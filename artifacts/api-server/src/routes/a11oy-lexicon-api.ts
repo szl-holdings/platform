@@ -182,22 +182,93 @@ let seedingPromise: Promise<void> | null = null;
 const approvedCache = new Set<string>();
 const statusCache = new Map<string, LexiconLicenseStatus>();
 
+/**
+ * Concurrency-safety state for `refreshApprovedCache` (task #5004).
+ *
+ * The refresh is a two-phase operation: (1) read the catalog snapshot from
+ * the DB with `await db.select(...)`, then (2) synchronously rewrite the
+ * in-memory caches from that snapshot. Approve/deny handlers
+ * (`applyDecision`) also mutate these caches directly and race against the
+ * refresh: if a deny commits and mutates the cache while step 1 is in
+ * flight, step 2 would clobber the deny by repopulating from the stale
+ * pre-deny snapshot — letting a denied model briefly pass the inference
+ * gate.
+ *
+ * Fix: while a refresh is in flight, every mutation routed through
+ * `recordCacheMutation` is also recorded in `pendingMutations`. The refresh
+ * overlays those mutations on top of its snapshot before publishing, so
+ * concurrent mutations always win against the older snapshot.
+ */
+let refreshInFlight = 0;
+const pendingMutations = new Map<string, LexiconLicenseStatus>();
+
+/**
+ * Apply a status mutation to both caches atomically. When a refresh is in
+ * flight, also stash the mutation so the refresh's overlay step can replay
+ * it on top of the (older) DB snapshot.
+ */
+function recordCacheMutation(targetId: string, status: LexiconLicenseStatus): void {
+  statusCache.set(targetId, status);
+  if (status === 'approved') approvedCache.add(targetId);
+  else approvedCache.delete(targetId);
+  if (refreshInFlight > 0) {
+    pendingMutations.set(targetId, status);
+  }
+}
+
 async function refreshApprovedCache(): Promise<void> {
+  refreshInFlight += 1;
+  // Reset the overlay buffer at the start of this refresh so we only
+  // capture mutations that race with THIS refresh.
+  pendingMutations.clear();
   try {
     const rows = await db
       .select({ targetId: lexiconEntriesTable.targetId, status: lexiconEntriesTable.status })
       .from(lexiconEntriesTable);
-    approvedCache.clear();
-    statusCache.clear();
+
+    // Build the snapshot in local containers first; only swap them into
+    // the live caches once we've overlaid any concurrent mutations. This
+    // keeps the public caches strictly monotonic for racing mutations.
+    const snapshotStatus = new Map<string, LexiconLicenseStatus>();
+    const snapshotApproved = new Set<string>();
     for (const r of rows) {
       const st = r.status as LexiconLicenseStatus;
-      statusCache.set(r.targetId, st);
-      if (st === 'approved') approvedCache.add(r.targetId);
+      snapshotStatus.set(r.targetId, st);
+      if (st === 'approved') snapshotApproved.add(r.targetId);
     }
+
+    // Overlay any approve/deny mutations that committed while the
+    // db.select() above was in flight. They are strictly newer than the
+    // snapshot, so they take precedence.
+    for (const [targetId, status] of pendingMutations) {
+      snapshotStatus.set(targetId, status);
+      if (status === 'approved') snapshotApproved.add(targetId);
+      else snapshotApproved.delete(targetId);
+    }
+
+    approvedCache.clear();
+    statusCache.clear();
+    for (const t of snapshotApproved) approvedCache.add(t);
+    for (const [k, v] of snapshotStatus) statusCache.set(k, v);
   } catch (err) {
     logger.warn({ err }, '[lexicon] cache refresh failed (non-fatal)');
+  } finally {
+    refreshInFlight -= 1;
+    if (refreshInFlight === 0) pendingMutations.clear();
   }
 }
+
+/** @internal — exposed for race-condition tests in task #5004. */
+export const __testing = {
+  refreshApprovedCache,
+  recordCacheMutation,
+  resetCaches(): void {
+    approvedCache.clear();
+    statusCache.clear();
+    pendingMutations.clear();
+    refreshInFlight = 0;
+  },
+};
 
 /** Synchronous gate-check helper. Returns true iff the target has been
  *  approved by an operator. */
@@ -598,12 +669,12 @@ async function applyDecision(
       .returning();
 
     // Refresh the in-memory caches so the inference gate sees the new state
-    // immediately (next call to checkInferenceGates picks it up). Both the
-    // approved-set (fast yes/no) and the tri-state status map (authoritative)
-    // are updated.
-    statusCache.set(entry.targetId, decision);
-    if (decision === 'approved') approvedCache.add(entry.targetId);
-    else approvedCache.delete(entry.targetId);
+    // immediately (next call to checkInferenceGates picks it up). Routing
+    // through `recordCacheMutation` ensures that if a background
+    // refreshApprovedCache is mid-rebuild, this mutation is overlaid on
+    // its snapshot so a denied target can never be reinstated as approved
+    // by a stale refresh (task #5004).
+    recordCacheMutation(entry.targetId, decision);
 
     // Emit a fabric proof so the orchestration ledger records this decision.
     // Lexicon is not a separate product (the fixed A11oyProductId union has
