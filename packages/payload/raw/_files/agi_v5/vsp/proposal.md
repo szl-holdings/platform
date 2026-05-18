@@ -477,11 +477,24 @@ The VSP `emitLambdaSpan()` call has three components:
 | `span.addEvent()` — 1 event, 5 attributes | 0.2–0.4 µs | OTel event encoding |
 | `span.end()` — enqueue to batch exporter | 0.1–0.2 µs | Async queue enqueue, not synchronous export |
 
-**Total synchronous overhead: ~1.2–1.8 µs**
+**Total synchronous overhead estimate: ~1.2–1.8 µs**
 
-Receipt build p50 currently: 11.5 µs  
-VSP overhead: +1.5 µs (midpoint estimate)  
-New p50 estimate: **~13.0 µs** (within the ≤ 13.8 µs budget at +13%)
+### Measured (2026-05-18)
+
+Estimates above have been replaced with reproducible measurements. The `LambdaSpanEmitter.emit` micro-benchmark in [`packages/vsp-otel/bench/emit.bench.ts`](../../../../vsp-otel/bench/emit.bench.ts) runs `emit` against the OTel no-op tracer (1s warmup + 3s measured per case, [tinybench](https://github.com/tinylibs/tinybench)) on Node v24.13.0 / linux-x64 / Intel Xeon Platinum 8581C @ 2.30 GHz:
+
+| case | p50 (µs) | p75 (µs) | p99 (µs) | samples |
+|---|---:|---:|---:|---:|
+| `emit(minimal)` — hash + license only | 0.47 | 0.54 | 1.86 | 4.7 M |
+| `emit(full)` — 9 Λ-axes + replayCount + ingestionPolicy | 0.65 | 0.73 | 1.63 | 3.7 M |
+
+This is the emitter's **own** synchronous work only (license check, hash slicing, traceId derivation, parent-context construction, attribute stamping, `span.end()`) — not the cost of OTLP serialization or network export, which sit downstream of the BatchSpanProcessor and are off the hot path by construction.
+
+Receipt build p50 (upstream ouroboros, separately measured): 11.5 µs  
+VSP overhead (measured emit-only, no-op tracer): +0.5–0.7 µs  
+New p50 estimate: **~12.0–12.2 µs** (well within the ≤ 13.8 µs budget at +5%)
+
+Reproduce with `pnpm --filter @szl-holdings/vsp-otel bench`; the package README's "Performance" section is the canonical reference and is updated whenever a new measurement is recorded.
 
 The OTLP export is **fully asynchronous** via the batch span processor. No blocking I/O on the hot path. The batch processor uses a configurable queue (default: 2048 spans, 5-second flush interval). At ouroboros throughput of ~62,764 ops/sec, the batch processor queue fills in approximately 32 ms — well within the default 5-second flush interval. Queue overflow risk: negligible at current throughput.
 

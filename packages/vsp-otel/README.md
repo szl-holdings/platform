@@ -118,6 +118,43 @@ Sets `openinference.span.kind=LLM` so the spans land in Phoenix's LLM
 trace view, and mirrors per-axis Λ scores to `llm.evaluation.<axis>.score`
 for the evaluator panel.
 
+## Performance
+
+`LambdaSpanEmitter.emit` is hot-path code (called once per Λ-receipt), so we
+keep a reproducible micro-benchmark in `bench/emit.bench.ts` that measures it
+against the default OTel no-op tracer (no SDK / exporter registered — what we
+isolate is the emitter's own work: license check, hash slicing, traceId
+derivation, parent-context construction, span start, attribute stamping,
+`span.end()`).
+
+Run it locally:
+
+```bash
+pnpm --filter @szl-holdings/vsp-otel bench
+```
+
+### Latest measured results
+
+Methodology: [tinybench](https://github.com/tinylibs/tinybench) with 1s warmup
+and 3s measured time per case. Reported in microseconds (µs).
+
+- Node: v24.13.0, linux/x64
+- CPU: Intel Xeon Platinum 8581C @ 2.30 GHz (Replit Reserved-VM class, shared tenant)
+- Date: 2026-05-18
+
+| case                          | mean (µs) | p50 (µs) | p75 (µs) | p99 (µs) | samples   |
+| ----------------------------- | --------: | -------: | -------: | -------: | --------: |
+| `emit(minimal)`               |      0.63 |     0.47 |     0.54 |     1.86 | 4,726,576 |
+| `emit(full: 9 axes + metadata)` |    0.80 |     0.65 |     0.73 |     1.63 | 3,735,100 |
+
+The previously aspirational "p50 ≈ 11.5 µs" figure quoted in the public VSP
+proposal was an upper-bound guess made before this harness existed; the
+measured numbers above are roughly **15–25× faster** on the reference
+hardware. Treat them as ceiling-of-best-case (no exporter on the wire, no
+GC pressure from a real workload) — once a real OTLP exporter and
+BatchSpanProcessor are in the pipeline, end-to-end emit cost is dominated
+by serialization + network, not by this function.
+
 ## End-to-end verification
 
 `src/node-sdk-bootstrap.test.ts` spins up an in-process HTTP catcher
