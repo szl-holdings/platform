@@ -15,7 +15,8 @@
     "start:stdio": "tsx src/index.ts --stdio",
     "build": "tsc --build",
     "typecheck": "tsc --noEmit",
-    "test": "tsx --test tests/e2e.test.ts"
+    "test": "tsx --test tests/e2e.test.ts",
+    "test:perf": "NODE_OPTIONS=--expose-gc tsx --test tests/session-bootstrap.perf.test.ts"
   },
   "dependencies": {
     "@modelcontextprotocol/ext-apps": "^1.7.0",
