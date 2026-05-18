@@ -68,6 +68,38 @@ const fabricBackend = new DevHashEmbeddingBackend();
 const FABRIC_BACKEND_ID = 'aef-dev-hash';
 const FABRIC_MODEL = fabricBackend.descriptor.supportedModels[0] ?? 'aef-dev-hash';
 
+/**
+ * Backend-keyed rescale multipliers for the top-K mean cosine in the
+ * thesis-RAG probe. Numbers were measured by
+ * `scripts/calibrate-thesis-fit.mjs` against a representative
+ * discovery set (8 doctrine-aligned + 8 unrelated artifacts) and
+ * chosen so that:
+ *   - aligned artifacts land in ~[0.55, 0.95] (above the queue
+ *     trigger thesisFit > 0.5 used in classifier.ts), and
+ *   - unrelated artifacts stay below 0.35 (well under the discard
+ *     edge composite < 0.18).
+ *
+ * Backend characteristics observed:
+ *   - aef-dev-hash    : sparse hashed bag, related-text cosine
+ *                       saturates near 0.3-0.4 → 2.5x rescale.
+ *   - cpu-local       : BGE-M3 family (dense, L2-normalized),
+ *                       related-text cosine ~0.55-0.75 → 1.4x.
+ *   - external-http   : same family as cpu-local; same rescale.
+ * Unknown backends fall back to the dev-hash multiplier which is
+ * the historical default and keeps existing tests green.
+ */
+const THESIS_FIT_RESCALE_BY_BACKEND: Readonly<Record<string, number>> = {
+  'aef-dev-hash': 2.5,
+  'cpu-local': 1.4,
+  'external-http': 1.4,
+};
+const THESIS_FIT_RESCALE_DEFAULT = 2.5;
+function thesisFitRescaleFor(backendId: string): number {
+  return THESIS_FIT_RESCALE_BY_BACKEND[backendId] ?? THESIS_FIT_RESCALE_DEFAULT;
+}
+export const _thesisFitRescaleForTests = thesisFitRescaleFor;
+export const _THESIS_FIT_RESCALE_BY_BACKEND_FOR_TESTS = THESIS_FIT_RESCALE_BY_BACKEND;
+
 // Provenance of the most recent embedFn call. Module-scoped so the
 // configured embedFn can mark itself as healthy or as having
 // fallen through to the dev-hash backend, without changing the
@@ -340,12 +372,14 @@ export const defaultThesisProbe: ThesisProbe = async (artifact) => {
   if (top.length === 0) return undefined;
 
   const meanTop = top.reduce((acc, x) => acc + x.s, 0) / top.length;
-  // Cosine on the fabric's hashed vectors saturates well below 1.0
-  // for even highly-related texts; rescale into roughly [0,1] so the
+  // Rescale the top-K mean cosine into roughly [0,1] so the
   // downstream Lutar axis floors and queue/auto-promote thresholds
-  // stay calibrated. scoreArtifact additionally takes the max of
-  // (RAG, keyword) so this can only lift thesisFit, never depress it.
-  const score = Math.min(1, meanTop * 2.5);
+  // stay calibrated across embedder backends. scoreArtifact takes
+  // max(RAG, keyword) so this can only lift thesisFit, never depress
+  // it. Multiplier is backend-keyed because cosine distributions
+  // differ sharply by backend — see THESIS_FIT_RESCALE_BY_BACKEND
+  // and scripts/calibrate-thesis-fit.mjs for the measured numbers.
+  const score = Math.min(1, meanTop * thesisFitRescaleFor(provenance.backendId));
 
   const citations = top
     .filter((x) => x.s > 0.05)

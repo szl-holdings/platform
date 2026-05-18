@@ -3,6 +3,8 @@ import {
   _getArtifactCacheSizeForTests,
   _getCorpusSizeForTests,
   _resetThesisRagForTests,
+  _THESIS_FIT_RESCALE_BY_BACKEND_FOR_TESTS,
+  _thesisFitRescaleForTests,
   classify,
   createEmbedWorkerThesisFn,
   defaultThesisProbe,
@@ -258,6 +260,21 @@ describe('thesis-rag probe', () => {
       }),
     );
     expect(decision.decision).toBe('discard');
+  });
+
+  it('thesis-fit rescale table is pinned per backend (calibration regression guard)', () => {
+    // These numbers are the output of
+    // scripts/calibrate-thesis-fit.mjs and are wired into
+    // defaultThesisProbe via thesisFitRescaleFor(). If you change
+    // them, re-run the calibration script and verify the aligned
+    // median stays in [0.55, 0.95] and the unrelated median stays
+    // below 0.35 under both backends.
+    expect(_THESIS_FIT_RESCALE_BY_BACKEND_FOR_TESTS['aef-dev-hash']).toBe(2.5);
+    expect(_THESIS_FIT_RESCALE_BY_BACKEND_FOR_TESTS['cpu-local']).toBe(1.4);
+    expect(_THESIS_FIT_RESCALE_BY_BACKEND_FOR_TESTS['external-http']).toBe(1.4);
+    // Unknown backends fall back to the dev-hash multiplier (the
+    // historical default) rather than collapsing to 0 or 1.
+    expect(_thesisFitRescaleForTests('some-future-backend')).toBe(2.5);
   });
 
   it('classify() routes claude-opus-5 to queue (regression guard for review #1)', async () => {
