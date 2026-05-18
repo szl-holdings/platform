@@ -88,12 +88,50 @@ export interface AefClientConfigWithReceipts extends AefClientConfig {
   receipts?: AefReceiptsConfig;
 }
 
+/**
+ * Callable hybrid-search namespace. `client.hybridSearch(req)` runs a one-
+ * shot query; `client.hybridSearch.stream(req)` opens an SSE stream where
+ * each chunk is recorded as its own LambdaReceipt and the closure is folded
+ * via a StreamClosureReceipt. Same call surface across both modes.
+ */
+export interface HybridSearchNamespace {
+  (
+    request: WithDefaults<
+      Omit<HybridSearchRequest, 'requestId' | 'tenantId'>,
+      | 'topK'
+      | 'candidatePool'
+      | 'denseWeight'
+      | 'keywordWeight'
+      | 'rerankEnabled'
+      | 'includeProvenance'
+      | 'metadata'
+    > & { requestId?: string },
+  ): Promise<HybridSearchResponse>;
+  stream(
+    request: WithDefaults<
+      Omit<HybridSearchRequest, 'requestId' | 'tenantId'>,
+      | 'topK'
+      | 'candidatePool'
+      | 'denseWeight'
+      | 'keywordWeight'
+      | 'rerankEnabled'
+      | 'includeProvenance'
+      | 'metadata'
+    > & { requestId?: string; streamId?: string; signal?: AbortSignal },
+  ): ReceiptedStream<unknown>;
+}
+
 export class AefClient {
   private readonly config: Required<AefClientConfig>;
   readonly receipts: AefReceiptsHandle;
   private readonly chain?: ReceiptChain;
   private readonly receiptsOperatorId?: string;
   private readonly onReceiptError: (err: unknown, ctx: { endpoint: string }) => void;
+  /**
+   * Hybrid-search entry point — callable for one-shot queries and exposes
+   * `.stream(...)` for SSE streaming with per-chunk verifiable receipts.
+   */
+  readonly hybridSearch: HybridSearchNamespace;
 
   constructor(configOverrides: Partial<AefClientConfigWithReceipts> = {}) {
     const { receipts, ...rest } = configOverrides;
@@ -123,6 +161,12 @@ export class AefClient {
       this.receipts = new DisabledReceipts();
       this.onReceiptError = () => {};
     }
+    // Build the callable namespace once, so `client.hybridSearch(req)` and
+    // `client.hybridSearch.stream(req)` share `this` and the same chain.
+    const call = (req: Parameters<HybridSearchNamespace>[0]) => this.hybridSearchCall(req);
+    this.hybridSearch = Object.assign(call, {
+      stream: (req: Parameters<HybridSearchNamespace['stream']>[0]) => this.hybridSearchStream(req),
+    }) as HybridSearchNamespace;
   }
 
   private buildHeaders(traceId: string | undefined, idempotencyKey: string): Record<string, string> {
@@ -298,7 +342,7 @@ export class AefClient {
    * the same chain as non-streaming calls, so `client.receipts.readAll()`
    * returns both kinds in seq order.
    */
-  hybridSearchStream(
+  private hybridSearchStream(
     request: WithDefaults<
       Omit<HybridSearchRequest, 'requestId' | 'tenantId'>,
       | 'topK'
@@ -406,7 +450,7 @@ export class AefClient {
     });
   }
 
-  async hybridSearch(
+  private async hybridSearchCall(
     request: WithDefaults<
       Omit<HybridSearchRequest, 'requestId' | 'tenantId'>,
       | 'topK'

@@ -82,7 +82,7 @@ function sseResponse(frames: string[]): Response {
   return new Response(body, { status: 200, headers: { 'content-type': 'text/event-stream' } });
 }
 
-describe('AefClient.hybridSearchStream()', () => {
+describe('AefClient.hybridSearch.stream()', () => {
   it('happy path: yields chunks and emits one receipt per chunk plus a closure', async () => {
     const { sha256Hex } = await import('@szl-holdings/szl-receipts');
     const frames = [
@@ -95,7 +95,7 @@ describe('AefClient.hybridSearchStream()', () => {
       ...baseConfig,
       receipts: { enabled: true, operatorId: 'op@szl' },
     });
-    const stream = client.hybridSearchStream({ query: 'q', requestId: 'rq' });
+    const stream = client.hybridSearch.stream({ query: 'q', requestId: 'rq' });
     const got: unknown[] = [];
     for await (const c of stream) got.push(c);
     expect(got).toEqual([
@@ -123,7 +123,7 @@ describe('AefClient.hybridSearchStream()', () => {
       ...baseConfig,
       receipts: { enabled: true, operatorId: 'op' },
     });
-    const stream = client.hybridSearchStream({ query: 'q', requestId: 'rq' });
+    const stream = client.hybridSearch.stream({ query: 'q', requestId: 'rq' });
     let count = 0;
     for await (const _ of stream) {
       void _;
@@ -142,7 +142,7 @@ describe('AefClient.hybridSearchStream()', () => {
         ...baseConfig,
         receipts: { enabled: true, operatorId: 'op' },
       });
-      const stream = client.hybridSearchStream({ query: 'q', requestId: 'rq' });
+      const stream = client.hybridSearch.stream({ query: 'q', requestId: 'rq' });
       for await (const _ of stream) void _;
       const rows = await client.receipts.readAll();
       return { root: (await stream.closure).merkleRoot, paramsHashes: rows.map((r) => r.paramsHash) };
