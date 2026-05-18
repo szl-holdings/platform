@@ -6,6 +6,7 @@ import { createHash } from 'node:crypto';
 import type { NextFunction, Request, Response } from 'express';
 import { sendError, sendForbidden, sendUnauthorized } from '../lib/api-response';
 import { readSessionCookie } from '../lib/auth';
+import { fullApiPath } from './global-auth-enforcer';
 import {
   type InternalAgentContext,
   type InternalScope,
@@ -487,6 +488,19 @@ export function authMiddleware(options: { required?: boolean } = {}) {
       }
 
       if (!user && required) {
+        // Vessels Maritime Intelligence public-read carve-out: GET requests
+        // under /api/vessels/* are anonymous-accessible (investor / consumer
+        // walkthrough surface). The global enforcer already passes them here,
+        // but per-route authMiddleware() declarations would still 401 without
+        // this check. Mutations (POST/PUT/PATCH/DELETE) are unaffected and
+        // continue to require a session. Tenant context for org-scoped queries
+        // is hydrated to the `vessels-demo` org by tenantScope downstream.
+        const _vPath = fullApiPath(req);
+        if (req.method === 'GET' && (_vPath === '/api/vessels' || _vPath.startsWith('/api/vessels/'))) {
+          req.user = undefined;
+          next();
+          return;
+        }
         serverTelemetry.recordAuthFailure();
         if (revokedReason) {
           sendError(res, 'Session has been revoked. Please sign in again.', 401, 'SESSION_REVOKED');

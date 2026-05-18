@@ -5,7 +5,7 @@ import rateLimit from 'express-rate-limit';
 import { handleRouteError, sendSuccess } from '../lib/api-response';
 import { listQuerySchema, validateQuery } from '../lib/validation';
 import { authMiddleware } from '../middlewares/auth';
-import { getUserOrgIds } from '../middlewares/tenant-scope';
+import { getEffectiveOrgIds } from '../middlewares/tenant-scope';
 
 const router: IRouter = Router();
 
@@ -369,7 +369,7 @@ router.get(
     try {
       let dbVessels: DbVessel[] = [];
       try {
-        const orgIds = getUserOrgIds(req.user!);
+        const orgIds = getEffectiveOrgIds(req);
         const orgFilter = orgIds !== null ? inArray(vesselsTable.orgId, [...orgIds]) : undefined;
         dbVessels = (await db.select().from(vesselsTable).where(orgFilter).limit(30)) as unknown as DbVessel[];
       } catch {

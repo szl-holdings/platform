@@ -12,7 +12,13 @@ export function register(router: IRouter): void {
   // Listed in PUBLIC_PREFIXES ("/api/vessels/ops-core/") for defense in depth.
   router.use(lazyMatch('/vessels', () => import('../vessels-ops-core'), 'vessels-ops-core'));
 
-  router.use('/vessels', tenantScope({ required: true }));
+  // Vessels is anonymous-readable for investors/consumers (see
+  // global-auth-enforcer GET-public block for /api/vessels/*). tenantScope
+  // runs in required:false mode so anonymous GETs pass through with their
+  // tenant context hydrated to the `vessels-demo` org; authenticated
+  // sessions still get full cross-tenant enforcement. Mutations (POST/PUT/
+  // PATCH/DELETE) are 401'd by the global enforcer before reaching this.
+  router.use('/vessels', tenantScope({ required: false }));
   router.use('/vessels', perUserApiSlidingLimiter);
 
   router.use(lazyMatch('/vessels', () => import('../vessels'), 'vessels'));

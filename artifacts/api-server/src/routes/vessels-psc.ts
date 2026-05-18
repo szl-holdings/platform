@@ -207,7 +207,11 @@ router.get('/vessels/:id/psc/checklist', authMiddleware(), tenantScope(), async 
       sendNotFound(res, 'Vessel');
       return;
     }
-    await ensureChecklistForVessel(vesselId, vessel.orgId ?? null);
+    // Seeding writes rows — gate behind an authenticated caller so the
+    // anonymous investor/consumer walkthrough is strictly read-only.
+    if (req.user) {
+      await ensureChecklistForVessel(vesselId, vessel.orgId ?? null);
+    }
     const rows = await db
       .select()
       .from(vesselsPscChecklistItemsTable)

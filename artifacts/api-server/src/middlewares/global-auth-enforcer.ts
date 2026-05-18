@@ -926,6 +926,24 @@ export function globalAuthEnforcer(
     return;
   }
 
+  // Vessels Maritime Intelligence — read-only GET routes are public so
+  // investors and consumers can walk the full operational surface (fleets,
+  // PSC inspections, voyage risk, bunkering, sanctions screening, trading
+  // signals, autonomous routing, cortex modules, ops-core snapshot) without
+  // a session. All mutating methods (POST, PUT, PATCH, DELETE) fall through
+  // to the 401 response below; authMiddleware() inside the route handlers
+  // provides defence-in-depth for writes. Anonymous callers have their
+  // tenant context hydrated to the seeded `vessels-demo` organization by
+  // tenantScope so org-scoped DB queries return real demo data instead of
+  // empty results. Mirrors the Sentra GET-public pattern directly above.
+  if (
+    req.method === "GET" &&
+    (path === "/api/vessels" || path.startsWith("/api/vessels/"))
+  ) {
+    next();
+    return;
+  }
+
   // Sentra EDR agent endpoints — machine-to-machine; agents authenticate via
   // long-lived bearer tokens issued at enrollment-token exchange time.
   // No browser session or cookie involved; route handlers enforce their own

@@ -44,7 +44,7 @@ import {
 } from '../lib/api-response';
 import { validateBody } from '../lib/validation';
 import { authMiddleware } from '../middlewares/auth';
-import { getUserOrgIds, tenantScope } from '../middlewares/tenant-scope';
+import { getEffectiveOrgIds, getUserOrgIds, tenantScope } from '../middlewares/tenant-scope';
 import { appendProof } from '../services/orchestration-store.js';
 
 const router: IRouter = Router();
@@ -138,7 +138,7 @@ router.post(
   async (req, res) => {
     try {
       const input = req.body as z.infer<typeof recomputeRiskSchema>;
-      const orgIds = getUserOrgIds(req.user!);
+      const orgIds = getEffectiveOrgIds(req);
       const orgId = resolveOrgIdForWrite(orgIds, input.orgId);
       if (orgId === null) {
         return sendBadRequest(
@@ -215,7 +215,7 @@ router.get('/vessels/formula/risk-history/:vesselId', async (req, res) => {
     const vesselId = Number.parseInt(req.params.vesselId ?? '', 10);
     if (Number.isNaN(vesselId)) return sendBadRequest(res, 'Invalid vesselId');
 
-    const orgIds = getUserOrgIds(req.user!);
+    const orgIds = getEffectiveOrgIds(req);
     const since = new Date(Date.now() - 90 * 24 * 60 * 60 * 1000);
 
     const conditions = [
@@ -372,7 +372,7 @@ router.post(
   async (req, res) => {
     try {
       const input = req.body as z.infer<typeof voyageMonteCarloSchema>;
-      const orgIds = getUserOrgIds(req.user!);
+      const orgIds = getEffectiveOrgIds(req);
       const orgId = resolveOrgIdForWrite(orgIds, input.orgId);
       if (orgId === null) {
         return sendBadRequest(
@@ -466,7 +466,7 @@ router.post(
   async (req, res) => {
     try {
       const input = req.body as z.infer<typeof anomalyDetectSchema>;
-      const orgIds = getUserOrgIds(req.user!);
+      const orgIds = getEffectiveOrgIds(req);
       const orgId = resolveOrgIdForWrite(orgIds, input.orgId);
       if (orgId === null) {
         return sendBadRequest(
@@ -542,7 +542,7 @@ router.post(
 
 router.get('/vessels/formula/anomalies', async (req, res) => {
   try {
-    const orgIds = getUserOrgIds(req.user!);
+    const orgIds = getEffectiveOrgIds(req);
     const vesselIdRaw = req.query.vesselId as string | undefined;
     const vesselId = vesselIdRaw ? Number.parseInt(vesselIdRaw, 10) : null;
 
@@ -606,15 +606,18 @@ const SEED_BUNKER_STATIONS = [
   { stationCode: 'ALG-01', port: 'Algeciras', country: 'ES', region: 'EMEA', lat: 36.13, lon: -5.45, vlsfoUsdPerMt: 601, hfoUsdPerMt: 449, mgoUsdPerMt: 788, lngUsdPerMmbtu: 11.7, biofuelAvailable: false, avgWaitHours: 5, qualityScore: 0.87 },
 ];
 
-router.get('/vessels/formula/bunker-stations', async (_req, res) => {
+router.get('/vessels/formula/bunker-stations', async (req, res) => {
   try {
     // DB-only existence check — no in-memory flag. Insert is idempotent
     // (UNIQUE constraint on station_code + onConflictDoNothing), so safe
     // to call from any process or worker without coordination.
+    // Seeding is gated behind an authenticated caller so that the anonymous
+    // investor/consumer walkthrough surface is strictly read-only and never
+    // triggers DB writes via a GET (no write-on-read for anonymous traffic).
     const [{ count }] = await db
       .select({ count: sql<number>`count(*)::int` })
       .from(vesselsBunkerStationsTable);
-    if (Number(count) === 0) {
+    if (Number(count) === 0 && req.user) {
       await db
         .insert(vesselsBunkerStationsTable)
         .values(SEED_BUNKER_STATIONS)

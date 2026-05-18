@@ -138,6 +138,67 @@ function isGatewayKeyBearerOnMcpTransport(req: Request): boolean {
   return MCP_TRANSPORT_FULL_PREFIXES.some(p => full === p || full.startsWith(p + "/"));
 }
 
+// Vessels demo org — anonymous GETs under /api/vessels/* are hydrated against
+// this seeded tenant so org-scoped DB queries return real data instead of
+// empty results. Resolved lazily by slug; cached for process lifetime.
+let vesselsDemoOrgIdCache: number | null | undefined = undefined;
+
+async function getVesselsDemoOrgId(): Promise<number | null> {
+  if (vesselsDemoOrgIdCache !== undefined) return vesselsDemoOrgIdCache;
+  try {
+    const rows = await db
+      .select({ id: organizationsTable.id })
+      .from(organizationsTable)
+      .where(eq(organizationsTable.slug, 'vessels-demo'))
+      .limit(1);
+    vesselsDemoOrgIdCache = rows[0]?.id ?? null;
+  } catch (err) {
+    logger.warn({ err }, '[tenant-scope] vessels-demo org lookup failed');
+    vesselsDemoOrgIdCache = null;
+  }
+  return vesselsDemoOrgIdCache;
+}
+
+function isVesselsPublicRead(req: Request): boolean {
+  if (req.method !== 'GET') return false;
+  const p = fullApiPath(req);
+  return p === '/api/vessels' || p.startsWith('/api/vessels/');
+}
+
+/**
+ * Attaches the vessels-demo tenant context to the request. Returns true on
+ * success, false if the demo org could not be resolved (DB down or the row
+ * was deleted). Callers MUST fail closed on false — proceeding with
+ * req.tenantOrgId === undefined would let anonymous reads escape org
+ * filtering in handlers that treat undefined as "no filter".
+ */
+async function attachVesselsDemoTenant(req: Request): Promise<boolean> {
+  const demoOrgId = await getVesselsDemoOrgId();
+  if (demoOrgId == null) return false;
+  req.tenantOrgId = demoOrgId;
+  req.tenantOrgSlug = 'vessels-demo';
+  return true;
+}
+
+/**
+ * Returns the set of org IDs that should be used to filter org-scoped
+ * queries for the current request. Use this in route handlers that need
+ * to support both authenticated and anonymous (vessels-demo) callers.
+ *
+ *   - Elevated authenticated user → null (no filter, all orgs)
+ *   - Regular authenticated user → Set of their member orgs
+ *   - Anonymous with tenantOrgId hydrated (vessels-demo) → Set([orgId])
+ *   - Anonymous with no tenantOrgId → empty Set (returns no rows)
+ *
+ * The empty-Set path is the safe default: callers iterating `inArray(col, [...set])`
+ * with an empty set return zero rows, which is the correct fail-closed behavior.
+ */
+export function getEffectiveOrgIds(req: Request): Set<number> | null {
+  if (req.user) return getUserOrgIds(req.user);
+  if (req.tenantOrgId != null) return new Set([req.tenantOrgId]);
+  return new Set<number>();
+}
+
 export function tenantScope(options: { required?: boolean } = {}) {
   const { required = true } = options;
 
@@ -146,6 +207,25 @@ export function tenantScope(options: { required?: boolean } = {}) {
       const user = req.user;
 
       if (!user) {
+        // Vessels investor/consumer walkthrough: anonymous GETs get the
+        // seeded vessels-demo tenant attached so org-scoped queries return
+        // real demo data. Runs in both required:true and required:false
+        // modes because route handlers below assume req.tenantOrgId is set.
+        if (isVesselsPublicRead(req)) {
+          const ok = await attachVesselsDemoTenant(req);
+          if (!ok) {
+            // Fail closed: refusing the request is the only safe option,
+            // because downstream handlers treat req.tenantOrgId === undefined
+            // as "no org filter" and could return cross-tenant rows.
+            res.status(503).json({
+              error: 'Vessels demo tenant unavailable',
+              code: 'DEMO_TENANT_UNAVAILABLE',
+            });
+            return;
+          }
+          next();
+          return;
+        }
         if (required) {
           if (isAllowlistedPublicPath(fullApiPath(req))) {
             next();
