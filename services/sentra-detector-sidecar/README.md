@@ -48,9 +48,49 @@ call to the api-server at `$SENTRA_API_SERVER_URL` (default
 
 ## Deployment
 
-This sidecar is **local-runnable only** for the framework drop. Production
-hosting (containerisation, autoscaling, registration retry policy) is
-tracked as a follow-up task.
+The sidecar is a production-ready managed service:
+
+- **Container image** — `services/sentra-detector-sidecar/Dockerfile`
+  builds a slim Python 3.11 image with the canonical detectors and
+  their ML dependencies (numpy, scikit-learn). The image runs as a
+  non-root user and exposes port `8765`.
+- **Managed deployment** — `artifacts/api-server/.replit-artifact/artifact.toml`
+  declares a `sentra-sidecar` service entry alongside `api` so the
+  platform knows the port and run command. In addition,
+  `artifacts/api-server/start.sh` co-launches the sidecar inline so a
+  single api-server boot brings up the full detector framework
+  end-to-end. If the standalone workflow has already bound port 8765
+  the inline launcher detects that and skips, mirroring the `amaru`
+  pattern.
+- **Registration retry policy** — the sidecar registers with the
+  api-server on boot and then **heartbeats every
+  `SENTRA_SIDECAR_HEARTBEAT_SECONDS` (default 30s)** so the
+  api-server's `lastSeenAt` stays fresh and a restarted api-server
+  rediscovers us within one interval. The initial handshake retries
+  indefinitely with exponential backoff capped at
+  `SENTRA_SIDECAR_REGISTER_MAX_BACKOFF_SECONDS` (default 60s), so the
+  sidecar tolerates being booted before the api-server is ready.
+- **Observability** — `GET /api/sentra/sidecars` on the api-server
+  surfaces the last-known set of sidecar-backed detectors with
+  `lastSeenAt` / `chainReceiptId`, and the sidecar's own `GET /health`
+  returns the live registration state (`attempts`, `successes`,
+  `lastSuccessAt`, `lastError`).
+- **Failover & double-fire** — every detector run gets a fresh
+  server-side UUID (`runId`), and findings are persisted with
+  `onConflictDoNothing` keyed by finding `id`. If two sidecars
+  register the same detector (e.g. during a rolling restart) the
+  most-recent registration wins via the `sentraDetectorsTable`
+  upsert, so subsequent `/run` calls only fan out to one sidecar.
+
+### Required env vars in production
+
+| Var | Purpose |
+| --- | --- |
+| `SENTRA_API_SERVER_URL` | Where the sidecar POSTs `sidecar-register`. |
+| `SENTRA_SIDECAR_BASE_URL` | URL the api-server uses to call back into us. Must be reachable from the api-server. |
+| `SENTRA_SIDECAR_SHARED_SECRET` | Validates the `sidecar-register` handshake. |
+| `SENTRA_SIDECAR_INTERNAL_TOKEN` | Required when the sidecar is NOT on loopback so `/api/sentra/*` accepts the call. |
+| `SENTRA_SIDECAR_ALLOWED_HOSTS` | api-server side: comma-separated allowlist of non-loopback sidecar hosts (SSRF guard). |
 
 ## Tests
 

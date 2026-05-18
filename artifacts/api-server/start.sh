@@ -202,4 +202,43 @@ echo "[api-server start.sh] Bootstrapping sentra-core venv..."
 bash "$SENTRA_CORE_DIR/scripts/bootstrap.sh"
 # -----------------------------------------------------------------------------
 
+# --- Sentra Detector Sidecar -------------------------------------------------
+# Hosts the Python anomaly detectors (sklearn IsolationForest, embedding drift)
+# that ship in services/sentra-detector-sidecar/. The api-server proxies
+# /api/sentra/detectors/:id/run to this sidecar when manifest.runtime == "python".
+# Same co-launch pattern as amaru: the standalone workflow exists in
+# artifact.toml (sentra-sidecar) for production/operator override, but we boot
+# the sidecar inline here so a single `start.sh` run brings up the full
+# detector framework end-to-end.
+SENTRA_SIDECAR_DIR="/home/runner/workspace/services/sentra-detector-sidecar"
+SENTRA_SIDECAR_LOG="/tmp/sentra-sidecar.log"
+SENTRA_SIDECAR_PORT="${SENTRA_SIDECAR_PORT:-8765}"
+export SENTRA_SIDECAR_PORT
+# Make sure the sidecar registers against THIS api-server instance.
+export SENTRA_API_SERVER_URL="${SENTRA_API_SERVER_URL:-http://127.0.0.1:${PORT:-8080}}"
+export SENTRA_SIDECAR_HEARTBEAT_SECONDS="${SENTRA_SIDECAR_HEARTBEAT_SECONDS:-30}"
+if (exec 3<>/dev/tcp/127.0.0.1/"$SENTRA_SIDECAR_PORT") 2>/dev/null; then
+  exec 3<&- 3>&-
+  echo "[api-server start.sh] Port ${SENTRA_SIDECAR_PORT} already bound (standalone sentra-sidecar workflow); skipping sidecar spawn"
+  SENTRA_SIDECAR_PID=""
+elif [ -f "$SENTRA_SIDECAR_DIR/src/sidecar/main.py" ] && command -v python3 >/dev/null 2>&1; then
+  echo "[api-server start.sh] Launching sentra-sidecar on port ${SENTRA_SIDECAR_PORT} — log: $SENTRA_SIDECAR_LOG"
+  (
+    exec bash /home/runner/workspace/scripts/sentra-sidecar-dev.sh
+  ) >"$SENTRA_SIDECAR_LOG" 2>&1 &
+  SENTRA_SIDECAR_PID=$!
+  echo "[api-server start.sh] sentra-sidecar pid=$SENTRA_SIDECAR_PID"
+  old_cleanup_ss=$(declare -f cleanup)
+  cleanup() {
+    eval "${old_cleanup_ss#cleanup ()}"
+    if [ -n "$SENTRA_SIDECAR_PID" ] && kill -0 "$SENTRA_SIDECAR_PID" 2>/dev/null; then
+      kill "$SENTRA_SIDECAR_PID" 2>/dev/null || true
+    fi
+  }
+  trap cleanup EXIT INT TERM
+else
+  echo "[api-server start.sh] WARN: sentra-sidecar not found or python3 unavailable — skipping sidecar." >&2
+fi
+# -----------------------------------------------------------------------------
+
 exec node --max-old-space-size=1536 --expose-gc --optimize-for-size --enable-source-maps ./dist/index.mjs

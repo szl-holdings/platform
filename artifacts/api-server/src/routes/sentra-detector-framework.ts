@@ -260,6 +260,61 @@ router.get('/sentra/detectors', async (_req: Request, res: Response) => {
   }
 });
 
+/**
+ * Observability surface for the Python sidecar fleet. Returns one
+ * entry per distinct `sidecarBaseUrl` last seen registering a detector,
+ * with the set of detector ids it owns and the freshest `lastSeenAt`.
+ * Operators rely on this to confirm that the production sidecar (a)
+ * is still heartbeating and (b) is the one currently authoritative
+ * for a given detector id — important during rolling sidecar restarts
+ * where the most-recent registration wins.
+ */
+router.get('/sentra/sidecars', async (_req: Request, res: Response) => {
+  try {
+    const rows = await db
+      .select()
+      .from(sentraDetectorsTable)
+      .where(eq(sentraDetectorsTable.runtime, 'python'));
+    const byBaseUrl = new Map<
+      string,
+      {
+        sidecarBaseUrl: string;
+        detectorIds: string[];
+        lastSeenAt: string;
+        registeredAt: string;
+        chainReceiptIds: string[];
+      }
+    >();
+    for (const r of rows) {
+      const key = r.sidecarBaseUrl ?? '<none>';
+      const cur = byBaseUrl.get(key);
+      if (cur) {
+        cur.detectorIds.push(r.id);
+        if (r.lastSeenAt.toISOString() > cur.lastSeenAt) {
+          cur.lastSeenAt = r.lastSeenAt.toISOString();
+        }
+        if (r.chainReceiptId) cur.chainReceiptIds.push(r.chainReceiptId);
+      } else {
+        byBaseUrl.set(key, {
+          sidecarBaseUrl: key,
+          detectorIds: [r.id],
+          lastSeenAt: r.lastSeenAt.toISOString(),
+          registeredAt: r.registeredAt.toISOString(),
+          chainReceiptIds: r.chainReceiptId ? [r.chainReceiptId] : [],
+        });
+      }
+    }
+    const now = Date.now();
+    const sidecars = Array.from(byBaseUrl.values()).map((s) => ({
+      ...s,
+      ageSeconds: Math.round((now - new Date(s.lastSeenAt).getTime()) / 1000),
+    }));
+    sendSuccess(res, { sidecars });
+  } catch (err) {
+    handleRouteError(res, err, 'Failed to list sidecars');
+  }
+});
+
 const registerBodySchema = z.object({
   manifest: detectorManifestSchema,
   sidecarBaseUrl: z.string().url().optional(),

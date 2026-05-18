@@ -73,3 +73,19 @@ run = "bash -c 'cd /home/runner/workspace/services/amaru && bash scripts/bootstr
 PORT = "6810"
 AMARU_YAWAR_BUS_URL = "http://localhost:8080/api/prism-bus/publish"
 AMARU_YAWAR_BUS_DOMAIN = "amaru"
+
+[[services]]
+name = "sentra-sidecar"
+paths = []
+localPort = 8765
+autoStart = false
+
+[services.development]
+run = "bash /home/runner/workspace/scripts/sentra-sidecar-dev.sh"
+
+[services.env]
+PORT = "8765"
+SENTRA_SIDECAR_HOST = "127.0.0.1"
+SENTRA_SIDECAR_ADVERTISED_HOST = "127.0.0.1"
+SENTRA_API_SERVER_URL = "http://127.0.0.1:8080"
+SENTRA_SIDECAR_HEARTBEAT_SECONDS = "30"
