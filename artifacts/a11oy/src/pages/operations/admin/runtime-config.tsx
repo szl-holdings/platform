@@ -171,9 +171,12 @@ function HistoryDrawer({
   const [pendingRevertId, setPendingRevertId] = useState<number | null>(null);
   // Global-view filters (per task #5061: "with filters by key and actor").
   // Filters are client-side over the already-fetched window so they don't
-  // re-issue a request per keystroke — the endpoint caps at 200 entries
-  // which is small enough that in-browser filtering stays instant. Reset
-  // whenever the drawer switches mode so a fresh open starts unfiltered.
+  // re-issue a request per keystroke — the endpoint caps at 200 entries,
+  // small enough that in-browser filtering stays instant. Filters reset
+  // naturally on drawer close/reopen (HistoryDrawer unmounts when both
+  // historyKey and historyAll are null) so a fresh open always starts
+  // unfiltered; the "View all changes →" intra-drawer transition just
+  // remounts with configKey=null and therefore also starts unfiltered.
   const [keyFilter, setKeyFilter] = useState('');
   const [actorFilter, setActorFilter] = useState<string>('');
   const [actionFilter, setActionFilter] = useState<string>('');
