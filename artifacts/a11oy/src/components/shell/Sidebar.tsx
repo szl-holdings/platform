@@ -76,8 +76,17 @@ const strategySections: NavSection[] = [
       { id: 'strat-atlas-runtime', name: 'Atlas Runtime', icon: Zap, path: '/strategy/atlas-runtime' },
       { id: 'strat-enterprise', name: 'Enterprise State', icon: Layers, path: '/strategy/enterprise-state' },
       { id: 'strat-simulation', name: 'Simulation', icon: GitBranch, path: '/strategy/simulation' },
-      { id: 'strat-stress', name: 'Crisis Stress Drill', icon: Activity, path: '/strategy/stress-drill' },
-      { id: 'strat-gameday', name: 'Game Day Engine', icon: Target, path: '/strategy/game-day' },
+      // Crisis Stress Drill + Game Day are gated behind the
+      // VITE_FEATURE_A11OY_STRATEGY_SIMS flag (Task #5171). When the flag is
+      // not set, these items are removed from the default nav; the new
+      // /api/a11oy/strategy/* scenario+run contract is the supported surface
+      // for headless drill execution.
+      ...(import.meta.env.VITE_FEATURE_A11OY_STRATEGY_SIMS === 'true'
+        ? [
+            { id: 'strat-stress', name: 'Crisis Stress Drill', icon: Activity, path: '/strategy/stress-drill' },
+            { id: 'strat-gameday', name: 'Game Day Engine', icon: Target, path: '/strategy/game-day' },
+          ]
+        : []),
       { id: 'strat-correlation', name: 'Correlation Map', icon: Network, path: '/strategy/correlation-map' },
       { id: 'strat-signals', name: 'Signal Chains', icon: Radio, path: '/strategy/signal-chains' },
       { id: 'strat-worldline', name: 'Worldline Registry', icon: FileText, path: '/strategy/worldline-registry' },
@@ -105,6 +114,9 @@ const operationsSections: NavSection[] = [
       { id: 'ops-runbook', name: 'Runbook Studio', icon: FileText, path: '/operations/runbook-studio' },
       { id: 'ops-deployments', name: 'Deployments', icon: Rocket, path: '/operations/deployments' },
       { id: 'ops-admin', name: 'Admin Console', icon: Settings, path: '/operations/admin/overview' },
+      { id: 'ops-ownership-graph', name: 'Ownership Graph', icon: Network, path: '/operations/ownership-graph' },
+      { id: 'ops-distress-engine', name: 'Distress Engine', icon: Activity, path: '/operations/distress-engine' },
+      { id: 'ops-knowledge-vault', name: 'Knowledge Vault', icon: FileText, path: '/operations/knowledge-vault' },
     ],
   },
 ];

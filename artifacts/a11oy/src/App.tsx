@@ -416,6 +416,9 @@ const OpsDexScoring = lazy(() => import('./pages/operations/dex-scoring'));
 const OpsApprovalsCenter = lazy(() => import('./pages/operations/approvals-center'));
 const OpsCommandInbox = lazy(() => import('./pages/operations/command-inbox'));
 const OpsOwnershipMap = lazy(() => import('./pages/operations/ownership-map-new'));
+const OpsOwnershipGraph = lazy(() => import('./pages/operations/ownership-graph'));
+const OpsDistressEngine = lazy(() => import('./pages/operations/distress-engine'));
+const OpsKnowledgeVault = lazy(() => import('./pages/operations/knowledge-vault'));
 const OpsEscalationCenter = lazy(() => import('./pages/operations/escalation-center'));
 const OpsActionQueue = lazy(() => import('./pages/operations/action-queue'));
 const OpsOperationalQueue = lazy(() => import('./pages/operations/operational-queue'));
@@ -958,12 +961,16 @@ function AppInner() {
         <Route path={`${base}/strategy/simulation`}>
           <WithShell><Simulation /></WithShell>
         </Route>
-        <Route path={`${base}/strategy/stress-drill`}>
-          <WithShell><StressDrill /></WithShell>
-        </Route>
-        <Route path={`${base}/strategy/game-day`}>
-          <WithShell><GameDay /></WithShell>
-        </Route>
+        {import.meta.env.VITE_FEATURE_A11OY_STRATEGY_SIMS === 'true' && (
+          <Route path={`${base}/strategy/stress-drill`}>
+            <WithShell><StressDrill /></WithShell>
+          </Route>
+        )}
+        {import.meta.env.VITE_FEATURE_A11OY_STRATEGY_SIMS === 'true' && (
+          <Route path={`${base}/strategy/game-day`}>
+            <WithShell><GameDay /></WithShell>
+          </Route>
+        )}
         <Route path={`${base}/strategy/correlation-map`}>
           <WithShell><CorrelationMap /></WithShell>
         </Route>
@@ -1079,6 +1086,15 @@ function AppInner() {
         </Route>
         <Route path={`${base}/operations/ownership`}>
           <WithShell><OpsOwnershipMap /></WithShell>
+        </Route>
+        <Route path={`${base}/operations/ownership-graph`}>
+          <WithShell><OpsOwnershipGraph /></WithShell>
+        </Route>
+        <Route path={`${base}/operations/distress-engine`}>
+          <WithShell><OpsDistressEngine /></WithShell>
+        </Route>
+        <Route path={`${base}/operations/knowledge-vault`}>
+          <WithShell><OpsKnowledgeVault /></WithShell>
         </Route>
         <Route path={`${base}/operations/escalation`}>
           <WithShell><OpsEscalationCenter /></WithShell>

@@ -1,309 +1,231 @@
-import { ClassificationBadge } from '../../components/infrastructure/classification-badge';
-import {
-  type Century,
-  type Cohort,
-  getAquilaColor,
-  getAquilaLabel,
-  getThreatColor,
-  IMPERIUM_DATA,
-  type Legion,
-  type Sentinel,
-} from '../../lib/infrastructure/imperium-data';
-import { cn } from '../../lib/infrastructure/utils';
-import {
-  Activity,
-  ChevronDown,
-  ChevronRight,
-  Cpu,
-  Database,
-  Globe2,
-  Lock,
-  Network,
-  Radio,
-  Server,
-  Shield,
-} from 'lucide-react';
-import React, { useState } from 'react';
+/**
+ * Imperium Map — MapLibre geospatial surface for tenant infrastructure.
+ *
+ * Pins are loaded from /api/a11oy/stubs/infrastructure-map (tenant-scoped).
+ * The basemap tile/style URL is read from VITE_MAPLIBRE_STYLE_URL — when
+ * absent we render a branded empty state instead of a broken/blank map.
+ */
 
-const CENTURY_ICONS: Record<string, React.ElementType> = {
-  'container-app': Cpu,
-  'static-web-app': Globe2,
-  database: Database,
-  cache: Activity,
-  storage: Server,
-  messaging: Radio,
-  keyvault: Lock,
-  network: Network,
-  monitoring: Shield,
+import 'maplibre-gl/dist/maplibre-gl.css';
+import maplibregl from 'maplibre-gl';
+import { useEffect, useMemo, useRef } from 'react';
+import { PageHeader } from '../../components/ui/PageHeader';
+import { Card } from '../../components/ui/Card';
+import { DataStateBadge } from '../../components/ui/DataStateBadge';
+import { useApiData } from '../../hooks/useApiData';
+import { Map as MapIcon, AlertTriangle } from 'lucide-react';
+
+interface InfraPin {
+  id: string;
+  label: string;
+  region: string;
+  lat: number;
+  lon: number;
+  status: 'nominal' | 'degraded' | 'critical' | string;
+  tier: string;
+  capacity: number;
+}
+
+interface InfraEdge {
+  from: string;
+  to: string;
+  kind?: string;
+  health?: string;
+}
+
+interface InfraMapResponse {
+  pins: InfraPin[];
+  edges?: InfraEdge[];
+  regions?: { id: string; label: string; pinCount: number }[];
+}
+
+const STATUS_COLOR: Record<string, string> = {
+  nominal: '#22c55e',
+  degraded: '#f59e0b',
+  critical: '#ef4444',
 };
 
-function AquilaPip({ score, size = 'sm' }: { score: number; size?: 'xs' | 'sm' }) {
-  const color = getAquilaColor(score);
-  const dim = size === 'xs' ? 'w-5 h-5 text-[9px]' : 'w-6 h-6 text-[10px]';
-  return (
-    <div
-      className={cn(
-        'rounded-full flex items-center justify-center font-mono font-bold flex-shrink-0',
-        dim,
-      )}
-      style={{ background: `${color}18`, border: `1px solid ${color}50`, color }}
-    >
-      {score}
-    </div>
-  );
-}
+const STYLE_URL = (import.meta.env.VITE_MAPLIBRE_STYLE_URL as string | undefined) ?? '';
 
-function SentinelRow({ sentinel, depth }: { sentinel: Sentinel; depth: number }) {
-  const statusColor =
-    sentinel.status === 'ACTIVE'
-      ? '#4ade80'
-      : sentinel.status === 'DEGRADED'
-        ? '#fb923c'
-        : '#ef4444';
+export default function ImperiumMapPage() {
+  const { data, loading, error, source } = useApiData<InfraMapResponse>('/stubs/infrastructure-map');
+  const mapContainer = useRef<HTMLDivElement | null>(null);
+  const mapRef = useRef<maplibregl.Map | null>(null);
+  const markersRef = useRef<maplibregl.Marker[]>([]);
+
+  const pins = data?.pins ?? [];
+  const regions = data?.regions ?? [];
+
+  const totals = useMemo(() => {
+    const t = { nominal: 0, degraded: 0, critical: 0 };
+    for (const p of pins) {
+      if (p.status in t) (t as Record<string, number>)[p.status] += 1;
+    }
+    return t;
+  }, [pins]);
+
+  useEffect(() => {
+    if (!STYLE_URL) return;
+    if (!mapContainer.current) return;
+    if (mapRef.current) return;
+    mapRef.current = new maplibregl.Map({
+      container: mapContainer.current,
+      style: STYLE_URL,
+      center: [0, 20],
+      zoom: 1.2,
+      attributionControl: { compact: true },
+    });
+    mapRef.current.addControl(new maplibregl.NavigationControl({ showCompass: false }), 'top-right');
+    return () => {
+      markersRef.current.forEach((m) => m.remove());
+      markersRef.current = [];
+      mapRef.current?.remove();
+      mapRef.current = null;
+    };
+  }, []);
+
+  useEffect(() => {
+    const map = mapRef.current;
+    if (!map || !STYLE_URL) return;
+    markersRef.current.forEach((m) => m.remove());
+    markersRef.current = [];
+    if (pins.length === 0) return;
+
+    const apply = () => {
+      pins.forEach((p) => {
+        const el = document.createElement('div');
+        el.style.width = '14px';
+        el.style.height = '14px';
+        el.style.borderRadius = '50%';
+        el.style.background = STATUS_COLOR[p.status] ?? '#94a3b8';
+        el.style.border = '2px solid rgba(255,255,255,0.85)';
+        el.style.boxShadow = '0 0 0 2px rgba(15,23,42,0.6)';
+        const popup = new maplibregl.Popup({ offset: 14, closeButton: false }).setHTML(
+          `<div style="font-family:ui-sans-serif,system-ui;font-size:12px;line-height:1.35">
+             <div style="font-weight:600;color:#0f172a">${p.label}</div>
+             <div style="color:#475569">${p.region} · ${p.tier}</div>
+             <div style="color:#475569">Status: <span style="color:${STATUS_COLOR[p.status] ?? '#475569'};text-transform:uppercase">${p.status}</span></div>
+             <div style="color:#475569">Capacity: ${Math.round((p.capacity ?? 0) * 100)}%</div>
+           </div>`,
+        );
+        const m = new maplibregl.Marker({ element: el }).setLngLat([p.lon, p.lat]).setPopup(popup).addTo(map);
+        markersRef.current.push(m);
+      });
+      if (pins.length > 0) {
+        const bounds = new maplibregl.LngLatBounds();
+        pins.forEach((p) => bounds.extend([p.lon, p.lat]));
+        map.fitBounds(bounds, { padding: 60, maxZoom: 4, duration: 600 });
+      }
+    };
+
+    if (map.isStyleLoaded()) apply();
+    else map.once('load', apply);
+  }, [pins]);
+
+  const badgeState = loading ? 'loading' : error ? 'error' : source === 'api' ? 'live' : 'demo';
+  const badgeLabel = STYLE_URL ? undefined : 'NO BASEMAP TOKEN';
+
   return (
-    <div
-      className="flex items-center gap-2 px-3 py-1.5 rounded hover:bg-white/3 transition-all group animate-data-stream"
-      style={{ paddingLeft: `${depth * 12 + 12}px` }}
-    >
-      <div
-        className="w-1.5 h-1.5 rounded-full flex-shrink-0"
-        style={{ backgroundColor: statusColor }}
+    <div className="p-6 space-y-6">
+      <PageHeader
+        breadcrumbs={[{ label: 'Infrastructure' }, { label: 'Imperium Map' }]}
+        title="Imperium Map"
+        description="Tenant infrastructure topology on a live geospatial canvas."
       />
-      <span className="font-mono text-[10px] text-slate-400 group-hover:text-slate-300 flex-1 truncate">
-        {sentinel.name}
-      </span>
-      <span className="text-[10px] text-slate-600 hidden sm:block truncate max-w-[120px]">
-        {sentinel.type}
-      </span>
-      <AquilaPip score={sentinel.aquilaScore} size="xs" />
-      <ClassificationBadge classification={sentinel.classification} size="xs" />
-    </div>
-  );
-}
+      <div className="flex items-center gap-3">
+        <DataStateBadge state={badgeState} label={badgeLabel} />
+        <span className="text-xs text-slate-400">
+          {pins.length} pins · {regions.length} regions · {totals.critical} critical · {totals.degraded} degraded · {totals.nominal} nominal
+        </span>
+      </div>
 
-function CenturyBlock({ century, depth }: { century: Century; depth: number }) {
-  const [open, setOpen] = useState(false);
-  const Icon = CENTURY_ICONS[century.type] || Server;
-  const color = getAquilaColor(century.aquilaScore);
-
-  return (
-    <div>
-      <button
-        onClick={() => setOpen(!open)}
-        className="w-full flex items-center gap-2 px-3 py-2 rounded hover:bg-white/3 transition-all text-left"
-        style={{ paddingLeft: `${depth * 12 + 8}px` }}
-      >
-        {open ? (
-          <ChevronDown className="w-3 h-3 text-slate-600 flex-shrink-0" />
+      <Card padding="none" radius="lg" accent="cyan" style={{ overflow: 'hidden' }}>
+        {STYLE_URL ? (
+          <div ref={mapContainer} style={{ width: '100%', height: 560 }} />
         ) : (
-          <ChevronRight className="w-3 h-3 text-slate-600 flex-shrink-0" />
-        )}
-        <Icon className="w-3.5 h-3.5 flex-shrink-0" style={{ color }} />
-        <div className="flex-1 min-w-0">
-          <span className="font-display text-[10px] tracking-[0.1em] text-slate-300 font-semibold truncate block">
-            {century.name}
-          </span>
-          <span className="text-[9px] text-slate-600">
-            {century.label} · {century.sentinels.length} resources
-          </span>
-        </div>
-        <AquilaPip score={century.aquilaScore} size="xs" />
-        <ClassificationBadge classification={century.classification} size="xs" />
-      </button>
-      {open && (
-        <div>
-          {century.sentinels.map((s) => (
-            <SentinelRow key={s.id} sentinel={s} depth={depth + 2} />
-          ))}
-        </div>
-      )}
-    </div>
-  );
-}
-
-function CohortBlock({ cohort, depth }: { cohort: Cohort; depth: number }) {
-  const [open, setOpen] = useState(true);
-  const color = getAquilaColor(cohort.aquilaScore);
-
-  return (
-    <div className="mb-1">
-      <button
-        onClick={() => setOpen(!open)}
-        className="w-full flex items-center gap-2 px-3 py-2.5 rounded hover:bg-white/5 transition-all text-left border border-transparent hover:border-white/5"
-        style={{ paddingLeft: `${depth * 12 + 8}px` }}
-      >
-        {open ? (
-          <ChevronDown className="w-3.5 h-3.5 text-slate-500 flex-shrink-0" />
-        ) : (
-          <ChevronRight className="w-3.5 h-3.5 text-slate-500 flex-shrink-0" />
-        )}
-        <div className="flex-1 min-w-0">
           <div
-            className="font-display text-[11px] tracking-[0.12em] font-bold truncate"
-            style={{ color }}
-          >
-            {cohort.name}
-          </div>
-          <div className="text-[10px] text-slate-500">
-            {cohort.label} · ${cohort.costPerMonth}/mo
-          </div>
-        </div>
-        <AquilaPip score={cohort.aquilaScore} />
-        <ClassificationBadge classification={cohort.classification} size="xs" />
-      </button>
-      {open && (
-        <div className="ml-2 border-l border-white/5 pl-1 mt-1 space-y-0.5">
-          {cohort.centuries.map((ct) => (
-            <CenturyBlock key={ct.id} century={ct} depth={depth + 1} />
-          ))}
-        </div>
-      )}
-    </div>
-  );
-}
-
-function LegionBlock({ legion }: { legion: Legion }) {
-  const [open, setOpen] = useState(true);
-  const color = getAquilaColor(legion.aquilaScore);
-  const threatColor = getThreatColor(legion.threatLevel);
-
-  return (
-    <div className="imperial-card rounded-lg mb-4 overflow-hidden">
-      <button
-        onClick={() => setOpen(!open)}
-        className="w-full flex items-center gap-3 px-4 py-3 hover:bg-white/3 transition-all text-left border-b border-gold/10"
-      >
-        {open ? (
-          <ChevronDown className="w-4 h-4 text-slate-500 flex-shrink-0" />
-        ) : (
-          <ChevronRight className="w-4 h-4 text-slate-500 flex-shrink-0" />
-        )}
-        <div className="flex-1">
-          <div className="font-display text-sm tracking-[0.15em] font-bold" style={{ color }}>
-            {legion.name}
-          </div>
-          <div className="text-[11px] text-slate-400">
-            {legion.label} · Azure {legion.region}
-          </div>
-        </div>
-        <div className="flex items-center gap-2">
-          <div
-            className="px-2 py-0.5 rounded font-mono text-[10px] tracking-widest border"
             style={{
-              color: threatColor,
-              borderColor: `${threatColor}40`,
-              background: `${threatColor}10`,
+              height: 560,
+              display: 'flex',
+              flexDirection: 'column',
+              alignItems: 'center',
+              justifyContent: 'center',
+              gap: 16,
+              padding: 32,
+              background:
+                'radial-gradient(circle at 30% 20%, rgba(34,211,238,0.10), transparent 60%), radial-gradient(circle at 70% 80%, rgba(168,85,247,0.10), transparent 55%), #0b1220',
+              color: '#e2e8f0',
+              textAlign: 'center',
             }}
           >
-            {legion.threatLevel}
-          </div>
-          <AquilaPip score={legion.aquilaScore} />
-        </div>
-      </button>
-      {open && (
-        <div className="p-2">
-          <div className="grid grid-cols-3 gap-3 mb-3 px-2 py-2">
-            <div className="text-center">
-              <div className="font-mono text-lg font-bold" style={{ color }}>
-                {legion.aquilaScore}
-              </div>
-              <div className="text-[10px] text-slate-500">Health Score</div>
+            <div
+              style={{
+                width: 56,
+                height: 56,
+                borderRadius: 14,
+                background: 'rgba(34,211,238,0.12)',
+                border: '1px solid rgba(34,211,238,0.35)',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+              }}
+            >
+              <MapIcon size={28} color="#22d3ee" />
             </div>
-            <div className="text-center">
-              <div className="font-mono text-lg font-bold text-slate-300">
-                {legion.cohorts.length}
-              </div>
-              <div className="text-[10px] text-slate-500">Groups</div>
+            <div style={{ fontSize: 18, fontWeight: 600 }}>Basemap not configured</div>
+            <div style={{ maxWidth: 460, fontSize: 13, color: '#94a3b8', lineHeight: 1.55 }}>
+              Set <code style={{ color: '#22d3ee' }}>VITE_MAPLIBRE_STYLE_URL</code> to a MapLibre style URL
+              (with any required token) to render the live Imperium Map. The pin data
+              below is already streaming live from <code style={{ color: '#22d3ee' }}>/api/a11oy/stubs/infrastructure-map</code>.
             </div>
-            <div className="text-center">
-              <div className="font-mono text-lg font-bold text-green-400">
-                ${legion.costPerMonth.toLocaleString()}
-              </div>
-              <div className="text-[10px] text-slate-500">Monthly</div>
+            <div
+              style={{
+                display: 'flex',
+                gap: 8,
+                flexWrap: 'wrap',
+                justifyContent: 'center',
+                marginTop: 12,
+                maxWidth: 700,
+              }}
+            >
+              {pins.slice(0, 12).map((p) => (
+                <span
+                  key={p.id}
+                  style={{
+                    padding: '6px 10px',
+                    borderRadius: 999,
+                    background: 'rgba(255,255,255,0.04)',
+                    border: `1px solid ${STATUS_COLOR[p.status] ?? '#475569'}55`,
+                    color: '#cbd5e1',
+                    fontSize: 11,
+                    fontFamily: 'ui-monospace,monospace',
+                  }}
+                >
+                  <span
+                    style={{
+                      display: 'inline-block',
+                      width: 8,
+                      height: 8,
+                      borderRadius: '50%',
+                      background: STATUS_COLOR[p.status] ?? '#94a3b8',
+                      marginRight: 6,
+                    }}
+                  />
+                  {p.label}
+                </span>
+              ))}
             </div>
           </div>
-          <div className="space-y-1">
-            {legion.cohorts.map((cohort) => (
-              <CohortBlock key={cohort.id} cohort={cohort} depth={0} />
-            ))}
+        )}
+      </Card>
+
+      {error && (
+        <Card accent="amber" padding="md">
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8, color: '#f59e0b' }}>
+            <AlertTriangle size={16} /> Failed to load infrastructure map: {error}
           </div>
-        </div>
+        </Card>
       )}
-    </div>
-  );
-}
-
-export default function ImperiumMap() {
-  const imperium = IMPERIUM_DATA;
-
-  return (
-    <div className="space-y-6">
-      <div>
-        <div className="flex items-center gap-3 mb-1">
-          <Globe2 className="w-5 h-5" style={{ color: '#c9a227' }} />
-          <h1 className="font-display text-lg tracking-[0.2em] gold-text gold-glow font-bold uppercase">
-            Resource Map
-          </h1>
-        </div>
-        <p className="text-xs text-slate-500 ml-8">
-          Full platform hierarchy — Regions → Groups → Clusters → Resources
-        </p>
-      </div>
-
-      {/* Hierarchy legend */}
-      <div className="flex flex-wrap gap-4 text-[10px] text-slate-500 font-mono">
-        {[
-          { label: 'PLATFORM', desc: 'Entire cloud estate' },
-          { label: 'REGION', desc: 'Azure region' },
-          { label: 'GROUP', desc: 'Resource group / service cluster' },
-          { label: 'CLUSTER', desc: 'Service type group' },
-          { label: 'RESOURCE', desc: 'Individual resource instance' },
-        ].map((tier, i) => (
-          <React.Fragment key={tier.label}>
-            {i > 0 && <ChevronRight className="w-3 h-3 text-slate-700 self-center" />}
-            <div>
-              <span className="gold-text font-semibold">{tier.label}</span>
-              <span className="text-slate-600 ml-1">({tier.desc})</span>
-            </div>
-          </React.Fragment>
-        ))}
-      </div>
-
-      {/* Imperium root */}
-      <div
-        className="rounded-lg p-4 border"
-        style={{ background: 'rgba(201,162,39,0.04)', borderColor: 'rgba(201,162,39,0.2)' }}
-      >
-        <div className="flex items-center gap-3">
-          <Globe2 className="w-6 h-6" style={{ color: '#c9a227' }} />
-          <div className="flex-1">
-            <div className="font-display text-base tracking-[0.2em] gold-text font-bold">
-              {imperium.name}
-            </div>
-            <div className="text-xs text-slate-400">
-              {imperium.totalResources} total resources · Aquila {imperium.aquilaScore} · $
-              {imperium.totalCostPerMonth.toLocaleString()}/mo
-            </div>
-          </div>
-          <div
-            className="px-3 py-1 rounded font-mono text-sm font-bold"
-            style={{
-              color: getAquilaColor(imperium.aquilaScore),
-              background: `${getAquilaColor(imperium.aquilaScore)}15`,
-              border: `1px solid ${getAquilaColor(imperium.aquilaScore)}40`,
-            }}
-          >
-            {imperium.aquilaScore} · {getAquilaLabel(imperium.aquilaScore)}
-          </div>
-        </div>
-      </div>
-
-      {/* Legions */}
-      <div>
-        {imperium.legions.map((legion) => (
-          <LegionBlock key={legion.id} legion={legion} />
-        ))}
-      </div>
     </div>
   );
 }

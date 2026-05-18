@@ -899,4 +899,25 @@ router.use(lazyMatch("/eval-harness", () => import("./eval-harness"), "eval-harn
 // GET    /a11oy/orchestrator/status                         — orchestrator readiness probe
 router.use(lazyMatch("/a11oy/orchestrator", () => import("./a11oy-vertical-orchestrator"), "a11oy-vertical-orchestrator"));
 
+// A11oy Stubs Killer — backing endpoints for previously-stub surfaces:
+// Ownership Graph, Distress Engine, Knowledge Vault, Infrastructure Map fixtures.
+// All endpoints return deterministic seed data scoped per tenant; reassignment
+// state for the ownership graph is kept in-memory keyed by tenant.
+// GET  /a11oy/stubs/ownership-graph
+// POST /a11oy/stubs/ownership-graph/reassign
+// GET  /a11oy/stubs/distress-engine
+// GET  /a11oy/stubs/distress-engine/:id
+// GET  /a11oy/stubs/knowledge-vault?q=&category=
+// GET  /a11oy/stubs/knowledge-vault/:id
+// GET  /a11oy/stubs/infrastructure-map
+router.use("/a11oy/stubs", lazyMount(() => import("./a11oy-stubs"), "a11oy-stubs"));
+
+// A11oy Strategy Simulations contract (Task #5171):
+// GET  /a11oy/strategy/scenarios
+// GET  /a11oy/strategy/scenarios/:id
+// POST /a11oy/strategy/scenarios/:id/run
+// GET  /a11oy/strategy/runs
+// GET  /a11oy/strategy/runs/:runId
+router.use("/a11oy/strategy", lazyMount(() => import("./a11oy-strategy"), "a11oy-strategy"));
+
 export default router;
