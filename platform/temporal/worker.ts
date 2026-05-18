@@ -20,6 +20,7 @@ import * as approvalActivities from "./activities/approval-activities.js";
 import * as evidenceActivities from "./activities/evidence-activities.js";
 import * as ingestionActivities from "./activities/ingestion-activities.js";
 import * as frontierActivities from "./activities/frontier-ingest-activities.js";
+import * as frontierRetentionActivities from "./activities/frontier-retention-activities.js";
 
 export const DEFAULT_TASK_QUEUE = "szl-platform";
 export const DEFAULT_NAMESPACE = "default";
@@ -41,6 +42,7 @@ export function buildActivityRegistry() {
     ...evidenceActivities,
     ...ingestionActivities,
     ...frontierActivities,
+    ...frontierRetentionActivities,
   };
 }
 

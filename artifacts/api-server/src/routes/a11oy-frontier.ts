@@ -2,6 +2,7 @@ import { Router, type Request, type Response } from 'express';
 import {
   approveInboxItem,
   approveInboxItemShared,
+  dbGetFrontierTableCounts,
   dbGetStatsShared,
   dbListDownstreamShared,
   dbListInboxShared,
@@ -11,6 +12,7 @@ import {
   discardInboxItemShared,
   ensureFrontierIngestDbSchema,
   ensureFrontierIngestSchedule,
+  ensureFrontierRetentionSchedule,
   getDailySpendHydrated,
   getStats,
   getSpendCap,
@@ -20,8 +22,10 @@ import {
   listPromoted,
   listSources,
   listTimeline,
+  pruneFrontierRetention,
   pullAll,
   pullSource,
+  resolveFrontierRetentionConfig,
   setSpendCap,
   startWorker,
   stopWorker,
@@ -339,6 +343,73 @@ router.post('/a11oy/frontier/cost-cap', requireAuth, async (req: Request, res: R
     sendSuccess(res, { spendCapUsd: getSpendCap() });
   } catch (err) {
     handleRouteError(res, err, 'Failed to set spend cap');
+  }
+});
+
+/**
+ * Admin: current row counts for every `frontier_*` table.
+ *
+ * Surfaces table growth so operators can see whether the retention sweep
+ * is actually keeping the engine lean — without this they'd have to shell
+ * into the DB to verify. Also reports the configured retention windows and
+ * the Temporal schedule state for the retention workflow so the UI can
+ * show a single "storage health" panel.
+ */
+router.get('/a11oy/frontier/admin/table-counts', requireAuth, async (_req: Request, res: Response) => {
+  try {
+    await ensureFrontierIngestDbSchema();
+    const counts = isFrontierIngestDbEnabled() ? await dbGetFrontierTableCounts() : undefined;
+    const retentionCfg = resolveFrontierRetentionConfig();
+    const retentionSchedule = await ensureFrontierRetentionSchedule();
+    sendSuccess(res, {
+      persisted: isFrontierIngestDbEnabled(),
+      counts: counts ?? null,
+      retention: {
+        timelineDays: retentionCfg.timelineDays,
+        discardedInboxDays: retentionCfg.discardedInboxDays,
+        intervalMs: retentionCfg.intervalMs,
+      },
+      retentionScheduler: {
+        scheduled: retentionSchedule.ok,
+        scheduleId: retentionSchedule.scheduleId,
+        workflowType: retentionSchedule.workflowType,
+        taskQueue: retentionSchedule.taskQueue,
+        unavailableReason: retentionSchedule.ok ? undefined : retentionSchedule.reason,
+      },
+    });
+  } catch (err) {
+    handleRouteError(res, err, 'Failed to load frontier table counts');
+  }
+});
+
+/**
+ * Admin: on-demand retention sweep. The scheduled Temporal workflow is
+ * the production path; this endpoint lets operators force a sweep without
+ * waiting for the next tick (e.g. after a burst of test discoveries
+ * flooded the timeline).
+ */
+router.post('/a11oy/frontier/admin/prune', requireAuth, async (req: Request, res: Response) => {
+  try {
+    const body = (req.body ?? {}) as { timelineDays?: number; discardedInboxDays?: number };
+    const overrides: { timelineDays?: number; discardedInboxDays?: number } = {};
+    if (typeof body.timelineDays === 'number' && body.timelineDays > 0) {
+      overrides.timelineDays = body.timelineDays;
+    }
+    if (typeof body.discardedInboxDays === 'number' && body.discardedInboxDays > 0) {
+      overrides.discardedInboxDays = body.discardedInboxDays;
+    }
+    await ensureFrontierIngestDbSchema();
+    if (!isFrontierIngestDbEnabled()) {
+      return sendSuccess(res, {
+        persisted: false,
+        skipped: true,
+        note: 'DB backend disabled — nothing to prune',
+      });
+    }
+    const result = await pruneFrontierRetention(overrides);
+    sendSuccess(res, { persisted: true, result: result ?? null });
+  } catch (err) {
+    handleRouteError(res, err, 'Failed to prune frontier retention');
   }
 });
 

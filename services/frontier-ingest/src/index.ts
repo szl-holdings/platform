@@ -17,9 +17,23 @@ export {
   dbListPromotions as dbListPromotionsShared,
   dbListDownstream as dbListDownstreamShared,
   dbGetStats as dbGetStatsShared,
+  dbGetFrontierTableCounts,
+  dbPruneFrontierRetention,
   _truncateForTests as _truncateFrontierDbForTests,
   _resetDbBackendForTests,
 } from './db-backend.js';
+export type { FrontierTableCounts, FrontierRetentionResult } from './db-backend.js';
+export {
+  resolveFrontierRetentionConfig,
+  pruneFrontierRetention,
+  type FrontierRetentionConfig,
+} from './retention.js';
+export {
+  ensureFrontierRetentionSchedule,
+  startRetentionLoopIfEnabled,
+  stopRetentionLoop,
+  isRetentionLoopRunning,
+} from './temporal-retention-scheduler.js';
 
 // Auto-install the thesis-RAG probe on first import so any process
 // using the classifier (api-server, Temporal worker, in-process dev

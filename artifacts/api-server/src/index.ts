@@ -810,10 +810,38 @@ export async function bootstrap(
           // to the in-process dev loop ONLY when the operator opts in via
           // FRONTIER_INGEST_DEV_WORKER=true. This guarantees production
           // never silently runs the setInterval fallback.
-          const { ensureFrontierIngestSchedule, startWorker } = await import(
-            '@workspace/frontier-ingest'
-          );
+          const {
+            ensureFrontierIngestSchedule,
+            ensureFrontierRetentionSchedule,
+            startRetentionLoopIfEnabled,
+            startWorker,
+          } = await import('@workspace/frontier-ingest');
           const scheduleResult = await ensureFrontierIngestSchedule();
+          // Retention sweep schedule is independent of the ingest schedule —
+          // it keeps frontier_timeline / discarded inbox rows from growing
+          // unbounded. Soft-fails on the same Temporal-unavailable path.
+          const retentionResult = await ensureFrontierRetentionSchedule();
+          if (retentionResult.ok) {
+            logger.info(
+              {
+                scheduleId: retentionResult.scheduleId,
+                workflowType: retentionResult.workflowType,
+                taskQueue: retentionResult.taskQueue,
+              },
+              '[frontier-ingest] retention schedule ensured',
+            );
+          } else if (process.env.FRONTIER_RETENTION_IN_PROCESS === 'true') {
+            const loop = startRetentionLoopIfEnabled();
+            logger.warn(
+              { reason: retentionResult.reason, loop },
+              '[frontier-ingest] Temporal unavailable — in-process retention loop armed (FRONTIER_RETENTION_IN_PROCESS=true)',
+            );
+          } else {
+            logger.warn(
+              { reason: retentionResult.reason },
+              '[frontier-ingest] retention schedule not armed (Temporal unavailable and FRONTIER_RETENTION_IN_PROCESS!=true)',
+            );
+          }
           if (scheduleResult.ok) {
             logger.info(
               {

@@ -151,3 +151,32 @@ export type FrontierTimelineRow = typeof frontierTimelineTable.$inferSelect;
 export type FrontierPromotionRow = typeof frontierPromotionsTable.$inferSelect;
 export type FrontierSpendRow = typeof frontierSpendTable.$inferSelect;
 export type FrontierSpendWindowRow = typeof frontierSpendWindowTable.$inferSelect;
+
+/**
+ * Frontier-table row counts surfaced to the operator admin endpoint so growth
+ * is observable without ad-hoc DB queries. Maps one-to-one with the
+ * `frontier_*` tables above; new tables should be added here when introduced.
+ */
+export interface FrontierTableCounts {
+  frontier_artifacts: number;
+  frontier_evidence: number;
+  frontier_inbox: number;
+  frontier_promotions: number;
+  frontier_downstream: number;
+  frontier_timeline: number;
+  frontier_spend: number;
+  frontier_spend_window: number;
+  frontier_seen: number;
+}
+
+/**
+ * Result of a single retention sweep, returned by the prune activity so the
+ * Temporal workflow log carries a durable proof-record of what was removed.
+ */
+export interface FrontierRetentionResult {
+  timelineDeleted: number;
+  discardedInboxDeleted: number;
+  orphanArtifactsDeleted: number;
+  timelineCutoff: string;
+  discardedInboxCutoff: string;
+}

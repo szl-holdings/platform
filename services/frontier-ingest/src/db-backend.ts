@@ -566,6 +566,154 @@ function rowToInbox(r: Row): InboxItem {
   };
 }
 
+/**
+ * One row per `frontier_*` table with its current row count. Exposed via
+ * the admin endpoint so operators can watch table growth and verify that
+ * retention sweeps are actually shrinking the tables they target.
+ */
+export interface FrontierTableCounts {
+  frontier_artifacts: number;
+  frontier_evidence: number;
+  frontier_inbox: number;
+  frontier_promotions: number;
+  frontier_downstream: number;
+  frontier_timeline: number;
+  frontier_spend: number;
+  frontier_spend_window: number;
+  frontier_seen: number;
+}
+
+/**
+ * Result of a single retention sweep. The cutoffs are returned so operators
+ * (and the Temporal workflow log) can audit exactly which window the prune
+ * applied to, even after retention env values are changed later.
+ */
+export interface FrontierRetentionResult {
+  timelineDeleted: number;
+  discardedInboxDeleted: number;
+  orphanArtifactsDeleted: number;
+  timelineCutoff: string;
+  discardedInboxCutoff: string;
+}
+
+const FRONTIER_TABLES = [
+  'frontier_artifacts',
+  'frontier_evidence',
+  'frontier_inbox',
+  'frontier_promotions',
+  'frontier_downstream',
+  'frontier_timeline',
+  'frontier_spend',
+  'frontier_spend_window',
+  'frontier_seen',
+] as const;
+
+/**
+ * Return current row counts for every `frontier_*` table. Returns `undefined`
+ * when the DB backend isn't available so callers can fall back to a "not
+ * persisted" response instead of crashing.
+ */
+export async function dbGetFrontierTableCounts(): Promise<FrontierTableCounts | undefined> {
+  const ok = await ensureSchema();
+  if (!ok || !pool) return undefined;
+  const counts = {
+    frontier_artifacts: 0,
+    frontier_evidence: 0,
+    frontier_inbox: 0,
+    frontier_promotions: 0,
+    frontier_downstream: 0,
+    frontier_timeline: 0,
+    frontier_spend: 0,
+    frontier_spend_window: 0,
+    frontier_seen: 0,
+  } as FrontierTableCounts;
+  for (const t of FRONTIER_TABLES) {
+    // Table names are a fixed allow-list above — safe to interpolate.
+    const rows = await safeQuery(`SELECT count(*)::bigint AS n FROM ${t}`);
+    if (rows && rows.length > 0) {
+      counts[t] = Number(rows[0]!['n'] ?? 0);
+    }
+  }
+  return counts;
+}
+
+/**
+ * Delete frontier records older than the configured retention windows.
+ *
+ * What is kept:
+ *  - Artifacts referenced by any `frontier_promotions` row — the promotion
+ *    ledger is the proof-chain root and must not lose its source artifact.
+ *  - Artifacts referenced by any non-discarded inbox row (pending or approved
+ *    decisions are still operator-actionable / part of the approval chain).
+ *  - `frontier_spend`, `frontier_spend_window`, `frontier_seen` — small,
+ *    bounded-size meters that are not growth concerns.
+ *
+ * What is pruned:
+ *  - `frontier_timeline` rows older than `timelineDays` (the dominant growth
+ *    source — every pull-start/pull-complete/discovered/queued event lands
+ *    here at tens of thousands of rows/week per provider).
+ *  - `frontier_inbox` rows in `discarded` status with `reviewed_at` older
+ *    than `discardedInboxDays`.
+ *  - Artifacts that, after the above deletes, have no inbox row and no
+ *    promotion (i.e. the operator marked them irrelevant long ago).
+ *    Cascading FKs clean up evidence/seen.
+ */
+export async function dbPruneFrontierRetention(opts: {
+  timelineDays: number;
+  discardedInboxDays: number;
+}): Promise<FrontierRetentionResult | undefined> {
+  const ok = await ensureSchema();
+  if (!ok || !pool) return undefined;
+
+  const timelineDays = Math.max(1, Math.floor(opts.timelineDays));
+  const discardedInboxDays = Math.max(1, Math.floor(opts.discardedInboxDays));
+  const now = Date.now();
+  const timelineCutoff = new Date(now - timelineDays * 24 * 60 * 60 * 1000).toISOString();
+  const discardedInboxCutoff = new Date(
+    now - discardedInboxDays * 24 * 60 * 60 * 1000,
+  ).toISOString();
+
+  // NOTE: intentionally no try/catch wrapper — real SQL errors should
+  // bubble up so the Temporal workflow records a failed activity and
+  // retries, and the admin endpoint surfaces the failure to the operator.
+  // The earlier `safeQuery` swallow-pattern is reserved for the read path
+  // where partial unavailability is acceptable.
+  const tlRes = await pool.query(
+    `DELETE FROM frontier_timeline WHERE at < $1`,
+    [timelineCutoff],
+  );
+  const timelineDeleted = tlRes.rowCount ?? 0;
+
+  const inboxRes = await pool.query(
+    `DELETE FROM frontier_inbox
+       WHERE status = 'discarded'
+         AND reviewed_at IS NOT NULL
+         AND reviewed_at < $1`,
+    [discardedInboxCutoff],
+  );
+  const discardedInboxDeleted = inboxRes.rowCount ?? 0;
+
+  // Drop artifacts that no longer have any inbox row OR promotion — these
+  // are pure discarded discoveries that long ago dropped out of the
+  // operator queue. Their evidence/seen rows cascade on delete.
+  const orphRes = await pool.query(
+    `DELETE FROM frontier_artifacts a
+       WHERE NOT EXISTS (SELECT 1 FROM frontier_inbox i WHERE i.artifact_id = a.id)
+         AND NOT EXISTS (SELECT 1 FROM frontier_promotions p WHERE p.artifact_id = a.id)
+         AND a.discovered_at < $1`,
+    [discardedInboxCutoff],
+  );
+  const orphanArtifactsDeleted = orphRes.rowCount ?? 0;
+
+  return {
+    timelineDeleted,
+    discardedInboxDeleted,
+    orphanArtifactsDeleted,
+    timelineCutoff,
+    discardedInboxCutoff,
+  };
+}
+
 /** Test helper: wipe all frontier_* tables. Use only with DATABASE_URL pointing at a test DB. */
 export async function _truncateForTests(): Promise<void> {
   if (!(await ensureSchema()) || !pool) return;
