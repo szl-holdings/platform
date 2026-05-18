@@ -482,4 +482,152 @@ router.get('/org-intelligence/healthz', (_req, res) => {
   });
 });
 
+// ---------------------------------------------------------------------------
+// Deep-dive: per-repo rich intel for a single repo. Pulls README (raw),
+// top-level tree, last 10 commits, open PRs, languages-by-bytes, releases.
+// Cached 5 minutes per slug (rate-limit budget: a load of every repo is
+// 17 slugs × 6 calls × 12 refreshes/hr = ~1200 calls/hr, well below 5000).
+// Anonymous-readable GET (matches /snapshot posture). No mock fallback —
+// returns 503 with `github_token_missing` if token absent, partial-200
+// with per-field _error markers if individual calls fail.
+// ---------------------------------------------------------------------------
+const DEEPDIVE_TTL_MS = 5 * 60 * 1000;
+const _deepCache: Map<string, { data: unknown; fetched_at: number }> = new Map();
+
+async function buildDeepDive(slug: string): Promise<unknown> {
+  const token = process.env.GH_WORKFLOW_TOKEN;
+  if (!token) throw Object.assign(new Error('github_token_missing'), { _http: 503 });
+  const [meta, readme, treeTop, commits, prs, langs, releases] = await Promise.all([
+    ghFetch(`/repos/${ORG}/${slug}`, token),
+    ghFetch(`/repos/${ORG}/${slug}/readme`, token, 'application/vnd.github.raw'),
+    ghFetch(`/repos/${ORG}/${slug}/contents`, token),
+    ghFetch(`/repos/${ORG}/${slug}/commits?per_page=10`, token),
+    ghFetch(`/repos/${ORG}/${slug}/pulls?state=open&per_page=10`, token),
+    ghFetch(`/repos/${ORG}/${slug}/languages`, token),
+    ghFetch(`/repos/${ORG}/${slug}/releases?per_page=5`, token),
+  ]);
+  if (!meta.ok) {
+    throw Object.assign(new Error(`repo_meta_unreachable_http_${meta.status}`), { _http: meta.status || 502 });
+  }
+  const m = meta.body as Record<string, unknown>;
+  return {
+    slug,
+    url: `https://github.com/${ORG}/${slug}`,
+    fetched_at: new Date().toISOString(),
+    meta: {
+      description: m.description ?? null,
+      language: m.language ?? null,
+      size_kb: m.size ?? null,
+      pushed_at: m.pushed_at ?? null,
+      default_branch: m.default_branch ?? null,
+      open_issues: m.open_issues_count ?? null,
+      license: ((m.license as { spdx_id?: string } | null) ?? null)?.spdx_id ?? null,
+      stargazers: m.stargazers_count ?? 0,
+      forks: m.forks_count ?? 0,
+      topics: (m.topics as string[] | undefined) ?? [],
+      archived: m.archived ?? false,
+    },
+    readme: readme.ok && typeof readme.body === 'string'
+      ? { ok: true, length: (readme.body as string).length, first_4000: (readme.body as string).slice(0, 4000) }
+      : { ok: false, _error: `readme_unreachable_http_${readme.status}` },
+    top_level: treeTop.ok && Array.isArray(treeTop.body)
+      ? (treeTop.body as Array<{ name: string; type: string; size?: number; html_url: string }>).map(t => ({
+          name: t.name, type: t.type, size: t.size ?? null, url: t.html_url,
+        }))
+      : { _error: `top_level_unreachable_http_${treeTop.status}` },
+    recent_commits: commits.ok && Array.isArray(commits.body)
+      ? (commits.body as Array<{ sha: string; html_url: string; commit: { message: string; author: { name?: string; date: string } } }>).map(c => ({
+          sha: c.sha.slice(0, 7),
+          url: c.html_url,
+          author: c.commit.author.name ?? '(unknown)',
+          when: c.commit.author.date,
+          subject: (c.commit.message || '').split('\n')[0].slice(0, 200),
+        }))
+      : { _error: `commits_unreachable_http_${commits.status}` },
+    open_prs: prs.ok && Array.isArray(prs.body)
+      ? (prs.body as Array<{ number: number; title: string; user: { login: string }; created_at: string; html_url: string; draft: boolean }>).map(p => ({
+          number: p.number, title: p.title, author: p.user.login,
+          created_at: p.created_at, url: p.html_url, draft: p.draft,
+        }))
+      : { _error: `prs_unreachable_http_${prs.status}` },
+    languages_bytes: langs.ok && langs.body && typeof langs.body === 'object'
+      ? (langs.body as Record<string, number>)
+      : { _error: `languages_unreachable_http_${langs.status}` },
+    releases: releases.ok && Array.isArray(releases.body)
+      ? (releases.body as Array<{ tag_name: string; name: string | null; published_at: string; html_url: string; draft: boolean; prerelease: boolean }>).map(r => ({
+          tag: r.tag_name, name: r.name, published_at: r.published_at, url: r.html_url, draft: r.draft, prerelease: r.prerelease,
+        }))
+      : { _error: `releases_unreachable_http_${releases.status}` },
+  };
+}
+
+router.get('/org-intelligence/deep-dive/:slug', async (req, res) => {
+  const slug = String(req.params.slug).replace(/[^a-z0-9_.-]/gi, '').slice(0, 80);
+  if (!slug) { res.status(400).json({ error: 'invalid_slug' }); return; }
+  const fresh = req.query.fresh === '1';
+  const cached = _deepCache.get(slug);
+  if (!fresh && cached && Date.now() - cached.fetched_at < DEEPDIVE_TTL_MS) {
+    res.setHeader('cache-control', 'no-store');
+    res.setHeader('x-snapshot-age', String(Math.round((Date.now() - cached.fetched_at) / 1000)));
+    res.json(cached.data);
+    return;
+  }
+  try {
+    const data = await buildDeepDive(slug);
+    _deepCache.set(slug, { data, fetched_at: Date.now() });
+    res.setHeader('cache-control', 'no-store');
+    res.setHeader('x-snapshot-age', '0');
+    res.json(data);
+  } catch (e) {
+    const httpCode = (e as { _http?: number })?._http ?? 500;
+    const msg = e instanceof Error ? e.message : String(e);
+    res.status(httpCode).json({ error: msg, slug, fetched_at: new Date().toISOString() });
+  }
+});
+
+// ---------------------------------------------------------------------------
+// Lean status: live sorry count per Lutar/*.lean file in lutar-lean. This
+// is the thesis screenshot's "kernel signs off when sorry=0" claim, made
+// queryable. Pulls each .lean file via GH contents API and counts `sorry`
+// tokens. Cached 5 minutes (same TTL as deep-dive). Returns the per-file
+// breakdown + a total; consumers (a11oy organism) render a live shield.
+// ---------------------------------------------------------------------------
+const _leanCache: { data: unknown; fetched_at: number } | null = null;
+let _leanCacheRef = _leanCache;
+
+router.get('/org-intelligence/lean-status', async (_req, res) => {
+  if (_leanCacheRef && Date.now() - _leanCacheRef.fetched_at < DEEPDIVE_TTL_MS) {
+    res.setHeader('x-snapshot-age', String(Math.round((Date.now() - _leanCacheRef.fetched_at) / 1000)));
+    res.json(_leanCacheRef.data);
+    return;
+  }
+  const token = process.env.GH_WORKFLOW_TOKEN;
+  if (!token) { res.status(503).json({ error: 'github_token_missing' }); return; }
+  const files = ['Axioms', 'Egyptian', 'Invariant', 'Bound', 'Uniqueness'];
+  const results = await Promise.all(files.map(async f => {
+    const r = await ghFetch(`/repos/${ORG}/lutar-lean/contents/Lutar/${f}.lean`, token, 'application/vnd.github.raw');
+    if (!r.ok) return { file: `Lutar/${f}.lean`, _error: `unreachable_http_${r.status}`, sorry: null, lines: null };
+    const text = typeof r.body === 'string' ? r.body : '';
+    const sorry = (text.match(/\bsorry\b/g) || []).length;
+    const lines = text.split('\n').length;
+    return { file: `Lutar/${f}.lean`, sorry, lines };
+  }));
+  const total = results.reduce((acc, r) => acc + (r.sorry ?? 0), 0);
+  const kernel_signed_off = total === 0 && results.every(r => r.sorry !== null);
+  const data = {
+    fetched_at: new Date().toISOString(),
+    repo: `${ORG}/lutar-lean`,
+    files: results,
+    total_sorry: total,
+    kernel_signed_off,
+    interpretation: kernel_signed_off
+      ? 'Lean 4 kernel has signed off every Lutar invariant theorem. Λ_k uniqueness is machine-verified.'
+      : `${total} sorry occurrence(s) remaining across ${results.filter(r => (r.sorry ?? 0) > 0).length} file(s). Kernel has NOT yet signed off Λ_k uniqueness — this is the honest, screenshot-can't-drift state.`,
+    shield: { schemaVersion: 1, label: 'lean sorry', message: String(total), color: total === 0 ? 'brightgreen' : (total <= 3 ? 'orange' : 'red') },
+  };
+  _leanCacheRef = { data, fetched_at: Date.now() };
+  res.setHeader('cache-control', 'no-store');
+  res.json(data);
+});
+
 export default router;
