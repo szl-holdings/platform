@@ -57,7 +57,7 @@
     "@szl-holdings/config": "workspace:*",
     "@szl-holdings/domain-claims": "workspace:*",
     "@szl-holdings/env": "workspace:*",
-    "framer-motion": "^12.38.0",
+    "framer-motion": "^12.39.0",
     "recharts": "^2.15.3",
     "@szl-holdings/api-client-react": "workspace:*",
     "@workspace/aef-sdk": "workspace:*"
