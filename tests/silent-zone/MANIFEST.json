@@ -1,0 +1,594 @@
+{
+  "generatedAt": "2026-05-18T17:42:25.364Z",
+  "count": 98,
+  "packages": [
+    {
+      "name": "@workspace/a11oy-cli",
+      "rel": "packages/a11oy-cli",
+      "file": "tests/silent-zone/workspace__a11oy-cli.smoke.test.ts",
+      "entry": null
+    },
+    {
+      "name": "@workspace/a11oy-reliquary",
+      "rel": "packages/a11oy-reliquary",
+      "file": "tests/silent-zone/workspace__a11oy-reliquary.smoke.test.ts",
+      "entry": "packages/a11oy-reliquary/src/index.ts"
+    },
+    {
+      "name": "@szl/a11oy-runtime",
+      "rel": "packages/a11oy-runtime",
+      "file": "tests/silent-zone/szl__a11oy-runtime.smoke.test.ts",
+      "entry": "packages/a11oy-runtime/src/index.ts"
+    },
+    {
+      "name": "@szl-holdings/agent-core",
+      "rel": "packages/agent-core",
+      "file": "tests/silent-zone/szl-holdings__agent-core.smoke.test.ts",
+      "entry": "packages/agent-core/src/index.ts"
+    },
+    {
+      "name": "@workspace/agents-evals",
+      "rel": "packages/agents-evals",
+      "file": "tests/silent-zone/workspace__agents-evals.smoke.test.ts",
+      "entry": "packages/agents-evals/src/index.ts"
+    },
+    {
+      "name": "@workspace/agents-prompts",
+      "rel": "packages/agents-prompts",
+      "file": "tests/silent-zone/workspace__agents-prompts.smoke.test.ts",
+      "entry": "packages/agents-prompts/src/index.ts"
+    },
+    {
+      "name": "@workspace/agents-tools",
+      "rel": "packages/agents-tools",
+      "file": "tests/silent-zone/workspace__agents-tools.smoke.test.ts",
+      "entry": "packages/agents-tools/src/index.ts"
+    },
+    {
+      "name": "@szl-holdings/ai-control-plane",
+      "rel": "packages/ai-control-plane",
+      "file": "tests/silent-zone/szl-holdings__ai-control-plane.smoke.test.ts",
+      "entry": "packages/ai-control-plane/src/index.ts"
+    },
+    {
+      "name": "@workspace/alloy-crew",
+      "rel": "packages/alloy-crew",
+      "file": "tests/silent-zone/workspace__alloy-crew.smoke.test.ts",
+      "entry": "packages/alloy-crew/src/index.ts"
+    },
+    {
+      "name": "@workspace/approvals-inbox",
+      "rel": "packages/approvals-inbox",
+      "file": "tests/silent-zone/workspace__approvals-inbox.smoke.test.ts",
+      "entry": "packages/approvals-inbox/src/index.ts"
+    },
+    {
+      "name": "@szl-holdings/atlas-core",
+      "rel": "packages/atlas-core",
+      "file": "tests/silent-zone/szl-holdings__atlas-core.smoke.test.ts",
+      "entry": "packages/atlas-core/src/index.ts"
+    },
+    {
+      "name": "@szl-holdings/atlas-events",
+      "rel": "packages/atlas-events",
+      "file": "tests/silent-zone/szl-holdings__atlas-events.smoke.test.ts",
+      "entry": "packages/atlas-events/src/index.ts"
+    },
+    {
+      "name": "@szl-holdings/auth-shared",
+      "rel": "packages/auth-shared",
+      "file": "tests/silent-zone/szl-holdings__auth-shared.smoke.test.ts",
+      "entry": "packages/auth-shared/src/index.ts"
+    },
+    {
+      "name": "@szl-holdings/billing-client",
+      "rel": "packages/billing-client",
+      "file": "tests/silent-zone/szl-holdings__billing-client.smoke.test.ts",
+      "entry": "packages/billing-client/src/index.ts"
+    },
+    {
+      "name": "@szl-holdings/brand-registry",
+      "rel": "packages/brand-registry",
+      "file": "tests/silent-zone/szl-holdings__brand-registry.smoke.test.ts",
+      "entry": "packages/brand-registry/src/index.ts"
+    },
+    {
+      "name": "@szl-holdings/business-events",
+      "rel": "packages/business-events",
+      "file": "tests/silent-zone/szl-holdings__business-events.smoke.test.ts",
+      "entry": "packages/business-events/src/index.ts"
+    },
+    {
+      "name": "@szl-holdings/platform-registry",
+      "rel": "packages/config",
+      "file": "tests/silent-zone/szl-holdings__platform-registry.smoke.test.ts",
+      "entry": "packages/config/src/index.ts"
+    },
+    {
+      "name": "@workspace/continuum-embedding-api",
+      "rel": "packages/continuum-embedding-api",
+      "file": "tests/silent-zone/workspace__continuum-embedding-api.smoke.test.ts",
+      "entry": "packages/continuum-embedding-api/src/index.ts"
+    },
+    {
+      "name": "@szl-holdings/db-migrations",
+      "rel": "packages/db-migrations",
+      "file": "tests/silent-zone/szl-holdings__db-migrations.smoke.test.ts",
+      "entry": "packages/db-migrations/src/index.ts"
+    },
+    {
+      "name": "@szl-holdings/db-repository",
+      "rel": "packages/db-repository",
+      "file": "tests/silent-zone/szl-holdings__db-repository.smoke.test.ts",
+      "entry": "packages/db-repository/src/index.ts"
+    },
+    {
+      "name": "@szl-holdings/db-schema",
+      "rel": "packages/db-schema",
+      "file": "tests/silent-zone/szl-holdings__db-schema.smoke.test.ts",
+      "entry": "packages/db-schema/src/index.ts"
+    },
+    {
+      "name": "@szl-holdings/decision-engine",
+      "rel": "packages/decision-engine",
+      "file": "tests/silent-zone/szl-holdings__decision-engine.smoke.test.ts",
+      "entry": "packages/decision-engine/src/index.ts"
+    },
+    {
+      "name": "@workspace/demo-seed",
+      "rel": "packages/demo-seed",
+      "file": "tests/silent-zone/workspace__demo-seed.smoke.test.ts",
+      "entry": "packages/demo-seed/src/index.ts"
+    },
+    {
+      "name": "@szl-holdings/design-system",
+      "rel": "packages/design-system",
+      "file": "tests/silent-zone/szl-holdings__design-system.smoke.test.ts",
+      "entry": "packages/design-system/src/index.ts"
+    },
+    {
+      "name": "@szl-holdings/document-intelligence",
+      "rel": "packages/document-intelligence",
+      "file": "tests/silent-zone/szl-holdings__document-intelligence.smoke.test.ts",
+      "entry": "packages/document-intelligence/src/index.ts"
+    },
+    {
+      "name": "@szl-holdings/domain-profiles",
+      "rel": "packages/domain-profiles",
+      "file": "tests/silent-zone/szl-holdings__domain-profiles.smoke.test.ts",
+      "entry": "packages/domain-profiles/src/index.ts"
+    },
+    {
+      "name": "@szl-holdings/env",
+      "rel": "packages/env",
+      "file": "tests/silent-zone/szl-holdings__env.smoke.test.ts",
+      "entry": "packages/env/src/index.ts"
+    },
+    {
+      "name": "@workspace/eval-os",
+      "rel": "packages/eval-os",
+      "file": "tests/silent-zone/workspace__eval-os.smoke.test.ts",
+      "entry": "packages/eval-os/src/index.ts"
+    },
+    {
+      "name": "@szl-holdings/evidence-graph",
+      "rel": "packages/evidence-graph",
+      "file": "tests/silent-zone/szl-holdings__evidence-graph.smoke.test.ts",
+      "entry": "packages/evidence-graph/src/index.ts"
+    },
+    {
+      "name": "@szl-holdings/evidence-ledger",
+      "rel": "packages/evidence-ledger",
+      "file": "tests/silent-zone/szl-holdings__evidence-ledger.smoke.test.ts",
+      "entry": "packages/evidence-ledger/src/index.ts"
+    },
+    {
+      "name": "@szl-holdings/frontier-mythos",
+      "rel": "packages/frontier-mythos",
+      "file": "tests/silent-zone/szl-holdings__frontier-mythos.smoke.test.ts",
+      "entry": "packages/frontier-mythos/src/index.ts"
+    },
+    {
+      "name": "@szl-holdings/marketing",
+      "rel": "packages/marketing",
+      "file": "tests/silent-zone/szl-holdings__marketing.smoke.test.ts",
+      "entry": "packages/marketing/src/index.ts"
+    },
+    {
+      "name": "@szl-holdings/memory-core",
+      "rel": "packages/memory-core",
+      "file": "tests/silent-zone/szl-holdings__memory-core.smoke.test.ts",
+      "entry": "packages/memory-core/src/index.ts"
+    },
+    {
+      "name": "@szl-holdings/model-passport",
+      "rel": "packages/model-passport",
+      "file": "tests/silent-zone/szl-holdings__model-passport.smoke.test.ts",
+      "entry": "packages/model-passport/src/index.ts"
+    },
+    {
+      "name": "@szl-holdings/nvidia-adapters",
+      "rel": "packages/nvidia-adapters",
+      "file": "tests/silent-zone/szl-holdings__nvidia-adapters.smoke.test.ts",
+      "entry": "packages/nvidia-adapters/src/index.ts"
+    },
+    {
+      "name": "@szl-holdings/observability-core",
+      "rel": "packages/observability-core",
+      "file": "tests/silent-zone/szl-holdings__observability-core.smoke.test.ts",
+      "entry": "packages/observability-core/src/index.ts"
+    },
+    {
+      "name": "@szl-holdings/omnia-shell",
+      "rel": "packages/omnia-shell",
+      "file": "tests/silent-zone/szl-holdings__omnia-shell.smoke.test.ts",
+      "entry": "packages/omnia-shell/src/index.ts"
+    },
+    {
+      "name": "@szl-holdings/openusd-export",
+      "rel": "packages/openusd-export",
+      "file": "tests/silent-zone/szl-holdings__openusd-export.smoke.test.ts",
+      "entry": "packages/openusd-export/src/index.ts"
+    },
+    {
+      "name": "@szl-holdings/otel",
+      "rel": "packages/otel",
+      "file": "tests/silent-zone/szl-holdings__otel.smoke.test.ts",
+      "entry": "packages/otel/src/index.ts"
+    },
+    {
+      "name": "@workspace/ouroboros-bench",
+      "rel": "packages/ouroboros-bench",
+      "file": "tests/silent-zone/workspace__ouroboros-bench.smoke.test.ts",
+      "entry": null
+    },
+    {
+      "name": "@szl-holdings/payload-doctrine",
+      "rel": "packages/payload-doctrine",
+      "file": "tests/silent-zone/szl-holdings__payload-doctrine.smoke.test.ts",
+      "entry": "packages/payload-doctrine/src/index.ts"
+    },
+    {
+      "name": "@szl-holdings/platform-metrics-registry",
+      "rel": "packages/platform-metrics-registry",
+      "file": "tests/silent-zone/szl-holdings__platform-metrics-registry.smoke.test.ts",
+      "entry": "packages/platform-metrics-registry/src/index.ts"
+    },
+    {
+      "name": "@szl-holdings/plugin-host",
+      "rel": "packages/plugin-host",
+      "file": "tests/silent-zone/szl-holdings__plugin-host.smoke.test.ts",
+      "entry": "packages/plugin-host/src/index.ts"
+    },
+    {
+      "name": "@szl-holdings/policy-guard",
+      "rel": "packages/policy-guard",
+      "file": "tests/silent-zone/szl-holdings__policy-guard.smoke.test.ts",
+      "entry": "packages/policy-guard/src/index.ts"
+    },
+    {
+      "name": "@szl-holdings/prompt-registry",
+      "rel": "packages/prompt-registry",
+      "file": "tests/silent-zone/szl-holdings__prompt-registry.smoke.test.ts",
+      "entry": "packages/prompt-registry/src/index.ts"
+    },
+    {
+      "name": "@workspace/reconciliation",
+      "rel": "packages/reconciliation",
+      "file": "tests/silent-zone/workspace__reconciliation.smoke.test.ts",
+      "entry": "packages/reconciliation/src/index.ts"
+    },
+    {
+      "name": "@szl-holdings/retrieval-core",
+      "rel": "packages/retrieval-core",
+      "file": "tests/silent-zone/szl-holdings__retrieval-core.smoke.test.ts",
+      "entry": "packages/retrieval-core/src/index.ts"
+    },
+    {
+      "name": "@workspace/run-ledger",
+      "rel": "packages/run-ledger",
+      "file": "tests/silent-zone/workspace__run-ledger.smoke.test.ts",
+      "entry": "packages/run-ledger/src/index.ts"
+    },
+    {
+      "name": "@szl-holdings/security-headers",
+      "rel": "packages/security-headers",
+      "file": "tests/silent-zone/szl-holdings__security-headers.smoke.test.ts",
+      "entry": "packages/security-headers/src/index.ts"
+    },
+    {
+      "name": "@szl-holdings/sentra-detector-sdk",
+      "rel": "packages/sentra-detector-sdk",
+      "file": "tests/silent-zone/szl-holdings__sentra-detector-sdk.smoke.test.ts",
+      "entry": "packages/sentra-detector-sdk/src/index.ts"
+    },
+    {
+      "name": "@szl-holdings/shared-contracts",
+      "rel": "packages/shared-contracts",
+      "file": "tests/silent-zone/szl-holdings__shared-contracts.smoke.test.ts",
+      "entry": "packages/shared-contracts/src/index.ts"
+    },
+    {
+      "name": "@szl-holdings/shared-proxy",
+      "rel": "packages/shared-proxy",
+      "file": "tests/silent-zone/szl-holdings__shared-proxy.smoke.test.ts",
+      "entry": "packages/shared-proxy/src/index.ts"
+    },
+    {
+      "name": "@szl-holdings/signal-mesh",
+      "rel": "packages/signal-mesh",
+      "file": "tests/silent-zone/szl-holdings__signal-mesh.smoke.test.ts",
+      "entry": "packages/signal-mesh/src/index.ts"
+    },
+    {
+      "name": "@workspace/simulation",
+      "rel": "packages/simulation",
+      "file": "tests/silent-zone/workspace__simulation.smoke.test.ts",
+      "entry": "packages/simulation/src/index.ts"
+    },
+    {
+      "name": "@szl-holdings/speech-specialist",
+      "rel": "packages/speech-specialist",
+      "file": "tests/silent-zone/szl-holdings__speech-specialist.smoke.test.ts",
+      "entry": "packages/speech-specialist/src/index.ts"
+    },
+    {
+      "name": "@workspace/storybook",
+      "rel": "packages/storybook",
+      "file": "tests/silent-zone/workspace__storybook.smoke.test.ts",
+      "entry": null
+    },
+    {
+      "name": "@szl-holdings/substrate-adapters",
+      "rel": "packages/substrate-adapters",
+      "file": "tests/silent-zone/szl-holdings__substrate-adapters.smoke.test.ts",
+      "entry": "packages/substrate-adapters/src/index.ts"
+    },
+    {
+      "name": "@szl/substrate-client",
+      "rel": "packages/substrate-client",
+      "file": "tests/silent-zone/szl__substrate-client.smoke.test.ts",
+      "entry": "packages/substrate-client/src/index.ts"
+    },
+    {
+      "name": "@szl-holdings/szl-doctrine",
+      "rel": "packages/szl-doctrine",
+      "file": "tests/silent-zone/szl-holdings__szl-doctrine.smoke.test.ts",
+      "entry": "packages/szl-doctrine/src/index.ts"
+    },
+    {
+      "name": "@workspace/tokens",
+      "rel": "packages/tokens",
+      "file": "tests/silent-zone/workspace__tokens.smoke.test.ts",
+      "entry": "packages/tokens/src/index.ts"
+    },
+    {
+      "name": "@workspace/tool-registry",
+      "rel": "packages/tool-registry",
+      "file": "tests/silent-zone/workspace__tool-registry.smoke.test.ts",
+      "entry": "packages/tool-registry/src/index.ts"
+    },
+    {
+      "name": "@szl-holdings/workflow-runtime",
+      "rel": "packages/workflow-runtime",
+      "file": "tests/silent-zone/szl-holdings__workflow-runtime.smoke.test.ts",
+      "entry": "packages/workflow-runtime/src/index.ts"
+    },
+    {
+      "name": "@workspace/a11oy-fabric",
+      "rel": "lib/a11oy-fabric",
+      "file": "tests/silent-zone/workspace__a11oy-fabric.smoke.test.ts",
+      "entry": "lib/a11oy-fabric/src/index.ts"
+    },
+    {
+      "name": "@workspace/a11oy-orchestration",
+      "rel": "lib/a11oy-orchestration",
+      "file": "tests/silent-zone/workspace__a11oy-orchestration.smoke.test.ts",
+      "entry": "lib/a11oy-orchestration/src/index.ts"
+    },
+    {
+      "name": "@szl-holdings/ai-engine",
+      "rel": "lib/ai-engine",
+      "file": "tests/silent-zone/szl-holdings__ai-engine.smoke.test.ts",
+      "entry": "lib/ai-engine/src/index.ts"
+    },
+    {
+      "name": "@szl-holdings/alloy-client",
+      "rel": "lib/alloy-client",
+      "file": "tests/silent-zone/szl-holdings__alloy-client.smoke.test.ts",
+      "entry": "lib/alloy-client/src/index.ts"
+    },
+    {
+      "name": "@szl-holdings/analytics",
+      "rel": "lib/analytics",
+      "file": "tests/silent-zone/szl-holdings__analytics.smoke.test.ts",
+      "entry": "lib/analytics/src/index.ts"
+    },
+    {
+      "name": "@szl-holdings/api-spec",
+      "rel": "lib/api-spec",
+      "file": "tests/silent-zone/szl-holdings__api-spec.smoke.test.ts",
+      "entry": null
+    },
+    {
+      "name": "@szl-holdings/api-zod",
+      "rel": "lib/api-zod",
+      "file": "tests/silent-zone/szl-holdings__api-zod.smoke.test.ts",
+      "entry": "lib/api-zod/src/index.ts"
+    },
+    {
+      "name": "@szl-holdings/atlas-artifacts",
+      "rel": "lib/atlas-artifacts",
+      "file": "tests/silent-zone/szl-holdings__atlas-artifacts.smoke.test.ts",
+      "entry": "lib/atlas-artifacts/src/index.ts"
+    },
+    {
+      "name": "@szl-holdings/atlas-spatial-runtime",
+      "rel": "lib/atlas-spatial-runtime",
+      "file": "tests/silent-zone/szl-holdings__atlas-spatial-runtime.smoke.test.ts",
+      "entry": "lib/atlas-spatial-runtime/src/index.ts"
+    },
+    {
+      "name": "@szl-holdings/auth",
+      "rel": "lib/auth",
+      "file": "tests/silent-zone/szl-holdings__auth.smoke.test.ts",
+      "entry": "lib/auth/src/index.ts"
+    },
+    {
+      "name": "@szl-holdings/crdt-sync",
+      "rel": "lib/crdt-sync",
+      "file": "tests/silent-zone/szl-holdings__crdt-sync.smoke.test.ts",
+      "entry": "lib/crdt-sync/src/index.ts"
+    },
+    {
+      "name": "@szl-holdings/data-connectors",
+      "rel": "lib/data-connectors",
+      "file": "tests/silent-zone/szl-holdings__data-connectors.smoke.test.ts",
+      "entry": "lib/data-connectors/src/index.ts"
+    },
+    {
+      "name": "@szl-holdings/db",
+      "rel": "lib/db",
+      "file": "tests/silent-zone/szl-holdings__db.smoke.test.ts",
+      "entry": "lib/db/src/index.ts"
+    },
+    {
+      "name": "@szl-holdings/decision-fabric",
+      "rel": "lib/decision-fabric",
+      "file": "tests/silent-zone/szl-holdings__decision-fabric.smoke.test.ts",
+      "entry": "lib/decision-fabric/src/index.ts"
+    },
+    {
+      "name": "@szl-holdings/forge-runtime",
+      "rel": "lib/forge-runtime",
+      "file": "tests/silent-zone/szl-holdings__forge-runtime.smoke.test.ts",
+      "entry": "lib/forge-runtime/src/index.ts"
+    },
+    {
+      "name": "@szl-holdings/graphql-client",
+      "rel": "lib/graphql-client",
+      "file": "tests/silent-zone/szl-holdings__graphql-client.smoke.test.ts",
+      "entry": "lib/graphql-client/src/index.ts"
+    },
+    {
+      "name": "@szl-holdings/i18n",
+      "rel": "lib/i18n",
+      "file": "tests/silent-zone/szl-holdings__i18n.smoke.test.ts",
+      "entry": "lib/i18n/src/index.ts"
+    },
+    {
+      "name": "@workspace/integrations-openai-ai-react",
+      "rel": "lib/integrations-openai-ai-react",
+      "file": "tests/silent-zone/workspace__integrations-openai-ai-react.smoke.test.ts",
+      "entry": "lib/integrations-openai-ai-react/src/index.ts"
+    },
+    {
+      "name": "@workspace/integrations-openai-ai-server",
+      "rel": "lib/integrations-openai-ai-server",
+      "file": "tests/silent-zone/workspace__integrations-openai-ai-server.smoke.test.ts",
+      "entry": "lib/integrations-openai-ai-server/src/index.ts"
+    },
+    {
+      "name": "@szl-holdings/intelligence-feeds",
+      "rel": "lib/intelligence-feeds",
+      "file": "tests/silent-zone/szl-holdings__intelligence-feeds.smoke.test.ts",
+      "entry": "lib/intelligence-feeds/src/index.ts"
+    },
+    {
+      "name": "@workspace/lutar-formulas",
+      "rel": "lib/lutar-formulas",
+      "file": "tests/silent-zone/workspace__lutar-formulas.smoke.test.ts",
+      "entry": "lib/lutar-formulas/src/index.ts"
+    },
+    {
+      "name": "@szl-holdings/mcp-client",
+      "rel": "lib/mcp-client",
+      "file": "tests/silent-zone/szl-holdings__mcp-client.smoke.test.ts",
+      "entry": "lib/mcp-client/src/index.ts"
+    },
+    {
+      "name": "@szl-holdings/mobile-shared",
+      "rel": "lib/mobile-shared",
+      "file": "tests/silent-zone/szl-holdings__mobile-shared.smoke.test.ts",
+      "entry": "lib/mobile-shared/src/index.ts"
+    },
+    {
+      "name": "@workspace/object-storage-web",
+      "rel": "lib/object-storage-web",
+      "file": "tests/silent-zone/workspace__object-storage-web.smoke.test.ts",
+      "entry": "lib/object-storage-web/src/index.ts"
+    },
+    {
+      "name": "@szl-holdings/observability",
+      "rel": "lib/observability",
+      "file": "tests/silent-zone/szl-holdings__observability.smoke.test.ts",
+      "entry": "lib/observability/src/index.ts"
+    },
+    {
+      "name": "@szl-holdings/offline-engine",
+      "rel": "lib/offline-engine",
+      "file": "tests/silent-zone/szl-holdings__offline-engine.smoke.test.ts",
+      "entry": "lib/offline-engine/src/index.ts"
+    },
+    {
+      "name": "@szl-holdings/outcome-graph",
+      "rel": "lib/outcome-graph",
+      "file": "tests/silent-zone/szl-holdings__outcome-graph.smoke.test.ts",
+      "entry": "lib/outcome-graph/src/index.ts"
+    },
+    {
+      "name": "@szl-holdings/pqc-identity",
+      "rel": "lib/pqc-identity",
+      "file": "tests/silent-zone/szl-holdings__pqc-identity.smoke.test.ts",
+      "entry": "lib/pqc-identity/src/index.ts"
+    },
+    {
+      "name": "@szl-holdings/proof-chain",
+      "rel": "lib/proof-chain",
+      "file": "tests/silent-zone/szl-holdings__proof-chain.smoke.test.ts",
+      "entry": "lib/proof-chain/src/index.ts"
+    },
+    {
+      "name": "@szl-holdings/pulse-evals",
+      "rel": "lib/pulse-evals",
+      "file": "tests/silent-zone/szl-holdings__pulse-evals.smoke.test.ts",
+      "entry": "lib/pulse-evals/src/index.ts"
+    },
+    {
+      "name": "@szl-holdings/quantum-engine",
+      "rel": "lib/quantum-engine",
+      "file": "tests/silent-zone/szl-holdings__quantum-engine.smoke.test.ts",
+      "entry": "lib/quantum-engine/src/index.ts"
+    },
+    {
+      "name": "@szl-holdings/query-keys",
+      "rel": "lib/query-keys",
+      "file": "tests/silent-zone/szl-holdings__query-keys.smoke.test.ts",
+      "entry": "lib/query-keys/src/index.ts"
+    },
+    {
+      "name": "@szl-holdings/receipt-graph",
+      "rel": "lib/receipt-graph",
+      "file": "tests/silent-zone/szl-holdings__receipt-graph.smoke.test.ts",
+      "entry": "lib/receipt-graph/src/index.ts"
+    },
+    {
+      "name": "@szl-holdings/replit-auth-web",
+      "rel": "lib/replit-auth-web",
+      "file": "tests/silent-zone/szl-holdings__replit-auth-web.smoke.test.ts",
+      "entry": "lib/replit-auth-web/src/index.ts"
+    },
+    {
+      "name": "@szl-holdings/workflow-engine",
+      "rel": "lib/workflow-engine",
+      "file": "tests/silent-zone/szl-holdings__workflow-engine.smoke.test.ts",
+      "entry": "lib/workflow-engine/src/index.ts"
+    },
+    {
+      "name": "@szl-holdings/worldline",
+      "rel": "lib/worldline",
+      "file": "tests/silent-zone/szl-holdings__worldline.smoke.test.ts",
+      "entry": "lib/worldline/src/index.ts"
+    }
+  ]
+}

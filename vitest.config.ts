@@ -63,6 +63,14 @@ export default defineConfig({
         replacement: resolve(__dirname, 'lib/forge-runtime/src/index.ts'),
       },
       {
+        find: '@szl-holdings/forge-runtime/sandbox',
+        replacement: resolve(__dirname, 'lib/forge-runtime/src/sandbox.ts'),
+      },
+      {
+        find: '@workspace/guardian/crypto',
+        replacement: resolve(__dirname, 'packages/guardian/src/crypto.ts'),
+      },
+      {
         find: '@workspace/ai-engine',
         replacement: resolve(__dirname, 'lib/ai-engine/src/index.ts'),
       },
@@ -75,6 +83,10 @@ export default defineConfig({
         replacement: resolve(__dirname, 'lib/shared-ui/src/index.ts'),
       },
       { find: '@szl-holdings/auth', replacement: resolve(__dirname, 'lib/auth/src/index.ts') },
+      {
+        find: '@szl-holdings/db/schema',
+        replacement: resolve(__dirname, 'lib/db/src/schema/index.ts'),
+      },
       { find: '@szl-holdings/db', replacement: resolve(__dirname, 'lib/db/src/index.ts') },
       {
         find: '@szl-holdings/api-zod',
@@ -277,6 +289,18 @@ export default defineConfig({
       {
         find: '@workspace/tool-mesh/mcp-bridge',
         replacement: resolve(__dirname, 'packages/tool-mesh/src/mcp-bridge.ts'),
+      },
+      {
+        find: '@workspace/tool-mesh/tools/finance-tools',
+        replacement: resolve(__dirname, 'packages/tool-mesh/src/tools/finance-tools.ts'),
+      },
+      {
+        find: '@workspace/tool-mesh/tools/operations-tools',
+        replacement: resolve(__dirname, 'packages/tool-mesh/src/tools/operations-tools.ts'),
+      },
+      {
+        find: '@workspace/tool-mesh/tools/security-tools',
+        replacement: resolve(__dirname, 'packages/tool-mesh/src/tools/security-tools.ts'),
       },
       {
         find: '@workspace/tool-mesh',
@@ -516,6 +540,7 @@ export default defineConfig({
     pool: 'forks',
     include: [
       'tests/**/*.test.ts',
+      'tests/**/*.test.tsx',
       'tests/**/*.spec.ts',
       'lib/audit/src/**/*.test.ts',
       'lib/formulas/src/**/*.test.ts',
