@@ -243,6 +243,7 @@ const NAV_GROUPS = [
       { href: '/boardroom',     label: 'Boardroom' },
       { href: '/investor-demo', label: 'Investor Demo' },
       { href: '/about',         label: 'About' },
+      { href: '/uds',           label: 'UDS' },
     ],
   },
   {

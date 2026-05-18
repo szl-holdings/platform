@@ -138,6 +138,7 @@ const Tools = lazy(() => import('./pages/Tools').then(m => ({ default: m.Tools }
 const Pce = lazy(() => import('./pages/Pce').then(m => ({ default: m.Pce })));
 const Demo = lazy(() => import('./pages/Demo').then(m => ({ default: m.Demo })));
 const About = lazy(() => import('./pages/About').then(m => ({ default: m.About })));
+const UdsPage = lazy(() => import('./pages/UdsPage').then(m => ({ default: m.UdsPage })));
 const Recommendations = lazy(() => import('./pages/Recommendations').then(m => ({ default: m.Recommendations })));
 const ExecutiveBrief = lazy(() => import('./pages/ExecutiveBrief').then(m => ({ default: m.ExecutiveBrief })));
 const AgentOrchestration = lazy(() => import('./pages/AgentOrchestration').then(m => ({ default: m.AgentOrchestration })));
@@ -700,6 +701,7 @@ function AppInner() {
           <WithShell><Solutions /></WithShell>
         </Route>
         <Route path={`${base}/about`} component={About} />
+        <Route path={`${base}/uds`} component={UdsPage} />
         <Route path={`${base}/omnia-adoption`} component={OmniaAdoptionPage} />
         <Route path={`${base}/applications`} component={ApplicationsCatalog} />
         <Route path={`${base}/constellation`} component={ConstellationGraph} />

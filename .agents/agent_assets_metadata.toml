@@ -983,3 +983,45 @@ id = "Yn3BQ81-5b2kRRfZGP9jU"
 uri = "file://exports/email-to-andrew.txt"
 type = "text"
 title = "Email to Andrew — a11oy.UDS"
+
+[[outputs]]
+id = "59eE4De-mGUy4Tz3R-OlG"
+uri = "file://docs/proposals/defense-unicorns/tuesday/a11oy_uds_package.zip"
+type = "unspecified"
+title = "a11oy.UDS — Tuesday package (updated: now includes yes-day kit)"
+
+[[outputs]]
+id = "GJXTLRUP3oGXIGuu05nBi"
+uri = "file://docs/proposals/defense-unicorns/tuesday/email_to_andrew.docx"
+type = "word_document"
+title = "Email to Andrew (Word .docx — send verbatim)"
+
+[[outputs]]
+id = "GuFuEVPapxE6cAaZ2xajV"
+uri = "file://docs/proposals/defense-unicorns/tuesday/a11oy_uds_vision_deck.pdf"
+type = "pdf"
+title = "Vision deck — PDF preview"
+
+[[outputs]]
+id = "sd-Iqpxjb9Umsb4AgxZoy"
+uri = "file://docs/proposals/defense-unicorns/tuesday/a11oy_uds_vision_deck.pptx"
+type = "slides"
+title = "Vision deck — PowerPoint (editable)"
+
+[[outputs]]
+id = "IobYGhv7Xi9vrfMOuyMdj"
+uri = "file://docs/proposals/defense-unicorns/tuesday/07_day_one_kickoff.md"
+type = "text"
+title = "07 — Day-1 kickoff (the four asks + first 48 hours)"
+
+[[outputs]]
+id = "Tt7rz94yBQEDrAR0Vu7kd"
+uri = "file://docs/proposals/defense-unicorns/tuesday/08_demo_script.md"
+type = "text"
+title = "08 — Week-3 demo script (minute-by-minute + pre-flight checklist)"
+
+[[outputs]]
+id = "_JDwMuBhj8_uO_9UKwbMW"
+uri = "file://docs/proposals/defense-unicorns/tuesday/09_followup_responses.md"
+type = "text"
+title = "09 — Pre-drafted replies to Andrew's four likely responses"
