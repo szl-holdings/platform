@@ -109,6 +109,7 @@ const PatternAtlasNative = lazy(() => import('./pages/lab/PatternAtlasNative').t
 const PromptRegistryNative = lazy(() => import('./pages/lab/PromptRegistryNative').then(m => ({ default: m.PromptRegistryNative })));
 const EvalConsoleNative = lazy(() => import('./pages/lab/EvalConsoleNative').then(m => ({ default: m.EvalConsoleNative })));
 const SentraOps = lazy(() => import('./pages/SentraOps').then(m => ({ default: m.SentraOps })));
+const VesselsOps = lazy(() => import('./pages/VesselsOps').then(m => ({ default: m.VesselsOps })));
 const AiGateway = lazy(() => import('./pages/AiGateway').then(m => ({ default: m.AiGateway })));
 const SkillsLibrary = lazy(() => import('./pages/SkillsLibrary').then(m => ({ default: m.SkillsLibrary })));
 const SkillForge = lazy(() => import('./pages/SkillForge'));
@@ -1526,6 +1527,11 @@ function AppInner() {
         <Route path={`${base}/sentra-ops`}>
           <Suspense fallback={null}>
             <SentraOps />
+          </Suspense>
+        </Route>
+        <Route path={`${base}/vessels-ops`}>
+          <Suspense fallback={null}>
+            <VesselsOps />
           </Suspense>
         </Route>
 

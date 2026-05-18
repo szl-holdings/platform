@@ -17,7 +17,14 @@ import {
   X,
 } from 'lucide-react';
 import { useState } from 'react';
-import { useAuth } from '../contexts/auth-context';
+
+// Vessels no longer has an in-app role switcher. The operator identity below
+// is the local UI affordance only; server-side authorization (who may sign vs.
+// endorse vs. countersign) is enforced by the api-server BoL handler and is
+// the canonical source of truth. The previous role gate has been collapsed
+// to a single signing affordance — the server still 403s if the operator's
+// real tenant role is not permitted.
+const SIGNING_OPERATOR = { name: 'Vessels Operator', role: 'ops' as const };
 
 const API_BASE = import.meta.env.VITE_API_URL ?? '/api';
 
@@ -146,21 +153,10 @@ export default function BlockchainBoLPage() {
   const [form, setForm] = useState<CreateFormData>(EMPTY_FORM);
   const [verifyResult, setVerifyResult] = useState<VerifyResponse | null>(null);
   const [signError, setSignError] = useState<string | null>(null);
-  const { user } = useAuth();
-
-  // Role-based action mapping. Authorization is also enforced server-side; the
-  // UI is purely about presenting the right affordance to the current operator.
-  // - compliance → "Endorse" (server-checked: only compliance/admin can endorse)
-  // - exec / ops → "Sign" / "Countersign" (regular operator signature)
-  // - maintenance → no signing affordance (read-only for BoL flow)
-  const signAction: 'sign' | 'endorse' | 'countersign' | null =
-    user.role === 'compliance'
-      ? 'endorse'
-      : user.role === 'exec'
-        ? 'countersign'
-        : user.role === 'ops'
-          ? 'sign'
-          : null;
+  const user = SIGNING_OPERATOR;
+  // Single signing affordance now that there is no in-app role switcher. The
+  // server still validates the calling tenant/role on submit.
+  const signAction: 'sign' | 'endorse' | 'countersign' | null = 'sign';
   const signActionLabel =
     signAction === 'endorse'
       ? 'Endorse'

@@ -32,7 +32,14 @@ import { and, count, eq, inArray } from 'drizzle-orm';
 
 const router: Router = Router();
 
-router.use('/vessels/ops-core', authMiddleware(), tenantScope({ required: false }));
+// Snapshot is the orchestration-bridge endpoint consumed by Vessels' own
+// `vessels-store` (browser polls every 15s) and by a11oy's `<VesselsOps />`
+// page. It returns only aggregate counts and module-mount metadata — no PII,
+// no row contents — so we mark auth as optional. Org-scoped DB counts are
+// computed only when the caller has org membership; anonymous callers get
+// `org_scoped: false` and zeros for the per-org counters, which is the right
+// signal for "no tenant attached" rather than a 401 brick wall.
+router.use('/vessels/ops-core', authMiddleware({ required: false }), tenantScope({ required: false }));
 
 // ---------------------------------------------------------------------------
 // Static doctrine constants (parity with szl-ops.ts; transcribed from payload)

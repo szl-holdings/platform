@@ -174,7 +174,7 @@ export default function VesselDetailPage() {
       setStealthSnapshot({
         policy: 'blocked',
         reason: msg.includes('401') || msg.includes('Unauthorized')
-          ? 'Authentication required — sign in via PRAXIS first, then retry.'
+          ? 'Authentication required — configure a Camofox credential in PRAXIS (a11oy), then retry.'
           : msg.includes('403') || msg.includes('blocked')
             ? 'Domain not in Camofox allowlist. Add it in PRAXIS → Skills → Camofox.'
             : `Request failed: ${msg}`,

@@ -49,12 +49,6 @@ export function MarketingNav() {
               {link.label}
             </Link>
           ))}
-          <Link
-            href="/sign-in"
-            className="text-[13px] font-medium text-[#8a8a8a]/40 hover:text-[#e0e0e0] transition-colors"
-          >
-            Sign In
-          </Link>
           <a
             href="./dashboard?demo=true"
             className="flex items-center gap-1.5 px-4 py-2 rounded-lg text-[13px] font-semibold text-[#0a0a0a] bg-[#c9b787] hover:bg-[#d4c494] transition-colors"
@@ -85,13 +79,6 @@ export function MarketingNav() {
                 {link.label}
               </Link>
             ))}
-            <Link
-              href="/sign-in"
-              onClick={() => setMobileOpen(false)}
-              className="text-[#8a8a8a]/50 text-[15px]"
-            >
-              Sign In
-            </Link>
             <Link
               href="/demo"
               onClick={() => setMobileOpen(false)}

@@ -36,7 +36,6 @@ import {
 } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { Link } from 'wouter';
-import { useAuth } from '@/contexts/auth-context';
 import {
   useFleetExceptions,
   useMaintenance,
@@ -764,7 +763,6 @@ function IntelControls({
 type TabId = 'exec' | 'ops' | 'commercial';
 
 export default function CommandOverviewPage() {
-  const { user } = useAuth();
   const { vessels, isLive, refetch } = useVessels();
   const { fleetExceptions } = useFleetExceptions();
   const { voyageEconomics } = useVoyages();
@@ -779,9 +777,9 @@ export default function CommandOverviewPage() {
     qcVessels.invalidateQueries({ queryKey: ['fleet-exceptions'] });
   }, [wsVesselMsg, qcVessels]);
 
-  const [activeTab, setActiveTab] = useState<TabId>(
-    user.role === 'exec' ? 'exec' : user.role === 'compliance' ? 'commercial' : 'ops',
-  );
+  // Default tab is the executive overview. The persona switcher is gone — any
+  // operator can pick the lens they want from the tab nav below.
+  const [activeTab, setActiveTab] = useState<TabId>('exec');
   const [timeRange, setTimeRange] = useState('24h');
   const [savedView, setSavedView] = useState('default');
   const [activeLayers, setActiveLayers] = useState<Set<string>>(

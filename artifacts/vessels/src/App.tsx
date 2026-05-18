@@ -33,12 +33,7 @@ import {
 import { CookieBanner } from '@szl-holdings/shared-ui/cookie-banner';
 import { AgentCopilot } from '@szl-holdings/shared-ui/copilot';
 import { helmsmanConfig } from '@szl-holdings/shared-ui/copilot-configs';
-import { DemoModeProvider, useDemoMode } from '@szl-holdings/shared-ui/demo-mode';
-import {
-  DemoPersonaModeBridge,
-  DemoPersonaProvider,
-  DemoPersonaSwitcher,
-} from '@szl-holdings/shared-ui/demo-persona-switcher';
+import { DemoModeProvider } from '@szl-holdings/shared-ui/demo-mode';
 import {
   DashboardShell as SharedDashboardShell,
   SidebarNav,
@@ -82,7 +77,6 @@ import {
   BarChart3,
   Brain,
   Calculator,
-  ChevronDown,
   Cpu,
   Database,
   DollarSign,
@@ -116,12 +110,7 @@ import {
 } from 'lucide-react';
 import { lazy, Suspense, useEffect, useRef, useState } from 'react';
 import { Link, Redirect, Route, Switch, useLocation, Router as WouterRouter } from 'wouter';
-import {
-  AuthProvider,
-  roleLabels,
-  type UserRole,
-  useAuth as useVesselsRoleAuth,
-} from '@/contexts/auth-context';
+import { startVesselsStore } from '@/lib/vessels-store';
 import MarketingHomePage from '@/pages/marketing-home';
 import VesselsLandingPage from '@/pages/vessels-landing';
 
@@ -257,7 +246,6 @@ const MarketingUseCasesPage = lazy(() => import('@/pages/marketing-use-cases'));
 const MarketingSecurityPage = lazy(() => import('@/pages/marketing-security'));
 const MarketingPricingPage = lazy(() => import('@/pages/marketing-pricing'));
 const MarketingDemoPage = lazy(() => import('@/pages/marketing-demo'));
-const SignInPage = lazy(() => import('@/pages/marketing-sign-in'));
 const FleetAssessmentPage = lazy(() => import('@/pages/fleet-assessment'));
 const LegalPrivacyPage = lazy(() => import('@/pages/legal-privacy'));
 const LegalTermsPage = lazy(() => import('@/pages/legal-terms'));
@@ -439,67 +427,6 @@ function DemoModeBanner() {
       <span className="text-[10px] text-[#c9b787]/70">
         {data.summary.mockedDemoMode} provider feed(s) in modeled mode — connect a live source to upgrade
       </span>
-    </div>
-  );
-}
-
-function RoleSelector({ expanded }: { expanded: boolean }) {
-  const { user, setRole } = useVesselsRoleAuth();
-  const [open, setOpen] = useState(false);
-  const roles: UserRole[] = ['exec', 'ops', 'compliance', 'maintenance'];
-
-  return (
-    <div className="relative">
-      <button
-        onClick={() => setOpen(!open)}
-        className="flex items-center gap-2 w-full px-2 py-2 rounded-lg hover:bg-[#c9b787]/5 transition-colors text-left"
-        aria-label={`Current role: ${roleLabels[user.role]}`}
-      >
-        <div className="w-7 h-7 rounded-full bg-[#c9b787]/10 flex items-center justify-center shrink-0">
-          <User className="w-3.5 h-3.5 text-[#c9b787]" />
-        </div>
-        {expanded && (
-          <>
-            <div className="flex-1 min-w-0">
-              <p className="text-xs font-medium text-[#f5f5f5] truncate">{user.name}</p>
-              <p className="text-[10px] text-[#c9b787]/60">{roleLabels[user.role]}</p>
-            </div>
-            <ChevronDown
-              className={cn(
-                'w-3 h-3 text-[#c9b787]/50 transition-transform shrink-0',
-                open && 'rotate-180',
-              )}
-            />
-          </>
-        )}
-      </button>
-      {open && (
-        <div
-          className="absolute bottom-full left-0 right-0 mb-1 bg-[#141414] border border-[#c9b787]/20 rounded-lg shadow-xl z-50 overflow-hidden"
-          style={{ minWidth: 160 }}
-        >
-          <div className="p-2 border-b border-[#c9b787]/10">
-            <p className="text-[10px] text-[#c9b787]/60 uppercase tracking-wider px-2 font-mono">Switch Role</p>
-          </div>
-          {roles.map((r) => (
-            <button
-              key={r}
-              onClick={() => {
-                setRole(r);
-                setOpen(false);
-              }}
-              className={cn(
-                'w-full text-left px-3 py-2 text-xs transition-colors',
-                user.role === r
-                  ? 'bg-[#c9b787]/10 text-[#c9b787]'
-                  : 'text-white/60 hover:text-white hover:bg-[#c9b787]/5',
-              )}
-            >
-              {roleLabels[r]}
-            </button>
-          ))}
-        </div>
-      )}
     </div>
   );
 }
@@ -1029,7 +956,6 @@ function VesselsSidebarContent({
         </div>
       </Link>
       <UserButton showName className="w-full" />
-      <RoleSelector expanded={expanded} />
       <PackBanner
         vertical="Maritime Intelligence Pack"
         accentColor={VESSELS_BRAND_ACCENT}
@@ -1039,7 +965,6 @@ function VesselsSidebarContent({
   ) : (
     <div className="space-y-2">
       <UserButton className="w-full" />
-      <RoleSelector expanded={false} />
     </div>
   );
 
@@ -1580,10 +1505,11 @@ function AppContent({
     location.startsWith('/med-shadow-fleet');
 
   if (isDashboard) {
-    // Vessels dashboard surfaces are intentionally accessible without sign-in
-    // for investor demos. The internal AuthProvider supplies a default
-    // role-based persona (see contexts/auth-context.tsx). Real user accounts
-    // still flow through Replit Auth via the marketing /sign-in route.
+    // Vessels dashboards are open by default — no in-app sign-on or persona
+    // switcher. Per-tenant access is enforced by the api-server via
+    // authMiddleware/tenant-scope; orchestration telemetry is published to
+    // a11oy via the `vessels:ops-status` localStorage bridge (see
+    // `lib/vessels-store.ts`).
     return <VesselsDashboard cmdOpen={cmdOpen} setCmdOpen={setCmdOpen} />;
   }
 
@@ -1606,7 +1532,6 @@ function AppContent({
         <Route path="/security" component={MarketingSecurityPage} />
         <Route path="/pricing" component={MarketingPricingPage} />
         <Route path="/demo" component={MarketingDemoPage} />
-        <Route path="/sign-in" component={SignInPage} />
         <Route path="/fleet-assessment" component={FleetAssessmentPage} />
         <Route path="/legal/privacy" component={LegalPrivacyPage} />
         <Route path="/legal/terms" component={LegalTermsPage} />
@@ -1616,14 +1541,18 @@ function AppContent({
   );
 }
 
-function DemoPersonaModeBridgeWired() {
-  const { setMode } = useDemoMode();
-  return <DemoPersonaModeBridge setMode={setMode} />;
-}
-
 function App() {
   const { open: cmdOpen, setOpen: setCmdOpen } = useCommandPalette(vesselsCommands);
   useSessionRevocationToast();
+
+  // Boot the Vessels orchestration telemetry bridge. The store periodically
+  // fetches counts from /api/vessels/* and publishes them to localStorage
+  // under `vessels:ops-status`, where the a11oy VesselsOps page consumes
+  // them — same pattern as sentra-store.ts / SentraOps.
+  useEffect(() => {
+    const stop = startVesselsStore();
+    return () => stop();
+  }, []);
 
   return (
     <AppModeProvider>
@@ -1633,20 +1562,14 @@ function App() {
         <PrismBusProvider domain="vessels">
           <SandboxModeProvider>
             <DemoModeProvider>
-              <DemoPersonaProvider>
-                <DemoPersonaModeBridgeWired />
-                <QueryClientProvider client={queryClient}>
-                  <StaleIndicator accentColor={VESSELS_BRAND_ACCENT} />
-                  <AuthProvider>
-                    <WouterRouter base={import.meta.env.BASE_URL.replace(/\/$/, '')}>
-                      <AppContent cmdOpen={cmdOpen} setCmdOpen={setCmdOpen} />
-                    </WouterRouter>
-                  </AuthProvider>
-                  <AgentCopilot config={helmsmanConfig} />
-                  <McpOverlay domain="vessels" />
-                </QueryClientProvider>
-                <DemoPersonaSwitcher />
-              </DemoPersonaProvider>
+              <QueryClientProvider client={queryClient}>
+                <StaleIndicator accentColor={VESSELS_BRAND_ACCENT} />
+                <WouterRouter base={import.meta.env.BASE_URL.replace(/\/$/, '')}>
+                  <AppContent cmdOpen={cmdOpen} setCmdOpen={setCmdOpen} />
+                </WouterRouter>
+                <AgentCopilot config={helmsmanConfig} />
+                <McpOverlay domain="vessels" />
+              </QueryClientProvider>
             </DemoModeProvider>
           </SandboxModeProvider>
         </PrismBusProvider>
