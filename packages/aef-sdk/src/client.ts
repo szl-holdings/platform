@@ -1,4 +1,10 @@
 import { type EmbedRequest, type EmbedResponse, type HybridSearchRequest, type HybridSearchResponse, type IngestRequest, type IngestResponse, type RerankRequest, type RerankResponse, EmbedResponseSchema, HybridSearchResponseSchema, IngestResponseSchema, RerankResponseSchema } from '@workspace/aef-contracts';
+// NOTE: `@szl-holdings/szl-receipts` is a workspace package. Its `exports.import`
+// condition resolves directly to `src/index.ts` (see packages/szl-receipts/package.json),
+// so consumers in the workspace do NOT need a built `dist/` to load it. If you change
+// that package's exports back to `dist/index.js`, every consumer (including this file)
+// will fail with a cryptic `ERR_MODULE_NOT_FOUND` until you run `pnpm --filter
+// @szl-holdings/szl-receipts build`. Keep it pointed at source.
 import {
   ReceiptChain,
   hashJson,
