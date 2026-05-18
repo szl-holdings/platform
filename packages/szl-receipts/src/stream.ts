@@ -18,7 +18,7 @@ import type {
   LambdaReceipt,
   StreamClosureReceipt,
 } from './types.js';
-import { canonicalJson, sha256Hex } from './hash.js';
+import { canonicalJson, hashJson, sha256Hex, sha256HexBytes } from './hash.js';
 import { merkleRoot } from './merkle.js';
 import type { ReceiptChain } from './chain.js';
 
@@ -50,7 +50,8 @@ export class StreamSession {
   private readonly streamId: string;
   private readonly endpoint: string;
   private readonly method: string;
-  private readonly params: unknown;
+  /** sha256 of the opening request params — recorded as metadata.openParamsHash on every chunk receipt so a verifier can attribute chunks to the originating request. */
+  private readonly openParamsHash: string;
   private readonly operatorId: string;
   private readonly emitted: LambdaReceipt[] = [];
   private chunkIndex = 0;
@@ -61,7 +62,7 @@ export class StreamSession {
     this.streamId = opts.streamId;
     this.endpoint = opts.endpoint;
     this.method = opts.method;
-    this.params = opts.params;
+    this.openParamsHash = hashJson(opts.params);
     this.operatorId = opts.operatorId;
   }
 
@@ -81,11 +82,10 @@ export class StreamSession {
   ): Promise<LambdaReceipt> {
     if (this.closed) throw new Error('StreamSession: cannot append to a closed stream');
     const raw = bytesOf(bytes);
-    // sha256 directly over the bytes' UTF-8 string view. Two clean runs of
-    // the same wire produce the same paramsHash; any byte mutation localizes
-    // to the affected chunk's hash and propagates to the closure's Merkle
-    // root. (SSE bodies are JSON in practice, so non-UTF-8 is out of scope.)
-    const paramsHash = sha256Hex(new TextDecoder('utf-8', { fatal: false }).decode(raw));
+    // sha256 of the raw chunk bytes — no UTF-8 round-trip. Any single
+    // byte mutation (including non-UTF-8 noise) localizes to that
+    // chunk's paramsHash and propagates to the closure's Merkle root.
+    const paramsHash = sha256HexBytes(raw);
     const idx = this.chunkIndex++;
     const row = await this.chain.appendChunkReceipt({
       endpoint: this.endpoint,
@@ -95,6 +95,7 @@ export class StreamSession {
         ...(extraMetadata ?? {}),
         streamId: this.streamId,
         chunkIndex: idx,
+        openParamsHash: this.openParamsHash,
         kind: 'stream-chunk',
       },
     });
@@ -169,7 +170,8 @@ export async function* parseSSE(
         }
         return;
       }
-      buf += decoder.decode(value, { stream: true });
+      // Normalize CRLF → LF so the rest of the parser only handles one line ending.
+      buf += decoder.decode(value, { stream: true }).replace(/\r\n/g, '\n');
       let sep: number;
       while ((sep = buf.indexOf('\n\n')) !== -1) {
         const block = buf.slice(0, sep);

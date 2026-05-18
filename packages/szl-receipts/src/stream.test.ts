@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { ReceiptChain } from './chain.js';
 import { StreamSession, parseSSE, streamWithReceipts } from './stream.js';
-import { sha256Hex, merkleRoot } from './index.js';
+import { sha256Hex, sha256HexBytes, merkleRoot } from './index.js';
 
 function bodyFromString(text: string): ReadableStream<Uint8Array> {
   const bytes = new TextEncoder().encode(text);
@@ -41,6 +41,8 @@ describe('StreamSession', () => {
     expect(rows).toHaveLength(2);
     expect(rows[0]!.paramsHash).toBe(sha256Hex(a));
     expect(rows[1]!.paramsHash).toBe(sha256Hex(b));
+    // Each chunk row also carries openParamsHash so verifiers can attribute it to the originating request.
+    expect((rows[0]!.metadata as Record<string, unknown>).openParamsHash).toBeDefined();
     expect(rows[1]!.prevHash).toBe(rows[0]!.selfHash);
     // The chain saw them too, so chain.verify() must pass:
     expect((await chain.verify()).valid).toBe(true);
@@ -112,7 +114,39 @@ describe('StreamSession', () => {
   });
 });
 
+describe('StreamSession wire-byte fidelity', () => {
+  it('hashes raw bytes — non-ASCII payloads roundtrip without normalization', async () => {
+    const chain = new ReceiptChain({ operatorId: 'op' });
+    const session = new StreamSession({
+      chain, streamId: 's', endpoint: '/x', method: 'GET',
+      params: {}, operatorId: 'op',
+    });
+    const utf8 = new TextEncoder().encode('{"msg":"héllo 世界 🚀"}');
+    await session.appendChunk(utf8);
+    // Raw bytes containing non-UTF-8 noise hash to a different value than
+    // their lossy UTF-8 string view — proves we are hashing bytes, not strings.
+    const noisy = new Uint8Array([0xff, 0xfe, 0x00, 0x80]);
+    await session.appendChunk(noisy);
+    const rows = session.receipts();
+    expect(rows[0]!.paramsHash).toBe(sha256HexBytes(utf8));
+    expect(rows[1]!.paramsHash).toBe(sha256HexBytes(noisy));
+    // The lossy-decode hash would be different — confirms we did not round-trip.
+    const lossy = sha256Hex(new TextDecoder('utf-8', { fatal: false }).decode(noisy));
+    expect(rows[1]!.paramsHash).not.toBe(lossy);
+  });
+});
+
 describe('parseSSE', () => {
+  it('handles CRLF line endings between fields and between frames', async () => {
+    const wire = 'event: chunk\r\ndata: {"i":1}\r\n\r\nevent: chunk\r\ndata: {"i":2}\r\n\r\n';
+    const body = new ReadableStream<Uint8Array>({
+      start(c) { c.enqueue(new TextEncoder().encode(wire)); c.close(); },
+    });
+    const frames: string[] = [];
+    for await (const f of parseSSE(body)) frames.push(f.data);
+    expect(frames).toEqual(['{"i":1}', '{"i":2}']);
+  });
+
   it('splits chunk frames on the blank-line separator', async () => {
     const wire = [
       'event: chunk',

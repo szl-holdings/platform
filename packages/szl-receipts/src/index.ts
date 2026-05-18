@@ -18,7 +18,7 @@ export type {
   AppendInput,
 } from './types.js';
 
-export { canonicalJson, sha256Hex, hashJson } from './hash.js';
+export { canonicalJson, sha256Hex, sha256HexBytes, hashJson } from './hash.js';
 export { merkleRoot } from './merkle.js';
 export { ReceiptChain } from './chain.js';
 export {
