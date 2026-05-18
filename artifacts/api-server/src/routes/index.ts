@@ -355,6 +355,12 @@ router.use(lazyMatch("/doctrine", () => import("./doctrine-crud"), "doctrine-cru
 // /formulas/:id matcher that would otherwise capture our /catalog path.
 // Mutating endpoints (propose/approve/reject) mount after guardianPolicyCheck.
 router.use(a11oyFormulasPublicRouter);
+// Lutar Λ₅ forecast gauge (Task #5175) — public read of current invariant,
+// recent history, forecast band, and per-axis sensitivity inspector.
+// Mounted before /a11oy chat to avoid the /formulas/:id matcher collision.
+router.use(lazyMatch("/formulas/lutar-invariant-5", () => import("./formulas-lutar"), "formulas-lutar"));
+// Operator dashboard (Task #5175) — cross-product roll-up + SSE stream.
+router.use(lazyMatch("/operator/dashboard", () => import("./operator-dashboard"), "operator-dashboard"));
 router.use("/a11oy", lazyMount(() => import("./a11oy-chat"), "a11oy-chat"));
 
 // A11oy Console — Workbench BFF route.

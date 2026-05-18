@@ -323,6 +323,7 @@ const ReliquaryDoctrine = lazy(() => import('./pages/reliquary/ReliquaryDoctrine
 const ModelProvenance = lazy(() => import('./pages/ModelProvenance').then(m => ({ default: m.ModelProvenance })));
 
 const StrategyDashboard = lazy(() => import('./pages/strategy/dashboard'));
+const OperatorDashboard = lazy(() => import('./pages/operator/OperatorDashboard').then(m => ({ default: m.OperatorDashboard })));
 const AtlasRuntime = lazy(() => import('./pages/strategy/atlas-runtime'));
 const CorrelationMap = lazy(() => import('./pages/strategy/correlation-map').then(m => ({ default: m.CorrelationMapPage })));
 const SignalChains = lazy(() => import('./pages/strategy/signal-chains').then(m => ({ default: m.SignalChainsPage })));
@@ -1524,6 +1525,9 @@ function AppInner() {
         </Route>
         <Route path={`${base}/operator-profile`}>
           <WithShell><OperatorProfile /></WithShell>
+        </Route>
+        <Route path={`${base}/operator`}>
+          <WithShell><OperatorDashboard /></WithShell>
         </Route>
 
         {/* Marketing pages */}

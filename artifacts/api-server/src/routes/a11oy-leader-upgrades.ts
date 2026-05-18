@@ -274,9 +274,9 @@ interface RegressionAlert {
   detectedAt: string;
 }
 
-const suiteBaselines = new Map<string, SuiteBaseline>();
+export const suiteBaselines = new Map<string, SuiteBaseline>();
 
-function computeAlerts(): RegressionAlert[] {
+export function computeAlerts(): RegressionAlert[] {
   const alerts: RegressionAlert[] = [];
   for (const baseline of suiteBaselines.values()) {
     const latest = Array.from(runStore.values())
@@ -540,6 +540,33 @@ function buildAttestationHtml(
 </html>`;
 }
 
+export interface BomAttestationRecord {
+  agentId: string;
+  agentName: string;
+  modelProvider: string;
+  modelSnapshot: string;
+  merkleRoot: string;
+  closureHash: string;
+  receiptCount: number;
+  attestedAt: string;
+  verified: boolean;
+  verificationError?: string;
+}
+
+const BOM_ATTESTATION_HISTORY_LIMIT = 50;
+const bomAttestations: BomAttestationRecord[] = [];
+
+function recordBomAttestation(record: BomAttestationRecord) {
+  bomAttestations.unshift(record);
+  if (bomAttestations.length > BOM_ATTESTATION_HISTORY_LIMIT) {
+    bomAttestations.length = BOM_ATTESTATION_HISTORY_LIMIT;
+  }
+}
+
+export function listRecentBomAttestations(limit = 10): BomAttestationRecord[] {
+  return bomAttestations.slice(0, limit);
+}
+
 router.post('/a11oy/proof/bom/:agentId/cyclonedx', async (req: Request, res: Response) => {
   try {
     const body = req.body as { bom?: BomAgentInput };
@@ -549,6 +576,17 @@ router.post('/a11oy/proof/bom/:agentId/cyclonedx', async (req: Request, res: Res
     }
     const cosigned = await buildBomReceiptRoot(body.bom);
     const cyclonedx = buildCyclonedx(body.bom, cosigned);
+    recordBomAttestation({
+      agentId: body.bom.agentId,
+      agentName: body.bom.agentName,
+      modelProvider: body.bom.modelProvider,
+      modelSnapshot: body.bom.modelSnapshot,
+      merkleRoot: cosigned.merkleRoot,
+      closureHash: cosigned.closureHash,
+      receiptCount: cosigned.receiptCount,
+      attestedAt: new Date().toISOString(),
+      verified: true,
+    });
     sendSuccess(res, {
       cyclonedx,
       cosigned: {
@@ -590,6 +628,20 @@ router.post('/a11oy/proof/verify', async (req: Request, res: Response) => {
     const matches = body.expectedMerkleRoot
       ? cosigned.merkleRoot === body.expectedMerkleRoot
       : true;
+    if (body.expectedMerkleRoot) {
+      recordBomAttestation({
+        agentId: body.bom.agentId,
+        agentName: body.bom.agentName,
+        modelProvider: body.bom.modelProvider,
+        modelSnapshot: body.bom.modelSnapshot,
+        merkleRoot: cosigned.merkleRoot,
+        closureHash: cosigned.closureHash,
+        receiptCount: cosigned.receiptCount,
+        attestedAt: new Date().toISOString(),
+        verified: matches,
+        verificationError: matches ? undefined : 'merkleRoot mismatch',
+      });
+    }
     sendSuccess(res, {
       valid: matches,
       computedMerkleRoot: cosigned.merkleRoot,
@@ -774,9 +826,24 @@ const PATTERN_CONFIG: PatternTrackerConfig = {
   stableMinAgeMs: 7 * 24 * 60 * 60 * 1000,
 };
 
-const patternStats = new Map<string, PatternStat>();
+export const patternStats = new Map<string, PatternStat>();
 
-function deriveMaturity(stat: Omit<PatternStat, 'maturity'>): PatternStat['maturity'] {
+export interface PatternMaturityTransition {
+  patternKey: string;
+  fromStage: PatternStat['maturity'];
+  toStage: PatternStat['maturity'];
+  callCount: number;
+  changedAt: string;
+}
+
+const PATTERN_TRANSITION_LIMIT = 100;
+const patternTransitions: PatternMaturityTransition[] = [];
+
+export function listPatternTransitions(): PatternMaturityTransition[] {
+  return patternTransitions.slice();
+}
+
+export function deriveMaturity(stat: Omit<PatternStat, 'maturity'>): PatternStat['maturity'] {
   const ageMs = Date.now() - new Date(stat.firstUsedAt).getTime();
   if (stat.callCount >= PATTERN_CONFIG.betaToStableUses && ageMs >= PATTERN_CONFIG.stableMinAgeMs) {
     return 'stable';
@@ -805,6 +872,18 @@ router.post('/a11oy/patterns/track', (req: Request, res: Response) => {
       consumers: Array.from(consumers).slice(0, 32),
     };
     const stat: PatternStat = { ...next, maturity: deriveMaturity(next) };
+    if (existing && existing.maturity !== stat.maturity) {
+      patternTransitions.unshift({
+        patternKey,
+        fromStage: existing.maturity,
+        toStage: stat.maturity,
+        callCount: stat.callCount,
+        changedAt: now,
+      });
+      if (patternTransitions.length > PATTERN_TRANSITION_LIMIT) {
+        patternTransitions.length = PATTERN_TRANSITION_LIMIT;
+      }
+    }
     patternStats.set(patternKey, stat);
     sendSuccess(res, stat);
   } catch (err) {
