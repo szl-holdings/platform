@@ -1,7 +1,6 @@
 # Vessels — Investor Walkthrough Script
 
-8 steps, ~7 minutes, fresh database. The script doubles as the spec for
-`tests/e2e/investor-walkthrough.spec.ts`.
+A 9-step demo that walks an investor through the Vessels artifact in ~12 minutes. Every step references a real route, a real persisted table, and (where relevant) a Λ-receipt hash you can verify on screen.
 
 Pre-flight (do once before the room):
 - `pnpm --filter @workspace/api-server seed:vessels:investor` plants one
@@ -9,101 +8,95 @@ Pre-flight (do once before the room):
   maintenance item, and 90 days of risk-score history.
 - Confirm the api-server, the vessels web artifact, and the a11oy
   artifact are all green in workflows.
+- `pnpm dev` against `artifacts/vessels`. The script assumes the operator dashboard (`/dashboard`).
 
 ---
 
-## 1. Landing → enter the platform (45s)
+## 1. Landing & Command Overview (90s)
 
 Open `/vessels/`. Read the one-line thesis aloud: *"Vessels is the
 operator surface for ocean-going risk — sanctions, anomalies, voyage
 economics — with a receipt for every decision."* Click **Enter
-platform**. Land on the Fleet List.
+platform**. Land on the Command Overview (`/dashboard`).
 
-Investor takeaway: this is operational, not marketing.
+Lead with "this is what a maritime risk operator sees at 06:00 UTC." Point at the KPI strip — fleet count, open exceptions, sanctions exposure, average Λ. Numbers come from `/api/vessels` and `/api/vessels/formula/risk-history/*`.
 
-## 2. Fleet List → pick a real vessel (30s)
+Investor takeaway: this is operational, not marketing. Every number on this screen has a receipt.
 
-Sort by composite Λ risk descending. Top row is `MV TAMAR EXPRESS`
-(seeded). Click into it.
+## 2. Fleet List & Behavioural Risk Scoring (90s)
 
-Investor takeaway: the ordering reflects a single composite score, not
-ad-hoc filters.
+Sort by composite Λ risk descending. Top row is `MV TAMAR EXPRESS` (seeded). Click into it or navigate to `/risk-scoring`.
 
-## 3. Vessel Detail → real data on first paint (45s)
+Show the radar — six axes, one accent. Pick the top-risk vessel (Λ ≈ 0.9). Click **Show the math**. The Sheet opens, expression renders verbatim:
 
-KPI strip shows IMO, MMSI, vessel type, current lat/lng, current speed,
-heading. All values render in tabular-num monospace and pull live from
-the API — no placeholders. Point at the **Recent A11oy decisions** panel
-on the right rail: empty for now, we'll fill it in step 5.
+```
+Λ = clamp( severity · likelihood · valueAtRisk / cap , 0, 1 )
+```
 
-Investor takeaway: every number on the page is a real number from a
-real persisted table.
+Point at the Λ-receipt hash in the footer. Tagline: **"the formula is the product, not the chart."**
 
-## 4. Route Anomaly Engine → live anomaly feed (1m)
+## 3. Vessel Detail & 90-day Λ history (60s)
 
-Click the **Anomalies** tab. SSE feed renders the seeded anomaly at the
-top with severity 0.82, type `route_deviation`. Click it. Evidence panel
-populates with the AIS track that triggered the detection. Show the
-`// AMARU_HOOK: third_eye_pattern` marker in the developer-tools view
-(or just mention it) — this is the attach point for the brain runtime
-once #5176 lands.
+KPI strip shows IMO, MMSI, vessel type, current lat/lng, current speed, heading. All values render in tabular-num monospace and pull live from the API — no placeholders.
 
-Investor takeaway: detections persist across restarts and the brain
-integration has a marked seam.
+The line chart pulls from `vessels_risk_history` (table) via `/api/vessels/formula/risk-history/:vesselId`. The chart renders real numerics on first paint.
 
-## 5. Open A11oy workcell → cross-product handoff (1m)
+Investor takeaway: every number on the page is a real number from a real persisted table. Each row carries the receipt hash that produced it.
 
-Click **Open A11oy workcell**. The page hands off to the A11oy artifact
-with the anomaly context as the payload. A workcell appears with the
-maritime-routing template. Navigate back to Vessels. The **Recent A11oy
-decisions** panel on the Vessel Detail page now lists the workcell with
-a link back into A11oy.
+## 4. Run a live recompute (60s)
 
-Investor takeaway: the platform is one fabric, not a folder of disjoint
-apps.
+Click the **Show the math** affordance next to the composite number. The Λ weighted geometric mean expands inline with the live inputs, the weights, and the receipt ID of the most recent compute.
 
-## 6. Risk Scoring → recompute live with "show the math" (1m 30s)
+POST `/api/vessels/formula/risk-recompute` from the in-page **Recompute now** button. The composite ticks (400ms ease), the 90-day trend line gains a new point, and a new row appears in the page-footer receipt strip.
 
-Open the **Risk Scoring** tab. Big number: composite Λ score 0.71. Per-
-driver bar chart shows sanctions (0.9 × weight), AIS-anomaly (0.82 ×
-weight), maintenance-overdue (0.4 × weight), PSC (0.2 × weight), route-
-deviation (0.65 × weight). Click the **Show the math** affordance next
-to the composite number. The Λ weighted geometric mean expands inline
-with the live inputs, the weights, and the receipt ID of the most
-recent compute. Click **Recompute now**. The composite ticks (400ms
-ease), the 90-day trend line gains a new point, and a new row appears
-in the page-footer receipt strip.
+Investor takeaway: the math is auditable in-page and every compute emits a receipt.
 
-Investor takeaway: the math is auditable in-page and every compute
-emits a receipt.
+## 5. Route Anomaly Engine & A11oy Handoff (1.5m)
 
-## 7. Bunkering → real quote on real prices (1m)
+Click the **Anomalies** tab or navigate to `/route-anomaly-engine`. SSE feed renders the seeded anomaly at the top with severity 0.82, type `route_deviation`. Click it. Evidence panel populates with the AIS track that triggered the detection. Show the `// AMARU_HOOK: third_eye_pattern` marker in the developer-tools view — this is the attach point for the brain runtime.
 
-Open the **Bunkering** tab. Map shows the seeded bunker stations
-(Singapore, Rotterdam, Fujairah, Houston, Antwerp, Hong Kong, Panama,
-Gibraltar) with live prices. Pick Fujairah. Click **Get quote**. Modal
-shows total cost USD, ETA hours from current AIS position, voyage delay
-hours, margin impact, and a recommendation. The recommendation uses the
-same Λ operator weighing cost vs delay vs availability — open the
-**Show the math** affordance to prove it.
+Note the **A11oy handoff ID** chip — every anomaly above the 0.7 threshold fires `crossProductHandoff` and the ID is persisted in the `vessels_anomaly_detections` table next to the receipt hash.
 
-Investor takeaway: pricing and recommendation are real, not canned.
+Tagline: **"the moment a detection clears 0.7, it's no longer just Vessels' problem — it's an A11oy workcell."**
 
-## 8. Sanctions Screening → block + automatic A11oy handoff (1m)
+## 6. Open A11oy workcell — cross-product handoff (1m)
 
-Open the **Sanctions Screening** tab. Trigger a screen on the seeded
-vessel. OFAC status badge flips to **HIT**. The A11oy handoff fires
-automatically because the policy threshold tripped. Navigate back to
-the Vessel Detail page. The **Recent A11oy decisions** panel now lists
-two workcells: the anomaly review from step 5, and the sanctions block
-from this step. Each has its own receipt.
+Click **Open A11oy workcell**. The page hands off to the A11oy artifact with the anomaly context as the payload. A workcell appears with the maritime-routing template. Navigate back to Vessels. The **Recent A11oy decisions** panel on the Vessel Detail page now lists the workcell with a link back into A11oy.
 
-Investor takeaway: governance is automatic — the operator never has to
-remember to escalate.
+Investor takeaway: the platform is one fabric, not a folder of disjoint apps.
+
+## 7. Voyage Calculator + Monte Carlo (120s)
+
+Navigate to `/voyage-calculator`. Pick VLCC + Ras Tanura → Rotterdam. Submit. Show the deterministic P&L (revenue, costs, TCE, break-even freight).
+
+Then click **Run Monte Carlo (2,000 iterations)** — calls `/api/vessels/formula/voyage-monte-carlo`. p10 / p50 / p90 land on screen. Click **Show the math** on the p50 — Sheet renders the Gaussian sampling formula. The calculation lands in `vessels_voyage_calculations` with its receipt.
+
+## 8. Bunkering & Sanctions Screening (1.5m)
+
+Navigate to `/bunkering`. Map shows the seeded bunker stations (Singapore, Rotterdam, Fujairah, etc.) with live prices, wait times, and quality scores. Investor takeaway: **"this is operational data, not a brochure."**
+
+Navigate to `/sanctions-screening`. Trigger a screen on the seeded vessel. OFAC status badge flips to **HIT**. The A11oy handoff fires automatically because the policy threshold tripped. Show the ownership network graph in the **Sanctions Chain Explorer**.
+
+## 9. Receipt inspector & closing (90s)
+
+Open the receipt drawer (top-right). Show the most recent N receipts from the `vessels-formula-thesis` chain — each linked to its predecessor via `prevHash`. Pick one, expand, show:
+- formula id (e.g. `normalizedRiskScore`)
+- inputs hash + result hash
+- sequence number
+- `selfHash` and `prevHash`
+
+Closing line: *"Every number you saw is from a persisted table. Every decision left a receipt. The math is in-page, not in a slide. That's the bar."*
 
 ---
 
-## Closing line
+## What to NOT click
 
-*"Every number you saw is from a persisted table. Every decision left a
-receipt. The math is in-page, not in a slide. That's the bar."*
+- `/cortex/*` deep tabs — they have great content but they branch the narrative.
+- Anything tagged `// AMARU_HOOK:` — deferred behind that marker.
+- The warm-gold redesign surfaces (still landing under #5096).
+
+## If something breaks
+
+- If a chart is empty: hit the recompute / detect button on the page — both routes seed shape on first call.
+- If a receipt hash is missing: the in-memory ReceiptChain resets on server restart. Run any compute endpoint once to re-bootstrap the chain.
+- If a page 404s: check that `vessels-formula-thesis` is registered in `artifacts/api-server/src/routes/groups/vessels.ts`.

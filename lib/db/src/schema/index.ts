@@ -188,6 +188,7 @@ export * from './vessels_intelligence';
 export * from './vessels_product';
 export * from './vessels_psc';
 export * from './vessels_trading';
+export * from './vessels_formula_thesis';
 export * from './web_push';
 export * from './webhook_events';
 export * from './worldline';

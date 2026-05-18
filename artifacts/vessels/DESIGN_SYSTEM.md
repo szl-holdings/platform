@@ -1,4 +1,4 @@
-# Vessels — Design System (v1, locked)
+# Vessels — Design System
 
 This document is the single source of truth for the visual language of the
 Vessels artifact. It is the foundation deliverable for project task #5181.
@@ -172,3 +172,28 @@ colors or off-token type sizes in `src/pages/`.
 - Formula elevation to `@szl-holdings/formulas` and the `ShowTheMath`
   component implementation → step 5 of #5181.
 - Doctrine scanner rule for inline hex / off-token sizes → step 6 of #5181.
+
+---
+
+## Rationale — how this evolves the three sources
+
+- **From anomaly.com** we keep the radical restraint (one accent, never two) and the discipline that a page should usually answer one question.
+- **From anthropic.com** we keep the editorial type ramp on marketing surfaces — Vessels is technical, but the marketing must read like a paper, not a brochure.
+- **From A11oy** we keep the operator-density and the receipt/governance chrome. A11oy taught us that the math is the product; Vessels surfaces that lesson via `ShowTheMath`.
+
+What Vessels adds that none of the three sources have:
+
+- **Forensic tier** — a third density used only for chain explorers and receipt inspection. Tabular monospace, very tight leading, intentionally feels like a terminal.
+- **Single signal color, applied consistently across operator + marketing** — anomaly.com and anthropic.com both use multiple accents across surfaces. Vessels collapses to one (`--vessels-marine`) on every surface so an operator's eye never has to re-learn what "important" looks like when switching between marketing and ops.
+- **"Show the math" as a tokenised primitive** — neither anomaly nor anthropic externalise their reasoning. Vessels does, and treats the affordance as a component, not a one-off.
+
+---
+
+## What does NOT belong
+
+- Drop shadows in operator surfaces.
+- Glassmorphism. Blur. Translucency over content.
+- More than one accent color on a page.
+- Coloured KPI deltas (red-down / green-up). Use `▲` / `▼` glyphs in mono and let the number be the signal.
+- Hard-coded hex values inside components. Always go through tokens.
+- Emoji in chrome.
