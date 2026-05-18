@@ -175,6 +175,7 @@ const NAV_SECTIONS: NavSection[] = [
     id: 'core',
     label: 'Core',
     items: [
+      { path: '/overwatch-r0513', label: 'R0513 OVERWATCH', icon: Eye, comp: L(() => import('@/pages/overwatch-r0513')) },
       { path: '/dashboard', label: 'Dashboard', icon: LayoutDashboard, comp: L(() => import('@/pages/dashboard')) },
       { path: '/threats', label: 'Threat Overview', icon: ShieldAlert, comp: L(() => import('@/pages/threat-overview')) },
       { path: '/assets', label: 'Asset Risk Graph', icon: Cpu, comp: L(() => import('@/pages/asset-risk-graph')) },

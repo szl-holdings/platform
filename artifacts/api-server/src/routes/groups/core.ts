@@ -22,6 +22,12 @@ export function register(router: IRouter): void {
 
   router.use('/files', _writeLimiter);
 
+  // Amaru sidecar proxy — exposes the R0513 OVERWATCH read-only panel and
+  // amaru /state, /healthz through the api-server's same-origin surface so
+  // browser artifacts (sentra, a11oy) don't need a sidecar URL or CORS dance.
+  // GET-only by design: R0513 watches; halt authority belongs to HUKLLA.
+  router.use(lazyMatch('/amaru', () => import('../amaru-proxy'), 'amaru-proxy'));
+
   router.use(lazyMatch(['/healthz', '/health'], () => import('../health'), 'health'));
   router.use(
     lazyMatch(
