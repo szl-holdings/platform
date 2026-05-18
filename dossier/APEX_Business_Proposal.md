@@ -1,3 +1,4 @@
+<!-- doctrine-scanner-exempt: legacy live-product surface; rename tracked as separate engineering debt — see scripts/check-doctrine-v6.mjs header. -->
 # SZL Holdings -- Business Proposal
 ## Governed Operational Intelligence for Federal and State Agencies
 ## Prepared for Empire APEX Accelerator

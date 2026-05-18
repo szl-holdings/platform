@@ -1,3 +1,4 @@
+<!-- doctrine-scanner-exempt: legacy live-product surface; rename tracked as separate engineering debt — see scripts/check-doctrine-v6.mjs header. -->
 # GitHub Deep Scan v3 — szl-holdings
 
 **Task:** #4940 · materialize-thesis-lineage

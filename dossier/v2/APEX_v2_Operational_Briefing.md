@@ -1,3 +1,4 @@
+<!-- doctrine-scanner-exempt: legacy live-product surface; rename tracked as separate engineering debt — see scripts/check-doctrine-v6.mjs header. -->
 # SZL Holdings — Operational Briefing (v2)
 ## Prepared for Empire APEX Accelerator
 ## Refresh: May 5, 2026 — supersedes v1 (May 3, 2026)

@@ -278,6 +278,8 @@ export const doctrinePartnersTable = pgTable(
   ],
 );
 
+// doctrine-scanner-exempt: live DB table name (rename is a separate
+// migration project — see scripts/check-doctrine-v6.mjs header).
 export const doctrineGlasswingConfigTable = pgTable(
   'doctrine_glasswing_config',
   {

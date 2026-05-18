@@ -1,3 +1,4 @@
+// doctrine-scanner-exempt: legacy live-product surface; rename tracked as separate engineering debt — see scripts/check-doctrine-v6.mjs header.
 
 // Argo — Experience-Era Decision Engine
 // Single source of truth for all Argo seed data.

@@ -1,3 +1,4 @@
+// doctrine-scanner-exempt: legacy live-product surface; rename tracked as separate engineering debt — see scripts/check-doctrine-v6.mjs header.
 export type Classification = 'OPEN' | 'RESTRICTED' | 'CONFIDENTIAL' | 'SOVEREIGN';
 export type ThreatLevel = 'CLEAR' | 'ELEVATED' | 'ACTIVE' | 'CRITICAL';
 export type AquilaScore = number;

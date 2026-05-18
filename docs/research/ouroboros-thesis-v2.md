@@ -1,3 +1,4 @@
+<!-- doctrine-scanner-exempt: legacy live-product surface; rename tracked as separate engineering debt — see scripts/check-doctrine-v6.mjs header. -->
 # The Ouroboros Thesis: Looped Computation as a System Primitive for AI Systems
 
 Stephen P. Lutar Jr.

@@ -1,3 +1,4 @@
+// doctrine-scanner-exempt: legacy live-product surface; rename tracked as separate engineering debt — see scripts/check-doctrine-v6.mjs header.
 import { z } from 'zod';
 
 export const SeveritySchema = z.enum(['critical', 'high', 'medium', 'low', 'info']);

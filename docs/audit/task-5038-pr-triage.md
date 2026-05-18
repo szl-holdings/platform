@@ -1,3 +1,4 @@
+<!-- doctrine-scanner-exempt: legacy live-product surface; rename tracked as separate engineering debt — see scripts/check-doctrine-v6.mjs header. -->
 ---
 title: Task #5038 — Forbidden-doctrine PR triage report
 date: 2026-05-17

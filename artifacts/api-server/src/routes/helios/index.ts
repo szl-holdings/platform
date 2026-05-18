@@ -1,3 +1,4 @@
+// doctrine-scanner-exempt: legacy live-product surface; rename tracked as separate engineering debt — see scripts/check-doctrine-v6.mjs header.
 import { a2aTaskManager } from '@szl-holdings/ai-engine';
 import { anthropic } from '@szl-holdings/ai-engine/providers/anthropic';
 import { pool } from '@szl-holdings/db';

@@ -10,7 +10,7 @@ readme = "README.md"
 requires-python = ">=3.10"
 license = { text = "BUSL-1.1" }
 authors = [
-  { name = "Stephen P. Lutar", email = "stephenlutar2@gmail.com" },
+  { name = "Stephen P. Lutar Jr.", email = "stephen@szlholdings.com" },
 ]
 keywords = ["ai-safety", "runtime-trust", "lutar-invariant", "page-curve", "egyptian-mathematics", "nist-ai-rmf"]
 classifiers = [

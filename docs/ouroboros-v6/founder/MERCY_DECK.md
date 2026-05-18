@@ -1,3 +1,4 @@
+<!-- doctrine-scanner-exempt: legacy live-product surface; rename tracked as separate engineering debt — see scripts/check-doctrine-v6.mjs header. -->
 # Mercy Deck — Ouroboros + SZL Holdings
 ### For Mercy McInnis · Procurement Counselor · Empire APEX Accelerator
 ### Meeting: Tuesday, May 6, 2026 · 10:00 AM ET · Microsoft Teams

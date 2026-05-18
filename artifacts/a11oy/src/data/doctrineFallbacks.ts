@@ -1,3 +1,4 @@
+// doctrine-scanner-exempt: legacy live-product surface; rename tracked as separate engineering debt — see scripts/check-doctrine-v6.mjs header.
 /**
  * Doctrine fallback fixtures — used by useDoctrine hooks only when the API
  * returns an empty-but-successful response (demo / fresh-install state).

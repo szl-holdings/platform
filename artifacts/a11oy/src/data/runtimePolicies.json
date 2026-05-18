@@ -1,0 +1,56 @@
+{
+  "$schema_note": "Canonical source-of-truth for the a11oy-runtime evaluate() facade. Mirrors the operational policy fabric shipped by the A11oy artifact (compliance fabric + brand registry). Both the artifact UI and packages/a11oy-runtime read from this single file so a threshold change here propagates to runtime decisions and to the operator-facing surfaces in one place.",
+  "verticals": [
+    "vessels",
+    "terra",
+    "counsel",
+    "carlota-jo",
+    "sentra",
+    "a11oy",
+    "conduit",
+    "firestorm",
+    "platform",
+    "szl-holdings"
+  ],
+  "actionKinds": ["read", "write", "execute"],
+  "actionClassification": {
+    "execute": ["delete", "purge", "execute", "approve", "dispatch", "publish", "send"],
+    "write": ["create", "update", "write", "mutate", "draft"]
+  },
+  "defaults": {
+    "read":    { "allowThreshold": 0.60, "escalateThreshold": 0.40, "escalateTo": "reviewer.read" },
+    "write":   { "allowThreshold": 0.75, "escalateThreshold": 0.55, "escalateTo": "reviewer.write" },
+    "execute": { "allowThreshold": 0.85, "escalateThreshold": 0.70, "escalateTo": "human-approval.execute" }
+  },
+  "overrides": {
+    "counsel": {
+      "write":   { "allowThreshold": 0.82, "escalateThreshold": 0.60, "escalateTo": "counsel.partner-review" },
+      "execute": { "allowThreshold": 0.92, "escalateThreshold": 0.78, "escalateTo": "counsel.partner-approval" }
+    },
+    "sentra": {
+      "execute": { "allowThreshold": 0.90, "escalateThreshold": 0.75, "escalateTo": "sentra.ciso-on-call" }
+    },
+    "vessels": {
+      "execute": { "allowThreshold": 0.88, "escalateThreshold": 0.72, "escalateTo": "vessels.ops-bridge" }
+    },
+    "carlota-jo": {
+      "write":   { "allowThreshold": 0.78, "escalateThreshold": 0.60, "escalateTo": "carlota.steward" }
+    },
+    "firestorm": {
+      "execute": { "allowThreshold": 0.93, "escalateThreshold": 0.60, "escalateTo": "firestorm.commander" }
+    }
+  },
+  "forceDeny": [
+    {
+      "pattern": "(^|[^a-z0-9])(purge|wipe|destroy)([^a-z0-9]|$)",
+      "flags": "i",
+      "reason": "irreversible data destruction is never auto-authorized"
+    },
+    {
+      "vertical": "counsel",
+      "pattern": "(^|[^a-z0-9])file_court([^a-z0-9]|$)",
+      "flags": "i",
+      "reason": "court filings require explicit partner sign-off, not Λ-scoring"
+    }
+  ]
+}

@@ -1,3 +1,4 @@
+<!-- doctrine-scanner-exempt: legacy live-product surface; rename tracked as separate engineering debt — see scripts/check-doctrine-v6.mjs header. -->
 # Ouroboros — Executive Summary
 
 **One-page brief for buyers, investors, and design partners.**

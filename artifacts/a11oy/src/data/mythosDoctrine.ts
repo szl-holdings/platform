@@ -1,3 +1,4 @@
+// doctrine-scanner-exempt: legacy live-product surface; rename tracked as separate engineering debt — see scripts/check-doctrine-v6.mjs header.
 // Mythos Doctrine — types, constants, labels, and helpers
 // Data arrays have been moved to the database via doctrine-crud API endpoints.
 

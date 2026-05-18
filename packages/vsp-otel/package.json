@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "description": "Verifiable Span Protocol (VSP) — OTel bridge MVP. Emits one OpenTelemetry span per Λ-receipt with the receipt hash as trace_id and Λ-axis attributes.",
   "license": "Apache-2.0",
-  "author": "Lutar, Stephen P. <https://orcid.org/0009-0001-0110-4173>",
+  "author": "Stephen P. Lutar Jr. <stephen@szlholdings.com>",
   "type": "module",
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",

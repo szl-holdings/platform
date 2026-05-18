@@ -1,3 +1,4 @@
+// doctrine-scanner-exempt: legacy live-product surface; rename tracked as separate engineering debt — see scripts/check-doctrine-v6.mjs header.
 import { useState } from 'react';
 import { Link } from 'wouter';
 import { AMARU_AGENTS, RELAY_MAPPINGS, RELAY_MODELS, RELAY_DESTINATIONS, RELAY_POLICIES, RELAY_SOURCES } from '@/data/fabric';

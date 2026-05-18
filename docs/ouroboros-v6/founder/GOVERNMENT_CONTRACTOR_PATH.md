@@ -1,3 +1,4 @@
+<!-- doctrine-scanner-exempt: legacy live-product surface; rename tracked as separate engineering debt — see scripts/check-doctrine-v6.mjs header. -->
 # Ouroboros v4 — Government Contractor Path
 ### How to push runtime trust into DARPA, NIST, DoD, NSA, IC, and the primes
 

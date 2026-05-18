@@ -1,3 +1,4 @@
+<!-- doctrine-scanner-exempt: legacy live-product surface; rename tracked as separate engineering debt — see scripts/check-doctrine-v6.mjs header. -->
 # RESEARCH_MYTHOS — A11oy Frontier Intelligence Doctrine
 
 **Classification:** Internal Research Doctrine  

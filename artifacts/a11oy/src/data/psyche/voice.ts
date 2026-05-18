@@ -1,3 +1,4 @@
+// doctrine-scanner-exempt: legacy live-product surface; rename tracked as separate engineering debt — see scripts/check-doctrine-v6.mjs header.
 // PSYCHE — Voice & Consent seed data
 // 30 voice items: objections, withdrawal requests, and discomfort logs.
 

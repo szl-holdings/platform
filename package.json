@@ -6,7 +6,7 @@
     "preinstall": "sh -c 'rm -f package-lock.json yarn.lock; case \"$npm_config_user_agent\" in pnpm/*) ;; *) echo \"Use pnpm instead\" >&2; exit 1 ;; esac'",
     "prepare": "sh scripts/setup-hooks.sh || true",
     "dev": "pnpm -r --if-present run dev",
-    "lint": "biome lint .",
+    "lint": "biome lint . && pnpm run check:doctrine",
     "lint:ci": "oxlint . && biome lint --reporter=github . && pnpm run check:env-coverage && pnpm run check:risk-formula-drift && pnpm run check:szl-doctrine-drift && pnpm run check:a11oy-command-redirects && pnpm run check:doctrine && pnpm run check:zero-test-packages && pnpm run check:schema-sync",
     "check:zero-test-packages": "node scripts/check-zero-test-packages.mjs",
     "check:schema-sync": "pnpm --filter @szl-holdings/db run check:schema-sync",

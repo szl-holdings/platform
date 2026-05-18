@@ -13,7 +13,7 @@
  * Rosie, Counsel, etc.) so scoring, routing, and proof emission share a
  * single source of truth.
  *
- * Authored by Stephen Paul Lutar Jr. / SZL Consulting Ltd. CC BY 4.0.
+ * Authored by Stephen P. Lutar Jr. <stephen@szlholdings.com> / SZL Consulting Ltd. CC BY 4.0.
  */
 export * from './lutar.js';
 export * from './omega.js';

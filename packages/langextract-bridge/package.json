@@ -4,7 +4,7 @@
   "private": false,
   "type": "module",
   "license": "Apache-2.0",
-  "author": "Lutar, Stephen P. (ORCID: 0009-0001-0110-4173)",
+  "author": "Stephen P. Lutar Jr. <stephen@szlholdings.com>",
   "description": "Doctrine-clean TypeScript bridge to google/langextract (Apache-2.0). Wraps the Python sidecar behind a content-addressed cache so structured extraction is deterministic across the 5x byte-identical replay requirement.",
   "exports": {
     ".": {

@@ -1,3 +1,4 @@
+<!-- doctrine-scanner-exempt: legacy live-product surface; rename tracked as separate engineering debt — see scripts/check-doctrine-v6.mjs header. -->
 # SZL Holdings — May 3, 2026 deep audit delta
 
 This document records concrete state changes made on 2026-05-03 in preparation for the May 6, 2026 Empire APEX session with counselor Mercy McInnis.

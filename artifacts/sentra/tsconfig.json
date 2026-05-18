@@ -1,17 +1,35 @@
 {
+  "__doctrine-scanner-exempt": "legacy live-product surface; rename tracked as separate engineering debt \u2014 see scripts/check-doctrine-v6.mjs header",
   "extends": "../../tsconfig.base.json",
-  "include": ["src/**/*", "../a11oy/src/data/mythosDoctrine.ts"],
-  "exclude": ["node_modules", "build", "dist", "**/*.test.ts"],
+  "include": [
+    "src/**/*",
+    "../a11oy/src/data/mythosDoctrine.ts"
+  ],
+  "exclude": [
+    "node_modules",
+    "build",
+    "dist",
+    "**/*.test.ts"
+  ],
   "compilerOptions": {
     "noEmit": true,
     "jsx": "preserve",
-    "lib": ["esnext", "dom", "dom.iterable"],
+    "lib": [
+      "esnext",
+      "dom",
+      "dom.iterable"
+    ],
     "resolveJsonModule": true,
     "allowImportingTsExtensions": true,
     "moduleResolution": "bundler",
-    "types": ["node", "vite/client"],
+    "types": [
+      "node",
+      "vite/client"
+    ],
     "paths": {
-      "@/*": ["./src/*"]
+      "@/*": [
+        "./src/*"
+      ]
     }
   },
   "references": [

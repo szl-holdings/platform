@@ -1,3 +1,4 @@
+// doctrine-scanner-exempt: legacy live-product surface; rename tracked as separate engineering debt — see scripts/check-doctrine-v6.mjs header.
 CREATE TABLE IF NOT EXISTS "doctrine_constitutions" (
   "id" serial PRIMARY KEY NOT NULL,
   "constitution_id" text NOT NULL,

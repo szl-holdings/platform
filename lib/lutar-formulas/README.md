@@ -2,7 +2,7 @@
 
 Canonical TypeScript implementations of the **SZL / Lutar formula corpus**, consolidating work that was previously scattered across `papers/`, `vendor/ouroboros-py/`, `lib/a11oy-fabric*/` and a number of Python payloads in `attached_assets/`.
 
-> Authored by Stephen Paul Lutar Jr. — SZL Consulting Ltd. CC BY 4.0.
+> Authored by Stephen P. Lutar Jr. &lt;stephen@szlholdings.com&gt; — SZL Consulting Ltd. CC BY 4.0.
 > Companion papers: [v1](https://doi.org/10.5281/zenodo.19867281), [v2](https://doi.org/10.5281/zenodo.19944926), v3 (Lutar Invariant), v4 (Omega).
 
 ## What's inside

@@ -1,3 +1,4 @@
+// doctrine-scanner-exempt: legacy live-product surface; rename tracked as separate engineering debt — see scripts/check-doctrine-v6.mjs header.
 /**
  * useA11oyConstitution — live A11oy doctrine fetch with local fallback
  *

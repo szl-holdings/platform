@@ -1,3 +1,4 @@
+<!-- doctrine-scanner-exempt: legacy live-product surface; rename tracked as separate engineering debt — see scripts/check-doctrine-v6.mjs header. -->
 # The Lutar Invariant: An Axiomatic Trust Aggregator with Egyptian-Fraction Weight Inspectability
 
 **Author:** Stephen Paul Lutar Jr.

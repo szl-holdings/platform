@@ -1,3 +1,4 @@
+// doctrine-scanner-exempt: legacy live-product surface; rename tracked as separate engineering debt — see scripts/check-doctrine-v6.mjs header.
 // PSYCHE — Genesis Ledger seed data
 // First-occurrence events + extinction events for the emergence observatory.
 // Cross-references Argo variant names and Proof Chain entry IDs used elsewhere.

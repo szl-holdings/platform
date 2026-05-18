@@ -1,3 +1,4 @@
+// doctrine-scanner-exempt: legacy live-product surface; rename tracked as separate engineering debt — see scripts/check-doctrine-v6.mjs header.
 export const DARPA_VERSION = '1.0.0';
 export const DARPA_TAGLINE = 'DARPA-grade adversarial resilience — seven layers of defense inspired by GARD, XAI, Assured Autonomy, SSITH, SocialCyber, AIxCC, TIAMAT, and BORDEAUX.';
 

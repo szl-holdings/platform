@@ -1,3 +1,4 @@
+<!-- doctrine-scanner-exempt: legacy live-product surface; rename tracked as separate engineering debt — see scripts/check-doctrine-v6.mjs header. -->
 # GitHub Audit — What v3 Can and Cannot Prove
 
 **Audit date:** 2026-05-02

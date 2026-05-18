@@ -1,3 +1,4 @@
+<!-- doctrine-scanner-exempt: legacy live-product surface; rename tracked as separate engineering debt — see scripts/check-doctrine-v6.mjs header. -->
 # A11OY Doctrine
 
 > The internal operating doctrine for A11oy as the author and operator of the Mythos Doctrine Open Spec. This document tells engineers, partners, and reviewers how A11oy treats the spec, the Glasswing Partner program, and the surfaces that depend on them.

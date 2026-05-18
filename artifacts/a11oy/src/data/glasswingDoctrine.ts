@@ -1,3 +1,4 @@
+// doctrine-scanner-exempt: legacy live-product surface; rename tracked as separate engineering debt — see scripts/check-doctrine-v6.mjs header.
 import type { Finding, PatchCandidate, Approval, AuditEvent, RLState } from '../lib/glasswing-schemas';
 
 export const GLASSWING_VERSION = '1.0.0-experience-era';

@@ -98,8 +98,22 @@ import agiForecastStatusRouter from './routes/agi-forecast-status';
 import a11oyOrchestrationRouter from './routes/a11oy-orchestration-api';
 import a11oyLeaderUpgradesRouter from './routes/a11oy-leader-upgrades';
 import payloadRouter from './routes/payload';
+import yawarRouter, { publishYawarEvent } from './routes/yawar';
+import { setYawarPublisher } from '@szl/a11oy-runtime';
 import a11oyLexiconRouter from './routes/a11oy-lexicon-api';
 import psycheRouter from './routes/psyche';
+
+// Wire the a11oy-runtime `evaluate()` receipt publisher to the yawar-bus
+// in-process helper (#5173). Every `evaluate()` call writes its receipt
+// to the `a11oy.proof` topic via the same persistence path as HTTP
+// publishers — fail-loud rather than swallow.
+setYawarPublisher(async (event) => {
+  await publishYawarEvent({
+    topic: event.topic,
+    payload: event,
+    signer: 'a11oy-runtime.evaluate',
+  });
+});
 import { sentraProbeDetectionMiddleware } from './middlewares/sentra-probe-detection';
 
 const app: Express = express();
@@ -416,6 +430,12 @@ app.use('/api/a11oy', a11oyOrchestrationRouter);
 // idempotent and stateless.
 app.use('/api', a11oyLeaderUpgradesRouter);
 app.use('/api/payload', payloadRouter);
+
+// yawar-bus HTTP surface (#5173) — canonical event-bus mounted in-process
+// over the api-server. Public read surface (subscribe/events/verify) plus
+// authenticated-style POST /publish (callers attach signer in body). See
+// `./routes/yawar.ts` for full semantics.
+app.use('/api/yawar', yawarRouter);
 
 // AGI-forecast read surface (#5095). Mounted BEFORE auth so the gauge
 // dashboard (public read) can poll without a session. The single mutating

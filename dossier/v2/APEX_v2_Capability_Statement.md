@@ -1,3 +1,4 @@
+<!-- doctrine-scanner-exempt: legacy live-product surface; rename tracked as separate engineering debt — see scripts/check-doctrine-v6.mjs header. -->
 # SZL Holdings — Capability Statement (v2)
 
 **Founder / Principal:** Stephen Lutar

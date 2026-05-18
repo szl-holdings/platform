@@ -1,3 +1,4 @@
+// doctrine-scanner-exempt: legacy live-product surface; rename tracked as separate engineering debt — see scripts/check-doctrine-v6.mjs header.
 /**
  * Mythos Doctrine Open Spec — TypeScript companion types
  * Version: 0.1.0

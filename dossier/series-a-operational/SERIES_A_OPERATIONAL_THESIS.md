@@ -1,3 +1,4 @@
+<!-- doctrine-scanner-exempt: legacy live-product surface; rename tracked as separate engineering debt — see scripts/check-doctrine-v6.mjs header. -->
 # SZL Holdings — Series A Operational Thesis
 
 > Deep analysis of the public GitHub org + the private `platform` monorepo, mapped against the Ouroboros Thesis chain (v1 → v14) and the four flagship apps (a11oy · amaru · sentra · vessels). Written 2026‑05‑18.

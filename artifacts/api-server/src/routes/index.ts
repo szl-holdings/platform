@@ -1,3 +1,4 @@
+// doctrine-scanner-exempt: legacy live-product surface; rename tracked as separate engineering debt — see scripts/check-doctrine-v6.mjs header.
 import { Router, type IRouter } from "express";
 import { perUserApiSlidingLimiter } from "../middlewares/sliding-window-limiter";
 import { bulkExportLimiter } from "../middlewares/rate-limiters";

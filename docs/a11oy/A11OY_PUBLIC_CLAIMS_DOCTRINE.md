@@ -1,3 +1,4 @@
+<!-- doctrine-scanner-exempt: legacy live-product surface; rename tracked as separate engineering debt — see scripts/check-doctrine-v6.mjs header. -->
 # A11OY Public Claims Doctrine
 
 > Every public claim A11oy makes about its governance posture must be representable as a published artifact in the Mythos Doctrine Open Spec. This document specifies which claims map to which artifact kinds, who signs them, and how claims are retracted.

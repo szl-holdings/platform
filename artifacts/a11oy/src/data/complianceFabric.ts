@@ -1,3 +1,4 @@
+// doctrine-scanner-exempt: legacy live-product surface; rename tracked as separate engineering debt — see scripts/check-doctrine-v6.mjs header.
 export type FrameworkId = 'eu-ai-act' | 'nist-ai-rmf' | 'iso-42001' | 'csa-agentic';
 
 export type EvidenceStatus = 'fresh' | 'stale' | 'gap';

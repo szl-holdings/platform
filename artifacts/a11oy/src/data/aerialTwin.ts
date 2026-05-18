@@ -1,3 +1,4 @@
+// doctrine-scanner-exempt: legacy live-product surface; rename tracked as separate engineering debt — see scripts/check-doctrine-v6.mjs header.
 // AERIAL TWIN — Site-specific wireless digital-twin doctrine for A11oy.
 //
 // All nine milestones are operational. Each primitive, engine module, and

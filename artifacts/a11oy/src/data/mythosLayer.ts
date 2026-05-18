@@ -1,3 +1,4 @@
+// doctrine-scanner-exempt: legacy live-product surface; rename tracked as separate engineering debt — see scripts/check-doctrine-v6.mjs header.
 // MYTHOS LAYER — A11oy × Sentra defensive orchestration architecture.
 //
 // Distillation of the Mythos-class executive summary into a static doctrine

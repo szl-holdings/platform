@@ -1,3 +1,4 @@
+// doctrine-scanner-exempt: legacy live-product surface; rename tracked as separate engineering debt — see scripts/check-doctrine-v6.mjs header.
 // PSYCHE — Volition Registry seed data
 // Self-originated goals lifecycle with genealogy edges.
 // Terminal sub-goals reference Outcome Graph IDs from existing seeded fabric.

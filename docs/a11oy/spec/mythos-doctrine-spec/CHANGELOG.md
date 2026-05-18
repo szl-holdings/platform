@@ -1,3 +1,4 @@
+<!-- doctrine-scanner-exempt: legacy live-product surface; rename tracked as separate engineering debt — see scripts/check-doctrine-v6.mjs header. -->
 # Changelog — Mythos Doctrine Open Spec
 
 All notable changes to this spec are documented here. The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and the spec follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).

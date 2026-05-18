@@ -1,3 +1,4 @@
+<!-- doctrine-scanner-exempt: legacy live-product surface; rename tracked as separate engineering debt — see scripts/check-doctrine-v6.mjs header. -->
 # Cold-email template — IP attorney
 
 **Audience:** open-source / commercial-licensing IP attorneys with experience in BUSL, Elastic License, AGPL.

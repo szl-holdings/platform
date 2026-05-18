@@ -1,3 +1,4 @@
+<!-- doctrine-scanner-exempt: legacy live-product surface; rename tracked as separate engineering debt — see scripts/check-doctrine-v6.mjs header. -->
 # a11oy Platform Report
 ## The Governed Decision Operating System — Market Position, Architecture, and Competitive Analysis
 

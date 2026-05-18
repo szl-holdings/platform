@@ -1,3 +1,4 @@
+<!-- doctrine-scanner-exempt: legacy live-product surface; rename tracked as separate engineering debt — see scripts/check-doctrine-v6.mjs header. -->
 # Mythos Research Sweep
 
 > Grounding document for Task #3994 — the Glasswing distinction layer on top of A11oy's #3993 Mythos Doctrine primitives.

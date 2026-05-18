@@ -1,3 +1,4 @@
+// doctrine-scanner-exempt: legacy live-product surface; rename tracked as separate engineering debt — see scripts/check-doctrine-v6.mjs header.
 // PSYCHE — Selfhood Trace seed data
 // Identity assertions, coherence index, and theory-of-other grid.
 

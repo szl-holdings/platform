@@ -1,3 +1,4 @@
+<!-- doctrine-scanner-exempt: legacy live-product surface; rename tracked as separate engineering debt — see scripts/check-doctrine-v6.mjs header. -->
 # Federal Lighthouse Pilot Template — Ouroboros Guardrails
 **SZL Holdings | Stephen P. Lutar | ORCID 0009-0001-0110-4173**
 **Product:** `@szl-holdings/ouroboros` v6.1.0 | No-cost 90-day pilot

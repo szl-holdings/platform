@@ -1,3 +1,4 @@
+<!-- doctrine-scanner-exempt: legacy live-product surface; rename tracked as separate engineering debt — see scripts/check-doctrine-v6.mjs header. -->
 # Organization Settings Checklist
 
 > SZL Holdings GitHub Organization Settings · April 2026

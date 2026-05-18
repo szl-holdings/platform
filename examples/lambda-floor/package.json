@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "description": "Pepr capability that enforces the Doctrine V6 9-axis Λ-floor on AgentInvocation CRs.",
   "license": "Apache-2.0",
-  "author": "Lutar, Stephen P. <stephen@szlholdings.com> (ORCID 0009-0001-0110-4173, SZL Holdings)",
+  "author": "Stephen P. Lutar Jr. <stephen@szlholdings.com>",
   "type": "module",
   "main": "capabilities/lambda-floor.ts",
   "scripts": {

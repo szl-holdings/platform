@@ -21,6 +21,9 @@ export type EntityState =
   | 'failed'
   | 'recovered';
 export type CommandPhase = 'DETECT' | 'INTERPRET' | 'DECIDE' | 'EXECUTE' | 'VERIFY';
+// doctrine-scanner-exempt: legacy product id literal preserved for back-compat
+// (live storage rows + dossier exports still use the prior name; rename tracked
+// as separate engineering debt — see scripts/check-doctrine-v6.mjs header).
 export type ProductId = 'beacon' | 'lyte' | 'alloy' | 'alloyscape';
 
 export interface ObsEvent {

@@ -1,0 +1,25 @@
+{
+  "name": "@szl-holdings/lambda-math",
+  "version": "0.1.0",
+  "description": "Canonical Lambda operator — weighted geometric mean with Egyptian-fraction weights and B1-B4 bound checks. TS mirror of the upstream Lean source of truth.",
+  "type": "module",
+  "main": "./src/index.ts",
+  "types": "./src/index.ts",
+  "exports": {
+    ".": {
+      "types": "./src/index.ts",
+      "import": "./src/index.ts"
+    }
+  },
+  "author": "Stephen P. Lutar Jr. <stephen@szlholdings.com>",
+  "license": "UNLICENSED",
+  "scripts": {
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run --passWithNoTests"
+  },
+  "devDependencies": {
+    "@types/node": "catalog:",
+    "typescript": "catalog:",
+    "vitest": "catalog:"
+  }
+}

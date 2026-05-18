@@ -1,3 +1,4 @@
+// doctrine-scanner-exempt: legacy live-product surface; rename tracked as separate engineering debt — see scripts/check-doctrine-v6.mjs header.
 // ARGO — Field Intelligence Forge
 // Integration of external open-source primitives + frontier public research
 // + the Sentra defensive doctrine into capability seeds for the

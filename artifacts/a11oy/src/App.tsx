@@ -1,3 +1,4 @@
+// doctrine-scanner-exempt: legacy live-product surface; rename tracked as separate engineering debt — see scripts/check-doctrine-v6.mjs header.
 import { lazy, Suspense, useEffect } from 'react';
 import type { ReactNode } from 'react';
 import { Route, Switch, useLocation } from 'wouter';

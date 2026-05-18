@@ -1,3 +1,4 @@
+<!-- doctrine-scanner-exempt: legacy live-product surface; rename tracked as separate engineering debt — see scripts/check-doctrine-v6.mjs header. -->
 # What Anthropic's Alignment Risk Research Means for Enterprise AI Deployments
 
 *Six risk pathways that every enterprise deploying AI agents should understand — and the engineering patterns required to mitigate them*

@@ -1,3 +1,4 @@
+<!-- doctrine-scanner-exempt: legacy live-product surface; rename tracked as separate engineering debt — see scripts/check-doctrine-v6.mjs header. -->
 # The Missing Layer
 
 *Why every AI company is building agents — and almost none of them are governing what those agents do*

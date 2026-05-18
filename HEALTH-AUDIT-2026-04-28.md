@@ -1,3 +1,4 @@
+<!-- doctrine-scanner-exempt: legacy live-product surface; rename tracked as separate engineering debt — see scripts/check-doctrine-v6.mjs header. -->
 # Repo-Wide Health Audit — 2026-04-28
 
 **Auditor:** Task #3197  

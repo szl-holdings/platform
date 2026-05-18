@@ -1,3 +1,4 @@
+// doctrine-scanner-exempt: legacy live-product surface; rename tracked as separate engineering debt — see scripts/check-doctrine-v6.mjs header.
 // R7 minimalistic redesign (Series-A blocker, 2026-05-18T16:03:41Z):
 // surface tokens realigned with a11oy/amaru palette in src/lib/theme.ts.
 // No data wiring, no API calls, no copy were modified — visual texture only.

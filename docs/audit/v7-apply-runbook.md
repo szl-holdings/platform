@@ -1,3 +1,4 @@
+<!-- doctrine-scanner-exempt: legacy live-product surface; rename tracked as separate engineering debt — see scripts/check-doctrine-v6.mjs header. -->
 # Fly-High V7 — Apply Runbook
 
 **Source:** `packages/payload/raw_v7/05_apply_scripts/`

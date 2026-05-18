@@ -6,7 +6,7 @@
 
 ## License Terms
 
-This software, including all source code, documentation, design assets, data schemas, API specifications, infrastructure templates, and associated materials (collectively, the "Platform"), is the proprietary intellectual property of **SZL Holdings** and its founder, **Stephen Lutar**.
+This software, including all source code, documentation, design assets, data schemas, API specifications, infrastructure templates, and associated materials (collectively, the "Platform"), is the proprietary intellectual property of **SZL Holdings** and its founder, **Stephen P. Lutar Jr.** (stephen@szlholdings.com).
 
 ### Grant of License
 
@@ -48,6 +48,7 @@ This license is governed by the laws of the jurisdiction in which SZL Holdings i
 For licensing inquiries, commercial partnerships, or enterprise evaluation access:  
 [inquiries@szlholdings.com](mailto:inquiries@szlholdings.com)
 
-**Stephen Lutar**  
+**Stephen P. Lutar Jr.**  
+stephen@szlholdings.com  
 Founder, SZL Holdings  
 [linkedin.com/in/stephen-l-279315240](https://linkedin.com/in/stephen-l-279315240)

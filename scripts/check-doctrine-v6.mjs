@@ -68,34 +68,19 @@ const EXCLUDE_PATH_PREFIXES = [
   "packages/payload/",
   // ── Workspace package whose name embeds a renamed token ──
   "packages/frontier-mythos/",
+  // ── Auto-generated baseline smoke tests / manifest that reference the
+  //    above package by its package name (which embeds a renamed token).
+  //    The MANIFEST is JSON (no comments allowed → can't carry an inline
+  //    exempt marker), and the .ts file is generated. ──
+  "tests/silent-zone/",
   // ── Previous-generation forbidden-pattern scanner — declares the tokens
   //    as its own list. Superseded by this script.
   "scripts/check-forbidden-patterns.",
   // ── GitHub Action whose directory name embeds a renamed token ──
   "tools/github-actions/mythos-doctrine/",
-  // ── A11oy artifact (live product surfaces: pages, data, schemas that
-  //    encode legacy names as identifiers, routes, and DB columns) ──
-  "artifacts/a11oy/",
-  // ── Other artifacts that import legacy data files transitively ──
-  "artifacts/api-server/",
-  "artifacts/carlota-jo/",
-  "artifacts/conduit/",
-  "artifacts/sentra/",
-  // ── DB schema / migrations — tables literally named doctrine_glasswing_*
-  //    etc. Rename = migration risk; tracked as separate debt. ──
-  "lib/db/",
-  // ── Engine libraries that reference legacy archetype names in registries ──
-  "lib/ai-engine/",
-  "lib/lutar-formulas/",
-  "lib/shared-ui/",
-  // ── Historical docs, audits, research, dossier exports (frozen) ──
-  ".agents/",
-  "docs/",
-  "dossier/",
-  "content-package/",
-  // ── Root-level audit snapshot (frozen) ──
-  "HEALTH-AUDIT-",
   // ── PPTX-builder Python script: dossier export with legacy slide titles ──
+  //    (binary-ish generated script; uses in-file marker as well, but path
+  //    exempted because the script string-builds slide titles dynamically). ──
   "scripts/build_apex_v2_pptx.py",
 ];
 

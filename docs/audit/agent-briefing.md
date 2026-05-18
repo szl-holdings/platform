@@ -1,3 +1,4 @@
+<!-- doctrine-scanner-exempt: legacy live-product surface; rename tracked as separate engineering debt — see scripts/check-doctrine-v6.mjs header. -->
 # Agent Briefing — In-Flight Tasks (post #4940)
 
 **Author:** task #4940 (materialize-thesis-lineage)

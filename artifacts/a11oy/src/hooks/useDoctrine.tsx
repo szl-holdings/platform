@@ -1,3 +1,4 @@
+// doctrine-scanner-exempt: legacy live-product surface; rename tracked as separate engineering debt — see scripts/check-doctrine-v6.mjs header.
 import { useState, useEffect, useCallback, useRef } from 'react';
 import {
   STATIC_PARTNERS, STATIC_CAVD, STATIC_DSL_EXAMPLES, STATIC_DSL_SIMULATIONS,

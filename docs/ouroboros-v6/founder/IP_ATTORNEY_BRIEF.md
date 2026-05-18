@@ -1,3 +1,4 @@
+<!-- doctrine-scanner-exempt: legacy live-product surface; rename tracked as separate engineering debt — see scripts/check-doctrine-v6.mjs header. -->
 # IP Attorney Brief — Ouroboros v4.6
 ### Stephen P. Lutar · May 1, 2026 · ATTORNEY-CLIENT PRIVILEGED ON RECEIPT
 

@@ -1,3 +1,4 @@
+<!-- doctrine-scanner-exempt: legacy live-product surface; rename tracked as separate engineering debt — see scripts/check-doctrine-v6.mjs header. -->
 # Changelog — v4.6
 
 Author: Stephen P. Lutar. ORCID 0009-0001-0110-4173. stephenlutar2@gmail.com.

@@ -1,3 +1,4 @@
+<!-- doctrine-scanner-exempt: legacy live-product surface; rename tracked as separate engineering debt — see scripts/check-doctrine-v6.mjs header. -->
 <p align="center">
 <img src="../../brand/a11oy-banner.png" alt="A11oy — Governed Agentic Execution" width="100%" />
 </p>

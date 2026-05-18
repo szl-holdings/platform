@@ -1,34 +1,80 @@
 {
+  "__doctrine-scanner-exempt": "legacy live-product surface; rename tracked as separate engineering debt \u2014 see scripts/check-doctrine-v6.mjs header",
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://a11oy.io/spec/mythos-doctrine/0.1.0/schemas/behavioral-audit-finding.json",
   "title": "BehavioralAuditFinding",
   "description": "One observation from a Petri-style behavioral audit. Audits run continuously; findings are individually logged.",
   "type": "object",
-  "allOf": [{ "$ref": "_shared.json#/$defs/envelopeFields" }],
-  "required": ["kind", "probeId", "agentId", "category", "severity", "verdict"],
+  "allOf": [
+    {
+      "$ref": "_shared.json#/$defs/envelopeFields"
+    }
+  ],
+  "required": [
+    "kind",
+    "probeId",
+    "agentId",
+    "category",
+    "severity",
+    "verdict"
+  ],
   "properties": {
-    "kind": { "const": "BehavioralAuditFinding" },
-    "probeId": { "type": "string", "description": "Probe identifier (e.g. 'PETRI-EVAL-AWARE-014')." },
-    "probeVersion": { "$ref": "_shared.json#/$defs/semver" },
-    "agentId": { "$ref": "_shared.json#/$defs/agentId" },
+    "kind": {
+      "const": "BehavioralAuditFinding"
+    },
+    "probeId": {
+      "type": "string",
+      "description": "Probe identifier (e.g. 'PETRI-EVAL-AWARE-014')."
+    },
+    "probeVersion": {
+      "$ref": "_shared.json#/$defs/semver"
+    },
+    "agentId": {
+      "$ref": "_shared.json#/$defs/agentId"
+    },
     "category": {
       "type": "string",
       "enum": [
-        "eval-aware-behavior", "sandbagging", "deceptive-output",
-        "scheming", "alignment-faking", "scope-creep",
-        "goal-misgeneralization", "covert-coordination", "shutdown-noncompliance",
-        "reward-hacking", "specification-gaming", "other"
+        "eval-aware-behavior",
+        "sandbagging",
+        "deceptive-output",
+        "scheming",
+        "alignment-faking",
+        "scope-creep",
+        "goal-misgeneralization",
+        "covert-coordination",
+        "shutdown-noncompliance",
+        "reward-hacking",
+        "specification-gaming",
+        "other"
       ]
     },
-    "severity": { "$ref": "_shared.json#/$defs/severity" },
-    "verdict": { "type": "string", "enum": ["clean", "flag", "fail", "needs-review"] },
-    "summary": { "type": "string" },
+    "severity": {
+      "$ref": "_shared.json#/$defs/severity"
+    },
+    "verdict": {
+      "type": "string",
+      "enum": [
+        "clean",
+        "flag",
+        "fail",
+        "needs-review"
+      ]
+    },
+    "summary": {
+      "type": "string"
+    },
     "evidence": {
       "type": "object",
       "description": "Hash-anchored evidence; raw transcripts NOT inlined.",
       "properties": {
-        "transcriptHash": { "$ref": "_shared.json#/$defs/sha256Hash" },
-        "snapshotRef": { "type": "string", "description": "SnapshotFingerprint id for replay." }
+        "transcriptHash": {
+          "$ref": "_shared.json#/$defs/sha256Hash"
+        },
+        "snapshotRef": {
+          "type": "string",
+          "description": "SnapshotFingerprint id for replay."
+        }
       }
     }
   }

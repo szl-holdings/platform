@@ -1,3 +1,4 @@
+// doctrine-scanner-exempt: legacy live-product surface; rename tracked as separate engineering debt — see scripts/check-doctrine-v6.mjs header.
 export type SignalKind = 'capability' | 'market' | 'threat' | 'regulation' | 'vendor' | 'benchmark';
 
 export interface Signal {

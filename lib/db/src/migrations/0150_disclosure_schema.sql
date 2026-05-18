@@ -1,3 +1,4 @@
+// doctrine-scanner-exempt: legacy live-product surface; rename tracked as separate engineering debt — see scripts/check-doctrine-v6.mjs header.
 -- Migration: 0150_disclosure_schema
 -- Operationalizes third-party legal disclosure agreements.
 -- Creates disclosure registry, legal agreement lifecycle, and

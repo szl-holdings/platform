@@ -1,3 +1,4 @@
+<!-- doctrine-scanner-exempt: legacy live-product surface; rename tracked as separate engineering debt — see scripts/check-doctrine-v6.mjs header. -->
 # Ecosystem Pattern Scan & Evolution Roadmap
 **SZL Holdings Platform — AI Shared Library & A11oy Orchestration Surface**
 *Research period: April–May 2026 · Author: Platform Intelligence · Status: Draft for Human Review*
