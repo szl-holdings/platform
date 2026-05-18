@@ -192,6 +192,42 @@ describe('deriveMetrics', () => {
     expect(overlap).toEqual([]);
   });
 
+  it('covers all 12 registered gauge variables across capability + safety partitions', () => {
+    const combined = new Set([...CAPABILITY_SIGNAL_IDS, ...SAFETY_SIGNAL_IDS]);
+    expect(combined.size).toBe(12);
+    for (const id of ['METR','EPOCH','ARC','APOLLO','AISI','RSP','FSF','GPQA','MMLU','SWE_BENCH','HUMANEVAL','MATH']) {
+      expect(combined.has(id)).toBe(true);
+    }
+  });
+
+  it('every signal — including semver-valued RSP/FSF — contributes numerically to derived metrics', () => {
+    const sem = (v: string, date: string): VariableSnapshot[string] =>
+      ({ ok: true, value: v, fetchedAt: `${date}T00:00:00.000Z`, sourceUrl: 'x' });
+    const snap = (date: string, capBase: number, safeBase: number, tagMinor: number): VariableSnapshot => ({
+      METR: ok(capBase, date), EPOCH: ok(capBase + 100, date), ARC: ok(capBase + 200, date),
+      GPQA: ok(capBase / 1000, date), MMLU: ok(capBase / 1000 + 0.01, date),
+      SWE_BENCH: ok(capBase / 2000, date), HUMANEVAL: ok(capBase / 2000 + 0.01, date),
+      MATH: ok(capBase / 3000, date),
+      APOLLO: ok(safeBase, date), AISI: ok(safeBase + 5, date),
+      RSP: sem(`v0.${tagMinor}.0`, date), FSF: sem(`v1.${tagMinor}.0`, date),
+    });
+    const history: HistoryEntry[] = [
+      { date: '2026-05-12', snapshot: snap('2026-05-12', 100, 50, 1) },
+      { date: '2026-05-16', snapshot: snap('2026-05-16', 140, 53, 5) },
+    ];
+    const m = deriveMetrics(history);
+    expect(m.horizonVelocity).not.toBeNull();
+    expect(m.alignmentDebt).not.toBeNull();
+    expect(m.lutarReadiness).not.toBeNull();
+
+    const withoutSemver: HistoryEntry[] = history.map(h => ({
+      date: h.date,
+      snapshot: Object.fromEntries(Object.entries(h.snapshot).filter(([k]) => k !== 'RSP' && k !== 'FSF')),
+    }));
+    const m2 = deriveMetrics(withoutSemver);
+    expect(m.alignmentDebt).not.toBeCloseTo(m2.alignmentDebt as number, 6);
+  });
+
   it('buildDailySummary embeds derived metrics computed against history+today', () => {
     const today: VariableSnapshot = {
       METR: ok(140, '2026-05-16'), APOLLO: ok(53, '2026-05-16'),

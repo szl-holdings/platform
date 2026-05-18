@@ -80,11 +80,29 @@ export const SAFETY_SIGNAL_IDS: readonly string[] = [
   'APOLLO', 'AISI', 'RSP', 'FSF',
 ];
 
+/**
+ * Coerce a semver-shaped tag string (e.g. "v1.4.2", "0.12.0") into a
+ * monotonic integer so semver-valued signals (RSP, FSF) can participate
+ * in the same per-day velocity math as numeric signals. Uses major*1e6 +
+ * minor*1e3 + patch, which preserves ordering for any realistic version
+ * range. Returns null if no semver fragment is found.
+ */
+export function semverToNumber(s: string): number | null {
+  const m = /(\d+)\.(\d+)(?:\.(\d+))?/.exec(s);
+  if (!m) return null;
+  const maj = Number(m[1]);
+  const min = Number(m[2]);
+  const pat = m[3] !== undefined ? Number(m[3]) : 0;
+  if (!Number.isFinite(maj) || !Number.isFinite(min) || !Number.isFinite(pat)) return null;
+  return maj * 1_000_000 + min * 1_000 + pat;
+}
+
 function numericValue(entry: VariableSnapshot[string] | undefined): number | null {
   if (!entry) return null;
-  if ((entry as { ok: unknown }).ok === true && typeof (entry as { value?: unknown }).value === 'number') {
-    return (entry as { value: number }).value;
-  }
+  if ((entry as { ok: unknown }).ok !== true) return null;
+  const value = (entry as { value?: unknown }).value;
+  if (typeof value === 'number' && Number.isFinite(value)) return value;
+  if (typeof value === 'string') return semverToNumber(value);
   return null;
 }
 
