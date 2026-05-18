@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { Layout } from '../components/layout';
 import { PageHeader, Card, SectionTitle, StatusBadge } from '../components/ui';
+import { PANEL_FACTS } from '@szl-holdings/payload';
 import {
   DOCTRINE_V6,
   DOI_LEDGER,
@@ -203,7 +204,7 @@ export function PayloadProvenance() {
       </div>
 
       {/* 4. Full org-wide repo grid */}
-      <SectionTitle>Org · {ORG_SUMMARY.reposTotal} repositories</SectionTitle>
+      <SectionTitle>Org · {PANEL_FACTS.reposCountText} repositories</SectionTitle>
       <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-3 mb-8">
         {REPOS.map(r => (
           <Card key={r.name}>
