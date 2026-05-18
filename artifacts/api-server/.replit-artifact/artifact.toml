@@ -59,3 +59,17 @@ PORT = "6802"
 TEMPORAL_ENDPOINT = "localhost:7233"
 TEMPORAL_NAMESPACE = "default"
 TEMPORAL_APPROVAL_TASK_QUEUE = "approval-task-queue"
+
+[[services]]
+name = "amaru"
+paths = [ "/amaru/" ]
+localPort = 6810
+autoStart = false
+
+[services.development]
+run = "bash -c 'cd /home/runner/workspace/services/amaru && PYTHONPATH=src exec .venv/bin/python -m uvicorn amaru.app:app --host 0.0.0.0 --port 6810'"
+
+[services.env]
+PORT = "6810"
+AMARU_YAWAR_BUS_URL = "http://localhost:8080/api/prism-bus/publish"
+AMARU_YAWAR_BUS_DOMAIN = "amaru"

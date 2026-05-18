@@ -42,6 +42,7 @@ import {
 
 const coreItems = [
   { name: 'Cockpit', href: '/cockpit', icon: Activity },
+  { name: 'Brain', href: '/brain', icon: Brain },
   { name: 'Compute', href: '/compute', icon: Cpu },
   { name: 'Connections', href: '/connections', icon: Cable },
   { name: 'Syncs', href: '/syncs', icon: FolderSync },
