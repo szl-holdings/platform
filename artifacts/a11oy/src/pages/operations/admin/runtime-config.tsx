@@ -169,6 +169,14 @@ function HistoryDrawer({
   });
   const [revertError, setRevertError] = useState<string | null>(null);
   const [pendingRevertId, setPendingRevertId] = useState<number | null>(null);
+  // Global-view filters (per task #5061: "with filters by key and actor").
+  // Filters are client-side over the already-fetched window so they don't
+  // re-issue a request per keystroke — the endpoint caps at 200 entries
+  // which is small enough that in-browser filtering stays instant. Reset
+  // whenever the drawer switches mode so a fresh open starts unfiltered.
+  const [keyFilter, setKeyFilter] = useState('');
+  const [actorFilter, setActorFilter] = useState<string>('');
+  const [actionFilter, setActionFilter] = useState<string>('');
 
   const revertMutation = useStandardMutation({
     mutationFn: ({
@@ -195,7 +203,33 @@ function HistoryDrawer({
     },
   });
 
-  const entries = data?.data ?? [];
+  const allEntries = data?.data ?? [];
+  // Build the actor dropdown options from the actual data window so we only
+  // ever surface actors that have a real entry to filter to. Sorted by label
+  // for predictable navigation.
+  const uniqueActors = useMemo(() => {
+    if (!isAllKeys) return [];
+    const seen = new Map<string, string>();
+    for (const e of allEntries) {
+      if (e.actor && !seen.has(e.actor)) seen.set(e.actor, e.actor);
+    }
+    return Array.from(seen.values()).sort((a, b) => a.localeCompare(b));
+  }, [allEntries, isAllKeys]);
+
+  const entries = useMemo(() => {
+    if (!isAllKeys) return allEntries;
+    const keyQ = keyFilter.trim().toLowerCase();
+    return allEntries.filter((e) => {
+      if (keyQ && !(e.key ?? '').toLowerCase().includes(keyQ)) return false;
+      if (actorFilter && e.actor !== actorFilter) return false;
+      if (actionFilter && e.action !== actionFilter) return false;
+      return true;
+    });
+  }, [allEntries, isAllKeys, keyFilter, actorFilter, actionFilter]);
+
+  const hasActiveFilter =
+    isAllKeys && (keyFilter.trim() !== '' || actorFilter !== '' || actionFilter !== '');
+
   return (
     <div
       className="fixed inset-0 z-50 flex items-center justify-center bg-background/80 backdrop-blur-sm p-4"
@@ -213,7 +247,16 @@ function HistoryDrawer({
             </h2>
             <p className="text-[11px] text-muted-foreground mt-0.5 break-all">
               {isAllKeys ? (
-                <>All runtime_config events — last 200 entries</>
+                <>
+                  All runtime_config events — last 200 entries
+                  {hasActiveFilter && (
+                    <>
+                      {' '}
+                      · showing <span className="text-foreground">{entries.length}</span> of{' '}
+                      {allEntries.length}
+                    </>
+                  )}
+                </>
               ) : (
                 <>
                   <code className="font-mono">{configKey}</code> — last 50 entries{' '}
@@ -238,6 +281,57 @@ function HistoryDrawer({
             <X className="w-4 h-4" />
           </button>
         </div>
+        {isAllKeys && (
+          <div className="flex items-center gap-2 px-5 py-2 border-b border-border bg-muted/20 flex-wrap">
+            <div className="relative flex-1 min-w-[160px]">
+              <Search className="w-3 h-3 text-muted-foreground absolute left-2 top-1/2 -translate-y-1/2 pointer-events-none" />
+              <input
+                value={keyFilter}
+                onChange={(e) => setKeyFilter(e.target.value)}
+                placeholder="Filter by key…"
+                className="w-full pl-7 pr-2 py-1 text-[11px] font-mono bg-card rounded border border-border focus:outline-none focus:ring-1 focus:ring-primary"
+              />
+            </div>
+            <select
+              value={actorFilter}
+              onChange={(e) => setActorFilter(e.target.value)}
+              className="px-2 py-1 text-[11px] bg-card rounded border border-border focus:outline-none focus:ring-1 focus:ring-primary"
+              title="Filter by actor"
+            >
+              <option value="">All actors ({uniqueActors.length})</option>
+              {uniqueActors.map((a) => (
+                <option key={a} value={a}>
+                  {a}
+                </option>
+              ))}
+            </select>
+            <select
+              value={actionFilter}
+              onChange={(e) => setActionFilter(e.target.value)}
+              className="px-2 py-1 text-[11px] bg-card rounded border border-border focus:outline-none focus:ring-1 focus:ring-primary"
+              title="Filter by action"
+            >
+              <option value="">All actions</option>
+              <option value="create">create</option>
+              <option value="update">update</option>
+              <option value="delete">delete</option>
+            </select>
+            {hasActiveFilter && (
+              <button
+                type="button"
+                onClick={() => {
+                  setKeyFilter('');
+                  setActorFilter('');
+                  setActionFilter('');
+                }}
+                className="px-2 py-1 text-[11px] rounded border border-border text-muted-foreground hover:bg-muted/40"
+                title="Clear filters"
+              >
+                Clear
+              </button>
+            )}
+          </div>
+        )}
         <div className="flex-1 overflow-y-auto">
           {isLoading ? (
             <div className="flex items-center justify-center py-12">
