@@ -42,7 +42,10 @@ export default defineConfig({
     environment: 'node',
     pool: 'forks',
     isolate: true,
-    globalSetup: ['tests/utils/smoke-test-preflight.ts'],
+    globalSetup: [
+      resolve(__dirname, 'tests/utils/smoke-test-preflight.ts'),
+      resolve(__dirname, 'tests/utils/warmup-shared-services.ts'),
+    ],
     testTimeout: 30000,
     hookTimeout: 15000,
     teardownTimeout: 15000,

@@ -1,4 +1,4 @@
-import { afterEach, beforeAll, describe, expect, it } from 'vitest';
+import { afterEach, describe, expect, it } from 'vitest';
 import {
   _resetAdaptersForTests,
   _resetForTests,
@@ -12,16 +12,12 @@ import {
   onPromotion,
   pullSource,
 } from '../src/index.js';
-import { ensureSchema } from '../src/db-backend.js';
 
-// Warm the DB-backend schema (idempotent CREATE TABLE IF NOT EXISTS) once,
-// outside any per-test timeout budget. On a cold shared Postgres, the first
-// schema bootstrap can take 7–8s on its own, which would otherwise blow the
-// default 5s per-test timeout and produce spurious failures that mask real
-// bugs. Doing it here amortizes that cost across the whole suite.
-beforeAll(async () => {
-  await ensureSchema();
-}, 60_000);
+// Note: the frontier_* schema is pre-warmed by the workspace-level vitest
+// `globalSetup` (`tests/utils/warmup-shared-services.ts`) before any test
+// fork starts. This avoids the 7–8s cold-start cost of CREATE TABLE IF
+// NOT EXISTS against a freshly-provisioned shared Postgres blowing
+// per-test timeouts.
 
 afterEach(() => {
   _resetAdaptersForTests();

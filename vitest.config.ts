@@ -549,6 +549,7 @@ export default defineConfig({
       exclude: ['**/node_modules/**', '**/dist/**'],
     },
     setupFiles: [],
+    globalSetup: [resolve(__dirname, 'tests/utils/warmup-shared-services.ts')],
     testTimeout: 15000,
     hookTimeout: 10000,
     teardownTimeout: 10000,
