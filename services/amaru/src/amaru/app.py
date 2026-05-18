@@ -17,6 +17,7 @@ from .chakana_wiring import wiring_snapshot
 from .chakras import CHAKRA_REGISTRY, get_chakra
 from .amaru_scheduler import AmaruScheduler
 from .huklla import evaluate_all
+from . import overwatch as _overwatch
 from .receipts import ReceiptChain
 from .yawar_bus import get_bus
 
@@ -119,6 +120,26 @@ def healthz() -> dict[str, Any]:
         "scheduler_ticks": _scheduler.tick_count,
         "receipts": _chain.length(),
     }
+
+
+@app.get("/overwatch/snapshot")
+def overwatch_snapshot() -> dict[str, Any]:
+    """R0513 — read-only OVERWATCH panel (6 invariants).
+
+    Doctrine: R0513 watches; halt authority belongs to HUKLLA. This endpoint
+    never mutates state. It computes the panel against the current receipt
+    chain and chakana wiring."""
+    receipts = [r.to_dict() for r in _chain.all()]
+    snap = _overwatch.evaluate_panel(
+        receipts=receipts,
+        wiring=wiring_snapshot(),
+        baseline_axes=None,
+        observed_axes=None,
+        margins=None,
+        in_flight=0,
+        regated=0,
+    )
+    return snap.to_dict()
 
 
 @app.get("/chakra/{name}/leader")
