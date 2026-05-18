@@ -67,7 +67,7 @@ localPort = 6810
 autoStart = false
 
 [services.development]
-run = "bash -c 'cd /home/runner/workspace/services/amaru && bash scripts/bootstrap_venv.sh && PYTHONPATH=src exec .venv/bin/python -m uvicorn amaru.app:app --host 0.0.0.0 --port 6810'"
+run = "bash -c 'cd /home/runner/workspace/services/amaru && bash scripts/bootstrap_venv.sh && PYTHONPATH=src exec .venv/bin/python scripts/serve_dualstack.py'"
 
 [services.env]
 PORT = "6810"

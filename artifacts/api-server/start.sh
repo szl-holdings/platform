@@ -148,4 +148,41 @@ else
 fi
 # -----------------------------------------------------------------------------
 
+# --- Amaru sidecar -----------------------------------------------------------
+# Amaru (FastAPI) is the chakra orchestrator that serves /amaru/* via the
+# artifact proxy on localPort 6810. Its standalone workflow consistently fails
+# the platform's port-readiness check despite uvicorn binding successfully, so
+# we co-launch it here alongside the api-server. Mirrors eval-runner pattern.
+AMARU_DIR="/home/runner/workspace/services/amaru"
+AMARU_LOG="/tmp/amaru.log"
+AMARU_PORT="${AMARU_PORT:-6810}"
+if (exec 3<>/dev/tcp/127.0.0.1/"$AMARU_PORT") 2>/dev/null; then
+  exec 3<&- 3>&-
+  echo "[api-server start.sh] Port ${AMARU_PORT} already bound (standalone amaru workflow); skipping sidecar spawn"
+  AMARU_PID=""
+elif [ -f "$AMARU_DIR/scripts/serve_dualstack.py" ] && [ -f "$AMARU_DIR/scripts/bootstrap_venv.sh" ]; then
+  echo "[api-server start.sh] Launching amaru sidecar on port ${AMARU_PORT} — log: $AMARU_LOG"
+  (
+    cd "$AMARU_DIR"
+    bash scripts/bootstrap_venv.sh
+    PYTHONPATH=src PORT="$AMARU_PORT" \
+      AMARU_YAWAR_BUS_URL="${AMARU_YAWAR_BUS_URL:-http://localhost:8080/api/prism-bus/publish}" \
+      AMARU_YAWAR_BUS_DOMAIN="${AMARU_YAWAR_BUS_DOMAIN:-amaru}" \
+      exec .venv/bin/python scripts/serve_dualstack.py
+  ) >"$AMARU_LOG" 2>&1 &
+  AMARU_PID=$!
+  echo "[api-server start.sh] Amaru pid=$AMARU_PID"
+  old_cleanup_am=$(declare -f cleanup)
+  cleanup() {
+    eval "${old_cleanup_am#cleanup ()}"
+    if [ -n "$AMARU_PID" ] && kill -0 "$AMARU_PID" 2>/dev/null; then
+      kill "$AMARU_PID" 2>/dev/null || true
+    fi
+  }
+  trap cleanup EXIT INT TERM
+else
+  echo "[api-server start.sh] WARN: amaru not found — skipping sidecar." >&2
+fi
+# -----------------------------------------------------------------------------
+
 exec node --max-old-space-size=1536 --expose-gc --optimize-for-size --enable-source-maps ./dist/index.mjs
