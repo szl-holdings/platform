@@ -218,6 +218,14 @@ router.use(lazyMatch("/rf-intel", () => import("./rf-intel"), "rf-intel"));
 // by each app's `*-store.ts` and a11oy's <{App}Ops /> pages.
 router.use(lazyMatch("/sentra/ops-core", () => import("./sentra-ops-core"), "sentra-ops-core"));
 router.use(lazyMatch("/amaru/ops-core", () => import("./amaru-ops-core"), "amaru-ops-core"));
+// Round 2 (2026-05-18): five additional vertical ops-core bridges. Mounted on
+// their own narrow prefixes so they cannot shadow the existing per-app routers
+// (counsel.ts, carlota-jo.ts, pulse.ts, lexicon.ts, terra.ts) that sit below.
+router.use(lazyMatch("/counsel/ops-core", () => import("./counsel-ops-core"), "counsel-ops-core"));
+router.use(lazyMatch("/carlota-jo/ops-core", () => import("./carlota-jo-ops-core"), "carlota-jo-ops-core"));
+router.use(lazyMatch("/pulse/ops-core", () => import("./pulse-ops-core"), "pulse-ops-core"));
+router.use(lazyMatch("/lexicon/ops-core", () => import("./lexicon-ops-core"), "lexicon-ops-core"));
+router.use(lazyMatch("/terra/ops-core", () => import("./terra-ops-core"), "terra-ops-core"));
 
 // Sentra cyber resilience cockpit — incidents + alerts CRUD. Public demo
 // surface (in-memory store). Write paths carry CSRF double-submit protection

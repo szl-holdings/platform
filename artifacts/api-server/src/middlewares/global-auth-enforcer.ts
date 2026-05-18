@@ -391,18 +391,11 @@ const PUBLIC_PREFIXES = [
   // Infrastructure status — lightweight public health summary used by the
   // Legatus infrastructure console to show live AquilaScore and threat level.
   "/api/infrastructure/",
-  // Vessels / Sentra / Amaru — Operational Core snapshot bridge.
-  // The `/{app}/ops-core/snapshot` endpoints are the cross-app orchestration
-  // surface consumed by each app's browser `*-store.ts` (polling every 15s)
-  // and by a11oy's <{App}Ops /> pages. Returns aggregate counters + module
-  // mount metadata only — no PII, no row contents. Org-scoped DB counts are
-  // computed only when the caller has an org session; anonymous callers get
-  // `org_scoped: false` and zeros for per-org counters, which is the correct
-  // signal for "no tenant attached" rather than a 401 brick wall. The handler
-  // uses `authMiddleware({ required: false })` for opportunistic hydration.
-  "/api/vessels/ops-core/",
-  "/api/sentra/ops-core/",
-  "/api/amaru/ops-core/",
+  // Ops-core public surface is INTENTIONALLY ABSENT from this prefix list —
+  // PUBLIC_PREFIXES is method-agnostic and would let a future POST under
+  // `/api/{app}/ops-core/` slip the global wall. Ops-core is instead carved
+  // out below in `isOpsCorePublicRead(req)` which gates on GET/HEAD only.
+  // See lines ~870 (the method-scoped block) for the actual carve-out.
   // Agent Mesh telemetry — the three genuinely-public paths (state, index, scan)
   // are listed in PUBLIC_EXACT_PATHS above using exact Set.has() matching.
   // The broad "/api/agent-mesh/" prefix is intentionally absent here to prevent
@@ -613,6 +606,44 @@ export function fullApiPath(req: Request): string {
   if (!base) return path;
   if (path === "/" || path === "") return base;
   return base + path;
+}
+
+/**
+ * Ops-core cross-app orchestration public surface.
+ *
+ * Allowlists GET/HEAD requests to `/api/{app}/ops-core/...` for the eight
+ * Series-A verticals so a11oy's <OperationalStatus /> board (and each app's
+ * own browser store) can poll module-mount metadata without an auth session.
+ *
+ * Method-scoped on purpose: anything other than GET/HEAD under these
+ * prefixes falls through to the 401 wall, even if a future PATCH/POST
+ * handler is mounted on the same router. That property is what
+ * PUBLIC_PREFIXES (which is method-agnostic and uses startsWith) cannot
+ * provide on its own.
+ *
+ * Exact-suffix matching on `/snapshot` and `/healthz` would be even
+ * tighter, but the per-app routers may add additional read-only sub-paths
+ * (e.g. `/snapshot/agents`) and gating those one by one creates the
+ * opposite drift risk. The GET/HEAD gate is the right altitude.
+ */
+const OPS_CORE_PUBLIC_PREFIXES = [
+  "/api/vessels/ops-core/",
+  "/api/sentra/ops-core/",
+  "/api/amaru/ops-core/",
+  "/api/counsel/ops-core/",
+  "/api/carlota-jo/ops-core/",
+  "/api/pulse/ops-core/",
+  "/api/lexicon/ops-core/",
+  "/api/terra/ops-core/",
+] as const;
+
+function isOpsCorePublicRead(req: Request): boolean {
+  if (req.method !== "GET" && req.method !== "HEAD") return false;
+  const path = req.path;
+  for (const prefix of OPS_CORE_PUBLIC_PREFIXES) {
+    if (path.startsWith(prefix)) return true;
+  }
+  return false;
 }
 
 function isValidInternalToken(req: Request): boolean {
@@ -864,6 +895,19 @@ export function globalAuthEnforcer(
   const path = req.path;
 
   if (isAllowlistedPublicPath(path)) {
+    next();
+    return;
+  }
+
+  // Ops-core cross-app orchestration surface. METHOD-SCOPED to GET/HEAD only
+  // so that the eight `/api/{app}/ops-core/` carve-outs cannot be widened by
+  // a future POST/PATCH handler being added under the same prefix (which is
+  // what would happen if these were entries in the method-agnostic
+  // PUBLIC_PREFIXES list). Each handler still re-runs `authMiddleware({
+  // required: false })` + `tenantScope({ required: false })` for opportunistic
+  // org hydration. Mutations under these prefixes fall through to the 401
+  // response below — exactly as a private endpoint would.
+  if (isOpsCorePublicRead(req)) {
     next();
     return;
   }
