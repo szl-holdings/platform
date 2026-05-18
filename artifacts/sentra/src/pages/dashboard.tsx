@@ -15,8 +15,39 @@ import { useCallback, useEffect, useState } from 'react';
 import { sentraTwin as fallbackTwin, type CyberAsset, type Incident, type ControlDrift } from '@/data/sentra-twin';
 import { listCyberTwinAssets, listCyberTwinIncidents, listCyberTwinControlDrifts, getCyberTwinPosture } from '@/lib/sentra-api';
 import { SourceBadge, useApiQuery } from '@/lib/use-api-query';
+import { useSentraCoreLive } from '@/lib/use-sentra-core-live';
+import { DataStateBadge } from '@szl-holdings/shared-ui/data-state-badge';
 import { GuardDogBrainPanel } from '@/components/GuardDogBrainPanel';
 import { IncidentPipelineCard } from '@/components/IncidentPipelineCard';
+
+interface PostureDriftLive {
+  lambda_score: number;
+  added: Array<{ control_id: string }>;
+  removed: Array<{ control_id: string }>;
+  changed: Array<{ control_id: string }>;
+}
+
+const POSTURE_DRIFT_BODY = {
+  baseline: {
+    snapshot_id: 'dashboard-baseline',
+    captured_at: '2026-05-01T00:00:00.000Z',
+    controls: [
+      { id: 'pr-ac-01', name: 'mfa-enforced', severity: 'critical' },
+      { id: 'pr-ds-01', name: 'encryption-at-rest', severity: 'high' },
+      { id: 'de-cm-01', name: 'edr-coverage', severity: 'high' },
+      { id: 'rs-rp-01', name: 'incident-response-plan', severity: 'high' },
+    ],
+  },
+  current: {
+    snapshot_id: 'dashboard-current',
+    captured_at: '2026-05-18T00:00:00.000Z',
+    controls: [
+      { id: 'pr-ac-01', name: 'mfa-enforced', severity: 'critical', state: 'partial' },
+      { id: 'de-cm-01', name: 'edr-coverage', severity: 'high' },
+      { id: 'rs-rp-01', name: 'incident-response-plan', severity: 'high' },
+    ],
+  },
+} as const;
 
 const BASELINE_ENTITIES = [
   {
@@ -331,6 +362,12 @@ export default function Dashboard() {
       .catch(() => {});
   }, []);
 
+  const livePostureDrift = useSentraCoreLive<PostureDriftLive>({
+    endpoint: '/posture-drift',
+    body: POSTURE_DRIFT_BODY,
+  });
+  const isLivePosture = livePostureDrift.source === 'live' && livePostureDrift.data !== null;
+
   return (
     <div className="space-y-6 animate-fade-in">
       <header>
@@ -376,15 +413,34 @@ export default function Dashboard() {
           </div>
         </div>
 
-        <div className="stat-panel p-6">
+        <div className="stat-panel p-6" data-testid="dashboard-posture-drift">
           <div className="flex items-center gap-3 text-[#8a8a8a] mb-2">
             <ShieldCheck className="w-5 h-5" />
-            <span className="text-sm font-medium">Control Drift</span>
+            <span className="text-sm font-medium">Posture Drift</span>
+            <span className="ml-auto">
+              <DataStateBadge
+                state={isLivePosture ? 'live' : livePostureDrift.source === 'offline' ? 'stub' : 'seeded'}
+                pulse={isLivePosture}
+              />
+            </span>
           </div>
-          <div className="text-4xl font-display font-bold">
-            {controlDrifts.filter((d) => d.status === 'drift_detected').length}
-          </div>
-          <div className="text-xs text-[#8a8a8a]/60 mt-2 font-mono">RESPOND / RECOVER FAMILY</div>
+          {isLivePosture && livePostureDrift.data ? (
+            <>
+              <div className="text-4xl font-display font-bold text-emerald-300">
+                Λ {livePostureDrift.data.lambda_score.toFixed(2)}
+              </div>
+              <div className="text-xs text-[#8a8a8a]/60 mt-2 font-mono">
+                {livePostureDrift.data.removed.length} REMOVED · {livePostureDrift.data.changed.length} CHANGED · {livePostureDrift.data.added.length} ADDED
+              </div>
+            </>
+          ) : (
+            <>
+              <div className="text-4xl font-display font-bold">
+                {controlDrifts.filter((d) => d.status === 'drift_detected').length}
+              </div>
+              <div className="text-xs text-[#8a8a8a]/60 mt-2 font-mono">RESPOND / RECOVER FAMILY</div>
+            </>
+          )}
         </div>
 
         <CyberResilienceTrendTile />

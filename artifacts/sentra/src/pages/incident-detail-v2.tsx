@@ -317,14 +317,81 @@ function BlastRadiusPreview({ assetId, actionClass }: { assetId: string; actionC
   );
 }
 
+interface LiveEvidencePack {
+  pack_id: string;
+  pack_hash: string;
+  signer_id: string;
+  publication?: { attempted: boolean; ok: boolean; reason?: string; topic?: string };
+}
+
+async function signEvidencePackViaSentraCore(
+  incidentId: string,
+  items: Array<{ id: string; kind: string; description: string; payload: string }>,
+): Promise<LiveEvidencePack> {
+  const headers: Record<string, string> = { 'Content-Type': 'application/json' };
+  const cookieMatch =
+    typeof document !== 'undefined' ? document.cookie.match(/(?:^|;\s*)csrf_token=([^;]+)/) : null;
+  let token = cookieMatch ? decodeURIComponent(cookieMatch[1]) : null;
+  if (!token) {
+    try {
+      await fetch('/api/csrf-token', { credentials: 'include' });
+      const m =
+        typeof document !== 'undefined' ? document.cookie.match(/(?:^|;\s*)csrf_token=([^;]+)/) : null;
+      token = m ? decodeURIComponent(m[1]) : null;
+    } catch {
+      /* best-effort */
+    }
+  }
+  if (token) headers['X-CSRF-Token'] = token;
+  const res = await fetch('/api/sentra/core/evidence-pack', {
+    method: 'POST',
+    headers,
+    credentials: 'include',
+    body: JSON.stringify({ incident_id: incidentId, items }),
+  });
+  if (!res.ok) throw new Error(`evidence-pack HTTP ${res.status}`);
+  const json = (await res.json()) as { data?: LiveEvidencePack } & LiveEvidencePack;
+  return (json.data ?? json) as LiveEvidencePack;
+}
+
 function EvidencePane({ incident }: { incident: Incident }) {
   const store = useSentraStore();
   const [fileType, setFileType] = useState('log_excerpt');
   const [fileName, setFileName] = useState('');
   const [source, setSource] = useState('');
   const [collected, setCollected] = useState(false);
+  const [signing, setSigning] = useState(false);
+  const [livePack, setLivePack] = useState<LiveEvidencePack | null>(null);
+  const [packError, setPackError] = useState<string | null>(null);
 
   const evItems = store.evidence.filter(e => e.incident_id === incident.id);
+
+  async function handleSignPack() {
+    if (evItems.length === 0) {
+      setPackError('Collect at least one evidence item before signing a pack.');
+      setTimeout(() => setPackError(null), 4000);
+      return;
+    }
+    setSigning(true);
+    setPackError(null);
+    try {
+      const pack = await signEvidencePackViaSentraCore(
+        incident.id,
+        evItems.map((e) => ({
+          id: e.id,
+          kind: e.type,
+          description: e.file_name,
+          payload: e.sha256 || e.id,
+        })),
+      );
+      setLivePack(pack);
+    } catch (err) {
+      setPackError(`Sidecar unreachable: ${err instanceof Error ? err.message : String(err)}`);
+      setTimeout(() => setPackError(null), 6000);
+    } finally {
+      setSigning(false);
+    }
+  }
 
   function handleCollect() {
     if (!fileName || !source) return;
@@ -362,15 +429,66 @@ function EvidencePane({ incident }: { incident: Incident }) {
           <input type="text" value={fileName} onChange={e => setFileName(e.target.value)} placeholder="File name…"
             className="bg-slate-900 border border-slate-800 rounded-lg px-3 py-2 text-xs text-slate-300 placeholder:text-slate-600 outline-none focus:border-[#c9b787]/40" />
         </div>
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-3 flex-wrap">
           <button onClick={handleCollect} disabled={!fileName || !source}
             className="flex items-center gap-1.5 px-4 py-2 rounded text-[10px] font-mono font-bold border transition-all disabled:opacity-40"
             style={{ borderColor: '#c9b787', color: '#c9b787', background: 'rgba(201,183,135,0.05)' }}>
             <FolderLock className="w-3.5 h-3.5" /> Collect & Hash
           </button>
+          <button
+            data-testid="sign-evidence-pack"
+            onClick={() => { void handleSignPack(); }}
+            disabled={signing || evItems.length === 0}
+            className="flex items-center gap-1.5 px-4 py-2 rounded text-[10px] font-mono font-bold border transition-all disabled:opacity-40"
+            style={{ borderColor: '#60a5fa', color: '#60a5fa', background: 'rgba(96,165,250,0.05)' }}
+          >
+            <Download className="w-3.5 h-3.5" />
+            {signing ? 'Signing…' : livePack ? 'Re-sign Pack via sentra-core' : 'Sign Evidence Pack via sentra-core'}
+          </button>
           {collected && <span className="text-[10px] font-mono text-green-400">✓ Evidence collected and SHA-256 hashed</span>}
+          {packError && <span className="text-[10px] font-mono text-red-400">{packError}</span>}
         </div>
       </div>
+
+      {livePack && (
+        <div
+          data-testid="live-evidence-pack-link"
+          className="rounded-lg border p-4 space-y-2"
+          style={{ background: 'rgba(96,165,250,0.04)', borderColor: 'rgba(96,165,250,0.25)' }}
+        >
+          <div className="flex items-center justify-between gap-3 flex-wrap">
+            <div>
+              <div className="text-[10px] font-mono uppercase tracking-widest text-[#60a5fa]">
+                Signed evidence pack · sentra-core evidence_pack.build
+              </div>
+              <div className="mt-1 flex items-center gap-3 flex-wrap font-mono text-xs">
+                <span className="text-slate-100">
+                  pack <span className="text-[#60a5fa]">{livePack.pack_id.slice(0, 16)}…</span>
+                </span>
+                <span className="text-slate-500">signer <span className="text-slate-300">{livePack.signer_id}</span></span>
+              </div>
+              <div className="mt-1 text-[10px] font-mono text-slate-500 break-all max-w-2xl">
+                hash {livePack.pack_hash}
+              </div>
+              {livePack.publication && (
+                <div className="text-[10px] font-mono mt-1 text-slate-500">
+                  {livePack.publication.attempted && livePack.publication.ok
+                    ? `published to ${livePack.publication.topic ?? 'sentra.evidence'}`
+                    : livePack.publication.attempted
+                      ? `publish failed (${livePack.publication.reason ?? 'unknown'})`
+                      : 'publish skipped (no yawar_url configured)'}
+                </div>
+              )}
+            </div>
+            <Link
+              href="/evidence-vault"
+              className="text-[10px] font-mono text-[#60a5fa] hover:underline whitespace-nowrap"
+            >
+              Open in Evidence Vault →
+            </Link>
+          </div>
+        </div>
+      )}
 
       <div className="space-y-2">
         {evItems.length === 0 ? (
