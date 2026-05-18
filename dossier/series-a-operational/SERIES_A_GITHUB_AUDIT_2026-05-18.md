@@ -166,3 +166,8 @@ If yes on any, I'll prepare the exact diff and show it to you
 
 I do not need any additional access — admin+push on all 17 repos is
 already live in this environment.
+
+<!-- AUTOGEN:test-package-counts START -->
+<!-- Regenerate with: node scripts/count-tests-and-packages.mjs --write -->
+**Platform monorepo:** 8,682 test declarations across 640 test files in 206 workspace packages. _(measured 2026-05-18)_
+<!-- AUTOGEN:test-package-counts END -->

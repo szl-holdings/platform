@@ -63,3 +63,8 @@ See `GH_PUSHES_2026-05-18.md` for PR URLs, diffs, and rollback steps.
 - PR-2 on `szl-holdings/lutar-lean` — live-sorry-count CI badge
 - PR-3 on `szl-holdings/platform` — `SERIES_A.md` snapshot-rendered
   from `/api/ecosystem/snapshot`
+
+<!-- AUTOGEN:test-package-counts START -->
+<!-- Regenerate with: node scripts/count-tests-and-packages.mjs --write -->
+**Platform monorepo:** 8,682 test declarations across 640 test files in 206 workspace packages. _(measured 2026-05-18)_
+<!-- AUTOGEN:test-package-counts END -->

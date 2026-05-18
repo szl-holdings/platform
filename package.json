@@ -13,6 +13,8 @@
     "check:env-coverage:strict": "tsx scripts/check-env-coverage.ts --strict",
     "check:nexus-scope": "tsx scripts/check-nexus-scope.ts",
     "check:risk-formula-drift": "node scripts/check-risk-formula-drift.mjs",
+    "check:test-package-counts": "node scripts/count-tests-and-packages.mjs --check",
+    "write:test-package-counts": "node scripts/count-tests-and-packages.mjs --write",
     "check:szl-doctrine-drift": "pnpm --filter @szl-holdings/szl-doctrine run check:drift",
     "check:a11oy-command-redirects": "pnpm --filter @workspace/a11oy run check:command-redirects",
     "lint:copy": "bash scripts/lint-copy.sh",

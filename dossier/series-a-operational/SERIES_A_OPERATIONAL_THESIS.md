@@ -46,7 +46,7 @@ The thesis says you have an **anatomy** (HEART/HANDS/FEET/WIRES/BRAIN/IMMUNE SYS
 | `terra` | Real estate intel | Docs‑only. **No `artifacts/terra/` in private monorepo** — gap. |
 | `counsel` | Legal matter command | Docs‑only. `artifacts/counsel/` exists privately but not orchestrated through a11oy. |
 | `carlota-jo` | Concierge advisory | Docs‑only. `artifacts/carlota-jo/` exists privately, also not orchestrated. |
-| `platform` | The private monorepo we're in | 637 MB, 1,220 tests, 76 packages |
+| `platform` | The private monorepo we're in | 637 MB; see auto-generated test/package counts at end of file |
 
 ### 1.4 The drift
 Every product repo got the same three commits this week: `name-suffix "Jr."`, `doctrine drift sweep v12/v13/v6.3.0`, `thesis v13 DOI badge`. **Public commits are doctrine paperwork, not product code.** That's not a sin — but a Series A diligence team will notice the daylight between badge density and shipping cadence.
@@ -214,10 +214,15 @@ The thesis v14 already cites the right frontier (LangGraph, Mastra, Microsoft Ma
 
 ## 8. Diligence one‑liner you can put in the deck
 
-> SZL Holdings is a 14‑version Lean‑mechanized thesis, an Apache‑2.0 runtime with 218/218 passing tests + ClusterFuzzLite, a private platform of 848 DB tables and 1,220 tests across 76 packages, and an anatomy — HEART · HANDS · FEET · WIRES · BRAIN · IMMUNE SYSTEM — proven on regulated maritime workloads today, with cyber, legal, real‑estate, and concierge verticals following the same orchestration spine.
+> SZL Holdings is a 14‑version Lean‑mechanized thesis, an Apache‑2.0 runtime with 218/218 passing tests + ClusterFuzzLite, a private platform of 848 DB tables (current monorepo test/package counts are auto-generated at the end of this file — never hand-edit), and an anatomy — HEART · HANDS · FEET · WIRES · BRAIN · IMMUNE SYSTEM — proven on regulated maritime workloads today, with cyber, legal, real‑estate, and concierge verticals following the same orchestration spine.
 
 That sentence is true today **for vessels and sentra only.** Ship Move 1, Move 2, and Move 3 and it's true for the whole company.
 
 ---
 
 *Compiled 2026‑05‑18 against `szl-holdings/*` HEAD and `platform` HEAD. Re‑verify counts via `SOURCE_OF_TRUTH.md` commands before quoting externally.*
+
+<!-- AUTOGEN:test-package-counts START -->
+<!-- Regenerate with: node scripts/count-tests-and-packages.mjs --write -->
+**Platform monorepo:** 8,682 test declarations across 640 test files in 206 workspace packages. _(measured 2026-05-18)_
+<!-- AUTOGEN:test-package-counts END -->
