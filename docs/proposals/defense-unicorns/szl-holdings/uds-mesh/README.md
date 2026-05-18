@@ -175,14 +175,48 @@ uds-cli bundle remove uds-bundle-szl-mesh-amd64-0.1.0.tar.zst --confirm
 kind delete cluster --name szl-mesh
 ```
 
+## Off-platform validation (`preflight.sh`)
+
+Steps 2–4 above are bundled into a single one-shot script,
+[`preflight.sh`](./preflight.sh), so the off-platform validation is
+push-button on a workstation that has `zarf`, `uds`, `kind`, and
+`kubectl` installed:
+
+```sh
+cd docs/proposals/defense-unicorns/szl-holdings/uds-mesh
+./preflight.sh                # full: static checks + build + kind deploy + Ready wait + teardown
+./preflight.sh --static       # static-only (safe inside Replit; what CI runs)
+./preflight.sh --keep         # keep the kind cluster + artifacts for poking
+```
+
+The script:
+
+1. Parses every YAML (bundle + 3 zarf.yaml + all manifests).
+2. Confirms every file referenced from a `zarf.yaml` component
+   (`manifests:` and `files:`) exists on disk.
+3. Confirms the bundle's package names match the on-disk
+   `metadata.name` of each Zarf package.
+4. If `--static` is not passed, builds the three Zarf packages with
+   `zarf package create`, builds the bundle with `uds bundle create`
+   (rewritten to use sibling `path:` entries so no GHCR round-trip is
+   needed), spins up a throwaway `kind` cluster, deploys the bundle,
+   and waits for `kubectl rollout status` on each namespace.
+5. Tears down the cluster + temp artifacts on exit (unless `--keep`).
+
+The static portion (steps 1–3) is what we run inside Replit; it passes
+for the current bundle. The live portion (step 4) requires the four
+CLIs and a workstation Docker daemon, so it is gated on tool presence
+and intended to be run before the Warhacker demo.
+
 ## Status notes
 
-- Steps 0–4 are the contract for "Done looks like" in Plane 1. They
-  require `uds-cli`, `zarf`, and `kind` on the operator's machine —
-  none of which run inside the Replit container. Validation against a
-  real kind cluster is performed off-platform on a workstation with
-  those tools installed; the manifests here are static Kubernetes YAML
-  with no Replit-specific assumptions.
+- Steps 0–4 in the walk-through are the contract for "Done looks like"
+  in Plane 1. They require `uds-cli`, `zarf`, and `kind` on the
+  operator's machine — none of which run inside the Replit container.
+  Validation against a real kind cluster is performed off-platform on
+  a workstation with those tools installed; the manifests here are
+  static Kubernetes YAML with no Replit-specific assumptions. Use
+  `preflight.sh` (above) to drive that validation in one command.
 - Steps 5–8 are the §06 Warhacker demo overlay; they assume the same
   binaries used in the existing local dev workflow
   (`tools/a11oy-code/`, etc.).
