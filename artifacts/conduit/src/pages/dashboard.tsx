@@ -34,6 +34,7 @@ import {
 import { Badge, Button } from '@/components/ui';
 import { INNOVATION_CAPABILITIES } from '@/data/innovation/competitive';
 import { useStats, useConnections, useSyncs } from '@/lib/api-hooks';
+import { AmaruHealthPanel } from '@/components/AmaruLive';
 
 export default function Dashboard() {
   const liveStats = useStats();
@@ -157,6 +158,8 @@ export default function Dashboard() {
           </div>
         </div>
       </div>
+
+      <AmaruHealthPanel />
 
       {/* Live KPI tiles — wired to /api/conduit/* */}
       {liveStats.isError || liveConnections.isError || liveSyncs.isError ? (

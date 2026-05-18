@@ -49,6 +49,11 @@ const APPS = [
 interface AppCardEvidence {
   modules_total: number | null;
   modules_healthy: number | null;
+  modules_unprobed: number | null;
+  modules_degraded: number | null;
+  modules_probed: number | null;
+  degraded_module_ids: string[];
+  unprobed_module_ids: string[];
   formula_count: number | null;
   doi_bindings: number | null;
 }
@@ -98,12 +103,40 @@ function classifyApp(slug: string, title: string, anatomy: string, fetched: Awai
     };
   }
   const b = fetched.body as Record<string, unknown>;
-  const modules = b.b3_modules as { total?: number; healthy?: number } | undefined;
+  const modules = b.b3_modules as {
+    total?: number; healthy?: number; unprobed?: number; degraded?: number; probed?: number;
+    items?: Array<{ id?: string; status?: string; ok?: boolean; mounted?: boolean }>;
+  } | undefined;
   const formula = (b.b1_formula_pillars as { items?: unknown[] } | undefined)?.items?.length ?? null;
   const dois = (b.b5_doi_bindings as unknown[] | undefined)?.length ?? null;
+  // Per-item walk lets us list the actual offending module ids on the board
+  // (used by a11oy /organism to show which module is failing without a
+  // second round-trip). Tolerant of both Round-3 legacy items (no `status`,
+  // only `ok`/`mounted`) and Round-5 enriched items (`status` tri-state).
+  const items = modules?.items ?? [];
+  // Architect Round-5 fix: legacy (Round-3) shape has no `status` field —
+  // a module is degraded iff `mounted === false` OR `ok === false`. The
+  // previous predicate excluded `mounted:false` from the degraded set,
+  // which inverted the polarity and hid real gaps.
+  const degraded_module_ids = items
+    .filter((m) =>
+      m.status === 'degraded' ||
+      (m.status === undefined && (m.mounted === false || m.ok === false))
+    )
+    .map((m) => m.id ?? '?')
+    .filter((id) => id !== '?');
+  const unprobed_module_ids = items
+    .filter((m) => m.status === 'unprobed')
+    .map((m) => m.id ?? '?')
+    .filter((id) => id !== '?');
   const evidence: AppCardEvidence = {
     modules_total: modules?.total ?? null,
     modules_healthy: modules?.healthy ?? null,
+    modules_unprobed: modules?.unprobed ?? (unprobed_module_ids.length || null),
+    modules_degraded: modules?.degraded ?? (degraded_module_ids.length || null),
+    modules_probed: modules?.probed ?? null,
+    degraded_module_ids,
+    unprobed_module_ids,
     formula_count: typeof formula === 'number' ? formula : null,
     doi_bindings: typeof dois === 'number' ? dois : null,
   };

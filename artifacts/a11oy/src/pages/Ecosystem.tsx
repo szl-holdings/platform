@@ -29,7 +29,12 @@ interface AppCard {
   slug: string; title: string; anatomy: string;
   verdict: AppVerdict; label: string; detail: string;
   generated_at: string | null; ttl_seconds: number | null; http_code: number;
-  evidence: { modules_total: number | null; modules_healthy: number | null; formula_count: number | null; doi_bindings: number | null } | null;
+  evidence: {
+    modules_total: number | null; modules_healthy: number | null;
+    modules_unprobed: number | null; modules_degraded: number | null; modules_probed: number | null;
+    degraded_module_ids: string[]; unprobed_module_ids: string[];
+    formula_count: number | null; doi_bindings: number | null;
+  } | null;
   _error?: string;
 }
 interface OrgRepoLite { slug: string; verdict: RepoVerdict; language: string | null; size_kb: number | null; }
@@ -150,12 +155,35 @@ export default function Ecosystem() {
                 }}>{a.verdict} · {a.label}</div>
                 <div style={{ fontSize: 12, color: T.dim, lineHeight: 1.5, marginBottom: 8 }}>{a.detail}</div>
                 {a.evidence && (
-                  <div style={{ fontSize: 11, color: T.dim, display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 4 }}>
-                    <span>modules: <strong style={{ color: T.text }}>{a.evidence.modules_healthy}/{a.evidence.modules_total}</strong></span>
-                    <span>formula: <strong style={{ color: T.text }}>{a.evidence.formula_count ?? '—'}</strong></span>
-                    <span>DOIs: <strong style={{ color: T.text }}>{a.evidence.doi_bindings ?? '—'}</strong></span>
-                    <span>age: <strong style={{ color: T.text }}>{relAge(a.generated_at)}</strong></span>
-                  </div>
+                  <>
+                    <div style={{ fontSize: 11, color: T.dim, display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 4 }}>
+                      <span>modules: <strong style={{ color: T.text }}>{a.evidence.modules_healthy}/{a.evidence.modules_total}</strong></span>
+                      <span>formula: <strong style={{ color: T.text }}>{a.evidence.formula_count ?? '—'}</strong></span>
+                      <span>DOIs: <strong style={{ color: T.text }}>{a.evidence.doi_bindings ?? '—'}</strong></span>
+                      <span>age: <strong style={{ color: T.text }}>{relAge(a.generated_at)}</strong></span>
+                    </div>
+                    {/* Round 5: per-module tri-state breakdown — full visibility */}
+                    <div style={{ marginTop: 8, paddingTop: 8, borderTop: `1px solid ${T.border}`, fontSize: 10, color: T.dim, display: 'flex', flexWrap: 'wrap', gap: 6 }}>
+                      <span style={{ color: T.green }}>● healthy {Math.max(0, (a.evidence.modules_healthy ?? 0) - (a.evidence.modules_unprobed ?? 0))}</span>
+                      {(a.evidence.modules_unprobed ?? 0) > 0 && (
+                        <span style={{ color: T.amber }}>● unprobed {a.evidence.modules_unprobed}</span>
+                      )}
+                      {(a.evidence.modules_degraded ?? 0) > 0 && (
+                        <span style={{ color: T.red }}>● degraded {a.evidence.modules_degraded}</span>
+                      )}
+                      <span>(probed {a.evidence.modules_probed ?? '—'})</span>
+                    </div>
+                    {a.evidence.degraded_module_ids.length > 0 && (
+                      <div style={{ marginTop: 4, fontSize: 10, color: T.red, lineHeight: 1.4 }}>
+                        degraded: <code style={{ color: T.red }}>{a.evidence.degraded_module_ids.join(', ')}</code>
+                      </div>
+                    )}
+                    {a.evidence.unprobed_module_ids.length > 0 && (
+                      <div style={{ marginTop: 2, fontSize: 10, color: T.amber, lineHeight: 1.4 }}>
+                        unprobed (mounted, no HTTP surface): <code style={{ color: T.amber }}>{a.evidence.unprobed_module_ids.join(', ')}</code>
+                      </div>
+                    )}
+                  </>
                 )}
               </div>
             ))}

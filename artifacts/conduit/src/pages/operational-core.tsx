@@ -18,6 +18,7 @@ import {
   Infinity as InfinityIcon,
   ExternalLink,
 } from 'lucide-react';
+import { AmaruTripwiresPanel } from '@/components/AmaruLive';
 
 /**
  * Conduit — Operational Core.
@@ -293,6 +294,9 @@ export default function ConduitOperationalCore() {
             )}
           </CardContent>
         </Card>
+
+        {/* B2.5 — HUKLLA Tripwires (live) */}
+        <AmaruTripwiresPanel />
 
         {/* B3 — Six inherited mechanisms */}
         <Card className="bg-[#0e0e0e] border-white/5">

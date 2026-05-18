@@ -1,6 +1,7 @@
 import { Router } from 'express';
 import { authMiddleware } from '../middlewares/auth';
 import { tenantScope } from '../middlewares/tenant-scope';
+import { classifyOpsCoreModules } from './_ops-core-probe';
 
 /**
  * Terra — Operational Core snapshot.
@@ -45,17 +46,17 @@ const DOI_BINDINGS = [
 ];
 
 const MODULES = [
-  { id: 'terra-broker',           name: 'Broker Feed',          description: 'Multi-broker listing ingest + normalization',         probe_path: '/api/terra/broker',           mounted: true, ok: true  },
-  { id: 'terra-cap-rate',         name: 'Cap Rate Engine',      description: 'NOI / market-comp cap rate estimation',               probe_path: '/api/terra/cap-rate',         mounted: true, ok: true  },
-  { id: 'terra-cognitive',        name: 'Cognitive Layer',      description: 'Anomaly + opportunity surfacing across portfolio',    probe_path: '/api/terra/cognitive',        mounted: true, ok: true  },
-  { id: 'terra-digital-twin',     name: 'Digital Twin',         description: 'Per-asset digital twin with sensor + record state',   probe_path: '/api/terra/digital-twin',     mounted: true, ok: true  },
-  { id: 'terra-distress',         name: 'Distress Tracker',     description: 'Foreclosure, lien, tax-sale, bankruptcy signals',     probe_path: '/api/terra/distress',         mounted: true, ok: true  },
-  { id: 'terra-live',             name: 'Live Market',          description: 'Real-time listing + transaction stream',              probe_path: '/api/terra/live',             mounted: true, ok: true  },
-  { id: 'terra-modules',          name: 'Module Registry',      description: 'Cross-module mount + health registry',                probe_path: '/api/terra/modules',          mounted: true, ok: true  },
-  { id: 'terra-portfolio-intel',  name: 'Portfolio Intel',      description: 'Cross-asset risk + concentration analytics',          probe_path: '/api/terra/portfolio-intel',  mounted: true, ok: true  },
-  { id: 'terra-property-intel',   name: 'Property Intel',       description: 'Per-asset enrichment (zoning, hazards, comps)',       probe_path: '/api/terra/property-intel',   mounted: true, ok: true  },
-  { id: 'terra-sourcing',         name: 'Deal Sourcing',        description: 'Lead generation + outreach for off-market deals',     probe_path: '/api/terra/sourcing',         mounted: true, ok: true  },
-  { id: 'terra-why-this-property', name: 'Why-This-Property',   description: 'Explanation engine — composite-score provenance',     probe_path: '/api/terra/why-this-property', mounted: true, ok: true  },
+  { id: 'terra-broker',           name: 'Broker Feed',          description: 'Multi-broker listing ingest + normalization',         probe_path: '/api/terra/broker',           mounted: true, ok: true, auth_wall_ok: true  },
+  { id: 'terra-cap-rate',         name: 'Cap Rate Engine',      description: 'NOI / market-comp cap rate estimation',               probe_path: '/api/terra/cap-rate',         mounted: true, ok: true, auth_wall_ok: true  },
+  { id: 'terra-cognitive',        name: 'Cognitive Layer',      description: 'Anomaly + opportunity surfacing across portfolio',    probe_path: '/api/terra/cognitive',        mounted: true, ok: true, auth_wall_ok: true  },
+  { id: 'terra-digital-twin',     name: 'Digital Twin',         description: 'Per-asset digital twin with sensor + record state',   probe_path: '/api/terra/digital-twin',     mounted: true, ok: true, auth_wall_ok: true  },
+  { id: 'terra-distress',         name: 'Distress Tracker',     description: 'Foreclosure, lien, tax-sale, bankruptcy signals',     probe_path: '/api/terra/distress',         mounted: true, ok: true, auth_wall_ok: true  },
+  { id: 'terra-live',             name: 'Live Market',          description: 'Real-time listing + transaction stream',              probe_path: '/api/terra/live',             mounted: true, ok: true, auth_wall_ok: true  },
+  { id: 'terra-modules',          name: 'Module Registry',      description: 'Cross-module mount + health registry',                probe_path: '/api/terra/modules',          mounted: true, ok: true, auth_wall_ok: true  },
+  { id: 'terra-portfolio-intel',  name: 'Portfolio Intel',      description: 'Cross-asset risk + concentration analytics',          probe_path: '/api/terra/portfolio-intel',  mounted: true, ok: true, auth_wall_ok: true  },
+  { id: 'terra-property-intel',   name: 'Property Intel',       description: 'Per-asset enrichment (zoning, hazards, comps)',       probe_path: '/api/terra/property-intel',   mounted: true, ok: true, auth_wall_ok: true  },
+  { id: 'terra-sourcing',         name: 'Deal Sourcing',        description: 'Lead generation + outreach for off-market deals',     probe_path: '/api/terra/sourcing',         mounted: true, ok: true, auth_wall_ok: true  },
+  { id: 'terra-why-this-property', name: 'Why-This-Property',   description: 'Explanation engine — composite-score provenance',     probe_path: '/api/terra/why-this-property', mounted: true, ok: true, auth_wall_ok: true  },
   { id: 'terra-web-app',          name: 'Web App',              description: 'artifacts/terra/ — not yet scaffolded (gap)',         probe_path: null,                           mounted: false, ok: false },
 ] as const;
 
@@ -71,7 +72,7 @@ router.get('/terra/ops-core/snapshot', async (req, res) => {
   }
 
 
-  const modules = MODULES.map((m) => ({ ...m }));
+  const modulesBlock = await classifyOpsCoreModules(MODULES);
   const snap = {
     generated_at: new Date().toISOString(),
     ttl_seconds: SNAPSHOT_TTL_MS / 1000,
@@ -98,12 +99,7 @@ router.get('/terra/ops-core/snapshot', async (req, res) => {
       note: 'Org-scoped terra counters (assets tracked, distress flags, sourced deals) will surface here when wired through this endpoint. Not yet wired through this snapshot endpoint (anonymous-safe, cache-shared).',
     },
 
-    b3_modules: {
-      total: modules.length,
-      healthy: modules.filter((m) => m.ok).length,
-      probed: modules.filter((m) => m.probe_path !== null).length,
-      items: modules,
-    },
+    b3_modules: modulesBlock,
 
     b4_mechanisms: MECHANISMS,
     b5_doi_bindings: DOI_BINDINGS.map((d) => ({ ...d, url: `https://doi.org/10.5281/zenodo.${d.zenodo_id}` })),

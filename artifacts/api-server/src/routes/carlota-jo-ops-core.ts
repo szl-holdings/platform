@@ -1,6 +1,7 @@
 import { Router } from 'express';
 import { authMiddleware } from '../middlewares/auth';
 import { tenantScope } from '../middlewares/tenant-scope';
+import { classifyOpsCoreModules } from './_ops-core-probe';
 
 /**
  * Carlota-Jo — Operational Core snapshot.
@@ -41,10 +42,10 @@ const DOI_BINDINGS = [
 ];
 
 const MODULES = [
-  { id: 'carlota-drip',          name: 'Outreach Drip',     description: 'Sequenced outbound drip + reply detection',         probe_path: '/api/carlota-drip',          mounted: true, ok: true  },
-  { id: 'carlota-jo-invoice',    name: 'Invoice Email',     description: 'Invoice generation + client delivery',              probe_path: '/api/carlota-jo-invoice-email', mounted: true, ok: true  },
-  { id: 'carlota-metrics',       name: 'Client Metrics',    description: 'Per-client engagement + LTV dashboards',            probe_path: '/api/carlota-metrics',       mounted: true, ok: true  },
-  { id: 'carlota-time-tracking', name: 'Time Tracking',     description: 'Billable-hour ledger + matter attribution',         probe_path: '/api/carlota-time-tracking', mounted: true, ok: true  },
+  { id: 'carlota-drip',          name: 'Outreach Drip',     description: 'Sequenced outbound drip + reply detection',         probe_path: '/api/carlota-drip',          mounted: true, ok: true, auth_wall_ok: true  },
+  { id: 'carlota-jo-invoice',    name: 'Invoice Email',     description: 'Invoice generation + client delivery',              probe_path: '/api/carlota-jo-invoice-email', mounted: true, ok: true, auth_wall_ok: true  },
+  { id: 'carlota-metrics',       name: 'Client Metrics',    description: 'Per-client engagement + LTV dashboards',            probe_path: '/api/carlota-metrics',       mounted: true, ok: true, auth_wall_ok: true  },
+  { id: 'carlota-time-tracking', name: 'Time Tracking',     description: 'Billable-hour ledger + matter attribution',         probe_path: '/api/carlota-time-tracking', mounted: true, ok: true, auth_wall_ok: true  },
   { id: 'carlota-voice-agent',   name: 'Voice Agent',       description: 'Real-time concierge voice interface',                probe_path: null,                          mounted: true, ok: false },
 ] as const;
 
@@ -60,7 +61,7 @@ router.get('/carlota-jo/ops-core/snapshot', async (req, res) => {
   }
 
 
-  const modules = MODULES.map((m) => ({ ...m }));
+  const modulesBlock = await classifyOpsCoreModules(MODULES);
   const snap = {
     generated_at: new Date().toISOString(),
     ttl_seconds: SNAPSHOT_TTL_MS / 1000,
@@ -83,12 +84,7 @@ router.get('/carlota-jo/ops-core/snapshot', async (req, res) => {
       note: 'Org-scoped carlota-jo counters (drips active, invoices sent, hours billed) will surface here when wired through this endpoint. Not yet wired through this snapshot endpoint (anonymous-safe, cache-shared).',
     },
 
-    b3_modules: {
-      total: modules.length,
-      healthy: modules.filter((m) => m.ok).length,
-      probed: modules.filter((m) => m.probe_path !== null).length,
-      items: modules,
-    },
+    b3_modules: modulesBlock,
 
     b4_mechanisms: MECHANISMS,
     b5_doi_bindings: DOI_BINDINGS.map((d) => ({ ...d, url: `https://doi.org/10.5281/zenodo.${d.zenodo_id}` })),

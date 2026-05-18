@@ -1,4 +1,5 @@
 import { Badge } from '@/components/ui';
+import { AmaruWiringPanel } from '@/components/AmaruLive';
 import {
   Cpu,
   Layers,
@@ -75,6 +76,8 @@ export default function ComputePage() {
           Inspired by Lambda AI's flexible orchestration architecture.
         </p>
       </div>
+
+      <AmaruWiringPanel />
 
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
         {ORCHESTRATORS.map(o => (

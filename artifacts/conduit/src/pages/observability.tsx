@@ -3,6 +3,7 @@ import { RELAY_RUN_EVENTS } from '@/data/fabric';
 import { rankSyncRisk, generateRecommendedAction } from '@/lib/agentic';
 import { FabricHeader, FabricStat, FabricToolbar, FabricDrawer, SeverityChip, Sparkline } from '@/components/fabric/primitives';
 import { Input, Select, Badge } from '@/components/ui';
+import { AmaruEventsPanel } from '@/components/AmaruLive';
 
 export default function ObservabilityPage() {
   const [q, setQ] = useState('');
@@ -53,6 +54,7 @@ export default function ObservabilityPage() {
           </div>
         }
       />
+      <AmaruEventsPanel limit={30} />
       <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-6">
         <FabricStat label="Events captured" value={total} tone="gold" />
         <FabricStat label="Completed" value={completed} tone="good" />

@@ -1,6 +1,7 @@
 import { Router } from 'express';
 import { authMiddleware } from '../middlewares/auth';
 import { tenantScope } from '../middlewares/tenant-scope';
+import { classifyOpsCoreModules } from './_ops-core-probe';
 
 /**
  * Amaru — Operational Core snapshot.
@@ -75,9 +76,9 @@ router.get('/amaru/ops-core/snapshot', async (req, res) => {
 
   const orgFilter = Array.isArray((req.user as { orgs?: unknown })?.orgs) && ((req.user as { orgs: unknown[] }).orgs.length > 0);
 
-  const modules = MODULES.map((m) => ({ ...m }));
-  const fingersWired = modules.filter((m) => m.id.startsWith('maki-') && m.ok).length;
-  const fingersTotal = modules.filter((m) => m.id.startsWith('maki-')).length;
+  const modulesBlock = await classifyOpsCoreModules(MODULES);
+  const fingersWired = modulesBlock.items.filter((m) => m.id.startsWith('maki-') && m.status !== 'degraded').length;
+  const fingersTotal = modulesBlock.items.filter((m) => m.id.startsWith('maki-')).length;
 
   const snap = {
     generated_at: new Date().toISOString(),
@@ -102,12 +103,7 @@ router.get('/amaru/ops-core/snapshot', async (req, res) => {
       note: orgFilter ? 'Org-scoped amaru counters (connections, syncs, rows ingested) will land when the conduit tables are wired through this surface.' : 'Anonymous caller — no per-org counters.',
     },
 
-    b3_modules: {
-      total: modules.length,
-      healthy: modules.filter((m) => m.ok).length,
-      probed: modules.filter((m) => m.probe_path !== null).length,
-      items: modules,
-    },
+    b3_modules: modulesBlock,
 
     b4_mechanisms: MECHANISMS,
     b5_doi_bindings: DOI_BINDINGS.map((d) => ({ ...d, url: `https://doi.org/10.5281/zenodo.${d.zenodo_id}` })),

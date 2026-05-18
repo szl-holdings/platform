@@ -58,4 +58,27 @@ router.get('/amaru/healthz', (_req, res) => {
   void proxyGet('/healthz', res);
 });
 
+// Read-only Amaru kernel surfaces — exposed for Conduit tabs to render real
+// upstream evidence (Round 5 / T003). All are GET-only; the upstream FastAPI
+// organ (services/amaru) is read-only by design.
+//
+// Note: /events on the sidecar is a Server-Sent Events stream (open-ended),
+// not a JSON snapshot, so it is intentionally NOT proxied — proxying it would
+// block the express response until the stream closes. Tabs that need the
+// event-counter view consume /state (bus publishes + receipts counters) and
+// /receipts (the materialised chain) instead.
+
+router.get('/amaru/receipts', (req, res) => {
+  const limit = typeof req.query.limit === 'string' ? `?limit=${encodeURIComponent(req.query.limit)}` : '';
+  void proxyGet(`/receipts${limit}`, res);
+});
+
+router.get('/amaru/tripwires', (_req, res) => {
+  void proxyGet('/tripwires', res);
+});
+
+router.get('/amaru/scheduler/wiring', (_req, res) => {
+  void proxyGet('/scheduler/wiring', res);
+});
+
 export default router;

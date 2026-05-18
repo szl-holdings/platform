@@ -1,6 +1,7 @@
 import { Router } from 'express';
 import { authMiddleware } from '../middlewares/auth';
 import { tenantScope } from '../middlewares/tenant-scope';
+import { classifyOpsCoreModules } from './_ops-core-probe';
 
 /**
  * Pulse — Operational Core snapshot.
@@ -42,9 +43,9 @@ const DOI_BINDINGS = [
 ];
 
 const MODULES = [
-  { id: 'pulse-evals',       name: 'Eval Runner',       description: 'Pluggable eval pipelines (golden, adversarial, regression)', probe_path: '/api/pulse/evals',       mounted: true, ok: true  },
-  { id: 'pulse-eval-trends', name: 'Eval Trends',       description: 'Per-eval timeseries + alerting on regressions',              probe_path: '/api/pulse/eval-trends', mounted: true, ok: true  },
-  { id: 'pulse-org',         name: 'Org Health',        description: 'Per-org rollup of eval health + agent performance',          probe_path: '/api/pulse/org',         mounted: true, ok: true  },
+  { id: 'pulse-evals',       name: 'Eval Runner',       description: 'Pluggable eval pipelines (golden, adversarial, regression)', probe_path: '/api/pulse/evals',       mounted: true, ok: true, auth_wall_ok: true  },
+  { id: 'pulse-eval-trends', name: 'Eval Trends',       description: 'Per-eval timeseries + alerting on regressions',              probe_path: '/api/pulse/eval-trends', mounted: true, ok: true, auth_wall_ok: true  },
+  { id: 'pulse-org',         name: 'Org Health',        description: 'Per-org rollup of eval health + agent performance',          probe_path: '/api/pulse/org',         mounted: true, ok: true, auth_wall_ok: true  },
   { id: 'pulse-leaderboard', name: 'Agent Leaderboard', description: 'Cross-agent benchmark board with receipt provenance',        probe_path: null,                      mounted: true, ok: false },
 ] as const;
 
@@ -60,7 +61,7 @@ router.get('/pulse/ops-core/snapshot', async (req, res) => {
   }
 
 
-  const modules = MODULES.map((m) => ({ ...m }));
+  const modulesBlock = await classifyOpsCoreModules(MODULES);
   const snap = {
     generated_at: new Date().toISOString(),
     ttl_seconds: SNAPSHOT_TTL_MS / 1000,
@@ -84,12 +85,7 @@ router.get('/pulse/ops-core/snapshot', async (req, res) => {
       note: 'Org-scoped pulse counters (evals total, pass rate, last run age) will surface here when wired through this endpoint. Not yet wired through this snapshot endpoint (anonymous-safe, cache-shared).',
     },
 
-    b3_modules: {
-      total: modules.length,
-      healthy: modules.filter((m) => m.ok).length,
-      probed: modules.filter((m) => m.probe_path !== null).length,
-      items: modules,
-    },
+    b3_modules: modulesBlock,
 
     b4_mechanisms: MECHANISMS,
     b5_doi_bindings: DOI_BINDINGS.map((d) => ({ ...d, url: `https://doi.org/10.5281/zenodo.${d.zenodo_id}` })),

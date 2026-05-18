@@ -15,6 +15,7 @@
  * Wires to /api/ouroboros/amaru/observe-metric and /audit-threshold.
  */
 import { useState } from 'react';
+import { AmaruReceiptsPanel } from '@/components/AmaruLive';
 
 interface SekedReading {
   seked: number;
@@ -132,6 +133,8 @@ export default function OuroborosPage() {
           A11oy approval tiers.
         </p>
       </div>
+
+      <AmaruReceiptsPanel limit={15} />
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <div className="rounded-lg border border-[rgba(255,255,255,0.08)] bg-[#0e0e0e] p-5">

@@ -1,6 +1,7 @@
 import { Router } from 'express';
 import { authMiddleware } from '../middlewares/auth';
 import { tenantScope } from '../middlewares/tenant-scope';
+import { classifyOpsCoreModules } from './_ops-core-probe';
 
 /**
  * Counsel — Operational Core snapshot.
@@ -45,9 +46,9 @@ const DOI_BINDINGS = [
 
 const MODULES = [
   { id: 'counsel-matters',    name: 'Matter Intake',           description: 'Engagement letters, conflict checks, matter lifecycle',     probe_path: '/api/counsel/matters',     mounted: true, ok: true  },
-  { id: 'counsel-clauses',    name: 'Clause Library',          description: 'Versioned clause corpus + provenance',                     probe_path: '/api/counsel/clauses',     mounted: true, ok: true  },
+  { id: 'counsel-clauses',    name: 'Clause Library',          description: 'Versioned clause corpus + provenance',                     probe_path: '/api/counsel/clauses',     mounted: true, ok: true, auth_wall_ok: true  },
   { id: 'counsel-feeds',      name: 'Regulatory Feeds',        description: 'Federal Register / EDGAR / EUR-Lex ingest',                probe_path: '/api/counsel/feeds',       mounted: true, ok: true  },
-  { id: 'counsel-knowledge',  name: 'Knowledge Graph',         description: 'Entity / matter / clause graph for retrieval',             probe_path: '/api/counsel/knowledge',   mounted: true, ok: true  },
+  { id: 'counsel-knowledge',  name: 'Knowledge Graph',         description: 'Entity / matter / clause graph for retrieval',             probe_path: '/api/counsel/knowledge',   mounted: true, ok: true, auth_wall_ok: true  },
   { id: 'counsel-redline',    name: 'Redline Engine',          description: 'AI-assisted clause diff + risk grading',                   probe_path: null,                        mounted: true, ok: false },
   { id: 'counsel-privilege',  name: 'Privilege Guard',         description: 'Attorney-work-product classifier on receipts',             probe_path: null,                        mounted: true, ok: false },
 ] as const;
@@ -64,7 +65,7 @@ router.get('/counsel/ops-core/snapshot', async (req, res) => {
   }
 
 
-  const modules = MODULES.map((m) => ({ ...m }));
+  const modulesBlock = await classifyOpsCoreModules(MODULES);
   const snap = {
     generated_at: new Date().toISOString(),
     ttl_seconds: SNAPSHOT_TTL_MS / 1000,
@@ -88,12 +89,7 @@ router.get('/counsel/ops-core/snapshot', async (req, res) => {
       note: 'Org-scoped counsel counters (matters, clauses, redlines pending) will surface here when wired through this endpoint. Not yet wired through this snapshot endpoint (anonymous-safe, cache-shared).',
     },
 
-    b3_modules: {
-      total: modules.length,
-      healthy: modules.filter((m) => m.ok).length,
-      probed: modules.filter((m) => m.probe_path !== null).length,
-      items: modules,
-    },
+    b3_modules: modulesBlock,
 
     b4_mechanisms: MECHANISMS,
     b5_doi_bindings: DOI_BINDINGS.map((d) => ({ ...d, url: `https://doi.org/10.5281/zenodo.${d.zenodo_id}` })),

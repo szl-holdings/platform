@@ -310,6 +310,14 @@ router.use(lazyMatch("/sentra", () => import("./sentra-posture"), "sentra-postur
 // and services/sentra-detector-sidecar.
 router.use(lazyMatch("/sentra", () => import("./sentra-detector-framework"), "sentra-detector-framework"));
 
+// Sentra Tabs (Round 5 #5208) — honest empty 200s for SPA tabs that previously
+// hit unmounted endpoints and got 404. Replaces console errors with clean
+// empty-state rendering. NO MOCK DATA — every handler returns
+// { items: [], total: 0, note } until a real backing store is wired.
+// Mounts: /sentra/{assets,identities,playbooks,risk-bow-tie,threat-intel,
+//                  approvals,overview}
+router.use(lazyMatch("/sentra", () => import("./sentra-tabs"), "sentra-tabs"));
+
 // Sentra Core — typed HTTP routes backed by the services/sentra-core Python
 // sidecar (threat_model, posture_drift, incident_response, evidence_pack,
 // policy_gate). Mounted under /sentra/core/*.

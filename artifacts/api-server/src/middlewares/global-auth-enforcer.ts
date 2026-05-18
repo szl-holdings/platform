@@ -109,6 +109,13 @@ const PUBLIC_EXACT_PATHS = new Set([
   "/api/amaru/healthz",
   "/api/amaru/state",
   "/api/amaru/overwatch/snapshot",
+  // Round 5 / T003 — additional read-only Amaru kernel surfaces. All GET-only
+  // via routes/amaru-proxy.ts; the upstream FastAPI organ is read-only by
+  // design (R0513 watches, halt authority lives in HUKLLA). /events is SSE
+  // and intentionally NOT proxied; clients use /state + /receipts instead.
+  "/api/amaru/receipts",
+  "/api/amaru/tripwires",
+  "/api/amaru/scheduler/wiring",
   "/api/enterprise-mcp/idp-configs",
   // Self-healing orchestrator — read-only GET endpoints.
   // Exact-path matches ensure the mutating PATCH /policies/:id/toggle
