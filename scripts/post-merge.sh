@@ -56,6 +56,81 @@ elif ! printf '%s\n' "$current_snapshot" | diff -q - "$WORKSPACE_SNAPSHOT_FILE" 
   snapshot_changed=1
 fi
 
+# Detect removed/renamed workspace packages (Task #5089).
+# Task #5076 surfaces *added* workspace packages so they reliably get
+# installed. The mirror failure mode — a merge that *removes* or *renames*
+# a workspace package — is silent: dependents in the remaining packages
+# fail to resolve the missing module on the next workflow restart. Here
+# we name the removed packages explicitly, list any plausible renames
+# (newly-added names in the same merge), and fail the post-merge step if
+# any remaining workspace package still declares a dependency on a
+# removed name so the broken state is visible at merge time rather than
+# at the next workflow restart.
+if [ -n "$current_snapshot" ] && [ -f "$WORKSPACE_SNAPSHOT_FILE" ]; then
+  previous_names="$(sed 's/@[^@]*$//' "$WORKSPACE_SNAPSHOT_FILE" | sort -u)"
+  current_names="$(printf '%s\n' "$current_snapshot" | sed 's/@[^@]*$//' | sort -u)"
+  removed_names="$(comm -23 <(printf '%s\n' "$previous_names") <(printf '%s\n' "$current_names"))"
+  added_names="$(comm -13 <(printf '%s\n' "$previous_names") <(printf '%s\n' "$current_names"))"
+  if [ -n "$removed_names" ]; then
+    echo "post-merge: workspace packages removed since last merge:"
+    printf '  - %s\n' $removed_names
+    if [ -n "$added_names" ]; then
+      echo "post-merge: workspace packages added since last merge (possible renames):"
+      printf '  + %s\n' $added_names
+    fi
+
+    # Build the list of *remaining* workspace package.json paths from
+    # `pnpm m ls` so we only flag dependents that live inside a real
+    # workspace member. This avoids false positives from archived /
+    # vendored / excluded package.json files elsewhere in the tree.
+    set +e
+    workspace_manifests="$(pnpm m ls --json --depth -1 2>/dev/null \
+      | node -e 'let d="";process.stdin.on("data",c=>d+=c).on("end",()=>{try{const pkgs=JSON.parse(d);if(!Array.isArray(pkgs))throw 0;const path=require("path");console.log(pkgs.filter(p=>p&&p.path).map(p=>path.relative(process.cwd(),path.join(p.path,"package.json"))).join("\n"))}catch(e){process.exit(1)}})')"
+    workspace_manifests_exit=$?
+    set -e
+    if [ "$workspace_manifests_exit" -ne 0 ] || [ -z "$workspace_manifests" ]; then
+      # Fail-closed: removed_names is non-empty here, so silently
+      # skipping the dependent scan would let a real dangling dep
+      # slip through. Exit non-zero so the broken state is visible.
+      echo "post-merge: ERROR — workspace packages were removed but workspace manifests could not be enumerated (exit=$workspace_manifests_exit); refusing to skip the dangling-dependent check."
+      echo "post-merge: failing post-merge so the situation is visible at merge time (Task #5089)."
+      exit 1
+    fi
+
+    broken_report=""
+    if [ -n "$workspace_manifests" ]; then
+      for removed in $removed_names; do
+        # Escape regex metacharacters in the package name before passing
+        # to grep -E so unusual but valid names (e.g. containing a `.`)
+        # can't false-match. Match "<name>": as a dependency *key* so
+        # we don't trip on the package's own "name" field, where the
+        # value side has no trailing colon.
+        escaped="$(printf '%s' "$removed" | sed 's/[][\\.^$*+?(){}|]/\\&/g')"
+        matches=""
+        while IFS= read -r manifest; do
+          [ -z "$manifest" ] && continue
+          [ ! -f "$manifest" ] && continue
+          if grep -qE "\"${escaped}\"[[:space:]]*:" "$manifest" 2>/dev/null; then
+            matches+="${manifest}"$'\n'
+          fi
+        done <<< "$workspace_manifests"
+        if [ -n "$matches" ]; then
+          broken_report+="\n  ${removed} is still referenced by:\n"
+          while IFS= read -r f; do
+            [ -n "$f" ] && broken_report+="    - ${f}\n"
+          done <<< "$matches"
+        fi
+      done
+    fi
+    if [ -n "$broken_report" ]; then
+      echo "post-merge: ERROR — removed workspace packages still have dependents in the monorepo:"
+      printf '%b' "$broken_report"
+      echo "post-merge: failing so the dangling dependency is visible at merge time (Task #5089)."
+      exit 1
+    fi
+  fi
+fi
+
 if [ "$snapshot_changed" -eq 1 ]; then
   # Workspace package set changed (or snapshot untrustworthy) — must NOT
   # use --frozen-lockfile, since the lockfile may already encode the new
