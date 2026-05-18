@@ -155,6 +155,7 @@ szl-holdings-platform/
 | Contribution workflow | [`CONTRIBUTING.md`](../CONTRIBUTING.md) |
 | Demo guide for sales/investors | [`docs/sales/demo-guide.md`](sales/demo-guide.md) |
 | Working with model weights / datasets (Hugging Face Xet) | [`docs/operations/xet-developer-guide.md`](operations/xet-developer-guide.md) |
+| Bring up Temporal locally for approval workflows | [`infra/temporal/README.md`](../infra/temporal/README.md) |
 
 ---
 

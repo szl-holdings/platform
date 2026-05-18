@@ -57,11 +57,11 @@ Evidence (`packages/szl-sdk/src/default-policy-provider.ts`):
 ---
 
 ## 3. Temporal worker infrastructure (P2)
-**What's missing:** Temporal Frontend on `localhost:7233` in dev env.
+**What's missing in prod:** Temporal Frontend connection string for a managed cluster.
 
-The two workers (`temporal-worker`, `temporal-approval-worker`) start fine, poll for the Frontend, timeout after 300s. Code is real and tested; deploy gap only.
+**Dev:** Resolved by Task #5215 — `pnpm --filter @szl-holdings/temporal-tests run dev:server` brings up an embedded Temporal CLI dev server on `localhost:7233` with a `default` namespace pre-created. Both workers connect and stay running. On a fresh clone without bringing the dev server up, the workers now short-circuit cleanly with `exit(0)` after a 5s probe (see `scripts/start-worker.ts` / `scripts/start-approval-worker.ts`) so the workflows report "finished" instead of "failed". E2E smoke tests (`worker:smoke`, `worker:approval:smoke`) cover the full approval round-trip. See [`infra/temporal/README.md`](../../infra/temporal/README.md).
 
-**Real path:** either (a) run Temporal Cloud and inject the connection string as a secret, or (b) `docker compose` a local Temporal in the env. Production-side this should be one of the platform tasks.
+**Real path for production:** either (a) run Temporal Cloud and inject the connection string as a secret, or (b) deploy a Temporal cluster alongside the platform. Production-side this is a separate platform task.
 
 ---
 
