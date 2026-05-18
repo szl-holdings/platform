@@ -76,6 +76,7 @@ import router from './routes';
 import demoResetRouter from './routes/demo-reset';
 import agiForecastStatusRouter from './routes/agi-forecast-status';
 import a11oyOrchestrationRouter from './routes/a11oy-orchestration-api';
+import a11oyLeaderUpgradesRouter from './routes/a11oy-leader-upgrades';
 import payloadRouter from './routes/payload';
 import a11oyLexiconRouter from './routes/a11oy-lexicon-api';
 import psycheRouter from './routes/psyche';
@@ -389,6 +390,11 @@ app.use('/api/alloy-embedding-api', _aefRouter);
 // fabric API: child products register from public boots and the demo-chain
 // endpoint must run without a session for the demo flow.
 app.use('/api/a11oy', a11oyOrchestrationRouter);
+// A11oy leader-grade upgrades (#5172) — eval diff/significance, Agent BOM
+// CycloneDX + HTML attestations, PRISM counterfactuals, Pattern Atlas
+// telemetry. Public read surface; the chain verification endpoint is
+// idempotent and stateless.
+app.use('/api', a11oyLeaderUpgradesRouter);
 app.use('/api/payload', payloadRouter);
 
 // AGI-forecast read surface (#5095). Mounted BEFORE auth so the gauge

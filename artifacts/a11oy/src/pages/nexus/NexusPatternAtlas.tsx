@@ -33,9 +33,23 @@ import {
   Workflow,
   Zap,
 } from 'lucide-react';
-import { Component, type CSSProperties, type ErrorInfo, type ReactNode, useState } from 'react';
+import { Component, type CSSProperties, type ErrorInfo, type ReactNode, useEffect, useState } from 'react';
 import { sharedUiExports } from 'virtual:shared-ui-manifest';
 import { GENERATED_METADATA } from './patternAtlasMetadata.generated';
+
+interface PatternTelemetryStat {
+  patternKey: string;
+  callCount: number;
+  lastUsedAt: string;
+  firstUsedAt: string;
+  consumers: string[];
+  maturity: 'experimental' | 'beta' | 'stable';
+}
+
+interface PatternTelemetry {
+  stats: PatternTelemetryStat[];
+  counts: { total: number; stable: number; beta: number; experimental: number };
+}
 
 interface PropDef {
   name: string;
@@ -923,6 +937,32 @@ export default function PatternAtlas() {
   const [category, setCategory] = useState('all');
   const [search, setSearch] = useState('');
   const [selected, setSelected] = useState<CatalogEntry>(() => CATALOG[0] as CatalogEntry);
+  const [telemetry, setTelemetry] = useState<Record<string, PatternTelemetryStat>>({});
+
+  useEffect(() => {
+    fetch('/api/a11oy/patterns/telemetry')
+      .then((r) => r.json())
+      .then((d: PatternTelemetry) => {
+        const map: Record<string, PatternTelemetryStat> = {};
+        for (const s of d.stats ?? []) map[s.patternKey] = s;
+        setTelemetry(map);
+      })
+      .catch(() => setTelemetry({}));
+  }, []);
+
+  // Fire-and-forget tracking; rate-limited by user navigation, so safe to call
+  // on each selection. The server clamps count per request.
+  useEffect(() => {
+    if (!selected) return;
+    fetch('/api/a11oy/patterns/track', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ patternKey: selected.name, consumer: 'a11oy:NexusPatternAtlas' }),
+    })
+      .then((r) => r.json())
+      .then((s: PatternTelemetryStat) => setTelemetry((prev) => ({ ...prev, [s.patternKey]: s })))
+      .catch(() => {});
+  }, [selected]);
 
   const filtered = CATALOG.filter((c) => {
     const matchCat = category === 'all' || c.meta.category === category;
@@ -998,7 +1038,11 @@ export default function PatternAtlas() {
         <div className="flex-1 overflow-y-auto p-1.5 space-y-0.5">
           {filtered.map((c) => {
             const isSelected = selected?.name === c.name;
-            const statusCfg = STATUS_CFG[c.meta.status];
+            // Telemetry maturity wins when present — auto-graduation overrides
+            // the static GENERATED_METADATA status once usage thresholds trip.
+            const stat = telemetry[c.name];
+            const effectiveStatus = stat ? stat.maturity : c.meta.status;
+            const statusCfg = STATUS_CFG[effectiveStatus];
             return (
               <button
                 key={c.name}
@@ -1011,13 +1055,18 @@ export default function PatternAtlas() {
               >
                 <div className="flex-1 min-w-0">
                   <div className="text-[11px] font-mono font-medium truncate">{c.name}</div>
-                  <div className="text-[9px] text-muted-foreground/50 truncate">{c.meta.category}</div>
+                  <div className="text-[9px] text-muted-foreground/50 truncate">
+                    {c.meta.category}
+                    {stat && (
+                      <span className="ml-1.5 text-praxis-cyan/70">· {stat.callCount} uses</span>
+                    )}
+                  </div>
                 </div>
                 {c.meta.livePreview && (
                   <span className="text-[8px] text-praxis-green font-mono shrink-0">▶</span>
                 )}
                 <span className={`text-[8px] font-mono ${statusCfg.color} px-1 py-0.5 rounded border shrink-0`}>
-                  {c.meta.status === 'stable' ? '●' : c.meta.status === 'beta' ? '◐' : '○'}
+                  {effectiveStatus === 'stable' ? '●' : effectiveStatus === 'beta' ? '◐' : '○'}
                 </span>
                 {isSelected && <ChevronRight className="w-3 h-3 shrink-0" />}
               </button>

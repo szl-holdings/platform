@@ -86,9 +86,52 @@ function BomDetail({ bom }: { bom: AgentBomEntry }) {
   );
 }
 
+interface VerifyResult {
+  valid: boolean;
+  computedMerkleRoot: string;
+  computedClosureHash: string;
+  receiptCount: number;
+  matches?: boolean;
+  expectedMerkleRoot?: string;
+}
+
 export function AgentBom() {
   const [selectedId, setSelectedId] = useState<string>(AGENT_BOMS[0].agentId);
   const selected = AGENT_BOMS.find(b => b.agentId === selectedId) ?? AGENT_BOMS[0];
+  const [verify, setVerify] = useState<VerifyResult | null>(null);
+  const [verifying, setVerifying] = useState(false);
+
+  async function downloadAttestation() {
+    const r = await fetch(`/api/a11oy/proof/bom/${selected.agentId}/attestation`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ bom: selected }),
+    });
+    const html = await r.text();
+    const blob = new Blob([html], { type: 'text/html' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `${selected.agentId}-attestation.html`;
+    a.click();
+    URL.revokeObjectURL(url);
+  }
+
+  async function verifyChain() {
+    setVerifying(true);
+    setVerify(null);
+    try {
+      const r = await fetch('/api/a11oy/proof/verify', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ bom: selected }),
+      });
+      const d = await r.json();
+      setVerify(d as VerifyResult);
+    } finally {
+      setVerifying(false);
+    }
+  }
 
   return (
     <Layout>
@@ -193,6 +236,51 @@ export function AgentBom() {
             >
               Export CycloneDX ML-BOM v1.7
             </button>
+            <button
+              className="w-full text-xs font-medium py-2.5 rounded-lg mt-2"
+              style={{
+                backgroundColor: 'rgba(34,197,94,0.10)',
+                color: '#22c55e',
+                border: '1px solid rgba(34,197,94,0.25)',
+                cursor: 'pointer',
+              }}
+              onClick={downloadAttestation}
+            >
+              Export HTML Attestation
+            </button>
+            <button
+              className="w-full text-xs font-medium py-2.5 rounded-lg mt-2"
+              style={{
+                backgroundColor: 'rgba(255,255,255,0.04)',
+                color: '#ccc',
+                border: '1px solid rgba(255,255,255,0.10)',
+                cursor: verifying ? 'not-allowed' : 'pointer',
+              }}
+              onClick={verifyChain}
+              disabled={verifying}
+            >
+              {verifying ? 'Verifying…' : 'Verify Receipt Chain'}
+            </button>
+            {verify && (
+              <div
+                className="mt-3 p-3 rounded-lg text-xs"
+                style={{
+                  background: verify.valid ? 'rgba(34,197,94,0.08)' : 'rgba(248,113,113,0.08)',
+                  border: `1px solid ${verify.valid ? 'rgba(34,197,94,0.3)' : 'rgba(248,113,113,0.3)'}`,
+                  color: 'var(--color-a11oy-text-sub)',
+                }}
+              >
+                <div style={{ color: verify.valid ? '#22c55e' : '#f87171', fontWeight: 600 }}>
+                  {verify.valid ? '✓ Chain verified' : '✗ Chain mismatch'}
+                </div>
+                <div className="font-mono mt-1" style={{ wordBreak: 'break-all', fontSize: 10 }}>
+                  root: {verify.computedMerkleRoot}
+                </div>
+                <div className="font-mono" style={{ fontSize: 10, color: 'var(--color-a11oy-text-ghost)' }}>
+                  {verify.receiptCount} cosigned receipts
+                </div>
+              </div>
+            )}
           </div>
         </div>
 

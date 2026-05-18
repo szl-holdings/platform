@@ -173,7 +173,7 @@ function buildMockCorpusAdapter(domain: AEFDomain): RetrievalAdapter {
 
 const router: IRouter = Router();
 
-const runStore = new Map<string, EvalRunReport>();
+export const runStore = new Map<string, EvalRunReport>();
 const suiteStore = new Map<string, EvalSuiteDef>(ALL_SUITES.map((s: any) => [s.suiteId, s]));
 
 upsertEvalForgeSuites(ALL_SUITES).catch(() => {});
