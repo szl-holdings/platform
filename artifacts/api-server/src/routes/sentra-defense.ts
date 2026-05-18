@@ -551,7 +551,7 @@ function handleHoneyRequest(req: Request, res: Response): void {
   });
 }
 
-router.all('/honey/*', handleHoneyRequest);
+router.all('/honey/*splat', handleHoneyRequest);
 router.all('/honey', handleHoneyRequest);
 
 export default router;

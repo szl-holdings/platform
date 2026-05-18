@@ -229,7 +229,7 @@ router.delete(
 // ─── GET /sandbox/sessions/:id/files/* ───────────────────────────────────────
 
 router.get(
-  '/sandbox/sessions/:id/files/*',
+  '/sandbox/sessions/:id/files/*splat',
   authMiddleware(),
   tenantScope({ required: true }),
   async (req: Request, res: Response) => {
@@ -243,8 +243,16 @@ router.get(
         return;
       }
 
-      // Express captures the glob as req.params[0]
-      const filePath = (req.params as Record<string, string>)[0] ?? '';
+      // Express 5 / path-to-regexp v7 captures `*splat` as an array of path
+      // segments under req.params.splat. Older builds used req.params[0]
+      // (string). Support both shapes so the handler stays backward-compatible
+      // if the runtime ever rolls back.
+      const splatParam = (req.params as Record<string, unknown>).splat;
+      const filePath = Array.isArray(splatParam)
+        ? splatParam.join('/')
+        : typeof splatParam === 'string'
+          ? splatParam
+          : ((req.params as Record<string, string>)[0] ?? '');
       if (!filePath) {
         res.status(400).json({ error: 'File path is required' });
         return;

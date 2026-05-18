@@ -37,7 +37,7 @@ router.use((_req, res, next) => {
   next();
 });
 
-router.options('*', (_req, res) => {
+router.options('/*splat', (_req, res) => {
   res.sendStatus(204);
 });
 
