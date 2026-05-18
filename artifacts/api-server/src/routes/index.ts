@@ -281,6 +281,10 @@ router.use(lazyMatch("/sentra/remediation", () => import("./sentra-remediation")
 //   GET /api/sentra/controls/coverage
 //   GET /api/sentra/governance/doctrine
 router.use(lazyMatch("/sentra", () => import("./sentra-posture"), "sentra-posture"));
+// Sentra Detector Framework (#5186) — canonical detector/finding contract,
+// shared by TS detectors and the Python sidecar. See packages/sentra-detector-sdk
+// and services/sentra-detector-sidecar.
+router.use(lazyMatch("/sentra", () => import("./sentra-detector-framework"), "sentra-detector-framework"));
 router.use(lazyMatch("/sentra", () => import("./sentra-defense"), "sentra-defense"));
 router.use(lazyMatch("/honey", () => import("./sentra-defense"), "sentra-honey"));
 

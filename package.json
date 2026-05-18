@@ -46,6 +46,8 @@
     "migrate": "pnpm --filter @szl-holdings/db run push-non-interactive",
     "db:migrate": "pnpm --filter @szl-holdings/db run migrate",
     "start": "pnpm -r --if-present run dev",
+    "sentra:sidecar:dev": "bash scripts/sentra-sidecar-dev.sh",
+    "sentra:sidecar:test": "bash -c 'cd services/sentra-detector-sidecar && ../../services/sentra-detector-sidecar/.venv/bin/pytest -q'",
     "capture:screens": "bash scripts/media/capture-screenshots.sh",
     "qa:routes": "node scripts/qa/smoke-routes.js",
     "qa:links": "node scripts/qa/check-links.js",

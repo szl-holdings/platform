@@ -783,6 +783,9 @@ importers:
       '@szl-holdings/schemas':
         specifier: workspace:*
         version: link:../../packages/schemas
+      '@szl-holdings/sentra-detector-sdk':
+        specifier: workspace:*
+        version: link:../../packages/sentra-detector-sdk
       '@szl-holdings/services':
         specifier: workspace:*
         version: link:../../lib/services
@@ -792,6 +795,9 @@ importers:
       '@szl-holdings/signal-mesh':
         specifier: workspace:*
         version: link:../../packages/signal-mesh
+      '@szl-holdings/szl-receipts':
+        specifier: workspace:*
+        version: link:../../packages/szl-receipts
       '@szl-holdings/telemetry-standards':
         specifier: workspace:*
         version: link:../../packages/telemetry-standards
@@ -4383,6 +4389,22 @@ importers:
       '@types/node':
         specifier: 'catalog:'
         version: 25.3.5
+      vitest:
+        specifier: 'catalog:'
+        version: 3.2.4(@types/node@25.3.5)(@vitest/ui@4.1.2)(happy-dom@20.8.9)(jiti@2.6.1)(lightningcss@1.31.1)(terser@5.46.1)(tsx@4.21.0)(yaml@2.8.3)
+
+  packages/sentra-detector-sdk:
+    dependencies:
+      zod:
+        specifier: 'catalog:'
+        version: 3.25.76
+    devDependencies:
+      '@types/node':
+        specifier: 'catalog:'
+        version: 25.3.5
+      typescript:
+        specifier: 'catalog:'
+        version: 5.9.3
       vitest:
         specifier: 'catalog:'
         version: 3.2.4(@types/node@25.3.5)(@vitest/ui@4.1.2)(happy-dom@20.8.9)(jiti@2.6.1)(lightningcss@1.31.1)(terser@5.46.1)(tsx@4.21.0)(yaml@2.8.3)

@@ -76,6 +76,8 @@
     "@szl-holdings/covenant-policy": "workspace:*",
     "@szl-holdings/crdt-sync": "workspace:*",
     "@szl-holdings/db": "workspace:*",
+    "@szl-holdings/sentra-detector-sdk": "workspace:*",
+    "@szl-holdings/szl-receipts": "workspace:*",
     "@szl-holdings/db-repository": "workspace:*",
     "@szl-holdings/db-schema": "workspace:*",
     "@szl-holdings/decision-engine": "workspace:*",

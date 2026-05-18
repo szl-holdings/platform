@@ -204,6 +204,7 @@ const NAV_SECTIONS: NavSection[] = [
       { path: '/cases', label: 'Cases', icon: Briefcase, comp: L(() => import('@/pages/cases-page')) },
       { path: '/aegis/cps-command', label: 'CPS Executive Command', icon: Landmark, comp: L(() => import('@/pages/aegis-cps-executive')) },
       { path: '/findings', label: 'Findings', icon: Target, comp: L(() => import('@/pages/findings-page')) },
+      { path: '/detector-framework', label: 'Detector Framework', icon: Target, comp: L(() => import('@/pages/detector-framework')) },
       { path: '/action-queue', label: 'Action Queue', icon: Zap, comp: L(() => import('@/pages/action-queue')) },
       { path: '/forensics', label: 'Forensics Timeline', icon: Microscope, comp: L(() => import('@/pages/forensics-timeline')) },
       { path: '/deception-grid', label: 'Deception Grid', icon: Filter, comp: L(() => import('@/pages/deception-grid')) },

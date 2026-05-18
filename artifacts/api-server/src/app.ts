@@ -53,6 +53,26 @@ void hydrateProofsFromDb().catch((err) => {
   // eslint-disable-next-line no-console
   console.error('[orchestration-store] proof ledger hydrate failed at boot', err);
 });
+
+// Sentra detector framework (#5186) — register the canonical in-process
+// TS detector(s) so `POST /api/sentra/detectors/:id/run` can resolve them
+// without a separate registration round-trip. Python detectors register
+// themselves from the sidecar at boot.
+import {
+  persistRegisteredDetector,
+  sentraDetectorRegistry,
+} from './lib/sentra-detector-registry.js';
+import { heuristicPortScanDetector } from './lib/sentra-detectors/heuristic-port-scan.js';
+sentraDetectorRegistry.register(heuristicPortScanDetector);
+// Fire-and-forget: persist the in-process TS detector(s) so the
+// `GET /api/sentra/detectors` and `POST /api/sentra/detectors/:id/run`
+// routes can resolve them without a separate registration round-trip.
+void persistRegisteredDetector(heuristicPortScanDetector).catch((err) => {
+  // Don't crash boot — but DO surface the failure so a missed migration
+  // or stale schema is visible instead of silently breaking list/run.
+  // eslint-disable-next-line no-console
+  console.error('[sentra-detector-framework] boot persistence failed', err);
+});
 import { assertInternalTokenPolicy } from './lib/internal-tokens';
 import { logger } from './lib/logger';
 import { ENV_SPECS } from './lib/startup-validation';
