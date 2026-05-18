@@ -34,6 +34,12 @@ export type { VspVendor, VendorMirrorInfo } from './vendor-adapters.js';
 
 export { startVspNodeSdk } from './node-sdk-bootstrap.js';
 
+export {
+  createLambdaAxisStream,
+  type LambdaAxisListener,
+  type LambdaAxisStreamHandle,
+} from './lambda-axis-stream.js';
+
 export type {
   VspNodeSdk,
   VspNodeSdkOptions,

@@ -27,8 +27,20 @@ export {
   defaultPolicyProvider,
   builtInDefaultProvider,
   DEFAULT_SDK_AXES,
+  isPolicyAdmit,
   type DefaultPolicyProviderOptions,
 } from './default-policy-provider.js';
+export {
+  telemetryPolicyProvider,
+  createInMemoryLambdaAxisStream,
+  type LambdaAxisStream,
+  type LambdaAxisListener,
+  type PublishableLambdaAxisStream,
+  type TelemetryPolicyProvider,
+  type TelemetryPolicyProviderOptions,
+  type TelemetryProviderState,
+  type TelemetryProviderStateKind,
+} from './telemetry-policy-provider.js';
 export { ApiKeysResource } from './resources/api-keys.js';
 export { PortfolioResource } from './resources/portfolio.js';
 export { BriefingsResource } from './resources/briefings.js';
