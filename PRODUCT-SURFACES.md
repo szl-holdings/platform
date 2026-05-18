@@ -12,7 +12,7 @@
 |------|---------|
 | **Command surface** | KORA (Lyte Command Center), Command Portal, LUMINA (Pulse) |
 | **Execution fabric** | FORGE (shared backbone) · Continuum — Business Observability Fabric |
-| **Mobile command** | APEX (`artifacts/szl-holdings-mobile`) |
+| **Mobile command** | APEX (roadmap — no mobile artifact currently registered; see Mobile Surfaces) |
 | **Domain pack** | TENAX (Sentra), SEXTANT (Vessels), DOMAINE (Terra), Counsel, Carlota Jo, LUMINA (Pulse), PARAGON (Aegis) |
 | **Corporate platform** | SZL Holdings (web) |
 | **Internal / tooling** | API Server, mockup-sandbox (PRAXIS) |
@@ -114,26 +114,29 @@ These surfaces had registered artifacts that have since been removed from disk. 
 
 ## Mobile Surfaces
 
-### APEX — Unified Mobile Command
-- **Artifact:** `artifacts/szl-holdings-mobile`
-- **Preview path:** `/szl-holdings-mobile/`
-- **Status:** Functional alpha
-- **Platform:** iOS + Android (Expo / React Native)
-- **Domains:** All 9 platform domains in one app
+> **Status reconciliation:** No mobile artifacts are currently registered in this monorepo. Every mobile surface listed below is **roadmap**, not shipped. This section was previously ambiguous about which mobile apps existed; see [`docs/operations/known-gaps.md`](docs/operations/known-gaps.md) entries **TD-006** (mobile surface documentation accuracy) and **KG031** (status page / customer-visible roadmap) for the tracking record.
 
----
+### Shipped Mobile Surfaces
 
-## Domain-Specific Mobile Apps — Roadmap (Not Yet Built)
+_None._ There are no registered mobile artifacts at this time. Mobile access today is delivered via the responsive web surfaces listed above.
 
-> None of the apps below are registered artifacts or built code. They are planned companions to APEX (`artifacts/szl-holdings-mobile`). Domain-specific mobile apps will only be split out from APEX when a paying customer or design partner requires a standalone experience.
+### Roadmap — Unified Mobile Command
 
-| App | Planned Artifact | Status |
-|-----|------------------|--------|
-| PARAGON Mobile | `artifacts/paragon-mobile` (not registered) | Roadmap — H2 2026 |
-| SEXTANT Mobile | `artifacts/sextant-mobile` (not registered) | Roadmap — H2 2026 |
-| DOMAINE Mobile | `artifacts/domaine-mobile` (not registered) | Roadmap — 2027 |
-| KORA Mobile | `artifacts/kora-mobile` (not registered) | Roadmap — 2027 |
-| Carlota Jo Mobile | `artifacts/carlota-jo-mobile` (not registered) | Roadmap — H2 2026 |
+| App | Planned Artifact | Status | Tracking |
+|-----|------------------|--------|----------|
+| 🗺️ APEX — Unified Mobile Command (all 9 domains, Expo / React Native) | `artifacts/szl-holdings-mobile` (not registered) | Roadmap — flagship mobile target | [TD-006](docs/operations/known-gaps.md#full-gap-registry) |
+
+### Roadmap — Domain-Specific Mobile Apps
+
+> The apps below are planned companions to APEX. None are registered artifacts or built code. Domain-specific mobile apps will only be split out from APEX when a paying customer or design partner requires a standalone experience.
+
+| App | Planned Artifact | Status | Tracking |
+|-----|------------------|--------|----------|
+| 🗺️ PARAGON Mobile | `artifacts/paragon-mobile` (not registered) | Roadmap — H2 2026 | [TD-006](docs/operations/known-gaps.md#full-gap-registry) |
+| 🗺️ SEXTANT Mobile | `artifacts/sextant-mobile` (not registered) | Roadmap — H2 2026 | [TD-006](docs/operations/known-gaps.md#full-gap-registry) |
+| 🗺️ DOMAINE Mobile | `artifacts/domaine-mobile` (not registered) | Roadmap — 2027 | [TD-006](docs/operations/known-gaps.md#full-gap-registry) |
+| 🗺️ KORA Mobile | `artifacts/kora-mobile` (not registered) | Roadmap — 2027 | [TD-006](docs/operations/known-gaps.md#full-gap-registry) |
+| 🗺️ Carlota Jo Mobile | `artifacts/carlota-jo-mobile` (not registered) | Roadmap — H2 2026 | [TD-006](docs/operations/known-gaps.md#full-gap-registry) |
 
 ---
 
