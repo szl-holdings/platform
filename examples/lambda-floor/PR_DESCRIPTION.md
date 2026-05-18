@@ -47,7 +47,7 @@ Refs: SZL field gap **C4** (see SZL Holdings' Defense Unicorns proposal
 | 1 | All-axes-pass admits | `tests/lambda-floor.test.ts` → "admits when all axes meet their floors" |
 | 2 | Any axis fail → `MATURITY_GATE_BLOCKED` w/ axis name + value | `capabilities/lambda-floor.ts` `request.Deny(...)` + `tests/lambda-floor.test.ts` per-axis rows |
 | 3 | SZL OPA pack ported as proof-of-work | `tests/lambda-floor-opa-parity.test.ts` (Rego truth-table parity) + `tests/lambda-floor-webhook-fixture.test.ts` (on-wire request shape) |
-| 4 | p95 admission latency ≤ 50 ms on reference t3.medium | Measured by `pnpm run test:cluster` (Pepr in-cluster runner) and reported in the upstream CI run linked from this PR — **not** by a unit-test microbench, by design |
+| 4 | p95 admission latency ≤ 50 ms on reference t3.medium | Measured end-to-end (incl. webhook RTT) by `scripts/run-cluster-latency.sh` (invoked via `pnpm run test:cluster`). The script stands up k3d, deploys this module with `pepr deploy`, applies a batch of `AgentInvocation` CRs, and asserts p95 ≤ 50 ms. CI: `.github/workflows/lambda-floor-cluster.yml` uploads the `lambda-floor-latency` artifact (raw `samples.ndjson` + `summary.json`/`summary.md`). Linked run: _<paste the GitHub Actions run URL for the `lambda-floor — in-cluster admission latency` job here before merging>_ |
 | 5 | No new runtime deps outside Pepr SDK + `@noble/curves` (MIT) | `package.json` `dependencies` |
 
 ## License

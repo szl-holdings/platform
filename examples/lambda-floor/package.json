@@ -10,7 +10,7 @@
     "build": "pepr build",
     "format": "pepr format",
     "test": "vitest run",
-    "test:cluster": "pepr test"
+    "test:cluster": "bash scripts/run-cluster-latency.sh"
   },
   "dependencies": {
     "pepr": "^0.34.0",

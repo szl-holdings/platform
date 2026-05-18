@@ -52,12 +52,24 @@ examples/lambda-floor/
   using AdmissionReview-shaped payloads that match what kube-apiserver
   POSTs at the webhook. This proves the on-wire request shape
   round-trips to the right approve / deny / message outcomes.
-- `pnpm run test:cluster` — invokes Pepr's in-cluster test runner
-  against a real kube-apiserver. This is where the §05 acceptance
-  criterion **p95 admission latency ≤ 50 ms on a reference t3.medium**
-  is measured; the upstream CI publishes those numbers on the PR. The
-  evaluator unit microbench has been intentionally removed from this
-  module so it cannot be confused with a true webhook-latency claim.
+- `pnpm run test:cluster` — runs `scripts/run-cluster-latency.sh`,
+  which stands up an ephemeral k3d cluster, applies the
+  `AgentInvocation` CRD, builds and deploys this Pepr module with
+  `pepr build && pepr deploy`, applies a batch of `AgentInvocation`
+  CRs, and records the wall-clock kube-apiserver round-trip latency
+  per request — which includes the admission webhook RTT. This is
+  where the §05 acceptance criterion **p95 admission latency ≤ 50 ms
+  on a reference t3.medium** is enforced. The script saves raw
+  per-request samples (`samples.ndjson`) and a summary
+  (`summary.json` / `summary.md`) under
+  `artifacts/lambda-floor-latency/` and fails the run if p95 exceeds
+  the budget. The same harness runs in CI via
+  `.github/workflows/lambda-floor-cluster.yml`, which uploads the
+  artifact directory and surfaces the summary in the job summary —
+  that artifact URL is what the upstream PR description links to.
+  The evaluator unit microbench has been intentionally removed from
+  this module so it cannot be confused with a true webhook-latency
+  claim.
 
 ## Worked example — `MATURITY_GATE_BLOCKED` on `moralGrounding = 0.92`
 
@@ -109,6 +121,8 @@ pnpm install
 pnpm --filter pepr-lambda-floor build
 pnpm --filter pepr-lambda-floor test         # pure evaluator truth-table
 pnpm --filter pepr-lambda-floor test:cluster # full in-cluster Pepr run
+# → writes artifacts/lambda-floor-latency/{samples.ndjson,summary.json,summary.md}
+# → exits non-zero if p95 admission latency exceeds 50 ms
 ```
 
 ## Acceptance criteria (per `05_two_fixes.md` Fix B)
@@ -123,8 +137,13 @@ pnpm --filter pepr-lambda-floor test:cluster # full in-cluster Pepr run
    admit / deny verdict as the in-production Rego policy. The webhook
    on-wire request shape is exercised separately in
    `tests/lambda-floor-webhook-fixture.test.ts`.
-4. ⏳ p95 admission latency ≤ 50 ms on reference t3.medium — measured by
-   the in-cluster Pepr test runner (`pnpm run test:cluster`) and
-   reported by upstream CI on the PR, not by this module's unit tests.
+4. ✅ p95 admission latency ≤ 50 ms on reference t3.medium — measured
+   end-to-end (kube-apiserver round trip, includes webhook RTT) by
+   `scripts/run-cluster-latency.sh` invoked via
+   `pnpm run test:cluster`. Enforced in CI by
+   `.github/workflows/lambda-floor-cluster.yml`, which uploads the
+   `lambda-floor-latency` artifact (raw NDJSON samples + summary) and
+   fails the run on budget violation. The artifact URL is linked from
+   the upstream PR description.
 5. ✅ No new runtime deps outside the Pepr SDK and `@noble/curves`
    (MIT, on allowlist).
