@@ -70,8 +70,8 @@ const COVENANT = [
   { v: '0.95', k: 'moralGrounding floor', sub: 'covenant kernel · V6' },
   { v: '0.95', k: 'measurabilityHonesty floor', sub: 'no unmeasured claim' },
   { v: '5 / 5', k: 'byte-identical replays', sub: 'required per release' },
-  { v: '13', k: 'DOI ledger entries', sub: 'public · citable' },
-  { v: '16', k: 'repos under audit', sub: 'szl-holdings org' },
+  { v: String(DOI_LEDGER_COUNT), k: 'DOI ledger entries', sub: 'public · citable' },
+  { v: PANEL_FACTS.reposCountText, k: 'repos under audit', sub: 'szl-holdings org' },
   { v: 'PUBLIC_ONLY', k: 'ingestion policy', sub: 'no private corpora' },
   { v: 'V6', k: 'doctrine version', sub: 'replay-root sealed' },
 ];
