@@ -19,7 +19,9 @@
     "./schema/memory-fabric": "./src/schema/memory_fabric.ts"
   },
   "scripts": {
-    "generate": "drizzle-kit generate --config ./drizzle.config.ts",
+    "generate": "drizzle-kit generate --config ./drizzle.config.ts && node ./scripts/update-schema-hash.mjs",
+    "check:schema-sync": "node ./scripts/check-schema-sync.mjs",
+    "check:schema-sync:fix": "node ./scripts/update-schema-hash.mjs",
     "migrate": "node ./scripts/backfill-migrations.mjs && drizzle-kit migrate --config ./drizzle.config.ts && node ./scripts/apply-manual-migrations.mjs",
     "migrate:backfill": "node ./scripts/backfill-migrations.mjs",
     "migrate:apply": "drizzle-kit migrate --config ./drizzle.config.ts",

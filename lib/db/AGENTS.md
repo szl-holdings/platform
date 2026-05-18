@@ -37,6 +37,22 @@
 2. Understand the naming convention: tables are namespaced by domain (e.g. `vessels_*`, `alloy_*`, `auth_*`).
 3. Check whether your new table concept is already represented in an existing table before creating a new one. 799 tables means there is a high chance something relevant already exists.
 
+## Schema-drift guardrail
+
+Editing anything under `src/schema/**` without producing a matching SQL
+migration is treated as drift. The guardrail (task #5057) lives in
+`scripts/check-schema-sync.mjs` and runs in CI as part of `pnpm lint:ci`.
+
+- Detect locally: `pnpm --filter @szl-holdings/db check:schema-sync`
+- Fix the drift: `pnpm --filter @szl-holdings/db generate` (which also
+  refreshes `drizzle/meta/_schema_hash.json` via the `update-schema-hash`
+  post-step). Commit the new SQL file, the updated `_journal.json`,
+  the snapshot JSON, and the refreshed `_schema_hash.json` together.
+- Comment / formatting-only changes that intentionally do not need a SQL
+  file: re-stamp the marker with
+  `pnpm --filter @szl-holdings/db check:schema-sync:fix` and commit the
+  updated `_schema_hash.json`. Do NOT set `SKIP_SCHEMA_SYNC_CHECK=1` in CI.
+
 ## Critical Rules
 
 - **Never drop or rename a column in a migration.** Forward-only migrations mean a dropped column is permanent data loss. Add a new column and deprecate the old one instead.
