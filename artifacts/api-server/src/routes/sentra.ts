@@ -7,7 +7,6 @@ import { handleRouteError, sendCreated, sendNotFound, sendSuccess } from '../lib
 import { authMiddleware } from '../middlewares/auth';
 import { validateBody } from '../lib/validation';
 import { logger } from '../lib/logger';
-import { authMiddleware } from '../middlewares/auth';
 import { getReflexivityRuntime } from '../lib/cognitive-reflexivity-runtime';
 
 /**
@@ -112,14 +111,28 @@ function rowToAlert(row: typeof sentraAlertsTable.$inferSelect) {
 // ────────────────────────────────────────────────────────────────────────────
 
 // GET /api/sentra/incidents
-router.get('/sentra/incidents', async (_req: Request, res: Response) => {
+// Pagination: ?limit=N (default 200, max 1000), ?offset=M (default 0).
+// Default cap of 200 keeps demo payloads under ~120KB even when the org has
+// 1000+ incidents on file (was returning ~558KB before the cap was added).
+router.get('/sentra/incidents', async (req: Request, res: Response) => {
   try {
-    const rows = await db
-      .select()
-      .from(sentraIncidentsTable)
-      .orderBy(desc(sentraIncidentsTable.detectedAt));
+    const limitRaw = Number.parseInt(String(req.query.limit ?? ''), 10);
+    const offsetRaw = Number.parseInt(String(req.query.offset ?? ''), 10);
+    const limit = Number.isFinite(limitRaw) ? Math.min(Math.max(limitRaw, 1), 1000) : 200;
+    const offset = Number.isFinite(offsetRaw) && offsetRaw >= 0 ? offsetRaw : 0;
+
+    const [rows, totalRow] = await Promise.all([
+      db
+        .select()
+        .from(sentraIncidentsTable)
+        .orderBy(desc(sentraIncidentsTable.detectedAt))
+        .limit(limit)
+        .offset(offset),
+      db.select({ count: sql<number>`count(*)::int` }).from(sentraIncidentsTable),
+    ]);
     const incidents = rows.map(rowToIncident);
-    sendSuccess(res, { incidents, total: incidents.length, source: 'live' });
+    const total = totalRow[0]?.count ?? incidents.length;
+    sendSuccess(res, { incidents, total, returned: incidents.length, limit, offset, source: 'live' });
   } catch (err) {
     handleRouteError(res, err, 'Failed to list incidents');
   }
@@ -265,14 +278,27 @@ router.patch('/sentra/incidents/:id', authMiddleware(), validateBody(updateIncid
 });
 
 // GET /api/sentra/alerts
-router.get('/sentra/alerts', async (_req: Request, res: Response) => {
+// Pagination: ?limit=N (default 200, max 1000), ?offset=M (default 0).
+// Default cap keeps payload bounded (~80KB) even when 1000+ alerts exist.
+router.get('/sentra/alerts', async (req: Request, res: Response) => {
   try {
-    const rows = await db
-      .select()
-      .from(sentraAlertsTable)
-      .orderBy(desc(sentraAlertsTable.detectedAt));
+    const limitRaw = Number.parseInt(String(req.query.limit ?? ''), 10);
+    const offsetRaw = Number.parseInt(String(req.query.offset ?? ''), 10);
+    const limit = Number.isFinite(limitRaw) ? Math.min(Math.max(limitRaw, 1), 1000) : 200;
+    const offset = Number.isFinite(offsetRaw) && offsetRaw >= 0 ? offsetRaw : 0;
+
+    const [rows, totalRow] = await Promise.all([
+      db
+        .select()
+        .from(sentraAlertsTable)
+        .orderBy(desc(sentraAlertsTable.detectedAt))
+        .limit(limit)
+        .offset(offset),
+      db.select({ count: sql<number>`count(*)::int` }).from(sentraAlertsTable),
+    ]);
     const alerts = rows.map(rowToAlert);
-    sendSuccess(res, { alerts, total: alerts.length, source: 'live' });
+    const total = totalRow[0]?.count ?? alerts.length;
+    sendSuccess(res, { alerts, total, returned: alerts.length, limit, offset, source: 'live' });
   } catch (err) {
     handleRouteError(res, err, 'Failed to list alerts');
   }

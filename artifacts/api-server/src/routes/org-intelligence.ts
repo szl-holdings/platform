@@ -75,12 +75,28 @@ const DOI_BINDINGS = [
 ];
 
 const ORG = 'szl-holdings';
-const REPOS = ['szl-cookbook', 'agi-forecast', 'szl-trust', 'vsp-otel', 'ouroboros-thesis', 'ouroboros'] as const;
-type Repo = typeof REPOS[number];
+// Round 4: replaced the hardcoded six-repo allow-list with a live
+// `GET /orgs/szl-holdings/repos` paginated lookup. The 6-name seed is
+// kept ONLY as the fallback when the org listing call fails (so the
+// board never goes fully dark on a single transport failure — same
+// "no fail-open mocks" posture as elsewhere).
+const REPO_FALLBACK_SEED = ['szl-cookbook', 'agi-forecast', 'szl-trust', 'vsp-otel', 'ouroboros-thesis', 'ouroboros'] as const;
+const MAX_REPOS = 50; // bound rate-limit and snapshot size
 
 interface TreeEntry { path: string; type: string; size?: number; }
+interface OrgRepoMeta {
+  name: string;
+  description: string | null;
+  language: string | null;
+  size: number | null;
+  pushed_at: string | null;
+  default_branch: string | null;
+  open_issues_count: number | null;
+  archived?: boolean;
+  fork?: boolean;
+}
 interface RepoSnap {
-  slug: Repo;
+  slug: string;
   url: string;
   description: string | null;
   language: string | null;
@@ -222,9 +238,38 @@ function computeShippedSignals(tree: TreeEntry[], readme: string | null): { sign
   return { signals, source_files: source.length, test_files: tests.length, receipts_present: receipts.length > 0 };
 }
 
-async function fetchRepo(slug: Repo, token: string): Promise<RepoSnap> {
+async function listOrgRepos(token: string): Promise<{ ok: boolean; repos: OrgRepoMeta[]; error?: string }> {
+  // Public repos only. Sort by pushed_at desc so freshest activity wins
+  // if we ever hit the MAX_REPOS cap. Paginate up to 100/page (GitHub max).
+  const out: OrgRepoMeta[] = [];
+  let page = 1;
+  while (out.length < MAX_REPOS && page <= 5) {
+    const r = await ghFetch(`/orgs/${ORG}/repos?per_page=100&type=public&sort=pushed&direction=desc&page=${page}`, token);
+    if (!r.ok || !Array.isArray(r.body)) {
+      if (out.length === 0) return { ok: false, repos: [], error: `org_listing_failed_http_${r.status}` };
+      break; // partial — return what we have
+    }
+    const batch = r.body as OrgRepoMeta[];
+    for (const repo of batch) {
+      // Skip archived and forks — those are not "live" surfaces.
+      if (repo.archived || repo.fork) continue;
+      out.push(repo);
+      if (out.length >= MAX_REPOS) break;
+    }
+    if (batch.length < 100) break; // last page
+    page += 1;
+  }
+  return { ok: true, repos: out };
+}
+
+async function fetchRepo(slug: string, token: string, prefetchedMeta?: OrgRepoMeta): Promise<RepoSnap> {
+  // Skip the per-repo meta call when the org listing already gave us
+  // the meta — saves 1 API call per repo (huge at 17+ repos).
+  const metaPromise = prefetchedMeta
+    ? Promise.resolve({ ok: true, status: 200, body: prefetchedMeta as unknown })
+    : ghFetch(`/repos/${ORG}/${slug}`, token);
   const [meta, tree, commits, readme] = await Promise.all([
-    ghFetch(`/repos/${ORG}/${slug}`, token),
+    metaPromise,
     ghFetch(`/repos/${ORG}/${slug}/git/trees/HEAD?recursive=1`, token),
     ghFetch(`/repos/${ORG}/${slug}/commits?per_page=3`, token),
     ghFetch(`/repos/${ORG}/${slug}/readme`, token, 'application/vnd.github.raw'),
@@ -307,7 +352,24 @@ async function buildSnapshot(): Promise<unknown> {
   if (!token) {
     throw Object.assign(new Error('github_token_missing'), { _http: 503 });
   }
-  const repos = await Promise.all(REPOS.map(r => fetchRepo(r, token)));
+
+  // Round 4: live org listing. Fall back to the 6-name seed list ONLY
+  // if listing itself fails — never silently produce a "complete" board
+  // from a stale seed when reality has more/fewer repos.
+  const listing = await listOrgRepos(token);
+  // Track the actual source so b7_org_overview.listing_source never lies.
+  // Architect HIGH (Round 4): listing.ok can be true with an empty array
+  // (e.g. token has no scope, or the org momentarily returned []); we must
+  // still report "fallback_seed_*" in that case, not "live_orgs_repos_api".
+  const usingLiveListing = listing.ok && listing.repos.length > 0;
+  const repoMetas: { slug: string; meta?: OrgRepoMeta }[] = usingLiveListing
+    ? listing.repos.map(m => ({ slug: m.name, meta: m }))
+    : REPO_FALLBACK_SEED.map(s => ({ slug: s }));
+  const listingError = listing.ok
+    ? (listing.repos.length === 0 ? 'live_listing_returned_empty' : undefined)
+    : listing.error;
+
+  const repos = await Promise.all(repoMetas.map(({ slug, meta }) => fetchRepo(slug, token, meta)));
   // Reachable = at least the meta fetch succeeded. Repos that failed the
   // tree fetch carry _error='github_tree_unreachable' but still count as
   // reachable for the meta. The verdict counts gate on the *signals*, so
@@ -335,7 +397,7 @@ async function buildSnapshot(): Promise<unknown> {
     anatomy_region: { region: 'BRAIN STEM', quechua: 'uma', meaning: 'head — the organism-level orchestration surface' },
     author: AUTHOR,
     doctrine: DOCTRINE,
-    org: { slug: ORG, url: `https://github.com/${ORG}`, repos_audited: REPOS.length },
+    org: { slug: ORG, url: `https://github.com/${ORG}`, repos_audited: repos.length },
     b1_formula_pillars: {
       source: 'GitHub REST v3 (https://api.github.com)',
       items: [
@@ -361,9 +423,26 @@ async function buildSnapshot(): Promise<unknown> {
     b4_mechanisms: MECHANISMS,
     b5_doi_bindings: DOI_BINDINGS.map(d => ({ ...d, url: `https://doi.org/10.5281/zenodo.${d.zenodo_id}` })),
     b6_org_repos: repos,
-    known_gaps: [
-      { id: 'docs-shell-repos', severity: 'low', detail: 'vessels, terra, counsel, carlota-jo are docs-shell repos in the org — implementation lives in this platform monorepo. Listed for completeness in §3 of PUBLIC_AUDIT_2026-05-18.md; not yet ingested into this snapshot to keep the focus on the six user-named repos.' },
-    ],
+    b7_org_overview: {
+      org: ORG,
+      url: `https://github.com/${ORG}`,
+      public_repos_audited: repos.length,
+      total_size_kb: repos.reduce((acc, r) => acc + (r.size_kb ?? 0), 0),
+      most_recently_pushed: [...repos]
+        .filter(r => r.pushed_at)
+        .sort((a, b) => (b.pushed_at ?? '').localeCompare(a.pushed_at ?? ''))[0]?.slug ?? null,
+      languages: Object.fromEntries(
+        Object.entries(
+          repos.reduce<Record<string, number>>((acc, r) => {
+            const k = r.language ?? '(none)';
+            acc[k] = (acc[k] ?? 0) + 1;
+            return acc;
+          }, {})
+        ).sort((a, b) => b[1] - a[1])
+      ),
+      listing_source: usingLiveListing ? 'live_orgs_repos_api' : `fallback_seed_${listingError ?? 'unknown'}`,
+    },
+    known_gaps: [],
   };
 }
 

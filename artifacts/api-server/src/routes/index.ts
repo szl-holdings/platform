@@ -232,6 +232,10 @@ router.use(lazyMatch("/terra/ops-core", () => import("./terra-ops-core"), "terra
 // GitHub REST API. Same auth posture as the per-app ops-core surfaces
 // (GET/HEAD only via isOpsCorePublicRead — see global-auth-enforcer).
 router.use(lazyMatch("/org-intelligence", () => import("./org-intelligence"), "org-intelligence"));
+// Round 4 (2026-05-18): unified ecosystem aggregator. Fans out server-
+// side to org-intelligence/snapshot + the 8 per-app ops-core/snapshots
+// so a11oy can render the entire board with ONE network call.
+router.use(lazyMatch("/ecosystem", () => import("./ecosystem"), "ecosystem"));
 
 // Sentra cyber resilience cockpit — incidents + alerts CRUD. Public demo
 // surface (in-memory store). Write paths carry CSRF double-submit protection

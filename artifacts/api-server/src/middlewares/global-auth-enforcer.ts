@@ -97,6 +97,18 @@ const PUBLIC_EXACT_PATHS = new Set([
   "/api/enterprise-mcp/link-user",
   "/api/enterprise-mcp/internal-revoke",
   "/api/enterprise-mcp/revoked-subjects",
+  // Amaru sidecar read-only proxy (routes/amaru-proxy.ts). The Conduit
+  // Operational Core page (artifacts/conduit/src/pages/operational-core.tsx)
+  // calls /api/amaru/overwatch/snapshot from the browser without a session;
+  // /healthz + /state back the supporting health pills. The proxy registers
+  // ONLY GET handlers (POST/PUT/PATCH/DELETE 404 at the router) and the
+  // upstream FastAPI organ (services/amaru) is read-only by design — R0513
+  // watches, halt authority lives in HUKLLA — so exact-path public exposure
+  // is bounded. Same posture as /api/amaru/ops-core/ already in
+  // OPS_CORE_PUBLIC_PREFIXES below.
+  "/api/amaru/healthz",
+  "/api/amaru/state",
+  "/api/amaru/overwatch/snapshot",
   "/api/enterprise-mcp/idp-configs",
   // Self-healing orchestrator — read-only GET endpoints.
   // Exact-path matches ensure the mutating PATCH /policies/:id/toggle
@@ -638,6 +650,8 @@ const OPS_CORE_PUBLIC_PREFIXES = [
   // Round 3 (2026-05-18): org-level intelligence ingest. Same posture as
   // per-app ops-core — GET/HEAD only, mutations cannot reach the handler.
   "/api/org-intelligence/",
+  // Round 4 (2026-05-18): unified ecosystem aggregator. Same posture.
+  "/api/ecosystem/",
 ] as const;
 
 function isOpsCorePublicRead(req: Request): boolean {
