@@ -1,0 +1,2 @@
+ ERROR  @szl/a11oy-runtime#typecheck: command (/home/runner/workspace/packages/a11oy-runtime) /nix/store/61lr9izijvg30pcribjdxgjxvh3bysp4-pnpm-10.26.1/bin/pnpm run typecheck exited (2)
+ ERROR  run failed: command  exited (2)

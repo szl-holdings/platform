@@ -27,14 +27,14 @@ import {
  * fetches surface a numeric value, failures are returned (never thrown) so
  * one slow or unreachable source can't take the whole batch down.
  */
-export type IngestorFn = () => Promise<IngestResult<number>>;
+export type IngestorFn = () => Promise<IngestResult<number | string>>;
 
 /**
  * Authoritative mapping from gauge id → ingestor function. Keys must match
  * the `id` of every PUBLIC_ONLY entry in `GAUGE_VARIABLES`; the registry
  * coverage assertion in `runAllPublicIngestors` guards against drift.
  */
-export const PUBLIC_INGESTORS: Readonly<Record<string, IngestorFn>> = Object.freeze({
+export const PUBLIC_INGESTORS: Readonly<Record<string, IngestorFn>> = Object.freeze<Record<string, IngestorFn>>({
   METR: () => ingestMetr(),
   EPOCH: () => ingestEpoch(),
   ARC: () => ingestArc(),
@@ -60,7 +60,7 @@ export interface VariableStatus {
   readonly source: string;
   readonly ok: boolean;
   readonly lastFetchedAt: string;
-  readonly value: number | null;
+  readonly value: number | string | null;
   readonly error: string | null;
 }
 
@@ -140,7 +140,7 @@ export async function runAllPublicIngestors(
   const results = await Promise.all(
     vars.map(async (v) => {
       const fn = ingestors[v.id];
-      let result: IngestResult<number>;
+      let result: IngestResult<number | string>;
       try {
         result = await fn();
       } catch (err) {

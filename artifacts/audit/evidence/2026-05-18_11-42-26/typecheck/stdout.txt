@@ -1,0 +1,161 @@
+
+> workspace@0.0.0 typecheck /home/runner/workspace
+> turbo run typecheck
+
+
+   • Packages in scope: @szl-holdings/action-engine, @szl-holdings/agent-core, @szl-holdings/agent-gateway, @szl-holdings/ai-control-plane, @szl-holdings/ai-engine, @szl-holdings/alloy-client, @szl-holdings/analytics, @szl-holdings/api-client-react, @szl-holdings/api-spec, @szl-holdings/api-zod, @szl-holdings/atlas-artifacts, @szl-holdings/atlas-core, @szl-holdings/atlas-events, @szl-holdings/atlas-spatial-runtime, @szl-holdings/audit, @szl-holdings/auth, @szl-holdings/auth-shared, @szl-holdings/billing-client, @szl-holdings/brand-registry, @szl-holdings/business-events, @szl-holdings/connectors, @szl-holdings/constellation, @szl-holdings/contracts, @szl-holdings/covenant-policy, @szl-holdings/crdt-sync, @szl-holdings/data-connectors, @szl-holdings/db, @szl-holdings/db-migrations, @szl-holdings/db-repository, @szl-holdings/db-schema, @szl-holdings/decision-engine, @szl-holdings/decision-fabric, @szl-holdings/design-system, @szl-holdings/document-intelligence, @szl-holdings/domain-profiles, @szl-holdings/env, @szl-holdings/evidence-graph, @szl-holdings/evidence-ledger, @szl-holdings/evolution-core, @szl-holdings/flexcache, @szl-holdings/forge-runtime, @szl-holdings/formulas, @szl-holdings/frontier-mythos, @szl-holdings/graphql-client, @szl-holdings/i18n, @szl-holdings/intelligence-feeds, @szl-holdings/marketing, @szl-holdings/mcp-client, @szl-holdings/memory-core, @szl-holdings/mobile-shared, @szl-holdings/model-passport, @szl-holdings/monte-carlo, @szl-holdings/nvidia-adapters, @szl-holdings/observability, @szl-holdings/observability-core, @szl-holdings/offline-engine, @szl-holdings/omnia-shell, @szl-holdings/openusd-export, @szl-holdings/otel, @szl-holdings/outcome-graph, @szl-holdings/payload, @szl-holdings/payload-doctrine, @szl-holdings/platform-metrics-registry, @szl-holdings/platform-registry, @szl-holdings/plugin-host, @szl-holdings/policy-engine, @szl-holdings/policy-guard, @szl-holdings/pqc-identity, @szl-holdings/prism-bus, @szl-holdings/prompt-registry, @szl-holdings/proof-chain, @szl-holdings/pulse-evals, @szl-holdings/quantum-engine, @szl-holdings/query-keys, @szl-holdings/receipt-graph, @szl-holdings/replit-auth-web, @szl-holdings/retrieval-core, @szl-holdings/scene-export, @szl-holdings/schemas, @szl-holdings/sdk, @szl-holdings/security-headers, @szl-holdings/sentra-detector-sdk, @szl-holdings/services, @szl-holdings/shared-contracts, @szl-holdings/shared-proxy, @szl-holdings/shared-ui, @szl-holdings/signal-mesh, @szl-holdings/speech-specialist, @szl-holdings/substrate-adapters, @szl-holdings/szl-doctrine, @szl-holdings/szl-receipts, @szl-holdings/telemetry-standards, @szl-holdings/temporal-tests, @szl-holdings/vsp-otel, @szl-holdings/workflow-engine, @szl-holdings/workflow-runtime, @szl-holdings/worldline, @szl/a11oy-runtime, @szl/alloy, @szl/alloy-agentic-rag, @szl/substrate, @szl/substrate-client, @szl/substrate-mcp-gateway, @workspace/a11oy, @workspace/a11oy-cli, @workspace/a11oy-fabric, @workspace/a11oy-orchestration, @workspace/a11oy-reliquary, @workspace/aef-contracts, @workspace/aef-domain-profiles, @workspace/aef-evals, @workspace/aef-evidence-ledger, @workspace/aef-policy-guard, @workspace/aef-retrieval-core, @workspace/aef-sdk, @workspace/aef-storage-adapters, @workspace/aef-workflow-runtime, @workspace/agents-core, @workspace/agents-evals, @workspace/agents-prompts, @workspace/agents-sdk-bridge, @workspace/agents-tools, @workspace/agi-forecast, @workspace/alloy, @workspace/alloy-crew, @workspace/alloy-embed-worker, @workspace/alloy-embedding-api, @workspace/alloy-fabric-api, @workspace/alloy-fabric-ingest-control, @workspace/alloy-ingestion-orchestrator, @workspace/alloy-rank-worker, @workspace/alloy-rerank-worker, @workspace/alloy-runtime-api, @workspace/alloy-vector-worker, @workspace/anomaly-fabric, @workspace/api-server, @workspace/approvals-inbox, @workspace/codex-kernel, @workspace/cognitive-observability, @workspace/cognitive-reflexivity, @workspace/cognitive-runtime, @workspace/conduit, @workspace/continuum-embedding-api, @workspace/demo-seed, @workspace/drift-eval, @workspace/eval-forge, @workspace/eval-harness, @workspace/eval-os, @workspace/executive-briefing, @workspace/forecast-fabric, @workspace/frontier-ingest, @workspace/guardian, @workspace/integrations-openai-ai-react, @workspace/integrations-openai-ai-server, @workspace/langextract-bridge, @workspace/lexicon, @workspace/lutar-formulas, @workspace/memory-fabric, @workspace/nexus-mcp, @workspace/object-storage-web, @workspace/ontology, @workspace/ouroboros, @workspace/ouroboros-adapters, @workspace/ouroboros-alloy, @workspace/ouroboros-anchor, @workspace/ouroboros-anduril, @workspace/ouroboros-aristotle, @workspace/ouroboros-bench, @workspace/ouroboros-blanca, @workspace/ouroboros-davinci, @workspace/ouroboros-emerald, @workspace/ouroboros-flashforge, @workspace/ouroboros-fractional, @workspace/ouroboros-gauss, @workspace/ouroboros-guardrails, @workspace/ouroboros-horizon, @workspace/ouroboros-integrations, @workspace/ouroboros-invariant, @workspace/ouroboros-jung, @workspace/ouroboros-lara, @workspace/ouroboros-newton, @workspace/ouroboros-oppenheimer, @workspace/ouroboros-resonance, @workspace/ouroboros-socrates, @workspace/ouroboros-theosophy, @workspace/ouroboros-trithemius, @workspace/ouroboros-verifier, @workspace/planner, @workspace/reconciliation, @workspace/reflection-engine, @workspace/replay-core, @workspace/run-ledger, @workspace/sandbox-runtime, @workspace/scripts, @workspace/self-model, @workspace/sentra, @workspace/simulation, @workspace/skill-library, @workspace/storybook, @workspace/tokens, @workspace/tool-mesh, @workspace/tool-registry, @workspace/trace-graph, @workspace/verifier, @workspace/vessels, @workspace/vessels-pitch
+   • Running typecheck in 206 packages
+   • Remote caching disabled
+
+@szl-holdings/vsp-otel:build: cache miss, executing 3543b1ce9176419e
+@workspace/anomaly-fabric:typecheck: cache miss, executing a2327dc894e9e70b
+@workspace/self-model:typecheck: cache miss, executing 526d63eda173a1fe
+@szl-holdings/contracts:typecheck: cache miss, executing addeccf4261a2e96
+@szl-holdings/payload-doctrine:build: cache miss, executing 94ca0c3a3bdabf80
+@workspace/aef-contracts:build: cache miss, executing c821c53c49f76f2b
+@workspace/self-model:typecheck: 
+@workspace/self-model:typecheck: > @workspace/self-model@0.0.0 typecheck /home/runner/workspace/packages/self-model
+@workspace/self-model:typecheck: > tsc -p tsconfig.json --noEmit
+@workspace/self-model:typecheck: 
+@szl-holdings/contracts:typecheck: 
+@szl-holdings/contracts:typecheck: > @szl-holdings/contracts@0.1.0 typecheck /home/runner/workspace/packages/contracts
+@szl-holdings/contracts:typecheck: > tsc --noEmit
+@szl-holdings/contracts:typecheck: 
+@szl-holdings/payload-doctrine:build: 
+@szl-holdings/payload-doctrine:build: > @szl-holdings/payload-doctrine@0.1.0 build /home/runner/workspace/packages/payload-doctrine
+@szl-holdings/payload-doctrine:build: > tsc
+@szl-holdings/payload-doctrine:build: 
+@workspace/aef-contracts:build: 
+@workspace/aef-contracts:build: > @workspace/aef-contracts@0.0.0 build /home/runner/workspace/packages/aef-contracts
+@workspace/aef-contracts:build: > tsc --build
+@workspace/aef-contracts:build: 
+@workspace/anomaly-fabric:typecheck: 
+@workspace/anomaly-fabric:typecheck: > @workspace/anomaly-fabric@1.0.0 typecheck /home/runner/workspace/packages/anomaly-fabric
+@workspace/anomaly-fabric:typecheck: > tsc -p tsconfig.json --noEmit
+@workspace/anomaly-fabric:typecheck: 
+@szl-holdings/document-intelligence:typecheck: cache miss, executing 26c7be4be88e4d67
+@szl-holdings/vsp-otel:build: 
+@szl-holdings/vsp-otel:build: > @szl-holdings/vsp-otel@0.1.0 build /home/runner/workspace/packages/vsp-otel
+@szl-holdings/vsp-otel:build: > tsc
+@szl-holdings/vsp-otel:build: 
+@szl-holdings/szl-receipts:build: cache miss, executing 1a2b5f5037f28874
+@szl-holdings/mobile-shared:typecheck: cache miss, executing 2484798a56e0721b
+@workspace/ouroboros-adapters:typecheck: cache miss, executing 800a57c02f4524d9
+@szl-holdings/document-intelligence:typecheck: 
+@szl-holdings/document-intelligence:typecheck: > @szl-holdings/document-intelligence@0.0.0 typecheck /home/runner/workspace/packages/document-intelligence
+@szl-holdings/document-intelligence:typecheck: > tsc -p tsconfig.json --noEmit
+@szl-holdings/document-intelligence:typecheck: 
+@szl-holdings/szl-receipts:build: 
+@szl-holdings/szl-receipts:build: > @szl-holdings/szl-receipts@0.1.0 build /home/runner/workspace/packages/szl-receipts
+@szl-holdings/szl-receipts:build: > tsc
+@szl-holdings/szl-receipts:build: 
+@szl-holdings/env:typecheck: cache miss, executing 5640a8dfd4f0d200
+@szl-holdings/mobile-shared:typecheck: 
+@szl-holdings/mobile-shared:typecheck: > @szl-holdings/mobile-shared@0.0.0 typecheck /home/runner/workspace/lib/mobile-shared
+@szl-holdings/mobile-shared:typecheck: > tsc -p tsconfig.json --noEmit
+@szl-holdings/mobile-shared:typecheck: 
+@workspace/ouroboros-adapters:typecheck: 
+@workspace/ouroboros-adapters:typecheck: > @workspace/ouroboros-adapters@0.1.0 typecheck /home/runner/workspace/packages/ouroboros-adapters
+@workspace/ouroboros-adapters:typecheck: > tsc --noEmit
+@workspace/ouroboros-adapters:typecheck: 
+@szl-holdings/env:typecheck: 
+@szl-holdings/env:typecheck: > @szl-holdings/env@0.1.0 typecheck /home/runner/workspace/packages/env
+@szl-holdings/env:typecheck: > tsc --noEmit
+@szl-holdings/env:typecheck: 
+@workspace/ouroboros-adapters:typecheck: src/index.ts(11,28): error TS2307: Cannot find module 'node:crypto' or its corresponding type declarations.
+@workspace/ouroboros-adapters:typecheck: src/index.ts(43,10): error TS2591: Cannot find name 'Buffer'. Do you need to install type definitions for node? Try `npm i --save-dev @types/node` and then add 'node' to the types field in your tsconfig.
+@workspace/ouroboros-adapters:typecheck:  ELIFECYCLE  Command failed with exit code 2.
+@szl-holdings/platform-registry:typecheck: cache miss, executing 301c0f61f3d9d740
+@workspace/tool-registry:typecheck: cache miss, executing 5027acf5380e437a
+@szl-holdings/payload-doctrine:build:  ELIFECYCLE  Command failed.
+@szl-holdings/env:typecheck:  ELIFECYCLE  Command failed.
+@szl-holdings/szl-receipts:build:  ELIFECYCLE  Command failed.
+@szl-holdings/api-spec:codegen: cache miss, executing 95915ec0bfa385d8
+@szl-holdings/document-intelligence:typecheck:  ELIFECYCLE  Command failed.
+@workspace/self-model:typecheck:  ELIFECYCLE  Command failed.
+@szl-holdings/contracts:typecheck:  ELIFECYCLE  Command failed.
+@workspace/anomaly-fabric:typecheck:  ELIFECYCLE  Command failed.
+@szl-holdings/mobile-shared:typecheck:  ELIFECYCLE  Command failed.
+@szl-holdings/vsp-otel:build:  ELIFECYCLE  Command failed.
+@szl-holdings/offline-engine:typecheck: cache miss, executing a991aaca48de5210
+@szl-holdings/speech-specialist:typecheck: cache miss, executing 73c1cc012e23b965
+@workspace/ouroboros-resonance:typecheck: cache miss, executing 84cf37e88c1378e8
+@szl-holdings/analytics:typecheck: cache miss, executing 97ee6c1609e4a8b9
+@szl/substrate-client:build: cache miss, executing 2cea8816568533e3
+@szl-holdings/sentra-detector-sdk:typecheck: cache miss, executing a4f7f0c92e405a4a
+@workspace/ouroboros:typecheck: cache miss, executing f4eb4cd32d1b18af
+@szl-holdings/shared-contracts:typecheck: cache miss, executing 80f13b8fd7d05900
+@szl-holdings/brand-registry:typecheck: cache miss, executing cb264de1b7d2bd7a
+@szl-holdings/pqc-identity:typecheck: cache miss, executing e82406f9573282c5
+@workspace/simulation:typecheck: cache miss, executing e2c76547251945e9
+@workspace/eval-os:typecheck: cache miss, executing 0ef3a07340202a43
+@szl-holdings/crdt-sync:typecheck: cache miss, executing 31a3c076f96e2fb3
+@szl-holdings/platform-metrics-registry:typecheck: cache miss, executing 03bc3cc27dae0124
+@workspace/ouroboros-anchor:typecheck: cache miss, executing 72063e2399e28eca
+@workspace/drift-eval:typecheck: cache miss, executing 80f995c3d076bb5f
+@workspace/langextract-bridge:typecheck: cache miss, executing 223561158fb52d73
+@workspace/a11oy-cli:typecheck: cache miss, executing 1b801472a2cb8480
+@workspace/ouroboros-horizon:typecheck: cache miss, executing 292fb3ce1ca86bda
+@szl-holdings/schemas:typecheck: cache miss, executing 9aa772a49eb02cf7
+@szl-holdings/api-spec:typecheck: cache miss, executing 0f961f3cbd9bece2
+@szl/substrate-client:typecheck: cache miss, executing 4f7143ea1a475a65
+@szl-holdings/agent-gateway:typecheck: cache miss, executing 00721e0e35ef9b49
+@szl-holdings/graphql-client:typecheck: cache miss, executing b67b8df4ccac952c
+@szl-holdings/monte-carlo:typecheck: cache miss, executing 57008812396e6ec9
+@szl-holdings/szl-receipts:typecheck: cache miss, executing c59e7be84550d5b6
+@workspace/reconciliation:typecheck: cache miss, executing 7b9b788df1347896
+@workspace/memory-fabric:typecheck: cache miss, executing 2d1196547cdf1a53
+@workspace/vessels-pitch:typecheck: cache miss, executing c7433d6833b5640b
+@workspace/skill-library:typecheck: cache miss, executing 74fa311f0e10c517
+@szl-holdings/pulse-evals:typecheck: cache miss, executing e01a4c65685a3d08
+@szl-holdings/quantum-engine:typecheck: cache miss, executing 30f5d0819562e97f
+@szl-holdings/i18n:typecheck: cache miss, executing e20c419cdfa21256
+@workspace/forecast-fabric:typecheck: cache miss, executing def7e7dbd1ef0b20
+@szl/a11oy-runtime:typecheck: cache miss, executing 296d6469a0b2982a
+@szl-holdings/sentra-detector-sdk:build: cache miss, executing 2102dfccce298951
+@szl-holdings/vsp-otel:typecheck: cache miss, executing 2b7a789b26c09475
+@szl-holdings/atlas-core:typecheck: cache miss, executing 6d5ce4df054d5e0a
+@workspace/a11oy-orchestration:typecheck: cache miss, executing c3ec14eb108b7a33
+@szl-holdings/flexcache:typecheck: cache miss, executing 968a8f8b9c15fae6
+@workspace/lutar-formulas:typecheck: cache miss, executing 974b0cf223ad5c1d
+@workspace/eval-harness:typecheck: cache miss, executing 4d800d8b8dc74cf0
+@workspace/object-storage-web:typecheck: cache miss, executing 03bfb996e8c70c3e
+@workspace/replay-core:typecheck: cache miss, executing abca9b7d7c01a4cc
+@workspace/a11oy-fabric:typecheck: cache miss, executing fe923de240757ac2
+@szl-holdings/payload-doctrine:typecheck: cache miss, executing e7c6cb01633f3a16
+@szl-holdings/payload:typecheck: cache miss, executing 9f7d897bd08c14be
+@workspace/aef-contracts:typecheck: cache miss, executing fb46151ec37cfb1f
+@szl-holdings/frontier-mythos:typecheck: cache miss, executing 702bbf0b84c5191f
+@szl-holdings/flexcache:build: cache miss, executing c0f7a3da0e1491a2
+@szl-holdings/billing-client:build: cache miss, executing 881ccc14007f854b
+@workspace/codex-kernel:typecheck: cache miss, executing 164a12abc3de8eef
+@workspace/ouroboros-invariant:typecheck: cache miss, executing 62a2f5d8c505e73f
+@szl-holdings/policy-engine:build: cache miss, executing 9729538da00d07f2
+@szl-holdings/decision-engine:typecheck: cache miss, executing 1fd1a9d33fe624c6
+@szl-holdings/decision-engine:build: cache miss, executing 50bdb5400b1cd18d
+@szl-holdings/policy-engine:typecheck: cache miss, executing b4c0d1f3bb72e5d1
+@szl-holdings/atlas-events:typecheck: cache miss, executing 979fe9fca8b2c82b
+@szl-holdings/szl-doctrine:typecheck: cache miss, executing d36ebbf32a9126c0
+@workspace/agents-prompts:typecheck: cache miss, executing 277a60e49dd4c580
+@workspace/nexus-mcp:build: cache miss, executing 9bf23f3d767ef1cc
+@workspace/nexus-mcp:typecheck: cache miss, executing c97f0e09d6c326de
+@szl-holdings/auth-shared:typecheck: cache miss, executing 6709c29a00609d67
+@szl-holdings/auth:typecheck: cache miss, executing cd8ffbf47b040cb7
+@szl-holdings/services:typecheck: cache miss, executing 8464340afe79c273
+@szl-holdings/db:typecheck: cache miss, executing 073ad57af5a9310a
+@szl-holdings/formulas:typecheck: cache miss, executing ab17faa14b28ae66
+@workspace/aef-retrieval-core:typecheck: cache miss, executing df9c3cfd9e480833
+@workspace/alloy-rerank-worker:typecheck: cache miss, executing a69f1355fe455e5a
+@workspace/aef-policy-guard:typecheck: cache miss, executing 7f826d620394604c
+@workspace/aef-evidence-ledger:typecheck: cache miss, executing ce7a607d1efbfd8d
+@workspace/alloy-embed-worker:typecheck: cache miss, executing c37edf89f3335907
+@workspace/alloy-rank-worker:typecheck: cache miss, executing cd825c1951c91959
+@workspace/aef-storage-adapters:typecheck: cache miss, executing 5208d567f85d7d1d
+@workspace/aef-domain-profiles:typecheck: cache miss, executing 583531f9dfa44bb0
+
+ Tasks:    1 successful, 89 total
+Cached:    0 cached, 89 total
+  Time:    24.027s 
+Failed:    @workspace/ouroboros-adapters#typecheck
+
+ ELIFECYCLE  Command failed with exit code 2.

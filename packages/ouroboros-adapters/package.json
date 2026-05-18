@@ -9,5 +9,5 @@
     ".": { "types": "./src/index.ts", "default": "./src/index.ts" }
   },
   "scripts": { "typecheck": "tsc --noEmit" },
-  "devDependencies": { "typescript": "*" }
+  "devDependencies": { "typescript": "*", "@types/node": "*" }
 }

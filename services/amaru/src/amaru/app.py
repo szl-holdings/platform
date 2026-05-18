@@ -122,6 +122,36 @@ def healthz() -> dict[str, Any]:
     }
 
 
+@app.get("/health")
+def health() -> dict[str, Any]:
+    """Alias of /healthz for clients that probe the conventional path."""
+    return healthz()
+
+
+@app.get("/")
+def root() -> dict[str, Any]:
+    """Service identity card — points discoverers at /docs and /healthz."""
+    return {
+        "service": "amaru",
+        "version": __version__,
+        "docs": "/docs",
+        "openapi": "/openapi.json",
+        "health": "/healthz",
+        "endpoints": [
+            "/healthz",
+            "/overwatch/snapshot",
+            "/chakra/{name}/leader",
+            "/chakra/{name}/evaluate",
+            "/scheduler/tick",
+            "/scheduler/wiring",
+            "/state",
+            "/receipts",
+            "/events",
+            "/tripwires",
+        ],
+    }
+
+
 @app.get("/overwatch/snapshot")
 def overwatch_snapshot() -> dict[str, Any]:
     """R0513 — read-only OVERWATCH panel (6 invariants).

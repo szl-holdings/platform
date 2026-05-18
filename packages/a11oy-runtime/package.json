@@ -17,6 +17,7 @@
     "@huggingface/tiny-agents": "^0.3.4"
   },
   "devDependencies": {
-    "typescript": "catalog:"
+    "typescript": "catalog:",
+    "@types/node": "catalog:"
   }
 }

@@ -171,6 +171,8 @@ function expectedValue(dist: Distribution): number {
     }
     case 'poisson':
       return dist.lambda;
+    case 'bernoulli':
+      return dist.p;
     case 'constant':
       return dist.value;
     case 'custom': {

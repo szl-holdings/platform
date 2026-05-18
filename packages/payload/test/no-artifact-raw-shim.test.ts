@@ -38,9 +38,9 @@ function listArtifacts(): string[] {
 function listMjsBundles(distDir: string): string[] {
   if (!existsSync(distDir)) return [];
   const out: string[] = [];
-  let entries: ReturnType<typeof readdirSync>;
+  let entries;
   try {
-    entries = readdirSync(distDir, { withFileTypes: true });
+    entries = readdirSync(distDir, { withFileTypes: true, encoding: "utf8" });
   } catch {
     return [];
   }

@@ -1,0 +1,10 @@
+{
+  "id": "typecheck",
+  "label": "Typecheck",
+  "cmd": "pnpm run typecheck",
+  "priority": "P0",
+  "exitCode": 2,
+  "passed": false,
+  "durationMs": 47701,
+  "timestamp": "2026-05-18T12:06:22.480Z"
+}

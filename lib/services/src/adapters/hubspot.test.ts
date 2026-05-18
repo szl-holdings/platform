@@ -114,7 +114,7 @@ describe('HubSpotAdapter (live mapping)', () => {
     globalThis.fetch = fetchSpy as unknown as typeof fetch;
     await new HubSpotAdapter().listContacts();
     expect(fetchSpy).toHaveBeenCalledTimes(1);
-    const [url, init] = fetchSpy.mock.calls[0] as [string, RequestInit];
+    const [url, init] = fetchSpy.mock.calls[0] as unknown as [string, RequestInit];
     expect(url).toContain('https://api.hubapi.com/crm/v3/objects/contacts');
     expect((init.headers as Record<string, string>).Authorization).toBe(
       'Bearer fake-token-for-test',

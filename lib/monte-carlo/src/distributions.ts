@@ -5,8 +5,14 @@ export type DistributionType =
   | 'triangular'
   | 'beta'
   | 'poisson'
+  | 'bernoulli'
   | 'constant'
   | 'custom';
+
+export interface BernoulliDistribution {
+  type: 'bernoulli';
+  p: number;
+}
 
 export interface NormalDistribution {
   type: 'normal';
@@ -64,6 +70,7 @@ export type Distribution =
   | TriangularDistribution
   | BetaDistribution
   | PoissonDistribution
+  | BernoulliDistribution
   | ConstantDistribution
   | CustomDistribution;
 
@@ -148,6 +155,9 @@ export function sample(dist: Distribution): number {
 
     case 'poisson':
       return randomPoisson(dist.lambda);
+
+    case 'bernoulli':
+      return Math.random() < dist.p ? 1 : 0;
 
     case 'constant':
       return dist.value;

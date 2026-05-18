@@ -1,0 +1,318 @@
+
+> workspace@0.0.0 typecheck /home/runner/workspace
+> turbo run typecheck
+
+
+   • Packages in scope: @szl-holdings/action-engine, @szl-holdings/agent-core, @szl-holdings/agent-gateway, @szl-holdings/ai-control-plane, @szl-holdings/ai-engine, @szl-holdings/alloy-client, @szl-holdings/analytics, @szl-holdings/api-client-react, @szl-holdings/api-spec, @szl-holdings/api-zod, @szl-holdings/atlas-artifacts, @szl-holdings/atlas-core, @szl-holdings/atlas-events, @szl-holdings/atlas-spatial-runtime, @szl-holdings/audit, @szl-holdings/auth, @szl-holdings/auth-shared, @szl-holdings/billing-client, @szl-holdings/brand-registry, @szl-holdings/business-events, @szl-holdings/connectors, @szl-holdings/constellation, @szl-holdings/contracts, @szl-holdings/covenant-policy, @szl-holdings/crdt-sync, @szl-holdings/data-connectors, @szl-holdings/db, @szl-holdings/db-migrations, @szl-holdings/db-repository, @szl-holdings/db-schema, @szl-holdings/decision-engine, @szl-holdings/decision-fabric, @szl-holdings/design-system, @szl-holdings/document-intelligence, @szl-holdings/domain-profiles, @szl-holdings/env, @szl-holdings/evidence-graph, @szl-holdings/evidence-ledger, @szl-holdings/evolution-core, @szl-holdings/flexcache, @szl-holdings/forge-runtime, @szl-holdings/formulas, @szl-holdings/frontier-mythos, @szl-holdings/graphql-client, @szl-holdings/i18n, @szl-holdings/intelligence-feeds, @szl-holdings/marketing, @szl-holdings/mcp-client, @szl-holdings/memory-core, @szl-holdings/mobile-shared, @szl-holdings/model-passport, @szl-holdings/monte-carlo, @szl-holdings/nvidia-adapters, @szl-holdings/observability, @szl-holdings/observability-core, @szl-holdings/offline-engine, @szl-holdings/omnia-shell, @szl-holdings/openusd-export, @szl-holdings/otel, @szl-holdings/outcome-graph, @szl-holdings/payload, @szl-holdings/payload-doctrine, @szl-holdings/platform-metrics-registry, @szl-holdings/platform-registry, @szl-holdings/plugin-host, @szl-holdings/policy-engine, @szl-holdings/policy-guard, @szl-holdings/pqc-identity, @szl-holdings/prism-bus, @szl-holdings/prompt-registry, @szl-holdings/proof-chain, @szl-holdings/pulse-evals, @szl-holdings/quantum-engine, @szl-holdings/query-keys, @szl-holdings/receipt-graph, @szl-holdings/replit-auth-web, @szl-holdings/retrieval-core, @szl-holdings/scene-export, @szl-holdings/schemas, @szl-holdings/sdk, @szl-holdings/security-headers, @szl-holdings/sentra-detector-sdk, @szl-holdings/services, @szl-holdings/shared-contracts, @szl-holdings/shared-proxy, @szl-holdings/shared-ui, @szl-holdings/signal-mesh, @szl-holdings/speech-specialist, @szl-holdings/substrate-adapters, @szl-holdings/szl-doctrine, @szl-holdings/szl-receipts, @szl-holdings/telemetry-standards, @szl-holdings/temporal-tests, @szl-holdings/vsp-otel, @szl-holdings/workflow-engine, @szl-holdings/workflow-runtime, @szl-holdings/worldline, @szl/a11oy-runtime, @szl/alloy, @szl/alloy-agentic-rag, @szl/substrate, @szl/substrate-client, @szl/substrate-mcp-gateway, @workspace/a11oy, @workspace/a11oy-cli, @workspace/a11oy-fabric, @workspace/a11oy-orchestration, @workspace/a11oy-reliquary, @workspace/aef-contracts, @workspace/aef-domain-profiles, @workspace/aef-evals, @workspace/aef-evidence-ledger, @workspace/aef-policy-guard, @workspace/aef-retrieval-core, @workspace/aef-sdk, @workspace/aef-storage-adapters, @workspace/aef-workflow-runtime, @workspace/agents-core, @workspace/agents-evals, @workspace/agents-prompts, @workspace/agents-sdk-bridge, @workspace/agents-tools, @workspace/agi-forecast, @workspace/alloy, @workspace/alloy-crew, @workspace/alloy-embed-worker, @workspace/alloy-embedding-api, @workspace/alloy-fabric-api, @workspace/alloy-fabric-ingest-control, @workspace/alloy-ingestion-orchestrator, @workspace/alloy-rank-worker, @workspace/alloy-rerank-worker, @workspace/alloy-runtime-api, @workspace/alloy-vector-worker, @workspace/anomaly-fabric, @workspace/api-server, @workspace/approvals-inbox, @workspace/codex-kernel, @workspace/cognitive-observability, @workspace/cognitive-reflexivity, @workspace/cognitive-runtime, @workspace/conduit, @workspace/continuum-embedding-api, @workspace/demo-seed, @workspace/drift-eval, @workspace/eval-forge, @workspace/eval-harness, @workspace/eval-os, @workspace/executive-briefing, @workspace/forecast-fabric, @workspace/frontier-ingest, @workspace/guardian, @workspace/integrations-openai-ai-react, @workspace/integrations-openai-ai-server, @workspace/langextract-bridge, @workspace/lexicon, @workspace/lutar-formulas, @workspace/memory-fabric, @workspace/nexus-mcp, @workspace/object-storage-web, @workspace/ontology, @workspace/ouroboros, @workspace/ouroboros-adapters, @workspace/ouroboros-alloy, @workspace/ouroboros-anchor, @workspace/ouroboros-anduril, @workspace/ouroboros-aristotle, @workspace/ouroboros-bench, @workspace/ouroboros-blanca, @workspace/ouroboros-davinci, @workspace/ouroboros-emerald, @workspace/ouroboros-flashforge, @workspace/ouroboros-fractional, @workspace/ouroboros-gauss, @workspace/ouroboros-guardrails, @workspace/ouroboros-horizon, @workspace/ouroboros-integrations, @workspace/ouroboros-invariant, @workspace/ouroboros-jung, @workspace/ouroboros-lara, @workspace/ouroboros-newton, @workspace/ouroboros-oppenheimer, @workspace/ouroboros-resonance, @workspace/ouroboros-socrates, @workspace/ouroboros-theosophy, @workspace/ouroboros-trithemius, @workspace/ouroboros-verifier, @workspace/planner, @workspace/reconciliation, @workspace/reflection-engine, @workspace/replay-core, @workspace/run-ledger, @workspace/sandbox-runtime, @workspace/scripts, @workspace/self-model, @workspace/sentra, @workspace/simulation, @workspace/skill-library, @workspace/storybook, @workspace/tokens, @workspace/tool-mesh, @workspace/tool-registry, @workspace/trace-graph, @workspace/verifier, @workspace/vessels, @workspace/vessels-pitch
+   • Running typecheck in 206 packages
+   • Remote caching disabled
+
+@szl-holdings/payload:typecheck: cache miss, executing 5750f1ac52b2d848
+@szl-holdings/analytics:typecheck: cache hit, replaying logs 2de20074d73979d5
+@szl-holdings/analytics:typecheck: 
+@szl-holdings/analytics:typecheck: > @szl-holdings/analytics@0.0.0 typecheck /home/runner/workspace/lib/analytics
+@szl-holdings/analytics:typecheck: > tsc -p tsconfig.json --noEmit
+@szl-holdings/analytics:typecheck: 
+@szl-holdings/document-intelligence:typecheck: cache miss, executing 66f270c83b4ef473
+@szl-holdings/pqc-identity:typecheck: cache miss, executing 88d65d678982b7f8
+@szl-holdings/offline-engine:typecheck: cache miss, executing bcabc899ce6bd965
+@szl-holdings/contracts:typecheck: cache hit, replaying logs 8f5e97a6c1ae19b1
+@szl-holdings/contracts:typecheck: 
+@szl-holdings/contracts:typecheck: > @szl-holdings/contracts@0.1.0 typecheck /home/runner/workspace/packages/contracts
+@szl-holdings/contracts:typecheck: > tsc --noEmit
+@szl-holdings/contracts:typecheck: 
+@szl-holdings/pulse-evals:typecheck: cache hit, replaying logs d732d31b24e40ef6
+@szl-holdings/pulse-evals:typecheck: 
+@szl-holdings/pulse-evals:typecheck: > @szl-holdings/pulse-evals@0.0.0 typecheck /home/runner/workspace/lib/pulse-evals
+@szl-holdings/pulse-evals:typecheck: > tsc -p tsconfig.json --noEmit
+@szl-holdings/pulse-evals:typecheck: 
+@szl-holdings/szl-receipts:build: cache hit, replaying logs d4ea1648d4759829
+@szl-holdings/szl-receipts:build: 
+@szl-holdings/szl-receipts:build: > @szl-holdings/szl-receipts@0.1.0 build /home/runner/workspace/packages/szl-receipts
+@szl-holdings/szl-receipts:build: > tsc
+@szl-holdings/szl-receipts:build: 
+@workspace/aef-contracts:build: cache hit, replaying logs 52132b016b5c50af
+@workspace/aef-contracts:build: 
+@workspace/aef-contracts:build: > @workspace/aef-contracts@0.0.0 build /home/runner/workspace/packages/aef-contracts
+@workspace/aef-contracts:build: > tsc --build
+@workspace/aef-contracts:build: 
+@workspace/codex-kernel:typecheck: cache hit, replaying logs d2c305bd8ab16242
+@workspace/codex-kernel:typecheck: 
+@workspace/codex-kernel:typecheck: > @workspace/codex-kernel@1.0.0 typecheck /home/runner/workspace/packages/codex-kernel
+@workspace/codex-kernel:typecheck: > tsc -p tsconfig.json --noEmit
+@workspace/codex-kernel:typecheck: 
+@szl-holdings/i18n:typecheck: cache hit, replaying logs a5e4ce15854bf390
+@szl-holdings/i18n:typecheck: 
+@szl-holdings/i18n:typecheck: > @szl-holdings/i18n@0.0.0 typecheck /home/runner/workspace/lib/i18n
+@szl-holdings/i18n:typecheck: > tsc -p tsconfig.json --noEmit
+@szl-holdings/i18n:typecheck: 
+@szl-holdings/platform-registry:typecheck: cache miss, executing b19a8895ff2c567c
+@szl-holdings/szl-receipts:typecheck: cache miss, executing 9c2829a302d9657d
+@workspace/a11oy-cli:typecheck: cache miss, executing 9f7d00bf3c8f556c
+@workspace/forecast-fabric:typecheck: cache miss, executing 1e3c83a3af01bfe0
+@szl-holdings/shared-contracts:typecheck: cache miss, executing 293228ee04784126
+@szl-holdings/pqc-identity:typecheck: 
+@szl-holdings/pqc-identity:typecheck: > @szl-holdings/pqc-identity@0.0.0 typecheck /home/runner/workspace/lib/pqc-identity
+@szl-holdings/pqc-identity:typecheck: > tsc -p tsconfig.json --noEmit
+@szl-holdings/pqc-identity:typecheck: 
+@szl-holdings/offline-engine:typecheck: 
+@szl-holdings/offline-engine:typecheck: > @szl-holdings/offline-engine@0.0.0 typecheck /home/runner/workspace/lib/offline-engine
+@szl-holdings/offline-engine:typecheck: > tsc -p tsconfig.json --noEmit
+@szl-holdings/offline-engine:typecheck: 
+@szl-holdings/quantum-engine:typecheck: cache miss, executing 2e7562354d7dd2fe
+@szl-holdings/document-intelligence:typecheck: 
+@szl-holdings/document-intelligence:typecheck: > @szl-holdings/document-intelligence@0.0.0 typecheck /home/runner/workspace/packages/document-intelligence
+@szl-holdings/document-intelligence:typecheck: > tsc -p tsconfig.json --noEmit
+@szl-holdings/document-intelligence:typecheck: 
+@szl-holdings/payload:typecheck: 
+@szl-holdings/payload:typecheck: > @szl-holdings/payload@0.1.0 typecheck /home/runner/workspace/packages/payload
+@szl-holdings/payload:typecheck: > tsc --noEmit
+@szl-holdings/payload:typecheck: 
+@szl-holdings/shared-contracts:typecheck: 
+@szl-holdings/shared-contracts:typecheck: > @szl-holdings/shared-contracts@0.1.0 typecheck /home/runner/workspace/packages/shared-contracts
+@szl-holdings/shared-contracts:typecheck: > tsc --noEmit
+@szl-holdings/shared-contracts:typecheck: 
+@szl-holdings/quantum-engine:typecheck: 
+@szl-holdings/quantum-engine:typecheck: > @szl-holdings/quantum-engine@0.0.0 typecheck /home/runner/workspace/lib/quantum-engine
+@szl-holdings/quantum-engine:typecheck: > tsc -p tsconfig.json --noEmit
+@szl-holdings/quantum-engine:typecheck: 
+@workspace/forecast-fabric:typecheck: 
+@workspace/forecast-fabric:typecheck: > @workspace/forecast-fabric@1.0.0 typecheck /home/runner/workspace/packages/forecast-fabric
+@workspace/forecast-fabric:typecheck: > tsc -p tsconfig.json --noEmit
+@workspace/forecast-fabric:typecheck: 
+@workspace/a11oy-cli:typecheck: 
+@workspace/a11oy-cli:typecheck: > @workspace/a11oy-cli@1.0.0 typecheck /home/runner/workspace/packages/a11oy-cli
+@workspace/a11oy-cli:typecheck: > tsc --noEmit
+@workspace/a11oy-cli:typecheck: 
+@szl-holdings/szl-receipts:typecheck: 
+@szl-holdings/szl-receipts:typecheck: > @szl-holdings/szl-receipts@0.1.0 typecheck /home/runner/workspace/packages/szl-receipts
+@szl-holdings/szl-receipts:typecheck: > tsc --noEmit
+@szl-holdings/szl-receipts:typecheck: 
+@szl-holdings/platform-registry:typecheck: 
+@szl-holdings/platform-registry:typecheck: > @szl-holdings/platform-registry@0.1.0 typecheck /home/runner/workspace/packages/config
+@szl-holdings/platform-registry:typecheck: > tsc --noEmit
+@szl-holdings/platform-registry:typecheck: 
+@workspace/vessels-pitch:typecheck: cache miss, executing 0afe9963cd5b48a4
+@szl-holdings/crdt-sync:typecheck: cache hit, replaying logs 1593efae0d9ddb7d
+@szl-holdings/crdt-sync:typecheck: 
+@szl-holdings/crdt-sync:typecheck: > @szl-holdings/crdt-sync@0.0.0 typecheck /home/runner/workspace/lib/crdt-sync
+@szl-holdings/crdt-sync:typecheck: > tsc -p tsconfig.json --noEmit
+@szl-holdings/crdt-sync:typecheck: 
+@workspace/a11oy-fabric:typecheck: cache miss, executing 3c8c0c7167a24bd5
+@workspace/vessels-pitch:typecheck: 
+@workspace/vessels-pitch:typecheck: > @workspace/vessels-pitch@0.0.0 typecheck /home/runner/workspace/artifacts/vessels-pitch
+@workspace/vessels-pitch:typecheck: > tsc -p tsconfig.json --noEmit
+@workspace/vessels-pitch:typecheck: 
+@szl-holdings/vsp-otel:build: cache hit, replaying logs 7f240c2209d1a881
+@szl-holdings/vsp-otel:build: 
+@szl-holdings/vsp-otel:build: > @szl-holdings/vsp-otel@0.1.0 build /home/runner/workspace/packages/vsp-otel
+@szl-holdings/vsp-otel:build: > tsc
+@szl-holdings/vsp-otel:build: 
+@workspace/a11oy-orchestration:typecheck: cache miss, executing 972011ba65a6934c
+@szl-holdings/payload-doctrine:build: cache hit, replaying logs 0da0e78df4ef255e
+@szl-holdings/payload-doctrine:build: 
+@szl-holdings/payload-doctrine:build: > @szl-holdings/payload-doctrine@0.1.0 build /home/runner/workspace/packages/payload-doctrine
+@szl-holdings/payload-doctrine:build: > tsc
+@szl-holdings/payload-doctrine:build: 
+@szl-holdings/sentra-detector-sdk:build: cache hit, replaying logs 4a76404c24e849f9
+@szl-holdings/sentra-detector-sdk:build: 
+@szl-holdings/sentra-detector-sdk:build: > @szl-holdings/sentra-detector-sdk@0.1.0 build /home/runner/workspace/packages/sentra-detector-sdk
+@szl-holdings/sentra-detector-sdk:build: > tsc
+@szl-holdings/sentra-detector-sdk:build: 
+@szl/a11oy-runtime:typecheck: cache miss, executing 65194e96fe7444cd
+@workspace/eval-harness:typecheck: cache miss, executing 5efd12faeb91e3fe
+@szl-holdings/platform-metrics-registry:typecheck: cache hit, replaying logs 2d66e7a8363df91d
+@szl-holdings/platform-metrics-registry:typecheck: 
+@szl-holdings/platform-metrics-registry:typecheck: > @szl-holdings/platform-metrics-registry@0.1.0 typecheck /home/runner/workspace/packages/platform-metrics-registry
+@szl-holdings/platform-metrics-registry:typecheck: > tsc --noEmit
+@szl-holdings/platform-metrics-registry:typecheck: 
+@szl-holdings/schemas:typecheck: cache miss, executing c9a090e965b55aad
+@workspace/a11oy-fabric:typecheck: 
+@workspace/a11oy-fabric:typecheck: > @workspace/a11oy-fabric@0.0.0 typecheck /home/runner/workspace/lib/a11oy-fabric
+@workspace/a11oy-fabric:typecheck: > tsc -p tsconfig.json --noEmit
+@workspace/a11oy-fabric:typecheck: 
+@szl-holdings/agent-gateway:typecheck: cache miss, executing 2b0a832899a99872
+@workspace/a11oy-orchestration:typecheck: 
+@workspace/a11oy-orchestration:typecheck: > @workspace/a11oy-orchestration@0.0.0 typecheck /home/runner/workspace/lib/a11oy-orchestration
+@workspace/a11oy-orchestration:typecheck: > tsc -p tsconfig.json --noEmit
+@workspace/a11oy-orchestration:typecheck: 
+@szl-holdings/schemas:typecheck: 
+@szl-holdings/schemas:typecheck: > @szl-holdings/schemas@0.1.0 typecheck /home/runner/workspace/packages/schemas
+@szl-holdings/schemas:typecheck: > tsc --noEmit
+@szl-holdings/schemas:typecheck: 
+@workspace/eval-harness:typecheck: 
+@workspace/eval-harness:typecheck: > @workspace/eval-harness@0.0.0 typecheck /home/runner/workspace/packages/eval-harness
+@workspace/eval-harness:typecheck: > tsc --noEmit
+@workspace/eval-harness:typecheck: 
+@szl/a11oy-runtime:typecheck: 
+@szl/a11oy-runtime:typecheck: > @szl/a11oy-runtime@0.1.0 typecheck /home/runner/workspace/packages/a11oy-runtime
+@szl/a11oy-runtime:typecheck: > tsc --noEmit
+@szl/a11oy-runtime:typecheck: 
+@szl-holdings/agent-gateway:typecheck: 
+@szl-holdings/agent-gateway:typecheck: > @szl-holdings/agent-gateway@0.1.0 typecheck /home/runner/workspace/platform/agent-gateway
+@szl-holdings/agent-gateway:typecheck: > tsc -p tsconfig.json --noEmit
+@szl-holdings/agent-gateway:typecheck: 
+@workspace/reconciliation:typecheck: cache hit, replaying logs a6d81a81a64b14a1
+@workspace/reconciliation:typecheck: 
+@workspace/reconciliation:typecheck: > @workspace/reconciliation@0.1.0 typecheck /home/runner/workspace/packages/reconciliation
+@workspace/reconciliation:typecheck: > tsc --noEmit
+@workspace/reconciliation:typecheck: 
+@workspace/tool-registry:typecheck: cache hit, replaying logs 7cf646d6a5bc9319
+@workspace/tool-registry:typecheck: 
+@workspace/tool-registry:typecheck: > @workspace/tool-registry@1.0.0 typecheck /home/runner/workspace/packages/tool-registry
+@workspace/tool-registry:typecheck: > tsc --noEmit
+@workspace/tool-registry:typecheck: 
+@workspace/memory-fabric:typecheck: cache miss, executing d04082ab9fb2b2c1
+@workspace/ouroboros-horizon:typecheck: cache miss, executing 3cd66ebb43426ad5
+@szl-holdings/vsp-otel:typecheck: cache miss, executing a8eb999ac080fc61
+@workspace/ouroboros-anchor:typecheck: cache miss, executing c83b90362be65271
+@szl-holdings/payload:typecheck: test/no-artifact-raw-shim.test.ts(43,5): error TS2322: Type 'Dirent<string>[]' is not assignable to type 'Dirent<NonSharedBuffer>[]'.
+@szl-holdings/payload:typecheck:   Type 'Dirent<string>' is not assignable to type 'Dirent<NonSharedBuffer>'.
+@szl-holdings/payload:typecheck:     Type 'string' is not assignable to type 'NonSharedBuffer'.
+@szl-holdings/payload:typecheck: test/no-artifact-raw-shim.test.ts(48,32): error TS2345: Argument of type 'NonSharedBuffer' is not assignable to parameter of type 'string'.
+@szl-holdings/payload:typecheck: test/no-artifact-raw-shim.test.ts(50,11): error TS2367: This comparison appears to be unintentional because the types 'NonSharedBuffer' and 'string' have no overlap.
+@szl-holdings/payload:typecheck: test/no-artifact-raw-shim.test.ts(52,45): error TS2339: Property 'endsWith' does not exist on type 'NonSharedBuffer'.
+@szl-holdings/payload:typecheck:  ELIFECYCLE  Command failed with exit code 2.
+@szl-holdings/vsp-otel:typecheck: 
+@szl-holdings/vsp-otel:typecheck: > @szl-holdings/vsp-otel@0.1.0 typecheck /home/runner/workspace/packages/vsp-otel
+@szl-holdings/vsp-otel:typecheck: > tsc --noEmit
+@szl-holdings/vsp-otel:typecheck: 
+@workspace/ouroboros-anchor:typecheck: 
+@workspace/ouroboros-anchor:typecheck: > @workspace/ouroboros-anchor@0.1.0 typecheck /home/runner/workspace/packages/ouroboros-anchor
+@workspace/ouroboros-anchor:typecheck: > tsc --noEmit
+@workspace/ouroboros-anchor:typecheck: 
+@workspace/memory-fabric:typecheck: 
+@workspace/memory-fabric:typecheck: > @workspace/memory-fabric@2.0.0 typecheck /home/runner/workspace/packages/memory-fabric
+@workspace/memory-fabric:typecheck: > tsc -p tsconfig.json --noEmit
+@workspace/memory-fabric:typecheck: 
+@workspace/ouroboros-horizon:typecheck: 
+@workspace/ouroboros-horizon:typecheck: > @workspace/ouroboros-horizon@0.1.0 typecheck /home/runner/workspace/packages/ouroboros-horizon
+@workspace/ouroboros-horizon:typecheck: > tsc --noEmit
+@workspace/ouroboros-horizon:typecheck: 
+@szl-holdings/vsp-otel:typecheck:  ELIFECYCLE  Command failed.
+@workspace/ouroboros-horizon:typecheck:  ELIFECYCLE  Command failed.
+@workspace/ouroboros-anchor:typecheck:  ELIFECYCLE  Command failed.
+@workspace/vessels-pitch:typecheck:  ELIFECYCLE  Command failed.
+@workspace/memory-fabric:typecheck:  ELIFECYCLE  Command failed.
+@szl-holdings/schemas:typecheck:  ELIFECYCLE  Command failed.
+@workspace/a11oy-orchestration:typecheck:  ELIFECYCLE  Command failed.
+@workspace/eval-harness:typecheck:  ELIFECYCLE  Command failed.
+@workspace/object-storage-web:typecheck: cache hit, replaying logs f79aa3539a31e7ac
+@workspace/object-storage-web:typecheck: 
+@workspace/object-storage-web:typecheck: > @workspace/object-storage-web@0.0.0 typecheck /home/runner/workspace/lib/object-storage-web
+@workspace/object-storage-web:typecheck: > tsc -p tsconfig.json --noEmit
+@workspace/object-storage-web:typecheck: 
+@szl-holdings/agent-gateway:typecheck:  ELIFECYCLE  Command failed.
+@szl-holdings/atlas-core:typecheck: cache miss, executing bfdfbd205e2ffce0
+@szl-holdings/sentra-detector-sdk:typecheck: cache miss, executing 1b9ce8b2f4769a64
+@szl/substrate-client:build: cache hit, replaying logs a9016c567930e9f1
+@szl/substrate-client:build: 
+@szl/substrate-client:build: > @szl/substrate-client@1.0.0 build /home/runner/workspace/packages/substrate-client
+@szl/substrate-client:build: > tsc --build
+@szl/substrate-client:build: 
+@workspace/replay-core:typecheck: cache miss, executing 7f78f483017c2068
+@workspace/anomaly-fabric:typecheck: cache miss, executing 93600e3b100c94f3
+@workspace/skill-library:typecheck: cache miss, executing 3865887083b39538
+@szl-holdings/brand-registry:typecheck: cache hit, replaying logs 9f224046142d0fa2
+@szl-holdings/brand-registry:typecheck: 
+@szl-holdings/brand-registry:typecheck: > @szl-holdings/brand-registry@1.0.0 typecheck /home/runner/workspace/packages/brand-registry
+@szl-holdings/brand-registry:typecheck: > tsc -p tsconfig.json --noEmit
+@szl-holdings/brand-registry:typecheck: 
+@szl-holdings/flexcache:typecheck: cache hit, replaying logs f9683c3d48df628a
+@szl-holdings/flexcache:typecheck: 
+@szl-holdings/flexcache:typecheck: > @szl-holdings/flexcache@0.0.1 typecheck /home/runner/workspace/lib/flexcache
+@szl-holdings/flexcache:typecheck: > tsc -p tsconfig.json --noEmit
+@szl-holdings/flexcache:typecheck: 
+@szl-holdings/billing-client:build: cache hit, replaying logs ed8fb575077430e2
+@szl-holdings/billing-client:build: 
+@szl-holdings/billing-client:build: > @szl-holdings/billing-client@1.0.0 build /home/runner/workspace/packages/billing-client
+@szl-holdings/billing-client:build: > tsc
+@szl-holdings/billing-client:build: 
+@szl-holdings/graphql-client:typecheck: cache miss, executing 29851128e679070d
+@workspace/ouroboros-resonance:typecheck: cache miss, executing 8905f19b6e5ccf84
+@szl-holdings/api-spec:codegen: cache hit, replaying logs d8ae1c9d9ef48618
+@szl-holdings/api-spec:codegen: 
+@szl-holdings/api-spec:codegen: > @szl-holdings/api-spec@0.0.0 codegen /home/runner/workspace/lib/api-spec
+@szl-holdings/api-spec:codegen: > test -f ../api-client-react/src/generated/api.ts && test -f ../api-zod/src/generated/api.ts && echo 'codegen artifacts present, skipping orval' || orval --config ./orval.config.ts
+@szl-holdings/api-spec:codegen: 
+@szl-holdings/api-spec:codegen: codegen artifacts present, skipping orval
+@workspace/eval-os:typecheck: cache hit, replaying logs be5b3253c3ea06b0
+@szl-holdings/flexcache:build: cache hit, replaying logs 87ea11f94d0353ea
+@workspace/eval-os:typecheck: 
+@workspace/eval-os:typecheck: > @workspace/eval-os@1.0.0 typecheck /home/runner/workspace/packages/eval-os
+@workspace/eval-os:typecheck: > tsc --noEmit
+@workspace/eval-os:typecheck: 
+@szl-holdings/flexcache:build: 
+@szl-holdings/flexcache:build: > @szl-holdings/flexcache@0.0.1 build /home/runner/workspace/lib/flexcache
+@szl-holdings/flexcache:build: > tsc -p tsconfig.json
+@szl-holdings/flexcache:build: 
+@workspace/self-model:typecheck: cache hit, replaying logs 0f336c5650380aad
+@workspace/self-model:typecheck: 
+@workspace/self-model:typecheck: > @workspace/self-model@0.0.0 typecheck /home/runner/workspace/packages/self-model
+@workspace/self-model:typecheck: > tsc -p tsconfig.json --noEmit
+@workspace/self-model:typecheck: 
+@workspace/lutar-formulas:typecheck: cache miss, executing b1e0e89e0272f104
+@szl-holdings/env:typecheck: cache hit, replaying logs bf08784c1b0d8412
+@szl-holdings/env:typecheck: 
+@szl-holdings/env:typecheck: > @szl-holdings/env@0.1.0 typecheck /home/runner/workspace/packages/env
+@szl-holdings/env:typecheck: > tsc --noEmit
+@szl-holdings/env:typecheck: 
+@workspace/aef-contracts:typecheck: cache miss, executing 2dd5280f2af4d768
+@szl/substrate-client:typecheck: cache miss, executing bc757d9273786dab
+@szl-holdings/frontier-mythos:typecheck: cache hit, replaying logs e5d7ad0697538cdf
+@szl-holdings/frontier-mythos:typecheck: 
+@szl-holdings/frontier-mythos:typecheck: > @szl-holdings/frontier-mythos@0.1.0 typecheck /home/runner/workspace/packages/frontier-mythos
+@szl-holdings/frontier-mythos:typecheck: > tsc --noEmit
+@szl-holdings/frontier-mythos:typecheck: 
+@szl-holdings/payload-doctrine:typecheck: cache miss, executing 18ac78f5a114a41d
+@workspace/ouroboros-adapters:typecheck: cache miss, executing cdea9c9d2d42ef20
+@workspace/drift-eval:typecheck: cache hit, replaying logs a4c58d711efa5a8e
+@workspace/drift-eval:typecheck: 
+@workspace/drift-eval:typecheck: > @workspace/drift-eval@1.0.0 typecheck /home/runner/workspace/packages/drift-eval
+@workspace/drift-eval:typecheck: > tsc -p tsconfig.json --noEmit
+@workspace/drift-eval:typecheck: 
+@workspace/simulation:typecheck: cache miss, executing eb898cbfc604ca7e
+@szl-holdings/monte-carlo:typecheck: cache miss, executing 94fdbbebe7a4dcfd
+@workspace/langextract-bridge:typecheck: cache miss, executing f0e42d89a81573bb
+@szl-holdings/mobile-shared:typecheck: cache miss, executing fd35049197c4e090
+@workspace/ouroboros:typecheck: cache hit, replaying logs 52034bc71dbd63b3
+@workspace/ouroboros:typecheck: 
+@workspace/ouroboros:typecheck: > @workspace/ouroboros@1.0.0 typecheck /home/runner/workspace/packages/ouroboros
+@workspace/ouroboros:typecheck: > tsc -p tsconfig.json --noEmit
+@workspace/ouroboros:typecheck: 
+@szl-holdings/speech-specialist:typecheck: cache miss, executing 5102f58209ffd3eb
+@szl-holdings/api-spec:typecheck: cache miss, executing 553a5d02d07e9372
+@szl-holdings/decision-engine:typecheck: cache miss, executing 6f3eb96f6f6a4c3c
+@szl-holdings/decision-engine:build: cache miss, executing 8d3db85a1a537330
+@szl-holdings/policy-engine:build: cache miss, executing a6b31a5e8731953b
+@szl-holdings/policy-engine:typecheck: cache miss, executing 28f6c9f6c1503669
+@szl-holdings/atlas-events:typecheck: cache miss, executing 658f4f43c2de991e
+@workspace/aef-policy-guard:typecheck: cache miss, executing 76a56e3e24bb3599
+@workspace/alloy-rank-worker:typecheck: cache miss, executing c2ab01e468408ebe
+@workspace/alloy-rerank-worker:typecheck: cache miss, executing ee7085cc07a8e70a
+@workspace/aef-domain-profiles:typecheck: cache miss, executing 1e7900f8d6a3daa6
+@workspace/aef-storage-adapters:typecheck: cache miss, executing ecd6f4910dd344e6
+@workspace/aef-retrieval-core:typecheck: cache miss, executing 822a8082d2ab54af
+@workspace/aef-evidence-ledger:typecheck: cache miss, executing 221dd01257605a45
+@workspace/alloy-embed-worker:typecheck: cache miss, executing 3bf07ba333a8e46d
+@workspace/agents-prompts:typecheck: cache miss, executing c088bc83c6484746
+@workspace/run-ledger:typecheck: cache miss, executing 695fe22d4c46ff22
+@szl-holdings/auth:typecheck: cache miss, executing 73fe8bff02a3837f
+@szl-holdings/services:typecheck: cache miss, executing 67d59ff1c186ad9d
+@szl-holdings/auth-shared:typecheck: cache miss, executing c664103c148438fc
+@szl-holdings/db:typecheck: cache miss, executing cec0d206877f45e5
+@szl-holdings/evidence-ledger:typecheck: cache miss, executing 25a13062148cc917
+@workspace/eval-forge:typecheck: cache miss, executing 3af43a8ce9ec460a
+@szl-holdings/agent-core:typecheck: cache miss, executing b13bde6c221f0099
+@szl-holdings/memory-core:typecheck: cache miss, executing 6d25321026810b1e
+@szl-holdings/domain-profiles:typecheck: cache miss, executing 005d8fc337b9e0e5
+@szl-holdings/policy-guard:typecheck: cache miss, executing b9254301f5351179
+@workspace/aef-sdk:typecheck: cache miss, executing e51fa8eba798b18b
+@workspace/aef-sdk:build: cache miss, executing 3fbc9a01cc5ee559
+
+ Tasks:    38 successful, 93 total
+Cached:    27 cached, 93 total
+  Time:    42.995s 
+Failed:    @szl-holdings/payload#typecheck
+
+ ELIFECYCLE  Command failed with exit code 2.

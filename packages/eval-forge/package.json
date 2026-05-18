@@ -66,6 +66,7 @@
   },
   "devDependencies": {
     "@types/node": "catalog:",
+    "node-fetch": "^3.3.2",
     "tsx": "catalog:",
     "vitest": "catalog:"
   }

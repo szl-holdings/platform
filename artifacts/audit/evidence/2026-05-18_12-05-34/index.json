@@ -1,0 +1,28 @@
+{
+  "timestamp": "2026-05-18_12-05-34",
+  "generatedAt": "2026-05-18T12:06:22.480Z",
+  "totalDurationMs": 47701,
+  "passed": false,
+  "p0Failures": [
+    "typecheck"
+  ],
+  "p1Failures": [],
+  "steps": [
+    {
+      "id": "install",
+      "label": "Install dependencies",
+      "priority": "P0",
+      "status": "skipped",
+      "exitCode": null,
+      "durationMs": 0
+    },
+    {
+      "id": "typecheck",
+      "label": "Typecheck",
+      "priority": "P0",
+      "status": "fail",
+      "exitCode": 2,
+      "durationMs": 47701
+    }
+  ]
+}

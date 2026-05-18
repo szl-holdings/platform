@@ -165,8 +165,8 @@ export const FORMULA_REGISTRY: readonly FormulaSpec<any, any>[] = [
       citations: ['papers/paper-10-ultra-routing-xi-unification.tex'],
     },
     parameters: [],
-    impl: ({ lOmega: lO, pLambda, meanALang, history }: { lOmega: number; pLambda: number; meanALang: number; history: { role: string; content: string }[] }) =>
-      xiCompute(lO, pLambda, sigmoid(meanALang), 1 / (1 + dialogEntropy(history))),
+    impl: ({ lOmega, pLambda, meanALang, history }: { lOmega: number; pLambda: number; meanALang: number; history: { role: string; content: string }[] }) =>
+      xiCompute({ lOmega, pLambda, meanALang, history }).xi,
     inputShape: '{ lOmega, pLambda, meanALang, history }',
     outputShape: 'number (Ξ scalar)',
     consumers: ['lib/lutar-formulas/src/router.ts'],

@@ -1,0 +1,2 @@
+ ERROR  @szl-holdings/agent-gateway#typecheck: command (/home/runner/workspace/platform/agent-gateway) /nix/store/61lr9izijvg30pcribjdxgjxvh3bysp4-pnpm-10.26.1/bin/pnpm run typecheck exited (2)
+ ERROR  run failed: command  exited (2)

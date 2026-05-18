@@ -1011,9 +1011,17 @@ export const TERRA_OWNER_INTENT: ScenarioDefinition = {
     const intentProb = Math.min(0.97, baseIntent + nodSignal + maturitySignal + dscrSignal + vacancySignal + deedBoost + recencyPenalty);
     const confidenceProxy = 1 - Math.abs(intentProb - 0.5) * 0.3;
 
+    // primaryDriverCode: 1=nod_filing, 2=loan_maturity, 3=dscr_stress
+    // (numeric code keeps CalculationFn's Record<string, number> contract intact)
+    const primaryDriverCode =
+      nodSignal > maturitySignal && nodSignal > dscrSignal
+        ? 1
+        : maturitySignal >= dscrSignal
+          ? 2
+          : 3;
     return {
       intentProb12m: parseFloat((intentProb * 100).toFixed(2)),
-      primaryDriver: nodSignal > maturitySignal && nodSignal > dscrSignal ? 'nod_filing' : maturitySignal >= dscrSignal ? 'loan_maturity' : 'dscr_stress',
+      primaryDriverCode,
       confidenceProxy: parseFloat((confidenceProxy * 100).toFixed(2)),
     };
   },

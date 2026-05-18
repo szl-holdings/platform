@@ -52,6 +52,8 @@ export function applyTweak(d: Distribution, t: DriverTweak): Distribution {
     }
     case "poisson":
       return { type: "poisson", lambda: Math.max(0, d.lambda * mm) };
+    case "bernoulli":
+      return { type: "bernoulli", p: Math.min(1, Math.max(0, d.p * mm)) };
     case "constant":
       return { type: "constant", value: d.value * mm };
     case "custom":
@@ -86,6 +88,8 @@ export function tweakSummary(d: Distribution): { center: number; spread: number 
     }
     case "poisson":
       return { center: d.lambda, spread: Math.sqrt(d.lambda) };
+    case "bernoulli":
+      return { center: d.p, spread: Math.sqrt(d.p * (1 - d.p)) };
     case "constant":
       return { center: d.value, spread: 0 };
     case "custom": {
