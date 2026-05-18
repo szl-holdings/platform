@@ -201,8 +201,10 @@ export default function DarkVesselDetection() {
   const raiseAlert = async (vessel: (typeof darkVessels)[0]) => {
     setRaiseState((p) => ({ ...p, [vessel.id]: 'raising' }));
     try {
-      const fleetVessels = (await api.vessels.list()) as Array<{ id: number }>;
-      const anchorVesselId = fleetVessels[0]?.id ?? null;
+      const fleetVessels = (await api.vessels.list()) as Array<{ id: number; orgId?: number }>;
+      const anchorVessel = fleetVessels[0] ?? null;
+      const anchorVesselId = anchorVessel?.id ?? null;
+      const anchorOrgId = anchorVessel?.orgId;
       if (!anchorVesselId) {
         toast.error(
           'No fleet vessel available to attribute alert. Add a vessel before raising dark-vessel alerts.',
@@ -240,8 +242,58 @@ export default function DarkVesselDetection() {
         },
       });
       qc.invalidateQueries({ queryKey: ['alerts'] });
+
+      // Also persist via the formula-thesis anomaly engine — this writes a
+      // row to vessels_anomaly_detections, emits a Λ-receipt, and fires the
+      // real A11oy cross-product handoff (two proof-ledger entries) for
+      // high/critical severities. Best-effort: a failure here must not undo
+      // the user-visible alert above.
+      let handoffSuffix = '';
+      try {
+        const anomalyType: string = vessel.reason.toLowerCase().includes('ais')
+          ? 'ais_blackout'
+          : vessel.reason.toLowerCase().includes('sts')
+            ? 'sts_transfer'
+            : 'dark_loiter';
+        const anomalyBody: Record<string, unknown> = {
+          vesselId: anchorVesselId,
+          anomalyType,
+          anomalyScore: vessel.suspicionScore / 100,
+          confidence: 0.85,
+          summary: message.slice(0, 480),
+          evidence: {
+            darkVesselId: vessel.id,
+            imo: vessel.imo,
+            flag: vessel.flag,
+            gapDuration: vessel.gapDuration,
+            lastAIS: vessel.lastAIS,
+            priorCalls: vessel.priorCalls,
+            ownerChain: vessel.ownerChain,
+            behaviour: vessel.reason,
+          },
+          location: { lat: vessel.lat, lon: vessel.lon },
+        };
+        // Pass orgId when known so multi-org users don't 400 on resolveOrgIdForWrite.
+        if (typeof anchorOrgId === 'number') anomalyBody.orgId = anchorOrgId;
+        const r = await fetch('/api/vessels/formula/anomaly-detect', {
+          method: 'POST',
+          credentials: 'include',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(anomalyBody),
+        });
+        if (r.ok) {
+          const json = await r.json();
+          const ho = (json.data ?? json)?.a11oyHandoff;
+          if (ho?.handoffId) {
+            handoffSuffix = ` · A11oy handoff ${ho.handoffId.slice(-10)}`;
+          }
+        }
+      } catch {
+        // best-effort; primary alert already succeeded
+      }
+
       setRaiseState((p) => ({ ...p, [vessel.id]: 'raised' }));
-      toast.success(`Alert raised for ${vessel.name} — visible in Alert Center`);
+      toast.success(`Alert raised for ${vessel.name} — visible in Alert Center${handoffSuffix}`);
     } catch (err) {
       setRaiseState((p) => ({ ...p, [vessel.id]: 'idle' }));
       toast.error(err instanceof Error ? err.message : 'Failed to raise alert');

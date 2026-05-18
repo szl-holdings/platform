@@ -1,7 +1,11 @@
 import { Badge } from '@szl-holdings/shared-ui/ui/badge';
+import { Button } from '@szl-holdings/shared-ui/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@szl-holdings/shared-ui/ui/card';
-import { AlertTriangle, Globe, Shield } from 'lucide-react';
-import { useState } from 'react';
+import { Slider } from '@szl-holdings/shared-ui/ui/slider';
+import { toast } from '@szl-holdings/shared-ui/ui/sonner';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { AlertTriangle, Loader2, RefreshCw, Shield } from 'lucide-react';
+import { useEffect, useMemo, useState } from 'react';
 import {
   Area,
   AreaChart,
@@ -15,98 +19,70 @@ import {
   XAxis,
   YAxis,
 } from 'recharts';
+import { api } from '@/lib/api';
+import { ShowTheMath } from '@/components/ShowTheMath';
 
-const vessels = [
-  {
-    id: 'V-001',
-    name: 'PACIFIC ENDEAVOR',
-    imo: '9234567',
-    flag: 'Marshall Islands',
-    riskScore: 91,
-    riskLevel: 'Critical',
-    factors: {
-      flagState: 85,
-      ownerOpacity: 92,
-      routeAnomaly: 88,
-      aisGaps: 95,
-      portCalls: 78,
-      cargo: 72,
-    },
-    anomalies: [
-      '3x AIS blackouts in 30 days',
-      'Route deviation 240nm off standard track',
-      'Sanctioned port call history',
-    ],
-    ownership: 'Shell company chain — 4 layers',
-  },
-  {
-    id: 'V-002',
-    name: 'NORDIC CARRIER',
-    imo: '9876543',
-    flag: 'Norway',
-    riskScore: 22,
-    riskLevel: 'Low',
-    factors: {
-      flagState: 15,
-      ownerOpacity: 18,
-      routeAnomaly: 20,
-      aisGaps: 10,
-      portCalls: 25,
-      cargo: 30,
-    },
-    anomalies: ['Minor route variance — weather routing'],
-    ownership: 'Stena Line AB — Public company',
-  },
-  {
-    id: 'V-003',
-    name: 'ATLAS FORTUNE',
-    imo: '9456789',
-    flag: 'Panama',
-    riskScore: 67,
-    riskLevel: 'Medium',
-    factors: {
-      flagState: 62,
-      ownerOpacity: 75,
-      routeAnomaly: 55,
-      aisGaps: 72,
-      portCalls: 68,
-      cargo: 58,
-    },
-    anomalies: ['Ownership chain through 2 jurisdictions', 'Irregular port call at Hodeidah'],
-    ownership: 'Fortune Maritime Ltd. — Confidential',
-  },
-  {
-    id: 'V-004',
-    name: 'EMERALD COAST',
-    imo: '9123456',
-    flag: 'Comoros',
-    riskScore: 82,
-    riskLevel: 'High',
-    factors: {
-      flagState: 90,
-      ownerOpacity: 84,
-      routeAnomaly: 76,
-      aisGaps: 88,
-      portCalls: 82,
-      cargo: 65,
-    },
-    anomalies: [
-      'High-risk flag state',
-      'AIS manipulation detected',
-      'Prior STS transfer near sanctioned territory',
-    ],
-    ownership: '3 shell companies — 2 BVI, 1 Cayman',
-  },
-];
+const API_BASE = import.meta.env.BASE_URL?.replace(/\/$/, '') ?? '';
 
-const riskTrend = [
-  { date: 'Mar 1', fleet: 42 },
-  { date: 'Mar 7', fleet: 47 },
-  { date: 'Mar 14', fleet: 45 },
-  { date: 'Mar 21', fleet: 51 },
-  { date: 'Mar 28', fleet: 48 },
-  { date: 'Today', fleet: 53 },
-];
+interface FleetVessel {
+  id: number;
+  orgId?: number;
+  name?: string | null;
+  imo?: string | null;
+  flag?: string | null;
+}
+
+function extractErrorMessage(json: unknown, fallback: string): string {
+  if (json && typeof json === 'object') {
+    const j = json as Record<string, unknown>;
+    if (typeof j.error === 'string') return j.error;
+    if (j.error && typeof j.error === 'object') {
+      const e = j.error as Record<string, unknown>;
+      if (typeof e.message === 'string') return e.message;
+    }
+    if (typeof j.message === 'string') return j.message;
+  }
+  return fallback;
+}
+
+interface RiskPoint {
+  computedAt: string;
+  lambdaScore: number;
+  severity?: number;
+  likelihood?: number;
+  valueAtRiskUsd?: number;
+  driftScore?: number | null;
+  formulaVersion?: string;
+  receiptHash?: string | null;
+  seeded?: boolean;
+}
+
+interface RiskHistoryResponse {
+  vesselId: number;
+  windowDays: number;
+  formula: string;
+  formulaVersion: string;
+  points: RiskPoint[];
+  seeded: boolean;
+}
+
+interface RecomputeResponse {
+  vesselId: number;
+  lambdaScore: number;
+  rawRiskUsd: number;
+  formula: string;
+  formulaVersion: string;
+  receiptHash: string;
+  a11oyHandoff?: { handoffId: string; vesselsProofId: string; a11oyProofId: string } | null;
+  computedAt: string;
+}
+
+function riskLevelFromLambda(lambda: number): 'Critical' | 'High' | 'Medium' | 'Low' {
+  if (lambda >= 0.85) return 'Critical';
+  if (lambda >= 0.65) return 'High';
+  if (lambda >= 0.4) return 'Medium';
+  return 'Low';
+}
 
 const levelColor: Record<string, string> = {
   Critical: 'text-red-400 bg-red-500/10 border-red-500/20',
@@ -115,14 +91,133 @@ const levelColor: Record<string, string> = {
   Low: 'text-emerald-400 bg-emerald-500/10 border-emerald-500/20',
 };
 
-export default function RiskScoringPage() {
-  const [selected, setSelected] = useState(vessels[0]);
+function fmtDate(iso: string): string {
+  try {
+    return new Date(iso).toLocaleDateString(undefined, { month: 'short', day: 'numeric' });
+  } catch {
+    return iso.slice(0, 10);
+  }
+}
 
-  const radarData = Object.entries(selected.factors).map(([key, val]) => ({
-    subject: key.replace(/([A-Z])/g, ' $1').replace(/^./, (s) => s.toUpperCase()),
-    value: val,
-    fullMark: 100,
+export default function RiskScoringPage() {
+  const qc = useQueryClient();
+
+  const { data: fleet, isLoading: fleetLoading } = useQuery<FleetVessel[]>({
+    queryKey: ['vessels-fleet'],
+    queryFn: () => api.vessels.list() as Promise<FleetVessel[]>,
+    staleTime: 60_000,
+  });
+
+  const [selectedId, setSelectedId] = useState<number | null>(null);
+
+  // Default to first fleet vessel once loaded.
+  useEffect(() => {
+    if (selectedId === null && fleet && fleet.length > 0 && fleet[0]) {
+      setSelectedId(fleet[0].id);
+    }
+  }, [fleet, selectedId]);
+
+  // Clear any prior recompute result when the user switches vessels — the
+  // displayed Λ/receipt/handoff must only ever refer to the current selection.
+  useEffect(() => {
+    recompute.reset();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [selectedId]);
+
+  const selected = useMemo(
+    () => fleet?.find((v) => v.id === selectedId) ?? null,
+    [fleet, selectedId],
+  );
+
+  const {
+    data: history,
+    isLoading: histLoading,
+    isFetching: histFetching,
+  } = useQuery<RiskHistoryResponse>({
+    queryKey: ['vessels-risk-history', selectedId],
+    queryFn: async () => {
+      const r = await fetch(`${API_BASE}/api/vessels/formula/risk-history/${selectedId}`, {
+        credentials: 'include',
+      });
+      if (!r.ok) throw new Error(`risk-history HTTP ${r.status}`);
+      const json = await r.json();
+      return (json.data ?? json) as RiskHistoryResponse;
+    },
+    enabled: selectedId !== null,
+    staleTime: 30_000,
+  });
+
+  const latest: RiskPoint | undefined = history?.points[0];
+
+  // Recompute inputs — seeded from latest point or sensible defaults.
+  const [severity, setSeverity] = useState(0.5);
+  const [likelihood, setLikelihood] = useState(0.5);
+  const [varUsd, setVarUsd] = useState(500_000);
+
+  useEffect(() => {
+    if (latest) {
+      if (typeof latest.severity === 'number') setSeverity(latest.severity);
+      if (typeof latest.likelihood === 'number') setLikelihood(latest.likelihood);
+      if (typeof latest.valueAtRiskUsd === 'number') setVarUsd(latest.valueAtRiskUsd);
+    }
+  }, [latest]);
+
+  const recompute = useMutation<RecomputeResponse>({
+    mutationFn: async () => {
+      if (selectedId === null) throw new Error('No vessel selected');
+      const body: Record<string, unknown> = {
+        vesselId: selectedId,
+        severity,
+        likelihood,
+        valueAtRiskUsd: varUsd,
+        capUsd: 1_000_000,
+      };
+      // Pass orgId when the vessel exposes one so multi-org users don't hit
+      // resolveOrgIdForWrite's 400. Single-org users: backend auto-resolves.
+      if (typeof selected?.orgId === 'number') body.orgId = selected.orgId;
+      const r = await fetch(`${API_BASE}/api/vessels/formula/risk-recompute`, {
+        method: 'POST',
+        credentials: 'include',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(body),
+      });
+      const json = await r.json().catch(() => ({}));
+      if (!r.ok) {
+        throw new Error(extractErrorMessage(json, `Recompute failed (HTTP ${r.status})`));
+      }
+      return (json.data ?? json) as RecomputeResponse;
+    },
+    onSuccess: (result) => {
+      qc.invalidateQueries({ queryKey: ['vessels-risk-history', selectedId] });
+      const handoffSuffix = result.a11oyHandoff
+        ? ` — A11oy handoff ${result.a11oyHandoff.handoffId}`
+        : '';
+      toast.success(
+        `Λ recomputed to ${result.lambdaScore.toFixed(3)}${handoffSuffix}`,
+      );
+    },
+    onError: (err) => {
+      toast.error(err instanceof Error ? err.message : 'Recompute failed');
+    },
+  });
+
+  const chartPoints = (history?.points ?? []).slice().reverse().map((p) => ({
+    date: fmtDate(p.computedAt),
+    lambda: Math.round(p.lambdaScore * 1000) / 1000,
   }));
+
+  const lambda = recompute.data?.lambdaScore ?? latest?.lambdaScore ?? 0;
+  const level = riskLevelFromLambda(lambda);
+  const lambdaPct = Math.round(lambda * 100);
+
+  // Radar from the three driver axes the formula uses.
+  const radarData = [
+    { subject: 'Severity', value: Math.round(severity * 100), fullMark: 100 },
+    { subject: 'Likelihood', value: Math.round(likelihood * 100), fullMark: 100 },
+    { subject: 'Value at Risk', value: Math.min(100, Math.round((varUsd / 10_000))), fullMark: 100 },
+    { subject: 'Drift', value: Math.round((latest?.driftScore ?? 0) * 100), fullMark: 100 },
+    { subject: 'Λ Composite', value: lambdaPct, fullMark: 100 },
+  ];
 
   return (
     <div className="p-6 space-y-6">
@@ -132,161 +227,266 @@ export default function RiskScoringPage() {
           Behavioral Risk Scoring Engine
         </h1>
         <p className="text-sm text-muted-foreground mt-1">
-          Voyage anomaly detection, flag state risk, ownership chain analysis, and behavioral
-          scoring
+          Λ-normalized vessel risk — persisted history, canonical formula from{' '}
+          <code className="font-mono text-[11px]">@szl-holdings/formulas</code>,
+          A11oy cross-product handoff when Λ ≥ 0.7.
         </p>
       </div>
 
-      <div className="grid grid-cols-4 gap-4">
-        {[
-          { label: 'Critical Risk Vessels', value: '1', color: 'text-red-400' },
-          { label: 'High Risk Vessels', value: '1', color: 'text-orange-400' },
-          { label: 'Avg Fleet Risk Score', value: '65.5', color: 'text-amber-400' },
-          { label: 'Anomalies Detected (30d)', value: '247', color: 'text-sky-400' },
-        ].map(({ label, value, color }) => (
-          <Card key={label}>
-            <CardContent className="p-4">
-              <p className="text-xs text-muted-foreground">{label}</p>
-              <p className={`text-2xl font-bold ${color}`}>{value}</p>
-            </CardContent>
-          </Card>
-        ))}
-      </div>
-
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        {/* Fleet list */}
         <div className="space-y-3">
           <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider">
-            Fleet Risk List
+            Fleet ({fleet?.length ?? 0})
           </h3>
-          {vessels.map((v) => (
-            <Card
-              key={v.id}
-              onClick={() => setSelected(v)}
-              className={`cursor-pointer transition-all hover:border-primary/30 ${selected.id === v.id ? 'border-primary ring-1 ring-primary/20' : ''}`}
-            >
-              <CardContent className="p-3">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-sm font-semibold">{v.name}</p>
-                    <p className="text-[10px] text-muted-foreground">
-                      {v.flag} · IMO {v.imo}
-                    </p>
-                  </div>
-                  <div className="text-right">
-                    <p className={`text-xl font-bold ${levelColor[v.riskLevel].split(' ')[0]}`}>
-                      {v.riskScore}
-                    </p>
-                    <Badge variant="outline" className={`text-[10px] ${levelColor[v.riskLevel]}`}>
-                      {v.riskLevel}
-                    </Badge>
-                  </div>
-                </div>
-                <div className="mt-2 h-1.5 bg-muted rounded-full overflow-hidden">
-                  <div
-                    className={`h-full rounded-full ${v.riskScore >= 85 ? 'bg-red-500' : v.riskScore >= 65 ? 'bg-orange-500' : v.riskScore >= 40 ? 'bg-amber-500' : 'bg-emerald-500'}`}
-                    style={{ width: `${v.riskScore}%` }}
-                  />
-                </div>
-              </CardContent>
-            </Card>
-          ))}
-        </div>
-
-        <div className="space-y-4">
-          <Card>
-            <CardHeader className="pb-2">
-              <CardTitle className="text-sm">{selected.name} — Risk Radar</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <ResponsiveContainer width="100%" height={220}>
-                <RadarChart data={radarData}>
-                  <PolarGrid stroke="rgba(255,255,255,0.1)" />
-                  <PolarAngleAxis dataKey="subject" tick={{ fontSize: 10, fill: '#94a3b8' }} />
-                  <Radar dataKey="value" stroke="#06b6d4" fill="#06b6d4" fillOpacity={0.25} />
-                  <Tooltip
-                    contentStyle={{
-                      background: 'hsl(var(--card))',
-                      border: '1px solid hsl(var(--border))',
-                      borderRadius: 8,
-                      fontSize: 12,
-                    }}
-                  />
-                </RadarChart>
-              </ResponsiveContainer>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardHeader className="pb-2">
-              <CardTitle className="text-sm">Fleet Risk Trend</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <ResponsiveContainer width="100%" height={120}>
-                <AreaChart data={riskTrend} margin={{ top: 5, right: 10, left: -20, bottom: 0 }}>
-                  <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.05)" />
-                  <XAxis dataKey="date" tick={{ fontSize: 10, fill: '#94a3b8' }} />
-                  <YAxis tick={{ fontSize: 10, fill: '#94a3b8' }} domain={[30, 70]} />
-                  <Tooltip
-                    contentStyle={{
-                      background: 'hsl(var(--card))',
-                      border: '1px solid hsl(var(--border))',
-                      borderRadius: 8,
-                      fontSize: 12,
-                    }}
-                  />
-                  <Area
-                    type="monotone"
-                    dataKey="fleet"
-                    stroke="#f97316"
-                    fill="#f97316"
-                    fillOpacity={0.15}
-                  />
-                </AreaChart>
-              </ResponsiveContainer>
-            </CardContent>
-          </Card>
-        </div>
-
-        <div className="space-y-4">
-          <Card>
-            <CardHeader className="pb-2">
-              <CardTitle className="text-sm">Detected Anomalies</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-2">
-              {selected.anomalies.map((a, i) => (
-                <div key={i} className="flex items-start gap-2 p-2 rounded-lg bg-muted/40">
-                  <AlertTriangle className="w-3.5 h-3.5 text-amber-400 mt-0.5 shrink-0" />
-                  <p className="text-xs">{a}</p>
-                </div>
-              ))}
-            </CardContent>
-          </Card>
-          <Card>
-            <CardHeader className="pb-2">
-              <CardTitle className="text-sm">Ownership Intelligence</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="flex items-start gap-2">
-                <Globe className="w-4 h-4 text-primary mt-0.5 shrink-0" />
-                <p className="text-xs">{selected.ownership}</p>
-              </div>
-              <div className="mt-3 pt-3 border-t border-border">
-                <p className="text-xs text-muted-foreground mb-2">Risk Factor Breakdown</p>
-                {Object.entries(selected.factors).map(([key, val]) => (
-                  <div key={key} className="flex items-center gap-2 mb-1.5">
-                    <p className="text-xs w-28 text-muted-foreground capitalize">
-                      {key.replace(/([A-Z])/g, ' $1')}
-                    </p>
-                    <div className="flex-1 h-1 bg-muted rounded-full overflow-hidden">
-                      <div
-                        className={`h-full rounded-full ${val >= 80 ? 'bg-red-500' : val >= 60 ? 'bg-orange-500' : val >= 40 ? 'bg-amber-500' : 'bg-emerald-500'}`}
-                        style={{ width: `${val}%` }}
-                      />
+          {fleetLoading && (
+            <div className="flex items-center gap-2 text-xs text-muted-foreground">
+              <Loader2 className="w-3 h-3 animate-spin" /> Loading fleet…
+            </div>
+          )}
+          {!fleetLoading && (fleet?.length ?? 0) === 0 && (
+            <div className="rounded-lg border border-border bg-muted/30 p-3 text-xs text-muted-foreground">
+              No vessels in fleet. Add a vessel in the Fleet page to run risk
+              scoring against it.
+            </div>
+          )}
+          {(fleet ?? []).map((v) => {
+            const isSel = v.id === selectedId;
+            return (
+              <Card
+                key={v.id}
+                onClick={() => setSelectedId(v.id)}
+                className={`cursor-pointer transition-all hover:border-primary/30 ${isSel ? 'border-primary ring-1 ring-primary/20' : ''}`}
+                data-testid={`risk-fleet-row-${v.id}`}
+              >
+                <CardContent className="p-3">
+                  <div className="flex items-center justify-between">
+                    <div className="min-w-0">
+                      <p className="text-sm font-semibold truncate">{v.name ?? `Vessel #${v.id}`}</p>
+                      <p className="text-[10px] text-muted-foreground truncate">
+                        {(v.flag ?? '—')} · IMO {v.imo ?? '—'}
+                      </p>
                     </div>
-                    <span className="text-xs font-mono w-6 text-right">{val}</span>
                   </div>
-                ))}
+                </CardContent>
+              </Card>
+            );
+          })}
+        </div>
+
+        {/* Center: Λ score + radar + history chart */}
+        <div className="space-y-4">
+          <Card>
+            <CardHeader className="pb-2">
+              <CardTitle className="text-sm flex items-center justify-between">
+                <span>{selected?.name ?? 'Select a vessel'} — Λ Composite</span>
+                {selected && (
+                  <ShowTheMath
+                    formulaId="lutar-invariant-5"
+                    label="Lutar Invariant Λ"
+                    expression="Λ = normalizedRiskScore(severity, likelihood, VaR, cap)"
+                    inputs={{
+                      severity,
+                      likelihood,
+                      valueAtRiskUsd: varUsd,
+                      capUsd: 1_000_000,
+                    }}
+                    result={lambda}
+                    thesisRef="v10 §2.5 — Λ-composite"
+                    receiptHash={recompute.data?.receiptHash ?? latest?.receiptHash ?? null}
+                  />
+                )}
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="flex items-center gap-4">
+                <div className="text-center">
+                  <p className={`text-5xl font-bold font-mono ${levelColor[level].split(' ')[0]}`}>
+                    {lambdaPct}
+                  </p>
+                  <Badge variant="outline" className={`mt-2 text-[10px] ${levelColor[level]}`}>
+                    {level}
+                  </Badge>
+                </div>
+                <div className="flex-1">
+                  <ResponsiveContainer width="100%" height={160}>
+                    <RadarChart data={radarData}>
+                      <PolarGrid stroke="rgba(255,255,255,0.1)" />
+                      <PolarAngleAxis dataKey="subject" tick={{ fontSize: 10, fill: '#94a3b8' }} />
+                      <Radar
+                        dataKey="value"
+                        stroke="#06b6d4"
+                        fill="#06b6d4"
+                        fillOpacity={0.25}
+                      />
+                      <Tooltip
+                        contentStyle={{
+                          background: 'hsl(var(--card))',
+                          border: '1px solid hsl(var(--border))',
+                          borderRadius: 8,
+                          fontSize: 12,
+                        }}
+                      />
+                    </RadarChart>
+                  </ResponsiveContainer>
+                </div>
               </div>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader className="pb-2">
+              <CardTitle className="text-sm flex items-center justify-between">
+                <span>Λ History — 90 day</span>
+                {history?.seeded && (
+                  <Badge variant="outline" className="text-[10px] text-amber-400 border-amber-500/30">
+                    No real history yet — seeded
+                  </Badge>
+                )}
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              {(histLoading || histFetching) && !history && (
+                <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                  <Loader2 className="w-3 h-3 animate-spin" /> Loading history…
+                </div>
+              )}
+              {chartPoints.length > 0 && (
+                <ResponsiveContainer width="100%" height={160}>
+                  <AreaChart data={chartPoints} margin={{ top: 5, right: 10, left: -20, bottom: 0 }}>
+                    <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.05)" />
+                    <XAxis dataKey="date" tick={{ fontSize: 10, fill: '#94a3b8' }} />
+                    <YAxis tick={{ fontSize: 10, fill: '#94a3b8' }} domain={[0, 1]} />
+                    <Tooltip
+                      contentStyle={{
+                        background: 'hsl(var(--card))',
+                        border: '1px solid hsl(var(--border))',
+                        borderRadius: 8,
+                        fontSize: 12,
+                      }}
+                    />
+                    <Area
+                      type="monotone"
+                      dataKey="lambda"
+                      stroke="#f97316"
+                      fill="#f97316"
+                      fillOpacity={0.15}
+                    />
+                  </AreaChart>
+                </ResponsiveContainer>
+              )}
+            </CardContent>
+          </Card>
+        </div>
+
+        {/* Right: Recompute panel */}
+        <div className="space-y-4">
+          <Card>
+            <CardHeader className="pb-2">
+              <CardTitle className="text-sm">Recompute Λ</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="space-y-1.5">
+                <div className="flex items-center justify-between text-xs">
+                  <span className="text-muted-foreground">Severity</span>
+                  <span className="font-mono">{severity.toFixed(2)}</span>
+                </div>
+                <Slider
+                  min={0}
+                  max={1}
+                  step={0.01}
+                  value={[severity]}
+                  onValueChange={(v) => setSeverity(v[0] ?? 0)}
+                />
+              </div>
+              <div className="space-y-1.5">
+                <div className="flex items-center justify-between text-xs">
+                  <span className="text-muted-foreground">Likelihood</span>
+                  <span className="font-mono">{likelihood.toFixed(2)}</span>
+                </div>
+                <Slider
+                  min={0}
+                  max={1}
+                  step={0.01}
+                  value={[likelihood]}
+                  onValueChange={(v) => setLikelihood(v[0] ?? 0)}
+                />
+              </div>
+              <div className="space-y-1.5">
+                <div className="flex items-center justify-between text-xs">
+                  <span className="text-muted-foreground">Value at Risk (USD)</span>
+                  <span className="font-mono">${varUsd.toLocaleString()}</span>
+                </div>
+                <Slider
+                  min={0}
+                  max={1_000_000}
+                  step={10_000}
+                  value={[varUsd]}
+                  onValueChange={(v) => setVarUsd(v[0] ?? 0)}
+                />
+              </div>
+
+              <Button
+                type="button"
+                onClick={() => recompute.mutate()}
+                disabled={selectedId === null || recompute.isPending}
+                className="w-full"
+                data-testid="risk-recompute-btn"
+              >
+                {recompute.isPending ? (
+                  <>
+                    <Loader2 className="w-3.5 h-3.5 animate-spin mr-1.5" /> Recomputing…
+                  </>
+                ) : (
+                  <>
+                    <RefreshCw className="w-3.5 h-3.5 mr-1.5" /> Recompute Λ
+                  </>
+                )}
+              </Button>
+
+              {recompute.data?.a11oyHandoff && (
+                <div className="flex items-start gap-2 p-2 rounded-lg bg-amber-500/10 border border-amber-500/20">
+                  <AlertTriangle className="w-3.5 h-3.5 text-amber-400 mt-0.5 shrink-0" />
+                  <div className="text-[11px]">
+                    <p className="font-semibold text-amber-300">Elevated risk — A11oy notified</p>
+                    <p className="text-amber-200/70 font-mono mt-0.5 break-all">
+                      {recompute.data.a11oyHandoff.handoffId}
+                    </p>
+                  </div>
+                </div>
+              )}
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader className="pb-2">
+              <CardTitle className="text-sm">Formula Provenance</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-2 text-xs">
+              <div className="flex items-center justify-between">
+                <span className="text-muted-foreground">Formula</span>
+                <code className="font-mono text-[11px]">{history?.formula ?? '—'}</code>
+              </div>
+              <div className="flex items-center justify-between">
+                <span className="text-muted-foreground">Version</span>
+                <code className="font-mono text-[11px]">{history?.formulaVersion ?? 'lambda-v10'}</code>
+              </div>
+              <div className="flex items-center justify-between">
+                <span className="text-muted-foreground">Source</span>
+                <code className="font-mono text-[11px]">@szl-holdings/formulas</code>
+              </div>
+              <div className="flex items-center justify-between">
+                <span className="text-muted-foreground">Thesis</span>
+                <code className="font-mono text-[11px]">v10 §2.5</code>
+              </div>
+              {(recompute.data?.receiptHash || latest?.receiptHash) && (
+                <div className="flex items-center justify-between gap-2">
+                  <span className="text-muted-foreground">Λ-receipt</span>
+                  <Badge variant="outline" className="font-mono text-[10px] break-all">
+                    {(recompute.data?.receiptHash ?? latest?.receiptHash ?? '').slice(0, 12)}…
+                  </Badge>
+                </div>
+              )}
             </CardContent>
           </Card>
         </div>

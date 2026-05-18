@@ -1,4 +1,5 @@
 import { Badge } from '@szl-holdings/shared-ui/ui/badge';
+import { toast } from '@szl-holdings/shared-ui/ui/sonner';
 import { cn } from '@szl-holdings/shared-ui/utils';
 import { useMutation, useQuery } from '@tanstack/react-query';
 import {
@@ -13,10 +14,12 @@ import {
   Loader2,
   MapPin,
   Ship,
+  Sigma,
   TrendingDown,
   TrendingUp,
 } from 'lucide-react';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
+import { ShowTheMath } from '@/components/ShowTheMath';
 
 const API_BASE = import.meta.env.BASE_URL?.replace(/\/$/, '') ?? '';
 
@@ -152,9 +155,74 @@ export default function VoyageCalculatorPage() {
     },
   });
 
+  // Monte Carlo (canonical voyageCostMonteCarlo from @szl-holdings/formulas).
+  // Runs against the deterministic estimate's totalCosts as the mean and
+  // persists the p10/p50/p90 envelope plus a Λ-receipt server-side.
+  const monteCarloMutation = useMutation({
+    mutationFn: async () => {
+      if (!estimateMutation.data) throw new Error('Run Calculate P&L first');
+      const body: Record<string, unknown> = {
+        vesselClassId,
+        routeId,
+        meanCostUsd: estimateMutation.data.costs.totalCosts,
+        costStdDevPct: 0.18,
+        iterations: 2000,
+        charterType,
+        cargoQuantityMt: estimateMutation.data.revenue.cargoQuantityMt,
+      };
+      // Surface orgId when refData carries one so multi-org users don't 400.
+      const refOrgId = (refData as unknown as { orgId?: number } | undefined)?.orgId;
+      if (typeof refOrgId === 'number') body.orgId = refOrgId;
+      const r = await fetch(`${API_BASE}/api/vessels/formula/voyage-monte-carlo`, {
+        method: 'POST',
+        credentials: 'include',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(body),
+      });
+      const json = await r.json().catch(() => ({}));
+      if (!r.ok) {
+        const msg =
+          typeof json?.error === 'string'
+            ? json.error
+            : (json?.error?.message ?? json?.message ?? `Monte Carlo failed (HTTP ${r.status})`);
+        throw new Error(msg);
+      }
+      return (json.data ?? json) as {
+        calculationRef: string;
+        formula: string;
+        formulaVersion: string;
+        meanCostUsd: number;
+        iterations: number;
+        p10: number;
+        p50: number;
+        p90: number;
+        mean: number;
+        receiptHash: string;
+        computedAt: string;
+      };
+    },
+    onSuccess: (mc) => {
+      toast.success(
+        `Monte Carlo: P50 $${(mc.p50 / 1000).toFixed(0)}K · P90 $${(mc.p90 / 1000).toFixed(0)}K (ref ${mc.calculationRef.slice(-6)})`,
+      );
+    },
+    onError: (err) => {
+      toast.error(err instanceof Error ? err.message : 'Monte Carlo failed');
+    },
+  });
+
   const estimate = estimateMutation.data;
   const selectedRoute = refData?.routes.find((r) => r.id === routeId);
   const selectedVessel = refData?.vesselClasses.find((v) => v.id === vesselClassId);
+
+  // The Monte Carlo envelope is computed against a specific (vessel, route,
+  // charter, deterministic estimate) tuple. Whenever any of those inputs
+  // change, drop the previous result so the UI never shows a P50/receipt
+  // that belongs to stale parameters.
+  useEffect(() => {
+    monteCarloMutation.reset();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [vesselClassId, routeId, charterType, estimate?.costs.totalCosts]);
   const selectedRate = refData?.charterRates.find((c) => c.vesselClass === vesselClassId);
 
   const costItems = estimate
@@ -356,6 +424,74 @@ export default function VoyageCalculatorPage() {
                   </div>
                   <p className="text-[10px] text-white/30">Based on EU ETS @ $85/tCO₂</p>
                 </div>
+              </div>
+
+              {/* Monte Carlo envelope — server-side voyageCostMonteCarlo */}
+              <div className="rounded-lg border border-white/[0.06] bg-white/[0.02] p-4 space-y-3">
+                <div className="flex items-center justify-between">
+                  <p className="text-[10px] text-white/30 font-mono uppercase tracking-wider flex items-center gap-1">
+                    <Sigma className="w-3 h-3" /> Monte Carlo — Cost Envelope
+                  </p>
+                  <div className="flex items-center gap-2">
+                    {monteCarloMutation.data && (
+                      <ShowTheMath
+                        formulaId="voyage-cost-monte-carlo"
+                        label="Voyage Cost Monte Carlo"
+                        expression="voyageCostMonteCarlo({mean, σ, N}) → p10/p50/p90 (Gaussian sampling)"
+                        inputs={{
+                          meanCostUsd: monteCarloMutation.data.meanCostUsd,
+                          costStdDevPct: 0.18,
+                          iterations: monteCarloMutation.data.iterations,
+                        }}
+                        result={`P50 $${monteCarloMutation.data.p50.toLocaleString()}`}
+                        thesisRef="v10 §4.2 — Voyage stochastic envelope"
+                        receiptHash={monteCarloMutation.data.receiptHash}
+                      />
+                    )}
+                    <button
+                      type="button"
+                      onClick={() => monteCarloMutation.mutate()}
+                      disabled={monteCarloMutation.isPending}
+                      data-testid="run-monte-carlo-btn"
+                      className="h-7 rounded bg-sky-500/20 border border-sky-500/30 text-sky-400 text-[10px] font-semibold hover:bg-sky-500/30 transition-colors flex items-center gap-1 px-2.5 disabled:opacity-50"
+                    >
+                      {monteCarloMutation.isPending ? (
+                        <Loader2 className="w-3 h-3 animate-spin" />
+                      ) : (
+                        <Sigma className="w-3 h-3" />
+                      )}
+                      Run Monte Carlo
+                    </button>
+                  </div>
+                </div>
+                {monteCarloMutation.data ? (
+                  <div className="grid grid-cols-4 gap-3 text-[11px]">
+                    <KpiCard
+                      label="P10 (Best)"
+                      value={`$${(monteCarloMutation.data.p10 / 1000).toFixed(0)}K`}
+                      color="text-emerald-400"
+                    />
+                    <KpiCard
+                      label="P50 (Median)"
+                      value={`$${(monteCarloMutation.data.p50 / 1000).toFixed(0)}K`}
+                    />
+                    <KpiCard
+                      label="P90 (Worst)"
+                      value={`$${(monteCarloMutation.data.p90 / 1000).toFixed(0)}K`}
+                      color="text-orange-400"
+                    />
+                    <KpiCard
+                      label="Iterations"
+                      value={monteCarloMutation.data.iterations.toLocaleString()}
+                      sub={monteCarloMutation.data.formulaVersion}
+                    />
+                  </div>
+                ) : (
+                  <p className="text-[11px] text-white/30">
+                    Click "Run Monte Carlo" to sample {(2000).toLocaleString()} cost realizations
+                    around ${estimate.costs.totalCosts.toLocaleString()} (σ = 18%).
+                  </p>
+                )}
               </div>
 
               <div className="rounded-lg border border-white/[0.06] bg-white/[0.02] p-4 space-y-2">
