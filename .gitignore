@@ -199,3 +199,4 @@ screenshots/raw
 **/forge-keys/ed25519-private.pem
 artifacts/api-server/.data/
 artifacts/api-server/.data/agi-forecast-snapshot.json
+.coverage
