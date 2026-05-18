@@ -86,6 +86,12 @@ spell it out. gRPC ignores the path component.
 
 ### Vendor cheatsheet
 
+Setting `vendor` (constructor option) or `VSP_OTEL_VENDOR` (env var) is the
+**only** step required to get vendor-shaped mirrors. Every `emit()` call
+auto-stamps the mirror attributes for the selected vendor alongside the
+canonical `gen_ai.*` namespace — there is no separate `mirrorLambdaAxesFor*`
+call to remember. Originals are never modified.
+
 **Honeycomb**
 
 ```

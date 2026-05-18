@@ -26,6 +26,46 @@ function buildHarness(vendor: VspVendor) {
 }
 
 describe('applyVendorAttributes (via LambdaSpanEmitter)', () => {
+  // Regression guard for the auto-mirror contract: once `vendor` is set on
+  // the emitter, a single `emit()` call MUST produce the vendor-shaped
+  // mirror attributes. No caller-side `mirrorLambdaAxesFor*` step exists
+  // or is required — forgetting one used to silently degrade Datadog APM /
+  // Phoenix evaluator views, so we pin the behaviour here.
+  it('auto-mirrors Λ-axes for datadog on emit() with zero post-emit calls', () => {
+    const { exporter, emitter } = buildHarness('datadog');
+    const span = emitter.emit(
+      {
+        hash: fakeHash('dd-auto'),
+        license: 'Apache-2.0',
+        endpoint: 'POST /v1/auto',
+        lambdaAxes: { cleanliness: 0.91, invariance: 0.77 },
+      },
+      { endImmediately: true },
+    );
+    // Sanity: emit() returned the span — caller did nothing else.
+    expect(span).toBeDefined();
+    const attrs = exporter.getFinishedSpans()[0]?.attributes ?? {};
+    expect(attrs['dd.lambda.cleanliness']).toBe(0.91);
+    expect(attrs['dd.lambda.invariance']).toBe(0.77);
+    expect(attrs['operation.name']).toBe('POST /v1/auto');
+  });
+
+  it('auto-mirrors Λ-axes for phoenix on emit() with zero post-emit calls', () => {
+    const { exporter, emitter } = buildHarness('phoenix');
+    emitter.emit(
+      {
+        hash: fakeHash('phx-auto'),
+        license: 'MIT',
+        lambdaAxes: { horizon: 0.82, resonance: 0.6 },
+      },
+      { endImmediately: true },
+    );
+    const attrs = exporter.getFinishedSpans()[0]?.attributes ?? {};
+    expect(attrs['llm.evaluation.horizon.score']).toBe(0.82);
+    expect(attrs['llm.evaluation.resonance.score']).toBe(0.6);
+    expect(attrs['openinference.span.kind']).toBe('LLM');
+  });
+
   it('honeycomb adapter stamps app.span_name + app.kind without dropping gen_ai.*', () => {
     const { exporter, emitter } = buildHarness('honeycomb');
     emitter.emit(
