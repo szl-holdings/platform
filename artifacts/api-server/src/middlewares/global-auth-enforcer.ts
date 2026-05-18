@@ -635,6 +635,9 @@ const OPS_CORE_PUBLIC_PREFIXES = [
   "/api/pulse/ops-core/",
   "/api/lexicon/ops-core/",
   "/api/terra/ops-core/",
+  // Round 3 (2026-05-18): org-level intelligence ingest. Same posture as
+  // per-app ops-core — GET/HEAD only, mutations cannot reach the handler.
+  "/api/org-intelligence/",
 ] as const;
 
 function isOpsCorePublicRead(req: Request): boolean {

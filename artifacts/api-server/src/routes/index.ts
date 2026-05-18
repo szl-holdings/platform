@@ -226,6 +226,12 @@ router.use(lazyMatch("/carlota-jo/ops-core", () => import("./carlota-jo-ops-core
 router.use(lazyMatch("/pulse/ops-core", () => import("./pulse-ops-core"), "pulse-ops-core"));
 router.use(lazyMatch("/lexicon/ops-core", () => import("./lexicon-ops-core"), "lexicon-ops-core"));
 router.use(lazyMatch("/terra/ops-core", () => import("./terra-ops-core"), "terra-ops-core"));
+// Round 3 (2026-05-18): org-level intelligence surface. Ingests the live
+// state of the six user-named public repos in szl-holdings (cookbook,
+// agi-forecast, trust, vsp-otel, ouroboros-thesis, ouroboros) via the
+// GitHub REST API. Same auth posture as the per-app ops-core surfaces
+// (GET/HEAD only via isOpsCorePublicRead — see global-auth-enforcer).
+router.use(lazyMatch("/org-intelligence", () => import("./org-intelligence"), "org-intelligence"));
 
 // Sentra cyber resilience cockpit — incidents + alerts CRUD. Public demo
 // surface (in-memory store). Write paths carry CSRF double-submit protection

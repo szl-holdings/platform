@@ -21,7 +21,13 @@ export function register(router: IRouter): void {
   router.use('/vessels', tenantScope({ required: false }));
   router.use('/vessels', perUserApiSlidingLimiter);
 
-  router.use(lazyMatch('/vessels', () => import('../vessels'), 'vessels'));
+  // ORDER MATTERS: modules exposing literal `/vessels/<word>` routes must be
+  // mounted BEFORE `../vessels`, whose `GET /vessels/:id` handler captures any
+  // single-segment path and rejects non-numeric values with HTTP 400 instead of
+  // falling through. Mounting vessels-extended (dashboard/roster/voyage-economics/
+  // fleet-summary/exceptions/maintenance/readiness/sanctions/map-payload/ports)
+  // and sibling literal-prefix modules first lets those literals resolve cleanly,
+  // while real numeric IDs (e.g. /vessels/123) still fall through to vessels.ts.
   router.use(lazyMatch('/vessels', () => import('../vessels-extended'), 'vessels-extended'));
   router.use(lazyMatch('/vessels', () => import('../vessels-psc'), 'vessels-psc'));
   router.use(lazyMatch('/vessels', () => import('../vessels-platform'), 'vessels-platform'));
@@ -38,6 +44,8 @@ export function register(router: IRouter): void {
   router.use(lazyMatch('/vessels', () => import('../vessels-sanctions-network'), 'vessels-sanctions-network'));
   router.use(lazyMatch('/vessels', () => import('../vessels-forecasts'), 'vessels-forecasts'));
   router.use(lazyMatch('/vessels', () => import('../vessels-formula-thesis'), 'vessels-formula-thesis'));
+  // Mounted LAST so its `/vessels/:id` handler is the fall-through, not a trap.
+  router.use(lazyMatch('/vessels', () => import('../vessels'), 'vessels'));
 
   // NOTE: vessels-ops-core is mounted at the TOP of this function (before
   // the tenantScope wall) so it can be polled anonymously by the
