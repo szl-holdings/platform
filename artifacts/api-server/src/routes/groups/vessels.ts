@@ -24,4 +24,9 @@ export function register(router: IRouter): void {
   router.use(lazyMatch('/vessels', () => import('../vessels-sanctions-network'), 'vessels-sanctions-network'));
   router.use(lazyMatch('/vessels', () => import('../vessels-forecasts'), 'vessels-forecasts'));
   router.use(lazyMatch('/vessels', () => import('../vessels-formula-thesis'), 'vessels-formula-thesis'));
+
+  // Vessels Operational Core — Series A executive aggregator over all
+  // vessels-* sub-routers above. Surfaces live counts, module health,
+  // inherited mechanisms, formula pillars, DOI proof bindings. Read-only.
+  router.use(lazyMatch('/vessels', () => import('../vessels-ops-core'), 'vessels-ops-core'));
 }

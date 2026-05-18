@@ -279,6 +279,7 @@ const CommodityFlowIntelligence = lazy(() => import('@/pages/commodity-flow-inte
 const WeatherPage = lazy(() => import('@/pages/weather-page'));
 const PortAnalyticsPage = lazy(() => import('@/pages/port-analytics'));
 const CO2EmissionsPage = lazy(() => import('@/pages/co2-emissions'));
+const OperationalCorePage = lazy(() => import('@/pages/operational-core'));
 const RiskScoringPage = lazy(() => import('@/pages/risk-scoring'));
 const DarkVesselDetection = lazy(() => import('@/pages/dark-vessel-detection'));
 const AisDecodePage = lazy(() => import('@/pages/ais-decode'));
@@ -521,6 +522,12 @@ function VesselsSidebarContent({
       id: 'os-layer',
       label: 'OS Layer',
       items: [
+        {
+          id: 'operational-core',
+          label: 'Operational Core',
+          href: '/operational-core',
+          icon: <ShieldCheck className="w-3.5 h-3.5" />,
+        },
         {
           id: 'decision-center',
           label: 'Decision Center',
@@ -1170,6 +1177,7 @@ function DashboardRouter() {
         <Route path="/weather" component={WeatherPage} />
         <Route path="/port-analytics" component={PortAnalyticsPage} />
         <Route path="/co2-emissions" component={CO2EmissionsPage} />
+        <Route path="/operational-core" component={OperationalCorePage} />
         <Route path="/risk-scoring" component={RiskScoringPage} />
         <Route path="/dark-vessel-detection" component={DarkVesselDetection} />
         <Route path="/ais-decode" component={AisDecodePage} />
