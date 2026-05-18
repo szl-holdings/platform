@@ -10,7 +10,7 @@
     "build": "node ./build.mjs",
     "build:nexus": "cd ../mockup-sandbox && NODE_ENV=production node_modules/.bin/vite build",
     "rebuild:nexus": "FORCE_NEXUS_BUILD=1 bash ./start.sh",
-    "start": "node --max-old-space-size=2048 --expose-gc --enable-source-maps ./dist/index.mjs",
+    "start": "bash ../../services/sentra-core/scripts/bootstrap.sh && node --max-old-space-size=2048 --expose-gc --enable-source-maps ./dist/index.mjs",
     "typecheck": "tsc -p tsconfig.json --noEmit",
     "seed:demo": "tsx src/scripts/seed-demo.ts",
     "seed:terra": "tsx src/scripts/seed-terra-distress.ts",

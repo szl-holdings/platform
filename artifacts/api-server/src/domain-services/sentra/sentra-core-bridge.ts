@@ -18,7 +18,18 @@ import { logger } from '../../lib/logger';
 
 function resolvePythonBin(): string {
   if (process.env.SENTRA_CORE_PYTHON) return process.env.SENTRA_CORE_PYTHON;
+  // Prefer the sentra-core sidecar's own venv (populated by
+  // services/sentra-core/scripts/bootstrap.sh at deploy build time and at
+  // workflow start). This is the only path guaranteed to have httpx installed
+  // in a fresh deployment container; .pythonlibs/ is repl-only and absent in
+  // autoscale deploys (root cause of task #5191).
+  const workspaceRoot = path.resolve(
+    process.cwd(),
+    process.cwd().includes('/artifacts/') ? '../..' : '.',
+  );
   const candidates = [
+    path.join(workspaceRoot, 'services/sentra-core/.venv/bin/python'),
+    path.join(workspaceRoot, 'services/sentra-core/.venv/bin/python3'),
     path.resolve(process.cwd(), '.pythonlibs/bin/python3'),
     '/home/runner/workspace/.pythonlibs/bin/python3',
     '/usr/bin/python3',

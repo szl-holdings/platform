@@ -6,7 +6,7 @@ build-backend = "hatchling.build"
 name = "sentra-core"
 version = "0.1.0"
 description = "Sentra core defensive primitives: threat_model, posture_drift, incident_response, evidence_pack, policy_gate"
-requires-python = ">=3.12"
+requires-python = ">=3.11"
 dependencies = [
     "httpx>=0.27.0",
 ]

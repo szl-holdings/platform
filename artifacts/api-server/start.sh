@@ -185,4 +185,21 @@ else
 fi
 # -----------------------------------------------------------------------------
 
+# --- sentra-core sidecar bootstrap -------------------------------------------
+# Sentra is invoked from the api-server via subprocess (see
+# src/domain-services/sentra/sentra-core-bridge.ts). The bridge spawns
+# `python -m sentra_core.cli` and depends on httpx + sentra_core being importable.
+# We bootstrap the venv at workflow start (idempotent, no-op when healthy) so
+# the bridge keeps working even when .pythonlibs/ is absent (task #5191).
+SENTRA_CORE_DIR="/home/runner/workspace/services/sentra-core"
+if [ ! -f "$SENTRA_CORE_DIR/scripts/bootstrap.sh" ]; then
+  echo "[api-server start.sh] FATAL: sentra-core bootstrap script missing at $SENTRA_CORE_DIR/scripts/bootstrap.sh" >&2
+  exit 1
+fi
+echo "[api-server start.sh] Bootstrapping sentra-core venv..."
+# Fail fast: a broken sentra-core sidecar means every /api/sentra/core/* request
+# will 500. Refuse to start rather than serve a half-broken surface (task #5191).
+bash "$SENTRA_CORE_DIR/scripts/bootstrap.sh"
+# -----------------------------------------------------------------------------
+
 exec node --max-old-space-size=1536 --expose-gc --optimize-for-size --enable-source-maps ./dist/index.mjs
