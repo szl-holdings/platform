@@ -151,6 +151,9 @@ export class SZLClient {
           // Default: warn but don't break the call. Audit gap is observable.
           console.warn(`[szl-sdk] receipt append failed for ${ctx.method} ${ctx.path}:`, err);
         });
+      // Wire the same chain into the HTTP transport so .stream<T>() can
+      // append per-chunk receipts onto the same audit log as ordinary calls.
+      this.http.setStreamChain(chain, options.receipts.operatorId);
       this.http.setObserver(async (record) => {
         try {
           await chain.append({

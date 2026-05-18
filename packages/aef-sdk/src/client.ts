@@ -2,9 +2,12 @@ import { type EmbedRequest, type EmbedResponse, type HybridSearchRequest, type H
 import {
   ReceiptChain,
   hashJson,
+  parseSSE,
+  streamWithReceipts,
   type AuditClosureReceipt,
   type LambdaReceipt,
   type ReceiptStorage,
+  type ReceiptedStream,
 } from '@szl-holdings/szl-receipts';
 import { type AefClientConfig, resolveConfig } from './config.js';
 import {
@@ -89,6 +92,7 @@ export class AefClient {
   private readonly config: Required<AefClientConfig>;
   readonly receipts: AefReceiptsHandle;
   private readonly chain?: ReceiptChain;
+  private readonly receiptsOperatorId?: string;
   private readonly onReceiptError: (err: unknown, ctx: { endpoint: string }) => void;
 
   constructor(configOverrides: Partial<AefClientConfigWithReceipts> = {}) {
@@ -108,6 +112,7 @@ export class AefClient {
         operatorId: receipts.operatorId,
         ...(receipts.storage ? { storage: receipts.storage } : {}),
       });
+      this.receiptsOperatorId = receipts.operatorId;
       this.receipts = new EnabledReceipts(this.chain);
       this.onReceiptError =
         receipts.onError ??
@@ -279,6 +284,126 @@ export class AefClient {
     };
     const raw = await this.fetchAef<unknown>('/v1/rerank', body, body.requestId);
     return RerankResponseSchema.parse(raw);
+  }
+
+  /**
+   * Stream a hybrid-search query as it scores candidates. Each chunk is
+   * recorded as its own `LambdaReceipt` (paramsHash = sha256 of the chunk's
+   * raw bytes); the returned `closure` promise resolves with a folded
+   * `StreamClosureReceipt`.
+   *
+   * Expected wire format: `event: chunk\ndata: <json>\n\n` per result with
+   * an optional `event: end` terminator. Mid-stream abort (consumer break)
+   * yields a closure with `reason: 'abort'`. Receipts are appended through
+   * the same chain as non-streaming calls, so `client.receipts.readAll()`
+   * returns both kinds in seq order.
+   */
+  hybridSearchStream(
+    request: WithDefaults<
+      Omit<HybridSearchRequest, 'requestId' | 'tenantId'>,
+      | 'topK'
+      | 'candidatePool'
+      | 'denseWeight'
+      | 'keywordWeight'
+      | 'rerankEnabled'
+      | 'includeProvenance'
+      | 'metadata'
+    > & { requestId?: string; streamId?: string; signal?: AbortSignal },
+  ): ReceiptedStream<unknown> {
+    const body: HybridSearchRequest = {
+      topK: 10,
+      candidatePool: 100,
+      denseWeight: 0.6,
+      keywordWeight: 0.4,
+      rerankEnabled: false,
+      includeProvenance: true,
+      metadata: {},
+      ...request,
+      requestId: request.requestId ?? generateId(),
+      tenantId: this.config.tenantId as HybridSearchRequest['tenantId'],
+    };
+    return this.streamAef('/v1/hybrid-search/stream', body, {
+      streamId: request.streamId,
+      signal: request.signal,
+    });
+  }
+
+  /**
+   * Internal: open an SSE connection to `endpoint` with the given body and
+   * wire it through the shared per-chunk receipt primitive. Returns the
+   * streaming iterable plus a `closure` promise. Falls back to a stub
+   * closure when receipts are disabled, so callers can use the same code
+   * path in both modes.
+   */
+  private streamAef<T>(
+    endpoint: string,
+    body: unknown,
+    options: { streamId?: string; signal?: AbortSignal } = {},
+  ): ReceiptedStream<T> {
+    const url = `${this.config.gatewayUrl}${endpoint}`;
+    const paramsHash = hashJson(body);
+    const streamId = options.streamId ?? `aef-stream-${Date.now()}-${Math.random().toString(36).slice(2, 10)}`;
+    const headers: Record<string, string> = {
+      ...this.buildHeaders(undefined, paramsHash),
+      accept: 'text/event-stream',
+    };
+    const chain = this.chain;
+    const operatorIdLocal = this.receiptsOperatorId ?? 'anonymous';
+
+    async function* source(): AsyncGenerator<{ event: string; data: string; rawBytes: Uint8Array }, void, void> {
+      const response = await globalThis.fetch(url, {
+        method: 'POST',
+        headers,
+        body: JSON.stringify(body),
+        ...(options.signal ? { signal: options.signal } : {}),
+      });
+      if (!response.ok) {
+        const text = await response.text().catch(() => '');
+        throw new AefError(
+          `AEF gateway stream returned HTTP ${response.status}: ${text}`,
+          'AEF_STREAM_ERROR',
+          response.status,
+          false,
+        );
+      }
+      if (!response.body) {
+        throw new AefError('AEF gateway stream had no body', 'AEF_STREAM_NO_BODY', 500, false);
+      }
+      yield* parseSSE(response.body, options.signal);
+    }
+
+    if (!chain) {
+      const iter = (async function* () {
+        for await (const frame of source()) {
+          if (frame.event === 'chunk') yield JSON.parse(frame.data) as T;
+        }
+      })();
+      const closure = Promise.resolve({
+        closureTs: new Date().toISOString(),
+        operatorId: operatorIdLocal,
+        chainLength: 0,
+        firstReceiptHash: '0'.repeat(64),
+        lastReceiptHash: '0'.repeat(64),
+        merkleRoot: '0'.repeat(64),
+        selfHash: '0'.repeat(64),
+        streamId,
+        firstSeq: -1,
+        lastSeq: -1,
+        reason: 'end' as const,
+      });
+      return Object.assign(iter, { closure });
+    }
+
+    return streamWithReceipts<T>({
+      chain,
+      operatorId: operatorIdLocal,
+      streamId,
+      endpoint,
+      method: 'POST',
+      params: body,
+      source: source(),
+      parseChunk: (d) => JSON.parse(d) as T,
+    });
   }
 
   async hybridSearch(

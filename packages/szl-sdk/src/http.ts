@@ -1,3 +1,9 @@
+import {
+  parseSSE,
+  streamWithReceipts,
+  type ReceiptedStream,
+  type ReceiptChain,
+} from '@szl-holdings/szl-receipts';
 import { SZLApiError, SZLAuthError, SZLNotFoundError, SZLRateLimitError } from './errors.js';
 import type { GateDecision } from './lambda-gate.js';
 import type { SZLClientOptions } from './types.js';
@@ -34,6 +40,14 @@ export interface RequestOptions {
   gateDecision?: GateDecision;
 }
 
+export interface StreamRequestOptions {
+  query?: Record<string, string | number | boolean | undefined>;
+  signal?: AbortSignal;
+  headers?: Record<string, string>;
+  /** Caller-supplied stream id. If omitted, a random one is generated. */
+  streamId?: string;
+}
+
 export class HttpClient {
   private readonly apiKey: string;
   private readonly baseUrl: string;
@@ -41,6 +55,8 @@ export class HttpClient {
   private readonly maxRetries: number;
   private readonly userAgent: string;
   private observer?: HttpRequestObserver;
+  private chain?: ReceiptChain;
+  private operatorId?: string;
 
   constructor(options: SZLClientOptions) {
     this.apiKey = options.apiKey;
@@ -53,6 +69,97 @@ export class HttpClient {
   /** Internal hook used by SZLClient to attach a receipt observer. */
   setObserver(observer: HttpRequestObserver | undefined): void {
     this.observer = observer;
+  }
+
+  /**
+   * Internal hook used by SZLClient to attach a receipt chain for streaming
+   * requests (`stream<T>()`). Per-chunk receipts are appended directly to the
+   * chain so they share `seq`/`prevHash` with non-streaming calls.
+   */
+  setStreamChain(chain: ReceiptChain | undefined, operatorId: string | undefined): void {
+    this.chain = chain;
+    this.operatorId = operatorId;
+  }
+
+  /**
+   * Stream a server-sent-events response and emit one `LambdaReceipt` per
+   * chunk (`paramsHash` = sha256 of the chunk's raw bytes). When the
+   * iterator finishes — either normally or because the caller broke out —
+   * a `StreamClosureReceipt` is folded over the per-chunk receipts and
+   * resolved via the returned `closure` promise.
+   *
+   * Expected wire format: `event: chunk\ndata: <json>\n\n` per chunk and
+   * an optional `event: end\ndata: ...\n\n` terminator. Non-chunk frames
+   * are ignored for receipt purposes.
+   */
+  stream<T>(method: string, path: string, options: StreamRequestOptions = {}): ReceiptedStream<T> {
+    const url = new URL(`${this.baseUrl}${path}`);
+    if (options.query) {
+      for (const [k, v] of Object.entries(options.query)) {
+        if (v !== undefined) url.searchParams.set(k, String(v));
+      }
+    }
+    const streamId = options.streamId ?? `sdk-stream-${Date.now()}-${Math.random().toString(36).slice(2, 10)}`;
+    const headers: Record<string, string> = {
+      Authorization: `Bearer ${this.apiKey}`,
+      'User-Agent': this.userAgent,
+      Accept: 'text/event-stream',
+      ...(options.headers ?? {}),
+    };
+
+    const chain = this.chain;
+    const operatorId = this.operatorId ?? 'anonymous';
+
+    async function* source(): AsyncGenerator<{ event: string; data: string; rawBytes: Uint8Array }, void, void> {
+      const response = await fetch(url.toString(), {
+        method,
+        headers,
+        ...(options.signal ? { signal: options.signal } : {}),
+      });
+      if (!response.ok) {
+        const text = await response.text().catch(() => '');
+        throw new SZLApiError(`Stream request failed (${response.status}): ${text}`, response.status, 'STREAM_ERROR');
+      }
+      if (!response.body) {
+        throw new SZLApiError('Stream response had no body', 500, 'STREAM_NO_BODY');
+      }
+      yield* parseSSE(response.body, options.signal);
+    }
+
+    if (!chain) {
+      // Receipts disabled — return a degenerate stream whose closure is a
+      // stub. Still yields chunks so callers don't lose data.
+      const iter = (async function* () {
+        for await (const frame of source()) {
+          if (frame.event === 'chunk') yield JSON.parse(frame.data) as T;
+        }
+      })();
+      const closure = Promise.resolve({
+        closureTs: new Date().toISOString(),
+        operatorId,
+        chainLength: 0,
+        firstReceiptHash: '0'.repeat(64),
+        lastReceiptHash: '0'.repeat(64),
+        merkleRoot: '0'.repeat(64),
+        selfHash: '0'.repeat(64),
+        streamId,
+        firstSeq: -1,
+        lastSeq: -1,
+        reason: 'end' as const,
+      });
+      return Object.assign(iter, { closure });
+    }
+
+    return streamWithReceipts<T>({
+      chain,
+      operatorId,
+      streamId,
+      endpoint: path,
+      method: method.toUpperCase(),
+      params: { method, path, query: options.query ?? null },
+      source: source(),
+      parseChunk: (d) => JSON.parse(d) as T,
+    });
   }
 
   async request<T>(method: string, path: string, options: RequestOptions = {}): Promise<T> {

@@ -25,6 +25,11 @@ class InMemoryStorage implements ReceiptStorage {
  * predecessor via `prevHash`, and content-addresses its call parameters via
  * `paramsHash`. `close()` returns an `AuditClosureReceipt` that seals the
  * chain with its Merkle root.
+ *
+ * All writes (`append`, `appendChunkReceipt`) go through a single-flight
+ * promise queue, so concurrent callers can never observe the same `prevHash`
+ * twice. This matters when ordinary calls and `StreamSession` chunk receipts
+ * race on the same chain.
  */
 export class ReceiptChain {
   private readonly storage: ReceiptStorage;
@@ -33,6 +38,9 @@ export class ReceiptChain {
   private cache: LambdaReceipt[] = [];
   private loaded = false;
   private closed = false;
+  /** Single-flight write queue. Each enqueued function runs after the
+   * previous one fully resolves, so seq/prevHash are computed atomically. */
+  private writeQueue: Promise<unknown> = Promise.resolve();
 
   constructor(options: ReceiptChainOptions) {
     this.operatorId = options.operatorId;
@@ -47,52 +55,90 @@ export class ReceiptChain {
     this.loaded = true;
   }
 
+  /** Serialize an async writer against any in-flight write. */
+  private enqueue<T>(fn: () => Promise<T>): Promise<T> {
+    const run = this.writeQueue.then(() => fn(), () => fn());
+    this.writeQueue = run.catch(() => {
+      /* swallow so future enqueues continue past prior failures */
+    });
+    return run;
+  }
+
   /** Append a receipt row. Returns the appended row. */
-  async append(input: AppendInput): Promise<LambdaReceipt> {
-    if (this.closed) throw new Error('ReceiptChain: cannot append to a closed chain');
-    await this.ensureLoaded();
+  append(input: AppendInput): Promise<LambdaReceipt> {
+    return this.enqueue(async () => {
+      if (this.closed) throw new Error('ReceiptChain: cannot append to a closed chain');
+      await this.ensureLoaded();
 
-    const prev = this.cache[this.cache.length - 1];
-    const seq = prev ? prev.seq + 1 : 0;
-    const prevHash = prev ? prev.selfHash : ZERO_HASH;
+      const prev = this.cache[this.cache.length - 1];
+      const seq = prev ? prev.seq + 1 : 0;
+      const prevHash = prev ? prev.selfHash : ZERO_HASH;
 
-    const skeleton: Omit<LambdaReceipt, 'selfHash' | 'agentSignature'> = {
-      seq,
-      ts: new Date().toISOString(),
-      endpoint: input.endpoint,
-      method: input.method,
-      paramsHash: hashJson(input.params),
-      ...(input.result !== undefined ? { resultHash: hashJson(input.result) } : {}),
-      operatorId: this.operatorId,
-      prevHash,
-      ...(input.metadata ? { metadata: input.metadata } : {}),
-    };
+      const skeleton: Omit<LambdaReceipt, 'selfHash' | 'agentSignature'> = {
+        seq,
+        ts: new Date().toISOString(),
+        endpoint: input.endpoint,
+        method: input.method,
+        paramsHash: hashJson(input.params),
+        ...(input.result !== undefined ? { resultHash: hashJson(input.result) } : {}),
+        operatorId: this.operatorId,
+        prevHash,
+        ...(input.metadata ? { metadata: input.metadata } : {}),
+      };
 
-    const selfHash = sha256Hex(canonicalJson(skeleton));
-    const receipt: LambdaReceipt = { ...skeleton, selfHash };
-    if (this.signer) {
-      receipt.agentSignature = await this.signer(selfHash);
-    }
+      const selfHash = sha256Hex(canonicalJson(skeleton));
+      const receipt: LambdaReceipt = { ...skeleton, selfHash };
+      if (this.signer) {
+        receipt.agentSignature = await this.signer(selfHash);
+      }
 
-    await this.storage.append(receipt);
-    this.cache.push(receipt);
-    return receipt;
+      await this.storage.append(receipt);
+      this.cache.push(receipt);
+      return receipt;
+    });
   }
 
   /**
-   * Append a pre-built receipt row directly. Used by `StreamSession` so
-   * stream-chunk receipts (whose `paramsHash` is computed from raw bytes,
-   * not from `hashJson(params)`) can still flow through the same storage
-   * and Merkle root as ordinary receipts. The caller MUST have already
-   * computed `seq`, `prevHash`, and `selfHash` consistently with the
-   * current chain head; otherwise `verify()` will report a break.
+   * Append a stream-chunk receipt whose `paramsHash` was pre-computed from
+   * raw bytes (rather than `hashJson(params)`). Used by `StreamSession`.
+   * Runs through the same write queue as `append`, so concurrent stream
+   * chunks and ordinary calls cannot collide on `seq`/`prevHash`.
    */
-  async appendRaw(receipt: LambdaReceipt): Promise<LambdaReceipt> {
-    if (this.closed) throw new Error('ReceiptChain: cannot append to a closed chain');
-    await this.ensureLoaded();
-    await this.storage.append(receipt);
-    this.cache.push(receipt);
-    return receipt;
+  appendChunkReceipt(input: {
+    endpoint: string;
+    method: string;
+    paramsHash: string;
+    metadata?: Record<string, unknown>;
+  }): Promise<LambdaReceipt> {
+    return this.enqueue(async () => {
+      if (this.closed) throw new Error('ReceiptChain: cannot append to a closed chain');
+      await this.ensureLoaded();
+
+      const prev = this.cache[this.cache.length - 1];
+      const seq = prev ? prev.seq + 1 : 0;
+      const prevHash = prev ? prev.selfHash : ZERO_HASH;
+
+      const skeleton: Omit<LambdaReceipt, 'selfHash' | 'agentSignature'> = {
+        seq,
+        ts: new Date().toISOString(),
+        endpoint: input.endpoint,
+        method: input.method,
+        paramsHash: input.paramsHash,
+        operatorId: this.operatorId,
+        prevHash,
+        ...(input.metadata ? { metadata: input.metadata } : {}),
+      };
+
+      const selfHash = sha256Hex(canonicalJson(skeleton));
+      const receipt: LambdaReceipt = { ...skeleton, selfHash };
+      if (this.signer) {
+        receipt.agentSignature = await this.signer(selfHash);
+      }
+
+      await this.storage.append(receipt);
+      this.cache.push(receipt);
+      return receipt;
+    });
   }
 
   /** Return the full chain (load from storage if not yet cached). */
@@ -108,22 +154,24 @@ export class ReceiptChain {
   }
 
   /** Seal the chain. Subsequent `append` calls throw. */
-  async close(): Promise<AuditClosureReceipt> {
-    await this.ensureLoaded();
-    const root = merkleRoot(this.cache.map((r) => r.selfHash));
-    const first = this.cache[0];
-    const last = this.cache[this.cache.length - 1];
-    const skeleton = {
-      closureTs: new Date().toISOString(),
-      operatorId: this.operatorId,
-      chainLength: this.cache.length,
-      firstReceiptHash: first ? first.selfHash : ZERO_HASH,
-      lastReceiptHash: last ? last.selfHash : ZERO_HASH,
-      merkleRoot: root,
-    };
-    const selfHash = sha256Hex(canonicalJson(skeleton));
-    this.closed = true;
-    return { ...skeleton, selfHash };
+  close(): Promise<AuditClosureReceipt> {
+    return this.enqueue(async () => {
+      await this.ensureLoaded();
+      const root = merkleRoot(this.cache.map((r) => r.selfHash));
+      const first = this.cache[0];
+      const last = this.cache[this.cache.length - 1];
+      const skeleton = {
+        closureTs: new Date().toISOString(),
+        operatorId: this.operatorId,
+        chainLength: this.cache.length,
+        firstReceiptHash: first ? first.selfHash : ZERO_HASH,
+        lastReceiptHash: last ? last.selfHash : ZERO_HASH,
+        merkleRoot: root,
+      };
+      const selfHash = sha256Hex(canonicalJson(skeleton));
+      this.closed = true;
+      return { ...skeleton, selfHash };
+    });
   }
 
   /** Verify SHA-256 link integrity across the whole chain. */

@@ -15,7 +15,6 @@
  *   3. whether the consumer aborted vs. completed (`reason` field).
  */
 import type {
-  AppendInput,
   LambdaReceipt,
   StreamClosureReceipt,
 } from './types.js';
@@ -71,6 +70,10 @@ export class StreamSession {
    * so any tampering downstream is detectable by the closure.
    *
    * `extraMetadata` is merged in alongside the streamId/chunkIndex bookkeeping.
+   *
+   * Runs through `ReceiptChain.appendChunkReceipt`, which serializes against
+   * all other writers on the same chain so concurrent ordinary `append`s
+   * and stream chunks can never duplicate `seq` or `prevHash`.
    */
   async appendChunk(
     bytes: Uint8Array | string,
@@ -78,43 +81,25 @@ export class StreamSession {
   ): Promise<LambdaReceipt> {
     if (this.closed) throw new Error('StreamSession: cannot append to a closed stream');
     const raw = bytesOf(bytes);
+    // sha256 directly over the bytes' UTF-8 string view. Two clean runs of
+    // the same wire produce the same paramsHash; any byte mutation localizes
+    // to the affected chunk's hash and propagates to the closure's Merkle
+    // root. (SSE bodies are JSON in practice, so non-UTF-8 is out of scope.)
     const paramsHash = sha256Hex(new TextDecoder('utf-8', { fatal: false }).decode(raw));
     const idx = this.chunkIndex++;
-    // We bypass chain.append's hashJson because we want the hash to come
-    // straight from the raw bytes (so byte-level tampering is detectable).
-    const skeleton: Omit<LambdaReceipt, 'selfHash'> = {
-      seq: await this.nextSeq(),
-      ts: new Date().toISOString(),
+    const row = await this.chain.appendChunkReceipt({
       endpoint: this.endpoint,
       method: this.method,
       paramsHash,
-      operatorId: this.operatorId,
-      prevHash: await this.lastChainHash(),
       metadata: {
         ...(extraMetadata ?? {}),
         streamId: this.streamId,
         chunkIndex: idx,
         kind: 'stream-chunk',
       },
-    };
-    const selfHash = sha256Hex(canonicalJson(skeleton));
-    const row: LambdaReceipt = { ...skeleton, selfHash };
-    // Persist via the chain's storage so it shows up in readAll() / merkleRoot()
-    await this.chain.appendRaw(row);
+    });
     this.emitted.push(row);
     return row;
-  }
-
-  private async nextSeq(): Promise<number> {
-    const all = await this.chain.readAll();
-    const last = all[all.length - 1];
-    return last ? last.seq + 1 : 0;
-  }
-
-  private async lastChainHash(): Promise<string> {
-    const all = await this.chain.readAll();
-    const last = all[all.length - 1];
-    return last ? last.selfHash : ZERO_HASH;
   }
 
   /** Number of chunks appended so far. */
