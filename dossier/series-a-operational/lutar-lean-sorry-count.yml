@@ -1,0 +1,64 @@
+name: sorry-count
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  count:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Count `sorry` occurrences across Lutar/**/*.lean
+        id: count
+        shell: bash
+        run: |
+          set -euo pipefail
+          TOTAL=$(grep -r --include="*.lean" -o "\\bsorry\\b" Lutar/ 2>/dev/null | wc -l | tr -d ' ' || echo 0)
+          UNIQ=$(grep -c "\\bsorry\\b" Lutar/Uniqueness.lean 2>/dev/null || echo 0)
+          BOUND=$(grep -c "\\bsorry\\b" Lutar/Bound.lean 2>/dev/null || echo 0)
+          EGYP=$(grep -c "\\bsorry\\b" Lutar/Egyptian.lean 2>/dev/null || echo 0)
+          AXM=$(grep -c "\\bsorry\\b" Lutar/Axioms.lean 2>/dev/null || echo 0)
+          INV=$(grep -c "\\bsorry\\b" Lutar/Invariant.lean 2>/dev/null || echo 0)
+          echo "TOTAL=$TOTAL" >> "$GITHUB_OUTPUT"
+          {
+            echo "## Lean kernel sorry count"
+            echo ""
+            echo "| File | sorry |"
+            echo "|---|---:|"
+            echo "| Lutar/Uniqueness.lean | $UNIQ |"
+            echo "| Lutar/Bound.lean | $BOUND |"
+            echo "| Lutar/Egyptian.lean | $EGYP |"
+            echo "| Lutar/Axioms.lean | $AXM |"
+            echo "| Lutar/Invariant.lean | $INV |"
+            echo "| **Total** | **$TOTAL** |"
+            echo ""
+            echo "When this reaches **0**, the kernel signs off the Λ_k uniqueness theorem."
+          } >> "$GITHUB_STEP_SUMMARY"
+      - name: Write shield JSON
+        if: github.ref == 'refs/heads/main'
+        run: |
+          mkdir -p .shields
+          COLOR=red
+          [ "${{ steps.count.outputs.TOTAL }}" -le 3 ] && COLOR=orange
+          [ "${{ steps.count.outputs.TOTAL }}" -eq 0 ] && COLOR=brightgreen
+          cat > .shields/sorry.json << JSON
+          {
+            "schemaVersion": 1,
+            "label": "lean sorry",
+            "message": "${{ steps.count.outputs.TOTAL }}",
+            "color": "$COLOR"
+          }
+          JSON
+      - name: Upload shield artifact
+        if: github.ref == 'refs/heads/main'
+        uses: actions/upload-artifact@v4
+        with:
+          name: sorry-shield
+          path: .shields/sorry.json
+
