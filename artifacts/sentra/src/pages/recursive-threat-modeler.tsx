@@ -18,6 +18,12 @@ import {
   vectorConsistency,
 } from '@workspace/ouroboros';
 import { LoopGlyph, OuroborosTrace } from '@workspace/ouroboros/react';
+import { DataStateBadge } from '@szl-holdings/shared-ui/data-state-badge';
+import { toDataState, useSentraCoreLive } from '@/lib/use-sentra-core-live';
+
+interface ThreatGraphResponse {
+  findings: Array<{ technique: string; asset: string; source: string; severity: string }>;
+}
 
 const VECTORS = [
   'Spoofing',
@@ -142,6 +148,21 @@ export default function RecursiveThreatModeler() {
     }
   }, [scenario, stakes, maxSteps, adaptive, trace, allocator]);
 
+  const liveThreatGraph = useSentraCoreLive<ThreatGraphResponse>({
+    endpoint: '/threat-model',
+    body: {
+      assets: [
+        { id: 'prod-web', name: 'production-web', kind: 'endpoint' },
+        { id: 'prod-db', name: 'production-db', kind: 'data' },
+        { id: 'iam', name: 'workforce-identity', kind: 'identity' },
+      ],
+      sources: [
+        { id: 'apt29', name: 'APT29', techniques: ['T1078', 'T1059', 'T1486'] },
+        { id: 'lockbit', name: 'LockBit', techniques: ['T1486', 'T1490'] },
+      ],
+    },
+  });
+
   const finalScores = trace?.finalState.scores ?? scenario.seed;
   const top = useMemo(
     () =>
@@ -177,6 +198,17 @@ export default function RecursiveThreatModeler() {
             }}
           >
             Sentra · Recursive Threat Modeler
+            <span style={{ marginLeft: 12, display: 'inline-flex', verticalAlign: 'middle' }}>
+              <DataStateBadge
+                state={liveThreatGraph.data ? 'live' : toDataState(liveThreatGraph.source)}
+                pulse={liveThreatGraph.source === 'live'}
+              />
+            </span>
+            {liveThreatGraph.data?.findings && (
+              <span style={{ marginLeft: 8, fontSize: 10, color: 'rgba(126,215,193,0.7)' }}>
+                {liveThreatGraph.data.findings.length} live MITRE findings
+              </span>
+            )}
           </div>
           <h1 style={{ fontSize: 22, margin: 0, fontWeight: 500 }}>
             Risk surfaces that stop moving
@@ -332,6 +364,56 @@ export default function RecursiveThreatModeler() {
         </div>
 
         <div style={{ display: 'grid', gap: 16 }}>
+          {liveThreatGraph.data?.findings && liveThreatGraph.data.findings.length > 0 && (
+            <div
+              data-testid="live-threat-findings"
+              style={{
+                background: 'rgba(126,215,193,0.04)',
+                border: '1px solid rgba(126,215,193,0.18)',
+                borderRadius: 6,
+                padding: 16,
+              }}
+            >
+              <div style={{ fontSize: 11, letterSpacing: '0.16em', textTransform: 'uppercase', color: 'rgba(126,215,193,0.85)' }}>
+                Live MITRE findings · sentra-core threat_model.build
+              </div>
+              <ul style={{ margin: '10px 0 0', padding: 0, listStyle: 'none', display: 'grid', gap: 6 }}>
+                {liveThreatGraph.data.findings.slice(0, 8).map((f, i) => (
+                  <li
+                    key={`${f.technique}-${f.asset}-${i}`}
+                    style={{
+                      display: 'grid',
+                      gridTemplateColumns: '90px 1fr 1fr 80px',
+                      gap: 10,
+                      fontSize: 12,
+                      fontFamily: 'ui-monospace, monospace',
+                      color: 'rgba(255,255,255,0.78)',
+                      padding: '4px 0',
+                      borderBottom: '1px dashed rgba(255,255,255,0.06)',
+                    }}
+                  >
+                    <span style={{ color: '#7ed7c1' }}>{f.technique}</span>
+                    <span>{f.asset}</span>
+                    <span style={{ color: 'rgba(255,255,255,0.55)' }}>{f.source}</span>
+                    <span
+                      style={{
+                        textAlign: 'right',
+                        color:
+                          f.severity === 'critical'
+                            ? '#ff8c8c'
+                            : f.severity === 'high'
+                              ? '#c9b787'
+                              : 'rgba(255,255,255,0.55)',
+                      }}
+                    >
+                      {f.severity}
+                    </span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
+
           <div
             style={{
               background: 'rgba(255,255,255,0.02)',

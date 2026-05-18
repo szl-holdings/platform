@@ -285,6 +285,13 @@ router.use(lazyMatch("/sentra", () => import("./sentra-posture"), "sentra-postur
 // shared by TS detectors and the Python sidecar. See packages/sentra-detector-sdk
 // and services/sentra-detector-sidecar.
 router.use(lazyMatch("/sentra", () => import("./sentra-detector-framework"), "sentra-detector-framework"));
+
+// Sentra Core — typed HTTP routes backed by the services/sentra-core Python
+// sidecar (threat_model, posture_drift, incident_response, evidence_pack,
+// policy_gate). Mounted under /sentra/core/*.
+router.use(
+  lazyMatch("/sentra/core", () => import("../domain-services/sentra/routes"), "sentra-core"),
+);
 router.use(lazyMatch("/sentra", () => import("./sentra-defense"), "sentra-defense"));
 router.use(lazyMatch("/honey", () => import("./sentra-defense"), "sentra-honey"));
 

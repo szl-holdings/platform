@@ -6,10 +6,26 @@ import {
 } from '@szl-holdings/design-system';
 import { cn } from '@szl-holdings/shared-ui/utils';
 import { Activity, CheckCircle2, FileText, ShieldAlert } from 'lucide-react';
-import { useCallback, useState } from 'react';
+import { useCallback, useMemo, useState } from 'react';
+import { DataStateBadge } from '@szl-holdings/shared-ui/data-state-badge';
 import { sentraTwin as fallbackTwin, type ControlDrift as ControlDriftType } from '@/data/sentra-twin';
 import { listCyberTwinControlDrifts } from '@/lib/sentra-api';
-import { SourceBadge, useApiQuery } from '@/lib/use-api-query';
+import { useApiQuery } from '@/lib/use-api-query';
+import { toDataState, useSentraCoreLive } from '@/lib/use-sentra-core-live';
+
+interface PostureDriftChange {
+  control_id: string;
+  name?: string;
+  severity?: string;
+  state?: string;
+}
+
+interface PostureDriftLive {
+  lambda_score: number;
+  added: PostureDriftChange[];
+  removed: PostureDriftChange[];
+  changed: PostureDriftChange[];
+}
 
 const ACCENT = '#f5f5f5';
 const DRIFT_EVIDENCE: EvidenceSource[] = [
@@ -35,13 +51,79 @@ export default function ControlDrift() {
   const [autonomyMode, setAutonomyMode] = useState<AutonomyMode>('recommend');
 
   const fetcher = useCallback(() => listCyberTwinControlDrifts(), []);
-  const { data: controlDrifts, source } = useApiQuery<ControlDriftType[]>(fetcher, 'controlDrifts', fallbackTwin.controlDrifts);
+  const { data: seedDrifts, source } = useApiQuery<ControlDriftType[]>(fetcher, 'controlDrifts', fallbackTwin.controlDrifts);
+
+  // Build the posture-drift request body once per page mount. The hook
+  // re-fetches whenever JSON.stringify(body) changes, so volatile values
+  // like `new Date().toISOString()` would otherwise cause a request storm
+  // on every render. Pinning the timestamps to mount-time keeps the
+  // payload (and therefore the effect) stable.
+  const livePostureBody = useMemo(() => {
+    const mountedAt = Date.now();
+    return {
+      baseline: {
+        snapshot_id: 'baseline-2026-05-01',
+        captured_at: new Date(mountedAt - 14 * 86_400_000).toISOString(),
+        controls: [
+          { id: 'pr-ac-01', name: 'mfa-enforced', severity: 'critical' },
+          { id: 'pr-ds-01', name: 'encryption-at-rest', severity: 'high' },
+          { id: 'de-cm-01', name: 'edr-coverage', severity: 'high' },
+        ],
+      },
+      current: {
+        snapshot_id: 'current',
+        captured_at: new Date(mountedAt).toISOString(),
+        controls: [
+          { id: 'pr-ac-01', name: 'mfa-enforced', severity: 'critical', state: 'partial' },
+          { id: 'de-cm-01', name: 'edr-coverage', severity: 'high' },
+        ],
+      },
+    };
+  }, []);
+
+  const livePosture = useSentraCoreLive<PostureDriftLive>({
+    endpoint: '/posture-drift',
+    body: livePostureBody,
+  });
+  const isLive = livePosture.source === 'live' && livePosture.data !== null;
+  const pageState = isLive ? 'live' : toDataState(source);
+
+  // Primary control-drift dataset: derived from the sentra-core posture_drift
+  // response when the sidecar is live. The seeded twin is only used as a
+  // fallback while the sidecar is unreachable (source === 'offline'/'seed').
+  const FAMILY_BY_PREFIX: Record<string, ControlDriftType['family']> = {
+    id: 'Identify',
+    pr: 'Protect',
+    de: 'Detect',
+    rs: 'Respond',
+    rc: 'Recover',
+  };
+  const liveDrifts: ControlDriftType[] =
+    isLive && livePosture.data
+      ? [...livePosture.data.removed, ...livePosture.data.changed].map((c, i) => {
+          const prefix = c.control_id.slice(0, 2).toLowerCase();
+          const family = FAMILY_BY_PREFIX[prefix] ?? 'Protect';
+          return {
+            id: c.control_id,
+            family,
+            control: c.name ?? c.control_id,
+            status: 'drift_detected',
+            evidence:
+              livePosture.data!.removed.includes(c)
+                ? `Control ${c.control_id} removed from current posture snapshot (sentra-core Λ=${livePosture.data!.lambda_score.toFixed(2)}).`
+                : `Control ${c.control_id} changed state to "${c.state ?? 'unknown'}" (sentra-core Λ=${livePosture.data!.lambda_score.toFixed(2)}).`,
+          } as ControlDriftType;
+        })
+      : [];
+  const controlDrifts = liveDrifts.length > 0 ? liveDrifts : seedDrifts;
 
   const familyNames = ['Identify', 'Protect', 'Detect', 'Respond', 'Recover'] as const;
   const families = familyNames.map((name) => {
     const matching = controlDrifts.filter((d) => d.family === name);
     const driftCount = matching.filter((d) => d.status === 'drift_detected').length;
-    const totalCount = matching.length || (name === 'Identify' ? 12 : name === 'Protect' ? 45 : name === 'Detect' ? 18 : name === 'Respond' ? 8 : 14);
+    const totalCount =
+      matching.length ||
+      (name === 'Identify' ? 12 : name === 'Protect' ? 45 : name === 'Detect' ? 18 : name === 'Respond' ? 8 : 14);
     return { name, status: driftCount > 0 ? 'drift_detected' : 'compliant', count: totalCount, drift: driftCount };
   });
 
@@ -50,12 +132,65 @@ export default function ControlDrift() {
       <header>
         <div className="flex items-center gap-3 flex-wrap">
           <h1 className="text-3xl font-display font-bold text-slate-100">Control Drift</h1>
-          <SourceBadge source={source} />
+          <DataStateBadge state={pageState} pulse={isLive} />
+          {livePosture.data && (
+            <span className="text-[10px] font-mono text-emerald-400">
+              Λ = {livePosture.data.lambda_score.toFixed(2)}
+            </span>
+          )}
         </div>
         <p className="text-slate-400 mt-1">
-          NIST CSF control family monitoring and drift detection
+          NIST CSF control family monitoring and drift detection · sourced live from sentra-core
+          posture_drift.compute when available
         </p>
       </header>
+
+      {livePosture.data && (
+        <section className="sentra-panel p-5 space-y-4" data-testid="live-posture-summary">
+          <div className="flex items-center justify-between">
+            <div>
+              <div className="text-[10px] font-mono uppercase tracking-widest text-slate-500">
+                Live posture drift · sentra-core
+              </div>
+              <div className="text-2xl font-display font-bold text-slate-100 mt-1">
+                Λ {livePosture.data.lambda_score.toFixed(3)}
+              </div>
+            </div>
+            <div className="grid grid-cols-3 gap-4 text-center">
+              <div>
+                <div className="text-2xl font-display font-bold text-emerald-300">{livePosture.data.added.length}</div>
+                <div className="text-[9px] font-mono uppercase text-slate-500">Added</div>
+              </div>
+              <div>
+                <div className="text-2xl font-display font-bold text-rose-300">{livePosture.data.removed.length}</div>
+                <div className="text-[9px] font-mono uppercase text-slate-500">Removed</div>
+              </div>
+              <div>
+                <div className="text-2xl font-display font-bold text-amber-300">{livePosture.data.changed.length}</div>
+                <div className="text-[9px] font-mono uppercase text-slate-500">Changed</div>
+              </div>
+            </div>
+          </div>
+          {(livePosture.data.removed.length > 0 || livePosture.data.changed.length > 0) && (
+            <ul className="space-y-1.5 text-xs font-mono text-slate-300">
+              {livePosture.data.removed.map((c) => (
+                <li key={`r-${c.control_id}`} className="flex items-center gap-2">
+                  <span className="text-rose-400">REMOVED</span>
+                  <span>{c.control_id}</span>
+                  {c.name && <span className="text-slate-500">· {c.name}</span>}
+                </li>
+              ))}
+              {livePosture.data.changed.map((c) => (
+                <li key={`c-${c.control_id}`} className="flex items-center gap-2">
+                  <span className="text-amber-400">CHANGED</span>
+                  <span>{c.control_id}</span>
+                  {c.state && <span className="text-slate-500">→ {c.state}</span>}
+                </li>
+              ))}
+            </ul>
+          )}
+        </section>
+      )}
 
       <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
         {families.map((family) => (

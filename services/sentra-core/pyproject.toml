@@ -1,0 +1,35 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "sentra-core"
+version = "0.1.0"
+description = "Sentra core defensive primitives: threat_model, posture_drift, incident_response, evidence_pack, policy_gate"
+requires-python = ">=3.12"
+dependencies = [
+    "httpx>=0.27.0",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=8.0.0",
+    "pytest-cov>=5.0.0",
+    "ruff>=0.5.0",
+    "respx>=0.21.0",
+]
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/sentra_core"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "--cov=sentra_core --cov-report=term-missing --cov-fail-under=85"
+pythonpath = ["src"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py312"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "B", "UP", "N"]

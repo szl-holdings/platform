@@ -19,7 +19,9 @@ import {
   Zap,
 } from 'lucide-react';
 import { useEffect, useState } from 'react';
+import { DataStateBadge } from '@szl-holdings/shared-ui/data-state-badge';
 import { PageHeader, SeverityChip, StatusChip } from '@/lib/data-provenance';
+import { toDataState, useSentraCoreLive } from '@/lib/use-sentra-core-live';
 import { HealthcareCaseStudyBanner } from '../components/healthcare-case-study-banner';
 import {
   createIncident,
@@ -29,6 +31,12 @@ import {
   type IncidentSeverity,
   type IncidentStatus,
 } from '@/lib/sentra-api';
+
+interface RunbookRunResponse {
+  runbook: string;
+  status: 'completed' | 'failed' | 'awaiting_approval';
+  events: Array<{ step_name: string; status: string; kind: string }>;
+}
 
 const ACCENT = '#f5f5f5';
 
@@ -541,14 +549,74 @@ export default function IncidentCommander() {
   const selected = incidents.find((i) => i.id === selectedId) ?? incidents[0];
   const activeCount = incidents.filter((i) => !['resolved', 'contained'].includes(i.status)).length;
 
+  // Drive the live runbook execution from the actually-selected incident so
+  // pressing "Execute Containment Runbook" runs the sentra-core runbook on
+  // real page state (not a hardcoded probe). The `reload()` exposed by the
+  // hook is wired to the Execute button below.
+  const runbookByStage: Record<string, 'ransomware' | 'credential-compromise' | 'data-exfiltration'> = {
+    'initial-access': 'credential-compromise',
+    execution: 'credential-compromise',
+    persistence: 'credential-compromise',
+    'privilege-escalation': 'credential-compromise',
+    'defense-evasion': 'credential-compromise',
+    'credential-access': 'credential-compromise',
+    discovery: 'credential-compromise',
+    'lateral-movement': 'ransomware',
+    collection: 'data-exfiltration',
+    'command-and-control': 'ransomware',
+    exfiltration: 'data-exfiltration',
+    impact: 'ransomware',
+  };
+  const selectedRunbook = selected
+    ? runbookByStage[selected.mitreStage?.toLowerCase?.() ?? ''] ?? 'credential-compromise'
+    : 'credential-compromise';
+  // /incident-response is a state-changing op (runs the runbook + may
+  // publish events) so we run it in manual mode — the runbook only fires
+  // when the operator clicks the Execute button below.
+  const liveRunbook = useSentraCoreLive<RunbookRunResponse>({
+    endpoint: '/incident-response',
+    body: {
+      incident: {
+        id: selected?.id ?? 'INC-LIVE-PROBE',
+        title: selected?.title ?? 'Live runbook probe',
+        severity: (selected?.severity as 'critical' | 'high' | 'medium' | 'low' | undefined) ?? 'high',
+        affected_assets: selected?.affectedAssets?.length ? selected.affectedAssets : ['probe-host'],
+        mitre_techniques: selected?.mitreTechniques ?? [],
+      },
+      runbook_name: selectedRunbook,
+    },
+    manual: true,
+  });
+  const isLive = liveRunbook.source === 'live' && liveRunbook.data !== null;
+  const liveSource = isLive ? 'live' : source;
+  const liveState = isLive ? 'live' : toDataState(source);
+
   return (
     <div className="space-y-6 animate-fade-in">
       <PageHeader
         title="Incident Commander"
         subtitle="Real-time containment and response orchestration"
-        provenance={source}
+        provenance={liveSource}
         actions={
           <div className="flex items-center gap-3">
+            <DataStateBadge state={liveState} pulse={isLive} />
+            {liveRunbook.data && (
+              <span className="text-[10px] font-mono text-emerald-400">
+                runbook {liveRunbook.data.runbook} · {liveRunbook.data.events.length} steps
+              </span>
+            )}
+            <button
+              data-testid="execute-runbook-trigger"
+              onClick={() => liveRunbook.reload()}
+              disabled={liveRunbook.loading || !selected}
+              className="px-3 py-1.5 rounded border border-emerald-500/40 bg-emerald-500/10 text-[10px] font-mono uppercase tracking-widest text-emerald-200 hover:bg-emerald-500/20 disabled:opacity-50"
+            >
+              {liveRunbook.loading
+                ? 'Executing…'
+                : liveRunbook.data
+                  ? 'Re-execute Runbook'
+                  : 'Execute Runbook'}
+            </button>
             {activeCount > 0 && (
               <div className="px-3 py-1.5 rounded border border-[#f5f5f5]/40 bg-[#f5f5f5]/10 flex items-center gap-2">
                 <Activity className="w-4 h-4 text-[#f5f5f5] animate-pulse" />
@@ -567,6 +635,58 @@ export default function IncidentCommander() {
       />
 
       <HealthcareCaseStudyBanner currentPage="incident-commander" />
+
+      {liveRunbook.data && (
+        <section
+          data-testid="live-runbook-execution"
+          className="rounded border border-emerald-500/30 bg-emerald-500/[0.04] p-5"
+        >
+          <div className="flex items-center justify-between flex-wrap gap-3">
+            <div>
+              <div className="text-[10px] font-mono uppercase tracking-widest text-emerald-300">
+                Live runbook · sentra-core incident_response.run
+              </div>
+              <div className="mt-1 text-sm font-mono text-slate-100">
+                {liveRunbook.data.runbook} — status{' '}
+                <span
+                  className={
+                    liveRunbook.data.status === 'completed'
+                      ? 'text-emerald-300'
+                      : liveRunbook.data.status === 'awaiting_approval'
+                        ? 'text-amber-300'
+                        : 'text-rose-300'
+                  }
+                >
+                  {liveRunbook.data.status}
+                </span>
+              </div>
+            </div>
+            <div className="flex items-center gap-3">
+              <span className="text-[10px] font-mono text-slate-400">
+                {liveRunbook.data.events.length} steps executed
+              </span>
+              <button
+                data-testid="execute-runbook"
+                onClick={() => liveRunbook.reload()}
+                disabled={liveRunbook.loading}
+                className="px-3 py-1.5 rounded border border-emerald-500/40 bg-emerald-500/10 text-[10px] font-mono uppercase tracking-widest text-emerald-200 hover:bg-emerald-500/20 disabled:opacity-50"
+              >
+                {liveRunbook.loading ? 'Executing…' : 'Re-execute Runbook'}
+              </button>
+            </div>
+          </div>
+          <ol className="mt-3 space-y-1 text-xs font-mono text-slate-300">
+            {liveRunbook.data.events.slice(0, 8).map((ev, i) => (
+              <li key={`${ev.step_name}-${i}`} className="flex gap-3">
+                <span className="text-slate-500 w-6 text-right">{i + 1}.</span>
+                <span className="text-emerald-300 w-24">{ev.kind}</span>
+                <span className="flex-1">{ev.step_name}</span>
+                <span className="text-slate-500">{ev.status}</span>
+              </li>
+            ))}
+          </ol>
+        </section>
+      )}
 
       {showCreate && (
         <CreateIncidentModal

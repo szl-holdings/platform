@@ -5,6 +5,93 @@ import {
 } from 'lucide-react';
 import { cn } from '@szl-holdings/shared-ui/utils';
 import { useSentraStore, ensureSeeded, type EvidenceItem } from '@/lib/sentra-store';
+import { DataStateBadge } from '@szl-holdings/shared-ui/data-state-badge';
+import { toDataState, useSentraCoreLive } from '@/lib/use-sentra-core-live';
+
+interface EvidencePackLive {
+  pack_id: string;
+  pack_hash: string;
+  signature: string;
+  signer_id: string;
+  items: Array<{ id: string; content_hash: string; kind?: string }>;
+  publication?: { attempted: boolean; ok: boolean; reason?: string; topic?: string };
+}
+
+const EVIDENCE_TYPES = new Set<EvidenceItem['type']>([
+  'log_excerpt',
+  'pcap',
+  'memory_dump',
+  'screenshot',
+  'artifact',
+  'indicator',
+  'report',
+]);
+
+function toEvidenceType(kind: string | undefined): EvidenceItem['type'] {
+  if (kind && EVIDENCE_TYPES.has(kind as EvidenceItem['type'])) {
+    return kind as EvidenceItem['type'];
+  }
+  return 'artifact';
+}
+
+function mapLivePackItemToEvidence(
+  it: { id: string; content_hash: string; kind?: string },
+  signerId: string,
+): EvidenceItem {
+  const now = new Date().toISOString();
+  return {
+    id: it.id,
+    incident_id: 'INC-LIVE-PROBE',
+    file_name: `${it.id}.bin`,
+    type: toEvidenceType(it.kind),
+    source: 'sentra-core',
+    sha256: it.content_hash,
+    size_bytes: it.content_hash.length,
+    collected_at: now,
+    collected_by: signerId,
+    locked: true,
+    locked_at: now,
+    locked_by: signerId,
+    chain_of_custody: [
+      { actor: signerId, action: 'collected', timestamp: now },
+      { actor: signerId, action: 'signed', timestamp: now },
+    ],
+  };
+}
+
+async function postEvidencePack(body: Record<string, unknown>): Promise<EvidencePackLive> {
+  const headers: Record<string, string> = { 'Content-Type': 'application/json' };
+  // Reuse the same CSRF dance the live hook performs.
+  const cookieMatch =
+    typeof document !== 'undefined'
+      ? document.cookie.match(/(?:^|;\s*)csrf_token=([^;]+)/)
+      : null;
+  let token = cookieMatch ? decodeURIComponent(cookieMatch[1]) : null;
+  if (!token) {
+    try {
+      await fetch('/api/csrf-token', { credentials: 'include' });
+      const m =
+        typeof document !== 'undefined'
+          ? document.cookie.match(/(?:^|;\s*)csrf_token=([^;]+)/)
+          : null;
+      token = m ? decodeURIComponent(m[1]) : null;
+    } catch {
+      // best-effort; route will reject if CSRF is required and missing.
+    }
+  }
+  if (token) headers['X-CSRF-Token'] = token;
+  const res = await fetch('/api/sentra/core/evidence-pack', {
+    method: 'POST',
+    headers,
+    credentials: 'include',
+    body: JSON.stringify(body),
+  });
+  if (!res.ok) {
+    throw new Error(`evidence-pack HTTP ${res.status}`);
+  }
+  const json = (await res.json()) as { data?: EvidencePackLive } & EvidencePackLive;
+  return (json.data ?? json) as EvidencePackLive;
+}
 
 const TYPE_CONFIG: Record<string, { label: string; color: string; icon: typeof FileText }> = {
   log_excerpt: { label: 'LOG', color: '#60a5fa', icon: FileText },
@@ -140,7 +227,32 @@ export default function EvidenceVault() {
   const [packResult, setPackResult] = useState<string | null>(null);
   const [verifyResult, setVerifyResult] = useState<{ valid: boolean; checked: number } | null>(null);
 
-  const evidence = store.evidence;
+  // /evidence-pack is a state-changing op (signs and may publish) so we
+  // run it in manual mode — nothing happens until the operator clicks
+  // "Sign live probe pack" below or invokes Generate Evidence Pack on a
+  // specific incident.
+  const livePack = useSentraCoreLive<EvidencePackLive>({
+    endpoint: '/evidence-pack',
+    body: {
+      incident_id: 'INC-LIVE-PROBE',
+      items: [
+        { id: 'live-probe-1', kind: 'log_excerpt', payload: 'live evidence probe', collected_at: Date.now() / 1000 },
+      ],
+    },
+    manual: true,
+  });
+
+  // Primary evidence dataset: when sentra-core returns a signed pack, surface
+  // its items at the top of the vault. The seeded store is only used as a
+  // fallback / historical pane when the sidecar is unreachable.
+  const liveEvidence: EvidenceItem[] = livePack.data
+    ? livePack.data.items.map((it) => mapLivePackItemToEvidence(it, livePack.data!.signer_id))
+    : [];
+
+  // When sentra-core has signed a live pack, surface ONLY its items —
+  // the seeded store is reserved for the unreachable-sidecar fallback so
+  // operators are never shown a mix of live and seeded evidence.
+  const evidence: EvidenceItem[] = liveEvidence.length > 0 ? liveEvidence : store.evidence;
   const filtered = evidence.filter(e => {
     if (typeFilter !== 'all' && e.type !== typeFilter) return false;
     if (lockFilter === 'locked' && !e.locked) return false;
@@ -156,10 +268,43 @@ export default function EvidenceVault() {
     store.lockEvidence(id, 'Analyst (Manual)');
   }
 
-  function handlePack(incidentId: string) {
-    const pack = store.generateEvidencePack(incidentId, 'Analyst');
-    setPackResult(`Evidence pack ${pack.id} created — Merkle root: ${pack.merkle_root.substring(0, 12)}…`);
-    setTimeout(() => setPackResult(null), 4000);
+  async function handlePack(incidentId: string) {
+    // Primary path: sign the incident's evidence via the sentra-core sidecar
+    // (POST /api/sentra/core/evidence-pack). The seeded store fallback is only
+    // used when the sidecar is unreachable — and is clearly labelled as such
+    // so operators never mistake a local hash for a chain-of-custody signature.
+    const incidentItems = store.evidence
+      .filter((e) => e.incident_id === incidentId)
+      .map((e) => ({
+        id: e.id,
+        kind: e.type,
+        description: e.file_name,
+        payload: e.sha256 || e.id,
+        collected_at: 0,
+      }));
+    if (incidentItems.length === 0) {
+      setPackResult(`No evidence items linked to ${incidentId} — nothing to sign.`);
+      setTimeout(() => setPackResult(null), 4000);
+      return;
+    }
+    try {
+      const live = await postEvidencePack({ incident_id: incidentId, items: incidentItems });
+      const pubNote =
+        live.publication?.attempted && live.publication.ok
+          ? ` · published to ${live.publication.topic ?? 'sentra.evidence'}`
+          : live.publication?.attempted
+            ? ` · publish failed: ${live.publication.reason ?? 'unknown'}`
+            : ' · publish skipped (no yawar_url)';
+      setPackResult(
+        `Evidence pack ${live.pack_id.slice(0, 16)}… signed by ${live.signer_id} — hash ${live.pack_hash.slice(0, 12)}…${pubNote}`,
+      );
+    } catch (err) {
+      const pack = store.generateEvidencePack(incidentId, 'Analyst');
+      setPackResult(
+        `Sidecar unreachable (${err instanceof Error ? err.message : String(err)}); local-only Merkle pack ${pack.id} — not chain-of-custody signed.`,
+      );
+    }
+    setTimeout(() => setPackResult(null), 6000);
   }
 
   function handleVerifyPacks() {
@@ -179,10 +324,68 @@ export default function EvidenceVault() {
         <div className="flex items-center gap-2 mb-1">
           <FolderLock className="w-4 h-4 text-[#c9b787]" />
           <span className="text-[10px] font-mono uppercase tracking-widest text-slate-500">Sentra — Evidence Vault</span>
+          <span className="ml-2">
+            <DataStateBadge
+              state={livePack.data ? 'live' : toDataState(livePack.source)}
+              pulse={livePack.source === 'live'}
+            />
+          </span>
+          <button
+            data-testid="sign-live-probe-pack"
+            onClick={() => livePack.reload()}
+            disabled={livePack.loading}
+            className="ml-3 px-3 py-1 rounded border border-[#c9b787]/40 bg-[#c9b787]/10 text-[10px] font-mono uppercase tracking-widest text-[#c9b787] hover:bg-[#c9b787]/20 disabled:opacity-50"
+          >
+            {livePack.loading ? 'Signing…' : livePack.data ? 'Re-sign probe pack' : 'Sign live probe pack'}
+          </button>
         </div>
         <h1 className="text-2xl font-display font-bold text-slate-100">Evidence Vault</h1>
         <p className="text-sm text-slate-500 mt-1">Tamper-evident evidence collection with Merkle-root verification and chain-of-custody tracking.</p>
       </div>
+
+      {livePack.data && (
+        <section
+          data-testid="live-evidence-pack"
+          className="sentra-panel p-5 border border-[#c9b787]/30 bg-[#c9b787]/[0.04]"
+        >
+          <div className="flex items-center justify-between gap-4 flex-wrap">
+            <div>
+              <div className="text-[10px] font-mono uppercase tracking-widest text-[#c9b787]">
+                Live signed pack · sentra-core evidence_pack.build
+              </div>
+              <div className="mt-2 flex items-center gap-3 flex-wrap">
+                <span className="font-mono text-sm text-slate-100">
+                  pack <span className="text-[#c9b787]">{livePack.data.pack_id.slice(0, 16)}…</span>
+                </span>
+                <span className="text-[10px] font-mono text-slate-500">
+                  signer <span className="text-slate-300">{livePack.data.signer_id}</span>
+                </span>
+                <span className="text-[10px] font-mono text-slate-500">
+                  {livePack.data.items.length} items
+                </span>
+              </div>
+              <div className="mt-1 text-[10px] font-mono text-slate-500 break-all max-w-2xl">
+                hash {livePack.data.pack_hash}
+              </div>
+            </div>
+            <span
+              className={cn(
+                'text-[10px] font-mono',
+                livePack.data?.publication?.attempted && livePack.data.publication.ok
+                  ? 'text-emerald-400'
+                  : 'text-slate-400',
+              )}
+            >
+              HMAC signed ·{' '}
+              {livePack.data?.publication?.attempted && livePack.data.publication.ok
+                ? `published to ${livePack.data.publication.topic ?? 'sentra.evidence'}`
+                : livePack.data?.publication?.attempted
+                  ? `publish failed (${livePack.data.publication.reason ?? 'unknown'})`
+                  : 'publish skipped (no yawar_url configured)'}
+            </span>
+          </div>
+        </section>
+      )}
 
       {/* KPIs */}
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
