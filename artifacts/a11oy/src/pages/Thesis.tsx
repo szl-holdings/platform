@@ -414,6 +414,17 @@ export default function Thesis() {
                 No canonical doc for "{requestedVersion}" — showing {active.slug}
               </span>
             )}
+            <Link
+              href={`${BASE}/thesis/diff`}
+              className={`px-2 py-1 rounded font-mono text-xs hover:opacity-80${missing && requestedVersion ? '' : ' ml-auto'}`}
+              style={{
+                backgroundColor: 'rgba(201,183,135,0.1)',
+                color: GOLD,
+                border: `1px solid ${GOLD}40`,
+              }}
+            >
+              compare revisions →
+            </Link>
           </div>
         </Card>
 

@@ -205,6 +205,7 @@ const ApprovalQueue = lazy(() => import('./pages/ApprovalQueue').then(m => ({ de
 const CognitiveReflexivity = lazy(() => import('./pages/CognitiveReflexivity'));
 const Ouroboros = lazy(() => import('./pages/Ouroboros'));
 const Thesis = lazy(() => import('./pages/Thesis'));
+const ThesisDiff = lazy(() => import('./pages/ThesisDiff'));
 const Dossier = lazy(() => import('./pages/Dossier'));
 const Anatomy = lazy(() => import('./pages/Anatomy'));
 const CodexNode = lazy(() => import('./pages/CodexNode'));
@@ -766,6 +767,8 @@ function AppInner() {
         <Route path={`${base}/cognitive-reflexivity`} component={CognitiveReflexivity} />
         <Route path={`${base}/ouroboros`} component={Ouroboros} />
         <Route path={`${base}/thesis`} component={Thesis} />
+        <Route path={`${base}/thesis/diff`} component={ThesisDiff} />
+        <Route path={`${base}/thesis/diff/:from/:to`} component={ThesisDiff} />
         <Route path={`${base}/thesis/:version`} component={Thesis} />
         <Route path={`${base}/dossier`} component={Dossier} />
         <Route path={`${base}/anatomy`} component={Anatomy} />
