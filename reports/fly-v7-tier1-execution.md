@@ -37,6 +37,8 @@ All closed with comment explaining doctrine-violation merge risk.
 | szl-brand | [#13](https://github.com/szl-holdings/szl-brand/pull/13) |
 | lutar-lean | [#16](https://github.com/szl-holdings/lutar-lean/pull/16) |
 
+<!-- doctrine-scanner-exempt: historical execution report — by design lists the forbidden token strings verbatim as the patterns that were scanned for and closed against. -->
+
 **All currently existing `polish/hygiene-and-doctrine-sweep` PRs were closed.** Rollup said 13; query of `/repos/szl-holdings/{repo}/pulls?state=open` across all 18 org repos returned only 12 PRs with this branch name (ouroboros and ouroboros-thesis have none). Evidence: the org-wide PR snapshot captured at the start of execution, included as Appendix A below.
 
 ## 2. PRs CLOSED — feature PRs with forbidden patterns in body (6)

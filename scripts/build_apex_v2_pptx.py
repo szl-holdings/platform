@@ -218,9 +218,9 @@ def slide1():
     # divider
     add_rect(s, MARGIN_X+Inches(0.1), Inches(5.5), Inches(2.0), Emu(19050), fill=GOLD)
     add_text(s, MARGIN_X+Inches(0.1), Inches(5.65), Inches(11.5), Inches(0.4),
-             "Stephen Lutar  ·  Founder", size=16, color=INK, bold=True, font="Calibri")
+             "Stephen P. Lutar Jr.  ·  Founder", size=16, color=INK, bold=True, font="Calibri")
     add_text(s, MARGIN_X+Inches(0.1), Inches(6.05), Inches(11.5), Inches(0.35),
-             "stephenlutar2@gmail.com", size=12, color=INK_DIM, font="Calibri")
+             "stephen@szlholdings.com", size=12, color=INK_DIM, font="Calibri")
     add_text(s, MARGIN_X+Inches(0.1), Inches(6.35), Inches(11.5), Inches(0.35),
              "github.com/szl-holdings  ·  ORCID 0009-0001-0110-4173",
              size=12, color=INK_DIM, font="Calibri")
@@ -380,7 +380,7 @@ def slide6():
 def slide7():
     s = prs.slides.add_slide(blank); add_bg(s, NAVY)
     add_eyebrow(s, "06  ·  THE CONTROL PLANE")
-    add_title(s, "A11oy is the Mythos-class control plane.")
+    add_title(s, "A11oy is the leader-class control plane.")
     items = [
         ("ARGO",
          "Experience-era decision engine. Champion policies, self-play arena, mirror eval, counterfactuals, reward-hacking guardrails. World-model accuracy 89.1% · throughput 31.4 ev/s."),
