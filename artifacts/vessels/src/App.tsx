@@ -104,6 +104,7 @@ import {
   Search,
   Shield,
   ShieldAlert,
+  ShieldCheck,
   Ship,
   TrendingUp,
   User,
