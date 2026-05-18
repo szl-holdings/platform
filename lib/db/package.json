@@ -28,6 +28,7 @@
     "push": "drizzle-kit push --config ./drizzle.config.ts",
     "push-force": "drizzle-kit push --force --config ./drizzle.config.ts",
     "push-non-interactive": "node ./scripts/non-interactive-migrate.mjs",
+    "migrate-non-interactive": "node ./scripts/non-interactive-migrate.mjs",
     "lint": "biome lint ./src",
     "lint:ci": "biome lint ./src",
     "format": "biome format --write ./src",

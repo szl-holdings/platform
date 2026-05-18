@@ -71,20 +71,25 @@ if [ -n "$current_snapshot" ]; then
   printf '%s\n' "$current_snapshot" > "$WORKSPACE_SNAPSHOT_FILE"
 fi
 # Run schema sync non-interactively.
-# Uses the non-interactive wrapper (push-non-interactive) so the workflow
-# never hangs on drizzle-kit's "Is `foo` a new table or rename?" prompts.
-# See lib/db/scripts/non-interactive-migrate.mjs for behavior + safety knobs
-# (DB_MIGRATE_TIMEOUT_MS, DB_MIGRATE_FAIL_ON_PROMPT, DB_MIGRATE_FORCE).
-# stdin is /dev/null so any remaining prompt receives EOF and fails immediately
-# rather than blocking forever.
 #
-# Schema-hash short-circuit (Task #5025): the wrapper now hashes
-# lib/db/src/schema/** and compares against a marker row in
-# `_szl_schema_marker` on the dev DB. The common case (no schema change)
-# completes in seconds without invoking drizzle-kit at all. Only an
-# actual schema delta triggers the ~4 min `drizzle-kit push` introspection.
+# Schema-hash short-circuit (Task #5025) + journaled migrate (Task #5056):
+# the wrapper hashes lib/db/src/schema/** and compares against a marker
+# row in `_szl_schema_marker` on the dev DB. The common case (no schema
+# change) completes in seconds without invoking drizzle-kit at all.
 #
-# Real drizzle failures now propagate. With the schema-hash short-circuit
+# On a hash delta the wrapper runs the lib/db `migrate` pipeline
+# (backfill → drizzle-kit migrate → manual). `drizzle-kit migrate`
+# replays journaled SQL files from lib/db/drizzle/ that are newer than
+# the latest entry in `drizzle.__drizzle_migrations`, which is dramatically
+# faster than the old `drizzle-kit push` introspection diff and is fully
+# non-interactive by design (no prompts, no newline-injection wrapper
+# needed). See lib/db/scripts/non-interactive-migrate.mjs for behavior +
+# safety knobs (DB_MIGRATE_TIMEOUT_MS, DB_MIGRATE_FORCE).
+#
+# stdin is /dev/null defensively; with `migrate` there should be no
+# prompts to receive it anyway.
+#
+# Real drizzle failures propagate. With the schema-hash short-circuit
 # in place, the common (no-delta) case never invokes drizzle-kit at all,
 # so a timeout or non-zero exit always signals a genuine problem with an
 # actual schema delta. We therefore fail the post-merge on ANY non-zero
@@ -95,15 +100,14 @@ fi
 # command evaluated). `set +e` / `set -e` is the only pattern that works.
 set +e
 DB_MIGRATE_TIMEOUT_MS=600000 \
-DB_MIGRATE_FAIL_ON_PROMPT=false \
-  pnpm --filter @szl-holdings/db push-non-interactive < /dev/null 2>&1
+  pnpm --filter @szl-holdings/db migrate-non-interactive < /dev/null 2>&1
 migrate_status=$?
 set -e
 if [ "$migrate_status" -eq 124 ]; then
-  echo "drizzle-kit push timed out applying a schema delta — failing the post-merge step so the drift is visible (raise DB_MIGRATE_TIMEOUT_MS or investigate the delta)"
+  echo "drizzle-kit migrate timed out applying a schema delta — failing the post-merge step so the drift is visible (raise DB_MIGRATE_TIMEOUT_MS or investigate the delta)"
   exit "$migrate_status"
 elif [ "$migrate_status" -ne 0 ]; then
-  echo "drizzle-kit push failed with exit $migrate_status — failing the post-merge step so the schema drift is visible"
+  echo "drizzle-kit migrate failed with exit $migrate_status — failing the post-merge step so the schema drift is visible"
   exit "$migrate_status"
 fi
 
