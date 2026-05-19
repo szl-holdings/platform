@@ -64,6 +64,8 @@ export function RecalibrationMemos() {
   const [selected, setSelected] = useState<RecalibrationMemo | null>(null);
   const [generating, setGenerating] = useState(false);
   const [generateError, setGenerateError] = useState<string | null>(null);
+  const [actioning, setActioning] = useState(false);
+  const [actionError, setActionError] = useState<string | null>(null);
 
   useEffect(() => {
     fetch(`${API}/memos`)
@@ -98,6 +100,53 @@ export function RecalibrationMemos() {
       setGenerateError(err instanceof Error ? err.message : 'Generation failed');
     } finally {
       setGenerating(false);
+    }
+  }
+
+  async function handlePublish(memo: RecalibrationMemo) {
+    setActioning(true);
+    setActionError(null);
+    try {
+      const r = await fetch(`${API}/memos/${memo.id}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ status: 'published' }),
+      });
+      if (!r.ok) {
+        const body = await r.json().catch(() => ({}));
+        throw new Error(body.error ?? `Publish failed (${r.status})`);
+      }
+      const data = await r.json();
+      const updated = data.memo as RecalibrationMemo;
+      setMemos(prev => prev.map(m => (m.id === updated.id ? updated : m)));
+      setSelected(updated);
+    } catch (err) {
+      setActionError(err instanceof Error ? err.message : 'Publish failed');
+    } finally {
+      setActioning(false);
+    }
+  }
+
+  async function handleDiscard(memo: RecalibrationMemo) {
+    setActioning(true);
+    setActionError(null);
+    try {
+      const r = await fetch(`${API}/memos/${memo.id}`, { method: 'DELETE' });
+      if (!r.ok && r.status !== 204) {
+        const body = await r.json().catch(() => ({}));
+        throw new Error(body.error ?? `Discard failed (${r.status})`);
+      }
+      setMemos(prev => {
+        const next = prev.filter(m => m.id !== memo.id);
+        if (selected?.id === memo.id) {
+          setSelected(next[0] ?? null);
+        }
+        return next;
+      });
+    } catch (err) {
+      setActionError(err instanceof Error ? err.message : 'Discard failed');
+    } finally {
+      setActioning(false);
     }
   }
 
@@ -216,9 +265,60 @@ export function RecalibrationMemos() {
                   <MemoSection label="Roadmap implications" content={selected.roadmap} />
                 </div>
 
+                {selected.status === 'draft' && (
+                  <div style={{ marginTop: 16, paddingTop: 16, borderTop: `1px solid ${BORDER}`, display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap' }}>
+                    <button
+                      type="button"
+                      onClick={() => handlePublish(selected)}
+                      disabled={actioning}
+                      style={{
+                        padding: '8px 14px',
+                        border: `1px solid ${GOLD}80`,
+                        borderRadius: 6,
+                        background: actioning ? 'transparent' : `${GOLD}14`,
+                        color: GOLD,
+                        fontFamily: 'var(--font-mono, monospace)',
+                        fontSize: 11,
+                        letterSpacing: '0.08em',
+                        textTransform: 'uppercase',
+                        cursor: actioning ? 'wait' : 'pointer',
+                        opacity: actioning ? 0.6 : 1,
+                      }}
+                    >
+                      Publish memo
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => handleDiscard(selected)}
+                      disabled={actioning}
+                      style={{
+                        padding: '8px 14px',
+                        border: '1px solid #e36b6b60',
+                        borderRadius: 6,
+                        background: 'transparent',
+                        color: '#e36b6b',
+                        fontFamily: 'var(--font-mono, monospace)',
+                        fontSize: 11,
+                        letterSpacing: '0.08em',
+                        textTransform: 'uppercase',
+                        cursor: actioning ? 'wait' : 'pointer',
+                        opacity: actioning ? 0.6 : 1,
+                      }}
+                    >
+                      Discard draft
+                    </button>
+                    {actionError && (
+                      <span style={{ fontSize: 11, color: '#e36b6b', fontFamily: 'var(--font-mono, monospace)' }}>
+                        {actionError}
+                      </span>
+                    )}
+                  </div>
+                )}
+
                 <div style={{ marginTop: 8, paddingTop: 12, borderTop: `1px solid ${BORDER}` }}>
                   <div style={{ fontSize: 10, fontFamily: 'var(--font-mono, monospace)', color: MUTED }}>
                     Generated {new Date(selected.createdAt).toLocaleString()} · ID: {selected.id}
+                    {selected.status === 'published' && ' · Published'}
                   </div>
                 </div>
               </div>

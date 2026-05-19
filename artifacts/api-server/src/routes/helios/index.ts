@@ -405,6 +405,76 @@ router.get('/memos/:id', async (req, res) => {
   res.json({ memo });
 });
 
+router.patch('/memos/:id', async (req, res) => {
+  const { id } = req.params;
+  const { status } = (req.body ?? {}) as { status?: 'published' };
+  if (status !== 'published') {
+    res.status(400).json({ error: 'Only status: "published" is supported' });
+    return;
+  }
+
+  // Stored memo path — persist status flip and strip [DRAFT] prefix.
+  try {
+    await ensureMemoSchema();
+    const existing = await pool.query<StoredMemoRow>(
+      `SELECT * FROM helios_recalibration_memos WHERE id = $1`,
+      [id],
+    );
+    if (existing.rows.length > 0) {
+      const row = existing.rows[0];
+      const newTitle = row.title.replace(/^\s*\[DRAFT\]\s*/i, '');
+      const updated = await pool.query<StoredMemoRow>(
+        `UPDATE helios_recalibration_memos
+           SET status = 'published', title = $2
+         WHERE id = $1
+         RETURNING *`,
+        [id, newTitle],
+      );
+      res.json({ memo: rowToMemo(updated.rows[0]) });
+      return;
+    }
+  } catch {
+    // Fall through to in-memory path.
+  }
+
+  const idx = RECALIBRATION_MEMOS.findIndex(m => m.id === id);
+  if (idx === -1) {
+    res.status(404).json({ error: 'Memo not found' });
+    return;
+  }
+  RECALIBRATION_MEMOS[idx] = {
+    ...RECALIBRATION_MEMOS[idx],
+    status: 'published',
+    title: RECALIBRATION_MEMOS[idx].title.replace(/^\s*\[DRAFT\]\s*/i, ''),
+  };
+  res.json({ memo: RECALIBRATION_MEMOS[idx] });
+});
+
+router.delete('/memos/:id', async (req, res) => {
+  const { id } = req.params;
+  let deleted = false;
+
+  try {
+    await ensureMemoSchema();
+    const r = await pool.query(`DELETE FROM helios_recalibration_memos WHERE id = $1`, [id]);
+    if ((r.rowCount ?? 0) > 0) deleted = true;
+  } catch {
+    // Ignore — try in-memory fallback below.
+  }
+
+  const idx = RECALIBRATION_MEMOS.findIndex(m => m.id === id);
+  if (idx !== -1) {
+    RECALIBRATION_MEMOS.splice(idx, 1);
+    deleted = true;
+  }
+
+  if (!deleted) {
+    res.status(404).json({ error: 'Memo not found' });
+    return;
+  }
+  res.status(204).end();
+});
+
 // ── Memo synthesis pipeline ──────────────────────────────────────────────────
 // Groups the week's top signals by theme, then drafts an audit/blueprint/roadmap
 // memo. The output is persisted as `status: draft` for human review before it
