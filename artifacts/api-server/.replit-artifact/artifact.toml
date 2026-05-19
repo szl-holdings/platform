@@ -18,49 +18,6 @@ run = "pnpm --filter @workspace/api-server run dev:fast"
 PORT = "8080"
 
 [[services]]
-name = "agent-gateway"
-paths = [ "/agent-gateway/" ]
-localPort = 6800
-autoStart = false
-
-[services.development]
-run = "bash -c 'cd /home/runner/workspace/platform/agent-gateway && exec node dist/server.js'"
-
-[services.env]
-PORT = "6800"
-BASE_PATH = "/agent-gateway"
-
-[[services]]
-name = "temporal-worker"
-paths = []
-localPort = 6801
-autoStart = false
-
-[services.development]
-run = "pnpm --filter @szl-holdings/temporal-tests run worker:start"
-
-[services.env]
-PORT = "6801"
-TEMPORAL_ENDPOINT = "localhost:7233"
-TEMPORAL_NAMESPACE = "default"
-TEMPORAL_TASK_QUEUE = "szl-platform"
-
-[[services]]
-name = "temporal-approval-worker"
-paths = []
-localPort = 6802
-autoStart = false
-
-[services.development]
-run = "pnpm --filter @szl-holdings/temporal-tests run worker:approval:start"
-
-[services.env]
-PORT = "6802"
-TEMPORAL_ENDPOINT = "localhost:7233"
-TEMPORAL_NAMESPACE = "default"
-TEMPORAL_APPROVAL_TASK_QUEUE = "approval-task-queue"
-
-[[services]]
 name = "amaru"
 paths = [ "/amaru/" ]
 localPort = 6810
