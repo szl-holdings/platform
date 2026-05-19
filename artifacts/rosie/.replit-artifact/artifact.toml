@@ -1,0 +1,31 @@
+kind = "web"
+previewPath = "/rosie/"
+title = "ROSIE — Governed Decision Fabric"
+version = "1.0.0"
+id = "artifacts/rosie"
+router = "path"
+
+[[integratedSkills]]
+name = "react-vite"
+version = "1.0.0"
+
+[[services]]
+name = "web"
+paths = [ "/rosie/" ]
+localPort = 25263
+
+[services.development]
+run = "bash -c 'cd /home/runner/workspace/artifacts/rosie && exec node_modules/.bin/vite --config vite.config.ts --host ::'"
+
+[services.production]
+build = [ "pnpm", "--filter", "@workspace/rosie", "run", "build" ]
+publicDir = "artifacts/rosie/dist/public"
+serve = "static"
+
+[[services.production.rewrites]]
+from = "/*"
+to = "/index.html"
+
+[services.env]
+PORT = "25263"
+BASE_PATH = "/rosie/"

@@ -22,4 +22,9 @@ export const TOKEN_GOVERNED_ARTIFACTS: readonly ArtifactDescriptor[] = [
   { id: 'vessels', dir: 'artifacts/vessels', title: 'Vessels Maritime Intelligence', kind: 'web' },
   { id: 'lyte-command-center', dir: 'artifacts/lyte-command-center', title: 'Lyte — Decision Intelligence', kind: 'web' },
   { id: 'api-server', dir: 'artifacts/api-server', title: 'API Server', kind: 'web' },
+  { id: 'rosie', dir: 'artifacts/rosie', title: 'ROSIE — Governed Decision Fabric', kind: 'web' },
+  { id: 'rosie-mobile', dir: 'artifacts/rosie-mobile', title: 'ROSIE — Mobile Command', kind: 'mobile' },
+  { id: 'conduit', dir: 'artifacts/conduit', title: 'Amaru — The Andean Ouroboros', kind: 'web' },
+  { id: 'a11oy', dir: 'artifacts/a11oy', title: 'A11oy — Brand Orchestration Layer', kind: 'web' },
+  { id: 'vessels-pitch', dir: 'artifacts/vessels-pitch', title: 'Vessels x Dorian LPG — Pitch', kind: 'design' },
 ];

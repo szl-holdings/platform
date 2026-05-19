@@ -1,0 +1,27 @@
+kind = "mobile"
+previewPath = "/rosie-mobile/"
+title = "ROSIE — Mobile Command"
+version = "1.0.0"
+id = "artifacts/rosie-mobile"
+router = "expo-domain"
+
+[[integratedSkills]]
+name = "expo"
+version = "1.0.0"
+
+[[services]]
+ensurePreviewReachable = "/status"
+name = "expo"
+paths = [ "/rosie-mobile/" ]
+localPort = 24050
+
+[services.development]
+run = "pnpm --filter @workspace/rosie-mobile run dev"
+
+[services.production]
+build = [ "pnpm", "--filter", "@workspace/rosie-mobile", "run", "build" ]
+run = [ "pnpm", "--filter", "@workspace/rosie-mobile", "run", "serve" ]
+
+[services.env]
+PORT = "24050"
+BASE_PATH = "/rosie-mobile/"

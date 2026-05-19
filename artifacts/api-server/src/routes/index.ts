@@ -94,6 +94,11 @@ router.use(lazyMatch("/self-healing", () => import("./self-healing"), "self-heal
 // Simulation what-if engine — POST route is public.
 router.use(lazyMatch("/simulation", () => import("./simulation-whatif"), "simulation-whatif"));
 
+// ROSIE — Governed Decision Fabric. Public demo surface.
+// Owns /rosie/templates, /rosie/solve, /rosie/narrate, /rosie/receipts*,
+// /rosie/research, /rosie/github/*, /rosie/ingest/*, /rosie/fabric, /rosie/events
+router.use(lazyMatch("/rosie", () => import("./rosie"), "rosie"));
+
 // Adversarial red-team & crisis stress-drill suite.
 // All state is isolated in-memory — no production tables touched.
 // GET  /stress-drill/scenarios

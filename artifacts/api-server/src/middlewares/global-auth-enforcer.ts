@@ -123,6 +123,15 @@ const PUBLIC_EXACT_PATHS = new Set([
   // (which requires auth) is NOT covered by these allowlist entries.
   "/api/self-healing/stats",
   "/api/self-healing/policies",
+  // ROSIE — anonymous mutation POSTs that drive the demo (each emits a
+  // Covenant-Proof receipt into the in-memory chain mirrored to proof_ledger).
+  // Exact-match only so /api/rosie/solve/queue/:id/approve|reject and
+  // /api/rosie/ingest/run continue to hit requireAnyAuth() at the route layer.
+  "/api/rosie/solve",
+  "/api/rosie/solve/custom",
+  "/api/rosie/solve/queue",
+  "/api/rosie/narrate",
+  "/api/rosie/receipts/verify",
   // Shared action store SSE stream — read-only live feed used by the Business
   // State / Enterprise State pages. GET /api/action-store is allowed below via
   // a method-specific check so the deny-by-default enforcer still rejects
@@ -411,6 +420,11 @@ const PUBLIC_PREFIXES = [
   // Infrastructure status — lightweight public health summary used by the
   // Legatus infrastructure console to show live AquilaScore and threat level.
   "/api/infrastructure/",
+  // ROSIE — intentionally NOT in PUBLIC_PREFIXES. GET reads go through
+  // OPS_CORE_PUBLIC_PREFIXES (GET/HEAD only). Anonymous mutation POSTs
+  // (solve, solve/queue propose, narrate, receipts/verify) are listed in
+  // PUBLIC_EXACT_PATHS above via exact Set.has() matching so the HITL
+  // mutation routes (approve/reject/ingest/run) keep their auth wall.
   // Ops-core public surface is INTENTIONALLY ABSENT from this prefix list —
   // PUBLIC_PREFIXES is method-agnostic and would let a future POST under
   // `/api/{app}/ops-core/` slip the global wall. Ops-core is instead carved
@@ -660,6 +674,11 @@ const OPS_CORE_PUBLIC_PREFIXES = [
   "/api/org-intelligence/",
   // Round 4 (2026-05-18): unified ecosystem aggregator. Same posture.
   "/api/ecosystem/",
+  // ROSIE Governed Decision Fabric: GET reads (templates, fabric, receipts,
+  // research, ingest/status, github/repos, events) are anonymous-readable;
+  // POST mutations (solve/queue, approve, reject, narrate, ingest/run) fall
+  // through to the auth wall and the per-route requireAuth() enforcement.
+  "/api/rosie/",
 ] as const;
 
 function isOpsCorePublicRead(req: Request): boolean {

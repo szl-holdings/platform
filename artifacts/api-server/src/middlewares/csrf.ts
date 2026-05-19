@@ -225,6 +225,20 @@ function isExempt(path: string): boolean {
   // state that an attacker could hijack. Mutating routes additionally carry
   // authMiddleware({ required: false }) so sessions are attached when available.
   if (path.startsWith('/api/reliquary/')) return true;
+  // ROSIE — Governed Decision Fabric. NARROW exemption: only the anonymous
+  // demo POSTs (solve, solve/queue propose, narrate, receipts/verify) are
+  // bypassed. The authenticated HITL endpoints (solve/queue/:id/approve,
+  // /reject, ingest/run) MUST keep CSRF double-submit because they mutate
+  // operator-decided governance state under a session cookie. Bearer-token
+  // callers (mobile, CLI) continue to bypass CSRF via the global Authorization
+  // branch above.
+  if (
+    path === '/api/rosie/solve' ||
+    path === '/api/rosie/solve/custom' ||
+    path === '/api/rosie/solve/queue' ||
+    path === '/api/rosie/narrate' ||
+    path === '/api/rosie/receipts/verify'
+  ) return true;
   // LaaS v1 guard — public Lambda-as-a-Service endpoint. Stateless, Zod-validated,
   // no PII or session. Receipts returned to caller; no server-side persistence.
   if (path === '/api/v1/guard' || path.startsWith('/api/v1/guard/')) return true;
