@@ -1052,6 +1052,19 @@ export function globalAuthEnforcer(
     return;
   }
 
+  // Sentra → A11oy cross-device status bridge. Anonymous POST so the Sentra
+  // browser store can publish its operational telemetry summary on every
+  // notify() without requiring an authenticated session — this is what lets
+  // A11oy operators on a different device see live telemetry instead of the
+  // "telemetry not yet available" placeholder. Payload is a bounded counters
+  // snapshot (no PII, no per-user mutation), the route handler validates the
+  // shape and applies its own rate limit, and the CSRF middleware exempts
+  // this exact path. See routes/sentra-status.ts.
+  if (req.method === "POST" && path === "/api/sentra/status") {
+    next();
+    return;
+  }
+
   // Risk evidence store — read-only GET routes are public so external reviewers
   // and lender briefing exports can resolve saved evidence without a session.
   // POST (save) and DELETE (remove) fall through to 401; authMiddleware() in

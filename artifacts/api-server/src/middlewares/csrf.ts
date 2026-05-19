@@ -202,6 +202,12 @@ function isExempt(path: string): boolean {
   // endpoint. HMAC-SHA256 signature in x-signature-sha256 header authenticates
   // the push; no browser session or cookie involved, CSRF not applicable.
   if (path.startsWith('/api/sentra/siem/ingest/')) return true;
+  // Sentra → A11oy cross-device status bridge. Fire-and-forget telemetry POST
+  // emitted from the Sentra browser store on every notify(). Payload is a
+  // bounded, schema-validated counters/agent-telemetry snapshot — no
+  // per-user state mutation, no session involvement, and the route handler
+  // applies its own rate limit. CSRF double-submit is not applicable.
+  if (path === '/api/sentra/status') return true;
   // Non-production demo PIN verification — stateless read-only PIN check;
   // no session or user state is modified on the server side.
   if (process.env.NODE_ENV !== 'production' && path === '/api/pulse/demo/verify') return true;

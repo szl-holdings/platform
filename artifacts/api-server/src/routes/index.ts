@@ -223,6 +223,8 @@ router.use(lazyMatch("/rf-intel", () => import("./rf-intel"), "rf-intel"));
 // vessels-ops-core. Public (PUBLIC_PREFIXES "/api/{app}/ops-core/"). Consumed
 // by each app's `*-store.ts` and a11oy's <{App}Ops /> pages.
 router.use(lazyMatch("/sentra/ops-core", () => import("./sentra-ops-core"), "sentra-ops-core"));
+// Sentra → A11oy cross-device status bridge. See `./sentra-status.ts`.
+router.use(lazyMatch("/sentra/status", () => import("./sentra-status"), "sentra-status"));
 router.use(lazyMatch("/amaru/ops-core", () => import("./amaru-ops-core"), "amaru-ops-core"));
 // Round 2 (2026-05-18): five additional vertical ops-core bridges. Mounted on
 // their own narrow prefixes so they cannot shadow the existing per-app routers

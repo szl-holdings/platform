@@ -589,7 +589,7 @@ class SentraStore {
         },
       };
 
-      localStorage.setItem('sentra:ops-status', JSON.stringify({
+      const payload = {
         activeIncidents,
         pendingApprovals,
         auditEntries: this.auditEntries.length,
@@ -599,7 +599,22 @@ class SentraStore {
         ownedAssets: this.assets.filter(a => ['owned', 'authorized', 'contracted_scope', 'lab'].includes(a.ownership_status)).length,
         agents,
         lastUpdated: new Date().toISOString(),
-      }));
+      };
+      localStorage.setItem('sentra:ops-status', JSON.stringify(payload));
+
+      // Also push to the API server so A11oy operators viewing SentraOps on a
+      // different device or fresh session can see the same telemetry. Fire-
+      // and-forget; failures (offline, CORS, server down) are non-fatal.
+      try {
+        if (typeof fetch !== 'undefined') {
+          void fetch('/api/sentra/status', {
+            method: 'POST',
+            headers: { 'content-type': 'application/json' },
+            body: JSON.stringify(payload),
+            keepalive: true,
+          }).catch(() => { /* network unavailable — local bridge still works */ });
+        }
+      } catch { /* fetch missing or threw synchronously */ }
     } catch { /* storage unavailable */ }
   }
 

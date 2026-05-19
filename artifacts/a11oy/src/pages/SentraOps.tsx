@@ -286,6 +286,24 @@ function readSentraStatus(): SentraOpsStatus | null {
   }
 }
 
+// Cross-device fallback: when the local `sentra:ops-status` bridge is empty
+// (operator on a different browser/device, or a fresh session), pull the
+// latest broadcast from the API server. Sentra pushes here on every store
+// mutation, so any open Sentra session anywhere keeps this view live.
+async function fetchSentraStatusFromApi(): Promise<SentraOpsStatus | null> {
+  try {
+    const res = await fetch('/api/sentra/status', {
+      headers: { accept: 'application/json' },
+      credentials: 'include',
+    });
+    if (!res.ok) return null;
+    const body = await res.json() as { status?: SentraOpsStatus | null };
+    return body?.status ?? null;
+  } catch {
+    return null;
+  }
+}
+
 export function SentraOps() {
   const [view, setView] = useState<View>('agents');
   const [selectedAgent, setSelectedAgent] = useState<string | null>(null);
@@ -294,11 +312,26 @@ export function SentraOps() {
   const [dryRunResult, setDryRunResult] = useState<string | null>(null);
   const [sentraStatus, setSentraStatus] = useState<SentraOpsStatus | null>(readSentraStatus);
 
-  // Poll Sentra store state via the localStorage bridge written by sentra-store.ts
+  // Poll Sentra store state. Primary source is the localStorage bridge written
+  // by sentra-store.ts (same-browser handoff). When that's empty — operator
+  // on a different device/browser or a fresh session — fall back to the API
+  // server, which Sentra pushes to on every mutation.
   useEffect(() => {
-    setSentraStatus(readSentraStatus());
-    const timer = setInterval(() => setSentraStatus(readSentraStatus()), 2000);
-    return () => clearInterval(timer);
+    let cancelled = false;
+
+    const tick = async () => {
+      const local = readSentraStatus();
+      if (local) {
+        if (!cancelled) setSentraStatus(local);
+        return;
+      }
+      const remote = await fetchSentraStatusFromApi();
+      if (!cancelled && remote) setSentraStatus(remote);
+    };
+
+    void tick();
+    const timer = setInterval(() => { void tick(); }, 2000);
+    return () => { cancelled = true; clearInterval(timer); };
   }, []);
 
   // Merge live per-agent telemetry from the Sentra store (if available) over
@@ -366,7 +399,7 @@ export function SentraOps() {
       )}
       {!sentraStatus && (
         <div className="rounded-lg border px-4 py-3 mb-8 text-[10px] font-mono text-slate-600" style={{ borderColor: 'rgba(255,255,255,0.06)' }}>
-          Sentra telemetry not yet available — open Sentra to initialize store, then return here for live data.
+          Sentra telemetry not yet available — open Sentra in any session (this browser or another device) to publish ops status, then this view will hydrate from the API bridge automatically.
         </div>
       )}
 
