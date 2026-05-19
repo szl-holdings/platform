@@ -121,6 +121,7 @@ const SkillForge = lazy(() => import('./pages/SkillForge'));
 const WorkcellReplay = lazy(() => import('./pages/WorkcellReplay').then(m => ({ default: m.WorkcellReplay })));
 const SovereignReplayDetail = lazy(() => import('./pages/SovereignReplayDetail').then(m => ({ default: m.SovereignReplayDetail })));
 const Sovereign = lazy(() => import('./pages/Sovereign').then(m => ({ default: m.Sovereign })));
+const SovereignArtifactDetail = lazy(() => import('./pages/SovereignArtifactDetail').then(m => ({ default: m.SovereignArtifactDetail })));
 const BoardroomMode = lazy(() => import('./pages/BoardroomMode').then(m => ({ default: m.BoardroomMode })));
 const InvestorDemo = lazy(() => import('./pages/InvestorDemo').then(m => ({ default: m.InvestorDemo })));
 const FlexCacheRuntime = lazy(() => import('./pages/FlexCacheRuntime').then(m => ({ default: m.FlexCacheRuntime })));
@@ -607,6 +608,8 @@ function AppInner() {
         <Route path={`${base}/connectors`} component={ConnectorFirewall} />
         <Route path={`${base}/twins`} component={TwinFoundry} />
         <Route path={`${base}/model-router`} component={ModelRouter} />
+        <Route path={`${base}/sovereign/:id`} component={SovereignArtifactDetail} />
+        <Route path={`${base}/sovereign`} component={Sovereign} />
         <Route path={`${base}/ai-gateway`} component={AiGateway} />
         <Route path={`${base}/skills`} component={SkillsLibrary} />
         <Route path={`${base}/forge`} component={SkillForge} />

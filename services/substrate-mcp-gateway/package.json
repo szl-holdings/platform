@@ -24,6 +24,7 @@
     "@szl-holdings/evidence-graph": "workspace:*",
     "@szl-holdings/policy-engine": "workspace:*",
     "@szl-holdings/db": "workspace:*",
+    "@workspace/sovereign-substrate": "workspace:*",
     "@szl-holdings/pqc-identity": "workspace:*",
     "@szl/substrate": "workspace:*",
     "@szl/substrate-client": "workspace:*",

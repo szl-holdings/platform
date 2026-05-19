@@ -159,6 +159,74 @@ export const ENV_CONTRACT: EnvVarSpec[] = [
     risksIfMissing: 'File upload and object storage features unavailable.',
   },
 
+  // Sovereign Substrate — HuggingFace Buckets
+  {
+    key: 'HF_TOKEN',
+    classification: 'optional',
+    description:
+      'HuggingFace API token used by Sovereign Substrate to push FORGE artifacts ' +
+      'and Proof Packets to the betterwithage buckets. Read+write scope on the ' +
+      'three forge-* buckets is required.',
+    risksIfMissing:
+      'Sovereign Substrate uploads disabled — FORGE artifacts will not be published ' +
+      'to HF; the /sovereign catalog will only show pre-existing records.',
+  },
+  {
+    key: 'HF_BUCKET_MODELS',
+    classification: 'optional',
+    description: 'HF bucket name (private) for FORGE fine-tuned model weights. Default: forge-models',
+    example: 'forge-models',
+    risksIfMissing: 'Fine-tuned model artifacts cannot be persisted to HF.',
+  },
+  {
+    key: 'HF_BUCKET_DATASETS',
+    classification: 'optional',
+    description: 'HF bucket name (private) for training and eval datasets. Default: forge-datasets',
+    example: 'forge-datasets',
+    risksIfMissing: 'Training datasets cannot be persisted to HF.',
+  },
+  {
+    key: 'HF_BUCKET_PUBLIC',
+    classification: 'optional',
+    description:
+      'HF bucket name (public) for published Sovereign artifacts with open licenses. ' +
+      'Default: forge-public. CDN pre-warming should be enabled on this bucket.',
+    example: 'forge-public',
+    risksIfMissing: 'Publicly-released artifacts cannot be persisted to HF.',
+  },
+  {
+    key: 'SOVEREIGN_SIGNING_KEY_ID',
+    classification: 'optional',
+    description: 'Opaque key id (e.g. "sovereign-2026-05") embedded in every Proof Packet.',
+    risksIfMissing: 'Proof Packet signing disabled.',
+  },
+  {
+    key: 'SOVEREIGN_SIGNING_KEY_HEX',
+    classification: 'optional',
+    description:
+      'Ed25519 signing seed (32 bytes, hex-encoded) used to sign Proof Packets. ' +
+      'The public key derived from it is published at /api/sovereign/public-key ' +
+      'for third-party verification.',
+    risksIfMissing: 'Proof Packets cannot be signed; artifacts will publish unsigned.',
+  },
+  {
+    key: 'SOVEREIGN_PUBLISH_TOKEN',
+    classification: 'optional',
+    description:
+      'Bearer token required on POST /api/sovereign/publish. Must be at ' +
+      'least 16 chars. If unset, the publish endpoint is disabled (401) and ' +
+      'only FORGE pipelines configured with the matching token can register ' +
+      'new artifacts.',
+    risksIfMissing: 'Sovereign publish endpoint disabled; only read paths remain.',
+  },
+  {
+    key: 'SOVEREIGN_HF_ORG',
+    classification: 'optional',
+    description: 'HuggingFace org that owns the forge-* buckets. Default: betterwithage',
+    example: 'betterwithage',
+    risksIfMissing: 'Sovereign uploads cannot resolve the target org.',
+  },
+
   // Deprecated
   {
     key: 'FIREBASE_API_KEY',

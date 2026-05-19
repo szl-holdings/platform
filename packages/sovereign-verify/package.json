@@ -1,0 +1,33 @@
+{
+  "name": "@workspace/sovereign-verify",
+  "version": "0.1.0",
+  "private": false,
+  "type": "module",
+  "description": "Standalone CLI for verifying Sovereign Substrate Proof Packets against HuggingFace bucket artifacts. Zero platform dependencies — anyone can audit our claims.",
+  "bin": {
+    "hf-sovereign": "./dist/cli.js"
+  },
+  "files": ["dist", "README.md"],
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    }
+  },
+  "dependencies": {
+    "@workspace/sovereign-substrate": "workspace:*"
+  },
+  "devDependencies": {
+    "@types/node": "catalog:",
+    "vitest": "catalog:"
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "test": "vitest run --passWithNoTests",
+    "test:watch": "vitest",
+    "prepublishOnly": "pnpm run build"
+  }
+}

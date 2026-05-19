@@ -1,225 +1,376 @@
-import { useState, useEffect } from 'react';
-import { Link } from 'wouter';
-import { Layout } from '../components/layout';
-import { PageHeader, Card, SectionTitle, KpiCard, StatusPill } from '../components/ui';
+/**
+ * Sovereign Substrate — Public Catalog
+ *
+ * Lists FORGE artifacts published to HuggingFace Buckets, with their Proof
+ * Packet trust tier, MirrorEval scorecard, and a client-side "Verify" button
+ * that re-checks the packet signature against the published public key.
+ */
 
-const BASE = (import.meta.env.BASE_URL ?? '/').replace(/\/$/, '');
-function b(path: string) { return `${BASE}${path}`; }
+import { useEffect, useMemo, useState } from 'react';
+import { verifyPacket, type TrustedKey } from '@workspace/sovereign-substrate';
 
-const API = '/api/a11oy';
+const API_BASE = '/api/sovereign';
 
-interface SovereignSummary {
-  tenants: number;
-  models: { registered: number; active: number };
-  evals: { total: number; passed: number; blocked: number };
-  replays: { total: number; successful: number; failed: number };
-  connectors: { total: number; approved: number; blocked: number };
-  twins: { total: number; highRisk: number };
-  skills: { total: number; live: number };
-  boardPackets: number;
-  telemetry: { spans: number; blockedSpans: number };
-  lastRegenerated: string;
-  selfTestStatus: string;
+interface SovereignArtifact {
+  id: string;
+  name: string;
+  kind: 'model' | 'dataset' | 'eval-snapshot' | 'agent-skill';
+  task: string | null;
+  bucket: string;
+  bucketUri: string;
+  packetUri: string;
+  contentHash: string;
+  packetHash: string;
+  trustTier: 'verified' | 'community' | 'experimental';
+  visibility: string;
+  biasScore: number | null;
+  mirrorEvalScore: number | null;
+  evalSummary: Record<string, number>;
+  signerId: string;
+  revocationUrl: string | null;
+  verificationState: 'verified' | 'unverified' | 'failed' | 'revoked';
+  lastVerifiedAt: string | null;
+  publishedAt: string;
+  license: string | null;
+  isRevoked: boolean;
 }
 
-interface SelfTestResult {
-  passed: number; warned: number; failed: number; total: number;
-  overallStatus: string;
-  tests: Array<{ name: string; status: string; detail: string }>;
+interface VerifyState {
+  status: 'idle' | 'running' | 'ok' | 'fail';
+  message?: string;
 }
 
-const NAV_LINKS = [
-  { href: '/model-router', label: 'Model Router', icon: '⬡', description: 'Provider status, routing policy, latency, cost' },
-  { href: '/evals', label: 'MirrorEval 2.0', icon: '◎', description: '14-dimension eval dashboard, regression suite' },
-  { href: '/replay', label: 'Workcell Replay', icon: '▶', description: 'Flight recorder, timeline, failure classification' },
-  { href: '/connectors', label: 'Connector Firewall', icon: '⊕', description: 'Registry, trust scores, injection blocking' },
-  { href: '/twins', label: 'Twin Foundry', icon: '◈', description: 'Business twins, drift map, simulation' },
-  { href: '/skills', label: 'Skill Library', icon: '∿', description: '15 named skills, run-demo, policy links' },
-  { href: '/boardroom', label: 'Boardroom Mode', icon: '◇', description: 'Board packets, executive snapshot' },
-  { href: '/trust', label: 'Trust Center', icon: '⚖', description: 'Security posture, human-gated autonomy' },
-  { href: '/investor-demo', label: 'Investor Demo', icon: '▸', description: '12-step guided product story' },
-];
+const TIER_BADGE: Record<SovereignArtifact['trustTier'], { label: string; color: string }> = {
+  verified: { label: 'Verified', color: '#10b981' },
+  community: { label: 'Community', color: '#3b82f6' },
+  experimental: { label: 'Experimental', color: '#a78bfa' },
+};
 
-const ST_COLOR: Record<string, string> = { passed: '#c9b787', warning: '#c9b787', failed: '#f5f5f5' };
-const ST_ICON: Record<string, string> = { passed: '✓', warning: '⚠', failed: '✗' };
-
-export function Sovereign() {
-  const [summary, setSummary] = useState<SovereignSummary | null>(null);
-  const [summaryLoading, setSummaryLoading] = useState(true);
-  const [summaryError, setSummaryError] = useState<string | null>(null);
-  const [selfTest, setSelfTest] = useState<SelfTestResult | null>(null);
-  const [selfTestLoading, setSelfTestLoading] = useState(false);
-  const [regenLoading, setRegenLoading] = useState(false);
-  const [regenDone, setRegenDone] = useState(false);
+export function Sovereign(): JSX.Element {
+  const [artifacts, setArtifacts] = useState<SovereignArtifact[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [verifyState, setVerifyState] = useState<Record<string, VerifyState>>({});
+  const [trustedKeys, setTrustedKeys] = useState<TrustedKey[] | null>(null);
+  const [filters, setFilters] = useState<{
+    kind: string;
+    trustTier: string;
+    minMirrorEval: string;
+  }>({ kind: '', trustTier: '', minMirrorEval: '' });
 
   useEffect(() => {
-    setSummaryLoading(true);
-    fetch(`${API}/sovereign/summary`)
-      .then(r => {
-        if (!r.ok) throw new Error(`HTTP ${r.status}`);
+    fetch(`${API_BASE}/public-key`)
+      .then(async (r) => {
+        if (!r.ok) throw new Error(`public-key endpoint returned ${r.status}`);
         return r.json();
       })
-      .then(d => {
-        if (d?.ok && d.data) {
-          setSummary(d.data);
-          setSummaryError(null);
-        } else {
-          throw new Error('Unexpected response format');
-        }
+      .then((k: { keyId: string; publicKeyHex: string }) => {
+        setTrustedKeys([{ publicKeyId: k.keyId, publicKeyHex: k.publicKeyHex }]);
       })
-      .catch(e => setSummaryError(e instanceof Error ? e.message : 'Failed to load'))
-      .finally(() => setSummaryLoading(false));
+      .catch(() => setTrustedKeys([]));
   }, []);
 
-  async function runSelfTest() {
-    setSelfTestLoading(true);
-    setSelfTest(null);
-    try {
-      const r = await fetch(`${API}/selftest/run`, { method: 'POST' });
-      if (!r.ok) throw new Error(`HTTP ${r.status}`);
-      const d = await r.json();
-      if (d?.ok && d.data) setSelfTest(d.data);
-    } catch {
-      setSelfTest({
-        passed: 0, warned: 0, failed: 1, total: 1,
-        overallStatus: 'failed',
-        tests: [{ name: 'Self-test runner', status: 'failed', detail: 'API unreachable' }],
-      });
-    } finally {
-      setSelfTestLoading(false);
-    }
-  }
+  useEffect(() => {
+    const params = new URLSearchParams();
+    if (filters.kind) params.set('kind', filters.kind);
+    if (filters.trustTier) params.set('trustTier', filters.trustTier);
+    if (filters.minMirrorEval) params.set('minMirrorEval', filters.minMirrorEval);
+    setLoading(true);
+    fetch(`${API_BASE}/artifacts?${params.toString()}`)
+      .then(async (r) => {
+        if (!r.ok) throw new Error(`request failed (${r.status})`);
+        return r.json();
+      })
+      .then((data: { artifacts: SovereignArtifact[] }) => {
+        setArtifacts(data.artifacts);
+        setError(null);
+      })
+      .catch((e: Error) => setError(e.message))
+      .finally(() => setLoading(false));
+  }, [filters]);
 
-  async function regenerate() {
-    setRegenLoading(true);
+  const verify = async (a: SovereignArtifact) => {
+    setVerifyState((s) => ({ ...s, [a.id]: { status: 'running' } }));
     try {
-      const r = await fetch(`${API}/demo/regenerate`, { method: 'POST' });
-      if (!r.ok) throw new Error(`HTTP ${r.status}`);
-      const d = await r.json();
-      if (d?.ok && d.data?.regeneratedAt) {
-        setSummary(prev => prev ? { ...prev, lastRegenerated: d.data.regeneratedAt } : prev);
+      if (!trustedKeys || !trustedKeys.length) {
+        throw new Error(
+          'no trusted platform key available — cannot verify (publisher signing is disabled)',
+        );
       }
-      setRegenDone(true);
-      setTimeout(() => setRegenDone(false), 4000);
+      const detail = await fetch(`${API_BASE}/artifacts/${a.id}`).then((r) => r.json());
+      const packet = detail.packet;
+      if (!packet) throw new Error('packet not reachable from HF');
+      const artifactRes = await fetch(`${API_BASE}/artifacts/${a.id}/bytes`);
+      if (!artifactRes.ok) {
+        throw new Error(`could not download artifact bytes (${artifactRes.status})`);
+      }
+      const bytes = new Uint8Array(await artifactRes.arrayBuffer());
+      const result = verifyPacket(packet, bytes, { trustedKeys });
+      setVerifyState((s) => ({
+        ...s,
+        [a.id]: {
+          status: result.ok ? 'ok' : 'fail',
+          message: result.ok
+            ? `signature OK (key ${trustedKeys[0].publicKeyId})`
+            : (result.reason ?? 'failed'),
+        },
+      }));
     } catch (e) {
-      setSummaryError(e instanceof Error ? e.message : 'Refresh failed');
-    } finally {
-      setRegenLoading(false);
+      setVerifyState((s) => ({
+        ...s,
+        [a.id]: { status: 'fail', message: (e as Error).message },
+      }));
     }
-  }
+  };
+
+  const copyUri = (uri: string) => {
+    void navigator.clipboard.writeText(uri);
+  };
+
+  const filterPanel = useMemo(
+    () => (
+      <div
+        style={{
+          display: 'flex',
+          gap: 12,
+          flexWrap: 'wrap',
+          padding: '16px 24px',
+          background: 'rgba(255,255,255,0.02)',
+          border: '1px solid rgba(255,255,255,0.06)',
+          borderRadius: 12,
+          marginBottom: 24,
+        }}
+      >
+        <FilterSelect
+          label="Kind"
+          value={filters.kind}
+          onChange={(v) => setFilters((f) => ({ ...f, kind: v }))}
+          options={[
+            ['', 'All'],
+            ['model', 'Models'],
+            ['dataset', 'Datasets'],
+            ['eval-snapshot', 'Eval snapshots'],
+            ['agent-skill', 'Agent skills'],
+          ]}
+        />
+        <FilterSelect
+          label="Trust tier"
+          value={filters.trustTier}
+          onChange={(v) => setFilters((f) => ({ ...f, trustTier: v }))}
+          options={[
+            ['', 'Any'],
+            ['verified', 'Verified'],
+            ['community', 'Community'],
+            ['experimental', 'Experimental'],
+          ]}
+        />
+        <FilterSelect
+          label="Min MirrorEval"
+          value={filters.minMirrorEval}
+          onChange={(v) => setFilters((f) => ({ ...f, minMirrorEval: v }))}
+          options={[
+            ['', 'Any'],
+            ['0.5', '≥ 0.5'],
+            ['0.7', '≥ 0.7'],
+            ['0.9', '≥ 0.9'],
+          ]}
+        />
+      </div>
+    ),
+    [filters],
+  );
 
   return (
-    <Layout>
-      <PageHeader
-        label="SOVEREIGN EXECUTION LAB"
-        title="Governed Execution Fabric"
-        subtitle="A11oy is the governed execution fabric where enterprise signals, agents, tools, people, policies, and proof operate as one controlled system."
-        status="LIVE"
-      />
+    <div style={{ padding: '32px 40px', color: '#e5e5e5', minHeight: '100vh', background: '#0a0a0a' }}>
+      <header style={{ marginBottom: 32 }}>
+        <h1 style={{ fontSize: 32, fontWeight: 600, marginBottom: 8 }}>Sovereign Substrate</h1>
+        <p style={{ color: '#9ca3af', maxWidth: 720, lineHeight: 1.6 }}>
+          Every fine-tuned model, training dataset, eval snapshot, and agent skill produced by
+          FORGE is stored on HuggingFace under <code>betterwithage</code> and sealed in a
+          cryptographic Proof Packet that binds the artifact to its provenance, evals, policy
+          attestations, and trust tier. Anyone can verify a packet without our platform being
+          online — see <a href="/docs/sovereign" style={{ color: '#c9b787' }}>docs</a> and the
+          <code> hf-sovereign</code> CLI.
+        </p>
+      </header>
 
-      <div className="flex items-center gap-3 mb-6 flex-wrap">
-        <button
-          onClick={regenerate} disabled={regenLoading}
-          className="text-xs px-3 py-1.5 rounded font-medium"
-          style={{ backgroundColor: 'rgba(138,138,138,0.15)', color: '#8a8a8a', border: '1px solid rgba(138,138,138,0.3)', opacity: regenLoading ? 0.6 : 1 }}
-        >
-          {regenLoading ? 'Refreshing…' : regenDone ? '✓ Refreshed' : 'Refresh Enterprise State'}
-        </button>
-        <button
-          onClick={runSelfTest} disabled={selfTestLoading}
-          className="text-xs px-3 py-1.5 rounded font-medium"
-          style={{ backgroundColor: 'rgba(201,183,135,0.12)', color: '#c9b787', border: '1px solid rgba(201,183,135,0.25)', opacity: selfTestLoading ? 0.6 : 1 }}
-        >
-          {selfTestLoading ? 'Running tests…' : '▶ Run Sovereign Self-Test'}
-        </button>
-        {summary && (
-          <span className="text-xs" style={{ color: 'var(--color-a11oy-text-ghost)' }}>
-            Last sync: {new Date(summary.lastRegenerated).toLocaleString('en-US', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })}
-          </span>
-        )}
-      </div>
+      {filterPanel}
 
-      {selfTest && (
-        <div className="mb-8 p-4 rounded-lg border" style={{ backgroundColor: 'rgba(201,183,135,0.04)', borderColor: 'rgba(201,183,135,0.2)' }}>
-          <div className="flex items-center justify-between mb-3">
-            <div className="text-sm font-semibold" style={{ color: ST_COLOR[selfTest.overallStatus] ?? '#c9b787' }}>
-              Sovereign Self-Test — {selfTest.overallStatus.toUpperCase()} · {selfTest.passed}/{selfTest.total}
-            </div>
-            <div className="text-xs" style={{ color: 'var(--color-a11oy-text-ghost)' }}>{selfTest.warned} warned · {selfTest.failed} failed</div>
-          </div>
-          <div className="grid md:grid-cols-2 gap-1 max-h-52 overflow-y-auto">
-            {selfTest.tests.map((t, i) => (
-              <div key={i} className="flex items-start gap-2 text-xs">
-                <span style={{ color: ST_COLOR[t.status] ?? '#5e5e5e', flexShrink: 0 }}>{ST_ICON[t.status] ?? '?'}</span>
-                <span style={{ color: 'var(--color-a11oy-text-sub)' }}>{t.name}</span>
-                <span className="ml-auto font-mono flex-shrink-0" style={{ color: 'var(--color-a11oy-text-ghost)', fontSize: 10 }}>{t.detail}</span>
-              </div>
-            ))}
-          </div>
-        </div>
-      )}
+      {loading && <div style={{ color: '#9ca3af' }}>Loading catalog…</div>}
+      {error && <div style={{ color: '#f87171' }}>Error: {error}</div>}
 
-      <SectionTitle>Telemetry Rollup — Governed Fabric</SectionTitle>
-      {summaryLoading ? (
-        <div className="text-xs animate-pulse mb-8" style={{ color: 'var(--color-a11oy-text-ghost)' }}>
-          Loading sovereign state…
-        </div>
-      ) : summaryError ? (
-        <div className="mb-8 p-3 rounded-lg text-xs border" style={{ backgroundColor: 'rgba(239,68,68,0.06)', borderColor: 'rgba(239,68,68,0.2)', color: '#f87171' }}>
-          Could not load sovereign summary — {summaryError}
-        </div>
-      ) : summary ? (
-        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-3 mb-8">
-          <KpiCard label="TENANTS" value={String(summary.tenants)} sub="Enterprise orgs" accent="#8a8a8a" />
-          <KpiCard label="MODELS ACTIVE" value={String(summary.models.active)} sub={`${summary.models.registered} registered`} accent="#c9b787" />
-          <KpiCard label="EVAL RESULTS" value={String(summary.evals.total)} sub={`${summary.evals.passed} pass · ${summary.evals.blocked} blocked`} accent="#c9b787" />
-          <KpiCard label="REPLAYS" value={String(summary.replays.total)} sub={`${summary.replays.successful} success · ${summary.replays.failed} failed`} accent="#c9b787" />
-          <KpiCard label="CONNECTORS" value={String(summary.connectors.total)} sub={`${summary.connectors.blocked} blocked`} accent="#f5f5f5" />
-          <KpiCard label="BUSINESS TWINS" value={String(summary.twins.total)} sub={`${summary.twins.highRisk} high risk`} accent="#b08d52" />
-          <KpiCard label="SKILLS" value={String(summary.skills.total)} sub={`${summary.skills.live} live`} accent="#8a8a8a" />
-          <KpiCard label="BOARD PACKETS" value={String(summary.boardPackets)} sub="Generated" accent="#c9b787" />
-          <KpiCard label="TRACE SPANS" value={summary.telemetry.spans.toLocaleString()} sub={`${summary.telemetry.blockedSpans} blocked`} accent="#5e5e5e" />
-          <KpiCard label="SELF-TEST" value={summary.selfTestStatus.toUpperCase()} sub="All gates" accent="#c9b787" />
-        </div>
-      ) : null}
-
-      <SectionTitle>Sovereign Sub-Surfaces</SectionTitle>
-      <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-3 mb-8">
-        {NAV_LINKS.map(link => (
-          <Link key={link.href} href={b(link.href)}>
-            <Card className="cursor-pointer hover:opacity-80 transition-opacity">
-              <div className="flex items-center gap-3">
-                <span className="text-xl" style={{ color: 'var(--color-a11oy-gold)' }}>{link.icon}</span>
+      <div style={{ display: 'grid', gap: 16 }}>
+        {artifacts.map((a) => {
+          const v = verifyState[a.id] ?? { status: 'idle' };
+          const badge = TIER_BADGE[a.trustTier];
+          return (
+            <article
+              key={a.id}
+              style={{
+                background: 'rgba(255,255,255,0.03)',
+                border: '1px solid rgba(255,255,255,0.07)',
+                borderRadius: 12,
+                padding: 20,
+              }}
+              data-testid={`sovereign-artifact-${a.id}`}
+            >
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'start' }}>
                 <div>
-                  <div className="text-sm font-semibold" style={{ color: 'var(--color-a11oy-text)' }}>{link.label}</div>
-                  <div className="text-xs mt-0.5" style={{ color: 'var(--color-a11oy-text-ghost)' }}>{link.description}</div>
+                  <div style={{ display: 'flex', gap: 12, alignItems: 'center' }}>
+                    <h2 style={{ fontSize: 18, fontWeight: 600, margin: 0 }}>{a.name}</h2>
+                    <span
+                      style={{
+                        fontSize: 11,
+                        padding: '3px 10px',
+                        borderRadius: 999,
+                        background: `${badge.color}22`,
+                        color: badge.color,
+                        border: `1px solid ${badge.color}55`,
+                      }}
+                    >
+                      {badge.label}
+                    </span>
+                    <span style={{ fontSize: 12, color: '#6b7280' }}>{a.kind}</span>
+                    {a.task && <span style={{ fontSize: 12, color: '#6b7280' }}>· {a.task}</span>}
+                  </div>
+                  <div style={{ fontSize: 12, color: '#6b7280', marginTop: 6, fontFamily: 'monospace' }}>
+                    {a.bucketUri}
+                  </div>
+                </div>
+                <div style={{ display: 'flex', gap: 8 }}>
+                  <a
+                    href={`/sovereign/${a.id}`}
+                    style={{ ...btn('#1f2937'), textDecoration: 'none', display: 'inline-block' }}
+                    data-testid={`detail-${a.id}`}
+                  >
+                    Details
+                  </a>
+                  <button
+                    onClick={() => copyUri(a.bucketUri)}
+                    style={btn('#1f2937')}
+                    data-testid={`copy-uri-${a.id}`}
+                  >
+                    Copy HF URI
+                  </button>
+                  <button
+                    onClick={() => verify(a)}
+                    style={btn('#312e81')}
+                    disabled={v.status === 'running'}
+                    data-testid={`verify-${a.id}`}
+                  >
+                    {v.status === 'running' ? 'Verifying…' : 'Verify'}
+                  </button>
                 </div>
               </div>
-            </Card>
-          </Link>
-        ))}
-      </div>
 
-      <SectionTitle>Deployment Posture</SectionTitle>
-      <div className="grid md:grid-cols-3 gap-4 mb-6">
-        {[
-          { label: 'Cloud Managed', status: 'LIVE' as const, desc: 'Current posture. A11oy hosted. Governed environment active.' },
-          { label: 'VPC Isolated', status: 'ROADMAP' as const, desc: 'Customer VPC deployment — data stays within cloud boundary.' },
-          { label: 'Air-Gapped', status: 'ROADMAP' as const, desc: 'Full on-premises. Local model inference. Defense/gov posture.' },
-        ].map(m => (
-          <Card key={m.label}>
-            <div className="flex items-center justify-between mb-2">
-              <div className="text-sm font-semibold" style={{ color: 'var(--color-a11oy-text)' }}>{m.label}</div>
-              <StatusPill status={m.status} />
-            </div>
-            <p className="text-xs" style={{ color: 'var(--color-a11oy-text-sub)' }}>{m.desc}</p>
-          </Card>
-        ))}
-      </div>
+              <div style={{ display: 'flex', gap: 24, marginTop: 16, fontSize: 13, flexWrap: 'wrap' }}>
+                <Metric label="MirrorEval" value={fmtScore(a.mirrorEvalScore)} />
+                <Metric label="Bias score" value={fmtScore(a.biasScore)} />
+                <Metric label="Storage" value={`${a.bucket} · ${a.verificationState}`} />
+                <Metric label="Packet hash" value={a.packetHash.slice(0, 18) + '…'} mono />
+                <Metric label="Signer" value={a.signerId} mono />
+                <Metric label="Published" value={new Date(a.publishedAt).toLocaleDateString()} />
+                {a.license && <Metric label="License" value={a.license} />}
+              </div>
 
-      <div className="p-3 rounded-lg text-xs flex items-center gap-2" style={{ backgroundColor: 'rgba(201,183,135,0.06)', border: '1px solid rgba(201,183,135,0.15)', color: 'var(--color-a11oy-text-ghost)' }}>
-        <span className="w-1.5 h-1.5 rounded-full bg-[var(--color-a11oy-blue)]" /> Governed Environment — all fabric components operational. Covenant enforced. No real connector calls, LLM API calls, or destructive actions without human approval.
+              {v.status !== 'idle' && (
+                <div
+                  style={{
+                    marginTop: 12,
+                    fontSize: 12,
+                    color:
+                      v.status === 'ok' ? '#10b981' : v.status === 'fail' ? '#f87171' : '#9ca3af',
+                  }}
+                >
+                  {v.status === 'ok' && '✓ packet signature verifies'}
+                  {v.status === 'fail' && `✗ ${v.message}`}
+                  {v.status === 'running' && 'verifying signature…'}
+                </div>
+              )}
+            </article>
+          );
+        })}
+        {!loading && !artifacts.length && (
+          <div
+            style={{
+              padding: 40,
+              textAlign: 'center',
+              border: '1px dashed rgba(255,255,255,0.08)',
+              borderRadius: 12,
+              color: '#6b7280',
+            }}
+          >
+            No artifacts published yet. Publish via the FORGE pipeline or the
+            <code> POST /api/sovereign/publish</code> endpoint.
+          </div>
+        )}
       </div>
-    </Layout>
+    </div>
   );
 }
+
+function Metric({ label, value, mono }: { label: string; value: string; mono?: boolean }) {
+  return (
+    <div>
+      <div style={{ color: '#6b7280', fontSize: 11, textTransform: 'uppercase' }}>{label}</div>
+      <div style={{ color: '#e5e5e5', fontFamily: mono ? 'monospace' : undefined, fontSize: 13 }}>
+        {value}
+      </div>
+    </div>
+  );
+}
+
+function FilterSelect({
+  label,
+  value,
+  onChange,
+  options,
+}: {
+  label: string;
+  value: string;
+  onChange: (v: string) => void;
+  options: Array<[string, string]>;
+}) {
+  return (
+    <label style={{ display: 'flex', flexDirection: 'column', gap: 4, fontSize: 12 }}>
+      <span style={{ color: '#9ca3af' }}>{label}</span>
+      <select
+        value={value}
+        onChange={(e) => onChange(e.target.value)}
+        style={{
+          background: '#111',
+          color: '#e5e5e5',
+          border: '1px solid rgba(255,255,255,0.1)',
+          borderRadius: 6,
+          padding: '6px 8px',
+          minWidth: 140,
+        }}
+      >
+        {options.map(([v, l]) => (
+          <option key={v} value={v}>
+            {l}
+          </option>
+        ))}
+      </select>
+    </label>
+  );
+}
+
+function btn(bg: string): React.CSSProperties {
+  return {
+    background: bg,
+    color: '#e5e5e5',
+    border: '1px solid rgba(255,255,255,0.1)',
+    borderRadius: 6,
+    padding: '6px 12px',
+    fontSize: 12,
+    cursor: 'pointer',
+  };
+}
+
+function fmtScore(v: number | null): string {
+  if (v === null || v === undefined) return '—';
+  return v.toFixed(3);
+}
+
+export default Sovereign;

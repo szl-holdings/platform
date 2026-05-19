@@ -317,6 +317,52 @@ export const SUBSTRATE_TOOLS: McpToolDescriptor[] = [
   },
 
   {
+    name: 'sovereign.searchArtifacts',
+    description:
+      'Search the Sovereign Substrate catalog for AI artifacts (models, datasets, ' +
+      'eval snapshots, agent skills) published to HuggingFace Buckets under ' +
+      'betterwithage. Each result includes the HF bucket URI you can pull directly, ' +
+      'the Proof Packet hash, trust tier, and MirrorEval/bias scores. ' +
+      'Tenant isolation and rate limits apply.',
+    inputSchema: {
+      type: 'object',
+      properties: {
+        kind: {
+          type: 'string',
+          enum: ['model', 'dataset', 'eval-snapshot', 'agent-skill'],
+          description: 'Filter by artifact kind',
+        },
+        trustTier: {
+          type: 'string',
+          enum: ['verified', 'community', 'experimental'],
+          description: 'Minimum trust tier',
+        },
+        task: {
+          type: 'string',
+          description: 'Filter by task slug (e.g. "ner", "sentiment", "rag-eval")',
+        },
+        minMirrorEval: {
+          type: 'number',
+          minimum: 0,
+          maximum: 1,
+          description: 'Minimum MirrorEval score (0..1)',
+        },
+        minBiasScore: {
+          type: 'number',
+          minimum: 0,
+          maximum: 1,
+          description: 'Minimum bias score (0..1; higher = less biased)',
+        },
+        limit: {
+          type: 'number',
+          description: 'Maximum results (default 25, max 100)',
+        },
+      },
+      additionalProperties: false,
+    },
+  },
+
+  {
     name: 'search_available_servers',
     description:
       'Search available MCP server endpoints by natural-language query. ' +

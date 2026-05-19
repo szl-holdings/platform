@@ -647,6 +647,7 @@ router.use(lazyMatch("/hf/hub", () => import("./hf-hub"), "hf-hub"));
 // HF operator registry + failover chains + audit — mounted before /hf so
 // /hf/registry/* resolves before the catch-all /hf status route.
 router.use(lazyMatch("/hf/registry", () => import("./hf-registry"), "hf-registry"));
+router.use("/sovereign", lazyMount(() => import("./sovereign"), "sovereign"));
 
 // HF status / whoami / subsystem health check — mounted after /hf/hub and /hf/registry.
 router.use(lazyMatch("/hf", () => import("./hf-status"), "hf-status"));

@@ -7,6 +7,7 @@ import {
   serial,
   text,
   timestamp,
+  varchar,
 } from 'drizzle-orm/pg-core';
 import { usersTable } from './auth';
 import { organizationsTable } from './organizations';
@@ -110,6 +111,15 @@ export const hfModelRegistryTable = pgTable(
     retiredAt: timestamp('retired_at', { withTimezone: true }),
 
     notes: text('notes'),
+    // Sovereign Substrate storage columns: when a registered model has been
+    // published as a Proof Packet, these point at the HF bucket location and
+    // the most recent verification state so the registry UI can render a
+    // "Storage" column with the bucket URI + packet hash + verified badge.
+    sovereignArtifactId: varchar('sovereign_artifact_id', { length: 64 }),
+    sovereignBucketUri: text('sovereign_bucket_uri'),
+    sovereignPacketHash: text('sovereign_packet_hash'),
+    sovereignVerificationState: varchar('sovereign_verification_state', { length: 20 }),
+    sovereignLastVerifiedAt: timestamp('sovereign_last_verified_at', { withTimezone: true }),
     orgId: integer('org_id').references(() => organizationsTable.id, { onDelete: 'cascade' }),
 
     createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),

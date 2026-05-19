@@ -977,6 +977,9 @@ async function dispatchTool(
       return handleReject(rawParams, actorId);
     case 'substrate_list_workflows':
       return handleListWorkflows();
+    case 'sovereign.searchArtifacts':
+    case 'sovereign_search_artifacts':
+      return handleSovereignSearch(rawParams, actorId);
     case 'substrate_search_servers':
     case 'search_available_servers':
       return handleSearchServers(rawParams);
@@ -2348,4 +2351,129 @@ function handleElicitationGet(rawParams: unknown): ToolResult {
   const flow = getElicitationFlow(parsed.data.flowId);
   if (!flow) return err(`Elicitation flow '${parsed.data.flowId}' not found`);
   return ok(flow);
+}
+
+// ── sovereign_search_artifacts ────────────────────────────────────────────────
+
+const SovereignSearchSchema = z.object({
+  kind: z.enum(['model', 'dataset', 'eval-snapshot', 'agent-skill']).optional(),
+  trustTier: z.enum(['verified', 'community', 'experimental']).optional(),
+  task: z.string().optional(),
+  minMirrorEval: z.number().min(0).max(1).optional(),
+  minBiasScore: z.number().min(0).max(1).optional(),
+  limit: z.number().int().positive().max(100).default(25),
+});
+
+// Token-bucket rate limiter keyed by tenantId (fallback: actorId). Sovereign
+// search hits the catalog DB; the limiter prevents a runaway agent / abusive
+// caller from sweeping the entire artifact set in tight loops.
+const SOVEREIGN_SEARCH_RATE_LIMIT = 60; // requests
+const SOVEREIGN_SEARCH_RATE_WINDOW_MS = 60_000; // per minute
+const sovereignSearchBuckets = new Map<string, { count: number; resetAt: number }>();
+
+function checkSovereignRateLimit(key: string): { ok: true } | { ok: false; retryAfterMs: number } {
+  const now = Date.now();
+  const bucket = sovereignSearchBuckets.get(key);
+  if (!bucket || bucket.resetAt <= now) {
+    sovereignSearchBuckets.set(key, { count: 1, resetAt: now + SOVEREIGN_SEARCH_RATE_WINDOW_MS });
+    return { ok: true };
+  }
+  if (bucket.count >= SOVEREIGN_SEARCH_RATE_LIMIT) {
+    return { ok: false, retryAfterMs: bucket.resetAt - now };
+  }
+  bucket.count += 1;
+  return { ok: true };
+}
+
+async function handleSovereignSearch(
+  rawParams: unknown,
+  actorId: string,
+): Promise<ToolResult> {
+  const parsed = SovereignSearchSchema.safeParse(rawParams ?? {});
+  if (!parsed.success) return err('Invalid parameters', parsed.error.flatten());
+  const f = parsed.data;
+
+  // Tenant isolation: scope every search to the caller's tenant. The public
+  // catalog is global, so unscoped queries are explicitly limited to public
+  // (visibility='public') rows; tenant-private rows require a matching orgId.
+  const tenantId = getCurrentTenantId();
+  const rateKey = tenantId ?? actorId ?? 'anonymous';
+  const limit = checkSovereignRateLimit(rateKey);
+  if (!limit.ok) {
+    return err('rate-limited', {
+      retryAfterMs: limit.retryAfterMs,
+      limit: SOVEREIGN_SEARCH_RATE_LIMIT,
+      windowMs: SOVEREIGN_SEARCH_RATE_WINDOW_MS,
+    });
+  }
+
+  try {
+    const { db, sovereignArtifactsTable } = await import('@szl-holdings/db');
+    const { and, desc, eq, gte, or } = await import('drizzle-orm');
+    const conditions = [];
+    // Tenant scope: a caller may only see (a) public-bucket rows OR (b) rows
+    // belonging to their own tenant/org. Without a tenant, only public rows
+    // are returned. This is enforced at the SQL level so the agent surface
+    // cannot bypass it.
+    const tenantNum = tenantId ? Number.parseInt(tenantId, 10) : Number.NaN;
+    if (Number.isFinite(tenantNum)) {
+      conditions.push(
+        or(
+          eq(sovereignArtifactsTable.visibility, 'public'),
+          eq(sovereignArtifactsTable.orgId, tenantNum),
+        )!,
+      );
+    } else {
+      conditions.push(eq(sovereignArtifactsTable.visibility, 'public'));
+      conditions.push(eq(sovereignArtifactsTable.bucket, 'forge-public'));
+    }
+    if (f.kind) conditions.push(eq(sovereignArtifactsTable.kind, f.kind));
+    if (f.trustTier) {
+      // Descriptor advertises trustTier as a MINIMUM tier. Map to the set of
+      // tiers at-or-above the requested floor and filter via IN().
+      const TIER_ORDER = ['experimental', 'community', 'verified'] as const;
+      const floorIdx = TIER_ORDER.indexOf(f.trustTier);
+      const allowed = TIER_ORDER.slice(floorIdx);
+      const { inArray } = await import('drizzle-orm');
+      conditions.push(inArray(sovereignArtifactsTable.trustTier, allowed as unknown as string[]));
+    }
+    if (f.task) conditions.push(eq(sovereignArtifactsTable.task, f.task));
+    if (f.minMirrorEval !== undefined) {
+      conditions.push(
+        gte(sovereignArtifactsTable.mirrorEvalScore, f.minMirrorEval.toString()),
+      );
+    }
+    if (f.minBiasScore !== undefined) {
+      conditions.push(gte(sovereignArtifactsTable.biasScore, f.minBiasScore.toString()));
+    }
+    const rows = await db
+      .select()
+      .from(sovereignArtifactsTable)
+      .where(conditions.length ? and(...conditions) : undefined)
+      .orderBy(desc(sovereignArtifactsTable.publishedAt))
+      .limit(f.limit);
+
+    return ok({
+      count: rows.length,
+      artifacts: rows.map((r) => ({
+        id: r.id,
+        name: r.name,
+        kind: r.kind,
+        task: r.task,
+        bucket: r.bucket,
+        bucketUri: r.bucketUri,
+        packetUri: r.packetUri,
+        contentHash: r.contentHash,
+        packetHash: r.packetHash,
+        trustTier: r.trustTier,
+        mirrorEvalScore: r.mirrorEvalScore ? Number(r.mirrorEvalScore) : null,
+        biasScore: r.biasScore ? Number(r.biasScore) : null,
+        signerId: r.signerId,
+        publishedAt: r.publishedAt,
+        license: r.license,
+      })),
+    });
+  } catch (e) {
+    return err(e instanceof Error ? e.message : String(e));
+  }
 }

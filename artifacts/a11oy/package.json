@@ -35,6 +35,7 @@
     "@szl/substrate-client": "workspace:*",
     "@urql/exchange-graphcache": "^9.0.0",
     "@workspace/a11oy-fabric": "workspace:*",
+    "@workspace/sovereign-substrate": "workspace:*",
     "@workspace/a11oy-orchestration": "workspace:*",
     "@workspace/codex-kernel": "workspace:*",
     "@workspace/ouroboros": "workspace:*",

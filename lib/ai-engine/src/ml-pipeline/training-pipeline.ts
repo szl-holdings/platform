@@ -4,6 +4,7 @@ import {
 import { getDomainFeatureDefinitions, } from './feature-store.js';
 import { logger } from './logger.js';
 import { mlModelRegistry } from './ml-model-registry.js';
+import { publishToSovereign } from '../fine-tuning/sovereign-publisher.js';
 
 export type TrainingStage =
   | 'data_extraction'
@@ -255,6 +256,55 @@ export async function startTrainingRun(config: TrainingRunConfig): Promise<Train
       testMetrics: metrics.test,
       featureImportance: run.featureImportance,
     });
+
+    // Sovereign Substrate publish: on registration, push the model artifact
+    // (plus signed Proof Packet) to the public/private HF bucket so the
+    // run is independently verifiable. Failures here must not abort the
+    // training run — the publisher itself is fail-open at this layer and
+    // fail-closed at the API layer.
+    try {
+      // FORGE training currently produces an in-memory model spec rather than
+      // on-disk weights. We serialize the full registered artifact — model
+      // spec + metrics + feature importances + run config — as the bytes
+      // sealed by the Proof Packet. This is the same bundle the registry
+      // hands back at inference time, so signing it proves the *served*
+      // model, not just metadata about it. When safetensors/checkpoint
+      // output is added to the pipeline, swap `artifactBytes` for the
+      // raw weight bytes; the sovereign-publisher contract already
+      // accepts arbitrary Uint8Array payloads.
+      const artifactBundle = {
+        runId,
+        modelName,
+        modelType: config.modelType,
+        datasetId: config.datasetId,
+        domain: config.domain,
+        metrics,
+        featureImportance: run.featureImportance,
+        model: run.model ?? null,
+      };
+      const artifactBytes = Buffer.from(JSON.stringify(artifactBundle), 'utf8');
+      const sovereign = await publishToSovereign({
+        name: modelName,
+        kind: 'model',
+        task: config.modelType,
+        artifactBytes,
+        path: `${modelName}/${runId}.json`,
+        performance: {
+          mirrorEvalScore: metrics.test.f1 ?? metrics.test.accuracy,
+          metrics: metrics.test as Record<string, number>,
+        },
+        provenance: { runId, datasetId: config.datasetId, domain: config.domain },
+      });
+      logger.info(
+        { runId, sovereignStatus: sovereign.status, bucket: sovereign.bucket },
+        'Sovereign publish attempted',
+      );
+    } catch (err) {
+      logger.warn(
+        { runId, error: err instanceof Error ? err.message : String(err) },
+        'Sovereign publish failed (non-fatal)',
+      );
+    }
 
     run.durationSeconds = (Date.now() - t0) / 1000;
     run.status = 'completed';

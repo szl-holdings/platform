@@ -103,6 +103,8 @@
     "@szl-holdings/prism-bus": "workspace:*",
     "@szl-holdings/prompt-registry": "workspace:*",
     "@szl-holdings/proof-chain": "workspace:*",
+    "@huggingface/hub": "^2.7.0",
+    "@workspace/sovereign-substrate": "workspace:*",
     "@szl-holdings/pulse-evals": "workspace:*",
     "@szl-holdings/quantum-engine": "workspace:*",
     "@szl-holdings/receipt-graph": "workspace:*",

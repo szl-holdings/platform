@@ -1,0 +1,45 @@
+{
+  "name": "@workspace/sovereign-substrate",
+  "version": "0.1.0",
+  "private": false,
+  "type": "module",
+  "description": "Sovereign Substrate — Proof Packet format, signing, verification, and HuggingFace bucket storage adapter for FORGE artifacts.",
+  "files": ["dist"],
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    },
+    "./packet": {
+      "types": "./dist/packet.d.ts",
+      "import": "./dist/packet.js"
+    },
+    "./verify": {
+      "types": "./dist/verify.d.ts",
+      "import": "./dist/verify.js"
+    },
+    "./hf-bucket": {
+      "types": "./dist/hf-bucket.d.ts",
+      "import": "./dist/hf-bucket.js"
+    }
+  },
+  "dependencies": {
+    "@huggingface/hub": "^2.7.0",
+    "@noble/curves": "2.2.0",
+    "@noble/hashes": "2.2.0",
+    "zod": "catalog:"
+  },
+  "devDependencies": {
+    "@types/node": "catalog:",
+    "vitest": "catalog:"
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "test": "vitest run --passWithNoTests",
+    "test:watch": "vitest",
+    "prepublishOnly": "pnpm run build"
+  }
+}
