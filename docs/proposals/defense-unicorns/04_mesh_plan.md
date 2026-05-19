@@ -26,6 +26,61 @@ If this plane fits, **SZL cuts a draft PR to `szl-holdings/a11oy` adding
 example PR in a new repo `szl-holdings/uds-mesh` (or contributes the
 example to `defenseunicorns/uds-package` if that repo is revived).
 
+### Plane 1 — published draft PRs (status: 2026-05-18)
+
+Per task #5119, the staged copies under
+`docs/proposals/defense-unicorns/szl-holdings/` have been lifted out
+into the external `szl-holdings` org and opened as **draft** PRs:
+
+- `szl-holdings/a11oy` — <https://github.com/szl-holdings/a11oy/pull/31>
+  (adds `deploy/zarf.yaml` + manifests + `attestations.jsonl`).
+- `szl-holdings/sentra` — <https://github.com/szl-holdings/sentra/pull/29>
+  (adds `deploy/zarf.yaml` + manifests).
+- `szl-holdings/amaru` — <https://github.com/szl-holdings/amaru/pull/29>
+  (adds `deploy/zarf.yaml` + manifests).
+- `szl-holdings/uds-mesh` — repo created (`auto_init`, Apache-2.0) +
+  bundle bootstrap PR <https://github.com/szl-holdings/uds-mesh/pull/1>
+  (adds `uds-bundle.yaml` + `README.md`).
+
+**`zarf package publish` to `ghcr.io/szl-holdings/packages/*:1.0.0-alpha`
+— complete (2026-05-18, `zarf` v0.76.0, `crane` v0.20.2):**
+
+| Package | OCI ref | Manifest digest |
+| --- | --- | --- |
+| A11oy | `ghcr.io/szl-holdings/packages/a11oy:1.0.0-alpha` | `sha256:f984b90a712c5319f7193fb6efee0278071e9e2c8e6a28b584098ff1b45a0e43` |
+| Sentra | `ghcr.io/szl-holdings/packages/sentra:1.0.0-alpha` | `sha256:0c1dce3330e5b0a45d9ee188df0436f74a3dbdbb6ccc580372a71a8ed0dba906` |
+| Amaru | `ghcr.io/szl-holdings/packages/amaru:1.0.0-alpha` | `sha256:c175334959af83f4932b45e22a1a6a30fc59e95f6938000ded9d02e70696108f` |
+
+The runtime images referenced by each `zarf.yaml`
+(`ghcr.io/szl-holdings/<name>:v1.0.0-alpha`, all
+`sha256:b669b9df05a88a085fefed6520c6d2268aabacf3008b149ddf877e752ae89400`)
+are currently **`distroless/static-debian12:nonroot` placeholders** —
+shape-correct OCI artifacts that let `zarf package create` succeed and
+the bundle round-trip end-to-end, but not the real A11oy / Sentra /
+Amaru runtimes. Replacing them with the real app images is tracked as
+follow-up work in each app repo's `.github/workflows/` (image-build
+pipeline) — once those land, re-running the publish recipe below will
+overwrite the `v1.0.0-alpha` tags with the real runtime, no Zarf
+package changes required.
+
+Reproduce / re-publish (one-shot, requires `zarf` v0.76+ and a GitHub
+token with `write:packages` for `szl-holdings`):
+
+```sh
+export ZARF_REGISTRY_PUSH_USERNAME=<your-gh-username>
+export ZARF_REGISTRY_PUSH_PASSWORD=<your-gh-token-with-write:packages>
+for app in a11oy sentra amaru; do
+  ( cd /tmp && rm -rf "pkg-$app" && \
+    git clone --depth=1 --branch plane-1-deploy-zarf \
+      "https://github.com/szl-holdings/$app" "pkg-$app" && \
+    cd "pkg-$app/deploy" && \
+    zarf package create . --confirm --skip-sbom && \
+    zarf package publish \
+      "zarf-package-$app-amd64-1.0.0-alpha.tar.zst" \
+      oci://ghcr.io/szl-holdings/packages )
+done
+```
+
 ## Plane 2 — Policy (OPA gateway test pack as a Pepr / OPA-Gatekeeper module)
 
 **SZL ships:** the OPA test pack at
