@@ -143,6 +143,7 @@ async function main() {
   results.push(await runSeed('Distribution OS', seedDistributionOS));
   results.push(await runSeed('Counsel', seedPrismCounsel));
   results.push(runSeedScript('Alloy Narratives', 'seed-alloy.ts'));
+  results.push(runSeedScript('A11oy Dashboard', 'seed-a11oy-dashboard.ts'));
   results.push(runSeedScript('Observability', 'seed-observability.ts'));
   results.push(runSeedScript('Terra Full', 'seed-terra-full.ts'));
   results.push(await runSeed('Pulse Briefings (30-day)', seedPulse));
