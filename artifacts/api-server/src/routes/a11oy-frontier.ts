@@ -38,11 +38,123 @@ import {
   listDownstream,
   type DownstreamTarget,
 } from '../a11oy/runtime/frontier-downstream.js';
+import { createHash } from 'node:crypto';
+import rateLimit from 'express-rate-limit';
 import { handleRouteError, sendSuccess, sendBadRequest } from '../lib/api-response.js';
 import { authMiddleware } from '../middlewares/auth.js';
 
 const router = Router();
 const requireAuth = authMiddleware({ required: true });
+
+/**
+ * Public, unauthenticated read of the promoted model catalog.
+ *
+ * Consumed by the public install of `tools/a11oy-code` (see
+ * `src/providers/router.mjs`) so operators who set
+ * `A11OY_FRONTIER_REGISTRY_URL` can auto-update their model registry
+ * without provisioning a bearer token. Returns only the *promoted*
+ * `operator_model_registry` entries with `kind === 'model'`, projected
+ * to the minimal `{ id, provider, weight }` shape the router accepts.
+ *
+ * No score rationales, no inbox metadata, no internal IDs — this is
+ * intentionally the narrowest possible projection of the catalog so we
+ * don't leak codex internals to anonymous callers.
+ *
+ * Rate-limited per IP (separate budget from the global authenticated
+ * limiter) and cache-friendly (max-age + ETag) so it can be hammered
+ * from every install without melting the api-server.
+ */
+const PUBLIC_MODELS_CACHE_SECONDS = 300;
+
+const publicModelsLimiter = rateLimit({
+  windowMs: 60 * 1000,
+  max: process.env.NODE_ENV === 'production' ? 60 : 600,
+  standardHeaders: true,
+  legacyHeaders: true,
+  handler: (_req: Request, res: Response) => {
+    res.status(429).json({
+      success: false,
+      error: 'Too many requests for public model catalog. Please slow down.',
+      code: 'RATE_LIMITED',
+    });
+  },
+});
+
+interface PublicModelEntry {
+  id: string;
+  provider: string;
+  weight: number;
+  kind: 'model';
+}
+
+function weightFromScore(composite: unknown): number {
+  const n = typeof composite === 'number' ? composite : Number(composite);
+  if (!Number.isFinite(n)) return 0.5;
+  // Codex composite is already 0..1; clamp defensively.
+  return Math.max(0, Math.min(1, n));
+}
+
+router.get(
+  '/a11oy/frontier/public/models',
+  publicModelsLimiter,
+  async (req: Request, res: Response) => {
+    try {
+      await ensureFrontierIngestDbSchema();
+      const shared = isFrontierIngestDbEnabled()
+        ? await dbListPromotionsShared(200)
+        : undefined;
+      const rows = shared ?? listPromoted(200);
+
+      // Deduplicate by `${provider}:${externalId}` — promotions can repeat
+      // across pulls and the router contract expects each model once.
+      const seen = new Set<string>();
+      const models: PublicModelEntry[] = [];
+      for (const row of rows) {
+        const artifact = row.artifact;
+        if (!artifact || artifact.kind !== 'model') continue;
+        // Only surface promotions destined for the operator model registry.
+        // Other promotion targets (eval_harness, benchmark_registry, ...) are
+        // internal intelligence routing and must not leak to anonymous callers.
+        if (row.target !== 'operator_model_registry') continue;
+        const id = String(artifact.externalId || artifact.id || '').trim();
+        const provider = String(artifact.provider || '').toLowerCase();
+        if (!id || !provider) continue;
+        const key = `${provider}:${id}`;
+        if (seen.has(key)) continue;
+        seen.add(key);
+        models.push({
+          id,
+          provider,
+          weight: weightFromScore(row.evidence?.score?.composite),
+          kind: 'model',
+        });
+      }
+
+      const generatedAt = new Date().toISOString().slice(0, 19) + 'Z';
+      const body = { models, count: models.length, generatedAt };
+      // ETag derived from the model set (id+provider+weight) — stable across
+      // restarts as long as the promoted catalog is unchanged so installs
+      // get cheap 304s.
+      const etagSource = models
+        .map((m) => `${m.provider}:${m.id}:${m.weight.toFixed(4)}`)
+        .join('|');
+      const etag = `W/"a11oy-models-${createHash('sha1').update(etagSource).digest('hex').slice(0, 16)}-${models.length}"`;
+
+      res.setHeader('Cache-Control', `public, max-age=${PUBLIC_MODELS_CACHE_SECONDS}, s-maxage=${PUBLIC_MODELS_CACHE_SECONDS}`);
+      res.setHeader('ETag', etag);
+      res.setHeader('Vary', 'Accept-Encoding');
+
+      const ifNoneMatch = req.headers['if-none-match'];
+      if (typeof ifNoneMatch === 'string' && ifNoneMatch === etag) {
+        return res.status(304).end();
+      }
+
+      res.status(200).json(body);
+    } catch (err) {
+      handleRouteError(res, err, 'Failed to load public model catalog');
+    }
+  },
+);
 
 interface AuthUser {
   id?: string;
