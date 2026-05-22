@@ -16,8 +16,8 @@ abstract: >-
 type: software
 authors:
   - family-names: Lutar
-    given-names: Stephen
-    name-particle: P.
+    given-names: "Stephen P."
+    name-suffix: "Jr."
     affiliation: SZL Holdings
     orcid: "https://orcid.org/0009-0001-0110-4173"
 identifiers:
@@ -52,8 +52,8 @@ preferred-citation:
   title: "Ouroboros Thesis v10 — EXHAUSTIVE-AUDIT: The Audit Closure Operator Λ₁₀"
   authors:
     - family-names: Lutar
-      given-names: Stephen
-      name-particle: P.
+      given-names: "Stephen P."
+      name-suffix: "Jr."
       affiliation: SZL Holdings
       orcid: "https://orcid.org/0009-0001-0110-4173"
   year: 2026
@@ -69,8 +69,8 @@ references:
     title: "Ouroboros Thesis v9 — UNIFIED-OPERATIONAL: The Lutar Invariant Family (v1 → v7 + Ω)"
     authors:
       - family-names: Lutar
-        given-names: Stephen
-        name-particle: P.
+        given-names: "Stephen P."
+        name-suffix: "Jr."
         affiliation: SZL Holdings
         orcid: "https://orcid.org/0009-0001-0110-4173"
     year: 2026
