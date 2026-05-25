@@ -20,9 +20,120 @@
  * and repeats every `HELIOS_SCANNERS_INTERVAL_MS` (default 6h).
  */
 
+import { anthropic } from '@szl-holdings/ai-engine/providers/anthropic';
 import { logger } from '../lib/logger';
 import { getScanner, ingestSignals, recordScannerError } from '../routes/helios/live-store';
 import type { Signal } from '../routes/helios/types';
+import { callModel } from '../services/ai/call-model';
+
+// ── AI signal enrichment ─────────────────────────────────────────────────────
+//
+// Live signals arrive with generic templated `soWhat` text and an empty
+// `affectedAgents` list. We use a single small Anthropic call per signal to
+// rewrite `soWhat` into a 1-2 sentence portfolio-specific rationale and to
+// populate `affectedAgents` from the known agent list. The call is gated on
+// `ANTHROPIC_API_KEY` and silently falls back to the templated values on any
+// failure, so the pipeline keeps producing signals in dev/CI/offline runs.
+
+const KNOWN_AGENTS = ['Sentra', 'Counsel', 'Aegis', 'A11oy', 'Vessels', 'Lyte'] as const;
+type KnownAgent = (typeof KNOWN_AGENTS)[number];
+
+const ENRICH_AI_MODEL = 'claude-3-haiku-20240307';
+
+interface EnrichmentResult {
+  soWhat?: string;
+  affectedAgents?: string[];
+  impactScore?: number;
+  confidence?: number;
+}
+
+function normaliseAgents(input: unknown): string[] {
+  if (!Array.isArray(input)) return [];
+  const lookup = new Map(KNOWN_AGENTS.map(a => [a.toLowerCase(), a as KnownAgent]));
+  const out: string[] = [];
+  for (const raw of input) {
+    if (typeof raw !== 'string') continue;
+    const match = lookup.get(raw.trim().toLowerCase());
+    if (match && !out.includes(match)) out.push(match);
+  }
+  return out;
+}
+
+function clampUnit(input: unknown): number | undefined {
+  const n = typeof input === 'number' ? input : Number(input);
+  if (!Number.isFinite(n)) return undefined;
+  if (n < 0) return 0;
+  if (n > 1) return 1;
+  return Math.round(n * 100) / 100;
+}
+
+async function enrichSignal(signal: Signal): Promise<Signal> {
+  if (!process.env.ANTHROPIC_API_KEY) return signal;
+
+  const systemPrompt = `You enrich frontier-intelligence signals for the SZL Holdings portfolio. The portfolio agents are: ${KNOWN_AGENTS.join(', ')}.
+
+For the given signal, return STRICT JSON with these fields (no markdown, no preamble):
+{
+  "soWhat": string (1-2 sentences, mention the specific portfolio agent(s) most affected and why this matters operationally),
+  "affectedAgents": string[] (subset of [${KNOWN_AGENTS.map(a => `"${a}"`).join(', ')}]; empty array if none clearly apply),
+  "impactScore": number between 0 and 1 (how strategically material to the portfolio),
+  "confidence": number between 0 and 1 (how confident you are in the assessment)
+}
+
+Portfolio context: Sentra=cyber resilience; Counsel=legal/regulatory reasoning; Aegis=risk & compliance; A11oy=brand orchestration; Vessels=maritime intelligence; Lyte=consumer/lifestyle ops.`;
+
+  const userPrompt = `Signal title: ${signal.title}\nSummary: ${signal.summary.slice(0, 800)}\nSource: ${signal.sourceName}\n\nReturn JSON only.`;
+
+  try {
+    const { content } = await callModel({
+      provider: 'anthropic',
+      model: ENRICH_AI_MODEL,
+      surface: 'helios-scanner-enrich',
+      estimatedInputTokens: 400,
+      fn: async () => {
+        const result = await anthropic.messages.create({
+          model: ENRICH_AI_MODEL,
+          max_tokens: 400,
+          system: systemPrompt,
+          messages: [{ role: 'user', content: userPrompt }],
+        });
+        const text = result.content[0]?.type === 'text' ? result.content[0].text : '';
+        return {
+          promptTokens: result.usage.input_tokens,
+          completionTokens: result.usage.output_tokens,
+          content: text,
+        };
+      },
+    });
+
+    const cleaned = content.trim().replace(/^```(?:json)?\s*/i, '').replace(/```\s*$/, '');
+    const parsed = JSON.parse(cleaned) as EnrichmentResult;
+
+    const out: Signal = { ...signal };
+    if (typeof parsed.soWhat === 'string' && parsed.soWhat.trim().length > 0) {
+      out.soWhat = parsed.soWhat.trim().slice(0, 600);
+    }
+    const agents = normaliseAgents(parsed.affectedAgents);
+    if (agents.length > 0) out.affectedAgents = agents;
+    const impact = clampUnit(parsed.impactScore);
+    if (impact !== undefined) out.impactScore = impact;
+    const confidence = clampUnit(parsed.confidence);
+    if (confidence !== undefined) out.confidence = confidence;
+    return out;
+  } catch (err) {
+    logger.warn(
+      { err: err instanceof Error ? err.message : String(err), signalId: signal.id },
+      '[helios-scanners] AI enrichment failed; falling back to templated signal',
+    );
+    return signal;
+  }
+}
+
+async function enrichSignals(signals: Signal[]): Promise<Signal[]> {
+  if (!process.env.ANTHROPIC_API_KEY || signals.length === 0) return signals;
+  const results = await Promise.all(signals.map(enrichSignal));
+  return results;
+}
 
 const ARXIV_URL =
   'https://export.arxiv.org/api/query?search_query=cat:cs.AI+OR+cat:cs.LG&sortBy=submittedDate&sortOrder=descending&max_results=10';
@@ -125,7 +236,7 @@ export async function runArxivScanner(): Promise<{ added: number; skipped?: bool
     const xml = await res.text();
     const entries = parseArxivAtom(xml);
     if (entries.length === 0) throw new Error('arxiv returned 0 entries');
-    const fresh = entries.map(arxivToSignal);
+    const fresh = await enrichSignals(entries.map(arxivToSignal));
     const { added } = ingestSignals('scanner-arxiv', fresh);
     logger.info({ scanner: 'scanner-arxiv', fetched: entries.length, added }, '[helios-scanners] arxiv ingest ok');
     return { added };
@@ -188,7 +299,7 @@ export async function runHuggingFaceScanner(): Promise<{ added: number; skipped?
     if (!res.ok) throw new Error(`huggingface HTTP ${res.status}`);
     const data = (await res.json()) as HfModel[];
     if (!Array.isArray(data) || data.length === 0) throw new Error('huggingface returned 0 models');
-    const fresh = data.map(hfToSignal);
+    const fresh = await enrichSignals(data.map(hfToSignal));
     const { added } = ingestSignals('scanner-github', fresh);
     logger.info({ scanner: 'scanner-github', fetched: data.length, added }, '[helios-scanners] huggingface ingest ok');
     return { added };
