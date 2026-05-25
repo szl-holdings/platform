@@ -541,4 +541,201 @@ export const api = {
       ),
   },
   seed: () => apiFetch<{ message: string }>('/vessels/seed', { method: 'POST' }),
+  /**
+   * A11oy primitive backend (Task #5318). Each surface persists a real
+   * Drizzle-backed record:
+   *   fleet        = Anatomy
+   *   positions    = Substance state-log
+   *   risk         = Transformation (Phase-2 perturbation bound)
+   *   routePlan    = Connection (Phase-2 anatomy-boundary lemma)
+   *   coexistence  = Connection-level Transformation (null-space lemma)
+   */
+  a11oy: {
+    fleet: {
+      list: () => apiFetchList<A11oyFleet>('/vessels/fleet'),
+      create: (data: A11oyFleetInput) =>
+        apiFetch<A11oyFleet>('/vessels/fleet', {
+          method: 'POST',
+          body: JSON.stringify(data),
+        }),
+    },
+    positions: {
+      list: (params?: { fleetRef?: string; vesselImo?: string; limit?: number }) => {
+        const q = new URLSearchParams();
+        if (params?.fleetRef) q.set('fleetRef', params.fleetRef);
+        if (params?.vesselImo) q.set('vesselImo', params.vesselImo);
+        if (params?.limit) q.set('limit', String(params.limit));
+        const qs = q.toString();
+        return apiFetchList<A11oyPosition>(`/vessels/positions${qs ? `?${qs}` : ''}`);
+      },
+      record: (data: A11oyPositionInput) =>
+        apiFetch<A11oyPosition>('/vessels/positions', {
+          method: 'POST',
+          body: JSON.stringify(data),
+        }),
+    },
+    risk: {
+      list: (params?: { fleetRef?: string; vesselImo?: string }) => {
+        const q = new URLSearchParams();
+        if (params?.fleetRef) q.set('fleetRef', params.fleetRef);
+        if (params?.vesselImo) q.set('vesselImo', params.vesselImo);
+        const qs = q.toString();
+        return apiFetchList<A11oyRiskSnapshot>(`/vessels/risk${qs ? `?${qs}` : ''}`);
+      },
+      compute: (data: A11oyRiskInput) =>
+        apiFetch<A11oyRiskSnapshot>('/vessels/risk', {
+          method: 'POST',
+          body: JSON.stringify(data),
+        }),
+    },
+    routePlan: {
+      list: (params?: { fleetRef?: string; vesselImo?: string }) => {
+        const q = new URLSearchParams();
+        if (params?.fleetRef) q.set('fleetRef', params.fleetRef);
+        if (params?.vesselImo) q.set('vesselImo', params.vesselImo);
+        const qs = q.toString();
+        return apiFetchList<A11oyRoute>(`/vessels/route-plan${qs ? `?${qs}` : ''}`);
+      },
+      compute: (data: A11oyRouteInput) =>
+        apiFetch<{ route: A11oyRoute; anatomyBoundary: A11oyAnatomyBoundary }>(
+          '/vessels/route-plan',
+          { method: 'POST', body: JSON.stringify(data) },
+        ),
+    },
+    coexistence: {
+      list: (params?: { fleetRef?: string; routeId?: number }) => {
+        const q = new URLSearchParams();
+        if (params?.fleetRef) q.set('fleetRef', params.fleetRef);
+        if (params?.routeId) q.set('routeId', String(params.routeId));
+        const qs = q.toString();
+        return apiFetchList<A11oyCoexistenceReport>(
+          `/vessels/coexistence${qs ? `?${qs}` : ''}`,
+        );
+      },
+      compute: (data: A11oyCoexistenceInput) =>
+        apiFetch<A11oyCoexistenceReport>('/vessels/coexistence', {
+          method: 'POST',
+          body: JSON.stringify(data),
+        }),
+    },
+  },
 };
+
+// ─── A11oy primitive backend types (Task #5318) ─────────────────────────────
+
+export interface A11oyFleet {
+  id: number;
+  orgId: number | null;
+  fleetRef: string;
+  name: string;
+  operator: string | null;
+  vesselCount: number;
+  anatomySeal: string | null;
+  metadata: Record<string, unknown> | null;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface A11oyFleetInput {
+  fleetRef: string;
+  name: string;
+  operator?: string;
+  vesselCount?: number;
+  anatomySeal?: string;
+  metadata?: Record<string, unknown>;
+}
+
+export interface A11oyPosition {
+  id: number;
+  orgId: number | null;
+  fleetRef: string;
+  vesselImo: string;
+  latitude: number;
+  longitude: number;
+  speedKnots: number | null;
+  headingDeg: number | null;
+  source: string;
+  recordedAt: string;
+}
+
+export interface A11oyPositionInput {
+  fleetRef: string;
+  vesselImo: string;
+  latitude: number;
+  longitude: number;
+  speedKnots?: number;
+  headingDeg?: number;
+  source?: string;
+  recordedAt?: string;
+}
+
+export type A11oyRiskSeverity = 'normal' | 'watch' | 'elevated' | 'critical';
+
+export interface A11oyRiskSnapshot {
+  id: number;
+  orgId: number | null;
+  fleetRef: string;
+  vesselImo: string | null;
+  perturbationBound: number;
+  severity: A11oyRiskSeverity;
+  factors: { factors: Record<string, number>; weights: Record<string, number> | null } | null;
+  receiptHash: string | null;
+  computedAt: string;
+}
+
+export interface A11oyRiskInput {
+  fleetRef: string;
+  vesselImo?: string;
+  factors: Record<string, number>;
+  weights?: Record<string, number>;
+}
+
+export interface A11oyRoute {
+  id: number;
+  orgId: number | null;
+  fleetRef: string;
+  vesselImo: string;
+  originPort: string;
+  destinationPort: string;
+  waypoints: Array<{ lat: number; lon: number; label?: string }>;
+  rfCoexistenceVector: number[] | null;
+  anatomyBoundaryOk: boolean;
+  anatomyBoundaryNotes: string | null;
+  receiptHash: string | null;
+  createdAt: string;
+}
+
+export interface A11oyRouteInput {
+  fleetRef: string;
+  vesselImo: string;
+  originPort: string;
+  destinationPort: string;
+  waypoints: Array<{ lat: number; lon: number; label?: string }>;
+  rfCoexistenceVector?: number[];
+  anatomyMaxDeviationKm?: number;
+}
+
+export interface A11oyAnatomyBoundary {
+  ok: boolean;
+  notes: string | null;
+  maxObservedKm: number;
+}
+
+export interface A11oyCoexistenceReport {
+  id: number;
+  orgId: number | null;
+  fleetRef: string;
+  routeId: number | null;
+  rfBands: Array<{ band: string; utilization: number }>;
+  nullSpaceProjection: number[];
+  interferenceScore: number;
+  receiptHash: string | null;
+  computedAt: string;
+}
+
+export interface A11oyCoexistenceInput {
+  fleetRef: string;
+  routeId?: number;
+  bands: Array<{ band: string; utilization: number }>;
+  bandWeights?: number[];
+}

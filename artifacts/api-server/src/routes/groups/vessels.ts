@@ -44,6 +44,15 @@ export function register(router: IRouter): void {
   router.use(lazyMatch('/vessels', () => import('../vessels-sanctions-network'), 'vessels-sanctions-network'));
   router.use(lazyMatch('/vessels', () => import('../vessels-forecasts'), 'vessels-forecasts'));
   router.use(lazyMatch('/vessels', () => import('../vessels-formula-thesis'), 'vessels-formula-thesis'));
+  // A11oy primitive backend (Task #5318): fleet/positions/risk/route-plan/
+  // coexistence. Literal-path-only routers, mounted BEFORE the catch-all
+  // ../vessels module whose `/vessels/:id` handler would otherwise swallow
+  // `/vessels/risk` and `/vessels/fleet` with HTTP 400.
+  router.use(lazyMatch('/vessels', () => import('../vessels-fleet'), 'vessels-fleet'));
+  router.use(lazyMatch('/vessels', () => import('../vessels-positions'), 'vessels-positions'));
+  router.use(lazyMatch('/vessels', () => import('../vessels-risk'), 'vessels-risk'));
+  router.use(lazyMatch('/vessels', () => import('../vessels-route-plan'), 'vessels-route-plan'));
+  router.use(lazyMatch('/vessels', () => import('../vessels-coexistence'), 'vessels-coexistence'));
   // Mounted LAST so its `/vessels/:id` handler is the fall-through, not a trap.
   router.use(lazyMatch('/vessels', () => import('../vessels'), 'vessels'));
 
