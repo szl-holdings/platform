@@ -35,6 +35,11 @@ import {
 } from '../lib/sentra-prism-signals';
 import { validateBody, validateQuery } from '../lib/validation';
 import { authMiddleware } from '../middlewares/auth';
+import {
+  recordAssetRiskObservation,
+  recordBlastRadiusObservation,
+  recordAdversaryReplayObservation,
+} from '../lib/sentra-formula-observations';
 
 const router: IRouter = Router();
 
@@ -107,6 +112,12 @@ router.post(
       await initModels();
       const input = req.body as AssetRiskInput;
       const score = await scoreAssetRisk(input);
+      recordAssetRiskObservation({
+        criticality: input.assetCriticality ?? 'medium',
+        internetExposure: input.internetExposure ?? false,
+        cvssScore: input.cvssScore,
+        observed: score.p30dCompromise,
+      });
       logger.info({ assetId: input.assetId, p30d: score.p30dCompromise, modelVersionId: score.modelVersionId }, '[sentra/ml] asset risk scored');
       sendSuccess(res, { score });
     } catch (err) {
@@ -160,6 +171,13 @@ router.post(
       await initModels();
       const { emitSignal, ...input } = req.body as IdentityBlastRadiusInput & { emitSignal?: boolean };
       const forecast = await forecastIdentityBlastRadius(input);
+      recordBlastRadiusObservation({
+        identityType: input.identityType ?? 'human',
+        hasAdminRights: input.hasAdminRights ?? false,
+        accessibleSystems: input.accessibleSystems ?? 10,
+        observed: forecast.p7dLateralPath,
+        estimatedBlastRadius: forecast.estimatedBlastRadius,
+      });
 
       if (emitSignal) {
         await emitBlastRadiusSignal({
@@ -188,6 +206,12 @@ router.post(
       await initModels();
       const { emitSignal, ...input } = req.body as AdversaryReplayInput & { emitSignal?: boolean };
       const result = await runAdversaryReplay(input);
+      recordAdversaryReplayObservation({
+        observed: result.overallSuccessRate,
+        kevListedCount: input.kevListedCves?.length ?? 0,
+        webApps: input.targetSurface?.webApps ?? 3,
+        endpoints: input.targetSurface?.endpoints ?? 50,
+      });
 
       if (emitSignal) {
         const missedDetections = result.attackChain.filter(s => s.outcome === 'succeeded').length;

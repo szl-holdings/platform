@@ -141,6 +141,50 @@ without an operator decision, in line with `docs/A11OY_NON_NEGOTIABLES.md`.
 
 ---
 
+## 7a. Observed-vs-baseline meta contract
+
+`instrument(spec, caller?, metaFn?)` (see `lib/formulas/src/instrument.ts`)
+accepts an optional **meta extractor** that is invoked after the formula
+impl runs. Its return value rides along on
+`FormulaInvocation.meta` and is consumed server-side by
+`formulaInvocationDriftBridge`
+(`artifacts/api-server/src/jobs/rosie-evolution-loop.ts`), which
+unpacks it into a `DriftObservation` for the shared drift detector. The
+scheduled `runRosieEvolutionTick` then drains drifting buckets into the
+A11oy Codex tuning queue (`formula_tuning_proposals`).
+
+For the bridge to record an observation, **all** of these keys must be
+present on `meta` and well-typed:
+
+| Key              | Type     | Meaning                                                                |
+|------------------|----------|------------------------------------------------------------------------|
+| `observed`       | `number` | Real measured value the callsite just produced.                        |
+| `baseline`       | `number` | Expected/target value for this input class; `\|observed − baseline\|` is the drift sample. |
+| `parameter`      | `string` | Name of the registry parameter being tuned (must exist on the formula).|
+| `oldValue`       | `number` | Current value of `parameter` (the registry default unless overridden). |
+| `candidateValue` | `number` | Suggested new value if drift breaches ROSIE thresholds.                |
+| `thesisCitation` | `string` | `thesisDoc §section` so proposals stay traceable.                      |
+| `irreversibility`| `number` | Optional. In `[0,1]`. Higher = more cautious ROSIE scoring.            |
+
+Any additional fields are passed through unchanged (useful for debugging
+diagnostics like `callsite`). If any required field is missing or
+malformed the bridge silently drops the observation — the hot path is
+never broken by metadata mistakes.
+
+**Reference instrumented callsites** (server-side; the browser sink is a
+no-op so frontend `instrument()` calls never reach the bridge):
+
+1. `POST /api/sentra/ml/asset-risk` — emits `risk-score` meta with
+   `observed = p30dCompromise`, `baseline` from the criticality bucket.
+2. `POST /api/sentra/ml/blast-radius` — emits `risk-score` meta with
+   `observed = p7dLateralPath`, `baseline` per identity type.
+3. `POST /api/sentra/ml/adversary-replay` — emits `risk-score` meta with
+   `observed = overallSuccessRate`, baseline `0.30`.
+
+Wiring lives in `artifacts/api-server/src/lib/sentra-formula-observations.ts`.
+
+---
+
 ## 8. After-state summary
 
 - Single canonical formula library: `lib/formulas/` (10 entries today,
