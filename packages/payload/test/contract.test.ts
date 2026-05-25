@@ -22,7 +22,7 @@
  *      transcribed constants.
  */
 
-import { readFileSync } from "node:fs";
+import { existsSync, readFileSync } from "node:fs";
 import { dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import { runInNewContext } from "node:vm";
@@ -765,5 +765,43 @@ describe("layer 4 — V7 forbidden-pattern guard (Mythos + git-author refinement
     ] as const) {
       expect(v7IsForbidden(text, ctx)).toBe(false);
     }
+  });
+});
+
+// ---------------------------------------------------------------------------
+// Layer 3 (V7 audit docs) — V7_PANEL_FACTS doc-link constants pin to real
+// files on disk. If somebody renames or moves docs/audit/v7-pr-triage.md or
+// docs/audit/v7-pm-decisions.md without updating the constants, every
+// "↗ PR triage" / "↗ PM decisions" link in the 7 GovernancePanels (and the
+// Amaru ribbon V7 chip) would silently 404. Catch it here.
+// ---------------------------------------------------------------------------
+
+describe("layer 3 — V7 audit doc links pin to real files on disk", () => {
+  it("V7_PANEL_FACTS.prTriageDocPath resolves to an existing file", () => {
+    const abs = join(ROOT, V7_PANEL_FACTS.prTriageDocPath);
+    expect(
+      existsSync(abs),
+      `V7_PANEL_FACTS.prTriageDocPath "${V7_PANEL_FACTS.prTriageDocPath}" does not exist on disk at ${abs}`,
+    ).toBe(true);
+  });
+
+  it("V7_PANEL_FACTS.pmDecisionsDocPath resolves to an existing file", () => {
+    const abs = join(ROOT, V7_PANEL_FACTS.pmDecisionsDocPath);
+    expect(
+      existsSync(abs),
+      `V7_PANEL_FACTS.pmDecisionsDocPath "${V7_PANEL_FACTS.pmDecisionsDocPath}" does not exist on disk at ${abs}`,
+    ).toBe(true);
+  });
+
+  it("prTriageDocHref === '/' + prTriageDocPath (constants cannot drift)", () => {
+    expect(V7_PANEL_FACTS.prTriageDocHref).toBe(
+      "/" + V7_PANEL_FACTS.prTriageDocPath,
+    );
+  });
+
+  it("pmDecisionsDocHref === '/' + pmDecisionsDocPath (constants cannot drift)", () => {
+    expect(V7_PANEL_FACTS.pmDecisionsDocHref).toBe(
+      "/" + V7_PANEL_FACTS.pmDecisionsDocPath,
+    );
   });
 });
