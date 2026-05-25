@@ -30,6 +30,10 @@ args = "artifacts/conduit: web"
 task = "workflow.run"
 args = "risk-formula-drift"
 
+[[workflows.workflow.tasks]]
+task = "workflow.run"
+args = "lean"
+
 [[workflows.workflow]]
 name = "artifacts/conduit: web"
 author = "agent"
@@ -49,6 +53,17 @@ author = "agent"
 [[workflows.workflow.tasks]]
 task = "shell.exec"
 args = "pnpm run check:risk-formula-drift"
+
+[workflows.workflow.metadata]
+isValidation = true
+
+[[workflows.workflow]]
+name = "lean"
+author = "agent"
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "cd packages/lean-formulas && lake build"
 
 [workflows.workflow.metadata]
 isValidation = true
