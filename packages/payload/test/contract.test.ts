@@ -350,22 +350,70 @@ describe("layer 3 — panels render only payload-derived facts", () => {
           THESIS_LINEAGE,
           THESIS_PAPERS,
           THESIS_TIMELINE,
-          // Mocked `.map((p) => ...)` closure variable. Panels iterate
-          // THESIS_PAPERS and reference `p.key`, `p.status`, `p.version`,
-          // etc. inside the callback — bind a real paper so those
-          // expressions resolve without us having to parse the JSX scope.
-          p: THESIS_PAPERS[0],
         };
 
-        // Extract every JSX `value={...}` expression body. This regex is
-        // intentionally narrow — matches `value={` then captures up to the
-        // matching closing `}` on the same logical span (the panels keep
-        // each Row to one line).
+        // Detect `IDENT.map((NAME) => ...)` (and `?.map`, `.flatMap`) closures
+        // so the closure variable name is bound dynamically from the actual
+        // source array — instead of hard-coding a single loop variable (`p`).
+        // If a panel refactors to `.map((paper) => ...)` or `.map((thesis) =>
+        // ...)`, this still resolves correctly. The source iterable is
+        // evaluated in the sandbox; the first element becomes the binding.
+        type MapClosure = {
+          bodyStart: number;
+          bodyEnd: number;
+          name: string;
+          source: string;
+        };
+        const closures: MapClosure[] = [];
+        const mapRe =
+          /\.(?:flatMap|map)\s*\(\s*\(?\s*([A-Za-z_$][\w$]*)\s*(?:,\s*[A-Za-z_$][\w$]*\s*)?\)?\s*=>/g;
+        let mc: RegExpExecArray | null;
+        while ((mc = mapRe.exec(src)) !== null) {
+          const name = mc[1];
+          // Walk back from the `.` to collect the iterable identifier chain
+          // (e.g. `THESIS_PAPERS`, `acc?.items`, `foo.bar.baz`).
+          let i = mc.index - 1;
+          while (i >= 0 && /[\w$.?]/.test(src[i])) i--;
+          const source = src.slice(i + 1, mc.index).replace(/\?\./g, ".");
+          if (!source) continue;
+          // Find the `(` opening the `.map(` callback arglist.
+          const open = src.indexOf("(", mc.index);
+          if (open === -1) continue;
+          // Walk forward, balancing parens (ignoring those inside string
+          // literals) to find the matching `)` that closes `.map(`.
+          let depth = 1;
+          let j = open + 1;
+          let quote: string | null = null;
+          while (j < src.length && depth > 0) {
+            const c = src[j];
+            if (quote) {
+              if (c === "\\") {
+                j += 2;
+                continue;
+              }
+              if (c === quote) quote = null;
+            } else if (c === '"' || c === "'" || c === "`") {
+              quote = c;
+            } else if (c === "(") {
+              depth++;
+            } else if (c === ")") {
+              depth--;
+            }
+            j++;
+          }
+          closures.push({ bodyStart: open, bodyEnd: j, name, source });
+        }
+
+        // Extract every JSX `value={...}` expression body, retaining its
+        // position so we can detect which (if any) map-closure scope it sits
+        // in. The regex is intentionally narrow — matches `value={` then
+        // captures up to the matching closing `}` on the same logical span
+        // (panels keep each Row to one line).
         const re = /\bvalue=\{([^{}\n]+(?:\{[^{}]*\}[^{}\n]*)*)\}/g;
-        const expressions: string[] = [];
+        const expressions: { expr: string; offset: number }[] = [];
         let m: RegExpExecArray | null;
         while ((m = re.exec(src)) !== null) {
-          expressions.push(m[1].trim());
+          expressions.push({ expr: m[1].trim(), offset: m.index });
         }
 
         expect(
@@ -374,9 +422,27 @@ describe("layer 3 — panels render only payload-derived facts", () => {
         ).toBeGreaterThan(0);
 
         const failures: Array<{ expr: string; error: string }> = [];
-        for (const expr of expressions) {
+        for (const { expr, offset } of expressions) {
+          // Build a per-expression scope, layering on bindings from every
+          // enclosing map-closure. Innermost wins (later loop iterations
+          // overwrite outer bindings of the same name).
+          const scope: Record<string, unknown> = { ...sandbox };
+          const enclosing = closures
+            .filter((c) => offset > c.bodyStart && offset < c.bodyEnd)
+            .sort((a, b) => a.bodyStart - b.bodyStart);
+          for (const c of enclosing) {
+            try {
+              const arr = runInNewContext(`(${c.source})`, sandbox, {
+                timeout: 100,
+              }) as unknown;
+              scope[c.name] = Array.isArray(arr) ? arr[0] : arr;
+            } catch {
+              // Leave the closure variable unbound; the expression eval
+              // below will fail loudly with a real "X is not defined".
+            }
+          }
           try {
-            const result = runInNewContext(`(${expr})`, sandbox, {
+            const result = runInNewContext(`(${expr})`, scope, {
               timeout: 100,
             });
             if (
