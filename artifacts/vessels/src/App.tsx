@@ -11,7 +11,6 @@ const { vesselsCommercial: VESSELS_COMMERCIAL_ENABLED } = readEnvFeatureFlags(
   import.meta.env as unknown as Record<string, unknown>,
 );
 const COMMERCIAL_GATED_NAV_IDS = new Set(['insurance-panel', 'trading-desk']);
-import { McpOverlay } from '@szl-holdings/mcp-client';
 import {
   clearUser as clearSentryUser,
   identifyAnalyticsUser,
@@ -32,7 +31,6 @@ import {
   useCommandPalette,
 } from '@szl-holdings/shared-ui/command-palette';
 import { CookieBanner } from '@szl-holdings/shared-ui/cookie-banner';
-import { AgentCopilot } from '@szl-holdings/shared-ui/copilot';
 import { helmsmanConfig } from '@szl-holdings/shared-ui/copilot-configs';
 import { DemoModeProvider } from '@szl-holdings/shared-ui/demo-mode';
 import {
@@ -49,7 +47,6 @@ import { LANE_ACCENT_HEX } from '@szl-holdings/shared-ui/lane-colors';
 import {
   GettingStartedChecklist,
   type OnboardingConfig,
-  OnboardingWizard,
   useOnboardingAnalytics,
 } from '@szl-holdings/shared-ui/onboarding';
 import { PackBanner } from '@szl-holdings/shared-ui/pack-banner';
@@ -235,6 +232,28 @@ const VESSELS_ONBOARDING_CONFIG: OnboardingConfig = {
     },
   ],
 };
+
+// Heavy non-critical overlays — deferred so they don't block first paint of
+// the dashboard. These are each defined in their own subpath-exported module
+// (no eager re-imports from the same file), so the lazy split actually
+// produces a separate chunk. `CommandPalette` is intentionally left static
+// because `useCommandPalette` (a top-level hook needed at boot for the
+// ⌘K shortcut) is co-located in the same source file, which would otherwise
+// trigger Rollup's "dynamically and statically imported" warning and defeat
+// the split.
+const OnboardingWizard = lazy(() =>
+  import('@szl-holdings/shared-ui/onboarding').then((m) => ({
+    default: m.OnboardingWizard,
+  })),
+);
+const AgentCopilot = lazy(() =>
+  import('@szl-holdings/shared-ui/copilot').then((m) => ({
+    default: m.AgentCopilot,
+  })),
+);
+const McpOverlay = lazy(() =>
+  import('@szl-holdings/mcp-client').then((m) => ({ default: m.McpOverlay })),
+);
 
 // Marketing pages
 const VesselsPulse = lazy(() => import('@/pages/pulse'));
@@ -1415,11 +1434,13 @@ function VesselsDashboard({
         appName="Vessels"
         accentColor={accent}
       />
-      <OnboardingWizard
-        config={VESSELS_ONBOARDING_CONFIG}
-        onComplete={trackTourCompleted}
-        onSkip={trackTourSkipped}
-      />
+      <Suspense fallback={null}>
+        <OnboardingWizard
+          config={VESSELS_ONBOARDING_CONFIG}
+          onComplete={trackTourCompleted}
+          onSkip={trackTourSkipped}
+        />
+      </Suspense>
     </PowerUserProvider>
   );
 }
@@ -1642,8 +1663,12 @@ function App() {
                 <WouterRouter base={import.meta.env.BASE_URL.replace(/\/$/, '')}>
                   <AppContent cmdOpen={cmdOpen} setCmdOpen={setCmdOpen} />
                 </WouterRouter>
-                <AgentCopilot config={helmsmanConfig} />
-                <McpOverlay domain="vessels" />
+                <Suspense fallback={null}>
+                  <AgentCopilot config={helmsmanConfig} />
+                </Suspense>
+                <Suspense fallback={null}>
+                  <McpOverlay domain="vessels" />
+                </Suspense>
               </QueryClientProvider>
             </DemoModeProvider>
           </SandboxModeProvider>

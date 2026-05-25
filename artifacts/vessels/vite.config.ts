@@ -99,8 +99,28 @@ export default defineConfig({
             if (id.includes('@radix-ui')) return 'vendor-radix';
             if (id.includes('@tanstack')) return 'vendor-tanstack';
             if (id.includes('lucide-react')) return 'vendor-icons';
-            if (id.includes('react-dom')) return 'vendor-react';
-            if (id.includes('react/')) return 'vendor-react';
+            // Router stack is small but isolating it keeps `vendor-react`
+            // strictly the React runtime so first-paint blocking JS is
+            // easier to reason about.
+            if (
+              id.includes('/wouter/') ||
+              id.includes('/wouter-') ||
+              id.includes('/regexparam/') ||
+              id.includes('/mitt/')
+            ) {
+              return 'vendor-router';
+            }
+            // `vendor-react` is reserved for React itself + the minimum
+            // runtime peers (`scheduler`, `use-sync-external-store`) so the
+            // chunk doesn't accidentally sweep in CJS-interop tails from
+            // `react-*` packages.
+            if (
+              /[\\/]node_modules[\\/](?:\.pnpm[\\/][^\\/]+[\\/]node_modules[\\/])?(?:react|react-dom|scheduler|use-sync-external-store)[\\/]/.test(
+                id,
+              )
+            ) {
+              return 'vendor-react';
+            }
           }
           return undefined;
         },
