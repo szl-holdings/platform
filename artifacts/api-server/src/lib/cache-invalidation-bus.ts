@@ -55,6 +55,11 @@ interface BusState {
   client: PgLikeClient | null;
   reconnectTimer: NodeJS.Timeout | null;
   attempt: number;
+  lastConnectedAt: string | null;
+  lastDisconnectedAt: string | null;
+  lastReconnectAttemptAt: string | null;
+  nextReconnectAt: string | null;
+  lastError: string | null;
 }
 
 const state: BusState = {
@@ -63,7 +68,57 @@ const state: BusState = {
   client: null,
   reconnectTimer: null,
   attempt: 0,
+  lastConnectedAt: null,
+  lastDisconnectedAt: null,
+  lastReconnectAttemptAt: null,
+  nextReconnectAt: null,
+  lastError: null,
 };
+
+/**
+ * Snapshot of the cache invalidation bus's current connection state.
+ * Used by `/admin/cache-bus` so operators can see at a glance whether
+ * kill-switches will propagate instantly (connected) or are falling
+ * back to per-worker TTL (disconnected).
+ */
+export interface CacheBusStatus {
+  connected: boolean;
+  started: boolean;
+  channel: string;
+  reconnectAttempts: number;
+  lastConnectedAt: string | null;
+  lastDisconnectedAt: string | null;
+  lastReconnectAttemptAt: string | null;
+  nextReconnectAt: string | null;
+  lastError: string | null;
+}
+
+export function getCacheBusStatus(): CacheBusStatus {
+  return {
+    connected: state.client !== null,
+    started: state.started,
+    channel: CHANNEL,
+    reconnectAttempts: state.attempt,
+    lastConnectedAt: state.lastConnectedAt,
+    lastDisconnectedAt: state.lastDisconnectedAt,
+    lastReconnectAttemptAt: state.lastReconnectAttemptAt,
+    nextReconnectAt: state.nextReconnectAt,
+    lastError: state.lastError,
+  };
+}
+
+function markDisconnected(err?: unknown): void {
+  // Stamp a disconnect timestamp on any transition into a non-connected
+  // state — including the very first boot-time connect failure (when
+  // there was never a `state.client` to lose). Without this, operators
+  // would see "down" with no "down since" on first-failure scenarios.
+  if (state.lastDisconnectedAt === null || state.client !== null) {
+    state.lastDisconnectedAt = new Date().toISOString();
+  }
+  if (err) {
+    state.lastError = err instanceof Error ? err.message : String(err);
+  }
+}
 
 interface PgLikeClient {
   connect(): Promise<void>;
@@ -127,6 +182,11 @@ export function __setClientForTests(client: PgLikeClient | null): void {
   state.started = !!client;
   state.stopping = false;
   state.attempt = 0;
+  state.lastConnectedAt = client ? new Date().toISOString() : state.lastConnectedAt;
+  state.lastDisconnectedAt = client ? state.lastDisconnectedAt : new Date().toISOString();
+  state.lastReconnectAttemptAt = null;
+  state.nextReconnectAt = null;
+  state.lastError = null;
 }
 
 /**
@@ -167,6 +227,9 @@ export async function stopCacheInvalidationBus(): Promise<void> {
 
 async function connect(databaseUrl?: string): Promise<void> {
   if (state.stopping) return;
+  // Stamp every attempt (initial connect AND each backoff retry) so
+  // operators can see how recently the bus tried to recover.
+  state.lastReconnectAttemptAt = new Date().toISOString();
   try {
     // Lazy-import to avoid pulling pg into test environments that mock
     // the bus wholesale.
@@ -186,24 +249,31 @@ async function connect(databaseUrl?: string): Promise<void> {
     });
     client.on('error', (err) => {
       logger.warn({ err }, '[cache-bus] dedicated client error — reconnecting');
+      markDisconnected(err);
       void reconnect(databaseUrl);
     });
     client.on('end', () => {
       if (!state.stopping) {
         logger.warn('[cache-bus] dedicated client closed — reconnecting');
+        markDisconnected();
         void reconnect(databaseUrl);
       }
     });
     await client.query(`LISTEN ${CHANNEL}`);
     state.client = client;
     state.attempt = 0;
+    state.lastConnectedAt = new Date().toISOString();
+    state.nextReconnectAt = null;
+    state.lastError = null;
     logger.info(
       { channel: CHANNEL },
       '[cache-bus] connected — listening for cross-process cache invalidations',
     );
   } catch (err) {
+    markDisconnected(err);
     const backoff = Math.min(MAX_BACKOFF_MS, 500 * 2 ** state.attempt);
     state.attempt += 1;
+    state.nextReconnectAt = new Date(Date.now() + backoff).toISOString();
     logger.warn(
       { err, backoff, attempt: state.attempt },
       '[cache-bus] connect failed — will retry; meanwhile cross-process invalidation falls back to TTL',

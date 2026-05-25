@@ -127,4 +127,17 @@ export interface RmmHealth {
   healing: { pendingApprovals: number; stats: Record<string, number> };
 }
 
+export interface CacheBusStatus {
+  timestamp: string;
+  connected: boolean;
+  started: boolean;
+  channel: string;
+  reconnectAttempts: number;
+  lastConnectedAt: string | null;
+  lastDisconnectedAt: string | null;
+  lastReconnectAttemptAt: string | null;
+  nextReconnectAt: string | null;
+  lastError: string | null;
+}
+
 export type TabKey = 'overview' | 'health' | 'jobs' | 'connectors' | 'seed' | 'feeds' | 'errors' | 'infrastructure';

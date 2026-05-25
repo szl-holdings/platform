@@ -1,6 +1,6 @@
 import { useStandardQuery } from '@szl-holdings/api-client-react';
 import { apiFetch } from '@szl-holdings/shared-ui/api-fetch';
-import { Activity, AlertCircle, BarChart3, Clock, Cpu, Database, Globe, RefreshCw, Rss, Server, Shield, Target, Users } from 'lucide-react';
+import { Activity, AlertCircle, AlertTriangle, BarChart3, Clock, Cpu, Database, Globe, Radio, RefreshCw, Rss, Server, Shield, Target, Users } from 'lucide-react';
 import { useState } from 'react';
 import { ConnectorsTab } from './connectors-tab';
 import { ErrorsTab } from './errors-tab';
@@ -12,7 +12,7 @@ import { OverviewTab } from './overview-tab';
 import { SeedTab } from './seed-tab';
 import { BG, BORDER, MetricCard, StatusBadge, TEXT } from './shared';
 import { formatBytes, formatTime, formatUptime } from './utils';
-import type { AdminOverview, ConnectorSummary, FeedHealth, JobStats, RmmHealth, SeedValidation, SystemHealth, TabKey } from './types';
+import type { AdminOverview, CacheBusStatus, ConnectorSummary, FeedHealth, JobStats, RmmHealth, SeedValidation, SystemHealth, TabKey } from './types';
 
 const TABS: { key: TabKey; label: string; icon: any; getBadge?: (data: any) => number | undefined }[] = [
   { key: 'overview', label: 'Overview', icon: BarChart3 },
@@ -43,6 +43,7 @@ export default function OpsConsole() {
   const seedData = useStandardQuery<SeedValidation>({ queryKey: ['ops-seed', refreshKey], queryFn: () => apiFetch('/admin/seed/validate'), staleTime: 5 * 60 * 1000 });
   const feedHealth = useStandardQuery<FeedHealth>({ queryKey: ['ops-feed-health', refreshKey], queryFn: () => apiFetch('/admin/feed-health'), refetchInterval: 30000 });
   const rmmHealth = useStandardQuery<RmmHealth>({ queryKey: ['lyte-rmm-health', refreshKey], queryFn: () => apiFetch('/msp/rmm/health'), refetchInterval: 30000, enabled: activeTab === 'infrastructure' });
+  const cacheBus = useStandardQuery<CacheBusStatus>({ queryKey: ['ops-cache-bus', refreshKey], queryFn: () => apiFetch('/admin/cache-bus'), refetchInterval: 15000 });
 
   const ov = overview.data;
   const sh = systemHealth.data;
@@ -70,6 +71,30 @@ export default function OpsConsole() {
           <p style={{ fontSize: '11px', color: TEXT.tertiary, marginTop: '2px' }}>Operational visibility: service health, deployment info, queue status, connector sync, and diagnostics</p>
         </div>
         <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+          {cacheBus.data && (
+            <div
+              title={
+                cacheBus.data.connected
+                  ? `Cache sync bus connected on channel "${cacheBus.data.channel}"${cacheBus.data.lastConnectedAt ? ` since ${formatTime(cacheBus.data.lastConnectedAt)}` : ''}`
+                  : `Cache sync bus DISCONNECTED — feature-flag and runtime-config changes are falling back to per-worker TTL (30–60s). Last error: ${cacheBus.data.lastError ?? 'unknown'}. Reconnect attempts: ${cacheBus.data.reconnectAttempts}.`
+              }
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: '5px',
+                fontSize: '10px',
+                padding: '4px 8px',
+                borderRadius: '6px',
+                fontFamily: 'var(--font-mono)',
+                background: cacheBus.data.connected ? 'rgba(107,143,113,0.1)' : 'rgba(196,90,74,0.12)',
+                border: `1px solid ${cacheBus.data.connected ? 'rgba(107,143,113,0.3)' : 'rgba(196,90,74,0.35)'}`,
+                color: cacheBus.data.connected ? '#6b8f71' : '#c45a4a',
+              }}
+            >
+              <Radio style={{ width: 10, height: 10 }} />
+              Cache bus: {cacheBus.data.connected ? 'connected' : 'down'}
+            </div>
+          )}
           <StatusBadge status={overallStatus} />
           <button onClick={handleRefresh} style={{ display: 'flex', alignItems: 'center', gap: '5px', fontSize: '11px', padding: '5px 10px', borderRadius: '6px', background: BG.card, border: `1px solid ${BORDER.subtle}`, color: TEXT.secondary, cursor: 'pointer' }}>
             <RefreshCw style={{ width: 12, height: 12, ...(isRefreshing ? { animation: 'spin 1s linear infinite' } : {}) }} />
@@ -77,6 +102,41 @@ export default function OpsConsole() {
           </button>
         </div>
       </div>
+
+      {cacheBus.data && !cacheBus.data.connected && cacheBus.data.started && (
+        <div
+          style={{
+            display: 'flex',
+            alignItems: 'flex-start',
+            gap: '0.5rem',
+            padding: '8px 12px',
+            borderRadius: '8px',
+            background: 'rgba(196,90,74,0.08)',
+            border: '1px solid rgba(196,90,74,0.25)',
+            color: '#c45a4a',
+            fontSize: '11px',
+            marginBottom: '1rem',
+          }}
+        >
+          <AlertTriangle style={{ width: 14, height: 14, flexShrink: 0, marginTop: '1px' }} />
+          <div style={{ lineHeight: 1.5 }}>
+            <strong style={{ fontWeight: 600 }}>Cache sync bus is disconnected.</strong>{' '}
+            Feature-flag and runtime-config changes will not propagate between workers instantly — each worker will only pick up changes when its local TTL expires (30s for flags, 60s for runtime config). Kill-switches may take up to a minute to take effect cluster-wide.
+            {cacheBus.data.lastDisconnectedAt && (
+              <span style={{ color: TEXT.muted, marginLeft: '6px', fontFamily: 'var(--font-mono)', fontSize: '10px' }}>
+                Down since {formatTime(cacheBus.data.lastDisconnectedAt)} · {cacheBus.data.reconnectAttempts} reconnect attempt(s)
+                {cacheBus.data.lastReconnectAttemptAt ? ` · last tried ${formatTime(cacheBus.data.lastReconnectAttemptAt)}` : ''}
+                {cacheBus.data.nextReconnectAt ? ` · next retry ${formatTime(cacheBus.data.nextReconnectAt)}` : ''}
+              </span>
+            )}
+            {cacheBus.data.lastError && (
+              <div style={{ color: TEXT.muted, fontFamily: 'var(--font-mono)', fontSize: '10px', marginTop: '2px' }}>
+                Last error: {cacheBus.data.lastError}
+              </div>
+            )}
+          </div>
+        </div>
+      )}
 
       {ov && (
         <div style={{ fontSize: '10px', color: TEXT.muted, fontFamily: 'var(--font-mono)', marginBottom: '1.25rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
