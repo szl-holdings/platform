@@ -8,6 +8,7 @@ const b = (path: string) => `${BASE}${path}`;
 
 const NAV_ITEMS = [
   { label: 'Models', href: b('/hub/foundry') },
+  { label: 'DeepSeek-V4', href: b('/foundry/deepseek-v4') },
   { label: 'Datasets', href: b('/hub/foundry') },
   { label: 'Spaces', href: b('/hub/foundry') },
   { label: 'Docs', href: b('/') },

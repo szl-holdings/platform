@@ -978,4 +978,14 @@ router.use("/a11oy/stubs", lazyMount(() => import("./a11oy-stubs"), "a11oy-stubs
 // GET  /a11oy/strategy/runs/:runId
 router.use("/a11oy/strategy", lazyMount(() => import("./a11oy-strategy"), "a11oy-strategy"));
 
+// Foundry — DeepSeek-V4 surface (task #5223).
+// GET  /foundry/deepseek-v4
+// GET  /foundry/deepseek-v4/models
+// GET  /foundry/deepseek-v4/benchmarks?board=frontier|modes
+// POST /foundry/deepseek-v4/route
+// GET  /foundry/deepseek-v4/proofs
+// GET  /foundry/deepseek-v4/long-context/recipes
+// POST /foundry/deepseek-v4/long-context/ingest
+router.use(lazyMatch("/foundry/deepseek-v4", () => import("./foundry-deepseek-v4"), "foundry-deepseek-v4"));
+
 export default router;

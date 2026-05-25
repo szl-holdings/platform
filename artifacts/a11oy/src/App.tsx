@@ -65,6 +65,7 @@ const PsycheVoice = lazy(() => import('./pages/psyche/VoiceConsent').then(m => (
 const AlloyHubLanding = lazy(() => import('./pages/AlloyHubLanding').then(m => ({ default: m.AlloyHubLanding })));
 const AlloyFleet = lazy(() => import('./pages/AlloyFleet').then(m => ({ default: m.AlloyFleet })));
 const AlloyFoundry = lazy(() => import('./pages/AlloyFoundry').then(m => ({ default: m.AlloyFoundry })));
+const DeepSeekV4Dossier = lazy(() => import('./pages/foundry/DeepSeekV4Dossier'));
 const AlloyGovernance = lazy(() => import('./pages/AlloyGovernance').then(m => ({ default: m.AlloyGovernance })));
 const AlloyPricing = lazy(() => import('./pages/AlloyPricing').then(m => ({ default: m.AlloyPricing })));
 const LoopReasoner = lazy(() => import('./pages/LoopReasoner').then(m => ({ default: m.LoopReasoner })));
@@ -950,6 +951,9 @@ function AppInner() {
         </Route>
         <Route path={`${base}/hub/foundry`}>
           <Suspense fallback={<Loader />}><AlloyFoundry /></Suspense>
+        </Route>
+        <Route path={`${base}/foundry/deepseek-v4`}>
+          <Suspense fallback={<Loader />}><DeepSeekV4Dossier /></Suspense>
         </Route>
         <Route path={`${base}/hub/governance`}>
           <Suspense fallback={<Loader />}><AlloyGovernance /></Suspense>

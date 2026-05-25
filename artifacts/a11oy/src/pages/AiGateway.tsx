@@ -307,8 +307,28 @@ export function AiGateway() {
     { id: 'code-agent',  label: 'Code Agent' },
   ];
 
+  const dossierHref = `${(import.meta.env.BASE_URL ?? '/').replace(/\/$/, '')}/foundry/deepseek-v4`;
   return (
     <Layout>
+      <a
+        href={dossierHref}
+        style={{
+          display: 'block', marginBottom: '1rem', padding: '1rem 1.25rem',
+          background: 'linear-gradient(135deg, rgba(201,183,135,0.08), rgba(201,183,135,0.02))',
+          border: '1px solid rgba(201,183,135,0.4)', borderRadius: 8,
+          textDecoration: 'none', color: '#e5e7eb',
+        }}
+      >
+        <div style={{ fontSize: '0.625rem', fontFamily: 'ui-monospace,monospace', color: '#c9b787', letterSpacing: '0.08em', marginBottom: '0.25rem' }}>
+          GATEWAY · DEFAULT REASONING TIER
+        </div>
+        <div style={{ fontSize: '0.9375rem', fontWeight: 600 }}>
+          DeepSeek-V4-Pro / Flash routed under A11oy Covenant — 1M context, FP4+FP8, MIT
+        </div>
+        <div style={{ fontSize: '0.75rem', color: '#9ca3af', marginTop: '0.25rem' }}>
+          Reasoning lane defaults to DeepSeek-V4-Pro; fast lane to DeepSeek-V4-Flash. Open dossier →
+        </div>
+      </a>
       <PageHeader
         label="AI GATEWAY"
         title="Governed AI Gateway"

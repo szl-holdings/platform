@@ -95,6 +95,27 @@ interface VerifyResult {
   expectedMerkleRoot?: string;
 }
 
+const DEEPSEEK_DOSSIER_HREF = `${(import.meta.env.BASE_URL ?? '/').replace(/\/$/, '')}/foundry/deepseek-v4`;
+
+function DeepSeekLeadCallout() {
+  return (
+    <a
+      href={DEEPSEEK_DOSSIER_HREF}
+      className="block mb-4 rounded-lg border p-4"
+      style={{
+        background: 'linear-gradient(135deg, rgba(201,183,135,0.08), rgba(201,183,135,0.02))',
+        borderColor: 'rgba(201,183,135,0.4)', color: 'var(--color-a11oy-text)', textDecoration: 'none',
+      }}
+    >
+      <div className="text-[10px] font-mono mb-1" style={{ color: GOLD, letterSpacing: '0.08em' }}>AGENT BOM · RECOMMENDED PLANNER/EXECUTOR</div>
+      <div className="text-sm font-semibold">DeepSeek-V4-Pro (planner) + DeepSeek-V4-Flash (executor)</div>
+      <div className="text-xs mt-1" style={{ color: 'var(--color-a11oy-text-ghost)' }}>
+        1.6T / 49B activated + 284B / 13B. MIT-licensed. 1M context. Open dossier →
+      </div>
+    </a>
+  );
+}
+
 export function AgentBom() {
   const [selectedId, setSelectedId] = useState<string>(AGENT_BOMS[0].agentId);
   const selected = AGENT_BOMS.find(b => b.agentId === selectedId) ?? AGENT_BOMS[0];
@@ -141,6 +162,7 @@ export function AgentBom() {
         subtitle="Per-agent, continuously-updated AIBOM covering model snapshot fingerprints, tool manifest hashes, constitution version, prompt hashes, evaluation history, and welfare posture. Exportable as CycloneDX ML-BOM v1.7 JSON."
         status="LIVE"
       />
+      <DeepSeekLeadCallout />
 
       <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-8">
         <KpiCard label="AGENTS COVERED" value={String(AGENT_BOMS.length)} sub="with live BOM" accent={GOLD} />

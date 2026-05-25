@@ -130,6 +130,32 @@ function ModelsTab() {
 
   return (
     <div>
+      {/* Foundry lead: DeepSeek-V4 (task #5223) */}
+      <a
+        href={`${(import.meta.env.BASE_URL ?? '/').replace(/\/$/, '')}/foundry/deepseek-v4`}
+        style={{
+          display: 'block', marginBottom: '1.25rem', padding: '1.25rem',
+          background: 'linear-gradient(135deg, rgba(201,183,135,0.08), rgba(201,183,135,0.02))',
+          border: `1px solid ${T.accent}55`, borderRadius: 12,
+          textDecoration: 'none', color: T.text,
+        }}
+      >
+        <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.5rem' }}>
+          <span style={{ fontSize: '0.625rem', fontFamily: T.mono, color: T.accent, letterSpacing: '0.08em' }}>FOUNDRY · LEAD MODEL</span>
+          <span style={{ fontSize: '0.625rem', fontFamily: T.mono, padding: '0.125rem 0.375rem', borderRadius: 3, background: `${T.accent}26`, color: T.accent }}>LIVE</span>
+        </div>
+        <div style={{ fontSize: '1.125rem', fontWeight: 700, marginBottom: '0.25rem' }}>
+          DeepSeek-V4 — Million-Token Governed Intelligence
+        </div>
+        <div style={{ fontSize: '0.8125rem', color: T.textDim, lineHeight: 1.5 }}>
+          DeepSeek-V4-Pro (1.6T / 49B activated) and Flash (284B / 13B). 1M context, FP4 + FP8 mixed, MIT-licensed.
+          Hybrid Governance Attention, mHC residuals, three reasoning modes mapped to A11oy autonomy tiers.
+        </div>
+        <div style={{ fontSize: '0.6875rem', color: T.accent, fontFamily: T.mono, marginTop: '0.5rem' }}>
+          Open dossier · benchmarks · reasoning router · 1M-context doctrine →
+        </div>
+      </a>
+
       <div style={{ display: 'flex', gap: '0.75rem', marginBottom: '1rem' }}>
         <input
           type="search"

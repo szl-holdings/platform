@@ -165,6 +165,7 @@ const NAV_GROUPS = [
       { href: '/connectors',   label: 'Agent Gateway' },
       { href: '/twins',        label: 'Twin Foundry' },
       { href: '/model-foundry', label: 'Model Foundry' },
+      { href: '/foundry/deepseek-v4', label: 'DeepSeek-V4 · Lead' },
       { href: '/terminal',     label: 'Terminal' },
     ],
   },
