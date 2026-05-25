@@ -10,10 +10,11 @@ import {
   InMemorySpanExporter,
   SimpleSpanProcessor,
 } from '@opentelemetry/sdk-trace-base';
+import { NodeTracerProvider } from '@opentelemetry/sdk-trace-node';
 import { getEnv } from '@szl-holdings/env';
 
 let otelInitialized = false;
-let _provider: BasicTracerProvider | null = null;
+let _provider: BasicTracerProvider | NodeTracerProvider | null = null;
 let inMemoryExporter: InMemorySpanExporter | null = null;
 
 export interface OtelConfig {
@@ -281,7 +282,12 @@ export async function initializeOpenTelemetry(config: OtelConfig): Promise<void>
     'deployment.environment': _env.NODE_ENV,
   });
 
-  const tracerProvider = new BasicTracerProvider({ spanProcessors, resource });
+  // NodeTracerProvider extends BasicTracerProvider with Node-specific
+  // context propagation defaults. Required by task #5149 so that
+  // orchestration proof spans (and every other span emitted via the
+  // global tracer) are exported to a real OTLP collector when
+  // OTEL_EXPORTER_OTLP_ENDPOINT is set in production.
+  const tracerProvider = new NodeTracerProvider({ spanProcessors, resource });
   _provider = tracerProvider;
 
   api.trace.setGlobalTracerProvider(tracerProvider);

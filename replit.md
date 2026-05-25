@@ -134,6 +134,35 @@ The single source of truth for canonical metrics, vertical names, and slugs is `
 - Cloudflare for edge / DNS / WAF; Vercel and Replit for app hosting
 - GitHub for VCS; CI via GitHub Actions
 
+## Observability — OTLP Tracing
+
+The api-server exports OpenTelemetry spans (including the orchestration proof
+spans emitted by `services/orchestration-store.ts` via VSP `LambdaSpanEmitter`)
+to a real OTLP/HTTP backend when the `OTEL_EXPORTER_OTLP_ENDPOINT` env var is
+set. With the var unset (the default in tests and local dev), the SDK stays in
+no-op mode and no telemetry leaves the process.
+
+The boot path in `artifacts/api-server/src/app.ts` calls
+`initializeOpenTelemetry()` from `@szl-holdings/observability`, which wires a
+`NodeTracerProvider` + `BatchSpanProcessor` + `OTLPTraceExporter` (HTTP). The
+shutdown handler in `artifacts/api-server/src/index.ts` calls `shutdownTracer()`
+so buffered spans flush before the process exits.
+
+To point spans at a backend, set:
+
+- `OTEL_EXPORTER_OTLP_ENDPOINT` — base OTLP/HTTP URL. `/v1/traces` is appended
+  automatically. Examples:
+  - Honeycomb: `https://api.honeycomb.io` (also set
+    `OTEL_EXPORTER_OTLP_HEADERS=x-honeycomb-team=YOUR_API_KEY`)
+  - Grafana Tempo / local collector: `http://otel-collector:4318`
+  - Jaeger (with OTLP enabled): `http://jaeger:4318`
+- `OTEL_SERVICE_NAME` — overrides `service.name` (default `szl-api-server`)
+- `OTEL_CONSOLE_EXPORT=true` — also dump spans to stdout for local debugging
+
+The `live_otel_export_enabled` runtime flag gates the optional
+`bootstrapObservability()` path (used by detailed health/Sentry integration) —
+set it to `true` in the platform flags table to activate.
+
 ## External Dependencies
 - **Database:** PostgreSQL
 - **Authentication:** Replit Auth
