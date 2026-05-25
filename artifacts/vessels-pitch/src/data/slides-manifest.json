@@ -126,5 +126,85 @@
     "title": "Next steps",
     "description": "Pick three vessels — live in two weeks",
     "speakerNotes": "- Decision today: pilot scope and vessel selection.\n- Decision next week: compliance and IT sign-off, short-form MSA.\n- Decision in ninety days: fleet-wide rollout under the Helios pool."
+  },
+  {
+    "id": "22222222-2222-4222-8222-000000000017",
+    "position": 17,
+    "filepath": "src/pages/slides/ThesisTitle.tsx",
+    "title": "TH1 → TH8 thesis lineage",
+    "description": "SZL Holdings doctrine — full proof chain",
+    "speakerNotes": ""
+  },
+  {
+    "id": "22222222-2222-4222-8222-000000000018",
+    "position": 18,
+    "filepath": "src/pages/slides/ThesisTH1.tsx",
+    "title": "TH1 — Lambda-Gate Composability",
+    "description": "Composition of doctrine-locked systems is itself doctrine-locked",
+    "speakerNotes": ""
+  },
+  {
+    "id": "22222222-2222-4222-8222-000000000019",
+    "position": 19,
+    "filepath": "src/pages/slides/ThesisTH2.tsx",
+    "title": "TH2 — Replay-DOI Duality",
+    "description": "5× byte-identical replay anchored to Zenodo",
+    "speakerNotes": ""
+  },
+  {
+    "id": "22222222-2222-4222-8222-000000000020",
+    "position": 20,
+    "filepath": "src/pages/slides/ThesisTH3.tsx",
+    "title": "TH3 — ρ-Closure Completeness",
+    "description": "Eight-region closure — bisimulation up and down",
+    "speakerNotes": ""
+  },
+  {
+    "id": "22222222-2222-4222-8222-000000000021",
+    "position": 21,
+    "filepath": "src/pages/slides/ThesisTH4.tsx",
+    "title": "TH4 — Lambda-Category Composability",
+    "description": "Receipt category as a monoidal category",
+    "speakerNotes": ""
+  },
+  {
+    "id": "22222222-2222-4222-8222-000000000022",
+    "position": 22,
+    "filepath": "src/pages/slides/ThesisTH5.tsx",
+    "title": "TH5 — Chain Confluence",
+    "description": "Receipt chain as cofree comonad — unique normal form",
+    "speakerNotes": ""
+  },
+  {
+    "id": "22222222-2222-4222-8222-000000000023",
+    "position": 23,
+    "filepath": "src/pages/slides/ThesisTH6.tsx",
+    "title": "TH6 — Bekenstein via DPI",
+    "description": "Receipt-chain entropy bounded by registry size",
+    "speakerNotes": ""
+  },
+  {
+    "id": "22222222-2222-4222-8222-000000000024",
+    "position": 24,
+    "filepath": "src/pages/slides/ThesisTH7.tsx",
+    "title": "TH7 — Curry-Howard Receipt Calculus",
+    "description": "Machine-checked in Lean 4 — sorry count 0",
+    "speakerNotes": ""
+  },
+  {
+    "id": "22222222-2222-4222-8222-000000000025",
+    "position": 25,
+    "filepath": "src/pages/slides/ThesisTH8.tsx",
+    "title": "TH8 — Graded Lambda-Receipt Identity",
+    "description": "GLR proposal with Lean 4 skeleton (TH8a–c)",
+    "speakerNotes": ""
+  },
+  {
+    "id": "22222222-2222-4222-8222-000000000026",
+    "position": 26,
+    "filepath": "src/pages/slides/ThesisScorecard.tsx",
+    "title": "Lean discharge scorecard",
+    "description": "Live Fly High V6 audit counters from THESIS_LINEAGE.audit",
+    "speakerNotes": ""
   }
 ]

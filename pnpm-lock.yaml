@@ -1993,6 +1993,10 @@ importers:
         version: 3.9.0(react@19.1.0)
 
   artifacts/vessels-pitch:
+    dependencies:
+      '@szl-holdings/payload':
+        specifier: workspace:*
+        version: link:../../packages/payload
     devDependencies:
       '@replit/vite-plugin-cartographer':
         specifier: 'catalog:'
