@@ -57,6 +57,7 @@ const SCANNER_ID_TO_SIGNAL_TAG: Record<string, string> = {
   'scanner-vendor': 'vendor',
   'scanner-market': 'market',
   'scanner-mena': 'mena',
+  'scanner-cve': 'cve',
 };
 
 function signalTagFor(scannerId: string): string {

@@ -285,6 +285,12 @@ router.post('/scanners/:id/run', async (req, res) => {
   } else if (id === 'scanner-github') {
     const { runHuggingFaceScanner } = await import('../../jobs/helios-scanners');
     await runHuggingFaceScanner();
+  } else if (id === 'scanner-cve') {
+    const { runNvdCveScanner } = await import('../../jobs/helios-scanners');
+    await runNvdCveScanner();
+  } else if (id === 'scanner-vendor') {
+    const { runVendorRssScanner } = await import('../../jobs/helios-scanners');
+    await runVendorRssScanner();
   } else {
     touchScannerRun(id);
   }
