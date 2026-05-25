@@ -234,6 +234,42 @@ def test_sse_events_endpoint_sends_hello() -> None:
     assert "amaru.scheduler" in frame
 
 
+def test_solar_kernel_verdict_thresholds() -> None:
+    # Real (non-stub) solar kernel: will = clamp(intent*agency - friction, 0, 1).
+    from amaru.chakras.solar import kernel as solar_kernel
+
+    assert solar_kernel.STUBBED is False
+    high = solar_kernel.evaluate({"signals": {"intent": 0.9, "agency": 0.9, "friction": 0.0}})
+    mid = solar_kernel.evaluate({"signals": {"intent": 0.5, "agency": 0.5, "friction": 0.0}})
+    low = solar_kernel.evaluate({"signals": {"intent": 0.3, "agency": 0.3, "friction": 0.3}})
+    assert high["verdict"] == "act" and high["will"] >= 0.5
+    assert mid["verdict"] == "defer" and 0.2 <= mid["will"] < 0.5
+    assert low["verdict"] == "block" and low["will"] < 0.2
+
+
+def test_third_eye_kernel_verdict_thresholds() -> None:
+    # Real (non-stub) third-eye kernel: insight = clamp(pattern*(1-uncertainty), 0, 1).
+    from amaru.chakras.third_eye import kernel as te_kernel
+
+    assert te_kernel.STUBBED is False
+    foresee = te_kernel.evaluate({"signals": {"pattern_strength": 0.9, "uncertainty": 0.1}})
+    peek = te_kernel.evaluate({"signals": {"pattern_strength": 0.5, "uncertainty": 0.4}})
+    blind = te_kernel.evaluate({"signals": {"pattern_strength": 0.2, "uncertainty": 0.5}})
+    assert foresee["verdict"] == "foresee" and foresee["insight"] >= 0.5
+    assert peek["verdict"] == "peek" and 0.25 <= peek["insight"] < 0.5
+    assert blind["verdict"] == "blind" and blind["insight"] < 0.25
+
+
+def test_solar_and_third_eye_absent_from_state_stubbed_array() -> None:
+    # Regression guard for the "Done looks like" criterion: /healthz.stubbed
+    # must never re-list solar or third_eye.
+    client = _client()
+    body = client.get("/healthz").json()
+    assert "solar" not in body["stubbed"]
+    assert "third_eye" not in body["stubbed"]
+    assert body["stubbed"] == []
+
+
 def test_scheduler_wiring_is_ouroboros() -> None:
     client = _client()
     r = client.get("/scheduler/wiring")
