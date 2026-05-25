@@ -272,9 +272,13 @@ export default function BrainPage() {
 
   useEffect(() => {
     void refresh();
-    const id = setInterval(refresh, 2000);
+    // Poll every 2s normally; once the SSE stream is live the same poll
+    // becomes a low-rate fallback (15s) for the tripwire/bus-counter
+    // snapshots that the bus stream doesn't push.
+    const interval = sseOpen ? 15_000 : 2_000;
+    const id = setInterval(refresh, interval);
     return () => clearInterval(id);
-  }, [refresh]);
+  }, [refresh, sseOpen]);
 
   // Subscribe to Amaru's SSE stream so chakra/tripwire state updates push,
   // not poll. /amaru/events emits exact topic names: amaru.chakra (per
