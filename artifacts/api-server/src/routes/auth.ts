@@ -9,7 +9,7 @@ import { logActivity } from "../lib/activity-logger";
 import { logger } from "../lib/logger";
 import { createAuthService } from "@szl-holdings/auth";
 import { issueWsTicket } from "../lib/websocket.js";
-import { clearSessionCookie, getSessionToken, getSessionUser, getOrigin } from "../lib/auth";
+import { clearSessionCookie, getSessionToken, getSessionUser, getOrigin, setSessionCookie } from "../lib/auth";
 import {
   createSessionWithRefresh,
   rotateRefreshToken,
@@ -288,6 +288,124 @@ router.post("/auth/login", loginLimiter, validateBody(loginBodySchema), async (r
 
 router.get("/auth/providers", async (_req, res) => {
   sendSuccess(res, { providers: authService.getProviders() });
+});
+
+// ---------------------------------------------------------------------------
+// Demo investor session — Task #5145
+//
+// Drops an anonymous visitor into a read-only "executive viewer" session so
+// deep dashboard routes (e.g. /dashboard, /fleet, /trading-desk inside the
+// vessels command shell) render with live data on first paint instead of
+// throwing the visitor at a sign-in wall.
+//
+// The seeded user (`replit_id = demo-investor`) is created on first hit and
+// reused thereafter. It carries the `viewer` role (read-only) plus the
+// `executive_viewer` platform role; together these satisfy the standard
+// `authMiddleware()` / `requireRole()` gates on the read-only product APIs
+// without exposing any write surface.
+//
+// Gated by ALLOW_DEMO_SESSION (default on in non-production). Set the env
+// var to `false` in production to disable. The endpoint sets the session
+// cookie AND returns the bearer token pair so both cookie- and Bearer-based
+// clients work transparently.
+// ---------------------------------------------------------------------------
+
+function isDemoSessionEnabled(): boolean {
+  const raw = process.env.ALLOW_DEMO_SESSION;
+  if (raw === undefined) return process.env.NODE_ENV !== "production";
+  return raw.toLowerCase() === "true" || raw === "1";
+}
+
+const DEMO_USER_REPLIT_ID = "demo-investor";
+const DEMO_USER_EMAIL = "investor-demo@szlholdings.local";
+const DEMO_USER_DISPLAY_NAME = "Investor Demo";
+const DEMO_ROLE_NAME: RoleName = "viewer";
+
+router.post("/auth/demo-session", validateBody(bodyShape({})), async (req, res) => {
+  try {
+    if (!isDemoSessionEnabled()) {
+      sendError(res, "Demo sessions are disabled", 403, "DEMO_DISABLED");
+      return;
+    }
+
+    let [user] = await db
+      .select()
+      .from(usersTable)
+      .where(eq(usersTable.replitId, DEMO_USER_REPLIT_ID));
+
+    if (!user) {
+      [user] = await db
+        .insert(usersTable)
+        .values({
+          replitId: DEMO_USER_REPLIT_ID,
+          email: DEMO_USER_EMAIL,
+          displayName: DEMO_USER_DISPLAY_NAME,
+          platformRole: "executive_viewer",
+          isActive: true,
+        })
+        .returning();
+    } else if (!user.isActive || user.platformRole !== "executive_viewer") {
+      [user] = await db
+        .update(usersTable)
+        .set({ isActive: true, platformRole: "executive_viewer" })
+        .where(eq(usersTable.id, user.id))
+        .returning();
+    }
+
+    let [viewerRole] = await db
+      .select()
+      .from(rolesTable)
+      .where(eq(rolesTable.name, DEMO_ROLE_NAME));
+    if (!viewerRole) {
+      [viewerRole] = await db
+        .insert(rolesTable)
+        .values({
+          name: DEMO_ROLE_NAME,
+          description: "External viewer — read-only access to shared dashboards",
+        })
+        .returning();
+    }
+
+    const [existingLink] = await db
+      .select()
+      .from(userRolesTable)
+      .where(
+        and(eq(userRolesTable.userId, user.id), eq(userRolesTable.roleId, viewerRole.id)),
+      )
+      .limit(1);
+    if (!existingLink) {
+      await db.insert(userRolesTable).values({ userId: user.id, roleId: viewerRole.id });
+    }
+
+    const created = await createSessionWithRefresh({
+      userId: user.id,
+      ipAddress: req.ip ?? null,
+      userAgent: req.headers["user-agent"] ?? null,
+      reason: "demo_session",
+    });
+
+    // Drop the session cookie so subsequent cookie-based API calls (which
+    // useAuth's /api/auth/user check relies on) are immediately authenticated.
+    setSessionCookie(res, created.token);
+
+    sendCreated(res, {
+      token: created.token,
+      refreshToken: created.refreshToken,
+      expiresAt: created.expiresAt.toISOString(),
+      refreshTokenExpiresAt: created.refreshTokenExpiresAt.toISOString(),
+      user: {
+        id: user.id,
+        displayName: user.displayName,
+        email: user.email,
+        roles: [DEMO_ROLE_NAME],
+        platformRole: "executive_viewer",
+        readOnly: true,
+      },
+    });
+  } catch (err) {
+    req.log?.error({ err }, "Demo session creation failed");
+    handleRouteError(res, err, "Demo session creation failed");
+  }
 });
 
 router.get("/auth/me", authMiddleware(), async (req, res) => {

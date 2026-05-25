@@ -114,6 +114,12 @@ const EXEMPT_PATHS = new Set([
   '/api/auth/magic-link/verify',
   '/api/auth/lockout-status',
   '/api/auth/risk-assessment',
+  // Investor demo session seed — anonymous POST that pre-seats a read-only
+  // executive_viewer session so deep app routes don't hit a sign-in wall.
+  // Gated server-side by ALLOW_DEMO_SESSION (defaults on in non-production).
+  // No CSRF token can exist before the session does; no per-user state of a
+  // real operator is mutated (the demo user is a dedicated fixed identity).
+  '/api/auth/demo-session',
 ]);
 
 const GRAPHQL_PATHS = ['/api/graphql', '/graphql'];

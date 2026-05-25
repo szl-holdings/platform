@@ -21,6 +21,7 @@ import {
 import { CommandQueue, ConflictResolver, IndexedDBAdapter } from '@szl-holdings/offline-engine';
 import { PrismBusProvider } from '@szl-holdings/prism-bus';
 import { useAuth } from '@szl-holdings/replit-auth-web';
+import { setAuthTokens, type AuthTokens } from '@szl-holdings/shared-ui/api-fetch';
 import { AnalyticsProvider } from '@szl-holdings/shared-ui/analytics-provider';
 import { AppModeBanner, AppModeProvider } from '@szl-holdings/shared-ui/app-mode-banner';
 import {
@@ -1423,6 +1424,111 @@ function VesselsDashboard({
   );
 }
 
+// ---------------------------------------------------------------------------
+// Demo investor seed — Task #5145
+//
+// When an investor link lands the visitor on any vessels path with `?demo=1`
+// (or directly on `/demo-session`), we POST to the api-server's
+// `/auth/demo-session` endpoint to mint a read-only executive_viewer session.
+// Tokens are stashed via `setAuthTokens` (so the shared apiFetch picks them
+// up as a Bearer token) and the session cookie is set server-side (so the
+// cookie-based `useAuth` check returns the demo user).
+//
+// On success we strip the `?demo=1` query so refreshes don't loop, and we
+// redirect to `/dashboard` if the visitor arrived on a non-dashboard path.
+// Failure is a no-op — the visitor still sees the normal anonymous shell.
+// ---------------------------------------------------------------------------
+const VESSELS_DEMO_SEEDED_KEY = 'vessels:demo-session-seeded';
+
+function useDemoSessionSeed(): { seeding: boolean; seeded: boolean } {
+  const [, navigate] = useLocation();
+  const [seeding, setSeeding] = useState(false);
+  const [seeded, setSeeded] = useState(false);
+
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    const url = new URL(window.location.href);
+    const wantsDemo =
+      url.searchParams.get('demo') === '1' || url.pathname.endsWith('/demo-session');
+    if (!wantsDemo) return;
+
+    // Reuse a session minted in the same tab.
+    let alreadySeeded = false;
+    try {
+      alreadySeeded = window.sessionStorage.getItem(VESSELS_DEMO_SEEDED_KEY) === '1';
+    } catch {
+      /* sessionStorage unavailable — proceed with a fresh seed */
+    }
+
+    let cancelled = false;
+    const goToDashboard = () => {
+      const base = (import.meta.env.BASE_URL ?? '/').replace(/\/$/, '');
+      url.searchParams.delete('demo');
+      const cleanedQuery = url.searchParams.toString();
+      const isDashboardPath =
+        url.pathname.startsWith(`${base}/dashboard`) ||
+        url.pathname === `${base}/dashboard`;
+      const target = isDashboardPath
+        ? `${url.pathname}${cleanedQuery ? `?${cleanedQuery}` : ''}${url.hash}`
+        : `${base}/dashboard`;
+      window.history.replaceState({}, '', target);
+      // Drop the wouter-relative path so the SPA router renders /dashboard
+      navigate('/dashboard');
+    };
+
+    if (alreadySeeded) {
+      setSeeded(true);
+      goToDashboard();
+      return;
+    }
+
+    setSeeding(true);
+    fetch('/api/auth/demo-session', {
+      method: 'POST',
+      credentials: 'include',
+      headers: { 'Content-Type': 'application/json' },
+      body: '{}',
+    })
+      .then(async (res) => {
+        if (!res.ok) throw new Error(`demo-session failed: ${res.status}`);
+        const body = (await res.json()) as { data?: AuthTokens } | AuthTokens;
+        const tokens = (body as { data?: AuthTokens }).data ?? (body as AuthTokens);
+        if (tokens?.token && tokens.refreshToken) {
+          setAuthTokens(tokens);
+        }
+        try {
+          window.sessionStorage.setItem(VESSELS_DEMO_SEEDED_KEY, '1');
+        } catch {
+          /* ignore */
+        }
+        if (cancelled) return;
+        setSeeded(true);
+        goToDashboard();
+      })
+      .catch(() => {
+        if (cancelled) return;
+        // Strip ?demo=1 so failed attempts don't loop on refresh.
+        url.searchParams.delete('demo');
+        const cleanedQuery = url.searchParams.toString();
+        window.history.replaceState(
+          {},
+          '',
+          `${url.pathname}${cleanedQuery ? `?${cleanedQuery}` : ''}${url.hash}`,
+        );
+      })
+      .finally(() => {
+        if (!cancelled) setSeeding(false);
+      });
+
+    return () => {
+      cancelled = true;
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  return { seeding, seeded };
+}
+
 function AppContent({
   cmdOpen,
   setCmdOpen,
@@ -1432,6 +1538,7 @@ function AppContent({
 }) {
   const { user } = useAuth();
   const [location] = useLocation();
+  const { seeding: demoSeeding } = useDemoSessionSeed();
 
   useEffect(() => {
     if (user) {
