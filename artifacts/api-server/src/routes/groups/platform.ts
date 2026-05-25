@@ -106,6 +106,12 @@ export function register(router: IRouter): void {
   router.use('/audit-chain', _readLimiter);
   router.use('/audit-chain', _writeLimiter);
   router.use(lazyMatch('/audit-chain', () => import('../audit-chain'), 'audit-chain'));
+  // Hybrid attestation surfaces (backfill, coverage, quarantine, per-event verify).
+  // Mounted as a sibling lazy module so it shares /audit-chain prefix without
+  // forcing the legacy router to evaluate first.
+  router.use(
+    lazyMatch('/audit-chain', () => import('../audit-chain-attestations'), 'audit-chain-attestations'),
+  );
 
   // Identity Registry — operator surface for platform DID lifecycle and key custody.
   // Owns /identity-registry/dids, /identity-registry/key-custody, /identity-registry/audit-summary.

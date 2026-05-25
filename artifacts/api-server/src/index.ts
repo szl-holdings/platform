@@ -50,6 +50,10 @@ import { startOtIcsStreamFeed } from './jobs/ot-ics-stream-feed';
 import { startRosieEvolutionLoop } from './jobs/rosie-evolution-loop';
 import { startHeliosScanners } from './jobs/helios-scanners';
 import { startAgiForecastIngest, stopAgiForecastIngest } from './jobs/agi-forecast-ingest';
+import {
+  ensureProofChainBackfillSchedule,
+  startAttestationCatchUpLoop,
+} from './services/audit-attestation-scheduler';
 import { isSeedDataAllowed, resolveRuntimeMode } from '@szl-holdings/platform-registry';
 import { shutdownTracer } from '@szl-holdings/observability';
 import { otelReady, registerGraphQLHandler } from './app.js';
@@ -548,6 +552,24 @@ export async function bootstrap(
       // IngestFailure values and never block sibling ingestors or the
       // next scheduled run. Disable with AGI_FORECAST_INGEST_ENABLED=false.
       startAgiForecastIngest();
+
+      // Proof-chain hybrid attestation catch-up + Temporal schedule (#5228).
+      // The in-process loop sweeps any audit_chain_events written by a still-
+      // legacy code path and appends a parallel hybrid attestation within an
+      // hour. When Temporal is configured we ALSO register a durable schedule
+      // for the resumable backfill workflow; otherwise the in-process loop
+      // is the sole catch-up engine.
+      startAttestationCatchUpLoop();
+      void ensureProofChainBackfillSchedule().then((res) => {
+        if (res.ok) {
+          logger.info(res, '[proof-chain-backfill] Temporal schedule ensured');
+        } else {
+          logger.info(
+            { reason: res.reason },
+            '[proof-chain-backfill] Temporal not configured — relying on in-process catch-up loop',
+          );
+        }
+      });
 
       // Frontier Ingestion Engine — continuous pulls from Anthropic/OpenAI/
       // Google/NVIDIA/HuggingFace. Default OFF so we never make surprise

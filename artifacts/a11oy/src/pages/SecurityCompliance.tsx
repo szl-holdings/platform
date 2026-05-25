@@ -139,11 +139,35 @@ export function SecurityCompliance() {
   const [verifyResult, setVerifyResult] = useState<Record<string, unknown> | null>(null);
   const [verifyInput, setVerifyInput] = useState('');
   const [verifyLoading, setVerifyLoading] = useState(false);
+  const [coverage, setCoverage] = useState<{
+    totalEvents: number;
+    totalAttested: number;
+    totalLegacySigned: number;
+    totalQuarantined: number;
+    coveragePct: number;
+    updatedAt?: string;
+  } | null>(null);
+  const [quarantineRows, setQuarantineRows] = useState<Array<{
+    id: number;
+    eventId: number;
+    orgId: number | null;
+    failureReason: string;
+    decision: string;
+    quarantinedAt: string;
+  }>>([]);
 
   useEffect(() => {
     fetch(`${API_BASE}/pqc/status`)
       .then((r) => (r.ok ? r.json() : null))
       .then((data) => { if (data?.data) setPqcStatus(data.data); })
+      .catch(() => {});
+    fetch(`${API_BASE}/audit-chain/attestation/coverage`)
+      .then((r) => (r.ok ? r.json() : null))
+      .then((data) => { if (data?.data) setCoverage(data.data); })
+      .catch(() => {});
+    fetch(`${API_BASE}/audit-chain/attestation/quarantine?decision=pending&limit=10`)
+      .then((r) => (r.ok ? r.json() : null))
+      .then((data) => { if (data?.data?.rows) setQuarantineRows(data.data.rows); })
       .catch(() => {});
   }, []);
 
@@ -184,6 +208,78 @@ export function SecurityCompliance() {
         <KpiCard label="CVE · CRITICAL" value="≤ 24h" sub="patch SLA" accent={T.accent} />
         <KpiCard label="SIGNING" value={pqcStatus?.signingMode?.toUpperCase() ?? 'HYBRID-PQC'} sub="Ed25519 + ML-DSA-65" accent={T.accent} />
       </div>
+
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-6">
+        <KpiCard
+          label="HYBRID COVERAGE"
+          value={coverage ? `${coverage.coveragePct.toFixed(1)}%` : '—'}
+          sub={coverage ? `${coverage.totalAttested.toLocaleString()} attested / ${coverage.totalEvents.toLocaleString()} events` : 'loading'}
+          accent={T.accent}
+        />
+        <KpiCard
+          label="LEGACY HYBRID"
+          value={coverage ? coverage.totalLegacySigned.toLocaleString() : '—'}
+          sub="events natively hybrid-signed"
+          accent={T.accent}
+        />
+        <KpiCard
+          label="BACKFILLED"
+          value={coverage ? coverage.totalAttested.toLocaleString() : '—'}
+          sub="parallel attestation appended"
+          accent={T.accent}
+        />
+        <KpiCard
+          label="QUARANTINE"
+          value={coverage ? coverage.totalQuarantined.toLocaleString() : '—'}
+          sub={quarantineRows.length > 0 ? `${quarantineRows.length} pending review` : 'awaiting operator review'}
+          accent={T.accent}
+        />
+      </div>
+
+      {quarantineRows.length > 0 && (
+        <>
+          <SectionTitle>Attestation Quarantine</SectionTitle>
+          <Card className="mb-6">
+            <div style={{ padding: '1rem 1.5rem', borderBottom: `1px solid ${T.border}` }}>
+              <p style={{ fontFamily: T.serif, fontSize: '0.875rem', color: T.textDim, margin: 0 }}>
+                Historical audit_chain_events rows that failed the integrity guard during hybrid backfill.
+                Each row needs an admin decision: <strong>accepted</strong> (with justification),
+                <strong> known_bad</strong>, or <strong>escalated</strong>. Quarantined rows are never silently attested.
+              </p>
+            </div>
+            <div style={{ overflowX: 'auto' }}>
+              <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+                <thead>
+                  <tr style={{ borderBottom: `1px solid ${T.border}` }}>
+                    {['Event', 'Org', 'Failure', 'Decision', 'Quarantined'].map((h) => (
+                      <th key={h} style={{
+                        textAlign: 'left', padding: '0.75rem 1rem',
+                        fontFamily: T.mono, fontSize: '0.625rem',
+                        color: T.textMuted, textTransform: 'uppercase', letterSpacing: '0.14em',
+                      }}>{h}</th>
+                    ))}
+                  </tr>
+                </thead>
+                <tbody>
+                  {quarantineRows.map((r) => (
+                    <tr key={r.id} style={{ borderBottom: `1px solid ${T.border}` }}>
+                      <td style={{ padding: '0.75rem 1rem', fontSize: '0.8125rem', color: T.text, fontFamily: T.mono }}>#{r.eventId}</td>
+                      <td style={{ padding: '0.75rem 1rem', fontSize: '0.8125rem', color: T.textDim }}>{r.orgId ?? 'platform'}</td>
+                      <td style={{ padding: '0.75rem 1rem', fontSize: '0.8125rem', color: T.textDim, fontFamily: T.mono }}>{r.failureReason}</td>
+                      <td style={{ padding: '0.75rem 1rem' }}>
+                        <StatusBadge status={r.decision === 'pending' ? 'warn' : 'info'} label={r.decision.toUpperCase()} />
+                      </td>
+                      <td style={{ padding: '0.75rem 1rem', fontSize: '0.75rem', color: T.textMuted, fontFamily: T.mono }}>
+                        {new Date(r.quarantinedAt).toISOString().slice(0, 19).replace('T', ' ')}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </Card>
+        </>
+      )}
 
       <Card className="mb-6">
         <div style={{ padding: '1.5rem' }}>

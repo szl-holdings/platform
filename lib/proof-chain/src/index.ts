@@ -267,3 +267,21 @@ export {
   verifyProofEntry,
   canonicalStringify,
 } from './identity-signing.js';
+
+export {
+  ATTESTATION_SCHEME_VERSION,
+  buildAttestationPayload,
+  getAttestationCoverage,
+  getAttestationForEvent,
+  runAttestationBackfill,
+  runAttestationCatchUp,
+  runIntegrityGuard,
+} from './attestation-backfill.js';
+export type {
+  AttestationLookupResult,
+  AttestationSigner,
+  AttestationSignerResult,
+  BackfillOptions,
+  BackfillSummary,
+  CoverageStats,
+} from './attestation-backfill.js';

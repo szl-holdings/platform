@@ -145,6 +145,7 @@ export * from './prism_counsel_review';
 export * from './prism_counsel_s31';
 export * from './projects';
 export * from './proof_chain';
+export * from './proof_chain_attestations';
 export * from './pulse';
 export * from './push_infra';
 export * from './push_tokens';
