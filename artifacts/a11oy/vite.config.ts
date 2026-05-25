@@ -50,6 +50,42 @@ export default defineConfig({
     sourcemap: 'hidden',
     emptyOutDir: true,
     cssCodeSplit: true,
+    rollupOptions: {
+      output: {
+        manualChunks(id): string | undefined {
+          if (id.includes('node_modules')) {
+            // Isolate map libraries (leaflet + maplibre-gl) so the chunk is
+            // only fetched on the imperium-map / geospatial pages.
+            if (
+              id.includes('maplibre-gl') ||
+              id.includes('/leaflet/') ||
+              id.includes('react-leaflet') ||
+              id.includes('/earcut/') ||
+              id.includes('/geojson-vt/') ||
+              id.includes('/vt-pbf/') ||
+              id.includes('/pbf/') ||
+              id.includes('/supercluster/') ||
+              id.includes('/kdbush/') ||
+              id.includes('/quickselect/') ||
+              id.includes('/potpack/') ||
+              id.includes('/tinyqueue/')
+            ) {
+              return 'vendor-map';
+            }
+            if (id.includes('/recharts/')) return 'vendor-recharts';
+            if (id.includes('/victory-vendor/')) return 'vendor-recharts';
+            if (id.includes('/d3-')) return 'vendor-d3';
+            if (id.includes('framer-motion')) return 'vendor-motion';
+            if (id.includes('@radix-ui')) return 'vendor-radix';
+            if (id.includes('@tanstack')) return 'vendor-tanstack';
+            if (id.includes('lucide-react')) return 'vendor-icons';
+            if (id.includes('react-dom')) return 'vendor-react';
+            if (id.includes('react/')) return 'vendor-react';
+          }
+          return undefined;
+        },
+      },
+    },
   },
   server: {
     port: vitePort || undefined,

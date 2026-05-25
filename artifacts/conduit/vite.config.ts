@@ -47,7 +47,9 @@ export default defineConfig({
       output: {
         manualChunks(id): string | undefined {
           if (id.includes('node_modules')) {
-            if (id.includes('recharts') || id.includes('d3-')) return 'vendor-charts';
+            if (id.includes('/recharts/')) return 'vendor-recharts';
+            if (id.includes('/victory-vendor/')) return 'vendor-recharts';
+            if (id.includes('/d3-')) return 'vendor-d3';
             if (id.includes('framer-motion')) return 'vendor-motion';
             if (id.includes('@radix-ui')) return 'vendor-radix';
             if (id.includes('@tanstack')) return 'vendor-tanstack';

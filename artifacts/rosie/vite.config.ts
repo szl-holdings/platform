@@ -57,6 +57,26 @@ export default defineConfig({
   build: {
     outDir: path.resolve(import.meta.dirname, "dist/public"),
     emptyOutDir: true,
+    sourcemap: "hidden",
+    cssCodeSplit: true,
+    rollupOptions: {
+      output: {
+        manualChunks(id): string | undefined {
+          if (id.includes("node_modules")) {
+            if (id.includes("/recharts/")) return "vendor-recharts";
+            if (id.includes("/victory-vendor/")) return "vendor-recharts";
+            if (id.includes("/d3-")) return "vendor-d3";
+            if (id.includes("framer-motion")) return "vendor-motion";
+            if (id.includes("@radix-ui")) return "vendor-radix";
+            if (id.includes("@tanstack")) return "vendor-tanstack";
+            if (id.includes("lucide-react")) return "vendor-icons";
+            if (id.includes("react-dom")) return "vendor-react";
+            if (id.includes("react/")) return "vendor-react";
+          }
+          return undefined;
+        },
+      },
+    },
   },
   server: {
     port,
