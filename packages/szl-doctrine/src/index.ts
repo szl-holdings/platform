@@ -402,18 +402,16 @@ export interface SloStatus {
 /**
  * Org-posture counters sourced from the V8 GitHub inventory snapshot
  * (`.local/payload-v8/06_github/` and `09_gaps_upgrades/inventory.json`).
- * Repo-count and branch-protection figures are derived from
- * `@szl-holdings/payload` PANEL_FACTS so the chips stay in lockstep with the
- * canonical inventory — never re-transcribe these literals.
- * Cycle-specific deltas (Dependabot-merged-this-cycle) remain inline because
- * they are not exposed by PANEL_FACTS yet.
+ * Every figure here is derived from `@szl-holdings/payload` PANEL_FACTS so
+ * the chips stay in lockstep with the canonical inventory — never
+ * re-transcribe these literals.
  */
 export const SLO_STATUS: SloStatus = {
   ciFailingText: `${PANEL_FACTS_PAYLOAD.ciFailingText} failing across ${PANEL_FACTS_PAYLOAD.reposCountText} repos`,
   scorecardText: `Avg ${ORG_SUMMARY_PAYLOAD.scorecardAvg.toFixed(2)} · per-repo published`,
   branchProtectionText: `${PANEL_FACTS_PAYLOAD.branchProtectionStrictText} repos strict; ${ORG_SUMMARY_PAYLOAD.branchProtectionWeak} awaiting 2nd reviewer`,
-  dependabotText: `${PANEL_FACTS_PAYLOAD.dependabotHighCritText} high / critical · 12 merged this cycle`,
-  codeScanningText: "0 open critical alerts",
+  dependabotText: `${PANEL_FACTS_PAYLOAD.dependabotHighCritText} high / critical · ${PANEL_FACTS_PAYLOAD.dependabotMergedThisCycleText}`,
+  codeScanningText: PANEL_FACTS_PAYLOAD.openCriticalCodeScanningAlertsText,
   orgRepoCountText: `${PANEL_FACTS_PAYLOAD.reposCountText} repos in szl-holdings`,
 };
 

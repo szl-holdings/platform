@@ -73,7 +73,22 @@ const inventory = inventoryRaw as unknown as {
         pushed_at: string;
       };
       tags?: ReadonlyArray<{ name: string; sha: string }>;
-      recent_commits?: ReadonlyArray<{ sha: string; date: string }>;
+      recent_commits?: ReadonlyArray<{
+        sha: string;
+        date: string;
+        author?: string;
+        message?: string;
+      }>;
+      code_scanning_alerts?: {
+        count: number;
+        alerts?: ReadonlyArray<{
+          number: number;
+          rule_id: string;
+          rule_severity: string;
+          rule_description: string;
+          state: string;
+        }>;
+      };
     }
   >;
 };
@@ -152,6 +167,45 @@ export const ORG_SUMMARY: OrgSummary = Object.freeze({
   branchProtectionWeak: master.org_summary.branch_protection_weak,
   hygieneGaps: Object.freeze([...master.org_summary.hygiene_gaps]),
 });
+
+// ---------------------------------------------------------------------------
+// Org-wide derivations from the raw inventory snapshot. These aggregate fields
+// are not present in master.org_summary, so they are computed here directly
+// from inventory.repos[*] — the integrity-locked raw bundle remains the single
+// source of truth.
+// ---------------------------------------------------------------------------
+
+const inventoryRepos = Object.values(inventory.repos);
+
+/**
+ * Count of merged-and-landed Dependabot commits visible in the inventory
+ * snapshot (the recent_commits window represents the "current cycle" captured
+ * by the bundle). Authors include both "dependabot[bot]" (git commits) and
+ * "app/dependabot" (GitHub Apps) — both are matched case-insensitively.
+ */
+export const DEPENDABOT_MERGED_THIS_CYCLE_COUNT: number = inventoryRepos.reduce(
+  (n, r) =>
+    n +
+    (r.recent_commits ?? []).filter((c) =>
+      (c.author ?? "").toLowerCase().includes("dependabot"),
+    ).length,
+  0,
+);
+
+/**
+ * Count of open code-scanning alerts whose rule severity is "critical",
+ * summed across every repo in the org inventory. master.org_summary exposes
+ * the total open code-scanning count but not the critical-only subset.
+ */
+export const OPEN_CRITICAL_CODE_SCANNING_ALERTS_COUNT: number =
+  inventoryRepos.reduce(
+    (n, r) =>
+      n +
+      (r.code_scanning_alerts?.alerts ?? []).filter(
+        (a) => a.rule_severity.toLowerCase() === "critical",
+      ).length,
+    0,
+  );
 
 // ---------------------------------------------------------------------------
 // Per-repo facts (derived from github_inventory.json). The inventory truncates
@@ -339,7 +393,9 @@ export const PANEL_FACTS = Object.freeze({
   branchProtectionStrictText: `${ORG_SUMMARY.branchProtectionCompliant} / ${ORG_SUMMARY.reposTotal}`,
   dependabotHighCritText: `${ORG_SUMMARY.openDependabotHighCritical}`,
   dependabotHighCritPairText: `${ORG_SUMMARY.openDependabotHighCritical} / ${ORG_SUMMARY.openDependabotHighCritical}`,
+  dependabotMergedThisCycleText: `${DEPENDABOT_MERGED_THIS_CYCLE_COUNT} merged this cycle`,
   codeScanningOrgWideText: `${ORG_SUMMARY.openAlertsCodeScanning} (org-wide)`,
+  openCriticalCodeScanningAlertsText: `${OPEN_CRITICAL_CODE_SCANNING_ALERTS_COUNT} open critical alerts`,
 
   // DOI
   doiLedgerEvidenceText: `${DOI_LEDGER_COUNT}-DOI evidence chain`,

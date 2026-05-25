@@ -29,6 +29,8 @@ import { runInNewContext } from "node:vm";
 import { describe, expect, it } from "vitest";
 
 import {
+  DEPENDABOT_MERGED_THIS_CYCLE_COUNT,
+  OPEN_CRITICAL_CODE_SCANNING_ALERTS_COUNT,
   ARXIV_SHA_SHORT,
   DOCTRINE,
   DOI_LEDGER_COUNT,
@@ -224,7 +226,9 @@ describe("layer 2 — every PANEL_FACTS string equals its formatter-of-exports",
     branchProtectionStrictText: `${ORG_SUMMARY.branchProtectionCompliant} / ${ORG_SUMMARY.reposTotal}`,
     dependabotHighCritText: `${ORG_SUMMARY.openDependabotHighCritical}`,
     dependabotHighCritPairText: `${ORG_SUMMARY.openDependabotHighCritical} / ${ORG_SUMMARY.openDependabotHighCritical}`,
+    dependabotMergedThisCycleText: `${DEPENDABOT_MERGED_THIS_CYCLE_COUNT} merged this cycle`,
     codeScanningOrgWideText: `${ORG_SUMMARY.openAlertsCodeScanning} (org-wide)`,
+    openCriticalCodeScanningAlertsText: `${OPEN_CRITICAL_CODE_SCANNING_ALERTS_COUNT} open critical alerts`,
     doiLedgerEvidenceText: `${DOI_LEDGER_COUNT}-DOI evidence chain`,
     doiMintedText: `${DOI_LEDGER_COUNT} minted`,
   };
