@@ -1,5 +1,19 @@
 # @szl-holdings/payload
 
+> **DEPRECATED for artifact consumers (task #5142).** The "dark" artifact
+> landing / about / lineage surfaces (sentra, conduit, a11oy) now import
+> panel facts, the V7 ribbon facts, the thesis lineage / papers, the org
+> summary, and the DOI ledger count from **`@szl-holdings/szl-doctrine`**
+> — which re-exports the same constants from this package. New artifact
+> code must depend on szl-doctrine, not on this package directly. A drift
+> guardrail (`pnpm run check:payload-doctrine-drift`) fails CI if any file
+> under `artifacts/*/src` re-introduces a direct `@szl-holdings/payload`
+> import.
+>
+> The package itself is still the canonical source of truth for the raw
+> payload bytes and is consumed transitively by szl-doctrine and directly
+> by the api-server (out of scope for the migration). Do not delete.
+
 Canonical SZL Holdings machine-to-machine handoff payload, formalized as a
 real pnpm workspace package.
 

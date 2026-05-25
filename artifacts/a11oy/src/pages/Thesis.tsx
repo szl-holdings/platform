@@ -25,7 +25,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { Link, useRoute } from 'wouter';
 import { Layout } from '../components/layout';
 import { Card, PageHeader, SectionTitle, KpiCard, StatusPill } from '../components/ui';
-import { THESIS_LINEAGE, THESIS_PAPERS } from '@szl-holdings/payload';
+import { THESIS_LINEAGE, THESIS_PAPERS } from '@szl-holdings/szl-doctrine';
 
 // Vite: eagerly import every v{N}-canonical.md as a raw string at build time.
 // Path is relative from artifacts/a11oy/src/pages/ → repo-root docs/thesis/.
@@ -491,7 +491,7 @@ export default function Thesis() {
                 <div>TH8 sorries: <span style={{ color: THESIS_LINEAGE.audit.leanSorriesOpen === 0 ? '#7fb893' : '#d4a853' }}>{THESIS_LINEAGE.audit.leanSorriesOpen} open</span> / {THESIS_LINEAGE.audit.leanTheorems} · {THESIS_LINEAGE.audit.leanSorriesClosed.length} closed in mirror</div>
                 <div>Fly-High: doctrine <span style={{ color: GOLD }}>{THESIS_LINEAGE.audit.doctrine}</span> · P0 {THESIS_LINEAGE.audit.p0Fixes} · beautify {THESIS_LINEAGE.audit.beautifyAvg}</div>
                 <div>Last updated: <span style={{ color: '#cfcfcf' }}>{THESIS_LINEAGE.audit.updatedAt}</span></div>
-                <div>Source: @szl-holdings/payload</div>
+                <div>Source: @szl-holdings/szl-doctrine</div>
               </div>
             </div>
             <MarkdownView md={active.markdown} />

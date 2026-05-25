@@ -9,7 +9,7 @@
  * Author: Stephen P. Lutar — SZL Holdings — ORCID 0009-0001-0110-4173
  */
 import { Layout } from '@/components/layout';
-import { THESIS_LINEAGE, THESIS_PAPERS, thesisPaperSummary } from '@szl-holdings/payload';
+import { THESIS_LINEAGE, THESIS_PAPERS, thesisPaperSummary } from '@szl-holdings/szl-doctrine';
 
 const GOLD = '#c9b787';
 const MONO = 'ui-monospace, SFMono-Regular, Menlo, monospace';

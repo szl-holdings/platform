@@ -1,5 +1,5 @@
 import { Link } from 'wouter';
-import { V7_PANEL_FACTS } from '@szl-holdings/payload';
+import { V7_PANEL_FACTS } from '@szl-holdings/szl-doctrine';
 import { CommandShell } from './CommandShell';
 
 const T = {

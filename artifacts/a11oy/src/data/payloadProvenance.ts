@@ -73,7 +73,7 @@ export interface RepoEntry {
 }
 
 // Repo entries parsed from github_pro/github_inventory.json + clone_manifest.json
-// (count is exposed via @szl-holdings/payload PANEL_FACTS.reposCountText).
+// (count is exposed via @szl-holdings/szl-doctrine PANEL_FACTS.reposCountText).
 export const REPOS: RepoEntry[] = [
   { name: 'amaru', fullName: 'szl-holdings/amaru', description: 'Convergent multi-source data sync. Append-only delta logs, hash-verified ingest, and bounded loops with measurable convergence.', defaultBranch: 'main', latestCommitSha: '6e1614d541d66fb95557a57d05dfe3c788e34c46', latestTag: 'v1.0.0-alpha', pushedAt: '2026-05-15T12:58:31Z', scorecard: 6.8, openCodeScanningAlerts: 7, openDependabotHighCritical: 0, branchProtectionStrict: true, cloneUrl: 'https://github.com/szl-holdings/amaru.git' },
   { name: 'a11oy', fullName: 'szl-holdings/a11oy', description: 'Governed agentic execution fabric. Policy gates, signal mesh, proof ledger, and Λ invariant runtime.', defaultBranch: 'main', latestCommitSha: '3d0f98412ee6738102634b47f7d8618a6e4cd2b5', latestTag: 'v1.0.0-alpha', pushedAt: '2026-05-15T20:48:09Z', scorecard: 6.8, openCodeScanningAlerts: 7, openDependabotHighCritical: 0, branchProtectionStrict: true, cloneUrl: 'https://github.com/szl-holdings/a11oy.git' },
@@ -105,11 +105,11 @@ export interface OrgSummary {
   openDependabotHighCritical: number;
 }
 
-// Org counters delegate to @szl-holdings/payload so the repo count and
+// Org counters delegate to @szl-holdings/szl-doctrine so the repo count and
 // branch-protection figures stay in lockstep with the canonical inventory.
-// Fields not yet exposed by the payload (open PRs, hygiene-gap repos)
+// Fields not yet exposed by the doctrine (open PRs, hygiene-gap repos)
 // remain inline.
-import { ORG_SUMMARY as PAYLOAD_ORG_SUMMARY } from '@szl-holdings/payload';
+import { ORG_SUMMARY as PAYLOAD_ORG_SUMMARY } from '@szl-holdings/szl-doctrine';
 
 export const ORG_SUMMARY: OrgSummary = {
   reposTotal: PAYLOAD_ORG_SUMMARY.reposTotal,

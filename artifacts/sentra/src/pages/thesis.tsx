@@ -16,7 +16,7 @@ import v9Canonical from '../../../../docs/thesis/v9-canonical.md?raw';
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-ignore — vite '?raw' import
 import v10Canonical from '../../../../docs/thesis/v10-canonical.md?raw';
-import { THESIS_LINEAGE, THESIS_PAPERS } from '@szl-holdings/payload';
+import { THESIS_LINEAGE, THESIS_PAPERS } from '@szl-holdings/szl-doctrine';
 
 const SENTRA_GOLD = '#c9b787';
 
@@ -119,7 +119,7 @@ export default function SentraThesisPage() {
               Last updated: <span className="text-white/85">{THESIS_LINEAGE.audit.updatedAt}</span>
             </div>
             <div>
-              Source: <span className="text-white/80">@szl-holdings/payload</span>
+              Source: <span className="text-white/80">@szl-holdings/szl-doctrine</span>
             </div>
           </div>
         </CardContent>

@@ -27,6 +27,35 @@ import {
   PANEL_FACTS as PANEL_FACTS_PAYLOAD,
 } from "@szl-holdings/payload";
 
+/**
+ * Re-exports of the legacy `@szl-holdings/payload` panel facts.
+ *
+ * Task #5142 collapsed the "dark" artifact landing / about / lineage
+ * surfaces (sentra, conduit, a11oy) onto a single canonical import surface:
+ * `@szl-holdings/szl-doctrine`. The underlying numbers still come from the
+ * payload package — szl-doctrine is the only consumer that depends on it
+ * directly. Artifacts must import these symbols from szl-doctrine.
+ *
+ * A drift guardrail in `scripts/check-payload-doctrine-drift.mjs` fails CI
+ * if any file under `artifacts/*\/src` re-introduces a direct
+ * `@szl-holdings/payload` import.
+ */
+export {
+  DOI_LEDGER_COUNT,
+  ORG_SUMMARY,
+  PANEL_FACTS,
+  THESIS_LINEAGE,
+  THESIS_PAPERS,
+  V7_PANEL_FACTS,
+  thesisPaperSummary,
+} from "@szl-holdings/payload";
+export type {
+  PanelFactsKey,
+  ThesisLineage,
+  ThesisPaper,
+  V7PanelFactsKey,
+} from "@szl-holdings/payload";
+
 export type AxisId =
   | "semanticCoherence"
   | "empiricalGrounding"

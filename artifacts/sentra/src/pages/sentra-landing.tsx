@@ -1,5 +1,5 @@
 import { ContactModal } from '@szl-holdings/shared-ui/contact-modal';
-import { PANEL_FACTS, DOI_LEDGER_COUNT } from '@szl-holdings/payload';
+import { PANEL_FACTS, DOI_LEDGER_COUNT } from '@szl-holdings/szl-doctrine';
 import { ArrowRight, ChevronRight } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
 import { SentraGovernancePanels } from '../components/GovernancePanels';

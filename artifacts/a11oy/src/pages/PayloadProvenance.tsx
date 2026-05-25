@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Layout } from '../components/layout';
 import { PageHeader, Card, SectionTitle, StatusBadge } from '../components/ui';
-import { PANEL_FACTS } from '@szl-holdings/payload';
+import { PANEL_FACTS } from '@szl-holdings/szl-doctrine';
 import {
   DOCTRINE_V6,
   DOI_LEDGER,
