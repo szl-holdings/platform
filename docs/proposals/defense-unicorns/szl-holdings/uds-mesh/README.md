@@ -80,15 +80,20 @@ artifacts. In production these are pushed to
 
 As shipped, `uds-bundle.yaml` references the three packages by their
 published OCI coordinates (`ghcr.io/szl-holdings/packages/<name>`).
-You have two options:
+The three packages at `1.0.0-alpha` have been published to GHCR, so
+**Option A is now the default path** — an operator with only `uds-cli`
+on their workstation can build the bundle straight from this directory
+without any local-path edits. Option B is retained for offline demo
+work and for iterating on a package before re-publishing.
 
-**Option A — published packages (production / post-publish path):**
+**Option A — published packages (default, production path):**
 
 ```sh
-# Prereq: run `zarf package publish` for each .tar.zst from step 2 first.
-( cd ../a11oy/deploy  && zarf package publish zarf-package-a11oy-amd64-1.0.0-alpha.tar.zst   oci://ghcr.io/szl-holdings/packages )
-( cd ../sentra/deploy && zarf package publish zarf-package-sentra-amd64-1.0.0-alpha.tar.zst oci://ghcr.io/szl-holdings/packages )
-( cd ../amaru/deploy  && zarf package publish zarf-package-amaru-amd64-1.0.0-alpha.tar.zst  oci://ghcr.io/szl-holdings/packages )
+# Packages are already published at ghcr.io/szl-holdings/packages/{a11oy,sentra,amaru}:1.0.0-alpha.
+# To republish (e.g. after a package edit), run the three publish lines first:
+# ( cd ../a11oy/deploy  && zarf package publish zarf-package-a11oy-amd64-1.0.0-alpha.tar.zst   oci://ghcr.io/szl-holdings/packages )
+# ( cd ../sentra/deploy && zarf package publish zarf-package-sentra-amd64-1.0.0-alpha.tar.zst oci://ghcr.io/szl-holdings/packages )
+# ( cd ../amaru/deploy  && zarf package publish zarf-package-amaru-amd64-1.0.0-alpha.tar.zst  oci://ghcr.io/szl-holdings/packages )
 
 uds-cli bundle create . --confirm
 ```
