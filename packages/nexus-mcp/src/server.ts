@@ -1327,6 +1327,44 @@ export class PRAXISMcpServer {
         await this._config.proofChainWriter(entry);
       } catch { /* proof chain writes must not throw */ }
     }
+    // VSP (Verifiable Span Protocol) — emit one OTel GenAI v1.37 span per
+    // MCP-recorded receipt so external agents calling the gateway show up
+    // in the same trace surface as direct `tagAIContent` callers. Hash is
+    // derived from a stable JSON form of the entry when no explicit hash
+    // is present. Fully fire-and-forget: errors are swallowed inside the
+    // emitter and counted in the VSP coverage snapshot.
+    // Only emit when the writer's entry carries a real receipt hash —
+    // synthetic hashes are not verifiable against the public proof API,
+    // so we skip emission rather than produce an un-linkable span.
+    try {
+      const e = entry as unknown as {
+        hash?: string;
+        receiptHash?: string;
+        selfHash?: string;
+        contentHash?: string;
+        lambdaAxes?: Record<string, unknown>;
+        toolName?: string;
+      };
+      const hash = e.hash ?? e.receiptHash ?? e.selfHash ?? e.contentHash;
+      if (!hash || typeof hash !== 'string' || hash.length < 32) return;
+      const axes: Record<string, number> = {};
+      if (e.lambdaAxes && typeof e.lambdaAxes === 'object') {
+        for (const [k, v] of Object.entries(e.lambdaAxes)) {
+          if (typeof v === 'number' && Number.isFinite(v)) axes[k] = v;
+        }
+      }
+      const { emitVspProofSpan } = await import('@szl-holdings/proof-chain');
+      emitVspProofSpan({
+        hash,
+        license: 'Apache-2.0',
+        name: `mcp.${e.toolName ?? 'tool_call'}`,
+        endpoint: `mcp.${e.toolName ?? 'tool_call'}`,
+        ts: new Date().toISOString(),
+        ...(Object.keys(axes).length > 0 ? { lambdaAxes: axes } : {}),
+      });
+    } catch {
+      /* VSP emission must never affect MCP request flow */
+    }
   }
 
   private async _writeAuditLog(entry: Parameters<AuditLogger>[0]): Promise<void> {

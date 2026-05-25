@@ -19,6 +19,7 @@ import {
   type LambdaAxes,
   type VspLicense,
 } from '@szl-holdings/vsp-otel';
+import { setVspProofEmitter } from '@szl-holdings/proof-chain';
 import { logger } from '../lib/logger.js';
 
 export type A11oyProductId =
@@ -327,6 +328,13 @@ export function appendProof(input: EmitProofInput): ProofLedgerEntry {
 }
 
 const proofSpanEmitter = new LambdaSpanEmitter({ tracerName: 'a11oy-orchestration' });
+
+// Boot-time wiring: install the proof-chain VSP emitter so every
+// `tagAIContent` call in the hot path produces a verifiable OTel
+// GenAI span. Without this, `emitVspProofSpan` is a no-op. Safe to
+// run at module-load — `setVspProofEmitter` is a simple module-level
+// setter with no side effects beyond storing the reference.
+setVspProofEmitter(proofSpanEmitter);
 
 /**
  * Build the deterministic SHA-256 hash that anchors a proof's VSP receipt.

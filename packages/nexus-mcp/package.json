@@ -25,6 +25,7 @@
   "dependencies": {
     "@modelcontextprotocol/sdk": "^1.29.0",
     "@szl-holdings/pqc-identity": "workspace:*",
+    "@szl-holdings/proof-chain": "workspace:*",
     "zod": "catalog:"
   },
   "devDependencies": {

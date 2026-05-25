@@ -136,6 +136,12 @@ interface PQCStatus {
 export function SecurityCompliance() {
   const attested = CERTS.filter((c) => c.status === 'attested' || c.status === 'in-place').length;
   const [pqcStatus, setPqcStatus] = useState<PQCStatus | null>(null);
+  const [vspCoverage, setVspCoverage] = useState<{
+    spansEmittedLastHour: number;
+    coveragePercentLastHour: number | null;
+    otlpExportHealth: string;
+    spansFailedLastHour: number;
+  } | null>(null);
   const [verifyResult, setVerifyResult] = useState<Record<string, unknown> | null>(null);
   const [verifyInput, setVerifyInput] = useState('');
   const [verifyLoading, setVerifyLoading] = useState(false);
@@ -168,6 +174,10 @@ export function SecurityCompliance() {
     fetch(`${API_BASE}/audit-chain/attestation/quarantine?decision=pending&limit=10`)
       .then((r) => (r.ok ? r.json() : null))
       .then((data) => { if (data?.data?.rows) setQuarantineRows(data.data.rows); })
+      .catch(() => {});
+    fetch(`${API_BASE}/vsp/coverage`)
+      .then((r) => (r.ok ? r.json() : null))
+      .then((data) => { if (data?.data) setVspCoverage(data.data); })
       .catch(() => {});
   }, []);
 
@@ -207,6 +217,18 @@ export function SecurityCompliance() {
         <KpiCard label="P1 NOTIFY SLA" value="≤ 24h" sub="confirmed material" accent={T.accent} />
         <KpiCard label="CVE · CRITICAL" value="≤ 24h" sub="patch SLA" accent={T.accent} />
         <KpiCard label="SIGNING" value={pqcStatus?.signingMode?.toUpperCase() ?? 'HYBRID-PQC'} sub="Ed25519 + ML-DSA-65" accent={T.accent} />
+        <KpiCard
+          label="VSP COVERAGE"
+          value={vspCoverage?.coveragePercentLastHour != null ? `${vspCoverage.coveragePercentLastHour}%` : '—'}
+          sub="Λ-gate spans verified · 1h"
+          accent={T.accent}
+        />
+        <KpiCard
+          label="VSP SPANS · 1H"
+          value={vspCoverage ? String(vspCoverage.spansEmittedLastHour) : '—'}
+          sub={vspCoverage ? `${vspCoverage.spansFailedLastHour} failed · OTLP ${vspCoverage.otlpExportHealth}` : 'OTel GenAI v1.37 emitted'}
+          accent={T.accent}
+        />
       </div>
 
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-6">
@@ -280,6 +302,23 @@ export function SecurityCompliance() {
           </Card>
         </>
       )}
+      <SectionTitle>Verifiable Span Protocol (VSP)</SectionTitle>
+      <Card className="mb-6">
+        <div style={{ padding: '1.25rem 1.5rem' }}>
+          <p style={{ fontFamily: T.serif, fontSize: '0.9375rem', lineHeight: 1.7, color: T.text, margin: 0, marginBottom: '0.75rem' }}>
+            Every Λ-gate evaluation emits an OpenTelemetry GenAI v1.37 span whose
+            <code style={{ fontFamily: T.mono, fontSize: '0.8125rem', color: T.accent, padding: '0 0.25rem' }}>trace_id</code>
+            is derived from the proof-chain receipt hash. Anyone holding a receipt can verify
+            the trace against the public verification API — without access to SZL internal systems.
+          </p>
+          <InfoRow label="Span schema" value="OpenTelemetry GenAI Semantic Conventions v1.37" />
+          <InfoRow label="Trace identity" value="trace_id = receipt_hash[:16]" />
+          <InfoRow label="Λ-vector axes" value="9 axes stamped as gen_ai.lambda.* attributes" />
+          <InfoRow label="ρ-closure event" value="byte_identical + chain_root recorded as span event" />
+          <InfoRow label="Library" value="@szl-holdings/vsp-otel (TypeScript + Python verifier)" />
+          <InfoRow label="Supported sinks" value="Langfuse · Arize Phoenix · Honeycomb · Datadog (OTLP/gRPC + OTLP/HTTP)" />
+        </div>
+      </Card>
 
       <Card className="mb-6">
         <div style={{ padding: '1.5rem' }}>

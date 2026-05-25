@@ -85,6 +85,10 @@ router.use(lazyMatch(["/v1/replay-attestation", "/governance/stats", "/.well-kno
 // POST /pqc/transparency-log/inclusion-proof
 router.use(lazyMatch(["/pqc", "/.well-known/did.json"], () => import("./pqc-verification"), "pqc-verification"));
 
+// VSP (Verifiable Span Protocol) coverage — public read-only metrics.
+// GET /vsp/coverage
+router.use(lazyMatch("/vsp", () => import("./vsp-coverage"), "vsp-coverage"));
+
 // Email provider webhooks (bounces, complaints) + unsubscribe handler — public, unauthenticated.
 router.use(emailWebhooksRouter);
 

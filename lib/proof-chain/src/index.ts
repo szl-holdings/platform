@@ -9,6 +9,7 @@ import {
 import { createHash } from 'node:crypto';
 import { and, desc, eq, } from 'drizzle-orm';
 import { tagAIContentWithIdentity } from './identity-signing.js';
+import { emitVspProofSpan } from './vsp-emitter.js';
 
 export type { ProofChain, ProofExportSafetyState, ProofReviewState, ProvenanceSourceClass };
 
@@ -97,6 +98,43 @@ export async function tagAIContent(params: TagAIContentParams): Promise<ProofCha
       ...mergedMetadata,
       pqcSignature: identityResult,
     };
+
+    // ── VSP (Verifiable Span Protocol) emission ───────────────────────────────
+    // Fire-and-forget OTel GenAI span keyed on the receipt's hybrid content
+    // hash. Errors are swallowed inside `emitVspProofSpan` so the receipt
+    // build path never regresses past its 11.5 µs p50 budget.
+    const contentHash = identityResult?.contentHash;
+    if (typeof contentHash === 'string' && contentHash.length >= 32) {
+      // Pull 9-axis Λ-vector from metadata when callers (Λ-gate evaluators,
+      // orchestration-store) provide it. Missing axes are simply not stamped.
+      const md = (params.metadata ?? {}) as Record<string, unknown>;
+      const rawAxes =
+        (md['lambdaAxes'] as Record<string, unknown> | undefined) ??
+        (md['lambda'] as Record<string, unknown> | undefined);
+      let lambdaAxes: Record<string, number | undefined> | undefined;
+      if (rawAxes && typeof rawAxes === 'object') {
+        lambdaAxes = {};
+        for (const [k, v] of Object.entries(rawAxes)) {
+          if (typeof v === 'number' && Number.isFinite(v)) lambdaAxes[k] = v;
+        }
+      }
+      // ρ-closure: receipt is byte-identical to a prior replay when
+      // metadata sets `replay.byteIdentical=true`. chain_root is the prior
+      // entry hash (or genesis when first entry).
+      const replay = md['replay'] as { byteIdentical?: unknown } | undefined;
+      const byteIdentical = replay?.byteIdentical === true;
+      const chainRoot = previousEntryHash ?? '0'.repeat(64);
+      emitVspProofSpan({
+        hash: contentHash,
+        license: 'Apache-2.0',
+        name: `lambda_gate.${params.contentType}`,
+        endpoint: `lambda_gate.${params.contentType}`,
+        ingestionPolicy: params.sourceClass,
+        ts: new Date().toISOString(),
+        ...(lambdaAxes && Object.keys(lambdaAxes).length > 0 ? { lambdaAxes } : {}),
+        rhoClosure: { byteIdentical, chainRoot },
+      });
+    }
   }
 
   const [proof] = await db
@@ -285,3 +323,9 @@ export type {
   BackfillSummary,
   CoverageStats,
 } from './attestation-backfill.js';
+export {
+  setVspProofEmitter,
+  getVspProofEmitter,
+  emitVspProofSpan,
+} from './vsp-emitter.js';
+export type { VspProofEmitter, VspProofEmitterInput } from './vsp-emitter.js';

@@ -33,6 +33,7 @@ import {
 } from '@opentelemetry/api';
 
 import { applyVendorAttributes, type VspVendor } from './vendor-adapters.js';
+import { recordVspEmissionFailure, recordVspEmissionSuccess } from './coverage.js';
 
 /**
  * License allowlist enforced on every emitted span. Sourced from Doctrine V6
@@ -209,13 +210,20 @@ export class LambdaSpanEmitter {
    * `{ endImmediately: true }` if no further events are expected.
    */
   emit(receipt: VspReceipt, opts: EmitOptions = {}): Span {
-    assertLicense(receipt.license);
-
-    const hash = receipt.hash ?? receipt.selfHash;
-    if (!hash) {
-      throw new Error('[vsp-otel] receipt is missing `hash` / `selfHash`');
+    let traceId: string;
+    let hash: string;
+    try {
+      assertLicense(receipt.license);
+      const h = receipt.hash ?? receipt.selfHash;
+      if (!h) {
+        throw new Error('[vsp-otel] receipt is missing `hash` / `selfHash`');
+      }
+      hash = h;
+      traceId = deriveTraceIdFromReceiptHash(hash);
+    } catch (err) {
+      recordVspEmissionFailure(err);
+      throw err;
     }
-    const traceId = deriveTraceIdFromReceiptHash(hash);
     if (traceId === ZERO_SPAN_ID + ZERO_SPAN_ID.slice(0, 16)) {
       // Defensive: the all-zero traceId is invalid per W3C trace-context and
       // would be rejected by the SDK's `isSpanContextValid` check.
@@ -265,6 +273,7 @@ export class LambdaSpanEmitter {
       });
     }
 
+    recordVspEmissionSuccess();
     if (opts.endImmediately) {
       span.end();
     }

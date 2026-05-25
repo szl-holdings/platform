@@ -4170,6 +4170,9 @@ importers:
       '@szl-holdings/pqc-identity':
         specifier: workspace:*
         version: link:../../lib/pqc-identity
+      '@szl-holdings/proof-chain':
+        specifier: workspace:*
+        version: link:../../lib/proof-chain
       zod:
         specifier: 'catalog:'
         version: 3.25.76
@@ -5256,6 +5259,9 @@ importers:
         specifier: ^1.40.0
         version: 1.40.0
     devDependencies:
+      '@szl-holdings/proof-chain':
+        specifier: workspace:*
+        version: link:../../lib/proof-chain
       '@types/node':
         specifier: 'catalog:'
         version: 25.3.5

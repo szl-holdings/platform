@@ -36,6 +36,7 @@ import {
 import { ATTR_SERVICE_NAME } from '@opentelemetry/semantic-conventions';
 
 import { LambdaSpanEmitter } from './lambda-span-emitter.js';
+import { recordOtlpExportHealth } from './coverage.js';
 import type { VspVendor } from './vendor-adapters.js';
 
 export type OtlpProtocol = 'grpc' | 'http/protobuf';
@@ -135,6 +136,35 @@ function resolveHttpTracesUrl(explicit: string | undefined): string | undefined 
   return normalizeOtlpHttpTracesUrl(base);
 }
 
+/**
+ * Wrap a SpanExporter so every `export()` call updates the VSP
+ * coverage snapshot's `otlpExportHealth` field. We start at `healthy`
+ * (the SDK was constructed without error) and transition to
+ * `failed` / `degraded` based on the exporter's own result codes.
+ *
+ * `ExportResultCode.SUCCESS === 0` and `FAILED === 1` — we avoid an
+ * `@opentelemetry/core` import by comparing against the literal codes.
+ */
+function wrapExporterWithHealthReporting(inner: SpanExporter): SpanExporter {
+  recordOtlpExportHealth('healthy');
+  return {
+    export(spans, resultCallback) {
+      inner.export(spans, (result) => {
+        if (result?.code === 0) {
+          recordOtlpExportHealth('healthy');
+        } else {
+          recordOtlpExportHealth('failed');
+        }
+        resultCallback(result);
+      });
+    },
+    shutdown() {
+      return inner.shutdown();
+    },
+    forceFlush: inner.forceFlush?.bind(inner),
+  };
+}
+
 function buildOtlpExporter(
   protocol: OtlpProtocol,
   endpoint: string | undefined,
@@ -173,7 +203,11 @@ export function startVspNodeSdk(options: VspNodeSdkOptions = {}): VspNodeSdk {
     options.serviceName ?? process.env.OTEL_SERVICE_NAME ?? 'vsp-otel';
   const vendor = resolveVendor(options.vendor);
 
-  const exporter = options.exporter ?? buildOtlpExporter(protocol, endpoint, headers);
+  const rawExporter = options.exporter ?? buildOtlpExporter(protocol, endpoint, headers);
+  // Wrap the exporter so we can update the VSP coverage snapshot's
+  // `otlpExportHealth` field as batches succeed or fail. UIs (A11oy,
+  // Sentra) and the public `/vsp/coverage` endpoint expose this state.
+  const exporter: SpanExporter = wrapExporterWithHealthReporting(rawExporter);
 
   const spanProcessors: SpanProcessor[] = [];
   if (options.extraSpanProcessors) {

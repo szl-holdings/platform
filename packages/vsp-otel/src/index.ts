@@ -45,3 +45,20 @@ export type {
   VspNodeSdkOptions,
   OtlpProtocol,
 } from './node-sdk-bootstrap.js';
+
+export { verifyVspSpan } from './verifier.js';
+export type {
+  VspVerdict,
+  VspVerdictStatus,
+  VspSpanLike,
+  VspSpanRecord,
+  VerifyVspSpanOptions,
+} from './verifier.js';
+
+export {
+  getVspCoverageSnapshot,
+  recordOtlpExportHealth,
+  recordVspEmissionSuccess,
+  recordVspEmissionFailure,
+} from './coverage.js';
+export type { VspCoverageSnapshot } from './coverage.js';

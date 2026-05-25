@@ -190,6 +190,12 @@ export default function PqcReadiness() {
   const [expandedStandard, setExpandedStandard] = useState<string | null>(null);
   const [mutating, setMutating] = useState<string | null>(null);
   const [liveStatus, setLiveStatus] = useState<PQCLiveStatus | null>(null);
+  const [vspCoverage, setVspCoverage] = useState<{
+    spansEmittedLastHour: number;
+    spansFailedLastHour: number;
+    coveragePercentLastHour: number | null;
+    otlpExportHealth: string;
+  } | null>(null);
 
   useEffect(() => {
     const base = (import.meta.env.BASE_URL ?? '/sentra/').replace(/\/$/, '');
@@ -208,6 +214,10 @@ export default function PqcReadiness() {
           });
         }
       })
+      .catch(() => {});
+    fetch(`${apiBase}/vsp/coverage`)
+      .then((r) => (r.ok ? r.json() : null))
+      .then((data) => { if (data?.data) setVspCoverage(data.data); })
       .catch(() => {});
   }, []);
 
@@ -281,6 +291,39 @@ export default function PqcReadiness() {
         <div className="bg-white/[0.02] border border-white/[0.06] rounded-lg p-4 text-center">
           <p className="text-2xl font-semibold text-white">4</p>
           <p className="text-[10px] uppercase tracking-wider text-white/25 mt-0.5">NIST Standards</p>
+        </div>
+      </div>
+
+      <div className="bg-white/[0.02] border border-white/[0.06] rounded-xl p-5">
+        <div className="flex items-center gap-2 mb-3">
+          <ShieldCheck className="w-4 h-4 text-emerald-400" />
+          <h3 className="text-[13px] font-medium text-white">Verifiable Span Protocol (VSP) — OTel GenAI Bridge</h3>
+          <span className="text-[9px] font-mono uppercase tracking-wider px-1.5 py-0.5 rounded bg-emerald-400/10 text-emerald-400">LIVE</span>
+        </div>
+        <p className="text-[12px] text-white/40 leading-relaxed mb-4">
+          Every Λ-gate evaluation emits an OpenTelemetry GenAI v1.37 span whose <code className="text-emerald-400/80">trace_id</code> is
+          derived from the proof-chain receipt hash. Spans export over OTLP/gRPC and OTLP/HTTP to Langfuse, Arize Phoenix, Honeycomb,
+          and Datadog with no custom collector configuration.
+        </p>
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+          <div>
+            <div className="text-[10px] text-white/25 uppercase tracking-wider mb-1">VSP Throughput · 1h</div>
+            <div className="text-[13px] font-mono text-white/70">{vspCoverage ? vspCoverage.spansEmittedLastHour : '—'}</div>
+          </div>
+          <div>
+            <div className="text-[10px] text-white/25 uppercase tracking-wider mb-1">OTLP Export Health</div>
+            <div className={`text-[13px] font-mono ${vspCoverage?.otlpExportHealth === 'healthy' ? 'text-emerald-400' : vspCoverage?.otlpExportHealth === 'degraded' ? 'text-amber-400' : vspCoverage?.otlpExportHealth === 'failed' ? 'text-red-400' : 'text-white/50'}`}>
+              {vspCoverage?.otlpExportHealth ?? 'unknown'}
+            </div>
+          </div>
+          <div>
+            <div className="text-[10px] text-white/25 uppercase tracking-wider mb-1">Failed Emissions · 1h</div>
+            <div className="text-[13px] font-mono text-white/70">{vspCoverage ? vspCoverage.spansFailedLastHour : '—'}</div>
+          </div>
+          <div>
+            <div className="text-[10px] text-white/25 uppercase tracking-wider mb-1">Coverage · 1h</div>
+            <div className="text-[13px] font-mono text-emerald-400">{vspCoverage?.coveragePercentLastHour != null ? `${vspCoverage.coveragePercentLastHour}%` : '—'}</div>
+          </div>
         </div>
       </div>
 
