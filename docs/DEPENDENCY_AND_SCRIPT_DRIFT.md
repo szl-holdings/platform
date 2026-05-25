@@ -83,7 +83,7 @@ This single SDK error cascades to: `@workspace/a11oy`, `@workspace/szl-holdings-
 |--------|-------------|-------------|
 | `pnpm run qa:site` | Routes + links + trust + meta + empty-states + og | Not run this audit; references server that may not be running |
 | `pnpm run audit:mocks` | Audit mock usage | Not run this audit |
-| `pnpm metrics:generate` | Declared in root package.json | Points to `tsx scripts/generate-platform-metrics.ts` (root-level); the diligence audit runner also uses `scripts/audit/generate-platform-metrics.ts` (subdirectory) — see Section 7 for path inconsistency detail |
+| `pnpm metrics:generate` | Declared in root package.json | Points to `tsx scripts/generate-platform-metrics.ts` (root-level). As of task #5112, `scripts/audit/generate-platform-metrics.ts` is a thin re-export of the root script — both callers now share one canonical generator. |
 
 ### Scripts in package.json That Reference Removed/Archived Artifacts
 
@@ -118,13 +118,14 @@ This single SDK error cascades to: `@workspace/a11oy`, `@workspace/szl-holdings-
 
 | Script Alias | Declared | Points To | Notes |
 |-------------|----------|-----------|-------|
-| `pnpm metrics:generate` | YES | `tsx scripts/generate-platform-metrics.ts` (root-level) | Root-level script; potentially diverged from audit subdirectory script |
+| `pnpm metrics:generate` | YES | `tsx scripts/generate-platform-metrics.ts` (root-level) | **Canonical** generator; emits all four outputs (registry, `docs/platform-facts.md`, `generated/platform-metrics.json`, `generated/platform-metrics.md`) in one pass. |
+| `tsx scripts/audit/generate-platform-metrics.ts` | n/a | Thin re-export of the canonical script | Kept for backward compatibility with diligence-audit runners and existing docs links. |
 | `pnpm audit:full` | YES | `node --experimental-vm-modules scripts/audit-full.js` | Full pipeline harness |
 | `pnpm audit:full:fast` | YES | Same with `--skip-install --skip-e2e` | Fast variant (skips install and E2E) |
 | `pnpm audit:all` | YES | `pnpm audit:mocks && audit:routes && audit:copy && audit:deps && audit:design-system && audit:broken-links && audit:smoke && audit:crawl && audit:stress` | Advisory P1 audits only — not a full P0 pipeline check |
 | `pnpm audit:series-a` | YES | brand:check + typecheck + test + audit:mocks + audit:routes + audit:deps + audit:copy + security:audit + smoke:product-mode + build | Investor-grade release check |
 
-**Finding:** `metrics:generate` points to `scripts/generate-platform-metrics.ts` (root) but the diligence audit runs `scripts/audit/generate-platform-metrics.ts` (subdirectory). Both write to `generated/platform-metrics.json`. Verify both scripts produce identical output; consolidate to one canonical script.
+**Status — RESOLVED (task #5112):** Both `pnpm metrics:generate` and the diligence audit runner now invoke the same canonical script at `scripts/generate-platform-metrics.ts`. The audit-subdirectory file is a one-line re-export, so the artifact-exclude logic, registry walk, and output shape can no longer drift. All four outputs are produced in a single run.
 
 **Correction from initial finding:** `pnpm audit:all` IS declared — it runs the P1 advisory audit suite. It is distinct from `pnpm audit:full` which runs the full P0+P1 pipeline. Use `audit:full` or `audit:series-a` for P0 pipeline coverage; use `audit:all` for advisory checks only.
 
@@ -136,7 +137,7 @@ This single SDK error cascades to: `@workspace/a11oy`, `@workspace/szl-holdings-
 |------|----------|--------|
 | Fix `@szl-holdings/sdk` TypeScript errors | **P0** | Low — type annotation fix |
 | Fix 9-package typecheck failures (`aef-sdk`, `reflection-engine`, `aef-storage-adapters`, `alloy-rank-worker`, `alloy-embed-worker`, `aef-retrieval-core`, `aef-policy-guard`, `@szl-holdings/db`, `api-client-react`) | **P0** | Medium |
-| Consolidate `metrics:generate` script — root `scripts/generate-platform-metrics.ts` and `scripts/audit/generate-platform-metrics.ts` (subdirectory) both exist; verify they produce identical output and consolidate | **P1** | Low |
+| ~~Consolidate `metrics:generate` script — root `scripts/generate-platform-metrics.ts` and `scripts/audit/generate-platform-metrics.ts` (subdirectory) both exist; verify they produce identical output and consolidate~~ | ~~P1~~ | **Fixed in task #5112** — audit-subdirectory script is now a thin re-export of the canonical root script |
 | ~~Update README package/artifact counts~~ | ~~P1~~ | **Fixed in this audit** |
 | ~~Register or archive `conduit`, `helios`, and `pluginmesh`~~; update metrics script to exclude `artifacts/audit` evidence dir from artifact count | **P1** | Low | (artifact dispositions complete: conduit registered, helios folded into A11oy #4364, pluginmesh removed #4897) |
 | ~~Update `PLATFORM_OVERVIEW.md` Alloy → A11oy~~ | ~~P1~~ | **Fixed in this audit** |

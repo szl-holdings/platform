@@ -1,21 +1,25 @@
 {
-  "generated_at": "2026-05-18T19:05:03.065Z",
-  "generator": "scripts/audit/generate-platform-metrics.ts",
+  "generated_at": "2026-05-25T05:15:41.043Z",
+  "generator": "scripts/generate-platform-metrics.ts",
   "repository": {
-    "typescript_files": 4893,
-    "tsx_files": 1593,
-    "total_ts_tsx": 6486,
+    "typescript_files": 4954,
+    "tsx_files": 1673,
+    "total_ts_tsx": 6627,
     "python_files": 291,
-    "css_files": 9,
-    "markdown_docs": 2078,
+    "css_files": 10,
+    "markdown_docs": 2096,
     "screenshot_assets": 0
   },
   "architecture": {
-    "artifacts": 13,
-    "activeArtifactCount": 14,
+    "artifacts": 15,
+    "activeArtifactCount": 16,
     "artifact_list": [
       {
         "name": "@workspace/a11oy",
+        "kind": "web"
+      },
+      {
+        "name": "@workspace/a11oy-uds",
         "kind": "web"
       },
       {
@@ -51,8 +55,12 @@
         "kind": "web"
       },
       {
-        "name": "rosie",
+        "name": "@workspace/rosie",
         "kind": "web"
+      },
+      {
+        "name": "@workspace/rosie-mobile",
+        "kind": "mobile"
       },
       {
         "name": "@workspace/sentra",
@@ -68,17 +76,17 @@
       }
     ],
     "lib_packages": 57,
-    "standalone_packages": 147,
-    "total_packages": 204
+    "standalone_packages": 150,
+    "total_packages": 207
   },
   "api_surface": {
-    "route_files_recursive": 212,
-    "route_handlers": 7921,
-    "db_tables_defined": 1269,
-    "migrations": 79
+    "route_files_recursive": 213,
+    "route_handlers": 8028,
+    "db_tables_defined": 1273,
+    "migrations": 81
   },
   "quality": {
-    "test_files": 715,
+    "test_files": 727,
     "ci_workflows": 29
   },
   "platform_primitives": [

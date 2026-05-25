@@ -1,6 +1,6 @@
 # Platform Facts
 
-**Source:** `packages/platform-metrics-registry` | **Generated:** 2026-05-18 | **Codename:** AEEP
+**Source:** `packages/platform-metrics-registry` | **Generated:** 2026-05-25 | **Codename:** AEEP
 
 This document is the canonical public reference for all SZL Holdings platform statistics.
 
@@ -16,7 +16,7 @@ All counts are derived from the platform metrics registry. **Do not edit this fi
 | Codename | AEEP (Counsel Execution and Evidence Platform) |
 | Version | 4.0.0 |
 | Founded | 2024 |
-| Last comprehensive audit | 2026-05-18 |
+| Last comprehensive audit | 2026-05-25 |
 
 ---
 
@@ -24,8 +24,8 @@ All counts are derived from the platform metrics registry. **Do not edit this fi
 
 | Metric | Count |
 |--------|-------|
-| Active registered artifacts | 14 |
-| Total artifacts (including archived) | 13 |
+| Active registered artifacts | 16 |
+| Total artifacts (including archived) | 15 |
 | Domain packs | 6 |
 | Standalone applications | 5 |
 | Background workers | 5 |
@@ -48,9 +48,9 @@ All counts are derived from the platform metrics registry. **Do not edit this fi
 
 | Metric | Count |
 |--------|-------|
-| Domain packages (`packages/`) | 147 |
+| Domain packages (`packages/`) | 150 |
 | Shared library packages (`lib/`) | 57 |
-| Total packages | 204 |
+| Total packages | 207 |
 
 ---
 
@@ -58,8 +58,8 @@ All counts are derived from the platform metrics registry. **Do not edit this fi
 
 | Metric | Count |
 |--------|-------|
-| Database tables (Drizzle pgTable) | 1270 |
-| Schema files | 238 |
+| Database tables (Drizzle pgTable) | 1274 |
+| Schema files | 240 |
 | Schema domains | 10 |
 
 ---

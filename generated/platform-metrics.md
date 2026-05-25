@@ -1,34 +1,35 @@
 # SZL Holdings — Platform Metrics
-> Auto-generated 2026-05-18T19:05:03.065Z by `scripts/audit/generate-platform-metrics.ts`
+> Auto-generated 2026-05-25T05:15:41.043Z by `scripts/generate-platform-metrics.ts`
 > **These numbers are code-derived. Do not hand-edit.**
 
 ## Repository Scale
 
 | Metric | Count |
 |--------|-------|
-| TypeScript files (.ts) | 4,893 |
-| React/TSX files (.tsx) | 1,593 |
-| Total TS + TSX | 6,486 |
+| TypeScript files (.ts) | 4,954 |
+| React/TSX files (.tsx) | 1,673 |
+| Total TS + TSX | 6,627 |
 | Python files (.py) | 291 |
-| CSS/SCSS files | 9 |
-| Markdown docs | 2078 |
+| CSS/SCSS files | 10 |
+| Markdown docs | 2096 |
 | Screenshot assets | 0 |
 
 ## Architecture
 
 | Metric | Count |
 |--------|-------|
-| Active registered artifacts (canonical registry) | 14 |
-| Artifact directories on disk (filtered) | 13 |
+| Active registered artifacts (canonical registry) | 16 |
+| Artifact directories on disk (filtered) | 15 |
 | Library packages (lib/) | 57 |
-| Standalone packages (packages/) | 147 |
-| Total packages | 204 |
+| Standalone packages (packages/) | 150 |
+| Total packages | 207 |
 
 ### Artifact Registry
 
 | Name | Kind |
 |------|------|
 | @workspace/a11oy | web |
+| @workspace/a11oy-uds | web |
 | @workspace/api-server | backend |
 | carlota-jo | web |
 | command | web |
@@ -37,7 +38,8 @@
 | @workspace/lexicon | web |
 | mockup-sandbox | design |
 | pulse | web |
-| rosie | web |
+| @workspace/rosie | web |
+| @workspace/rosie-mobile | mobile |
 | @workspace/sentra | web |
 | @workspace/vessels | web |
 | @workspace/vessels-pitch | web |
@@ -46,16 +48,16 @@
 
 | Metric | Count |
 |--------|-------|
-| Route files (recursive) | 212 |
-| Route handlers (GET/POST/PUT/PATCH/DELETE) | 7,921 |
-| Database table definitions (Drizzle pgTable) | 1269 |
-| SQL migrations | 79 |
+| Route files (recursive) | 213 |
+| Route handlers (GET/POST/PUT/PATCH/DELETE) | 8,028 |
+| Database table definitions (Drizzle pgTable) | 1273 |
+| SQL migrations | 81 |
 
 ## Quality & CI
 
 | Metric | Count |
 |--------|-------|
-| Test files (.test.ts/tsx, .spec.ts/tsx) | 715 |
+| Test files (.test.ts/tsx, .spec.ts/tsx) | 727 |
 | GitHub CI workflows | 29 |
 
 ## Platform Primitives
@@ -79,4 +81,4 @@
 
 ---
 
-*To regenerate: `npx tsx scripts/audit/generate-platform-metrics.ts`*
+*To regenerate: `pnpm metrics:generate` (or `tsx scripts/generate-platform-metrics.ts`)*
