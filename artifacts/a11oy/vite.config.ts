@@ -1,20 +1,75 @@
+import { cpSync, existsSync, createReadStream, statSync } from 'node:fs';
 import runtimeErrorOverlay from '@replit/vite-plugin-runtime-error-modal';
 import { sharedProxyPlugin } from '@szl-holdings/shared-proxy';
 import tailwindcss from '@tailwindcss/vite';
 import react from '@vitejs/plugin-react';
 import path from 'node:path';
-import { defineConfig } from 'vite';
+import { defineConfig, type Plugin } from 'vite';
 import { securityHeadersVitePlugin } from '@szl-holdings/security-headers';
 import { sharedUiManifestPlugin } from './sharedUiManifestPlugin';
 
 const vitePort = Number(process.env.VITE_PORT) || 4110;
 const basePath = process.env.BASE_PATH || '/';
 
+const REPO_DOCS = path.resolve(import.meta.dirname, '../../docs');
+const DOCS_URL_PREFIX = '/docs/';
+const DOCS_ALLOWED_SUBPATH = 'proposals/defense-unicorns/tuesday';
+const DOCS_ALLOWED_ROOT = path.join(REPO_DOCS, DOCS_ALLOWED_SUBPATH);
+
+const MIME: Record<string, string> = {
+  '.md': 'text/markdown; charset=utf-8',
+  '.txt': 'text/plain; charset=utf-8',
+  '.pdf': 'application/pdf',
+  '.pptx': 'application/vnd.openxmlformats-officedocument.presentationml.presentation',
+  '.docx': 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+  '.zip': 'application/zip',
+  '.json': 'application/json; charset=utf-8',
+  '.png': 'image/png',
+  '.jpg': 'image/jpeg',
+  '.jpeg': 'image/jpeg',
+  '.svg': 'image/svg+xml',
+};
+
+function repoDocsPlugin(): Plugin {
+  return {
+    name: 'a11oy-repo-docs',
+    configureServer(server) {
+      server.middlewares.use((req, res, next) => {
+        const url = req.url ?? '';
+        if (!url.startsWith(DOCS_URL_PREFIX)) return next();
+        let rel: string;
+        try {
+          rel = decodeURIComponent(url.slice(DOCS_URL_PREFIX.length).split('?')[0]);
+        } catch {
+          return next();
+        }
+        const filePath = path.resolve(REPO_DOCS, rel);
+        if (!filePath.startsWith(DOCS_ALLOWED_ROOT + path.sep)) return next();
+        if (!existsSync(filePath) || !statSync(filePath).isFile()) return next();
+        const ext = path.extname(filePath).toLowerCase();
+        res.setHeader('Content-Type', MIME[ext] ?? 'application/octet-stream');
+        createReadStream(filePath).pipe(res);
+      });
+    },
+    writeBundle() {
+      const src = path.join(REPO_DOCS, 'proposals/defense-unicorns/tuesday');
+      const dest = path.resolve(
+        import.meta.dirname,
+        'dist/public/docs/proposals/defense-unicorns/tuesday',
+      );
+      if (existsSync(src)) {
+        cpSync(src, dest, { recursive: true });
+      }
+    },
+  };
+}
+
 export default defineConfig({
   base: basePath,
   plugins: [
     securityHeadersVitePlugin(),
     sharedUiManifestPlugin(),
+    repoDocsPlugin(),
     react(),
     tailwindcss(),
     runtimeErrorOverlay(),
