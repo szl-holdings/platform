@@ -23,7 +23,8 @@
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
     "test:watch": "vitest",
-    "bench": "tsx bench/emit.bench.ts"
+    "bench": "tsx bench/emit.bench.ts",
+    "bench:e2e": "tsx bench/emit-e2e.bench.ts"
   },
   "dependencies": {
     "@opentelemetry/api": "^1.9.0",
