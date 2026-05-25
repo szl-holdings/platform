@@ -21,7 +21,7 @@
  * Source: docs/audits/formulas.md, lib/formulas/src/registry.ts.
  */
 
-import { Router, type Response } from 'express';
+import { Router, type Request, type Response } from 'express';
 import { and, desc, eq, sql } from 'drizzle-orm';
 import {
   db,
@@ -29,6 +29,7 @@ import {
   formulaVersionsTable,
   formulaInvocationsTable,
   formulaTuningProposalsTable,
+  usersTable,
 } from '@szl-holdings/db';
 import { logger } from '../lib/logger.js';
 import {
@@ -251,7 +252,10 @@ publicRouter.get('/a11oy/formulas/history/:id', async (req, res) => {
   }
 });
 
-function proposalDto(row: typeof formulaTuningProposalsTable.$inferSelect) {
+function proposalDto(
+  row: typeof formulaTuningProposalsTable.$inferSelect,
+  deciderDisplayName?: string | null,
+) {
   return {
     id: row.id,
     formulaId: row.formulaId,
@@ -264,6 +268,8 @@ function proposalDto(row: typeof formulaTuningProposalsTable.$inferSelect) {
     evidence: row.evidence,
     proposedBy: row.proposedBy,
     status: row.status,
+    decidedBy: row.decidedBy ?? undefined,
+    decidedByName: deciderDisplayName ?? undefined,
     decidedAt: row.decidedAt?.toISOString(),
     decisionNote: row.decisionNote ?? undefined,
     createdAt: row.createdAt.toISOString(),
@@ -308,18 +314,25 @@ publicRouter.get('/a11oy/formulas/proposals', async (req, res) => {
       ? eq(formulaTuningProposalsTable.status, status)
       : undefined;
 
+    const baseSelect = db
+      .select({
+        proposal: formulaTuningProposalsTable,
+        deciderName: usersTable.displayName,
+      })
+      .from(formulaTuningProposalsTable)
+      .leftJoin(
+        usersTable,
+        eq(usersTable.id, formulaTuningProposalsTable.decidedBy),
+      );
+
     const [rows, [{ count: total }], statusCounts] = await Promise.all([
       filter
-        ? db
-            .select()
-            .from(formulaTuningProposalsTable)
+        ? baseSelect
             .where(filter)
             .orderBy(desc(formulaTuningProposalsTable.createdAt))
             .limit(limit)
             .offset(offset)
-        : db
-            .select()
-            .from(formulaTuningProposalsTable)
+        : baseSelect
             .orderBy(desc(formulaTuningProposalsTable.createdAt))
             .limit(limit)
             .offset(offset),
@@ -345,7 +358,7 @@ publicRouter.get('/a11oy/formulas/proposals', async (req, res) => {
 
     ok(res, {
       total,
-      proposals: rows.map(proposalDto),
+      proposals: rows.map((r) => proposalDto(r.proposal, r.deciderName)),
       byStatus,
       limit,
       offset,
@@ -465,6 +478,7 @@ async function decide(
   id: number,
   status: 'approved' | 'rejected',
   note?: string,
+  deciderId?: number,
 ): Promise<ReturnType<typeof proposalDto> | null> {
   // Run the whole decision — proposal status update, version insert,
   // and formula parameter mirror — inside one transaction so a mid-way
@@ -486,6 +500,7 @@ async function decide(
         status,
         decidedAt: new Date(),
         decisionNote: note ?? null,
+        decidedBy: deciderId ?? null,
       })
       .where(
         and(
@@ -533,6 +548,7 @@ async function decide(
         version: nextVersion,
         parameters: nextParams,
         note: `tuning #${updated.id}: ${updated.rationale.slice(0, 200)}`,
+        promotedBy: deciderId ?? null,
       });
 
       await tx
@@ -549,12 +565,34 @@ async function decide(
   });
 }
 
+// Resolve the acting principal's user id so `decided_by` / `promoted_by`
+// are persisted alongside the decision. Internal-agent calls (id=0) are
+// recorded as no-user so the audit trail doesn't falsely attribute a
+// decision to a real human.
+function actingUserId(req: Request): number | undefined {
+  const id = req.user?.id;
+  if (typeof id !== 'number' || id <= 0) return undefined;
+  return id;
+}
+
+async function attachDeciderName(
+  result: ReturnType<typeof proposalDto>,
+): Promise<ReturnType<typeof proposalDto>> {
+  if (!result.decidedBy) return result;
+  const [user] = await db
+    .select({ displayName: usersTable.displayName })
+    .from(usersTable)
+    .where(eq(usersTable.id, result.decidedBy))
+    .limit(1);
+  return { ...result, decidedByName: user?.displayName ?? undefined };
+}
+
 protectedRouter.post('/a11oy/formulas/approve-tuning/:id', async (req, res) => {
   try {
     const id = parseInt(req.params.id, 10);
-    const result = await decide(id, 'approved', String(req.body?.note ?? ''));
+    const result = await decide(id, 'approved', String(req.body?.note ?? ''), actingUserId(req));
     if (!result) return err(res, 404, `Proposal ${id} not found.`);
-    ok(res, result);
+    ok(res, await attachDeciderName(result));
   } catch (e) {
     logger.error({ err: e }, '[a11oy-formulas] approve-tuning');
     err(res, 500, 'Failed to approve proposal.');
@@ -564,9 +602,9 @@ protectedRouter.post('/a11oy/formulas/approve-tuning/:id', async (req, res) => {
 protectedRouter.post('/a11oy/formulas/reject-tuning/:id', async (req, res) => {
   try {
     const id = parseInt(req.params.id, 10);
-    const result = await decide(id, 'rejected', String(req.body?.note ?? ''));
+    const result = await decide(id, 'rejected', String(req.body?.note ?? ''), actingUserId(req));
     if (!result) return err(res, 404, `Proposal ${id} not found.`);
-    ok(res, result);
+    ok(res, await attachDeciderName(result));
   } catch (e) {
     logger.error({ err: e }, '[a11oy-formulas] reject-tuning');
     err(res, 500, 'Failed to reject proposal.');

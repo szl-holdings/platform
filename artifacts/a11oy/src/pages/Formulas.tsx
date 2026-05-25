@@ -64,6 +64,10 @@ interface Proposal {
   rationale: string;
   status: string;
   createdAt: string;
+  decidedAt?: string;
+  decidedBy?: number;
+  decidedByName?: string;
+  decisionNote?: string;
 }
 
 const DOMAIN_COLOR: Record<string, string> = {
@@ -224,18 +228,33 @@ export default function Formulas() {
                     <th style={{ padding: 6 }}>Old → New</th>
                     <th style={{ padding: 6 }}>Score</th>
                     <th style={{ padding: 6 }}>Status</th>
+                    <th style={{ padding: 6 }}>Decided by</th>
                   </tr>
                 </thead>
                 <tbody>
-                  {proposals.map((p) => (
-                    <tr key={p.id} data-testid={`proposal-${p.id}`} style={{ borderBottom: '1px solid rgba(255,255,255,0.04)' }}>
-                      <td style={{ padding: 6, color: '#e5e7eb' }}>{p.formulaId}</td>
-                      <td style={{ padding: 6 }}>{p.parameter}</td>
-                      <td style={{ padding: 6 }}>{p.oldValue} → <span style={{ color: GOLD }}>{p.newValue}</span></td>
-                      <td style={{ padding: 6 }}>{p.proposalScore.toFixed(3)}</td>
-                      <td style={{ padding: 6, color: p.status === 'pending' ? '#fbbf24' : p.status === 'approved' ? '#34d399' : '#9ca3af' }}>{p.status}</td>
-                    </tr>
-                  ))}
+                  {proposals.map((p) => {
+                    const decidedLabel =
+                      p.status === 'pending'
+                        ? '—'
+                        : p.decidedByName ??
+                          (p.decidedBy ? `user #${p.decidedBy}` : 'system');
+                    return (
+                      <tr key={p.id} data-testid={`proposal-${p.id}`} style={{ borderBottom: '1px solid rgba(255,255,255,0.04)' }}>
+                        <td style={{ padding: 6, color: '#e5e7eb' }}>{p.formulaId}</td>
+                        <td style={{ padding: 6 }}>{p.parameter}</td>
+                        <td style={{ padding: 6 }}>{p.oldValue} → <span style={{ color: GOLD }}>{p.newValue}</span></td>
+                        <td style={{ padding: 6 }}>{p.proposalScore.toFixed(3)}</td>
+                        <td style={{ padding: 6, color: p.status === 'pending' ? '#fbbf24' : p.status === 'approved' ? '#34d399' : '#9ca3af' }}>{p.status}</td>
+                        <td
+                          style={{ padding: 6, color: p.status === 'pending' ? '#6b7280' : '#cbd5e1' }}
+                          data-testid={`proposal-${p.id}-decider`}
+                          title={p.decidedAt ? new Date(p.decidedAt).toLocaleString() : undefined}
+                        >
+                          {decidedLabel}
+                        </td>
+                      </tr>
+                    );
+                  })}
                 </tbody>
               </table>
             </div>
