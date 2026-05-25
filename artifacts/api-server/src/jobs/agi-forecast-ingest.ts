@@ -33,6 +33,7 @@ import path from 'node:path';
 import {
   runAllPublicIngestors,
   type DerivedMetrics,
+  type HistoryEntry,
   type ScheduledRunResult,
   type VariableStatus,
 } from '@workspace/agi-forecast';
@@ -46,6 +47,35 @@ const DEFAULT_KICKOFF_MS = 60_000; // 1 minute after boot
 
 /** How many daily derived-metric points to retain on disk for the sparkline. */
 const HISTORY_CAP = 30;
+
+/**
+ * Default retention window for the rolling full-snapshot history that
+ * feeds derived-metric velocity math. 90 days gives the trend calculations
+ * a long-enough baseline to be meaningful without unbounded disk growth.
+ * Override via `AGI_FORECAST_HISTORY_RETENTION_DAYS`.
+ */
+const DEFAULT_HISTORY_RETENTION_DAYS = 90;
+
+function getHistoryRetentionDays(): number {
+  const env = Number(process.env.AGI_FORECAST_HISTORY_RETENTION_DAYS);
+  if (Number.isFinite(env) && env > 0) return Math.floor(env);
+  return DEFAULT_HISTORY_RETENTION_DAYS;
+}
+
+const MS_PER_DAY = 86_400_000;
+
+function pruneSnapshotHistory(
+  history: readonly HistoryEntry[],
+  today: string,
+  retentionDays: number,
+): HistoryEntry[] {
+  const cutoffMs = Date.parse(today) - retentionDays * MS_PER_DAY;
+  if (!Number.isFinite(cutoffMs)) return [...history];
+  return history.filter((h) => {
+    const t = Date.parse(h.date);
+    return Number.isFinite(t) && t >= cutoffMs;
+  });
+}
 
 /**
  * Trimmed per-day record stored in `history` — keeps only what the dashboard
@@ -75,6 +105,14 @@ export interface PersistedSnapshot {
    * previous entry for that date.
    */
   readonly history: readonly DerivedHistoryEntry[];
+  /**
+   * Rolling per-day full snapshots, oldest-first, used to feed
+   * `runAllPublicIngestors` so derived velocity metrics reflect a real
+   * multi-day trend. Pruned to `AGI_FORECAST_HISTORY_RETENTION_DAYS`
+   * (default 90) on every write. One entry per ISO date — re-runs on the
+   * same date overwrite the prior entry.
+   */
+  readonly snapshotHistory: readonly HistoryEntry[];
 }
 
 let _intervalHandle: NodeJS.Timeout | null = null;
@@ -110,12 +148,14 @@ async function loadPersistedSnapshot(): Promise<PersistedSnapshot | null> {
       typeof parsed.lastRunAt === 'string' &&
       Array.isArray(parsed.statuses)
     ) {
-      // History is a newer field — backfill an empty array when reading
-      // older snapshot files so callers always see a defined array.
-      if (!Array.isArray(parsed.history)) {
-        return { ...parsed, history: [] };
-      }
-      return parsed;
+      // History fields are newer — backfill empty arrays when reading
+      // older snapshot files so callers always see defined arrays.
+      const hydrated: PersistedSnapshot = {
+        ...parsed,
+        history: Array.isArray(parsed.history) ? parsed.history : [],
+        snapshotHistory: Array.isArray(parsed.snapshotHistory) ? parsed.snapshotHistory : [],
+      };
+      return hydrated;
     }
     return null;
   } catch (err) {
@@ -150,7 +190,12 @@ export function runAgiForecastIngestOnce(): Promise<PersistedSnapshot> {
   _inflight = (async () => {
     const startedAtMs = Date.now();
     try {
-      const result = await runAllPublicIngestors();
+      // Feed the rolling per-day snapshot history into the package so the
+      // derived velocity metrics reflect a real multi-day trend instead of
+      // being computed against a single point. `buildDailySummary` dedupes
+      // by date internally, so passing entries that include today is safe.
+      const priorSnapshotHistory = _latest?.snapshotHistory ?? [];
+      const result = await runAllPublicIngestors({ history: priorSnapshotHistory });
       _runCount += 1;
       const ok = result.statuses.filter((s) => s.ok).length;
       const failed = result.statuses.length - ok;
@@ -168,6 +213,19 @@ export function runAgiForecastIngestOnce(): Promise<PersistedSnapshot> {
       ];
       merged.sort((a, b) => (a.date < b.date ? -1 : a.date > b.date ? 1 : 0));
       const history = merged.slice(-HISTORY_CAP);
+      // Append today's full snapshot to the rolling snapshot history,
+      // collapsing prior entries for the same date, sorting oldest-first,
+      // and pruning anything outside the configured retention window.
+      const mergedSnapshots: HistoryEntry[] = [
+        ...priorSnapshotHistory.filter((h) => h.date !== result.date),
+        { date: result.date, snapshot: result.snapshot },
+      ];
+      mergedSnapshots.sort((a, b) => (a.date < b.date ? -1 : a.date > b.date ? 1 : 0));
+      const snapshotHistory = pruneSnapshotHistory(
+        mergedSnapshots,
+        result.date,
+        getHistoryRetentionDays(),
+      );
       const snap: PersistedSnapshot = {
         lastRunAt: result.finishedAt,
         date: result.date,
@@ -175,6 +233,7 @@ export function runAgiForecastIngestOnce(): Promise<PersistedSnapshot> {
         summary: result.summary,
         runCount: _runCount,
         history,
+        snapshotHistory,
       };
       _latest = snap;
       await writePersistedSnapshot(snap);
