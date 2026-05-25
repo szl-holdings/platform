@@ -584,6 +584,8 @@ importers:
         specifier: 'catalog:'
         version: 3.25.76
 
+  artifacts/a11oy-uds: {}
+
   artifacts/api-server:
     dependencies:
       '@apollo/server':
