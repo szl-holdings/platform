@@ -12,9 +12,9 @@ VENV="$SIDECAR_DIR/.venv"
 if [ ! -d "$VENV" ]; then
   echo "[sentra:sidecar] creating virtualenv at $VENV"
   python3 -m venv "$VENV"
-  "$VENV/bin/pip" install --upgrade pip wheel >/dev/null
-  "$VENV/bin/pip" install -r "$SIDECAR_DIR/requirements.txt"
-  "$VENV/bin/pip" install pytest httpx
+  PIP_USER=0 "$VENV/bin/pip" install --no-user --upgrade pip wheel >/dev/null
+  PIP_USER=0 "$VENV/bin/pip" install --no-user -r "$SIDECAR_DIR/requirements.txt"
+  PIP_USER=0 "$VENV/bin/pip" install --no-user pytest httpx
 fi
 
 export PYTHONPATH="$SIDECAR_DIR/src${PYTHONPATH:+:$PYTHONPATH}"
