@@ -210,6 +210,7 @@ const Thesis = lazy(() => import('./pages/Thesis'));
 const ThesisDiff = lazy(() => import('./pages/ThesisDiff'));
 const Dossier = lazy(() => import('./pages/Dossier'));
 const Anatomy = lazy(() => import('./pages/Anatomy'));
+const DoctrineAnatomy = lazy(() => import('./pages/DoctrineAnatomy'));
 const CodexNode = lazy(() => import('./pages/CodexNode'));
 const VerifierAgent = lazy(() => import('./pages/VerifierAgent').then(m => ({ default: m.VerifierAgent })));
 const AtlasSection = lazy(() => import('./pages/AtlasSection').then(m => ({ default: m.AtlasSection })));
@@ -779,6 +780,7 @@ function AppInner() {
         <Route path={`${base}/anatomy`} component={Anatomy} />
         <Route path={`${base}/formulas/:id`} component={CodexNode} />
         <Route path={`${base}/verifier`} component={VerifierAgent} />
+        <Route path={`${base}/doctrine/anatomy`} component={DoctrineAnatomy} />
         <Route path={`${base}/doctrine`} component={DoctrineOverview} />
         <Route path={`${base}/payload`} component={PayloadProvenance} />
         <Route path={`${base}/atlas/org`} component={OrgAtlas} />

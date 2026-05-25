@@ -15,6 +15,7 @@ export function SentraGovernancePanels() {
       slug="sentra"
       theme={THEME}
       headline="Cyber resilience — every alert carries its proof envelope"
+      doctrineAnatomyHref="https://a11oy.szlholdings.com/doctrine/anatomy"
     />
   );
 }

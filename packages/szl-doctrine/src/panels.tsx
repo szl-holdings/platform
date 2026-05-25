@@ -155,6 +155,14 @@ export interface GovernancePanelsProps {
    * used by A11oy to surface package + axiom/theorem counts.
    */
   extraOwnershipRows?: ReadonlyArray<{ label: string; value: string; mono?: boolean }>;
+  /**
+   * Base href for the V8 anatomy figure viewer. The component appends
+   * `#<figure-slug>` to deep-link into a specific figure. Defaults to
+   * `/doctrine/anatomy` (A11oy hub-relative). Set this from cross-
+   * artifact wrappers (e.g. Sentra, Vessels) to point at the A11oy host
+   * URL.
+   */
+  doctrineAnatomyHref?: string;
 }
 
 export function GovernancePanelsBase({
@@ -162,6 +170,7 @@ export function GovernancePanelsBase({
   theme,
   headline,
   extraOwnershipRows,
+  doctrineAnatomyHref = "/doctrine/anatomy",
 }: GovernancePanelsProps) {
   const acceptance = ARTIFACT_ACCEPTANCE[slug];
   const anatomyForArtifact = ANATOMY_FIGURES.filter((f) =>
@@ -274,19 +283,96 @@ export function GovernancePanelsBase({
             <Row label="arXiv" value={ARXIV_TEXT} mono theme={theme} />
             <Row label="Zenodo" value={ZENODO_TEXT} theme={theme} />
             {anatomyForArtifact.length > 0 ? (
-              <Row
-                label="Anatomy figures"
-                value={anatomyForArtifact
-                  .map((f) => f.title)
-                  .join(" · ")}
-                theme={theme}
-              />
+              <div
+                style={{
+                  display: "flex",
+                  justifyContent: "space-between",
+                  alignItems: "baseline",
+                  gap: 12,
+                  paddingBottom: 8,
+                  borderBottom: `1px solid ${theme.divider}`,
+                  flexWrap: "wrap",
+                }}
+              >
+                <span style={theme.rowLabel}>Anatomy figures</span>
+                <span
+                  style={{
+                    ...theme.rowValue,
+                    display: "inline-flex",
+                    flexWrap: "wrap",
+                    gap: 6,
+                    justifyContent: "flex-end",
+                  }}
+                >
+                  {anatomyForArtifact.map((f, i) => (
+                    <span key={f.slug}>
+                      <a
+                        href={`${doctrineAnatomyHref}#${f.slug}`}
+                        style={{
+                          color: theme.chipFg,
+                          textDecoration: "underline",
+                          textUnderlineOffset: 3,
+                        }}
+                      >
+                        {f.title}
+                      </a>
+                      {i < anatomyForArtifact.length - 1 ? " · " : null}
+                    </span>
+                  ))}
+                </span>
+              </div>
             ) : null}
-            <Row
-              label="Primary theses for this artifact"
-              value={acceptance.primaryTheses.join(" · ")}
-              theme={theme}
-            />
+            <div
+              style={{
+                display: "flex",
+                justifyContent: "space-between",
+                alignItems: "baseline",
+                gap: 12,
+                paddingBottom: 8,
+                borderBottom: `1px solid ${theme.divider}`,
+                flexWrap: "wrap",
+              }}
+            >
+              <span style={theme.rowLabel}>
+                Primary theses for this artifact
+              </span>
+              <span
+                style={{
+                  ...theme.rowValue,
+                  display: "inline-flex",
+                  flexWrap: "wrap",
+                  gap: 6,
+                  justifyContent: "flex-end",
+                }}
+              >
+                {acceptance.primaryTheses.map((th, i) => {
+                  const anchor =
+                    anatomyForArtifact.length > 0
+                      ? anatomyForArtifact[i % anatomyForArtifact.length]!
+                      : null;
+                  return (
+                    <span key={th}>
+                      {anchor ? (
+                        <a
+                          href={`${doctrineAnatomyHref}#${anchor.slug}`}
+                          title={`Anatomy: ${anchor.title}`}
+                          style={{
+                            color: theme.chipFg,
+                            textDecoration: "underline",
+                            textUnderlineOffset: 3,
+                          }}
+                        >
+                          {th}
+                        </a>
+                      ) : (
+                        th
+                      )}
+                      {i < acceptance.primaryTheses.length - 1 ? " · " : null}
+                    </span>
+                  );
+                })}
+              </span>
+            </div>
           </Card>
 
           <Card

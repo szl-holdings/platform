@@ -15,6 +15,7 @@ export function ConduitGovernancePanels() {
       slug="conduit"
       theme={THEME}
       headline="Amaru ouroboros — closure → category → confluence holds end-to-end"
+      doctrineAnatomyHref="https://a11oy.szlholdings.com/doctrine/anatomy"
     />
   );
 }

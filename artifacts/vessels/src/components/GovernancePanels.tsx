@@ -15,6 +15,7 @@ export function VesselsGovernancePanels() {
       slug="vessels"
       theme={THEME}
       headline="Maritime intelligence — every voyage span flushes a replay-stamped receipt"
+      doctrineAnatomyHref="https://a11oy.szlholdings.com/doctrine/anatomy"
     />
   );
 }
