@@ -1,0 +1,34 @@
+kind: ZarfPackageConfig
+metadata:
+  name: a11oy-uds
+  description: |
+    A11oy — Brand Orchestration Layer. Self-contained, declaratively-deployable
+    payload for Defense-Unicorns (UDS) environments. Drops the @a11oy/core and
+    @a11oy/connection runtime plus a provenance manifest into a UDS bundle via
+    `zarf package deploy`.
+  version: 0.1.0
+  architecture: multi
+  url: https://github.com/replit/a11oy
+  authors: "A11oy / SZL Holdings"
+
+components:
+  - name: a11oy-core
+    description: "Built @a11oy/core runtime (orchestration kernel + connection module)."
+    required: true
+    files:
+      - source: build/a11oy-core
+        target: /opt/a11oy/core
+
+  - name: a11oy-connection
+    description: "Built @a11oy/connection client (substrate connection / transport layer)."
+    required: true
+    files:
+      - source: build/a11oy-connection
+        target: /opt/a11oy/connection
+
+  - name: a11oy-provenance
+    description: "Per-file SHA-256 manifest, build metadata, and signature sidecar."
+    required: true
+    files:
+      - source: build/MANIFEST.json
+        target: /opt/a11oy/MANIFEST.json

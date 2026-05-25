@@ -1,0 +1,10 @@
+{
+  "name": "@workspace/a11oy-uds",
+  "version": "0.1.0",
+  "private": true,
+  "description": "A11oy UDS / Zarf payload — single-command installable A11oy bundle for Defense-Unicorns environments.",
+  "scripts": {
+    "build": "bash scripts/build.sh",
+    "verify": "node scripts/verify-manifest.mjs"
+  }
+}

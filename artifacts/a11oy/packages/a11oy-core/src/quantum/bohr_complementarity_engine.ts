@@ -12,7 +12,7 @@
  *   σ_A · σ_B  >=  COMPLEMENTARITY_FLOOR
  * (the discrete-policy analogue of Heisenberg's σ_x σ_p >= ℏ/2).
  */
-import type { TetradFrame } from '../connection/tetrad_field';
+import type { TetradFrame } from '@a11oy/connection';
 
 /** Lower bound on the σ_A · σ_B product. Tuned so a degenerate
  *  (deterministic) frame-pair fails the test. */
@@ -111,7 +111,7 @@ export function checkComplementarity(
 /** Convenience: derive both frame values from a TetradFrame for FP-01/02/07. */
 export function fromTetrad(pair: FramePair, frame: TetradFrame): [number, number] {
   const find = (axis: string) => {
-    const leg = frame.legs.find((l) => l.axis === axis);
+    const leg = frame.legs.find((l: { axis: string; value: number }) => l.axis === axis);
     return leg ? leg.value : 0;
   };
   return [find(pair.axisA), find(pair.axisB)];
