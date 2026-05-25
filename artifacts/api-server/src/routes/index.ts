@@ -620,8 +620,11 @@ router.use(decisionsRuntimeRouter);
 router.use(lazyMatch(["/traces", "/runs"], () => import("./traces"), "traces"));
 
 // ACR Governance — v1 approval interrupts and run ledger (auth-gated)
-router.use(lazyMatch("/v1/approvals", () => import("./v1-approvals"), "v1-approvals"));
-router.use(lazyMatch("/v1/runs", () => import("./v1-runs"), "v1-runs"));
+// Mounted via router.use(prefix, lazyMount(...)) because inner routers use
+// relative paths (e.g. "/", "/:id") that only resolve once Express strips
+// the prefix. lazyMatch leaves the original URL intact and would 404.
+router.use("/v1/approvals", lazyMount(() => import("./v1-approvals"), "v1-approvals"));
+router.use("/v1/runs", lazyMount(() => import("./v1-runs"), "v1-runs"));
 
 router.use(lazyMatch("/reflections", () => import("./reflections"), "reflections"));
 router.use(lazyMatch("/plans", () => import("./plans"), "plans"));
@@ -700,11 +703,13 @@ router.use(lazyMatch(["/nexus/v1"], () => import("./nexus-v1"), "nexus-v1"));
 
 // NEXUS Kernel — Unified AI Compute Kernel orchestration layer (SGLang + HuggingFace Kernel Hub).
 // Owns /nexus/kernels, /nexus/infer, /nexus/compare, /nexus/simulate, /nexus/health, /nexus/audit, /nexus/stats
-router.use(lazyMatch("/nexus", () => import("./nexus-kernel"), "nexus-kernel"));
+// nexus-kernel routes are defined relative to /nexus (e.g. /stats, /kernels);
+// mount with prefix-stripping lazyMount so they resolve.
+router.use("/nexus", lazyMount(() => import("./nexus-kernel"), "nexus-kernel"));
 
 // NEXUS MCP Fabric — bidirectional governed MCP control plane.
 // Handles external server registry, session tracking, anomaly detection, and governed workflows.
-router.use(lazyMatch("/nexus-mcp", () => import("./nexus-mcp"), "nexus-mcp"));
+router.use("/nexus-mcp", lazyMount(() => import("./nexus-mcp"), "nexus-mcp"));
 
 router.use("/nexus", lazyMount(() => import("./nexus"), "nexus"));
 
@@ -749,13 +754,13 @@ router.use("/signal-bus", lazyMount(() => import("./signal-bus"), "signal-bus"))
 // Outbound Gateway — unified external delivery with tracking, retry, and audit.
 router.use("/outbound", lazyMount(() => import("./outbound-gateway"), "outbound-gateway"));
 
-router.use(lazyMatch("/document-lifecycle", () => import("./document-lifecycle"), "document-lifecycle"));
+router.use("/document-lifecycle", lazyMount(() => import("./document-lifecycle"), "document-lifecycle"));
 
-router.use(lazyMatch("/fund-management", () => import("./fund-management"), "fund-management"));
+router.use("/fund-management", lazyMount(() => import("./fund-management"), "fund-management"));
 
 // Aegis PDF export — heavyweight CPU/IO operation; apply bulk export limit.
 router.use("/aegis-export", bulkExportLimiter);
-router.use(lazyMatch("/aegis-export", () => import("./aegis-export"), "aegis-export"));
+router.use("/aegis-export", lazyMount(() => import("./aegis-export"), "aegis-export"));
 
 router.use(lazyMatch("/mobile-biometric", () => import("./mobile-biometric"), "mobile-biometric"));
 
@@ -790,7 +795,7 @@ router.use(lazyMatch("/ecosystem", () => import("./ecosystem-command"), "ecosyst
 // entity ripple analysis, public story mode, and shell adoption telemetry.
 // Public endpoints: /omnia/narrative, /omnia/story, /omnia/search, /omnia/graph, /omnia/notifications
 // Adoption beacon: POST /omnia/adoption/beacon (unauthenticated, fire-and-forget)
-router.use(lazyMatch("/omnia", () => import("./omnia"), "omnia"));
+router.use("/omnia", lazyMount(() => import("./omnia"), "omnia"));
 
 // OpenAI Voice & Audio — conversational voice sessions (gpt-audio speech-to-speech)
 // and TTS audio briefing generation for Pulse and mobile.
@@ -835,7 +840,7 @@ router.use(lazyRegisterMatch(["/flags"], () => import("./feature-flags-public"),
 // POST   /alloy/agentic-rag/run/stream     — SSE streaming run
 // GET    /alloy/agentic-rag/specialists    — list available specialist agents
 // GET    /alloy/agentic-rag/mcp-classes    — list MCP server class capability descriptors
-router.use(lazyMatch("/alloy/agentic-rag", () => import("./alloy-agentic-rag"), "alloy-agentic-rag"));
+router.use("/alloy/agentic-rag", lazyMount(() => import("./alloy-agentic-rag"), "alloy-agentic-rag"));
 
 // Open Evaluation Layer — benchmark registry, leaderboards, result submission & verification
 // GET  /eval-registry/benchmarks
@@ -904,7 +909,7 @@ router.use(lazyMatch("/runtime-config", () => import("./runtime-config"), "runti
 // GET /lexicon/v1/families/:id
 // GET /lexicon/v1/stats
 // GET /lexicon/v1/openapi.json
-router.use(lazyMatch("/lexicon", () => import("./lexicon"), "lexicon"));
+router.use("/lexicon", lazyMount(() => import("./lexicon"), "lexicon"));
 
 // Model Passport Registry — signed per-model-variant identity and governance artifacts.
 // GET    /model-passports             — list passports (filter by lane, tier, state, tenant)
@@ -914,7 +919,7 @@ router.use(lazyMatch("/lexicon", () => import("./lexicon"), "lexicon"));
 // POST   /model-passports/:id/verify  — re-verify signature + provenance hash live
 // PATCH  /model-passports/:id/state   — lifecycle state transition (ops/admin, approver for high-risk)
 // POST   /model-passports/seed        — seed passports for current allow-listed models (admin only)
-router.use(lazyMatch("/model-passports", () => import("./model-passports"), "model-passports"));
+router.use("/model-passports", lazyMount(() => import("./model-passports"), "model-passports"));
 
 // Governance Gate Configuration & Operator Model Registry API
 // GET    /governance/registry               — list all operator-registered models
@@ -955,7 +960,11 @@ router.use(lazyMatch("/eval-harness", () => import("./eval-harness"), "eval-harn
 // GET    /a11oy/orchestrator/packs/:slug/health             — per-pack health KPIs
 // GET    /a11oy/orchestrator/packs/:slug/audit              — pack audit trail
 // GET    /a11oy/orchestrator/status                         — orchestrator readiness probe
-router.use(lazyMatch("/a11oy/orchestrator", () => import("./a11oy-vertical-orchestrator"), "a11oy-vertical-orchestrator"));
+// Mounted with router.use(prefix, lazyMount(...)) — not lazyMatch — because
+// the inner router defines paths relative to the orchestrator prefix
+// (e.g. /packs, /status). lazyMatch does not strip the prefix, so those
+// relative paths would never match and every request would 404.
+router.use("/a11oy/orchestrator", lazyMount(() => import("./a11oy-vertical-orchestrator"), "a11oy-vertical-orchestrator"));
 
 // A11oy Stubs Killer — backing endpoints for previously-stub surfaces:
 // Ownership Graph, Distress Engine, Knowledge Vault, Infrastructure Map fixtures.
