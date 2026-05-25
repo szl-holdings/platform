@@ -36,6 +36,7 @@ import {
   getFormula,
   setInvocationSink,
   evaluateObservedEvent,
+  driftDetector,
   type FormulaInvocation,
   type ObservedEvent,
 } from '@szl-holdings/formulas';
@@ -271,6 +272,21 @@ function proposalDto(row: typeof formulaTuningProposalsTable.$inferSelect) {
 
 const PROPOSAL_STATUSES = ['pending', 'approved', 'rejected', 'superseded'] as const;
 type ProposalStatus = (typeof PROPOSAL_STATUSES)[number];
+
+publicRouter.get('/a11oy/formulas/drift-buckets', (_req, res) => {
+  try {
+    const buckets = driftDetector.inspectBuckets();
+    ok(res, {
+      buckets,
+      thresholds: driftDetector.thresholds,
+      bucketCount: buckets.length,
+      firingCount: buckets.filter((b) => b.willFire).length,
+    });
+  } catch (e) {
+    logger.error({ err: e }, '[a11oy-formulas] drift-buckets');
+    err(res, 500, 'Failed to load drift buckets.');
+  }
+});
 
 publicRouter.get('/a11oy/formulas/proposals', async (req, res) => {
   try {

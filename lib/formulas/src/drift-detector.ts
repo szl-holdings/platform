@@ -84,6 +84,41 @@ function relativeGap(observed: number, baseline: number): number {
   return Math.min(1, Math.abs(observed - baseline) / denom);
 }
 
+/**
+ * Snapshot of a single bucket's progress toward firing — surfaced to the
+ * sentra brain UI so operators can see what's "warming up" before a
+ * proposal lands in the Codex. Unlike `pendingSignals()`, this includes
+ * buckets that have NOT yet crossed the threshold.
+ */
+export interface DriftBucketSnapshot {
+  formulaId: string;
+  parameter: string;
+  oldValue: number;
+  candidateValue: number;
+  fromVersion: string;
+  thesisCitation: string;
+  irreversibility: number;
+  /** Samples currently in the rolling window. */
+  sampleCount: number;
+  /** Total samples ever recorded (never decreases). */
+  totalSamples: number;
+  /** Mean absolute relative gap across the window. */
+  meanGap: number;
+  /** Effective samplesMin / gapMin in force for this detector. */
+  samplesMinTarget: number;
+  gapMinTarget: number;
+  /** 0..1 progress toward samplesMin. */
+  progressSamples: number;
+  /** 0..1 progress of meanGap toward gapMin (capped at 1). */
+  progressGap: number;
+  /** True iff this bucket would emit a signal on the next `pendingSignals` call. */
+  willFire: boolean;
+  /** Tail of rolling observed values (most recent last, up to 60). */
+  observedTail: number[];
+  /** Tail of rolling baseline values (aligned with observedTail). */
+  baselineTail: number[];
+}
+
 export interface DriftDetector {
   /** Record one observation. Updates the rolling window in place. */
   record(obs: DriftObservation): void;
@@ -92,6 +127,13 @@ export interface DriftDetector {
    * crossed the drift threshold. Useful for UI surfacing.
    */
   pendingSignals(): SentraSignalForRosie[];
+  /**
+   * Inspect (without mutating) every tracked bucket — including those
+   * that have not yet crossed the firing threshold. Sorted by descending
+   * `willFire`, then by descending progressGap × progressSamples so
+   * the buckets closest to firing surface at the top.
+   */
+  inspectBuckets(): DriftBucketSnapshot[];
   /**
    * Collect and clear the drift-tripping buckets, returning one signal
    * per (formulaId, parameter) ready to feed into `runRosieLoop`.
@@ -183,6 +225,48 @@ export function createDriftDetector(thresholds: DriftThresholds = {}): DriftDete
     return out;
   }
 
+  function snapshotBucket(b: Bucket): DriftBucketSnapshot {
+    const sampleCount = b.gapHistory.length;
+    const meanGap = sampleCount === 0
+      ? 0
+      : b.gapHistory.reduce((acc, g) => acc + g, 0) / sampleCount;
+    const progressSamples = Math.min(1, sampleCount / Math.max(1, cfg.samplesMin));
+    const progressGap = Math.min(1, meanGap / Math.max(1e-9, cfg.gapMin));
+    const willFire = sampleCount >= cfg.samplesMin && meanGap > cfg.gapMin;
+    const TAIL = 60;
+    return {
+      formulaId: b.formulaId,
+      parameter: b.parameter,
+      oldValue: b.oldValue,
+      candidateValue: b.candidateValue,
+      fromVersion: b.fromVersion,
+      thesisCitation: b.thesisCitation,
+      irreversibility: b.irreversibility,
+      sampleCount,
+      totalSamples: b.totalSamples,
+      meanGap,
+      samplesMinTarget: cfg.samplesMin,
+      gapMinTarget: cfg.gapMin,
+      progressSamples,
+      progressGap,
+      willFire,
+      observedTail: b.observedHistory.slice(-TAIL),
+      baselineTail: b.baselineHistory.slice(-TAIL),
+    };
+  }
+
+  function inspectBuckets(): DriftBucketSnapshot[] {
+    const out: DriftBucketSnapshot[] = [];
+    for (const b of buckets.values()) out.push(snapshotBucket(b));
+    out.sort((a, b) => {
+      if (a.willFire !== b.willFire) return a.willFire ? -1 : 1;
+      const aScore = a.progressGap * a.progressSamples;
+      const bScore = b.progressGap * b.progressSamples;
+      return bScore - aScore;
+    });
+    return out;
+  }
+
   function drainSignals(): SentraSignalForRosie[] {
     const out: SentraSignalForRosie[] = [];
     for (const [key, b] of buckets) {
@@ -200,6 +284,7 @@ export function createDriftDetector(thresholds: DriftThresholds = {}): DriftDete
   return {
     record,
     pendingSignals,
+    inspectBuckets,
     drainSignals,
     reset: () => buckets.clear(),
     size: () => buckets.size,

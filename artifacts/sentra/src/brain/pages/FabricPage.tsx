@@ -1,5 +1,6 @@
 // doctrine-scanner-exempt: legacy live-product surface; rename tracked as separate engineering debt — see scripts/check-doctrine-v6.mjs header.
 import { useEffect, useRef, useState } from 'react';
+import { DriftWatchPanel } from '../components/DriftWatchPanel';
 
 interface KernelNode {
   id: string;
@@ -318,6 +319,8 @@ export function FabricPage() {
               </div>
             ))}
           </div>
+
+          <DriftWatchPanel />
         </div>
       </div>
     </div>
