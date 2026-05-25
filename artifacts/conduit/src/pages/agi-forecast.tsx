@@ -1,5 +1,127 @@
+import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
-import { getAgiForecastStatus, type AgiForecastDerived, type AgiForecastHistoryEntry, type AgiForecastStatus } from '@/lib/api';
+import {
+  getAgiForecastStatus,
+  refreshAgiForecast,
+  type AgiForecastDerived,
+  type AgiForecastHistoryEntry,
+  type AgiForecastStatus,
+  type AgiForecastStatusPresent,
+} from '@/lib/api';
+
+type GaugeStatus = AgiForecastStatusPresent['statuses'][number];
+
+function relativeTime(iso: string | null): string {
+  if (!iso) return 'never';
+  const then = new Date(iso).getTime();
+  if (!Number.isFinite(then)) return '—';
+  const diffSec = Math.max(0, Math.round((Date.now() - then) / 1000));
+  if (diffSec < 60) return `${diffSec}s ago`;
+  if (diffSec < 3600) return `${Math.round(diffSec / 60)}m ago`;
+  if (diffSec < 86400) return `${Math.round(diffSec / 3600)}h ago`;
+  return `${Math.round(diffSec / 86400)}d ago`;
+}
+
+function formatGaugeValue(v: GaugeStatus['value']): string {
+  if (v === null || v === undefined) return '—';
+  if (typeof v === 'number') {
+    if (!Number.isFinite(v)) return '—';
+    return Math.abs(v) >= 1000 || (Math.abs(v) > 0 && Math.abs(v) < 0.01)
+      ? v.toExponential(3)
+      : v.toFixed(3);
+  }
+  return String(v);
+}
+
+function GaugeStatusTable({ statuses }: { statuses: readonly GaugeStatus[] }) {
+  if (statuses.length === 0) {
+    return (
+      <div className="text-[12px] font-mono text-[#666]">
+        No gauges registered.
+      </div>
+    );
+  }
+  return (
+    <div className="rounded-xl border border-[rgba(255,255,255,0.06)] bg-[#0e0e0e] overflow-hidden">
+      <div className="px-5 py-3 border-b border-[rgba(255,255,255,0.06)] flex items-baseline justify-between">
+        <div className="text-[10px] font-mono uppercase tracking-[0.18em] text-[#666]">
+          Per-Gauge Status
+        </div>
+        <div className="text-[11px] font-mono text-[#8a8a8a] tabular-nums">
+          {statuses.filter((s) => s.ok).length}/{statuses.length} ok
+        </div>
+      </div>
+      <div className="overflow-x-auto">
+        <table className="w-full text-[12px]">
+          <thead className="text-[10px] font-mono uppercase tracking-[0.15em] text-[#555]">
+            <tr className="border-b border-[rgba(255,255,255,0.04)]">
+              <th className="text-left px-5 py-2 font-normal">Gauge</th>
+              <th className="text-left px-3 py-2 font-normal">Source</th>
+              <th className="text-left px-3 py-2 font-normal">Status</th>
+              <th className="text-right px-3 py-2 font-normal">Value</th>
+              <th className="text-left px-3 py-2 font-normal">Last Fetched</th>
+              <th className="text-left px-5 py-2 font-normal">Error</th>
+            </tr>
+          </thead>
+          <tbody>
+            {statuses.map((s) => (
+              <tr
+                key={s.id}
+                className="border-b border-[rgba(255,255,255,0.03)] last:border-b-0 hover:bg-[rgba(255,255,255,0.02)]"
+              >
+                <td className="px-5 py-2.5">
+                  <div className="font-mono text-[#f5f5f5]">{s.label ?? s.id}</div>
+                  {s.label && s.label !== s.id && (
+                    <div className="text-[10px] font-mono text-[#555]">{s.id}</div>
+                  )}
+                </td>
+                <td className="px-3 py-2.5 font-mono text-[11px] text-[#8a8a8a]">
+                  {s.source ?? '—'}
+                </td>
+                <td className="px-3 py-2.5">
+                  <span
+                    className={
+                      'inline-flex items-center gap-1.5 rounded px-2 py-0.5 text-[10px] font-mono uppercase tracking-[0.12em] ' +
+                      (s.ok
+                        ? 'bg-[rgba(120,200,140,0.08)] text-[#7bc88c] border border-[rgba(120,200,140,0.2)]'
+                        : 'bg-[rgba(220,80,80,0.08)] text-[#dc8a8a] border border-[rgba(220,80,80,0.25)]')
+                    }
+                  >
+                    <span
+                      className={
+                        'inline-block w-1.5 h-1.5 rounded-full ' +
+                        (s.ok ? 'bg-[#7bc88c]' : 'bg-[#dc8a8a]')
+                      }
+                    />
+                    {s.ok ? 'ok' : 'failed'}
+                  </span>
+                </td>
+                <td className="px-3 py-2.5 text-right font-mono tabular-nums text-[#c9b787]">
+                  {formatGaugeValue(s.value)}
+                </td>
+                <td className="px-3 py-2.5 font-mono text-[11px] text-[#8a8a8a]">
+                  <div>{relativeTime(s.lastFetchedAt)}</div>
+                  {s.lastFetchedAt && (
+                    <div className="text-[10px] text-[#555]" title={s.lastFetchedAt}>
+                      {new Date(s.lastFetchedAt).toISOString().replace('T', ' ').slice(0, 19)}Z
+                    </div>
+                  )}
+                </td>
+                <td className="px-5 py-2.5 font-mono text-[11px] text-[#dc8a8a] max-w-[280px]">
+                  {s.error ? (
+                    <span className="line-clamp-2" title={s.error}>{s.error}</span>
+                  ) : (
+                    <span className="text-[#444]">—</span>
+                  )}
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  );
+}
 
 type MetricKey = keyof AgiForecastDerived;
 
@@ -167,6 +289,26 @@ export default function AgiForecastPage() {
     refetchInterval: 60_000,
   });
 
+  const [isRefreshing, setIsRefreshing] = useState(false);
+  const [refreshError, setRefreshError] = useState<string | null>(null);
+
+  const handleRefresh = async () => {
+    setIsRefreshing(true);
+    setRefreshError(null);
+    try {
+      await refreshAgiForecast();
+      await refetch();
+    } catch (err) {
+      setRefreshError(err instanceof Error ? err.message : String(err));
+      // Still refetch so the panel re-syncs with whatever the scheduler last wrote.
+      await refetch();
+    } finally {
+      setIsRefreshing(false);
+    }
+  };
+
+  const busy = isRefreshing || isFetching;
+
   return (
     <div className="flex flex-col gap-6">
       <header className="flex items-start justify-between gap-6">
@@ -182,11 +324,12 @@ export default function AgiForecastPage() {
           </p>
         </div>
         <button
-          onClick={() => refetch()}
-          disabled={isFetching}
+          onClick={handleRefresh}
+          disabled={busy}
           className="shrink-0 rounded-lg border border-[rgba(255,255,255,0.08)] bg-[#0e0e0e] px-3 py-1.5 text-[11px] font-mono uppercase tracking-[0.15em] text-[#8a8a8a] hover:text-[#f5f5f5] hover:border-[rgba(201,183,135,0.4)] transition-colors disabled:opacity-40"
+          title="Trigger a fresh scheduled-style run via POST /api/agi-forecast/refresh"
         >
-          {isFetching ? 'refreshing…' : 'refresh'}
+          {isRefreshing ? 'running ingest…' : isFetching ? 'refreshing…' : 'refresh now'}
         </button>
       </header>
 
@@ -197,6 +340,12 @@ export default function AgiForecastPage() {
       {isError && (
         <div className="rounded-lg border border-[rgba(220,80,80,0.3)] bg-[rgba(220,80,80,0.05)] p-4 text-[12px] text-[#dc8a8a]">
           Failed to load forecast snapshot: {error instanceof Error ? error.message : String(error)}
+        </div>
+      )}
+
+      {refreshError && (
+        <div className="rounded-lg border border-[rgba(220,80,80,0.3)] bg-[rgba(220,80,80,0.05)] p-4 text-[12px] text-[#dc8a8a]">
+          Manual refresh failed: {refreshError}
         </div>
       )}
 
@@ -219,6 +368,7 @@ export default function AgiForecastPage() {
               />
             ))}
           </div>
+          <GaugeStatusTable statuses={data.statuses} />
         </>
       )}
     </div>

@@ -354,6 +354,17 @@ export type AgiForecastStatus = AgiForecastStatusPresent | AgiForecastStatusAbse
 
 export const getAgiForecastStatus = () => apiFetch<AgiForecastStatus>('/agi-forecast/status');
 
+export interface AgiForecastRefreshResponse {
+  lastRunAt: string;
+  date: string;
+  runCount: number;
+  statuses: AgiForecastStatusPresent['statuses'];
+  summary: AgiForecastStatusPresent['summary'];
+}
+
+export const refreshAgiForecast = () =>
+  apiFetch<AgiForecastRefreshResponse>('/agi-forecast/refresh', { method: 'POST' });
+
 // ─── Destination list ─────────────────────────────────────────────────────────
 export const DESTINATIONS = [
   { id: 'salesforce', label: 'Salesforce', color: '#00A1E0' },
