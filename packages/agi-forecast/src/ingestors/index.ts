@@ -12,6 +12,12 @@ export { ingestHumanEval } from './humaneval';
 export { ingestMath } from './math';
 export { ingestGithubStargazers } from './_github';
 export { ingestBenchmarkReadmeFraction, parseMaxPercentFraction } from './_benchmark';
+export {
+  ingestBenchmarkLeaderboardFraction,
+  parseLeaderboardMaxFraction,
+  fileLoader,
+} from './_leaderboard';
+export type { LeaderboardLoader, LeaderboardEntry, LeaderboardSnapshot } from './_leaderboard';
 export { extractCitations } from './citation-extractor';
 export type {
   CitationExtractionInput,

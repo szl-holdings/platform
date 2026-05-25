@@ -1,0 +1,16 @@
+{
+  "benchmark": "SWE-bench Verified",
+  "snapshotTakenAt": "2025-05-01",
+  "upstreamSource": "https://www.swebench.com/ (leaderboard, manually pinned snapshot)",
+  "note": "Pinned dataset file. Update the entries + snapshotTakenAt when refreshing. Each `resolved` value is the fraction of resolved instances in [0,1].",
+  "entries": [
+    { "model": "Augment Agent v0 (Claude 3.7 Sonnet)", "resolved": 0.6502 },
+    { "model": "Tools + Claude 3.7 Sonnet (2025-02-24)", "resolved": 0.6340 },
+    { "model": "Amazon Q Developer Agent (v20241202)", "resolved": 0.5500 },
+    { "model": "OpenHands + CodeAct v2.1 (claude-3-5-sonnet-20241022)", "resolved": 0.5300 },
+    { "model": "devlo", "resolved": 0.4720 },
+    { "model": "Agentless-1.5 + Claude 3.5 Sonnet", "resolved": 0.4080 },
+    { "model": "Tools + Claude 3.5 Sonnet (2024-10-22)", "resolved": 0.4900 },
+    { "model": "SWE-agent + Claude 3.5 Sonnet", "resolved": 0.3320 }
+  ]
+}

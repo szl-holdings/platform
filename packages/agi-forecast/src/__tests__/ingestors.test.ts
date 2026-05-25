@@ -12,6 +12,7 @@ import {
   ingestMmlu,
   ingestRsp,
   ingestSweBench,
+  parseLeaderboardMaxFraction,
   parseMaxPercentFraction,
 } from '../ingestors';
 
@@ -201,6 +202,97 @@ describe.each(TAG_INGESTORS)('$name ingestor — latest git tag (semver string)'
   });
 });
 
+describe('parseLeaderboardMaxFraction — structured snapshot parser', () => {
+  it('returns max resolved fraction (values already in [0,1])', () => {
+    const json = JSON.stringify({
+      entries: [
+        { model: 'a', resolved: 0.33 },
+        { model: 'b', resolved: 0.6502 },
+        { model: 'c', resolved: 0.49 },
+      ],
+    });
+    expect(parseLeaderboardMaxFraction(json)).toBeCloseTo(0.6502, 6);
+  });
+
+  it('normalizes percentage-style values (>1) by dividing by 100', () => {
+    const json = JSON.stringify({
+      entries: [
+        { model: 'a', resolved: 33.2 },
+        { model: 'b', resolved: 65.02 },
+      ],
+    });
+    expect(parseLeaderboardMaxFraction(json)).toBeCloseTo(0.6502, 6);
+  });
+
+  it('skips non-numeric or out-of-range entries', () => {
+    const json = JSON.stringify({
+      entries: [
+        { model: 'bad', resolved: 'oops' },
+        { model: 'huge', resolved: 9999 },
+        { model: 'ok', resolved: 0.41 },
+      ],
+    });
+    expect(parseLeaderboardMaxFraction(json)).toBeCloseTo(0.41, 6);
+  });
+
+  it('throws when entries are missing', () => {
+    expect(() => parseLeaderboardMaxFraction(JSON.stringify({}))).toThrow(/no entries/);
+  });
+
+  it('throws when no entry has a usable numeric score', () => {
+    const json = JSON.stringify({ entries: [{ model: 'x', resolved: 'n/a' }] });
+    expect(() => parseLeaderboardMaxFraction(json)).toThrow(/usable numeric/);
+  });
+});
+
+describe('SWE_BENCH ingestor — pinned structured leaderboard snapshot', () => {
+  it('returns the max resolved fraction from an injected loader', async () => {
+    const synthetic = JSON.stringify({
+      benchmark: 'SWE-bench Verified',
+      snapshotTakenAt: '2025-01-01',
+      upstreamSource: 'test',
+      entries: [
+        { model: 'a', resolved: 0.42 },
+        { model: 'b', resolved: 0.6502 },
+      ],
+    });
+    const res = await ingestSweBench(async () => synthetic);
+    expect(res.ok).toBe(true);
+    if (res.ok) {
+      expect(res.value).toBeCloseTo(0.6502, 6);
+      expect(res.sourceUrl).toMatch(/swebench\.com/);
+    }
+  });
+
+  it('default loader reads the checked-in pinned snapshot and returns a [0,1] fraction', async () => {
+    const res = await ingestSweBench();
+    expect(res.ok).toBe(true);
+    if (res.ok) {
+      expect(res.value).toBeGreaterThan(0);
+      expect(res.value).toBeLessThanOrEqual(1);
+      expect(res.sourceUrl).toMatch(/swe-bench-verified-leaderboard\.json/);
+    }
+  });
+
+  it('captures loader exceptions without throwing', async () => {
+    const res = await ingestSweBench(async () => {
+      throw new Error('swe-boom');
+    });
+    expect(res.ok).toBe(false);
+    if (!res.ok) expect(res.error).toBe('swe-boom');
+  });
+
+  it('fails on malformed JSON', async () => {
+    const res = await ingestSweBench(async () => '{ not json');
+    expect(res.ok).toBe(false);
+  });
+
+  it('fails on empty snapshot payload', async () => {
+    const res = await ingestSweBench(async () => '');
+    expect(res.ok).toBe(false);
+  });
+});
+
 describe('parseMaxPercentFraction — README leaderboard parser', () => {
   it('returns max percentage divided by 100', () => {
     const md = 'Baseline: 45%, GPT-3.5: 62.4%, GPT-4: 86.7%.';
@@ -223,7 +315,6 @@ describe('parseMaxPercentFraction — README leaderboard parser', () => {
 const BENCHMARK_INGESTORS = [
   { name: 'GPQA', fn: ingestGpqa, urlMatch: /idavidrein\/gpqa\/readme/ },
   { name: 'MMLU', fn: ingestMmlu, urlMatch: /hendrycks\/test\/readme/ },
-  { name: 'SWE_BENCH', fn: ingestSweBench, urlMatch: /SWE-bench\/readme/ },
   { name: 'HUMANEVAL', fn: ingestHumanEval, urlMatch: /human-eval\/readme/ },
   { name: 'MATH', fn: ingestMath, urlMatch: /hendrycks\/math\/readme/ },
 ] as const;
@@ -263,3 +354,4 @@ describe.each(BENCHMARK_INGESTORS)('$name ingestor — README max-score fraction
     if (!res.ok) expect(res.error).toBe(`${name}-boom`);
   });
 });
+
