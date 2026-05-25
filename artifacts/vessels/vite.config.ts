@@ -68,7 +68,33 @@ export default defineConfig({
       output: {
         manualChunks(id): string | undefined {
           if (id.includes('node_modules')) {
-            if (id.includes('recharts') || id.includes('d3-')) return 'vendor-charts';
+            // Isolate mapbox-gl and its heavy peers (~1.7MB) so the chunk is
+            // only fetched when fleet-map.tsx dynamically imports
+            // `mapbox-gl` (the page itself is lazy-loaded).
+            if (
+              id.includes('mapbox-gl') ||
+              id.includes('/earcut/') ||
+              id.includes('/geojson-vt/') ||
+              id.includes('/vt-pbf/') ||
+              id.includes('/pbf/') ||
+              id.includes('/supercluster/') ||
+              id.includes('/kdbush/') ||
+              id.includes('/quickselect/') ||
+              id.includes('/rw-lock/') ||
+              id.includes('/potpack/') ||
+              id.includes('/tinyqueue/')
+            ) {
+              return 'vendor-mapbox';
+            }
+            // Split the chart stack so consumers only pay for what they use.
+            // - `vendor-recharts` is loaded by any chart page.
+            // - `vendor-d3` groups the d3-* utilities (some chart consumers
+            //   only need a subset; isolating them keeps recharts-only pages
+            //   from paying for the full d3 footprint when downstream tree-
+            //   shaking improves).
+            if (id.includes('/recharts/')) return 'vendor-recharts';
+            if (id.includes('/victory-vendor/')) return 'vendor-recharts';
+            if (id.includes('/d3-')) return 'vendor-d3';
             if (id.includes('framer-motion')) return 'vendor-motion';
             if (id.includes('@radix-ui')) return 'vendor-radix';
             if (id.includes('@tanstack')) return 'vendor-tanstack';
