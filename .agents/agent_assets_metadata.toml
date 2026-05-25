@@ -1,4 +1,3 @@
-# doctrine-scanner-exempt: legacy live-product surface; rename tracked as separate engineering debt — see scripts/check-doctrine-v6.mjs header.
 uploads = []
 
 [[generated]]
@@ -1038,3 +1037,9 @@ id = "rpmhLuqFx77RL722KR_2S"
 uri = "file://dossier/series-a-operational/SERIES_A_OPERATIONAL_THESIS.md"
 type = "text"
 title = "SZL Holdings — Series A Operational Thesis"
+
+[[outputs]]
+id = "Ti0LC4KSiLEYidN4rWEBO"
+uri = "file://docs/proposals/szl-evolution-plan.md"
+type = "text"
+title = "SZL Holdings — Evolution & Operationalisation Plan (v1 draft)"
