@@ -1,0 +1,26 @@
+{
+  "measured": "T_gate_cpu (pure evaluator only — NOT end-to-end)",
+  "n": 100000,
+  "warmup": 5000,
+  "p50_ms": 0.000462,
+  "p95_ms": 0.00096,
+  "p99_ms": 0.001352,
+  "max_ms": 1.2241,
+  "mean_ms": 0.000833,
+  "collected_at": "2026-05-25T04:17:09.275Z",
+  "doctrine_version": "V6",
+  "replay_root": "1ed4d253e876f428c6e182f8ed8a569585442556b339529bbf8ec2522581698b",
+  "host": {
+    "hostname": "repl",
+    "arch": "x64",
+    "platform": "linux",
+    "release": "6.17.5",
+    "cpu_model": "INTEL(R) XEON(R) PLATINUM 8581C CPU @ 2.30GHz",
+    "cpu_mhz": 2300,
+    "cpu_count": 8,
+    "total_mem_bytes": 16762150912,
+    "node_version": "v24.13.0",
+    "collected_at": "2026-05-25T04:17:09.275Z"
+  },
+  "note": "End-to-end p95 (apiserver + webhook RTT + this evaluator) is bounded above by the in-cluster harness in scripts/run-cluster-latency.sh. Run that on a t3.medium for the §05 acceptance number."
+}

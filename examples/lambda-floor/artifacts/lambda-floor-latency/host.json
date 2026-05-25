@@ -1,0 +1,12 @@
+{
+  "hostname": "repl",
+  "arch": "x64",
+  "platform": "linux",
+  "release": "6.17.5",
+  "cpu_model": "INTEL(R) XEON(R) PLATINUM 8581C CPU @ 2.30GHz",
+  "cpu_mhz": 2300,
+  "cpu_count": 8,
+  "total_mem_bytes": 16762150912,
+  "node_version": "v24.13.0",
+  "collected_at": "2026-05-25T04:17:09.275Z"
+}
