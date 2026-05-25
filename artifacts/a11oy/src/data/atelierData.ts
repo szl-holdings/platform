@@ -54,6 +54,10 @@ export interface AtelierSpace {
   runCount: number;
   createdAt: string;
   trending: boolean;
+  parentSlug?: string;
+  composedOf?: string[];
+  diff?: { added: string[]; removed: string[]; modified: string[] };
+  publicProofPacketId?: string;
   template: string;
   tags: string[];
   proofChain: ProofChainEntry[];
@@ -724,6 +728,106 @@ prohibited:
   - metric_override`,
     proofChain: [
       { id: 'pc-p-001', timestamp: '2026-05-04T10:00:00Z', action: 'All 7 fabric layers — health verified', verdict: 'pass', score: 1.0, proofRef: 'sha256:a4b5c6d7e8f9a0b1c2d3e4f5a6b7' },
+    ],
+    nexusSignals: [],
+  },
+  // ============================================================
+  // Fork (#5237): inherits re-underwriting Constitution with diff.
+  // ============================================================
+  {
+    id: 'space-re-underwriting-distressed',
+    slug: 're-underwriting-distressed',
+    name: 'Real Estate Underwriting — Distressed Assets',
+    description: 'Forked from re-underwriting with added distress-scoring and workout-proposal capabilities. Constitution v3.1.0 inherits parent prohibitions.',
+    longDescription: 'A constitutional fork of the canonical Real Estate Underwriting Agent — re-targeted at distressed and special-situation acquisitions. Adds receivership filing ingestion, workout proposal generation, and a distress-scoring model. All parent governance constraints (no bid submission, no covenant override) remain enforced; the fork only adds — it never weakens.',
+    vertical: 'real-estate',
+    audienceTier: 'enterprise',
+    runtime: 'agent-loop',
+    constitutionRef: 'const-domaine-v3-distressed',
+    connectors: ['CoStar API', 'MLS Feed', 'Lender Covenant DB', 'Portfolio Holdings', 'Receivership Filings'],
+    modelPolicy: 'claude-3.5-sonnet → gpt-4o (fallback)',
+    governanceScore: 92, proofScore: 95, auditCompleteness: 0.96,
+    costPerDecision: 0.17, p95ApprovalLatencyMs: 48000, sloAdherence: 0.97,
+    forkCount: 0, embedCount: 0, runCount: 36,
+    createdAt: '2026-05-21',
+    trending: true,
+    parentSlug: 're-underwriting',
+    diff: {
+      added: ['capability:distress_score', 'capability:workout_propose', 'connector:Receivership Filings', 'prohibition:workout_execute'],
+      removed: [],
+      modified: ['constitutionVersion: 3.0.0 → 3.1.0'],
+    },
+    publicProofPacketId: 'pp-run-seed-re-underwriting-distressed-6',
+    template: 'real-estate-underwriting',
+    tags: ['distressed', 'workout', 'fork', 'real-estate'],
+    author: 'terra-distress',
+    constitution: `name: const-domaine-v3-distressed
+version: 3.1.0
+parent: const-domaine-v3
+purpose: Distressed-asset underwriting fork — adds workout-proposal capability.
+
+inherits_from: const-domaine-v3
+capabilities:
+  - comp_read              # inherited
+  - covenant_check         # inherited
+  - cap_rate_model         # inherited
+  - distress_score         # added
+  - workout_propose        # added
+
+prohibited:
+  - bid_submit             # inherited
+  - covenant_override      # inherited
+  - workout_execute        # added`,
+    proofChain: [
+      { id: 'pc-rd-001', timestamp: '2026-05-22T11:00:00Z', action: 'Fork inherited const-domaine-v3 with diff', verdict: 'pass', score: 0.96, proofRef: 'sha256:f4e3d2c1b0a9988776655443322110ff' },
+    ],
+    nexusSignals: [],
+  },
+  // ============================================================
+  // Composition (#5237): cross-Space executive brief.
+  // ============================================================
+  {
+    id: 'space-cross-vertical-executive-brief',
+    slug: 'cross-vertical-executive-brief',
+    name: 'Cross-Vertical Executive Brief',
+    description: 'Composed from maritime-routing + re-underwriting + cyber-triage. Aggregates child proofs into a single boardroom-ready packet.',
+    longDescription: 'A composition Space: it does not run its own agent loop. Instead, it subscribes to proofs from three child Spaces (maritime-routing, re-underwriting, cyber-triage) and synthesizes a unified executive brief. Each child proof remains independently verifiable; the composition Space adds its own MirrorEval pass over the synthesized output.',
+    vertical: 'executive',
+    audienceTier: 'internal',
+    runtime: 'canvas',
+    constitutionRef: 'const-boardroom-v2',
+    connectors: ['Signal Mesh', 'Workcell Registry', 'Proof Ledger'],
+    modelPolicy: 'gpt-4o (composition-mode)',
+    governanceScore: 96, proofScore: 98, auditCompleteness: 0.99,
+    costPerDecision: 0.31, p95ApprovalLatencyMs: 12000, sloAdherence: 0.995,
+    forkCount: 0, embedCount: 2, runCount: 84,
+    createdAt: '2026-05-22',
+    trending: true,
+    composedOf: ['maritime-routing', 're-underwriting', 'cyber-triage'],
+    publicProofPacketId: 'pp-run-seed-cross-vertical-executive-brief-7',
+    template: 'executive-brief',
+    tags: ['composition', 'executive', 'cross-vertical', 'boardroom'],
+    author: 'platform-ops',
+    constitution: `name: const-boardroom-v2
+version: 2.0.0
+purpose: Compose proofs from child Spaces into a boardroom-ready brief.
+
+composed_of:
+  - maritime-routing
+  - re-underwriting
+  - cyber-triage
+
+capabilities:
+  - signal_aggregate
+  - brief_synthesize
+  - child_proof_verify
+
+prohibited:
+  - child_capability_escalate
+  - cross_tenant_read
+  - child_constitution_override`,
+    proofChain: [
+      { id: 'pc-cv-001', timestamp: '2026-05-23T08:30:00Z', action: 'Composed brief — 3 child proofs verified', verdict: 'pass', score: 0.98, proofRef: 'sha256:b0a99887766554433221100ffeeddccb' },
     ],
     nexusSignals: [],
   },

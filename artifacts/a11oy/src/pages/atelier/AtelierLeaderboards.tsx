@@ -1,6 +1,7 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Link } from 'wouter';
-import { ATELIER_SPACES, VERTICAL_COLORS, LEADERBOARD_SORT_MODES, sortSpaces, type LeaderboardSortMode } from '../../data/atelierData';
+import { ATELIER_SPACES, VERTICAL_COLORS, LEADERBOARD_SORT_MODES, sortSpaces, type AtelierSpace, type LeaderboardSortMode } from '../../data/atelierData';
+import { fetchAtelierSpaces, fetchAtelierLeaderboards } from '../../lib/atelier-runtime';
 
 const BASE = (import.meta.env.BASE_URL ?? '/a11oy/').replace(/\/$/, '');
 const b = (p: string) => `${BASE}${p}`;
@@ -29,23 +30,77 @@ function ScoreBar({ value, max, color = T.accent }: { value: number; max: number
   );
 }
 
-function getScoreDisplay(space: typeof ATELIER_SPACES[0], mode: LeaderboardSortMode): { label: string; value: string; bar: number; barMax: number; barColor?: string } {
+function getScoreDisplay(space: AtelierSpace, mode: LeaderboardSortMode, pool: AtelierSpace[]): { label: string; value: string; bar: number; barMax: number; barColor?: string } {
   switch (mode) {
     case 'proof-score': return { label: 'Proof Score', value: `${space.proofScore}`, bar: space.proofScore, barMax: 100 };
     case 'most-audited': return { label: 'Audit Complete', value: `${Math.round(space.auditCompleteness * 100)}%`, bar: space.auditCompleteness * 100, barMax: 100 };
     case 'lowest-cost': return { label: 'Cost/Decision', value: `$${space.costPerDecision.toFixed(2)}`, bar: Math.max(0, 2 - space.costPerDecision), barMax: 2 };
     case 'fastest-approval': return { label: 'p95 Approval', value: `${Math.round(space.p95ApprovalLatencyMs / 1000)}s`, bar: Math.max(0, 100000 - space.p95ApprovalLatencyMs) / 1000, barMax: 100 };
     case 'slo-adherence': return { label: 'SLO Adherence', value: `${Math.round(space.sloAdherence * 100)}%`, bar: space.sloAdherence * 100, barMax: 100 };
-    case 'most-forked': return { label: 'Forks', value: `${space.forkCount}`, bar: space.forkCount, barMax: Math.max(...ATELIER_SPACES.map(s => s.forkCount)) };
-    case 'most-embedded': return { label: 'Embeds', value: `${space.embedCount}`, bar: space.embedCount, barMax: Math.max(...ATELIER_SPACES.map(s => s.embedCount)) };
+    case 'most-forked': return { label: 'Forks', value: `${space.forkCount}`, bar: space.forkCount, barMax: Math.max(1, ...pool.map(s => s.forkCount)) };
+    case 'most-embedded': return { label: 'Embeds', value: `${space.embedCount}`, bar: space.embedCount, barMax: Math.max(1, ...pool.map(s => s.embedCount)) };
     default: return { label: 'Score', value: '—', bar: 0, barMax: 100 };
   }
 }
 
 export function AtelierLeaderboards() {
   const [activeBoard, setActiveBoard] = useState<LeaderboardSortMode>('proof-score');
+  // Primary source = /api/atelier/leaderboards (telemetry-aggregated).
+  // Static catalog only supplies visual fields (description, tags) for
+  // each slug. `liveBySlug` tracks which entries came from live telemetry
+  // so we can show a "telemetry" vs "seed" provenance badge per row.
+  const [spaces, setSpaces] = useState<AtelierSpace[]>(ATELIER_SPACES);
+  const [liveBySlug, setLiveBySlug] = useState<Map<string, 'telemetry' | 'seed'>>(new Map());
 
-  const ranked = sortSpaces(ATELIER_SPACES, activeBoard);
+  useEffect(() => {
+    let cancelled = false;
+    void Promise.all([fetchAtelierSpaces(), fetchAtelierLeaderboards()]).then(([remoteSpaces, remoteLb]) => {
+      if (cancelled) return;
+      const bySlug = new Map(ATELIER_SPACES.map((s) => [s.slug, { ...s }]));
+      // Add any space that exists only in the live registry.
+      for (const r of remoteSpaces ?? []) {
+        if (bySlug.has(r.slug)) continue;
+        bySlug.set(r.slug, {
+          id: `sp-live-${r.slug}`, slug: r.slug, name: r.name,
+          description: 'Live Space from /api/atelier/spaces.',
+          longDescription: 'Live Space from /api/atelier/spaces.',
+          vertical: (r.vertical as AtelierSpace['vertical']) ?? 'cross-vertical',
+          audienceTier: r.audienceTier ?? 'enterprise',
+          runtime: 'agent-loop', constitutionRef: 'const-default',
+          connectors: [], modelPolicy: 'governed-default',
+          governanceScore: 92, proofScore: 94, auditCompleteness: 0.95,
+          costPerDecision: 0.1, p95ApprovalLatencyMs: 30000, sloAdherence: 0.98,
+          forkCount: 0, embedCount: 0, runCount: 0, createdAt: r.createdAt,
+          trending: false, parentSlug: r.parentSlug, composedOf: r.composedOf,
+          template: 'live', tags: [], proofChain: [], nexusSignals: [],
+          author: r.author, constitution: '',
+        });
+      }
+      // Override numeric fields with telemetry-aggregated values.
+      const provenance = new Map<string, 'telemetry' | 'seed'>();
+      if (remoteLb) {
+        for (const e of remoteLb) {
+          const sp = bySlug.get(e.slug);
+          provenance.set(e.slug, e.source);
+          if (!sp) continue;
+          if (e.runCount > 0) {
+            sp.proofScore = Math.round(e.proofScore * 100);
+            sp.governanceScore = Math.round(e.governanceScore * 100);
+            sp.auditCompleteness = e.auditCompleteness;
+            sp.costPerDecision = e.costPerDecision;
+            sp.p95ApprovalLatencyMs = e.p95ApprovalLatencyMs;
+          }
+          sp.embedCount = e.embedCount;
+          sp.runCount = e.runCount;
+        }
+      }
+      setSpaces(Array.from(bySlug.values()));
+      setLiveBySlug(provenance);
+    });
+    return () => { cancelled = true; };
+  }, []);
+
+  const ranked = sortSpaces(spaces, activeBoard);
 
   return (
     <div style={{ minHeight: '100vh', background: T.bg, color: T.text }}>
@@ -102,7 +157,7 @@ export function AtelierLeaderboards() {
         <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
           {ranked.map((space, i) => {
             const vColor = VERTICAL_COLORS[space.vertical];
-            const scoreInfo = getScoreDisplay(space, activeBoard);
+            const scoreInfo = getScoreDisplay(space, activeBoard, spaces);
             return (
               <Link key={space.id} href={b(`/atelier/s/${space.slug}`)} style={{ textDecoration: 'none' }}>
                 <div style={{
@@ -116,7 +171,23 @@ export function AtelierLeaderboards() {
                   <RankBadge rank={i + 1} />
 
                   <div style={{ flex: 1, minWidth: 0 }}>
-                    <div style={{ fontSize: '0.875rem', fontWeight: 600, color: T.text, marginBottom: '0.2rem' }}>{space.name}</div>
+                    <div style={{ fontSize: '0.875rem', fontWeight: 600, color: T.text, marginBottom: '0.2rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                      {space.name}
+                      {(() => {
+                        const src = liveBySlug.get(space.slug);
+                        if (!src) return null;
+                        const isLive = src === 'telemetry';
+                        return (
+                          <span style={{
+                            fontSize: '0.5rem', fontFamily: T.mono, padding: '0.1rem 0.375rem',
+                            borderRadius: 3, letterSpacing: '0.1em', textTransform: 'uppercase',
+                            color: isLive ? T.accent : T.textMuted,
+                            border: `1px solid ${isLive ? `${T.accent}40` : T.border}`,
+                            background: isLive ? `${T.accent}10` : 'transparent',
+                          }}>{isLive ? 'telemetry' : 'seed'}</span>
+                        );
+                      })()}
+                    </div>
                     <div style={{ fontSize: '0.5625rem', fontFamily: T.mono, color: vColor, textTransform: 'uppercase' }}>
                       {space.vertical.replace(/-/g, ' ')}
                     </div>

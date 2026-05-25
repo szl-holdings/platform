@@ -1,7 +1,44 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import { Link } from 'wouter';
 import { motion } from 'framer-motion';
-import { ATELIER_SPACES, VERTICAL_COLORS, type AudienceTier, type Runtime, type Vertical, type AtelierSpace } from '../../data/atelierData';
+import { ATELIER_SPACES as STATIC_ATELIER_SPACES, VERTICAL_COLORS, type AudienceTier, type Runtime, type Vertical, type AtelierSpace } from '../../data/atelierData';
+import { fetchAtelierSpaces } from '../../lib/atelier-runtime';
+
+// Merge static catalog with live registry from /api/atelier/spaces so
+// freshly-created/forked Spaces appear without a redeploy. Live entries
+// fall back to placeholder metrics; static entries always win on
+// duplicate slug so the rich UI catalog stays intact.
+function useMergedSpaces(): AtelierSpace[] {
+  const [spaces, setSpaces] = useState<AtelierSpace[]>(STATIC_ATELIER_SPACES);
+  useEffect(() => {
+    let cancelled = false;
+    void fetchAtelierSpaces().then((remote) => {
+      if (cancelled || !remote) return;
+      const bySlug = new Map(STATIC_ATELIER_SPACES.map((s) => [s.slug, s]));
+      for (const r of remote) {
+        if (bySlug.has(r.slug)) continue;
+        bySlug.set(r.slug, {
+          id: `sp-live-${r.slug}`, slug: r.slug, name: r.name,
+          description: 'Live Space from /api/atelier/spaces.',
+          longDescription: 'Live Space from /api/atelier/spaces.',
+          vertical: (r.vertical as Vertical) ?? 'cross-vertical',
+          audienceTier: r.audienceTier ?? 'enterprise',
+          runtime: 'agent-loop', constitutionRef: 'const-default',
+          connectors: [], modelPolicy: 'governed-default',
+          governanceScore: 92, proofScore: 94, auditCompleteness: 0.95,
+          costPerDecision: 0.1, p95ApprovalLatencyMs: 30000, sloAdherence: 0.98,
+          forkCount: 0, embedCount: 0, runCount: 0, createdAt: r.createdAt,
+          trending: false, parentSlug: r.parentSlug, composedOf: r.composedOf,
+          template: 'live', tags: [], proofChain: [], nexusSignals: [],
+          author: r.author, constitution: '',
+        });
+      }
+      setSpaces(Array.from(bySlug.values()));
+    });
+    return () => { cancelled = true; };
+  }, []);
+  return spaces;
+}
 
 const BASE = (import.meta.env.BASE_URL ?? '/a11oy/').replace(/\/$/, '');
 const b = (p: string) => `${BASE}${p}`;
@@ -72,7 +109,7 @@ function ProofScoreBadge({ score }: { score: number }) {
   );
 }
 
-function SpaceCard({ space, i }: { space: typeof ATELIER_SPACES[number]; i: number }) {
+function SpaceCard({ space, i }: { space: AtelierSpace; i: number }) {
   const [hovered, setHovered] = useState(false);
   const vColor = VERTICAL_COLORS[space.vertical];
   const am = AUDIENCE_META[space.audienceTier];
@@ -137,7 +174,7 @@ function SpaceCard({ space, i }: { space: typeof ATELIER_SPACES[number]; i: numb
   );
 }
 
-function DiscoveryRail({ label, spaces, metricFn }: { label: string; spaces: typeof ATELIER_SPACES; metricFn: (s: typeof ATELIER_SPACES[number]) => string }) {
+function DiscoveryRail({ label, spaces, metricFn }: { label: string; spaces: AtelierSpace[]; metricFn: (s: AtelierSpace) => string }) {
   return (
     <div style={{ marginBottom: '2.5rem' }}>
       <div style={{ fontSize: '0.625rem', fontFamily: T.mono, fontWeight: 600, letterSpacing: '0.14em', textTransform: 'uppercase', color: T.textMuted, marginBottom: '0.75rem' }}>
@@ -196,6 +233,7 @@ function getGovernanceTier(space: AtelierSpace): GovernanceTier {
 }
 
 export function AtelierHub() {
+  const spaces = useMergedSpaces();
   const [search, setSearch] = useState('');
   const [filterVertical, setFilterVertical] = useState<Vertical | 'all'>('all');
   const [filterRuntime, setFilterRuntime] = useState<Runtime | 'all'>('all');
@@ -211,7 +249,7 @@ export function AtelierHub() {
   const govTiers: GovernanceTier[] = ['gold', 'silver', 'bronze'];
 
   const sorted = useMemo(() => {
-    let list = [...ATELIER_SPACES];
+    let list = [...spaces];
     if (sortMode === 'trending') list = list.filter(s => s.trending).concat(list.filter(s => !s.trending));
     else if (sortMode === 'new') list = list.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
     else if (sortMode === 'proof-score') list = list.sort((a, b) => b.proofScore - a.proofScore);
@@ -219,7 +257,7 @@ export function AtelierHub() {
     else if (sortMode === 'lowest-cost') list = list.sort((a, b) => a.costPerDecision - b.costPerDecision);
     else if (sortMode === 'fastest-approval') list = list.sort((a, b) => a.p95ApprovalLatencyMs - b.p95ApprovalLatencyMs);
     return list;
-  }, [sortMode]);
+  }, [sortMode, spaces]);
 
   const filtered = useMemo(() => {
     let list = sorted;
@@ -235,10 +273,10 @@ export function AtelierHub() {
     return list;
   }, [sorted, filterVertical, filterRuntime, filterAudience, filterModelFamily, filterGovTier, search]);
 
-  const trendingSpaces = ATELIER_SPACES.filter(s => s.trending);
-  const newestSpaces = useMemo(() => [...ATELIER_SPACES].sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()).slice(0, 6), []);
-  const highestProofSpaces = useMemo(() => [...ATELIER_SPACES].sort((a, b) => b.proofScore - a.proofScore).slice(0, 6), []);
-  const mostAuditedSpaces = useMemo(() => [...ATELIER_SPACES].sort((a, b) => b.auditCompleteness - a.auditCompleteness).slice(0, 6), []);
+  const trendingSpaces = spaces.filter(s => s.trending);
+  const newestSpaces = useMemo(() => [...spaces].sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()).slice(0, 6), []);
+  const highestProofSpaces = useMemo(() => [...spaces].sort((a, b) => b.proofScore - a.proofScore).slice(0, 6), []);
+  const mostAuditedSpaces = useMemo(() => [...spaces].sort((a, b) => b.auditCompleteness - a.auditCompleteness).slice(0, 6), []);
 
   return (
     <div style={{ minHeight: '100vh', background: T.bg, color: T.text }}>

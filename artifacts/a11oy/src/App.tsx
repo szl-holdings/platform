@@ -304,6 +304,7 @@ const AtelierLeaderboards = lazy(() => import('./pages/atelier/AtelierLeaderboar
 const AtelierManifesto = lazy(() => import('./pages/atelier/AtelierManifesto').then(m => ({ default: m.AtelierManifesto })));
 const AtelierMySpaces = lazy(() => import('./pages/atelier/AtelierMySpaces').then(m => ({ default: m.AtelierMySpaces })));
 const AtelierEmbedHost = lazy(() => import('./pages/atelier/AtelierEmbedHost').then(m => ({ default: m.AtelierEmbedHost })));
+const AtelierProof = lazy(() => import('./pages/atelier/AtelierProof').then(m => ({ default: m.AtelierProof })));
 const McpHub = lazy(() => import('./pages/McpHub').then(m => ({ default: m.McpHub })));
 const AgenticRag = lazy(() => import('./pages/AgenticRag').then(m => ({ default: m.AgenticRag })));
 const SubstrateCompute = lazy(() => import('./pages/SubstrateCompute').then(m => ({ default: m.SubstrateCompute })));
@@ -982,6 +983,9 @@ function AppInner() {
         </Route>
         <Route path={`${base}/atelier/manifesto`}>
           <Suspense fallback={<Loader />}><AtelierManifesto /></Suspense>
+        </Route>
+        <Route path={`${base}/atelier/proof/:id`}>
+          <Suspense fallback={<Loader />}><AtelierProof /></Suspense>
         </Route>
         <Route path={`${base}/atelier`}>
           <Suspense fallback={<Loader />}><AtelierHub /></Suspense>

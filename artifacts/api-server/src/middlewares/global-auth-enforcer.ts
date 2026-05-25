@@ -266,6 +266,12 @@ const PUBLIC_PREFIXES = [
   "/api/auth/",
   "/api/oidc/",
   "/api/public/",
+  // A11oy Atelier — NOT a blanket prefix here. GET reads route through
+  // OPS_CORE_PUBLIC_PREFIXES (GET/HEAD only). The four narrow POST
+  // exemptions (runs, runs/:id/complete, proofs/:id/verify,
+  // embed-events) are gated by isAtelierPublicMutation() below so the
+  // Space registry mutation routes (/spaces, /spaces/:p/fork) keep
+  // their auth wall.
   // SIGIL — SZL Integrated Governance & Invariant Layer.
   // Pure-functional, stateless, validated by Zod, no PII. The framework's
   // demo UI in A11oy/Sentra/Amaru calls these endpoints from the browser
@@ -679,7 +685,36 @@ const OPS_CORE_PUBLIC_PREFIXES = [
   // POST mutations (solve/queue, approve, reject, narrate, ingest/run) fall
   // through to the auth wall and the per-route requireAuth() enforcement.
   "/api/rosie/",
+  // A11oy Atelier: GET reads (spaces, runs, proofs, leaderboards) are
+  // anonymous-readable for the public proof URLs, embed iframes, and
+  // marketing surface. Mutations are narrowly carved out below via
+  // isAtelierPublicMutation() — Space registry mutations (create / fork)
+  // keep their auth wall.
+  "/api/atelier/",
 ] as const;
+
+// A11oy Atelier — narrow POST allowlist. These four endpoints are
+// browser-callable without a session because (a) /runs and
+// /runs/:id/complete mint an in-memory run with no per-user state and
+// the proof body is content-addressed (sha256 of runId), (b)
+// /proofs/:id/verify is a pure idempotent re-derivation, and (c)
+// /embed-events is fire-and-forget telemetry analogous to
+// /api/sentra/status. /spaces and /spaces/:parent/fork are
+// INTENTIONALLY EXCLUDED so anonymous callers cannot mutate the Space
+// registry.
+const ATELIER_PUBLIC_POST_EXACT = new Set<string>([
+  "/api/atelier/runs",
+  "/api/atelier/embed-events",
+  "/api/atelier/proofs/verify",
+]);
+function isAtelierPublicMutation(req: Request): boolean {
+  if (req.method !== "POST") return false;
+  const p = req.path;
+  if (ATELIER_PUBLIC_POST_EXACT.has(p)) return true;
+  if (/^\/api\/atelier\/runs\/[^/]+\/complete$/.test(p)) return true;
+  if (/^\/api\/atelier\/proofs\/[^/]+\/verify$/.test(p)) return true;
+  return false;
+}
 
 function isOpsCorePublicRead(req: Request): boolean {
   if (req.method !== "GET" && req.method !== "HEAD") return false;
@@ -952,6 +987,13 @@ export function globalAuthEnforcer(
   // org hydration. Mutations under these prefixes fall through to the 401
   // response below — exactly as a private endpoint would.
   if (isOpsCorePublicRead(req)) {
+    next();
+    return;
+  }
+
+  // A11oy Atelier narrow POST carve-outs (runs, runs/:id/complete,
+  // proofs/:id/verify, embed-events). See ATELIER_PUBLIC_POST_EXACT.
+  if (isAtelierPublicMutation(req)) {
     next();
     return;
   }

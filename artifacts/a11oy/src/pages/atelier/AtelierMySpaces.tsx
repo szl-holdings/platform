@@ -1,5 +1,7 @@
+import { useEffect, useState } from 'react';
 import { Link } from 'wouter';
-import { ATELIER_SPACES, VERTICAL_COLORS } from '../../data/atelierData';
+import { ATELIER_SPACES, VERTICAL_COLORS, type AtelierSpace } from '../../data/atelierData';
+import { fetchAtelierSpaces } from '../../lib/atelier-runtime';
 
 const BASE = (import.meta.env.BASE_URL ?? '/a11oy/').replace(/\/$/, '');
 const b = (p: string) => `${BASE}${p}`;
@@ -10,9 +12,36 @@ const T = {
   mono: 'var(--font-mono,ui-monospace,monospace)',
 };
 
-const MY_SPACES = ATELIER_SPACES.slice(0, 3);
-
 export function AtelierMySpaces() {
+  // Merge live /api/atelier/spaces into the static catalog (live entries
+  // appended after the static seed) and surface the first 3 as "mine".
+  const [MY_SPACES, setMySpaces] = useState<AtelierSpace[]>(ATELIER_SPACES.slice(0, 3));
+  useEffect(() => {
+    let cancelled = false;
+    void fetchAtelierSpaces().then((remote) => {
+      if (cancelled || !remote || remote.length === 0) return;
+      const staticSlugs = new Set(ATELIER_SPACES.map((s) => s.slug));
+      const liveOnly = remote.filter((r) => !staticSlugs.has(r.slug));
+      if (liveOnly.length === 0) return;
+      const liveCards: AtelierSpace[] = liveOnly.slice(0, 3).map((r) => ({
+        id: `sp-live-${r.slug}`, slug: r.slug, name: r.name,
+        description: 'Live Space from /api/atelier/spaces.',
+        longDescription: 'Live Space from /api/atelier/spaces.',
+        vertical: (r.vertical as AtelierSpace['vertical']) ?? 'cross-vertical',
+        audienceTier: r.audienceTier ?? 'enterprise',
+        runtime: 'agent-loop', constitutionRef: 'const-default',
+        connectors: [], modelPolicy: 'governed-default',
+        governanceScore: 92, proofScore: 94, auditCompleteness: 0.95,
+        costPerDecision: 0.1, p95ApprovalLatencyMs: 30000, sloAdherence: 0.98,
+        forkCount: 0, embedCount: 0, runCount: 0, createdAt: r.createdAt,
+        trending: false, parentSlug: r.parentSlug, composedOf: r.composedOf,
+        template: 'live', tags: [], proofChain: [], nexusSignals: [],
+        author: r.author, constitution: '',
+      }));
+      setMySpaces([...liveCards, ...ATELIER_SPACES].slice(0, 3));
+    });
+    return () => { cancelled = true; };
+  }, []);
   return (
     <div style={{ minHeight: '100vh', background: T.bg, color: T.text }}>
       <div style={{ maxWidth: 900, margin: '0 auto', padding: '2rem clamp(1rem, 3vw, 2rem)' }}>

@@ -301,6 +301,113 @@ export async function streamRunOutput(
   return state;
 }
 
+// Persist a completed Atelier run to /api/atelier/runs so leaderboards,
+// public proof URLs, and embed telemetry stay grounded in real data.
+export interface RecordAtelierRunOpts {
+  spaceSlug: string;
+  workcellId: string;
+  vertical: string;
+  proofRef?: string;
+  outputLines: string[];
+  verdict?: 'pass' | 'fail' | 'warn';
+  governanceScore?: number;
+  origin?: string;
+  tenantId?: string;
+}
+
+export interface AtelierRunRecord {
+  id: string;
+  proofPacketId?: string;
+  proofRef?: string;
+}
+
+export async function recordAtelierRun(opts: RecordAtelierRunOpts): Promise<AtelierRunRecord | null> {
+  const created = (await tryFetch(`/api/atelier/runs`, {
+    method: 'POST',
+    body: JSON.stringify({
+      spaceSlug: opts.spaceSlug,
+      workcellId: opts.workcellId,
+      vertical: opts.vertical,
+      origin: opts.origin,
+      tenantId: opts.tenantId,
+    }),
+  })) as { ok?: boolean; data?: { id: string } } | null;
+  if (!created?.ok || !created.data) return null;
+  const completed = (await tryFetch(`/api/atelier/runs/${created.data.id}/complete`, {
+    method: 'POST',
+    body: JSON.stringify({
+      verdict: opts.verdict ?? 'pass',
+      governanceScore: opts.governanceScore,
+      proofRef: opts.proofRef,
+      outputLines: opts.outputLines.slice(-50),
+    }),
+  })) as { ok?: boolean; data?: { id: string; proofPacketId?: string; proofRef?: string } } | null;
+  if (!completed?.ok || !completed.data) return { id: created.data.id };
+  return {
+    id: completed.data.id,
+    proofPacketId: completed.data.proofPacketId,
+    proofRef: completed.data.proofRef,
+  };
+}
+
+// Fetch the live Space registry from /api/atelier/spaces. The handler is
+// anonymous-readable (GET via OPS_CORE_PUBLIC_PREFIXES). Returns null
+// on any failure so callers can fall back to the static catalog.
+export interface RemoteAtelierSpace {
+  slug: string;
+  name: string;
+  vertical: string;
+  audienceTier: 'internal' | 'enterprise' | 'public';
+  parentSlug?: string;
+  composedOf?: string[];
+  author: string;
+  createdAt: string;
+}
+export async function fetchAtelierSpaces(): Promise<RemoteAtelierSpace[] | null> {
+  const res = (await tryFetch(`/api/atelier/spaces`)) as
+    | { ok?: boolean; data?: RemoteAtelierSpace[] }
+    | null;
+  if (!res?.ok || !Array.isArray(res.data)) return null;
+  return res.data;
+}
+
+// Telemetry-aggregated leaderboard row returned by GET /api/atelier/leaderboards.
+// Numeric scores are 0-1 fractions on the server (proofScore/governanceScore/
+// auditCompleteness/passRate); cost is USD/decision; latency is ms.
+// `source` is 'telemetry' when at least one real run exists for the Space,
+// otherwise 'seed' for catalog-only entries.
+export interface RemoteAtelierLeaderboardEntry {
+  slug: string;
+  name: string;
+  vertical: string;
+  parentSlug?: string;
+  composedOf?: string[];
+  runCount: number;
+  proofScore: number;
+  governanceScore: number;
+  auditCompleteness: number;
+  costPerDecision: number;
+  p95ApprovalLatencyMs: number;
+  embedCount: number;
+  passRate: number;
+  lastRunAt?: string;
+  source: 'telemetry' | 'seed';
+}
+export async function fetchAtelierLeaderboards(): Promise<RemoteAtelierLeaderboardEntry[] | null> {
+  const res = (await tryFetch(`/api/atelier/leaderboards`)) as
+    | { ok?: boolean; data?: RemoteAtelierLeaderboardEntry[] }
+    | null;
+  if (!res?.ok || !Array.isArray(res.data)) return null;
+  return res.data;
+}
+
+export async function recordEmbedEvent(spaceSlug: string, origin: string, event: 'handshake' | 'run' | 'completed'): Promise<void> {
+  await tryFetch(`/api/atelier/embed-events`, {
+    method: 'POST',
+    body: JSON.stringify({ spaceSlug, origin, event }),
+  });
+}
+
 export async function validateProof(workcellId: string, pceContractId?: string): Promise<ProofResult> {
   if (pceContractId) {
     const result = (await tryFetch(`${API_PREFIX}/pce/${pceContractId}/validate`, {

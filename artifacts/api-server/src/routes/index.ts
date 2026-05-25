@@ -997,4 +997,20 @@ router.use("/a11oy/strategy", lazyMount(() => import("./a11oy-strategy"), "a11oy
 // POST /foundry/deepseek-v4/long-context/ingest
 router.use(lazyMatch("/foundry/deepseek-v4", () => import("./foundry-deepseek-v4"), "foundry-deepseek-v4"));
 
+// Atelier (#5237): persisted Spaces / Runs / Proof Packets / Embed telemetry.
+// Public endpoints — proof URLs and leaderboards are intentionally readable.
+// GET    /atelier/spaces                       — list all Spaces
+// GET    /atelier/spaces/:slug                 — single Space
+// POST   /atelier/spaces                       — create Space
+// POST   /atelier/spaces/:parent/fork          — fork with computed diff
+// GET    /atelier/runs?spaceSlug=              — list runs (optional filter)
+// GET    /atelier/runs/:id                     — single run
+// POST   /atelier/runs                         — start run
+// POST   /atelier/runs/:id/complete            — complete run, mint proof packet
+// GET    /atelier/proofs                       — list proof packets
+// GET    /atelier/proofs/:id                   — single proof packet (public)
+// POST   /atelier/embed-events                 — record embed telemetry
+// GET    /atelier/leaderboards?mode=           — governance-weighted leaderboard
+router.use("/atelier", lazyMount(() => import("./atelier"), "atelier"));
+
 export default router;

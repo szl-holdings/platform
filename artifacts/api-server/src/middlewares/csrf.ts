@@ -184,6 +184,14 @@ function isExempt(path: string): boolean {
   // a CSRF token. The store is in-memory and per-product; callers are
   // identified by the `product` field (validated against A11OY_PRODUCT_IDS).
   if (path.startsWith('/api/a11oy/fabric/')) return true;
+  // A11oy Atelier — narrow CSRF exemption matching the auth carve-outs
+  // in global-auth-enforcer (ATELIER_PUBLIC_POST_EXACT). /spaces and
+  // /spaces/:parent/fork are INTENTIONALLY NOT exempt; they require a
+  // session + CSRF double-submit like other mutation routes.
+  if (path === '/api/atelier/runs') return true;
+  if (/^\/api\/atelier\/runs\/[^/]+\/complete$/.test(path)) return true;
+  if (/^\/api\/atelier\/proofs\/[^/]+\/verify$/.test(path)) return true;
+  if (path === '/api/atelier/embed-events') return true;
   // A11oy FORGE — Proof-Carrying Agent Skills marketplace.
   // Narrow CSRF exemption: only read-only routes and the stateless
   // evaluation preview are exempt. The state-mutating publish route

@@ -14,6 +14,7 @@ import {
   Zap,
 } from 'lucide-react';
 import { useState } from 'react';
+import { AtelierEmbedFrame } from '../components/AtelierEmbedFrame';
 
 const ROUTES = [
   {
@@ -464,6 +465,14 @@ export default function AutonomousRoutingPage() {
               </div>
             </div>
           </div>
+        </div>
+
+        <div className="mt-8">
+          <div className="text-[10px] font-mono uppercase tracking-[0.14em] text-[#c9b787] mb-2">Composed governance · A11oy Atelier</div>
+          <p className="text-[11px] text-sky-400/60 max-w-[60ch] leading-relaxed mb-3">
+            The maritime-routing Atelier Space is embedded directly into Vessels. Each run produces a publicly verifiable proof packet — telemetry feeds the governance-weighted leaderboard.
+          </p>
+          <AtelierEmbedFrame spaceSlug="maritime-routing" title="Maritime Routing — governed loop" />
         </div>
       </div>
     </div>

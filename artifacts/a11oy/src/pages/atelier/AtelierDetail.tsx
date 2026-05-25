@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { useParams, Link } from 'wouter';
 import { ATELIER_SPACES, VERTICAL_COLORS, type AudienceTier } from '../../data/atelierData';
-import { createSpaceRun, streamRunOutput, validateProof, type ProofResult } from '../../lib/atelier-runtime';
+import { createSpaceRun, streamRunOutput, validateProof, recordAtelierRun, type ProofResult } from '../../lib/atelier-runtime';
 
 const BASE = (import.meta.env.BASE_URL ?? '/a11oy/').replace(/\/$/, '');
 const b = (p: string) => `${BASE}${p}`;
@@ -89,6 +89,15 @@ function StreamRunner({ spaceSlug, runtime, vertical, connectors, constitutionRe
       setProof(result);
       if (result.proofRef) {
         setLines((prev) => [...prev, `✓ Proof ref: ${result.proofRef}`]);
+      }
+      // Persist run + proof packet so leaderboards and /atelier/proof/:id stay live.
+      const persisted = await recordAtelierRun({
+        spaceSlug, workcellId: finalState.workcellId, vertical,
+        proofRef: result.proofRef, outputLines: lines,
+        verdict: 'pass', origin: 'a11oy:atelier-detail',
+      });
+      if (persisted?.proofPacketId) {
+        setLines((prev) => [...prev, `↗ Public proof: ${BASE}/atelier/proof/${persisted.proofPacketId}`]);
       }
     } catch (e) {
       setLines((prev) => [...prev, `✗ Run error: ${e instanceof Error ? e.message : String(e)}`]);
@@ -205,23 +214,152 @@ function StreamRunner({ spaceSlug, runtime, vertical, connectors, constitutionRe
   );
 }
 
-function ForkDialog({ spaceName, onClose }: { spaceName: string; onClose: () => void }) {
+interface ForkDiff {
+  added: string[];
+  removed: string[];
+  modified: string[];
+}
+
+function ForkDialog({ parentSlug, spaceName, parentConnectors, onClose }: { parentSlug: string; spaceName: string; parentConnectors: string[]; onClose: () => void }) {
+  const [slug, setSlug] = useState(`${parentSlug}-fork`);
+  const [name, setName] = useState(`${spaceName} (Fork)`);
+  const [removed, setRemoved] = useState<string[]>([]);
+  const [addedRaw, setAddedRaw] = useState('');
+  const [constitutionModified, setConstitutionModified] = useState(false);
+  const [status, setStatus] = useState<'idle' | 'submitting' | 'ok' | 'err'>('idle');
+  const [errMsg, setErrMsg] = useState('');
+  const [createdSlug, setCreatedSlug] = useState<string | null>(null);
+
+  const addedConnectors = addedRaw.split(',').map((s) => s.trim()).filter(Boolean);
+  const diff: ForkDiff = {
+    added: addedConnectors.map((c) => `connector:${c}`),
+    removed: removed.map((c) => `connector:${c}`),
+    modified: constitutionModified ? ['constitution: modified'] : [],
+  };
+
+  async function submit() {
+    setStatus('submitting');
+    setErrMsg('');
+    try {
+      // Fork is a tenant-scoped mutation (not in the public-mutation CSRF
+      // carve-out), so we must present a CSRF token. Fetch one first to
+      // ensure the csrf_token cookie is set, then read it back.
+      await fetch('/api/csrf-token', { credentials: 'include' }).catch(() => {});
+      const csrfMatch = document.cookie.split(';').find((c) => c.trim().startsWith('csrf_token='));
+      const csrf = csrfMatch ? decodeURIComponent(csrfMatch.trim().split('=').slice(1).join('=')) : '';
+      const res = await fetch(`/api/atelier/spaces/${parentSlug}/fork`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          ...(csrf ? { 'x-csrf-token': csrf } : {}),
+        },
+        credentials: 'include',
+        body: JSON.stringify({
+          slug, name,
+          addConnectors: addedConnectors,
+          removeConnectors: removed,
+          constitution: constitutionModified ? `# Forked constitution — overrides from ${parentSlug}\n` : undefined,
+        }),
+      });
+      const j = await res.json().catch(() => ({}));
+      if (!res.ok || !j.ok) {
+        setStatus('err');
+        setErrMsg(j.error ?? `HTTP ${res.status}`);
+        return;
+      }
+      setCreatedSlug(j.data?.slug ?? slug);
+      setStatus('ok');
+    } catch (e) {
+      setStatus('err');
+      setErrMsg(e instanceof Error ? e.message : 'network_error');
+    }
+  }
+
   return (
     <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.7)', zIndex: 50, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '1rem' }}>
-      <div style={{ background: '#111', border: `1px solid ${T.border}`, borderRadius: 10, padding: '2rem', maxWidth: 480, width: '100%' }}>
+      <div style={{ background: '#111', border: `1px solid ${T.border}`, borderRadius: 10, padding: '2rem', maxWidth: 560, width: '100%', maxHeight: '90vh', overflowY: 'auto' }}>
         <div style={{ fontSize: '0.625rem', fontFamily: T.mono, color: T.accent, marginBottom: '0.75rem', textTransform: 'uppercase', letterSpacing: '0.14em' }}>Fork Space</div>
         <h3 style={{ fontSize: '1.125rem', fontWeight: 600, color: T.text, margin: '0 0 0.875rem', letterSpacing: '-0.015em' }}>Fork: {spaceName}</h3>
         <div style={{ fontSize: '0.8125rem', color: T.textDim, lineHeight: 1.6, marginBottom: '1.25rem' }}>
-          Forking inherits the Constitution, connectors, and model policy. You can customize any layer after forking — but governance constraints from the parent Constitution are preserved unless explicitly overridden and re-audited.
+          Forking inherits the Constitution, connectors, and model policy. Governance constraints from the parent Constitution are preserved unless explicitly overridden and re-audited.
         </div>
-        <div style={{ display: 'flex', gap: '0.5rem' }}>
-          <button onClick={onClose} style={{ flex: 1, padding: '0.625rem', borderRadius: 6, fontSize: '0.8125rem', fontWeight: 500, background: 'rgba(201,183,135,0.1)', border: `1px solid rgba(201,183,135,0.25)`, color: T.accent, cursor: 'pointer' }}>
-            ⑂ Fork & Open in Authoring
-          </button>
-          <button onClick={onClose} style={{ padding: '0.625rem 0.875rem', borderRadius: 6, fontSize: '0.8125rem', background: 'transparent', border: `1px solid ${T.border}`, color: T.textMuted, cursor: 'pointer' }}>
-            Cancel
-          </button>
-        </div>
+
+        {status !== 'ok' && (
+          <>
+            <label style={{ display: 'block', fontSize: '0.625rem', fontFamily: T.mono, color: T.textMuted, textTransform: 'uppercase', letterSpacing: '0.14em', marginBottom: '0.25rem' }}>Fork Slug</label>
+            <input value={slug} onChange={(e) => setSlug(e.target.value)} style={{ width: '100%', padding: '0.5rem 0.625rem', marginBottom: '0.75rem', background: '#0a0a0a', border: `1px solid ${T.border}`, borderRadius: 4, color: T.text, fontFamily: T.mono, fontSize: '0.75rem' }} />
+
+            <label style={{ display: 'block', fontSize: '0.625rem', fontFamily: T.mono, color: T.textMuted, textTransform: 'uppercase', letterSpacing: '0.14em', marginBottom: '0.25rem' }}>Fork Name</label>
+            <input value={name} onChange={(e) => setName(e.target.value)} style={{ width: '100%', padding: '0.5rem 0.625rem', marginBottom: '0.75rem', background: '#0a0a0a', border: `1px solid ${T.border}`, borderRadius: 4, color: T.text, fontSize: '0.8125rem' }} />
+
+            <label style={{ display: 'block', fontSize: '0.625rem', fontFamily: T.mono, color: T.textMuted, textTransform: 'uppercase', letterSpacing: '0.14em', marginBottom: '0.25rem' }}>Remove Inherited Connectors</label>
+            <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.375rem', marginBottom: '0.75rem' }}>
+              {parentConnectors.map((c) => {
+                const on = removed.includes(c);
+                return (
+                  <button key={c} onClick={() => setRemoved((r) => on ? r.filter((x) => x !== c) : [...r, c])}
+                    style={{ padding: '0.25rem 0.5rem', fontSize: '0.6875rem', fontFamily: T.mono, borderRadius: 4, cursor: 'pointer', background: on ? 'rgba(239,68,68,0.15)' : 'transparent', border: `1px solid ${on ? 'rgba(239,68,68,0.4)' : T.border}`, color: on ? '#ef4444' : T.textDim, textDecoration: on ? 'line-through' : 'none' }}>
+                    {c}
+                  </button>
+                );
+              })}
+            </div>
+
+            <label style={{ display: 'block', fontSize: '0.625rem', fontFamily: T.mono, color: T.textMuted, textTransform: 'uppercase', letterSpacing: '0.14em', marginBottom: '0.25rem' }}>Add Connectors (comma-separated)</label>
+            <input value={addedRaw} onChange={(e) => setAddedRaw(e.target.value)} placeholder="e.g. slack, splunk" style={{ width: '100%', padding: '0.5rem 0.625rem', marginBottom: '0.75rem', background: '#0a0a0a', border: `1px solid ${T.border}`, borderRadius: 4, color: T.text, fontFamily: T.mono, fontSize: '0.75rem' }} />
+
+            <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.8125rem', color: T.textDim, marginBottom: '1rem', cursor: 'pointer' }}>
+              <input type="checkbox" checked={constitutionModified} onChange={(e) => setConstitutionModified(e.target.checked)} />
+              Override parent Constitution (requires re-audit)
+            </label>
+
+            <div style={{ background: '#0a0a0a', border: `1px solid ${T.border}`, borderRadius: 6, padding: '0.75rem', marginBottom: '1rem', fontFamily: T.mono, fontSize: '0.6875rem' }}>
+              <div style={{ color: T.accent, marginBottom: '0.5rem', textTransform: 'uppercase', letterSpacing: '0.14em', fontSize: '0.5625rem' }}>Diff Preview</div>
+              {diff.added.length === 0 && diff.removed.length === 0 && diff.modified.length === 0 && (
+                <div style={{ color: T.textMuted }}>No changes — exact clone of parent.</div>
+              )}
+              {diff.added.map((d) => <div key={`a-${d}`} style={{ color: '#22c55e' }}>+ {d}</div>)}
+              {diff.removed.map((d) => <div key={`r-${d}`} style={{ color: '#ef4444' }}>− {d}</div>)}
+              {diff.modified.map((d) => <div key={`m-${d}`} style={{ color: T.accent }}>~ {d}</div>)}
+            </div>
+
+            {status === 'err' && (
+              <div style={{ background: 'rgba(239,68,68,0.1)', border: '1px solid rgba(239,68,68,0.3)', borderRadius: 4, padding: '0.5rem 0.625rem', marginBottom: '0.75rem', fontFamily: T.mono, fontSize: '0.6875rem', color: '#ef4444' }}>
+                Fork failed: {errMsg}
+              </div>
+            )}
+
+            <div style={{ display: 'flex', gap: '0.5rem' }}>
+              <button onClick={submit} disabled={status === 'submitting' || !slug || !name}
+                style={{ flex: 1, padding: '0.625rem', borderRadius: 6, fontSize: '0.8125rem', fontWeight: 500, background: 'rgba(201,183,135,0.1)', border: `1px solid rgba(201,183,135,0.25)`, color: T.accent, cursor: status === 'submitting' ? 'wait' : 'pointer', opacity: status === 'submitting' ? 0.6 : 1 }}>
+                {status === 'submitting' ? 'Forking…' : '⑂ Fork Space'}
+              </button>
+              <button onClick={onClose} style={{ padding: '0.625rem 0.875rem', borderRadius: 6, fontSize: '0.8125rem', background: 'transparent', border: `1px solid ${T.border}`, color: T.textMuted, cursor: 'pointer' }}>
+                Cancel
+              </button>
+            </div>
+          </>
+        )}
+
+        {status === 'ok' && createdSlug && (
+          <div>
+            <div style={{ background: 'rgba(34,197,94,0.08)', border: '1px solid rgba(34,197,94,0.3)', borderRadius: 6, padding: '0.875rem', marginBottom: '1rem', fontSize: '0.8125rem', color: T.text }}>
+              <div style={{ color: '#22c55e', fontFamily: T.mono, fontSize: '0.625rem', textTransform: 'uppercase', letterSpacing: '0.14em', marginBottom: '0.375rem' }}>Fork created</div>
+              <div style={{ fontFamily: T.mono, fontSize: '0.75rem', color: T.text }}>{createdSlug}</div>
+              <div style={{ fontSize: '0.75rem', color: T.textDim, marginTop: '0.5rem' }}>
+                Inherited from <span style={{ fontFamily: T.mono, color: T.accent }}>{parentSlug}</span>. Diff registered on parent.
+              </div>
+            </div>
+            <div style={{ display: 'flex', gap: '0.5rem' }}>
+              <Link href={b(`/atelier/${createdSlug}`)} style={{ flex: 1, padding: '0.625rem', borderRadius: 6, fontSize: '0.8125rem', fontWeight: 500, background: 'rgba(201,183,135,0.1)', border: `1px solid rgba(201,183,135,0.25)`, color: T.accent, textDecoration: 'none', textAlign: 'center' }}>
+                Open Fork →
+              </Link>
+              <button onClick={onClose} style={{ padding: '0.625rem 0.875rem', borderRadius: 6, fontSize: '0.8125rem', background: 'transparent', border: `1px solid ${T.border}`, color: T.textMuted, cursor: 'pointer' }}>
+                Close
+              </button>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );
@@ -272,7 +410,7 @@ export function AtelierDetail() {
 
   return (
     <div style={{ minHeight: '100vh', background: T.bg, color: T.text }}>
-      {showFork && <ForkDialog spaceName={space.name} onClose={() => setShowFork(false)} />}
+      {showFork && <ForkDialog parentSlug={space.slug} spaceName={space.name} parentConnectors={space.connectors} onClose={() => setShowFork(false)} />}
 
       <div style={{ maxWidth: 1100, margin: '0 auto', padding: '2rem clamp(1rem, 3vw, 2rem)' }}>
         <div style={{ marginBottom: '1.5rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
@@ -293,6 +431,45 @@ export function AtelierDetail() {
               <p style={{ fontSize: '0.875rem', lineHeight: 1.65, color: T.textDim, margin: '0 0 1rem', maxWidth: '60ch' }}>
                 {space.longDescription}
               </p>
+              {(space.parentSlug || (space.composedOf && space.composedOf.length > 0) || space.publicProofPacketId) && (
+                <div style={{ marginBottom: '0.875rem', padding: '0.625rem 0.875rem', border: `1px solid ${T.border}`, borderRadius: 6, background: T.surface, fontSize: '0.75rem', color: T.textDim, lineHeight: 1.7 }}>
+                  {space.parentSlug && (
+                    <div>
+                      <span style={{ fontFamily: T.mono, color: T.textMuted, fontSize: '0.5625rem', textTransform: 'uppercase', letterSpacing: '0.12em' }}>Forked from </span>
+                      <Link href={b(`/atelier/s/${space.parentSlug}`)} style={{ color: T.accent, textDecoration: 'none' }}>{space.parentSlug}</Link>
+                      {space.diff && (
+                        <span style={{ marginLeft: '0.5rem', fontFamily: T.mono, color: T.textMuted, fontSize: '0.625rem' }}>
+                          (+{space.diff.added.length} −{space.diff.removed.length} ~{space.diff.modified.length})
+                        </span>
+                      )}
+                    </div>
+                  )}
+                  {space.diff && (space.diff.added.length > 0 || space.diff.removed.length > 0 || space.diff.modified.length > 0) && (
+                    <div style={{ marginTop: '0.5rem', fontFamily: T.mono, fontSize: '0.625rem' }}>
+                      {space.diff.added.map((a) => <div key={`a-${a}`} style={{ color: '#7ad97a' }}>+ {a}</div>)}
+                      {space.diff.removed.map((r) => <div key={`r-${r}`} style={{ color: '#d97a7a' }}>− {r}</div>)}
+                      {space.diff.modified.map((m) => <div key={`m-${m}`} style={{ color: '#d9b97a' }}>~ {m}</div>)}
+                    </div>
+                  )}
+                  {space.composedOf && space.composedOf.length > 0 && (
+                    <div style={{ marginTop: space.parentSlug ? '0.5rem' : 0 }}>
+                      <span style={{ fontFamily: T.mono, color: T.textMuted, fontSize: '0.5625rem', textTransform: 'uppercase', letterSpacing: '0.12em' }}>Composed of </span>
+                      {space.composedOf.map((s, i) => (
+                        <span key={s}>
+                          {i > 0 && ', '}
+                          <Link href={b(`/atelier/s/${s}`)} style={{ color: T.accent, textDecoration: 'none' }}>{s}</Link>
+                        </span>
+                      ))}
+                    </div>
+                  )}
+                  {space.publicProofPacketId && (
+                    <div style={{ marginTop: '0.5rem' }}>
+                      <span style={{ fontFamily: T.mono, color: T.textMuted, fontSize: '0.5625rem', textTransform: 'uppercase', letterSpacing: '0.12em' }}>Public proof </span>
+                      <Link href={b(`/atelier/proof/${space.publicProofPacketId}`)} style={{ color: T.accent, textDecoration: 'none', fontFamily: T.mono, fontSize: '0.6875rem' }}>↗ {space.publicProofPacketId}</Link>
+                    </div>
+                  )}
+                </div>
+              )}
               <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap', alignItems: 'center' }}>
                 <span style={{ fontSize: '0.5rem', fontFamily: T.mono, padding: '0.2rem 0.5rem', borderRadius: 3, background: am.bg, color: am.color, border: `1px solid ${am.color}20` }}>
                   {am.label}

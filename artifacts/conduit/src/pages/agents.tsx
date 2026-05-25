@@ -8,6 +8,7 @@ import { FabricHeader, FabricStat, FabricCard, FabricDrawer, MicroBar, SeverityC
 import { Badge, Button, Select } from '@/components/ui';
 import { useInnovationStore, applyMappingOverrides } from '@/lib/innovation-store';
 import { Settings } from 'lucide-react';
+import { AtelierEmbedFrame } from '@/components/AtelierEmbedFrame';
 
 export default function AgentsPage() {
   const { mapperStats, dslVersions, mappingOverrides, goldenMerges } = useInnovationStore();
@@ -161,6 +162,14 @@ export default function AgentsPage() {
           </>
         )}
       </FabricDrawer>
+
+      <div className="mt-8">
+        <div className="label-mono mb-3 text-[#c9b787]">CROSS-SPACE COMPOSITION · A11OY ATELIER</div>
+        <div className="text-[11px] text-[#8a8a8a] mb-3 max-w-[60ch] leading-relaxed">
+          This Atelier Space runs inside Amaru under its own Constitution and emits proofs back to the public ledger. Telemetry from this embed feeds the governance-weighted leaderboard.
+        </div>
+        <AtelierEmbedFrame spaceSlug="cross-vertical-executive-brief" title="Cross-Vertical Executive Brief — composed" />
+      </div>
     </div>
   );
 }

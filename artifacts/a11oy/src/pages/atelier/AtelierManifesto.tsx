@@ -216,6 +216,35 @@ export function AtelierManifesto() {
           </div>
         </div>
 
+        <div style={{ marginBottom: '4rem', padding: '2rem', border: `1px solid ${T.border}`, borderRadius: 10, background: T.surface }}>
+          <div style={{ fontSize: '0.625rem', fontFamily: T.mono, color: T.accent, textTransform: 'uppercase', letterSpacing: '0.18em', marginBottom: '1rem', textAlign: 'center' }}>
+            The Proofs — Not Marketing Copy
+          </div>
+          <p style={{ fontSize: '0.875rem', color: T.textDim, lineHeight: 1.65, textAlign: 'center', maxWidth: '56ch', margin: '0 auto 1.5rem' }}>
+            Every claim above is backed by a verifiable, publicly addressable proof packet. No screenshots. No demos. Click any claim to inspect its constitution, MirrorEval dimensions, and signed proof reference.
+          </p>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '0.625rem' }}>
+            {[
+              { claim: 'Constitutionally bound', target: 'pp-run-seed-re-underwriting-5' },
+              { claim: 'Cryptographic proof chain', target: 'pp-run-seed-maritime-routing-1' },
+              { claim: 'Cross-Space composition', target: 'pp-run-seed-cross-vertical-executive-brief-7' },
+              { claim: 'Forked with inheritance', target: 'pp-run-seed-re-underwriting-distressed-6' },
+              { claim: 'Cyber triage under governance', target: 'pp-run-seed-cyber-triage-3' },
+              { claim: 'Platform-health self-monitor', target: 'pp-run-seed-platform-health-5' },
+            ].map((c) => (
+              <Link key={c.target} href={b(`/atelier/proof/${c.target}`)} style={{ textDecoration: 'none' }}>
+                <div style={{
+                  padding: '0.75rem 0.875rem', border: `1px solid ${T.border}`, borderRadius: 6,
+                  background: 'rgba(255,255,255,0.015)', cursor: 'pointer', transition: 'border-color 0.15s',
+                }}>
+                  <div style={{ fontSize: '0.75rem', color: T.text, marginBottom: '0.375rem', fontWeight: 500 }}>{c.claim}</div>
+                  <div style={{ fontSize: '0.625rem', fontFamily: T.mono, color: T.accent }}>↗ proof/{c.target}</div>
+                </div>
+              </Link>
+            ))}
+          </div>
+        </div>
+
         <div style={{ textAlign: 'center', padding: '4rem 0 2rem' }}>
           <div style={{ fontSize: '0.5625rem', fontFamily: T.mono, color: T.accent, textTransform: 'uppercase', letterSpacing: '0.18em', marginBottom: '1.25rem' }}>
             The Proof Speaks

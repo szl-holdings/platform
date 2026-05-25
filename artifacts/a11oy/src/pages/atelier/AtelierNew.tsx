@@ -164,6 +164,28 @@ export function AtelierNew() {
   }
 
   function publish() {
+    // Attempt to persist via POST /api/atelier/spaces. This endpoint
+    // requires auth in production; failure is non-fatal so the demo
+    // wizard always completes (Space appears as published locally and
+    // will join the live registry once the operator is authenticated).
+    const slug = (spaceName || template?.name || 'new-space')
+      .toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '').slice(0, 60) || 'new-space';
+    void fetch('/api/atelier/spaces', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        slug,
+        name: spaceName || template?.name || 'New Space',
+        vertical: template?.vertical ?? 'cross-vertical',
+        audienceTier: audienceTier ?? 'enterprise',
+        templateId: selectedTemplate,
+        runtime,
+        constitutionRef: constitution,
+        connectors,
+        modelPolicy,
+        nexusSubscriptions,
+      }),
+    }).catch(() => {});
     setPublished(true);
     setStep('published');
   }

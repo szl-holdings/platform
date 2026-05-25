@@ -21,6 +21,7 @@ import {
   XCircle,
   Zap,
 } from 'lucide-react';
+import { AtelierEmbedFrame } from '../components/AtelierEmbedFrame';
 import { useState } from 'react';
 import { api } from '../lib/api';
 
@@ -653,6 +654,14 @@ export default function AgenticSOC() {
             </div>
           </div>
         </div>
+      </div>
+
+      <div className="mt-6 px-4">
+        <div className="text-[10px] font-mono uppercase tracking-[0.14em] text-[#c9b787] mb-2">Composed governance · A11oy Atelier</div>
+        <p className="text-[11px] text-zinc-500 max-w-[60ch] leading-relaxed mb-3">
+          The cyber-triage Atelier Space runs inside Sentra under its own Constitution. Each run emits a publicly verifiable proof packet and contributes to the governance-weighted leaderboard.
+        </p>
+        <AtelierEmbedFrame spaceSlug="cyber-triage" title="Cyber Threat Triage — governed loop" />
       </div>
     </div>
   );

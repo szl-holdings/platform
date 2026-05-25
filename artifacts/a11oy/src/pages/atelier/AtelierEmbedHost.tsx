@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { useParams } from 'wouter';
-import { createSpaceRun, streamRunOutput, validateProof } from '../../lib/atelier-runtime';
+import { createSpaceRun, streamRunOutput, validateProof, recordAtelierRun, recordEmbedEvent } from '../../lib/atelier-runtime';
 import { ALLOWED_EMBED_ORIGINS } from '../../components/AtelierEmbed';
 
 const EMBED_SPACES: Record<string, { name: string; vertical: string; color: string; connectors: string[]; constitutionRef: string; modelPolicy: string }> = {
@@ -82,6 +82,7 @@ export function AtelierEmbedHost() {
   const slug = params.slug ?? '';
   const space = EMBED_SPACES[slug];
   const parentOriginRef = useRef<string | null>(null);
+  const tenantIdRef = useRef<string>('szl');
   const [status, setStatus] = useState<'idle' | 'running' | 'done'>('idle');
 
   useEffect(() => {
@@ -90,6 +91,7 @@ export function AtelierEmbedHost() {
     async function handleRun(origin: string) {
       setStatus('running');
       try {
+        await recordEmbedEvent(slug, origin, 'run');
         const state = await createSpaceRun({
           spaceSlug: slug,
           vertical: space.vertical,
@@ -98,9 +100,11 @@ export function AtelierEmbedHost() {
           modelPolicy: space.modelPolicy,
         });
 
+        const collectedLines: string[] = [];
         const finalState = await streamRunOutput(
           state.workcellId,
           (line) => {
+            collectedLines.push(line);
             window.parent.postMessage(
               { type: 'a11oy-space-line', spaceSlug: slug, line },
               origin,
@@ -110,9 +114,19 @@ export function AtelierEmbedHost() {
         );
 
         const proof = await validateProof(finalState.workcellId, finalState.pceContractId);
+        const persisted = await recordAtelierRun({
+          spaceSlug: slug, workcellId: finalState.workcellId, vertical: space.vertical,
+          proofRef: proof.proofRef, outputLines: collectedLines, verdict: 'pass',
+          origin, tenantId: tenantIdRef.current,
+        });
 
         window.parent.postMessage(
-          { type: 'a11oy-space-done', spaceSlug: slug, proofRef: proof.proofRef, done: true },
+          {
+            type: 'a11oy-space-done', spaceSlug: slug,
+            proofRef: proof.proofRef,
+            proofPacketId: persisted?.proofPacketId,
+            done: true,
+          },
           origin,
         );
       } catch (e) {
@@ -133,8 +147,16 @@ export function AtelierEmbedHost() {
 
       if (data.type === 'a11oy-space-handshake' && data.spaceSlug === slug) {
         parentOriginRef.current = e.origin;
+        // Tenant context flows from the host artifact (conduit/sentra/
+        // vessels) through the handshake. We do NOT trust this value
+        // for authorization — packets gated by tenantId only resolve
+        // through the X-Tenant-Id header on /api/atelier/proofs/:id,
+        // which never leaves the host's auth boundary. The echo back
+        // is purely so the iframe can render the tenant badge.
+        const tenantId = (typeof data.tenantId === 'string' && data.tenantId.trim()) || 'szl';
+        tenantIdRef.current = tenantId;
         (e.source as WindowProxy)?.postMessage(
-          { type: 'a11oy-space-ack', spaceSlug: slug, tenantId: 'szl', ready: true },
+          { type: 'a11oy-space-ack', spaceSlug: slug, tenantId, ready: true },
           e.origin,
         );
       }
