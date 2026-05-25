@@ -15,6 +15,42 @@ import { db, runtimeConfigTable, type RuntimeConfig } from '@szl-holdings/db';
 import { eq } from 'drizzle-orm';
 import { onCacheInvalidation, publishCacheInvalidation } from './cache-invalidation-bus';
 import { logger } from './logger';
+import { dispatchExternalAlert } from './notification-dispatch';
+
+/**
+ * Per-key dedup window for corruption alerts. A hot path that reads a bad
+ * config row hundreds of times per second should not flood the ops channel —
+ * we only re-page when the raw value changes or the window expires.
+ */
+const CORRUPTION_ALERT_DEDUP_MS = 15 * 60 * 1000;
+const corruptionAlertState = new Map<string, { raw: string; firedAt: number }>();
+
+function alertCorruptedConfig(key: string, valueType: string, raw: string): void {
+  const now = Date.now();
+  const prev = corruptionAlertState.get(key);
+  if (prev && prev.raw === raw && now - prev.firedAt < CORRUPTION_ALERT_DEDUP_MS) {
+    return;
+  }
+  corruptionAlertState.set(key, { raw, firedAt: now });
+
+  void dispatchExternalAlert({
+    appName: 'Runtime Config',
+    title: `Corrupted runtime config: ${key}`,
+    message:
+      `Runtime config row "${key}" (value_type=${valueType}) has a malformed value ` +
+      `that cannot be cast. Raw value: ${JSON.stringify(raw)}. ` +
+      `The default is being used until the row is fixed.`,
+    severity: 'warning',
+    actionUrl: '/command/operations/runtime-config',
+  }).catch((err) => {
+    logger.warn({ err, key }, '[runtime-config] Failed to dispatch corruption alert');
+  });
+}
+
+/** Test helper: clear the dedup state so each test starts fresh. */
+export function __resetCorruptionAlertDedupForTests(): void {
+  corruptionAlertState.clear();
+}
 
 const DEFAULT_CACHE_TTL_MS = 60_000;
 
@@ -89,6 +125,7 @@ function castValue(raw: string, type: string, key: string, defaultValue: unknown
         { key, valueType: type, raw, defaultValue },
         '[runtime-config] malformed number value — falling back to default',
       );
+      alertCorruptedConfig(key, type, raw);
       return defaultValue;
     }
     case 'boolean':
@@ -101,6 +138,7 @@ function castValue(raw: string, type: string, key: string, defaultValue: unknown
           { key, valueType: type, raw, err, defaultValue },
           '[runtime-config] malformed JSON value — falling back to default',
         );
+        alertCorruptedConfig(key, type, raw);
         return defaultValue;
       }
     }
