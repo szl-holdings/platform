@@ -3482,6 +3482,30 @@ router.get('/orchestrate', requireNexusOps, async (req: Request, res: Response) 
   }
 });
 
+router.get('/orchestrate/by-trace/:traceId', requireNexusOps, async (req: Request, res: Response) => {
+  try {
+    const traceId = req.params.traceId as string;
+    if (!traceId || typeof traceId !== 'string') {
+      sendBadRequest(res, 'traceId is required');
+      return;
+    }
+    const plan = Array.from(orchestrationStore.values()).find((p) => p.traceId === traceId);
+    if (!plan) {
+      sendError(res, 'Orchestration not found', 404);
+      return;
+    }
+    const callerIdentity = req.user?.email ?? req.user?.id?.toString();
+    const elevated = isNexusPrivileged(req);
+    if (!elevated && (plan.createdBy === undefined || plan.createdBy !== callerIdentity)) {
+      sendError(res, 'Orchestration not found', 404);
+      return;
+    }
+    sendSuccess(res, elevated ? plan : redactOrchestrationPlan(plan));
+  } catch (err) {
+    handleRouteError(res, err, 'GET /api/nexus/orchestrate/by-trace/:traceId');
+  }
+});
+
 router.get('/orchestrate/:id', requireNexusOps, async (req: Request, res: Response) => {
   try {
     const plan = orchestrationStore.get(req.params.id as string);

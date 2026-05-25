@@ -85,6 +85,11 @@ export const praxisApi = {
 
   getOrchestration: (id: string) => req<import('./nexus-types').OrchestrationPlan>(`/orchestrate/${id}`),
 
+  getOrchestrationByTrace: (traceId: string) =>
+    req<import('./nexus-types').OrchestrationPlan>(
+      `/orchestrate/by-trace/${encodeURIComponent(traceId)}`,
+    ),
+
   listOrchestrations: () => req<import('./nexus-types').OrchestrationPlan[]>('/orchestrate'),
 
   listIngestJobs: () => req<import('./nexus-types').IngestJob[]>('/ingest'),

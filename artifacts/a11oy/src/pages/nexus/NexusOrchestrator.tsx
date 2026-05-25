@@ -9,6 +9,7 @@ import {
   ExternalLink,
   FileVideo,
   Gauge,
+  Search,
   Lightbulb,
   Loader,
   Play,
@@ -831,7 +832,33 @@ export default function Orchestrator() {
   const [error, setError] = useState<string | null>(null);
   const [explainStep, setExplainStep] = useState<OrchestrationStep | null>(null);
   const [retrying, setRetrying] = useState(false);
+  const [traceQuery, setTraceQuery] = useState('');
+  const [traceLookupError, setTraceLookupError] = useState<string | null>(null);
+  const [traceLookupBusy, setTraceLookupBusy] = useState(false);
   const pollRef = useRef<ReturnType<typeof setInterval> | null>(null);
+
+  async function handleTraceLookup() {
+    const q = traceQuery.trim();
+    if (!q) return;
+    setTraceLookupError(null);
+    setTraceLookupBusy(true);
+    try {
+      const found = await praxisApi.getOrchestrationByTrace(q);
+      setPlan(found);
+      setExplainStep(null);
+      if (pollRef.current) clearInterval(pollRef.current);
+      if (found.status === 'planning' || found.status === 'running') {
+        setLoading(true);
+        startPolling(found.id);
+      } else {
+        setLoading(false);
+      }
+    } catch (err) {
+      setTraceLookupError(err instanceof Error ? err.message : 'Trace lookup failed');
+    } finally {
+      setTraceLookupBusy(false);
+    }
+  }
 
   useEffect(() => {
     praxisApi
@@ -1048,6 +1075,44 @@ export default function Orchestrator() {
             )}
 
             {plan.steps.length > 0 && <AuditTrailPanel plan={plan} />}
+          </div>
+        )}
+
+        {!plan && (
+          <div className="mb-4">
+            <div className="flex gap-2">
+              <div className="flex-1 flex items-center gap-2 bg-praxis-surface border border-praxis rounded-lg px-3 py-2 focus-within:border-praxis-amber/40">
+                <Search className="w-3.5 h-3.5 text-muted-foreground/50 shrink-0" />
+                <input
+                  type="text"
+                  value={traceQuery}
+                  onChange={(e) => setTraceQuery(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter') handleTraceLookup();
+                  }}
+                  placeholder="Look up an orchestration by trace ID…"
+                  className="flex-1 bg-transparent outline-none text-xs font-mono text-foreground placeholder:text-muted-foreground/40"
+                />
+              </div>
+              <button
+                onClick={handleTraceLookup}
+                disabled={traceLookupBusy || !traceQuery.trim()}
+                className="px-3 py-2 rounded-lg bg-praxis-amber/10 border border-praxis-amber/30 text-praxis-amber text-xs font-medium hover:bg-praxis-amber/20 disabled:opacity-40 disabled:cursor-not-allowed transition-colors flex items-center gap-1.5"
+              >
+                {traceLookupBusy ? (
+                  <Loader className="w-3.5 h-3.5 animate-spin" />
+                ) : (
+                  <Search className="w-3.5 h-3.5" />
+                )}
+                Look up
+              </button>
+            </div>
+            {traceLookupError && (
+              <div className="mt-2 flex items-center gap-1.5 text-[10px] text-praxis-red">
+                <AlertCircle className="w-3 h-3" />
+                {traceLookupError}
+              </div>
+            )}
           </div>
         )}
 
