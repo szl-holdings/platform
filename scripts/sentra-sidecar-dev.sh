@@ -9,12 +9,32 @@ ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 SIDECAR_DIR="$ROOT/services/sentra-detector-sidecar"
 VENV="$SIDECAR_DIR/.venv"
 
-if [ ! -d "$VENV" ]; then
-  echo "[sentra:sidecar] creating virtualenv at $VENV"
-  python3 -m venv "$VENV"
-  PIP_USER=0 "$VENV/bin/pip" install --no-user --upgrade pip wheel >/dev/null
-  PIP_USER=0 "$VENV/bin/pip" install --no-user -r "$SIDECAR_DIR/requirements.txt"
-  PIP_USER=0 "$VENV/bin/pip" install --no-user pytest httpx
+STAMP="$VENV/.bootstrap-ok"
+# Gate on a stamp file (not just the venv directory) so a previously
+# partially-installed .venv from a failed bootstrap is re-installed instead
+# of silently skipped.
+if [ ! -f "$STAMP" ]; then
+  echo "[sentra:sidecar] bootstrapping virtualenv at $VENV"
+  [ -d "$VENV" ] || python3 -m venv "$VENV"
+  # Replit's nixpkgs Python ships an EXTERNALLY-MANAGED marker (PEP 668) AND a
+  # global PIP_CONFIG_FILE in the nix store that redirects pip's install target.
+  # Both make `pip install` inside the venv unreliable. `uv pip` ignores both
+  # signals and installs into the venv's site-packages by default.
+  if command -v uv >/dev/null 2>&1; then
+    VIRTUAL_ENV="$VENV" uv pip install --python "$VENV/bin/python" \
+      -r "$SIDECAR_DIR/requirements.txt" pytest httpx
+  else
+    # Fallback: explicit --prefix forces install into the venv even if a global
+    # pip config sets a different target.
+    PIP_USER=0 "$VENV/bin/pip" install --no-user --break-system-packages \
+      --prefix "$VENV" --upgrade pip wheel >/dev/null
+    PIP_USER=0 "$VENV/bin/pip" install --no-user --break-system-packages \
+      --prefix "$VENV" -r "$SIDECAR_DIR/requirements.txt" pytest httpx
+  fi
+  # Sanity check: confirm the runtime entry point imports before stamping.
+  PYTHONPATH="$SIDECAR_DIR/src" "$VENV/bin/python" -c "import sidecar.main" \
+    || { echo "[sentra:sidecar] bootstrap verification failed"; exit 1; }
+  touch "$STAMP"
 fi
 
 export PYTHONPATH="$SIDECAR_DIR/src${PYTHONPATH:+:$PYTHONPATH}"
