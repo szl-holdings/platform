@@ -73,6 +73,26 @@ export type ProofKind =
   | 'governance_block'
   | 'model_invocation';
 
+/**
+ * Snapshot of the nine Λ axes (cleanliness, horizon, resonance, frustum,
+ * gaussClosure, invariance, moralGrounding, ontologicalGrounding,
+ * measurabilityHonesty). Mirrors `LambdaAxes` in `@szl-holdings/vsp-otel` but
+ * is declared inline here so the SDK contract doesn't pull the OTel package
+ * into browser bundles. Only finite numeric axes that were actually stamped
+ * onto the proof's span are included.
+ */
+export type ProofLambdaAxes = Partial<{
+  cleanliness: number;
+  horizon: number;
+  resonance: number;
+  frustum: number;
+  gaussClosure: number;
+  invariance: number;
+  moralGrounding: number;
+  ontologicalGrounding: number;
+  measurabilityHonesty: number;
+}>;
+
 export interface ProofLedgerEntry {
   id: string;
   product: A11oyProductId;
@@ -85,6 +105,25 @@ export interface ProofLedgerEntry {
   /** Free-form structured payload (kept small — UI-friendly). */
   payload?: Record<string, unknown>;
   ts: string;
+  /**
+   * SHA-256 hash that anchors this proof's VSP receipt (task #5053). Derived
+   * deterministically from the proof's canonical form so auditors can
+   * independently re-compute it from the durable `proof_ledger` row.
+   */
+  receiptHash?: string;
+  /**
+   * OTel traceId stamped on the verifiable span emitted for this proof.
+   * Equal to `receiptHash.slice(0, 32)` — operators can paste this into any
+   * tracing tool wired to the OTLP exporter to audit the AI decision end-
+   * to-end.
+   */
+  traceId?: string;
+  /**
+   * Λ-axis scores that were stamped on the verifiable span for this proof
+   * (if any). Surfaced so the A11oy hub can render a verify panel without
+   * re-querying the tracing backend.
+   */
+  lambdaAxes?: ProofLambdaAxes;
 }
 
 export interface GovernedModelCallRequest {

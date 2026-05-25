@@ -16,6 +16,7 @@
 import { createHash, randomUUID } from 'node:crypto';
 import {
   LambdaSpanEmitter,
+  deriveTraceIdFromReceiptHash,
   type LambdaAxes,
   type VspLicense,
 } from '@szl-holdings/vsp-otel';
@@ -85,6 +86,12 @@ export interface ProofLedgerEntry {
   relatedProduct?: A11oyProductId;
   payload?: Record<string, unknown>;
   ts: string;
+  /** SHA-256 receipt hash anchoring this proof's VSP span (task #5148). */
+  receiptHash?: string;
+  /** OTel traceId derived from `receiptHash.slice(0, 32)` — pasteable into any tracing tool. */
+  traceId?: string;
+  /** Λ-axis snapshot stamped on the span, when the payload carried one. */
+  lambdaAxes?: LambdaAxes;
 }
 
 const PROOF_LIMIT = 500;
@@ -295,7 +302,7 @@ export interface EmitProofInput {
 }
 
 export function appendProof(input: EmitProofInput): ProofLedgerEntry {
-  const entry: ProofLedgerEntry = {
+  const base: ProofLedgerEntry = {
     id: `pf-${randomUUID().slice(0, 8)}`,
     product: input.product,
     kind: input.kind,
@@ -304,6 +311,19 @@ export function appendProof(input: EmitProofInput): ProofLedgerEntry {
     relatedProduct: input.relatedProduct,
     payload: input.payload,
     ts: new Date().toISOString(),
+  };
+  // Compute the verifiable receipt hash + derived traceId once, attach them
+  // to the entry, and surface any Λ-axis snapshot the payload carried. Task
+  // #5148: the hub UI shows these alongside each row so operators can paste
+  // the traceId into their tracing tool and audit the AI decision end-to-end
+  // without re-deriving the hash client-side.
+  const receiptHash = receiptHashForProof(base, input.modelUsed);
+  const lambdaAxes = extractLambdaAxes(base.payload);
+  const entry: ProofLedgerEntry = {
+    ...base,
+    receiptHash,
+    traceId: deriveTraceIdFromReceiptHash(receiptHash),
+    ...(lambdaAxes ? { lambdaAxes } : {}),
   };
   proofs.unshift(entry);
   if (proofs.length > PROOF_LIMIT) proofs.length = PROOF_LIMIT;
@@ -391,7 +411,11 @@ function extractLambdaAxes(payload: Record<string, unknown> | undefined): Lambda
 
 function emitProofSpan(entry: ProofLedgerEntry, modelUsed: string | undefined): void {
   try {
-    const hash = receiptHashForProof(entry, modelUsed);
+    // Reuse the hash already attached by appendProof when available so the
+    // emitted span's traceId stays byte-identical to the one we expose on
+    // the entry. Hydrated/legacy entries that lack the field still get a
+    // span (computed on-the-fly) so observability never regresses.
+    const hash = entry.receiptHash ?? receiptHashForProof(entry, modelUsed);
     const license: VspLicense = 'Apache-2.0';
     const span = proofSpanEmitter.emit(
       {
@@ -399,7 +423,7 @@ function emitProofSpan(entry: ProofLedgerEntry, modelUsed: string | undefined): 
         name: `a11oy.proof.${entry.kind}`,
         endpoint: entry.kind,
         license,
-        lambdaAxes: extractLambdaAxes(entry.payload),
+        lambdaAxes: (entry.lambdaAxes as LambdaAxes | undefined) ?? extractLambdaAxes(entry.payload),
         ts: entry.ts,
       },
       { endImmediately: false },
@@ -499,7 +523,7 @@ export async function hydrateProofsFromDb(): Promise<number> {
     // push directly. To replay product aggregates correctly (counts +
     // model-usage history) we walk the rows oldest-first via reverse iter.
     for (const r of rows) {
-      const entry: ProofLedgerEntry = {
+      const base: ProofLedgerEntry = {
         id: r.id,
         product: r.product as A11oyProductId,
         kind: r.kind as ProofKind,
@@ -508,6 +532,18 @@ export async function hydrateProofsFromDb(): Promise<number> {
         relatedProduct: (r.relatedProduct ?? undefined) as A11oyProductId | undefined,
         payload: (r.payload as Record<string, unknown> | null) ?? undefined,
         ts: new Date(r.ts).toISOString(),
+      };
+      // Re-derive the verifiable hash/traceId on hydrate so rows persisted
+      // before task #5148 still surface them to the hub. The canonical form
+      // is deterministic, so the rebuilt traceId matches the one VSP emitted
+      // at original ingest time.
+      const receiptHash = receiptHashForProof(base, r.modelUsed ?? undefined);
+      const lambdaAxes = extractLambdaAxes(base.payload);
+      const entry: ProofLedgerEntry = {
+        ...base,
+        receiptHash,
+        traceId: deriveTraceIdFromReceiptHash(receiptHash),
+        ...(lambdaAxes ? { lambdaAxes } : {}),
       };
       proofs.push(entry);
     }

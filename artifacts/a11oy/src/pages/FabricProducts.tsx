@@ -7,13 +7,14 @@
  * canonical Sentra → Counsel → Amaru handoff.
  */
 
-import { useEffect, useState } from 'react';
+import { Fragment, useEffect, useState } from 'react';
 import {
   listFabricProducts,
   runDemoCrossProductChain,
   type ProductRegistryResponse,
   type RegisteredProduct,
   type ProofLedgerEntry,
+  type ProofLambdaAxes,
 } from '@workspace/a11oy-orchestration/client';
 
 const palette = {
@@ -71,11 +72,66 @@ const styles = {
   } as const,
   row: {
     display: 'grid',
-    gridTemplateColumns: '120px 120px 1fr 100px',
+    gridTemplateColumns: '120px 120px 1fr 260px 100px',
     gap: 12,
     padding: '8px 0',
     borderTop: `1px solid ${palette.border}`,
     fontSize: 13,
+    alignItems: 'center',
+  } as const,
+  hashCell: {
+    display: 'flex',
+    flexDirection: 'column' as const,
+    gap: 4,
+    fontFamily: 'ui-monospace, SFMono-Regular, Menlo, monospace',
+    fontSize: 11,
+    color: palette.muted,
+    position: 'relative' as const,
+  } as const,
+  hashLine: {
+    display: 'flex',
+    alignItems: 'center',
+    gap: 6,
+  } as const,
+  hashLabel: {
+    color: palette.muted,
+    textTransform: 'uppercase' as const,
+    letterSpacing: '0.06em',
+    fontSize: 9,
+    width: 44,
+    flexShrink: 0,
+  } as const,
+  hashValue: {
+    color: palette.text,
+    whiteSpace: 'nowrap' as const,
+    overflow: 'hidden' as const,
+    textOverflow: 'ellipsis' as const,
+    minWidth: 0,
+    flex: 1,
+  } as const,
+  copyBtn: {
+    background: 'transparent',
+    border: `1px solid ${palette.border}`,
+    color: palette.muted,
+    borderRadius: 4,
+    padding: '1px 6px',
+    fontSize: 9,
+    cursor: 'pointer',
+    fontFamily: 'inherit',
+    flexShrink: 0,
+  } as const,
+  verifyPanel: {
+    position: 'absolute' as const,
+    top: '100%',
+    right: 0,
+    marginTop: 6,
+    background: palette.bg,
+    border: `1px solid ${palette.accent}55`,
+    borderRadius: 8,
+    padding: 12,
+    minWidth: 240,
+    boxShadow: '0 8px 24px rgba(0,0,0,0.45)',
+    zIndex: 20,
   } as const,
   btn: {
     background: palette.accent,
@@ -128,7 +184,81 @@ function ProductTile({ product }: { product: RegisteredProduct }) {
   );
 }
 
+const LAMBDA_AXIS_LABELS: Record<keyof ProofLambdaAxes, string> = {
+  cleanliness: 'Cleanliness',
+  horizon: 'Horizon',
+  resonance: 'Resonance',
+  frustum: 'Frustum',
+  gaussClosure: 'Gauss Closure',
+  invariance: 'Invariance',
+  moralGrounding: 'Moral Grounding',
+  ontologicalGrounding: 'Ontological Grounding',
+  measurabilityHonesty: 'Measurability Honesty',
+};
+
+function shortHash(h: string): string {
+  if (h.length <= 18) return h;
+  return `${h.slice(0, 10)}…${h.slice(-6)}`;
+}
+
+async function copyToClipboard(value: string, key: string, setCopied: (k: string | null) => void): Promise<void> {
+  try {
+    if (typeof navigator !== 'undefined' && navigator.clipboard?.writeText) {
+      await navigator.clipboard.writeText(value);
+    } else if (typeof document !== 'undefined') {
+      const ta = document.createElement('textarea');
+      ta.value = value;
+      ta.style.position = 'fixed';
+      ta.style.opacity = '0';
+      document.body.appendChild(ta);
+      ta.select();
+      document.execCommand('copy');
+      document.body.removeChild(ta);
+    }
+    setCopied(key);
+    window.setTimeout(() => setCopied(null), 1200);
+  } catch {
+    /* clipboard unavailable — silently ignore */
+  }
+}
+
+function VerifyPanel({ axes, traceId, receiptHash }: { axes: ProofLambdaAxes; traceId?: string; receiptHash?: string }) {
+  const entries = (Object.entries(axes) as [keyof ProofLambdaAxes, number | undefined][])
+    .filter(([, v]) => typeof v === 'number' && Number.isFinite(v));
+  return (
+    <div style={styles.verifyPanel} data-testid="verify-panel">
+      <div style={{ fontSize: 10, textTransform: 'uppercase', letterSpacing: '0.08em', color: palette.accent, marginBottom: 8 }}>
+        Λ-axis attestation
+      </div>
+      {entries.length === 0 ? (
+        <div style={{ color: palette.muted, fontSize: 12 }}>No Λ-axis scores stamped on this span.</div>
+      ) : (
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr auto', gap: '4px 12px', fontSize: 12 }}>
+          {entries.map(([k, v]) => (
+            <Fragment key={k}>
+              <span style={{ color: palette.muted }}>{LAMBDA_AXIS_LABELS[k]}</span>
+              <span style={{ color: palette.text, fontFamily: 'ui-monospace, monospace' }}>{(v as number).toFixed(2)}</span>
+            </Fragment>
+          ))}
+        </div>
+      )}
+      {(traceId || receiptHash) && (
+        <div style={{ marginTop: 10, paddingTop: 8, borderTop: `1px solid ${palette.border}`, fontSize: 10, color: palette.muted, lineHeight: 1.5, fontFamily: 'ui-monospace, monospace', wordBreak: 'break-all' }}>
+          {traceId ? <div><span style={{ color: palette.accent }}>trace</span> {traceId}</div> : null}
+          {receiptHash ? <div><span style={{ color: palette.accent }}>hash</span> {receiptHash}</div> : null}
+        </div>
+      )}
+    </div>
+  );
+}
+
 function ProofRow({ p }: { p: ProofLedgerEntry }) {
+  const [copied, setCopied] = useState<string | null>(null);
+  const [showVerify, setShowVerify] = useState(false);
+  const hash = p.receiptHash;
+  const traceId = p.traceId;
+  const hasAxes = !!p.lambdaAxes && Object.keys(p.lambdaAxes).length > 0;
+
   return (
     <div style={styles.row} data-testid={`proof-row-${p.id}`}>
       <span style={{ color: palette.muted, fontSize: 11 }}>{new Date(p.ts).toLocaleTimeString()}</span>
@@ -137,6 +267,57 @@ function ProofRow({ p }: { p: ProofLedgerEntry }) {
         <span style={{ color: palette.accent }}>{p.kind}</span> · {p.summary}
         {p.relatedProduct ? <span style={{ color: palette.muted }}> → {p.relatedProduct}</span> : null}
       </span>
+      <div
+        style={styles.hashCell}
+        onMouseEnter={() => hasAxes && setShowVerify(true)}
+        onMouseLeave={() => setShowVerify(false)}
+        data-testid={`proof-trace-${p.id}`}
+      >
+        {hash ? (
+          <div style={styles.hashLine} title={hash}>
+            <span style={styles.hashLabel}>hash</span>
+            <span style={styles.hashValue} data-testid={`proof-hash-${p.id}`}>{shortHash(hash)}</span>
+            <button
+              type="button"
+              style={styles.copyBtn}
+              onClick={(e) => { e.stopPropagation(); void copyToClipboard(hash, `${p.id}-hash`, setCopied); }}
+              data-testid={`copy-hash-${p.id}`}
+              aria-label="Copy receipt hash"
+            >
+              {copied === `${p.id}-hash` ? '✓' : 'copy'}
+            </button>
+          </div>
+        ) : null}
+        {traceId ? (
+          <div style={styles.hashLine} title={traceId}>
+            <span style={styles.hashLabel}>trace</span>
+            <span style={styles.hashValue} data-testid={`proof-traceid-${p.id}`}>{shortHash(traceId)}</span>
+            <button
+              type="button"
+              style={styles.copyBtn}
+              onClick={(e) => { e.stopPropagation(); void copyToClipboard(traceId, `${p.id}-trace`, setCopied); }}
+              data-testid={`copy-trace-${p.id}`}
+              aria-label="Copy traceId"
+            >
+              {copied === `${p.id}-trace` ? '✓' : 'copy'}
+            </button>
+            {hasAxes ? (
+              <span
+                style={{ ...styles.copyBtn, color: palette.accent, borderColor: `${palette.accent}55` }}
+                data-testid={`verify-toggle-${p.id}`}
+              >
+                Λ
+              </span>
+            ) : null}
+          </div>
+        ) : null}
+        {!hash && !traceId ? (
+          <span style={{ color: palette.muted, fontStyle: 'italic' }}>no receipt</span>
+        ) : null}
+        {showVerify && hasAxes && p.lambdaAxes ? (
+          <VerifyPanel axes={p.lambdaAxes} traceId={traceId} receiptHash={hash} />
+        ) : null}
+      </div>
       {p.deepLink ? (
         <a href={p.deepLink} style={{ color: palette.accent, fontSize: 12 }}>open ↗</a>
       ) : <span />}
