@@ -78,48 +78,40 @@ artifacts. In production these are pushed to
 
 ### 3. Build the bundle
 
-As shipped, `uds-bundle.yaml` references the three packages by their
-published OCI coordinates (`ghcr.io/szl-holdings/packages/<name>`).
-The three packages at `1.0.0-alpha` have been published to GHCR, so
-**Option A is now the default path** — an operator with only `uds-cli`
-on their workstation can build the bundle straight from this directory
-without any local-path edits. Option B is retained for offline demo
-work and for iterating on a package before re-publishing.
+Two bundle files live in this directory:
 
-**Option A — published packages (default, production path):**
+- **`uds-bundle.local.yaml`** — *demo default.* Each package entry uses
+  `path: ../<app>/deploy`, so `uds-cli bundle create` builds the three
+  Zarf packages locally at bundle-build time. **No GHCR round-trip and
+  no published-package dependency.** This is what the Andrew demo and
+  the Warhacker dry-runs use.
+- **`uds-bundle.yaml`** — *production path.* References the three
+  packages by their OCI coordinates
+  (`ghcr.io/szl-holdings/packages/{a11oy,sentra,amaru}:1.0.0-alpha`).
+  Use this once the packages have been published — i.e. for downstream
+  adopters pulling the bundle from a registry rather than building from
+  source.
+
+**Demo path (default — local build, what we run for Andrew):**
 
 ```sh
-# Packages are already published at ghcr.io/szl-holdings/packages/{a11oy,sentra,amaru}:1.0.0-alpha.
-# To republish (e.g. after a package edit), run the three publish lines first:
+uds-cli bundle create . -f uds-bundle.local.yaml --confirm
+```
+
+**Production path (published packages on GHCR):**
+
+```sh
+# Pre-req: the three packages are published at
+#   ghcr.io/szl-holdings/packages/{a11oy,sentra,amaru}:1.0.0-alpha
+# To (re)publish, build each package first then:
 # ( cd ../a11oy/deploy  && zarf package publish zarf-package-a11oy-amd64-1.0.0-alpha.tar.zst   oci://ghcr.io/szl-holdings/packages )
 # ( cd ../sentra/deploy && zarf package publish zarf-package-sentra-amd64-1.0.0-alpha.tar.zst oci://ghcr.io/szl-holdings/packages )
 # ( cd ../amaru/deploy  && zarf package publish zarf-package-amaru-amd64-1.0.0-alpha.tar.zst  oci://ghcr.io/szl-holdings/packages )
 
-uds-cli bundle create . --confirm
+uds-cli bundle create . --confirm   # uses uds-bundle.yaml
 ```
 
-**Option B — local demo (no GHCR round-trip, use this for Warhacker dry-runs):**
-
-Swap each package entry's `repository` + `ref` for a `path:` pointing
-at the sibling `deploy/` directory, e.g.:
-
-```yaml
-packages:
-  - name: a11oy
-    path: ../a11oy/deploy
-  - name: sentra
-    path: ../sentra/deploy
-  - name: amaru
-    path: ../amaru/deploy
-```
-
-Then:
-
-```sh
-uds-cli bundle create . --confirm
-```
-
-Either option produces `uds-bundle-szl-mesh-amd64-0.1.0.tar.zst` —
+Either path produces `uds-bundle-szl-mesh-amd64-0.1.0.tar.zst` —
 the single artifact handed to operators (or to Andrew on a USB stick).
 
 ### 4. Deploy the bundle into the kind cluster
@@ -203,9 +195,9 @@ The script:
    `metadata.name` of each Zarf package.
 4. If `--static` is not passed, builds the three Zarf packages with
    `zarf package create`, builds the bundle with `uds bundle create`
-   (rewritten to use sibling `path:` entries so no GHCR round-trip is
-   needed), spins up a throwaway `kind` cluster, deploys the bundle,
-   and waits for `kubectl rollout status` on each namespace.
+   against `uds-bundle.local.yaml` (sibling `path:` entries — no GHCR
+   round-trip), spins up a throwaway `kind` cluster, deploys the
+   bundle, and waits for `kubectl rollout status` on each namespace.
 5. Tears down the cluster + temp artifacts on exit (unless `--keep`).
 
 The static portion (steps 1–3) is what we run inside Replit; it passes

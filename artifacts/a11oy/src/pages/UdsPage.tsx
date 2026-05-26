@@ -153,6 +153,25 @@ const WIRES = [
   { ref: '#5118 / #5119', body: 'Publish + validate steps for the merged work. Tracked, out of scope for Tuesday.', tag: 'TRACKED' },
 ];
 
+const BUNDLE_VARIANTS = [
+  {
+    file: 'uds-bundle.local.yaml',
+    badge: 'DEMO DEFAULT',
+    badgeColor: COLORS.gold,
+    summary:
+      'Path-based references to the sibling a11oy/sentra/amaru deploy/ directories. uds-cli builds the three Zarf packages locally at bundle-build time \u2014 no GHCR pull, no published-package dependency. This is what we run for Andrew.',
+    cmd: 'uds-cli bundle create . -f uds-bundle.local.yaml --confirm',
+  },
+  {
+    file: 'uds-bundle.yaml',
+    badge: 'PRODUCTION PATH',
+    badgeColor: COLORS.uds,
+    summary:
+      'OCI references to ghcr.io/szl-holdings/packages/{a11oy,sentra,amaru}:1.0.0-alpha. For downstream adopters pulling the bundle from a registry once the packages have been published \u2014 not the demo path.',
+    cmd: 'uds-cli bundle create . --confirm',
+  },
+];
+
 const DOCS = [
   ['00_cover_letter.md', 'Cover note Stephen can paste as the email body.'],
   ['01_vision_deck.md', 'Slide-by-slide outline (~14 slides) with speaker notes.'],
@@ -556,6 +575,78 @@ export function UdsPage() {
             </Card>
           ))}
         </div>
+      </Section>
+
+      {/* Bundle variants */}
+      <Section
+        id="bundle"
+        label="BUNDLE · DEMO VS. PRODUCTION"
+        title="Two bundle files, one source tree"
+      >
+        <p style={{ fontSize: 14, color: COLORS.sub, lineHeight: 1.65, marginTop: -6, marginBottom: 16 }}>
+          The Tuesday packet ships two top-level UDS bundles side by side. The local-build
+          variant is the <span style={{ color: COLORS.gold }}>demo default</span> so the Day-1
+          happy path runs without depending on the szl-holdings GHCR packages being
+          reachable; the registry variant is the production path for downstream adopters.
+        </p>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: 14 }}>
+          {BUNDLE_VARIANTS.map((b) => (
+            <Card key={b.file} accent={b.badgeColor}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 10 }}>
+                <span
+                  style={{
+                    fontFamily: 'JetBrains Mono, ui-monospace, monospace',
+                    fontSize: 13,
+                    color: COLORS.text,
+                  }}
+                >
+                  {b.file}
+                </span>
+                <Pill color={b.badgeColor}>{b.badge}</Pill>
+              </div>
+              <p style={{ fontSize: 13, color: COLORS.sub, lineHeight: 1.65, margin: 0 }}>{b.summary}</p>
+              <pre
+                style={{
+                  marginTop: 12,
+                  marginBottom: 0,
+                  padding: '10px 12px',
+                  backgroundColor: COLORS.bg,
+                  border: `1px solid ${COLORS.border}`,
+                  fontSize: 11,
+                  color: COLORS.text,
+                  fontFamily: 'JetBrains Mono, ui-monospace, monospace',
+                  lineHeight: 1.5,
+                  overflowX: 'auto',
+                }}
+              >
+                $ {b.cmd}
+              </pre>
+            </Card>
+          ))}
+        </div>
+        <p style={{ marginTop: 14, fontSize: 12, color: COLORS.sub }}>
+          Source:&nbsp;
+          <a
+            href="/docs/proposals/defense-unicorns/szl-holdings/uds-mesh/uds-bundle.local.yaml"
+            style={{ color: COLORS.gold }}
+          >
+            uds-bundle.local.yaml
+          </a>
+          &nbsp;·&nbsp;
+          <a
+            href="/docs/proposals/defense-unicorns/szl-holdings/uds-mesh/uds-bundle.yaml"
+            style={{ color: COLORS.uds }}
+          >
+            uds-bundle.yaml
+          </a>
+          &nbsp;·&nbsp;
+          <a
+            href="/docs/proposals/defense-unicorns/szl-holdings/uds-mesh/README.md"
+            style={{ color: COLORS.sub }}
+          >
+            README walk-through
+          </a>
+        </p>
       </Section>
 
       {/* Wires */}

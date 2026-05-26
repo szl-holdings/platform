@@ -34,10 +34,17 @@ component map in his head, then switch to terminal.
 > *Screen: terminal on the reference cluster's jump host.*
 
 ```
-$ uds-cli bundle inspect a11oy-uds-bundle.tar.zst
+$ uds-cli bundle create . -f uds-bundle.local.yaml --confirm
+$ uds-cli bundle inspect uds-bundle-szl-mesh-amd64-0.1.0.tar.zst
 ```
 
-> "This is the bundle you signed off on for deploy. Three Zarf packages,
+> "We build the bundle from source — `uds-bundle.local.yaml` points at
+> the three sibling Zarf package directories, so `uds-cli` builds them
+> in place. No GHCR pull, no published-package dependency. The same
+> tree also ships a `uds-bundle.yaml` that resolves the packages from
+> `ghcr.io/szl-holdings/packages` for downstream adopters once we
+> publish — but today's demo runs the local-build path so nothing on
+> Andrew's network has to talk to a registry. Three Zarf packages,
 > one attestations sidecar. Hash chain visible right here."
 
 ```
@@ -161,8 +168,9 @@ Now try to promote a deliberately broken artifact.
 
 ## Pre-flight checklist (24 hours before the demo)
 
-- [ ] `uds-cli bundle deploy` rerun against the reference cluster from a
-      clean state.
+- [ ] `uds-cli bundle create . -f uds-bundle.local.yaml --confirm` then
+      `uds-cli bundle deploy` rerun against the reference cluster from a
+      clean state (local-build path; no GHCR round-trip).
 - [ ] Keycloak realm health: SSO round-trip recorded, recording archived.
 - [ ] Mission App endpoint: test invocation OK, expected payload confirmed.
 - [ ] Loki query saved as a tile so we don't fumble it live.

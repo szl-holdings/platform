@@ -7,8 +7,8 @@
 #   3. Bundle package names match on-disk package metadata names
 #
 # Then, if uds-cli/zarf/kind are on PATH, runs the live validation:
-#   4. zarf package create for each of a11oy/sentra/amaru (Option B / local path build)
-#   5. uds-cli bundle create from uds-mesh/
+#   4. zarf package create for each of a11oy/sentra/amaru (local-build variant)
+#   5. uds-cli bundle create -f uds-bundle.local.yaml from uds-mesh/
 #   6. uds-cli bundle deploy into a fresh kind cluster named szl-mesh-preflight
 #   7. kubectl wait Ready on each namespace's deployment
 #   8. tear-down (cluster + artifacts)
@@ -97,28 +97,19 @@ if (( MISSING )); then
   exit 2
 fi
 
-blue "[2/3] Build packages + bundle (local-path Option B)"
-# Use a throwaway copy of uds-bundle.yaml that points at sibling deploy/ dirs,
-# so we do not need GHCR round-trip for the preflight.
+blue "[2/3] Build packages + bundle (local-build variant)"
+# Use the committed uds-bundle.local.yaml — it already points at sibling
+# deploy/ dirs, so we do not need GHCR round-trip for the preflight.
 TMP="$(mktemp -d)"
 trap '[[ $KEEP -eq 1 ]] || rm -rf "$TMP"' EXIT
 cp -r "$ROOT/uds-mesh" "$TMP/uds-mesh"
-python3 - "$TMP/uds-mesh/uds-bundle.yaml" <<'PY'
-import sys, yaml
-p = sys.argv[1]
-d = yaml.safe_load(open(p))
-for pkg in d['packages']:
-  pkg.pop('repository', None); pkg.pop('ref', None)
-  pkg['path'] = f'../{pkg["name"]}/deploy'
-yaml.safe_dump(d, open(p, 'w'), sort_keys=False)
-PY
 # Symlink sibling package dirs next to the temp uds-mesh
 for p in a11oy sentra amaru; do ln -s "$ROOT/$p" "$TMP/$p"; done
 
 ( cd "$TMP/a11oy/deploy"  && zarf package create . --confirm )
 ( cd "$TMP/sentra/deploy" && zarf package create . --confirm )
 ( cd "$TMP/amaru/deploy"  && zarf package create . --confirm )
-( cd "$TMP/uds-mesh"      && uds bundle create . --confirm )
+( cd "$TMP/uds-mesh"      && uds bundle create . -f uds-bundle.local.yaml --confirm )
 BUNDLE="$(ls "$TMP/uds-mesh"/uds-bundle-szl-mesh-*.tar.zst | head -1)"
 [[ -f "$BUNDLE" ]] || { red "bundle not produced"; exit 3; }
 green "    built: $BUNDLE"

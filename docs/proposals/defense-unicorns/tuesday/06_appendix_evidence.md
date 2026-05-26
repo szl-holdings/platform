@@ -27,7 +27,8 @@ or path-walk to.
 | A11oy Zarf package | `docs/proposals/defense-unicorns/szl-holdings/a11oy/deploy/zarf.yaml` | A11oy ships as a real Zarf component with proof-ledger sidecar. |
 | Sentra Zarf package | `docs/proposals/defense-unicorns/szl-holdings/sentra/deploy/zarf.yaml` | Sentra ships as a real Zarf component. |
 | Amaru Zarf package | `docs/proposals/defense-unicorns/szl-holdings/amaru/deploy/zarf.yaml` | Amaru ships as a real Zarf component with delta-log PVC. |
-| Top-level UDS bundle | `docs/proposals/defense-unicorns/szl-holdings/uds-mesh/uds-bundle.yaml` | The three packages compose into a single UDS bundle, with the attestations sidecar wired as optional component. |
+| Top-level UDS bundle — local-build (demo default) | `docs/proposals/defense-unicorns/szl-holdings/uds-mesh/uds-bundle.local.yaml` | The bundle Andrew's engineer runs on demo day: `path: ../<app>/deploy` references, so `uds-cli bundle create` builds the three Zarf packages locally with no GHCR dependency. |
+| Top-level UDS bundle — registry (production path) | `docs/proposals/defense-unicorns/szl-holdings/uds-mesh/uds-bundle.yaml` | Same three packages composed via `ghcr.io/szl-holdings/packages/{a11oy,sentra,amaru}:1.0.0-alpha`. Production path for downstream adopters once the packages are published. |
 | Bundle skeletons | `docs/proposals/defense-unicorns/skeletons/` | Reusable skeletons for downstream UDS adopters. |
 
 ## C. Upstream PRs (merged)
