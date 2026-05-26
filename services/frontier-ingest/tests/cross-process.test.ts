@@ -270,6 +270,75 @@ describeIfDb('frontier ingestion engine — daily spend cap survives restart', (
   );
 });
 
+describeIfDb('frontier ingestion engine — 7-day daily spend history', () => {
+  beforeAll(async () => {
+    _resetDbBackendForTests();
+    const ok = await ensureFrontierIngestDbSchema();
+    if (ok) await _truncateFrontierDbForTests();
+  }, 60_000);
+
+  afterAll(async () => {
+    if (isFrontierIngestDbEnabled()) await _truncateFrontierDbForTests();
+    _resetAdaptersForTests();
+    _resetForTests();
+  }, 30_000);
+
+  it(
+    'returns exactly N calendar days oldest→newest, zero-filling quiet days',
+    async () => {
+      const ok = await ensureFrontierIngestDbSchema();
+      if (!ok) return;
+      await _truncateFrontierDbForTests();
+      _resetAdaptersForTests();
+      _resetForTests();
+
+      const { dbArchiveDailySpend } = await import('../src/db-backend.js');
+      const { getRecentDailySpend, recordCost, setDailySpendCap, setSpendCap } =
+        await import('../src/store.js');
+
+      // Compute UTC day keys relative to "today" so the test is
+      // independent of wall-clock date.
+      const DAY_MS = 24 * 60 * 60 * 1000;
+      const todayKey = new Date().toISOString().slice(0, 10);
+      const todayStartUtcMs = Date.UTC(
+        Number(todayKey.slice(0, 4)),
+        Number(todayKey.slice(5, 7)) - 1,
+        Number(todayKey.slice(8, 10)),
+      );
+      const isoFor = (offsetDays: number) =>
+        new Date(todayStartUtcMs - offsetDays * DAY_MS).toISOString();
+
+      // Seed only days at offsets 6, 4, 2 — days 5, 3, 1 should be
+      // zero-filled in the returned series.
+      await dbArchiveDailySpend(isoFor(6), 0.10);
+      await dbArchiveDailySpend(isoFor(4), 0.25);
+      await dbArchiveDailySpend(isoFor(2), 0.05);
+
+      setSpendCap(100);
+      setDailySpendCap(5);
+      recordCost('openai', 0.42);
+      await new Promise((r) => setTimeout(r, 200));
+
+      const history = await getRecentDailySpend(7);
+      expect(history.length).toBe(7);
+      // Oldest → newest, ending with today.
+      expect(history[0]!.day).toBe(isoFor(6).slice(0, 10));
+      expect(history[6]!.day).toBe(todayKey);
+      // Archived values present at the seeded offsets.
+      expect(history[0]!.usd).toBeCloseTo(0.10, 5);
+      expect(history[2]!.usd).toBeCloseTo(0.25, 5);
+      expect(history[4]!.usd).toBeCloseTo(0.05, 5);
+      // Missing days are zero-filled, not dropped.
+      expect(history[1]!.usd).toBe(0);
+      expect(history[3]!.usd).toBe(0);
+      expect(history[5]!.usd).toBe(0);
+      // Today (last entry) reflects the live in-memory spend.
+      expect(history[6]!.usd).toBeCloseTo(0.42, 5);
+    },
+    20_000,
+  );
+});
+
 describe('frontier ingestion engine — DB backend gracefully disabled', () => {
   it('isFrontierIngestDbEnabled() returns false when DATABASE_URL is absent', async () => {
     const original = process.env.DATABASE_URL;

@@ -14,6 +14,7 @@ import {
   ensureFrontierIngestSchedule,
   ensureFrontierRetentionSchedule,
   getDailySpendHydrated,
+  getRecentDailySpend,
   getStats,
   getSpendCap,
   isFrontierIngestDbEnabled,
@@ -206,6 +207,9 @@ router.get('/a11oy/frontier/stats', requireAuth, async (_req: Request, res: Resp
     const daily = await getDailySpendHydrated();
     const DAY_MS = 24 * 60 * 60 * 1000;
     const msUntilReset = Math.max(0, new Date(daily.windowStart).getTime() + DAY_MS - Date.now());
+    // 7-day sparkline of rolled-over daily totals + the live "today"
+    // entry so operators can see whether today is unusual vs. the trend.
+    const history = await getRecentDailySpend(7);
     sendSuccess(res, {
       ...(shared ?? inMem),
       dailySpend: {
@@ -213,6 +217,7 @@ router.get('/a11oy/frontier/stats', requireAuth, async (_req: Request, res: Resp
         capUsd: daily.capUsd,
         windowStart: daily.windowStart,
         msUntilReset,
+        history,
       },
       backend: shared ? 'postgres-shared' : 'in-memory',
       scheduler: {

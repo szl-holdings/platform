@@ -146,6 +146,14 @@ CREATE TABLE IF NOT EXISTS frontier_spend_window (
   daily_usd    numeric(14,6) NOT NULL DEFAULT 0,
   window_start timestamptz NOT NULL DEFAULT now()
 );
+
+CREATE TABLE IF NOT EXISTS frontier_spend_daily (
+  day          date PRIMARY KEY,
+  daily_usd    numeric(14,6) NOT NULL DEFAULT 0,
+  window_start timestamptz NOT NULL,
+  archived_at  timestamptz NOT NULL DEFAULT now()
+);
+CREATE INDEX IF NOT EXISTS frontier_spend_daily_day_idx ON frontier_spend_daily(day DESC);
 `;
 
 export async function ensureSchema(): Promise<boolean> {
@@ -488,6 +496,58 @@ export async function dbResetSpendWindow(windowStartIso: string): Promise<void> 
   );
 }
 
+/**
+ * Archive a completed daily spend window to the per-day history table.
+ * Called from rollover paths so the just-closed window's total survives
+ * the in-place reset of `frontier_spend_window`. Idempotent + safe under
+ * multi-process rollover: if two processes archive the same day, we keep
+ * the larger total (last writer with the higher value wins) so a process
+ * that observed more increments before rolling over isn't overwritten by
+ * a process that observed fewer.
+ */
+export async function dbArchiveDailySpend(
+  windowStartIso: string,
+  dailyUsd: number,
+): Promise<void> {
+  await safeQuery(
+    `INSERT INTO frontier_spend_daily (day, daily_usd, window_start, archived_at)
+     VALUES ($1::date, $2, $1::timestamptz, now())
+     ON CONFLICT (day) DO UPDATE
+       SET daily_usd = GREATEST(frontier_spend_daily.daily_usd, EXCLUDED.daily_usd),
+           archived_at = now()`,
+    [windowStartIso, dailyUsd],
+  );
+}
+
+/**
+ * Return the most recent `limit` archived daily spend rows, oldest →
+ * newest. Used by the operator UI to render a sparkline alongside the
+ * current 24h progress bar so cap-tuning is data-driven.
+ */
+export async function dbListRecentDailySpend(
+  limit: number,
+): Promise<Array<{ day: string; dailyUsd: number; windowStart: string }> | undefined> {
+  const n = Math.min(Math.max(Math.floor(limit), 1), 90);
+  const rows = await safeQuery(
+    `SELECT day, daily_usd, window_start FROM (
+       SELECT day, daily_usd, window_start
+         FROM frontier_spend_daily
+         ORDER BY day DESC
+         LIMIT $1
+     ) recent
+     ORDER BY day ASC`,
+    [n],
+  );
+  if (!rows) return undefined;
+  return rows.map((r) => ({
+    day: r['day'] instanceof Date
+      ? (r['day'] as Date).toISOString().slice(0, 10)
+      : String(r['day']).slice(0, 10),
+    dailyUsd: Number(r['daily_usd'] ?? 0),
+    windowStart: toIso(r['window_start']),
+  }));
+}
+
 export async function dbLoadSpendWindow(): Promise<{ dailyUsd: number; windowStart: string } | undefined> {
   const rows = await safeQuery(`SELECT daily_usd, window_start FROM frontier_spend_window WHERE id=1`);
   if (!rows || rows.length === 0) return undefined;
@@ -580,6 +640,7 @@ export interface FrontierTableCounts {
   frontier_timeline: number;
   frontier_spend: number;
   frontier_spend_window: number;
+  frontier_spend_daily: number;
   frontier_seen: number;
 }
 
@@ -605,6 +666,7 @@ const FRONTIER_TABLES = [
   'frontier_timeline',
   'frontier_spend',
   'frontier_spend_window',
+  'frontier_spend_daily',
   'frontier_seen',
 ] as const;
 
@@ -625,6 +687,7 @@ export async function dbGetFrontierTableCounts(): Promise<FrontierTableCounts | 
     frontier_timeline: 0,
     frontier_spend: 0,
     frontier_spend_window: 0,
+    frontier_spend_daily: 0,
     frontier_seen: 0,
   } as FrontierTableCounts;
   for (const t of FRONTIER_TABLES) {
@@ -718,6 +781,6 @@ export async function dbPruneFrontierRetention(opts: {
 export async function _truncateForTests(): Promise<void> {
   if (!(await ensureSchema()) || !pool) return;
   await pool.query(
-    `TRUNCATE frontier_inbox, frontier_promotions, frontier_downstream, frontier_timeline, frontier_evidence, frontier_artifacts, frontier_spend, frontier_spend_window, frontier_seen RESTART IDENTITY CASCADE`,
+    `TRUNCATE frontier_inbox, frontier_promotions, frontier_downstream, frontier_timeline, frontier_evidence, frontier_artifacts, frontier_spend, frontier_spend_window, frontier_spend_daily, frontier_seen RESTART IDENTITY CASCADE`,
   );
 }

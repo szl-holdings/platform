@@ -17,6 +17,7 @@ export {
   dbListPromotions as dbListPromotionsShared,
   dbListDownstream as dbListDownstreamShared,
   dbGetStats as dbGetStatsShared,
+  dbListRecentDailySpend as dbListRecentDailySpendShared,
   dbGetFrontierTableCounts,
   dbPruneFrontierRetention,
   _truncateForTests as _truncateFrontierDbForTests,

@@ -41,6 +41,7 @@ interface Stats {
     capUsd: number;
     windowStart: string;
     msUntilReset: number;
+    history?: Array<{ day: string; usd: number }>;
   };
 }
 
@@ -138,6 +139,9 @@ export function Frontier() {
   const dailyPct = daily && daily.capUsd > 0 ? Math.min(100, (daily.usd / daily.capUsd) * 100) : 0;
   const dailyTripped = !!daily && daily.capUsd > 0 && daily.usd >= daily.capUsd;
   const dailyBarColor = dailyTripped ? '#ef4444' : dailyPct >= 80 ? '#f59e0b' : '#c9b787';
+  const history = daily?.history ?? [];
+  const historyMax = history.reduce((m, h) => Math.max(m, h.usd), 0);
+  const sparkScaleRef = Math.max(historyMax, daily?.capUsd ?? 0, 0.0001);
 
   return (
     <Layout>
@@ -186,14 +190,48 @@ export function Frontier() {
               <div className="text-xs text-neutral-300 font-mono">{formatDuration(daily.msUntilReset)}</div>
             </div>
           </div>
-          <div className="h-2 rounded overflow-hidden" style={{ backgroundColor: 'rgba(255,255,255,0.05)' }}>
-            <div
-              className="h-full transition-all"
-              style={{ width: `${dailyPct}%`, backgroundColor: dailyBarColor }}
-            />
-          </div>
-          <div className="mt-1 text-[10px] text-neutral-500 font-mono">
-            window started {new Date(daily.windowStart).toLocaleString()}
+          <div className="flex items-end gap-3">
+            <div className="flex-1">
+              <div className="h-2 rounded overflow-hidden" style={{ backgroundColor: 'rgba(255,255,255,0.05)' }}>
+                <div
+                  className="h-full transition-all"
+                  style={{ width: `${dailyPct}%`, backgroundColor: dailyBarColor }}
+                />
+              </div>
+              <div className="mt-1 text-[10px] text-neutral-500 font-mono">
+                window started {new Date(daily.windowStart).toLocaleString()}
+              </div>
+            </div>
+            <div className="shrink-0" title="Daily spend, last 7 days (rightmost = today)">
+              <div className="flex items-end gap-0.5 h-8">
+                {history.length === 0 && (
+                  <div className="text-[10px] text-neutral-600 font-mono self-center">
+                    no trend yet
+                  </div>
+                )}
+                {history.map((h) => {
+                  const pct = sparkScaleRef > 0 ? Math.max(2, Math.round((h.usd / sparkScaleRef) * 100)) : 2;
+                  const isToday = h.day === daily.windowStart.slice(0, 10);
+                  const overCap = daily.capUsd > 0 && h.usd >= daily.capUsd;
+                  const color = overCap
+                    ? '#ef4444'
+                    : isToday
+                      ? dailyBarColor
+                      : 'rgba(201,183,135,0.55)';
+                  return (
+                    <div
+                      key={h.day}
+                      title={`${h.day}: $${h.usd.toFixed(4)}`}
+                      className="w-2 rounded-sm"
+                      style={{ height: `${pct}%`, backgroundColor: color, minHeight: 2 }}
+                    />
+                  );
+                })}
+              </div>
+              <div className="mt-1 text-[10px] text-neutral-500 font-mono text-right">
+                7d trend
+              </div>
+            </div>
           </div>
         </Card>
       )}

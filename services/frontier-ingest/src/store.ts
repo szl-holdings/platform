@@ -2,6 +2,7 @@ import { randomUUID } from 'node:crypto';
 import { applyPromotion } from './adapters.js';
 import {
   dbAddSpend,
+  dbArchiveDailySpend,
   dbGetInboxById,
   dbHasSeen,
   dbInsertArtifact,
@@ -9,6 +10,7 @@ import {
   dbInsertPromotion,
   dbInsertTimeline,
   dbAddSpendWindowIncrement,
+  dbListRecentDailySpend,
   dbLoadSpendWindow,
   dbMarkSeen,
   dbResetSpendWindow,
@@ -92,8 +94,12 @@ async function hydrateSpendWindow(): Promise<void> {
       }
       const startMs = new Date(row.windowStart).getTime();
       if (now - startMs >= DAY_MS) {
-        // Persisted window expired — atomically roll it over and add
-        // any pending local increments into the fresh window.
+        // Persisted window expired — archive the just-closed day
+        // (including zero-spend days, so the 7-day sparkline reflects
+        // calendar days rather than only days with activity), then
+        // atomically roll over and add any pending local increments
+        // into the fresh window.
+        fireAndForget(dbArchiveDailySpend(row.windowStart, row.dailyUsd));
         dailyWindowStartMs = now;
         const result = await dbAddSpendWindowIncrement(localPending, new Date(dailyWindowStartMs).toISOString());
         dailySpendUsd = result?.dailyUsd ?? localPending;
@@ -159,6 +165,15 @@ export function onCapReached(fn: CapNotifier): () => void {
 
 function rolloverDailyWindowIfNeeded(): void {
   if (Date.now() - dailyWindowStartMs >= DAY_MS) {
+    // Snapshot the just-closed window before resetting so the per-day
+    // archive captures the actual total for that day. Without this the
+    // sparkline would lose the most recent rolled-over day entirely.
+    const closedWindowStartIso = new Date(dailyWindowStartMs).toISOString();
+    const closedDailyUsd = dailySpendUsd;
+    // Archive every rolled-over day — including zero-spend days — so
+    // the 7-day sparkline accurately represents "the last 7 days" and
+    // doesn't silently skip quiet days.
+    fireAndForget(dbArchiveDailySpend(closedWindowStartIso, closedDailyUsd));
     dailySpendUsd = 0;
     dailyWindowStartMs = Date.now();
     fireAndForget(dbResetSpendWindow(new Date(dailyWindowStartMs).toISOString()));
@@ -287,6 +302,46 @@ export async function getDailySpendHydrated(): Promise<{ usd: number; capUsd: nu
     capUsd: dailySpendCapUsd,
     windowStart: new Date(dailyWindowStartMs).toISOString(),
   };
+}
+
+/**
+ * Per-day spend history for the operator sparkline. Returns exactly
+ * `days` calendar days (UTC), oldest → newest, ending with today.
+ * Days with no archived row and no live spend are zero-filled so the
+ * trend always renders a fixed-length bar series and quiet days are
+ * visible as flat bars rather than silently omitted.
+ *
+ * Today's bucket reflects the live in-memory `dailySpendUsd` for the
+ * current open window so the chart updates without waiting for the
+ * next rollover.
+ */
+export async function getRecentDailySpend(
+  days: number,
+): Promise<Array<{ day: string; usd: number }>> {
+  await hydrateSpendWindow();
+  rolloverDailyWindowIfNeeded();
+  const n = Math.max(1, Math.floor(days));
+  const todayKey = new Date(dailyWindowStartMs).toISOString().slice(0, 10);
+  // Materialize the last N UTC day keys ending with today.
+  const todayStartUtcMs = Date.UTC(
+    Number(todayKey.slice(0, 4)),
+    Number(todayKey.slice(5, 7)) - 1,
+    Number(todayKey.slice(8, 10)),
+  );
+  const keys: string[] = [];
+  for (let i = n - 1; i >= 0; i -= 1) {
+    keys.push(new Date(todayStartUtcMs - i * DAY_MS).toISOString().slice(0, 10));
+  }
+  // Overlay any archived rows. We ask for a generous window (last N
+  // archived rows) and index by day key so the calendar series stays
+  // exactly N entries.
+  const archive = isDbBackendEnabled() ? (await dbListRecentDailySpend(n)) ?? [] : [];
+  const archiveByDay = new Map<string, number>();
+  for (const r of archive) archiveByDay.set(r.day, r.dailyUsd);
+  return keys.map((day) => {
+    if (day === todayKey) return { day, usd: dailySpendUsd };
+    return { day, usd: archiveByDay.get(day) ?? 0 };
+  });
 }
 
 export function setDailySpendCap(usd: number): void {
