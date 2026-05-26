@@ -1,0 +1,14 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "description": "Top-level registry of directories in this repo that are byte-for-byte vendored copies of payload-v8 content. Each entry points the generalized drift checker (packages/szl-doctrine/scripts/check-vendored-bundles-drift.ts) at the bundle's VENDOR.json. Add a new entry here when a new vendored bundle lands.",
+  "bundles": [
+    {
+      "name": "doctrine-anatomy",
+      "manifest": "artifacts/a11oy/public/doctrine-anatomy/VENDOR.json"
+    },
+    {
+      "name": "agent-anatomy",
+      "manifest": "artifacts/a11oy/public/agent-anatomy/VENDOR.json"
+    }
+  ]
+}

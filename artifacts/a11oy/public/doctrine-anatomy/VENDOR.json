@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "description": "Manifest of anatomy figures vendored from the SZL Payload V8 bundle. Every file listed here is a byte-for-byte copy of the corresponding source file under `.local/payload-v8/05_anatomy/figures/`. Regenerate via `pnpm --filter @szl-holdings/szl-doctrine run check:anatomy-drift -- --write`.",
+  "description": "Manifest of anatomy figures vendored from the SZL Payload V8 bundle. Every file listed here is a byte-for-byte copy of the corresponding source file under `.local/payload-v8/05_anatomy/figures/`. Regenerate via `pnpm --filter @szl-holdings/szl-doctrine run check:vendored-bundles -- --write`.",
   "source_root": ".local/payload-v8/05_anatomy/figures",
   "vendored_root": "artifacts/a11oy/public/doctrine-anatomy",
   "hash_algorithm": "sha256",

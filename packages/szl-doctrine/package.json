@@ -15,7 +15,7 @@
   "scripts": {
     "typecheck": "tsc --noEmit",
     "check:drift": "tsx scripts/check-payload-v8-drift.ts",
-    "check:anatomy-drift": "tsx scripts/check-anatomy-drift.ts"
+    "check:vendored-bundles": "tsx scripts/check-vendored-bundles-drift.ts"
   },
   "peerDependencies": {
     "react": ">=18"
