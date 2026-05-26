@@ -186,6 +186,48 @@ uri = "file://brand/architecture-decision-flow.png"
 type = "image"
 title = "Decision flow architecture diagram"
 
+[[generated]]
+id = "t-8jLFVZMZ-PhJRBLMEuv"
+uri = "file://artifacts/a11oy/public/anatomy/hero/root.png"
+type = "image"
+title = "root chakra hero"
+
+[[generated]]
+id = "jdriv6aoCeEoL9tqPiyaX"
+uri = "file://artifacts/a11oy/public/anatomy/hero/sacral.png"
+type = "image"
+title = "sacral chakra hero"
+
+[[generated]]
+id = "yxb394pscttT7zfnvxshi"
+uri = "file://artifacts/a11oy/public/anatomy/hero/solar.png"
+type = "image"
+title = "solar chakra hero"
+
+[[generated]]
+id = "cWJq6hFPoUtjmsnENHsKD"
+uri = "file://artifacts/a11oy/public/anatomy/hero/heart.png"
+type = "image"
+title = "heart chakra hero"
+
+[[generated]]
+id = "zETed8z2sJK0i3kwEcBo0"
+uri = "file://artifacts/a11oy/public/anatomy/hero/throat.png"
+type = "image"
+title = "throat chakra hero"
+
+[[generated]]
+id = "b6t1a8ZsqNYAFcPu9RGOk"
+uri = "file://artifacts/a11oy/public/anatomy/hero/third_eye.png"
+type = "image"
+title = "third_eye chakra hero"
+
+[[generated]]
+id = "Lvxr8Vq8A_1QPuI8liNeQ"
+uri = "file://artifacts/a11oy/public/anatomy/hero/crown.png"
+type = "image"
+title = "crown chakra hero"
+
 [[outputs]]
 id = "I_ORUhKS2b7MEVDwDdGWJ"
 uri = "file://social-content/banners/linkedin-7-lenses-banner.png"
@@ -1043,3 +1085,225 @@ id = "Ti0LC4KSiLEYidN4rWEBO"
 uri = "file://docs/proposals/szl-evolution-plan.md"
 type = "text"
 title = "SZL Holdings — Evolution & Operationalisation Plan (v1 draft)"
+
+[[outputs]]
+id = "cMpByk9gsLuwBrV7HvuIZ"
+uri = "file://screenshots/a11oy_anatomy_top.jpg"
+type = "image"
+title = "A11oy /anatomy — top of page (green integrity banner + Root chakra)"
+
+[[outputs]]
+id = "XXPUWrwg6sEnys4u-qx2v"
+uri = "file://screenshots/a11oy_anatomy_agent_series.jpg"
+type = "image"
+title = "A11oy /anatomy — scrolled view (chakra sections + upstream prose collapsibles)"
+
+[[outputs]]
+id = "mN5p1mZHft4skDGKWpMKS"
+uri = "file://artifacts/a11oy/public/agent-anatomy/anatomy_brain.pdf"
+type = "pdf"
+title = "Upstream figure 1 — Brain (AMARU cortex, 9-axis doctrine gate)"
+
+[[outputs]]
+id = "H4UVysKgriwhn6x0dQb50"
+uri = "file://artifacts/a11oy/public/agent-anatomy/anatomy_heart.pdf"
+type = "pdf"
+title = "Upstream figure 4 — Heart (YUYAY v3 13-axis conjunctive gate)"
+
+[[outputs]]
+id = "MSbuSQPql3w-5lGjMpTfL"
+uri = "file://artifacts/a11oy/public/agent-anatomy/anatomy_skeleton.pdf"
+type = "pdf"
+title = "Upstream figure 6 — Skeleton (12-repo service topology)"
+
+[[outputs]]
+id = "KYrB3e9xM3lGVoTjYOPXy"
+uri = "file://artifacts/a11oy/public/agent-anatomy/anatomy_nervous.pdf"
+type = "pdf"
+title = "Upstream figure 7 — Nervous (OTel/VSP span propagation)"
+
+[[outputs]]
+id = "MSHRndY-isKWlM5l8IvaW"
+uri = "file://artifacts/a11oy/public/agent-anatomy/anatomy_body_graph.pdf"
+type = "pdf"
+title = "Upstream figure 8 — Body Graph (master overlay)"
+
+[[outputs]]
+id = "KvixRo5kEHWN660u3Hr_b"
+uri = "file://artifacts/a11oy/public/agent-anatomy/anatomy_blood_immune.pdf"
+type = "pdf"
+title = "Upstream figure 5 — Blood & Immune (YAWAR ledger + HUKLLA/SENTRA)"
+
+[[outputs]]
+id = "hNon67ErGgVjhSuZ3K5Vy"
+uri = "file://artifacts/a11oy/public/agent-anatomy/anatomy_wires.pdf"
+type = "pdf"
+title = "Upstream figure 2 — Wires (YAWAR bus + HUKLLA tripwires)"
+
+[[outputs]]
+id = "ECtqt8IYtJmLmvqRSPFyj"
+uri = "file://artifacts/a11oy/public/agent-anatomy/anatomy_full_body.pdf"
+type = "pdf"
+title = "Upstream figure 3 — Full Body (complete agent organism)"
+
+[[outputs]]
+id = "6sdRangIPUzV-dIxIL7s8"
+uri = "file://.local/linkedin-post-anatomy.md"
+type = "text"
+title = "LinkedIn post drafts (A + B) + image stack + posting tips"
+
+[[outputs]]
+id = "Cab8Y2f6qAP3JczWyBQJA"
+uri = "file://exports/a11oy_anatomy_linkedin_post.docx"
+type = "word_document"
+title = "LinkedIn post .docx"
+
+[[outputs]]
+id = "TUvy7FqDGnHjnmkEcGNR3"
+uri = "file://screenshots/a11oy_anatomy_hero.jpg"
+type = "image"
+title = "/anatomy — new editorial hero spread (Root + Sacral visible)"
+
+[[outputs]]
+id = "LJK7U9wTBisG2pE014CCS"
+uri = "file://exports/a11oy_anatomy_linkedin_images.zip"
+type = "unspecified"
+title = "All 5 PNGs (zip — one-shot download)"
+
+[[outputs]]
+id = "L4dwqeO58hXMeOODH4EN3"
+uri = "file://exports/linkedin-images/a11oy_anatomy_top.png"
+type = "image"
+title = "1. /anatomy — top of page"
+
+[[outputs]]
+id = "YY7D6UZuc4O6hmVGzEHiP"
+uri = "file://exports/linkedin-images/a11oy_anatomy_hero.png"
+type = "image"
+title = "2. /anatomy — hero"
+
+[[outputs]]
+id = "a3eBIV8tV2TfCAdZbF9J3"
+uri = "file://exports/linkedin-images/a11oy_anatomy_hero_bottom.png"
+type = "image"
+title = "3. /anatomy — hero (bottom half)"
+
+[[outputs]]
+id = "RjPlIc0WPEYUxXtk9k_cw"
+uri = "file://exports/linkedin-images/a11oy_anatomy_agent_series.png"
+type = "image"
+title = "4. /anatomy — agent series"
+
+[[outputs]]
+id = "MGH1A8kjxWwE-kmHpx1xc"
+uri = "file://exports/linkedin-images/a11oy_anatomy_liveops.png"
+type = "image"
+title = "5. /anatomy — LiveOps panel (the money frame)"
+
+[[outputs]]
+id = "GUYLmbTCV0cFzBYRIaVQr"
+uri = "file://screenshots/hero_clean.jpg"
+type = "image"
+title = "01 — Hero: bundle integrity verified banner + sha256 match"
+
+[[outputs]]
+id = "GP44FxH9NgRPzHyhvsMSX"
+uri = "file://screenshots/liveops_clean.jpg"
+type = "image"
+title = "02 — LiveOps panel: services/amaru poll (chakras 7/7, HUKLLA 8 pass / 2 warn / 0 trip, R0513 invariants)"
+
+[[outputs]]
+id = "JPL-GTm1pXyt4G88N5nNJ"
+uri = "file://screenshots/chakras_1to3.jpg"
+type = "image"
+title = "03 — Chakras root → solar (1–3) with citation links + LinkedIn explainers"
+
+[[outputs]]
+id = "W8_gk5u-rWWoEIZg7Kxpz"
+uri = "file://screenshots/chakras_4to7.jpg"
+type = "image"
+title = "04 — Chakras heart → crown (4–7) with citation links + LinkedIn explainers"
+
+[[outputs]]
+id = "XIO5t3MpjDY6gnbFB3yfD"
+uri = "file://screenshots/page_full_nosidebar.jpg"
+type = "image"
+title = "05 — Full-page overview (sidebar removed, 1460×3000)"
+
+[[outputs]]
+id = "FS0hAhg5iQ75LczlIlJ98"
+uri = "file://screenshots/anatomy_v2_top_zoomed.jpg"
+type = "image"
+title = "06 — Hero zoomed (1600×1800 for pixel density)"
+
+[[outputs]]
+id = "w3e6icNi04isg9RtXx-Nl"
+uri = "file://screenshots/investor_02_nosidebar.jpg"
+type = "image"
+title = "APP shot — Hero + LiveOps (readable)"
+
+[[outputs]]
+id = "53xbeF64g2B37pLWh64dO"
+uri = "file://screenshots/investor_03_nosidebar.jpg"
+type = "image"
+title = "APP shot — Hero + LiveOps + 5 chakras (readable)"
+
+[[outputs]]
+id = "nXyIze5t6-rt3iMYlcOne"
+uri = "file://screenshots/investor_01_nosidebar.jpg"
+type = "image"
+title = "APP — Above-the-fold (1280×900)"
+
+[[outputs]]
+id = "lRElf4_T2uT-bynFAQxtO"
+uri = "file://exports/linkedin-anatomy/anatomy_full_body.png"
+type = "image"
+title = "1. Full body — governed agent overview"
+
+[[outputs]]
+id = "fyWVxct2F4Mpxr7wpVYZV"
+uri = "file://exports/linkedin-anatomy/anatomy_brain.png"
+type = "image"
+title = "2. Brain — AMARU cortex + 9-axis doctrine gate"
+
+[[outputs]]
+id = "e49dacyl03LBwnelbCFRU"
+uri = "file://exports/linkedin-anatomy/anatomy_heart.png"
+type = "image"
+title = "3. Heart — YAWAR append-only ledger"
+
+[[outputs]]
+id = "BX2H7-tozwyYvUVnM2khU"
+uri = "file://exports/linkedin-anatomy/anatomy_nervous.png"
+type = "image"
+title = "4. Nervous system — OTel + VSP"
+
+[[outputs]]
+id = "sulXot1v5_KneEqDBlwnf"
+uri = "file://exports/linkedin-anatomy/anatomy_skeleton.png"
+type = "image"
+title = "5. Skeleton — HUKLLA T01–T10 tripwires"
+
+[[outputs]]
+id = "SV6jJEwV0fbwZP5KRHtcr"
+uri = "file://exports/linkedin-anatomy/anatomy_blood_immune.png"
+type = "image"
+title = "6. Blood + immune — YUYAY v3 13-axis AND gate"
+
+[[outputs]]
+id = "e_7ZO77U84L9e0jjOQhjy"
+uri = "file://exports/linkedin-anatomy/anatomy_wires.png"
+type = "image"
+title = "7. Wires — kernel → dispatch"
+
+[[outputs]]
+id = "JneJRuMuf06lCsuMFiHNF"
+uri = "file://exports/linkedin-anatomy/anatomy_body_graph.png"
+type = "image"
+title = "8. Body graph — CHAKANA 21-edge M=0 lattice"
+
+[[outputs]]
+id = "bupvoQtZBxxtJEG6_V1lE"
+uri = "file://exports/a11oy_linkedin_pack.zip"
+type = "unspecified"
+title = "a11oy_linkedin_pack.zip — anatomy + screenshots + docx (one file)"

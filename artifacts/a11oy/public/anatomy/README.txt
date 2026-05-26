@@ -4,7 +4,23 @@ Anatomy bundle — vendored mirror (read-only)
 This directory ships the 7-chakra anatomy figure set consumed by the
 A11oy `/anatomy` viewer.
 
-State: VENDORED (bundle_kind="vendored" in VENDOR.json).
+State: VENDORED — deterministic local render
+(bundle_kind="vendored" in VENDOR.json).
+
+Upstream publication: https://github.com/szl-holdings/ouroboros-thesis
+Canonical concept DOI: 10.5281/zenodo.19944926 (always resolves to the
+latest published version of the Ouroboros thesis; see
+upstream CITATION.cff). v13 release DOI: 10.5281/zenodo.20195368.
+
+Note on the bytes: the upstream repo currently ships a different
+8-figure "SZL Agent Anatomy" series under `docs/anatomy/figures/`
+(brain, wires, full_body, heart, blood_immune, skeleton, nervous,
+body_graph) — not the 7-chakra root→crown naming this viewer
+expects. Until upstream publishes chakra-named binaries, the bytes
+here are the deterministic local render produced by
+`services/amaru/scripts/vendor_anatomy.py`, and `VENDOR.json::upstream_sha`
+is pinned to that render's bundle hash so the in-browser drift check
+stays green.
 
 The 14 binaries (7 chakras × {pdf, png}) listed in
 `VENDOR.json::expected_files` are present. They are rendered

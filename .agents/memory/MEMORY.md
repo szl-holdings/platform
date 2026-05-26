@@ -1,0 +1,2 @@
+- [Replit GitHub OAuth token lacks workflow scope, but env has one](github-token-workflow-scope.md) — integration token can't touch .github/workflows/*.yml; use the `GH_WORKFLOW_TOKEN` env var (already set in this project) for those merges.
+- [Mathlib builds don't fit in a session](lean-mathlib-build-cost.md) — `require mathlib` pulls hundreds of MB and a multi-hour compile; treat lean as one-shot CI, not a live workflow.
