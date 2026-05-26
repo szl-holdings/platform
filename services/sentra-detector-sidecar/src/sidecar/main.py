@@ -44,8 +44,8 @@ log = logging.getLogger("sentra-detector-sidecar")
 logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(name)s %(message)s")
 
 SIDECAR_ID = os.environ.get("SENTRA_SIDECAR_ID", "sentra-detector-sidecar-local")
-SIDECAR_PORT = int(os.environ.get("PORT", os.environ.get("SENTRA_SIDECAR_PORT", "8765")))
-SIDECAR_HOST = os.environ.get("SENTRA_SIDECAR_HOST", "127.0.0.1")
+SIDECAR_PORT = int(os.environ.get("SENTRA_SIDECAR_PORT", os.environ.get("PORT", "8765")))
+SIDECAR_HOST = os.environ.get("SENTRA_SIDECAR_HOST", "::")
 # When advertising back to the api-server, the URL must be reachable from
 # the api-server's POV. In dev that's loopback; in prod operators set
 # SENTRA_SIDECAR_BASE_URL to the in-cluster DNS name of this sidecar.

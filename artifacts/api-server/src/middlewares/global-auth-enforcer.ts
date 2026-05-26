@@ -872,6 +872,24 @@ function isSentraSiemIngest(req: Request): boolean {
   return req.path.startsWith("/api/sentra/siem/ingest/");
 }
 
+/**
+ * Sentra detector sidecar registration — POST /api/sentra/detectors/sidecar-register.
+ * The Python sidecar (services/sentra-detector-sidecar) boots before any user
+ * session exists and posts its detector manifests over loopback. The route
+ * handler enforces a shared-secret check (`checkSidecarSecret` —
+ * x-sentra-sidecar-secret header) and the CSRF middleware already exempts
+ * this path. We pass the request through the global enforcer only when the
+ * TCP peer is loopback (kernel-reported, not X-Forwarded-For), so the
+ * shared-secret check is reached. Off-host deploys must set
+ * SENTRA_SIDECAR_INTERNAL_TOKEN to a valid x-internal-token instead.
+ */
+function isSentraSidecarRegisterLoopback(req: Request): boolean {
+  if (req.method !== "POST") return false;
+  if (req.path !== "/api/sentra/detectors/sidecar-register") return false;
+  const peer = req.socket?.remoteAddress ?? "";
+  return peer === "127.0.0.1" || peer === "::1" || peer === "::ffff:127.0.0.1";
+}
+
 function isValidSiemWebhookToken(req: Request): boolean {
   if (req.method !== "POST") return false;
   if (req.path !== "/api/stream/webhook-siem") return false;
@@ -967,6 +985,11 @@ export function globalAuthEnforcer(
   }
 
   if (isSentraSiemIngest(req)) {
+    next();
+    return;
+  }
+
+  if (isSentraSidecarRegisterLoopback(req)) {
     next();
     return;
   }

@@ -39,6 +39,11 @@ fi
 
 export PYTHONPATH="$SIDECAR_DIR/src${PYTHONPATH:+:$PYTHONPATH}"
 export SENTRA_SIDECAR_PORT="${SENTRA_SIDECAR_PORT:-8765}"
-export SENTRA_API_SERVER_URL="${SENTRA_API_SERVER_URL:-http://127.0.0.1:5000}"
+export SENTRA_API_SERVER_URL="${SENTRA_API_SERVER_URL:-http://127.0.0.1:8080}"
+# Bind on all interfaces (IPv4 + IPv6) so Replit's port prober — which dials
+# the container's external interface, not loopback — can detect that 8765 is
+# open. Localhost-only binding causes the workflow to be marked FAILED with
+# "didn't open port 8765" even though uvicorn started cleanly.
+export SENTRA_SIDECAR_HOST="${SENTRA_SIDECAR_HOST:-::}"
 
 exec "$VENV/bin/python" -m sidecar.main

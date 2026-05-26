@@ -3,3 +3,5 @@
 - [packages/lean-formulas builds pure-Lean-4](lean-formulas-pure-core.md) — mathlib dropped on purpose; `scripts/check-lean-build.sh` is the green validation; restoring mathlib is a two-edit revert documented in the package README.
 - [Partial git clones leave phantom staged deletes](git-partial-clone-staged-deletes.md) — `--filter=blob:none` + LFS smudge failure makes `git add` of two files commit thousands of deletions; sanity-check `git status -s` is empty on a fresh clone before any commit.
 - [GitHub org 2FA enforcement silently no-ops via API](github-org-2fa-api-noop.md) — PATCH /orgs returns 200 but the field stays false on free orgs; re-read to verify, surface as manual web-UI step.
+- [Replit workflow port prober](replit-workflow-port-prober.md) — port prober dials the external container iface, not loopback; bind `::` / `0.0.0.0` or the workflow flips to FAILED even when the service is up.
+- [api-server loopback sidecars](api-server-loopback-sidecars.md) — sidecar POSTs traverse three independent auth gates (CSRF exempt + globalAuthEnforcer loopback bypass + route-level shared secret); fix all three or failures cascade across restarts.

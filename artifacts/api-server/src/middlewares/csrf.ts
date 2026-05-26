@@ -19,6 +19,12 @@ const EXEMPT_PATHS = new Set([
   // so double-submit CSRF protection does not apply.
   '/api/mobile-auth/token-exchange',
   '/api/mobile-auth/logout',
+  // Sentra detector sidecar registration — server-to-server bootstrap from the
+  // Python sidecar (services/sentra-detector-sidecar). Authenticated at the
+  // route level by `checkSidecarSecret` (loopback shared secret + optional
+  // x-internal-token for off-host deploys). No browser session is involved,
+  // so CSRF double-submit does not apply and would block the only callers.
+  '/api/sentra/detectors/sidecar-register',
   '/api/health',
   '/api/health/live',
   '/api/health/ready',
