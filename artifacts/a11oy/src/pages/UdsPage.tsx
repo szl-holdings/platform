@@ -1,6 +1,36 @@
+import { useEffect, useState } from 'react';
 import { Layout } from '../components/layout';
 
 const BASE = (import.meta.env.BASE_URL ?? '/').replace(/\/$/, '');
+const ATTEST_URL = `${BASE}/uds-attestations.json`;
+
+type AttestChainEntry = {
+  index: number;
+  subject: string;
+  fileCount: number;
+  totalBytes: number;
+  subjectSha256: string;
+  prevHash: string;
+  entryHash: string;
+};
+
+type AttestManifest = {
+  name: string;
+  version: string;
+  gitSha?: string;
+  builtAt: string;
+  hashAlgorithm: string;
+  manifestSha256?: string;
+  subjects?: string[];
+  chain: AttestChainEntry[];
+  head: string;
+};
+
+type AttestState =
+  | { status: 'loading' }
+  | { status: 'ready'; manifest: AttestManifest; verifiedAt: string }
+  | { status: 'missing' }
+  | { status: 'error'; message: string };
 
 const COLORS = {
   bg: '#0a0a0a',
@@ -181,6 +211,229 @@ const DOCS = [
   ['05_proof_plan.md', '2\u20133 week proof plan with week-by-week milestones, demo script, asks.'],
   ['06_appendix_evidence.md', '\u201CWires are set up\u201D exhibit list. Every claim path-walkable.'],
 ];
+
+function useAttestation(): AttestState {
+  const [state, setState] = useState<AttestState>({ status: 'loading' });
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      try {
+        const res = await fetch(ATTEST_URL, { cache: 'no-store' });
+        if (cancelled) return;
+        if (res.status === 404) {
+          setState({ status: 'missing' });
+          return;
+        }
+        if (!res.ok) {
+          setState({ status: 'error', message: `HTTP ${res.status}` });
+          return;
+        }
+        const dateHeader = res.headers.get('date') ?? new Date().toUTCString();
+        const manifest = (await res.json()) as AttestManifest;
+        if (cancelled) return;
+        if (!manifest || !Array.isArray(manifest.chain) || typeof manifest.head !== 'string') {
+          setState({ status: 'error', message: 'malformed manifest' });
+          return;
+        }
+        setState({
+          status: 'ready',
+          manifest,
+          verifiedAt: new Date(dateHeader).toISOString(),
+        });
+      } catch (err) {
+        if (!cancelled) {
+          setState({ status: 'error', message: (err as Error).message });
+        }
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+  return state;
+}
+
+function shortHash(h: string): string {
+  if (!h) return '—';
+  if (h.length <= 16) return h;
+  return `${h.slice(0, 10)}…${h.slice(-6)}`;
+}
+
+function StatBlock({ label, value, mono = false, color = COLORS.text }: { label: string; value: React.ReactNode; mono?: boolean; color?: string }) {
+  return (
+    <div
+      style={{
+        padding: '12px 14px',
+        backgroundColor: COLORS.bg,
+        border: `1px solid ${COLORS.border}`,
+        borderRadius: 2,
+        minWidth: 0,
+      }}
+    >
+      <div
+        style={{
+          fontSize: 10,
+          letterSpacing: '0.1em',
+          textTransform: 'uppercase',
+          color: COLORS.sub,
+          marginBottom: 6,
+        }}
+      >
+        {label}
+      </div>
+      <div
+        style={{
+          fontSize: mono ? 12 : 16,
+          color,
+          fontFamily: mono ? 'JetBrains Mono, ui-monospace, monospace' : 'inherit',
+          wordBreak: 'break-all',
+          lineHeight: 1.3,
+          fontWeight: mono ? 500 : 600,
+        }}
+      >
+        {value}
+      </div>
+    </div>
+  );
+}
+
+function LiveAttestationTile() {
+  const state = useAttestation();
+
+  const statusBadge = (() => {
+    if (state.status === 'loading') return <Pill color={COLORS.sub}>READING MANIFEST…</Pill>;
+    if (state.status === 'missing') return <Pill color={COLORS.gold}>NOT YET GENERATED</Pill>;
+    if (state.status === 'error') return <Pill color={COLORS.gold}>UNAVAILABLE</Pill>;
+    return <Pill color={COLORS.ok}>CHAIN INTACT · {state.manifest.hashAlgorithm.toUpperCase()}</Pill>;
+  })();
+
+  return (
+    <section style={{ marginBottom: 48 }}>
+      <Card accent={COLORS.ok}>
+        <div
+          style={{
+            display: 'flex',
+            justifyContent: 'space-between',
+            alignItems: 'center',
+            gap: 12,
+            flexWrap: 'wrap',
+            marginBottom: 14,
+          }}
+        >
+          <div>
+            <Pill color={COLORS.ok}>LIVE · IN-BUNDLE ATTESTATION</Pill>
+            <h2
+              style={{
+                marginTop: 10,
+                marginBottom: 0,
+                fontSize: 22,
+                fontWeight: 600,
+                color: COLORS.text,
+                letterSpacing: '-0.01em',
+              }}
+            >
+              Hash-chained sidecar — read at page load
+            </h2>
+          </div>
+          {statusBadge}
+        </div>
+
+        {state.status === 'ready' && (
+          <>
+            <div
+              style={{
+                display: 'grid',
+                gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))',
+                gap: 10,
+              }}
+            >
+              <StatBlock label="Bundle" value={`${state.manifest.name} · v${state.manifest.version}`} />
+              <StatBlock label="Entries" value={state.manifest.chain.length} />
+              <StatBlock
+                label="Head Hash (sha256)"
+                value={shortHash(state.manifest.head)}
+                mono
+                color={COLORS.ok}
+              />
+              <StatBlock
+                label="Built At (UTC)"
+                value={state.manifest.builtAt}
+                mono
+              />
+              <StatBlock
+                label="Last Verified"
+                value={state.verifiedAt}
+                mono
+              />
+              {state.manifest.gitSha && (
+                <StatBlock label="Git SHA" value={state.manifest.gitSha} mono />
+              )}
+            </div>
+            <details style={{ marginTop: 14 }}>
+              <summary
+                style={{
+                  cursor: 'pointer',
+                  fontSize: 11,
+                  letterSpacing: '0.08em',
+                  textTransform: 'uppercase',
+                  color: COLORS.sub,
+                }}
+              >
+                Inspect chain ({state.manifest.chain.length} entries)
+              </summary>
+              <div style={{ overflowX: 'auto', marginTop: 10 }}>
+                <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 11 }}>
+                  <thead>
+                    <tr style={{ textAlign: 'left', color: COLORS.sub, letterSpacing: '0.08em' }}>
+                      <th style={{ padding: '6px 8px', borderBottom: `1px solid ${COLORS.border}` }}>#</th>
+                      <th style={{ padding: '6px 8px', borderBottom: `1px solid ${COLORS.border}` }}>SUBJECT</th>
+                      <th style={{ padding: '6px 8px', borderBottom: `1px solid ${COLORS.border}` }}>FILES</th>
+                      <th style={{ padding: '6px 8px', borderBottom: `1px solid ${COLORS.border}` }}>BYTES</th>
+                      <th style={{ padding: '6px 8px', borderBottom: `1px solid ${COLORS.border}` }}>ENTRY HASH</th>
+                    </tr>
+                  </thead>
+                  <tbody style={{ fontFamily: 'JetBrains Mono, ui-monospace, monospace' }}>
+                    {state.manifest.chain.map((e) => (
+                      <tr key={e.index} style={{ color: COLORS.text }}>
+                        <td style={{ padding: '6px 8px', borderBottom: `1px solid ${COLORS.border}`, color: COLORS.sub }}>{e.index}</td>
+                        <td style={{ padding: '6px 8px', borderBottom: `1px solid ${COLORS.border}` }}>{e.subject}</td>
+                        <td style={{ padding: '6px 8px', borderBottom: `1px solid ${COLORS.border}`, color: COLORS.sub }}>{e.fileCount}</td>
+                        <td style={{ padding: '6px 8px', borderBottom: `1px solid ${COLORS.border}`, color: COLORS.sub }}>{e.totalBytes}</td>
+                        <td style={{ padding: '6px 8px', borderBottom: `1px solid ${COLORS.border}`, color: COLORS.ok }}>{shortHash(e.entryHash)}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </details>
+          </>
+        )}
+
+        {state.status === 'loading' && (
+          <p style={{ fontSize: 13, color: COLORS.sub, margin: 0 }}>
+            Fetching <code style={{ color: COLORS.gold }}>{ATTEST_URL}</code>…
+          </p>
+        )}
+
+        {state.status === 'missing' && (
+          <p style={{ fontSize: 13, color: COLORS.sub, margin: 0, lineHeight: 1.6 }}>
+            Attestation not yet generated. Run{' '}
+            <code style={{ color: COLORS.gold }}>pnpm --filter @workspace/a11oy-uds run build</code>{' '}
+            to produce <code style={{ color: COLORS.gold }}>build-attestations/ATTESTATIONS.json</code>;
+            this tile reads from disk on every page load.
+          </p>
+        )}
+
+        {state.status === 'error' && (
+          <p style={{ fontSize: 13, color: COLORS.sub, margin: 0, lineHeight: 1.6 }}>
+            Could not read the attestation manifest ({state.message}). The page is intentionally
+            degrading rather than crashing.
+          </p>
+        )}
+      </Card>
+    </section>
+  );
+}
 
 function Pill({ children, color = COLORS.gold, bg }: { children: React.ReactNode; color?: string; bg?: string }) {
   return (
@@ -377,6 +630,9 @@ export function UdsPage() {
           ))}
         </div>
       </div>
+
+      {/* Live attestation tile */}
+      <LiveAttestationTile />
 
       {/* Vision deck */}
       <Section id="vision" label="VISION DECK · §01" title="The deck, in five panels">

@@ -16,6 +16,12 @@ const DOCS_URL_PREFIX = '/docs/';
 const DOCS_ALLOWED_SUBPATH = 'proposals/defense-unicorns/tuesday';
 const DOCS_ALLOWED_ROOT = path.join(REPO_DOCS, DOCS_ALLOWED_SUBPATH);
 
+const UDS_ATTEST_SRC = path.resolve(
+  import.meta.dirname,
+  '../a11oy-uds/build-attestations/ATTESTATIONS.json',
+);
+const UDS_ATTEST_URL = '/uds-attestations.json';
+
 const MIME: Record<string, string> = {
   '.md': 'text/markdown; charset=utf-8',
   '.txt': 'text/plain; charset=utf-8',
@@ -64,12 +70,41 @@ function repoDocsPlugin(): Plugin {
   };
 }
 
+function udsAttestationsPlugin(): Plugin {
+  return {
+    name: 'a11oy-uds-attestations',
+    configureServer(server) {
+      server.middlewares.use((req, res, next) => {
+        const url = (req.url ?? '').split('?')[0];
+        if (url !== UDS_ATTEST_URL) return next();
+        if (!existsSync(UDS_ATTEST_SRC) || !statSync(UDS_ATTEST_SRC).isFile()) {
+          res.statusCode = 404;
+          res.setHeader('Content-Type', 'application/json; charset=utf-8');
+          res.end('{"error":"attestations not yet generated"}');
+          return;
+        }
+        const mtimeMs = statSync(UDS_ATTEST_SRC).mtimeMs;
+        res.setHeader('Content-Type', 'application/json; charset=utf-8');
+        res.setHeader('Cache-Control', 'no-store');
+        res.setHeader('X-Manifest-Mtime', String(Math.floor(mtimeMs)));
+        createReadStream(UDS_ATTEST_SRC).pipe(res);
+      });
+    },
+    writeBundle() {
+      if (!existsSync(UDS_ATTEST_SRC)) return;
+      const dest = path.resolve(import.meta.dirname, 'dist/public/uds-attestations.json');
+      cpSync(UDS_ATTEST_SRC, dest);
+    },
+  };
+}
+
 export default defineConfig({
   base: basePath,
   plugins: [
     securityHeadersVitePlugin(),
     sharedUiManifestPlugin(),
     repoDocsPlugin(),
+    udsAttestationsPlugin(),
     react(),
     tailwindcss(),
     runtimeErrorOverlay(),
