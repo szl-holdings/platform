@@ -200,3 +200,4 @@ screenshots/raw
 artifacts/api-server/.data/
 artifacts/api-server/.data/agi-forecast-snapshot.json
 .coverage
+.local/cosign/
