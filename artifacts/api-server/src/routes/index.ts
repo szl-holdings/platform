@@ -84,6 +84,7 @@ router.use(lazyMatch(["/v1/replay-attestation", "/governance/stats", "/.well-kno
 // POST /pqc/verify, /pqc/verify/signature, /pqc/verify/certificate, /pqc/verify/did
 // POST /pqc/transparency-log/inclusion-proof
 router.use(lazyMatch(["/pqc", "/.well-known/did.json"], () => import("./pqc-verification"), "pqc-verification"));
+router.use(lazyMatch("/pqc/ca", () => import("./pqc-hsm"), "pqc-hsm"));
 
 // VSP (Verifiable Span Protocol) coverage — public read-only metrics.
 // GET /vsp/coverage

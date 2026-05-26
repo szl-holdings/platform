@@ -445,7 +445,7 @@ async function openLegacySseSession(): Promise<SessionResult> {
     mockSseRes as unknown as http.ServerResponse,
   );
 
-  const sharedServer = getGatewayServer();
+  const sharedServer = await getGatewayServer();
   let disposer: () => void;
   try {
     disposer = await sharedServer.attachSession(sseTransport);
@@ -585,7 +585,7 @@ async function openStdioSession(): Promise<SessionResult> {
   const synthSessionId = `stdio-sim-${randomUUID()}`;
   (serverSide as { sessionId?: string }).sessionId = synthSessionId;
 
-  const sharedServer = getGatewayServer();
+  const sharedServer = await getGatewayServer();
   let disposer: () => void;
   try {
     disposer = await sharedServer.attachSession(serverSide);

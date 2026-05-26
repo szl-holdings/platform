@@ -30,6 +30,31 @@ export {
 } from './ca/persistent-ca.js';
 export type { PersistentCAStore } from './ca/persistent-ca.js';
 
+export {
+  SoftwareHsmDriver,
+  setHsmAuditSink,
+  getHsmAuditSink,
+  registerHsmDriver,
+  createHsmSigner,
+  getConfiguredHsmDriver,
+} from './ca/hsm-signer.js';
+export type {
+  HsmDriverKind,
+  HsmKeyTier,
+  HsmOperation,
+  HsmOutcome,
+  HsmSigner,
+  HsmSignContext,
+  HsmAuditRecord,
+  HsmAuditSink,
+  HsmAttestation,
+  HsmHealth,
+  HsmDriverFactory,
+} from './ca/hsm-signer.js';
+
+export { IntermediateCA } from './ca/intermediate-ca.js';
+export type { IntermediateCAConfig } from './ca/intermediate-ca.js';
+
 export { TransparencyLog } from './transparency/merkle-log.js';
 
 export {

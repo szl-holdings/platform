@@ -220,10 +220,10 @@ export async function initPersistentCAForGateway(): Promise<void> {
   }
 }
 
-export function initGatewayIdentity(): CryptographicIdentityConfig {
+export async function initGatewayIdentity(): Promise<CryptographicIdentityConfig> {
   const signingMode = getSigningMode();
 
-  _gatewayIdentity = createAgentIdentity({
+  _gatewayIdentity = await createAgentIdentity({
     agentName: 'substrate-mcp-gateway',
   });
 

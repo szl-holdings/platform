@@ -410,7 +410,7 @@ export function createHttpTransport(): express.Router {
     // clients that only watch our custom events also see lifecycle progress
     // (szl-holdings/platform#113).
     const sseTransport = new SSEServerTransport('/mcp/message', res);
-    const sharedServer = getGatewayServer();
+    const sharedServer = await getGatewayServer();
     sseSessions.set(sseTransport.sessionId, sseTransport);
     sseTransport.onclose = () => {
       sseSessions.delete(sseTransport.sessionId);
@@ -603,7 +603,7 @@ export function createHttpTransport(): express.Router {
           streamableSessions.set(id, transport);
         },
       });
-      const sharedServer = getGatewayServer();
+      const sharedServer = await getGatewayServer();
       transport.onclose = () => {
         if (transport.sessionId) {
           streamableSessions.delete(transport.sessionId);

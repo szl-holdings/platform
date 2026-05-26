@@ -109,8 +109,9 @@ import { runAlertRuleEvaluation } from './routes/ops-management';
 import { startSloComputationScheduler } from './lib/slo-engine';
 import { bootstrapChainState } from './routes/signal-chains';
 import { twinRegistry } from '@szl-holdings/ai-engine';
-import { initializePersistentCA, setDefaultCA, setPersistentCAStore } from '@szl-holdings/pqc-identity';
+import { initializePersistentCA, setDefaultCA, setPersistentCAStore, setHsmAuditSink, getConfiguredHsmDriver, createHsmSigner, generateHybridKeyPair } from '@szl-holdings/pqc-identity';
 import { DrizzlePersistentCAStore } from './lib/pqc-db-store';
+import { DrizzleHsmAuditSink } from './lib/pqc-hsm-store';
 import { bootstrapPlatformIdentity } from './lib/identity-bootstrap';
 import { bootstrapSentraDefense } from './lib/sentra-defense-bootstrap';
 
@@ -898,12 +899,62 @@ export async function bootstrap(
     try {
       const pqcStore = new DrizzlePersistentCAStore();
       setPersistentCAStore(pqcStore);
+      setHsmAuditSink(new DrizzleHsmAuditSink());
       const ca = await initializePersistentCA('SZL Holdings Root CA v1', pqcStore);
       setDefaultCA(ca);
+
+      // Two-tier cutover: mint an intermediate signer and delegate
+      // day-to-day issuance to it. After this, the root signer is
+      // touched only for ceremonies (intermediate creation, rotation,
+      // attestation, cross-signing). The intermediate signer uses the
+      // same configured HSM driver as the root; in dev / when no HSM
+      // is registered, both fall back to the software driver but every
+      // signing operation still flows through the HSM audit chain.
+      try {
+        const driverKind = getConfiguredHsmDriver();
+        const intermediateName = `SZL Holdings Intermediate CA — ${new Date().getUTCFullYear()}`;
+        const intermediateKeyPair = driverKind === 'software'
+          ? generateHybridKeyPair()
+          : undefined;
+        const intermediateSigner = createHsmSigner(driverKind, {
+          keyTier: 'intermediate',
+          keyRef: `intermediate:${intermediateName}`,
+          keyPair: intermediateKeyPair,
+        });
+        // Cross-sign the intermediate with the root so verifiers can
+        // walk subject -> intermediate -> root. The root signature is
+        // recorded by the HSM audit chain as a 'sign' ceremony.
+        const crossSignPayload = JSON.stringify({
+          intermediateName,
+          publicKeys: intermediateSigner.publicKeys,
+          notBefore: Date.now(),
+        }, Object.keys({ intermediateName: 0, publicKeys: 0, notBefore: 0 }).sort());
+        await ca.signWithRootKey(
+          new TextEncoder().encode(crossSignPayload),
+          `intermediate-bootstrap:${intermediateName}`,
+        );
+        ca.setIntermediateSigner(intermediateSigner, intermediateName);
+        logger.info(
+          { intermediateName, driver: driverKind },
+          '[pqc] Intermediate signer installed — root key is now reserved for ceremonies',
+        );
+      } catch (intErr) {
+        logger.warn(
+          { err: intErr },
+          '[pqc] Intermediate signer cutover failed — issuance will fall back to root signer',
+        );
+      }
+
       const stats = ca.getStats();
       logger.info(
-        { certs: stats.totalIssued, logSize: stats.transparencyLogSize },
-        '[pqc] Persistent CA initialized (DB-backed) — before HTTP handler',
+        {
+          certs: stats.totalIssued,
+          logSize: stats.transparencyLogSize,
+          hsmDriver: getConfiguredHsmDriver(),
+          intermediateInstalled: stats.intermediateInstalled,
+          intermediateName: stats.intermediateName,
+        },
+        '[pqc] Persistent CA initialized (DB-backed, HSM audit sink armed) — before HTTP handler',
       );
     } catch (pqcErr) {
       if (process.env.NODE_ENV === 'production') {

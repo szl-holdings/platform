@@ -68,10 +68,10 @@ function ensureGlobalBridges(server: PRAXISMcpServer): void {
  * Return (or build) the singleton PRAXISMcpServer for the Substrate Gateway.
  * All callers — Streamable HTTP, legacy SSE, and stdio — share this instance.
  */
-export function getGatewayServer(): PRAXISMcpServer {
+export async function getGatewayServer(): Promise<PRAXISMcpServer> {
   if (_server) return _server;
 
-  const cryptographicIdentity = initGatewayIdentity();
+  const cryptographicIdentity = await initGatewayIdentity();
   const domainRoots = listRoots('substrate-gateway').map((r) => ({
     uri: r.uri,
     name: r.name,
@@ -243,7 +243,8 @@ function _registerSubstrateTool(
  * the gateway's run-event bus.
  */
 export async function notifyToolListChanged(): Promise<void> {
-  await getGatewayServer().notifyListChanged('tools/list_changed');
+  const srv = await getGatewayServer();
+  await srv.notifyListChanged('tools/list_changed');
   emitToolListChanged();
 }
 

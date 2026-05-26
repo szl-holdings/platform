@@ -24,7 +24,7 @@ export async function tagAIContentWithIdentity(
 ): Promise<SignedProofChainEntry> {
   const pqc = await getPqcIdentity();
 
-  const identity = pqc.createAgentIdentity({ agentName: params.agentName });
+  const identity = await pqc.createAgentIdentity({ agentName: params.agentName });
 
   const entryContent = buildCanonicalContent(
     params.contentId,

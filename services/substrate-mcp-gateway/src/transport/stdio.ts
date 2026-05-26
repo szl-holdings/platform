@@ -26,7 +26,7 @@ import { getGatewayServer } from '../nexus-gateway-server.js';
  */
 export async function startStdioTransport(): Promise<void> {
   const transport = new StdioServerTransport();
-  const server = getGatewayServer();
+  const server = await getGatewayServer();
 
   // Forward tool_list_changed events to the connected host as an SDK-standard
   // notifications/tools/list_changed notification (MCP spec §6.5).

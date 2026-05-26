@@ -224,6 +224,7 @@ export * from './hf_pinned';
 export * from './hf_registry';
 export * from './model_passport_lenses';
 export * from './pqc_identity';
+export * from './pqc_hsm';
 export * from './platform_identity';
 export * from './reliquary';
 export * from './model_foundry';

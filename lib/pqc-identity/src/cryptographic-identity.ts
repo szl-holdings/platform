@@ -16,21 +16,22 @@ import type {
 import { getSigningMode } from './config/signing-config.js';
 import { onCASwap } from './ca/certificate-authority.js';
 
-export function createTenantIdentity(opts: {
+export async function createTenantIdentity(opts: {
   domain: string;
   tenantName: string;
   serviceEndpoints?: DIDService[];
-}): CryptographicIdentity {
+}): Promise<CryptographicIdentity> {
   const keyPair = generateHybridKeyPair();
   const mode = getSigningMode();
   const signer = createHybridSigner(keyPair, mode);
   const did = createDidWeb(opts.domain);
 
   const ca = getDefaultCA();
-  const { certificate } = ca.issueCertificate({
+  const { certificate } = await ca.issueCertificate({
     subjectDid: did,
     subjectName: opts.tenantName,
     publicKeys: signer.publicKeys,
+    requesterIdentity: `tenant:${opts.tenantName}`,
   });
 
   return {
@@ -42,36 +43,52 @@ export function createTenantIdentity(opts: {
 }
 
 const _agentIdentityCache = new Map<string, CryptographicIdentity>();
+const _agentIdentityInflight = new Map<string, Promise<CryptographicIdentity>>();
 
-onCASwap(() => _agentIdentityCache.clear());
+onCASwap(() => {
+  _agentIdentityCache.clear();
+  _agentIdentityInflight.clear();
+});
 
-export function createAgentIdentity(opts: {
+export async function createAgentIdentity(opts: {
   agentName: string;
-}): CryptographicIdentity {
+}): Promise<CryptographicIdentity> {
   const cached = _agentIdentityCache.get(opts.agentName);
   if (cached) return cached;
+  const inflight = _agentIdentityInflight.get(opts.agentName);
+  if (inflight) return inflight;
 
-  const keyPair = generateHybridKeyPair();
-  const mode = getSigningMode();
-  const signer = createHybridSigner(keyPair, mode);
-  const did = createDidKey(keyPair.ed25519.publicKey);
+  const promise = (async () => {
+    const keyPair = generateHybridKeyPair();
+    const mode = getSigningMode();
+    const signer = createHybridSigner(keyPair, mode);
+    const did = createDidKey(keyPair.ed25519.publicKey);
 
-  const ca = getDefaultCA();
-  const { certificate } = ca.issueCertificate({
-    subjectDid: did,
-    subjectName: opts.agentName,
-    publicKeys: signer.publicKeys,
-  });
+    const ca = getDefaultCA();
+    const { certificate } = await ca.issueCertificate({
+      subjectDid: did,
+      subjectName: opts.agentName,
+      publicKeys: signer.publicKeys,
+      requesterIdentity: `agent:${opts.agentName}`,
+    });
 
-  const identity: CryptographicIdentity = {
-    did,
-    signer,
-    certificate,
-    certThumbprint: certificate.thumbprint,
-  };
+    const identity: CryptographicIdentity = {
+      did,
+      signer,
+      certificate,
+      certThumbprint: certificate.thumbprint,
+    };
 
-  _agentIdentityCache.set(opts.agentName, identity);
-  return identity;
+    _agentIdentityCache.set(opts.agentName, identity);
+    return identity;
+  })();
+
+  _agentIdentityInflight.set(opts.agentName, promise);
+  try {
+    return await promise;
+  } finally {
+    _agentIdentityInflight.delete(opts.agentName);
+  }
 }
 
 export function clearAgentIdentityCache(): void {

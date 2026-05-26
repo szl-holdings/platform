@@ -1,6 +1,7 @@
 import { CertificateAuthority } from './certificate-authority.js';
 import type { CertificateData, HybridKeyPair, TransparencyLogEntry } from '../types.js';
 import { generateHybridKeyPair } from '../hybrid-signer.js';
+import { createHsmSigner, getConfiguredHsmDriver } from './hsm-signer.js';
 
 export interface PersistentCAStore {
   loadRootKeys(issuerName: string): Promise<{ keyPair: HybridKeyPair } | null>;
@@ -57,9 +58,22 @@ export async function initializePersistentCA(
     }
   }
 
+  // Build the HSM-shaped root signer from the configured driver. The
+  // software driver wraps the loaded keyPair; hardware drivers
+  // (`aws-kms`, `gcp-kms`, `pkcs11`) ignore the keyPair and load the
+  // non-exportable key by `keyRef`. Either way, every root-key signing
+  // operation now flows through `HsmSigner.sign()` and is captured by
+  // the registered `HsmAuditSink`.
+  const driverKind = getConfiguredHsmDriver();
+  const rootSigner = createHsmSigner(driverKind, {
+    keyTier: 'root',
+    keyRef: `root:${issuerName}`,
+    keyPair: driverKind === 'software' ? keyPair : undefined,
+  });
+
   const ca = new CertificateAuthority({
     issuerName,
-    keyPair,
+    rootSigner,
   });
 
   const certs = await activeStore.loadCertificates();
@@ -88,8 +102,8 @@ export async function initializePersistentCA(
     () => _pendingPersistence;
 
   const origIssue = ca.issueCertificate.bind(ca);
-  ca.issueCertificate = (opts) => {
-    const result = origIssue(opts);
+  ca.issueCertificate = async (opts) => {
+    const result = await origIssue(opts);
     const certData = result.certificate;
     const log = ca.transparencyLog;
     const latestEntry = log.entries[log.entries.length - 1];

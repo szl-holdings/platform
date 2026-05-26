@@ -179,6 +179,50 @@ interface PQCLiveStatus {
   merkleRoot?: string;
 }
 
+interface HsmCustodyStatus {
+  driver: string;
+  rootIssuer: string;
+  signerHealth: { available: boolean; latencyMs: number | null; message?: string };
+  intermediates: Array<{
+    intermediateName: string;
+    driver: string;
+    notAfter: string;
+  }>;
+  audit: {
+    totalSignings: number;
+    rootSignings: number;
+    intermediateSignings: number;
+    failures: number;
+    lastSigningAt: string | null;
+    lastAttestationAt: string | null;
+    lastRotationAt: string | null;
+    chainTip: { sequence: number; hash: string } | null;
+    recent: Array<{
+      sequence: number;
+      operation: string;
+      keyTier: string;
+      driver: string;
+      requester: string;
+      outcome: string;
+      occurredAt: string;
+    }>;
+  };
+  disasterRecovery: {
+    ready: boolean;
+    blockingReasons: string[];
+    staleness: {
+      backupVerifyDays: number | null;
+      recoveryRehearsalDays: number | null;
+      rotationRehearsalDays: number | null;
+    };
+    lastBackupVerifyAt: string | null;
+    lastRecoveryRehearsalAt: string | null;
+    lastRotationRehearsalAt: string | null;
+    operatorsRequired: number | null;
+    operatorsLastSeen: number | null;
+  };
+}
+
 const STATUS_TRANSITIONS: Record<AlgorithmStatus, AlgorithmStatus[]> = {
   'not-started': ['planned'],
   'planned': ['in-progress', 'not-started'],
@@ -190,6 +234,8 @@ export default function PqcReadiness() {
   const [expandedStandard, setExpandedStandard] = useState<string | null>(null);
   const [mutating, setMutating] = useState<string | null>(null);
   const [liveStatus, setLiveStatus] = useState<PQCLiveStatus | null>(null);
+  const [hsm, setHsm] = useState<HsmCustodyStatus | null>(null);
+  const [hsmError, setHsmError] = useState<string | null>(null);
   const [vspCoverage, setVspCoverage] = useState<{
     spansEmittedLastHour: number;
     spansFailedLastHour: number;
@@ -219,6 +265,18 @@ export default function PqcReadiness() {
       .then((r) => (r.ok ? r.json() : null))
       .then((data) => { if (data?.data) setVspCoverage(data.data); })
       .catch(() => {});
+    fetch(`${apiBase}/pqc/ca/hsm-status`, { credentials: 'include' })
+      .then(async (r) => {
+        if (r.status === 401 || r.status === 403) {
+          setHsmError('Sign in as an operator to view HSM custody.');
+          return null;
+        }
+        return r.ok ? r.json() : null;
+      })
+      .then((data) => {
+        if (data?.data) setHsm(data.data as HsmCustodyStatus);
+      })
+      .catch(() => setHsmError('HSM status unavailable'));
   }, []);
 
   const stdFetcher = useCallback(() => listPqcStandards(), []);
@@ -325,6 +383,117 @@ export default function PqcReadiness() {
             <div className="text-[13px] font-mono text-emerald-400">{vspCoverage?.coveragePercentLastHour != null ? `${vspCoverage.coveragePercentLastHour}%` : '—'}</div>
           </div>
         </div>
+      </div>
+
+      <div className="bg-white/[0.02] border border-white/[0.06] rounded-xl p-5">
+        <div className="flex items-center gap-2 mb-3">
+          <Lock className="w-4 h-4 text-amber-400" />
+          <h3 className="text-[13px] font-medium text-white">Sovereign Root-Key Custody (HSM)</h3>
+          <span className="text-[9px] font-mono uppercase tracking-wider px-1.5 py-0.5 rounded bg-amber-400/10 text-amber-400">
+            {hsm?.driver?.toUpperCase() ?? 'PENDING'}
+          </span>
+        </div>
+        {!hsm && (
+          <p className="text-[12px] text-white/40">
+            {hsmError ?? 'Loading HSM custody status…'}
+          </p>
+        )}
+        {hsm && (
+          <>
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-4">
+              <div>
+                <div className="text-[10px] text-white/25 uppercase tracking-wider mb-1">Driver</div>
+                <div className={cn('text-[13px] font-mono', hsm.driver === 'software' ? 'text-amber-400' : 'text-emerald-400')}>
+                  {hsm.driver}
+                </div>
+                {hsm.driver === 'software' && (
+                  <div className="text-[10px] text-amber-400/60 mt-0.5">software fallback — production should select aws-kms / gcp-kms / pkcs11</div>
+                )}
+              </div>
+              <div>
+                <div className="text-[10px] text-white/25 uppercase tracking-wider mb-1">Signer Health</div>
+                <div className={cn('text-[13px] font-mono', hsm.signerHealth.available ? 'text-emerald-400' : 'text-red-400')}>
+                  {hsm.signerHealth.available ? 'available' : 'down'} {hsm.signerHealth.latencyMs != null ? `· ${hsm.signerHealth.latencyMs}ms` : ''}
+                </div>
+              </div>
+              <div>
+                <div className="text-[10px] text-white/25 uppercase tracking-wider mb-1">Active Intermediates</div>
+                <div className="text-[13px] font-mono text-white/70">{hsm.intermediates.length}</div>
+              </div>
+              <div>
+                <div className="text-[10px] text-white/25 uppercase tracking-wider mb-1">Audit Chain Tip</div>
+                <div className="text-[13px] font-mono text-white/70">#{hsm.audit.chainTip?.sequence ?? 0}</div>
+              </div>
+            </div>
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-3 pt-3 border-t border-white/[0.06] mb-4">
+              <div>
+                <div className="text-[10px] text-white/25 uppercase tracking-wider mb-1">Root Signings</div>
+                <div className="text-[13px] font-mono text-white/70">{hsm.audit.rootSignings}</div>
+              </div>
+              <div>
+                <div className="text-[10px] text-white/25 uppercase tracking-wider mb-1">Intermediate Signings</div>
+                <div className="text-[13px] font-mono text-white/70">{hsm.audit.intermediateSignings}</div>
+              </div>
+              <div>
+                <div className="text-[10px] text-white/25 uppercase tracking-wider mb-1">Last Attestation</div>
+                <div className="text-[13px] font-mono text-white/70">{hsm.audit.lastAttestationAt ? new Date(hsm.audit.lastAttestationAt).toLocaleString() : '—'}</div>
+              </div>
+              <div>
+                <div className="text-[10px] text-white/25 uppercase tracking-wider mb-1">Failures</div>
+                <div className={cn('text-[13px] font-mono', hsm.audit.failures > 0 ? 'text-red-400' : 'text-emerald-400')}>{hsm.audit.failures}</div>
+              </div>
+            </div>
+            <div className={cn('rounded-lg border px-4 py-3', hsm.disasterRecovery.ready ? 'border-emerald-500/20 bg-emerald-500/5' : 'border-amber-500/20 bg-amber-500/5')}>
+              <div className="flex items-center justify-between mb-2">
+                <div className="flex items-center gap-2">
+                  <AlertTriangle className={cn('w-3.5 h-3.5', hsm.disasterRecovery.ready ? 'text-emerald-400' : 'text-amber-400')} />
+                  <span className="text-[12px] font-medium text-white">Disaster-Recovery Readiness</span>
+                </div>
+                <span className={cn('text-[10px] font-mono uppercase', hsm.disasterRecovery.ready ? 'text-emerald-400' : 'text-amber-400')}>
+                  {hsm.disasterRecovery.ready ? 'ready' : 'attention required'}
+                </span>
+              </div>
+              <div className="grid grid-cols-3 gap-3 text-[11px] font-mono">
+                <div>
+                  <div className="text-white/25 mb-0.5">Backup verify</div>
+                  <div className="text-white/70">{hsm.disasterRecovery.staleness.backupVerifyDays != null ? `${hsm.disasterRecovery.staleness.backupVerifyDays}d ago` : 'never'}</div>
+                </div>
+                <div>
+                  <div className="text-white/25 mb-0.5">Recovery rehearsal</div>
+                  <div className="text-white/70">{hsm.disasterRecovery.staleness.recoveryRehearsalDays != null ? `${hsm.disasterRecovery.staleness.recoveryRehearsalDays}d ago` : 'never'}</div>
+                </div>
+                <div>
+                  <div className="text-white/25 mb-0.5">Rotation rehearsal</div>
+                  <div className="text-white/70">{hsm.disasterRecovery.staleness.rotationRehearsalDays != null ? `${hsm.disasterRecovery.staleness.rotationRehearsalDays}d ago` : 'never'}</div>
+                </div>
+              </div>
+              {hsm.disasterRecovery.blockingReasons.length > 0 && (
+                <ul className="mt-2 pt-2 border-t border-white/[0.06] space-y-0.5">
+                  {hsm.disasterRecovery.blockingReasons.map((r) => (
+                    <li key={r} className="text-[11px] text-amber-300/80">• {r}</li>
+                  ))}
+                </ul>
+              )}
+            </div>
+            {hsm.audit.recent.length > 0 && (
+              <div className="mt-4">
+                <div className="text-[10px] text-white/25 uppercase tracking-wider mb-2">Recent HSM Operations</div>
+                <div className="space-y-1">
+                  {hsm.audit.recent.slice(0, 5).map((e) => (
+                    <div key={e.sequence} className="flex items-center justify-between text-[11px] font-mono py-1 border-b border-white/[0.03]">
+                      <span className="text-white/30">#{e.sequence}</span>
+                      <span className={cn('w-20', e.keyTier === 'root' ? 'text-amber-400' : 'text-white/50')}>{e.keyTier}</span>
+                      <span className="w-24 text-white/60">{e.operation}</span>
+                      <span className="flex-1 text-white/30 truncate px-2">{e.requester}</span>
+                      <span className={cn(e.outcome === 'success' ? 'text-emerald-400' : 'text-red-400')}>{e.outcome}</span>
+                      <span className="text-white/25 ml-2">{new Date(e.occurredAt).toLocaleTimeString()}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+          </>
+        )}
       </div>
 
       {liveStatus && (
