@@ -53,7 +53,7 @@ jobs:
       amaru: ${{ steps.read.outputs.amaru }}
       bundle: ${{ steps.read.outputs.bundle }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
 
       - name: Install yq
         run: |
@@ -105,15 +105,15 @@ jobs:
       matrix:
         package: [a11oy, sentra, amaru]
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
 
       - name: Install zarf
-        uses: defenseunicorns/setup-zarf@main
+        uses: defenseunicorns/setup-zarf@745f0990f3d0611774b552930ea053ac61ebf0a6 # main
         with:
           download-init-package: false
 
       - name: Install cosign
-        uses: sigstore/cosign-installer@v3
+        uses: sigstore/cosign-installer@398d4b0eeef1380460a10c8013a76f728fb906ac # v3
 
       - name: Log in to GHCR
         run: |
@@ -171,7 +171,7 @@ jobs:
         run: shred -u "${{ steps.cosign_key.outputs.key_path }}" || true
 
       - name: Upload package artifact (for auditing)
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
         with:
           name: zarf-package-${{ matrix.package }}
           path: ${{ env.SZL_ROOT }}/${{ matrix.package }}/deploy/zarf-package-${{ matrix.package }}-*.tar.zst
@@ -186,15 +186,15 @@ jobs:
     needs: [check-version-sync, publish-packages]
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
 
       - name: Install zarf
-        uses: defenseunicorns/setup-zarf@main
+        uses: defenseunicorns/setup-zarf@745f0990f3d0611774b552930ea053ac61ebf0a6 # main
         with:
           download-init-package: false
 
       - name: Install uds-cli
-        uses: defenseunicorns/setup-uds@main
+        uses: defenseunicorns/setup-uds@ab842abcad1f7a3305c2538e3dd1950d0daacfa5 # main
 
       - name: Log in to GHCR
         run: |
@@ -215,7 +215,7 @@ jobs:
           uds publish "$bundle" "oci://${REGISTRY}/${ORG}/bundles"
 
       - name: Upload bundle artifact (for auditing)
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
         with:
           name: uds-bundle-szl-mesh
           path: ${{ env.SZL_ROOT }}/uds-mesh/uds-bundle-szl-mesh-*.tar.zst
