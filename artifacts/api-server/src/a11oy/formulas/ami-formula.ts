@@ -13,6 +13,8 @@
  * how much autonomy this turn is allowed. Pure, deterministic, replayable.
  */
 
+import { computeLambda } from '@szl-holdings/lambda-math';
+
 export type AmiGate = 'BLOCK' | 'WATCH' | 'ASSIST' | 'OPERATE' | 'AUTONOMOUS';
 
 export const PERMISSION_GATES: Record<AmiGate, string[]> = {
@@ -23,6 +25,36 @@ export const PERMISSION_GATES: Record<AmiGate, string[]> = {
   AUTONOMOUS: ['observe', 'draft', 'run_tests', 'open_pr', 'low_risk_execute_if_policy_allows'],
 };
 
+/**
+ * AMI v2 coefficient table expressed as Egyptian-fraction strings so the
+ * canonical Λ-operator (`@szl-holdings/lambda-math`) parses them as exact
+ * rationals. Each entry's numeric value matches the v1.0 payload:
+ *
+ *   lambda                = 11/50  = 1/5 + 1/50           = 0.22
+ *   khipu_topology        = 4/25   = 1/10 + 1/20 + 1/100  = 0.16
+ *   witness_density       = 4/25   = 1/10 + 1/20 + 1/100  = 0.16
+ *   tool_readiness        = 7/50   = 1/10 + 1/25          = 0.14
+ *   mesh_compatibility    = 7/50   = 1/10 + 1/25          = 0.14
+ *   evidence_quality      = 1/10                          = 0.10
+ *   performance_reliability = 2/25 = 1/15 + 1/75          = 0.08
+ *
+ * Σ = 1 by construction.
+ */
+export const AMI_WEIGHTS_EGYPTIAN = {
+  lambda: '1/5+1/50',
+  khipu_topology: '1/10+1/20+1/100',
+  witness_density: '1/10+1/20+1/100',
+  tool_readiness: '1/10+1/25',
+  mesh_compatibility: '1/10+1/25',
+  evidence_quality: '1/10',
+  performance_reliability: '1/15+1/75',
+} as const;
+
+/**
+ * Numeric mirror of {@link AMI_WEIGHTS_EGYPTIAN}, retained for callers that
+ * surface weights for display or metrics. The canonical Λ computation uses
+ * the Egyptian-fraction table; this view must stay in lockstep.
+ */
 export const AMI_WEIGHTS = {
   lambda: 0.22,
   khipu_topology: 0.16,
@@ -89,7 +121,7 @@ export interface AmiInput {
 }
 
 export function amiFormula(i: AmiInput): number {
-  const v = {
+  const axisScores: Record<keyof typeof AMI_WEIGHTS_EGYPTIAN, number> = {
     lambda: clamp(i.lambda),
     khipu_topology: clamp(i.K),
     witness_density: clamp(i.W),
@@ -98,11 +130,19 @@ export function amiFormula(i: AmiInput): number {
     evidence_quality: clamp(i.E),
     performance_reliability: clamp(i.P),
   };
-  let product = 1.0;
-  for (const [key, weight] of Object.entries(AMI_WEIGHTS)) {
-    const val = (v as Record<string, number>)[key]!;
-    product *= Math.max(1e-9, val) ** weight;
-  }
+  // Canonical Λ — weighted geometric mean over the seven AMI axes with
+  // Egyptian-fraction weights. Σ weights = 1, so the Λ result is the raw
+  // geometric mean; the envelope `e^(-0.7N - 0.5D) · G` is applied after.
+  // To preserve the legacy `Math.max(1e-9, val)` floor that kept a single
+  // zero axis from collapsing the whole score, clamp scores up to 1e-9
+  // before handing them to computeLambda (which would otherwise zero-pin
+  // the composite under axiom A2).
+  const components = (Object.keys(AMI_WEIGHTS_EGYPTIAN) as Array<keyof typeof AMI_WEIGHTS_EGYPTIAN>).map((key) => ({
+    name: key,
+    weight: AMI_WEIGHTS_EGYPTIAN[key],
+    score: Math.max(1e-9, axisScores[key]),
+  }));
+  const { lambda: product } = computeLambda({ components });
   const score = product * Math.exp(-0.7 * clamp(i.N) - 0.5 * clamp(i.D)) * clamp(i.G);
   return Number(score.toFixed(8));
 }

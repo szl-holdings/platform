@@ -89,6 +89,7 @@
     "@szl-holdings/evolution-core": "workspace:*",
     "@szl-holdings/forge-runtime": "workspace:*",
     "@szl-holdings/formulas": "workspace:*",
+    "@szl-holdings/lambda-math": "workspace:*",
     "@szl-holdings/intelligence-feeds": "workspace:*",
     "@szl-holdings/model-passport": "workspace:*",
     "@szl-holdings/monte-carlo": "workspace:*",
