@@ -205,6 +205,18 @@ router.get('/packs', async (req: OrchestratorRequest, res: Response) => {
     logger.info({ requestId, actor, action: 'list_packs', outcome: 'success', count: packs.length }, '[orchestrator] list packs ok');
     ok(res, { packs, total: packs.length });
   } catch (err) {
+    // 42P01 = undefined_table. The domain_packs migration (0163) may not be
+    // applied yet in fresh environments; treat that as "registry empty" and
+    // return 200 so the A11oy console can render its empty state instead of
+    // a hard failure. Any other DB error is a real fault → 500.
+    const pgCode = (err as { code?: string } | null)?.code;
+    if (pgCode === '42P01') {
+      span.setAttributes({ 'orchestrator.result.count': 0, 'orchestrator.registry.uninitialized': true });
+      span.setStatus({ code: api.SpanStatusCode.OK });
+      logger.warn({ requestId, actor, action: 'list_packs', outcome: 'uninitialized' }, '[orchestrator] domain_packs table missing — returning empty list');
+      ok(res, { packs: [], total: 0 });
+      return;
+    }
     span.setStatus({ code: api.SpanStatusCode.ERROR, message: String(err) });
     span.recordException(err as Error);
     logger.error({ requestId, actor, action: 'list_packs', outcome: 'error', err }, '[orchestrator] list packs failed');
@@ -866,6 +878,29 @@ router.get('/status', async (req: OrchestratorRequest, res: Response) => {
   });
   logger.info({ requestId, actor, action: 'status_probe' }, '[orchestrator] status probe');
   try {
+    // Probe whether the registry table exists before SELECTing from it. If
+    // migration 0163 hasn't been applied yet we still want to return a 200
+    // (with ready:false / migrationsApplied:false) so the A11oy console can
+    // render an honest "registry not yet seeded" state rather than treating
+    // a healthy-but-uninitialized server as a hard 503 outage.
+    const tableCheck = await pool.query<{ exists: boolean }>(
+      `SELECT to_regclass('public.domain_packs') IS NOT NULL AS exists`,
+    );
+    const registryQueryable = tableCheck.rows[0]?.exists === true;
+
+    if (!registryQueryable) {
+      const payload = {
+        ready: false, featureEnabled: IS_ENABLED(), evolveEnabled: IS_EVOLVE_ENABLED(),
+        migrationsApplied: false, registryQueryable: false,
+        activePacks: 0, draftPacks: 0, pendingPacks: 0, approvalQueuePending: 0,
+      };
+      span.setAttributes({ 'orchestrator.registry.uninitialized': true });
+      span.setStatus({ code: api.SpanStatusCode.OK });
+      logger.warn({ requestId, actor, action: 'status_probe', outcome: 'uninitialized' }, '[orchestrator] domain_packs table missing — registry uninitialized');
+      ok(res, payload);
+      return;
+    }
+
     const [countsRes, queueRes] = await Promise.all([
       pool.query<{ active_packs: number; draft_packs: number; pending_packs: number }>(
         `SELECT COUNT(*) FILTER (WHERE lifecycle = 'active')::int AS active_packs,
