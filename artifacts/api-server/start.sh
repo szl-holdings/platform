@@ -126,11 +126,19 @@ trap cleanup EXIT INT TERM
 # The api-server proxies /eval-harness/* to this sidecar.
 EVAL_RUNNER_DIR="/home/runner/workspace/apps/eval-runner"
 EVAL_RUNNER_LOG="/tmp/eval-runner.log"
-if [ -f "$EVAL_RUNNER_DIR/run.py" ] && command -v python3 >/dev/null 2>&1; then
+if [ -f "$EVAL_RUNNER_DIR/run.py" ] && [ -f "$EVAL_RUNNER_DIR/scripts/bootstrap.sh" ] && command -v python3 >/dev/null 2>&1; then
+  # Idempotent venv bootstrap (task #5260). Without this the sidecar tries to
+  # import fastapi/uvicorn/httpx from a non-existent .pythonlibs/ in any clean
+  # environment and crash-loops on every restart.
+  echo "[api-server start.sh] Bootstrapping eval-runner venv..."
+  if ! bash "$EVAL_RUNNER_DIR/scripts/bootstrap.sh"; then
+    echo "[api-server start.sh] WARN: eval-runner bootstrap failed — skipping sidecar." >&2
+    EVAL_RUNNER_PID=""
+  else
   echo "[api-server start.sh] Launching eval-runner sidecar on port 8001 — log: $EVAL_RUNNER_LOG"
   (
     cd "$EVAL_RUNNER_DIR"
-    PORT=8001 exec python3 run.py
+    PORT=8001 exec .venv/bin/python run.py
   ) >"$EVAL_RUNNER_LOG" 2>&1 &
   EVAL_RUNNER_PID=$!
   echo "[api-server start.sh] Eval-runner pid=$EVAL_RUNNER_PID"
@@ -143,6 +151,7 @@ if [ -f "$EVAL_RUNNER_DIR/run.py" ] && command -v python3 >/dev/null 2>&1; then
     fi
   }
   trap cleanup EXIT INT TERM
+  fi
 else
   echo "[api-server start.sh] WARN: eval-runner not found or python3 unavailable — skipping sidecar." >&2
 fi
@@ -150,15 +159,20 @@ fi
 
 # --- Amaru sidecar -----------------------------------------------------------
 # Amaru (FastAPI) is the chakra orchestrator that serves /amaru/* via the
-# artifact proxy on localPort 6810. Its standalone workflow consistently fails
-# the platform's port-readiness check despite uvicorn binding successfully, so
-# we co-launch it here alongside the api-server. Mirrors eval-runner pattern.
+# api-server's proxy route to localhost:6810. We co-launch it here as a child
+# of the api workflow because the standalone `[[services]] amaru` artifact
+# workflow consistently fails the platform's port-readiness check on Replit's
+# infrastructure even when uvicorn binds successfully on 0.0.0.0:6810 — both
+# IPv6-dualstack and plain IPv4 bind variants were tested (task #5260). The
+# standalone entry was removed from artifact.toml; this inline co-launch is
+# now the single source of truth.
 AMARU_DIR="/home/runner/workspace/services/amaru"
 AMARU_LOG="/tmp/amaru.log"
 AMARU_PORT="${AMARU_PORT:-6810}"
+export AMARU_PORT
 if (exec 3<>/dev/tcp/127.0.0.1/"$AMARU_PORT") 2>/dev/null; then
   exec 3<&- 3>&-
-  echo "[api-server start.sh] Port ${AMARU_PORT} already bound (standalone amaru workflow); skipping sidecar spawn"
+  echo "[api-server start.sh] Port ${AMARU_PORT} already bound; skipping amaru spawn"
   AMARU_PID=""
 elif [ -f "$AMARU_DIR/scripts/serve_dualstack.py" ] && [ -f "$AMARU_DIR/scripts/bootstrap_venv.sh" ]; then
   echo "[api-server start.sh] Launching amaru sidecar on port ${AMARU_PORT} — log: $AMARU_LOG"
@@ -204,27 +218,31 @@ bash "$SENTRA_CORE_DIR/scripts/bootstrap.sh"
 
 # --- Sentra Detector Sidecar -------------------------------------------------
 # Hosts the Python anomaly detectors (sklearn IsolationForest, embedding drift)
-# that ship in services/sentra-detector-sidecar/. The api-server proxies
-# /api/sentra/detectors/:id/run to this sidecar when manifest.runtime == "python".
-# Same co-launch pattern as amaru: the standalone workflow exists in
-# artifact.toml (sentra-sidecar) for production/operator override, but we boot
-# the sidecar inline here so a single `start.sh` run brings up the full
-# detector framework end-to-end.
+# from services/sentra-detector-sidecar/. The api-server proxies
+# /api/sentra/detectors/:id/run to this sidecar when manifest.runtime=="python".
+# Same rationale as amaru above: the standalone artifact workflow cannot pass
+# Replit's port-readiness check, so this inline co-launch is the single source
+# of truth (task #5260). The CSRF and global-auth exemptions for
+# /api/sentra/detectors/sidecar-register are now in place so the registration
+# handshake succeeds end-to-end.
 SENTRA_SIDECAR_DIR="/home/runner/workspace/services/sentra-detector-sidecar"
 SENTRA_SIDECAR_LOG="/tmp/sentra-sidecar.log"
 SENTRA_SIDECAR_PORT="${SENTRA_SIDECAR_PORT:-8765}"
 export SENTRA_SIDECAR_PORT
-# Make sure the sidecar registers against THIS api-server instance.
 export SENTRA_API_SERVER_URL="${SENTRA_API_SERVER_URL:-http://127.0.0.1:${PORT:-8080}}"
 export SENTRA_SIDECAR_HEARTBEAT_SECONDS="${SENTRA_SIDECAR_HEARTBEAT_SECONDS:-30}"
 if (exec 3<>/dev/tcp/127.0.0.1/"$SENTRA_SIDECAR_PORT") 2>/dev/null; then
   exec 3<&- 3>&-
-  echo "[api-server start.sh] Port ${SENTRA_SIDECAR_PORT} already bound (standalone sentra-sidecar workflow); skipping sidecar spawn"
+  echo "[api-server start.sh] Port ${SENTRA_SIDECAR_PORT} already bound; skipping sentra-sidecar spawn"
   SENTRA_SIDECAR_PID=""
 elif [ -f "$SENTRA_SIDECAR_DIR/src/sidecar/main.py" ] && command -v python3 >/dev/null 2>&1; then
   echo "[api-server start.sh] Launching sentra-sidecar on port ${SENTRA_SIDECAR_PORT} — log: $SENTRA_SIDECAR_LOG"
+  # IMPORTANT: override PORT here. sidecar/main.py reads PORT FIRST and only
+  # falls back to SENTRA_SIDECAR_PORT — without this override the api's
+  # PORT=8080 leaks through and uvicorn tries to bind 8080 (api's port)
+  # instead of 8765, crashing with EADDRINUSE (task #5260).
   (
-    exec bash /home/runner/workspace/scripts/sentra-sidecar-dev.sh
+    PORT="$SENTRA_SIDECAR_PORT" exec bash /home/runner/workspace/scripts/sentra-sidecar-dev.sh
   ) >"$SENTRA_SIDECAR_LOG" 2>&1 &
   SENTRA_SIDECAR_PID=$!
   echo "[api-server start.sh] sentra-sidecar pid=$SENTRA_SIDECAR_PID"

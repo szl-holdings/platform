@@ -133,12 +133,9 @@ export default defineConfig({
       'react',
       'react-dom',
       'react-dom/client',
-      'react-router-dom',
+      'wouter',
       'framer-motion',
       'lucide-react',
-      '@radix-ui/react-dialog',
-      '@radix-ui/react-dropdown-menu',
-      '@radix-ui/react-tooltip',
       '@tanstack/react-query',
       'recharts',
     ],
@@ -151,7 +148,7 @@ export default defineConfig({
     warmup: {
       clientFiles: ['src/main.tsx', 'src/App.tsx'],
     },
-    hmr: { clientPort: 443, path: basePath },
+    hmr: { clientPort: 443 },
     fs: {
       strict: false,
       deny: ['**/.*'],

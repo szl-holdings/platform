@@ -4,27 +4,15 @@ import tailwindcss from "@tailwindcss/vite";
 import path from "path";
 import runtimeErrorOverlay from "@replit/vite-plugin-runtime-error-modal";
 
-const rawPort = process.env.PORT;
+// Align with sibling artifacts (a11oy, conduit, sentra, vessels): the
+// artifact-router proxies to vite, so vite must bind to a port that is
+// NOT the artifact-router's localPort. Use VITE_PORT (falls back to
+// 5263) — anything that collides with localPort kills the router.
+const rawPort = process.env.VITE_PORT ?? process.env.PORT;
+const parsedPort = rawPort ? Number(rawPort) : NaN;
+const port = Number.isFinite(parsedPort) && parsedPort > 0 ? parsedPort : 5263;
 
-if (!rawPort) {
-  throw new Error(
-    "PORT environment variable is required but was not provided.",
-  );
-}
-
-const port = Number(rawPort);
-
-if (Number.isNaN(port) || port <= 0) {
-  throw new Error(`Invalid PORT value: "${rawPort}"`);
-}
-
-const basePath = process.env.BASE_PATH;
-
-if (!basePath) {
-  throw new Error(
-    "BASE_PATH environment variable is required but was not provided.",
-  );
-}
+const basePath = process.env.BASE_PATH ?? '/rosie/';
 
 export default defineConfig({
   base: basePath,
@@ -81,9 +69,9 @@ export default defineConfig({
   server: {
     port,
     strictPort: true,
-    host: true,
+    host: "0.0.0.0",
     allowedHosts: true,
-    hmr: { clientPort: 443, path: basePath },
+    hmr: { clientPort: 443 },
     fs: {
       strict: true,
     },

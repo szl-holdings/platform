@@ -12,10 +12,21 @@ VENV="$SIDECAR_DIR/.venv"
 STAMP="$VENV/.bootstrap-ok"
 # Gate on a stamp file (not just the venv directory) so a previously
 # partially-installed .venv from a failed bootstrap is re-installed instead
-# of silently skipped.
+# of silently skipped. CRUCIAL: when the stamp is missing but the venv
+# directory exists, we delete the venv and rebuild from scratch. Without this
+# `uv pip install` sees the package dist-info already present, reports
+# "Audited N packages", and skips reinstall — leaving the corrupt half-install
+# (dist-info present but package directory missing) in place. We hit this
+# exact failure with scikit-learn (task #5260): RECORD listed sklearn/* files
+# that never made it to disk, so every restart re-failed with
+# `ModuleNotFoundError: No module named 'sklearn'`.
 if [ ! -f "$STAMP" ]; then
+  if [ -d "$VENV" ]; then
+    echo "[sentra:sidecar] previous bootstrap incomplete (no stamp); rebuilding $VENV from scratch"
+    rm -rf "$VENV"
+  fi
   echo "[sentra:sidecar] bootstrapping virtualenv at $VENV"
-  [ -d "$VENV" ] || python3 -m venv "$VENV"
+  python3 -m venv "$VENV"
   # Replit's nixpkgs Python ships an EXTERNALLY-MANAGED marker (PEP 668) AND a
   # global PIP_CONFIG_FILE in the nix store that redirects pip's install target.
   # Both make `pip install` inside the venv unreliable. `uv pip` ignores both

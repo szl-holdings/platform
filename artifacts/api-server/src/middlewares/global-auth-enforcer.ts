@@ -98,6 +98,15 @@ const PUBLIC_EXACT_PATHS = new Set([
   "/api/enterprise-mcp/link-user",
   "/api/enterprise-mcp/internal-revoke",
   "/api/enterprise-mcp/revoked-subjects",
+  // Sentra detector sidecar registration handshake — same pattern as the
+  // enterprise-mcp internal endpoints above. The Python sidecar
+  // (services/sentra-detector-sidecar) authenticates with the
+  // X-Sentra-Sidecar-Secret shared secret verified inside the handler
+  // (checkSidecarSecret in routes/sentra-detector-framework.ts). The sidecar
+  // is a server process with no user session, so the global session check
+  // must let it through. Without this entry every sidecar boot retry-loops
+  // on 401 UNAUTHORIZED and detectors never register (task #5260).
+  "/api/sentra/detectors/sidecar-register",
   // Amaru sidecar read-only proxy (routes/amaru-proxy.ts). The Conduit
   // Operational Core page (artifacts/conduit/src/pages/operational-core.tsx)
   // calls /api/amaru/overwatch/snapshot from the browser without a session;

@@ -34,6 +34,13 @@ const EXEMPT_PATHS = new Set([
   '/api/openapi',
   '/api/openapi.json',
   '/api/csrf-token',
+  // Sentra detector sidecar handshake — service-to-service POST authenticated
+  // via the X-Sentra-Sidecar-Secret shared secret (see checkSidecarSecret in
+  // routes/sentra-detector-framework.ts). The sidecar is a Python uvicorn
+  // process with no browser cookies, so CSRF double-submit does not apply.
+  // Without this exemption every detector-sidecar startup retry-loops on a
+  // CSRF_TOKEN_MISSING 403 and detectors never register (task #5260).
+  '/api/sentra/detectors/sidecar-register',
   '/api/auth/login',
   '/api/auth/login-password',
   '/api/auth/register',
