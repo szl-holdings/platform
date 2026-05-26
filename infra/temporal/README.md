@@ -19,8 +19,30 @@ This boots the Temporal Frontend on `127.0.0.1:7233`, pre-creates the
 restarts.
 
 To persist between restarts, set `TEMPORAL_DEV_DB=/path/to/temporal.db`
-before running. To enable the Temporal Web UI, set
-`TEMPORAL_DEV_UI_PORT=8233`.
+before running.
+
+### Temporal Web UI (opt-in)
+
+For visual workflow inspection — browsing histories, querying state, and
+debugging stuck approvals without installing the `temporal` CLI locally —
+bring the dev server up with the sibling `dev:server:ui` script:
+
+```bash
+pnpm --filter @szl-holdings/temporal-tests run dev:server:ui
+```
+
+This is the same dev server as `dev:server`, but with the Temporal Web UI
+enabled on `http://127.0.0.1:8233` (override with `TEMPORAL_DEV_UI_PORT`).
+Open that URL in a browser to see the `default` namespace, click into any
+workflow execution to view its event history and pending activities, and
+send signals/queries from the UI to unblock approval workflows that are
+waiting on human input.
+
+Equivalent one-off invocation without the helper script:
+
+```bash
+TEMPORAL_DEV_UI_PORT=8233 pnpm --filter @szl-holdings/temporal-tests run dev:server
+```
 
 Leave the process running and bring up the workers in another shell:
 
