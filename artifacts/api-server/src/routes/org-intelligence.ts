@@ -93,10 +93,20 @@ const MAX_REPOS = 50; // bound rate-limit and snapshot size
 // The dual-witness verdict correctly classifies it as THEATER, which
 // pushes the ecosystem aggregator to DEGRADED. Until the public repo
 // has a real source surface, suppress it from the org board entirely.
-// Re-promotion path: remove from this set the moment the public repo
-// ships >=3 source files (the OPERATIONAL threshold) — the verdict
-// engine is the gate, this list is only the "not yet on stage" filter.
-const EXCLUDED_REPOS = new Set<string>(['vsp-otel']);
+// Re-promotion path: remove the slug from EXCLUDED_REPOS in
+// scripts/lib/excluded-repo-rules.mjs the moment the public repo ships
+// >= OPERATIONAL_THRESHOLD source files — the verdict engine is the
+// gate, this list is only the "not yet on stage" filter.
+//
+// The rule set (slug list, threshold, source-file predicate) is shared
+// with scripts/check-excluded-repo-promotion.mjs so the GitHub-Actions
+// promotion probe and this audit can never drift out of sync.
+import {
+  EXCLUDED_REPOS as EXCLUDED_REPOS_LIST,
+  OPERATIONAL_THRESHOLD,
+  isRealSourceFile,
+} from '../../../../scripts/lib/excluded-repo-rules.mjs';
+const EXCLUDED_REPOS = new Set<string>(EXCLUDED_REPOS_LIST);
 
 interface TreeEntry { path: string; type: string; size?: number; }
 interface OrgRepoMeta {
@@ -178,11 +188,13 @@ async function ghFetch(path: string, token: string, accept = 'application/vnd.gi
  * a runtime/ package AND scaffolded docs).
  */
 function computeShippedSignals(tree: TreeEntry[], readme: string | null): { signals: RepoSnap['shipped_signals']; source_files: number; test_files: number; receipts_present: boolean } {
-  const sourceExts = /\.(ts|tsx|js|mjs|cjs|py|lean|rs|go|java)$/i;
+  // Source-file predicate (extensions + real-source-dir prefix) and the
+  // OPERATIONAL threshold both come from the shared rule module so the
+  // promotion probe in scripts/check-excluded-repo-promotion.mjs can never
+  // drift away from this verdict.
   const testExts = /\.(test|spec)\.(ts|tsx|js|py)$|tests?\//i;
-  const realSourceDirs = /^(src\/|runtime\/|agentic\/|packages\/|papers\/|runs\/|Lutar\/|skills\/)/;
 
-  const source = tree.filter(t => t.type === 'blob' && sourceExts.test(t.path) && realSourceDirs.test(t.path));
+  const source = tree.filter(t => t.type === 'blob' && isRealSourceFile(t.path));
   const tests = tree.filter(t => t.type === 'blob' && testExts.test(t.path));
   const receipts = tree.filter(t => t.type === 'blob' && /\/(decision_receipt|proof_ledger|run_manifest|run_summary)\.(json|jsonl)$/.test(t.path));
   const hasCitation = tree.some(t => t.path === 'CITATION.cff');

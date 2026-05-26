@@ -24,20 +24,21 @@
 // Token: GH_WORKFLOW_TOKEN (preferred) or GITHUB_TOKEN (Actions default).
 // Org: szl-holdings.
 //
-// MUST stay in sync with `computeShippedSignals` in
-// artifacts/api-server/src/routes/org-intelligence.ts — specifically the
-// source-extension regex, the real-source-dir regex, and the OPERATIONAL
-// threshold (≥3). If those drift, this probe will tell engineers to
-// promote a repo the server still classifies as THEATER.
+// The promotion rule (source-extension regex, real-source-dir regex,
+// OPERATIONAL threshold, EXCLUDED_REPOS slug set) is imported from
+// `scripts/lib/excluded-repo-rules.mjs`, which is the single source of
+// truth shared with `computeShippedSignals` in
+// artifacts/api-server/src/routes/org-intelligence.ts.
 
 import { appendFileSync } from "node:fs";
 import { env, exit, stderr, stdout } from "node:process";
+import {
+  EXCLUDED_REPOS,
+  OPERATIONAL_THRESHOLD,
+  isRealSourceFile,
+} from "./lib/excluded-repo-rules.mjs";
 
 const ORG = "szl-holdings";
-const EXCLUDED_REPOS = ["vsp-otel"];
-const OPERATIONAL_THRESHOLD = 3;
-const SOURCE_EXTS = /\.(ts|tsx|js|mjs|cjs|py|lean|rs|go|java)$/i;
-const REAL_SOURCE_DIRS = /^(src\/|runtime\/|agentic\/|packages\/|papers\/|runs\/|Lutar\/|skills\/)/;
 
 const token = env.GH_WORKFLOW_TOKEN || env.GITHUB_TOKEN;
 if (!token) {
@@ -64,7 +65,7 @@ async function probeRepo(slug) {
   }
   const entries = Array.isArray(tree.body?.tree) ? tree.body.tree : [];
   const sourceFiles = entries.filter(
-    (t) => t.type === "blob" && SOURCE_EXTS.test(t.path) && REAL_SOURCE_DIRS.test(t.path),
+    (t) => t.type === "blob" && isRealSourceFile(t.path),
   );
   const ready = sourceFiles.length >= OPERATIONAL_THRESHOLD;
   return {
@@ -120,7 +121,7 @@ if (env.GITHUB_STEP_SUMMARY) {
     }
   }
   lines.push("");
-  lines.push(`Re-promotion path: edit \`EXCLUDED_REPOS\` in \`artifacts/api-server/src/routes/org-intelligence.ts\` and delete the slug.`);
+  lines.push(`Re-promotion path: edit \`EXCLUDED_REPOS\` in \`scripts/lib/excluded-repo-rules.mjs\` and delete the slug — the audit route and this probe both import from it.`);
   appendFileSync(env.GITHUB_STEP_SUMMARY, lines.join("\n") + "\n");
 }
 
