@@ -1,0 +1,15 @@
+{
+  "benchmark": "HumanEval (pass@1)",
+  "snapshotTakenAt": "2026-05-26",
+  "upstreamSource": "https://llm-stats.com/benchmarks/humaneval (top entries, manually pinned snapshot)",
+  "note": "Pinned dataset file. Refresh by visiting the upstream leaderboard, copying the top ~10 entries, and bumping snapshotTakenAt. Each `resolved` value is the best reported HumanEval pass@1 as a fraction in [0,1].",
+  "entries": [
+    { "model": "MiniCPM-SALA (OpenBMB, 9B)", "resolved": 0.951 },
+    { "model": "Kimi K2 0905 (Moonshot AI, 1T)", "resolved": 0.945 },
+    { "model": "Claude 3.5 Sonnet (Anthropic, 2024-10-22)", "resolved": 0.937 },
+    { "model": "GPT-5 (OpenAI, 2025-08-07)", "resolved": 0.934 },
+    { "model": "Kimi K2 Instruct (Moonshot AI, 1T)", "resolved": 0.933 },
+    { "model": "Qwen2.5-Coder 32B Instruct (Alibaba/Qwen)", "resolved": 0.927 },
+    { "model": "o1-mini (OpenAI)", "resolved": 0.924 }
+  ]
+}

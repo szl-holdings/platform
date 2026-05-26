@@ -1,15 +1,26 @@
-import { ingestBenchmarkReadmeFraction } from './_benchmark';
-import { fetchWithTimeout, type IngestResult } from './_fetch';
+import {
+  fileLoader,
+  ingestBenchmarkLeaderboardFraction,
+  type LeaderboardLoader,
+} from './_leaderboard';
+import type { IngestResult } from './_fetch';
 
-const URL = 'https://api.github.com/repos/openai/human-eval/readme';
+const SOURCE_URL =
+  'https://github.com/openai/human-eval (pinned snapshot: data/humaneval-leaderboard.json)';
+
+const defaultLoader: LeaderboardLoader = fileLoader(
+  '../../data/humaneval-leaderboard.json',
+);
 
 /**
- * HUMANEVAL — OpenAI's reference HumanEval repository (MIT, no auth).
- * Value: maximum reported pass@k score (as a [0,1] fraction) parsed from
- * the repo's public README.
+ * HUMANEVAL — best documented HumanEval pass@1, drawn from a pinned JSON
+ * snapshot of the public leaderboard rather than from regex-parsing the
+ * upstream repo's README (which drifts on every copy edit). The snapshot
+ * lives at `packages/agi-forecast/data/humaneval-leaderboard.json`;
+ * refresh it (and bump `snapshotTakenAt`) when the leaderboard moves.
  */
 export function ingestHumanEval(
-  fetchImpl: typeof fetchWithTimeout = fetchWithTimeout,
+  loader: LeaderboardLoader = defaultLoader,
 ): Promise<IngestResult<number>> {
-  return ingestBenchmarkReadmeFraction('humaneval', URL, fetchImpl);
+  return ingestBenchmarkLeaderboardFraction('humaneval', SOURCE_URL, loader);
 }

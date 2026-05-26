@@ -11,7 +11,6 @@ export { ingestSweBench } from './swe_bench';
 export { ingestHumanEval } from './humaneval';
 export { ingestMath } from './math';
 export { ingestGithubStargazers } from './_github';
-export { ingestBenchmarkReadmeFraction, parseMaxPercentFraction } from './_benchmark';
 export {
   ingestBenchmarkLeaderboardFraction,
   parseLeaderboardMaxFraction,

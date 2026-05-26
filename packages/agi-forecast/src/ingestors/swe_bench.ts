@@ -19,10 +19,8 @@ const defaultLoader: LeaderboardLoader = fileLoader(
  * `packages/agi-forecast/data/swe-bench-verified-leaderboard.json`; refresh
  * it (and bump `snapshotTakenAt`) when the leaderboard moves materially.
  *
- * GPQA / MMLU / HUMANEVAL / MATH still ingest via README percent-parsing —
- * see `_benchmark.ts`. They lack a single canonical structured leaderboard
- * (Papers With Code is rate-limited and HuggingFace leaderboards churn), so
- * they remain noisy until a similar pinned snapshot is curated for each.
+ * GPQA / MMLU / HUMANEVAL / MATH follow the same pinned-snapshot pattern —
+ * see their respective `data/*-leaderboard.json` files.
  */
 export function ingestSweBench(
   loader: LeaderboardLoader = defaultLoader,

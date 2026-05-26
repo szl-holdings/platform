@@ -13,7 +13,6 @@ import {
   ingestRsp,
   ingestSweBench,
   parseLeaderboardMaxFraction,
-  parseMaxPercentFraction,
 } from '../ingestors';
 
 function jsonResponse(body: unknown, ok = true, status = 200): Response {
@@ -293,36 +292,25 @@ describe('SWE_BENCH ingestor — pinned structured leaderboard snapshot', () => 
   });
 });
 
-describe('parseMaxPercentFraction — README leaderboard parser', () => {
-  it('returns max percentage divided by 100', () => {
-    const md = 'Baseline: 45%, GPT-3.5: 62.4%, GPT-4: 86.7%.';
-    expect(parseMaxPercentFraction(md)).toBeCloseTo(0.867, 6);
-  });
-
-  it('ignores out-of-range numbers like "200%"', () => {
-    expect(parseMaxPercentFraction('only 45% and 200% noise')).toBeCloseTo(0.45, 6);
-  });
-
-  it('throws when no percentages are present', () => {
-    expect(() => parseMaxPercentFraction('no scores documented')).toThrow(/percentage/);
-  });
-
-  it('accepts 100% as the upper bound', () => {
-    expect(parseMaxPercentFraction('saturated at 100% pass rate')).toBe(1);
-  });
-});
-
-const BENCHMARK_INGESTORS = [
-  { name: 'GPQA', fn: ingestGpqa, urlMatch: /idavidrein\/gpqa\/readme/ },
-  { name: 'MMLU', fn: ingestMmlu, urlMatch: /hendrycks\/test\/readme/ },
-  { name: 'HUMANEVAL', fn: ingestHumanEval, urlMatch: /human-eval\/readme/ },
-  { name: 'MATH', fn: ingestMath, urlMatch: /hendrycks\/math\/readme/ },
+const LEADERBOARD_INGESTORS = [
+  { name: 'GPQA', fn: ingestGpqa, urlMatch: /gpqa-leaderboard\.json/ },
+  { name: 'MMLU', fn: ingestMmlu, urlMatch: /mmlu-leaderboard\.json/ },
+  { name: 'HUMANEVAL', fn: ingestHumanEval, urlMatch: /humaneval-leaderboard\.json/ },
+  { name: 'MATH', fn: ingestMath, urlMatch: /math-leaderboard\.json/ },
 ] as const;
 
-describe.each(BENCHMARK_INGESTORS)('$name ingestor — README max-score fraction', ({ name, fn, urlMatch }) => {
-  it(`${name} success returns a [0,1] fraction parsed from the README`, async () => {
-    const readme = `# ${name}\nBaseline 25%, leading model 88.5% on the test split.`;
-    const res = await fn(async () => textResponse(readme));
+describe.each(LEADERBOARD_INGESTORS)('$name ingestor — pinned structured leaderboard snapshot', ({ name, fn, urlMatch }) => {
+  it(`${name} returns the max resolved fraction from an injected loader`, async () => {
+    const synthetic = JSON.stringify({
+      benchmark: name,
+      snapshotTakenAt: '2025-01-01',
+      upstreamSource: 'test',
+      entries: [
+        { model: 'a', resolved: 0.42 },
+        { model: 'b', resolved: 0.885 },
+      ],
+    });
+    const res = await fn(async () => synthetic);
     expect(res.ok).toBe(true);
     if (res.ok) {
       expect(res.value).toBeCloseTo(0.885, 6);
@@ -330,28 +318,31 @@ describe.each(BENCHMARK_INGESTORS)('$name ingestor — README max-score fraction
     }
   });
 
-  it(`${name} fails on HTTP error`, async () => {
-    const res = await fn(async () => new Response('nope', { status: 404 }));
-    expect(res.ok).toBe(false);
-    if (!res.ok) expect(res.error).toMatch(/HTTP 404/);
+  it(`${name} default loader reads the checked-in pinned snapshot and returns a [0,1] fraction`, async () => {
+    const res = await fn();
+    expect(res.ok).toBe(true);
+    if (res.ok) {
+      expect(res.value).toBeGreaterThan(0);
+      expect(res.value).toBeLessThanOrEqual(1);
+    }
   });
 
-  it(`${name} fails when README has no percentages`, async () => {
-    const res = await fn(async () => textResponse('# Title\nno scores here'));
-    expect(res.ok).toBe(false);
-  });
-
-  it(`${name} fails on empty README`, async () => {
-    const res = await fn(async () => textResponse(''));
-    expect(res.ok).toBe(false);
-  });
-
-  it(`${name} captures network failures`, async () => {
+  it(`${name} captures loader exceptions without throwing`, async () => {
     const res = await fn(async () => {
       throw new Error(`${name}-boom`);
     });
     expect(res.ok).toBe(false);
     if (!res.ok) expect(res.error).toBe(`${name}-boom`);
+  });
+
+  it(`${name} fails on malformed JSON`, async () => {
+    const res = await fn(async () => '{ not json');
+    expect(res.ok).toBe(false);
+  });
+
+  it(`${name} fails on empty snapshot payload`, async () => {
+    const res = await fn(async () => '');
+    expect(res.ok).toBe(false);
   });
 });
 

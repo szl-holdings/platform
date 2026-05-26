@@ -1,16 +1,18 @@
 {
   "benchmark": "SWE-bench Verified",
-  "snapshotTakenAt": "2025-05-01",
-  "upstreamSource": "https://www.swebench.com/ (leaderboard, manually pinned snapshot)",
-  "note": "Pinned dataset file. Update the entries + snapshotTakenAt when refreshing. Each `resolved` value is the fraction of resolved instances in [0,1].",
+  "snapshotTakenAt": "2026-05-26",
+  "upstreamSource": "https://llm-stats.com/benchmarks/swe-bench-verified (top entries, manually pinned snapshot)",
+  "note": "Pinned dataset file. Refresh by visiting the upstream leaderboard, copying the top ~10 entries, and bumping snapshotTakenAt. Each `resolved` value is the fraction of resolved instances in [0,1].",
   "entries": [
-    { "model": "Augment Agent v0 (Claude 3.7 Sonnet)", "resolved": 0.6502 },
-    { "model": "Tools + Claude 3.7 Sonnet (2025-02-24)", "resolved": 0.6340 },
-    { "model": "Amazon Q Developer Agent (v20241202)", "resolved": 0.5500 },
-    { "model": "OpenHands + CodeAct v2.1 (claude-3-5-sonnet-20241022)", "resolved": 0.5300 },
-    { "model": "devlo", "resolved": 0.4720 },
-    { "model": "Agentless-1.5 + Claude 3.5 Sonnet", "resolved": 0.4080 },
-    { "model": "Tools + Claude 3.5 Sonnet (2024-10-22)", "resolved": 0.4900 },
-    { "model": "SWE-agent + Claude 3.5 Sonnet", "resolved": 0.3320 }
+    { "model": "Claude Mythos Preview (Anthropic)", "resolved": 0.939 },
+    { "model": "Claude Opus 4.7 (Anthropic)", "resolved": 0.876 },
+    { "model": "Claude Opus 4.5 (Anthropic, 2025-11-01)", "resolved": 0.809 },
+    { "model": "Claude Opus 4.6 (Anthropic)", "resolved": 0.808 },
+    { "model": "Gemini 3.1 Pro Preview (Google)", "resolved": 0.806 },
+    { "model": "DeepSeek-V4-Pro-Max", "resolved": 0.806 },
+    { "model": "MiniMax M2.5", "resolved": 0.802 },
+    { "model": "Kimi K2.6 (Moonshot AI)", "resolved": 0.802 },
+    { "model": "GPT-5.2 (OpenAI, 2025-12-11)", "resolved": 0.800 },
+    { "model": "Claude Sonnet 4.6 (Anthropic)", "resolved": 0.796 }
   ]
 }

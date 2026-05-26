@@ -1,0 +1,16 @@
+{
+  "benchmark": "MMLU",
+  "snapshotTakenAt": "2026-05-26",
+  "upstreamSource": "https://llm-stats.com/benchmarks/mmlu (top entries, manually pinned snapshot)",
+  "note": "Pinned dataset file. Refresh by visiting the upstream leaderboard, copying the top ~10 entries, and bumping snapshotTakenAt. Each `resolved` value is the best reported MMLU accuracy as a fraction in [0,1].",
+  "entries": [
+    { "model": "GPT-5 (OpenAI, 2025-08-07)", "resolved": 0.925 },
+    { "model": "o1 (OpenAI, 2024-12-17)", "resolved": 0.918 },
+    { "model": "GPT-4.5 (OpenAI)", "resolved": 0.908 },
+    { "model": "o1-preview (OpenAI)", "resolved": 0.908 },
+    { "model": "Qwen3 VL 235B A22B Thinking (Alibaba/Qwen)", "resolved": 0.906 },
+    { "model": "Sarvam-105B (Sarvam AI)", "resolved": 0.906 },
+    { "model": "Claude 3.5 Sonnet (Anthropic, 2024-06-20)", "resolved": 0.904 },
+    { "model": "Claude 3.5 Sonnet (Anthropic, 2024-10-22)", "resolved": 0.904 }
+  ]
+}
