@@ -52,6 +52,13 @@ export interface TuningProposal {
   evidence: {
     samples: number;
     gap: number;
+    /**
+     * Hoeffding 95 % one-sided lower confidence bound on `gap`. Equals
+     * 0 (i.e. "unknown / not computed") when no per-sample gap history
+     * was supplied. Surfaced so operators reviewing the proposal can
+     * see the *credible* improvement floor, not just the point estimate.
+     */
+    gapLcb: number;
     drift: number;
     thesisCitation: string;
   };
@@ -68,8 +75,54 @@ export interface ObservedEvent {
   observedGap: number;
   samples: number;
   driftSamples?: { current: readonly number[]; candidate: readonly number[] };
+  /**
+   * Per-sample relative-gap history in [0,1]. When present, the evaluator
+   * computes a Hoeffding lower confidence bound on the mean gap and
+   * gates by `gapLcbMin` — preventing thin-evidence proposals from
+   * sneaking past `gapMin` on the strength of a high but unstable point
+   * estimate. See `hoeffdingLowerBound` for the citation.
+   */
+  gapHistory?: readonly number[];
   irreversibility?: number;
   thesisCitation: string;
+}
+
+/**
+ * Hoeffding lower confidence bound on the mean of a sequence bounded
+ * in [0, 1].
+ *
+ * For X₁,…,Xₙ iid with each Xᵢ ∈ [0, 1] and sample mean X̄,
+ * Hoeffding's inequality gives, for any δ ∈ (0, 1):
+ *
+ *     P( X̄ − E[X] ≥ ε ) ≤ exp(−2nε²)
+ *
+ * Solving δ = exp(−2nε²) ⇒ ε = √(ln(1/δ) / (2n)). The one-sided
+ * (1 − δ) lower confidence bound on E[X] is therefore X̄ − ε.
+ *
+ * This is the same confidence radius used by UCB1 (Auer, Cesa-Bianchi,
+ * Fischer, 2002, *Finite-time Analysis of the Multiarmed Bandit
+ * Problem*, Machine Learning 47:235–256, §2.1, doi:10.1023/A:1013689704352).
+ * Original bound: Hoeffding (1963), *Probability inequalities for sums of
+ * bounded random variables*, JASA 58:13–30. The bound is distribution-free
+ * — valid for any bounded random variable, no normality assumption — and
+ * holds for every finite n, not just asymptotically. The drift detector's
+ * `relativeGap` clamps each sample into [0, 1] by construction, so the
+ * Hoeffding precondition is met.
+ *
+ * @param mean   sample mean in [0, 1]
+ * @param n      number of observations (≥ 1)
+ * @param delta  confidence level (default 0.05 → 95 % one-sided LCB)
+ * @returns lower confidence bound, clamped to [0, 1]; returns 0 when n ≤ 0
+ */
+export function hoeffdingLowerBound(
+  mean: number,
+  n: number,
+  delta: number = 0.05,
+): number {
+  if (n <= 0) return 0;
+  const safeDelta = Math.min(Math.max(delta, 1e-12), 0.999999);
+  const radius = Math.sqrt(Math.log(1 / safeDelta) / (2 * n));
+  return Math.max(0, Math.min(1, mean - radius));
 }
 
 export type RosieDecision =
@@ -85,17 +138,54 @@ import { driftScore } from './risk.js';
  */
 export function evaluateObservedEvent(
   event: ObservedEvent,
-  config: { gapMin?: number; samplesMin?: number; scoreMin?: number } = {},
+  config: {
+    gapMin?: number;
+    samplesMin?: number;
+    scoreMin?: number;
+    /**
+     * Reject proposals whose Hoeffding lower confidence bound on the
+     * observed gap falls below this threshold. Defaults to 0 — i.e. the
+     * gate is informational unless explicitly enabled — to preserve
+     * existing behaviour for callers that don't supply `gapHistory`.
+     * Recommended production value: `gapMin` (so a proposal must clear
+     * the same bar with 95 % confidence, not just on a point estimate).
+     */
+    gapLcbMin?: number;
+    /** Confidence level for the LCB (default 0.05 → 95 % LCB). */
+    gapLcbDelta?: number;
+  } = {},
 ): RosieDecision {
   const gapMin = config.gapMin ?? 0.1;
   const samplesMin = config.samplesMin ?? 25;
   const scoreMin = config.scoreMin ?? 0.5;
+  const gapLcbMin = config.gapLcbMin ?? 0;
+  const gapLcbDelta = config.gapLcbDelta ?? 0.05;
 
   if (event.observedGap < gapMin) {
     return { kind: 'noop', reason: `gap ${event.observedGap.toFixed(3)} below ${gapMin}` };
   }
   if (event.samples < samplesMin) {
     return { kind: 'noop', reason: `samples ${event.samples} below ${samplesMin}` };
+  }
+
+  // Hoeffding LCB on the observed gap — distribution-free, valid for
+  // every finite n. Only computed when the caller supplies per-sample
+  // history; otherwise reported as 0 ("unknown") and the gate is skipped.
+  const gapLcb = event.gapHistory && event.gapHistory.length > 0
+    ? hoeffdingLowerBound(
+        event.gapHistory.reduce((acc, g) => acc + g, 0) / event.gapHistory.length,
+        event.gapHistory.length,
+        gapLcbDelta,
+      )
+    : 0;
+
+  if (event.gapHistory && event.gapHistory.length > 0 && gapLcb < gapLcbMin) {
+    return {
+      kind: 'noop',
+      reason:
+        `gap LCB ${gapLcb.toFixed(3)} (95% Hoeffding, n=${event.gapHistory.length}) ` +
+        `below ${gapLcbMin}`,
+    };
   }
 
   const drift = event.driftSamples
@@ -113,6 +203,10 @@ export function evaluateObservedEvent(
     return { kind: 'noop', reason: `score ${score.toFixed(3)} below ${scoreMin}` };
   }
 
+  const lcbNote = event.gapHistory && event.gapHistory.length > 0
+    ? ` (95% Hoeffding LCB ${(gapLcb * 100).toFixed(1)}%)`
+    : '';
+
   const proposal: TuningProposal = {
     formulaId: event.formulaId,
     fromVersion: event.fromVersion,
@@ -122,12 +216,13 @@ export function evaluateObservedEvent(
     evidence: {
       samples: event.samples,
       gap: event.observedGap,
+      gapLcb,
       drift,
       thesisCitation: event.thesisCitation,
     },
     score,
     rationale:
-      `Observed gap of ${(event.observedGap * 100).toFixed(1)}% over ${event.samples} samples ` +
+      `Observed gap of ${(event.observedGap * 100).toFixed(1)}%${lcbNote} over ${event.samples} samples ` +
       `with drift ${drift.toFixed(3)} suggests retuning ${event.parameter} ` +
       `from ${event.oldValue} to ${event.candidateValue} (cited from ${event.thesisCitation}).`,
   };
@@ -153,6 +248,8 @@ export interface SentraSignalForRosie {
   fromVersion: string;
   thesisCitation: string;
   driftSamples?: { current: readonly number[]; candidate: readonly number[] };
+  /** Per-sample relative-gap history in [0,1]. Forwarded to the LCB gate. */
+  gapHistory?: readonly number[];
   irreversibility?: number;
 }
 
@@ -165,6 +262,8 @@ export interface RosieLoopOptions {
   gapMin?: number;
   samplesMin?: number;
   scoreMin?: number;
+  gapLcbMin?: number;
+  gapLcbDelta?: number;
 }
 
 export interface RosieLoopResult {
@@ -190,6 +289,7 @@ export async function processSignal(
     observedGap: signal.observedGap,
     samples: signal.samples,
     driftSamples: signal.driftSamples,
+    gapHistory: signal.gapHistory,
     irreversibility: signal.irreversibility,
     thesisCitation: signal.thesisCitation,
   };
@@ -197,6 +297,8 @@ export async function processSignal(
     gapMin: options.gapMin,
     samplesMin: options.samplesMin,
     scoreMin: options.scoreMin,
+    gapLcbMin: options.gapLcbMin,
+    gapLcbDelta: options.gapLcbDelta,
   });
   if (decision.kind === 'noop') return { decision };
 
@@ -219,6 +321,7 @@ export async function processSignal(
         samples: event.samples,
         thesisCitation: event.thesisCitation,
         driftSamples: event.driftSamples,
+        gapHistory: event.gapHistory,
         irreversibility: event.irreversibility,
       }),
     });

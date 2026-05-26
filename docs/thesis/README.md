@@ -92,6 +92,14 @@ idea to a specific A11oy surface that benefits.
   highlighting, LOD labels) landed in `A11oy AgentViz` topology;
   follow-ups queued for `AgentBom`, `AgentMesh`, and
   `AgentOrchestration`.
+  (2026-05-26). The two assigned sources didn't earn an upgrade
+  (verified directly against arxiv.org; one is a quantum-walks paper,
+  the other doesn't resolve). The note then surveyed the actual leaders
+  in online-eval — Auer-Cesa-Bianchi-Fischer 2002 (UCB1), Hoeffding 1963,
+  Howard-Ramdas confidence sequences, Kohavi-Tang-Xu — and shipped a
+  **Hoeffding lower-confidence-bound gate** on the observed drift gap in
+  ROSIE's evolution loop. Opt-in via `ROSIE_GAP_LCB_MIN`. Demo:
+  `scripts/demo-rosie-lcb-gate.ts`.
 
 ## Provenance policy
 

@@ -415,10 +415,19 @@ export async function proposeTuningInProcess(
       observedGap: Number(partial.observedGap ?? 0),
       samples: Number(partial.samples ?? 0),
       driftSamples: partial.driftSamples,
+      gapHistory: Array.isArray(partial.gapHistory)
+        ? partial.gapHistory.map((g) => Number(g)).filter((g) => Number.isFinite(g))
+        : undefined,
       irreversibility: partial.irreversibility ?? 0,
       thesisCitation: partial.thesisCitation ?? `${f.provenance.thesisDoc} ${f.provenance.thesisSection}`,
     };
-    const decision = evaluateObservedEvent(event);
+    // Hoeffding LCB gate — configurable per process via ROSIE_GAP_LCB_MIN.
+    // Default 0 preserves prior behaviour; operators dial it up (typical
+    // target: equal to `gapMin`, i.e. 0.10) once they trust the loop.
+    const gapLcbMin = Number.isFinite(Number(process.env.ROSIE_GAP_LCB_MIN))
+      ? Number(process.env.ROSIE_GAP_LCB_MIN)
+      : 0;
+    const decision = evaluateObservedEvent(event, { gapLcbMin });
     if (decision.kind === 'noop') {
       return {
         status: 200,

@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { createDriftDetector, type DriftObservation } from './drift-detector.js';
+import { hoeffdingLowerBound } from './evolution.js';
 
 function obs(over: Partial<DriftObservation>): DriftObservation {
   return {
@@ -76,5 +77,20 @@ describe('inspectBuckets()', () => {
   it('returns an empty list when no observations have been recorded', () => {
     const d = createDriftDetector();
     expect(d.inspectBuckets()).toEqual([]);
+  });
+});
+
+describe('drainSignals() — gapHistory forwarding', () => {
+  it('attaches the per-sample gapHistory to each emitted signal so the ROSIE LCB gate can run', () => {
+    const d = createDriftDetector({ samplesMin: 5, gapMin: 0.1 });
+    for (let i = 0; i < 5; i++) d.record(obs({ observed: 1.2, baseline: 1.0 }));
+    const [sig] = d.drainSignals();
+    expect(sig).toBeDefined();
+    expect(sig.gapHistory).toBeDefined();
+    expect(sig.gapHistory!).toHaveLength(5);
+    // Every sample is a 20% gap → mean 0.2 → LCB at 95% should be 0
+    // (clamped) because n=5 is too thin (radius ≈ 0.547).
+    const lcb = hoeffdingLowerBound(0.2, 5, 0.05);
+    expect(lcb).toBe(0);
   });
 });

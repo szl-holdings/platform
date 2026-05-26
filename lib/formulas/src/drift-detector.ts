@@ -212,6 +212,12 @@ export function createDriftDetector(thresholds: DriftThresholds = {}): DriftDete
         current: [...b.baselineHistory],
         candidate: [...b.observedHistory],
       },
+      // Forward the per-sample gap history so the ROSIE evaluator can
+      // compute a Hoeffding lower confidence bound on the mean gap
+      // (Auer-Cesa-Bianchi-Fischer 2002 §2.1) and reject thin-evidence
+      // proposals that beat `gapMin` only on a high-variance point
+      // estimate.
+      gapHistory: [...b.gapHistory],
       irreversibility: b.irreversibility,
     };
   }

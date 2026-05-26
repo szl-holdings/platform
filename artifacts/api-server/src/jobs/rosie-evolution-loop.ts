@@ -136,15 +136,24 @@ export interface RosieEvolutionTickResult {
  * canonical `runRosieLoop`. Safe to call from a scheduler; never throws.
  */
 export async function runRosieEvolutionTick(
-  options: Pick<RosieLoopOptions, 'gapMin' | 'samplesMin' | 'scoreMin'> = {},
+  options: Pick<
+    RosieLoopOptions,
+    'gapMin' | 'samplesMin' | 'scoreMin' | 'gapLcbMin' | 'gapLcbDelta'
+  > = {},
 ): Promise<RosieEvolutionTickResult> {
   const signals: SentraSignalForRosie[] = detector.drainSignals();
   if (signals.length === 0) {
     return { drained: 0, proposals: 0, noops: 0, results: [] };
   }
+  // Hoeffding LCB gate (Auer-Cesa-Bianchi-Fischer 2002 §2.1) — defaults
+  // to 0 ("informational only") so existing deployments don't change
+  // behaviour. Operators tighten via ROSIE_GAP_LCB_MIN env (typical
+  // target: same value as gapMin, e.g. 0.10).
+  const envLcb = Number(process.env.ROSIE_GAP_LCB_MIN);
   const results = await runRosieLoop(signals, {
     apiBase: '/api',
     fetchImpl: makeInProcessFetch(),
+    gapLcbMin: Number.isFinite(envLcb) ? envLcb : 0,
     ...options,
   });
   let proposals = 0;
