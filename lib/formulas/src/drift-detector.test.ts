@@ -1,5 +1,9 @@
-import { describe, expect, it } from 'vitest';
-import { createDriftDetector, type DriftObservation } from './drift-detector.js';
+import { describe, expect, it, vi } from 'vitest';
+import {
+  createDriftDetector,
+  type DriftBucketState,
+  type DriftObservation,
+} from './drift-detector.js';
 import { hoeffdingLowerBound } from './evolution.js';
 
 function obs(over: Partial<DriftObservation>): DriftObservation {
@@ -92,5 +96,118 @@ describe('drainSignals() — gapHistory forwarding', () => {
     // (clamped) because n=5 is too thin (radius ≈ 0.547).
     const lcb = hoeffdingLowerBound(0.2, 5, 0.05);
     expect(lcb).toBe(0);
+  });
+});
+
+describe('persistence hooks', () => {
+  it('fires onBucketChanged on every record() call with a lossless snapshot', () => {
+    const onBucketChanged = vi.fn();
+    const d = createDriftDetector({ samplesMin: 5, gapMin: 0.1 }, { onBucketChanged });
+    d.record(obs({ observed: 1.3, baseline: 1.0 }));
+    d.record(obs({ observed: 1.4, baseline: 1.0 }));
+    expect(onBucketChanged).toHaveBeenCalledTimes(2);
+    const last = onBucketChanged.mock.calls[1][0] as DriftBucketState;
+    expect(last.observedHistory).toEqual([1.3, 1.4]);
+    expect(last.baselineHistory).toEqual([1.0, 1.0]);
+    expect(last.gapHistory).toHaveLength(2);
+    expect(last.totalSamples).toBe(2);
+  });
+
+  it('fires onBucketDeleted when drainSignals removes a fired bucket', () => {
+    const onBucketDeleted = vi.fn();
+    const d = createDriftDetector({ samplesMin: 3, gapMin: 0.1 }, { onBucketDeleted });
+    for (let i = 0; i < 3; i++) d.record(obs({ observed: 1.5, baseline: 1.0 }));
+    const signals = d.drainSignals();
+    expect(signals).toHaveLength(1);
+    expect(onBucketDeleted).toHaveBeenCalledOnce();
+    expect(onBucketDeleted).toHaveBeenCalledWith('f1', 'p1');
+  });
+
+  it('fires onBucketDeleted once per remaining bucket on reset()', () => {
+    const onBucketDeleted = vi.fn();
+    const d = createDriftDetector({ samplesMin: 5, gapMin: 0.1 }, { onBucketDeleted });
+    d.record(obs({ formulaId: 'A', observed: 1.2, baseline: 1.0 }));
+    d.record(obs({ formulaId: 'B', observed: 1.3, baseline: 1.0 }));
+    d.reset();
+    expect(onBucketDeleted).toHaveBeenCalledTimes(2);
+  });
+
+  it('swallows persistence errors so record() never throws', () => {
+    const d = createDriftDetector(
+      {},
+      {
+        onBucketChanged: () => {
+          throw new Error('boom');
+        },
+      },
+    );
+    expect(() => d.record(obs({ observed: 1.5, baseline: 1.0 }))).not.toThrow();
+    expect(d.size()).toBe(1);
+  });
+});
+
+describe('loadBuckets() rehydration', () => {
+  it('replays persisted state into a new detector and resumes accumulation', () => {
+    const d1 = createDriftDetector({ samplesMin: 5, gapMin: 0.1 });
+    for (let i = 0; i < 3; i++) d1.record(obs({ observed: 1.3, baseline: 1.0 }));
+    const snapshots = d1.dumpBuckets();
+    expect(snapshots).toHaveLength(1);
+    expect(snapshots[0].totalSamples).toBe(3);
+
+    const d2 = createDriftDetector({ samplesMin: 5, gapMin: 0.1 });
+    d2.loadBuckets(snapshots);
+    expect(d2.size()).toBe(1);
+
+    // Two more observations should now cross the threshold — proving the
+    // window resumed where d1 left off instead of restarting at zero.
+    d2.record(obs({ observed: 1.4, baseline: 1.0 }));
+    d2.record(obs({ observed: 1.4, baseline: 1.0 }));
+    const signals = d2.drainSignals();
+    expect(signals).toHaveLength(1);
+    expect(signals[0].samples).toBe(5);
+  });
+
+  it('loadBuckets does NOT fire onBucketChanged (no write-loop on boot)', () => {
+    const onBucketChanged = vi.fn();
+    const d = createDriftDetector({}, { onBucketChanged });
+    d.loadBuckets([
+      {
+        formulaId: 'f1',
+        parameter: 'p1',
+        oldValue: 0.5,
+        candidateValue: 0.7,
+        fromVersion: 'v1',
+        thesisCitation: 'docs',
+        irreversibility: 0,
+        observedHistory: [1.2, 1.3],
+        baselineHistory: [1.0, 1.0],
+        gapHistory: [0.2, 0.3],
+        totalSamples: 2,
+      },
+    ]);
+    expect(onBucketChanged).not.toHaveBeenCalled();
+    expect(d.size()).toBe(1);
+  });
+
+  it('trims persisted history exceeding the configured window size', () => {
+    const d = createDriftDetector({ windowSize: 3 });
+    d.loadBuckets([
+      {
+        formulaId: 'f1',
+        parameter: 'p1',
+        oldValue: 0.5,
+        candidateValue: 0.7,
+        fromVersion: 'v1',
+        thesisCitation: 'docs',
+        irreversibility: 0,
+        observedHistory: [1, 2, 3, 4, 5],
+        baselineHistory: [1, 1, 1, 1, 1],
+        gapHistory: [0, 1, 2, 3, 4],
+        totalSamples: 5,
+      },
+    ]);
+    const dumped = d.dumpBuckets();
+    expect(dumped[0].observedHistory).toEqual([3, 4, 5]);
+    expect(dumped[0].totalSamples).toBe(5); // totalSamples is preserved
   });
 });

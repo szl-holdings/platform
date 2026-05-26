@@ -119,9 +119,55 @@ export interface DriftBucketSnapshot {
   baselineTail: number[];
 }
 
+/**
+ * Full serialized state of a single bucket — emitted to persistence
+ * hooks so the rolling window can be rehydrated after a process
+ * restart. Distinct from `DriftBucketSnapshot` (which is a UI-shaped
+ * progress view with truncated tails); this snapshot is lossless.
+ */
+export interface DriftBucketState {
+  formulaId: string;
+  parameter: string;
+  oldValue: number;
+  candidateValue: number;
+  fromVersion: string;
+  thesisCitation: string;
+  irreversibility: number;
+  observedHistory: number[];
+  baselineHistory: number[];
+  gapHistory: number[];
+  totalSamples: number;
+}
+
+export interface DriftDetectorPersistence {
+  /**
+   * Called synchronously after every mutation to a bucket (insert or
+   * update). Implementations should write-through to durable storage;
+   * any returned promise is fire-and-forget from the detector's POV.
+   */
+  onBucketChanged?: (state: DriftBucketState) => void | Promise<void>;
+  /**
+   * Called when a bucket is removed (e.g. by `drainSignals` or
+   * `reset`). Implementations should delete the corresponding row.
+   */
+  onBucketDeleted?: (formulaId: string, parameter: string) => void | Promise<void>;
+}
+
 export interface DriftDetector {
   /** Record one observation. Updates the rolling window in place. */
   record(obs: DriftObservation): void;
+  /**
+   * Seed the detector with previously-persisted bucket state. Existing
+   * buckets with the same (formulaId, parameter) key are replaced.
+   * Does NOT fire the `onBucketChanged` hook — load is the inverse of
+   * persistence, so re-emitting would create a write-loop on boot.
+   */
+  loadBuckets(states: readonly DriftBucketState[]): void;
+  /**
+   * Return a lossless snapshot of every bucket currently in memory.
+   * Primarily a test helper for the persistence layer.
+   */
+  dumpBuckets(): DriftBucketState[];
   /**
    * Inspect (without mutating) the current set of buckets that have
    * crossed the drift threshold. Useful for UI surfacing.
@@ -147,13 +193,59 @@ export interface DriftDetector {
   thresholds: Required<DriftThresholds>;
 }
 
-export function createDriftDetector(thresholds: DriftThresholds = {}): DriftDetector {
+export function createDriftDetector(
+  thresholds: DriftThresholds = {},
+  persistence: DriftDetectorPersistence = {},
+): DriftDetector {
   const cfg: Required<DriftThresholds> = {
     gapMin: thresholds.gapMin ?? DEFAULT_DRIFT_THRESHOLDS.gapMin,
     samplesMin: thresholds.samplesMin ?? DEFAULT_DRIFT_THRESHOLDS.samplesMin,
     windowSize: thresholds.windowSize ?? DEFAULT_DRIFT_THRESHOLDS.windowSize,
   };
   const buckets = new Map<string, Bucket>();
+
+  function bucketToState(b: Bucket): DriftBucketState {
+    return {
+      formulaId: b.formulaId,
+      parameter: b.parameter,
+      oldValue: b.oldValue,
+      candidateValue: b.candidateValue,
+      fromVersion: b.fromVersion,
+      thesisCitation: b.thesisCitation,
+      irreversibility: b.irreversibility,
+      observedHistory: [...b.observedHistory],
+      baselineHistory: [...b.baselineHistory],
+      gapHistory: [...b.gapHistory],
+      totalSamples: b.totalSamples,
+    };
+  }
+
+  function emitChanged(b: Bucket): void {
+    if (!persistence.onBucketChanged) return;
+    try {
+      const maybePromise = persistence.onBucketChanged(bucketToState(b));
+      if (maybePromise && typeof (maybePromise as Promise<void>).catch === 'function') {
+        (maybePromise as Promise<void>).catch(() => {
+          // Persistence errors must never crash the in-memory detector;
+          // callers are expected to log within the hook itself.
+        });
+      }
+    } catch {
+      // Same — never propagate persistence errors into hot record path.
+    }
+  }
+
+  function emitDeleted(formulaId: string, parameter: string): void {
+    if (!persistence.onBucketDeleted) return;
+    try {
+      const maybePromise = persistence.onBucketDeleted(formulaId, parameter);
+      if (maybePromise && typeof (maybePromise as Promise<void>).catch === 'function') {
+        (maybePromise as Promise<void>).catch(() => {});
+      }
+    } catch {
+      /* swallow */
+    }
+  }
 
   function record(obs: DriftObservation): void {
     const key = bucketKey(obs.formulaId, obs.parameter);
@@ -192,6 +284,37 @@ export function createDriftDetector(thresholds: DriftThresholds = {}): DriftDete
       b.baselineHistory.shift();
       b.gapHistory.shift();
     }
+
+    emitChanged(b);
+  }
+
+  function loadBuckets(states: readonly DriftBucketState[]): void {
+    for (const s of states) {
+      // Trim any persisted history that exceeds the configured window —
+      // windowSize may legitimately shrink between deploys.
+      const observed = s.observedHistory.slice(-cfg.windowSize);
+      const baseline = s.baselineHistory.slice(-cfg.windowSize);
+      const gap = s.gapHistory.slice(-cfg.windowSize);
+      buckets.set(bucketKey(s.formulaId, s.parameter), {
+        formulaId: s.formulaId,
+        parameter: s.parameter,
+        oldValue: s.oldValue,
+        candidateValue: s.candidateValue,
+        fromVersion: s.fromVersion,
+        thesisCitation: s.thesisCitation,
+        irreversibility: s.irreversibility,
+        observedHistory: [...observed],
+        baselineHistory: [...baseline],
+        gapHistory: [...gap],
+        totalSamples: s.totalSamples,
+      });
+    }
+  }
+
+  function dumpBuckets(): DriftBucketState[] {
+    const out: DriftBucketState[] = [];
+    for (const b of buckets.values()) out.push(bucketToState(b));
+    return out;
   }
 
   function buildSignal(b: Bucket): SentraSignalForRosie | null {
@@ -282,17 +405,26 @@ export function createDriftDetector(thresholds: DriftThresholds = {}): DriftDete
         // Clear this bucket so we don't re-propose on every tick — wait
         // for fresh observations before signalling again.
         buckets.delete(key);
+        emitDeleted(b.formulaId, b.parameter);
       }
     }
     return out;
   }
 
+  function reset(): void {
+    const drained = Array.from(buckets.values());
+    buckets.clear();
+    for (const b of drained) emitDeleted(b.formulaId, b.parameter);
+  }
+
   return {
     record,
+    loadBuckets,
+    dumpBuckets,
     pendingSignals,
     inspectBuckets,
     drainSignals,
-    reset: () => buckets.clear(),
+    reset,
     size: () => buckets.size,
     thresholds: cfg,
   };
