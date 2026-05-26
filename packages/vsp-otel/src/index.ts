@@ -40,6 +40,16 @@ export {
   type LambdaAxisStreamHandle,
 } from './lambda-axis-stream.js';
 
+export {
+  startOtlpHttpReceiver,
+  extractLambdaAxesFromOtlpAttributes,
+} from './otlp-http-receiver.js';
+export type {
+  OtlpHttpReceiver,
+  OtlpHttpReceiverOptions,
+  ReceiverConnectionState,
+} from './otlp-http-receiver.js';
+
 export type {
   VspNodeSdk,
   VspNodeSdkOptions,

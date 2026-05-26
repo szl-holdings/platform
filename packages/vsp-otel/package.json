@@ -36,6 +36,8 @@
     "@opentelemetry/semantic-conventions": "^1.40.0"
   },
   "devDependencies": {
+    "@opentelemetry/core": "^2.7.1",
+    "@opentelemetry/otlp-transformer": "^0.200.0",
     "@szl-holdings/proof-chain": "workspace:*",
     "@types/node": "catalog:",
     "tinybench": "^2.9.0",
