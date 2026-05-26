@@ -34,6 +34,22 @@ In the external split, each `<app>/deploy/` directory will live at the
 root of its own `szl-holdings/<app>` repository, and `uds-mesh/` will
 be the root of `szl-holdings/uds-mesh`.
 
+## Automated publish (CI)
+
+Operators should not hand-publish these packages from a workstation.
+The GitHub Actions workflow
+[`.github/workflows/szl-zarf-publish.yml`](../../../../../.github/workflows/szl-zarf-publish.yml)
+runs `zarf package create` + `zarf package publish` for all three
+packages (a11oy, sentra, amaru) and `uds create` + `uds publish` for
+this bundle on every push of a tag matching `szl-v*` (it can also be
+fired manually via `workflow_dispatch`). It authenticates to
+`ghcr.io/szl-holdings` using the built-in `GITHUB_TOKEN` with
+`packages: write` — no long-lived PAT is required.
+
+To cut a new release, bump the `version:` fields in each
+`<app>/deploy/zarf.yaml` and in `uds-mesh/uds-bundle.yaml`, then push
+a tag (e.g. `git tag szl-v1.0.0-alpha.2 && git push origin szl-v1.0.0-alpha.2`).
+
 ## Warhacker demo walk-through (validated against §06)
 
 Each numbered step below maps to a step in
@@ -108,7 +124,7 @@ uds-cli bundle create . -f uds-bundle.local.yaml --confirm
 # ( cd ../a11oy/deploy  && zarf package publish zarf-package-a11oy-amd64-1.0.0-alpha.tar.zst   oci://ghcr.io/szl-holdings/packages --signing-key ../../uds-mesh/cosign.key )
 # ( cd ../sentra/deploy && zarf package publish zarf-package-sentra-amd64-1.0.0-alpha.tar.zst oci://ghcr.io/szl-holdings/packages --signing-key ../../uds-mesh/cosign.key )
 # ( cd ../amaru/deploy  && zarf package publish zarf-package-amaru-amd64-1.0.0-alpha.tar.zst  oci://ghcr.io/szl-holdings/packages --signing-key ../../uds-mesh/cosign.key )
-# In CI, the GitHub Actions workflow (see .github/workflows/zarf-publish.yml)
+# In CI, the GitHub Actions workflow (see .github/workflows/szl-zarf-publish.yml)
 # materializes the PEM from the ZARF_COSIGN_PRIVATE_KEY secret into a
 # 0600 cosign.key file inside ${GITHUB_WORKSPACE} and passes that path
 # to --signing-key, then shreds it on exit.
@@ -175,9 +191,9 @@ shred -u cosign.key
 ```
 
 The companion CI workflow,
-[`.github/workflows/zarf-publish.yml`](../../../../../.github/workflows/zarf-publish.yml),
+[`.github/workflows/szl-zarf-publish.yml`](../../../../../.github/workflows/szl-zarf-publish.yml),
 consumes those two secrets and re-publishes signed packages on every
-tag matching `uds-mesh-v*`.
+tag matching `szl-v*`.
 
 Either path produces `uds-bundle-szl-mesh-amd64-0.1.0.tar.zst` —
 the single artifact handed to operators (or to Andrew on a USB stick).
