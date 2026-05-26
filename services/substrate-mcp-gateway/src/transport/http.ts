@@ -420,6 +420,14 @@ export function createHttpTransport(): express.Router {
       // via its multiplexing transport, so per-session attach is just
       // sub-transport registration — no fresh tool/resource/prompt setup.
       await sharedServer.attachSession(sseTransport);
+      // Task #5360: attachSession() only wires the sub-transport into the
+      // multiplexer — it does NOT call start() on the sub-transport. Without
+      // start() the SDK never flushes SSE headers nor writes the initial
+      // `event: endpoint` frame, so legacy (MCP 2024-11-05) clients never
+      // learn the per-session POST URL. Streamable HTTP clients are
+      // unaffected because they get their own start() via the streamable
+      // transport handshake.
+      await sseTransport.start();
     } catch (err) {
       sseSessions.delete(sseTransport.sessionId);
       if (!res.headersSent) {

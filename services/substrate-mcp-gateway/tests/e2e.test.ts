@@ -1537,3 +1537,179 @@ test('29. concurrent sessions with colliding JSON-RPC ids receive their own resp
     ),
   );
 });
+
+test('30. legacy SSE handshake: GET /mcp/sse emits endpoint event and POST /mcp/message delivers the initialize response on the open stream', async () => {
+  // Regression guard for task #5360. The legacy MCP 2024-11-05 transport is
+  // a two-channel protocol:
+  //   • GET /mcp/sse opens an SSE stream. The SDK's SSEServerTransport MUST
+  //     write an initial `event: endpoint` frame containing the per-session
+  //     POST URL (`/mcp/message?sessionId=...`). Without that frame the
+  //     client never learns where to send its first message and is wedged.
+  //   • POST /mcp/message?sessionId=... delivers JSON-RPC requests; the
+  //     response is pushed back over the open SSE stream as a `message`
+  //     event, not in the POST response body (the POST returns 202).
+  //
+  // Before this task, the gateway allocated the SSEServerTransport and
+  // attached it to the shared multiplexer but never called `start()`, so the
+  // endpoint frame was never written and the whole legacy transport was
+  // dead. This test exercises the full handshake end-to-end.
+  type SseFrame = { event: string; data: string };
+  const frames: SseFrame[] = [];
+  let endpointResolved = false;
+  let responseResolved = false;
+
+  const url = new URL(baseUrl);
+  const sseReq = http.request({
+    hostname: url.hostname,
+    port: Number(url.port),
+    path: '/mcp/sse',
+    method: 'GET',
+    headers: {
+      Authorization: `Bearer ${TEST_API_KEY}`,
+      Accept: 'text/event-stream',
+    },
+  });
+
+  const endpointPromise = new Promise<string>((resolve, reject) => {
+    const timer = setTimeout(
+      () => reject(new Error('Timed out waiting for SSE endpoint event')),
+      5_000,
+    );
+    sseReq.on('error', (err) => {
+      clearTimeout(timer);
+      reject(err);
+    });
+    sseReq.on('response', (sseRes) => {
+      assert.equal(sseRes.statusCode, 200, 'GET /mcp/sse must return 200');
+      const ct = sseRes.headers['content-type'] ?? '';
+      assert.ok(
+        String(ct).includes('text/event-stream'),
+        `GET /mcp/sse must return text/event-stream, got: ${String(ct)}`,
+      );
+
+      let buf = '';
+      sseRes.on('data', (chunk: Buffer) => {
+        buf += chunk.toString('utf8');
+        // SSE frames are separated by a blank line.
+        let blankIdx: number;
+        while ((blankIdx = buf.indexOf('\n\n')) !== -1) {
+          const block = buf.slice(0, blankIdx);
+          buf = buf.slice(blankIdx + 2);
+          let ev = 'message';
+          const dataLines: string[] = [];
+          for (const line of block.split('\n')) {
+            if (line.startsWith('event: ')) ev = line.slice(7).trim();
+            else if (line.startsWith('data: ')) dataLines.push(line.slice(6));
+          }
+          if (dataLines.length === 0) continue;
+          const frame: SseFrame = { event: ev, data: dataLines.join('\n') };
+          frames.push(frame);
+          if (frame.event === 'endpoint' && !endpointResolved) {
+            endpointResolved = true;
+            clearTimeout(timer);
+            resolve(frame.data);
+          }
+        }
+      });
+      sseRes.on('error', (err) => {
+        clearTimeout(timer);
+        if (!endpointResolved) reject(err);
+      });
+    });
+    sseReq.end();
+  });
+
+  try {
+    const endpointPath = await endpointPromise;
+    // The SDK writes the endpoint URL with a `?sessionId=` query string.
+    assert.ok(
+      endpointPath.includes('/mcp/message') && endpointPath.includes('sessionId='),
+      `Endpoint event must point to /mcp/message?sessionId=..., got: ${endpointPath}`,
+    );
+
+    const initialize = {
+      jsonrpc: '2.0',
+      id: 42,
+      method: 'initialize',
+      params: {
+        protocolVersion: '2024-11-05',
+        capabilities: {},
+        clientInfo: { name: 'legacy-sse-e2e', version: '1.0.0' },
+      },
+    };
+
+    // Race: the POST returns 202 but the actual JSON-RPC response is
+    // pushed back over the open SSE stream. Watch the frames list for the
+    // matching response while issuing the POST.
+    const responsePromise = new Promise<{ id: unknown; result?: unknown; error?: unknown }>(
+      (resolve, reject) => {
+        const timer = setTimeout(
+          () => reject(new Error('Timed out waiting for initialize response on SSE stream')),
+          5_000,
+        );
+        const tick = setInterval(() => {
+          for (const f of frames) {
+            if (f.event !== 'message') continue;
+            try {
+              const parsed = JSON.parse(f.data) as { id?: unknown };
+              if (parsed.id === 42) {
+                clearTimeout(timer);
+                clearInterval(tick);
+                responseResolved = true;
+                resolve(parsed as { id: unknown; result?: unknown; error?: unknown });
+                return;
+              }
+            } catch {
+              // Ignore non-JSON frames (e.g. $/ready, substrate runtime events).
+            }
+          }
+        }, 25);
+        // Surface stream errors so the test fails fast instead of timing out.
+        sseReq.on('error', (err) => {
+          if (!responseResolved) {
+            clearTimeout(timer);
+            clearInterval(tick);
+            reject(err);
+          }
+        });
+      },
+    );
+
+    const postUrl = endpointPath.startsWith('http')
+      ? endpointPath
+      : `${baseUrl}${endpointPath.startsWith('/') ? '' : '/'}${endpointPath}`;
+    const postRes = await fetch(postUrl, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${TEST_API_KEY}`,
+      },
+      body: JSON.stringify(initialize),
+    });
+    assert.equal(
+      postRes.status,
+      202,
+      `POST /mcp/message must return 202 Accepted, got ${postRes.status}`,
+    );
+    // Drain the (empty) POST body so the socket is released.
+    await postRes.text();
+
+    const response = await responsePromise;
+    assert.equal(response.id, 42, 'SSE-delivered response must echo the initialize request id');
+    assert.ok(
+      response.result && !response.error,
+      `Initialize on legacy SSE must succeed, got: ${JSON.stringify(response.error ?? response.result)}`,
+    );
+    const result = response.result as {
+      protocolVersion?: string;
+      serverInfo?: { name?: string };
+    };
+    assert.ok(result.protocolVersion, 'initialize result must carry a protocolVersion');
+    assert.ok(
+      result.serverInfo?.name?.includes('substrate'),
+      `initialize result must identify the substrate gateway, got: ${result.serverInfo?.name}`,
+    );
+  } finally {
+    sseReq.destroy();
+  }
+});
