@@ -97,6 +97,44 @@ describe('check-risk-formula-drift', () => {
     expect(result.stderr).toMatch(/packages\/fake\/src\/drift\.ts/);
   });
 
+  it('fails when a new file outside packages/lambda-math/ reimplements a weighted geometric mean', () => {
+    const scratch = seedScratch();
+    const offendingDir = join(scratch, 'artifacts', 'fake', 'src');
+    mkdirSync(offendingDir, { recursive: true });
+    // Hand-rolled weighted geomean via `prod *= Math.pow(score, w / sum)` —
+    // exactly the idiom task #5464 wants to keep from landing.
+    writeFileSync(
+      join(offendingDir, 'wgmean.ts'),
+      'export function score(xs: number[], ws: number[]) {\n' +
+        '  const sum = ws.reduce((a, b) => a + b, 0);\n' +
+        '  let prod = 1;\n' +
+        '  for (let i = 0; i < xs.length; i++) {\n' +
+        '    prod *= Math.pow(xs[i], ws[i] / sum);\n' +
+        '  }\n' +
+        '  return prod;\n' +
+        '}\n',
+    );
+    const result = runIn(scratch);
+    expect(result.status).toBe(1);
+    expect(result.stderr).toMatch(/\[wgmean\]/);
+    expect(result.stderr).toMatch(/artifacts\/fake\/src\/wgmean\.ts/);
+  });
+
+  it('fails when a new file inlines Math.exp(... * Math.log(...)) weighted geomean', () => {
+    const scratch = seedScratch();
+    const offendingDir = join(scratch, 'artifacts', 'fake', 'src');
+    mkdirSync(offendingDir, { recursive: true });
+    writeFileSync(
+      join(offendingDir, 'inline.ts'),
+      'export const wgm = (a: number, b: number, w1: number, w2: number) =>\n' +
+        '  Math.exp(w1 * Math.log(a) + w2 * Math.log(b));\n',
+    );
+    const result = runIn(scratch);
+    expect(result.status).toBe(1);
+    expect(result.stderr).toMatch(/\[wgmean\]/);
+    expect(result.stderr).toMatch(/artifacts\/fake\/src\/inline\.ts/);
+  });
+
   it('does not flag innocuous Math.log usage', () => {
     const scratch = seedScratch();
     const dir = join(scratch, 'artifacts', 'ok', 'src');

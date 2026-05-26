@@ -17,6 +17,12 @@
  *                       canonical: `autonomyGate` in `lib/formulas/src/governance.ts`
  *   3. drift-score    — `Math.log(<ident>/<ident>)` (KL / JSD style accumulator)
  *                       canonical: `driftScore` in `lib/formulas/src/risk.ts`
+ *   4. wgmean         — ad-hoc weighted geometric mean idioms (task #5464):
+ *                       inline `Math.exp(... * Math.log(...))`, product loops
+ *                       `... *= Math.pow(...)`, and weighted-log accumulators
+ *                       `... += <w> * Math.log(<ident>)`.
+ *                       canonical: `computeLambda` in
+ *                       `packages/lambda-math/src/lambda.ts`
  *
  * Exit codes: 0 = clean, 1 = at least one violation.
  */
@@ -63,7 +69,14 @@ const RULES = [
     pattern: /\b(severity\s*\*\s*likelihood|likelihood\s*\*\s*severity)\b/i,
     canonical: 'lib/formulas/src/risk.ts',
     symbol: 'riskScore',
-    allowed: [],
+    allowed: [
+      // Pre-existing UDS doctrine kernels — pure-ESM, zero-dependency
+      // operational cores that ship inside signed Zarf payloads. By design
+      // they re-implement canonical formulas from primary sources rather
+      // than importing them; migration is out of scope for the guardrail.
+      `artifacts${sep}amaru-uds${sep}lib${sep}index.mjs`,
+      `artifacts${sep}sentra-uds${sep}lib${sep}index.mjs`,
+    ],
   },
   {
     id: 'autonomy-gate',
@@ -99,6 +112,38 @@ const RULES = [
       // rather than re-normalising distributions); migration to canonical
       // `driftScore` is out of scope for the guardrail itself.
       `packages${sep}anomaly-fabric${sep}src${sep}batch.ts`,
+      // Pre-existing UDS doctrine kernels (see risk-score allow list).
+      `artifacts${sep}amaru-uds${sep}lib${sep}index.mjs`,
+      `artifacts${sep}sentra-uds${sep}lib${sep}index.mjs`,
+    ],
+  },
+  {
+    id: 'wgmean',
+    // Ad-hoc weighted geometric mean idioms (task #5464). Three sub-patterns:
+    //   (a) inline `Math.exp(... * Math.log(...))` — beta-style or weighted
+    //       log sum collapsed into one expression
+    //   (b) product-loop accumulator `... *= Math.pow(...)` — hand-rolled
+    //       `∏ score_i ^ w_i`
+    //   (c) weighted-log accumulator `... += <expr> * Math.log(<ident>)` —
+    //       single-identifier log argument keeps this disjoint from the
+    //       KL/JSD pattern handled by `drift-score` (which has `Math.log(a/b)`)
+    pattern: /(Math\.exp\([^\n]*\*\s*Math\.log\(|\*=\s*Math\.pow\(|\+=\s*[\w$.[\]]+\s*\*\s*Math\.log\(\s*[\w$.[\]]+\s*\))/,
+    canonical: 'packages/lambda-math/src/lambda.ts',
+    symbol: 'computeLambda',
+    allowed: [
+      // Legitimate regularized incomplete beta (continued fraction). The
+      // `Math.exp(Math.log(x) * a + Math.log(1 - x) * b - lnBeta)` is the
+      // standard numerically-stable form, not a weighted geomean of scores.
+      `artifacts${sep}api-server${sep}src${sep}routes${sep}a11oy-leader-upgrades.ts`,
+      // Pre-existing weighted log accumulator (LUTAR invariant 9 — a
+      // Λ-adjacent quantity tracked separately for migration).
+      `packages${sep}ouroboros-invariant${sep}src${sep}lutar-invariant-9.ts`,
+      // Pre-existing weighted product loops (Lutar Σ + envelope) shipped as
+      // the Amaru UDS reference impl; migration tracked separately.
+      `artifacts${sep}amaru-uds${sep}lib${sep}index.mjs`,
+      // Pre-existing AMI scoring product (calls computeLambda from a
+      // sibling file; this legacy local version is kept for parity tests).
+      `artifacts${sep}api-server${sep}src${sep}lib${sep}ami-formula.ts`,
     ],
   },
 ];
@@ -107,6 +152,9 @@ const RULES = [
 // source of truth, this script, and its test.
 const GLOBAL_ALLOWED_PREFIXES = [
   `lib${sep}formulas${sep}`,
+  // Canonical Λ-operator package — task #5464 promoted it alongside lib/formulas
+  // as the source of truth for weighted geometric means.
+  `packages${sep}lambda-math${sep}`,
   `scripts${sep}check-risk-formula-drift.mjs`,
   `scripts${sep}check-risk-formula-drift.test`,
 ];
