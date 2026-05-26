@@ -62,6 +62,21 @@ Each canonical thesis document follows the same structural cadence:
 
 v10 introduces the **Audit Closure Operator Λ₁₀** as a meta-invariant on the v9 Lutar family. Λ₁₀ = Σ_k L_k · ∏_{j∈{CODE,CODEX,API,TEST,THESIS,SURFACE}} 𝟙[j_k]; auditClosed ⇔ closureRatio = 1. v10 is strictly inert when the chain is operational and quantifies drift by exactly the missing fraction otherwise. No new physical L-term. Shipping: `lutarV10Audit` exported from `@workspace/ouroboros-integrations`, `POST /api/ouroboros/lutar/v10`, codex node `lutar_v10`, 8 contract tests, A11oy `/thesis` row v10, Sentra `/thesis` mirror.
 
+## Ingestion notes
+
+Synthesis docs that catalog upstream bodies of work studied (URL,
+license, ideas re-derived — never code copied) and map each extracted
+idea to a specific A11oy surface that benefits.
+
+- **Graph viz & dependency mapping** — `docs/ingestion/graph-viz.md`
+  Survey of anvaka's `ngraph` / `pm` work, JiaxuanYou's GraphGym /
+  GNN design-space papers, and ulab-uiuc's multi-agent topology
+  writing. Re-derived ideas (Fruchterman-Reingold layout, degree
+  centrality encoding, edge-weight modulated springs, focal-subgraph
+  highlighting, LOD labels) landed in `A11oy AgentViz` topology;
+  follow-ups queued for `AgentBom`, `AgentMesh`, and
+  `AgentOrchestration`.
+
 ## Provenance policy
 
 - No numbers are fabricated.

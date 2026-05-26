@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef, useMemo } from 'react';
 import { Layout } from '../components/layout';
 import { PageHeader, Card, SectionTitle, KpiCard } from '../components/ui';
 
@@ -120,47 +120,305 @@ function TraceWaterfall({ nodes }: { nodes: TraceNode[] }) {
   );
 }
 
+interface TopoNode {
+  id: string;
+  name: string;
+  role: 'realtime' | 'specialist' | 'evaluator' | 'system';
+  x: number;
+  y: number;
+  vx: number;
+  vy: number;
+  degree: number;
+}
+
+interface TopoEdge {
+  source: number;
+  target: number;
+  weight: number;
+  label: string;
+}
+
+const TOPO_AGENTS: Array<{ name: string; role: TopoNode['role'] }> = [
+  { name: 'Voice', role: 'realtime' },
+  { name: 'Cascade', role: 'specialist' },
+  { name: 'Guardian', role: 'specialist' },
+  { name: 'Counsel', role: 'specialist' },
+  { name: 'Oracle', role: 'specialist' },
+  { name: 'DOMAINE', role: 'specialist' },
+  { name: 'Fabric', role: 'system' },
+  { name: 'MirrorEval', role: 'evaluator' },
+];
+
+const TOPO_EDGES_RAW: Array<[number, number, number, string]> = [
+  [0, 1, 47, 'maritime route'],
+  [0, 2, 23, 'threat route'],
+  [0, 3, 9, 'legal route'],
+  [1, 3, 8, 'sanctions handoff'],
+  [4, 3, 12, 'contract review'],
+  [5, 4, 5, 'portfolio→revenue'],
+  [2, 6, 3, 'infra threat'],
+  [1, 7, 31, 'eval feed'],
+  [2, 7, 29, 'eval feed'],
+  [3, 7, 18, 'eval feed'],
+  [4, 7, 24, 'eval feed'],
+  [5, 7, 14, 'eval feed'],
+  [7, 6, 4, 'drift alert'],
+];
+
+const ROLE_COLOR: Record<TopoNode['role'], string> = {
+  realtime: '#c9b787',
+  specialist: '#e6d9b8',
+  evaluator: '#7b8fa1',
+  system: '#a08a5a',
+};
+
+/**
+ * Force-directed agent topology — re-derived from Fruchterman-Reingold
+ * (anvaka/ngraph family) with degree-weighted node radii (a JiaxuanYou
+ * GNN-design pattern: encode structural centrality visually) and
+ * edge-weight-modulated spring strength (anvaka/pm: stronger ties pull
+ * harder). LOD labels (anvaka/pm idea): always-on for hovered/selected,
+ * muted otherwise to reduce visual clutter at scale.
+ */
 function AgentTopology() {
-  const agents = [
-    { name: 'Voice', x: 50, y: 10, active: true },
-    { name: 'Cascade', x: 15, y: 40, active: true },
-    { name: 'Guardian', x: 85, y: 40, active: true },
-    { name: 'Counsel', x: 15, y: 70, active: true },
-    { name: 'Oracle', x: 50, y: 70, active: true },
-    { name: 'DOMAINE', x: 85, y: 70, active: true },
-    { name: 'MirrorEval', x: 50, y: 95, active: true },
-  ];
+  const W = 100;
+  const H = 100;
 
-  const connections = [
-    { from: 0, to: 1 }, { from: 0, to: 2 },
-    { from: 1, to: 3 }, { from: 1, to: 4 },
-    { from: 4, to: 3 }, { from: 5, to: 4 },
-    { from: 2, to: 6 }, { from: 1, to: 6 }, { from: 3, to: 6 }, { from: 4, to: 6 }, { from: 5, to: 6 },
-  ];
-
-  const [pulse, setPulse] = useState(0);
-  useEffect(() => {
-    const iv = setInterval(() => setPulse(p => (p + 1) % connections.length), 1200);
-    return () => clearInterval(iv);
+  // Build nodes/edges with degree once
+  const { initialNodes, edges } = useMemo(() => {
+    const deg = new Array(TOPO_AGENTS.length).fill(0);
+    TOPO_EDGES_RAW.forEach(([s, t]) => { deg[s]++; deg[t]++; });
+    const initialNodes: TopoNode[] = TOPO_AGENTS.map((a, i) => {
+      const angle = (i / TOPO_AGENTS.length) * Math.PI * 2;
+      return {
+        id: `n${i}`,
+        name: a.name,
+        role: a.role,
+        x: W / 2 + Math.cos(angle) * 25,
+        y: H / 2 + Math.sin(angle) * 25,
+        vx: 0,
+        vy: 0,
+        degree: deg[i],
+      };
+    });
+    const edges: TopoEdge[] = TOPO_EDGES_RAW.map(([s, t, w, label]) => ({
+      source: s, target: t, weight: w, label,
+    }));
+    return { initialNodes, edges };
   }, []);
 
+  const [nodes, setNodes] = useState<TopoNode[]>(initialNodes);
+  const [hover, setHover] = useState<number | null>(null);
+  const [selected, setSelected] = useState<number | null>(null);
+  const [drag, setDrag] = useState<number | null>(null);
+  const [epoch, setEpoch] = useState(0); // bump to restart the RAF loop after cooling
+  const svgRef = useRef<SVGSVGElement | null>(null);
+  const tempRef = useRef(8); // Fruchterman-Reingold temperature
+  const nodesRef = useRef<TopoNode[]>(initialNodes);
+  nodesRef.current = nodes;
+
+  // Force-directed simulation loop — Fruchterman-Reingold with cooling
+  useEffect(() => {
+    void epoch;
+    let raf = 0;
+    const k = 18; // ideal edge length — tuned for viewBox 100x100, ~8 nodes
+    const step = () => {
+      const ns = nodesRef.current.map(n => ({ ...n }));
+      // Repulsive forces O(n²) — fine for <50 nodes; anvaka uses
+      // Barnes-Hut quadtree at larger N. Documented in synthesis doc.
+      for (let i = 0; i < ns.length; i++) {
+        for (let j = i + 1; j < ns.length; j++) {
+          const dx = ns[i].x - ns[j].x;
+          const dy = ns[i].y - ns[j].y;
+          const d2 = dx * dx + dy * dy + 0.01;
+          const d = Math.sqrt(d2);
+          const f = (k * k) / d;
+          const fx = (dx / d) * f;
+          const fy = (dy / d) * f;
+          ns[i].vx += fx; ns[i].vy += fy;
+          ns[j].vx -= fx; ns[j].vy -= fy;
+        }
+      }
+      // Attractive forces along edges, weighted by handoff volume
+      const maxW = Math.max(...edges.map(e => e.weight));
+      edges.forEach(e => {
+        const a = ns[e.source]; const b = ns[e.target];
+        const dx = a.x - b.x; const dy = a.y - b.y;
+        const d = Math.sqrt(dx * dx + dy * dy) + 0.01;
+        const w = 0.5 + (e.weight / maxW) * 1.5;
+        const f = ((d * d) / k) * w * 0.04;
+        const fx = (dx / d) * f;
+        const fy = (dy / d) * f;
+        a.vx -= fx; a.vy -= fy;
+        b.vx += fx; b.vy += fy;
+      });
+      // Mild gravity to the center keeps disconnected pieces in frame
+      ns.forEach(n => {
+        n.vx += (W / 2 - n.x) * 0.01;
+        n.vy += (H / 2 - n.y) * 0.01;
+      });
+      // Apply displacement clamped to temperature, then cool
+      const t = tempRef.current;
+      ns.forEach((n, i) => {
+        if (drag === i) { n.vx = 0; n.vy = 0; return; }
+        const vmag = Math.sqrt(n.vx * n.vx + n.vy * n.vy) + 0.001;
+        const dx = (n.vx / vmag) * Math.min(vmag, t);
+        const dy = (n.vy / vmag) * Math.min(vmag, t);
+        n.x = Math.max(6, Math.min(W - 6, n.x + dx));
+        n.y = Math.max(6, Math.min(H - 6, n.y + dy));
+        n.vx *= 0.4; n.vy *= 0.4;
+      });
+      tempRef.current = Math.max(0.4, t * 0.985);
+      setNodes(ns);
+      if (tempRef.current > 0.5 || drag !== null) raf = requestAnimationFrame(step);
+    };
+    raf = requestAnimationFrame(step);
+    return () => cancelAnimationFrame(raf);
+  }, [edges, drag, epoch]);
+
+  // Reheat on user interaction so layout responds to drags. Bumping `epoch`
+  // also restarts the RAF loop in case the previous one already exited
+  // (which happens once temperature has cooled below the threshold).
+  const reheat = (t = 4) => {
+    tempRef.current = Math.max(tempRef.current, t);
+    setEpoch(e => e + 1);
+  };
+
+  // Adjacency for highlight-on-hover (re-derived: anvaka/pm focal subgraph)
+  const focus = hover ?? selected;
+  const adj = useMemo(() => {
+    const s = new Set<number>();
+    if (focus === null) return s;
+    edges.forEach(e => {
+      if (e.source === focus) s.add(e.target);
+      if (e.target === focus) s.add(e.source);
+    });
+    return s;
+  }, [focus, edges]);
+
+  const svgPoint = (clientX: number, clientY: number) => {
+    const svg = svgRef.current;
+    if (!svg) return null;
+    const pt = svg.createSVGPoint();
+    pt.x = clientX; pt.y = clientY;
+    const ctm = svg.getScreenCTM();
+    if (!ctm) return null;
+    const p = pt.matrixTransform(ctm.inverse());
+    return { x: p.x, y: p.y };
+  };
+
+  const onPointerMove = (e: React.PointerEvent) => {
+    if (drag === null) return;
+    const p = svgPoint(e.clientX, e.clientY);
+    if (!p) return;
+    setNodes(prev => prev.map((n, i) => i === drag ? { ...n, x: p.x, y: p.y, vx: 0, vy: 0 } : n));
+    reheat();
+  };
+
+  const onPointerUp = () => setDrag(null);
+
   return (
-    <div className="rounded-lg p-6" style={{ background: '#050505', border: `1px solid ${T.border}` }}>
-      <div className="text-[9px] font-mono uppercase tracking-wider mb-4" style={{ color: T.muted }}>Live Agent Topology</div>
-      <svg viewBox="0 0 100 105" className="w-full" style={{ maxHeight: 300 }}>
-        {connections.map((c, i) => (
-          <line key={i} x1={agents[c.from].x} y1={agents[c.from].y} x2={agents[c.to].x} y2={agents[c.to].y} stroke={i === pulse ? T.accent : 'rgba(255,255,255,0.06)'} strokeWidth={i === pulse ? 0.4 : 0.2} strokeDasharray={i === pulse ? 'none' : '1 1'} />
-        ))}
-        {agents.map((a, i) => (
-          <g key={i}>
-            <circle cx={a.x} cy={a.y} r={3.5} fill="#0a0a0a" stroke={T.accent} strokeWidth={0.3} />
-            {a.active && <circle cx={a.x} cy={a.y} r={1} fill={T.accent} opacity={0.8}>
-              <animate attributeName="r" values="0.8;1.2;0.8" dur="2s" repeatCount="indefinite" />
-            </circle>}
-            <text x={a.x} y={a.y + 6.5} textAnchor="middle" fill={T.dim} fontSize={2.8} fontFamily="monospace">{a.name}</text>
-          </g>
-        ))}
+    <div
+      className="rounded-lg p-4"
+      style={{ background: '#050505', border: `1px solid ${T.border}` }}
+    >
+      <div className="flex items-center justify-between mb-3">
+        <div className="text-[9px] font-mono uppercase tracking-wider" style={{ color: T.muted }}>
+          Live Agent Topology — Force-Directed
+        </div>
+        <button
+          onClick={() => reheat(8)}
+          className="text-[9px] font-mono px-2 py-0.5 rounded"
+          style={{ color: T.dim, border: `1px solid ${T.border}`, background: 'transparent', cursor: 'pointer' }}
+        >
+          ↻ relax
+        </button>
+      </div>
+      <svg
+        ref={svgRef}
+        viewBox={`0 0 ${W} ${H}`}
+        className="w-full select-none"
+        style={{ maxHeight: 360, touchAction: 'none' }}
+        onPointerMove={onPointerMove}
+        onPointerUp={onPointerUp}
+        onPointerLeave={onPointerUp}
+      >
+        {/* Edges — opacity/stroke encodes weight; focus subgraph pops */}
+        {edges.map((e, i) => {
+          const a = nodes[e.source]; const b = nodes[e.target];
+          const inFocus = focus !== null && (e.source === focus || e.target === focus);
+          const dim = focus !== null && !inFocus;
+          const w = 0.15 + (e.weight / 47) * 0.5;
+          return (
+            <line
+              key={i}
+              x1={a.x} y1={a.y} x2={b.x} y2={b.y}
+              stroke={inFocus ? T.accent : 'rgba(255,255,255,0.18)'}
+              strokeWidth={inFocus ? w * 2 : w}
+              opacity={dim ? 0.08 : (inFocus ? 0.9 : 0.45)}
+            />
+          );
+        })}
+        {/* Nodes — radius encodes degree centrality */}
+        {nodes.map((n, i) => {
+          const r = 2.4 + n.degree * 0.55;
+          const inFocus = focus !== null && (i === focus || adj.has(i));
+          const dim = focus !== null && !inFocus;
+          const color = ROLE_COLOR[n.role];
+          return (
+            <g key={n.id} opacity={dim ? 0.25 : 1}>
+              <circle
+                cx={n.x} cy={n.y} r={r + 1.5}
+                fill={i === selected ? `${color}40` : 'transparent'}
+                stroke={i === selected ? color : 'transparent'}
+                strokeWidth={0.3}
+              />
+              <circle
+                cx={n.x} cy={n.y} r={r}
+                fill="#0a0a0a"
+                stroke={color}
+                strokeWidth={i === focus ? 0.6 : 0.35}
+                style={{ cursor: 'grab' }}
+                onPointerDown={(e) => {
+                  e.currentTarget.setPointerCapture(e.pointerId);
+                  setDrag(i);
+                  setSelected(i);
+                  reheat();
+                }}
+                onPointerEnter={() => setHover(i)}
+                onPointerLeave={() => setHover(null)}
+              />
+              <circle cx={n.x} cy={n.y} r={r * 0.45} fill={color} opacity={0.7} pointerEvents="none" />
+              <text
+                x={n.x} y={n.y + r + 3.2}
+                textAnchor="middle"
+                fill={i === focus || i === selected ? T.text : T.dim}
+                fontSize={i === focus || i === selected ? 3.4 : 2.6}
+                fontFamily="ui-monospace, monospace"
+                pointerEvents="none"
+              >{n.name}</text>
+            </g>
+          );
+        })}
       </svg>
+      <div className="mt-3 flex items-center justify-between text-[9px] font-mono" style={{ color: T.muted }}>
+        <div className="flex items-center gap-3">
+          {(['realtime','specialist','evaluator','system'] as const).map(r => (
+            <span key={r} className="flex items-center gap-1.5">
+              <span style={{ display: 'inline-block', width: 6, height: 6, borderRadius: 999, background: ROLE_COLOR[r] }} />
+              {r}
+            </span>
+          ))}
+        </div>
+        <div>node size = degree · edge weight = handoff volume · drag to perturb</div>
+      </div>
+      {focus !== null && (
+        <div className="mt-3 p-3 rounded-md text-[10px] font-mono" style={{ background: 'rgba(201,183,135,0.04)', border: '1px solid rgba(201,183,135,0.15)', color: T.dim }}>
+          <span style={{ color: T.accent }}>{nodes[focus].name}</span>
+          {' · degree '}{nodes[focus].degree}
+          {' · neighbors: '}{Array.from(adj).map(i => nodes[i].name).join(', ') || '—'}
+        </div>
+      )}
     </div>
   );
 }
@@ -229,9 +487,9 @@ export function AgentViz() {
               <Card>
                 <div className="text-[9px] font-mono uppercase tracking-wider mb-3" style={{ color: T.muted }}>Topology Metrics</div>
                 <div className="space-y-2 font-mono text-[11px]">
-                  <div className="flex justify-between"><span style={{ color: T.dim }}>Active agents</span><span style={{ color: T.accent }}>7</span></div>
-                  <div className="flex justify-between"><span style={{ color: T.dim }}>Active connections</span><span style={{ color: T.text }}>11</span></div>
-                  <div className="flex justify-between"><span style={{ color: T.dim }}>Handoffs (24h)</span><span style={{ color: T.accent }}>133</span></div>
+                  <div className="flex justify-between"><span style={{ color: T.dim }}>Active agents</span><span style={{ color: T.accent }}>{TOPO_AGENTS.length}</span></div>
+                  <div className="flex justify-between"><span style={{ color: T.dim }}>Active connections</span><span style={{ color: T.text }}>{TOPO_EDGES_RAW.length}</span></div>
+                  <div className="flex justify-between"><span style={{ color: T.dim }}>Handoffs (24h)</span><span style={{ color: T.accent }}>{TOPO_EDGES_RAW.reduce((a, [,,w]) => a + w, 0)}</span></div>
                   <div className="flex justify-between"><span style={{ color: T.dim }}>Avg handoff latency</span><span style={{ color: T.text }}>142ms</span></div>
                   <div className="flex justify-between"><span style={{ color: T.dim }}>Proof chain depth</span><span style={{ color: T.accent }}>4.2 avg</span></div>
                   <div className="flex justify-between"><span style={{ color: T.dim }}>Graph cycles</span><span style={{ color: T.muted }}>0 (acyclic)</span></div>
