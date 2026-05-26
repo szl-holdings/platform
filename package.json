@@ -166,7 +166,7 @@
     "turbo": "^2.9.14",
     "typescript": "~6.0.3",
     "vitest": "^4.1.7",
-    "ws": "^8.18.0"
+    "ws": "^8.20.1"
   },
   "dependencies": {
     "@amplitude/analytics-browser": "^2.40.0",
