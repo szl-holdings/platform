@@ -1307,3 +1307,135 @@ id = "bupvoQtZBxxtJEG6_V1lE"
 uri = "file://exports/a11oy_linkedin_pack.zip"
 type = "unspecified"
 title = "a11oy_linkedin_pack.zip — anatomy + screenshots + docx (one file)"
+
+[[outputs]]
+id = "pvPyYJPIPXWnL4kxGy3w3"
+uri = "file://dist/a11oy-uds/a11oy-uds-0.1.0-release-bundle.tar.gz"
+type = "unspecified"
+title = "a11oy.UDS v0.1.0 — signed release bundle (download & forward to Andrew)"
+
+[[outputs]]
+id = "m5Fq6zcbou2KPZE3zlbsu"
+uri = "file://dist/a11oy-uds/OPERATOR-QUICKSTART.md"
+type = "text"
+title = "Operator quickstart"
+
+[[outputs]]
+id = "NV1nuLTVosir3ayEcac7D"
+uri = "file://dist/a11oy-uds/EMAIL-TO-ANDREW-GREENE.md"
+type = "text"
+title = "Email to Andrew Greene (Defense Unicorns)"
+
+[[outputs]]
+id = "HjlqKbIKwGEnsVvnTrBwF"
+uri = "file://dist/a11oy-uds/LINKEDIN-POST.md"
+type = "text"
+title = "LinkedIn post — A11oy.UDS v0.1.0 + Warhacker"
+
+[[outputs]]
+id = "8g_pmvsQ5gwEKXxfZYZ46"
+uri = "file://dist/a11oy-uds/AUDIT-LOG.md"
+type = "text"
+title = "Release audit log (verify-chain output)"
+
+[[outputs]]
+id = "tzFnZ08ETlfTc53PPj_di"
+uri = "file://dist/a11oy-uds/a11oy-warhacker-packet.docx"
+type = "word_document"
+title = "A11oy.UDS — Warhacker Outreach Packet (email + LinkedIn + smoke proof + recommendation)"
+
+[[outputs]]
+id = "ZrARneeZuPzYRGS4u-FWV"
+uri = "file://deliverables/andrew-email.docx"
+type = "word_document"
+title = "Andrew email — full message (visibility question left open)"
+
+[[outputs]]
+id = "zw35azl9tr3B8utWaYLcw"
+uri = "file://deliverables/linkedin-series.docx"
+type = "word_document"
+title = "LinkedIn post — 2,994/3,000 chars, mesh + per-artifact release URLs"
+
+[[outputs]]
+id = "1X0tKk2NQFEOPfu7n97rz"
+uri = "file://deliverables/series-a-readiness.md"
+type = "text"
+title = "Series-A readiness scorecard (READY verdict)"
+
+[[outputs]]
+id = "E_LDQTHgZKZU6VByor-L8"
+uri = "file://deliverables/audit-report.md"
+type = "text"
+title = "Series-A audit report (11 issues + UDS v0.1.1 closure)"
+
+[[outputs]]
+id = "R3kFx1tio-cL-eVGdL2HD"
+uri = "file://deliverables/preview/andrew-email.png"
+type = "image"
+title = "Andrew private brief — cover (deliverables/preview/andrew-email.png)"
+
+[[outputs]]
+id = "Shen_-Io6-ofTpHacvOc9"
+uri = "file://deliverables/preview/linkedin-series.png"
+type = "image"
+title = "3. RECOMMENDED LinkedIn cover — proof-receipt screenshot (sha256 + lake build + real Lean theorem)"
+
+[[outputs]]
+id = "Z-dmGUrtQA80x_Mk8UJ2r"
+uri = "file://deliverables/preview/andrew-uds-manual.png"
+type = "image"
+title = "4. RECOMMENDED Andrew attachment — UDS bundle map cover (clean, shareable)"
+
+[[outputs]]
+id = "9J2Twt7zySqZmIKTTDo-R"
+uri = "file://deliverables/preview/linkedin-post-manual.png"
+type = "image"
+title = "LinkedIn posting manual — cover screenshot"
+
+[[outputs]]
+id = "kTZb2BVgHv5oLLR00-Lib"
+uri = "file://deliverables/andrew-uds-manual.docx"
+type = "word_document"
+title = "Andrew UDS manual — mesh + all 20 repos + pull/verify steps"
+
+[[outputs]]
+id = "5_iPk_mvo_qtto-yCnp__"
+uri = "file://deliverables/linkedin-post-manual.docx"
+type = "word_document"
+title = "LinkedIn posting manual — step-by-step"
+
+[[outputs]]
+id = "4fBaQtisyxmYrk3id-eY2"
+uri = "file://deliverables/downloads/linkedin-cover-proofs.png"
+type = "image"
+title = "LinkedIn cover — PROOFS (corrected uds-v0.1.1 tag URLs)"
+
+[[outputs]]
+id = "mPBNX76Xd5o0Bvdgscr7K"
+uri = "file://deliverables/downloads/linkedin-series.docx"
+type = "word_document"
+title = "LinkedIn post .docx — corrected uds-v0.1.1 URLs"
+
+[[outputs]]
+id = "baf3Czb7iGEPTBhCwPc9I"
+uri = "file://deliverables/downloads/andrew-uds-manual.docx"
+type = "word_document"
+title = "Andrew UDS manual .docx — corrected uds-v0.1.1 URLs"
+
+[[outputs]]
+id = "bXtofHVvq5TzX1dMbi5PH"
+uri = "file://deliverables/downloads/andrew-email.docx"
+type = "word_document"
+title = "1. Email to Andrew (.docx) — single doc, with uds-v0.1.1 + uds-v0.1.0 URLs and the visibility question"
+
+[[outputs]]
+id = "BbDI6BUSLwcRQI8GxA5zF"
+uri = "file://deliverables/downloads/linkedin-post-manual.docx"
+type = "word_document"
+title = "LinkedIn posting manual .docx"
+
+[[outputs]]
+id = "PEdSFfuMSDqsp0_r02VRl"
+uri = "file://deliverables/downloads/linkedin-post.docx"
+type = "word_document"
+title = "2. LinkedIn post (.docx) — single post, 2985/3000 chars"

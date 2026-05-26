@@ -1,4 +1,4 @@
-kind = "web"
+  kind = "web"
   previewPath = "/conduit/"
   title = "Amaru — The Andean Ouroboros"
   version = "1.0.0"

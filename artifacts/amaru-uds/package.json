@@ -1,0 +1,7 @@
+{
+  "name": "@szl/amaru-uds",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Amaru.UDS — signed Zarf payload for the Andean Ouroboros convergent data-sync runtime (Doctrine V6: Lutar Σ family, Λ floor, Bekenstein admission, bounded-loop convergence, KL drift, hash-chained proof receipts).",
+  "license": "SEE LICENSE IN LICENSE"
+}

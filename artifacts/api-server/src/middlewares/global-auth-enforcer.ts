@@ -110,6 +110,11 @@ const PUBLIC_EXACT_PATHS = new Set([
   "/api/amaru/healthz",
   "/api/amaru/state",
   "/api/amaru/overwatch/snapshot",
+  // Sentra detector sidecar registration — server-to-server handshake authenticated
+  // by the x-sentra-sidecar-secret header (validated inside the route handler at
+  // routes/sentra-detector-framework.ts). The sidecar boots before any browser
+  // session exists, so requiring a session would deadlock startup.
+  "/api/sentra/detectors/sidecar-register",
   // Round 5 / T003 — additional read-only Amaru kernel surfaces. All GET-only
   // via routes/amaru-proxy.ts; the upstream FastAPI organ is read-only by
   // design (R0513 watches, halt authority lives in HUKLLA). /events is SSE

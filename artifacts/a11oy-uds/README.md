@@ -226,8 +226,49 @@ artifacts/a11oy-uds/
 
 Build output lives at `dist/a11oy-uds/` at the repo root.
 
+## Registry
+
+Each tagged release (`v*.*.*`) is published to GitHub Container Registry as an
+OCI artifact by the `Publish A11oy UDS payload` workflow
+(`.github/workflows/a11oy-uds-publish.yml`):
+
+| Channel | Coordinates                                          | Signed                  | When                       |
+| ------- | ---------------------------------------------------- | ----------------------- | -------------------------- |
+| release | `oci://ghcr.io/szl-holdings/a11oy-uds:<version>`     | yes (cosign keyless)    | push of a `v*.*.*` tag     |
+| release | `oci://ghcr.io/szl-holdings/a11oy-uds:latest`        | yes (cosign keyless)    | tracks latest release      |
+| dev     | `oci://ghcr.io/szl-holdings/a11oy-uds:dev-<sha>`     | no                      | push to `main`/`master`    |
+| dev     | `oci://ghcr.io/szl-holdings/a11oy-uds:dev`           | no                      | tracks latest `main` build |
+
+Pull a release by name + version:
+
+```bash
+zarf package pull oci://ghcr.io/szl-holdings/a11oy-uds:0.1.0
+zarf package deploy zarf-package-a11oy-uds-*.tar.zst --confirm
+```
+
+Verify the cosign signature (release channel only) against the published
+digest:
+
+```bash
+cosign verify \
+  --certificate-identity-regexp 'https://github.com/szl-holdings/.+/\.github/workflows/a11oy-uds-publish\.yml@.+' \
+  --certificate-oidc-issuer https://token.actions.githubusercontent.com \
+  ghcr.io/szl-holdings/a11oy-uds:0.1.0
+```
+
+For pre-release testing, the unsigned dev channel publishes on every push to
+`main`:
+
+```bash
+zarf package pull oci://ghcr.io/szl-holdings/a11oy-uds:dev
+```
+
+The release workflow also attaches the raw `*.tar.zst`, `*.sig`, and `*.sha256`
+sidecars to the corresponding GitHub Release for air-gapped operators who
+cannot reach GHCR.
+
 ## Out of scope
 
-- Publishing the payload to any registry (OCI, S3, Artifactory, etc.)
+- Publishing to non-OCI registries (S3, Artifactory, etc.)
 - Authoring Helm charts beyond what `zarf package create` consumes
 - Deploy-time secrets management — UDS operators handle that out-of-band

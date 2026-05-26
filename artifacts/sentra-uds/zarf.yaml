@@ -1,0 +1,47 @@
+kind: ZarfPackageConfig
+metadata:
+  name: sentra-uds
+  description: |
+    Sentra — Cyber Resilience Command. Self-contained, declaratively-
+    deployable payload for Defense-Unicorns (UDS) environments. Drops the
+    strictly-defensive containment kernel (asset-scoped fail-closed Safety
+    Gate, offensive-action null surface, risk + financial-exposure formulas,
+    z-score + KL drift, Ising-style allocation, NIST CSF 2.0 / SP 800-61r2
+    / CISA CIRCIA / MITRE D3FEND mappings, hash-chained Proof Chain) plus a
+    per-file provenance manifest into a UDS bundle via `zarf package deploy`.
+  version: 0.1.0
+  architecture: multi
+  url: https://github.com/szl-holdings/sentra
+  authors: "Stephen P. Lutar Jr. / SZL Holdings"
+
+components:
+  - name: sentra-core
+    description: "Defensive containment kernel — Safety Gate, risk + exposure formulas, z-score + KL drift, Ising allocation, framework mappings, Proof Chain."
+    required: true
+    files:
+      - source: lib
+        target: /opt/sentra/lib
+  - name: sentra-demo
+    description: "doctrine-demo.mjs — 30-second post-deploy harness."
+    required: true
+    files:
+      - source: doctrine-demo.mjs
+        target: /opt/sentra/doctrine-demo.mjs
+  - name: sentra-provenance
+    description: "MANIFEST.json — per-file sha256 + build metadata."
+    required: true
+    files:
+      - source: build/MANIFEST.json
+        target: /opt/sentra/MANIFEST.json
+  - name: sentra-docs
+    description: "ARCHITECTURE, SECURITY, UDS-BUNDLE, OPERATOR-QUICKSTART."
+    required: true
+    files:
+      - source: docs/ARCHITECTURE.md
+        target: /opt/sentra/docs/ARCHITECTURE.md
+      - source: docs/SECURITY.md
+        target: /opt/sentra/docs/SECURITY.md
+      - source: docs/UDS-BUNDLE.md
+        target: /opt/sentra/docs/UDS-BUNDLE.md
+      - source: docs/OPERATOR-QUICKSTART.md
+        target: /opt/sentra/docs/OPERATOR-QUICKSTART.md

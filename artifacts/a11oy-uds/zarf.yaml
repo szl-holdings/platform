@@ -4,23 +4,25 @@ metadata:
   description: |
     A11oy — Brand Orchestration Layer. Self-contained, declaratively-deployable
     payload for Defense-Unicorns (UDS) environments. Drops the @a11oy/core and
-    @a11oy/connection runtime plus a provenance manifest into a UDS bundle via
-    `zarf package deploy`.
+    @a11oy/connection runtime (Fisher manifold, Bohr complementarity engine,
+    Kochen-Specker 18-vector witness, POVM verdict semantics, tetrad-field
+    gauge connection) plus a per-file provenance manifest into a UDS bundle
+    via `zarf package deploy`.
   version: 0.1.0
   architecture: multi
-  url: https://github.com/replit/a11oy
+  url: https://github.com/szl-holdings/a11oy
   authors: "A11oy / SZL Holdings"
 
 components:
   - name: a11oy-core
-    description: "Built @a11oy/core runtime (orchestration kernel + connection module)."
+    description: "Built @a11oy/core runtime — Fisher manifold, Bohr complementarity engine, Kochen-Specker 18-vector witness, POVM verdict semantics."
     required: true
     files:
       - source: build/a11oy-core
         target: /opt/a11oy/core
 
   - name: a11oy-connection
-    description: "Built @a11oy/connection client (substrate connection / transport layer)."
+    description: "Built @a11oy/connection client — tetrad-field gauge connection over the policy manifold."
     required: true
     files:
       - source: build/a11oy-connection
@@ -45,3 +47,14 @@ components:
     files:
       - source: build-attestations/ATTESTATIONS.json
         target: /opt/a11oy/ATTESTATIONS.json
+
+  - name: a11oy-docs
+    description: "In-package documentation — ARCHITECTURE (formulas + citations), SECURITY (provenance + signature chain), UDS-BUNDLE (uds-cli integration)."
+    required: true
+    files:
+      - source: docs/ARCHITECTURE.md
+        target: /opt/a11oy/docs/ARCHITECTURE.md
+      - source: docs/SECURITY.md
+        target: /opt/a11oy/docs/SECURITY.md
+      - source: docs/UDS-BUNDLE.md
+        target: /opt/a11oy/docs/UDS-BUNDLE.md

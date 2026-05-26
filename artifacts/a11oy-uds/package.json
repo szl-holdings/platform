@@ -1,6 +1,6 @@
 {
   "name": "@workspace/a11oy-uds",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "private": true,
   "description": "A11oy UDS / Zarf payload — single-command installable A11oy bundle for Defense-Unicorns environments.",
   "scripts": {

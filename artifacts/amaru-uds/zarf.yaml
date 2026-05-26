@@ -1,0 +1,46 @@
+kind: ZarfPackageConfig
+metadata:
+  name: amaru-uds
+  description: |
+    Amaru — The Andean Ouroboros. Self-contained, declaratively-deployable
+    payload for Defense-Unicorns (UDS) environments. Drops the Doctrine V6
+    convergent-sync kernel (Lutar Σ canonical composition, Λ-floor risk
+    governance, Bekenstein admission gate, bounded-loop convergence,
+    9-axis AND gate, hash-chained proof receipts) plus a per-file
+    provenance manifest into a UDS bundle via `zarf package deploy`.
+  version: 0.1.0
+  architecture: multi
+  url: https://github.com/szl-holdings/amaru
+  authors: "Stephen P. Lutar Jr. / SZL Holdings"
+
+components:
+  - name: amaru-core
+    description: "Doctrine V6 kernel — Lutar Σ, Λ risk, Bekenstein gate, bounded loop, 9-axis AND, KL drift, proof receipts."
+    required: true
+    files:
+      - source: lib
+        target: /opt/amaru/lib
+  - name: amaru-demo
+    description: "doctrine-demo.mjs — 30-second post-deploy harness."
+    required: true
+    files:
+      - source: doctrine-demo.mjs
+        target: /opt/amaru/doctrine-demo.mjs
+  - name: amaru-provenance
+    description: "MANIFEST.json — per-file sha256 + build metadata."
+    required: true
+    files:
+      - source: build/MANIFEST.json
+        target: /opt/amaru/MANIFEST.json
+  - name: amaru-docs
+    description: "ARCHITECTURE (doctrine + citations), SECURITY (signing model), UDS-BUNDLE (integration), OPERATOR-QUICKSTART (4-cmd verify)."
+    required: true
+    files:
+      - source: docs/ARCHITECTURE.md
+        target: /opt/amaru/docs/ARCHITECTURE.md
+      - source: docs/SECURITY.md
+        target: /opt/amaru/docs/SECURITY.md
+      - source: docs/UDS-BUNDLE.md
+        target: /opt/amaru/docs/UDS-BUNDLE.md
+      - source: docs/OPERATOR-QUICKSTART.md
+        target: /opt/amaru/docs/OPERATOR-QUICKSTART.md

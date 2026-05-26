@@ -1,0 +1,15 @@
+kind: UDSBundle
+metadata:
+  name: amaru-uds-bundle
+  description: "Reference UDS bundle that drops Amaru.UDS into a UDS-enabled cluster."
+  version: 0.1.0
+  authors: "Stephen P. Lutar Jr. / SZL Holdings"
+
+packages:
+  - name: amaru-uds
+    repository: ghcr.io/szl-holdings/amaru-uds
+    ref: 0.1.0
+    # For air-gap: replace `repository`/`ref` with a `path:` to the local tarball.
+    # path: ./a11oy-uds-0.1.0.tar.zst   # (example shape)
+    optionalComponents:
+      - amaru-docs

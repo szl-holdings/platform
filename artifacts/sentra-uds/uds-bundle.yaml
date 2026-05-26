@@ -1,0 +1,13 @@
+kind: UDSBundle
+metadata:
+  name: sentra-uds-bundle
+  description: "Reference UDS bundle that drops Sentra.UDS into a UDS-enabled cluster."
+  version: 0.1.0
+  authors: "Stephen P. Lutar Jr. / SZL Holdings"
+
+packages:
+  - name: sentra-uds
+    repository: ghcr.io/szl-holdings/sentra-uds
+    ref: 0.1.0
+    optionalComponents:
+      - sentra-docs

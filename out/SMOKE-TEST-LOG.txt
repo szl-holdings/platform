@@ -1,0 +1,110 @@
+==========================================================
+ A11OY.UDS v0.1.1 -- END-TO-END SMOKE TEST
+ Source: PUBLIC release URL (no local repo access)
+ Date:   2026-05-26 01:32:37 UTC
+==========================================================
+
+===== STEP 1: download all 11 release assets from PUBLIC URL =====
+  ok a11oy-uds-0.1.1.tar.zst                            59033 bytes
+  ok a11oy-uds-0.1.1.tar.zst.sha256                     90 bytes
+  ok a11oy-uds-0.1.1.tar.zst.sig                        96 bytes
+  ok a11oy-uds-dev.pub                                  178 bytes
+  ok a11oy-uds-0.1.1-release-bundle.tar.gz              59720 bytes
+  ok OPERATOR-QUICKSTART.md                             2956 bytes
+  ok AUDIT-LOG.md                                       1674 bytes
+  ok ARCHITECTURE.md                                    10527 bytes
+  ok SECURITY.md                                        5892 bytes
+  ok UDS-BUNDLE.md                                      3698 bytes
+  ok uds-bundle.yaml                                    1003 bytes
+
+===== STEP 2: sha256 sidecar check =====
+a11oy-uds-0.1.1.tar.zst: OK
+
+===== STEP 3: cosign verify-blob (offline, bundled pubkey) =====
+Verified OK
+
+===== STEP 4: zarf package inspect definition (head) =====
+
+[96mkind[0m:[95m ZarfPackageConfig[0m
+[95m[0m[96mmetadata[0m:[96m[0m
+[96m  name[0m:[95m a11oy-uds[0m
+[95m  [0m[96mdescription[0m: |
+[95m    A11oy — Brand Orchestration Layer. Self-contained, declaratively-deployable[0m
+[95m    payload for Defense-Unicorns (UDS) environments. Drops the @a11oy/core and[0m
+[95m    @a11oy/connection runtime (Fisher manifold, Bohr complementarity engine,[0m
+[95m    Kochen-Specker 18-vector witness, POVM verdict semantics, tetrad-field[0m
+[95m    gauge connection) plus a per-file provenance manifest into a UDS bundle[0m
+[95m    via `zarf package deploy`.[0m
+[95m  [0m[96mversion[0m:[95m 0.1.0[0m
+[95m  [0m[96murl[0m:[95m https://github.com/szl-holdings/a11oy[0m
+[95m  [0m[96marchitecture[0m:[95m multi[0m
+[95m  [0m[96mauthors[0m:[95m A11oy / SZL Holdings[0m
+[95m  [0m[96maggregateChecksum[0m:[95m 7182657e66e6c86ef18fa8fd945a9ef6f8c1d617c6f844ed56b3342f157a0eb2[0m
+[95m[0m[96mbuild[0m:[96m[0m
+[96m  terminal[0m:[95m repl[0m
+[95m  [0m[96muser[0m:[95m ""[0m[96m[0m
+[96m  architecture[0m:[95m multi[0m
+[95m  [0m[96mtimestamp[0m:[95m Tue, 26 May 2026 01:30:16 +0000[0m
+[95m  [0m[96mversion[0m:[95m v0.49.0[0m
+[95m  [0m[96mmigrations[0m:
+  -[95m scripts-to-actions[0m
+[95m  [0m-[95m pluralize-set-variable[0m
+[95m  [0m[96mlastNonBreakingVersion[0m:[95m v0.27.0[0m
+[95m[0m[96mcomponents[0m:
+-[96m name[0m:[95m a11oy-core[0m
+
+===== STEP 5: zarf SBOM extract =====
+[90m2026-05-26 01:32:41[0m [32mINF[0m [1mSBOM successfully extracted[0m [36mpath=[0m/tmp/a11oy-smoke/sbom-fresh/a11oy-uds
+SBOM files (head):
+sbom-fresh/a11oy-uds/compare.html
+sbom-fresh/a11oy-uds/sbom-viewer-zarf-component-a11oy-connection.html
+sbom-fresh/a11oy-uds/sbom-viewer-zarf-component-a11oy-core.html
+sbom-fresh/a11oy-uds/sbom-viewer-zarf-component-a11oy-docs.html
+sbom-fresh/a11oy-uds/sbom-viewer-zarf-component-a11oy-provenance.html
+sbom-fresh/a11oy-uds/zarf-component-a11oy-connection.json
+sbom-fresh/a11oy-uds/zarf-component-a11oy-core.json
+sbom-fresh/a11oy-uds/zarf-component-a11oy-docs.json
+sbom-fresh/a11oy-uds/zarf-component-a11oy-provenance.json
+
+===== STEP 6: MANIFEST.json round-trip (content-hash match, no basename collision) =====
+MANIFEST at: staged/a11oy-provenance/a11oy-provenance/files/0/MANIFEST.json
+  manifest entries: 18  totalBytes: 26340
+  gitSha: 582914adf  builtAt: 2026-05-26T01:29:52Z  sourcePackaged: false
+  content-hash round-trip: 18/18 present on disk, 0 missing
+
+===== STEP 7: execute shipped runtime end-to-end (doctrine smoke test) =====
+  rewritten imports in 8 files
+   PASS tetrad: 4 legs 
+   PASS tetrad: inner = sum a_i^2 = 30 
+   PASS tetrad: norm = sqrt(30) 
+   PASS fisher: d(p,p)=0 
+   PASS fisher: d(uniform,delta)=pi/2 
+   PASS fisher: F_ii = 1/p_i 
+   PASS bohr: 12 canonical frame-pairs 
+   PASS bohr: sigma_A * sigma_B >= 0.25 (varying) product=0.5088 floor=0.25
+   PASS bohr: deterministic stream FAILS floor (sigma=0) 
+   PASS bohr: fromTetrad pulls correct legs 
+   PASS bohr: unknown pair throws (Unknown frame-pair: NOPE)
+   PASS ks18: 18 vectors / 9 contexts 
+   PASS ks18: empty obs -> contextual (no NC-HV model fits) reason=NO_NON_CONTEXTUAL_MODEL_FITS_OBSERVATIONS
+   PASS povm: completeness Sum E_i = I enforced 
+   PASS povm: Tr(E.rho) = sum e_i * rho_i 
+   PASS povm: argmax picks higher-prob outcome 
+   PASS povm: incomplete set throws POVMSetError 
+
+ RESULT: 17 passed / 0 failed
+
+===== STEP 8: release-bundle.tar.gz round-trip =====
+a11oy-uds-0.1.1.tar.zst: OK
+Verified OK
+
+===== STEP 9: doctrine invariants verified at runtime =====
+  - frames.length === 2:        enforced by emitDecision (step 7 PASS)
+  - sigma_A * sigma_B >= 0.25:  enforced by checkComplementarity (varying PASS, sigma=0 FAIL)
+  - Sum E_i = I (completeness): enforced by makePOVM (good PASS, bad throws)
+  - KS-18 contextuality:        no NC-HV model fits 9 contexts (PASS)
+  - MANIFEST sha256 round-trip: every file content-hashed (step 6 PASS)
+
+================================================================
+ ALL GREEN -- bundle is verifiable, signed, and doctrine-conforming
+================================================================

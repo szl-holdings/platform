@@ -228,6 +228,11 @@ function isExempt(path: string): boolean {
   // per-user state mutation, no session involvement, and the route handler
   // applies its own rate limit. CSRF double-submit is not applicable.
   if (path === '/api/sentra/status') return true;
+  // Sentra detector sidecar registration — server-to-server handshake authenticated
+  // by the x-sentra-sidecar-secret header (validated inside the route handler).
+  // The sidecar boots before any browser session exists, so CSRF double-submit
+  // is not applicable.
+  if (path === '/api/sentra/detectors/sidecar-register') return true;
   // Non-production demo PIN verification — stateless read-only PIN check;
   // no session or user state is modified on the server side.
   if (process.env.NODE_ENV !== 'production' && path === '/api/pulse/demo/verify') return true;
