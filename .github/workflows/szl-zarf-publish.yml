@@ -1,0 +1,223 @@
+name: Publish SZL Zarf packages and UDS bundle
+
+# Builds and publishes the three SZL Zarf packages (a11oy, sentra, amaru)
+# and the top-level UDS bundle (szl-mesh) to ghcr.io/szl-holdings on tag push.
+#
+# Trigger:
+#   - Push of a tag matching `szl-v*` (e.g. `szl-v1.0.0-alpha.2`) publishes
+#     all three packages + the bundle at their currently-declared versions
+#     in the zarf.yaml / uds-bundle.yaml files.
+#   - Or via workflow_dispatch for manual runs / re-publishes.
+#
+# Auth:
+#   - Built-in GITHUB_TOKEN with `packages: write` for GHCR pushes — no PAT.
+#   - Optional cosign signing via repo secrets ZARF_COSIGN_PRIVATE_KEY (PEM)
+#     and COSIGN_PASSWORD. When both are present, packages are signed at
+#     publish time and the local key is shredded on exit (per
+#     docs/proposals/defense-unicorns/szl-holdings/uds-mesh/README.md).
+
+on:
+  push:
+    tags:
+      - 'szl-v*'
+  workflow_dispatch:
+    inputs:
+      sign:
+        description: 'Sign packages with cosign (requires ZARF_COSIGN_PRIVATE_KEY + COSIGN_PASSWORD secrets)'
+        type: boolean
+        default: true
+
+permissions:
+  contents: read
+  packages: write
+  id-token: write
+
+env:
+  REGISTRY: ghcr.io
+  ORG: szl-holdings
+  SZL_ROOT: docs/proposals/defense-unicorns/szl-holdings
+
+jobs:
+  # ---------------------------------------------------------------------------
+  # 0. Guardrail: package versions in each zarf.yaml MUST match the
+  #    corresponding ref: in uds-mesh/uds-bundle.yaml, or the published
+  #    bundle would reference packages that don't exist (or worse, stale
+  #    versions). Fail fast before touching the registry.
+  # ---------------------------------------------------------------------------
+  check-version-sync:
+    name: Check package ↔ bundle version sync
+    runs-on: ubuntu-latest
+    outputs:
+      a11oy: ${{ steps.read.outputs.a11oy }}
+      sentra: ${{ steps.read.outputs.sentra }}
+      amaru: ${{ steps.read.outputs.amaru }}
+      bundle: ${{ steps.read.outputs.bundle }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install yq
+        run: |
+          sudo curl -sSL -o /usr/local/bin/yq \
+            https://github.com/mikefarah/yq/releases/latest/download/yq_linux_amd64
+          sudo chmod +x /usr/local/bin/yq
+
+      - name: Read & compare versions
+        id: read
+        run: |
+          set -euo pipefail
+          ROOT="${{ env.SZL_ROOT }}"
+          a11oy=$(yq '.metadata.version'   "$ROOT/a11oy/deploy/zarf.yaml")
+          sentra=$(yq '.metadata.version'  "$ROOT/sentra/deploy/zarf.yaml")
+          amaru=$(yq '.metadata.version'   "$ROOT/amaru/deploy/zarf.yaml")
+          bundle=$(yq '.metadata.version'  "$ROOT/uds-mesh/uds-bundle.yaml")
+
+          ref_a11oy=$(yq  '.packages[] | select(.name=="a11oy")  | .ref' "$ROOT/uds-mesh/uds-bundle.yaml")
+          ref_sentra=$(yq '.packages[] | select(.name=="sentra") | .ref' "$ROOT/uds-mesh/uds-bundle.yaml")
+          ref_amaru=$(yq  '.packages[] | select(.name=="amaru")  | .ref' "$ROOT/uds-mesh/uds-bundle.yaml")
+
+          echo "a11oy zarf=$a11oy  bundle ref=$ref_a11oy"
+          echo "sentra zarf=$sentra bundle ref=$ref_sentra"
+          echo "amaru zarf=$amaru   bundle ref=$ref_amaru"
+          echo "bundle version=$bundle"
+
+          fail=0
+          [[ "$a11oy"  == "$ref_a11oy"  ]] || { echo "::error::a11oy version drift: zarf=$a11oy bundle=$ref_a11oy";   fail=1; }
+          [[ "$sentra" == "$ref_sentra" ]] || { echo "::error::sentra version drift: zarf=$sentra bundle=$ref_sentra"; fail=1; }
+          [[ "$amaru"  == "$ref_amaru"  ]] || { echo "::error::amaru version drift: zarf=$amaru bundle=$ref_amaru";   fail=1; }
+          [[ "$fail" == "0" ]] || exit 1
+
+          {
+            echo "a11oy=$a11oy"
+            echo "sentra=$sentra"
+            echo "amaru=$amaru"
+            echo "bundle=$bundle"
+          } >> "$GITHUB_OUTPUT"
+
+  # ---------------------------------------------------------------------------
+  # 1. Build + (optionally sign) + publish each Zarf package in parallel.
+  # ---------------------------------------------------------------------------
+  publish-packages:
+    name: zarf publish ${{ matrix.package }}
+    needs: check-version-sync
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        package: [a11oy, sentra, amaru]
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install zarf
+        uses: defenseunicorns/setup-zarf@main
+        with:
+          download-init-package: false
+
+      - name: Install cosign
+        uses: sigstore/cosign-installer@v3
+
+      - name: Log in to GHCR
+        run: |
+          echo "${{ secrets.GITHUB_TOKEN }}" \
+            | zarf tools registry login ${{ env.REGISTRY }} \
+                -u "${{ github.actor }}" --password-stdin
+
+      - name: Materialize cosign key (if signing secrets present)
+        id: cosign_key
+        env:
+          COSIGN_KEY_PEM: ${{ secrets.ZARF_COSIGN_PRIVATE_KEY }}
+        run: |
+          set -euo pipefail
+          if [[ -n "${COSIGN_KEY_PEM}" && -n "${{ secrets.COSIGN_PASSWORD }}" ]]; then
+            install -m 600 /dev/null "$RUNNER_TEMP/cosign.key"
+            printf '%s' "${COSIGN_KEY_PEM}" > "$RUNNER_TEMP/cosign.key"
+            echo "key_path=$RUNNER_TEMP/cosign.key" >> "$GITHUB_OUTPUT"
+            echo "sign=true"                       >> "$GITHUB_OUTPUT"
+          else
+            echo "::notice::ZARF_COSIGN_PRIVATE_KEY / COSIGN_PASSWORD not set — publishing unsigned"
+            echo "sign=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: zarf package create
+        working-directory: ${{ env.SZL_ROOT }}/${{ matrix.package }}/deploy
+        env:
+          COSIGN_PASSWORD: ${{ secrets.COSIGN_PASSWORD }}
+        run: |
+          set -euo pipefail
+          if [[ "${{ steps.cosign_key.outputs.sign }}" == "true" ]]; then
+            zarf package create . --confirm --output . \
+              --signing-key "${{ steps.cosign_key.outputs.key_path }}"
+          else
+            zarf package create . --confirm --output .
+          fi
+
+      - name: zarf package publish
+        working-directory: ${{ env.SZL_ROOT }}/${{ matrix.package }}/deploy
+        env:
+          COSIGN_PASSWORD: ${{ secrets.COSIGN_PASSWORD }}
+        run: |
+          set -euo pipefail
+          pkg=$(ls zarf-package-${{ matrix.package }}-*.tar.zst | head -n1)
+          echo "Publishing $pkg → oci://${REGISTRY}/${ORG}/packages"
+          if [[ "${{ steps.cosign_key.outputs.sign }}" == "true" ]]; then
+            zarf package publish "$pkg" \
+              "oci://${REGISTRY}/${ORG}/packages" \
+              --signing-key "${{ steps.cosign_key.outputs.key_path }}"
+          else
+            zarf package publish "$pkg" "oci://${REGISTRY}/${ORG}/packages"
+          fi
+
+      - name: Shred cosign key
+        if: always() && steps.cosign_key.outputs.sign == 'true'
+        run: shred -u "${{ steps.cosign_key.outputs.key_path }}" || true
+
+      - name: Upload package artifact (for auditing)
+        uses: actions/upload-artifact@v4
+        with:
+          name: zarf-package-${{ matrix.package }}
+          path: ${{ env.SZL_ROOT }}/${{ matrix.package }}/deploy/zarf-package-${{ matrix.package }}-*.tar.zst
+          retention-days: 14
+          if-no-files-found: error
+
+  # ---------------------------------------------------------------------------
+  # 2. Build + publish the szl-mesh UDS bundle once all three packages are up.
+  # ---------------------------------------------------------------------------
+  publish-bundle:
+    name: uds bundle publish szl-mesh
+    needs: [check-version-sync, publish-packages]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install zarf
+        uses: defenseunicorns/setup-zarf@main
+        with:
+          download-init-package: false
+
+      - name: Install uds-cli
+        uses: defenseunicorns/setup-uds@main
+
+      - name: Log in to GHCR
+        run: |
+          echo "${{ secrets.GITHUB_TOKEN }}" \
+            | zarf tools registry login ${{ env.REGISTRY }} \
+                -u "${{ github.actor }}" --password-stdin
+
+      - name: uds create bundle
+        working-directory: ${{ env.SZL_ROOT }}/uds-mesh
+        run: uds create . --confirm --output .
+
+      - name: uds publish bundle
+        working-directory: ${{ env.SZL_ROOT }}/uds-mesh
+        run: |
+          set -euo pipefail
+          bundle=$(ls uds-bundle-szl-mesh-*.tar.zst | head -n1)
+          echo "Publishing $bundle → oci://${REGISTRY}/${ORG}/bundles"
+          uds publish "$bundle" "oci://${REGISTRY}/${ORG}/bundles"
+
+      - name: Upload bundle artifact (for auditing)
+        uses: actions/upload-artifact@v4
+        with:
+          name: uds-bundle-szl-mesh
+          path: ${{ env.SZL_ROOT }}/uds-mesh/uds-bundle-szl-mesh-*.tar.zst
+          retention-days: 30
+          if-no-files-found: error
