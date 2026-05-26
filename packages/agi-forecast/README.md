@@ -9,6 +9,25 @@ follow-ups.
 - License: Apache-2.0
 - Byline: Lutar, Stephen P. (ORCID 0009-0001-0110-4173)
 
+## Refreshing pinned leaderboards
+
+The five benchmark snapshots in `data/*-leaderboard.json` (SWE-bench Verified,
+GPQA Diamond, MMLU, HumanEval, MATH) can be refreshed from their public
+upstream leaderboards via:
+
+```
+pnpm --filter @workspace/agi-forecast run refresh:leaderboards          # writes
+pnpm --filter @workspace/agi-forecast run refresh:leaderboards:dry      # no writes
+```
+
+Per-benchmark failures are isolated — a parser miss for one snapshot will
+never touch the JSON of another, and never overwrites an existing snapshot
+with a partial / empty / corrupted one. The scheduled workflow
+`.github/workflows/refresh-leaderboards.yml` runs the refresher weekly and
+opens a PR with the diff for review. Upstream sites that move off their
+current HTML embedding shape will surface as logged per-benchmark failures
+and need a new parser in `scripts/refresh-leaderboards.ts`.
+
 ## What's in this slice
 
 - **Gauge registry** — 12 typed variables (`GAUGE_VARIABLES`) as a

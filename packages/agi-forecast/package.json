@@ -34,7 +34,9 @@
     "format": "biome format --write ./src",
     "typecheck": "tsc -p tsconfig.json --noEmit",
     "test": "vitest run --passWithNoTests",
-    "test:watch": "vitest"
+    "test:watch": "vitest",
+    "refresh:leaderboards": "tsx scripts/refresh-leaderboards.ts",
+    "refresh:leaderboards:dry": "tsx scripts/refresh-leaderboards.ts --dry-run"
   },
   "dependencies": {
     "@workspace/langextract-bridge": "workspace:*",
