@@ -23,6 +23,7 @@ set -euo pipefail
 ARTIFACT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 REPO_ROOT="$(cd "${ARTIFACT_DIR}/../.." && pwd)"
 BUILD_DIR="${ARTIFACT_DIR}/build"
+ATTEST_DIR="${ARTIFACT_DIR}/build-attestations"
 VERSION="$(node -p "require('${ARTIFACT_DIR}/package.json').version")"
 GIT_SHA="$(git -C "${REPO_ROOT}" rev-parse --short HEAD 2>/dev/null || echo 'unknown')"
 BUILD_TS="$(date -u +%Y-%m-%dT%H:%M:%SZ)"
@@ -40,7 +41,7 @@ log "version=${VERSION} git=${GIT_SHA} ts=${BUILD_TS} allow_source_fallback=${AL
 # ---------------------------------------------------------------------------
 # 1. Clean staging.
 # ---------------------------------------------------------------------------
-rm -rf "${BUILD_DIR}"
+rm -rf "${BUILD_DIR}" "${ATTEST_DIR}"
 mkdir -p "${BUILD_DIR}/a11oy-core" "${BUILD_DIR}/a11oy-connection"
 
 A11OY_CORE_SRC="${REPO_ROOT}/artifacts/a11oy/packages/a11oy-core"
@@ -108,6 +109,18 @@ VERSION="${VERSION}" GIT_SHA="${GIT_SHA}" BUILD_TS="${BUILD_TS}" \
 # ---------------------------------------------------------------------------
 log "verifying MANIFEST.json"
 node "${ARTIFACT_DIR}/scripts/verify-manifest.mjs" "${BUILD_DIR}"
+
+# ---------------------------------------------------------------------------
+# 4b. Generate + verify the hash-chained attestation sidecar.
+#     Lives in a SEPARATE directory (build-attestations/) so it does not
+#     pollute build/ — verify-manifest.mjs treats unknown files there as
+#     a hard error. The Zarf component a11oy-attestations ships this
+#     file as /opt/a11oy/ATTESTATIONS.json.
+# ---------------------------------------------------------------------------
+log "writing ATTESTATIONS.json (hash chain over MANIFEST.json subjects)"
+node "${ARTIFACT_DIR}/scripts/write-attestations.mjs" "${BUILD_DIR}" "${ATTEST_DIR}"
+log "verifying ATTESTATIONS.json"
+node "${ARTIFACT_DIR}/scripts/verify-attestations.mjs" "${BUILD_DIR}" "${ATTEST_DIR}"
 
 # ---------------------------------------------------------------------------
 # 5. Produce the deployable tarball.

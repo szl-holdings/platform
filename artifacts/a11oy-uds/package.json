@@ -5,6 +5,7 @@
   "description": "A11oy UDS / Zarf payload — single-command installable A11oy bundle for Defense-Unicorns environments.",
   "scripts": {
     "build": "bash scripts/build.sh",
-    "verify": "node scripts/verify-manifest.mjs"
+    "verify": "node scripts/verify-manifest.mjs",
+    "verify:attestations": "node scripts/verify-attestations.mjs build build-attestations"
   }
 }

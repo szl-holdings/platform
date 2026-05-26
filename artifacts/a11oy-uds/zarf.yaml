@@ -32,3 +32,16 @@ components:
     files:
       - source: build/MANIFEST.json
         target: /opt/a11oy/MANIFEST.json
+
+  - name: a11oy-attestations
+    description: |
+      In-bundle hash-chained attestation sidecar. Each link binds a
+      built subject (a11oy-core, a11oy-connection) to the previous
+      link's hash, producing an offline-verifiable provenance chain
+      over MANIFEST.json. Optional; off by default. Referenced by the
+      szl-mesh UDS bundle as `optionalComponents: [a11oy-attestations]`.
+    required: false
+    default: false
+    files:
+      - source: build-attestations/ATTESTATIONS.json
+        target: /opt/a11oy/ATTESTATIONS.json

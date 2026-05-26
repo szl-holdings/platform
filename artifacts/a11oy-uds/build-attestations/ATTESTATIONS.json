@@ -1,0 +1,33 @@
+{
+  "name": "a11oy-attestations",
+  "version": "0.1.0",
+  "gitSha": "cf7c308a1",
+  "builtAt": "2026-05-26T01:35:33Z",
+  "hashAlgorithm": "sha256",
+  "manifestSha256": "370751df8d14d264db90ab099a843aa7f9e6f744c31896495e55cdf764c3b7f9",
+  "subjects": [
+    "a11oy-core",
+    "a11oy-connection"
+  ],
+  "chain": [
+    {
+      "index": 0,
+      "subject": "a11oy-core",
+      "fileCount": 11,
+      "totalBytes": 18921,
+      "subjectSha256": "b73c043c0c7109e3a105e5318bce6d0ddc285b35eced2ff862b78024678f1990",
+      "prevHash": "0000000000000000000000000000000000000000000000000000000000000000",
+      "entryHash": "d947b264b0cb31f7c901ec51c8f624085598525de3e972a51d21442ef879fff7"
+    },
+    {
+      "index": 1,
+      "subject": "a11oy-connection",
+      "fileCount": 7,
+      "totalBytes": 5251,
+      "subjectSha256": "38223484a191abda6ac13d16e219eee8dcef893a72fd64bdd8797ce175e033d5",
+      "prevHash": "d947b264b0cb31f7c901ec51c8f624085598525de3e972a51d21442ef879fff7",
+      "entryHash": "0bf52285f7e3872abf5b500cb83e5d4542528f70a83c5cdd5b45f5fbcddb8604"
+    }
+  ],
+  "head": "0bf52285f7e3872abf5b500cb83e5d4542528f70a83c5cdd5b45f5fbcddb8604"
+}
