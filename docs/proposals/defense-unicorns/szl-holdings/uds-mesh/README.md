@@ -195,6 +195,65 @@ The companion CI workflow,
 consumes those two secrets and re-publishes signed packages on every
 tag matching `szl-v*`.
 
+**Two independent signatures per artifact.** Every Zarf package and the
+szl-mesh UDS bundle pushed by the workflow is signed twice:
+
+1. **Long-lived cosign key signature** — produced by `zarf package publish`
+   / `uds-cli bundle publish` against the key materialized from the
+   `ZARF_COSIGN_PRIVATE_KEY` secret. This is the offline-verifiable
+   signature checked with `--key cosign.pub` (the §05 Fix A path above).
+2. **Cosign keyless (Sigstore / Fulcio + Rekor) signature** — produced by
+   `cosign sign` using the workflow's GitHub OIDC identity. The signature
+   is pushed to GHCR alongside the artifact under the `.sig` tag and the
+   signing event is logged in the public Rekor transparency log. No
+   long-lived private key is involved on this path; the signer's identity
+   is the workflow itself, bound to the immutable artifact digest.
+
+In the same job, the workflow also attaches a **SLSA build provenance
+attestation** via `actions/attest-build-provenance`. The attestation's
+subject is the artifact digest and its predicate is a SLSA v1 provenance
+statement describing the workflow run (repo, ref, commit SHA, runner,
+inputs) that produced it. Like the keyless signature, it is pushed to
+GHCR alongside the artifact and recorded in Rekor.
+
+**Operator-side keyless verification.** Anyone pulling an artifact from
+GHCR can independently verify both the keyless signature and the SLSA
+provenance — no key file needed, just `cosign` ≥ v2:
+
+```sh
+# Identity = this workflow, on any tag in any szl-holdings repo.
+IDENTITY='^https://github.com/szl-holdings/.+/\.github/workflows/szl-zarf-publish\.yml@.+'
+ISSUER='https://token.actions.githubusercontent.com'
+
+# 1. Verify the cosign keyless signature.
+cosign verify \
+  --certificate-identity-regexp "$IDENTITY" \
+  --certificate-oidc-issuer "$ISSUER" \
+  ghcr.io/szl-holdings/packages/a11oy:1.0.0-alpha
+
+cosign verify \
+  --certificate-identity-regexp "$IDENTITY" \
+  --certificate-oidc-issuer "$ISSUER" \
+  ghcr.io/szl-holdings/szl-mesh:0.1.0
+
+# 2. Verify the SLSA build provenance attestation.
+cosign verify-attestation \
+  --type slsaprovenance \
+  --certificate-identity-regexp "$IDENTITY" \
+  --certificate-oidc-issuer "$ISSUER" \
+  ghcr.io/szl-holdings/packages/a11oy:1.0.0-alpha
+
+# Same shape for sentra, amaru, and the szl-mesh bundle.
+```
+
+Successful exit (0) on both commands proves the artifact at that digest
+was produced by `szl-zarf-publish.yml` running in the `szl-holdings` org,
+without trusting any operator-held key. A non-zero exit on either is a
+release-blocker. The long-lived-key path (`zarf package inspect --key
+cosign.pub`, above) remains the canonical offline check; the keyless
+path is the online cross-check that does not require operators to
+trust-on-first-use the `cosign.pub` file shipped in this repo.
+
 Either path produces `uds-bundle-szl-mesh-amd64-0.1.0.tar.zst` —
 the single artifact handed to operators (or to Andrew on a USB stick).
 
