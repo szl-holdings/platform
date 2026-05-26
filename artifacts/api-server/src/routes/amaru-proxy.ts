@@ -58,6 +58,52 @@ router.get('/amaru/healthz', (_req, res) => {
   void proxyGet('/healthz', res);
 });
 
+/**
+ * Sidecar health probe with the same envelope shape as
+ * `/api/sentra/core/health` so a single monitoring rule can detect either
+ * sidecar going missing in production (task #5259).
+ *
+ * Returns 200 with `{ ok, sidecar: { ok, status?, error?, upstream } }` even
+ * when the upstream FastAPI is unreachable — uptime monitors can alert on the
+ * boolean and an automated probe can distinguish "api-server down" from
+ * "amaru sidecar down".
+ */
+router.get('/amaru/health', async (_req, res) => {
+  const upstreamUrl = `${AMARU_BASE}/healthz`;
+  try {
+    const upstream = await fetch(upstreamUrl, {
+      method: 'GET',
+      headers: { Accept: 'application/json' },
+      signal: AbortSignal.timeout(4_000),
+    });
+    const ok = upstream.ok;
+    res.status(200);
+    res.setHeader('cache-control', 'no-store');
+    res.json({
+      ok,
+      sidecar: {
+        ok,
+        status: upstream.status,
+        upstream: upstreamUrl,
+      },
+      dataState: ok ? 'live' : 'stub',
+    });
+  } catch (err) {
+    res.status(200);
+    res.setHeader('cache-control', 'no-store');
+    res.json({
+      ok: false,
+      sidecar: {
+        ok: false,
+        error:
+          err instanceof Error ? err.message : 'amaru sidecar did not respond within 4s',
+        upstream: upstreamUrl,
+      },
+      dataState: 'stub',
+    });
+  }
+});
+
 // Read-only Amaru kernel surfaces — exposed for Conduit tabs to render real
 // upstream evidence (Round 5 / T003). All are GET-only; the upstream FastAPI
 // organ (services/amaru) is read-only by design.
