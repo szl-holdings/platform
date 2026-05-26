@@ -14,6 +14,9 @@
  *   POST /api/ouroboros/amaru/observe-metric         — RMP seked sample
  *   POST /api/ouroboros/amaru/audit-threshold        — unit-fraction audit
  *   POST /api/ouroboros/sentra/anchor-event          — doubling append
+ *   GET  /api/ouroboros/npmr/cross-section           — v11 five-stratum topology
+ *   GET  /api/ouroboros/npmr/kappa/band              — advisory healthy band
+ *   POST /api/ouroboros/npmr/kappa                   — κ₁₁ coupling coefficient
  *   POST /api/ouroboros/sentra/anchor-batch          — bulk append
  *   POST /api/ouroboros/sentra/verify-trace          — verify doubling
  *   GET  /api/ouroboros/sentra/anchor-state          — current accumulator
@@ -52,6 +55,9 @@ import {
   lutarOmega,
   lutarV7,
   lutarV10Audit,
+  npmrCrossSection,
+  computeKappa11,
+  DEFAULT_KAPPA11_BAND,
   adaptiveWeights,
   evaluateAll,
   twistorProject,
@@ -657,6 +663,58 @@ router.post('/lutar/v10', (req: Request, res: Response) => {
   if (!parsed.success) return jsonError(res, 400, 'INVALID_INPUT', parsed.error.message);
   try {
     return res.json(lutarV10Audit(parsed.data));
+  } catch (e) {
+    return jsonError(res, 400, 'VALIDATION_ERROR', (e as Error).message);
+  }
+});
+
+// ---------------------------------------------------------------------------
+// v11 NPMR cosmology — additive over v10. Surfaces the κ₁₁ coupling
+// coefficient and the five-stratum cross-section. No new L-term.
+// See: docs/thesis/v11-npmr.md
+// ---------------------------------------------------------------------------
+const Kappa11Schema = z.object({
+  carrier: z.object({
+    written: z.array(z.string().min(1)).min(1),
+    enforced: z.array(z.string().min(1)),
+  }),
+  uptake: z.object({
+    channelWidth: z.number().positive().finite(),
+    surfaceWidth: z.number().nonnegative().finite(),
+  }),
+  loss: z.object({
+    samples: z.array(z.number().nonnegative().finite()).min(1),
+  }),
+  healthyBand: z
+    .object({ lower: z.number().min(0).max(1), upper: z.number().min(0).max(1) })
+    .optional(),
+});
+
+router.get('/npmr/cross-section', (_req: Request, res: Response) => {
+  return res.json({
+    ...npmrCrossSection(),
+    thesisAnchor: 'v11-npmr#3-2-the-five-stratum-cross-section',
+    author: 'Stephen Lutar / SZL Consulting Ltd',
+  });
+});
+
+router.get('/npmr/kappa/band', (_req: Request, res: Response) => {
+  return res.json({
+    defaultBand: DEFAULT_KAPPA11_BAND,
+    note:
+      'Band edges are CONVENTION, not measurement. Calibrate to your own baseline before relying on the verdict.',
+    source: 'docs/thesis/v11-npmr.md §5',
+  });
+});
+
+router.post('/npmr/kappa', (req: Request, res: Response) => {
+  const parsed = Kappa11Schema.safeParse(req.body);
+  if (!parsed.success) return jsonError(res, 400, 'INVALID_INPUT', parsed.error.message);
+  try {
+    return res.json({
+      ...computeKappa11(parsed.data),
+      author: 'Stephen Lutar / SZL Consulting Ltd',
+    });
   } catch (e) {
     return jsonError(res, 400, 'VALIDATION_ERROR', (e as Error).message);
   }

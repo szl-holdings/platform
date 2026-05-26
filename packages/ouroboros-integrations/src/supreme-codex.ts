@@ -634,6 +634,71 @@ const CODEX_NODES: CodexNode[] = [
       "Lambda_10 = sum_k L_k * prod_j 1[j_k]; auditClosed iff closure_ratio = 1",
   },
   {
+    id: "npmr_auo",
+    domain: "cosmology",
+    content:
+      "NPMR cross-section stratum 0 — AUO (Absolute Unbounded Oneness, Campbell My Big TOE) / Hanan Pacha (Andean upper world) / ungoverned substrate (operational). Pre-distinction field; the hermetic 'One Thing'. Outermost shell of the v11 five-stratum cosmology.",
+    source: "docs/thesis/v11-npmr.md §3.2",
+  },
+  {
+    id: "npmr_lcs",
+    domain: "cosmology",
+    content:
+      "NPMR cross-section stratum 1 — LCS (Larger Consciousness System, Campbell) / Kay-Pacha-as-totality (Andean lived world held whole) / shared semantic space (operational). The medium ideas travel through; receives the uptake-surface > channel primitive from outer strata.",
+    source: "docs/thesis/v11-npmr.md §3.2",
+  },
+  {
+    id: "npmr_n1",
+    domain: "cosmology",
+    content:
+      "NPMR cross-section stratum 2 — NPMR_N₁ (Non-Physical MR, branch 1, Campbell) / the realm Amaru ascends from (Andean) / policy-as-written, intent (operational). Upper face of the Amaru equator — where ideas are declared. Origin of the partial-match carrier edge to PMR.",
+    source: "docs/thesis/v11-npmr.md §3.2",
+  },
+  {
+    id: "npmr_pmr",
+    domain: "cosmology",
+    content:
+      "NPMR cross-section stratum 3 — PMR (Physical Matter Reality, Campbell) / Kay Pacha (Andean this-world) / policy-as-enforced, production (operational). Lower face of the Amaru equator — where ideas land or fail to. Receives partial-match carrier from N₁ and emits loss-as-coupling to sub-surface.",
+    source: "docs/thesis/v11-npmr.md §3.2",
+  },
+  {
+    id: "npmr_pmr_subsurface",
+    domain: "cosmology",
+    content:
+      "NPMR cross-section stratum 4 — PMR sub-surface entropic floor (Campbell) / Uku Pacha (Andean inner/lower world) / audit trail, receipts (operational). Innermost shell. Where what was enforced is recorded; receives the loss-as-coupling primitive from PMR.",
+    source: "docs/thesis/v11-npmr.md §3.2",
+  },
+  {
+    id: "amaru_equator",
+    domain: "cosmology",
+    content:
+      "Amaru read as the ouroboros laid along the N₁↔PMR equator of the NPMR cross-section: the strait where intent becomes enforcement. Original v11 synthesis — the Andean two-headed serpent is not metaphor for Campbell's diagram, it is the operational name for the equatorial coupling surface.",
+    source: "docs/thesis/v11-npmr.md §3.3",
+  },
+  {
+    id: "npmr_kappa_11",
+    domain: "mathematics",
+    content:
+      "κ₁₁ — Coupling Coefficient across the Amaru equator. κ₁₁ = 1 − carrierFidelity · uptakeRatio · lossCoherence, where carrierFidelity = |enforced ∩ written| / |written| (partial-match carrier), uptakeRatio = min(1, surfaceWidth / channelWidth) (uptake-surface > channel), lossCoherence = 1 / (1 + (σ/μ)²) (loss-as-coupling). κ₁₁ ∈ [0,1]. v11 contributes no new L-term to the Lutar family — κ₁₁ is a dimensionless governance metric over the v10 audit surface. Healthy band edges [0.1, 0.6] are convention, not measurement.",
+    formula:
+      "κ₁₁ = 1 − carrierFidelity · uptakeRatio · lossCoherence",
+    source: "docs/thesis/v11-npmr.md §5",
+  },
+  {
+    id: "campbell_npmr",
+    domain: "cosmology",
+    content:
+      "Tom Campbell — My Big TOE (Trilogy, 2003). Source of the NPMR / PMR / LCS / AUO vocabulary that v11 ingests. Cited; not reproduced. v11 does not reproduce Campbell's diagram — it renders the same five-stratum topology in our own visual idiom and adds the Andean ouroboros at the equator.",
+    source: "https://www.my-big-toe.com/",
+  },
+  {
+    id: "standardgalactic_how_ideas_work",
+    domain: "philosophy",
+    content:
+      "standardgalactic — abraxas / Functional Melancholic / syllabus 01_how_ideas_work.pdf. Source of the three idea-propagation primitives v11 makes operational: partial-match carrier, loss as coupling, and uptake-surface > channel. Cited as the philosophical synthesis layered onto Campbell's NPMR topology.",
+    source: "https://standardgalactic.github.io/",
+  },
+  {
     id: "huft_bridge",
     domain: "physics",
     content:
@@ -746,6 +811,26 @@ const CODEX_EDGES: CodexEdge[] = [
   { from: "supreme_equation_omega", to: "lutar_omega", relation: "realizes_via" },
   { from: "supreme_equation_extended", to: "supreme_equation_omega", relation: "evolved_by" },
   { from: "lutar_v7", to: "supreme_equation_omega", relation: "grounds_closure" },
+
+  // v11 NPMR cosmology — additive documentary layer over v10.
+  { from: "campbell_npmr", to: "npmr_auo", relation: "names" },
+  { from: "campbell_npmr", to: "npmr_lcs", relation: "names" },
+  { from: "campbell_npmr", to: "npmr_n1", relation: "names" },
+  { from: "campbell_npmr", to: "npmr_pmr", relation: "names" },
+  { from: "campbell_npmr", to: "npmr_pmr_subsurface", relation: "names" },
+  { from: "npmr_auo", to: "npmr_lcs", relation: "contains" },
+  { from: "npmr_lcs", to: "npmr_n1", relation: "contains" },
+  { from: "npmr_n1", to: "npmr_pmr", relation: "contains" },
+  { from: "npmr_pmr", to: "npmr_pmr_subsurface", relation: "contains" },
+  { from: "npmr_lcs", to: "npmr_n1", relation: "primitive_uptake_surface_gt_channel" },
+  { from: "npmr_n1", to: "npmr_pmr", relation: "primitive_partial_match_carrier" },
+  { from: "npmr_pmr", to: "npmr_pmr_subsurface", relation: "primitive_loss_as_coupling" },
+  { from: "amaru_equator", to: "npmr_n1", relation: "equator_upper_face" },
+  { from: "amaru_equator", to: "npmr_pmr", relation: "equator_lower_face" },
+  { from: "ouroboros_operator", to: "amaru_equator", relation: "instantiated_at" },
+  { from: "standardgalactic_how_ideas_work", to: "npmr_kappa_11", relation: "supplies_primitives" },
+  { from: "amaru_equator", to: "npmr_kappa_11", relation: "measured_by" },
+  { from: "npmr_kappa_11", to: "lutar_v10", relation: "extends_audit_surface" },
 ];
 
 export function buildSupremeCodex(): SupremeCodex {

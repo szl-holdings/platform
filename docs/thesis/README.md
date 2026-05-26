@@ -60,6 +60,22 @@ Each canonical thesis document follows the same structural cadence:
 | `docs/thesis/v10-onepager.md`                     | One-pager / release notes                                                        |
 | `paper/v10/`                                      | arXiv-ready manuscript bundle (canonical, abstract, CITATION.cff, .zenodo.json, references.bib, ARXIV_SUBMISSION.md) |
 
+## v11 — NPMR CROSS-SECTION (May 26, 2026)
+
+| Document                                          | Purpose                                                                          |
+| ------------------------------------------------- | -------------------------------------------------------------------------------- |
+| `docs/thesis/v11-npmr.md`                         | Documentary reading of the Amaru ouroboros as a cross-section of NPMR.            |
+| `docs/thesis/v11-essay.md`                        | Long-form essay (~1500 words) — the cosmological reading written out at length.   |
+| `docs/thesis/v11-onepager.md`                     | One-pager / release notes — what ships, what doesn't, sources.                    |
+| `artifacts/conduit/src/pages/npmr.tsx`            | Conduit visual surface (`/npmr`) — five-stratum cross-section + live κ₁₁ panel.   |
+| `packages/ouroboros-integrations/src/npmr-cosmology.ts` | `computeKappa11`, `crossSection`, strata + edges + default band.            |
+| `packages/ouroboros-integrations/test/npmr.test.ts` | 13 deterministic contract tests.                                                  |
+| `artifacts/api-server/src/routes/ouroboros.ts`    | `GET /npmr/cross-section`, `GET /npmr/kappa/band`, `POST /npmr/kappa`.            |
+| `artifacts/a11oy/src/pages/Thesis.tsx`            | v11 row in `FORMULA_ROWS` — points at κ₁₁ endpoint and `npmr_kappa_11` codex node. |
+| `artifacts/sentra/src/pages/thesis.tsx`           | v11 row mirror on the Sentra thesis surface.                                       |
+
+v11 is **additive** to v10: it ships the cross-section visual surface, the κ₁₁ governance metric, and the supporting API/codex/tests across the v10 six-artefact contract — and touches no v10 artefact. It synthesises Tom Campbell's NPMR diagram (*My Big TOE*, <https://www.my-big-toe.com/>), the standardgalactic essays (*abraxas*, *Functional Melancholic*, *01 — How Ideas Work* at <https://standardgalactic.github.io/syllabus/01_how_ideas_work.pdf>), and the Andean three-world stack into a single operational reading: the ouroboros is the equator of a layered consciousness cosmology, and the equator is the locus at which a lossy carrier from the governance stratum (N₁) touches the uptake surface of PMR. **κ₁₁ = 1 − carrierFidelity · uptakeRatio · lossCoherence** quantifies the impedance of that crossing, ∈ [0,1], extending the v10 audit *surface* without extending the Lutar carrier set. No new L-term; no Λ₁₁ is cut; Λ₁₀ remains the family's audit scalar.
+
 v10 introduces the **Audit Closure Operator Λ₁₀** as a meta-invariant on the v9 Lutar family. Λ₁₀ = Σ_k L_k · ∏_{j∈{CODE,CODEX,API,TEST,THESIS,SURFACE}} 𝟙[j_k]; auditClosed ⇔ closureRatio = 1. v10 is strictly inert when the chain is operational and quantifies drift by exactly the missing fraction otherwise. No new physical L-term. Shipping: `lutarV10Audit` exported from `@workspace/ouroboros-integrations`, `POST /api/ouroboros/lutar/v10`, codex node `lutar_v10`, 8 contract tests, A11oy `/thesis` row v10, Sentra `/thesis` mirror.
 
 ## Ingestion notes

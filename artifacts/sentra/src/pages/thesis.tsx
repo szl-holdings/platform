@@ -39,6 +39,7 @@ const FORMULAS: FormulaRow[] = [
   { version: 'Ω', title: 'Master invariant on the 5-simplex', formula: 'L_Ω = Σ w_k · L_k, Σw_k = 1', endpoint: '/api/ouroboros/lutar/omega', codexNode: 'lutar_omega' },
   { version: 'v7', title: 'Bianchi closure (HUFT-inspired)', formula: 'L₇ = L_Ω · exp(−κ · ‖D_A F‖²/‖F‖²)', endpoint: '/api/ouroboros/lutar/v7', codexNode: 'lutar_v7' },
   { version: 'v10', title: 'Exhaustive-audit (Λ₁₀ closure operator)', formula: 'Λ₁₀ = Σ_k L_k · ∏_j 𝟙[j_k]; auditClosed ⇔ ratio = 1', endpoint: '/api/ouroboros/lutar/v10', codexNode: 'lutar_v10', newInV10: true },
+  { version: 'v11', title: 'NPMR equator coupling coefficient (κ₁₁)', formula: 'κ₁₁ = 1 − carrierFidelity · uptakeRatio · lossCoherence; ∈ [0,1]', endpoint: '/api/ouroboros/npmr/kappa', codexNode: 'npmr_kappa_11', newInV10: true },
 ];
 
 function CodeBlock({ children }: { children: string }) {

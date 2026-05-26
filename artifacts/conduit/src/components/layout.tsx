@@ -45,6 +45,7 @@ const coreItems = [
   { name: 'Operational Core', href: '/operational-core', icon: InfinityIcon },
   { name: 'Cockpit', href: '/cockpit', icon: Activity },
   { name: 'Brain', href: '/brain', icon: Brain },
+  { name: 'NPMR Cross-Section', href: '/npmr', icon: InfinityIcon },
   { name: 'Compute', href: '/compute', icon: Cpu },
   { name: 'Connections', href: '/connections', icon: Cable },
   { name: 'Syncs', href: '/syncs', icon: FolderSync },

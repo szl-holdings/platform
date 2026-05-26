@@ -18,6 +18,7 @@ import Settings from '@/pages/settings';
 import ConvergentSync from '@/pages/convergent-sync';
 import CodexLoop from '@/pages/codex-loop';
 import OuroborosPage from '@/pages/ouroboros';
+import NpmrCrossSectionPage from '@/pages/npmr';
 import AmaruThesisPage from '@/pages/thesis';
 import BrainPage from '@/pages/brain';
 import ConduitSigil from '@/pages/sigil';
@@ -84,6 +85,7 @@ function AppContent() {
         <Route path="/convergent-sync" component={ConvergentSync} />
         <Route path="/codex-loop" component={CodexLoop} />
         <Route path="/ouroboros" component={OuroborosPage} />
+        <Route path="/npmr" component={NpmrCrossSectionPage} />
         <Route path="/thesis" component={AmaruThesisPage} />
         <Route path="/brain" component={BrainPage} />
         <Route path="/sigil" component={ConduitSigil} />

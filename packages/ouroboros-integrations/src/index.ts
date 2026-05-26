@@ -289,3 +289,15 @@ export {
   type LutarV7Result,
   type EvaluateAllInput,
 } from "./lutar-formulas.js";
+
+export {
+  NPMR_STRATA,
+  NPMR_EDGES,
+  DEFAULT_KAPPA11_BAND,
+  crossSection as npmrCrossSection,
+  computeKappa11,
+  type NpmrStratum,
+  type NpmrCrossSection,
+  type Kappa11Input,
+  type Kappa11Result,
+} from "./npmr-cosmology.js";
