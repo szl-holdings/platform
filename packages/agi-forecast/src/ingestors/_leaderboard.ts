@@ -65,10 +65,10 @@ export function parseLeaderboardMaxFraction(jsonText: string): number {
 
 /**
  * Structured leaderboard ingestor — reads a pinned JSON snapshot and reports
- * the best documented score as a [0, 1] fraction. Mirrors the
- * `ingestBenchmarkReadmeFraction` shape (same `IngestResult` contract) but
- * draws from explicitly maintained data instead of regex-scanning README
- * prose, so the gauge cannot drift on upstream copy edits.
+ * the best documented score as a [0, 1] fraction. Returns the same
+ * `IngestResult` contract as the other ingestors, but draws from explicitly
+ * maintained data rather than scraping upstream prose, so the gauge cannot
+ * drift on README copy edits.
  *
  * @param name      gauge id (for error messages)
  * @param sourceUrl human-readable provenance string recorded on the receipt
