@@ -22,7 +22,8 @@ export type FormulaDomain =
   | 'evolution'
   | 'invariant'
   | 'physics'
-  | 'arbitrage';
+  | 'arbitrage'
+  | 'signal-processing';
 
 export interface FormulaProvenance {
   thesisDoc: string;
@@ -115,6 +116,38 @@ export const FORMULA_REGISTRY: readonly FormulaSpec<any, any>[] = [
       'artifacts/sentra/src/brain/lib/proof.ts',
       'artifacts/a11oy/src/pages/ProofLedger.tsx',
       'artifacts/api-server/src/routes/ouroboros.ts',
+    ],
+  },
+
+  // ─── Signal-processing primitives (Lean-formalised) ─────────────────
+  {
+    id: 'null-space-projection',
+    name: 'Null-space projection coexistence',
+    domain: 'signal-processing',
+    version: '1.0.0',
+    description:
+      'For a channel map A and a projector P into ker(A), every projected waveform satisfies A(P v) = 0 — the radar/comms coexistence post-condition.',
+    provenance: {
+      thesisDoc: 'v10-canonical.md',
+      thesisSection: '§3.1 (Connection primitive — null-space coexistence)',
+      thesisVersion: 'v10',
+      equation: 'A · P = 0   ⇒   ∀v.  A (P v) = 0',
+      intent:
+        'Make the radar/comms null-space-projection post-condition checkable both numerically (TS shim) and formally (Lean lemma).',
+      citations: [
+        'Sodagari, Khawar, Clancy, McGwier — A Projection-Based Approach for Radar and Telecommunication Systems Coexistence (IEEE Globecom 2012)',
+        'packages/lean-formulas/Connection/NullSpace.lean',
+        'packages/agi-forecast/src/null-space.ts',
+      ],
+    },
+    parameters: [],
+    impl: ({ Av }: { Av: readonly number[] }) =>
+      Av.every((x) => Math.abs(x) < 1e-9),
+    inputShape: '{ Av: number[]  // A·(P v) sampled numerically }',
+    outputShape: 'boolean (true if post-condition holds within 1e-9)',
+    consumers: [
+      'packages/agi-forecast/src/null-space.ts',
+      'packages/lean-formulas/Connection/NullSpace.lean',
     ],
   },
 

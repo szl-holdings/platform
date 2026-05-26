@@ -1,2 +1,3 @@
 - [Replit GitHub OAuth token lacks workflow scope, but env has one](github-token-workflow-scope.md) — integration token can't touch .github/workflows/*.yml; use the `GH_WORKFLOW_TOKEN` env var (already set in this project) for those merges.
 - [Mathlib builds don't fit in a session](lean-mathlib-build-cost.md) — `require mathlib` pulls hundreds of MB and a multi-hour compile; treat lean as one-shot CI, not a live workflow.
+- [packages/lean-formulas builds pure-Lean-4](lean-formulas-pure-core.md) — mathlib dropped on purpose; `scripts/check-lean-build.sh` is the green validation; restoring mathlib is a two-edit revert documented in the package README.
