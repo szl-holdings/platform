@@ -207,6 +207,7 @@ const NAV_SECTIONS: NavSection[] = [
       { path: '/detector-framework', label: 'Detector Framework', icon: Target, comp: L(() => import('@/pages/detector-framework')) },
       { path: '/action-queue', label: 'Action Queue', icon: Zap, comp: L(() => import('@/pages/action-queue')) },
       { path: '/forensics', label: 'Forensics Timeline', icon: Microscope, comp: L(() => import('@/pages/forensics-timeline')) },
+      { path: '/agent-traffic', label: 'Agent Traffic Forensics', icon: Microscope, comp: L(() => import('@/pages/agent-traffic-forensics')) },
       { path: '/deception-grid', label: 'Deception Grid', icon: Filter, comp: L(() => import('@/pages/deception-grid')) },
       { path: '/identity-threat', label: 'Identity Threat', icon: Fingerprint, comp: L(() => import('@/pages/identity-threat')) },
       { path: '/identity-blast-radius', label: 'Identity Blast Radius', icon: ShieldAlert, comp: L(() => import('@/pages/identity-blast-radius')) },

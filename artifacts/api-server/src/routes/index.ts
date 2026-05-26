@@ -289,6 +289,11 @@ router.use(lazyMatch("/sentra/threat-feeds", () => import("./sentra-threat-feeds
 // adversary-replay simulator. Monte Carlo, drift monitors, model registry.
 router.use(lazyMatch("/sentra/ml", () => import("./sentra-ml-scoring"), "sentra-ml-scoring"));
 
+// Sentra Agent Traffic Forensics — mitmproxy-style introspection of
+// agent ↔ tool calls. Mocked streaming source today; live capture deferred
+// (see docs/ingestion/sentra-introspection.md).
+router.use(lazyMatch("/sentra/agent-traffic", () => import("./sentra-agent-traffic"), "sentra-agent-traffic"));
+
 // Sentra A11oy Integration — tool registry, PCE-gated invocations, Healthcare
 // case study, Prism Bus event stream.
 router.use(lazyMatch("/sentra/a11oy", () => import("./sentra-a11oy"), "sentra-a11oy"));
