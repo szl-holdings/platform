@@ -882,3 +882,335 @@ describe('PRAXISMcpServer apps registry', () => {
     expect(proofChain).toHaveLength(0);
   });
 });
+
+describe('PRAXISMcpServer sampling governance', () => {
+  const tenantContext: TenantContext = {
+    tenantId: 'tenant-42',
+    orgId: 7,
+    userId: 99,
+    roles: ['operator'],
+    domain: 'rosie',
+  };
+
+  const sampleMessages = [
+    { role: 'user' as const, content: { type: 'text' as const, text: 'hi' } },
+    { role: 'user' as const, content: { type: 'text' as const, text: 'again' } },
+  ];
+
+  function stubCreateMessage(
+    server: PRAXISMcpServer,
+    impl: (params: unknown) => Promise<unknown>,
+  ): ReturnType<typeof vi.fn> {
+    const fn = vi.fn(impl);
+    (server.server as unknown as { createMessage: unknown }).createMessage = fn;
+    return fn;
+  }
+
+  it('requestSampling happy path returns the assistant message and writes a sampling_request success entry', async () => {
+    const proofChain: ProofChainEntry[] = [];
+    const proofChainWriter: ProofChainWriter = vi.fn(async (entry) => {
+      proofChain.push(entry);
+    });
+    const server = new PRAXISMcpServer({
+      name: 'test',
+      version: '0.0.1',
+      tenantContext,
+      proofChainWriter,
+      enableSampling: true,
+    });
+
+    const createMessage = stubCreateMessage(server, async () => ({
+      content: { type: 'text', text: 'hello back' },
+      model: 'claude-sonnet',
+      stopReason: 'endTurn',
+    }));
+
+    const result = await server.requestSampling({
+      messages: sampleMessages,
+      maxTokens: 256,
+    });
+    await flushAsync();
+
+    expect(createMessage).toHaveBeenCalledTimes(1);
+    expect(result).toEqual({
+      role: 'assistant',
+      content: { type: 'text', text: 'hello back' },
+      model: 'claude-sonnet',
+      stopReason: 'endTurn',
+    });
+
+    expect(proofChain).toHaveLength(1);
+    expect(proofChain[0]).toMatchObject({
+      entryType: 'sampling_request',
+      tenantId: 'tenant-42',
+      userId: 99,
+      outcome: 'success',
+      args: { maxTokens: 256, messageCount: 2 },
+    });
+    expect(typeof proofChain[0]!.latencyMs).toBe('number');
+    expect(proofChain[0]!.error).toBeUndefined();
+  });
+
+  it('requestSampling writes a sampling_request error entry and rethrows when createMessage throws', async () => {
+    const proofChain: ProofChainEntry[] = [];
+    const proofChainWriter: ProofChainWriter = vi.fn(async (entry) => {
+      proofChain.push(entry);
+    });
+    const server = new PRAXISMcpServer({
+      name: 'test',
+      version: '0.0.1',
+      tenantContext,
+      proofChainWriter,
+      enableSampling: true,
+    });
+
+    stubCreateMessage(server, async () => {
+      throw new Error('upstream model unavailable');
+    });
+
+    await expect(
+      server.requestSampling({ messages: sampleMessages, maxTokens: 128 }),
+    ).rejects.toThrow('upstream model unavailable');
+    await flushAsync();
+
+    expect(proofChain).toHaveLength(1);
+    expect(proofChain[0]).toMatchObject({
+      entryType: 'sampling_request',
+      tenantId: 'tenant-42',
+      userId: 99,
+      outcome: 'error',
+      error: 'upstream model unavailable',
+    });
+    expect(typeof proofChain[0]!.latencyMs).toBe('number');
+    expect(proofChain[0]!.args).toBeUndefined();
+  });
+
+  it('requestSampling blocked by Guardian policy never calls createMessage and writes a sampling_request blocked entry', async () => {
+    const proofChain: ProofChainEntry[] = [];
+    const proofChainWriter: ProofChainWriter = vi.fn(async (entry) => {
+      proofChain.push(entry);
+    });
+    const policyEvaluator: PolicyEvaluator = vi.fn(async () => ({
+      allowed: false,
+      reason: 'system prompt flagged',
+    }));
+    const server = new PRAXISMcpServer({
+      name: 'test',
+      version: '0.0.1',
+      tenantContext,
+      policyEvaluator,
+      proofChainWriter,
+      enableSampling: true,
+    });
+
+    const createMessage = stubCreateMessage(server, async () => ({
+      content: { type: 'text', text: 'should not run' },
+      model: 'x',
+    }));
+
+    await expect(
+      server.requestSampling({
+        messages: sampleMessages,
+        systemPrompt: 'do something sensitive',
+        maxTokens: 64,
+      }),
+    ).rejects.toThrow(/Sampling blocked by Guardian policy: system prompt flagged/);
+    await flushAsync();
+
+    expect(createMessage).not.toHaveBeenCalled();
+    expect(policyEvaluator).toHaveBeenCalledWith(
+      'sampling/createMessage',
+      { systemPrompt: 'do something sensitive', maxTokens: 64 },
+      expect.objectContaining({ tenantId: 'tenant-42', userId: 99 }),
+    );
+
+    expect(proofChain).toHaveLength(1);
+    expect(proofChain[0]).toMatchObject({
+      entryType: 'sampling_request',
+      tenantId: 'tenant-42',
+      userId: 99,
+      outcome: 'blocked',
+      error: 'system prompt flagged',
+      args: { maxTokens: 64, messageCount: 2 },
+    });
+    expect(typeof proofChain[0]!.latencyMs).toBe('number');
+  });
+});
+
+describe('PRAXISMcpServer elicitation governance', () => {
+  const tenantContext: TenantContext = {
+    tenantId: 'tenant-42',
+    orgId: 7,
+    userId: 99,
+    roles: ['operator'],
+    domain: 'rosie',
+  };
+
+  const requestedSchema = {
+    confirm: { type: 'boolean', description: 'approve?' },
+  };
+
+  function stubElicitInput(
+    server: PRAXISMcpServer,
+    impl: (params: unknown) => Promise<unknown>,
+  ): ReturnType<typeof vi.fn> {
+    const fn = vi.fn(impl);
+    (server.server as unknown as { elicitInput: unknown }).elicitInput = fn;
+    return fn;
+  }
+
+  it('requestElicitation accept writes pending_approval then success proof-chain entries', async () => {
+    const proofChain: ProofChainEntry[] = [];
+    const proofChainWriter: ProofChainWriter = vi.fn(async (entry) => {
+      proofChain.push(entry);
+    });
+    const server = new PRAXISMcpServer({
+      name: 'test',
+      version: '0.0.1',
+      tenantContext,
+      proofChainWriter,
+      enableElicitation: true,
+    });
+
+    const elicitInput = stubElicitInput(server, async () => ({
+      action: 'accept',
+      content: { confirm: true },
+    }));
+
+    const result = await server.requestElicitation({
+      message: 'Approve transfer?',
+      requestedSchema,
+      elicitationType: 'approval',
+    });
+    await flushAsync();
+
+    expect(elicitInput).toHaveBeenCalledTimes(1);
+    expect(elicitInput.mock.calls[0]![0]).toMatchObject({
+      message: 'Approve transfer?',
+      requestedSchema: { type: 'object', properties: requestedSchema },
+    });
+    expect(result).toEqual({ action: 'accept', content: { confirm: true } });
+
+    expect(proofChain).toHaveLength(2);
+    expect(proofChain[0]).toMatchObject({
+      entryType: 'elicitation',
+      tenantId: 'tenant-42',
+      userId: 99,
+      outcome: 'pending_approval',
+      args: { message: 'Approve transfer?', elicitationType: 'approval' },
+    });
+    expect(proofChain[0]!.latencyMs).toBeUndefined();
+    expect(proofChain[1]).toMatchObject({
+      entryType: 'elicitation',
+      tenantId: 'tenant-42',
+      userId: 99,
+      outcome: 'success',
+      args: { action: 'accept' },
+    });
+    expect(typeof proofChain[1]!.latencyMs).toBe('number');
+  });
+
+  it('requestElicitation deny writes pending_approval then blocked proof-chain entries', async () => {
+    const proofChain: ProofChainEntry[] = [];
+    const proofChainWriter: ProofChainWriter = vi.fn(async (entry) => {
+      proofChain.push(entry);
+    });
+    const server = new PRAXISMcpServer({
+      name: 'test',
+      version: '0.0.1',
+      tenantContext,
+      proofChainWriter,
+      enableElicitation: true,
+    });
+
+    stubElicitInput(server, async () => ({ action: 'deny' }));
+
+    const result = await server.requestElicitation({
+      message: 'Approve transfer?',
+      requestedSchema,
+    });
+    await flushAsync();
+
+    expect(result).toEqual({ action: 'deny', content: undefined });
+    expect(proofChain).toHaveLength(2);
+    expect(proofChain[0]!.outcome).toBe('pending_approval');
+    expect(proofChain[1]).toMatchObject({
+      entryType: 'elicitation',
+      outcome: 'blocked',
+      args: { action: 'deny' },
+    });
+  });
+
+  it('requestElicitation cancel writes pending_approval then blocked proof-chain entries', async () => {
+    const proofChain: ProofChainEntry[] = [];
+    const proofChainWriter: ProofChainWriter = vi.fn(async (entry) => {
+      proofChain.push(entry);
+    });
+    const server = new PRAXISMcpServer({
+      name: 'test',
+      version: '0.0.1',
+      tenantContext,
+      proofChainWriter,
+      enableElicitation: true,
+    });
+
+    stubElicitInput(server, async () => ({ action: 'cancel' }));
+
+    const result = await server.requestElicitation({
+      message: 'Approve transfer?',
+      requestedSchema,
+    });
+    await flushAsync();
+
+    expect(result.action).toBe('cancel');
+    expect(proofChain).toHaveLength(2);
+    expect(proofChain[0]!.outcome).toBe('pending_approval');
+    expect(proofChain[1]).toMatchObject({
+      entryType: 'elicitation',
+      outcome: 'blocked',
+      args: { action: 'cancel' },
+    });
+  });
+
+  it('requestElicitation writes pending_approval then error proof-chain entries and rethrows when elicitInput throws', async () => {
+    const proofChain: ProofChainEntry[] = [];
+    const proofChainWriter: ProofChainWriter = vi.fn(async (entry) => {
+      proofChain.push(entry);
+    });
+    const server = new PRAXISMcpServer({
+      name: 'test',
+      version: '0.0.1',
+      tenantContext,
+      proofChainWriter,
+      enableElicitation: true,
+    });
+
+    stubElicitInput(server, async () => {
+      throw new Error('client disconnected');
+    });
+
+    await expect(
+      server.requestElicitation({
+        message: 'Approve transfer?',
+        requestedSchema,
+        elicitationType: 'confirmation',
+      }),
+    ).rejects.toThrow('client disconnected');
+    await flushAsync();
+
+    expect(proofChain).toHaveLength(2);
+    expect(proofChain[0]).toMatchObject({
+      entryType: 'elicitation',
+      outcome: 'pending_approval',
+      args: { message: 'Approve transfer?', elicitationType: 'confirmation' },
+    });
+    expect(proofChain[1]).toMatchObject({
+      entryType: 'elicitation',
+      tenantId: 'tenant-42',
+      userId: 99,
+      outcome: 'error',
+      error: 'client disconnected',
+    });
+    expect(typeof proofChain[1]!.latencyMs).toBe('number');
+  });
+});

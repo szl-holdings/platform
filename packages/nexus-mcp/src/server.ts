@@ -771,6 +771,17 @@ export class PRAXISMcpServer {
         policyResult = { allowed: true };
       }
       if (!policyResult.allowed) {
+        const latencyMs = Date.now() - start;
+        void this._writeProofChain({
+          entryType: 'sampling_request',
+          tenantId: ctx.tenantId,
+          userId: ctx.userId,
+          args: { maxTokens: params.maxTokens, messageCount: params.messages.length },
+          outcome: 'blocked',
+          latencyMs,
+          error: policyResult.reason,
+          timestamp: new Date().toISOString(),
+        });
         throw new Error(`Sampling blocked by Guardian policy: ${policyResult.reason ?? 'policy denied'}`);
       }
     }
