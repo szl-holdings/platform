@@ -38,7 +38,15 @@ is produced by `../../scripts/run-cluster-latency.sh`, which:
 
 That script must run on actual t3.medium EC2 hardware to satisfy the
 acceptance criterion as written. The plumbing is in place; the run itself
-is gated on hardware access.
+is gated on AWS credentials being available.
+
+To execute the certifying run end-to-end (provision → run → upload → tear
+down), use `../../scripts/run-on-ec2-t3-medium.sh`. It requires
+`AWS_REGION`, `S3_BUCKET`, and standard AWS credentials in the
+environment, and it always tears down the instance, key pair, and
+security group on EXIT (including failures). The same path is wired into
+`.github/workflows/lambda-floor-cluster.yml` for one-click manual dispatch
+once the matching repo secrets are added.
 
 ## Decomposition the bundle relies on
 
@@ -62,6 +70,12 @@ T_admission_e2e  =  T_apiserver  +  T_network  +  T_gate_cpu
 # CPU portion (this directory)
 node examples/lambda-floor/scripts/measure-evaluator-cpu.mjs
 
-# End-to-end (requires docker + k3d + kubectl + node, ideally on t3.medium)
+# End-to-end on whatever host you're on (requires docker + k3d + kubectl + node)
 bash examples/lambda-floor/scripts/run-cluster-latency.sh
+
+# Certifying end-to-end on a one-shot real t3.medium (provision + run + S3 +
+# teardown). Requires AWS creds + a writable S3 bucket; see the script
+# header for the full env list.
+AWS_REGION=us-east-1 S3_BUCKET=my-bucket \
+  bash examples/lambda-floor/scripts/run-on-ec2-t3-medium.sh
 ```
