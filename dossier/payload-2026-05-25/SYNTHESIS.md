@@ -16,14 +16,14 @@ table — no further re-reading of the dossier should be necessary.
 | 1 | Sodagari, Khawar, Clancy, McGwier — *Projection Based Approach for Radar/Comms Coexistence* (Globecom 2012) | Null-space projection annihilates the radar channel matrix        | Connection    | `packages/lean-formulas/Connection/NullSpace.lean` + `packages/agi-forecast/src/null-space.ts` (+ `artifacts/api-server/src/routes/vessels-coexistence.ts` in Phase 4) | 2, 4   |
 | 2 | Fleming, McGwier — *Regular Perturbation Expansion in Nonlinear Filtering* (1983)                | O(ε²) residual bound for first-order forecast linearisation       | Forecast      | `packages/lean-formulas/Forecast/Perturbation.lean` + `packages/agi-forecast/src/perturbation.ts` | 2      |
 | 3 | Kawamoto, McGwier — *Rigorous Moment-Based AMC* (GNU Radio Conf 2016)                            | Moment ↔ Hermite (Gram–Charlier A) bridge for modulation fingerprints | Substance     | `packages/lean-formulas/Substance/GCA.lean` + `packages/agi-forecast/src/moments.ts` | 2      |
-| 4 | Clark, Ernst, McGwier — *AMC via Waveform Signature* (arXiv:2404.01119)                          | Signature distance as routing decision metric                     | Transformation | `packages/agi-forecast/src/waveform-signature.ts` (planned)     | 4      |
+| 4 | Clark, Ernst, McGwier — *AMC via Waveform Signature* (arXiv:2404.01119)                          | Signature distance as routing decision metric                     | Transformation | `packages/agi-forecast/src/waveform-signature.ts` (shipped)     | 4      |
 | 5 | Henderson, McGwier — *Uniqueness/Existence/Optimality for 4th-Order Lipschitz Equations* (J. Diff. Eq. 1987) | Uniqueness on 4-tuple physiology nodes (`L < 384/(b−a)⁴`)         | Anatomy       | `packages/lean-formulas/Anatomy/Boundary.lean` + `packages/agi-forecast/src/anatomy-boundary.ts` | 2      |
 | 6 | Kannan, Ravi — *Second-Order Statistical AMC with SVM/KNN*                                       | Baseline comparator only                                          | (comparator)  | Used in Phase 6 test harness, no new primitive                  | 6      |
 | 7 | AlloyScape — *Exploring Frameworks for the Continuum Hypothesis* (internal)                      | Narrative framing                                                 | —             | Narrative section below; no code surface                         | 1      |
-| 8 | Stanford Montanari — *High-Dimensional Statistics, Part A*                                       | Concentration / covariance bounds for gauge state                 | Substance     | `packages/agi-forecast/src/concentration.ts` (planned)          | 4      |
-| 9 | VectifyAI / PageIndex                                                                            | Doc-tree retrieval                                                | Anatomy (ops) | `packages/payload/src/page-index.ts` (planned)                  | 4      |
-| 10 | thestacks.org Glass-Box UMAP                                                                    | Interpretable embeddings for operator console                     | (viz)         | `artifacts/conduit/src/pages/operator-state-map.tsx` (planned)  | 4      |
-| 11 | Army CDR Vol 11 No 3 — Dotterrer                                                                 | Cyber resilience taxonomy refresh                                 | (Sentra)      | `artifacts/sentra/src/lib/resilience-rubric.ts` (refactor)      | 4      |
+| 8 | Stanford Montanari — *High-Dimensional Statistics, Part A*                                       | Concentration / covariance bounds for gauge state                 | Substance     | `packages/agi-forecast/src/concentration.ts` (shipped)          | 4      |
+| 9 | VectifyAI / PageIndex                                                                            | Doc-tree retrieval                                                | Anatomy (ops) | `packages/payload/src/page-index.ts` (shipped)                  | 4      |
+| 10 | thestacks.org Glass-Box UMAP                                                                    | Interpretable embeddings for operator console                     | (viz)         | `artifacts/conduit/src/pages/operator-state-map.tsx` (shipped)  | 4      |
+| 11 | Army CDR Vol 11 No 3 — Dotterrer                                                                 | Cyber resilience taxonomy refresh                                 | (Sentra)      | `artifacts/sentra/src/lib/resilience-rubric.ts` (shipped)       | 4      |
 | 12 | Springer s00521-026-12120-0 (NC&A 2026)                                                          | Secondary reference                                               | —             | Narrative only                                                  | 1      |
 | 13 | arXiv:2605.09073                                                                                 | Secondary reference                                               | —             | Narrative only                                                  | 1      |
 | 14 | Wikipedia — Hilbert's problems                                                                   | Narrative framing                                                 | —             | Narrative only                                                  | 1      |
@@ -66,6 +66,8 @@ surface and is excluded from Phase 2's Lean targets.
 
 ## Companion mapping
 
-A machine-readable `MAPPING.json` is intentionally deferred to Phase 4 when
-the remaining rows (4, 8, 9, 10, 11) ship their target files. The table above
-is the authoritative source until then.
+A machine-readable companion lives at `MAPPING.json` in this directory. It is
+generated from the table above and pins each row's source, contribution,
+primitive, target file paths, phase numbers, and shipped/planned/narrative-only
+status. Phase 4 closed rows 4, 8, 9, 10, and 11; the remaining `planned` row
+is the Phase 6 comparator (row 6).

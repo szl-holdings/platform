@@ -1,0 +1,155 @@
+{
+  "$schema_version": "1",
+  "generated_from": "dossier/payload-2026-05-25/SYNTHESIS.md",
+  "rows": [
+    {
+      "id": 1,
+      "source": "Sodagari, Khawar, Clancy, McGwier — Projection Based Approach for Radar/Comms Coexistence (Globecom 2012)",
+      "contribution": "Null-space projection annihilates the radar channel matrix",
+      "primitive": "Connection",
+      "target_files": [
+        "packages/lean-formulas/Connection/NullSpace.lean",
+        "packages/agi-forecast/src/null-space.ts",
+        "artifacts/api-server/src/routes/vessels-coexistence.ts"
+      ],
+      "phases": [2, 4],
+      "status": "shipped"
+    },
+    {
+      "id": 2,
+      "source": "Fleming, McGwier — Regular Perturbation Expansion in Nonlinear Filtering (1983)",
+      "contribution": "O(ε²) residual bound for first-order forecast linearisation",
+      "primitive": "Forecast",
+      "target_files": [
+        "packages/lean-formulas/Forecast/Perturbation.lean",
+        "packages/agi-forecast/src/perturbation.ts"
+      ],
+      "phases": [2],
+      "status": "shipped"
+    },
+    {
+      "id": 3,
+      "source": "Kawamoto, McGwier — Rigorous Moment-Based AMC (GNU Radio Conf 2016)",
+      "contribution": "Moment ↔ Hermite (Gram–Charlier A) bridge for modulation fingerprints",
+      "primitive": "Substance",
+      "target_files": [
+        "packages/lean-formulas/Substance/GCA.lean",
+        "packages/agi-forecast/src/moments.ts"
+      ],
+      "phases": [2],
+      "status": "shipped"
+    },
+    {
+      "id": 4,
+      "source": "Clark, Ernst, McGwier — AMC via Waveform Signature (arXiv:2404.01119)",
+      "contribution": "Signature distance as routing decision metric",
+      "primitive": "Transformation",
+      "target_files": [
+        "packages/agi-forecast/src/waveform-signature.ts"
+      ],
+      "phases": [4],
+      "status": "shipped"
+    },
+    {
+      "id": 5,
+      "source": "Henderson, McGwier — Uniqueness/Existence/Optimality for 4th-Order Lipschitz Equations (J. Diff. Eq. 1987)",
+      "contribution": "Uniqueness on 4-tuple physiology nodes (L < 384/(b−a)^4)",
+      "primitive": "Anatomy",
+      "target_files": [
+        "packages/lean-formulas/Anatomy/Boundary.lean",
+        "packages/agi-forecast/src/anatomy-boundary.ts"
+      ],
+      "phases": [2],
+      "status": "shipped"
+    },
+    {
+      "id": 6,
+      "source": "Kannan, Ravi — Second-Order Statistical AMC with SVM/KNN",
+      "contribution": "Baseline comparator only",
+      "primitive": "(comparator)",
+      "target_files": [],
+      "phases": [6],
+      "status": "planned"
+    },
+    {
+      "id": 7,
+      "source": "AlloyScape — Exploring Frameworks for the Continuum Hypothesis (internal)",
+      "contribution": "Narrative framing",
+      "primitive": null,
+      "target_files": [],
+      "phases": [1],
+      "status": "narrative-only"
+    },
+    {
+      "id": 8,
+      "source": "Stanford Montanari — High-Dimensional Statistics, Part A",
+      "contribution": "Concentration / covariance bounds for gauge state",
+      "primitive": "Substance",
+      "target_files": [
+        "packages/agi-forecast/src/concentration.ts"
+      ],
+      "phases": [4],
+      "status": "shipped"
+    },
+    {
+      "id": 9,
+      "source": "VectifyAI / PageIndex",
+      "contribution": "Doc-tree retrieval",
+      "primitive": "Anatomy (ops)",
+      "target_files": [
+        "packages/payload/src/page-index.ts"
+      ],
+      "phases": [4],
+      "status": "shipped"
+    },
+    {
+      "id": 10,
+      "source": "thestacks.org Glass-Box UMAP",
+      "contribution": "Interpretable embeddings for operator console",
+      "primitive": "(viz)",
+      "target_files": [
+        "artifacts/conduit/src/pages/operator-state-map.tsx"
+      ],
+      "phases": [4],
+      "status": "shipped"
+    },
+    {
+      "id": 11,
+      "source": "Army CDR Vol 11 No 3 — Dotterrer",
+      "contribution": "Cyber resilience taxonomy refresh",
+      "primitive": "(Sentra)",
+      "target_files": [
+        "artifacts/sentra/src/lib/resilience-rubric.ts"
+      ],
+      "phases": [4],
+      "status": "shipped"
+    },
+    {
+      "id": 12,
+      "source": "Springer s00521-026-12120-0 (NC&A 2026)",
+      "contribution": "Secondary reference",
+      "primitive": null,
+      "target_files": [],
+      "phases": [1],
+      "status": "narrative-only"
+    },
+    {
+      "id": 13,
+      "source": "arXiv:2605.09073",
+      "contribution": "Secondary reference",
+      "primitive": null,
+      "target_files": [],
+      "phases": [1],
+      "status": "narrative-only"
+    },
+    {
+      "id": 14,
+      "source": "Wikipedia — Hilbert's problems",
+      "contribution": "Narrative framing",
+      "primitive": null,
+      "target_files": [],
+      "phases": [1],
+      "status": "narrative-only"
+    }
+  ]
+}
