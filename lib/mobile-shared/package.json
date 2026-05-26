@@ -76,7 +76,7 @@
     "expo-local-authentication": "~17.0.8",
     "expo-secure-store": "~15.0.8",
     "react-native-keyboard-controller": "1.18.5",
-    "react-native-safe-area-context": "~5.6.0"
+    "react-native-safe-area-context": "~5.8.0"
   },
   "dependencies": {
     "@tanstack/query-async-storage-persister": "^5.100.9",
