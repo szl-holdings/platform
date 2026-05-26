@@ -6,6 +6,9 @@
 
 This index summarizes the unresolved findings catalogued in each per-artifact audit so a downstream pass can pick them up without re-walking the codebase. See [`INVESTOR_DEMO_PATH.md`](./INVESTOR_DEMO_PATH.md) for the canonical 5-minute walkthrough.
 
+## Doctrine
+- [`trust-doctrine.md`](./trust-doctrine.md) — Names the long-arc trust problem (flyxion *Trust Apocalypse*, Yale finding aid MS 1028) and maps each named risk to a specific element of the audit chain below. Read this first; the rest of the corpus is the response.
+
 ## Reports
 
 | Artifact | Report | Tier 1 open | Tier 2 open | Tier 3 open | Fixes applied this pass |
