@@ -1,6 +1,7 @@
 packages:
   - apps/*
   - artifacts/*
+  - artifacts/a11oy/packages/*
   - '!artifacts/imperium'
   - '!artifacts/stephen-site'
   - lib/*

@@ -7,11 +7,7 @@
     "noEmit": false,
     "module": "esnext",
     "moduleResolution": "bundler",
-    "verbatimModuleSyntax": false,
-    "baseUrl": ".",
-    "paths": {
-      "@a11oy/connection": ["../a11oy-connection/dist/index.d.ts"]
-    }
+    "verbatimModuleSyntax": false
   },
   "include": ["src/**/*.ts"],
   "exclude": ["src/pesher_renderer.ts"]
