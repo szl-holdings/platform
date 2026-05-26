@@ -23,41 +23,17 @@ interface DeepSeekEnvelope {
   responseFormat: string;
   precisionBudget: string;
   contextBudgetTokens: number;
-  metrics: { latencyMs: number; thinkingTokens: number; answerTokens: number; costUsd: number };
+  metrics: {
+    latencyMs: number;
+    thinkingTokens: number;
+    answerTokens: number;
+    costUsd: number;
+    proofDepth: number;
+    covenantLift: number;
+  };
   covenant: { policy: string; decision: string; rationale: string };
   trustCenterRef: string | null;
   createdAt: string;
-}
-
-// Stable, deterministic per-envelope derivations. We hash the envelope id so
-// the same envelope always renders the same proof depth / covenant lift —
-// nothing here is random, and the formula is documented inline so an
-// operator can audit it.
-function hashTo01(seed: string, salt: number): number {
-  let h = 2166136261 ^ salt;
-  for (let i = 0; i < seed.length; i++) {
-    h = Math.imul(h ^ seed.charCodeAt(i), 16777619);
-  }
-  return ((h >>> 0) % 10000) / 10000;
-}
-
-function deriveProofDepth(env: DeepSeekEnvelope): number {
-  // Base depth per autonomy mode + jitter from envelope id, +1 hop for
-  // policies that emit a trace, +1 hop per ~800 thinking tokens.
-  const base = env.mode === 'think-max' ? 9 : env.mode === 'think-high' ? 6 : 3;
-  const jitter = Math.floor(hashTo01(env.envelopeId, 1) * 3);
-  const traceBonus = env.covenant.decision === 'permit-with-trace' ? 1 : 0;
-  const thinkBonus = Math.min(3, Math.floor(env.metrics.thinkingTokens / 800));
-  return base + jitter + traceBonus + thinkBonus;
-}
-
-function deriveCovenantLift(env: DeepSeekEnvelope): number {
-  // 4..19 pp lift, weighted up by think-* modes and trace-emitting policies.
-  // Refused decisions report 0 lift — nothing was permitted to begin with.
-  if (env.covenant.decision === 'refuse') return 0;
-  const r = hashTo01(env.envelopeId, 2);
-  const modeWeight = env.mode === 'think-max' ? 6 : env.mode === 'think-high' ? 3 : 0;
-  return Number((4 + r * 9 + modeWeight).toFixed(1));
 }
 
 const DECISION_STYLE: Record<string, { color: string; bg: string; label: string }> = {
@@ -138,8 +114,8 @@ function DeepSeekReasoningPanel() {
               </thead>
               <tbody>
                 {envelopes.map((env) => {
-                  const depth = deriveProofDepth(env);
-                  const lift = deriveCovenantLift(env);
+                  const depth = env.metrics.proofDepth;
+                  const lift = env.metrics.covenantLift;
                   const style = DECISION_STYLE[env.covenant.decision] ?? DECISION_STYLE.permit;
                   const when = (() => {
                     try { return new Date(env.createdAt).toISOString().replace('T', ' ').slice(0, 19) + 'Z'; }
