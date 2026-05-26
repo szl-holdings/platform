@@ -48,6 +48,7 @@
   },
   "dependencies": {
     "@szl-holdings/formulas": "workspace:*",
+    "@szl-holdings/lambda-math": "workspace:*",
     "@szl/alloy": "workspace:*",
     "@szl-holdings/design-system": "workspace:*",
     "@szl-holdings/graphql-client": "workspace:*",

@@ -9,11 +9,18 @@
  *     ANTICIPATE · WITHSTAND · RECOVER · ADAPT · EVOLVE
  *
  * into a typed scoring rubric Sentra's cockpit can grade an estate against.
- * Each stage carries a weight (sums to 1) and a 0-100 score; the composite
- * is the weighted mean, clipped to [0, 100]. A maturity tier is derived
- * from the composite for badge rendering. Stages are intentionally evaluated
- * in the dossier order so the UI always tells the same story top-to-bottom.
+ * Each stage carries an Egyptian-fraction weight (Σ = 1) and a 0-100 score.
+ * The composite is the canonical Λ-operator — the weighted geometric mean
+ * `computeLambda` from `@szl-holdings/lambda-math` — applied to stage scores
+ * normalised into [0, 1], then scaled back to [0, 100] for badge rendering.
+ * Using Λ instead of a local weighted arithmetic mean keeps Sentra in lock-
+ * step with every other risk-scoring surface (vessels, counsel, etc.): if
+ * the formula needs to change, change it in `packages/lambda-math` and every
+ * consumer moves together. A maturity tier is derived from the composite.
+ * Stages are intentionally evaluated in the dossier order so the UI always
+ * tells the same story top-to-bottom.
  */
+import { computeLambda } from '@szl-holdings/lambda-math';
 
 export const RESILIENCE_STAGES = [
   'anticipate',
@@ -29,6 +36,13 @@ export interface StageDefinition {
   readonly stage: ResilienceStage;
   readonly label: string;
   readonly weight: number;       // ∑ weights === 1
+  /**
+   * Egyptian-fraction expression of `weight` — a sum of distinct unit
+   * fractions (or a single rational atom) that `computeLambda` parses
+   * exactly. Keeping both fields means auditors can reconstruct the
+   * weight without trusting an IEEE-754 round-trip.
+   */
+  readonly weightEgyptian: string;
   readonly description: string;
   readonly evidencePrompts: ReadonlyArray<string>;
 }
@@ -37,12 +51,25 @@ export interface StageDefinition {
  * Dotterrer weighting from the CDR essay: ANTICIPATE and WITHSTAND together
  * carry ≈ 50% of the rubric, with the remaining 50% distributed across the
  * three recovery / learning stages.
+ *
+ * Weights in Egyptian-fraction form (each is a sum of distinct unit
+ * fractions, so the rubric's audit story is `decomposeUnitFraction`-style
+ * inspectable):
+ *
+ *     anticipate = 1/4               (= 5/20)
+ *     withstand  = 1/4               (= 5/20)
+ *     recover    = 1/5               (= 4/20)
+ *     adapt      = 1/10 + 1/20       (= 3/20)
+ *     evolve     = 1/10 + 1/20       (= 3/20)
+ *     —————————————————————————————
+ *     Σ          = 20/20 = 1
  */
 export const RESILIENCE_RUBRIC: ReadonlyArray<StageDefinition> = Object.freeze([
   Object.freeze({
     stage: 'anticipate',
     label: 'Anticipate',
     weight: 0.25,
+    weightEgyptian: '1/4',
     description:
       'Threat-informed posture: continuous intel, attack-surface mapping, and pre-positioned playbooks.',
     evidencePrompts: Object.freeze([
@@ -55,6 +82,7 @@ export const RESILIENCE_RUBRIC: ReadonlyArray<StageDefinition> = Object.freeze([
     stage: 'withstand',
     label: 'Withstand',
     weight: 0.25,
+    weightEgyptian: '1/4',
     description:
       'Continue mission delivery while under active compromise: segmentation, hardening, and graceful degradation.',
     evidencePrompts: Object.freeze([
@@ -67,6 +95,7 @@ export const RESILIENCE_RUBRIC: ReadonlyArray<StageDefinition> = Object.freeze([
     stage: 'recover',
     label: 'Recover',
     weight: 0.2,
+    weightEgyptian: '1/5',
     description:
       'Restore trusted state from verified clean backups within target RTO/RPO; certify the recovered surface.',
     evidencePrompts: Object.freeze([
@@ -79,6 +108,7 @@ export const RESILIENCE_RUBRIC: ReadonlyArray<StageDefinition> = Object.freeze([
     stage: 'adapt',
     label: 'Adapt',
     weight: 0.15,
+    weightEgyptian: '1/10+1/20',
     description:
       'Close the loop: ingest incident telemetry into controls, detections, and runbooks before the next event.',
     evidencePrompts: Object.freeze([
@@ -91,6 +121,7 @@ export const RESILIENCE_RUBRIC: ReadonlyArray<StageDefinition> = Object.freeze([
     stage: 'evolve',
     label: 'Evolve',
     weight: 0.15,
+    weightEgyptian: '1/10+1/20',
     description:
       'Reshape the doctrine: re-baseline tolerances, retire brittle controls, invest in step-change capabilities.',
     evidencePrompts: Object.freeze([
@@ -146,11 +177,12 @@ function maturityFromScore(score: number): MaturityTier {
 
 /**
  * Grade an estate against the Dotterrer rubric. Each stage score is clipped
- * to [0, 100] before weighting so out-of-range inputs cannot move the
- * composite outside the unit interval.
+ * to [0, 100] before being normalised to [0, 1] for the canonical Λ-operator
+ * (`computeLambda`), so out-of-range inputs cannot move the composite outside
+ * the unit interval and a single zero-scored stage zero-pins the rubric
+ * (axiom A2 — see `packages/lambda-math/src/lambda.ts`).
  */
 export function gradeResilience(scores: StageScores): ResilienceAssessment {
-  let composite = 0;
   let weakStage: ResilienceStage = RESILIENCE_RUBRIC[0]!.stage;
   let weakScore = Infinity;
   let strongStage: ResilienceStage = RESILIENCE_RUBRIC[0]!.stage;
@@ -164,10 +196,20 @@ export function gradeResilience(scores: StageScores): ResilienceAssessment {
     const raw = scores[def.stage];
     const s = clamp(typeof raw === 'number' && Number.isFinite(raw) ? raw : 0, 0, 100);
     normalised[def.stage] = s;
-    composite += s * def.weight;
     if (s < weakScore) { weakScore = s; weakStage = def.stage; }
     if (s > strongScore) { strongScore = s; strongStage = def.stage; }
   }
+
+  // Λ over stage scores normalised to [0, 1]; scale the result back to
+  // the rubric's 0..100 axis for badge rendering.
+  const lambda = computeLambda({
+    components: RESILIENCE_RUBRIC.map((def) => ({
+      name: def.stage,
+      weight: def.weightEgyptian,
+      score: normalised[def.stage] / 100,
+    })),
+  }).lambda;
+  const composite = lambda * 100;
 
   // Recommendation surface: surface the first prompt of every stage scoring
   // below the "defined" maturity threshold so the cockpit always has a

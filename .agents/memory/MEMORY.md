@@ -1,3 +1,5 @@
 - [Replit GitHub OAuth token lacks workflow scope, but env has one](github-token-workflow-scope.md) — integration token can't touch .github/workflows/*.yml; use the `GH_WORKFLOW_TOKEN` env var (already set in this project) for those merges.
 - [Mathlib builds don't fit in a session](lean-mathlib-build-cost.md) — `require mathlib` pulls hundreds of MB and a multi-hour compile; treat lean as one-shot CI, not a live workflow.
 - [packages/lean-formulas builds pure-Lean-4](lean-formulas-pure-core.md) — mathlib dropped on purpose; `scripts/check-lean-build.sh` is the green validation; restoring mathlib is a two-edit revert documented in the package README.
+- [Partial git clones leave phantom staged deletes](git-partial-clone-staged-deletes.md) — `--filter=blob:none` + LFS smudge failure makes `git add` of two files commit thousands of deletions; sanity-check `git status -s` is empty on a fresh clone before any commit.
+- [GitHub org 2FA enforcement silently no-ops via API](github-org-2fa-api-noop.md) — PATCH /orgs returns 200 but the field stays false on free orgs; re-read to verify, surface as manual web-UI step.
