@@ -5,6 +5,10 @@
 #   1. YAML parses for the bundle, the three zarf.yaml files, and every manifest
 #   2. Every file referenced from a zarf.yaml component (manifests + files) exists
 #   3. Bundle package names match on-disk package metadata names
+#   4. uds-mesh/cosign.pub is present and a syntactically valid P-256 PEM
+#      (the public key operators use to verify the published Zarf packages
+#      per §05 Fix A — see uds-mesh/README.md "Operator-side signature
+#      verification")
 #
 # Then, if uds-cli/zarf/kind are on PATH, runs the live validation:
 #   4. zarf package create for each of a11oy/sentra/amaru (local-build variant)
@@ -82,7 +86,38 @@ if bn != dn:
 
 sys.exit(1 if fail else 0)
 PY
-green "    static checks: OK"
+
+# (4) cosign.pub — verifies the committed public key is a valid P-256
+# PEM so operators can actually run `zarf package inspect --key cosign.pub`.
+# Falls back to a pure-Python ASN.1 sniff when openssl is unavailable.
+COSIGN_PUB="$ROOT/uds-mesh/cosign.pub"
+if [[ ! -f "$COSIGN_PUB" ]]; then
+  red "FAIL: $COSIGN_PUB is missing — operators cannot verify package signatures."
+  exit 1
+fi
+if command -v openssl >/dev/null 2>&1; then
+  CURVE="$(openssl pkey -pubin -in "$COSIGN_PUB" -text -noout 2>/dev/null \
+          | grep -oE 'ASN1 OID: [A-Za-z0-9_-]+' | head -1 | awk '{print $3}')"
+  if [[ "$CURVE" != "prime256v1" ]]; then
+    red "FAIL: $COSIGN_PUB is not a P-256 (prime256v1) PEM (got: '${CURVE:-unparseable}')."
+    red "      cosign / zarf --key expects an ECDSA P-256 public key in PEM form."
+    exit 1
+  fi
+else
+  python3 - "$COSIGN_PUB" <<'PY' || exit 1
+import base64, sys, re
+data = open(sys.argv[1]).read()
+m = re.search(r'-----BEGIN PUBLIC KEY-----(.+?)-----END PUBLIC KEY-----', data, re.S)
+if not m:
+    print(f'FAIL: {sys.argv[1]} is not a PEM PUBLIC KEY block'); sys.exit(1)
+der = base64.b64decode(''.join(m.group(1).split()))
+# P-256 SPKI is 91 bytes and contains the prime256v1 OID 1.2.840.10045.3.1.7
+oid = bytes([0x2A,0x86,0x48,0xCE,0x3D,0x03,0x01,0x07])
+if len(der) != 91 or oid not in der:
+    print(f'FAIL: {sys.argv[1]} is not an ECDSA P-256 (prime256v1) SPKI'); sys.exit(1)
+PY
+fi
+green "    static checks: OK (incl. cosign.pub P-256 PEM)"
 
 if [[ "$MODE" == "static" ]]; then
   green "Done (static-only mode)."

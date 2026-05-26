@@ -101,15 +101,83 @@ uds-cli bundle create . -f uds-bundle.local.yaml --confirm
 **Production path (published packages on GHCR):**
 
 ```sh
-# Pre-req: the three packages are published at
+# Pre-req: the three packages are published — and signed — at
 #   ghcr.io/szl-holdings/packages/{a11oy,sentra,amaru}:1.0.0-alpha
-# To (re)publish, build each package first then:
-# ( cd ../a11oy/deploy  && zarf package publish zarf-package-a11oy-amd64-1.0.0-alpha.tar.zst   oci://ghcr.io/szl-holdings/packages )
-# ( cd ../sentra/deploy && zarf package publish zarf-package-sentra-amd64-1.0.0-alpha.tar.zst oci://ghcr.io/szl-holdings/packages )
-# ( cd ../amaru/deploy  && zarf package publish zarf-package-amaru-amd64-1.0.0-alpha.tar.zst  oci://ghcr.io/szl-holdings/packages )
+# To (re)build, sign, and publish, build each package first then:
+# export COSIGN_PASSWORD=...    # password for the cosign signing key
+# ( cd ../a11oy/deploy  && zarf package publish zarf-package-a11oy-amd64-1.0.0-alpha.tar.zst   oci://ghcr.io/szl-holdings/packages --signing-key ../../uds-mesh/cosign.key )
+# ( cd ../sentra/deploy && zarf package publish zarf-package-sentra-amd64-1.0.0-alpha.tar.zst oci://ghcr.io/szl-holdings/packages --signing-key ../../uds-mesh/cosign.key )
+# ( cd ../amaru/deploy  && zarf package publish zarf-package-amaru-amd64-1.0.0-alpha.tar.zst  oci://ghcr.io/szl-holdings/packages --signing-key ../../uds-mesh/cosign.key )
+# In CI, the GitHub Actions workflow (see .github/workflows/zarf-publish.yml)
+# materializes the PEM from the ZARF_COSIGN_PRIVATE_KEY secret into a
+# 0600 cosign.key file inside ${GITHUB_WORKSPACE} and passes that path
+# to --signing-key, then shreds it on exit.
 
 uds-cli bundle create . --confirm   # uses uds-bundle.yaml
 ```
+
+**Operator-side signature verification.**
+
+The public half of the signing key lives in this directory as
+[`cosign.pub`](./cosign.pub). The same `--key cosign.pub` flag works
+both online (against an OCI ref) and fully offline (against a tarball
+on a USB stick), which is what makes the §05 Fix A offline story hold:
+once the bundle is on the operator's workstation, GHCR is no longer
+in the loop.
+
+```sh
+# OFFLINE — air-gapped / USB hand-off path. No network required after
+# the tarball is on disk. This is the canonical §05 Fix A flow.
+zarf package inspect zarf-package-a11oy-amd64-1.0.0-alpha.tar.zst  --key cosign.pub
+zarf package inspect zarf-package-sentra-amd64-1.0.0-alpha.tar.zst --key cosign.pub
+zarf package inspect zarf-package-amaru-amd64-1.0.0-alpha.tar.zst  --key cosign.pub
+
+uds-cli bundle inspect uds-bundle-szl-mesh-amd64-0.1.0.tar.zst --key cosign.pub
+uds-cli bundle deploy  uds-bundle-szl-mesh-amd64-0.1.0.tar.zst --key cosign.pub --confirm
+
+# ONLINE — when the operator pulls straight from GHCR. Same key, same
+# command shape; only the source changes.
+zarf package inspect oci://ghcr.io/szl-holdings/packages/a11oy:1.0.0-alpha   --key cosign.pub
+zarf package inspect oci://ghcr.io/szl-holdings/packages/sentra:1.0.0-alpha --key cosign.pub
+zarf package inspect oci://ghcr.io/szl-holdings/packages/amaru:1.0.0-alpha  --key cosign.pub
+
+uds-cli bundle create . --confirm --key cosign.pub          # uses uds-bundle.yaml
+```
+
+The pinned digests in `uds-bundle.yaml` still bind the bundle to
+specific package contents; the cosign signature additionally proves
+who produced them.
+
+If a package was published without a signature, `zarf package inspect
+--key` exits non-zero with `package is not signed - verification cannot
+be performed`. Treat that as a release-blocker, not a warning.
+
+**Provisioning / rotating the signing key.**
+
+`cosign.pub` here is the production public key. The matching private
+key is **never** committed; it lives only as the GitHub Actions secret
+`ZARF_COSIGN_PRIVATE_KEY` (PEM contents) plus `COSIGN_PASSWORD` (empty
+string for an unencrypted PEM, or the chosen passphrase for a
+cosign-encrypted PEM). To rotate:
+
+```sh
+# Generates cosign.key (private, do not commit) and cosign.pub (public).
+# Prompts twice for a passphrase; press Enter for an unencrypted PEM.
+cosign generate-key-pair
+
+# Commit the new public key, then upload the new private key + password
+# to the szl-holdings/uds-mesh repo secrets:
+#   gh secret set ZARF_COSIGN_PRIVATE_KEY < cosign.key
+#   gh secret set COSIGN_PASSWORD --body "<passphrase or empty>"
+# Then shred the local cosign.key so the only surviving copy is the
+# encrypted GitHub secret:
+shred -u cosign.key
+```
+
+The companion CI workflow,
+[`.github/workflows/zarf-publish.yml`](../../../../../.github/workflows/zarf-publish.yml),
+consumes those two secrets and re-publishes signed packages on every
+tag matching `uds-mesh-v*`.
 
 Either path produces `uds-bundle-szl-mesh-amd64-0.1.0.tar.zst` —
 the single artifact handed to operators (or to Andrew on a USB stick).
