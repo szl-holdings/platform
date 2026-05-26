@@ -206,6 +206,7 @@ const DOCS = [
   ['00_cover_letter.md', 'Cover note Stephen can paste as the email body.'],
   ['01_vision_deck.md', 'Slide-by-slide outline (~14 slides) with speaker notes.'],
   ['02_a11oy_uds_architecture.md', 'System diagram, per-component table, problem-to-component map, CRD sketch.'],
+  ['02a_formula_lean_traceability.md', 'Appendix: every registry formula paired with its Lean lemma (or honestly marked as not-yet-formalized).'],
   ['03_meshing_writeup.md', '~1500-word write-up on Options A / B / C and the proof plan.'],
   ['04_problem_briefs.md', 'One-page brief per problem with smallest-credible-demo + acceptance signal.'],
   ['05_proof_plan.md', '2\u20133 week proof plan with week-by-week milestones, demo script, asks.'],

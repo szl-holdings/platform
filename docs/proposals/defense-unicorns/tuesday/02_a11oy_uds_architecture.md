@@ -162,7 +162,28 @@ This is the artifact-spine surface a11oy.UDS exposes to UDS operators.
 Lifecycle transitions are gated by Component 3 (Λ-9) and Component 2
 (Approval).
 
-## 6. What this architecture deliberately does **not** introduce
+## 6. Formula ↔ Lean traceability (machine-checked claims)
+
+The writeup refers to "machine-checked formulas" wherever it talks about
+the Λ-9 floor and the proof ledger. The full binding table — every
+registry formula in `lib/formulas/src/registry.ts` paired with the Lean
+lemma in `packages/lean-formulas/` that backs it, with an honest
+**formalized** vs **registered but not yet formalized** split — is in
+the companion appendix:
+
+- `02a_formula_lean_traceability.md` — appendix.
+
+Headline today: exactly one registry formula
+(`null-space-projection`) is bound to a Lean lemma
+(`null_space_projection` in `packages/lean-formulas/Connection/NullSpace.lean`),
+discharged in pure Lean 4 with no `axiom` and no mathlib dependency.
+Three other Lean files (`Substance/GCA.lean`, `Anatomy/Boundary.lean`,
+`Forecast/Perturbation.lean`) formalize platform shims but do not yet
+have matching registry entries; two of them are explicitly axiom-gated.
+Ten further registry entries are registered with provenance but have no
+Lean lemma. The appendix names each one.
+
+## 7. What this architecture deliberately does **not** introduce
 
 - No new identity provider — Keycloak is canonical.
 - No new policy engine — UDS policy engine + Pepr admission.
