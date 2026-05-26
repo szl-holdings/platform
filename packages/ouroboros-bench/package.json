@@ -7,7 +7,7 @@
     "bench": "tsx run.ts"
   },
   "devDependencies": {
-    "typescript": "^5.7.0",
+    "typescript": "^6.0.3",
     "tsx": "^4.19.0"
   }
 }
