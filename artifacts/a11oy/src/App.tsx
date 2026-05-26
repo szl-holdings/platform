@@ -178,6 +178,8 @@ const OrchestratorCatalog = lazy(() => import('./pages/orchestrator/Orchestrator
 const OrchestratorCompose = lazy(() => import('./pages/orchestrator/OrchestratorCompose').then(m => ({ default: m.OrchestratorCompose })));
 const OrchestratorWiring = lazy(() => import('./pages/orchestrator/OrchestratorWiring').then(m => ({ default: m.OrchestratorWiring })));
 const OrchestratorHealth = lazy(() => import('./pages/orchestrator/OrchestratorHealth').then(m => ({ default: m.OrchestratorHealth })));
+const OrchestratorLibrary = lazy(() => import('./pages/orchestrator/OrchestratorLibrary').then(m => ({ default: m.OrchestratorLibrary })));
+const OrchestratorRevisions = lazy(() => import('./pages/orchestrator/OrchestratorRevisions').then(m => ({ default: m.OrchestratorRevisions })));
 const Counterfactuals = lazy(() => import('./pages/Counterfactuals').then(m => ({ default: m.Counterfactuals })));
 const AdversarialResilience = lazy(() => import('./pages/AdversarialResilience').then(m => ({ default: m.AdversarialResilience })));
 const FrontierIntelligence = lazy(() => import('./pages/FrontierIntelligence').then(m => ({ default: m.FrontierIntelligence })));
@@ -1698,6 +1700,8 @@ function AppInner() {
           <>
             <Route path={`${base}/orchestrator/wiring/:slug`} component={OrchestratorWiring} />
             <Route path={`${base}/orchestrator/health/:slug`} component={OrchestratorHealth} />
+            <Route path={`${base}/orchestrator/revisions/:slug`} component={OrchestratorRevisions} />
+            <Route path={`${base}/orchestrator/library`} component={OrchestratorLibrary} />
             <Route path={`${base}/orchestrator/catalog`} component={OrchestratorCatalog} />
             <Route path={`${base}/orchestrator/compose`} component={OrchestratorCompose} />
           </>

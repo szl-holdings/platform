@@ -305,7 +305,9 @@ const orchestratorSections: NavSection[] = [
     defaultOpen: false,
     items: [
       { id: 'orch-catalog', name: 'Domain Pack Catalog', icon: Package, path: '/orchestrator/catalog' },
+      { id: 'orch-library', name: 'Pack Library', icon: Package, path: '/orchestrator/library' },
       { id: 'orch-compose', name: 'Compose Pack', icon: PenTool, path: '/orchestrator/compose' },
+      { id: 'orch-revisions', name: 'Revisions & Rollback', icon: Share2, path: '/orchestrator/revisions/counsel' },
       { id: 'orch-wiring', name: 'Governance Wiring', icon: Share2, path: '/orchestrator/wiring/counsel' },
       { id: 'orch-health', name: 'Pack Health', icon: HeartPulse, path: '/orchestrator/health/counsel' },
     ],

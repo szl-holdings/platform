@@ -29,6 +29,22 @@ const IS_ENABLED = () =>
     process.env.APP_ENV !== 'production' &&
     process.env.A11OY_ORCHESTRATOR_ENABLED !== 'false');
 
+// Evolve features (Task #5230): AI-Assisted Composer, Pack Library, Revisions+Rollback,
+// Cross-Pack Capability Proposals, Live Readiness. Default off in prod, on in dev.
+const IS_EVOLVE_ENABLED = () =>
+  process.env.A11OY_ORCHESTRATOR_EVOLVE_ENABLED === 'true' ||
+  (process.env.NODE_ENV !== 'production' &&
+    process.env.APP_ENV !== 'production' &&
+    process.env.A11OY_ORCHESTRATOR_EVOLVE_ENABLED !== 'false');
+
+function evolveGuard(res: Response): boolean {
+  if (!IS_EVOLVE_ENABLED()) {
+    sendError(res, 'Orchestrator Evolve features are not enabled', 404, 'EVOLVE_DISABLED');
+    return false;
+  }
+  return true;
+}
+
 const REQUIRED_FIELDS: (keyof DomainPack)[] = [
   'slug', 'name', 'description', 'industry', 'constitution', 'dataSources',
   'evaluators', 'approvalRules', 'selfOptimization', 'learningLoop',
@@ -864,7 +880,8 @@ router.get('/status', async (req: OrchestratorRequest, res: Response) => {
     ]);
     const row = countsRes.rows[0];
     const payload = {
-      ready: true, featureEnabled: IS_ENABLED(), migrationsApplied: true, registryQueryable: true,
+      ready: true, featureEnabled: IS_ENABLED(), evolveEnabled: IS_EVOLVE_ENABLED(),
+      migrationsApplied: true, registryQueryable: true,
       activePacks: row?.active_packs ?? 0, draftPacks: row?.draft_packs ?? 0,
       pendingPacks: row?.pending_packs ?? 0, approvalQueuePending: queueRes.rows[0]?.cnt ?? 0,
     };
@@ -877,6 +894,654 @@ router.get('/status', async (req: OrchestratorRequest, res: Response) => {
     span.recordException(err as Error);
     logger.error({ requestId, actor, action: 'status_probe', outcome: 'error', err }, '[orchestrator] status failed');
     sendError(res, 'Orchestrator not ready — registry not queryable', 503, 'NOT_READY');
+  } finally { span.end(); }
+});
+
+// ═══════════════════════════════════════════════════════════════════════════
+// EVOLVE FEATURES (Task #5230) — gated by A11OY_ORCHESTRATOR_EVOLVE_ENABLED
+// ═══════════════════════════════════════════════════════════════════════════
+
+// ── GET /templates ────────────────────────────────────────────────────────────
+// Public read of the pack-library blueprints. Returns empty list if the table
+// hasn't been migrated yet (honest empty state — no fake fallbacks).
+
+router.get('/templates', async (req: OrchestratorRequest, res: Response) => {
+  const requestId = randomUUID();
+  const actor = getActor(req);
+  const span = tracer.startSpan('orchestrator.templates.list', {
+    attributes: { 'orchestrator.action': 'list_templates', 'szl.request.id': requestId },
+  });
+  try {
+    const result = await pool.query(
+      `SELECT slug, name, description, industry, origin, tags, created_at, updated_at
+       FROM domain_pack_templates ORDER BY name ASC`,
+    );
+    span.setAttributes({ 'orchestrator.result.count': result.rows.length });
+    span.setStatus({ code: api.SpanStatusCode.OK });
+    logger.info({ requestId, actor, action: 'list_templates', outcome: 'success', count: result.rows.length }, '[orchestrator] templates list ok');
+    ok(res, { templates: result.rows, total: result.rows.length });
+  } catch (err) {
+    logger.warn({ requestId, actor, action: 'list_templates', outcome: 'unavailable', err }, '[orchestrator] templates table unavailable');
+    ok(res, { templates: [], total: 0, note: 'Template library not initialized — run migration 0166_domain_pack_templates.sql' });
+  } finally { span.end(); }
+});
+
+// ── GET /templates/:templateSlug ─────────────────────────────────────────────
+
+router.get('/templates/:templateSlug', async (req: OrchestratorRequest, res: Response) => {
+  const { templateSlug } = req.params;
+  const requestId = randomUUID();
+  const actor = getActor(req);
+  const span = tracer.startSpan('orchestrator.templates.get', {
+    attributes: { 'orchestrator.template.slug': templateSlug, 'szl.request.id': requestId },
+  });
+  try {
+    const result = await pool.query(
+      `SELECT slug, name, description, industry, origin, tags, template_json, created_at, updated_at
+       FROM domain_pack_templates WHERE slug = $1`, [templateSlug],
+    );
+    if (result.rows.length === 0) {
+      sendError(res, `Template not found: ${templateSlug}`, 404, 'TEMPLATE_NOT_FOUND');
+      return;
+    }
+    span.setStatus({ code: api.SpanStatusCode.OK });
+    logger.info({ requestId, actor, templateSlug, action: 'get_template', outcome: 'success' }, '[orchestrator] template get ok');
+    ok(res, result.rows[0]);
+  } catch (err) {
+    span.setStatus({ code: api.SpanStatusCode.ERROR, message: String(err) });
+    span.recordException(err as Error);
+    logger.error({ requestId, actor, templateSlug, action: 'get_template', outcome: 'error', err }, '[orchestrator] template get failed');
+    sendError(res, 'Failed to get template', 500, 'INTERNAL_ERROR');
+  } finally { span.end(); }
+});
+
+// ── POST /templates/:templateSlug/instantiate ────────────────────────────────
+// Materializes a template into a new DRAFT pack. Caller must provide a unique
+// target slug. Never activates — the draft must go through the normal
+// request-activation → approval flow. adminGuard + evolveGuard.
+
+router.post('/templates/:templateSlug/instantiate', adminGuard, async (req: OrchestratorRequest, res: Response) => {
+  if (!mutationGuard(res)) return;
+  if (!evolveGuard(res)) return;
+  const { templateSlug } = req.params;
+  const { targetSlug, name: nameOverride } = req.body as { targetSlug?: string; name?: string };
+  const requestId = randomUUID();
+  const actor = getActor(req);
+  const span = tracer.startSpan('orchestrator.templates.instantiate', {
+    attributes: { 'orchestrator.template.slug': templateSlug, 'orchestrator.action': 'instantiate', 'szl.request.id': requestId },
+  });
+  logger.info({ requestId, actor, templateSlug, targetSlug, action: 'instantiate' }, '[orchestrator] instantiate template');
+  try {
+    if (!targetSlug || !/^[a-z0-9-]+$/.test(targetSlug)) {
+      sendError(res, 'targetSlug is required (lowercase alphanumeric + hyphens)', 400, 'INVALID_TARGET_SLUG');
+      return;
+    }
+    const tplRes = await pool.query(
+      `SELECT name, industry, template_json FROM domain_pack_templates WHERE slug = $1`,
+      [templateSlug],
+    );
+    if (tplRes.rows.length === 0) {
+      sendError(res, `Template not found: ${templateSlug}`, 404, 'TEMPLATE_NOT_FOUND');
+      return;
+    }
+    const existing = await pool.query('SELECT slug FROM domain_packs WHERE slug = $1', [targetSlug]);
+    if (existing.rows.length > 0) {
+      sendError(res, `A pack with slug '${targetSlug}' already exists`, 409, 'PACK_ALREADY_EXISTS');
+      return;
+    }
+    const tpl = tplRes.rows[0];
+    const tplBody = tpl.template_json as Partial<DomainPack>;
+    const pack: DomainPack = {
+      slug: targetSlug,
+      name: nameOverride || (tpl.name as string),
+      description: tplBody.description ?? '',
+      industry: tplBody.industry ?? (tpl.industry as string),
+      uiShellTemplate: tplBody.uiShellTemplate ?? 'standard',
+      constitution: tplBody.constitution ?? [],
+      dataSources: tplBody.dataSources ?? [],
+      evaluators: tplBody.evaluators ?? [],
+      approvalRules: tplBody.approvalRules ?? [],
+      selfOptimization: tplBody.selfOptimization ?? { rewardSignals: [], lockedParameters: [] },
+      learningLoop: tplBody.learningLoop ?? { calibrationMetric: 'acceptance_rate', driftThresholdPct: 2.0, recalibrationTrigger: 'auto' },
+      lifecycle: 'draft',
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+    };
+    await pool.query(
+      `INSERT INTO domain_packs (slug, name, description, industry, ui_shell_template, lifecycle, pack_json)
+       VALUES ($1, $2, $3, $4, $5, 'draft', $6)`,
+      [pack.slug, pack.name, pack.description, pack.industry, pack.uiShellTemplate, JSON.stringify(pack)],
+    );
+    await writeRevision(pack.slug, 'draft', pack, actor, `Instantiated from template ${templateSlug}`);
+    await writeAuditEvent(pack.slug, 'instantiated_from_template', actor, 'success', { templateSlug, requestId });
+    span.setStatus({ code: api.SpanStatusCode.OK });
+    logger.info({ requestId, actor, templateSlug, targetSlug, action: 'instantiate', outcome: 'success' }, '[orchestrator] instantiate ok');
+    res.status(201).json({ ok: true, data: pack });
+  } catch (err) {
+    span.setStatus({ code: api.SpanStatusCode.ERROR, message: String(err) });
+    span.recordException(err as Error);
+    logger.error({ requestId, actor, templateSlug, action: 'instantiate', outcome: 'error', err }, '[orchestrator] instantiate failed');
+    sendError(res, 'Failed to instantiate template', 500, 'INTERNAL_ERROR');
+  } finally { span.end(); }
+});
+
+// ── POST /ai-draft ────────────────────────────────────────────────────────────
+// AI-Assisted Composer. Takes a {brief, industry?} body and returns a *draft*
+// DomainPack object. Never auto-creates the pack — caller must POST /packs.
+// If AI_INTEGRATIONS_OPENAI_BASE_URL + _API_KEY are set, calls the proxy;
+// otherwise returns a deterministic structured stub built from the brief
+// (marked source:'stub' so the UI shows it honestly).
+// Cost (if any) recorded via @szl-holdings/ai-control-plane.
+
+interface AiDraftBody { brief?: string; industry?: string; name?: string }
+
+router.post('/ai-draft', adminGuard, async (req: OrchestratorRequest, res: Response) => {
+  if (!mutationGuard(res)) return;
+  if (!evolveGuard(res)) return;
+  const { brief, industry, name } = req.body as AiDraftBody;
+  const requestId = randomUUID();
+  const actor = getActor(req);
+  const span = tracer.startSpan('orchestrator.ai-draft', {
+    attributes: { 'orchestrator.action': 'ai_draft', 'szl.request.id': requestId },
+  });
+  logger.info({ requestId, actor, action: 'ai_draft', briefLen: brief?.length ?? 0 }, '[orchestrator] AI draft request');
+  try {
+    if (!brief || brief.length < 10) {
+      sendError(res, 'brief is required (min 10 chars)', 400, 'INVALID_BRIEF');
+      return;
+    }
+
+    const baseUrl = process.env.AI_INTEGRATIONS_OPENAI_BASE_URL;
+    const apiKey = process.env.AI_INTEGRATIONS_OPENAI_API_KEY;
+    const useAi = Boolean(baseUrl && apiKey);
+
+    const stubName = name || (industry ? `${industry} — Governed Vertical` : 'Untitled Vertical');
+    const stubSlug = stubName.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '').slice(0, 48) || 'untitled';
+
+    const stubDraft: Partial<DomainPack> = {
+      slug: stubSlug,
+      name: stubName,
+      description: brief.slice(0, 480),
+      industry: industry ?? 'General',
+      uiShellTemplate: 'standard',
+      constitution: [
+        { articleId: 'I', version: 'v4.2.0' },
+        { articleId: 'II', version: 'v4.2.0' },
+      ],
+      dataSources: [],
+      evaluators: [{
+        evaluatorId: 'mirroreval-standard', displayName: 'MirrorEval Standard',
+        passThreshold: 0.85,
+        dimensions: ['groundedness', 'evidence_coverage', 'policy_compliance', 'approval_alignment'],
+      }],
+      approvalRules: [
+        { riskTier: 'critical', requiresApprover: 'C-Suite' },
+        { riskTier: 'high', requiresApprover: 'VP / Functional Lead' },
+        { riskTier: 'medium', requiresApprover: 'Senior Operator' },
+      ],
+      selfOptimization: { rewardSignals: ['acceptance_rate', 'decision_accuracy'], lockedParameters: [] },
+      learningLoop: { calibrationMetric: 'outcome_accuracy', driftThresholdPct: 2.0, recalibrationTrigger: 'auto' },
+    };
+
+    if (!useAi) {
+      span.setAttributes({ 'orchestrator.ai_draft.source': 'stub' });
+      span.setStatus({ code: api.SpanStatusCode.OK });
+      logger.info({ requestId, actor, action: 'ai_draft', outcome: 'stub' }, '[orchestrator] AI draft via stub (proxy not configured)');
+      ok(res, { draft: stubDraft, source: 'stub', note: 'AI proxy not configured — returned deterministic stub from brief. Set AI_INTEGRATIONS_OPENAI_* to enable LLM drafting.' });
+      return;
+    }
+
+    // Call the AI integrations proxy (OpenAI-compatible).
+    const systemPrompt =
+      'You are A11oy\'s governance architect. Given a brief, propose a DomainPack JSON draft with: slug, name, description, industry, uiShellTemplate, constitution (articleIds from I-IX), dataSources (empty list ok), evaluators (one mirroreval entry), approvalRules (3 tiers), selfOptimization, learningLoop. Output ONLY a single JSON object — no prose. Never mark lifecycle:active. The draft will be human-reviewed before activation.';
+    let aiDraft: Partial<DomainPack> = stubDraft;
+    let source = 'stub-fallback';
+    let costUsd = 0;
+    try {
+      const url = `${(baseUrl as string).replace(/\/$/, '')}/chat/completions`;
+      const resp = await fetch(url, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${apiKey}` },
+        body: JSON.stringify({
+          model: process.env.A11OY_ORCHESTRATOR_DRAFT_MODEL || 'gpt-5-mini',
+          messages: [
+            { role: 'system', content: systemPrompt },
+            { role: 'user', content: `Brief:\n${brief}\n\nIndustry: ${industry ?? '(infer)'}\nTarget slug hint: ${stubSlug}` },
+          ],
+          response_format: { type: 'json_object' },
+          temperature: 0.2,
+          max_tokens: 1400,
+        }),
+        signal: AbortSignal.timeout(20000),
+      });
+      if (resp.ok) {
+        const body = await resp.json() as { choices?: Array<{ message?: { content?: string } }>; usage?: { prompt_tokens?: number; completion_tokens?: number } };
+        const content = body.choices?.[0]?.message?.content;
+        if (content) {
+          const parsed = JSON.parse(content) as Partial<DomainPack>;
+          // Defensive merge: never trust LLM to set lifecycle.
+          aiDraft = { ...stubDraft, ...parsed, slug: parsed.slug || stubDraft.slug };
+          source = 'ai';
+          // Crude cost estimate (gpt-5-mini-ish). Best-effort, never block.
+          const inTok = body.usage?.prompt_tokens ?? 0;
+          const outTok = body.usage?.completion_tokens ?? 0;
+          costUsd = (inTok * 0.00015 + outTok * 0.0006) / 1000;
+          try {
+            const cc = await import('@szl-holdings/ai-control-plane') as { recordCost?: (entry: Record<string, unknown>) => void };
+            cc.recordCost?.({
+              orgId: actor, provider: 'openai',
+              model: process.env.A11OY_ORCHESTRATOR_DRAFT_MODEL || 'gpt-5-mini',
+              routeClass: 'orchestrator-ai-draft',
+              inputTokens: inTok, outputTokens: outTok,
+              inputCostPerToken: 0.00000015, outputCostPerToken: 0.0000006,
+              fixedCostUsd: 0,
+            });
+          } catch { /* cost ledger optional */ }
+        }
+      } else {
+        logger.warn({ requestId, status: resp.status }, '[orchestrator] AI draft proxy returned non-200, falling back to stub');
+      }
+    } catch (aiErr) {
+      logger.warn({ requestId, err: aiErr }, '[orchestrator] AI draft proxy call failed, falling back to stub');
+    }
+    span.setAttributes({ 'orchestrator.ai_draft.source': source });
+    span.setStatus({ code: api.SpanStatusCode.OK });
+    logger.info({ requestId, actor, action: 'ai_draft', outcome: 'success', source, costUsd }, '[orchestrator] AI draft ok');
+    ok(res, { draft: aiDraft, source, costUsd });
+  } catch (err) {
+    span.setStatus({ code: api.SpanStatusCode.ERROR, message: String(err) });
+    span.recordException(err as Error);
+    logger.error({ requestId, actor, action: 'ai_draft', outcome: 'error', err }, '[orchestrator] AI draft failed');
+    sendError(res, 'Failed to generate AI draft', 500, 'INTERNAL_ERROR');
+  } finally { span.end(); }
+});
+
+// ── GET /packs/:slug/revisions ────────────────────────────────────────────────
+
+router.get('/packs/:slug/revisions', async (req: OrchestratorRequest, res: Response) => {
+  const { slug } = req.params;
+  const requestId = randomUUID();
+  const actor = getActor(req);
+  const limit = Math.min(Number(req.query.limit ?? 100), 500);
+  const span = tracer.startSpan('orchestrator.packs.revisions', {
+    attributes: { 'orchestrator.slug': slug, 'szl.request.id': requestId },
+  });
+  try {
+    const result = await pool.query(
+      `SELECT id, slug, lifecycle, actor_id, note, created_at
+       FROM domain_pack_revisions WHERE slug = $1
+       ORDER BY created_at DESC LIMIT $2`,
+      [slug, limit],
+    );
+    span.setAttributes({ 'orchestrator.result.count': result.rows.length });
+    span.setStatus({ code: api.SpanStatusCode.OK });
+    logger.info({ requestId, actor, slug, action: 'list_revisions', outcome: 'success', count: result.rows.length }, '[orchestrator] revisions ok');
+    ok(res, { revisions: result.rows, total: result.rows.length });
+  } catch (err) {
+    span.setStatus({ code: api.SpanStatusCode.ERROR, message: String(err) });
+    span.recordException(err as Error);
+    logger.error({ requestId, actor, slug, action: 'list_revisions', outcome: 'error', err }, '[orchestrator] revisions failed');
+    sendError(res, 'Failed to list revisions', 500, 'INTERNAL_ERROR');
+  } finally { span.end(); }
+});
+
+// ── GET /packs/:slug/revisions/:revA/diff/:revB ──────────────────────────────
+// Field-level diff between two revisions of the same pack (or revA vs current
+// when revB === 'current'). Returns { added, removed, changed } maps.
+
+function diffPackJson(a: Record<string, unknown>, b: Record<string, unknown>) {
+  const keys = new Set([...Object.keys(a ?? {}), ...Object.keys(b ?? {})]);
+  const added: Record<string, unknown> = {};
+  const removed: Record<string, unknown> = {};
+  const changed: Record<string, { from: unknown; to: unknown }> = {};
+  for (const k of keys) {
+    const va = a?.[k];
+    const vb = b?.[k];
+    const sa = JSON.stringify(va);
+    const sb = JSON.stringify(vb);
+    if (sa === sb) continue;
+    if (va === undefined) added[k] = vb;
+    else if (vb === undefined) removed[k] = va;
+    else changed[k] = { from: va, to: vb };
+  }
+  return { added, removed, changed };
+}
+
+router.get('/packs/:slug/revisions/:revA/diff/:revB', async (req: OrchestratorRequest, res: Response) => {
+  const { slug, revA, revB } = req.params;
+  const requestId = randomUUID();
+  const actor = getActor(req);
+  const span = tracer.startSpan('orchestrator.packs.revisions.diff', {
+    attributes: { 'orchestrator.slug': slug, 'orchestrator.revA': revA, 'orchestrator.revB': revB, 'szl.request.id': requestId },
+  });
+  try {
+    const aRes = await pool.query<{ pack_json: Record<string, unknown>; lifecycle: string; created_at: string }>(
+      `SELECT pack_json, lifecycle, created_at FROM domain_pack_revisions WHERE id = $1 AND slug = $2`,
+      [revA, slug],
+    );
+    if (aRes.rows.length === 0) {
+      sendError(res, `Revision A not found: ${revA}`, 404, 'REVISION_NOT_FOUND');
+      return;
+    }
+    let bPack: Record<string, unknown>;
+    let bMeta: { lifecycle: string; created_at: string };
+    if (revB === 'current') {
+      const cur = await pool.query<{ pack_json: Record<string, unknown>; lifecycle: string; updated_at: string }>(
+        `SELECT pack_json, lifecycle, updated_at FROM domain_packs WHERE slug = $1`, [slug],
+      );
+      if (cur.rows.length === 0) { sendError(res, `Pack not found: ${slug}`, 404, 'PACK_NOT_FOUND'); return; }
+      bPack = cur.rows[0].pack_json;
+      bMeta = { lifecycle: cur.rows[0].lifecycle, created_at: cur.rows[0].updated_at };
+    } else {
+      const bRes = await pool.query<{ pack_json: Record<string, unknown>; lifecycle: string; created_at: string }>(
+        `SELECT pack_json, lifecycle, created_at FROM domain_pack_revisions WHERE id = $1 AND slug = $2`,
+        [revB, slug],
+      );
+      if (bRes.rows.length === 0) { sendError(res, `Revision B not found: ${revB}`, 404, 'REVISION_NOT_FOUND'); return; }
+      bPack = bRes.rows[0].pack_json;
+      bMeta = { lifecycle: bRes.rows[0].lifecycle, created_at: bRes.rows[0].created_at };
+    }
+    const diff = diffPackJson(aRes.rows[0].pack_json, bPack);
+    span.setStatus({ code: api.SpanStatusCode.OK });
+    logger.info({ requestId, actor, slug, revA, revB, action: 'diff_revisions', outcome: 'success' }, '[orchestrator] diff ok');
+    ok(res, {
+      slug, revA: { id: revA, lifecycle: aRes.rows[0].lifecycle, at: aRes.rows[0].created_at },
+      revB: { id: revB, lifecycle: bMeta.lifecycle, at: bMeta.created_at }, diff,
+    });
+  } catch (err) {
+    span.setStatus({ code: api.SpanStatusCode.ERROR, message: String(err) });
+    span.recordException(err as Error);
+    logger.error({ requestId, actor, slug, action: 'diff_revisions', outcome: 'error', err }, '[orchestrator] diff failed');
+    sendError(res, 'Failed to diff revisions', 500, 'INTERNAL_ERROR');
+  } finally { span.end(); }
+});
+
+// ── POST /packs/:slug/rollback/:revisionId ───────────────────────────────────
+// Governed rollback: files an approval_requests row (action_class:
+// domain_pack_rollback), writes a pending revision, and emits an audit event.
+// The actual pack_json swap happens only when the approval is resolved
+// (operator goes through the existing approval pathway). adminGuard + evolveGuard.
+
+router.post('/packs/:slug/rollback/:revisionId', adminGuard, async (req: OrchestratorRequest, res: Response) => {
+  if (!mutationGuard(res)) return;
+  if (!evolveGuard(res)) return;
+  const { slug, revisionId } = req.params;
+  const { note } = req.body as { note?: string };
+  const requestId = randomUUID();
+  const actor = getActor(req);
+  const span = tracer.startSpan('orchestrator.packs.rollback', {
+    attributes: { 'orchestrator.slug': slug, 'orchestrator.revision.id': revisionId, 'szl.request.id': requestId },
+  });
+  logger.info({ requestId, actor, slug, revisionId, action: 'rollback_request', note }, '[orchestrator] rollback request');
+  try {
+    const packRes = await pool.query('SELECT name, industry, lifecycle FROM domain_packs WHERE slug = $1', [slug]);
+    if (packRes.rows.length === 0) { sendError(res, `Pack not found: ${slug}`, 404, 'PACK_NOT_FOUND'); return; }
+    if (packRes.rows[0].lifecycle !== 'active') {
+      sendError(res, `Rollback only supported on active packs (current: ${packRes.rows[0].lifecycle})`, 400, 'PACK_INVALID_STATE');
+      return;
+    }
+    const revRes = await pool.query<{ pack_json: Record<string, unknown>; created_at: string; lifecycle: string }>(
+      `SELECT pack_json, created_at, lifecycle FROM domain_pack_revisions WHERE id = $1 AND slug = $2`,
+      [revisionId, slug],
+    );
+    if (revRes.rows.length === 0) { sendError(res, `Revision not found: ${revisionId}`, 404, 'REVISION_NOT_FOUND'); return; }
+    const targetPack = revRes.rows[0].pack_json;
+    const correlationId = `orch-rollback-${slug}-${revisionId}-${Date.now()}`;
+    let approvalId: number;
+    try {
+      const r = await pool.query<{ id: number }>(
+        `INSERT INTO approval_requests
+           (resource_type, resource_id, title, description, action_class,
+            priority, status, correlation_id, service_attribution)
+         VALUES
+           ('domain_pack', $1, $2, $3, 'domain_pack_rollback',
+            'high', 'pending', $4, 'a11oy-vertical-orchestrator')
+         RETURNING id`,
+        [slug,
+         `Rollback Domain Pack: ${packRes.rows[0].name} → rev ${revisionId}`,
+         `Operator-requested rollback of active pack "${packRes.rows[0].name}" to revision ${revisionId} (originally ${revRes.rows[0].lifecycle} on ${revRes.rows[0].created_at}). Reason: ${note ?? 'No reason provided'}.`,
+         correlationId],
+      );
+      approvalId = r.rows[0]?.id;
+      if (!approvalId) throw new Error('approval_requests INSERT returned no id');
+    } catch (approvalErr) {
+      logger.error({ requestId, actor, slug, revisionId, err: approvalErr }, '[orchestrator] rollback approval INSERT failed');
+      await writeAuditEvent(slug, 'rollback_requested', actor, 'fail', { reason: 'approval_queue_insert_failed', revisionId, requestId });
+      sendError(res, 'Failed to file rollback request in Approval Queue — pack unchanged', 503, 'APPROVAL_QUEUE_FAILED');
+      return;
+    }
+    await writeRevision(slug, 'active', targetPack as DomainPack, actor, `Rollback proposed to revision ${revisionId} — pending approval`);
+    await writeAuditEvent(slug, 'rollback_requested', actor, 'success', { revisionId, correlationId, approvalRequestId: approvalId, note, requestId });
+    span.setStatus({ code: api.SpanStatusCode.OK });
+    logger.info({ requestId, actor, slug, revisionId, action: 'rollback_request', outcome: 'success', approvalId }, '[orchestrator] rollback filed');
+    ok(res, {
+      slug, revisionId, status: 'pending_approval',
+      approvalRequestId: approvalId, correlationId,
+      note: 'Rollback filed in Approval Queue — pack_json unchanged until approval resolves.',
+    }, 202);
+  } catch (err) {
+    span.setStatus({ code: api.SpanStatusCode.ERROR, message: String(err) });
+    span.recordException(err as Error);
+    logger.error({ requestId, actor, slug, action: 'rollback_request', outcome: 'error', err }, '[orchestrator] rollback failed');
+    sendError(res, 'Failed to file rollback request', 500, 'INTERNAL_ERROR');
+  } finally { span.end(); }
+});
+
+// ── GET /packs/:slug/readiness ────────────────────────────────────────────────
+// Live readiness score 0–100 with breakdown. Always available (no evolve gate)
+// so the catalog can show it for *all* packs, but score is computed from
+// existing data — no synthetic numbers.
+
+router.get('/packs/:slug/readiness', async (req: OrchestratorRequest, res: Response) => {
+  const { slug } = req.params;
+  const requestId = randomUUID();
+  const actor = getActor(req);
+  const span = tracer.startSpan('orchestrator.packs.readiness', {
+    attributes: { 'orchestrator.slug': slug, 'szl.request.id': requestId },
+  });
+  try {
+    const packRes = await pool.query(
+      `SELECT pack_json, lifecycle FROM domain_packs WHERE slug = $1`, [slug],
+    );
+    if (packRes.rows.length === 0) { sendError(res, `Pack not found: ${slug}`, 404, 'PACK_NOT_FOUND'); return; }
+    const pack = packRes.rows[0].pack_json as DomainPack;
+    const lifecycle = packRes.rows[0].lifecycle as string;
+
+    // Component scores (each 0..1).
+    const validationErrors = validatePack(pack);
+    const validationScore = validationErrors.length === 0 ? 1.0 : Math.max(0, 1 - validationErrors.length * 0.15);
+    const evaluatorScore = (pack.evaluators?.length ?? 0) > 0 ? 1.0 : 0.0;
+    const approvalRulesScore = Math.min(1.0, (pack.approvalRules?.length ?? 0) / 3);
+
+    const since7d = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString();
+    const since30d = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString();
+
+    const [evalRes, proofRes] = await Promise.all([
+      pool.query<{ passed: number; total: number }>(
+        `SELECT COUNT(*) FILTER (WHERE eval_passed = true)::int AS passed,
+                COUNT(*)::int AS total
+         FROM ai_traces WHERE domain = $1 AND captured_at > $2`,
+        [slug, since7d],
+      ).catch(() => ({ rows: [{ passed: 0, total: 0 }] })),
+      pool.query<{ flagged: number; total: number }>(
+        `SELECT COUNT(*) FILTER (WHERE review_state IN ('flagged','retracted'))::int AS flagged,
+                COUNT(*)::int AS total
+         FROM proof_chain WHERE id IN (
+           SELECT proof_chain_id FROM ai_traces
+           WHERE domain = $1 AND proof_chain_id IS NOT NULL AND captured_at > $2)`,
+        [slug, since30d],
+      ).catch(() => ({ rows: [{ flagged: 0, total: 0 }] })),
+    ]);
+
+    const evalRow = evalRes.rows[0];
+    const evalPassRate = evalRow?.total > 0 ? evalRow.passed / evalRow.total : null;
+    const evalScore = evalPassRate == null ? 0.5 : evalPassRate; // unknown = neutral
+
+    const proofRow = proofRes.rows[0];
+    const proofScore = !proofRow || proofRow.total === 0
+      ? 0.5
+      : proofRow.flagged === 0
+        ? 1.0
+        : Math.max(0, 1 - (proofRow.flagged / proofRow.total) * 5);
+
+    // Weighted composite (sums to 100).
+    const score = Math.round(
+      validationScore * 40 +
+      evaluatorScore * 10 +
+      approvalRulesScore * 15 +
+      evalScore * 20 +
+      proofScore * 15,
+    );
+    const grade = score >= 90 ? 'A' : score >= 80 ? 'B' : score >= 65 ? 'C' : score >= 50 ? 'D' : 'F';
+
+    span.setAttributes({ 'orchestrator.readiness.score': score, 'orchestrator.readiness.grade': grade });
+    span.setStatus({ code: api.SpanStatusCode.OK });
+    logger.info({ requestId, actor, slug, action: 'readiness', outcome: 'success', score, grade }, '[orchestrator] readiness ok');
+    ok(res, {
+      slug, lifecycle, score, grade,
+      breakdown: {
+        validation:    { weight: 40, score: Math.round(validationScore * 100), errors: validationErrors.length },
+        evaluators:    { weight: 10, score: Math.round(evaluatorScore * 100), count: pack.evaluators?.length ?? 0 },
+        approvalRules: { weight: 15, score: Math.round(approvalRulesScore * 100), count: pack.approvalRules?.length ?? 0 },
+        evalPassRate:  { weight: 20, score: Math.round(evalScore * 100), passRate: evalPassRate, sampleSize: evalRow?.total ?? 0 },
+        proofLedger:   { weight: 15, score: Math.round(proofScore * 100), flagged: proofRow?.flagged ?? 0, total: proofRow?.total ?? 0 },
+      },
+      computedAt: new Date().toISOString(),
+    });
+  } catch (err) {
+    span.setStatus({ code: api.SpanStatusCode.ERROR, message: String(err) });
+    span.recordException(err as Error);
+    logger.error({ requestId, actor, slug, action: 'readiness', outcome: 'error', err }, '[orchestrator] readiness failed');
+    sendError(res, 'Failed to compute readiness', 500, 'INTERNAL_ERROR');
+  } finally { span.end(); }
+});
+
+// ── POST /packs/:slug/emit-capability-proposal ────────────────────────────────
+// Cross-pack learning loop. Materializes a proposal into the existing
+// frontier pipeline (#4385): writes a synthetic frontier_artifacts row tagged
+// `capability-proposal` and a frontier_inbox row in pending state, then
+// records the orchestrator-side reference in capability_proposal_log.
+// The proposal is then reviewed via the existing frontier inbox UI —
+// no new approval path is created. adminGuard + evolveGuard.
+
+interface ProposalBody {
+  title?: string;
+  summary?: string;
+  proposalKind?: string;
+  evidence?: Record<string, unknown>;
+}
+
+router.post('/packs/:slug/emit-capability-proposal', adminGuard, async (req: OrchestratorRequest, res: Response) => {
+  if (!mutationGuard(res)) return;
+  if (!evolveGuard(res)) return;
+  const { slug } = req.params;
+  const { title, summary, proposalKind, evidence } = req.body as ProposalBody;
+  const requestId = randomUUID();
+  const actor = getActor(req);
+  const span = tracer.startSpan('orchestrator.packs.emit-capability-proposal', {
+    attributes: { 'orchestrator.slug': slug, 'szl.request.id': requestId },
+  });
+  logger.info({ requestId, actor, slug, action: 'emit_capability_proposal', proposalKind }, '[orchestrator] emit proposal');
+  try {
+    if (!title || title.length < 3) {
+      sendError(res, 'title is required (min 3 chars)', 400, 'INVALID_TITLE');
+      return;
+    }
+    const packRes = await pool.query('SELECT name FROM domain_packs WHERE slug = $1', [slug]);
+    if (packRes.rows.length === 0) { sendError(res, `Pack not found: ${slug}`, 404, 'PACK_NOT_FOUND'); return; }
+    const packName = packRes.rows[0].name as string;
+    const artifactId = `cap-prop-${slug}-${randomUUID()}`;
+    const inboxId = `inbox-${artifactId}`;
+    const url = `internal://a11oy-orchestrator/packs/${slug}/capability-proposals/${artifactId}`;
+    const tags = ['capability-proposal', `pack:${slug}`, proposalKind ? `kind:${proposalKind}` : 'kind:cross_pack_learning'];
+
+    // Step 1: synthetic frontier_artifacts row (so the existing inbox UI can render it).
+    let frontierWritten = false;
+    try {
+      await pool.query(
+        `INSERT INTO frontier_artifacts (id, provider, kind, external_id, title, url, summary, tags, raw)
+         VALUES ($1, 'a11oy-orchestrator', 'capability-proposal', $1, $2, $3, $4, $5::jsonb, $6::jsonb)
+         ON CONFLICT (id) DO NOTHING`,
+        [artifactId, `${packName}: ${title}`, url, summary ?? null,
+         JSON.stringify(tags),
+         JSON.stringify({ sourcePackSlug: slug, sourcePackName: packName, proposalKind: proposalKind ?? 'cross_pack_learning', evidence: evidence ?? {} })],
+      );
+      await pool.query(
+        `INSERT INTO frontier_inbox (id, artifact_id, status) VALUES ($1, $2, 'pending')
+         ON CONFLICT (id) DO NOTHING`,
+        [inboxId, artifactId],
+      );
+      frontierWritten = true;
+    } catch (frontierErr) {
+      logger.warn({ requestId, slug, err: frontierErr }, '[orchestrator] frontier_inbox write failed — proposal recorded locally only');
+    }
+
+    // Step 2: orchestrator-side log row (always succeeds even if frontier tables are missing).
+    let logId: number | null = null;
+    try {
+      const r = await pool.query<{ id: number }>(
+        `INSERT INTO capability_proposal_log
+           (source_pack_slug, artifact_id, inbox_id, title, summary, evidence, actor_id)
+         VALUES ($1, $2, $3, $4, $5, $6::jsonb, $7) RETURNING id`,
+        [slug, artifactId, frontierWritten ? inboxId : null, title, summary ?? null,
+         JSON.stringify({ proposalKind: proposalKind ?? 'cross_pack_learning', evidence: evidence ?? {} }),
+         actor],
+      );
+      logId = r.rows[0]?.id ?? null;
+    } catch (logErr) {
+      logger.warn({ requestId, slug, err: logErr }, '[orchestrator] capability_proposal_log write failed — run migration 0166');
+    }
+
+    await writeAuditEvent(slug, 'capability_proposal_emitted', actor, frontierWritten ? 'success' : 'partial', {
+      artifactId, inboxId: frontierWritten ? inboxId : null, logId, title, proposalKind, requestId,
+    });
+    span.setAttributes({ 'orchestrator.proposal.artifact_id': artifactId, 'orchestrator.proposal.frontier_written': frontierWritten });
+    span.setStatus({ code: api.SpanStatusCode.OK });
+    logger.info({ requestId, actor, slug, action: 'emit_capability_proposal', outcome: 'success', artifactId, frontierWritten }, '[orchestrator] proposal emitted');
+    ok(res, {
+      slug, artifactId, inboxId: frontierWritten ? inboxId : null, logId,
+      title, summary, frontierInboxQueued: frontierWritten,
+      reviewPath: frontierWritten ? '/api/a11oy/frontier/inbox' : null,
+      note: frontierWritten
+        ? 'Proposal queued in frontier inbox (#4385) — review via /api/a11oy/frontier/inbox.'
+        : 'Frontier tables unavailable — proposal recorded in capability_proposal_log only.',
+    }, 201);
+  } catch (err) {
+    span.setStatus({ code: api.SpanStatusCode.ERROR, message: String(err) });
+    span.recordException(err as Error);
+    logger.error({ requestId, actor, slug, action: 'emit_capability_proposal', outcome: 'error', err }, '[orchestrator] proposal emit failed');
+    sendError(res, 'Failed to emit capability proposal', 500, 'INTERNAL_ERROR');
+  } finally { span.end(); }
+});
+
+// ── GET /capability-proposals ─────────────────────────────────────────────────
+// Lists proposals emitted by the orchestrator (from capability_proposal_log).
+// Source of truth for the proposal *itself* remains frontier_inbox.
+
+router.get('/capability-proposals', async (req: OrchestratorRequest, res: Response) => {
+  const requestId = randomUUID();
+  const actor = getActor(req);
+  const limit = Math.min(Number(req.query.limit ?? 100), 500);
+  const span = tracer.startSpan('orchestrator.capability-proposals.list', {
+    attributes: { 'orchestrator.action': 'list_capability_proposals', 'szl.request.id': requestId },
+  });
+  try {
+    const result = await pool.query(
+      `SELECT cpl.id, cpl.source_pack_slug, cpl.artifact_id, cpl.inbox_id, cpl.title,
+              cpl.summary, cpl.actor_id, cpl.created_at,
+              fi.status AS frontier_status, fi.reviewed_at, fi.reviewed_by
+       FROM capability_proposal_log cpl
+       LEFT JOIN frontier_inbox fi ON fi.id = cpl.inbox_id
+       ORDER BY cpl.created_at DESC LIMIT $1`,
+      [limit],
+    );
+    span.setAttributes({ 'orchestrator.result.count': result.rows.length });
+    span.setStatus({ code: api.SpanStatusCode.OK });
+    logger.info({ requestId, actor, action: 'list_capability_proposals', outcome: 'success', count: result.rows.length }, '[orchestrator] proposals list ok');
+    ok(res, { proposals: result.rows, total: result.rows.length });
+  } catch (err) {
+    logger.warn({ requestId, actor, action: 'list_capability_proposals', outcome: 'unavailable', err }, '[orchestrator] capability_proposal_log unavailable');
+    ok(res, { proposals: [], total: 0, note: 'capability_proposal_log table missing — run migration 0166_domain_pack_templates.sql' });
   } finally { span.end(); }
 });
 

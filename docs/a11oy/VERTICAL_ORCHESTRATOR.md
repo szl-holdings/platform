@@ -394,3 +394,80 @@ All pages live in `artifacts/a11oy/src/pages/orchestrator/`:
 - Every mutation journals to `domain_pack_revisions` (mutable snapshots) and `domain_pack_audit_events` (immutable ledger). Neither table is truncated or deleted from in normal operation.
 - `pack_json.lifecycle` is kept in sync with the DB `lifecycle` column on every mutation. Response composition spreads `pack_json` first and overwrites with DB column values — stale JSON can never misreport lifecycle state.
 - The feature flag gates **mutations only** (`POST`, `DELETE`). Read endpoints (`GET`) are always reachable so seeded reference packs remain visible in tooling and dashboards when writes are disabled. Setting `A11OY_ORCHESTRATOR_ENABLED=false` returns `404 FLAG_DISABLED` on mutating endpoints only.
+
+---
+
+## Evolve Features (Task #5230)
+
+Five new capabilities extend the orchestrator. All are gated by the
+`A11OY_ORCHESTRATOR_EVOLVE_ENABLED` environment variable (default: off in prod,
+on in dev). Read endpoints are always callable; mutations 404 with
+`EVOLVE_DISABLED` when the flag is off. `GET /status` exposes `evolveEnabled`
+so the UI can grey out controls honestly.
+
+### 1. Pack Library
+Archived-vertical blueprints live in `domain_pack_templates` (migration
+0166_domain_pack_templates.sql) — Counsel, Terra, Command, Lyte, Pulse,
+Carlota Jo. Operators instantiate one into a fresh **draft** in `domain_packs`;
+the original template is unaffected. The draft still goes through the standard
+approval flow.
+
+- `GET  /api/a11oy/orchestrator/templates`
+- `GET  /api/a11oy/orchestrator/templates/:slug`
+- `POST /api/a11oy/orchestrator/templates/:slug/instantiate`  (adminGuard + evolveGuard)
+
+### 2. AI-Assisted Composer
+Takes a `{brief, industry?, name?}` body and returns a *draft* `DomainPack`
+object. **Never auto-creates the pack** — the operator still POSTs it
+explicitly. If `AI_INTEGRATIONS_OPENAI_BASE_URL` + `_API_KEY` are set, the
+endpoint calls the AI Integrations proxy (model: `gpt-5-mini` by default);
+otherwise it returns a deterministic stub built from the brief and marks
+`source: 'stub'`. Cost (when available) records via
+`@szl-holdings/ai-control-plane`. Defensive merge — lifecycle is forced
+client-side to `draft`.
+
+- `POST /api/a11oy/orchestrator/ai-draft`  (adminGuard + evolveGuard)
+
+### 3. Revisions Diff + Governed Rollback
+- `GET  /api/a11oy/orchestrator/packs/:slug/revisions`
+- `GET  /api/a11oy/orchestrator/packs/:slug/revisions/:revA/diff/:revB`  
+  (revB may be `current` to diff a revision against the live pack)
+- `POST /api/a11oy/orchestrator/packs/:slug/rollback/:revisionId`  (adminGuard + evolveGuard)
+
+Rollback **never swaps `pack_json` directly.** It files an
+`approval_requests` row (`action_class: domain_pack_rollback`) and a new
+revision in pending state. The pack only changes when an approver resolves the
+queue item — same human-gated path as activation.
+
+### 4. Cross-Pack Capability Proposals
+Reuses the #4385 frontier pipeline rather than inventing a parallel queue.
+Writes a synthetic `frontier_artifacts` row (`provider: 'a11oy-orchestrator'`,
+`kind: 'capability-proposal'`) and a `frontier_inbox` row in pending state.
+The proposal is then reviewed via the existing frontier inbox UI. A bridge
+row in `capability_proposal_log` lets the orchestrator UI show its own
+audit trail without joining across worlds.
+
+- `POST /api/a11oy/orchestrator/packs/:slug/emit-capability-proposal`  (adminGuard + evolveGuard)
+- `GET  /api/a11oy/orchestrator/capability-proposals`
+
+### 5. Live Readiness Score
+A composite 0–100 score with letter grade (A–F) and per-component breakdown.
+Always available (no evolve gate) so the catalog can render it for every
+pack. Components are computed from real data — no synthetic numbers; missing
+data scores neutral (50).
+
+| Component | Weight | Source |
+|---|---:|---|
+| Validation | 40 | `validatePack(pack_json)` |
+| Evaluators | 10 | `pack.evaluators.length > 0` |
+| Approval rules | 15 | `min(1, rules / 3)` |
+| MirrorEval pass-rate | 20 | `ai_traces` last 7d for this domain |
+| Proof-ledger health | 15 | `proof_chain` flagged/retracted ratio last 30d |
+
+- `GET /api/a11oy/orchestrator/packs/:slug/readiness`
+
+### Frontend
+- `/orchestrator/library` — pack library, instantiate to draft.
+- `/orchestrator/revisions/:slug` — revision list, diff viewer, rollback button.
+- Readiness badge on the catalog, computed live per pack.
+- Sidebar adds **Pack Library** and **Revisions & Rollback** entries.

@@ -1,8 +1,36 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Link } from 'wouter';
 import { Layout } from '../../components/layout';
 import { PageHeader, Card, KpiCard, SectionTitle } from '../../components/ui';
 import { useApiData } from '../../hooks/useApiData';
+
+interface ReadinessPayload { score: number; grade: string }
+
+function ReadinessBadge({ slug }: { slug: string }) {
+  const [data, setData] = useState<ReadinessPayload | null>(null);
+  const [errored, setErrored] = useState(false);
+  useEffect(() => {
+    let cancelled = false;
+    const baseUrl = (import.meta.env.BASE_URL ?? '/').replace(/\/$/, '');
+    fetch(`${baseUrl}/api/a11oy/orchestrator/packs/${slug}/readiness`, { credentials: 'include' })
+      .then(r => r.json())
+      .then((body: { ok?: boolean; data?: ReadinessPayload }) => {
+        if (cancelled) return;
+        if (body.ok && body.data) setData(body.data); else setErrored(true);
+      })
+      .catch(() => { if (!cancelled) setErrored(true); });
+    return () => { cancelled = true; };
+  }, [slug]);
+  if (errored) return null;
+  if (!data) return <span className="text-xs font-mono" style={{ color: '#5e5e5e' }}>readiness…</span>;
+  const color = data.score >= 80 ? '#22c55e' : data.score >= 65 ? '#c9b787' : data.score >= 50 ? '#f97316' : '#ef4444';
+  return (
+    <span className="text-xs font-mono px-1.5 py-0.5 rounded" title={`Readiness score ${data.score}/100 (grade ${data.grade})`}
+      style={{ color, backgroundColor: `${color}10`, border: `1px solid ${color}40` }}>
+      readiness {data.score} · {data.grade}
+    </span>
+  );
+}
 
 const BASE = (import.meta.env.BASE_URL ?? '/').replace(/\/$/, '');
 const API_BASE = `${BASE}/api/a11oy`;
@@ -161,6 +189,7 @@ export function OrchestratorCatalog() {
                       {style.label}
                     </span>
                     <span className="text-xs font-mono" style={{ color: T.textMuted }}>{pack.industry}</span>
+                    <ReadinessBadge slug={pack.slug} />
                     {pack.activatedAt && (
                       <span className="text-xs font-mono" style={{ color: T.textMuted }}>
                         activated {new Date(pack.activatedAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
@@ -199,6 +228,13 @@ export function OrchestratorCatalog() {
                     style={{ color: T.textDim, backgroundColor: T.surface, border: `1px solid ${T.border}`, textDecoration: 'none' }}
                   >
                     Health →
+                  </Link>
+                  <Link
+                    href={link(`/orchestrator/revisions/${pack.slug}`)}
+                    className="text-xs font-mono px-2.5 py-1 rounded"
+                    style={{ color: T.textDim, backgroundColor: T.surface, border: `1px solid ${T.border}`, textDecoration: 'none' }}
+                  >
+                    Revisions →
                   </Link>
                   {pack.lifecycle === 'draft' && !actState?.done && (
                     <button

@@ -249,9 +249,100 @@ else
   info "$DRAFT_RESP"
 fi
 
-# ── 7. 404 guard on non-existent pack ────────────────────────────────────────
+# ── 7. Evolve features (Task #5230) — read endpoints always callable ─────────
 echo ""
-echo "7. Error handling"
+echo "7. Evolve — Pack Library, Revisions, Readiness, Capability Proposals"
+ORCH="${API}/a11oy/orchestrator"
+
+TPL_RESP=$(curl -sf "${ORCH}/templates" 2>/dev/null || echo '{}')
+if echo "$TPL_RESP" | jq -e '.ok == true and (.data.templates | type) == "array"' > /dev/null 2>&1; then
+  TPL_COUNT=$(echo "$TPL_RESP" | jq '.data.templates | length')
+  pass "GET /orchestrator/templates → ${TPL_COUNT} templates"
+else
+  fail "GET /orchestrator/templates → unexpected response"
+  info "$TPL_RESP"
+fi
+
+PROP_RESP=$(curl -sf "${ORCH}/capability-proposals" 2>/dev/null || echo '{}')
+if echo "$PROP_RESP" | jq -e '.ok == true and (.data.proposals | type) == "array"' > /dev/null 2>&1; then
+  pass "GET /orchestrator/capability-proposals → list ok"
+else
+  fail "GET /orchestrator/capability-proposals → unexpected response"
+  info "$PROP_RESP"
+fi
+
+PACKS_RESP=$(curl -sf "${ORCH}/packs" 2>/dev/null || echo '{}')
+FIRST_SLUG=$(echo "$PACKS_RESP" | jq -r '.data.packs[0].slug // empty')
+if [ -n "$FIRST_SLUG" ]; then
+  READ_RESP=$(curl -sf "${ORCH}/packs/${FIRST_SLUG}/readiness" 2>/dev/null || echo '{}')
+  if echo "$READ_RESP" | jq -e '.ok == true and (.data.score | type) == "number" and .data.grade' > /dev/null 2>&1; then
+    pass "GET /orchestrator/packs/${FIRST_SLUG}/readiness → score $(echo "$READ_RESP" | jq -r '.data.score') (${FIRST_SLUG})"
+  else
+    fail "GET /orchestrator/packs/${FIRST_SLUG}/readiness → unexpected response"
+    info "$READ_RESP"
+  fi
+
+  REV_RESP=$(curl -sf "${ORCH}/packs/${FIRST_SLUG}/revisions" 2>/dev/null || echo '{}')
+  if echo "$REV_RESP" | jq -e '.ok == true and (.data.revisions | type) == "array"' > /dev/null 2>&1; then
+    pass "GET /orchestrator/packs/${FIRST_SLUG}/revisions → list ok"
+  else
+    fail "GET /orchestrator/packs/${FIRST_SLUG}/revisions → unexpected response"
+    info "$REV_RESP"
+  fi
+else
+  info "No packs in registry — skipping per-pack evolve checks"
+fi
+
+# Evolve mutations (require auth + evolve flag). If auth or flag unavailable,
+# tolerate 401/403/404 (EVOLVE_DISABLED) but never tolerate 500s.
+if [ ${#AUTH_HEADERS[@]} -gt 0 ] && [ -n "$FIRST_SLUG" ]; then
+  TPL_INSTANTIATE_SLUG="smoke-tpl-$(date +%s)"
+  INST_HTTP=$(curl -s -o /tmp/orch-inst.json -w '%{http_code}' \
+    -X POST "${ORCH}/templates/tpl-counsel/instantiate" \
+    "${AUTH_HEADERS[@]}" -H 'Content-Type: application/json' \
+    -d "{\"targetSlug\":\"${TPL_INSTANTIATE_SLUG}\"}")
+  if [ "$INST_HTTP" = "201" ]; then
+    pass "POST /orchestrator/templates/tpl-counsel/instantiate → 201 ${TPL_INSTANTIATE_SLUG}"
+    curl -s -X DELETE "${ORCH}/packs/${TPL_INSTANTIATE_SLUG}" "${AUTH_HEADERS[@]}" >/dev/null 2>&1 || true
+  elif [ "$INST_HTTP" = "404" ] || [ "$INST_HTTP" = "403" ] || [ "$INST_HTTP" = "401" ]; then
+    info "instantiate skipped — evolve flag off or auth scoped out (HTTP ${INST_HTTP})"
+  else
+    fail "POST /orchestrator/templates/tpl-counsel/instantiate → HTTP ${INST_HTTP}"
+    info "$(cat /tmp/orch-inst.json 2>/dev/null)"
+  fi
+
+  AI_HTTP=$(curl -s -o /tmp/orch-ai.json -w '%{http_code}' \
+    -X POST "${ORCH}/ai-draft" \
+    "${AUTH_HEADERS[@]}" -H 'Content-Type: application/json' \
+    -d '{"brief":"A governed compliance copilot for a regional bank.","industry":"Banking"}')
+  if [ "$AI_HTTP" = "200" ]; then
+    pass "POST /orchestrator/ai-draft → 200 ($(jq -r '.data.source' /tmp/orch-ai.json))"
+  elif [ "$AI_HTTP" = "404" ] || [ "$AI_HTTP" = "403" ] || [ "$AI_HTTP" = "401" ]; then
+    info "ai-draft skipped — evolve flag off or auth scoped out (HTTP ${AI_HTTP})"
+  else
+    fail "POST /orchestrator/ai-draft → HTTP ${AI_HTTP}"
+    info "$(cat /tmp/orch-ai.json 2>/dev/null)"
+  fi
+
+  CP_HTTP=$(curl -s -o /tmp/orch-cp.json -w '%{http_code}' \
+    -X POST "${ORCH}/packs/${FIRST_SLUG}/emit-capability-proposal" \
+    "${AUTH_HEADERS[@]}" -H 'Content-Type: application/json' \
+    -d '{"title":"smoke proposal","summary":"automated smoke","proposalKind":"cross_pack_learning"}')
+  if [ "$CP_HTTP" = "201" ]; then
+    pass "POST /orchestrator/packs/${FIRST_SLUG}/emit-capability-proposal → 201"
+  elif [ "$CP_HTTP" = "404" ] || [ "$CP_HTTP" = "403" ] || [ "$CP_HTTP" = "401" ]; then
+    info "emit-capability-proposal skipped — evolve flag off or auth scoped out (HTTP ${CP_HTTP})"
+  else
+    fail "POST /orchestrator/packs/${FIRST_SLUG}/emit-capability-proposal → HTTP ${CP_HTTP}"
+    info "$(cat /tmp/orch-cp.json 2>/dev/null)"
+  fi
+else
+  info "Skipping evolve mutation checks (no auth header or no pack)"
+fi
+
+# ── 8. 404 guard on non-existent pack ────────────────────────────────────────
+echo ""
+echo "8. Error handling"
 NOT_FOUND=$(curl -sf "${ORCH}/packs/this-pack-does-not-exist-smoke-9999" 2>/dev/null || echo '{}')
 if echo "$NOT_FOUND" | jq -e '.code == "PACK_NOT_FOUND"' > /dev/null 2>&1; then
   pass "GET /a11oy/orchestrator/packs/non-existent → PACK_NOT_FOUND"
