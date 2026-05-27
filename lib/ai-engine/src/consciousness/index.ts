@@ -72,6 +72,17 @@ export {
   predictiveProcessing,
 } from './predictive-processing.js';
 export {
+  arbitrate,
+  type BroadcastTick,
+  type CtmLoopOptions,
+  type CtmLoopResult,
+  defaultProcessors,
+  type Processor,
+  type ProcessorCandidate,
+  type ProcessorContext,
+  runCtmLoop,
+} from './ctm-loop.js';
+export {
   type AdversarialProbe,
   type AgentBeliefModel,
   type AgentCapabilityProfile,

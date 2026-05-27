@@ -7,6 +7,12 @@ import Optimizer from "@/pages/Optimizer";
 import Fabric from "@/pages/Fabric";
 import Research from "@/pages/Research";
 import Proof from "@/pages/Proof";
+import Reasoning from "@/pages/Reasoning";
+import Planner from "@/pages/Planner";
+import CTM from "@/pages/CTM";
+import Temporal from "@/pages/Temporal";
+import Bench from "@/pages/Bench";
+import DroneOversight from "@/pages/DroneOversight";
 import Warhacker from "@/pages/Warhacker";
 
 const queryClient = new QueryClient({
@@ -34,6 +40,12 @@ export default function App() {
             <Route path="/jarvis" component={Jarvis} />
             <Route path="/identity" component={Identity} />
             <Route path="/optimizer" component={Optimizer} />
+            <Route path="/reasoning" component={Reasoning} />
+            <Route path="/reasoning/planner" component={Planner} />
+            <Route path="/reasoning/ctm" component={CTM} />
+            <Route path="/reasoning/temporal" component={Temporal} />
+            <Route path="/reasoning/bench" component={Bench} />
+            <Route path="/reasoning/drone-oversight" component={DroneOversight} />
             <Route path="/fabric" component={Fabric} />
             <Route path="/research" component={Research} />
             <Route path="/proof" component={Proof} />

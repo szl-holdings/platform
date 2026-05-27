@@ -465,6 +465,15 @@ export {
   buildMeshAgentIndex,
 } from './a2a/agent-cards.js';
 export {
+  arbitrate,
+  type BroadcastTick,
+  type CtmLoopOptions,
+  type CtmLoopResult,
+  defaultProcessors,
+  type Processor,
+  type ProcessorCandidate,
+  type ProcessorContext,
+  runCtmLoop,
   type AdversarialProbe,
   type AffectiveForecast,
   type AgentBeliefModel,

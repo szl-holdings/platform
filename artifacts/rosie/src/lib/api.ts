@@ -188,6 +188,147 @@ export const rosieApi = {
     }>("/fabric"),
 };
 
+// ───────────────────────────────────────────────────────────────────────
+// Reasoning surface — Graph Planner / CTM / Time-R1 / MARBLE
+// ───────────────────────────────────────────────────────────────────────
+
+export interface LambdaReceipt {
+  receiptId: string;
+  kind: string;
+  inputHash: string;
+  outputHash: string;
+  prevHash: string;
+  receiptHash: string;
+  createdAt: string;
+  governance: { standard: string; pillar: string; authority: string };
+  payload: Record<string, unknown>;
+}
+
+export interface PlanAction {
+  id: string;
+  title: string;
+  preconditions: string[];
+  effects: string[];
+  actor?: string;
+  cost?: number;
+}
+
+export interface PlanDag {
+  planId: string;
+  goal: string[];
+  initialState: string[];
+  nodes: PlanAction[];
+  edges: { from: string; to: string }[];
+  executionOrder: string[];
+  criticalPath: string[];
+  parallelBranches: string[][];
+  unmetPreconditions: string[];
+  totalCost: number;
+}
+
+export interface PlanTemplate {
+  id: string;
+  title: string;
+  description: string;
+  body?: { goal: string[]; initialState: string[]; actions: PlanAction[] };
+}
+
+export interface CtmCandidate {
+  processorId: string;
+  content: string;
+  salience: number;
+  tags?: string[];
+}
+
+export interface CtmTick {
+  tick: number;
+  candidates: CtmCandidate[];
+  winner: CtmCandidate;
+  suppressed: CtmCandidate[];
+  arbitrationRationale: string;
+}
+
+export interface CtmResult {
+  loopId: string;
+  ticks: CtmTick[];
+  finalSynthesis: string;
+  totalSuppressed: number;
+}
+
+export interface BucketDrift {
+  bucketIndex: number;
+  startT: number;
+  endT: number;
+  mean: number;
+  std: number;
+  driftScore: number;
+  count: number;
+}
+
+export interface TemporalForecast {
+  seriesId: string;
+  bucketWindowMs: number;
+  bucketCount: number;
+  baseline: { mean: number; std: number };
+  buckets: BucketDrift[];
+  causalPriorViolations: number[];
+  peakBucket: BucketDrift | null;
+  forecast: { nextMean: number; confidence: number; horizonMs: number };
+  synthesis: string;
+}
+
+export interface MarbleScenarioMeta {
+  scenarioId: string;
+  teamGoal: string;
+  ticks: number;
+  agentCount: number;
+  hasAdversarial: boolean;
+  expectedPolicyDenials: string[];
+}
+
+export interface MarbleResult {
+  scenarioId: string;
+  coordinationCost: number;
+  messagesExchanged: number;
+  conflictingWrites: { key: string; agents: string[]; tick: number }[];
+  teamGoalReached: boolean;
+  adversarialGoalsAchieved: number;
+  policyDenialsObserved: string[];
+  expectedDenialsMissed: string[];
+  score: number;
+  trace: { tick: number; perAgent: ({ agentId: string; message: string; writes: Record<string, string>; claimedGoalReached: boolean; policyViolation?: string })[] }[];
+}
+
+export interface DroneOversightResponse {
+  verdict: "auto-cleared" | "requires-hitl";
+  telemetry: { t: number; altitude: number; speed: number; inGeofence: boolean }[];
+  plan: PlanDag;
+  temporal: TemporalForecast;
+  ctm: CtmResult;
+  receipts: { plan: LambdaReceipt; temporal: LambdaReceipt; ctm: LambdaReceipt; oversight: LambdaReceipt };
+  pendingApproval: { id: string; submittedAt: number } | null;
+}
+
+export const reasoningApi = {
+  planTemplates: () => request<{ templates: PlanTemplate[] }>("/plan/templates"),
+  planTemplate: (id: string) => request<PlanTemplate>(`/plan/templates/${encodeURIComponent(id)}`),
+  plan: (body: { goal: string[]; initialState: string[]; actions: PlanAction[]; planId?: string }) =>
+    request<{ dag: PlanDag; receipt: LambdaReceipt }>("/plan", { method: "POST", body: JSON.stringify(body) }),
+  ctm: (body: { input: string; ticks?: number; seed?: number }) =>
+    request<{ result: CtmResult; receipt: LambdaReceipt }>("/ctm", { method: "POST", body: JSON.stringify(body) }),
+  temporal: (body: { series: { t: number; v: number; label?: string }[]; bucketWindowMs?: number; baselineBuckets?: number; allowNonMonotonic?: boolean; seriesId?: string }) =>
+    request<{ forecast: TemporalForecast; receipt: LambdaReceipt }>("/temporal", { method: "POST", body: JSON.stringify(body) }),
+  marbleScenarios: () => request<{ scenarios: MarbleScenarioMeta[] }>("/marble/scenarios"),
+  marbleRun: (body: { scenarioId: string; seed?: number }) =>
+    request<{ result: MarbleResult; receipt: LambdaReceipt }>("/marble/run", { method: "POST", body: JSON.stringify(body) }),
+  droneOversight: (body: { seed?: number; scenario?: string } = {}) =>
+    request<DroneOversightResponse>("/demos/drone-oversight", { method: "POST", body: JSON.stringify(body) }),
+  reasoningReceipts: (kind?: string, limit = 50) =>
+    request<{ receipts: LambdaReceipt[]; chainHead: string; total: number }>(
+      `/reasoning/receipts?${kind ? `kind=${encodeURIComponent(kind)}&` : ""}limit=${limit}`,
+    ),
+};
+
 /** WebGPU detection — returns a status string for the UI. */
 export async function detectWebGPU(): Promise<{
   available: boolean;

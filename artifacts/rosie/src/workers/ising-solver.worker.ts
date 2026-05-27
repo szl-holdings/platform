@@ -17,6 +17,14 @@ export type WorkerInput = {
   sweeps?: number;
   tStart?: number;
   tEnd?: number;
+  /**
+   * Optional Time-R1 temporal bias. Added to the local field h[i] for each
+   * spin before descent — this is how a temporal-anomaly forecast (bucket
+   * drift z-scores) is fused into the Ising decision so that "where it
+   * dropped recently" pulls the optimizer toward the same answer.
+   * Length must equal h.length when provided.
+   */
+  temporalBias?: number[];
 };
 
 export type WorkerProgress =
@@ -26,8 +34,10 @@ export type WorkerProgress =
 
 self.onmessage = (ev: MessageEvent<WorkerInput>) => {
   try {
-    const { J, h, seed, sweeps = 600, tStart = 2.0, tEnd = 0.01 } = ev.data;
-    const n = h.length;
+    const { J, h: baseH, seed, sweeps = 600, tStart = 2.0, tEnd = 0.01, temporalBias } = ev.data;
+    const n = baseH.length;
+    // Fuse: h' = h + temporalBias (zero-pad / validate length).
+    const h: number[] = baseH.map((v, i) => v + (temporalBias && i < temporalBias.length ? temporalBias[i] : 0));
     let state = seed >>> 0;
     const rng = () => {
       state = (state + 0x6d2b79f5) >>> 0;

@@ -28,6 +28,26 @@ export default defineConfig({
         find: '@workspace/codex-kernel',
         replacement: resolve(__dirname, '../../packages/codex-kernel/src/index.ts'),
       },
+      {
+        find: '@workspace/planner',
+        replacement: resolve(__dirname, '../../packages/planner/src/index.ts'),
+      },
+      {
+        find: '@workspace/forecast-fabric',
+        replacement: resolve(__dirname, '../../packages/forecast-fabric/src/index.ts'),
+      },
+      {
+        find: '@workspace/agents-evals',
+        replacement: resolve(__dirname, '../../packages/agents-evals/src/index.ts'),
+      },
+      {
+        find: '@szl-holdings/evidence-ledger',
+        replacement: resolve(__dirname, '../../packages/evidence-ledger/src/index.ts'),
+      },
+      {
+        find: '@szl-holdings/shared-contracts',
+        replacement: resolve(__dirname, '../../packages/shared-contracts/src/index.ts'),
+      },
     ],
   },
   test: {

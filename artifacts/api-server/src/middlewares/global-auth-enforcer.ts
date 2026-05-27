@@ -146,6 +146,19 @@ const PUBLIC_EXACT_PATHS = new Set([
   "/api/rosie/solve/queue",
   "/api/rosie/narrate",
   "/api/rosie/receipts/verify",
+  // ROSIE Reasoning surface (Λ-receipt chain). Public anonymous compute —
+  // graph-planner DAG synthesis, CTM-loop arbitration, Time-R1 drift scoring,
+  // MARBLE bench runs, and the composed drone-oversight demo. All deterministic
+  // with no session state mutated; results sealed in the receipt chain.
+  "/api/rosie/plan",
+  "/api/rosie/plan/templates",
+  "/api/rosie/ctm",
+  "/api/rosie/ctm/stream",
+  "/api/rosie/temporal",
+  "/api/rosie/marble/scenarios",
+  "/api/rosie/marble/run",
+  "/api/rosie/demos/drone-oversight",
+  "/api/rosie/reasoning/receipts",
   // Shared action store SSE stream — read-only live feed used by the Business
   // State / Enterprise State pages. GET /api/action-store is allowed below via
   // a method-specific check so the deny-by-default enforcer still rejects

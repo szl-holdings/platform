@@ -19,6 +19,14 @@ export * from './types.js';
 export * from './adapters.js';
 export * from './service.js';
 export * from './heads/index.js';
+export {
+  type BucketDrift,
+  type TemporalForecast,
+  type TemporalScoreOptions,
+  type TimeSeriesPoint,
+  NonMonotonicSeriesError,
+  scoreBuckets,
+} from './features/time-r1-drift.js';
 
 export { FORECAST_FABRIC_VERSION } from './types.js';
 

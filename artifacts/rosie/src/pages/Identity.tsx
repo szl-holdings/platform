@@ -145,6 +145,13 @@ function Hero({ stat, streamState }: { stat: Stat; streamState: "connecting" | "
             <span className="text-xs opacity-70 group-hover:translate-x-0.5 transition-transform">→</span>
           </Link>
           <Link
+            href="/reasoning"
+            data-testid="link-reasoning"
+            className="inline-flex items-center gap-2 px-5 py-2.5 rounded-md border border-border text-sm hover:bg-secondary transition"
+          >
+            ❖ Reasoning Surface
+          </Link>
+          <Link
             href="/proof"
             data-testid="link-view-receipts"
             className="inline-flex items-center gap-2.5 px-5 py-3 rounded-md border border-border text-sm text-foreground hover:border-accent/60 hover:text-accent transition-colors"
@@ -360,18 +367,52 @@ function CapabilityNarrative({
         />
       </div>
 
+      <section className="space-y-4">
+        <div className="text-[10px] uppercase tracking-[0.22em] text-primary font-mono">reasoning kernels · doctrine v6</div>
+        <div className="grid md:grid-cols-2 gap-4">
+          <ThesisCard
+            href="/reasoning/planner"
+            glyph="❖"
+            title="Graph Planner (DAG)"
+            body="Backward-chain a goal into an action DAG with explicit critical path and parallel branches. Unreachable preconditions reject the plan."
+            receipt="plan.dag.v1"
+          />
+          <ThesisCard
+            href="/reasoning/ctm"
+            glyph="◉"
+            title="CTM-Loop Reasoner"
+            body="Consciousness-Turing-Machine broadcast arbitration. Every suppressed alternative is logged — the audit trail is complete, not lossy."
+            receipt="consciousness.broadcast.v1"
+          />
+          <ThesisCard
+            href="/reasoning/temporal"
+            glyph="⌛"
+            title="Time-R1 Temporal Engine"
+            body="Bucket-drift scoring with a causal prior. Non-monotonic timestamps are refused — effect-before-cause cannot be silently scored."
+            receipt="anomaly.time-r1.v1"
+          />
+          <ThesisCard
+            href="/reasoning/bench"
+            glyph="▣"
+            title="MARBLE Multi-Agent Bench"
+            body="Held-out regression for orchestrations. Lower coordination cost + higher policy denials of adversarial goals = better score."
+            receipt="bench.marble.v1"
+          />
+        </div>
+      </section>
+
       {/* Live activity strip — telemetry-as-decoration */}
-      <div className="rounded-lg border border-border bg-card overflow-hidden">
+      <div className="rounded-lg border border-border bg-card overflow-hidden" data-testid="live-ticker">
         <div className="flex items-center justify-between px-5 py-3 border-b border-border">
           <div className="flex items-center gap-3">
             <StreamDot state={streamState} />
-            <span className="font-mono text-[10px] uppercase tracking-[0.22em] text-foreground/80">
-              live · /api/rosie/events
-            </span>
+            <div className="text-[10px] uppercase tracking-[0.22em] text-primary font-mono">
+              live activity · /api/rosie/events
+            </div>
           </div>
-          <span className="font-mono text-[10px] text-muted-foreground">
-            {rings ? `kernel ${rings.kernel} · external ${rings.external}` : `${ticker.length} events`}
-          </span>
+          <div className="text-[10px] font-mono text-muted-foreground">
+            stream={streamState} · {rings ? `kernel ${rings.kernel} · external ${rings.external}` : `${ticker.length} events`}
+          </div>
         </div>
         {ticker.length === 0 ? (
           <div className="px-5 py-4 text-sm text-muted-foreground">
@@ -586,4 +627,45 @@ function summarize(kind: string, payload: Record<string, unknown>): string {
 function fmtTime(iso: string | null): string {
   if (!iso) return "warming…";
   return new Date(iso).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
+}
+
+function StatCard({ label, value, sub, testId }: { label: string; value: string; sub: string; testId?: string }) {
+  return (
+    <div className="rounded-lg border border-border bg-card p-4" data-testid={testId}>
+      <div className="text-[10px] uppercase tracking-widest text-muted-foreground">{label}</div>
+      <div className="mt-1 text-2xl font-semibold tabular-nums">{value}</div>
+      <div className="text-xs text-muted-foreground mt-0.5 font-mono truncate">{sub}</div>
+    </div>
+  );
+}
+
+function ThesisCard({ href, glyph, title, body, receipt }: { href: string; glyph: string; title: string; body: string; receipt: string }) {
+  return (
+    <Link
+      href={href}
+      data-testid={`thesis-${title.toLowerCase().replace(/[^a-z0-9]+/g, "-")}`}
+      className="block rounded-lg border border-border bg-card p-5 hover:border-primary/40 transition-colors"
+    >
+      <div className="flex items-start gap-3">
+        <div className="text-primary text-2xl">{glyph}</div>
+        <div className="flex-1">
+          <div className="font-medium mb-1.5">{title}</div>
+          <p className="text-sm text-muted-foreground leading-relaxed">{body}</p>
+          <div className="text-[10px] uppercase tracking-[0.18em] text-muted-foreground font-mono mt-3">
+            receipt · <span className="text-primary">{receipt}</span>
+          </div>
+        </div>
+      </div>
+    </Link>
+  );
+}
+
+function Pillar({ glyph, title, body }: { glyph: string; title: string; body: string }) {
+  return (
+    <div className="rounded-lg border border-border bg-card p-5 hover:border-primary/40 transition-colors">
+      <div className="text-primary text-2xl mb-3">{glyph}</div>
+      <div className="font-medium mb-2">{title}</div>
+      <p className="text-sm text-muted-foreground leading-relaxed">{body}</p>
+    </div>
+  );
 }

@@ -109,6 +109,10 @@ router.use(lazyMatch("/simulation", () => import("./simulation-whatif"), "simula
 router.use(lazyMatch("/rosie", () => import("./rosie-jarvis"), "rosie-jarvis"));
 router.use(lazyMatch("/rosie", () => import("./rosie"), "rosie"));
 
+// ROSIE Reasoning — Graph Planner, CTM-Loop, Time-R1, MARBLE bench, Drone Oversight demo.
+// Each capability emits a Λ-receipt (Doctrine V6) on its own chain at /rosie/reasoning/receipts*.
+router.use(lazyMatch("/rosie", () => import("./rosie-reasoning"), "rosie-reasoning"));
+
 // Adversarial red-team & crisis stress-drill suite.
 // All state is isolated in-memory — no production tables touched.
 // GET  /stress-drill/scenarios

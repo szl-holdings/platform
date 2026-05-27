@@ -284,6 +284,16 @@ function isExempt(path: string): boolean {
     path === '/api/rosie/narrate' ||
     path === '/api/rosie/receipts/verify'
   ) return true;
+  // ROSIE Reasoning surface (graph-planner / ctm-loop / time-r1 / marble bench /
+  // drone-oversight demo). Public anonymous POSTs, deterministic compute, no
+  // session state mutated — all results sealed in the Λ-receipt chain.
+  if (
+    path === '/api/rosie/plan' ||
+    path === '/api/rosie/ctm' ||
+    path === '/api/rosie/temporal' ||
+    path === '/api/rosie/marble/run' ||
+    path === '/api/rosie/demos/drone-oversight'
+  ) return true;
   // LaaS v1 guard — public Lambda-as-a-Service endpoint. Stateless, Zod-validated,
   // no PII or session. Receipts returned to caller; no server-side persistence.
   if (path === '/api/v1/guard' || path.startsWith('/api/v1/guard/')) return true;

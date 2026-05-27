@@ -11,6 +11,15 @@ export {
 } from './progressive-discovery.js';
 export { rankFallbacks } from './ranker.js';
 export {
+  type ActionNode,
+  type PlanDag,
+  type PlanDagInput,
+  type StateFact,
+  PlanCycleError,
+  planDag,
+  UnreachablePreconditionError,
+} from './graph-planner.js';
+export {
   estimateRiskAndApprovals,
   levelForRisk,
   topoSort,
