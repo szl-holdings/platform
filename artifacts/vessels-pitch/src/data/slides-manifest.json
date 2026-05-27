@@ -1,210 +1,42 @@
 [
-  {
-    "id": "11111111-1111-4111-8111-000000000001",
-    "position": 1,
-    "filepath": "src/pages/slides/TitleSlide.tsx",
-    "title": "Vessels x Dorian LPG",
-    "description": "Title slide — Maritime intelligence for the VLGC fleet",
-    "speakerNotes": "- Open by naming the audience: Dorian LPG, NYSE LPG, the Hadjipateras family business.\n- Land the one-line proposition: visibility, sanctions cover, freight intelligence for the VLGC fleet.\n- Set tone: this is a working session, not a marketing pitch."
-  },
-  {
-    "id": "11111111-1111-4111-8111-000000000002",
-    "position": 2,
-    "filepath": "src/pages/slides/TheMeeting.tsx",
-    "title": "Why we are in the room",
-    "description": "Acknowledgement of Dorian's position and exposure surface",
-    "speakerNotes": "- Acknowledge the fleet they built: 25+ modern VLGCs, dual-fuel LPG propulsion, Helios Pool.\n- Name the trade lane: USG to Far East arbitrage.\n- Frame the risk surface: sanctioned-adjacent waters, gray-fleet counterparties, STS transfers."
-  },
-  {
-    "id": "11111111-1111-4111-8111-000000000003",
-    "position": 3,
-    "filepath": "src/pages/slides/WhyNow.tsx",
-    "title": "The compliance perimeter moved",
-    "description": "Three macro pressures on the gas-carrier compliance perimeter",
-    "speakerNotes": "- OFAC LPG sanctions have widened materially since 2024.\n- Dark-fleet behavior is migrating from crude tankers into the gas-carrier segment.\n- Insurers and trade-finance banks now require voyage-level, not annual, evidence."
-  },
-  {
-    "id": "11111111-1111-4111-8111-000000000004",
-    "position": 4,
-    "filepath": "src/pages/slides/DorianToday.tsx",
-    "title": "Dorian today",
-    "description": "Listing, fleet, commercial structure, trade lane snapshot",
-    "speakerNotes": "- NYSE LPG, listed 2014, Stamford and Athens.\n- 25+ modern VLGCs, ECO and LPG dual-fuel.\n- Helios LPG Pool for commercial management.\n- US Gulf to Far East as the dominant arbitrage lane."
-  },
-  {
-    "id": "11111111-1111-4111-8111-000000000005",
-    "position": 5,
-    "filepath": "src/pages/slides/ExposureSurface.tsx",
-    "title": "Six surfaces of exposure",
-    "description": "Where a single bad signal becomes a real problem",
-    "speakerNotes": "- Walk the six exposure surfaces quickly.\n- Stress: any one of them, unmonitored, is a headline or a P and I issue.\n- This is the surface Vessels is built to cover end to end."
-  },
-  {
-    "id": "11111111-1111-4111-8111-000000000006",
-    "position": 6,
-    "filepath": "src/pages/slides/WhatIsVessels.tsx",
-    "title": "What Vessels is",
-    "description": "One operating layer: tracking, screening, provenance",
-    "speakerNotes": "- One line: one operating layer for visibility, screening, and voyage-level provenance.\n- Wired into your existing workflow, not a replacement for it."
-  },
-  {
-    "id": "11111111-1111-4111-8111-000000000007",
-    "position": 7,
-    "filepath": "src/pages/slides/FleetTracking.tsx",
-    "title": "Fleet tracking",
-    "description": "AIS, satellite, port-call fusion across 1,200+ gas carriers",
-    "speakerNotes": "- Terrestrial AIS, satellite AIS, and port-call data fused.\n- 1,200+ gas carriers, 15-second median refresh.\n- Replay voyages, diff against filed plans, alert on deviations."
-  },
-  {
-    "id": "11111111-1111-4111-8111-000000000008",
-    "position": 8,
-    "filepath": "src/pages/slides/SanctionsScreening.tsx",
-    "title": "Sanctions screening",
-    "description": "OFAC, EU, UK, UN, port-state and UBO feeds, continuous",
-    "speakerNotes": "- Every list that matters, live, not annual.\n- Walk the sample screen: charterer, vessel, UBO hops, risk score, action.\n- Each screen produces a signed receipt your team can defend."
-  },
-  {
-    "id": "11111111-1111-4111-8111-000000000009",
-    "position": 9,
-    "filepath": "src/pages/slides/DarkVesselDetection.tsx",
-    "title": "Dark vessel detection",
-    "description": "AIS gap forensics, STS rendezvous inference, SAR cross-check",
-    "speakerNotes": "- Show the AIS gap pattern: vessel goes dark, four-hour gap, comes back.\n- Cross-check with SAR satellite, find the second hull alongside.\n- Counterparty is sanctioned. The system flagged the gap before the insurer asked."
-  },
-  {
-    "id": "11111111-1111-4111-8111-000000000010",
-    "position": 10,
-    "filepath": "src/pages/slides/VoyageEconomics.tsx",
-    "title": "Voyage economics",
-    "description": "Baltic LPG, Mt Belvieu, Argus FE, bunker spreads",
-    "speakerNotes": "- Baltic LPG, Mt Belvieu, Argus FE, bunker spreads wired in.\n- Pre-fixture TCE per option, sensitivity to bunker spread.\n- Note clearly: the chart values are illustrative of feed structure, not today's print."
-  },
-  {
-    "id": "11111111-1111-4111-8111-000000000011",
-    "position": 11,
-    "filepath": "src/pages/slides/CounterpartyDD.tsx",
-    "title": "Counterparty due diligence",
-    "description": "UBO graph traversal and composite risk score",
-    "speakerNotes": "- Every counterparty walked all the way up the ownership chain.\n- Show the three-hop UBO match that ends at an SDN entity.\n- Composite risk score: sanctions distance, PEP, port-state history, AIS behaviour, adverse media."
-  },
-  {
-    "id": "11111111-1111-4111-8111-000000000012",
-    "position": 12,
-    "filepath": "src/pages/slides/TrustReceipts.tsx",
-    "title": "SZL trust receipts",
-    "description": "Cryptographic, chained, defensible audit primitives",
-    "speakerNotes": "- This is the moat. Every screen and every decision is hashed at the source.\n- Chained, tamper-evident, verifiable.\n- When an examiner asks what you knew and when, you hand them an answer, not a screenshot folder."
-  },
-  {
-    "id": "11111111-1111-4111-8111-000000000013",
-    "position": 13,
-    "filepath": "src/pages/slides/WorkflowFit.tsx",
-    "title": "Workflow fit",
-    "description": "Chartering, operations, compliance and legal",
-    "speakerNotes": "- Three desks at Dorian, one operating layer.\n- Chartering: faster fixtures with the math.\n- Operations: see the gap before the email.\n- Compliance and legal: defensible by default."
-  },
-  {
-    "id": "11111111-1111-4111-8111-000000000014",
-    "position": 14,
-    "filepath": "src/pages/slides/PilotProposal.tsx",
-    "title": "90-day pilot proposal",
-    "description": "Three vessels, capped fee, returnable against year-one",
-    "speakerNotes": "- Ninety days. Three vessels. A live answer, not a slide.\n- Two weeks to wire up, six weeks live, two weeks readout.\n- Capped pilot fee, returnable against year-one. Full data export on exit, no lock-in."
-  },
-  {
-    "id": "11111111-1111-4111-8111-000000000015",
-    "position": 15,
-    "filepath": "src/pages/slides/WhyUs.tsx",
-    "title": "Why Vessels",
-    "description": "Shared platform, maritime-first, receipts as primitive",
-    "speakerNotes": "- We sit in the same operating family as A11oy and Sentra. Shared identity, shared receipts.\n- Maritime-first domain model, not a generic CRM with a shipping skin.\n- Receipts as a primitive, not a feature.\n- Open data export. If we ever fail you, you walk with everything."
-  },
-  {
-    "id": "11111111-1111-4111-8111-000000000016",
-    "position": 16,
-    "filepath": "src/pages/slides/NextSteps.tsx",
-    "title": "Next steps",
-    "description": "Pick three vessels — live in two weeks",
-    "speakerNotes": "- Decision today: pilot scope and vessel selection.\n- Decision next week: compliance and IT sign-off, short-form MSA.\n- Decision in ninety days: fleet-wide rollout under the Helios pool."
-  },
-  {
-    "id": "22222222-2222-4222-8222-000000000017",
-    "position": 17,
-    "filepath": "src/pages/slides/ThesisTitle.tsx",
-    "title": "TH1 → TH8 thesis lineage",
-    "description": "SZL Holdings doctrine — full proof chain",
-    "speakerNotes": ""
-  },
-  {
-    "id": "22222222-2222-4222-8222-000000000018",
-    "position": 18,
-    "filepath": "src/pages/slides/ThesisTH1.tsx",
-    "title": "TH1 — Lambda-Gate Composability",
-    "description": "Composition of doctrine-locked systems is itself doctrine-locked",
-    "speakerNotes": ""
-  },
-  {
-    "id": "22222222-2222-4222-8222-000000000019",
-    "position": 19,
-    "filepath": "src/pages/slides/ThesisTH2.tsx",
-    "title": "TH2 — Replay-DOI Duality",
-    "description": "5× byte-identical replay anchored to Zenodo",
-    "speakerNotes": ""
-  },
-  {
-    "id": "22222222-2222-4222-8222-000000000020",
-    "position": 20,
-    "filepath": "src/pages/slides/ThesisTH3.tsx",
-    "title": "TH3 — ρ-Closure Completeness",
-    "description": "Eight-region closure — bisimulation up and down",
-    "speakerNotes": ""
-  },
-  {
-    "id": "22222222-2222-4222-8222-000000000021",
-    "position": 21,
-    "filepath": "src/pages/slides/ThesisTH4.tsx",
-    "title": "TH4 — Lambda-Category Composability",
-    "description": "Receipt category as a monoidal category",
-    "speakerNotes": ""
-  },
-  {
-    "id": "22222222-2222-4222-8222-000000000022",
-    "position": 22,
-    "filepath": "src/pages/slides/ThesisTH5.tsx",
-    "title": "TH5 — Chain Confluence",
-    "description": "Receipt chain as cofree comonad — unique normal form",
-    "speakerNotes": ""
-  },
-  {
-    "id": "22222222-2222-4222-8222-000000000023",
-    "position": 23,
-    "filepath": "src/pages/slides/ThesisTH6.tsx",
-    "title": "TH6 — Bekenstein via DPI",
-    "description": "Receipt-chain entropy bounded by registry size",
-    "speakerNotes": ""
-  },
-  {
-    "id": "22222222-2222-4222-8222-000000000024",
-    "position": 24,
-    "filepath": "src/pages/slides/ThesisTH7.tsx",
-    "title": "TH7 — Curry-Howard Receipt Calculus",
-    "description": "Machine-checked in Lean 4 — sorry count 0",
-    "speakerNotes": ""
-  },
-  {
-    "id": "22222222-2222-4222-8222-000000000025",
-    "position": 25,
-    "filepath": "src/pages/slides/ThesisTH8.tsx",
-    "title": "TH8 — Graded Lambda-Receipt Identity",
-    "description": "GLR proposal with Lean 4 skeleton (TH8a–c)",
-    "speakerNotes": ""
-  },
-  {
-    "id": "22222222-2222-4222-8222-000000000026",
-    "position": 26,
-    "filepath": "src/pages/slides/ThesisScorecard.tsx",
-    "title": "Lean discharge scorecard",
-    "description": "Live Fly High V6 audit counters from THESIS_LINEAGE.audit",
-    "speakerNotes": ""
-  }
+  { "id": "aaaa0001-0001-4111-8111-000000000001", "position": 1, "filepath": "src/pages/slides/TitleSlide.tsx", "title": "A11oy × Dorian — Series A", "description": "Governed AI for the Enterprise", "speakerNotes": "Open by naming the room: Peter on ops, Marina on enterprise, Costa on counsel. This is a working session — and a Series A walk-through." },
+  { "id": "aaaa0001-0001-4111-8111-000000000002", "position": 2, "filepath": "src/pages/slides/ThreeRooms.tsx", "title": "Three rooms", "description": "Three audiences, one chain of custody", "speakerNotes": "Peter wants ops gains. Marina wants enterprise leverage. Costa wants admissible evidence. The platform answers all three from the same substrate." },
+  { "id": "aaaa0001-0001-4111-8111-000000000003", "position": 3, "filepath": "src/pages/slides/Thesis.tsx", "title": "The thesis", "description": "AI ships faster than governance. We are the gate.", "speakerNotes": "One-sentence thesis. The rest is mechanics." },
+  { "id": "aaaa0001-0001-4111-8111-000000000004", "position": 4, "filepath": "src/pages/slides/FocalTrio.tsx", "title": "A11oy · Amaru · Sentra", "description": "The focal trio", "speakerNotes": "Three products, one substrate. Each ships today as cosign-signed UDS bundles." },
+  { "id": "aaaa0001-0001-4111-8111-000000000005", "position": 5, "filepath": "src/pages/slides/A11oyWhat.tsx", "title": "A11oy — what it is", "description": "Governed inference gate at the call site", "speakerNotes": "The gate wraps every model call your org makes." },
+  { "id": "aaaa0001-0001-4111-8111-000000000006", "position": 6, "filepath": "src/pages/slides/A11oyArchitecture.tsx", "title": "A11oy — architecture", "description": "Five layers, one seam", "speakerNotes": "SDK / Sidecar / Gateway / Governor / Receipt-bus. Each layer swappable, each cosign-attested." },
+  { "id": "aaaa0001-0001-4111-8111-000000000007", "position": 7, "filepath": "src/pages/slides/A11oyPrimitives.tsx", "title": "A11oy — primitives", "description": "Lexicon · Doctrine · Constitution · Λ-receipt", "speakerNotes": "Four primitives in @a11oy/core that the entire platform composes from." },
+  { "id": "aaaa0001-0001-4111-8111-000000000008", "position": 8, "filepath": "src/pages/slides/A11oyLicense.tsx", "title": "License intelligence", "description": "Every model call carries license + policy", "speakerNotes": "License terms parsed at registration, re-evaluated at every call." },
+  { "id": "aaaa0001-0001-4111-8111-000000000009", "position": 9, "filepath": "src/pages/slides/A11oyReceipts.tsx", "title": "Λ-receipt envelope", "description": "Replayable, arbitration-grade", "speakerNotes": "Every inference produces a sealed Λ-receipt." },
+  { "id": "aaaa0001-0001-4111-8111-000000000010", "position": 10, "filepath": "src/pages/slides/A11oyRouting.tsx", "title": "Multi-vendor, your policy", "description": "Lock-in dies at the gate", "speakerNotes": "Route between vendors under one portable policy." },
+  { "id": "aaaa0001-0001-4111-8111-000000000011", "position": 11, "filepath": "src/pages/slides/A11oySecurity.tsx", "title": "Security model", "description": "Cosign · SBOM · OIDC · OPA · KS-18", "speakerNotes": "Supply-chain, identity, policy, and contextuality witness — every layer attested." },
+  { "id": "aaaa0001-0001-4111-8111-000000000012", "position": 12, "filepath": "src/pages/slides/A11oyAPISurface.tsx", "title": "API surface", "description": "What you can call today", "speakerNotes": "Full route table of A11oy + governance endpoints, live in this env now." },
+  { "id": "aaaa0001-0001-4111-8111-000000000013", "position": 13, "filepath": "src/pages/slides/AmaruWhat.tsx", "title": "Amaru — what it is", "description": "Convergent data sync (Andean Ouroboros)", "speakerNotes": "Memory layer feeding A11oy with grounded context." },
+  { "id": "aaaa0001-0001-4111-8111-000000000014", "position": 14, "filepath": "src/pages/slides/AmaruSynthesis.tsx", "title": "Amaru — synthesis", "description": "One graph, three readers", "speakerNotes": "Peter, Marina, Costa all read from the same governed graph." },
+  { "id": "aaaa0001-0001-4111-8111-000000000015", "position": 15, "filepath": "src/pages/slides/SentraWhat.tsx", "title": "Sentra — what it is", "description": "Cyber resilience command", "speakerNotes": "Posture + readiness layer reading the same receipt stream." },
+  { "id": "aaaa0001-0001-4111-8111-000000000016", "position": 16, "filepath": "src/pages/slides/SentraRollup.tsx", "title": "Executive rollup", "description": "NIST · ISO 27001 · CMMC live", "speakerNotes": "One page · auditor-grade · drillable." },
+  { "id": "aaaa0001-0001-4111-8111-000000000017", "position": 17, "filepath": "src/pages/slides/Composition.tsx", "title": "Composition", "description": "One call across all three", "speakerNotes": "1.2s end-to-end: gate → ground → model → seal." },
+  { "id": "aaaa0001-0001-4111-8111-000000000018", "position": 18, "filepath": "src/pages/slides/VerticalMatrix.tsx", "title": "Vertical × capability matrix", "description": "Six verticals, one substrate", "speakerNotes": "Show A11oy/Amaru/Sentra cells against shipping, finance, healthcare, gov, ICS, legal." },
+  { "id": "aaaa0001-0001-4111-8111-000000000019", "position": 19, "filepath": "src/pages/slides/VerticalShipping.tsx", "title": "Vertical — Shipping & Energy", "description": "The Dorian-native vertical", "speakerNotes": "Sanctions, charter clause analysis, dark-fleet, port-state risk — all gated and receipt-bound." },
+  { "id": "aaaa0001-0001-4111-8111-000000000020", "position": 20, "filepath": "src/pages/slides/VerticalFinance.tsx", "title": "Vertical — Financial Services", "description": "Trade finance, model risk, AML", "speakerNotes": "Pre-trade screening, SR 11-7 model governance, KYV provenance." },
+  { "id": "aaaa0001-0001-4111-8111-000000000021", "position": 21, "filepath": "src/pages/slides/VerticalHealthLife.tsx", "title": "Vertical — Healthcare / Life Sci", "description": "Perception-loop privacy", "speakerNotes": "Features cross the membrane, raw frames never. HIPAA-compatible by construction." },
+  { "id": "aaaa0001-0001-4111-8111-000000000022", "position": 22, "filepath": "src/pages/slides/VerticalGov.tsx", "title": "Vertical — Public Sector / Defense", "description": "Air-gapped, cosign-attested", "speakerNotes": "UDS bundles ship to air-gapped installs. CMMC Level 2 ready." },
+  { "id": "aaaa0001-0001-4111-8111-000000000023", "position": 23, "filepath": "src/pages/slides/ForPeterOps.tsx", "title": "For Peter — Dorian operations", "description": "What ops gets in week one", "speakerNotes": "Charter clause analysis, sanctions-aware decision support, ops AI with citations." },
+  { "id": "aaaa0001-0001-4111-8111-000000000024", "position": 24, "filepath": "src/pages/slides/ForPeterICS.tsx", "title": "For Peter — fleet & shore-side posture", "description": "ICS / OT under Sentra", "speakerNotes": "VLGC OT estate scoring, IMO 2025 cyber risk readiness, P&I evidence packets." },
+  { "id": "aaaa0001-0001-4111-8111-000000000025", "position": 25, "filepath": "src/pages/slides/ForMarina.tsx", "title": "For Marina — enterprise control plane", "description": "Govern AI across the org", "speakerNotes": "Sentra readiness + A11oy license gate + ROSIE replayability — one pane." },
+  { "id": "aaaa0001-0001-4111-8111-000000000026", "position": 26, "filepath": "src/pages/slides/ForCosta.tsx", "title": "For Costa — counsel-grade evidence", "description": "Λ-receipts hold up in arbitration", "speakerNotes": "Arbitration-grade by construction, discharged by Lean theses TH1–TH8." },
+  { "id": "aaaa0001-0001-4111-8111-000000000027", "position": 27, "filepath": "src/pages/slides/ForCostaJurisdictions.tsx", "title": "For Costa — jurisdictions", "description": "NYC + London + EU", "speakerNotes": "OFAC + OFSI + EU consolidated. SDNY + LMAA/LCIA aligned." },
+  { "id": "aaaa0001-0001-4111-8111-000000000028", "position": 28, "filepath": "src/pages/slides/ForCostaDiscovery.tsx", "title": "For Costa — discovery export", "description": "What a subpoena gets, in one click", "speakerNotes": "Receipt bundle + Merkle proofs + cosign manifest + Lean check log." },
+  { "id": "aaaa0001-0001-4111-8111-000000000029", "position": 29, "filepath": "src/pages/slides/LeanTheses.tsx", "title": "TH1 → TH8 — discharged", "description": "Lean 4 proofs behind the calculus", "speakerNotes": "Eight theses, all green, machine-checked. The math is done." },
+  { "id": "aaaa0001-0001-4111-8111-000000000030", "position": 30, "filepath": "src/pages/slides/PublicRepos.tsx", "title": "Public proof — verify today", "description": "github.com/szl-holdings + cosign verify", "speakerNotes": "Six public repos, cosign-keyless via Actions OIDC." },
+  { "id": "aaaa0001-0001-4111-8111-000000000031", "position": 31, "filepath": "src/pages/slides/PrivateRepos.tsx", "title": "Private proof — under NDA", "description": "What unlocks at NDA + MSA", "speakerNotes": "A11oy core algorithms, Alloy prompt kernels, brand IP, Lean proofs, Doctrine v6." },
+  { "id": "aaaa0001-0001-4111-8111-000000000032", "position": 32, "filepath": "src/pages/slides/LiveNow.tsx", "title": "Live in this environment", "description": "Route surface you can call after NDA", "speakerNotes": "Not a roadmap. A live route table you can hit from your laptop." },
+  { "id": "aaaa0001-0001-4111-8111-000000000033", "position": 33, "filepath": "src/pages/slides/Traction.tsx", "title": "Traction — what's built", "description": "Numbers, not slogans", "speakerNotes": "Lines of code, repos, receipts processed, theses discharged, products production-grade." },
+  { "id": "aaaa0001-0001-4111-8111-000000000034", "position": 34, "filepath": "src/pages/slides/AccessPeter.tsx", "title": "Access · Peter", "description": "Five asks, no prod access day one", "speakerNotes": "Two ops workflows, one data source, IT/OT topology, two contacts, sponsor." },
+  { "id": "aaaa0001-0001-4111-8111-000000000035", "position": 35, "filepath": "src/pages/slides/AccessMarina.tsx", "title": "Access · Marina", "description": "Narrow pilot, wide contract", "speakerNotes": "Frameworks, SSO read-only, control evidence, AI usage list, one vertical." },
+  { "id": "aaaa0001-0001-4111-8111-000000000036", "position": 36, "filepath": "src/pages/slides/AccessCosta.tsx", "title": "Access · Costa", "description": "Counsel-led, evidence-graded", "speakerNotes": "NDA template, choice-of-law, retention/residency, 3-5 matters, London contact." },
+  { "id": "aaaa0001-0001-4111-8111-000000000037", "position": 37, "filepath": "src/pages/slides/SeriesA.tsx", "title": "Series A — the round", "description": "$8M on $32M pre · $40M post", "speakerNotes": "AI-governance comp band: Credo $12.8M, CalypsoAI $23M, Cranium $25M. Anchor disciplined." },
+  { "id": "aaaa0001-0001-4111-8111-000000000038", "position": 38, "filepath": "src/pages/slides/UseOfProceeds.tsx", "title": "Use of proceeds + 24-month plan", "description": "Where every dollar goes", "speakerNotes": "Engineering 50% / GTM 25% / Security & Compliance 15% / Legal & Ops 10%." },
+  { "id": "aaaa0001-0001-4111-8111-000000000039", "position": 39, "filepath": "src/pages/slides/Engagement.tsx", "title": "Engagement model", "description": "NDA → MSA → pilot → production", "speakerNotes": "Four steps. Three signatures. Ninety days from NDA to receipts in your audit board." },
+  { "id": "aaaa0001-0001-4111-8111-000000000040", "position": 40, "filepath": "src/pages/slides/Close.tsx", "title": "The ask", "description": "Lead the round · sign the NDA · open the gate", "speakerNotes": "Three asks: lead investor, NDA signer, design-partner. Decide before walking out." }
 ]
