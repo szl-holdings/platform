@@ -4,6 +4,8 @@ Every consequential action traverses a 9-step governance loop (signal→context�
 
 Each uds-v0.2.0 release (2026-05-27) carries four assets — bundle, sha256, cosign blob signature, dev pubkey — on the Release itself. No GHCR, no Sigstore round-trip. Air-gap parity by construction.
 
+The five bundles (all v0.2.0, all signed, all deterministic):
+
 • A11oy — governed execution fabric. Λ-gate (9-axis Lutar Invariant), Bekenstein-bounded admission, dual-witness MATCH/DIVERGE verdict, signed receipts.
 https://github.com/szl-holdings/a11oy/releases/tag/uds-v0.2.0
 
