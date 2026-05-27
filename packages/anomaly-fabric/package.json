@@ -24,6 +24,10 @@
     "./batch": {
       "types": "./dist/batch.d.ts",
       "import": "./src/batch.ts"
+    },
+    "./peak-detector": {
+      "types": "./dist/peak-detector.d.ts",
+      "import": "./src/peak-detector.ts"
     }
   },
   "scripts": {

@@ -1,0 +1,40 @@
+{
+  "name": "@workspace/vessels-perception-viz",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Shared React visualization components for Vessels web and Vessels-Pitch slides. Wraps sim-kit (trajectory + collision cone), peak-detector (signal-mesh ranking), procedural-kit + openusd-export (ship/port 3D scenes, USD round-trip), and sequence-pipeline (voyage Λ-receipts). Single import path so the deck and the live product render the same components.",
+  "main": "./src/index.ts",
+  "types": "./src/index.ts",
+  "exports": {
+    ".": { "types": "./src/index.ts", "import": "./src/index.ts" },
+    "./trajectory": { "types": "./src/trajectory.tsx", "import": "./src/trajectory.tsx" },
+    "./ship-port-scene": { "types": "./src/ship-port-scene.tsx", "import": "./src/ship-port-scene.tsx" },
+    "./ranked-signal-mesh": { "types": "./src/ranked-signal-mesh.tsx", "import": "./src/ranked-signal-mesh.tsx" },
+    "./voyage-pipeline-trace": { "types": "./src/voyage-pipeline-trace.tsx", "import": "./src/voyage-pipeline-trace.tsx" },
+    "./pipeline": { "types": "./src/pipeline.ts", "import": "./src/pipeline.ts" },
+    "./ship-library": { "types": "./src/ship-library.ts", "import": "./src/ship-library.ts" }
+  },
+  "scripts": {
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run --passWithNoTests"
+  },
+  "license": "UNLICENSED",
+  "dependencies": {
+    "@szl-holdings/sim-kit": "workspace:*",
+    "@szl-holdings/procedural-kit": "workspace:*",
+    "@szl-holdings/openusd-export": "workspace:*",
+    "@szl-holdings/sequence-pipeline": "workspace:*",
+    "@workspace/anomaly-fabric": "workspace:*"
+  },
+  "devDependencies": {
+    "@types/node": "catalog:",
+    "@types/react": "catalog:",
+    "react": "catalog:",
+    "typescript": "catalog:",
+    "vitest": "catalog:"
+  },
+  "peerDependencies": {
+    "react": "catalog:"
+  }
+}

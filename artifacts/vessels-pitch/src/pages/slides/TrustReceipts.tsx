@@ -1,4 +1,27 @@
+import { useEffect, useState } from "react";
+import {
+  runVoyagePipeline,
+  VoyagePipelineTrace,
+  type VoyagePipelineResult,
+} from "@workspace/vessels-perception-viz";
+
+const TRUST_VOYAGE = {
+  voyageRef: "VOY-2026-001",
+  imo: "9412987",
+  aisPoints: 3200,
+  counterpartyIds: ["CP-001", "CP-SDN-77"],
+  sanctionsListVersion: "OFAC-SDN-2026.05.14",
+};
+
 export default function TrustReceipts() {
+  const [trace, setTrace] = useState<VoyagePipelineResult | null>(null);
+  useEffect(() => {
+    runVoyagePipeline(TRUST_VOYAGE).then(setTrace);
+  }, []);
+  return <TrustReceiptsContent trace={trace} />;
+}
+
+function TrustReceiptsContent({ trace }: { trace: VoyagePipelineResult | null }) {
   return (
     <div className="relative w-screen h-screen overflow-hidden bg-bg text-text font-body px-[6vw] py-[7vh] flex flex-col">
       <div className="flex items-center justify-between">
@@ -48,6 +71,14 @@ export default function TrustReceipts() {
         <span className="mx-[1vw] text-rule">·</span>
         signed by operator-12 · 2026-05-17T14:02:11Z
       </div>
+
+      {/* Per-stage Λ-receipts emitted by the same sequence-pipeline the live
+          Vessels surface runs. Stage shape locked by the package fixture test. */}
+      {trace ? (
+        <div className="mt-[2vh]">
+          <VoyagePipelineTrace pipelineId={trace.pipelineId} stages={trace.stages} />
+        </div>
+      ) : null}
 
       <div className="flex items-end justify-between border-t border-rule pt-[3vh] mt-[3vh]">
         <div className="font-mono text-[0.9vw] tracking-[0.2em] text-muted uppercase">Capability 06 of 06</div>

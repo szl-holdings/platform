@@ -1,3 +1,12 @@
+import { DeterministicTrajectory } from "@workspace/vessels-perception-viz";
+
+const FLEET_VOYAGE_WAYPOINTS = [
+  { lat: 29.5, lon: -94.8, name: "USG · Houston" },
+  { lat: 36.0, lon: -45.0 },
+  { lat: 47.0, lon: -10.0 },
+  { lat: 51.95, lon: 4.13, name: "ROT · Rotterdam" },
+] as const;
+
 export default function FleetTracking() {
   return (
     <div className="relative w-screen h-screen overflow-hidden bg-bg text-text font-body px-[6vw] py-[7vh] flex flex-col">
@@ -31,6 +40,18 @@ export default function FleetTracking() {
         </div>
 
         <div className="col-span-7 bg-panel border border-rule relative overflow-hidden">
+          {/* Deterministic trajectory rendered by @workspace/vessels-perception-viz — the
+              same component the live Vessels surface uses (sim-physics-driven). */}
+          <div className="absolute inset-0 z-10 flex items-center justify-center pointer-events-none">
+            <DeterministicTrajectory
+              voyageId="DORIAN-FLEET-2026-001"
+              waypoints={FLEET_VOYAGE_WAYPOINTS as unknown as { lat: number; lon: number; name?: string }[]}
+              width={680}
+              height={460}
+              tickMs={0}
+              ariaLabel="Dorian fleet flagship voyage, USG → Rotterdam, deterministic"
+            />
+          </div>
           <svg viewBox="0 0 700 480" className="w-full h-full" preserveAspectRatio="xMidYMid slice">
             <defs>
               <linearGradient id="oceanGrad" x1="0" y1="0" x2="0" y2="1">

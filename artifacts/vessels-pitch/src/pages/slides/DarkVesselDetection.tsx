@@ -1,3 +1,25 @@
+import { RankedSignalMesh, type SignalSeriesInput } from "@workspace/vessels-perception-viz";
+
+// Fixture-locked signal-mesh inputs — order produced by peak-detector,
+// not by hand. Matches the @workspace/vessels-perception-viz fixture
+// test so the deck and the product cannot diverge.
+function bump(center: number, height: number, n = 21) {
+  const pts: { x: number; intensity: number }[] = [];
+  for (let i = 0; i < n; i++) {
+    const x = i - n / 2;
+    const noise = 0.05 * Math.sin(i * 1.7);
+    pts.push({ x: center + x, intensity: 1 + height * Math.exp(-(x * x) / 4) + noise });
+  }
+  return pts;
+}
+
+const DARK_VESSEL_SIGNALS: readonly SignalSeriesInput[] = [
+  { streamId: "sanctions-hits",  label: "Sanctions hits",     category: "comp",    series: bump(0, 6.1) },
+  { streamId: "ais-density",     label: "AIS density",        category: "traffic", series: bump(0, 4.5) },
+  { streamId: "port-congestion", label: "Port congestion",    category: "port",    series: bump(0, 2.2) },
+  { streamId: "sts-rendezvous",  label: "STS rendezvous",     category: "risk",    series: bump(0, 1.4) },
+];
+
 export default function DarkVesselDetection() {
   return (
     <div className="relative w-screen h-screen overflow-hidden bg-bg text-text font-body px-[6vw] py-[7vh] flex flex-col">
@@ -71,6 +93,15 @@ export default function DarkVesselDetection() {
               <div className="text-muted tracking-[0.15em] text-[0.85vw] uppercase mb-[0.5vh]">Counterparty hull</div>
               <div className="text-alert">IMO 9650441 · sanctioned ownership</div>
             </div>
+          </div>
+
+          {/* Signal-mesh ranked by peak-detector — same component the live Vessels surface
+              renders. Order is fixture-locked in the @workspace/vessels-perception-viz tests. */}
+          <div className="mt-[2vh]">
+            <div className="font-mono text-[0.85vw] tracking-[0.2em] text-muted uppercase mb-[1vh]">
+              Signal-mesh · peak-detector ranking
+            </div>
+            <RankedSignalMesh streams={DARK_VESSEL_SIGNALS} limit={4} />
           </div>
         </div>
       </div>

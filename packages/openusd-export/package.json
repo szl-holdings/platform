@@ -14,7 +14,8 @@
     "./vessel-usd": "./src/vessel-usd.ts",
     "./property-usd": "./src/property-usd.ts",
     "./scenario-usd": "./src/scenario-usd.ts",
-    "./serializer": "./src/serializer.ts"
+    "./serializer": "./src/serializer.ts",
+    "./from-part-graph": "./src/from-part-graph.ts"
   },
   "dependencies": {
     "pino": "^9"

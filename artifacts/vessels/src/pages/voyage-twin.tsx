@@ -13,9 +13,19 @@ import {
   Play,
   RefreshCw,
   RotateCcw,
+  Sparkles,
   TrendingUp,
 } from 'lucide-react';
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
+import {
+  DeterministicTrajectory,
+  RankedSignalMesh,
+  ShipPortScene,
+  VoyagePipelineTrace,
+  runVoyagePipeline,
+  type SignalSeriesInput,
+  type VoyagePipelineResult,
+} from '@workspace/vessels-perception-viz';
 
 const ACCENT = 'var(--gi-accent-blue)';
 const API_BASE = import.meta.env.BASE_URL?.replace(/\/$/, '') ?? '';
@@ -210,12 +220,114 @@ function WhatIfCard({ scenario }: { scenario: WhatIf }) {
   );
 }
 
+function PerceptionTwinView({
+  data,
+  trace,
+}: {
+  data: TwinData;
+  trace: VoyagePipelineResult | null;
+}) {
+  const waypoints = useMemo(
+    () =>
+      data.snapshots
+        .filter((s) => typeof s.position?.lat === 'number' && typeof s.position?.lon === 'number')
+        .map((s) => ({ lat: s.position.lat, lon: s.position.lon, name: s.snapshotId })),
+    [data],
+  );
+  const signals = useMemo<SignalSeriesInput[]>(() => {
+    const bump = (height: number, n = 21) => {
+      const pts: { x: number; intensity: number }[] = [];
+      for (let i = 0; i < n; i++) {
+        const x = i - n / 2;
+        pts.push({ x, intensity: 1 + height * Math.exp(-(x * x) / 4) + 0.04 * Math.sin(i * 1.7) });
+      }
+      return pts;
+    };
+    return [
+      { streamId: 'fuel-burn', label: 'Fuel burn', category: 'energy', series: bump(5.4) },
+      { streamId: 'eta-drift', label: 'ETA drift', category: 'voyage', series: bump(3.9) },
+      { streamId: 'weather-load', label: 'Weather load', category: 'env', series: bump(2.1) },
+      { streamId: 'sanctions', label: 'Sanctions exposure', category: 'comp', series: bump(1.2) },
+    ];
+  }, []);
+
+  return (
+    <div className="grid grid-cols-12 gap-4">
+      <div
+        className="col-span-7 rounded-xl border border-white/[0.06] p-3"
+        style={{ background: 'rgba(10,22,40,0.8)' }}
+      >
+        <div className="text-[10px] tracking-[0.2em] uppercase text-[#8a8a8a] mb-2">
+          Deterministic trajectory · sim-kit
+        </div>
+        <DeterministicTrajectory
+          voyageId={data.voyageRef}
+          waypoints={waypoints}
+          width={680}
+          height={320}
+          tickMs={0}
+          ariaLabel={`Deterministic trajectory for ${data.voyageRef}`}
+        />
+        <div className="mt-3">
+          <ShipPortScene
+            seed={Array.from(data.voyageRef).reduce((h, c) => (h * 33 + c.charCodeAt(0)) >>> 0, 5381)}
+            width={680}
+            height={220}
+          />
+        </div>
+      </div>
+      <div className="col-span-5 space-y-3">
+        <div
+          className="rounded-xl border border-white/[0.06] p-3"
+          style={{ background: 'rgba(10,22,40,0.8)' }}
+        >
+          <div className="text-[10px] tracking-[0.2em] uppercase text-[#8a8a8a] mb-2">
+            Signal-mesh · peak-detector
+          </div>
+          <RankedSignalMesh streams={signals} limit={4} />
+        </div>
+        <div
+          className="rounded-xl border border-white/[0.06] p-3"
+          style={{ background: 'rgba(10,22,40,0.8)' }}
+        >
+          <div className="text-[10px] tracking-[0.2em] uppercase text-[#8a8a8a] mb-2">
+            Λ-receipts · sequence-pipeline
+          </div>
+          {trace ? (
+            <VoyagePipelineTrace pipelineId={trace.pipelineId} stages={trace.stages} />
+          ) : (
+            <div className="text-[11px] text-[#6a6a6a]">Computing pipeline trace…</div>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+}
+
 export default function VoyageTwinPage() {
   const [voyageRef, setVoyageRef] = useState<string>('VOY-2026-001');
   const [data, setData] = useState<TwinData | null>(null);
   const [loading, setLoading] = useState(false);
   const [selectedSnap, setSelectedSnap] = useState<Snapshot | null>(null);
-  const [view, setView] = useState<'timeline' | 'whatif'>('timeline');
+  const [view, setView] = useState<'timeline' | 'whatif' | 'perception'>('timeline');
+  const [pipelineTrace, setPipelineTrace] = useState<VoyagePipelineResult | null>(null);
+
+  useEffect(() => {
+    if (!data) return;
+    let cancelled = false;
+    runVoyagePipeline({
+      voyageRef: data.voyageRef,
+      imo: data.vessel.imo,
+      aisPoints: data.summary.totalSnapshots * 480,
+      counterpartyIds: [`CP-${data.vessel.imo}`],
+      sanctionsListVersion: 'OFAC-SDN-2026.05.14',
+    }).then((r) => {
+      if (!cancelled) setPipelineTrace(r);
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, [data]);
 
   async function load(ref: string) {
     setLoading(true);
@@ -389,6 +501,7 @@ export default function VoyageTwinPage() {
         {[
           { k: 'timeline', label: 'Timeline Replay', icon: Play },
           { k: 'whatif', label: 'What-If Forks', icon: GitBranch },
+          { k: 'perception', label: 'Perception Twin', icon: Sparkles },
         ].map((v) => {
           const Icon = v.icon;
           return (
@@ -527,6 +640,8 @@ export default function VoyageTwinPage() {
             ))}
           </div>
         </div>
+      ) : view === 'perception' && data ? (
+        <PerceptionTwinView data={data} trace={pipelineTrace} />
       ) : null}
     </div>
   );
