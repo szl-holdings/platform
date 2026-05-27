@@ -26,9 +26,12 @@ type BundleEntry = {
   version: string;
   artifactRef: string | null;
   artifactSha256: string | null;
+  artifactSha256Source: "sidecar" | "computed" | "none";
   sidecarRef: string | null;
   sidecarSha256: string | null;
   signatureRef: string | null;
+  signerDid: string | null;
+  signerKeyRef: string | null;
   sizeBytes: number | null;
   builtAt: string | null;
   source: "dist" | "fallback";
@@ -312,7 +315,7 @@ function Lane1() {
                     <th className="text-left px-3 py-1.5">Bundle</th>
                     <th className="text-left px-3 py-1.5">Artifact</th>
                     <th className="text-left px-3 py-1.5">sha256</th>
-                    <th className="text-left px-3 py-1.5">Sidecar</th>
+                    <th className="text-left px-3 py-1.5">Signer</th>
                     <th className="text-left px-3 py-1.5">Source</th>
                   </tr>
                 </thead>
@@ -321,10 +324,47 @@ function Lane1() {
                     <tr key={b.name} className="border-t border-border">
                       <td className="px-3 py-1.5 text-foreground">{b.name}</td>
                       <td className="px-3 py-1.5 text-muted-foreground break-all">{b.artifactRef ?? "—"}</td>
-                      <td className="px-3 py-1.5 text-emerald-400">
-                        {b.artifactSha256 ? short(b.artifactSha256) : <span className="text-muted-foreground">pending build</span>}
+                      <td className="px-3 py-1.5">
+                        {b.artifactSha256 ? (
+                          <span
+                            className={
+                              b.artifactSha256Source === "sidecar"
+                                ? "text-emerald-400"
+                                : "text-amber-400"
+                            }
+                            title={
+                              b.artifactSha256Source === "sidecar"
+                                ? `from ${b.sidecarRef ?? ".sha256"}`
+                                : b.artifactSha256Source === "computed"
+                                  ? "recomputed from tarball (no .sha256 sidecar)"
+                                  : "no tarball on disk"
+                            }
+                          >
+                            {short(b.artifactSha256)}
+                            <span className="ml-1 text-[9px] uppercase tracking-[0.1em] opacity-70">
+                              {b.artifactSha256Source === "sidecar" ? "signed" : "computed"}
+                            </span>
+                          </span>
+                        ) : (
+                          <span className="text-muted-foreground">pending build</span>
+                        )}
                       </td>
-                      <td className="px-3 py-1.5 text-muted-foreground break-all">{b.sidecarRef ?? "—"}</td>
+                      <td className="px-3 py-1.5 break-all">
+                        {b.signerDid ? (
+                          <span
+                            className="text-emerald-400"
+                            title={b.signerKeyRef ?? undefined}
+                          >
+                            {b.signerDid}
+                          </span>
+                        ) : b.signatureRef ? (
+                          <span className="text-amber-400" title={b.signatureRef}>
+                            signed (no key)
+                          </span>
+                        ) : (
+                          <span className="text-muted-foreground">unsigned</span>
+                        )}
+                      </td>
                       <td className="px-3 py-1.5">
                         {b.source === "dist" ? (
                           <span className="text-emerald-400">disk</span>

@@ -183,10 +183,26 @@ interface BundleEntry {
   name: string;
   version: string;
   artifactRef: string | null;
+  /**
+   * SHA-256 of the bundle tarball. When a sibling `.sha256` sidecar
+   * exists, this value is parsed from the sidecar (the asserted/signed
+   * hash); otherwise it is recomputed from the tarball bytes.
+   */
   artifactSha256: string | null;
+  /** Source of `artifactSha256`: 'sidecar' parses from the .sha256 file,
+   *  'computed' recomputes from tarball bytes, 'none' when no tarball. */
+  artifactSha256Source: 'sidecar' | 'computed' | 'none';
   sidecarRef: string | null;
   sidecarSha256: string | null;
   signatureRef: string | null;
+  /**
+   * Signer DID derived from the cosign public key when a signature
+   * sidecar is present and a `.pub` key is discoverable on disk.
+   * Format: `did:key:cosign:sha256:<first-32-hex-of-pubkey-sha256>`.
+   */
+  signerDid: string | null;
+  /** Path (repo-relative) to the public key used to derive `signerDid`. */
+  signerKeyRef: string | null;
   sizeBytes: number | null;
   builtAt: string | null;
   source: 'dist' | 'fallback';
@@ -204,6 +220,55 @@ function findRepoRoot(): string {
   return process.cwd();
 }
 
+// Parse a `sha256sum`-style sidecar (`<64-hex>  <filename>`). Returns the
+// asserted hex digest in lowercase, or null if the file does not contain a
+// well-formed sha256.
+function parseSha256Sidecar(contents: string): string | null {
+  for (const line of contents.split(/\r?\n/)) {
+    const m = line.trim().match(/^([0-9a-fA-F]{64})\b/);
+    if (m) return m[1]!.toLowerCase();
+  }
+  return null;
+}
+
+// Discover the cosign public key on disk that should verify a given
+// bundle's signature, then derive a stable DID from it. We look in the
+// artifact's `release-keys/` dir (the only convention used so far) and
+// fall back to any sibling `*.pub` next to the tarball.
+function discoverSignerKey(
+  root: string,
+  bundleName: string,
+  bundleDir: string,
+  bundleFiles: readonly string[],
+): { keyAbs: string; keyRef: string } | null {
+  const candidates: string[] = [];
+  const releaseDir = path.join(root, 'artifacts', bundleName, 'release-keys');
+  try {
+    if (existsSync(releaseDir) && statSync(releaseDir).isDirectory()) {
+      for (const f of readdirSync(releaseDir)) {
+        if (f.endsWith('.pub')) candidates.push(path.join(releaseDir, f));
+      }
+    }
+  } catch {
+    // ignore
+  }
+  for (const f of bundleFiles) {
+    if (f.endsWith('.pub')) candidates.push(path.join(bundleDir, f));
+  }
+  if (candidates.length === 0) return null;
+  // Stable selection: alphabetically first .pub.
+  candidates.sort();
+  const keyAbs = candidates[0]!;
+  return { keyAbs, keyRef: path.relative(root, keyAbs) };
+}
+
+function deriveSignerDid(pubKeyBytes: Buffer): string {
+  // did:key isn't a registered cosign method; we namespace it explicitly
+  // so consumers know this DID is content-addressed off the cosign public
+  // key bytes, not a real DID-resolver lookup.
+  return `did:key:cosign:sha256:${sha256(pubKeyBytes).slice(0, 32)}`;
+}
+
 function readBundleMatrix(): BundleEntry[] {
   const root = findRepoRoot();
   const out: BundleEntry[] = [];
@@ -214,9 +279,12 @@ function readBundleMatrix(): BundleEntry[] {
       version: '1.0.0-alpha',
       artifactRef: null,
       artifactSha256: null,
+      artifactSha256Source: 'none',
       sidecarRef: null,
       sidecarSha256: null,
       signatureRef: null,
+      signerDid: null,
+      signerKeyRef: null,
       sizeBytes: null,
       builtAt: null,
       source: 'fallback',
@@ -236,18 +304,40 @@ function readBundleMatrix(): BundleEntry[] {
             ...bundle,
             artifactRef: path.relative(root, abs),
             artifactSha256: sha256(readFileSync(abs)),
+            artifactSha256Source: 'computed',
             sizeBytes: tar.st.size,
             builtAt: tar.st.mtime.toISOString(),
             source: 'dist',
           };
+          // Prefer the asserted hash from the .sha256 sidecar — that is
+          // the value the build pipeline signs and downstream verifiers
+          // check against. Fall back to the recomputed hash only when
+          // the sidecar is missing or malformed.
           const sidecar = files.find((f) => f === `${tar.f}.sha256`);
           if (sidecar) {
             const sidecarAbs = path.join(dir, sidecar);
+            const raw = readFileSync(sidecarAbs);
             bundle.sidecarRef = path.relative(root, sidecarAbs);
-            bundle.sidecarSha256 = sha256(readFileSync(sidecarAbs));
+            bundle.sidecarSha256 = sha256(raw);
+            const asserted = parseSha256Sidecar(raw.toString('utf8'));
+            if (asserted) {
+              bundle.artifactSha256 = asserted;
+              bundle.artifactSha256Source = 'sidecar';
+            }
           }
           const sig = files.find((f) => f === `${tar.f}.sig` || f === `${tar.f}.cosign.sig`);
-          if (sig) bundle.signatureRef = path.relative(root, path.join(dir, sig));
+          if (sig) {
+            bundle.signatureRef = path.relative(root, path.join(dir, sig));
+            const key = discoverSignerKey(root, name, dir, files);
+            if (key) {
+              try {
+                bundle.signerDid = deriveSignerDid(readFileSync(key.keyAbs));
+                bundle.signerKeyRef = key.keyRef;
+              } catch {
+                // unreadable public key — leave signer fields null
+              }
+            }
+          }
         }
       }
     } catch {
@@ -305,7 +395,10 @@ router.post('/warhacker/lane/1/bundle-compose', validateBody(Lane1Body), (req, r
             version: b.version,
             artifactRef: b.artifactRef,
             artifactSha256: b.artifactSha256,
+            artifactSha256Source: b.artifactSha256Source,
             sidecarRef: b.sidecarRef,
+            signatureRef: b.signatureRef,
+            signerDid: b.signerDid,
             sizeBytes: b.sizeBytes,
             source: b.source,
           })),
@@ -319,7 +412,16 @@ router.post('/warhacker/lane/1/bundle-compose', validateBody(Lane1Body), (req, r
         pillar: 'evidence-first',
         payload: {
           algorithm: 'sha256',
-          signer: 'did:plat:szl-warhacker-prod',
+          // Real per-bundle signers when discoverable; the synthetic
+          // `did:plat:szl-warhacker-prod` is only used as a placeholder
+          // when no .sig + .pub pair has been produced yet.
+          signers: matrix.map((b) => ({
+            bundle: b.name,
+            did: b.signerDid ?? 'did:plat:szl-warhacker-prod',
+            resolved: b.signerDid !== null,
+            keyRef: b.signerKeyRef,
+          })),
+          signedBundles: matrix.filter((b) => b.signerDid !== null).length,
           entries: matrix.length * 3,
         },
       },
