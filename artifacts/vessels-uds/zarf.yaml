@@ -1,0 +1,46 @@
+kind: ZarfPackageConfig
+metadata:
+  name: vessels-uds
+  description: |
+    Vessels — Maritime Intelligence. Self-contained, declaratively-deployable
+    payload for Defense-Unicorns (UDS) environments. Drops the Vessels
+    maritime-intelligence kernel (trajectory inspector with closest-point-of-
+    approach + collision-cone, AIS-gap dark-vessel detector, sanctions screen
+    over OFAC/EU/UK/UN list shapes, voyage Λ-receipt chain) plus a per-file
+    provenance manifest into a UDS bundle via `zarf package deploy`.
+  version: 0.1.0
+  architecture: multi
+  url: https://github.com/szl-holdings/vessels
+  authors: "Stephen P. Lutar Jr. / SZL Holdings"
+
+components:
+  - name: vessels-core
+    description: "Vessels kernel — trajectory inspector (CPA + collision cone), AIS-gap detector, sanctions screen, voyage Λ-receipts, hash-chained proof."
+    required: true
+    files:
+      - source: lib
+        target: /opt/vessels/lib
+  - name: vessels-demo
+    description: "vessels-demo.mjs — 30-second post-deploy harness exercising every primitive."
+    required: true
+    files:
+      - source: vessels-demo.mjs
+        target: /opt/vessels/vessels-demo.mjs
+  - name: vessels-provenance
+    description: "MANIFEST.json — per-file sha256 + build metadata."
+    required: true
+    files:
+      - source: build/MANIFEST.json
+        target: /opt/vessels/MANIFEST.json
+  - name: vessels-docs
+    description: "ARCHITECTURE (primitives + citations), SECURITY (signing model), UDS-BUNDLE (integration), OPERATOR-QUICKSTART (4-cmd verify)."
+    required: true
+    files:
+      - source: docs/ARCHITECTURE.md
+        target: /opt/vessels/docs/ARCHITECTURE.md
+      - source: docs/SECURITY.md
+        target: /opt/vessels/docs/SECURITY.md
+      - source: docs/UDS-BUNDLE.md
+        target: /opt/vessels/docs/UDS-BUNDLE.md
+      - source: docs/OPERATOR-QUICKSTART.md
+        target: /opt/vessels/docs/OPERATOR-QUICKSTART.md

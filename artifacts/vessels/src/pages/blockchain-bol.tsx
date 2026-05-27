@@ -156,7 +156,7 @@ export default function BlockchainBoLPage() {
   const user = SIGNING_OPERATOR;
   // Single signing affordance now that there is no in-app role switcher. The
   // server still validates the calling tenant/role on submit.
-  const signAction: 'sign' | 'endorse' | 'countersign' | null = 'sign';
+  const signAction = 'sign' as 'sign' | 'endorse' | 'countersign' | null;
   const signActionLabel =
     signAction === 'endorse'
       ? 'Endorse'

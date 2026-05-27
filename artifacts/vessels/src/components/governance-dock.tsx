@@ -13,6 +13,7 @@ import {
   OmniaTimeline,
   OwnershipMeta,
   PolicySummaryBar,
+  StatusChip,
   StatusChipGroup,
   type EvidenceEntry,
   type TimelineEvent,
@@ -69,11 +70,11 @@ const EVIDENCE: EvidenceEntry[] = [
 ];
 
 const TIMELINE: TimelineEvent[] = [
-  { id: 't1', label: 'Voyage manifest synced', timestamp: minutesAgo(180), severity: 'info' },
-  { id: 't2', label: 'Sanctions list refreshed', timestamp: minutesAgo(120), severity: 'info' },
-  { id: 't3', label: 'Dark-vessel signal raised', timestamp: minutesAgo(42), severity: 'warning' },
-  { id: 't4', label: 'Operator approved review', timestamp: minutesAgo(20), severity: 'success' },
-  { id: 't5', label: 'PSC pre-brief delivered', timestamp: minutesAgo(8), severity: 'info' },
+  { id: 't1', title: 'Voyage manifest synced', timestamp: minutesAgo(180), severity: 'info' },
+  { id: 't2', title: 'Sanctions list refreshed', timestamp: minutesAgo(120), severity: 'info' },
+  { id: 't3', title: 'Dark-vessel signal raised', timestamp: minutesAgo(42), severity: 'warning' },
+  { id: 't4', title: 'Operator approved review', timestamp: minutesAgo(20), severity: 'success' },
+  { id: 't5', title: 'PSC pre-brief delivered', timestamp: minutesAgo(8), severity: 'info' },
 ];
 
 export function GovernanceDock() {
@@ -86,22 +87,14 @@ export function GovernanceDock() {
         </p>
       </header>
 
-      <StatusChipGroup
-        chips={[
-          { status: 'healthy', label: 'AIS pipeline' },
-          { status: 'enforced', label: 'OPA policies' },
-          { status: 'advisory', label: 'Agent gateway' },
-          { status: 'approved', label: 'Last release' },
-        ]}
-      />
+      <StatusChipGroup>
+        <StatusChip status="healthy" label="AIS pipeline" />
+        <StatusChip status="healthy" label="OPA policies" />
+        <StatusChip status="warning" label="Agent gateway (advisory)" />
+        <StatusChip status="healthy" label="Last release approved" />
+      </StatusChipGroup>
 
-      <PolicySummaryBar
-        policies={[
-          { id: 'maritime.sanctions', name: 'Sanctions screen', status: 'enforced' },
-          { id: 'maritime.dark-vessel', name: 'Dark vessel review', status: 'requires-approval' },
-          { id: 'maritime.psc.brief', name: 'PSC pre-brief draft', status: 'advisory' },
-        ]}
-      />
+      <PolicySummaryBar enforced={2} advisory={1} violations={0} exempt={0} />
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <OmniaEvidencePanel
@@ -121,20 +114,23 @@ export function GovernanceDock() {
           lifecycle="production"
           healthEndpoint="/health"
           runbookUrl="https://backstage.szl/catalog/component/vessels/runbook"
-          scorecard={{ score: 86, scale: 100 }}
+          scorecardScore={86}
           lastDeploy={minutesAgo(60 * 8)}
         />
         <DeploymentContext
+          serviceName="vessels-web"
           environment="production"
-          deploymentStatus="healthy"
+          deploymentStatus="deployed"
           version="2026.05.03-r4"
-          uptimeSeconds={60 * 60 * 36}
-          probes={[
-            { name: 'web', status: 'healthy', latencyMs: 42 },
-            { name: 'api', status: 'healthy', latencyMs: 18 },
-            { name: 'ais-stream', status: 'degraded', latencyMs: 240 },
+          uptime={60 * 60 * 36}
+          healthProbes={[
+            { name: 'web', url: '/health', status: 'passing', latencyMs: 42 },
+            { name: 'api', url: '/api/health', status: 'passing', latencyMs: 18 },
+            { name: 'ais-stream', url: '/api/vessels/ais/health', status: 'passing', latencyMs: 240 },
           ]}
-          slo={{ name: 'availability', target: 99.9, current: 99.94 }}
+          sloName="availability"
+          sloTarget={99.9}
+          sloCurrent={99.94}
         />
       </div>
     </section>

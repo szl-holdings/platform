@@ -1,0 +1,11 @@
+{
+  "name": "@szl/vessels-uds",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Vessels.UDS — signed Zarf payload for the Vessels maritime-intelligence runtime (trajectory inspector, AIS-gap detector, sanctions screen, voyage Λ-receipts). Pure-ESM kernel, no runtime dependencies, deterministic build.",
+  "license": "SEE LICENSE IN LICENSE",
+  "scripts": {
+    "build": "bash scripts/build.sh",
+    "verify": "node scripts/verify-manifest.mjs ."
+  }
+}

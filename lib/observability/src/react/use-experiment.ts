@@ -6,8 +6,8 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 // ---------------------------------------------------------------------------
 
 const BASE_API = (
-  typeof import.meta !== 'undefined' && (import.meta as Record<string, unknown>).env
-    ? (import.meta as { env: Record<string, string> }).env.VITE_API_URL ?? ''
+  typeof import.meta !== 'undefined' && (import.meta as unknown as Record<string, unknown>).env
+    ? (import.meta as unknown as { env: Record<string, string> }).env.VITE_API_URL ?? ''
     : ''
 ) as string;
 

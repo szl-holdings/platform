@@ -33,7 +33,7 @@ interface RegisteredFeed {
   lastHeartbeat: string;
 }
 
-const KIND_CONFIG: Record<FeedKind, { icon: React.ComponentType<{ className?: string }>; label: string; schemaHint: string }> = {
+const KIND_CONFIG: Record<FeedKind, { icon: React.ComponentType<{ className?: string; style?: React.CSSProperties }>; label: string; schemaHint: string }> = {
   COASTAL_RADAR: { icon: Radio, label: 'Coastal radar', schemaHint: 'NMEA-2000 RATTM bursts, 1Hz min' },
   VTS: { icon: Database, label: 'VTS feed', schemaHint: 'IALA VTM Annex A, 5s update' },
   RF: { icon: Activity, label: 'RF geolocation', schemaHint: 'Custom JSON: bearing, freq, snr, ts' },

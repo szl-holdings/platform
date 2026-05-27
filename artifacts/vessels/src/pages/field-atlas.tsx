@@ -22,7 +22,7 @@ interface AtlasPillar {
   code: string;
   name: string;
   href: string;
-  icon: React.ComponentType<{ className?: string }>;
+  icon: React.ComponentType<{ className?: string; style?: React.CSSProperties }>;
   governance: string;
   oneLiner: string;
   bullets: string[];

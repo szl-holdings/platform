@@ -378,7 +378,7 @@ export default function Platform() {
                         </p>
                       </div>
                       <p className="text-[10px] text-sky-400/40 mt-1">
-                        {e.vesselName ?? '—'} · {new Date(e.detectedAt ?? e.createdAt).toLocaleDateString()}
+                        {e.vesselName ?? '—'} · {new Date(e.detectedAt ?? e.createdAt ?? Date.now()).toLocaleDateString()}
                       </p>
                     </div>
                   );

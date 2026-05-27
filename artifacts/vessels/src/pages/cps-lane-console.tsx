@@ -276,7 +276,9 @@ export default function VesselsCpsLaneConsole() {
                       {run.startedAt ? new Date(run.startedAt).toLocaleString() : '—'}
                     </span>
                     {run.proofBundle && (
-                      <FileText className="w-3.5 h-3.5 text-slate-500" title="Proof bundle available" />
+                      <span title="Proof bundle available" className="inline-flex">
+                        <FileText className="w-3.5 h-3.5 text-slate-500" />
+                      </span>
                     )}
                   </div>
                   {run.decide?.reasoning && (

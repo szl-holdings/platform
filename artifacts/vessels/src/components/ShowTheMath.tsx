@@ -41,7 +41,7 @@ export function ShowTheMath({
   pkg = '@szl-holdings/formulas',
   receiptHash,
   children,
-}: ShowTheMathProps): JSX.Element {
+}: ShowTheMathProps): React.JSX.Element {
   return (
     <Sheet>
       <SheetTrigger asChild>

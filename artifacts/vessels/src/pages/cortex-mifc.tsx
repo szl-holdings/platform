@@ -111,7 +111,7 @@ const CASES: VesselCase[] = [
   },
 ];
 
-const SOURCE_CONFIG: Record<IntSource, { icon: React.ComponentType<{ className?: string }>; label: string }> = {
+const SOURCE_CONFIG: Record<IntSource, { icon: React.ComponentType<{ className?: string; style?: React.CSSProperties }>; label: string }> = {
   AIS: { icon: Radio, label: 'AIS broadcast' },
   SAR: { icon: Satellite, label: 'SAR' },
   RF: { icon: Activity, label: 'RF geolocation' },

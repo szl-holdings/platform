@@ -93,7 +93,7 @@ interface VoyageScenario {
     distanceNm: number;
     chokepoints: string[];
   };
-  dataLabel: 'live' | 'sampled';
+  dataLabel: 'live' | 'sampled' | 'modeled';
   risk: {
     sanctions: RiskDimension;
     darkActivity: RiskDimension;

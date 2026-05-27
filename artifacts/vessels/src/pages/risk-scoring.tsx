@@ -104,7 +104,7 @@ export default function RiskScoringPage() {
 
   const { data: fleet, isLoading: fleetLoading } = useQuery<FleetVessel[]>({
     queryKey: ['vessels-fleet'],
-    queryFn: () => api.vessels.list() as Promise<FleetVessel[]>,
+    queryFn: () => api.vessels.list() as unknown as Promise<FleetVessel[]>,
     staleTime: 60_000,
   });
 
