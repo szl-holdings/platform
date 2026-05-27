@@ -36,6 +36,36 @@ contains are both engineered.
 - Framework mapping is complete (`frameworkCoverage().complete === true`)
   and CI-enforced.
 
+## Verifying a downloaded bundle
+
+Every release ships three sidecars next to `sentra-uds-<ver>.tar.zst`:
+
+- `<tarball>.sha256` — GNU `sha256sum` line for integrity.
+- `<tarball>.sig` — `cosign sign-blob` ed25519 signature.
+- `sentra-uds-dev.pub` — the matching cosign public key (dev key; see
+  "Signing model" above for the production re-sign requirement).
+
+To verify offline:
+
+```sh
+# 1. integrity
+sha256sum -c sentra-uds-<ver>.tar.zst.sha256
+
+# 2. provenance (cosign >= 2.x)
+cosign verify-blob \
+  --key sentra-uds-dev.pub \
+  --signature sentra-uds-<ver>.tar.zst.sig \
+  sentra-uds-<ver>.tar.zst
+```
+
+`verify-blob` exits 0 and prints `Verified OK` on success. Any mismatch
+(tampered tarball, wrong key, swapped signature) exits non-zero.
+
+For non-air-gap verifiers, the same signature is recorded in the public
+Sigstore Rekor transparency log at sign time; omit `--key` and pass
+`--certificate-identity` / `--certificate-oidc-issuer` to verify against
+the log entry instead.
+
 ## Reporting a vulnerability
 
 See the repository `SECURITY.md` for the private-advisory channel. Do

@@ -61,10 +61,37 @@ log "wrote $(du -h "${TARBALL}" | cut -f1) -> ${TARBALL}"
 ( cd "${DIST_DIR}" && sha256sum "$(basename "${TARBALL}")" > "$(basename "${TARBALL}").sha256" )
 log "wrote ${TARBALL}.sha256"
 
-if [[ -n "${COSIGN_KEY:-}" ]] && command -v cosign >/dev/null 2>&1; then
-  log "signing with cosign"
+# Resolve cosign + key with sensible defaults so signing is the default path,
+# not a silent skip. Operators can override either via env.
+COSIGN_BIN="${COSIGN_BIN:-}"
+if [[ -z "${COSIGN_BIN}" ]]; then
+  if command -v cosign >/dev/null 2>&1; then
+    COSIGN_BIN="$(command -v cosign)"
+  elif [[ -x "${REPO_ROOT}/.local/bin/cosign" ]]; then
+    COSIGN_BIN="${REPO_ROOT}/.local/bin/cosign"
+  fi
+fi
+COSIGN_KEY="${COSIGN_KEY:-${REPO_ROOT}/.local/cosign/cosign.key}"
+COSIGN_PUB="${COSIGN_PUB:-${REPO_ROOT}/.local/cosign/cosign.pub}"
+
+if [[ -n "${COSIGN_BIN}" && -f "${COSIGN_KEY}" ]]; then
+  log "signing with cosign (${COSIGN_BIN})"
   rm -f "${TARBALL}.sig"
-  cosign sign-blob --yes --key "${COSIGN_KEY}" --output-signature "${TARBALL}.sig" "${TARBALL}"
+  COSIGN_PASSWORD="${COSIGN_PASSWORD-}" "${COSIGN_BIN}" sign-blob --yes \
+    --key "${COSIGN_KEY}" --output-signature "${TARBALL}.sig" "${TARBALL}"
   log "wrote ${TARBALL}.sig"
+  if [[ -f "${COSIGN_PUB}" ]]; then
+    cp -f "${COSIGN_PUB}" "${DIST_DIR}/sentra-uds-dev.pub"
+    log "wrote ${DIST_DIR}/sentra-uds-dev.pub"
+  fi
+  if [[ -f "${COSIGN_PUB}" ]]; then
+    log "verifying signature locally"
+    "${COSIGN_BIN}" verify-blob \
+      --key "${COSIGN_PUB}" --signature "${TARBALL}.sig" "${TARBALL}" >/dev/null
+    log "signature OK"
+  fi
+else
+  log "WARNING: cosign signing skipped (bin=${COSIGN_BIN:-none} key=${COSIGN_KEY})"
+  log "set COSIGN_BIN/COSIGN_KEY or place a key at .local/cosign/cosign.key"
 fi
 log "done."
