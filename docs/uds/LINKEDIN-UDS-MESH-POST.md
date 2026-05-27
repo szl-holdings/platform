@@ -1,47 +1,53 @@
-SZL Holdings — UDS bundle mesh, v0.2.0 — live on GHCR.
+SZL Holdings — UDS bundles, v0.2.0 — live on GitHub Releases today.
 
-Five signed Zarf payloads + a read-only mesh registry for Defense-Unicorns environments. Same pull-verify-install contract across every bundle. Cosign-keyless via GitHub Actions OIDC. Air-gap-compatible from day one.
+Five signed Zarf payloads for Defense-Unicorns environments. One repo per bundle. Same download → sha256 → cosign-verify-blob → zarf deploy contract across every release. Air-gap-compatible by construction — every byte you need is attached to the Release itself.
 
-The five bundles:
+The five releases (each tagged uds-v0.2.0, published 2026-05-27):
 
-1) A11oy — brand orchestration layer. @a11oy/core + @a11oy/connection kernels, optional hash-chained attestations component for offline provenance without a Rekor round-trip.
-   oci://ghcr.io/szl-holdings/a11oy-uds:0.2.0
+• A11oy — brand orchestration. @a11oy/core + @a11oy/connection kernels, optional hash-chained attestations component for offline provenance.
+https://github.com/szl-holdings/a11oy/releases/tag/uds-v0.2.0
 
-2) Amaru — Andean Ouroboros convergent data-sync. Doctrine V6 runtime: Lutar Σ, Λ floor, Bekenstein admission, bounded-loop convergence, KL drift, hash-chained proof receipts.
-   oci://ghcr.io/szl-holdings/amaru-uds:0.2.0
+• Amaru — convergent multi-source data-sync. Append-only delta logs, hash-verified ingest, bounded-loop convergence, KL drift, hash-chained proof receipts.
+https://github.com/szl-holdings/amaru/releases/tag/uds-v0.2.0
 
-3) ROSIE — governed decision fabric. Policy admission, contradiction detection, governed-action emit, hash-chained decision receipts.
-   oci://ghcr.io/szl-holdings/rosie-uds:0.2.0
+• ROSIE — governed decision fabric. Deny-by-default admission, contradiction detector, governed-action emit, hash-chained decision receipts.
+https://github.com/szl-holdings/rosie/releases/tag/uds-v0.2.0
 
-4) Sentra — cyber resilience command. Asset-scoped fail-closed Safety Gate. NIST CSF 2.0 + SP 800-61r2 + CISA CIRCIA + MITRE D3FEND mappings. Ising allocation. Proof Chain.
-   oci://ghcr.io/szl-holdings/sentra-uds:0.2.0
+• Sentra — cyber resilience command. Asset-scoped fail-closed Safety Gate, NIST CSF 2.0 / SP 800-61r2 / CISA CIRCIA / MITRE D3FEND mappings, Ising allocation, hash-chained Proof Chain.
+https://github.com/szl-holdings/sentra/releases/tag/uds-v0.2.0
 
-5) Vessels — maritime intelligence. CPA (Bowditch), collision cone, AIS-gap dark-vessel detector (Λ-floor 0.90), sanctions screen, voyage Λ-receipts.
-   oci://ghcr.io/szl-holdings/vessels-uds:0.2.0
+• Vessels — maritime intelligence. Trajectory inspector, AIS-gap detector, sanctions screen, voyage Λ-receipts.
+https://github.com/szl-holdings/vessels/releases/tag/uds-v0.2.0
 
-The universal three-step contract:
+Every release ships four assets:
 
-  zarf package pull oci://ghcr.io/szl-holdings/<bundle>-uds:0.2.0
+  <bundle>-uds-0.2.0.tar.zst
+  <bundle>-uds-0.2.0.tar.zst.sha256
+  <bundle>-uds-0.2.0.tar.zst.sig
+  <bundle>-uds-dev.pub
 
-  cosign verify \
-    --certificate-identity-regexp 'https://github.com/szl-holdings/.+/\.github/workflows/<bundle>-uds-publish\.yml@.+' \
-    --certificate-oidc-issuer https://token.actions.githubusercontent.com \
-    ghcr.io/szl-holdings/<bundle>-uds:0.2.0
+Universal verify-and-install (replace <bundle> with: a11oy, amaru, rosie, sentra, or vessels):
 
-  zarf package deploy zarf-package-<bundle>-uds-*.tar.zst --confirm
+  BASE=https://github.com/szl-holdings/<bundle>/releases/download/uds-v0.2.0
+  curl -LO $BASE/<bundle>-uds-0.2.0.tar.zst
+  curl -LO $BASE/<bundle>-uds-0.2.0.tar.zst.sha256
+  curl -LO $BASE/<bundle>-uds-0.2.0.tar.zst.sig
+  curl -LO $BASE/<bundle>-uds-dev.pub
+  sha256sum -c <bundle>-uds-0.2.0.tar.zst.sha256
+  cosign verify-blob \
+    --key <bundle>-uds-dev.pub \
+    --signature <bundle>-uds-0.2.0.tar.zst.sig \
+    <bundle>-uds-0.2.0.tar.zst
+  zarf package deploy <bundle>-uds-0.2.0.tar.zst --confirm
 
-Mesh registry — read-only, machine-readable, live:
-  curl https://<mesh-host>/api/uds/registry
-Returns versions, OCI coords, cosign identity regex, install paths, build commands. Bundles register at publish time via the per-bundle Actions workflow — the same workflow whose identity cosign verifies against. No POST surface. That invariant is the trust anchor.
+Source repos (all public, all auditable):
+github.com/szl-holdings/a11oy
+github.com/szl-holdings/amaru
+github.com/szl-holdings/rosie
+github.com/szl-holdings/sentra
+github.com/szl-holdings/vessels
+github.com/szl-holdings/uds-mesh
 
-Air-gap path: every release attaches the raw *.tar.zst, *.sig, and *.sha256 sidecars to the matching GitHub Release. Verify offline against per-file MANIFEST.json, deploy from the local tarball.
+Download a tarball. Check its sha256. Verify its signature against the published dev key. Deploy. If anything in those four steps surprises you — that's a bug. Open an issue on the per-bundle repo.
 
-Repos:
-github.com/szl-holdings/szl — monorepo (bundle sources, mesh api-server, publish workflows, verifier scripts)
-ghcr.io/szl-holdings/<bundle>-uds — signed OCI images, one per bundle
-
-Shared SZL packages baked into every bundle (v0.2): @szl-holdings/perception-loop, @szl-holdings/sequence-pipeline, @szl-holdings/sparse-attention-kit. v0.3 adds @szl-holdings/memo-reflection-kit.
-
-Pull the registry. Pull a bundle. Verify. Deploy. If any step surprises you, that's a bug — open an issue.
-
-#DefenseUnicorns #UDS #Zarf #Cosign #Sigstore #SupplyChainSecurity #SLSA #SBOM #AirGap #GHCR #OIDC #ZeroTrust
+#DefenseUnicorns #UDS #Zarf #Cosign #Sigstore #SupplyChainSecurity #SBOM #AirGap #ZeroTrust
