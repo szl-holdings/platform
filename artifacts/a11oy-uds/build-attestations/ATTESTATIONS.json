@@ -1,10 +1,10 @@
 {
   "name": "a11oy-attestations",
   "version": "0.2.0",
-  "gitSha": "e5ab5b2ca",
-  "builtAt": "2026-05-27T16:54:36Z",
+  "gitSha": "9ae00c89a",
+  "builtAt": "2026-05-27T21:04:40Z",
   "hashAlgorithm": "sha256",
-  "manifestSha256": "461c5b9fcb9f8c7f55b0f443356013e53f85b97f59af644c1bbe3ee6e48451a2",
+  "manifestSha256": "18036d13bc68094f83ca3b50a706f3d0e009f6007ab972aa94d79414e9b42659",
   "subjects": [
     "a11oy-core",
     "a11oy-connection",
