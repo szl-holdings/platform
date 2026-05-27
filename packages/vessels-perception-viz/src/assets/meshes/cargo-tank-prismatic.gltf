@@ -1,0 +1,91 @@
+{
+  "asset": {
+    "version": "2.0",
+    "generator": "vessels-perception-viz/build-meshes.mjs"
+  },
+  "scene": 0,
+  "scenes": [
+    {
+      "nodes": [
+        0
+      ]
+    }
+  ],
+  "nodes": [
+    {
+      "mesh": 0,
+      "name": "cargo-tank-prismatic"
+    }
+  ],
+  "meshes": [
+    {
+      "name": "cargo-tank-prismatic",
+      "primitives": [
+        {
+          "attributes": {
+            "POSITION": 0,
+            "NORMAL": 1
+          },
+          "indices": 2,
+          "mode": 4
+        }
+      ]
+    }
+  ],
+  "buffers": [
+    {
+      "uri": "data:application/octet-stream;base64,AAAAAJqZmT5mZuY+2+qiPpqZmT7b6qI+ZmbmPpqZmT5ZJf4j2+qiPpqZmT7b6qK+WSV+JJqZmT5mZua+2+qivpqZmT7b6qK+ZmbmvpqZmT4DnL6k2+qivpqZmT7b6qI+WSX+pJqZmT5mZuY+AAAAAJqZmb5mZuY+2+qiPpqZmb7b6qI+ZmbmPpqZmb5ZJf4j2+qiPpqZmb7b6qK+WSV+JJqZmb5mZua+2+qivpqZmb7b6qK+ZmbmvpqZmb4DnL6k2+qivpqZmb7b6qI+WSX+pJqZmb5mZuY+AAAAAJqZmT4AAAAAAAAAAJqZmT4AAAAAAAAAAJqZmT4AAAAAAAAAAJqZmT4AAAAAAAAAAJqZmT4AAAAAAAAAAJqZmT4AAAAAAAAAAJqZmT4AAAAAAAAAAJqZmT4AAAAAAAAAAJqZmT5mZuY+2+qiPpqZmT7b6qI+ZmbmPpqZmT5ZJf4j2+qiPpqZmT7b6qK+WSV+JJqZmT5mZua+2+qivpqZmT7b6qK+ZmbmvpqZmT4DnL6k2+qivpqZmT7b6qI+WSX+pJqZmT5mZuY+AAAAAJqZmb4AAAAAAAAAAJqZmb4AAAAAAAAAAJqZmb4AAAAAAAAAAJqZmb4AAAAAAAAAAJqZmb4AAAAAAAAAAJqZmb4AAAAAAAAAAJqZmb4AAAAAAAAAAJqZmb4AAAAAAAAAAJqZmb5mZuY+2+qiPpqZmb7b6qI+ZmbmPpqZmb5ZJf4j2+qiPpqZmb7b6qK+WSV+JJqZmb5mZua+2+qivpqZmb7b6qK+ZmbmvpqZmb4DnL6k2+qivpqZmb7b6qI+WSX+pJqZmb5mZuY+E+/DPgAAAABfg2w/O48aPwAAAACtE0w/HZh9PwAAAABiDgw+rRNMPwAAAAA7jxq/Yg4MPgAAAAAdmH2/O48avwAAAACtE0y/HZh9vwAAAABiDgy+rRNMvwAAAAA7jxo/E+/DvgAAAABfg2w/E+/DPgAAAABfg2w/rBNMPwAAAAA8jxo/HZh9PwAAAABiDgy+PI8aPwAAAACsE0y/Yg4MvgAAAAAdmH2/rBNMvwAAAAA8jxq/HZh9vwAAAABiDgw+PI8avwAAAACsE0w/E+/DvgAAAABfg2w/AAAAAAAAgD8AAAAAAAAAAAAAgD8AAAAAAAAAAAAAgD8AAAAAAAAAAAAAgD8AAAAAAAAAAAAAgD8AAAAAAAAAAAAAgD8AAAAAAAAAAAAAgD8AAAAAAAAAAAAAgD8AAAAAAAAAAAAAgD8AAAAAAAAAAAAAgD8AAAAAAAAAAAAAgD8AAAAAAAAAAAAAgD8AAAAAAAAAAAAAgD8AAAAAAAAAAAAAgD8AAAAAAAAAAAAAgD8AAAAAAAAAAAAAgD8AAAAAAAAAAAAAgD8AAAAAAAAAAAAAgL8AAAAAAAAAAAAAgL8AAAAAAAAAAAAAgL8AAAAAAAAAAAAAgL8AAAAAAAAAAAAAgL8AAAAAAAAAAAAAgL8AAAAAAAAAAAAAgL8AAAAAAAAAAAAAgL8AAAAAAAAAAAAAgL8AAAAAAAAAAAAAgL8AAAAAAAAAAAAAgL8AAAAAAAAAAAAAgL8AAAAAAAAAAAAAgL8AAAAAAAAAAAAAgL8AAAAAAAAAAAAAgL8AAAAAAAAAAAAAgL8AAAAAAAAAAAAAgL8AAAAAAAAAAAkAAAABAAAACQAAAAoAAAABAAAAAQAAAAoAAAACAAAACgAAAAsAAAACAAAAAgAAAAsAAAADAAAACwAAAAwAAAADAAAAAwAAAAwAAAAEAAAADAAAAA0AAAAEAAAABAAAAA0AAAAFAAAADQAAAA4AAAAFAAAABQAAAA4AAAAGAAAADgAAAA8AAAAGAAAABgAAAA8AAAAHAAAADwAAABAAAAAHAAAABwAAABAAAAAIAAAAEAAAABEAAAAIAAAAGgAAABsAAAASAAAAGwAAABwAAAATAAAAHAAAAB0AAAAUAAAAHQAAAB4AAAAVAAAAHgAAAB8AAAAWAAAAHwAAACAAAAAXAAAAIAAAACEAAAAYAAAAIQAAACIAAAAZAAAALAAAACsAAAAjAAAALQAAACwAAAAkAAAALgAAAC0AAAAlAAAALwAAAC4AAAAmAAAAMAAAAC8AAAAnAAAAMQAAADAAAAAoAAAAMgAAADEAAAApAAAAMwAAADIAAAAqAAAA",
+      "byteLength": 1632
+    }
+  ],
+  "bufferViews": [
+    {
+      "buffer": 0,
+      "byteOffset": 0,
+      "byteLength": 624,
+      "target": 34962
+    },
+    {
+      "buffer": 0,
+      "byteOffset": 624,
+      "byteLength": 624,
+      "target": 34962
+    },
+    {
+      "buffer": 0,
+      "byteOffset": 1248,
+      "byteLength": 384,
+      "target": 34963
+    }
+  ],
+  "accessors": [
+    {
+      "bufferView": 0,
+      "componentType": 5126,
+      "count": 52,
+      "type": "VEC3",
+      "min": [
+        -0.44999998807907104,
+        -0.30000001192092896,
+        -0.44999998807907104
+      ],
+      "max": [
+        0.44999998807907104,
+        0.30000001192092896,
+        0.44999998807907104
+      ]
+    },
+    {
+      "bufferView": 1,
+      "componentType": 5126,
+      "count": 52,
+      "type": "VEC3"
+    },
+    {
+      "bufferView": 2,
+      "componentType": 5125,
+      "count": 96,
+      "type": "SCALAR"
+    }
+  ]
+}

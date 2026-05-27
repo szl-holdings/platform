@@ -58,7 +58,9 @@ export {
 export {
   buildShipPortScene,
   shipPortMeshResolver,
+  shipPortMeshAssetUrl,
   defaultShipPartLibrary,
 } from './ship-library.js';
+export type { ShipPortPartId } from './ship-library.js';
 
 export const VESSELS_PERCEPTION_VIZ_VERSION = '0.1.0' as const;

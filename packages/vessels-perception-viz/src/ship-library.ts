@@ -13,6 +13,31 @@ import {
   type Scene,
 } from '@szl-holdings/procedural-kit';
 
+/** Real, downloadable glTF asset URLs for each partId. Built once by
+ *  `scripts/build-meshes.mjs` and committed under `src/assets/meshes`.
+ *  `new URL(..., import.meta.url)` is ESM-standard so Vite emits a
+ *  hashed asset URL in browsers and Node returns a `file://` URL for
+ *  vitest — same import works in every consumer. */
+const MESH_ASSET_FILES = {
+  'hull-lgc': new URL('./assets/meshes/hull-lgc.gltf', import.meta.url).href,
+  'hull-vlcc': new URL('./assets/meshes/hull-vlcc.gltf', import.meta.url).href,
+  'bridge-house': new URL('./assets/meshes/bridge-house.gltf', import.meta.url).href,
+  'cargo-tank-c': new URL('./assets/meshes/cargo-tank-c.gltf', import.meta.url).href,
+  'cargo-tank-prismatic': new URL('./assets/meshes/cargo-tank-prismatic.gltf', import.meta.url).href,
+  'manifold': new URL('./assets/meshes/manifold.gltf', import.meta.url).href,
+  'port-jetty': new URL('./assets/meshes/port-jetty.gltf', import.meta.url).href,
+  'port-loading-arm': new URL('./assets/meshes/port-loading-arm.gltf', import.meta.url).href,
+} as const;
+
+export type ShipPortPartId = keyof typeof MESH_ASSET_FILES;
+
+/** Resolve a partId to a real downloadable glTF asset URL. Returns
+ *  undefined for unknown partIds so callers can fall back to an
+ *  in-line primitive. */
+export function shipPortMeshAssetUrl(partId: string): string | undefined {
+  return (MESH_ASSET_FILES as Record<string, string>)[partId];
+}
+
 /** Minimal mesh resolver — maps a procedural-kit partId to a USD prim
  *  reference. Vessels picks these prims from a downstream operator
  *  tool's USD library; for the deck and the live product, the

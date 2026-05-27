@@ -13,14 +13,63 @@
 
 import { useEffect, useMemo, useRef } from 'react';
 import * as THREE from 'three';
+import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
 import {
   bomOf,
   partGraphHash,
   type Scene,
 } from '@szl-holdings/procedural-kit';
-import { buildShipPortScene, shipPortMeshResolver } from './ship-library.js';
+import {
+  buildShipPortScene,
+  shipPortMeshAssetUrl,
+  shipPortMeshResolver,
+} from './ship-library.js';
 import { fromPartGraphAdapter } from './usd-adapter.js';
 import type { UsdStageDescriptor } from './usd-adapter.js';
+
+/** Module-level cache so repeated mounts (e.g. seed changes, deck slide
+ *  navigation) reuse parsed geometry instead of re-fetching the asset.
+ *  Keyed by partId; the value is the geometry from the first mesh in
+ *  the loaded glTF, or `null` if loading failed (so we don't retry a
+ *  known-broken URL on every mount). */
+const GLTF_GEOMETRY_CACHE = new Map<string, Promise<THREE.BufferGeometry | null>>();
+
+function loadPartGeometry(partId: string): Promise<THREE.BufferGeometry | null> {
+  const cached = GLTF_GEOMETRY_CACHE.get(partId);
+  if (cached) return cached;
+  const url = shipPortMeshAssetUrl(partId);
+  if (!url) {
+    const miss = Promise.resolve(null);
+    GLTF_GEOMETRY_CACHE.set(partId, miss);
+    return miss;
+  }
+  const loader = new GLTFLoader();
+  const p = new Promise<THREE.BufferGeometry | null>((resolve) => {
+    loader.load(
+      url,
+      (gltf) => {
+        let geom: THREE.BufferGeometry | null = null;
+        gltf.scene.traverse((obj) => {
+          if (!geom && (obj as THREE.Mesh).isMesh) {
+            geom = ((obj as THREE.Mesh).geometry as THREE.BufferGeometry).clone();
+          }
+        });
+        resolve(geom);
+      },
+      undefined,
+      (err) => {
+        // Swallow the error and fall back to the in-line primitive
+        // geometry — the 3D scene must keep rendering even when assets
+        // can't be fetched (offline preview, CSP, etc.).
+        // eslint-disable-next-line no-console
+        console.warn(`[vessels-perception-viz] failed to load ${url}`, err);
+        resolve(null);
+      },
+    );
+  });
+  GLTF_GEOMETRY_CACHE.set(partId, p);
+  return p;
+}
 
 export interface ShipPortScene3DProps {
   readonly seed: number;
@@ -193,18 +242,22 @@ export function ShipPortScene3D(props: ShipPortScene3DProps) {
     (grid.material as THREE.Material).opacity = 0.45;
     threeScene.add(grid);
 
-    // Build meshes from the laid-out scene tree.
+    // Build meshes from the laid-out scene tree. Each mesh starts on
+    // its in-line primitive geometry so the first frame paints with
+    // something visible even if the glTF asset is still in flight; we
+    // then swap in the real authored geometry once the loader resolves.
     const disposables: Array<THREE.BufferGeometry | THREE.Material> = [];
     let meshCount = 0;
+    let cancelled = false;
     for (const part of laidOut) {
-      const { geom, color, emissive } = geometryFor(part.partId);
+      const { geom: fallbackGeom, color, emissive } = geometryFor(part.partId);
       const mat = new THREE.MeshStandardMaterial({
         color,
         emissive,
         roughness: 0.55,
         metalness: 0.35,
       });
-      const mesh = new THREE.Mesh(geom, mat);
+      const mesh = new THREE.Mesh(fallbackGeom, mat);
       mesh.position.set(part.position[0], part.position[1] + 0.4, part.position[2]);
       // Orient hull-like parts along the radial direction so they read
       // as ships pointing at the dock; deterministic from position.
@@ -214,8 +267,22 @@ export function ShipPortScene3D(props: ShipPortScene3DProps) {
         mesh.rotation.y = Math.atan2(part.position[2], part.position[0]);
       }
       threeScene.add(mesh);
-      disposables.push(geom, mat);
+      disposables.push(fallbackGeom, mat);
       meshCount += 1;
+
+      // Async swap: replace the placeholder geometry with the real glTF
+      // mesh when it arrives. If the load fails (cache returns null) we
+      // keep the fallback in place — the prim count panel doesn't move
+      // either way because we still rendered one mesh per laid-out part.
+      void loadPartGeometry(part.partId).then((real) => {
+        if (cancelled || !real) return;
+        const prev = mesh.geometry;
+        mesh.geometry = real;
+        // Don't dispose the cached glTF geometry — it's shared across
+        // mounts; only dispose the per-mount fallback we replaced.
+        prev.dispose();
+        renderer.render(threeScene, camera);
+      });
     }
     renderedMeshes.current = meshCount;
 
@@ -264,6 +331,7 @@ export function ShipPortScene3D(props: ShipPortScene3DProps) {
     renderer.render(threeScene, camera);
 
     return () => {
+      cancelled = true;
       renderer.domElement.removeEventListener('pointerdown', onDown);
       renderer.domElement.removeEventListener('pointermove', onMove);
       renderer.domElement.removeEventListener('pointerup', onUp);

@@ -1,0 +1,91 @@
+{
+  "asset": {
+    "version": "2.0",
+    "generator": "vessels-perception-viz/build-meshes.mjs"
+  },
+  "scene": 0,
+  "scenes": [
+    {
+      "nodes": [
+        0
+      ]
+    }
+  ],
+  "nodes": [
+    {
+      "mesh": 0,
+      "name": "hull-lgc"
+    }
+  ],
+  "meshes": [
+    {
+      "name": "hull-lgc",
+      "primitives": [
+        {
+          "attributes": {
+            "POSITION": 0,
+            "NORMAL": 1
+          },
+          "indices": 2,
+          "mode": 4
+        }
+      ]
+    }
+  ],
+  "buffers": [
+    {
+      "uri": "data:application/octet-stream;base64,zczMvzxuKaSamRk/zczMvzxuKSSamRm/j8L1PjxuKSSamRm/zczMPwAAAAAAAAAAj8L1PjxuKaSamRk/zczMvzxuKaSamRk/zczMvzxuKaSamRk/j8L1PjxuKSSamRm/zczMPwAAAAAAAAAAj8L1PjMzMz+amRm/zczMvzMzMz+amRm/zczMvzMzMz+amRk/zczMvzMzMz+amRk/j8L1PjMzMz+amRk/zczMPzMzMz9Fq0UkzczMPzMzMz9Fq0Ukj8L1PjMzMz+amRm/zczMvzMzMz+amRk/zczMvzxuKaSamRk/j8L1PjxuKaSamRk/zczMvzMzMz+amRk/j8L1PjxuKaSamRk/j8L1PjMzMz+amRk/zczMvzMzMz+amRk/j8L1PjxuKaSamRk/zczMPwAAAAAAAAAAj8L1PjMzMz+amRk/zczMPwAAAAAAAAAAzczMPzMzMz9Fq0Ukj8L1PjMzMz+amRk/zczMPwAAAAAAAAAAj8L1PjxuKSSamRm/zczMPzMzMz9Fq0Ukj8L1PjxuKSSamRm/j8L1PjMzMz+amRm/zczMPzMzMz9Fq0Ukj8L1PjxuKSSamRm/zczMvzxuKSSamRm/j8L1PjMzMz+amRm/zczMvzxuKSSamRm/zczMvzMzMz+amRm/j8L1PjMzMz+amRm/zczMvzxuKSSamRm/zczMvzxuKaSamRk/zczMvzMzMz+amRm/zczMvzxuKaSamRk/zczMvzMzMz+amRk/zczMvzMzMz+amRm/AAAAAAAAgL8yMY2kAAAAAAAAgL8yMY2kAAAAAAAAgL8yMY2kAAAAgAAAgL8yMY2kAAAAgAAAgL8yMY2kAAAAgAAAgL8yMY2kAAAAAAAAgL8yMY2kAAAAAAAAgL8yMY2kAAAAAAAAgL8yMY2kAAAAAAAAgD8AAAAAAAAAAAAAgD8AAAAAAAAAAAAAgD8AAAAAAAAAAAAAgD8AAAAAAAAAAAAAgD8AAAAAAAAAAAAAgD8AAAAAAAAAAAAAgD8AAACAAAAAAAAAgD8AAACAAAAAAAAAgD8AAACAAAAAAAAAAAAAAIA/AAAAAAAAAAAAAIA/AAAAAAAAAAAAAIA/AAAAAAAAAAAAAIA/AAAAAAAAAAAAAIA/AAAAAAAAAAAAAIA/AcfxPgAAAACsqGE/AcfxPgAAAACsqGE/AcfxPgAAAACsqGE/AcfxPofqeKSsqGE/AcfxPofqeKSsqGE/AcfxPofqeKSsqGE/AcfxPgAAAACsqGG/AcfxPgAAAACsqGG/AcfxPgAAAACsqGG/AcfxPgAAAACsqGG/AcfxPgAAAACsqGG/AcfxPgAAAACsqGG/AAAAAAAAAAAAAIC/AAAAAAAAAAAAAIC/AAAAAAAAAAAAAIC/AAAAAAAAAAAAAIC/AAAAAAAAAAAAAIC/AAAAAAAAAAAAAIC/AACAvwAAAAAAAAAAAACAvwAAAAAAAAAAAACAvwAAAAAAAAAAAACAvwAAAIAAAACAAACAvwAAAIAAAACAAACAvwAAAIAAAACAAAAAAAEAAAACAAAAAwAAAAQAAAAFAAAABgAAAAcAAAAIAAAACQAAAAoAAAALAAAADAAAAA0AAAAOAAAADwAAABAAAAARAAAAEgAAABMAAAAUAAAAFQAAABYAAAAXAAAAGAAAABkAAAAaAAAAGwAAABwAAAAdAAAAHgAAAB8AAAAgAAAAIQAAACIAAAAjAAAAJAAAACUAAAAmAAAAJwAAACgAAAApAAAAKgAAACsAAAAsAAAALQAAAC4AAAAvAAAA",
+      "byteLength": 1344
+    }
+  ],
+  "bufferViews": [
+    {
+      "buffer": 0,
+      "byteOffset": 0,
+      "byteLength": 576,
+      "target": 34962
+    },
+    {
+      "buffer": 0,
+      "byteOffset": 576,
+      "byteLength": 576,
+      "target": 34962
+    },
+    {
+      "buffer": 0,
+      "byteOffset": 1152,
+      "byteLength": 192,
+      "target": 34963
+    }
+  ],
+  "accessors": [
+    {
+      "bufferView": 0,
+      "componentType": 5126,
+      "count": 48,
+      "type": "VEC3",
+      "min": [
+        -1.600000023841858,
+        -3.6739405577555036e-17,
+        -0.6000000238418579
+      ],
+      "max": [
+        1.600000023841858,
+        0.699999988079071,
+        0.6000000238418579
+      ]
+    },
+    {
+      "bufferView": 1,
+      "componentType": 5126,
+      "count": 48,
+      "type": "VEC3"
+    },
+    {
+      "bufferView": 2,
+      "componentType": 5125,
+      "count": 48,
+      "type": "SCALAR"
+    }
+  ]
+}
