@@ -83,13 +83,22 @@ function getCached<T>(
     });
 }
 
-async function fetchJson(url: string, timeoutMs = 10000): Promise<unknown> {
+async function fetchJson(
+  url: string,
+  timeoutMs = 10000,
+  extraHeaders: Record<string, string> = {},
+): Promise<unknown> {
   const controller = new AbortController();
   const timer = setTimeout(() => controller.abort(), timeoutMs);
   try {
     const res = await fetch(url, {
       signal: controller.signal,
-      headers: { 'User-Agent': 'SZL-Vessels/1.0', Accept: 'application/json' },
+      headers: {
+        'User-Agent': 'SZL-Vessels/1.0',
+        Accept: 'application/json',
+        'Accept-Encoding': 'gzip, deflate',
+        ...extraHeaders,
+      },
     });
     clearTimeout(timer);
     if (!res.ok) throw new Error(`HTTP ${res.status}`);
@@ -179,7 +188,7 @@ const FLAG_MAP: Record<string, string> = {
 async function fetchDigitrafficAis(): Promise<{ vessels: LiveVessel[]; source: string }> {
   try {
     const raw = await fetchJson(
-      'https://meri.digitraffic.fi/api/ais/v1/locations/latest?from=0&to=100',
+      'https://meri.digitraffic.fi/api/ais/v1/locations',
       10000,
     );
     const data = raw as { features?: unknown[] };
@@ -364,11 +373,79 @@ async function fetchCommercialAis(
   }
 }
 
-async function fetchBarentsWatchAis(): Promise<{ vessels: LiveVessel[]; source: string }> {
+/**
+ * BarentsWatch AIS open positions — Norwegian Coastal Administration.
+ *
+ * BarentsWatch retired anonymous access; the v2 `/bwapi/v2/geodata/ais/openpositions`
+ * endpoint now requires an OAuth2 client_credentials token issued at
+ * https://developer.barentswatch.no. Registration is free but credentialed.
+ *
+ * Environment variables:
+ *   BARENTSWATCH_CLIENT_ID, BARENTSWATCH_CLIENT_SECRET — set both to activate.
+ * When either is missing the adapter returns source='barentswatch-credentials-required'
+ * so operators see what to do (matches the USCG NAIS adapter pattern in this file).
+ */
+let bwTokenCache: { token: string; expiry: number } | null = null;
+async function getBarentsWatchToken(): Promise<string | null> {
+  const clientId = process.env.BARENTSWATCH_CLIENT_ID;
+  const clientSecret = process.env.BARENTSWATCH_CLIENT_SECRET;
+  if (!clientId || !clientSecret) return null;
+  const now = Date.now();
+  if (bwTokenCache && bwTokenCache.expiry > now + 30_000) return bwTokenCache.token;
+
+  const body = new URLSearchParams({
+    grant_type: 'client_credentials',
+    client_id: clientId,
+    client_secret: clientSecret,
+    scope: 'api',
+  });
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), 8000);
+  try {
+    const resp = await fetch('https://id.barentswatch.no/connect/token', {
+      method: 'POST',
+      signal: controller.signal,
+      headers: {
+        'User-Agent': 'SZL-Vessels/1.0',
+        'Content-Type': 'application/x-www-form-urlencoded',
+        Accept: 'application/json',
+      },
+      body,
+    });
+    if (!resp.ok) return null;
+    const data = (await resp.json()) as { access_token?: string; expires_in?: number };
+    if (!data.access_token) return null;
+    bwTokenCache = {
+      token: data.access_token,
+      expiry: now + (data.expires_in ?? 3600) * 1000,
+    };
+    return data.access_token;
+  } catch {
+    return null;
+  } finally {
+    clearTimeout(timer);
+  }
+}
+
+async function fetchBarentsWatchAis(): Promise<{
+  vessels: LiveVessel[];
+  source: string;
+  note?: string;
+}> {
+  const token = await getBarentsWatchToken();
+  if (!token) {
+    return {
+      vessels: [],
+      source: 'barentswatch-credentials-required',
+      note: 'BarentsWatch retired anonymous AIS access. Register a free app at https://developer.barentswatch.no and set BARENTSWATCH_CLIENT_ID and BARENTSWATCH_CLIENT_SECRET env vars to activate this provider.',
+    };
+  }
+
   try {
     const raw = await fetchJson(
-      'https://www.barentswatch.no/bwapi/v2/latest/combined?Xabcd=positions&area=NOR',
+      'https://www.barentswatch.no/bwapi/v2/geodata/ais/openpositions',
       10000,
+      { Authorization: `Bearer ${token}` },
     );
     const data = raw as Record<string, any>[];
     if (!Array.isArray(data) || data.length === 0) throw new Error('No BarentsWatch data');
