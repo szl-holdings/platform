@@ -1439,3 +1439,15 @@ id = "PEdSFfuMSDqsp0_r02VRl"
 uri = "file://deliverables/downloads/linkedin-post.docx"
 type = "word_document"
 title = "2. LinkedIn post (.docx) — single post, 2985/3000 chars"
+
+[[outputs]]
+id = "vEpS9_8mlHWdmlxAK0yIO"
+uri = "file://docs/posts/linkedin-2026-05-27.md"
+type = "text"
+title = "LinkedIn post — 2026-05-27"
+
+[[outputs]]
+id = "SNn4NCwsOueUsdZf78q97"
+uri = "file://docs/proposals/defense-unicorns/UDS_UPDATE_2026-05-27.md"
+type = "text"
+title = "UDS-facing update — 2026-05-27"
