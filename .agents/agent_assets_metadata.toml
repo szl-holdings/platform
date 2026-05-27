@@ -1486,7 +1486,7 @@ title = "Diagram: verify-and-install contract"
 id = "gbvXjks5PA79UKZFWUb8j"
 uri = "file://.local/outputs/Vessels-x-Dorian-LPG---Pitch.pptx"
 type = "slides"
-title = "Vessels x Dorian LPG — Pitch (PPTX, 40 slides)"
+title = "Vessels x Dorian LPG — Pitch deck (PPTX, editable)"
 
 [[outputs]]
 id = "814I5SY-3SSiG75UepdGo"
@@ -1505,3 +1505,9 @@ id = "5EX9BpDqDUr7VJXICUbqg"
 uri = "file://docs/uds/exports/ANDREW-GREEN-EMAIL.md"
 type = "text"
 title = "Andrew Green — ready-to-paste email body"
+
+[[outputs]]
+id = "wfrpLRbJwiJ3F04UnYTTa"
+uri = "file://.local/outputs/Vessels-x-Dorian-LPG---Pitch.pdf"
+type = "pdf"
+title = "Vessels x Dorian LPG — Pitch deck (PDF, 44 slides)"
