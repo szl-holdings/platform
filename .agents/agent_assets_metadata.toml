@@ -1481,3 +1481,9 @@ id = "YIKVzlGypwwhickc5BT7V"
 uri = "file://docs/uds/exports/img/uds-pull-verify-install.png"
 type = "image"
 title = "Diagram 2 — Universal pull-verify-install contract"
+
+[[outputs]]
+id = "gbvXjks5PA79UKZFWUb8j"
+uri = "file://.local/outputs/Vessels-x-Dorian-LPG---Pitch.pptx"
+type = "slides"
+title = "Vessels x Dorian LPG — Pitch (PPTX, 40 slides)"
