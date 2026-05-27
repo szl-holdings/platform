@@ -427,6 +427,60 @@ def build_docx(path, fleet_png, contract_png):
     ]:
         doc.add_paragraph(line, style="List Bullet")
 
+    # ── Doctrine receipt — published, machine-verified, measured ────────
+    add_heading(doc, "Doctrine receipt — published, machine-verified, measured", level=1)
+    doc.add_paragraph(
+        "The bundles above are the operator surface of a doctrine that is "
+        "published, peer-deposited on Zenodo, and Lean-4 kernel-verified. "
+        "Every consequential action in the runtime traverses a 9-step "
+        "governance loop — signal → context → recommendation → simulation → "
+        "policy → approval → execution → proof → outcome — and seals into a "
+        "hash-chained Proof Chain. The primitives are not marketing; they are "
+        "named theorems with measured overhead."
+    )
+    add_para(doc, "Primitives the UDS bundles inherit:", bold=True)
+    for line in [
+        "Λ-gate (9-axis Lutar Invariant) — admission gate; Lean-4 kernel-verified uniqueness theorem.",
+        "Bekenstein-bounded admission — information-budget cap on what enters the loop per receipt.",
+        "Dual-witness verdict (MATCH / DIVERGE) — every governed decision carries two independent witnesses; mismatch fails closed.",
+        "KL drift bound — convergence guarantee on bounded loops with a measurable closure ratio.",
+        "Reference-vector parity — bit-exact cross-runtime determinism; receipts are reproducible byte-for-byte.",
+        "Proof Chain — append-only hash-chained signed receipts; the audit log IS the execution record.",
+    ]:
+        doc.add_paragraph(line, style="List Bullet")
+
+    add_para(doc, "Published doctrine (Ouroboros Thesis, v1–v13 on Zenodo):", bold=True)
+    add_code(doc,
+        "Concept DOI (always latest):  10.5281/zenodo.19944926\n"
+        "v13  Unified Ouroboros Spine — Anatomy as Architecture     10.5281/zenodo.20195368\n"
+        "v12  The Lambda-Ouroboros Substrate — Lean-4 verified      10.5281/zenodo.20173920\n"
+        "v11  APPLIED Lambda — measured per-request overhead        10.5281/zenodo.20119582\n"
+        "v10  EXHAUSTIVE-AUDIT — Lambda_10 audit-closure operator   10.5281/zenodo.20053163\n"
+        "v9   UNIFIED-OPERATIONAL — Lutar family with Bianchi       10.5281/zenodo.20053148\n"
+        "v3   The Lutar Invariant — axiomatic trust aggregator      10.5281/zenodo.19983066\n"
+        "v2   Empirical companion (A11oy, Sentra, Amaru)            10.5281/zenodo.19934129\n"
+        "v1   Position paper — bounded looped computation           10.5281/zenodo.19867281"
+    )
+
+    add_para(doc, "Quantitative anchor (v11, APPLIED Λ):", bold=True)
+    for line in [
+        "24,800 HTTP calls measured across 8 routes in a governed runtime.",
+        "Median Λ₁₀ overhead 0.49–0.59 ms · p99 ≤ 1.27 ms per request.",
+        "ρ = 1.000 (audit-closure ratio) on 8,000 / 8,000 governed pairs.",
+        "61/61 unit + adapter tests passing for the Λ-Ouroboros substrate.",
+    ]:
+        doc.add_paragraph(line, style="List Bullet")
+
+    add_para(doc, "Provenance:", bold=True)
+    add_link_para(doc, "Lean-4 kernel-verified Lutar Invariant:",
+                  "https://github.com/szl-holdings/lutar-lean")
+    add_link_para(doc, "Ouroboros runtime (218/218 guardrail tests passing):",
+                  "https://github.com/szl-holdings/ouroboros")
+    add_link_para(doc, "Ouroboros Thesis (canonical text, paper-kit per version):",
+                  "https://github.com/szl-holdings/ouroboros-thesis")
+    add_link_para(doc, "Author ORCID — Stephen P. Lutar:",
+                  "https://orcid.org/0009-0001-0110-4173")
+
     # ── Why ──────────────────────────────────────────────────────────────
     add_heading(doc, "Why this matters for UDS / Defense-Unicorns operators", level=1)
     for line in [

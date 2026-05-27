@@ -1462,28 +1462,34 @@ title = "LinkedIn — SZL UDS Mesh Drop (Defense-Unicorns facing)"
 id = "NXJiyDGBo0U-l76KKkc4t"
 uri = "file://docs/uds/exports/SZL-UDS-Mesh-Launch-AndrewGreen.docx"
 type = "word_document"
-title = "Andrew Green packet (.docx, both diagrams embedded)"
+title = "Andrew Green packet (doctrine-framed, verified-URL set)"
 
 [[outputs]]
 id = "z_9U50CWrEYpOIHxyKPrF"
 uri = "file://docs/uds/LINKEDIN-UDS-MESH-POST.md"
 type = "text"
-title = "LinkedIn post (2763 chars, every URL verified live)"
+title = "LinkedIn post (2972/3000 chars, doctrine + verified)"
 
 [[outputs]]
 id = "cPlNiHfdwSsxD5o8Xs_6m"
 uri = "file://docs/uds/exports/img/uds-fleet-mesh.png"
 type = "image"
-title = "Diagram 1 — fleet → releases → operator"
+title = "Diagram: fleet mesh"
 
 [[outputs]]
 id = "YIKVzlGypwwhickc5BT7V"
 uri = "file://docs/uds/exports/img/uds-pull-verify-install.png"
 type = "image"
-title = "Diagram 2 — download → sha256 → cosign-verify-blob → deploy"
+title = "Diagram: verify-and-install contract"
 
 [[outputs]]
 id = "gbvXjks5PA79UKZFWUb8j"
 uri = "file://.local/outputs/Vessels-x-Dorian-LPG---Pitch.pptx"
 type = "slides"
 title = "Vessels x Dorian LPG — Pitch (PPTX, 40 slides)"
+
+[[outputs]]
+id = "814I5SY-3SSiG75UepdGo"
+uri = "file://docs/uds/exports/SZL-Public-Repo-Audit.pdf"
+type = "pdf"
+title = "SZL Public Repo Audit (master receipt — 18 repos, 300 URLs probed)"
