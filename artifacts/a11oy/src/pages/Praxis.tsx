@@ -60,12 +60,31 @@ interface Thread {
   createdAt: string;
 }
 
-const MODELS = [
+interface ModelOption {
+  id: string;
+  label: string;
+  description: string;
+  tier: 'flagship' | 'specialized' | 'fast' | 'promoted';
+  tooltip?: string;
+}
+
+const MODELS: ModelOption[] = [
   { id: 'a1.1oy-sovereign', label: 'a1.1oy Sovereign', description: 'Governed multi-model orchestration', tier: 'flagship' },
   { id: 'a1.1oy-code', label: 'a1.1oy Code', description: 'Code generation & refactoring', tier: 'specialized' },
   { id: 'a1.1oy-reason', label: 'a1.1oy Reason', description: 'Deep reasoning with proof chains', tier: 'specialized' },
   { id: 'a1.1oy-fast', label: 'a1.1oy Fast', description: 'Low-latency operational queries', tier: 'fast' },
 ];
+
+interface PromotedModelHealth {
+  modelId: string;
+  displayName: string;
+  provider?: string;
+  upstreamModel?: string;
+  codexScore?: number;
+  tooltip?: string;
+  summary?: string;
+  promotedAt?: string;
+}
 
 const API_BASE = '/api/a11oy';
 
@@ -402,8 +421,9 @@ export function Praxis() {
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState('');
   const [selectedArtifact, setSelectedArtifact] = useState<Artifact | null>(null);
-  const [selectedModel, setSelectedModel] = useState(MODELS[0]);
+  const [selectedModel, setSelectedModel] = useState<ModelOption>(MODELS[0]);
   const [showModelPicker, setShowModelPicker] = useState(false);
+  const [promotedModels, setPromotedModels] = useState<ModelOption[]>([]);
   const [showThreads, setShowThreads] = useState(false);
   const [isStreaming, setIsStreaming] = useState(false);
   const [streamingContent, setStreamingContent] = useState('');
@@ -435,6 +455,38 @@ export function Praxis() {
         }
       })
       .catch(() => {});
+  }, []);
+
+  useEffect(() => {
+    let cancelled = false;
+    const loadPromoted = () => {
+      fetch(`${API_BASE}/chat/health`)
+        .then((r) => r.json())
+        .then((d) => {
+          if (cancelled) return;
+          if (!d || !Array.isArray(d.promotedModels)) return;
+          const mapped: ModelOption[] = d.promotedModels.map((m: PromotedModelHealth) => ({
+            id: m.modelId,
+            label: m.displayName || m.modelId,
+            description: m.summary
+              || (typeof m.codexScore === 'number'
+                ? `Frontier-promoted · codex ${m.codexScore.toFixed(2)}`
+                : 'Frontier-promoted model'),
+            tier: 'promoted' as const,
+            tooltip: m.tooltip,
+          }));
+          setPromotedModels(mapped);
+          setSelectedModel((cur) => {
+            if (mapped.some((m) => m.id === cur.id)) return cur;
+            if (MODELS.some((m) => m.id === cur.id)) return cur;
+            return MODELS[0];
+          });
+        })
+        .catch(() => { /* picker just keeps built-in lanes */ });
+    };
+    loadPromoted();
+    const interval = window.setInterval(loadPromoted, 60_000);
+    return () => { cancelled = true; window.clearInterval(interval); };
   }, []);
 
   useEffect(() => {
@@ -705,7 +757,7 @@ export function Praxis() {
                 <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.25)" strokeWidth="2"><path d="M6 9l6 6 6-6"/></svg>
               </button>
               {showModelPicker && (
-                <div className="absolute top-full left-1/2 -translate-x-1/2 mt-2 w-72 rounded-xl shadow-2xl z-50 py-1.5 overflow-hidden" style={{ backgroundColor: '#161616', border: '1px solid rgba(255,255,255,0.08)' }}>
+                <div className="absolute top-full left-1/2 -translate-x-1/2 mt-2 w-72 rounded-xl shadow-2xl z-50 py-1.5 overflow-hidden max-h-[420px] overflow-y-auto" style={{ backgroundColor: '#161616', border: '1px solid rgba(255,255,255,0.08)' }}>
                   {MODELS.map((m) => (
                     <button
                       key={m.id}
@@ -721,6 +773,32 @@ export function Praxis() {
                       )}
                     </button>
                   ))}
+                  {promotedModels.length > 0 && (
+                    <>
+                      <div
+                        className="px-4 pt-2 pb-1 text-[10px] uppercase tracking-[0.12em]"
+                        style={{ color: 'rgba(201,183,135,0.55)', borderTop: '1px solid rgba(255,255,255,0.06)', marginTop: 4 }}
+                      >
+                        Frontier-promoted
+                      </div>
+                      {promotedModels.map((m) => (
+                        <button
+                          key={m.id}
+                          onClick={() => { setSelectedModel(m); setShowModelPicker(false); }}
+                          title={m.tooltip ?? m.description}
+                          className="w-full px-4 py-2.5 text-left transition-colors hover:bg-white/[0.04] flex items-center justify-between"
+                        >
+                          <div className="min-w-0 pr-2">
+                            <div className="text-[13px] font-medium truncate" style={{ color: selectedModel.id === m.id ? '#c9b787' : 'rgba(255,255,255,0.7)' }}>{m.label}</div>
+                            <div className="text-[11px] mt-0.5 truncate" style={{ color: 'rgba(255,255,255,0.3)' }}>{m.description}</div>
+                          </div>
+                          {selectedModel.id === m.id && (
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#c9b787" strokeWidth="2.5"><path d="M20 6L9 17l-5-5"/></svg>
+                          )}
+                        </button>
+                      ))}
+                    </>
+                  )}
                 </div>
               )}
             </div>
