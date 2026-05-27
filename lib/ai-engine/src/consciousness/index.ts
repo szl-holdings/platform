@@ -7,6 +7,14 @@ export {
   type WorkingMemoryItem,
 } from './cognitive-workspace.js';
 export {
+  type CtmBusOptions,
+  type CtmSubscriber,
+  type CtmThought,
+  type CtmThoughtKind,
+  CtmBroadcastBus,
+  ctmBus,
+} from './ctm-loop.js';
+export {
   type ConsolidationReport,
   type DiscoveredPattern,
   type DreamConsolidationState,

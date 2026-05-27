@@ -47,6 +47,36 @@ No UI change is required when a new detector ships — the canonical
 | GET    | `/api/sentra/detector-runs`                | public                        | List recent runs (run-history view)  |
 | GET    | `/api/sentra/findings`                     | public                        | Query findings (filters: status, …)  |
 | POST   | `/api/sentra/findings/:id/resolve`         | session (`authMiddleware`)    | Resolve / suppress a finding         |
+| GET    | `/api/sentra/agi/council/verdicts`         | public                        | Last N Detector Council verdicts     |
+| POST   | `/api/sentra/agi/council/deliberate`       | public (validated body)       | MARBLE arbitration over candidates   |
+| POST   | `/api/sentra/agi/time-r1/score`            | public (validated body)       | Time-R1 trajectory anomaly scoring   |
+| GET    | `/api/sentra/agi/bus/snapshot`             | public                        | CTM broadcast bus window             |
+| POST   | `/api/sentra/agi/edge-adversary-drill`     | public (validated body)       | End-to-end drill across all four     |
+
+### AGI-stack primitives (#5503)
+
+Four primitives, mounted on `/api/sentra/agi/*`, extend the detector
+framework with a shared arbitration + broadcast plane:
+
+| Primitive          | Inspiration                          | DetectorKind | Receipt class                 |
+| ------------------ | ------------------------------------ | ------------ | ----------------------------- |
+| Detector Council   | MARBLE multi-agent arbitration       | n/a (meta)   | `bench.marble.v1`             |
+| Time-R1 scoring    | Time-R1 temporal anomaly model       | `temporal`   | `anomaly.time-r1.v1`          |
+| Antivenom matcher  | Antivenom adversarial-input matching | `antivenom`  | `sentra.antivenom-match.v1`   |
+| CTM broadcast bus  | Continuous Thought Machine           | n/a (bus)    | `consciousness.broadcast.v1`  |
+
+Council arbitration is **kind-weighted with a diversity floor**: a swarm
+from a single detector kind cannot reach `critical`, even at high
+individual scores — at least two distinct kinds must co-fire. The
+multi-kind bump only applies once the diversity floor is met. The
+governance ceiling of the verdict is the strictest class across all
+supporting findings (`advisory` < `mutating` < `destructive`), so a
+single destructive-class finding forces operator/exec approval on the
+whole bundle.
+
+The CTM bus is **re-entrancy-guarded** — broadcasting from inside a
+subscriber is a no-op, not a stack overflow. Subscribers see thoughts
+in publish order but never their own.
 
 Every mutating route appends to a per-detector `ReceiptChain` and stores
 `selfHash` on the run / finding row.

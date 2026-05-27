@@ -63,16 +63,29 @@ import {
   sentraDetectorRegistry,
 } from './lib/sentra-detector-registry.js';
 import { heuristicPortScanDetector } from './lib/sentra-detectors/heuristic-port-scan.js';
+import { antivenomPromptInjectionDetector } from './lib/sentra-detectors/antivenom-prompt-injection.js';
+import { temporalBaselineShiftDetector } from './lib/sentra-detectors/temporal-baseline-shift.js';
 sentraDetectorRegistry.register(heuristicPortScanDetector);
+// AGI-stack detectors (#5503) — antivenom + Time-R1 temporal. Both ship
+// as in-process TS detectors so the Detector Council can deliberate on
+// their findings without a sidecar dependency.
+sentraDetectorRegistry.register(antivenomPromptInjectionDetector);
+sentraDetectorRegistry.register(temporalBaselineShiftDetector);
 // Fire-and-forget: persist the in-process TS detector(s) so the
 // `GET /api/sentra/detectors` and `POST /api/sentra/detectors/:id/run`
 // routes can resolve them without a separate registration round-trip.
-void persistRegisteredDetector(heuristicPortScanDetector).catch((err) => {
-  // Don't crash boot — but DO surface the failure so a missed migration
-  // or stale schema is visible instead of silently breaking list/run.
-  // eslint-disable-next-line no-console
-  console.error('[sentra-detector-framework] boot persistence failed', err);
-});
+for (const det of [
+  heuristicPortScanDetector,
+  antivenomPromptInjectionDetector,
+  temporalBaselineShiftDetector,
+]) {
+  void persistRegisteredDetector(det).catch((err) => {
+    // Don't crash boot — but DO surface the failure so a missed migration
+    // or stale schema is visible instead of silently breaking list/run.
+    // eslint-disable-next-line no-console
+    console.error('[sentra-detector-framework] boot persistence failed', det.manifest.id, err);
+  });
+}
 import { assertInternalTokenPolicy } from './lib/internal-tokens';
 import { logger } from './lib/logger';
 import { ENV_SPECS } from './lib/startup-validation';

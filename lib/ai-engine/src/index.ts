@@ -532,6 +532,12 @@ export {
   type TemporalPattern,
   temporalAwareness,
   type WorkingMemoryItem,
+  type CtmBusOptions,
+  type CtmSubscriber,
+  type CtmThought,
+  type CtmThoughtKind,
+  CtmBroadcastBus,
+  ctmBus,
 } from './consciousness/index.js';
 export {
   type BudgetConfig,

@@ -36,12 +36,22 @@ export type GovernanceClass =
   | 'mutating'
   | 'auto-remediable';
 
+/**
+ * `antivenom` (#5503) — adversarial-input detectors that recognise the
+ * counter-pattern of an attack instead of the attack itself (prompt
+ * injection, jailbreak, model-extraction probing, adversarial-example
+ * perturbations). Kept as a first-class kind, not a tag on `ml`, so the
+ * Detector Council (MARBLE) can weight antivenom evidence distinctly
+ * from baseline-shift evidence when arbitrating overlapping firings.
+ */
 export type DetectorKind =
   | 'heuristic'
   | 'signature'
   | 'statistical'
   | 'ml'
-  | 'correlation';
+  | 'correlation'
+  | 'antivenom'
+  | 'temporal';
 
 export type DetectorRuntime = 'ts' | 'python';
 

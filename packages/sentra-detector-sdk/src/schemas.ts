@@ -10,6 +10,8 @@ export const detectorKindSchema = z.enum([
   'statistical',
   'ml',
   'correlation',
+  'antivenom',
+  'temporal',
 ]);
 
 export const detectorRuntimeSchema = z.enum(['ts', 'python']);

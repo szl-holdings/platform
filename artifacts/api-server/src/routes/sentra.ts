@@ -8,6 +8,10 @@ import { authMiddleware } from '../middlewares/auth';
 import { validateBody } from '../lib/validation';
 import { logger } from '../lib/logger';
 import { getReflexivityRuntime } from '../lib/cognitive-reflexivity-runtime';
+import {
+  getLatestTemporalScore,
+  getLatestVerdict,
+} from '../lib/sentra-detector-council.js';
 
 /**
  * Emit a cognitive-reflexive observation when a Sentra incident is created.
@@ -75,6 +79,12 @@ const acknowledgeAlertSchema = z.object({
 // ────────────────────────────────────────────────────────────────────────────
 
 function rowToIncident(row: typeof sentraIncidentsTable.$inferSelect) {
+  // AGI-stack enrichment (#5503): if the Council/Time-R1 fired with the
+  // incident id as correlation key, surface the latest verdict + temporal
+  // score inline so the commander list can prioritise without an extra
+  // round-trip. Both fields are optional and null when no signal exists.
+  const verdict = getLatestVerdict(row.id);
+  const temporal = getLatestTemporalScore(row.id);
   return {
     id: row.id,
     title: row.title,
@@ -89,6 +99,11 @@ function rowToIncident(row: typeof sentraIncidentsTable.$inferSelect) {
     affectedAssets: (row.affectedAssets as string[]) ?? [],
     tags: (row.tags as string[]) ?? [],
     timeline: (row.timeline as unknown[]) ?? [],
+    councilSeverity: verdict?.arbitratedSeverity ?? null,
+    councilConfidence: verdict?.confidence ?? null,
+    councilGovernanceCeiling: verdict?.governanceCeiling ?? null,
+    temporalScore: temporal?.temporalScore ?? null,
+    temporalSeverity: temporal?.severity ?? null,
   };
 }
 

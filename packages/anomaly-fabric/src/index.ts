@@ -7,6 +7,7 @@
  *  - Streaming detection with rolling-window z-score analysis
  *  - Batch detection with per-metric outlier and distribution-shift detection
  *  - Pluggable AnomalyStore for persistence
+ *  - Time-R1 temporal-trajectory scoring (#5503)
  *
  * Usage:
  *   import { globalAnomalyService } from "@workspace/anomaly-fabric";
@@ -17,5 +18,6 @@ export * from './types.js';
 export * from './streaming.js';
 export * from './batch.js';
 export * from './service.js';
+export * from './time-r1-scoring.js';
 
 export { ANOMALY_FABRIC_VERSION } from './types.js';

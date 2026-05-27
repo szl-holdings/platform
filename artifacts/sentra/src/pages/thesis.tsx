@@ -211,6 +211,63 @@ Closure: Λ₁₀ / Σ_k L_k = 1  ⇔  every artefact is present for every layer
         </Card>
       </div>
 
+      <Card className="bg-black/30 border-white/10" style={{ borderColor: 'rgba(201,183,135,0.22)' }}>
+        <CardHeader>
+          <CardTitle className="text-white text-base">AGI-stack capabilities (#5503)</CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-3 text-sm text-white/80">
+          <p>
+            Four primitives distilled from the 2026 AGI-stack synthesis (
+            <span className="font-mono">docs/research/agi-stack-synthesis-2026.md</span>) now
+            run inside Sentra's 10-stage remediation pipeline. Each emits a Λ-receipt and
+            broadcasts onto the CTM bus, giving the Council a coherent cross-detector view.
+          </p>
+          <div className="overflow-x-auto">
+            <table className="w-full text-sm">
+              <thead>
+                <tr className="border-b border-white/10">
+                  <th className="text-left py-2 pr-3 text-white/60 font-medium">Primitive</th>
+                  <th className="text-left py-2 pr-3 text-white/60 font-medium">Inspiration</th>
+                  <th className="text-left py-2 pr-3 text-white/60 font-medium">Receipt class</th>
+                  <th className="text-left py-2 pr-3 text-white/60 font-medium">Endpoint</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr className="border-b border-white/5 align-top">
+                  <td className="py-2 pr-3 text-white/85">Detector Council</td>
+                  <td className="py-2 pr-3 text-white/70">MARBLE multi-agent arbitration</td>
+                  <td className="py-2 pr-3 text-white/60 font-mono text-[11px]">bench.marble.v1</td>
+                  <td className="py-2 pr-3 text-white/60 font-mono text-[11px]">/api/sentra/agi/council/deliberate</td>
+                </tr>
+                <tr className="border-b border-white/5 align-top">
+                  <td className="py-2 pr-3 text-white/85">Time-R1 trajectory scoring</td>
+                  <td className="py-2 pr-3 text-white/70">Time-R1 temporal anomaly model</td>
+                  <td className="py-2 pr-3 text-white/60 font-mono text-[11px]">anomaly.time-r1.v1</td>
+                  <td className="py-2 pr-3 text-white/60 font-mono text-[11px]">/api/sentra/agi/time-r1/score</td>
+                </tr>
+                <tr className="border-b border-white/5 align-top">
+                  <td className="py-2 pr-3 text-white/85">Antivenom detector class</td>
+                  <td className="py-2 pr-3 text-white/70">Antivenom adversarial-input matching</td>
+                  <td className="py-2 pr-3 text-white/60 font-mono text-[11px]">sentra.antivenom-match.v1</td>
+                  <td className="py-2 pr-3 text-white/60 font-mono text-[11px]">/api/sentra/detectors/* (kind: antivenom)</td>
+                </tr>
+                <tr className="border-b border-white/5 align-top">
+                  <td className="py-2 pr-3 text-white/85">CTM broadcast bus</td>
+                  <td className="py-2 pr-3 text-white/70">Continuous Thought Machine</td>
+                  <td className="py-2 pr-3 text-white/60 font-mono text-[11px]">consciousness.broadcast.v1</td>
+                  <td className="py-2 pr-3 text-white/60 font-mono text-[11px]">/api/sentra/agi/bus/snapshot</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          <p className="text-xs text-white/60">
+            The end-to-end drill — <span className="font-mono">/api/sentra/agi/edge-adversary-drill</span> —
+            exercises all four in one call and is surfaced on the Incident Commander as
+            <span className="font-mono"> Run Edge Adversary Drill</span>.
+          </p>
+        </CardContent>
+      </Card>
+
       <Card className="bg-black/30 border-white/10">
         <CardHeader>
           <CardTitle className="text-white text-base">Provenance</CardTitle>

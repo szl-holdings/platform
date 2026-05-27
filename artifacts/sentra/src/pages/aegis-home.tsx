@@ -586,6 +586,74 @@ export default function AegisHomePage() {
       </Reveal>
 
       <Reveal>
+        <section id="agi-stack" className="relative py-24 sm:py-32 px-6">
+          <div className="max-w-[1200px] mx-auto">
+            <p aria-hidden="true" className="text-[10px] font-semibold tracking-[0.2em] uppercase text-white/60 mb-4">
+              AGI-Stack Capabilities (2026)
+            </p>
+            <h2 className="text-[clamp(1.4rem,3vw,2.2rem)] font-bold leading-[1.15] tracking-tight text-white mb-4">
+              Four primitives wired into the 10-stage remediation pipeline
+            </h2>
+            <p className="text-[15px] leading-[1.8] text-white/65 max-w-[720px] mb-10">
+              Distilled from 13 external AGI-stack repos and rebuilt as auditable Λ-receipts.
+              Each one is hot-pluggable into Incident Commander, the Detector framework, and the
+              remediation pipeline.
+            </p>
+            <div
+              className="grid grid-cols-1 sm:grid-cols-2 gap-px rounded-2xl overflow-hidden"
+              style={{ background: 'rgba(255,255,255,0.04)' }}
+            >
+              {[
+                {
+                  icon: Brain,
+                  title: 'Detector Council (MARBLE)',
+                  receipt: 'bench.marble.v1',
+                  desc:
+                    'Weighted multi-detector arbitration with co-firing bump, diversity floor, and a governance ceiling. Replaces single-detector winners with a quorum verdict.',
+                },
+                {
+                  icon: Activity,
+                  title: 'Time-R1 trajectory scoring',
+                  receipt: 'anomaly.time-r1.v1',
+                  desc:
+                    'Drift / shock / direction-cosine composite over per-metric baselines. Surfaces "this trajectory broke" instead of "this point is high".',
+                },
+                {
+                  icon: Shield,
+                  title: 'Antivenom detector class',
+                  receipt: 'sentra.antivenom-match.v1',
+                  desc:
+                    'Adversary-prompt-injection class lives alongside heuristic/signature/ml. Layered jailbreaks are blocked at the agent surface, benign queries pass.',
+                },
+                {
+                  icon: Radio,
+                  title: 'CTM broadcast bus',
+                  receipt: 'consciousness.broadcast.v1',
+                  desc:
+                    'Cross-detector pub/sub for findings, verdicts, and trajectories. Every publish gets a receipt so the full deliberation chain is reconstructable.',
+                },
+              ].map((cap) => (
+                <div key={cap.title} className="bg-[#0b0d12] p-7">
+                  <div className="flex items-center gap-3 mb-3">
+                    <cap.icon size={18} className="text-white/70" />
+                    <h3 className="text-[13px] font-bold text-white uppercase tracking-[0.08em]">
+                      {cap.title}
+                    </h3>
+                  </div>
+                  <p className="text-[12px] leading-[1.85] text-white/65 mb-3">{cap.desc}</p>
+                  <p className="text-[10px] font-mono text-white/40">Λ-receipt · {cap.receipt}</p>
+                </div>
+              ))}
+            </div>
+            <p className="text-[11px] font-mono text-white/40 mt-6">
+              Demo flow: <span className="text-white/70">POST /api/sentra/agi/edge-adversary-drill</span> ·
+              audit: <span className="text-white/70">GET /api/sentra/agi/council/verdicts</span>
+            </p>
+          </div>
+        </section>
+      </Reveal>
+
+      <Reveal>
         <section className="relative py-24 sm:py-32 px-6">
           <div className="max-w-[1200px] mx-auto">
             <p aria-hidden="true" className="text-[10px] font-semibold tracking-[0.2em] uppercase text-white/60 mb-6">

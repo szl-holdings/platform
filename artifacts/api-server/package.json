@@ -134,6 +134,7 @@
     "@types/nodemailer": "^7.0.11",
     "@types/pdfkit": "^0.17.5",
     "@workspace/a11oy-fabric": "workspace:*",
+    "@workspace/anomaly-fabric": "workspace:*",
     "@workspace/a11oy-orchestration": "workspace:*",
     "@workspace/a11oy-reliquary": "workspace:*",
     "@workspace/aef-domain-profiles": "workspace:*",

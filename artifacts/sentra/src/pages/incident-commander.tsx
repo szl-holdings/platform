@@ -23,6 +23,7 @@ import { DataStateBadge } from '@szl-holdings/shared-ui/data-state-badge';
 import { PageHeader, SeverityChip, StatusChip } from '@/lib/data-provenance';
 import { toDataState, useSentraCoreLive } from '@/lib/use-sentra-core-live';
 import { HealthcareCaseStudyBanner } from '../components/healthcare-case-study-banner';
+import { DetectorCouncilPanel } from '../components/detector-council-panel';
 import {
   createIncident,
   listIncidents,
@@ -546,7 +547,30 @@ export default function IncidentCommander() {
     void load();
   }, []);
 
-  const selected = incidents.find((i) => i.id === selectedId) ?? incidents[0];
+  // AGI-stack prioritisation (#5503): if the Detector Council or Time-R1
+  // fired on this incident, lift it to the top of the list. We rank by
+  //   max(councilSeverityRank, baseSeverityRank), tie-broken by temporalScore.
+  // Plain incidents (no enrichment) sort by their base severity + detectedAt
+  // exactly as before.
+  const SEV_RANK: Record<IncidentSeverity, number> = {
+    critical: 4,
+    high: 3,
+    medium: 2,
+    low: 1,
+    info: 0,
+  } as Record<IncidentSeverity, number>;
+  const priorityScore = (inc: Incident): number => {
+    const base = SEV_RANK[inc.severity] ?? 0;
+    const council = inc.councilSeverity ? SEV_RANK[inc.councilSeverity] ?? 0 : 0;
+    const t = typeof inc.temporalScore === 'number' ? inc.temporalScore : 0;
+    return Math.max(base, council) * 10 + t;
+  };
+  const sortedIncidents = [...incidents].sort((a, b) => {
+    const dp = priorityScore(b) - priorityScore(a);
+    if (dp !== 0) return dp;
+    return (b.detectedAt ?? '').localeCompare(a.detectedAt ?? '');
+  });
+  const selected = sortedIncidents.find((i) => i.id === selectedId) ?? sortedIncidents[0];
   const activeCount = incidents.filter((i) => !['resolved', 'contained'].includes(i.status)).length;
 
   // Drive the live runbook execution from the actually-selected incident so
@@ -636,6 +660,8 @@ export default function IncidentCommander() {
 
       <HealthcareCaseStudyBanner currentPage="incident-commander" />
 
+      <DetectorCouncilPanel />
+
       {liveRunbook.data && (
         <section
           data-testid="live-runbook-execution"
@@ -708,13 +734,13 @@ export default function IncidentCommander() {
               ))}
             </div>
           ) : (
-            incidents.map((inc) => (
+            sortedIncidents.map((inc) => (
               <button
                 key={inc.id}
                 onClick={() => setSelectedId(inc.id)}
                 className={cn(
                   'w-full text-left sentra-panel p-4 transition-colors',
-                  (selectedId === inc.id || (!selectedId && inc === incidents[0]))
+                  (selectedId === inc.id || (!selectedId && inc === sortedIncidents[0]))
                     ? 'border-[#f5f5f5]/30 bg-[#f5f5f5]/5'
                     : 'hover:bg-slate-800/30',
                 )}
@@ -728,6 +754,28 @@ export default function IncidentCommander() {
                 <div className="flex items-center gap-2 flex-wrap">
                   <span className="text-[10px] text-slate-500 font-mono">{inc.id}</span>
                   <StatusChip status={inc.status} />
+                  {inc.councilSeverity && (
+                    <span
+                      data-testid="incident-council-chip"
+                      className="px-1.5 py-0.5 rounded text-[9px] font-mono uppercase tracking-widest border border-amber-400/40 bg-amber-400/10 text-amber-200"
+                      title={`Council arbitrated ${inc.councilSeverity}${
+                        inc.councilConfidence != null
+                          ? ` · confidence ${(inc.councilConfidence * 100).toFixed(0)}%`
+                          : ''
+                      }`}
+                    >
+                      MARBLE·{inc.councilSeverity}
+                    </span>
+                  )}
+                  {typeof inc.temporalScore === 'number' && (
+                    <span
+                      data-testid="incident-temporal-chip"
+                      className="px-1.5 py-0.5 rounded text-[9px] font-mono uppercase tracking-widest border border-cyan-400/40 bg-cyan-400/10 text-cyan-200"
+                      title={`Time-R1 score ${(inc.temporalScore * 100).toFixed(0)}% · severity ${inc.temporalSeverity ?? 'n/a'}`}
+                    >
+                      T-R1·{(inc.temporalScore * 100).toFixed(0)}
+                    </span>
+                  )}
                 </div>
                 <div className="text-[10px] text-slate-600 font-mono mt-1 flex items-center gap-1">
                   <Clock className="w-2.5 h-2.5" />

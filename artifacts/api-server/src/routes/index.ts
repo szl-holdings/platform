@@ -327,6 +327,11 @@ router.use(lazyMatch("/sentra", () => import("./sentra-posture"), "sentra-postur
 // shared by TS detectors and the Python sidecar. See packages/sentra-detector-sdk
 // and services/sentra-detector-sidecar.
 router.use(lazyMatch("/sentra", () => import("./sentra-detector-framework"), "sentra-detector-framework"));
+// AGI-stack capabilities (#5503) — Detector Council (MARBLE), Time-R1
+// trajectory scoring, CTM bus snapshot, antivenom audit, edge-adversary
+// demo drill. Mounted on `/sentra/agi/*` so the existing `/sentra`
+// detector framework remains source-of-truth for individual detectors.
+router.use(lazyMatch("/sentra/agi", () => import("./sentra-agi-stack"), "sentra-agi-stack"));
 
 // Sentra Tabs (Round 5 #5208) — honest empty 200s for SPA tabs that previously
 // hit unmounted endpoints and got 404. Replaces console errors with clean

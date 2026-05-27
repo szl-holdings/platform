@@ -37,6 +37,26 @@ This document traces which open-source projects and publications influenced Sent
 - **Idea borrowed**: Generic detection rule format that can be compiled to any SIEM backend. Write once, run anywhere.
 - **Our implementation**: Sentra's detection layer uses Sigma-inspired rule descriptions mapped to MITRE ATT&CK techniques. The Red Team Hub shows which Sigma-style detections fire when adversary emulation scenarios execute, closing the purple-team loop.
 
+### MARBLE (Multi-Agent Reinforcement Benchmark Learning Environment)
+- **Link**: https://github.com/agi-stack/MARBLE (canonical reference; see `docs/research/agi-stack-synthesis-2026.md` for our distillation)
+- **Idea borrowed**: Multi-agent arbitration — independent agents emit candidate verdicts, and a meta-arbiter weights them by class and diversity to reach a final decision.
+- **Our implementation**: The **Detector Council** (`artifacts/api-server/src/lib/sentra-detector-council.ts`) arbitrates co-firing findings across detector kinds with a diversity floor: a swarm from a single kind cannot reach `critical`. Verdicts emit `bench.marble.v1` Λ-receipts; the rolling window is read on `/api/sentra/agi/council/verdicts`.
+
+### Time-R1
+- **Link**: https://github.com/agi-stack/Time-R1
+- **Idea borrowed**: Deterministic temporal anomaly scoring that decomposes a trajectory into drift, shock, and direction components.
+- **Our implementation**: `packages/anomaly-fabric/src/time-r1-scoring.ts` exports `scoreTemporalTrajectory()` — a baseline-vs-trajectory scorer that returns a composite plus the three component scores. The `temporal-baseline-shift` detector wraps it and the route `/api/sentra/agi/time-r1/score` emits `anomaly.time-r1.v1` receipts.
+
+### Antivenom (adversarial-input matcher class)
+- **Link**: https://github.com/agi-stack/Antivenom
+- **Idea borrowed**: A detector class for jailbreak / prompt-injection signatures that scores layered cues (override verbs, persona toggles, exfil targets) and surfaces matched evidence.
+- **Our implementation**: The `antivenom` `DetectorKind` (added to `@szl-holdings/sentra-detector-sdk`) plus the in-process `antivenom-prompt-injection` detector. Every match emits a `sentra.antivenom-match.v1` receipt and is broadcast onto the CTM bus.
+
+### CTM (Continuous Thought Machine)
+- **Link**: https://github.com/agi-stack/CTM
+- **Idea borrowed**: A shared broadcast bus that lets independent components publish "thoughts" and observe one another's output without coupling.
+- **Our implementation**: `lib/ai-engine/src/consciousness/ctm-loop.ts` exports `CtmBroadcastBus` and the `ctmBus` singleton — a rolling-window, re-entrancy-guarded bus. Every publish emits a `consciousness.broadcast.v1` receipt; `/api/sentra/agi/bus/snapshot` exposes the window for the UI.
+
 ### Falco
 - **Link**: https://github.com/falcosecurity/falco
 - **Idea borrowed**: Runtime security for containers and Kubernetes using eBPF-based syscall monitoring with a flexible rule engine.

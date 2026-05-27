@@ -27,6 +27,11 @@ import { handleRouteError, sendCreated, sendNotFound, sendSuccess } from '../lib
 import { validateBody } from '../lib/validation';
 import { logger } from '../lib/logger';
 import { authMiddleware, type AuthenticatedUser } from '../middlewares/auth';
+import {
+  deliberateAndReceipt,
+  getLatestVerdict,
+} from '../lib/sentra-detector-council.js';
+import type { DetectorKind, Finding } from '@szl-holdings/sentra-detector-sdk';
 
 const router: IRouter = Router();
 
@@ -325,18 +330,41 @@ function simulateImpact(input: {
 function evaluatePolicy(input: {
   severity: string;
   blastRadius: 'low' | 'medium' | 'high';
+  council?: {
+    arbitratedSeverity: string;
+    governanceCeiling: 'read-only' | 'advisory' | 'mutating' | 'auto-remediable';
+    confidence: number;
+    distinctKinds: number;
+  } | null;
 }): NonNullable<Row['policy']> {
+  // Effective severity = max(base, council.arbitratedSeverity) so a Council
+  // verdict can only escalate, never downgrade, the policy tier.
+  const sevRank: Record<string, number> = { low: 1, medium: 2, high: 3, critical: 4 };
+  const baseRank = sevRank[input.severity] ?? 0;
+  const councilRank = input.council ? sevRank[input.council.arbitratedSeverity] ?? 0 : 0;
+  const effRank = Math.max(baseRank, councilRank);
+  const effSeverity =
+    effRank >= 4 ? 'critical' : effRank >= 3 ? 'high' : effRank >= 2 ? 'medium' : 'low';
+
   let tier: 'auto' | 'operator' | 'executive';
   let reason: string;
-  if (input.blastRadius === 'high' || input.severity === 'critical') {
+  if (input.blastRadius === 'high' || effSeverity === 'critical') {
     tier = 'executive';
-    reason = `Severity=${input.severity}, blast=${input.blastRadius} → executive sign-off required by Covenant Policy`;
-  } else if (input.blastRadius === 'medium' || input.severity === 'high') {
+    reason = `Severity=${effSeverity}, blast=${input.blastRadius} → executive sign-off required by Covenant Policy`;
+  } else if (input.blastRadius === 'medium' || effSeverity === 'high') {
     tier = 'operator';
-    reason = `Severity=${input.severity}, blast=${input.blastRadius} → operator approval required`;
+    reason = `Severity=${effSeverity}, blast=${input.blastRadius} → operator approval required`;
   } else {
     tier = 'auto';
-    reason = `Low risk profile (severity=${input.severity}, blast=${input.blastRadius}) → auto-approved`;
+    reason = `Low risk profile (severity=${effSeverity}, blast=${input.blastRadius}) → auto-approved`;
+  }
+  // Governance ceiling clamp: read-only kits cannot auto-execute, period.
+  if (input.council?.governanceCeiling === 'read-only' && tier === 'auto') {
+    tier = 'operator';
+    reason = `${reason}; clamped to operator by Council read-only governance ceiling`;
+  }
+  if (input.council) {
+    reason = `${reason}; MARBLE verdict ${input.council.arbitratedSeverity} (confidence ${(input.council.confidence * 100).toFixed(0)}%, ${input.council.distinctKinds} kinds, ceiling=${input.council.governanceCeiling})`;
   }
   return { requiredTier: tier, tierReason: reason };
 }
@@ -592,7 +620,23 @@ router.post('/sentra/remediation/cases/:id/policy', authMiddleware({ required: t
     if (!enforceStage(res, existing.stage as RemediationStage, 'policy')) return;
 
     const blast = existing.simulation?.blastRadius ?? 'medium';
-    const policy = evaluatePolicy({ severity: existing.severity, blastRadius: blast });
+    // AGI-stack wiring (#5503): if the Detector Council has fired with this
+    // case id as the correlation key, fold the verdict into the policy
+    // decision. Verdict can only escalate the tier (never downgrade), and
+    // a read-only governance ceiling clamps auto-approve to operator.
+    const verdict = getLatestVerdict(existing.id);
+    const policy = evaluatePolicy({
+      severity: existing.severity,
+      blastRadius: blast,
+      council: verdict
+        ? {
+            arbitratedSeverity: verdict.arbitratedSeverity,
+            governanceCeiling: verdict.governanceCeiling,
+            confidence: verdict.confidence,
+            distinctKinds: verdict.distinctKinds,
+          }
+        : null,
+    });
     const actor = (req.body as { actor?: string })?.actor ?? 'covenant-policy';
     const proofId = await bindProof({
       caseId: id,
@@ -720,6 +764,102 @@ router.post(
       sendSuccess(res, rowToCase(updated!));
     } catch (err) {
       handleRouteError(res, err, 'Failed to record approval');
+    }
+  },
+);
+
+// POST /sentra/remediation/cases/:id/agi-arbitrate — convene the Detector
+// Council on a bundle of candidate findings for this case. The verdict is
+// kept in the latest-verdict ring under the case id so the next `policy`
+// stage folds it into the autonomy tier decision. A timeline entry is
+// recorded so the audit trail captures the arbitration.
+const arbitrateSchema = z.object({
+  candidates: z
+    .array(
+      z.object({
+        finding: z.object({
+          id: z.string(),
+          detectorId: z.string(),
+          runId: z.string().optional().default('agi-arbitrate'),
+          severity: z.enum(['critical', 'high', 'medium', 'low', 'info']),
+          score: z.number().min(0).max(1),
+          title: z.string(),
+          summary: z.string(),
+          attackTechniques: z.array(z.string()).optional().default([]),
+          affectedAssets: z.array(z.string()).optional().default([]),
+          evidence: z.record(z.unknown()).optional().default({}),
+          emittedAt: z.string().optional(),
+          governanceClass: z
+            .enum(['read-only', 'advisory', 'mutating', 'auto-remediable'])
+            .optional()
+            .default('advisory'),
+        }),
+        detectorKind: z.enum([
+          'heuristic',
+          'signature',
+          'statistical',
+          'ml',
+          'correlation',
+          'antivenom',
+          'temporal',
+        ]),
+      }),
+    )
+    .min(1)
+    .max(64),
+});
+
+router.post(
+  '/sentra/remediation/cases/:id/agi-arbitrate',
+  authMiddleware({ required: true }),
+  validateBody(arbitrateSchema),
+  async (req: Request, res: Response) => {
+    try {
+      const id = req.params.id as string;
+      const [existing] = await db
+        .select()
+        .from(sentraRemediationCasesTable)
+        .where(eq(sentraRemediationCasesTable.id, id))
+        .limit(1);
+      if (!existing) return sendNotFound(res, 'Remediation case');
+
+      const body = req.body as z.infer<typeof arbitrateSchema>;
+      const candidates = body.candidates.map((c) => ({
+        finding: {
+          ...c.finding,
+          emittedAt: c.finding.emittedAt ?? new Date().toISOString(),
+        } as Finding,
+        detectorKind: c.detectorKind as DetectorKind,
+      }));
+      const result = await deliberateAndReceipt(id, candidates);
+      if (!result) {
+        res.status(422).json({
+          error: 'Council could not produce a verdict from the supplied candidates.',
+          code: 'COUNCIL_NO_VERDICT',
+        });
+        return;
+      }
+
+      const actor = (req.body as { actor?: string })?.actor ?? 'detector-council';
+      const [updated] = await db
+        .update(sentraRemediationCasesTable)
+        .set({
+          timeline: appendTimeline(existing.timeline, {
+            stage: existing.stage as RemediationStage,
+            message: `MARBLE verdict ${result.verdict.arbitratedSeverity} (confidence ${(result.verdict.confidence * 100).toFixed(0)}%, ${result.verdict.distinctKinds} kinds, ceiling=${result.verdict.governanceCeiling}). Receipt ${result.chainReceiptId.slice(0, 12)}…`,
+            actor,
+          }),
+          updatedAt: new Date(),
+        })
+        .where(eq(sentraRemediationCasesTable.id, id))
+        .returning();
+      sendCreated(res, {
+        verdict: result.verdict,
+        chainReceiptId: result.chainReceiptId,
+        case: rowToCase(updated!),
+      });
+    } catch (err) {
+      handleRouteError(res, err, 'Failed to arbitrate council verdict for case');
     }
   },
 );

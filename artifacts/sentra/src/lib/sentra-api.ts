@@ -53,6 +53,19 @@ export interface Incident {
   affectedAssets: string[];
   tags: string[];
   timeline: TimelineEntry[];
+  // AGI-stack enrichment (#5503) — populated when the Council/Time-R1
+  // detectors fired with this incident id as the correlation key. Both
+  // are null when no signal exists.
+  councilSeverity?: IncidentSeverity | null;
+  councilConfidence?: number | null;
+  councilGovernanceCeiling?:
+    | 'read-only'
+    | 'advisory'
+    | 'mutating'
+    | 'auto-remediable'
+    | null;
+  temporalScore?: number | null;
+  temporalSeverity?: 'low' | 'medium' | 'high' | 'critical' | null;
 }
 
 export interface SentraAlert {
@@ -2365,4 +2378,149 @@ export function registerCanary(body: {
   description?: string;
 }) {
   return postJson<CanaryToken>('/sentra/deception/canaries', body);
+}
+
+// ────────────────────────────────────────────────────────────────────────
+// AGI-stack (#5503) — Detector Council, Time-R1, CTM bus, Edge Adversary Drill.
+// ────────────────────────────────────────────────────────────────────────
+export type AgiSeverity = 'low' | 'medium' | 'high' | 'critical';
+export type AgiDetectorKind =
+  | 'heuristic'
+  | 'signature'
+  | 'statistical'
+  | 'ml'
+  | 'correlation'
+  | 'antivenom'
+  | 'temporal';
+
+export type AgiGovernanceClass =
+  | 'read-only'
+  | 'advisory'
+  | 'mutating'
+  | 'auto-remediable';
+
+export interface CouncilVerdict {
+  id: string;
+  correlationKey: string;
+  arbitratedSeverity: AgiSeverity;
+  confidence: number;
+  distinctKinds: number;
+  rationale: string;
+  supportingFindingIds: string[];
+  suppressedFindingIds: string[];
+  kindContributions: Record<string, number>;
+  inputCount: number;
+  governanceCeiling: AgiGovernanceClass;
+  deliberatedAt: string;
+  receiptKind: 'bench.marble.v1';
+  version: string;
+  chainReceiptId?: string;
+}
+
+export interface TimeR1Score {
+  metricName: string;
+  lane?: string;
+  entityId?: string;
+  scoredAt: string;
+  windowStart: string;
+  windowEnd: string;
+  temporalScore: number;
+  severity: AgiSeverity;
+  components: {
+    driftSigma: number;
+    peakShockSigma: number;
+    directionCosineDistance: number;
+  };
+  perStepShock: Array<{ timestamp: string; value: number; zScore: number }>;
+  receiptKind: 'anomaly.time-r1.v1';
+  version: string;
+}
+
+export interface CtmThought {
+  sequenceId: number;
+  source: string;
+  kind:
+    | 'finding'
+    | 'temporal-trajectory'
+    | 'antivenom-match'
+    | 'baseline-shift'
+    | 'council-verdict';
+  correlationKey?: string;
+  score?: number;
+  payload: unknown;
+  emittedAt: string;
+}
+
+export interface EdgeAdversaryDrillResponse {
+  drill: 'edge-adversary';
+  correlationKey: string;
+  startedAt: string;
+  finishedAt: string;
+  antivenom: {
+    runId: string;
+    findings: Array<{ id: string; severity: AgiSeverity; score: number; summary: string }>;
+    receipts: Array<{ findingId: string; chainReceiptId: string }>;
+  };
+  temporal: {
+    runId: string;
+    findings: Array<{ id: string; severity: AgiSeverity; score: number; summary: string }>;
+  };
+  council: {
+    verdict: CouncilVerdict;
+    chainReceiptId: string;
+    broadcast: { sequenceId: number; chainReceiptId: string } | null;
+  } | null;
+  broadcastReceipts: Array<{ sequenceId: number; chainReceiptId: string; findingId: string }>;
+  governanceCeiling: 'advisory' | 'mutating' | 'destructive';
+}
+
+async function postJsonAgi<T>(path: string, body: unknown): Promise<T | null> {
+  try {
+    const res = await fetch(`${BASE}${path}`, {
+      method: 'POST',
+      credentials: 'include',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(body),
+    });
+    if (!res.ok) return null;
+    return (await res.json()) as T;
+  } catch {
+    return null;
+  }
+}
+
+export function listCouncilVerdicts() {
+  return getJson<{ verdicts: CouncilVerdict[]; count: number }>(
+    '/sentra/agi/council/verdicts',
+  );
+}
+
+export function scoreTrajectory(body: {
+  metricName: string;
+  lane?: string;
+  entityId?: string;
+  baseline: Array<{ value: number; timestamp: string }>;
+  trajectory: Array<{ value: number; timestamp: string }>;
+}) {
+  return postJsonAgi<{ score: TimeR1Score; chainReceiptId: string; broadcast: { sequenceId: number; chainReceiptId: string } }>(
+    '/sentra/agi/time-r1/score',
+    body,
+  );
+}
+
+export function getCtmBusSnapshot(opts?: { correlationKey?: string; kinds?: CtmThought['kind'][] }) {
+  const params = new URLSearchParams();
+  if (opts?.correlationKey) params.set('correlationKey', opts.correlationKey);
+  if (opts?.kinds?.length) params.set('kinds', opts.kinds.join(','));
+  const qs = params.toString();
+  return getJson<{ thoughts: CtmThought[]; count: number }>(
+    `/sentra/agi/bus/snapshot${qs ? `?${qs}` : ''}`,
+  );
+}
+
+export function runEdgeAdversaryDrill(body?: { correlationKey?: string; dryRun?: boolean }) {
+  return postJsonAgi<EdgeAdversaryDrillResponse>(
+    '/sentra/agi/edge-adversary-drill',
+    body ?? {},
+  );
 }
