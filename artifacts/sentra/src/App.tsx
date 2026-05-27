@@ -424,6 +424,7 @@ const NAV_SECTIONS: NavSection[] = [
     label: 'Benchmarks',
     items: [
       { path: '/benchmarks', label: 'Benchmarks & Leaderboards', icon: Trophy, comp: L(() => import('@/pages/benchmarks')) },
+      { path: '/benchmarks/putnam', label: 'Putnam Leaderboard', icon: Sigma, comp: L(() => import('@/pages/putnam-leaderboard')) },
     ],
   },
   {
