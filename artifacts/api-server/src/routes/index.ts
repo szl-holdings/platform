@@ -1023,4 +1023,20 @@ router.use(lazyMatch("/foundry/deepseek-v4", () => import("./foundry-deepseek-v4
 // GET    /atelier/leaderboards?mode=           — governance-weighted leaderboard
 router.use("/atelier", lazyMount(() => import("./atelier"), "atelier"));
 
+// Perception/Bio API surface (#5519): one governed entry point per
+// shared package — `@szl-holdings/perception-loop` (feature-vector
+// verify, antivenom nonce), `@szl-holdings/sequence-pipeline` (trace
+// ingest + tabulated statistic), `@szl-holdings/anomaly-fabric`
+// peak-detector (batch scoring + ranked-candidate classification),
+// `@szl-holdings/procedural-kit` (USD export job). All four prefixes
+// share one router; lazy-loaded so cold-start cost is paid only on
+// first hit.
+router.use(
+  lazyMatch(
+    ["/perception", "/sequence-pipeline", "/peak-detector", "/procedural-kit"],
+    () => import("./perception-bio"),
+    "perception-bio",
+  ),
+);
+
 export default router;

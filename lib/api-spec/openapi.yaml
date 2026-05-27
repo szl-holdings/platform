@@ -297,6 +297,8 @@ tags:
     description: "Auto-generated tag for gov-data route group"
   - name: govern-evolve
     description: "Auto-generated tag for govern-evolve route group"
+  - name: perception-bio
+    description: "Perception/bio shared-package surface: feature-vector verify (antivenom), sequence-pipeline trace ingest, peak-detector batch scoring, procedural-kit USD export."
   - name: governance
     description: "Auto-generated tag for governance route group"
   - name: governance-counts
@@ -65056,6 +65058,345 @@ paths:
                 items: { $ref: "#/components/schemas/ConduitDestinationField" }
 
 
+  /perception/nonce:
+    post:
+      operationId: perceptionIssueNonce
+      tags: [perception-bio]
+      summary: Issue a single-use server nonce for a perception verify call (antivenom).
+      description: |
+        Returns a single-use server-issued nonce bound to the authenticated
+        caller. The nonce is valid for `windowMs` (default 30s) and must be
+        presented unmodified to `POST /perception/verify` together with a
+        feature-vector envelope whose `capturedAt` lies inside that window.
+        Replays and cross-caller use are rejected (`NONCE_REPLAYED`,
+        `NONCE_WRONG_ACTOR`).
+      security:
+        - sessionAuth: []
+        - bearerAuth: []
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+      responses:
+        "201":
+          description: Nonce issued.
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [nonceId, issuedAt, expiresAt, windowMs]
+                properties:
+                  nonceId: { type: string }
+                  issuedAt: { type: string, format: date-time }
+                  expiresAt: { type: string, format: date-time }
+                  windowMs: { type: integer }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "429": { $ref: "#/components/responses/RateLimited" }
+  /perception/verify:
+    post:
+      operationId: perceptionVerifyEnvelope
+      tags: [perception-bio]
+      summary: Verify a perception feature-vector envelope (no frames, antivenom-guarded).
+      description: |
+        Verifies a `perception.envelope.v1` summary built from the
+        `@szl-holdings/perception-loop` package. The server **never**
+        receives raw frames or per-detection keypoints — only the
+        per-head counts, the frame hash, and the client-computed
+        liveness confidence. A valid server-issued nonce (see
+        `/perception/nonce`) is mandatory; replays and stale capture
+        timestamps are rejected at the route boundary.
+        Emits a `perception.envelope.v1` evidence-ledger entry under
+        the Doctrine V6 evidence-first pillar.
+      security:
+        - sessionAuth: []
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              required: [nonceId, featureVector]
+              properties:
+                nonceId: { type: string }
+                featureVector:
+                  type: object
+                  required: [frameHash, capturedAt, ranHeads, skippedHeads, livenessConfidence, budgetMs, consumerArtifact]
+                  properties:
+                    frameHash: { type: string }
+                    capturedAt: { type: integer }
+                    ranHeads:
+                      type: array
+                      items: { type: string, enum: [face, body, hand, gesture, iris, emotion, object, person] }
+                    skippedHeads:
+                      type: array
+                      items: { type: string, enum: [face, body, hand, gesture, iris, emotion, object, person] }
+                    detectionCounts:
+                      type: object
+                      additionalProperties: { type: integer, minimum: 0 }
+                    livenessConfidence: { type: number, minimum: 0, maximum: 1 }
+                    budgetMs: { type: number, minimum: 0 }
+                    consumerArtifact: { type: string }
+      responses:
+        "201":
+          description: Envelope accepted and ledger entry written.
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [receiptClass, entryId, traceId, pillar, detectionsSummary, livenessConfidence, nonceWindowMs]
+                properties:
+                  receiptClass: { type: string, enum: ["perception.envelope.v1"] }
+                  entryId: { type: string }
+                  traceId: { type: string }
+                  pillar: { type: string }
+                  detectionsSummary: { type: object, additionalProperties: true }
+                  livenessConfidence: { type: number }
+                  nonceWindowMs: { type: integer }
+        "400": { $ref: "#/components/responses/BadRequest" }
+        "401":
+          description: Nonce unknown, expired, replayed, or issued to a different caller.
+        "403":
+          description: Policy-guard denied.
+        "429": { $ref: "#/components/responses/RateLimited" }
+  /sequence-pipeline/trace:
+    post:
+      operationId: sequencePipelineIngestTrace
+      tags: [perception-bio]
+      summary: Ingest a sequence-pipeline trace (per-stage receipts + tabulated statistic).
+      description: |
+        Ingests a multi-stage pipeline trace from
+        `@szl-holdings/sequence-pipeline`. Emits one
+        `pipeline.stage.v1` ledger entry per stage and, if present, a
+        terminal `pipeline.tabulated-statistic.v1` entry. The
+        tabulated statistic is re-validated server-side: CI bounds
+        are mandatory ("no claim without an interval"), and tables
+        with `requiresNegativeSpace: true` must include at least one
+        `isNegativeSpace` row ("absence is a row"). Doctrine V6
+        pillar: evidence-first.
+      security:
+        - sessionAuth: []
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              required: [pipelineId, stages]
+              properties:
+                pipelineId: { type: string }
+                stages:
+                  type: array
+                  minItems: 1
+                  items:
+                    type: object
+                    additionalProperties: false
+                    required: [stageName, stageOrdinal, parentPipelineId, inputsHash, paramsHash, outputsHash, tooling]
+                    properties:
+                      stageName: { type: string }
+                      stageOrdinal: { type: integer, minimum: 0 }
+                      parentPipelineId: { type: string }
+                      inputsHash: { type: string }
+                      paramsHash: { type: string }
+                      outputsHash: { type: string }
+                      tooling: { type: object, additionalProperties: { type: string } }
+                tabulatedStatistic:
+                  type: object
+                  additionalProperties: false
+                  required: [totalTrials, rows, methodRef, requiresNegativeSpace]
+                  properties:
+                    totalTrials: { type: integer, minimum: 0 }
+                    methodRef: { type: string }
+                    requiresNegativeSpace: { type: boolean }
+                    rows:
+                      type: array
+                      minItems: 1
+                      items:
+                        type: object
+                        additionalProperties: false
+                        required: [label, count, fraction, ciLower, ciUpper, isNegativeSpace]
+                        properties:
+                          label: { type: string }
+                          count: { type: integer, minimum: 0 }
+                          fraction: { type: number, minimum: 0, maximum: 1 }
+                          ciLower: { type: number, minimum: 0, maximum: 1 }
+                          ciUpper: { type: number, minimum: 0, maximum: 1 }
+                          isNegativeSpace: { type: boolean }
+      responses:
+        "201":
+          description: Trace accepted.
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [pipelineId, stageReceiptClass, stageEntryIds, pillar]
+                properties:
+                  pipelineId: { type: string }
+                  stageReceiptClass: { type: string, enum: ["pipeline.stage.v1"] }
+                  stageEntryIds:
+                    type: array
+                    items: { type: string }
+                  tabulatedStatisticReceiptClass: { type: string, enum: ["pipeline.tabulated-statistic.v1"] }
+                  tabulatedStatisticEntryId: { type: string }
+                  pillar: { type: string }
+        "400": { $ref: "#/components/responses/BadRequest" }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "429": { $ref: "#/components/responses/RateLimited" }
+  /peak-detector/batch:
+    post:
+      operationId: peakDetectorBatchScore
+      tags: [perception-bio]
+      summary: Batch peak detection + ranked-candidate classification.
+      description: |
+        Scores a batch of peaks emitted from the
+        `@szl-holdings/anomaly-fabric` peak-detector. Each peak gets a
+        Wilson-95 CI on its (successes, trials) and a composite score
+        derived from itemised components (`prominence`, `snRatio`,
+        `shapeResidual`) — never just a composite alone. Emits one
+        `peak.detection.v1` entry per peak. If `classification` is
+        present, emits a `peak.classification.v1` entry — the
+        `cutoffChosenBy.rationale` is mandatory ("no collapse without
+        provenance").
+      security:
+        - sessionAuth: []
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              required: [detectorVersion, peaks]
+              properties:
+                detectorVersion: { type: string }
+                peaks:
+                  type: array
+                  minItems: 1
+                  maxItems: 256
+                  items:
+                    type: object
+                    additionalProperties: false
+                    required: [surfaceRef, peakId, scoreComponents, successes, trials]
+                    properties:
+                      surfaceRef: { type: string }
+                      peakId: { type: string }
+                      scoreComponents:
+                        type: object
+                        required: [prominence, snRatio, shapeResidual]
+                        properties:
+                          prominence: { type: number }
+                          snRatio: { type: number }
+                          shapeResidual: { type: number }
+                      successes: { type: integer, minimum: 0 }
+                      trials: { type: integer, minimum: 1 }
+                classification:
+                  type: object
+                  additionalProperties: false
+                  required: [confidenceCutoff, cutoffChosenBy]
+                  properties:
+                    confidenceCutoff: { type: number, minimum: 0, maximum: 1 }
+                    cutoffChosenBy:
+                      type: object
+                      required: [actor, rationale]
+                      properties:
+                        actor: { type: string }
+                        rationale: { type: string }
+      responses:
+        "201":
+          description: Batch scored.
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [detectorVersion, detectionReceiptClass, peaks, pillar]
+                properties:
+                  detectorVersion: { type: string }
+                  detectionReceiptClass: { type: string, enum: ["peak.detection.v1"] }
+                  classificationReceiptClass: { type: string, enum: ["peak.classification.v1"] }
+                  classificationEntryId: { type: string }
+                  pillar: { type: string }
+                  peaks:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        peakId: { type: string }
+                        surfaceRef: { type: string }
+                        composite: { type: number }
+                        scoreComponents: { type: object }
+                        confidenceInterval:
+                          type: object
+                          properties:
+                            p: { type: number }
+                            ciLower: { type: number }
+                            ciUpper: { type: number }
+                            level: { type: string }
+                        entryId: { type: string }
+        "400": { $ref: "#/components/responses/BadRequest" }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "429": { $ref: "#/components/responses/RateLimited" }
+  /procedural-kit/usd-export:
+    post:
+      operationId: proceduralKitUsdExport
+      tags: [perception-bio]
+      summary: Submit a procedural-kit USD export job.
+      description: |
+        Submits a USD export job for a procedural scene composed via
+        `@szl-holdings/procedural-kit`. The body carries the
+        deterministic `seed`, `libraryRef`, `partGraphHash`,
+        `sceneHash`, and a flattened `bom`; the server stamps a
+        `scene.composed.v1` ledger entry under the Doctrine V6
+        operational-ontology pillar and returns a `jobId` for the
+        background export. The kitbash lesson is enforced: no scene
+        without its seed.
+      security:
+        - sessionAuth: []
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              required: [seed, libraryRef, partGraphHash, sceneHash, bom, consumerArtifact]
+              properties:
+                seed: { type: integer }
+                libraryRef: { type: string }
+                partGraphHash: { type: string }
+                sceneHash: { type: string }
+                bom:
+                  type: object
+                  additionalProperties: { type: integer, minimum: 0 }
+                consumerArtifact: { type: string }
+      responses:
+        "201":
+          description: Export job accepted.
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [jobId, receiptClass, entryId, seed, libraryRef, partGraphHash, sceneHash, bom, pillar]
+                properties:
+                  jobId: { type: string }
+                  receiptClass: { type: string, enum: ["scene.composed.v1"] }
+                  entryId: { type: string }
+                  seed: { type: integer }
+                  libraryRef: { type: string }
+                  partGraphHash: { type: string }
+                  sceneHash: { type: string }
+                  bom: { type: object }
+                  pillar: { type: string }
+        "400": { $ref: "#/components/responses/BadRequest" }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "429": { $ref: "#/components/responses/RateLimited" }
 components:
   securitySchemes:
     bearerAuth:
