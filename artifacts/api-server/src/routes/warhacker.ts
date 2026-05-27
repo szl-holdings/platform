@@ -17,99 +17,15 @@
  *   POST /warhacker/lane/4/trajectory         → pipeline.stage.v1 chain
  *   POST /warhacker/lane/5/edge-drill         → peak.detection.v1 …
  */
-import { createHash } from 'node:crypto';
 import { existsSync, readdirSync, readFileSync, statSync } from 'node:fs';
 import * as path from 'node:path';
 import { Router, type Request, type Response } from 'express';
 import { z } from 'zod';
 import { sendError, sendSuccess } from '../lib/api-response';
+import { chain, laneEnvelope, sha256, traceFor } from '../lib/receipt-chain';
 import { validateBody } from '../lib/validation';
 
 const router = Router();
-
-// ─── Receipt chain primitives ────────────────────────────────────────────────
-
-interface Receipt {
-  readonly index: number;
-  readonly receiptClass: string;
-  readonly subject: string;
-  readonly summary: string;
-  readonly payloadSha256: string;
-  readonly prevHash: string;
-  readonly entryHash: string;
-  readonly emittedAt: string;
-  readonly pillar: string;
-}
-
-const GENESIS = '0'.repeat(64);
-
-function sha256(input: string | Buffer): string {
-  return createHash('sha256').update(input).digest('hex');
-}
-
-function canonicalJson(value: unknown): string {
-  if (value === null || typeof value !== 'object') return JSON.stringify(value);
-  if (Array.isArray(value)) return `[${value.map(canonicalJson).join(',')}]`;
-  const keys = Object.keys(value as Record<string, unknown>).sort();
-  return `{${keys
-    .map((k) => `${JSON.stringify(k)}:${canonicalJson((value as Record<string, unknown>)[k])}`)
-    .join(',')}}`;
-}
-
-interface ReceiptInput {
-  receiptClass: string;
-  subject: string;
-  summary: string;
-  pillar: string;
-  payload: unknown;
-}
-
-// Deterministic chain: emittedAt is derived from the canonical payload
-// hash (not wall-clock) so the same input body yields the same chain
-// across calls. This is what makes "captured receipt sample" lines in
-// docs/proposals/defense-unicorns/warhacker-2026-readiness.md
-// reproducible from a fresh server.
-function chain(entries: ReceiptInput[], traceId: string): Receipt[] {
-  const out: Receipt[] = [];
-  let prev = GENESIS;
-  const baseT = Date.parse('2026-05-27T00:00:00Z');
-  entries.forEach((e, i) => {
-    const payloadSha256 = sha256(canonicalJson(e.payload));
-    const emittedAt = new Date(baseT + i * 1000).toISOString();
-    const entryHash = sha256(
-      [traceId, String(i), e.receiptClass, e.subject, payloadSha256, prev, emittedAt].join('|'),
-    );
-    out.push({
-      index: i,
-      receiptClass: e.receiptClass,
-      subject: e.subject,
-      summary: e.summary,
-      payloadSha256,
-      prevHash: prev,
-      entryHash,
-      emittedAt,
-      pillar: e.pillar,
-    });
-    prev = entryHash;
-  });
-  return out;
-}
-
-function laneEnvelope(lane: string, traceId: string, receipts: Receipt[]) {
-  return {
-    lane,
-    traceId,
-    chain: receipts,
-    head: receipts.length > 0 ? receipts[receipts.length - 1]!.entryHash : GENESIS,
-    chainLength: receipts.length,
-  };
-}
-
-// Traces are content-addressed off the canonical input body. Same body
-// in, same trace out, same chain out.
-function traceFor(lane: string, body: unknown): string {
-  return `wh_${lane}_${sha256(canonicalJson(body) + ':' + lane).slice(0, 16)}`;
-}
 
 // ─── Replay store ────────────────────────────────────────────────────────────
 //
@@ -443,7 +359,9 @@ router.get('/warhacker/replay/:traceId', (req: Request, res: Response) => {
 router.post('/warhacker/lane/1/bundle-compose', validateBody(Lane1Body), (req, res) => {
   const body = req.body as z.infer<typeof Lane1Body>;
   const wanted = body.bundles ?? [...BUNDLE_NAMES];
-  const matrix = readBundleMatrix().filter((b) => wanted.includes(b.name as typeof BUNDLE_NAMES[number]));
+  const matrix = readBundleMatrix().filter((b) =>
+    wanted.includes(b.name as (typeof BUNDLE_NAMES)[number]),
+  );
   const traceId = traceFor('lane-1', { bundles: wanted, matrix });
 
   const receipts = chain(
@@ -640,7 +558,8 @@ router.post('/warhacker/lane/3/drone-oversight', validateBody(Lane3Body), (req, 
       {
         receiptClass: 'time-r1.window.v1',
         subject: `time-r1:${b.droneRef}:t0..t60`,
-        summary: 'Time-R1 temporal window verified monotone causal ordering across telemetry frames.',
+        summary:
+          'Time-R1 temporal window verified monotone causal ordering across telemetry frames.',
         pillar: 'evidence-first',
         payload: { windowSec: 60, frames: 600, ordering: 'monotone' },
       },
@@ -726,7 +645,8 @@ router.post('/warhacker/lane/4/trajectory', validateBody(Lane4Body), (req, res) 
       {
         receiptClass: 'time-r1.window.v1',
         subject: `time-r1:${b.trackRef}`,
-        summary: 'Time-R1 returned monotone window with no causal inversion in the fused trajectory.',
+        summary:
+          'Time-R1 returned monotone window with no causal inversion in the fused trajectory.',
         pillar: 'evidence-first',
         payload: { windowSec: b.fusionWindowSec, inversions: 0 },
       },
