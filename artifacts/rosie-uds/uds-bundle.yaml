@@ -1,0 +1,15 @@
+kind: UDSBundle
+metadata:
+  name: rosie-uds-bundle
+  description: "Reference UDS bundle that drops ROSIE.UDS into a UDS-enabled cluster."
+  version: 0.1.0
+  authors: "Stephen P. Lutar Jr. / SZL Holdings"
+
+packages:
+  - name: rosie-uds
+    repository: ghcr.io/szl-holdings/rosie-uds
+    ref: 0.1.0
+    # For air-gap: replace `repository`/`ref` with a `path:` to the local tarball.
+    # path: ./rosie-uds-0.1.0.tar.zst
+    optionalComponents:
+      - rosie-docs

@@ -165,8 +165,13 @@ fi
 log "wrote $(du -h "${TARBALL}" | cut -f1) -> ${TARBALL}"
 
 # ---------------------------------------------------------------------------
-# 6. Sign (cosign) OR sidecar (.sha256).
+# 6. ALWAYS emit a sha256 sidecar; cosign .sig is additive when keys exist.
+#    Earlier revs treated cosign as a replacement for sha256, which broke the
+#    release gate's sha256 invariant whenever a key was configured.
 # ---------------------------------------------------------------------------
+( cd "${DIST_DIR}" && sha256sum "$(basename "${TARBALL}")" > "$(basename "${TARBALL}").sha256" )
+log "wrote ${TARBALL}.sha256"
+
 if [[ -n "${COSIGN_KEY:-}" ]] && command -v cosign >/dev/null 2>&1; then
   log "signing with cosign"
   rm -f "${TARBALL}.sig"
@@ -174,14 +179,10 @@ if [[ -n "${COSIGN_KEY:-}" ]] && command -v cosign >/dev/null 2>&1; then
     --output-signature "${TARBALL}.sig" \
     "${TARBALL}"
   log "wrote ${TARBALL}.sig"
+elif [[ -n "${COSIGN_KEY:-}" ]]; then
+  log "COSIGN_KEY set but cosign binary missing — sha256-only (no .sig)"
 else
-  if [[ -n "${COSIGN_KEY:-}" ]]; then
-    log "COSIGN_KEY set but cosign binary missing — falling back to .sha256 sidecar"
-  else
-    log "COSIGN_KEY not set — emitting unsigned .sha256 sidecar"
-  fi
-  ( cd "${DIST_DIR}" && sha256sum "$(basename "${TARBALL}")" > "$(basename "${TARBALL}").sha256" )
-  log "wrote ${TARBALL}.sha256"
+  log "COSIGN_KEY not set — sha256-only (no .sig)"
 fi
 
 log "done."

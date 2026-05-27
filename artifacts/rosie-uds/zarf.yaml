@@ -1,0 +1,46 @@
+kind: ZarfPackageConfig
+metadata:
+  name: rosie-uds
+  description: |
+    ROSIE — Governed Decision Fabric. Self-contained, declaratively-deployable
+    payload for Defense-Unicorns (UDS) environments. Drops the ROSIE governance
+    kernel (policy admission with deny-by-default, contradiction detector,
+    governed action emit, hash-chained decision receipts, coverage witness)
+    plus a per-file provenance manifest into a UDS bundle via
+    `zarf package deploy`.
+  version: 0.1.0
+  architecture: multi
+  url: https://github.com/szl-holdings/szl-holdings-platform
+  authors: "Stephen P. Lutar Jr. / SZL Holdings"
+
+components:
+  - name: rosie-core
+    description: "ROSIE governance kernel — admission, contradiction detection, governed emit, hash-chained receipts, coverage witness."
+    required: true
+    files:
+      - source: lib
+        target: /opt/rosie/lib
+  - name: rosie-demo
+    description: "doctrine-demo.mjs — 30-second post-deploy harness."
+    required: true
+    files:
+      - source: doctrine-demo.mjs
+        target: /opt/rosie/doctrine-demo.mjs
+  - name: rosie-provenance
+    description: "MANIFEST.json — per-file sha256 + build metadata."
+    required: true
+    files:
+      - source: build/MANIFEST.json
+        target: /opt/rosie/MANIFEST.json
+  - name: rosie-docs
+    description: "ARCHITECTURE, SECURITY, UDS-BUNDLE, OPERATOR-QUICKSTART."
+    required: true
+    files:
+      - source: docs/ARCHITECTURE.md
+        target: /opt/rosie/docs/ARCHITECTURE.md
+      - source: docs/SECURITY.md
+        target: /opt/rosie/docs/SECURITY.md
+      - source: docs/UDS-BUNDLE.md
+        target: /opt/rosie/docs/UDS-BUNDLE.md
+      - source: docs/OPERATOR-QUICKSTART.md
+        target: /opt/rosie/docs/OPERATOR-QUICKSTART.md

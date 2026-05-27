@@ -1,0 +1,31 @@
+{
+  "$schema": "./uds-version-sync.schema.json",
+  "description": "Source-of-truth manifest for UDS bundle versions. Each entry MUST match the package.json version of the artifact directory. The szl-v* tag workflow reads this file to build release notes; uds-release.sh requires every listed bundle to be present and pass the full gate (build + sha256 + smoke).",
+  "release_base_url": "https://github.com/szl-holdings/szl-holdings-platform/releases/download",
+  "bundles": [
+    {
+      "name": "a11oy-uds",
+      "artifact": "artifacts/a11oy-uds",
+      "doctrine": "Mythos-V1 (KS-18 contextuality witness)",
+      "headline": "Brand-orchestration kernel with hash-chained attestation sidecar"
+    },
+    {
+      "name": "sentra-uds",
+      "artifact": "artifacts/sentra-uds",
+      "doctrine": "Sentra-V1 (NIST CSF 2.0 + D3FEND mapping, Ising allocation)",
+      "headline": "Cyber-resilience runtime with fail-closed asset-scoped Safety Gate"
+    },
+    {
+      "name": "amaru-uds",
+      "artifact": "artifacts/amaru-uds",
+      "doctrine": "V6 (Lutar Σ, Λ floor, Bekenstein admission, bounded-loop convergence)",
+      "headline": "Convergent data-sync runtime with KL drift + hash-chained proof receipts"
+    },
+    {
+      "name": "rosie-uds",
+      "artifact": "artifacts/rosie-uds",
+      "doctrine": "ROSIE-V1 (deny-by-default admission, contradiction detector, hash-chained receipts)",
+      "headline": "Governed decision fabric with mandatory witnesses on every decision"
+    }
+  ]
+}

@@ -84,6 +84,8 @@
     "verify:claims:strict": "node --experimental-vm-modules scripts/qa/verify-claims.js --strict",
     "verify:routes": "node --experimental-vm-modules scripts/qa/audit-routes.js",
     "verify:health": "node --experimental-vm-modules scripts/qa/health-check.js",
+    "test:uds-release": "bash scripts/release/uds-release.sh",
+    "uds:release-notes": "node scripts/release/uds-release-notes.mjs",
     "release:check": "pnpm run verify:env && pnpm run verify:claims:strict && pnpm run test:unit && pnpm run test:smoke && pnpm run audit:mocks && pnpm run audit:routes && pnpm run audit:deps && pnpm run brand:check",
     "release:prep": "echo 'Release prep: run pnpm build && pnpm test && pnpm qa:site, then update CHANGELOG.md'",
     "release:notes": "echo 'Generate release notes from CHANGELOG.md for the latest version'",
