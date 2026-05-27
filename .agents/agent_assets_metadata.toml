@@ -1451,3 +1451,9 @@ id = "SNn4NCwsOueUsdZf78q97"
 uri = "file://docs/proposals/defense-unicorns/UDS_UPDATE_2026-05-27.md"
 type = "text"
 title = "UDS-facing update — 2026-05-27"
+
+[[outputs]]
+id = "R1YY4zuZUhGE5eHmiFsr4"
+uri = "file://docs/uds/LINKEDIN-UDS-MESH.md"
+type = "text"
+title = "LinkedIn — SZL UDS Mesh Drop (Defense-Unicorns facing)"
