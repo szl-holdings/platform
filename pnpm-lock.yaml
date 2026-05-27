@@ -1733,6 +1733,8 @@ importers:
         specifier: ^3.4.0
         version: 3.5.4(zod@3.25.76)
 
+  artifacts/rosie-uds: {}
+
   artifacts/sentra:
     dependencies:
       '@szl-holdings/alloy-client':
