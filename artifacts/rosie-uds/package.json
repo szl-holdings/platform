@@ -1,6 +1,6 @@
 {
   "name": "@szl/rosie-uds",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "private": true,
   "description": "ROSIE.UDS — signed Zarf payload for the governed decision-fabric runtime (policy admission, contradiction detection, governed-action emit, hash-chained decision receipts).",
   "license": "SEE LICENSE IN LICENSE",

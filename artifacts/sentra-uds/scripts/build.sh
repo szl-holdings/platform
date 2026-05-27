@@ -12,12 +12,19 @@ log() { printf '[sentra-uds] %s\n' "$*"; }
 log "version=${VERSION} git=${GIT_SHA} ts=${BUILD_TS}"
 mkdir -p "${ARTIFACT_DIR}/build"
 
+# v0.2: stage cross-cutting shared packages (perception-loop, sequence-pipeline,
+# sparse-attention-kit) under build/shared/. Picked up by the walker below and
+# by the sentra-shared zarf component.
+# shellcheck disable=SC1091
+source "${REPO_ROOT}/scripts/release/lib/stage-v2-packages.sh"
+stage_v2_shared_packages "${ARTIFACT_DIR}/build" "${REPO_ROOT}" "sentra-uds"
+
 node -e '
 import fs from "node:fs";
 import path from "node:path";
 import crypto from "node:crypto";
 const root = process.argv[1];
-function walk(d, acc=[]){ for (const e of fs.readdirSync(d, {withFileTypes:true})) {
+function walk(d, acc=[]){ if (!fs.existsSync(d)) return acc; for (const e of fs.readdirSync(d, {withFileTypes:true})) {
   const p = path.join(d, e.name);
   if (e.isDirectory()) walk(p, acc); else acc.push(p);
 }; return acc; }
@@ -25,6 +32,7 @@ const files = [
   ...walk(path.join(root,"lib")),
   path.join(root,"doctrine-demo.mjs"),
   ...walk(path.join(root,"docs")),
+  ...walk(path.join(root,"build/shared")),
 ].map(p => path.relative(root, p)).sort();
 const entries = files.map(rel => {
   const buf = fs.readFileSync(path.join(root, rel));
@@ -51,7 +59,7 @@ if command -v zarf >/dev/null 2>&1; then
 else
   log "zarf not available — fallback deterministic tar+zstd"
   STAGE="$(mktemp -d)"
-  cp -R "${ARTIFACT_DIR}/lib" "${ARTIFACT_DIR}/docs" "${ARTIFACT_DIR}/doctrine-demo.mjs" "${ARTIFACT_DIR}/build/MANIFEST.json" "${ARTIFACT_DIR}/uds-bundle.yaml" "${ARTIFACT_DIR}/zarf.yaml" "${STAGE}/"
+  cp -R "${ARTIFACT_DIR}/lib" "${ARTIFACT_DIR}/docs" "${ARTIFACT_DIR}/doctrine-demo.mjs" "${ARTIFACT_DIR}/build/MANIFEST.json" "${ARTIFACT_DIR}/build/shared" "${ARTIFACT_DIR}/uds-bundle.yaml" "${ARTIFACT_DIR}/zarf.yaml" "${STAGE}/"
   tar --sort=name --owner=0 --group=0 --numeric-owner --mtime="${BUILD_TS}" -C "${STAGE}" -cf - . | zstd -19 -q -f -o "${TARBALL}"
   rm -rf "${STAGE}"
 fi

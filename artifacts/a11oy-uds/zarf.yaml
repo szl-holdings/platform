@@ -8,7 +8,7 @@ metadata:
     Kochen-Specker 18-vector witness, POVM verdict semantics, tetrad-field
     gauge connection) plus a per-file provenance manifest into a UDS bundle
     via `zarf package deploy`.
-  version: 0.1.0
+  version: 0.2.0
   architecture: multi
   url: https://github.com/szl-holdings/a11oy
   authors: "A11oy / SZL Holdings"
@@ -34,6 +34,22 @@ components:
     files:
       - source: build/MANIFEST.json
         target: /opt/a11oy/MANIFEST.json
+
+  - name: a11oy-shared
+    description: |
+      v0.2 cross-cutting shared packages (TypeScript source, ESM):
+        - @szl-holdings/perception-loop      — operator-loop perception envelope
+        - @szl-holdings/sequence-pipeline    — multi-stage hashed evidence pipeline
+        - @szl-holdings/sparse-attention-kit — sparse-attention envelope + 12 receipt classes (NSA / MoBA / MiniMax / FlashAttention re-expressed)
+    required: false
+    default: true
+    files:
+      - source: build/shared/perception-loop
+        target: /opt/a11oy/shared/perception-loop
+      - source: build/shared/sequence-pipeline
+        target: /opt/a11oy/shared/sequence-pipeline
+      - source: build/shared/sparse-attention-kit
+        target: /opt/a11oy/shared/sparse-attention-kit
 
   - name: a11oy-attestations
     description: |

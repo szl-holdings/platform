@@ -14,14 +14,19 @@ log() { printf '[rosie-uds] %s\n' "$*"; }
 log "version=${VERSION} git=${GIT_SHA} ts=${BUILD_TS}"
 mkdir -p "${ARTIFACT_DIR}/build"
 
-# MANIFEST.json: sha256 + size of every payload file (lib/ + demo + docs).
+# v0.2 shared packages.
+# shellcheck disable=SC1091
+source "${REPO_ROOT}/scripts/release/lib/stage-v2-packages.sh"
+stage_v2_shared_packages "${ARTIFACT_DIR}/build" "${REPO_ROOT}" "rosie-uds"
+
+# MANIFEST.json: sha256 + size of every payload file (lib/ + demo + docs + build/shared/).
 VERSION="${VERSION}" GIT_SHA="${GIT_SHA}" BUILD_TS="${BUILD_TS}" \
 node -e '
 import fs from "node:fs";
 import path from "node:path";
 import crypto from "node:crypto";
 const root = process.argv[1];
-function walk(d, acc=[]){ for (const e of fs.readdirSync(d, {withFileTypes:true})) {
+function walk(d, acc=[]){ if (!fs.existsSync(d)) return acc; for (const e of fs.readdirSync(d, {withFileTypes:true})) {
   const p = path.join(d, e.name);
   if (e.isDirectory()) walk(p, acc); else acc.push(p);
 }; return acc; }
@@ -29,6 +34,7 @@ const files = [
   ...walk(path.join(root,"lib")),
   path.join(root,"doctrine-demo.mjs"),
   ...walk(path.join(root,"docs")),
+  ...walk(path.join(root,"build/shared")),
 ].map(p => path.relative(root, p)).sort();
 const entries = files.map(rel => {
   const buf = fs.readFileSync(path.join(root, rel));
@@ -55,7 +61,7 @@ if command -v zarf >/dev/null 2>&1; then
 else
   log "zarf not available — fallback deterministic tar+zstd"
   STAGE="$(mktemp -d)"
-  cp -R "${ARTIFACT_DIR}/lib" "${ARTIFACT_DIR}/docs" "${ARTIFACT_DIR}/doctrine-demo.mjs" "${ARTIFACT_DIR}/build/MANIFEST.json" "${ARTIFACT_DIR}/uds-bundle.yaml" "${ARTIFACT_DIR}/zarf.yaml" "${STAGE}/"
+  cp -R "${ARTIFACT_DIR}/lib" "${ARTIFACT_DIR}/docs" "${ARTIFACT_DIR}/doctrine-demo.mjs" "${ARTIFACT_DIR}/build/MANIFEST.json" "${ARTIFACT_DIR}/build/shared" "${ARTIFACT_DIR}/uds-bundle.yaml" "${ARTIFACT_DIR}/zarf.yaml" "${STAGE}/"
   tar --sort=name --owner=0 --group=0 --numeric-owner --mtime="${BUILD_TS}" -C "${STAGE}" -cf - . | zstd -19 -q -f -o "${TARBALL}"
   rm -rf "${STAGE}"
 fi
@@ -66,11 +72,29 @@ log "wrote $(du -h "${TARBALL}" | cut -f1) -> ${TARBALL}"
 ( cd "${DIST_DIR}" && sha256sum "$(basename "${TARBALL}")" > "$(basename "${TARBALL}").sha256" )
 log "wrote ${TARBALL}.sha256"
 
-# cosign .sig — additive, only when a key is configured.
-if [[ -n "${COSIGN_KEY:-}" ]] && command -v cosign >/dev/null 2>&1; then
-  log "signing with cosign"
+# cosign .sig — auto-discover binary + default to .local/cosign/cosign.key.
+COSIGN_BIN="${COSIGN_BIN:-}"
+if [[ -z "${COSIGN_BIN}" ]]; then
+  if command -v cosign >/dev/null 2>&1; then COSIGN_BIN="$(command -v cosign)"
+  elif [[ -x "${REPO_ROOT}/.local/bin/cosign" ]]; then COSIGN_BIN="${REPO_ROOT}/.local/bin/cosign"
+  fi
+fi
+COSIGN_KEY="${COSIGN_KEY:-${REPO_ROOT}/.local/cosign/cosign.key}"
+COSIGN_PUB="${COSIGN_PUB:-${REPO_ROOT}/.local/cosign/cosign.pub}"
+if [[ -n "${COSIGN_BIN}" && -f "${COSIGN_KEY}" ]]; then
+  log "signing with cosign (${COSIGN_BIN})"
   rm -f "${TARBALL}.sig"
-  cosign sign-blob --yes --key "${COSIGN_KEY}" --output-signature "${TARBALL}.sig" "${TARBALL}"
+  COSIGN_PASSWORD="${COSIGN_PASSWORD-}" "${COSIGN_BIN}" sign-blob --yes \
+    --key "${COSIGN_KEY}" --output-signature "${TARBALL}.sig" "${TARBALL}"
   log "wrote ${TARBALL}.sig"
+  if [[ -f "${COSIGN_PUB}" ]]; then
+    cp -f "${COSIGN_PUB}" "${DIST_DIR}/rosie-uds-dev.pub"
+    log "wrote ${DIST_DIR}/rosie-uds-dev.pub"
+    log "verifying signature locally"
+    "${COSIGN_BIN}" verify-blob --key "${COSIGN_PUB}" --signature "${TARBALL}.sig" "${TARBALL}" >/dev/null
+    log "signature OK"
+  fi
+else
+  log "WARNING: cosign signing skipped (bin=${COSIGN_BIN:-none} key=${COSIGN_KEY})"
 fi
 log "done."

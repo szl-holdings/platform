@@ -40,7 +40,13 @@ if (!buildDir || !attestDir) {
 }
 
 const GENESIS = "0".repeat(64);
-const SUBJECTS = ["a11oy-core", "a11oy-connection"];
+const SUBJECTS = [
+  "a11oy-core",
+  "a11oy-connection",
+  "shared/perception-loop",
+  "shared/sequence-pipeline",
+  "shared/sparse-attention-kit",
+];
 
 const manifestPath = join(buildDir, "MANIFEST.json");
 const manifestBytes = readFileSync(manifestPath);

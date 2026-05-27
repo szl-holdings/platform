@@ -42,3 +42,38 @@ zarf package deploy vessels-uds-0.1.0.tar.zst --confirm
 ```
 
 Files land under `/opt/vessels/` (see `UDS-BUNDLE.md`).
+
+---
+
+## v0.2.0 — shared-package addendum
+
+`v0.2.0` adds three cross-cutting SZL shared packages under
+`/opt/vessels/shared/` (component name `vessels-shared`, default-enabled
+but `required: false` — operators can disable with
+`--components=-vessels-shared` at `zarf package deploy` time):
+
+| Package                              | Purpose                                                                                                              | Receipt classes                |
+|--------------------------------------|----------------------------------------------------------------------------------------------------------------------|--------------------------------|
+| `@szl-holdings/perception-loop`      | Operator-loop perception envelope. **Privacy invariant: raw frames never leave the loop**; only feature-vector summaries enter the receipt stream. | `perception.observation.v1` family |
+| `@szl-holdings/sequence-pipeline`    | Multi-stage hashed evidence pipeline (per-stage `evidence.stage.v1` linked into a sealed `evidence.sealed.v1`).        | `evidence.*.v1`                |
+| `@szl-holdings/sparse-attention-kit` | Sparse-attention envelope (NSA / MoBA / MiniMax / FlashAttention re-expressed). **Non-negotiable contradiction-probe + fail-up-to-full escalation** — the MiniMax M2 lesson. | 12 `sparse.*.v1` receipts        |
+
+### Pull v0.2.0 (verify + install)
+
+```bash
+BASE=https://github.com/szl-holdings/vessels/releases/download/uds-v0.2.0
+curl -fsSLO $BASE/vessels-uds-0.2.0.tar.zst
+curl -fsSLO $BASE/vessels-uds-0.2.0.tar.zst.sha256
+curl -fsSLO $BASE/vessels-uds-0.2.0.tar.zst.sig
+curl -fsSLO $BASE/vessels-uds-dev.pub
+sha256sum -c vessels-uds-0.2.0.tar.zst.sha256
+cosign verify-blob --key vessels-uds-dev.pub \
+  --signature vessels-uds-0.2.0.tar.zst.sig vessels-uds-0.2.0.tar.zst
+zarf package deploy vessels-uds-0.2.0.tar.zst --confirm
+```
+
+### Disable shared (kernel-only deploy)
+
+```bash
+zarf package deploy vessels-uds-0.2.0.tar.zst --confirm --components=-vessels-shared
+```

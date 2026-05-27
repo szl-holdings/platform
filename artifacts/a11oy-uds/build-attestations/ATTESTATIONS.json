@@ -1,13 +1,16 @@
 {
   "name": "a11oy-attestations",
-  "version": "0.1.1",
-  "gitSha": "0eb4f5a0d",
-  "builtAt": "2026-05-27T16:13:37Z",
+  "version": "0.2.0",
+  "gitSha": "e5ab5b2ca",
+  "builtAt": "2026-05-27T16:54:36Z",
   "hashAlgorithm": "sha256",
-  "manifestSha256": "dcad72e9ce127746efa0d5fcf8fbcca4210bc6c0b1180638b0249857e8d5686b",
+  "manifestSha256": "461c5b9fcb9f8c7f55b0f443356013e53f85b97f59af644c1bbe3ee6e48451a2",
   "subjects": [
     "a11oy-core",
-    "a11oy-connection"
+    "a11oy-connection",
+    "shared/perception-loop",
+    "shared/sequence-pipeline",
+    "shared/sparse-attention-kit"
   ],
   "chain": [
     {
@@ -27,7 +30,34 @@
       "subjectSha256": "38223484a191abda6ac13d16e219eee8dcef893a72fd64bdd8797ce175e033d5",
       "prevHash": "8df8e029b4deb77dabe0a4e3462c15d3cdadbf6f721841041f357e40e6e0f69e",
       "entryHash": "e7bddf2263496ed7ff51e45ffa6d8f5871e338e98c9ee583e4e0d35f289f89d3"
+    },
+    {
+      "index": 2,
+      "subject": "shared/perception-loop",
+      "fileCount": 8,
+      "totalBytes": 20268,
+      "subjectSha256": "23c2424518480839c299adc056d7b0fb1b5b244a45f490bedca26a0ac5c73acc",
+      "prevHash": "e7bddf2263496ed7ff51e45ffa6d8f5871e338e98c9ee583e4e0d35f289f89d3",
+      "entryHash": "f60174f1ac1c278d853243483ca2d390c4f9e663bbfa912893c581b778bd4069"
+    },
+    {
+      "index": 3,
+      "subject": "shared/sequence-pipeline",
+      "fileCount": 8,
+      "totalBytes": 18815,
+      "subjectSha256": "02e1e55fd1f46817718be6abc50b66d3d2727728aac1c458814f83a39141a331",
+      "prevHash": "f60174f1ac1c278d853243483ca2d390c4f9e663bbfa912893c581b778bd4069",
+      "entryHash": "0e0df5b094f0dd198ad75612df6ee910c57262bf54519380be95665e496ec3c2"
+    },
+    {
+      "index": 4,
+      "subject": "shared/sparse-attention-kit",
+      "fileCount": 10,
+      "totalBytes": 30553,
+      "subjectSha256": "3e282d1418da386cf1421c360938c2f7e70892f2111466ebf2094fb0b4bb9b46",
+      "prevHash": "0e0df5b094f0dd198ad75612df6ee910c57262bf54519380be95665e496ec3c2",
+      "entryHash": "23bbabf407a75c1a7bd4d7b22fd9536c35d42c5312d94f918c79c869001c3800"
     }
   ],
-  "head": "e7bddf2263496ed7ff51e45ffa6d8f5871e338e98c9ee583e4e0d35f289f89d3"
+  "head": "23bbabf407a75c1a7bd4d7b22fd9536c35d42c5312d94f918c79c869001c3800"
 }

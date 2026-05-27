@@ -7,7 +7,7 @@ metadata:
     Bohr complementarity engine, Kochen-Specker 18-vector witness, POVM
     verdict semantics, tetrad-field gauge connection) under /opt/a11oy/
     on the target node via Zarf.
-  version: 0.1.0
+  version: 0.2.0
   authors: A11oy / SZL Holdings
   url: https://github.com/szl-holdings/a11oy
   architecture: multi
@@ -21,4 +21,4 @@ packages:
   # first, or override with `--set` at `uds create` time.
   - name: a11oy-uds
     path: ../../dist/a11oy-uds
-    ref: 0.1.0
+    ref: 0.2.0

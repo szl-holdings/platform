@@ -96,6 +96,14 @@ stage_built_package() {
 stage_built_package "@a11oy/connection" "${A11OY_CONN_SRC}" "${BUILD_DIR}/a11oy-connection"
 stage_built_package "@a11oy/core"       "${A11OY_CORE_SRC}" "${BUILD_DIR}/a11oy-core"
 
+# v0.2: stage cross-cutting shared packages (perception-loop, sequence-pipeline,
+# sparse-attention-kit) under build/shared/. write-manifest.mjs walks the whole
+# build/ dir so these are picked up automatically; attestation subjects extended
+# in write-attestations.mjs and zarf.yaml below.
+# shellcheck disable=SC1091
+source "${REPO_ROOT}/scripts/release/lib/stage-v2-packages.sh"
+stage_v2_shared_packages "${BUILD_DIR}" "${REPO_ROOT}" "a11oy-uds"
+
 # ---------------------------------------------------------------------------
 # 3. Generate MANIFEST.json (sorted, per-file sha256 + size).
 # ---------------------------------------------------------------------------
@@ -172,17 +180,30 @@ log "wrote $(du -h "${TARBALL}" | cut -f1) -> ${TARBALL}"
 ( cd "${DIST_DIR}" && sha256sum "$(basename "${TARBALL}")" > "$(basename "${TARBALL}").sha256" )
 log "wrote ${TARBALL}.sha256"
 
-if [[ -n "${COSIGN_KEY:-}" ]] && command -v cosign >/dev/null 2>&1; then
-  log "signing with cosign"
+# Cosign signature — auto-discover binary + default to .local/cosign/cosign.key.
+COSIGN_BIN="${COSIGN_BIN:-}"
+if [[ -z "${COSIGN_BIN}" ]]; then
+  if command -v cosign >/dev/null 2>&1; then COSIGN_BIN="$(command -v cosign)"
+  elif [[ -x "${REPO_ROOT}/.local/bin/cosign" ]]; then COSIGN_BIN="${REPO_ROOT}/.local/bin/cosign"
+  fi
+fi
+COSIGN_KEY="${COSIGN_KEY:-${REPO_ROOT}/.local/cosign/cosign.key}"
+COSIGN_PUB="${COSIGN_PUB:-${REPO_ROOT}/.local/cosign/cosign.pub}"
+if [[ -n "${COSIGN_BIN}" && -f "${COSIGN_KEY}" ]]; then
+  log "signing with cosign (${COSIGN_BIN})"
   rm -f "${TARBALL}.sig"
-  cosign sign-blob --yes --key "${COSIGN_KEY}" \
-    --output-signature "${TARBALL}.sig" \
-    "${TARBALL}"
+  COSIGN_PASSWORD="${COSIGN_PASSWORD-}" "${COSIGN_BIN}" sign-blob --yes \
+    --key "${COSIGN_KEY}" --output-signature "${TARBALL}.sig" "${TARBALL}"
   log "wrote ${TARBALL}.sig"
-elif [[ -n "${COSIGN_KEY:-}" ]]; then
-  log "COSIGN_KEY set but cosign binary missing — sha256-only (no .sig)"
+  if [[ -f "${COSIGN_PUB}" ]]; then
+    cp -f "${COSIGN_PUB}" "${DIST_DIR}/a11oy-uds-dev.pub"
+    log "wrote ${DIST_DIR}/a11oy-uds-dev.pub"
+    log "verifying signature locally"
+    "${COSIGN_BIN}" verify-blob --key "${COSIGN_PUB}" --signature "${TARBALL}.sig" "${TARBALL}" >/dev/null
+    log "signature OK"
+  fi
 else
-  log "COSIGN_KEY not set — sha256-only (no .sig)"
+  log "WARNING: cosign signing skipped (bin=${COSIGN_BIN:-none} key=${COSIGN_KEY})"
 fi
 
 log "done."
