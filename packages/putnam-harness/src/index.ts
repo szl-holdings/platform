@@ -9,6 +9,7 @@
 export * from "./loader.js";
 export * from "./receipts.js";
 export * from "./orchestrator.js";
-export { checkLeanStub } from "./lean-check.js";
+export { checkLeanStub, checkClosedFormStub } from "./lean-check.js";
+export type { LeanCheckResult, ClosedFormCheckOptions } from "./lean-check.js";
 export { judge as judgeProof } from "./judge.js";
 export { CANDIDATE_MODEL, JUDGE_MODEL } from "./anthropic.js";

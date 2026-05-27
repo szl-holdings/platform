@@ -34,5 +34,6 @@ lean_lib «LeanFormulas» where
     `Substance.GCA,
     `Anatomy.Boundary,
     `Forecast.Perturbation,
-    `Perception.PeakScore
+    `Perception.PeakScore,
+    `Putnam.Closed
   ]
