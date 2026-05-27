@@ -20,116 +20,153 @@ import {
   type InsertVesselsPscChecklistItem,
   type InsertVesselsPscInspection,
 } from '@szl-holdings/db';
-import { sql } from 'drizzle-orm';
+import { inArray, sql } from 'drizzle-orm';
 
 const now = new Date();
 const daysAgo = (d: number) => new Date(now.getTime() - d * 86400000);
 
+// Dorian LPG (NYSE: LPG) fleet of record + Helios LPG Pool partners + the
+// tracked peer VLGC operators that Vessels watches for benchmarking.
+// Names sourced from public Dorian fleet list, Helios LPG Pool fleet, BW LPG
+// fleet list, Avance Gas fleet, and Petredec disclosures as of 2026.
+// IMO numbers for the 21 owned Dorian hulls + 4 dual-fuel hulls are pinned
+// in DORIAN_IMOS below; the remainder fall through to the deterministic
+// IMO generator further down the file.
 const VESSEL_NAMES = [
-  'MV ATLAS PIONEER',
-  'MT PACIFIC GLORY',
-  'MV NORDIC STAR',
-  'MT OCEAN FORTUNE',
-  'MV SILVER HORIZON',
-  'MT GOLDEN GATE',
-  'MV TITAN VOYAGER',
-  'MT BLUE ODYSSEY',
-  'MV SEA MERCURY',
-  'MT CORAL KING',
-  'MV ARCTIC BRIDGE',
-  'MT EMERALD WAVE',
-  'MV STORM RUNNER',
-  'MT IRON GIANT',
-  'MV JADE NAVIGATOR',
-  'MT SAPPHIRE COAST',
-  'MV DELTA PRIDE',
-  'MT AURORA BOREALIS',
-  'MV HORIZON HAWK',
-  'MT CRIMSON TIDE',
-  'MV MONSOON SPIRIT',
-  'MT PACIFIC EAGLE',
-  'MV GOLD PIONEER',
-  'MT EAST STAR',
-  'MV BERING QUEST',
-  'MT CAPE HOPE',
-  'MV OCEAN KING',
-  'MT STELLAR DAWN',
-  'MV TROPICAL BREEZE',
-  'MT VIKING SPIRIT',
-  'MV MARATHON RUNNER',
-  'MT ARCTIC WOLF',
-  'MV CAPE VERDE',
-  'MT MORNING STAR',
-  'MV SOUTH WIND',
-  'MT BLACK PEARL',
-  'MV CORAL SEA',
-  'MT DEEP OCEAN',
-  'MV EAGLE POINT',
-  'MT FRONTIER SPIRIT',
-  'MV GLOBAL REACH',
-  'MT HARBOR MASTER',
-  'MV INDIA OCEAN',
-  'MT JADE EMPRESS',
-  'MV KESTREL',
-  'MT LIBERTY BELL',
-  'MV MARINE EAGLE',
-  'MT NAUTILUS PRIME',
-  'MV OCEAN GUARDIAN',
-  'MT POLAR STAR',
-  'MV QUANTUM LEAP',
-  'MT RED SEA GLORY',
-  'MV SILK ROAD',
-  'MT THUNDER BAY',
-  'MV UNITED SEA',
+  // ─── Dorian LPG — Owned ECO VLGCs (HHI, Korea) ───────────────────────────
+  'CAPTAIN MARKOS NL', // #1  IMO 9349837
+  'CAPTAIN JOHN NP', // #2  IMO 9349849
+  'CAPTAIN NIKOLAS G', // #3  IMO 9349851
+  'CAPTAIN KONSTANTINOS', // #4  IMO 9349863
+  'COMET', // #5  IMO 9622207
+  'CRESQUES', // #6  IMO 9622219
+  'COPERNICUS', // #7  IMO 9622221
+  'CORVETTE', // #8  IMO 9622233
+  'CONCORDE', // #9  IMO 9622245
+  'COUGAR', // #10 IMO 9622257
+  'COPERNICO', // #11 IMO 9622269
+  'CONSTITUTION', // #12 IMO 9622271
+  'COMMODORE', // #13 IMO 9622283
+  'CONTINENTAL', // #14 IMO 9622295
+  'CONSTELLATION', // #15 IMO 9686199
+  'COMMANDER', // #16 IMO 9686204
+  'CORSAIR', // #17 IMO 9686216
+  'CORVUS', // #18 IMO 9686228
+  'COLOSSOS', // #19 IMO 9686230
+  'COBALT', // #20 IMO 9686242
+  'AREION', // #21 IMO 9958864 — Hanwha Ocean newbuild, 2026, dual-fuel
+  // ─── Dorian LPG — Chartered-in Dual-Fuel VLGCs (Hyundai Samho, 2023) ─────
+  'HLS CITRINE', // #22 IMO 9878987
+  'HLS DIAMOND', // #23 IMO 9878999
+  'CAPTAIN MARKOS', // #24 IMO 9879004
+  'CRISTOBAL', // #25 IMO 9879016
+  // ─── Helios LPG Pool — MOL Energia VLGCs (JV partner) ────────────────────
+  'MOL HYPERION',
+  'MOL HELIOS',
+  'GREEN PIONEER',
+  'GREEN ARROW',
+  'GREEN ORION',
+  'MOL SUPERLATIVE',
+  'MOL CITRINE',
+  'MOL CHALLENGE',
+  'BAY EMERALD',
+  'PACIFIC EMERALD',
+  // ─── BW LPG — peer VLGC operator (Oslo: BWLPG, NYSE: BWLP) ───────────────
+  'BW GEMINI',
+  'BW LIBRA',
+  'BW LEO',
+  'BW TUCANA',
+  'BW PINE',
+  'BW BIRCH',
+  'BW ELM',
+  'BW CEDAR',
+  'BW OAK',
+  'BW YEW',
+  // ─── Avance Gas — peer (Oslo: AGAS) ──────────────────────────────────────
+  'PAMPERO',
+  'MISTRAL',
+  'SIROCCO',
+  'PROVIDENCE',
+  'POLAR GLORY',
+  // ─── Petredec — peer (private, Geneva/Singapore) ─────────────────────────
+  'GAS DEFIANCE',
+  'GAS CATHAR',
+  'ANDROMACHE',
+  'BERLIAN ABADI',
+  'GAS PRODIGY',
 ] as const;
 
+// Real IMO numbers for the Dorian-owned / Dorian-chartered hulls so the demo
+// cross-references cleanly against Equasis / MarineTraffic / Lloyd's Register.
+// Index in VESSEL_NAMES → IMO string. Anything not pinned here falls through
+// to the deterministic placeholder IMO generator used by vesselRows below.
+const DORIAN_IMOS: Record<number, string> = {
+  0: 'IMO9349837',
+  1: 'IMO9349849',
+  2: 'IMO9349851',
+  3: 'IMO9349863',
+  4: 'IMO9622207',
+  5: 'IMO9622219',
+  6: 'IMO9622221',
+  7: 'IMO9622233',
+  8: 'IMO9622245',
+  9: 'IMO9622257',
+  10: 'IMO9622269',
+  11: 'IMO9622271',
+  12: 'IMO9622283',
+  13: 'IMO9622295',
+  14: 'IMO9686199',
+  15: 'IMO9686204',
+  16: 'IMO9686216',
+  17: 'IMO9686228',
+  18: 'IMO9686230',
+  19: 'IMO9686242',
+  20: 'IMO9958864',
+  21: 'IMO9878987',
+  22: 'IMO9878999',
+  23: 'IMO9879004',
+  24: 'IMO9879016',
+};
+
+// 21 owned + 4 chartered = 25 hulls flying Dorian commercial colors.
+const DORIAN_OPERATED_COUNT = 25;
+// Year-built per-hull for the Dorian fleet so the dashboard's age histogram
+// reflects the real ECO-class roll-up (2007/2008 quartet, 2014–2016 series,
+// 2023 dual-fuel, 2026 Areion).
+const DORIAN_YEAR_BUILT: Record<number, number> = {
+  0: 2007, 1: 2007, 2: 2008, 3: 2008,
+  4: 2014, 5: 2014, 6: 2014, 7: 2014, 8: 2014, 9: 2014,
+  10: 2015, 11: 2015, 12: 2015, 13: 2015, 14: 2015, 15: 2015,
+  16: 2016, 17: 2016, 18: 2016, 19: 2016,
+  20: 2026,
+  21: 2023, 22: 2023, 23: 2023, 24: 2023,
+};
+
+// VLGC flag distribution heavily favors Panama, Marshall Islands and Liberia.
+// Dorian's chartered-in dual-fuel quartet flies Panama; Helios LPG Pool MOL
+// hulls fly Singapore / Liberia; BW LPG hulls Isle of Man / Singapore;
+// Avance Gas Marshall Islands; Petredec Liberia / Marshall Islands.
 const FLAGS = [
   'Panama',
-  'Liberia',
+  'Panama',
   'Marshall Islands',
+  'Marshall Islands',
+  'Liberia',
+  'Liberia',
   'Bahamas',
-  'Malta',
-  'Cyprus',
-  'Cayman Islands',
-  'Singapore',
   'Greece',
+  'Singapore',
+  'Isle of Man',
   'Norway',
-  'Denmark',
-  'United Kingdom',
-  'China',
-  'Japan',
-  'Hong Kong',
-  'Antigua and Barbuda',
-  'St Kitts and Nevis',
-  'Palau',
-  'Cook Islands',
+  'Malta',
 ];
 
+// Pure VLGC tracking universe — every hull is a gas tanker. The schema's
+// vesselType enum has no 'lpg' member, so we standardize on 'tanker' and
+// disambiguate via vesselClass ('VLGC') and cargoType ('LPG' / 'Propane' /
+// 'Butane' / 'Ammonia').
 const VESSEL_TYPES: Array<(typeof vesselsTable.$inferInsert)['vesselType']> = [
   'tanker',
-  'tanker',
-  'tanker',
-  'tanker',
-  'tanker',
-  'tanker',
-  'container',
-  'container',
-  'container',
-  'container',
-  'container',
-  'bulk',
-  'bulk',
-  'bulk',
-  'bulk',
-  'bulk',
-  'bulk',
-  'cargo',
-  'cargo',
-  'cargo',
-  'passenger',
-  'passenger',
-  'other',
-  'other',
 ];
 
 const VESSEL_STATUSES: Array<(typeof vesselsTable.$inferInsert)['status']> = [
@@ -174,62 +211,55 @@ const VESSEL_STATUSES: Array<(typeof vesselsTable.$inferInsert)['status']> = [
   'active',
 ];
 
+// VLGC trade corridors discharge into Asia (Chiba, Yeosu, Ulsan, Mailiao,
+// Zhoushan, Mundra) and NWE (Flushing, Rotterdam, Brunsbüttel). These are
+// Dorian's actual delivery footprint.
 const DESTINATIONS = [
+  'Chiba',
+  'Yeosu',
+  'Ulsan',
+  'Mailiao',
+  'Zhoushan',
+  'Mundra',
+  'Kandla',
+  'Map Ta Phut',
+  'Sriracha',
+  'Yantai',
+  'Flushing',
   'Rotterdam',
-  'Singapore',
-  'Shanghai',
-  'Houston',
-  'Yokohama',
-  'Dubai',
-  'Jebel Ali',
-  'Los Angeles',
-  'Colombo',
-  'Cape Town',
-  'Mumbai',
-  'Hamburg',
+  'Brunsbüttel',
   'Le Havre',
-  'Antwerp',
-  'Busan',
-  'Qingdao',
-  'Ningbo',
-  'Port Said',
-  'Piraeus',
-  'Barcelona',
+  'Mongstad',
+  'Tarragona',
+  'Mariel',
+  'Acajutla',
+  'Quintero',
+  'Cartagena',
 ];
 
+// Real owners of the hulls we track. Dorian-operated tonnage (25 hulls) is
+// commercially branded as Dorian LPG / Helios LPG Pool; peer hulls keep
+// their own owner labels for benchmark integrity.
 const OWNERS = [
-  'Oceanic Shipping Corp',
-  'Pacific Maritime Holdings',
-  'Nordic Tankers AS',
-  'Golden Gate Shipping',
-  'Atlantic Bulk Carriers',
-  'Mediterranean Lines SA',
-  'Eastern Pacific Navigation',
-  'Global Maritime Partners',
-  'Titan Ocean Freight',
-  'Blue Ocean Ventures Ltd',
-  'Northern Star Maritime',
-  'Coral Bay Shipping',
-  'Viking Ocean Transport',
-  'Emerald Seas Corp',
-  'SZL Maritime Holdings',
-  'Apex Fleet Management',
+  'Dorian LPG Ltd',
+  'Helios LPG Pool LLC',
+  'MOL Energia Pte Ltd',
+  'BW LPG Ltd',
+  'Avance Gas Holding',
+  'Petredec Ltd',
+  'Naftomar Shipping',
+  'StealthGas Inc',
 ];
 
 const MANAGERS = [
+  'Dorian (Hellas) S.A.',
+  'MOL Ship Management',
+  'BW Fleet Management',
   'V.Group',
   'Anglo-Eastern',
-  'Stolt-Nielsen',
-  'MOL Ship Management',
   'Bernhard Schulte',
-  'Thome Group',
-  'Fleet Management Ltd',
-  'Columbia Shipmanagement',
   'Wilhelmsen Ship Management',
-  'Pacific Basin Shipping',
-  'Wallem Group',
-  'Döhle Seafront Crewing',
-  'OSMC Maritime',
+  'Thome Group',
 ];
 
 const PORT_CALL_PORTS = [
@@ -250,42 +280,41 @@ const PORT_CALL_PORTS = [
   { name: 'Cape Town', locode: 'ZACPT', country: 'South Africa' },
 ];
 
+// VLGC cargo book is overwhelmingly LPG (~95%). Propane and butane are
+// the dominant fractions; petrochemical (propylene, butadiene) and
+// anhydrous ammonia move on a small number of voyages — and ammonia is
+// the future dual-fuel cargo Dorian's Areion is sized for.
 const CARGO_TYPES = [
-  'Crude Oil',
-  'Refined Products',
-  'LNG',
-  'LPG',
-  'Iron Ore',
-  'Coal',
-  'Grain',
-  'Bauxite',
-  'Containers',
-  'General Cargo',
-  'Steel Products',
-  'Fertilizers',
-  'Chemical Products',
-  'Phosphate',
-  'Vehicles',
-  'Timber',
+  'LPG (Propane)',
+  'LPG (Butane)',
+  'LPG (Mixed)',
+  'LPG (Mixed)',
+  'LPG (Propane)',
+  'LPG (Propane)',
+  'LPG (Butane)',
+  'Propylene',
+  'Butadiene',
+  'Ammonia',
 ];
 
+// VLGC load ports — Middle East Gulf (Ras Tanura, Ruwais, Mesaieed) and
+// US Gulf (Houston/Enterprise, Nederland/Targa, Marcus Hook) carry ~85%
+// of global VLGC liftings.
 const ORIGIN_PORTS = [
-  'Rotterdam',
-  'Singapore',
-  'Shanghai',
-  'Houston',
-  'Yokohama',
-  'Dubai',
-  'Jebel Ali',
-  'Los Angeles',
-  'Colombo',
-  'Cape Town',
-  'Mumbai',
   'Ras Tanura',
-  'Sullom Voe',
-  'Port Hedland',
-  'Gladstone',
-  'Dampier',
+  'Ruwais',
+  'Mesaieed',
+  'Yanbu',
+  'Houston',
+  'Nederland',
+  'Marcus Hook',
+  'Freeport',
+  'Corpus Christi',
+  'Ras Laffan',
+  'Mongstad',
+  'Stenungsund',
+  'Sonatrach Bethioua',
+  'Plaquemine',
 ];
 
 const CHARTER_TYPES: Array<(typeof vesselVoyageEconomicsTable.$inferInsert)['charterType']> = [
@@ -638,79 +667,124 @@ export async function seedVesselsData(): Promise<void> {
     // backfilled below if needed.
   }
 
-  // Create fleets
+  // Fleet groups reflect the real Dorian LPG commercial structure plus the
+  // peer-watch fleet that Vessels benchmarks against.
+  //   • Dorian ECO VLGC Fleet     — 20 HHI-built ECO hulls 2014–2016 + the
+  //                                  four 82k cbm Captain-series 2007/2008
+  //   • Dorian Dual-Fuel & Newbuild — Areion 2026 + four chartered HLS/Captain
+  //                                   Markos / Cristobal dual-fuel hulls
+  //   • Helios LPG Pool           — MOL Energia hulls pooled with Dorian
+  //   • Peer VLGC Watch           — BW LPG, Avance Gas, Petredec hulls
   const fleetData = [
     {
-      name: 'SZL Tanker Fleet',
-      description: 'VLCC and Suezmax crude tankers',
+      name: 'Dorian ECO VLGC Fleet',
+      description: 'HHI-built ECO VLGCs — 84,000 cbm modern + 82,000 cbm Captain series',
+      region: 'AG-USG-FE',
+      status: 'active' as const,
+    },
+    {
+      name: 'Dorian Dual-Fuel & Newbuild Fleet',
+      description:
+        'Areion (93,000 cbm, Hanwha Ocean 2026) + HLS Citrine/Diamond/Captain Markos/Cristobal (86,000 cbm, Hyundai Samho 2023)',
       region: 'Global',
       status: 'active' as const,
     },
     {
-      name: 'SZL Container Fleet',
-      description: 'Container and box ship operations',
-      region: 'Asia-Pacific',
+      name: 'Helios LPG Pool',
+      description: 'MOL Energia VLGCs pooled with Dorian under Helios LPG Pool LLC',
+      region: 'Global',
       status: 'active' as const,
     },
     {
-      name: 'SZL Bulk Carrier Fleet',
-      description: 'Dry bulk commodities fleet',
-      region: 'Atlantic',
-      status: 'active' as const,
-    },
-    {
-      name: 'SZL Specialty Fleet',
-      description: 'LNG, LPG, and chemical tankers',
-      region: 'Middle East',
+      name: 'Peer VLGC Watch',
+      description: 'BW LPG, Avance Gas, Petredec hulls tracked for benchmark intelligence',
+      region: 'Global',
       status: 'active' as const,
     },
   ];
 
-  const insertedFleets = await db
-    .insert(vesselsFleetsTable)
-    .values(fleetData)
-    .onConflictDoNothing()
-    .returning();
-  const fleetIds = insertedFleets.map((f) => f.id);
-  const fallbackFleetId = fleetIds[0] ?? 1;
+  await db.insert(vesselsFleetsTable).values(fleetData).onConflictDoNothing();
 
-  // Create 55 vessels
-  const vesselRows = VESSEL_NAMES.map((name, i) => {
-    const yearBuilt = 2000 + Math.floor(seeded(i, 99, 24));
-    const vtype = pick(VESSEL_TYPES, i, 5);
-    const flag = pick(FLAGS, i, 6);
-    const status = pick(VESSEL_STATUSES, i, 7);
-    const grossTonnage =
-      vtype === 'tanker'
-        ? 45000 + seeded(i, 8, 80000)
-        : vtype === 'container'
-          ? 30000 + seeded(i, 8, 120000)
-          : vtype === 'bulk'
-            ? 20000 + seeded(i, 8, 60000)
-            : 15000 + seeded(i, 8, 30000);
-    const fleetId = fleetIds[i % fleetIds.length] ?? fallbackFleetId;
-
-    // Assign a real vessel class based on type and tonnage so voyage
-    // economics can compare against the right Baltic benchmark.
-    let vesselClass: (typeof vesselsTable.$inferInsert)['vesselClass'] = null;
-    if (vtype === 'tanker') {
-      // 1 in 6 tankers is an LNG carrier, otherwise size-based crude/product class.
-      if (i % 6 === 0) vesselClass = 'LNG Carrier';
-      else if (grossTonnage >= 100000) vesselClass = 'VLCC';
-      else if (grossTonnage >= 70000) vesselClass = 'Suezmax';
-      else vesselClass = 'Aframax';
-    } else if (vtype === 'bulk') {
-      if (grossTonnage >= 60000) vesselClass = 'Capesize';
-      else if (grossTonnage >= 40000) vesselClass = 'Panamax';
-      else if (grossTonnage >= 25000) vesselClass = 'Supramax';
-      else vesselClass = 'Handysize';
+  // Resolve fleet IDs by canonical name AFTER insert. We can't rely on
+  // .returning() from the insert above because onConflictDoNothing returns
+  // an empty array when rows already exist, which on a non-clean reseed
+  // would collapse all four fleetIds to undefined and route every vessel
+  // to fallbackFleetId (1) — at best mis-assigning the fleet, at worst
+  // failing the FK if id 1 doesn't exist. Fetching by name is deterministic
+  // for both fresh-insert and conflict paths.
+  const fleetNamesInOrder = fleetData.map((f) => f.name);
+  const fleetRows = await db
+    .select({ id: vesselsFleetsTable.id, name: vesselsFleetsTable.name })
+    .from(vesselsFleetsTable)
+    .where(inArray(vesselsFleetsTable.name, fleetNamesInOrder));
+  const fleetIdByName = new Map(fleetRows.map((f) => [f.name, f.id]));
+  const fleetIds: number[] = fleetNamesInOrder.map((name) => {
+    const id = fleetIdByName.get(name);
+    if (id === undefined) {
+      throw new Error(
+        `seedVesselsData: fleet "${name}" missing after insert — refusing to mis-route vessels`,
+      );
     }
+    return id;
+  });
+  const fallbackFleetId = fleetIds[0];
+
+  // Build vessels. We assign each hull to the correct sub-fleet:
+  //   indices 0..19  → Dorian ECO VLGC Fleet           (fleetIds[0])
+  //   indices 20..24 → Dorian Dual-Fuel & Newbuild     (fleetIds[1])
+  //   indices 25..34 → Helios LPG Pool (MOL Energia)   (fleetIds[2])
+  //   indices 35..   → Peer VLGC Watch (BW/Avance/...) (fleetIds[3])
+  const fleetForIndex = (i: number): number => {
+    const target =
+      i < 20 ? fleetIds[0] : i < DORIAN_OPERATED_COUNT ? fleetIds[1] : i < 35 ? fleetIds[2] : fleetIds[3];
+    return target ?? fallbackFleetId;
+  };
+
+  const vesselRows = VESSEL_NAMES.map((name, i) => {
+    // Use the real Dorian year-built table where we have it; otherwise the
+    // peer fleet is roughly 2015–2022 vintage.
+    const yearBuilt = DORIAN_YEAR_BUILT[i] ?? 2015 + Math.floor(seeded(i, 99, 8));
+    // Every hull in the VLGC universe is a 'tanker' at the schema level.
+    const vtype: (typeof vesselsTable.$inferInsert)['vesselType'] = 'tanker';
+    // Flag: Dorian-chartered dual-fuel hulls fly Panama; AREION flies Marshall
+    // Islands; Captain series flies Marshall Islands; otherwise distribute
+    // realistically.
+    const flag =
+      i >= 21 && i < 25
+        ? 'Panama'
+        : i === 20
+          ? 'Marshall Islands'
+          : i < 4
+            ? 'Marshall Islands'
+            : pick(FLAGS, i, 6);
+    const status = pick(VESSEL_STATUSES, i, 7);
+    // VLGC gross tonnage: 82k-cbm Captain series ≈ 47k GT, 84k-cbm ECO ≈ 48k
+    // GT, 86k-cbm dual-fuel ≈ 49k GT, AREION (93k cbm) ≈ 53k GT, peer hulls
+    // 45k–53k GT.
+    const grossTonnage =
+      i < 4
+        ? 47200 + seeded(i, 8, 600)
+        : i < 20
+          ? 48100 + seeded(i, 8, 800)
+          : i === 20
+            ? 53000
+            : i < 25
+              ? 49200 + seeded(i, 8, 500)
+              : 46500 + seeded(i, 8, 6800);
+
+    // Every hull in this fleet is a VLGC (Very Large Gas Carrier). The
+    // 93k-cbm AREION is sometimes pre-classified as VLAC (Very Large
+    // Ammonia Carrier) because it is ammonia-ready.
+    const vesselClass: (typeof vesselsTable.$inferInsert)['vesselClass'] =
+      i === 20 ? 'VLAC' : 'VLGC';
 
     return {
-      fleetId,
+      fleetId: fleetForIndex(i),
       name,
-      imo: `IMO${9000000 + i * 127 + 3}`,
-      mmsi: `${210000000 + i * 8931 + 7}`,
+      // Real IMOs for the 25 Dorian-operated hulls, deterministic placeholders
+      // for the peer fleet (so they still hash-uniquely without colliding).
+      imo: DORIAN_IMOS[i] ?? `IMO${9700000 + i * 131 + 17}`,
+      mmsi: `${i < DORIAN_OPERATED_COUNT ? 351000000 : 235000000 + i * 8931 + 7}`,
       vesselType: vtype,
       vesselClass,
       flag,

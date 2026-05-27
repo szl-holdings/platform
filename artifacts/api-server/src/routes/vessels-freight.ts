@@ -103,6 +103,31 @@ const CLASS_BASELINES: ClassBaseline[] = [
     routes: ['BLNG1g (AG→JPN)', 'BLNG2g (USG→UKC)', 'BLNG3g (USG→JPN)'],
     pnlAlias: ['LNG Carrier'],
   },
+  {
+    // VLGC class — anchors the Dorian LPG (NYSE: LPG) trade book.
+    // Baltic VLGC Index BLPG1 (Ras Tanura→Chiba) averaged ~$68/MT and
+    // BLPG3 (Houston→Chiba) ~$125/MT through 1H FY26, translating to
+    // ~$48K TCE/day on the modern ECO fleet. Volatility is structurally
+    // high because Panama Canal slot availability + US export terminal
+    // capacity swing rates ±40% on the spot.
+    key: 'vlgc',
+    label: 'VLGC',
+    dwt: '82,000–93,000 cbm',
+    color: '#fbbf24',
+    baseTce: 48000,
+    volatility: 0.085,
+    routes: ['BLPG1 (AG→Chiba)', 'BLPG3 (Houston→Chiba)', 'BLPG2 (Houston→Flushing)'],
+    // Voyage P&L emits friendly class strings that include displacement;
+    // alias them all back to this benchmark so the lookup hits.
+    pnlAlias: [
+      'VLGC',
+      'VLAC',
+      'VLGC (82k cbm)',
+      'VLGC ECO (84k cbm)',
+      'VLGC Dual-Fuel (86k cbm)',
+      'VLGC Ammonia-Ready (93k cbm)',
+    ],
+  },
 ];
 
 const ROUTE_BASELINES = [
