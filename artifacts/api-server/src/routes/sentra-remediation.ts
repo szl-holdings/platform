@@ -32,6 +32,42 @@ import {
   getLatestVerdict,
 } from '../lib/sentra-detector-council.js';
 import type { DetectorKind, Finding } from '@szl-holdings/sentra-detector-sdk';
+import {
+  emitRemediationStageReceipt,
+  stageOrdinal,
+  type RemediationStageName,
+} from '../lib/sentra-remediation-pipeline.js';
+
+/**
+ * Per-stage Λ-receipt helper (#5516). Records inputs/params/outputs hashes
+ * for the transition and attaches the receipt to the API response under
+ * `_pipelineReceipt` so the UI + auditors can chain stages off-line. Any
+ * failure to emit is logged but does not roll back the stage transition —
+ * receipts are observability, not the source of truth.
+ */
+async function attachStageReceipt(
+  caseId: string,
+  stageName: RemediationStageName,
+  inputs: unknown,
+  params: unknown,
+  outputs: unknown,
+  actor: string,
+): Promise<Awaited<ReturnType<typeof emitRemediationStageReceipt>> | null> {
+  try {
+    return await emitRemediationStageReceipt({
+      caseId,
+      stageName,
+      stageOrdinal: stageOrdinal(stageName),
+      inputs,
+      params,
+      outputs,
+      actor,
+    });
+  } catch (err) {
+    logger.warn({ err, caseId, stageName }, '[sentra-remediation] stage receipt failed');
+    return null;
+  }
+}
 
 const router: IRouter = Router();
 
@@ -516,7 +552,15 @@ router.post('/sentra/remediation/cases/:id/contextualize', authMiddleware({ requ
       })
       .where(eq(sentraRemediationCasesTable.id, id))
       .returning();
-    sendSuccess(res, rowToCase(updated!));
+    const stageReceipt = await attachStageReceipt(
+      id,
+      'contextualized',
+      { priorStage: existing.stage, priorContext: existing.context ?? null },
+      { contextEngine: 'default' },
+      { stage: 'contextualized', context: enrichedContext },
+      actor,
+    );
+    sendSuccess(res, { ...rowToCase(updated!), _pipelineReceipt: stageReceipt });
   } catch (err) {
     handleRouteError(res, err, 'Failed to contextualize case');
   }
@@ -563,7 +607,15 @@ router.post('/sentra/remediation/cases/:id/recommend', authMiddleware({ required
       })
       .where(eq(sentraRemediationCasesTable.id, id))
       .returning();
-    sendSuccess(res, rowToCase(updated!));
+    const stageReceipt = await attachStageReceipt(
+      id,
+      'recommended',
+      { priorStage: existing.stage, severity: existing.severity, cveId: existing.cveId },
+      { engine: 'recommendation-engine' },
+      { stage: 'recommended', recommendation, proofId },
+      actor,
+    );
+    sendSuccess(res, { ...rowToCase(updated!), _pipelineReceipt: stageReceipt });
   } catch (err) {
     handleRouteError(res, err, 'Failed to generate recommendation');
   }
@@ -601,7 +653,15 @@ router.post('/sentra/remediation/cases/:id/simulate', authMiddleware({ required:
       })
       .where(eq(sentraRemediationCasesTable.id, id))
       .returning();
-    sendSuccess(res, rowToCase(updated!));
+    const stageReceipt = await attachStageReceipt(
+      id,
+      'simulated',
+      { priorStage: existing.stage, affectedAssets: existing.affectedAssets, severity: existing.severity },
+      { engine: 'simulation-engine' },
+      { stage: 'simulated', simulation },
+      actor,
+    );
+    sendSuccess(res, { ...rowToCase(updated!), _pipelineReceipt: stageReceipt });
   } catch (err) {
     handleRouteError(res, err, 'Failed to simulate impact');
   }
@@ -673,7 +733,15 @@ router.post('/sentra/remediation/cases/:id/policy', authMiddleware({ required: t
       })
       .where(eq(sentraRemediationCasesTable.id, id))
       .returning();
-    sendSuccess(res, rowToCase(updated!));
+    const stageReceipt = await attachStageReceipt(
+      id,
+      nextStage === 'approved' ? 'approved' : 'policy-gated',
+      { priorStage: existing.stage, blastRadius: blast, councilVerdict: verdict ?? null },
+      { gate: 'covenant-policy' },
+      { stage: nextStage, policy: finalPolicy },
+      actor,
+    );
+    sendSuccess(res, { ...rowToCase(updated!), _pipelineReceipt: stageReceipt });
   } catch (err) {
     handleRouteError(res, err, 'Failed to evaluate policy');
   }
@@ -761,7 +829,15 @@ router.post(
         })
         .where(eq(sentraRemediationCasesTable.id, id))
         .returning();
-      sendSuccess(res, rowToCase(updated!));
+      const stageReceipt = await attachStageReceipt(
+        id,
+        nextStage,
+        { priorStage: existing.stage, requiredTier, actorTier },
+        { decision: body.decision, requiredTier },
+        { stage: nextStage, approver: approverIdentity, policy, proofId },
+        approverIdentity,
+      );
+      sendSuccess(res, { ...rowToCase(updated!), _pipelineReceipt: stageReceipt });
     } catch (err) {
       handleRouteError(res, err, 'Failed to record approval');
     }
@@ -954,7 +1030,25 @@ router.post(
         })
         .where(eq(sentraRemediationCasesTable.id, id))
         .returning();
-      sendSuccess(res, rowToCase(updated!));
+      // Execute hits two transitions atomically; emit a receipt for each so
+      // the chain reflects the canonical 9-stage lifecycle.
+      await attachStageReceipt(
+        id,
+        'executing',
+        { priorStage: existing.stage, dispatchedTo },
+        { mode: 'dispatch' },
+        { stage: 'executing', execution, proofId },
+        executorIdentity,
+      );
+      const stageReceipt = await attachStageReceipt(
+        id,
+        settledStage,
+        { dispatchResult: body.result, dispatchedTo },
+        { settlement: 'execute' },
+        { stage: settledStage, execution, outcome: body.result === 'failed' ? 'failed' : existing.outcome },
+        executorIdentity,
+      );
+      sendSuccess(res, { ...rowToCase(updated!), _pipelineReceipt: stageReceipt });
     } catch (err) {
       handleRouteError(res, err, 'Failed to record execution');
     }
@@ -1033,7 +1127,26 @@ router.post(
         })
         .where(eq(sentraRemediationCasesTable.id, id))
         .returning();
-      sendSuccess(res, rowToCase(updated!));
+      // Verify can settle to either `resolved` or `failed`. Emit a stage
+      // receipt for the canonical `verifying` transition the lifecycle
+      // implies, and a second one for the terminal stage.
+      await attachStageReceipt(
+        id,
+        'verifying',
+        { priorStage: existing.stage, method: body.method },
+        { verifier: verifierIdentity },
+        { stage: 'verifying', verification, proofId },
+        verifierIdentity,
+      );
+      const stageReceipt = await attachStageReceipt(
+        id,
+        finalStage,
+        { vulnerabilityResolved: body.vulnerabilityResolved, regressionDetected: body.regressionDetected ?? false },
+        { settlement: 'verify' },
+        { stage: finalStage, verification, outcome: finalOutcome },
+        verifierIdentity,
+      );
+      sendSuccess(res, { ...rowToCase(updated!), _pipelineReceipt: stageReceipt });
     } catch (err) {
       handleRouteError(res, err, 'Failed to verify remediation');
     }

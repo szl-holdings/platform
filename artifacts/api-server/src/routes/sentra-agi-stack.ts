@@ -45,6 +45,7 @@ import {
 } from '../lib/sentra-detector-council.js';
 import { antivenomPromptInjectionDetector } from '../lib/sentra-detectors/antivenom-prompt-injection.js';
 import { temporalBaselineShiftDetector } from '../lib/sentra-detectors/temporal-baseline-shift.js';
+import { scorePeaksAndVote } from '../lib/sentra-detectors/peak-detector-voter.js';
 import { runTsDetector } from '../lib/sentra-detector-registry.js';
 import {
   handleRouteError,
@@ -403,6 +404,35 @@ router.post(
         }
       }
 
+      // 5b. Peak-detector voter (#5516): treat the trajectory as a 1-D
+      // surface and score peaks via @workspace/anomaly-fabric. Surviving
+      // peaks become statistical-kind Council candidates, giving the
+      // Council a 3rd detector kind (antivenom + temporal + peak) for the
+      // distinctKinds governance ceiling check.
+      const peakSurface = trajectoryInput.trajectory.map((t, i) => ({
+        x: i,
+        intensity: t.value,
+      }));
+      const peakVoter = await scorePeaksAndVote({
+        correlationKey,
+        surface: peakSurface,
+        options: { minProminence: 5, minSnRatio: 1.5 },
+        affectedAssets: [trajectoryInput.entityId],
+        metricName: trajectoryInput.metricName,
+      });
+      for (const cand of peakVoter.candidates) {
+        if (!body.dryRun) {
+          const b = await broadcastAndReceipt({
+            source: 'ts-perception/peak-detector',
+            kind: 'peak-detection',
+            payload: cand.finding,
+            correlationKey,
+            score: cand.finding.score,
+          });
+          broadcastReceipts.push({ ...b, findingId: cand.finding.id });
+        }
+      }
+
       // 6. Convene the Council on the union of findings.
       const candidates: Array<{ finding: Finding; detectorKind: DetectorKind }> = [
         ...antivenomResult.findings.map((f) => ({
@@ -413,6 +443,7 @@ router.post(
           finding: f,
           detectorKind: 'temporal' as DetectorKind,
         })),
+        ...peakVoter.candidates,
       ];
       const deliberation = await deliberateAndReceipt(correlationKey, candidates);
       let councilBroadcast: { sequenceId: number; chainReceiptId: string } | null = null;
@@ -442,6 +473,12 @@ router.post(
         temporal: {
           runId: temporalRunId,
           findings: temporalResult.findings,
+        },
+        peakDetector: {
+          peakCount: peakVoter.peaks.length,
+          candidateCount: peakVoter.candidates.length,
+          chainReceiptId: peakVoter.chainReceiptId,
+          candidates: peakVoter.candidates.map((c) => c.finding),
         },
         council: deliberation
           ? {

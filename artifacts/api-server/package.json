@@ -116,6 +116,7 @@
     "@szl-holdings/schemas": "workspace:*",
     "@szl-holdings/sentra-detector-sdk": "workspace:*",
     "@szl-holdings/sequence-pipeline": "workspace:*",
+    "@szl-holdings/sim-kit": "workspace:*",
     "@szl-holdings/services": "workspace:*",
     "@szl-holdings/shared-contracts": "workspace:*",
     "@szl-holdings/signal-mesh": "workspace:*",

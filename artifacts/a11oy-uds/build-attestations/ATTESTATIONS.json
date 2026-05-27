@@ -1,10 +1,10 @@
 {
   "name": "a11oy-attestations",
-  "version": "0.1.0",
-  "gitSha": "cf7c308a1",
-  "builtAt": "2026-05-26T01:35:33Z",
+  "version": "0.1.1",
+  "gitSha": "503c51db9",
+  "builtAt": "2026-05-27T05:41:24Z",
   "hashAlgorithm": "sha256",
-  "manifestSha256": "370751df8d14d264db90ab099a843aa7f9e6f744c31896495e55cdf764c3b7f9",
+  "manifestSha256": "923199dc981a9bd9eb09e53b7d4bfb47e05d7fa9741ece68278d03350a9a62ca",
   "subjects": [
     "a11oy-core",
     "a11oy-connection"
@@ -14,10 +14,10 @@
       "index": 0,
       "subject": "a11oy-core",
       "fileCount": 11,
-      "totalBytes": 18921,
-      "subjectSha256": "b73c043c0c7109e3a105e5318bce6d0ddc285b35eced2ff862b78024678f1990",
+      "totalBytes": 21089,
+      "subjectSha256": "51cc9b017fc80a0871440f722b8e53e4be4940afb93129bfd004feaf93b8e583",
       "prevHash": "0000000000000000000000000000000000000000000000000000000000000000",
-      "entryHash": "d947b264b0cb31f7c901ec51c8f624085598525de3e972a51d21442ef879fff7"
+      "entryHash": "8df8e029b4deb77dabe0a4e3462c15d3cdadbf6f721841041f357e40e6e0f69e"
     },
     {
       "index": 1,
@@ -25,9 +25,9 @@
       "fileCount": 7,
       "totalBytes": 5251,
       "subjectSha256": "38223484a191abda6ac13d16e219eee8dcef893a72fd64bdd8797ce175e033d5",
-      "prevHash": "d947b264b0cb31f7c901ec51c8f624085598525de3e972a51d21442ef879fff7",
-      "entryHash": "0bf52285f7e3872abf5b500cb83e5d4542528f70a83c5cdd5b45f5fbcddb8604"
+      "prevHash": "8df8e029b4deb77dabe0a4e3462c15d3cdadbf6f721841041f357e40e6e0f69e",
+      "entryHash": "e7bddf2263496ed7ff51e45ffa6d8f5871e338e98c9ee583e4e0d35f289f89d3"
     }
   ],
-  "head": "0bf52285f7e3872abf5b500cb83e5d4542528f70a83c5cdd5b45f5fbcddb8604"
+  "head": "e7bddf2263496ed7ff51e45ffa6d8f5871e338e98c9ee583e4e0d35f289f89d3"
 }

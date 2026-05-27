@@ -47,6 +47,10 @@
     "wouter": "^3.3.5"
   },
   "dependencies": {
+    "@szl-holdings/perception-loop": "workspace:*",
+    "@szl-holdings/sequence-pipeline": "workspace:*",
+    "@szl-holdings/sim-kit": "workspace:*",
+    "@workspace/anomaly-fabric": "workspace:*",
     "@szl-holdings/formulas": "workspace:*",
     "@szl-holdings/lambda-math": "workspace:*",
     "@szl/alloy": "workspace:*",

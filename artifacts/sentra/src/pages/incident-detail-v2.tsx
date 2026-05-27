@@ -12,6 +12,8 @@ import {
 } from '@/lib/sentra-store';
 import { runPolicyGate, ALLOWED_ACTION_CLASSES, requiresApproval } from '@/lib/policy-engine';
 import { ActionConfirmModal } from '@/components/action-confirm-modal';
+import { OperatorAttentionPanel } from '@/components/operator-attention-panel';
+import { BlastRadiusSim } from '@/components/blast-radius-sim';
 import { EXECUTABLE_STATUSES, type ActionClass } from '@/lib/sentra-store';
 
 const SEV_COLOR: Record<IncidentSeverity, string> = {
@@ -780,6 +782,14 @@ export default function IncidentDetailV2() {
           <div className="space-y-4">
             <div className="rounded-lg border p-4 text-[11px] leading-relaxed text-slate-400" style={{ background: 'rgba(255,255,255,0.025)', borderColor: 'rgba(255,255,255,0.08)' }}>
               {incident.description}
+            </div>
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+              <OperatorAttentionPanel incidentId={incident.id} />
+              <BlastRadiusSim
+                incidentId={incident.id}
+                affectedAssetCount={incident.affected_assets.length}
+                severity={incident.severity}
+              />
             </div>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               <div className="rounded-lg border p-4" style={{ background: 'rgba(255,255,255,0.025)', borderColor: 'rgba(255,255,255,0.08)' }}>

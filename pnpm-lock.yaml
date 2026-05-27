@@ -838,6 +838,9 @@ importers:
       '@szl-holdings/signal-mesh':
         specifier: workspace:*
         version: link:../../packages/signal-mesh
+      '@szl-holdings/sim-kit':
+        specifier: workspace:*
+        version: link:../../packages/sim-kit
       '@szl-holdings/szl-receipts':
         specifier: workspace:*
         version: link:../../packages/szl-receipts
@@ -1756,6 +1759,9 @@ importers:
       '@szl-holdings/omnia-shell':
         specifier: workspace:*
         version: link:../../packages/omnia-shell
+      '@szl-holdings/perception-loop':
+        specifier: workspace:*
+        version: link:../../packages/perception-loop
       '@szl-holdings/platform-registry':
         specifier: workspace:*
         version: link:../../packages/config
@@ -1765,9 +1771,15 @@ importers:
       '@szl-holdings/replit-auth-web':
         specifier: workspace:*
         version: link:../../lib/replit-auth-web
+      '@szl-holdings/sequence-pipeline':
+        specifier: workspace:*
+        version: link:../../packages/sequence-pipeline
       '@szl-holdings/services':
         specifier: workspace:*
         version: link:../../lib/services
+      '@szl-holdings/sim-kit':
+        specifier: workspace:*
+        version: link:../../packages/sim-kit
       '@szl/alloy':
         specifier: workspace:*
         version: link:../../packages/szl-alloy
@@ -1783,6 +1795,9 @@ importers:
       '@workspace/aef-sdk':
         specifier: workspace:*
         version: link:../../packages/aef-sdk
+      '@workspace/anomaly-fabric':
+        specifier: workspace:*
+        version: link:../../packages/anomaly-fabric
       '@workspace/ouroboros':
         specifier: workspace:*
         version: link:../../packages/ouroboros

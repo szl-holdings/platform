@@ -1,6 +1,6 @@
 {
   "name": "@szl/sentra-uds",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "private": true,
   "description": "Sentra.UDS — signed Zarf payload for the cyber-resilience command runtime (asset-scoped fail-closed Safety Gate, NIST CSF 2.0 / SP 800-61r2 / CISA CIRCIA / MITRE D3FEND mappings, risk + exposure + drift + Ising allocation, hash-chained Proof Chain).",
   "license": "SEE LICENSE IN LICENSE"
