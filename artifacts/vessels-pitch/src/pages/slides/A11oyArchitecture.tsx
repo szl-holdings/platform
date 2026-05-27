@@ -36,14 +36,14 @@ export default function A11oyArchitecture() {
       </div>
 
       <div className="mt-[2vh] border border-gold bg-bg p-[1.4vw] grid grid-cols-4 gap-[1.5vw]">
-        <div><div className="font-mono text-[0.75vw] tracking-[0.2em] text-gold uppercase mb-[0.4vh]">Latency budget</div><div className="text-[1.1vw] text-text">&lt;15ms gate overhead p95</div></div>
-        <div><div className="font-mono text-[0.75vw] tracking-[0.2em] text-gold uppercase mb-[0.4vh]">Throughput</div><div className="text-[1.1vw] text-text">10k receipts/s/node</div></div>
+        <div><div className="font-mono text-[0.75vw] tracking-[0.2em] text-gold uppercase mb-[0.4vh]">Gate overhead (measured)</div><div className="text-[1.1vw] text-text">0.49–0.59 ms median · p99 ≤ 1.27 ms</div></div>
+        <div><div className="font-mono text-[0.75vw] tracking-[0.2em] text-gold uppercase mb-[0.4vh]">Audit closure</div><div className="text-[1.1vw] text-text">ρ = 1.000 · 8,000 / 8,000</div></div>
         <div><div className="font-mono text-[0.75vw] tracking-[0.2em] text-gold uppercase mb-[0.4vh]">Failure mode</div><div className="text-[1.1vw] text-text">Fail closed · audit logged</div></div>
-        <div><div className="font-mono text-[0.75vw] tracking-[0.2em] text-gold uppercase mb-[0.4vh]">Deploy targets</div><div className="text-[1.1vw] text-text">SaaS · VPC · air-gap</div></div>
+        <div><div className="font-mono text-[0.75vw] tracking-[0.2em] text-gold uppercase mb-[0.4vh]">Deploy targets</div><div className="text-[1.1vw] text-text">SaaS · VPC · UDS air-gap</div></div>
       </div>
 
       <div className="border-t border-rule pt-[1.8vh] mt-[2vh] flex items-end justify-between">
-        <div className="font-mono text-[0.9vw] tracking-[0.2em] text-muted uppercase">Architecture in @szl-holdings/szl-holdings-platform · packages/a11oy-*</div>
+        <div className="font-mono text-[0.9vw] tracking-[0.2em] text-muted uppercase">Measured: 24,800 HTTP calls across 8 routes (Ouroboros Thesis v11 · Zenodo 10.5281/zenodo.20119582)</div>
         <div className="font-mono text-[0.9vw] tracking-[0.2em] text-muted">06 / 40</div>
       </div>
     </div>

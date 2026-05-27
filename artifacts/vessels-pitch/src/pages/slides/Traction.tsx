@@ -1,10 +1,10 @@
 const STATS = [
-  { n: "6", l: "Production products", s: "A11oy · Amaru · Sentra · Vessels · ROSIE · Conduit" },
-  { n: "8 / 8", l: "Lean theses discharged", s: "TH1 → TH8 · machine-checked · CI gated" },
-  { n: "6 + 8", l: "Public + private repos", s: "github.com/szl-holdings · NDA-gated IP" },
-  { n: "5", l: "Cosign-signed UDS bundles", s: "a11oy · rosie · sentra · vessels · amaru" },
-  { n: "14+", l: "Governed API routes live", s: "a11oy, rosie, amaru, sentra, prism" },
-  { n: "5", l: "Synthesis ledgers absorbed", s: "AGI · perception-bio · electrodynamics · sparse-attn · Ising" },
+  { n: "18",          l: "Public repos on szl-holdings",    s: "every README HTTP-audited · 285/300 URLs verified live" },
+  { n: "5",           l: "UDS bundles · uds-v0.2.0",        s: "a11oy · amaru · rosie · sentra · vessels · 4 assets each · all cosign-verified" },
+  { n: "13 + 1",      l: "Ouroboros Thesis DOIs",           s: "v1–v13 on Zenodo · concept DOI 10.5281/zenodo.19944926" },
+  { n: "218 / 218",   l: "Ouroboros guardrail tests",       s: "release v6.3.0 · verified 2026-05-12" },
+  { n: "0.59 ms",     l: "Measured median Λ₁₀ overhead",    s: "p99 ≤ 1.27 ms · 24,800 HTTP calls · v11 paper" },
+  { n: "ρ = 1.000",   l: "Audit-closure ratio",             s: "8,000 / 8,000 governed pairs · Λ₁₀ EXHAUSTIVE-AUDIT" },
 ];
 
 const TIMELINE = [

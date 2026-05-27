@@ -10,7 +10,7 @@ export default function Close() {
 
       <div className="absolute top-[6vh] left-[6vw] right-[6vw] flex items-center justify-between">
         <div className="font-mono text-[1vw] tracking-[0.25em] text-gold uppercase">Section 18 · The ask</div>
-        <div className="font-mono text-[0.9vw] tracking-[0.2em] text-muted">40 / 40</div>
+        <div className="font-mono text-[0.9vw] tracking-[0.2em] text-muted">45 / 45</div>
       </div>
 
       <div className="absolute left-[6vw] right-[6vw] top-[22vh]">
@@ -55,7 +55,7 @@ export default function Close() {
 
       <div className="absolute bottom-[6vh] left-[6vw] right-[6vw] flex items-end justify-between border-t border-rule pt-[2vh]">
         <div className="font-mono text-[0.9vw] tracking-[0.2em] text-gold uppercase">We are not asking for trust — we are asking for the gate to verify behind</div>
-        <div className="font-mono text-[0.9vw] tracking-[0.2em] text-muted uppercase">40 / 40</div>
+        <div className="font-mono text-[0.9vw] tracking-[0.2em] text-muted uppercase">45 / 45</div>
       </div>
     </div>
   );

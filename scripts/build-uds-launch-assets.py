@@ -324,7 +324,10 @@ def build_docx(path, fleet_png, contract_png):
     # ── Bundle table ────────────────────────────────────────────────────
     add_heading(doc, "The five bundles", level=1)
     table = doc.add_table(rows=1, cols=4)
-    table.style = "Light Grid Accent 1"
+    # `Table Grid` is a built-in Word style; safer than `Light Grid Accent 1`
+    # which python-docx references by name but does NOT inject into the doc's
+    # styles.xml -- Word then flags the file as "needing repair" on download.
+    table.style = "Table Grid"
     hdr = table.rows[0].cells
     for i, label in enumerate(["#", "Bundle", "Runtime", "Release URL"]):
         hdr[i].text = label

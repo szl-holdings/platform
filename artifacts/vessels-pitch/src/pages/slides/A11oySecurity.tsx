@@ -1,10 +1,10 @@
 const PILLARS = [
-  { name: "Supply chain", how: "Cosign-keyless via GitHub Actions OIDC. SBOM per bundle. Image identity regex pinned per workflow.", verify: "cosign verify ghcr.io/szl-holdings/a11oy-uds:0.2.0" },
+  { name: "Supply chain", how: "Cosign blob signature over the .tar.zst, made with the per-bundle dev keypair. The matching public key (<bundle>-uds-dev.pub) is published as the fourth release asset. No GHCR, no Sigstore round-trip — works air-gapped.", verify: "cosign verify-blob --key <bundle>-uds-dev.pub" },
   { name: "Identity", how: "OIDC issuer pinning. Tenant-scoped JWTs. mTLS at the gateway. Loopback bypass only for cosigned sidecars.", verify: "Bound to your Okta / Azure / Google IdP" },
   { name: "Policy", how: "OPA-compatible policy bundles. Doctrine v6 scanner runs in CI. Constitution drift flagged before merge.", verify: "doctrine-scanner exit code = 0" },
   { name: "Composition", how: "KS-18 contextuality witness — receipts that compose without the gate are detectable in O(1).", verify: "@a11oy/core ks18 test suite" },
   { name: "Privacy", how: "I/O hashes in receipts — never raw bytes. PII window separate from receipt retention. Right-of-erasure scoped to PII tier.", verify: "Perception-loop serialization test" },
-  { name: "Replay", how: "Curry-Howard discipline. Same inputs → bit-identical outputs. Lean theses TH1–TH8 discharge the math.", verify: "scripts/check-lean-build.sh · green" },
+  { name: "Replay", how: "Curry-Howard discipline. Same inputs → bit-identical outputs. Lean 4 kernel-verified Λ-gate uniqueness in szl-holdings/lutar-lean.", verify: "lake build · kernel-checked on CI" },
 ];
 
 export default function A11oySecurity() {

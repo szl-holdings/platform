@@ -1462,13 +1462,13 @@ title = "LinkedIn — SZL UDS Mesh Drop (Defense-Unicorns facing)"
 id = "NXJiyDGBo0U-l76KKkc4t"
 uri = "file://docs/uds/exports/SZL-UDS-Mesh-Launch-AndrewGreen.docx"
 type = "word_document"
-title = "Andrew Green packet (doctrine-framed, verified-URL set)"
+title = "Andrew Green attachment — .docx (table-style corruption fixed)"
 
 [[outputs]]
 id = "z_9U50CWrEYpOIHxyKPrF"
 uri = "file://docs/uds/LINKEDIN-UDS-MESH-POST.md"
 type = "text"
-title = "LinkedIn post (2972/3000 chars, doctrine + verified)"
+title = "LinkedIn post — 2994 / 3000 chars, all 11 URLs HTTP 200 verified"
 
 [[outputs]]
 id = "cPlNiHfdwSsxD5o8Xs_6m"
@@ -1492,4 +1492,16 @@ title = "Vessels x Dorian LPG — Pitch (PPTX, 40 slides)"
 id = "814I5SY-3SSiG75UepdGo"
 uri = "file://docs/uds/exports/SZL-Public-Repo-Audit.pdf"
 type = "pdf"
-title = "SZL Public Repo Audit (master receipt — 18 repos, 300 URLs probed)"
+title = "SZL Public Repo Audit — master receipt (18 repos, 300 URLs probed)"
+
+[[outputs]]
+id = "Y1kZvUgXZSL5mx5KQIrZa"
+uri = "file://docs/uds/exports/SZL-UDS-Mesh-Launch-AndrewGreen.pdf"
+type = "pdf"
+title = "Andrew Green attachment — .pdf BACKUP (open this if Word complains)"
+
+[[outputs]]
+id = "5EX9BpDqDUr7VJXICUbqg"
+uri = "file://docs/uds/exports/ANDREW-GREEN-EMAIL.md"
+type = "text"
+title = "Andrew Green — ready-to-paste email body"
