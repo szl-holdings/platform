@@ -26,3 +26,8 @@ export {
   canonicalizeEgyptian,
   type Fraction,
 } from './egyptian.js';
+
+// Perception/bio extensions (Task #5513 — synthesis §1–§5).
+export { peakConfidence, type PeakConfidenceInput } from './peak-confidence.js';
+export { gazeStability, type GazeStabilityInput } from './gaze-stability.js';
+export { wilsonInterval, type WilsonIntervalResult, type WilsonConfidenceLevel } from './wilson.js';
