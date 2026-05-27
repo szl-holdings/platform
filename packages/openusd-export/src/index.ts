@@ -21,6 +21,8 @@ export {
   buildExportResult,
   serializeToUsda,
 } from './serializer.js';
+export type { PartGraphScene } from './from-part-graph.js';
+export { fromPartGraph } from './from-part-graph.js';
 export type {
   RouteSimulationParams,
   VesselUsdState,

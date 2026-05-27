@@ -28,6 +28,10 @@ function NativeTabLayout() {
         <Icon sf={{ default: "function", selected: "function" }} />
         <Label>Optimizer</Label>
       </NativeTabs.Trigger>
+      <NativeTabs.Trigger name="trajectory">
+        <Icon sf={{ default: "scope", selected: "scope" }} />
+        <Label>Trajectory</Label>
+      </NativeTabs.Trigger>
       <NativeTabs.Trigger name="receipts">
         <Icon sf={{ default: "link", selected: "link" }} />
         <Label>Receipts</Label>
@@ -107,6 +111,18 @@ function ClassicTabLayout() {
               <SymbolView name="function" tintColor={color} size={24} />
             ) : (
               <Feather name="cpu" size={22} color={color} />
+            ),
+        }}
+      />
+      <Tabs.Screen
+        name="trajectory"
+        options={{
+          title: "Trajectory",
+          tabBarIcon: ({ color }) =>
+            isIOS ? (
+              <SymbolView name="scope" tintColor={color} size={24} />
+            ) : (
+              <Feather name="crosshair" size={22} color={color} />
             ),
         }}
       />

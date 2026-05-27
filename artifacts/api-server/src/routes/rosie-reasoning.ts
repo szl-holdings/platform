@@ -40,6 +40,18 @@ import {
 } from '@workspace/agents-evals';
 import { submitPendingApprovalRequest } from '@workspace/approvals-inbox';
 import { EvidenceLedger } from '@szl-holdings/evidence-ledger';
+import { step as verletStep, type Particle } from '@szl-holdings/sim-kit';
+import { detectPeaks, type Peak } from '@workspace/anomaly-fabric/peak-detector';
+import { StagedPipeline, type StageArtefact } from '@szl-holdings/sequence-pipeline';
+import {
+  generate as proceduralGenerate,
+  makePartLibrary,
+  rootNode,
+  partGraphHash,
+  type Scene,
+  type Part,
+} from '@szl-holdings/procedural-kit';
+import { fromPartGraph, serializeToUsda } from '@szl-holdings/openusd-export';
 
 const router: IRouter = Router();
 
@@ -452,6 +464,61 @@ interface DroneTelemetryPoint {
   inGeofence: boolean;
 }
 
+/**
+ * Deterministic 2D trajectory under real Verlet physics (sim-kit). One
+ * particle representing the drone, accelerated by a small lateral wind
+ * field whose intensity is seeded; same seed always yields the same
+ * `(x, y)` path. Used by the drone-oversight viz so trajectories are
+ * physics-driven, not faked tweens. Returns the recorded positions.
+ */
+function simulatePhysicsTrajectory(
+  seed: number,
+  telemetry: DroneTelemetryPoint[],
+): Array<{ t: number; x: number; y: number; vx: number; vy: number }> {
+  let s = (seed * 0x9e3779b1) >>> 0;
+  const rng = () => {
+    s = (s + 0x6d2b79f5) >>> 0;
+    let t = s;
+    t = Math.imul(t ^ (t >>> 15), t | 1);
+    t ^= t + Math.imul(t ^ (t >>> 7), t | 61);
+    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+  };
+  // Wind acceleration: small steady force + a gust window aligned to the
+  // synthetic geofence breach so the visualisation tracks the anomaly.
+  const baseGustX = (rng() - 0.5) * 0.4;
+  const baseGustY = (rng() - 0.5) * 0.4;
+
+  const dt = 1; // unit timestep per telemetry sample
+  let particle: Particle = {
+    id: 'drone',
+    position: [0, 0],
+    prevPosition: [-0.5 - rng() * 0.2, -0.1 - rng() * 0.05],
+    radius: 1,
+    label: 'drone',
+  };
+  const trace: Array<{ t: number; x: number; y: number; vx: number; vy: number }> = [];
+  for (let i = 0; i < telemetry.length; i++) {
+    const p = telemetry[i]!;
+    const inBreachWindow = !p.inGeofence;
+    const ax = baseGustX + (inBreachWindow ? 0.6 : 0) + (rng() - 0.5) * 0.04;
+    const ay = baseGustY + (inBreachWindow ? 0.4 : 0) + (rng() - 0.5) * 0.04;
+    const next = verletStep([particle], dt, {
+      acceleration: [ax, ay],
+      damping: 0.04,
+    });
+    const np = next[0]!;
+    trace.push({
+      t: p.t,
+      x: np.position[0],
+      y: np.position[1],
+      vx: np.position[0] - np.prevPosition[0],
+      vy: np.position[1] - np.prevPosition[1],
+    });
+    particle = np;
+  }
+  return trace;
+}
+
 function syntheticDroneTelemetry(seed: number): DroneTelemetryPoint[] {
   let s = seed >>> 0;
   const rng = () => {
@@ -489,7 +556,7 @@ const DRONE_ACTIONS: ActionNode[] = [
   { id: 'request-hitl', title: 'Request HITL approval', preconditions: ['gate:cleared'], effects: ['hitl:requested', 'oversight:logged'], actor: 'operator', cost: 3 },
 ];
 
-router.post('/rosie/demos/drone-oversight', (req: Request, res: Response) => {
+router.post('/rosie/demos/drone-oversight', async (req: Request, res: Response) => {
   try {
     if (!demoRateLimitOk(req)) {
       sendError(
@@ -503,6 +570,23 @@ router.post('/rosie/demos/drone-oversight', (req: Request, res: Response) => {
     }
     const body = DroneBodySchema.parse(req.body);
     const telemetry = syntheticDroneTelemetry(body.seed);
+
+    // Wrap the whole oversight flow in a sequence-pipeline trace so every
+    // stage emits a hashed artefact for the evidence-ledger UI.
+    const pipelineStages: StageArtefact<string>[] = [];
+    const stagedPipeline = new StagedPipeline({
+      pipelineId: `drone-oversight-${body.seed}`,
+      tooling: {
+        'sim-kit': '0.1.0',
+        'forecast-fabric/time-r1': '1.0.0',
+        'anomaly-fabric/peak-detector': '0.1.0',
+        'ai-engine/ctm-loop': '0.1.0',
+      },
+      hash: (value) => sha256Hex(JSON.stringify(value ?? null)),
+    });
+
+    // Physics trajectory (sim-kit Verlet) — deterministic from seed.
+    const trajectory = simulatePhysicsTrajectory(body.seed, telemetry);
 
     // 1. Plan
     const dag = planDag({
@@ -522,6 +606,23 @@ router.post('/rosie/demos/drone-oversight', (req: Request, res: Response) => {
     // 2. Time-R1 on altitude
     const altSeries = telemetry.map((p) => ({ t: p.t, v: p.altitude, label: p.inGeofence ? 'in' : 'breach' }));
     const altForecast = scoreBuckets(altSeries, { seriesId: `drone-alt-${body.seed}`, baselineBuckets: 5 });
+
+    // 2b. Peak-detector cross-confirmation on the altitude surface — a
+    // second-opinion on Time-R1's anomaly window. If the peak-detector
+    // independently surfaces a peak inside Time-R1's peak bucket, that
+    // counts as a cross-confirmation and is surfaced in the response.
+    const altSurface = telemetry.map((p, i) => ({ x: i, intensity: p.altitude }));
+    const detectedPeaks: Peak[] = detectPeaks(altSurface, {
+      minProminence: 8,
+      minSnRatio: 2,
+      halfWindow: 4,
+    });
+    const peakBucket = altForecast.peakBucket;
+    const crossConfirmedPeaks = detectedPeaks.filter((peak) => {
+      if (!peakBucket) return false;
+      const tAtPeak = telemetry[peak.index]?.t ?? -1;
+      return tAtPeak >= peakBucket.startT && tAtPeak <= peakBucket.endT;
+    });
     const tempReceipt = sealLambda({
       receiptId: `lr_${randomUUID()}`,
       kind: 'anomaly.time-r1.v1',
@@ -540,6 +641,69 @@ router.post('/rosie/demos/drone-oversight', (req: Request, res: Response) => {
       ? 'drone altitude spike outside geofence — possible policy breach'
       : 'drone trajectory nominal — monitor only';
     const ctm = runCtmLoop({ input: situation, ticks: 4, seed: body.seed, processors: defaultProcessors() });
+
+    // Record the staged pipeline trace — one StageArtefact per stage,
+    // each carrying inputsHash / paramsHash / outputsHash for the
+    // evidence-ledger UI. We use the StagedPipeline runner so the
+    // hashing strategy is uniform with every other sequence-pipeline
+    // caller in the platform.
+    try {
+      const pipelineResult = await stagedPipeline.run<
+        'ingest-telemetry' | 'simulate-physics' | 'time-r1' | 'peak-detector' | 'ctm-arbitration',
+        { seed: number; scenario: string },
+        unknown
+      >(
+        { seed: body.seed, scenario: body.scenario },
+        [
+          {
+            name: 'ingest-telemetry',
+            params: { samples: telemetry.length },
+            run: () => ({ telemetry }),
+          },
+          {
+            name: 'simulate-physics',
+            params: { kernel: 'verlet', damping: 0.04 },
+            run: () => ({ trajectory }),
+          },
+          {
+            name: 'time-r1',
+            params: { baselineBuckets: 5 },
+            run: () => ({ forecast: altForecast }),
+          },
+          {
+            name: 'peak-detector',
+            params: { minProminence: 8, minSnRatio: 2, halfWindow: 4 },
+            run: () => ({ peaks: detectedPeaks, crossConfirmed: crossConfirmedPeaks.length }),
+          },
+          {
+            name: 'ctm-arbitration',
+            params: { ticks: 4 },
+            run: () => ({ loopId: ctm.loopId, finalSynthesis: ctm.finalSynthesis }),
+          },
+        ],
+      );
+      pipelineStages.push(...pipelineResult.stages);
+    } catch (pipelineErr) {
+      // The trace is observational and must never block the oversight
+      // flow, but a silent swallow violates the "every decision run
+      // produces a sequence-pipeline trace" invariant. Log structurally
+      // and stamp a single fallback artefact so the absence is observable
+      // in the evidence-ledger UI instead of looking like success.
+      console.warn(
+        '[drone-oversight] sequence-pipeline trace failed; surfacing fallback stage',
+        { err: pipelineErr instanceof Error ? pipelineErr.message : String(pipelineErr), seed: body.seed },
+      );
+      pipelineStages.push({
+        stageName: 'pipeline-trace-unavailable',
+        stageOrdinal: 0,
+        parentPipelineId: `drone-oversight-${body.seed}`,
+        inputsHash: sha256Hex(`drone-oversight:${body.seed}`),
+        paramsHash: sha256Hex('fallback'),
+        outputsHash: sha256Hex(pipelineErr instanceof Error ? pipelineErr.message : String(pipelineErr)),
+        tooling: { reason: 'staged-pipeline.run threw' },
+        receiptClass: 'pipeline.stage.v1',
+      } as StageArtefact<string>);
+    }
     const ctmReceipt = sealLambda({
       receiptId: `lr_${randomUUID()}`,
       kind: 'consciousness.broadcast.v1',
@@ -621,9 +785,19 @@ router.post('/rosie/demos/drone-oversight', (req: Request, res: Response) => {
     sendSuccess(res, {
       verdict,
       telemetry,
+      trajectory,
       plan: dag,
       temporal: altForecast,
       ctm,
+      peaks: {
+        detected: detectedPeaks,
+        crossConfirmedCount: crossConfirmedPeaks.length,
+        timeR1PeakBucket: peakBucket?.bucketIndex ?? -1,
+      },
+      pipeline: {
+        pipelineId: `drone-oversight-${body.seed}`,
+        stages: pipelineStages,
+      },
       receipts: {
         plan: planReceipt,
         temporal: tempReceipt,
@@ -634,6 +808,105 @@ router.post('/rosie/demos/drone-oversight', (req: Request, res: Response) => {
     });
   } catch (err) {
     handleRouteError(res, err, 'drone_oversight_failed');
+  }
+});
+
+// ──────────────────────────────────────────────────────────────────────────
+// /rosie/planner/usd-export — procedural-kit → openusd-export round-trip
+//
+// Turns a planner DAG (or a seeded synthetic scene) into a procedural-kit
+// `Scene`, exports it through openusd-export, and returns both the USD
+// stage descriptor and the serialised `.usda`. The deterministic seed
+// guarantees the same scene every time, and the part-graph hash is
+// included so callers can prove round-trip identity.
+// ──────────────────────────────────────────────────────────────────────────
+
+const PlannerNodeSchema = z.object({
+  id: z.string().min(1),
+  title: z.string().min(1).optional(),
+});
+
+const UsdExportBodySchema = z.object({
+  seed: z.number().int().default(1),
+  /** Optional planner DAG nodes — when supplied, used as parts; otherwise a
+   *  small synthetic library is generated. */
+  nodes: z.array(PlannerNodeSchema).max(64).optional(),
+});
+
+function plannerScene(seed: number, nodes?: { id: string; title?: string }[]): { scene: Scene; library: ReturnType<typeof makePartLibrary> } {
+  const partList: Part[] = (nodes && nodes.length > 0
+    ? nodes
+    : [
+        { id: 'plan-root' },
+        { id: 'ingest' },
+        { id: 'score' },
+        { id: 'arbitrate' },
+        { id: 'gate' },
+      ]
+  ).map((n, i) => ({
+    partId: n.id,
+    meshRef: `mesh://planner/${n.id}.usd`,
+    tags: i === 0 ? ['planner-root'] : ['planner-step'],
+    attachmentFrame: { translation: [0, 0, 0], rotation: [0, 0, 0, 1], scale: [1, 1, 1] },
+    slots:
+      i === 0
+        ? [{ slotId: 'children', allowedPartTags: ['planner-step'], localTransform: { translation: [0, 1, 0], rotation: [0, 0, 0, 1], scale: [1, 1, 1] } }]
+        : [],
+  }));
+  const library = makePartLibrary(`planner-lib-${seed}`, partList);
+  const scene = proceduralGenerate(seed, library, {
+    rootTag: 'planner-root',
+    maxDepth: 2,
+    fillProbability: 1.0,
+  });
+  return { scene, library };
+}
+
+router.post('/rosie/planner/usd-export', (req: Request, res: Response) => {
+  try {
+    const body = UsdExportBodySchema.parse(req.body);
+    const { scene, library } = plannerScene(body.seed, body.nodes);
+    const graphHash = partGraphHash(scene, (v) => sha256Hex(JSON.stringify(v)));
+    const usdStage = fromPartGraph(
+      { libraryRef: scene.libraryRef, root: scene.root as never },
+      (partId) => library.parts.get(partId)?.meshRef,
+    );
+    // Build the serializer-shape stage (one root Xform with children).
+    const usda = serializeToUsda({
+      defaultPrim: 'world',
+      upAxis: 'Y',
+      metersPerUnit: 1,
+      prims: [
+        {
+          path: '/world',
+          typeName: 'Xform',
+          attributes: [
+            { name: 'libraryRef', type: 'string', value: scene.libraryRef, custom: true },
+            { name: 'partGraphHash', type: 'string', value: graphHash, custom: true },
+          ],
+          children: usdStage.prims
+            .filter((p) => p.primPath !== '/world')
+            .map((p) => ({
+              path: p.primPath,
+              typeName: p.typeName,
+              attributes: [
+                ...(p.meshRef ? [{ name: 'meshRef', type: 'asset' as const, value: p.meshRef }] : []),
+                { name: 'translation', type: 'float3' as const, value: [...p.transform.translation] },
+                { name: 'rotation', type: 'quatf' as const, value: [...p.transform.rotation] },
+                { name: 'scale', type: 'float3' as const, value: [...p.transform.scale] },
+              ],
+            })),
+        },
+      ],
+    });
+    sendSuccess(res, {
+      libraryRef: scene.libraryRef,
+      partGraphHash: graphHash,
+      stage: usdStage,
+      usda,
+    });
+  } catch (err) {
+    handleRouteError(res, err, 'usd_export_failed');
   }
 });
 

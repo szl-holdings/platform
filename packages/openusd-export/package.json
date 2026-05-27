@@ -21,6 +21,7 @@
     "pino": "^9"
   },
   "devDependencies": {
+    "@szl-holdings/procedural-kit": "workspace:*",
     "@types/node": "catalog:"
   },
   "scripts": {

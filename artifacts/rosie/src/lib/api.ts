@@ -299,14 +299,73 @@ export interface MarbleResult {
   trace: { tick: number; perAgent: ({ agentId: string; message: string; writes: Record<string, string>; claimedGoalReached: boolean; policyViolation?: string })[] }[];
 }
 
+export interface TrajectoryPoint {
+  t: number;
+  x: number;
+  y: number;
+  vx: number;
+  vy: number;
+}
+
+export interface DetectedPeak {
+  index: number;
+  xCenter: number;
+  height: number;
+  width: number;
+  prominence: number;
+  snRatio: number;
+  scoreComponents: {
+    prominence: number;
+    snRatio: number;
+    shapeResidual: number;
+    alpha: number;
+    beta: number;
+    gamma: number;
+    composite: number;
+  };
+}
+
+export interface PipelineStageArtefact {
+  stageName: string;
+  stageOrdinal: number;
+  parentPipelineId: string;
+  inputsHash: string;
+  paramsHash: string;
+  outputsHash: string;
+  tooling: Record<string, string>;
+  receiptClass: "pipeline.stage.v1";
+}
+
 export interface DroneOversightResponse {
   verdict: "auto-cleared" | "requires-hitl";
   telemetry: { t: number; altitude: number; speed: number; inGeofence: boolean }[];
+  trajectory: TrajectoryPoint[];
   plan: PlanDag;
   temporal: TemporalForecast;
   ctm: CtmResult;
+  peaks: {
+    detected: DetectedPeak[];
+    crossConfirmedCount: number;
+    timeR1PeakBucket: number;
+  };
+  pipeline: {
+    pipelineId: string;
+    stages: PipelineStageArtefact[];
+  };
   receipts: { plan: LambdaReceipt; temporal: LambdaReceipt; ctm: LambdaReceipt; oversight: LambdaReceipt };
   pendingApproval: { id: string; submittedAt: number } | null;
+}
+
+export interface UsdExportResponse {
+  libraryRef: string;
+  partGraphHash: string;
+  stage: {
+    libraryRef: string;
+    rootPrimPath: string;
+    prims: Array<{ primPath: string; typeName: string; meshRef?: string }>;
+    uvStrategy: string;
+  };
+  usda: string;
 }
 
 export const reasoningApi = {
@@ -323,6 +382,8 @@ export const reasoningApi = {
     request<{ result: MarbleResult; receipt: LambdaReceipt }>("/marble/run", { method: "POST", body: JSON.stringify(body) }),
   droneOversight: (body: { seed?: number; scenario?: string } = {}) =>
     request<DroneOversightResponse>("/demos/drone-oversight", { method: "POST", body: JSON.stringify(body) }),
+  plannerUsdExport: (body: { seed?: number; nodes?: { id: string; title?: string }[] } = {}) =>
+    request<UsdExportResponse>("/planner/usd-export", { method: "POST", body: JSON.stringify(body) }),
   reasoningReceipts: (kind?: string, limit = 50) =>
     request<{ receipts: LambdaReceipt[]; chainHead: string; total: number }>(
       `/reasoning/receipts?${kind ? `kind=${encodeURIComponent(kind)}&` : ""}limit=${limit}`,

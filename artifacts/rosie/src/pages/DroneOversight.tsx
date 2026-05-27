@@ -1,6 +1,63 @@
-import { useState } from "react";
-import { reasoningApi, type DroneOversightResponse } from "@/lib/api";
+import { useMemo, useState } from "react";
+import { reasoningApi, type DroneOversightResponse, type TrajectoryPoint, type DetectedPeak } from "@/lib/api";
 import { ReceiptCard } from "./Planner";
+
+function TrajectoryViz({
+  trajectory,
+  telemetry,
+  peaks,
+}: {
+  trajectory: TrajectoryPoint[];
+  telemetry: DroneOversightResponse["telemetry"];
+  peaks: DetectedPeak[];
+}) {
+  const W = 480;
+  const H = 200;
+  const path = useMemo(() => {
+    if (trajectory.length === 0) return "";
+    const xs = trajectory.map((p) => p.x);
+    const ys = trajectory.map((p) => p.y);
+    const xMin = Math.min(...xs);
+    const xMax = Math.max(...xs);
+    const yMin = Math.min(...ys);
+    const yMax = Math.max(...ys);
+    const sx = (x: number) => ((x - xMin) / Math.max(0.001, xMax - xMin)) * (W - 20) + 10;
+    const sy = (y: number) => H - 10 - ((y - yMin) / Math.max(0.001, yMax - yMin)) * (H - 20);
+    return trajectory.map((p, i) => `${i === 0 ? "M" : "L"}${sx(p.x).toFixed(1)},${sy(p.y).toFixed(1)}`).join(" ");
+  }, [trajectory]);
+  const peakSet = new Set(peaks.map((p) => p.index));
+  return (
+    <div className="rounded-lg border border-border bg-card p-4" data-testid="trajectory-viz">
+      <div className="text-[10px] uppercase tracking-[0.22em] text-primary font-mono mb-3">
+        sim-kit verlet trajectory · {trajectory.length} steps · {peaks.length} peaks
+      </div>
+      <svg viewBox={`0 0 ${W} ${H}`} className="w-full h-48" role="img" aria-label="drone trajectory">
+        <path d={path} fill="none" stroke="currentColor" strokeWidth="1.5" className="text-primary/80" />
+        {trajectory.map((p, i) => {
+          const breach = telemetry[i] && !telemetry[i].inGeofence;
+          const peak = peakSet.has(i);
+          if (!breach && !peak) return null;
+          const xs = trajectory.map((q) => q.x);
+          const ys = trajectory.map((q) => q.y);
+          const cx = ((p.x - Math.min(...xs)) / Math.max(0.001, Math.max(...xs) - Math.min(...xs))) * (W - 20) + 10;
+          const cy = H - 10 - ((p.y - Math.min(...ys)) / Math.max(0.001, Math.max(...ys) - Math.min(...ys))) * (H - 20);
+          return (
+            <circle
+              key={i}
+              cx={cx}
+              cy={cy}
+              r={peak ? 4 : 2.5}
+              className={peak ? "fill-yellow-400" : "fill-destructive"}
+            />
+          );
+        })}
+      </svg>
+      <div className="text-[10px] font-mono text-muted-foreground mt-2">
+        red = geofence breach · yellow = peak-detector hit
+      </div>
+    </div>
+  );
+}
 
 export default function DroneOversight() {
   const [seed, setSeed] = useState(7);
@@ -126,6 +183,42 @@ export default function DroneOversight() {
                   />
                 );
               })}
+            </div>
+          </div>
+
+          <TrajectoryViz
+            trajectory={result.trajectory}
+            telemetry={result.telemetry}
+            peaks={result.peaks.detected}
+          />
+
+          <div className="grid md:grid-cols-2 gap-4">
+            <div className="rounded-lg border border-border bg-card p-4" data-testid="peak-card">
+              <div className="text-[10px] uppercase tracking-[0.22em] text-primary font-mono mb-2">peak-detector (cross-opinion on Time-R1)</div>
+              <div className="text-sm">
+                <span className="font-semibold text-2xl tabular-nums" data-testid="text-peak-count">{result.peaks.detected.length}</span>{" "}
+                <span className="text-muted-foreground">peaks surfaced ·</span>{" "}
+                <span className="font-semibold tabular-nums" data-testid="text-peak-confirmed">{result.peaks.crossConfirmedCount}</span>{" "}
+                <span className="text-muted-foreground">cross-confirm Time-R1 bucket {result.peaks.timeR1PeakBucket}</span>
+              </div>
+              {result.peaks.detected.slice(0, 3).map((p) => (
+                <div key={p.index} className="text-[10px] font-mono text-muted-foreground mt-1.5">
+                  idx {p.index} · prom {p.prominence.toFixed(1)} · s/n {p.snRatio.toFixed(2)} · composite {p.scoreComponents.composite.toFixed(2)}
+                </div>
+              ))}
+            </div>
+            <div className="rounded-lg border border-border bg-card p-4" data-testid="pipeline-card">
+              <div className="text-[10px] uppercase tracking-[0.22em] text-primary font-mono mb-2">sequence-pipeline trace · {result.pipeline.stages.length} stages</div>
+              <div className="space-y-1">
+                {result.pipeline.stages.map((s) => (
+                  <div key={s.stageOrdinal} className="flex items-center gap-2 text-[11px] font-mono" data-testid={`pipeline-stage-${s.stageName}`}>
+                    <span className="text-muted-foreground w-6">{String(s.stageOrdinal + 1).padStart(2, "0")}</span>
+                    <span className="text-primary min-w-[140px]">{s.stageName}</span>
+                    <span className="text-muted-foreground">in {s.inputsHash.slice(0, 8)}</span>
+                    <span className="text-muted-foreground">→ out {s.outputsHash.slice(0, 8)}</span>
+                  </div>
+                ))}
+              </div>
             </div>
           </div>
 
