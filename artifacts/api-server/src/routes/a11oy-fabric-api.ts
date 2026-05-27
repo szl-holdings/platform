@@ -1,5 +1,5 @@
 import { Router, type Request, type Response } from 'express';
-import { createHash } from 'crypto';
+import { canonicalJson, sha256 as sha256hex } from '../lib/receipt-chain';
 import { logger } from '../lib/logger';
 import {
   SEED_SIGNALS,
@@ -189,19 +189,6 @@ router.get('/a11oy/proof', (_req: Request, res: Response) => {
 // ============================================================
 // PROOF CHAIN STORE — in-memory, seeded on boot
 // ============================================================
-
-function sha256hex(data: string): string {
-  return createHash('sha256').update(data).digest('hex');
-}
-
-function canonicalJson(obj: unknown): string {
-  if (obj === null || typeof obj !== 'object') return JSON.stringify(obj);
-  if (Array.isArray(obj)) return `[${(obj as unknown[]).map(canonicalJson).join(',')}]`;
-  const sorted = Object.keys(obj as Record<string, unknown>)
-    .sort()
-    .map(k => `${JSON.stringify(k)}:${canonicalJson((obj as Record<string, unknown>)[k])}`);
-  return `{${sorted.join(',')}}`;
-}
 
 interface FabricReasoningStep {
   id: string;
