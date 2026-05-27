@@ -1044,4 +1044,20 @@ router.use(
   ),
 );
 
+// Electrodynamics API surface (#5532): one governed entry point for the
+// shared package `@szl-holdings/electrodynamics-kit`. Ten endpoints
+// under the `/electrodynamics` prefix cover actuator-command,
+// device-lifecycle, bus-budget, mission-graph compile, engagement
+// dosimetry, swarm consensus tally, redundancy mode transitions,
+// nav-state fusion, em-field-step, and sealed-capability seal. All
+// share one router; lazy-loaded so cold-start cost is paid only on
+// first hit. See docs/research/electrodynamics-synthesis-2026.md.
+router.use(
+  lazyMatch(
+    ["/electrodynamics"],
+    () => import("./electrodynamics"),
+    "electrodynamics",
+  ),
+);
+
 export default router;

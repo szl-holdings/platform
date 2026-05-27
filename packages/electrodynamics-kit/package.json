@@ -1,0 +1,32 @@
+{
+  "name": "@szl-holdings/electrodynamics-kit",
+  "version": "0.1.0",
+  "private": false,
+  "description": "Precision-electromagnetics / motion-control / aerospace-navigation primitives re-expressed against SZL Doctrine V6. Typed actuator-command envelope, device lifecycle, deterministic-bus budget, mission graph compile-and-sign, engagement dosimetry, bounded-Byzantine swarm consensus, redundancy mode envelope, nav-state fusion with covariance, EM field step with energy bookkeeping, sealed-capability envelope. See docs/research/electrodynamics-synthesis-2026.md.",
+  "type": "module",
+  "main": "./src/index.ts",
+  "types": "./src/index.ts",
+  "exports": {
+    ".": { "types": "./src/index.ts", "import": "./src/index.ts" },
+    "./actuator-command": { "types": "./src/actuator-command.ts", "import": "./src/actuator-command.ts" },
+    "./device-lifecycle": { "types": "./src/device-lifecycle.ts", "import": "./src/device-lifecycle.ts" },
+    "./bus-budget": { "types": "./src/bus-budget.ts", "import": "./src/bus-budget.ts" },
+    "./mission-graph": { "types": "./src/mission-graph.ts", "import": "./src/mission-graph.ts" },
+    "./engagement-dosimetry": { "types": "./src/engagement-dosimetry.ts", "import": "./src/engagement-dosimetry.ts" },
+    "./swarm-consensus": { "types": "./src/swarm-consensus.ts", "import": "./src/swarm-consensus.ts" },
+    "./redundancy-envelope": { "types": "./src/redundancy-envelope.ts", "import": "./src/redundancy-envelope.ts" },
+    "./nav-state-fusion": { "types": "./src/nav-state-fusion.ts", "import": "./src/nav-state-fusion.ts" },
+    "./em-field-step": { "types": "./src/em-field-step.ts", "import": "./src/em-field-step.ts" },
+    "./sealed-capability": { "types": "./src/sealed-capability.ts", "import": "./src/sealed-capability.ts" }
+  },
+  "scripts": {
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run --passWithNoTests"
+  },
+  "license": "UNLICENSED",
+  "devDependencies": {
+    "@types/node": "catalog:",
+    "typescript": "catalog:",
+    "vitest": "catalog:"
+  }
+}

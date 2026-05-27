@@ -84,6 +84,7 @@
     "@szl-holdings/db-schema": "workspace:*",
     "@szl-holdings/decision-engine": "workspace:*",
     "@szl-holdings/decision-fabric": "workspace:*",
+    "@szl-holdings/electrodynamics-kit": "workspace:*",
     "@szl-holdings/env": "workspace:*",
     "@szl-holdings/evidence-graph": "workspace:*",
     "@szl-holdings/evidence-ledger": "workspace:*",
