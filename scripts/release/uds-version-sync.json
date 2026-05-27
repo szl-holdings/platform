@@ -1,31 +1,43 @@
 {
   "$schema": "./uds-version-sync.schema.json",
-  "description": "Source-of-truth manifest for UDS bundle versions. Each entry MUST match the package.json version of the artifact directory. The szl-v* tag workflow reads this file to build release notes; uds-release.sh requires every listed bundle to be present and pass the full gate (build + sha256 + smoke).",
-  "release_base_url": "https://github.com/szl-holdings/szl-holdings-platform/releases/download",
+  "description": "Source-of-truth manifest for UDS bundle versions. Each entry MUST match the package.json version of the artifact directory. Each bundle is released on its OWN org repo (szl-holdings/<product>) — see release_repo. The monorepo no longer cuts combined UDS releases; uds-release.sh still builds + signs + verifies all bundles locally, but the assets are uploaded to the per-product repo's release.",
+  "release_base_url": "https://github.com/szl-holdings",
+  "release_tag_prefix": "uds-v",
   "bundles": [
     {
       "name": "a11oy-uds",
       "artifact": "artifacts/a11oy-uds",
-      "doctrine": "Mythos-V1 (KS-18 contextuality witness)",
+      "release_repo": "szl-holdings/a11oy",
+      "doctrine": "A11oy-V1 (KS-18 contextuality witness)",
       "headline": "Brand-orchestration kernel with hash-chained attestation sidecar"
     },
     {
       "name": "sentra-uds",
       "artifact": "artifacts/sentra-uds",
+      "release_repo": "szl-holdings/sentra",
       "doctrine": "Sentra-V1 (NIST CSF 2.0 + D3FEND mapping, Ising allocation)",
       "headline": "Cyber-resilience runtime with fail-closed asset-scoped Safety Gate"
     },
     {
       "name": "amaru-uds",
       "artifact": "artifacts/amaru-uds",
+      "release_repo": "szl-holdings/amaru",
       "doctrine": "V6 (Lutar Σ, Λ floor, Bekenstein admission, bounded-loop convergence)",
       "headline": "Convergent data-sync runtime with KL drift + hash-chained proof receipts"
     },
     {
       "name": "rosie-uds",
       "artifact": "artifacts/rosie-uds",
+      "release_repo": "szl-holdings/rosie",
       "doctrine": "ROSIE-V1 (deny-by-default admission, contradiction detector, hash-chained receipts)",
       "headline": "Governed decision fabric with mandatory witnesses on every decision"
+    },
+    {
+      "name": "vessels-uds",
+      "artifact": "artifacts/vessels-uds",
+      "release_repo": "szl-holdings/vessels",
+      "doctrine": "V6 (haversine, CPA + collision-cone, AIS-gap Λ floor, sanctions screen, voyage Λ-receipts)",
+      "headline": "Maritime intelligence kernel with hash-chained voyage receipts"
     }
   ]
 }

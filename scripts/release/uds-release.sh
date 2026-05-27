@@ -22,7 +22,21 @@ set -uo pipefail
 REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 cd "${REPO_ROOT}"
 
-REQUIRED_BUNDLES=(a11oy-uds sentra-uds amaru-uds rosie-uds)
+# Bundle list is sourced from uds-version-sync.json (single source of truth).
+# Adding a bundle there auto-extends the release gate — no edits needed here.
+MANIFEST_JSON="${REPO_ROOT}/scripts/release/uds-version-sync.json"
+if [[ ! -f "${MANIFEST_JSON}" ]]; then
+  printf '[uds-release] ERROR: manifest not found at %s\n' "${MANIFEST_JSON}" >&2
+  exit 1
+fi
+mapfile -t REQUIRED_BUNDLES < <(node -e '
+  const m = JSON.parse(require("fs").readFileSync(process.argv[1], "utf8"));
+  for (const b of m.bundles) console.log(b.name);
+' "${MANIFEST_JSON}")
+if [[ "${#REQUIRED_BUNDLES[@]}" -eq 0 ]]; then
+  printf '[uds-release] ERROR: no bundles in manifest %s\n' "${MANIFEST_JSON}" >&2
+  exit 1
+fi
 
 declare -a OK_BUNDLES=()
 declare -a MISSING_BUNDLES=()
