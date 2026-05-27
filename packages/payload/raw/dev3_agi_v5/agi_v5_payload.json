@@ -6,7 +6,7 @@
   "replay_root": "1ed4d253e876f428c6e182f8ed8a569585442556b339529bbf8ec2522581698b",
   "doctrine_pass": true,
   "forbidden_pattern_sweep": {
-    "patterns_checked": ["Jr.", "AlloyScape", "Glass Wing", "Glasswing", "Stephen Paul", "Perplexity Computer", "anonymous"],
+    "patterns_checked": ["AlloyScape", "Glass Wing", "Glasswing", "Perplexity Computer", "anonymous"],
     "violations": 0,
     "note_on_mythos": "String 'Mythos' appears only as a third-party citation ('Claude Mythos Preview' from Anthropic/METR) — not as an SZL artifact name. Permitted as factual external citation."
   },
@@ -617,7 +617,7 @@
     "byte_identical_replays": 5,
     "ingestion_policy": "PUBLIC_ONLY",
     "license_allowlist": ["Apache-2.0", "MIT", "BSD-3-Clause", "CC-BY"],
-    "forbidden_patterns": ["Jr.", "AlloyScape", "Glass Wing", "Glasswing", "Mythos", "Stephen Paul", "Perplexity Computer", "anonymous"],
+    "forbidden_patterns": ["AlloyScape", "Glass Wing", "Glasswing", "Mythos", "Perplexity Computer", "anonymous"],
     "repos": [".github", "amaru", "a11oy", "carlota-jo", "counsel", "lutar-lean", "ouroboros", "ouroboros-thesis", "sentra", "szl-brand", "szl-cookbook", "szl-trust", "terra", "vessels"],
     "ouroboros_ground_truth": {
       "version": "v6.3.0",

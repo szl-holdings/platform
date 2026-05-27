@@ -56,6 +56,16 @@ const SELF_REFERENCE_ALLOWLIST = new Set([
   'docs/audit/v7-pr-triage.md',
   'docs/audit/v7-pm-decisions.md',
   'docs/audit/v7-apply-runbook.md',
+  // Doctrine-discussion audit docs (task #4967) — these triage / audit
+  // documents enumerate the patterns to discuss remediation; they are
+  // meta-references, not new brand violations.
+  'docs/audit/task-5038-pr-triage.md',
+  'docs/audit/github-org-audit-2026-05-27.md',
+  // Doctrine sweep script itself names the patterns by string.
+  'scripts/check-doctrine-v6.mjs',
+  // The baseline file lists every legacy (file, pattern) pair as DATA;
+  // it is the artifact of this scanner, not source content under audit.
+  'scripts/check-forbidden-patterns.baseline.json',
 ]);
 
 // Pre-existing legacy violations in docs/ from prior commits. New violations

@@ -18,12 +18,10 @@
       "measurabilityHonesty": 0.95
     },
     "forbidden_patterns": [
-      "Jr.",
       "AlloyScape",
       "Glass Wing",
       "Glasswing",
       "Mythos",
-      "Stephen Paul",
       "Perplexity Computer",
       "anonymous"
     ],

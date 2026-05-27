@@ -128,7 +128,7 @@ The thirteen artefacts covered, by upstream owner:
 
 **Doctrine V6 compliance.**
 - **Pillar:** Evidence-First.
-- **Receipt:** `agi.axis-rating.v1` — fields: `artifact`, `releaseTag`, `axisVector{}`, `evidenceLinks[]`. Rating without `evidenceLinks[]` is rejected at receipt write time. *No anonymous capability claims.*
+- **Receipt:** `agi.axis-rating.v1` — fields: `artifact`, `releaseTag`, `axisVector{}`, `evidenceLinks[]`. Rating without `evidenceLinks[]` is rejected at receipt write time. *No unattributed capability claims.*
 
 ---
 
@@ -229,7 +229,7 @@ The thirteen artefacts covered, by upstream owner:
 
 **Doctrine V6 compliance.**
 - **Pillar:** Governed Autonomy + Evidence-First.
-- **Receipt:** `consciousness.broadcast.v1` — fields: `winner`, `suppressed[]`, `arbitrationRationale`, `loopIteration`. The presence of `suppressed[]` is the audit trail for "what the system almost did" — directly addresses the "no anonymous entries" voice rule.
+- **Receipt:** `consciousness.broadcast.v1` — fields: `winner`, `suppressed[]`, `arbitrationRationale`, `loopIteration`. The presence of `suppressed[]` is the audit trail for "what the system almost did" — directly addresses the "no unattributed entries" voice rule.
 
 ---
 

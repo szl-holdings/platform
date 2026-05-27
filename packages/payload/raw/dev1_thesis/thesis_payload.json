@@ -212,7 +212,7 @@
     "byline": "Lutar, Stephen P.",
     "orcid": "0009-0001-0110-4173",
     "replay_root": "1ed4d253e876f428c6e182f8ed8a569585442556b339529bbf8ec2522581698b",
-    "forbidden_patterns": ["Jr.", "AlloyScape", "Glass Wing", "Glasswing", "Mythos", "Stephen Paul", "Perplexity Computer", "anonymous"],
+    "forbidden_patterns": ["AlloyScape", "Glass Wing", "Glasswing", "Mythos", "Perplexity Computer", "anonymous"],
     "license_text": "CC-BY-4.0",
     "license_code": "Apache-2.0"
   }

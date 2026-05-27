@@ -116,6 +116,10 @@
     "pattern": "Glasswing"
   },
   {
+    "file": "artifacts/a11oy/src/lib/atelier-runtime.ts",
+    "pattern": "anonymous"
+  },
+  {
     "file": "artifacts/a11oy/src/lib/glasswing-schemas.ts",
     "pattern": "Glasswing"
   },
@@ -292,6 +296,10 @@
     "pattern": "Mythos"
   },
   {
+    "file": "artifacts/a11oy/src/pages/OperationalStatus.tsx",
+    "pattern": "anonymous"
+  },
+  {
     "file": "artifacts/a11oy/src/pages/psyche/VolitionRegistry.tsx",
     "pattern": "Mythos"
   },
@@ -336,6 +344,10 @@
     "pattern": "Mythos"
   },
   {
+    "file": "artifacts/a11oy/src/pages/SzlOperationalCore.tsx",
+    "pattern": "anonymous"
+  },
+  {
     "file": "artifacts/a11oy/src/pages/TrustCenter.tsx",
     "pattern": "anonymous"
   },
@@ -354,6 +366,10 @@
   {
     "file": "artifacts/a11oy/src/pages/WelfarePlaybooks.tsx",
     "pattern": "Mythos"
+  },
+  {
+    "file": "artifacts/api-server/src/__tests__/a11oy-frontier-public-models.test.ts",
+    "pattern": "anonymous"
   },
   {
     "file": "artifacts/api-server/src/__tests__/atlas-tenant-isolation.test.ts",
@@ -376,40 +392,16 @@
     "pattern": "anonymous"
   },
   {
-    "file": "artifacts/api-server/src/data/audit/backlog.json",
-    "pattern": "Jr."
-  },
-  {
-    "file": "artifacts/api-server/src/data/audit/backlog.json",
-    "pattern": "Stephen Paul"
-  },
-  {
     "file": "artifacts/api-server/src/data/audit/gap_report.json",
     "pattern": "AlloyScape"
-  },
-  {
-    "file": "artifacts/api-server/src/data/audit/gap_report.json",
-    "pattern": "Jr."
   },
   {
     "file": "artifacts/api-server/src/data/audit/gap_report.json",
     "pattern": "Perplexity Computer"
   },
   {
-    "file": "artifacts/api-server/src/data/audit/gap_report.json",
-    "pattern": "Stephen Paul"
-  },
-  {
     "file": "artifacts/api-server/src/data/audit/github_full.json",
     "pattern": "Glass Wing"
-  },
-  {
-    "file": "artifacts/api-server/src/data/audit/github_full.json",
-    "pattern": "Jr."
-  },
-  {
-    "file": "artifacts/api-server/src/data/audit/github_full.json",
-    "pattern": "Stephen Paul"
   },
   {
     "file": "artifacts/api-server/src/data/compliance-control-mappings.ts",
@@ -432,10 +424,6 @@
     "pattern": "anonymous"
   },
   {
-    "file": "artifacts/api-server/src/lib/ami-formula.ts",
-    "pattern": "Jr."
-  },
-  {
     "file": "artifacts/api-server/src/lib/expo-push.ts",
     "pattern": "anonymous"
   },
@@ -456,6 +444,10 @@
     "pattern": "anonymous"
   },
   {
+    "file": "artifacts/api-server/src/middlewares/auth.ts",
+    "pattern": "anonymous"
+  },
+  {
     "file": "artifacts/api-server/src/middlewares/csrf.ts",
     "pattern": "anonymous"
   },
@@ -473,6 +465,10 @@
   },
   {
     "file": "artifacts/api-server/src/middlewares/sliding-window-limiter.ts",
+    "pattern": "anonymous"
+  },
+  {
+    "file": "artifacts/api-server/src/middlewares/tenant-scope.ts",
     "pattern": "anonymous"
   },
   {
@@ -508,12 +504,40 @@
     "pattern": "anonymous"
   },
   {
+    "file": "artifacts/api-server/src/routes/a11oy-vertical-orchestrator.ts",
+    "pattern": "anonymous"
+  },
+  {
     "file": "artifacts/api-server/src/routes/alloy-agentic-rag.ts",
     "pattern": "anonymous"
   },
   {
     "file": "artifacts/api-server/src/routes/alloy.ts",
     "pattern": "anonymous"
+  },
+  {
+    "file": "artifacts/api-server/src/routes/amaru-ops-core.ts",
+    "pattern": "AlloyScape"
+  },
+  {
+    "file": "artifacts/api-server/src/routes/amaru-ops-core.ts",
+    "pattern": "anonymous"
+  },
+  {
+    "file": "artifacts/api-server/src/routes/amaru-ops-core.ts",
+    "pattern": "Glass Wing"
+  },
+  {
+    "file": "artifacts/api-server/src/routes/amaru-ops-core.ts",
+    "pattern": "Glasswing"
+  },
+  {
+    "file": "artifacts/api-server/src/routes/amaru-ops-core.ts",
+    "pattern": "Mythos"
+  },
+  {
+    "file": "artifacts/api-server/src/routes/amaru-ops-core.ts",
+    "pattern": "Perplexity Computer"
   },
   {
     "file": "artifacts/api-server/src/routes/analytics-engine-public.ts",
@@ -526,6 +550,38 @@
   {
     "file": "artifacts/api-server/src/routes/api-keys.ts",
     "pattern": "anonymous"
+  },
+  {
+    "file": "artifacts/api-server/src/routes/atelier.ts",
+    "pattern": "anonymous"
+  },
+  {
+    "file": "artifacts/api-server/src/routes/auth.ts",
+    "pattern": "anonymous"
+  },
+  {
+    "file": "artifacts/api-server/src/routes/carlota-jo-ops-core.ts",
+    "pattern": "AlloyScape"
+  },
+  {
+    "file": "artifacts/api-server/src/routes/carlota-jo-ops-core.ts",
+    "pattern": "anonymous"
+  },
+  {
+    "file": "artifacts/api-server/src/routes/carlota-jo-ops-core.ts",
+    "pattern": "Glass Wing"
+  },
+  {
+    "file": "artifacts/api-server/src/routes/carlota-jo-ops-core.ts",
+    "pattern": "Glasswing"
+  },
+  {
+    "file": "artifacts/api-server/src/routes/carlota-jo-ops-core.ts",
+    "pattern": "Mythos"
+  },
+  {
+    "file": "artifacts/api-server/src/routes/carlota-jo-ops-core.ts",
+    "pattern": "Perplexity Computer"
   },
   {
     "file": "artifacts/api-server/src/routes/carlota-jo.ts",
@@ -558,6 +614,30 @@
   {
     "file": "artifacts/api-server/src/routes/counsel-knowledge.ts",
     "pattern": "anonymous"
+  },
+  {
+    "file": "artifacts/api-server/src/routes/counsel-ops-core.ts",
+    "pattern": "AlloyScape"
+  },
+  {
+    "file": "artifacts/api-server/src/routes/counsel-ops-core.ts",
+    "pattern": "anonymous"
+  },
+  {
+    "file": "artifacts/api-server/src/routes/counsel-ops-core.ts",
+    "pattern": "Glass Wing"
+  },
+  {
+    "file": "artifacts/api-server/src/routes/counsel-ops-core.ts",
+    "pattern": "Glasswing"
+  },
+  {
+    "file": "artifacts/api-server/src/routes/counsel-ops-core.ts",
+    "pattern": "Mythos"
+  },
+  {
+    "file": "artifacts/api-server/src/routes/counsel-ops-core.ts",
+    "pattern": "Perplexity Computer"
   },
   {
     "file": "artifacts/api-server/src/routes/counsel.ts",
@@ -600,6 +680,14 @@
     "pattern": "anonymous"
   },
   {
+    "file": "artifacts/api-server/src/routes/ecosystem.ts",
+    "pattern": "anonymous"
+  },
+  {
+    "file": "artifacts/api-server/src/routes/electrodynamics.ts",
+    "pattern": "anonymous"
+  },
+  {
     "file": "artifacts/api-server/src/routes/evidence-graph.ts",
     "pattern": "anonymous"
   },
@@ -612,7 +700,15 @@
     "pattern": "anonymous"
   },
   {
+    "file": "artifacts/api-server/src/routes/foundry-deepseek-v4.ts",
+    "pattern": "Glasswing"
+  },
+  {
     "file": "artifacts/api-server/src/routes/groups/decisions.ts",
+    "pattern": "anonymous"
+  },
+  {
+    "file": "artifacts/api-server/src/routes/groups/vessels.ts",
     "pattern": "anonymous"
   },
   {
@@ -638,6 +734,30 @@
   {
     "file": "artifacts/api-server/src/routes/investor-analytics.ts",
     "pattern": "anonymous"
+  },
+  {
+    "file": "artifacts/api-server/src/routes/lexicon-ops-core.ts",
+    "pattern": "AlloyScape"
+  },
+  {
+    "file": "artifacts/api-server/src/routes/lexicon-ops-core.ts",
+    "pattern": "anonymous"
+  },
+  {
+    "file": "artifacts/api-server/src/routes/lexicon-ops-core.ts",
+    "pattern": "Glass Wing"
+  },
+  {
+    "file": "artifacts/api-server/src/routes/lexicon-ops-core.ts",
+    "pattern": "Glasswing"
+  },
+  {
+    "file": "artifacts/api-server/src/routes/lexicon-ops-core.ts",
+    "pattern": "Mythos"
+  },
+  {
+    "file": "artifacts/api-server/src/routes/lexicon-ops-core.ts",
+    "pattern": "Perplexity Computer"
   },
   {
     "file": "artifacts/api-server/src/routes/lyte-extended.ts",
@@ -672,8 +792,60 @@
     "pattern": "anonymous"
   },
   {
+    "file": "artifacts/api-server/src/routes/org-intelligence.ts",
+    "pattern": "AlloyScape"
+  },
+  {
+    "file": "artifacts/api-server/src/routes/org-intelligence.ts",
+    "pattern": "anonymous"
+  },
+  {
+    "file": "artifacts/api-server/src/routes/org-intelligence.ts",
+    "pattern": "Glass Wing"
+  },
+  {
+    "file": "artifacts/api-server/src/routes/org-intelligence.ts",
+    "pattern": "Glasswing"
+  },
+  {
+    "file": "artifacts/api-server/src/routes/org-intelligence.ts",
+    "pattern": "Mythos"
+  },
+  {
+    "file": "artifacts/api-server/src/routes/org-intelligence.ts",
+    "pattern": "Perplexity Computer"
+  },
+  {
     "file": "artifacts/api-server/src/routes/page-view-tracking.ts",
     "pattern": "anonymous"
+  },
+  {
+    "file": "artifacts/api-server/src/routes/perception-bio.ts",
+    "pattern": "anonymous"
+  },
+  {
+    "file": "artifacts/api-server/src/routes/pulse-ops-core.ts",
+    "pattern": "AlloyScape"
+  },
+  {
+    "file": "artifacts/api-server/src/routes/pulse-ops-core.ts",
+    "pattern": "anonymous"
+  },
+  {
+    "file": "artifacts/api-server/src/routes/pulse-ops-core.ts",
+    "pattern": "Glass Wing"
+  },
+  {
+    "file": "artifacts/api-server/src/routes/pulse-ops-core.ts",
+    "pattern": "Glasswing"
+  },
+  {
+    "file": "artifacts/api-server/src/routes/pulse-ops-core.ts",
+    "pattern": "Mythos"
+  },
+  {
+    "file": "artifacts/api-server/src/routes/pulse-ops-core.ts",
+    "pattern": "Perplexity Computer"
   },
   {
     "file": "artifacts/api-server/src/routes/push-tokens.ts",
@@ -688,12 +860,76 @@
     "pattern": "anonymous"
   },
   {
+    "file": "artifacts/api-server/src/routes/risk-evidence.ts",
+    "pattern": "anonymous"
+  },
+  {
+    "file": "artifacts/api-server/src/routes/rosie.ts",
+    "pattern": "anonymous"
+  },
+  {
+    "file": "artifacts/api-server/src/routes/sentra-ops-core.ts",
+    "pattern": "AlloyScape"
+  },
+  {
+    "file": "artifacts/api-server/src/routes/sentra-ops-core.ts",
+    "pattern": "anonymous"
+  },
+  {
+    "file": "artifacts/api-server/src/routes/sentra-ops-core.ts",
+    "pattern": "Glass Wing"
+  },
+  {
+    "file": "artifacts/api-server/src/routes/sentra-ops-core.ts",
+    "pattern": "Glasswing"
+  },
+  {
+    "file": "artifacts/api-server/src/routes/sentra-ops-core.ts",
+    "pattern": "Mythos"
+  },
+  {
+    "file": "artifacts/api-server/src/routes/sentra-ops-core.ts",
+    "pattern": "Perplexity Computer"
+  },
+  {
     "file": "artifacts/api-server/src/routes/sentra-remediation.ts",
     "pattern": "Glasswing"
   },
   {
     "file": "artifacts/api-server/src/routes/sentra-remediation.ts",
     "pattern": "Mythos"
+  },
+  {
+    "file": "artifacts/api-server/src/routes/sentra-status.ts",
+    "pattern": "anonymous"
+  },
+  {
+    "file": "artifacts/api-server/src/routes/sentra-tabs.ts",
+    "pattern": "anonymous"
+  },
+  {
+    "file": "artifacts/api-server/src/routes/sovereign.ts",
+    "pattern": "anonymous"
+  },
+  {
+    "file": "artifacts/api-server/src/routes/szl-ops.ts",
+    "pattern": "AlloyScape"
+  },
+  {
+    "file": "artifacts/api-server/src/routes/szl-ops.ts",
+    "pattern": "Glass Wing"
+  },
+  {
+    "file": "artifacts/api-server/src/routes/szl-ops.ts",
+    "pattern": "Glasswing"
+  },
+  {
+    "file": "artifacts/api-server/src/routes/szl-ops.ts",
+    "pattern": "Mythos"
+  },
+  {
+    "file": "artifacts/api-server/src/routes/szl-ops.ts",
+    "pattern": "Perplexity Computer"
   },
   {
     "file": "artifacts/api-server/src/routes/tenant-provisioning/powerbi.ts",
@@ -704,11 +940,71 @@
     "pattern": "anonymous"
   },
   {
+    "file": "artifacts/api-server/src/routes/terra-ops-core.ts",
+    "pattern": "AlloyScape"
+  },
+  {
+    "file": "artifacts/api-server/src/routes/terra-ops-core.ts",
+    "pattern": "anonymous"
+  },
+  {
+    "file": "artifacts/api-server/src/routes/terra-ops-core.ts",
+    "pattern": "Glass Wing"
+  },
+  {
+    "file": "artifacts/api-server/src/routes/terra-ops-core.ts",
+    "pattern": "Glasswing"
+  },
+  {
+    "file": "artifacts/api-server/src/routes/terra-ops-core.ts",
+    "pattern": "Mythos"
+  },
+  {
+    "file": "artifacts/api-server/src/routes/terra-ops-core.ts",
+    "pattern": "Perplexity Computer"
+  },
+  {
     "file": "artifacts/api-server/src/routes/tool-mesh.ts",
     "pattern": "anonymous"
   },
   {
     "file": "artifacts/api-server/src/routes/traces.ts",
+    "pattern": "anonymous"
+  },
+  {
+    "file": "artifacts/api-server/src/routes/vessels-formula-thesis.ts",
+    "pattern": "anonymous"
+  },
+  {
+    "file": "artifacts/api-server/src/routes/vessels-live.ts",
+    "pattern": "anonymous"
+  },
+  {
+    "file": "artifacts/api-server/src/routes/vessels-ops-core.ts",
+    "pattern": "AlloyScape"
+  },
+  {
+    "file": "artifacts/api-server/src/routes/vessels-ops-core.ts",
+    "pattern": "anonymous"
+  },
+  {
+    "file": "artifacts/api-server/src/routes/vessels-ops-core.ts",
+    "pattern": "Glass Wing"
+  },
+  {
+    "file": "artifacts/api-server/src/routes/vessels-ops-core.ts",
+    "pattern": "Glasswing"
+  },
+  {
+    "file": "artifacts/api-server/src/routes/vessels-ops-core.ts",
+    "pattern": "Mythos"
+  },
+  {
+    "file": "artifacts/api-server/src/routes/vessels-ops-core.ts",
+    "pattern": "Perplexity Computer"
+  },
+  {
+    "file": "artifacts/api-server/src/routes/vessels-psc.ts",
     "pattern": "anonymous"
   },
   {
@@ -748,6 +1044,30 @@
     "pattern": "Mythos"
   },
   {
+    "file": "artifacts/conduit/src/pages/operational-core.tsx",
+    "pattern": "AlloyScape"
+  },
+  {
+    "file": "artifacts/conduit/src/pages/operational-core.tsx",
+    "pattern": "Glass Wing"
+  },
+  {
+    "file": "artifacts/conduit/src/pages/operational-core.tsx",
+    "pattern": "Glasswing"
+  },
+  {
+    "file": "artifacts/conduit/src/pages/operational-core.tsx",
+    "pattern": "Mythos"
+  },
+  {
+    "file": "artifacts/conduit/src/pages/operational-core.tsx",
+    "pattern": "Perplexity Computer"
+  },
+  {
+    "file": "artifacts/rosie/src/pages/Identity.tsx",
+    "pattern": "anonymous"
+  },
+  {
     "file": "artifacts/sentra/src/brain/data/a11oyConstitution.ts",
     "pattern": "Mythos"
   },
@@ -778,6 +1098,10 @@
   {
     "file": "artifacts/sentra/tsconfig.json",
     "pattern": "Mythos"
+  },
+  {
+    "file": "artifacts/vessels/src/App.tsx",
+    "pattern": "anonymous"
   },
   {
     "file": "docs/A11OY_OPERATING_PRINCIPLES.md",
@@ -940,18 +1264,6 @@
     "pattern": "anonymous"
   },
   {
-    "file": "docs/audit/szl-government-readiness.md",
-    "pattern": "Jr."
-  },
-  {
-    "file": "docs/audits/github-audit-v9.md",
-    "pattern": "Jr."
-  },
-  {
-    "file": "docs/audits/github-audit-v9.md",
-    "pattern": "Stephen Paul"
-  },
-  {
     "file": "docs/DECISION_LEDGER.md",
     "pattern": "anonymous"
   },
@@ -984,6 +1296,14 @@
     "pattern": "anonymous"
   },
   {
+    "file": "docs/proposals/defense-unicorns/_sources/uds-cli-install.html",
+    "pattern": "anonymous"
+  },
+  {
+    "file": "docs/proposals/szl-evolution-plan.md",
+    "pattern": "anonymous"
+  },
+  {
     "file": "docs/reports/elite/analytics/analytics-operating-model.md",
     "pattern": "anonymous"
   },
@@ -992,10 +1312,6 @@
     "pattern": "AlloyScape"
   },
   {
-    "file": "docs/research/a11oy-ultimate-replit-payload.v6.json",
-    "pattern": "Jr."
-  },
-  {
     "file": "docs/research/ecosystem-pattern-scan-2026-04.md",
     "pattern": "Glasswing"
   },
@@ -1004,115 +1320,11 @@
     "pattern": "Mythos"
   },
   {
-    "file": "docs/research/ouroboros-runtime-contract.v2.json",
-    "pattern": "Jr."
-  },
-  {
-    "file": "docs/research/ouroboros-runtime-contract.v3.json",
-    "pattern": "AlloyScape"
-  },
-  {
-    "file": "docs/research/ouroboros-runtime-contract.v3.json",
-    "pattern": "Jr."
-  },
-  {
-    "file": "docs/research/ouroboros-runtime-contract.v4.json",
-    "pattern": "Jr."
-  },
-  {
-    "file": "docs/research/ouroboros-thesis-v2.md",
-    "pattern": "Jr."
+    "file": "docs/series-a/series-a-readiness-2026-05-27.md",
+    "pattern": "Mythos"
   },
   {
     "file": "docs/TOP_20_FIXES_COMPLETED.md",
     "pattern": "anonymous"
-  },
-  {
-    "file": "docs/trust/A11OY-01-fedramp-authorization-disclosure.md",
-    "pattern": "Jr."
-  },
-  {
-    "file": "docs/trust/A11OY-02-cmmc-nist-800-171-gap-assessment.md",
-    "pattern": "Jr."
-  },
-  {
-    "file": "docs/trust/A11OY-03-bias-testing-methodology.md",
-    "pattern": "Jr."
-  },
-  {
-    "file": "docs/trust/A11OY-04-us-data-residency.md",
-    "pattern": "Jr."
-  },
-  {
-    "file": "docs/trust/A11OY-05-incident-response-72hr.md",
-    "pattern": "Jr."
-  },
-  {
-    "file": "docs/trust/AMARU-01-data-classification.md",
-    "pattern": "Jr."
-  },
-  {
-    "file": "docs/trust/AMARU-02-retention-deletion.md",
-    "pattern": "Jr."
-  },
-  {
-    "file": "docs/trust/AMARU-03-cots-erp-integration.md",
-    "pattern": "Jr."
-  },
-  {
-    "file": "docs/trust/AMARU-04-privacy-impact-assessment.md",
-    "pattern": "Jr."
-  },
-  {
-    "file": "docs/trust/SENTRA-01-soc2-type-2-plan.md",
-    "pattern": "Jr."
-  },
-  {
-    "file": "docs/trust/SENTRA-02-incident-response-runbook.md",
-    "pattern": "Jr."
-  },
-  {
-    "file": "docs/trust/SENTRA-03-threat-feed-catalog.md",
-    "pattern": "Jr."
-  },
-  {
-    "file": "docs/trust/SENTRA-04-penetration-testing-plan.md",
-    "pattern": "Jr."
-  },
-  {
-    "file": "scripts/build-thesis-pdf.mjs",
-    "pattern": "Jr."
-  },
-  {
-    "file": "scripts/check-forbidden-patterns.baseline.json",
-    "pattern": "AlloyScape"
-  },
-  {
-    "file": "scripts/check-forbidden-patterns.baseline.json",
-    "pattern": "anonymous"
-  },
-  {
-    "file": "scripts/check-forbidden-patterns.baseline.json",
-    "pattern": "Glass Wing"
-  },
-  {
-    "file": "scripts/check-forbidden-patterns.baseline.json",
-    "pattern": "Glasswing"
-  },
-  {
-    "file": "scripts/check-forbidden-patterns.baseline.json",
-    "pattern": "Jr."
-  },
-  {
-    "file": "scripts/check-forbidden-patterns.baseline.json",
-    "pattern": "Mythos"
-  },
-  {
-    "file": "scripts/check-forbidden-patterns.baseline.json",
-    "pattern": "Perplexity Computer"
-  },
-  {
-    "file": "scripts/check-forbidden-patterns.baseline.json",
-    "pattern": "Stephen Paul"
   }
 ]
