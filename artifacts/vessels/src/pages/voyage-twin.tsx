@@ -221,6 +221,12 @@ function WhatIfCard({ scenario }: { scenario: WhatIf }) {
   );
 }
 
+interface SignalMeshResponse {
+  voyageRef: string;
+  streams: SignalSeriesInput[];
+  window?: { from: string; to: string; snapshotCount: number; samplesPerStream: number };
+}
+
 function PerceptionTwinView({
   data,
   trace,
@@ -235,22 +241,28 @@ function PerceptionTwinView({
         .map((s) => ({ lat: s.position.lat, lon: s.position.lon, name: s.snapshotId })),
     [data],
   );
-  const signals = useMemo<SignalSeriesInput[]>(() => {
-    const bump = (height: number, n = 21) => {
-      const pts: { x: number; intensity: number }[] = [];
-      for (let i = 0; i < n; i++) {
-        const x = i - n / 2;
-        pts.push({ x, intensity: 1 + height * Math.exp(-(x * x) / 4) + 0.04 * Math.sin(i * 1.7) });
-      }
-      return pts;
+  const [signals, setSignals] = useState<SignalSeriesInput[]>([]);
+  const [signalsError, setSignalsError] = useState<string | null>(null);
+
+  useEffect(() => {
+    let cancelled = false;
+    setSignalsError(null);
+    fetch(`${API_BASE}/api/vessels/cognitive/signal-mesh/${data.voyageRef}`)
+      .then(async (r) => {
+        if (!r.ok) throw new Error(`signal-mesh ${r.status}`);
+        const payload = (await r.json()) as SignalMeshResponse;
+        if (!cancelled) setSignals(payload.streams ?? []);
+      })
+      .catch((err) => {
+        if (!cancelled) {
+          setSignalsError(err instanceof Error ? err.message : String(err));
+          setSignals([]);
+        }
+      });
+    return () => {
+      cancelled = true;
     };
-    return [
-      { streamId: 'fuel-burn', label: 'Fuel burn', category: 'energy', series: bump(5.4) },
-      { streamId: 'eta-drift', label: 'ETA drift', category: 'voyage', series: bump(3.9) },
-      { streamId: 'weather-load', label: 'Weather load', category: 'env', series: bump(2.1) },
-      { streamId: 'sanctions', label: 'Sanctions exposure', category: 'comp', series: bump(1.2) },
-    ];
-  }, []);
+  }, [data.voyageRef]);
 
   return (
     <div className="grid grid-cols-12 gap-4">
@@ -289,8 +301,13 @@ function PerceptionTwinView({
           className="rounded-xl border border-white/[0.06] p-3"
           style={{ background: 'rgba(10,22,40,0.8)' }}
         >
-          <div className="text-[10px] tracking-[0.2em] uppercase text-[#8a8a8a] mb-2">
-            Signal-mesh · peak-detector
+          <div className="text-[10px] tracking-[0.2em] uppercase text-[#8a8a8a] mb-2 flex items-center justify-between">
+            <span>Signal-mesh · peak-detector</span>
+            {signalsError && (
+              <span className="text-[9px] text-amber-400/70 normal-case tracking-normal">
+                feed unavailable · {signalsError}
+              </span>
+            )}
           </div>
           <RankedSignalMesh streams={signals} limit={4} />
         </div>
