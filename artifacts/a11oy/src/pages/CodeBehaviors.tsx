@@ -2,7 +2,7 @@
 import { Layout } from '../components/layout';
 import { PageHeader, Card, SectionTitle, KpiCard, ProgressBar } from '../components/ui';
 import { RadarChart, PolarGrid, PolarAngleAxis, Radar, ResponsiveContainer } from 'recharts';
-import { CODE_BEHAVIOR_DIMS, CODE_BEHAVIOR_LABELS, AGENT_LABEL, fmtPct } from '../data/mythosDoctrine';
+import { CODE_BEHAVIOR_DIMS, CODE_BEHAVIOR_LABELS, AGENT_LABEL, fmtPct } from '../data/khipuDoctrine';
 import { useCodeBehaviors, DoctrineLoader, type DoctrineCodeBehavior } from '../hooks/useDoctrine';
 
 const GOLD = '#c9b787';

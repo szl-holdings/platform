@@ -64,7 +64,7 @@ Each ties to a proposed gap in `docs/audit/github-org-audit-2026-05-27.md` §3.
 Single commit (`Initialize repo`); no LICENSE/SECURITY/CITATION/CHANGELOG/topics/protection; yet has a tagged `uds-v0.1.0` release. First-impression risk in diligence.
 
 ### B3 — Doctrine V6 scanner failing on `main` (proposed GAP-018)
-9 forbidden-token violations including `Mythos-V1` literally in `scripts/release/uds-version-sync.json`. A failing CI gate on `main` is the wrong signal during diligence.
+9 forbidden-token violations including `Khipu-V1` literally in `scripts/release/uds-version-sync.json`. A failing CI gate on `main` is the wrong signal during diligence.
 
 ---
 

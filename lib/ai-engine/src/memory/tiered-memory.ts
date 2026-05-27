@@ -3,7 +3,7 @@
  * Tiered Memory — Three-Tier Architecture
  *
  * Adopts Claude Code's memory tier model:
- *   Tier 0: org-constitution   — immutable per release, sourced from mythosDoctrine + Constitution
+ *   Tier 0: org-constitution   — immutable per release, sourced from khipuDoctrine + Constitution
  *   Tier 1: project-doctrine   — per-artifact CLAUDE.md-style file, writable by operators
  *   Tier 2: auto-memory        — learned, append-only, redactable, written by hooks
  *
@@ -90,7 +90,7 @@ const autoMemoryStore = new Map<string, TieredMemoryEntry>();
 const MAX_AUTO_MEMORY = 10_000;
 
 // ---------------------------------------------------------------------------
-// Org Constitution (Tier 0) — immutable, seeded from mythosDoctrine
+// Org Constitution (Tier 0) — immutable, seeded from khipuDoctrine
 // ---------------------------------------------------------------------------
 
 export function seedOrgConstitution(entries: Array<{ key: string; content: string }>): void {

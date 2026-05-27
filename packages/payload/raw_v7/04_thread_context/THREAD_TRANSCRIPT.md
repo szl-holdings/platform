@@ -82,6 +82,6 @@ Components: payload.json, dev1_thesis, dev2_runtime, dev3_agi_v5, dev4_ops, gith
 
 ## Three PM Decisions Pending
 
-1. **`Glasswing` / `Mythos` in `platform` repo** — 25+ and 30+ files. Live product feature names in active code. Doctrine exception or wholesale rename?
+1. **`Pillpintu` / `Khipu` in `platform` repo** — 25+ and 30+ files. Live product feature names in active code. Doctrine exception or wholesale rename?
 2. **BP review-count strategy** — self-only CODEOWNERS + platform self-approve ban = no merge path with `required_approving_review_count: 1`. Add 2nd collaborator OR drop `require_code_owner_reviews`?
 3. **GitHub display name** — currently "Stephen Paul Lutar Jr." (contains 2 forbidden patterns). Patch to "Lutar, Stephen P."?

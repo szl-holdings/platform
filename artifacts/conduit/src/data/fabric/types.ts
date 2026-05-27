@@ -277,7 +277,7 @@ export interface RelayOutcome {
 export interface AmaruAgent {
   readonly id: AgentId;
   readonly name: string;
-  readonly mythosName: string;
+  readonly khipuName: string;
   readonly role: string;
   readonly responsibilities: readonly string[];
   readonly allowedActions: readonly string[];

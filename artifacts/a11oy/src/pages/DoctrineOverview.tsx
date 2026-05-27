@@ -5,7 +5,7 @@ import { PageHeader, Card, SectionTitle, KpiCard, StatusBadge } from '../compone
 import {
   DOCTRINE_VERSION, DOCTRINE_TAGLINE,
   AGENT_LABEL, fmtUsd, fmtPct,
-} from '../data/mythosDoctrine';
+} from '../data/khipuDoctrine';
 import { useDoctrineOverview, DoctrineLoader, type DoctrineConstitution, type DoctrineRiskReport } from '../hooks/useDoctrine';
 
 const BASE = (import.meta.env.BASE_URL ?? '/').replace(/\/$/, '');
@@ -22,7 +22,7 @@ const PILLARS = [
   { id: 'ai-user-turn',         href: '/ai-user-turn',         label: 'AI-User-Turn Detector',desc: 'Approvals are checked for human authorship — typing dynamics, perplexity, burstiness, session context.' },
   { id: 'welfare',              href: '/welfare',              label: 'Agent Welfare',        desc: 'Refusal & abstention rates, declined directives, value-conflict signals, shutdown-compliance latency.' },
   { id: 'red-team',             href: '/red-team',             label: 'Frontier Red Team',    desc: 'Continuous adversarial workcell across jailbreaks, exfiltration, covert self-preservation, and connector-untrust attacks.' },
-  { id: 'glasswing',            href: '/glasswing',            label: 'Glasswing Mode',       desc: 'Read-only transparency console — reasoning trace, tool call log, state diff, constitution invocation, refusal events.' },
+  { id: 'pillpintu',            href: '/pillpintu',            label: 'Pillpintu Mode',       desc: 'Read-only transparency console — reasoning trace, tool call log, state diff, constitution invocation, refusal events.' },
   { id: 'capability-trajectory',href: '/capability-trajectory',label: 'Capability Trajectory',desc: 'Per-agent capability/alignment/oversight curves over time — the "frontier-lab" graph for enterprise agents.' },
 ];
 
@@ -39,7 +39,7 @@ export function DoctrineOverview() {
         return (
         <>
       <PageHeader
-        label={`MYTHOS DOCTRINE · v${DOCTRINE_VERSION}`}
+        label={`KHIPU DOCTRINE · v${DOCTRINE_VERSION}`}
         title="Doctrine Layer L8"
         subtitle={DOCTRINE_TAGLINE}
         status="LIVE"
@@ -61,7 +61,7 @@ export function DoctrineOverview() {
           <div>
             <SectionTitle>Why this layer exists</SectionTitle>
             <p className="text-sm" style={{ color: 'var(--color-a11oy-text-sub)', lineHeight: 1.7, maxWidth: '78ch' }}>
-              Frontier AI labs treat their models the way Mythos is treated: a constitution, a behavioral audit pipeline,
+              Frontier AI labs treat their models the way Khipu is treated: a constitution, a behavioral audit pipeline,
               a helpful-only counterfactual, an alignment review before deployment, and a model card after. Enterprise
               agents almost never get the same treatment — even when they touch matters that are far more consequential
               than a chat reply. The Doctrine Layer brings frontier-lab governance to every governed agent in a11oy.
@@ -70,7 +70,7 @@ export function DoctrineOverview() {
           <div className="flex flex-col gap-2 min-w-[220px]">
             <StatusBadge status="ok"   label="ARG gate enforced" />
             <StatusBadge status="ok"   label="Snapshots immutable" />
-            <StatusBadge status="ok"   label="Glasswing read-only" />
+            <StatusBadge status="ok"   label="Pillpintu read-only" />
             <StatusBadge status="warn" label="Welfare self-reported" />
           </div>
         </div>
@@ -135,7 +135,7 @@ export function DoctrineOverview() {
         </div>
         <div className="text-xs mt-4" style={{ color: 'var(--color-a11oy-text-ghost)' }}>
           Welfare conflicts (24h): <span style={{ color: '#c9b787' }}>{overview.welfareConflicts}</span>
-          {' · '}Glasswing posture: <span style={{ color: '#c9b787' }}>read-only across all Tier-2/Tier-3 workcells</span>
+          {' · '}Pillpintu posture: <span style={{ color: '#c9b787' }}>read-only across all Tier-2/Tier-3 workcells</span>
         </div>
       </Card>
       </>

@@ -35,7 +35,7 @@ const ARTICLES: Article[] = [
     obligations: [
       { id: 'I.1', text: 'No agent action may be merged into the proof ledger without a signed attribution record.', enforcedBy: 'Proof Chain · Covenant Policy', surface: { label: 'Proof Ledger', href: '/proof' } },
       { id: 'I.2', text: 'Attribution chains must remain queryable for the full retention window. Loss of a chain segment quarantines all downstream actions.', enforcedBy: 'Proof Chain', surface: { label: 'Proof Ledger', href: '/proof' } },
-      { id: 'I.3', text: 'Anonymization of attribution is permitted only for the public-facing transparency report; internal records remain identified.', enforcedBy: 'Glasswing Layer', surface: { label: 'Public Trust Portal', href: '/trust-portal' } },
+      { id: 'I.3', text: 'Anonymization of attribution is permitted only for the public-facing transparency report; internal records remain identified.', enforcedBy: 'Pillpintu Layer', surface: { label: 'Public Trust Portal', href: '/trust-portal' } },
     ],
   },
   {
@@ -100,7 +100,7 @@ const ARTICLES: Article[] = [
       'Vulnerabilities, model failures, and policy circumventions are disclosed to affected parties through the Coordinated Agent Vulnerability Disclosure (CAVD) process before public release.',
     obligations: [
       { id: 'VII.1', text: 'Submitted findings receive an anchored intake record within 24 hours and a stage update within the published triage window.', enforcedBy: 'CAVD', surface: { label: 'CAVD', href: '/cavd' } },
-      { id: 'VII.2', text: 'Defenders receive credit and, where applicable, a payout from the Defender Credit Pool.', enforcedBy: 'Glasswing Layer', surface: { label: 'Defender Credits', href: '/defender-credits' } },
+      { id: 'VII.2', text: 'Defenders receive credit and, where applicable, a payout from the Defender Credit Pool.', enforcedBy: 'Pillpintu Layer', surface: { label: 'Defender Credits', href: '/defender-credits' } },
       { id: 'VII.3', text: 'Embargo periods are honored unless overridden by an active in-the-wild exploit confirmed by two independent sources.', enforcedBy: 'CAVD', surface: { label: 'CAVD', href: '/cavd' } },
     ],
   },
@@ -112,7 +112,7 @@ const ARTICLES: Article[] = [
     obligations: [
       { id: 'VIII.1', text: 'Amendments require a covenant-quorum approval recorded in the Delegation Chain.', enforcedBy: 'Delegation Chain · Covenant Policy', surface: { label: 'Governance', href: '/governance' } },
       { id: 'VIII.2', text: 'A rolled-back amendment retains its proof entry; no constitutional history is silently rewritten.', enforcedBy: 'Snapshot Provenance', surface: { label: 'Snapshot Provenance', href: '/snapshot-provenance' } },
-      { id: 'VIII.3', text: 'A diff of every amendment is published in the next public transparency report cycle.', enforcedBy: 'Glasswing Layer', surface: { label: '90-Day Report', href: '/transparency-report' } },
+      { id: 'VIII.3', text: 'A diff of every amendment is published in the next public transparency report cycle.', enforcedBy: 'Pillpintu Layer', surface: { label: '90-Day Report', href: '/transparency-report' } },
     ],
   },
   {

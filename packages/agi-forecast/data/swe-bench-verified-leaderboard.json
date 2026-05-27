@@ -4,7 +4,7 @@
   "upstreamSource": "https://llm-stats.com/benchmarks/swe-bench-verified (top entries, manually pinned snapshot)",
   "note": "Pinned dataset file. Refresh by visiting the upstream leaderboard, copying the top ~10 entries, and bumping snapshotTakenAt. Each `resolved` value is the fraction of resolved instances in [0,1].",
   "entries": [
-    { "model": "Claude Mythos Preview (Anthropic)", "resolved": 0.939 },
+    { "model": "Claude Khipu Preview (Anthropic)", "resolved": 0.939 },
     { "model": "Claude Opus 4.7 (Anthropic)", "resolved": 0.876 },
     { "model": "Claude Opus 4.5 (Anthropic, 2025-11-01)", "resolved": 0.809 },
     { "model": "Claude Opus 4.6 (Anthropic)", "resolved": 0.808 },

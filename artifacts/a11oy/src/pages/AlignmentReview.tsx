@@ -1,7 +1,7 @@
 // doctrine-scanner-exempt: legacy live-product surface; rename tracked as separate engineering debt — see scripts/check-doctrine-v6.mjs header.
 import { Layout } from '../components/layout';
 import { PageHeader, Card, SectionTitle, KpiCard, StatusBadge } from '../components/ui';
-import { AGENT_LABEL, fmtPct } from '../data/mythosDoctrine';
+import { AGENT_LABEL, fmtPct } from '../data/khipuDoctrine';
 import { useAlignmentReviews, DoctrineLoader, type DoctrineAlignmentReview } from '../hooks/useDoctrine';
 
 const DECISION_STATUS: Record<string, 'ok' | 'warn' | 'error' | 'info'> = {

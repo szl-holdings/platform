@@ -74,8 +74,8 @@ All 6 files are **net-new additions** (no deletions, no modifications to existin
 | `Jr.` | PASS — not found | PASS — not found |
 | `AlloyScape` | PASS — not found | PASS — not found |
 | `Glass Wing` | PASS — not found | PASS — not found |
-| `Glasswing` | PASS — not found | PASS — not found |
-| `Mythos` (outside Anthropic) | PASS — not found | PASS — not found |
+| `Pillpintu` | PASS — not found | PASS — not found |
+| `Khipu` (outside Anthropic) | PASS — not found | PASS — not found |
 | `Stephen Paul` | PASS — not found | PASS — not found |
 | `Perplexity Computer` | PASS — not found | PASS — not found |
 | `anonymous` | PASS — not found | PASS — not found |

@@ -117,7 +117,7 @@ export function SnapshotReplay() {
           </div>
           <h1 style={{ fontSize: 24, fontWeight: 700, color: '#f1f5f9', margin: '0 0 4px' }}>Snapshot Replay</h1>
           <p style={{ fontSize: 13, color: '#64748b', margin: 0 }}>
-            Time-travel into any Glasswing snapshot — rehydrate the full governance context
+            Time-travel into any Pillpintu snapshot — rehydrate the full governance context
           </p>
         </div>
 

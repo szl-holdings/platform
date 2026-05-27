@@ -85,7 +85,7 @@ router.get('/models', (_req: Request, res: Response) => {
       inputCostPer1kTokens: number; outputCostPer1kTokens: number;
       capabilities: string[]; tier: string;
       supportsExtendedThinking: boolean; supportsVision: boolean;
-      supportsPromptCaching: boolean; mythosModel: boolean;
+      supportsPromptCaching: boolean; khipuModel: boolean;
       available: boolean;
     };
     const byProvider: Record<string, ModelEntry[]> = {};
@@ -112,7 +112,7 @@ router.get('/models', (_req: Request, res: Response) => {
         supportsExtendedThinking: spec.supportsExtendedThinking,
         supportsVision: spec.supportsVision,
         supportsPromptCaching: spec.supportsPromptCaching ?? false,
-        mythosModel: spec.mythosModel ?? false,
+        khipuModel: spec.khipuModel ?? false,
         available,
       });
     }

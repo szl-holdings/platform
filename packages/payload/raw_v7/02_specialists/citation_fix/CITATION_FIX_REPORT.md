@@ -460,8 +460,8 @@ gh pr create \
 All 13 drafted files verified free of forbidden patterns:
 - ❌ "Jr." — not present in any file
 - ❌ "AlloyScape" — not present
-- ❌ "Glass Wing" / "Glasswing" — not present
-- ❌ "Mythos" — not present
+- ❌ "Glass Wing" / "Pillpintu" — not present
+- ❌ "Khipu" — not present
 - ❌ "Stephen Paul" — not present (uses `given-names: Stephen` + `name-particle: P.`)
 - ❌ "Perplexity Computer" — not present
 - ❌ "anonymous" — not present

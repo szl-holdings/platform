@@ -14,7 +14,7 @@
 - 8-region body: brain→ouroboros, heart→a11oy, wires→sentra, spine→amaru, skeleton→lutar-lean, hands→counsel+terra, full body→ouroboros-thesis, vessels→vessels+szl-trust+szl-cookbook
 
 ## Forbidden patterns (zero tolerance — all artifacts must doctrine-pass)
-`Jr.`, `AlloyScape`, `Glass Wing`, `Glasswing`, `Mythos`, `Stephen Paul`, `Perplexity Computer`, `anonymous`
+`Jr.`, `AlloyScape`, `Glass Wing`, `Pillpintu`, `Khipu`, `Stephen Paul`, `Perplexity Computer`, `anonymous`
 
 ## Operating doctrine
 - no hallucinations no bandaids; test test test

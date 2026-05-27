@@ -20,13 +20,13 @@ Patterns are pulled from the canonical payload
 1. `Jr.`
 2. `AlloyScape`
 3. `Glass Wing`
-4. `Glasswing`
-5. `Mythos`
+4. `Pillpintu`
+5. `Khipu`
 6. `Stephen Paul`
 7. `Perplexity Computer`
 8. `anonymous`
 
-The V7 `Claude Mythos Preview` exception clause from
+The V7 `Claude Khipu Preview` exception clause from
 `packages/payload/raw_v7/03_manifests/MANIFEST.json` is honored — that exact
 phrase is masked before pattern matching so legitimate Anthropic citations do
 not trigger a hit.
@@ -37,7 +37,7 @@ Via the Replit-managed GitHub integration (read + write):
 
 1. Enumerated all `szl-holdings` org repos (`GET /orgs/szl-holdings/repos`).
 2. Listed every open PR per repo (`GET /repos/{repo}/pulls?state=open`).
-3. Masked the Mythos exception phrase, then substring-matched the 8 patterns
+3. Masked the Khipu exception phrase, then substring-matched the 8 patterns
    against each PR's title and body.
 4. For each match, posted the templated comment and PATCHed the PR to
    `state=closed`, then verified the head branch is still present on the
@@ -58,7 +58,7 @@ Via the Replit-managed GitHub integration (read + write):
 - Base: `main`
 - Files added: `SECURITY.md` (+58), `CONTRIBUTING.md` (+99), `CODE_OF_CONDUCT.md` (+52).
 - Matched patterns: **all 8** — every pattern appears verbatim inside a single
-  "No forbidden patterns (Jr., AlloyScape, Glass Wing, Glasswing, Mythos
+  "No forbidden patterns (Jr., AlloyScape, Glass Wing, Pillpintu, Khipu
   outside Anthropic context, Stephen Paul, Perplexity Computer, anonymous)"
   checklist line in the PR body. The `check-forbidden-patterns` guard would
   block this merge even though the files themselves are clean hygiene seeds.

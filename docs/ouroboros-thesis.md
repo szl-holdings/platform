@@ -457,14 +457,14 @@ consistency: high-consistency answers cache long, low-consistency answers cache
 briefly or not at all. **Measurable signal:** cache hit rate × downstream
 correctness, vs. fixed-TTL baseline.
 
-### 8.5 Mythos-mode agents (recursive self-narrative)
+### 8.5 Khipu-mode agents (recursive self-narrative)
 
-A11oy already has Mythos. Layer the Ouroboros on top: an agent's Mythos is its
+A11oy already has Khipu. Layer the Ouroboros on top: an agent's Khipu is its
 *own narrative of its own loop traces*. Periodically the agent runs a
 meta-loop that re-narrates its recent decisions and looks for stable
 self-description. A stable self-narrative across many decisions is an honest
-proxy for *role coherence*. **Measurable signal:** Mythos delta-magnitude over
-rolling windows; flag agents whose Mythos never converges (incoherent) or
+proxy for *role coherence*. **Measurable signal:** Khipu delta-magnitude over
+rolling windows; flag agents whose Khipu never converges (incoherent) or
 converges trivially (reductive).
 
 ### 8.6 Sentra crisis-time depth dial

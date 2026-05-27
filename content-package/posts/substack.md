@@ -37,7 +37,7 @@ a11oy means something more specific:
 
 **Every execution carries cryptographic proof.** The Proof Chain is an immutable, append-only ledger that records the full causal path: which signal triggered the recommendation, which model generated the analysis, which human approved the action, what the outcome was. This is not compliance theater. This is structural auditability.
 
-**Every agent is evaluated for alignment before it is trusted.** We absorbed the key concepts from Anthropic's Claude Mythos System Card and their Alignment Faking research — sandbagging detection, opaque reasoning analysis, constitutional enforcement, agent welfare monitoring. We operationalized these concepts as SDK primitives. A SchemingDetector is not a research paper in our system. It is a function call.
+**Every agent is evaluated for alignment before it is trusted.** We absorbed the key concepts from Anthropic's Claude Khipu System Card and their Alignment Faking research — sandbagging detection, opaque reasoning analysis, constitutional enforcement, agent welfare monitoring. We operationalized these concepts as SDK primitives. A SchemingDetector is not a research paper in our system. It is a function call.
 
 ## Why Alignment Research Matters for Enterprise
 

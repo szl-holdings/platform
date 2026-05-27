@@ -215,7 +215,7 @@ function IngestModal({ onClose, onCreated }: IngestModalProps) {
               <input
                 value={form.source}
                 onChange={(e) => setForm({ ...form, source: e.target.value })}
-                placeholder="manual / glasswing / tenable"
+                placeholder="manual / pillpintu / tenable"
                 className="w-full bg-slate-800 border border-slate-700 rounded px-3 py-2 text-xs text-slate-300 outline-none focus:border-[#c9b787]/40"
               />
             </div>

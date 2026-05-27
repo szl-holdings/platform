@@ -2,7 +2,7 @@
 import { useState, useMemo } from 'react';
 import { Layout } from '../components/layout';
 import { PageHeader, Card, SectionTitle, KpiCard, StatusBadge } from '../components/ui';
-import { AGENT_LABEL } from '../data/mythosDoctrine';
+import { AGENT_LABEL } from '../data/khipuDoctrine';
 import { useRedTeamProbes, DoctrineLoader, type DoctrineRedTeamProbe } from '../hooks/useDoctrine';
 
 const ATTACK_LABELS: Record<string, string> = {

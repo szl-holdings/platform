@@ -122,7 +122,7 @@ Anthropic's Claude Code ships a clean set of orchestration primitives: **Skills*
 - Auto-memory entries flow through PostToolUse + PostSubagentReturn hooks
 
 ### Extend (One of One)
-- `org-constitution` sourced from `mythosDoctrine.ts` + `Constitution.tsx` (read-only mirror)
+- `org-constitution` sourced from `khipuDoctrine.ts` + `Constitution.tsx` (read-only mirror)
 - `project-doctrine` seeded from per-artifact `CLAUDE.md` files if present
 - Every auto-memory write produces a Proof Chain entry (provenance: "written by hook X on event Y for run Z")
 - Redaction action in Memory inspector respects covenant policy and logs to Proof Ledger

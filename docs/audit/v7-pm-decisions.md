@@ -16,12 +16,12 @@ recommendation. Picking a path here is a prerequisite for
 
 ---
 
-## Decision 1 — `Glasswing` / `Mythos` usage inside `platform/`
+## Decision 1 — `Pillpintu` / `Khipu` usage inside `platform/`
 
 ### Observation
 
-The V7 doctrine sweep counted 25+ occurrences of `Glasswing` and 30+
-occurrences of `Mythos` inside `platform/` (the private 17th repo flagged
+The V7 doctrine sweep counted 25+ occurrences of `Pillpintu` and 30+
+occurrences of `Khipu` inside `platform/` (the private 17th repo flagged
 by `docs/audit/github-deep-scan.md`). Both strings appear to be **live
 product feature names** — i.e. user-visible UI labels, route names, and
 internal type names — not stale documentation drift.
@@ -37,14 +37,14 @@ breaking implications.
 
 | Option | Description | Risk | Reversibility |
 | ------ | ----------- | ---- | ------------- |
-| **A. Doctrine exception** | Add `platform/`-scoped exception clauses to the doctrine for both names, formalized in `MANIFEST.json` as a fields analogous to `mythos_exception`. | Doctrine becomes more permissive; future audits must read both exception fields. | High — easy to retract later. |
+| **A. Doctrine exception** | Add `platform/`-scoped exception clauses to the doctrine for both names, formalized in `MANIFEST.json` as a fields analogous to `khipu_exception`. | Doctrine becomes more permissive; future audits must read both exception fields. | High — easy to retract later. |
 | **B. Rename in `platform/`** | Sweep `platform/` and rename both features. New names TBD. | Multi-week refactor; URL/API breakage; possible billing / marketing impact. | Low — old names live in git history. |
 | **C. Mark `platform/` out-of-scope** | Treat `platform/` as a non-canonical surface; doctrine guards skip the repo entirely. | Loses doctrine coverage on a customer-facing surface — defeats the point of V6. | Medium. |
 
 ### V7 specialist recommendation
 
 **Option A — formalized doctrine exception** — provided the
-`Claude Mythos Preview` precedent (already in V7) establishes the template
+`Claude Khipu Preview` precedent (already in V7) establishes the template
 for narrowly-scoped name exemptions. The new exception should specify the
 exact `platform/` path prefix and the two feature names, not be a blanket
 allowance.
@@ -52,24 +52,24 @@ allowance.
 ### Action requested from Stephen
 
 Choose A / B / C. If A, name each feature explicitly (e.g.
-`platform/internal/glasswing/**` is exempt for the literal string
-`Glasswing`).
+`platform/internal/pillpintu/**` is exempt for the literal string
+`Pillpintu`).
 
 ### Decision: A — doctrine exception (recorded 2026-05-17)
 
-**Rationale.** Both `Glasswing` and `Mythos` are live, customer-facing
+**Rationale.** Both `Pillpintu` and `Khipu` are live, customer-facing
 product feature names inside `platform/`. Renaming them (Option B) would
 break URLs and APIs without doctrinal benefit; marking `platform/` as
 out-of-scope (Option C) would gut V6's customer-facing coverage. The
-existing `Claude Mythos Preview` precedent already establishes that
+existing `Claude Khipu Preview` precedent already establishes that
 narrowly-scoped, path-anchored name exemptions are doctrine-compatible.
 
 **Scope (narrow, path-anchored — not a blanket allowance).**
 
 | Literal | Path prefix exempted |
 | ------- | -------------------- |
-| `Glasswing` | `platform/` (any subpath) |
-| `Mythos`    | `platform/` (any subpath) |
+| `Pillpintu` | `platform/` (any subpath) |
+| `Khipu`    | `platform/` (any subpath) |
 
 Outside `platform/` both strings remain forbidden. The exception is
 encoded in `@szl-holdings/payload` as `V7_PLATFORM_NAME_EXCEPTIONS` and

@@ -710,7 +710,7 @@ VSP is the highest-leverage single action for P1, the #1 priority gap, while sim
 | 5× byte-identical replay | Explicitly analyzed in §6 (Test Plan). VSP is a pure read on the completed Receipt; replay root `1ed4d253e876f428c6e182f8ed8a569585442556b339529bbf8ec2522581698b` preserved unconditionally. |
 | PUBLIC-ONLY ingestion · Apache-2.0/MIT/BSD-3/CC-BY only | All dependencies referenced (OTel SDK: Apache-2.0; Langfuse: MIT; Arize Phoenix: Apache-2.0). No paywalled claims. |
 | NEVER schedule_cron / mint Zenodo / push GitHub / npm publish without confirm_action | No such actions issued. PR is proposed as a draft; all pushes are PENDING Stephen's confirm_action. |
-| No forbidden patterns | Pattern list from CHARTER.md verified: `Jr.`, `AlloyScape`, `Glass Wing`, `Glasswing`, `Mythos`, `Stephen Paul`, `Perplexity Computer`, `anonymous` — none present in this document. |
+| No forbidden patterns | Pattern list from CHARTER.md verified: `Jr.`, `AlloyScape`, `Glass Wing`, `Pillpintu`, `Khipu`, `Stephen Paul`, `Perplexity Computer`, `anonymous` — none present in this document. |
 | Every claim cited with markdown link | All external claims carry inline markdown links to public sources. |
 | Honest gap analysis | §8 (Why competitors cannot ship this) is structured as "missing primitive" analysis — not performance comparisons that could be spun. §10 (Gap closure) explicitly lists gaps NOT closed by VSP. |
 | Byline on every output | Present at top of document. |

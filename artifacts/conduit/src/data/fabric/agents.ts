@@ -14,7 +14,7 @@ export const AMARU_AGENTS: readonly AmaruAgent[] = [
   {
     id: 'cartographer',
     name: 'Cartographer',
-    mythosName: 'Pacha-Mapa',
+    khipuName: 'Pacha-Mapa',
     role: 'Discovers sources, profiles tables, infers entities and PII surfaces.',
     responsibilities: [
       'Profile new sources and tables on connect',
@@ -36,7 +36,7 @@ export const AMARU_AGENTS: readonly AmaruAgent[] = [
   {
     id: 'mapper',
     name: 'Mapper',
-    mythosName: 'Quipu-Wari',
+    khipuName: 'Quipu-Wari',
     role: 'Proposes field-to-destination mappings with transforms and confidence.',
     responsibilities: [
       'Match model fields to destination fields',
@@ -58,7 +58,7 @@ export const AMARU_AGENTS: readonly AmaruAgent[] = [
   {
     id: 'courier',
     name: 'Courier',
-    mythosName: 'Chaski-Yacu',
+    khipuName: 'Chaski-Yacu',
     role: 'Plans and executes batched, retry-aware deliveries to destinations.',
     responsibilities: [
       'Plan sync batches respecting rate limits',
@@ -80,7 +80,7 @@ export const AMARU_AGENTS: readonly AmaruAgent[] = [
   {
     id: 'sentinel',
     name: 'Sentinel',
-    mythosName: 'Apu-Wasi',
+    khipuName: 'Apu-Wasi',
     role: 'Enforces policies pre-flight and mid-flight; halts unsafe batches.',
     responsibilities: [
       'Evaluate every batch against the policy registry',
@@ -102,7 +102,7 @@ export const AMARU_AGENTS: readonly AmaruAgent[] = [
   {
     id: 'verity',
     name: 'Verity',
-    mythosName: 'Hampi-Tika',
+    khipuName: 'Hampi-Tika',
     role: 'Validates delivery acknowledgements against expected schema and counts.',
     responsibilities: [
       'Verify destination acknowledgement payloads',
@@ -124,7 +124,7 @@ export const AMARU_AGENTS: readonly AmaruAgent[] = [
   {
     id: 'forecaster',
     name: 'Forecaster',
-    mythosName: 'Quilla-Riq',
+    khipuName: 'Quilla-Riq',
     role: 'Predicts metric outcomes and quantifies activation lift.',
     responsibilities: [
       'Forecast destination KPI delta from a sync (lift estimate)',
@@ -146,7 +146,7 @@ export const AMARU_AGENTS: readonly AmaruAgent[] = [
   {
     id: 'fixer',
     name: 'Fixer',
-    mythosName: 'Inti-Khipu',
+    khipuName: 'Inti-Khipu',
     role: 'Triages sync failures and proposes deterministic remediations.',
     responsibilities: [
       'Classify failure (auth, rate, schema, data quality, destination)',
@@ -168,7 +168,7 @@ export const AMARU_AGENTS: readonly AmaruAgent[] = [
   {
     id: 'scribe',
     name: 'Scribe',
-    mythosName: 'Quipu-Mayu',
+    khipuName: 'Quipu-Mayu',
     role: 'Writes the proof ledger entries and replay-grade decision receipts.',
     responsibilities: [
       'Hash-chain every decision into the Codex Kernel ledger',

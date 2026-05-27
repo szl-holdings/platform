@@ -43,7 +43,7 @@ interface ScanRoot {
 
 const REPO_ROOT = path.resolve(process.cwd().includes('artifacts/api-server') ? path.join(process.cwd(), '..', '..') : process.cwd());
 
-const CORPUS_KEYWORDS = ['thesis', 'ouroboros', 'orbor', 'formula', 'codex', 'finding', 'audit', 'payload', 'mythos', 'manifesto', 'doctrine', 'evolution', 'a11oy', 'alloy', 'rosie', 'apex', 'sentra', 'aegis', 'mythos', 'replit'];
+const CORPUS_KEYWORDS = ['thesis', 'ouroboros', 'orbor', 'formula', 'codex', 'finding', 'audit', 'payload', 'khipu', 'manifesto', 'doctrine', 'evolution', 'a11oy', 'alloy', 'rosie', 'apex', 'sentra', 'aegis', 'khipu', 'replit'];
 
 // Scan roots are deliberately restricted to material that is already part of
 // the public GitHub repo. We do NOT index .local/* (workspace-only operational
@@ -72,7 +72,7 @@ const FILENAME_HINTS: Array<{ test: (s: string) => boolean; kind: CodexKind; wei
   { test: s => /doctrine/i.test(s),                                kind: 'doctrine',      weight: 65 },
   { test: s => /\bfinding(s)?\b|gap[-_ ]report/i.test(s),          kind: 'finding',       weight: 80 },
   { test: s => /\baudit\b|\bsweep\b/i.test(s),                     kind: 'audit',         weight: 60 },
-  { test: s => /payload|mythos|evolution/i.test(s),                kind: 'payload',       weight: 55 },
+  { test: s => /payload|khipu|evolution/i.test(s),                kind: 'payload',       weight: 55 },
 ];
 
 function classify(relativePath: string): { kind: CodexKind; weight: number } {
@@ -113,7 +113,7 @@ function deriveTags(relativePath: string, content: string): string[] {
   for (const t of seg.split(/[\s/_-]+/)) {
     if (t && t.length >= 3 && t.length <= 24 && !/^\d+$/.test(t)) tagSet.add(t);
   }
-  for (const kw of ['thesis', 'formula', 'codex', 'ouroboros', 'mythos', 'rosie', 'a11oy', 'alloy', 'sentra', 'aegis', 'counsel', 'terra', 'vessels', 'lyte', 'doctrine', 'manifesto', 'audit', 'finding', 'evolution', 'governance', 'proof', 'attestation', 'routing']) {
+  for (const kw of ['thesis', 'formula', 'codex', 'ouroboros', 'khipu', 'rosie', 'a11oy', 'alloy', 'sentra', 'aegis', 'counsel', 'terra', 'vessels', 'lyte', 'doctrine', 'manifesto', 'audit', 'finding', 'evolution', 'governance', 'proof', 'attestation', 'routing']) {
     if (new RegExp(`\\b${kw}\\b`, 'i').test(content.slice(0, 2000)) || new RegExp(kw, 'i').test(relativePath)) tagSet.add(kw);
   }
   return [...tagSet].slice(0, 12);

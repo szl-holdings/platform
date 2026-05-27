@@ -2,7 +2,7 @@
 import { useState } from 'react';
 import { Layout } from '../components/layout';
 import { PageHeader, Card, SectionTitle, KpiCard, InfoRow, StatusBadge } from '../components/ui';
-import { AGENT_LABEL } from '../data/mythosDoctrine';
+import { AGENT_LABEL } from '../data/khipuDoctrine';
 import { useWelfarePlaybooks as useWelfarePlaybooksHook, DoctrineLoader } from '../hooks/useDoctrine';
 
 export function WelfarePlaybooks() {

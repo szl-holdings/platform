@@ -338,7 +338,7 @@ const frontierSections: NavSection[] = [
     items: [
       { id: 'frontier-index', name: 'Frontier Overview', icon: Telescope, path: '/frontier' },
       { id: 'frontier-feed', name: 'Signal Feed', icon: Radio, path: '/frontier/feed' },
-      { id: 'frontier-mythos', name: 'Mythos Index', icon: BookOpenCheck, path: '/frontier/mythos' },
+      { id: 'frontier-khipu', name: 'Khipu Index', icon: BookOpenCheck, path: '/frontier/khipu' },
       { id: 'frontier-proposals', name: 'Capability Proposals', icon: Lightbulb, path: '/frontier/proposals' },
       { id: 'frontier-benchmarks', name: 'Benchmark Scoreboard', icon: BarChart, path: '/frontier/benchmarks' },
       { id: 'frontier-memos', name: 'Recalibration Memos', icon: FileStack, path: '/frontier/memos' },

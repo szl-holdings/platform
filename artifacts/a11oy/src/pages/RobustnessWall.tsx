@@ -2,7 +2,7 @@
 import { useState } from 'react';
 import { Layout } from '../components/layout';
 import { PageHeader, Card, SectionTitle, KpiCard, StatusBadge, InfoRow, ProgressBar } from '../components/ui';
-import { AGENT_LABEL } from '../data/mythosDoctrine';
+import { AGENT_LABEL } from '../data/khipuDoctrine';
 import { useRobustnessSnapshots, DoctrineLoader } from '../hooks/useDoctrine';
 
 const fmtDate = (s: string) => new Date(s).toISOString().slice(0, 16).replace('T', ' ');

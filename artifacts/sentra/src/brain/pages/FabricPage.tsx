@@ -20,7 +20,7 @@ const INNER_KERNELS: KernelNode[] = [
   { id: 'vessels',   label: 'Vessels',   role: 'Maritime Intelligence',              pullsFrom: 'Fleet positions, port windows, demurrage risk, berth utilization',          status: 'operational',    icon: '⚓', color: '#06b6d4', previewPath: '/vessels/',   angle: 60,  radius: 190 },
   { id: 'counsel',   label: 'Counsel',   role: 'Legal Matter Command',               pullsFrom: 'Matter staffing, obligation calendars, billing risk, attorney roster',       status: 'operational',    icon: '⚖', color: '#c9b787', previewPath: '/counsel/',   angle: 120, radius: 190 },
   { id: 'terra',     label: 'Terra',     role: 'Real Estate Intelligence',           pullsFrom: 'Portfolio positions, deal pipeline, valuations, market comps',               status: 'operational',    icon: '▣', color: '#10b981', previewPath: '/terra/',     angle: 180, radius: 190 },
-  { id: 'sentra',    label: 'Sentra',    role: 'Cyber Resilience Command',           pullsFrom: 'Threat surface area, posture scores, incident queue, Glasswing patch state', status: 'operational',    icon: '⬡', color: '#a78bfa', previewPath: '/sentra/',    angle: 240, radius: 190 },
+  { id: 'sentra',    label: 'Sentra',    role: 'Cyber Resilience Command',           pullsFrom: 'Threat surface area, posture scores, incident queue, Pillpintu patch state', status: 'operational',    icon: '⬡', color: '#a78bfa', previewPath: '/sentra/',    angle: 240, radius: 190 },
   { id: 'carlota',   label: 'Carlota Jo',role: 'Advisory Consulting',               pullsFrom: 'Client signals, engagement briefs, deliverables, revenue pipeline',          status: 'operational',    icon: '◎', color: '#f59e0b', previewPath: '/carlota-jo/',angle: 300, radius: 190 },
 ];
 

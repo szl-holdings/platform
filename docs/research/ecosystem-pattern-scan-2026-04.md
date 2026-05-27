@@ -242,7 +242,7 @@ The pattern is that any agent, IDE, or external system that speaks MCP can invok
 
 **What's novel vs. what we already do.** The platform is already an MCP *consumer* (`packages/mcp-client`). It is not an MCP *server*. Any external system wanting to invoke A11oy tools — a partner IDE, a third-party agent, an Anthropic Claude instance — must use our proprietary REST/GraphQL API. An A11oy MCP server would expose governed tools (with covenant policy gates and proof-chain logging) to any MCP-speaking client.
 
-**Fit verdict.** Strong fit and strategically differentiating. The Glasswing partner program already builds external trust relationships; an A11oy MCP server makes those relationships programmable. Low-to-medium effort — the tools already exist; the work is wrapping them in the MCP protocol with appropriate governance.
+**Fit verdict.** Strong fit and strategically differentiating. The Pillpintu partner program already builds external trust relationships; an A11oy MCP server makes those relationships programmable. Low-to-medium effort — the tools already exist; the work is wrapping them in the MCP protocol with appropriate governance.
 
 ---
 
@@ -294,9 +294,9 @@ Langfuse and Braintrust both implement OTLP ingestion and provide AI-specific vi
 
 The pattern in agent governance is to express covenant constraints as structured, versionable policy artifacts that can be audited by external reviewers — not as imperative code that must be read end-to-end to understand its behavior.
 
-**Observed in:** OPA 0.68 (Apache-2.0), Cedar 4.x (Apache-2.0), Anthropic Constitutional AI (research), prior research sweep (`MYTHOS_RESEARCH_SWEEP.md §5`).
+**Observed in:** OPA 0.68 (Apache-2.0), Cedar 4.x (Apache-2.0), Anthropic Constitutional AI (research), prior research sweep (`KHIPU_RESEARCH_SWEEP.md §5`).
 
-**What's novel vs. what we already do.** `packages/covenant-policy` enforces constraints at runtime and is already integrated into the PCE gate. The Mythos Constitution DSL is in development. What we do not yet have is *structural verification*: the ability to statically analyze a covenant policy document and prove that a class of requests will always be denied, or that two policy versions are equivalent in a given domain. We also do not have a diff view between policy versions that is machine-checkable rather than human-readable prose.
+**What's novel vs. what we already do.** `packages/covenant-policy` enforces constraints at runtime and is already integrated into the PCE gate. The Khipu Constitution DSL is in development. What we do not yet have is *structural verification*: the ability to statically analyze a covenant policy document and prove that a class of requests will always be denied, or that two policy versions are equivalent in a given domain. We also do not have a diff view between policy versions that is machine-checkable rather than human-readable prose.
 
 **Fit verdict.** Medium fit. The structural verification property matters most to regulated enterprise buyers (financial, defense) who need independent auditors to verify policy correctness without running the system. Medium effort — integrating Cedar's verifier or OPA's rego-eval tool against our covenant schema.
 
@@ -326,7 +326,7 @@ This pattern moves agent identity from "trust the caller because they're inside 
 
 **What's novel vs. what we already do.** `lib/ai-engine/src/a2a/` has an A2A delegation module and agent registry. The Model Passport system signs routing decisions with Ed25519. However, there is no *agent capability attestation* — no Agent Card format that external systems can fetch to discover what a specific A11oy agent can do, what its governance constraints are, and how to verify its messages. This is distinct from the existing proof-chain, which records what an agent *did*, not what it is *authorized to do*.
 
-**Fit verdict.** Strong fit, especially for the Glasswing partner ecosystem where external agents need to interact with A11oy agents under a trust model. Low-to-medium effort — the identity infrastructure (Model Passport, Ed25519) already exists; the work is the Agent Card format and discovery endpoint.
+**Fit verdict.** Strong fit, especially for the Pillpintu partner ecosystem where external agents need to interact with A11oy agents under a trust model. Low-to-medium effort — the identity infrastructure (Model Passport, Ed25519) already exists; the work is the Agent Card format and discovery endpoint.
 
 ---
 
@@ -395,13 +395,13 @@ Each pattern is scored on six dimensions. Strategic Fit: 1 (low) to 5 (high). Ef
 | P-01 | Unified provider facade + streaming normalization | 5 | M | Low | Green | AI Gateway, Model Router | All artifacts via api-server |
 | P-02 | Declarative agent graph with conditional edges | 4 | L | Medium | Green | Workcells, Agent Orchestration | A11oy workcells, all domain packs |
 | P-03 | Durable execution (Temporal-style step isolation) | 4 | XL | Medium | Green (Temporal SDK) | Workcells, Control Tower | All domain packs with long-horizon tasks |
-| P-04 | MCP server with governed tool exposure | 5 | M | Low | Green | AI Gateway, SkillsLibrary, Glasswing | External agents, partner integrations |
+| P-04 | MCP server with governed tool exposure | 5 | M | Low | Green | AI Gateway, SkillsLibrary, Pillpintu | External agents, partner integrations |
 | P-05 | Structured output contracts + schema registry | 4 | M | Low | Green | Lab / PromptRegistry, AI Gateway | All artifacts via api-server |
 | P-06 | Eval-driven prompt iteration loop | 4 | M | Low | Green | EvalConsole, MirrorEval, Lab | A11oy, all domain packs |
 | P-07 | OTel-native AI trace export | 4 | S | Low | Green | Control Tower, Compass | A11oy ops, enterprise buyers |
-| P-08 | Policy-as-code structural verification | 3 | M | Low | Green | Constitution, Covenant policies, Glasswing | A11oy governance, regulated buyers |
+| P-08 | Policy-as-code structural verification | 3 | M | Low | Green | Constitution, Covenant policies, Pillpintu | A11oy governance, regulated buyers |
 | P-09 | Semantic memory with episodic retrieval | 4 | M | Low | Green | Memory (fabric), AgentMesh | All domain agents |
-| P-10 | Agent identity + signed capability attestation | 4 | M | Low | Green | AgentBom, Glasswing, A2AInterop | Partner agents, external MCP clients |
+| P-10 | Agent identity + signed capability attestation | 4 | M | Low | Green | AgentBom, Pillpintu, A2AInterop | Partner agents, external MCP clients |
 | P-11 | Cost-aware async batch routing | 3 | M | Low | Green | CostAwareMonitoring, AI Gateway | Eval pipeline, report generation |
 | P-12 | Prompt caching + semantic deduplication | 3 | S | Low | Green | Model Router, AI Gateway | All artifacts (cost reduction) |
 | P-13 | Eval-gated model promotion | 4 | M | Low | Green | EvalConsole, NexusEvalLayer, PromptRegistry | All artifacts using model router |
@@ -416,7 +416,7 @@ Patterns are placed in four tiers: **Now** (do in the next sprint cycle), **Next
 ### Now — High-leverage, low-risk, directly unblocks existing work
 
 **P-04: MCP Server with Governed Tool Exposure**
-A11oy becoming an MCP server is the single highest-leverage move available. The Glasswing partner ecosystem, the Nexus marketplace, and any future A11oy SDK story all hinge on external systems being able to invoke governed A11oy tools through a standard protocol. The infrastructure is ready: tools are defined in `packages/tool-registry`, covenant policies gate them, and the proof chain logs every invocation. The work is wrapping them in the MCP server protocol. This directly extends the existing `packages/mcp-client` investment into a bidirectional protocol relationship.
+A11oy becoming an MCP server is the single highest-leverage move available. The Pillpintu partner ecosystem, the Nexus marketplace, and any future A11oy SDK story all hinge on external systems being able to invoke governed A11oy tools through a standard protocol. The infrastructure is ready: tools are defined in `packages/tool-registry`, covenant policies gate them, and the proof chain logs every invocation. The work is wrapping them in the MCP server protocol. This directly extends the existing `packages/mcp-client` investment into a bidirectional protocol relationship.
 
 **P-07: OTel-Native AI Trace Export**
 The `ModelRouterTelemetry` struct is already rich. Emitting it as OTLP spans with GenAI semantic conventions requires a small exporter module — a few hundred lines. The payoff is immediate: enterprise buyers and internal operators gain a vendor-neutral observability stream. This feeds into Compass (Layer 9 compliance posture) and makes the Control Tower's live mesh verifiable by external tools. Treat this as infrastructure plumbing, not a feature.
@@ -490,7 +490,7 @@ A `GovernedTool` wraps a `ToolDefinition` from `packages/tool-registry` and enfo
 **A11oy operator surfaces:**
 - **AI Gateway** page (`/a11oy/ai-gateway`): shows connected MCP clients and governed tool call log.
 - **SkillsLibrary** page (`/a11oy/skills`): exposed tools surfaced as browsable skills with their covenant constraints visible.
-- **Glasswing** partner program: partner agents connect via MCP; their calls are logged with partner identity and show in the CAVD audit trail.
+- **Pillpintu** partner program: partner agents connect via MCP; their calls are logged with partner identity and show in the CAVD audit trail.
 
 **Consuming artifacts**: Any external agent, IDE, or automation that speaks MCP. Internal: `packages/agents-core` could use the MCP server to invoke cross-artifact tools without hardcoded API calls.
 
@@ -605,7 +605,7 @@ The scan found that AWS Bedrock's Converse API is a strong provider-gateway patt
 
 **Q4: Do we publish the Agent Card spec for A11oy agents as an open standard, or keep it proprietary?**
 
-The Mythos Doctrine Open Spec (CC-BY-4.0) sets a precedent for open-sourcing governance primitives. An open Agent Card format for governed AI agents — extending Google's A2A Agent Card with covenant-constraint and proof-chain fields — could position SZL as a standards author in the governed AI space, similar to how Anthropic is the MCP spec author. The alternative is a proprietary format that maximizes control but may slow ecosystem adoption. This is partly a business/positioning decision.
+The Khipu Doctrine Open Spec (CC-BY-4.0) sets a precedent for open-sourcing governance primitives. An open Agent Card format for governed AI agents — extending Google's A2A Agent Card with covenant-constraint and proof-chain fields — could position SZL as a standards author in the governed AI space, similar to how Anthropic is the MCP spec author. The alternative is a proprietary format that maximizes control but may slow ecosystem adoption. This is partly a business/positioning decision.
 
 ---
 

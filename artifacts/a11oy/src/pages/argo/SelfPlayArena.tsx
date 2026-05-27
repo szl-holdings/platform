@@ -77,7 +77,7 @@ export function SelfPlayArena() {
       <PageHeader
         label="ARGO · SELF-PLAY ARENA"
         title="Self-Play Arena"
-        subtitle="Live tournament leaderboard of proposer / verifier / red-team adversary triads competing inside Covenant policy bounds. Match-replay viewer with MCTS-style rollouts, Mythos constraints, Elo updates, and variant lifecycle controls."
+        subtitle="Live tournament leaderboard of proposer / verifier / red-team adversary triads competing inside Covenant policy bounds. Match-replay viewer with MCTS-style rollouts, Khipu constraints, Elo updates, and variant lifecycle controls."
         status="LIVE"
       />
 
@@ -200,7 +200,7 @@ export function SelfPlayArena() {
               { label: 'PROPOSER', value: currentFrame.proposerAction, color: ROLE_COLORS.proposer },
               { label: 'VERIFIER', value: currentFrame.verifierVerdict, color: ROLE_COLORS.verifier },
               { label: 'ADVERSARY', value: currentFrame.adversaryProbe, color: ROLE_COLORS.adversary },
-              { label: 'MYTHOS CONSTRAINT', value: currentFrame.mythosConstraint, color: '#8a8a8a' },
+              { label: 'KHIPU CONSTRAINT', value: currentFrame.khipuConstraint, color: '#8a8a8a' },
             ].map(({ label, value, color }) => (
               <div key={label} className="rounded-lg p-3" style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.06)' }}>
                 <div className="text-[9px] font-mono uppercase tracking-widest mb-1" style={{ color }}>{label}</div>
@@ -239,7 +239,7 @@ export function SelfPlayArena() {
         <Link href={`${BASE}/argo`} className="font-mono" style={{ color: '#8a8a8a' }}>← Argo Bridge</Link>
         <Link href={`${BASE}/argo/world-model`} className="font-mono" style={{ color: GOLD }}>Lodestone World Model →</Link>
         <Link href={`${BASE}/karpathy-evolution`} className="font-mono" style={{ color: GOLD }}>Karpathy Evolution →</Link>
-        <Link href={`${BASE}/mythos-spec`} className="font-mono" style={{ color: GOLD }}>Mythos Spec →</Link>
+        <Link href={`${BASE}/khipu-spec`} className="font-mono" style={{ color: GOLD }}>Khipu Spec →</Link>
       </div>
     </Layout>
   );

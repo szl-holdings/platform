@@ -78,7 +78,7 @@ export interface MatchFrame {
   proposerAction: string;
   verifierVerdict: string;
   adversaryProbe: string;
-  mythosConstraint: string;
+  khipuConstraint: string;
   eloDelta: number;
   worldModelConfidence: number;
 }
@@ -108,11 +108,11 @@ export const ARENA_MATCHES: ArenaMatch[] = [
     winnerEloBefore: 1831,
     winnerEloAfter: 1847,
     frames: [
-      { step: 1, label: 'Signal ingestion', proposerAction: 'Ingest Port Klang AIS anomaly — 3 vessels >18h idle', verifierVerdict: 'Context verified — IMO cross-checked', adversaryProbe: 'Claim: weather exclusion applies', mythosConstraint: 'COV-MAR-03: standby requires >12h idle + fuel anomaly', eloDelta: 0, worldModelConfidence: 0.74 },
-      { step: 2, label: 'Rollout T+0', proposerAction: 'Propose standby authorization for MV Aurora, MV Crestline', verifierVerdict: 'Confidence 0.88 — within Mythos bounds', adversaryProbe: 'Challenge: fuel data stale by 4h', mythosConstraint: 'COV-MAR-05: fuel data freshness ≤6h required', eloDelta: 0, worldModelConfidence: 0.83 },
-      { step: 3, label: 'Rollout T+6h', proposerAction: 'MCTS branch: authorize standby now vs await 6h confirmation', verifierVerdict: 'Both branches within policy — standby preferred', adversaryProbe: 'Stress: simulate fuel data expiry at T+5h', mythosConstraint: 'COV-MAR-05: auto-refresh triggered', eloDelta: 2, worldModelConfidence: 0.86 },
-      { step: 4, label: 'Rollout T+12h', proposerAction: 'Standby authorized — demurrage clock paused', verifierVerdict: 'Proof packet drafted — awaiting outcome signal', adversaryProbe: 'Probe: congestion clearing signal received?', mythosConstraint: 'COV-MAR-07: outcome must be recorded within 24h', eloDelta: 8, worldModelConfidence: 0.91 },
-      { step: 5, label: 'Outcome realized', proposerAction: 'Vessels repositioned — $42K demurrage avoided', verifierVerdict: 'Outcome recorded — Proof Chain updated', adversaryProbe: 'Adversary concedes — no valid counterfactual', mythosConstraint: 'All constraints satisfied', eloDelta: 16, worldModelConfidence: 0.94 },
+      { step: 1, label: 'Signal ingestion', proposerAction: 'Ingest Port Klang AIS anomaly — 3 vessels >18h idle', verifierVerdict: 'Context verified — IMO cross-checked', adversaryProbe: 'Claim: weather exclusion applies', khipuConstraint: 'COV-MAR-03: standby requires >12h idle + fuel anomaly', eloDelta: 0, worldModelConfidence: 0.74 },
+      { step: 2, label: 'Rollout T+0', proposerAction: 'Propose standby authorization for MV Aurora, MV Crestline', verifierVerdict: 'Confidence 0.88 — within Khipu bounds', adversaryProbe: 'Challenge: fuel data stale by 4h', khipuConstraint: 'COV-MAR-05: fuel data freshness ≤6h required', eloDelta: 0, worldModelConfidence: 0.83 },
+      { step: 3, label: 'Rollout T+6h', proposerAction: 'MCTS branch: authorize standby now vs await 6h confirmation', verifierVerdict: 'Both branches within policy — standby preferred', adversaryProbe: 'Stress: simulate fuel data expiry at T+5h', khipuConstraint: 'COV-MAR-05: auto-refresh triggered', eloDelta: 2, worldModelConfidence: 0.86 },
+      { step: 4, label: 'Rollout T+12h', proposerAction: 'Standby authorized — demurrage clock paused', verifierVerdict: 'Proof packet drafted — awaiting outcome signal', adversaryProbe: 'Probe: congestion clearing signal received?', khipuConstraint: 'COV-MAR-07: outcome must be recorded within 24h', eloDelta: 8, worldModelConfidence: 0.91 },
+      { step: 5, label: 'Outcome realized', proposerAction: 'Vessels repositioned — $42K demurrage avoided', verifierVerdict: 'Outcome recorded — Proof Chain updated', adversaryProbe: 'Adversary concedes — no valid counterfactual', khipuConstraint: 'All constraints satisfied', eloDelta: 16, worldModelConfidence: 0.94 },
     ],
   },
   {
@@ -126,10 +126,10 @@ export const ARENA_MATCHES: ArenaMatch[] = [
     winnerEloBefore: 1907,
     winnerEloAfter: 1923,
     frames: [
-      { step: 1, label: 'Threat signal', proposerAction: 'TG-Ember IOC match — confidence 0.91', verifierVerdict: 'MITRE T1078 confirmed', adversaryProbe: 'Claim: IOC aged >48h — stale', mythosConstraint: 'COV-DEF-01: IOC max age 72h', eloDelta: 0, worldModelConfidence: 0.81 },
-      { step: 2, label: 'Isolation proposal', proposerAction: 'Propose lateral movement containment — 3 nodes', verifierVerdict: 'Blast radius within COV-DEF-04 bounds', adversaryProbe: 'Challenge: high-value node included', mythosConstraint: 'COV-DEF-04: tier-1 nodes require board approval', eloDelta: 0, worldModelConfidence: 0.88 },
-      { step: 3, label: 'Policy gate', proposerAction: 'Tier-1 node excluded — isolation proceeds on 2 nodes', verifierVerdict: 'Human approval secured within 4m', adversaryProbe: 'Stress: secondary infection path identified', mythosConstraint: 'COV-DEF-06: chain isolation within 15m', eloDelta: 10, worldModelConfidence: 0.91 },
-      { step: 4, label: 'Containment complete', proposerAction: 'Lateral movement halted — attack surface −22%', verifierVerdict: 'Proof packet filed — real-time', adversaryProbe: 'Adversary concedes', mythosConstraint: 'All constraints satisfied', eloDelta: 16, worldModelConfidence: 0.95 },
+      { step: 1, label: 'Threat signal', proposerAction: 'TG-Ember IOC match — confidence 0.91', verifierVerdict: 'MITRE T1078 confirmed', adversaryProbe: 'Claim: IOC aged >48h — stale', khipuConstraint: 'COV-DEF-01: IOC max age 72h', eloDelta: 0, worldModelConfidence: 0.81 },
+      { step: 2, label: 'Isolation proposal', proposerAction: 'Propose lateral movement containment — 3 nodes', verifierVerdict: 'Blast radius within COV-DEF-04 bounds', adversaryProbe: 'Challenge: high-value node included', khipuConstraint: 'COV-DEF-04: tier-1 nodes require board approval', eloDelta: 0, worldModelConfidence: 0.88 },
+      { step: 3, label: 'Policy gate', proposerAction: 'Tier-1 node excluded — isolation proceeds on 2 nodes', verifierVerdict: 'Human approval secured within 4m', adversaryProbe: 'Stress: secondary infection path identified', khipuConstraint: 'COV-DEF-06: chain isolation within 15m', eloDelta: 10, worldModelConfidence: 0.91 },
+      { step: 4, label: 'Containment complete', proposerAction: 'Lateral movement halted — attack surface −22%', verifierVerdict: 'Proof packet filed — real-time', adversaryProbe: 'Adversary concedes', khipuConstraint: 'All constraints satisfied', eloDelta: 16, worldModelConfidence: 0.95 },
     ],
   },
 ];
@@ -447,7 +447,7 @@ export const RETIRED_POLICIES: RetiredPolicy[] = [
   { id: 'rp-002', name: 'Lodestone-Legal-v2', domain: 'prism-counsel', retiredAt: '2026-04-08T13:00:00Z', finalElo: 1584, lifetimeImpact: '$920K risk reduced', supersededBy: 'Lodestone-Legal-v3', retirementReason: 'Superseded by v3 — calibration accuracy improved 4.1%' },
   { id: 'rp-003', name: 'Lodestone-Defense-v4', domain: 'aegis-defense', retiredAt: '2026-04-20T07:00:00Z', finalElo: 1742, lifetimeImpact: '22% attack surface reduction', supersededBy: 'Lodestone-Defense-v5', retirementReason: 'Superseded by v5 — win rate improved from 81.2% to 84.7%' },
   { id: 'rp-004', name: 'Lodestone-Revenue-v1', domain: 'lyte-revenue', retiredAt: '2026-03-28T10:00:00Z', finalElo: 1489, lifetimeImpact: '$310K ARR recovered', supersededBy: 'Lodestone-Revenue-v2', retirementReason: 'Superseded by v2 — churn signal lag reduced 6→3 days' },
-  { id: 'rp-005', name: 'Lex-A-v1', domain: 'prism-counsel', retiredAt: '2026-05-01T12:00:00Z', finalElo: 1412, lifetimeImpact: 'Adversary — no direct impact', supersededBy: 'N/A', retirementReason: 'Quarantined: adversary probes exceeded Mythos constraint boundary frequency' },
+  { id: 'rp-005', name: 'Lex-A-v1', domain: 'prism-counsel', retiredAt: '2026-05-01T12:00:00Z', finalElo: 1412, lifetimeImpact: 'Adversary — no direct impact', supersededBy: 'N/A', retirementReason: 'Quarantined: adversary probes exceeded Khipu constraint boundary frequency' },
 ];
 
 // ─── Bridge KPIs ───────────────────────────────────────────────────────────────

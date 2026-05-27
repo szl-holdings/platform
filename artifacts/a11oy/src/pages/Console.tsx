@@ -31,7 +31,7 @@ interface ModelSpec {
   supportsExtendedThinking: boolean;
   supportsVision: boolean;
   supportsPromptCaching: boolean;
-  mythosModel: boolean;
+  khipuModel: boolean;
 }
 
 interface Message {
@@ -63,7 +63,7 @@ interface RunProvenance {
 
 const PROVIDER_ORDER = ['anthropic', 'openai', 'gemini', 'deepseek', 'huggingface'];
 const PROVIDER_LABELS: Record<string, string> = {
-  anthropic: 'Mythos Tier — Claude (Anthropic)',
+  anthropic: 'Khipu Tier — Claude (Anthropic)',
   openai: 'OpenAI',
   gemini: 'Gemini (Google)',
   deepseek: 'DeepSeek',
@@ -408,7 +408,7 @@ export function Console() {
                     <optgroup key={provider} label={PROVIDER_LABELS[provider] ?? provider}>
                       {providerModels.map(m => (
                         <option key={m.id} value={m.id}>
-                          {m.displayName}{m.mythosModel ? ' ★' : ''}
+                          {m.displayName}{m.khipuModel ? ' ★' : ''}
                         </option>
                       ))}
                     </optgroup>

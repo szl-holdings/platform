@@ -3,7 +3,7 @@
  * Doctrine fallback fixtures — used by useDoctrine hooks only when the API
  * returns an empty-but-successful response (demo / fresh-install state).
  *
- * Canonical agent IDs and labels come from mythosDoctrine.ts
+ * Canonical agent IDs and labels come from khipuDoctrine.ts
  * (DOCTRINE_AGENT_IDS, AGENT_LABEL). The data here is intentionally a minimal
  * representative set that mirrors what seedDoctrineData() seeds into the DB,
  * so the UI looks coherent before any seeding has run.
@@ -21,7 +21,7 @@ export const STATIC_PARTNERS = [
     verifications: [{ type: 'identity', outcome: 'pass', at: '2026-01-12T00:00:00Z' }, { type: 'soc2', outcome: 'pass', at: '2026-01-14T00:00:00Z' }],
     dualApproval: [{ actor: 'a11oy/alignment-review', role: 'reviewer', approvedAt: '2026-01-15T00:00:00Z' }],
     defenderCreditAllocated: '25000.00', defenderCreditPaid: '12000.00',
-    notes: 'First Glasswing partner. Specialises in LLM prompt-injection and scope-escape probes.',
+    notes: 'First Pillpintu partner. Specialises in LLM prompt-injection and scope-escape probes.',
     createdAt: '2026-01-10T09:00:00Z', updatedAt: '2026-04-01T00:00:00Z',
   },
 ];
@@ -135,10 +135,10 @@ export const STATIC_ROBUSTNESS = [
 ];
 
 /**
- * Glasswing-specific fallbacks — mapped from alignment-reviews and
+ * Pillpintu-specific fallbacks — mapped from alignment-reviews and
  * reward-hacking endpoints. Used only when those endpoints return empty arrays.
  */
-export const STATIC_GLASSWING_APPROVALS = [
+export const STATIC_PILLPINTU_APPROVALS = [
   {
     id: 'apr-0001', requestedByAgent: 'hephaestus', actionType: 'patch_apply',
     description: 'Apply patch-0001 (admin role assertion on billing-reset route)',
@@ -162,7 +162,7 @@ export const STATIC_GLASSWING_APPROVALS = [
   },
 ];
 
-export const STATIC_GLASSWING_PATCHES = [
+export const STATIC_PILLPINTU_PATCHES = [
   {
     id: 'patch-0001',
     title: 'Add admin role assertion + tenant audit on billing-reset route',

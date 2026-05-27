@@ -144,7 +144,7 @@ Agent frameworks provide the building blocks for autonomous AI agents — tool c
 
 a11oy is the only enterprise platform that ships alignment monitoring as production infrastructure. The 10 alignment-specific primitives are derived from Anthropic's published research:
 
-**From the Claude Mythos System Card:**
+**From the Claude Khipu System Card:**
 - ResponsibleScalingPolicy — enforces ASL-level commitments
 - ConstitutionalEnforcer — immutable principle enforcement
 - EmotionProbe — agent welfare indicator tracking

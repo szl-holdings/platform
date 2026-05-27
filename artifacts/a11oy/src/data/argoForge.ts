@@ -6,7 +6,7 @@
 //
 // External code is studied with-knowledge-of, not adopted. Frontier methods are
 // reimplemented from first principles using only public inputs. Adoption requires
-// a Sentra approval workflow per the Glasswing doctrine.
+// a Sentra approval workflow per the Pillpintu doctrine.
 
 export const ARGO_VERSION = '0.2.0-seed';
 
@@ -15,7 +15,7 @@ export const ARGO_TAGLINE =
 
 // ---------------------------------------------------------------------------
 // 1. DOCTRINE PILLARS
-// Quoted from the Sentra Defensive Executive Summary and the Mythos/Glasswing
+// Quoted from the Sentra Defensive Executive Summary and the Khipu/Pillpintu
 // research brief. Every seed must satisfy at least one pillar and violate none.
 // ---------------------------------------------------------------------------
 
@@ -70,7 +70,7 @@ export const DOCTRINE_PILLARS: readonly DoctrinePillar[] = [
   {
     id: 'public-inputs-only',
     pillar: 'Public inputs only. No leaks, no scraped weights.',
-    citation: 'Mythos doctrine — Ethical/Legal/IP Considerations',
+    citation: 'Khipu doctrine — Ethical/Legal/IP Considerations',
     quote:
       'We rely solely on published research, official repos, and licensed data. Reverse-engineering proprietary weights or using leaked artifacts is forbidden.',
     enforcedBy: 'Hephaestus provenance gate · SLSA-style supply-chain attestation',
@@ -257,7 +257,7 @@ export const CAPABILITY_SEEDS: readonly CapabilitySeed[] = [
     status: 'active',
   },
 
-  // ---------- FRONTIER METHODS (Anthropic / OpenMythos public research) ----------
+  // ---------- FRONTIER METHODS (Anthropic / OpenKhipu public research) ----------
   {
     id: 'skills-standard',
     name: 'Declarative skills with capability scopes',
@@ -315,9 +315,9 @@ export const CAPABILITY_SEEDS: readonly CapabilitySeed[] = [
     oneLine:
       'Iterative-compute transformer for hard reasoning: looped depth, switchable attention, sparse expert routing. Studied in clean-room only.',
     primitive:
-      'Recurrent-Depth Transformer + MLA/GQA switchable attention + sparse Mixture-of-Experts feed-forward, per OpenMythos public reconstruction.',
+      'Recurrent-Depth Transformer + MLA/GQA switchable attention + sparse Mixture-of-Experts feed-forward, per OpenKhipu public reconstruction.',
     sourceKind: 'public-research',
-    source: { repo: 'OpenMythos reference', url: 'https://github.com/anthropics', author: 'OpenMythos (independent OSS)', lang: 'Python' },
+    source: { repo: 'OpenKhipu reference', url: 'https://github.com/anthropics', author: 'OpenKhipu (independent OSS)', lang: 'Python' },
     evolves: 'A11oy',
     evolvesAgent: 'Daedalus (architect) + Twin Foundry',
     doctrineLink: 'public-inputs-only',
@@ -330,7 +330,7 @@ export const CAPABILITY_SEEDS: readonly CapabilitySeed[] = [
     id: 'frontier-red-team',
     name: 'Internal frontier red-team gate',
     oneLine:
-      'Dedicated internal red-team probes new agent capabilities before release. Findings flow into the Glasswing patch queue as P-tagged risk items.',
+      'Dedicated internal red-team probes new agent capabilities before release. Findings flow into the Pillpintu patch queue as P-tagged risk items.',
     primitive:
       'Standing red-team practice with autonomous-code-reasoning evaluations on a closed test fleet. Output: an alignment risk report attached to the system card.',
     sourceKind: 'public-research',
@@ -376,7 +376,7 @@ export const ARGO_CITATIONS: ReadonlyArray<{ label: string; url: string; kind: '
   { label: 'ei-grad — repository index', url: 'https://github.com/ei-grad?tab=repositories', kind: 'repo' },
   { label: 'anthropics/skills — Agent Skills standard (public)', url: 'https://github.com/anthropics/skills', kind: 'repo' },
   { label: 'Anthropic Research — system cards & frontier red team (public)', url: 'https://www.anthropic.com/research', kind: 'doctrine' },
-  { label: 'OpenMythos — independent public reconstruction (RDT/MoE)', url: 'https://github.com/anthropics', kind: 'repo' },
+  { label: 'OpenKhipu — independent public reconstruction (RDT/MoE)', url: 'https://github.com/anthropics', kind: 'repo' },
   { label: 'Chain-of-Thought monitorability — Mikulik, Bowman et al. (public preprint)', url: 'https://arxiv.org/abs/2407.13692', kind: 'doctrine' },
   { label: 'NIST SP 800-61r3 — Computer Security Incident Handling Guide', url: 'https://csrc.nist.gov/pubs/sp/800/61/r3/final', kind: 'standard' },
   { label: 'NIST AI Risk Management Framework (AI RMF 1.0)', url: 'https://www.nist.gov/itl/ai-risk-management-framework', kind: 'standard' },

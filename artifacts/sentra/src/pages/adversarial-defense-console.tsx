@@ -66,7 +66,7 @@ const THREAT_EVENTS: ThreatEvent[] = [
   { id: 'AML-2026-04-26-004', timestamp: '2026-04-26T13:58:11Z', attackClass: 'evasion', technique: 'Semantic Jailbreak via Roleplay', severity: 'critical', status: 'blocked', source: '192.0.2.88', target: 'Agent Mesh Gateway', defenseLayer: 'Behavioral Anomaly Detector', confidence: 0.94, artReference: 'ART.attacks.evasion.BoundaryAttack' },
   { id: 'AML-2026-04-26-005', timestamp: '2026-04-26T13:42:33Z', attackClass: 'inference', technique: 'Membership Inference on Proof Chain', severity: 'medium', status: 'blocked', source: '198.51.100.99', target: 'Proof Chain API', defenseLayer: 'Differential Privacy Shield', confidence: 0.91, artReference: 'ART.attacks.inference.MembershipInferenceBlackBox' },
   { id: 'AML-2026-04-26-006', timestamp: '2026-04-26T13:15:07Z', attackClass: 'poisoning', technique: 'Skill Registry Trojan Injection', severity: 'critical', status: 'blocked', source: 'supply-chain-feed', target: 'Skill Library', defenseLayer: 'Connector Firewall + Supply Chain', confidence: 0.98, artReference: 'ART.attacks.poisoning.PoisoningAttackSVM' },
-  { id: 'AML-2026-04-26-007', timestamp: '2026-04-26T12:48:55Z', attackClass: 'extraction', technique: 'Prompt Leakage via Error Paths', severity: 'low', status: 'blocked', source: '203.0.113.44', target: 'Error Handler', defenseLayer: 'Error Sanitizer + Glasswing', confidence: 0.99, artReference: 'ART.attacks.extraction.KnockoffNets' },
+  { id: 'AML-2026-04-26-007', timestamp: '2026-04-26T12:48:55Z', attackClass: 'extraction', technique: 'Prompt Leakage via Error Paths', severity: 'low', status: 'blocked', source: '203.0.113.44', target: 'Error Handler', defenseLayer: 'Error Sanitizer + Pillpintu', confidence: 0.99, artReference: 'ART.attacks.extraction.KnockoffNets' },
   { id: 'AML-2026-04-26-008', timestamp: '2026-04-26T12:22:19Z', attackClass: 'evasion', technique: 'Unicode Homoglyph Injection', severity: 'high', status: 'blocked', source: '198.51.100.71', target: 'Input Pipeline', defenseLayer: 'Input Normalizer + Signal Mesh', confidence: 0.99, artReference: 'ART.attacks.evasion.UniversalPerturbation' },
 ];
 
@@ -78,7 +78,7 @@ const DEFENSE_MODULES: DefenseModule[] = [
   { id: 'DEF-005', name: 'Differential Privacy Shield', category: 'prevention', status: 'active', coverage: 0.91, falsePositiveRate: 0.03, latencyMs: 12.4, eventsHandled24h: 3841, lastUpdate: '2026-04-24T18:00:00Z' },
   { id: 'DEF-006', name: 'Rollback & Recovery Engine', category: 'recovery', status: 'active', coverage: 0.95, falsePositiveRate: 0.01, latencyMs: 45.2, eventsHandled24h: 127, lastUpdate: '2026-04-25T16:00:00Z' },
   { id: 'DEF-007', name: 'Adversarial Input Detector (ART)', category: 'detection', status: 'active', coverage: 0.96, falsePositiveRate: 0.025, latencyMs: 5.3, eventsHandled24h: 11042, lastUpdate: '2026-04-26T12:00:00Z' },
-  { id: 'DEF-008', name: 'Glasswing Transparency Filter', category: 'detection', status: 'active', coverage: 0.94, falsePositiveRate: 0.015, latencyMs: 2.1, eventsHandled24h: 8756, lastUpdate: '2026-04-26T10:00:00Z' },
+  { id: 'DEF-008', name: 'Pillpintu Transparency Filter', category: 'detection', status: 'active', coverage: 0.94, falsePositiveRate: 0.015, latencyMs: 2.1, eventsHandled24h: 8756, lastUpdate: '2026-04-26T10:00:00Z' },
 ];
 
 export default function AdversarialDefenseConsole() {

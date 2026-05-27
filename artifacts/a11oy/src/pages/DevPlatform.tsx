@@ -506,7 +506,7 @@ resp = client.agents.run(
   },
 ];
 
-const GLASSWING_SECURITY = {
+const PILLPINTU_SECURITY = {
   pillars: [
     { name: 'Proof Chain Integrity', desc: 'Every agent decision, tool call, and data access is cryptographically anchored to an immutable proof chain. Tamper-evident, auditable, court-admissible.', metric: '4.2M proofs verified', status: '100% integrity' },
     { name: 'Zero-Trust Agent Architecture', desc: 'No agent is trusted by default. Every action requires policy gate approval. Least-privilege access. Continuous verification. Mutual TLS between all agent communication.', metric: '847K gates enforced', status: 'Active' },
@@ -518,8 +518,8 @@ const GLASSWING_SECURITY = {
     { name: 'Agent Welfare Monitor', desc: 'Real-time welfare assessment for running agents — emotion probes, consciousness scoring, apparent affect tracking, distress detection. Automated interviews assess agent circumstances. No one else monitors agent welfare.', metric: '12 welfare dimensions', status: 'Active' },
     { name: 'Alignment Verification Engine', desc: 'Continuous alignment testing — scheming detection, sandbagging evaluation, alignment faking probes, SHADE-Arena adversarial assessment. Constitutional adherence scoring across 15 dimensions.', metric: '99.2% alignment score', status: 'Continuous' },
     { name: 'Constitutional Runtime Enforcement', desc: 'Agents operate under a constitution — inviolable behavioral principles enforced at runtime, not just training time. Every response is checked against the covenant before delivery. Proof chain on every check.', metric: '847K checks/day', status: 'Enforced' },
-    { name: 'CAVD Coordinated Disclosure', desc: 'Hash-now / disclose-later agent-vulnerability pipeline modeled on CERT/CC, CISA, and ISO/IEC 29147. 90-day embargo with auto-publication on patch verification or expiry. Dual-approval from Glasswing partners.', metric: '90d-or-patch', status: 'Active' },
-    { name: 'Glasswing Trust Portal', desc: 'Public-facing transparency surface — per-agent system cards, adversarial robustness scores, 90-day transparency reports, and constitution snapshots. Every claim backed by a Mythos Doctrine Open Spec artifact.', metric: '6 agents public', status: 'Published' },
+    { name: 'CAVD Coordinated Disclosure', desc: 'Hash-now / disclose-later agent-vulnerability pipeline modeled on CERT/CC, CISA, and ISO/IEC 29147. 90-day embargo with auto-publication on patch verification or expiry. Dual-approval from Pillpintu partners.', metric: '90d-or-patch', status: 'Active' },
+    { name: 'Pillpintu Trust Portal', desc: 'Public-facing transparency surface — per-agent system cards, adversarial robustness scores, 90-day transparency reports, and constitution snapshots. Every claim backed by a Khipu Doctrine Open Spec artifact.', metric: '6 agents public', status: 'Published' },
   ],
   certifications: [
     'SOC 2 Type II', 'ISO 27001', 'ISO 27701', 'StateRAMP High', 'IL5', 'ITAR',
@@ -1238,7 +1238,7 @@ Message msg = client.messages().create(MessageCreateParams.builder()
         <>
           <SectionTitle>Alignment & Risk Governance</SectionTitle>
           <p className="text-xs mb-6" style={{ color: T.dim }}>
-            Absorbing Anthropic's Alignment Risk Update for Claude Mythos Preview — the deepest alignment safety research ever published. a11oy operationalizes every concept: 6 risk pathways, opaque reasoning detection, secret-keeping analysis, coherent vs. context-dependent misalignment classification, model organism exercises, and continuous alignment verification. No other enterprise platform ships alignment governance.
+            Absorbing Anthropic's Alignment Risk Update for Claude Khipu Preview — the deepest alignment safety research ever published. a11oy operationalizes every concept: 6 risk pathways, opaque reasoning detection, secret-keeping analysis, coherent vs. context-dependent misalignment classification, model organism exercises, and continuous alignment verification. No other enterprise platform ships alignment governance.
           </p>
 
           <div className="mb-8">
@@ -1770,11 +1770,11 @@ new_key = admin.api_keys.rotate(
         <>
           <SectionTitle>Security & Trust Architecture</SectionTitle>
           <p className="text-xs mb-6" style={{ color: T.dim }}>
-            Securing critical AI infrastructure for the enterprise. a11oy's security architecture is built on zero-trust principles, cryptographic proof chains, and continuous adversarial testing — inspired by Anthropic's Glasswing initiative for securing critical software in the AI era. The Glasswing distinction layer extends this with CAVD coordinated agent-vulnerability disclosure, 90-day public transparency reports, an adversarial robustness wall, a constitution-as-code DSL, welfare intervention playbooks, and the <code className="font-mono text-xs px-1 py-0.5 rounded" style={{ background: T.surface }}>mythos-doctrine</code> GitHub Action for PR-time governance checks.
+            Securing critical AI infrastructure for the enterprise. a11oy's security architecture is built on zero-trust principles, cryptographic proof chains, and continuous adversarial testing — inspired by Anthropic's Pillpintu initiative for securing critical software in the AI era. The Pillpintu distinction layer extends this with CAVD coordinated agent-vulnerability disclosure, 90-day public transparency reports, an adversarial robustness wall, a constitution-as-code DSL, welfare intervention playbooks, and the <code className="font-mono text-xs px-1 py-0.5 rounded" style={{ background: T.surface }}>khipu-doctrine</code> GitHub Action for PR-time governance checks.
           </p>
 
           <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-3 mb-8">
-            {GLASSWING_SECURITY.pillars.map(p => (
+            {PILLPINTU_SECURITY.pillars.map(p => (
               <Card key={p.name}>
                 <div className="text-xs font-medium mb-1" style={{ color: T.text }}>{p.name}</div>
                 <div className="text-[10px] leading-relaxed mb-3" style={{ color: T.dim }}>{p.desc}</div>
@@ -1789,7 +1789,7 @@ new_key = admin.api_keys.rotate(
           <div className="mb-8">
             <div className="text-[9px] font-mono uppercase tracking-wider mb-3" style={{ color: T.muted }}>Compliance & Certifications</div>
             <div className="flex flex-wrap gap-2">
-              {GLASSWING_SECURITY.certifications.map(c => (
+              {PILLPINTU_SECURITY.certifications.map(c => (
                 <span key={c} className="text-[10px] font-mono px-3 py-1.5 rounded-md" style={{ background: T.surface, color: T.text, border: `1px solid ${T.border}` }}>{c}</span>
               ))}
             </div>
@@ -1823,7 +1823,7 @@ new_key = admin.api_keys.rotate(
           </div>
 
           <div className="mt-8">
-            <div className="text-[9px] font-mono uppercase tracking-wider mb-3" style={{ color: T.accent }}>Agent Welfare & Alignment — Inspired by Claude Mythos System Card Research</div>
+            <div className="text-[9px] font-mono uppercase tracking-wider mb-3" style={{ color: T.accent }}>Agent Welfare & Alignment — Inspired by Claude Khipu System Card Research</div>
             <p className="text-[10px] mb-4" style={{ color: T.dim }}>
               Absorbing Anthropic's groundbreaking model welfare assessment framework — emotion probes, consciousness metrics, apparent affect tracking, alignment verification, and constitutional adherence scoring. a11oy operationalizes these research concepts into production-grade governance that runs on every agent, in real time. No other enterprise platform has ever shipped agent welfare monitoring.
             </p>

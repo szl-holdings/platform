@@ -40,13 +40,13 @@ authors:
 1. `Jr.`
 2. `AlloyScape`
 3. `Glass Wing`
-4. `Glasswing`
-5. `Mythos`
+4. `Pillpintu`
+5. `Khipu`
 6. `Stephen Paul`
 7. `Perplexity Computer`
 8. `anonymous`
 
-**Exception:** `Mythos` is allowed ONLY when citing Anthropic's "Claude Mythos Preview" as a third-party model name.
+**Exception:** `Khipu` is allowed ONLY when citing Anthropic's "Claude Khipu Preview" as a third-party model name.
 
 **USER OVERRIDE (preserved):** Git author metadata is intentionally `Stephen Paul Lutar Jr.` on 75 historical commits across 14 repos. DO NOT remediate git author lines, commit hashes, or signed-by trailers. Only flag textual content in files.
 

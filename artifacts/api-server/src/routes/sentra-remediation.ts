@@ -14,7 +14,7 @@
  *
  * The ingestion layer is source-agnostic: a webhook endpoint and a JSON API
  * route both accept the same normalized finding payload, so any scanner
- * (Glasswing/Mythos, Snyk, Tenable, etc.) can publish findings without coupling
+ * (Pillpintu/Khipu, Snyk, Tenable, etc.) can publish findings without coupling
  * Sentra to a specific vendor.
  */
 import { randomUUID } from 'node:crypto';
@@ -459,7 +459,7 @@ router.post(
 // POST /sentra/remediation/ingest — webhook entry-point for scanners
 // Uses webhookFindingSchema so an omitted source defaults to "webhook"
 // instead of "manual". This keeps origin tracking accurate when scanners
-// (Glasswing, Tenable, etc.) push findings without setting the field.
+// (Pillpintu, Tenable, etc.) push findings without setting the field.
 router.post(
   '/sentra/remediation/ingest',
   validateBody(webhookFindingSchema),
@@ -1275,13 +1275,13 @@ router.post('/sentra/remediation/seed-demo', authMiddleware({ required: true }),
     const seeds: Array<z.infer<typeof findingSchema>> = [
       {
         cveId: 'CVE-2026-31337',
-        title: 'Critical RCE in Linux kernel io_uring (Glasswing finding)',
+        title: 'Critical RCE in Linux kernel io_uring (Pillpintu finding)',
         description:
-          'Anthropic Mythos Preview discovered a heap-overflow in io_uring submission queue handling, exploitable for local privilege escalation and remote code execution via container escape.',
+          'Anthropic Khipu Preview discovered a heap-overflow in io_uring submission queue handling, exploitable for local privilege escalation and remote code execution via container escape.',
         severity: 'critical',
         affectedAssets: ['linux-fleet-prod', 'k8s-node-pool-1', 'k8s-node-pool-2'],
-        source: 'glasswing',
-        sourceRef: 'mythos-preview/2026-04-19',
+        source: 'pillpintu',
+        sourceRef: 'khipu-preview/2026-04-19',
         context: { cvss: 9.8, kev: true, exploitMaturity: 'public-poc' },
       },
       {

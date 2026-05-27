@@ -107,7 +107,7 @@
 **[P1-04]** *The mulberry32 PRNG is used in the replay determinism claim (Theorem 7). PM_MATH_REPORT.md mentions xoshiro256** as the recommended migration target due to period exhaustion risk at 62K ops/sec, but the thesis body does not acknowledge this risk explicitly.*  
 - Target: `evolution_pod/math_pod_v3/phd_thesis/main.tex.md`, §4.1 (Theorem 7, line 166) and §11 Future Work.
 
-**[P1-05]** *The Forecast Gauge cites "Claude Mythos Preview" as a METR benchmark model. Per identity rules, "Mythos" may only appear as an Anthropic Claude Mythos Preview citation, not as an SZL artifact name. Verify all Forecast Gauge occurrences are properly contextualized.*  
+**[P1-05]** *The Forecast Gauge cites "Claude Khipu Preview" as a METR benchmark model. Per identity rules, "Khipu" may only appear as an Anthropic Claude Khipu Preview citation, not as an SZL artifact name. Verify all Forecast Gauge occurrences are properly contextualized.*  
 - Target: `evolution_pod/meditation_v5/phd_agi_forecast/operational_spec.md`, Table row 1 (line 37).
 
 **[P1-06]** *Theorem TH3 (Anatomy Reduction) in main.tex.md cites \cite{zenodo_v12_20119582} for the proof but that DOI is the ouroboros v6.3.0 runtime paper, not a bisimulation proof. The citation is mismatched.*  

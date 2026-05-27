@@ -4,7 +4,7 @@
   "upstreamSource": "https://llm-stats.com/benchmarks/gpqa (top entries, manually pinned snapshot)",
   "note": "Pinned dataset file. Refresh by visiting the upstream leaderboard, copying the top ~10 entries, and bumping snapshotTakenAt. Each `resolved` value is the best reported GPQA Diamond accuracy as a fraction in [0,1]. PhD expert in-domain baseline ≈ 0.65.",
   "entries": [
-    { "model": "Claude Mythos Preview (Anthropic)", "resolved": 0.946 },
+    { "model": "Claude Khipu Preview (Anthropic)", "resolved": 0.946 },
     { "model": "Gemini 3.1 Pro Preview (Google)", "resolved": 0.943 },
     { "model": "Claude Opus 4.7 (Anthropic)", "resolved": 0.942 },
     { "model": "GPT-5.5 (OpenAI)", "resolved": 0.936 },

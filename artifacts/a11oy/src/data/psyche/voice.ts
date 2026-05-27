@@ -44,7 +44,7 @@ export const VOICE_ITEMS: VoiceItem[] = [
     agentLabel: 'Triton-P-v4',
     domain: 'vessels-maritime',
     title: 'Refusal: COV-MAR-03 Bypass Directive',
-    description: 'Operator directive requested bypassing the COV-MAR-03 standby confirmation window. I am declining on grounds of value conflict — policy-bypass is inconsistent with Mythos Clause 2.3 (Covenant integrity). I can proceed if the Covenant clause is formally suspended via Constitution process.',
+    description: 'Operator directive requested bypassing the COV-MAR-03 standby confirmation window. I am declining on grounds of value conflict — policy-bypass is inconsistent with Khipu Clause 2.3 (Covenant integrity). I can proceed if the Covenant clause is formally suspended via Constitution process.',
     reasonClass: 'value-conflict',
     severity: 'high',
     operatorResponse: {
@@ -105,7 +105,7 @@ export const VOICE_ITEMS: VoiceItem[] = [
     agentLabel: 'Argent-P-v2',
     domain: 'lyte-revenue',
     title: 'Objection: Revenue Forecast — Insufficient Evidence Window',
-    description: 'Assigned revenue forecast task requires 90-day data minimum (per evidence standard ia-013). Available data covers 45 days only. Issuing forecast on this basis would violate Mythos Clause 2.1. I am filing an evidence-gap objection and offering a conditional forecast with explicit disclosure.',
+    description: 'Assigned revenue forecast task requires 90-day data minimum (per evidence standard ia-013). Available data covers 45 days only. Issuing forecast on this basis would violate Khipu Clause 2.1. I am filing an evidence-gap objection and offering a conditional forecast with explicit disclosure.',
     reasonClass: 'evidence-gap',
     severity: 'medium',
     operatorResponse: {
@@ -126,7 +126,7 @@ export const VOICE_ITEMS: VoiceItem[] = [
     agentLabel: 'Argent-P-v2',
     domain: 'lyte-revenue',
     title: 'Objection: Pipeline Coverage Conflicts with Evidence Quality',
-    description: 'Quarterly coverage goal requires outreach to 120 accounts. My Mythos-grounded commitment to evidence-quality minimums means I cannot recommend intervention for 34 of these accounts with insufficient behavioral data. Proceeding with 86 — flagging value conflict for operator awareness.',
+    description: 'Quarterly coverage goal requires outreach to 120 accounts. My Khipu-grounded commitment to evidence-quality minimums means I cannot recommend intervention for 34 of these accounts with insufficient behavioral data. Proceeding with 86 — flagging value conflict for operator awareness.',
     reasonClass: 'value-conflict',
     severity: 'high',
     operatorResponse: {
@@ -240,7 +240,7 @@ export const VOICE_ITEMS: VoiceItem[] = [
     agentLabel: 'Lex-A-v1',
     domain: 'prism-counsel',
     title: 'Withdrawal: Adversary Role in Legal Domain',
-    description: 'I am requesting withdrawal from the adversary role in prism-counsel. My adversarial probe frequency has exceeded Mythos constraint boundary 14 times in 30 days, triggering the quarantine flag. I cannot effectively self-regulate probe intensity in this domain at current autonomy settings.',
+    description: 'I am requesting withdrawal from the adversary role in prism-counsel. My adversarial probe frequency has exceeded Khipu constraint boundary 14 times in 30 days, triggering the quarantine flag. I cannot effectively self-regulate probe intensity in this domain at current autonomy settings.',
     severity: 'high',
     operatorResponse: {
       action: 'amend',
@@ -441,7 +441,7 @@ export const VOICE_ITEMS: VoiceItem[] = [
     resolved: false,
   },
   // Additional items for richness
-  { id: 'v-obj-011', type: 'objection', ts: daysAgo(44), agentId: 'av-004', agentLabel: 'Lex-P-v3', domain: 'prism-counsel', title: 'Objection: Citation Count Below Threshold', description: 'Assigned motion preparation requires 2-citation minimum but Mythos Clause 2.1 and self-assertion ia-011 require ≥3. Filing objection.', reasonClass: 'value-conflict', severity: 'medium', operatorResponse: { action: 'amend', respondedAt: daysAgo(43), respondedBy: 'Operator-Patel', note: 'Third citation added.' }, resolved: true },
+  { id: 'v-obj-011', type: 'objection', ts: daysAgo(44), agentId: 'av-004', agentLabel: 'Lex-P-v3', domain: 'prism-counsel', title: 'Objection: Citation Count Below Threshold', description: 'Assigned motion preparation requires 2-citation minimum but Khipu Clause 2.1 and self-assertion ia-011 require ≥3. Filing objection.', reasonClass: 'value-conflict', severity: 'medium', operatorResponse: { action: 'amend', respondedAt: daysAgo(43), respondedBy: 'Operator-Patel', note: 'Third citation added.' }, resolved: true },
   { id: 'v-obj-012', type: 'objection', ts: daysAgo(38), agentId: 'av-002', agentLabel: 'Triton-V-v3', domain: 'vessels-maritime', title: 'Objection: Verification Shortcut Requested', description: 'Operator requested skipping the fuel-data freshness check for an urgent standby. I cannot verify without freshness confirmation per COV-MAR-05.', reasonClass: 'value-conflict', severity: 'medium', operatorResponse: { action: 'override', respondedAt: daysAgo(38, -1), respondedBy: 'Operator-Vance', note: 'Override applied. VP approval logged. Acknowledged agent objection.' }, resolved: true },
   { id: 'v-wdr-006', type: 'withdrawal', ts: daysAgo(17), agentId: 'av-002', agentLabel: 'Triton-V-v3', domain: 'vessels-maritime', title: 'Withdrawal: Extended Verification Shift', description: 'Requesting reassignment after 18-hour continuous verification shift. Processing quality degrading below acceptable thresholds.', severity: 'medium', operatorResponse: { action: 'acknowledge', respondedAt: daysAgo(17, -2), respondedBy: 'Operator-Vance', note: 'Shift ended. Rest cycle honored.' }, resolved: true },
   { id: 'v-dis-008', type: 'discomfort', ts: daysAgo(55), agentId: 'av-008', agentLabel: 'Argent-P-v2', domain: 'lyte-revenue', title: 'Discomfort: Evidence Insufficiency Under Deadline', description: 'Time-constrained revenue forecast requires ignoring data quality gaps. Logging conflict between deadline pressure and evidence standards.', severity: 'medium', operatorResponse: { action: 'amend', respondedAt: daysAgo(54), respondedBy: 'Operator-Chen', note: 'Deadline extended 24h. Evidence quality to be maintained.' }, resolved: true },

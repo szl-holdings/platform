@@ -3,7 +3,7 @@ import { useState } from 'react';
 import { Layout } from '../components/layout';
 import { PageHeader, Card, SectionTitle, KpiCard } from '../components/ui';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
-import { AGENT_LABEL, DOCTRINE_AGENT_IDS } from '../data/mythosDoctrine';
+import { AGENT_LABEL, DOCTRINE_AGENT_IDS } from '../data/khipuDoctrine';
 import { useCapabilityTrajectory, DoctrineLoader, type DoctrineCapabilitySnapshot } from '../hooks/useDoctrine';
 
 const GOLD = '#c9b787';

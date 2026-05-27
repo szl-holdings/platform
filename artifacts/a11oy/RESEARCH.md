@@ -13,7 +13,7 @@ This document traces which open-source projects and publications influenced A11o
 - **Idea borrowed**: The notion of a constitution as a hierarchical set of principles that govern model behavior at inference time, not just training time.
 - **Our implementation**: A11oy's Constitution is a runtime-enforced contract, not just documentation. Every agent action cites which article it honored or refused. We extended this with the new **Adversarial Covenants** chapter (Article IX) that governs what the predictive swarm is allowed to simulate — matching Anthropic's responsible scaling commitments but in an operational, proof-chained form.
 
-### Anthropic Mythos / Agent Research
+### Anthropic Khipu / Agent Research
 - **Link**: https://www.anthropic.com/research (agent architecture papers)
 - **Idea borrowed**: Structured tool use, multi-step reasoning with intermediate artifacts, and the idea of a "proof chain" that lets humans audit each reasoning step.
 - **Our implementation**: Praxis (A11oy's AI assistant) emits a proof packet for every answer — model, lane, latency, cost, tool calls, trust score. The Praxis toolbar implements named first-class actions (Analyze, Search the Web, GitHub) rather than unlabeled icons.

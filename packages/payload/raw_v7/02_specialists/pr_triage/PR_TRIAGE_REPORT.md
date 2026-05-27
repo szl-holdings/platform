@@ -26,23 +26,23 @@ All are categorized **CLOSE** pending content remediation by the author.
 
 | PR | Repo | Branch | Patterns Hit | Notes |
 |---|---|---|---|---|
-| [#18](https://github.com/szl-holdings/amaru/pull/18) | `amaru` | `polish/hygiene-and-doctrine-sweep` | `jr.`, `alloyscape`, `glass wing`, `glasswing`, `mythos`, `stephen paul`, `perplexity computer`, `anonymous` | Hygiene sweep PR body contains all 8 forbidden patterns — must be scrubbed befor |
-| [#19](https://github.com/szl-holdings/a11oy/pull/19) | `a11oy` | `polish/hygiene-and-doctrine-sweep` | `jr.`, `alloyscape`, `glass wing`, `glasswing`, `mythos`, `stephen paul`, `perplexity computer`, `anonymous` | Hygiene sweep PR body contains all 8 forbidden patterns — must be scrubbed befor |
+| [#18](https://github.com/szl-holdings/amaru/pull/18) | `amaru` | `polish/hygiene-and-doctrine-sweep` | `jr.`, `alloyscape`, `glass wing`, `pillpintu`, `khipu`, `stephen paul`, `perplexity computer`, `anonymous` | Hygiene sweep PR body contains all 8 forbidden patterns — must be scrubbed befor |
+| [#19](https://github.com/szl-holdings/a11oy/pull/19) | `a11oy` | `polish/hygiene-and-doctrine-sweep` | `jr.`, `alloyscape`, `glass wing`, `pillpintu`, `khipu`, `stephen paul`, `perplexity computer`, `anonymous` | Hygiene sweep PR body contains all 8 forbidden patterns — must be scrubbed befor |
 | [#15](https://github.com/szl-holdings/a11oy/pull/15) | `a11oy` | `feat/lambda-ql-v0.1` | `jr.` | PR body contains forbidden identity pattern 'Jr.' in author block — doctrine vio |
-| [#18](https://github.com/szl-holdings/sentra/pull/18) | `sentra` | `polish/hygiene-and-doctrine-sweep` | `jr.`, `alloyscape`, `glass wing`, `glasswing`, `mythos`, `stephen paul`, `perplexity computer`, `anonymous` | Hygiene sweep PR body contains all 8 forbidden patterns — must be scrubbed befor |
-| [#18](https://github.com/szl-holdings/terra/pull/18) | `terra` | `polish/hygiene-and-doctrine-sweep` | `jr.`, `alloyscape`, `glass wing`, `glasswing`, `mythos`, `stephen paul`, `perplexity computer`, `anonymous` | Hygiene sweep PR body contains all 8 forbidden patterns — must be scrubbed befor |
-| [#18](https://github.com/szl-holdings/vessels/pull/18) | `vessels` | `polish/hygiene-and-doctrine-sweep` | `jr.`, `alloyscape`, `glass wing`, `glasswing`, `mythos`, `stephen paul`, `perplexity computer`, `anonymous` | Hygiene sweep PR body contains all 8 forbidden patterns — must be scrubbed befor |
-| [#18](https://github.com/szl-holdings/counsel/pull/18) | `counsel` | `polish/hygiene-and-doctrine-sweep` | `jr.`, `alloyscape`, `glass wing`, `glasswing`, `mythos`, `stephen paul`, `perplexity computer`, `anonymous` | Hygiene sweep PR body contains all 8 forbidden patterns — must be scrubbed befor |
-| [#18](https://github.com/szl-holdings/carlota-jo/pull/18) | `carlota-jo` | `polish/hygiene-and-doctrine-sweep` | `jr.`, `alloyscape`, `glass wing`, `glasswing`, `mythos`, `stephen paul`, `perplexity computer`, `anonymous` | Hygiene sweep PR body contains all 8 forbidden patterns — must be scrubbed befor |
-| [#36](https://github.com/szl-holdings/ouroboros-thesis/pull/36) | `ouroboros-thesis` | `doctrine/v13-readme-citation` | `jr.`, `alloyscape`, `glasswing`, `mythos`, `stephen paul`, `perplexity computer` | PR body contains forbidden patterns as grep audit arguments — body itself trigge |
-| [#16](https://github.com/szl-holdings/lutar-lean/pull/16) | `lutar-lean` | `polish/hygiene-and-doctrine-sweep` | `jr.`, `alloyscape`, `glass wing`, `glasswing`, `mythos`, `stephen paul`, `perplexity computer`, `anonymous` | Hygiene sweep PR body contains all 8 forbidden patterns — must be scrubbed befor |
+| [#18](https://github.com/szl-holdings/sentra/pull/18) | `sentra` | `polish/hygiene-and-doctrine-sweep` | `jr.`, `alloyscape`, `glass wing`, `pillpintu`, `khipu`, `stephen paul`, `perplexity computer`, `anonymous` | Hygiene sweep PR body contains all 8 forbidden patterns — must be scrubbed befor |
+| [#18](https://github.com/szl-holdings/terra/pull/18) | `terra` | `polish/hygiene-and-doctrine-sweep` | `jr.`, `alloyscape`, `glass wing`, `pillpintu`, `khipu`, `stephen paul`, `perplexity computer`, `anonymous` | Hygiene sweep PR body contains all 8 forbidden patterns — must be scrubbed befor |
+| [#18](https://github.com/szl-holdings/vessels/pull/18) | `vessels` | `polish/hygiene-and-doctrine-sweep` | `jr.`, `alloyscape`, `glass wing`, `pillpintu`, `khipu`, `stephen paul`, `perplexity computer`, `anonymous` | Hygiene sweep PR body contains all 8 forbidden patterns — must be scrubbed befor |
+| [#18](https://github.com/szl-holdings/counsel/pull/18) | `counsel` | `polish/hygiene-and-doctrine-sweep` | `jr.`, `alloyscape`, `glass wing`, `pillpintu`, `khipu`, `stephen paul`, `perplexity computer`, `anonymous` | Hygiene sweep PR body contains all 8 forbidden patterns — must be scrubbed befor |
+| [#18](https://github.com/szl-holdings/carlota-jo/pull/18) | `carlota-jo` | `polish/hygiene-and-doctrine-sweep` | `jr.`, `alloyscape`, `glass wing`, `pillpintu`, `khipu`, `stephen paul`, `perplexity computer`, `anonymous` | Hygiene sweep PR body contains all 8 forbidden patterns — must be scrubbed befor |
+| [#36](https://github.com/szl-holdings/ouroboros-thesis/pull/36) | `ouroboros-thesis` | `doctrine/v13-readme-citation` | `jr.`, `alloyscape`, `pillpintu`, `khipu`, `stephen paul`, `perplexity computer` | PR body contains forbidden patterns as grep audit arguments — body itself trigge |
+| [#16](https://github.com/szl-holdings/lutar-lean/pull/16) | `lutar-lean` | `polish/hygiene-and-doctrine-sweep` | `jr.`, `alloyscape`, `glass wing`, `pillpintu`, `khipu`, `stephen paul`, `perplexity computer`, `anonymous` | Hygiene sweep PR body contains all 8 forbidden patterns — must be scrubbed befor |
 | [#11](https://github.com/szl-holdings/lutar-lean/pull/11) | `lutar-lean` | `feat/graphhop-ragreceipt-t7` | `jr.` | PR body contains forbidden identity pattern 'Jr.' in author block — doctrine vio |
-| [#12](https://github.com/szl-holdings/szl-trust/pull/12) | `szl-trust` | `polish/hygiene-and-doctrine-sweep` | `jr.`, `alloyscape`, `glass wing`, `glasswing`, `mythos`, `stephen paul`, `perplexity computer`, `anonymous` | Hygiene sweep PR body contains all 8 forbidden patterns — must be scrubbed befor |
-| [#11](https://github.com/szl-holdings/szl-cookbook/pull/11) | `szl-cookbook` | `polish/hygiene-and-doctrine-sweep` | `jr.`, `alloyscape`, `glass wing`, `glasswing`, `mythos`, `stephen paul`, `perplexity computer`, `anonymous` | Hygiene sweep PR body contains all 8 forbidden patterns — must be scrubbed befor |
-| [#13](https://github.com/szl-holdings/szl-brand/pull/13) | `szl-brand` | `polish/hygiene-and-doctrine-sweep` | `jr.`, `alloyscape`, `glasswing` | Hygiene sweep PR body contains all 8 forbidden patterns — must be scrubbed befor |
-| [#10](https://github.com/szl-holdings/szl-brand/pull/10) | `szl-brand` | `doctrine/anatomy-author-fix` | `jr.`, `alloyscape`, `glass wing`, `glasswing`, `mythos`, `perplexity computer`, `anonymous` | PR body references forbidden patterns in 'was X' correction context — body still |
+| [#12](https://github.com/szl-holdings/szl-trust/pull/12) | `szl-trust` | `polish/hygiene-and-doctrine-sweep` | `jr.`, `alloyscape`, `glass wing`, `pillpintu`, `khipu`, `stephen paul`, `perplexity computer`, `anonymous` | Hygiene sweep PR body contains all 8 forbidden patterns — must be scrubbed befor |
+| [#11](https://github.com/szl-holdings/szl-cookbook/pull/11) | `szl-cookbook` | `polish/hygiene-and-doctrine-sweep` | `jr.`, `alloyscape`, `glass wing`, `pillpintu`, `khipu`, `stephen paul`, `perplexity computer`, `anonymous` | Hygiene sweep PR body contains all 8 forbidden patterns — must be scrubbed befor |
+| [#13](https://github.com/szl-holdings/szl-brand/pull/13) | `szl-brand` | `polish/hygiene-and-doctrine-sweep` | `jr.`, `alloyscape`, `pillpintu` | Hygiene sweep PR body contains all 8 forbidden patterns — must be scrubbed befor |
+| [#10](https://github.com/szl-holdings/szl-brand/pull/10) | `szl-brand` | `doctrine/anatomy-author-fix` | `jr.`, `alloyscape`, `glass wing`, `pillpintu`, `khipu`, `perplexity computer`, `anonymous` | PR body references forbidden patterns in 'was X' correction context — body still |
 | [#8](https://github.com/szl-holdings/szl-brand/pull/8) | `szl-brand` | `chore/security-10-10` | `jr.` | PR body contains forbidden identity pattern 'Jr.' in author block — doctrine vio |
-| [#32](https://github.com/szl-holdings/.github/pull/32) | `.github` | `polish/hygiene-and-doctrine-sweep` | `jr.`, `alloyscape`, `glass wing`, `glasswing`, `mythos`, `stephen paul`, `perplexity computer`, `anonymous` | Hygiene sweep PR body contains all 8 forbidden patterns — must be scrubbed befor |
+| [#32](https://github.com/szl-holdings/.github/pull/32) | `.github` | `polish/hygiene-and-doctrine-sweep` | `jr.`, `alloyscape`, `glass wing`, `pillpintu`, `khipu`, `stephen paul`, `perplexity computer`, `anonymous` | Hygiene sweep PR body contains all 8 forbidden patterns — must be scrubbed befor |
 | [#29](https://github.com/szl-holdings/.github/pull/29) | `.github` | `feat/doctrine-v2` | `jr.` | PR body contains forbidden identity pattern 'Jr.' in author block — doctrine vio |
 
 ---
@@ -384,84 +384,84 @@ Includes 13 hygiene-sweep doctrine violations + 5 additional doctrine/stale issu
 **[amaru] #18:** polish(hygiene+doctrine): hygiene file backfill + doctrine sweep — **DOCTRINE ESCALATION**
   - Branch: `polish/hygiene-and-doctrine-sweep`
   - CI: ✅ passing | Mergeable: MERGEABLE | Age: 0d | Draft: True
-  - Doctrine hits: `jr.`, `alloyscape`, `glass wing`, `glasswing`, `mythos`, `stephen paul`, `perplexity computer`, `anonymous`
+  - Doctrine hits: `jr.`, `alloyscape`, `glass wing`, `pillpintu`, `khipu`, `stephen paul`, `perplexity computer`, `anonymous`
   - Reason: Hygiene sweep PR body contains all 8 forbidden patterns — must be scrubbed before merge
   - Command: `gh pr close 18 --repo szl-holdings/amaru --comment 'Closing: Hygiene sweep PR body contains all 8 forbidden patterns — must be scrubbed befor'`
 
 **[a11oy] #19:** polish(hygiene+doctrine): hygiene file backfill + doctrine sweep — **DOCTRINE ESCALATION**
   - Branch: `polish/hygiene-and-doctrine-sweep`
   - CI: ✅ passing | Mergeable: UNKNOWN | Age: 0d | Draft: True
-  - Doctrine hits: `jr.`, `alloyscape`, `glass wing`, `glasswing`, `mythos`, `stephen paul`, `perplexity computer`, `anonymous`
+  - Doctrine hits: `jr.`, `alloyscape`, `glass wing`, `pillpintu`, `khipu`, `stephen paul`, `perplexity computer`, `anonymous`
   - Reason: Hygiene sweep PR body contains all 8 forbidden patterns — must be scrubbed before merge
   - Command: `gh pr close 19 --repo szl-holdings/a11oy --comment 'Closing: Hygiene sweep PR body contains all 8 forbidden patterns — must be scrubbed befor'`
 
 **[sentra] #18:** polish(hygiene+doctrine): hygiene file backfill + doctrine sweep — **DOCTRINE ESCALATION**
   - Branch: `polish/hygiene-and-doctrine-sweep`
   - CI: ✅ passing | Mergeable: MERGEABLE | Age: 0d | Draft: True
-  - Doctrine hits: `jr.`, `alloyscape`, `glass wing`, `glasswing`, `mythos`, `stephen paul`, `perplexity computer`, `anonymous`
+  - Doctrine hits: `jr.`, `alloyscape`, `glass wing`, `pillpintu`, `khipu`, `stephen paul`, `perplexity computer`, `anonymous`
   - Reason: Hygiene sweep PR body contains all 8 forbidden patterns — must be scrubbed before merge
   - Command: `gh pr close 18 --repo szl-holdings/sentra --comment 'Closing: Hygiene sweep PR body contains all 8 forbidden patterns — must be scrubbed befor'`
 
 **[terra] #18:** polish(hygiene+doctrine): hygiene file backfill + doctrine sweep — **DOCTRINE ESCALATION**
   - Branch: `polish/hygiene-and-doctrine-sweep`
   - CI: ✅ passing | Mergeable: MERGEABLE | Age: 0d | Draft: True
-  - Doctrine hits: `jr.`, `alloyscape`, `glass wing`, `glasswing`, `mythos`, `stephen paul`, `perplexity computer`, `anonymous`
+  - Doctrine hits: `jr.`, `alloyscape`, `glass wing`, `pillpintu`, `khipu`, `stephen paul`, `perplexity computer`, `anonymous`
   - Reason: Hygiene sweep PR body contains all 8 forbidden patterns — must be scrubbed before merge
   - Command: `gh pr close 18 --repo szl-holdings/terra --comment 'Closing: Hygiene sweep PR body contains all 8 forbidden patterns — must be scrubbed befor'`
 
 **[vessels] #18:** polish(hygiene+doctrine): hygiene file backfill + doctrine sweep — **DOCTRINE ESCALATION**
   - Branch: `polish/hygiene-and-doctrine-sweep`
   - CI: ✅ passing | Mergeable: MERGEABLE | Age: 0d | Draft: True
-  - Doctrine hits: `jr.`, `alloyscape`, `glass wing`, `glasswing`, `mythos`, `stephen paul`, `perplexity computer`, `anonymous`
+  - Doctrine hits: `jr.`, `alloyscape`, `glass wing`, `pillpintu`, `khipu`, `stephen paul`, `perplexity computer`, `anonymous`
   - Reason: Hygiene sweep PR body contains all 8 forbidden patterns — must be scrubbed before merge
   - Command: `gh pr close 18 --repo szl-holdings/vessels --comment 'Closing: Hygiene sweep PR body contains all 8 forbidden patterns — must be scrubbed befor'`
 
 **[counsel] #18:** polish(hygiene+doctrine): hygiene file backfill + doctrine sweep — **DOCTRINE ESCALATION**
   - Branch: `polish/hygiene-and-doctrine-sweep`
   - CI: ✅ passing | Mergeable: MERGEABLE | Age: 0d | Draft: True
-  - Doctrine hits: `jr.`, `alloyscape`, `glass wing`, `glasswing`, `mythos`, `stephen paul`, `perplexity computer`, `anonymous`
+  - Doctrine hits: `jr.`, `alloyscape`, `glass wing`, `pillpintu`, `khipu`, `stephen paul`, `perplexity computer`, `anonymous`
   - Reason: Hygiene sweep PR body contains all 8 forbidden patterns — must be scrubbed before merge
   - Command: `gh pr close 18 --repo szl-holdings/counsel --comment 'Closing: Hygiene sweep PR body contains all 8 forbidden patterns — must be scrubbed befor'`
 
 **[carlota-jo] #18:** polish(hygiene+doctrine): hygiene file backfill + doctrine sweep — **DOCTRINE ESCALATION**
   - Branch: `polish/hygiene-and-doctrine-sweep`
   - CI: ✅ passing | Mergeable: MERGEABLE | Age: 0d | Draft: True
-  - Doctrine hits: `jr.`, `alloyscape`, `glass wing`, `glasswing`, `mythos`, `stephen paul`, `perplexity computer`, `anonymous`
+  - Doctrine hits: `jr.`, `alloyscape`, `glass wing`, `pillpintu`, `khipu`, `stephen paul`, `perplexity computer`, `anonymous`
   - Reason: Hygiene sweep PR body contains all 8 forbidden patterns — must be scrubbed before merge
   - Command: `gh pr close 18 --repo szl-holdings/carlota-jo --comment 'Closing: Hygiene sweep PR body contains all 8 forbidden patterns — must be scrubbed befor'`
 
 **[lutar-lean] #16:** polish(hygiene+doctrine): hygiene file backfill + doctrine sweep — **DOCTRINE ESCALATION**
   - Branch: `polish/hygiene-and-doctrine-sweep`
   - CI: ✅ passing | Mergeable: UNKNOWN | Age: 0d | Draft: True
-  - Doctrine hits: `jr.`, `alloyscape`, `glass wing`, `glasswing`, `mythos`, `stephen paul`, `perplexity computer`, `anonymous`
+  - Doctrine hits: `jr.`, `alloyscape`, `glass wing`, `pillpintu`, `khipu`, `stephen paul`, `perplexity computer`, `anonymous`
   - Reason: Hygiene sweep PR body contains all 8 forbidden patterns — must be scrubbed before merge
   - Command: `gh pr close 16 --repo szl-holdings/lutar-lean --comment 'Closing: Hygiene sweep PR body contains all 8 forbidden patterns — must be scrubbed befor'`
 
 **[szl-trust] #12:** polish(hygiene+doctrine): hygiene file backfill + doctrine sweep — **DOCTRINE ESCALATION**
   - Branch: `polish/hygiene-and-doctrine-sweep`
   - CI: ✅ passing | Mergeable: MERGEABLE | Age: 0d | Draft: True
-  - Doctrine hits: `jr.`, `alloyscape`, `glass wing`, `glasswing`, `mythos`, `stephen paul`, `perplexity computer`, `anonymous`
+  - Doctrine hits: `jr.`, `alloyscape`, `glass wing`, `pillpintu`, `khipu`, `stephen paul`, `perplexity computer`, `anonymous`
   - Reason: Hygiene sweep PR body contains all 8 forbidden patterns — must be scrubbed before merge
   - Command: `gh pr close 12 --repo szl-holdings/szl-trust --comment 'Closing: Hygiene sweep PR body contains all 8 forbidden patterns — must be scrubbed befor'`
 
 **[szl-cookbook] #11:** polish(hygiene+doctrine): hygiene file backfill + doctrine sweep — **DOCTRINE ESCALATION**
   - Branch: `polish/hygiene-and-doctrine-sweep`
   - CI: ✅ passing | Mergeable: MERGEABLE | Age: 0d | Draft: True
-  - Doctrine hits: `jr.`, `alloyscape`, `glass wing`, `glasswing`, `mythos`, `stephen paul`, `perplexity computer`, `anonymous`
+  - Doctrine hits: `jr.`, `alloyscape`, `glass wing`, `pillpintu`, `khipu`, `stephen paul`, `perplexity computer`, `anonymous`
   - Reason: Hygiene sweep PR body contains all 8 forbidden patterns — must be scrubbed before merge
   - Command: `gh pr close 11 --repo szl-holdings/szl-cookbook --comment 'Closing: Hygiene sweep PR body contains all 8 forbidden patterns — must be scrubbed befor'`
 
 **[szl-brand] #13:** polish(hygiene+doctrine): hygiene file backfill + doctrine sweep — **DOCTRINE ESCALATION**
   - Branch: `polish/hygiene-and-doctrine-sweep`
   - CI: ✅ passing | Mergeable: MERGEABLE | Age: 0d | Draft: True
-  - Doctrine hits: `jr.`, `alloyscape`, `glasswing`
+  - Doctrine hits: `jr.`, `alloyscape`, `pillpintu`
   - Reason: Hygiene sweep PR body contains all 8 forbidden patterns — must be scrubbed before merge
   - Command: `gh pr close 13 --repo szl-holdings/szl-brand --comment 'Closing: Hygiene sweep PR body contains all 8 forbidden patterns — must be scrubbed befor'`
 
 **[.github] #32:** polish(hygiene+doctrine): hygiene file backfill + doctrine sweep — **DOCTRINE ESCALATION**
   - Branch: `polish/hygiene-and-doctrine-sweep`
   - CI: — none | Mergeable: MERGEABLE | Age: 0d | Draft: True
-  - Doctrine hits: `jr.`, `alloyscape`, `glass wing`, `glasswing`, `mythos`, `stephen paul`, `perplexity computer`, `anonymous`
+  - Doctrine hits: `jr.`, `alloyscape`, `glass wing`, `pillpintu`, `khipu`, `stephen paul`, `perplexity computer`, `anonymous`
   - Reason: Hygiene sweep PR body contains all 8 forbidden patterns — must be scrubbed before merge
   - Command: `gh pr close 32 --repo szl-holdings/.github --comment 'Closing: Hygiene sweep PR body contains all 8 forbidden patterns — must be scrubbed befor'`
 
@@ -475,7 +475,7 @@ Includes 13 hygiene-sweep doctrine violations + 5 additional doctrine/stale issu
 **[ouroboros-thesis] #36:** doctrine(thesis): v13 latest-paper badge + v12/v13 DOI rows + CITATION.cff bump — **DOCTRINE ESCALATION**
   - Branch: `doctrine/v13-readme-citation`
   - CI: ✅ passing | Mergeable: UNKNOWN | Age: 0d | Draft: True
-  - Doctrine hits: `jr.`, `alloyscape`, `glasswing`, `mythos`, `stephen paul`, `perplexity computer`
+  - Doctrine hits: `jr.`, `alloyscape`, `pillpintu`, `khipu`, `stephen paul`, `perplexity computer`
   - Reason: PR body contains forbidden patterns as grep audit arguments — body itself triggers doctrine flag
   - Command: `gh pr close 36 --repo szl-holdings/ouroboros-thesis --comment 'Closing: PR body contains forbidden patterns as grep audit arguments — body itself trigge'`
 
@@ -489,7 +489,7 @@ Includes 13 hygiene-sweep doctrine violations + 5 additional doctrine/stale issu
 **[szl-brand] #10:** docs(anatomy): doctrine fix — author metadata + PNG previews — **DOCTRINE ESCALATION**
   - Branch: `doctrine/anatomy-author-fix`
   - CI: ✅ passing | Mergeable: MERGEABLE | Age: 0d | Draft: False
-  - Doctrine hits: `jr.`, `alloyscape`, `glass wing`, `glasswing`, `mythos`, `perplexity computer`, `anonymous`
+  - Doctrine hits: `jr.`, `alloyscape`, `glass wing`, `pillpintu`, `khipu`, `perplexity computer`, `anonymous`
   - Reason: PR body references forbidden patterns in 'was X' correction context — body still contains violations
   - Command: `gh pr close 10 --repo szl-holdings/szl-brand --comment 'Closing: PR body references forbidden patterns in was X correction context — body still c'`
 

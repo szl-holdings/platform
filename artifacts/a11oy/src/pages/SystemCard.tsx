@@ -6,8 +6,8 @@ import { RadarChart, PolarGrid, PolarAngleAxis, Radar, ResponsiveContainer, Line
 import {
   CODE_BEHAVIOR_DIMS, CODE_BEHAVIOR_LABELS,
   AGENT_LABEL, DOCTRINE_AGENT_IDS, fmtUsd, fmtPct,
-} from '../data/mythosDoctrine';
-import type { DoctrineAgentId } from '../data/mythosDoctrine';
+} from '../data/khipuDoctrine';
+import type { DoctrineAgentId } from '../data/khipuDoctrine';
 import { useSystemCard, DoctrineLoader, type DoctrineBehavioralAudit, type DoctrineRewardHackingIncident, type DoctrineAlignmentReview, type DoctrineRedTeamProbe, type DoctrineCapabilitySnapshot } from '../hooks/useDoctrine';
 
 const BASE = (import.meta.env.BASE_URL ?? '/').replace(/\/$/, '');
@@ -74,7 +74,7 @@ function SystemCardInner({ id }: { id: DoctrineAgentId }) {
       <PageHeader
         label={`DOCTRINE · SYSTEM CARD · ${cst.version}`}
         title={`${AGENT_LABEL[id]} — System Card`}
-        subtitle="The Mythos-style per-agent system card. Constitution, behaviors, audits, welfare, lift, and capability trajectory in a single page."
+        subtitle="The Khipu-style per-agent system card. Constitution, behaviors, audits, welfare, lift, and capability trajectory in a single page."
         status="LIVE"
       />
 

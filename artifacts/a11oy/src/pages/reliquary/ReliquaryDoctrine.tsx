@@ -23,10 +23,10 @@ const INNOVATIONS = [
     icon: '⊸',
   },
   {
-    id: 'glasswing-snapshots',
-    title: 'III. Glasswing Snapshots',
+    id: 'pillpintu-snapshots',
+    title: 'III. Pillpintu Snapshots',
     subtitle: 'Deterministic, content-addressed, time-frozen governance manifests',
-    description: `A Glasswing Snapshot is a content-addressed manifest that pins the exact state of an entire decision context — model revision, prompt version, dataset hash, agent definition, active policy, and doctrine revision — at a single instant. The manifest itself is SHA-256 hashed, making any tampering immediately detectable. An auditor can reconstruct the complete governance state years after a decision was made.`,
+    description: `A Pillpintu Snapshot is a content-addressed manifest that pins the exact state of an entire decision context — model revision, prompt version, dataset hash, agent definition, active policy, and doctrine revision — at a single instant. The manifest itself is SHA-256 hashed, making any tampering immediately detectable. An auditor can reconstruct the complete governance state years after a decision was made.`,
     regulatory: 'EU AI Act Art. 12(c) — technical documentation must include the computational resources used and the results of any tests performed.',
     nist: 'NIST AI RMF MEASURE 2.6 — the AI system and its components are evaluated for performance across its lifecycle.',
     color: '#a78bfa',
@@ -80,7 +80,7 @@ export function ReliquaryDoctrine() {
       <div style={{ padding: '3rem 2rem', maxWidth: 860, margin: '0 auto' }}>
         <div style={{ textAlign: 'center', marginBottom: '3rem' }}>
           <div style={{ fontSize: 11, letterSpacing: 6, color: GOLD, textTransform: 'uppercase', fontWeight: 600, marginBottom: 14 }}>
-            Reliquary · Mythos Doctrine
+            Reliquary · Khipu Doctrine
           </div>
           <h1 style={{ fontSize: 34, fontWeight: 800, color: '#f1f5f9', margin: '0 0 16px', lineHeight: 1.2 }}>
             Seven Innovations of the<br />Provenance-Bound Cache

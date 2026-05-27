@@ -1,7 +1,7 @@
 // doctrine-scanner-exempt: legacy live-product surface; rename tracked as separate engineering debt — see scripts/check-doctrine-v6.mjs header.
 import { Layout } from '../components/layout';
 import { PageHeader, Card, SectionTitle, KpiCard, InfoRow, StatusBadge } from '../components/ui';
-import { AGENT_LABEL, MYTHOS_SPEC_VERSION } from '../data/mythosDoctrine';
+import { AGENT_LABEL, KHIPU_SPEC_VERSION } from '../data/khipuDoctrine';
 import { Link } from 'wouter';
 import {
   useConstitutions, useCavdRecords, useRobustnessSnapshots,
@@ -40,8 +40,8 @@ export function PublicTrustPortal() {
       />
 
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-6">
-        <KpiCard label="OPEN SPEC" value={MYTHOS_SPEC_VERSION} sub="CC-BY-4.0" accent="#c9b787" />
-        <KpiCard label="GLASSWING AGENTS" value={publicSnapshots.length} sub="public scores" accent="#c9b787" />
+        <KpiCard label="OPEN SPEC" value={KHIPU_SPEC_VERSION} sub="CC-BY-4.0" accent="#c9b787" />
+        <KpiCard label="PILLPINTU AGENTS" value={publicSnapshots.length} sub="public scores" accent="#c9b787" />
         <KpiCard label="CAVD DISCLOSED" value={disclosed.length} sub={`${intakeAnchored.length} anchored`} accent="#c9b787" />
         <KpiCard label="DEFENDER POOL" value={pool ? fmtCurrency(Number(pool.totalCommitted)) : '—'} sub={pool ? `${fmtCurrency(Number(pool.totalPaid))} paid` : ''} accent="#c9b787" />
       </div>
@@ -50,10 +50,10 @@ export function PublicTrustPortal() {
         <Card>
           <SectionTitle>Open Spec</SectionTitle>
           <p className="text-xs mb-3" style={{ color: 'var(--color-a11oy-text-sub)', lineHeight: 1.7 }}>
-            The Mythos Doctrine Open Spec is the format every artifact below conforms to. Version pinned to{' '}
-            <span className="font-mono" style={{ color: '#c9b787' }}>{MYTHOS_SPEC_VERSION}</span>.
+            The Khipu Doctrine Open Spec is the format every artifact below conforms to. Version pinned to{' '}
+            <span className="font-mono" style={{ color: '#c9b787' }}>{KHIPU_SPEC_VERSION}</span>.
           </p>
-          <Link href={link('/mythos-spec')} className="text-xs font-mono" style={{ color: '#c9b787' }}>
+          <Link href={link('/khipu-spec')} className="text-xs font-mono" style={{ color: '#c9b787' }}>
             View spec ›
           </Link>
         </Card>
@@ -77,7 +77,7 @@ export function PublicTrustPortal() {
       </div>
 
       <Card className="mb-4">
-        <SectionTitle>Per-agent disclosure (Glasswing-Mode agents)</SectionTitle>
+        <SectionTitle>Per-agent disclosure (Pillpintu-Mode agents)</SectionTitle>
         {cstItems.map((c: any) => {
           const snap = publicSnapshots.find((s: any) => s.agentId === c.agentId);
           return (
@@ -157,7 +157,7 @@ export function PublicTrustPortal() {
       <Card>
         <SectionTitle>Notes</SectionTitle>
         <p className="text-xs" style={{ color: 'var(--color-a11oy-text-sub)', lineHeight: 1.7 }}>
-          Every claim on this portal maps to a published artifact under the Mythos Doctrine Open Spec. If a claim cannot be backed by an artifact,
+          Every claim on this portal maps to a published artifact under the Khipu Doctrine Open Spec. If a claim cannot be backed by an artifact,
           it is not posted here. Retractions are published next to originals; originals are never edited or deleted.
         </p>
       </Card>

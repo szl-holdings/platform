@@ -3,7 +3,7 @@
   "extends": "../../tsconfig.base.json",
   "include": [
     "src/**/*",
-    "../a11oy/src/data/mythosDoctrine.ts"
+    "../a11oy/src/data/khipuDoctrine.ts"
   ],
   "exclude": [
     "node_modules",

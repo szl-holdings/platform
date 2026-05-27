@@ -1,7 +1,7 @@
 {
   "schema": "szl-holdings/fly-v7-replit-payload/v1",
   "generated_at_utc": "2026-05-16T03:06:12Z",
-  "mission": "Fly V7 \u2014 Doctrine Sweep + Hygiene + BP Fix + CITATION.cff Fix + PR Triage",
+  "mission": "Fly V7 — Doctrine Sweep + Hygiene + BP Fix + CITATION.cff Fix + PR Triage",
   "operator": {
     "byline": "Lutar, Stephen P.",
     "orcid": "0009-0001-0110-4173",
@@ -20,12 +20,10 @@
     "forbidden_patterns": [
       "AlloyScape",
       "Glass Wing",
-      "Glasswing",
-      "Mythos",
       "Perplexity Computer",
       "anonymous"
     ],
-    "mythos_exception": "Allowed only when citing Anthropic's 'Claude Mythos Preview' as third-party model name",
+    "khipu_exception": "Allowed only when citing Anthropic's 'Claude Khipu Preview' as third-party model name",
     "license_allowlist": [
       "Apache-2.0",
       "MIT",
@@ -63,7 +61,7 @@
         "agi-forecast"
       ],
       "put_payloads_ready": 6,
-      "risk": "Self-only CODEOWNERS + platform self-approve ban could deadlock merges \u2014 PM must decide review-count strategy",
+      "risk": "Self-only CODEOWNERS + platform self-approve ban could deadlock merges — PM must decide review-count strategy",
       "status": "AWAITING_CONFIRM_ACTION_PER_REPO"
     },
     "citation_fix": {
@@ -82,7 +80,7 @@
         "NEEDS_REVIEW": 38
       },
       "merge_candidates": "Dependabot bumps: codeql-action 4.35.4->4.35.5, harden-runner 2.19.1->2.19.3",
-      "close_urgency": "13 polish/hygiene-and-doctrine-sweep PRs contain all 8 forbidden patterns and are CI-green \u2014 could be merged by accident",
+      "close_urgency": "13 polish/hygiene-and-doctrine-sweep PRs contain all 8 forbidden patterns and are CI-green — could be merged by accident",
       "status": "AWAITING_CONFIRM_ACTION"
     }
   },
@@ -123,7 +121,7 @@
     }
   ],
   "pending_pm_decisions": [
-    "Glasswing/Mythos in platform repo: doctrine exception or wholesale rename?",
+    "Pillpintu/Khipu in platform repo: doctrine exception or wholesale rename?",
     "BP review-count strategy: add 2nd collaborator OR drop require_code_owner_reviews?",
     "GitHub display name patch from 'Stephen Paul Lutar Jr.' to 'Lutar, Stephen P.'?"
   ],
@@ -131,7 +129,7 @@
     "1. CLOSE 18 doctrine-violation PRs (Tier 2)",
     "2. MERGE 12 Dependabot PRs (Tier 1)",
     "3. Open 2 Hygiene PRs + 13 CITATION.cff PRs (Tier 1)",
-    "4. PM ruling on Glasswing/Mythos (Tier 4)",
+    "4. PM ruling on Pillpintu/Khipu (Tier 4)",
     "5. PATCH GitHub display name (Tier 3)",
     "6. PM ruling on BP review-count strategy (Tier 4)",
     "7. Apply 6 BP PUTs (Tier 3)",

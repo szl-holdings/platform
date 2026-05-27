@@ -18,7 +18,7 @@ export interface Signal {
   scanner: string;
 }
 
-export interface MythosNode {
+export interface KhipuNode {
   id: string;
   kind: 'concept' | 'repo' | 'paper' | 'vendor' | 'benchmark' | 'technique' | 'person';
   label: string;
@@ -28,7 +28,7 @@ export interface MythosNode {
   linkedSignalCount: number;
 }
 
-export interface MythosEdge {
+export interface KhipuEdge {
   source: string;
   target: string;
   relation: 'cites' | 'implements' | 'competes-with' | 'benchmarked-on' | 'authored-by' | 'extends';

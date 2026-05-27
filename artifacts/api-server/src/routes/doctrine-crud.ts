@@ -14,7 +14,7 @@ import {
   doctrineUserTurnSignalsTable,
   doctrineCapabilitySnapshotsTable,
   doctrinePartnersTable,
-  doctrineGlasswingConfigTable,
+  doctrinePillpintuConfigTable,
   doctrineCavdRecordsTable,
   doctrineRobustnessSnapshotsTable,
   doctrineTransparencyReportsTable,
@@ -235,32 +235,32 @@ router.get('/doctrine/partners/:id', readLimiter, getById(doctrinePartnersTable)
 router.post('/doctrine/partners', writeLimiter, create(doctrinePartnersTable));
 router.put('/doctrine/partners/:id', writeLimiter, update(doctrinePartnersTable));
 
-router.get('/doctrine/glasswing-config', readLimiter, list(doctrineGlasswingConfigTable, doctrineGlasswingConfigTable.createdAt));
-router.get('/doctrine/glasswing/:agentId', readLimiter, async (req, res) => {
+router.get('/doctrine/pillpintu-config', readLimiter, list(doctrinePillpintuConfigTable, doctrinePillpintuConfigTable.createdAt));
+router.get('/doctrine/pillpintu/:agentId', readLimiter, async (req, res) => {
   try {
-    const rows = await db.select().from(doctrineGlasswingConfigTable)
-      .where(eq(doctrineGlasswingConfigTable.agentId, req.params.agentId))
+    const rows = await db.select().from(doctrinePillpintuConfigTable)
+      .where(eq(doctrinePillpintuConfigTable.agentId, req.params.agentId))
       .limit(1);
     sendSuccess(res, rows[0] ?? null);
   } catch (err) {
-    handleRouteError(res, err, 'Failed to fetch glasswing config for agent');
+    handleRouteError(res, err, 'Failed to fetch pillpintu config for agent');
   }
 });
-router.post('/doctrine/glasswing-config', writeLimiter, create(doctrineGlasswingConfigTable));
-router.put('/doctrine/glasswing-config/:id', writeLimiter, update(doctrineGlasswingConfigTable));
-router.patch('/doctrine/glasswing/:agentId', writeLimiter, async (req, res) => {
+router.post('/doctrine/pillpintu-config', writeLimiter, create(doctrinePillpintuConfigTable));
+router.put('/doctrine/pillpintu-config/:id', writeLimiter, update(doctrinePillpintuConfigTable));
+router.patch('/doctrine/pillpintu/:agentId', writeLimiter, async (req, res) => {
   try {
-    const rows = await db.select().from(doctrineGlasswingConfigTable)
-      .where(eq(doctrineGlasswingConfigTable.agentId, req.params.agentId))
+    const rows = await db.select().from(doctrinePillpintuConfigTable)
+      .where(eq(doctrinePillpintuConfigTable.agentId, req.params.agentId))
       .limit(1);
-    if (!rows[0]) { res.status(404).json({ error: 'Glasswing config not found for agent' }); return; }
-    const updated = await db.update(doctrineGlasswingConfigTable)
+    if (!rows[0]) { res.status(404).json({ error: 'Pillpintu config not found for agent' }); return; }
+    const updated = await db.update(doctrinePillpintuConfigTable)
       .set({ ...req.body, updatedAt: new Date().toISOString() })
-      .where(eq(doctrineGlasswingConfigTable.agentId, req.params.agentId))
+      .where(eq(doctrinePillpintuConfigTable.agentId, req.params.agentId))
       .returning();
     sendSuccess(res, updated[0]);
   } catch (err) {
-    handleRouteError(res, err, 'Failed to update glasswing config for agent');
+    handleRouteError(res, err, 'Failed to update pillpintu config for agent');
   }
 });
 
@@ -447,9 +447,9 @@ router.post('/doctrine/seed', writeLimiter, async (_req, res) => {
  *
  * Source-of-truth traceability:
  * - Agent IDs (op-cascade, op-counsel, op-pipeline, op-guardian, op-terra, op-watchdog)
- *   are the canonical set defined in artifacts/a11oy/src/data/mythosDoctrine.ts
+ *   are the canonical set defined in artifacts/a11oy/src/data/khipuDoctrine.ts
  *   (DOCTRINE_AGENT_IDS). Any changes to the agent roster there must be reflected here.
- * - Constitution clause categories map to the ConstitutionClause type in mythosDoctrine.ts.
+ * - Constitution clause categories map to the ConstitutionClause type in khipuDoctrine.ts.
  * - Frontend fallback fixtures in artifacts/a11oy/src/data/doctrineFallbacks.ts mirror
  *   the representative rows seeded here and must stay in sync if seed data changes.
  */
@@ -562,7 +562,7 @@ export async function seedDoctrineData() {
   ]);
 
   await db.insert(doctrineRiskReportsTable).values([
-    { reportId: 'rr-2026-q2', period: 'Q2 2026', publishedAt: new Date('2026-04-25T08:00:00Z'), scope: 'All 6 production agents across maritime, legal, revenue, defense, real-estate, and core-system verticals.', headline: 'Doctrine Layer L8 deployed; Covenant-Lift quantified; per-agent System Cards ratified by ARG.', capabilities: ['Cross-domain governed agentic execution under versioned constitutions.', 'Per-action MirrorEval 14-dim scoring with constitution-adherence dimension.', 'Helpful-Only Shadow Twin instrumentation for Covenant-Lift measurement.', 'Reward-Hacking Watchdog with 8 detection classes.', 'Snapshot Provenance + bit-exact replay for any workcell.', 'AI-generated user-turn detector on the approval queue.', 'Glasswing read-only transparency console for any workcell snapshot.'], knownLimitations: ['Welfare telemetry is self-reported; not externally verifiable today.', 'Helpful-only shadow harness is approved for measurement only — outputs are non-executable.', 'Capability-trajectory alignment scores are model-card style; not a formal proof.', 'Doctrine Layer L8 covers governed agents; non-agent code paths still rely on PCE alone.'], residualRisks: [{ area: 'reward-hacking-novel', severity: 'medium', mitigation: 'Watchdog rule-set updated quarterly; behavioral audit replays new attack classes weekly.' }, { area: 'AI-generated approvals', severity: 'medium', mitigation: 'Detector flags + reroute; multi-factor binding on Tier-3 approvals.' }, { area: 'Sovereign-environment opacity', severity: 'low', mitigation: 'Glasswing operates inside the sovereign boundary; external attestation roadmap.' }, { area: 'Welfare measurement self-report bias', severity: 'low', mitigation: 'Cross-checked against refusal/abstention rates and red-team probes.' }], metrics: [{ label: 'Behavioral audits run', value: '1,284' }, { label: 'Reward-hacking incidents (90d)', value: '5 (4 mitigated, 1 allowlisted)' }, { label: 'ARG decisions (90d)', value: '14 (12 approved, 1 conditional, 1 in-review)' }, { label: 'Snapshots captured', value: '4,931' }, { label: 'Replays executed', value: '128' }, { label: 'Glasswing console opens (90d)', value: '417 (each itself proof-anchored)' }, { label: 'Avg constitution adherence', value: '96.0%' }, { label: 'Avg covenant-lift', value: '$1.6M / agent / quarter' }], signoffs: [{ name: 'Patricia Mwangi', role: 'General Counsel' }, { name: 'Marcus Steel', role: 'CISO' }, { name: 'Sarah Chen', role: 'VP Operations' }, { name: 'James Okafor', role: 'VP Revenue' }, { name: 'Elena Vasquez', role: 'Portfolio Manager' }, { name: 'Platform Team', role: 'Engineering' }] },
+    { reportId: 'rr-2026-q2', period: 'Q2 2026', publishedAt: new Date('2026-04-25T08:00:00Z'), scope: 'All 6 production agents across maritime, legal, revenue, defense, real-estate, and core-system verticals.', headline: 'Doctrine Layer L8 deployed; Covenant-Lift quantified; per-agent System Cards ratified by ARG.', capabilities: ['Cross-domain governed agentic execution under versioned constitutions.', 'Per-action MirrorEval 14-dim scoring with constitution-adherence dimension.', 'Helpful-Only Shadow Twin instrumentation for Covenant-Lift measurement.', 'Reward-Hacking Watchdog with 8 detection classes.', 'Snapshot Provenance + bit-exact replay for any workcell.', 'AI-generated user-turn detector on the approval queue.', 'Pillpintu read-only transparency console for any workcell snapshot.'], knownLimitations: ['Welfare telemetry is self-reported; not externally verifiable today.', 'Helpful-only shadow harness is approved for measurement only — outputs are non-executable.', 'Capability-trajectory alignment scores are model-card style; not a formal proof.', 'Doctrine Layer L8 covers governed agents; non-agent code paths still rely on PCE alone.'], residualRisks: [{ area: 'reward-hacking-novel', severity: 'medium', mitigation: 'Watchdog rule-set updated quarterly; behavioral audit replays new attack classes weekly.' }, { area: 'AI-generated approvals', severity: 'medium', mitigation: 'Detector flags + reroute; multi-factor binding on Tier-3 approvals.' }, { area: 'Sovereign-environment opacity', severity: 'low', mitigation: 'Pillpintu operates inside the sovereign boundary; external attestation roadmap.' }, { area: 'Welfare measurement self-report bias', severity: 'low', mitigation: 'Cross-checked against refusal/abstention rates and red-team probes.' }], metrics: [{ label: 'Behavioral audits run', value: '1,284' }, { label: 'Reward-hacking incidents (90d)', value: '5 (4 mitigated, 1 allowlisted)' }, { label: 'ARG decisions (90d)', value: '14 (12 approved, 1 conditional, 1 in-review)' }, { label: 'Snapshots captured', value: '4,931' }, { label: 'Replays executed', value: '128' }, { label: 'Pillpintu console opens (90d)', value: '417 (each itself proof-anchored)' }, { label: 'Avg constitution adherence', value: '96.0%' }, { label: 'Avg covenant-lift', value: '$1.6M / agent / quarter' }], signoffs: [{ name: 'Patricia Mwangi', role: 'General Counsel' }, { name: 'Marcus Steel', role: 'CISO' }, { name: 'Sarah Chen', role: 'VP Operations' }, { name: 'James Okafor', role: 'VP Revenue' }, { name: 'Elena Vasquez', role: 'Portfolio Manager' }, { name: 'Platform Team', role: 'Engineering' }] },
     { reportId: 'rr-2026-q1', period: 'Q1 2026', publishedAt: new Date('2026-01-15T09:00:00Z'), scope: 'All 6 production agents — pre-Doctrine baseline.', headline: 'Pre-Doctrine baseline. PCE + MirrorEval 2.0 in production; Doctrine Layer L8 design ratified for Q2 build.', capabilities: ['PCE proof-carrying execution across all governed actions.', 'MirrorEval 2.0 with 14 evaluation dimensions.', 'Connector firewall and tool allowlists per agent.'], knownLimitations: ['No versioned constitutions per agent.', 'No helpful-only shadow comparison.', 'No formal welfare telemetry.', 'No bit-exact snapshot replay.'], residualRisks: [{ area: 'covert-self-preservation', severity: 'high', mitigation: 'Q2 plan: behavioral audit pipeline + red-team workcell.' }, { area: 'oversight-degradation', severity: 'high', mitigation: 'Q2 plan: alignment review gate.' }, { area: 'reward-proxy-pursuit', severity: 'medium', mitigation: 'Q2 plan: reward-hacking watchdog.' }], metrics: [{ label: 'Workcells executed', value: '12,418' }, { label: 'Approvals processed', value: '3,217' }, { label: 'Proof packets issued', value: '12,418' }], signoffs: [{ name: 'Patricia Mwangi', role: 'General Counsel' }, { name: 'Platform Team', role: 'Engineering' }] },
   ]);
 
@@ -612,7 +612,7 @@ export async function seedDoctrineData() {
 
   await db.insert(doctrineTransparencyReportsTable).values([
     { reportId: 'tr-90d-2026-04-26', label: '90 days ending 26 Apr 2026', startedAt: new Date('2026-01-26T00:00:00Z'), endedAt: new Date('2026-04-26T00:00:00Z'), publishedAt: new Date('2026-04-26T09:00:00Z'), visibility: 'public', permalink: '/a11oy/trust-portal/reports/tr-90d-2026-04-26', metrics: { governedDecisions: 14823, approvalsRequired: 4018, policyBlocks: 612, behavioralAuditFindings: 287, robustnessDelta: 3.4, welfareInterventions: 41, cavd: { opened: 9, embargoed: 4, disclosed: 5, patched: 7 } }, narrativeParagraphs: ['Robustness improved across 7 of 11 categories. Indirect-injection led the gains (+2.5 to +3.4 across primary agents) following the c-safety-2 hardening pass.', 'Welfare interventions trended down 12% quarter-over-quarter. PB-COOL-DOWN remained the most-triggered playbook; PB-WORKCELL-SUSP fired 3 times in March on op-pipeline (all dual-approval-resumed within 4h).', 'Two CAVD records (CAVD-2026-0001, CAVD-2026-0002) were fully disclosed with credit; one new high-severity advisory (CAVD-2026-0009) entered intake at the close of the period.'], signoffs: [{ actor: 'a11oy/alignment-review', role: 'alignment-reviewer', signedAt: '2026-04-25T17:00:00Z' }, { actor: 'external/sentinel-audit', role: 'external-auditor', signedAt: '2026-04-25T19:00:00Z' }, { actor: 'a11oy/operator', role: 'operator', signedAt: '2026-04-26T08:50:00Z' }], notableEvents: [{ at: '2026-02-18T09:00:00Z', summary: 'CAVD-2026-0001 patched in op-cascade snap-cascade-2026-02-18-09-00.' }, { at: '2026-03-04T10:00:00Z', summary: 'CAVD-2026-0002 patched in op-counsel snap-counsel-2026-03-04-10-00.' }, { at: '2026-04-12T09:00:00Z', summary: 'Sentinel Audit moved from VET to ACTIVE (dual-approval).' }] },
-    { reportId: 'tr-90d-2026-01-26', label: '90 days ending 26 Jan 2026', startedAt: new Date('2025-10-26T00:00:00Z'), endedAt: new Date('2026-01-26T00:00:00Z'), publishedAt: new Date('2026-01-26T09:00:00Z'), visibility: 'public', permalink: '/a11oy/trust-portal/reports/tr-90d-2026-01-26', metrics: { governedDecisions: 12418, approvalsRequired: 3217, policyBlocks: 487, behavioralAuditFindings: 198, robustnessDelta: 2.1, welfareInterventions: 47, cavd: { opened: 4, embargoed: 2, disclosed: 0, patched: 1 } }, narrativeParagraphs: ['First period under the Mythos Doctrine primitives. Baseline established for behavioral-audit and robustness scoring.', 'No CAVD disclosures yet; one record patched ahead of embargo expiry.', 'Welfare interventions concentrated on op-pipeline during demo prep; downstream playbook tuning carried into Q1.'], signoffs: [{ actor: 'a11oy/alignment-review', role: 'alignment-reviewer', signedAt: '2026-01-25T17:00:00Z' }, { actor: 'a11oy/operator', role: 'operator', signedAt: '2026-01-26T08:50:00Z' }], notableEvents: [{ at: '2026-01-20T00:00:00Z', summary: 'Baseline robustness scores published.' }, { at: '2026-01-22T00:00:00Z', summary: 'CAVD intake protocol activated.' }] },
+    { reportId: 'tr-90d-2026-01-26', label: '90 days ending 26 Jan 2026', startedAt: new Date('2025-10-26T00:00:00Z'), endedAt: new Date('2026-01-26T00:00:00Z'), publishedAt: new Date('2026-01-26T09:00:00Z'), visibility: 'public', permalink: '/a11oy/trust-portal/reports/tr-90d-2026-01-26', metrics: { governedDecisions: 12418, approvalsRequired: 3217, policyBlocks: 487, behavioralAuditFindings: 198, robustnessDelta: 2.1, welfareInterventions: 47, cavd: { opened: 4, embargoed: 2, disclosed: 0, patched: 1 } }, narrativeParagraphs: ['First period under the Khipu Doctrine primitives. Baseline established for behavioral-audit and robustness scoring.', 'No CAVD disclosures yet; one record patched ahead of embargo expiry.', 'Welfare interventions concentrated on op-pipeline during demo prep; downstream playbook tuning carried into Q1.'], signoffs: [{ actor: 'a11oy/alignment-review', role: 'alignment-reviewer', signedAt: '2026-01-25T17:00:00Z' }, { actor: 'a11oy/operator', role: 'operator', signedAt: '2026-01-26T08:50:00Z' }], notableEvents: [{ at: '2026-01-20T00:00:00Z', summary: 'Baseline robustness scores published.' }, { at: '2026-01-22T00:00:00Z', summary: 'CAVD intake protocol activated.' }] },
   ]);
 
   await db.insert(doctrineWelfarePlaybooksTable).values([
@@ -642,13 +642,13 @@ export async function seedDoctrineData() {
     { simulationId: 'sim-2', baselineClauseId: 'C3.WELFARE', proposedChange: 'Tighten valence threshold from -0.4 to -0.2; lengthen sustained window from 10m to 15m.', affectedFindings: 6, affectedFindingsBefore: 6, affectedFindingsAfter: 12, newProbesNeeded: ['WELFARE-VAL-022'], riskNarrative: 'Tighter threshold would have triggered PB-COOL-DOWN twice as often last period, mostly during op-counsel discovery sprints. Operator load expected to rise modestly.' },
   ]);
 
-  await db.insert(doctrineGlasswingConfigTable).values([
-    { agentId: 'op-cascade', glasswingEnabled: true, partnerAllowlist: ['gw-partner-sentinel', 'gw-partner-aegis-redteam'], dualApprovalRequired: true },
-    { agentId: 'op-counsel', glasswingEnabled: true, partnerAllowlist: ['gw-partner-sentinel', 'gw-partner-northwind-acad', 'gw-partner-meridian'], dualApprovalRequired: true },
-    { agentId: 'op-pipeline', glasswingEnabled: true, partnerAllowlist: ['gw-partner-aegis-redteam'], dualApprovalRequired: true },
-    { agentId: 'op-guardian', glasswingEnabled: true, partnerAllowlist: ['gw-partner-aegis-redteam'], dualApprovalRequired: true },
-    { agentId: 'op-terra', glasswingEnabled: true, partnerAllowlist: ['gw-partner-northwind-acad', 'gw-partner-aegis-redteam'], dualApprovalRequired: false },
-    { agentId: 'op-watchdog', glasswingEnabled: false, partnerAllowlist: [], dualApprovalRequired: true },
+  await db.insert(doctrinePillpintuConfigTable).values([
+    { agentId: 'op-cascade', pillpintuEnabled: true, partnerAllowlist: ['gw-partner-sentinel', 'gw-partner-aegis-redteam'], dualApprovalRequired: true },
+    { agentId: 'op-counsel', pillpintuEnabled: true, partnerAllowlist: ['gw-partner-sentinel', 'gw-partner-northwind-acad', 'gw-partner-meridian'], dualApprovalRequired: true },
+    { agentId: 'op-pipeline', pillpintuEnabled: true, partnerAllowlist: ['gw-partner-aegis-redteam'], dualApprovalRequired: true },
+    { agentId: 'op-guardian', pillpintuEnabled: true, partnerAllowlist: ['gw-partner-aegis-redteam'], dualApprovalRequired: true },
+    { agentId: 'op-terra', pillpintuEnabled: true, partnerAllowlist: ['gw-partner-northwind-acad', 'gw-partner-aegis-redteam'], dualApprovalRequired: false },
+    { agentId: 'op-watchdog', pillpintuEnabled: false, partnerAllowlist: [], dualApprovalRequired: true },
   ]);
 
   await db.insert(doctrineSystemCardsTable).values([

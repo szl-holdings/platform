@@ -277,7 +277,7 @@ PUT /repos/szl-holdings/ouroboros-thesis/rulesets/16195489
 ## Doctrine Sweep Results
 
 ### Patterns checked:
-`Jr.` | `AlloyScape` | `Glass Wing` | `Glasswing` | `Mythos` | `Stephen Paul` | `Perplexity Computer` | `anonymous`
+`Jr.` | `AlloyScape` | `Glass Wing` | `Pillpintu` | `Khipu` | `Stephen Paul` | `Perplexity Computer` | `anonymous`
 
 ### szl-holdings/lutar-lean (post-merge main)
 | Pattern | Result |
@@ -285,8 +285,8 @@ PUT /repos/szl-holdings/ouroboros-thesis/rulesets/16195489
 | Jr. | CLEAN |
 | AlloyScape | CLEAN |
 | Glass Wing | CLEAN |
-| Glasswing | CLEAN |
-| Mythos | CLEAN |
+| Pillpintu | CLEAN |
+| Khipu | CLEAN |
 | Stephen Paul | CLEAN |
 | Perplexity Computer | CLEAN |
 | anonymous | CLEAN |
@@ -299,8 +299,8 @@ PUT /repos/szl-holdings/ouroboros-thesis/rulesets/16195489
 | Jr. | HIT — see below |
 | AlloyScape | CLEAN |
 | Glass Wing | CLEAN |
-| Glasswing | CLEAN |
-| Mythos | CLEAN |
+| Pillpintu | CLEAN |
+| Khipu | CLEAN |
 | Stephen Paul | HIT — see below |
 | Perplexity Computer | CLEAN |
 | anonymous | CLEAN |
@@ -318,8 +318,8 @@ PUT /repos/szl-holdings/ouroboros-thesis/rulesets/16195489
 | Jr. | HIT — multiple pre-existing files |
 | AlloyScape | HIT — 1 pre-existing file |
 | Glass Wing | CLEAN |
-| Glasswing | CLEAN |
-| Mythos | CLEAN |
+| Pillpintu | CLEAN |
+| Khipu | CLEAN |
 | Stephen Paul | HIT — multiple pre-existing files |
 | Perplexity Computer | HIT — 1 pre-existing file |
 | anonymous | CLEAN |

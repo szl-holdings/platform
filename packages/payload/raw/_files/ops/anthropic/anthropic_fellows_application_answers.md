@@ -209,8 +209,8 @@ The following 8 patterns are zero-tolerance. Each must be absent from the final 
 | `Jr.` | ABSENT ✓ |
 | `AlloyScape` | ABSENT ✓ |
 | `Glass Wing` | ABSENT ✓ |
-| `Glasswing` | ABSENT ✓ |
-| `Mythos` | ABSENT ✓ |
+| `Pillpintu` | ABSENT ✓ |
+| `Khipu` | ABSENT ✓ |
 | `Stephen Paul` | ABSENT ✓ |
 | `Perplexity Computer` | ABSENT ✓ |
 | `anonymous` | ABSENT ✓ |

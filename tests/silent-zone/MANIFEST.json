@@ -183,10 +183,10 @@
       "entry": "packages/evidence-ledger/src/index.ts"
     },
     {
-      "name": "@szl-holdings/frontier-mythos",
-      "rel": "packages/frontier-mythos",
-      "file": "tests/silent-zone/szl-holdings__frontier-mythos.smoke.test.ts",
-      "entry": "packages/frontier-mythos/src/index.ts"
+      "name": "@szl-holdings/frontier-khipu",
+      "rel": "packages/frontier-khipu",
+      "file": "tests/silent-zone/szl-holdings__frontier-khipu.smoke.test.ts",
+      "entry": "packages/frontier-khipu/src/index.ts"
     },
     {
       "name": "@szl-holdings/marketing",

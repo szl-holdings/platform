@@ -350,7 +350,7 @@ PASS — 0 violations in README.md, CITATION.cff, scorecard.yml
 
 ## 3. Doctrine Sweep Results — All Artifacts Touched
 
-| Artifact | Files Scanned | Jr. | AlloyScape | Glass Wing | Glasswing | Mythos | Stephen Paul | Perplexity Computer | anonymous | Result |
+| Artifact | Files Scanned | Jr. | AlloyScape | Glass Wing | Pillpintu | Khipu | Stephen Paul | Perplexity Computer | anonymous | Result |
 |----------|---------------|-----|------------|------------|-----------|--------|--------------|---------------------|-----------|--------|
 | lutar-lean PR #12 (before fix) | MoralGrounding.lean, MeasurabilityHonesty.lean, Axioms.lean | ❌ 3 HITS | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | VIOLATION — FIXED |
 | lutar-lean PR #12 (after fix) | Same 3 files + Lutar/ dir | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | PASS |

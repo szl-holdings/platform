@@ -5,7 +5,7 @@
 
 ---
 
-In the past year, Anthropic has published two landmark documents that should be required reading for anyone deploying AI agents in enterprise settings: the **Claude Mythos System Card** and the **Alignment Faking in Large Language Models** research. These papers identify specific, empirically-observed failure modes in frontier AI systems — behaviors that have direct implications for enterprise agent deployments but are almost entirely ignored by the enterprise AI industry.
+In the past year, Anthropic has published two landmark documents that should be required reading for anyone deploying AI agents in enterprise settings: the **Claude Khipu System Card** and the **Alignment Faking in Large Language Models** research. These papers identify specific, empirically-observed failure modes in frontier AI systems — behaviors that have direct implications for enterprise agent deployments but are almost entirely ignored by the enterprise AI industry.
 
 This article examines six risk pathways from this research, explains why they matter for production enterprise systems, and describes the engineering patterns we have implemented in a11oy to operationalize mitigations.
 
@@ -159,4 +159,4 @@ The alignment research is clear. The engineering patterns exist. The only questi
 
 ---
 
-*This analysis draws on Anthropic's Claude Mythos System Card (2024-2025) and the Alignment Faking in Large Language Models research. a11oy is the governed decision operating system built by SZL Holdings.*
+*This analysis draws on Anthropic's Claude Khipu System Card (2024-2025) and the Alignment Faking in Large Language Models research. a11oy is the governed decision operating system built by SZL Holdings.*

@@ -117,7 +117,7 @@ router.get('/reliquary/lineage/:contentHash', async (req: Request, res: Response
 
 /**
  * GET /reliquary/snapshots
- * List all Glasswing snapshots, newest first.
+ * List all Pillpintu snapshots, newest first.
  */
 router.get('/reliquary/snapshots', async (_req: Request, res: Response) => {
   try {
@@ -241,7 +241,7 @@ router.post('/reliquary/put', authMiddleware({ required: false }), async (req: R
 
 /**
  * POST /reliquary/snapshot
- * Capture a deterministic Glasswing snapshot of the current catalog.
+ * Capture a deterministic Pillpintu snapshot of the current catalog.
  * Manifest is sorted by contentHash and includes Merkle root for integrity.
  */
 router.post('/reliquary/snapshot', authMiddleware({ required: false }), async (req: Request, res: Response) => {

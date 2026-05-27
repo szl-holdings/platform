@@ -280,12 +280,12 @@ export const doctrinePartnersTable = pgTable(
 
 // doctrine-scanner-exempt: live DB table name (rename is a separate
 // migration project — see scripts/check-doctrine-v6.mjs header).
-export const doctrineGlasswingConfigTable = pgTable(
-  'doctrine_glasswing_config',
+export const doctrinePillpintuConfigTable = pgTable(
+  'doctrine_pillpintu_config',
   {
     id: serial('id').primaryKey(),
     agentId: text('agent_id').notNull(),
-    glasswingEnabled: jsonb('glasswing_enabled').notNull().default(true),
+    pillpintuEnabled: jsonb('pillpintu_enabled').notNull().default(true),
     partnerAllowlist: jsonb('partner_allowlist').notNull().default([]),
     dualApprovalRequired: jsonb('dual_approval_required').notNull().default(true),
     createdAt: timestamp('created_at').notNull().defaultNow(),
@@ -454,8 +454,8 @@ export type DoctrineCapabilitySnapshot = typeof doctrineCapabilitySnapshotsTable
 export type InsertDoctrineCapabilitySnapshot = typeof doctrineCapabilitySnapshotsTable.$inferInsert;
 export type DoctrinePartner = typeof doctrinePartnersTable.$inferSelect;
 export type InsertDoctrinePartner = typeof doctrinePartnersTable.$inferInsert;
-export type DoctrineGlasswingConfig = typeof doctrineGlasswingConfigTable.$inferSelect;
-export type InsertDoctrineGlasswingConfig = typeof doctrineGlasswingConfigTable.$inferInsert;
+export type DoctrinePillpintuConfig = typeof doctrinePillpintuConfigTable.$inferSelect;
+export type InsertDoctrinePillpintuConfig = typeof doctrinePillpintuConfigTable.$inferInsert;
 
 export const doctrineSystemCardsTable = pgTable(
   'doctrine_system_cards',

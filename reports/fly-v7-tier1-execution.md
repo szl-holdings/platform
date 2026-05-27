@@ -43,12 +43,12 @@ All closed with comment explaining doctrine-violation merge risk.
 
 ## 2. PRs CLOSED — feature PRs with forbidden patterns in body (6)
 
-Identified by scanning every open PR's title+body against the forbidden-pattern list (`Jr.`, `Glasswing`, `Glass Wing`, `Mythos`, `Stephen Paul`, `AlloyScape`, `Perplexity Computer`). Closed with comment instructing refile via clean branch with sanitized body.
+Identified by scanning every open PR's title+body against the forbidden-pattern list (`Jr.`, `Pillpintu`, `Glass Wing`, `Khipu`, `Stephen Paul`, `AlloyScape`, `Perplexity Computer`). Closed with comment instructing refile via clean branch with sanitized body.
 
 | Repo | PR | Patterns hit |
 |---|---|---|
-| ouroboros-thesis | [#36](https://github.com/szl-holdings/ouroboros-thesis/pull/36) | Jr., Glasswing, Mythos, Stephen Paul, AlloyScape, Perplexity Computer |
-| szl-brand | [#10](https://github.com/szl-holdings/szl-brand/pull/10) | Jr., Glasswing, Glass Wing, Mythos, AlloyScape, Perplexity Computer |
+| ouroboros-thesis | [#36](https://github.com/szl-holdings/ouroboros-thesis/pull/36) | Jr., Pillpintu, Khipu, Stephen Paul, AlloyScape, Perplexity Computer |
+| szl-brand | [#10](https://github.com/szl-holdings/szl-brand/pull/10) | Jr., Pillpintu, Glass Wing, Khipu, AlloyScape, Perplexity Computer |
 | szl-brand | [#8](https://github.com/szl-holdings/szl-brand/pull/8) | Jr. |
 | lutar-lean | [#11](https://github.com/szl-holdings/lutar-lean/pull/11) | Jr. |
 | .github | [#29](https://github.com/szl-holdings/.github/pull/29) | Jr. |

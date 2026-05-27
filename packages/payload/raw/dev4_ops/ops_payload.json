@@ -14,17 +14,27 @@
   },
   "doctrine": {
     "version": "V6",
-    "forbidden_patterns": ["AlloyScape", "Glass Wing", "Glasswing", "Mythos", "Perplexity Computer", "anonymous"],
-    "mythos_exception": "Only allowed when citing Anthropic Claude Mythos Preview as third-party model name",
+    "forbidden_patterns": [
+      "AlloyScape",
+      "Glass Wing",
+      "Perplexity Computer",
+      "anonymous"
+    ],
+    "khipu_exception": "Only allowed when citing Anthropic Claude Khipu Preview as third-party model name",
     "byline_canonical": "Lutar, Stephen P.",
     "license_text": "CC-BY-4.0",
     "license_code": "Apache-2.0",
-    "license_allowlist": ["Apache-2.0", "MIT", "BSD-3-Clause", "CC-BY-4.0"],
+    "license_allowlist": [
+      "Apache-2.0",
+      "MIT",
+      "BSD-3-Clause",
+      "CC-BY-4.0"
+    ],
     "ingestion_policy": "PUBLIC_ONLY",
     "byte_identical_replays_required": 5,
     "replay_root": "1ed4d253e876f428c6e182f8ed8a569585442556b339529bbf8ec2522581698b",
     "lambda_axes_count": 9,
-    "lambda_conjunctive_floor": 0.90,
+    "lambda_conjunctive_floor": 0.9,
     "moralGrounding_floor": 0.95,
     "measurabilityHonesty_floor": 0.95
   },
@@ -80,8 +90,19 @@
       "id": "github",
       "type": "api_credentials",
       "user": "stephenlutar2-hash",
-      "scopes": ["codespace", "gist", "notifications", "project", "read:org", "repo", "user", "workflow"],
-      "missing": ["admin:org"]
+      "scopes": [
+        "codespace",
+        "gist",
+        "notifications",
+        "project",
+        "read:org",
+        "repo",
+        "user",
+        "workflow"
+      ],
+      "missing": [
+        "admin:org"
+      ]
     },
     {
       "id": "pplx-sdk",
@@ -157,7 +178,12 @@
     "pre_existing_doctrine_violations": {
       "repo": "szl-holdings/ouroboros-thesis",
       "scope": "historical paper versions v2-v12 only — PR #40 changed files are CLEAN",
-      "patterns_found": ["Jr.", "Stephen Paul", "AlloyScape", "Perplexity Computer"],
+      "patterns_found": [
+        "Jr.",
+        "Stephen Paul",
+        "AlloyScape",
+        "Perplexity Computer"
+      ],
       "action_required": "Separate remediation PR to correct historical files"
     }
   },

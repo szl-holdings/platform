@@ -2,7 +2,7 @@
 import { useMemo, useState, useCallback, useEffect } from 'react';
 import { Layout } from '../components/layout';
 import { PageHeader, Card, SectionTitle, KpiCard, StatusBadge, HashId, InfoRow, ActionButton } from '../components/ui';
-import type { CAVDStage } from '../data/mythosDoctrine';
+import type { CAVDStage } from '../data/khipuDoctrine';
 import { useCavdRecords, usePartners, DoctrineLoader } from '../hooks/useDoctrine';
 
 async function sha256(input: string): Promise<string> {
@@ -244,7 +244,7 @@ function CAVDIntakeForm({ onSubmit, nextSequence, activePartners }: { onSubmit: 
       </div>
       {!showForm && !anchoredHash && (
         <p className="text-xs" style={{ color: 'var(--color-a11oy-text-ghost)', lineHeight: 1.7 }}>
-          Submit a new agent-vulnerability finding. The finding is hash-anchored at receive time via SHA-256, placed under 90-day embargo, and dual-approved by the Glasswing partner and A11oy operations. Click "New intake" to begin.
+          Submit a new agent-vulnerability finding. The finding is hash-anchored at receive time via SHA-256, placed under 90-day embargo, and dual-approved by the Pillpintu partner and A11oy operations. Click "New intake" to begin.
         </p>
       )}
       {showForm && !anchoredHash && (

@@ -107,8 +107,8 @@ const PRIMITIVES = [
   { name: 'Proof Chain', num: '02', desc: 'Immutable append-only ledger of every consequential action. Cryptographically verifiable. Queryable by actor or decision.' },
   { name: 'Covenant Policy', num: '03', desc: 'Policy-as-code engine that gates every action. Who can approve, when, under what conditions — enforced at the platform layer.' },
   { name: 'Outcome Graph', num: '04', desc: 'Closes the loop. Records the real-world consequence of each decision and feeds the result back to calibrate future confidence.' },
-  { name: 'Mythos Doctrine', num: '05', desc: 'Frontier-grade alignment governance — versioned constitutions, behavioral audit, reward-hacking watchdog, red-team probes, agent welfare telemetry, and per-agent system cards. Open Spec (CC-BY-4.0).' },
-  { name: 'Glasswing Layer', num: '06', desc: 'Transparency-first partner program — 4-stage cyber verification, CAVD coordinated disclosure, 90-day public transparency reports, Constitution-as-Code DSL, adversarial robustness wall, and welfare intervention playbooks.' },
+  { name: 'Khipu Doctrine', num: '05', desc: 'Frontier-grade alignment governance — versioned constitutions, behavioral audit, reward-hacking watchdog, red-team probes, agent welfare telemetry, and per-agent system cards. Open Spec (CC-BY-4.0).' },
+  { name: 'Pillpintu Layer', num: '06', desc: 'Transparency-first partner program — 4-stage cyber verification, CAVD coordinated disclosure, 90-day public transparency reports, Constitution-as-Code DSL, adversarial robustness wall, and welfare intervention playbooks.' },
   { name: 'Compliance Fabric', num: '07', desc: 'Compliance-as-Runtime — maps every A11oy primitive to EU AI Act, NIST AI RMF, ISO 42001, and CSA Agentic Profile controls. Compass dashboard, Agent-BOM (CycloneDX), Delegation Chain governance, Federated Trust Exchange, and CARE engine.' },
 ];
 
@@ -120,7 +120,7 @@ const VERTICALS = [
 ];
 
 const MODEL_PROVIDERS = [
-  { name: 'Anthropic', models: ['Claude Mythos', 'Claude 4 Opus', 'Claude 4 Sonnet', 'Claude Haiku'], tier: 'frontier', desc: 'Constitutional AI with the strongest safety guarantees. Powers sensitive legal analysis, security assessments, and governance-critical reasoning through the a11oy Covenant layer.' },
+  { name: 'Anthropic', models: ['Claude Khipu', 'Claude 4 Opus', 'Claude 4 Sonnet', 'Claude Haiku'], tier: 'frontier', desc: 'Constitutional AI with the strongest safety guarantees. Powers sensitive legal analysis, security assessments, and governance-critical reasoning through the a11oy Covenant layer.' },
   { name: 'OpenAI', models: ['GPT-5.1', 'o3', 'o4-mini', 'GPT-4.1 nano'], tier: 'frontier', desc: 'Frontier reasoning, function calling, multimodal. Powers the a11oy Responses API layer, Codex execution, and complex multi-step agentic workflows.' },
   { name: 'DeepSeek', models: ['V4-Pro (236B MoE)', 'V3', 'R1'], tier: 'frontier', desc: '236B MoE, 22B active params. Exceptional at complex reasoning and mathematical modeling — ideal for voyage economics and portfolio analytics.' },
   { name: 'Google', models: ['Gemma-4-31B-IT', 'Gemini 2.5 Pro'], tier: 'frontier', desc: '31B dense model, 128K context. Strong multilingual and instruction-following for legal document analysis and threat intelligence reports.' },
@@ -1131,7 +1131,7 @@ export function HomePage() {
               { title: 'Outcomes Close the Loop', desc: 'The Outcome Graph records what actually happened and compares it to the recommendation. Models recalibrate. The system evolves.' },
               { title: 'Durable Execution', desc: 'Checkpoint recovery, agent coordination, human-in-the-loop handoffs. Not a stateless API call — a governed, durable workflow.' },
               { title: '7 Industry Verticals', desc: 'Finance, Science, Engineering, Legal, Maritime, Real Estate, Defense. Same canonical loop. Domain-specific intelligence.' },
-              { title: 'Glasswing Transparency', desc: 'Public trust portal, CAVD coordinated disclosure, 90-day transparency reports, adversarial robustness wall. Every governance claim backed by a verifiable open-spec artifact.' },
+              { title: 'Pillpintu Transparency', desc: 'Public trust portal, CAVD coordinated disclosure, 90-day transparency reports, adversarial robustness wall. Every governance claim backed by a verifiable open-spec artifact.' },
             ].map((item, i) => (
               <FadeIn key={item.title} delay={i * 0.05}>
                 <Card>
@@ -1273,7 +1273,7 @@ export function HomePage() {
               {
                 name: 'a11oy',
                 category: 'Governed Execution',
-                has: 'Full stack: signal ingestion, causal reasoning, governed orchestration, cryptographic proof, alignment monitoring, 7 enterprise verticals. Glasswing distinction layer — CAVD coordinated disclosure, public trust portal, 90-day transparency, adversarial robustness wall, constitution-as-code DSL.',
+                has: 'Full stack: signal ingestion, causal reasoning, governed orchestration, cryptographic proof, alignment monitoring, 7 enterprise verticals. Pillpintu distinction layer — CAVD coordinated disclosure, public trust portal, 90-day transparency, adversarial robustness wall, constitution-as-code DSL.',
                 gap: '',
               },
             ].map((comp, i) => (

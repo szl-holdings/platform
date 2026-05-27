@@ -1,6 +1,6 @@
 # UDS Update — 2026-05-27
 
-**Author:** Stephen Paul Lutar · SZL Holdings
+**Author:** Stephen P. Lutar Jr. · SZL Holdings
 **Audience:** Defense Unicorns team, UDS pull partners
 **Window:** since the per-product UDS release cut (2026-05-26/27)
 

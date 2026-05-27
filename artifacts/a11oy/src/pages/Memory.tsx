@@ -34,7 +34,7 @@ interface MemoryEntry {
 
 
 const TIER_META: Record<MemoryTier, { label: string; color: string; description: string; icon: string }> = {
-  'org-constitution': { label: 'Org Constitution', color: '#b08d52', description: 'Immutable per release. Sourced from mythosDoctrine + Constitution. Cannot be overridden by operators.', icon: '◆' },
+  'org-constitution': { label: 'Org Constitution', color: '#b08d52', description: 'Immutable per release. Sourced from khipuDoctrine + Constitution. Cannot be overridden by operators.', icon: '◆' },
   'project-doctrine': { label: 'Project Doctrine', color: '#c9b787', description: 'Per-artifact CLAUDE.md-style directives. Writable by operators. Versioned.', icon: '◈' },
   'auto-memory': { label: 'Auto-Memory', color: '#8a8a8a', description: 'Learned, append-only entries written by hooks on PostToolUse / PostSubagentReturn. Redactable with proof entry.', icon: '◉' },
 };
@@ -340,7 +340,7 @@ export function Memory() {
                     ['Writable by', 'Release system', 'Operators', 'Hooks only'],
                     ['Redactable', 'No', 'No (versioned)', 'Yes + proof'],
                     ['Scope', 'All artifacts', 'Per-artifact', 'Per-session'],
-                    ['Source', 'mythosDoctrine', 'CLAUDE.md-style', 'PostToolUse hook'],
+                    ['Source', 'khipuDoctrine', 'CLAUDE.md-style', 'PostToolUse hook'],
                     ['Audit', 'Immutable', 'Versioned', 'Proof-chained'],
                   ].map((row, i) => (
                     <div key={i} className="contents">

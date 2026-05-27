@@ -49,7 +49,7 @@ A11oy closes that gap structurally — not with policy documents, not with manua
 │  ISO 42001, CSA Agentic Profile. Compass, Agent-   │
 │  BOM, Delegation Chain, Trust Exchange, CARE        │
 ├─────────────────────────────────────────────────────┤
-│  Layer 8: DOCTRINE (MYTHOS)                         │
+│  Layer 8: DOCTRINE (KHIPU)                         │
 │  Frontier alignment governance — constitutions,     │
 │  behavioral audit, reward-hacking watchdog,         │
 │  red-team probes, agent welfare, system cards       │
@@ -88,9 +88,9 @@ A11oy closes that gap structurally — not with policy documents, not with manua
 | **Digital Twin Simulation** | Probabilistic modeling of downstream effects before any high-stakes action is approved |
 | **Covenant Governance** | Policy constraints that travel with every recommendation — what is permitted, what is prohibited, under what conditions |
 | **Executive Briefing** | Board-ready decision surfaces with complete attribution chains from raw signal to final outcome |
-| **Mythos Doctrine** | Layer 8 frontier-grade alignment governance — versioned constitutions, behavioral audit, reward-hacking watchdog, red-team probes, agent welfare telemetry, Glasswing transparency mode, and per-agent system cards |
-| **Mythos Doctrine Open Spec** | Open standard (CC-BY-4.0) for the artifacts above — JSON Schema 2020-12 + TypeScript types. A11oy authors and operates the spec; other implementations are invited |
-| **Glasswing Distinction Layer** | Glasswing partner program (4-stage cyber verification with dual approval), Coordinated Agent-Vulnerability Disclosure (CAVD), 90-Day Transparency Reports, Public Trust Portal, Adversarial Robustness Wall, Constitution-as-Code DSL + simulator, Welfare Intervention Playbooks, Defender Credit Pool, and the `mythos-doctrine` GitHub Action |
+| **Khipu Doctrine** | Layer 8 frontier-grade alignment governance — versioned constitutions, behavioral audit, reward-hacking watchdog, red-team probes, agent welfare telemetry, Pillpintu transparency mode, and per-agent system cards |
+| **Khipu Doctrine Open Spec** | Open standard (CC-BY-4.0) for the artifacts above — JSON Schema 2020-12 + TypeScript types. A11oy authors and operates the spec; other implementations are invited |
+| **Pillpintu Distinction Layer** | Pillpintu partner program (4-stage cyber verification with dual approval), Coordinated Agent-Vulnerability Disclosure (CAVD), 90-Day Transparency Reports, Public Trust Portal, Adversarial Robustness Wall, Constitution-as-Code DSL + simulator, Welfare Intervention Playbooks, Defender Credit Pool, and the `khipu-doctrine` GitHub Action |
 | **Compliance Fabric (Layer 9)** | Compliance-as-Runtime — maps every A11oy governance primitive to EU AI Act (Articles 9-72, Annex IV), NIST AI RMF (GOVERN/MAP/MEASURE/MANAGE), ISO 42001 (Annex A), and CSA Agentic Profile controls. Five pillars: **Compass** (real-time compliance posture dashboard with heat map, drill-down, and one-click audit package export), **Agent-BOM** (per-agent CycloneDX ML-BOM v1.7 covering model fingerprints, tool manifest hashes, constitution version, eval history, welfare posture), **Delegation Chain** (governs multi-agent delegation with scope narrowing, privilege boundaries, and chain replay), **Federated Trust Exchange** (cross-org compliance attestation via posture brackets without exposing proprietary internals), **CARE** (Continuous Audit Readiness Engine — evidence freshness monitoring, 6-month log retention verification, FRIA template generator) |
 
 ### 24 Operator Surfaces
@@ -101,10 +101,10 @@ A11oy is not a single screen. It exposes 24 purpose-built operator surfaces acro
 
 | Document | Purpose |
 |:---------|:--------|
-| [`A11OY_DOCTRINE.md`](./A11OY_DOCTRINE.md) | A11oy's internal operating doctrine for the Open Spec, Glasswing partners, CAVD, transparency reports, the Public Trust Portal, the Adversarial Robustness Wall, the Constitution-as-Code DSL, the Welfare Intervention Playbooks, the Defender Credit Pool, and the `mythos-doctrine` GitHub Action |
+| [`A11OY_DOCTRINE.md`](./A11OY_DOCTRINE.md) | A11oy's internal operating doctrine for the Open Spec, Pillpintu partners, CAVD, transparency reports, the Public Trust Portal, the Adversarial Robustness Wall, the Constitution-as-Code DSL, the Welfare Intervention Playbooks, the Defender Credit Pool, and the `khipu-doctrine` GitHub Action |
 | [`A11OY_PUBLIC_CLAIMS_DOCTRINE.md`](./A11OY_PUBLIC_CLAIMS_DOCTRINE.md) | Every public claim → its backing artifact in the Open Spec |
-| [`MYTHOS_RESEARCH_SWEEP.md`](./MYTHOS_RESEARCH_SWEEP.md) | Catalogued prior art that grounds the Mythos Doctrine work |
-| [`spec/mythos-doctrine-spec/`](./spec/mythos-doctrine-spec/) | The Mythos Doctrine Open Spec — JSON Schemas + TypeScript types, CC-BY-4.0 |
+| [`KHIPU_RESEARCH_SWEEP.md`](./KHIPU_RESEARCH_SWEEP.md) | Catalogued prior art that grounds the Khipu Doctrine work |
+| [`spec/khipu-doctrine-spec/`](./spec/khipu-doctrine-spec/) | The Khipu Doctrine Open Spec — JSON Schemas + TypeScript types, CC-BY-4.0 |
 
 ---
 

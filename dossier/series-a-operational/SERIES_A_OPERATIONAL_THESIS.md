@@ -92,7 +92,7 @@ Every product repo got the same three commits this week: `name-suffix "Jr."`, `d
 ## 3. App‑by‑app anatomy & "real vs theater" audit
 
 ### 3.1 a11oy — the BRAIN console (orchestrator)
-- **Real:** governance gates · agent identity registry · workcell replay · Mythos Doctrine 21 PG tables · SentraOps / VesselsOps bridges (live as of today).
+- **Real:** governance gates · agent identity registry · workcell replay · Khipu Doctrine 21 PG tables · SentraOps / VesselsOps bridges (live as of today).
 - **Theater:** `pages/psyche/*` ("Cognitive Reflexivity", "Selfhood Trace") = mocked. `IntentRouter.tsx` has multiple `TODO: recursive self‑correction` stubs.
 - **Gap to thesis:** v14 introduces the **Lutar Calculus categorical semantics** — a11oy still has no `λ`‑category visualizer. The hub is the natural home for it.
 

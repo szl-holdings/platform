@@ -64,8 +64,8 @@
       "forbidden: 'jr.'",
       "forbidden: 'alloyscape'",
       "forbidden: 'glass wing'",
-      "forbidden: 'glasswing'",
-      "forbidden: 'mythos'",
+      "forbidden: 'pillpintu'",
+      "forbidden: 'khipu'",
       "forbidden: 'stephen paul'",
       "forbidden: 'perplexity computer'",
       "forbidden: 'anonymous'"
@@ -188,8 +188,8 @@
       "forbidden: 'jr.'",
       "forbidden: 'alloyscape'",
       "forbidden: 'glass wing'",
-      "forbidden: 'glasswing'",
-      "forbidden: 'mythos'",
+      "forbidden: 'pillpintu'",
+      "forbidden: 'khipu'",
       "forbidden: 'stephen paul'",
       "forbidden: 'perplexity computer'",
       "forbidden: 'anonymous'"
@@ -314,8 +314,8 @@
       "forbidden: 'jr.'",
       "forbidden: 'alloyscape'",
       "forbidden: 'glass wing'",
-      "forbidden: 'glasswing'",
-      "forbidden: 'mythos'",
+      "forbidden: 'pillpintu'",
+      "forbidden: 'khipu'",
       "forbidden: 'stephen paul'",
       "forbidden: 'perplexity computer'",
       "forbidden: 'anonymous'"
@@ -438,8 +438,8 @@
       "forbidden: 'jr.'",
       "forbidden: 'alloyscape'",
       "forbidden: 'glass wing'",
-      "forbidden: 'glasswing'",
-      "forbidden: 'mythos'",
+      "forbidden: 'pillpintu'",
+      "forbidden: 'khipu'",
       "forbidden: 'stephen paul'",
       "forbidden: 'perplexity computer'",
       "forbidden: 'anonymous'"
@@ -562,8 +562,8 @@
       "forbidden: 'jr.'",
       "forbidden: 'alloyscape'",
       "forbidden: 'glass wing'",
-      "forbidden: 'glasswing'",
-      "forbidden: 'mythos'",
+      "forbidden: 'pillpintu'",
+      "forbidden: 'khipu'",
       "forbidden: 'stephen paul'",
       "forbidden: 'perplexity computer'",
       "forbidden: 'anonymous'"
@@ -686,8 +686,8 @@
       "forbidden: 'jr.'",
       "forbidden: 'alloyscape'",
       "forbidden: 'glass wing'",
-      "forbidden: 'glasswing'",
-      "forbidden: 'mythos'",
+      "forbidden: 'pillpintu'",
+      "forbidden: 'khipu'",
       "forbidden: 'stephen paul'",
       "forbidden: 'perplexity computer'",
       "forbidden: 'anonymous'"
@@ -787,8 +787,8 @@
       "forbidden: 'jr.'",
       "forbidden: 'alloyscape'",
       "forbidden: 'glass wing'",
-      "forbidden: 'glasswing'",
-      "forbidden: 'mythos'",
+      "forbidden: 'pillpintu'",
+      "forbidden: 'khipu'",
       "forbidden: 'stephen paul'",
       "forbidden: 'perplexity computer'",
       "forbidden: 'anonymous'"
@@ -1071,8 +1071,8 @@
     "doctrine_violations": [
       "forbidden: 'jr.'",
       "forbidden: 'alloyscape'",
-      "forbidden: 'glasswing'",
-      "forbidden: 'mythos'",
+      "forbidden: 'pillpintu'",
+      "forbidden: 'khipu'",
       "forbidden: 'stephen paul'",
       "forbidden: 'perplexity computer'"
     ],
@@ -1148,8 +1148,8 @@
       "forbidden: 'jr.'",
       "forbidden: 'alloyscape'",
       "forbidden: 'glass wing'",
-      "forbidden: 'glasswing'",
-      "forbidden: 'mythos'",
+      "forbidden: 'pillpintu'",
+      "forbidden: 'khipu'",
       "forbidden: 'stephen paul'",
       "forbidden: 'perplexity computer'",
       "forbidden: 'anonymous'"
@@ -1274,8 +1274,8 @@
       "forbidden: 'jr.'",
       "forbidden: 'alloyscape'",
       "forbidden: 'glass wing'",
-      "forbidden: 'glasswing'",
-      "forbidden: 'mythos'",
+      "forbidden: 'pillpintu'",
+      "forbidden: 'khipu'",
       "forbidden: 'stephen paul'",
       "forbidden: 'perplexity computer'",
       "forbidden: 'anonymous'"
@@ -1375,8 +1375,8 @@
       "forbidden: 'jr.'",
       "forbidden: 'alloyscape'",
       "forbidden: 'glass wing'",
-      "forbidden: 'glasswing'",
-      "forbidden: 'mythos'",
+      "forbidden: 'pillpintu'",
+      "forbidden: 'khipu'",
       "forbidden: 'stephen paul'",
       "forbidden: 'perplexity computer'",
       "forbidden: 'anonymous'"
@@ -1452,7 +1452,7 @@
     "doctrine_violations": [
       "forbidden: 'jr.'",
       "forbidden: 'alloyscape'",
-      "forbidden: 'glasswing'"
+      "forbidden: 'pillpintu'"
     ],
     "scorecard_cat": null,
     "category": "CLOSE",
@@ -1526,8 +1526,8 @@
       "forbidden: 'jr.'",
       "forbidden: 'alloyscape'",
       "forbidden: 'glass wing'",
-      "forbidden: 'glasswing'",
-      "forbidden: 'mythos'",
+      "forbidden: 'pillpintu'",
+      "forbidden: 'khipu'",
       "forbidden: 'perplexity computer'",
       "forbidden: 'anonymous'"
     ],
@@ -1582,8 +1582,8 @@
       "forbidden: 'jr.'",
       "forbidden: 'alloyscape'",
       "forbidden: 'glass wing'",
-      "forbidden: 'glasswing'",
-      "forbidden: 'mythos'",
+      "forbidden: 'pillpintu'",
+      "forbidden: 'khipu'",
       "forbidden: 'stephen paul'",
       "forbidden: 'perplexity computer'",
       "forbidden: 'anonymous'"

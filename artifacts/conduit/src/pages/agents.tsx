@@ -89,7 +89,7 @@ export default function AgentsPage() {
           <button key={a.id} onClick={() => setDrawerId(a.id)} className="conduit-card p-4 text-left">
             <div className="flex items-start justify-between mb-2">
               <div>
-                <div className="text-[#f5f5f5] text-base font-medium">{a.name} <span className="text-[#666] text-[12px] font-mono">/ {a.mythosName}</span></div>
+                <div className="text-[#f5f5f5] text-base font-medium">{a.name} <span className="text-[#666] text-[12px] font-mono">/ {a.khipuName}</span></div>
                 <div className="text-[12px] text-[#8a8a8a] mt-1">{a.role}</div>
               </div>
               <Badge variant="active">Σ-axis {a.lutarAxisAffinity}</Badge>

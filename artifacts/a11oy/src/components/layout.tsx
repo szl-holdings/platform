@@ -42,15 +42,15 @@ const NAV_GROUPS = [
     items: [
       { href: '/frontier-intel',       label: 'Overview' },
       { href: '/frontier/feed',        label: 'Signal Feed' },
-      { href: '/frontier/mythos',      label: 'Mythos Index' },
+      { href: '/frontier/khipu',      label: 'Khipu Index' },
       { href: '/frontier/proposals',   label: 'Capability Proposals' },
       { href: '/frontier/memos',       label: 'Recalibration Memos' },
       { href: '/frontier/benchmarks',  label: 'Benchmark Scoreboard' },
       { href: '/frontier/scanners',    label: 'Scanner Admin' },
       { href: '/frontier/system',      label: 'System Health' },
-      { href: '/mythos-layer',         label: 'Mythos Layer' },
+      { href: '/khipu-layer',         label: 'Khipu Layer' },
       { href: '/signals',              label: 'Signal Mesh + KG' },
-      { href: '/mythos-spec',          label: 'Open Spec' },
+      { href: '/khipu-spec',          label: 'Open Spec' },
     ],
   },
   {
@@ -178,7 +178,7 @@ const NAV_GROUPS = [
   {
     label: 'DOCTRINE',
     items: [
-      { href: '/doctrine',              label: 'Mythos Overview' },
+      { href: '/doctrine',              label: 'Khipu Overview' },
       { href: '/payload',                label: 'Payload' },
       { href: '/atlas/org',              label: 'Atlas · Org' },
       { href: '/atlas/thesis',           label: 'Atlas · Thesis' },
@@ -193,7 +193,7 @@ const NAV_GROUPS = [
       { href: '/ai-user-turn',           label: 'AI-User Turn' },
       { href: '/welfare',                label: 'Agent Welfare' },
       { href: '/red-team',               label: 'Red Team' },
-      { href: '/glasswing',              label: 'Glasswing Mode' },
+      { href: '/pillpintu',              label: 'Pillpintu Mode' },
       { href: '/capability-trajectory',  label: 'Capability Trajectory' },
     ],
   },
@@ -211,10 +211,10 @@ const NAV_GROUPS = [
     ],
   },
   {
-    label: 'GLASSWING',
+    label: 'PILLPINTU',
     items: [
-      { href: '/mythos-spec',          label: 'Open Spec' },
-      { href: '/glasswing-partners',   label: 'Partners' },
+      { href: '/khipu-spec',          label: 'Open Spec' },
+      { href: '/pillpintu-partners',   label: 'Partners' },
       { href: '/cavd',                 label: 'CAVD' },
       { href: '/robustness-wall',      label: 'Robustness Wall' },
       { href: '/constitution-dsl',     label: 'Constitution DSL' },

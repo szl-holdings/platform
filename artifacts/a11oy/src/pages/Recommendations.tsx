@@ -254,7 +254,7 @@ export function Recommendations() {
                 {[
                   { label: 'Signal Feed', href: '/frontier/feed' },
                   { label: 'Capability Proposals', href: '/frontier/proposals' },
-                  { label: 'Mythos Index', href: '/frontier/mythos' },
+                  { label: 'Khipu Index', href: '/frontier/khipu' },
                 ].map(l => {
                   const BASE_LINK = (import.meta.env.BASE_URL ?? '/').replace(/\/$/, '');
                   return (

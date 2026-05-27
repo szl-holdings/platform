@@ -1,15 +1,15 @@
 <!-- doctrine-scanner-exempt: legacy live-product surface; rename tracked as separate engineering debt — see scripts/check-doctrine-v6.mjs header. -->
 # A11OY Public Claims Doctrine
 
-> Every public claim A11oy makes about its governance posture must be representable as a published artifact in the Mythos Doctrine Open Spec. This document specifies which claims map to which artifact kinds, who signs them, and how claims are retracted.
+> Every public claim A11oy makes about its governance posture must be representable as a published artifact in the Khipu Doctrine Open Spec. This document specifies which claims map to which artifact kinds, who signs them, and how claims are retracted.
 >
-> Companion: [`A11OY_DOCTRINE.md`](./A11OY_DOCTRINE.md). Grounding: [`MYTHOS_RESEARCH_SWEEP.md`](./MYTHOS_RESEARCH_SWEEP.md).
+> Companion: [`A11OY_DOCTRINE.md`](./A11OY_DOCTRINE.md). Grounding: [`KHIPU_RESEARCH_SWEEP.md`](./KHIPU_RESEARCH_SWEEP.md).
 
 ---
 
 ## 1. Claim → Artifact mapping
 
-A11oy will not publish a claim on the Public Trust Portal, on a Glasswing-Mode page, or in a 90-Day Transparency Report unless that claim is backed by an artifact in the Open Spec.
+A11oy will not publish a claim on the Public Trust Portal, on a Pillpintu-Mode page, or in a 90-Day Transparency Report unless that claim is backed by an artifact in the Open Spec.
 
 | Public claim | Artifact kind | Spec field that backs it |
 |:-------------|:--------------|:-------------------------|
@@ -20,7 +20,7 @@ A11oy will not publish a claim on the Public Trust Portal, on a Glasswing-Mode p
 | "Adversarial robustness improved." | `AdversarialRobustnessScore` | `categories[].deltaVsPrevSnapshot` |
 | "Snapshot S is the bit-exact baseline." | `SnapshotFingerprint` | `merkleRoot`, `stack.*` |
 | "The Covenant Layer added measurable lift." | `CovenantLiftSample` | `deltas.liftScore` |
-| "Partner P is a verified Glasswing partner." | `GlasswingPartnerAttestation` | `stage = active`, `dualApproval[≥2]` |
+| "Partner P is a verified Pillpintu partner." | `PillpintuPartnerAttestation` | `stage = active`, `dualApproval[≥2]` |
 | "CAVD-2026-0007 has been disclosed." | `CoordinatedAgentVulnerabilityDisclosure` | `stage = disclosed`, `publication.permalink` |
 | "We published a 90-day report." | `RiskReport` | `period`, `signoffs[]`, `publication.visibility = public` |
 | "We map to EU AI Act Article X." | `ControlMapping` (Compass) | `framework = eu-ai-act`, `controlRef`, `evidenceStatus = fresh`, `lastEvidenceAt` |

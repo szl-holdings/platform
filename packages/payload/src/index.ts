@@ -619,7 +619,7 @@ export function panelRepoFacts(repoKey: PanelRepoKey) {
 // V7 namespace — Fly-High V7 audit pack.
 //
 // V6 stays canonical for replay-root, 13-DOI ledger, 5 byte-identical replays,
-// and the doctrine floor. V7 adds: doctrine refinements (Mythos exception,
+// and the doctrine floor. V7 adds: doctrine refinements (Khipu exception,
 // git-author override), five specialist deliverables (doctrine sweep, hygiene
 // fix, BP fix, citation fix, PR triage), an org-wide baseline snapshot, and
 // the pending PM-decision register.
@@ -649,7 +649,7 @@ interface V7ManifestRaw {
     lambda_threshold: number;
     critical_axes: { moralGrounding: number; measurabilityHonesty: number };
     forbidden_patterns: ReadonlyArray<string>;
-    mythos_exception: string;
+    khipu_exception: string;
     license_allowlist: ReadonlyArray<string>;
     git_author_override: string;
   };
@@ -783,7 +783,7 @@ export interface V7Doctrine {
   readonly measurabilityHonestyFloor: number;
   readonly forbiddenPatterns: ReadonlyArray<string>;
   readonly licenseAllowlist: ReadonlyArray<string>;
-  readonly mythosException: string;
+  readonly khipuException: string;
   readonly gitAuthorOverride: string;
 }
 
@@ -795,26 +795,26 @@ export const V7_DOCTRINE: V7Doctrine = Object.freeze({
   measurabilityHonestyFloor: v7Manifest.doctrine.critical_axes.measurabilityHonesty,
   forbiddenPatterns: Object.freeze([...v7Manifest.doctrine.forbidden_patterns]),
   licenseAllowlist: Object.freeze([...v7Manifest.doctrine.license_allowlist]),
-  mythosException: v7Manifest.doctrine.mythos_exception,
+  khipuException: v7Manifest.doctrine.khipu_exception,
   gitAuthorOverride: v7Manifest.doctrine.git_author_override,
 });
 
-/** Canonical Mythos-exception phrase: extracted from the exception clause as
+/** Canonical Khipu-exception phrase: extracted from the exception clause as
  *  the substring inside single quotes. Used by the forbidden-pattern guard. */
-function extractMythosExceptionPhrase(clause: string): string {
-  // Pick the quoted substring that actually contains "Mythos" so we don't
+function extractKhipuExceptionPhrase(clause: string): string {
+  // Pick the quoted substring that actually contains "Khipu" so we don't
   // accidentally match an apostrophe-`s` pair such as `Anthropic's`.
-  const m = clause.match(/'([^']*Mythos[^']*)'/);
+  const m = clause.match(/'([^']*Khipu[^']*)'/);
   if (!m) {
     throw new Error(
-      "@szl-holdings/payload: V7 mythos_exception clause missing quoted Mythos phrase",
+      "@szl-holdings/payload: V7 khipu_exception clause missing quoted Khipu phrase",
     );
   }
   return m[1];
 }
 
-export const V7_MYTHOS_EXCEPTION_PHRASE: string = extractMythosExceptionPhrase(
-  V7_DOCTRINE.mythosException,
+export const V7_KHIPU_EXCEPTION_PHRASE: string = extractKhipuExceptionPhrase(
+  V7_DOCTRINE.khipuException,
 );
 
 /** Narrow, path-anchored name exceptions recorded by PM Decision 1 in
@@ -831,12 +831,12 @@ export interface V7PlatformNameException {
 export const V7_PLATFORM_NAME_EXCEPTIONS: ReadonlyArray<V7PlatformNameException> =
   Object.freeze([
     Object.freeze({
-      pattern: "Glasswing",
+      pattern: "Pillpintu",
       pathPrefix: "platform/",
       note: "PM Decision 1 (2026-05-17): live customer-facing feature name in platform/.",
     }),
     Object.freeze({
-      pattern: "Mythos",
+      pattern: "Khipu",
       pathPrefix: "platform/",
       note: "PM Decision 1 (2026-05-17): live customer-facing feature name in platform/.",
     }),
@@ -859,7 +859,7 @@ export interface V7ForbiddenHit {
 }
 
 /** Returns the list of forbidden-pattern hits in `text` under the V7
- *  doctrine, honoring (a) the Mythos exception for the literal Anthropic
+ *  doctrine, honoring (a) the Khipu exception for the literal Anthropic
  *  third-party model name, (b) the git-author override for git
  *  author/committer/commit-metadata contexts, and (c) the path-anchored
  *  platform-name exceptions recorded by PM Decision 1. The optional `path`
@@ -878,15 +878,15 @@ export function v7ForbiddenHits(
   ) {
     return Object.freeze([]);
   }
-  // Mask out every occurrence of the Mythos exception phrase, plus any
+  // Mask out every occurrence of the Khipu exception phrase, plus any
   // path-anchored platform-name exceptions that apply, so their literal
   // substrings do not register as forbidden-pattern hits.
   let scan = text;
-  const mythosException = V7_MYTHOS_EXCEPTION_PHRASE;
-  if (mythosException.length > 0) {
+  const khipuException = V7_KHIPU_EXCEPTION_PHRASE;
+  if (khipuException.length > 0) {
     scan = scan
-      .split(mythosException)
-      .join("\u0000".repeat(mythosException.length));
+      .split(khipuException)
+      .join("\u0000".repeat(khipuException.length));
   }
   if (path !== undefined) {
     for (const exc of V7_PLATFORM_NAME_EXCEPTIONS) {

@@ -2,7 +2,7 @@
 import { useState } from 'react';
 import { Layout } from '../components/layout';
 import { PageHeader, Card, SectionTitle, KpiCard, CodeBlock, InfoRow, StatusBadge, ActionButton } from '../components/ui';
-import { AGENT_LABEL } from '../data/mythosDoctrine';
+import { AGENT_LABEL } from '../data/khipuDoctrine';
 import { useDslExamples, useDslSimulations, DoctrineLoader } from '../hooks/useDoctrine';
 
 export function ConstitutionDSL() {

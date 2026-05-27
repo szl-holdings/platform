@@ -53,9 +53,9 @@ export interface ModelSpec {
   supportsCitations?: boolean;
   /**
    * True for first-party Claude family models (Opus/Sonnet/Haiku).
-   * Used to group the Claude family under the "Mythos Tier" label in the Console.
+   * Used to group the Claude family under the "Khipu Tier" label in the Console.
    */
-  mythosModel?: boolean;
+  khipuModel?: boolean;
 }
 
 export const MODEL_REGISTRY: Record<string, ModelSpec> = {
@@ -121,7 +121,7 @@ export const MODEL_REGISTRY: Record<string, ModelSpec> = {
     supportsVision: true,
   },
 
-  // ── Anthropic — Mythos Tier ────────────────────────────────────────────────
+  // ── Anthropic — Khipu Tier ────────────────────────────────────────────────
   'claude-opus-4-7': {
     id: 'claude-opus-4-7',
     displayName: 'Claude Opus 4.7',
@@ -140,7 +140,7 @@ export const MODEL_REGISTRY: Record<string, ModelSpec> = {
     supportsBatchApi: true,
     supportsFilesApi: true,
     supportsCitations: true,
-    mythosModel: true,
+    khipuModel: true,
   },
   'claude-sonnet-4-6': {
     id: 'claude-sonnet-4-6',
@@ -160,7 +160,7 @@ export const MODEL_REGISTRY: Record<string, ModelSpec> = {
     supportsBatchApi: true,
     supportsFilesApi: true,
     supportsCitations: true,
-    mythosModel: true,
+    khipuModel: true,
   },
   'claude-haiku-4-5': {
     id: 'claude-haiku-4-5',
@@ -180,7 +180,7 @@ export const MODEL_REGISTRY: Record<string, ModelSpec> = {
     supportsBatchApi: true,
     supportsFilesApi: true,
     supportsCitations: true,
-    mythosModel: true,
+    khipuModel: true,
   },
   'claude-3-5-sonnet-20241022': {
     id: 'claude-3-5-sonnet-20241022',
@@ -200,7 +200,7 @@ export const MODEL_REGISTRY: Record<string, ModelSpec> = {
     supportsBatchApi: true,
     supportsFilesApi: true,
     supportsCitations: true,
-    mythosModel: true,
+    khipuModel: true,
   },
 
   // ── DeepSeek ───────────────────────────────────────────────────────────────

@@ -190,7 +190,7 @@ const CommandFrontierProposals = lazy(() => import('./pages/command/CommandFront
 const CommandInbox = lazy(() => import('./pages/command/CommandInbox').then(m => ({ default: m.CommandInbox })));
 const CommandApprovals = lazy(() => import('./pages/command/CommandApprovals').then(m => ({ default: m.CommandApprovals })));
 const FrontierFeed = lazy(() => import('./pages/frontier/FrontierFeed').then(m => ({ default: m.FrontierFeed })));
-const FrontierMythos = lazy(() => import('./pages/frontier/MythosIndex').then(m => ({ default: m.MythosIndex })));
+const FrontierKhipu = lazy(() => import('./pages/frontier/KhipuIndex').then(m => ({ default: m.KhipuIndex })));
 const FrontierProposals = lazy(() => import('./pages/frontier/CapabilityProposals').then(m => ({ default: m.CapabilityProposals })));
 const FrontierBenchmarks = lazy(() => import('./pages/frontier/BenchmarkScoreboard').then(m => ({ default: m.BenchmarkScoreboard })));
 const FrontierMemos = lazy(() => import('./pages/frontier/RecalibrationMemos').then(m => ({ default: m.RecalibrationMemos })));
@@ -237,15 +237,15 @@ const SnapshotProvenance = lazy(() => import('./pages/SnapshotProvenance').then(
 const AIUserTurn = lazy(() => import('./pages/AIUserTurn').then(m => ({ default: m.AIUserTurn })));
 const AgentWelfare = lazy(() => import('./pages/AgentWelfare').then(m => ({ default: m.AgentWelfare })));
 const RedTeam = lazy(() => import('./pages/RedTeam').then(m => ({ default: m.RedTeam })));
-const GlasswingPage = lazy(() => import('./pages/Glasswing').then(m => ({ default: m.Glasswing })));
+const PillpintuPage = lazy(() => import('./pages/Pillpintu').then(m => ({ default: m.Pillpintu })));
 const ArgoForgePage = lazy(() => import('./pages/ArgoForge').then(m => ({ default: m.ArgoForge })));
-const MythosLayerPage = lazy(() => import('./pages/MythosLayer').then(m => ({ default: m.MythosLayer })));
+const KhipuLayerPage = lazy(() => import('./pages/KhipuLayer').then(m => ({ default: m.KhipuLayer })));
 const AerialTwinPage = lazy(() => import('./pages/AerialTwin').then(m => ({ default: m.AerialTwin })));
 const AerialTwinMilestonePage = lazy(() => import('./pages/AerialTwinMilestone').then(m => ({ default: m.AerialTwinMilestone })));
 const SystemCard = lazy(() => import('./pages/SystemCard').then(m => ({ default: m.SystemCard })));
 const CapabilityTrajectory = lazy(() => import('./pages/CapabilityTrajectory').then(m => ({ default: m.CapabilityTrajectory })));
-const MythosSpec = lazy(() => import('./pages/MythosSpec').then(m => ({ default: m.MythosSpec })));
-const GlasswingPartners = lazy(() => import('./pages/GlasswingPartners').then(m => ({ default: m.GlasswingPartners })));
+const KhipuSpec = lazy(() => import('./pages/KhipuSpec').then(m => ({ default: m.KhipuSpec })));
+const PillpintuPartners = lazy(() => import('./pages/PillpintuPartners').then(m => ({ default: m.PillpintuPartners })));
 const CAVDPage = lazy(() => import('./pages/CAVD').then(m => ({ default: m.CAVD })));
 const TransparencyReport = lazy(() => import('./pages/TransparencyReport').then(m => ({ default: m.TransparencyReport })));
 const PublicTrustPortal = lazy(() => import('./pages/PublicTrustPortal').then(m => ({ default: m.PublicTrustPortal })));
@@ -760,7 +760,7 @@ function AppInner() {
         {/* Frontier sub-routes must precede the /frontier root to avoid prefix matching */}
         <Route path={`${base}/frontier/inbox`} component={FrontierInbox} />
         <Route path={`${base}/frontier/feed`} component={FrontierFeed} />
-        <Route path={`${base}/frontier/mythos`} component={FrontierMythos} />
+        <Route path={`${base}/frontier/khipu`} component={FrontierKhipu} />
         <Route path={`${base}/frontier/proposals`} component={FrontierProposals} />
         <Route path={`${base}/frontier/benchmarks`} component={FrontierBenchmarks} />
         <Route path={`${base}/frontier/memos`} component={FrontierMemos} />
@@ -801,7 +801,7 @@ function AppInner() {
         <Route path={`${base}/ai-user-turn`} component={AIUserTurn} />
         <Route path={`${base}/welfare`} component={AgentWelfare} />
         <Route path={`${base}/red-team`} component={RedTeam} />
-        <Route path={`${base}/glasswing`} component={GlasswingPage} />
+        <Route path={`${base}/pillpintu`} component={PillpintuPage} />
         <Route path={`${base}/argo/world-model`}><WithShell><ArgoWorldModel /></WithShell></Route>
         <Route path={`${base}/argo/arena`}><WithShell><ArgoArena /></WithShell></Route>
         <Route path={`${base}/argo/stream`}><WithShell><ArgoStream /></WithShell></Route>
@@ -809,7 +809,7 @@ function AppInner() {
         <Route path={`${base}/argo/forge`}><WithShell><ArgoForge /></WithShell></Route>
         <Route path={`${base}/argo`}><WithShell><ArgoBridge /></WithShell></Route>
         <Route path={`${base}/argo-field-forge`} component={ArgoForgePage} />
-        <Route path={`${base}/mythos-layer`} component={MythosLayerPage} />
+        <Route path={`${base}/khipu-layer`} component={KhipuLayerPage} />
         <Route path={`${base}/aerial-twin`} component={AerialTwinPage} />
         <Route path={`${base}/aerial-twin/:milestone`} component={AerialTwinMilestonePage} />
         <Route path={`${base}/system-card/:id`} component={SystemCard} />
@@ -822,8 +822,8 @@ function AppInner() {
         <Route path={`${base}/compartments`} component={CapabilityCompartments} />
         <Route path={`${base}/cyber-resilience`} component={CyberResilience} />
         <Route path={`${base}/sim-governance`} component={SimGovernance} />
-        <Route path={`${base}/mythos-spec`} component={MythosSpec} />
-        <Route path={`${base}/glasswing-partners`} component={GlasswingPartners} />
+        <Route path={`${base}/khipu-spec`} component={KhipuSpec} />
+        <Route path={`${base}/pillpintu-partners`} component={PillpintuPartners} />
         <Route path={`${base}/cavd`} component={CAVDPage} />
         <Route path={`${base}/transparency-report`} component={TransparencyReport} />
         <Route path={`${base}/trust-portal`} component={PublicTrustPortal} />

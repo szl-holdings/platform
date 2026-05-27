@@ -37,7 +37,7 @@ const FRIA_SECTIONS = [
   { title: 'Oversight Mechanisms', source: 'Covenant Layer + Approval Queue', desc: 'Human oversight structure — approval tiers, named approvers, escalation paths, override protections.' },
   { title: 'Data Protection', source: 'Connector Firewall + Data Handling', desc: 'PII handling, data minimization, consent gating, retention policies, and privacy impact.' },
   { title: 'Bias and Fairness', source: 'MirrorEval + Code Behaviors', desc: 'Bias detection scoring, demographic fairness checks, sycophancy resistance, and fairness-relevant eval dimensions.' },
-  { title: 'Transparency Measures', source: 'Glasswing Mode + Public Trust Portal', desc: 'Public disclosure commitments — transparency reports, CAVD, constitution publication, robustness wall.' },
+  { title: 'Transparency Measures', source: 'Pillpintu Mode + Public Trust Portal', desc: 'Public disclosure commitments — transparency reports, CAVD, constitution publication, robustness wall.' },
   { title: 'Remediation Plan', source: 'CARE Engine + ARG', desc: 'Procedures for addressing identified risks, updating constitutions, and re-evaluating agents post-remediation.' },
 ];
 

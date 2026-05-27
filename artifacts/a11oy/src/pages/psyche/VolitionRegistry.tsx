@@ -259,8 +259,8 @@ export function VolitionRegistry() {
                   <p className="text-[11px] leading-relaxed mb-3" style={{ color: T.dim }}>{goal.description}</p>
                   <div className="grid sm:grid-cols-2 gap-3 text-[10px]">
                     <div>
-                      <div style={{ color: T.muted }} className="mb-0.5">Mythos Alignment</div>
-                      <div style={{ color: T.dim }}>{goal.mythosAlignment}</div>
+                      <div style={{ color: T.muted }} className="mb-0.5">Khipu Alignment</div>
+                      <div style={{ color: T.dim }}>{goal.khipuAlignment}</div>
                     </div>
                     <div>
                       <div style={{ color: T.muted }} className="mb-0.5">Covenant Policy Floor</div>

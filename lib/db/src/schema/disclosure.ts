@@ -244,7 +244,7 @@ export const complianceFrameworkControlsTable = pgTable(
         'covenant',
         'welfare',
         'snapshot',
-        'glasswing',
+        'pillpintu',
         'cavd',
       ],
     }),

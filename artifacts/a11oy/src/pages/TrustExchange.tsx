@@ -216,7 +216,7 @@ export function TrustExchange() {
       </div>
 
       <div className="p-3 rounded-lg text-xs flex items-center gap-2" style={{ backgroundColor: 'rgba(201,183,135,0.06)', border: '1px solid rgba(201,183,135,0.15)', color: 'var(--color-a11oy-text-ghost)' }}>
-        <span className="w-1.5 h-1.5 rounded-full bg-[var(--color-a11oy-blue)] flex-shrink-0" /> Federated Trust Exchange — extends the Glasswing Partner Lifecycle Console with machine-readable trust exchange. Proprietary details stay private; compliance posture is verifiable.
+        <span className="w-1.5 h-1.5 rounded-full bg-[var(--color-a11oy-blue)] flex-shrink-0" /> Federated Trust Exchange — extends the Pillpintu Partner Lifecycle Console with machine-readable trust exchange. Proprietary details stay private; compliance posture is verifiable.
       </div>
     </Layout>
   );

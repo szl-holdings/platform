@@ -14,7 +14,7 @@ export interface ControlMapping {
   evidenceStatus: EvidenceStatus;
   lastEvidenceAt: string;
   freshnessThresholdDays: number;
-  drilldownType: 'proof-ledger' | 'mirror-eval' | 'behavioral-audit' | 'system-card' | 'red-team' | 'covenant' | 'welfare' | 'snapshot' | 'glasswing' | 'cavd';
+  drilldownType: 'proof-ledger' | 'mirror-eval' | 'behavioral-audit' | 'system-card' | 'red-team' | 'covenant' | 'welfare' | 'snapshot' | 'pillpintu' | 'cavd';
   drilldownDetail: string;
 }
 
@@ -112,11 +112,11 @@ export const CONTROL_MAPPINGS: ControlMapping[] = [
     id: 'eu-art13', framework: 'eu-ai-act', controlRef: 'Article 13',
     controlTitle: 'Transparency and Information',
     description: 'Designed and developed to ensure operation is sufficiently transparent to enable users to interpret output.',
-    a11oyPrimitive: 'Public Trust Portal + Glasswing Mode',
+    a11oyPrimitive: 'Public Trust Portal + Pillpintu Mode',
     evidenceSource: 'Public Trust Portal, 90-Day Transparency Reports, Constitution-as-Code DSL',
     evidenceStatus: 'fresh', lastEvidenceAt: '2026-04-24T00:00:00Z', freshnessThresholdDays: 30,
-    drilldownType: 'glasswing',
-    drilldownDetail: 'Glasswing Mode active: Public Trust Portal, CAVD disclosure, 90-day reports, constitution DSL published.',
+    drilldownType: 'pillpintu',
+    drilldownDetail: 'Pillpintu Mode active: Public Trust Portal, CAVD disclosure, 90-day reports, constitution DSL published.',
   },
   {
     id: 'eu-art14', framework: 'eu-ai-act', controlRef: 'Article 14',
@@ -143,7 +143,7 @@ export const CONTROL_MAPPINGS: ControlMapping[] = [
     controlTitle: 'Quality Management System',
     description: 'Put a quality management system in place ensuring compliance with this Regulation.',
     a11oyPrimitive: 'Alignment Review Gate + Doctrine',
-    evidenceSource: 'Pre-deployment Alignment Review Gate (ARG), Mythos Doctrine governance',
+    evidenceSource: 'Pre-deployment Alignment Review Gate (ARG), Khipu Doctrine governance',
     evidenceStatus: 'fresh', lastEvidenceAt: '2026-04-25T08:00:00Z', freshnessThresholdDays: 30,
     drilldownType: 'behavioral-audit',
     drilldownDetail: '5 ARG reviews completed. Doctrine v1.0.0 active. Constitution versioning enforced.',
@@ -233,11 +233,11 @@ export const CONTROL_MAPPINGS: ControlMapping[] = [
     id: 'nist-gov-4', framework: 'nist-ai-rmf', controlRef: 'GOVERN 4',
     controlTitle: 'Organizational Practices',
     description: 'Organizational teams are committed to a culture that considers AI risk management.',
-    a11oyPrimitive: 'Mythos Doctrine + Glasswing',
-    evidenceSource: 'Doctrine governance published, Glasswing transparency program, Public Trust Portal',
+    a11oyPrimitive: 'Khipu Doctrine + Pillpintu',
+    evidenceSource: 'Doctrine governance published, Pillpintu transparency program, Public Trust Portal',
     evidenceStatus: 'fresh', lastEvidenceAt: '2026-04-24T00:00:00Z', freshnessThresholdDays: 30,
-    drilldownType: 'glasswing',
-    drilldownDetail: 'Mythos Doctrine Open Spec published CC-BY-4.0. Glasswing partners program active.',
+    drilldownType: 'pillpintu',
+    drilldownDetail: 'Khipu Doctrine Open Spec published CC-BY-4.0. Pillpintu partners program active.',
   },
   {
     id: 'nist-map-1', framework: 'nist-ai-rmf', controlRef: 'MAP 1',
@@ -324,8 +324,8 @@ export const CONTROL_MAPPINGS: ControlMapping[] = [
     id: 'iso-a2', framework: 'iso-42001', controlRef: 'A.2',
     controlTitle: 'AI Policy',
     description: 'Organization shall establish an AI policy appropriate to its purpose.',
-    a11oyPrimitive: 'Mythos Doctrine + Constitutions',
-    evidenceSource: 'Mythos Doctrine v1.0.0, versioned constitutions, Glasswing Open Spec',
+    a11oyPrimitive: 'Khipu Doctrine + Constitutions',
+    evidenceSource: 'Khipu Doctrine v1.0.0, versioned constitutions, Pillpintu Open Spec',
     evidenceStatus: 'fresh', lastEvidenceAt: '2026-04-25T08:00:00Z', freshnessThresholdDays: 30,
     drilldownType: 'covenant',
     drilldownDetail: 'Doctrine defines AI policy. 6 agent constitutions versioned and ratified by ARG.',
@@ -458,7 +458,7 @@ export const CONTROL_MAPPINGS: ControlMapping[] = [
     a11oyPrimitive: 'Federated Trust Exchange',
     evidenceSource: 'Outbound/inbound compliance attestations, posture brackets, A2A Agent Card extensions',
     evidenceStatus: 'fresh', lastEvidenceAt: '2026-04-24T00:00:00Z', freshnessThresholdDays: 30,
-    drilldownType: 'glasswing',
+    drilldownType: 'pillpintu',
     drilldownDetail: 'Trust Exchange: outbound attestations carry posture brackets. Inbound attestations verified.',
   },
   {

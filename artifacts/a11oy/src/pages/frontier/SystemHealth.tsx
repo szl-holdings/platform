@@ -52,7 +52,7 @@ const SYSTEM_CITATIONS: Citation[] = [
 
 const SUBSYSTEMS = [
   { id: 'signal-ingestion', name: 'Signal Ingestion', description: 'arXiv, vendor, market, threat, regulation scanner pipeline', status: 'operational' as const },
-  { id: 'mythos-graph', name: 'Mythos Graph', description: 'Capability knowledge graph — nodes, edges, relevance scoring', status: 'operational' as const },
+  { id: 'khipu-graph', name: 'Khipu Graph', description: 'Capability knowledge graph — nodes, edges, relevance scoring', status: 'operational' as const },
   { id: 'proposal-queue', name: 'Proposal Queue', description: 'Human-gated capability proposal workflow', status: 'operational' as const },
   { id: 'benchmark-tracker', name: 'Benchmark Tracker', description: 'Agent score tracking against SOTA baselines', status: 'operational' as const },
   { id: 'memo-synthesis', name: 'Memo Synthesis', description: 'Weekly recalibration memo generation pipeline', status: 'operational' as const },

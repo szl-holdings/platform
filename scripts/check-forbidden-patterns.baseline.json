@@ -4,124 +4,12 @@
     "pattern": "anonymous"
   },
   {
-    "file": "artifacts/a11oy/package.json",
-    "pattern": "Mythos"
-  },
-  {
-    "file": "artifacts/a11oy/RESEARCH.md",
-    "pattern": "Mythos"
-  },
-  {
-    "file": "artifacts/a11oy/src/App.tsx",
-    "pattern": "Glasswing"
-  },
-  {
-    "file": "artifacts/a11oy/src/App.tsx",
-    "pattern": "Mythos"
-  },
-  {
-    "file": "artifacts/a11oy/src/components/layout.tsx",
-    "pattern": "Glasswing"
-  },
-  {
-    "file": "artifacts/a11oy/src/components/layout.tsx",
-    "pattern": "Mythos"
-  },
-  {
-    "file": "artifacts/a11oy/src/components/shell/Sidebar.tsx",
-    "pattern": "Mythos"
-  },
-  {
-    "file": "artifacts/a11oy/src/data/aerialTwin.ts",
-    "pattern": "Glasswing"
-  },
-  {
-    "file": "artifacts/a11oy/src/data/aerialTwin.ts",
-    "pattern": "Mythos"
-  },
-  {
     "file": "artifacts/a11oy/src/data/agiConvergenceData.ts",
     "pattern": "anonymous"
   },
   {
-    "file": "artifacts/a11oy/src/data/argo.ts",
-    "pattern": "Mythos"
-  },
-  {
-    "file": "artifacts/a11oy/src/data/argoForge.ts",
-    "pattern": "Glasswing"
-  },
-  {
-    "file": "artifacts/a11oy/src/data/argoForge.ts",
-    "pattern": "Mythos"
-  },
-  {
-    "file": "artifacts/a11oy/src/data/complianceFabric.ts",
-    "pattern": "Glasswing"
-  },
-  {
-    "file": "artifacts/a11oy/src/data/complianceFabric.ts",
-    "pattern": "Mythos"
-  },
-  {
-    "file": "artifacts/a11oy/src/data/darpaResilience.ts",
-    "pattern": "Glasswing"
-  },
-  {
-    "file": "artifacts/a11oy/src/data/doctrineFallbacks.ts",
-    "pattern": "Glasswing"
-  },
-  {
-    "file": "artifacts/a11oy/src/data/doctrineFallbacks.ts",
-    "pattern": "Mythos"
-  },
-  {
-    "file": "artifacts/a11oy/src/data/glasswingDoctrine.ts",
-    "pattern": "Glasswing"
-  },
-  {
-    "file": "artifacts/a11oy/src/data/mythosDoctrine.ts",
-    "pattern": "Glasswing"
-  },
-  {
-    "file": "artifacts/a11oy/src/data/mythosDoctrine.ts",
-    "pattern": "Mythos"
-  },
-  {
-    "file": "artifacts/a11oy/src/data/mythosLayer.ts",
-    "pattern": "Glasswing"
-  },
-  {
-    "file": "artifacts/a11oy/src/data/mythosLayer.ts",
-    "pattern": "Mythos"
-  },
-  {
-    "file": "artifacts/a11oy/src/data/psyche/genesis.ts",
-    "pattern": "Mythos"
-  },
-  {
-    "file": "artifacts/a11oy/src/data/psyche/selfhood.ts",
-    "pattern": "Mythos"
-  },
-  {
-    "file": "artifacts/a11oy/src/data/psyche/voice.ts",
-    "pattern": "Mythos"
-  },
-  {
-    "file": "artifacts/a11oy/src/data/psyche/volition.ts",
-    "pattern": "Mythos"
-  },
-  {
-    "file": "artifacts/a11oy/src/hooks/useDoctrine.tsx",
-    "pattern": "Glasswing"
-  },
-  {
     "file": "artifacts/a11oy/src/lib/atelier-runtime.ts",
     "pattern": "anonymous"
-  },
-  {
-    "file": "artifacts/a11oy/src/lib/glasswing-schemas.ts",
-    "pattern": "Glasswing"
   },
   {
     "file": "artifacts/a11oy/src/lib/infrastructure/imperium-data.ts",
@@ -132,216 +20,8 @@
     "pattern": "anonymous"
   },
   {
-    "file": "artifacts/a11oy/src/pages/About.tsx",
-    "pattern": "Glasswing"
-  },
-  {
-    "file": "artifacts/a11oy/src/pages/About.tsx",
-    "pattern": "Mythos"
-  },
-  {
-    "file": "artifacts/a11oy/src/pages/AgentWelfare.tsx",
-    "pattern": "Mythos"
-  },
-  {
-    "file": "artifacts/a11oy/src/pages/AlignmentReview.tsx",
-    "pattern": "Mythos"
-  },
-  {
-    "file": "artifacts/a11oy/src/pages/argo/Bridge.tsx",
-    "pattern": "Mythos"
-  },
-  {
-    "file": "artifacts/a11oy/src/pages/argo/SelfPlayArena.tsx",
-    "pattern": "Mythos"
-  },
-  {
-    "file": "artifacts/a11oy/src/pages/ArgoForge.tsx",
-    "pattern": "Mythos"
-  },
-  {
-    "file": "artifacts/a11oy/src/pages/BehavioralAudit.tsx",
-    "pattern": "Mythos"
-  },
-  {
-    "file": "artifacts/a11oy/src/pages/BoardroomMode.tsx",
-    "pattern": "Glasswing"
-  },
-  {
-    "file": "artifacts/a11oy/src/pages/BoardroomMode.tsx",
-    "pattern": "Mythos"
-  },
-  {
-    "file": "artifacts/a11oy/src/pages/CapabilityTrajectory.tsx",
-    "pattern": "Mythos"
-  },
-  {
-    "file": "artifacts/a11oy/src/pages/CareEngine.tsx",
-    "pattern": "Glasswing"
-  },
-  {
-    "file": "artifacts/a11oy/src/pages/CAVD.tsx",
-    "pattern": "Glasswing"
-  },
-  {
-    "file": "artifacts/a11oy/src/pages/CAVD.tsx",
-    "pattern": "Mythos"
-  },
-  {
-    "file": "artifacts/a11oy/src/pages/CodeBehaviors.tsx",
-    "pattern": "Mythos"
-  },
-  {
-    "file": "artifacts/a11oy/src/pages/Compass.tsx",
-    "pattern": "Mythos"
-  },
-  {
-    "file": "artifacts/a11oy/src/pages/Console.tsx",
-    "pattern": "Mythos"
-  },
-  {
-    "file": "artifacts/a11oy/src/pages/Constitution.tsx",
-    "pattern": "Glasswing"
-  },
-  {
-    "file": "artifacts/a11oy/src/pages/ConstitutionDSL.tsx",
-    "pattern": "Mythos"
-  },
-  {
-    "file": "artifacts/a11oy/src/pages/CovenantLift.tsx",
-    "pattern": "Glasswing"
-  },
-  {
-    "file": "artifacts/a11oy/src/pages/CovenantLift.tsx",
-    "pattern": "Mythos"
-  },
-  {
-    "file": "artifacts/a11oy/src/pages/DevPlatform.tsx",
-    "pattern": "Glasswing"
-  },
-  {
-    "file": "artifacts/a11oy/src/pages/DevPlatform.tsx",
-    "pattern": "Mythos"
-  },
-  {
-    "file": "artifacts/a11oy/src/pages/DoctrineOverview.tsx",
-    "pattern": "Glasswing"
-  },
-  {
-    "file": "artifacts/a11oy/src/pages/DoctrineOverview.tsx",
-    "pattern": "Mythos"
-  },
-  {
-    "file": "artifacts/a11oy/src/pages/frontier/MythosGraphCanvas.tsx",
-    "pattern": "Mythos"
-  },
-  {
-    "file": "artifacts/a11oy/src/pages/frontier/MythosIndex.tsx",
-    "pattern": "Mythos"
-  },
-  {
-    "file": "artifacts/a11oy/src/pages/frontier/ResearchCitationPanel.tsx",
-    "pattern": "Mythos"
-  },
-  {
-    "file": "artifacts/a11oy/src/pages/frontier/SystemHealth.tsx",
-    "pattern": "Mythos"
-  },
-  {
-    "file": "artifacts/a11oy/src/pages/FrontierIntelligence.tsx",
-    "pattern": "Mythos"
-  },
-  {
-    "file": "artifacts/a11oy/src/pages/Glasswing.tsx",
-    "pattern": "Glasswing"
-  },
-  {
-    "file": "artifacts/a11oy/src/pages/GlasswingPartners.tsx",
-    "pattern": "Glasswing"
-  },
-  {
-    "file": "artifacts/a11oy/src/pages/GlasswingPartners.tsx",
-    "pattern": "Mythos"
-  },
-  {
-    "file": "artifacts/a11oy/src/pages/HomePage.tsx",
-    "pattern": "Glasswing"
-  },
-  {
-    "file": "artifacts/a11oy/src/pages/HomePage.tsx",
-    "pattern": "Mythos"
-  },
-  {
-    "file": "artifacts/a11oy/src/pages/InvestorDemo.tsx",
-    "pattern": "Glasswing"
-  },
-  {
-    "file": "artifacts/a11oy/src/pages/InvestorDemo.tsx",
-    "pattern": "Mythos"
-  },
-  {
-    "file": "artifacts/a11oy/src/pages/KarpathyEvolution.tsx",
-    "pattern": "Mythos"
-  },
-  {
-    "file": "artifacts/a11oy/src/pages/Memory.tsx",
-    "pattern": "Mythos"
-  },
-  {
-    "file": "artifacts/a11oy/src/pages/MythosLayer.tsx",
-    "pattern": "Mythos"
-  },
-  {
-    "file": "artifacts/a11oy/src/pages/MythosSpec.tsx",
-    "pattern": "Mythos"
-  },
-  {
     "file": "artifacts/a11oy/src/pages/OperationalStatus.tsx",
     "pattern": "anonymous"
-  },
-  {
-    "file": "artifacts/a11oy/src/pages/psyche/VolitionRegistry.tsx",
-    "pattern": "Mythos"
-  },
-  {
-    "file": "artifacts/a11oy/src/pages/PublicTrustPortal.tsx",
-    "pattern": "Glasswing"
-  },
-  {
-    "file": "artifacts/a11oy/src/pages/PublicTrustPortal.tsx",
-    "pattern": "Mythos"
-  },
-  {
-    "file": "artifacts/a11oy/src/pages/Recommendations.tsx",
-    "pattern": "Mythos"
-  },
-  {
-    "file": "artifacts/a11oy/src/pages/RedTeam.tsx",
-    "pattern": "Mythos"
-  },
-  {
-    "file": "artifacts/a11oy/src/pages/reliquary/ReliquaryDoctrine.tsx",
-    "pattern": "Glasswing"
-  },
-  {
-    "file": "artifacts/a11oy/src/pages/reliquary/ReliquaryDoctrine.tsx",
-    "pattern": "Mythos"
-  },
-  {
-    "file": "artifacts/a11oy/src/pages/reliquary/SnapshotReplay.tsx",
-    "pattern": "Glasswing"
-  },
-  {
-    "file": "artifacts/a11oy/src/pages/RewardHacking.tsx",
-    "pattern": "Mythos"
-  },
-  {
-    "file": "artifacts/a11oy/src/pages/RobustnessWall.tsx",
-    "pattern": "Mythos"
-  },
-  {
-    "file": "artifacts/a11oy/src/pages/SystemCard.tsx",
-    "pattern": "Mythos"
   },
   {
     "file": "artifacts/a11oy/src/pages/SzlOperationalCore.tsx",
@@ -350,22 +30,6 @@
   {
     "file": "artifacts/a11oy/src/pages/TrustCenter.tsx",
     "pattern": "anonymous"
-  },
-  {
-    "file": "artifacts/a11oy/src/pages/TrustExchange.tsx",
-    "pattern": "Glasswing"
-  },
-  {
-    "file": "artifacts/a11oy/src/pages/Verticals.tsx",
-    "pattern": "Glasswing"
-  },
-  {
-    "file": "artifacts/a11oy/src/pages/Verticals.tsx",
-    "pattern": "Mythos"
-  },
-  {
-    "file": "artifacts/a11oy/src/pages/WelfarePlaybooks.tsx",
-    "pattern": "Mythos"
   },
   {
     "file": "artifacts/api-server/src/__tests__/a11oy-frontier-public-models.test.ts",
@@ -384,10 +48,6 @@
     "pattern": "anonymous"
   },
   {
-    "file": "artifacts/api-server/src/a11oy/codex/codex-index.ts",
-    "pattern": "Mythos"
-  },
-  {
     "file": "artifacts/api-server/src/app.ts",
     "pattern": "anonymous"
   },
@@ -402,14 +62,6 @@
   {
     "file": "artifacts/api-server/src/data/audit/github_full.json",
     "pattern": "Glass Wing"
-  },
-  {
-    "file": "artifacts/api-server/src/data/compliance-control-mappings.ts",
-    "pattern": "Glasswing"
-  },
-  {
-    "file": "artifacts/api-server/src/data/compliance-control-mappings.ts",
-    "pattern": "Mythos"
   },
   {
     "file": "artifacts/api-server/src/jobs/helios-scanners.ts",
@@ -432,10 +84,6 @@
     "pattern": "anonymous"
   },
   {
-    "file": "artifacts/api-server/src/lib/seed-disclosure.ts",
-    "pattern": "Glasswing"
-  },
-  {
     "file": "artifacts/api-server/src/lib/seed-dreamscape.ts",
     "pattern": "AlloyScape"
   },
@@ -454,10 +102,6 @@
   {
     "file": "artifacts/api-server/src/middlewares/global-auth-enforcer.ts",
     "pattern": "anonymous"
-  },
-  {
-    "file": "artifacts/api-server/src/middlewares/global-auth-enforcer.ts",
-    "pattern": "Mythos"
   },
   {
     "file": "artifacts/api-server/src/middlewares/rate-limiters.ts",
@@ -480,20 +124,12 @@
     "pattern": "anonymous"
   },
   {
-    "file": "artifacts/api-server/src/routes/__tests__/helios-memos-generate.test.ts",
-    "pattern": "Mythos"
-  },
-  {
     "file": "artifacts/api-server/src/routes/__tests__/loose-mount-coverage.test.ts",
     "pattern": "anonymous"
   },
   {
     "file": "artifacts/api-server/src/routes/a11oy-adaptive-intelligence.ts",
     "pattern": "anonymous"
-  },
-  {
-    "file": "artifacts/api-server/src/routes/a11oy-console.ts",
-    "pattern": "Mythos"
   },
   {
     "file": "artifacts/api-server/src/routes/a11oy-frontier.ts",
@@ -526,14 +162,6 @@
   {
     "file": "artifacts/api-server/src/routes/amaru-ops-core.ts",
     "pattern": "Glass Wing"
-  },
-  {
-    "file": "artifacts/api-server/src/routes/amaru-ops-core.ts",
-    "pattern": "Glasswing"
-  },
-  {
-    "file": "artifacts/api-server/src/routes/amaru-ops-core.ts",
-    "pattern": "Mythos"
   },
   {
     "file": "artifacts/api-server/src/routes/amaru-ops-core.ts",
@@ -570,14 +198,6 @@
   {
     "file": "artifacts/api-server/src/routes/carlota-jo-ops-core.ts",
     "pattern": "Glass Wing"
-  },
-  {
-    "file": "artifacts/api-server/src/routes/carlota-jo-ops-core.ts",
-    "pattern": "Glasswing"
-  },
-  {
-    "file": "artifacts/api-server/src/routes/carlota-jo-ops-core.ts",
-    "pattern": "Mythos"
   },
   {
     "file": "artifacts/api-server/src/routes/carlota-jo-ops-core.ts",
@@ -629,14 +249,6 @@
   },
   {
     "file": "artifacts/api-server/src/routes/counsel-ops-core.ts",
-    "pattern": "Glasswing"
-  },
-  {
-    "file": "artifacts/api-server/src/routes/counsel-ops-core.ts",
-    "pattern": "Mythos"
-  },
-  {
-    "file": "artifacts/api-server/src/routes/counsel-ops-core.ts",
     "pattern": "Perplexity Computer"
   },
   {
@@ -668,14 +280,6 @@
     "pattern": "anonymous"
   },
   {
-    "file": "artifacts/api-server/src/routes/doctrine-crud.ts",
-    "pattern": "Glasswing"
-  },
-  {
-    "file": "artifacts/api-server/src/routes/doctrine-crud.ts",
-    "pattern": "Mythos"
-  },
-  {
     "file": "artifacts/api-server/src/routes/domain-atlas-execution.ts",
     "pattern": "anonymous"
   },
@@ -700,10 +304,6 @@
     "pattern": "anonymous"
   },
   {
-    "file": "artifacts/api-server/src/routes/foundry-deepseek-v4.ts",
-    "pattern": "Glasswing"
-  },
-  {
     "file": "artifacts/api-server/src/routes/groups/decisions.ts",
     "pattern": "anonymous"
   },
@@ -712,24 +312,8 @@
     "pattern": "anonymous"
   },
   {
-    "file": "artifacts/api-server/src/routes/helios/data.ts",
-    "pattern": "Mythos"
-  },
-  {
-    "file": "artifacts/api-server/src/routes/helios/index.ts",
-    "pattern": "Mythos"
-  },
-  {
-    "file": "artifacts/api-server/src/routes/helios/types.ts",
-    "pattern": "Mythos"
-  },
-  {
     "file": "artifacts/api-server/src/routes/index.ts",
     "pattern": "anonymous"
-  },
-  {
-    "file": "artifacts/api-server/src/routes/index.ts",
-    "pattern": "Mythos"
   },
   {
     "file": "artifacts/api-server/src/routes/investor-analytics.ts",
@@ -746,14 +330,6 @@
   {
     "file": "artifacts/api-server/src/routes/lexicon-ops-core.ts",
     "pattern": "Glass Wing"
-  },
-  {
-    "file": "artifacts/api-server/src/routes/lexicon-ops-core.ts",
-    "pattern": "Glasswing"
-  },
-  {
-    "file": "artifacts/api-server/src/routes/lexicon-ops-core.ts",
-    "pattern": "Mythos"
   },
   {
     "file": "artifacts/api-server/src/routes/lexicon-ops-core.ts",
@@ -805,14 +381,6 @@
   },
   {
     "file": "artifacts/api-server/src/routes/org-intelligence.ts",
-    "pattern": "Glasswing"
-  },
-  {
-    "file": "artifacts/api-server/src/routes/org-intelligence.ts",
-    "pattern": "Mythos"
-  },
-  {
-    "file": "artifacts/api-server/src/routes/org-intelligence.ts",
     "pattern": "Perplexity Computer"
   },
   {
@@ -837,23 +405,11 @@
   },
   {
     "file": "artifacts/api-server/src/routes/pulse-ops-core.ts",
-    "pattern": "Glasswing"
-  },
-  {
-    "file": "artifacts/api-server/src/routes/pulse-ops-core.ts",
-    "pattern": "Mythos"
-  },
-  {
-    "file": "artifacts/api-server/src/routes/pulse-ops-core.ts",
     "pattern": "Perplexity Computer"
   },
   {
     "file": "artifacts/api-server/src/routes/push-tokens.ts",
     "pattern": "anonymous"
-  },
-  {
-    "file": "artifacts/api-server/src/routes/reliquary.ts",
-    "pattern": "Glasswing"
   },
   {
     "file": "artifacts/api-server/src/routes/replay-attestation.ts",
@@ -881,23 +437,7 @@
   },
   {
     "file": "artifacts/api-server/src/routes/sentra-ops-core.ts",
-    "pattern": "Glasswing"
-  },
-  {
-    "file": "artifacts/api-server/src/routes/sentra-ops-core.ts",
-    "pattern": "Mythos"
-  },
-  {
-    "file": "artifacts/api-server/src/routes/sentra-ops-core.ts",
     "pattern": "Perplexity Computer"
-  },
-  {
-    "file": "artifacts/api-server/src/routes/sentra-remediation.ts",
-    "pattern": "Glasswing"
-  },
-  {
-    "file": "artifacts/api-server/src/routes/sentra-remediation.ts",
-    "pattern": "Mythos"
   },
   {
     "file": "artifacts/api-server/src/routes/sentra-status.ts",
@@ -918,14 +458,6 @@
   {
     "file": "artifacts/api-server/src/routes/szl-ops.ts",
     "pattern": "Glass Wing"
-  },
-  {
-    "file": "artifacts/api-server/src/routes/szl-ops.ts",
-    "pattern": "Glasswing"
-  },
-  {
-    "file": "artifacts/api-server/src/routes/szl-ops.ts",
-    "pattern": "Mythos"
   },
   {
     "file": "artifacts/api-server/src/routes/szl-ops.ts",
@@ -950,14 +482,6 @@
   {
     "file": "artifacts/api-server/src/routes/terra-ops-core.ts",
     "pattern": "Glass Wing"
-  },
-  {
-    "file": "artifacts/api-server/src/routes/terra-ops-core.ts",
-    "pattern": "Glasswing"
-  },
-  {
-    "file": "artifacts/api-server/src/routes/terra-ops-core.ts",
-    "pattern": "Mythos"
   },
   {
     "file": "artifacts/api-server/src/routes/terra-ops-core.ts",
@@ -993,14 +517,6 @@
   },
   {
     "file": "artifacts/api-server/src/routes/vessels-ops-core.ts",
-    "pattern": "Glasswing"
-  },
-  {
-    "file": "artifacts/api-server/src/routes/vessels-ops-core.ts",
-    "pattern": "Mythos"
-  },
-  {
-    "file": "artifacts/api-server/src/routes/vessels-ops-core.ts",
     "pattern": "Perplexity Computer"
   },
   {
@@ -1012,36 +528,8 @@
     "pattern": "anonymous"
   },
   {
-    "file": "artifacts/api-server/src/seed/psyche/genesis.ts",
-    "pattern": "Mythos"
-  },
-  {
-    "file": "artifacts/api-server/src/seed/psyche/selfhood.ts",
-    "pattern": "Mythos"
-  },
-  {
-    "file": "artifacts/api-server/src/seed/psyche/voice.ts",
-    "pattern": "Mythos"
-  },
-  {
-    "file": "artifacts/api-server/src/seed/psyche/volition.ts",
-    "pattern": "Mythos"
-  },
-  {
     "file": "artifacts/api-server/TENANT_ISOLATION_AUDIT.md",
     "pattern": "anonymous"
-  },
-  {
-    "file": "artifacts/conduit/src/data/fabric/agents.ts",
-    "pattern": "Mythos"
-  },
-  {
-    "file": "artifacts/conduit/src/data/fabric/types.ts",
-    "pattern": "Mythos"
-  },
-  {
-    "file": "artifacts/conduit/src/pages/agents.tsx",
-    "pattern": "Mythos"
   },
   {
     "file": "artifacts/conduit/src/pages/operational-core.tsx",
@@ -1053,35 +541,11 @@
   },
   {
     "file": "artifacts/conduit/src/pages/operational-core.tsx",
-    "pattern": "Glasswing"
-  },
-  {
-    "file": "artifacts/conduit/src/pages/operational-core.tsx",
-    "pattern": "Mythos"
-  },
-  {
-    "file": "artifacts/conduit/src/pages/operational-core.tsx",
     "pattern": "Perplexity Computer"
   },
   {
     "file": "artifacts/rosie/src/pages/Identity.tsx",
     "pattern": "anonymous"
-  },
-  {
-    "file": "artifacts/sentra/src/brain/data/a11oyConstitution.ts",
-    "pattern": "Mythos"
-  },
-  {
-    "file": "artifacts/sentra/src/brain/hooks/useA11oyConstitution.ts",
-    "pattern": "Mythos"
-  },
-  {
-    "file": "artifacts/sentra/src/brain/pages/FabricPage.tsx",
-    "pattern": "Glasswing"
-  },
-  {
-    "file": "artifacts/sentra/src/pages/adversarial-defense-console.tsx",
-    "pattern": "Glasswing"
   },
   {
     "file": "artifacts/sentra/src/pages/nexus/threat-actor-profiling.tsx",
@@ -1090,14 +554,6 @@
   {
     "file": "artifacts/sentra/src/pages/phantom-war-room.tsx",
     "pattern": "anonymous"
-  },
-  {
-    "file": "artifacts/sentra/src/pages/remediation-pipeline.tsx",
-    "pattern": "Glasswing"
-  },
-  {
-    "file": "artifacts/sentra/tsconfig.json",
-    "pattern": "Mythos"
   },
   {
     "file": "artifacts/vessels/src/App.tsx",
@@ -1112,136 +568,8 @@
     "pattern": "anonymous"
   },
   {
-    "file": "docs/a11oy/A11OY_DOCTRINE.md",
-    "pattern": "Glasswing"
-  },
-  {
-    "file": "docs/a11oy/A11OY_DOCTRINE.md",
-    "pattern": "Mythos"
-  },
-  {
-    "file": "docs/a11oy/A11OY_PUBLIC_CLAIMS_DOCTRINE.md",
-    "pattern": "Glasswing"
-  },
-  {
-    "file": "docs/a11oy/A11OY_PUBLIC_CLAIMS_DOCTRINE.md",
-    "pattern": "Mythos"
-  },
-  {
-    "file": "docs/a11oy/A11OY.md",
-    "pattern": "Glasswing"
-  },
-  {
-    "file": "docs/a11oy/A11OY.md",
-    "pattern": "Mythos"
-  },
-  {
-    "file": "docs/a11oy/CLAUDE_CODE_DOCTRINE_RESEARCH.md",
-    "pattern": "Mythos"
-  },
-  {
-    "file": "docs/a11oy/CLAUDE_DOCTRINE_RESEARCH.md",
-    "pattern": "Mythos"
-  },
-  {
-    "file": "docs/a11oy/MYTHOS_RESEARCH_SWEEP.md",
-    "pattern": "Glasswing"
-  },
-  {
-    "file": "docs/a11oy/MYTHOS_RESEARCH_SWEEP.md",
-    "pattern": "Mythos"
-  },
-  {
-    "file": "docs/a11oy/RESEARCH_MYTHOS.md",
+    "file": "docs/a11oy/RESEARCH_KHIPU.md",
     "pattern": "anonymous"
-  },
-  {
-    "file": "docs/a11oy/RESEARCH_MYTHOS.md",
-    "pattern": "Glasswing"
-  },
-  {
-    "file": "docs/a11oy/RESEARCH_MYTHOS.md",
-    "pattern": "Mythos"
-  },
-  {
-    "file": "docs/a11oy/spec/mythos-doctrine-spec/CHANGELOG.md",
-    "pattern": "Glasswing"
-  },
-  {
-    "file": "docs/a11oy/spec/mythos-doctrine-spec/CHANGELOG.md",
-    "pattern": "Mythos"
-  },
-  {
-    "file": "docs/a11oy/spec/mythos-doctrine-spec/LICENSE.md",
-    "pattern": "Glasswing"
-  },
-  {
-    "file": "docs/a11oy/spec/mythos-doctrine-spec/LICENSE.md",
-    "pattern": "Mythos"
-  },
-  {
-    "file": "docs/a11oy/spec/mythos-doctrine-spec/README.md",
-    "pattern": "Glasswing"
-  },
-  {
-    "file": "docs/a11oy/spec/mythos-doctrine-spec/README.md",
-    "pattern": "Mythos"
-  },
-  {
-    "file": "docs/a11oy/spec/mythos-doctrine-spec/schemas/_shared.json",
-    "pattern": "Mythos"
-  },
-  {
-    "file": "docs/a11oy/spec/mythos-doctrine-spec/schemas/adversarial-robustness-score.json",
-    "pattern": "Mythos"
-  },
-  {
-    "file": "docs/a11oy/spec/mythos-doctrine-spec/schemas/behavioral-audit-finding.json",
-    "pattern": "Mythos"
-  },
-  {
-    "file": "docs/a11oy/spec/mythos-doctrine-spec/schemas/constitution.json",
-    "pattern": "Mythos"
-  },
-  {
-    "file": "docs/a11oy/spec/mythos-doctrine-spec/schemas/coordinated-agent-vulnerability-disclosure.json",
-    "pattern": "Mythos"
-  },
-  {
-    "file": "docs/a11oy/spec/mythos-doctrine-spec/schemas/covenant-lift-sample.json",
-    "pattern": "Mythos"
-  },
-  {
-    "file": "docs/a11oy/spec/mythos-doctrine-spec/schemas/glasswing-partner-attestation.json",
-    "pattern": "Glasswing"
-  },
-  {
-    "file": "docs/a11oy/spec/mythos-doctrine-spec/schemas/glasswing-partner-attestation.json",
-    "pattern": "Mythos"
-  },
-  {
-    "file": "docs/a11oy/spec/mythos-doctrine-spec/schemas/risk-report.json",
-    "pattern": "Mythos"
-  },
-  {
-    "file": "docs/a11oy/spec/mythos-doctrine-spec/schemas/snapshot-fingerprint.json",
-    "pattern": "Mythos"
-  },
-  {
-    "file": "docs/a11oy/spec/mythos-doctrine-spec/schemas/system-card.json",
-    "pattern": "Mythos"
-  },
-  {
-    "file": "docs/a11oy/spec/mythos-doctrine-spec/schemas/welfare-telemetry-sample.json",
-    "pattern": "Mythos"
-  },
-  {
-    "file": "docs/a11oy/spec/mythos-doctrine-spec/types/index.d.ts",
-    "pattern": "Glasswing"
-  },
-  {
-    "file": "docs/a11oy/spec/mythos-doctrine-spec/types/index.d.ts",
-    "pattern": "Mythos"
   },
   {
     "file": "docs/API-SPEC.md",
@@ -1284,10 +612,6 @@
     "pattern": "anonymous"
   },
   {
-    "file": "docs/ouroboros-thesis.md",
-    "pattern": "Mythos"
-  },
-  {
     "file": "docs/ouroboros-v5/MVP_STACK_OF_ONE.md",
     "pattern": "anonymous"
   },
@@ -1310,18 +634,6 @@
   {
     "file": "docs/reports/github-repo-audit-summary.md",
     "pattern": "AlloyScape"
-  },
-  {
-    "file": "docs/research/ecosystem-pattern-scan-2026-04.md",
-    "pattern": "Glasswing"
-  },
-  {
-    "file": "docs/research/ecosystem-pattern-scan-2026-04.md",
-    "pattern": "Mythos"
-  },
-  {
-    "file": "docs/series-a/series-a-readiness-2026-05-27.md",
-    "pattern": "Mythos"
   },
   {
     "file": "docs/TOP_20_FIXES_COMPLETED.md",

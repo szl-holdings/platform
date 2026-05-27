@@ -288,7 +288,7 @@ export function Compass() {
                   assessmentAreas: [
                     { right: 'Non-discrimination', impact: 'Low', mitigation: 'Bias detection in MirrorEval 2.0 (14-dimension scoring). Constitutional alignment checked on every output.', evidenceRef: 'MirrorEval bias dimension scores, Constitutional Enforcer logs' },
                     { right: 'Privacy and data protection', impact: 'Low', mitigation: 'PII redaction enforced. Data minimization. No customer data persisted in LLM context beyond single request.', evidenceRef: 'Connector Firewall logs, Data Handling controls' },
-                    { right: 'Human dignity', impact: 'Low', mitigation: 'Agent Welfare Assessment active. No claims of sentience. Welfare telemetry is governance signal only.', evidenceRef: 'WelfareAssessment probe results, Mythos Doctrine system cards' },
+                    { right: 'Human dignity', impact: 'Low', mitigation: 'Agent Welfare Assessment active. No claims of sentience. Welfare telemetry is governance signal only.', evidenceRef: 'WelfareAssessment probe results, Khipu Doctrine system cards' },
                     { right: 'Freedom of expression', impact: 'Not applicable', mitigation: 'A11oy operates in enterprise operational context. No content moderation or speech filtering.', evidenceRef: 'N/A' },
                     { right: 'Access to justice', impact: 'Low', mitigation: 'Full audit trail via Proof Ledger. Every decision is replayable and attributable. Human override always available.', evidenceRef: 'Proof Ledger chain, Workcell Replay logs' },
                   ],

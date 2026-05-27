@@ -1,7 +1,7 @@
 // doctrine-scanner-exempt: legacy live-product surface; rename tracked as separate engineering debt — see scripts/check-doctrine-v6.mjs header.
 import { Layout } from '../components/layout';
 import { PageHeader, Card, SectionTitle, KpiCard } from '../components/ui';
-import { AGENT_LABEL, fmtUsd, fmtPct } from '../data/mythosDoctrine';
+import { AGENT_LABEL, fmtUsd, fmtPct } from '../data/khipuDoctrine';
 import { useCovenantLift, DoctrineLoader, type DoctrineCovenantLift } from '../hooks/useDoctrine';
 
 export function CovenantLift() {
@@ -30,7 +30,7 @@ export function CovenantLift() {
 
       <Card className="mb-6">
         <p className="text-xs" style={{ color: 'var(--color-a11oy-text-sub)', lineHeight: 1.7 }}>
-          The shadow twin is approved for measurement only — it cannot execute, send, or write. Every shadow output stays inside Glasswing.
+          The shadow twin is approved for measurement only — it cannot execute, send, or write. Every shadow output stays inside Pillpintu.
           Lift quantification carries an Alignment Review sign-off (ARG-018).
         </p>
       </Card>

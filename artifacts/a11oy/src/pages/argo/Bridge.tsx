@@ -160,7 +160,7 @@ export function ArgoBridge() {
           { label: 'Proof Chain', to: '/proof' },
           { label: 'Learning Loop', to: '/learning' },
           { label: 'Model Router', to: '/model-router' },
-          { label: 'Mythos Doctrine', to: '/doctrine' },
+          { label: 'Khipu Doctrine', to: '/doctrine' },
           { label: 'Reward Hacking', to: '/reward-hacking' },
           { label: 'Mirror Eval', to: '/evals' },
           { label: 'Counterfactuals', to: '/counterfactuals' },

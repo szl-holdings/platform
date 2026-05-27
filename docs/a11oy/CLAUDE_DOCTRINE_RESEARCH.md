@@ -7,7 +7,7 @@
 
 ---
 
-## 1. Models (Claude Family — "Mythos Tier")
+## 1. Models (Claude Family — "Khipu Tier")
 
 ### Current Claude model lineup (as of May 2026)
 
@@ -20,7 +20,7 @@
 | `claude-3-5-haiku-20241022` | Claude 3.5 Haiku | 200,000 | 8,192 | $0.80 | $4.00 | — | ✓ | ✓ | Legacy fast |
 | `claude-3-opus-20240229` | Claude 3 Opus | 200,000 | 4,096 | $15.00 | $75.00 | — | ✓ | ✓ | Legacy frontier |
 
-**Platform note:** Our model registry uses our own internal Mythos versioning (`claude-opus-4-7`, `claude-sonnet-4-6`) which we maintain as forward-looking labels. We've added `claude-haiku-4-5` and added `supportsPromptCaching` + `mythosModel` flags to the registry.
+**Platform note:** Our model registry uses our own internal Khipu versioning (`claude-opus-4-7`, `claude-sonnet-4-6`) which we maintain as forward-looking labels. We've added `claude-haiku-4-5` and added `supportsPromptCaching` + `khipuModel` flags to the registry.
 
 ---
 
@@ -323,7 +323,7 @@ Key doctrine from the docs:
 | Content moderation | Partial (PCE gate is platform-level) | `anthropic/content-moderation.ts` pre/post hooks |
 | Token counting (exact) | Partial (heuristic) | `anthropic/token-counter.ts` shim + Console pre-flight |
 | Haiku model | ✗ | Add `claude-haiku-4-5` to model registry |
-| Model registry `supportsPromptCaching` flag | ✗ | Add flag + `mythosModel` indicator |
+| Model registry `supportsPromptCaching` flag | ✗ | Add flag + `khipuModel` indicator |
 | Console UI (3-pane workbench) | ✗ | Build `pages/Console.tsx` |
 | Console API route | ✗ | Build `api-server/routes/a11oy-console.ts` |
 | Sidebar Console nav entry | ✗ | Add to Orchestration group in Sidebar |

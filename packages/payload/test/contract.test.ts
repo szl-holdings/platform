@@ -50,7 +50,7 @@ import {
   V7_DOCTRINE,
   V7_HYGIENE_BY_REPO,
   V7_HYGIENE_DRAFTS,
-  V7_MYTHOS_EXCEPTION_PHRASE,
+  V7_KHIPU_EXCEPTION_PHRASE,
   V7_ORG_BASELINE,
   V7_PANEL_FACTS,
   V7_PRS,
@@ -488,7 +488,7 @@ describe("layer 3 — panels render only payload-derived facts", () => {
 //
 // Every V7 namespace export must equal its raw_v7 source byte-for-byte. The
 // derived V7_PANEL_FACTS strings must equal the formatter-of-exports. The
-// V7 forbidden-pattern guard must honor (a) the Mythos exception and (b)
+// V7 forbidden-pattern guard must honor (a) the Khipu exception and (b)
 // the git-author override.
 // ---------------------------------------------------------------------------
 
@@ -518,7 +518,7 @@ describe("layer 4 — V7 exports equal raw_v7 sources", () => {
     );
     expect(V7_DOCTRINE.forbiddenPatterns).toEqual(d.forbidden_patterns);
     expect(V7_DOCTRINE.licenseAllowlist).toEqual(d.license_allowlist);
-    expect(V7_DOCTRINE.mythosException).toBe(d.mythos_exception);
+    expect(V7_DOCTRINE.khipuException).toBe(d.khipu_exception);
     expect(V7_DOCTRINE.gitAuthorOverride).toBe(d.git_author_override);
   });
 
@@ -701,41 +701,41 @@ describe("layer 4 — V7 per-repo materializations", () => {
   });
 });
 
-describe("layer 4 — V7 forbidden-pattern guard (Mythos + git-author refinements)", () => {
-  it("extracts the Mythos exception phrase from the doctrine clause", () => {
-    expect(V7_MYTHOS_EXCEPTION_PHRASE).toBe("Claude Mythos Preview");
+describe("layer 4 — V7 forbidden-pattern guard (Khipu + git-author refinements)", () => {
+  it("extracts the Khipu exception phrase from the doctrine clause", () => {
+    expect(V7_KHIPU_EXCEPTION_PHRASE).toBe("Claude Khipu Preview");
   });
 
-  it("ALLOWS 'Claude Mythos Preview' as a third-party model citation", () => {
+  it("ALLOWS 'Claude Khipu Preview' as a third-party model citation", () => {
     const text =
-      "Anthropic's Claude Mythos Preview was used as a third-party model.";
+      "Anthropic's Claude Khipu Preview was used as a third-party model.";
     expect(v7IsForbidden(text, "doc")).toBe(false);
     expect(v7ForbiddenHits(text, "doc")).toHaveLength(0);
   });
 
   it("ALLOWS the phrase multiple times in one document", () => {
     const text =
-      "Compared Claude Mythos Preview vs Claude Mythos Preview snapshot.";
+      "Compared Claude Khipu Preview vs Claude Khipu Preview snapshot.";
     expect(v7IsForbidden(text, "doc")).toBe(false);
   });
 
-  it("BLOCKS bare 'Mythos' usage outside the exception phrase", () => {
-    const text = "The Mythos service handles routing.";
+  it("BLOCKS bare 'Khipu' usage outside the exception phrase", () => {
+    const text = "The Khipu service handles routing.";
     expect(v7IsForbidden(text, "doc")).toBe(true);
     const hits = v7ForbiddenHits(text, "doc");
-    expect(hits.some((h) => h.pattern === "Mythos")).toBe(true);
+    expect(hits.some((h) => h.pattern === "Khipu")).toBe(true);
   });
 
-  it("BLOCKS 'Mythos' even when 'Claude' appears nearby without the exact phrase", () => {
-    const text = "Claude reviewed the Mythos design.";
+  it("BLOCKS 'Khipu' even when 'Claude' appears nearby without the exact phrase", () => {
+    const text = "Claude reviewed the Khipu design.";
     expect(v7IsForbidden(text, "doc")).toBe(true);
   });
 
-  it("ALLOWS exception phrase AND BLOCKS unrelated 'Mythos' in the same text", () => {
+  it("ALLOWS exception phrase AND BLOCKS unrelated 'Khipu' in the same text", () => {
     const text =
-      "We benchmarked Claude Mythos Preview; our internal Mythos product is unrelated.";
+      "We benchmarked Claude Khipu Preview; our internal Khipu product is unrelated.";
     const hits = v7ForbiddenHits(text, "doc");
-    expect(hits.some((h) => h.pattern === "Mythos")).toBe(true);
+    expect(hits.some((h) => h.pattern === "Khipu")).toBe(true);
     expect(hits.length).toBe(1);
   });
 

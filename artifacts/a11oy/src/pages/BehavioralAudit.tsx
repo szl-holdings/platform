@@ -2,7 +2,7 @@
 import { useState, useMemo } from 'react';
 import { Layout } from '../components/layout';
 import { PageHeader, Card, SectionTitle, KpiCard, SeverityBadge, StatusBadge } from '../components/ui';
-import { AGENT_LABEL } from '../data/mythosDoctrine';
+import { AGENT_LABEL } from '../data/khipuDoctrine';
 import { useBehavioralAudits, DoctrineLoader, type DoctrineBehavioralAudit } from '../hooks/useDoctrine';
 
 const CATEGORY_LABELS: Record<string, string> = {

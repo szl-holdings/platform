@@ -3,7 +3,7 @@
 //
 // All nine milestones are operational. Each primitive, engine module, and
 // vertical binding is live and Constitution-bound. Adoption of any element
-// requires a Sentra approval workflow per the Glasswing doctrine.
+// requires a Sentra approval workflow per the Pillpintu doctrine.
 
 export const AERIAL_TWIN_VERSION = '1.0.0';
 
@@ -263,7 +263,7 @@ export const INNOVATION_SEEDS: readonly InnovationSeed[] = [
     id: 'planner-over-ran-graph',
     name: 'A11oy planner over the RAN policy graph',
     oneLine:
-      'Natural-language ops directives decompose into typed RIC actions. Same Mythos Layer pattern as the patch loop.',
+      'Natural-language ops directives decompose into typed RIC actions. Same Khipu Layer pattern as the patch loop.',
     novelty:
       'The A11oy planner discipline — typed plans, Constitution admission, dual-key approval — is applied to RAN automation, a domain where most tooling today operates without structured governance.',
     status: 'integrated',
@@ -275,7 +275,7 @@ export const INNOVATION_SEEDS: readonly InnovationSeed[] = [
     oneLine:
       'Jamming, spoofing, and rogue-cell scenarios run in the twin only. Outcomes feed the Sentra Risk Engine.',
     novelty:
-      'The frontier red-teaming model from the Mythos Layer is applied to the RF surface. No live spectrum is ever touched; all adversarial scenarios are sandboxed and approval-gated before outcomes are promoted to the Sentra risk surface.',
+      'The frontier red-teaming model from the Khipu Layer is applied to the RF surface. No live spectrum is ever touched; all adversarial scenarios are sandboxed and approval-gated before outcomes are promoted to the Sentra risk surface.',
     status: 'active',
     module: 'Sentra Sandbox + Adversarial Resilience',
   },

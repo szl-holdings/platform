@@ -96,7 +96,7 @@ const DOSSIER = {
   postTraining: {
     pipeline: 'Expert Cultivation → On-Policy Distillation',
     a11oyLens:
-      'Two-stage paradigm. Domain experts are cultivated independently via SFT + RL with GRPO, then consolidated into one model with on-policy distillation. A11oy treats this as the governed Expert Cultivation workflow — every cultivated expert is registered as a Glasswing capability before the distillation gate accepts it.',
+      'Two-stage paradigm. Domain experts are cultivated independently via SFT + RL with GRPO, then consolidated into one model with on-policy distillation. A11oy treats this as the governed Expert Cultivation workflow — every cultivated expert is registered as a Pillpintu capability before the distillation gate accepts it.',
     stages: [
       { id: 'cultivation', label: 'Independent Expert Cultivation', method: 'SFT + RL (GRPO) per domain' },
       { id: 'distillation', label: 'Unified Consolidation', method: 'On-Policy Distillation across domains' },

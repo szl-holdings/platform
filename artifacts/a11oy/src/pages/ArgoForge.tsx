@@ -39,7 +39,7 @@ const SOURCE_KIND_META: Record<SeedSourceKind, { title: string; subtitle: string
   'public-research': {
     title: 'Frontier Methods (public research)',
     subtitle:
-      'Reimplemented from first principles using only public Anthropic research, system cards, and the OpenMythos independent reconstruction. No leaks, no scraped weights.',
+      'Reimplemented from first principles using only public Anthropic research, system cards, and the OpenKhipu independent reconstruction. No leaks, no scraped weights.',
     chip: 'RESEARCH',
   },
 };

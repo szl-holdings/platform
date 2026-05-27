@@ -222,7 +222,7 @@ const PUBLIC_EXACT_PATHS = new Set([
   // protected by session auth and are NOT reachable anonymously.
   "/api/helios/stats",
   "/api/helios/signals",
-  "/api/helios/mythos",
+  "/api/helios/khipu",
   "/api/helios/proposals",
   "/api/helios/benchmarks",
   "/api/helios/scanners",
@@ -570,12 +570,12 @@ const PUBLIC_PREFIXES = [
   // requireAuthenticatedOrg() inside the handler, so anonymous callers
   // cannot write to or delete shared demo-org data via this allowlist.
   "/api/counsel-knowledge/",
-  // Helios sub-resource read-only paths — covers /mythos/search and
-  // /mythos/nodes/:id (graph exploration) and /memos/:id (individual memo
+  // Helios sub-resource read-only paths — covers /khipu/search and
+  // /khipu/nodes/:id (graph exploration) and /memos/:id (individual memo
   // detail). Mutating routes (PATCH /proposals/:id/status,
   // PATCH /scanners/:id/toggle, POST /scanners/:id/run, POST /mcp)
   // are NOT covered here and enforce auth via session/token.
-  "/api/helios/mythos/",
+  "/api/helios/khipu/",
   "/api/helios/memos/",
   // Mission Runbooks — in-memory runbook library and run orchestration backing
   // the Unified Command "Mission Runbooks" page. Fully public (same model as
@@ -612,7 +612,7 @@ const PUBLIC_PREFIXES = [
   // demo mode. Mutating routes are still rate-limited by the route group's
   // perUserWriteSlidingLimiter and CSRF-double-submit on writes.
   "/api/ouroboros/",
-  // Mythos Doctrine governance CRUD — read-only GET surfaces and POST seed
+  // Khipu Doctrine governance CRUD — read-only GET surfaces and POST seed
   // endpoint backing the A11oy Doctrine pages. Public in demo mode (DB-backed,
   // no tenant PII). Write routes are CSRF-protected via global csrfMiddleware.
   "/api/doctrine/",

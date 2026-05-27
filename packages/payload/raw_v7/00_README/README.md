@@ -46,7 +46,7 @@
 ## Execution order
 
 1. Read `00_README/PM_OVERWATCH_FLY_V7_ROLLUP.md` — full executive summary, risk register, tier definitions.
-2. Confirm the 3 pending PM decisions (Glasswing/Mythos, BP review-count, GitHub display name).
+2. Confirm the 3 pending PM decisions (Pillpintu/Khipu, BP review-count, GitHub display name).
 3. Use `05_apply_scripts/` in numeric order. Each script requires `confirm_action`. Scripts 01–02 need PR numbers filled from `02_specialists/pr_triage/all_prs_final.json` first.
 4. Per-action verification belongs in `02_specialists/{specialist}/*REPORT.md`.
 
@@ -59,7 +59,7 @@
 - Replay root: `1ed4d253e876f428c6e182f8ed8a569585442556b339529bbf8ec2522581698b`
 - 9-axis Λ-gate ≥ 0.90, moralGrounding + measurabilityHonesty ≥ 0.95
 - Public-only ingestion; license allowlist: Apache-2.0 / MIT / BSD-3 / CC-BY
-- 8 forbidden text patterns (Mythos exception: third-party Anthropic model name only)
+- 8 forbidden text patterns (Khipu exception: third-party Anthropic model name only)
 - **User override preserved:** historical git author "Stephen Paul Lutar Jr." on 75 commits is intentional and NOT remediated
 
 ---

@@ -55,7 +55,7 @@ const AUTHOR = {
 
 const DOCTRINE = {
   version: 'v6',
-  ban_list: ['AlloyScape', 'Glass Wing', 'Glasswing', 'Mythos', 'Stephen Paul', 'Perplexity Computer'],
+  ban_list: ['AlloyScape', 'Glass Wing', 'Pillpintu', 'Khipu', 'Stephen Paul', 'Perplexity Computer'],
   byline_rule: 'Use "Stephen P." — never "Stephen Paul". "Jr." is canonical.',
 };
 

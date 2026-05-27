@@ -86,7 +86,7 @@ been set.
 1. **`packages/payload/raw/**` is byte-locked.** Read only. The doctrine
    compares hashes; modifying these files breaks every downstream surface.
 2. **Forbidden patterns:** `Jr.`, `AlloyScape`, `Glass Wing`,
-   `Glasswing`, `Mythos`, `Stephen Paul`, `Perplexity Computer`,
+   `Pillpintu`, `Khipu`, `Stephen Paul`, `Perplexity Computer`,
    `anonymous`. Use **Stephen P. Lutar** (no "Jr.", no "Paul"). The CI
    guard will catch new occurrences in your code.
 3. **Thesis lineage is single-sourced from `@szl-holdings/payload`.**
@@ -166,7 +166,7 @@ Import from `@szl-holdings/payload`:
 
 - `V7` — rollup `{ manifest, doctrine, specialists, orgBaseline, prs }`.
 - `V7_DOCTRINE` — pins `version: V6`, same `replayRoot`, plus the two
-  V7 refinements: `mythosException` and `gitAuthorOverride`.
+  V7 refinements: `khipuException` and `gitAuthorOverride`.
 - `V7_SPECIALISTS` — `{ doctrineSweep, hygieneFix, bpFix, citationFix,
   prTriage }`. Headline numbers: 582 files scanned, 6 BP PUT payloads,
   13 CITATION.cff drafts, 68 open PRs triaged (12 MERGE / 18 CLOSE /
@@ -178,7 +178,7 @@ Import from `@szl-holdings/payload`:
 - `V7_PANEL_FACTS` — display strings rendered by the new "Latest audit"
   row in every GovernancePanel and by the Amaru V7 ribbon.
 - `v7ForbiddenHits(text, context)` / `v7IsForbidden(text, context)` —
-  doctrine-aware guard that honors the Mythos exception and the
+  doctrine-aware guard that honors the Khipu exception and the
   git-author override (context: `doc | code | ui | git_author |
   git_committer | commit_metadata`).
 
@@ -186,11 +186,11 @@ Import from `@szl-holdings/payload`:
 
 ### V7.2 Two doctrine refinements you must respect
 
-1. **Mythos exception.** `Mythos` is **allowed** when it appears as part
-   of the exact phrase `Claude Mythos Preview` (citing Anthropic's
-   third-party model name). All other `Mythos` usage remains forbidden.
+1. **Khipu exception.** `Khipu` is **allowed** when it appears as part
+   of the exact phrase `Claude Khipu Preview` (citing Anthropic's
+   third-party model name). All other `Khipu` usage remains forbidden.
    The phrase is extracted at module-load from
-   `V7_DOCTRINE.mythosException` — do not transcribe it.
+   `V7_DOCTRINE.khipuException` — do not transcribe it.
 2. **Git author override.** Historical `Stephen Paul Lutar Jr.` git
    `author`/`committer` metadata is explicitly approved by the user.
    `v7ForbiddenHits(text, context)` returns `[]` when context is
@@ -209,7 +209,7 @@ add new tooling that inspects git-author fields, use the typed guard.
   V7 apply scripts (token scopes, one-way-door inventory, post-condition
   checks).
 - `docs/audit/v7-pm-decisions.md` — the 3 PM-decision items the V7
-  specialist explicitly refused to auto-resolve (Glasswing/Mythos in
+  specialist explicitly refused to auto-resolve (Pillpintu/Khipu in
   `platform/`, BP review-count deadlock, missing CODEOWNERS in
   `vsp-otel` / `agi-forecast`).
 
@@ -231,7 +231,7 @@ chip on its governance ribbon.
 - `pnpm -F @szl-holdings/payload verify:all` — both.
 - `pnpm -F @szl-holdings/payload test` — contract test now includes a
   4th layer asserting V7 exports equal raw_v7 sources, plus
-  unit tests for the Mythos exception and git-author override.
+  unit tests for the Khipu exception and git-author override.
 
 ### V7.6 What V7 does NOT do
 

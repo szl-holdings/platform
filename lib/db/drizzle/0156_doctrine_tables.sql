@@ -237,17 +237,17 @@ CREATE INDEX IF NOT EXISTS "doctrine_partners_pid_idx" ON "doctrine_partners" ("
 CREATE INDEX IF NOT EXISTS "doctrine_partners_stage_idx" ON "doctrine_partners" ("stage");
 --> statement-breakpoint
 
-CREATE TABLE IF NOT EXISTS "doctrine_glasswing_config" (
+CREATE TABLE IF NOT EXISTS "doctrine_pillpintu_config" (
   "id" serial PRIMARY KEY NOT NULL,
   "agent_id" text NOT NULL,
-  "glasswing_enabled" jsonb DEFAULT 'true' NOT NULL,
+  "pillpintu_enabled" jsonb DEFAULT 'true' NOT NULL,
   "partner_allowlist" jsonb DEFAULT '[]' NOT NULL,
   "dual_approval_required" jsonb DEFAULT 'true' NOT NULL,
   "created_at" timestamp DEFAULT now() NOT NULL,
   "updated_at" timestamp DEFAULT now() NOT NULL
 );
 --> statement-breakpoint
-CREATE INDEX IF NOT EXISTS "doctrine_gw_agent_idx" ON "doctrine_glasswing_config" ("agent_id");
+CREATE INDEX IF NOT EXISTS "doctrine_gw_agent_idx" ON "doctrine_pillpintu_config" ("agent_id");
 --> statement-breakpoint
 
 CREATE TABLE IF NOT EXISTS "doctrine_cavd_records" (

@@ -22,7 +22,7 @@
     "@szl-holdings/domain-profiles": "workspace:*",
     "@szl-holdings/flexcache": "workspace:*",
     "@szl-holdings/formulas": "workspace:*",
-    "@szl-holdings/frontier-mythos": "workspace:*",
+    "@szl-holdings/frontier-khipu": "workspace:*",
     "@szl-holdings/omnia-shell": "workspace:*",
     "@szl-holdings/platform-registry": "workspace:*",
     "@szl-holdings/replit-auth-web": "workspace:*",

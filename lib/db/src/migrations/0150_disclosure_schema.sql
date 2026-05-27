@@ -159,7 +159,7 @@ CREATE TABLE IF NOT EXISTS "compliance_framework_controls" (
   "a11oy_primitive"          TEXT,
   "evidence_source"          TEXT,
   "freshness_threshold_days" INTEGER       NOT NULL DEFAULT 30,
-  "drilldown_type"           TEXT          CHECK ("drilldown_type" IN ('proof-ledger','mirror-eval','behavioral-audit','system-card','red-team','covenant','welfare','snapshot','glasswing','cavd')),
+  "drilldown_type"           TEXT          CHECK ("drilldown_type" IN ('proof-ledger','mirror-eval','behavioral-audit','system-card','red-team','covenant','welfare','snapshot','pillpintu','cavd')),
   "drilldown_detail"         TEXT,
   "is_active"                BOOLEAN       NOT NULL DEFAULT true,
   "created_at"               TIMESTAMPTZ   NOT NULL DEFAULT NOW(),

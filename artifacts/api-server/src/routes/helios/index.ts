@@ -7,8 +7,8 @@ import { callModel } from '../../services/ai/call-model';
 import {
   BENCHMARK_SCORES,
   BENCHMARK_TIME_SERIES,
-  MYTHOS_EDGES,
-  MYTHOS_NODES,
+  KHIPU_EDGES,
+  KHIPU_NODES,
   PROPOSALS,
   RECALIBRATION_MEMOS,
 } from './data';
@@ -89,16 +89,16 @@ router.get('/signals', (req, res) => {
   res.json({ signals, total, page: pageNum, pageSize: size });
 });
 
-// ── Mythos Index ──────────────────────────────────────────────────────────────
-router.get('/mythos', (_req, res) => {
-  res.json({ nodes: MYTHOS_NODES, edges: MYTHOS_EDGES });
+// ── Khipu Index ──────────────────────────────────────────────────────────────
+router.get('/khipu', (_req, res) => {
+  res.json({ nodes: KHIPU_NODES, edges: KHIPU_EDGES });
 });
 
-router.get('/mythos/search', (req, res) => {
+router.get('/khipu/search', (req, res) => {
   const { q = '' } = req.query as Record<string, string>;
   const lower = q.toLowerCase();
 
-  const scored = MYTHOS_NODES
+  const scored = KHIPU_NODES
     .map(n => {
       let score = n.relevanceScore * 0.4;
       if (n.label.toLowerCase().includes(lower)) score += 0.5;
@@ -112,21 +112,21 @@ router.get('/mythos/search', (req, res) => {
 
   const nodeIds = new Set(scored.map(({ node }) => node.id));
   const nodes = scored.map(({ node }) => node);
-  const edges = MYTHOS_EDGES.filter(e => nodeIds.has(e.source) && nodeIds.has(e.target));
+  const edges = KHIPU_EDGES.filter(e => nodeIds.has(e.source) && nodeIds.has(e.target));
 
   res.json({ nodes, edges, query: q });
 });
 
-router.get('/mythos/nodes/:id', (req, res) => {
-  const node = MYTHOS_NODES.find(n => n.id === req.params.id);
+router.get('/khipu/nodes/:id', (req, res) => {
+  const node = KHIPU_NODES.find(n => n.id === req.params.id);
   if (!node) {
     res.status(404).json({ error: 'Node not found' });
     return;
   }
 
-  const neighborEdges = MYTHOS_EDGES.filter(e => e.source === node.id || e.target === node.id);
+  const neighborEdges = KHIPU_EDGES.filter(e => e.source === node.id || e.target === node.id);
   const neighborIds = new Set(neighborEdges.flatMap(e => [e.source, e.target]).filter(id => id !== node.id));
-  const neighbors = MYTHOS_NODES.filter(n => neighborIds.has(n.id));
+  const neighbors = KHIPU_NODES.filter(n => neighborIds.has(n.id));
 
   res.json({ node, neighbors, edges: neighborEdges });
 });
@@ -743,14 +743,14 @@ router.post('/memos/generate', async (req, res) => {
   });
 });
 
-// ── MCP endpoint (Mythos query for portfolio agents) ──────────────────────────
+// ── MCP endpoint (Khipu query for portfolio agents) ──────────────────────────
 router.post('/mcp', (req, res) => {
   const { query, entity, benchmark } = req.body as Record<string, string>;
 
   if (entity) {
-    const node = MYTHOS_NODES.find(n => n.label.toLowerCase() === entity.toLowerCase());
+    const node = KHIPU_NODES.find(n => n.label.toLowerCase() === entity.toLowerCase());
     if (node) {
-      const edges = MYTHOS_EDGES.filter(e => e.source === node.id || e.target === node.id);
+      const edges = KHIPU_EDGES.filter(e => e.source === node.id || e.target === node.id);
       res.json({ type: 'entity', node, edges, signals: getSignals().filter(s => s.entities.includes(entity)) });
       return;
     }
@@ -767,7 +767,7 @@ router.post('/mcp', (req, res) => {
     const relevantSignals = getSignals().filter(s =>
       s.title.toLowerCase().includes(lower) || s.summary.toLowerCase().includes(lower)
     ).slice(0, 5);
-    const relevantNodes = MYTHOS_NODES.filter(n =>
+    const relevantNodes = KHIPU_NODES.filter(n =>
       n.label.toLowerCase().includes(lower) || n.description.toLowerCase().includes(lower)
     ).slice(0, 5);
     res.json({ type: 'query', query, signals: relevantSignals, nodes: relevantNodes });

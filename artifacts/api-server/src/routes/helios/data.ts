@@ -1,5 +1,5 @@
 // doctrine-scanner-exempt: legacy live-product surface; rename tracked as separate engineering debt — see scripts/check-doctrine-v6.mjs header.
-import type { Signal, MythosNode, MythosEdge, CapabilityProposal, Scanner, RecalibrationMemo, BenchmarkScore, BenchmarkTimeSeries } from './types';
+import type { Signal, KhipuNode, KhipuEdge, CapabilityProposal, Scanner, RecalibrationMemo, BenchmarkScore, BenchmarkTimeSeries } from './types';
 
 function daysAgo(n: number) {
   const d = new Date();
@@ -232,9 +232,9 @@ export const SIGNALS: Signal[] = [
   },
 ];
 
-// IDs here are intentionally aligned with @szl-holdings/frontier-mythos package IDs
-// so that MythosIndex enrichment (linkedSignalCount) resolves correctly via ID match.
-export const MYTHOS_NODES: MythosNode[] = [
+// IDs here are intentionally aligned with @szl-holdings/frontier-khipu package IDs
+// so that KhipuIndex enrichment (linkedSignalCount) resolves correctly via ID match.
+export const KHIPU_NODES: KhipuNode[] = [
   { id: 'idea-agentic-ai',   kind: 'concept',   label: 'Agentic AI',                    description: 'AI systems that plan, reason, and take multi-step actions autonomously with minimal human intervention.',              tags: ['autonomous', 'planning', 'LLM'],             relevanceScore: 0.98, linkedSignalCount: 8 },
   { id: 'idea-embodied-ai',  kind: 'concept',   label: 'Embodied AI',                   description: 'AI systems that interact with physical or simulated 3D environments through sensorimotor loops.',                 tags: ['robotics', 'perception', 'manipulation'],    relevanceScore: 0.91, linkedSignalCount: 3 },
   { id: 'idea-maniparena',   kind: 'benchmark', label: 'ManipArena',                    description: 'Spatial reasoning benchmark for embodied AI agents across manipulation, navigation, and 3D reasoning tasks.',     tags: ['robotics', 'benchmark', 'evaluation'],       relevanceScore: 0.89, linkedSignalCount: 2 },
@@ -249,7 +249,7 @@ export const MYTHOS_NODES: MythosNode[] = [
   { id: 'idea-attention',    kind: 'paper',     label: 'Attention Is All You Need',     description: 'Seminal 2017 paper introducing the Transformer architecture; foundation of modern LLMs.',                       tags: ['transformer', 'attention', 'NLP', 'seminal'],relevanceScore: 0.92, linkedSignalCount: 5 },
 ];
 
-export const MYTHOS_EDGES: MythosEdge[] = [
+export const KHIPU_EDGES: KhipuEdge[] = [
   { source: 'idea-embodied-ai',  target: 'idea-maniparena',  relation: 'benchmarked-on' },
   { source: 'idea-agentic-ai',   target: 'idea-swe-bench',   relation: 'benchmarked-on' },
   { source: 'idea-agentic-ai',   target: 'idea-agentbench',  relation: 'benchmarked-on' },

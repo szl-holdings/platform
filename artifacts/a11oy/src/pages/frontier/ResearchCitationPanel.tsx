@@ -107,7 +107,7 @@ export function ResearchCitationPanel({
         <div style={{ padding: '0 16px 16px' }}>
           <div style={{ fontSize: 11, color: MUTED, fontFamily: 'var(--font-mono, monospace)', marginBottom: 12, lineHeight: 1.5 }}>
             Lab and company names below are for internal research context only.
-            They do not appear in external product copy. See RESEARCH_MYTHOS doctrine.
+            They do not appear in external product copy. See RESEARCH_KHIPU doctrine.
           </div>
           <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
             {citations.map(c => (

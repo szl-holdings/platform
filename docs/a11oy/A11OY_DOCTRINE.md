@@ -1,50 +1,50 @@
 <!-- doctrine-scanner-exempt: legacy live-product surface; rename tracked as separate engineering debt — see scripts/check-doctrine-v6.mjs header. -->
 # A11OY Doctrine
 
-> The internal operating doctrine for A11oy as the author and operator of the Mythos Doctrine Open Spec. This document tells engineers, partners, and reviewers how A11oy treats the spec, the Glasswing Partner program, and the surfaces that depend on them.
+> The internal operating doctrine for A11oy as the author and operator of the Khipu Doctrine Open Spec. This document tells engineers, partners, and reviewers how A11oy treats the spec, the Pillpintu Partner program, and the surfaces that depend on them.
 >
-> Companion: [`A11OY_PUBLIC_CLAIMS_DOCTRINE.md`](./A11OY_PUBLIC_CLAIMS_DOCTRINE.md). Grounding: [`MYTHOS_RESEARCH_SWEEP.md`](./MYTHOS_RESEARCH_SWEEP.md).
+> Companion: [`A11OY_PUBLIC_CLAIMS_DOCTRINE.md`](./A11OY_PUBLIC_CLAIMS_DOCTRINE.md). Grounding: [`KHIPU_RESEARCH_SWEEP.md`](./KHIPU_RESEARCH_SWEEP.md).
 
 ---
 
 ## 1. A11oy's role with respect to the Open Spec
 
-A11oy authored the Mythos Doctrine Open Spec. A11oy is also one of its implementations. These are deliberately separate roles.
+A11oy authored the Khipu Doctrine Open Spec. A11oy is also one of its implementations. These are deliberately separate roles.
 
 - As **author**, A11oy treats the spec as public infrastructure — versioned under SemVer, licensed under CC-BY-4.0, and changed only through a posted review window.
 - As **implementation**, A11oy emits and consumes every artifact kind in the spec and stays current with the latest published version.
 
 **Conflict-of-interest rule.** A spec change that exclusively benefits A11oy's implementation must either (a) become a `MAJOR` revision with a public migration path, or (b) be re-shaped to benefit any conformant implementation. The 90-day Transparency Report logs every spec revision and the parties who proposed it.
 
-## 2. Backward compatibility with #3993 (Mythos Doctrine primitives)
+## 2. Backward compatibility with #3993 (Khipu Doctrine primitives)
 
 Task #3994 is **strictly additive** on top of the #3993 primitives:
 - Constitutions, System Cards, Behavioral Audit findings, Welfare telemetry, Snapshot fingerprints, Red Team probes, Capability Trajectory, Reward Hacking watchdog, Alignment Reviews, Covenant Lift samples — **all retained as authored in #3993**, no field renames, no removals.
 - The Open Spec wraps each of these primitives in a versioned envelope (`specVersion`, `kind`, `id`, `issuedBy`, `issuedAt`, optional `signature`). The envelope is additive; existing #3993 callers ignore it.
-- New artifact kinds — `GlasswingPartnerAttestation`, `CoordinatedAgentVulnerabilityDisclosure`, `AdversarialRobustnessScore` — are net-new and do not touch any #3993 primitive.
+- New artifact kinds — `PillpintuPartnerAttestation`, `CoordinatedAgentVulnerabilityDisclosure`, `AdversarialRobustnessScore` — are net-new and do not touch any #3993 primitive.
 
 If a #3993 type ever needs a breaking change, it goes through the same SemVer rules as any other spec change. There are no in-place mutations.
 
-## 3. Glasswing Mode — the distinction layer
+## 3. Pillpintu Mode — the distinction layer
 
-Glasswing Mode is what A11oy ships when a customer or partner needs not just governed inference, but **publicly verifiable governance**. Three commitments distinguish Glasswing Mode from the base Covenant Layer:
+Pillpintu Mode is what A11oy ships when a customer or partner needs not just governed inference, but **publicly verifiable governance**. Three commitments distinguish Pillpintu Mode from the base Covenant Layer:
 
 1. **Public artifacts.** Constitutions, System Cards, 90-Day Transparency Reports, and Adversarial Robustness scores for in-scope agents are published on the Public Trust Portal. Permalinks are stable.
 2. **Coordinated disclosure.** Every reported agent-vulnerability is hashed at intake and disclosed at expiry or patch — whichever comes first. The hash anchor is published immediately; the content follows.
 3. **Defender posture.** A funded Defender Credit Pool finances independent reporters. Allocations and payouts are public.
 
-Glasswing Mode is opt-in per agent. An agent in Glasswing Mode cannot be silently downgraded — a downgrade requires dual approval and is itself published as a doctrine event.
+Pillpintu Mode is opt-in per agent. An agent in Pillpintu Mode cannot be silently downgraded — a downgrade requires dual approval and is itself published as a doctrine event.
 
-## 4. Glasswing Partner Lifecycle (four stages)
+## 4. Pillpintu Partner Lifecycle (four stages)
 
-The partner program follows a four-stage Cyber Verification Program. Modeled on Anthropic's Project Glasswing and standard responsible-disclosure norms.
+The partner program follows a four-stage Cyber Verification Program. Modeled on Anthropic's Project Pillpintu and standard responsible-disclosure norms.
 
 | Stage | Required check | Output |
 |:------|:---------------|:-------|
 | **APPLY** | Identity, public homepage, contact, public code-of-conduct, responsible-disclosure policy. | Application record (hash-anchored). |
 | **VERIFY** | Legal standing, prior public work, signed responsible-disclosure agreement. | `verifications[]` entries with `evidenceHash`. |
 | **VET** | Technical scope review (allowlisted agents, allowlisted actions, denied actions), data-handling review (where applicable, SOC 2 / ISO 27001). | Scope draft, dual-approver review queue. |
-| **ONBOARD** | Dual approval (two distinct A11oy approver actors), publication of attestation, announcement window. | `GlasswingPartnerAttestation` (stage = `onboard` → `active`). |
+| **ONBOARD** | Dual approval (two distinct A11oy approver actors), publication of attestation, announcement window. | `PillpintuPartnerAttestation` (stage = `onboard` → `active`). |
 
 Once active, partners can be `suspended` (temporary, single-approval) or `revoked` (permanent, dual-approval). Every stage transition is appended to the proof chain.
 
@@ -82,7 +82,7 @@ Exception clause: a report is never delayed for convenience. If a report is dela
 A no-login, public-by-default surface that aggregates the publishable artifacts. Each artifact is reachable by stable permalink. The portal exposes:
 
 - The current Open Spec (with `$schema` URLs).
-- The current Constitution and System Card per Glasswing-Mode agent.
+- The current Constitution and System Card per Pillpintu-Mode agent.
 - The most recent 90-Day Transparency Report and the previous 4 (rolling year).
 - The Adversarial Robustness Wall (latest scores per snapshot, per category).
 - The CAVD ledger (intake-anchored hashes; disclosed advisories with full content).
@@ -92,8 +92,8 @@ A no-login, public-by-default surface that aggregates the publishable artifacts.
 
 Per snapshot, a composite robustness score (0–100) and a per-category breakdown across the eleven attack categories drawn from MITRE ATLAS and OWASP LLM Top 10. The Wall ships:
 
-- **Public scores** for Glasswing-Mode agents.
-- **Partner-only scores** for non-Glasswing agents covered by partner attestation scope.
+- **Public scores** for Pillpintu-Mode agents.
+- **Partner-only scores** for non-Pillpintu agents covered by partner attestation scope.
 - **Internal-only scores** otherwise.
 
 Scores are recomputed every snapshot. A drop > 5 points in a category triggers an alignment-reviewer notification within 24 hours.
@@ -131,9 +131,9 @@ A budgeted pool that finances independent reporters of valid CAVD intakes. The p
 
 Allocation rule: per-finding allocation is set at triage from a published rubric (severity × novelty × proof-quality). Allocations and payouts are visible on the Public Trust Portal.
 
-## 12. The `mythos-doctrine` GitHub Action
+## 12. The `khipu-doctrine` GitHub Action
 
-A first-party GitHub Action lives at `tools/github-actions/mythos-doctrine/`. Drop it into any repo that touches A11oy artifacts. Per PR:
+A first-party GitHub Action lives at `tools/github-actions/khipu-doctrine/`. Drop it into any repo that touches A11oy artifacts. Per PR:
 
 1. **Lint** Constitutions in the DSL (suggest-only; never blocks).
 2. **Run** a small Petri-style behavioral-audit subset against the changed agent.

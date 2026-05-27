@@ -7,8 +7,8 @@ import {
   RadarChart, PolarGrid, PolarAngleAxis, Radar, ResponsiveContainer,
   BarChart, Bar, XAxis, YAxis, Cell,
 } from 'recharts';
-import { COMPETITOR_LANES, DIMENSIONS, CAPABILITY_GAPS } from '@szl-holdings/frontier-mythos';
-import type { CompetitorLane } from '@szl-holdings/frontier-mythos';
+import { COMPETITOR_LANES, DIMENSIONS, CAPABILITY_GAPS } from '@szl-holdings/frontier-khipu';
+import type { CompetitorLane } from '@szl-holdings/frontier-khipu';
 import { ResearchCitationPanel } from './frontier/ResearchCitationPanel';
 import type { Citation } from './frontier/ResearchCitationPanel';
 
@@ -197,7 +197,7 @@ export function FrontierIntelligence() {
   const BASE_URL = (import.meta.env.BASE_URL ?? '/').replace(/\/$/, '');
   const FRONTIER_NAV = [
     { label: 'Signal Feed', path: '/frontier/feed' },
-    { label: 'Mythos Index', path: '/frontier/mythos' },
+    { label: 'Khipu Index', path: '/frontier/khipu' },
     { label: 'Capability Proposals', path: '/frontier/proposals' },
     { label: 'Benchmarks', path: '/frontier/benchmarks' },
     { label: 'Recalibration Memos', path: '/frontier/memos' },

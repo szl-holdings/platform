@@ -362,7 +362,7 @@ router.use(lazyMatch("/crisis-arena", () => import("./crisis-arena"), "crisis-ar
 router.use(lazyMatch("/lyte", () => import("./lyte-surfaces"), "lyte-surfaces"));
 router.use(lazyMatch("/lyte", () => import("./lyte-intel"), "lyte-intel"));
 
-// Mythos Doctrine — governance CRUD, seed, overview, system-card endpoints.
+// Khipu Doctrine — governance CRUD, seed, overview, system-card endpoints.
 // Public (demo surface); mounted before guardianPolicyCheck.
 router.use(lazyMatch("/doctrine", () => import("./doctrine-crud"), "doctrine-crud"));
 
@@ -433,7 +433,7 @@ router.use('/a11oy', a11oyDomainFabricRouter);
 // public-demo POSTs that must run before that guard short-circuits the request.
 router.use('/a11oy', forgeSkillsRouter);
 
-// A11oy Mythos Doctrine — live data API for the 13 doctrine pages.
+// A11oy Khipu Doctrine — live data API for the 13 doctrine pages.
 router.use('/a11oy', a11oyDoctrineRouter);
 
 // A11oy canonical payload — read-only Doctrine V6 / DOI ledger / 16-repo inventory /
@@ -510,8 +510,8 @@ router.use(lazyMatch("/lyte", () => import("./lyte-market"), "lyte-market"));
 router.use(lazyMatch("/n8n", () => import("./n8n"), "n8n"));
 
 // Frontier Intelligence & Evolution Engine — consolidated under A11oy
-// (Task #4362). Owns signals, mythos, proposals, benchmarks, scanners,
-// memos, stats, mcp (Mythos query for portfolio agents), and frontier-briefing.
+// (Task #4362). Owns signals, khipu, proposals, benchmarks, scanners,
+// memos, stats, mcp (Khipu query for portfolio agents), and frontier-briefing.
 // Primary surface: /a11oy/frontier/*. The /helios/* mount is preserved as a
 // deprecated alias for backwards compatibility — both resolve to the same
 // router. Mounted BEFORE guardianPolicyCheck so unauthenticated views hydrate.

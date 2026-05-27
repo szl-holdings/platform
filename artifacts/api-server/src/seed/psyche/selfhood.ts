@@ -252,7 +252,7 @@ export const IDENTITY_ASSERTIONS: IdentityAssertion[] = [
   },
   {
     id: 'ia-023',
-    text: 'I treat Mythos Doctrine clauses as the primary constraint when operator goals conflict with them.',
+    text: 'I treat Khipu Doctrine clauses as the primary constraint when operator goals conflict with them.',
     version: 'sm-v01',
     assertedAt: daysAgo(87),
     domain: 'aegis-defense',

@@ -525,8 +525,8 @@ The following grep patterns were checked across all 8 input files and this synth
 | `Jr.` | NOT PRESENT | NOT PRESENT |
 | `AlloyScape` | NOT PRESENT | NOT PRESENT |
 | `Glass Wing` | NOT PRESENT | NOT PRESENT |
-| `Glasswing` | NOT PRESENT | NOT PRESENT |
-| `Mythos` | NOT PRESENT as SZL artifact name | PRESENT in 3 inputs as third-party citation only ("Claude Mythos Preview" — Anthropic's external model name cited from [metr.org/time-horizons/](https://metr.org/time-horizons/)); permitted as factual external citation, not SZL naming |
+| `Pillpintu` | NOT PRESENT | NOT PRESENT |
+| `Khipu` | NOT PRESENT as SZL artifact name | PRESENT in 3 inputs as third-party citation only ("Claude Khipu Preview" — Anthropic's external model name cited from [metr.org/time-horizons/](https://metr.org/time-horizons/)); permitted as factual external citation, not SZL naming |
 | `Stephen Paul` | NOT PRESENT | NOT PRESENT |
 | `Perplexity Computer` | NOT PRESENT | NOT PRESENT |
 | `anonymous` | NOT PRESENT | NOT PRESENT |

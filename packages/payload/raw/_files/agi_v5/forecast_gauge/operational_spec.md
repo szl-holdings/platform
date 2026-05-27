@@ -45,7 +45,7 @@ Per [recon_agi_forecast/leaders.md §2](https://metr.org/time-horizons/), the mo
 
 | # | canonical-key | Definition | Upstream Source | Current Value (May 2026) | Update Cadence |
 |---|---------------|------------|-----------------|--------------------------|----------------|
-| 1 | `METR-th50-hours` | 50%-task-completion time horizon of the field-frontier model (hours) | [metr.org/time-horizons](https://metr.org/time-horizons/) | ≥16 h (ceiling hit by Claude Mythos Preview per [METR TH1.1](https://metr.org/blog/2026-1-29-time-horizon-1-1/)) | Monthly / on-release |
+| 1 | `METR-th50-hours` | 50%-task-completion time horizon of the field-frontier model (hours) | [metr.org/time-horizons](https://metr.org/time-horizons/) | ≥16 h (ceiling hit by Claude Khipu Preview per [METR TH1.1](https://metr.org/blog/2026-1-29-time-horizon-1-1/)) | Monthly / on-release |
 | 2 | `METR-doubling-months` | P50 doubling time of frontier th50, post-2023 trend (months) | [METR TH1.1 Jan 2026](https://metr.org/blog/2026-1-29-time-horizon-1-1/) | 4.3 months (130.8 days); post-2024: 3 months (88.6 days) per [METR TH1.1](https://metr.org/blog/2026-1-29-time-horizon-1-1/) | Quarterly |
 | 3 | `Epoch-frontier-flops` | log₁₀ of largest known training run (FLOP) | [epoch.ai/trends](https://epoch.ai/trends) | 26.7 (≈5×10²⁶, Grok 4) per [Epoch Trends May 2026](https://epoch.ai/trends) | Monthly |
 | 4 | `ARC-AGI-2-SOTA-pct` | Best verified score on ARC-AGI-2 (%) | [arcprize.org/arc-agi/2](https://arcprize.org/arc-agi/2) | 95% (Gemini 3.1 Pro + Code Evolution, Imbue, Feb 2026) per [bracai.eu tracker](https://www.bracai.eu/post/arc-agi-2-benchmark) | Monthly |
@@ -207,7 +207,7 @@ Before emitting the receipt, the module runs a `doctrine-pass` check:
 
 ```typescript
 function doctrineCheck(receipt: ForecastSummaryReceipt): boolean {
-  const FORBIDDEN = ["Jr.", "AlloyScape", "Glass Wing", "Glasswing", "Stephen Paul",
+  const FORBIDDEN = ["Jr.", "AlloyScape", "Glass Wing", "Pillpintu", "Stephen Paul",
                      "Perplexity Computer", "anonymous"];
   const asText = JSON.stringify(receipt);
   return FORBIDDEN.every(p => !asText.includes(p));
@@ -832,7 +832,7 @@ echo "1ed4d253e876f428c6e182f8ed8a569585442556b339529bbf8ec2522581698b" \
 ## Doctrine Sweep
 
 **Forbidden patterns:**  
-`Jr.` ✗ | `AlloyScape` ✗ | `Glass Wing` ✗ | `Glasswing` ✗ | `Mythos` — not used as an SZL artifact name; appears only in the upstream citation table from [METR's published leaderboard](https://metr.org/time-horizons/) as a third-party model designation ✗ | `Stephen Paul` ✗ | `Perplexity Computer` ✗ | `anonymous` ✗  
+`Jr.` ✗ | `AlloyScape` ✗ | `Glass Wing` ✗ | `Pillpintu` ✗ | `Khipu` — not used as an SZL artifact name; appears only in the upstream citation table from [METR's published leaderboard](https://metr.org/time-horizons/) as a third-party model designation ✗ | `Stephen Paul` ✗ | `Perplexity Computer` ✗ | `anonymous` ✗  
 **Result: ALL CLEAR.**
 
 **Hallucination check:** Every quantitative claim is sourced to a public URL cited inline. The "Current Value (May 2026)" entries in the variable roster are sourced directly from the Recon-AGI-Forecast leaders.md which cites primary sources. No unsourced numbers.

@@ -33,7 +33,7 @@ The V7 specialist's recommended order, mirrored from
 
    | # | Item | Decision | Impact on apply scripts |
    | - | ---- | -------- | ----------------------- |
-   | 1 | `Glasswing` / `Mythos` inside `platform/` | **A — narrow doctrine exception** | None on the 6 scripts. Encoded in `@szl-holdings/payload` via `V7_PLATFORM_NAME_EXCEPTIONS` and the new `path?` parameter on `v7ForbiddenHits()`. Future doctrine sweeps must invoke `v7ForbiddenHits(text, context, path)` with the file's repo-relative path so the exception applies. |
+   | 1 | `Pillpintu` / `Khipu` inside `platform/` | **A — narrow doctrine exception** | None on the 6 scripts. Encoded in `@szl-holdings/payload` via `V7_PLATFORM_NAME_EXCEPTIONS` and the new `path?` parameter on `v7ForbiddenHits()`. Future doctrine sweeps must invoke `v7ForbiddenHits(text, context, path)` with the file's repo-relative path so the exception applies. |
    | 2 | BP review-count deadlock | **A — set `required_approving_review_count: 0` and `require_code_owner_reviews: false`** | Before running `05_apply_bp.sh`, patch each of the 6 PUT payloads in `raw_v7/05_apply_scripts/05_apply_bp.sh` to set both fields as above. Keep `required_status_checks.strict: true` and `enforce_admins: true`. This is recorded as a temporary posture pending a second reviewer being onboarded (tracked as a follow-up). |
    | 3 | Missing CODEOWNERS in `vsp-otel` / `agi-forecast` | **A — draft CODEOWNERS first** | Before running `03_open_hygiene_prs.sh`, add a 4th file to each of the two hygiene PRs: `.github/CODEOWNERS` containing `*       @SLutar`. The two repos then carry the same posture as the other four BP targets in step 7. |
 

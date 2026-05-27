@@ -303,7 +303,7 @@ export async function seedDisclosureData(orgId: number): Promise<void> {
         | 'covenant'
         | 'welfare'
         | 'snapshot'
-        | 'glasswing'
+        | 'pillpintu'
         | 'cavd',
       drilldownDetail: c.drilldownDetail,
       isActive: true,

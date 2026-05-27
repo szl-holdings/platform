@@ -66,18 +66,16 @@ const EXCLUDE_PATH_PREFIXES = [
   // ── Vendored / upstream mirrors — fix upstream then re-vendor ──
   "vendor/",
   "packages/payload/",
-  // ── Workspace package whose name embeds a renamed token ──
-  "packages/frontier-mythos/",
-  // ── Auto-generated baseline smoke tests / manifest that reference the
-  //    above package by its package name (which embeds a renamed token).
-  //    The MANIFEST is JSON (no comments allowed → can't carry an inline
-  //    exempt marker), and the .ts file is generated. ──
-  "tests/silent-zone/",
+  // ── Dossier payload mirror (raw upstream snapshot, treated like packages/payload) ──
+  "dossier/payload-2026-05-25/",
+  // ── Audit evidence is a frozen historical receipt; tokens captured in
+  //    typecheck stdouts pre-date the Inca rename and must remain verbatim. ──
+  "artifacts/audit/evidence/",
   // ── Previous-generation forbidden-pattern scanner — declares the tokens
   //    as its own list. Superseded by this script.
   "scripts/check-forbidden-patterns.",
-  // ── GitHub Action whose directory name embeds a renamed token ──
-  "tools/github-actions/mythos-doctrine/",
+  // ── Inca rename script — declares the legacy tokens as its FROM list. ──
+  "scripts/rename-inca.mjs",
   // ── PPTX-builder Python script: dossier export with legacy slide titles ──
   //    (binary-ish generated script; uses in-file marker as well, but path
   //    exempted because the script string-builds slide titles dynamically). ──

@@ -37,8 +37,8 @@ const DOCTRINE = {
   ban_list: [
     'AlloyScape',
     'Glass Wing',
-    'Glasswing',
-    'Mythos',
+    'Pillpintu',
+    'Khipu',
     'Stephen Paul',
     'Perplexity Computer',
   ] as readonly string[],

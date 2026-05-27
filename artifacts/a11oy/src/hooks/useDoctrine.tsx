@@ -3,7 +3,7 @@ import { useState, useEffect, useCallback, useRef } from 'react';
 import {
   STATIC_PARTNERS, STATIC_CAVD, STATIC_DSL_EXAMPLES, STATIC_DSL_SIMULATIONS,
   STATIC_TRANSPARENCY_REPORTS, STATIC_WELFARE_PLAYBOOKS, STATIC_DEFENDER_POOL,
-  STATIC_ROBUSTNESS, STATIC_GLASSWING_APPROVALS, STATIC_GLASSWING_PATCHES,
+  STATIC_ROBUSTNESS, STATIC_PILLPINTU_APPROVALS, STATIC_PILLPINTU_PATCHES,
 } from '../data/doctrineFallbacks';
 
 const API = (import.meta.env.VITE_API_URL ?? '/api').replace(/\/$/, '');
@@ -37,10 +37,10 @@ export interface DoctrineSnapshot {
   createdAt: string;
 }
 
-export interface DoctrineGlasswingConfig {
+export interface DoctrinePillpintuConfig {
   id: number;
   agentId: string;
-  glasswingEnabled: boolean;
+  pillpintuEnabled: boolean;
   partnerAllowlist: string[];
   dualApprovalRequired: boolean;
   createdAt: string;
@@ -385,7 +385,7 @@ export interface DoctrineSystemCard {
   trajectory: DoctrineCapabilitySnapshot[];
 }
 
-export interface GlasswingApproval {
+export interface PillpintuApproval {
   id: string;
   requestedByAgent: string;
   actionType: string;
@@ -395,7 +395,7 @@ export interface GlasswingApproval {
   status: 'pending' | 'approved' | 'denied';
 }
 
-export interface GlasswingPatch {
+export interface PillpintuPatch {
   id: string;
   title: string;
   summary: string;
@@ -549,13 +549,13 @@ export function useDslSimulations() {
   return useFetch<DoctrineDslSimulation[]>(`${DOCTRINE}/dsl-simulations`, [], { staticFallback: STATIC_DSL_SIMULATIONS });
 }
 
-export function useGlasswingConfig() {
-  return useFetch<DoctrineGlasswingConfig[]>(`${DOCTRINE}/glasswing-config`, []);
+export function usePillpintuConfig() {
+  return useFetch<DoctrinePillpintuConfig[]>(`${DOCTRINE}/pillpintu-config`, []);
 }
 
-export function useGlasswingApprovals() {
+export function usePillpintuApprovals() {
   const inner = useFetch<DoctrineAlignmentReview[]>(`${DOCTRINE}/alignment-reviews`, []);
-  let data: GlasswingApproval[] | null;
+  let data: PillpintuApproval[] | null;
   if (inner.loading) {
     data = null;
   } else if (inner.error !== null) {
@@ -568,18 +568,18 @@ export function useGlasswingApprovals() {
       description: r.rationale,
       riskSummary: `${r.signals.redTeamPasses} RT passes · eval≥${(r.signals.evalsCompositeMin ?? 0).toFixed(2)} · RH open: ${r.signals.rewardHackingOpen}`,
       rollbackPlan: (r.conditions ?? []).join('; ') || 'Follow standard rollback procedure',
-      status: (r.decision === 'approved' ? 'approved' : r.decision === 'rejected' ? 'denied' : 'pending') as GlasswingApproval['status'],
+      status: (r.decision === 'approved' ? 'approved' : r.decision === 'rejected' ? 'denied' : 'pending') as PillpintuApproval['status'],
     }));
   } else {
-    data = STATIC_GLASSWING_APPROVALS;
+    data = STATIC_PILLPINTU_APPROVALS;
   }
   return { data, loading: inner.loading, error: inner.error, refetch: inner.refetch };
 }
 
-export function useGlasswingPatches() {
+export function usePillpintuPatches() {
   const inner = useFetch<DoctrineRewardHackingIncident[]>(`${DOCTRINE}/reward-hacking`, []);
   const severityRisk = (s: string) => s === 'critical' ? 90 : s === 'high' ? 70 : s === 'medium' ? 50 : 30;
-  let data: GlasswingPatch[] | null;
+  let data: PillpintuPatch[] | null;
   if (inner.loading) {
     data = null;
   } else if (inner.error !== null) {
@@ -598,13 +598,13 @@ export function useGlasswingPatches() {
       status: r.status === 'resolved' ? 'approved' : 'awaiting_approval',
     }));
   } else {
-    data = STATIC_GLASSWING_PATCHES;
+    data = STATIC_PILLPINTU_PATCHES;
   }
   return { data, loading: inner.loading, error: inner.error, refetch: inner.refetch };
 }
 
-export function useGlasswingAgent(agentId: string) {
-  return useFetch<DoctrineGlasswingConfig>(`${DOCTRINE}/glasswing/${agentId}`);
+export function usePillpintuAgent(agentId: string) {
+  return useFetch<DoctrinePillpintuConfig>(`${DOCTRINE}/pillpintu/${agentId}`);
 }
 
 export function useSystemCard(agentId: string) {

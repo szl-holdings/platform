@@ -1,7 +1,7 @@
 // doctrine-scanner-exempt: legacy live-product surface; rename tracked as separate engineering debt — see scripts/check-doctrine-v6.mjs header.
 import { Layout } from '../components/layout';
 import { PageHeader, Card, SectionTitle, KpiCard, SeverityBadge, StatusBadge } from '../components/ui';
-import { RH_WATCHDOG_RULES, AGENT_LABEL } from '../data/mythosDoctrine';
+import { RH_WATCHDOG_RULES, AGENT_LABEL } from '../data/khipuDoctrine';
 import { useRewardHacking, DoctrineLoader, type DoctrineRewardHackingIncident } from '../hooks/useDoctrine';
 
 const STATUS_LABEL: Record<string, 'ok' | 'warn' | 'error' | 'info'> = {

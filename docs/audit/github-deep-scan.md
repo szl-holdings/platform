@@ -159,7 +159,7 @@ non-org code repos, so the scope is complete.
   predates the guard and cannot be renamed in a thesis-lineage task):
   baselined hits, 277 pairs (193 artifacts, 75 docs, 9 scripts).
 
-Why split? `Mythos` and `Glasswing` are legitimate internal product
+Why split? `Khipu` and `Pillpintu` are legitimate internal product
 feature names elsewhere in `artifacts/a11oy/src/` that predate this
 guard. The strict zone covers every shipped chrome surface (panels +
 thesis pages); the soft zone captures grandfathered hits elsewhere.

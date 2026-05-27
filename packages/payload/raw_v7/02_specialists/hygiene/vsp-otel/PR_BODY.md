@@ -29,7 +29,7 @@ Documentation-only change — no executable logic modified. Doctrine-V6 gate doe
 
 ### Checklist
 
-- [x] No forbidden patterns (Jr., AlloyScape, Glass Wing, Glasswing, Mythos outside Anthropic context, Stephen Paul, Perplexity Computer, anonymous)
+- [x] No forbidden patterns (Jr., AlloyScape, Glass Wing, Pillpintu, Khipu outside Anthropic context, Stephen Paul, Perplexity Computer, anonymous)
 - [x] Author byline: `Lutar, Stephen P.` (ORCID 0009-0001-0110-4173 · SZL Holdings)
 - [x] Contact email: `stephen@szlholdings.com`
 - [x] Matches sibling repo style (ouroboros, sentra)

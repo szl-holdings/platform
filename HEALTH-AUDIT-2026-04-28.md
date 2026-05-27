@@ -72,7 +72,7 @@ All 17 are `TS18046: 'res' is of type 'unknown'` in catch blocks across:
 ### `artifacts/helios`
 **Typecheck:** ❌ FAIL (2 errors) | **Build:** ✅ PASS (12.32s)
 
-- `src/pages/MythosIndex.tsx:91` — CSS property `truncate` is not valid in `React.CSSProperties` (Tailwind class used as inline style)
+- `src/pages/KhipuIndex.tsx:91` — CSS property `truncate` is not valid in `React.CSSProperties` (Tailwind class used as inline style)
 - `src/pages/RecalibrationMemos.tsx:80` — Unsafe conversion from `RecalibrationMemo` to `Record<string, string>`
 
 ### `artifacts/lyte-command-center` — Lyte Decision Intelligence
@@ -201,7 +201,7 @@ All blocking errors fixed. See Safe Fixes below.
 All are `TS18046` from TypeScript's `useUnknownInCatchVariables` (strict mode). Variable `res` (not `err`) in five pages accesses `.message`, `.status`, etc. without narrowing. Fix options: `(res as Error).message` or type guard `if (res instanceof Error)`. The variable name `res` suggests these may be API response objects — verify shape before casting to avoid hiding real bugs.
 
 ### NI-6 — `artifacts/helios`: 2 typecheck errors
-- `MythosIndex.tsx:91` — `truncate` is a Tailwind class, not a CSS property. Move to `className` or replace with `{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }`.
+- `KhipuIndex.tsx:91` — `truncate` is a Tailwind class, not a CSS property. Move to `className` or replace with `{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }`.
 - `RecalibrationMemos.tsx:80` — Type cast from `RecalibrationMemo` to `Record<string, string>` may fail at runtime. Review intended usage.
 
 ### NI-7 — `artifacts/conduit`: 1 remaining typecheck error

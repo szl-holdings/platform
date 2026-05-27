@@ -392,8 +392,8 @@ METR measures the [50%-task-completion time horizon](https://metr.org/time-horiz
 | `Jr.` | NOT PRESENT |
 | `AlloyScape` | NOT PRESENT |
 | `Glass Wing` | NOT PRESENT |
-| `Glasswing` | NOT PRESENT |
-| `Mythos` | NOT PRESENT |
+| `Pillpintu` | NOT PRESENT |
+| `Khipu` | NOT PRESENT |
 | `Stephen Paul` | NOT PRESENT |
 | `Perplexity Computer` | NOT PRESENT |
 | `anonymous` | NOT PRESENT |

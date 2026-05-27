@@ -11,7 +11,7 @@
 
 **Top 3 leaders by area:**
 
-1. **AGI Capability Forecasting — METR (leaders).** [METR's March 2025 paper](https://metr.org/blog/2025-03-19-measuring-ai-ability-to-complete-long-tasks/) established the 50%-task-completion time horizon metric with a measured doubling time of ~7 months since 2019. As of May 2026, Claude Mythos Preview exceeded METR's 16-hour measurement ceiling. [Epoch AI's Trends dashboard](https://epoch.ai/trends) quantifies training compute growing at 5×/year since 2020 and AI chip stock doubling every 7 months. These orgs own the quantitative forecasting discourse.
+1. **AGI Capability Forecasting — METR (leaders).** [METR's March 2025 paper](https://metr.org/blog/2025-03-19-measuring-ai-ability-to-complete-long-tasks/) established the 50%-task-completion time horizon metric with a measured doubling time of ~7 months since 2019. As of May 2026, Claude Khipu Preview exceeded METR's 16-hour measurement ceiling. [Epoch AI's Trends dashboard](https://epoch.ai/trends) quantifies training compute growing at 5×/year since 2020 and AI chip stock doubling every 7 months. These orgs own the quantitative forecasting discourse.
 
 2. **Formal Verification of LLM Systems — DeepMind AlphaProof (leaders).** [AlphaProof (Nature, Nov 2025)](https://www.nature.com/articles/s41586-025-09833-y) reached silver-medal IMO performance using RL over Lean proofs. [Lean Copilot (arXiv 2404.12534)](https://arxiv.org/abs/2404.12534) automates 74.2% of Lean proof steps.
 
@@ -65,7 +65,7 @@ Source: [METR blog (March 2025)](https://metr.org/blog/2025-03-19-measuring-ai-a
 | Current agents on >4-hour human tasks | <20% success |
 | Week-long tasks prediction | achievable in 2–4 more years at current trend |
 | Month-long tasks prediction | by end of decade if trend holds |
-| Claude Mythos Preview (May 2026) | ≥16 hours 50%-horizon; 95% CI 8.5–55 hrs — exceeds METR measurement ceiling |
+| Claude Khipu Preview (May 2026) | ≥16 hours 50%-horizon; 95% CI 8.5–55 hrs — exceeds METR measurement ceiling |
 
 METR notes the exponential fit is robust: "if the absolute measurements are off by a factor of 10x, that only changes the arrival time by around 2 years."
 
@@ -167,8 +167,8 @@ Checking all sections above for forbidden patterns per CHARTER.md:
 | `Jr.` | NOT PRESENT |
 | `AlloyScape` | NOT PRESENT |
 | `Glass Wing` | NOT PRESENT |
-| `Glasswing` | NOT PRESENT |
-| `Mythos` | NOT PRESENT *(note: "Claude Mythos Preview" appears only as a third-party proper noun in a citation from METR, not as an SZL artifact name — permitted as factual external citation)* |
+| `Pillpintu` | NOT PRESENT |
+| `Khipu` | NOT PRESENT *(note: "Claude Khipu Preview" appears only as a third-party proper noun in a citation from METR, not as an SZL artifact name — permitted as factual external citation)* |
 | `Stephen Paul` | NOT PRESENT |
 | `Perplexity Computer` | NOT PRESENT |
 | `anonymous` | NOT PRESENT |

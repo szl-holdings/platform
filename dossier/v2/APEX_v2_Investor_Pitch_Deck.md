@@ -98,7 +98,7 @@ May 5, 2026
 
 ## SLIDE 7 — A11oy as Control Plane
 
-# A11oy is the Mythos-class control plane.
+# A11oy is the Khipu-class control plane.
 
 - **Argo** — experience-era decision engine. Champion policies, self-play arena, mirror eval, counterfactuals, reward-hacking guardrails. World-model accuracy 89.1%, throughput 31.4 ev/s.
 - **PSYCHE** — emergent-sentience observatory.

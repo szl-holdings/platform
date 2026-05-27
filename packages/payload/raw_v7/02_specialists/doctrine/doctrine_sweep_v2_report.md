@@ -47,8 +47,8 @@ Searched all 18 repos under `szl-holdings` org via `gh search code --owner szl-h
 | 1 | `Jr.` | Git author metadata (intentional per USER OVERRIDE) |
 | 2 | `AlloyScape` | None |
 | 3 | `Glass Wing` | None |
-| 4 | `Glasswing` | None |
-| 5 | `Mythos` | Third-party model name "Claude Mythos Preview" |
+| 4 | `Pillpintu` | None |
+| 5 | `Khipu` | Third-party model name "Claude Khipu Preview" |
 | 6 | `Stephen Paul` | None |
 | 7 | `Perplexity Computer` | None |
 | 8 | `anonymous` | None |
@@ -212,34 +212,34 @@ Lines define forbidden pattern #8: `"pattern": "anonymous", "description": "Forb
 
 ---
 
-### Pattern: `Glasswing` — 25+ file hits in `szl-holdings/platform`
+### Pattern: `Pillpintu` — 25+ file hits in `szl-holdings/platform`
 
-> **NOTE:** In `szl-holdings/platform`, "Glasswing" / "GLASSWING" is the canonical product feature name for A11oy's transparency mode (e.g., `Glasswing.tsx`, `GlasswingPartners.tsx`, `glasswing-schemas.ts`, `glasswingDoctrine.ts`, `A11OY_DOCTRINE.md § 3. Glasswing Mode`). This is an **internal product identity term**, not a legacy brand name.
+> **NOTE:** In `szl-holdings/platform`, "Pillpintu" / "PILLPINTU" is the canonical product feature name for A11oy's transparency mode (e.g., `Pillpintu.tsx`, `PillpintuPartners.tsx`, `pillpintu-schemas.ts`, `pillpintuDoctrine.ts`, `A11OY_DOCTRINE.md § 3. Pillpintu Mode`). This is an **internal product identity term**, not a legacy brand name.
 >
-> **Assessment:** Given that `Glasswing` is the live product's own name (components, schemas, routes, docs), the doctrine replacement rule (`Glasswing` → `a11oy`) would **rename the product** if applied wholesale. This requires explicit PM/founder confirmation before acting.
+> **Assessment:** Given that `Pillpintu` is the live product's own name (components, schemas, routes, docs), the doctrine replacement rule (`Pillpintu` → `a11oy`) would **rename the product** if applied wholesale. This requires explicit PM/founder confirmation before acting.
 >
-> **Recommended action:** Confirm with Lutar, Stephen P. whether "Glasswing" is an approved product sub-brand or a forbidden legacy name. If legacy, rename the product surface. If approved, add an exception to doctrine for `Glasswing` as product name.
+> **Recommended action:** Confirm with Lutar, Stephen P. whether "Pillpintu" is an approved product sub-brand or a forbidden legacy name. If legacy, rename the product surface. If approved, add an exception to doctrine for `Pillpintu` as product name.
 
 Flagged files include (representative sample):
-- `artifacts/a11oy/src/pages/Glasswing.tsx`
-- `artifacts/a11oy/src/pages/GlasswingPartners.tsx`
-- `artifacts/a11oy/src/lib/glasswing-schemas.ts`
-- `artifacts/a11oy/src/data/glasswingDoctrine.ts`
-- `docs/a11oy/A11OY_DOCTRINE.md` (§3 Glasswing Mode)
-- `docs/a11oy/MYTHOS_RESEARCH_SWEEP.md`
-- `docs/a11oy/spec/mythos-doctrine-spec/schemas/glasswing-partner-attestation.json`
+- `artifacts/a11oy/src/pages/Pillpintu.tsx`
+- `artifacts/a11oy/src/pages/PillpintuPartners.tsx`
+- `artifacts/a11oy/src/lib/pillpintu-schemas.ts`
+- `artifacts/a11oy/src/data/pillpintuDoctrine.ts`
+- `docs/a11oy/A11OY_DOCTRINE.md` (§3 Pillpintu Mode)
+- `docs/a11oy/KHIPU_RESEARCH_SWEEP.md`
+- `docs/a11oy/spec/khipu-doctrine-spec/schemas/pillpintu-partner-attestation.json`
 
 ---
 
-### Pattern: `Mythos` — 30+ file hits in `szl-holdings/platform`
+### Pattern: `Khipu` — 30+ file hits in `szl-holdings/platform`
 
-> **NOTE:** In `szl-holdings/platform`, "Mythos Doctrine" / "Mythos Doctrine Open Spec" is the canonical product name for A11oy's governance layer (e.g., `mythosDoctrine.ts`, `mythosLayer.ts`, `tools/github-actions/mythos-doctrine/`, `docs/a11oy/spec/mythos-doctrine-spec/`). The exception in the doctrine is for Anthropic's "Claude Mythos Preview" only.
+> **NOTE:** In `szl-holdings/platform`, "Khipu Doctrine" / "Khipu Doctrine Open Spec" is the canonical product name for A11oy's governance layer (e.g., `khipuDoctrine.ts`, `khipuLayer.ts`, `tools/github-actions/khipu-doctrine/`, `docs/a11oy/spec/khipu-doctrine-spec/`). The exception in the doctrine is for Anthropic's "Claude Khipu Preview" only.
 >
-> **Assessment:** "Mythos Doctrine" is SZL's own published Open Spec product (CC-BY-4.0 licensed). Applying the Mythos → fix rule would rename SZL's own product. This requires explicit PM/founder confirmation.
+> **Assessment:** "Khipu Doctrine" is SZL's own published Open Spec product (CC-BY-4.0 licensed). Applying the Khipu → fix rule would rename SZL's own product. This requires explicit PM/founder confirmation.
 >
-> One file contains a note: `// Inspired by the Anthropic Claude Mythos Preview System Card.` — this is the allowed citation context.
+> One file contains a note: `// Inspired by the Anthropic Claude Khipu Preview System Card.` — this is the allowed citation context.
 >
-> **Recommended action:** Confirm with Lutar, Stephen P. whether "Mythos Doctrine" as SZL product name is exempt from FP-5, or whether the product name should be changed.
+> **Recommended action:** Confirm with Lutar, Stephen P. whether "Khipu Doctrine" as SZL product name is exempt from FP-5, or whether the product name should be changed.
 
 ---
 
@@ -260,7 +260,7 @@ gh api -X PATCH /user \
 | Hit | File | Reason |
 |---|---|---|
 | `anonymous` in `ANALYTICS-EVENTS.md`, `ACCESS-CONTROL-MATRIX.md`, `auth.ts` | platform | Technical term (`anonymous_visitor` role, `## Page Tracking (anonymous)`) — not an identity attribution |
-| `Mythos` in `artifacts/a11oy/src/data/mythosDoctrine.ts` line with `// Inspired by the Anthropic Claude Mythos Preview System Card.` | platform | Allowed third-party citation |
+| `Khipu` in `artifacts/a11oy/src/data/khipuDoctrine.ts` line with `// Inspired by the Anthropic Claude Khipu Preview System Card.` | platform | Allowed third-party citation |
 | `Jr.` in `papers/v12/README.md` BibTeX: `author = {Lutar Jr., Stephen P.}` | ouroboros-thesis | Same file as other Jr. hits — flagged above for fix |
 | `anonymous` in `pilot-to-case-study-system.md` | platform | Legitimate use: "anonymous case study" / "anonymous reference" — describes business practice not identity attribution |
 
@@ -307,8 +307,8 @@ gh api -X PATCH /user \
 | 🟡 MEDIUM | Fix `papers/v3/build_paper.py` author field | `ouroboros-thesis` | `Stephen Paul`, `Perplexity Computer` | YES |
 | 🟡 MEDIUM | Fix `papers/v3/AUDIT.md` auditor field | `ouroboros-thesis` | `Perplexity Computer` | YES |
 | 🟡 MEDIUM | Fix `AlloyScape` in `ouroboros-runtime-contract.v3.json` | `ouroboros-thesis` | `AlloyScape` | YES |
-| 🟣 CONFIRM | Determine if `Glasswing` in platform is an approved product sub-brand or legacy name | `platform` (25+ files) | `Glasswing` | YES — PM decision |
-| 🟣 CONFIRM | Determine if `Mythos Doctrine` product name is exempt from FP-5 | `platform` (30+ files) | `Mythos` | YES — PM decision |
+| 🟣 CONFIRM | Determine if `Pillpintu` in platform is an approved product sub-brand or legacy name | `platform` (25+ files) | `Pillpintu` | YES — PM decision |
+| 🟣 CONFIRM | Determine if `Khipu Doctrine` product name is exempt from FP-5 | `platform` (30+ files) | `Khipu` | YES — PM decision |
 | 🟡 LOW | Update Zenodo record creator metadata for historical records | Zenodo API | `Jr.` | YES — external |
 | ✅ DONE | Fix author bylines in local github_releases/ paper snapshots (v3–v12) | Local workspace | `Jr.`, `Stephen Paul` | Auto-applied |
 | ✅ DONE | Fix author in latest_release.json local snapshot | Local workspace | `Jr.` | Auto-applied |
@@ -316,11 +316,11 @@ gh api -X PATCH /user \
 
 ---
 
-## Notes on "Glasswing" and "Mythos" Product Names
+## Notes on "Pillpintu" and "Khipu" Product Names
 
-The live `platform` repo uses both `Glasswing` and `Mythos Doctrine` extensively as SZL Holdings product feature names — these are not legacy/external brand names but the current live product identity. Applying the doctrine replacements (`Glasswing` → `a11oy`, `Mythos` → fix) would require renaming live product components, routes, and schemas. This is a PM-level decision with significant engineering impact and must not be auto-applied.
+The live `platform` repo uses both `Pillpintu` and `Khipu Doctrine` extensively as SZL Holdings product feature names — these are not legacy/external brand names but the current live product identity. Applying the doctrine replacements (`Pillpintu` → `a11oy`, `Khipu` → fix) would require renaming live product components, routes, and schemas. This is a PM-level decision with significant engineering impact and must not be auto-applied.
 
-Recommendation: Add an explicit **doctrine exception** for `Glasswing` (as A11oy transparency mode product name) and `Mythos Doctrine` (as A11oy governance spec product name), with the constraint that the terms appear only in that product context and not as author attribution or tool attribution.
+Recommendation: Add an explicit **doctrine exception** for `Pillpintu` (as A11oy transparency mode product name) and `Khipu Doctrine` (as A11oy governance spec product name), with the constraint that the terms appear only in that product context and not as author attribution or tool attribution.
 
 ---
 

@@ -245,4 +245,4 @@ cleanly from the existing `Lutar.*` namespace (`Axioms`, `Invariant`, `Bound`,
 ---
 
 *Byline: Lutar, Stephen P. · ORCID [0009-0001-0110-4173](https://orcid.org/0009-0001-0110-4173) · SZL Holdings · 2026-05-15*  
-*Doctrine sweep: PASS · 0 forbidden patterns (Jr., AlloyScape, Glass Wing, Glasswing, Mythos, Stephen Paul, Perplexity Computer, anonymous) · All claims cited*
+*Doctrine sweep: PASS · 0 forbidden patterns (Jr., AlloyScape, Glass Wing, Pillpintu, Khipu, Stephen Paul, Perplexity Computer, anonymous) · All claims cited*

@@ -5,7 +5,7 @@ description: When a forbidden-token hit should be added to EXCLUDE_PATH_PREFIXES
 
 `scripts/check-doctrine-v6.mjs` scans the repo for renamed-token drift. Three escape hatches:
 
-1. **`EXCLUDE_PATH_PREFIXES`** (path-level allow-list at the top of the script). Use for: dated/frozen historical payloads (`dossier/payload-YYYY-MM-DD/`), vendored mirrors (`vendor/`, `packages/payload/`), generated artifacts whose names embed the old token (`packages/frontier-mythos/`), and metadata files whose values are themselves the historical receipt (`.agents/agent_assets_metadata.toml`).
+1. **`EXCLUDE_PATH_PREFIXES`** (path-level allow-list at the top of the script). Use for: dated/frozen historical payloads (`dossier/payload-YYYY-MM-DD/`), vendored mirrors (`vendor/`, `packages/payload/`), generated artifacts whose names embed the old token (`packages/frontier-khipu/`), and metadata files whose values are themselves the historical receipt (`.agents/agent_assets_metadata.toml`).
 2. **`// doctrine-scanner-exempt`** (file-level marker comment). Use for source files where a small contiguous block legitimately references the old token (e.g. migration shims) but most of the file is greenfield. Less heavy-handed than path exemption.
 3. **Fix at the source.** Default choice when neither of the above applies — rename the token in the code/comment/string.
 

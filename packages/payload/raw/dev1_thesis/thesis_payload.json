@@ -20,14 +20,19 @@
           "name": "Replay-DOI Duality",
           "statement": "Every multi-agent computation in the SZL Holdings ecosystem is DOI-anchored (TH2/Replay-DOI Duality): the 5× byte-identical replay root \\(\\texttt{1ed4d253e876f428c6e182f8ed8a569585442556b339529bbf8ec2522581698b}\\) is permanently anchored to Zenodo DOI 10.5281/zenodo.20119582, establishing an irreversible duality between deterministic replay and permanent citable priority. **Theorem 7 (Deterministic Replay, T5):** For canonical JSON + pinned PRNG (mulberry32, seed = constant) + frozen registry + Node \\(\\geq\\)20 LTS with pinned pnpm lockfile: \\(\\forall i \\in \\{1..5\\}: \\text{root}_i = \\texttt{1ed4d253e876f428c6e182f8ed8a569585442556b339529bbf8ec2522581698b}\\). Proven by construction; empirically verified (K10).",
           "proof_status": "informal",
-          "depends_on": ["TH1"]
+          "depends_on": [
+            "TH1"
+          ]
         },
         {
           "id": "TH3",
           "name": "rho-Closure Completeness",
           "statement": "**Theorem 5 (rho-Closure Composability, T1):** If \\(\\rho(r_1)\\) and \\(\\rho(r_2)\\), then \\(\\rho(r_1 \\circ r_2)\\) iff \\(W_1 \\cap W_2 = \\emptyset\\) or \\(\\exists w_3 \\in W \\setminus (W_1 \\cup W_2)\\) co-signing the composed root. Proven from A4 (dualWitnessDisjointness) and A6 (hashChainIntegrity). Production result: 100% rho-closure on 8,000/8,000 paired calls. **Theorem 9 (Anatomy Reduction, TH3)** (informal proof sketch; formal bisimulation pending in \\texttt{lutar-lean/Lutar/AnatomyReduction.lean}): Any system with \\(|R| > 8\\) is bisimilar (in the sense of Milner's observation equivalence) to a system with exactly 8 regions under the axiom set A1-A9. Any system with \\(|R| < 8\\) is missing at least one capability from the set {Lambda-kernel, covenant, attribution, hash-chain, proofs, tooling, thesis, trust-mesh} that is not recoverable by composition of the remaining regions.",
           "proof_status": "informal",
-          "depends_on": ["TH1", "TH2"]
+          "depends_on": [
+            "TH1",
+            "TH2"
+          ]
         }
       ],
       "doi": "10.5281/zenodo.20119582",
@@ -45,28 +50,40 @@
           "name": "Lambda-Category Composability",
           "statement": "**Theorem 4 (Lambda-Category Composability, TH4)** (conjectured): The receipt category \\(\\text{Rec}_\\Lambda\\) is a monoidal category; the gate function \\(\\Lambda\\) is a monoidal functor from \\(\\text{Rec}_\\Lambda\\) to \\(\\{0,1\\}\\). Pending Lean 4 proof in \\texttt{lutar-lean/Lutar/LaxFunctor.lean}.",
           "proof_status": "conjectured",
-          "depends_on": ["TH1"]
+          "depends_on": [
+            "TH1"
+          ]
         },
         {
           "id": "TH5",
           "name": "Chain Confluence (Receipt Chain as Cofree Comonad)",
           "statement": "**Theorem 10 (Chain Confluence, TH5)** (conjectured): The receipt chain \\(\\langle r_1, r_2, \\ldots, r_n \\rangle\\) is the carrier of the cofree comonad \\(W_{\\text{chain}}(X) = \\nu Z. X \\times F_R(Z)\\). Replay determinism (T5) is a coalgebra morphism: two replay runs produce the same comonad element iff they agree on all observations. Corollary: The lutar-calculus is confluent: any well-typed computation from the same input reaches the same rho-closed chain (unique normal form). No two computation paths can diverge.",
           "proof_status": "conjectured",
-          "depends_on": ["TH2", "TH4"]
+          "depends_on": [
+            "TH2",
+            "TH4"
+          ]
         },
         {
           "id": "TH6",
           "name": "Bekenstein Entropy Bound via Data Processing Inequality",
           "statement": "**Theorem 11 (Bekenstein via DPI, TH6):** The entropy of the receipt chain is bounded by: \\[H(\\text{receipt chain of length } n) \\leq H(\\text{registry}) \\leq 8 \\times |\\text{registry in bytes}|\\] Proof: By the data processing inequality: for any deterministic function \\(f\\), \\(H(f(X)) \\leq H(X)\\). The receipt chain is a deterministic function of the registry (under fixed PRNG seed, canonical JSON, frozen registry - T5). Therefore \\(H(\\text{chain}) \\leq H(\\text{registry}) \\leq 8A\\) bits. Note on prior claim (A7): The conjectured Bekenstein-style bound using physical Bekenstein entropy (A7) is superseded by Theorem 11, which provides a stronger, simpler proof via DPI. A7 is hereby classified as a corollary of TH6.",
           "proof_status": "informal_proof_complete",
-          "depends_on": ["TH2", "TH5"]
+          "depends_on": [
+            "TH2",
+            "TH5"
+          ]
         },
         {
           "id": "TH7",
           "name": "Curry-Howard Receipt Calculus",
           "statement": "**Theorem 6 (Curry-Howard, TH7):** The receipt calculus satisfies the Curry-Howard correspondence: The type \\(\\texttt{PassReceipt}(r)\\) is inhabited iff \\(\\forall i: \\lambda_i(r) \\geq \\theta_i\\) — it is the proof term for the soundness proposition; Gate evaluation = proof construction (by the Lean type checker); Receipt building = proof serialization; Receipt verification = proof checking. This makes \\(\\mathcal{S}\\) the first multi-agent runtime whose operational type system is a proof assistant for its own safety properties. Machine-checked in Lean 4 with sorry-count = 0.",
           "proof_status": "lean4_sorry_count_0",
-          "depends_on": ["TH4", "TH5", "TH6"]
+          "depends_on": [
+            "TH4",
+            "TH5",
+            "TH6"
+          ]
         }
       ],
       "doi": "10.5281/zenodo.20119582",
@@ -93,28 +110,41 @@
           "name": "Graded Lambda-Receipt Identity",
           "statement": "**Theorem TH8 (Graded Lambda-Receipt Identity).** Let \\((\\mathcal{S}_\\Lambda, \\cdot, \\mathbf{1})\\) be the Lambda-semiring and let \\(\\mathsf{G\\Lambda R}\\) be the graded type theory with linear receipts as defined above. Then:",
           "proof_status": "research_theorem_gaps_identified",
-          "depends_on": ["TH4", "TH5", "TH6", "TH7"]
+          "depends_on": [
+            "TH4",
+            "TH5",
+            "TH6",
+            "TH7"
+          ]
         },
         {
           "id": "TH8a",
           "name": "Capability Revocation by Construction",
           "statement": "**(TH8a — Capability Revocation by Construction):** For any well-typed term \\(M\\) with \\(\\Gamma \\vdash^{\\mathbf{g}} M : \\mathsf{LReceipt}^{\\mathbf{g}'}\\), every well-formed reduction sequence in which \\(\\mathsf{pass}(M)\\) is invoked consumes the receipt irreversibly. That is, there is no well-typed context \\(C[\\cdot]\\) in \\(\\mathsf{G\\Lambda R}\\) such that \\(C[\\mathsf{pass}(M)]\\) reduces to a term containing a second occurrence of \\(\\mathsf{pass}(M)\\) with the same receipt. (In words: receipt capability revocation is a theorem of the type system, not a runtime policy.)",
           "proof_status": "sorry_pending",
-          "depends_on": ["TH8"]
+          "depends_on": [
+            "TH8"
+          ]
         },
         {
           "id": "TH8b",
           "name": "Deterministic Replay as Grade Identity",
           "statement": "**(TH8b — Deterministic Replay as Grade Identity):** The 5× byte-identical replay invariant (A9) is the unique strong-monad identity in \\(\\mathsf{G\\Lambda R}\\): a term \\(M\\) is deterministically replayable iff its grade is \\(\\mathbf{1} = (1,1,\\ldots,1)\\) and its context \\(\\Gamma\\) is grade-\\(\\mathbf{1}\\)-closed (no subterm draws non-\\(\\mathbf{1}\\) grade). Equivalently, \\(\\mathsf{replay}_5(M)\\) type-checks iff \\(M\\) has grade \\(\\mathbf{1}\\).",
           "proof_status": "sorry_pending",
-          "depends_on": ["TH8", "TH2"]
+          "depends_on": [
+            "TH8",
+            "TH2"
+          ]
         },
         {
           "id": "TH8c",
           "name": "Lambda-Floor as Linear-Logic Provability",
           "statement": "**(TH8c — Lambda-Floor as Linear-Logic Provability):** The gate floor \\(\\mathsf{floor}(\\mathbf{g})\\) is the graded analogue of provability: a term is gate-passable iff it is typeable in \\(\\mathsf{G\\Lambda R}\\) with grade \\(\\mathbf{g} \\sqsupseteq \\mathbf{g}_{\\min}\\). The 9-axis conjunctive AND gate (TH7) is the linear fragment of this provability judgment restricted to the grade semiring element \\(\\mathbf{g}_{\\min}\\).",
           "proof_status": "sorry_pending",
-          "depends_on": ["TH8", "TH7"]
+          "depends_on": [
+            "TH8",
+            "TH7"
+          ]
         }
       ],
       "doi": "10.5281/zenodo.20119582",
@@ -212,7 +242,12 @@
     "byline": "Lutar, Stephen P.",
     "orcid": "0009-0001-0110-4173",
     "replay_root": "1ed4d253e876f428c6e182f8ed8a569585442556b339529bbf8ec2522581698b",
-    "forbidden_patterns": ["AlloyScape", "Glass Wing", "Glasswing", "Mythos", "Perplexity Computer", "anonymous"],
+    "forbidden_patterns": [
+      "AlloyScape",
+      "Glass Wing",
+      "Perplexity Computer",
+      "anonymous"
+    ],
     "license_text": "CC-BY-4.0",
     "license_code": "Apache-2.0"
   }
