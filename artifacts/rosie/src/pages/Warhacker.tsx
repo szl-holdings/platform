@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 
 type Receipt = {
   index: number;
@@ -119,10 +119,50 @@ function StatusPill({
   );
 }
 
-function ChainTable({ env }: { env: ChainEnvelope }) {
+function buildReplayUrl(traceId: string): string {
+  if (typeof window === "undefined") return `?trace=${encodeURIComponent(traceId)}`;
+  const url = new URL(window.location.href);
+  url.search = "";
+  url.hash = "";
+  url.searchParams.set("trace", traceId);
+  return url.toString();
+}
+
+function ShareReplayButton({ traceId }: { traceId: string }) {
+  const [copied, setCopied] = useState(false);
+  const onClick = useCallback(async () => {
+    const url = buildReplayUrl(traceId);
+    try {
+      if (typeof navigator !== "undefined" && navigator.clipboard?.writeText) {
+        await navigator.clipboard.writeText(url);
+      } else if (typeof window !== "undefined") {
+        window.prompt("Copy this replay link:", url);
+      }
+      setCopied(true);
+      window.setTimeout(() => setCopied(false), 1800);
+    } catch {
+      if (typeof window !== "undefined") window.prompt("Copy this replay link:", url);
+    }
+  }, [traceId]);
   return (
-    <div className="rounded-md border border-border bg-background/50">
-      <div className="px-3 py-2 border-b border-border flex flex-wrap gap-3 text-[11px] font-mono text-muted-foreground">
+    <button
+      type="button"
+      onClick={() => void onClick()}
+      data-testid={`share-replay-${traceId}`}
+      className="ml-auto px-2 py-0.5 rounded border border-border bg-card hover:border-primary/50 text-foreground font-mono text-[10px] uppercase tracking-[0.12em]"
+    >
+      {copied ? "link copied" : "share replay link"}
+    </button>
+  );
+}
+
+function ChainTable({ env, replayed }: { env: ChainEnvelope; replayed?: boolean }) {
+  return (
+    <div
+      className="rounded-md border border-border bg-background/50"
+      data-testid={`chain-${env.traceId}`}
+    >
+      <div className="px-3 py-2 border-b border-border flex flex-wrap items-center gap-3 text-[11px] font-mono text-muted-foreground">
         <span>
           trace <span className="text-foreground">{env.traceId}</span>
         </span>
@@ -132,6 +172,15 @@ function ChainTable({ env }: { env: ChainEnvelope }) {
         <span>
           verified <span className="text-foreground">{env.verifiedAt}</span>
         </span>
+        {replayed && (
+          <span
+            className="px-1.5 py-0.5 rounded border border-sky-500/40 bg-sky-500/10 text-sky-400 text-[10px] uppercase tracking-[0.12em]"
+            data-testid="replayed-badge"
+          >
+            replayed
+          </span>
+        )}
+        <ShareReplayButton traceId={env.traceId} />
       </div>
       <div className="overflow-x-auto">
         <table className="w-full text-xs">
@@ -159,13 +208,33 @@ function ChainTable({ env }: { env: ChainEnvelope }) {
   );
 }
 
-function useLane<T extends ChainEnvelope>(endpoint: string) {
-  const [state, setState] = useState<
-    | { kind: "idle" }
-    | { kind: "running" }
-    | { kind: "ok"; result: T }
-    | { kind: "err"; message: string }
-  >({ kind: "idle" });
+
+type LaneInitial<T extends ChainEnvelope> = { result: T; replayed?: boolean };
+
+type LaneState<T extends ChainEnvelope> =
+  | { kind: "idle" }
+  | { kind: "running" }
+  | { kind: "ok"; result: T; replayed?: boolean }
+  | { kind: "err"; message: string };
+
+function useLane<T extends ChainEnvelope>(
+  endpoint: string,
+  initial?: { result: T; replayed?: boolean } | null,
+) {
+  const [state, setState] = useState<LaneState<T>>(
+    initial
+      ? { kind: "ok", result: initial.result, replayed: initial.replayed }
+      : { kind: "idle" },
+  );
+
+  // When a replay arrives for this lane after initial render, swap it in.
+  const initialTrace = initial?.result.traceId;
+  useEffect(() => {
+    if (initial) {
+      setState({ kind: "ok", result: initial.result, replayed: initial.replayed });
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [initialTrace]);
 
   async function run(body: unknown = {}) {
     setState({ kind: "running" });
@@ -206,7 +275,7 @@ function LaneShell({
   artifact: string;
   description: string;
   receiptClasses: string[];
-  state: { kind: "idle" } | { kind: "running" } | { kind: "ok"; result: ChainEnvelope } | { kind: "err"; message: string };
+  state: LaneState<ChainEnvelope>;
   children: React.ReactNode;
   evidenceLink?: { href: string; label: string };
 }) {
@@ -260,15 +329,17 @@ function LaneShell({
           {state.message}
         </pre>
       )}
-      {state.kind === "ok" && <ChainTable env={state.result} />}
+      {state.kind === "ok" && (
+        <ChainTable env={state.result} replayed={state.replayed} />
+      )}
     </div>
   );
 }
 
 // ─── Lane 1 — Bundle composition ────────────────────────────────────────────
 
-function Lane1() {
-  const { state, run } = useLane<Lane1Result>("/api/warhacker/lane/1/bundle-compose");
+function Lane1({ initial }: { initial?: LaneInitial<Lane1Result> }) {
+  const { state, run } = useLane<Lane1Result>("/api/warhacker/lane/1/bundle-compose", initial);
   return (
     <LaneShell
       id="lane-1"
@@ -386,13 +457,17 @@ function Lane1() {
 
 // ─── Lane 2 — Health screening ──────────────────────────────────────────────
 
-function Lane2() {
-  const { state, run } = useLane<Lane2Result>("/api/warhacker/lane/2/health-screening");
-  const [unitRef, setUnitRef] = useState("unit:7-30-CAV-A-CO");
-  const [rosterSize, setRosterSize] = useState(118);
-  const [screened, setScreened] = useState(110);
-  const [deferred, setDeferred] = useState(6);
-  const [failed, setFailed] = useState(2);
+function Lane2({ initial }: { initial?: LaneInitial<Lane2Result> }) {
+  const { state, run } = useLane<Lane2Result>(
+    "/api/warhacker/lane/2/health-screening",
+    initial,
+  );
+  const dash = initial?.result.commanderDashboard;
+  const [unitRef, setUnitRef] = useState(dash?.unitRef ?? "unit:7-30-CAV-A-CO");
+  const [rosterSize, setRosterSize] = useState(dash?.rosterSize ?? 118);
+  const [screened, setScreened] = useState(dash?.screened ?? 110);
+  const [deferred, setDeferred] = useState(dash?.deferred ?? 6);
+  const [failed, setFailed] = useState(dash?.failed ?? 2);
 
   function submit(e: React.FormEvent) {
     e.preventDefault();
@@ -486,8 +561,11 @@ function Lane2() {
 
 // ─── Lane 3 — Drone oversight ───────────────────────────────────────────────
 
-function Lane3() {
-  const { state, run } = useLane<Lane3Result>("/api/warhacker/lane/3/drone-oversight");
+function Lane3({ initial }: { initial?: LaneInitial<Lane3Result> }) {
+  const { state, run } = useLane<Lane3Result>(
+    "/api/warhacker/lane/3/drone-oversight",
+    initial,
+  );
   return (
     <LaneShell
       id="lane-3"
@@ -562,8 +640,11 @@ function TrajectoryChart({ points }: { points: { t: number; x: number; y: number
   );
 }
 
-function Lane4() {
-  const { state, run } = useLane<Lane4Result>("/api/warhacker/lane/4/trajectory");
+function Lane4({ initial }: { initial?: LaneInitial<Lane4Result> }) {
+  const { state, run } = useLane<Lane4Result>(
+    "/api/warhacker/lane/4/trajectory",
+    initial,
+  );
   return (
     <LaneShell
       id="lane-4"
@@ -636,8 +717,11 @@ function Lane4() {
 
 // ─── Lane 5 — Edge adversary drill ──────────────────────────────────────────
 
-function Lane5() {
-  const { state, run } = useLane<Lane5Result>("/api/warhacker/lane/5/edge-drill");
+function Lane5({ initial }: { initial?: LaneInitial<Lane5Result> }) {
+  const { state, run } = useLane<Lane5Result>(
+    "/api/warhacker/lane/5/edge-drill",
+    initial,
+  );
   return (
     <LaneShell
       id="lane-5"
@@ -682,7 +766,31 @@ function Lane5() {
 
 // ─── Hub page ───────────────────────────────────────────────────────────────
 
+type ReplayBucket =
+  | { lane: 1; result: Lane1Result }
+  | { lane: 2; result: Lane2Result }
+  | { lane: 3; result: Lane3Result }
+  | { lane: 4; result: Lane4Result }
+  | { lane: 5; result: Lane5Result };
+
+type ReplayBanner =
+  | { kind: "idle" }
+  | { kind: "loading"; traceId: string }
+  | { kind: "ok"; traceId: string; lane: number; recordedAt: string }
+  | { kind: "err"; traceId: string; message: string };
+
+const LANE_TO_NUM: Record<string, 1 | 2 | 3 | 4 | 5> = {
+  "lane-1": 1,
+  "lane-2": 2,
+  "lane-3": 3,
+  "lane-4": 4,
+  "lane-5": 5,
+};
+
 export default function Warhacker() {
+  const [replayBucket, setReplayBucket] = useState<ReplayBucket | null>(null);
+  const [banner, setBanner] = useState<ReplayBanner>({ kind: "idle" });
+
   // Smooth-scroll to the deep-link anchor (#lane-N) when the page loads
   // from a cross-artifact tile.
   useEffect(() => {
@@ -694,6 +802,97 @@ export default function Warhacker() {
       (el as HTMLElement).scrollIntoView({ behavior: "smooth", block: "start" });
     }
   }, []);
+
+  // Replay flow: ?trace=wh_lane-N_<hex> on load → fetch the captured
+  // envelope and hand it to the matching lane card so the operator sees
+  // the same chain the original run produced.
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const traceId = new URLSearchParams(window.location.search).get("trace");
+    if (!traceId) return;
+    let cancelled = false;
+    setBanner({ kind: "loading", traceId });
+    (async () => {
+      try {
+        const res = await fetch(`/api/warhacker/replay/${encodeURIComponent(traceId)}`);
+        if (!res.ok) {
+          const body = (await res.json().catch(() => ({}))) as { error?: string };
+          if (cancelled) return;
+          setBanner({
+            kind: "err",
+            traceId,
+            message: body.error ?? `HTTP ${res.status}`,
+          });
+          return;
+        }
+        const payload = (await res.json()) as {
+          lane: string;
+          envelope: ChainEnvelope & Record<string, unknown>;
+          recordedAt: string;
+        };
+        const num = LANE_TO_NUM[payload.lane];
+        if (!num) {
+          if (cancelled) return;
+          setBanner({ kind: "err", traceId, message: `Unknown lane: ${payload.lane}` });
+          return;
+        }
+        if (cancelled) return;
+        // The envelope shape varies per lane; the cast is safe because
+        // the server stored exactly the typed envelope this lane emits.
+        const bucket = { lane: num, result: payload.envelope } as unknown as ReplayBucket;
+        setReplayBucket(bucket);
+        setBanner({
+          kind: "ok",
+          traceId,
+          lane: num,
+          recordedAt: payload.recordedAt,
+        });
+        // Scroll the replayed lane into view.
+        window.requestAnimationFrame(() => {
+          const el = document.getElementById(`lane-${num}`);
+          el?.scrollIntoView({ behavior: "smooth", block: "start" });
+        });
+      } catch (err) {
+        if (cancelled) return;
+        setBanner({ kind: "err", traceId, message: (err as Error).message });
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  const initials = useMemo(() => {
+    const out: {
+      1?: LaneInitial<Lane1Result>;
+      2?: LaneInitial<Lane2Result>;
+      3?: LaneInitial<Lane3Result>;
+      4?: LaneInitial<Lane4Result>;
+      5?: LaneInitial<Lane5Result>;
+    } = {};
+    if (replayBucket) {
+      // Each branch narrows the union so the result lands in the
+      // correctly-typed slot.
+      switch (replayBucket.lane) {
+        case 1:
+          out[1] = { result: replayBucket.result, replayed: true };
+          break;
+        case 2:
+          out[2] = { result: replayBucket.result, replayed: true };
+          break;
+        case 3:
+          out[3] = { result: replayBucket.result, replayed: true };
+          break;
+        case 4:
+          out[4] = { result: replayBucket.result, replayed: true };
+          break;
+        case 5:
+          out[5] = { result: replayBucket.result, replayed: true };
+          break;
+      }
+    }
+    return out;
+  }, [replayBucket]);
 
   return (
     <div className="space-y-8 rosie-route">
@@ -733,12 +932,44 @@ export default function Warhacker() {
         </nav>
       </header>
 
+      {banner.kind !== "idle" && (
+        <div
+          data-testid="warhacker-replay-banner"
+          className={
+            "rounded-lg border p-3 text-xs font-mono flex flex-wrap items-center gap-2 " +
+            (banner.kind === "ok"
+              ? "border-sky-500/40 bg-sky-500/10 text-sky-300"
+              : banner.kind === "err"
+              ? "border-rose-500/40 bg-rose-500/10 text-rose-300"
+              : "border-border bg-card text-muted-foreground")
+          }
+        >
+          <span className="uppercase tracking-[0.18em]">
+            {banner.kind === "loading"
+              ? "replaying"
+              : banner.kind === "ok"
+              ? "replay"
+              : "replay failed"}
+          </span>
+          <span className="text-foreground">{banner.traceId}</span>
+          {banner.kind === "ok" && (
+            <>
+              <span>→ lane {banner.lane}</span>
+              <span className="text-muted-foreground">
+                originally captured {banner.recordedAt}
+              </span>
+            </>
+          )}
+          {banner.kind === "err" && <span>· {banner.message}</span>}
+        </div>
+      )}
+
       <section className="grid grid-cols-1 lg:grid-cols-2 gap-5" data-testid="warhacker-lanes">
-        <Lane1 />
-        <Lane2 />
-        <Lane3 />
-        <Lane4 />
-        <Lane5 />
+        <Lane1 initial={initials[1]} />
+        <Lane2 initial={initials[2]} />
+        <Lane3 initial={initials[3]} />
+        <Lane4 initial={initials[4]} />
+        <Lane5 initial={initials[5]} />
       </section>
 
       <section className="rounded-lg border border-border bg-card p-6 space-y-3">

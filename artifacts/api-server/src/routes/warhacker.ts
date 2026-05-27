@@ -111,6 +111,45 @@ function traceFor(lane: string, body: unknown): string {
   return `wh_${lane}_${sha256(canonicalJson(body) + ':' + lane).slice(0, 16)}`;
 }
 
+// ─── Replay store ────────────────────────────────────────────────────────────
+//
+// Each lane handler hands its full response envelope to recordReplay before
+// returning it to the caller. GET /warhacker/replay/:traceId then serves the
+// exact same envelope back. Because traces are content-addressed off the
+// canonical input body (see traceFor), a server restart simply means the
+// first lookup misses; the next lane invocation with the same body rebuilds
+// the same chain under the same trace ID and re-populates the store.
+//
+// Storage is bounded so a long-running server can't grow without bound.
+//
+// We capture both the envelope and the lane number so the replay response
+// includes the lane the trace originally ran against — the UI uses that to
+// route the replay back to the correct lane card.
+
+interface ReplayRecord {
+  lane: string;
+  envelope: Record<string, unknown>;
+  recordedAt: string;
+}
+
+const REPLAY_CAP = 512;
+const replayStore = new Map<string, ReplayRecord>();
+
+function recordReplay(lane: string, traceId: string, envelope: Record<string, unknown>): void {
+  if (replayStore.has(traceId)) replayStore.delete(traceId);
+  replayStore.set(traceId, { lane, envelope, recordedAt: new Date().toISOString() });
+  while (replayStore.size > REPLAY_CAP) {
+    const oldest = replayStore.keys().next().value;
+    if (oldest === undefined) break;
+    replayStore.delete(oldest);
+  }
+}
+
+// Exposed for tests; not used in production code paths.
+export function __resetReplayStoreForTests(): void {
+  replayStore.clear();
+}
+
 // ─── Lane catalog ────────────────────────────────────────────────────────────
 
 const LANES = [
@@ -376,6 +415,31 @@ const Lane1Body = z
   })
   .strict();
 
+// ─── GET /warhacker/replay/:traceId ──────────────────────────────────────────
+
+router.get('/warhacker/replay/:traceId', (req: Request, res: Response) => {
+  const traceId = req.params.traceId ?? '';
+  if (!/^wh_lane-[1-5]_[0-9a-f]{16}$/.test(traceId)) {
+    return sendError(res, 'traceId must look like wh_lane-N_<16-hex>', 400, 'INVALID_TRACE_ID');
+  }
+  const hit = replayStore.get(traceId);
+  if (!hit) {
+    return sendError(
+      res,
+      'No captured run for this trace. Re-run the lane with the original input to repopulate.',
+      404,
+      'TRACE_NOT_FOUND',
+    );
+  }
+  return sendSuccess(res, {
+    lane: hit.lane,
+    traceId,
+    recordedAt: hit.recordedAt,
+    replayedAt: new Date().toISOString(),
+    envelope: hit.envelope,
+  });
+});
+
 router.post('/warhacker/lane/1/bundle-compose', validateBody(Lane1Body), (req, res) => {
   const body = req.body as z.infer<typeof Lane1Body>;
   const wanted = body.bundles ?? [...BUNDLE_NAMES];
@@ -440,7 +504,7 @@ router.post('/warhacker/lane/1/bundle-compose', validateBody(Lane1Body), (req, r
     traceId,
   );
 
-  sendSuccess(res, {
+  const envelope = {
     ...laneEnvelope('lane-1', traceId, receipts),
     bundleMatrix: matrix,
     bundlesPresentOnDisk: matrix.filter((b) => b.source === 'dist').length,
@@ -450,7 +514,9 @@ router.post('/warhacker/lane/1/bundle-compose', validateBody(Lane1Body), (req, r
       'uds-cli bundle inspect ./uds-bundle-warhacker-amd64-1.0.0-alpha.tar.zst --attest',
     ],
     verifiedAt: new Date().toISOString(),
-  });
+  };
+  recordReplay('lane-1', traceId, envelope);
+  sendSuccess(res, envelope);
 });
 
 // ─── Lane 2 — Health screening ───────────────────────────────────────────────
@@ -510,7 +576,7 @@ router.post('/warhacker/lane/2/health-screening', validateBody(Lane2Body), (req,
     ],
     traceId,
   );
-  return sendSuccess(res, {
+  const envelope = {
     ...laneEnvelope('lane-2', traceId, receipts),
     commanderDashboard: {
       unitRef: b.unitRef,
@@ -522,7 +588,9 @@ router.post('/warhacker/lane/2/health-screening', validateBody(Lane2Body), (req,
       rosterSize: b.rosterSize,
     },
     verifiedAt: new Date().toISOString(),
-  });
+  };
+  recordReplay('lane-2', traceId, envelope);
+  return sendSuccess(res, envelope);
 });
 
 // ─── Lane 3 — Drone oversight ────────────────────────────────────────────────
@@ -590,7 +658,7 @@ router.post('/warhacker/lane/3/drone-oversight', validateBody(Lane3Body), (req, 
   // trace id (so the operator can locate this exact chain) and the
   // chain head (so they can verify it hasn't been swapped).
   const head = receipts[receipts.length - 1]!.entryHash;
-  return sendSuccess(res, {
+  const envelope = {
     ...laneEnvelope('lane-3', traceId, receipts),
     approvalsInbox: {
       ref: `/rosie/proof?trace=${encodeURIComponent(traceId)}&head=${encodeURIComponent(head)}&lane=lane-3`,
@@ -598,7 +666,9 @@ router.post('/warhacker/lane/3/drone-oversight', validateBody(Lane3Body), (req, 
       admitted,
     },
     verifiedAt: new Date().toISOString(),
-  });
+  };
+  recordReplay('lane-3', traceId, envelope);
+  return sendSuccess(res, envelope);
 });
 
 // ─── Lane 4 — Trajectory inspector ───────────────────────────────────────────
@@ -671,7 +741,7 @@ router.post('/warhacker/lane/4/trajectory', validateBody(Lane4Body), (req, res) 
     ],
     traceId,
   );
-  return sendSuccess(res, {
+  const envelope = {
     ...laneEnvelope('lane-4', traceId, receipts),
     inspector: {
       trackRef: b.trackRef,
@@ -682,7 +752,9 @@ router.post('/warhacker/lane/4/trajectory', validateBody(Lane4Body), (req, res) 
       vesselsDeepLink: `/vessels/?trajectory=${encodeURIComponent(b.trackRef)}&trace=${encodeURIComponent(traceId)}`,
     },
     verifiedAt: new Date().toISOString(),
-  });
+  };
+  recordReplay('lane-4', traceId, envelope);
+  return sendSuccess(res, envelope);
 });
 
 // ─── Lane 5 — Edge adversary drill ───────────────────────────────────────────
@@ -745,14 +817,16 @@ router.post('/warhacker/lane/5/edge-drill', validateBody(Lane5Body), (req, res) 
     ],
     traceId,
   );
-  return sendSuccess(res, {
+  const envelope = {
     ...laneEnvelope('lane-5', traceId, receipts),
     edgeNodeRef: b.edgeNodeRef,
     poisoned,
     caught,
     caughtAll: caught === poisoned,
     verifiedAt: new Date().toISOString(),
-  });
+  };
+  recordReplay('lane-5', traceId, envelope);
+  return sendSuccess(res, envelope);
 });
 
 export default router;
