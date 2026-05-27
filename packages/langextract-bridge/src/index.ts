@@ -12,6 +12,21 @@ import {
 
 export type { ExtractionExample, ExtractionHit, ExtractionRequest, ExtractionResult } from './cache.js';
 export { computeCacheKey } from './cache.js';
+export {
+  groundExtractionAgainstSchema,
+  type DocumentSchema,
+  type FieldSchema,
+  type ExtractedField,
+  type FieldGap,
+  type FieldConflict,
+  type SchemaGroundedResult,
+} from './schema-grounded-extract.js';
+export {
+  buildSpanProvenance,
+  hashDocument,
+  normaliseSpanText,
+  type SpanProvenance,
+} from './span-provenance.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);

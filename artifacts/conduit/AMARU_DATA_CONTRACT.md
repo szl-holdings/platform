@@ -65,6 +65,62 @@ Doctrine V6 values (Λ floor 0.90, 9-axis AND, moral-grounding 0.95, repo
 `szl-holdings/amaru`, ORCID `0009-0001-0110-4173`). These are static
 payload-grounded constants, not product copy.
 
+## Ingestion primitives (May 2026)
+
+Three ingestion surfaces re-express the AGI-stack KnowledgeExtraction,
+SeeingEye, and memnet primitives against Amaru's existing
+`conduitConnectionsTable` / `conduitSyncsTable` / `conduitSyncRunsTable`
+shape — no new tables, no bolted-on subsystems.
+
+### Unstructured · schema-grounded
+
+- **Source.** `packages/langextract-bridge` (extended) — `groundExtractionAgainstSchema()`
+  consumes raw `ExtractionHit[]` from the existing extractor and post-processes
+  against a `DocumentSchema`.
+- **Doctrine surface.** `gaps[]` (no source span / low confidence /
+  type-mismatch) and `conflicts[]` (multiple incompatible spans) are
+  first-class outputs — never silently dropped.
+- **Provenance.** Every extracted value carries a `SpanProvenance`
+  (`packages/langextract-bridge/src/span-provenance.ts`) hashing
+  `(documentHash, startByte, endByte, normalisedText)`.
+- **Receipt:** `extraction.schema-grounded.v1` — fields: `schemaRef`,
+  `documentHash`, `extracted[]`, `gaps[]`, `conflicts[]`, `receiptHash`.
+
+### Visual · SeeingEye
+
+- **Source.** `packages/seeing-eye` (new sibling, mirrors the
+  langextract-bridge contract for images).
+- **Doctrine surface.** No visual caption without `bbox + frameHash`
+  (`UngroundedVisualClaimError`). `notDetected[]` for asked-about-but-absent
+  labels is first-class.
+- **Provenance.** `frameHash` (SHA-256 of canonical frame bytes) +
+  `perceptualHash` (aHash over downsampled luminance, survives JPEG
+  re-encoding).
+- **Receipt:** `vision.seeing-eye.v1` — fields: `schemaRef`, `frameHash`,
+  `perceptualHash`, `detections[]`, `notDetected[]`, `receiptHash`.
+
+### Recall · memnet (episodic mapping recall)
+
+- **Source.** `lib/ai-engine/src/memory/memnet-recall.ts` (new sibling to
+  the existing tiered/RL memory stores).
+- **Doctrine surface.** Dual-index — content similarity (cosine over the
+  episode vector) AND temporal adjacency (exponential decay around the
+  query's `now`). The recall **path** (`contentMatches[]`,
+  `temporalMatches[]`, `fusionRule`) is part of the returned record — the
+  audit trail for *why* a memory surfaced.
+- **Receipt:** `memory.recall.v1` — fields: `recallId`, `items[]`,
+  `fusionRule: 'sqrt(content*temporal)'`, `receiptHash`. Reused mappings
+  cite the source `episodeId`.
+
+### End-to-end demo
+
+`/health-screening` renders a *Deployment Health Screening* commander
+dashboard that composes all three primitives over a synthetic pierside
+reefer assessment — proving that one unified record can be assembled
+from a scanned form (visual), a free-text inspector note (extraction),
+and historical mapping decisions (recall), with each pipeline's receipt
+attached and replayable.
+
 ## Branding
 
 - Display name: **Amaru — The Andean Ouroboros**

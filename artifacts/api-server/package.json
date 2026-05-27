@@ -135,6 +135,8 @@
     "@types/pdfkit": "^0.17.5",
     "@workspace/a11oy-fabric": "workspace:*",
     "@workspace/anomaly-fabric": "workspace:*",
+    "@workspace/langextract-bridge": "workspace:*",
+    "@workspace/seeing-eye": "workspace:*",
     "@workspace/a11oy-orchestration": "workspace:*",
     "@workspace/a11oy-reliquary": "workspace:*",
     "@workspace/aef-domain-profiles": "workspace:*",

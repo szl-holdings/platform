@@ -4,6 +4,7 @@ import { Toaster } from 'sonner';
 import { Layout } from '@/components/layout';
 import { InnovationStoreProvider } from '@/lib/innovation-store';
 import ConduitLandingPage from '@/pages/conduit-landing';
+import HealthScreeningPage from '@/pages/health-screening';
 import Dashboard from '@/pages/dashboard';
 import ComputePage from '@/pages/compute';
 import ConnectionsList from '@/pages/connections/list';
@@ -67,6 +68,7 @@ function AppContent() {
   return (
     <Switch>
       <Route path="/" component={ConduitLandingPage} />
+      <Route path="/health-screening" component={HealthScreeningPage} />
       <Route>
         <Layout>
           <Switch>

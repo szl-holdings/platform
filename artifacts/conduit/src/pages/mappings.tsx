@@ -4,8 +4,18 @@ import { RELAY_MAPPINGS, RELAY_MODELS, RELAY_DESTINATIONS, RELAY_SOURCES, RELAY_
 import { scoreMappingCompatibility, deriveApprovalRequirement, buildDryRunSummary, classifyPiiRisk } from '@/lib/agentic';
 import { FabricHeader, FabricStat, FabricToolbar, FabricDrawer, GovernanceDot, MicroBar, SeverityChip } from '@/components/fabric/primitives';
 import { Input, Select, Badge } from '@/components/ui';
-import { ScanLine, GitBranch as DriftIcon } from 'lucide-react';
+import { ScanLine, GitBranch as DriftIcon, Brain } from 'lucide-react';
 import { useInnovationStore, applyMappingOverrides } from '@/lib/innovation-store';
+
+interface RecallSuggestion {
+  sourceField: string;
+  destinationField: string;
+  transform?: string | null;
+  contentSimilarity: number;
+  temporalSimilarity: number;
+  fused: number;
+  citedEpisodeId: string;
+}
 
 export default function MappingsPage() {
   const { driftDecisions, mappingOverrides } = useInnovationStore();
@@ -13,6 +23,32 @@ export default function MappingsPage() {
   const [vertical, setVertical] = useState('');
   const [needsApproval, setNeedsApproval] = useState(false);
   const [drawerId, setDrawerId] = useState<string | null>(null);
+  const [recall, setRecall] = useState<{
+    query: string;
+    suggestions: RecallSuggestion[];
+    receipt: { kind: string; receiptHash: string };
+  } | null>(null);
+  const [recallLoading, setRecallLoading] = useState(false);
+
+  async function loadRecall(query: string): Promise<void> {
+    if (!query.trim()) { setRecall(null); return; }
+    setRecallLoading(true);
+    try {
+      const apiBase = ((import.meta as { env?: { BASE_URL?: string } }).env?.BASE_URL ?? '/').replace(/\/$/, '');
+      const res = await fetch(`${apiBase}/api/conduit/mappings/suggest`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ query, scope: 'mapping', topK: 4 }),
+        credentials: 'include',
+      });
+      if (res.ok) setRecall(await res.json());
+      else setRecall({ query, suggestions: [], receipt: { kind: 'memory.recall.v1', receiptHash: '—' } });
+    } catch {
+      setRecall(null);
+    } finally {
+      setRecallLoading(false);
+    }
+  }
 
   const driftByMappingId = useMemo(() => {
     const map = new Map<string, typeof driftDecisions[number][]>();
@@ -77,7 +113,14 @@ export default function MappingsPage() {
       </div>
 
       <FabricToolbar>
-        <Input placeholder="Search mappings…" value={q} onChange={(e) => setQ(e.target.value)} className="max-w-xs" />
+        <Input
+          placeholder="Search mappings…"
+          value={q}
+          onChange={(e) => setQ(e.target.value)}
+          onBlur={() => loadRecall(q)}
+          onKeyDown={(e) => { if (e.key === 'Enter') loadRecall(q); }}
+          className="max-w-xs"
+        />
         <Select value={vertical} onChange={(e) => setVertical(e.target.value)} className="max-w-xs">
           <option value="">All verticals</option>
           {Array.from(new Set(RELAY_MAPPINGS.map((m) => m.verticalId))).map((v) => (
@@ -89,6 +132,47 @@ export default function MappingsPage() {
           needs approval only
         </label>
       </FabricToolbar>
+
+      {(recall || recallLoading) && (
+        <div className="conduit-card p-4 mb-4 border-l-2 border-l-[#c9b787]">
+          <div className="flex items-center justify-between mb-3 flex-wrap gap-2">
+            <div className="flex items-center gap-2">
+              <Brain className="w-3.5 h-3.5 text-[#c9b787]" />
+              <span className="text-[12px] font-medium text-[#f5f5f5]">memnet recall · prior mappings</span>
+              <span className="text-[10px] font-mono text-[#666]">scope=mapping</span>
+            </div>
+            {recall && (
+              <span className="text-[10px] font-mono text-[#c9b787]">
+                {recall.receipt.kind} · {recall.receipt.receiptHash}
+              </span>
+            )}
+          </div>
+          {recallLoading ? (
+            <div className="text-[11px] text-[#666] italic">querying recall…</div>
+          ) : recall && recall.suggestions.length === 0 ? (
+            <div className="text-[11px] text-[#666] italic">no prior mappings matched “{recall.query}”. The recall receipt was still emitted (empty items[] is first-class).</div>
+          ) : recall ? (
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+              {recall.suggestions.map((s) => (
+                <div key={s.citedEpisodeId} className="rounded border border-[rgba(255,255,255,0.06)] bg-[rgba(255,255,255,0.02)] p-3">
+                  <div className="flex items-center justify-between mb-1.5">
+                    <span className="font-mono text-[11px] text-[#f5f5f5]">
+                      {s.sourceField} <span className="text-[#666]">→</span> {s.destinationField}
+                    </span>
+                    <span className="font-mono text-[10px] text-[#c9b787]">fused {s.fused.toFixed(2)}</span>
+                  </div>
+                  <div className="flex gap-3 text-[10px] font-mono text-[#666]">
+                    <span>content {s.contentSimilarity.toFixed(2)}</span>
+                    <span>temporal {s.temporalSimilarity.toFixed(2)}</span>
+                    {s.transform && <span>via {s.transform}</span>}
+                  </div>
+                  <div className="font-mono text-[9px] text-[#555] mt-1.5">cited · {s.citedEpisodeId}</div>
+                </div>
+              ))}
+            </div>
+          ) : null}
+        </div>
+      )}
 
       <div className="conduit-card overflow-hidden">
         <table className="w-full text-sm">

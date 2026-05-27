@@ -1,0 +1,26 @@
+{
+  "name": "@workspace/seeing-eye",
+  "version": "0.1.0",
+  "private": false,
+  "type": "module",
+  "license": "Apache-2.0",
+  "author": "Stephen P. Lutar Jr. <stephen@szlholdings.com>",
+  "description": "Doctrine-clean visual grounding primitive (SeeingEye re-expression). Every visual claim carries a bounding box, a frame hash, and a perceptual hash; un-grounded captions are rejected at the schema layer.",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./src/index.ts"
+    }
+  },
+  "scripts": {
+    "lint": "biome lint ./src",
+    "lint:ci": "biome lint ./src",
+    "format": "biome format --write ./src",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "test": "vitest run --passWithNoTests"
+  },
+  "devDependencies": {
+    "@types/node": "catalog:",
+    "vitest": "catalog:"
+  }
+}

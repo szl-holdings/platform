@@ -1,6 +1,8 @@
 import { registerSource, registerDestination } from './connector-registry';
 import { postgresSource } from './sources/postgres-source';
 import { internalApiSource } from './sources/internal-api-source';
+import { unstructuredSource } from './sources/unstructured-source';
+import { visualSource } from './sources/visual-source';
 import { webhookDestination } from './destinations/webhook-destination';
 import { slackDestination } from './destinations/slack-destination';
 import { createStubDestination, STUB_DESTINATIONS } from './destinations/stub-destination';
@@ -15,6 +17,8 @@ export function initConduitEngine(): void {
 
   registerSource(postgresSource);
   registerSource(internalApiSource);
+  registerSource(unstructuredSource);
+  registerSource(visualSource);
 
   registerDestination(webhookDestination);
   registerDestination(slackDestination);
@@ -25,7 +29,7 @@ export function initConduitEngine(): void {
 
   startScheduler();
 
-  logger.info('Conduit sync engine initialized — 2 sources, 13 destinations registered');
+  logger.info('Conduit sync engine initialized — 4 sources (postgres, api_resource, unstructured, visual), 13 destinations registered');
 }
 
 export { getSource, getDestination, listSources, listDestinations } from './connector-registry';

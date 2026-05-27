@@ -14,6 +14,14 @@
     "./cache": {
       "types": "./dist/cache.d.ts",
       "import": "./src/cache.ts"
+    },
+    "./schema-grounded": {
+      "types": "./dist/schema-grounded-extract.d.ts",
+      "import": "./src/schema-grounded-extract.ts"
+    },
+    "./span-provenance": {
+      "types": "./dist/span-provenance.d.ts",
+      "import": "./src/span-provenance.ts"
     }
   },
   "scripts": {

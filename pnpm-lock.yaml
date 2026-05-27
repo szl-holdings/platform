@@ -967,6 +967,9 @@ importers:
       '@workspace/integrations-openai-ai-server':
         specifier: workspace:*
         version: link:../../lib/integrations-openai-ai-server
+      '@workspace/langextract-bridge':
+        specifier: workspace:*
+        version: link:../../packages/langextract-bridge
       '@workspace/memory-fabric':
         specifier: workspace:*
         version: link:../../packages/memory-fabric
@@ -1012,6 +1015,9 @@ importers:
       '@workspace/sandbox-runtime':
         specifier: workspace:*
         version: link:../../packages/sandbox-runtime
+      '@workspace/seeing-eye':
+        specifier: workspace:*
+        version: link:../../packages/seeing-eye
       '@workspace/self-model':
         specifier: workspace:*
         version: link:../../packages/self-model
@@ -4843,6 +4849,15 @@ importers:
       typescript:
         specifier: 'catalog:'
         version: 5.9.3
+
+  packages/seeing-eye:
+    devDependencies:
+      '@types/node':
+        specifier: 'catalog:'
+        version: 25.3.5
+      vitest:
+        specifier: 'catalog:'
+        version: 3.2.4(@types/node@25.3.5)(@vitest/ui@4.1.2)(happy-dom@20.8.9)(jiti@2.6.1)(lightningcss@1.31.1)(terser@5.46.1)(tsx@4.21.0)(yaml@2.8.3)
 
   packages/self-model:
     dependencies:

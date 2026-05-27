@@ -1,3 +1,4 @@
+import { createHash } from 'node:crypto';
 import { Router, type IRouter, type Request, type Response } from 'express';
 import { and, count, desc, eq, sql } from 'drizzle-orm';
 import { db } from '@szl-holdings/db';
@@ -20,6 +21,8 @@ import {
   retryFailedRow,
   applyMappings,
 } from '../lib/conduit/index';
+import { dryRunUnstructured } from '../lib/conduit/sources/unstructured-source';
+import { recallEpisodes, hashEmbedding, type MemnetEpisode } from '@szl-holdings/ai-engine/memory/memnet-recall';
 
 /**
  * Emit a cognitive-reflexive observation when a sync run completes.
@@ -572,6 +575,129 @@ router.post('/conduit/syncs/:id/run', async (req: Request, res: Response): Promi
 });
 
 
+// ─── Doctrine V6 Ingestion Primitives ────────────────────────────────────────
+// Public dry-run endpoints for the schema-grounded, visual, and recall
+// primitives. These run pure functions and emit receipts; they do NOT
+// persist by themselves. To persist into a sync run, configure a sync with
+// sourceType='unstructured' and POST /conduit/syncs/:id/run — the
+// unstructuredSource connector will surface every gap/conflict/extracted
+// row through the standard sync-run table.
+
+router.post('/conduit/unstructured/dry-run', async (req: Request, res: Response): Promise<void> => {
+  const { documentText, documentBytesB64, documentMime, schema, hits } = req.body as {
+    documentText?: string;
+    documentBytesB64?: string;
+    documentMime?: string;
+    schema?: { schemaRef: string; fields: Array<{ name: string; type: string; required: boolean }> };
+    hits?: Array<{ class: string; text: string; startChar: number; endChar: number; attributes?: Record<string, string> }>;
+  };
+  // Document ingestion adapter: accept inline text OR base64 bytes + MIME.
+  // HTML is stripped to plain text; PDF/other types should pre-decode upstream.
+  let effectiveText = documentText;
+  if (!effectiveText && documentBytesB64) {
+    const raw = Buffer.from(documentBytesB64, 'base64').toString('utf8');
+    const mime = (documentMime ?? 'text/plain').toLowerCase();
+    effectiveText = mime.includes('html')
+      ? raw.replace(/<script[\s\S]*?<\/script>/gi, ' ')
+            .replace(/<style[\s\S]*?<\/style>/gi, ' ')
+            // Insert newlines at block-level boundaries so the field-anchor
+            // regex still has natural row breaks after tag stripping.
+            .replace(/<\/(p|div|li|tr|h[1-6]|section|article|br)\s*>/gi, '\n')
+            .replace(/<br\s*\/?>/gi, '\n')
+            .replace(/<[^>]+>/g, ' ')
+            .replace(/&nbsp;/g, ' ').replace(/&amp;/g, '&')
+            .replace(/&lt;/g, '<').replace(/&gt;/g, '>')
+            .replace(/[ \t]+/g, ' ').replace(/\n+/g, '\n').trim()
+      : raw;
+  }
+  if (!effectiveText || !schema?.fields?.length) {
+    res.status(400).json({ error: 'documentText (or documentBytesB64+documentMime) and schema.fields are required' });
+    return;
+  }
+  try {
+    const result = dryRunUnstructured(
+      effectiveText,
+      schema as unknown as import('@workspace/langextract-bridge').DocumentSchema,
+      hits as unknown as import('@workspace/langextract-bridge').ExtractionHit[] | undefined,
+    );
+    res.json({ ...result, documentMime: documentMime ?? (documentText ? 'text/plain' : undefined) });
+  } catch (err) {
+    req.log.error({ err }, 'unstructured dry-run failed');
+    res.status(500).json({ error: err instanceof Error ? err.message : 'dry-run failed' });
+  }
+});
+
+router.post('/conduit/visual/dry-run', async (req: Request, res: Response): Promise<void> => {
+  const { schemaRef, labels, frameBytesB64, detections } = req.body as {
+    schemaRef?: string;
+    labels?: string[];
+    frameBytesB64?: string;
+    detections?: Array<{ label: string; bbox: [number, number, number, number]; confidence?: number }>;
+  };
+  if (!schemaRef || !Array.isArray(labels) || !frameBytesB64 || !Array.isArray(detections)) {
+    res.status(400).json({ error: 'schemaRef, labels[], frameBytesB64, detections[] are required' });
+    return;
+  }
+  try {
+    const { groundVisualClaims } = await import('@workspace/seeing-eye');
+    const frameBytes = Uint8Array.from(Buffer.from(frameBytesB64, 'base64'));
+    const result = groundVisualClaims({ schemaRef, labels }, frameBytes, detections);
+    res.json(result);
+  } catch (err) {
+    req.log.error({ err }, 'visual dry-run failed');
+    const status = err instanceof Error && err.name === 'UngroundedVisualClaimError' ? 422 : 500;
+    res.status(status).json({ error: err instanceof Error ? err.message : 'dry-run failed' });
+  }
+});
+
+router.post('/conduit/mappings/suggest', async (req: Request, res: Response): Promise<void> => {
+  const { query, scope = 'mapping', topK = 5 } = req.body as { query?: string; scope?: string; topK?: number };
+  if (!query) { res.status(400).json({ error: 'query is required' }); return; }
+  try {
+    const rows = await db.select({
+      id: conduitSyncMappingsTable.id,
+      sourceField: conduitSyncMappingsTable.sourceField,
+      destinationField: conduitSyncMappingsTable.destinationField,
+      transform: conduitSyncMappingsTable.transform,
+      syncId: conduitSyncMappingsTable.syncId,
+      createdAt: conduitSyncMappingsTable.createdAt,
+    }).from(conduitSyncMappingsTable).limit(500);
+
+    const episodes: MemnetEpisode<typeof rows[number]>[] = rows.map((r) => ({
+      episodeId: r.id,
+      contentVector: hashEmbedding(`${r.sourceField} ${r.destinationField} ${r.transform ?? ''}`),
+      occurredAt: (r.createdAt instanceof Date ? r.createdAt : new Date(r.createdAt ?? Date.now())).toISOString(),
+      scope,
+      payload: r,
+    }));
+
+    const result = recallEpisodes(episodes, {
+      contentVector: hashEmbedding(query),
+      now: new Date().toISOString(),
+      topK,
+      scope,
+    });
+    res.json({
+      query,
+      scope,
+      suggestions: result.items.map((it) => ({
+        sourceField: it.episode.payload.sourceField,
+        destinationField: it.episode.payload.destinationField,
+        transform: it.episode.payload.transform,
+        contentSimilarity: it.contentSimilarity,
+        temporalSimilarity: it.temporalSimilarity,
+        fused: it.fused,
+        citedEpisodeId: it.episode.episodeId,
+      })),
+      recallPath: result.recallPath,
+      receipt: result.receipt,
+    });
+  } catch (err) {
+    req.log.error({ err }, 'mapping suggest failed');
+    res.status(500).json({ error: 'mapping suggest failed' });
+  }
+});
+
 // ─── Sync Mappings ────────────────────────────────────────────────────────────
 router.get('/conduit/syncs/:id/mappings', async (req: Request, res: Response): Promise<void> => {
   const id = Array.isArray(req.params.id) ? req.params.id[0] : req.params.id;
@@ -588,7 +714,10 @@ router.get('/conduit/syncs/:id/mappings', async (req: Request, res: Response): P
 
 router.put('/conduit/syncs/:id/mappings', async (req: Request, res: Response): Promise<void> => {
   const id = Array.isArray(req.params.id) ? req.params.id[0] : req.params.id;
-  const { mappings } = req.body as { mappings?: Array<Record<string, unknown>> };
+  const { mappings, reuseCitations } = req.body as {
+    mappings?: Array<Record<string, unknown> & { _citedEpisodeId?: string }>;
+    reuseCitations?: Array<{ sourceField: string; destinationField: string; citedEpisodeId: string; fused?: number }>;
+  };
   if (!Array.isArray(mappings)) { res.status(400).json({ error: 'mappings array required' }); return; }
   try {
     await db.delete(conduitSyncMappingsTable).where(eq(conduitSyncMappingsTable.syncId, id));
@@ -604,8 +733,37 @@ router.put('/conduit/syncs/:id/mappings', async (req: Request, res: Response): P
           }))
         ).returning()
       : [];
-    await logActivityFromRequest(req, 'conduit.sync.mappings.update', 'conduit_sync', id, undefined, { mappingCount: mappings.length });
-    res.json(inserted);
+
+    // Doctrine V6: when an operator reuses a recalled mapping (i.e. they
+    // applied a suggestion citing a prior episode), emit a memory.recall.v1
+    // receipt at *apply* time and persist it in the activity log so the
+    // governance panel can show "this mapping reused episode X". Receipt
+    // hash is deterministic over the citation set + syncId.
+    const citations = Array.isArray(reuseCitations) ? reuseCitations : mappings
+      .filter((m) => typeof m._citedEpisodeId === 'string')
+      .map((m) => ({
+        sourceField: m.sourceField as string,
+        destinationField: m.destinationField as string,
+        citedEpisodeId: m._citedEpisodeId as string,
+        fused: typeof m._fused === 'number' ? (m._fused as number) : undefined,
+      }));
+
+    let reuseReceipt: { kind: string; producedAt: string; receiptHash: string } | undefined;
+    if (citations.length > 0) {
+      const producedAt = new Date().toISOString();
+      const canonical = JSON.stringify({ syncId: id, citations: citations.map((c) => ({
+        s: c.sourceField, d: c.destinationField, e: c.citedEpisodeId,
+      })) });
+      const receiptHash = createHash('sha256').update(canonical, 'utf8').digest('hex');
+      reuseReceipt = { kind: 'memory.recall.v1', producedAt, receiptHash };
+    }
+
+    await logActivityFromRequest(req, 'conduit.sync.mappings.update', 'conduit_sync', id, undefined, {
+      mappingCount: mappings.length,
+      reuseCitationCount: citations.length,
+      reuseReceipt,
+    });
+    res.json({ mappings: inserted, reuseReceipt, reuseCitationCount: citations.length });
   } catch (err) {
     req.log.error({ err }, 'Failed to update sync mappings');
     res.status(500).json({ error: 'Internal server error' });

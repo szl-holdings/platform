@@ -2,8 +2,11 @@ import { ContactModal } from '@szl-holdings/shared-ui/contact-modal';
 import {
   Activity,
   ArrowRight,
+  Brain,
   ChevronRight,
   Database,
+  Eye,
+  FileText,
   GitBranch,
   Layers,
   Network,
@@ -505,6 +508,73 @@ export default function ConduitLandingPage() {
                 <p className="display text-[15px] font-light text-[#c9b787] mt-2 tracking-tight">{p.v}</p>
               </div>
             ))}
+          </div>
+        </div>
+      </section>
+
+      {/* INGESTION SURFACE — Unstructured / Visual / Recall */}
+      <section id="ingestion" className="border-t border-white/[0.05] px-6 py-28">
+        <div className="max-w-6xl mx-auto">
+          <div className="reveal flex items-end justify-between mb-14 flex-wrap gap-6">
+            <div className="max-w-xl">
+              <p className="mono text-[10px] tracking-[0.2em] text-[#666] uppercase mb-3">INGESTION · 03 SURFACES</p>
+              <h2 className="display text-[40px] font-light leading-tight tracking-tight">
+                Documents, frames, and prior decisions — all receipt-bound.
+              </h2>
+            </div>
+            <p className="text-[14px] text-[#888] max-w-sm leading-relaxed">
+              Three new ingestion primitives bring unstructured text, visual scenes, and the
+              fabric's own historical mapping decisions into the same Doctrine V6 envelope.
+            </p>
+          </div>
+
+          <div className="reveal grid grid-cols-1 md:grid-cols-3 gap-px bg-white/[0.05] mb-8">
+            {[
+              {
+                icon: FileText,
+                code: 'KE.01',
+                title: 'Unstructured · schema-grounded',
+                body: 'PDFs, HTML, free-text notes — schema-grounded extraction with gaps and conflicts as first-class outputs. Every value carries a per-field span hash.',
+                receipt: 'extraction.schema-grounded.v1',
+              },
+              {
+                icon: Eye,
+                code: 'SEE.02',
+                title: 'Visual · SeeingEye',
+                body: 'Screenshots, diagrams, PDF pages → labelled detections. No caption without a bounding box and a frame hash. Negative claims are first-class.',
+                receipt: 'vision.seeing-eye.v1',
+              },
+              {
+                icon: Brain,
+                code: 'MEM.03',
+                title: 'Recall · memnet',
+                body: 'Dual-index (content + temporal) recall over prior mapping decisions. Reused mappings emit their own receipt with citation paths.',
+                receipt: 'memory.recall.v1',
+              },
+            ].map((s, i) => (
+              <div key={s.code} className={`reveal reveal-d${(i % 3) + 1} relative p-7 group transition-colors hover:bg-[#0e0e0e]`} style={{ background: '#0a0a0a' }}>
+                <div className="flex items-center justify-between mb-5">
+                  <s.icon className="w-4 h-4 text-[#c9b787]/70 group-hover:text-[#c9b787] transition-colors" />
+                  <span className="mono text-[9px] tracking-[0.2em] text-[#555] uppercase">{s.code}</span>
+                </div>
+                <h3 className="display text-[18px] font-medium text-[#f5f5f5] mb-2.5 tracking-tight">{s.title}</h3>
+                <p className="text-[13px] leading-relaxed text-[#888] mb-4">{s.body}</p>
+                <p className="mono text-[9px] tracking-wider text-[#c9b787] uppercase border-t border-white/[0.04] pt-3">
+                  receipt · {s.receipt}
+                </p>
+              </div>
+            ))}
+          </div>
+
+          <div className="reveal text-center">
+            <Link href="/health-screening">
+              <span className="inline-flex items-center gap-2 px-5 py-2.5 text-[13px] font-medium text-[#c9b787] border border-[#c9b787]/30 rounded-md hover:bg-[#c9b787]/[0.05] transition-colors cursor-pointer">
+                Open Deployment Health Screening demo <ArrowRight className="w-3.5 h-3.5" />
+              </span>
+            </Link>
+            <p className="mono text-[10px] text-[#666] uppercase tracking-wider mt-4">
+              one assessment · three ingestion paths · one receipt-bound record
+            </p>
           </div>
         </div>
       </section>
