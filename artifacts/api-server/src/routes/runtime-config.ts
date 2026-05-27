@@ -28,7 +28,11 @@ import {
 } from '../lib/api-response';
 import { logActivity } from '../lib/activity-logger';
 
-import { invalidateConfigCache, invalidateAllConfigCache } from '../lib/runtime-config';
+import {
+  invalidateConfigCache,
+  invalidateAllConfigCache,
+  validateRuntimeConfigValue,
+} from '../lib/runtime-config';
 import { authMiddleware, requireRole } from '../middlewares/auth';
 
 const REDACTED_VALUE = '[redacted]';
@@ -306,6 +310,30 @@ router.post(
           skipped.push({ key: e.key, reason: 'sensitive entries cannot be bulk-imported' });
           continue;
         }
+        // Per-row write-time validation (task #4963). A malformed value in
+        // a bulk payload would otherwise sneak past the single-row endpoint
+        // guardrails. Skip the bad row with a clear reason rather than
+        // aborting the whole import.
+        const valCheck = validateRuntimeConfigValue(e.value, e.valueType);
+        if (!valCheck.ok) {
+          payloadKeys.add(e.key);
+          skipped.push({
+            key: e.key,
+            reason: `invalid value for valueType=${e.valueType}: ${valCheck.reason}`,
+          });
+          continue;
+        }
+        if (e.defaultValue !== undefined && e.defaultValue !== null) {
+          const defCheck = validateRuntimeConfigValue(e.defaultValue, e.valueType);
+          if (!defCheck.ok) {
+            payloadKeys.add(e.key);
+            skipped.push({
+              key: e.key,
+              reason: `invalid defaultValue for valueType=${e.valueType}: ${defCheck.reason}`,
+            });
+            continue;
+          }
+        }
         seenKeys.add(e.key);
         payloadKeys.add(e.key);
         dedupedEntries.push(e);
@@ -501,6 +529,31 @@ router.post(
         return;
       }
       const data = parsed.data;
+      // Reject malformed values at write time so the row can never enter
+      // the DB in a state where the reader has to fall back to a default
+      // (task #4963). Symmetric to `castValue`'s runtime contract.
+      const valueCheck = validateRuntimeConfigValue(data.value, data.valueType);
+      if (!valueCheck.ok) {
+        sendBadRequest(
+          res,
+          `Invalid value for key '${data.key}' (valueType=${data.valueType}): ${valueCheck.reason}`,
+          { value: [valueCheck.reason] },
+        );
+        return;
+      }
+      // Same check for defaultValue when supplied — a malformed default
+      // would defeat the entire fallback contract.
+      if (data.defaultValue !== undefined) {
+        const defCheck = validateRuntimeConfigValue(data.defaultValue, data.valueType);
+        if (!defCheck.ok) {
+          sendBadRequest(
+            res,
+            `Invalid defaultValue for key '${data.key}' (valueType=${data.valueType}): ${defCheck.reason}`,
+            { defaultValue: [defCheck.reason] },
+          );
+          return;
+        }
+      }
       const [row] = await db
         .insert(runtimeConfigTable)
         .values({
@@ -553,17 +606,37 @@ router.patch(
         sendBadRequest(res, 'At least one field must be provided to update');
         return;
       }
-      const updateData: Record<string, unknown> = { updatedAt: new Date() };
-      if (data.value !== undefined) updateData.value = data.value;
-      if (data.description !== undefined) updateData.description = data.description;
-      if (data.category !== undefined) updateData.category = data.category;
-      if (data.isSensitive !== undefined) updateData.isSensitive = data.isSensitive;
-
       const [previous] = await db
         .select()
         .from(runtimeConfigTable)
         .where(eq(runtimeConfigTable.key, key))
         .limit(1);
+
+      // Validate the candidate value against the row's declared valueType
+      // BEFORE building the UPDATE (task #4963). valueType isn't mutable
+      // via PATCH so we trust the existing row's type. If the row doesn't
+      // exist, fall through to the UPDATE which produces the canonical
+      // 404 response below.
+      if (data.value !== undefined && previous) {
+        const check = validateRuntimeConfigValue(
+          data.value,
+          previous.valueType as 'string' | 'number' | 'boolean' | 'json',
+        );
+        if (!check.ok) {
+          sendBadRequest(
+            res,
+            `Invalid value for key '${key}' (valueType=${previous.valueType}): ${check.reason}`,
+            { value: [check.reason] },
+          );
+          return;
+        }
+      }
+
+      const updateData: Record<string, unknown> = { updatedAt: new Date() };
+      if (data.value !== undefined) updateData.value = data.value;
+      if (data.description !== undefined) updateData.description = data.description;
+      if (data.category !== undefined) updateData.category = data.category;
+      if (data.isSensitive !== undefined) updateData.isSensitive = data.isSensitive;
 
       const [row] = await db
         .update(runtimeConfigTable)

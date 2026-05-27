@@ -326,10 +326,21 @@ vi.mock('../lib/activity-logger.js', () => ({
 
 const invalidateConfigCache = vi.fn();
 const invalidateAllConfigCache = vi.fn();
-vi.mock('../lib/runtime-config.js', () => ({
-  invalidateConfigCache,
-  invalidateAllConfigCache,
-}));
+// Re-export the real `validateRuntimeConfigValue` from the actual module
+// so the route's write-time validation contract is exercised end-to-end
+// (task #4963). The cache hooks remain mocked so we can still assert
+// per-call invocation in the existing audit tests.
+vi.mock('../lib/runtime-config.js', async () => {
+  const actual =
+    await vi.importActual<typeof import('../lib/runtime-config.js')>(
+      '../lib/runtime-config.js',
+    );
+  return {
+    invalidateConfigCache,
+    invalidateAllConfigCache,
+    validateRuntimeConfigValue: actual.validateRuntimeConfigValue,
+  };
+});
 
 vi.mock('../middlewares/auth.js', () => ({
   authMiddleware:
@@ -733,5 +744,135 @@ describe('GET /runtime-config/_history', () => {
     const res = await request(app).get('/runtime-config/_history');
     expect(res.status).toBe(200);
     expect((res.body as unknown[]).length).toBe(1);
+  });
+});
+
+/**
+ * Task #4963 — write-time value validation.
+ *
+ * #4902 made the reader fail-safe when a row is already corrupted. This
+ * suite locks the symmetric guard on the writer: malformed values are
+ * rejected at the door with a 400 so the bad row can never enter the DB
+ * in the first place.
+ */
+describe('Runtime config write-time value validation (task #4963)', () => {
+  it('POST rejects a non-numeric value when valueType=number', async () => {
+    const app = buildApp();
+    const res = await request(app).post('/runtime-config').send({
+      key: 'bad_number',
+      value: 'twohundred',
+      valueType: 'number',
+    });
+    expect(res.status).toBe(400);
+    expect(res.body.error ?? res.body.message ?? '').toMatch(/bad_number/);
+    expect(res.body.error ?? res.body.message ?? '').toMatch(/number/);
+    expect(invalidateConfigCache).not.toHaveBeenCalled();
+    expect(logActivityMock).not.toHaveBeenCalled();
+    // The row must not have been inserted.
+    expect(store.has('bad_number')).toBe(false);
+  });
+
+  it('POST rejects an empty string when valueType=number', async () => {
+    const app = buildApp();
+    const res = await request(app).post('/runtime-config').send({
+      key: 'empty_number',
+      value: '',
+      valueType: 'number',
+    });
+    expect(res.status).toBe(400);
+    expect(store.has('empty_number')).toBe(false);
+  });
+
+  it('POST rejects malformed JSON when valueType=json', async () => {
+    const app = buildApp();
+    const res = await request(app).post('/runtime-config').send({
+      key: 'bad_json',
+      value: '{ this is not json',
+      valueType: 'json',
+    });
+    expect(res.status).toBe(400);
+    expect(res.body.error ?? res.body.message ?? '').toMatch(/JSON/);
+    expect(store.has('bad_json')).toBe(false);
+  });
+
+  it('POST rejects a non-canonical boolean (e.g. "yes") when valueType=boolean', async () => {
+    const app = buildApp();
+    const res = await request(app).post('/runtime-config').send({
+      key: 'bad_bool',
+      value: 'yes',
+      valueType: 'boolean',
+    });
+    expect(res.status).toBe(400);
+    expect(store.has('bad_bool')).toBe(false);
+  });
+
+  it('POST accepts well-formed values for each valueType', async () => {
+    const app = buildApp();
+    for (const [key, value, valueType] of [
+      ['ok_number', '42', 'number'],
+      ['ok_negative_number', '-1.5', 'number'],
+      ['ok_bool_true', 'true', 'boolean'],
+      ['ok_bool_zero', '0', 'boolean'],
+      ['ok_json', '{"a":1}', 'json'],
+      ['ok_string', 'anything goes', 'string'],
+    ] as const) {
+      const res = await request(app).post('/runtime-config').send({ key, value, valueType });
+      expect(res.status, `${key}=${value} (${valueType})`).toBe(201);
+      expect(store.has(key)).toBe(true);
+    }
+  });
+
+  it('POST rejects a malformed defaultValue even if value is fine', async () => {
+    const app = buildApp();
+    const res = await request(app).post('/runtime-config').send({
+      key: 'bad_default',
+      value: '1',
+      defaultValue: 'NaN-ish',
+      valueType: 'number',
+    });
+    expect(res.status).toBe(400);
+    expect(res.body.error ?? res.body.message ?? '').toMatch(/defaultValue/);
+    expect(store.has('bad_default')).toBe(false);
+  });
+
+  it('PATCH rejects a value that does not parse as the existing row valueType', async () => {
+    const app = buildApp();
+    await request(app).post('/runtime-config').send({
+      key: 'existing_number',
+      value: '100',
+      valueType: 'number',
+    });
+    invalidateConfigCache.mockClear();
+    logActivityMock.mockClear();
+
+    const res = await request(app)
+      .patch('/runtime-config/existing_number')
+      .send({ value: 'oops' });
+    expect(res.status).toBe(400);
+    expect(invalidateConfigCache).not.toHaveBeenCalled();
+    expect(logActivityMock).not.toHaveBeenCalled();
+    // Row value must be unchanged.
+    expect(store.get('existing_number')?.value).toBe('100');
+  });
+
+  it('PATCH still accepts a description-only edit that omits value', async () => {
+    const app = buildApp();
+    await request(app).post('/runtime-config').send({
+      key: 'desc_only',
+      value: '7',
+      valueType: 'number',
+    });
+    const res = await request(app)
+      .patch('/runtime-config/desc_only')
+      .send({ description: 'updated docs' });
+    expect(res.status).toBe(200);
+  });
+
+  it('PATCH on a missing key still 404s before any validation work', async () => {
+    const app = buildApp();
+    const res = await request(app)
+      .patch('/runtime-config/nope')
+      .send({ value: 'twohundred' });
+    expect(res.status).toBe(404);
   });
 });

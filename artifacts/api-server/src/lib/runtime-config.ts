@@ -104,6 +104,67 @@ async function getCachedRow(key: string): Promise<RuntimeConfig | null> {
 }
 
 /**
+ * Validate that a candidate stored-as-text `value` parses cleanly as its
+ * declared `valueType`. Symmetric to `castValue` below but used at WRITE
+ * time so the admin endpoints reject corruption at the door (task #4963)
+ * instead of relying on the reader's fail-safe fallback.
+ *
+ * Contract:
+ *   - `string`    accepts anything (`value` is already a string).
+ *   - `number`    must parse as a finite JS number via `Number(value)`.
+ *                 The empty string is rejected (`Number("")` is 0, which
+ *                 would silently mask a typo).
+ *   - `boolean`   must be exactly one of `true|false|1|0` (the reader's
+ *                 contract treats `"true"` and `"1"` as true; everything
+ *                 else as false — at write time we refuse anything outside
+ *                 that explicit set so operators don't write `"yes"` and
+ *                 silently get `false`).
+ *   - `json`      must `JSON.parse` cleanly.
+ *
+ * Returns `{ ok: true }` on success, or `{ ok: false, reason }` with a
+ * short human-readable explanation suitable for surfacing in a 400.
+ */
+export function validateRuntimeConfigValue(
+  value: string,
+  valueType: 'string' | 'number' | 'boolean' | 'json',
+): { ok: true } | { ok: false; reason: string } {
+  switch (valueType) {
+    case 'string':
+      return { ok: true };
+    case 'number': {
+      if (value.trim() === '') {
+        return { ok: false, reason: 'expected a finite number, got empty string' };
+      }
+      const n = Number(value);
+      if (!Number.isFinite(n)) {
+        return { ok: false, reason: `expected a finite number, got ${JSON.stringify(value)}` };
+      }
+      return { ok: true };
+    }
+    case 'boolean': {
+      if (value !== 'true' && value !== 'false' && value !== '1' && value !== '0') {
+        return {
+          ok: false,
+          reason: `expected one of "true" | "false" | "1" | "0", got ${JSON.stringify(value)}`,
+        };
+      }
+      return { ok: true };
+    }
+    case 'json': {
+      try {
+        JSON.parse(value);
+        return { ok: true };
+      } catch (err) {
+        const msg = err instanceof Error ? err.message : String(err);
+        return { ok: false, reason: `invalid JSON: ${msg}` };
+      }
+    }
+    default:
+      return { ok: false, reason: `unknown valueType: ${valueType}` };
+  }
+}
+
+/**
  * Cast a stored string value to the requested type.
  *
  * Contract (changed in task #4902):
