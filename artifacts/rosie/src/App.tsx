@@ -6,6 +6,7 @@ import Optimizer from "@/pages/Optimizer";
 import Fabric from "@/pages/Fabric";
 import Research from "@/pages/Research";
 import Proof from "@/pages/Proof";
+import Warhacker from "@/pages/Warhacker";
 
 const queryClient = new QueryClient({
   defaultOptions: { queries: { staleTime: 5_000, refetchOnWindowFocus: false } },
@@ -33,6 +34,7 @@ export default function App() {
             <Route path="/fabric" component={Fabric} />
             <Route path="/research" component={Research} />
             <Route path="/proof" component={Proof} />
+            <Route path="/warhacker" component={Warhacker} />
             <Route component={NotFound} />
           </Switch>
         </Shell>

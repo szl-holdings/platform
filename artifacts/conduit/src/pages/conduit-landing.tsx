@@ -288,6 +288,20 @@ export default function ConduitLandingPage() {
         </div>
       </header>
 
+      <a
+        href="/rosie/warhacker#lane-2"
+        data-testid="warhacker-tile-conduit"
+        className="mx-6 md:mx-10 flex items-center justify-between gap-4 flex-wrap px-5 py-3 rounded border border-[#c9b787]/30 bg-gradient-to-r from-[#c9b787]/10 to-transparent text-[#e6e6e6] no-underline"
+      >
+        <div className="flex items-center gap-3">
+          <span className="mono text-[10px] uppercase tracking-[0.18em] text-[#c9b787]">⚑ WARHACKER · LANE 2</span>
+          <span className="text-[13px]">
+            Amaru drives the deployment health-screening lane — schema-grounded extract + memnet recall back the unit-readiness rollup.
+          </span>
+        </div>
+        <span className="text-[12px] text-[#888]">open hub →</span>
+      </a>
+
       {/* HERO */}
       <section className="relative overflow-hidden">
         <div className="absolute inset-0 grid-bg pointer-events-none" />

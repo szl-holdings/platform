@@ -7,6 +7,7 @@ const NAV = [
   { path: "/fabric", label: "Fabric", glyph: "✷" },
   { path: "/research", label: "Research", glyph: "≡" },
   { path: "/proof", label: "Proof Chain", glyph: "◐" },
+  { path: "/warhacker", label: "Warhacker", glyph: "⚑" },
 ];
 
 /**

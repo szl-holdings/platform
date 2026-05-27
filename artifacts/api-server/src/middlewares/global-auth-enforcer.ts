@@ -309,6 +309,13 @@ const PUBLIC_PREFIXES = [
   "/api/ouroboros/sovereign/arbitrage/",
   "/api/ouroboros/sovereign/ultra/",
   "/api/ouroboros/sovereign/xi/",
+  // Warhacker Hub (Task #5539) — five-lane Defense Unicorns demo at
+  // /rosie/warhacker. Every endpoint is stateless and Zod-validated;
+  // input bodies map deterministically to a hash-chained receipt array
+  // returned in-band. No persistence, no PII, no per-tenant state, no
+  // session is required to run the lanes from the browser. Same compute-
+  // only posture as /api/ouroboros/gauss/ above.
+  "/api/warhacker/",
   "/api/webhooks/",
   "/api/scim/",
   "/api/stream/webhook/",

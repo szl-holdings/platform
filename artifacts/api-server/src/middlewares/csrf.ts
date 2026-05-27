@@ -167,6 +167,13 @@ function isExempt(path: string): boolean {
   // /api/ouroboros/* routes (anchor, fleet audit, reconcile-handoff)
   // continue to require CSRF — this exemption stays narrowed to guardrails.
   if (path.startsWith('/api/ouroboros/guardrails/')) return true;
+  // Warhacker Hub (Task #5539) — five-lane Defense Unicorns demo. Same
+  // compute-only posture as /api/ouroboros/gauss/ and /guardrails/:
+  // stateless, Zod-validated, no session, no PII, no server-side
+  // persistence. The hub UI POSTs from the browser without a session,
+  // so the CSRF double-submit is not available. Mirrors the auth
+  // exemption added in global-auth-enforcer for "/api/warhacker/".
+  if (path.startsWith('/api/warhacker/')) return true;
   if (path.startsWith('/api-docs')) return true;
   if (path.startsWith('/api/ai/')) return true;
   if (path === '/api/alloy/channels/slack/webhook') return true;

@@ -306,6 +306,32 @@ export function HomePage() {
         </div>
       </nav>
 
+      <a
+        href="/rosie/warhacker#lane-1"
+        data-testid="warhacker-tile-a11oy"
+        style={{
+          display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+          gap: '1rem', flexWrap: 'wrap',
+          margin: '0 clamp(2rem, 6vw, 5rem)',
+          padding: '0.875rem 1.25rem',
+          borderRadius: 8,
+          border: `1px solid ${T.text}22`,
+          background: `linear-gradient(90deg, ${T.text}06, transparent)`,
+          textDecoration: 'none', color: T.text,
+        }}
+      >
+        <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+          <span style={{
+            fontFamily: T.mono, fontSize: '0.6875rem', letterSpacing: '0.18em',
+            textTransform: 'uppercase', color: T.textDim,
+          }}>⚑ WARHACKER · LANE 1</span>
+          <span style={{ fontSize: '0.875rem', color: T.text }}>
+            a11oy.UDS composes into the Warhacker satellite-ground bundle stack — see all five operational lanes
+          </span>
+        </div>
+        <span style={{ fontSize: '0.8125rem', color: T.textDim }}>open hub →</span>
+      </a>
+
       <section style={{
         display: 'flex', alignItems: 'flex-start',
         position: 'relative', overflow: 'hidden',

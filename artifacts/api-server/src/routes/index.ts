@@ -1060,4 +1060,16 @@ router.use(
   ),
 );
 
+// Warhacker Hub API (#5539): five operational lanes proving the
+// Defense Unicorns problem set against the live backend. Endpoints
+// emit hash-chained Doctrine V6 receipts so the hub UI at
+// /rosie/warhacker can render real receipt chains, not slideware.
+router.use(
+  lazyMatch(
+    ["/warhacker"],
+    () => import("./warhacker"),
+    "warhacker",
+  ),
+);
+
 export default router;
