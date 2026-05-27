@@ -2,6 +2,7 @@ import { Switch, Route, Router as WouterRouter } from "wouter";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { Shell } from "@/components/Shell";
 import Identity from "@/pages/Identity";
+import Jarvis from "@/pages/Jarvis";
 import Optimizer from "@/pages/Optimizer";
 import Fabric from "@/pages/Fabric";
 import Research from "@/pages/Research";
@@ -29,7 +30,9 @@ export default function App() {
       <WouterRouter base={import.meta.env.BASE_URL.replace(/\/$/, "")}>
         <Shell>
           <Switch>
-            <Route path="/" component={Identity} />
+            <Route path="/" component={Jarvis} />
+            <Route path="/jarvis" component={Jarvis} />
+            <Route path="/identity" component={Identity} />
             <Route path="/optimizer" component={Optimizer} />
             <Route path="/fabric" component={Fabric} />
             <Route path="/research" component={Research} />

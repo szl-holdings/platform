@@ -32,7 +32,7 @@ interface UdsBundleEntry {
   readonly description: string;
 }
 
-const BUNDLES: ReadonlyArray<UdsBundleEntry> = [
+export const BUNDLES: ReadonlyArray<UdsBundleEntry> = [
   {
     slug: 'a11oy',
     title: 'A11oy — Brand Orchestration Layer',

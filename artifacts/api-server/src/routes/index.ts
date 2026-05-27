@@ -102,6 +102,11 @@ router.use(lazyMatch("/simulation", () => import("./simulation-whatif"), "simula
 // ROSIE — Governed Decision Fabric. Public demo surface.
 // Owns /rosie/templates, /rosie/solve, /rosie/narrate, /rosie/receipts*,
 // /rosie/research, /rosie/github/*, /rosie/ingest/*, /rosie/fabric, /rosie/events
+// Jarvis aggregator mounts BEFORE the main rosie router so the
+// more-specific /rosie/jarvis/* paths hit it first (Express matches in
+// registration order). The main rosie router has no /jarvis subtree, so
+// this isn't a functional conflict — just a deliberate ordering.
+router.use(lazyMatch("/rosie", () => import("./rosie-jarvis"), "rosie-jarvis"));
 router.use(lazyMatch("/rosie", () => import("./rosie"), "rosie"));
 
 // Adversarial red-team & crisis stress-drill suite.

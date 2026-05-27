@@ -2,7 +2,8 @@ import { Link, useLocation } from "wouter";
 import { useEffect, useState } from "react";
 
 const NAV = [
-  { path: "/", label: "Identity", glyph: "◆" },
+  { path: "/", label: "Jarvis", glyph: "◇" },
+  { path: "/identity", label: "Identity", glyph: "◆" },
   { path: "/optimizer", label: "Optimizer", glyph: "▲" },
   { path: "/fabric", label: "Fabric", glyph: "✷" },
   { path: "/research", label: "Research", glyph: "≡" },

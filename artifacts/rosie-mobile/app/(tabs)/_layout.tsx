@@ -16,9 +16,21 @@ import { useColors } from "@/hooks/useColors";
 function NativeTabLayout() {
   return (
     <NativeTabs>
+      <NativeTabs.Trigger name="jarvis">
+        <Icon sf={{ default: "sparkles", selected: "sparkles" }} />
+        <Label>Jarvis</Label>
+      </NativeTabs.Trigger>
       <NativeTabs.Trigger name="index">
-        <Icon sf={{ default: "house", selected: "house.fill" }} />
-        <Label>Home</Label>
+        <Icon sf={{ default: "checkmark.shield", selected: "checkmark.shield.fill" }} />
+        <Label>Approvals</Label>
+      </NativeTabs.Trigger>
+      <NativeTabs.Trigger name="optimizer">
+        <Icon sf={{ default: "function", selected: "function" }} />
+        <Label>Optimizer</Label>
+      </NativeTabs.Trigger>
+      <NativeTabs.Trigger name="receipts">
+        <Icon sf={{ default: "link", selected: "link" }} />
+        <Label>Receipts</Label>
       </NativeTabs.Trigger>
     </NativeTabs>
   );
@@ -63,14 +75,50 @@ function ClassicTabLayout() {
       }}
     >
       <Tabs.Screen
-        name="index"
+        name="jarvis"
         options={{
-          title: "Home",
+          title: "Jarvis",
           tabBarIcon: ({ color }) =>
             isIOS ? (
-              <SymbolView name="house" tintColor={color} size={24} />
+              <SymbolView name="sparkles" tintColor={color} size={24} />
             ) : (
-              <Feather name="home" size={22} color={color} />
+              <Feather name="zap" size={22} color={color} />
+            ),
+        }}
+      />
+      <Tabs.Screen
+        name="index"
+        options={{
+          title: "Approvals",
+          tabBarIcon: ({ color }) =>
+            isIOS ? (
+              <SymbolView name="checkmark.shield" tintColor={color} size={24} />
+            ) : (
+              <Feather name="check-circle" size={22} color={color} />
+            ),
+        }}
+      />
+      <Tabs.Screen
+        name="optimizer"
+        options={{
+          title: "Optimizer",
+          tabBarIcon: ({ color }) =>
+            isIOS ? (
+              <SymbolView name="function" tintColor={color} size={24} />
+            ) : (
+              <Feather name="cpu" size={22} color={color} />
+            ),
+        }}
+      />
+      <Tabs.Screen
+        name="receipts"
+        options={{
+          title: "Receipts",
+          tabBarIcon: ({ color }) =>
+            isIOS ? (
+              <SymbolView name="link" tintColor={color} size={24} />
+            ) : (
+              <Feather name="link" size={22} color={color} />
             ),
         }}
       />
