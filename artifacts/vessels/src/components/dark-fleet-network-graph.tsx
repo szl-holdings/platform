@@ -394,7 +394,7 @@ export function DarkFleetNetworkGraph({
                     fill="#fff"
                     className="pointer-events-none font-bold"
                   >
-                    ⚠
+                    !
                   </text>
                 )}
                 {!n.sanctioned && (
@@ -471,7 +471,7 @@ export function DarkFleetNetworkGraph({
             </div>
             {tooltip.node.sanctioned && (
               <div className="text-red-400 font-semibold mt-1">
-                ⚠ SANCTIONED —{' '}
+                SANCTIONED —{' '}
                 {tooltip.node.sanctionLists?.map((l) => SANCTION_LIST_ABBR[l] ?? l).join(', ')}
               </div>
             )}

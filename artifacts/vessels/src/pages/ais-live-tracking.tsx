@@ -158,7 +158,7 @@ function mapApiVessel(v: any, idx: number): LiveVessel {
     name: v.name || `VESSEL-${v.mmsi?.slice(-4) ?? idx}`,
     vesselType: getVesselType(v.type ?? '', v.shipTypeCode),
     flag: v.flag ?? '—',
-    flagEmoji: FLAG_EMOJI[v.flag ?? ''] ?? '🏳️',
+    flagEmoji: FLAG_EMOJI[v.flag ?? ''] ?? '',
     status,
     lat: v.lat ?? 0,
     lng: v.lon ?? 0,

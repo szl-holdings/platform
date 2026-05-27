@@ -55,10 +55,10 @@ export function AtelierSpaceEmbed({ compact = false }: { compact?: boolean }) {
         setRunning(false);
         setDone(true);
         if (data.proofRef) {
-          setLines(prev => [...prev, `✓ Proof ref: ${data.proofRef}`]);
+          setLines(prev => [...prev, `[OK] Proof ref: ${data.proofRef}`]);
         }
         if (data.error) {
-          setLines(prev => [...prev, `⚠ ${data.error}`]);
+          setLines(prev => [...prev, `[WARN] ${data.error}`]);
         }
       }
     }
@@ -100,22 +100,22 @@ export function AtelierSpaceEmbed({ compact = false }: { compact?: boolean }) {
     }
 
     const fallbackOutputs = [
-      '⟳ Connecting to AIS feed…',
-      '✓ Vessel data received — VLCC Everest',
-      '⟳ Calculating ETA deviation…',
-      '⚠ ETA +31h delay detected at Port Rotterdam',
-      '⟳ Running port standby cost model…',
-      '✓ Standby cost: $2.4M/day',
-      '⟳ Evaluating 3 alternative routes…',
-      '✓ Route via Port Antwerp: saves $1.2M demurrage',
-      '⟳ Generating proof packet…',
-      '✓ Proof: sha256:c9f2e5b8a1d3e6f9c4b7…\n\nRecommendation: Reroute to Port Antwerp. Connect A11oy runtime for governed execution.',
+      '[…] Connecting to AIS feed…',
+      '[OK] Vessel data received — VLCC Everest',
+      '[…] Calculating ETA deviation…',
+      '[WARN] ETA +31h delay detected at Port Rotterdam',
+      '[…] Running port standby cost model…',
+      '[OK] Standby cost: $2.4M/day',
+      '[…] Evaluating 3 alternative routes…',
+      '[OK] Route via Port Antwerp: saves $1.2M demurrage',
+      '[…] Generating proof packet…',
+      '[OK] Proof: sha256:c9f2e5b8a1d3e6f9c4b7…\n\nRecommendation: Reroute to Port Antwerp. Connect A11oy runtime for governed execution.',
     ];
 
     setTimeout(() => {
       if (!connectedRef.current) {
         setRunMode('demo-preview');
-        setLines(prev => [...prev, '⚠ A11oy Atelier runtime unavailable — showing demo preview']);
+        setLines(prev => [...prev, '[WARN] A11oy Atelier runtime unavailable — showing demo preview']);
         let i = 0;
         const iv = setInterval(() => {
           if (i < fallbackOutputs.length) { setLines(p => [...p, fallbackOutputs[i]]); i++; }
@@ -184,7 +184,7 @@ export function AtelierSpaceEmbed({ compact = false }: { compact?: boolean }) {
         )}
         {lines.map((l, i) => (
           <div key={i} style={{
-            color: l.startsWith('[DEMO]') ? '#fbbf24' : l.startsWith('✓') ? '#c9b787' : l.startsWith('⚠') ? '#8a8a8a' : l.startsWith('⟳') ? '#5e5e5e' : '#f5f5f5',
+            color: l.startsWith('[DEMO]') ? '#fbbf24' : l.startsWith('[OK]') ? '#c9b787' : l.startsWith('[WARN]') ? '#8a8a8a' : l.startsWith('[…]') ? '#5e5e5e' : '#f5f5f5',
             whiteSpace: 'pre-line',
           }}>
             {l}
@@ -197,11 +197,11 @@ export function AtelierSpaceEmbed({ compact = false }: { compact?: boolean }) {
       <div style={{ padding: '0.625rem 0.875rem', borderTop: '1px solid rgba(255,255,255,0.08)', display: 'flex', gap: '0.5rem', alignItems: 'center', background: 'rgba(255,255,255,0.01)' }}>
         <button onClick={run} disabled={running}
           style={{ padding: '0.375rem 0.875rem', borderRadius: 5, fontSize: '0.6875rem', fontWeight: 500, cursor: running ? 'not-allowed' : 'pointer', background: 'rgba(201,183,135,0.1)', border: '1px solid rgba(201,183,135,0.25)', color: '#c9b787', opacity: running ? 0.5 : 1 }}>
-          {running ? '⟳ Running…' : '▶ Run'}
+          {running ? 'Running…' : 'Run'}
         </button>
         {done && (
           <span style={{ fontSize: '0.5625rem', fontFamily: 'ui-monospace,monospace', color: runMode === 'demo-preview' ? '#fbbf24' : '#c9b787' }}>
-            {runMode === 'demo-preview' ? '⚠ Demo preview — connect runtime for proof' : '✓ Proof generated'}
+            {runMode === 'demo-preview' ? 'Demo preview — connect runtime for proof' : 'Proof generated'}
           </span>
         )}
         <div style={{ marginLeft: 'auto', display: 'flex', alignItems: 'center', gap: '0.375rem' }}>

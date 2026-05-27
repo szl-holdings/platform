@@ -104,7 +104,7 @@ export function AtelierEmbedFrame({ spaceSlug, height = 380, title, tenantId }: 
             border: '1px solid rgba(201,183,135,0.25)',
             fontSize: '0.625rem', fontFamily: 'ui-monospace, monospace',
           }}>
-          {lines.length === 0 ? '▶ Run governed' : done ? '↻ Run again' : '⟳ Running…'}
+          {lines.length === 0 ? 'Run governed' : done ? 'Run again' : 'Running…'}
         </button>
       </div>
       <iframe ref={ref} src={embedSrc} title={`Atelier ${spaceSlug}`}
@@ -118,13 +118,13 @@ export function AtelierEmbedFrame({ spaceSlug, height = 380, title, tenantId }: 
           <div style={{ color: '#5e5e5e' }}>Click Run to execute this Atelier Space in the governed runtime.</div>
         )}
         {lines.map((l, i) => (
-          <div key={i} style={{ color: l.startsWith('✓') ? '#c9b787' : l.startsWith('⚠') ? '#e8b04f' : l.startsWith('⟳') ? '#5e5e5e' : '#f5f5f5' }}>
+          <div key={i} style={{ color: l.startsWith('[OK]') ? '#c9b787' : l.startsWith('[WARN]') ? '#e8b04f' : l.startsWith('[…]') ? '#5e5e5e' : '#f5f5f5' }}>
             {l}
           </div>
         ))}
         {proofRef && (
           <div style={{ marginTop: '0.75rem', paddingTop: '0.75rem', borderTop: '1px solid rgba(255,255,255,0.05)', color: '#c9b787' }}>
-            ✓ Proof ref:{' '}
+            [OK] Proof ref:{' '}
             {proofPacketId ? (
               <a href={`${atelierOrigin}/atelier/proof/${proofPacketId}`} target="_blank" rel="noreferrer" style={{ color: '#c9b787' }}>{proofRef}</a>
             ) : (

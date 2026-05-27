@@ -668,8 +668,8 @@ export default function CommodityFlowIntelligence() {
                             }}
                           >
                             {route.id === 'red-sea'
-                              ? '⚠ Houthi attacks have reduced traffic by 67%. Suezmax and VLCC owners diverting via Cape of Good Hope (+14 days). Insurance premiums +380% vs pre-crisis. Monitor ICS / MSCHOA advisories.'
-                              : '⚠ Sanctioned fleet operating without standard insurance. AIS blackouts observed. Do not engage without OFAC/HM Treasury screening.'}
+                              ? 'Houthi attacks have reduced traffic by 67%. Suezmax and VLCC owners diverting via Cape of Good Hope (+14 days). Insurance premiums +380% vs pre-crisis. Monitor ICS / MSCHOA advisories.'
+                              : 'Sanctioned fleet operating without standard insurance. AIS blackouts observed. Do not engage without OFAC/HM Treasury screening.'}
                           </div>
                         )}
                       </div>

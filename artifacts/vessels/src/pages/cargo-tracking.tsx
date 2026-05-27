@@ -54,13 +54,13 @@ const COMMODITY_CONFIG: Record<
   CommodityType,
   { label: string; color: string; icon: string; unit: string }
 > = {
-  crude_oil: { label: 'Crude Oil', color: '#f97316', icon: '🛢', unit: 'MT' },
-  lng: { label: 'LNG', color: '#60a5fa', icon: '💧', unit: 'MT' },
-  iron_ore: { label: 'Iron Ore', color: '#a78bfa', icon: '⚙', unit: 'MT' },
-  grain: { label: 'Grain / Agri', color: '#34d399', icon: '🌾', unit: 'MT' },
-  container: { label: 'Container / General', color: '#38bdf8', icon: '📦', unit: 'TEU' },
-  chemicals: { label: 'Chemicals', color: '#fb923c', icon: '⚗', unit: 'MT' },
-  coal: { label: 'Coal', color: '#94a3b8', icon: '⚫', unit: 'MT' },
+  crude_oil: { label: 'Crude Oil', color: '#f97316', icon: '', unit: 'MT' },
+  lng: { label: 'LNG', color: '#60a5fa', icon: '', unit: 'MT' },
+  iron_ore: { label: 'Iron Ore', color: '#a78bfa', icon: '', unit: 'MT' },
+  grain: { label: 'Grain / Agri', color: '#34d399', icon: '', unit: 'MT' },
+  container: { label: 'Container / General', color: '#38bdf8', icon: '', unit: 'TEU' },
+  chemicals: { label: 'Chemicals', color: '#fb923c', icon: '', unit: 'MT' },
+  coal: { label: 'Coal', color: '#94a3b8', icon: '', unit: 'MT' },
 };
 
 const TRADE_FLOWS: TradeFlow[] = [

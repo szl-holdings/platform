@@ -530,38 +530,32 @@ router.get('/vessels/track/:vesselId', authMiddleware(), tenantScope(), async (r
       return;
     }
 
-    const latest = positions[0];
-    let track: Array<{ lat: number; lon: number; recordedAt: string }>;
-
-    if (positions.length >= 2) {
-      track = positions.map((p) => ({
+    // Track points come exclusively from real `vessel_positions` history.
+    // Previously, when a vessel had only one position row we extrapolated
+    // 8 synthetic points backward along the current heading at the current
+    // speed — that's invented data and was removed (Vessels audit, task
+    // #5507). If history is short the response carries the truncated real
+    // window plus a `windowStartedAt` marker so the frontend can render a
+    // visible "limited history" timestamp range instead of pretending to
+    // have a full 24h trail.
+    const track = positions
+      .slice()
+      .reverse()
+      .map((p) => ({
         lat: parseFloat(p.latitude as string),
         lon: parseFloat(p.longitude as string),
         recordedAt: (p.recordedAt as Date).toISOString(),
       }));
-    } else if (latest) {
-      const baseLat = parseFloat(latest.latitude as string);
-      const baseLon = parseFloat(latest.longitude as string);
-      const headingDeg = (latest.heading ?? 90) as number;
-      const speedKts = (latest.speed ?? 12) as number;
-      const rad = (headingDeg * Math.PI) / 180;
-      const now = new Date((latest.recordedAt as Date).getTime());
-      track = Array.from({ length: 8 }, (_, i) => {
-        const hoursBack = (7 - i) * 3;
-        const distNm = speedKts * hoursBack;
-        const dLat = (-Math.cos(rad) * distNm) / 60;
-        const dLon = (-Math.sin(rad) * distNm) / (60 * Math.cos((baseLat * Math.PI) / 180));
-        return {
-          lat: baseLat + dLat,
-          lon: baseLon + dLon,
-          recordedAt: new Date(now.getTime() - hoursBack * 3600 * 1000).toISOString(),
-        };
-      });
-    } else {
-      track = [];
-    }
 
-    sendSuccess(res, { vesselId, vessel: vessel[0], track });
+    sendSuccess(res, {
+      vesselId,
+      vessel: vessel[0],
+      track,
+      windowStartedAt: track[0]?.recordedAt ?? null,
+      windowEndedAt: track[track.length - 1]?.recordedAt ?? null,
+      pointCount: track.length,
+      truncated: track.length < 8,
+    });
   } catch (err) {
     handleRouteError(res, err, 'Failed to get vessel track');
   }

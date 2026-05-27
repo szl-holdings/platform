@@ -212,7 +212,7 @@ export default function RouteRisk() {
                     border: '1px solid #c04a2a30',
                   }}
                 >
-                  ⚠ Sanctions Exposure
+                  Sanctions Exposure
                 </span>
               )}
             </div>

@@ -16,12 +16,12 @@ const ACCENT = {
 };
 
 const TEMPLATE_ICONS: Record<string, string> = {
-  voyage_report: '🚢',
-  brief: '📋',
-  report: '📈',
-  executive_summary: '📄',
-  incident_packet: '🚨',
-  approval_packet: '✅',
+  voyage_report: '',
+  brief: '',
+  report: '',
+  executive_summary: '',
+  incident_packet: '',
+  approval_packet: '',
 };
 
 const TEMPLATE_LABELS: Record<string, string> = {
@@ -244,7 +244,7 @@ export default function VesselsAtlasArtifactsPage() {
     >
       <div style={{ maxWidth: 900, margin: '0 auto' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 24 }}>
-          <span style={{ fontSize: 24 }}>🚢</span>
+          <span style={{ fontSize: 11, letterSpacing: '0.08em' }} className="font-mono text-[#c9b787]">ATLAS</span>
           <div>
             <h1 style={{ fontSize: 20, fontWeight: 700, margin: 0 }}>Intelligence Artifacts — Maritime</h1>
             <p style={{ fontSize: 12, color: TEXT.secondary, margin: 0 }}>
@@ -384,7 +384,7 @@ export default function VesselsAtlasArtifactsPage() {
                   gap: 12,
                 }}
               >
-                <span style={{ fontSize: 22 }}>{TEMPLATE_ICONS[a.templateType] ?? '📄'}</span>
+                <span style={{ fontSize: 10, letterSpacing: '0.08em' }} className="font-mono uppercase text-[#9a8d68]">{a.templateType.replace(/_/g, ' ')}</span>
                 <div style={{ flex: 1 }}>
                   <div style={{ fontSize: 13, fontWeight: 500, color: TEXT.primary }}>
                     {a.title}

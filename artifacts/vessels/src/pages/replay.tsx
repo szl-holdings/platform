@@ -622,7 +622,7 @@ export default function VesselsReplayPage() {
                     >
                       {ev.label}
                     </p>
-                    {ev.severity === 'warn' && <span className="text-[9px] text-amber-400">⚠</span>}
+                    {ev.severity === 'warn' && <span className="text-[9px] text-amber-400 font-mono">!</span>}
                   </div>
                   <p className="text-[10px] text-[#6a6a6a]">
                     {ev.time} · {ev.detail}

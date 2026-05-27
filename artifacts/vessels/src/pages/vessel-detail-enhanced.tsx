@@ -1213,7 +1213,7 @@ export default function VesselDetailEnhancedPage() {
                 </h3>
                 {selectedNetworkNode.sanctioned && (
                   <Badge className="text-[10px] bg-red-500/10 text-red-400 border-red-500/20">
-                    ⚠ SANCTIONED
+                    SANCTIONED
                   </Badge>
                 )}
               </div>

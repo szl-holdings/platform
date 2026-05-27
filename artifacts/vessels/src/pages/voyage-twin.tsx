@@ -86,10 +86,10 @@ const EVENT_CONFIG: Record<string, { color: string; label: string }> = {
 };
 
 const WEATHER_ICONS: Record<string, string> = {
-  calm: '☀️',
-  slight_swell: '🌊',
-  moderate: '🌊',
-  rough: '⛈️',
+  calm: 'CALM',
+  slight_swell: 'SWELL',
+  moderate: 'MOD',
+  rough: 'ROUGH',
 };
 
 const FEASIBILITY_CONFIG: Record<string, { color: string }> = {
@@ -143,7 +143,7 @@ function SnapshotRow({
           <div className="text-[#9a9a9a]">{snap.speed} kts</div>
           <div className="text-[#6a6a6a]">{snap.fuelConsumed} mt</div>
         </div>
-        <div className="text-[12px] w-6">{WEATHER_ICONS[snap.weatherState] ?? '🌊'}</div>
+        <div className="text-[9px] font-mono text-[#9a8d68] w-12">{WEATHER_ICONS[snap.weatherState] ?? '—'}</div>
       </div>
       {hasAnomaly && (
         <div className="mt-1.5 text-[9px] text-amber-300/60 truncate">{snap.anomaly}</div>

@@ -197,3 +197,40 @@ What Vessels adds that none of the three sources have:
 - Coloured KPI deltas (red-down / green-up). Use `▲` / `▼` glyphs in mono and let the number be the signal.
 - Hard-coded hex values inside components. Always go through tokens.
 - Emoji in chrome.
+
+---
+
+## Style pass — 2026-05-27 (task #5507)
+
+Series-A audit pass against the rules above. Before/after summary for the patterns that were actually moved this commit. Full per-page status lives in `BACKEND_AUDIT.md`.
+
+### Retired patterns
+
+| Pattern | Before | After |
+|---------|--------|-------|
+| Decorative emoji in chrome | `⚠ SANCTIONED`, `🏳️ {flag}`, `💰 {margin}`, `⛽ {fuel}`, `📍 {nm}`, `⚓ {days}`, `💨 {kts}`, `🔧 {wear}`, `✓ Comparing`, `⟳ Running…`, `▶ Run`, `🚢 LIVE`, `🛢/💧/⚙/🌾/📦/⚗/⚫`, `☀/🌊/⛈`, `📋/📈/📄/🚨/✅`, `🏳️` flag fallback | Plain text labels (`SANCTIONED`, `{flag}`, `{margin}`, `{fuel}`, `{nm} deviation`, `{days}d wait`, `{kts}kts wind`, `{wear}% wear`, `Comparing`, `Running…`, `Run`, `● LIVE`, empty-string icon, uppercase mono code (`CALM/SWELL/MOD/ROUGH`), uppercase template-type labels, neutral `!` for warn, `[OK]/[WARN]/[…]` bracket prefixes in the demo terminal) |
+| Simulated 24h vessel track (backend) | `/api/vessels/vessels/:id/track` extrapolated 8 fake points from current heading × speed when `vessel_positions` had ≤1 row | Real positions only, plus `windowStartedAt/windowEndedAt/pointCount/truncated` so the UI can render an honest limited-history badge. Fabricated data path deleted. |
+| `⚠/✓/⟳/▶` terminal glyphs | Used as run-state and proof-state markers in `AtelierEmbedFrame` / `AtelierSpaceEmbed` | Replaced with bracketed text codes (`[OK]/[WARN]/[…]/[DEMO]`). Color map and behavior preserved; chrome no longer renders pictographic characters. |
+| `'⚠ Red Sea (Houthi)'` curated labels | Anomaly chips on `trade-flow-heatmap` opened with a warning glyph | Plain labels; the chip color carries the alarm semantic, not the glyph. |
+
+### Patterns retained (with rationale)
+
+- **Limited gradient hairlines** (`marketing-home`, `digital-twin`, `predictive-maintenance`, `autonomous-routing`, `fleet-dashboard`) — these are 1-pixel `bg-gradient-to-r from-transparent via-white/[0.04] to-transparent` separators and progress-bar fills, not surface gradients. They satisfy the "no surface gradients" rule because they are line/fill primitives, not container chrome. Listed in `BACKEND_AUDIT.md` §4.
+- **Popover/tooltip `shadow-*`** — functional elevation for layered surfaces (z-axis disambiguation). Conversion to 1px-border tokens is filed as a follow-up; this pass did not touch them because doing so risks regressing tooltip readability against dark backgrounds before the border-token shadow primitive exists.
+
+### Known drift NOT addressed this pass
+
+- ~90 files still use `text-(green|red|emerald|rose)-(400|500|600)` for KPI deltas. The doctrine wants `▲/▼` glyphs in mono token-secondary. Each call site needs eyes (some "red" is genuine alarm state, not a down-delta) so this is filed as a dedicated codemod task. See `BACKEND_AUDIT.md` §5.
+
+### How to verify
+
+```bash
+# emoji scan — must return zero lines
+rg '[\x{1F300}-\x{1FAFF}]|[\x{2600}-\x{27BF}]' artifacts/vessels/src/pages/ artifacts/vessels/src/components/
+
+# fabricated track regression test (live curl)
+curl -sS "$BASE/api/vessels/vessels/1/track" | jq '.pointCount, .truncated, .windowStartedAt'
+
+# doctrine still green
+pnpm check:doctrine
+```

@@ -360,7 +360,7 @@ export default function VesselsScenarioBranchesPage() {
                   )}
                   disabled={isSelected}
                 >
-                  {isCompare ? '✓ Comparing' : 'Compare'}
+                  {isCompare ? 'Comparing' : 'Compare'}
                 </button>
               </div>
             );

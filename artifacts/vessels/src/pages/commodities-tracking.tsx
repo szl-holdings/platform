@@ -23,7 +23,7 @@ const commodities = [
   {
     id: 'crude',
     name: 'Crude Oil',
-    icon: '🛢️',
+    icon: '',
     vessels: 847,
     volume: '312M bbl',
     change: +3.2,
@@ -34,7 +34,7 @@ const commodities = [
   {
     id: 'lng',
     name: 'LNG',
-    icon: '🔵',
+    icon: '',
     vessels: 234,
     volume: '47M tons',
     change: -1.1,
@@ -45,7 +45,7 @@ const commodities = [
   {
     id: 'grains',
     name: 'Grains & Agri',
-    icon: '🌾',
+    icon: '',
     vessels: 423,
     volume: '89M tons',
     change: +7.4,
@@ -67,7 +67,7 @@ const commodities = [
   {
     id: 'iron',
     name: 'Iron Ore',
-    icon: '🪨',
+    icon: '',
     vessels: 289,
     volume: '203M tons',
     change: +1.8,
@@ -78,7 +78,7 @@ const commodities = [
   {
     id: 'containers',
     name: 'Containers',
-    icon: '📦',
+    icon: '',
     vessels: 1204,
     volume: '24M TEU',
     change: +5.1,

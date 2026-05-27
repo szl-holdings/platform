@@ -184,7 +184,7 @@ function mapApiVessel(v: ApiVessel, idx: number): DisplayVessel {
     id: String(v.id),
     name: v.name,
     type: v.vesselType,
-    flag: v.flag ?? '🚢',
+    flag: v.flag ?? '',
     lat: demo.lat,
     lon: demo.lon,
     status: v.status,
@@ -290,7 +290,7 @@ function RouteMemoryCanvas({ vesselId, waypoints }: { vesselId: string; waypoint
       ctx.fill();
       ctx.font = '9px monospace';
       ctx.fillStyle = '#38bdf8';
-      ctx.fillText('▶ LIVE', vx + 8, vy - 6);
+      ctx.fillText('● LIVE', vx + 8, vy - 6);
       ctx.fillStyle = 'rgba(56,189,248,0.4)';
       ctx.fillText(vesselId, vx + 8, vy + 4);
       raf = requestAnimationFrame(draw);
@@ -696,7 +696,7 @@ export default function VesselsAtlasRuntimePage() {
                           ov.active ? 'border-[#c9b787]/40 bg-[#c9b787]/16' : 'border-white/[0.08]',
                         )}
                       >
-                        {ov.active && <span className="text-[8px] text-[#c9b787]">✓</span>}
+                        {ov.active && <span className="text-[8px] text-[#c9b787] font-mono">*</span>}
                       </div>
                     </div>
                   </div>

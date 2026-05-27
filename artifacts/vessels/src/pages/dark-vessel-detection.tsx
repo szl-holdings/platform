@@ -480,7 +480,7 @@ export default function DarkVesselDetection() {
                             IMO {vessel.imo}
                           </Badge>
                           <Badge variant="outline" className="text-[10px]">
-                            🏳️ {vessel.flag}
+                            {vessel.flag}
                           </Badge>
                           <Badge
                             variant="outline"

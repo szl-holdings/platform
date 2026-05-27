@@ -397,35 +397,35 @@ export default function CommandWorkflowsPage() {
                         )}
                         {cd.marginImpact && (
                           <span className="text-[10px] text-red-400">
-                            💰 {formatCurrency(cd.marginImpact)} margin impact
+                            {formatCurrency(cd.marginImpact)} margin impact
                           </span>
                         )}
                         {cd.revenueImpact && (
                           <span className="text-[10px] text-red-400">
-                            💰 {formatCurrency(cd.revenueImpact)} revenue impact
+                            {formatCurrency(cd.revenueImpact)} revenue impact
                           </span>
                         )}
                         {cd.fuelImpact && (
                           <span className="text-[10px] text-amber-400">
-                            ⛽ {formatCurrency(cd.fuelImpact)} fuel impact
+                            {formatCurrency(cd.fuelImpact)} fuel impact
                           </span>
                         )}
                         {cd.deviationNm && (
                           <span className="text-[10px] text-[#c9b787]">
-                            📍 {cd.deviationNm}nm deviation
+                            {cd.deviationNm}nm deviation
                           </span>
                         )}
                         {cd.wearPct && (
-                          <span className="text-[10px] text-yellow-400">🔧 {cd.wearPct}% wear</span>
+                          <span className="text-[10px] text-yellow-400">{cd.wearPct}% wear</span>
                         )}
                         {cd.waitDays && (
                           <span className="text-[10px] text-purple-400">
-                            ⚓ {cd.waitDays}d wait
+                            {cd.waitDays}d wait
                           </span>
                         )}
                         {cd.windKnots && (
                           <span className="text-[10px] text-[#c9b787]">
-                            💨 {cd.windKnots}kts wind
+                            {cd.windKnots}kts wind
                           </span>
                         )}
                       </div>
