@@ -17,3 +17,18 @@ export {
   type ActionKind,
   type EvaluatePolicy,
 } from './policy-registry.js';
+export {
+  runOrchestration,
+  getRecentOrchestrationTraces,
+  clearOrchestrationTracesForTest,
+  type OrchestrationStages,
+  type OrchestrationTrace,
+  type OrchestrationStageName,
+  type RunOrchestrationOptions,
+} from './orchestration-trace.js';
+export {
+  peaksToAmiContribution,
+  type PeakSignal,
+  type PeakSignalContribution,
+  type PeakSignalOptions,
+} from './peak-signal.js';

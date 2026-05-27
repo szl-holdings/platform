@@ -187,6 +187,24 @@ export interface ChatAmiSignals {
   testCoverage: number;
   alignment: number;
   knotCount?: number;
+  /**
+   * Optional peak-detector contribution (MsdialWorkbench primitive,
+   * sourced from `@workspace/anomaly-fabric/peak-detector` via
+   * `@szl/a11oy-runtime` `peaksToAmiContribution`). Raises the N
+   * (noise) and D (drift) axes monotonically. Caller is expected to
+   * pass the already-clamped contribution; the gate mixes it with
+   * `max()` so existing per-turn signals are never overwritten.
+   */
+  peakSignal?: { noise: number; drift: number; peakCount: number; topComposite: number };
+  /**
+   * Optional reviewer-presence signal (perception-loop liveness or
+   * second-factor token). Reduces governance gate G when the
+   * reviewer cannot be attested. Pass `null` for unattended runs.
+   */
+  reviewerPresence?: {
+    confidence: number;
+    mode: 'perception' | 'second-factor' | 'absent';
+  };
 }
 
 export interface ChatAmiResult {
@@ -222,8 +240,15 @@ export function evaluateChatAmi(s: ChatAmiSignals): ChatAmiResult {
   const E = clamp(0.55 * s.mirrorEvalScore + 0.45 * s.testCoverage);
   const P = clamp(s.testCoverage);
   const K = clamp(0.4 + Math.min(0.5, Math.log1p(s.toolsAvailable) / Math.log1p(20)));
-  const D = clamp(1.0 - s.alignment);
-  const N = clamp(0.35 * (1 - W) + 0.25 * (1 - s.alignment) + 0.20 * (1 - W) + 0.20 * (1 - T));
+  // Base drift / noise from per-turn signals. Peak-detector contributions
+  // are mixed with max() so a sudden burst raises the floor without ever
+  // *lowering* what existing telemetry already established.
+  const D_base = clamp(1.0 - s.alignment);
+  const N_base = clamp(0.35 * (1 - W) + 0.25 * (1 - s.alignment) + 0.20 * (1 - W) + 0.20 * (1 - T));
+  const peakNoise = clamp(s.peakSignal?.noise ?? 0);
+  const peakDrift = clamp(s.peakSignal?.drift ?? 0);
+  const D = clamp(Math.max(D_base, peakDrift));
+  const N = clamp(Math.max(N_base, peakNoise));
 
   const cleanliness = clamp(1.0 - N);
   const horizon = clamp(0.40 * 0.7 + 0.30 * T + 0.30 * s.alignment);
@@ -237,7 +262,18 @@ export function evaluateChatAmi(s: ChatAmiSignals): ChatAmiResult {
     noise: N, witness: W,
   });
 
-  const G = s.hasGovernance ? governanceGate(contradictions, tests, W, T) : 0.7;
+  // Governance gate is multiplicatively dampened by reviewer-presence
+  // attestation. Absent reviewer → ×0.6 (the gate caps autonomy until a
+  // human re-attests); second-factor fallback → ×0.85 (allowed but
+  // visibly diminished); perception-attested → ×(0.85 + 0.15·confidence).
+  let G_review = 1;
+  if (s.reviewerPresence) {
+    const c = clamp(s.reviewerPresence.confidence);
+    if (s.reviewerPresence.mode === 'absent') G_review = 0.6;
+    else if (s.reviewerPresence.mode === 'second-factor') G_review = 0.85;
+    else G_review = 0.85 + 0.15 * c;
+  }
+  const G = (s.hasGovernance ? governanceGate(contradictions, tests, W, T) : 0.7) * G_review;
   const amiScore = amiFormula({ lambda, K, W, T, M, E, P, N: renewed.noise, D, G });
   const gate = amiGate(amiScore, renewed.noise, contradictions, tests, knots);
 
@@ -247,6 +283,16 @@ export function evaluateChatAmi(s: ChatAmiSignals): ChatAmiResult {
   if (D > 0.4) reasons.push(`drift ${D.toFixed(2)} above 0.40`);
   if (renewed.noise > 0.3) reasons.push(`noise ${renewed.noise.toFixed(2)} above 0.30`);
   if (!s.pceAllowed) reasons.push('PCE gate did not allow autonomy');
+  if (s.peakSignal && s.peakSignal.peakCount > 0) {
+    reasons.push(
+      `peak-detector burst (${s.peakSignal.peakCount} peaks, top=${s.peakSignal.topComposite.toFixed(2)})`,
+    );
+  }
+  if (s.reviewerPresence?.mode === 'absent') {
+    reasons.push('reviewer absent — governance capped');
+  } else if (s.reviewerPresence?.mode === 'second-factor') {
+    reasons.push('reviewer attested via typed second-factor fallback');
+  }
   const rationale = reasons.length === 0
     ? `AMI ${amiScore.toFixed(3)} → ${gate}: all axes healthy, full autonomy within policy.`
     : `AMI ${amiScore.toFixed(3)} → ${gate}: ${reasons.join('; ')}.`;

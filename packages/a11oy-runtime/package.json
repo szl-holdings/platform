@@ -19,7 +19,8 @@
   },
   "dependencies": {
     "@huggingface/tiny-agents": "^0.3.4",
-    "@szl-holdings/lambda-math": "workspace:*"
+    "@szl-holdings/lambda-math": "workspace:*",
+    "@szl-holdings/sequence-pipeline": "workspace:*"
   },
   "devDependencies": {
     "typescript": "catalog:",

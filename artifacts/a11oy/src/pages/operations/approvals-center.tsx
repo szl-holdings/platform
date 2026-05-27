@@ -1,5 +1,10 @@
+import { useState } from 'react';
 import { APPROVALS, formatCurrency } from '@szl-holdings/shared-ui/core-observability-data';
 import { AlertTriangle, ArrowRight, CheckSquare, Clock, ExternalLink, User } from 'lucide-react';
+import {
+  PerceptionGate,
+  type ReviewerPresenceAttestation,
+} from '../../components/operations/perception-gate';
 
 export default function ApprovalsCenter() {
   const escalated = APPROVALS.filter((a) => a.status === 'escalated');
@@ -7,6 +12,13 @@ export default function ApprovalsCenter() {
   const normal = APPROVALS.filter((a) => a.status === 'pending' && a.age_hours <= 48);
 
   const allSorted = [...escalated, ...aging, ...normal];
+
+  // Reviewer-presence attestations, keyed by approval id. The Approve
+  // button is gated until the reviewer attests via perception or
+  // typed-second-factor; the AMI gate downstream uses `attestation.mode`
+  // to dampen the governance multiplier accordingly.
+  const [attestations, setAttestations] = useState<Record<string, ReviewerPresenceAttestation>>({});
+  const [activeGate, setActiveGate] = useState<string | null>(null);
 
   return (
     <div className="max-w-7xl mx-auto space-y-6">
@@ -146,17 +158,67 @@ export default function ApprovalsCenter() {
                 )}
               </div>
 
+              {activeGate === a.id && !attestations[a.id] && (
+                <div className="mb-3">
+                  <PerceptionGate
+                    onAttest={(att) => {
+                      setAttestations((prev) => ({ ...prev, [a.id]: att }));
+                      setActiveGate(null);
+                    }}
+                  />
+                </div>
+              )}
+              {attestations[a.id] && (
+                <div
+                  className="mb-3 rounded-lg border p-2 text-[10px]"
+                  style={{
+                    borderColor: 'rgba(107,143,113,0.25)',
+                    background: 'rgba(107,143,113,0.06)',
+                    color: '#9bc4a0',
+                  }}
+                >
+                  Reviewer attested · mode={attestations[a.id]!.mode} · confidence=
+                  {attestations[a.id]!.confidence.toFixed(2)}
+                </div>
+              )}
+
               <div className="flex gap-2">
                 <button
-                  className="text-[10px] px-3 py-1.5 rounded-lg font-medium transition-all hover:opacity-80"
+                  type="button"
+                  disabled={!attestations[a.id]}
+                  onClick={() => {
+                    if (!attestations[a.id]) {
+                      setActiveGate(a.id);
+                    }
+                  }}
+                  className="text-[10px] px-3 py-1.5 rounded-lg font-medium transition-all hover:opacity-80 disabled:opacity-40 disabled:cursor-not-allowed"
                   style={{
                     color: '#6b8f71',
                     background: 'rgba(107,143,113,0.1)',
                     border: '1px solid rgba(107,143,113,0.25)',
                   }}
+                  title={
+                    attestations[a.id]
+                      ? `Approve (reviewer attested via ${attestations[a.id]!.mode})`
+                      : 'Reviewer attestation required'
+                  }
                 >
-                  Approve
+                  {attestations[a.id] ? 'Approve' : 'Approve (locked)'}
                 </button>
+                {!attestations[a.id] && activeGate !== a.id && (
+                  <button
+                    type="button"
+                    onClick={() => setActiveGate(a.id)}
+                    className="text-[10px] px-3 py-1.5 rounded-lg font-medium transition-all hover:opacity-80"
+                    style={{
+                      color: '#d4a054',
+                      background: 'rgba(212,160,84,0.08)',
+                      border: '1px solid rgba(212,160,84,0.2)',
+                    }}
+                  >
+                    Attest to Approve
+                  </button>
+                )}
                 <button
                   className="text-[10px] px-3 py-1.5 rounded-lg font-medium transition-all hover:opacity-80"
                   style={{

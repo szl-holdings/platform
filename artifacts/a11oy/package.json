@@ -32,6 +32,7 @@
     "@szl-holdings/telemetry-standards": "workspace:*",
     "@szl/a11oy-runtime": "workspace:*",
     "@szl/alloy": "workspace:*",
+    "@szl-holdings/perception-loop": "workspace:*",
     "@szl/substrate-client": "workspace:*",
     "@urql/exchange-graphcache": "^9.0.0",
     "@workspace/a11oy-fabric": "workspace:*",

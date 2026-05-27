@@ -327,6 +327,7 @@ const LineageGraph = lazy(() => import('./pages/reliquary/LineageGraph').then(m 
 const SnapshotReplay = lazy(() => import('./pages/reliquary/SnapshotReplay').then(m => ({ default: m.SnapshotReplay })));
 const SovereignMode = lazy(() => import('./pages/reliquary/SovereignMode').then(m => ({ default: m.SovereignMode })));
 const ReliquaryDoctrine = lazy(() => import('./pages/reliquary/ReliquaryDoctrine').then(m => ({ default: m.ReliquaryDoctrine })));
+const OrchestrationTraces = lazy(() => import('./pages/reliquary/OrchestrationTraces').then(m => ({ default: m.OrchestrationTraces })));
 const ModelProvenance = lazy(() => import('./pages/ModelProvenance').then(m => ({ default: m.ModelProvenance })));
 
 const StrategyDashboard = lazy(() => import('./pages/strategy/dashboard'));
@@ -900,6 +901,9 @@ function AppInner() {
         </Route>
         <Route path={`${base}/reliquary/doctrine`}>
           <WithShell><ReliquaryDoctrine /></WithShell>
+        </Route>
+        <Route path={`${base}/reliquary/orchestration-traces`}>
+          <WithShell><OrchestrationTraces /></WithShell>
         </Route>
 
         <Route path={`${base}/atlas`}>

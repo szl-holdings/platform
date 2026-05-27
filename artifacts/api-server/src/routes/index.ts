@@ -385,6 +385,9 @@ router.use(lazyMatch("/formulas/lutar-invariant-5", () => import("./formulas-lut
 // Operator dashboard (Task #5175) — cross-product roll-up + SSE stream.
 router.use(lazyMatch("/operator/dashboard", () => import("./operator-dashboard"), "operator-dashboard"));
 router.use("/a11oy", lazyMount(() => import("./a11oy-chat"), "a11oy-chat"));
+// Orchestration traces (Task #5514) — sequence-pipeline trace ring buffer
+// surfaced for the reliquary, joined to Λ verdict receipts.
+router.use(lazyMatch("/a11oy/orchestration-traces", () => import("./a11oy-orchestration"), "a11oy-orchestration"));
 
 // A11oy Console — Workbench BFF route.
 // GET  /api/a11oy/console/models
