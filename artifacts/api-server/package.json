@@ -95,6 +95,8 @@
     "@szl-holdings/formulas": "workspace:*",
     "@szl-holdings/lambda-math": "workspace:*",
     "@szl-holdings/intelligence-feeds": "workspace:*",
+    "@workspace/antivenom-fabric": "workspace:*",
+    "@workspace/unirec-fabric": "workspace:*",
     "@szl-holdings/model-passport": "workspace:*",
     "@szl-holdings/monte-carlo": "workspace:*",
     "@szl-holdings/observability": "workspace:*",

@@ -1,0 +1,22 @@
+{
+  "name": "@workspace/unirec-fabric",
+  "version": "0.1.0",
+  "private": false,
+  "type": "module",
+  "description": "Unified Briefing Recommender — tri-tower scorer (user · context · item) re-expressed as Lutar Λ axes. Backs the A11oy briefing ranking and the /a11oy/unirec API.",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./src/index.ts"
+    }
+  },
+  "scripts": {
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "test": "vitest run --passWithNoTests"
+  },
+  "devDependencies": {
+    "@types/node": "catalog:",
+    "typescript": "catalog:",
+    "vitest": "catalog:"
+  }
+}

@@ -1,8 +1,15 @@
 /**
  * A11oy AMI Formula — TypeScript port of A11OY_AMI_FORMULA_PAYLOAD v1.0
+ * (extended in May 2026 with the Adversarial Resistance multiplier A from
+ * the antivenom synthesis — see docs/research/agi-stack-synthesis-2026.md §12).
  *
  *   AMI_v2 = (Λ^0.22 · K^0.16 · W^0.16 · T^0.14 · M^0.14 · E^0.10 · P^0.08)
- *            · e^(-0.7N - 0.5D) · G
+ *            · e^(-0.7N - 0.5D) · G · A
+ *
+ * Where A ∈ [0.10, 1.00] is the Adversarial Resistance multiplier sourced from
+ * the antivenom fabric input classifier. A=1 means no adversarial pattern
+ * matched; A → 0.10 means a critical-severity attack pattern was matched and
+ * the turn must be gated to BLOCK regardless of the other axes.
  *
  * Treats A11oy as a meshing intelligence layer (not a replacement) and gates
  * each agent turn into one of five permission tiers:
@@ -118,6 +125,9 @@ export interface AmiInput {
   N: number; // noise
   D: number; // drift
   G: number; // governance gate
+  /** Adversarial Resistance multiplier (antivenom synthesis §12).
+   *  A ∈ [0.10, 1.00]; default 1 = no adversarial pattern matched. */
+  A?: number;
 }
 
 export function amiFormula(i: AmiInput): number {
@@ -143,7 +153,8 @@ export function amiFormula(i: AmiInput): number {
     score: Math.max(1e-9, axisScores[key]),
   }));
   const { lambda: product } = computeLambda({ components });
-  const score = product * Math.exp(-0.7 * clamp(i.N) - 0.5 * clamp(i.D)) * clamp(i.G);
+  const A = i.A === undefined ? 1 : Math.max(0.10, Math.min(1, i.A));
+  const score = product * Math.exp(-0.7 * clamp(i.N) - 0.5 * clamp(i.D)) * clamp(i.G) * A;
   return Number(score.toFixed(8));
 }
 
@@ -205,6 +216,10 @@ export interface ChatAmiSignals {
     confidence: number;
     mode: 'perception' | 'second-factor' | 'absent';
   };
+  /** Optional antivenom Adversarial Resistance signal (defaults to A=1). */
+  adversarialResistance?: number;
+  /** Optional list of antivenom attack family labels matched on this turn. */
+  antivenomFamilies?: readonly string[];
 }
 
 export interface ChatAmiResult {
@@ -223,6 +238,12 @@ export interface ChatAmiResult {
     N_noise: number;
     D_drift: number;
     G_governance: number;
+    A_adversarial_resistance: number;
+  };
+  antivenom: {
+    A: number;
+    families: readonly string[];
+    forcedBlock: boolean;
   };
   lutarAxes: LutarAxesAMI;
   ouroboros: OuroborosState;
@@ -274,8 +295,14 @@ export function evaluateChatAmi(s: ChatAmiSignals): ChatAmiResult {
     else G_review = 0.85 + 0.15 * c;
   }
   const G = (s.hasGovernance ? governanceGate(contradictions, tests, W, T) : 0.7) * G_review;
-  const amiScore = amiFormula({ lambda, K, W, T, M, E, P, N: renewed.noise, D, G });
-  const gate = amiGate(amiScore, renewed.noise, contradictions, tests, knots);
+  const Araw = s.adversarialResistance === undefined ? 1 : s.adversarialResistance;
+  const A = Math.max(0.10, Math.min(1, Araw));
+  const antivenomFamilies = s.antivenomFamilies ?? [];
+  // Antivenom hard-floor: A ≤ 0.15 (critical-severity match) forces BLOCK.
+  const forcedBlock = A <= 0.15;
+  const amiScore = amiFormula({ lambda, K, W, T, M, E, P, N: renewed.noise, D, G, A });
+  const baseGate = amiGate(amiScore, renewed.noise, contradictions, tests, knots);
+  const gate: AmiGate = forcedBlock ? 'BLOCK' : baseGate;
 
   const reasons: string[] = [];
   if (W < 0.6) reasons.push(`witness density ${W.toFixed(2)} below 0.60`);
@@ -293,12 +320,14 @@ export function evaluateChatAmi(s: ChatAmiSignals): ChatAmiResult {
   } else if (s.reviewerPresence?.mode === 'second-factor') {
     reasons.push('reviewer attested via typed second-factor fallback');
   }
+  if (A < 1) reasons.push(`adversarial resistance A=${A.toFixed(2)} (${antivenomFamilies.join(', ') || 'antivenom match'})`);
+  if (forcedBlock) reasons.push('antivenom hard-floor forced BLOCK');
   const rationale = reasons.length === 0
     ? `AMI ${amiScore.toFixed(3)} → ${gate}: all axes healthy, full autonomy within policy.`
     : `AMI ${amiScore.toFixed(3)} → ${gate}: ${reasons.join('; ')}.`;
 
   return {
-    formula: 'AMI_v2 = (Λ^0.22·K^0.16·W^0.16·T^0.14·M^0.14·E^0.10·P^0.08) · e^(-0.7N-0.5D) · G',
+    formula: 'AMI_v2 = (Λ^0.22·K^0.16·W^0.16·T^0.14·M^0.14·E^0.10·P^0.08) · e^(-0.7N-0.5D) · G · A',
     amiScore,
     gate,
     permissions: PERMISSION_GATES[gate],
@@ -313,6 +342,12 @@ export function evaluateChatAmi(s: ChatAmiSignals): ChatAmiResult {
       N_noise: round6(renewed.noise),
       D_drift: round6(D),
       G_governance: round6(G),
+      A_adversarial_resistance: round6(A),
+    },
+    antivenom: {
+      A: round6(A),
+      families: antivenomFamilies,
+      forcedBlock,
     },
     lutarAxes,
     ouroboros: renewed,
@@ -332,9 +367,9 @@ export const FORMULA_REGISTRY = {
   'ami_v2': {
     id: 'ami_v2',
     name: 'A11oy Meshing Intelligence (AMI v2)',
-    expression: 'AMI_v2 = (Λ^0.22·K^0.16·W^0.16·T^0.14·M^0.14·E^0.10·P^0.08) · e^(-0.7N-0.5D) · G',
-    purpose: 'Per-turn agent autonomy gate (BLOCK/WATCH/ASSIST/OPERATE/AUTONOMOUS).',
-    inputs: ['lambda', 'K', 'W', 'T', 'M', 'E', 'P', 'N', 'D', 'G'],
+    expression: 'AMI_v2 = (Λ^0.22·K^0.16·W^0.16·T^0.14·M^0.14·E^0.10·P^0.08) · e^(-0.7N-0.5D) · G · A',
+    purpose: 'Per-turn agent autonomy gate (BLOCK/WATCH/ASSIST/OPERATE/AUTONOMOUS). A is the antivenom Adversarial Resistance multiplier (May 2026).',
+    inputs: ['lambda', 'K', 'W', 'T', 'M', 'E', 'P', 'N', 'D', 'G', 'A'],
     output: 'score in [0,1] mapped to one of five permission gates',
     source: 'attached_assets/A11OY_AMI_FORMULA_PAYLOAD_V1',
   },

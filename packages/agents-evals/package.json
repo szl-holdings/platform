@@ -20,6 +20,14 @@
     "./runner": {
       "types": "./dist/runner.d.ts",
       "import": "./src/runner.ts"
+    },
+    "./sotopia-judge": {
+      "types": "./dist/sotopia-judge.d.ts",
+      "import": "./src/sotopia-judge.ts"
+    },
+    "./operator-calibration": {
+      "types": "./dist/operator-calibration.d.ts",
+      "import": "./src/operator-calibration.ts"
     }
   },
   "dependencies": {

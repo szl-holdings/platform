@@ -364,6 +364,7 @@ const GovernanceTiers = lazy(() => import('./pages/strategy/governance-tiers'));
 const StrategyGovernance = lazy(() => import('./pages/strategy/governance'));
 const GovernedCockpit = lazy(() => import('./pages/strategy/governed-cockpit'));
 const GuardianApprovals = lazy(() => import('./pages/strategy/guardian-approvals'));
+const ApprovalCalibration = lazy(() => import('./pages/strategy/ApprovalCalibration'));
 const GuardrailConfigs = lazy(() => import('./pages/strategy/guardrail-configs'));
 const GuardrailHealth = lazy(() => import('./pages/strategy/guardrail-health'));
 const HealthPage = lazy(() => import('./pages/strategy/health'));
@@ -1267,6 +1268,9 @@ function AppInner() {
         </Route>
         <Route path={`${base}/operations/guardian/approvals`}>
           <WithShell><GuardianApprovals /></WithShell>
+        </Route>
+        <Route path={`${base}/operations/approvals/calibration`}>
+          <WithShell><ApprovalCalibration /></WithShell>
         </Route>
         <Route path={`${base}/operations/policy-manager`}>
           <WithShell><PolicyManager /></WithShell>

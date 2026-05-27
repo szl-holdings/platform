@@ -19,6 +19,7 @@ import {
   ApprovalRequestSchema,
 } from '@szl-holdings/contracts/governance';
 import { signApprovalDecision } from '@workspace/guardian/crypto';
+import { recordDecision as recordCalibrationDecision } from '@workspace/agents-evals/operator-calibration';
 import { randomUUID } from 'node:crypto';
 
 // ─── Store ───────────────────────────────────────────────────────────────────
@@ -256,6 +257,17 @@ export function decideApproval(
     resolvedBy: opts.actor,
   };
   store.saveRequest(updatedReq);
+
+  // Sotopia-RL calibration: every operator decision nudges the per-(operator, domain)
+  // Λ-Resonance weight that UniRec consults when ranking briefings. We use the
+  // request's `kind` as the domain proxy (e.g. 'maritime.standby') — this stays
+  // safe because the calibration band is clamped to [0.80, 1.20] inside the
+  // calibration module itself.
+  recordCalibrationDecision({
+    operatorId: opts.actor,
+    domain: req.kind,
+    verdict: opts.verdict,
+  });
 
   let governanceMemory: GovernanceMemoryRecord | undefined;
   if (opts.verdict === 'deny' || opts.verdict === 'escalate') {

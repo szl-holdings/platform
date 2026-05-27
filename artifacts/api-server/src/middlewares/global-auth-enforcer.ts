@@ -639,6 +639,14 @@ const PUBLIC_PREFIXES = [
   "/api/a11oy/chat",
   "/api/a11oy/health",
   "/api/a11oy/conversations",
+  // A11oy AGI-stack evolution surfaces (task #5502): UniRec briefing recommender,
+  // memnet associative recall over the Reliquary catalog. Stateless / read-only
+  // compute, no per-user mutation, called by the public A11oy demo surfaces.
+  "/api/a11oy/unirec/recommend",
+  "/api/a11oy/unirec/health",
+  "/api/a11oy/reliquary/recall",
+  "/api/a11oy/calibration",
+  "/api/a11oy/calibration/reset",
   // Counsel live legal feeds — CourtListener, EDGAR, Federal Register, USPTO PEDS, State AG.
   // Read-only GET endpoints; no tenant PII exposed. Public in demo mode so the
   // Counsel frontend can render feed health and item lists without an auth session.

@@ -1,0 +1,22 @@
+{
+  "name": "@workspace/antivenom-fabric",
+  "version": "0.1.0",
+  "private": false,
+  "type": "module",
+  "description": "Antivenom Fabric — attack/antidote pair index for prompt-injection, jailbreak, exfiltration, and poisoning patterns. Lightweight classifier consulted by AMI v2 and Sentra detector council.",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./src/index.ts"
+    }
+  },
+  "scripts": {
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "test": "vitest run --passWithNoTests"
+  },
+  "devDependencies": {
+    "@types/node": "catalog:",
+    "typescript": "catalog:",
+    "vitest": "catalog:"
+  }
+}

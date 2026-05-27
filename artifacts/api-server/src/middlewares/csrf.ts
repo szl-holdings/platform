@@ -89,6 +89,13 @@ const EXEMPT_PATHS = new Set([
   // entirely in the browser tab. Public so anyone can demo A11oy without a session.
   '/api/a11oy/chat',
   '/api/a11oy/health',
+  // A11oy UniRec briefing recommender — stateless tri-tower scorer; inputs are
+  // signals + operator affinity, no per-user state mutated. Public so TodaysBrief
+  // can rank without a session.
+  '/api/a11oy/unirec/recommend',
+  // A11oy Sotopia calibration audit panel — reset button POSTs to clear the
+  // in-memory per-(operator,domain) weight map. No per-user state, audit only.
+  '/api/a11oy/calibration/reset',
   // Demo reset — public POST endpoint called by the Demo Launchpad presenter
   // surface to clear in-memory scenario state without a browser session.
   // No per-user state modified; memory flush is safe without CSRF protection.

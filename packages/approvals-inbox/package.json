@@ -23,6 +23,7 @@
   },
   "dependencies": {
     "@szl-holdings/contracts": "workspace:*",
+    "@workspace/agents-evals": "workspace:*",
     "@workspace/guardian": "workspace:*"
   },
   "devDependencies": {

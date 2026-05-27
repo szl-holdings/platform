@@ -11,5 +11,7 @@ export {
   type RunOptions,
   runMarbleProfile,
 } from './marble-bench.js';
+export * from './sotopia-judge.js';
+export * from './operator-calibration.js';
 
 export const AGENTS_EVALS_VERSION = '0.1.0' as const;

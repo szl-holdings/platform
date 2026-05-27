@@ -6,6 +6,7 @@ import { runPCEGate, generateProofPacket, type PCEGateResult } from '../a11oy/ru
 import { tagAIContent } from '@szl-holdings/proof-chain';
 import { db } from '@szl-holdings/db';
 import { sql } from 'drizzle-orm';
+import { match as matchAntivenom } from '@workspace/antivenom-fabric';
 import {
   evaluateChatAmi,
   FORMULA_REGISTRY,
@@ -650,6 +651,7 @@ router.post('/chat', async (req: Request, res: Response) => {
     },
   });
 
+  const antivenom = matchAntivenom(lastUserMsg?.content ?? '');
   const ami: ChatAmiResult = evaluateChatAmi({
     mirrorEvalScore: mirrorEval.overallScore,
     pceAllowed: pceResult?.allowed !== false,
@@ -661,6 +663,8 @@ router.post('/chat', async (req: Request, res: Response) => {
     testCoverage: 0.7,
     alignment: recommendation.confidence ?? 0.75,
     knotCount: 50,
+    adversarialResistance: antivenom.adversarialResistance,
+    antivenomFamilies: Array.from(new Set(antivenom.matches.map((m) => m.family))),
   });
 
   send({

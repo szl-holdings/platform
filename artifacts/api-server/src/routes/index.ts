@@ -398,6 +398,13 @@ router.use("/a11oy", lazyMount(() => import("./a11oy-chat"), "a11oy-chat"));
 // surfaced for the reliquary, joined to Λ verdict receipts.
 router.use(lazyMatch("/a11oy/orchestration-traces", () => import("./a11oy-orchestration"), "a11oy-orchestration"));
 
+// A11oy UniRec + Memnet (Task #5502) — mounted here BEFORE a11oyDoctrineRouter
+// (line ~429) so the doctrine-crud router-level authMiddleware does not
+// short-circuit anonymous POST /a11oy/unirec/recommend or GET /a11oy/reliquary/recall.
+router.use(lazyMatch(["/a11oy/unirec"], () => import("./a11oy-unirec"), "a11oy-unirec-early"));
+router.use(lazyMatch("/a11oy/reliquary", () => import("./a11oy-memnet-recall"), "a11oy-memnet-recall-early"));
+router.use(lazyMatch("/a11oy/calibration", () => import("./a11oy-calibration"), "a11oy-calibration-early"));
+
 // A11oy Console — Workbench BFF route.
 // GET  /api/a11oy/console/models
 // POST /api/a11oy/console/count-tokens
@@ -464,6 +471,8 @@ router.use('/a11oy', a11oyAgenticPagesRouter);
 // Real SHA-256 hashing, disk I/O, DB lineage edges, Merkle-root attestations, sovereign mode.
 // Owns /api/reliquary/* endpoints (catalog, put, get, covenant, snapshot, replay, lineage, attest, sovereign, seed).
 router.use(lazyMatch("/reliquary", () => import("./reliquary"), "reliquary"));
+
+// A11oy UniRec + Memnet Recall (Task #5502) — mounted EARLIER, see above.
 
 // A11oy Sovereign API (Phase 3) — Sovereign Execution Lab endpoints.
 // model-router, MirrorEval 2.0, replay, connector firewall, twin foundry, skills, boardroom, trust center.

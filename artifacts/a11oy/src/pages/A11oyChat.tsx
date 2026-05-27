@@ -280,6 +280,18 @@ function ProvenanceFooter({ p, mev, ami }: { p: Provenance; mev?: MirrorEvalData
               <div>ami gate: <span style={{ color: AMI_GATE_COLORS[ami.gate] }}>{ami.gate}</span> · score: <span style={{ color: T.text }}>{ami.score.toFixed(4)}</span></div>
               <div style={{ color: T.muted, fontSize: '0.6rem' }}>{ami.rationale}</div>
               <div style={{ color: T.muted, fontSize: '0.58rem', marginTop: 3 }}>permissions: {ami.permissions.join(' · ')}</div>
+              {typeof ami.components?.A_adversarial_resistance === 'number' ? (
+                (() => {
+                  const A = ami.components.A_adversarial_resistance as number;
+                  const color = A >= 0.95 ? T.good : A >= 0.5 ? T.warn : '#ef4444';
+                  return (
+                    <div style={{ marginTop: 4, paddingTop: 3, borderTop: `1px dotted ${T.border}`, fontSize: '0.58rem' }}>
+                      antivenom A = <span style={{ color }}>{A.toFixed(2)}</span>
+                      <span style={{ color: T.muted }}> · {A >= 0.95 ? 'no adversarial pattern' : A <= 0.15 ? 'critical match → forced BLOCK' : 'partial resistance lift'}</span>
+                    </div>
+                  );
+                })()
+              ) : null}
             </div>
           ) : null}
         </div>

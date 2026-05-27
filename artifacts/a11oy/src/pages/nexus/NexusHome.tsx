@@ -1,4 +1,4 @@
-import { ArrowRight, Brain, FlaskConical, Network, Play, Shield, Workflow, Zap } from 'lucide-react';
+import { ArrowRight, Brain, FlaskConical, Network, Play, Search, Shield, Sparkles, Workflow, Zap } from 'lucide-react';
 import { useState } from 'react';
 import { Link, useLocation } from 'wouter';
 import { praxisApi } from './nexus-api';
@@ -187,6 +187,10 @@ export default function NexusHome() {
         </div>
       </div>
 
+      <div className="max-w-5xl mx-auto px-8 pb-6">
+        <MemnetRecallSidebar />
+      </div>
+
       <div className="max-w-5xl mx-auto px-8 pb-8">
         <h2 className="text-xs font-mono text-muted-foreground uppercase tracking-widest mb-6">
           Four Pillars — Integrated
@@ -269,6 +273,106 @@ export default function NexusHome() {
             </div>
           </div>
         </div>
+      </div>
+    </div>
+  );
+}
+
+interface MemnetHit {
+  contentHash: string;
+  label: string;
+  artifactType: string;
+  recallScore: number;
+  rationale: string;
+  createdAt: string;
+}
+
+function MemnetRecallSidebar() {
+  const [q, setQ] = useState('');
+  const [hits, setHits] = useState<MemnetHit[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [err, setErr] = useState<string | null>(null);
+  const [touched, setTouched] = useState(false);
+
+  async function recall(e: React.FormEvent) {
+    e.preventDefault();
+    if (!q.trim()) return;
+    setLoading(true); setErr(null); setTouched(true);
+    try {
+      const url = `${BASE}/api/a11oy/reliquary/recall?q=${encodeURIComponent(q)}&limit=6`;
+      const r = await fetch(url);
+      const j = await r.json();
+      if (!r.ok || !j?.ok) throw new Error(j?.error?.message ?? `HTTP ${r.status}`);
+      setHits((j.data?.hits ?? []) as MemnetHit[]);
+    } catch (er) {
+      setErr(er instanceof Error ? er.message : 'recall failed');
+      setHits([]);
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  return (
+    <div className="bg-praxis-surface border border-praxis-violet/30 rounded-xl p-5">
+      <div className="flex items-center gap-3 mb-3">
+        <div className="w-9 h-9 rounded-lg bg-praxis-violet/10 border border-praxis-violet/30 flex items-center justify-center">
+          <Sparkles className="w-5 h-5" style={{ color: '#9b7cc8' }} />
+        </div>
+        <div className="flex-1">
+          <h3 className="text-sm font-semibold" style={{ color: '#9b7cc8' }}>Memnet Associative Recall</h3>
+          <p className="text-[11px] text-muted-foreground/60">
+            Query the Reliquary catalog — lexical · temporal · outcome (0.55 / 0.25 / 0.20)
+          </p>
+        </div>
+      </div>
+      <form onSubmit={recall} className="flex items-center gap-2 mb-3">
+        <div className="relative flex-1">
+          <Search className="w-3.5 h-3.5 absolute left-2.5 top-1/2 -translate-y-1/2 text-muted-foreground/40" />
+          <input
+            type="text"
+            value={q}
+            onChange={(e) => setQ(e.target.value)}
+            placeholder="e.g. port congestion · brand drift · CVE triage"
+            className="w-full bg-praxis-bg border border-praxis rounded-md pl-8 pr-3 py-1.5 text-xs font-mono text-foreground placeholder:text-muted-foreground/40 focus:outline-none focus:border-praxis-violet/60"
+          />
+        </div>
+        <button
+          type="submit"
+          disabled={loading || !q.trim()}
+          className="px-3 py-1.5 rounded-md bg-praxis-violet/15 border border-praxis-violet/40 text-[11px] font-mono disabled:opacity-40 disabled:cursor-not-allowed"
+          style={{ color: '#9b7cc8' }}
+        >
+          {loading ? 'recalling…' : 'recall'}
+        </button>
+      </form>
+      {err ? <div className="text-[11px] font-mono text-red-400/80 mb-2">{err}</div> : null}
+      {touched && !loading && !err && hits.length === 0 ? (
+        <div className="text-[11px] font-mono text-muted-foreground/50 py-3 px-2">
+          no prior receipts in the reliquary for that query — memnet is empty or this is a novel context.
+        </div>
+      ) : null}
+      {hits.length > 0 ? (
+        <ul className="space-y-1.5">
+          {hits.map((h) => (
+            <li key={h.contentHash} className="flex items-start gap-3 py-1.5 px-2 rounded border border-praxis/40">
+              <div
+                className="text-[10px] font-mono font-bold tabular-nums w-12 shrink-0 text-right"
+                style={{ color: h.recallScore >= 0.6 ? '#22c55e' : h.recallScore >= 0.3 ? '#9b7cc8' : '#71717a' }}
+              >
+                {(h.recallScore * 100).toFixed(0)}
+              </div>
+              <div className="flex-1 min-w-0">
+                <div className="text-xs text-foreground truncate">{h.label}</div>
+                <div className="text-[10px] font-mono text-muted-foreground/60 truncate">
+                  {h.artifactType} · {h.rationale}
+                </div>
+              </div>
+            </li>
+          ))}
+        </ul>
+      ) : null}
+      <div className="mt-3 text-[10px] font-mono text-muted-foreground/40">
+        Recalled hits feed UniRec as memnet hints, lifting contextFit for matching briefings (capped at +0.15).
       </div>
     </div>
   );

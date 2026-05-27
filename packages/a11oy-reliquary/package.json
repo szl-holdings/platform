@@ -7,7 +7,14 @@
   "exports": {
     ".": {
       "import": "./src/index.ts"
+    },
+    "./memnet-recall": {
+      "types": "./src/memnet-recall.ts",
+      "import": "./src/memnet-recall.ts"
     }
+  },
+  "peerDependencies": {
+    "drizzle-orm": "*"
   },
   "dependencies": {
     "@szl-holdings/db": "workspace:*"
