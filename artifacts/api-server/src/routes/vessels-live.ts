@@ -9,7 +9,7 @@ import { authMiddleware } from '../middlewares/auth';
 
 const router: IRouter = Router();
 
-interface LiveVessel {
+export interface LiveVessel {
   mmsi: string;
   imo: string | null;
   name: string;
@@ -185,7 +185,7 @@ const FLAG_MAP: Record<string, string> = {
   '376': 'TC',
 };
 
-async function fetchDigitrafficAis(): Promise<{ vessels: LiveVessel[]; source: string }> {
+export async function fetchDigitrafficAis(): Promise<{ vessels: LiveVessel[]; source: string }> {
   try {
     const raw = await fetchJson(
       'https://meri.digitraffic.fi/api/ais/v1/locations',
@@ -427,7 +427,7 @@ async function getBarentsWatchToken(): Promise<string | null> {
   }
 }
 
-async function fetchBarentsWatchAis(): Promise<{
+export async function fetchBarentsWatchAis(): Promise<{
   vessels: LiveVessel[];
   source: string;
   note?: string;

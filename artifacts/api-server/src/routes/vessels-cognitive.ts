@@ -7,6 +7,7 @@ import { lookupEntity } from '../lib/vessels/sanctions-registry';
 import { listQuerySchema, validateQuery } from '../lib/validation';
 import { authMiddleware } from '../middlewares/auth';
 import { getEffectiveOrgIds } from '../middlewares/tenant-scope';
+import { fetchBarentsWatchAis, fetchDigitrafficAis, type LiveVessel } from './vessels-live';
 
 const router: IRouter = Router();
 
@@ -1293,6 +1294,56 @@ function interpolateSeries(
   return pts;
 }
 
+// Radius (nautical miles) used when counting nearby AIS contacts around each
+// voyage snapshot position. 50nm is a typical "operational neighbourhood" for
+// dark-vessel / STS analysis — wide enough to pick up rendezvous candidates,
+// tight enough to be locally meaningful. Overridable per request via ?radiusNm.
+const DEFAULT_AIS_DENSITY_RADIUS_NM = 50;
+const NM_PER_DEGREE_LAT = 60; // 1° latitude ≈ 60 nm
+
+function haversineNm(
+  lat1: number,
+  lon1: number,
+  lat2: number,
+  lon2: number,
+): number {
+  const toRad = (d: number) => (d * Math.PI) / 180;
+  const R_NM = 3440.065; // mean Earth radius in nautical miles
+  const dLat = toRad(lat2 - lat1);
+  const dLon = toRad(lon2 - lon1);
+  const a =
+    Math.sin(dLat / 2) ** 2 +
+    Math.cos(toRad(lat1)) * Math.cos(toRad(lat2)) * Math.sin(dLon / 2) ** 2;
+  return 2 * R_NM * Math.asin(Math.min(1, Math.sqrt(a)));
+}
+
+function countVesselsWithinRadius(
+  vessels: LiveVessel[],
+  lat: number,
+  lon: number,
+  radiusNm: number,
+): number {
+  // Pre-filter by a generous bounding box (cheap) before doing the haversine
+  // (expensive) for each candidate. dLatMax in degrees, dLonMax scaled by cos.
+  const dLatMax = radiusNm / NM_PER_DEGREE_LAT;
+  const cosLat = Math.max(0.05, Math.cos((lat * Math.PI) / 180));
+  const dLonMax = radiusNm / (NM_PER_DEGREE_LAT * cosLat);
+  let count = 0;
+  for (const v of vessels) {
+    if (
+      typeof v.lat !== 'number' ||
+      typeof v.lon !== 'number' ||
+      Number.isNaN(v.lat) ||
+      Number.isNaN(v.lon)
+    )
+      continue;
+    if (Math.abs(v.lat - lat) > dLatMax) continue;
+    if (Math.abs(v.lon - lon) > dLonMax) continue;
+    if (haversineNm(lat, lon, v.lat, v.lon) <= radiusNm) count++;
+  }
+  return count;
+}
+
 const PORT_EVENT_WEIGHT: Record<string, number> = {
   voyage_start: 0.4,
   port_approach: 1.0,
@@ -1313,9 +1364,54 @@ router.get(
       const snapshots = VOYAGE_SNAPSHOTS[normalizedRef] ?? VOYAGE_SNAPSHOTS['VOY-2026-001'];
       const vessel = SAMPLE_VESSELS_GRAPH[0];
 
-      // 1. AIS density (traffic): per-snapshot speed-over-ground is the live
-      //    AIS proxy for vessel activity. Higher speed = denser AIS pings.
-      const aisValues = snapshots.map((s) => s.speed / 3);
+      // 1. AIS density (traffic): count live AIS contacts within `radiusNm`
+      //    of each voyage snapshot from the Digitraffic + BarentsWatch feeds
+      //    the api-server already proxies. Falls back to the
+      //    speed-over-ground proxy when neither feed yields any vessels,
+      //    surfaced explicitly via the stream `source` field.
+      const radiusParam = Number(req.query.radiusNm);
+      const radiusNm =
+        Number.isFinite(radiusParam) && radiusParam > 0 && radiusParam <= 500
+          ? radiusParam
+          : DEFAULT_AIS_DENSITY_RADIUS_NM;
+
+      const [digi, bw] = await Promise.all([
+        fetchDigitrafficAis().catch(() => ({ vessels: [] as LiveVessel[], source: 'error' })),
+        fetchBarentsWatchAis().catch(() => ({ vessels: [] as LiveVessel[], source: 'error' })),
+      ]);
+      const liveAisVessels: LiveVessel[] = [...digi.vessels, ...bw.vessels];
+
+      // A provider is "available" when it returned without raising and its
+      // source string reports a live/cached feed (not an error / missing
+      // credentials). An available provider that returns zero nearby
+      // vessels is a legitimate low-density measurement, NOT a fallback
+      // trigger — see code review on task #5562.
+      const isProviderAvailable = (source: string): boolean =>
+        source.startsWith('live-') || source === 'stale';
+      const digiAvailable = isProviderAvailable(digi.source);
+      const bwAvailable = isProviderAvailable(bw.source);
+      const anyProviderAvailable = digiAvailable || bwAvailable;
+
+      const availableFeedSources: string[] = [];
+      if (digiAvailable) availableFeedSources.push(`Digitraffic AIS (${digi.source})`);
+      if (bwAvailable) availableFeedSources.push(`BarentsWatch AIS (${bw.source})`);
+
+      const liveDensityCounts = snapshots.map((s) =>
+        countVesselsWithinRadius(liveAisVessels, s.position.lat, s.position.lon, radiusNm),
+      );
+
+      // Speed-over-ground proxy is the fallback only when BOTH providers
+      // are unavailable (error / credentials missing / offline). When a
+      // provider is up but reports no contacts inside the radius, that
+      // zero IS the real signal and we keep it.
+      const aisFallbackValues = snapshots.map((s) => s.speed / 3);
+      const aisValues = anyProviderAvailable ? liveDensityCounts : aisFallbackValues;
+      const totalNearby = liveDensityCounts.reduce((a, b) => a + b, 0);
+      const aisDensitySource = anyProviderAvailable
+        ? totalNearby > 0
+          ? `${availableFeedSources.join(' + ')} — vessels within ${radiusNm}nm of snapshot position`
+          : `${availableFeedSources.join(' + ')} — live feed available, 0 vessels within ${radiusNm}nm of any snapshot (voyage outside provider coverage area)`
+        : `Live AIS unavailable (Digitraffic=${digi.source}, BarentsWatch=${bw.source}) — fallback: snapshot speed-over-ground`;
 
       // 2. STS rendezvous (risk): a snapshot with an anomaly flag spikes,
       //    flanked by elevated readings at the neighbouring snapshots so the
@@ -1356,8 +1452,8 @@ router.get(
           streamId: 'ais-density',
           label: 'AIS density',
           category: 'traffic',
-          units: 'kts',
-          source: 'Digitraffic AIS + BarentsWatch AIS (snapshot speed)',
+          units: anyProviderAvailable ? `vessels/${radiusNm}nm` : 'kts',
+          source: aisDensitySource,
           series: interpolateSeries(aisValues, 1, seed ^ 0x1111),
         },
         {
