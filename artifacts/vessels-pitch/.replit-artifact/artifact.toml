@@ -15,7 +15,7 @@ paths = [ "/vessels-pitch/" ]
 localPort = 24631
 
 [services.development]
-run = "pnpm --filter @workspace/vessels-pitch run dev"
+run = "bash -c '/home/runner/workspace/scripts/kill-stale-vite-ports.sh 24631; cd /home/runner/workspace/artifacts/vessels-pitch && exec node_modules/.bin/vite --config vite.config.ts --host ::'"
 
 [services.production]
 build = [ "pnpm", "--filter", "@workspace/vessels-pitch", "run", "build" ]

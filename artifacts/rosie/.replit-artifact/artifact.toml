@@ -15,7 +15,7 @@ paths = [ "/rosie/" ]
 localPort = 25263
 
 [services.development]
-run = "pnpm --filter @workspace/rosie run dev"
+run = "bash -c '/home/runner/workspace/scripts/kill-stale-vite-ports.sh 25263; cd /home/runner/workspace/artifacts/rosie && exec node_modules/.bin/vite --config vite.config.ts --host 0.0.0.0'"
 
 [services.production]
 build = [ "pnpm", "--filter", "@workspace/rosie", "run", "build" ]
