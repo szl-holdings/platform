@@ -12,3 +12,4 @@
 - [Multi-artifact preview path routing](multi-artifact-preview-routing.md) — each artifact takes a unique `PORT` from env; hardcoding `server.port` in vite.config collides with the path-routed proxy.
 - [Lean toolchain on Replit](lean-toolchain-replit.md) — elan installs to `~/.elan/bin`; symlink `lake`/`lean` into `node_modules/.bin/` so workflows find them on PATH; mathlib full build is 30–60 min from source.
 - [Artifact workflow port-check flakiness](artifact-workflow-port-check-flakiness.md) — DIDNT_OPEN_A_PORT can persist for many restarts even when vite clearly binds; pick one port pattern, stop editing, retry, then rollback — don't keep tweaking config.
+- [AGI stack synthesis 2026](../../docs/research/agi-stack-synthesis-2026.md) — single source of truth distilling 13 external AGI repos into SZL primitives, receipt classes, and Warhacker bundle mapping; downstream ROSIE/A11oy/Sentra/Amaru evolution tasks read from it.
