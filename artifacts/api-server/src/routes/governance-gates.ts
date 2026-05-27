@@ -38,6 +38,7 @@ import {
   revokeGateBypass,
   updateModelInRegistry,
 } from '../a11oy/runtime/model-registry.js';
+import { removePromotedModel } from './a11oy-chat.js';
 
 const router: IRouter = Router();
 
@@ -279,6 +280,9 @@ router.patch(
       if (body.isActive === false) {
         // Deactivate: remove from routing cache + gate override + bypass caches.
         removeModelFromRegistry(id);
+        // Also drop any chat-picker promoted entries for this upstream so the
+        // picker doesn't keep offering a deactivated model.
+        removePromotedModel(updated!.hfModelId);
       } else if (body.isActive === true) {
         // Reactivate: re-add the model to the routing cache using the fresh DB row,
         // then restore its gate config so routing gate checks work immediately.
@@ -359,8 +363,15 @@ router.delete(
 
       // Remove from in-memory registry and clear associated gate caches
       removeModelFromRegistry(id);
+      // And from the chat-router promoted-model picker so /chat/health no
+      // longer lists the deleted model and forcedModelId routing falls back
+      // to the default sovereign lane (see a11oy-chat.ts lane resolution).
+      const removedLanes = removePromotedModel(existing[0]!.hfModelId);
 
-      logger.info({ id, hfModelId: existing[0]!.hfModelId, actor: getUserLabel(req) }, '[governance] model removed from registry');
+      logger.info(
+        { id, hfModelId: existing[0]!.hfModelId, removedPickerLanes: removedLanes, actor: getUserLabel(req) },
+        '[governance] model removed from registry',
+      );
       sendSuccess(res, { deleted: true, id });
     } catch (err) {
       handleRouteError(res, err, 'Failed to delete model from registry');

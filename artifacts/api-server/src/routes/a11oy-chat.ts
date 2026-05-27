@@ -177,6 +177,32 @@ export function registerPromotedModel(input: {
   }
 }
 
+/**
+ * Drop any promoted-model picker entries that were sourced from the given
+ * upstream model id. Called from the governance DELETE /registry/:id path
+ * (and from the PATCH isActive:false deactivation path) so the chat picker
+ * stays in sync with operator_model_registry — without this, deleting a
+ * model from the registry would leave a dead picker entry and the chat
+ * router would happily route to it via forcedModelId.
+ *
+ * Matches by upstreamModel (== the registry row's hfModelId) so the caller
+ * doesn't need to know the synthesised lane id format. Multiple promoted
+ * entries can share an upstream model (different providers), so we sweep
+ * all matches rather than break on first hit.
+ *
+ * Returns the lane ids that were actually removed for logging/test asserts.
+ */
+export function removePromotedModel(upstreamModelId: string): string[] {
+  const removed: string[] = [];
+  for (const [laneId, entry] of PROMOTED_MODELS) {
+    if (entry.upstreamModel === upstreamModelId) {
+      PROMOTED_MODELS.delete(laneId);
+      removed.push(laneId);
+    }
+  }
+  return removed;
+}
+
 export function enqueueToolProposalImprovement(input: {
   artifactId: string;
   title: string;
