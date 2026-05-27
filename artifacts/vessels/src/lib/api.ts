@@ -116,6 +116,34 @@ export interface VoyageEconomics {
   updatedAt: string;
 }
 
+export interface BunkerPrice {
+  port: string;
+  vlsfoUsdPerMt: number;
+  hfoUsdPerMt: number;
+  mgoUsdPerMt: number;
+  lngUsdPerMmbtu: number;
+  asOfDate: string;
+}
+
+export interface BunkerPricesResponse {
+  bunkerPrices: BunkerPrice[];
+  asOfDate: string;
+}
+
+export interface CharterRateEstimate {
+  vesselClass: string;
+  timeCharterRateUsd: number;
+  spotRateUsd: number;
+  trend: 'rising' | 'stable' | 'falling';
+  weeklyChange: number;
+  asOfDate: string;
+}
+
+export interface CharterRatesResponse {
+  charterRates: CharterRateEstimate[];
+  asOfDate: string;
+}
+
 export interface VoyageEconomicsAnalytics {
   revenueByMonth: Array<{
     month: string;
@@ -484,6 +512,12 @@ export const api = {
       return apiFetchList<VoyageEconomics>(`/vessels/voyage-economics${qs ? `?${qs}` : ''}`);
     },
     analytics: () => apiFetch<VoyageEconomicsAnalytics>('/vessels/voyage-economics/analytics'),
+  },
+  voyageCalc: {
+    bunkerPrices: () =>
+      apiFetch<BunkerPricesResponse>('/vessels/voyage-calc/bunker-prices'),
+    charterRates: () =>
+      apiFetch<CharterRatesResponse>('/vessels/voyage-calc/charter-rates'),
   },
   sanctions: {
     list: (params?: { ofacStatus?: string }) => {

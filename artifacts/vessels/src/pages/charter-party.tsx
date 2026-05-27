@@ -1,6 +1,7 @@
 import { EmptyState } from '@szl-holdings/shared-ui/EmptyState';
 import { Badge } from '@szl-holdings/shared-ui/ui/badge';
 import { cn } from '@szl-holdings/shared-ui/utils';
+import { useQuery } from '@tanstack/react-query';
 import {
   AlertTriangle,
   Calendar,
@@ -11,12 +12,14 @@ import {
   DollarSign,
   FileText,
   Filter,
+  Loader2,
   Plus,
-  Sparkles,
 } from 'lucide-react';
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
+import { api, type VoyageEconomics } from '@/lib/api';
 
 type FixtureStatus = 'draft' | 'negotiated' | 'fixed' | 'performing' | 'completed';
+type CharterType = 'voyage' | 'time';
 
 const STATUS_CONFIG: Record<FixtureStatus, { label: string; color: string; step: number }> = {
   draft: { label: 'Draft', color: 'text-sky-400/50 bg-sky-500/5 border-sky-500/10', step: 1 },
@@ -35,188 +38,90 @@ const STATUS_CONFIG: Record<FixtureStatus, { label: string; color: string; step:
 };
 
 interface Fixture {
-  id: string;
+  id: number;
   ref: string;
-  type: 'voyage' | 'time';
+  type: CharterType;
   vessel: string;
-  imo: string;
-  charterer: string;
-  owner: string;
   status: FixtureStatus;
   cargo: string;
   loadPort: string;
   dischargePort: string;
-  laycanFrom: string;
-  laycanTo: string;
+  laycanFrom: string | null;
+  laycanTo: string | null;
   freightRate: number;
   freightUnit: string;
   quantity: number;
-  demurrageRate: number;
-  despatchRate: number;
-  aiRiskScore: number;
-  aiFlags: string[];
-  clauses: { clause: string; risk: 'low' | 'medium' | 'high'; note: string }[];
+  totalValue: number;
+  marginPct: number | null;
 }
 
-const FIXTURES: Fixture[] = [
-  {
-    id: 'CP-001',
-    ref: 'SZL-VOY-2026-0142',
-    type: 'voyage',
-    vessel: 'Pacific Navigator',
-    imo: '9234567',
-    charterer: 'Trafigura Pte Ltd',
-    owner: 'SZL Maritime Holdings',
-    status: 'performing',
-    cargo: 'Iron Ore (65,000 MT ±10%)',
-    loadPort: 'Port Hedland, AUS',
-    dischargePort: 'Zhoushan, CHN',
-    laycanFrom: '2026-04-18',
-    laycanTo: '2026-04-22',
-    freightRate: 12.4,
-    freightUnit: 'USD/MT',
-    quantity: 65000,
-    demurrageRate: 18500,
-    despatchRate: 9250,
-    aiRiskScore: 28,
-    aiFlags: ['Laycan window tight — 4 days', 'Demurrage clause favours charterer'],
-    clauses: [
-      {
-        clause: 'ASBATANKVOY demurrage clause',
-        risk: 'medium',
-        note: 'Rate $18,500/day — slightly above Baltic C5 benchmark',
-      },
-      {
-        clause: 'Force majeure — weather',
-        risk: 'low',
-        note: 'Standard wording, no unusual carve-outs',
-      },
-      { clause: 'BIMCO ISPS clause', risk: 'low', note: 'Compliant with standard ISPS wording' },
-    ],
-  },
-  {
-    id: 'CP-002',
-    ref: 'SZL-TC-2026-0089',
-    type: 'time',
-    vessel: 'Arctic Breeze',
-    imo: '9876543',
-    charterer: 'Vitol Group',
-    owner: 'SZL Maritime Holdings',
-    status: 'fixed',
-    cargo: 'N/A — Time Charter',
-    loadPort: 'Rotterdam, NL',
-    dischargePort: 'Various',
-    laycanFrom: '2026-05-01',
-    laycanTo: '2026-05-05',
-    freightRate: 32500,
-    freightUnit: 'USD/day',
-    quantity: 0,
-    demurrageRate: 0,
-    despatchRate: 0,
-    aiRiskScore: 14,
-    aiFlags: ['Hire rate 4.2% above VLCC benchmark — favourable'],
-    clauses: [
-      {
-        clause: 'NYPE 2015 — Maintenance obligations',
-        risk: 'low',
-        note: 'Owner maintains class — standard',
-      },
-      {
-        clause: 'Off-hire clause — extended drydock',
-        risk: 'high',
-        note: 'Charterer can off-hire if drydock exceeds 30 days — unusual',
-      },
-      {
-        clause: 'Trading limit clause',
-        risk: 'low',
-        note: 'Worldwide trading excluding sanctioned zones',
-      },
-    ],
-  },
-  {
-    id: 'CP-003',
-    ref: 'SZL-VOY-2026-0161',
-    type: 'voyage',
-    vessel: 'Cape Resolute',
-    imo: '9123456',
-    charterer: 'Cargill Ocean Transportation',
-    owner: 'SZL Maritime Holdings',
-    status: 'negotiated',
-    cargo: 'Wheat (45,000 MT)',
-    loadPort: 'Novorossiysk, RU',
-    dischargePort: 'Alexandria, EG',
-    laycanFrom: '2026-05-10',
-    laycanTo: '2026-05-17',
-    freightRate: 28.5,
-    freightUnit: 'USD/MT',
-    quantity: 45000,
-    demurrageRate: 14000,
-    despatchRate: 7000,
-    aiRiskScore: 67,
-    aiFlags: [
-      'Russian port — sanctions risk elevated',
-      'Black Sea war risk clause required',
-      'Cargo insurance verification outstanding',
-    ],
-    clauses: [
-      {
-        clause: 'War risk / Black Sea additional premium',
-        risk: 'high',
-        note: 'Current Novorossiysk war risk premium: ~0.85% — not yet agreed',
-      },
-      {
-        clause: 'Sanctions compliance clause',
-        risk: 'high',
-        note: 'BIMCO SANCTCL24 clause recommended — not included in draft',
-      },
-      {
-        clause: 'NOR tendering',
-        risk: 'medium',
-        note: 'NOR tendering WIBON WIFPON — standard for Black Sea',
-      },
-    ],
-  },
-  {
-    id: 'CP-004',
-    ref: 'SZL-VOY-2026-0098',
-    type: 'voyage',
-    vessel: 'Meridian Bulk',
-    imo: '9456789',
-    charterer: 'Louis Dreyfus Company',
-    owner: 'SZL Maritime Holdings',
-    status: 'completed',
-    cargo: 'Soybean (55,000 MT ±5%)',
-    loadPort: 'Santos, BRA',
-    dischargePort: 'Ningbo, CHN',
-    laycanFrom: '2026-02-14',
-    laycanTo: '2026-02-18',
-    freightRate: 31.2,
-    freightUnit: 'USD/MT',
-    quantity: 55000,
-    demurrageRate: 15500,
-    despatchRate: 7750,
-    aiRiskScore: 11,
-    aiFlags: [],
-    clauses: [
-      {
-        clause: 'Laytime calculation — SHINC',
-        risk: 'low',
-        note: 'Sundays & holidays included — standard for Brazil',
-      },
-      {
-        clause: 'Draft restrictions Santos',
-        risk: 'low',
-        note: '11.8m draft limit agreed — vessel compliant',
-      },
-    ],
-  },
-];
+function mapVoyageStatusToFixture(status: string): FixtureStatus {
+  switch (status) {
+    case 'planned':
+    case 'pending':
+      return 'negotiated';
+    case 'scheduled':
+    case 'awaiting_departure':
+      return 'fixed';
+    case 'in_progress':
+    case 'underway':
+    case 'at_port':
+      return 'performing';
+    case 'completed':
+    case 'delivered':
+      return 'completed';
+    case 'draft':
+    default:
+      return STATUS_CONFIG[status as FixtureStatus] ? (status as FixtureStatus) : 'draft';
+  }
+}
 
-const clauseRiskColor: Record<string, string> = {
-  high: 'text-red-400 bg-red-500/10 border-red-500/20',
-  medium: 'text-amber-400 bg-amber-500/10 border-amber-500/20',
-  low: 'text-emerald-400 bg-emerald-500/10 border-emerald-500/20',
-};
+function mapCharterType(charterType: string): CharterType {
+  return charterType?.toLowerCase().includes('time') ? 'time' : 'voyage';
+}
+
+function voyageToFixture(v: VoyageEconomics): Fixture {
+  const type = mapCharterType(v.charterType);
+  const status = mapVoyageStatusToFixture(v.status);
+  const quantity = Number(v.cargoQuantityMt ?? 0);
+  const rate = Number(v.charterRatePerDay ?? 0);
+  const duration = Number(v.durationDays ?? 30);
+  const totalValue = type === 'voyage' ? Number(v.grossRevenue ?? rate * quantity) : rate * duration;
+  return {
+    id: v.id,
+    ref: v.voyageRef,
+    type,
+    vessel: v.vesselName ?? `Vessel #${v.vesselId}`,
+    status,
+    cargo: v.cargoType
+      ? `${v.cargoType}${quantity > 0 ? ` (${quantity.toLocaleString()} MT)` : ''}`
+      : type === 'time'
+        ? 'N/A — Time Charter'
+        : '—',
+    loadPort: v.originPort,
+    dischargePort: v.destinationPort,
+    laycanFrom: v.scheduledDepartureAt ?? null,
+    laycanTo: v.scheduledArrivalAt ?? v.estimatedArrivalAt ?? null,
+    freightRate: rate,
+    freightUnit: type === 'voyage' ? 'USD/MT' : 'USD/day',
+    quantity,
+    totalValue,
+    marginPct: v.marginPct != null ? Number(v.marginPct) : null,
+  };
+}
+
+function fmtDate(iso: string | null): string {
+  if (!iso) return '—';
+  try {
+    return new Date(iso).toLocaleDateString(undefined, {
+      year: 'numeric',
+      month: 'short',
+      day: 'numeric',
+    });
+  } catch {
+    return iso.slice(0, 10);
+  }
+}
 
 function LifecyclePipeline({ status }: { status: FixtureStatus }) {
   const steps: FixtureStatus[] = ['draft', 'negotiated', 'fixed', 'performing', 'completed'];
@@ -253,18 +158,19 @@ function LifecyclePipeline({ status }: { status: FixtureStatus }) {
 
 function FixtureCard({ fixture }: { fixture: Fixture }) {
   const [expanded, setExpanded] = useState(false);
-  const totalValue =
-    fixture.type === 'voyage' ? fixture.freightRate * fixture.quantity : fixture.freightRate * 30;
+  const marginColor =
+    fixture.marginPct == null
+      ? 'text-sky-400/60'
+      : fixture.marginPct < 5
+        ? 'text-red-400'
+        : fixture.marginPct < 15
+          ? 'text-amber-400'
+          : 'text-emerald-400';
 
   return (
     <div
       className={cn(
-        'bg-[#0a1628]/80 border rounded-xl overflow-hidden transition-all',
-        fixture.aiRiskScore >= 60
-          ? 'border-red-500/20'
-          : fixture.aiRiskScore >= 30
-            ? 'border-amber-500/20'
-            : 'border-sky-500/10',
+        'bg-[#0a1628]/80 border rounded-xl overflow-hidden transition-all border-sky-500/10',
       )}
     >
       <button className="w-full text-left px-4 py-4" onClick={() => setExpanded(!expanded)}>
@@ -287,7 +193,7 @@ function FixtureCard({ fixture }: { fixture: Fixture }) {
             </div>
             <p className="text-xs text-sky-300 font-medium">{fixture.vessel}</p>
             <p className="text-[10px] text-sky-400/50 mt-0.5">
-              {fixture.charterer} · {fixture.loadPort} → {fixture.dischargePort}
+              {fixture.loadPort} → {fixture.dischargePort}
             </p>
             <div className="mt-2">
               <LifecyclePipeline status={fixture.status} />
@@ -295,20 +201,11 @@ function FixtureCard({ fixture }: { fixture: Fixture }) {
           </div>
           <div className="text-right shrink-0">
             <p className="text-sm font-bold font-mono text-emerald-400">
-              ${(totalValue / 1000).toFixed(0)}K
+              ${(fixture.totalValue / 1000).toFixed(0)}K
             </p>
             <p className="text-[9px] text-sky-400/40">est. value</p>
-            <div
-              className={cn(
-                'text-[10px] font-mono mt-1',
-                fixture.aiRiskScore >= 60
-                  ? 'text-red-400'
-                  : fixture.aiRiskScore >= 30
-                    ? 'text-amber-400'
-                    : 'text-emerald-400',
-              )}
-            >
-              AI Risk: {fixture.aiRiskScore}
+            <div className={cn('text-[10px] font-mono mt-1', marginColor)}>
+              Margin: {fixture.marginPct != null ? `${fixture.marginPct.toFixed(1)}%` : '—'}
             </div>
             {expanded ? (
               <ChevronUp className="w-3.5 h-3.5 text-sky-400/30 mt-1 ml-auto" />
@@ -324,29 +221,28 @@ function FixtureCard({ fixture }: { fixture: Fixture }) {
           <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
             {[
               {
-                label: 'Laycan Open',
-                value: fixture.laycanFrom,
+                label: 'Scheduled Departure',
+                value: fmtDate(fixture.laycanFrom),
                 icon: Calendar,
                 color: 'text-sky-300',
               },
               {
-                label: 'Laycan Close',
-                value: fixture.laycanTo,
+                label: 'Scheduled Arrival',
+                value: fmtDate(fixture.laycanTo),
                 icon: Calendar,
                 color: 'text-sky-300',
               },
               {
                 label: fixture.type === 'voyage' ? 'Freight Rate' : 'Hire Rate',
-                value: `$${fixture.freightRate.toLocaleString()} ${fixture.freightUnit}`,
+                value: fixture.freightRate
+                  ? `$${fixture.freightRate.toLocaleString()} ${fixture.freightUnit}`
+                  : '—',
                 icon: DollarSign,
                 color: 'text-emerald-400',
               },
               {
-                label: 'Demurrage Rate',
-                value:
-                  fixture.demurrageRate > 0
-                    ? `$${fixture.demurrageRate.toLocaleString()}/day`
-                    : 'N/A (TC)',
+                label: 'Cargo',
+                value: fixture.cargo,
                 icon: Clock,
                 color: 'text-orange-400',
               },
@@ -357,50 +253,6 @@ function FixtureCard({ fixture }: { fixture: Fixture }) {
               </div>
             ))}
           </div>
-
-          {fixture.aiFlags.length > 0 && (
-            <div className="bg-amber-500/5 border border-amber-500/15 rounded-lg p-3">
-              <div className="flex items-center gap-1.5 mb-2">
-                <Sparkles className="w-3 h-3 text-amber-400" />
-                <span className="text-[10px] font-semibold text-amber-400 uppercase tracking-wider">
-                  AI Clause Intelligence
-                </span>
-              </div>
-              <div className="space-y-1">
-                {fixture.aiFlags.map((flag, i) => (
-                  <div key={i} className="flex items-start gap-1.5">
-                    <AlertTriangle className="w-3 h-3 text-amber-400 shrink-0 mt-0.5" />
-                    <p className="text-[11px] text-amber-300/80">{flag}</p>
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
-
-          <div>
-            <p className="text-[9px] text-sky-400/40 uppercase tracking-wider mb-2">
-              Clause Risk Analysis
-            </p>
-            <div className="space-y-2">
-              {fixture.clauses.map((c, i) => (
-                <div
-                  key={i}
-                  className="flex items-start gap-3 p-3 bg-sky-500/3 rounded-lg border border-sky-500/8"
-                >
-                  <Badge
-                    variant="outline"
-                    className={cn('text-[9px] shrink-0 mt-0.5', clauseRiskColor[c.risk])}
-                  >
-                    {c.risk}
-                  </Badge>
-                  <div>
-                    <p className="text-xs font-medium text-sky-200">{c.clause}</p>
-                    <p className="text-[10px] text-sky-400/50 mt-0.5">{c.note}</p>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
         </div>
       )}
     </div>
@@ -409,23 +261,38 @@ function FixtureCard({ fixture }: { fixture: Fixture }) {
 
 export default function CharterPartyPage() {
   const [statusFilter, setStatusFilter] = useState<FixtureStatus | 'all'>('all');
-  const [typeFilter, setTypeFilter] = useState<'all' | 'voyage' | 'time'>('all');
+  const [typeFilter, setTypeFilter] = useState<'all' | CharterType>('all');
 
-  const filtered = FIXTURES.filter(
-    (f) =>
-      (statusFilter === 'all' || f.status === statusFilter) &&
-      (typeFilter === 'all' || f.type === typeFilter),
+  const voyagesQuery = useQuery({
+    queryKey: ['vessels-voyage-economics-all'],
+    queryFn: () => api.voyageEconomics.list(),
+    staleTime: 30_000,
+  });
+
+  const fixtures = useMemo<Fixture[]>(
+    () => (voyagesQuery.data ?? []).map(voyageToFixture),
+    [voyagesQuery.data],
   );
 
-  const stats = {
-    total: FIXTURES.length,
-    active: FIXTURES.filter((f) => ['fixed', 'performing'].includes(f.status)).length,
-    highRisk: FIXTURES.filter((f) => f.aiRiskScore >= 50).length,
-    totalValue: FIXTURES.reduce(
-      (a, f) => a + (f.type === 'voyage' ? f.freightRate * f.quantity : f.freightRate * 30),
-      0,
-    ),
-  };
+  const filtered = useMemo(
+    () =>
+      fixtures.filter(
+        (f) =>
+          (statusFilter === 'all' || f.status === statusFilter) &&
+          (typeFilter === 'all' || f.type === typeFilter),
+      ),
+    [fixtures, statusFilter, typeFilter],
+  );
+
+  const stats = useMemo(
+    () => ({
+      total: fixtures.length,
+      active: fixtures.filter((f) => ['fixed', 'performing'].includes(f.status)).length,
+      lowMargin: fixtures.filter((f) => f.marginPct != null && f.marginPct < 5).length,
+      totalValue: fixtures.reduce((a, f) => a + f.totalValue, 0),
+    }),
+    [fixtures],
+  );
 
   return (
     <div className="p-6 space-y-6">
@@ -436,7 +303,7 @@ export default function CharterPartyPage() {
             Charter Party Manager
           </h1>
           <p className="text-xs text-sky-400/50 mt-0.5">
-            Create, negotiate and track charter fixtures with Governed clause risk analysis
+            Live view of charter fixtures sourced from the voyage economics ledger
           </p>
         </div>
         <button className="flex items-center gap-1.5 text-xs px-3 py-2 rounded-lg bg-sky-500/10 border border-sky-500/20 text-sky-300 hover:bg-sky-500/15 transition-colors">
@@ -454,8 +321,8 @@ export default function CharterPartyPage() {
             icon: CheckCircle2,
           },
           {
-            label: 'High AI Risk',
-            value: stats.highRisk,
+            label: 'Margin < 5%',
+            value: stats.lowMargin,
             color: 'text-red-400',
             icon: AlertTriangle,
           },
@@ -516,7 +383,24 @@ export default function CharterPartyPage() {
       </div>
 
       <div className="space-y-3">
-        {filtered.length === 0 ? (
+        {voyagesQuery.isLoading ? (
+          <div className="flex items-center justify-center py-16 text-sky-400/60">
+            <Loader2 className="w-4 h-4 animate-spin mr-2" />
+            <span className="text-xs">Loading charter fixtures…</span>
+          </div>
+        ) : voyagesQuery.isError ? (
+          <div className="bg-red-500/5 border border-red-500/20 rounded-xl p-4 flex items-start gap-3">
+            <AlertTriangle className="w-4 h-4 text-red-400 mt-0.5" />
+            <div>
+              <p className="text-xs font-semibold text-red-300">
+                Could not load charter fixtures
+              </p>
+              <p className="text-[11px] text-red-300/70 mt-1">
+                {(voyagesQuery.error as Error)?.message ?? 'Unknown error'}
+              </p>
+            </div>
+          </div>
+        ) : filtered.length === 0 ? (
           stats.total === 0 ? (
             <EmptyState
               icon={CheckCircle2}
