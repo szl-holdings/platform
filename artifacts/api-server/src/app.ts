@@ -109,6 +109,7 @@ import router from './routes';
 import demoResetRouter from './routes/demo-reset';
 import agiForecastStatusRouter from './routes/agi-forecast-status';
 import putnamRouter from './routes/putnam';
+import memoRouter from './routes/memo';
 import a11oyOrchestrationRouter from './routes/a11oy-orchestration-api';
 import a11oyLeaderUpgradesRouter from './routes/a11oy-leader-upgrades';
 import payloadRouter from './routes/payload';
@@ -456,6 +457,7 @@ app.use('/api/yawar', yawarRouter);
 // endpoint (`POST /refresh`) attaches `authMiddleware` inline.
 app.use('/api/agi-forecast', agiForecastStatusRouter);
 app.use('/api/putnam', putnamRouter);
+app.use('/api/memo', memoRouter);
 
 // PSYCHE — Emergent Sentience Observatory (#4856). Mounted as a public read
 // surface alongside the orchestration backbone so the A11oy PSYCHE pages

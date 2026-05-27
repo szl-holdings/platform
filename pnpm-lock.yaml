@@ -763,6 +763,9 @@ importers:
       '@szl-holdings/lambda-math':
         specifier: workspace:*
         version: link:../../packages/lambda-math
+      '@szl-holdings/memo-reflection-kit':
+        specifier: workspace:*
+        version: link:../../packages/memo-reflection-kit
       '@szl-holdings/model-passport':
         specifier: workspace:*
         version: link:../../packages/model-passport
@@ -4241,6 +4244,18 @@ importers:
       typescript:
         specifier: 'catalog:'
         version: 5.9.3
+
+  packages/memo-reflection-kit:
+    devDependencies:
+      '@types/node':
+        specifier: 'catalog:'
+        version: 25.3.5
+      typescript:
+        specifier: 'catalog:'
+        version: 5.9.3
+      vitest:
+        specifier: 'catalog:'
+        version: 3.2.4(@types/node@25.3.5)(@vitest/ui@4.1.2)(happy-dom@20.8.9)(jiti@2.6.1)(lightningcss@1.31.1)(terser@5.46.1)(tsx@4.21.0)(yaml@2.8.3)
 
   packages/memory-core:
     dependencies:
