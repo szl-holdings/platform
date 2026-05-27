@@ -1,0 +1,53 @@
+{
+  "name": "@szl-holdings/putnam-harness",
+  "version": "0.1.0",
+  "private": false,
+  "description": "Receipt-attested Putnam-2025 evaluation harness. Orchestrates sparse-attention contradiction-probe, sequence-pipeline staged evidence, perception-loop reasoning trace, and lean-formulas verification against the 12 MathArena Putnam-2025 problems. No bandaid, no hallucinated wins — every attempt produces a hash-chained receipt and a judged score.",
+  "type": "module",
+  "main": "./src/index.ts",
+  "types": "./src/index.ts",
+  "exports": {
+    ".": {
+      "types": "./src/index.ts",
+      "import": "./src/index.ts"
+    },
+    "./loader": {
+      "types": "./src/loader.ts",
+      "import": "./src/loader.ts"
+    },
+    "./orchestrator": {
+      "types": "./src/orchestrator.ts",
+      "import": "./src/orchestrator.ts"
+    },
+    "./judge": {
+      "types": "./src/judge.ts",
+      "import": "./src/judge.ts"
+    },
+    "./receipts": {
+      "types": "./src/receipts.ts",
+      "import": "./src/receipts.ts"
+    },
+    "./lean-check": {
+      "types": "./src/lean-check.ts",
+      "import": "./src/lean-check.ts"
+    }
+  },
+  "scripts": {
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run --passWithNoTests",
+    "eval:live": "node --experimental-strip-types src/cli/eval-live.ts"
+  },
+  "license": "UNLICENSED",
+  "dependencies": {
+    "@anthropic-ai/sdk": "^0.78.0",
+    "@szl-holdings/perception-loop": "workspace:*",
+    "@szl-holdings/sequence-pipeline": "workspace:*",
+    "@szl-holdings/sparse-attention-kit": "workspace:*"
+  },
+  "devDependencies": {
+    "@types/node": "catalog:",
+    "tsx": "catalog:",
+    "typescript": "catalog:",
+    "vitest": "catalog:"
+  }
+}
