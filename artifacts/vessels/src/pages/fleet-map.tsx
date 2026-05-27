@@ -23,6 +23,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Link } from 'wouter';
 import type { VesselProfile } from '@/data/types';
 import { useMapboxToken } from '@/hooks/use-mapbox-token';
+import { AisProvenanceChip } from '@/components/ais-provenance-chip';
 import { useFleetExceptions, useVessels } from '@/hooks/use-vessels-data';
 
 const statusColors: Record<string, string> = {
@@ -943,6 +944,7 @@ export default function FleetMapPage() {
         </div>
 
         <div className="ml-auto flex items-center gap-2">
+          <AisProvenanceChip />
           <div className="hidden lg:flex items-center gap-3">
             {Object.entries({
               at_sea: color.accent.green,

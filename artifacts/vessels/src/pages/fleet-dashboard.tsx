@@ -26,6 +26,7 @@ import {
 } from 'lucide-react';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { Link, useLocation } from 'wouter';
+import { AisProvenanceChip } from '@/components/ais-provenance-chip';
 import { VesselsGraphQLPanel } from '@/components/graphql-data-panel';
 import { dataProvider } from '@/data/data-provider';
 import { useFleetExceptions, useRoster, useSanctions } from '@/hooks/use-vessels-data';
@@ -1457,6 +1458,12 @@ export default function FleetDashboard() {
             >
               Intelligence Sources
             </span>
+            <AisProvenanceChip compact />
+            <AisProvenanceChip
+              compact
+              endpoint="/api/vessels/live/ais?provider=barentswatch"
+              queryKeySuffix="barentswatch"
+            />
             {[
               { label: 'AIS Live', active: true, color: '#22c55e' },
               { label: 'SAR', active: roster.some((v) => v.status === 'dark'), color: 'var(--gi-accent-blue)' },

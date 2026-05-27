@@ -3,6 +3,7 @@ import { Badge } from '@szl-holdings/shared-ui/ui/badge';
 import { cn } from '@szl-holdings/shared-ui/utils';
 import { Activity, AlertTriangle, Cpu, DollarSign, FileSearch, FileText, Link2, Shield, TrendingUp } from 'lucide-react';
 import { useEffect, useMemo, useState } from 'react';
+import { AisProvenanceChip } from '@/components/ais-provenance-chip';
 
 interface Claim {
   id: string;
@@ -265,6 +266,7 @@ export default function InsurancePanelPage() {
               API error — showing whatever loaded
             </Badge>
           )}
+          <AisProvenanceChip compact />
         </div>
       </div>
 
