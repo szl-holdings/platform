@@ -45,6 +45,8 @@
   },
   "dependencies": {
     "@szl-holdings/design-system": "workspace:*",
+    "@szl-holdings/document-intelligence": "workspace:*",
+    "@szl-holdings/openusd-export": "workspace:*",
     "@szl-holdings/observability": "workspace:*",
     "@szl-holdings/replit-auth-web": "workspace:*",
     "@szl-holdings/brand-registry": "workspace:*",

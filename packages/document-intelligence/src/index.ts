@@ -22,5 +22,16 @@ export * from './types.js';
 export * from './adapters.js';
 export * from './pipeline.js';
 export * from './ingestion.js';
+// NOTE: `staged-pipeline` is Node-only (depends on `node:crypto` via
+// `@workspace/seeing-eye`). Import it from the `./staged-pipeline`
+// subpath in server code; the main barrel stays browser-safe.
+export * from './extraction-peaks.js';
+export * from './episodic-scene.js';
+export type {
+  EpisodicRecallEpisode,
+  EpisodicRecallInput,
+  EpisodicRecallHit,
+  EpisodicRecallResult,
+} from './episodic-recall-types.js';
 
-export const DOCUMENT_INTELLIGENCE_VERSION = '0.1.0' as const;
+export const DOCUMENT_INTELLIGENCE_VERSION = '0.2.0' as const;

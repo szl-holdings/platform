@@ -48,7 +48,7 @@ export interface StageProvenanceEntry {
   notes?: string;
 }
 
-export type PipelineStage = 'ocr' | 'layout' | 'tables' | 'charts' | 'qa';
+export type PipelineStage = 'ocr' | 'layout' | 'tables' | 'charts' | 'visual-ground' | 'qa' | 'episodic-map';
 
 /**
  * Chunk-level evidence reference emitted by every pipeline stage.
@@ -69,7 +69,7 @@ export interface DocumentChunk {
   /** Confidence from the upstream adapter (0–1) */
   confidence: number;
   /** Type of content captured in this chunk */
-  contentType: 'text' | 'header' | 'footer' | 'table-cell' | 'table-row' | 'chart-caption' | 'figure-caption' | 'qa-answer';
+  contentType: 'text' | 'header' | 'footer' | 'table-cell' | 'table-row' | 'chart-caption' | 'figure-caption' | 'qa-answer' | 'visual-claim' | 'recall-hit';
   /** Evidence reference linking to the source document */
   evidenceRef: ChunkEvidenceRef;
   /** Provenance chain for the retrieval layer */

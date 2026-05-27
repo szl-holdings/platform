@@ -23,6 +23,13 @@ import {
 } from '../lib/conduit/index';
 import { dryRunUnstructured } from '../lib/conduit/sources/unstructured-source';
 import { recallEpisodes, hashEmbedding, type MemnetEpisode } from '@szl-holdings/ai-engine/memory/memnet-recall';
+import {
+  rankExtractionConfidencePeaks,
+  composeEpisodicScene,
+  episodicSceneToUsd,
+  type EpisodicRecallInput,
+} from '@szl-holdings/document-intelligence';
+import { runStagedDocumentPipeline } from '@szl-holdings/document-intelligence/staged-pipeline';
 
 /**
  * Emit a cognitive-reflexive observation when a sync run completes.
@@ -977,6 +984,99 @@ router.get('/conduit/destinations/:destination/objects/:objectType/fields', asyn
   } catch (err) {
     req.log.error({ err }, 'Failed to list destination fields');
     res.json([]);
+  }
+});
+
+// ---------------------------------------------------------------------------
+// Ingest Trace — sequence-pipeline backbone (Task #5517)
+//
+// Runs the *real* staged document-intelligence pipeline against a small
+// synthetic batch and returns the per-stage `pipeline.stage.v1` receipt
+// chain (with SHA-256 hashes), the unified `DocumentPipelineResult`s,
+// the SeeingEye `VisualGroundedResult`, the `EpisodicRecallResult`, the
+// peak-detector review queue ranking, and the USD round-trip of the
+// procedural-kit recall scene. The Conduit `/ingest-trace` page fetches
+// this and renders the actual stage receipts (FNV-1a previews are only
+// the local-only fallback).
+//
+// Public read surface — Conduit is one of the six A11oy products and the
+// page that consumes this lives at `/conduit/ingest-trace` (no session).
+// The batch is in-memory only; no DB writes.
+// ---------------------------------------------------------------------------
+const INGEST_TRACE_EPISODES: EpisodicRecallInput['episodes'] = [
+  { episodeId: 'ep-2024-q3', text: 'reefer return air defrost frost door seal', occurredAt: '2024-08-12T11:30:00Z', scope: 'reefer-screening', payload: { sourceField: 'observed_return_air_c', destField: 'reefer.return_air_c', outcome: 'accepted' } },
+  { episodeId: 'ep-2025-q1', text: 'container weight manifest variance reefer', occurredAt: '2025-03-04T09:10:00Z', scope: 'reefer-screening', payload: { sourceField: 'observed_weight_kg', destField: 'reefer.gross_weight_kg', outcome: 'accepted' } },
+  { episodeId: 'ep-2026-q1', text: 'reefer power draw kw amperage nominal', occurredAt: '2026-02-08T08:20:00Z', scope: 'reefer-screening', payload: { sourceField: 'power_draw_kw', destField: 'reefer.power_kw', outcome: 'accepted' } },
+];
+
+const INGEST_TRACE_BATCH = [
+  { documentId: 'doc-alpha',   fileName: 'engagement-letter.pdf',  lane: 'counsel' as const, trace: [0.95, 0.93, 0.92, 0.30, 0.91, 0.94, 0.93], hasVisual: false, hasRecall: false },
+  { documentId: 'doc-bravo',   fileName: 'voyage-manifest.pdf',    lane: 'vessels' as const, trace: [0.92, 0.93, 0.92, 0.91, 0.93, 0.92, 0.94], hasVisual: false, hasRecall: false },
+  { documentId: 'doc-charlie', fileName: 'reefer-inspection.pdf',  lane: 'vessels' as const, trace: [0.85, 0.82, 0.84, 0.65, 0.84, 0.83, 0.85], hasVisual: true,  hasRecall: true  },
+  { documentId: 'doc-delta',   fileName: 'foreclosure-notice.pdf', lane: 'terra'   as const, trace: [0.96, 0.95, 0.97, 0.10, 0.96, 0.95, 0.97], hasVisual: false, hasRecall: false },
+];
+
+router.get('/conduit/ingest-trace/run', async (_req: Request, res: Response): Promise<void> => {
+  try {
+    const staged = [];
+    for (const spec of INGEST_TRACE_BATCH) {
+      const result = await runStagedDocumentPipeline(
+        {
+          request: {
+            documentId: spec.documentId,
+            kind: 'filing',
+            lane: spec.lane,
+            fileName: spec.fileName,
+            mimeType: 'application/pdf',
+            content: new TextEncoder().encode(`${spec.documentId} synthetic body`),
+          },
+          visual: spec.hasVisual ? {
+            frameBytes: new TextEncoder().encode('PSC-204|reefer|TGHU-9182'),
+            labels: ['door_seal_frost', 'manifest_placard'],
+            rawDetections: [
+              { label: 'door_seal_frost', bbox: [0.12, 0.22, 0.31, 0.38], confidence: 0.86 },
+              { label: 'manifest_placard', bbox: [0.40, 0.62, 0.66, 0.78], confidence: 0.79 },
+            ],
+          } : undefined,
+          episodicRecall: spec.hasRecall ? {
+            queryText: 'reefer return air defrost frost door seal',
+            scope: 'reefer-screening',
+            episodes: INGEST_TRACE_EPISODES,
+            now: new Date('2026-05-27T00:00:00Z'),
+            topK: 3,
+          } : undefined,
+        },
+        { pipelineId: `pipe-${spec.documentId}` },
+      );
+      // Splice the deterministic confidence trace onto the document's
+      // chunks so the peak-detector ranking is reproducible across runs.
+      const traceChunks = spec.trace.map((c, idx) => ({
+        chunkId: `${spec.documentId}-trace-${idx}`,
+        documentId: spec.documentId,
+        stage: 'qa' as const,
+        page: 1,
+        text: '',
+        confidence: c,
+        contentType: 'qa-answer' as const,
+        evidenceRef: { documentId: spec.documentId, chunkId: `${spec.documentId}-trace-${idx}`, page: 1, retrievedAt: result.document.completedAt },
+        provenance: { documentId: spec.documentId, lane: spec.lane, kind: 'filing' as const, stage: 'qa' as const, adapterProvider: 'trace', confidence: c, generatedAt: result.document.completedAt },
+      }));
+      const augmentedDoc = { ...result.document, chunks: [...result.document.chunks, ...traceChunks] };
+      staged.push({
+        pipelineId: result.pipelineResult.pipelineId,
+        stages: result.pipelineResult.stages,
+        document: augmentedDoc,
+        visual: result.visual,
+        episodicRecall: result.episodicRecall,
+      });
+    }
+    const ranked = rankExtractionConfidencePeaks(staged.map((s) => s.document), { mode: 'gap', topK: 4 });
+    const recall = staged.find((s) => s.episodicRecall)?.episodicRecall ?? null;
+    const usd = recall ? episodicSceneToUsd(composeEpisodicScene(recall)) : null;
+    res.json({ generatedAt: new Date().toISOString(), staged, ranked, recall, usd });
+  } catch (err) {
+    req.log?.error?.({ err }, 'ingest-trace run failed');
+    res.status(500).json({ error: 'ingest-trace run failed', message: (err as Error).message });
   }
 });
 

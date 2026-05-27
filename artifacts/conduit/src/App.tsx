@@ -5,6 +5,7 @@ import { Layout } from '@/components/layout';
 import { InnovationStoreProvider } from '@/lib/innovation-store';
 import ConduitLandingPage from '@/pages/conduit-landing';
 import HealthScreeningPage from '@/pages/health-screening';
+import IngestTracePage from '@/pages/ingest-trace';
 import Dashboard from '@/pages/dashboard';
 import ComputePage from '@/pages/compute';
 import ConnectionsList from '@/pages/connections/list';
@@ -69,6 +70,7 @@ function AppContent() {
     <Switch>
       <Route path="/" component={ConduitLandingPage} />
       <Route path="/health-screening" component={HealthScreeningPage} />
+      <Route path="/ingest-trace" component={IngestTracePage} />
       <Route>
         <Layout>
           <Switch>

@@ -14,6 +14,22 @@ import type { DocumentPipelineAdapters } from './pipeline.js';
 import { runDocumentPipeline } from './pipeline.js';
 import type { DocumentIngestionRequest, DocumentKind, DocumentLane, DocumentPipelineResult } from './types.js';
 
+/**
+ * NOTE — sequence-pipeline backbone (Task #5517):
+ *
+ * The canonical *server-side* ingest path is `ingestDocumentStaged`,
+ * exported from the Node-only subpath `@szl-holdings/document-intelligence/staged-pipeline`.
+ * That path runs the full `sequence-pipeline` backbone with per-stage
+ * `pipeline.stage.v1` receipts, SeeingEye visual grounding, and the
+ * episodic-map recall stage.
+ *
+ * This module keeps `ingestDocument` on the simpler `runDocumentPipeline`
+ * runtime so the main barrel stays **browser-safe** (the staged backbone
+ * pulls `node:crypto` via `@workspace/seeing-eye`). The two share the
+ * same `DocumentPipelineResult` shape; the staged path only ADDS the
+ * per-stage receipt chain and the optional visual / recall side-channels.
+ */
+
 export interface IngestDocumentOptions {
   adapters?: DocumentPipelineAdapters;
   /** Pre-defined questions for the QA stage */
@@ -27,6 +43,9 @@ export function generateDocumentId(prefix = 'doc'): string {
 
 /**
  * Ingest any document kind through the full pipeline.
+ *
+ * For the staged backbone with per-stage receipts + visual + recall,
+ * use `ingestDocumentStaged` from the `./staged-pipeline` subpath.
  */
 export async function ingestDocument(
   req: DocumentIngestionRequest,

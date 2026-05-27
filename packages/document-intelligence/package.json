@@ -1,9 +1,9 @@
 {
   "name": "@szl-holdings/document-intelligence",
-  "version": "0.0.0",
+  "version": "0.2.0",
   "private": false,
   "type": "module",
-  "description": "Citation-preserving document intelligence pipeline — OCR, layout parsing, table extraction, chart extraction, and QA with provenance baked in. Ingestion entrypoints for contracts, filings, and memos across all lanes.",
+  "description": "Citation-preserving document intelligence pipeline — OCR, layout parsing, table extraction, chart extraction, and QA with provenance baked in. Re-expressed as a sequence-pipeline backbone with SeeingEye visual ingest and episodic-map recall as first-class stages; surfaces extraction-confidence peaks via peak-detector and renders episodic recall scenes via procedural-kit (USD-exportable).",
   "exports": {
     ".": {
       "types": "./dist/index.d.ts",
@@ -24,15 +24,36 @@
     "./ingestion": {
       "types": "./dist/ingestion.d.ts",
       "import": "./src/ingestion.ts"
+    },
+    "./staged-pipeline": {
+      "types": "./dist/staged-pipeline.d.ts",
+      "import": "./src/staged-pipeline.ts"
+    },
+    "./extraction-peaks": {
+      "types": "./dist/extraction-peaks.d.ts",
+      "import": "./src/extraction-peaks.ts"
+    },
+    "./episodic-scene": {
+      "types": "./dist/episodic-scene.d.ts",
+      "import": "./src/episodic-scene.ts"
     }
   },
   "scripts": {
     "lint": "biome lint ./src",
     "lint:ci": "biome lint ./src",
     "format": "biome format --write ./src",
-    "typecheck": "tsc -p tsconfig.json --noEmit"
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "test": "vitest run --passWithNoTests"
+  },
+  "dependencies": {
+    "@szl-holdings/sequence-pipeline": "workspace:*",
+    "@szl-holdings/procedural-kit": "workspace:*",
+    "@szl-holdings/openusd-export": "workspace:*",
+    "@workspace/anomaly-fabric": "workspace:*",
+    "@workspace/seeing-eye": "workspace:*"
   },
   "devDependencies": {
-    "@types/node": "catalog:"
+    "@types/node": "catalog:",
+    "vitest": "catalog:"
   }
 }
