@@ -2118,6 +2118,8 @@ importers:
         specifier: 'catalog:'
         version: 3.25.76
 
+  artifacts/vessels-uds: {}
+
   lib/a11oy-fabric:
     dependencies:
       zod:
