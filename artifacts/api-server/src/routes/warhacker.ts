@@ -166,6 +166,12 @@ interface BundleEntry {
 const BUNDLE_NAMES = ['rosie-uds', 'sentra-uds', 'amaru-uds', 'a11oy-uds'] as const;
 
 function findRepoRoot(): string {
+  // Test-only escape hatch: lets the integration test point the bundle
+  // matrix at a temp `dist/` it controls instead of the repo's real one.
+  // Never set in production — there's nothing on the request path that
+  // reads it; it is read only here, at the top of readBundleMatrix.
+  const override = process.env.WARHACKER_REPO_ROOT_OVERRIDE;
+  if (override && existsSync(override)) return override;
   // api-server runs out of dist/; walk up until we find pnpm-workspace.yaml.
   let p = process.cwd();
   for (let i = 0; i < 8; i++) {
@@ -750,3 +756,14 @@ router.post('/warhacker/lane/5/edge-drill', validateBody(Lane5Body), (req, res) 
 });
 
 export default router;
+
+// Internal helpers exported for unit tests (#5573). Not part of the
+// route surface — do not import from application code.
+export const __testables = {
+  parseSha256Sidecar,
+  discoverSignerKey,
+  deriveSignerDid,
+  readBundleMatrix,
+  findRepoRoot,
+  sha256,
+};
