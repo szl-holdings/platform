@@ -110,6 +110,7 @@ import demoResetRouter from './routes/demo-reset';
 import agiForecastStatusRouter from './routes/agi-forecast-status';
 import putnamRouter from './routes/putnam';
 import memoRouter from './routes/memo';
+import isingRouter from './routes/ising';
 import udsRegistryRouter from './routes/uds-registry';
 import a11oyOrchestrationRouter from './routes/a11oy-orchestration-api';
 import a11oyLeaderUpgradesRouter from './routes/a11oy-leader-upgrades';
@@ -459,6 +460,12 @@ app.use('/api/yawar', yawarRouter);
 app.use('/api/agi-forecast', agiForecastStatusRouter);
 app.use('/api/putnam', putnamRouter);
 app.use('/api/memo', memoRouter);
+// NVIDIA-Ising-inspired pre-decoder cascade + calibration surface.
+// Public-read on /receipts/classes + /cascade/policy; auth-required on
+// admit/divergence endpoints. Receipts are content-addressed by the
+// @szl-holdings/ising-calibration-kit; the escalation gate refuses to
+// seal a residual-rate-exceeded cascade without a real global ref.
+app.use('/api/ising', isingRouter);
 // UDS bundle registry — public, read-only mesh-facing feed of every
 // signed UDS payload SZL ships. Mirror of `docs/uds/REGISTRY.md`.
 app.use('/api/uds', udsRegistryRouter);

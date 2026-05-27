@@ -1,0 +1,26 @@
+{
+  "name": "@szl-holdings/ising-calibration-kit",
+  "version": "0.1.0",
+  "private": false,
+  "description": "SZL re-expression of NVIDIA Ising (pre-decoder cascade + calibration loop + noise-learning) as dependency-free TypeScript primitives. Three runtime-enforced gates on top: content-addressed receipts, mandatory escalation when local-residual exceeds threshold, Jensen-Shannon divergence witness between learned and declared noise models. Inspired by Chamberland/Olle/Li/Thornton/Baratta (NVIDIA, arXiv:2604.12841, Apr 14 2026) and the Quantum-Calibration-Agent-Blueprint by ShuxiangCao et al.; ships no NVIDIA source code or model weights — pattern only.",
+  "type": "module",
+  "main": "./src/index.ts",
+  "types": "./src/index.ts",
+  "exports": {
+    ".": { "types": "./src/index.ts", "import": "./src/index.ts" },
+    "./receipts": { "types": "./src/receipts.ts", "import": "./src/receipts.ts" },
+    "./predecoder": { "types": "./src/predecoder.ts", "import": "./src/predecoder.ts" },
+    "./calibration": { "types": "./src/calibration.ts", "import": "./src/calibration.ts" },
+    "./noise-model": { "types": "./src/noise-model.ts", "import": "./src/noise-model.ts" }
+  },
+  "scripts": {
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run"
+  },
+  "license": "UNLICENSED",
+  "devDependencies": {
+    "@types/node": "catalog:",
+    "typescript": "catalog:",
+    "vitest": "catalog:"
+  }
+}

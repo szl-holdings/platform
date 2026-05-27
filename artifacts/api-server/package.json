@@ -71,6 +71,7 @@
     "@szl-holdings/atlas-artifacts": "workspace:*",
     "@szl-holdings/atlas-spatial-runtime": "workspace:*",
     "@szl-holdings/audit": "workspace:*",
+    "@szl-holdings/ising-calibration-kit": "workspace:*",
     "@szl-holdings/memo-reflection-kit": "workspace:*",
     "@szl-holdings/auth": "workspace:*",
     "@szl-holdings/auth-shared": "workspace:*",
