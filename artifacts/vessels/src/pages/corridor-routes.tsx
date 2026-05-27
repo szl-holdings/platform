@@ -36,7 +36,7 @@ const trendIcons: Record<string, typeof TrendingUp> = {
 const trendColors: Record<string, string> = {
   up: 'text-emerald-400',
   down: 'text-red-400',
-  stable: 'text-sky-400/50',
+  stable: 'text-[#8a8a8a]',
 };
 
 function getNum(val: string | number | undefined, def: number): number {
@@ -76,20 +76,20 @@ export default function CorridorRoutesPage() {
       <div className="flex items-start justify-between gap-4">
         <div>
           <div className="flex items-center gap-2">
-            <h1 className="font-display text-xl font-bold text-sky-50">Corridor Routes</h1>
+            <h1 className="font-display text-xl font-bold text-[#f5f5f5]">Corridor Routes</h1>
             {isLive && (
               <span className="text-[9px] px-1.5 py-0.5 rounded border border-emerald-500/30 bg-emerald-500/10 text-emerald-400 font-mono uppercase">
                 Live
               </span>
             )}
           </div>
-          <p className="text-xs text-sky-400/50 mt-0.5">
+          <p className="text-xs text-[#8a8a8a] mt-0.5">
             Global shipping corridor analysis — delay rates, profitability, and risk conditions
           </p>
         </div>
         <button
           onClick={() => refetch()}
-          className="p-2 rounded-lg border border-sky-500/10 text-sky-400/50 hover:text-sky-300 hover:border-sky-500/20 transition-all"
+          className="p-2 rounded-lg border border-white/[0.06] text-[#8a8a8a] hover:text-[#d4c598] hover:border-white/[0.08] transition-all"
         >
           <RefreshCw className={cn('w-4 h-4', isLoading && 'animate-spin')} />
         </button>
@@ -100,7 +100,7 @@ export default function CorridorRoutesPage() {
           {
             label: 'Active Corridors',
             value: corridors.length,
-            color: 'text-sky-400',
+            color: 'text-[#c9b787]',
             icon: Navigation,
           },
           {
@@ -125,12 +125,12 @@ export default function CorridorRoutesPage() {
         ].map((s) => (
           <div
             key={s.label}
-            className="bg-[#0a1628]/80 border border-sky-500/10 rounded-xl p-4 flex items-center gap-3"
+            className="bg-white/[0.02] border border-white/[0.06] rounded-xl p-4 flex items-center gap-3"
           >
             <s.icon className={cn('w-5 h-5 shrink-0', s.color)} />
             <div>
               <p className={cn('text-xl font-bold font-display', s.color)}>{s.value}</p>
-              <p className="text-[10px] text-sky-400/40 uppercase tracking-wider">{s.label}</p>
+              <p className="text-[10px] text-[#6a6a6a] uppercase tracking-wider">{s.label}</p>
             </div>
           </div>
         ))}
@@ -138,7 +138,7 @@ export default function CorridorRoutesPage() {
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <div className="lg:col-span-2 space-y-3">
-          <h2 className="text-[10px] font-mono text-sky-400/50 uppercase tracking-wider">
+          <h2 className="text-[10px] font-mono text-[#8a8a8a] uppercase tracking-wider">
             Corridor Performance
           </h2>
           {isLoading ? (
@@ -146,7 +146,7 @@ export default function CorridorRoutesPage() {
               {[1, 2, 3].map((i) => (
                 <div
                   key={i}
-                  className="h-20 rounded-xl bg-sky-500/5 border border-sky-500/10 animate-pulse"
+                  className="h-20 rounded-xl bg-[#c9b787]/8 border border-white/[0.06] animate-pulse"
                 />
               ))}
             </div>
@@ -164,14 +164,14 @@ export default function CorridorRoutesPage() {
                     key={corridor.id}
                     onClick={() => setSelected(isSelected ? null : String(corridor.id))}
                     className={cn(
-                      'w-full text-left bg-[#0a1628]/80 border rounded-xl p-4 hover:border-sky-500/20 transition-all',
-                      isSelected ? 'border-sky-500/30 bg-sky-500/5' : 'border-sky-500/10',
+                      'w-full text-left bg-white/[0.02] border rounded-xl p-4 hover:border-white/[0.08] transition-all',
+                      isSelected ? 'border-[#c9b787]/24 bg-[#c9b787]/8' : 'border-white/[0.06]',
                     )}
                   >
                     <div className="flex items-start gap-4">
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center gap-2 flex-wrap">
-                          <p className="text-sm font-bold text-sky-100">{corridor.name}</p>
+                          <p className="text-sm font-bold text-[#f5f5f5]">{corridor.name}</p>
                           {corridor.activeAlerts > 0 && (
                             <Badge
                               variant="outline"
@@ -184,17 +184,17 @@ export default function CorridorRoutesPage() {
                             variant="outline"
                             className={cn(
                               'text-[9px]',
-                              weatherRiskColors[corridor.weatherRisk] ?? 'text-sky-400',
+                              weatherRiskColors[corridor.weatherRisk] ?? 'text-[#c9b787]',
                             )}
                           >
                             {corridor.weatherRisk} weather
                           </Badge>
                         </div>
-                        <p className="text-[11px] text-sky-400/50 mt-0.5">
+                        <p className="text-[11px] text-[#8a8a8a] mt-0.5">
                           {corridor.origin} → {corridor.destination}
                         </p>
                         {(corridor.commodity || corridor.region) && (
-                          <p className="text-[10px] text-sky-400/30 mt-0.5">
+                          <p className="text-[10px] text-[#5a5a5a] mt-0.5">
                             {corridor.commodity} · {corridor.region}
                           </p>
                         )}
@@ -213,7 +213,7 @@ export default function CorridorRoutesPage() {
                         >
                           {profitIdx}
                         </p>
-                        <p className="text-[9px] text-sky-400/40">profit index</p>
+                        <p className="text-[9px] text-[#6a6a6a]">profit index</p>
                         <div
                           className={cn(
                             'flex items-center gap-1 justify-end mt-1',
@@ -227,18 +227,18 @@ export default function CorridorRoutesPage() {
                     </div>
 
                     <div className="mt-3 grid grid-cols-5 gap-2 text-center">
-                      <div className="bg-sky-500/5 rounded p-2 border border-sky-500/10">
-                        <p className="text-[9px] text-sky-400/30">Vessels</p>
-                        <p className="text-[11px] font-mono text-sky-300">{corridor.vesselCount}</p>
+                      <div className="bg-[#c9b787]/8 rounded p-2 border border-white/[0.06]">
+                        <p className="text-[9px] text-[#5a5a5a]">Vessels</p>
+                        <p className="text-[11px] font-mono text-[#d4c598]">{corridor.vesselCount}</p>
                       </div>
-                      <div className="bg-sky-500/5 rounded p-2 border border-sky-500/10">
-                        <p className="text-[9px] text-sky-400/30">Transit</p>
-                        <p className="text-[11px] font-mono text-sky-300">
+                      <div className="bg-[#c9b787]/8 rounded p-2 border border-white/[0.06]">
+                        <p className="text-[9px] text-[#5a5a5a]">Transit</p>
+                        <p className="text-[11px] font-mono text-[#d4c598]">
                           {corridor.avgTransitDays ?? '—'}d
                         </p>
                       </div>
-                      <div className="bg-sky-500/5 rounded p-2 border border-sky-500/10">
-                        <p className="text-[9px] text-sky-400/30">Delay</p>
+                      <div className="bg-[#c9b787]/8 rounded p-2 border border-white/[0.06]">
+                        <p className="text-[9px] text-[#5a5a5a]">Delay</p>
                         <p
                           className={cn(
                             'text-[11px] font-mono',
@@ -252,20 +252,20 @@ export default function CorridorRoutesPage() {
                           {delayRate.toFixed(0)}%
                         </p>
                       </div>
-                      <div className="bg-sky-500/5 rounded p-2 border border-sky-500/10">
-                        <p className="text-[9px] text-sky-400/30">Congestion</p>
+                      <div className="bg-[#c9b787]/8 rounded p-2 border border-white/[0.06]">
+                        <p className="text-[9px] text-[#5a5a5a]">Congestion</p>
                         <p
                           className={cn(
                             'text-[11px] font-mono capitalize',
-                            congestionColors[corridor.portCongestionRisk] ?? 'text-sky-300',
+                            congestionColors[corridor.portCongestionRisk] ?? 'text-[#d4c598]',
                           )}
                         >
                           {corridor.portCongestionRisk}
                         </p>
                       </div>
-                      <div className="bg-sky-500/5 rounded p-2 border border-sky-500/10">
-                        <p className="text-[9px] text-sky-400/30">Vol/wk</p>
-                        <p className="text-[11px] font-mono text-sky-300">
+                      <div className="bg-[#c9b787]/8 rounded p-2 border border-white/[0.06]">
+                        <p className="text-[9px] text-[#5a5a5a]">Vol/wk</p>
+                        <p className="text-[11px] font-mono text-[#d4c598]">
                           {corridor.weeklyVolume ?? '—'}
                         </p>
                       </div>
@@ -279,13 +279,13 @@ export default function CorridorRoutesPage() {
         <div className="space-y-4">
           {selectedCorridor ? (
             <>
-              <h2 className="text-[10px] font-mono text-sky-400/50 uppercase tracking-wider">
+              <h2 className="text-[10px] font-mono text-[#8a8a8a] uppercase tracking-wider">
                 Corridor Detail
               </h2>
-              <div className="bg-[#0a1628]/80 border border-sky-500/20 rounded-xl p-4 space-y-4">
+              <div className="bg-white/[0.02] border border-white/[0.08] rounded-xl p-4 space-y-4">
                 <div>
-                  <p className="text-sm font-bold text-sky-100">{selectedCorridor.name}</p>
-                  <p className="text-[11px] text-sky-400/50 mt-0.5">
+                  <p className="text-sm font-bold text-[#f5f5f5]">{selectedCorridor.name}</p>
+                  <p className="text-[11px] text-[#8a8a8a] mt-0.5">
                     {selectedCorridor.origin} → {selectedCorridor.destination}
                   </p>
                 </div>
@@ -295,7 +295,7 @@ export default function CorridorRoutesPage() {
                   return (
                     <div className="space-y-2">
                       <div className="flex items-center justify-between">
-                        <p className="text-[10px] text-sky-400/40">Profitability Index</p>
+                        <p className="text-[10px] text-[#6a6a6a]">Profitability Index</p>
                         <p
                           className={cn(
                             'text-sm font-bold font-mono',
@@ -305,7 +305,7 @@ export default function CorridorRoutesPage() {
                           {pi}
                         </p>
                       </div>
-                      <div className="h-2 bg-sky-500/10 rounded-full overflow-hidden">
+                      <div className="h-2 bg-[#c9b787]/10 rounded-full overflow-hidden">
                         <div
                           className={cn(
                             'h-full rounded-full',
@@ -335,12 +335,12 @@ export default function CorridorRoutesPage() {
                   ].map((item) => (
                     <div
                       key={item.label}
-                      className="bg-sky-500/5 rounded p-2 border border-sky-500/10"
+                      className="bg-[#c9b787]/8 rounded p-2 border border-white/[0.06]"
                     >
-                      <p className="text-[9px] text-sky-400/30">{item.label}</p>
+                      <p className="text-[9px] text-[#5a5a5a]">{item.label}</p>
                       <p
                         className={cn(
-                          'text-[10px] font-mono text-sky-200 mt-0.5',
+                          'text-[10px] font-mono text-[#e0e0e0] mt-0.5',
                           item.cap && 'capitalize',
                         )}
                       >
@@ -368,14 +368,14 @@ export default function CorridorRoutesPage() {
             </>
           ) : (
             <>
-              <h2 className="text-[10px] font-mono text-sky-400/50 uppercase tracking-wider">
+              <h2 className="text-[10px] font-mono text-[#8a8a8a] uppercase tracking-wider">
                 Corridor Summary
               </h2>
-              <div className="bg-[#0a1628]/80 border border-sky-500/10 rounded-xl p-4">
-                <p className="text-[11px] text-sky-400/40 mb-3">Select a corridor to see detail</p>
+              <div className="bg-white/[0.02] border border-white/[0.06] rounded-xl p-4">
+                <p className="text-[11px] text-[#6a6a6a] mb-3">Select a corridor to see detail</p>
                 <div className="space-y-2">
                   <div>
-                    <p className="text-[9px] text-sky-400/40 mb-1">Profitability Spread</p>
+                    <p className="text-[9px] text-[#6a6a6a] mb-1">Profitability Spread</p>
                     <div className="space-y-1">
                       {[...corridors]
                         .sort(
@@ -386,10 +386,10 @@ export default function CorridorRoutesPage() {
                           const pi = getNum(c.profitabilityIndex, 50);
                           return (
                             <div key={c.id} className="flex items-center gap-2">
-                              <span className="text-[9px] text-sky-200/50 w-24 truncate">
+                              <span className="text-[9px] text-[#e0e0e0]/50 w-24 truncate">
                                 {c.name.split(' ').slice(0, 2).join(' ')}
                               </span>
-                              <div className="flex-1 h-1 bg-sky-500/10 rounded-full overflow-hidden">
+                              <div className="flex-1 h-1 bg-[#c9b787]/10 rounded-full overflow-hidden">
                                 <div
                                   className={cn(
                                     'h-full rounded-full',
@@ -422,8 +422,8 @@ export default function CorridorRoutesPage() {
                 </div>
               </div>
 
-              <div className="bg-[#0a1628]/80 border border-sky-500/10 rounded-xl p-4">
-                <p className="text-[9px] text-sky-400/40 uppercase tracking-wider mb-3">
+              <div className="bg-white/[0.02] border border-white/[0.06] rounded-xl p-4">
+                <p className="text-[9px] text-[#6a6a6a] uppercase tracking-wider mb-3">
                   Weather Risk by Corridor
                 </p>
                 <div className="space-y-2">
@@ -441,7 +441,7 @@ export default function CorridorRoutesPage() {
                                 : 'bg-amber-400',
                           )}
                         />
-                        <span className="text-[10px] text-sky-200/60 flex-1 truncate">
+                        <span className="text-[10px] text-[#e0e0e0]/60 flex-1 truncate">
                           {c.name}
                         </span>
                         <Badge

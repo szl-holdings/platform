@@ -359,11 +359,11 @@ export default function PortCongestionPage() {
             className="w-8 h-8 rounded-lg flex items-center justify-center"
             style={{ background: 'rgba(56,189,248,0.1)' }}
           >
-            <Anchor className="w-4 h-4 text-sky-400" />
+            <Anchor className="w-4 h-4 text-[#c9b787]" />
           </div>
           <div>
-            <h1 className="text-sm font-bold text-sky-50">Port Congestion Monitor</h1>
-            <p className="text-[10px] text-sky-400/40">
+            <h1 className="text-sm font-bold text-[#f5f5f5]">Port Congestion Monitor</h1>
+            <p className="text-[10px] text-[#6a6a6a]">
               Global port queue · berth availability · wait time estimates
             </p>
           </div>
@@ -377,10 +377,10 @@ export default function PortCongestionPage() {
               background: 'rgba(56,189,248,0.06)',
             }}
           >
-            <span className="w-1.5 h-1.5 rounded-full bg-sky-400 animate-pulse" />
+            <span className="w-1.5 h-1.5 rounded-full bg-[#c9b787] animate-pulse" />
             Live AIS Data
           </div>
-          <button className="p-1.5 rounded hover:bg-sky-500/10 text-sky-400/40 transition-colors">
+          <button className="p-1.5 rounded hover:bg-[#c9b787]/10 text-[#6a6a6a] transition-colors">
             <RefreshCw className="w-3.5 h-3.5" />
           </button>
         </div>
@@ -404,8 +404,8 @@ export default function PortCongestionPage() {
           >
             <Icon className="w-4 h-4 shrink-0" style={{ color }} />
             <div>
-              <p className="text-[9px] text-sky-400/40">{label}</p>
-              <p className="text-lg font-bold text-sky-50 font-mono">{value}</p>
+              <p className="text-[9px] text-[#6a6a6a]">{label}</p>
+              <p className="text-lg font-bold text-[#f5f5f5] font-mono">{value}</p>
             </div>
           </div>
         ))}
@@ -464,10 +464,10 @@ export default function PortCongestionPage() {
                   <div className="flex items-start justify-between mb-2">
                     <div>
                       <div className="flex items-center gap-2 mb-0.5">
-                        <span className="text-[11px] font-bold text-sky-50">{port.name}</span>
-                        <span className="text-[9px] text-sky-400/30">{port.countryCode}</span>
+                        <span className="text-[11px] font-bold text-[#f5f5f5]">{port.name}</span>
+                        <span className="text-[9px] text-[#5a5a5a]">{port.countryCode}</span>
                       </div>
-                      <span className="text-[9px] text-sky-400/40">{port.region}</span>
+                      <span className="text-[9px] text-[#6a6a6a]">{port.region}</span>
                     </div>
                     <span
                       className="px-1.5 py-0.5 rounded text-[8px] font-bold border"
@@ -478,16 +478,16 @@ export default function PortCongestionPage() {
                   </div>
                   <div className="grid grid-cols-3 gap-2 mb-2 text-[9px]">
                     <div>
-                      <span className="text-sky-400/30">Waiting</span>
-                      <p className="font-bold text-sky-100">{port.vessels_waiting}</p>
+                      <span className="text-[#5a5a5a]">Waiting</span>
+                      <p className="font-bold text-[#f5f5f5]">{port.vessels_waiting}</p>
                     </div>
                     <div>
-                      <span className="text-sky-400/30">Avg Wait</span>
-                      <p className="font-bold text-sky-100">{port.avg_wait_hours}h</p>
+                      <span className="text-[#5a5a5a]">Avg Wait</span>
+                      <p className="font-bold text-[#f5f5f5]">{port.avg_wait_hours}h</p>
                     </div>
                     <div>
-                      <span className="text-sky-400/30">Berths</span>
-                      <p className="font-bold text-sky-100">{berthUtil}% full</p>
+                      <span className="text-[#5a5a5a]">Berths</span>
+                      <p className="font-bold text-[#f5f5f5]">{berthUtil}% full</p>
                     </div>
                   </div>
                   <CongestionBar value={port.congestion_index} color={cfg.color} />
@@ -510,7 +510,7 @@ export default function PortCongestionPage() {
                 <div className="flex items-start justify-between">
                   <div>
                     <div className="flex items-center gap-3 mb-1">
-                      <h2 className="text-lg font-bold text-sky-50">{selectedPort.name}</h2>
+                      <h2 className="text-lg font-bold text-[#f5f5f5]">{selectedPort.name}</h2>
                       <span
                         className="px-2 py-0.5 rounded text-[9px] font-bold border"
                         style={{ color: cfg.color, borderColor: cfg.border, background: cfg.bg }}
@@ -518,17 +518,17 @@ export default function PortCongestionPage() {
                         {cfg.label}
                       </span>
                     </div>
-                    <p className="text-[11px] text-sky-400/40">
+                    <p className="text-[11px] text-[#6a6a6a]">
                       {selectedPort.country} · {selectedPort.region} · Primary cargo:{' '}
                       {selectedPort.top_cargo}
                     </p>
                   </div>
                   <div className="text-right">
-                    <p className="text-[9px] text-sky-400/30">Congestion Index</p>
+                    <p className="text-[9px] text-[#5a5a5a]">Congestion Index</p>
                     <p className="text-3xl font-black font-mono" style={{ color: cfg.color }}>
                       {selectedPort.congestion_index}
                     </p>
-                    <p className="text-[9px] text-sky-400/30">/ 100</p>
+                    <p className="text-[9px] text-[#5a5a5a]">/ 100</p>
                   </div>
                 </div>
 
@@ -567,9 +567,9 @@ export default function PortCongestionPage() {
                     >
                       <div className="flex items-center gap-1.5 mb-1">
                         <Icon className="w-3 h-3" style={{ color }} />
-                        <span className="text-[9px] text-sky-400/30">{label}</span>
+                        <span className="text-[9px] text-[#5a5a5a]">{label}</span>
                       </div>
-                      <p className="text-lg font-bold text-sky-50 font-mono">{value}</p>
+                      <p className="text-lg font-bold text-[#f5f5f5] font-mono">{value}</p>
                       {label === 'Monthly TEU' && (
                         <div className="flex items-center gap-1 mt-1">
                           {selectedPort.throughput_change >= 0 ? (
@@ -601,10 +601,10 @@ export default function PortCongestionPage() {
                   }}
                 >
                   <div className="flex items-center justify-between mb-4">
-                    <h3 className="text-xs font-bold text-sky-50 flex items-center gap-2">
-                      <Anchor className="w-3.5 h-3.5 text-sky-400" /> Berth Availability
+                    <h3 className="text-xs font-bold text-[#f5f5f5] flex items-center gap-2">
+                      <Anchor className="w-3.5 h-3.5 text-[#c9b787]" /> Berth Availability
                     </h3>
-                    <div className="flex items-center gap-3 text-[9px] text-sky-400/40">
+                    <div className="flex items-center gap-3 text-[9px] text-[#6a6a6a]">
                       <span className="flex items-center gap-1">
                         <span
                           className="w-2.5 h-2.5 rounded-sm inline-block"
@@ -638,7 +638,7 @@ export default function PortCongestionPage() {
 
                   <div className="mb-3">
                     <div className="flex items-center justify-between text-[10px] mb-1">
-                      <span className="text-sky-400/50">Utilization</span>
+                      <span className="text-[#8a8a8a]">Utilization</span>
                       <span style={{ color: cfg.color }}>
                         {berthUtil}% ({selectedPort.berths_occupied}/{selectedPort.berths_total})
                       </span>
@@ -665,12 +665,12 @@ export default function PortCongestionPage() {
                             style={{ background: `${bCfg.color}50` }}
                           />
                           <div className="flex-1 min-w-0">
-                            <p className="text-[10px] font-medium text-sky-100">{berth.name}</p>
+                            <p className="text-[10px] font-medium text-[#f5f5f5]">{berth.name}</p>
                             {berth.vessel && (
-                              <p className="text-[9px] text-sky-400/50 flex items-center gap-1">
+                              <p className="text-[9px] text-[#8a8a8a] flex items-center gap-1">
                                 <Ship className="w-2.5 h-2.5" /> {berth.vessel}
                                 {berth.cargo && (
-                                  <span className="ml-2 text-sky-400/30">· {berth.cargo}</span>
+                                  <span className="ml-2 text-[#5a5a5a]">· {berth.cargo}</span>
                                 )}
                               </p>
                             )}
@@ -680,10 +680,10 @@ export default function PortCongestionPage() {
                               {bCfg.label.toUpperCase()}
                             </span>
                             {berth.etd && (
-                              <p className="text-[8px] text-sky-400/30">ETD {berth.etd}</p>
+                              <p className="text-[8px] text-[#5a5a5a]">ETD {berth.etd}</p>
                             )}
                             {berth.eta && (
-                              <p className="text-[8px] text-sky-400/30">ETA {berth.eta}</p>
+                              <p className="text-[8px] text-[#5a5a5a]">ETA {berth.eta}</p>
                             )}
                           </div>
                         </div>
@@ -700,8 +700,8 @@ export default function PortCongestionPage() {
                     background: 'rgba(56,189,248,0.02)',
                   }}
                 >
-                  <h3 className="text-xs font-bold text-sky-50 mb-3 flex items-center gap-2">
-                    <Ship className="w-3.5 h-3.5 text-sky-400" /> Anchorage Queue —{' '}
+                  <h3 className="text-xs font-bold text-[#f5f5f5] mb-3 flex items-center gap-2">
+                    <Ship className="w-3.5 h-3.5 text-[#c9b787]" /> Anchorage Queue —{' '}
                     {selectedPort.vessels_anchored} vessels waiting
                   </h3>
                   <div className="space-y-2">
@@ -730,13 +730,13 @@ export default function PortCongestionPage() {
                           background: 'rgba(56,189,248,0.03)',
                         }}
                       >
-                        <span className="text-[10px] font-mono text-sky-400/30 w-4">{i + 1}</span>
+                        <span className="text-[10px] font-mono text-[#5a5a5a] w-4">{i + 1}</span>
                         <div className="flex-1 min-w-0">
-                          <p className="text-[10px] font-medium text-sky-100">{vessel.name}</p>
-                          <p className="text-[9px] text-sky-400/40">{vessel.type}</p>
+                          <p className="text-[10px] font-medium text-[#f5f5f5]">{vessel.name}</p>
+                          <p className="text-[9px] text-[#6a6a6a]">{vessel.type}</p>
                         </div>
                         <div className="flex items-center gap-1.5">
-                          <Clock className="w-3 h-3 text-sky-400/30" />
+                          <Clock className="w-3 h-3 text-[#5a5a5a]" />
                           <span
                             className="text-[10px] font-mono"
                             style={{
@@ -754,7 +754,7 @@ export default function PortCongestionPage() {
                       </div>
                     ))}
                     {selectedPort.vessels_waiting > 5 && (
-                      <p className="text-[9px] text-sky-400/30 text-center pt-1">
+                      <p className="text-[9px] text-[#5a5a5a] text-center pt-1">
                         +{selectedPort.vessels_waiting - 5} more vessels in queue
                       </p>
                     )}

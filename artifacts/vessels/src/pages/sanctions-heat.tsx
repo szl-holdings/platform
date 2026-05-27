@@ -84,7 +84,7 @@ function HoldingRow({ holding }: { holding: PortfolioSanctionsHolding }) {
       <div className="min-w-0">
         <div className="flex items-center gap-2">
           <Link href={`/vessel/${holding.vesselId}`}>
-            <span className="text-sm font-semibold text-slate-100 hover:text-sky-300 transition-colors cursor-pointer">
+            <span className="text-sm font-semibold text-slate-100 hover:text-[#d4c598] transition-colors cursor-pointer">
               {holding.vesselName}
             </span>
           </Link>
@@ -136,7 +136,7 @@ function HoldingRow({ holding }: { holding: PortfolioSanctionsHolding }) {
 
       <div>
         <Link href={`/vessel/${holding.vesselId}`}>
-          <button className="p-1.5 rounded-lg bg-sky-500/10 border border-sky-500/20 text-sky-400/60 hover:text-sky-300 hover:bg-sky-500/20 transition-all">
+          <button className="p-1.5 rounded-lg bg-[#c9b787]/10 border border-white/[0.08] text-[#9a9a9a] hover:text-[#d4c598] hover:bg-[#c9b787]/16 transition-all">
             <ChevronRight className="w-3.5 h-3.5" />
           </button>
         </Link>
@@ -198,8 +198,8 @@ export default function SanctionsHeatPage() {
     <div className="p-6 space-y-6">
       <div className="flex items-start justify-between gap-4">
         <div>
-          <h1 className="font-display text-2xl font-bold text-sky-50 flex items-center gap-3">
-            <Shield className="w-6 h-6 text-sky-400" />
+          <h1 className="font-display text-2xl font-bold text-[#f5f5f5] flex items-center gap-3">
+            <Shield className="w-6 h-6 text-[#c9b787]" />
             Sanctions Heat
           </h1>
           <p className="text-sm text-slate-400 mt-1">
@@ -211,7 +211,7 @@ export default function SanctionsHeatPage() {
         <button
           onClick={() => void refetch()}
           disabled={isLoading}
-          className="flex items-center gap-1.5 text-xs text-sky-400/60 hover:text-sky-300 px-2 py-1.5 rounded-lg bg-sky-500/5 border border-sky-500/10 transition-colors disabled:opacity-40"
+          className="flex items-center gap-1.5 text-xs text-[#9a9a9a] hover:text-[#d4c598] px-2 py-1.5 rounded-lg bg-[#c9b787]/8 border border-white/[0.06] transition-colors disabled:opacity-40"
         >
           <RefreshCw className={`w-3 h-3 ${isLoading ? 'animate-spin' : ''}`} />
           Refresh scores
@@ -284,7 +284,7 @@ export default function SanctionsHeatPage() {
                   className={cn(
                     'text-xs px-2.5 py-1 rounded-lg border transition-all',
                     filter === f.id
-                      ? 'bg-sky-500/20 border-sky-500/30 text-sky-300'
+                      ? 'bg-[#c9b787]/16 border-[#c9b787]/24 text-[#d4c598]'
                       : 'border-slate-700/50 text-slate-400 hover:text-slate-300',
                   )}
                 >
@@ -303,7 +303,7 @@ export default function SanctionsHeatPage() {
               className={cn(
                 'text-[10px] px-2 py-0.5 rounded border transition-all',
                 sortBy === 'score'
-                  ? 'text-sky-300 border-sky-500/30 bg-sky-500/10'
+                  ? 'text-[#d4c598] border-[#c9b787]/24 bg-[#c9b787]/10'
                   : 'text-slate-500 border-slate-700/30',
               )}
             >
@@ -314,7 +314,7 @@ export default function SanctionsHeatPage() {
               className={cn(
                 'text-[10px] px-2 py-0.5 rounded border transition-all',
                 sortBy === 'name'
-                  ? 'text-sky-300 border-sky-500/30 bg-sky-500/10'
+                  ? 'text-[#d4c598] border-[#c9b787]/24 bg-[#c9b787]/10'
                   : 'text-slate-500 border-slate-700/30',
               )}
             >
@@ -342,7 +342,7 @@ export default function SanctionsHeatPage() {
       </div>
 
       <div className="flex items-start gap-3 bg-slate-800/40 border border-slate-700/40 rounded-lg px-4 py-3 text-[11px] text-slate-500">
-        <Zap className="w-3.5 h-3.5 text-sky-500/60 shrink-0 mt-0.5" />
+        <Zap className="w-3.5 h-3.5 text-[#f5f5f5]0/60 shrink-0 mt-0.5" />
         <span>
           Sanctions Heat scores are computed by the Vessels rules engine every 15 minutes against
           OFAC SDN, EU Consolidated, UK OFSI, and UN Security Council lists. Vessels marked{' '}

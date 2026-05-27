@@ -34,7 +34,7 @@ const generateHistory = (base: number, seed: number) =>
   }));
 
 const classColors: Record<string, string> = {
-  capesize: 'text-sky-400',
+  capesize: 'text-[#c9b787]',
   panamax: 'text-indigo-400',
   supramax: 'text-emerald-400',
   handysize: 'text-orange-400',
@@ -84,16 +84,16 @@ export default function FreightRatesPage() {
     <div className="p-6 space-y-6">
       <div className="flex items-start justify-between gap-4 flex-wrap">
         <div>
-          <h1 className="font-display text-xl font-bold text-sky-50 flex items-center gap-2">
-            <BarChart3 className="w-5 h-5 text-sky-400" />
+          <h1 className="font-display text-xl font-bold text-[#f5f5f5] flex items-center gap-2">
+            <BarChart3 className="w-5 h-5 text-[#c9b787]" />
             Freight Rate Benchmarking
           </h1>
-          <p className="text-xs text-sky-400/50 mt-0.5">
+          <p className="text-xs text-[#8a8a8a] mt-0.5">
             Live market rate panels with historical trends and forward curve estimation — derived
             from FRED Deep Sea Freight PPI (WPU3012, BLS)
           </p>
         </div>
-        <div className="flex items-center gap-2 text-[10px] text-sky-400/60 font-mono bg-[#0a1628]/80 border border-sky-500/15 rounded-md px-2.5 py-1.5">
+        <div className="flex items-center gap-2 text-[10px] text-[#9a9a9a] font-mono bg-white/[0.02] border border-white/[0.08] rounded-md px-2.5 py-1.5">
           <Clock className="w-3 h-3" />
           <span>
             {isLoading
@@ -111,14 +111,14 @@ export default function FreightRatesPage() {
             key={c.key}
             onClick={() => setSelectedClass(c.key as VisibleClassKey)}
             className={cn(
-              'text-left bg-[#0a1628]/80 border rounded-xl p-4 transition-all',
+              'text-left bg-white/[0.02] border rounded-xl p-4 transition-all',
               selectedClass === c.key
-                ? 'border-sky-500/30 ring-1 ring-sky-500/20'
-                : 'border-sky-500/10 hover:border-sky-500/20',
+                ? 'border-[#c9b787]/24 ring-1 ring-sky-500/20'
+                : 'border-white/[0.06] hover:border-white/[0.08]',
             )}
           >
             <div className="flex items-center justify-between mb-2">
-              <p className="text-[10px] text-sky-400/40 uppercase tracking-wider">{c.label}</p>
+              <p className="text-[10px] text-[#6a6a6a] uppercase tracking-wider">{c.label}</p>
               <Badge
                 variant="outline"
                 className={cn(
@@ -135,12 +135,12 @@ export default function FreightRatesPage() {
             <p className="text-lg font-bold font-mono" style={{ color: c.color }}>
               ${c.tce.toLocaleString()}
             </p>
-            <p className="text-[9px] text-sky-400/40 mt-0.5">USD/day TCE</p>
-            <p className="text-[9px] text-sky-400/30 mt-1">{c.dwt}</p>
+            <p className="text-[9px] text-[#6a6a6a] mt-0.5">USD/day TCE</p>
+            <p className="text-[9px] text-[#5a5a5a] mt-1">{c.dwt}</p>
           </button>
         ))}
         {!isLoading && visibleBenchmarks.length === 0 && (
-          <div className="col-span-full text-[11px] text-sky-400/50 italic">
+          <div className="col-span-full text-[11px] text-[#8a8a8a] italic">
             Benchmark feed offline.
           </div>
         )}
@@ -148,13 +148,13 @@ export default function FreightRatesPage() {
 
       {cls && (
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
-          <div className="lg:col-span-2 bg-[#0a1628]/80 border border-sky-500/10 rounded-xl p-4">
+          <div className="lg:col-span-2 bg-white/[0.02] border border-white/[0.06] rounded-xl p-4">
             <div className="flex items-center justify-between mb-4">
               <div>
-                <p className="text-xs font-semibold text-sky-200">
+                <p className="text-xs font-semibold text-[#e0e0e0]">
                   {cls.label} — 24-Month Historical TCE
                 </p>
-                <p className="text-[10px] text-sky-400/40">
+                <p className="text-[10px] text-[#6a6a6a]">
                   {cls.dwt} · scaled to live FRED PPI WPU3012
                 </p>
               </div>
@@ -205,8 +205,8 @@ export default function FreightRatesPage() {
           </div>
 
           <div className="space-y-3">
-            <div className="bg-[#0a1628]/80 border border-sky-500/10 rounded-xl p-4">
-              <p className="text-[10px] text-sky-400/40 uppercase tracking-wider mb-3">
+            <div className="bg-white/[0.02] border border-white/[0.06] rounded-xl p-4">
+              <p className="text-[10px] text-[#6a6a6a] uppercase tracking-wider mb-3">
                 Forward Curve (6M)
               </p>
               <div className="space-y-2">
@@ -217,14 +217,14 @@ export default function FreightRatesPage() {
                   const isUp = i === 0 || !prev ? d.rate > cls.tce : d.rate > prev.rate;
                   return (
                     <div key={d.month} className="flex items-center gap-2">
-                      <span className="text-[10px] text-sky-400/40 w-12 shrink-0">{d.month}</span>
-                      <div className="flex-1 h-1.5 bg-sky-500/10 rounded-full overflow-hidden">
+                      <span className="text-[10px] text-[#6a6a6a] w-12 shrink-0">{d.month}</span>
+                      <div className="flex-1 h-1.5 bg-[#c9b787]/10 rounded-full overflow-hidden">
                         <div
-                          className="h-full rounded-full bg-sky-400/50"
+                          className="h-full rounded-full bg-[#c9b787]/14"
                           style={{ width: `${pct}%` }}
                         />
                       </div>
-                      <span className="text-[10px] font-mono text-sky-300 w-14 text-right">
+                      <span className="text-[10px] font-mono text-[#d4c598] w-14 text-right">
                         ${(d.rate / 1000).toFixed(1)}K
                       </span>
                       {isUp ? (
@@ -238,15 +238,15 @@ export default function FreightRatesPage() {
               </div>
             </div>
 
-            <div className="bg-[#0a1628]/80 border border-sky-500/10 rounded-xl p-4">
-              <p className="text-[10px] text-sky-400/40 uppercase tracking-wider mb-2">
+            <div className="bg-white/[0.02] border border-white/[0.06] rounded-xl p-4">
+              <p className="text-[10px] text-[#6a6a6a] uppercase tracking-wider mb-2">
                 Key Routes — {cls.label}
               </p>
               <div className="space-y-2">
                 {cls.routes.map((r) => (
                   <div key={r} className="flex items-center gap-2">
-                    <Globe className="w-3 h-3 text-sky-400/30 shrink-0" />
-                    <span className="text-[11px] text-sky-300">{r}</span>
+                    <Globe className="w-3 h-3 text-[#5a5a5a] shrink-0" />
+                    <span className="text-[11px] text-[#d4c598]">{r}</span>
                   </div>
                 ))}
               </div>
@@ -255,13 +255,13 @@ export default function FreightRatesPage() {
         </div>
       )}
 
-      <div className="bg-[#0a1628]/80 border border-sky-500/10 rounded-xl overflow-hidden">
-        <div className="px-4 py-3 border-b border-sky-500/10 flex items-center gap-2">
-          <Activity className="w-3.5 h-3.5 text-sky-400" />
-          <span className="text-[11px] font-mono text-sky-300 uppercase tracking-wider">
+      <div className="bg-white/[0.02] border border-white/[0.06] rounded-xl overflow-hidden">
+        <div className="px-4 py-3 border-b border-white/[0.06] flex items-center gap-2">
+          <Activity className="w-3.5 h-3.5 text-[#c9b787]" />
+          <span className="text-[11px] font-mono text-[#d4c598] uppercase tracking-wider">
             Live Route Rates
           </span>
-          <span className="ml-auto text-[10px] text-sky-400/40 font-mono">
+          <span className="ml-auto text-[10px] text-[#6a6a6a] font-mono">
             {data?.asOf ? `As of ${formatAsOf(data.asOf)}` : ''}
           </span>
         </div>
@@ -271,23 +271,23 @@ export default function FreightRatesPage() {
             return (
               <div
                 key={r.route}
-                className="px-4 py-3 flex items-center gap-4 hover:bg-sky-500/5 transition-colors"
+                className="px-4 py-3 flex items-center gap-4 hover:bg-[#c9b787]/8 transition-colors"
               >
                 <div className="flex-1 min-w-0">
-                  <p className="text-xs font-medium text-sky-200">{r.route}</p>
+                  <p className="text-xs font-medium text-[#e0e0e0]">{r.route}</p>
                   <p
                     className={cn(
                       'text-[9px] mt-0.5',
-                      classColors[r.classKey] ?? 'text-sky-400/60',
+                      classColors[r.classKey] ?? 'text-[#9a9a9a]',
                     )}
                   >
                     {benchmark?.label ?? r.classKey}
                   </p>
                 </div>
                 <div className="text-right">
-                  <p className="text-sm font-bold font-mono text-sky-100">
+                  <p className="text-sm font-bold font-mono text-[#f5f5f5]">
                     {r.unit === '$/day' ? `$${r.rate.toLocaleString()}` : r.rate}{' '}
-                    <span className="text-[9px] text-sky-400/40 font-normal">{r.unit}</span>
+                    <span className="text-[9px] text-[#6a6a6a] font-normal">{r.unit}</span>
                   </p>
                   <p
                     className={cn(
@@ -303,7 +303,7 @@ export default function FreightRatesPage() {
             );
           })}
           {routeRates.length === 0 && (
-            <div className="px-4 py-6 text-[11px] text-sky-400/50 italic text-center">
+            <div className="px-4 py-6 text-[11px] text-[#8a8a8a] italic text-center">
               Route rates unavailable.
             </div>
           )}

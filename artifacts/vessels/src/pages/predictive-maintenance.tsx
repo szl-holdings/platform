@@ -144,14 +144,14 @@ const sevColor: Record<string, string> = {
   critical: 'text-red-400 bg-red-500/10 border-red-500/20',
   high: 'text-orange-400 bg-orange-500/10 border-orange-500/20',
   medium: 'text-amber-400 bg-amber-500/10 border-amber-500/20',
-  watch: 'text-sky-400 bg-sky-500/10 border-sky-500/20',
+  watch: 'text-[#c9b787] bg-[#c9b787]/10 border-white/[0.08]',
 };
 
 const priorityColor: Record<string, string> = {
   critical: 'text-red-400',
   high: 'text-orange-400',
   medium: 'text-amber-400',
-  watch: 'text-sky-400',
+  watch: 'text-[#c9b787]',
   routine: 'text-emerald-400',
 };
 
@@ -200,8 +200,8 @@ export default function PredictiveMaintenancePage() {
       <div className="flex items-center justify-between">
         <div>
           <div className="flex items-center gap-2 mb-1">
-            <Wrench className="w-4 h-4 text-sky-400" />
-            <h1 className="font-display text-xl font-bold text-sky-50">
+            <Wrench className="w-4 h-4 text-[#c9b787]" />
+            <h1 className="font-display text-xl font-bold text-[#f5f5f5]">
               Predictive Maintenance Neural Network
             </h1>
             <Badge
@@ -211,22 +211,22 @@ export default function PredictiveMaintenancePage() {
               ML MODEL v3.1
             </Badge>
           </div>
-          <p className="text-xs text-sky-400/40">
+          <p className="text-xs text-[#6a6a6a]">
             Failure prediction 30–90 days out · Vibration, temperature & operational data fusion
           </p>
         </div>
         <div className="flex items-center gap-3 text-right">
           <div>
             <p className="text-lg font-bold font-mono text-red-400">1</p>
-            <p className="text-[9px] text-sky-400/40 uppercase tracking-wider">Critical</p>
+            <p className="text-[9px] text-[#6a6a6a] uppercase tracking-wider">Critical</p>
           </div>
           <div>
             <p className="text-lg font-bold font-mono text-orange-400">1</p>
-            <p className="text-[9px] text-sky-400/40 uppercase tracking-wider">High</p>
+            <p className="text-[9px] text-[#6a6a6a] uppercase tracking-wider">High</p>
           </div>
           <div>
             <p className="text-lg font-bold font-mono text-amber-400">2</p>
-            <p className="text-[9px] text-sky-400/40 uppercase tracking-wider">Watch</p>
+            <p className="text-[9px] text-[#6a6a6a] uppercase tracking-wider">Watch</p>
           </div>
         </div>
       </div>
@@ -239,8 +239,8 @@ export default function PredictiveMaintenancePage() {
             className={cn(
               'text-xs px-4 py-1.5 rounded-lg capitalize transition-colors',
               tab === t
-                ? 'bg-sky-500/10 text-sky-300 border border-sky-500/20'
-                : 'text-sky-400/50 hover:text-sky-300',
+                ? 'bg-[#c9b787]/10 text-[#d4c598] border border-white/[0.08]'
+                : 'text-[#8a8a8a] hover:text-[#d4c598]',
             )}
           >
             {t === 'predictions'
@@ -260,20 +260,20 @@ export default function PredictiveMaintenancePage() {
                 key={p.id}
                 onClick={() => setSelectedPred(p)}
                 className={cn(
-                  'w-full text-left bg-[#0a1628]/80 border rounded-xl p-4 transition-all hover:border-sky-500/20',
-                  selectedPred.id === p.id ? 'border-sky-500/30' : 'border-sky-500/10',
+                  'w-full text-left bg-white/[0.02] border rounded-xl p-4 transition-all hover:border-white/[0.08]',
+                  selectedPred.id === p.id ? 'border-[#c9b787]/24' : 'border-white/[0.06]',
                 )}
               >
                 <div className="flex items-start gap-4">
                   <ProbabilityRing prob={p.failureProbability} />
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2 mb-1">
-                      <p className="text-sm font-semibold text-sky-100">{p.component}</p>
+                      <p className="text-sm font-semibold text-[#f5f5f5]">{p.component}</p>
                       <Badge variant="outline" className={cn('text-[9px]', sevColor[p.severity])}>
                         {p.severity}
                       </Badge>
                     </div>
-                    <p className="text-[10px] text-sky-400/40 mb-2">
+                    <p className="text-[10px] text-[#6a6a6a] mb-2">
                       {p.vessel} · {p.system}
                     </p>
                     <div className="flex flex-wrap gap-3">
@@ -294,7 +294,7 @@ export default function PredictiveMaintenancePage() {
                             'text-[9px] px-1.5 py-0.5 rounded border',
                             s.anomaly
                               ? 'text-amber-400 border-amber-500/20 bg-amber-500/5'
-                              : 'text-sky-400/40 border-sky-500/10 bg-sky-500/5',
+                              : 'text-[#6a6a6a] border-white/[0.06] bg-[#c9b787]/8',
                           )}
                         >
                           {s.label}: {s.trend}
@@ -302,59 +302,59 @@ export default function PredictiveMaintenancePage() {
                       ))}
                     </div>
                   </div>
-                  <ChevronRight className="w-3.5 h-3.5 text-sky-400/30 shrink-0 mt-1" />
+                  <ChevronRight className="w-3.5 h-3.5 text-[#5a5a5a] shrink-0 mt-1" />
                 </div>
               </button>
             ))}
           </div>
 
           <div className="space-y-4">
-            <div className="bg-[#0a1628]/80 border border-sky-500/20 rounded-xl p-4">
-              <p className="text-xs font-semibold text-sky-200 mb-3 flex items-center gap-1.5">
+            <div className="bg-white/[0.02] border border-white/[0.08] rounded-xl p-4">
+              <p className="text-xs font-semibold text-[#e0e0e0] mb-3 flex items-center gap-1.5">
                 <AlertTriangle className="w-3.5 h-3.5 text-red-400" />
                 Failure Analysis
               </p>
-              <p className="text-sm font-bold text-sky-100 mb-1">{selectedPred.component}</p>
-              <p className="text-[10px] text-sky-400/40 mb-3">
+              <p className="text-sm font-bold text-[#f5f5f5] mb-1">{selectedPred.component}</p>
+              <p className="text-[10px] text-[#6a6a6a] mb-3">
                 {selectedPred.vessel} · {selectedPred.system}
               </p>
               <div className="space-y-2 mb-4">
                 <div className="flex justify-between">
-                  <span className="text-[10px] text-sky-400/50">Failure probability</span>
+                  <span className="text-[10px] text-[#8a8a8a]">Failure probability</span>
                   <span className="text-[10px] font-mono text-red-400">
                     {Math.round(selectedPred.failureProbability * 100)}%
                   </span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-[10px] text-sky-400/50">Days to failure</span>
+                  <span className="text-[10px] text-[#8a8a8a]">Days to failure</span>
                   <span className="text-[10px] font-mono text-orange-400">
                     {selectedPred.daysToFailure} days
                   </span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-[10px] text-sky-400/50">Est. downtime</span>
-                  <span className="text-[10px] font-mono text-sky-300">
+                  <span className="text-[10px] text-[#8a8a8a]">Est. downtime</span>
+                  <span className="text-[10px] font-mono text-[#d4c598]">
                     {selectedPred.estimatedDowntime}
                   </span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-[10px] text-sky-400/50">Repair cost</span>
-                  <span className="text-[10px] font-mono text-sky-300">
+                  <span className="text-[10px] text-[#8a8a8a]">Repair cost</span>
+                  <span className="text-[10px] font-mono text-[#d4c598]">
                     ${(selectedPred.maintenanceCost / 1000).toFixed(0)}K
                   </span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-[10px] text-sky-400/50">Avoidance value</span>
+                  <span className="text-[10px] text-[#8a8a8a]">Avoidance value</span>
                   <span className="text-[10px] font-mono text-emerald-400">
                     ${(selectedPred.avoidedCost / 1000).toFixed(0)}K
                   </span>
                 </div>
               </div>
-              <div className="bg-sky-500/5 rounded-lg p-3 mb-3">
-                <p className="text-[9px] text-sky-400/50 uppercase tracking-wider mb-1">
+              <div className="bg-[#c9b787]/8 rounded-lg p-3 mb-3">
+                <p className="text-[9px] text-[#8a8a8a] uppercase tracking-wider mb-1">
                   Recommended Action
                 </p>
-                <p className="text-[11px] text-sky-200">{selectedPred.recommendedAction}</p>
+                <p className="text-[11px] text-[#e0e0e0]">{selectedPred.recommendedAction}</p>
               </div>
               <div className="flex items-center gap-1.5 text-[10px] text-emerald-400">
                 <Calendar className="w-3 h-3" />
@@ -362,8 +362,8 @@ export default function PredictiveMaintenancePage() {
               </div>
             </div>
 
-            <div className="bg-[#0a1628]/80 border border-sky-500/10 rounded-xl p-4">
-              <p className="text-xs font-semibold text-sky-200 mb-3 flex items-center gap-1.5">
+            <div className="bg-white/[0.02] border border-white/[0.06] rounded-xl p-4">
+              <p className="text-xs font-semibold text-[#e0e0e0] mb-3 flex items-center gap-1.5">
                 <TrendingUp className="w-3.5 h-3.5 text-violet-400" />
                 ML Model Stats
               </p>
@@ -376,10 +376,10 @@ export default function PredictiveMaintenancePage() {
               ].map((m) => (
                 <div
                   key={m.label}
-                  className="flex justify-between py-1.5 border-b border-sky-500/5 last:border-0"
+                  className="flex justify-between py-1.5 border-b border-white/[0.08] last:border-0"
                 >
-                  <span className="text-[10px] text-sky-400/50">{m.label}</span>
-                  <span className="text-[10px] font-mono text-sky-300">{m.val}</span>
+                  <span className="text-[10px] text-[#8a8a8a]">{m.label}</span>
+                  <span className="text-[10px] font-mono text-[#d4c598]">{m.val}</span>
                 </div>
               ))}
             </div>
@@ -388,10 +388,10 @@ export default function PredictiveMaintenancePage() {
       )}
 
       {tab === 'schedule' && (
-        <div className="bg-[#0a1628]/80 border border-sky-500/10 rounded-xl overflow-hidden">
-          <div className="px-4 py-3 border-b border-sky-500/10">
-            <p className="text-xs font-semibold text-sky-200">Optimized Maintenance Schedule</p>
-            <p className="text-[10px] text-sky-400/40">
+        <div className="bg-white/[0.02] border border-white/[0.06] rounded-xl overflow-hidden">
+          <div className="px-4 py-3 border-b border-white/[0.06]">
+            <p className="text-xs font-semibold text-[#e0e0e0]">Optimized Maintenance Schedule</p>
+            <p className="text-[10px] text-[#6a6a6a]">
               Auto-synchronized with port calls and dry dock windows
             </p>
           </div>
@@ -399,22 +399,22 @@ export default function PredictiveMaintenancePage() {
             {SCHEDULE.map((s, i) => (
               <div key={i} className="px-4 py-3 flex items-center gap-4">
                 <div className="w-20 shrink-0">
-                  <p className="text-xs font-mono text-sky-300">{s.date}</p>
-                  <p className="text-[9px] text-sky-400/40">{s.port}</p>
+                  <p className="text-xs font-mono text-[#d4c598]">{s.date}</p>
+                  <p className="text-[9px] text-[#6a6a6a]">{s.port}</p>
                 </div>
                 <div className="flex-1 min-w-0">
-                  <p className="text-sm text-sky-100">{s.component}</p>
-                  <p className="text-[10px] text-sky-400/40">{s.vessel}</p>
+                  <p className="text-sm text-[#f5f5f5]">{s.component}</p>
+                  <p className="text-[10px] text-[#6a6a6a]">{s.vessel}</p>
                 </div>
                 <Badge
                   variant="outline"
                   className={cn(
                     'text-[9px]',
                     s.status === 'scheduled'
-                      ? 'text-sky-400 border-sky-500/20'
+                      ? 'text-[#c9b787] border-white/[0.08]'
                       : s.status === 'booked'
                         ? 'text-emerald-400 border-emerald-500/20'
-                        : 'text-sky-400/40 border-sky-500/10',
+                        : 'text-[#6a6a6a] border-white/[0.06]',
                   )}
                 >
                   {s.status}
@@ -431,9 +431,9 @@ export default function PredictiveMaintenancePage() {
       {tab === 'fleet' && (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
           {HEALTH_SCORES.map((h) => (
-            <div key={h.vessel} className="bg-[#0a1628]/80 border border-sky-500/10 rounded-xl p-4">
-              <p className="text-xs font-semibold text-sky-100 mb-1">{h.vessel}</p>
-              <p className="text-[10px] text-sky-400/40 mb-3">
+            <div key={h.vessel} className="bg-white/[0.02] border border-white/[0.06] rounded-xl p-4">
+              <p className="text-xs font-semibold text-[#f5f5f5] mb-1">{h.vessel}</p>
+              <p className="text-[10px] text-[#6a6a6a] mb-3">
                 {h.components} components monitored
               </p>
               <div className="flex items-center gap-3">
@@ -450,7 +450,7 @@ export default function PredictiveMaintenancePage() {
                   {h.score}
                 </p>
                 <div>
-                  <p className="text-[9px] text-sky-400/40">Health Score</p>
+                  <p className="text-[9px] text-[#6a6a6a]">Health Score</p>
                   <Badge
                     variant="outline"
                     className={cn(
@@ -459,7 +459,7 @@ export default function PredictiveMaintenancePage() {
                         ? 'text-emerald-400 border-emerald-500/20'
                         : h.trend === 'down'
                           ? 'text-red-400 border-red-500/20'
-                          : 'text-sky-400/40 border-sky-500/10',
+                          : 'text-[#6a6a6a] border-white/[0.06]',
                     )}
                   >
                     {h.trend}
@@ -468,7 +468,7 @@ export default function PredictiveMaintenancePage() {
               </div>
               <div className="mt-3 h-1.5 bg-white/5 rounded-full overflow-hidden">
                 <div
-                  className="h-full rounded-full bg-gradient-to-r from-sky-500/60 to-sky-400/20 transition-all"
+                  className="h-full rounded-full bg-gradient-to-r from-[#c9b787]/10 to-transparent transition-all"
                   style={{ width: `${h.score}%` }}
                 />
               </div>

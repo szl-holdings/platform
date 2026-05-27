@@ -204,7 +204,7 @@ function NotificationsPanel() {
                 className={cn(
                   'flex items-center gap-2 px-3 py-1.5 rounded-lg border text-xs font-medium transition-colors',
                   enabled
-                    ? 'bg-sky-500/10 border-sky-500/20 text-sky-400'
+                    ? 'bg-[#c9b787]/10 border-white/[0.08] text-[#c9b787]'
                     : 'bg-muted border-border text-muted-foreground hover:text-foreground',
                 )}
               >
@@ -288,8 +288,8 @@ function IntegrationsPanel() {
         )}
       </SettingsCard>
 
-      <div className="mt-4 p-3 rounded-lg bg-sky-500/5 border border-sky-500/15">
-        <p className="text-xs text-sky-400/80">
+      <div className="mt-4 p-3 rounded-lg bg-[#c9b787]/8 border border-white/[0.08]">
+        <p className="text-xs text-[#c9b787]/80">
           Configure AIS feed credentials, satellite data providers, and port authority connections
           from the API settings console.
         </p>
@@ -307,7 +307,7 @@ function SecurityPanel() {
       <SettingsCard title="Session">
         <SettingsRow label="Authentication" description="Your current authentication method">
           <div className="flex items-center gap-2">
-            <Shield className="w-4 h-4 text-sky-400" />
+            <Shield className="w-4 h-4 text-[#c9b787]" />
             <span className="text-sm">Replit Auth (SSO)</span>
             <span className="text-[10px] px-1.5 py-0.5 rounded bg-emerald-500/10 border border-emerald-500/20 text-emerald-400">
               Active
@@ -329,7 +329,7 @@ function SecurityPanel() {
           </span>
         </SettingsRow>
         <SettingsRow label="API Keys" description="Manage API keys for programmatic access">
-          <button className="flex items-center gap-1.5 text-xs text-sky-400 hover:text-sky-300 transition-colors">
+          <button className="flex items-center gap-1.5 text-xs text-[#c9b787] hover:text-[#d4c598] transition-colors">
             <Key className="w-3 h-3" /> Manage API Keys
           </button>
         </SettingsRow>
@@ -381,7 +381,7 @@ function PreferencesPanel() {
                 className={cn(
                   'text-xs px-3 py-1.5 rounded-lg border transition-colors',
                   distanceUnit === opt.value
-                    ? 'bg-sky-500/10 border-sky-500/30 text-sky-400'
+                    ? 'bg-[#c9b787]/10 border-[#c9b787]/24 text-[#c9b787]'
                     : 'border-border text-muted-foreground hover:text-foreground',
                 )}
               >
@@ -407,7 +407,7 @@ function PreferencesPanel() {
                 className={cn(
                   'text-xs px-3 py-1.5 rounded-lg border transition-colors',
                   speedUnit === opt.value
-                    ? 'bg-sky-500/10 border-sky-500/30 text-sky-400'
+                    ? 'bg-[#c9b787]/10 border-[#c9b787]/24 text-[#c9b787]'
                     : 'border-border text-muted-foreground hover:text-foreground',
                 )}
               >
@@ -431,7 +431,7 @@ function PreferencesPanel() {
                 className={cn(
                   'text-xs px-3 py-1.5 rounded-lg border transition-colors',
                   mapStyle === opt.value
-                    ? 'bg-sky-500/10 border-sky-500/30 text-sky-400'
+                    ? 'bg-[#c9b787]/10 border-[#c9b787]/24 text-[#c9b787]'
                     : 'border-border text-muted-foreground hover:text-foreground',
                 )}
               >
@@ -454,18 +454,18 @@ function BillingPanel() {
       <SettingsCard title="Current Plan">
         <SettingsRow label="Plan">
           <div className="flex items-center gap-2">
-            <CreditCard className="w-4 h-4 text-sky-400" />
+            <CreditCard className="w-4 h-4 text-[#c9b787]" />
             <span className="text-sm">Managed via the SZL Holdings platform portal</span>
           </div>
         </SettingsRow>
         <SettingsRow label="Invoices">
-          <button className="flex items-center gap-1.5 text-xs text-sky-400 hover:text-sky-300 transition-colors">
+          <button className="flex items-center gap-1.5 text-xs text-[#c9b787] hover:text-[#d4c598] transition-colors">
             <FileText className="w-3 h-3" /> View Invoices
           </button>
         </SettingsRow>
       </SettingsCard>
-      <div className="mt-4 p-3 rounded-lg bg-sky-500/5 border border-sky-500/15">
-        <p className="text-xs text-sky-400/70">
+      <div className="mt-4 p-3 rounded-lg bg-[#c9b787]/8 border border-white/[0.08]">
+        <p className="text-xs text-[#a0a0a0]">
           Billing changes, plan upgrades, and invoice management are handled through the SZL
           Holdings platform admin panel.
         </p>
@@ -571,13 +571,13 @@ function AuditPanel() {
       title="Settings Change History"
       description="Audit trail of settings changes in Vessels"
     >
-      <p className="mb-4 text-xs text-sky-400/40">
+      <p className="mb-4 text-xs text-[#6a6a6a]">
         Org admins and platform admins see the full team history. Other members see only their own
         changes.
       </p>
-      <div className="mb-4 p-3 rounded-lg border border-sky-500/10 bg-sky-500/5 flex flex-wrap items-end gap-3">
+      <div className="mb-4 p-3 rounded-lg border border-white/[0.06] bg-[#c9b787]/8 flex flex-wrap items-end gap-3">
         <div className="flex flex-col gap-1 min-w-[160px]">
-          <label className="text-[10px] text-sky-400/60 font-medium uppercase tracking-wide">
+          <label className="text-[10px] text-[#9a9a9a] font-medium uppercase tracking-wide">
             Namespace prefix
           </label>
           <input
@@ -585,41 +585,41 @@ function AuditPanel() {
             value={filterForm.nsFilter}
             onChange={(e) => setFilterForm((f) => ({ ...f, nsFilter: e.target.value }))}
             placeholder="e.g. vessels.notifications"
-            className="h-7 px-2 text-xs rounded border border-sky-500/20 bg-[#040c1a] text-sky-100 placeholder:text-sky-400/30 focus:outline-none focus:ring-1 focus:ring-sky-500/40"
+            className="h-7 px-2 text-xs rounded border border-white/[0.08] bg-[#040c1a] text-[#f5f5f5] placeholder:text-[#5a5a5a] focus:outline-none focus:ring-1 focus:ring-sky-500/40"
           />
         </div>
         <div className="flex flex-col gap-1">
-          <label className="text-[10px] text-sky-400/60 font-medium uppercase tracking-wide">
+          <label className="text-[10px] text-[#9a9a9a] font-medium uppercase tracking-wide">
             From
           </label>
           <input
             type="date"
             value={filterForm.afterDate}
             onChange={(e) => setFilterForm((f) => ({ ...f, afterDate: e.target.value }))}
-            className="h-7 px-2 text-xs rounded border border-sky-500/20 bg-[#040c1a] text-sky-100 focus:outline-none focus:ring-1 focus:ring-sky-500/40"
+            className="h-7 px-2 text-xs rounded border border-white/[0.08] bg-[#040c1a] text-[#f5f5f5] focus:outline-none focus:ring-1 focus:ring-sky-500/40"
           />
         </div>
         <div className="flex flex-col gap-1">
-          <label className="text-[10px] text-sky-400/60 font-medium uppercase tracking-wide">
+          <label className="text-[10px] text-[#9a9a9a] font-medium uppercase tracking-wide">
             To
           </label>
           <input
             type="date"
             value={filterForm.beforeDate}
             onChange={(e) => setFilterForm((f) => ({ ...f, beforeDate: e.target.value }))}
-            className="h-7 px-2 text-xs rounded border border-sky-500/20 bg-[#040c1a] text-sky-100 focus:outline-none focus:ring-1 focus:ring-sky-500/40"
+            className="h-7 px-2 text-xs rounded border border-white/[0.08] bg-[#040c1a] text-[#f5f5f5] focus:outline-none focus:ring-1 focus:ring-sky-500/40"
           />
         </div>
         <div className="flex gap-2">
           <button
             onClick={applyFilters}
-            className="flex items-center gap-1.5 h-7 px-3 text-xs font-medium rounded bg-sky-500/10 border border-sky-500/20 text-sky-400 hover:bg-sky-500/20 transition-colors"
+            className="flex items-center gap-1.5 h-7 px-3 text-xs font-medium rounded bg-[#c9b787]/10 border border-white/[0.08] text-[#c9b787] hover:bg-[#c9b787]/16 transition-colors"
           >
             <Filter className="w-3 h-3" /> Apply
           </button>
           <button
             onClick={clearFilters}
-            className="h-7 px-3 text-xs text-sky-400/50 hover:text-sky-300 border border-sky-500/10 rounded transition-colors"
+            className="h-7 px-3 text-xs text-[#8a8a8a] hover:text-[#d4c598] border border-white/[0.06] rounded transition-colors"
           >
             Clear
           </button>
@@ -627,7 +627,7 @@ function AuditPanel() {
       </div>
 
       {total !== null && (
-        <p className="mb-3 text-xs text-sky-400/50">
+        <p className="mb-3 text-xs text-[#8a8a8a]">
           Showing {displayedEntries.length} of {total} record{total !== 1 ? 's' : ''}
         </p>
       )}
@@ -635,14 +635,14 @@ function AuditPanel() {
       {isLoading && offset === 0 ? (
         <div className="space-y-2">
           {[0, 1, 2].map((i) => (
-            <div key={i} className="h-14 bg-sky-500/5 animate-pulse rounded" />
+            <div key={i} className="h-14 bg-[#c9b787]/8 animate-pulse rounded" />
           ))}
         </div>
       ) : displayedEntries.length === 0 ? (
         <div className="py-10 text-center">
-          <FileText className="w-6 h-6 text-sky-400/30 mx-auto mb-2" />
-          <p className="text-sm text-sky-400/50">No settings changes found</p>
-          <p className="text-xs text-sky-400/30 mt-1">
+          <FileText className="w-6 h-6 text-[#5a5a5a] mx-auto mb-2" />
+          <p className="text-sm text-[#8a8a8a]">No settings changes found</p>
+          <p className="text-xs text-[#5a5a5a] mt-1">
             Changes will appear here when settings are modified
           </p>
         </div>
@@ -651,7 +651,7 @@ function AuditPanel() {
           {displayedEntries.map((e) => (
             <div
               key={e.id}
-              className="rounded-lg border border-sky-500/10 bg-sky-500/5 hover:bg-sky-500/10 transition-colors px-3 py-2.5"
+              className="rounded-lg border border-white/[0.06] bg-[#c9b787]/8 hover:bg-[#c9b787]/10 transition-colors px-3 py-2.5"
             >
               <div className="flex items-center gap-2 flex-wrap">
                 <span
@@ -660,31 +660,31 @@ function AuditPanel() {
                     e.action === 'create'
                       ? 'bg-emerald-500/10 text-emerald-400'
                       : e.action === 'update'
-                        ? 'bg-sky-500/10 text-sky-400'
+                        ? 'bg-[#c9b787]/10 text-[#c9b787]'
                         : 'bg-red-500/10 text-red-400',
                   )}
                 >
                   {e.action}
                 </span>
-                <span className="font-mono text-xs text-sky-100">
+                <span className="font-mono text-xs text-[#f5f5f5]">
                   {e.namespace}
-                  <span className="text-sky-400/40">.</span>
+                  <span className="text-[#6a6a6a]">.</span>
                   {e.key}
                 </span>
-                <span className="ml-auto text-[10px] text-sky-400/50 shrink-0">
+                <span className="ml-auto text-[10px] text-[#8a8a8a] shrink-0">
                   {new Date(e.createdAt).toLocaleString()}
                 </span>
               </div>
               <div className="mt-1.5 flex items-center gap-2 flex-wrap text-xs">
                 {e.actorName ? (
-                  <span className="text-sky-400/60">
-                    by <span className="text-sky-200 font-medium">{e.actorName}</span>
-                    {e.actorEmail && <span className="text-sky-400/40"> ({e.actorEmail})</span>}
+                  <span className="text-[#9a9a9a]">
+                    by <span className="text-[#e0e0e0] font-medium">{e.actorName}</span>
+                    {e.actorEmail && <span className="text-[#6a6a6a]"> ({e.actorEmail})</span>}
                   </span>
                 ) : e.actorId ? (
-                  <span className="text-sky-400/50">by user #{e.actorId}</span>
+                  <span className="text-[#8a8a8a]">by user #{e.actorId}</span>
                 ) : (
-                  <span className="text-sky-400/30 italic">system</span>
+                  <span className="text-[#5a5a5a] italic">system</span>
                 )}
                 {(e.oldValue != null || e.newValue != null) && (
                   <span className="flex items-center gap-1 font-mono text-[10px]">
@@ -694,7 +694,7 @@ function AuditPanel() {
                       </span>
                     )}
                     {e.oldValue != null && e.newValue != null && (
-                      <ChevronRight className="w-3 h-3 text-sky-400/30 shrink-0" />
+                      <ChevronRight className="w-3 h-3 text-[#5a5a5a] shrink-0" />
                     )}
                     {e.newValue != null && (
                       <span className="px-1.5 py-0.5 rounded bg-emerald-500/5 border border-emerald-500/20 text-emerald-400/70">
@@ -703,7 +703,7 @@ function AuditPanel() {
                     )}
                   </span>
                 )}
-                <span className="ml-auto text-[10px] px-1.5 py-0.5 rounded bg-sky-500/5 border border-sky-500/10 text-sky-400/50 capitalize">
+                <span className="ml-auto text-[10px] px-1.5 py-0.5 rounded bg-[#c9b787]/8 border border-white/[0.06] text-[#8a8a8a] capitalize">
                   {e.tier}
                 </span>
               </div>
@@ -713,7 +713,7 @@ function AuditPanel() {
             <button
               onClick={loadMore}
               disabled={loadingMore}
-              className="mt-2 w-full flex items-center justify-center gap-1.5 h-8 text-xs font-medium rounded-lg border border-sky-500/10 bg-sky-500/5 hover:bg-sky-500/10 text-sky-400/60 hover:text-sky-300 transition-colors disabled:opacity-50"
+              className="mt-2 w-full flex items-center justify-center gap-1.5 h-8 text-xs font-medium rounded-lg border border-white/[0.06] bg-[#c9b787]/8 hover:bg-[#c9b787]/10 text-[#9a9a9a] hover:text-[#d4c598] transition-colors disabled:opacity-50"
             >
               {loadingMore ? (
                 <Loader2 className="w-3 h-3 animate-spin" />
@@ -750,9 +750,9 @@ export default function VesselsSettings() {
 
   return (
     <div className="flex flex-col h-full bg-[#040c1a]">
-      <div className="px-6 py-4 border-b border-sky-500/10 shrink-0">
-        <h1 className="text-lg font-semibold text-sky-100">Settings</h1>
-        <p className="text-sm text-sky-400/50 mt-0.5">
+      <div className="px-6 py-4 border-b border-white/[0.06] shrink-0">
+        <h1 className="text-lg font-semibold text-[#f5f5f5]">Settings</h1>
+        <p className="text-sm text-[#8a8a8a] mt-0.5">
           Account, team, notifications, integrations &amp; more
         </p>
       </div>

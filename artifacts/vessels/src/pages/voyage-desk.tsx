@@ -9,6 +9,7 @@ import {
 import { useState } from 'react';
 import { BalticPill } from '@/components/baltic-pill';
 import { type VesselTwin, vesselTwins, voyageTwins } from '@/data/fleet-twin';
+import { PageHeader } from '@/components/shell';
 
 const ACCENT = 'hsl(205 70% 50%)';
 const ACCENT_DIM = 'hsl(205 70% 38%)';
@@ -207,39 +208,39 @@ export default function VoyageDesk() {
 
       {vessel ? (
         <div className="flex-1 overflow-y-auto p-6 space-y-6">
-          <div className="flex items-start justify-between">
-            <div>
-              <div className="flex items-center gap-3 mb-1">
-                <Anchor size={20} style={{ color: ACCENT }} />
-                <h1 className="text-xl font-bold" style={{ color: 'rgba(255,255,255,0.95)' }}>
-                  {vessel.name}
-                </h1>
+          <PageHeader
+            eyebrow="Operations"
+            breadcrumbs={[{ label: 'Voyage Desk' }, { label: vessel.name }]}
+            title={vessel.name}
+            description={`${vessel.flag} · ${vessel.vesselType} · IMO ${vessel.imo} · ${vessel.grossTonnage.toLocaleString()} GT · Built ${vessel.yearBuilt}`}
+            actions={
+              <div className="flex items-center gap-2">
                 <span
-                  className="flex items-center gap-1 text-xs capitalize"
-                  style={{ color: STATUS_COLOR[vessel.currentStatus] }}
+                  className="flex items-center gap-1.5 text-[11px] capitalize px-2 py-1 rounded border"
+                  style={{
+                    color: STATUS_COLOR[vessel.currentStatus],
+                    borderColor: `${STATUS_COLOR[vessel.currentStatus]}30`,
+                    background: `${STATUS_COLOR[vessel.currentStatus]}10`,
+                  }}
                 >
-                  <div
+                  <span
                     className="w-1.5 h-1.5 rounded-full"
                     style={{ background: STATUS_COLOR[vessel.currentStatus] }}
                   />
                   {vessel.currentStatus.replace('_', ' ')}
                 </span>
+                {vessel.maintenanceDue && (
+                  <span
+                    className="flex items-center gap-1.5 text-[11px] px-2 py-1 rounded border"
+                    style={{ background: 'rgba(184,84,80,0.10)', color: '#d18a86', borderColor: 'rgba(184,84,80,0.22)' }}
+                  >
+                    <AlertTriangle size={12} />
+                    Maintenance due
+                  </span>
+                )}
               </div>
-              <div className="text-sm" style={{ color: 'rgba(255,255,255,0.4)' }}>
-                {vessel.flag} · {vessel.vesselType} · {vessel.imo} ·{' '}
-                {vessel.grossTonnage.toLocaleString()} GT · Built {vessel.yearBuilt}
-              </div>
-            </div>
-            {vessel.maintenanceDue && (
-              <span
-                className="flex items-center gap-1.5 text-xs px-3 py-1 rounded-full"
-                style={{ background: '#c04a2a20', color: '#c04a2a', border: '1px solid #c04a2a30' }}
-              >
-                <AlertTriangle size={12} />
-                Maintenance Due
-              </span>
-            )}
-          </div>
+            }
+          />
 
           <div className="grid grid-cols-4 gap-4">
             {[

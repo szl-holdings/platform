@@ -42,7 +42,7 @@ function RiskMeter({ score }: { score: number }) {
   const color = score >= 85 ? '#ef4444' : score >= 70 ? '#f97316' : '#f59e0b';
   return (
     <div className="flex items-center gap-2">
-      <div className="flex-1 h-1.5 bg-[#0a1628] rounded-full overflow-hidden border border-sky-500/10">
+      <div className="flex-1 h-1.5 bg-[#0e0e0e] rounded-full overflow-hidden border border-white/[0.06]">
         <div
           className="h-full rounded-full transition-all"
           style={{ width: `${score}%`, background: color }}
@@ -64,19 +64,19 @@ function VesselEconomicsCard({ vessel }: { vessel: (typeof DARK_FLEET_VESSELS)[0
   return (
     <div
       className={cn(
-        'bg-[#0a1628]/80 border rounded-xl overflow-hidden transition-all cursor-pointer',
-        expanded ? 'border-orange-500/30' : 'border-sky-500/10 hover:border-sky-500/20',
+        'bg-white/[0.02] border rounded-xl overflow-hidden transition-all cursor-pointer',
+        expanded ? 'border-orange-500/30' : 'border-white/[0.06] hover:border-white/[0.08]',
       )}
       onClick={() => setExpanded(!expanded)}
     >
       <div className="px-4 py-4">
         <div className="flex items-start gap-3">
-          <div className="w-10 h-10 rounded-lg bg-slate-900 border border-sky-500/10 flex items-center justify-center shrink-0">
+          <div className="w-10 h-10 rounded-lg bg-slate-900 border border-white/[0.06] flex items-center justify-center shrink-0">
             <EyeOff className="w-5 h-5 text-orange-400" />
           </div>
           <div className="flex-1 min-w-0">
             <div className="flex items-center gap-2 flex-wrap mb-1">
-              <p className="text-sm font-bold text-sky-100">{vessel.name}</p>
+              <p className="text-sm font-bold text-[#f5f5f5]">{vessel.name}</p>
               <Badge variant="outline" className={cn('text-[9px]', statusColors[vessel.status])}>
                 {vessel.status}
               </Badge>
@@ -89,18 +89,18 @@ function VesselEconomicsCard({ vessel }: { vessel: (typeof DARK_FLEET_VESSELS)[0
                 </Badge>
               )}
             </div>
-            <p className="text-[10px] text-sky-400/50 mb-2">
+            <p className="text-[10px] text-[#8a8a8a] mb-2">
               {vessel.type} · {vessel.dwt.toLocaleString()} DWT · Flag: {vessel.flag}
             </p>
             <div className="grid grid-cols-3 gap-3 mb-2">
               <div>
-                <p className="text-[9px] text-sky-400/40 uppercase tracking-wider">Cargo Value</p>
+                <p className="text-[9px] text-[#6a6a6a] uppercase tracking-wider">Cargo Value</p>
                 <p className="text-sm font-bold font-mono text-orange-400">
                   {fmtMoney(vessel.cargoEstimate.totalValue)}
                 </p>
               </div>
               <div>
-                <p className="text-[9px] text-sky-400/40 uppercase tracking-wider">
+                <p className="text-[9px] text-[#6a6a6a] uppercase tracking-wider">
                   Insurance Exposure
                 </p>
                 <p className="text-sm font-bold font-mono text-red-400">
@@ -108,7 +108,7 @@ function VesselEconomicsCard({ vessel }: { vessel: (typeof DARK_FLEET_VESSELS)[0
                 </p>
               </div>
               <div>
-                <p className="text-[9px] text-sky-400/40 uppercase tracking-wider">
+                <p className="text-[9px] text-[#6a6a6a] uppercase tracking-wider">
                   Sanctions Risk
                 </p>
                 <p className="text-sm font-bold font-mono text-purple-400">{fmtMoney(totalFine)}</p>
@@ -118,7 +118,7 @@ function VesselEconomicsCard({ vessel }: { vessel: (typeof DARK_FLEET_VESSELS)[0
           </div>
           <ChevronRight
             className={cn(
-              'w-4 h-4 text-sky-400/30 shrink-0 mt-1 transition-transform',
+              'w-4 h-4 text-[#5a5a5a] shrink-0 mt-1 transition-transform',
               expanded && 'rotate-90',
             )}
           />
@@ -127,28 +127,28 @@ function VesselEconomicsCard({ vessel }: { vessel: (typeof DARK_FLEET_VESSELS)[0
 
       {expanded && (
         <>
-          <div className="border-t border-sky-500/10 grid grid-cols-1 md:grid-cols-3 gap-0 divide-y md:divide-y-0 md:divide-x divide-sky-500/10">
+          <div className="border-t border-white/[0.06] grid grid-cols-1 md:grid-cols-3 gap-0 divide-y md:divide-y-0 md:divide-x divide-sky-500/10">
             {/* Cargo */}
             <div className="p-4 space-y-2">
-              <p className="text-[10px] uppercase tracking-widest text-sky-400/40 flex items-center gap-1">
+              <p className="text-[10px] uppercase tracking-widest text-[#6a6a6a] flex items-center gap-1">
                 <Ship className="w-3 h-3" /> Cargo Assessment
               </p>
               <div className="space-y-1.5">
                 <div className="flex justify-between text-xs">
-                  <span className="text-sky-400/50">Commodity</span>
-                  <span className="text-sky-200 font-medium">{vessel.cargoEstimate.commodity}</span>
+                  <span className="text-[#8a8a8a]">Commodity</span>
+                  <span className="text-[#e0e0e0] font-medium">{vessel.cargoEstimate.commodity}</span>
                 </div>
                 <div className="flex justify-between text-xs">
-                  <span className="text-sky-400/50">Estimated Volume</span>
-                  <span className="text-sky-200 font-mono">
+                  <span className="text-[#8a8a8a]">Estimated Volume</span>
+                  <span className="text-[#e0e0e0] font-mono">
                     {vessel.cargoEstimate.volumeMT.toLocaleString()} MT
                   </span>
                 </div>
                 <div className="flex justify-between text-xs">
-                  <span className="text-sky-400/50">Price / MT</span>
-                  <span className="text-sky-200 font-mono">${vessel.cargoEstimate.pricePerMT}</span>
+                  <span className="text-[#8a8a8a]">Price / MT</span>
+                  <span className="text-[#e0e0e0] font-mono">${vessel.cargoEstimate.pricePerMT}</span>
                 </div>
-                <div className="flex justify-between text-xs border-t border-sky-500/10 pt-1.5">
+                <div className="flex justify-between text-xs border-t border-white/[0.06] pt-1.5">
                   <span className="text-orange-400 font-medium">Total Value</span>
                   <span className="text-orange-400 font-bold font-mono">
                     {fmtMoney(vessel.cargoEstimate.totalValue)}
@@ -171,29 +171,29 @@ function VesselEconomicsCard({ vessel }: { vessel: (typeof DARK_FLEET_VESSELS)[0
 
             {/* Insurance */}
             <div className="p-4 space-y-2">
-              <p className="text-[10px] uppercase tracking-widest text-sky-400/40 flex items-center gap-1">
+              <p className="text-[10px] uppercase tracking-widest text-[#6a6a6a] flex items-center gap-1">
                 <Building className="w-3 h-3" /> Insurance Exposure
               </p>
               <div className="space-y-1.5">
                 <div className="flex justify-between text-xs">
-                  <span className="text-sky-400/50">Hull & Machinery</span>
-                  <span className="text-sky-200 font-mono">
+                  <span className="text-[#8a8a8a]">Hull & Machinery</span>
+                  <span className="text-[#e0e0e0] font-mono">
                     {fmtMoney(vessel.insuranceExposure.hullValue)}
                   </span>
                 </div>
                 <div className="flex justify-between text-xs">
-                  <span className="text-sky-400/50">Cargo Insurance</span>
-                  <span className="text-sky-200 font-mono">
+                  <span className="text-[#8a8a8a]">Cargo Insurance</span>
+                  <span className="text-[#e0e0e0] font-mono">
                     {fmtMoney(vessel.insuranceExposure.cargoInsurance)}
                   </span>
                 </div>
                 <div className="flex justify-between text-xs">
-                  <span className="text-sky-400/50">P&I Liability Cap</span>
-                  <span className="text-sky-200 font-mono">
+                  <span className="text-[#8a8a8a]">P&I Liability Cap</span>
+                  <span className="text-[#e0e0e0] font-mono">
                     {fmtMoney(vessel.insuranceExposure.liabilityP_I)}
                   </span>
                 </div>
-                <div className="flex justify-between text-xs border-t border-sky-500/10 pt-1.5">
+                <div className="flex justify-between text-xs border-t border-white/[0.06] pt-1.5">
                   <span className="text-red-400 font-medium">Total Exposure</span>
                   <span className="text-red-400 font-bold font-mono">
                     {fmtMoney(vessel.insuranceExposure.totalExposure)}
@@ -212,29 +212,29 @@ function VesselEconomicsCard({ vessel }: { vessel: (typeof DARK_FLEET_VESSELS)[0
 
             {/* Sanctions */}
             <div className="p-4 space-y-2">
-              <p className="text-[10px] uppercase tracking-widest text-sky-400/40 flex items-center gap-1">
+              <p className="text-[10px] uppercase tracking-widest text-[#6a6a6a] flex items-center gap-1">
                 <Scale className="w-3 h-3" /> Sanctions Penalties
               </p>
               <div className="space-y-1.5">
                 <div className="flex justify-between text-xs">
-                  <span className="text-sky-400/50">US Treasury (OFAC)</span>
+                  <span className="text-[#8a8a8a]">US Treasury (OFAC)</span>
                   <span className="text-purple-300 font-mono">
                     {fmtMoney(vessel.sanctionsPenalty.usTreasury)}
                   </span>
                 </div>
                 <div className="flex justify-between text-xs">
-                  <span className="text-sky-400/50">EU Regulation</span>
+                  <span className="text-[#8a8a8a]">EU Regulation</span>
                   <span className="text-purple-300 font-mono">
                     {fmtMoney(vessel.sanctionsPenalty.euRegulation)}
                   </span>
                 </div>
                 <div className="flex justify-between text-xs">
-                  <span className="text-sky-400/50">UK OFSI</span>
+                  <span className="text-[#8a8a8a]">UK OFSI</span>
                   <span className="text-purple-300 font-mono">
                     {fmtMoney(vessel.sanctionsPenalty.ukOfsi)}
                   </span>
                 </div>
-                <div className="flex justify-between text-xs border-t border-sky-500/10 pt-1.5">
+                <div className="flex justify-between text-xs border-t border-white/[0.06] pt-1.5">
                   <span className="text-purple-400 font-medium">Total Potential Fines</span>
                   <span className="text-purple-400 font-bold font-mono">
                     {fmtMoney(vessel.sanctionsPenalty.totalPotentialFine)}
@@ -251,7 +251,7 @@ function VesselEconomicsCard({ vessel }: { vessel: (typeof DARK_FLEET_VESSELS)[0
               )}
             </div>
           </div>
-          <div className="border-t border-sky-500/10 p-3">
+          <div className="border-t border-white/[0.06] p-3">
             <button
               onClick={(e) => {
                 e.stopPropagation();
@@ -290,7 +290,7 @@ export default function DarkFleetEconomics() {
       <div>
         <div className="flex items-center gap-2 mb-1">
           <Calculator className="w-5 h-5 text-orange-400" />
-          <h1 className="text-xl font-bold text-sky-50 font-display">
+          <h1 className="text-xl font-bold text-[#f5f5f5] font-display">
             Dark Fleet Economics Calculator
           </h1>
           <Badge
@@ -300,7 +300,7 @@ export default function DarkFleetEconomics() {
             {DARK_FLEET_VESSELS.length} ACTIVE DETECTIONS
           </Badge>
         </div>
-        <p className="text-xs text-sky-400/50">
+        <p className="text-xs text-[#8a8a8a]">
           Converts AIS blackout detections into dollar-denominated risk assessments for insurers and
           compliance teams
         </p>
@@ -338,23 +338,23 @@ export default function DarkFleetEconomics() {
             color: 'text-amber-400',
           },
         ].map((kpi) => (
-          <div key={kpi.label} className="bg-[#0a1628]/80 border border-sky-500/10 rounded-xl p-4">
+          <div key={kpi.label} className="bg-white/[0.02] border border-white/[0.06] rounded-xl p-4">
             <div className="flex items-center justify-between mb-2">
-              <p className="text-[10px] uppercase tracking-widest text-sky-400/40">{kpi.label}</p>
+              <p className="text-[10px] uppercase tracking-widest text-[#6a6a6a]">{kpi.label}</p>
               <kpi.icon className={cn('w-4 h-4', kpi.color)} />
             </div>
             <p className={cn('text-xl font-bold font-mono', kpi.color)}>{kpi.value}</p>
-            <p className="text-[10px] text-sky-400/40 mt-0.5">{kpi.sub}</p>
+            <p className="text-[10px] text-[#6a6a6a] mt-0.5">{kpi.sub}</p>
           </div>
         ))}
       </div>
 
       {/* Aggregate exposure bar chart */}
-      <div className="bg-[#0a1628]/80 border border-sky-500/10 rounded-xl p-4">
-        <p className="text-xs font-semibold text-sky-200 mb-1">
+      <div className="bg-white/[0.02] border border-white/[0.06] rounded-xl p-4">
+        <p className="text-xs font-semibold text-[#e0e0e0] mb-1">
           Aggregate Exposure by Category (USD millions)
         </p>
-        <p className="text-[10px] text-sky-400/40 mb-4">
+        <p className="text-[10px] text-[#6a6a6a] mb-4">
           Combined across all detected dark vessels
         </p>
         <ResponsiveContainer width="100%" height={120}>
@@ -387,8 +387,8 @@ export default function DarkFleetEconomics() {
       {/* Vessel cards */}
       <div className="space-y-3">
         <div className="flex items-center justify-between">
-          <p className="text-xs font-semibold text-sky-200">Individual Vessel Assessments</p>
-          <p className="text-[10px] text-sky-400/40">Click to expand financial breakdown</p>
+          <p className="text-xs font-semibold text-[#e0e0e0]">Individual Vessel Assessments</p>
+          <p className="text-[10px] text-[#6a6a6a]">Click to expand financial breakdown</p>
         </div>
         {DARK_FLEET_VESSELS.map((v) => (
           <VesselEconomicsCard key={v.id} vessel={v} />

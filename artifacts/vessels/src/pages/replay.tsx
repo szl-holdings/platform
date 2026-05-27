@@ -152,14 +152,14 @@ const METRICS_TIMELINE = [
 
 const typeIcons: Record<string, React.ReactNode> = {
   departure: <MapPin className="w-3 h-3 text-emerald-400" />,
-  waypoint: <ChevronRight className="w-3 h-3 text-sky-400" />,
+  waypoint: <ChevronRight className="w-3 h-3 text-[#c9b787]" />,
   weather: <Wind className="w-3 h-3 text-amber-400" />,
   fuel: <Fuel className="w-3 h-3 text-orange-400" />,
   ais: <Activity className="w-3 h-3 text-violet-400" />,
   anomaly: <AlertTriangle className="w-3 h-3 text-red-400" />,
-  inspection: <Zap className="w-3 h-3 text-sky-400" />,
+  inspection: <Zap className="w-3 h-3 text-[#c9b787]" />,
   ais_dark: <Activity className="w-3 h-3 text-violet-400" />,
-  status_change: <ChevronRight className="w-3 h-3 text-sky-400" />,
+  status_change: <ChevronRight className="w-3 h-3 text-[#c9b787]" />,
   route_deviation: <AlertTriangle className="w-3 h-3 text-amber-400" />,
   weather_pressure: <Wind className="w-3 h-3 text-amber-400" />,
   eta_drift: <Clock className="w-3 h-3 text-orange-400" />,
@@ -342,7 +342,7 @@ export default function VesselsReplayPage() {
   );
   const current = VOYAGE_EVENTS[Math.min(cursor, totalEvents - 1)] ?? VOYAGE_EVENTS[0];
   const _sevColor: Record<string, string> = {
-    info: 'text-sky-400/60',
+    info: 'text-[#9a9a9a]',
     warn: 'text-amber-400',
     crit: 'text-red-400',
   };
@@ -355,7 +355,7 @@ export default function VesselsReplayPage() {
         <div>
           <div className="flex items-center gap-2 mb-1">
             <RotateCcw className="w-4 h-4 text-violet-400" />
-            <h1 className="font-display text-xl font-bold text-sky-50">Voyage Replay</h1>
+            <h1 className="font-display text-xl font-bold text-[#f5f5f5]">Voyage Replay</h1>
             <Badge
               variant="outline"
               className="text-[9px] text-violet-400 border-violet-500/30 bg-violet-500/5"
@@ -363,7 +363,7 @@ export default function VesselsReplayPage() {
               ATLAS RUNTIME
             </Badge>
           </div>
-          <p className="text-xs text-sky-400/40">
+          <p className="text-xs text-[#6a6a6a]">
             Step through the voyage worldline — every event, anomaly, and decision point
           </p>
         </div>
@@ -376,7 +376,7 @@ export default function VesselsReplayPage() {
                 setCursor(0);
                 setPlaying(false);
               }}
-              className="text-[10px] bg-[#0a1628] border border-sky-500/20 text-sky-300 rounded-lg px-2 py-1 outline-none"
+              className="text-[10px] bg-[#0e0e0e] border border-white/[0.08] text-[#d4c598] rounded-lg px-2 py-1 outline-none"
             >
               {vessels.map((v) => (
                 <option key={v.id} value={String(v.id)}>
@@ -404,8 +404,8 @@ export default function VesselsReplayPage() {
             </div>
           )}
           {dataMode === 'loading' && (
-            <div className="flex items-center gap-1.5 text-[10px] text-sky-400/60 bg-sky-500/5 border border-sky-500/20 px-2 py-1 rounded-lg">
-              <span className="w-1.5 h-1.5 rounded-full bg-sky-400/60 animate-pulse" />
+            <div className="flex items-center gap-1.5 text-[10px] text-[#9a9a9a] bg-[#c9b787]/8 border border-white/[0.08] px-2 py-1 rounded-lg">
+              <span className="w-1.5 h-1.5 rounded-full bg-[#c9b787]/14 animate-pulse" />
               LOADING
             </div>
           )}
@@ -448,33 +448,33 @@ export default function VesselsReplayPage() {
         </div>
       )}
 
-      <div className="bg-[#0a1628]/90 border border-violet-500/20 rounded-xl p-4 flex items-start gap-4">
+      <div className="bg-[#0e0e0e]/90 border border-violet-500/20 rounded-xl p-4 flex items-start gap-4">
         <div className="w-8 h-8 rounded-lg bg-violet-500/10 border border-violet-500/20 flex items-center justify-center shrink-0">
-          {typeIcons[current.type] ?? <Activity className="w-3.5 h-3.5 text-sky-400" />}
+          {typeIcons[current.type] ?? <Activity className="w-3.5 h-3.5 text-[#c9b787]" />}
         </div>
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-2 mb-0.5">
-            <p className="text-sm font-semibold text-sky-100">{current.label}</p>
+            <p className="text-sm font-semibold text-[#f5f5f5]">{current.label}</p>
             <Badge
               variant="outline"
               className={cn(
                 'text-[9px] capitalize',
                 current.severity === 'warn'
                   ? 'text-amber-400 border-amber-500/20 bg-amber-500/5'
-                  : 'text-sky-400/60 border-sky-500/10 bg-transparent',
+                  : 'text-[#9a9a9a] border-white/[0.06] bg-transparent',
               )}
             >
               {current.severity}
             </Badge>
           </div>
-          <p className="text-[11px] text-sky-400/50">{current.detail}</p>
+          <p className="text-[11px] text-[#8a8a8a]">{current.detail}</p>
         </div>
         <div className="text-right shrink-0">
-          <p className="text-[10px] text-sky-400/40 font-mono">
+          <p className="text-[10px] text-[#6a6a6a] font-mono">
             Event {cursor + 1} / {totalEvents}
           </p>
           {(current.lat !== 0 || current.lon !== 0) && (
-            <p className="text-[10px] text-sky-400/30 font-mono">
+            <p className="text-[10px] text-[#5a5a5a] font-mono">
               {current.lat.toFixed(1)}°N {Math.abs(current.lon).toFixed(1)}°
               {current.lon >= 0 ? 'E' : 'W'}
             </p>
@@ -482,14 +482,14 @@ export default function VesselsReplayPage() {
         </div>
       </div>
 
-      <div className="bg-[#0a1628]/80 border border-sky-500/10 rounded-xl p-4 space-y-3">
+      <div className="bg-white/[0.02] border border-white/[0.06] rounded-xl p-4 space-y-3">
         <div className="flex items-center justify-between mb-1">
-          <span className="text-[10px] text-sky-400/50 uppercase tracking-wider">
+          <span className="text-[10px] text-[#8a8a8a] uppercase tracking-wider">
             Voyage Timeline
           </span>
           <div className="flex items-center gap-3">
-            <div className="flex items-center gap-1.5 text-[9px] text-sky-400/40">
-              <span className="inline-block w-3 h-0.5 bg-sky-400/60 rounded" />
+            <div className="flex items-center gap-1.5 text-[9px] text-[#6a6a6a]">
+              <span className="inline-block w-3 h-0.5 bg-[#c9b787]/14 rounded" />
               Speed
               <span className="inline-block w-3 h-0.5 bg-amber-400/50 rounded ml-1" />
               Fuel
@@ -516,14 +516,14 @@ export default function VesselsReplayPage() {
               setPlaying(false);
               setCursor(0);
             }}
-            className="flex items-center gap-1 text-xs px-2.5 py-1.5 rounded-lg border border-sky-500/20 bg-sky-500/5 text-sky-400/60 hover:text-sky-300 transition-colors"
+            className="flex items-center gap-1 text-xs px-2.5 py-1.5 rounded-lg border border-white/[0.08] bg-[#c9b787]/8 text-[#9a9a9a] hover:text-[#d4c598] transition-colors"
           >
             <SkipBack className="w-3.5 h-3.5" />
             Start
           </button>
           <button
             onClick={() => setCursor((c) => Math.max(0, c - 1))}
-            className="flex items-center gap-1 text-xs px-2.5 py-1.5 rounded-lg border border-sky-500/20 bg-sky-500/5 text-sky-400/60 hover:text-sky-300 transition-colors"
+            className="flex items-center gap-1 text-xs px-2.5 py-1.5 rounded-lg border border-white/[0.08] bg-[#c9b787]/8 text-[#9a9a9a] hover:text-[#d4c598] transition-colors"
           >
             ‹ Prev
           </button>
@@ -533,7 +533,7 @@ export default function VesselsReplayPage() {
               'flex items-center gap-1.5 text-xs px-4 py-1.5 rounded-lg border transition-colors',
               playing
                 ? 'bg-violet-500/15 border-violet-500/30 text-violet-300'
-                : 'bg-sky-500/10 border-sky-500/30 text-sky-300',
+                : 'bg-[#c9b787]/10 border-[#c9b787]/24 text-[#d4c598]',
             )}
           >
             {playing ? (
@@ -550,7 +550,7 @@ export default function VesselsReplayPage() {
           </button>
           <button
             onClick={() => setCursor((c) => Math.min(totalEvents - 1, c + 1))}
-            className="flex items-center gap-1 text-xs px-2.5 py-1.5 rounded-lg border border-sky-500/20 bg-sky-500/5 text-sky-400/60 hover:text-sky-300 transition-colors"
+            className="flex items-center gap-1 text-xs px-2.5 py-1.5 rounded-lg border border-white/[0.08] bg-[#c9b787]/8 text-[#9a9a9a] hover:text-[#d4c598] transition-colors"
           >
             Next ›
           </button>
@@ -559,7 +559,7 @@ export default function VesselsReplayPage() {
               setPlaying(false);
               setCursor(totalEvents - 1);
             }}
-            className="flex items-center gap-1 text-xs px-2.5 py-1.5 rounded-lg border border-sky-500/20 bg-sky-500/5 text-sky-400/60 hover:text-sky-300 transition-colors"
+            className="flex items-center gap-1 text-xs px-2.5 py-1.5 rounded-lg border border-white/[0.08] bg-[#c9b787]/8 text-[#9a9a9a] hover:text-[#d4c598] transition-colors"
           >
             End
             <SkipForward className="w-3.5 h-3.5" />
@@ -567,10 +567,10 @@ export default function VesselsReplayPage() {
         </div>
       </div>
 
-      <div className="bg-[#0a1628]/80 border border-sky-500/10 rounded-xl overflow-hidden">
-        <div className="px-4 py-3 border-b border-sky-500/10">
-          <p className="text-sm font-semibold text-sky-100">Voyage Event Log</p>
-          <p className="text-[10px] text-sky-400/40">
+      <div className="bg-white/[0.02] border border-white/[0.06] rounded-xl overflow-hidden">
+        <div className="px-4 py-3 border-b border-white/[0.06]">
+          <p className="text-sm font-semibold text-[#f5f5f5]">Voyage Event Log</p>
+          <p className="text-[10px] text-[#6a6a6a]">
             Click any event to jump to that point in the voyage
           </p>
         </div>
@@ -586,12 +586,12 @@ export default function VesselsReplayPage() {
                   setCursor(i);
                 }}
                 className={cn(
-                  'flex gap-3 px-4 py-3 border-b border-sky-500/5 cursor-pointer transition-all',
+                  'flex gap-3 px-4 py-3 border-b border-white/[0.08] cursor-pointer transition-all',
                   isCurrent
                     ? 'bg-violet-500/8 border-violet-500/20'
                     : isPast
-                      ? 'hover:bg-sky-500/3 opacity-70'
-                      : 'hover:bg-sky-500/3 opacity-40',
+                      ? 'hover:bg-[#c9b787]/14 opacity-70'
+                      : 'hover:bg-[#c9b787]/14 opacity-40',
                 )}
               >
                 <div className="flex flex-col items-center mt-0.5">
@@ -601,30 +601,30 @@ export default function VesselsReplayPage() {
                       isCurrent
                         ? 'bg-violet-400 ring-2 ring-violet-400/30'
                         : isPast
-                          ? 'bg-sky-500/40'
-                          : 'bg-sky-500/15',
+                          ? 'bg-[#c9b787]/14'
+                          : 'bg-[#c9b787]/14',
                     )}
                   />
                   {i < VOYAGE_EVENTS.length - 1 && (
-                    <div className="w-px flex-1 bg-sky-500/8 mt-0.5" />
+                    <div className="w-px flex-1 bg-[#c9b787]/14 mt-0.5" />
                   )}
                 </div>
                 <div className="flex-1 min-w-0 pb-1">
                   <div className="flex items-center gap-2 mb-0.5">
                     <span>
-                      {typeIcons[ev.type] ?? <Activity className="w-3 h-3 text-sky-400" />}
+                      {typeIcons[ev.type] ?? <Activity className="w-3 h-3 text-[#c9b787]" />}
                     </span>
                     <p
                       className={cn(
                         'text-[11px] font-medium',
-                        isCurrent ? 'text-sky-100' : 'text-sky-300',
+                        isCurrent ? 'text-[#f5f5f5]' : 'text-[#d4c598]',
                       )}
                     >
                       {ev.label}
                     </p>
                     {ev.severity === 'warn' && <span className="text-[9px] text-amber-400">⚠</span>}
                   </div>
-                  <p className="text-[10px] text-sky-400/40">
+                  <p className="text-[10px] text-[#6a6a6a]">
                     {ev.time} · {ev.detail}
                   </p>
                 </div>

@@ -227,7 +227,7 @@ export default function VoyageCalculatorPage() {
 
   const costItems = estimate
     ? [
-        { label: 'Bunker', value: estimate.costs.bunkerCost, color: 'bg-sky-500/70' },
+        { label: 'Bunker', value: estimate.costs.bunkerCost, color: 'bg-[#c9b787]/14' },
         { label: 'Port Charges', value: estimate.costs.portCharges, color: 'bg-violet-500/70' },
         { label: 'Canal Fees', value: estimate.costs.canalFees, color: 'bg-amber-500/70' },
         { label: 'Insurance', value: estimate.costs.insurance, color: 'bg-emerald-500/70' },
@@ -241,7 +241,7 @@ export default function VoyageCalculatorPage() {
     <div className="space-y-6 p-6 max-w-7xl mx-auto">
       <div>
         <h1 className="text-lg font-semibold text-[#f5f5f5] tracking-tight flex items-center gap-2">
-          <Calculator className="w-5 h-5 text-sky-400" />
+          <Calculator className="w-5 h-5 text-[#c9b787]" />
           Voyage Economics Calculator
         </h1>
         <p className="text-[11px] text-white/30 mt-0.5">
@@ -307,7 +307,7 @@ export default function VoyageCalculatorPage() {
                     className={cn(
                       'flex-1 h-8 rounded text-[11px] font-medium border transition-colors',
                       charterType === ct
-                        ? 'bg-sky-500/10 border-sky-500/30 text-sky-400'
+                        ? 'bg-[#c9b787]/10 border-[#c9b787]/24 text-[#c9b787]'
                         : 'bg-white/[0.02] border-white/[0.08] text-white/40 hover:text-white/60',
                     )}
                   >
@@ -333,7 +333,7 @@ export default function VoyageCalculatorPage() {
             <button
               onClick={() => estimateMutation.mutate()}
               disabled={estimateMutation.isPending}
-              className="w-full h-9 rounded bg-sky-500/20 border border-sky-500/30 text-sky-400 text-[12px] font-semibold hover:bg-sky-500/30 transition-colors flex items-center justify-center gap-1.5 disabled:opacity-50"
+              className="w-full h-9 rounded bg-[#c9b787]/16 border border-[#c9b787]/24 text-[#c9b787] text-[12px] font-semibold hover:bg-[#c9b787]/24 transition-colors flex items-center justify-center gap-1.5 disabled:opacity-50"
             >
               {estimateMutation.isPending ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Calculator className="w-3.5 h-3.5" />}
               Calculate P&L
@@ -344,14 +344,14 @@ export default function VoyageCalculatorPage() {
         <div className="lg:col-span-3 space-y-4">
           {!estimate && !estimateMutation.isPending && (
             <div className="flex flex-col items-center justify-center h-64 rounded-lg border border-white/[0.06] bg-white/[0.02] text-white/20 text-[12px]">
-              <Ship className="w-8 h-8 mb-2 text-sky-400/20" />
+              <Ship className="w-8 h-8 mb-2 text-[#c9b787]/20" />
               Select parameters and click Calculate P&L
             </div>
           )}
 
           {estimateMutation.isPending && (
             <div className="flex items-center justify-center h-64 rounded-lg border border-white/[0.06] bg-white/[0.02]">
-              <Loader2 className="w-5 h-5 text-sky-400 animate-spin" />
+              <Loader2 className="w-5 h-5 text-[#c9b787] animate-spin" />
             </div>
           )}
 
@@ -359,10 +359,10 @@ export default function VoyageCalculatorPage() {
             <>
               <div className="rounded-lg border border-white/[0.06] bg-white/[0.02] p-3">
                 <div className="flex items-center gap-2 text-[12px] text-white/60">
-                  <Ship className="w-4 h-4 text-sky-400" />
+                  <Ship className="w-4 h-4 text-[#c9b787]" />
                   <span className="font-medium text-white/80">{estimate.vesselClass}</span>
                   <ArrowRight className="w-3 h-3 text-white/20" />
-                  <Anchor className="w-3.5 h-3.5 text-sky-400/50" />
+                  <Anchor className="w-3.5 h-3.5 text-[#8a8a8a]" />
                   <span>{estimate.route.from}</span>
                   <ArrowRight className="w-3 h-3 text-white/20" />
                   <span>{estimate.route.to}</span>
@@ -453,7 +453,7 @@ export default function VoyageCalculatorPage() {
                       onClick={() => monteCarloMutation.mutate()}
                       disabled={monteCarloMutation.isPending}
                       data-testid="run-monte-carlo-btn"
-                      className="h-7 rounded bg-sky-500/20 border border-sky-500/30 text-sky-400 text-[10px] font-semibold hover:bg-sky-500/30 transition-colors flex items-center gap-1 px-2.5 disabled:opacity-50"
+                      className="h-7 rounded bg-[#c9b787]/16 border border-[#c9b787]/24 text-[#c9b787] text-[10px] font-semibold hover:bg-[#c9b787]/24 transition-colors flex items-center gap-1 px-2.5 disabled:opacity-50"
                     >
                       {monteCarloMutation.isPending ? (
                         <Loader2 className="w-3 h-3 animate-spin" />

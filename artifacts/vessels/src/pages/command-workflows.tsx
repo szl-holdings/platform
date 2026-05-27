@@ -36,7 +36,7 @@ const EVENT_TYPE_CONFIG: Record<string, { label: string; icon: React.ElementType
     status_change: { label: 'Status Change', icon: Ship, color: 'text-blue-400' },
     route_deviation: { label: 'Route Deviation', icon: Navigation, color: 'text-amber-400' },
     eta_drift: { label: 'ETA Drift', icon: Clock, color: 'text-orange-400' },
-    weather_pressure: { label: 'Weather Pressure', icon: Wind, color: 'text-sky-400' },
+    weather_pressure: { label: 'Weather Pressure', icon: Wind, color: 'text-[#c9b787]' },
     maintenance_watch: { label: 'Maintenance Watch', icon: Wrench, color: 'text-yellow-400' },
     port_congestion: { label: 'Port Congestion', icon: Anchor, color: 'text-purple-400' },
     delay_event: { label: 'Delay Event', icon: TrendingDown, color: 'text-red-400' },
@@ -249,7 +249,7 @@ export default function CommandWorkflowsPage() {
       <div className="flex items-center justify-between flex-wrap gap-3">
         <div>
           <h1 className="text-xl font-bold text-white flex items-center gap-2">
-            <Ship className="w-5 h-5 text-sky-400" />
+            <Ship className="w-5 h-5 text-[#c9b787]" />
             Command Workflows
           </h1>
           <p className="text-sm text-slate-400 mt-0.5">
@@ -411,7 +411,7 @@ export default function CommandWorkflowsPage() {
                           </span>
                         )}
                         {cd.deviationNm && (
-                          <span className="text-[10px] text-sky-400">
+                          <span className="text-[10px] text-[#c9b787]">
                             📍 {cd.deviationNm}nm deviation
                           </span>
                         )}
@@ -424,7 +424,7 @@ export default function CommandWorkflowsPage() {
                           </span>
                         )}
                         {cd.windKnots && (
-                          <span className="text-[10px] text-sky-400">
+                          <span className="text-[10px] text-[#c9b787]">
                             💨 {cd.windKnots}kts wind
                           </span>
                         )}
@@ -457,7 +457,7 @@ export default function CommandWorkflowsPage() {
                     <Button
                       size="sm"
                       variant="outline"
-                      className="h-7 px-2.5 text-[10px] border-sky-500/30 text-sky-400 hover:bg-sky-500/10"
+                      className="h-7 px-2.5 text-[10px] border-[#c9b787]/24 text-[#c9b787] hover:bg-[#c9b787]/10"
                       onClick={() =>
                         createWorkflow.mutate({
                           eventId: event.id,

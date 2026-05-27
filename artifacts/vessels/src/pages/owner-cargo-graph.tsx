@@ -156,13 +156,13 @@ function NodeCard({
           <Icon className="w-3.5 h-3.5" style={{ color: cfg.color }} />
         </div>
         <div className="flex-1 min-w-0">
-          <div className="text-[11px] font-medium text-sky-100 truncate">{node.label}</div>
+          <div className="text-[11px] font-medium text-[#f5f5f5] truncate">{node.label}</div>
           <div className="flex items-center gap-1.5 mt-0.5">
             <span className="text-[9px] uppercase tracking-wider" style={{ color: cfg.color }}>
               {cfg.label}
             </span>
-            {node.flag && <span className="text-[9px] text-sky-400/50">{node.flag}</span>}
-            {node.country && <span className="text-[9px] text-sky-400/50">{node.country}</span>}
+            {node.flag && <span className="text-[9px] text-[#8a8a8a]">{node.flag}</span>}
+            {node.country && <span className="text-[9px] text-[#8a8a8a]">{node.country}</span>}
             {node.cargoCategory && (
               <span className="text-[9px] text-orange-400/60 capitalize">
                 {node.cargoCategory.replace(/_/g, ' ')}
@@ -190,7 +190,7 @@ function NodeCard({
           ) : (
             <Info className="w-2.5 h-2.5 text-amber-400/60" />
           )}
-          <span className="text-[9px] text-sky-400/40">
+          <span className="text-[9px] text-[#6a6a6a]">
             {Math.round(node.provenance.confidence * 100)}% conf.
           </span>
         </div>
@@ -209,7 +209,7 @@ function EdgeList({
   sourceId: string;
 }) {
   const connected = edges.filter((e) => e.source === sourceId || e.target === sourceId);
-  if (!connected.length) return <p className="text-sky-400/40 text-[11px]">No connections</p>;
+  if (!connected.length) return <p className="text-[#6a6a6a] text-[11px]">No connections</p>;
   return (
     <div className="space-y-1">
       {connected.map((e, i) => {
@@ -217,11 +217,11 @@ function EdgeList({
         const other = nodes.find((n) => n.id === otherId);
         const direction = e.source === sourceId ? '→' : '←';
         return (
-          <div key={i} className="flex items-center gap-1.5 text-[10px] text-sky-300/70">
-            <ChevronRight className="w-2.5 h-2.5 text-sky-400/40" />
-            <span className="text-sky-400/40">{direction}</span>
-            <span className="text-sky-400/60 italic">{e.label.replace(/_/g, ' ')}</span>
-            <span className="text-sky-100 truncate">{other?.label ?? otherId}</span>
+          <div key={i} className="flex items-center gap-1.5 text-[10px] text-[#a0a08a]">
+            <ChevronRight className="w-2.5 h-2.5 text-[#6a6a6a]" />
+            <span className="text-[#6a6a6a]">{direction}</span>
+            <span className="text-[#9a9a9a] italic">{e.label.replace(/_/g, ' ')}</span>
+            <span className="text-[#f5f5f5] truncate">{other?.label ?? otherId}</span>
           </div>
         );
       })}
@@ -295,19 +295,19 @@ export default function OwnerCargoGraphPage() {
         <div>
           <div className="flex items-center gap-2 mb-1">
             <Network className="w-5 h-5" style={{ color: ACCENT }} />
-            <h1 className="text-xl font-semibold text-sky-100">Owner–Port–Cargo Graph</h1>
-            <Badge variant="outline" className="text-[9px] border-sky-500/30 text-sky-400/70">
+            <h1 className="text-xl font-semibold text-[#f5f5f5]">Owner–Port–Cargo Graph</h1>
+            <Badge variant="outline" className="text-[9px] border-[#c9b787]/24 text-[#a0a0a0]">
               CONSTELLATION
             </Badge>
           </div>
-          <p className="text-xs text-sky-400/60">
+          <p className="text-xs text-[#9a9a9a]">
             Vessel ownership chains, beneficial owners, charterers, cargo manifests, and port call
             relationships — rendered via CONSTELLATION with full provenance.
           </p>
         </div>
         <button
           onClick={load}
-          className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs text-sky-400 border border-sky-500/20 hover:border-sky-500/40 transition-colors"
+          className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs text-[#c9b787] border border-white/[0.08] hover:border-[#c9b787]/40 transition-colors"
         >
           <RefreshCw className={cn('w-3.5 h-3.5', loading && 'animate-spin')} /> Refresh
         </button>
@@ -338,10 +338,10 @@ export default function OwnerCargoGraphPage() {
           ].map((s) => (
             <div
               key={s.label}
-              className="rounded-xl p-3 border border-sky-500/10"
+              className="rounded-xl p-3 border border-white/[0.06]"
               style={{ background: 'rgba(10,22,40,0.8)' }}
             >
-              <div className="text-[9px] text-sky-400/50 uppercase tracking-wider mb-1">
+              <div className="text-[9px] text-[#8a8a8a] uppercase tracking-wider mb-1">
                 {s.label}
               </div>
               <div className="text-xl font-bold" style={{ color: s.color }}>
@@ -361,12 +361,12 @@ export default function OwnerCargoGraphPage() {
           <span className="text-[10px] text-emerald-300/70 font-medium">
             {data.provenance.attestation}
           </span>
-          <span className="text-[10px] text-sky-400/40">·</span>
-          <span className="text-[10px] text-sky-400/50">
+          <span className="text-[10px] text-[#6a6a6a]">·</span>
+          <span className="text-[10px] text-[#8a8a8a]">
             {Math.round(data.provenance.confidence * 100)}% confidence
           </span>
-          <span className="text-[10px] text-sky-400/40">·</span>
-          <span className="text-[10px] text-sky-400/40">
+          <span className="text-[10px] text-[#6a6a6a]">·</span>
+          <span className="text-[10px] text-[#6a6a6a]">
             Fetched {new Date(data.provenance.freshness.fetchedAt).toLocaleTimeString()}
           </span>
         </div>
@@ -380,8 +380,8 @@ export default function OwnerCargoGraphPage() {
             className={cn(
               'px-3 py-1.5 rounded-lg text-[11px] border transition-colors capitalize',
               typeFilter === t
-                ? 'bg-sky-500/15 border-sky-500/30 text-sky-300'
-                : 'border-sky-500/10 text-sky-400/50 hover:text-sky-300/70',
+                ? 'bg-[#c9b787]/14 border-[#c9b787]/24 text-[#d4c598]'
+                : 'border-white/[0.06] text-[#8a8a8a] hover:text-[#a0a08a]',
             )}
           >
             {t === 'all' ? 'All Entity Types' : t}
@@ -392,23 +392,23 @@ export default function OwnerCargoGraphPage() {
       <div className="grid grid-cols-12 gap-4">
         <div className="col-span-8">
           <div
-            className="rounded-xl border border-sky-500/10 overflow-hidden"
+            className="rounded-xl border border-white/[0.06] overflow-hidden"
             style={{ background: 'rgba(10,22,40,0.8)' }}
           >
-            <div className="px-4 py-2 border-b border-sky-500/10 flex items-center justify-between">
-              <span className="text-[10px] uppercase tracking-widest text-sky-400/40 font-medium">
+            <div className="px-4 py-2 border-b border-white/[0.06] flex items-center justify-between">
+              <span className="text-[10px] uppercase tracking-widest text-[#6a6a6a] font-medium">
                 Interactive Ownership · Cargo · Port Graph
               </span>
-              <span className="text-[10px] text-sky-400/40">
+              <span className="text-[10px] text-[#6a6a6a]">
                 {graphNodes.length} nodes · {visibleEdgeCount} edges
               </span>
             </div>
             {loading ? (
-              <div className="flex items-center justify-center h-64 text-sky-400/40 text-sm">
+              <div className="flex items-center justify-center h-64 text-[#6a6a6a] text-sm">
                 Loading graph intelligence…
               </div>
             ) : graphNodes.length === 0 ? (
-              <div className="flex items-center justify-center h-64 text-sky-400/40 text-sm">
+              <div className="flex items-center justify-center h-64 text-[#6a6a6a] text-sm">
                 No entities in this category
               </div>
             ) : (
@@ -432,10 +432,10 @@ export default function OwnerCargoGraphPage() {
           </div>
 
           <div
-            className="mt-3 rounded-xl border border-sky-500/10 p-3"
+            className="mt-3 rounded-xl border border-white/[0.06] p-3"
             style={{ background: 'rgba(10,22,40,0.6)' }}
           >
-            <div className="text-[10px] text-sky-400/50 uppercase tracking-wider mb-2">
+            <div className="text-[10px] text-[#8a8a8a] uppercase tracking-wider mb-2">
               Entities ({filtered.length})
             </div>
             <div className="grid grid-cols-3 gap-2 max-h-72 overflow-y-auto pr-1">
@@ -448,7 +448,7 @@ export default function OwnerCargoGraphPage() {
                 />
               ))}
               {filtered.length === 0 && (
-                <p className="col-span-3 text-sky-400/40 text-xs text-center py-6">
+                <p className="col-span-3 text-[#6a6a6a] text-xs text-center py-6">
                   No entities in this category
                 </p>
               )}
@@ -458,7 +458,7 @@ export default function OwnerCargoGraphPage() {
 
         <div className="col-span-4 space-y-3">
           <div
-            className="rounded-xl border border-sky-500/10 p-4"
+            className="rounded-xl border border-white/[0.06] p-4"
             style={{ background: 'rgba(10,22,40,0.8)' }}
           >
             {selected ? (
@@ -474,38 +474,38 @@ export default function OwnerCargoGraphPage() {
                     );
                   })()}
                   <div>
-                    <div className="text-sm font-medium text-sky-100">{selected.label}</div>
-                    <div className="text-[10px] text-sky-400/50 capitalize">{selected.type}</div>
+                    <div className="text-sm font-medium text-[#f5f5f5]">{selected.label}</div>
+                    <div className="text-[10px] text-[#8a8a8a] capitalize">{selected.type}</div>
                   </div>
                 </div>
                 <div className="space-y-3 text-[11px]">
                   {selected.flag && (
                     <div className="flex justify-between">
-                      <span className="text-sky-400/50">Flag State</span>
-                      <span className="text-sky-200">{selected.flag}</span>
+                      <span className="text-[#8a8a8a]">Flag State</span>
+                      <span className="text-[#e0e0e0]">{selected.flag}</span>
                     </div>
                   )}
                   {selected.country && (
                     <div className="flex justify-between">
-                      <span className="text-sky-400/50">Country</span>
-                      <span className="text-sky-200">{selected.country}</span>
+                      <span className="text-[#8a8a8a]">Country</span>
+                      <span className="text-[#e0e0e0]">{selected.country}</span>
                     </div>
                   )}
                   {selected.imo && (
                     <div className="flex justify-between">
-                      <span className="text-sky-400/50">IMO</span>
-                      <span className="text-sky-200 font-mono">{selected.imo}</span>
+                      <span className="text-[#8a8a8a]">IMO</span>
+                      <span className="text-[#e0e0e0] font-mono">{selected.imo}</span>
                     </div>
                   )}
                   {selected.subtype && (
                     <div className="flex justify-between">
-                      <span className="text-sky-400/50">Vessel Type</span>
-                      <span className="text-sky-200">{selected.subtype}</span>
+                      <span className="text-[#8a8a8a]">Vessel Type</span>
+                      <span className="text-[#e0e0e0]">{selected.subtype}</span>
                     </div>
                   )}
                   {selected.riskTier && (
                     <div className="flex justify-between">
-                      <span className="text-sky-400/50">Risk Tier</span>
+                      <span className="text-[#8a8a8a]">Risk Tier</span>
                       <span
                         style={{ color: RISK_COLORS[selected.riskTier] }}
                         className="font-medium capitalize"
@@ -516,13 +516,13 @@ export default function OwnerCargoGraphPage() {
                   )}
                   {selected.creditRating && (
                     <div className="flex justify-between">
-                      <span className="text-sky-400/50">Credit Rating</span>
-                      <span className="text-sky-200">{selected.creditRating}</span>
+                      <span className="text-[#8a8a8a]">Credit Rating</span>
+                      <span className="text-[#e0e0e0]">{selected.creditRating}</span>
                     </div>
                   )}
                   {selected.congestionLevel && (
                     <div className="flex justify-between">
-                      <span className="text-sky-400/50">Port Congestion</span>
+                      <span className="text-[#8a8a8a]">Port Congestion</span>
                       <span
                         className="capitalize"
                         style={{
@@ -540,7 +540,7 @@ export default function OwnerCargoGraphPage() {
                   )}
                   {selected.cargoCategory && (
                     <div className="flex justify-between">
-                      <span className="text-sky-400/50">Cargo Category</span>
+                      <span className="text-[#8a8a8a]">Cargo Category</span>
                       <span className="text-orange-300 capitalize">
                         {selected.cargoCategory.replace(/_/g, ' ')}
                       </span>
@@ -548,8 +548,8 @@ export default function OwnerCargoGraphPage() {
                   )}
                   {selected.cargoTonnes !== undefined && (
                     <div className="flex justify-between">
-                      <span className="text-sky-400/50">Cargo Tonnes</span>
-                      <span className="text-sky-200">
+                      <span className="text-[#8a8a8a]">Cargo Tonnes</span>
+                      <span className="text-[#e0e0e0]">
                         {selected.cargoTonnes.toLocaleString()} mt
                       </span>
                     </div>
@@ -567,37 +567,37 @@ export default function OwnerCargoGraphPage() {
                     </div>
                   )}
                   {selected.provenance && (
-                    <div className="pt-2 border-t border-sky-500/10">
-                      <div className="text-[10px] text-sky-400/50 mb-1.5">Provenance</div>
+                    <div className="pt-2 border-t border-white/[0.06]">
+                      <div className="text-[10px] text-[#8a8a8a] mb-1.5">Provenance</div>
                       <div className="flex items-center gap-1.5">
                         {selected.provenance.verifierApproved ? (
                           <CheckCircle2 className="w-3 h-3 text-emerald-400" />
                         ) : (
                           <Shield className="w-3 h-3 text-amber-400" />
                         )}
-                        <span className="text-[10px] text-sky-300/60">
+                        <span className="text-[10px] text-[#d4c598]/60">
                           {selected.provenance.attestation}
                         </span>
                       </div>
-                      <div className="text-[10px] text-sky-400/40 mt-0.5">
+                      <div className="text-[10px] text-[#6a6a6a] mt-0.5">
                         {Math.round(selected.provenance.confidence * 100)}% confidence
                       </div>
-                      <div className="text-[10px] text-sky-400/30 mt-0.5">
+                      <div className="text-[10px] text-[#5a5a5a] mt-0.5">
                         {new Date(selected.provenance.freshness.fetchedAt).toLocaleString()}
                       </div>
                     </div>
                   )}
-                  <div className="pt-2 border-t border-sky-500/10">
-                    <div className="text-[10px] text-sky-400/50 mb-2">Graph Connections</div>
+                  <div className="pt-2 border-t border-white/[0.06]">
+                    <div className="text-[10px] text-[#8a8a8a] mb-2">Graph Connections</div>
                     <EdgeList edges={edges} nodes={nodes} sourceId={selected.id} />
                   </div>
                 </div>
               </>
             ) : (
               <div className="flex flex-col items-center justify-center h-48 text-center">
-                <Eye className="w-6 h-6 text-sky-400/30 mb-2" />
-                <p className="text-sky-400/40 text-sm">Select an entity to inspect</p>
-                <p className="text-sky-400/25 text-xs mt-1">
+                <Eye className="w-6 h-6 text-[#5a5a5a] mb-2" />
+                <p className="text-[#6a6a6a] text-sm">Select an entity to inspect</p>
+                <p className="text-[#c9b787]/25 text-xs mt-1">
                   Owners, vessels, charterers, cargo, ports
                 </p>
               </div>
@@ -605,10 +605,10 @@ export default function OwnerCargoGraphPage() {
           </div>
 
           <div
-            className="rounded-xl border border-sky-500/10 p-4"
+            className="rounded-xl border border-white/[0.06] p-4"
             style={{ background: 'rgba(10,22,40,0.8)' }}
           >
-            <div className="text-[10px] text-sky-400/50 uppercase tracking-wider mb-3">
+            <div className="text-[10px] text-[#8a8a8a] uppercase tracking-wider mb-3">
               Entity Legend
             </div>
             {Object.entries(TYPE_CONFIG).map(([type, cfg]) => {
@@ -619,8 +619,8 @@ export default function OwnerCargoGraphPage() {
                   <div className="p-1 rounded" style={{ background: cfg.bg }}>
                     <Icon className="w-2.5 h-2.5" style={{ color: cfg.color }} />
                   </div>
-                  <span className="text-[11px] text-sky-300/70 capitalize">{type}</span>
-                  <span className="ml-auto text-[10px] text-sky-400/40">{count}</span>
+                  <span className="text-[11px] text-[#a0a08a] capitalize">{type}</span>
+                  <span className="ml-auto text-[10px] text-[#6a6a6a]">{count}</span>
                 </div>
               );
             })}

@@ -396,7 +396,7 @@ export default function VesselsAtlasRuntimePage() {
 
   const statusColors: Record<string, string> = {
     at_sea: 'text-emerald-400 bg-emerald-500/10 border-emerald-500/20',
-    in_port: 'text-sky-400 bg-sky-500/10 border-sky-500/20',
+    in_port: 'text-[#c9b787] bg-[#c9b787]/10 border-white/[0.08]',
     anchored: 'text-amber-400 bg-amber-500/10 border-amber-500/20',
     active: 'text-emerald-400 bg-emerald-500/10 border-emerald-500/20',
   };
@@ -406,8 +406,8 @@ export default function VesselsAtlasRuntimePage() {
       <div className="flex items-center justify-between">
         <div>
           <div className="flex items-center gap-2 mb-1">
-            <Layers className="w-4 h-4 text-sky-400" />
-            <h1 className="font-display text-xl font-bold text-sky-50">ATLAS Spatial Runtime</h1>
+            <Layers className="w-4 h-4 text-[#c9b787]" />
+            <h1 className="font-display text-xl font-bold text-[#f5f5f5]">ATLAS Spatial Runtime</h1>
             <Badge
               variant="outline"
               className="text-[9px] text-violet-400 border-violet-500/30 bg-violet-500/5"
@@ -415,7 +415,7 @@ export default function VesselsAtlasRuntimePage() {
               TWIN ACTIVE
             </Badge>
           </div>
-          <p className="text-xs text-sky-400/40">
+          <p className="text-xs text-[#6a6a6a]">
             Vessel digital twin with route memory, spatial overlays, and live worldline tracking
           </p>
         </div>
@@ -426,7 +426,7 @@ export default function VesselsAtlasRuntimePage() {
               'flex items-center gap-1.5 text-[10px] px-2 py-1 rounded-lg border transition-colors',
               safeMode
                 ? 'text-violet-400 bg-violet-500/10 border-violet-500/30'
-                : 'text-sky-400/40 border-sky-500/10 hover:bg-sky-500/5',
+                : 'text-[#6a6a6a] border-white/[0.06] hover:bg-[#c9b787]/8',
             )}
           >
             <Lock className="w-3 h-3" /> {safeMode ? 'Safe Mode ON' : 'Safe Mode'}
@@ -450,8 +450,8 @@ export default function VesselsAtlasRuntimePage() {
             </div>
           )}
           {dataMode === 'loading' && (
-            <div className="flex items-center gap-1.5 text-[10px] text-sky-400/60 bg-sky-500/5 border border-sky-500/20 px-2 py-1 rounded-lg">
-              <span className="w-1.5 h-1.5 rounded-full bg-sky-400/60 animate-pulse" />
+            <div className="flex items-center gap-1.5 text-[10px] text-[#9a9a9a] bg-[#c9b787]/8 border border-white/[0.08] px-2 py-1 rounded-lg">
+              <span className="w-1.5 h-1.5 rounded-full bg-[#c9b787]/14 animate-pulse" />
               LOADING
             </div>
           )}
@@ -484,7 +484,7 @@ export default function VesselsAtlasRuntimePage() {
       )}
 
       {(liveDriftAvg !== null || liveBranchCount !== null || isLiveWaypoints) && (
-        <div className="flex items-center gap-3 text-[10px] px-3 py-2 rounded-lg border border-sky-500/10 bg-sky-500/3">
+        <div className="flex items-center gap-3 text-[10px] px-3 py-2 rounded-lg border border-white/[0.06] bg-[#c9b787]/14">
           {isLiveWaypoints && (
             <span className="text-emerald-400/70 flex items-center gap-1">
               <span className="w-1.5 h-1.5 rounded-full bg-emerald-400" />
@@ -492,16 +492,16 @@ export default function VesselsAtlasRuntimePage() {
             </span>
           )}
           {liveDriftAvg !== null && (
-            <span className="text-sky-400/50">
-              Live Drift Avg: <span className="font-mono text-sky-300">{liveDriftAvg}σ</span>
+            <span className="text-[#8a8a8a]">
+              Live Drift Avg: <span className="font-mono text-[#d4c598]">{liveDriftAvg}σ</span>
             </span>
           )}
           {liveBranchCount !== null && (
             <>
-              <span className="text-sky-400/20">·</span>
-              <span className="flex items-center gap-1 text-sky-400/50">
+              <span className="text-[#c9b787]/20">·</span>
+              <span className="flex items-center gap-1 text-[#8a8a8a]">
                 <GitBranch className="w-3 h-3" />{' '}
-                <span className="font-mono text-sky-300">{liveBranchCount}</span> scenario branch
+                <span className="font-mono text-[#d4c598]">{liveBranchCount}</span> scenario branch
                 {liveBranchCount !== 1 ? 'es' : ''}
               </span>
             </>
@@ -524,7 +524,7 @@ export default function VesselsAtlasRuntimePage() {
               'flex items-center gap-2 px-3 py-1.5 rounded-lg border text-[10px] whitespace-nowrap shrink-0',
               s.status === 'warn'
                 ? 'border-amber-500/25 bg-amber-500/5'
-                : 'border-sky-500/10 bg-[#0a1628]/60',
+                : 'border-white/[0.06] bg-white/[0.02]',
             )}
           >
             <span
@@ -533,9 +533,9 @@ export default function VesselsAtlasRuntimePage() {
                 s.status === 'warn' ? 'bg-amber-400 animate-pulse' : 'bg-emerald-400',
               )}
             />
-            <span className="text-sky-400/50">{s.label}</span>
+            <span className="text-[#8a8a8a]">{s.label}</span>
             <span
-              className={cn('font-mono', s.status === 'warn' ? 'text-amber-400' : 'text-sky-300')}
+              className={cn('font-mono', s.status === 'warn' ? 'text-amber-400' : 'text-[#d4c598]')}
             >
               {s.value}
             </span>
@@ -551,8 +551,8 @@ export default function VesselsAtlasRuntimePage() {
             className={cn(
               'flex items-center gap-2 px-3 py-2 rounded-lg border text-xs whitespace-nowrap transition-all',
               selectedVessel.id === v.id
-                ? 'bg-sky-500/10 border-sky-500/30 text-sky-300'
-                : 'bg-[#0a1628]/60 border-sky-500/10 text-sky-400/50 hover:text-sky-300',
+                ? 'bg-[#c9b787]/10 border-[#c9b787]/24 text-[#d4c598]'
+                : 'bg-white/[0.02] border-white/[0.06] text-[#8a8a8a] hover:text-[#d4c598]',
             )}
           >
             <span>{v.flag}</span>
@@ -572,20 +572,20 @@ export default function VesselsAtlasRuntimePage() {
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
         <div className="lg:col-span-2 space-y-4">
-          <div className="bg-[#0a1628]/80 border border-sky-500/10 rounded-xl overflow-hidden">
-            <div className="px-4 py-3 border-b border-sky-500/10 flex items-center justify-between">
+          <div className="bg-white/[0.02] border border-white/[0.06] rounded-xl overflow-hidden">
+            <div className="px-4 py-3 border-b border-white/[0.06] flex items-center justify-between">
               <div>
-                <p className="text-sm font-semibold text-sky-100">
+                <p className="text-sm font-semibold text-[#f5f5f5]">
                   {selectedVessel.name} — Route Memory Twin
                 </p>
-                <p className="text-[10px] text-sky-400/40">
+                <p className="text-[10px] text-[#6a6a6a]">
                   {selectedVessel.type} · Live spatial worldline · {displayHeading}° heading ·{' '}
                   {displaySpeed} kts
                 </p>
               </div>
               <div className="flex items-center gap-2">
-                <span className="text-[10px] text-sky-400/50 font-mono">SYNC 48ms</span>
-                <span className="w-1.5 h-1.5 rounded-full bg-sky-400 animate-pulse" />
+                <span className="text-[10px] text-[#8a8a8a] font-mono">SYNC 48ms</span>
+                <span className="w-1.5 h-1.5 rounded-full bg-[#c9b787] animate-pulse" />
               </div>
             </div>
             <div className="p-4">
@@ -593,20 +593,20 @@ export default function VesselsAtlasRuntimePage() {
             </div>
           </div>
 
-          <div className="bg-[#0a1628]/80 border border-sky-500/10 rounded-xl overflow-hidden">
-            <div className="px-4 py-3 border-b border-sky-500/10 flex items-center gap-2">
+          <div className="bg-white/[0.02] border border-white/[0.06] rounded-xl overflow-hidden">
+            <div className="px-4 py-3 border-b border-white/[0.06] flex items-center gap-2">
               <Clock className="w-3.5 h-3.5 text-violet-400" />
-              <span className="text-sm font-semibold text-sky-100">Route Memory Segments</span>
+              <span className="text-sm font-semibold text-[#f5f5f5]">Route Memory Segments</span>
             </div>
             <div className="overflow-x-auto">
               <table className="w-full text-xs">
                 <thead>
-                  <tr className="border-b border-sky-500/10">
+                  <tr className="border-b border-white/[0.06]">
                     {['Date', 'Segment', 'Avg Speed', 'Fuel Burn', 'Incidents', 'AIS Gap'].map(
                       (h) => (
                         <th
                           key={h}
-                          className="text-left px-4 py-2 text-[10px] text-sky-400/40 font-normal uppercase tracking-wider"
+                          className="text-left px-4 py-2 text-[10px] text-[#6a6a6a] font-normal uppercase tracking-wider"
                         >
                           {h}
                         </th>
@@ -618,14 +618,14 @@ export default function VesselsAtlasRuntimePage() {
                   {DEMO_ROUTE_MEMORY.map((row, i) => (
                     <tr
                       key={i}
-                      className="border-b border-sky-500/5 hover:bg-sky-500/5 transition-colors"
+                      className="border-b border-white/[0.08] hover:bg-[#c9b787]/8 transition-colors"
                     >
-                      <td className="px-4 py-2.5 text-sky-400/60 font-mono text-[10px]">
+                      <td className="px-4 py-2.5 text-[#9a9a9a] font-mono text-[10px]">
                         {row.date}
                       </td>
-                      <td className="px-4 py-2.5 text-sky-200">{row.segment}</td>
-                      <td className="px-4 py-2.5 font-mono text-sky-300">{row.avgSpeed} kts</td>
-                      <td className="px-4 py-2.5 font-mono text-sky-300">{row.fuelBurn} t/d</td>
+                      <td className="px-4 py-2.5 text-[#e0e0e0]">{row.segment}</td>
+                      <td className="px-4 py-2.5 font-mono text-[#d4c598]">{row.avgSpeed} kts</td>
+                      <td className="px-4 py-2.5 font-mono text-[#d4c598]">{row.fuelBurn} t/d</td>
                       <td className="px-4 py-2.5">
                         {row.incidents > 0 ? (
                           <span className="text-amber-400 font-mono">{row.incidents}</span>
@@ -651,9 +651,9 @@ export default function VesselsAtlasRuntimePage() {
         </div>
 
         <div className="space-y-4">
-          <div className="bg-[#0a1628]/80 border border-sky-500/10 rounded-xl p-4">
-            <p className="text-xs font-semibold text-sky-200 mb-3 flex items-center gap-1.5">
-              <Layers className="w-3.5 h-3.5 text-sky-400" />
+          <div className="bg-white/[0.02] border border-white/[0.06] rounded-xl p-4">
+            <p className="text-xs font-semibold text-[#e0e0e0] mb-3 flex items-center gap-1.5">
+              <Layers className="w-3.5 h-3.5 text-[#c9b787]" />
               External Overlays
             </p>
             <div className="space-y-2">
@@ -665,7 +665,7 @@ export default function VesselsAtlasRuntimePage() {
                     className={cn(
                       'flex items-center justify-between p-2.5 rounded-lg border cursor-pointer transition-all',
                       ov.active
-                        ? 'border-sky-500/20 bg-sky-500/5'
+                        ? 'border-white/[0.08] bg-[#c9b787]/8'
                         : 'border-transparent bg-white/2 opacity-50',
                     )}
                     onClick={() => toggleOverlay(ov.id)}
@@ -675,7 +675,7 @@ export default function VesselsAtlasRuntimePage() {
                         className="w-3.5 h-3.5"
                         style={{ color: ov.active ? ov.color : 'rgba(255,255,255,0.25)' }}
                       />
-                      <span className="text-[11px] text-sky-200">{ov.label}</span>
+                      <span className="text-[11px] text-[#e0e0e0]">{ov.label}</span>
                     </div>
                     <div className="flex items-center gap-2">
                       <span
@@ -693,10 +693,10 @@ export default function VesselsAtlasRuntimePage() {
                       <div
                         className={cn(
                           'w-3 h-3 rounded-sm border flex items-center justify-center',
-                          ov.active ? 'border-sky-400 bg-sky-500/20' : 'border-sky-500/20',
+                          ov.active ? 'border-[#c9b787]/40 bg-[#c9b787]/16' : 'border-white/[0.08]',
                         )}
                       >
-                        {ov.active && <span className="text-[8px] text-sky-400">✓</span>}
+                        {ov.active && <span className="text-[8px] text-[#c9b787]">✓</span>}
                       </div>
                     </div>
                   </div>
@@ -705,9 +705,9 @@ export default function VesselsAtlasRuntimePage() {
             </div>
           </div>
 
-          <div className="bg-[#0a1628]/80 border border-sky-500/10 rounded-xl p-4">
-            <p className="text-xs font-semibold text-sky-200 mb-3 flex items-center gap-1.5">
-              <Navigation className="w-3.5 h-3.5 text-sky-400" />
+          <div className="bg-white/[0.02] border border-white/[0.06] rounded-xl p-4">
+            <p className="text-xs font-semibold text-[#e0e0e0] mb-3 flex items-center gap-1.5">
+              <Navigation className="w-3.5 h-3.5 text-[#c9b787]" />
               Waypoint Sequence
               {isLiveWaypoints && (
                 <span className="text-[9px] text-emerald-400/70 ml-auto">● live</span>
@@ -720,7 +720,7 @@ export default function VesselsAtlasRuntimePage() {
                 .map((wp, i, arr) => {
                   const typeColors: Record<string, string> = {
                     origin: 'bg-emerald-400',
-                    waypoint: 'bg-sky-400',
+                    waypoint: 'bg-[#c9b787]',
                     chokepoint: 'bg-amber-400',
                     destination: 'bg-violet-400',
                   };
@@ -731,24 +731,24 @@ export default function VesselsAtlasRuntimePage() {
                         <div
                           className={cn(
                             'w-2 h-2 rounded-full mt-1 shrink-0',
-                            typeColors[wp.type] ?? 'bg-sky-400',
+                            typeColors[wp.type] ?? 'bg-[#c9b787]',
                             isActive && 'ring-2 ring-sky-400/40',
                           )}
                         />
-                        {i < arr.length - 1 && <div className="w-px flex-1 bg-sky-500/10 mt-0.5" />}
+                        {i < arr.length - 1 && <div className="w-px flex-1 bg-[#c9b787]/10 mt-0.5" />}
                       </div>
                       <div className="pb-3">
                         <p
                           className={cn(
                             'text-[11px] font-medium',
-                            isActive ? 'text-sky-300' : 'text-sky-400/60',
+                            isActive ? 'text-[#d4c598]' : 'text-[#9a9a9a]',
                           )}
                         >
                           {wp.label}
                         </p>
-                        <p className="text-[10px] text-sky-400/35 font-mono">{wp.eta}</p>
+                        <p className="text-[10px] text-[#c9b787]/35 font-mono">{wp.eta}</p>
                         {isActive && (
-                          <span className="text-[9px] text-sky-400 bg-sky-500/10 px-1.5 py-0.5 rounded mt-0.5 inline-block">
+                          <span className="text-[9px] text-[#c9b787] bg-[#c9b787]/10 px-1.5 py-0.5 rounded mt-0.5 inline-block">
                             ← CURRENT
                           </span>
                         )}
@@ -759,8 +759,8 @@ export default function VesselsAtlasRuntimePage() {
             </div>
           </div>
 
-          <div className="bg-[#0a1628]/80 border border-sky-500/10 rounded-xl p-4">
-            <p className="text-xs font-semibold text-sky-200 mb-3 flex items-center gap-1.5">
+          <div className="bg-white/[0.02] border border-white/[0.06] rounded-xl p-4">
+            <p className="text-xs font-semibold text-[#e0e0e0] mb-3 flex items-center gap-1.5">
               <Activity className="w-3.5 h-3.5 text-emerald-400" />
               Twin Drift Monitor
             </p>
@@ -772,9 +772,9 @@ export default function VesselsAtlasRuntimePage() {
             ].map((d) => (
               <div
                 key={d.label}
-                className="flex items-center justify-between py-1.5 border-b border-sky-500/5 last:border-0"
+                className="flex items-center justify-between py-1.5 border-b border-white/[0.08] last:border-0"
               >
-                <span className="text-[10px] text-sky-400/50">{d.label}</span>
+                <span className="text-[10px] text-[#8a8a8a]">{d.label}</span>
                 <span
                   className={cn(
                     'text-[10px] font-mono',

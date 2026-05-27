@@ -13,6 +13,7 @@ import {
   Zap,
 } from 'lucide-react';
 import { useState } from 'react';
+import { PageHeader } from '@/components/shell';
 
 interface Subscription {
   id: number;
@@ -46,7 +47,7 @@ const PLAN_NAMES: Record<number, string> = {
 function statusBadge(status: string) {
   const map: Record<string, { label: string; cls: string }> = {
     active: { label: 'Active', cls: 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20' },
-    trialing: { label: 'Trial', cls: 'bg-sky-500/10 text-sky-400 border-sky-500/20' },
+    trialing: { label: 'Trial', cls: 'bg-[#c9b787]/10 text-[#c9b787] border-white/[0.08]' },
     past_due: { label: 'Past due', cls: 'bg-orange-500/10 text-orange-400 border-orange-500/20' },
     canceled: { label: 'Canceled', cls: 'bg-red-500/10 text-red-400 border-red-500/20' },
     paid: { label: 'Paid', cls: 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20' },
@@ -115,74 +116,74 @@ export default function BillingPanelPage() {
     subscriptions.find((s) => s.status === 'active' || s.status === 'trialing') ?? subscriptions[0];
 
   return (
-    <div className="p-6 space-y-6 max-w-3xl">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="font-display text-xl font-bold text-sky-50">Billing</h1>
-          <p className="text-xs text-sky-400/50 mt-0.5">
-            Manage your Vessels subscription and payment history
-          </p>
-        </div>
-        <div className="flex items-center gap-2">
-          <button
-            onClick={() => {
-              void refetchSubs();
-              void refetchInvoices();
-            }}
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-sky-500/10 border border-sky-500/20 text-sky-400 text-xs hover:bg-sky-500/15 transition-colors"
-          >
-            <RefreshCw className="w-3 h-3" />
-            Refresh
-          </button>
-          <button
-            onClick={async () => {
-              trackEvent('upgrade_clicked', {
-                feature: 'vessels_billing',
-                plan: 'fleet-enterprise',
-              });
-              const origin = window.location.origin;
-              const res = await fetch(`${import.meta.env.BASE_URL}api/billing/checkout`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                  priceId:
-                    import.meta.env.VITE_STRIPE_PRICE_VESSELS_ENTERPRISE ??
-                    'price_vessels_enterprise',
-                  mode: 'subscription',
-                  successUrl: `${origin}/vessels/billing?checkout=success`,
-                  cancelUrl: `${origin}/vessels/billing`,
-                }),
-              });
-              const data = await res.json();
-              if (data?.data?.url) window.location.href = data.data.url;
-            }}
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-sky-600/20 border border-sky-500/30 text-sky-300 text-xs hover:bg-sky-600/30 transition-colors font-semibold"
-          >
-            <Zap className="w-3 h-3" />
-            Upgrade Fleet
-          </button>
-        </div>
-      </div>
+    <div className="space-y-6 max-w-3xl">
+      <PageHeader
+        eyebrow="Account"
+        breadcrumbs={[{ label: 'Billing' }]}
+        title="Billing"
+        description="Manage your Vessels subscription and payment history."
+        actions={
+          <div className="flex items-center gap-2">
+            <button
+              onClick={() => {
+                void refetchSubs();
+                void refetchInvoices();
+              }}
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded text-[11px] text-[#8a8a8a] hover:text-[#f5f5f5] hover:bg-white/[0.04] border border-white/[0.06] transition-colors"
+            >
+              <RefreshCw className="w-3 h-3" />
+              Refresh
+            </button>
+            <button
+              onClick={async () => {
+                trackEvent('upgrade_clicked', {
+                  feature: 'vessels_billing',
+                  plan: 'fleet-enterprise',
+                });
+                const origin = window.location.origin;
+                const res = await fetch(`${import.meta.env.BASE_URL}api/billing/checkout`, {
+                  method: 'POST',
+                  headers: { 'Content-Type': 'application/json' },
+                  body: JSON.stringify({
+                    priceId:
+                      import.meta.env.VITE_STRIPE_PRICE_VESSELS_ENTERPRISE ??
+                      'price_vessels_enterprise',
+                    mode: 'subscription',
+                    successUrl: `${origin}/vessels/billing?checkout=success`,
+                    cancelUrl: `${origin}/vessels/billing`,
+                  }),
+                });
+                const data = await res.json();
+                if (data?.data?.url) window.location.href = data.data.url;
+              }}
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded text-[11px] font-medium border border-[#c9b787]/24 bg-[#c9b787]/10 text-[#d4c598] hover:bg-[#c9b787]/16 transition-colors"
+            >
+              <Zap className="w-3 h-3" />
+              Upgrade Fleet
+            </button>
+          </div>
+        }
+      />
 
       {/* Current Plan */}
       <div>
-        <h2 className="text-[10px] uppercase tracking-widest text-sky-400/50 font-medium mb-3">
+        <h2 className="text-[10px] uppercase tracking-widest text-[#8a8a8a] font-medium mb-3">
           Current Plan
         </h2>
         {subsLoading ? (
-          <div className="bg-[#0a1628]/80 border border-sky-500/10 rounded-xl p-5 animate-pulse h-24" />
+          <div className="bg-white/[0.02] border border-white/[0.06] rounded-xl p-5 animate-pulse h-24" />
         ) : activeSub ? (
-          <div className="bg-[#0a1628]/80 border border-sky-500/10 rounded-xl p-5">
+          <div className="bg-white/[0.02] border border-white/[0.06] rounded-xl p-5">
             <div className="flex items-start justify-between gap-4">
               <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-xl bg-sky-500/10 flex items-center justify-center">
-                  <CreditCard className="w-5 h-5 text-sky-400" />
+                <div className="w-10 h-10 rounded-xl bg-[#c9b787]/10 flex items-center justify-center">
+                  <CreditCard className="w-5 h-5 text-[#c9b787]" />
                 </div>
                 <div>
-                  <p className="text-sm font-semibold text-sky-100">
+                  <p className="text-sm font-semibold text-[#f5f5f5]">
                     {PLAN_NAMES[activeSub.planId ?? 0] ?? 'Fleet Command Plan'}
                   </p>
-                  <p className="text-[11px] text-sky-400/50 mt-0.5">
+                  <p className="text-[11px] text-[#8a8a8a] mt-0.5">
                     {activeSub.stripeSubscriptionId
                       ? `ID: ${activeSub.stripeSubscriptionId.slice(0, 18)}…`
                       : 'Billed annually · 10 vessels'}
@@ -193,21 +194,21 @@ export default function BillingPanelPage() {
             </div>
 
             <div className="mt-4 grid grid-cols-2 gap-3">
-              <div className="bg-sky-500/5 rounded-lg p-3">
-                <p className="text-[10px] text-sky-400/40 uppercase tracking-wider mb-1">
+              <div className="bg-[#c9b787]/8 rounded-lg p-3">
+                <p className="text-[10px] text-[#6a6a6a] uppercase tracking-wider mb-1">
                   Period start
                 </p>
-                <p className="text-sm font-medium text-sky-100">
+                <p className="text-sm font-medium text-[#f5f5f5]">
                   {fmt(activeSub.currentPeriodStart)}
                 </p>
               </div>
-              <div className="bg-sky-500/5 rounded-lg p-3">
-                <p className="text-[10px] text-sky-400/40 uppercase tracking-wider mb-1">
+              <div className="bg-[#c9b787]/8 rounded-lg p-3">
+                <p className="text-[10px] text-[#6a6a6a] uppercase tracking-wider mb-1">
                   Renewal date
                 </p>
                 <div className="flex items-center gap-1.5">
-                  <Clock className="w-3 h-3 text-sky-400/60" />
-                  <p className="text-sm font-medium text-sky-100">
+                  <Clock className="w-3 h-3 text-[#9a9a9a]" />
+                  <p className="text-sm font-medium text-[#f5f5f5]">
                     {fmt(activeSub.currentPeriodEnd)}
                   </p>
                 </div>
@@ -215,33 +216,33 @@ export default function BillingPanelPage() {
             </div>
           </div>
         ) : (
-          <div className="bg-[#0a1628]/80 border border-sky-500/10 rounded-xl p-5">
+          <div className="bg-white/[0.02] border border-white/[0.06] rounded-xl p-5">
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-xl bg-sky-500/10 flex items-center justify-center">
-                <CreditCard className="w-5 h-5 text-sky-400" />
+              <div className="w-10 h-10 rounded-xl bg-[#c9b787]/10 flex items-center justify-center">
+                <CreditCard className="w-5 h-5 text-[#c9b787]" />
               </div>
               <div>
-                <p className="text-sm font-semibold text-sky-100">Fleet Command — Enterprise</p>
-                <p className="text-[11px] text-sky-400/50 mt-0.5">
+                <p className="text-sm font-semibold text-[#f5f5f5]">Fleet Command — Enterprise</p>
+                <p className="text-[11px] text-[#8a8a8a] mt-0.5">
                   10 vessels · AIS + Intelligence · Billed annually
                 </p>
               </div>
               <div className="ml-auto">{statusBadge('active')}</div>
             </div>
             <div className="mt-4 grid grid-cols-2 gap-3">
-              <div className="bg-sky-500/5 rounded-lg p-3">
-                <p className="text-[10px] text-sky-400/40 uppercase tracking-wider mb-1">
+              <div className="bg-[#c9b787]/8 rounded-lg p-3">
+                <p className="text-[10px] text-[#6a6a6a] uppercase tracking-wider mb-1">
                   Period start
                 </p>
-                <p className="text-sm font-medium text-sky-100">Jan 1, 2026</p>
+                <p className="text-sm font-medium text-[#f5f5f5]">Jan 1, 2026</p>
               </div>
-              <div className="bg-sky-500/5 rounded-lg p-3">
-                <p className="text-[10px] text-sky-400/40 uppercase tracking-wider mb-1">
+              <div className="bg-[#c9b787]/8 rounded-lg p-3">
+                <p className="text-[10px] text-[#6a6a6a] uppercase tracking-wider mb-1">
                   Renewal date
                 </p>
                 <div className="flex items-center gap-1.5">
-                  <Clock className="w-3 h-3 text-sky-400/60" />
-                  <p className="text-sm font-medium text-sky-100">Jan 1, 2027</p>
+                  <Clock className="w-3 h-3 text-[#9a9a9a]" />
+                  <p className="text-sm font-medium text-[#f5f5f5]">Jan 1, 2027</p>
                 </div>
               </div>
             </div>
@@ -250,8 +251,8 @@ export default function BillingPanelPage() {
       </div>
 
       {/* Plan Features */}
-      <div className="bg-[#0a1628]/80 border border-sky-500/10 rounded-xl p-5">
-        <h2 className="text-xs font-semibold text-sky-100 mb-3">Included in your plan</h2>
+      <div className="bg-white/[0.02] border border-white/[0.06] rounded-xl p-5">
+        <h2 className="text-xs font-semibold text-[#f5f5f5] mb-3">Included in your plan</h2>
         <div className="grid grid-cols-2 gap-y-2 gap-x-4">
           {[
             'AIS fleet tracking (live public feeds + simulated demo data)',
@@ -265,7 +266,7 @@ export default function BillingPanelPage() {
           ].map((f) => (
             <div key={f} className="flex items-center gap-2">
               <CheckCircle2 className="w-3 h-3 text-emerald-400 shrink-0" />
-              <span className="text-[11px] text-sky-300/70">{f}</span>
+              <span className="text-[11px] text-[#a0a08a]">{f}</span>
             </div>
           ))}
         </div>
@@ -273,61 +274,61 @@ export default function BillingPanelPage() {
 
       {/* Invoice History */}
       <div>
-        <h2 className="text-[10px] uppercase tracking-widest text-sky-400/50 font-medium mb-3">
+        <h2 className="text-[10px] uppercase tracking-widest text-[#8a8a8a] font-medium mb-3">
           Invoice History
         </h2>
-        <div className="bg-[#0a1628]/80 border border-sky-500/10 rounded-xl overflow-hidden">
+        <div className="bg-white/[0.02] border border-white/[0.06] rounded-xl overflow-hidden">
           {invLoading ? (
             <div className="p-5 animate-pulse space-y-3">
               {[1, 2, 3].map((i) => (
-                <div key={i} className="h-8 bg-sky-500/5 rounded" />
+                <div key={i} className="h-8 bg-[#c9b787]/8 rounded" />
               ))}
             </div>
           ) : invoices.length > 0 ? (
             <>
-              <div className="grid grid-cols-[1fr_auto_auto_auto] gap-x-4 px-4 py-2 border-b border-sky-500/10">
-                <span className="text-[10px] text-sky-400/40 uppercase tracking-wider">
+              <div className="grid grid-cols-[1fr_auto_auto_auto] gap-x-4 px-4 py-2 border-b border-white/[0.06]">
+                <span className="text-[10px] text-[#6a6a6a] uppercase tracking-wider">
                   Invoice
                 </span>
-                <span className="text-[10px] text-sky-400/40 uppercase tracking-wider">Amount</span>
-                <span className="text-[10px] text-sky-400/40 uppercase tracking-wider">Date</span>
-                <span className="text-[10px] text-sky-400/40 uppercase tracking-wider">Status</span>
+                <span className="text-[10px] text-[#6a6a6a] uppercase tracking-wider">Amount</span>
+                <span className="text-[10px] text-[#6a6a6a] uppercase tracking-wider">Date</span>
+                <span className="text-[10px] text-[#6a6a6a] uppercase tracking-wider">Status</span>
               </div>
               {invoices.map((inv) => (
                 <div
                   key={inv.id}
-                  className="grid grid-cols-[1fr_auto_auto_auto] gap-x-4 px-4 py-3 border-b border-sky-500/5 last:border-0 hover:bg-sky-500/3 transition-colors"
+                  className="grid grid-cols-[1fr_auto_auto_auto] gap-x-4 px-4 py-3 border-b border-white/[0.08] last:border-0 hover:bg-[#c9b787]/14 transition-colors"
                 >
                   <div className="flex items-center gap-2">
-                    <FileText className="w-3.5 h-3.5 text-sky-400/40" />
-                    <span className="text-xs text-sky-200 font-mono">
+                    <FileText className="w-3.5 h-3.5 text-[#6a6a6a]" />
+                    <span className="text-xs text-[#e0e0e0] font-mono">
                       {inv.stripeInvoiceId
                         ? `${inv.stripeInvoiceId.slice(0, 20)}…`
                         : `INV-${String(inv.id).padStart(4, '0')}`}
                     </span>
                   </div>
-                  <span className="text-xs font-semibold text-sky-100">
+                  <span className="text-xs font-semibold text-[#f5f5f5]">
                     {fmtAmount(inv.amount, inv.currency)}
                   </span>
-                  <span className="text-xs text-sky-400/60">
+                  <span className="text-xs text-[#9a9a9a]">
                     {fmt(inv.paidAt ?? inv.createdAt)}
                   </span>
                   {statusBadge(inv.status)}
                 </div>
               ))}
-              <div className="flex items-center justify-between px-4 py-2 border-t border-sky-500/10">
+              <div className="flex items-center justify-between px-4 py-2 border-t border-white/[0.06]">
                 <button
                   disabled={invoicePage === 0}
                   onClick={() => setInvoicePage((p) => p - 1)}
-                  className="text-[11px] text-sky-400 disabled:opacity-30 hover:text-sky-300 transition-colors"
+                  className="text-[11px] text-[#c9b787] disabled:opacity-30 hover:text-[#d4c598] transition-colors"
                 >
                   ← Previous
                 </button>
-                <span className="text-[10px] text-sky-400/40">Page {invoicePage + 1}</span>
+                <span className="text-[10px] text-[#6a6a6a]">Page {invoicePage + 1}</span>
                 <button
                   disabled={invoices.length < pageSize}
                   onClick={() => setInvoicePage((p) => p + 1)}
-                  className="text-[11px] text-sky-400 disabled:opacity-30 hover:text-sky-300 transition-colors"
+                  className="text-[11px] text-[#c9b787] disabled:opacity-30 hover:text-[#d4c598] transition-colors"
                 >
                   Next →
                 </button>
@@ -342,17 +343,17 @@ export default function BillingPanelPage() {
               ].map((inv) => (
                 <div
                   key={inv.id}
-                  className="flex items-center justify-between py-2 border-b border-sky-500/5 last:border-0"
+                  className="flex items-center justify-between py-2 border-b border-white/[0.08] last:border-0"
                 >
                   <div className="flex items-center gap-2">
-                    <FileText className="w-3.5 h-3.5 text-sky-400/40" />
-                    <span className="text-xs text-sky-200 font-mono">{inv.id}</span>
+                    <FileText className="w-3.5 h-3.5 text-[#6a6a6a]" />
+                    <span className="text-xs text-[#e0e0e0] font-mono">{inv.id}</span>
                   </div>
                   <div className="flex items-center gap-4">
-                    <span className="text-xs font-semibold text-sky-100">{inv.amount}</span>
-                    <span className="text-xs text-sky-400/60">{inv.date}</span>
+                    <span className="text-xs font-semibold text-[#f5f5f5]">{inv.amount}</span>
+                    <span className="text-xs text-[#9a9a9a]">{inv.date}</span>
                     {statusBadge(inv.status)}
-                    <ExternalLink className="w-3 h-3 text-sky-400/30" />
+                    <ExternalLink className="w-3 h-3 text-[#5a5a5a]" />
                   </div>
                 </div>
               ))}

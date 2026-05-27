@@ -234,7 +234,7 @@ const availColor: Record<string, string> = {
 const trendColor: Record<string, string> = {
   up: 'text-red-400',
   down: 'text-emerald-400',
-  stable: 'text-sky-400/40',
+  stable: 'text-[#6a6a6a]',
 };
 
 export default function BunkerOptimizerPage() {
@@ -251,15 +251,15 @@ export default function BunkerOptimizerPage() {
   return (
     <div className="p-6 space-y-6">
       <div>
-        <h1 className="font-display text-xl font-bold text-sky-50 flex items-center gap-2">
+        <h1 className="font-display text-xl font-bold text-[#f5f5f5] flex items-center gap-2">
           <Fuel className="w-5 h-5 text-amber-400" />
           Bunker Procurement Optimizer
         </h1>
-        <p className="text-xs text-sky-400/50 mt-0.5">
+        <p className="text-xs text-[#8a8a8a] mt-0.5">
           Multi-port fuel price comparison and optimal bunkering route recommendations factoring
           voyage economics
         </p>
-        <Badge variant="outline" className="text-[9px] mt-1 text-sky-400/30 border-sky-500/15">
+        <Badge variant="outline" className="text-[9px] mt-1 text-[#5a5a5a] border-white/[0.08]">
           Simulated data — for demonstration purposes
         </Badge>
       </div>
@@ -269,7 +269,7 @@ export default function BunkerOptimizerPage() {
           {
             label: 'Monitored Ports',
             value: BUNKER_PORTS.length,
-            color: 'text-sky-300',
+            color: 'text-[#d4c598]',
             icon: MapPin,
           },
           {
@@ -291,21 +291,21 @@ export default function BunkerOptimizerPage() {
             icon: BarChart3,
           },
         ].map((s) => (
-          <div key={s.label} className="bg-[#0a1628]/80 border border-sky-500/10 rounded-xl p-4">
+          <div key={s.label} className="bg-white/[0.02] border border-white/[0.06] rounded-xl p-4">
             <div className="flex items-center gap-2 mb-1">
               <s.icon className={cn('w-3.5 h-3.5', s.color)} />
-              <p className="text-[10px] text-sky-400/40 uppercase tracking-wider">{s.label}</p>
+              <p className="text-[10px] text-[#6a6a6a] uppercase tracking-wider">{s.label}</p>
             </div>
             <p className={cn('text-xl font-bold font-display', s.color)}>{s.value}</p>
           </div>
         ))}
       </div>
 
-      <div className="bg-[#0a1628]/80 border border-sky-500/10 rounded-xl overflow-hidden">
-        <div className="px-4 py-3 border-b border-sky-500/10 flex items-center justify-between">
+      <div className="bg-white/[0.02] border border-white/[0.06] rounded-xl overflow-hidden">
+        <div className="px-4 py-3 border-b border-white/[0.06] flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <Activity className="w-3.5 h-3.5 text-sky-400" />
-            <span className="text-[11px] font-mono text-sky-300 uppercase tracking-wider">
+            <Activity className="w-3.5 h-3.5 text-[#c9b787]" />
+            <span className="text-[11px] font-mono text-[#d4c598] uppercase tracking-wider">
               Live Bunker Price Comparison
             </span>
           </div>
@@ -317,8 +317,8 @@ export default function BunkerOptimizerPage() {
                 className={cn(
                   'text-[10px] px-2.5 py-1 rounded border uppercase transition-all',
                   sortBy === f
-                    ? 'bg-sky-500/10 border-sky-500/30 text-sky-300'
-                    : 'border-sky-500/10 text-sky-400/40 hover:text-sky-300',
+                    ? 'bg-[#c9b787]/10 border-[#c9b787]/24 text-[#d4c598]'
+                    : 'border-white/[0.06] text-[#6a6a6a] hover:text-[#d4c598]',
                 )}
               >
                 {f}
@@ -330,12 +330,12 @@ export default function BunkerOptimizerPage() {
           {sorted.map((p, i) => (
             <div
               key={p.code}
-              className="px-4 py-3 flex items-center gap-4 hover:bg-sky-500/5 transition-colors"
+              className="px-4 py-3 flex items-center gap-4 hover:bg-[#c9b787]/8 transition-colors"
             >
-              <span className="text-[10px] text-sky-400/30 w-4 shrink-0">{i + 1}</span>
+              <span className="text-[10px] text-[#5a5a5a] w-4 shrink-0">{i + 1}</span>
               <div className="w-28 shrink-0">
-                <p className="text-xs font-bold text-sky-200">{p.port}</p>
-                <p className="text-[9px] text-sky-400/40">
+                <p className="text-xs font-bold text-[#e0e0e0]">{p.port}</p>
+                <p className="text-[9px] text-[#6a6a6a]">
                   {p.country} · {p.code}
                 </p>
               </div>
@@ -348,7 +348,7 @@ export default function BunkerOptimizerPage() {
                       fuel === sortBy ? 'opacity-100' : 'opacity-60',
                     )}
                   >
-                    <p className="text-[9px] text-sky-400/30 uppercase">{fuel}</p>
+                    <p className="text-[9px] text-[#5a5a5a] uppercase">{fuel}</p>
                     <p
                       className={cn(
                         'text-xs font-mono font-bold',
@@ -356,7 +356,7 @@ export default function BunkerOptimizerPage() {
                           ? 'text-emerald-400'
                           : i === sorted.length - 1 && fuel === sortBy
                             ? 'text-red-400'
-                            : 'text-sky-300',
+                            : 'text-[#d4c598]',
                       )}
                     >
                       ${p[fuel as keyof BunkerPort] as number}
@@ -381,8 +381,8 @@ export default function BunkerOptimizerPage() {
               >
                 {p.availability}
               </Badge>
-              <span className="text-[9px] text-sky-400/30 w-8 shrink-0">{p.leadTime}</span>
-              <span className="text-[9px] text-sky-400/30 w-10 shrink-0">
+              <span className="text-[9px] text-[#5a5a5a] w-8 shrink-0">{p.leadTime}</span>
+              <span className="text-[9px] text-[#5a5a5a] w-10 shrink-0">
                 {p.supplierCount} sup.
               </span>
             </div>
@@ -390,11 +390,11 @@ export default function BunkerOptimizerPage() {
         </div>
       </div>
 
-      <div className="bg-[#0a1628]/80 border border-sky-500/10 rounded-xl overflow-hidden">
-        <div className="px-4 py-3 border-b border-sky-500/10 flex items-center justify-between">
+      <div className="bg-white/[0.02] border border-white/[0.06] rounded-xl overflow-hidden">
+        <div className="px-4 py-3 border-b border-white/[0.06] flex items-center justify-between">
           <div className="flex items-center gap-2">
             <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400" />
-            <span className="text-[11px] font-mono text-sky-300 uppercase tracking-wider">
+            <span className="text-[11px] font-mono text-[#d4c598] uppercase tracking-wider">
               Voyage Optimization Recommendations
             </span>
           </div>
@@ -406,8 +406,8 @@ export default function BunkerOptimizerPage() {
                 className={cn(
                   'text-[10px] px-2 py-1 rounded border transition-all',
                   selectedVessel === o.vessel
-                    ? 'bg-sky-500/10 border-sky-500/30 text-sky-300'
-                    : 'border-sky-500/10 text-sky-400/40 hover:text-sky-300',
+                    ? 'bg-[#c9b787]/10 border-[#c9b787]/24 text-[#d4c598]'
+                    : 'border-white/[0.06] text-[#6a6a6a] hover:text-[#d4c598]',
                 )}
               >
                 {o.vessel.split(' ')[0]}
@@ -419,8 +419,8 @@ export default function BunkerOptimizerPage() {
         <div className="p-4 space-y-4">
           <div className="flex items-start gap-3">
             <div className="flex-1">
-              <p className="text-sm font-semibold text-sky-100">{optimization.vessel}</p>
-              <p className="text-[10px] text-sky-400/50">{optimization.route}</p>
+              <p className="text-sm font-semibold text-[#f5f5f5]">{optimization.vessel}</p>
+              <p className="text-[10px] text-[#8a8a8a]">{optimization.route}</p>
             </div>
             <div className="text-right">
               <p className="text-lg font-bold font-mono text-emerald-400">
@@ -441,21 +441,21 @@ export default function BunkerOptimizerPage() {
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
             <div>
-              <p className="text-[9px] text-sky-400/40 uppercase tracking-wider mb-2">
+              <p className="text-[9px] text-[#6a6a6a] uppercase tracking-wider mb-2">
                 Current Plan
               </p>
               {optimization.currentPlan.map((s, i) => (
                 <div
                   key={i}
-                  className="flex items-center gap-3 p-2.5 bg-sky-500/5 rounded-lg border border-sky-500/10 mb-2"
+                  className="flex items-center gap-3 p-2.5 bg-[#c9b787]/8 rounded-lg border border-white/[0.06] mb-2"
                 >
-                  <Fuel className="w-3 h-3 text-sky-400/40 shrink-0" />
+                  <Fuel className="w-3 h-3 text-[#6a6a6a] shrink-0" />
                   <div className="flex-1">
-                    <p className="text-xs text-sky-200">
+                    <p className="text-xs text-[#e0e0e0]">
                       {s.port} · {s.qty.toLocaleString()}MT {s.fuel}
                     </p>
                   </div>
-                  <span className="text-[10px] font-mono text-sky-300">
+                  <span className="text-[10px] font-mono text-[#d4c598]">
                     ${(s.cost / 1000).toFixed(0)}K
                   </span>
                 </div>
@@ -473,7 +473,7 @@ export default function BunkerOptimizerPage() {
                   <div className="flex items-center gap-3">
                     <Fuel className="w-3 h-3 text-emerald-400 shrink-0" />
                     <div className="flex-1">
-                      <p className="text-xs text-sky-200">
+                      <p className="text-xs text-[#e0e0e0]">
                         {s.port} · {s.qty.toLocaleString()}MT {s.fuel}
                       </p>
                     </div>

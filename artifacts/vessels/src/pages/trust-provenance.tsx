@@ -28,7 +28,7 @@ interface SimulationData {
 
 function LoadingPanel({ label }: { label: string }) {
   return (
-    <div className="flex flex-col items-center justify-center py-16 gap-3 text-sky-400/50">
+    <div className="flex flex-col items-center justify-center py-16 gap-3 text-[#8a8a8a]">
       <Loader2 className="w-6 h-6 animate-spin" />
       <span className="text-xs">Loading {label}…</span>
     </div>
@@ -37,12 +37,12 @@ function LoadingPanel({ label }: { label: string }) {
 
 function ErrorPanel({ label, onRetry }: { label: string; onRetry: () => void }) {
   return (
-    <div className="flex flex-col items-center justify-center py-16 gap-3 text-sky-400/40">
+    <div className="flex flex-col items-center justify-center py-16 gap-3 text-[#6a6a6a]">
       <AlertCircle className="w-6 h-6" />
       <span className="text-xs">Failed to load {label}</span>
       <button
         onClick={onRetry}
-        className="text-xs text-sky-400/60 hover:text-sky-400 border border-sky-500/20 rounded px-3 py-1 transition-colors"
+        className="text-xs text-[#9a9a9a] hover:text-[#c9b787] border border-white/[0.08] rounded px-3 py-1 transition-colors"
       >
         Retry
       </button>
@@ -124,12 +124,12 @@ export default function TrustProvenancePage() {
   return (
     <div className="p-6 max-w-5xl mx-auto space-y-6">
       <div className="flex items-center gap-3 mb-2">
-        <div className="w-10 h-10 rounded-xl bg-sky-500/10 flex items-center justify-center">
-          <Anchor className="w-5 h-5 text-sky-400" />
+        <div className="w-10 h-10 rounded-xl bg-[#c9b787]/10 flex items-center justify-center">
+          <Anchor className="w-5 h-5 text-[#c9b787]" />
         </div>
         <div>
-          <h1 className="text-xl font-bold text-sky-50">Trust & Provenance Center</h1>
-          <p className="text-xs text-sky-400/50">
+          <h1 className="text-xl font-bold text-[#f5f5f5]">Trust & Provenance Center</h1>
+          <p className="text-xs text-[#8a8a8a]">
             Voyage simulation · AI proof chains · Policy governance · Decision audit
           </p>
         </div>
@@ -141,7 +141,7 @@ export default function TrustProvenancePage() {
             label: 'Proof Records',
             value: proofResult.loading ? '…' : proofs.length,
             icon: FileSearch,
-            color: 'text-sky-400',
+            color: 'text-[#c9b787]',
           },
           {
             label: 'Pending Reviews',
@@ -166,28 +166,28 @@ export default function TrustProvenancePage() {
         ].map(({ label, value, icon: Icon, color }) => (
           <div
             key={label}
-            className="bg-slate-900/80 border border-sky-500/10 rounded-xl p-4 flex items-center gap-3"
+            className="bg-slate-900/80 border border-white/[0.06] rounded-xl p-4 flex items-center gap-3"
           >
-            <div className="w-8 h-8 rounded-lg bg-sky-500/10 flex items-center justify-center shrink-0">
+            <div className="w-8 h-8 rounded-lg bg-[#c9b787]/10 flex items-center justify-center shrink-0">
               <Icon className={`w-4 h-4 ${color}`} />
             </div>
             <div>
-              <div className="text-lg font-bold text-sky-50">{value}</div>
-              <div className="text-[10px] text-sky-400/50">{label}</div>
+              <div className="text-lg font-bold text-[#f5f5f5]">{value}</div>
+              <div className="text-[10px] text-[#8a8a8a]">{label}</div>
             </div>
           </div>
         ))}
       </div>
 
-      <div className="flex gap-1 p-1 bg-slate-900/60 border border-sky-500/10 rounded-xl">
+      <div className="flex gap-1 p-1 bg-slate-900/60 border border-white/[0.06] rounded-xl">
         {tabs.map((tab) => (
           <button
             key={tab.id}
             onClick={() => setView(tab.id)}
             className={`flex-1 py-2 px-3 rounded-lg text-xs font-medium transition-all ${
               view === tab.id
-                ? 'bg-sky-500/15 text-sky-300 border border-sky-500/30'
-                : 'text-sky-400/50 hover:text-sky-400/80'
+                ? 'bg-[#c9b787]/14 text-[#d4c598] border border-[#c9b787]/24'
+                : 'text-[#8a8a8a] hover:text-[#c9b787]/80'
             }`}
           >
             {tab.label}
@@ -203,7 +203,7 @@ export default function TrustProvenancePage() {
             <ErrorPanel label="simulation results" onRetry={simulationResult.refetch} />
           ) : simulation ? (
             <>
-              <p className="text-xs text-sky-400/50 px-1">
+              <p className="text-xs text-[#8a8a8a] px-1">
                 VES-2026-044 Rotterdam → Singapore — 3 routing scenarios with Monte Carlo P&L ranges
               </p>
               <SimulationCockpit
@@ -227,11 +227,11 @@ export default function TrustProvenancePage() {
           domain="vessels"
           accentColor={ACCENT}
           accentClasses={{
-            text: 'text-sky-300',
-            textMuted: 'text-sky-400/60',
-            bg: 'bg-sky-500/10',
-            border: 'border-sky-500/20',
-            button: 'text-sky-300',
+            text: 'text-[#d4c598]',
+            textMuted: 'text-[#9a9a9a]',
+            bg: 'bg-[#c9b787]/10',
+            border: 'border-white/[0.08]',
+            button: 'text-[#d4c598]',
           }}
         />
       )}
@@ -244,7 +244,7 @@ export default function TrustProvenancePage() {
             <ErrorPanel label="proof records" onRetry={proofResult.refetch} />
           ) : (
             <>
-              <p className="text-xs text-sky-400/50 px-1">
+              <p className="text-xs text-[#8a8a8a] px-1">
                 AI-generated sanctions assessments, voyage P&L computations with full provenance
                 metadata
               </p>
@@ -270,7 +270,7 @@ export default function TrustProvenancePage() {
             <ErrorPanel label="policy decisions" onRetry={policyResult.refetch} />
           ) : (
             <>
-              <p className="text-xs text-sky-400/50 px-1">
+              <p className="text-xs text-[#8a8a8a] px-1">
                 Covenant policy evaluation results for sanctions alerts and trade freeze governance
               </p>
               {policyDecisions.map((d, i) => (

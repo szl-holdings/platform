@@ -220,16 +220,16 @@ export default function VesselsScenarioBranchesPage() {
       <div className="flex items-center justify-between">
         <div>
           <div className="flex items-center gap-2 mb-1">
-            <GitBranch className="w-4 h-4 text-sky-400" />
-            <h1 className="font-display text-xl font-bold text-sky-50">Scenario Branches</h1>
+            <GitBranch className="w-4 h-4 text-[#c9b787]" />
+            <h1 className="font-display text-xl font-bold text-[#f5f5f5]">Scenario Branches</h1>
             <Badge
               variant="outline"
-              className="text-[9px] text-sky-400 border-sky-500/30 bg-sky-500/5"
+              className="text-[9px] text-[#c9b787] border-[#c9b787]/24 bg-[#c9b787]/8"
             >
               ATLAS RUNTIME
             </Badge>
           </div>
-          <p className="text-xs text-sky-400/40">
+          <p className="text-xs text-[#6a6a6a]">
             Simulate diverging voyage worldlines — compare branch outcomes against baseline
           </p>
         </div>
@@ -253,8 +253,8 @@ export default function VesselsScenarioBranchesPage() {
             </div>
           )}
           {dataMode === 'loading' && (
-            <div className="flex items-center gap-1.5 text-[10px] text-sky-400/60 bg-sky-500/5 border border-sky-500/20 px-2 py-1 rounded-lg">
-              <span className="w-1.5 h-1.5 rounded-full bg-sky-400/60 animate-pulse" />
+            <div className="flex items-center gap-1.5 text-[10px] text-[#9a9a9a] bg-[#c9b787]/8 border border-white/[0.08] px-2 py-1 rounded-lg">
+              <span className="w-1.5 h-1.5 rounded-full bg-[#c9b787]/14 animate-pulse" />
               LOADING
             </div>
           )}
@@ -287,10 +287,10 @@ export default function VesselsScenarioBranchesPage() {
         </div>
       )}
 
-      <div className="bg-[#0a1628]/80 border border-sky-500/10 rounded-xl p-4">
+      <div className="bg-white/[0.02] border border-white/[0.06] rounded-xl p-4">
         <div className="flex items-center gap-2 mb-3">
           <div className="w-1.5 h-1.5 rounded-full bg-emerald-400" />
-          <span className="text-[11px] text-sky-300 font-semibold uppercase tracking-wider">
+          <span className="text-[11px] text-[#d4c598] font-semibold uppercase tracking-wider">
             Baseline Worldline — Pacific Navigator
           </span>
         </div>
@@ -304,10 +304,10 @@ export default function VesselsScenarioBranchesPage() {
             const Icon = m.icon;
             return (
               <div key={m.label} className="flex items-start gap-2">
-                <Icon className="w-3.5 h-3.5 text-sky-400/50 mt-0.5 shrink-0" />
+                <Icon className="w-3.5 h-3.5 text-[#8a8a8a] mt-0.5 shrink-0" />
                 <div>
-                  <p className="text-[10px] text-sky-400/40 mb-0.5">{m.label}</p>
-                  <p className="text-[11px] font-mono text-sky-200">{m.value}</p>
+                  <p className="text-[10px] text-[#6a6a6a] mb-0.5">{m.label}</p>
+                  <p className="text-[11px] font-mono text-[#e0e0e0]">{m.value}</p>
                 </div>
               </div>
             );
@@ -317,7 +317,7 @@ export default function VesselsScenarioBranchesPage() {
 
       <div className="grid grid-cols-1 lg:grid-cols-4 gap-5">
         <div className="space-y-2">
-          <p className="text-[10px] text-sky-400/40 uppercase tracking-wider mb-3">
+          <p className="text-[10px] text-[#6a6a6a] uppercase tracking-wider mb-3">
             Scenario Branches
           </p>
           {BRANCHES.map((b) => {
@@ -330,18 +330,18 @@ export default function VesselsScenarioBranchesPage() {
                 className={cn(
                   'p-3 rounded-xl border cursor-pointer transition-all',
                   isSelected
-                    ? 'border-sky-500/30 bg-sky-500/8'
-                    : 'border-sky-500/10 bg-[#0a1628]/60 hover:border-sky-500/20',
+                    ? 'border-[#c9b787]/24 bg-[#c9b787]/14'
+                    : 'border-white/[0.06] bg-white/[0.02] hover:border-white/[0.08]',
                 )}
               >
                 <div className="flex items-start gap-2.5" onClick={() => setSelected(b.id)}>
                   <Icon className="w-3.5 h-3.5 mt-0.5 shrink-0" style={{ color: b.color }} />
                   <div className="flex-1 min-w-0">
-                    <p className="text-[11px] font-semibold text-sky-200">{b.label}</p>
-                    <p className="text-[9px] text-sky-400/40">{b.subtitle}</p>
+                    <p className="text-[11px] font-semibold text-[#e0e0e0]">{b.label}</p>
+                    <p className="text-[9px] text-[#6a6a6a]">{b.subtitle}</p>
                     <div className="mt-2">
                       <div className="flex items-center justify-between mb-0.5">
-                        <span className="text-[9px] text-sky-400/40">Probability</span>
+                        <span className="text-[9px] text-[#6a6a6a]">Probability</span>
                         <span className="text-[9px] font-mono" style={{ color: b.color }}>
                           {b.probability}%
                         </span>
@@ -356,7 +356,7 @@ export default function VesselsScenarioBranchesPage() {
                     'mt-2 w-full text-[9px] py-1 rounded border transition-colors',
                     isCompare
                       ? 'border-violet-500/30 text-violet-400 bg-violet-500/8'
-                      : 'border-sky-500/10 text-sky-400/40 hover:text-sky-300',
+                      : 'border-white/[0.06] text-[#6a6a6a] hover:text-[#d4c598]',
                   )}
                   disabled={isSelected}
                 >
@@ -386,7 +386,7 @@ function BranchDetail({ branch, color, label }: { branch: Branch; color: string;
   return (
     <div className="space-y-4">
       <div
-        className="bg-[#0a1628]/80 border border-sky-500/10 rounded-xl p-4"
+        className="bg-white/[0.02] border border-white/[0.06] rounded-xl p-4"
         style={{ borderColor: `${color}25` }}
       >
         <div className="flex items-center gap-2 mb-2">
@@ -396,7 +396,7 @@ function BranchDetail({ branch, color, label }: { branch: Branch; color: string;
         </div>
         <div className="flex items-center gap-2 mb-1">
           <Icon className="w-4 h-4" style={{ color }} />
-          <h3 className="text-sm font-bold text-sky-100">{branch.label}</h3>
+          <h3 className="text-sm font-bold text-[#f5f5f5]">{branch.label}</h3>
           <span
             className="text-[10px] px-2 py-0.5 rounded-full border font-mono"
             style={{ color, borderColor: `${color}30`, background: `${color}10` }}
@@ -404,14 +404,14 @@ function BranchDetail({ branch, color, label }: { branch: Branch; color: string;
             {branch.probability}% probable
           </span>
         </div>
-        <p className="text-[11px] text-sky-400/50 mb-1">{branch.description}</p>
-        <p className="text-[10px] text-sky-400/30">
-          <span className="text-sky-400/50">Trigger:</span> {branch.trigger}
+        <p className="text-[11px] text-[#8a8a8a] mb-1">{branch.description}</p>
+        <p className="text-[10px] text-[#5a5a5a]">
+          <span className="text-[#8a8a8a]">Trigger:</span> {branch.trigger}
         </p>
       </div>
 
-      <div className="bg-[#0a1628]/80 border border-sky-500/10 rounded-xl p-4">
-        <p className="text-xs font-semibold text-sky-200 mb-3">Delta vs. Baseline</p>
+      <div className="bg-white/[0.02] border border-white/[0.06] rounded-xl p-4">
+        <p className="text-xs font-semibold text-[#e0e0e0] mb-3">Delta vs. Baseline</p>
         <div className="grid grid-cols-3 gap-3">
           {[
             {
@@ -439,7 +439,7 @@ function BranchDetail({ branch, color, label }: { branch: Branch; color: string;
                   : 'border-amber-500/20 bg-amber-500/5',
               )}
             >
-              <p className="text-[9px] text-sky-400/40 mb-1">{d.label}</p>
+              <p className="text-[9px] text-[#6a6a6a] mb-1">{d.label}</p>
               <p
                 className={cn(
                   'text-[11px] font-mono font-bold',
@@ -453,8 +453,8 @@ function BranchDetail({ branch, color, label }: { branch: Branch; color: string;
         </div>
       </div>
 
-      <div className="bg-[#0a1628]/80 border border-sky-500/10 rounded-xl p-4">
-        <p className="text-xs font-semibold text-sky-200 mb-3">Projected Outcomes</p>
+      <div className="bg-white/[0.02] border border-white/[0.06] rounded-xl p-4">
+        <p className="text-xs font-semibold text-[#e0e0e0] mb-3">Projected Outcomes</p>
         <div className="space-y-2">
           {branch.outcomes.map((o) => (
             <div key={o.label} className="flex items-center justify-between">
@@ -464,7 +464,7 @@ function BranchDetail({ branch, color, label }: { branch: Branch; color: string;
                 ) : (
                   <XCircle className="w-3 h-3 text-amber-400/60" />
                 )}
-                <span className="text-[11px] text-sky-400/50">{o.label}</span>
+                <span className="text-[11px] text-[#8a8a8a]">{o.label}</span>
               </div>
               <span
                 className={cn(
@@ -480,28 +480,28 @@ function BranchDetail({ branch, color, label }: { branch: Branch; color: string;
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-        <div className="bg-[#0a1628]/80 border border-red-500/10 rounded-xl p-4">
+        <div className="bg-white/[0.02] border border-red-500/10 rounded-xl p-4">
           <p className="text-[11px] font-semibold text-red-400/80 mb-2 flex items-center gap-1.5">
             <AlertTriangle className="w-3 h-3" />
             Key Risks
           </p>
           <ul className="space-y-1.5">
             {branch.risks.map((r, i) => (
-              <li key={i} className="text-[10px] text-sky-400/50 flex gap-1.5">
+              <li key={i} className="text-[10px] text-[#8a8a8a] flex gap-1.5">
                 <span className="text-red-400/40 mt-0.5">•</span>
                 {r}
               </li>
             ))}
           </ul>
         </div>
-        <div className="bg-[#0a1628]/80 border border-emerald-500/10 rounded-xl p-4">
+        <div className="bg-white/[0.02] border border-emerald-500/10 rounded-xl p-4">
           <p className="text-[11px] font-semibold text-emerald-400/80 mb-2 flex items-center gap-1.5">
             <CheckCircle2 className="w-3 h-3" />
             Mitigations
           </p>
           <ul className="space-y-1.5">
             {branch.mitigations.map((m, i) => (
-              <li key={i} className="text-[10px] text-sky-400/50 flex gap-1.5">
+              <li key={i} className="text-[10px] text-[#8a8a8a] flex gap-1.5">
                 <span className="text-emerald-400/40 mt-0.5">•</span>
                 {m}
               </li>

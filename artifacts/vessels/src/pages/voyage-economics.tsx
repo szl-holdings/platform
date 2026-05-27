@@ -24,7 +24,7 @@ import {
 import { exportVoyagesToCsv, exportVoyagesToPdf } from '../lib/voyage-export';
 
 const charterColors: Record<string, string> = {
-  time_charter: 'text-sky-400 bg-sky-500/10 border-sky-500/20',
+  time_charter: 'text-[#c9b787] bg-[#c9b787]/10 border-white/[0.08]',
   voyage_charter: 'text-violet-400 bg-violet-500/10 border-violet-500/20',
   spot: 'text-emerald-400 bg-emerald-500/10 border-emerald-500/20',
   bareboat: 'text-amber-400 bg-amber-500/10 border-amber-500/20',
@@ -32,9 +32,9 @@ const charterColors: Record<string, string> = {
 
 const statusColors: Record<string, string> = {
   at_sea: 'text-emerald-400 bg-emerald-500/10 border-emerald-500/20',
-  loading: 'text-sky-400 bg-sky-500/10 border-sky-500/20',
-  completed: 'text-sky-300 bg-sky-500/5 border-sky-500/10',
-  planned: 'text-sky-400/50 bg-sky-500/5 border-sky-500/10',
+  loading: 'text-[#c9b787] bg-[#c9b787]/10 border-white/[0.08]',
+  completed: 'text-[#d4c598] bg-[#c9b787]/8 border-white/[0.06]',
+  planned: 'text-[#8a8a8a] bg-[#c9b787]/8 border-white/[0.06]',
   cancelled: 'text-red-400 bg-red-500/10 border-red-500/20',
 };
 
@@ -53,12 +53,12 @@ function CostBar({
   return (
     <div>
       <div className="flex items-center justify-between mb-1">
-        <span className="text-[10px] text-sky-400/50">{label}</span>
-        <span className="text-[10px] font-mono text-sky-300">
-          ${(value / 1000).toFixed(0)}K <span className="text-sky-400/40">({pct.toFixed(1)}%)</span>
+        <span className="text-[10px] text-[#8a8a8a]">{label}</span>
+        <span className="text-[10px] font-mono text-[#d4c598]">
+          ${(value / 1000).toFixed(0)}K <span className="text-[#6a6a6a]">({pct.toFixed(1)}%)</span>
         </span>
       </div>
-      <div className="h-1.5 bg-sky-500/10 rounded-full overflow-hidden">
+      <div className="h-1.5 bg-[#c9b787]/10 rounded-full overflow-hidden">
         <div className={cn('h-full rounded-full', color)} style={{ width: `${pct}%` }} />
       </div>
     </div>
@@ -84,13 +84,13 @@ function VoyageCard({ voyage }: { voyage: VoyageRow }) {
   const benchmark = compareVoyageToBenchmark(benchmarkSnapshot, vesselClass, voyage.tce || 0);
 
   return (
-    <div className="bg-[#0a1628]/80 border border-sky-500/10 rounded-xl overflow-hidden hover:border-sky-500/20 transition-all">
+    <div className="bg-white/[0.02] border border-white/[0.06] rounded-xl overflow-hidden hover:border-white/[0.08] transition-all">
       <button className="w-full text-left" onClick={() => setExpanded(!expanded)}>
         <div className="px-4 py-4">
           <div className="flex items-start gap-4">
             <div className="flex-1 min-w-0">
               <div className="flex items-center gap-2 flex-wrap">
-                <p className="text-sm font-bold text-sky-100">
+                <p className="text-sm font-bold text-[#f5f5f5]">
                   {voyage.voyageRef || `Voyage #${voyage.voyageId}`}
                 </p>
                 <Badge
@@ -114,8 +114,8 @@ function VoyageCard({ voyage }: { voyage: VoyageRow }) {
                   </Badge>
                 )}
               </div>
-              <p className="text-[11px] text-sky-400/50 mt-0.5">{voyage.route}</p>
-              <p className="text-[10px] text-sky-400/30 mt-0.5">
+              <p className="text-[11px] text-[#8a8a8a] mt-0.5">{voyage.route}</p>
+              <p className="text-[10px] text-[#5a5a5a] mt-0.5">
                 {voyage.cargoType}
                 {voyage.distanceNm ? ` · ${Math.round(voyage.distanceNm).toLocaleString()} nm` : ''}
                 {voyage.durationDays ? ` · ${Number(voyage.durationDays).toFixed(1)} days` : ''}
@@ -123,12 +123,12 @@ function VoyageCard({ voyage }: { voyage: VoyageRow }) {
             </div>
 
             <div className="text-right shrink-0">
-              <p className="text-sm font-bold font-mono text-sky-100">
+              <p className="text-sm font-bold font-mono text-[#f5f5f5]">
                 {voyage.estimatedRevenue > 0
                   ? `$${(voyage.estimatedRevenue / 1e6).toFixed(2)}M`
                   : '—'}
               </p>
-              <p className="text-[10px] text-sky-400/50">
+              <p className="text-[10px] text-[#8a8a8a]">
                 {marginPct > 0 ? `${marginPct.toFixed(1)}% margin` : 'margin n/a'}
               </p>
               {voyage.marginEstimate !== 0 && (
@@ -186,7 +186,7 @@ function VoyageCard({ voyage }: { voyage: VoyageRow }) {
                 label: 'TCE/day',
                 value: voyage.tce > 0 ? `$${(voyage.tce / 1000).toFixed(1)}K` : '—',
                 icon: TrendingUp,
-                color: 'text-sky-400',
+                color: 'text-[#c9b787]',
               },
               {
                 label: 'Fuel Cost',
@@ -197,9 +197,9 @@ function VoyageCard({ voyage }: { voyage: VoyageRow }) {
             ].map((item) => (
               <div
                 key={item.label}
-                className="bg-sky-500/5 rounded-lg p-2.5 border border-sky-500/10"
+                className="bg-[#c9b787]/8 rounded-lg p-2.5 border border-white/[0.06]"
               >
-                <p className="text-[9px] text-sky-400/40 uppercase tracking-wider">{item.label}</p>
+                <p className="text-[9px] text-[#6a6a6a] uppercase tracking-wider">{item.label}</p>
                 <p className={cn('text-xs font-mono font-bold mt-0.5', item.color)}>{item.value}</p>
               </div>
             ))}
@@ -208,10 +208,10 @@ function VoyageCard({ voyage }: { voyage: VoyageRow }) {
       </button>
 
       {expanded && (
-        <div className="px-4 pb-4 border-t border-sky-500/10 pt-4 space-y-4">
+        <div className="px-4 pb-4 border-t border-white/[0.06] pt-4 space-y-4">
           {totalCosts > 0 && (
             <div>
-              <h4 className="text-[9px] text-sky-400/40 uppercase tracking-wider mb-3">
+              <h4 className="text-[9px] text-[#6a6a6a] uppercase tracking-wider mb-3">
                 Cost Breakdown
               </h4>
               <div className="space-y-2">
@@ -220,7 +220,7 @@ function VoyageCard({ voyage }: { voyage: VoyageRow }) {
                   label="Port Costs"
                   value={portCost}
                   total={totalCosts}
-                  color="bg-sky-400"
+                  color="bg-[#c9b787]"
                 />
                 {delayCost > 0 && (
                   <CostBar
@@ -241,22 +241,22 @@ function VoyageCard({ voyage }: { voyage: VoyageRow }) {
           )}
 
           <div className="grid grid-cols-3 gap-3">
-            <div className="bg-sky-500/5 rounded-lg p-3 border border-sky-500/10">
-              <p className="text-[9px] text-sky-400/40 uppercase tracking-wider">Fuel Impact</p>
+            <div className="bg-[#c9b787]/8 rounded-lg p-3 border border-white/[0.06]">
+              <p className="text-[9px] text-[#6a6a6a] uppercase tracking-wider">Fuel Impact</p>
               <p className="text-xs font-mono text-amber-400 mt-1">
                 ${(fuelCost / 1000).toFixed(0)}K
               </p>
-              <p className="text-[9px] text-sky-400/40">fuel cost</p>
+              <p className="text-[9px] text-[#6a6a6a]">fuel cost</p>
             </div>
-            <div className="bg-sky-500/5 rounded-lg p-3 border border-sky-500/10">
-              <p className="text-[9px] text-sky-400/40 uppercase tracking-wider">Port Cost</p>
-              <p className="text-xs font-mono text-sky-300 mt-1">
+            <div className="bg-[#c9b787]/8 rounded-lg p-3 border border-white/[0.06]">
+              <p className="text-[9px] text-[#6a6a6a] uppercase tracking-wider">Port Cost</p>
+              <p className="text-xs font-mono text-[#d4c598] mt-1">
                 ${(portCost / 1000).toFixed(0)}K
               </p>
-              <p className="text-[9px] text-sky-400/40">incl. dues and fees</p>
+              <p className="text-[9px] text-[#6a6a6a]">incl. dues and fees</p>
             </div>
-            <div className="bg-sky-500/5 rounded-lg p-3 border border-sky-500/10">
-              <p className="text-[9px] text-sky-400/40 uppercase tracking-wider">Delay Impact</p>
+            <div className="bg-[#c9b787]/8 rounded-lg p-3 border border-white/[0.06]">
+              <p className="text-[9px] text-[#6a6a6a] uppercase tracking-wider">Delay Impact</p>
               <p
                 className={cn(
                   'text-xs font-mono mt-1',
@@ -265,26 +265,26 @@ function VoyageCard({ voyage }: { voyage: VoyageRow }) {
               >
                 {delayCost > 0 ? `$${(delayCost / 1000).toFixed(0)}K` : 'None'}
               </p>
-              <p className="text-[9px] text-sky-400/40">
+              <p className="text-[9px] text-[#6a6a6a]">
                 {voyage.delayHours > 0 ? `${Math.round(voyage.delayHours)}h delay` : 'On schedule'}
               </p>
             </div>
           </div>
 
           {marginPct !== 0 && (
-            <div className="bg-sky-500/5 rounded-lg p-3 border border-sky-500/10">
-              <p className="text-[9px] text-sky-400/40 uppercase tracking-wider mb-2">
+            <div className="bg-[#c9b787]/8 rounded-lg p-3 border border-white/[0.06]">
+              <p className="text-[9px] text-[#6a6a6a] uppercase tracking-wider mb-2">
                 Margin Performance
               </p>
               <div className="flex items-center gap-3">
-                <div className="flex-1 h-2 bg-sky-500/10 rounded-full overflow-hidden">
+                <div className="flex-1 h-2 bg-[#c9b787]/10 rounded-full overflow-hidden">
                   <div
                     className={cn(
                       'h-full rounded-full',
                       marginPct >= 30
                         ? 'bg-emerald-400'
                         : marginPct >= 10
-                          ? 'bg-sky-400'
+                          ? 'bg-[#c9b787]'
                           : 'bg-red-400',
                     )}
                     style={{ width: `${Math.min(Math.max(marginPct * 2, 5), 95)}%` }}
@@ -299,7 +299,7 @@ function VoyageCard({ voyage }: { voyage: VoyageRow }) {
                   {marginPct.toFixed(1)}%
                 </span>
               </div>
-              <p className="text-[9px] text-sky-400/40 mt-1">
+              <p className="text-[9px] text-[#6a6a6a] mt-1">
                 {marginPct > 30
                   ? 'Strong margin — outperforming benchmark'
                   : marginPct > 10
@@ -369,8 +369,8 @@ export default function VoyageEconomicsPage() {
     <div className="p-6 space-y-6">
       <div className="flex items-center justify-between gap-4 flex-wrap">
         <div>
-          <h1 className="font-display text-xl font-bold text-sky-50">Voyage Economics</h1>
-          <p className="text-xs text-sky-400/50 mt-0.5">
+          <h1 className="font-display text-xl font-bold text-[#f5f5f5]">Voyage Economics</h1>
+          <p className="text-xs text-[#8a8a8a] mt-0.5">
             {isLive
               ? `${voyageEconomics.length} voyages from live database`
               : 'Revenue, margin, and cost performance'}{' '}
@@ -378,7 +378,7 @@ export default function VoyageEconomicsPage() {
           </p>
         </div>
         <div className="flex items-center gap-2">
-          {isLoading && <Loader2 className="w-4 h-4 text-sky-400 animate-spin" />}
+          {isLoading && <Loader2 className="w-4 h-4 text-[#c9b787] animate-spin" />}
           <button
             type="button"
             onClick={handleExportCsv}
@@ -386,7 +386,7 @@ export default function VoyageEconomicsPage() {
             data-testid="voyage-export-csv"
             className={cn(
               'flex items-center gap-1.5 text-[11px] px-3 py-1.5 rounded-lg border transition-all',
-              'bg-sky-500/10 border-sky-500/30 text-sky-200 hover:bg-sky-500/20',
+              'bg-[#c9b787]/10 border-[#c9b787]/24 text-[#e0e0e0] hover:bg-[#c9b787]/16',
               'disabled:opacity-40 disabled:cursor-not-allowed',
             )}
             title={`Export ${sorted.length} voyages to CSV`}
@@ -422,7 +422,7 @@ export default function VoyageEconomicsPage() {
           {
             label: 'Fleet Margin',
             value: `$${(totalMargin / 1e6).toFixed(1)}M`,
-            color: 'text-sky-300',
+            color: 'text-[#d4c598]',
             icon: TrendingUp,
             sub: totalRevenue > 0 ? `${((totalMargin / totalRevenue) * 100).toFixed(1)}% avg` : '—',
           },
@@ -441,20 +441,20 @@ export default function VoyageEconomicsPage() {
             sub: 'fleet-wide cost',
           },
         ].map((s) => (
-          <div key={s.label} className="bg-[#0a1628]/80 border border-sky-500/10 rounded-xl p-4">
+          <div key={s.label} className="bg-white/[0.02] border border-white/[0.06] rounded-xl p-4">
             <div className="flex items-center gap-2 mb-2">
               <s.icon className={cn('w-4 h-4', s.color)} />
-              <p className="text-[10px] text-sky-400/40 uppercase tracking-wider">{s.label}</p>
+              <p className="text-[10px] text-[#6a6a6a] uppercase tracking-wider">{s.label}</p>
             </div>
             <p className={cn('text-xl font-bold font-display', s.color)}>{s.value}</p>
-            <p className="text-[10px] text-sky-400/40 mt-0.5">{s.sub}</p>
+            <p className="text-[10px] text-[#6a6a6a] mt-0.5">{s.sub}</p>
           </div>
         ))}
       </div>
 
       {analytics?.revenueByMonth && analytics.revenueByMonth.length > 0 && (
-        <div className="bg-[#0a1628]/80 border border-sky-500/10 rounded-xl p-4">
-          <h3 className="text-[10px] font-mono text-sky-400/50 uppercase tracking-wider mb-4">
+        <div className="bg-white/[0.02] border border-white/[0.06] rounded-xl p-4">
+          <h3 className="text-[10px] font-mono text-[#8a8a8a] uppercase tracking-wider mb-4">
             Monthly Revenue vs Cost (12-Month Rolling)
           </h3>
           <div className="flex items-end gap-1 h-24">
@@ -484,16 +484,16 @@ export default function VoyageEconomicsPage() {
           </div>
           <div className="flex items-center justify-between mt-2">
             <div className="flex items-center gap-3">
-              <span className="flex items-center gap-1 text-[9px] text-sky-400/40">
+              <span className="flex items-center gap-1 text-[9px] text-[#6a6a6a]">
                 <span className="w-2 h-2 rounded-sm bg-emerald-500/40 inline-block" />
                 Revenue
               </span>
-              <span className="flex items-center gap-1 text-[9px] text-sky-400/40">
+              <span className="flex items-center gap-1 text-[9px] text-[#6a6a6a]">
                 <span className="w-2 h-2 rounded-sm bg-red-500/40 inline-block" />
                 Cost
               </span>
             </div>
-            <span className="text-[9px] text-sky-400/30">
+            <span className="text-[9px] text-[#5a5a5a]">
               {analytics.revenueByMonth.length} months of data
             </span>
           </div>
@@ -501,8 +501,8 @@ export default function VoyageEconomicsPage() {
       )}
 
       {analytics?.topRoutes && analytics.topRoutes.length > 0 && (
-        <div className="bg-[#0a1628]/80 border border-sky-500/10 rounded-xl p-4">
-          <h3 className="text-[10px] font-mono text-sky-400/50 uppercase tracking-wider mb-4">
+        <div className="bg-white/[0.02] border border-white/[0.06] rounded-xl p-4">
+          <h3 className="text-[10px] font-mono text-[#8a8a8a] uppercase tracking-wider mb-4">
             Top Routes by Revenue
           </h3>
           <div className="space-y-3">
@@ -520,18 +520,18 @@ export default function VoyageEconomicsPage() {
                 const maxRev = analytics.topRoutes[0]?.totalRevenue || 1;
                 return (
                   <div key={r.route} className="flex items-center gap-3">
-                    <span className="text-[10px] text-sky-400/30 w-4 shrink-0">{i + 1}</span>
+                    <span className="text-[10px] text-[#5a5a5a] w-4 shrink-0">{i + 1}</span>
                     <div className="w-40 shrink-0">
-                      <p className="text-[10px] text-sky-200 truncate">{r.route}</p>
-                      <p className="text-[9px] text-sky-400/40">{r.voyages} voyages</p>
+                      <p className="text-[10px] text-[#e0e0e0] truncate">{r.route}</p>
+                      <p className="text-[9px] text-[#6a6a6a]">{r.voyages} voyages</p>
                     </div>
-                    <div className="flex-1 h-2 bg-sky-500/10 rounded-full overflow-hidden">
+                    <div className="flex-1 h-2 bg-[#c9b787]/10 rounded-full overflow-hidden">
                       <div
-                        className="h-full rounded-full bg-sky-400"
+                        className="h-full rounded-full bg-[#c9b787]"
                         style={{ width: `${(r.totalRevenue / maxRev) * 100}%` }}
                       />
                     </div>
-                    <span className="text-[10px] font-mono text-sky-300 w-16 text-right">
+                    <span className="text-[10px] font-mono text-[#d4c598] w-16 text-right">
                       ${(r.totalRevenue / 1e6).toFixed(1)}M
                     </span>
                     <span className="text-[10px] font-mono text-emerald-400 w-12 text-right">
@@ -547,7 +547,7 @@ export default function VoyageEconomicsPage() {
 
       <div className="flex items-center gap-4 flex-wrap">
         <div className="flex items-center gap-2">
-          <span className="text-[10px] text-sky-400/40">Filter:</span>
+          <span className="text-[10px] text-[#6a6a6a]">Filter:</span>
           {[
             { id: 'all', label: `All (${voyageEconomics.length})` },
             { id: 'at_sea', label: `At Sea (${statusCounts.at_sea || 0})` },
@@ -560,8 +560,8 @@ export default function VoyageEconomicsPage() {
               className={cn(
                 'text-[10px] px-2.5 py-1.5 rounded-lg border transition-all',
                 statusFilter === opt.id
-                  ? 'bg-sky-500/10 border-sky-500/30 text-sky-300'
-                  : 'border-sky-500/10 text-sky-400/40 hover:text-sky-300',
+                  ? 'bg-[#c9b787]/10 border-[#c9b787]/24 text-[#d4c598]'
+                  : 'border-white/[0.06] text-[#6a6a6a] hover:text-[#d4c598]',
               )}
             >
               {opt.label}
@@ -569,7 +569,7 @@ export default function VoyageEconomicsPage() {
           ))}
         </div>
         <div className="flex items-center gap-2 ml-auto">
-          <span className="text-[10px] text-sky-400/40">Sort by:</span>
+          <span className="text-[10px] text-[#6a6a6a]">Sort by:</span>
           {[
             { id: 'margin', label: 'Margin' },
             { id: 'tce', label: 'TCE/day' },
@@ -581,8 +581,8 @@ export default function VoyageEconomicsPage() {
               className={cn(
                 'text-[10px] px-2.5 py-1.5 rounded-lg border transition-all',
                 sortBy === opt.id
-                  ? 'bg-sky-500/10 border-sky-500/30 text-sky-300'
-                  : 'border-sky-500/10 text-sky-400/40 hover:text-sky-300',
+                  ? 'bg-[#c9b787]/10 border-[#c9b787]/24 text-[#d4c598]'
+                  : 'border-white/[0.06] text-[#6a6a6a] hover:text-[#d4c598]',
               )}
             >
               {opt.label}
@@ -593,13 +593,13 @@ export default function VoyageEconomicsPage() {
 
       {isLoading ? (
         <div className="flex items-center justify-center py-12">
-          <Loader2 className="w-6 h-6 text-sky-400 animate-spin mr-2" />
-          <span className="text-sm text-sky-400/50">Loading voyage economics...</span>
+          <Loader2 className="w-6 h-6 text-[#c9b787] animate-spin mr-2" />
+          <span className="text-sm text-[#8a8a8a]">Loading voyage economics...</span>
         </div>
       ) : sorted.length === 0 ? (
         <div className="text-center py-12">
-          <Ship className="w-8 h-8 text-sky-400/20 mx-auto mb-2" />
-          <p className="text-sm text-sky-400/40">No voyages found</p>
+          <Ship className="w-8 h-8 text-[#c9b787]/20 mx-auto mb-2" />
+          <p className="text-sm text-[#6a6a6a]">No voyages found</p>
         </div>
       ) : (
         <div className="space-y-3">
@@ -607,7 +607,7 @@ export default function VoyageEconomicsPage() {
             <VoyageCard key={v.voyageId} voyage={v} />
           ))}
           {sorted.length > 30 && (
-            <p className="text-center text-[10px] text-sky-400/30 py-2">
+            <p className="text-center text-[10px] text-[#5a5a5a] py-2">
               Showing 30 of {sorted.length} voyages
             </p>
           )}

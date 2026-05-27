@@ -87,7 +87,7 @@ export default function AisDecodePage() {
           className="w-10 h-10 rounded-xl flex items-center justify-center shrink-0"
           style={{ background: 'rgba(14,165,233,0.1)', border: '1px solid rgba(14,165,233,0.2)' }}
         >
-          <Radio className="w-5 h-5 text-sky-400" />
+          <Radio className="w-5 h-5 text-[#c9b787]" />
         </div>
         <div>
           <h1 className="text-xl font-bold tracking-tight">AIS Decode &amp; ML Classification</h1>
@@ -230,7 +230,7 @@ export default function AisDecodePage() {
                   .map(([k, v]) => (
                     <div key={k} className="flex justify-between text-xs border-b border-white/5 pb-1">
                       <span className="text-white/40 font-mono">{k}</span>
-                      <span className="text-sky-300 font-mono">{String(v)}</span>
+                      <span className="text-[#d4c598] font-mono">{String(v)}</span>
                     </div>
                   ))}
               </div>

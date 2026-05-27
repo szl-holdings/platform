@@ -201,7 +201,7 @@ export default function PiracySanctionsPage() {
         <div>
           <div className="flex items-center gap-2 mb-1">
             <ShieldAlert className="w-4 h-4 text-red-400" />
-            <h1 className="font-display text-xl font-bold text-sky-50">
+            <h1 className="font-display text-xl font-bold text-[#f5f5f5]">
               Piracy & Sanctions Intelligence
             </h1>
             <Badge
@@ -211,24 +211,24 @@ export default function PiracySanctionsPage() {
               LIVE INTEL
             </Badge>
           </div>
-          <p className="text-xs text-sky-400/40">
+          <p className="text-xs text-[#6a6a6a]">
             Risk corridor mapping, AIS dark-vessel detection & OFAC/EU sanctions screening
           </p>
         </div>
         <div className="flex items-center gap-4">
           <div className="text-right">
             <p className="text-lg font-bold font-mono text-red-400">2</p>
-            <p className="text-[9px] text-sky-400/40">Critical Zones</p>
+            <p className="text-[9px] text-[#6a6a6a]">Critical Zones</p>
           </div>
           <div className="text-right">
             <p className="text-lg font-bold font-mono text-orange-400">{DARK_VESSELS.length}</p>
-            <p className="text-[9px] text-sky-400/40">Dark Vessels</p>
+            <p className="text-[9px] text-[#6a6a6a]">Dark Vessels</p>
           </div>
           <div className="text-right">
             <p className="text-lg font-bold font-mono text-amber-400">
               {SANCTIONS_HITS.filter((h) => h.status !== 'cleared').length}
             </p>
-            <p className="text-[9px] text-sky-400/40">Sanctions Flags</p>
+            <p className="text-[9px] text-[#6a6a6a]">Sanctions Flags</p>
           </div>
         </div>
       </div>
@@ -242,7 +242,7 @@ export default function PiracySanctionsPage() {
               'text-xs px-4 py-1.5 rounded-lg capitalize transition-colors',
               tab === t
                 ? 'bg-red-500/10 text-red-300 border border-red-500/20'
-                : 'text-sky-400/50 hover:text-sky-300',
+                : 'text-[#8a8a8a] hover:text-[#d4c598]',
             )}
           >
             {t === 'corridors'
@@ -260,19 +260,19 @@ export default function PiracySanctionsPage() {
             <div
               key={rc.id}
               className={cn(
-                'bg-[#0a1628]/80 border rounded-xl p-4',
+                'bg-white/[0.02] border rounded-xl p-4',
                 rc.level === 'critical'
                   ? 'border-red-500/20'
                   : rc.level === 'high'
                     ? 'border-orange-500/15'
-                    : 'border-sky-500/10',
+                    : 'border-white/[0.06]',
               )}
             >
               <div className="flex items-start justify-between gap-4">
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2 mb-1">
-                    <Globe className="w-3.5 h-3.5 text-sky-400/60" />
-                    <p className="text-sm font-semibold text-sky-100">{rc.name}</p>
+                    <Globe className="w-3.5 h-3.5 text-[#9a9a9a]" />
+                    <p className="text-sm font-semibold text-[#f5f5f5]">{rc.name}</p>
                     <Badge variant="outline" className={cn('text-[9px]', riskColor[rc.level])}>
                       {rc.level}
                     </Badge>
@@ -285,12 +285,12 @@ export default function PiracySanctionsPage() {
                       </Badge>
                     )}
                   </div>
-                  <p className="text-[10px] text-sky-400/50 mb-2">Threat: {rc.threat}</p>
+                  <p className="text-[10px] text-[#8a8a8a] mb-2">Threat: {rc.threat}</p>
                   <div className="flex gap-4 text-[10px]">
-                    <span className="text-sky-400/40">
-                      Fleet vessels: <span className="text-sky-300 font-mono">{rc.vessels}</span>
+                    <span className="text-[#6a6a6a]">
+                      Fleet vessels: <span className="text-[#d4c598] font-mono">{rc.vessels}</span>
                     </span>
-                    <span className="text-sky-400/40">
+                    <span className="text-[#6a6a6a]">
                       Incidents (30d):{' '}
                       <span
                         className={cn(
@@ -305,9 +305,9 @@ export default function PiracySanctionsPage() {
                         {rc.incidents30d}
                       </span>
                     </span>
-                    <span className="text-sky-400/40">
+                    <span className="text-[#6a6a6a]">
                       Coords:{' '}
-                      <span className="font-mono text-sky-400/60">
+                      <span className="font-mono text-[#9a9a9a]">
                         {rc.lat}°N, {rc.lon}°E
                       </span>
                     </span>
@@ -328,7 +328,7 @@ export default function PiracySanctionsPage() {
               <FileText className="w-3.5 h-3.5" />
               War Risk Insurance Documentation
             </p>
-            <p className="text-[11px] text-sky-300/70">
+            <p className="text-[11px] text-[#a0a08a]">
               Automated compliance documentation generated for Red Sea and Black Sea transits. Joint
               War Committee (JWC) listed areas: 4 active. War risk premium supplements applied to 3
               vessels. H&M underwriter notifications sent.
@@ -339,23 +339,23 @@ export default function PiracySanctionsPage() {
 
       {tab === 'dark' && (
         <div className="space-y-3">
-          <div className="bg-[#0a1628]/80 border border-sky-500/10 rounded-xl p-4 mb-2">
-            <p className="text-xs font-semibold text-sky-200 mb-2 flex items-center gap-1.5">
+          <div className="bg-white/[0.02] border border-white/[0.06] rounded-xl p-4 mb-2">
+            <p className="text-xs font-semibold text-[#e0e0e0] mb-2 flex items-center gap-1.5">
               <EyeOff className="w-3.5 h-3.5 text-amber-400" />
               AIS Dark-Vessel Detection
             </p>
-            <p className="text-[10px] text-sky-400/50">
+            <p className="text-[10px] text-[#8a8a8a]">
               Vessels detected via satellite AIS correlation, RF spectrum analysis, and optical
               imagery cross-referencing when transponder is off or manipulated.
             </p>
           </div>
           {DARK_VESSELS.map((dv) => (
-            <div key={dv.id} className="bg-[#0a1628]/80 border border-amber-500/20 rounded-xl p-4">
+            <div key={dv.id} className="bg-white/[0.02] border border-amber-500/20 rounded-xl p-4">
               <div className="flex items-start justify-between gap-4">
                 <div className="flex-1">
                   <div className="flex items-center gap-2 mb-1">
                     <EyeOff className="w-3.5 h-3.5 text-amber-400" />
-                    <p className="text-sm font-semibold text-sky-100">{dv.id}</p>
+                    <p className="text-sm font-semibold text-[#f5f5f5]">{dv.id}</p>
                     <Badge
                       variant="outline"
                       className="text-[9px] text-amber-400 border-amber-500/20"
@@ -365,31 +365,31 @@ export default function PiracySanctionsPage() {
                   </div>
                   <div className="grid grid-cols-2 gap-2 text-[10px] mt-2">
                     <div>
-                      <span className="text-sky-400/40">MMSI: </span>
-                      <span className="font-mono text-sky-300">{dv.mmsi}</span>
+                      <span className="text-[#6a6a6a]">MMSI: </span>
+                      <span className="font-mono text-[#d4c598]">{dv.mmsi}</span>
                     </div>
                     <div>
-                      <span className="text-sky-400/40">AIS Blackout: </span>
+                      <span className="text-[#6a6a6a]">AIS Blackout: </span>
                       <span className="font-mono text-amber-400">{dv.aisOff}</span>
                     </div>
                     <div>
-                      <span className="text-sky-400/40">Position: </span>
-                      <span className="font-mono text-sky-300">
+                      <span className="text-[#6a6a6a]">Position: </span>
+                      <span className="font-mono text-[#d4c598]">
                         {dv.lat}°, {dv.lon}°
                       </span>
                     </div>
                     <div>
-                      <span className="text-sky-400/40">Last Port: </span>
-                      <span className="text-sky-300">{dv.lastPort}</span>
+                      <span className="text-[#6a6a6a]">Last Port: </span>
+                      <span className="text-[#d4c598]">{dv.lastPort}</span>
                     </div>
                     <div>
-                      <span className="text-sky-400/40">Suspicion: </span>
+                      <span className="text-[#6a6a6a]">Suspicion: </span>
                       <span className="text-orange-400">{dv.suspicion}</span>
                     </div>
                   </div>
                 </div>
                 <div className="shrink-0 text-right">
-                  <p className="text-[9px] text-sky-400/40 mb-1">Detection confidence</p>
+                  <p className="text-[9px] text-[#6a6a6a] mb-1">Detection confidence</p>
                   <ConfidenceBar val={dv.confidence} />
                 </div>
               </div>
@@ -401,30 +401,30 @@ export default function PiracySanctionsPage() {
       {tab === 'sanctions' && (
         <div className="space-y-3">
           <div className="relative">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-sky-400/40" />
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-[#6a6a6a]" />
             <input
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               placeholder="Search entity or vessel…"
-              className="w-full bg-[#0a1628]/80 border border-sky-500/15 rounded-lg pl-8 pr-4 py-2 text-xs text-sky-200 placeholder:text-sky-400/30 focus:outline-none focus:border-sky-500/30"
+              className="w-full bg-white/[0.02] border border-white/[0.08] rounded-lg pl-8 pr-4 py-2 text-xs text-[#e0e0e0] placeholder:text-[#5a5a5a] focus:outline-none focus:border-[#c9b787]/24"
             />
           </div>
           {filteredHits.map((hit, i) => (
             <div
               key={i}
               className={cn(
-                'bg-[#0a1628]/80 border rounded-xl p-4',
+                'bg-white/[0.02] border rounded-xl p-4',
                 hit.status === 'blocked'
                   ? 'border-red-500/20'
                   : hit.status === 'escalated'
                     ? 'border-orange-500/15'
-                    : 'border-sky-500/10',
+                    : 'border-white/[0.06]',
               )}
             >
               <div className="flex items-start justify-between gap-4">
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2 mb-1">
-                    <p className="text-sm font-semibold text-sky-100">{hit.entity}</p>
+                    <p className="text-sm font-semibold text-[#f5f5f5]">{hit.entity}</p>
                     <Badge
                       variant="outline"
                       className={cn('text-[9px]', sanctionStatusColor[hit.status])}
@@ -432,23 +432,23 @@ export default function PiracySanctionsPage() {
                       {hit.status}
                     </Badge>
                   </div>
-                  <div className="flex flex-wrap gap-3 text-[10px] text-sky-400/50 mt-1">
+                  <div className="flex flex-wrap gap-3 text-[10px] text-[#8a8a8a] mt-1">
                     <span>
                       List: <span className="text-orange-400">{hit.list}</span>
                     </span>
                     <span>
-                      Vessel: <span className="text-sky-300">{hit.vessel}</span>
+                      Vessel: <span className="text-[#d4c598]">{hit.vessel}</span>
                     </span>
                     <span>
-                      Role: <span className="text-sky-300">{hit.type}</span>
+                      Role: <span className="text-[#d4c598]">{hit.type}</span>
                     </span>
                     <span>
-                      Date: <span className="text-sky-400/40">{hit.date}</span>
+                      Date: <span className="text-[#6a6a6a]">{hit.date}</span>
                     </span>
                   </div>
                 </div>
                 <div className="shrink-0 text-right">
-                  <p className="text-[9px] text-sky-400/40 mb-1">Match score</p>
+                  <p className="text-[9px] text-[#6a6a6a] mb-1">Match score</p>
                   <ConfidenceBar val={hit.match} />
                   <div className="mt-1">
                     {hit.status === 'cleared' ? (
@@ -463,8 +463,8 @@ export default function PiracySanctionsPage() {
               </div>
             </div>
           ))}
-          <div className="bg-sky-500/5 border border-sky-500/15 rounded-xl p-4">
-            <p className="text-xs font-semibold text-sky-200 mb-2">Screening Coverage</p>
+          <div className="bg-[#c9b787]/8 border border-white/[0.08] rounded-xl p-4">
+            <p className="text-xs font-semibold text-[#e0e0e0] mb-2">Screening Coverage</p>
             <div className="grid grid-cols-2 gap-2 text-[10px]">
               {[
                 'OFAC SDN',
@@ -476,7 +476,7 @@ export default function PiracySanctionsPage() {
               ].map((l) => (
                 <div key={l} className="flex items-center gap-1.5">
                   <CheckCircle2 className="w-2.5 h-2.5 text-emerald-400" />
-                  <span className="text-sky-400/60">{l}</span>
+                  <span className="text-[#9a9a9a]">{l}</span>
                 </div>
               ))}
             </div>

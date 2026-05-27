@@ -103,11 +103,11 @@ function HopCard({ hop, isLast }: { hop: ChainHop; isLast: boolean }) {
         <div
           className={cn(
             'w-8 h-8 rounded-full flex items-center justify-center border flex-shrink-0',
-            isSanctioned ? 'border-red-500/40 bg-red-500/10' : 'border-sky-500/20 bg-sky-500/05',
+            isSanctioned ? 'border-red-500/40 bg-red-500/10' : 'border-white/[0.08] bg-[#c9b787]/14',
           )}
           style={{ background: isSanctioned ? 'rgba(239,68,68,0.08)' : 'rgba(77,143,204,0.06)' }}
         >
-          <Icon className={cn('w-3.5 h-3.5', isSanctioned ? 'text-red-400' : 'text-sky-400')} />
+          <Icon className={cn('w-3.5 h-3.5', isSanctioned ? 'text-red-400' : 'text-[#c9b787]')} />
         </div>
         {!isLast && (
           <div
@@ -119,27 +119,27 @@ function HopCard({ hop, isLast }: { hop: ChainHop; isLast: boolean }) {
       <div
         className={cn(
           'flex-1 rounded-xl p-3.5 border mb-2 transition-all',
-          isSanctioned ? 'border-red-500/25' : 'border-sky-500/10',
+          isSanctioned ? 'border-red-500/25' : 'border-white/[0.06]',
         )}
         style={{ background: isSanctioned ? 'rgba(239,68,68,0.05)' : 'rgba(10,22,40,0.7)' }}
       >
         <div className="flex items-start justify-between gap-2">
           <div>
             <div className="flex items-center gap-2 mb-0.5">
-              <span className="text-[9px] uppercase tracking-wider text-sky-400/50">
+              <span className="text-[9px] uppercase tracking-wider text-[#8a8a8a]">
                 {hop.entityType.replace(/_/g, ' ')}
               </span>
-              <span className="text-[9px] text-sky-400/30">Hop {hop.hopIndex}</span>
+              <span className="text-[9px] text-[#5a5a5a]">Hop {hop.hopIndex}</span>
             </div>
             <div
               className={cn(
                 'text-[12px] font-semibold',
-                isSanctioned ? 'text-red-200' : 'text-sky-100',
+                isSanctioned ? 'text-red-200' : 'text-[#f5f5f5]',
               )}
             >
               {hop.entityName}
             </div>
-            <div className="text-[10px] text-sky-400/50 mt-0.5">
+            <div className="text-[10px] text-[#8a8a8a] mt-0.5">
               {hop.entityId} · {hop.country} · Reg. {hop.registeredAt}
             </div>
           </div>
@@ -169,12 +169,12 @@ function HopCard({ hop, isLast }: { hop: ChainHop; isLast: boolean }) {
         )}
         {hop.evidence.length > 0 && (
           <div className="mt-2">
-            <div className="text-[9px] text-sky-400/40 mb-1">Evidence Sources</div>
+            <div className="text-[9px] text-[#6a6a6a] mb-1">Evidence Sources</div>
             <div className="flex flex-wrap gap-1">
               {hop.evidence.map((ev) => (
                 <span
                   key={ev}
-                  className="text-[9px] px-1.5 py-0.5 rounded border border-sky-500/15 text-sky-400/50"
+                  className="text-[9px] px-1.5 py-0.5 rounded border border-white/[0.08] text-[#8a8a8a]"
                 >
                   {ev}
                 </span>
@@ -192,7 +192,7 @@ function HopCard({ hop, isLast }: { hop: ChainHop; isLast: boolean }) {
               }}
             />
           </div>
-          <span className="text-[9px] text-sky-400/40">
+          <span className="text-[9px] text-[#6a6a6a]">
             {Math.round(hop.confidence * 100)}% conf.
           </span>
         </div>
@@ -229,12 +229,12 @@ export default function SanctionsChainExplorerPage() {
         <div>
           <div className="flex items-center gap-2 mb-1">
             <Link2 className="w-5 h-5" style={{ color: ACCENT }} />
-            <h1 className="text-xl font-semibold text-sky-100">Sanctions Chain Explorer</h1>
-            <Badge variant="outline" className="text-[9px] border-sky-500/30 text-sky-400/70">
+            <h1 className="text-xl font-semibold text-[#f5f5f5]">Sanctions Chain Explorer</h1>
+            <Badge variant="outline" className="text-[9px] border-[#c9b787]/24 text-[#a0a0a0]">
               COGNITIVE RUNTIME
             </Badge>
           </div>
-          <p className="text-xs text-sky-400/60">
+          <p className="text-xs text-[#9a9a9a]">
             Walks ownership and control chains hop-by-hop with evidence on each link. Detects
             beneficial owner sanction exposure.
           </p>
@@ -244,10 +244,10 @@ export default function SanctionsChainExplorerPage() {
       <div className="grid grid-cols-12 gap-4">
         <div className="col-span-4">
           <div
-            className="rounded-xl border border-sky-500/10 p-3 mb-4"
+            className="rounded-xl border border-white/[0.06] p-3 mb-4"
             style={{ background: 'rgba(10,22,40,0.8)' }}
           >
-            <div className="text-[10px] text-sky-400/50 uppercase tracking-wider mb-3 flex items-center gap-2">
+            <div className="text-[10px] text-[#8a8a8a] uppercase tracking-wider mb-3 flex items-center gap-2">
               <Search className="w-3 h-3" /> Select Vessel
             </div>
             <div className="space-y-1.5">
@@ -258,12 +258,12 @@ export default function SanctionsChainExplorerPage() {
                   className={cn(
                     'w-full text-left px-3 py-2.5 rounded-lg border transition-all',
                     selectedImo === v.imo
-                      ? 'bg-sky-500/10 border-sky-500/25 text-sky-200'
-                      : 'border-sky-500/08 text-sky-400/60 hover:text-sky-300 hover:border-sky-500/15',
+                      ? 'bg-[#c9b787]/10 border-white/[0.08] text-[#e0e0e0]'
+                      : 'border-white/[0.08] text-[#9a9a9a] hover:text-[#d4c598] hover:border-white/[0.08]',
                   )}
                 >
                   <div className="text-[11px] font-medium">{v.name}</div>
-                  <div className="text-[9px] text-sky-400/40 mt-0.5">
+                  <div className="text-[9px] text-[#6a6a6a] mt-0.5">
                     IMO {v.imo} · {v.flag} · {v.type}
                   </div>
                 </button>
@@ -287,17 +287,17 @@ export default function SanctionsChainExplorerPage() {
               </div>
               <div className="space-y-2 text-[11px]">
                 <div className="flex justify-between">
-                  <span className="text-sky-400/50">Chain Depth</span>
-                  <span className="text-sky-200">{data.analysis.totalHops} hops</span>
+                  <span className="text-[#8a8a8a]">Chain Depth</span>
+                  <span className="text-[#e0e0e0]">{data.analysis.totalHops} hops</span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-sky-400/50">Sanctioned Hops</span>
+                  <span className="text-[#8a8a8a]">Sanctioned Hops</span>
                   <span style={{ color: data.analysis.sanctionedHops > 0 ? '#f87171' : '#34d399' }}>
                     {data.analysis.sanctionedHops}
                   </span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-sky-400/50">UBO Found</span>
+                  <span className="text-[#8a8a8a]">UBO Found</span>
                   <span
                     style={{
                       color: data.analysis.ultimateBeneficialOwnerFound ? '#34d399' : '#fbbf24',
@@ -307,8 +307,8 @@ export default function SanctionsChainExplorerPage() {
                   </span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-sky-400/50">Avg Confidence</span>
-                  <span className="text-sky-200">
+                  <span className="text-[#8a8a8a]">Avg Confidence</span>
+                  <span className="text-[#e0e0e0]">
                     {Math.round(data.analysis.averageConfidence * 100)}%
                   </span>
                 </div>
@@ -331,15 +331,15 @@ export default function SanctionsChainExplorerPage() {
 
           {data && (
             <div
-              className="rounded-xl border border-sky-500/10 p-3 mt-3"
+              className="rounded-xl border border-white/[0.06] p-3 mt-3"
               style={{ background: 'rgba(10,22,40,0.8)' }}
             >
-              <div className="text-[10px] text-sky-400/50 mb-2">Provenance</div>
+              <div className="text-[10px] text-[#8a8a8a] mb-2">Provenance</div>
               <div className="flex items-center gap-1.5 mb-1">
                 <CheckCircle2 className="w-3 h-3 text-emerald-400" />
-                <span className="text-[10px] text-sky-300/60">{data.provenance.attestation}</span>
+                <span className="text-[10px] text-[#d4c598]/60">{data.provenance.attestation}</span>
               </div>
-              <div className="text-[10px] text-sky-400/40">
+              <div className="text-[10px] text-[#6a6a6a]">
                 {Math.round(data.provenance.confidence * 100)}% confidence ·{' '}
                 {new Date(data.provenance.freshness.fetchedAt).toLocaleTimeString()}
               </div>
@@ -350,16 +350,16 @@ export default function SanctionsChainExplorerPage() {
         <div className="col-span-8">
           {!data && !loading && (
             <div
-              className="flex flex-col items-center justify-center h-64 text-center rounded-xl border border-sky-500/10"
+              className="flex flex-col items-center justify-center h-64 text-center rounded-xl border border-white/[0.06]"
               style={{ background: 'rgba(10,22,40,0.5)' }}
             >
-              <Eye className="w-8 h-8 text-sky-400/20 mb-3" />
-              <p className="text-sky-400/40 text-sm">
+              <Eye className="w-8 h-8 text-[#c9b787]/20 mb-3" />
+              <p className="text-[#6a6a6a] text-sm">
                 Select a vessel to explore its ownership chain
               </p>
               <button
                 onClick={() => select(selectedImo)}
-                className="mt-4 px-4 py-2 rounded-lg text-xs text-sky-400 border border-sky-500/25 hover:border-sky-500/40 transition-colors flex items-center gap-2"
+                className="mt-4 px-4 py-2 rounded-lg text-xs text-[#c9b787] border border-white/[0.08] hover:border-[#c9b787]/40 transition-colors flex items-center gap-2"
               >
                 <Search className="w-3.5 h-3.5" /> Load Chain
               </button>
@@ -367,7 +367,7 @@ export default function SanctionsChainExplorerPage() {
           )}
 
           {loading && (
-            <div className="flex items-center justify-center h-64 text-sky-400/40 text-sm">
+            <div className="flex items-center justify-center h-64 text-[#6a6a6a] text-sm">
               <RefreshCw className="w-4 h-4 animate-spin mr-2" /> Building ownership chain…
             </div>
           )}
@@ -378,10 +378,10 @@ export default function SanctionsChainExplorerPage() {
                 className="flex items-center gap-3 mb-5 p-3 rounded-xl border"
                 style={{ background: 'rgba(10,22,40,0.8)', borderColor: 'rgba(255,255,255,0.06)' }}
               >
-                <Anchor className="w-4 h-4 text-sky-400" />
+                <Anchor className="w-4 h-4 text-[#c9b787]" />
                 <div>
-                  <div className="text-sm font-semibold text-sky-100">{data.vesselName}</div>
-                  <div className="text-[10px] text-sky-400/50">
+                  <div className="text-sm font-semibold text-[#f5f5f5]">{data.vesselName}</div>
+                  <div className="text-[10px] text-[#8a8a8a]">
                     IMO {data.vesselImo} · {data.vesselFlag} · {data.vesselType}
                   </div>
                 </div>
@@ -425,7 +425,7 @@ export default function SanctionsChainExplorerPage() {
                     >
                       Compliance Recommendation
                     </div>
-                    <div className="text-[11px] text-sky-300/70">{data.recommendation}</div>
+                    <div className="text-[11px] text-[#a0a08a]">{data.recommendation}</div>
                   </div>
                 </div>
               </div>

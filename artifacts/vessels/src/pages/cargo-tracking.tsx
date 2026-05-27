@@ -298,11 +298,11 @@ export default function CargoTrackingPage() {
             className="w-8 h-8 rounded-lg flex items-center justify-center"
             style={{ background: 'rgba(56,189,248,0.1)' }}
           >
-            <Package className="w-4 h-4 text-sky-400" />
+            <Package className="w-4 h-4 text-[#c9b787]" />
           </div>
           <div>
-            <h1 className="text-sm font-bold text-sky-50">Cargo Flow Intelligence</h1>
-            <p className="text-[10px] text-sky-400/40">
+            <h1 className="text-sm font-bold text-[#f5f5f5]">Cargo Flow Intelligence</h1>
+            <p className="text-[10px] text-[#6a6a6a]">
               Global commodity flows · origin/destination · volume & trade patterns
             </p>
           </div>
@@ -316,7 +316,7 @@ export default function CargoTrackingPage() {
               background: 'rgba(56,189,248,0.06)',
             }}
           >
-            <span className="w-1.5 h-1.5 rounded-full bg-sky-400 animate-pulse" />
+            <span className="w-1.5 h-1.5 rounded-full bg-[#c9b787] animate-pulse" />
             Live — {TRADE_FLOWS.reduce((s, f) => s + f.vessels_active, 0)} vessels tracked
           </div>
         </div>
@@ -349,8 +349,8 @@ export default function CargoTrackingPage() {
           >
             <Icon className="w-4 h-4 shrink-0" style={{ color }} />
             <div>
-              <p className="text-[9px] text-sky-400/40">{label}</p>
-              <p className="text-lg font-bold text-sky-50 font-mono">{value}</p>
+              <p className="text-[9px] text-[#6a6a6a]">{label}</p>
+              <p className="text-lg font-bold text-[#f5f5f5] font-mono">{value}</p>
             </div>
           </div>
         ))}
@@ -435,10 +435,10 @@ export default function CargoTrackingPage() {
                     <div className="flex items-center gap-2">
                       <span className="text-base">{cfg.icon}</span>
                       <div>
-                        <p className="text-[10px] text-sky-400/40">{cfg.label}</p>
-                        <div className="flex items-center gap-1.5 text-[11px] font-medium text-sky-100">
+                        <p className="text-[10px] text-[#6a6a6a]">{cfg.label}</p>
+                        <div className="flex items-center gap-1.5 text-[11px] font-medium text-[#f5f5f5]">
                           <span>{flow.origin}</span>
-                          <ArrowRight className="w-3 h-3 text-sky-400/30 shrink-0" />
+                          <ArrowRight className="w-3 h-3 text-[#5a5a5a] shrink-0" />
                           <span>{flow.destination}</span>
                         </div>
                       </div>
@@ -459,7 +459,7 @@ export default function CargoTrackingPage() {
                     </div>
                   </div>
                   <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-3 text-[9px] text-sky-400/40">
+                    <div className="flex items-center gap-3 text-[9px] text-[#6a6a6a]">
                       <span>{flow.vessels_active} vessels</span>
                       <span>·</span>
                       <span>{flow.avg_transit_days}d transit</span>
@@ -487,11 +487,11 @@ export default function CargoTrackingPage() {
                       <span className="text-2xl">{cfg.icon}</span>
                       <div>
                         <div className="flex items-center gap-2 mb-0.5">
-                          <span className="text-sm font-bold text-sky-50">
+                          <span className="text-sm font-bold text-[#f5f5f5]">
                             {selectedFlow.origin}
                           </span>
-                          <ArrowRight className="w-4 h-4 text-sky-400/30" />
-                          <span className="text-sm font-bold text-sky-50">
+                          <ArrowRight className="w-4 h-4 text-[#5a5a5a]" />
+                          <span className="text-sm font-bold text-[#f5f5f5]">
                             {selectedFlow.destination}
                           </span>
                         </div>
@@ -502,8 +502,8 @@ export default function CargoTrackingPage() {
                     </div>
                   </div>
                   <div className="text-right">
-                    <p className="text-[9px] text-sky-400/30">Trade Value</p>
-                    <p className="text-2xl font-black font-mono text-sky-50">
+                    <p className="text-[9px] text-[#5a5a5a]">Trade Value</p>
+                    <p className="text-2xl font-black font-mono text-[#f5f5f5]">
                       ${selectedFlow.value_usd_m.toLocaleString()}M
                     </p>
                     <div className="flex items-center gap-1 justify-end mt-0.5">
@@ -561,9 +561,9 @@ export default function CargoTrackingPage() {
                     >
                       <div className="flex items-center gap-1.5 mb-1">
                         <Icon className="w-3 h-3" style={{ color }} />
-                        <span className="text-[9px] text-sky-400/30">{label}</span>
+                        <span className="text-[9px] text-[#5a5a5a]">{label}</span>
                       </div>
-                      <p className="text-sm font-bold text-sky-50 font-mono">{value}</p>
+                      <p className="text-sm font-bold text-[#f5f5f5] font-mono">{value}</p>
                     </div>
                   ))}
                 </div>
@@ -576,7 +576,7 @@ export default function CargoTrackingPage() {
                     background: 'rgba(56,189,248,0.02)',
                   }}
                 >
-                  <h3 className="text-xs font-bold text-sky-50 mb-3">6-Month Volume Trend</h3>
+                  <h3 className="text-xs font-bold text-[#f5f5f5] mb-3">6-Month Volume Trend</h3>
                   <ResponsiveContainer width="100%" height={140}>
                     <AreaChart
                       data={MONTHLY_VOLUME_DATA.map((d, i) => ({
@@ -617,7 +617,7 @@ export default function CargoTrackingPage() {
                       background: 'rgba(56,189,248,0.02)',
                     }}
                   >
-                    <h3 className="text-xs font-bold text-sky-50 mb-3">Global Commodity Mix</h3>
+                    <h3 className="text-xs font-bold text-[#f5f5f5] mb-3">Global Commodity Mix</h3>
                     <div className="flex items-center gap-4">
                       <PieChart width={100} height={100}>
                         <Pie
@@ -677,7 +677,7 @@ export default function CargoTrackingPage() {
                       background: 'rgba(56,189,248,0.02)',
                     }}
                   >
-                    <h3 className="text-xs font-bold text-sky-50 mb-3">Corridor Risk Profile</h3>
+                    <h3 className="text-xs font-bold text-[#f5f5f5] mb-3">Corridor Risk Profile</h3>
                     <div className="space-y-3">
                       {[
                         { label: 'Sanctions Risk', value: 12, color: '#22c55e' },
@@ -695,7 +695,7 @@ export default function CargoTrackingPage() {
                       ].map(({ label, value, color }) => (
                         <div key={label}>
                           <div className="flex items-center justify-between text-[9px] mb-1">
-                            <span className="text-sky-400/40">{label}</span>
+                            <span className="text-[#6a6a6a]">{label}</span>
                             <span style={{ color }}>{value}%</span>
                           </div>
                           <div className="h-1 rounded-full bg-white/5">

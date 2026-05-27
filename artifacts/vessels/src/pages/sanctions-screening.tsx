@@ -13,6 +13,7 @@ import {
 } from 'lucide-react';
 import { useState } from 'react';
 import { useSanctions, useSanctionsSummary } from '@/hooks/use-vessels-data';
+import { PageHeader, LoadingState } from '@/components/shell';
 
 type OfacDistEntry = { status: string; count: number };
 type PscDistEntry = { result: string; count: number; avgDeficiencies: number };
@@ -28,7 +29,7 @@ const pscColors: Record<string, string> = {
   passed: 'text-emerald-400 bg-emerald-500/10 border-emerald-500/20',
   deficiency: 'text-amber-400 bg-amber-500/10 border-amber-500/20',
   detained: 'text-red-400 bg-red-500/10 border-red-500/20',
-  no_inspection: 'text-sky-400/50 bg-sky-500/5 border-sky-500/10',
+  no_inspection: 'text-[#8a8a8a] bg-[#c9b787]/8 border-white/[0.06]',
 };
 
 const SANCTION_LISTS = [
@@ -43,7 +44,7 @@ function RiskGauge({ score }: { score: number }) {
     score >= 80
       ? 'text-emerald-400 bg-emerald-500/20'
       : score >= 60
-        ? 'text-sky-400 bg-sky-500/20'
+        ? 'text-[#c9b787] bg-[#c9b787]/16'
         : score >= 40
           ? 'text-amber-400 bg-amber-500/20'
           : 'text-red-400 bg-red-500/20';
@@ -85,29 +86,29 @@ export default function SanctionsScreeningPage() {
   const opaque = screenings.filter((s) => s.ownershipOpaque).length;
 
   return (
-    <div className="p-6 space-y-6">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="font-display text-xl font-bold text-sky-50 flex items-center gap-2">
-            <ShieldAlert className="w-5 h-5 text-red-400" />
-            Sanctions & Compliance Screening
-            <HelpTip
-              tipId="vessels.sanctions-screening"
-              platform="vessels"
-              title="Sanctions & Compliance Screening"
-              content="Continuously screens vessels, owners, and beneficial owners against OFAC, UN, EU, and UK consolidated sanctions lists. Hits create governed approvals with citation-backed evidence — never silent blocks."
-              accentColor="var(--gi-accent-blue)"
-              iconSize={13}
-            />
-          </h1>
-          <p className="text-xs text-sky-400/50 mt-0.5">
-            {isLive
-              ? `${screenings.length} vessels screened — live database`
-              : 'Vessel, owner, and beneficial owner screening against global sanctions lists'}
-          </p>
-        </div>
-        {isLoading && <Loader2 className="w-4 h-4 text-sky-400 animate-spin" />}
-      </div>
+    <div className="space-y-6">
+      <PageHeader
+        eyebrow="Compliance"
+        breadcrumbs={[{ label: 'Sanctions Screening' }]}
+        title="Sanctions & Compliance Screening"
+        description={
+          isLive
+            ? `${screenings.length} vessels screened — live database. Continuous screening against OFAC, UN, EU, and UK consolidated lists; hits surface as governed approvals with citation-backed evidence.`
+            : 'Vessel, owner, and beneficial owner screening against global sanctions lists. Hits create governed approvals — never silent blocks.'
+        }
+        actions={
+          <HelpTip
+            tipId="vessels.sanctions-screening"
+            platform="vessels"
+            title="Sanctions & Compliance Screening"
+            content="Continuously screens vessels, owners, and beneficial owners against OFAC, UN, EU, and UK consolidated sanctions lists. Hits create governed approvals with citation-backed evidence — never silent blocks."
+            accentColor="#c9b787"
+            iconSize={13}
+          />
+        }
+      />
+
+      {isLoading && <LoadingState label="Screening" />}
 
       <div className="grid grid-cols-2 md:grid-cols-5 gap-3">
         {[
@@ -122,10 +123,10 @@ export default function SanctionsScreeningPage() {
           { label: 'PSC Detained', value: detained, color: 'text-red-400', icon: Ship },
           { label: 'Opaque Ownership', value: opaque, color: 'text-amber-400', icon: Eye },
         ].map((s) => (
-          <div key={s.label} className="bg-[#0a1628]/80 border border-sky-500/10 rounded-xl p-4">
+          <div key={s.label} className="bg-white/[0.02] border border-white/[0.06] rounded-xl p-4">
             <div className="flex items-center gap-2 mb-1">
               <s.icon className={cn('w-3.5 h-3.5', s.color)} />
-              <p className="text-[10px] text-sky-400/40 uppercase tracking-wider">{s.label}</p>
+              <p className="text-[10px] text-[#6a6a6a] uppercase tracking-wider">{s.label}</p>
             </div>
             <p className={cn('text-2xl font-bold font-display', s.color)}>{s.value}</p>
           </div>
@@ -134,17 +135,17 @@ export default function SanctionsScreeningPage() {
 
       {summary && !summaryLoading && (
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div className="bg-[#0a1628]/80 border border-sky-500/10 rounded-xl p-4">
-            <h3 className="text-[10px] font-mono text-sky-400/50 uppercase tracking-wider mb-3">
+          <div className="bg-white/[0.02] border border-white/[0.06] rounded-xl p-4">
+            <h3 className="text-[10px] font-mono text-[#8a8a8a] uppercase tracking-wider mb-3">
               OFAC Status Distribution
             </h3>
             <div className="space-y-2">
               {(summary.ofacDistribution as OfacDistEntry[]).map((d) => (
                 <div key={d.status} className="flex items-center gap-3">
-                  <span className="text-[10px] text-sky-400/50 w-24 capitalize">
+                  <span className="text-[10px] text-[#8a8a8a] w-24 capitalize">
                     {d.status.replace('_', ' ')}
                   </span>
-                  <div className="flex-1 h-2 bg-sky-500/10 rounded-full overflow-hidden">
+                  <div className="flex-1 h-2 bg-[#c9b787]/10 rounded-full overflow-hidden">
                     <div
                       className={cn(
                         'h-full rounded-full',
@@ -161,28 +162,28 @@ export default function SanctionsScreeningPage() {
                       }}
                     />
                   </div>
-                  <span className="text-[10px] font-mono text-sky-300 w-8 text-right">
+                  <span className="text-[10px] font-mono text-[#d4c598] w-8 text-right">
                     {d.count}
                   </span>
                 </div>
               ))}
             </div>
             {summary.stats && (
-              <div className="mt-3 pt-3 border-t border-sky-500/10 grid grid-cols-3 gap-2">
+              <div className="mt-3 pt-3 border-t border-white/[0.06] grid grid-cols-3 gap-2">
                 <div>
-                  <p className="text-[9px] text-sky-400/30">Avg Score</p>
-                  <p className="text-xs font-mono text-sky-200">
+                  <p className="text-[9px] text-[#5a5a5a]">Avg Score</p>
+                  <p className="text-xs font-mono text-[#e0e0e0]">
                     {Math.round(summary.stats.avgScore ?? 0)}
                   </p>
                 </div>
                 <div>
-                  <p className="text-[9px] text-sky-400/30">Min Score</p>
+                  <p className="text-[9px] text-[#5a5a5a]">Min Score</p>
                   <p className="text-xs font-mono text-red-400">
                     {Math.round(summary.stats.minScore ?? 0)}
                   </p>
                 </div>
                 <div>
-                  <p className="text-[9px] text-sky-400/30">Max Score</p>
+                  <p className="text-[9px] text-[#5a5a5a]">Max Score</p>
                   <p className="text-xs font-mono text-emerald-400">
                     {Math.round(summary.stats.maxScore ?? 0)}
                   </p>
@@ -191,8 +192,8 @@ export default function SanctionsScreeningPage() {
             )}
           </div>
 
-          <div className="bg-[#0a1628]/80 border border-sky-500/10 rounded-xl p-4">
-            <h3 className="text-[10px] font-mono text-sky-400/50 uppercase tracking-wider mb-3">
+          <div className="bg-white/[0.02] border border-white/[0.06] rounded-xl p-4">
+            <h3 className="text-[10px] font-mono text-[#8a8a8a] uppercase tracking-wider mb-3">
               PSC Inspection Results
             </h3>
             <div className="space-y-2">
@@ -206,7 +207,7 @@ export default function SanctionsScreeningPage() {
                     >
                       {d.result?.replace('_', ' ')}
                     </Badge>
-                    <div className="flex-1 h-2 bg-sky-500/10 rounded-full overflow-hidden">
+                    <div className="flex-1 h-2 bg-[#c9b787]/10 rounded-full overflow-hidden">
                       <div
                         className={cn(
                           'h-full rounded-full',
@@ -221,7 +222,7 @@ export default function SanctionsScreeningPage() {
                         }}
                       />
                     </div>
-                    <span className="text-[10px] font-mono text-sky-300 w-8 text-right">
+                    <span className="text-[10px] font-mono text-[#d4c598] w-8 text-right">
                       {d.count}
                     </span>
                     {d.avgDeficiencies > 0 && (
@@ -238,12 +239,12 @@ export default function SanctionsScreeningPage() {
 
       <div className="flex items-center gap-3 flex-wrap">
         <div className="relative flex-1 min-w-48">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-sky-500/40" />
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-[#f5f5f5]0/40" />
           <input
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             placeholder="Search vessel, IMO, or owner..."
-            className="w-full pl-9 pr-4 py-2 text-xs bg-[#0a1628]/80 text-sky-200 placeholder:text-sky-500/30 rounded-lg border border-sky-500/20 focus:outline-none focus:border-sky-500/40 focus:ring-1 focus:ring-sky-500/20"
+            className="w-full pl-9 pr-4 py-2 text-xs bg-white/[0.02] text-[#e0e0e0] placeholder:text-[#f5f5f5]0/30 rounded-lg border border-white/[0.08] focus:outline-none focus:border-[#c9b787]/40 focus:ring-1 focus:ring-sky-500/20"
           />
         </div>
         {['all', 'match', 'partial_match', 'clear', 'pending'].map((filter) => (
@@ -253,8 +254,8 @@ export default function SanctionsScreeningPage() {
             className={cn(
               'text-[10px] px-2.5 py-1.5 rounded-lg border transition-all capitalize',
               ofacFilter === filter
-                ? 'bg-sky-500/10 border-sky-500/30 text-sky-300'
-                : 'border-sky-500/10 text-sky-400/40 hover:text-sky-300',
+                ? 'bg-[#c9b787]/10 border-[#c9b787]/24 text-[#d4c598]'
+                : 'border-white/[0.06] text-[#6a6a6a] hover:text-[#d4c598]',
             )}
           >
             {filter === 'all' ? `All (${screenings.length})` : filter.replace('_', ' ')}
@@ -262,24 +263,24 @@ export default function SanctionsScreeningPage() {
         ))}
       </div>
 
-      <div className="bg-[#0a1628]/80 border border-sky-500/10 rounded-xl overflow-hidden">
-        <div className="px-4 py-3 border-b border-sky-500/10 flex items-center gap-2">
-          <ShieldAlert className="w-3.5 h-3.5 text-sky-400" />
-          <span className="text-[11px] font-mono text-sky-300 uppercase tracking-wider">
+      <div className="bg-white/[0.02] border border-white/[0.06] rounded-xl overflow-hidden">
+        <div className="px-4 py-3 border-b border-white/[0.06] flex items-center gap-2">
+          <ShieldAlert className="w-3.5 h-3.5 text-[#c9b787]" />
+          <span className="text-[11px] font-mono text-[#d4c598] uppercase tracking-wider">
             Vessel Screening Queue
           </span>
-          <span className="ml-auto text-[10px] text-sky-400/40">{filtered.length} records</span>
+          <span className="ml-auto text-[10px] text-[#6a6a6a]">{filtered.length} records</span>
         </div>
 
         {isLoading ? (
           <div className="flex items-center justify-center py-12">
-            <Loader2 className="w-6 h-6 text-sky-400 animate-spin mr-2" />
-            <span className="text-sm text-sky-400/50">Loading sanctions data...</span>
+            <Loader2 className="w-6 h-6 text-[#c9b787] animate-spin mr-2" />
+            <span className="text-sm text-[#8a8a8a]">Loading sanctions data...</span>
           </div>
         ) : filtered.length === 0 ? (
           <div className="text-center py-12">
-            <ShieldAlert className="w-8 h-8 text-sky-400/20 mx-auto mb-2" />
-            <p className="text-sm text-sky-400/40">No vessels match current filters</p>
+            <ShieldAlert className="w-8 h-8 text-[#c9b787]/20 mx-auto mb-2" />
+            <p className="text-sm text-[#6a6a6a]">No vessels match current filters</p>
           </div>
         ) : (
           <div className="divide-y divide-sky-500/5">
@@ -287,7 +288,7 @@ export default function SanctionsScreeningPage() {
               <div
                 key={s.id}
                 className={cn(
-                  'px-4 py-3 hover:bg-sky-500/5 transition-colors',
+                  'px-4 py-3 hover:bg-[#c9b787]/8 transition-colors',
                   s.ofacStatus === 'match'
                     ? 'border-l-2 border-red-500/40'
                     : s.ofacStatus === 'partial_match'
@@ -299,11 +300,11 @@ export default function SanctionsScreeningPage() {
                   <RiskGauge score={parseFloat(s.complianceScore ?? '0')} />
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2 flex-wrap">
-                      <span className="text-sm font-bold text-sky-100">
+                      <span className="text-sm font-bold text-[#f5f5f5]">
                         {s.vesselName ?? `Vessel #${s.vesselId}`}
                       </span>
                       {s.vesselImo && (
-                        <span className="text-[10px] font-mono text-sky-400/50">
+                        <span className="text-[10px] font-mono text-[#8a8a8a]">
                           IMO {s.vesselImo}
                         </span>
                       )}
@@ -331,14 +332,14 @@ export default function SanctionsScreeningPage() {
                       )}
                     </div>
                     <div className="flex items-center gap-3 mt-0.5 flex-wrap">
-                      <span className="text-[10px] text-sky-400/50">
+                      <span className="text-[10px] text-[#8a8a8a]">
                         {s.vesselType ?? '—'} · Flag: {s.flagState ?? s.vesselFlag ?? '—'}
                       </span>
                       {s.knownOwner && (
-                        <span className="text-[10px] text-sky-400/40">Owner: {s.knownOwner}</span>
+                        <span className="text-[10px] text-[#6a6a6a]">Owner: {s.knownOwner}</span>
                       )}
                       {s.knownManager && (
-                        <span className="text-[10px] text-sky-400/30">Mgr: {s.knownManager}</span>
+                        <span className="text-[10px] text-[#5a5a5a]">Mgr: {s.knownManager}</span>
                       )}
                     </div>
                     {(s.matchedLists?.length ?? 0) > 0 && (
@@ -352,7 +353,7 @@ export default function SanctionsScreeningPage() {
                           </span>
                         ))}
                         {s.matchConfidence && (
-                          <span className="text-[9px] px-1.5 py-0.5 rounded bg-sky-500/10 text-sky-400 border border-sky-500/20">
+                          <span className="text-[9px] px-1.5 py-0.5 rounded bg-[#c9b787]/10 text-[#c9b787] border border-white/[0.08]">
                             {parseFloat(s.matchConfidence).toFixed(0)}% confidence
                           </span>
                         )}
@@ -363,11 +364,11 @@ export default function SanctionsScreeningPage() {
                         {s.pscDeficiencies} PSC deficiencies recorded
                       </p>
                     )}
-                    {s.notes && <p className="text-[9px] text-sky-400/40 mt-1 italic">{s.notes}</p>}
+                    {s.notes && <p className="text-[9px] text-[#6a6a6a] mt-1 italic">{s.notes}</p>}
                   </div>
                   <div className="text-right shrink-0">
                     <div className="flex flex-col gap-1 items-end">
-                      <span className="text-[9px] font-mono text-sky-400/30">
+                      <span className="text-[9px] font-mono text-[#5a5a5a]">
                         Screened {new Date(s.screeningDate).toLocaleDateString()}
                       </span>
                       {s.euStatus !== 'clear' && (
@@ -384,7 +385,7 @@ export default function SanctionsScreeningPage() {
               </div>
             ))}
             {filtered.length > 50 && (
-              <div className="px-4 py-3 text-center text-[10px] text-sky-400/30">
+              <div className="px-4 py-3 text-center text-[10px] text-[#5a5a5a]">
                 Showing 50 of {filtered.length} vessels
               </div>
             )}
@@ -392,10 +393,10 @@ export default function SanctionsScreeningPage() {
         )}
       </div>
 
-      <div className="bg-[#0a1628]/80 border border-sky-500/10 rounded-xl overflow-hidden">
-        <div className="px-4 py-3 border-b border-sky-500/10 flex items-center gap-2">
-          <CheckCircle className="w-3.5 h-3.5 text-sky-400" />
-          <span className="text-[11px] font-mono text-sky-300 uppercase tracking-wider">
+      <div className="bg-white/[0.02] border border-white/[0.06] rounded-xl overflow-hidden">
+        <div className="px-4 py-3 border-b border-white/[0.06] flex items-center gap-2">
+          <CheckCircle className="w-3.5 h-3.5 text-[#c9b787]" />
+          <span className="text-[11px] font-mono text-[#d4c598] uppercase tracking-wider">
             Sanctions Lists Monitored
           </span>
         </div>
@@ -403,11 +404,11 @@ export default function SanctionsScreeningPage() {
           {SANCTION_LISTS.map((list) => (
             <div
               key={list.name}
-              className="px-4 py-3 flex items-center justify-between hover:bg-sky-500/5 transition-colors"
+              className="px-4 py-3 flex items-center justify-between hover:bg-[#c9b787]/8 transition-colors"
             >
               <div>
-                <p className="text-xs font-semibold text-sky-100">{list.name}</p>
-                <p className="text-[10px] text-sky-400/50">
+                <p className="text-xs font-semibold text-[#f5f5f5]">{list.name}</p>
+                <p className="text-[10px] text-[#8a8a8a]">
                   {list.region} · {list.entities} entities
                 </p>
               </div>
@@ -418,7 +419,7 @@ export default function SanctionsScreeningPage() {
                 >
                   Active
                 </Badge>
-                <p className="text-[9px] text-sky-400/30 mt-1">Updated {list.lastUpdated}</p>
+                <p className="text-[9px] text-[#5a5a5a] mt-1">Updated {list.lastUpdated}</p>
               </div>
             </div>
           ))}

@@ -208,16 +208,16 @@ export default function PscInspectorPage() {
     <div className="p-6 space-y-6">
       <div>
         <div className="flex items-center gap-3 flex-wrap">
-          <h1 className="font-display text-xl font-bold text-sky-50 flex items-center gap-2">
-            <Shield className="w-5 h-5 text-sky-400" />
+          <h1 className="font-display text-xl font-bold text-[#f5f5f5] flex items-center gap-2">
+            <Shield className="w-5 h-5 text-[#c9b787]" />
             Port State Control Inspector
           </h1>
           <LiveDataBadge isLive={!profilesQ.isError} isLoading={profilesQ.isLoading} />
-          <span className="text-[10px] font-mono px-2 py-0.5 rounded border border-sky-500/20 bg-sky-500/8 text-sky-400/80 tracking-wider">
+          <span className="text-[10px] font-mono px-2 py-0.5 rounded border border-white/[0.08] bg-[#c9b787]/14 text-[#c9b787]/80 tracking-wider">
             Live DB · Paris MoU / Tokyo MoU methodology
           </span>
         </div>
-        <p className="text-xs text-sky-400/50 mt-0.5">
+        <p className="text-xs text-[#8a8a8a] mt-0.5">
           Detention risk predictor, deficiency history, and pre-inspection checklists — sourced
           from your fleet inspection records.
         </p>
@@ -228,7 +228,7 @@ export default function PscInspectorPage() {
           {
             label: 'Vessels Tracked',
             value: profiles.length,
-            color: 'text-sky-300',
+            color: 'text-[#d4c598]',
             icon: Ship,
           },
           {
@@ -250,10 +250,10 @@ export default function PscInspectorPage() {
             icon: TrendingUp,
           },
         ].map((s) => (
-          <div key={s.label} className="bg-[#0a1628]/80 border border-sky-500/10 rounded-xl p-4">
+          <div key={s.label} className="bg-white/[0.02] border border-white/[0.06] rounded-xl p-4">
             <div className="flex items-center gap-2 mb-1">
               <s.icon className={cn('w-3.5 h-3.5', s.color)} />
-              <p className="text-[10px] text-sky-400/40 uppercase tracking-wider">{s.label}</p>
+              <p className="text-[10px] text-[#6a6a6a] uppercase tracking-wider">{s.label}</p>
             </div>
             <p className={cn('text-xl font-bold font-display', s.color)}>{s.value}</p>
           </div>
@@ -261,22 +261,22 @@ export default function PscInspectorPage() {
       </div>
 
       {profilesQ.isLoading && profiles.length === 0 ? (
-        <div className="bg-[#0a1628]/80 border border-sky-500/10 rounded-xl p-8 text-center">
-          <Loader2 className="w-5 h-5 animate-spin text-sky-400 mx-auto mb-2" />
-          <p className="text-xs text-sky-400/60">Loading PSC fleet profile…</p>
+        <div className="bg-white/[0.02] border border-white/[0.06] rounded-xl p-8 text-center">
+          <Loader2 className="w-5 h-5 animate-spin text-[#c9b787] mx-auto mb-2" />
+          <p className="text-xs text-[#9a9a9a]">Loading PSC fleet profile…</p>
         </div>
       ) : profilesQ.isError ? (
-        <div className="bg-[#0a1628]/80 border border-red-500/20 rounded-xl p-6 text-center">
+        <div className="bg-white/[0.02] border border-red-500/20 rounded-xl p-6 text-center">
           <AlertTriangle className="w-5 h-5 text-red-400 mx-auto mb-2" />
           <p className="text-xs text-red-400">Unable to load PSC data.</p>
-          <p className="text-[10px] text-sky-400/40 mt-1">
+          <p className="text-[10px] text-[#6a6a6a] mt-1">
             {profilesQ.error instanceof Error ? profilesQ.error.message : 'Please try again.'}
           </p>
         </div>
       ) : profiles.length === 0 ? (
-        <div className="bg-[#0a1628]/80 border border-sky-500/10 rounded-xl p-8 text-center">
-          <Ship className="w-5 h-5 text-sky-400/40 mx-auto mb-2" />
-          <p className="text-xs text-sky-400/60">
+        <div className="bg-white/[0.02] border border-white/[0.06] rounded-xl p-8 text-center">
+          <Ship className="w-5 h-5 text-[#6a6a6a] mx-auto mb-2" />
+          <p className="text-xs text-[#9a9a9a]">
             No vessels in your fleet yet. PSC inspector will populate once vessels and inspection
             records are available.
           </p>
@@ -284,7 +284,7 @@ export default function PscInspectorPage() {
       ) : (
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
           <div className="space-y-2">
-            <p className="text-[10px] text-sky-400/40 uppercase tracking-wider px-1">
+            <p className="text-[10px] text-[#6a6a6a] uppercase tracking-wider px-1">
               Fleet PSC Risk
             </p>
             {profiles.map((v) => (
@@ -292,18 +292,18 @@ export default function PscInspectorPage() {
                 key={v.vesselId}
                 onClick={() => setSelectedId(v.vesselId)}
                 className={cn(
-                  'w-full text-left bg-[#0a1628]/80 border rounded-xl p-4 transition-all',
+                  'w-full text-left bg-white/[0.02] border rounded-xl p-4 transition-all',
                   selected?.vesselId === v.vesselId
-                    ? 'border-sky-500/30 ring-1 ring-sky-500/15'
+                    ? 'border-[#c9b787]/24 ring-1 ring-sky-500/15'
                     : v.detentionRiskLevel === 'high' || v.detentionRiskLevel === 'critical'
                       ? 'border-orange-500/20'
-                      : 'border-sky-500/10 hover:border-sky-500/20',
+                      : 'border-white/[0.06] hover:border-white/[0.08]',
                 )}
               >
                 <div className="flex items-center justify-between mb-2">
                   <div>
-                    <p className="text-sm font-bold text-sky-100">{v.vessel}</p>
-                    <p className="text-[10px] text-sky-400/50">
+                    <p className="text-sm font-bold text-[#f5f5f5]">{v.vessel}</p>
+                    <p className="text-[10px] text-[#8a8a8a]">
                       {v.flag ?? 'Unknown flag'} · IMO {v.imo ?? '—'}
                     </p>
                   </div>
@@ -328,7 +328,7 @@ export default function PscInspectorPage() {
                     </Badge>
                   </div>
                 </div>
-                <div className="h-1.5 bg-sky-500/10 rounded-full overflow-hidden">
+                <div className="h-1.5 bg-[#c9b787]/10 rounded-full overflow-hidden">
                   <div
                     className={cn(
                       'h-full rounded-full',
@@ -341,7 +341,7 @@ export default function PscInspectorPage() {
                     style={{ width: `${v.detentionRisk}%` }}
                   />
                 </div>
-                <div className="flex gap-3 mt-2 text-[9px] text-sky-400/40">
+                <div className="flex gap-3 mt-2 text-[9px] text-[#6a6a6a]">
                   <span>{v.deficiencies90d} defic. (90d)</span>
                   <span>{v.detentions12m} detentions (12m)</span>
                   <span className="ml-auto flex items-center gap-1">
@@ -362,8 +362,8 @@ export default function PscInspectorPage() {
                   className={cn(
                     'text-xs px-3 py-1.5 rounded-lg capitalize transition-colors',
                     tab === t
-                      ? 'bg-sky-500/10 text-sky-300 border border-sky-500/20'
-                      : 'text-sky-400/50 hover:text-sky-300',
+                      ? 'bg-[#c9b787]/10 text-[#d4c598] border border-white/[0.08]'
+                      : 'text-[#8a8a8a] hover:text-[#d4c598]',
                   )}
                 >
                   {t === 'risk'
@@ -403,7 +403,7 @@ export default function PscInspectorPage() {
         </div>
       )}
 
-      <div className="text-[9px] text-sky-400/30 flex items-center gap-1">
+      <div className="text-[9px] text-[#5a5a5a] flex items-center gap-1">
         <BarChart3 className="w-3 h-3" />
         Risk score blends recent deficiency density, detention history, and flag-state factors.
       </div>
@@ -413,11 +413,11 @@ export default function PscInspectorPage() {
 
 function RiskTab({ selected }: { selected: PscProfile }) {
   return (
-    <div className="bg-[#0a1628]/80 border border-sky-500/10 rounded-xl p-4 space-y-4">
+    <div className="bg-white/[0.02] border border-white/[0.06] rounded-xl p-4 space-y-4">
       <div className="flex items-start justify-between">
         <div>
-          <p className="text-sm font-bold text-sky-100">{selected.vessel}</p>
-          <p className="text-[10px] text-sky-400/50">
+          <p className="text-sm font-bold text-[#f5f5f5]">{selected.vessel}</p>
+          <p className="text-[10px] text-[#8a8a8a]">
             {selected.flag ?? 'Unknown flag'} · IMO {selected.imo ?? '—'}
           </p>
         </div>
@@ -434,22 +434,22 @@ function RiskTab({ selected }: { selected: PscProfile }) {
           { label: 'Last Inspection', value: formatDate(selected.lastInspection) },
           { label: 'Last Regime', value: selected.lastInspectionRegime ?? '—' },
         ].map((f) => (
-          <div key={f.label} className="bg-sky-500/5 rounded-lg p-3 border border-sky-500/10">
-            <p className="text-[9px] text-sky-400/40 uppercase tracking-wider">{f.label}</p>
-            <p className="text-xs font-mono text-sky-200 mt-0.5">{f.value}</p>
+          <div key={f.label} className="bg-[#c9b787]/8 rounded-lg p-3 border border-white/[0.06]">
+            <p className="text-[9px] text-[#6a6a6a] uppercase tracking-wider">{f.label}</p>
+            <p className="text-xs font-mono text-[#e0e0e0] mt-0.5">{f.value}</p>
           </div>
         ))}
       </div>
       {selected.lastInspectionPort && (
-        <div className="bg-sky-500/5 rounded-lg p-3 border border-sky-500/10">
-          <p className="text-[9px] text-sky-400/40 uppercase tracking-wider mb-1">
+        <div className="bg-[#c9b787]/8 rounded-lg p-3 border border-white/[0.06]">
+          <p className="text-[9px] text-[#6a6a6a] uppercase tracking-wider mb-1">
             Last Port of Inspection
           </p>
           <div className="flex items-center gap-2">
-            <MapPin className="w-3.5 h-3.5 text-sky-400" />
-            <p className="text-sm font-semibold text-sky-200">{selected.lastInspectionPort}</p>
+            <MapPin className="w-3.5 h-3.5 text-[#c9b787]" />
+            <p className="text-sm font-semibold text-[#e0e0e0]">{selected.lastInspectionPort}</p>
             {selected.lastInspectionRegime && (
-              <Badge variant="outline" className="text-[9px] text-sky-400/50 border-sky-500/15">
+              <Badge variant="outline" className="text-[9px] text-[#8a8a8a] border-white/[0.08]">
                 {selected.lastInspectionRegime}
               </Badge>
             )}
@@ -479,21 +479,21 @@ function HistoryTab({
 }) {
   if (isLoading) {
     return (
-      <div className="bg-[#0a1628]/80 border border-sky-500/10 rounded-xl p-6 text-center">
-        <Loader2 className="w-4 h-4 animate-spin text-sky-400 mx-auto" />
+      <div className="bg-white/[0.02] border border-white/[0.06] rounded-xl p-6 text-center">
+        <Loader2 className="w-4 h-4 animate-spin text-[#c9b787] mx-auto" />
       </div>
     );
   }
   if (isError) {
     return (
-      <div className="bg-[#0a1628]/80 border border-red-500/20 rounded-xl p-4 text-xs text-red-400">
+      <div className="bg-white/[0.02] border border-red-500/20 rounded-xl p-4 text-xs text-red-400">
         Unable to load inspection history.
       </div>
     );
   }
   if (inspections.length === 0) {
     return (
-      <div className="bg-[#0a1628]/80 border border-sky-500/10 rounded-xl p-6 text-center text-xs text-sky-400/60">
+      <div className="bg-white/[0.02] border border-white/[0.06] rounded-xl p-6 text-center text-xs text-[#9a9a9a]">
         No PSC inspections recorded for this vessel.
       </div>
     );
@@ -504,21 +504,21 @@ function HistoryTab({
         <div
           key={rec.id}
           className={cn(
-            'bg-[#0a1628]/80 border rounded-xl p-4',
+            'bg-white/[0.02] border rounded-xl p-4',
             rec.detained
               ? 'border-red-500/20'
               : rec.result === 'deficiency'
                 ? 'border-amber-500/20'
-                : 'border-sky-500/10',
+                : 'border-white/[0.06]',
           )}
         >
           <div className="flex items-start justify-between mb-2">
             <div>
-              <p className="text-xs font-semibold text-sky-200">
+              <p className="text-xs font-semibold text-[#e0e0e0]">
                 {rec.port}
                 {rec.portCountry ? `, ${rec.portCountry}` : ''}
               </p>
-              <p className="text-[10px] text-sky-400/40">
+              <p className="text-[10px] text-[#6a6a6a]">
                 {rec.mouRegime} · {formatDate(rec.inspectionDate)}
                 {rec.inspector ? ` · ${rec.inspector}` : ''}
               </p>
@@ -539,7 +539,7 @@ function HistoryTab({
           </div>
           {rec.deficienciesCount > 0 && (
             <div>
-              <p className="text-[9px] text-sky-400/40 mb-1">
+              <p className="text-[9px] text-[#6a6a6a] mb-1">
                 {rec.deficienciesCount} deficiency items:
               </p>
               <div className="flex flex-wrap gap-1">
@@ -555,7 +555,7 @@ function HistoryTab({
             </div>
           )}
           {rec.notes && (
-            <p className="text-[10px] text-sky-400/50 mt-2 italic">{rec.notes}</p>
+            <p className="text-[10px] text-[#8a8a8a] mt-2 italic">{rec.notes}</p>
           )}
         </div>
       ))}
@@ -584,31 +584,31 @@ function ChecklistTab({
 }) {
   if (isLoading) {
     return (
-      <div className="bg-[#0a1628]/80 border border-sky-500/10 rounded-xl p-6 text-center">
-        <Loader2 className="w-4 h-4 animate-spin text-sky-400 mx-auto" />
+      <div className="bg-white/[0.02] border border-white/[0.06] rounded-xl p-6 text-center">
+        <Loader2 className="w-4 h-4 animate-spin text-[#c9b787] mx-auto" />
       </div>
     );
   }
   if (isError) {
     return (
-      <div className="bg-[#0a1628]/80 border border-red-500/20 rounded-xl p-4 text-xs text-red-400">
+      <div className="bg-white/[0.02] border border-red-500/20 rounded-xl p-4 text-xs text-red-400">
         Unable to load checklist.
       </div>
     );
   }
   return (
-    <div className="bg-[#0a1628]/80 border border-sky-500/10 rounded-xl overflow-hidden">
-      <div className="px-4 py-3 border-b border-sky-500/10">
-        <p className="text-xs font-semibold text-sky-200">
+    <div className="bg-white/[0.02] border border-white/[0.06] rounded-xl overflow-hidden">
+      <div className="px-4 py-3 border-b border-white/[0.06]">
+        <p className="text-xs font-semibold text-[#e0e0e0]">
           Pre-Inspection Checklist{lastPort ? ` — Last call ${lastPort}` : ''}
           {regime ? ` (${regime})` : ''}
         </p>
-        <p className="text-[10px] text-sky-400/40">
+        <p className="text-[10px] text-[#6a6a6a]">
           Action items for vessel {vesselName} · click status to cycle pass → action → fail
         </p>
       </div>
       {items.length === 0 ? (
-        <div className="px-4 py-6 text-center text-xs text-sky-400/60">
+        <div className="px-4 py-6 text-center text-xs text-[#9a9a9a]">
           No checklist items yet.
         </div>
       ) : (
@@ -632,9 +632,9 @@ function ChecklistTab({
                   className={cn('w-4 h-4 shrink-0 mt-0.5', checklistStatusColor[item.status])}
                 />
                 <div className="flex-1">
-                  <p className="text-xs text-sky-200">{item.category}</p>
+                  <p className="text-xs text-[#e0e0e0]">{item.category}</p>
                   {item.note && (
-                    <p className="text-[10px] text-sky-400/50 mt-0.5">{item.note}</p>
+                    <p className="text-[10px] text-[#8a8a8a] mt-0.5">{item.note}</p>
                   )}
                 </div>
                 <button

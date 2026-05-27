@@ -248,16 +248,16 @@ function ExceptionCard({
   return (
     <div
       className={cn(
-        'bg-[#0a1628]/80 border rounded-xl overflow-hidden transition-all',
+        'bg-white/[0.02] border rounded-xl overflow-hidden transition-all',
         exc.severity === 'critical'
           ? 'border-red-500/20'
           : exc.severity === 'high'
             ? 'border-orange-500/15'
-            : 'border-sky-500/10',
+            : 'border-white/[0.06]',
       )}
     >
       <button
-        className="w-full text-left px-4 py-3 flex items-start gap-3 hover:bg-sky-500/5 transition-colors"
+        className="w-full text-left px-4 py-3 flex items-start gap-3 hover:bg-[#c9b787]/8 transition-colors"
         onClick={() => setExpanded(!expanded)}
         aria-expanded={expanded}
       >
@@ -274,7 +274,7 @@ function ExceptionCard({
 
         <div className="flex-1 min-w-0">
           <div className="flex items-start gap-2 flex-wrap">
-            <p className="text-xs font-semibold text-sky-100">{exc.title}</p>
+            <p className="text-xs font-semibold text-[#f5f5f5]">{exc.title}</p>
             <div className="flex items-center gap-1.5 flex-wrap ml-auto">
               <Badge variant="outline" className={cn('text-[9px] shrink-0', sev.badgeColor)}>
                 {sev.label}
@@ -284,7 +284,7 @@ function ExceptionCard({
               </Badge>
             </div>
           </div>
-          <div className="flex items-center gap-3 mt-1 text-[10px] text-sky-400/50">
+          <div className="flex items-center gap-3 mt-1 text-[10px] text-[#8a8a8a]">
             {exc.vesselName && (
               <span className="flex items-center gap-1">
                 <Ship className="w-2.5 h-2.5" />
@@ -293,7 +293,7 @@ function ExceptionCard({
             )}
             {exc.route && (
               <>
-                <span className="text-sky-400/30">·</span>
+                <span className="text-[#5a5a5a]">·</span>
                 <span className="truncate">{exc.route}</span>
               </>
             )}
@@ -312,22 +312,22 @@ function ExceptionCard({
         </div>
 
         {expanded ? (
-          <ChevronDown className="w-3.5 h-3.5 text-sky-400/40 shrink-0 mt-0.5" />
+          <ChevronDown className="w-3.5 h-3.5 text-[#6a6a6a] shrink-0 mt-0.5" />
         ) : (
-          <ChevronRight className="w-3.5 h-3.5 text-sky-400/40 shrink-0 mt-0.5" />
+          <ChevronRight className="w-3.5 h-3.5 text-[#6a6a6a] shrink-0 mt-0.5" />
         )}
       </button>
 
       {expanded && (
-        <div className="px-4 pb-4 space-y-3 border-t border-sky-500/10 pt-3">
+        <div className="px-4 pb-4 space-y-3 border-t border-white/[0.06] pt-3">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
             <div className="space-y-2">
               {exc.description && (
-                <div className="bg-sky-500/5 rounded-lg p-3 border border-sky-500/10">
-                  <p className="text-[9px] text-sky-400/40 uppercase tracking-wider mb-1.5">
+                <div className="bg-[#c9b787]/8 rounded-lg p-3 border border-white/[0.06]">
+                  <p className="text-[9px] text-[#6a6a6a] uppercase tracking-wider mb-1.5">
                     What Happened
                   </p>
-                  <p className="text-[11px] text-sky-200/80">{exc.description}</p>
+                  <p className="text-[11px] text-[#e0e0e0]/80">{exc.description}</p>
                 </div>
               )}
               {exc.whyItMatters && (
@@ -335,17 +335,17 @@ function ExceptionCard({
                   <p className="text-[9px] text-amber-400/60 uppercase tracking-wider mb-1.5">
                     Why It Matters
                   </p>
-                  <p className="text-[11px] text-sky-200/80">{exc.whyItMatters}</p>
+                  <p className="text-[11px] text-[#e0e0e0]/80">{exc.whyItMatters}</p>
                 </div>
               )}
             </div>
             <div className="space-y-2">
               {exc.recommendedResponse && (
-                <div className="bg-sky-500/5 rounded-lg p-3 border border-sky-500/10">
-                  <p className="text-[9px] text-sky-400/40 uppercase tracking-wider mb-1.5">
+                <div className="bg-[#c9b787]/8 rounded-lg p-3 border border-white/[0.06]">
+                  <p className="text-[9px] text-[#6a6a6a] uppercase tracking-wider mb-1.5">
                     Recommended Response
                   </p>
-                  <p className="text-[11px] text-sky-200/80">{exc.recommendedResponse}</p>
+                  <p className="text-[11px] text-[#e0e0e0]/80">{exc.recommendedResponse}</p>
                 </div>
               )}
               {exc.businessConsequence && (
@@ -357,16 +357,16 @@ function ExceptionCard({
                       : 'bg-red-500/5 border-red-500/10',
                   )}
                 >
-                  <p className="text-[9px] text-sky-400/40 uppercase tracking-wider mb-1.5">
+                  <p className="text-[9px] text-[#6a6a6a] uppercase tracking-wider mb-1.5">
                     Business Consequence
                   </p>
-                  <p className="text-[11px] text-sky-200/80">{exc.businessConsequence}</p>
+                  <p className="text-[11px] text-[#e0e0e0]/80">{exc.businessConsequence}</p>
                 </div>
               )}
             </div>
           </div>
 
-          <div className="flex items-center gap-4 pt-1 border-t border-sky-500/10">
+          <div className="flex items-center gap-4 pt-1 border-t border-white/[0.06]">
             <OperationalOwnerChip
               owner={
                 exc.owner ? { name: exc.owner, role: exc.ownerFunction ?? undefined } : undefined
@@ -375,7 +375,7 @@ function ExceptionCard({
               unassignedLabel="No owner assigned"
             />
             <OperationalRiskBadge level={severityToRiskLevel(exc.severity)} size="xs" />
-            <span className="flex items-center gap-1 text-[9px] text-sky-400/40">
+            <span className="flex items-center gap-1 text-[9px] text-[#6a6a6a]">
               <Clock className="w-2.5 h-2.5" />
               Detected{' '}
               {new Date(exc.detectedAt).toLocaleString('en-GB', {
@@ -388,14 +388,14 @@ function ExceptionCard({
             </span>
             <Badge
               variant="outline"
-              className="text-[9px] text-sky-400/50 border-sky-500/20 ml-auto"
+              className="text-[9px] text-[#8a8a8a] border-white/[0.08] ml-auto"
             >
               {type.label}
             </Badge>
           </div>
 
           {exc.status !== 'resolved' && exc.status !== 'dismissed' && (
-            <div className="flex items-center gap-2 pt-2 border-t border-sky-500/10">
+            <div className="flex items-center gap-2 pt-2 border-t border-white/[0.06]">
               {exc.status === 'active' && (
                 <button
                   disabled={actionLoading === 'ack'}
@@ -438,7 +438,7 @@ function ExceptionCard({
                 value={resolutionNote}
                 onChange={(e) => setResolutionNote(e.target.value)}
                 placeholder="Resolution notes (required)..."
-                className="flex-1 text-[11px] bg-sky-500/5 border border-sky-500/15 rounded-lg px-3 py-2 text-sky-100 placeholder-sky-400/30 outline-none focus:border-sky-500/40"
+                className="flex-1 text-[11px] bg-[#c9b787]/8 border border-white/[0.08] rounded-lg px-3 py-2 text-[#f5f5f5] placeholder-sky-400/30 outline-none focus:border-[#c9b787]/40"
               />
               <button
                 disabled={!resolutionNote.trim() || actionLoading === 'resolve'}
@@ -507,8 +507,8 @@ export default function ExceptionsCenterPage() {
     <div className="p-6 space-y-6">
       <div className="flex items-start justify-between">
         <div>
-          <h1 className="font-display text-xl font-bold text-sky-50">Exceptions Center</h1>
-          <p className="text-xs text-sky-400/50 mt-0.5">
+          <h1 className="font-display text-xl font-bold text-[#f5f5f5]">Exceptions Center</h1>
+          <p className="text-xs text-[#8a8a8a] mt-0.5">
             Prioritized operational exception queue — all vessels, all routes
           </p>
         </div>
@@ -521,7 +521,7 @@ export default function ExceptionsCenterPage() {
           )}
           <button
             onClick={() => refetch()}
-            className="p-2 rounded-lg border border-sky-500/15 text-sky-400/50 hover:text-sky-300 hover:border-sky-500/30 transition-all"
+            className="p-2 rounded-lg border border-white/[0.08] text-[#8a8a8a] hover:text-[#d4c598] hover:border-[#c9b787]/24 transition-all"
           >
             <RefreshCw className={cn('w-3.5 h-3.5', isLoading && 'animate-spin')} />
           </button>
@@ -541,17 +541,17 @@ export default function ExceptionsCenterPage() {
         ].map((s) => (
           <div
             key={s.label}
-            className="bg-[#0a1628]/80 border border-sky-500/10 rounded-xl p-4 text-center"
+            className="bg-white/[0.02] border border-white/[0.06] rounded-xl p-4 text-center"
           >
             <p className={cn('text-2xl font-bold font-display', s.color)}>{s.value}</p>
-            <p className="text-[10px] text-sky-400/40 uppercase tracking-wider mt-1">{s.label}</p>
+            <p className="text-[10px] text-[#6a6a6a] uppercase tracking-wider mt-1">{s.label}</p>
           </div>
         ))}
       </div>
 
       <div className="flex items-center gap-4 flex-wrap">
         <div className="flex items-center gap-1">
-          <span className="text-[10px] text-sky-400/40 mr-2">Status:</span>
+          <span className="text-[10px] text-[#6a6a6a] mr-2">Status:</span>
           {(['all', 'active', 'acknowledged', 'resolved'] as StatusFilter[]).map((f) => (
             <button
               key={f}
@@ -559,8 +559,8 @@ export default function ExceptionsCenterPage() {
               className={cn(
                 'text-[10px] px-2.5 py-1.5 rounded-lg border transition-all capitalize',
                 statusFilter === f
-                  ? 'bg-sky-500/10 border-sky-500/30 text-sky-300'
-                  : 'border-sky-500/10 text-sky-400/40 hover:text-sky-300',
+                  ? 'bg-[#c9b787]/10 border-[#c9b787]/24 text-[#d4c598]'
+                  : 'border-white/[0.06] text-[#6a6a6a] hover:text-[#d4c598]',
               )}
             >
               {f}
@@ -568,7 +568,7 @@ export default function ExceptionsCenterPage() {
           ))}
         </div>
         <div className="flex items-center gap-1">
-          <span className="text-[10px] text-sky-400/40 mr-2">Severity:</span>
+          <span className="text-[10px] text-[#6a6a6a] mr-2">Severity:</span>
           {(['all', 'critical', 'high', 'watch', 'normal'] as SeverityFilter[]).map((f) => (
             <button
               key={f}
@@ -576,15 +576,15 @@ export default function ExceptionsCenterPage() {
               className={cn(
                 'text-[10px] px-2.5 py-1.5 rounded-lg border transition-all capitalize',
                 severityFilter === f
-                  ? 'bg-sky-500/10 border-sky-500/30 text-sky-300'
-                  : 'border-sky-500/10 text-sky-400/40 hover:text-sky-300',
+                  ? 'bg-[#c9b787]/10 border-[#c9b787]/24 text-[#d4c598]'
+                  : 'border-white/[0.06] text-[#6a6a6a] hover:text-[#d4c598]',
               )}
             >
               {f}
             </button>
           ))}
         </div>
-        <span className="ml-auto text-[10px] text-sky-400/40">
+        <span className="ml-auto text-[10px] text-[#6a6a6a]">
           {filtered.length} exceptions shown
         </span>
       </div>
@@ -606,7 +606,7 @@ export default function ExceptionsCenterPage() {
           {[1, 2, 3].map((i) => (
             <div
               key={i}
-              className="h-16 rounded-xl border border-sky-500/10 bg-sky-500/5 animate-pulse"
+              className="h-16 rounded-xl border border-white/[0.06] bg-[#c9b787]/8 animate-pulse"
             />
           ))}
         </div>

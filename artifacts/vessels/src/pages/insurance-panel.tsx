@@ -171,7 +171,7 @@ const statusConfig: Record<string, { color: string; label: string }> = {
     label: 'Under Review',
   },
   settled: { color: 'text-emerald-400 bg-emerald-500/10 border-emerald-500/20', label: 'Settled' },
-  denied: { color: 'text-sky-400/50 bg-sky-500/5 border-sky-500/10', label: 'Denied' },
+  denied: { color: 'text-[#8a8a8a] bg-[#c9b787]/8 border-white/[0.06]', label: 'Denied' },
 };
 
 const scoreColor = (score: number) =>
@@ -241,16 +241,16 @@ export default function InsurancePanelPage() {
   return (
     <div className="p-6 space-y-6">
       <div>
-        <h1 className="font-display text-xl font-bold text-sky-50 flex items-center gap-2">
+        <h1 className="font-display text-xl font-bold text-[#f5f5f5] flex items-center gap-2">
           <Shield className="w-5 h-5 text-violet-400" />
           Insurance & P&I Panel
         </h1>
-        <p className="text-xs text-sky-400/50 mt-0.5">
+        <p className="text-xs text-[#8a8a8a] mt-0.5">
           Hull & machinery claims, P&I club correspondence, and underwriting risk scores feeding
           from the vessel risk engine
         </p>
         <div className="flex flex-wrap gap-2 mt-1">
-          <Badge variant="outline" className="text-[9px] text-sky-400/40 border-sky-500/15">
+          <Badge variant="outline" className="text-[9px] text-[#6a6a6a] border-white/[0.08]">
             Live · /api/vessels/insurance · {apiPolicies.length} polic
             {apiPolicies.length === 1 ? 'y' : 'ies'} · {apiClaims.length} claim
             {apiClaims.length === 1 ? '' : 's'}
@@ -285,7 +285,7 @@ export default function InsurancePanelPage() {
           {
             label: 'Annual Premium',
             value: `$${(totalPremium / 1000).toFixed(0)}K`,
-            color: 'text-sky-300',
+            color: 'text-[#d4c598]',
             icon: TrendingUp,
           },
           {
@@ -295,10 +295,10 @@ export default function InsurancePanelPage() {
             icon: Activity,
           },
         ].map((s) => (
-          <div key={s.label} className="bg-[#0a1628]/80 border border-sky-500/10 rounded-xl p-4">
+          <div key={s.label} className="bg-white/[0.02] border border-white/[0.06] rounded-xl p-4">
             <div className="flex items-center gap-2 mb-1">
               <s.icon className={cn('w-3.5 h-3.5', s.color)} />
-              <p className="text-[10px] text-sky-400/40 uppercase tracking-wider">{s.label}</p>
+              <p className="text-[10px] text-[#6a6a6a] uppercase tracking-wider">{s.label}</p>
             </div>
             <p className={cn('text-xl font-bold font-display', s.color)}>{s.value}</p>
           </div>
@@ -313,8 +313,8 @@ export default function InsurancePanelPage() {
             className={cn(
               'text-xs px-3 py-1.5 rounded-lg capitalize transition-colors',
               tab === t
-                ? 'bg-sky-500/10 text-sky-300 border border-sky-500/20'
-                : 'text-sky-400/50 hover:text-sky-300',
+                ? 'bg-[#c9b787]/10 text-[#d4c598] border border-white/[0.08]'
+                : 'text-[#8a8a8a] hover:text-[#d4c598]',
             )}
           >
             {t === 'policies' ? 'Policy Overview' : 'Claim Tracker'}
@@ -328,24 +328,24 @@ export default function InsurancePanelPage() {
             <div
               key={p.vessel}
               className={cn(
-                'bg-[#0a1628]/80 border rounded-xl p-4',
+                'bg-white/[0.02] border rounded-xl p-4',
                 p.underwritingScore < 50
                   ? 'border-red-500/20'
                   : p.underwritingScore < 65
                     ? 'border-amber-500/20'
-                    : 'border-sky-500/10',
+                    : 'border-white/[0.06]',
               )}
             >
               <div className="flex items-start justify-between mb-4">
                 <div>
-                  <p className="text-sm font-bold text-sky-100">{p.vessel}</p>
-                  <p className="text-[10px] text-sky-400/50">IMO {p.imo}</p>
+                  <p className="text-sm font-bold text-[#f5f5f5]">{p.vessel}</p>
+                  <p className="text-[10px] text-[#8a8a8a]">IMO {p.imo}</p>
                 </div>
                 <div className="text-right">
                   <p className={cn('text-xl font-bold font-mono', scoreColor(p.underwritingScore))}>
                     {p.underwritingScore}
                   </p>
-                  <p className="text-[9px] text-sky-400/40">underwriting score</p>
+                  <p className="text-[9px] text-[#6a6a6a]">underwriting score</p>
                   {p.openClaims > 0 && (
                     <Badge
                       variant="outline"
@@ -365,10 +365,10 @@ export default function InsurancePanelPage() {
                 ].map((f) => (
                   <div
                     key={f.label}
-                    className="bg-sky-500/5 rounded-lg p-2.5 border border-sky-500/10"
+                    className="bg-[#c9b787]/8 rounded-lg p-2.5 border border-white/[0.06]"
                   >
-                    <p className="text-[9px] text-sky-400/40 uppercase tracking-wider">{f.label}</p>
-                    <p className="text-xs text-sky-200 font-medium mt-0.5">{f.value}</p>
+                    <p className="text-[9px] text-[#6a6a6a] uppercase tracking-wider">{f.label}</p>
+                    <p className="text-xs text-[#e0e0e0] font-medium mt-0.5">{f.value}</p>
                   </div>
                 ))}
               </div>
@@ -410,14 +410,14 @@ export default function InsurancePanelPage() {
                 key={c.id}
                 onClick={() => setSelectedClaim(c)}
                 className={cn(
-                  'w-full text-left bg-[#0a1628]/80 border rounded-xl p-4 transition-all',
+                  'w-full text-left bg-white/[0.02] border rounded-xl p-4 transition-all',
                   selectedClaim?.id === c.id
-                    ? 'border-sky-500/30 ring-1 ring-sky-500/15'
+                    ? 'border-[#c9b787]/24 ring-1 ring-sky-500/15'
                     : c.status === 'open'
                       ? 'border-red-500/20'
                       : c.status === 'under_review'
                         ? 'border-amber-500/20'
-                        : 'border-sky-500/10 hover:border-sky-500/20',
+                        : 'border-white/[0.06] hover:border-white/[0.08]',
                 )}
               >
                 <div className="flex items-start gap-3">
@@ -444,10 +444,10 @@ export default function InsurancePanelPage() {
                   </div>
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2 mb-0.5">
-                      <span className="text-sm font-bold text-sky-100">{c.id}</span>
+                      <span className="text-sm font-bold text-[#f5f5f5]">{c.id}</span>
                       <Badge
                         variant="outline"
-                        className="text-[9px] text-sky-400/40 border-sky-500/10"
+                        className="text-[9px] text-[#6a6a6a] border-white/[0.06]"
                       >
                         {c.type}
                       </Badge>
@@ -458,8 +458,8 @@ export default function InsurancePanelPage() {
                         {statusConfig[c.status].label}
                       </Badge>
                     </div>
-                    <p className="text-xs text-sky-300">{c.vessel}</p>
-                    <p className="text-[10px] text-sky-400/50 mt-0.5 line-clamp-2">
+                    <p className="text-xs text-[#d4c598]">{c.vessel}</p>
+                    <p className="text-[10px] text-[#8a8a8a] mt-0.5 line-clamp-2">
                       {c.description}
                     </p>
                   </div>
@@ -467,12 +467,12 @@ export default function InsurancePanelPage() {
                     <p
                       className={cn(
                         'text-sm font-bold font-mono',
-                        c.status === 'settled' ? 'text-sky-300' : 'text-orange-400',
+                        c.status === 'settled' ? 'text-[#d4c598]' : 'text-orange-400',
                       )}
                     >
                       ${(c.estimatedAmount / 1000).toFixed(0)}K
                     </p>
-                    <p className="text-[9px] text-sky-400/40">{c.dateReported}</p>
+                    <p className="text-[9px] text-[#6a6a6a]">{c.dateReported}</p>
                   </div>
                 </div>
               </button>
@@ -480,13 +480,13 @@ export default function InsurancePanelPage() {
           </div>
 
           {selectedClaim && (
-            <div className="bg-[#0a1628]/80 border border-sky-500/10 rounded-xl p-4 space-y-4">
+            <div className="bg-white/[0.02] border border-white/[0.06] rounded-xl p-4 space-y-4">
               <div className="flex items-start justify-between">
                 <div>
-                  <p className="text-sm font-bold text-sky-100">
+                  <p className="text-sm font-bold text-[#f5f5f5]">
                     {selectedClaim.id} — {selectedClaim.type} Claim
                   </p>
-                  <p className="text-[10px] text-sky-400/50">
+                  <p className="text-[10px] text-[#8a8a8a]">
                     {selectedClaim.vessel} · Reported {selectedClaim.dateReported}
                   </p>
                 </div>
@@ -497,11 +497,11 @@ export default function InsurancePanelPage() {
                   {statusConfig[selectedClaim.status].label}
                 </Badge>
               </div>
-              <div className="bg-sky-500/5 rounded-lg p-3 border border-sky-500/10">
-                <p className="text-[9px] text-sky-400/40 uppercase tracking-wider mb-1">
+              <div className="bg-[#c9b787]/8 rounded-lg p-3 border border-white/[0.06]">
+                <p className="text-[9px] text-[#6a6a6a] uppercase tracking-wider mb-1">
                   Description
                 </p>
-                <p className="text-xs text-sky-200">{selectedClaim.description}</p>
+                <p className="text-xs text-[#e0e0e0]">{selectedClaim.description}</p>
               </div>
               <div className="grid grid-cols-2 gap-3">
                 {[
@@ -515,43 +515,43 @@ export default function InsurancePanelPage() {
                 ].map((f) => (
                   <div
                     key={f.label}
-                    className="bg-sky-500/5 rounded-lg p-2.5 border border-sky-500/10"
+                    className="bg-[#c9b787]/8 rounded-lg p-2.5 border border-white/[0.06]"
                   >
-                    <p className="text-[9px] text-sky-400/40 uppercase tracking-wider">{f.label}</p>
-                    <p className="text-xs text-sky-200 mt-0.5">{f.value}</p>
+                    <p className="text-[9px] text-[#6a6a6a] uppercase tracking-wider">{f.label}</p>
+                    <p className="text-xs text-[#e0e0e0] mt-0.5">{f.value}</p>
                   </div>
                 ))}
               </div>
               <div>
-                <p className="text-[9px] text-sky-400/40 uppercase tracking-wider mb-2">
+                <p className="text-[9px] text-[#6a6a6a] uppercase tracking-wider mb-2">
                   Correspondence Log
                 </p>
                 <div className="space-y-2">
                   {selectedClaim.correspondence.map((entry, i) => (
                     <div
                       key={i}
-                      className="flex items-start gap-3 p-2.5 bg-sky-500/3 rounded-lg border border-sky-500/8"
+                      className="flex items-start gap-3 p-2.5 bg-[#c9b787]/14 rounded-lg border border-white/[0.08]"
                     >
-                      <div className="w-1.5 h-1.5 rounded-full bg-sky-400/30 shrink-0 mt-1.5" />
+                      <div className="w-1.5 h-1.5 rounded-full bg-[#c9b787]/14 shrink-0 mt-1.5" />
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center gap-2 mb-0.5">
-                          <span className="text-[9px] font-mono text-sky-400/50">{entry.date}</span>
-                          <span className="text-[9px] text-sky-400/30">·</span>
-                          <span className="text-[9px] text-sky-400">{entry.party}</span>
+                          <span className="text-[9px] font-mono text-[#8a8a8a]">{entry.date}</span>
+                          <span className="text-[9px] text-[#5a5a5a]">·</span>
+                          <span className="text-[9px] text-[#c9b787]">{entry.party}</span>
                         </div>
-                        <p className="text-[11px] text-sky-300/80">{entry.summary}</p>
+                        <p className="text-[11px] text-[#d4c598]/80">{entry.summary}</p>
                       </div>
                     </div>
                   ))}
                 </div>
               </div>
 
-              <div className="rounded-xl border border-sky-500/12 bg-sky-500/3 p-4 space-y-3">
+              <div className="rounded-xl border border-white/[0.08] bg-[#c9b787]/14 p-4 space-y-3">
                 <div className="flex items-center gap-2">
                   <div className="w-6 h-6 rounded-lg flex items-center justify-center" style={{ background: 'rgba(6,182,212,0.15)', border: '1px solid rgba(6,182,212,0.25)' }}>
-                    <FileSearch className="w-3 h-3 text-sky-400" />
+                    <FileSearch className="w-3 h-3 text-[#c9b787]" />
                   </div>
-                  <p className="text-[10px] font-semibold text-sky-200">Document Intelligence — Exception Filing</p>
+                  <p className="text-[10px] font-semibold text-[#e0e0e0]">Document Intelligence — Exception Filing</p>
                   <div className="ml-auto flex items-center gap-1 px-1.5 py-0.5 rounded-full text-[8px] font-mono bg-emerald-500/10 border border-emerald-500/20 text-emerald-400">
                     <Cpu className="w-2 h-2" />
                     v0.1.0
@@ -576,18 +576,18 @@ export default function InsurancePanelPage() {
                       proofHash: `0x${selectedClaim.id.replace(/\W/g, '').slice(0, 6)}b9…22de`,
                     },
                   ].map((chunk, i) => (
-                    <div key={i} className="rounded-lg p-2.5 bg-sky-500/3 border border-sky-500/8">
+                    <div key={i} className="rounded-lg p-2.5 bg-[#c9b787]/14 border border-white/[0.08]">
                       <div className="flex items-start gap-2">
                         <span className={cn(
                           'shrink-0 px-1.5 py-0.5 rounded text-[8px] font-mono uppercase mt-0.5',
-                          chunk.stage === 'ocr' ? 'bg-sky-500/15 text-sky-300' : 'bg-emerald-500/15 text-emerald-300',
+                          chunk.stage === 'ocr' ? 'bg-[#c9b787]/14 text-[#d4c598]' : 'bg-emerald-500/15 text-emerald-300',
                         )}>
                           {chunk.stage}
                         </span>
                         <div className="flex-1 min-w-0">
-                          <p className="text-[10px] font-semibold text-sky-200 mb-1">{chunk.label}</p>
-                          <p className="text-[9px] text-sky-300/60 leading-relaxed mb-1.5">{chunk.text}</p>
-                          <div className="flex items-center gap-x-2.5 flex-wrap text-[8px] font-mono text-sky-400/35">
+                          <p className="text-[10px] font-semibold text-[#e0e0e0] mb-1">{chunk.label}</p>
+                          <p className="text-[9px] text-[#d4c598]/60 leading-relaxed mb-1.5">{chunk.text}</p>
+                          <div className="flex items-center gap-x-2.5 flex-wrap text-[8px] font-mono text-[#c9b787]/35">
                             <span className="flex items-center gap-0.5"><Link2 className="w-2 h-2" />{chunk.evidenceRefs.join(', ')}</span>
                             <span>{chunk.proofHash}</span>
                             <span className={chunk.confidence >= 0.93 ? 'text-emerald-400/60' : 'text-amber-400/60'}>
@@ -599,7 +599,7 @@ export default function InsurancePanelPage() {
                     </div>
                   ))}
                 </div>
-                <p className="text-[8px] font-mono text-sky-400/25">
+                <p className="text-[8px] font-mono text-[#c9b787]/25">
                   lane: vessels-insurance-exception · pipeline: ocr→layout→qa · {selectedClaim.id}
                 </p>
               </div>

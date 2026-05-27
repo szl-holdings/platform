@@ -99,7 +99,7 @@ function FeatureAttribution({ attrs }: { attrs: Record<string, number> }) {
       {sorted.map(([key, val]) => (
         <div key={key} className="flex items-center gap-2">
           <div className="flex-1 h-1 bg-muted rounded-full overflow-hidden">
-            <div className="h-full bg-sky-400/60 rounded-full" style={{ width: `${val * 100}%` }} />
+            <div className="h-full bg-[#c9b787]/14 rounded-full" style={{ width: `${val * 100}%` }} />
           </div>
           <span className="text-[9px] font-mono text-muted-foreground w-8 text-right">{(val * 100).toFixed(0)}%</span>
           <span className="text-[9px] font-mono text-muted-foreground w-28 truncate">{key.replace(/_/g, ' ')}</span>

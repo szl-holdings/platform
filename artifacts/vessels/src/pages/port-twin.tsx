@@ -159,25 +159,25 @@ function BerthGrid({ berths }: { berths: (typeof PORTS)[0]['berths'] }) {
           className={cn(
             'flex items-center gap-3 px-3 py-2 rounded-lg border',
             b.occupied
-              ? 'bg-sky-500/5 border-sky-500/15'
+              ? 'bg-[#c9b787]/8 border-white/[0.08]'
               : 'bg-emerald-500/5 border-emerald-500/15',
           )}
         >
           <div
             className={cn(
               'w-2 h-2 rounded-full shrink-0',
-              b.occupied ? 'bg-sky-400' : 'bg-emerald-400',
+              b.occupied ? 'bg-[#c9b787]' : 'bg-emerald-400',
             )}
           />
           <div className="flex-1 min-w-0">
             <div className="flex items-center gap-2">
-              <span className="text-[10px] font-mono text-sky-300">{b.id}</span>
-              <span className="text-[9px] text-sky-400/40">{b.type}</span>
+              <span className="text-[10px] font-mono text-[#d4c598]">{b.id}</span>
+              <span className="text-[9px] text-[#6a6a6a]">{b.type}</span>
             </div>
-            {b.vessel && <p className="text-[10px] text-sky-200">{b.vessel}</p>}
+            {b.vessel && <p className="text-[10px] text-[#e0e0e0]">{b.vessel}</p>}
           </div>
           {b.eta_departure && (
-            <span className="text-[9px] text-sky-400/40">Departs: {b.eta_departure}</span>
+            <span className="text-[9px] text-[#6a6a6a]">Departs: {b.eta_departure}</span>
           )}
           {!b.occupied && (
             <Badge variant="outline" className="text-[9px] text-emerald-400 border-emerald-500/20">
@@ -199,18 +199,18 @@ export default function PortTwinPage() {
       <div className="flex items-center justify-between">
         <div>
           <div className="flex items-center gap-2 mb-1">
-            <Anchor className="w-4 h-4 text-sky-400" />
-            <h1 className="font-display text-xl font-bold text-sky-50">
+            <Anchor className="w-4 h-4 text-[#c9b787]" />
+            <h1 className="font-display text-xl font-bold text-[#f5f5f5]">
               Port Digital Twin & Berth Optimization
             </h1>
             <Badge
               variant="outline"
-              className="text-[9px] text-sky-400 border-sky-500/30 bg-sky-500/5"
+              className="text-[9px] text-[#c9b787] border-[#c9b787]/24 bg-[#c9b787]/8"
             >
               AIS DENSITY
             </Badge>
           </div>
-          <p className="text-xs text-sky-400/40">
+          <p className="text-xs text-[#6a6a6a]">
             Congestion prediction, berth allocation optimization & just-in-time arrival routing
           </p>
         </div>
@@ -222,8 +222,8 @@ export default function PortTwinPage() {
               className={cn(
                 'text-xs px-3 py-1.5 rounded-lg border transition-colors',
                 selectedPort.id === p.id
-                  ? 'bg-sky-500/10 border-sky-500/30 text-sky-300'
-                  : 'border-sky-500/10 text-sky-400/40 hover:text-sky-300',
+                  ? 'bg-[#c9b787]/10 border-[#c9b787]/24 text-[#d4c598]'
+                  : 'border-white/[0.06] text-[#6a6a6a] hover:text-[#d4c598]',
               )}
             >
               {p.name}
@@ -233,8 +233,8 @@ export default function PortTwinPage() {
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-4 gap-3">
-        <div className="bg-[#0a1628]/80 border border-sky-500/10 rounded-xl p-3">
-          <p className="text-[9px] text-sky-400/40 uppercase tracking-wider mb-1">Congestion</p>
+        <div className="bg-white/[0.02] border border-white/[0.06] rounded-xl p-3">
+          <p className="text-[9px] text-[#6a6a6a] uppercase tracking-wider mb-1">Congestion</p>
           <Badge
             variant="outline"
             className={cn('text-xs', congestionColor[selectedPort.congestionLevel])}
@@ -242,21 +242,21 @@ export default function PortTwinPage() {
             {selectedPort.congestionLevel}
           </Badge>
         </div>
-        <div className="bg-[#0a1628]/80 border border-sky-500/10 rounded-xl p-3">
-          <p className="text-[9px] text-sky-400/40 uppercase tracking-wider mb-1">Avg Wait Time</p>
+        <div className="bg-white/[0.02] border border-white/[0.06] rounded-xl p-3">
+          <p className="text-[9px] text-[#6a6a6a] uppercase tracking-wider mb-1">Avg Wait Time</p>
           <p className="text-lg font-bold font-mono text-amber-400">{selectedPort.waitingTime}h</p>
         </div>
-        <div className="bg-[#0a1628]/80 border border-sky-500/10 rounded-xl p-3">
-          <p className="text-[9px] text-sky-400/40 uppercase tracking-wider mb-1">
+        <div className="bg-white/[0.02] border border-white/[0.06] rounded-xl p-3">
+          <p className="text-[9px] text-[#6a6a6a] uppercase tracking-wider mb-1">
             Berth Utilization
           </p>
-          <p className="text-lg font-bold font-mono text-sky-400">
+          <p className="text-lg font-bold font-mono text-[#c9b787]">
             {selectedPort.berthUtilization}%
           </p>
         </div>
-        <div className="bg-[#0a1628]/80 border border-sky-500/10 rounded-xl p-3">
-          <p className="text-[9px] text-sky-400/40 uppercase tracking-wider mb-1">Fleet Vessels</p>
-          <p className="text-lg font-bold font-mono text-sky-400">{selectedPort.vessels.length}</p>
+        <div className="bg-white/[0.02] border border-white/[0.06] rounded-xl p-3">
+          <p className="text-[9px] text-[#6a6a6a] uppercase tracking-wider mb-1">Fleet Vessels</p>
+          <p className="text-lg font-bold font-mono text-[#c9b787]">{selectedPort.vessels.length}</p>
         </div>
       </div>
 
@@ -268,8 +268,8 @@ export default function PortTwinPage() {
             className={cn(
               'text-xs px-4 py-1.5 rounded-lg capitalize transition-colors',
               tab === t
-                ? 'bg-sky-500/10 text-sky-300 border border-sky-500/20'
-                : 'text-sky-400/50 hover:text-sky-300',
+                ? 'bg-[#c9b787]/10 text-[#d4c598] border border-white/[0.08]'
+                : 'text-[#8a8a8a] hover:text-[#d4c598]',
             )}
           >
             {t === 'berths'
@@ -284,37 +284,37 @@ export default function PortTwinPage() {
       {tab === 'berths' && (
         <div className="grid grid-cols-1 xl:grid-cols-3 gap-4">
           <div className="xl:col-span-2 space-y-4">
-            <div className="bg-[#0a1628]/80 border border-sky-500/10 rounded-xl p-4">
-              <p className="text-xs font-semibold text-sky-200 mb-3 flex items-center gap-1.5">
-                <Map className="w-3.5 h-3.5 text-sky-400" />
+            <div className="bg-white/[0.02] border border-white/[0.06] rounded-xl p-4">
+              <p className="text-xs font-semibold text-[#e0e0e0] mb-3 flex items-center gap-1.5">
+                <Map className="w-3.5 h-3.5 text-[#c9b787]" />
                 {selectedPort.name} Port — Live Berth Status
               </p>
               <BerthGrid berths={selectedPort.berths} />
             </div>
-            <div className="bg-[#0a1628]/80 border border-sky-500/10 rounded-xl p-4">
-              <p className="text-xs font-semibold text-sky-200 mb-3 flex items-center gap-1.5">
-                <Navigation className="w-3.5 h-3.5 text-sky-400" />
+            <div className="bg-white/[0.02] border border-white/[0.06] rounded-xl p-4">
+              <p className="text-xs font-semibold text-[#e0e0e0] mb-3 flex items-center gap-1.5">
+                <Navigation className="w-3.5 h-3.5 text-[#c9b787]" />
                 Fleet Vessels — {selectedPort.name}
               </p>
               <div className="space-y-2">
                 {selectedPort.vessels.map((v) => (
                   <div
                     key={v.id}
-                    className="flex items-center gap-3 px-3 py-2 rounded-lg bg-sky-500/3 border border-sky-500/8"
+                    className="flex items-center gap-3 px-3 py-2 rounded-lg bg-[#c9b787]/14 border border-white/[0.08]"
                   >
                     <div
                       className={cn(
                         'w-1.5 h-1.5 rounded-full shrink-0',
                         v.status === 'berthed'
-                          ? 'bg-sky-400'
+                          ? 'bg-[#c9b787]'
                           : v.status === 'anchored'
                             ? 'bg-amber-400 animate-pulse'
                             : 'bg-emerald-400',
                       )}
                     />
                     <div className="flex-1 min-w-0">
-                      <p className="text-[11px] text-sky-200">{v.name}</p>
-                      <p className="text-[9px] text-sky-400/40">ETA: {v.eta}</p>
+                      <p className="text-[11px] text-[#e0e0e0]">{v.name}</p>
+                      <p className="text-[9px] text-[#6a6a6a]">ETA: {v.eta}</p>
                     </div>
                     <div className="text-right">
                       <Badge
@@ -322,7 +322,7 @@ export default function PortTwinPage() {
                         className={cn(
                           'text-[9px]',
                           v.status === 'berthed'
-                            ? 'text-sky-400 border-sky-500/20'
+                            ? 'text-[#c9b787] border-white/[0.08]'
                             : v.status === 'anchored'
                               ? 'text-amber-400 border-amber-500/20'
                               : 'text-emerald-400 border-emerald-500/20',
@@ -331,7 +331,7 @@ export default function PortTwinPage() {
                         {v.status}
                       </Badge>
                       {v.berth && (
-                        <p className="text-[9px] text-sky-400/40 mt-0.5">Berth {v.berth}</p>
+                        <p className="text-[9px] text-[#6a6a6a] mt-0.5">Berth {v.berth}</p>
                       )}
                     </div>
                   </div>
@@ -347,46 +347,46 @@ export default function PortTwinPage() {
               </p>
               <div className="space-y-2 text-[11px]">
                 <div className="flex justify-between">
-                  <span className="text-sky-400/50">Fuel saved</span>
+                  <span className="text-[#8a8a8a]">Fuel saved</span>
                   <span className="font-mono text-emerald-400">
                     ${selectedPort.jitSavings.fuel.toLocaleString()}
                   </span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-sky-400/50">CO₂ avoided</span>
+                  <span className="text-[#8a8a8a]">CO₂ avoided</span>
                   <span className="font-mono text-emerald-400">
                     {selectedPort.jitSavings.co2} t
                   </span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-sky-400/50">Wait hours eliminated</span>
+                  <span className="text-[#8a8a8a]">Wait hours eliminated</span>
                   <span className="font-mono text-emerald-400">
                     {selectedPort.jitSavings.hours}h
                   </span>
                 </div>
               </div>
             </div>
-            <div className="bg-[#0a1628]/80 border border-sky-500/10 rounded-xl p-4">
-              <p className="text-xs font-semibold text-sky-200 mb-2">Berth Allocation Algorithm</p>
-              <div className="space-y-1.5 text-[10px] text-sky-400/50">
+            <div className="bg-white/[0.02] border border-white/[0.06] rounded-xl p-4">
+              <p className="text-xs font-semibold text-[#e0e0e0] mb-2">Berth Allocation Algorithm</p>
+              <div className="space-y-1.5 text-[10px] text-[#8a8a8a]">
                 <div className="flex items-center gap-1.5">
-                  <div className="w-1 h-1 bg-sky-400/40 rounded-full" />
+                  <div className="w-1 h-1 bg-[#c9b787]/14 rounded-full" />
                   Vessel type matching
                 </div>
                 <div className="flex items-center gap-1.5">
-                  <div className="w-1 h-1 bg-sky-400/40 rounded-full" />
+                  <div className="w-1 h-1 bg-[#c9b787]/14 rounded-full" />
                   Tidal window optimization
                 </div>
                 <div className="flex items-center gap-1.5">
-                  <div className="w-1 h-1 bg-sky-400/40 rounded-full" />
+                  <div className="w-1 h-1 bg-[#c9b787]/14 rounded-full" />
                   Cargo priority scoring
                 </div>
                 <div className="flex items-center gap-1.5">
-                  <div className="w-1 h-1 bg-sky-400/40 rounded-full" />
+                  <div className="w-1 h-1 bg-[#c9b787]/14 rounded-full" />
                   Turnaround time minimization
                 </div>
                 <div className="flex items-center gap-1.5">
-                  <div className="w-1 h-1 bg-sky-400/40 rounded-full" />
+                  <div className="w-1 h-1 bg-[#c9b787]/14 rounded-full" />
                   Port equipment availability
                 </div>
               </div>
@@ -396,16 +396,16 @@ export default function PortTwinPage() {
       )}
 
       {tab === 'forecast' && (
-        <div className="bg-[#0a1628]/80 border border-sky-500/10 rounded-xl overflow-hidden">
-          <div className="px-4 py-3 border-b border-sky-500/10">
-            <p className="text-xs font-semibold text-sky-200">
+        <div className="bg-white/[0.02] border border-white/[0.06] rounded-xl overflow-hidden">
+          <div className="px-4 py-3 border-b border-white/[0.06]">
+            <p className="text-xs font-semibold text-[#e0e0e0]">
               Port Congestion Forecast — Next 7 Days
             </p>
           </div>
           <div className="divide-y divide-sky-500/5">
             {CONGESTION_FORECAST.map((p) => (
               <div key={p.port} className="px-4 py-3 flex items-center gap-6">
-                <p className="text-sm text-sky-200 w-24 shrink-0">{p.port}</p>
+                <p className="text-sm text-[#e0e0e0] w-24 shrink-0">{p.port}</p>
                 <div className="flex-1 grid grid-cols-3 gap-4">
                   {[
                     { label: 'Today', val: p.todayPct },
@@ -414,8 +414,8 @@ export default function PortTwinPage() {
                   ].map((d) => (
                     <div key={d.label}>
                       <div className="flex justify-between mb-1">
-                        <span className="text-[9px] text-sky-400/40">{d.label}</span>
-                        <span className="text-[9px] font-mono text-sky-300">{d.val}%</span>
+                        <span className="text-[9px] text-[#6a6a6a]">{d.label}</span>
+                        <span className="text-[9px] font-mono text-[#d4c598]">{d.val}%</span>
                       </div>
                       <div className="h-1.5 bg-white/5 rounded-full overflow-hidden">
                         <div
@@ -446,10 +446,10 @@ export default function PortTwinPage() {
       {tab === 'jit' && (
         <div className="space-y-4">
           {PORTS.map((p) => (
-            <div key={p.id} className="bg-[#0a1628]/80 border border-sky-500/10 rounded-xl p-4">
+            <div key={p.id} className="bg-white/[0.02] border border-white/[0.06] rounded-xl p-4">
               <div className="flex items-start justify-between">
                 <div>
-                  <p className="text-sm font-semibold text-sky-100">{p.name}</p>
+                  <p className="text-sm font-semibold text-[#f5f5f5]">{p.name}</p>
                   <div className="flex items-center gap-2 mt-1">
                     <Badge
                       variant="outline"
@@ -457,12 +457,12 @@ export default function PortTwinPage() {
                     >
                       {p.congestionLevel}
                     </Badge>
-                    <span className="text-[10px] text-sky-400/40">Wait: {p.waitingTime}h avg</span>
+                    <span className="text-[10px] text-[#6a6a6a]">Wait: {p.waitingTime}h avg</span>
                   </div>
                 </div>
                 <div className="text-right">
                   <p className="text-xs font-semibold text-emerald-400">JIT Optimization Active</p>
-                  <p className="text-[9px] text-sky-400/40">
+                  <p className="text-[9px] text-[#6a6a6a]">
                     {p.vessels.length} vessel{p.vessels.length !== 1 ? 's' : ''} in scope
                   </p>
                 </div>
@@ -472,17 +472,17 @@ export default function PortTwinPage() {
                   <p className="text-sm font-bold font-mono text-emerald-400">
                     ${p.jitSavings.fuel.toLocaleString()}
                   </p>
-                  <p className="text-[9px] text-sky-400/40">Fuel saved</p>
+                  <p className="text-[9px] text-[#6a6a6a]">Fuel saved</p>
                 </div>
                 <div className="bg-emerald-500/5 rounded-lg p-2">
                   <p className="text-sm font-bold font-mono text-emerald-400">
                     {p.jitSavings.co2} t
                   </p>
-                  <p className="text-[9px] text-sky-400/40">CO₂ avoided</p>
+                  <p className="text-[9px] text-[#6a6a6a]">CO₂ avoided</p>
                 </div>
-                <div className="bg-sky-500/5 rounded-lg p-2">
-                  <p className="text-sm font-bold font-mono text-sky-400">{p.jitSavings.hours}h</p>
-                  <p className="text-[9px] text-sky-400/40">Wait eliminated</p>
+                <div className="bg-[#c9b787]/8 rounded-lg p-2">
+                  <p className="text-sm font-bold font-mono text-[#c9b787]">{p.jitSavings.hours}h</p>
+                  <p className="text-[9px] text-[#6a6a6a]">Wait eliminated</p>
                 </div>
               </div>
             </div>

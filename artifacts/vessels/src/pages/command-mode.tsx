@@ -55,18 +55,18 @@ function VesselRail({
     <button
       onClick={onSelect}
       className={cn(
-        'w-full text-left px-3 py-2.5 border-b border-sky-500/5 transition-all hover:bg-sky-500/5',
-        selected ? 'bg-sky-500/10 border-l-2 border-l-sky-400' : 'border-l-2 border-l-transparent',
+        'w-full text-left px-3 py-2.5 border-b border-white/[0.08] transition-all hover:bg-[#c9b787]/8',
+        selected ? 'bg-[#c9b787]/10 border-l-2 border-l-sky-400' : 'border-l-2 border-l-transparent',
       )}
     >
       <div className="flex items-center gap-2">
         <span className="w-1.5 h-1.5 rounded-full shrink-0" style={{ backgroundColor: color }} />
-        <span className="text-[11px] font-medium text-sky-100 flex-1 truncate">{vessel.name}</span>
+        <span className="text-[11px] font-medium text-[#f5f5f5] flex-1 truncate">{vessel.name}</span>
         {(vessel.alertCount ?? 0) > 0 && (
           <span className="w-1.5 h-1.5 rounded-full bg-red-400 animate-pulse" />
         )}
       </div>
-      <div className="flex items-center gap-2 mt-0.5 pl-3.5 text-[9px] text-sky-400/40">
+      <div className="flex items-center gap-2 mt-0.5 pl-3.5 text-[9px] text-[#6a6a6a]">
         <span>{statusLabels[vessel.status]}</span>
         {(vessel.currentSpeed ?? 0) > 0 && <span>· {vessel.currentSpeed} kn</span>}
         {(vessel.etaDelta ?? 0) !== 0 && (
@@ -103,16 +103,16 @@ function AlertStream({
     .slice(0, 8);
 
   return (
-    <div className="bg-[#060e1a] border border-sky-500/10 rounded-xl overflow-hidden">
-      <div className="px-3 py-2 border-b border-sky-500/10 flex items-center gap-2">
+    <div className="bg-[#060e1a] border border-white/[0.06] rounded-xl overflow-hidden">
+      <div className="px-3 py-2 border-b border-white/[0.06] flex items-center gap-2">
         <Radio className="w-3 h-3 text-emerald-400 animate-pulse" />
-        <span className="text-[10px] font-mono text-sky-400/50 uppercase tracking-wider">
+        <span className="text-[10px] font-mono text-[#8a8a8a] uppercase tracking-wider">
           Alert Stream
         </span>
       </div>
       <div className="divide-y divide-sky-500/5 max-h-64 overflow-y-auto">
         {alerts.map((alert) => (
-          <div key={alert.id} className="px-3 py-2 hover:bg-sky-500/5 transition-colors">
+          <div key={alert.id} className="px-3 py-2 hover:bg-[#c9b787]/8 transition-colors">
             <div className="flex items-start gap-2">
               <span
                 className={cn(
@@ -125,8 +125,8 @@ function AlertStream({
                 )}
               />
               <div className="flex-1 min-w-0">
-                <p className="text-[10px] text-sky-200/80 leading-tight">{alert.message}</p>
-                <p className="text-[9px] text-sky-400/40 mt-0.5">
+                <p className="text-[10px] text-[#e0e0e0]/80 leading-tight">{alert.message}</p>
+                <p className="text-[9px] text-[#6a6a6a] mt-0.5">
                   {alert.vessel} ·{' '}
                   {new Date(alert.time).toLocaleTimeString('en-GB', {
                     hour: '2-digit',
@@ -154,7 +154,7 @@ function CommandMap({
   const H = 420;
 
   return (
-    <div className="relative w-full h-full overflow-hidden bg-[#060e1a] rounded-xl border border-sky-500/10">
+    <div className="relative w-full h-full overflow-hidden bg-[#060e1a] rounded-xl border border-white/[0.06]">
       <svg viewBox={`0 0 ${W} ${H}`} className="w-full h-full" preserveAspectRatio="xMidYMid meet">
         <defs>
           <radialGradient id="cmd-ocean" cx="50%" cy="40%" r="80%">
@@ -284,7 +284,7 @@ function CommandMap({
           const pctY = (y / H) * 100;
           return (
             <div
-              className="absolute z-10 bg-[#0a1628]/95 backdrop-blur border border-sky-500/20 rounded-lg p-2.5 pointer-events-none"
+              className="absolute z-10 bg-[#0e0e0e]/95 backdrop-blur border border-white/[0.08] rounded-lg p-2.5 pointer-events-none"
               style={{
                 left: `${Math.min(Math.max(pctX, 15), 75)}%`,
                 top: `${Math.max(pctY - 5, 5)}%`,
@@ -292,13 +292,13 @@ function CommandMap({
                 minWidth: 180,
               }}
             >
-              <p className="text-[11px] font-bold text-sky-100">{selectedVessel.name}</p>
+              <p className="text-[11px] font-bold text-[#f5f5f5]">{selectedVessel.name}</p>
               <div className="flex items-center gap-1.5 mt-0.5">
                 <span
                   className="w-1.5 h-1.5 rounded-full"
                   style={{ backgroundColor: statusColors[selectedVessel.status] }}
                 />
-                <span className="text-[9px] text-sky-400/60">
+                <span className="text-[9px] text-[#9a9a9a]">
                   {statusLabels[selectedVessel.status]} · {selectedVessel.currentSpeed} kn
                 </span>
               </div>
@@ -306,7 +306,7 @@ function CommandMap({
           );
         })()}
 
-      <div className="absolute bottom-2 right-2 text-[9px] text-sky-400/30 font-mono bg-[#0a1628]/80 px-2 py-1 rounded border border-sky-500/10">
+      <div className="absolute bottom-2 right-2 text-[9px] text-[#5a5a5a] font-mono bg-white/[0.02] px-2 py-1 rounded border border-white/[0.06]">
         <Radio className="w-2.5 h-2.5 inline mr-1 text-emerald-400" />
         {vessels.length} vessels tracked
       </div>
@@ -349,14 +349,14 @@ export default function CommandModePage() {
 
   return (
     <div className="h-full flex flex-col bg-[#040c18] overflow-hidden">
-      <div className="px-4 py-2 border-b border-sky-500/10 flex items-center gap-3 shrink-0">
+      <div className="px-4 py-2 border-b border-white/[0.06] flex items-center gap-3 shrink-0">
         <div className="flex items-center gap-2">
           <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
           <span className="text-[10px] font-mono text-emerald-400 uppercase tracking-wider">
             Command Mode
           </span>
         </div>
-        <div className="text-[10px] text-sky-400/30 font-mono">
+        <div className="text-[10px] text-[#5a5a5a] font-mono">
           {new Date().toLocaleTimeString('en-GB', {
             hour: '2-digit',
             minute: '2-digit',
@@ -369,7 +369,7 @@ export default function CommandModePage() {
             {
               label: 'Critical',
               value: criticalCount,
-              color: criticalCount > 0 ? 'text-red-400' : 'text-sky-400/30',
+              color: criticalCount > 0 ? 'text-red-400' : 'text-[#5a5a5a]',
             },
             { label: 'Active Exc.', value: activeExcCount, color: 'text-orange-400' },
             {
@@ -386,16 +386,16 @@ export default function CommandModePage() {
           ].map((s) => (
             <div key={s.label} className="flex items-center gap-1.5 text-[10px]">
               <span className={cn('font-bold font-mono', s.color)}>{s.value}</span>
-              <span className="text-sky-400/30">{s.label}</span>
+              <span className="text-[#5a5a5a]">{s.label}</span>
             </div>
           ))}
         </div>
       </div>
 
       <div className="flex flex-1 overflow-hidden gap-0">
-        <div className="w-44 shrink-0 border-r border-sky-500/10 flex flex-col overflow-hidden">
-          <div className="px-3 py-2 border-b border-sky-500/5">
-            <p className="text-[9px] font-mono text-sky-400/40 uppercase tracking-wider">Fleet</p>
+        <div className="w-44 shrink-0 border-r border-white/[0.06] flex flex-col overflow-hidden">
+          <div className="px-3 py-2 border-b border-white/[0.08]">
+            <p className="text-[9px] font-mono text-[#6a6a6a] uppercase tracking-wider">Fleet</p>
           </div>
           <div className="flex-1 overflow-y-auto">
             {vessels.map((v) => (
@@ -440,7 +440,7 @@ export default function CommandModePage() {
             ].map((s) => (
               <div
                 key={s.label}
-                className="bg-[#060e1a] border border-sky-500/10 rounded-lg px-3 py-2 flex items-center gap-2"
+                className="bg-[#060e1a] border border-white/[0.06] rounded-lg px-3 py-2 flex items-center gap-2"
               >
                 <span
                   className="w-2 h-2 rounded-full shrink-0"
@@ -450,19 +450,19 @@ export default function CommandModePage() {
                   <p className="text-base font-bold font-mono" style={{ color: s.color }}>
                     {s.count}
                   </p>
-                  <p className="text-[9px] text-sky-400/30">{s.label}</p>
+                  <p className="text-[9px] text-[#5a5a5a]">{s.label}</p>
                 </div>
               </div>
             ))}
           </div>
         </div>
 
-        <div className="w-72 shrink-0 border-l border-sky-500/10 flex flex-col overflow-hidden">
+        <div className="w-72 shrink-0 border-l border-white/[0.06] flex flex-col overflow-hidden">
           {activeVessel ? (
             <>
-              <div className="px-3 py-2 border-b border-sky-500/10 flex items-center gap-2">
-                <Ship className="w-3 h-3 text-sky-400/50" />
-                <span className="text-[10px] font-mono text-sky-400/50 truncate">
+              <div className="px-3 py-2 border-b border-white/[0.06] flex items-center gap-2">
+                <Ship className="w-3 h-3 text-[#8a8a8a]" />
+                <span className="text-[10px] font-mono text-[#8a8a8a] truncate">
                   {activeVessel.name}
                 </span>
               </div>
@@ -480,27 +480,27 @@ export default function CommandModePage() {
                   ].map((item) => (
                     <div
                       key={item.label}
-                      className="bg-sky-500/5 rounded p-2 border border-sky-500/10"
+                      className="bg-[#c9b787]/8 rounded p-2 border border-white/[0.06]"
                     >
-                      <p className="text-[9px] text-sky-400/30">{item.label}</p>
-                      <p className="text-[10px] font-mono text-sky-100 mt-0.5">{item.value}</p>
+                      <p className="text-[9px] text-[#5a5a5a]">{item.label}</p>
+                      <p className="text-[10px] font-mono text-[#f5f5f5] mt-0.5">{item.value}</p>
                     </div>
                   ))}
                 </div>
 
-                <div className="bg-sky-500/5 rounded-lg p-2.5 border border-sky-500/10">
+                <div className="bg-[#c9b787]/8 rounded-lg p-2.5 border border-white/[0.06]">
                   <div className="flex items-center gap-2 mb-1.5">
-                    <Navigation className="w-3 h-3 text-sky-400/40" />
-                    <p className="text-[9px] text-sky-400/40 uppercase tracking-wider">Route</p>
+                    <Navigation className="w-3 h-3 text-[#6a6a6a]" />
+                    <p className="text-[9px] text-[#6a6a6a] uppercase tracking-wider">Route</p>
                   </div>
-                  <p className="text-[10px] text-sky-200">
+                  <p className="text-[10px] text-[#e0e0e0]">
                     {activeVessel.lastPort ?? '—'} → {activeVessel.destination ?? '—'}
                   </p>
                 </div>
 
                 {vesselExceptions.length > 0 && (
                   <div className="space-y-1.5">
-                    <p className="text-[9px] text-sky-400/40 uppercase tracking-wider">
+                    <p className="text-[9px] text-[#6a6a6a] uppercase tracking-wider">
                       Active Exceptions
                     </p>
                     {vesselExceptions.map((exc) => (
@@ -509,7 +509,7 @@ export default function CommandModePage() {
                         className="bg-red-500/5 border border-red-500/10 rounded p-2"
                       >
                         <p className="text-[9px] font-medium text-red-300">{exc.title}</p>
-                        <p className="text-[9px] text-sky-400/40 mt-0.5">{exc.ownerFunction}</p>
+                        <p className="text-[9px] text-[#6a6a6a] mt-0.5">{exc.ownerFunction}</p>
                       </div>
                     ))}
                   </div>
@@ -517,7 +517,7 @@ export default function CommandModePage() {
 
                 {vesselMaint.length > 0 && (
                   <div className="space-y-1.5">
-                    <p className="text-[9px] text-sky-400/40 uppercase tracking-wider">
+                    <p className="text-[9px] text-[#6a6a6a] uppercase tracking-wider">
                       Maintenance
                     </p>
                     {vesselMaint.slice(0, 2).map((m) => (
@@ -526,7 +526,7 @@ export default function CommandModePage() {
                         className="bg-amber-500/5 border border-amber-500/10 rounded p-2"
                       >
                         <p className="text-[9px] font-medium text-amber-300">{m.component}</p>
-                        <p className="text-[9px] text-sky-400/40">
+                        <p className="text-[9px] text-[#6a6a6a]">
                           {m.daysToDue < 0
                             ? `${Math.abs(m.daysToDue)}d overdue`
                             : `Due in ${m.daysToDue}d`}
@@ -537,7 +537,7 @@ export default function CommandModePage() {
                 )}
 
                 <Link href={`/vessel/${activeVessel.id}`}>
-                  <button className="w-full text-[10px] text-sky-400 border border-sky-500/20 rounded-lg py-1.5 hover:bg-sky-500/5 transition-colors">
+                  <button className="w-full text-[10px] text-[#c9b787] border border-white/[0.08] rounded-lg py-1.5 hover:bg-[#c9b787]/8 transition-colors">
                     Full Detail <ChevronRight className="w-3 h-3 inline" />
                   </button>
                 </Link>
@@ -545,7 +545,7 @@ export default function CommandModePage() {
             </>
           ) : (
             <div className="flex-1 flex items-center justify-center p-4">
-              <p className="text-[10px] text-sky-400/30 font-mono text-center">
+              <p className="text-[10px] text-[#5a5a5a] font-mono text-center">
                 No vessels available.
                 <br />
                 Seed the fleet to begin.
@@ -553,7 +553,7 @@ export default function CommandModePage() {
             </div>
           )}
 
-          <div className="border-t border-sky-500/10 shrink-0">
+          <div className="border-t border-white/[0.06] shrink-0">
             <AlertStream fleetExceptions={fleetExceptions} />
           </div>
         </div>

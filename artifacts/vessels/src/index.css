@@ -152,74 +152,57 @@
   color: #555;
 }
 
-/* Sentra-family aliases — Vessels-named classes used across the pages map to the
-   same warm-gold glass-panel pattern. */
+/* Editorial command-console panels — hairline border, no glow, no gold-bias.
+   A11oy/Anthropic/Lambda restraint: surface lifts only on hover. */
 .vessel-panel,
 .sentra-panel {
-  background: #141414;
+  background: rgba(255,255,255,0.02);
   border: 1px solid rgba(255,255,255,0.06);
-  border-top: 1px solid rgba(201,183,135,0.12);
-  border-radius: var(--radius-lg);
-  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+  border-radius: var(--radius-md);
+  transition: border-color 0.15s ease, background 0.15s ease;
 }
 .vessel-panel:hover,
 .sentra-panel:hover {
-  border-top-color: rgba(201,183,135,0.25);
-  border-color: rgba(201,183,135,0.15);
-  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.4);
+  border-color: rgba(255,255,255,0.10);
 }
 
 .vessel-card,
 .sentra-card {
-  background: #141414;
+  background: rgba(255,255,255,0.02);
   border: 1px solid rgba(255,255,255,0.06);
-  border-left: 2px solid rgba(201,183,135,0.2);
-  border-radius: var(--radius-lg);
-  transition: border-left-color 0.18s ease, background 0.18s ease;
+  border-radius: var(--radius-md);
+  transition: border-color 0.15s ease, background 0.15s ease;
 }
 .vessel-card:hover,
 .sentra-card:hover {
-  border-left-color: rgba(201,183,135,0.5);
-  background: #161616;
+  border-color: rgba(255,255,255,0.10);
+  background: rgba(255,255,255,0.03);
 }
 
 .stat-panel {
-  background: #141414;
+  background: rgba(255,255,255,0.02);
   border: 1px solid rgba(255,255,255,0.06);
-  border-top: 1px solid rgba(201,183,135,0.12);
-  border-radius: var(--radius-lg);
+  border-radius: var(--radius-md);
   transition: border-color 0.15s ease;
 }
-.stat-panel:hover { border-color: rgba(201,183,135,0.2); }
+.stat-panel:hover { border-color: rgba(255,255,255,0.10); }
 
-.kpi-accent-rule { border-top: 2px solid rgba(201,183,135,0.3); }
+.kpi-accent-rule { border-top: 1px solid rgba(201,183,135,0.22); }
 
 .glass-panel {
-  background: rgba(14,14,14,0.8);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
+  background: rgba(14,14,14,0.86);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
 }
 
-.hero-glow {
-  position: absolute;
-  width: 600px;
-  height: 600px;
-  border-radius: 50%;
-  background: radial-gradient(circle, rgba(201,183,135,0.04) 0%, transparent 70%);
-  pointer-events: none;
-}
+.hero-glow { display: none; }
 
-.gradient-text {
-  background: linear-gradient(135deg, #f5f5f5 0%, #c9b787 100%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-}
+.gradient-text { color: #f5f5f5; }
 
 .accent-line {
-  width: 32px;
-  height: 2px;
-  background: linear-gradient(90deg, #c9b787, rgba(201,183,135,0.2));
+  width: 24px;
+  height: 1px;
+  background: rgba(201,183,135,0.4);
 }
 
 .exception-critical { border-left: 2px solid #b85450; }

@@ -137,7 +137,7 @@ const statusConfig: Record<string, { color: string; label: string }> = {
 function ConfidenceBar({ score }: { score: number }) {
   return (
     <div className="flex items-center gap-2">
-      <div className="flex-1 h-1.5 bg-sky-500/10 rounded-full overflow-hidden">
+      <div className="flex-1 h-1.5 bg-[#c9b787]/10 rounded-full overflow-hidden">
         <div
           className={cn(
             'h-full rounded-full',
@@ -173,11 +173,11 @@ export default function StsDetectionPage() {
   return (
     <div className="p-6 space-y-6">
       <div>
-        <h1 className="font-display text-xl font-bold text-sky-50 flex items-center gap-2">
+        <h1 className="font-display text-xl font-bold text-[#f5f5f5] flex items-center gap-2">
           <Eye className="w-5 h-5 text-orange-400" />
           Ship-to-Ship Transfer Detection
         </h1>
-        <p className="text-xs text-sky-400/50 mt-0.5">
+        <p className="text-xs text-[#8a8a8a] mt-0.5">
           AIS behavioral pattern analysis — speed drops, proximity clusters, transponder gaps —
           enhanced with PARAGON threat intelligence
         </p>
@@ -188,7 +188,7 @@ export default function StsDetectionPage() {
           {
             label: 'Total STS Events',
             value: STS_EVENTS.length,
-            color: 'text-sky-300',
+            color: 'text-[#d4c598]',
             icon: Ship,
           },
           {
@@ -210,10 +210,10 @@ export default function StsDetectionPage() {
             icon: Activity,
           },
         ].map((s) => (
-          <div key={s.label} className="bg-[#0a1628]/80 border border-sky-500/10 rounded-xl p-4">
+          <div key={s.label} className="bg-white/[0.02] border border-white/[0.06] rounded-xl p-4">
             <div className="flex items-center gap-2 mb-1">
               <s.icon className={cn('w-3.5 h-3.5', s.color)} />
-              <p className="text-[10px] text-sky-400/40 uppercase tracking-wider">{s.label}</p>
+              <p className="text-[10px] text-[#6a6a6a] uppercase tracking-wider">{s.label}</p>
             </div>
             <p className={cn('text-xl font-bold font-display', s.color)}>{s.value}</p>
           </div>
@@ -228,8 +228,8 @@ export default function StsDetectionPage() {
             className={cn(
               'text-[10px] px-2.5 py-1.5 rounded-lg border capitalize transition-all',
               statusFilter === s
-                ? 'bg-sky-500/10 border-sky-500/30 text-sky-300'
-                : 'border-sky-500/10 text-sky-400/40 hover:text-sky-300',
+                ? 'bg-[#c9b787]/10 border-[#c9b787]/24 text-[#d4c598]'
+                : 'border-white/[0.06] text-[#6a6a6a] hover:text-[#d4c598]',
             )}
           >
             {s === 'all' ? `All (${STS_EVENTS.length})` : (statusConfig[s]?.label ?? s)}
@@ -244,14 +244,14 @@ export default function StsDetectionPage() {
               key={ev.id}
               onClick={() => setSelected(ev)}
               className={cn(
-                'w-full text-left bg-[#0a1628]/80 border rounded-xl p-4 transition-all hover:border-sky-500/20',
+                'w-full text-left bg-white/[0.02] border rounded-xl p-4 transition-all hover:border-white/[0.08]',
                 selected?.id === ev.id
-                  ? 'border-sky-500/30 ring-1 ring-sky-500/15'
+                  ? 'border-[#c9b787]/24 ring-1 ring-sky-500/15'
                   : ev.status === 'confirmed'
                     ? 'border-red-500/20'
                     : ev.status === 'investigating'
                       ? 'border-amber-500/20'
-                      : 'border-sky-500/10',
+                      : 'border-white/[0.06]',
               )}
             >
               <div className="flex items-start gap-3">
@@ -278,7 +278,7 @@ export default function StsDetectionPage() {
                 </div>
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2 flex-wrap mb-0.5">
-                    <span className="text-sm font-bold text-sky-100">{ev.id}</span>
+                    <span className="text-sm font-bold text-[#f5f5f5]">{ev.id}</span>
                     <Badge
                       variant="outline"
                       className={cn('text-[9px]', statusConfig[ev.status]?.color)}
@@ -302,16 +302,16 @@ export default function StsDetectionPage() {
                       </Badge>
                     )}
                   </div>
-                  <p className="text-xs font-mono text-sky-300">{ev.vessels.join(' ↔ ')}</p>
-                  <p className="text-[10px] text-sky-400/50 mt-0.5">{ev.location}</p>
+                  <p className="text-xs font-mono text-[#d4c598]">{ev.vessels.join(' ↔ ')}</p>
+                  <p className="text-[10px] text-[#8a8a8a] mt-0.5">{ev.location}</p>
                   <div className="mt-2">
-                    <p className="text-[9px] text-sky-400/30 mb-1">Detection confidence</p>
+                    <p className="text-[9px] text-[#5a5a5a] mb-1">Detection confidence</p>
                     <ConfidenceBar score={ev.confidence} />
                   </div>
                 </div>
                 <div className="text-right shrink-0">
-                  <p className="text-[10px] text-sky-400/40">{ev.detectedAt}</p>
-                  <p className="text-[9px] text-sky-400/30 mt-0.5">Gap: {ev.gapDuration}</p>
+                  <p className="text-[10px] text-[#6a6a6a]">{ev.detectedAt}</p>
+                  <p className="text-[9px] text-[#5a5a5a] mt-0.5">Gap: {ev.gapDuration}</p>
                 </div>
               </div>
             </button>
@@ -320,9 +320,9 @@ export default function StsDetectionPage() {
 
         {selected && (
           <div className="space-y-4">
-            <div className="bg-[#0a1628]/80 border border-sky-500/20 rounded-xl p-4">
+            <div className="bg-white/[0.02] border border-white/[0.08] rounded-xl p-4">
               <div className="flex items-center justify-between mb-3">
-                <p className="text-xs font-semibold text-sky-200">
+                <p className="text-xs font-semibold text-[#e0e0e0]">
                   {selected.id} — Detailed Analysis
                 </p>
                 <Badge
@@ -335,14 +335,14 @@ export default function StsDetectionPage() {
 
               <div className="grid grid-cols-2 gap-3 mb-4">
                 {selected.vessels.map((v, i) => (
-                  <div key={v} className="bg-sky-500/5 rounded-lg p-3 border border-sky-500/10">
-                    <p className="text-[9px] text-sky-400/40 uppercase tracking-wider mb-1">
+                  <div key={v} className="bg-[#c9b787]/8 rounded-lg p-3 border border-white/[0.06]">
+                    <p className="text-[9px] text-[#6a6a6a] uppercase tracking-wider mb-1">
                       Vessel {i + 1}
                     </p>
-                    <p className="text-xs font-bold text-sky-100">{v}</p>
-                    <p className="text-[10px] text-sky-400/50">IMO {selected.imos[i]}</p>
-                    <p className="text-[10px] text-sky-400/40">Flag: {selected.flags[i]}</p>
-                    <p className="text-[9px] text-sky-400/30 mt-1 italic">
+                    <p className="text-xs font-bold text-[#f5f5f5]">{v}</p>
+                    <p className="text-[10px] text-[#8a8a8a]">IMO {selected.imos[i]}</p>
+                    <p className="text-[10px] text-[#6a6a6a]">Flag: {selected.flags[i]}</p>
+                    <p className="text-[9px] text-[#5a5a5a] mt-1 italic">
                       {selected.ownerChains[i]}
                     </p>
                   </div>
@@ -357,15 +357,15 @@ export default function StsDetectionPage() {
                   { label: 'Cargo', value: selected.cargo, icon: Ship },
                 ].map((f) => (
                   <div key={f.label} className="flex items-center gap-3">
-                    <f.icon className="w-3 h-3 text-sky-400/30 shrink-0" />
-                    <span className="text-[10px] text-sky-400/40 w-16 shrink-0">{f.label}</span>
-                    <span className="text-[11px] text-sky-300">{f.value}</span>
+                    <f.icon className="w-3 h-3 text-[#5a5a5a] shrink-0" />
+                    <span className="text-[10px] text-[#6a6a6a] w-16 shrink-0">{f.label}</span>
+                    <span className="text-[11px] text-[#d4c598]">{f.value}</span>
                   </div>
                 ))}
               </div>
 
               <div>
-                <p className="text-[9px] text-sky-400/40 uppercase tracking-wider mb-2">
+                <p className="text-[9px] text-[#6a6a6a] uppercase tracking-wider mb-2">
                   <Zap className="w-3 h-3 inline mr-1 text-amber-400" />
                   Behavioral Signals
                 </p>
@@ -383,8 +383,8 @@ export default function StsDetectionPage() {
               </div>
 
               {(selected.sanctionsLink || selected.aegisLink) && (
-                <div className="mt-4 pt-4 border-t border-sky-500/10">
-                  <p className="text-[9px] text-sky-400/40 uppercase tracking-wider mb-2">
+                <div className="mt-4 pt-4 border-t border-white/[0.06]">
+                  <p className="text-[9px] text-[#6a6a6a] uppercase tracking-wider mb-2">
                     Intelligence Links
                   </p>
                   <div className="flex gap-2 flex-wrap">

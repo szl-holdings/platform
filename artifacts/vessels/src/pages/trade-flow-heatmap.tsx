@@ -130,12 +130,12 @@ function TradeFlowMap({ selectedRoute }: { selectedRoute: string | null }) {
 
   return (
     <div
-      className="bg-[#060e1a] border border-sky-500/15 rounded-xl overflow-hidden relative"
+      className="bg-[#060e1a] border border-white/[0.08] rounded-xl overflow-hidden relative"
       style={{ height: 320 }}
     >
       <div className="absolute top-3 left-3 z-10 flex items-center gap-1.5">
-        <Globe className="w-3.5 h-3.5 text-sky-400/50" />
-        <span className="text-[10px] text-sky-400/40 uppercase tracking-widest">
+        <Globe className="w-3.5 h-3.5 text-[#8a8a8a]" />
+        <span className="text-[10px] text-[#6a6a6a] uppercase tracking-widest">
           Global Commodity Flow Heatmap
         </span>
       </div>
@@ -143,8 +143,8 @@ function TradeFlowMap({ selectedRoute }: { selectedRoute: string | null }) {
         <span className="flex items-center gap-1 text-[9px] text-orange-400">
           <span className="w-5 h-0.5 bg-orange-400 inline-block" /> Crude
         </span>
-        <span className="flex items-center gap-1 text-[9px] text-sky-400">
-          <span className="w-5 h-0.5 bg-sky-400 inline-block" /> LNG
+        <span className="flex items-center gap-1 text-[9px] text-[#c9b787]">
+          <span className="w-5 h-0.5 bg-[#c9b787] inline-block" /> LNG
         </span>
         <span className="flex items-center gap-1 text-[9px] text-yellow-400">
           <span className="w-5 h-0.5 bg-yellow-400 inline-block" /> Grain
@@ -291,7 +291,7 @@ function TradeFlowMap({ selectedRoute }: { selectedRoute: string | null }) {
 
       {/* Anomaly legend overlay */}
       <div className="absolute bottom-3 left-3 flex items-center gap-3">
-        <span className="text-[9px] text-sky-400/30 font-mono">3 anomalous corridors detected</span>
+        <span className="text-[9px] text-[#5a5a5a] font-mono">3 anomalous corridors detected</span>
         <span className="w-1.5 h-1.5 rounded-full bg-red-400 animate-pulse" />
       </div>
     </div>
@@ -500,7 +500,7 @@ export default function TradeFlowHeatmap() {
       <div>
         <div className="flex items-center gap-2 mb-1">
           <Globe className="w-5 h-5 text-purple-400" />
-          <h1 className="text-xl font-bold text-sky-50 font-display">Trade Flow Heatmap</h1>
+          <h1 className="text-xl font-bold text-[#f5f5f5] font-display">Trade Flow Heatmap</h1>
           <Badge
             variant="outline"
             className="text-[9px] text-purple-400 border-purple-500/20 bg-purple-500/5"
@@ -508,7 +508,7 @@ export default function TradeFlowHeatmap() {
             AI ANOMALY DETECTION
           </Badge>
         </div>
-        <p className="text-xs text-sky-400/50">
+        <p className="text-xs text-[#8a8a8a]">
           Global commodity flows with AI-identified anomalies — unusual routes, fleet repositioning,
           and volume shifts that signal market moves
         </p>
@@ -539,7 +539,7 @@ export default function TradeFlowHeatmap() {
             value: COMMODITIES.reduce((s, c) => s + c.vessels, 0),
             sub: 'across all flows',
             icon: Ship,
-            color: 'text-sky-400',
+            color: 'text-[#c9b787]',
           },
           {
             label: 'Active Trade Corridors',
@@ -549,20 +549,20 @@ export default function TradeFlowHeatmap() {
             color: 'text-purple-400',
           },
         ].map((kpi) => (
-          <div key={kpi.label} className="bg-[#0a1628]/80 border border-sky-500/10 rounded-xl p-4">
+          <div key={kpi.label} className="bg-white/[0.02] border border-white/[0.06] rounded-xl p-4">
             <div className="flex items-center justify-between mb-2">
-              <p className="text-[10px] uppercase tracking-widest text-sky-400/40">{kpi.label}</p>
+              <p className="text-[10px] uppercase tracking-widest text-[#6a6a6a]">{kpi.label}</p>
               <kpi.icon className={cn('w-4 h-4', kpi.color)} />
             </div>
             <p className={cn('text-2xl font-bold font-mono', kpi.color)}>{kpi.value}</p>
-            <p className="text-[10px] text-sky-400/40 mt-0.5">{kpi.sub}</p>
+            <p className="text-[10px] text-[#6a6a6a] mt-0.5">{kpi.sub}</p>
           </div>
         ))}
       </div>
 
       {/* Commodity tiles */}
       <div>
-        <p className="text-xs font-semibold text-sky-200 mb-3">Commodity Flow Overview</p>
+        <p className="text-xs font-semibold text-[#e0e0e0] mb-3">Commodity Flow Overview</p>
         <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-6 gap-2">
           {COMMODITIES.map((c) => (
             <button
@@ -571,19 +571,19 @@ export default function TradeFlowHeatmap() {
               className={cn(
                 'text-left p-3 rounded-xl border transition-all',
                 selectedCommodity === c.id
-                  ? 'border-sky-500/40 bg-sky-500/5'
-                  : 'border-sky-500/10 bg-[#0a1628]/80 hover:border-sky-500/20',
+                  ? 'border-[#c9b787]/40 bg-[#c9b787]/8'
+                  : 'border-white/[0.06] bg-white/[0.02] hover:border-white/[0.08]',
               )}
             >
               <div className="flex items-center justify-between mb-2">
                 <c.icon className="w-4 h-4" style={{ color: c.color }} />
                 {c.anomalyFlag && <Zap className="w-3 h-3 text-red-400" />}
               </div>
-              <p className="text-[10px] font-medium text-sky-200 mb-0.5">{c.name}</p>
+              <p className="text-[10px] font-medium text-[#e0e0e0] mb-0.5">{c.name}</p>
               <p className="text-xs font-bold font-mono" style={{ color: c.color }}>
                 {c.volume}
               </p>
-              <p className="text-[9px] text-sky-400/40">{c.unit}</p>
+              <p className="text-[9px] text-[#6a6a6a]">{c.unit}</p>
               <div
                 className={cn(
                   'flex items-center gap-0.5 mt-1 text-[9px] font-mono',
@@ -598,7 +598,7 @@ export default function TradeFlowHeatmap() {
                 {c.change >= 0 ? '+' : ''}
                 {c.change}%
               </div>
-              <p className="text-[9px] text-sky-400/30 mt-0.5">{c.vessels} vessels</p>
+              <p className="text-[9px] text-[#5a5a5a] mt-0.5">{c.vessels} vessels</p>
             </button>
           ))}
         </div>
@@ -623,11 +623,11 @@ export default function TradeFlowHeatmap() {
       </div>
 
       {/* Volume trend chart */}
-      <div className="bg-[#0a1628]/80 border border-sky-500/10 rounded-xl p-4">
-        <p className="text-xs font-semibold text-sky-200 mb-1">
+      <div className="bg-white/[0.02] border border-white/[0.06] rounded-xl p-4">
+        <p className="text-xs font-semibold text-[#e0e0e0] mb-1">
           Global Flow Volume Trends — 7 Month
         </p>
-        <p className="text-[10px] text-sky-400/40 mb-4">
+        <p className="text-[10px] text-[#6a6a6a] mb-4">
           Crude (MB/day) · LNG (MT/month ÷ 3.5) · Grain (MT/week) · Containers (TEU/week ÷ 25)
         </p>
         <ResponsiveContainer width="100%" height={200}>
@@ -675,8 +675,8 @@ export default function TradeFlowHeatmap() {
       {/* Route table */}
       <div>
         <div className="flex items-center justify-between mb-3">
-          <p className="text-xs font-semibold text-sky-200">Active Trade Corridors</p>
-          <div className="flex items-center gap-1 text-[10px] text-sky-400/40">
+          <p className="text-xs font-semibold text-[#e0e0e0]">Active Trade Corridors</p>
+          <div className="flex items-center gap-1 text-[10px] text-[#6a6a6a]">
             <Eye className="w-3 h-3" /> {FLOW_ROUTES.filter((r) => r.anomaly).length} corridors with
             AI anomaly signals
           </div>
@@ -688,24 +688,24 @@ export default function TradeFlowHeatmap() {
               className={cn(
                 'border rounded-xl overflow-hidden transition-all cursor-pointer',
                 expandedRoute === route.id
-                  ? 'border-sky-500/30 bg-[#0a1628]/90'
-                  : 'border-sky-500/10 bg-[#0a1628]/80 hover:border-sky-500/20',
+                  ? 'border-[#c9b787]/24 bg-[#0e0e0e]/90'
+                  : 'border-white/[0.06] bg-white/[0.02] hover:border-white/[0.08]',
               )}
               onClick={() => setExpandedRoute(expandedRoute === route.id ? null : route.id)}
             >
               <div className="px-4 py-3">
                 <div className="flex items-center gap-3">
-                  <MapPin className="w-4 h-4 text-sky-400/40 shrink-0" />
+                  <MapPin className="w-4 h-4 text-[#6a6a6a] shrink-0" />
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2 flex-wrap">
-                      <p className="text-xs font-bold text-sky-100">{route.name}</p>
+                      <p className="text-xs font-bold text-[#f5f5f5]">{route.name}</p>
                       <Badge variant="outline" className={cn('text-[9px]', riskColors[route.risk])}>
                         {route.risk}
                       </Badge>
-                      <span className="text-[10px] text-sky-400/40">{route.commodity}</span>
+                      <span className="text-[10px] text-[#6a6a6a]">{route.commodity}</span>
                       {route.anomaly && <AnomalyBadge />}
                     </div>
-                    <div className="flex items-center gap-1 mt-0.5 text-[10px] text-sky-400/40">
+                    <div className="flex items-center gap-1 mt-0.5 text-[10px] text-[#6a6a6a]">
                       <span>{route.from}</span>
                       <ArrowRight className="w-3 h-3" />
                       <span>{route.to}</span>
@@ -721,18 +721,18 @@ export default function TradeFlowHeatmap() {
                       {route.change >= 0 ? '+' : ''}
                       {route.change}%
                     </p>
-                    <p className="text-[9px] text-sky-400/40">{route.vessels} vessels</p>
+                    <p className="text-[9px] text-[#6a6a6a]">{route.vessels} vessels</p>
                   </div>
                   <ChevronRight
                     className={cn(
-                      'w-3.5 h-3.5 text-sky-400/30 shrink-0 transition-transform',
+                      'w-3.5 h-3.5 text-[#5a5a5a] shrink-0 transition-transform',
                       expandedRoute === route.id && 'rotate-90',
                     )}
                   />
                 </div>
               </div>
               {expandedRoute === route.id && route.anomaly && (
-                <div className="border-t border-sky-500/10 px-4 py-3 bg-red-500/3 space-y-2">
+                <div className="border-t border-white/[0.06] px-4 py-3 bg-red-500/3 space-y-2">
                   <div className="flex items-start gap-2">
                     <Zap className="w-3.5 h-3.5 text-red-400 shrink-0 mt-0.5" />
                     <div>

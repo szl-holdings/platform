@@ -33,7 +33,7 @@ import { type RosterVessel, api } from '@/lib/api';
 
 const statusColors: Record<string, string> = {
   at_sea: 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20',
-  in_port: 'bg-sky-500/10 text-sky-400 border-sky-500/20',
+  in_port: 'bg-[#c9b787]/10 text-[#c9b787] border-white/[0.08]',
   anchored: 'bg-amber-500/10 text-amber-400 border-amber-500/20',
   maintenance: 'bg-red-500/10 text-red-400 border-red-500/20',
 };
@@ -346,7 +346,7 @@ function FleetMap({
           const pctY = (y / H) * 100;
           return (
             <div
-              className="absolute z-10 bg-[#0a1628]/95 backdrop-blur border border-sky-500/20 rounded-lg shadow-xl p-3 pointer-events-none"
+              className="absolute z-10 bg-[#0e0e0e]/95 backdrop-blur border border-white/[0.08] rounded-lg shadow-xl p-3 pointer-events-none"
               style={{
                 left: `${Math.min(Math.max(pctX, 15), 85)}%`,
                 top: `${Math.max(pctY - 2, 5)}%`,
@@ -355,8 +355,8 @@ function FleetMap({
               }}
             >
               <div className="flex items-center justify-between gap-3">
-                <p className="text-xs font-bold text-sky-100">{hoveredVessel.name}</p>
-                <span className="text-[9px] font-mono text-sky-400/60">
+                <p className="text-xs font-bold text-[#f5f5f5]">{hoveredVessel.name}</p>
+                <span className="text-[9px] font-mono text-[#9a9a9a]">
                   IMO {hoveredVessel.imo}
                 </span>
               </div>
@@ -365,10 +365,10 @@ function FleetMap({
                   className="w-2 h-2 rounded-full"
                   style={{ backgroundColor: vesselStatusDotColors[hoveredVessel.status] }}
                 />
-                <span className="text-[10px] text-sky-200/70 capitalize">
+                <span className="text-[10px] text-[#e0e0e0]/70 capitalize">
                   {hoveredVessel.status?.replace('_', ' ')}
                 </span>
-                <span className="text-[10px] text-sky-200/40 ml-auto">
+                <span className="text-[10px] text-[#e0e0e0]/40 ml-auto">
                   {hoveredVessel.speed && parseFloat(hoveredVessel.speed) > 0
                     ? `${parseFloat(hoveredVessel.speed).toFixed(1)} kn`
                     : 'Stationary'}
@@ -376,8 +376,8 @@ function FleetMap({
               </div>
               {hoveredVessel.destination && (
                 <div className="flex items-center gap-1 mt-1">
-                  <MapPin className="w-2.5 h-2.5 text-sky-400/50" />
-                  <p className="text-[10px] text-sky-200/50">Next: {hoveredVessel.destination}</p>
+                  <MapPin className="w-2.5 h-2.5 text-[#8a8a8a]" />
+                  <p className="text-[10px] text-[#e0e0e0]/50">Next: {hoveredVessel.destination}</p>
                 </div>
               )}
             </div>
@@ -385,20 +385,20 @@ function FleetMap({
         })()}
 
       <div className="absolute bottom-3 left-3 flex flex-col gap-1.5">
-        <div className="flex items-center gap-3 bg-[#0a1628]/80 backdrop-blur rounded-lg px-3 py-2 border border-sky-500/10">
+        <div className="flex items-center gap-3 bg-white/[0.02] backdrop-blur rounded-lg px-3 py-2 border border-white/[0.06]">
           {[
             { label: 'At Sea', color: color.accent.green },
             { label: 'In Port', color: color.accent.blue },
             { label: 'Anchored', color: color.accent.amber },
             { label: 'Maintenance', color: color.accent.red },
           ].map((s) => (
-            <span key={s.label} className="flex items-center gap-1.5 text-[10px] text-sky-200/60">
+            <span key={s.label} className="flex items-center gap-1.5 text-[10px] text-[#e0e0e0]/60">
               <span className="w-2 h-2 rounded-full" style={{ backgroundColor: s.color }} />
               {s.label}
             </span>
           ))}
         </div>
-        <div className="flex items-center gap-3 bg-[#0a1628]/80 backdrop-blur rounded-lg px-3 py-2 border border-red-500/15">
+        <div className="flex items-center gap-3 bg-white/[0.02] backdrop-blur rounded-lg px-3 py-2 border border-red-500/15">
           <span className="flex items-center gap-1.5 text-[10px] text-red-300/70">
             <svg width="20" height="6">
               <line
@@ -433,7 +433,7 @@ function FleetMap({
             </svg>
             Risk Cluster
           </span>
-          <span className="flex items-center gap-1.5 text-[10px] text-sky-400/40 ml-1">
+          <span className="flex items-center gap-1.5 text-[10px] text-[#6a6a6a] ml-1">
             {
               vessels.filter(
                 (v) => v.status === 'detained' || v.status === 'dark' || v.status === 'diverting',
@@ -443,7 +443,7 @@ function FleetMap({
           </span>
         </div>
       </div>
-      <div className="absolute bottom-3 right-3 text-[10px] text-sky-400/40 font-mono bg-[#0a1628]/80 backdrop-blur rounded-lg px-3 py-2 border border-sky-500/10">
+      <div className="absolute bottom-3 right-3 text-[10px] text-[#6a6a6a] font-mono bg-white/[0.02] backdrop-blur rounded-lg px-3 py-2 border border-white/[0.06]">
         <Radio className="w-3 h-3 inline mr-1 text-emerald-400" />
         {vessels.length} vessels tracked
       </div>
@@ -478,7 +478,7 @@ function BehavioralRiskPanel({ exceptions }: { exceptions: ExceptionItem[] }) {
   const items = exceptions.filter((e) => behavioralTypes.includes(e.type)).slice(0, 5);
   if (items.length === 0) {
     return (
-      <div className="bg-[#0a1628]/80 backdrop-blur border border-sky-500/10 rounded-xl">
+      <div className="bg-white/[0.02] backdrop-blur border border-white/[0.06] rounded-xl">
         <EmptyState
           icon={Shield}
           headline="No active behavioral exceptions"
@@ -489,10 +489,10 @@ function BehavioralRiskPanel({ exceptions }: { exceptions: ExceptionItem[] }) {
     );
   }
   return (
-    <div className="bg-[#0a1628]/80 backdrop-blur border border-sky-500/10 rounded-xl overflow-hidden">
-      <div className="px-4 py-3 border-b border-sky-500/10 flex items-center gap-2">
+    <div className="bg-white/[0.02] backdrop-blur border border-white/[0.06] rounded-xl overflow-hidden">
+      <div className="px-4 py-3 border-b border-white/[0.06] flex items-center gap-2">
         <Shield className="w-3.5 h-3.5 text-red-400" />
-        <span className="text-[11px] font-mono text-sky-300 uppercase tracking-wider">
+        <span className="text-[11px] font-mono text-[#d4c598] uppercase tracking-wider">
           Behavioral Risk Exceptions
         </span>
         <Badge
@@ -504,17 +504,17 @@ function BehavioralRiskPanel({ exceptions }: { exceptions: ExceptionItem[] }) {
       </div>
       <div className="divide-y divide-sky-500/5">
         {items.map((e) => (
-          <div key={e.id} className="px-4 py-3 hover:bg-sky-500/5 transition-colors">
+          <div key={e.id} className="px-4 py-3 hover:bg-[#c9b787]/8 transition-colors">
             <div className="flex items-center justify-between mb-1">
-              <span className="text-xs font-semibold text-sky-100">{e.vesselName}</span>
+              <span className="text-xs font-semibold text-[#f5f5f5]">{e.vesselName}</span>
               <span
                 className={`text-[10px] font-bold px-2 py-0.5 rounded-full border ${e.severity === 'critical' ? 'text-red-400 bg-red-400/10 border-red-400/20' : e.severity === 'high' ? 'text-orange-400 bg-orange-400/10 border-orange-400/20' : 'text-amber-400 bg-amber-400/10 border-amber-400/20'}`}
               >
                 {e.severity}
               </span>
             </div>
-            <p className="text-[10px] text-sky-400/60 truncate">{e.title}</p>
-            <p className="text-[9px] text-sky-400/30 font-mono mt-0.5">
+            <p className="text-[10px] text-[#9a9a9a] truncate">{e.title}</p>
+            <p className="text-[9px] text-[#5a5a5a] font-mono mt-0.5">
               {e.type.replace(/_/g, ' ')} · impact ${e.estimatedImpactUSD.toLocaleString()}
             </p>
           </div>
@@ -528,7 +528,7 @@ function DarkVesselPanel({ exceptions }: { exceptions: ExceptionItem[] }) {
   const items = exceptions.filter((e) => e.type === 'ais_dark').slice(0, 5);
   if (items.length === 0) {
     return (
-      <div className="bg-[#0a1628]/80 backdrop-blur border border-sky-500/10 rounded-xl">
+      <div className="bg-white/[0.02] backdrop-blur border border-white/[0.06] rounded-xl">
         <EmptyState
           icon={EyeOff}
           headline="No dark vessel events detected"
@@ -539,10 +539,10 @@ function DarkVesselPanel({ exceptions }: { exceptions: ExceptionItem[] }) {
     );
   }
   return (
-    <div className="bg-[#0a1628]/80 backdrop-blur border border-sky-500/10 rounded-xl overflow-hidden">
-      <div className="px-4 py-3 border-b border-sky-500/10 flex items-center gap-2">
+    <div className="bg-white/[0.02] backdrop-blur border border-white/[0.06] rounded-xl overflow-hidden">
+      <div className="px-4 py-3 border-b border-white/[0.06] flex items-center gap-2">
         <EyeOff className="w-3.5 h-3.5 text-amber-400" />
-        <span className="text-[11px] font-mono text-sky-300 uppercase tracking-wider">
+        <span className="text-[11px] font-mono text-[#d4c598] uppercase tracking-wider">
           Dark Vessel Detection
         </span>
         <Badge
@@ -554,9 +554,9 @@ function DarkVesselPanel({ exceptions }: { exceptions: ExceptionItem[] }) {
       </div>
       <div className="divide-y divide-sky-500/5">
         {items.map((e) => (
-          <div key={e.id} className="px-4 py-3 hover:bg-sky-500/5 transition-colors">
+          <div key={e.id} className="px-4 py-3 hover:bg-[#c9b787]/8 transition-colors">
             <div className="flex items-center justify-between mb-1">
-              <span className="text-xs font-semibold text-sky-100">{e.vesselName}</span>
+              <span className="text-xs font-semibold text-[#f5f5f5]">{e.vesselName}</span>
               <Badge
                 variant="outline"
                 className={`text-[9px] ${e.severity === 'critical' ? 'bg-red-500/10 text-red-400 border-red-500/20' : e.severity === 'high' ? 'bg-orange-500/10 text-orange-400 border-orange-500/20' : 'bg-amber-500/10 text-amber-400 border-amber-500/20'}`}
@@ -564,12 +564,12 @@ function DarkVesselPanel({ exceptions }: { exceptions: ExceptionItem[] }) {
                 {e.severity}
               </Badge>
             </div>
-            <div className="flex items-center gap-4 text-[10px] text-sky-400/60">
+            <div className="flex items-center gap-4 text-[10px] text-[#9a9a9a]">
               <span className="flex items-center gap-1">
                 <Clock className="w-2.5 h-2.5" />
                 {e.title}
               </span>
-              <span className="ml-auto font-mono text-sky-400/40">
+              <span className="ml-auto font-mono text-[#6a6a6a]">
                 {new Date(e.detectedAt).toLocaleDateString()}
               </span>
             </div>
@@ -587,8 +587,8 @@ function SanctionsPanel({ exceptions }: { exceptions: ExceptionItem[] }) {
 
   if (isLoading) {
     return (
-      <div className="bg-[#0a1628]/80 backdrop-blur border border-sky-500/10 rounded-xl p-6 flex items-center justify-center">
-        <p className="text-[11px] text-sky-400/40 font-mono">Loading sanctions data…</p>
+      <div className="bg-white/[0.02] backdrop-blur border border-white/[0.06] rounded-xl p-6 flex items-center justify-center">
+        <p className="text-[11px] text-[#6a6a6a] font-mono">Loading sanctions data…</p>
       </div>
     );
   }
@@ -596,7 +596,7 @@ function SanctionsPanel({ exceptions }: { exceptions: ExceptionItem[] }) {
   const displayItems = items.length > 0 ? items : sanctionExceptions;
   if (displayItems.length === 0) {
     return (
-      <div className="bg-[#0a1628]/80 backdrop-blur border border-sky-500/10 rounded-xl">
+      <div className="bg-white/[0.02] backdrop-blur border border-white/[0.06] rounded-xl">
         <EmptyState
           icon={AlertTriangle}
           headline="No active sanctions matches"
@@ -608,10 +608,10 @@ function SanctionsPanel({ exceptions }: { exceptions: ExceptionItem[] }) {
   }
 
   return (
-    <div className="bg-[#0a1628]/80 backdrop-blur border border-sky-500/10 rounded-xl overflow-hidden">
-      <div className="px-4 py-3 border-b border-sky-500/10 flex items-center gap-2">
+    <div className="bg-white/[0.02] backdrop-blur border border-white/[0.06] rounded-xl overflow-hidden">
+      <div className="px-4 py-3 border-b border-white/[0.06] flex items-center gap-2">
         <AlertTriangle className="w-3.5 h-3.5 text-red-400 animate-pulse" />
-        <span className="text-[11px] font-mono text-sky-300 uppercase tracking-wider">
+        <span className="text-[11px] font-mono text-[#d4c598] uppercase tracking-wider">
           Sanctions Screening
         </span>
         <Badge
@@ -624,9 +624,9 @@ function SanctionsPanel({ exceptions }: { exceptions: ExceptionItem[] }) {
       <div className="divide-y divide-sky-500/5">
         {items.length > 0
           ? items.map((s) => (
-              <div key={s.id} className="px-4 py-3 hover:bg-sky-500/5 transition-colors">
+              <div key={s.id} className="px-4 py-3 hover:bg-[#c9b787]/8 transition-colors">
                 <div className="flex items-center justify-between mb-1.5">
-                  <span className="text-xs font-semibold text-sky-100">Vessel #{s.vesselId}</span>
+                  <span className="text-xs font-semibold text-[#f5f5f5]">Vessel #{s.vesselId}</span>
                   <span
                     className={`text-[10px] font-bold px-2 py-0.5 rounded border ${s.ofacStatus === 'match' ? 'bg-red-500/10 text-red-400 border-red-500/20' : 'bg-orange-500/10 text-orange-400 border-orange-500/20'}`}
                   >
@@ -634,23 +634,23 @@ function SanctionsPanel({ exceptions }: { exceptions: ExceptionItem[] }) {
                   </span>
                 </div>
                 <div className="flex items-center gap-2 flex-wrap">
-                  <span className="text-[10px] text-sky-400/50 font-mono">EU: {s.euStatus}</span>
-                  <span className="text-[10px] text-sky-400/50 font-mono">UN: {s.unStatus}</span>
-                  <span className="text-[10px] text-sky-400/50 font-mono">
+                  <span className="text-[10px] text-[#8a8a8a] font-mono">EU: {s.euStatus}</span>
+                  <span className="text-[10px] text-[#8a8a8a] font-mono">UN: {s.unStatus}</span>
+                  <span className="text-[10px] text-[#8a8a8a] font-mono">
                     PSC: {s.pscResult?.replace(/_/g, ' ')}
                   </span>
                 </div>
               </div>
             ))
           : sanctionExceptions.map((e) => (
-              <div key={e.id} className="px-4 py-3 hover:bg-sky-500/5 transition-colors">
+              <div key={e.id} className="px-4 py-3 hover:bg-[#c9b787]/8 transition-colors">
                 <div className="flex items-center justify-between mb-1">
-                  <span className="text-xs font-semibold text-sky-100">{e.vesselName}</span>
+                  <span className="text-xs font-semibold text-[#f5f5f5]">{e.vesselName}</span>
                   <span className="text-[10px] font-bold px-2 py-0.5 rounded border bg-red-500/10 text-red-400 border-red-500/20">
                     {e.severity}
                   </span>
                 </div>
-                <p className="text-[10px] text-sky-400/60 truncate">{e.title}</p>
+                <p className="text-[10px] text-[#9a9a9a] truncate">{e.title}</p>
               </div>
             ))}
       </div>
@@ -662,7 +662,7 @@ function CargoFlowPanel({ exceptions }: { exceptions: ExceptionItem[] }) {
   const portCongestExceptions = exceptions.filter((e) => e.type === 'port_congestion').slice(0, 4);
   if (portCongestExceptions.length === 0) {
     return (
-      <div className="bg-[#0a1628]/80 backdrop-blur border border-sky-500/10 rounded-xl">
+      <div className="bg-white/[0.02] backdrop-blur border border-white/[0.06] rounded-xl">
         <EmptyState
           icon={Package}
           headline="No cargo-related exceptions"
@@ -673,32 +673,32 @@ function CargoFlowPanel({ exceptions }: { exceptions: ExceptionItem[] }) {
     );
   }
   return (
-    <div className="bg-[#0a1628]/80 backdrop-blur border border-sky-500/10 rounded-xl overflow-hidden">
-      <div className="px-4 py-3 border-b border-sky-500/10 flex items-center gap-2">
-        <Package className="w-3.5 h-3.5 text-sky-400" />
-        <span className="text-[11px] font-mono text-sky-300 uppercase tracking-wider">
+    <div className="bg-white/[0.02] backdrop-blur border border-white/[0.06] rounded-xl overflow-hidden">
+      <div className="px-4 py-3 border-b border-white/[0.06] flex items-center gap-2">
+        <Package className="w-3.5 h-3.5 text-[#c9b787]" />
+        <span className="text-[11px] font-mono text-[#d4c598] uppercase tracking-wider">
           Cargo & Port Exceptions
         </span>
         <Badge
           variant="outline"
-          className="ml-auto text-[9px] bg-sky-500/10 text-sky-400 border-sky-500/20"
+          className="ml-auto text-[9px] bg-[#c9b787]/10 text-[#c9b787] border-white/[0.08]"
         >
           {portCongestExceptions.length} Active
         </Badge>
       </div>
       <div className="divide-y divide-sky-500/5">
         {portCongestExceptions.map((e) => (
-          <div key={e.id} className="px-4 py-3 hover:bg-sky-500/5 transition-colors">
+          <div key={e.id} className="px-4 py-3 hover:bg-[#c9b787]/8 transition-colors">
             <div className="flex items-center justify-between mb-1">
-              <span className="text-xs font-semibold text-sky-100">{e.vesselName}</span>
+              <span className="text-xs font-semibold text-[#f5f5f5]">{e.vesselName}</span>
               <span
                 className={`text-[10px] font-bold px-2 py-0.5 rounded border ${e.severity === 'critical' ? 'bg-red-500/10 text-red-400 border-red-500/20' : e.severity === 'high' ? 'bg-orange-500/10 text-orange-400 border-orange-500/20' : 'bg-amber-500/10 text-amber-400 border-amber-500/20'}`}
               >
                 {e.severity}
               </span>
             </div>
-            <p className="text-[10px] text-sky-400/60 truncate">{e.title}</p>
-            <p className="text-[9px] text-sky-400/30 font-mono mt-0.5">
+            <p className="text-[10px] text-[#9a9a9a] truncate">{e.title}</p>
+            <p className="text-[9px] text-[#5a5a5a] font-mono mt-0.5">
               impact ${e.estimatedImpactUSD.toLocaleString()}
             </p>
           </div>
@@ -714,7 +714,7 @@ function PortCongestionPanel({ exceptions }: { exceptions: ExceptionItem[] }) {
     .slice(0, 5);
   if (delayExceptions.length === 0) {
     return (
-      <div className="bg-[#0a1628]/80 backdrop-blur border border-sky-500/10 rounded-xl">
+      <div className="bg-white/[0.02] backdrop-blur border border-white/[0.06] rounded-xl">
         <EmptyState
           icon={Anchor}
           headline="No port congestion exceptions"
@@ -725,15 +725,15 @@ function PortCongestionPanel({ exceptions }: { exceptions: ExceptionItem[] }) {
     );
   }
   return (
-    <div className="bg-[#0a1628]/80 backdrop-blur border border-sky-500/10 rounded-xl overflow-hidden">
-      <div className="px-4 py-3 border-b border-sky-500/10 flex items-center gap-2">
-        <Anchor className="w-3.5 h-3.5 text-sky-400" />
-        <span className="text-[11px] font-mono text-sky-300 uppercase tracking-wider">
+    <div className="bg-white/[0.02] backdrop-blur border border-white/[0.06] rounded-xl overflow-hidden">
+      <div className="px-4 py-3 border-b border-white/[0.06] flex items-center gap-2">
+        <Anchor className="w-3.5 h-3.5 text-[#c9b787]" />
+        <span className="text-[11px] font-mono text-[#d4c598] uppercase tracking-wider">
           Port Delay Exceptions
         </span>
         <Badge
           variant="outline"
-          className="ml-auto text-[9px] bg-sky-500/10 text-sky-400 border-sky-500/20"
+          className="ml-auto text-[9px] bg-[#c9b787]/10 text-[#c9b787] border-white/[0.08]"
         >
           {delayExceptions.length} Active
         </Badge>
@@ -742,14 +742,14 @@ function PortCongestionPanel({ exceptions }: { exceptions: ExceptionItem[] }) {
         {delayExceptions.map((e) => (
           <div
             key={e.id}
-            className="px-4 py-2.5 flex items-center gap-3 hover:bg-sky-500/5 transition-colors"
+            className="px-4 py-2.5 flex items-center gap-3 hover:bg-[#c9b787]/8 transition-colors"
           >
-            <div className="w-6 h-6 rounded bg-sky-500/10 flex items-center justify-center shrink-0">
-              <Anchor className="w-3 h-3 text-sky-400/60" />
+            <div className="w-6 h-6 rounded bg-[#c9b787]/10 flex items-center justify-center shrink-0">
+              <Anchor className="w-3 h-3 text-[#9a9a9a]" />
             </div>
             <div className="flex-1 min-w-0">
-              <p className="text-xs font-semibold text-sky-100">{e.vesselName}</p>
-              <p className="text-[10px] text-sky-400/50 truncate">{e.title}</p>
+              <p className="text-xs font-semibold text-[#f5f5f5]">{e.vesselName}</p>
+              <p className="text-[10px] text-[#8a8a8a] truncate">{e.title}</p>
             </div>
             <div className="text-right">
               <p
@@ -757,7 +757,7 @@ function PortCongestionPanel({ exceptions }: { exceptions: ExceptionItem[] }) {
               >
                 {e.severity}
               </p>
-              <p className="text-[9px] text-sky-400/30">${e.estimatedImpactUSD.toLocaleString()}</p>
+              <p className="text-[9px] text-[#5a5a5a]">${e.estimatedImpactUSD.toLocaleString()}</p>
             </div>
           </div>
         ))}
@@ -775,21 +775,21 @@ function VesselDrawer({ vessel, onClose }: { vessel: RosterVessel; onClose: () =
   const risk = getRiskBadge(riskScore);
 
   return (
-    <div className="w-[380px] h-full bg-[#0a1628]/95 backdrop-blur-xl border-l border-sky-500/10 flex flex-col overflow-hidden shrink-0">
-      <div className="p-4 border-b border-sky-500/10 flex items-center justify-between">
+    <div className="w-[380px] h-full bg-[#0e0e0e]/95 backdrop-blur-xl border-l border-white/[0.06] flex flex-col overflow-hidden shrink-0">
+      <div className="p-4 border-b border-white/[0.06] flex items-center justify-between">
         <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-lg bg-sky-500/10 flex items-center justify-center">
-            <Ship className="w-5 h-5 text-sky-400" />
+          <div className="w-10 h-10 rounded-lg bg-[#c9b787]/10 flex items-center justify-center">
+            <Ship className="w-5 h-5 text-[#c9b787]" />
           </div>
           <div>
-            <h3 className="font-display font-bold text-sm text-sky-50">{vessel.name}</h3>
-            <p className="text-[10px] text-sky-400/60 font-mono">IMO {vessel.imo}</p>
+            <h3 className="font-display font-bold text-sm text-[#f5f5f5]">{vessel.name}</h3>
+            <p className="text-[10px] text-[#9a9a9a] font-mono">IMO {vessel.imo}</p>
           </div>
         </div>
         <button
           onClick={onClose}
           aria-label="Close"
-          className="p-1.5 rounded-lg hover:bg-sky-500/10 transition-colors text-sky-400/60 hover:text-sky-300"
+          className="p-1.5 rounded-lg hover:bg-[#c9b787]/10 transition-colors text-[#9a9a9a] hover:text-[#d4c598]"
         >
           <X className="w-4 h-4" />
         </button>
@@ -809,8 +809,8 @@ function VesselDrawer({ vessel, onClose }: { vessel: RosterVessel; onClose: () =
           </Badge>
         </div>
 
-        <div className="bg-sky-500/5 rounded-lg border border-sky-500/10 p-3 space-y-2">
-          <h4 className="text-[10px] font-mono text-sky-400/60 uppercase tracking-wider">
+        <div className="bg-[#c9b787]/8 rounded-lg border border-white/[0.06] p-3 space-y-2">
+          <h4 className="text-[10px] font-mono text-[#9a9a9a] uppercase tracking-wider">
             Position & Navigation
           </h4>
           <div className="grid grid-cols-2 gap-2">
@@ -833,19 +833,19 @@ function VesselDrawer({ vessel, onClose }: { vessel: RosterVessel; onClose: () =
               },
             ].map((item) => (
               <div key={item.label}>
-                <p className="text-[10px] text-sky-400/40">{item.label}</p>
-                <p className="text-xs font-mono text-sky-100">{item.value}</p>
+                <p className="text-[10px] text-[#6a6a6a]">{item.label}</p>
+                <p className="text-xs font-mono text-[#f5f5f5]">{item.value}</p>
               </div>
             ))}
           </div>
         </div>
 
-        <div className="bg-sky-500/5 rounded-lg border border-sky-500/10 p-3 space-y-2">
-          <h4 className="text-[10px] font-mono text-sky-400/60 uppercase tracking-wider">
+        <div className="bg-[#c9b787]/8 rounded-lg border border-white/[0.06] p-3 space-y-2">
+          <h4 className="text-[10px] font-mono text-[#9a9a9a] uppercase tracking-wider">
             Behavioral AI Score
           </h4>
           <div className="flex items-center gap-3">
-            <div className="flex-1 h-2 bg-sky-500/10 rounded-full overflow-hidden">
+            <div className="flex-1 h-2 bg-[#c9b787]/10 rounded-full overflow-hidden">
               <div
                 className="h-full rounded-full bg-gradient-to-r from-emerald-400 to-red-400"
                 style={{ width: `${riskScore}%` }}
@@ -855,11 +855,11 @@ function VesselDrawer({ vessel, onClose }: { vessel: RosterVessel; onClose: () =
               {riskScore}/100
             </span>
           </div>
-          <p className="text-[10px] text-sky-400/40">Pattern analysis from 90-day AIS history</p>
+          <p className="text-[10px] text-[#6a6a6a]">Pattern analysis from 90-day AIS history</p>
         </div>
 
-        <div className="bg-sky-500/5 rounded-lg border border-sky-500/10 p-3 space-y-2">
-          <h4 className="text-[10px] font-mono text-sky-400/60 uppercase tracking-wider">
+        <div className="bg-[#c9b787]/8 rounded-lg border border-white/[0.06] p-3 space-y-2">
+          <h4 className="text-[10px] font-mono text-[#9a9a9a] uppercase tracking-wider">
             Vessel Details
           </h4>
           {[
@@ -875,23 +875,23 @@ function VesselDrawer({ vessel, onClose }: { vessel: RosterVessel; onClose: () =
             { label: 'Charter', value: vessel.charterType || 'Unassigned' },
           ].map((item) => (
             <div key={item.label} className="flex items-center justify-between">
-              <span className="text-[10px] text-sky-400/40 font-mono">{item.label}</span>
-              <span className="text-xs text-sky-100">{item.value}</span>
+              <span className="text-[10px] text-[#6a6a6a] font-mono">{item.label}</span>
+              <span className="text-xs text-[#f5f5f5]">{item.value}</span>
             </div>
           ))}
         </div>
 
         {vessel.destination && (
-          <div className="bg-sky-500/5 rounded-lg border border-sky-500/10 p-3">
-            <h4 className="text-[10px] font-mono text-sky-400/60 uppercase tracking-wider mb-2">
+          <div className="bg-[#c9b787]/8 rounded-lg border border-white/[0.06] p-3">
+            <h4 className="text-[10px] font-mono text-[#9a9a9a] uppercase tracking-wider mb-2">
               Active Voyage
             </h4>
             <div className="flex items-center gap-2">
-              <MapPin className="w-3.5 h-3.5 text-sky-400" />
+              <MapPin className="w-3.5 h-3.5 text-[#c9b787]" />
               <div>
-                <p className="text-xs text-sky-100">Destination: {vessel.destination}</p>
+                <p className="text-xs text-[#f5f5f5]">Destination: {vessel.destination}</p>
                 {vessel.eta && (
-                  <p className="text-[10px] text-sky-400/40">
+                  <p className="text-[10px] text-[#6a6a6a]">
                     ETA: {new Date(vessel.eta).toLocaleDateString()}
                   </p>
                 )}
@@ -900,8 +900,8 @@ function VesselDrawer({ vessel, onClose }: { vessel: RosterVessel; onClose: () =
           </div>
         )}
 
-        <div className="bg-sky-500/5 rounded-lg border border-sky-500/10 p-3 space-y-2">
-          <h4 className="text-[10px] font-mono text-sky-400/60 uppercase tracking-wider">
+        <div className="bg-[#c9b787]/8 rounded-lg border border-white/[0.06] p-3 space-y-2">
+          <h4 className="text-[10px] font-mono text-[#9a9a9a] uppercase tracking-wider">
             Voyage Economics
           </h4>
           {[
@@ -915,14 +915,14 @@ function VesselDrawer({ vessel, onClose }: { vessel: RosterVessel; onClose: () =
             { label: 'Voyage Ref', value: vessel.voyageRef || '—' },
           ].map((item) => (
             <div key={item.label} className="flex items-center justify-between">
-              <span className="text-[10px] text-sky-400/40 font-mono">{item.label}</span>
-              <span className="text-xs font-mono text-sky-100">{item.value}</span>
+              <span className="text-[10px] text-[#6a6a6a] font-mono">{item.label}</span>
+              <span className="text-xs font-mono text-[#f5f5f5]">{item.value}</span>
             </div>
           ))}
         </div>
 
         <Link href={`/vessel/${vessel.id}`}>
-          <div className="w-full flex items-center justify-center gap-2 py-2.5 rounded-lg bg-sky-500/10 hover:bg-sky-500/20 border border-sky-500/20 text-sky-400 text-xs font-medium transition-colors cursor-pointer">
+          <div className="w-full flex items-center justify-center gap-2 py-2.5 rounded-lg bg-[#c9b787]/10 hover:bg-[#c9b787]/16 border border-white/[0.08] text-[#c9b787] text-xs font-medium transition-colors cursor-pointer">
             Full Vessel Profile <ChevronRight className="w-3.5 h-3.5" />
           </div>
         </Link>
@@ -943,7 +943,7 @@ function DocumentValidationPanel({ exceptions }: { exceptions: ExceptionItem[] }
 
   if (items.length === 0) {
     return (
-      <div className="bg-[#0a1628]/80 backdrop-blur border border-sky-500/10 rounded-xl">
+      <div className="bg-white/[0.02] backdrop-blur border border-white/[0.06] rounded-xl">
         <EmptyState
           icon={Shield}
           headline="All certificates nominal"
@@ -957,10 +957,10 @@ function DocumentValidationPanel({ exceptions }: { exceptions: ExceptionItem[] }
 
   const critical = items.filter((e) => e.severity === 'critical' || e.severity === 'high');
   return (
-    <div className="bg-[#0a1628]/80 backdrop-blur border border-sky-500/10 rounded-xl overflow-hidden">
-      <div className="px-4 py-3 border-b border-sky-500/10 flex items-center gap-2">
+    <div className="bg-white/[0.02] backdrop-blur border border-white/[0.06] rounded-xl overflow-hidden">
+      <div className="px-4 py-3 border-b border-white/[0.06] flex items-center gap-2">
         <Shield className="w-3.5 h-3.5 text-amber-400" />
-        <span className="text-[11px] font-mono text-sky-300 uppercase tracking-wider">
+        <span className="text-[11px] font-mono text-[#d4c598] uppercase tracking-wider">
           Document Validation
         </span>
         {critical.length > 0 && (
@@ -976,14 +976,14 @@ function DocumentValidationPanel({ exceptions }: { exceptions: ExceptionItem[] }
         {items.map((e) => (
           <div
             key={e.id}
-            className="px-4 py-2.5 flex items-center gap-3 hover:bg-sky-500/5 transition-colors"
+            className="px-4 py-2.5 flex items-center gap-3 hover:bg-[#c9b787]/8 transition-colors"
           >
             <div
               className={`w-1.5 h-1.5 rounded-full shrink-0 ${e.severity === 'critical' ? 'bg-red-400 animate-pulse' : e.severity === 'high' ? 'bg-orange-400' : 'bg-amber-400'}`}
             />
             <div className="flex-1 min-w-0">
-              <p className="text-xs font-semibold text-sky-100 truncate">{e.vesselName}</p>
-              <p className="text-[10px] text-sky-400/50 truncate">{e.title}</p>
+              <p className="text-xs font-semibold text-[#f5f5f5] truncate">{e.vesselName}</p>
+              <p className="text-[10px] text-[#8a8a8a] truncate">{e.title}</p>
             </div>
             <div className="text-right shrink-0">
               <span
@@ -1011,7 +1011,7 @@ function RouteForecastPanel({ exceptions }: { exceptions: ExceptionItem[] }) {
 
   if (items.length === 0) {
     return (
-      <div className="bg-[#0a1628]/80 backdrop-blur border border-sky-500/10 rounded-xl">
+      <div className="bg-white/[0.02] backdrop-blur border border-white/[0.06] rounded-xl">
         <EmptyState
           icon={TrendingUp}
           headline="All routes nominal"
@@ -1025,16 +1025,16 @@ function RouteForecastPanel({ exceptions }: { exceptions: ExceptionItem[] }) {
 
   const delays = items.filter((e) => e.severity !== 'low');
   return (
-    <div className="bg-[#0a1628]/80 backdrop-blur border border-sky-500/10 rounded-xl overflow-hidden">
-      <div className="px-4 py-3 border-b border-sky-500/10 flex items-center gap-2">
-        <TrendingUp className="w-3.5 h-3.5 text-sky-400" />
-        <span className="text-[11px] font-mono text-sky-300 uppercase tracking-wider">
+    <div className="bg-white/[0.02] backdrop-blur border border-white/[0.06] rounded-xl overflow-hidden">
+      <div className="px-4 py-3 border-b border-white/[0.06] flex items-center gap-2">
+        <TrendingUp className="w-3.5 h-3.5 text-[#c9b787]" />
+        <span className="text-[11px] font-mono text-[#d4c598] uppercase tracking-wider">
           Route Forecast & Delay Causes
         </span>
         {delays.length > 0 && (
           <Badge
             variant="outline"
-            className="ml-auto text-[9px] bg-sky-500/10 text-sky-400 border-sky-500/20"
+            className="ml-auto text-[9px] bg-[#c9b787]/10 text-[#c9b787] border-white/[0.08]"
           >
             {delays.length} Delay{delays.length !== 1 ? 's' : ''}
           </Badge>
@@ -1042,19 +1042,19 @@ function RouteForecastPanel({ exceptions }: { exceptions: ExceptionItem[] }) {
       </div>
       <div className="divide-y divide-sky-500/5">
         {items.map((e) => (
-          <div key={e.id} className="px-4 py-2.5 hover:bg-sky-500/5 transition-colors">
+          <div key={e.id} className="px-4 py-2.5 hover:bg-[#c9b787]/8 transition-colors">
             <div className="flex items-center justify-between mb-1">
-              <span className="text-xs font-semibold text-sky-100">{e.vesselName}</span>
+              <span className="text-xs font-semibold text-[#f5f5f5]">{e.vesselName}</span>
               <span
                 className={`text-[10px] font-bold ${e.severity === 'critical' ? 'text-red-400' : e.severity === 'high' ? 'text-orange-400' : e.severity === 'medium' ? 'text-amber-400' : 'text-emerald-400'}`}
               >
                 {e.severity === 'low' ? 'On time' : e.type.replace(/_/g, ' ')}
               </span>
             </div>
-            <div className="flex items-center gap-3 text-[10px] text-sky-400/50">
+            <div className="flex items-center gap-3 text-[10px] text-[#8a8a8a]">
               <span className="truncate">{e.title}</span>
               {e.estimatedImpactUSD > 0 && (
-                <span className="font-mono text-sky-400/30 shrink-0">
+                <span className="font-mono text-[#5a5a5a] shrink-0">
                   impact ${e.estimatedImpactUSD.toLocaleString()}
                 </span>
               )}
@@ -1182,7 +1182,7 @@ export default function FleetDashboard() {
       <div className="flex flex-1 overflow-hidden">
         <div className="flex-1 flex flex-col min-w-0">
           {kpis && (
-            <div className="border-b border-sky-500/10 bg-[#0a1628]/80 backdrop-blur shrink-0 relative overflow-hidden">
+            <div className="border-b border-white/[0.06] bg-white/[0.02] backdrop-blur shrink-0 relative overflow-hidden">
               <div
                 className="absolute top-0 left-0 right-0 h-[2px]"
                 style={{
@@ -1191,8 +1191,8 @@ export default function FleetDashboard() {
               />
               <div className="flex items-center gap-0.5 px-3 py-1.5 overflow-x-auto">
                 <div className="flex items-center gap-2 mr-3 shrink-0">
-                  <Globe className="w-3.5 h-3.5 text-sky-400" />
-                  <span className="font-display text-xs font-bold text-sky-50 uppercase tracking-wider">
+                  <Globe className="w-3.5 h-3.5 text-[#c9b787]" />
+                  <span className="font-display text-xs font-bold text-[#f5f5f5] uppercase tracking-wider">
                     Fleet Command
                   </span>
                   <span className="flex items-center gap-1 text-[9px] font-mono text-emerald-400 ml-1">
@@ -1227,12 +1227,12 @@ export default function FleetDashboard() {
                     }}
                   />
                 </div>
-                <div className="h-4 w-px bg-sky-500/20 mx-1 shrink-0" />
+                <div className="h-4 w-px bg-[#c9b787]/16 mx-1 shrink-0" />
                 {[
                   {
                     label: 'FLEET',
                     value: liveDashboard?.summary?.totalVessels ?? kpis.totalVessels,
-                    color: 'text-sky-200',
+                    color: 'text-[#e0e0e0]',
                   },
                   {
                     label: 'SEA',
@@ -1246,7 +1246,7 @@ export default function FleetDashboard() {
                     value:
                       liveDashboard?.statusDistribution?.find((s) => s.status === 'in_port')
                         ?.count ?? kpis.inPort,
-                    color: 'text-sky-400',
+                    color: 'text-[#c9b787]',
                   },
                   {
                     label: 'ANCHOR',
@@ -1258,12 +1258,12 @@ export default function FleetDashboard() {
                   {
                     label: 'DARK',
                     value: darkVesselCount,
-                    color: darkVesselCount > 0 ? 'text-red-400' : 'text-sky-400/40',
+                    color: darkVesselCount > 0 ? 'text-red-400' : 'text-[#6a6a6a]',
                   },
                   {
                     label: 'UTIL',
                     value: `${liveDashboard?.summary?.utilizationRate ?? kpis.averageUtilization}%`,
-                    color: 'text-sky-200',
+                    color: 'text-[#e0e0e0]',
                   },
                   {
                     label: 'EXCEP',
@@ -1282,7 +1282,7 @@ export default function FleetDashboard() {
                   },
                 ].map((kpi, i) => (
                   <div key={kpi.label} className="flex items-center gap-1.5 px-2 py-0.5 shrink-0">
-                    <span className="text-[9px] font-mono text-sky-500/50 uppercase">
+                    <span className="text-[9px] font-mono text-[#f5f5f5]0/50 uppercase">
                       {kpi.label}
                     </span>
                     <span className={`text-sm font-bold font-display ${kpi.color}`}>
@@ -1292,12 +1292,12 @@ export default function FleetDashboard() {
                         kpi.value
                       )}
                     </span>
-                    {i < 7 && <div className="h-3 w-px bg-sky-500/10 ml-1" />}
+                    {i < 7 && <div className="h-3 w-px bg-[#c9b787]/10 ml-1" />}
                   </div>
                 ))}
                 {kpis.criticalAlerts > 0 && (
                   <>
-                    <div className="h-4 w-px bg-sky-500/20 mx-1 shrink-0" />
+                    <div className="h-4 w-px bg-[#c9b787]/16 mx-1 shrink-0" />
                     <div className="flex items-center gap-1 px-2 py-0.5 shrink-0">
                       <AlertTriangle className="w-3 h-3 text-red-400 animate-pulse" />
                       <span className="text-[9px] font-mono text-red-400/80 uppercase">ALERTS</span>
@@ -1311,7 +1311,7 @@ export default function FleetDashboard() {
             </div>
           )}
 
-          <div className="flex items-center justify-between gap-2 px-3 py-1 border-b border-sky-500/10 bg-[#0a1628]/60 shrink-0 overflow-x-auto">
+          <div className="flex items-center justify-between gap-2 px-3 py-1 border-b border-white/[0.06] bg-white/[0.02] shrink-0 overflow-x-auto">
             <RoleSelector
               currentRole={activeRole}
               onRoleChange={setActiveRole}
@@ -1511,21 +1511,21 @@ export default function FleetDashboard() {
             ) : (
               <div className="flex items-center justify-center h-full bg-[#060e1a]">
                 <div className="text-center">
-                  <Ship className="w-12 h-12 text-sky-500/20 mx-auto mb-3" />
-                  <p className="text-sm text-sky-400/40">Loading fleet data...</p>
+                  <Ship className="w-12 h-12 text-[#f5f5f5]0/20 mx-auto mb-3" />
+                  <p className="text-sm text-[#6a6a6a]">Loading fleet data...</p>
                 </div>
               </div>
             )}
 
             {recentAlerts.length > 0 && (
-              <div className="absolute top-3 left-3 w-72 bg-[#0a1628]/90 backdrop-blur-xl rounded-lg border border-sky-500/10 overflow-hidden">
-                <div className="px-3 py-2 border-b border-sky-500/10 flex items-center justify-between">
-                  <span className="text-[10px] font-mono text-sky-400/60 uppercase tracking-wider flex items-center gap-1.5">
+              <div className="absolute top-3 left-3 w-72 bg-[#0e0e0e]/90 backdrop-blur-xl rounded-lg border border-white/[0.06] overflow-hidden">
+                <div className="px-3 py-2 border-b border-white/[0.06] flex items-center justify-between">
+                  <span className="text-[10px] font-mono text-[#9a9a9a] uppercase tracking-wider flex items-center gap-1.5">
                     <AlertTriangle className="w-3 h-3 text-amber-400" />
                     Live Alerts
                   </span>
                   <Link href="/alerts">
-                    <span className="text-[10px] text-sky-400 hover:text-sky-300 cursor-pointer">
+                    <span className="text-[10px] text-[#c9b787] hover:text-[#d4c598] cursor-pointer">
                       View all
                     </span>
                   </Link>
@@ -1534,19 +1534,19 @@ export default function FleetDashboard() {
                   {recentAlerts.map((alert) => (
                     <div
                       key={alert.id}
-                      className="px-3 py-2 border-b border-sky-500/5 last:border-0 hover:bg-sky-500/5 transition-colors"
+                      className="px-3 py-2 border-b border-white/[0.08] last:border-0 hover:bg-[#c9b787]/8 transition-colors"
                     >
                       <div className="flex items-start gap-2">
                         <span
                           className={`w-1.5 h-1.5 rounded-full mt-1 shrink-0 ${alert.severity === 'critical' ? 'bg-red-400 animate-pulse' : 'bg-amber-400'}`}
                         />
                         <div className="min-w-0">
-                          <p className="text-[11px] text-sky-100 leading-tight truncate">
+                          <p className="text-[11px] text-[#f5f5f5] leading-tight truncate">
                             {alert.title ?? alert.description}
                           </p>
                           <div className="flex items-center gap-2 mt-0.5">
-                            <span className="text-[9px] text-sky-400/40">{alert.vesselName}</span>
-                            <span className="text-[9px] text-sky-400/30 flex items-center gap-0.5">
+                            <span className="text-[9px] text-[#6a6a6a]">{alert.vesselName}</span>
+                            <span className="text-[9px] text-[#5a5a5a] flex items-center gap-0.5">
                               <Clock className="w-2 h-2" />
                               {new Date(alert.detectedAt).toLocaleTimeString([], {
                                 hour: '2-digit',
@@ -1601,8 +1601,8 @@ export default function FleetDashboard() {
       </div>
 
       {/* Intelligence Panel — full width bottom strip */}
-      <div className="shrink-0 bg-[#060e1a] border-t border-sky-500/10" style={{ height: 260 }}>
-        <div className="flex items-center gap-0 px-4 pt-0 border-b border-sky-500/10 relative">
+      <div className="shrink-0 bg-[#060e1a] border-t border-white/[0.06]" style={{ height: 260 }}>
+        <div className="flex items-center gap-0 px-4 pt-0 border-b border-white/[0.06] relative">
           <div
             className="absolute top-0 left-0 right-0 h-[2px]"
             style={{ background: 'linear-gradient(90deg, rgba(77,143,204,0.4), transparent)' }}
@@ -1611,10 +1611,10 @@ export default function FleetDashboard() {
             <button
               key={tab.id}
               onClick={() => setIntelTab(tab.id)}
-              className={`flex items-center gap-1.5 px-3 py-2 text-[11px] font-mono transition-colors relative ${intelTab === tab.id ? 'text-sky-300' : 'text-sky-400/50 hover:text-sky-400/80'}`}
+              className={`flex items-center gap-1.5 px-3 py-2 text-[11px] font-mono transition-colors relative ${intelTab === tab.id ? 'text-[#d4c598]' : 'text-[#8a8a8a] hover:text-[#c9b787]/80'}`}
             >
               {intelTab === tab.id && (
-                <div className="absolute bottom-0 left-0 right-0 h-[2px] bg-sky-400" />
+                <div className="absolute bottom-0 left-0 right-0 h-[2px] bg-[#c9b787]" />
               )}
               <tab.icon className="w-3 h-3" />
               {tab.label}
@@ -1622,7 +1622,7 @@ export default function FleetDashboard() {
           ))}
           <div className="ml-auto flex items-center gap-2 pr-2">
             <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
-            <span className="text-[9px] font-mono text-sky-400/30">
+            <span className="text-[9px] font-mono text-[#5a5a5a]">
               Maritime Intelligence · Live
             </span>
           </div>

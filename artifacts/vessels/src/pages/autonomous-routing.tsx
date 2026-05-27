@@ -98,7 +98,7 @@ const ECA_ZONES = [
 
 function _ScorePill({ score, color }: { score: number; color: string }) {
   const colorMap: Record<string, string> = {
-    sky: 'bg-sky-500/10 text-sky-400 border-sky-500/20',
+    sky: 'bg-[#c9b787]/10 text-[#c9b787] border-white/[0.08]',
     red: 'bg-red-500/10 text-red-400 border-red-500/20',
     emerald: 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20',
     amber: 'bg-amber-500/10 text-amber-400 border-amber-500/20',
@@ -130,7 +130,7 @@ function FactorBar({
     violet: 'from-violet-500/60 to-violet-400/20',
   };
   const iconColorMap: Record<string, string> = {
-    sky: 'text-sky-400',
+    sky: 'text-[#c9b787]',
     red: 'text-red-400',
     emerald: 'text-emerald-400',
     amber: 'text-amber-400',
@@ -141,9 +141,9 @@ function FactorBar({
       <div className="flex items-center justify-between mb-1">
         <div className="flex items-center gap-1.5">
           <Icon className={cn('w-3 h-3', iconColorMap[color])} />
-          <span className="text-[10px] text-sky-400/50">{label}</span>
+          <span className="text-[10px] text-[#8a8a8a]">{label}</span>
         </div>
-        <span className="text-[10px] font-mono text-sky-300">{score}</span>
+        <span className="text-[10px] font-mono text-[#d4c598]">{score}</span>
       </div>
       <div className="h-1.5 bg-white/5 rounded-full overflow-hidden">
         <div
@@ -166,7 +166,7 @@ const riskColor: Record<string, string> = {
 const ciiColor: Record<string, string> = {
   'A+': 'text-emerald-400',
   A: 'text-emerald-400',
-  B: 'text-sky-400',
+  B: 'text-[#c9b787]',
   C: 'text-amber-400',
   D: 'text-orange-400',
   E: 'text-red-400',
@@ -190,8 +190,8 @@ export default function AutonomousRoutingPage() {
       <div className="flex items-center justify-between">
         <div>
           <div className="flex items-center gap-2 mb-1">
-            <Navigation className="w-4 h-4 text-sky-400" />
-            <h1 className="font-display text-xl font-bold text-sky-50">
+            <Navigation className="w-4 h-4 text-[#c9b787]" />
+            <h1 className="font-display text-xl font-bold text-[#f5f5f5]">
               Autonomous Routing Intelligence
             </h1>
             <Badge
@@ -201,7 +201,7 @@ export default function AutonomousRoutingPage() {
               AI-OPTIMIZED
             </Badge>
           </div>
-          <p className="text-xs text-sky-400/40">
+          <p className="text-xs text-[#6a6a6a]">
             Multi-factor route optimization — weather, piracy, emissions, port congestion & fuel
             arbitrage
           </p>
@@ -209,7 +209,7 @@ export default function AutonomousRoutingPage() {
         <button
           onClick={handleRecalc}
           disabled={recalculating}
-          className="flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-lg border border-sky-500/20 bg-sky-500/5 text-sky-400/60 hover:text-sky-300 transition-colors disabled:opacity-50"
+          className="flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-lg border border-white/[0.08] bg-[#c9b787]/8 text-[#9a9a9a] hover:text-[#d4c598] transition-colors disabled:opacity-50"
         >
           <RefreshCw className={cn('w-3.5 h-3.5', recalculating && 'animate-spin')} />
           {recalculating ? 'Recalculating…' : 'Recalculate Routes'}
@@ -224,16 +224,16 @@ export default function AutonomousRoutingPage() {
                 key={route.id}
                 onClick={() => setSelectedRoute(route)}
                 className={cn(
-                  'w-full text-left bg-[#0a1628]/80 border rounded-xl p-4 transition-all hover:border-sky-500/20',
+                  'w-full text-left bg-white/[0.02] border rounded-xl p-4 transition-all hover:border-white/[0.08]',
                   selectedRoute.id === route.id
-                    ? 'border-sky-500/30 shadow-sky-500/5 shadow-lg'
-                    : 'border-sky-500/10',
+                    ? 'border-[#c9b787]/24 shadow-sky-500/5 shadow-lg'
+                    : 'border-white/[0.06]',
                 )}
               >
                 <div className="flex items-start justify-between gap-4">
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2 flex-wrap mb-1">
-                      <p className="text-sm font-semibold text-sky-100">{route.name}</p>
+                      <p className="text-sm font-semibold text-[#f5f5f5]">{route.name}</p>
                       {route.recommended && (
                         <Badge
                           variant="outline"
@@ -243,14 +243,14 @@ export default function AutonomousRoutingPage() {
                         </Badge>
                       )}
                     </div>
-                    <p className="text-[10px] text-sky-400/40 mb-2">
+                    <p className="text-[10px] text-[#6a6a6a] mb-2">
                       {route.vessel} · {route.distance.toLocaleString()} nm · {route.duration}
                     </p>
                     <div className="flex flex-wrap gap-1.5 mb-2">
                       {route.waypoints.map((wp) => (
                         <span
                           key={wp}
-                          className="text-[9px] text-sky-400/40 px-2 py-0.5 bg-sky-500/5 rounded border border-sky-500/10"
+                          className="text-[9px] text-[#6a6a6a] px-2 py-0.5 bg-[#c9b787]/8 rounded border border-white/[0.06]"
                         >
                           {wp}
                         </span>
@@ -259,19 +259,19 @@ export default function AutonomousRoutingPage() {
                     <div className="flex flex-wrap gap-3 mt-2">
                       <div className="flex items-center gap-1">
                         <Leaf className="w-3 h-3 text-emerald-400" />
-                        <span className="text-[10px] text-sky-300 font-mono">
+                        <span className="text-[10px] text-[#d4c598] font-mono">
                           {route.co2Tonnes.toLocaleString()} t CO₂
                         </span>
                       </div>
                       <div className="flex items-center gap-1">
                         <DollarSign className="w-3 h-3 text-violet-400" />
-                        <span className="text-[10px] text-sky-300 font-mono">
+                        <span className="text-[10px] text-[#d4c598] font-mono">
                           ${(route.fuelCost / 1000).toFixed(0)}K fuel
                         </span>
                       </div>
                       <div className="flex items-center gap-1">
-                        <BarChart3 className="w-3 h-3 text-sky-400" />
-                        <span className="text-[10px] font-mono text-sky-300">
+                        <BarChart3 className="w-3 h-3 text-[#c9b787]" />
+                        <span className="text-[10px] font-mono text-[#d4c598]">
                           CII:{' '}
                           <span className={ciiColor[route.ciiImpact] ?? ''}>{route.ciiImpact}</span>
                         </span>
@@ -304,7 +304,7 @@ export default function AutonomousRoutingPage() {
                   </div>
                 </div>
                 {route.savings && (
-                  <div className="mt-3 pt-3 border-t border-sky-500/10 flex gap-4">
+                  <div className="mt-3 pt-3 border-t border-white/[0.06] flex gap-4">
                     <div className="flex items-center gap-1 text-emerald-400 text-[10px]">
                       <CheckCircle2 className="w-3 h-3" />
                       Saves ${(route.savings.fuel / 1000).toFixed(0)}K vs alt route
@@ -320,8 +320,8 @@ export default function AutonomousRoutingPage() {
           </div>
 
           <div className="grid grid-cols-2 gap-4">
-            <div className="bg-[#0a1628]/80 border border-sky-500/10 rounded-xl p-4">
-              <p className="text-xs font-semibold text-sky-200 mb-3 flex items-center gap-1.5">
+            <div className="bg-white/[0.02] border border-white/[0.06] rounded-xl p-4">
+              <p className="text-xs font-semibold text-[#e0e0e0] mb-3 flex items-center gap-1.5">
                 <ShieldAlert className="w-3.5 h-3.5 text-red-400" />
                 Active Piracy Zones
               </p>
@@ -329,14 +329,14 @@ export default function AutonomousRoutingPage() {
                 {PIRACY_ZONES.map((z) => (
                   <div key={z.zone} className="flex items-center justify-between">
                     <div>
-                      <p className="text-[11px] text-sky-200">{z.zone}</p>
-                      <p className="text-[9px] text-sky-400/30">Last: {z.lastIncident}</p>
+                      <p className="text-[11px] text-[#e0e0e0]">{z.zone}</p>
+                      <p className="text-[9px] text-[#5a5a5a]">Last: {z.lastIncident}</p>
                     </div>
                     <div className="text-right">
                       <Badge variant="outline" className={cn('text-[9px]', riskColor[z.level])}>
                         {z.level}
                       </Badge>
-                      <p className="text-[9px] text-sky-400/30 mt-0.5">
+                      <p className="text-[9px] text-[#5a5a5a] mt-0.5">
                         {z.vessels} vessel{z.vessels !== 1 ? 's' : ''}
                       </p>
                     </div>
@@ -344,8 +344,8 @@ export default function AutonomousRoutingPage() {
                 ))}
               </div>
             </div>
-            <div className="bg-[#0a1628]/80 border border-sky-500/10 rounded-xl p-4">
-              <p className="text-xs font-semibold text-sky-200 mb-3 flex items-center gap-1.5">
+            <div className="bg-white/[0.02] border border-white/[0.06] rounded-xl p-4">
+              <p className="text-xs font-semibold text-[#e0e0e0] mb-3 flex items-center gap-1.5">
                 <Leaf className="w-3.5 h-3.5 text-emerald-400" />
                 ECA Compliance Zones
               </p>
@@ -353,8 +353,8 @@ export default function AutonomousRoutingPage() {
                 {ECA_ZONES.map((z) => (
                   <div key={z.zone} className="flex items-center justify-between">
                     <div>
-                      <p className="text-[11px] text-sky-200">{z.zone}</p>
-                      <p className="text-[9px] text-sky-400/30">{z.type}</p>
+                      <p className="text-[11px] text-[#e0e0e0]">{z.zone}</p>
+                      <p className="text-[9px] text-[#5a5a5a]">{z.type}</p>
                     </div>
                     <div className="text-right">
                       <Badge
@@ -368,7 +368,7 @@ export default function AutonomousRoutingPage() {
                       >
                         {z.status}
                       </Badge>
-                      <p className="text-[9px] text-sky-400/30 mt-0.5">{z.vesselCount} vessels</p>
+                      <p className="text-[9px] text-[#5a5a5a] mt-0.5">{z.vesselCount} vessels</p>
                     </div>
                   </div>
                 ))}
@@ -378,13 +378,13 @@ export default function AutonomousRoutingPage() {
         </div>
 
         <div className="space-y-4">
-          <div className="bg-[#0a1628]/80 border border-sky-500/30 rounded-xl p-4">
-            <p className="text-xs font-semibold text-sky-200 mb-4 flex items-center gap-1.5">
-              <Zap className="w-3.5 h-3.5 text-sky-400" />
+          <div className="bg-white/[0.02] border border-[#c9b787]/24 rounded-xl p-4">
+            <p className="text-xs font-semibold text-[#e0e0e0] mb-4 flex items-center gap-1.5">
+              <Zap className="w-3.5 h-3.5 text-[#c9b787]" />
               Selected Route Analysis
             </p>
-            <p className="text-sm font-semibold text-sky-100 mb-1">{selectedRoute.name}</p>
-            <p className="text-[10px] text-sky-400/40 mb-4">{selectedRoute.vessel}</p>
+            <p className="text-sm font-semibold text-[#f5f5f5] mb-1">{selectedRoute.name}</p>
+            <p className="text-[10px] text-[#6a6a6a] mb-4">{selectedRoute.vessel}</p>
             <div className="space-y-3">
               {FACTORS.map((f) => (
                 <FactorBar
@@ -396,7 +396,7 @@ export default function AutonomousRoutingPage() {
                 />
               ))}
             </div>
-            <div className="mt-4 pt-4 border-t border-sky-500/10 grid grid-cols-2 gap-3">
+            <div className="mt-4 pt-4 border-t border-white/[0.06] grid grid-cols-2 gap-3">
               {[
                 { label: 'Distance', val: `${selectedRoute.distance.toLocaleString()} nm` },
                 { label: 'Duration', val: selectedRoute.duration },
@@ -405,16 +405,16 @@ export default function AutonomousRoutingPage() {
                 { label: 'CO₂', val: `${selectedRoute.co2Tonnes.toLocaleString()} t` },
                 { label: 'CII Rating', val: selectedRoute.ciiImpact },
               ].map((m) => (
-                <div key={m.label} className="bg-sky-500/5 rounded-lg p-2">
-                  <p className="text-[9px] text-sky-400/40 uppercase tracking-wider">{m.label}</p>
-                  <p className="text-xs font-mono text-sky-200 mt-0.5">{m.val}</p>
+                <div key={m.label} className="bg-[#c9b787]/8 rounded-lg p-2">
+                  <p className="text-[9px] text-[#6a6a6a] uppercase tracking-wider">{m.label}</p>
+                  <p className="text-xs font-mono text-[#e0e0e0] mt-0.5">{m.val}</p>
                 </div>
               ))}
             </div>
           </div>
 
-          <div className="bg-[#0a1628]/80 border border-sky-500/10 rounded-xl p-4">
-            <p className="text-xs font-semibold text-sky-200 mb-3 flex items-center gap-1.5">
+          <div className="bg-white/[0.02] border border-white/[0.06] rounded-xl p-4">
+            <p className="text-xs font-semibold text-[#e0e0e0] mb-3 flex items-center gap-1.5">
               <Clock className="w-3.5 h-3.5 text-amber-400" />
               Dynamic Recalculation Triggers
             </p>
@@ -431,12 +431,12 @@ export default function AutonomousRoutingPage() {
                     <div
                       className={cn(
                         'w-1.5 h-1.5 rounded-full',
-                        t.active ? 'bg-emerald-400 animate-pulse' : 'bg-sky-500/20',
+                        t.active ? 'bg-emerald-400 animate-pulse' : 'bg-[#c9b787]/16',
                       )}
                     />
-                    <span className="text-[10px] text-sky-300/70">{t.trigger}</span>
+                    <span className="text-[10px] text-[#a0a08a]">{t.trigger}</span>
                   </div>
-                  <span className="text-[9px] font-mono text-sky-400/40">{t.freq}</span>
+                  <span className="text-[9px] font-mono text-[#6a6a6a]">{t.freq}</span>
                 </div>
               ))}
             </div>
@@ -448,19 +448,19 @@ export default function AutonomousRoutingPage() {
             </p>
             <div className="space-y-2">
               <div className="flex justify-between">
-                <span className="text-[10px] text-sky-400/50">Fuel saved</span>
+                <span className="text-[10px] text-[#8a8a8a]">Fuel saved</span>
                 <span className="text-[10px] font-mono text-emerald-400">$2.4M</span>
               </div>
               <div className="flex justify-between">
-                <span className="text-[10px] text-sky-400/50">CO₂ avoided</span>
+                <span className="text-[10px] text-[#8a8a8a]">CO₂ avoided</span>
                 <span className="text-[10px] font-mono text-emerald-400">4,820 t</span>
               </div>
               <div className="flex justify-between">
-                <span className="text-[10px] text-sky-400/50">Transit days saved</span>
+                <span className="text-[10px] text-[#8a8a8a]">Transit days saved</span>
                 <span className="text-[10px] font-mono text-emerald-400">38 days</span>
               </div>
               <div className="flex justify-between">
-                <span className="text-[10px] text-sky-400/50">Piracy diversions</span>
+                <span className="text-[10px] text-[#8a8a8a]">Piracy diversions</span>
                 <span className="text-[10px] font-mono text-emerald-400">7 avoided</span>
               </div>
             </div>
@@ -469,7 +469,7 @@ export default function AutonomousRoutingPage() {
 
         <div className="mt-8">
           <div className="text-[10px] font-mono uppercase tracking-[0.14em] text-[#c9b787] mb-2">Composed governance · A11oy Atelier</div>
-          <p className="text-[11px] text-sky-400/60 max-w-[60ch] leading-relaxed mb-3">
+          <p className="text-[11px] text-[#9a9a9a] max-w-[60ch] leading-relaxed mb-3">
             The maritime-routing Atelier Space is embedded directly into Vessels. Each run produces a publicly verifiable proof packet — telemetry feeds the governance-weighted leaderboard.
           </p>
           <AtelierEmbedFrame spaceSlug="maritime-routing" title="Maritime Routing — governed loop" />

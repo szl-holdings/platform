@@ -134,7 +134,7 @@ export default function CyberThreatPanel() {
           { label: 'Active Threats', value: '4', color: 'text-red-400' },
           { label: 'Vulnerable Systems', value: '12', color: 'text-orange-400' },
           { label: 'Patches Pending', value: '9', color: 'text-amber-400' },
-          { label: 'Fleet Cyber Score', value: '74/100', color: 'text-sky-400' },
+          { label: 'Fleet Cyber Score', value: '74/100', color: 'text-[#c9b787]' },
         ].map(({ label, value, color }) => (
           <Card key={label}>
             <CardContent className="p-4">

@@ -30,13 +30,13 @@ function _SparkBar({ values, color }: { values: number[]; color: string }) {
 function MiniBar({ value, max, color }: { value: number; max: number; color: string }) {
   return (
     <div className="flex items-center gap-2">
-      <div className="flex-1 h-1.5 bg-sky-500/10 rounded-full overflow-hidden">
+      <div className="flex-1 h-1.5 bg-[#c9b787]/10 rounded-full overflow-hidden">
         <div
           className={cn('h-full rounded-full', color)}
           style={{ width: `${Math.max((value / max) * 100, 2)}%` }}
         />
       </div>
-      <span className="text-[10px] font-mono text-sky-300 w-12 text-right shrink-0">
+      <span className="text-[10px] font-mono text-[#d4c598] w-12 text-right shrink-0">
         {value.toFixed(1)}
       </span>
     </div>
@@ -90,8 +90,8 @@ export default function PerformanceAnalyticsPage() {
   return (
     <div className="p-6 space-y-6">
       <div>
-        <h1 className="font-display text-xl font-bold text-sky-50">Performance Analytics</h1>
-        <p className="text-xs text-sky-400/50 mt-0.5">
+        <h1 className="font-display text-xl font-bold text-[#f5f5f5]">Performance Analytics</h1>
+        <p className="text-xs text-[#8a8a8a] mt-0.5">
           Fleet-wide performance metrics, route profitability, and corridor analysis
         </p>
       </div>
@@ -109,7 +109,7 @@ export default function PerformanceAnalyticsPage() {
           {
             label: 'On-Time Arrival',
             value: `${fleetOnTime.toFixed(1)}%`,
-            color: 'text-sky-400',
+            color: 'text-[#c9b787]',
             icon: Clock,
             sub: 'fleet average',
             trend: fleetOnTime >= 85 ? ('up' as const) : ('down' as const),
@@ -131,7 +131,7 @@ export default function PerformanceAnalyticsPage() {
             trend: 'down' as const,
           },
         ].map((s) => (
-          <div key={s.label} className="bg-[#0a1628]/80 border border-sky-500/10 rounded-xl p-4">
+          <div key={s.label} className="bg-white/[0.02] border border-white/[0.06] rounded-xl p-4">
             <div className="flex items-center justify-between mb-2">
               <s.icon className={cn('w-4 h-4', s.color)} />
               {s.trend === 'up' ? (
@@ -141,13 +141,13 @@ export default function PerformanceAnalyticsPage() {
               )}
             </div>
             <p className={cn('text-xl font-bold font-display', s.color)}>{s.value}</p>
-            <p className="text-[10px] text-sky-400/40 uppercase tracking-wider mt-1">{s.label}</p>
-            <p className="text-[9px] text-sky-400/30 mt-0.5">{s.sub}</p>
+            <p className="text-[10px] text-[#6a6a6a] uppercase tracking-wider mt-1">{s.label}</p>
+            <p className="text-[9px] text-[#5a5a5a] mt-0.5">{s.sub}</p>
           </div>
         ))}
       </div>
 
-      <div className="flex items-center gap-1 border-b border-sky-500/10 pb-3">
+      <div className="flex items-center gap-1 border-b border-white/[0.06] pb-3">
         {[
           { id: 'utilization', label: 'Utilization' },
           { id: 'ontime', label: 'On-Time Arrival' },
@@ -159,7 +159,7 @@ export default function PerformanceAnalyticsPage() {
             onClick={() => setView(tab.id as typeof view)}
             className={cn(
               'px-4 py-2 text-xs font-medium rounded-lg transition-all',
-              view === tab.id ? 'bg-sky-500/10 text-sky-300' : 'text-sky-400/40 hover:text-sky-300',
+              view === tab.id ? 'bg-[#c9b787]/10 text-[#d4c598]' : 'text-[#6a6a6a] hover:text-[#d4c598]',
             )}
           >
             {tab.label}
@@ -169,18 +169,18 @@ export default function PerformanceAnalyticsPage() {
 
       {view === 'utilization' && (
         <div className="space-y-4">
-          <h3 className="text-[10px] font-mono text-sky-400/50 uppercase tracking-wider">
+          <h3 className="text-[10px] font-mono text-[#8a8a8a] uppercase tracking-wider">
             Fleet Utilization by Vessel
           </h3>
           <div className="space-y-3">
             {sortedByUtil.map((m) => (
               <div
                 key={m.vesselId}
-                className="bg-[#0a1628]/80 border border-sky-500/10 rounded-xl p-4"
+                className="bg-white/[0.02] border border-white/[0.06] rounded-xl p-4"
               >
                 <div className="flex items-center gap-3 mb-3">
-                  <Ship className="w-3.5 h-3.5 text-sky-400/50" />
-                  <span className="text-xs font-semibold text-sky-100 flex-1">{m.vesselName}</span>
+                  <Ship className="w-3.5 h-3.5 text-[#8a8a8a]" />
+                  <span className="text-xs font-semibold text-[#f5f5f5] flex-1">{m.vesselName}</span>
                   <span
                     className={cn(
                       'text-sm font-bold font-mono',
@@ -190,13 +190,13 @@ export default function PerformanceAnalyticsPage() {
                           ? 'text-amber-400'
                           : m.utilization === 0
                             ? 'text-red-400'
-                            : 'text-sky-300',
+                            : 'text-[#d4c598]',
                     )}
                   >
                     {m.utilization > 0 ? `${m.utilization}%` : 'Unavailable'}
                   </span>
                 </div>
-                <div className="h-2 bg-sky-500/10 rounded-full overflow-hidden">
+                <div className="h-2 bg-[#c9b787]/10 rounded-full overflow-hidden">
                   <div
                     className={cn(
                       'h-full rounded-full transition-all',
@@ -206,12 +206,12 @@ export default function PerformanceAnalyticsPage() {
                           ? 'bg-amber-400'
                           : m.utilization === 0
                             ? 'bg-red-400'
-                            : 'bg-sky-400',
+                            : 'bg-[#c9b787]',
                     )}
                     style={{ width: `${m.utilization}%` }}
                   />
                 </div>
-                <div className="flex items-center gap-4 mt-2 text-[10px] text-sky-400/40">
+                <div className="flex items-center gap-4 mt-2 text-[10px] text-[#6a6a6a]">
                   <span>OTA: {m.onTimeArrivalRate > 0 ? `${m.onTimeArrivalRate}%` : '—'}</span>
                   <span>Avg delay: {m.avgDelayHours > 0 ? `${m.avgDelayHours}h` : 'None'}</span>
                   <span className="ml-auto">
@@ -226,7 +226,7 @@ export default function PerformanceAnalyticsPage() {
 
       {view === 'ontime' && (
         <div className="space-y-4">
-          <h3 className="text-[10px] font-mono text-sky-400/50 uppercase tracking-wider">
+          <h3 className="text-[10px] font-mono text-[#8a8a8a] uppercase tracking-wider">
             On-Time Arrival Rate by Vessel
           </h3>
           <div className="space-y-2">
@@ -235,10 +235,10 @@ export default function PerformanceAnalyticsPage() {
               .map((m) => (
                 <div
                   key={m.vesselId}
-                  className="bg-[#0a1628]/80 border border-sky-500/10 rounded-xl p-4"
+                  className="bg-white/[0.02] border border-white/[0.06] rounded-xl p-4"
                 >
                   <div className="flex items-center gap-3 mb-2">
-                    <span className="text-xs font-semibold text-sky-100 flex-1">
+                    <span className="text-xs font-semibold text-[#f5f5f5] flex-1">
                       {m.vesselName}
                     </span>
                     <span
@@ -265,7 +265,7 @@ export default function PerformanceAnalyticsPage() {
                           : 'bg-red-400'
                     }
                   />
-                  <div className="flex items-center gap-4 mt-2 text-[10px] text-sky-400/40">
+                  <div className="flex items-center gap-4 mt-2 text-[10px] text-[#6a6a6a]">
                     <span>
                       Avg delay: {m.avgDelayHours > 0 ? `${m.avgDelayHours.toFixed(1)}h` : 'None'}
                     </span>
@@ -278,8 +278,8 @@ export default function PerformanceAnalyticsPage() {
               ))}
           </div>
 
-          <div className="bg-[#0a1628]/80 border border-sky-500/10 rounded-xl p-4">
-            <h4 className="text-[10px] font-mono text-sky-400/50 uppercase tracking-wider mb-3">
+          <div className="bg-white/[0.02] border border-white/[0.06] rounded-xl p-4">
+            <h4 className="text-[10px] font-mono text-[#8a8a8a] uppercase tracking-wider mb-3">
               Delay Frequency Analysis
             </h4>
             <div className="space-y-2">
@@ -287,10 +287,10 @@ export default function PerformanceAnalyticsPage() {
                 .filter((m) => m.avgDelayHours > 0)
                 .map((m) => (
                   <div key={m.vesselId} className="flex items-center gap-3">
-                    <span className="text-[10px] text-sky-200/60 w-32 truncate">
+                    <span className="text-[10px] text-[#e0e0e0]/60 w-32 truncate">
                       {m.vesselName}
                     </span>
-                    <div className="flex-1 h-1.5 bg-sky-500/10 rounded-full overflow-hidden">
+                    <div className="flex-1 h-1.5 bg-[#c9b787]/10 rounded-full overflow-hidden">
                       <div
                         className={cn(
                           'h-full rounded-full',
@@ -324,7 +324,7 @@ export default function PerformanceAnalyticsPage() {
 
       {view === 'tce' && (
         <div className="space-y-4">
-          <h3 className="text-[10px] font-mono text-sky-400/50 uppercase tracking-wider">
+          <h3 className="text-[10px] font-mono text-[#8a8a8a] uppercase tracking-wider">
             TCE Performance Ranking
           </h3>
           <div className="space-y-2">
@@ -333,20 +333,20 @@ export default function PerformanceAnalyticsPage() {
               .map((m, i) => (
                 <div
                   key={m.vesselId}
-                  className="bg-[#0a1628]/80 border border-sky-500/10 rounded-xl p-4"
+                  className="bg-white/[0.02] border border-white/[0.06] rounded-xl p-4"
                 >
                   <div className="flex items-center gap-3 mb-2">
-                    <span className="text-sm font-bold text-sky-400/30 w-5">{i + 1}</span>
-                    <span className="text-xs font-semibold text-sky-100 flex-1">
+                    <span className="text-sm font-bold text-[#5a5a5a] w-5">{i + 1}</span>
+                    <span className="text-xs font-semibold text-[#f5f5f5] flex-1">
                       {m.vesselName}
                     </span>
                     <span className="text-sm font-bold font-mono text-emerald-400">
                       ${m.tce.toLocaleString()}
-                      <span className="text-xs text-sky-400/40">/d</span>
+                      <span className="text-xs text-[#6a6a6a]">/d</span>
                     </span>
                   </div>
                   <MiniBar value={m.tce} max={60000} color="bg-violet-400" />
-                  <div className="flex items-center gap-4 mt-2 text-[10px] text-sky-400/40">
+                  <div className="flex items-center gap-4 mt-2 text-[10px] text-[#6a6a6a]">
                     <span>Utilization: {m.utilization}%</span>
                     <span>Route margin: {m.routeProfitability.toFixed(1)}%</span>
                     <span className="ml-auto">Fuel eff.: {m.fuelEfficiency.toFixed(2)}</span>
@@ -359,26 +359,26 @@ export default function PerformanceAnalyticsPage() {
 
       {view === 'routes' && (
         <div className="space-y-4">
-          <h3 className="text-[10px] font-mono text-sky-400/50 uppercase tracking-wider">
+          <h3 className="text-[10px] font-mono text-[#8a8a8a] uppercase tracking-wider">
             Active Corridor Analysis
           </h3>
           <div className="space-y-3">
             {corridors.map((corridor) => (
               <div
                 key={corridor.id}
-                className="bg-[#0a1628]/80 border border-sky-500/10 rounded-xl p-4"
+                className="bg-white/[0.02] border border-white/[0.06] rounded-xl p-4"
               >
                 <div className="flex items-start gap-4">
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2 flex-wrap">
-                      <p className="text-xs font-bold text-sky-100">{corridor.name}</p>
+                      <p className="text-xs font-bold text-[#f5f5f5]">{corridor.name}</p>
                       {corridor.activeAlerts > 0 && (
                         <span className="text-[9px] px-1.5 py-0.5 rounded bg-red-500/10 text-red-400 border border-red-500/20">
                           {corridor.activeAlerts} alerts
                         </span>
                       )}
                     </div>
-                    <p className="text-[10px] text-sky-400/50 mt-0.5">
+                    <p className="text-[10px] text-[#8a8a8a] mt-0.5">
                       {corridor.origin} → {corridor.destination} · {corridor.commodity}
                     </p>
                   </div>
@@ -395,17 +395,17 @@ export default function PerformanceAnalyticsPage() {
                     >
                       {corridor.profitabilityIndex}
                     </p>
-                    <p className="text-[9px] text-sky-400/40">profit index</p>
+                    <p className="text-[9px] text-[#6a6a6a]">profit index</p>
                   </div>
                 </div>
 
                 <div className="mt-3 grid grid-cols-4 gap-2">
-                  <div className="bg-sky-500/5 rounded p-2 border border-sky-500/10">
-                    <p className="text-[9px] text-sky-400/40">Vessels</p>
-                    <p className="text-[10px] font-mono text-sky-300">{corridor.vesselCount}</p>
+                  <div className="bg-[#c9b787]/8 rounded p-2 border border-white/[0.06]">
+                    <p className="text-[9px] text-[#6a6a6a]">Vessels</p>
+                    <p className="text-[10px] font-mono text-[#d4c598]">{corridor.vesselCount}</p>
                   </div>
-                  <div className="bg-sky-500/5 rounded p-2 border border-sky-500/10">
-                    <p className="text-[9px] text-sky-400/40">Delay Rate</p>
+                  <div className="bg-[#c9b787]/8 rounded p-2 border border-white/[0.06]">
+                    <p className="text-[9px] text-[#6a6a6a]">Delay Rate</p>
                     <p
                       className={cn(
                         'text-[10px] font-mono',
@@ -419,8 +419,8 @@ export default function PerformanceAnalyticsPage() {
                       {corridor.delayRate}%
                     </p>
                   </div>
-                  <div className="bg-sky-500/5 rounded p-2 border border-sky-500/10">
-                    <p className="text-[9px] text-sky-400/40">Weather</p>
+                  <div className="bg-[#c9b787]/8 rounded p-2 border border-white/[0.06]">
+                    <p className="text-[9px] text-[#6a6a6a]">Weather</p>
                     <p
                       className={cn(
                         'text-[10px] font-mono capitalize',
@@ -430,8 +430,8 @@ export default function PerformanceAnalyticsPage() {
                       {corridor.weatherRisk}
                     </p>
                   </div>
-                  <div className="bg-sky-500/5 rounded p-2 border border-sky-500/10">
-                    <p className="text-[9px] text-sky-400/40">Congestion</p>
+                  <div className="bg-[#c9b787]/8 rounded p-2 border border-white/[0.06]">
+                    <p className="text-[9px] text-[#6a6a6a]">Congestion</p>
                     <p
                       className={cn(
                         'text-[10px] font-mono capitalize',
@@ -443,7 +443,7 @@ export default function PerformanceAnalyticsPage() {
                   </div>
                 </div>
 
-                <div className="flex items-center gap-4 mt-2 text-[10px] text-sky-400/40">
+                <div className="flex items-center gap-4 mt-2 text-[10px] text-[#6a6a6a]">
                   <span>Transit: {corridor.avgTransitDays}d avg</span>
                   <span>Volume: {corridor.weeklyVolume}/wk</span>
                   <span
@@ -453,7 +453,7 @@ export default function PerformanceAnalyticsPage() {
                         ? 'text-emerald-400'
                         : corridor.trend === 'down'
                           ? 'text-red-400'
-                          : 'text-sky-400/40',
+                          : 'text-[#6a6a6a]',
                     )}
                   >
                     {corridor.trend === 'up' ? (

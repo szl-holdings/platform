@@ -407,8 +407,8 @@ export default function DarkVesselDetection() {
             label: 'Avg Gap Duration',
             value: '10h 54m',
             icon: Clock,
-            color: 'text-sky-400',
-            bg: 'bg-sky-500/10',
+            color: 'text-[#c9b787]',
+            bg: 'bg-[#c9b787]/10',
           },
         ].map(({ label, value, icon: Icon, color, bg }) => (
           <Card key={label}>

@@ -104,27 +104,27 @@ function CrewCard({ cm }: { cm: CrewMember }) {
   return (
     <div
       className={cn(
-        'bg-[#0a1628]/80 border rounded-xl overflow-hidden transition-all',
+        'bg-white/[0.02] border rounded-xl overflow-hidden transition-all',
         expiredCerts > 0 || !cm.mlcCompliant
           ? 'border-red-500/20'
           : expiringSoon > 0 || medAlert
             ? 'border-amber-500/20'
-            : 'border-sky-500/10',
+            : 'border-white/[0.06]',
       )}
     >
       <button className="w-full text-left px-4 py-3" onClick={() => setExpanded(!expanded)}>
         <div className="flex items-center gap-3">
-          <div className="w-8 h-8 rounded-full bg-sky-500/10 flex items-center justify-center shrink-0">
-            <User className="w-3.5 h-3.5 text-sky-400" />
+          <div className="w-8 h-8 rounded-full bg-[#c9b787]/10 flex items-center justify-center shrink-0">
+            <User className="w-3.5 h-3.5 text-[#c9b787]" />
           </div>
           <div className="flex-1 min-w-0">
             <div className="flex items-center gap-2 flex-wrap">
-              <span className="text-sm font-bold text-sky-100">{cm.name}</span>
-              <span className="text-[10px] text-sky-400/60">{cm.flagEmoji}</span>
-              <Badge variant="outline" className="text-[9px] text-sky-400/50 border-sky-500/10">
+              <span className="text-sm font-bold text-[#f5f5f5]">{cm.name}</span>
+              <span className="text-[10px] text-[#9a9a9a]">{cm.flagEmoji}</span>
+              <Badge variant="outline" className="text-[9px] text-[#8a8a8a] border-white/[0.06]">
                 {cm.rank}
               </Badge>
-              <Badge variant="outline" className="text-[9px] text-sky-400/30 border-sky-500/8">
+              <Badge variant="outline" className="text-[9px] text-[#5a5a5a] border-white/[0.08]">
                 {cm.nationality}
               </Badge>
               {!cm.mlcCompliant && (
@@ -151,28 +151,28 @@ function CrewCard({ cm }: { cm: CrewMember }) {
                   {expiringSoon} expiring soon
                 </Badge>
               )}
-              <Badge variant="outline" className="text-[9px] text-sky-400/30 border-sky-500/8">
+              <Badge variant="outline" className="text-[9px] text-[#5a5a5a] border-white/[0.08]">
                 {cm.contractType}
               </Badge>
             </div>
-            <p className="text-[10px] text-sky-400/50 mt-0.5">
+            <p className="text-[10px] text-[#8a8a8a] mt-0.5">
               {cm.vessel} · IMO {cm.imo} · {cm.flagState}
             </p>
             <div className="mt-1.5">
               <div className="flex justify-between mb-0.5">
-                <span className="text-[9px] text-sky-400/30">
+                <span className="text-[9px] text-[#5a5a5a]">
                   Rotation: {cm.daysOnBoard}/{cm.maxRotationDays} days
                 </span>
                 <span
                   className={cn(
                     'text-[9px] font-mono',
-                    rotationPct > 85 ? 'text-orange-400' : 'text-sky-400/40',
+                    rotationPct > 85 ? 'text-orange-400' : 'text-[#6a6a6a]',
                   )}
                 >
                   {Math.round(rotationPct)}%
                 </span>
               </div>
-              <div className="h-1.5 bg-sky-500/10 rounded-full overflow-hidden">
+              <div className="h-1.5 bg-[#c9b787]/10 rounded-full overflow-hidden">
                 <div
                   className={cn(
                     'h-full rounded-full transition-all',
@@ -191,7 +191,7 @@ function CrewCard({ cm }: { cm: CrewMember }) {
       </button>
 
       {expanded && (
-        <div className="px-4 pb-4 border-t border-sky-500/10 pt-3 space-y-3">
+        <div className="px-4 pb-4 border-t border-white/[0.06] pt-3 space-y-3">
           <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
             {(
               [
@@ -201,12 +201,12 @@ function CrewCard({ cm }: { cm: CrewMember }) {
                 { label: 'Seafarer ID', value: cm.seafarerIdNo, alert: false },
               ] as { label: string; value: string; alert: boolean }[]
             ).map((f) => (
-              <div key={f.label} className="bg-sky-500/5 rounded-lg p-2.5 border border-sky-500/10">
-                <p className="text-[9px] text-sky-400/40 uppercase tracking-wider">{f.label}</p>
+              <div key={f.label} className="bg-[#c9b787]/8 rounded-lg p-2.5 border border-white/[0.06]">
+                <p className="text-[9px] text-[#6a6a6a] uppercase tracking-wider">{f.label}</p>
                 <p
                   className={cn(
                     'text-xs font-mono mt-0.5',
-                    f.alert ? 'text-amber-400' : 'text-sky-200',
+                    f.alert ? 'text-amber-400' : 'text-[#e0e0e0]',
                   )}
                 >
                   {f.value}
@@ -216,14 +216,14 @@ function CrewCard({ cm }: { cm: CrewMember }) {
           </div>
 
           <div>
-            <p className="text-[9px] text-sky-400/40 uppercase tracking-wider mb-2">
+            <p className="text-[9px] text-[#6a6a6a] uppercase tracking-wider mb-2">
               STCW Certifications
             </p>
             <div className="space-y-1.5">
               {cm.certifications.map((cert) => (
                 <div
                   key={cert.name}
-                  className="flex items-center gap-3 p-2 rounded-lg bg-sky-500/3 border border-sky-500/8"
+                  className="flex items-center gap-3 p-2 rounded-lg bg-[#c9b787]/14 border border-white/[0.08]"
                 >
                   <Badge
                     variant="outline"
@@ -232,10 +232,10 @@ function CrewCard({ cm }: { cm: CrewMember }) {
                     {certLabel[cert.status]}
                   </Badge>
                   <div className="flex-1 min-w-0">
-                    <span className="text-[11px] text-sky-200">{cert.name}</span>
-                    <span className="text-[9px] text-sky-400/30 ml-2">{cert.issuedBy}</span>
+                    <span className="text-[11px] text-[#e0e0e0]">{cert.name}</span>
+                    <span className="text-[9px] text-[#5a5a5a] ml-2">{cert.issuedBy}</span>
                   </div>
-                  <span className="text-[9px] font-mono text-sky-400/40 shrink-0">
+                  <span className="text-[9px] font-mono text-[#6a6a6a] shrink-0">
                     Exp: {cert.expiryDate}
                   </span>
                 </div>
@@ -265,12 +265,12 @@ function CrewCard({ cm }: { cm: CrewMember }) {
               </span>
             </div>
             <div className="flex items-center gap-1.5">
-              <Globe className="w-3 h-3 text-sky-400/30" />
-              <span className="text-sky-400/50">Flag: {cm.flagState}</span>
+              <Globe className="w-3 h-3 text-[#5a5a5a]" />
+              <span className="text-[#8a8a8a]">Flag: {cm.flagState}</span>
             </div>
             <div className="flex items-center gap-1.5">
-              <FileText className="w-3 h-3 text-sky-400/30" />
-              <span className="text-sky-400/50">
+              <FileText className="w-3 h-3 text-[#5a5a5a]" />
+              <span className="text-[#8a8a8a]">
                 {cm.contractType === 'agency' ? 'Agency hire' : 'Direct employment'}
               </span>
             </div>
@@ -305,25 +305,25 @@ export default function CrewTrackerPage() {
     <div className="p-6 space-y-6">
       <div className="flex items-start justify-between">
         <div>
-          <h1 className="font-display text-xl font-bold text-sky-50 flex items-center gap-2">
-            <Users className="w-5 h-5 text-sky-400" />
+          <h1 className="font-display text-xl font-bold text-[#f5f5f5] flex items-center gap-2">
+            <Users className="w-5 h-5 text-[#c9b787]" />
             Crew & Certification Tracker
           </h1>
-          <p className="text-xs text-sky-400/50 mt-0.5">
+          <p className="text-xs text-[#8a8a8a] mt-0.5">
             Rotation scheduling, STCW certification expiry alerts, medical compliance, and
             flag-state manning requirements
           </p>
         </div>
         <button
           onClick={() => refetch()}
-          className="text-sky-400/40 hover:text-sky-300 transition-colors mt-1"
+          className="text-[#6a6a6a] hover:text-[#d4c598] transition-colors mt-1"
         >
           <RefreshCw className="w-3.5 h-3.5" />
         </button>
       </div>
 
       {isLoading && (
-        <div className="flex items-center justify-center h-32 text-sky-400/40 text-sm">
+        <div className="flex items-center justify-center h-32 text-[#6a6a6a] text-sm">
           <RefreshCw className="w-4 h-4 animate-spin mr-2" /> Loading crew roster…
         </div>
       )}
@@ -331,10 +331,10 @@ export default function CrewTrackerPage() {
       {isError && (
         <div className="flex flex-col items-center justify-center h-32 gap-3">
           <AlertTriangle className="w-5 h-5 text-red-400" />
-          <p className="text-sm text-sky-400/50">Failed to load crew data</p>
+          <p className="text-sm text-[#8a8a8a]">Failed to load crew data</p>
           <button
             onClick={() => refetch()}
-            className="text-xs text-sky-400 border border-sky-500/20 px-3 py-1.5 rounded-lg"
+            className="text-xs text-[#c9b787] border border-white/[0.08] px-3 py-1.5 rounded-lg"
           >
             Retry
           </button>
@@ -344,7 +344,7 @@ export default function CrewTrackerPage() {
       {!isLoading && !isError && summary && (
         <div className="grid grid-cols-2 md:grid-cols-5 gap-3">
           {[
-            { label: 'Total Crew', value: summary.total, color: 'text-sky-300', icon: Users },
+            { label: 'Total Crew', value: summary.total, color: 'text-[#d4c598]', icon: Users },
             {
               label: 'Expired Certs',
               value: summary.expiredCerts,
@@ -370,10 +370,10 @@ export default function CrewTrackerPage() {
               icon: Calendar,
             },
           ].map((s) => (
-            <div key={s.label} className="bg-[#0a1628]/80 border border-sky-500/10 rounded-xl p-4">
+            <div key={s.label} className="bg-white/[0.02] border border-white/[0.06] rounded-xl p-4">
               <div className="flex items-center gap-2 mb-1">
                 <s.icon className={cn('w-3.5 h-3.5', s.color)} />
-                <p className="text-[10px] text-sky-400/40 uppercase tracking-wider">{s.label}</p>
+                <p className="text-[10px] text-[#6a6a6a] uppercase tracking-wider">{s.label}</p>
               </div>
               <p className={cn('text-xl font-bold font-display', s.color)}>{s.value}</p>
             </div>
@@ -392,8 +392,8 @@ export default function CrewTrackerPage() {
                   className={cn(
                     'text-xs px-3 py-1.5 rounded-lg capitalize transition-colors',
                     tab === t
-                      ? 'bg-sky-500/10 text-sky-300 border border-sky-500/20'
-                      : 'text-sky-400/50 hover:text-sky-300',
+                      ? 'bg-[#c9b787]/10 text-[#d4c598] border border-white/[0.08]'
+                      : 'text-[#8a8a8a] hover:text-[#d4c598]',
                   )}
                 >
                   {t === 'crew' ? 'Crew Roster' : 'Rotation Schedule'}
@@ -409,8 +409,8 @@ export default function CrewTrackerPage() {
                     className={cn(
                       'text-[10px] px-2.5 py-1.5 rounded-lg border transition-all',
                       vesselFilter === v
-                        ? 'bg-sky-500/10 border-sky-500/30 text-sky-300'
-                        : 'border-sky-500/10 text-sky-400/40 hover:text-sky-300',
+                        ? 'bg-[#c9b787]/10 border-[#c9b787]/24 text-[#d4c598]'
+                        : 'border-white/[0.06] text-[#6a6a6a] hover:text-[#d4c598]',
                     )}
                   >
                     {v === 'all' ? 'All Vessels' : v}
@@ -433,28 +433,28 @@ export default function CrewTrackerPage() {
               {rotations.map((r) => (
                 <div
                   key={r.vessel}
-                  className="bg-[#0a1628]/80 border border-sky-500/10 rounded-xl overflow-hidden"
+                  className="bg-white/[0.02] border border-white/[0.06] rounded-xl overflow-hidden"
                 >
-                  <div className="px-4 py-3 border-b border-sky-500/10 flex items-center gap-2">
-                    <Ship className="w-3.5 h-3.5 text-sky-400" />
-                    <span className="text-sm font-semibold text-sky-200">{r.vessel}</span>
-                    <span className="text-[10px] text-sky-400/30 font-mono">IMO {r.imo}</span>
+                  <div className="px-4 py-3 border-b border-white/[0.06] flex items-center gap-2">
+                    <Ship className="w-3.5 h-3.5 text-[#c9b787]" />
+                    <span className="text-sm font-semibold text-[#e0e0e0]">{r.vessel}</span>
+                    <span className="text-[10px] text-[#5a5a5a] font-mono">IMO {r.imo}</span>
                   </div>
                   <div className="divide-y divide-sky-500/5">
                     {r.reliefs.map((relief) => (
                       <div key={relief.name} className="px-4 py-3 flex items-center gap-4">
-                        <div className="w-8 h-8 rounded-full bg-sky-500/10 flex items-center justify-center shrink-0">
-                          <User className="w-3.5 h-3.5 text-sky-400" />
+                        <div className="w-8 h-8 rounded-full bg-[#c9b787]/10 flex items-center justify-center shrink-0">
+                          <User className="w-3.5 h-3.5 text-[#c9b787]" />
                         </div>
                         <div className="flex-1">
-                          <p className="text-sm font-medium text-sky-200">{relief.name}</p>
-                          <p className="text-[10px] text-sky-400/50">
+                          <p className="text-sm font-medium text-[#e0e0e0]">{relief.name}</p>
+                          <p className="text-[10px] text-[#8a8a8a]">
                             {relief.rank} · {relief.nationality} · via {relief.agency}
                           </p>
                         </div>
                         <div className="flex items-center gap-2">
-                          <Calendar className="w-3 h-3 text-sky-400/30" />
-                          <span className="text-xs text-sky-300">{relief.eta}</span>
+                          <Calendar className="w-3 h-3 text-[#5a5a5a]" />
+                          <span className="text-xs text-[#d4c598]">{relief.eta}</span>
                         </div>
                         <Badge
                           variant="outline"

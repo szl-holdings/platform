@@ -63,22 +63,22 @@ function VesselSidePanel({
   const scLabel = statusLabels[vessel.status] || vessel.status;
 
   return (
-    <div className="w-[340px] h-full bg-[#060e1a]/98 backdrop-blur-xl border-l border-sky-500/10 flex flex-col overflow-hidden shrink-0 z-20">
-      <div className="p-4 border-b border-sky-500/10 flex items-center justify-between">
+    <div className="w-[340px] h-full bg-[#060e1a]/98 backdrop-blur-xl border-l border-white/[0.06] flex flex-col overflow-hidden shrink-0 z-20">
+      <div className="p-4 border-b border-white/[0.06] flex items-center justify-between">
         <div className="flex items-center gap-3">
-          <div className="w-9 h-9 rounded-lg bg-sky-500/10 flex items-center justify-center">
-            <Ship className="w-4.5 h-4.5 text-sky-400" />
+          <div className="w-9 h-9 rounded-lg bg-[#c9b787]/10 flex items-center justify-center">
+            <Ship className="w-4.5 h-4.5 text-[#c9b787]" />
           </div>
           <div>
-            <h3 className="text-sm font-bold text-sky-50">{vessel.name}</h3>
-            <p className="text-[10px] text-sky-400/50 font-mono">
+            <h3 className="text-sm font-bold text-[#f5f5f5]">{vessel.name}</h3>
+            <p className="text-[10px] text-[#8a8a8a] font-mono">
               IMO {vessel.imo} · {vessel.flag}
             </p>
           </div>
         </div>
         <button
           onClick={onClose}
-          className="p-1.5 rounded hover:bg-sky-500/10 text-sky-400/50 hover:text-sky-300 transition-colors"
+          className="p-1.5 rounded hover:bg-[#c9b787]/10 text-[#8a8a8a] hover:text-[#d4c598] transition-colors"
         >
           <X className="w-4 h-4" />
         </button>
@@ -96,7 +96,7 @@ function VesselSidePanel({
             />
             {scLabel}
           </span>
-          <span className="text-[10px] text-sky-400/40 font-mono">{vessel.type}</span>
+          <span className="text-[10px] text-[#6a6a6a] font-mono">{vessel.type}</span>
           {vesselExceptions.length > 0 && (
             <Badge
               variant="outline"
@@ -116,16 +116,16 @@ function VesselSidePanel({
           ].map((item) => (
             <div
               key={item.label}
-              className="bg-sky-500/5 rounded-lg p-2.5 border border-sky-500/10"
+              className="bg-[#c9b787]/8 rounded-lg p-2.5 border border-white/[0.06]"
             >
-              <p className="text-[9px] text-sky-400/40 uppercase tracking-wider">{item.label}</p>
-              <p className="text-xs font-mono text-sky-100 mt-0.5">{item.value}</p>
+              <p className="text-[9px] text-[#6a6a6a] uppercase tracking-wider">{item.label}</p>
+              <p className="text-xs font-mono text-[#f5f5f5] mt-0.5">{item.value}</p>
             </div>
           ))}
         </div>
 
         {vessel.lat != null && vessel.lon != null && (
-          <div className="rounded-lg overflow-hidden border border-sky-500/10 relative">
+          <div className="rounded-lg overflow-hidden border border-white/[0.06] relative">
             <img
               src={`${import.meta.env.BASE_URL}api/maps/static?center=${vessel.lat},${vessel.lon}&zoom=7&size=400x160&maptype=satellite&markers=color:cyan|${vessel.lat},${vessel.lon}`}
               alt={`Satellite view of ${vessel.name} at ${vessel.lat.toFixed(2)}, ${vessel.lon.toFixed(2)}`}
@@ -144,22 +144,22 @@ function VesselSidePanel({
           </div>
         )}
 
-        <div className="bg-sky-500/5 rounded-lg p-3 border border-sky-500/10 space-y-2">
-          <p className="text-[9px] text-sky-400/40 uppercase tracking-wider">Route Progress</p>
-          <div className="flex items-center gap-2 text-xs text-sky-400/60">
+        <div className="bg-[#c9b787]/8 rounded-lg p-3 border border-white/[0.06] space-y-2">
+          <p className="text-[9px] text-[#6a6a6a] uppercase tracking-wider">Route Progress</p>
+          <div className="flex items-center gap-2 text-xs text-[#9a9a9a]">
             <MapPin className="w-3 h-3 shrink-0" />
             <span className="truncate">{vessel.lastPort}</span>
             <ChevronRight className="w-3 h-3 shrink-0" />
             <span className="truncate">{vessel.nextPort}</span>
           </div>
-          <div className="relative h-1.5 bg-sky-500/10 rounded-full overflow-hidden">
+          <div className="relative h-1.5 bg-[#c9b787]/10 rounded-full overflow-hidden">
             <div
-              className="absolute left-0 top-0 h-full bg-sky-400 rounded-full transition-all"
+              className="absolute left-0 top-0 h-full bg-[#c9b787] rounded-full transition-all"
               style={{ width: `${vessel.routeProgress}%` }}
             />
           </div>
           <div className="flex items-center justify-between text-[10px]">
-            <span className="text-sky-400/40">{vessel.routeProgress}% complete</span>
+            <span className="text-[#6a6a6a]">{vessel.routeProgress}% complete</span>
             <span
               className={cn(
                 'font-mono',
@@ -167,7 +167,7 @@ function VesselSidePanel({
                   ? 'text-emerald-400'
                   : (vessel.etaDelta ?? 0) > 0
                     ? 'text-orange-400'
-                    : 'text-sky-400/50',
+                    : 'text-[#8a8a8a]',
               )}
             >
               {(vessel.etaDelta ?? 0) < 0
@@ -180,35 +180,35 @@ function VesselSidePanel({
         </div>
 
         <div className="grid grid-cols-2 gap-2">
-          <div className="bg-sky-500/5 rounded-lg p-2.5 border border-sky-500/10">
-            <p className="text-[9px] text-sky-400/40 uppercase tracking-wider">TCE</p>
-            <p className="text-xs font-mono text-sky-100 mt-0.5">
+          <div className="bg-[#c9b787]/8 rounded-lg p-2.5 border border-white/[0.06]">
+            <p className="text-[9px] text-[#6a6a6a] uppercase tracking-wider">TCE</p>
+            <p className="text-xs font-mono text-[#f5f5f5] mt-0.5">
               {(vessel.tce ?? 0) > 0 ? `$${(vessel.tce ?? 0).toLocaleString()}/d` : '—'}
             </p>
           </div>
-          <div className="bg-sky-500/5 rounded-lg p-2.5 border border-sky-500/10">
-            <p className="text-[9px] text-sky-400/40 uppercase tracking-wider">Utilization</p>
-            <p className="text-xs font-mono text-sky-100 mt-0.5">
+          <div className="bg-[#c9b787]/8 rounded-lg p-2.5 border border-white/[0.06]">
+            <p className="text-[9px] text-[#6a6a6a] uppercase tracking-wider">Utilization</p>
+            <p className="text-xs font-mono text-[#f5f5f5] mt-0.5">
               {(vessel.utilization ?? 0) > 0 ? `${vessel.utilization}%` : 'Unavailable'}
             </p>
           </div>
-          <div className="bg-sky-500/5 rounded-lg p-2.5 border border-sky-500/10">
-            <p className="text-[9px] text-sky-400/40 uppercase tracking-wider">CII Rating</p>
+          <div className="bg-[#c9b787]/8 rounded-lg p-2.5 border border-white/[0.06]">
+            <p className="text-[9px] text-[#6a6a6a] uppercase tracking-wider">CII Rating</p>
             <p
               className={cn(
                 'text-xs font-mono font-bold mt-0.5',
                 vessel.ciiRating === 'A'
                   ? 'text-emerald-400'
                   : vessel.ciiRating === 'B'
-                    ? 'text-sky-400'
+                    ? 'text-[#c9b787]'
                     : 'text-amber-400',
               )}
             >
               {vessel.ciiRating}
             </p>
           </div>
-          <div className="bg-sky-500/5 rounded-lg p-2.5 border border-sky-500/10">
-            <p className="text-[9px] text-sky-400/40 uppercase tracking-wider">Readiness</p>
+          <div className="bg-[#c9b787]/8 rounded-lg p-2.5 border border-white/[0.06]">
+            <p className="text-[9px] text-[#6a6a6a] uppercase tracking-wider">Readiness</p>
             <p
               className={cn(
                 'text-xs font-mono font-bold mt-0.5',
@@ -226,11 +226,11 @@ function VesselSidePanel({
 
         {vesselExceptions.length > 0 && (
           <div className="space-y-2">
-            <p className="text-[9px] text-sky-400/40 uppercase tracking-wider">Active Exceptions</p>
+            <p className="text-[9px] text-[#6a6a6a] uppercase tracking-wider">Active Exceptions</p>
             {vesselExceptions.map((exc) => (
               <div key={exc.id} className="bg-red-500/5 border border-red-500/10 rounded-lg p-2.5">
                 <p className="text-[10px] font-medium text-red-300">{exc.title}</p>
-                <p className="text-[9px] text-sky-400/50 mt-0.5">
+                <p className="text-[9px] text-[#8a8a8a] mt-0.5">
                   {exc.description.slice(0, 80)}...
                 </p>
               </div>
@@ -239,7 +239,7 @@ function VesselSidePanel({
         )}
 
         <Link href={`/vessel/${vessel.id}`}>
-          <button className="w-full text-xs text-sky-400 hover:text-sky-300 border border-sky-500/20 hover:border-sky-500/40 rounded-lg py-2 transition-all">
+          <button className="w-full text-xs text-[#c9b787] hover:text-[#d4c598] border border-white/[0.08] hover:border-[#c9b787]/40 rounded-lg py-2 transition-all">
             View Full Detail <ChevronRight className="w-3 h-3 inline ml-1" />
           </button>
         </Link>
@@ -811,8 +811,8 @@ function MapboxFleetMap({
     return (
       <div className="flex-1 flex items-center justify-center bg-[#060e1a]">
         <div className="text-center space-y-2">
-          <Ship className="w-8 h-8 text-sky-400/30 mx-auto" />
-          <p className="text-sm text-sky-400/50">Map failed to load</p>
+          <Ship className="w-8 h-8 text-[#5a5a5a] mx-auto" />
+          <p className="text-sm text-[#8a8a8a]">Map failed to load</p>
         </div>
       </div>
     );
@@ -850,8 +850,8 @@ function MapboxFleetMap({
       {!mapLoaded && (
         <div className="absolute inset-0 flex items-center justify-center bg-[#060e1a] z-10">
           <div className="flex flex-col items-center gap-3">
-            <div className="w-8 h-8 border-2 border-sky-500/30 border-t-sky-400 rounded-full animate-spin" />
-            <p className="text-xs text-sky-400/40">Loading fleet map…</p>
+            <div className="w-8 h-8 border-2 border-[#c9b787]/24 border-t-sky-400 rounded-full animate-spin" />
+            <p className="text-xs text-[#6a6a6a]">Loading fleet map…</p>
           </div>
         </div>
       )}
@@ -862,7 +862,7 @@ function MapboxFleetMap({
           </p>
         </div>
       )}
-      <div className="absolute bottom-3 right-3 text-[10px] text-sky-400/40 font-mono bg-[#0a1628]/80 backdrop-blur rounded-lg px-3 py-2 border border-sky-500/10 z-10">
+      <div className="absolute bottom-3 right-3 text-[10px] text-[#6a6a6a] font-mono bg-white/[0.02] backdrop-blur rounded-lg px-3 py-2 border border-white/[0.06] z-10">
         <Radio className="w-3 h-3 inline mr-1 text-emerald-400 animate-pulse" />
         {filteredVessels.length} vessels · AIS live
         {showAis && aisVessels.length > 0 && ` · ${aisVessels.length} live AIS`}
@@ -927,17 +927,17 @@ export default function FleetMapPage() {
   if (tokenLoading) {
     return (
       <div className="flex-1 flex items-center justify-center bg-[#060e1a]">
-        <div className="w-8 h-8 border-2 border-sky-500/30 border-t-sky-400 rounded-full animate-spin" />
+        <div className="w-8 h-8 border-2 border-[#c9b787]/24 border-t-sky-400 rounded-full animate-spin" />
       </div>
     );
   }
 
   return (
     <div className="flex flex-col h-full bg-[#060e1a]">
-      <div className="px-4 py-3 border-b border-sky-500/10 flex items-center gap-3 shrink-0">
+      <div className="px-4 py-3 border-b border-white/[0.06] flex items-center gap-3 shrink-0">
         <div>
-          <h1 className="font-display text-sm font-bold text-sky-50">Fleet Map</h1>
-          <p className="text-[10px] text-sky-400/40">
+          <h1 className="font-display text-sm font-bold text-[#f5f5f5]">Fleet Map</h1>
+          <p className="text-[10px] text-[#6a6a6a]">
             Live vessel positions · AIS-based tracking · Mapbox GL
           </p>
         </div>
@@ -950,7 +950,7 @@ export default function FleetMapPage() {
               delayed: color.accent.amber,
               maintenance: color.accent.red,
             }).map(([key, dotColor]) => (
-              <span key={key} className="flex items-center gap-1 text-[10px] text-sky-400/50">
+              <span key={key} className="flex items-center gap-1 text-[10px] text-[#8a8a8a]">
                 <span className="w-2 h-2 rounded-full" style={{ backgroundColor: dotColor }} />
                 {statusLabels[key]}
               </span>
@@ -964,7 +964,7 @@ export default function FleetMapPage() {
               'flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg border text-[10px] transition-all',
               showAis
                 ? 'bg-emerald-500/10 border-emerald-500/30 text-emerald-400'
-                : 'border-sky-500/10 text-sky-400/40 hover:text-sky-300',
+                : 'border-white/[0.06] text-[#6a6a6a] hover:text-[#d4c598]',
             )}
           >
             <Radio className="w-3 h-3" />
@@ -981,7 +981,7 @@ export default function FleetMapPage() {
               'flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg border text-[10px] transition-all',
               playbackActive
                 ? 'bg-emerald-500/10 border-emerald-500/30 text-emerald-400'
-                : 'border-sky-500/10 text-sky-400/40 hover:text-sky-300',
+                : 'border-white/[0.06] text-[#6a6a6a] hover:text-[#d4c598]',
             )}
           >
             {playbackActive ? <Pause className="w-3 h-3" /> : <Play className="w-3 h-3" />}
@@ -993,8 +993,8 @@ export default function FleetMapPage() {
             className={cn(
               'flex items-center gap-1.5 px-3 py-1.5 rounded-lg border text-[10px] transition-all',
               showFilters
-                ? 'bg-sky-500/10 border-sky-500/30 text-sky-300'
-                : 'border-sky-500/10 text-sky-400/50 hover:text-sky-300',
+                ? 'bg-[#c9b787]/10 border-[#c9b787]/24 text-[#d4c598]'
+                : 'border-white/[0.06] text-[#8a8a8a] hover:text-[#d4c598]',
             )}
           >
             <Filter className="w-3 h-3" />
@@ -1004,13 +1004,13 @@ export default function FleetMapPage() {
       </div>
 
       {showFilters && (
-        <div className="px-4 py-2 border-b border-sky-500/10 flex items-start gap-4 shrink-0 flex-wrap">
+        <div className="px-4 py-2 border-b border-white/[0.06] flex items-start gap-4 shrink-0 flex-wrap">
           {[
             { label: 'Status', key: 'status' as const, opts: statuses },
             { label: 'Type', key: 'type' as const, opts: types },
           ].map(({ label, key, opts }) => (
             <div key={key} className="flex items-center gap-2 flex-wrap">
-              <span className="text-[10px] text-sky-400/40 shrink-0">{label}:</span>
+              <span className="text-[10px] text-[#6a6a6a] shrink-0">{label}:</span>
               <div className="flex items-center gap-1 flex-wrap">
                 {opts.map((opt) => (
                   <button
@@ -1019,8 +1019,8 @@ export default function FleetMapPage() {
                     className={cn(
                       'text-[10px] px-2 py-1 rounded border transition-all capitalize',
                       filters[key] === opt
-                        ? 'bg-sky-500/10 border-sky-500/30 text-sky-300'
-                        : 'border-sky-500/10 text-sky-400/40 hover:text-sky-300',
+                        ? 'bg-[#c9b787]/10 border-[#c9b787]/24 text-[#d4c598]'
+                        : 'border-white/[0.06] text-[#6a6a6a] hover:text-[#d4c598]',
                     )}
                   >
                     {opt === 'all' ? 'All' : statusLabels[opt] || opt.replace(/_/g, ' ')}
@@ -1029,7 +1029,7 @@ export default function FleetMapPage() {
               </div>
             </div>
           ))}
-          <span className="ml-auto text-[10px] text-sky-400/40 self-center">
+          <span className="ml-auto text-[10px] text-[#6a6a6a] self-center">
             {filteredVessels.length} of {vessels.length} shown
           </span>
         </div>
@@ -1049,7 +1049,7 @@ export default function FleetMapPage() {
 
         {!tokenLoading && filteredVessels.length === 0 && (
           <div className="absolute inset-0 flex items-center justify-center pointer-events-none z-10">
-            <div className="pointer-events-auto rounded-2xl bg-[#060e1a]/85 backdrop-blur-md border border-sky-500/20 px-6 py-2 max-w-md shadow-2xl">
+            <div className="pointer-events-auto rounded-2xl bg-[#060e1a]/85 backdrop-blur-md border border-white/[0.08] px-6 py-2 max-w-md shadow-2xl">
               <EmptyState
                 icon={Ship}
                 headline={
@@ -1087,14 +1087,14 @@ export default function FleetMapPage() {
       </div>
 
       {!selectedVessel && (
-        <div className="px-4 py-2 border-t border-sky-500/10 flex items-center gap-4 shrink-0 overflow-x-auto">
+        <div className="px-4 py-2 border-t border-white/[0.06] flex items-center gap-4 shrink-0 overflow-x-auto">
           {vessels.map((v) => {
             const color = statusColors[v.status] || '#666';
             return (
               <button
                 key={v.id}
                 onClick={() => setSelectedVessel(v)}
-                className="flex items-center gap-1.5 text-[10px] text-sky-400/50 hover:text-sky-200 transition-colors whitespace-nowrap"
+                className="flex items-center gap-1.5 text-[10px] text-[#8a8a8a] hover:text-[#e0e0e0] transition-colors whitespace-nowrap"
               >
                 <span className="w-1.5 h-1.5 rounded-full" style={{ backgroundColor: color }} />
                 {v.name}

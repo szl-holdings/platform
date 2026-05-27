@@ -164,7 +164,7 @@ const typeColors: Record<string, string> = {
   Geopolitical: 'text-red-400',
   Sanctions: 'text-purple-400',
   'Market Move': 'text-emerald-400',
-  Weather: 'text-sky-400',
+  Weather: 'text-[#c9b787]',
 };
 
 const typeIcons: Record<string, typeof Globe> = {
@@ -183,8 +183,8 @@ function BriefCard({ brief }: { brief: (typeof BRIEFS)[0] }) {
       className={cn(
         'border rounded-xl overflow-hidden transition-all',
         expanded
-          ? 'border-sky-500/30 bg-[#0a1628]/90'
-          : 'border-sky-500/10 bg-[#0a1628]/80 hover:border-sky-500/20',
+          ? 'border-[#c9b787]/24 bg-[#0e0e0e]/90'
+          : 'border-white/[0.06] bg-white/[0.02] hover:border-white/[0.08]',
       )}
     >
       <button className="w-full text-left" onClick={() => setExpanded(!expanded)}>
@@ -204,19 +204,19 @@ function BriefCard({ brief }: { brief: (typeof BRIEFS)[0] }) {
             </div>
             <div className="flex-1 min-w-0">
               <div className="flex items-center gap-2 flex-wrap mb-1">
-                <span className="text-[9px] font-mono text-sky-400/40">{brief.id}</span>
+                <span className="text-[9px] font-mono text-[#6a6a6a]">{brief.id}</span>
                 <Badge
                   variant="outline"
                   className={cn('text-[9px]', severityColors[brief.severity])}
                 >
                   {brief.severity}
                 </Badge>
-                <Badge variant="outline" className="text-[9px] text-sky-400/40 border-sky-500/15">
+                <Badge variant="outline" className="text-[9px] text-[#6a6a6a] border-white/[0.08]">
                   {brief.type}
                 </Badge>
               </div>
-              <p className="text-sm font-bold text-sky-100 mb-1.5">{brief.title}</p>
-              <div className="flex items-center gap-4 text-[10px] text-sky-400/50 flex-wrap">
+              <p className="text-sm font-bold text-[#f5f5f5] mb-1.5">{brief.title}</p>
+              <div className="flex items-center gap-4 text-[10px] text-[#8a8a8a] flex-wrap">
                 <span className="flex items-center gap-1">
                   <Clock className="w-3 h-3" /> {brief.generatedAt}
                 </span>
@@ -235,7 +235,7 @@ function BriefCard({ brief }: { brief: (typeof BRIEFS)[0] }) {
             </div>
             <ChevronRight
               className={cn(
-                'w-4 h-4 text-sky-400/30 shrink-0 transition-transform mt-1',
+                'w-4 h-4 text-[#5a5a5a] shrink-0 transition-transform mt-1',
                 expanded && 'rotate-90',
               )}
             />
@@ -244,31 +244,31 @@ function BriefCard({ brief }: { brief: (typeof BRIEFS)[0] }) {
       </button>
 
       {expanded && (
-        <div className="border-t border-sky-500/10 divide-y divide-sky-500/10">
+        <div className="border-t border-white/[0.06] divide-y divide-sky-500/10">
           {/* Who is affected */}
           <div className="px-5 py-4 grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
-              <p className="text-[10px] uppercase tracking-widest text-sky-400/40 mb-2 flex items-center gap-1">
+              <p className="text-[10px] uppercase tracking-widest text-[#6a6a6a] mb-2 flex items-center gap-1">
                 <Users className="w-3 h-3" /> Affected Parties
               </p>
               <ul className="space-y-1.5">
                 {brief.affected.map((a, i) => (
-                  <li key={i} className="text-xs text-sky-300/60 flex items-start gap-2">
-                    <ArrowRight className="w-3 h-3 text-sky-400/30 shrink-0 mt-0.5" />
+                  <li key={i} className="text-xs text-[#d4c598]/60 flex items-start gap-2">
+                    <ArrowRight className="w-3 h-3 text-[#5a5a5a] shrink-0 mt-0.5" />
                     {a}
                   </li>
                 ))}
               </ul>
             </div>
             <div className="space-y-2">
-              <div className="p-3 bg-sky-500/3 border border-sky-500/10 rounded-lg">
-                <p className="text-[9px] text-sky-400/40 uppercase tracking-wider mb-1">
+              <div className="p-3 bg-[#c9b787]/14 border border-white/[0.06] rounded-lg">
+                <p className="text-[9px] text-[#6a6a6a] uppercase tracking-wider mb-1">
                   Timeframe
                 </p>
-                <p className="text-xs text-sky-200">{brief.timeframe}</p>
+                <p className="text-xs text-[#e0e0e0]">{brief.timeframe}</p>
               </div>
-              <div className="p-3 bg-sky-500/3 border border-sky-500/10 rounded-lg">
-                <p className="text-[9px] text-sky-400/40 uppercase tracking-wider mb-1">
+              <div className="p-3 bg-[#c9b787]/14 border border-white/[0.06] rounded-lg">
+                <p className="text-[9px] text-[#6a6a6a] uppercase tracking-wider mb-1">
                   Dollar Impact Estimate
                 </p>
                 <p className="text-sm font-bold font-mono text-orange-400">{brief.dollarImpact}</p>
@@ -278,29 +278,29 @@ function BriefCard({ brief }: { brief: (typeof BRIEFS)[0] }) {
 
           {/* Situation */}
           <div className="px-5 py-4">
-            <p className="text-[10px] uppercase tracking-widest text-sky-400/40 mb-2">
+            <p className="text-[10px] uppercase tracking-widest text-[#6a6a6a] mb-2">
               Situation Summary
             </p>
-            <p className="text-xs text-sky-300/70 leading-relaxed">{brief.situation}</p>
+            <p className="text-xs text-[#a0a08a] leading-relaxed">{brief.situation}</p>
           </div>
 
           {/* Impact */}
           <div className="px-5 py-4">
-            <p className="text-[10px] uppercase tracking-widest text-sky-400/40 mb-2">
+            <p className="text-[10px] uppercase tracking-widest text-[#6a6a6a] mb-2">
               Financial & Operational Impact
             </p>
-            <p className="text-xs text-sky-300/70 leading-relaxed">{brief.impact}</p>
+            <p className="text-xs text-[#a0a08a] leading-relaxed">{brief.impact}</p>
           </div>
 
           {/* Recommendations */}
           <div className="px-5 py-4">
-            <p className="text-[10px] uppercase tracking-widest text-sky-400/40 mb-2 flex items-center gap-1">
+            <p className="text-[10px] uppercase tracking-widest text-[#6a6a6a] mb-2 flex items-center gap-1">
               <CheckCircle2 className="w-3 h-3" /> Recommended Actions
             </p>
             <ul className="space-y-2">
               {brief.recommendations.map((r, i) => (
-                <li key={i} className="flex items-start gap-2 text-xs text-sky-200/70">
-                  <span className="w-4 h-4 rounded-full bg-sky-500/10 border border-sky-500/20 flex items-center justify-center shrink-0 text-[8px] font-bold text-sky-400">
+                <li key={i} className="flex items-start gap-2 text-xs text-[#e0e0e0]/70">
+                  <span className="w-4 h-4 rounded-full bg-[#c9b787]/10 border border-white/[0.08] flex items-center justify-center shrink-0 text-[8px] font-bold text-[#c9b787]">
                     {i + 1}
                   </span>
                   {r}
@@ -310,15 +310,15 @@ function BriefCard({ brief }: { brief: (typeof BRIEFS)[0] }) {
           </div>
 
           {/* Sources */}
-          <div className="px-5 py-3 bg-sky-500/2">
-            <p className="text-[10px] uppercase tracking-widest text-sky-400/30 mb-1">
+          <div className="px-5 py-3 bg-[#c9b787]/14">
+            <p className="text-[10px] uppercase tracking-widest text-[#5a5a5a] mb-1">
               Intelligence Sources
             </p>
             <div className="flex flex-wrap gap-2">
               {brief.sources.map((s, i) => (
                 <span
                   key={i}
-                  className="text-[9px] text-sky-400/40 px-2 py-0.5 rounded border border-sky-500/10 bg-sky-500/3"
+                  className="text-[9px] text-[#6a6a6a] px-2 py-0.5 rounded border border-white/[0.06] bg-[#c9b787]/14"
                 >
                   {s}
                 </span>
@@ -327,7 +327,7 @@ function BriefCard({ brief }: { brief: (typeof BRIEFS)[0] }) {
           </div>
 
           {/* Inline feedback */}
-          <div className="px-5 py-3 border-t border-sky-500/10 bg-sky-500/2">
+          <div className="px-5 py-3 border-t border-white/[0.06] bg-[#c9b787]/14">
             <InlineFeedbackBar
               recommendationKey={`vessels-intel-brief-${brief.id}`}
               domain="maritime"
@@ -419,7 +419,7 @@ export default function IntelligenceBriefs() {
       <div>
         <div className="flex items-center gap-2 mb-1">
           <FileText className="w-5 h-5 text-emerald-400" />
-          <h1 className="text-xl font-bold text-sky-50 font-display">Intelligence Briefs</h1>
+          <h1 className="text-xl font-bold text-[#f5f5f5] font-display">Intelligence Briefs</h1>
           <Badge
             variant="outline"
             className="text-[9px] text-emerald-400 border-emerald-500/20 bg-emerald-500/5"
@@ -427,7 +427,7 @@ export default function IntelligenceBriefs() {
             AUTO-GENERATED
           </Badge>
         </div>
-        <p className="text-xs text-sky-400/50">
+        <p className="text-xs text-[#8a8a8a]">
           Structured disruption reports auto-generated when significant signals are detected —
           affected parties, dollar impact, and recommended actions
         </p>
@@ -441,7 +441,7 @@ export default function IntelligenceBriefs() {
             value: BRIEFS.length,
             sub: 'last 48 hours',
             icon: FileText,
-            color: 'text-sky-400',
+            color: 'text-[#c9b787]',
           },
           {
             label: 'Critical Alerts',
@@ -465,13 +465,13 @@ export default function IntelligenceBriefs() {
             color: 'text-purple-400',
           },
         ].map((kpi) => (
-          <div key={kpi.label} className="bg-[#0a1628]/80 border border-sky-500/10 rounded-xl p-4">
+          <div key={kpi.label} className="bg-white/[0.02] border border-white/[0.06] rounded-xl p-4">
             <div className="flex items-center justify-between mb-2">
-              <p className="text-[10px] uppercase tracking-widest text-sky-400/40">{kpi.label}</p>
+              <p className="text-[10px] uppercase tracking-widest text-[#6a6a6a]">{kpi.label}</p>
               <kpi.icon className={cn('w-4 h-4', kpi.color)} />
             </div>
             <p className={cn('text-2xl font-bold font-mono', kpi.color)}>{kpi.value}</p>
-            <p className="text-[10px] text-sky-400/40 mt-0.5">{kpi.sub}</p>
+            <p className="text-[10px] text-[#6a6a6a] mt-0.5">{kpi.sub}</p>
           </div>
         ))}
       </div>
@@ -498,28 +498,28 @@ export default function IntelligenceBriefs() {
       )}
 
       {/* On-demand brief generator */}
-      <div className="bg-[#0a1628]/80 border border-sky-500/15 rounded-xl p-4 space-y-3">
+      <div className="bg-white/[0.02] border border-white/[0.08] rounded-xl p-4 space-y-3">
         <div className="flex items-center gap-2">
           <Sparkles className="w-4 h-4 text-purple-400" />
-          <p className="text-sm font-semibold text-sky-200">
+          <p className="text-sm font-semibold text-[#e0e0e0]">
             Generate Intelligence Brief On-Demand
           </p>
         </div>
-        <p className="text-[11px] text-sky-400/50">
+        <p className="text-[11px] text-[#8a8a8a]">
           Helmsman AI will produce a structured brief for any maritime intelligence topic
         </p>
         <div className="flex gap-2">
           <input
             value={selectedTopic}
             onChange={(e) => setSelectedTopic(e.target.value)}
-            className="flex-1 bg-sky-500/5 border border-sky-500/15 rounded-lg px-3 py-2 text-xs text-sky-200 placeholder-sky-400/30 outline-none focus:border-sky-500/30"
+            className="flex-1 bg-[#c9b787]/8 border border-white/[0.08] rounded-lg px-3 py-2 text-xs text-[#e0e0e0] placeholder-sky-400/30 outline-none focus:border-[#c9b787]/24"
             placeholder="Describe the scenario to brief..."
             onClick={(e) => e.stopPropagation()}
           />
           <button
             onClick={generateBrief}
             disabled={generatedBrief?.loading}
-            className="flex items-center gap-2 px-4 py-2 rounded-lg text-xs font-medium bg-sky-500/10 border border-sky-500/20 text-sky-300 hover:bg-sky-500/15 disabled:opacity-50 transition-colors shrink-0"
+            className="flex items-center gap-2 px-4 py-2 rounded-lg text-xs font-medium bg-[#c9b787]/10 border border-white/[0.08] text-[#d4c598] hover:bg-[#c9b787]/14 disabled:opacity-50 transition-colors shrink-0"
           >
             {generatedBrief?.loading ? (
               <Loader2 className="w-3.5 h-3.5 animate-spin" />
@@ -535,7 +535,7 @@ export default function IntelligenceBriefs() {
               'rounded-lg p-4 text-xs leading-relaxed',
               generatedBrief.error
                 ? 'bg-red-500/5 border border-red-500/10 text-red-400/70'
-                : 'bg-sky-500/3 border border-sky-500/10 text-sky-200/80',
+                : 'bg-[#c9b787]/14 border border-white/[0.06] text-[#e0e0e0]/80',
             )}
           >
             {generatedBrief.error ? generatedBrief.error : generatedBrief.content}
@@ -545,7 +545,7 @@ export default function IntelligenceBriefs() {
 
       {/* Briefs list */}
       <div className="space-y-3">
-        <p className="text-xs font-semibold text-sky-200">Recent Intelligence Briefs</p>
+        <p className="text-xs font-semibold text-[#e0e0e0]">Recent Intelligence Briefs</p>
         {BRIEFS.map((b) => (
           <BriefCard key={b.id} brief={b} />
         ))}

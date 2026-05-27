@@ -134,7 +134,7 @@ const CARBON_CREDITS = [
 const CII_RATING_COLOR: Record<string, string> = {
   'A+': 'text-emerald-300 bg-emerald-500/10 border-emerald-400/30',
   A: 'text-emerald-400 bg-emerald-500/10 border-emerald-500/20',
-  B: 'text-sky-400 bg-sky-500/10 border-sky-500/20',
+  B: 'text-[#c9b787] bg-[#c9b787]/10 border-white/[0.08]',
   C: 'text-amber-400 bg-amber-500/10 border-amber-500/20',
   D: 'text-orange-400 bg-orange-500/10 border-orange-500/20',
   E: 'text-red-400 bg-red-500/10 border-red-500/20',
@@ -142,14 +142,14 @@ const CII_RATING_COLOR: Record<string, string> = {
 
 const fuelColor: Record<string, string> = {
   amber: 'text-amber-400',
-  sky: 'text-sky-400',
+  sky: 'text-[#c9b787]',
   violet: 'text-violet-400',
   emerald: 'text-emerald-400',
   teal: 'text-teal-400',
 };
 const _fuelBg: Record<string, string> = {
   amber: 'bg-amber-500/5 border-amber-500/15',
-  sky: 'bg-sky-500/5 border-sky-500/15',
+  sky: 'bg-[#c9b787]/8 border-white/[0.08]',
   violet: 'bg-violet-500/5 border-violet-500/15',
   emerald: 'bg-emerald-500/5 border-emerald-500/15',
   teal: 'bg-teal-500/5 border-teal-500/15',
@@ -172,7 +172,7 @@ function CIIGauge({ cii, score, limit }: { cii: string; score: number; limit: nu
         />
       </div>
       <div className="flex justify-between text-[8px]">
-        <span className="text-sky-400/30">0</span>
+        <span className="text-[#5a5a5a]">0</span>
         <span className="text-white/20">Limit: {limit}</span>
         <span style={{ color }} className="font-mono">
           {score.toFixed(2)}
@@ -194,7 +194,7 @@ export default function DecarbonizationPage() {
         <div>
           <div className="flex items-center gap-2 mb-1">
             <Leaf className="w-4 h-4 text-emerald-400" />
-            <h1 className="font-display text-xl font-bold text-sky-50">
+            <h1 className="font-display text-xl font-bold text-[#f5f5f5]">
               Decarbonization Command Center
             </h1>
             <Badge
@@ -204,7 +204,7 @@ export default function DecarbonizationPage() {
               IMO 2030 READY
             </Badge>
           </div>
-          <p className="text-xs text-sky-400/40">
+          <p className="text-xs text-[#6a6a6a]">
             CII tracking, EU ETS compliance, fuel pathway analysis & carbon credit portfolio
           </p>
         </div>
@@ -213,19 +213,19 @@ export default function DecarbonizationPage() {
             <p className="text-lg font-bold font-mono text-amber-400">
               ${(totalEtsExposure / 1000).toFixed(0)}K
             </p>
-            <p className="text-[9px] text-sky-400/40">ETS Exposure</p>
+            <p className="text-[9px] text-[#6a6a6a]">ETS Exposure</p>
           </div>
           <div className="text-right">
             <p className="text-lg font-bold font-mono text-emerald-400">
               ${(totalCreditsValue / 1000).toFixed(0)}K
             </p>
-            <p className="text-[9px] text-sky-400/40">Credit Portfolio</p>
+            <p className="text-[9px] text-[#6a6a6a]">Credit Portfolio</p>
           </div>
           <div className="text-right">
-            <p className="text-lg font-bold font-mono text-sky-400">
+            <p className="text-lg font-bold font-mono text-[#c9b787]">
               {(totalCO2 / 1000).toFixed(1)}K t
             </p>
-            <p className="text-[9px] text-sky-400/40">YTD CO₂</p>
+            <p className="text-[9px] text-[#6a6a6a]">YTD CO₂</p>
           </div>
         </div>
       </div>
@@ -239,7 +239,7 @@ export default function DecarbonizationPage() {
               'text-xs px-4 py-1.5 rounded-lg capitalize transition-colors',
               tab === t
                 ? 'bg-emerald-500/10 text-emerald-300 border border-emerald-500/20'
-                : 'text-sky-400/50 hover:text-sky-300',
+                : 'text-[#8a8a8a] hover:text-[#d4c598]',
             )}
           >
             {t === 'cii'
@@ -256,7 +256,7 @@ export default function DecarbonizationPage() {
       {tab === 'cii' && (
         <div className="space-y-3">
           {CII_DATA.map((v) => (
-            <div key={v.vessel} className="bg-[#0a1628]/80 border border-sky-500/10 rounded-xl p-4">
+            <div key={v.vessel} className="bg-white/[0.02] border border-white/[0.06] rounded-xl p-4">
               <div className="flex items-start gap-6">
                 <div className="shrink-0 text-center">
                   <Badge
@@ -265,11 +265,11 @@ export default function DecarbonizationPage() {
                   >
                     {v.cii}
                   </Badge>
-                  <p className="text-[9px] text-sky-400/40 mt-1">CII 2026</p>
+                  <p className="text-[9px] text-[#6a6a6a] mt-1">CII 2026</p>
                 </div>
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2 mb-1">
-                    <p className="text-sm font-semibold text-sky-100">{v.vessel}</p>
+                    <p className="text-sm font-semibold text-[#f5f5f5]">{v.vessel}</p>
                     <Badge
                       variant="outline"
                       className={cn(
@@ -278,27 +278,27 @@ export default function DecarbonizationPage() {
                           ? 'text-emerald-400 border-emerald-500/20'
                           : v.trajectory === 'worsening'
                             ? 'text-red-400 border-red-500/20'
-                            : 'text-sky-400/40 border-sky-500/10',
+                            : 'text-[#6a6a6a] border-white/[0.06]',
                       )}
                     >
                       {v.trajectory}
                     </Badge>
                   </div>
-                  <p className="text-[10px] text-sky-400/40 mb-3">
+                  <p className="text-[10px] text-[#6a6a6a] mb-3">
                     CII Score: {v.score} g CO₂/DWT·nm · Limit: {v.limit}
                   </p>
                   <CIIGauge cii={v.cii} score={v.score} limit={v.limit} />
                 </div>
                 <div className="shrink-0 text-right space-y-1">
                   <div>
-                    <p className="text-xs font-mono text-sky-300">{v.ytdCO2.toLocaleString()} t</p>
-                    <p className="text-[9px] text-sky-400/40">YTD CO₂</p>
+                    <p className="text-xs font-mono text-[#d4c598]">{v.ytdCO2.toLocaleString()} t</p>
+                    <p className="text-[9px] text-[#6a6a6a]">YTD CO₂</p>
                   </div>
                   <div>
-                    <p className="text-xs font-mono text-sky-400/50">
+                    <p className="text-xs font-mono text-[#8a8a8a]">
                       {v.target.toLocaleString()} t
                     </p>
-                    <p className="text-[9px] text-sky-400/40">Annual target</p>
+                    <p className="text-[9px] text-[#6a6a6a]">Annual target</p>
                   </div>
                 </div>
               </div>
@@ -308,16 +308,16 @@ export default function DecarbonizationPage() {
             <p className="text-xs font-semibold text-emerald-400 mb-2">IMO DCS Reporting</p>
             <div className="flex gap-6 text-[10px]">
               <div>
-                <span className="text-sky-400/40">Next submission:</span>{' '}
-                <span className="text-sky-300">Jun 30, 2026</span>
+                <span className="text-[#6a6a6a]">Next submission:</span>{' '}
+                <span className="text-[#d4c598]">Jun 30, 2026</span>
               </div>
               <div>
-                <span className="text-sky-400/40">Status:</span>{' '}
+                <span className="text-[#6a6a6a]">Status:</span>{' '}
                 <span className="text-emerald-400">On track</span>
               </div>
               <div>
-                <span className="text-sky-400/40">Data completeness:</span>{' '}
-                <span className="text-sky-300">98.4%</span>
+                <span className="text-[#6a6a6a]">Data completeness:</span>{' '}
+                <span className="text-[#d4c598]">98.4%</span>
               </div>
             </div>
           </div>
@@ -327,21 +327,21 @@ export default function DecarbonizationPage() {
       {tab === 'ets' && (
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
           {CII_DATA.map((v) => (
-            <div key={v.vessel} className="bg-[#0a1628]/80 border border-sky-500/10 rounded-xl p-4">
-              <p className="text-sm font-semibold text-sky-100 mb-3">{v.vessel}</p>
+            <div key={v.vessel} className="bg-white/[0.02] border border-white/[0.06] rounded-xl p-4">
+              <p className="text-sm font-semibold text-[#f5f5f5] mb-3">{v.vessel}</p>
               <div className="space-y-2 text-[11px]">
                 <div className="flex justify-between">
-                  <span className="text-sky-400/50">Allocated EUAs</span>
-                  <span className="font-mono text-sky-300">
+                  <span className="text-[#8a8a8a]">Allocated EUAs</span>
+                  <span className="font-mono text-[#d4c598]">
                     {v.ets.allocation.toLocaleString()} t
                   </span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-sky-400/50">Used (YTD)</span>
-                  <span className="font-mono text-sky-300">{v.ets.used.toLocaleString()} t</span>
+                  <span className="text-[#8a8a8a]">Used (YTD)</span>
+                  <span className="font-mono text-[#d4c598]">{v.ets.used.toLocaleString()} t</span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-sky-400/50">Balance</span>
+                  <span className="text-[#8a8a8a]">Balance</span>
                   <span
                     className={cn(
                       'font-mono',
@@ -352,11 +352,11 @@ export default function DecarbonizationPage() {
                   </span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-sky-400/50">EUA Price</span>
-                  <span className="font-mono text-sky-300">€{v.ets.price}/t</span>
+                  <span className="text-[#8a8a8a]">EUA Price</span>
+                  <span className="font-mono text-[#d4c598]">€{v.ets.price}/t</span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-sky-400/50">Financial Exposure</span>
+                  <span className="text-[#8a8a8a]">Financial Exposure</span>
                   <span
                     className={cn(
                       'font-mono font-bold',
@@ -382,19 +382,19 @@ export default function DecarbonizationPage() {
             <p className="text-xs font-semibold text-amber-400 mb-2">Fleet EU ETS Summary</p>
             <div className="flex gap-8 text-[10px]">
               <div>
-                <span className="text-sky-400/40">Total EUA Allocated:</span>{' '}
-                <span className="text-sky-300 font-mono">15,400 t</span>
+                <span className="text-[#6a6a6a]">Total EUA Allocated:</span>{' '}
+                <span className="text-[#d4c598] font-mono">15,400 t</span>
               </div>
               <div>
-                <span className="text-sky-400/40">Total Used:</span>{' '}
-                <span className="text-sky-300 font-mono">15,170 t</span>
+                <span className="text-[#6a6a6a]">Total Used:</span>{' '}
+                <span className="text-[#d4c598] font-mono">15,170 t</span>
               </div>
               <div>
-                <span className="text-sky-400/40">Net Exposure:</span>{' '}
+                <span className="text-[#6a6a6a]">Net Exposure:</span>{' '}
                 <span className="text-amber-400 font-mono">€72,528</span>
               </div>
               <div>
-                <span className="text-sky-400/40">Hedging Strategy:</span>{' '}
+                <span className="text-[#6a6a6a]">Hedging Strategy:</span>{' '}
                 <span className="text-emerald-400">Forward purchase recommended</span>
               </div>
             </div>
@@ -409,8 +409,8 @@ export default function DecarbonizationPage() {
               <div
                 key={f.fuel}
                 className={cn(
-                  'bg-[#0a1628]/80 border rounded-xl p-4',
-                  f.current ? 'border-amber-500/30' : 'border-sky-500/10',
+                  'bg-white/[0.02] border rounded-xl p-4',
+                  f.current ? 'border-amber-500/30' : 'border-white/[0.06]',
                 )}
               >
                 {f.current && (
@@ -424,24 +424,24 @@ export default function DecarbonizationPage() {
                 <p className={cn('text-sm font-bold mb-1', fuelColor[f.color])}>{f.fuel}</p>
                 <div className="space-y-1.5 text-[10px]">
                   <div className="flex justify-between">
-                    <span className="text-sky-400/40">CO₂ Factor</span>
-                    <span className="font-mono text-sky-300">{f.co2Factor} g/g</span>
+                    <span className="text-[#6a6a6a]">CO₂ Factor</span>
+                    <span className="font-mono text-[#d4c598]">{f.co2Factor} g/g</span>
                   </div>
                   <div className="flex justify-between">
-                    <span className="text-sky-400/40">Price</span>
-                    <span className="font-mono text-sky-300">${f.cost}/MT</span>
+                    <span className="text-[#6a6a6a]">Price</span>
+                    <span className="font-mono text-[#d4c598]">${f.cost}/MT</span>
                   </div>
                   <div className="flex justify-between">
-                    <span className="text-sky-400/40">Availability</span>
+                    <span className="text-[#6a6a6a]">Availability</span>
                     <span className={cn(fuelColor[f.color])}>{f.availability}</span>
                   </div>
                   <div className="flex justify-between">
-                    <span className="text-sky-400/40">Fleet vessels</span>
-                    <span className="font-mono text-sky-300">{f.vessels}</span>
+                    <span className="text-[#6a6a6a]">Fleet vessels</span>
+                    <span className="font-mono text-[#d4c598]">{f.vessels}</span>
                   </div>
                 </div>
                 <div className="mt-2">
-                  <div className="text-[9px] text-sky-400/30 mb-1">CO₂ reduction vs VLSFO</div>
+                  <div className="text-[9px] text-[#5a5a5a] mb-1">CO₂ reduction vs VLSFO</div>
                   <div className="h-1 bg-white/5 rounded-full overflow-hidden">
                     <div
                       className={cn(
@@ -469,11 +469,11 @@ export default function DecarbonizationPage() {
       {tab === 'credits' && (
         <div className="space-y-3">
           {CARBON_CREDITS.map((c, i) => (
-            <div key={i} className="bg-[#0a1628]/80 border border-sky-500/10 rounded-xl p-4">
+            <div key={i} className="bg-white/[0.02] border border-white/[0.06] rounded-xl p-4">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm font-semibold text-sky-100">{c.type}</p>
-                  <div className="flex items-center gap-3 mt-1 text-[10px] text-sky-400/50">
+                  <p className="text-sm font-semibold text-[#f5f5f5]">{c.type}</p>
+                  <div className="flex items-center gap-3 mt-1 text-[10px] text-[#8a8a8a]">
                     <span>{c.units.toLocaleString()} units</span>
                     <span>·</span>
                     <span>${c.price.toFixed(1)}/unit</span>
@@ -504,20 +504,20 @@ export default function DecarbonizationPage() {
             <p className="text-xs font-semibold text-emerald-400 mb-2">Portfolio Summary</p>
             <div className="grid grid-cols-3 gap-4 text-[10px]">
               <div>
-                <p className="text-sky-400/40">Total Value</p>
+                <p className="text-[#6a6a6a]">Total Value</p>
                 <p className="text-lg font-bold font-mono text-emerald-400">
                   ${(totalCreditsValue / 1000).toFixed(0)}K
                 </p>
               </div>
               <div>
-                <p className="text-sky-400/40">Total Units</p>
-                <p className="text-lg font-bold font-mono text-sky-300">
+                <p className="text-[#6a6a6a]">Total Units</p>
+                <p className="text-lg font-bold font-mono text-[#d4c598]">
                   {CARBON_CREDITS.reduce((a, c) => a + c.units, 0).toLocaleString()}
                 </p>
               </div>
               <div>
-                <p className="text-sky-400/40">Net ETS Coverage</p>
-                <p className="text-lg font-bold font-mono text-sky-300">86%</p>
+                <p className="text-[#6a6a6a]">Net ETS Coverage</p>
+                <p className="text-lg font-bold font-mono text-[#d4c598]">86%</p>
               </div>
             </div>
           </div>

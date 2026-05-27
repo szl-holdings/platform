@@ -78,7 +78,7 @@ function RosterRow({ v }: { v: RosterVessel }) {
 
   return (
     <Link href={`/vessel/${v.id}`}>
-      <div className="bg-[#0a1628]/80 border border-[rgba(77,143,204,0.10)] rounded-xl px-4 py-3 hover:border-[rgba(77,143,204,0.20)] hover:bg-[rgba(77,143,204,0.05)] cursor-pointer transition-all">
+      <div className="bg-white/[0.02] border border-[rgba(77,143,204,0.10)] rounded-xl px-4 py-3 hover:border-[rgba(77,143,204,0.20)] hover:bg-[rgba(77,143,204,0.05)] cursor-pointer transition-all">
         <div className="flex items-center gap-4">
           <div className="w-8 h-8 rounded-lg bg-[rgba(77,143,204,0.10)] flex items-center justify-center shrink-0">
             <Ship className="w-4 h-4 text-[var(--gi-accent-blue)/60]" />
@@ -115,7 +115,7 @@ function RosterRow({ v }: { v: RosterVessel }) {
                   <MapPin className="w-2.5 h-2.5" />
                   Destination
                 </p>
-                <p className="text-[11px] text-sky-200 font-medium">{v.destination}</p>
+                <p className="text-[11px] text-[#e0e0e0] font-medium">{v.destination}</p>
                 {eta && (
                   <p className="text-[9px] text-[var(--gi-accent-blue)]/40 flex items-center gap-1 justify-end mt-0.5">
                     <Clock className="w-2.5 h-2.5" />
@@ -128,7 +128,7 @@ function RosterRow({ v }: { v: RosterVessel }) {
             {lat !== null && lon !== null && (
               <div>
                 <p className="text-[9px] text-[var(--gi-accent-blue)]/30">Position</p>
-                <p className="text-[11px] font-mono text-sky-300">
+                <p className="text-[11px] font-mono text-[#d4c598]">
                   {lat.toFixed(2)}°, {lon.toFixed(2)}°
                 </p>
                 {v.speed && (
@@ -159,7 +159,7 @@ function RosterRow({ v }: { v: RosterVessel }) {
             {v.mmsi && !v.destination && lat === null && (
               <div>
                 <p className="text-[9px] text-[var(--gi-accent-blue)]/30">MMSI</p>
-                <p className="text-[11px] font-mono text-sky-300">{v.mmsi}</p>
+                <p className="text-[11px] font-mono text-[#d4c598]">{v.mmsi}</p>
               </div>
             )}
           </div>
@@ -210,7 +210,7 @@ export default function VesselsListPage() {
     <div className="p-6 space-y-6">
       <div className="flex items-start justify-between gap-4">
         <div>
-          <h1 className="font-display text-xl font-bold text-sky-50">Vessel Roster</h1>
+          <h1 className="font-display text-xl font-bold text-[#f5f5f5]">Vessel Roster</h1>
           <p className="text-xs text-[var(--gi-accent-blue)]/50 mt-0.5">
             {roster.length} vessels · SZL Maritime fleet
             {isLive && <span className="ml-2 text-emerald-400/60">· live</span>}
@@ -220,7 +220,7 @@ export default function VesselsListPage() {
         <button
           onClick={() => refetch()}
           disabled={isLoading || isRefetching}
-          className="p-2 rounded-lg bg-[rgba(77,143,204,0.10)] border border-sky-500/20 text-[var(--gi-accent-blue)/60] hover:text-sky-300 transition-all disabled:opacity-40"
+          className="p-2 rounded-lg bg-[rgba(77,143,204,0.10)] border border-white/[0.08] text-[var(--gi-accent-blue)/60] hover:text-[#d4c598] transition-all disabled:opacity-40"
         >
           <RefreshCw className={cn('w-3.5 h-3.5', (isLoading || isRefetching) && 'animate-spin')} />
         </button>
@@ -233,7 +233,7 @@ export default function VesselsListPage() {
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             placeholder="Search vessels, destination..."
-            className="pl-8 pr-3 py-2 bg-[#0a1628]/80 border border-[rgba(77,143,204,0.10)] rounded-lg text-xs text-sky-200 placeholder:text-[var(--gi-accent-blue)]/30 focus:outline-none focus:border-sky-500/30 w-56"
+            className="pl-8 pr-3 py-2 bg-white/[0.02] border border-[rgba(77,143,204,0.10)] rounded-lg text-xs text-[#e0e0e0] placeholder:text-[var(--gi-accent-blue)]/30 focus:outline-none focus:border-[#c9b787]/24 w-56"
           />
         </div>
         <div className="flex items-center gap-1 flex-wrap">
@@ -244,8 +244,8 @@ export default function VesselsListPage() {
               className={cn(
                 'text-[10px] px-2 py-1.5 rounded-lg border transition-all capitalize',
                 statusFilter === s
-                  ? 'bg-[rgba(77,143,204,0.10)] border-sky-500/30 text-sky-300'
-                  : 'border-[rgba(77,143,204,0.10)] text-[var(--gi-accent-blue)]/40 hover:text-sky-300',
+                  ? 'bg-[rgba(77,143,204,0.10)] border-[#c9b787]/24 text-[#d4c598]'
+                  : 'border-[rgba(77,143,204,0.10)] text-[var(--gi-accent-blue)]/40 hover:text-[#d4c598]',
               )}
             >
               {s === 'all' ? 'All' : statusConfig[s]?.label || s}
@@ -266,8 +266,8 @@ export default function VesselsListPage() {
               className={cn(
                 'text-[10px] px-2 py-1.5 rounded-lg border transition-all',
                 sortBy === s.id
-                  ? 'bg-[rgba(77,143,204,0.10)] border-sky-500/30 text-sky-300'
-                  : 'border-[rgba(77,143,204,0.10)] text-[var(--gi-accent-blue)]/40 hover:text-sky-300',
+                  ? 'bg-[rgba(77,143,204,0.10)] border-[#c9b787]/24 text-[#d4c598]'
+                  : 'border-[rgba(77,143,204,0.10)] text-[var(--gi-accent-blue)]/40 hover:text-[#d4c598]',
               )}
             >
               {s.label}

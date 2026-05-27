@@ -31,8 +31,8 @@ const statusConfig: Record<string, { label: string; color: string; dot: string }
   },
   scheduled: {
     label: 'Scheduled',
-    color: 'text-sky-400 bg-sky-500/10 border-sky-500/20',
-    dot: 'bg-sky-400',
+    color: 'text-[#c9b787] bg-[#c9b787]/10 border-white/[0.08]',
+    dot: 'bg-[#c9b787]',
   },
   completed: {
     label: 'Completed',
@@ -45,7 +45,7 @@ const priorityConfig: Record<string, { label: string; color: string }> = {
   critical: { label: 'Critical', color: 'text-red-400 bg-red-500/10 border-red-500/20' },
   high: { label: 'High', color: 'text-orange-400 bg-orange-500/10 border-orange-500/20' },
   medium: { label: 'Medium', color: 'text-amber-400 bg-amber-500/10 border-amber-500/20' },
-  low: { label: 'Low', color: 'text-sky-400 bg-sky-500/10 border-sky-500/20' },
+  low: { label: 'Low', color: 'text-[#c9b787] bg-[#c9b787]/10 border-white/[0.08]' },
 };
 
 function num(val: string | number | undefined | null, def = 0): number {
@@ -107,8 +107,8 @@ function AssetHealthBar({ value, label }: { value: number; label: string }) {
           : 'bg-red-400';
   return (
     <div className="flex items-center gap-2">
-      <span className="text-[9px] text-sky-400/40 w-20 shrink-0 truncate">{label}</span>
-      <div className="flex-1 h-1.5 bg-sky-500/10 rounded-full overflow-hidden">
+      <span className="text-[9px] text-[#6a6a6a] w-20 shrink-0 truncate">{label}</span>
+      <div className="flex-1 h-1.5 bg-[#c9b787]/10 rounded-full overflow-hidden">
         <div
           className={cn('h-full rounded-full transition-all', color)}
           style={{ width: `${value}%` }}
@@ -133,12 +133,12 @@ function MaintenanceCard({ item }: { item: DisplayItem }) {
   return (
     <div
       className={cn(
-        'bg-[#0a1628]/80 border rounded-xl p-4',
+        'bg-white/[0.02] border rounded-xl p-4',
         item.status === 'overdue'
           ? 'border-red-500/20'
           : item.priority === 'critical'
             ? 'border-orange-500/15'
-            : 'border-sky-500/10',
+            : 'border-white/[0.06]',
       )}
     >
       <div className="flex items-start gap-3">
@@ -146,8 +146,8 @@ function MaintenanceCard({ item }: { item: DisplayItem }) {
         <div className="flex-1 min-w-0">
           <div className="flex items-start gap-2 flex-wrap">
             <div className="flex-1 min-w-0">
-              <p className="text-xs font-semibold text-sky-100">{item.vesselName}</p>
-              <p className="text-[11px] text-sky-300/70 mt-0.5">{item.component}</p>
+              <p className="text-xs font-semibold text-[#f5f5f5]">{item.vesselName}</p>
+              <p className="text-[11px] text-[#a0a08a] mt-0.5">{item.component}</p>
             </div>
             <div className="flex items-center gap-1.5 shrink-0">
               <Badge variant="outline" className={cn('text-[9px]', pc.color)}>
@@ -160,12 +160,12 @@ function MaintenanceCard({ item }: { item: DisplayItem }) {
           </div>
 
           {item.description && (
-            <p className="text-[10px] text-sky-400/50 mt-1.5">{item.description}</p>
+            <p className="text-[10px] text-[#8a8a8a] mt-1.5">{item.description}</p>
           )}
 
           <div className="mt-3 grid grid-cols-3 gap-2">
-            <div className="bg-sky-500/5 rounded p-2 border border-sky-500/10">
-              <p className="text-[9px] text-sky-400/40 uppercase">Due</p>
+            <div className="bg-[#c9b787]/8 rounded p-2 border border-white/[0.06]">
+              <p className="text-[9px] text-[#6a6a6a] uppercase">Due</p>
               <p
                 className={cn(
                   'text-[10px] font-mono mt-0.5',
@@ -173,7 +173,7 @@ function MaintenanceCard({ item }: { item: DisplayItem }) {
                     ? 'text-red-400'
                     : item.daysToDue <= 14
                       ? 'text-orange-400'
-                      : 'text-sky-300',
+                      : 'text-[#d4c598]',
                 )}
               >
                 {item.daysToDue < 0
@@ -185,8 +185,8 @@ function MaintenanceCard({ item }: { item: DisplayItem }) {
                       : `In ${item.daysToDue}d`}
               </p>
             </div>
-            <div className="bg-sky-500/5 rounded p-2 border border-sky-500/10">
-              <p className="text-[9px] text-sky-400/40 uppercase">Service Risk</p>
+            <div className="bg-[#c9b787]/8 rounded p-2 border border-white/[0.06]">
+              <p className="text-[9px] text-[#6a6a6a] uppercase">Service Risk</p>
               <p
                 className={cn(
                   'text-[10px] font-mono mt-0.5',
@@ -200,9 +200,9 @@ function MaintenanceCard({ item }: { item: DisplayItem }) {
                 {item.riskOfServiceIssue > 0 ? `${item.riskOfServiceIssue.toFixed(0)}%` : '—'}
               </p>
             </div>
-            <div className="bg-sky-500/5 rounded p-2 border border-sky-500/10">
-              <p className="text-[9px] text-sky-400/40 uppercase">Est. Cost</p>
-              <p className="text-[10px] font-mono text-sky-300 mt-0.5">
+            <div className="bg-[#c9b787]/8 rounded p-2 border border-white/[0.06]">
+              <p className="text-[9px] text-[#6a6a6a] uppercase">Est. Cost</p>
+              <p className="text-[10px] font-mono text-[#d4c598] mt-0.5">
                 {item.estimatedCost > 0 ? `$${item.estimatedCost.toLocaleString()}` : '—'}
               </p>
             </div>
@@ -216,13 +216,13 @@ function MaintenanceCard({ item }: { item: DisplayItem }) {
           )}
 
           {item.technician && item.technician !== 'TBD' && (
-            <p className="mt-1 text-[10px] text-sky-400/40">Assigned: {item.technician}</p>
+            <p className="mt-1 text-[10px] text-[#6a6a6a]">Assigned: {item.technician}</p>
           )}
         </div>
       </div>
 
       {item.assetHealth > 0 && (
-        <div className="mt-3 pt-3 border-t border-sky-500/10">
+        <div className="mt-3 pt-3 border-t border-white/[0.06]">
           <AssetHealthBar value={Math.round(item.assetHealth)} label="Asset Health" />
         </div>
       )}
@@ -324,20 +324,20 @@ export default function MaintenanceReadinessPage() {
       <div className="flex items-start justify-between gap-4">
         <div>
           <div className="flex items-center gap-2">
-            <h1 className="font-display text-xl font-bold text-sky-50">Maintenance Readiness</h1>
+            <h1 className="font-display text-xl font-bold text-[#f5f5f5]">Maintenance Readiness</h1>
             {isLive && (
               <span className="text-[9px] px-1.5 py-0.5 rounded border border-emerald-500/30 bg-emerald-500/10 text-emerald-400 font-mono uppercase">
                 Live
               </span>
             )}
           </div>
-          <p className="text-xs text-sky-400/50 mt-0.5">
+          <p className="text-xs text-[#8a8a8a] mt-0.5">
             Asset health, service risk, and maintenance watchlist
           </p>
         </div>
         <button
           onClick={() => refetch()}
-          className="p-2 rounded-lg border border-sky-500/10 text-sky-400/50 hover:text-sky-300 hover:border-sky-500/20 transition-all"
+          className="p-2 rounded-lg border border-white/[0.06] text-[#8a8a8a] hover:text-[#d4c598] hover:border-white/[0.08] transition-all"
         >
           <RefreshCw className={cn('w-4 h-4', itemsLoading && 'animate-spin')} />
         </button>
@@ -351,18 +351,18 @@ export default function MaintenanceReadinessPage() {
           {
             label: 'Backlog Cost',
             value: `$${(backlogCost / 1000).toFixed(0)}K`,
-            color: 'text-sky-300',
+            color: 'text-[#d4c598]',
             icon: TrendingDown,
           },
         ].map((s) => (
           <div
             key={s.label}
-            className="bg-[#0a1628]/80 border border-sky-500/10 rounded-xl p-4 flex items-center gap-3"
+            className="bg-white/[0.02] border border-white/[0.06] rounded-xl p-4 flex items-center gap-3"
           >
             <s.icon className={cn('w-5 h-5 shrink-0', s.color)} />
             <div>
               <p className={cn('text-xl font-bold font-display', s.color)}>{s.value}</p>
-              <p className="text-[10px] text-sky-400/40 uppercase tracking-wider">{s.label}</p>
+              <p className="text-[10px] text-[#6a6a6a] uppercase tracking-wider">{s.label}</p>
             </div>
           </div>
         ))}
@@ -371,7 +371,7 @@ export default function MaintenanceReadinessPage() {
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <div className="lg:col-span-2 space-y-4">
           <div className="flex items-center gap-2">
-            <h2 className="text-[10px] font-mono text-sky-400/50 uppercase tracking-wider">
+            <h2 className="text-[10px] font-mono text-[#8a8a8a] uppercase tracking-wider">
               Maintenance Watchlist
             </h2>
             <div className="flex items-center gap-1 ml-4 flex-wrap">
@@ -391,8 +391,8 @@ export default function MaintenanceReadinessPage() {
                   className={cn(
                     'text-[9px] px-2 py-1 rounded border transition-all capitalize',
                     filter === f
-                      ? 'bg-sky-500/10 border-sky-500/30 text-sky-300'
-                      : 'border-sky-500/10 text-sky-400/40 hover:text-sky-300',
+                      ? 'bg-[#c9b787]/10 border-[#c9b787]/24 text-[#d4c598]'
+                      : 'border-white/[0.06] text-[#6a6a6a] hover:text-[#d4c598]',
                   )}
                 >
                   {f.replace('_', ' ')}
@@ -406,14 +406,14 @@ export default function MaintenanceReadinessPage() {
               {[1, 2, 3].map((i) => (
                 <div
                   key={i}
-                  className="h-32 rounded-xl bg-sky-500/5 border border-sky-500/10 animate-pulse"
+                  className="h-32 rounded-xl bg-[#c9b787]/8 border border-white/[0.06] animate-pulse"
                 />
               ))}
             </div>
           ) : (
             <div className="space-y-3">
               {filtered.length === 0 ? (
-                <div className="py-8 text-center text-sky-400/30 text-sm border border-sky-500/10 rounded-xl">
+                <div className="py-8 text-center text-[#5a5a5a] text-sm border border-white/[0.06] rounded-xl">
                   No items match this filter.
                 </div>
               ) : (
@@ -424,33 +424,33 @@ export default function MaintenanceReadinessPage() {
         </div>
 
         <div className="space-y-4">
-          <h2 className="text-[10px] font-mono text-sky-400/50 uppercase tracking-wider">
+          <h2 className="text-[10px] font-mono text-[#8a8a8a] uppercase tracking-wider">
             Vessel Readiness Scores
           </h2>
           {vesselReadiness.length === 0 ? (
-            <div className="bg-[#0a1628]/80 border border-sky-500/10 rounded-xl p-4">
-              <p className="text-[11px] text-sky-400/40">No open maintenance items</p>
+            <div className="bg-white/[0.02] border border-white/[0.06] rounded-xl p-4">
+              <p className="text-[11px] text-[#6a6a6a]">No open maintenance items</p>
             </div>
           ) : (
             <div className="space-y-2">
               {vesselReadiness.map((v) => (
                 <div
                   key={v.name}
-                  className="bg-[#0a1628]/80 border border-sky-500/10 rounded-xl p-3"
+                  className="bg-white/[0.02] border border-white/[0.06] rounded-xl p-3"
                 >
                   <div className="flex items-center gap-2 mb-2">
-                    <Ship className="w-3.5 h-3.5 text-sky-400/50" />
-                    <span className="text-xs font-medium text-sky-100 flex-1">{v.name}</span>
+                    <Ship className="w-3.5 h-3.5 text-[#8a8a8a]" />
+                    <span className="text-xs font-medium text-[#f5f5f5] flex-1">{v.name}</span>
                     <span
                       className={cn(
                         'text-sm font-bold font-mono',
-                        readinessColors[v.state] ?? 'text-sky-400',
+                        readinessColors[v.state] ?? 'text-[#c9b787]',
                       )}
                     >
                       {v.score}
                     </span>
                   </div>
-                  <div className="h-1.5 bg-sky-500/10 rounded-full overflow-hidden mb-2">
+                  <div className="h-1.5 bg-[#c9b787]/10 rounded-full overflow-hidden mb-2">
                     <div
                       className={cn(
                         'h-full rounded-full transition-all',
@@ -465,11 +465,11 @@ export default function MaintenanceReadinessPage() {
                       style={{ width: `${v.score}%` }}
                     />
                   </div>
-                  <div className="flex items-center gap-2 text-[9px] text-sky-400/40">
+                  <div className="flex items-center gap-2 text-[9px] text-[#6a6a6a]">
                     <span
                       className={cn(
                         'capitalize font-medium',
-                        readinessColors[v.state] ?? 'text-sky-400',
+                        readinessColors[v.state] ?? 'text-[#c9b787]',
                       )}
                     >
                       {v.state.replace('_', ' ')}
@@ -485,8 +485,8 @@ export default function MaintenanceReadinessPage() {
             </div>
           )}
 
-          <div className="bg-[#0a1628]/80 border border-sky-500/10 rounded-xl p-4">
-            <h3 className="text-[10px] font-mono text-sky-400/50 uppercase tracking-wider mb-3">
+          <div className="bg-white/[0.02] border border-white/[0.06] rounded-xl p-4">
+            <h3 className="text-[10px] font-mono text-[#8a8a8a] uppercase tracking-wider mb-3">
               Coming Due (30 days)
             </h3>
             <div className="space-y-2">
@@ -496,16 +496,16 @@ export default function MaintenanceReadinessPage() {
                 .slice(0, 5)
                 .map((item) => (
                   <div key={item.id} className="flex items-center gap-2">
-                    <Calendar className="w-3 h-3 text-sky-400/40 shrink-0" />
+                    <Calendar className="w-3 h-3 text-[#6a6a6a] shrink-0" />
                     <div className="flex-1 min-w-0">
-                      <p className="text-[10px] text-sky-200/70 truncate">{item.vesselName}</p>
-                      <p className="text-[9px] text-sky-400/40 truncate">{item.component}</p>
+                      <p className="text-[10px] text-[#e0e0e0]/70 truncate">{item.vesselName}</p>
+                      <p className="text-[9px] text-[#6a6a6a] truncate">{item.component}</p>
                     </div>
                     <div className="text-right shrink-0">
                       <p
                         className={cn(
                           'text-[10px] font-mono',
-                          item.daysToDue <= 7 ? 'text-orange-400' : 'text-sky-300',
+                          item.daysToDue <= 7 ? 'text-orange-400' : 'text-[#d4c598]',
                         )}
                       >
                         in {item.daysToDue}d
@@ -516,7 +516,7 @@ export default function MaintenanceReadinessPage() {
               {allItems.filter(
                 (m) => m.daysToDue >= 0 && m.daysToDue <= 30 && m.status !== 'completed',
               ).length === 0 && (
-                <p className="text-[11px] text-sky-400/30">Nothing due in the next 30 days</p>
+                <p className="text-[11px] text-[#5a5a5a]">Nothing due in the next 30 days</p>
               )}
             </div>
           </div>

@@ -234,7 +234,7 @@ function SensorCard({ s, running }: { s: (typeof SENSOR_STREAMS)[0]; running: bo
   const pct = Math.min(100, Math.max(0, ((val - s.min) / (s.max - s.min)) * 100));
   const status = val >= s.crit ? 'critical' : val >= s.warn ? 'warn' : 'normal';
   const colorMap: Record<string, string> = {
-    sky: 'text-sky-400',
+    sky: 'text-[#c9b787]',
     orange: 'text-orange-400',
     violet: 'text-violet-400',
     amber: 'text-amber-400',
@@ -245,18 +245,18 @@ function SensorCard({ s, running }: { s: (typeof SENSOR_STREAMS)[0]; running: bo
   return (
     <div
       className={cn(
-        'bg-[#0a1628]/80 border rounded-xl p-4 flex flex-col gap-2',
+        'bg-white/[0.02] border rounded-xl p-4 flex flex-col gap-2',
         status === 'critical'
           ? 'border-red-500/30 shadow-red-500/10 shadow-lg'
           : status === 'warn'
             ? 'border-amber-500/25'
-            : 'border-sky-500/10',
+            : 'border-white/[0.06]',
       )}
     >
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-1.5">
           <Icon className={cn('w-3.5 h-3.5', colorMap[s.color])} />
-          <span className="text-[10px] text-sky-400/60 uppercase tracking-wider">{s.label}</span>
+          <span className="text-[10px] text-[#9a9a9a] uppercase tracking-wider">{s.label}</span>
         </div>
         {status === 'critical' && (
           <span className="flex items-center gap-1 text-[9px] text-red-400">
@@ -273,7 +273,7 @@ function SensorCard({ s, running }: { s: (typeof SENSOR_STREAMS)[0]; running: bo
           <span className={cn('text-2xl font-bold font-mono leading-none', colorMap[s.color])}>
             {val}
           </span>
-          <span className="text-[10px] text-sky-400/40 ml-1">{s.unit}</span>
+          <span className="text-[10px] text-[#6a6a6a] ml-1">{s.unit}</span>
         </div>
       </div>
       <div className="h-1 bg-white/5 rounded-full overflow-hidden">
@@ -432,7 +432,7 @@ export default function DigitalTwinPage() {
 
   const statusColors: Record<string, string> = {
     at_sea: 'text-emerald-400 bg-emerald-500/10 border-emerald-500/20',
-    in_port: 'text-sky-400 bg-sky-500/10 border-sky-500/20',
+    in_port: 'text-[#c9b787] bg-[#c9b787]/10 border-white/[0.08]',
     anchored: 'text-amber-400 bg-amber-500/10 border-amber-500/20',
   };
 
@@ -441,18 +441,18 @@ export default function DigitalTwinPage() {
       <div className="flex items-center justify-between">
         <div>
           <div className="flex items-center gap-2 mb-1">
-            <Cpu className="w-4 h-4 text-sky-400" />
-            <h1 className="font-display text-xl font-bold text-sky-50">
+            <Cpu className="w-4 h-4 text-[#c9b787]" />
+            <h1 className="font-display text-xl font-bold text-[#f5f5f5]">
               Vessel Digital Twin Engine
             </h1>
             <Badge
               variant="outline"
-              className="text-[9px] text-sky-400 border-sky-500/30 bg-sky-500/5"
+              className="text-[9px] text-[#c9b787] border-[#c9b787]/24 bg-[#c9b787]/8"
             >
               LIVE SYNC
             </Badge>
           </div>
-          <p className="text-xs text-sky-400/40">
+          <p className="text-xs text-[#6a6a6a]">
             Real-time 3D digital twin with sensor simulation, performance prediction & historical
             replay
           </p>
@@ -467,7 +467,7 @@ export default function DigitalTwinPage() {
               'flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-lg border transition-colors',
               replayMode
                 ? 'bg-violet-500/10 border-violet-500/30 text-violet-400'
-                : 'bg-sky-500/5 border-sky-500/20 text-sky-400/60 hover:text-sky-300',
+                : 'bg-[#c9b787]/8 border-white/[0.08] text-[#9a9a9a] hover:text-[#d4c598]',
             )}
           >
             <RotateCcw className="w-3.5 h-3.5" />
@@ -475,7 +475,7 @@ export default function DigitalTwinPage() {
           </button>
           <button
             onClick={() => setRunning(!running)}
-            className="flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-lg border border-sky-500/20 bg-sky-500/5 text-sky-400/60 hover:text-sky-300 transition-colors"
+            className="flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-lg border border-white/[0.08] bg-[#c9b787]/8 text-[#9a9a9a] hover:text-[#d4c598] transition-colors"
           >
             {running ? <Pause className="w-3.5 h-3.5" /> : <Play className="w-3.5 h-3.5" />}
             {running ? 'Pause' : 'Resume'}
@@ -491,8 +491,8 @@ export default function DigitalTwinPage() {
             className={cn(
               'flex items-center gap-2 px-3 py-2 rounded-lg border text-xs whitespace-nowrap transition-all',
               selectedVessel.id === v.id
-                ? 'bg-sky-500/10 border-sky-500/30 text-sky-300'
-                : 'bg-[#0a1628]/60 border-sky-500/10 text-sky-400/50 hover:text-sky-300',
+                ? 'bg-[#c9b787]/10 border-[#c9b787]/24 text-[#d4c598]'
+                : 'bg-white/[0.02] border-white/[0.06] text-[#8a8a8a] hover:text-[#d4c598]',
             )}
           >
             <span>{v.flag}</span>
@@ -512,11 +512,11 @@ export default function DigitalTwinPage() {
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
         <div className="lg:col-span-2 space-y-4">
-          <div className="bg-[#0a1628]/80 border border-sky-500/10 rounded-xl overflow-hidden">
-            <div className="px-4 py-3 border-b border-sky-500/10 flex items-center justify-between">
+          <div className="bg-white/[0.02] border border-white/[0.06] rounded-xl overflow-hidden">
+            <div className="px-4 py-3 border-b border-white/[0.06] flex items-center justify-between">
               <div>
-                <p className="text-sm font-semibold text-sky-100">{selectedVessel.name}</p>
-                <p className="text-[10px] text-sky-400/40">
+                <p className="text-sm font-semibold text-[#f5f5f5]">{selectedVessel.name}</p>
+                <p className="text-[10px] text-[#6a6a6a]">
                   {selectedVessel.type} · Digital Twin Visualization
                 </p>
               </div>
@@ -538,9 +538,9 @@ export default function DigitalTwinPage() {
         </div>
 
         <div className="space-y-4">
-          <div className="bg-[#0a1628]/80 border border-sky-500/10 rounded-xl p-4">
-            <p className="text-xs font-semibold text-sky-200 mb-3 flex items-center gap-1.5">
-              <BarChart3 className="w-3.5 h-3.5 text-sky-400" />
+          <div className="bg-white/[0.02] border border-white/[0.06] rounded-xl p-4">
+            <p className="text-xs font-semibold text-[#e0e0e0] mb-3 flex items-center gap-1.5">
+              <BarChart3 className="w-3.5 h-3.5 text-[#c9b787]" />
               Performance Prediction
             </p>
             {[
@@ -552,11 +552,11 @@ export default function DigitalTwinPage() {
             ].map((r) => (
               <div
                 key={r.label}
-                className="flex items-center justify-between py-2 border-b border-sky-500/5 last:border-0"
+                className="flex items-center justify-between py-2 border-b border-white/[0.08] last:border-0"
               >
-                <span className="text-[11px] text-sky-400/50">{r.label}</span>
+                <span className="text-[11px] text-[#8a8a8a]">{r.label}</span>
                 <div className="text-right">
-                  <p className="text-[11px] font-mono text-sky-200">{r.val}</p>
+                  <p className="text-[11px] font-mono text-[#e0e0e0]">{r.val}</p>
                   <p
                     className={cn(
                       'text-[9px]',
@@ -570,9 +570,9 @@ export default function DigitalTwinPage() {
             ))}
           </div>
 
-          <div className="bg-[#0a1628]/80 border border-sky-500/10 rounded-xl p-4">
+          <div className="bg-white/[0.02] border border-white/[0.06] rounded-xl p-4">
             <div className="flex items-center justify-between mb-3">
-              <p className="text-xs font-semibold text-sky-200 flex items-center gap-1.5">
+              <p className="text-xs font-semibold text-[#e0e0e0] flex items-center gap-1.5">
                 <Clock className="w-3.5 h-3.5 text-violet-400" />
                 Voyage Replay
               </p>
@@ -585,9 +585,9 @@ export default function DigitalTwinPage() {
                 const shown = !replayMode || i <= replayIdx;
                 const isCurrent = replayMode && i === replayIdx;
                 const sev =
-                  { critical: 'text-red-400', warn: 'text-amber-400', info: 'text-sky-400/60' }[
+                  { critical: 'text-red-400', warn: 'text-amber-400', info: 'text-[#9a9a9a]' }[
                     ev.severity
-                  ] ?? 'text-sky-400/60';
+                  ] ?? 'text-[#9a9a9a]';
                 return (
                   <div
                     key={i}
@@ -605,15 +605,15 @@ export default function DigitalTwinPage() {
                             ? 'bg-red-400'
                             : ev.severity === 'warn'
                               ? 'bg-amber-400'
-                              : 'bg-sky-500/40',
+                              : 'bg-[#c9b787]/14',
                         )}
                       />
                       {i < REPLAY_EVENTS.length - 1 && (
-                        <div className="w-px flex-1 bg-sky-500/10 mt-0.5" />
+                        <div className="w-px flex-1 bg-[#c9b787]/10 mt-0.5" />
                       )}
                     </div>
                     <div className="pb-2">
-                      <p className="text-sky-400/30 font-mono">{ev.time}</p>
+                      <p className="text-[#5a5a5a] font-mono">{ev.time}</p>
                       <p className={cn('mt-0.5', sev)}>{ev.label}</p>
                     </div>
                   </div>
@@ -633,8 +633,8 @@ export default function DigitalTwinPage() {
             )}
           </div>
 
-          <div className="bg-[#0a1628]/80 border border-sky-500/10 rounded-xl p-4">
-            <p className="text-xs font-semibold text-sky-200 mb-3 flex items-center gap-1.5">
+          <div className="bg-white/[0.02] border border-white/[0.06] rounded-xl p-4">
+            <p className="text-xs font-semibold text-[#e0e0e0] mb-3 flex items-center gap-1.5">
               <Gauge className="w-3.5 h-3.5 text-emerald-400" />
               Twin Integrity
             </p>
@@ -646,12 +646,12 @@ export default function DigitalTwinPage() {
             ].map((m) => (
               <div key={m.label} className="mb-3">
                 <div className="flex justify-between mb-1">
-                  <span className="text-[10px] text-sky-400/50">{m.label}</span>
-                  <span className="text-[10px] font-mono text-sky-300">{m.val}%</span>
+                  <span className="text-[10px] text-[#8a8a8a]">{m.label}</span>
+                  <span className="text-[10px] font-mono text-[#d4c598]">{m.val}%</span>
                 </div>
                 <div className="h-1 bg-white/5 rounded-full overflow-hidden">
                   <div
-                    className="h-full rounded-full bg-gradient-to-r from-sky-500/60 to-sky-400/30 transition-all"
+                    className="h-full rounded-full bg-gradient-to-r from-[#c9b787]/10 to-transparent transition-all"
                     style={{ width: `${m.val}%` }}
                   />
                 </div>

@@ -56,8 +56,8 @@ const statusConfig: Record<string, { label: string; color: string; dot: string }
   },
   in_port: {
     label: 'In Port',
-    color: 'text-sky-400 bg-sky-500/10 border-sky-500/20',
-    dot: 'bg-sky-400',
+    color: 'text-[#c9b787] bg-[#c9b787]/10 border-white/[0.08]',
+    dot: 'bg-[#c9b787]',
   },
   anchored: {
     label: 'Anchored',
@@ -158,25 +158,25 @@ function StatCard({
             justifyContent: 'center',
           }}
         >
-          <Icon className="w-3.5 h-3.5 text-sky-400/80 shrink-0" />
+          <Icon className="w-3.5 h-3.5 text-[#c9b787]/80 shrink-0" />
         </div>
         <div>
           {trend === 'up' && <TrendingUp className="w-3 h-3 text-emerald-400" />}
           {trend === 'down' && <TrendingDown className="w-3 h-3 text-red-400" />}
-          {trend === 'neutral' && <Minus className="w-3 h-3 text-sky-400/40" />}
+          {trend === 'neutral' && <Minus className="w-3 h-3 text-[#6a6a6a]" />}
         </div>
       </div>
       <div>
         <p
           className={cn(
-            'text-2xl font-bold font-display leading-none text-sky-100',
+            'text-2xl font-bold font-display leading-none text-[#f5f5f5]',
             pulse && 'animate-pulse',
           )}
         >
           {value}
         </p>
-        <p className="text-[10px] text-sky-400/50 uppercase tracking-wider mt-1">{label}</p>
-        {sub && <p className="text-[10px] text-sky-400/35 mt-0.5">{sub}</p>}
+        <p className="text-[10px] text-[#8a8a8a] uppercase tracking-wider mt-1">{label}</p>
+        {sub && <p className="text-[10px] text-[#c9b787]/35 mt-0.5">{sub}</p>}
       </div>
     </div>
   );
@@ -218,7 +218,7 @@ function ExecutiveView({ vessels, fleetExceptions, voyageEconomics }: ViewProps)
   return (
     <div className="space-y-6">
       <div>
-        <h3 className="text-[10px] font-mono text-sky-400/50 uppercase tracking-wider mb-3">
+        <h3 className="text-[10px] font-mono text-[#8a8a8a] uppercase tracking-wider mb-3">
           Strategic Fleet Position
         </h3>
         <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
@@ -234,7 +234,7 @@ function ExecutiveView({ vessels, fleetExceptions, voyageEconomics }: ViewProps)
             label="Fleet Utilization"
             value={`${fleetUtil.toFixed(1)}%`}
             sub="excluding maintenance"
-            accent="border-sky-500/10"
+            accent="border-white/[0.06]"
             icon={Activity}
             trend="up"
           />
@@ -258,61 +258,61 @@ function ExecutiveView({ vessels, fleetExceptions, voyageEconomics }: ViewProps)
       </div>
 
       <div>
-        <h3 className="text-[10px] font-mono text-sky-400/50 uppercase tracking-wider mb-3">
+        <h3 className="text-[10px] font-mono text-[#8a8a8a] uppercase tracking-wider mb-3">
           Voyage P&amp;L Snapshot
         </h3>
         <div className="grid grid-cols-3 gap-3">
-          <div className="bg-[#0a1628]/80 border border-sky-500/10 rounded-xl p-4">
-            <p className="text-[10px] text-sky-400/50 uppercase tracking-wider">
+          <div className="bg-white/[0.02] border border-white/[0.06] rounded-xl p-4">
+            <p className="text-[10px] text-[#8a8a8a] uppercase tracking-wider">
               Estimated Revenue
             </p>
             <p className="text-xl font-bold text-emerald-400 mt-1">
               ${(totalRevenue / 1e6).toFixed(1)}M
             </p>
-            <p className="text-[10px] text-sky-400/40 mt-0.5">Active voyages combined</p>
+            <p className="text-[10px] text-[#6a6a6a] mt-0.5">Active voyages combined</p>
           </div>
-          <div className="bg-[#0a1628]/80 border border-sky-500/10 rounded-xl p-4">
-            <p className="text-[10px] text-sky-400/50 uppercase tracking-wider">Operating Cost</p>
+          <div className="bg-white/[0.02] border border-white/[0.06] rounded-xl p-4">
+            <p className="text-[10px] text-[#8a8a8a] uppercase tracking-wider">Operating Cost</p>
             <p className="text-xl font-bold text-amber-400 mt-1">
               ${((totalRevenue - totalMargin) / 1e6).toFixed(1)}M
             </p>
-            <p className="text-[10px] text-sky-400/40 mt-0.5">Fuel, port, operating</p>
+            <p className="text-[10px] text-[#6a6a6a] mt-0.5">Fuel, port, operating</p>
           </div>
-          <div className="bg-[#0a1628]/80 border border-sky-500/10 rounded-xl p-4">
-            <p className="text-[10px] text-sky-400/50 uppercase tracking-wider">Margin Estimate</p>
-            <p className="text-xl font-bold text-sky-300 mt-1">
+          <div className="bg-white/[0.02] border border-white/[0.06] rounded-xl p-4">
+            <p className="text-[10px] text-[#8a8a8a] uppercase tracking-wider">Margin Estimate</p>
+            <p className="text-xl font-bold text-[#d4c598] mt-1">
               ${(totalMargin / 1e6).toFixed(1)}M{' '}
-              <span className="text-sm text-sky-400/60">({avgMarginPct.toFixed(1)}%)</span>
+              <span className="text-sm text-[#9a9a9a]">({avgMarginPct.toFixed(1)}%)</span>
             </p>
-            <p className="text-[10px] text-sky-400/40 mt-0.5">Blended fleet average</p>
+            <p className="text-[10px] text-[#6a6a6a] mt-0.5">Blended fleet average</p>
           </div>
         </div>
       </div>
 
       <div>
-        <h3 className="text-[10px] font-mono text-sky-400/50 uppercase tracking-wider mb-3">
+        <h3 className="text-[10px] font-mono text-[#8a8a8a] uppercase tracking-wider mb-3">
           Fleet Status at a Glance
         </h3>
         <div className="space-y-2">
           {vessels.map((v) => {
             const sc = statusConfig[v.status] || {
               label: v.status,
-              color: 'text-sky-400 bg-sky-500/10 border-sky-500/20',
-              dot: 'bg-sky-400',
+              color: 'text-[#c9b787] bg-[#c9b787]/10 border-white/[0.08]',
+              dot: 'bg-[#c9b787]',
             };
             return (
               <Link key={v.id} href={`/vessel/${v.id}`}>
-                <div className="flex items-center gap-3 px-4 py-2.5 bg-[#0a1628]/60 border border-sky-500/10 rounded-lg hover:border-sky-500/20 hover:bg-sky-500/5 cursor-pointer transition-all">
+                <div className="flex items-center gap-3 px-4 py-2.5 bg-white/[0.02] border border-white/[0.06] rounded-lg hover:border-white/[0.08] hover:bg-[#c9b787]/8 cursor-pointer transition-all">
                   <span className={cn('w-2 h-2 rounded-full shrink-0', sc.dot)} />
-                  <span className="text-xs font-medium text-sky-100 flex-1">{v.name}</span>
-                  <span className="text-[10px] text-sky-400/50 font-mono">{v.type}</span>
+                  <span className="text-xs font-medium text-[#f5f5f5] flex-1">{v.name}</span>
+                  <span className="text-[10px] text-[#8a8a8a] font-mono">{v.type}</span>
                   <Badge variant="outline" className={cn('text-[9px] shrink-0', sc.color)}>
                     {sc.label}
                   </Badge>
-                  <div className="text-[10px] text-sky-400/40 font-mono w-16 text-right">
+                  <div className="text-[10px] text-[#6a6a6a] font-mono w-16 text-right">
                     {(v.utilization ?? 0) > 0 ? `${(v.tce ?? 0).toLocaleString()}/d` : '—'}
                   </div>
-                  <ChevronRight className="w-3 h-3 text-sky-400/30 shrink-0" />
+                  <ChevronRight className="w-3 h-3 text-[#5a5a5a] shrink-0" />
                 </div>
               </Link>
             );
@@ -365,13 +365,13 @@ function OperationsView({ vessels, fleetExceptions, maintenanceItems }: ViewProp
           label="In Port"
           value={inPortCount}
           sub="turnaround vessels"
-          accent="border-sky-500/10"
+          accent="border-white/[0.06]"
           icon={Ship}
         />
       </div>
 
       <div>
-        <h3 className="text-[10px] font-mono text-sky-400/50 uppercase tracking-wider mb-3">
+        <h3 className="text-[10px] font-mono text-[#8a8a8a] uppercase tracking-wider mb-3">
           Exception Queue
         </h3>
         <div className="space-y-2">
@@ -390,21 +390,21 @@ function OperationsView({ vessels, fleetExceptions, maintenanceItems }: ViewProp
                 : ((exc as { estimatedImpact?: number }).estimatedImpact ?? 0));
             return (
               <Link key={exc.id} href="/exceptions">
-                <div className="px-4 py-3 bg-[#0a1628]/60 border border-sky-500/10 rounded-lg hover:border-sky-500/20 transition-all cursor-pointer">
+                <div className="px-4 py-3 bg-white/[0.02] border border-white/[0.06] rounded-lg hover:border-white/[0.08] transition-all cursor-pointer">
                   <div className="flex items-start gap-3">
                     <Badge variant="outline" className={cn('text-[9px] shrink-0 mt-0.5', sc.color)}>
                       {sc.label}
                     </Badge>
                     <div className="flex-1 min-w-0">
-                      <p className="text-xs font-medium text-sky-100">{exc.title}</p>
-                      <p className="text-[10px] text-sky-400/50 mt-0.5">{exc.vesselName ?? ''}</p>
+                      <p className="text-xs font-medium text-[#f5f5f5]">{exc.title}</p>
+                      <p className="text-[10px] text-[#8a8a8a] mt-0.5">{exc.vesselName ?? ''}</p>
                     </div>
                     {impact > 0 && (
                       <div className="text-right shrink-0">
                         <p className="text-[10px] font-mono text-amber-400">
                           ${(impact / 1000).toFixed(0)}K
                         </p>
-                        <p className="text-[9px] text-sky-400/40">exposure</p>
+                        <p className="text-[9px] text-[#6a6a6a]">exposure</p>
                       </div>
                     )}
                   </div>
@@ -416,7 +416,7 @@ function OperationsView({ vessels, fleetExceptions, maintenanceItems }: ViewProp
       </div>
 
       <div>
-        <h3 className="text-[10px] font-mono text-sky-400/50 uppercase tracking-wider mb-3">
+        <h3 className="text-[10px] font-mono text-[#8a8a8a] uppercase tracking-wider mb-3">
           Maintenance Watch
         </h3>
         <div className="space-y-2">
@@ -437,7 +437,7 @@ function OperationsView({ vessels, fleetExceptions, maintenanceItems }: ViewProp
             return (
               <div
                 key={mv.id}
-                className="flex items-center gap-3 px-4 py-2.5 bg-[#0a1628]/60 border border-sky-500/10 rounded-lg"
+                className="flex items-center gap-3 px-4 py-2.5 bg-white/[0.02] border border-white/[0.06] rounded-lg"
               >
                 <div
                   className={cn(
@@ -446,16 +446,16 @@ function OperationsView({ vessels, fleetExceptions, maintenanceItems }: ViewProp
                       ? 'bg-red-400'
                       : mv.status === 'in_progress'
                         ? 'bg-amber-400'
-                        : 'bg-sky-400',
+                        : 'bg-[#c9b787]',
                   )}
                 />
                 <div className="flex-1 min-w-0">
-                  <p className="text-xs font-medium text-sky-100 truncate">
+                  <p className="text-xs font-medium text-[#f5f5f5] truncate">
                     {label}
                     {sub ? ` — ${sub}` : ''}
                   </p>
                   {mv.daysToDue !== undefined && (
-                    <p className="text-[10px] text-sky-400/50">
+                    <p className="text-[10px] text-[#8a8a8a]">
                       {mv.status === 'overdue'
                         ? `${Math.abs(mv.daysToDue)}d overdue`
                         : `Due in ${mv.daysToDue}d`}
@@ -527,7 +527,7 @@ function CommercialView({ voyageEconomics }: ViewProps) {
       </div>
 
       <div>
-        <h3 className="text-[10px] font-mono text-sky-400/50 uppercase tracking-wider mb-3">
+        <h3 className="text-[10px] font-mono text-[#8a8a8a] uppercase tracking-wider mb-3">
           Voyage P&amp;L by Charter
         </h3>
         <div className="space-y-2">
@@ -537,20 +537,20 @@ function CommercialView({ voyageEconomics }: ViewProps) {
             return (
               <div
                 key={v.voyageId}
-                className="px-4 py-3 bg-[#0a1628]/60 border border-sky-500/10 rounded-lg"
+                className="px-4 py-3 bg-white/[0.02] border border-white/[0.06] rounded-lg"
               >
                 <div className="flex items-center gap-3">
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2">
-                      <p className="text-xs font-medium text-sky-100">{v.vesselName}</p>
-                      <span className="text-[9px] px-1.5 py-0.5 rounded bg-sky-500/10 text-sky-400/60 border border-sky-500/10">
+                      <p className="text-xs font-medium text-[#f5f5f5]">{v.vesselName}</p>
+                      <span className="text-[9px] px-1.5 py-0.5 rounded bg-[#c9b787]/10 text-[#9a9a9a] border border-white/[0.06]">
                         {v.charterType.replace('_', ' ')}
                       </span>
                     </div>
-                    <p className="text-[10px] text-sky-400/50 mt-0.5">{v.route}</p>
+                    <p className="text-[10px] text-[#8a8a8a] mt-0.5">{v.route}</p>
                   </div>
                   <div className="text-right shrink-0 space-y-0.5">
-                    <p className="text-xs font-mono text-sky-100">
+                    <p className="text-xs font-mono text-[#f5f5f5]">
                       ${(v.marginEstimate / 1e6).toFixed(2)}M
                     </p>
                     <div
@@ -569,7 +569,7 @@ function CommercialView({ voyageEconomics }: ViewProps) {
                     </div>
                   </div>
                 </div>
-                <div className="mt-2 flex items-center gap-4 text-[10px] text-sky-400/40">
+                <div className="mt-2 flex items-center gap-4 text-[10px] text-[#6a6a6a]">
                   <span>Rev: ${(v.estimatedRevenue / 1e6).toFixed(2)}M</span>
                   <span>Fuel: ${(v.fuelCost / 1e3).toFixed(0)}K</span>
                   <span>Port: ${(v.portCost / 1e3).toFixed(0)}K</span>
@@ -635,11 +635,11 @@ function IntelControls({
   const currentView = SAVED_VIEWS.find((v) => v.id === savedView) ?? SAVED_VIEWS[0];
 
   return (
-    <div className="flex items-center gap-2 flex-wrap p-3 rounded-xl border border-sky-500/10 bg-sky-900/10">
+    <div className="flex items-center gap-2 flex-wrap p-3 rounded-xl border border-white/[0.06] bg-[#c9b787]/14">
       {/* Timeline brush */}
       <div className="flex items-center gap-1">
-        <CalendarRange className="w-3.5 h-3.5 text-sky-400/50" />
-        <span className="text-[10px] text-sky-400/50 font-mono uppercase tracking-wider mr-1">
+        <CalendarRange className="w-3.5 h-3.5 text-[#8a8a8a]" />
+        <span className="text-[10px] text-[#8a8a8a] font-mono uppercase tracking-wider mr-1">
           Window:
         </span>
         <div className="flex gap-0.5">
@@ -650,8 +650,8 @@ function IntelControls({
               className={cn(
                 'px-2 py-1 rounded text-[10px] font-mono font-semibold transition-colors',
                 timeRange === p.id
-                  ? 'bg-sky-500/20 text-sky-300 border border-sky-500/30'
-                  : 'text-sky-400/40 hover:text-sky-300 hover:bg-sky-500/10',
+                  ? 'bg-[#c9b787]/16 text-[#d4c598] border border-[#c9b787]/24'
+                  : 'text-[#6a6a6a] hover:text-[#d4c598] hover:bg-[#c9b787]/10',
               )}
             >
               {p.label}
@@ -660,7 +660,7 @@ function IntelControls({
         </div>
       </div>
 
-      <div className="w-px h-4 bg-sky-500/15 mx-1" />
+      <div className="w-px h-4 bg-[#c9b787]/14 mx-1" />
 
       {/* Saved views */}
       <div className="relative">
@@ -669,14 +669,14 @@ function IntelControls({
             setShowViews((v) => !v);
             setShowLayers(false);
           }}
-          className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg border border-sky-500/15 bg-sky-500/5 text-[10px] text-sky-300/70 hover:text-sky-200 hover:bg-sky-500/10 transition-colors font-mono"
+          className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg border border-white/[0.08] bg-[#c9b787]/8 text-[10px] text-[#a0a08a] hover:text-[#e0e0e0] hover:bg-[#c9b787]/10 transition-colors font-mono"
         >
           <BookmarkCheck className="w-3 h-3" />
           {currentView.label}
           <ChevronDown className={cn('w-3 h-3 transition-transform', showViews && 'rotate-180')} />
         </button>
         {showViews && (
-          <div className="absolute top-full left-0 mt-1 w-56 rounded-xl border border-sky-500/15 bg-[#060e1e] shadow-xl shadow-black/40 z-20 overflow-hidden">
+          <div className="absolute top-full left-0 mt-1 w-56 rounded-xl border border-white/[0.08] bg-[#060e1e] shadow-xl shadow-black/40 z-20 overflow-hidden">
             {SAVED_VIEWS.map((v) => (
               <button
                 key={v.id}
@@ -685,12 +685,12 @@ function IntelControls({
                   setShowViews(false);
                 }}
                 className={cn(
-                  'w-full flex flex-col px-3 py-2.5 text-left transition-colors hover:bg-sky-500/10',
-                  savedView === v.id && 'bg-sky-500/10',
+                  'w-full flex flex-col px-3 py-2.5 text-left transition-colors hover:bg-[#c9b787]/10',
+                  savedView === v.id && 'bg-[#c9b787]/10',
                 )}
               >
-                <span className="text-[11px] font-semibold text-sky-200">{v.label}</span>
-                <span className="text-[10px] text-sky-400/50">{v.description}</span>
+                <span className="text-[11px] font-semibold text-[#e0e0e0]">{v.label}</span>
+                <span className="text-[10px] text-[#8a8a8a]">{v.description}</span>
               </button>
             ))}
           </div>
@@ -704,14 +704,14 @@ function IntelControls({
             setShowLayers((v) => !v);
             setShowViews(false);
           }}
-          className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg border border-sky-500/15 bg-sky-500/5 text-[10px] text-sky-300/70 hover:text-sky-200 hover:bg-sky-500/10 transition-colors font-mono"
+          className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg border border-white/[0.08] bg-[#c9b787]/8 text-[10px] text-[#a0a08a] hover:text-[#e0e0e0] hover:bg-[#c9b787]/10 transition-colors font-mono"
         >
           <Layers className="w-3 h-3" />
           Layers ({layers.size}/{LAYER_CONFIG.length})
           <ChevronDown className={cn('w-3 h-3 transition-transform', showLayers && 'rotate-180')} />
         </button>
         {showLayers && (
-          <div className="absolute top-full right-0 mt-1 w-52 rounded-xl border border-sky-500/15 bg-[#060e1e] shadow-xl shadow-black/40 z-20 overflow-hidden p-1">
+          <div className="absolute top-full right-0 mt-1 w-52 rounded-xl border border-white/[0.08] bg-[#060e1e] shadow-xl shadow-black/40 z-20 overflow-hidden p-1">
             {LAYER_CONFIG.map((layer) => {
               const Icon = layer.icon;
               const isOn = layers.has(layer.id);
@@ -725,23 +725,23 @@ function IntelControls({
                     setLayers(next);
                   }}
                   className={cn(
-                    'w-full flex items-center gap-2.5 px-2.5 py-2 rounded-lg text-left transition-colors hover:bg-sky-500/10',
-                    isOn && 'bg-sky-500/5',
+                    'w-full flex items-center gap-2.5 px-2.5 py-2 rounded-lg text-left transition-colors hover:bg-[#c9b787]/10',
+                    isOn && 'bg-[#c9b787]/8',
                   )}
                 >
                   <div
                     className={cn(
                       'w-4 h-4 rounded flex items-center justify-center',
-                      isOn ? 'bg-sky-500/20' : 'bg-transparent border border-sky-500/20',
+                      isOn ? 'bg-[#c9b787]/16' : 'bg-transparent border border-white/[0.08]',
                     )}
                   >
-                    {isOn && <CheckCircle2 className="w-3 h-3 text-sky-400" />}
+                    {isOn && <CheckCircle2 className="w-3 h-3 text-[#c9b787]" />}
                   </div>
-                  <Icon className={cn('w-3 h-3', isOn ? 'text-sky-400/70' : 'text-sky-400/30')} />
+                  <Icon className={cn('w-3 h-3', isOn ? 'text-[#a0a0a0]' : 'text-[#5a5a5a]')} />
                   <span
                     className={cn(
                       'text-[11px] font-mono',
-                      isOn ? 'text-sky-200' : 'text-sky-400/40',
+                      isOn ? 'text-[#e0e0e0]' : 'text-[#6a6a6a]',
                     )}
                   >
                     {layer.label}
@@ -753,7 +753,7 @@ function IntelControls({
         )}
       </div>
 
-      <span className="ml-auto text-[10px] font-mono text-sky-400/30">
+      <span className="ml-auto text-[10px] font-mono text-[#5a5a5a]">
         Entities sync with timeline
       </span>
     </div>
@@ -821,15 +821,15 @@ export default function CommandOverviewPage() {
       <div className="flex items-start justify-between gap-4">
         <div>
           <div className="flex items-center gap-2 mb-1">
-            <Ship className="w-3.5 h-3.5 text-sky-400/70" />
-            <span className="text-[10px] font-bold uppercase tracking-widest font-mono text-sky-400/70">
+            <Ship className="w-3.5 h-3.5 text-[#a0a0a0]" />
+            <span className="text-[10px] font-bold uppercase tracking-widest font-mono text-[#a0a0a0]">
               Vessels · Fleet Command
             </span>
           </div>
-          <h1 className="font-display text-xl font-bold text-sky-50 tracking-tight">
+          <h1 className="font-display text-xl font-bold text-[#f5f5f5] tracking-tight">
             Fleet Command Overview
           </h1>
-          <p className="text-[11px] text-sky-400/50 mt-0.5">
+          <p className="text-[11px] text-[#8a8a8a] mt-0.5">
             {new Date().toLocaleDateString('en-GB', {
               weekday: 'long',
               day: 'numeric',
@@ -847,7 +847,7 @@ export default function CommandOverviewPage() {
           )}
           <button
             onClick={() => refetch()}
-            className="p-1.5 rounded-lg hover:bg-sky-500/10 text-sky-400/50 hover:text-sky-300 transition-colors"
+            className="p-1.5 rounded-lg hover:bg-[#c9b787]/10 text-[#8a8a8a] hover:text-[#d4c598] transition-colors"
           >
             <RefreshCw className="w-3.5 h-3.5" />
           </button>
@@ -864,7 +864,7 @@ export default function CommandOverviewPage() {
                 isLive ? 'bg-emerald-400 animate-pulse' : 'bg-amber-400',
               )}
             />
-            <span className="text-[10px] text-sky-400/60 font-mono">
+            <span className="text-[10px] text-[#9a9a9a] font-mono">
               {isLive ? 'Live' : 'Demo'} · {totalVessels} vessels
             </span>
           </div>
@@ -897,7 +897,7 @@ export default function CommandOverviewPage() {
             {
               label: 'Total',
               value: totalVessels,
-              color: 'text-sky-400',
+              color: 'text-[#c9b787]',
               borderColor: 'transparent',
             },
             {
@@ -909,7 +909,7 @@ export default function CommandOverviewPage() {
             {
               label: 'In Port',
               value: inPort,
-              color: 'text-sky-300',
+              color: 'text-[#d4c598]',
               borderColor: 'rgba(77,143,204,0.08)',
             },
             {
@@ -927,7 +927,7 @@ export default function CommandOverviewPage() {
             {
               label: 'Exceptions',
               value: criticalExceptions,
-              color: criticalExceptions > 0 ? 'text-red-400' : 'text-sky-400/40',
+              color: criticalExceptions > 0 ? 'text-red-400' : 'text-[#6a6a6a]',
               borderColor: 'rgba(77,143,204,0.08)',
             },
             {
@@ -951,7 +951,7 @@ export default function CommandOverviewPage() {
               <p className={cn('text-lg font-bold font-display leading-none', item.color)}>
                 {item.value}
               </p>
-              <p className="text-[9px] text-sky-400/40 mt-0.5 uppercase tracking-wide">
+              <p className="text-[9px] text-[#6a6a6a] mt-0.5 uppercase tracking-wide">
                 {item.label}
               </p>
             </div>
@@ -970,7 +970,7 @@ export default function CommandOverviewPage() {
       />
 
       {/* Tabs */}
-      <div className="flex items-center gap-1 border-b border-sky-500/10">
+      <div className="flex items-center gap-1 border-b border-white/[0.06]">
         {tabs.map((tab) => (
           <button
             key={tab.id}
@@ -978,8 +978,8 @@ export default function CommandOverviewPage() {
             className={cn(
               'px-4 py-2.5 text-xs font-medium transition-all border-b-2 -mb-px',
               activeTab === tab.id
-                ? 'border-sky-400 text-sky-300'
-                : 'border-transparent text-sky-400/50 hover:text-sky-300',
+                ? 'border-[#c9b787]/40 text-[#d4c598]'
+                : 'border-transparent text-[#8a8a8a] hover:text-[#d4c598]',
             )}
           >
             {tab.label}
@@ -987,12 +987,12 @@ export default function CommandOverviewPage() {
         ))}
         <div className="ml-auto flex items-center gap-2 pb-2">
           <Link href="/dashboard/fleet">
-            <button className="text-[10px] text-sky-400/50 hover:text-sky-300 flex items-center gap-1 transition-colors">
+            <button className="text-[10px] text-[#8a8a8a] hover:text-[#d4c598] flex items-center gap-1 transition-colors">
               Fleet Map <ChevronRight className="w-3 h-3" />
             </button>
           </Link>
           <Link href="/exceptions">
-            <button className="text-[10px] text-sky-400/50 hover:text-sky-300 flex items-center gap-1 transition-colors">
+            <button className="text-[10px] text-[#8a8a8a] hover:text-[#d4c598] flex items-center gap-1 transition-colors">
               Exceptions <ChevronRight className="w-3 h-3" />
             </button>
           </Link>
@@ -1034,8 +1034,8 @@ function CommercialAndCompliancePanels() {
       sub: 'draft + negotiated fixtures',
       href: '/charter-party',
       icon: FileSignature,
-      tone: 'text-sky-300',
-      ring: 'border-sky-500/15',
+      tone: 'text-[#d4c598]',
+      ring: 'border-white/[0.08]',
     },
     {
       label: 'Demurrage Accruing',
@@ -1108,18 +1108,18 @@ function CommercialAndCompliancePanels() {
               border: '1px solid rgba(56,189,248,0.15)',
             }}
           >
-            <Icon className="w-3.5 h-3.5 text-sky-300/80" />
+            <Icon className="w-3.5 h-3.5 text-[#d4c598]/80" />
           </div>
           <div className="flex-1 min-w-0">
             <p className={cn('text-lg font-bold font-display leading-none', item.tone)}>
               {item.value}
             </p>
-            <p className="text-[10px] text-sky-400/60 uppercase tracking-wider mt-1">
+            <p className="text-[10px] text-[#9a9a9a] uppercase tracking-wider mt-1">
               {item.label}
             </p>
-            <p className="text-[10px] text-sky-400/40 mt-0.5 truncate">{item.sub}</p>
+            <p className="text-[10px] text-[#6a6a6a] mt-0.5 truncate">{item.sub}</p>
           </div>
-          <ChevronRight className="w-3.5 h-3.5 text-sky-400/30 group-hover:text-sky-300 shrink-0 transition-colors" />
+          <ChevronRight className="w-3.5 h-3.5 text-[#5a5a5a] group-hover:text-[#d4c598] shrink-0 transition-colors" />
         </div>
       </Link>
     );
@@ -1129,11 +1129,11 @@ function CommercialAndCompliancePanels() {
     <div className="grid grid-cols-1 lg:grid-cols-2 gap-5 mt-6">
       <div>
         <div className="flex items-center justify-between mb-3">
-          <h3 className="text-[10px] font-mono text-sky-400/50 uppercase tracking-wider">
+          <h3 className="text-[10px] font-mono text-[#8a8a8a] uppercase tracking-wider">
             Commercial Risk
           </h3>
           <Link href="/charter-party">
-            <button className="text-[10px] text-sky-400/50 hover:text-sky-300 flex items-center gap-1 transition-colors">
+            <button className="text-[10px] text-[#8a8a8a] hover:text-[#d4c598] flex items-center gap-1 transition-colors">
               Charter Desk <ChevronRight className="w-3 h-3" />
             </button>
           </Link>
@@ -1146,11 +1146,11 @@ function CommercialAndCompliancePanels() {
       </div>
       <div>
         <div className="flex items-center justify-between mb-3">
-          <h3 className="text-[10px] font-mono text-sky-400/50 uppercase tracking-wider">
+          <h3 className="text-[10px] font-mono text-[#8a8a8a] uppercase tracking-wider">
             Crew &amp; Compliance
           </h3>
           <Link href="/psc-inspector">
-            <button className="text-[10px] text-sky-400/50 hover:text-sky-300 flex items-center gap-1 transition-colors">
+            <button className="text-[10px] text-[#8a8a8a] hover:text-[#d4c598] flex items-center gap-1 transition-colors">
               PSC Inspector <ChevronRight className="w-3 h-3" />
             </button>
           </Link>
@@ -1277,8 +1277,8 @@ function MaritimeIntelligencePanels() {
           background: 'rgba(77,143,204,0.03)',
         }}
       >
-        <Navigation className="w-3.5 h-3.5 text-sky-400/70" />
-        <span className="text-[10px] font-bold uppercase tracking-wider text-sky-400/70">
+        <Navigation className="w-3.5 h-3.5 text-[#a0a0a0]" />
+        <span className="text-[10px] font-bold uppercase tracking-wider text-[#a0a0a0]">
           Maritime Intelligence
         </span>
         <span
@@ -1338,12 +1338,12 @@ function MaritimeIntelligencePanels() {
                   <EyeOff className="w-3.5 h-3.5 mt-0.5 shrink-0" style={{ color: rc.text }} />
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2 mb-1">
-                      <span className="text-[11px] font-medium text-sky-100">{d.vessel}</span>
-                      <span className="text-[9px] font-mono text-sky-400/40">IMO {d.imo}</span>
-                      <span className="text-[9px] text-sky-400/30">· {d.flag}</span>
+                      <span className="text-[11px] font-medium text-[#f5f5f5]">{d.vessel}</span>
+                      <span className="text-[9px] font-mono text-[#6a6a6a]">IMO {d.imo}</span>
+                      <span className="text-[9px] text-[#5a5a5a]">· {d.flag}</span>
                     </div>
-                    <p className="text-[10px] text-sky-400/50">{d.reason}</p>
-                    <p className="text-[9px] text-sky-400/35 mt-0.5">Last known: {d.lastKnown}</p>
+                    <p className="text-[10px] text-[#8a8a8a]">{d.reason}</p>
+                    <p className="text-[9px] text-[#c9b787]/35 mt-0.5">Last known: {d.lastKnown}</p>
                   </div>
                   <div className="text-right shrink-0">
                     <div className="text-[11px] font-mono font-bold" style={{ color: rc.text }}>
@@ -1388,11 +1388,11 @@ function MaritimeIntelligencePanels() {
                   <ShieldAlert className="w-3.5 h-3.5 mt-0.5 shrink-0" style={{ color: rc.text }} />
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2 mb-1">
-                      <span className="text-[11px] font-medium text-sky-100">{s.vessel}</span>
-                      <span className="text-[9px] font-mono text-sky-400/40">IMO {s.imo}</span>
-                      <span className="text-[9px] text-sky-400/30">· {s.flag}</span>
+                      <span className="text-[11px] font-medium text-[#f5f5f5]">{s.vessel}</span>
+                      <span className="text-[9px] font-mono text-[#6a6a6a]">IMO {s.imo}</span>
+                      <span className="text-[9px] text-[#5a5a5a]">· {s.flag}</span>
                     </div>
-                    <p className="text-[10px] text-sky-400/50">{s.screen}</p>
+                    <p className="text-[10px] text-[#8a8a8a]">{s.screen}</p>
                     <p className="text-[9px] mt-1 font-medium" style={{ color: rc.text }}>
                       {s.action}
                     </p>
@@ -1431,10 +1431,10 @@ function MaritimeIntelligencePanels() {
                   <Navigation className="w-3.5 h-3.5 mt-0.5 shrink-0" style={{ color: rc.text }} />
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2 mb-1">
-                      <span className="text-[11px] font-medium text-sky-100">{r.vessel}</span>
-                      <span className="text-[9px] text-sky-400/40">{r.route}</span>
+                      <span className="text-[11px] font-medium text-[#f5f5f5]">{r.vessel}</span>
+                      <span className="text-[9px] text-[#6a6a6a]">{r.route}</span>
                     </div>
-                    <p className="text-[10px] text-sky-400/50">
+                    <p className="text-[10px] text-[#8a8a8a]">
                       {r.type} · deviation: {r.deviation}
                     </p>
                     <p className="text-[9px] mt-0.5 font-mono" style={{ color: rc.text }}>

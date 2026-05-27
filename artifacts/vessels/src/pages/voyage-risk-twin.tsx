@@ -949,11 +949,11 @@ function EvidenceList({ items }: { items: EvidenceItem[] }) {
           className="flex items-start gap-2 p-2 rounded-lg"
           style={{ background: 'rgba(255,255,255,0.025)' }}
         >
-          <Info className="w-3 h-3 text-sky-400/50 mt-0.5 shrink-0" />
+          <Info className="w-3 h-3 text-[#8a8a8a] mt-0.5 shrink-0" />
           <div className="flex-1 min-w-0">
-            <p className="text-[10px] text-sky-200/80 leading-snug">{ev.signal}</p>
+            <p className="text-[10px] text-[#e0e0e0]/80 leading-snug">{ev.signal}</p>
             <div className="flex items-center gap-2 mt-0.5">
-              <span className="text-[9px] text-sky-400/40">{ev.source}</span>
+              <span className="text-[9px] text-[#6a6a6a]">{ev.source}</span>
               <span
                 className="text-[9px] px-1.5 rounded"
                 style={{
@@ -1000,7 +1000,7 @@ function RiskPanel({
         </div>
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-2">
-            <span className="text-[11px] font-semibold text-sky-100">{title}</span>
+            <span className="text-[11px] font-semibold text-[#f5f5f5]">{title}</span>
             <span
               className="text-[9px] px-2 py-0.5 rounded-full border capitalize shrink-0"
               style={{ color: cfg.color, borderColor: cfg.border, background: cfg.bg }}
@@ -1008,22 +1008,22 @@ function RiskPanel({
               {cfg.label}
             </span>
           </div>
-          {!expanded && <p className="text-[9px] text-sky-400/40 truncate mt-0.5">{dim.summary}</p>}
+          {!expanded && <p className="text-[9px] text-[#6a6a6a] truncate mt-0.5">{dim.summary}</p>}
         </div>
         <div className="flex items-center gap-2 shrink-0">
           <RiskScore score={dim.score} level={dim.level} />
           {expanded ? (
-            <ChevronDown className="w-3 h-3 text-sky-400/30" />
+            <ChevronDown className="w-3 h-3 text-[#5a5a5a]" />
           ) : (
-            <ChevronRight className="w-3 h-3 text-sky-400/30" />
+            <ChevronRight className="w-3 h-3 text-[#5a5a5a]" />
           )}
         </div>
       </button>
       {expanded && (
         <div className="px-4 pb-4 space-y-3 border-t" style={{ borderColor: BORDER }}>
-          <p className="text-[10px] text-sky-300/70 leading-relaxed pt-3">{dim.summary}</p>
+          <p className="text-[10px] text-[#a0a08a] leading-relaxed pt-3">{dim.summary}</p>
           <div>
-            <p className="text-[9px] text-sky-400/40 uppercase tracking-wider mb-2">
+            <p className="text-[9px] text-[#6a6a6a] uppercase tracking-wider mb-2">
               Evidence & Signals
             </p>
             <EvidenceList items={dim.evidence} />
@@ -1046,7 +1046,7 @@ function OwnerNodeRow({ node }: { node: OwnerNode }) {
       />
       <div className="flex-1 min-w-0">
         <div className="flex items-center gap-2">
-          <span className="text-[11px] text-sky-100">{node.name}</span>
+          <span className="text-[11px] text-[#f5f5f5]">{node.name}</span>
           {node.sanctioned && (
             <Badge
               variant="outline"
@@ -1057,7 +1057,7 @@ function OwnerNodeRow({ node }: { node: OwnerNode }) {
           )}
         </div>
         <div className="flex items-center gap-2 mt-0.5">
-          <span className="text-[9px] text-sky-400/40">
+          <span className="text-[9px] text-[#6a6a6a]">
             {node.jurisdiction} · {node.type}
           </span>
           <span className="text-[9px] capitalize" style={{ color: opacityColor }}>
@@ -1112,12 +1112,12 @@ function EconomicsPanel({ econ, transitDays }: { econ: EconomicsSnapshot; transi
           return (
             <div
               key={m.label}
-              className="rounded-lg p-3 border border-sky-500/10"
+              className="rounded-lg p-3 border border-white/[0.06]"
               style={{ background: BG_CARD_INNER }}
             >
               <div className="flex items-center gap-1.5 mb-1">
                 <Icon className="w-3 h-3" style={{ color: m.color }} />
-                <span className="text-[9px] text-sky-400/50 uppercase tracking-wider">
+                <span className="text-[9px] text-[#8a8a8a] uppercase tracking-wider">
                   {m.label}
                 </span>
               </div>
@@ -1129,7 +1129,7 @@ function EconomicsPanel({ econ, transitDays }: { econ: EconomicsSnapshot; transi
         })}
       </div>
       <div className="space-y-2">
-        <p className="text-[9px] text-sky-400/40 uppercase tracking-wider">Cost Breakdown</p>
+        <p className="text-[9px] text-[#6a6a6a] uppercase tracking-wider">Cost Breakdown</p>
         {[
           { label: 'Bunker / Fuel', value: econ.fuelCostUsd, color: '#f87171' },
           { label: 'Port Disbursements', value: econ.portDisbursementsUsd, color: '#a78bfa' },
@@ -1143,7 +1143,7 @@ function EconomicsPanel({ econ, transitDays }: { econ: EconomicsSnapshot; transi
         ].map((item) => (
           <div key={item.label}>
             <div className="flex items-center justify-between mb-0.5">
-              <span className="text-[9px] text-sky-400/50">{item.label}</span>
+              <span className="text-[9px] text-[#8a8a8a]">{item.label}</span>
               <span className="text-[9px] font-mono" style={{ color: item.color }}>
                 ${(item.value / 1000).toFixed(0)}K
               </span>
@@ -1161,7 +1161,7 @@ function EconomicsPanel({ econ, transitDays }: { econ: EconomicsSnapshot; transi
         ))}
       </div>
       <div
-        className="p-2.5 rounded-lg border border-sky-500/10 text-[9px] text-sky-400/40"
+        className="p-2.5 rounded-lg border border-white/[0.06] text-[9px] text-[#6a6a6a]"
         style={{ background: BG_CARD_INNER }}
       >
         Fuel: {econ.fuelMt.toLocaleString()} MT @ ${econ.bunkerprice}/MT (VLSFO demo benchmark)
@@ -1404,15 +1404,15 @@ export default function VoyageRiskTwinPage() {
         <div>
           <div className="flex items-center gap-2 mb-1">
             <Layers className="w-5 h-5" style={{ color: ACCENT }} />
-            <h1 className="text-xl font-semibold text-sky-100">Voyage Risk Twin</h1>
-            <Badge variant="outline" className="text-[9px] border-sky-500/30 text-sky-400/70">
+            <h1 className="text-xl font-semibold text-[#f5f5f5]">Voyage Risk Twin</h1>
+            <Badge variant="outline" className="text-[9px] border-[#c9b787]/24 text-[#a0a0a0]">
               SIGNATURE FEATURE
             </Badge>
             <Badge variant="outline" className="text-[9px] border-amber-500/30 text-amber-400/70">
               DEMO DATA
             </Badge>
           </div>
-          <p className="text-xs text-sky-400/50">
+          <p className="text-xs text-[#8a8a8a]">
             Route · sanctions · dark activity · STS · weather · counterparty · economics — fused in
             one decision surface. Differentiates vs Windward &amp; Kpler: trade + risk + compliance
             in one workflow-ready memo.
@@ -1449,11 +1449,11 @@ export default function VoyageRiskTwinPage() {
         style={{ background: BG_CARD, borderColor: BORDER }}
       >
         <div className="flex items-center gap-2 mb-3">
-          <GitBranch className="w-3.5 h-3.5 text-sky-400" />
-          <span className="text-[11px] font-semibold text-sky-300 uppercase tracking-wider">
+          <GitBranch className="w-3.5 h-3.5 text-[#c9b787]" />
+          <span className="text-[11px] font-semibold text-[#d4c598] uppercase tracking-wider">
             Voyage Scenario Simulator
           </span>
-          <span className="text-[9px] text-sky-400/40 ml-auto">
+          <span className="text-[9px] text-[#6a6a6a] ml-auto">
             Select a candidate voyage to model risk and economics
           </span>
         </div>
@@ -1468,7 +1468,7 @@ export default function VoyageRiskTwinPage() {
               }}
               className={cn(
                 'flex-1 min-w-0 text-left rounded-xl p-3.5 border transition-all',
-                scenarioId === scn.id ? 'ring-1 ring-sky-400/30' : 'hover:border-sky-500/20',
+                scenarioId === scn.id ? 'ring-1 ring-sky-400/30' : 'hover:border-white/[0.08]',
               )}
               style={{
                 background:
@@ -1478,8 +1478,8 @@ export default function VoyageRiskTwinPage() {
               }}
             >
               <div className="flex items-center gap-2 mb-1">
-                <Ship className="w-3.5 h-3.5 text-sky-400" />
-                <span className="text-[11px] font-semibold text-sky-100 truncate">
+                <Ship className="w-3.5 h-3.5 text-[#c9b787]" />
+                <span className="text-[11px] font-semibold text-[#f5f5f5] truncate">
                   {scn.vessel.name}
                 </span>
                 <span
@@ -1522,10 +1522,10 @@ export default function VoyageRiskTwinPage() {
                   {scn.risk.composite}/100
                 </span>
               </div>
-              <p className="text-[9px] text-sky-400/50 truncate">
+              <p className="text-[9px] text-[#8a8a8a] truncate">
                 {scn.route.origin} → {scn.route.destination}
               </p>
-              <p className="text-[9px] text-sky-400/35">
+              <p className="text-[9px] text-[#c9b787]/35">
                 {scn.route.variant} · {scn.route.distanceNm.toLocaleString()} nm · {scn.vessel.type}
               </p>
             </button>
@@ -1540,31 +1540,31 @@ export default function VoyageRiskTwinPage() {
       >
         <div className="flex items-center gap-3 min-w-0">
           <div className="p-2 rounded-lg shrink-0" style={{ background: 'rgba(77,143,204,0.08)' }}>
-            <Ship className="w-4 h-4 text-sky-400" />
+            <Ship className="w-4 h-4 text-[#c9b787]" />
           </div>
           <div className="min-w-0">
-            <div className="text-sm font-semibold text-sky-100">{scenario.vessel.name}</div>
-            <div className="text-[10px] text-sky-400/50">
+            <div className="text-sm font-semibold text-[#f5f5f5]">{scenario.vessel.name}</div>
+            <div className="text-[10px] text-[#8a8a8a]">
               IMO {scenario.vessel.imo} · {scenario.vessel.flag} · {scenario.vessel.type} ·{' '}
               {scenario.vessel.dwt.toLocaleString()} DWT · {scenario.vessel.age}yr
             </div>
           </div>
         </div>
-        <div className="flex items-center gap-2 text-[10px] text-sky-400/50 shrink-0">
+        <div className="flex items-center gap-2 text-[10px] text-[#8a8a8a] shrink-0">
           <Navigation className="w-3 h-3" />
-          <span className="text-sky-200">{scenario.route.origin}</span>
+          <span className="text-[#e0e0e0]">{scenario.route.origin}</span>
           <span>→</span>
-          <span className="text-sky-200">{scenario.route.destination}</span>
-          <span className="text-sky-400/30">·</span>
+          <span className="text-[#e0e0e0]">{scenario.route.destination}</span>
+          <span className="text-[#5a5a5a]">·</span>
           <span>{scenario.route.variant}</span>
-          <span className="text-sky-400/30">·</span>
+          <span className="text-[#5a5a5a]">·</span>
           <span>{scenario.route.distanceNm.toLocaleString()} nm</span>
         </div>
         <div className="flex flex-wrap items-center gap-1.5 ml-auto">
           {scenario.route.chokepoints.map((cp) => (
             <span
               key={cp}
-              className="text-[9px] px-2 py-0.5 rounded-full border border-sky-500/20 text-sky-400/60"
+              className="text-[9px] px-2 py-0.5 rounded-full border border-white/[0.08] text-[#9a9a9a]"
             >
               {cp}
             </span>
@@ -1580,15 +1580,15 @@ export default function VoyageRiskTwinPage() {
             <CompositeGauge score={displayRisk.composite} />
             <div>
               <div className="flex items-center gap-2">
-                <p className="text-xs font-semibold text-sky-100">Risk Intelligence</p>
-                {apiLoading && <Loader2 className="w-3 h-3 text-sky-400/40 animate-spin" />}
+                <p className="text-xs font-semibold text-[#f5f5f5]">Risk Intelligence</p>
+                {apiLoading && <Loader2 className="w-3 h-3 text-[#6a6a6a] animate-spin" />}
                 {apiScore && !apiLoading && (
                   <span className="text-[8px] px-1.5 py-0.5 rounded bg-emerald-500/10 text-emerald-400/70 border border-emerald-500/20">
                     Scoring API
                   </span>
                 )}
               </div>
-              <p className="text-[10px] text-sky-400/50 max-w-xs">
+              <p className="text-[10px] text-[#8a8a8a] max-w-xs">
                 Five risk dimensions fused with evidence. Expand each to inspect signals, sources,
                 and confidence scores.
               </p>
@@ -1662,7 +1662,7 @@ export default function VoyageRiskTwinPage() {
               </div>
               <div className="flex-1 min-w-0">
                 <div className="flex items-center gap-2">
-                  <span className="text-[11px] font-semibold text-sky-100">
+                  <span className="text-[11px] font-semibold text-[#f5f5f5]">
                     Counterparty Ownership Graph
                   </span>
                   <span
@@ -1677,37 +1677,37 @@ export default function VoyageRiskTwinPage() {
                   </span>
                 </div>
                 {!showOwnership && (
-                  <p className="text-[9px] text-sky-400/40 truncate mt-0.5">
+                  <p className="text-[9px] text-[#6a6a6a] truncate mt-0.5">
                     {displayCounterparty.charterer} · {displayCounterparty.chartererCountry} ·{' '}
                     {displayCounterparty.creditRating}
                   </p>
                 )}
               </div>
               {showOwnership ? (
-                <ChevronDown className="w-3 h-3 text-sky-400/30 shrink-0" />
+                <ChevronDown className="w-3 h-3 text-[#5a5a5a] shrink-0" />
               ) : (
-                <ChevronRight className="w-3 h-3 text-sky-400/30 shrink-0" />
+                <ChevronRight className="w-3 h-3 text-[#5a5a5a] shrink-0" />
               )}
             </button>
             {showOwnership && (
               <div className="px-4 pb-4 border-t space-y-3" style={{ borderColor: BORDER }}>
                 <div className="grid grid-cols-2 gap-3 pt-3">
                   <div>
-                    <p className="text-[9px] text-sky-400/40 uppercase tracking-wider mb-1">
+                    <p className="text-[9px] text-[#6a6a6a] uppercase tracking-wider mb-1">
                       Charterer
                     </p>
-                    <p className="text-xs font-medium text-sky-100">
+                    <p className="text-xs font-medium text-[#f5f5f5]">
                       {displayCounterparty.charterer}
                     </p>
-                    <p className="text-[10px] text-sky-400/50">
+                    <p className="text-[10px] text-[#8a8a8a]">
                       {displayCounterparty.chartererCountry}
                     </p>
                   </div>
                   <div>
-                    <p className="text-[9px] text-sky-400/40 uppercase tracking-wider mb-1">
+                    <p className="text-[9px] text-[#6a6a6a] uppercase tracking-wider mb-1">
                       Credit Rating
                     </p>
-                    <p className="text-xs font-medium text-sky-100">
+                    <p className="text-xs font-medium text-[#f5f5f5]">
                       {displayCounterparty.creditRating}
                     </p>
                   </div>
@@ -1733,7 +1733,7 @@ export default function VoyageRiskTwinPage() {
                   </div>
                 </div>
                 <div>
-                  <p className="text-[9px] text-sky-400/40 uppercase tracking-wider mb-2">
+                  <p className="text-[9px] text-[#6a6a6a] uppercase tracking-wider mb-2">
                     Beneficial Control Chain
                   </p>
                   <div className="divide-y" style={{ borderColor: 'rgba(255,255,255,0.04)' }}>
@@ -1755,10 +1755,10 @@ export default function VoyageRiskTwinPage() {
           >
             <div className="flex items-center gap-2 mb-4">
               <Fuel className="w-3.5 h-3.5 text-violet-400" />
-              <span className="text-[11px] font-semibold text-sky-100 uppercase tracking-wider">
+              <span className="text-[11px] font-semibold text-[#f5f5f5] uppercase tracking-wider">
                 Voyage Economics
               </span>
-              <span className="text-[9px] text-sky-400/40 ml-auto">Demo benchmark rates</span>
+              <span className="text-[9px] text-[#6a6a6a] ml-auto">Demo benchmark rates</span>
             </div>
             <EconomicsPanel econ={displayEcon} transitDays={displayEcon.transitDays} />
 
@@ -1791,7 +1791,7 @@ export default function VoyageRiskTwinPage() {
                             ? 'MONITOR — Proceed with enhanced due diligence'
                             : 'PROCEED — Risk profile within acceptable parameters'}
                   </p>
-                  <p className="text-[9px] text-sky-400/50 mt-0.5">
+                  <p className="text-[9px] text-[#8a8a8a] mt-0.5">
                     Composite risk {displayRisk.composite}/100 · {displayEcon.marginPct.toFixed(1)}%
                     voyage margin
                   </p>
@@ -1824,7 +1824,7 @@ export default function VoyageRiskTwinPage() {
 
             {/* Compliance memo CTA */}
             <div className="mt-4 pt-4 border-t" style={{ borderColor: BORDER }}>
-              <p className="text-[9px] text-sky-400/40 mb-2">
+              <p className="text-[9px] text-[#6a6a6a] mb-2">
                 {apiScore
                   ? 'PDF memo generated by scoring service — includes live evidence and ownership chain.'
                   : 'Export a structured compliance memo with all evidence, suitable for screening submission.'}
@@ -1855,8 +1855,8 @@ export default function VoyageRiskTwinPage() {
               </button>
               {apiLoading && (
                 <div className="flex items-center gap-1.5 mt-1.5">
-                  <Loader2 className="w-3 h-3 text-sky-400/40 animate-spin" />
-                  <span className="text-[9px] text-sky-400/40">Scoring service running…</span>
+                  <Loader2 className="w-3 h-3 text-[#6a6a6a] animate-spin" />
+                  <span className="text-[9px] text-[#6a6a6a]">Scoring service running…</span>
                 </div>
               )}
               {apiScore && !apiLoading && (
@@ -1876,8 +1876,8 @@ export default function VoyageRiskTwinPage() {
       <div className="rounded-xl border p-4" style={{ background: BG_CARD, borderColor: BORDER }}>
         <div className="flex flex-wrap items-start gap-4">
           <div className="flex items-center gap-2">
-            <RefreshCw className="w-3.5 h-3.5 text-sky-400" />
-            <span className="text-[11px] font-semibold text-sky-300">
+            <RefreshCw className="w-3.5 h-3.5 text-[#c9b787]" />
+            <span className="text-[11px] font-semibold text-[#d4c598]">
               Sanctions Intelligence Sources
             </span>
           </div>
@@ -1908,12 +1908,12 @@ export default function VoyageRiskTwinPage() {
             ].map((src) => (
               <div
                 key={src.name}
-                className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg border border-sky-500/10"
+                className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg border border-white/[0.06]"
                 style={{ background: 'rgba(255,255,255,0.02)' }}
               >
                 <div className="w-1.5 h-1.5 rounded-full bg-amber-400" />
-                <span className="text-sky-300">{src.name}</span>
-                <span className="text-sky-400/40">
+                <span className="text-[#d4c598]">{src.name}</span>
+                <span className="text-[#6a6a6a]">
                   {src.region} · {src.entities} entities · {src.freq}
                 </span>
                 <Badge
@@ -1925,7 +1925,7 @@ export default function VoyageRiskTwinPage() {
               </div>
             ))}
           </div>
-          <p className="text-[9px] text-sky-400/30 ml-auto"></p>
+          <p className="text-[9px] text-[#5a5a5a] ml-auto"></p>
         </div>
       </div>
     </div>

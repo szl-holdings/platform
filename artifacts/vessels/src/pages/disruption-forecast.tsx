@@ -83,12 +83,12 @@ function DisruptionGlobe({
 
   return (
     <div
-      className="bg-[#060e1a] border border-sky-500/15 rounded-xl overflow-hidden relative"
+      className="bg-[#060e1a] border border-white/[0.08] rounded-xl overflow-hidden relative"
       style={{ height: 310 }}
     >
       <div className="absolute top-3 left-3 z-10 flex items-center gap-1.5">
-        <Globe className="w-3.5 h-3.5 text-sky-400/50" />
-        <span className="text-[10px] text-sky-400/40 uppercase tracking-widest">
+        <Globe className="w-3.5 h-3.5 text-[#8a8a8a]" />
+        <span className="text-[10px] text-[#6a6a6a] uppercase tracking-widest">
           72-Hour Disruption Globe
         </span>
       </div>
@@ -303,7 +303,7 @@ const _typeColors: Record<string, string> = {
   Security: 'text-orange-400',
   Congestion: 'text-amber-400',
   Regulatory: 'text-purple-400',
-  Weather: 'text-sky-400',
+  Weather: 'text-[#c9b787]',
 };
 
 function ProbabilityArc({ value }: { value: number }) {
@@ -344,8 +344,8 @@ function ZoneCard({
   return (
     <div
       className={cn(
-        'bg-[#0a1628]/80 border rounded-xl overflow-hidden transition-all cursor-pointer',
-        expanded ? 'border-sky-500/30' : 'border-sky-500/10 hover:border-sky-500/20',
+        'bg-white/[0.02] border rounded-xl overflow-hidden transition-all cursor-pointer',
+        expanded ? 'border-[#c9b787]/24' : 'border-white/[0.06] hover:border-white/[0.08]',
       )}
       onClick={onToggle}
     >
@@ -354,55 +354,55 @@ function ZoneCard({
           <ProbabilityArc value={zone.probability72h} />
           <div className="flex-1 min-w-0">
             <div className="flex items-center gap-2 flex-wrap mb-1">
-              <p className="text-sm font-bold text-sky-100">{zone.name}</p>
+              <p className="text-sm font-bold text-[#f5f5f5]">{zone.name}</p>
               <Badge variant="outline" className={cn('text-[9px]', severityColors[zone.severity])}>
                 {zone.severity}
               </Badge>
-              <Badge variant="outline" className="text-[9px] text-sky-400/50 border-sky-500/20">
+              <Badge variant="outline" className="text-[9px] text-[#8a8a8a] border-white/[0.08]">
                 {zone.type}
               </Badge>
             </div>
-            <p className="text-[11px] text-sky-400/50 mb-2">{zone.region}</p>
+            <p className="text-[11px] text-[#8a8a8a] mb-2">{zone.region}</p>
             <div className="flex items-center gap-4 text-[10px]">
-              <span className="flex items-center gap-1 text-sky-400/60">
+              <span className="flex items-center gap-1 text-[#9a9a9a]">
                 <Clock className="w-3 h-3" /> Peak in <CountdownTimer etaString={zone.eta} />
               </span>
-              <span className="flex items-center gap-1 text-sky-400/60">
+              <span className="flex items-center gap-1 text-[#9a9a9a]">
                 <Navigation className="w-3 h-3" /> {zone.affectedVessels} vessels
               </span>
-              <span className="flex items-center gap-1 text-sky-400/60">
+              <span className="flex items-center gap-1 text-[#9a9a9a]">
                 <BarChart3 className="w-3 h-3" /> {zone.cargoValue} at risk
               </span>
             </div>
           </div>
           <ChevronRight
             className={cn(
-              'w-4 h-4 text-sky-400/30 shrink-0 mt-1 transition-transform',
+              'w-4 h-4 text-[#5a5a5a] shrink-0 mt-1 transition-transform',
               expanded && 'rotate-90',
             )}
           />
         </div>
       </div>
       {expanded && (
-        <div className="border-t border-sky-500/10 px-4 py-4 space-y-3 bg-sky-500/2">
+        <div className="border-t border-white/[0.06] px-4 py-4 space-y-3 bg-[#c9b787]/14">
           <div>
-            <p className="text-[10px] uppercase tracking-widest text-sky-400/40 mb-2">
+            <p className="text-[10px] uppercase tracking-widest text-[#6a6a6a] mb-2">
               Signal Drivers
             </p>
             <ul className="space-y-1">
               {zone.drivers.map((d, i) => (
-                <li key={i} className="flex items-start gap-2 text-xs text-sky-300/60">
+                <li key={i} className="flex items-start gap-2 text-xs text-[#d4c598]/60">
                   <span className="w-1 h-1 rounded-full bg-orange-400/60 mt-1.5 shrink-0" />
                   {d}
                 </li>
               ))}
             </ul>
           </div>
-          <div className="bg-sky-500/5 border border-sky-500/10 rounded-lg p-3">
-            <p className="text-[10px] uppercase tracking-widest text-sky-400/40 mb-1">
+          <div className="bg-[#c9b787]/8 border border-white/[0.06] rounded-lg p-3">
+            <p className="text-[10px] uppercase tracking-widest text-[#6a6a6a] mb-1">
               Recommended Action
             </p>
-            <p className="text-xs text-sky-200/80">{zone.recommendation}</p>
+            <p className="text-xs text-[#e0e0e0]/80">{zone.recommendation}</p>
           </div>
           <button
             onClick={(e) => {
@@ -444,8 +444,8 @@ export default function DisruptionForecast() {
       <div className="flex items-start justify-between gap-4 flex-wrap">
         <div>
           <div className="flex items-center gap-2 mb-1">
-            <Globe className="w-5 h-5 text-sky-400" />
-            <h1 className="text-xl font-bold text-sky-50 font-display">
+            <Globe className="w-5 h-5 text-[#c9b787]" />
+            <h1 className="text-xl font-bold text-[#f5f5f5] font-display">
               Disruption Forecast Engine
             </h1>
             <Badge
@@ -455,11 +455,11 @@ export default function DisruptionForecast() {
               LIVE · 72H
             </Badge>
           </div>
-          <p className="text-xs text-sky-400/50">
+          <p className="text-xs text-[#8a8a8a]">
             Predictive disruption zones with probability scores and time-to-impact countdowns
           </p>
         </div>
-        <button className="flex items-center gap-1.5 text-xs text-sky-400/50 hover:text-sky-300 transition-colors">
+        <button className="flex items-center gap-1.5 text-xs text-[#8a8a8a] hover:text-[#d4c598] transition-colors">
           <RefreshCw className="w-3.5 h-3.5" /> Updated 4m ago
         </button>
       </div>
@@ -486,7 +486,7 @@ export default function DisruptionForecast() {
             value: totalAtRisk,
             sub: 'in 72h window',
             icon: Navigation,
-            color: 'text-sky-400',
+            color: 'text-[#c9b787]',
           },
           {
             label: 'Critical Zones',
@@ -503,24 +503,24 @@ export default function DisruptionForecast() {
             color: 'text-amber-400',
           },
         ].map((kpi) => (
-          <div key={kpi.label} className="bg-[#0a1628]/80 border border-sky-500/10 rounded-xl p-4">
+          <div key={kpi.label} className="bg-white/[0.02] border border-white/[0.06] rounded-xl p-4">
             <div className="flex items-center justify-between mb-2">
-              <p className="text-[10px] uppercase tracking-widest text-sky-400/40">{kpi.label}</p>
+              <p className="text-[10px] uppercase tracking-widest text-[#6a6a6a]">{kpi.label}</p>
               <kpi.icon className={cn('w-4 h-4', kpi.color)} />
             </div>
             <p className={cn('text-2xl font-bold font-mono', kpi.color)}>{kpi.value}</p>
-            <p className="text-[10px] text-sky-400/40 mt-0.5">{kpi.sub}</p>
+            <p className="text-[10px] text-[#6a6a6a] mt-0.5">{kpi.sub}</p>
           </div>
         ))}
       </div>
 
       <div className="grid grid-cols-1 xl:grid-cols-3 gap-4">
         {/* Risk trend chart */}
-        <div className="xl:col-span-2 bg-[#0a1628]/80 border border-sky-500/10 rounded-xl p-4">
+        <div className="xl:col-span-2 bg-white/[0.02] border border-white/[0.06] rounded-xl p-4">
           <div className="flex items-center justify-between mb-4">
             <div>
-              <p className="text-xs font-semibold text-sky-200">Aggregate Risk Index — Hormuz</p>
-              <p className="text-[10px] text-sky-400/40">Historical + 72h forecast</p>
+              <p className="text-xs font-semibold text-[#e0e0e0]">Aggregate Risk Index — Hormuz</p>
+              <p className="text-[10px] text-[#6a6a6a]">Historical + 72h forecast</p>
             </div>
             <Badge variant="outline" className="text-[9px] text-red-400 border-red-500/20">
               ↑ 18% vs 24h ago
@@ -558,16 +558,16 @@ export default function DisruptionForecast() {
             </AreaChart>
           </ResponsiveContainer>
           <div className="mt-2 flex items-center gap-2">
-            <span className="text-[9px] text-sky-400/30 font-mono">← HISTORICAL</span>
-            <div className="flex-1 h-px border-t border-dashed border-sky-500/20" />
-            <span className="text-[9px] text-sky-400/30 font-mono">FORECAST →</span>
+            <span className="text-[9px] text-[#5a5a5a] font-mono">← HISTORICAL</span>
+            <div className="flex-1 h-px border-t border-dashed border-white/[0.08]" />
+            <span className="text-[9px] text-[#5a5a5a] font-mono">FORECAST →</span>
           </div>
         </div>
 
         {/* Radar */}
-        <div className="bg-[#0a1628]/80 border border-sky-500/10 rounded-xl p-4">
-          <p className="text-xs font-semibold text-sky-200 mb-1">Risk Factor Breakdown</p>
-          <p className="text-[10px] text-sky-400/40 mb-3">All zones · composite score</p>
+        <div className="bg-white/[0.02] border border-white/[0.06] rounded-xl p-4">
+          <p className="text-xs font-semibold text-[#e0e0e0] mb-1">Risk Factor Breakdown</p>
+          <p className="text-[10px] text-[#6a6a6a] mb-3">All zones · composite score</p>
           <ResponsiveContainer width="100%" height={200}>
             <RadarChart data={RADAR_DATA}>
               <PolarGrid stroke="#1e3a5f" />
@@ -586,8 +586,8 @@ export default function DisruptionForecast() {
 
       {/* Filters */}
       <div className="flex items-center gap-2 flex-wrap">
-        <Filter className="w-3.5 h-3.5 text-sky-400/40" />
-        <span className="text-[10px] text-sky-400/40 uppercase tracking-wider">
+        <Filter className="w-3.5 h-3.5 text-[#6a6a6a]" />
+        <span className="text-[10px] text-[#6a6a6a] uppercase tracking-wider">
           Filter by severity:
         </span>
         {['all', 'Critical', 'High', 'Medium', 'Low'].map((s) => (
@@ -597,14 +597,14 @@ export default function DisruptionForecast() {
             className={cn(
               'text-[10px] px-2.5 py-1 rounded-full border transition-colors',
               filterSeverity === s
-                ? 'bg-sky-500/10 border-sky-500/30 text-sky-300'
-                : 'border-sky-500/10 text-sky-400/40 hover:text-sky-300',
+                ? 'bg-[#c9b787]/10 border-[#c9b787]/24 text-[#d4c598]'
+                : 'border-white/[0.06] text-[#6a6a6a] hover:text-[#d4c598]',
             )}
           >
             {s === 'all' ? 'All' : s}
           </button>
         ))}
-        <span className="text-[10px] text-sky-400/30 ml-2 uppercase tracking-wider">Type:</span>
+        <span className="text-[10px] text-[#5a5a5a] ml-2 uppercase tracking-wider">Type:</span>
         {['all', 'Geopolitical', 'Security', 'Congestion', 'Weather', 'Regulatory'].map((t) => (
           <button
             key={t}
@@ -612,8 +612,8 @@ export default function DisruptionForecast() {
             className={cn(
               'text-[10px] px-2.5 py-1 rounded-full border transition-colors',
               filterType === t
-                ? 'bg-sky-500/10 border-sky-500/30 text-sky-300'
-                : 'border-sky-500/10 text-sky-400/40 hover:text-sky-300',
+                ? 'bg-[#c9b787]/10 border-[#c9b787]/24 text-[#d4c598]'
+                : 'border-white/[0.06] text-[#6a6a6a] hover:text-[#d4c598]',
             )}
           >
             {t === 'all' ? 'All' : t}
@@ -632,7 +632,7 @@ export default function DisruptionForecast() {
           />
         ))}
         {filtered.length === 0 && (
-          <div className="text-center py-12 text-sky-400/30 text-sm">
+          <div className="text-center py-12 text-[#5a5a5a] text-sm">
             No disruption zones match current filters
           </div>
         )}

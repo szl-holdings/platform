@@ -116,7 +116,7 @@ function SnapshotRow({
       onClick={onClick}
       className={cn(
         'w-full text-left p-3 rounded-xl border transition-all',
-        isSelected ? 'ring-1 ring-sky-400/40' : 'hover:border-sky-500/15',
+        isSelected ? 'ring-1 ring-sky-400/40' : 'hover:border-white/[0.08]',
       )}
       style={{
         background: isSelected ? 'rgba(77,143,204,0.06)' : 'rgba(10,22,40,0.6)',
@@ -131,17 +131,17 @@ function SnapshotRow({
         <div className="w-2 h-2 rounded-full flex-shrink-0" style={{ background: evtCfg.color }} />
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-2">
-            <span className="text-[11px] font-medium text-sky-100">{evtCfg.label}</span>
+            <span className="text-[11px] font-medium text-[#f5f5f5]">{evtCfg.label}</span>
             {hasAnomaly && <AlertTriangle className="w-3 h-3 text-amber-400" />}
           </div>
-          <div className="text-[9px] text-sky-400/40 mt-0.5">
+          <div className="text-[9px] text-[#6a6a6a] mt-0.5">
             {new Date(snap.timestamp).toLocaleDateString()}{' '}
             {new Date(snap.timestamp).toLocaleTimeString()}
           </div>
         </div>
         <div className="text-right text-[10px]">
-          <div className="text-sky-400/60">{snap.speed} kts</div>
-          <div className="text-sky-400/40">{snap.fuelConsumed} mt</div>
+          <div className="text-[#9a9a9a]">{snap.speed} kts</div>
+          <div className="text-[#6a6a6a]">{snap.fuelConsumed} mt</div>
         </div>
         <div className="text-[12px] w-6">{WEATHER_ICONS[snap.weatherState] ?? '🌊'}</div>
       </div>
@@ -159,11 +159,11 @@ function WhatIfCard({ scenario }: { scenario: WhatIf }) {
   const costSign = scenario.costDeltaUsd > 0 ? '+' : '';
   return (
     <div
-      className="rounded-xl p-3.5 border border-sky-500/10"
+      className="rounded-xl p-3.5 border border-white/[0.06]"
       style={{ background: 'rgba(10,22,40,0.7)' }}
     >
       <div className="flex items-start justify-between mb-2">
-        <div className="text-[11px] font-medium text-sky-100 flex-1 pr-2">{scenario.label}</div>
+        <div className="text-[11px] font-medium text-[#f5f5f5] flex-1 pr-2">{scenario.label}</div>
         <span
           className="text-[9px] px-2 py-0.5 rounded-full border capitalize flex-shrink-0"
           style={{
@@ -177,7 +177,7 @@ function WhatIfCard({ scenario }: { scenario: WhatIf }) {
       </div>
       <div className="grid grid-cols-3 gap-2 text-[10px]">
         <div>
-          <div className="text-sky-400/40">ETA Delta</div>
+          <div className="text-[#6a6a6a]">ETA Delta</div>
           <div
             className="font-medium"
             style={{ color: scenario.etaDeltaHours > 0 ? '#fbbf24' : '#34d399' }}
@@ -187,7 +187,7 @@ function WhatIfCard({ scenario }: { scenario: WhatIf }) {
           </div>
         </div>
         <div>
-          <div className="text-sky-400/40">Fuel Delta</div>
+          <div className="text-[#6a6a6a]">Fuel Delta</div>
           <div
             className="font-medium"
             style={{ color: scenario.fuelDeltaMt > 0 ? '#f87171' : '#34d399' }}
@@ -197,7 +197,7 @@ function WhatIfCard({ scenario }: { scenario: WhatIf }) {
           </div>
         </div>
         <div>
-          <div className="text-sky-400/40">Cost Delta</div>
+          <div className="text-[#6a6a6a]">Cost Delta</div>
           <div
             className="font-medium"
             style={{ color: scenario.costDeltaUsd > 0 ? '#f87171' : '#34d399' }}
@@ -244,19 +244,19 @@ export default function VoyageTwinPage() {
         <div>
           <div className="flex items-center gap-2 mb-1">
             <Cpu className="w-5 h-5" style={{ color: ACCENT }} />
-            <h1 className="text-xl font-semibold text-sky-100">Voyage Twin</h1>
-            <Badge variant="outline" className="text-[9px] border-sky-500/30 text-sky-400/70">
+            <h1 className="text-xl font-semibold text-[#f5f5f5]">Voyage Twin</h1>
+            <Badge variant="outline" className="text-[9px] border-[#c9b787]/24 text-[#a0a0a0]">
               COGNITIVE RUNTIME
             </Badge>
           </div>
-          <p className="text-xs text-sky-400/60">
+          <p className="text-xs text-[#9a9a9a]">
             Replays a voyage through trace-graph snapshots. Supports what-if forks for alternate
             routing and speed scenarios.
           </p>
         </div>
         <button
           onClick={() => load(voyageRef)}
-          className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs text-sky-400 border border-sky-500/20 hover:border-sky-500/40 transition-colors"
+          className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs text-[#c9b787] border border-white/[0.08] hover:border-[#c9b787]/40 transition-colors"
         >
           <RefreshCw className={cn('w-3.5 h-3.5', loading && 'animate-spin')} /> Refresh
         </button>
@@ -270,8 +270,8 @@ export default function VoyageTwinPage() {
             className={cn(
               'px-3 py-1.5 rounded-lg text-[11px] border transition-colors',
               voyageRef === v.ref
-                ? 'bg-sky-500/15 border-sky-500/30 text-sky-300'
-                : 'border-sky-500/10 text-sky-400/50 hover:text-sky-300/70',
+                ? 'bg-[#c9b787]/14 border-[#c9b787]/24 text-[#d4c598]'
+                : 'border-white/[0.06] text-[#8a8a8a] hover:text-[#a0a08a]',
             )}
           >
             {v.label}
@@ -323,12 +323,12 @@ export default function VoyageTwinPage() {
             return (
               <div
                 key={s.label}
-                className="rounded-xl p-3 border border-sky-500/10"
+                className="rounded-xl p-3 border border-white/[0.06]"
                 style={{ background: 'rgba(10,22,40,0.8)' }}
               >
                 <div className="flex items-center gap-1.5 mb-1">
                   <Icon className="w-3 h-3" style={{ color: s.color }} />
-                  <div className="text-[10px] text-sky-400/50 uppercase tracking-wider">
+                  <div className="text-[10px] text-[#8a8a8a] uppercase tracking-wider">
                     {s.label}
                   </div>
                 </div>
@@ -350,8 +350,8 @@ export default function VoyageTwinPage() {
           <span className="text-[10px] text-emerald-300/70 font-medium">
             {data.provenance.attestation}
           </span>
-          <span className="text-[10px] text-sky-400/40">·</span>
-          <span className="text-[10px] text-sky-400/50">
+          <span className="text-[10px] text-[#6a6a6a]">·</span>
+          <span className="text-[10px] text-[#8a8a8a]">
             {Math.round(data.provenance.confidence * 100)}% confidence
           </span>
         </div>
@@ -359,23 +359,23 @@ export default function VoyageTwinPage() {
 
       {data && (
         <div
-          className="p-3.5 rounded-xl border border-sky-500/10 mb-5"
+          className="p-3.5 rounded-xl border border-white/[0.06] mb-5"
           style={{ background: 'rgba(10,22,40,0.8)' }}
         >
           <div className="flex items-center gap-3">
-            <Anchor className="w-4 h-4 text-sky-400" />
+            <Anchor className="w-4 h-4 text-[#c9b787]" />
             <div>
-              <div className="text-sm font-semibold text-sky-100">{data.vessel.name}</div>
-              <div className="text-[10px] text-sky-400/50">
+              <div className="text-sm font-semibold text-[#f5f5f5]">{data.vessel.name}</div>
+              <div className="text-[10px] text-[#8a8a8a]">
                 IMO {data.vessel.imo} · {data.vessel.flag} · {data.vessel.type}
               </div>
             </div>
-            <div className="ml-auto flex items-center gap-3 text-[10px] text-sky-400/50">
+            <div className="ml-auto flex items-center gap-3 text-[10px] text-[#8a8a8a]">
               <span className="flex items-center gap-1">
                 <MapPin className="w-3 h-3" />
                 {data.summary.originPort}
               </span>
-              <Navigation className="w-3 h-3 text-sky-400/30" />
+              <Navigation className="w-3 h-3 text-[#5a5a5a]" />
               <span className="flex items-center gap-1">
                 <MapPin className="w-3 h-3" />
                 {data.summary.destinationPort}
@@ -398,8 +398,8 @@ export default function VoyageTwinPage() {
               className={cn(
                 'flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[11px] border transition-colors',
                 view === v.k
-                  ? 'bg-sky-500/15 border-sky-500/30 text-sky-300'
-                  : 'border-sky-500/10 text-sky-400/50 hover:text-sky-300/70',
+                  ? 'bg-[#c9b787]/14 border-[#c9b787]/24 text-[#d4c598]'
+                  : 'border-white/[0.06] text-[#8a8a8a] hover:text-[#a0a08a]',
               )}
             >
               <Icon className="w-3 h-3" />
@@ -410,7 +410,7 @@ export default function VoyageTwinPage() {
       </div>
 
       {loading ? (
-        <div className="flex items-center justify-center h-48 text-sky-400/40 text-sm">
+        <div className="flex items-center justify-center h-48 text-[#6a6a6a] text-sm">
           Loading voyage twin…
         </div>
       ) : view === 'timeline' && data ? (
@@ -431,61 +431,61 @@ export default function VoyageTwinPage() {
           <div className="col-span-5">
             {selectedSnap ? (
               <div
-                className="rounded-xl border border-sky-500/10 p-4 sticky top-4"
+                className="rounded-xl border border-white/[0.06] p-4 sticky top-4"
                 style={{ background: 'rgba(10,22,40,0.9)' }}
               >
-                <div className="text-sm font-medium text-sky-100 mb-1">
+                <div className="text-sm font-medium text-[#f5f5f5] mb-1">
                   {(EVENT_CONFIG[selectedSnap.event] ?? { label: selectedSnap.event }).label}
                 </div>
-                <div className="text-[10px] text-sky-400/50 mb-4">
+                <div className="text-[10px] text-[#8a8a8a] mb-4">
                   {new Date(selectedSnap.timestamp).toLocaleString()}
                 </div>
                 <div className="space-y-2.5 text-[11px]">
                   <div className="flex justify-between">
-                    <span className="text-sky-400/50">Position</span>
-                    <span className="text-sky-200">
+                    <span className="text-[#8a8a8a]">Position</span>
+                    <span className="text-[#e0e0e0]">
                       {selectedSnap.position.lat.toFixed(2)}°,{' '}
                       {selectedSnap.position.lon.toFixed(2)}°
                     </span>
                   </div>
                   <div className="flex justify-between">
-                    <span className="text-sky-400/50">Speed</span>
-                    <span className="text-sky-200">{selectedSnap.speed} kts</span>
+                    <span className="text-[#8a8a8a]">Speed</span>
+                    <span className="text-[#e0e0e0]">{selectedSnap.speed} kts</span>
                   </div>
                   <div className="flex justify-between">
-                    <span className="text-sky-400/50">Heading</span>
-                    <span className="text-sky-200">{selectedSnap.heading}°</span>
+                    <span className="text-[#8a8a8a]">Heading</span>
+                    <span className="text-[#e0e0e0]">{selectedSnap.heading}°</span>
                   </div>
                   <div className="flex justify-between">
-                    <span className="text-sky-400/50">Fuel Consumed</span>
-                    <span className="text-sky-200">{selectedSnap.fuelConsumed} mt</span>
+                    <span className="text-[#8a8a8a]">Fuel Consumed</span>
+                    <span className="text-[#e0e0e0]">{selectedSnap.fuelConsumed} mt</span>
                   </div>
                   <div className="flex justify-between">
-                    <span className="text-sky-400/50">Status</span>
-                    <span className="text-sky-200 capitalize">{selectedSnap.status}</span>
+                    <span className="text-[#8a8a8a]">Status</span>
+                    <span className="text-[#e0e0e0] capitalize">{selectedSnap.status}</span>
                   </div>
                   <div className="flex justify-between">
-                    <span className="text-sky-400/50">Weather</span>
-                    <span className="text-sky-200 capitalize">
+                    <span className="text-[#8a8a8a]">Weather</span>
+                    <span className="text-[#e0e0e0] capitalize">
                       {selectedSnap.weatherState.replace(/_/g, ' ')}{' '}
                       {WEATHER_ICONS[selectedSnap.weatherState] ?? ''}
                     </span>
                   </div>
                   <div className="flex justify-between">
-                    <span className="text-sky-400/50">Cargo Intact</span>
+                    <span className="text-[#8a8a8a]">Cargo Intact</span>
                     <span style={{ color: selectedSnap.cargoIntact ? '#34d399' : '#f87171' }}>
                       {selectedSnap.cargoIntact ? 'Yes' : 'No'}
                     </span>
                   </div>
                   <div>
-                    <div className="text-sky-400/50 mb-1">ETA Original</div>
-                    <div className="text-sky-200">
+                    <div className="text-[#8a8a8a] mb-1">ETA Original</div>
+                    <div className="text-[#e0e0e0]">
                       {new Date(selectedSnap.etaOriginal).toLocaleString()}
                     </div>
                   </div>
                   <div>
-                    <div className="text-sky-400/50 mb-1">ETA Current</div>
-                    <div className="text-sky-200">
+                    <div className="text-[#8a8a8a] mb-1">ETA Current</div>
+                    <div className="text-[#e0e0e0]">
                       {new Date(selectedSnap.etaCurrent).toLocaleString()}
                     </div>
                   </div>
@@ -503,13 +503,13 @@ export default function VoyageTwinPage() {
               </div>
             ) : (
               <div
-                className="rounded-xl border border-sky-500/10 p-4"
+                className="rounded-xl border border-white/[0.06] p-4"
                 style={{ background: 'rgba(10,22,40,0.8)' }}
               >
                 <div className="flex flex-col items-center justify-center h-48 text-center">
-                  <Play className="w-6 h-6 text-sky-400/30 mb-2" />
-                  <p className="text-sky-400/40 text-sm">Select a snapshot to inspect</p>
-                  <p className="text-sky-400/25 text-xs mt-1">Position, speed, fuel, ETA drift</p>
+                  <Play className="w-6 h-6 text-[#5a5a5a] mb-2" />
+                  <p className="text-[#6a6a6a] text-sm">Select a snapshot to inspect</p>
+                  <p className="text-[#c9b787]/25 text-xs mt-1">Position, speed, fuel, ETA drift</p>
                 </div>
               </div>
             )}
@@ -517,7 +517,7 @@ export default function VoyageTwinPage() {
         </div>
       ) : view === 'whatif' && data ? (
         <div>
-          <div className="text-[11px] text-sky-400/50 mb-4">
+          <div className="text-[11px] text-[#8a8a8a] mb-4">
             The following what-if forks were computed from snapshot S005 (weather diversion point).
             Each fork replays the remaining voyage under alternate parameters.
           </div>

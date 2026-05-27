@@ -180,7 +180,7 @@ export default function VoyageCarbonPassport() {
 
   if (isLoading) {
     return (
-      <div className="flex items-center justify-center h-full min-h-[300px] text-sky-400/40 text-sm">
+      <div className="flex items-center justify-center h-full min-h-[300px] text-[#6a6a6a] text-sm">
         <RefreshCw className="w-4 h-4 animate-spin mr-2" /> Loading voyage carbon data…
       </div>
     );
@@ -190,10 +190,10 @@ export default function VoyageCarbonPassport() {
     return (
       <div className="flex flex-col items-center justify-center h-full min-h-[300px] gap-3">
         <AlertTriangle className="w-6 h-6 text-red-400" />
-        <p className="text-sm text-sky-400/50">Failed to load emission records</p>
+        <p className="text-sm text-[#8a8a8a]">Failed to load emission records</p>
         <button
           onClick={() => refetch()}
-          className="text-xs text-sky-400 border border-sky-500/20 px-3 py-1.5 rounded-lg hover:bg-sky-500/5"
+          className="text-xs text-[#c9b787] border border-white/[0.08] px-3 py-1.5 rounded-lg hover:bg-[#c9b787]/8"
         >
           Retry
         </button>
@@ -227,7 +227,7 @@ export default function VoyageCarbonPassport() {
           </button>
           <button
             onClick={() => refetch()}
-            className="flex items-center gap-1.5 text-xs text-sky-400/50 hover:text-sky-300 border border-sky-500/10 px-3 py-1.5 rounded-lg hover:bg-sky-500/5 transition-colors"
+            className="flex items-center gap-1.5 text-xs text-[#8a8a8a] hover:text-[#d4c598] border border-white/[0.06] px-3 py-1.5 rounded-lg hover:bg-[#c9b787]/8 transition-colors"
           >
             <RefreshCw className="w-3 h-3" /> Refresh
           </button>
@@ -428,7 +428,7 @@ export default function VoyageCarbonPassport() {
                         'text-[9px]',
                         voyage.status === 'completed'
                           ? 'text-emerald-400 border-emerald-500/20 bg-emerald-500/5'
-                          : 'text-sky-400 border-sky-500/20 bg-sky-500/5',
+                          : 'text-[#c9b787] border-white/[0.08] bg-[#c9b787]/8',
                       )}
                     >
                       {voyage.status}

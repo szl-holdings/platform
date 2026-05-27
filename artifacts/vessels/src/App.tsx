@@ -35,9 +35,9 @@ import { helmsmanConfig } from '@szl-holdings/shared-ui/copilot-configs';
 import { DemoModeProvider } from '@szl-holdings/shared-ui/demo-mode';
 import {
   DashboardShell as SharedDashboardShell,
-  SidebarNav,
   type SidebarNavSection,
 } from '@szl-holdings/shared-ui/design-system';
+import { AppShell, VesselsSidebar, VesselsTopBar } from '@/components/shell/AppShell';
 import { EcosystemNav } from '@szl-holdings/shared-ui/ecosystem-nav';
 import {
   type KeyboardShortcut,
@@ -59,10 +59,7 @@ import { UserButton } from '@szl-holdings/shared-ui/UserButton';
 import { Toaster } from '@szl-holdings/shared-ui/ui/sonner';
 import { useSessionRevocationToast } from '@szl-holdings/shared-ui/use-session-revocation-toast';
 import { useRealtimeChannel } from '@szl-holdings/shared-ui/use-realtime-channel';
-import {
-  useEffectiveAccent,
-  useUserPreferences,
-} from '@szl-holdings/shared-ui/use-user-preferences';
+import { useEffectiveAccent } from '@szl-holdings/shared-ui/use-user-preferences';
 import { useWebSyncStatus } from '@szl-holdings/shared-ui/use-web-sync-status';
 import { cn, toAlpha } from '@szl-holdings/shared-ui/utils';
 import { persistQueryClient } from '@tanstack/query-persist-client-core';
@@ -106,7 +103,7 @@ import {
   Wrench,
   Zap,
 } from 'lucide-react';
-import { lazy, Suspense, useEffect, useRef, useState } from 'react';
+import { lazy, Suspense, useEffect, useState } from 'react';
 import { Link, Redirect, Route, Switch, useLocation, Router as WouterRouter } from 'wouter';
 import { startVesselsStore } from '@/lib/vessels-store';
 import MarketingHomePage from '@/pages/marketing-home';
@@ -988,92 +985,33 @@ function VesselsSidebarContent({
     </div>
   );
 
+  // navigate is delegated to wouter <Link> inside VesselsSidebar via NavItem
+  void navigate;
+  void location;
+  void accent;
+  void onToggleCollapse;
+  void expanded;
+
+  const sidebarFooter = (
+    <div className="space-y-3">
+      {fleetStatusFooter}
+      <UsageIndicator
+        featureKey="vessels_tracked"
+        label="Vessel tracking"
+        accentColor="var(--gi-accent-blue)"
+        billingHref={`${(import.meta.env.BASE_URL ?? '/vessels/').replace(/\/$/, '')}/account/billing`}
+      />
+    </div>
+  );
+
   return (
-    <SidebarNav
+    <VesselsSidebar
       sections={primarySections}
-      currentPath={location}
-      accentColor={accent}
-      collapsed={!expanded}
-      onNavigate={(item) => {
-        if (item.href) navigate(item.href);
-        onMobileClose?.();
-      }}
-      header={
-        <Link href="/">
-          <div className="flex items-center gap-2.5 cursor-pointer hover:opacity-80 transition-opacity">
-            <div
-              className="w-8 h-8 rounded-md flex items-center justify-center shrink-0"
-              style={{
-                background: toAlpha(VESSELS_BRAND_ACCENT, 0.08),
-                border: `1px solid ${toAlpha(VESSELS_BRAND_ACCENT, 0.12)}`,
-              }}
-            >
-              <Ship className="w-4 h-4" style={{ color: VESSELS_BRAND_ACCENT }} />
-            </div>
-            {expanded && (
-              <div className="flex-1 min-w-0">
-                <h1 className="text-sm font-semibold text-[#f5f5f5] truncate tracking-tight">
-                  Vessels
-                </h1>
-                <p
-                  className="text-[10px] truncate font-mono uppercase tracking-wider"
-                  style={{ color: toAlpha(VESSELS_BRAND_ACCENT, 0.4) }}
-                >
-                  Maritime Intelligence Pack
-                </p>
-              </div>
-            )}
-          </div>
-        </Link>
-      }
-      footer={
-        expanded ? (
-          <div className="space-y-3">
-            {fleetStatusFooter}
-            <UsageIndicator
-              featureKey="vessels_tracked"
-              label="Vessel tracking"
-              accentColor="var(--gi-accent-blue)"
-              billingHref={`${(import.meta.env.BASE_URL ?? '/vessels/').replace(/\/$/, '')}/account/billing`}
-            />
-            <button
-              onClick={onToggleCollapse}
-              className="flex items-center justify-center w-full py-1 text-[10px] rounded transition-colors hover:bg-white/5"
-              style={{ color: toAlpha(VESSELS_BRAND_ACCENT, 0.4) }}
-              aria-label="Collapse sidebar"
-            >
-              <svg width="12" height="12" viewBox="0 0 12 12" fill="none" aria-hidden="true">
-                <path
-                  d="M8 2L5 6l3 4"
-                  stroke="currentColor"
-                  strokeWidth="1.5"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                />
-              </svg>
-            </button>
-          </div>
-        ) : (
-          <button
-            onClick={onToggleCollapse}
-            className="flex items-center justify-center w-7 h-7 mx-auto rounded transition-colors hover:bg-white/5"
-            style={{ color: toAlpha(VESSELS_BRAND_ACCENT, 0.4) }}
-            aria-label="Expand sidebar"
-          >
-            <svg width="12" height="12" viewBox="0 0 12 12" fill="none" aria-hidden="true">
-              <path
-                d="M4 2l3 4-3 4"
-                stroke="currentColor"
-                strokeWidth="1.5"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              />
-            </svg>
-          </button>
-        )
-      }
+      footer={sidebarFooter}
+      onMobileClose={onMobileClose}
     />
   );
+
 }
 
 function DashboardRouter() {
@@ -1313,27 +1251,7 @@ function VesselsDashboard({
     tourId: 'vessels-tour',
   });
   const [sidebarOpen, setSidebarOpen] = useState(false);
-  const [sidebarHovered, setSidebarHovered] = useState(false);
-  const { prefs, setPreference, isLoaded } = useUserPreferences();
   const accent = useEffectiveAccent(VESSELS_BRAND_ACCENT);
-  const [sidebarCollapsed, setSidebarCollapsed] = useState(() => prefs.sidebar_collapsed);
-  const userOverriddenSidebarRef = useRef(false);
-
-  useEffect(() => {
-    if (isLoaded && !userOverriddenSidebarRef.current) {
-      setSidebarCollapsed(prefs.sidebar_collapsed);
-    }
-  }, [isLoaded, prefs.sidebar_collapsed]);
-
-  const toggleSidebarCollapsed = () => {
-    userOverriddenSidebarRef.current = true;
-    setSidebarCollapsed((prev) => {
-      const next = !prev;
-      setPreference('sidebar_collapsed', next);
-      return next;
-    });
-  };
-  const sidebarExpanded = !sidebarCollapsed && (sidebarHovered || sidebarOpen);
   const [topbarLocation] = useLocation();
   const topbarActionType = pathToVesselsActionType(topbarLocation);
   const { status: wsStatus } = useRealtimeChannel('vessel-positions');
@@ -1365,42 +1283,13 @@ function VesselsDashboard({
           accentColor={accent}
         />
         <SandboxModeBanner />
-        <SharedDashboardShell
-          sidebar={
-            <VesselsSidebarContent
-              expanded={sidebarExpanded}
-              onMobileClose={() => setSidebarOpen(false)}
-              onToggleCollapse={toggleSidebarCollapsed}
-            />
-          }
-          mobileOpen={sidebarOpen}
-          onMobileClose={() => setSidebarOpen(false)}
-          sidebarWidth={sidebarExpanded ? '13rem' : '3.5rem'}
-          sidebarEvents={{
-            onMouseEnter: () => setSidebarHovered(true),
-            onMouseLeave: () => setSidebarHovered(false),
-          }}
-          theme={{ sidebarBg: '#0a0a0a', pageBg: '#0a0a0a', headerBg: toAlpha('#0a0a0a', 0.92) }}
-          accentColor={accent}
+        <AppShell
           topbar={
-            <div className="flex items-center gap-3 w-full">
-              <button
-                onClick={() => setSidebarOpen(!sidebarOpen)}
-                className="md:hidden p-1.5 rounded transition-colors"
-                style={{ color: toAlpha(VESSELS_BRAND_ACCENT, 0.5) }}
-                aria-label="Toggle navigation"
-              >
-                <Menu className="w-4 h-4" />
-              </button>
-              <span
-                className="md:hidden text-[10px] font-mono uppercase tracking-wider"
-                style={{ color: toAlpha(VESSELS_BRAND_ACCENT, 0.8) }}
-              >
-                Vessels Maritime Intelligence
-              </span>
-              <div className="ml-auto pr-1 flex items-center gap-2">
-                <PolicyModeBadge product="vessels" actionType={topbarActionType} />
-                <span className="md:hidden flex items-center gap-2">
+            <VesselsTopBar
+              onMobileToggle={() => setSidebarOpen((p) => !p)}
+              rightSlot={
+                <div className="flex items-center gap-2">
+                  <PolicyModeBadge product="vessels" actionType={topbarActionType} />
                   <SyncStatusBadge
                     syncState={vesselsSyncState}
                     lastSyncedAt={vesselsLastSynced}
@@ -1410,18 +1299,26 @@ function VesselsDashboard({
                     showLabel={false}
                   />
                   <RealtimeStatusIndicator status={wsStatus} compact />
-                </span>
-              </div>
-            </div>
+                </div>
+              }
+            />
           }
+          sidebar={
+            <VesselsSidebarContent
+              expanded={true}
+              onMobileClose={() => setSidebarOpen(false)}
+              onToggleCollapse={() => {}}
+            />
+          }
+          mobileOpen={sidebarOpen}
+          onMobileClose={() => setSidebarOpen(false)}
         >
-          <div
-            data-szl-shell-main
-            className="flex-1 overflow-auto h-full"
-          >
-            <DashboardRouter />
+          <div data-szl-shell-main className="flex-1 min-w-0 overflow-auto">
+            <div className="px-6 md:px-8 py-6 max-w-[1600px] mx-auto w-full">
+              <DashboardRouter />
+            </div>
           </div>
-        </SharedDashboardShell>
+        </AppShell>
         <div className="fixed bottom-0 left-0 right-0 z-40">
           <ServiceStatusRail />
         </div>

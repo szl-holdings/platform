@@ -115,7 +115,7 @@ function AlertRow({
       onClick={onClick}
       className={cn(
         'w-full text-left rounded-xl p-3.5 border transition-all',
-        selected ? 'ring-1 ring-sky-400/40' : 'hover:border-sky-500/20',
+        selected ? 'ring-1 ring-sky-400/40' : 'hover:border-white/[0.08]',
       )}
       style={{
         background: selected ? sev.bg : 'rgba(10,22,40,0.7)',
@@ -128,9 +128,9 @@ function AlertRow({
         </div>
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-2 mb-0.5">
-            <span className="text-[11px] font-medium text-sky-100">{alert.vesselName}</span>
-            <span className="text-[9px] text-sky-400/40">{alert.vesselFlag}</span>
-            <span className="text-[9px] text-sky-400/40">IMO {alert.vesselImo}</span>
+            <span className="text-[11px] font-medium text-[#f5f5f5]">{alert.vesselName}</span>
+            <span className="text-[9px] text-[#6a6a6a]">{alert.vesselFlag}</span>
+            <span className="text-[9px] text-[#6a6a6a]">IMO {alert.vesselImo}</span>
             <span
               className="ml-auto text-[9px] px-1.5 py-0.5 rounded-full border font-medium"
               style={{ color: sev.color, borderColor: sev.border, background: sev.bg }}
@@ -138,9 +138,9 @@ function AlertRow({
               {sev.label}
             </span>
           </div>
-          <div className="text-[11px] text-sky-300/80 font-medium">{alert.anomalyLabel}</div>
-          <div className="text-[10px] text-sky-400/50 mt-0.5 truncate">{alert.description}</div>
-          <div className="flex items-center gap-3 mt-1.5 text-[9px] text-sky-400/40">
+          <div className="text-[11px] text-[#d4c598]/80 font-medium">{alert.anomalyLabel}</div>
+          <div className="text-[10px] text-[#8a8a8a] mt-0.5 truncate">{alert.description}</div>
+          <div className="flex items-center gap-3 mt-1.5 text-[9px] text-[#6a6a6a]">
             <span>{alert.id}</span>
             <span>·</span>
             <span>{alert.corridor}</span>
@@ -194,19 +194,19 @@ export default function RouteAnomalyEnginePage() {
         <div>
           <div className="flex items-center gap-2 mb-1">
             <Navigation className="w-5 h-5" style={{ color: ACCENT }} />
-            <h1 className="text-xl font-semibold text-sky-100">Route Anomaly Engine</h1>
-            <Badge variant="outline" className="text-[9px] border-sky-500/30 text-sky-400/70">
+            <h1 className="text-xl font-semibold text-[#f5f5f5]">Route Anomaly Engine</h1>
+            <Badge variant="outline" className="text-[9px] border-[#c9b787]/24 text-[#a0a0a0]">
               COGNITIVE RUNTIME
             </Badge>
           </div>
-          <p className="text-xs text-sky-400/60">
+          <p className="text-xs text-[#9a9a9a]">
             Detects deviations from expected voyage corridors, AIS gaps, and behavioral anomalies —
             ranked by risk.
           </p>
         </div>
         <button
           onClick={load}
-          className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs text-sky-400 border border-sky-500/20 hover:border-sky-500/40 transition-colors"
+          className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs text-[#c9b787] border border-white/[0.08] hover:border-[#c9b787]/40 transition-colors"
         >
           <RefreshCw className={cn('w-3.5 h-3.5', loading && 'animate-spin')} /> Refresh
         </button>
@@ -227,10 +227,10 @@ export default function RouteAnomalyEnginePage() {
           ].map((s) => (
             <div
               key={s.label}
-              className="rounded-xl p-3 border border-sky-500/10"
+              className="rounded-xl p-3 border border-white/[0.06]"
               style={{ background: 'rgba(10,22,40,0.8)' }}
             >
-              <div className="text-[10px] text-sky-400/50 uppercase tracking-wider mb-1">
+              <div className="text-[10px] text-[#8a8a8a] uppercase tracking-wider mb-1">
                 {s.label}
               </div>
               <div className="text-2xl font-bold" style={{ color: s.color }}>
@@ -250,15 +250,15 @@ export default function RouteAnomalyEnginePage() {
           <span className="text-[10px] text-emerald-300/70 font-medium">
             {data.provenance.attestation}
           </span>
-          <span className="text-[10px] text-sky-400/40">·</span>
-          <span className="text-[10px] text-sky-400/50">
+          <span className="text-[10px] text-[#6a6a6a]">·</span>
+          <span className="text-[10px] text-[#8a8a8a]">
             {Math.round(data.provenance.confidence * 100)}% confidence
           </span>
         </div>
       )}
 
       <div className="flex items-center gap-2 mb-4">
-        <Filter className="w-3.5 h-3.5 text-sky-400/40" />
+        <Filter className="w-3.5 h-3.5 text-[#6a6a6a]" />
         <div className="flex gap-1.5">
           {['all', 'critical', 'high', 'medium'].map((s) => (
             <button
@@ -267,8 +267,8 @@ export default function RouteAnomalyEnginePage() {
               className={cn(
                 'px-2.5 py-1 rounded-lg text-[10px] border transition-colors capitalize',
                 severityFilter === s
-                  ? 'bg-sky-500/15 border-sky-500/30 text-sky-300'
-                  : 'border-sky-500/10 text-sky-400/50 hover:text-sky-300/70',
+                  ? 'bg-[#c9b787]/14 border-[#c9b787]/24 text-[#d4c598]'
+                  : 'border-white/[0.06] text-[#8a8a8a] hover:text-[#a0a08a]',
               )}
             >
               {s === 'all' ? 'All Severity' : s}
@@ -283,8 +283,8 @@ export default function RouteAnomalyEnginePage() {
               className={cn(
                 'px-2.5 py-1 rounded-lg text-[10px] border transition-colors capitalize',
                 statusFilter === s
-                  ? 'bg-sky-500/15 border-sky-500/30 text-sky-300'
-                  : 'border-sky-500/10 text-sky-400/50 hover:text-sky-300/70',
+                  ? 'bg-[#c9b787]/14 border-[#c9b787]/24 text-[#d4c598]'
+                  : 'border-white/[0.06] text-[#8a8a8a] hover:text-[#a0a08a]',
               )}
             >
               {s === 'all' ? 'All Status' : s}
@@ -296,11 +296,11 @@ export default function RouteAnomalyEnginePage() {
       <div className="grid grid-cols-12 gap-4">
         <div className="col-span-7 space-y-2">
           {loading ? (
-            <div className="flex items-center justify-center h-48 text-sky-400/40 text-sm">
+            <div className="flex items-center justify-center h-48 text-[#6a6a6a] text-sm">
               Loading anomaly alerts…
             </div>
           ) : filtered.length === 0 ? (
-            <div className="flex flex-col items-center justify-center h-48 text-sky-400/40 text-sm">
+            <div className="flex flex-col items-center justify-center h-48 text-[#6a6a6a] text-sm">
               <CheckCircle2 className="w-8 h-8 mb-2 text-emerald-400/30" />
               No alerts match current filters
             </div>
@@ -319,7 +319,7 @@ export default function RouteAnomalyEnginePage() {
         <div className="col-span-5">
           {selected ? (
             <div
-              className="rounded-xl border border-sky-500/10 p-4 sticky top-4"
+              className="rounded-xl border border-white/[0.06] p-4 sticky top-4"
               style={{ background: 'rgba(10,22,40,0.9)' }}
             >
               <div className="flex items-center gap-2 mb-4">
@@ -333,8 +333,8 @@ export default function RouteAnomalyEnginePage() {
                   );
                 })()}
                 <div>
-                  <div className="text-sm font-semibold text-sky-100">{selected.anomalyLabel}</div>
-                  <div className="text-[10px] text-sky-400/50">
+                  <div className="text-sm font-semibold text-[#f5f5f5]">{selected.anomalyLabel}</div>
+                  <div className="text-[10px] text-[#8a8a8a]">
                     {selected.vesselName} · {selected.id}
                   </div>
                 </div>
@@ -347,28 +347,28 @@ export default function RouteAnomalyEnginePage() {
                     border: '1px solid rgba(255,255,255,0.06)',
                   }}
                 >
-                  <div className="text-[10px] text-sky-400/50 mb-1">Description</div>
-                  <div className="text-[11px] text-sky-200">{selected.description}</div>
+                  <div className="text-[10px] text-[#8a8a8a] mb-1">Description</div>
+                  <div className="text-[11px] text-[#e0e0e0]">{selected.description}</div>
                 </div>
                 <div className="grid grid-cols-2 gap-2 text-[11px]">
                   <div>
-                    <span className="text-sky-400/50">Corridor</span>
-                    <div className="text-sky-200 mt-0.5">{selected.corridor}</div>
+                    <span className="text-[#8a8a8a]">Corridor</span>
+                    <div className="text-[#e0e0e0] mt-0.5">{selected.corridor}</div>
                   </div>
                   <div>
-                    <span className="text-sky-400/50">Drift</span>
-                    <div className="text-sky-200 mt-0.5">{selected.driftNm} nm</div>
+                    <span className="text-[#8a8a8a]">Drift</span>
+                    <div className="text-[#e0e0e0] mt-0.5">{selected.driftNm} nm</div>
                   </div>
                   <div>
-                    <span className="text-sky-400/50">Position</span>
-                    <div className="text-sky-200 mt-0.5">
+                    <span className="text-[#8a8a8a]">Position</span>
+                    <div className="text-[#e0e0e0] mt-0.5">
                       {selected.lastKnownPosition.lat.toFixed(2)}°,{' '}
                       {selected.lastKnownPosition.lon.toFixed(2)}°
                     </div>
                   </div>
                   <div>
-                    <span className="text-sky-400/50">Confidence</span>
-                    <div className="text-sky-200 mt-0.5">
+                    <span className="text-[#8a8a8a]">Confidence</span>
+                    <div className="text-[#e0e0e0] mt-0.5">
                       {Math.round(selected.confidence * 100)}%
                     </div>
                   </div>
@@ -386,17 +386,17 @@ export default function RouteAnomalyEnginePage() {
                   >
                     Recommended Action
                   </div>
-                  <div className="text-[11px] text-sky-100">{selected.recommendedAction}</div>
+                  <div className="text-[11px] text-[#f5f5f5]">{selected.recommendedAction}</div>
                 </div>
-                <div className="pt-2 border-t border-sky-500/10">
-                  <div className="text-[10px] text-sky-400/50 mb-1.5">Provenance</div>
+                <div className="pt-2 border-t border-white/[0.06]">
+                  <div className="text-[10px] text-[#8a8a8a] mb-1.5">Provenance</div>
                   <div className="flex items-center gap-1.5">
                     <CheckCircle2 className="w-3 h-3 text-emerald-400" />
-                    <span className="text-[10px] text-sky-300/60">
+                    <span className="text-[10px] text-[#d4c598]/60">
                       {selected.provenance.attestation}
                     </span>
                   </div>
-                  <div className="text-[10px] text-sky-400/40 mt-0.5">
+                  <div className="text-[10px] text-[#6a6a6a] mt-0.5">
                     Detected {new Date(selected.detectedAt).toLocaleString()}
                   </div>
                 </div>
@@ -404,13 +404,13 @@ export default function RouteAnomalyEnginePage() {
             </div>
           ) : (
             <div
-              className="rounded-xl border border-sky-500/10 p-4"
+              className="rounded-xl border border-white/[0.06] p-4"
               style={{ background: 'rgba(10,22,40,0.8)' }}
             >
               <div className="flex flex-col items-center justify-center h-48 text-center">
-                <Eye className="w-6 h-6 text-sky-400/30 mb-2" />
-                <p className="text-sky-400/40 text-sm">Select an alert to inspect</p>
-                <p className="text-sky-400/25 text-xs mt-1">
+                <Eye className="w-6 h-6 text-[#5a5a5a] mb-2" />
+                <p className="text-[#6a6a6a] text-sm">Select an alert to inspect</p>
+                <p className="text-[#c9b787]/25 text-xs mt-1">
                   View details, position, recommended action
                 </p>
               </div>

@@ -288,22 +288,22 @@ function VoyagePnLCard({
   return (
     <div
       className={cn(
-        'bg-[#0a1628]/80 border rounded-xl overflow-hidden transition-all',
-        expanded ? 'border-sky-500/30' : 'border-sky-500/10 hover:border-sky-500/20',
+        'bg-white/[0.02] border rounded-xl overflow-hidden transition-all',
+        expanded ? 'border-[#c9b787]/24' : 'border-white/[0.06] hover:border-white/[0.08]',
       )}
     >
       <button className="w-full text-left" onClick={() => setExpanded(!expanded)}>
         <div className="px-4 py-4">
           <div className="flex items-start gap-3">
-            <div className="w-9 h-9 rounded-lg bg-sky-500/5 border border-sky-500/10 flex items-center justify-center shrink-0">
-              <Ship className="w-4.5 h-4.5 text-sky-400" />
+            <div className="w-9 h-9 rounded-lg bg-[#c9b787]/8 border border-white/[0.06] flex items-center justify-center shrink-0">
+              <Ship className="w-4.5 h-4.5 text-[#c9b787]" />
             </div>
             <div className="flex-1 min-w-0">
               <div className="flex items-center gap-2 flex-wrap mb-1">
-                <p className="text-sm font-bold text-sky-100">
+                <p className="text-sm font-bold text-[#f5f5f5]">
                   {voyage.id} — {voyage.vessel}
                 </p>
-                <Badge variant="outline" className="text-[9px] text-sky-400/50 border-sky-500/10">
+                <Badge variant="outline" className="text-[9px] text-[#8a8a8a] border-white/[0.06]">
                   {voyage.type}
                 </Badge>
                 <Badge
@@ -313,12 +313,12 @@ function VoyagePnLCard({
                   {voyage.status}
                 </Badge>
               </div>
-              <p className="text-[10px] text-sky-400/50 mb-2">
+              <p className="text-[10px] text-[#8a8a8a] mb-2">
                 {voyage.from} → {voyage.to} · {voyage.cargo} · {voyage.distanceNM.toLocaleString()}{' '}
                 NM
               </p>
               <div className="flex items-center gap-4 text-[10px]">
-                <span className="text-sky-400/50 flex items-center gap-1">
+                <span className="text-[#8a8a8a] flex items-center gap-1">
                   <Clock className="w-3 h-3" /> Departs {voyage.departureETA}
                 </span>
                 <span
@@ -361,7 +361,7 @@ function VoyagePnLCard({
             </div>
             <ChevronRight
               className={cn(
-                'w-4 h-4 text-sky-400/30 shrink-0 mt-1 transition-transform',
+                'w-4 h-4 text-[#5a5a5a] shrink-0 mt-1 transition-transform',
                 expanded && 'rotate-90',
               )}
             />
@@ -370,11 +370,11 @@ function VoyagePnLCard({
       </button>
 
       {expanded && (
-        <div className="border-t border-sky-500/10 p-4 space-y-4 bg-sky-500/2">
+        <div className="border-t border-white/[0.06] p-4 space-y-4 bg-[#c9b787]/14">
           {/* Scenario selector */}
           <div className="flex items-center gap-2">
-            <Sliders className="w-3.5 h-3.5 text-sky-400/40" />
-            <span className="text-[10px] text-sky-400/40 uppercase tracking-wider">Scenario:</span>
+            <Sliders className="w-3.5 h-3.5 text-[#6a6a6a]" />
+            <span className="text-[10px] text-[#6a6a6a] uppercase tracking-wider">Scenario:</span>
             {(['base', 'optimistic', 'pessimistic'] as ScenarioKey[]).map((key) => (
               <button
                 key={key}
@@ -385,8 +385,8 @@ function VoyagePnLCard({
                 className={cn(
                   'text-[10px] px-3 py-1 rounded-full border transition-colors capitalize',
                   scenario === key
-                    ? 'border-sky-500/30 text-sky-300 bg-sky-500/10'
-                    : 'border-sky-500/10 text-sky-400/40 hover:text-sky-300',
+                    ? 'border-[#c9b787]/24 text-[#d4c598] bg-[#c9b787]/10'
+                    : 'border-white/[0.06] text-[#6a6a6a] hover:text-[#d4c598]',
                 )}
               >
                 {voyage.scenarios[key].label}
@@ -397,31 +397,31 @@ function VoyagePnLCard({
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {/* P&L summary */}
             <div className="space-y-3">
-              <p className="text-[10px] uppercase tracking-widest text-sky-400/40">
+              <p className="text-[10px] uppercase tracking-widest text-[#6a6a6a]">
                 Voyage P&L — {s.label}
               </p>
               <div className="space-y-2">
-                <div className="flex justify-between text-xs py-1 border-b border-sky-500/5">
-                  <span className="text-sky-400/50">Gross Freight Revenue</span>
+                <div className="flex justify-between text-xs py-1 border-b border-white/[0.08]">
+                  <span className="text-[#8a8a8a]">Gross Freight Revenue</span>
                   <span className="text-emerald-400 font-mono font-bold">
                     {fmtMoney(s.grossRevenue)}
                   </span>
                 </div>
                 <div className="flex justify-between text-xs">
-                  <span className="text-sky-400/50 flex items-center gap-1">
+                  <span className="text-[#8a8a8a] flex items-center gap-1">
                     <Fuel className="w-3 h-3" /> Bunker Cost
                   </span>
                   <span className="text-red-400/80 font-mono">({fmtMoney(s.fuelCost)})</span>
                 </div>
                 <div className="flex justify-between text-xs">
-                  <span className="text-sky-400/50 flex items-center gap-1">
+                  <span className="text-[#8a8a8a] flex items-center gap-1">
                     <Anchor className="w-3 h-3" /> Port Fees
                   </span>
                   <span className="text-red-400/80 font-mono">({fmtMoney(s.portCost)})</span>
                 </div>
                 {s.canalCost > 0 && (
                   <div className="flex justify-between text-xs">
-                    <span className="text-sky-400/50 flex items-center gap-1">
+                    <span className="text-[#8a8a8a] flex items-center gap-1">
                       <Navigation className="w-3 h-3" /> Canal / Rerouting
                     </span>
                     <span className="text-red-400/80 font-mono">({fmtMoney(s.canalCost)})</span>
@@ -429,13 +429,13 @@ function VoyagePnLCard({
                 )}
                 {s.delayCost > 0 && (
                   <div className="flex justify-between text-xs">
-                    <span className="text-sky-400/50 flex items-center gap-1">
+                    <span className="text-[#8a8a8a] flex items-center gap-1">
                       <Wind className="w-3 h-3" /> Weather Delay ({s.weatherDelay}d)
                     </span>
                     <span className="text-red-400/80 font-mono">({fmtMoney(s.delayCost)})</span>
                   </div>
                 )}
-                <div className="flex justify-between text-sm border-t border-sky-500/15 pt-2">
+                <div className="flex justify-between text-sm border-t border-white/[0.08] pt-2">
                   <span
                     className={cn('font-bold', isPositive ? 'text-emerald-400' : 'text-red-400')}
                   >
@@ -451,7 +451,7 @@ function VoyagePnLCard({
                   </span>
                 </div>
                 <div className="flex justify-between text-xs">
-                  <span className="text-sky-400/50">Margin</span>
+                  <span className="text-[#8a8a8a]">Margin</span>
                   <span
                     className={cn(
                       'font-mono',
@@ -462,23 +462,23 @@ function VoyagePnLCard({
                   </span>
                 </div>
                 <div className="flex justify-between text-xs">
-                  <span className="text-sky-400/50">Est. IRR</span>
-                  <span className={cn('font-mono', s.irr >= 0 ? 'text-sky-300' : 'text-red-400')}>
+                  <span className="text-[#8a8a8a]">Est. IRR</span>
+                  <span className={cn('font-mono', s.irr >= 0 ? 'text-[#d4c598]' : 'text-red-400')}>
                     {s.irr.toFixed(1)}%
                   </span>
                 </div>
                 <div className="flex justify-between text-xs">
-                  <span className="text-sky-400/50">
+                  <span className="text-[#8a8a8a]">
                     Bunker: {s.fuelMT.toLocaleString()} MT @ ${s.bunkerprice}/MT
                   </span>
-                  <span className="text-sky-400/30">{s.canalName}</span>
+                  <span className="text-[#5a5a5a]">{s.canalName}</span>
                 </div>
               </div>
             </div>
 
             {/* Cost breakdown chart */}
             <div>
-              <p className="text-[10px] uppercase tracking-widest text-sky-400/40 mb-3">
+              <p className="text-[10px] uppercase tracking-widest text-[#6a6a6a] mb-3">
                 Cost Breakdown (USD 000s)
               </p>
               <ResponsiveContainer width="100%" height={160}>
@@ -507,14 +507,14 @@ function VoyagePnLCard({
           </div>
 
           {benchmark && (
-            <div className="bg-[#0a1628]/60 border border-sky-500/10 rounded-lg p-3 space-y-3">
+            <div className="bg-white/[0.02] border border-white/[0.06] rounded-lg p-3 space-y-3">
               <div className="flex items-center justify-between flex-wrap gap-2">
                 <div className="flex items-center gap-2">
-                  <Activity className="w-3.5 h-3.5 text-sky-400" />
-                  <p className="text-[10px] uppercase tracking-widest text-sky-400/60">
+                  <Activity className="w-3.5 h-3.5 text-[#c9b787]" />
+                  <p className="text-[10px] uppercase tracking-widest text-[#9a9a9a]">
                     Freight Rate Benchmark — {voyage.type}
                   </p>
-                  <Badge variant="outline" className="text-[9px] text-sky-400/60 border-sky-500/15">
+                  <Badge variant="outline" className="text-[9px] text-[#9a9a9a] border-white/[0.08]">
                     FRED · WPU3012
                   </Badge>
                 </div>
@@ -523,7 +523,7 @@ function VoyagePnLCard({
                     e.stopPropagation();
                     navigate('/freight-rates');
                   }}
-                  className="text-[10px] text-sky-400/60 hover:text-sky-300 underline-offset-2 hover:underline"
+                  className="text-[10px] text-[#9a9a9a] hover:text-[#d4c598] underline-offset-2 hover:underline"
                 >
                   View full benchmark →
                 </button>
@@ -531,7 +531,7 @@ function VoyagePnLCard({
 
               <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
                 <div>
-                  <p className="text-[9px] uppercase tracking-wider text-sky-400/40">Voyage TCE</p>
+                  <p className="text-[9px] uppercase tracking-wider text-[#6a6a6a]">Voyage TCE</p>
                   <p
                     className={cn(
                       'text-sm font-bold font-mono',
@@ -539,19 +539,19 @@ function VoyagePnLCard({
                     )}
                   >
                     {fmtMoney(voyageTCE)}
-                    <span className="text-[9px] text-sky-400/40 font-normal">/day</span>
+                    <span className="text-[9px] text-[#6a6a6a] font-normal">/day</span>
                   </p>
-                  <p className="text-[9px] text-sky-400/40 mt-0.5">
+                  <p className="text-[9px] text-[#6a6a6a] mt-0.5">
                     over {totalDays.toFixed(1)} days
                   </p>
                 </div>
                 <div>
-                  <p className="text-[9px] uppercase tracking-wider text-sky-400/40">
+                  <p className="text-[9px] uppercase tracking-wider text-[#6a6a6a]">
                     Market Benchmark
                   </p>
-                  <p className="text-sm font-bold font-mono text-sky-200">
+                  <p className="text-sm font-bold font-mono text-[#e0e0e0]">
                     {fmtMoney(benchmark.tce)}
-                    <span className="text-[9px] text-sky-400/40 font-normal">/day</span>
+                    <span className="text-[9px] text-[#6a6a6a] font-normal">/day</span>
                   </p>
                   <p
                     className={cn(
@@ -564,7 +564,7 @@ function VoyagePnLCard({
                   </p>
                 </div>
                 <div>
-                  <p className="text-[9px] uppercase tracking-wider text-sky-400/40">vs Market</p>
+                  <p className="text-[9px] uppercase tracking-wider text-[#6a6a6a]">vs Market</p>
                   <p
                     className={cn(
                       'text-sm font-bold font-mono flex items-center gap-1',
@@ -579,27 +579,27 @@ function VoyagePnLCard({
                     {aboveMarket ? '+' : ''}
                     {tceDeltaPct.toFixed(1)}%
                   </p>
-                  <p className="text-[9px] text-sky-400/40 mt-0.5">
+                  <p className="text-[9px] text-[#6a6a6a] mt-0.5">
                     {aboveMarket ? '+' : ''}
                     {fmtMoney(tceDelta)}/day
                   </p>
                 </div>
                 <div>
-                  <p className="text-[9px] uppercase tracking-wider text-sky-400/40">
+                  <p className="text-[9px] uppercase tracking-wider text-[#6a6a6a]">
                     Fleet-Class Avg
                   </p>
-                  <p className="text-sm font-bold font-mono text-sky-300">
+                  <p className="text-sm font-bold font-mono text-[#d4c598]">
                     {fmtMoney(benchmark.fleetAvg)}
-                    <span className="text-[9px] text-sky-400/40 font-normal">/day</span>
+                    <span className="text-[9px] text-[#6a6a6a] font-normal">/day</span>
                   </p>
-                  <p className="text-[9px] text-sky-400/40 mt-0.5">
+                  <p className="text-[9px] text-[#6a6a6a] mt-0.5">
                     Q1: {fmtMoney(benchmark.bottomQuartile)} · Q3: {fmtMoney(benchmark.topQuartile)}
                   </p>
                 </div>
               </div>
 
               <div>
-                <p className="text-[10px] uppercase tracking-widest text-sky-400/40 mb-2">
+                <p className="text-[10px] uppercase tracking-widest text-[#6a6a6a] mb-2">
                   TCE vs Fleet-Class Distribution (USD 000s/day)
                 </p>
                 <ResponsiveContainer width="100%" height={140}>
@@ -695,7 +695,7 @@ export default function VoyagePnL() {
         <div>
           <div className="flex items-center gap-2 mb-1">
             <Calculator className="w-5 h-5 text-emerald-400" />
-            <h1 className="text-xl font-bold text-sky-50 font-display">Voyage P&L Predictor</h1>
+            <h1 className="text-xl font-bold text-[#f5f5f5] font-display">Voyage P&L Predictor</h1>
             <Badge
               variant="outline"
               className="text-[9px] text-emerald-400 border-emerald-500/20 bg-emerald-500/5"
@@ -703,12 +703,12 @@ export default function VoyagePnL() {
               PRE-DEPARTURE ANALYSIS
             </Badge>
           </div>
-          <p className="text-xs text-sky-400/50">
+          <p className="text-xs text-[#8a8a8a]">
             Full voyage economics with scenario modeling for fuel, weather delays, port fees, and
             rerouting — before ships depart
           </p>
         </div>
-        <div className="flex items-center gap-2 text-[10px] text-sky-400/60 font-mono bg-[#0a1628]/80 border border-sky-500/15 rounded-md px-2.5 py-1.5">
+        <div className="flex items-center gap-2 text-[10px] text-[#9a9a9a] font-mono bg-white/[0.02] border border-white/[0.08] rounded-md px-2.5 py-1.5">
           <Clock className="w-3 h-3" />
           <span>
             {benchmarksLoading
@@ -727,7 +727,7 @@ export default function VoyagePnL() {
             value: VOYAGES.length,
             sub: 'pre-departure',
             icon: Ship,
-            color: 'text-sky-400',
+            color: 'text-[#c9b787]',
             fmt: (v: number) => `${v}`,
           },
           {
@@ -758,21 +758,21 @@ export default function VoyagePnL() {
             fmt: (v: number) => `${v}`,
           },
         ].map((kpi) => (
-          <div key={kpi.label} className="bg-[#0a1628]/80 border border-sky-500/10 rounded-xl p-4">
+          <div key={kpi.label} className="bg-white/[0.02] border border-white/[0.06] rounded-xl p-4">
             <div className="flex items-center justify-between mb-2">
-              <p className="text-[10px] uppercase tracking-widest text-sky-400/40">{kpi.label}</p>
+              <p className="text-[10px] uppercase tracking-widest text-[#6a6a6a]">{kpi.label}</p>
               <kpi.icon className={cn('w-4 h-4', kpi.color)} />
             </div>
             <p className={cn('text-xl font-bold font-mono', kpi.color)}>{kpi.fmt(kpi.value)}</p>
-            <p className="text-[10px] text-sky-400/40 mt-0.5">{kpi.sub}</p>
+            <p className="text-[10px] text-[#6a6a6a] mt-0.5">{kpi.sub}</p>
           </div>
         ))}
       </div>
 
       <div className="space-y-3">
         <div className="flex items-center justify-between">
-          <p className="text-xs font-semibold text-sky-200">Voyage Assessments</p>
-          <p className="text-[10px] text-sky-400/40">Expand to compare scenarios</p>
+          <p className="text-xs font-semibold text-[#e0e0e0]">Voyage Assessments</p>
+          <p className="text-[10px] text-[#6a6a6a]">Expand to compare scenarios</p>
         </div>
         {VOYAGES.length === 0 ? (
           <EmptyState

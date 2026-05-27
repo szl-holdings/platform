@@ -23,7 +23,7 @@ const SEVERITY_CONFIG = {
   critical: { color: 'text-red-400', bg: 'bg-red-500/10', border: 'border-red-500/20', dot: '#ef4444' },
   high: { color: 'text-orange-400', bg: 'bg-orange-500/10', border: 'border-orange-500/20', dot: '#f97316' },
   medium: { color: 'text-amber-400', bg: 'bg-amber-500/10', border: 'border-amber-500/20', dot: '#f59e0b' },
-  low: { color: 'text-sky-400', bg: 'bg-sky-500/10', border: 'border-sky-500/20', dot: 'var(--gi-accent-blue)' },
+  low: { color: 'text-[#c9b787]', bg: 'bg-[#c9b787]/10', border: 'border-white/[0.08]', dot: 'var(--gi-accent-blue)' },
 };
 
 const LIST_LABEL: Record<string, string> = {
@@ -233,7 +233,7 @@ export function SanctionsScorePanel({ data, className }: Props) {
       <div className="bg-slate-800/60 border border-slate-700/50 rounded-xl p-4">
         <div className="flex items-center justify-between mb-3">
           <div className="flex items-center gap-2">
-            <Activity className="w-4 h-4 text-sky-400" />
+            <Activity className="w-4 h-4 text-[#c9b787]" />
             <span className="text-xs font-semibold text-slate-300 uppercase tracking-wider">
               Rules Engine
             </span>
@@ -255,7 +255,7 @@ export function SanctionsScorePanel({ data, className }: Props) {
         {data.rules.length > displayRules.length && (
           <button
             onClick={() => setShowAll(true)}
-            className="mt-2 text-xs text-sky-400 hover:text-sky-300 flex items-center gap-1 transition-colors"
+            className="mt-2 text-xs text-[#c9b787] hover:text-[#d4c598] flex items-center gap-1 transition-colors"
           >
             <Eye className="w-3 h-3" />
             Show all {data.rules.length} rules
@@ -272,7 +272,7 @@ export function SanctionsScorePanel({ data, className }: Props) {
       </div>
 
       <div className="bg-slate-800/40 border border-slate-700/40 rounded-lg px-4 py-2.5 flex items-center gap-3 text-[11px] text-slate-500">
-        <Zap className="w-3.5 h-3.5 text-sky-500/60 shrink-0" />
+        <Zap className="w-3.5 h-3.5 text-[#f5f5f5]/60 shrink-0" />
         <span>
           Score computed{' '}
           <span className="text-slate-400">{computedAgo}</span> from{' '}

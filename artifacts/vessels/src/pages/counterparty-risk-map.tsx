@@ -121,7 +121,7 @@ function CPCard({
       onClick={onClick}
       className={cn(
         'w-full text-left rounded-xl p-4 border transition-all',
-        selected ? 'ring-1 ring-sky-400/40' : 'hover:border-sky-500/20',
+        selected ? 'ring-1 ring-sky-400/40' : 'hover:border-white/[0.08]',
       )}
       style={{
         background: selected ? riskCfg.bg : 'rgba(10,22,40,0.7)',
@@ -130,8 +130,8 @@ function CPCard({
     >
       <div className="flex items-start justify-between mb-2">
         <div>
-          <div className="text-[12px] font-semibold text-sky-100">{cp.name}</div>
-          <div className="text-[9px] text-sky-400/50 mt-0.5">
+          <div className="text-[12px] font-semibold text-[#f5f5f5]">{cp.name}</div>
+          <div className="text-[9px] text-[#8a8a8a] mt-0.5">
             {cp.type.replace(/_/g, ' ')} · {cp.country}
           </div>
         </div>
@@ -145,17 +145,17 @@ function CPCard({
       <RiskBar score={cp.riskScore} />
       <div className="grid grid-cols-3 gap-2 mt-3 text-[10px]">
         <div>
-          <div className="text-sky-400/40">Exposure</div>
-          <div className="text-sky-200 font-medium">
+          <div className="text-[#6a6a6a]">Exposure</div>
+          <div className="text-[#e0e0e0] font-medium">
             ${(cp.totalExposureUsd / 1_000_000).toFixed(1)}M
           </div>
         </div>
         <div>
-          <div className="text-sky-400/40">Credit</div>
-          <div className="text-sky-200 font-medium">{cp.creditRating}</div>
+          <div className="text-[#6a6a6a]">Credit</div>
+          <div className="text-[#e0e0e0] font-medium">{cp.creditRating}</div>
         </div>
         <div>
-          <div className="text-sky-400/40">Sanction</div>
+          <div className="text-[#6a6a6a]">Sanction</div>
           <div className="font-medium" style={{ color: srCfg.color }}>
             {srCfg.label}
           </div>
@@ -169,7 +169,7 @@ function CPCard({
       )}
       <div className="flex items-center gap-1 mt-1.5">
         <CheckCircle2 className="w-2.5 h-2.5 text-emerald-400/40" />
-        <span className="text-[9px] text-sky-400/30">{Math.round(cp.confidence * 100)}% conf.</span>
+        <span className="text-[9px] text-[#5a5a5a]">{Math.round(cp.confidence * 100)}% conf.</span>
       </div>
     </button>
   );
@@ -208,19 +208,19 @@ export default function CounterpartyRiskMapPage() {
         <div>
           <div className="flex items-center gap-2 mb-1">
             <Users className="w-5 h-5" style={{ color: ACCENT }} />
-            <h1 className="text-xl font-semibold text-sky-100">Counterparty Risk Map</h1>
-            <Badge variant="outline" className="text-[9px] border-sky-500/30 text-sky-400/70">
+            <h1 className="text-xl font-semibold text-[#f5f5f5]">Counterparty Risk Map</h1>
+            <Badge variant="outline" className="text-[9px] border-[#c9b787]/24 text-[#a0a0a0]">
               COGNITIVE RUNTIME
             </Badge>
           </div>
-          <p className="text-xs text-sky-400/60">
+          <p className="text-xs text-[#9a9a9a]">
             Aggregates per-counterparty exposure, payment records, sanction risk, and credit quality
             with confidence scores.
           </p>
         </div>
         <button
           onClick={load}
-          className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs text-sky-400 border border-sky-500/20 hover:border-sky-500/40 transition-colors"
+          className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs text-[#c9b787] border border-white/[0.08] hover:border-[#c9b787]/40 transition-colors"
         >
           <RefreshCw className={cn('w-3.5 h-3.5', loading && 'animate-spin')} /> Refresh
         </button>
@@ -254,10 +254,10 @@ export default function CounterpartyRiskMapPage() {
           ].map((s) => (
             <div
               key={s.label}
-              className="rounded-xl p-3 border border-sky-500/10"
+              className="rounded-xl p-3 border border-white/[0.06]"
               style={{ background: 'rgba(10,22,40,0.8)' }}
             >
-              <div className="text-[10px] text-sky-400/50 uppercase tracking-wider mb-1">
+              <div className="text-[10px] text-[#8a8a8a] uppercase tracking-wider mb-1">
                 {s.label}
               </div>
               <div className="text-lg font-bold capitalize" style={{ color: s.color }}>
@@ -277,20 +277,20 @@ export default function CounterpartyRiskMapPage() {
           <span className="text-[10px] text-emerald-300/70 font-medium">
             {data.provenance.attestation}
           </span>
-          <span className="text-[10px] text-sky-400/40">·</span>
-          <span className="text-[10px] text-sky-400/50">
+          <span className="text-[10px] text-[#6a6a6a]">·</span>
+          <span className="text-[10px] text-[#8a8a8a]">
             {Math.round(data.provenance.confidence * 100)}% confidence
           </span>
-          <span className="text-[10px] text-sky-400/40">·</span>
-          <span className="text-[10px] text-sky-400/40">
+          <span className="text-[10px] text-[#6a6a6a]">·</span>
+          <span className="text-[10px] text-[#6a6a6a]">
             Fetched {new Date(data.provenance.freshness.fetchedAt).toLocaleTimeString()}
           </span>
         </div>
       )}
 
       <div className="flex items-center gap-2 mb-4">
-        <BarChart3 className="w-3.5 h-3.5 text-sky-400/40" />
-        <span className="text-[10px] text-sky-400/50">Sort by:</span>
+        <BarChart3 className="w-3.5 h-3.5 text-[#6a6a6a]" />
+        <span className="text-[10px] text-[#8a8a8a]">Sort by:</span>
         {[
           { k: 'riskScore', label: 'Risk Score' },
           { k: 'exposure', label: 'Exposure' },
@@ -302,8 +302,8 @@ export default function CounterpartyRiskMapPage() {
             className={cn(
               'px-2.5 py-1 rounded-lg text-[10px] border transition-colors',
               sortBy === o.k
-                ? 'bg-sky-500/15 border-sky-500/30 text-sky-300'
-                : 'border-sky-500/10 text-sky-400/50 hover:text-sky-300/70',
+                ? 'bg-[#c9b787]/14 border-[#c9b787]/24 text-[#d4c598]'
+                : 'border-white/[0.06] text-[#8a8a8a] hover:text-[#a0a08a]',
             )}
           >
             {o.label}
@@ -314,7 +314,7 @@ export default function CounterpartyRiskMapPage() {
       <div className="grid grid-cols-12 gap-4">
         <div className="col-span-7 grid grid-cols-2 gap-3 content-start">
           {loading ? (
-            <div className="col-span-2 flex items-center justify-center h-48 text-sky-400/40 text-sm">
+            <div className="col-span-2 flex items-center justify-center h-48 text-[#6a6a6a] text-sm">
               Loading counterparty map…
             </div>
           ) : (
@@ -332,7 +332,7 @@ export default function CounterpartyRiskMapPage() {
         <div className="col-span-5">
           {selected ? (
             <div
-              className="rounded-xl border border-sky-500/10 p-4 sticky top-4"
+              className="rounded-xl border border-white/[0.06] p-4 sticky top-4"
               style={{ background: 'rgba(10,22,40,0.9)' }}
             >
               <div className="flex items-center gap-2 mb-4">
@@ -346,8 +346,8 @@ export default function CounterpartyRiskMapPage() {
                   />
                 </div>
                 <div>
-                  <div className="text-sm font-semibold text-sky-100">{selected.name}</div>
-                  <div className="text-[10px] text-sky-400/50 capitalize">
+                  <div className="text-sm font-semibold text-[#f5f5f5]">{selected.name}</div>
+                  <div className="text-[10px] text-[#8a8a8a] capitalize">
                     {selected.type.replace(/_/g, ' ')}
                   </div>
                 </div>
@@ -355,35 +355,35 @@ export default function CounterpartyRiskMapPage() {
               <RiskBar score={selected.riskScore} />
               <div className="space-y-2.5 mt-4 text-[11px]">
                 <div className="flex justify-between">
-                  <span className="text-sky-400/50">Country</span>
-                  <span className="text-sky-200">{selected.country}</span>
+                  <span className="text-[#8a8a8a]">Country</span>
+                  <span className="text-[#e0e0e0]">{selected.country}</span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-sky-400/50">Credit Rating</span>
-                  <span className="text-sky-200 font-mono">{selected.creditRating}</span>
+                  <span className="text-[#8a8a8a]">Credit Rating</span>
+                  <span className="text-[#e0e0e0] font-mono">{selected.creditRating}</span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-sky-400/50">Active Contracts</span>
-                  <span className="text-sky-200">{selected.activeContracts}</span>
+                  <span className="text-[#8a8a8a]">Active Contracts</span>
+                  <span className="text-[#e0e0e0]">{selected.activeContracts}</span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-sky-400/50">Total Exposure</span>
-                  <span className="text-sky-200">{fmt(selected.totalExposureUsd)}</span>
+                  <span className="text-[#8a8a8a]">Total Exposure</span>
+                  <span className="text-[#e0e0e0]">{fmt(selected.totalExposureUsd)}</span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-sky-400/50">Overdue</span>
+                  <span className="text-[#8a8a8a]">Overdue</span>
                   <span style={{ color: selected.overdueAmount > 0 ? '#fbbf24' : '#34d399' }}>
                     {fmt(selected.overdueAmount)}
                   </span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-sky-400/50">Overdue Rate</span>
+                  <span className="text-[#8a8a8a]">Overdue Rate</span>
                   <span style={{ color: selected.overdueRatePct > 3 ? '#f87171' : '#34d399' }}>
                     {selected.overdueRatePct.toFixed(1)}%
                   </span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-sky-400/50">Payment Record</span>
+                  <span className="text-[#8a8a8a]">Payment Record</span>
                   <span
                     className="capitalize"
                     style={{
@@ -401,7 +401,7 @@ export default function CounterpartyRiskMapPage() {
                   </span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-sky-400/50">Sanction Risk</span>
+                  <span className="text-[#8a8a8a]">Sanction Risk</span>
                   <span
                     className="capitalize"
                     style={{ color: SANCTION_RISK_CONFIG[selected.sanctionRisk]?.color }}
@@ -410,20 +410,20 @@ export default function CounterpartyRiskMapPage() {
                   </span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-sky-400/50">Concentration</span>
-                  <span className="text-sky-200">
+                  <span className="text-[#8a8a8a]">Concentration</span>
+                  <span className="text-[#e0e0e0]">
                     {selected.concentrationPct.toFixed(1)}% of portfolio
                   </span>
                 </div>
               </div>
               {selected.relationships.length > 0 && (
-                <div className="mt-3 pt-3 border-t border-sky-500/10">
-                  <div className="text-[9px] text-sky-400/40 mb-1.5">Relationship Types</div>
+                <div className="mt-3 pt-3 border-t border-white/[0.06]">
+                  <div className="text-[9px] text-[#6a6a6a] mb-1.5">Relationship Types</div>
                   <div className="flex flex-wrap gap-1.5">
                     {selected.relationships.map((r) => (
                       <span
                         key={r}
-                        className="text-[9px] px-2 py-0.5 rounded-full border border-sky-500/20 text-sky-400/60"
+                        className="text-[9px] px-2 py-0.5 rounded-full border border-white/[0.08] text-[#9a9a9a]"
                       >
                         {r.replace(/_/g, ' ')}
                       </span>
@@ -431,30 +431,30 @@ export default function CounterpartyRiskMapPage() {
                   </div>
                 </div>
               )}
-              <div className="mt-3 pt-3 border-t border-sky-500/10">
-                <div className="text-[9px] text-sky-400/40 mb-1.5">
+              <div className="mt-3 pt-3 border-t border-white/[0.06]">
+                <div className="text-[9px] text-[#6a6a6a] mb-1.5">
                   Provenance · {selected.provenance.attestation}
                 </div>
                 <div className="flex items-center gap-1.5">
                   <CheckCircle2 className="w-3 h-3 text-emerald-400" />
-                  <span className="text-[10px] text-sky-300/60">
+                  <span className="text-[10px] text-[#d4c598]/60">
                     {Math.round(selected.confidence * 100)}% confidence
                   </span>
                 </div>
-                <div className="text-[9px] text-sky-400/30 mt-0.5">
+                <div className="text-[9px] text-[#5a5a5a] mt-0.5">
                   Last reviewed {new Date(selected.lastReviewedAt).toLocaleDateString()}
                 </div>
               </div>
             </div>
           ) : (
             <div
-              className="rounded-xl border border-sky-500/10 p-4"
+              className="rounded-xl border border-white/[0.06] p-4"
               style={{ background: 'rgba(10,22,40,0.8)' }}
             >
               <div className="flex flex-col items-center justify-center h-48 text-center">
-                <Eye className="w-6 h-6 text-sky-400/30 mb-2" />
-                <p className="text-sky-400/40 text-sm">Select a counterparty to inspect</p>
-                <p className="text-sky-400/25 text-xs mt-1">
+                <Eye className="w-6 h-6 text-[#5a5a5a] mb-2" />
+                <p className="text-[#6a6a6a] text-sm">Select a counterparty to inspect</p>
+                <p className="text-[#c9b787]/25 text-xs mt-1">
                   Exposure, credit, sanction risk, payment record
                 </p>
               </div>
@@ -463,10 +463,10 @@ export default function CounterpartyRiskMapPage() {
 
           {data?.portfolio && (
             <div
-              className="rounded-xl border border-sky-500/10 p-4 mt-3"
+              className="rounded-xl border border-white/[0.06] p-4 mt-3"
               style={{ background: 'rgba(10,22,40,0.8)' }}
             >
-              <div className="text-[10px] text-sky-400/50 uppercase tracking-wider mb-3">
+              <div className="text-[10px] text-[#8a8a8a] uppercase tracking-wider mb-3">
                 Risk Distribution
               </div>
               {Object.entries(data.portfolio.byRisk).map(([tier, count]) => (
@@ -475,7 +475,7 @@ export default function CounterpartyRiskMapPage() {
                     className="w-2 h-2 rounded-full"
                     style={{ background: RISK_CONFIG[tier]?.color ?? '#888' }}
                   />
-                  <span className="text-[11px] text-sky-300/70 capitalize w-16">{tier}</span>
+                  <span className="text-[11px] text-[#a0a08a] capitalize w-16">{tier}</span>
                   <div
                     className="flex-1 h-1 rounded-full"
                     style={{ background: 'rgba(255,255,255,0.05)' }}
@@ -488,7 +488,7 @@ export default function CounterpartyRiskMapPage() {
                       }}
                     />
                   </div>
-                  <span className="text-[10px] text-sky-400/40 w-4 text-right">{count}</span>
+                  <span className="text-[10px] text-[#6a6a6a] w-4 text-right">{count}</span>
                 </div>
               ))}
             </div>

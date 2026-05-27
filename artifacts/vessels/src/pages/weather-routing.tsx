@@ -126,7 +126,7 @@ const riskColor: Record<string, string> = {
 const sevColor: Record<string, string> = {
   critical: 'text-red-400 bg-red-500/5 border-red-500/15',
   warn: 'text-amber-400 bg-amber-500/5 border-amber-500/15',
-  info: 'text-sky-400/70 bg-sky-500/5 border-sky-500/10',
+  info: 'text-[#a0a0a0] bg-[#c9b787]/8 border-white/[0.06]',
 };
 
 function WaveSpectrum() {
@@ -143,7 +143,7 @@ function WaveSpectrum() {
             }}
           />
           {i % 3 === 0 && (
-            <span className="text-[7px] text-sky-400/30 font-mono">{d.freq.toFixed(2)}</span>
+            <span className="text-[7px] text-[#5a5a5a] font-mono">{d.freq.toFixed(2)}</span>
           )}
         </div>
       ))}
@@ -177,18 +177,18 @@ export default function WeatherRoutingPage() {
       <div className="flex items-center justify-between">
         <div>
           <div className="flex items-center gap-2 mb-1">
-            <Waves className="w-4 h-4 text-sky-400" />
-            <h1 className="font-display text-xl font-bold text-sky-50">
+            <Waves className="w-4 h-4 text-[#c9b787]" />
+            <h1 className="font-display text-xl font-bold text-[#f5f5f5]">
               Weather Routing & Wave Spectrum Analysis
             </h1>
             <Badge
               variant="outline"
-              className="text-[9px] text-sky-400 border-sky-500/30 bg-sky-500/5"
+              className="text-[9px] text-[#c9b787] border-[#c9b787]/24 bg-[#c9b787]/8"
             >
               NOAA FEED
             </Badge>
           </div>
-          <p className="text-xs text-sky-400/40">
+          <p className="text-xs text-[#6a6a6a]">
             Full wave spectrum modeling, hull stress prediction, parametric rolling risk &
             speed/heading optimization
           </p>
@@ -196,11 +196,11 @@ export default function WeatherRoutingPage() {
         <div className="flex items-center gap-3">
           <div className="text-right">
             <p className="text-lg font-bold font-mono text-red-400">1</p>
-            <p className="text-[9px] text-sky-400/40">Critical Risk</p>
+            <p className="text-[9px] text-[#6a6a6a]">Critical Risk</p>
           </div>
           <div className="text-right">
             <p className="text-lg font-bold font-mono text-amber-400">1</p>
-            <p className="text-[9px] text-sky-400/40">Warn</p>
+            <p className="text-[9px] text-[#6a6a6a]">Warn</p>
           </div>
         </div>
       </div>
@@ -213,8 +213,8 @@ export default function WeatherRoutingPage() {
             className={cn(
               'flex items-center gap-2 px-3 py-2 rounded-lg border text-xs whitespace-nowrap transition-all shrink-0',
               selectedVessel.vessel === v.vessel
-                ? 'bg-sky-500/10 border-sky-500/30 text-sky-300'
-                : 'bg-[#0a1628]/60 border-sky-500/10 text-sky-400/50 hover:text-sky-300',
+                ? 'bg-[#c9b787]/10 border-[#c9b787]/24 text-[#d4c598]'
+                : 'bg-white/[0.02] border-white/[0.06] text-[#8a8a8a] hover:text-[#d4c598]',
             )}
           >
             <Wind className="w-3 h-3" />
@@ -240,8 +240,8 @@ export default function WeatherRoutingPage() {
             className={cn(
               'text-xs px-4 py-1.5 rounded-lg capitalize transition-colors',
               tab === t
-                ? 'bg-sky-500/10 text-sky-300 border border-sky-500/20'
-                : 'text-sky-400/50 hover:text-sky-300',
+                ? 'bg-[#c9b787]/10 text-[#d4c598] border border-white/[0.08]'
+                : 'text-[#8a8a8a] hover:text-[#d4c598]',
             )}
           >
             {t === 'vessels'
@@ -256,11 +256,11 @@ export default function WeatherRoutingPage() {
       {tab === 'vessels' && (
         <div className="grid grid-cols-1 xl:grid-cols-3 gap-4">
           <div className="xl:col-span-2 space-y-3">
-            <div className="bg-[#0a1628]/80 border border-sky-500/10 rounded-xl p-4">
+            <div className="bg-white/[0.02] border border-white/[0.06] rounded-xl p-4">
               <div className="flex items-center justify-between mb-4">
                 <div>
-                  <p className="text-sm font-semibold text-sky-100">{selectedVessel.vessel}</p>
-                  <p className="text-[10px] text-sky-400/40">
+                  <p className="text-sm font-semibold text-[#f5f5f5]">{selectedVessel.vessel}</p>
+                  <p className="text-[10px] text-[#6a6a6a]">
                     {selectedVessel.route} · {selectedVessel.currentPosition}
                   </p>
                 </div>
@@ -300,13 +300,13 @@ export default function WeatherRoutingPage() {
                 ].map((m) => (
                   <div
                     key={m.label}
-                    className="bg-sky-500/3 border border-sky-500/8 rounded-lg p-3 text-center"
+                    className="bg-[#c9b787]/14 border border-white/[0.08] rounded-lg p-3 text-center"
                   >
                     <m.icon
                       className={cn(
                         'w-3.5 h-3.5 mx-auto mb-1',
                         m.color === 'sky'
-                          ? 'text-sky-400'
+                          ? 'text-[#c9b787]'
                           : m.color === 'violet'
                             ? 'text-violet-400'
                             : m.color === 'amber'
@@ -314,27 +314,27 @@ export default function WeatherRoutingPage() {
                               : 'text-emerald-400',
                       )}
                     />
-                    <p className="text-sm font-bold font-mono text-sky-200">{m.val}</p>
-                    <p className="text-[9px] text-sky-400/40">{m.label}</p>
+                    <p className="text-sm font-bold font-mono text-[#e0e0e0]">{m.val}</p>
+                    <p className="text-[9px] text-[#6a6a6a]">{m.label}</p>
                   </div>
                 ))}
               </div>
               <div className="mb-3">
                 <div className="flex justify-between mb-2">
-                  <span className="text-xs text-sky-400/50">Hull Stress Index</span>
-                  <span className="text-xs font-mono text-sky-300">
+                  <span className="text-xs text-[#8a8a8a]">Hull Stress Index</span>
+                  <span className="text-xs font-mono text-[#d4c598]">
                     {selectedVessel.hullStressIndex}%
                   </span>
                 </div>
                 <StressGauge value={selectedVessel.hullStressIndex} />
               </div>
-              <div className="flex flex-wrap gap-3 text-[10px] text-sky-400/50 pt-3 border-t border-sky-500/10">
+              <div className="flex flex-wrap gap-3 text-[10px] text-[#8a8a8a] pt-3 border-t border-white/[0.06]">
                 <span>
-                  Swell: <span className="text-sky-300">{selectedVessel.swellDirection}</span>
+                  Swell: <span className="text-[#d4c598]">{selectedVessel.swellDirection}</span>
                 </span>
                 <span>
                   Wind:{' '}
-                  <span className="text-sky-300">
+                  <span className="text-[#d4c598]">
                     {selectedVessel.windDirection} {selectedVessel.windSpeed}kts
                   </span>
                 </span>
@@ -347,7 +347,7 @@ export default function WeatherRoutingPage() {
                   <span className="text-amber-400">+{selectedVessel.fuelPenalty}%</span>
                 </span>
                 <span>
-                  Forecast: <span className="text-sky-300">{selectedVessel.forecastWindow}</span>
+                  Forecast: <span className="text-[#d4c598]">{selectedVessel.forecastWindow}</span>
                 </span>
               </div>
             </div>
@@ -367,19 +367,19 @@ export default function WeatherRoutingPage() {
             </div>
           </div>
           <div className="space-y-4">
-            <div className="bg-[#0a1628]/80 border border-sky-500/10 rounded-xl p-4">
-              <p className="text-xs font-semibold text-sky-200 mb-3 flex items-center gap-1.5">
-                <BarChart3 className="w-3.5 h-3.5 text-sky-400" />
+            <div className="bg-white/[0.02] border border-white/[0.06] rounded-xl p-4">
+              <p className="text-xs font-semibold text-[#e0e0e0] mb-3 flex items-center gap-1.5">
+                <BarChart3 className="w-3.5 h-3.5 text-[#c9b787]" />
                 Fleet Weather Summary
               </p>
               {WAVE_ANALYSIS.map((v) => (
                 <div
                   key={v.vessel}
-                  className="flex items-center justify-between py-2 border-b border-sky-500/5 last:border-0"
+                  className="flex items-center justify-between py-2 border-b border-white/[0.08] last:border-0"
                 >
                   <div>
-                    <p className="text-[11px] text-sky-200">{v.vessel}</p>
-                    <p className="text-[9px] text-sky-400/40">{v.currentPosition}</p>
+                    <p className="text-[11px] text-[#e0e0e0]">{v.vessel}</p>
+                    <p className="text-[9px] text-[#6a6a6a]">{v.currentPosition}</p>
                   </div>
                   <div className="text-right">
                     <Badge
@@ -388,32 +388,32 @@ export default function WeatherRoutingPage() {
                     >
                       {v.parametricRollingRisk}
                     </Badge>
-                    <p className="text-[9px] font-mono text-sky-400/40 mt-0.5">
+                    <p className="text-[9px] font-mono text-[#6a6a6a] mt-0.5">
                       {v.significantWaveHeight}m Hs
                     </p>
                   </div>
                 </div>
               ))}
             </div>
-            <div className="bg-[#0a1628]/80 border border-sky-500/10 rounded-xl p-4">
-              <p className="text-xs font-semibold text-sky-200 mb-3">Speed/Heading Optimization</p>
+            <div className="bg-white/[0.02] border border-white/[0.06] rounded-xl p-4">
+              <p className="text-xs font-semibold text-[#e0e0e0] mb-3">Speed/Heading Optimization</p>
               <div className="space-y-2 text-[10px]">
                 <div className="flex justify-between">
-                  <span className="text-sky-400/50">Current speed</span>
-                  <span className="font-mono text-sky-300">{selectedVessel.speedActual} kts</span>
+                  <span className="text-[#8a8a8a]">Current speed</span>
+                  <span className="font-mono text-[#d4c598]">{selectedVessel.speedActual} kts</span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-sky-400/50">Optimal speed</span>
+                  <span className="text-[#8a8a8a]">Optimal speed</span>
                   <span className="font-mono text-emerald-400">
                     {selectedVessel.speedOptimum} kts
                   </span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-sky-400/50">Fuel penalty</span>
+                  <span className="text-[#8a8a8a]">Fuel penalty</span>
                   <span className="font-mono text-amber-400">+{selectedVessel.fuelPenalty}%</span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-sky-400/50">Rec. heading</span>
+                  <span className="text-[#8a8a8a]">Rec. heading</span>
                   <span className="font-mono text-emerald-400">
                     {selectedVessel.recommendedHeading}
                   </span>
@@ -425,48 +425,48 @@ export default function WeatherRoutingPage() {
       )}
 
       {tab === 'spectrum' && (
-        <div className="bg-[#0a1628]/80 border border-sky-500/10 rounded-xl p-4">
+        <div className="bg-white/[0.02] border border-white/[0.06] rounded-xl p-4">
           <div className="flex items-center justify-between mb-4">
             <div>
-              <p className="text-xs font-semibold text-sky-200">
+              <p className="text-xs font-semibold text-[#e0e0e0]">
                 JONSWAP Wave Spectrum — {selectedVessel.vessel}
               </p>
-              <p className="text-[10px] text-sky-400/40">
+              <p className="text-[10px] text-[#6a6a6a]">
                 {selectedVessel.currentPosition} · Hs={selectedVessel.significantWaveHeight}m · Tp=
                 {selectedVessel.peakPeriod}s
               </p>
             </div>
-            <Badge variant="outline" className="text-[9px] text-sky-400 border-sky-500/20">
+            <Badge variant="outline" className="text-[9px] text-[#c9b787] border-white/[0.08]">
               JONSWAP Model
             </Badge>
           </div>
           <WaveSpectrum />
-          <div className="flex justify-between mt-2 text-[9px] text-sky-400/30">
+          <div className="flex justify-between mt-2 text-[9px] text-[#5a5a5a]">
             <span>Frequency (Hz)</span>
             <span>Peak: {(1 / selectedVessel.peakPeriod).toFixed(3)} Hz</span>
           </div>
-          <div className="mt-4 grid grid-cols-3 gap-4 pt-4 border-t border-sky-500/10">
+          <div className="mt-4 grid grid-cols-3 gap-4 pt-4 border-t border-white/[0.06]">
             <div>
-              <p className="text-[9px] text-sky-400/40">Significant Wave Height</p>
-              <p className="text-sm font-bold font-mono text-sky-300">
+              <p className="text-[9px] text-[#6a6a6a]">Significant Wave Height</p>
+              <p className="text-sm font-bold font-mono text-[#d4c598]">
                 {selectedVessel.significantWaveHeight}m
               </p>
             </div>
             <div>
-              <p className="text-[9px] text-sky-400/40">Peak Period</p>
-              <p className="text-sm font-bold font-mono text-sky-300">
+              <p className="text-[9px] text-[#6a6a6a]">Peak Period</p>
+              <p className="text-sm font-bold font-mono text-[#d4c598]">
                 {selectedVessel.peakPeriod}s
               </p>
             </div>
             <div>
-              <p className="text-[9px] text-sky-400/40">Spectral Energy</p>
+              <p className="text-[9px] text-[#6a6a6a]">Spectral Energy</p>
               <p className="text-sm font-bold font-mono text-violet-400">
                 {(selectedVessel.significantWaveHeight ** 2 / 16).toFixed(3)} m²·s
               </p>
             </div>
           </div>
-          <div className="mt-4 bg-sky-500/5 border border-sky-500/15 rounded-lg p-3">
-            <p className="text-[10px] text-sky-400/50">
+          <div className="mt-4 bg-[#c9b787]/8 border border-white/[0.08] rounded-lg p-3">
+            <p className="text-[10px] text-[#8a8a8a]">
               The spectrum shows the distribution of wave energy across frequencies. The peak at{' '}
               {(1 / selectedVessel.peakPeriod).toFixed(3)} Hz indicates dominant swell period of{' '}
               {selectedVessel.peakPeriod}s. Parametric rolling occurs when ship encounter period
@@ -478,17 +478,17 @@ export default function WeatherRoutingPage() {
       )}
 
       {tab === 'headings' && (
-        <div className="bg-[#0a1628]/80 border border-sky-500/10 rounded-xl overflow-hidden">
-          <div className="px-4 py-3 border-b border-sky-500/10">
-            <p className="text-xs font-semibold text-sky-200">
+        <div className="bg-white/[0.02] border border-white/[0.06] rounded-xl overflow-hidden">
+          <div className="px-4 py-3 border-b border-white/[0.06]">
+            <p className="text-xs font-semibold text-[#e0e0e0]">
               Heading Optimization Matrix — {selectedVessel.vessel}
             </p>
-            <p className="text-[10px] text-sky-400/40">
+            <p className="text-[10px] text-[#6a6a6a]">
               Parametric rolling risk, hull stress & fuel burn by heading
             </p>
           </div>
           <div className="divide-y divide-sky-500/5">
-            <div className="grid grid-cols-4 px-4 py-2 text-[9px] text-sky-400/40 uppercase tracking-wider">
+            <div className="grid grid-cols-4 px-4 py-2 text-[9px] text-[#6a6a6a] uppercase tracking-wider">
               <span>Heading</span>
               <span>Parametric Risk</span>
               <span>Hull Stress</span>
@@ -504,7 +504,7 @@ export default function WeatherRoutingPage() {
                     'bg-emerald-500/5',
                 )}
               >
-                <span className="text-sm font-mono font-bold text-sky-200 flex items-center gap-1.5">
+                <span className="text-sm font-mono font-bold text-[#e0e0e0] flex items-center gap-1.5">
                   {h.heading}
                   {h.parametricRisk ===
                     Math.min(...HEADING_OPTIMIZATION.map((x) => x.parametricRisk)) && (
@@ -556,7 +556,7 @@ export default function WeatherRoutingPage() {
                 >
                   {h.hullStress}%
                 </span>
-                <span className="text-[10px] font-mono text-sky-300">{h.fuelBurn} t/day</span>
+                <span className="text-[10px] font-mono text-[#d4c598]">{h.fuelBurn} t/day</span>
               </div>
             ))}
           </div>

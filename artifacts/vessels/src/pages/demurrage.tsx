@@ -148,7 +148,7 @@ const CASES: DemurrageCase[] = [
 ];
 
 const statusConfig: Record<string, string> = {
-  ongoing: 'text-sky-400 bg-sky-500/10 border-sky-500/20',
+  ongoing: 'text-[#c9b787] bg-[#c9b787]/10 border-white/[0.08]',
   settled: 'text-emerald-400 bg-emerald-500/10 border-emerald-500/20',
   disputed: 'text-red-400 bg-red-500/10 border-red-500/20',
 };
@@ -158,9 +158,9 @@ function LaytimeBar({ allowed, used }: { allowed: number; used: number }) {
   const pct = Math.min((used / (allowed * 1.5)) * 100, 100);
   const allowedPct = Math.min((allowed / (allowed * 1.5)) * 100, 100);
   return (
-    <div className="relative h-2.5 bg-sky-500/10 rounded-full overflow-hidden mt-1">
+    <div className="relative h-2.5 bg-[#c9b787]/10 rounded-full overflow-hidden mt-1">
       <div
-        className="absolute h-full rounded-full bg-sky-400/30"
+        className="absolute h-full rounded-full bg-[#c9b787]/14"
         style={{ width: `${allowedPct}%` }}
       />
       <div
@@ -186,12 +186,12 @@ function DemurrageCard({ c }: { c: DemurrageCase }) {
   return (
     <div
       className={cn(
-        'bg-[#0a1628]/80 border rounded-xl overflow-hidden transition-all',
+        'bg-white/[0.02] border rounded-xl overflow-hidden transition-all',
         c.status === 'disputed'
           ? 'border-red-500/20'
           : c.status === 'settled'
             ? 'border-emerald-500/15'
-            : 'border-sky-500/10',
+            : 'border-white/[0.06]',
       )}
     >
       <button className="w-full text-left px-4 py-4" onClick={() => setExpanded(!expanded)}>
@@ -208,24 +208,24 @@ function DemurrageCard({ c }: { c: DemurrageCase }) {
           </div>
           <div className="flex-1 min-w-0">
             <div className="flex items-center gap-2 flex-wrap">
-              <span className="text-sm font-bold text-sky-100">{c.id}</span>
-              <span className="text-[10px] font-mono text-sky-400/50">{c.voyageRef}</span>
+              <span className="text-sm font-bold text-[#f5f5f5]">{c.id}</span>
+              <span className="text-[10px] font-mono text-[#8a8a8a]">{c.voyageRef}</span>
               <Badge variant="outline" className={cn('text-[9px]', statusConfig[c.status])}>
                 {c.status}
               </Badge>
               <Badge
                 variant="outline"
-                className="text-[9px] text-sky-400/40 border-sky-500/10 capitalize"
+                className="text-[9px] text-[#6a6a6a] border-white/[0.06] capitalize"
               >
                 {c.type}
               </Badge>
             </div>
-            <p className="text-xs text-sky-300 mt-0.5">
+            <p className="text-xs text-[#d4c598] mt-0.5">
               {c.vessel} · {c.port}
             </p>
             <div className="mt-2">
               <div className="flex items-center justify-between mb-1">
-                <span className="text-[10px] text-sky-400/40">
+                <span className="text-[10px] text-[#6a6a6a]">
                   Laytime: {c.usedLaytime}h used / {c.allowedLaytime}h allowed
                 </span>
                 <span
@@ -251,7 +251,7 @@ function DemurrageCard({ c }: { c: DemurrageCase }) {
             >
               {isDemurrage ? '+' : '-'}${(amount / 1000).toFixed(0)}K
             </p>
-            <p className="text-[9px] text-sky-400/40">{isDemurrage ? 'demurrage' : 'despatch'}</p>
+            <p className="text-[9px] text-[#6a6a6a]">{isDemurrage ? 'demurrage' : 'despatch'}</p>
             {c.disputeFlags.length > 0 && (
               <div className="flex items-center gap-1 mt-1 justify-end">
                 <AlertTriangle className="w-3 h-3 text-red-400" />
@@ -263,7 +263,7 @@ function DemurrageCard({ c }: { c: DemurrageCase }) {
       </button>
 
       {expanded && (
-        <div className="px-4 pb-4 border-t border-sky-500/10 pt-4 space-y-4">
+        <div className="px-4 pb-4 border-t border-white/[0.06] pt-4 space-y-4">
           <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
             {[
               {
@@ -287,15 +287,15 @@ function DemurrageCard({ c }: { c: DemurrageCase }) {
               { label: 'Demurrage Rate', value: `$${c.demurrageRate.toLocaleString()}/day` },
               { label: 'Despatch Rate', value: `$${c.despatchRate.toLocaleString()}/day` },
             ].map((f) => (
-              <div key={f.label} className="bg-sky-500/5 rounded-lg p-3 border border-sky-500/10">
-                <p className="text-[9px] text-sky-400/40 uppercase tracking-wider">{f.label}</p>
-                <p className="text-xs font-mono text-sky-200 mt-0.5">{f.value}</p>
+              <div key={f.label} className="bg-[#c9b787]/8 rounded-lg p-3 border border-white/[0.06]">
+                <p className="text-[9px] text-[#6a6a6a] uppercase tracking-wider">{f.label}</p>
+                <p className="text-xs font-mono text-[#e0e0e0] mt-0.5">{f.value}</p>
               </div>
             ))}
           </div>
 
           <div>
-            <p className="text-[9px] text-sky-400/40 uppercase tracking-wider mb-2">
+            <p className="text-[9px] text-[#6a6a6a] uppercase tracking-wider mb-2">
               Statement of Facts (Laytime Log)
             </p>
             <div className="space-y-1">
@@ -304,20 +304,20 @@ function DemurrageCard({ c }: { c: DemurrageCase }) {
                   key={i}
                   className={cn(
                     'flex items-start gap-3 px-3 py-2 rounded-lg text-[11px]',
-                    ev.counts ? 'bg-sky-500/5 border border-sky-500/8' : 'opacity-60',
+                    ev.counts ? 'bg-[#c9b787]/8 border border-white/[0.08]' : 'opacity-60',
                   )}
                 >
-                  <span className="text-[10px] font-mono text-sky-400/40 w-20 shrink-0">
+                  <span className="text-[10px] font-mono text-[#6a6a6a] w-20 shrink-0">
                     {ev.timestamp.split(' ').slice(0, 3).join(' ')}
                   </span>
-                  <span className="flex-1 text-sky-200">{ev.event}</span>
+                  <span className="flex-1 text-[#e0e0e0]">{ev.event}</span>
                   {ev.hours > 0 && (
-                    <span className="font-mono text-sky-300 shrink-0">{ev.hours}h</span>
+                    <span className="font-mono text-[#d4c598] shrink-0">{ev.hours}h</span>
                   )}
                   <span
                     className={cn(
                       'text-[9px] shrink-0',
-                      ev.counts ? 'text-orange-400' : 'text-sky-400/30',
+                      ev.counts ? 'text-orange-400' : 'text-[#5a5a5a]',
                     )}
                   >
                     {ev.counts ? 'COUNTS' : 'excl.'}
@@ -364,14 +364,14 @@ export default function DemurragePage() {
   return (
     <div className="p-6 space-y-6">
       <div>
-        <h1 className="font-display text-xl font-bold text-sky-50 flex items-center gap-2">
+        <h1 className="font-display text-xl font-bold text-[#f5f5f5] flex items-center gap-2">
           <Calculator className="w-5 h-5 text-orange-400" />
           Demurrage Calculator
         </h1>
-        <p className="text-xs text-sky-400/50 mt-0.5">
+        <p className="text-xs text-[#8a8a8a] mt-0.5">
           Automated laytime tracking, demurrage/despatch computation, and dispute flagging
         </p>
-        <Badge variant="outline" className="text-[9px] mt-1 text-sky-400/30 border-sky-500/15">
+        <Badge variant="outline" className="text-[9px] mt-1 text-[#5a5a5a] border-white/[0.08]">
           Simulated data — for demonstration purposes
         </Badge>
       </div>
@@ -394,14 +394,14 @@ export default function DemurragePage() {
           {
             label: 'Avg Laytime Usage',
             value: `${avgLaytimePct.toFixed(0)}%`,
-            color: avgLaytimePct > 100 ? 'text-orange-400' : 'text-sky-300',
+            color: avgLaytimePct > 100 ? 'text-orange-400' : 'text-[#d4c598]',
             icon: Clock,
           },
         ].map((s) => (
-          <div key={s.label} className="bg-[#0a1628]/80 border border-sky-500/10 rounded-xl p-4">
+          <div key={s.label} className="bg-white/[0.02] border border-white/[0.06] rounded-xl p-4">
             <div className="flex items-center gap-2 mb-1">
               <s.icon className={cn('w-3.5 h-3.5', s.color)} />
-              <p className="text-[10px] text-sky-400/40 uppercase tracking-wider">{s.label}</p>
+              <p className="text-[10px] text-[#6a6a6a] uppercase tracking-wider">{s.label}</p>
             </div>
             <p className={cn('text-xl font-bold font-display', s.color)}>{s.value}</p>
           </div>
