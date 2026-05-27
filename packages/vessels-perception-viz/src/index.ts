@@ -24,6 +24,9 @@ export type {
 export { ShipPortScene } from './ship-port-scene.js';
 export type { ShipPortSceneProps } from './ship-port-scene.js';
 
+export { ShipPortScene3D, layoutShipPortScene3D } from './ship-port-scene-3d.js';
+export type { ShipPortScene3DProps } from './ship-port-scene-3d.js';
+
 export { RankedSignalMesh } from './ranked-signal-mesh.js';
 export type {
   RankedSignalMeshProps,

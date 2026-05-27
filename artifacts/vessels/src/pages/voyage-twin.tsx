@@ -21,6 +21,7 @@ import {
   DeterministicTrajectory,
   RankedSignalMesh,
   ShipPortScene,
+  ShipPortScene3D,
   VoyagePipelineTrace,
   runVoyagePipeline,
   type SignalSeriesInput,
@@ -268,11 +269,18 @@ function PerceptionTwinView({
           tickMs={0}
           ariaLabel={`Deterministic trajectory for ${data.voyageRef}`}
         />
-        <div className="mt-3">
+        <div className="mt-3 grid grid-cols-2 gap-3">
           <ShipPortScene
             seed={Array.from(data.voyageRef).reduce((h, c) => (h * 33 + c.charCodeAt(0)) >>> 0, 5381)}
-            width={680}
-            height={220}
+            width={328}
+            height={260}
+            ariaLabel={`Top-down part graph for ${data.voyageRef}`}
+          />
+          <ShipPortScene3D
+            seed={Array.from(data.voyageRef).reduce((h, c) => (h * 33 + c.charCodeAt(0)) >>> 0, 5381)}
+            width={328}
+            height={260}
+            ariaLabel={`3D perception twin for ${data.voyageRef}`}
           />
         </div>
       </div>
