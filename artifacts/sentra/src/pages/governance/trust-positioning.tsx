@@ -151,7 +151,7 @@ export default function TrustPositioningPage() {
             <div className="space-y-2">
               <p className="text-sm font-semibold text-[#c9b787]">Our Trust Commitment</p>
               <p className="text-xs text-[#c9b787]/80 font-mono leading-relaxed">
-                PARAGON is in <strong>production-ready pilot</strong> stage. Everything on this page
+                Sentra is in <strong>production-ready pilot</strong> stage. Everything on this page
                 reflects honest current state. We separate current capabilities from roadmap
                 clearly. We publish our AI trust metrics — schema validity rate, retrieval miss
                 rate, unsupported claim rate — because hiding them would undermine the trust we're

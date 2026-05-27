@@ -107,7 +107,7 @@ export default function GovernedCockpit() {
     <GovernedCockpitShell
       accentColor={ACCENT}
       headerIcon={<Shield className="w-4 h-4" style={{ color: ACCENT }} />}
-      headerTitle="PARAGON — Governed Security Intelligence"
+      headerTitle="Sentra — Governed Security Intelligence"
       headerSubtitle="Every threat, compliance gap, and risk carries a full proof chain"
       liveIndicatorLabel="Live Threat Intelligence · Deterministic Fallback (Counsel integration active)"
       defaultAutonomyMode="ask-to-act"

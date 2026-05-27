@@ -339,7 +339,7 @@ export default function AdversaryEngine() {
   const [activeId, setActiveId] = useState<string | null>(null);
 
   // Sentra ML Adversary Replay — POST /api/sentra/ml/adversary-replay (live inference).
-  // Replaces api.digitalTwin.scenarios() which called the unrelated PARAGON Digital Twin API.
+  // Replaces api.digitalTwin.scenarios() which called the unrelated Sentra Digital Twin API.
   const { data: scenariosData, isLoading, isError } = useQuery({
     queryKey: ['sentra-adversary-scenarios'],
     queryFn: async () => {
@@ -454,7 +454,7 @@ export default function AdversaryEngine() {
               style={{ background: 'rgba(201,183,135,0.08)', borderColor: 'rgba(201,183,135,0.25)', color: '#c9b787' }}
             >
               <Database className="w-2.5 h-2.5" />
-              Live DB · PARAGON
+              Live DB · Sentra
             </span>
           </div>
           <p className="text-xs text-zinc-500">
@@ -481,14 +481,14 @@ export default function AdversaryEngine() {
       {isError && (
         <div className="rounded-xl border border-[#c9b787]/20 bg-[#c9b787]/5 px-4 py-3 text-xs text-[#c9b787] flex items-center gap-2">
           <AlertTriangle className="w-3.5 h-3.5 shrink-0" />
-          Could not reach PARAGON API — showing scenario library data. Lifecycle controls will retry the API when triggered.
+          Could not reach Sentra API — showing scenario library data. Lifecycle controls will retry the API when triggered.
         </div>
       )}
 
       {isLoading && (
         <div className="flex items-center gap-2 text-xs text-zinc-500">
           <div className="w-3.5 h-3.5 border-2 border-[#f5f5f5]/40 border-t-red-400 rounded-full animate-spin" />
-          Loading simulations from PARAGON…
+          Loading simulations from Sentra…
         </div>
       )}
 

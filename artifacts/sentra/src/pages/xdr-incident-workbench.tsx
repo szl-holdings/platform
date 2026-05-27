@@ -928,7 +928,7 @@ export default function XDRIncidentWorkbench() {
                         Narrative not yet synthesized
                       </p>
                       <p className="text-[10px] text-white/15 mt-1">
-                        PARAGON is correlating evidence streams for this incident.
+                        Sentra is correlating evidence streams for this incident.
                       </p>
                     </div>
                   );

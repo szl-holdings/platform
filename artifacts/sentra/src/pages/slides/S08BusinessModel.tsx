@@ -152,7 +152,7 @@ export default function S08BusinessModel() {
                   color: 'rgba(240,236,230,0.4)',
                 }}
               >
-                Annual per domain. PARAGON security modules, SEXTANT commercial intel, DOMAINE property
+                Annual per domain. Sentra security modules, SEXTANT commercial intel, DOMAINE property
                 analysis
               </div>
             </div>

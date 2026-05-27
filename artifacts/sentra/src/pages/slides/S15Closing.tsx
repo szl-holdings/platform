@@ -4,7 +4,7 @@ import { useState } from 'react';
  * AegisNewsletterWidget — intentionally standalone (not using the shared
  * NewsletterSubscribe component from @szl-holdings/shared-ui).
  *
- * Reason: PARAGON is a slide deck rendered at full viewport size. All layout
+ * Reason: Sentra is a slide deck rendered at full viewport size. All layout
  * and typography use viewport-relative units (vw/vh) to maintain proportional
  * sizing across screen dimensions — a requirement that Tailwind-based shared
  * components cannot satisfy. The API contract (POST /api/newsletter/subscribe
@@ -187,7 +187,7 @@ export default function S15Closing() {
               color: '#0cc8d9',
             }}
           >
-            PARAGON
+            Sentra
           </span>
         </div>
         <h2

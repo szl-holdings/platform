@@ -549,7 +549,7 @@ export default function S05Demo() {
                   fontWeight: 600,
                 }}
               >
-                Governed Autonomy — PARAGON
+                Governed Autonomy — Sentra
               </div>
             </div>
           </div>

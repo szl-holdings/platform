@@ -27,7 +27,7 @@ const ECOSYSTEM_APPS = [
   },
   {
     id: 'msp',
-    name: 'PARAGON Operations',
+    name: 'Sentra Operations',
     role: 'Managed Services Command',
     agent: 'IT Sentinel',
     icon: Cpu,
@@ -67,7 +67,7 @@ const ECOSYSTEM_APPS = [
   },
   {
     id: 'aegis',
-    name: 'PARAGON',
+    name: 'Sentra',
     role: 'Security Operations',
     agent: 'Adaptive Defense',
     icon: Shield,
@@ -87,7 +87,7 @@ const ECOSYSTEM_APPS = [
   },
   {
     id: 'szl-holdings',
-    name: 'PARAGON',
+    name: 'Sentra',
     role: 'Portfolio Intelligence',
     agent: 'Portfolio Analyst',
     icon: TrendingUp,

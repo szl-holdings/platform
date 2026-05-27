@@ -218,7 +218,7 @@ export default function PresenterMode() {
               marginBottom: 4,
             }}
           >
-            Presenter Mode · PARAGON Investor Deck
+            Presenter Mode · Sentra Investor Deck
           </div>
           <div style={{ fontSize: 14, color: 'rgba(255,255,255,0.6)' }}>
             Slide {current} of {TOTAL} · arrow keys / space to advance · syncs with audience window

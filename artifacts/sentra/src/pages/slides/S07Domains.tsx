@@ -1,7 +1,7 @@
 export default function S07Domains() {
   const domains = [
     {
-      name: 'PARAGON',
+      name: 'Sentra',
       cat: 'Security & Defense',
       color: '#c9b787',
       desc: 'SOC command, threat intel, MITRE ATT&CK, governed incident response',

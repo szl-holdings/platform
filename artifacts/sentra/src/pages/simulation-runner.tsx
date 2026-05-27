@@ -196,7 +196,7 @@ export default function AdversaryEmulation() {
         layer: 'UNDERSTAND',
         severity,
         title: 'Security simulation analysis complete',
-        description: `PARAGON blast radius analysis: ${completedSimulations.length} simulation(s) completed. ${runningSimulations.length} currently running.`,
+        description: `Sentra blast radius analysis: ${completedSimulations.length} simulation(s) completed. ${runningSimulations.length} currently running.`,
         entitiesInvolved: completedSimulations.slice(0, 3).map((s) => s.name ?? 'simulation'),
         context: {
           source: 'simulation-runner',

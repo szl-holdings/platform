@@ -110,7 +110,7 @@ export default function AgentInsightsPage() {
       <div className="flex justify-end pt-1">
         <MicroFeedbackWidget
           featureId="aegis-agent-insights"
-          featureName="PARAGON Autonomous Threat Intelligence"
+          featureName="Sentra Autonomous Threat Intelligence"
           app="aegis"
           compact
           prompt="Were these threat insights useful?"

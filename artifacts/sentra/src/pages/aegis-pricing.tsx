@@ -69,7 +69,7 @@ const tiers = [
     cta: 'Contact Sales',
     highlight: false,
     features: [
-      'Full PARAGON platform — all workspaces',
+      'Full Sentra platform — all workspaces',
       'AI Intelligence Labs access',
       'Custom AI security models',
       'Classified threat feed integration',

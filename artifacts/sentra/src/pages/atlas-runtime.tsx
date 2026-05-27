@@ -500,7 +500,7 @@ function AegisAtlasRuntimeContent() {
               className="text-[10px] font-bold uppercase tracking-widest font-mono"
               style={{ color: '#8b7ac8' }}
             >
-              PARAGON · ATLAS Spatial Runtime
+              Sentra · ATLAS Spatial Runtime
             </span>
           </div>
           <h1 className="text-xl font-bold text-white tracking-tight">Posture Twin Theater</h1>
@@ -595,7 +595,7 @@ function AegisAtlasRuntimeContent() {
             </span>{' '}
             live incident
             {liveIncidents.filter((i) => i.status !== 'resolved').length !== 1 ? 's' : ''} ingested
-            from PARAGON — Incident Theater shows real-time feed
+            from Sentra — Incident Theater shows real-time feed
           </span>
           <span className="ml-auto text-[9px] font-mono" style={{ color: 'rgba(255,255,255,0.2)' }}>
             Updated {lastRefresh.toLocaleTimeString()}

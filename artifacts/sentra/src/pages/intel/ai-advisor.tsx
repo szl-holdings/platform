@@ -139,7 +139,7 @@ const EXAMPLE_CONSULTATIONS = [
       'El Niño weather pattern will increase Suez Canal delays by 15–22%. Red Sea tensions remain elevated — recommend rerouting 3 key fleet segments via Cape of Good Hope. Panama Canal water levels critical through April.',
   },
   {
-    question: "What is the PARAGON portfolio's greatest systemic risk in Q2 2026?",
+    question: "What is the Sentra portfolio's greatest systemic risk in Q2 2026?",
     oracle: 'Primary AI Model',
     confidence: 91,
     summary:
@@ -163,7 +163,7 @@ interface ComparisonResult {
 }
 
 const COMPARISON_QUESTION =
-  'What is the single highest-leverage action PARAGON could take in the next 90 days?';
+  'What is the single highest-leverage action Sentra could take in the next 90 days?';
 const COMPARISON_RESULTS: ComparisonResult[] = [
   {
     oracle: 'Primary AI Model',

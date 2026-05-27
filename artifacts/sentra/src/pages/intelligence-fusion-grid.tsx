@@ -451,7 +451,7 @@ export default function IntelligenceFusionGrid() {
               className="text-[10px] font-bold uppercase tracking-widest font-mono"
               style={{ color: PURPLE }}
             >
-              PARAGON · Intelligence Fusion Grid
+              Sentra · Intelligence Fusion Grid
             </span>
             <span
               className="px-1.5 py-0.5 rounded text-[8px] font-bold"

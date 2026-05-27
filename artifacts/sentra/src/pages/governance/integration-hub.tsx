@@ -214,7 +214,7 @@ export default function IntegrationHubPage() {
           <Lock size={14} className="text-[#c9b787] mt-0.5 shrink-0" />
           <p className="text-xs text-[#c9b787]/80 font-mono leading-relaxed">
             All integrations are <strong>tenant-owned</strong>: credentials belong to and are
-            controlled by each customer tenant. PARAGON never shares credentials across tenants. Hook
+            controlled by each customer tenant. Sentra never shares credentials across tenants. Hook
             Ready means the adapter is built but requires per-customer configuration. Failure
             surfacing is explicit — no silent failures.
           </p>

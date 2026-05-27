@@ -332,7 +332,7 @@ export default function AlertsPage() {
                 evidence={[
                   {
                     id: String(alert.id),
-                    label: alert.source?.replace('_', ' ') ?? 'PARAGON Engine',
+                    label: alert.source?.replace('_', ' ') ?? 'Sentra Engine',
                     type: 'signal',
                     timestamp: alert.createdAt,
                     excerpt: alert.description,

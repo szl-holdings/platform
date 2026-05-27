@@ -260,7 +260,7 @@ export default function BusinessSignalIntelligence() {
             className="text-[10px] font-bold uppercase tracking-widest font-mono"
             style={{ color: ACCENT }}
           >
-            PARAGON · Business Signal Intelligence
+            Sentra · Business Signal Intelligence
           </span>
         </div>
         <h1 className="text-xl font-bold text-white">Security Business Signal Intelligence</h1>

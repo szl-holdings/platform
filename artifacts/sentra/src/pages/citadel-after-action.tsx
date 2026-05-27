@@ -42,7 +42,7 @@ const AAR = {
   commanderName: 'J. Chen',
   reportVersion: 'v1.0 — Final',
   executiveSummary:
-    'On January 15, 2024 at 14:22 UTC, PARAGON SIEM detected APT29-attributed lateral movement on production asset DC-PROD-03. Incident Command was declared at ICS Level 3 within 2 minutes. Through coordinated containment, the active threat was severed within 28 minutes of the initial host isolation decision. Forensic evidence was preserved, managed clients were proactively notified, and external IR (CrowdStrike) was engaged for deep attribution. No data exfiltration was confirmed. The Northgate migration SLA was temporarily suspended. Regulatory breach notification review determined notification obligations were not triggered (no PII accessed). Full remediation was completed in 18.9 hours.',
+    'On January 15, 2024 at 14:22 UTC, Sentra SIEM detected APT29-attributed lateral movement on production asset DC-PROD-03. Incident Command was declared at ICS Level 3 within 2 minutes. Through coordinated containment, the active threat was severed within 28 minutes of the initial host isolation decision. Forensic evidence was preserved, managed clients were proactively notified, and external IR (CrowdStrike) was engaged for deep attribution. No data exfiltration was confirmed. The Northgate migration SLA was temporarily suspended. Regulatory breach notification review determined notification obligations were not triggered (no PII accessed). Full remediation was completed in 18.9 hours.',
 };
 
 const METRICS = [
@@ -470,7 +470,7 @@ export default function CitadelAfterAction() {
                   The incident was contained within 47 minutes of declaration with no confirmed data
                   exfiltration, no regulatory breach notification required, and client impact
                   limited to a planned migration delay. Post-incident attribution confirmed APT29
-                  and all persistence mechanisms were removed. The PARAGON platform's pre-detection
+                  and all persistence mechanisms were removed. The Sentra platform's pre-detection
                   capability (Labs neural explorer) provided critical early warning and is credited
                   with materially accelerating response time.
                 </p>

@@ -1,7 +1,7 @@
 export default function S07SeriesDomains() {
   const domains = [
     {
-      name: 'PARAGON',
+      name: 'Sentra',
       subtitle: 'Defense & Security',
       score: '8/10',
       desc: 'SOC command + 8 advanced intelligence modules: OT/ICS, OSINT, Dark Web, SIGINT, Behavioral, Counterintelligence, Quantum, AI Threat Hunter',
@@ -36,7 +36,7 @@ export default function S07SeriesDomains() {
       color: '#f5a623',
     },
     {
-      name: 'PARAGON',
+      name: 'Sentra',
       subtitle: 'Corporate Platform',
       score: '9/10',
       desc: 'Portfolio command, investor relations, trust center, data room — the corporate presence built on its own governance infrastructure',

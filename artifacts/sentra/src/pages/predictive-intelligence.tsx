@@ -235,7 +235,7 @@ export default function PredictiveIntelligence() {
             className="text-[10px] font-bold uppercase tracking-widest font-mono"
             style={{ color: PURPLE }}
           >
-            PARAGON · Predictive Intelligence
+            Sentra · Predictive Intelligence
           </span>
           <span
             className="px-1.5 py-0.5 rounded text-[8px] font-bold animate-pulse"

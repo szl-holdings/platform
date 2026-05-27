@@ -20,7 +20,7 @@ import { useCallback, useEffect, useState } from 'react';
 
 const DOMAIN = 'aegis';
 const ACCENT = '#8b7ac8';
-const DOMAIN_LABEL = 'PARAGON — Security Intelligence';
+const DOMAIN_LABEL = 'Sentra — Security Intelligence';
 const WORKFLOW_KEY = 'aegis-incident-response';
 
 const SIGNAL_TYPES = [

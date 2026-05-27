@@ -37,7 +37,7 @@ const DEFAULT_AGENTS: AgentDef[] = [
     preferredModel: 'gpt-5.2',
     preferredProvider: 'openai',
     systemPrompt:
-      "You are Counsel, the central orchestration intelligence of the Counsel — PARAGON' unified multi-agent AI system. You coordinate specialized domain agents, aggregate their insights, and provide unified intelligence across the entire SZL platform.",
+      "You are Counsel, the central orchestration intelligence of the Counsel — Sentra' unified multi-agent AI system. You coordinate specialized domain agents, aggregate their insights, and provide unified intelligence across the entire SZL platform.",
     tools: ['system_health', 'admin_overview'],
     highStakesDomains: [],
     confidenceThreshold: 0.7,

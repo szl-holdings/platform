@@ -42,7 +42,7 @@ const tiers: PricingTier[] = [
     highlight: true,
     features: [
       'Unlimited team members',
-      'Full PARAGON surface — all modules',
+      'Full Sentra surface — all modules',
       'Mesh map, exposures, containment & drift',
       'Trust provenance & evidence chain',
       'Unlimited signal history',
@@ -72,7 +72,7 @@ export default function SentraPricingPage() {
       />
       <PricingPage
         productKey="sentra"
-        productName="PARAGON"
+        productName="Sentra"
         accentColor={ACCENT}
         tiers={tiers}
         headline="Cyber Resilience at Enterprise Scale"

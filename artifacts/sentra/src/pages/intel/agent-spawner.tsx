@@ -45,7 +45,7 @@ const DOMAIN_TEMPLATES = [
       'Auto-triages IT tickets, predicts outages, and orchestrates remediation playbooks.',
     defaultInstruction:
       'Monitor ticket queue for patterns, predict infrastructure failures 4 hours ahead, auto-triage P1 incidents.',
-    domain: 'PARAGON Operations',
+    domain: 'Sentra Operations',
     systemType: 'deep' as const,
     capabilities: [
       'Ticket auto-triage',
@@ -140,7 +140,7 @@ const DOMAIN_TEMPLATES = [
       'Enforces agent security policies, detects threats, and orchestrates immune response.',
     defaultInstruction:
       'Monitor all agent actions for policy violations, detect anomalous AI behavior, enforce Policy Shield protocols.',
-    domain: 'PARAGON',
+    domain: 'Sentra',
     systemType: 'fast' as const,
     capabilities: ['Policy enforcement', 'Anomaly detection', 'Action auditing', 'Threat response'],
   },
@@ -154,7 +154,7 @@ const DOMAIN_TEMPLATES = [
       'Monitors ecosystem health across all 12 apps, surfaces investor insights, and tracks portfolio KPIs.',
     defaultInstruction:
       'Aggregate 6 Lenses scores across portfolio, detect cross-app anomalies, and generate investor-ready health summaries.',
-    domain: 'PARAGON',
+    domain: 'Sentra',
     systemType: 'deep' as const,
     capabilities: [
       'Cross-app aggregation',
@@ -176,7 +176,7 @@ const LIVE_AGENTS = [
   },
   {
     name: 'IT Sentinel',
-    domain: 'PARAGON Operations',
+    domain: 'Sentra Operations',
     status: 'active',
     uptime: '7d 2h',
     actions: 3847,
@@ -208,7 +208,7 @@ const LIVE_AGENTS = [
   },
   {
     name: 'Security Sentinel',
-    domain: 'PARAGON',
+    domain: 'Sentra',
     status: 'active',
     uptime: '30d 0h',
     actions: 7234,
@@ -224,7 +224,7 @@ const LIVE_AGENTS = [
   },
   {
     name: 'Portfolio Analyst',
-    domain: 'PARAGON',
+    domain: 'Sentra',
     status: 'monitoring',
     uptime: '14d 12h',
     actions: 2143,

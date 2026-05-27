@@ -130,7 +130,7 @@ export default function S01Cover() {
                 letterSpacing: '0.02em',
               }}
             >
-              PARAGON
+              Sentra
             </div>
             <div
               style={{
