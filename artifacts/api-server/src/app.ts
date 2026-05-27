@@ -110,6 +110,7 @@ import demoResetRouter from './routes/demo-reset';
 import agiForecastStatusRouter from './routes/agi-forecast-status';
 import putnamRouter from './routes/putnam';
 import memoRouter from './routes/memo';
+import udsRegistryRouter from './routes/uds-registry';
 import a11oyOrchestrationRouter from './routes/a11oy-orchestration-api';
 import a11oyLeaderUpgradesRouter from './routes/a11oy-leader-upgrades';
 import payloadRouter from './routes/payload';
@@ -458,6 +459,9 @@ app.use('/api/yawar', yawarRouter);
 app.use('/api/agi-forecast', agiForecastStatusRouter);
 app.use('/api/putnam', putnamRouter);
 app.use('/api/memo', memoRouter);
+// UDS bundle registry — public, read-only mesh-facing feed of every
+// signed UDS payload SZL ships. Mirror of `docs/uds/REGISTRY.md`.
+app.use('/api/uds', udsRegistryRouter);
 
 // PSYCHE — Emergent Sentience Observatory (#4856). Mounted as a public read
 // surface alongside the orchestration backbone so the A11oy PSYCHE pages

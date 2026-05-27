@@ -7,6 +7,7 @@
 - [api-server loopback sidecars](api-server-loopback-sidecars.md) — sidecar POSTs traverse three independent auth gates (CSRF exempt + globalAuthEnforcer loopback bypass + route-level shared secret); fix all three or failures cascade across restarts.
 - [KS-18 contextuality witness](ks18-contextuality-witness.md) — the impossibility is parity (each vector in exactly 2 contexts ⇒ Σ contexts = 2·Σv ⇒ 9 = 2·Σv ⇒ Σv = 4.5 ∉ ℤ), NOT physical orthogonality; non-obvious indexing in @a11oy/core.
 - [A11oy.UDS release flow](a11oy-uds-release-flow.md) — build via artifacts/a11oy-uds/scripts/build.sh, sign with COSIGN_KEY=.local/cosign/cosign.key COSIGN_PASSWORD="", smoke-test from PUBLIC URL not local file.
+- [UDS bundle registry](uds-bundle-registry.md) — fleet list lives in 3 places (REGISTRY.md, /api/uds/registry route, LinkedIn copy); all must agree on slug+version+OCI+cosign-identity-regex or verification silently breaks.
 - [Artifact toml + workflow config quirks](artifact-toml-and-configure-workflow.md) — never write `.replit-artifact/artifact.toml` directly; `configureWorkflow` counter can become stale after `removeWorkflow` (phantom limit).
 - [Doctrine v6 scanner exemptions](doctrine-v6-exemptions.md) — when to add to `EXCLUDE_PATH_PREFIXES` vs `// doctrine-scanner-exempt` marker; "frozen historical receipt" vs "new drift".
 - [Multi-artifact preview path routing](multi-artifact-preview-routing.md) — each artifact takes a unique `PORT` from env; hardcoding `server.port` in vite.config collides with the path-routed proxy.
