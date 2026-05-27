@@ -81,7 +81,11 @@ export const DOCTRINE_PILLARS: readonly DoctrinePillar[] = [
 // 2. CAPABILITY SEEDS — integrated from external sources
 // ---------------------------------------------------------------------------
 
-export type SeedStatus = 'active' | 'integrated' | 'adoptable' | 'piloted';
+// SeedStatus is the shared vocabulary — defined once in ./seedStatus and
+// re-exported here so existing `import { SeedStatus } from '../data/argoForge'`
+// paths keep working without churn. See ./seedStatus for the badge styles.
+export type { SeedStatus } from './seedStatus';
+import type { SeedStatus } from './seedStatus';
 export type ConstellationTarget = 'A11oy' | 'Sentra' | 'Psyche' | 'Argo';
 export type RoadmapPhase = '0\u20136' | '7\u201312' | '13\u201324';
 export type SeedSourceKind = 'open-source' | 'public-research';

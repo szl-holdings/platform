@@ -6,21 +6,15 @@ import {
 import {
   AERIAL_TWIN_VERSION, AERIAL_TWIN_TAGLINE,
   PRIMITIVES, ENGINE_MODULES, VERTICAL_BINDINGS, INNOVATION_SEEDS, ROADMAP, GUARDRAILS,
-  type SeedStatus, type VerticalId,
+  type VerticalId,
 } from '../data/aerialTwin';
+import { SEED_STATUS_STYLE as STATUS_STYLE } from '../data/seedStatus';
 import { AERIAL_TWIN_MILESTONES } from '../data/aerialTwinMilestones';
 
 const GOLD = '#c9b787';
 const TEXT = 'var(--color-a11oy-text)';
 const SUB = 'var(--color-a11oy-text-sub)';
 const GHOST = 'var(--color-a11oy-text-ghost)';
-
-const STATUS_STYLE: Record<SeedStatus, { color: string; bg: string; label: string }> = {
-  active:     { color: '#7afa7a', bg: 'rgba(122,250,122,0.08)',   label: 'ACTIVE' },
-  integrated: { color: '#c9b787', bg: 'rgba(201,183,135,0.10)',  label: 'INTEGRATED' },
-  adoptable:  { color: GOLD,      bg: 'rgba(201,183,135,0.18)',  label: 'ADOPTABLE' },
-  piloted:    { color: '#f5f5f5', bg: 'rgba(245,245,245,0.10)',  label: 'PILOTED' },
-};
 
 const VERTICAL_ACCENT: Record<VerticalId, string> = {
   vessels: '#c9b787',

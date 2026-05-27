@@ -227,7 +227,11 @@ export const VERTICAL_BINDINGS: readonly VerticalBinding[] = [
 // 4. INNOVATION SEEDS — differentiated capabilities built on the twin core.
 // ---------------------------------------------------------------------------
 
-export type SeedStatus = 'active' | 'integrated' | 'adoptable' | 'piloted';
+// SeedStatus is the shared vocabulary — defined once in ./seedStatus and
+// re-exported here so existing `import { SeedStatus } from '../data/aerialTwin'`
+// paths keep working without churn. See ./seedStatus for the badge styles.
+export type { SeedStatus } from './seedStatus';
+import type { SeedStatus } from './seedStatus';
 
 export interface InnovationSeed {
   id: string;

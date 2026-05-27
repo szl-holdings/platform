@@ -6,21 +6,15 @@ import {
 import {
   ARGO_TAGLINE, ARGO_VERSION, ARGO_CITATIONS,
   DOCTRINE_PILLARS, CAPABILITY_SEEDS, ALIGNMENT_MATRIX,
-  type CapabilitySeed, type SeedStatus, type ConstellationTarget,
+  type CapabilitySeed, type ConstellationTarget,
   type RoadmapPhase, type SeedSourceKind,
 } from '../data/argoForge';
+import { SEED_STATUS_STYLE as STATUS_STYLE } from '../data/seedStatus';
 
 const GOLD = '#c9b787';
 const SUB = 'var(--color-a11oy-text-sub)';
 const TEXT = 'var(--color-a11oy-text)';
 const GHOST = 'var(--color-a11oy-text-ghost)';
-
-const STATUS_STYLE: Record<SeedStatus, { color: string; bg: string; label: string }> = {
-  active:     { color: '#7afa7a', bg: 'rgba(122,250,122,0.08)',  label: 'ACTIVE' },
-  integrated: { color: '#c9b787', bg: 'rgba(201,183,135,0.10)',  label: 'INTEGRATED' },
-  adoptable:  { color: GOLD,      bg: 'rgba(201,183,135,0.18)',  label: 'ADOPTABLE' },
-  piloted:    { color: '#f5f5f5', bg: 'rgba(245,245,245,0.10)',  label: 'PILOTED' },
-};
 
 const TARGET_STYLE: Record<ConstellationTarget, { color: string; bg: string }> = {
   A11oy:  { color: GOLD,      bg: 'rgba(201,183,135,0.10)' },
