@@ -122,6 +122,7 @@ export function KhipuIndex() {
   const [nodeDetail, setNodeDetail] = useState<{ node: KhipuNode; neighbors: KhipuNode[]; edges: KhipuEdge[] } | null>(null);
   const [allCitations, setAllCitations] = useState<Citation[]>(FRAMEWORK_CITATIONS);
   const [view, setView] = useState<'grid' | 'graph'>('grid');
+  const [clusterByKind, setClusterByKind] = useState(false);
 
   // Build canonical nodes from the shared frontier-khipu package.
   // This is the single source of truth for all Khipu Index content.
@@ -236,23 +237,44 @@ export function KhipuIndex() {
               <span style={{ fontSize: 11, fontFamily: 'var(--font-mono, monospace)', color: MUTED }}>
                 {filtered.length} nodes · {edges.length} edges
               </span>
-              <div style={{ display: 'flex', gap: 0, marginLeft: 'auto', border: `1px solid ${BORDER}`, borderRadius: 4, overflow: 'hidden' }}>
-                {(['grid', 'graph'] as const).map(v => (
+              <div style={{ display: 'flex', gap: 8, marginLeft: 'auto', alignItems: 'center' }}>
+                {view === 'graph' && (
                   <button
-                    key={v}
                     type="button"
-                    onClick={() => setView(v)}
+                    onClick={() => setClusterByKind(v => !v)}
+                    aria-pressed={clusterByKind}
+                    title="Cluster nodes of the same kind toward a shared anchor"
+                    data-testid="toggle-cluster-by-kind"
                     style={{
                       padding: '5px 12px', fontSize: 10, fontFamily: 'var(--font-mono, monospace)',
                       letterSpacing: '0.08em', textTransform: 'uppercase', cursor: 'pointer',
-                      background: view === v ? GOLD : 'transparent',
-                      color: view === v ? '#0a0a0a' : DIM,
-                      border: 'none', transition: 'all 0.15s',
+                      background: clusterByKind ? GOLD : 'transparent',
+                      color: clusterByKind ? '#0a0a0a' : DIM,
+                      border: `1px solid ${clusterByKind ? GOLD : BORDER}`, borderRadius: 4,
+                      transition: 'all 0.15s',
                     }}
                   >
-                    {v}
+                    cluster by kind
                   </button>
-                ))}
+                )}
+                <div style={{ display: 'flex', gap: 0, border: `1px solid ${BORDER}`, borderRadius: 4, overflow: 'hidden' }}>
+                  {(['grid', 'graph'] as const).map(v => (
+                    <button
+                      key={v}
+                      type="button"
+                      onClick={() => setView(v)}
+                      style={{
+                        padding: '5px 12px', fontSize: 10, fontFamily: 'var(--font-mono, monospace)',
+                        letterSpacing: '0.08em', textTransform: 'uppercase', cursor: 'pointer',
+                        background: view === v ? GOLD : 'transparent',
+                        color: view === v ? '#0a0a0a' : DIM,
+                        border: 'none', transition: 'all 0.15s',
+                      }}
+                    >
+                      {v}
+                    </button>
+                  ))}
+                </div>
               </div>
             </div>
 
@@ -272,6 +294,7 @@ export function KhipuIndex() {
                 nodes={filtered}
                 edges={edges}
                 kindColor={KIND_COLOR}
+                clusterByKind={clusterByKind}
                 selectedId={selected?.id ?? null}
                 onSelect={(n) => {
                   const full = nodes.find(x => x.id === n.id);

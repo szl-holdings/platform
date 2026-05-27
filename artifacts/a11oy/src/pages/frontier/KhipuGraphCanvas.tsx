@@ -29,9 +29,23 @@ interface Props {
   selectedId?: string | null;
   onSelect: (node: KhipuGraphNode) => void;
   height?: number;
+  /**
+   * When true, nodes of the same `kind` are pulled toward a shared anchor
+   * (one column per kind, evenly spaced across the canvas width) via
+   * d3-force's forceX/forceY. Free-form layout is restored when false.
+   */
+  clusterByKind?: boolean;
 }
 
-export function KhipuGraphCanvas({ nodes, edges, kindColor, selectedId, onSelect, height = 560 }: Props) {
+export function KhipuGraphCanvas({
+  nodes,
+  edges,
+  kindColor,
+  selectedId,
+  onSelect,
+  height = 560,
+  clusterByKind = false,
+}: Props) {
   const svgRef = useRef<SVGSVGElement | null>(null);
   const containerRef = useRef<HTMLDivElement | null>(null);
   const onSelectRef = useRef(onSelect);
@@ -153,11 +167,31 @@ export function KhipuGraphCanvas({ nodes, edges, kindColor, selectedId, onSelect
       });
     nodeG.call(drag);
 
+    // Per-kind anchor map for cluster mode: one column per kind present in
+    // the current node set, evenly distributed across the canvas width, all
+    // sharing the same vertical anchor (graph mid-height). Kinds are sorted
+    // alphabetically so the column order is stable across renders.
+    const presentKinds = Array.from(new Set(simNodes.map(n => n.kind))).sort();
+    const anchorX = new Map<NodeKind, number>();
+    const colCount = Math.max(presentKinds.length, 1);
+    const margin = Math.min(width * 0.1, 80);
+    const usable = Math.max(width - margin * 2, 1);
+    const step = colCount > 1 ? usable / (colCount - 1) : 0;
+    presentKinds.forEach((k, i) => {
+      anchorX.set(k, margin + step * i);
+    });
+
     const sim = d3.forceSimulation<SimNode>(simNodes)
-      .force('link', d3.forceLink<SimNode, SimLink>(simLinks).id(d => d.id).distance(80).strength(0.35))
-      .force('charge', d3.forceManyBody<SimNode>().strength(-220))
+      .force('link', d3.forceLink<SimNode, SimLink>(simLinks).id(d => d.id).distance(80).strength(clusterByKind ? 0.15 : 0.35))
+      .force('charge', d3.forceManyBody<SimNode>().strength(clusterByKind ? -140 : -220))
       .force('center', d3.forceCenter(width / 2, height / 2))
       .force('collide', d3.forceCollide<SimNode>().radius(d => nodeRadius(d) + 6))
+      .force('x', clusterByKind
+        ? d3.forceX<SimNode>(d => anchorX.get(d.kind) ?? width / 2).strength(0.35)
+        : null)
+      .force('y', clusterByKind
+        ? d3.forceY<SimNode>(height / 2).strength(0.08)
+        : null)
       .on('tick', () => {
         linkSel
           .attr('x1', d => (d.source as SimNode).x ?? 0)
@@ -173,7 +207,7 @@ export function KhipuGraphCanvas({ nodes, edges, kindColor, selectedId, onSelect
     return () => {
       sim.stop();
     };
-  }, [nodes, edges, kindColor, selectedId, width, height]);
+  }, [nodes, edges, kindColor, selectedId, width, height, clusterByKind]);
 
   return (
     <div ref={containerRef} style={{ position: 'relative', width: '100%' }}>
