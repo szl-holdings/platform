@@ -81,3 +81,7 @@ export type {
   K10ReplayState,
 } from "./k10/k10v2_replay_root.js";
 export { K10ReplayRoot, makeEvent, EventValidator } from "./k10/k10v2_replay_root.js";
+
+// v17 grafts
+export * as wheeler from './wheeler/wheeler_window';
+export * as shannon from './shannon/shannon_doctrine_code';
