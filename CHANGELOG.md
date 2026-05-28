@@ -12,6 +12,30 @@ See `/docs/releases/versioning-policy.md` for the full versioning policy.
 
 ---
 
+## feat/r4-runtime-r1-r2-r3-a15-k10 — Doctrine v6 Runtime Layer — 2026-05-08
+
+### Added
+
+**`packages/doctrine-runtime`** — New workspace package `@workspace/doctrine-runtime` (v0.3.1) implementing six interlocking Doctrine v6 runtime modules:
+
+- **R1 — Composition Runtime** (`src/composer/`): Doctrine v6 geometric-mean and min-Λ policy composition engine with deterministic lexicographic/priority-weighted interleave and cosignature preservation. Geometric mean computed via log-sum for numerical stability per Leijon et al., IEEE TDSC 2022 (doi:10.1109/TDSC.2022.3154491). Zero-dependency Prometheus text-format exporter with `szl_composition_overhead_microseconds` histogram (13 buckets, 1µs–10ms), composition counters, and lambda gauge.
+
+- **R2 — SCITT-Rekor Adapter** (`src/scitt/`): Constructs `COSE_Sign1` envelopes (RFC 9052, https://www.rfc-editor.org/rfc/rfc9052) with an embedded CBOR-lite encoder (RFC 8949, https://www.rfc-editor.org/rfc/rfc8949). Submits `hashedrekord` entries to the Rekor transparency log v1 API (https://www.sigstore.dev/docs/rekor/api/) per draft-ietf-scitt-architecture-07 (https://datatracker.ietf.org/doc/draft-ietf-scitt-architecture/). `DpiChainVerifier` validates Doctrine v6 §7.2 DPI invariants including Merkle inclusion proofs (RFC 6962 §2.1.3, https://www.rfc-editor.org/rfc/rfc6962). `MerkleDAGB7` is a branching-factor-7 SHA-256 Merkle DAG targeting ≤5µs p50 insert/lookup.
+
+- **R3 — Vertical Policy Gate** (`src/policy/`): `PolicyGate` evaluates `RequestContext` against registered `DoctrinePolicy` objects using Doctrine v6 §4.3 best-match algorithm. NATS-backed `PolicyEventBus` provides hot-reload with loop detection. React 18 admin UI (`policy_admin_ui.tsx`) is WCAG 2.1 AA compliant (https://www.w3.org/TR/WCAG21/).
+
+- **R4 — A15 Persistent Homology** (`src/a15/`): Incremental H₀ persistent homology via Edelsbrunner-Letscher-Zomorodian 2002 Union-Find on Vietoris-Rips filtration (doi:10.1007/s00454-002-2885-2). Enforces the A15 invariant (β₀ = 1, full policy-space connectivity). Prometheus exporter for `szl_a15_*` metrics.
+
+- **R5 — xoshiro256** PRNG** (`src/prng/`): Pure-TypeScript implementation of xoshiro256** per Blackman & Vigna 2021 (doi:10.1145/3460772). 256-bit state, period 2²⁵⁶−1, splitmix64 seeding, jump function for parallel streams.
+
+- **R6 — K10_v2 Replay Root** (`src/k10/`): Event-sourcing replay with Lamport clock ordering (Lamport 1978, doi:10.1145/359545.359563). Pure state reducer pattern; snapshot fast-forward; SHA-256 state digest.
+
+**`tests/integration/runtime_integration.test.ts`**: 5 cross-module integration tests (INT-01 through INT-05) covering the full R1→R2→R3→R4→R5→R6 pipeline.
+
+**`docs/r_papers/cs/SUMMARY.md`**: Research-paper implementation summary with full citation list.
+
+---
+
 ## Rehaul 9/9 — CI Cleanup, Scope Rationalization & Investor Readiness Closeout — 2026-04-27
 
 ### Fixed
