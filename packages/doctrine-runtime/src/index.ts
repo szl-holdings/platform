@@ -85,3 +85,9 @@ export { K10ReplayRoot, makeEvent, EventValidator } from "./k10/k10v2_replay_roo
 // v17 grafts
 export * as wheeler from './wheeler/wheeler_window';
 export * as shannon from './shannon/shannon_doctrine_code';
+
+// v17 QEC lineage (Hamming + Shor + CSS + Kitaev)
+export * as qec from './qec/qec_lineage';
+
+// v17 matched-filter correlator (Bell Labs / P300 / radio astronomy lineage)
+export * as correlator from './correlator/matched_filter';
