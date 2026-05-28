@@ -1,26 +1,34 @@
 cff-version: 1.2.0
-message: "If you use this software, the Lutar Invariant family, the Audit Closure Operator Λ₁₀, or the Ouroboros Thesis v10, please cite as below."
-title: "Ouroboros Thesis v10 — EXHAUSTIVE-AUDIT: The Audit Closure Operator Λ₁₀ over the Lutar Invariant Family (v1 → v7 + Ω)"
+message: "If you use this software, the Lutar Invariant family, or the Ouroboros Thesis v14, please cite as below."
+title: "SZL Holdings Platform — Λ-Invariant Stack (Ouroboros Thesis v14 implementation)"
 abstract: >-
-  v10 of the Ouroboros thesis chain introduces the Audit Closure Operator
-  Lambda_10, a machine-verifiable meta-invariant over the v1..v7+Omega Lutar
-  family established in v9. For each layer L_k, A_k = L_k * product over six
-  artefact-presence indicators (CODE, CODEX, API, TEST, THESIS, SURFACE);
-  Lambda_10 = sum_k A_k. Closure theorem: Lambda_10 / sum L_k = 1 iff every
-  artefact is present for every layer. Strictly inert in the all-operational
-  limit and quantifies operational drift exactly otherwise. Shipping artefacts:
-  lutarV10Audit (TypeScript), POST /api/ouroboros/lutar/v10, codex node
-  lutar_v10, an 8-test contract suite, A11oy /thesis row v10, and Sentra
-  /thesis mirror. v10 introduces no new physical L-term; it formalises the
-  v9 implementation contract.
+  Production TypeScript monorepo implementing the v14 Master Thesis "Λ-Invariant
+  Stack + Anatomy-Evolved-v1". Ships the 9-axis Lutar Invariant Λ₉ gate, ρ-closure
+  receipts with SHA-256 hash chain + BLAKE3 Merkle nodes, the Egyptian-inspectable
+  weight algebra, the ouroboros-invariant package (Λ₆–Λ₉ extended forms with G/I/M/B/N
+  axes for kernel compatibility), the ouroboros-guardrails rail layer, the alloy-runtime
+  HTTP gate, and a multi-tenant Drizzle schema. Receipt envelope schema is
+  zod-validated in ouroboros/runtime/types/src/receipt.ts; benchmark constants
+  (K01 build 11.5 µs p50, K04 gate 3.12 µs p50, K06 ρ = 100% on 8000/8000) are
+  recorded in v11 (10.5281/zenodo.20119582).
 type: software
 authors:
   - family-names: Lutar
     given-names: "Stephen P."
     name-suffix: "Jr."
+    email: stephen@szlholdings.com
     affiliation: SZL Holdings
     orcid: "https://orcid.org/0009-0001-0110-4173"
 identifiers:
+  - description: "Concept DOI — always resolves to the latest thesis version"
+    type: doi
+    value: "10.5281/zenodo.19944926"
+  - description: "Ouroboros Thesis v14 (current)"
+    type: doi
+    value: "10.5281/zenodo.20195368"
+  - description: "Ouroboros Thesis v11 — Applied Λ (benchmark source)"
+    type: doi
+    value: "10.5281/zenodo.20119582"
   - description: ORCID iD of the principal author
     type: other
     value: "https://orcid.org/0009-0001-0110-4173"
@@ -29,44 +37,43 @@ url: "https://github.com/szl-holdings/ouroboros-thesis"
 keywords:
   - ouroboros
   - lutar-invariant
-  - audit-closure-operator
-  - meta-invariant
-  - software-contract
-  - machine-verifiable
-  - holographic-principle
-  - twistor-theory
-  - bekenstein-bound
-  - conformal-cyclic-cosmology
-  - bianchi-identity
-  - fiber-bundle
-  - noether-closure
-  - prisca-sapientia
+  - lambda-9-gate
+  - rho-closure
+  - receipt-as-proof
+  - egyptian-fractions
+  - blake3-merkle-dag
+  - scitt
   - ai-governance
-  - decision-intelligence
-  - supreme-knowledge-codex
-license: CC-BY-4.0
-version: "10.0.0"
-date-released: "2026-05-05"
+  - typescript-monorepo
+license: Apache-2.0
+version: "14.0.0"
+date-released: "2026-05-28"
 preferred-citation:
   type: article
-  title: "Ouroboros Thesis v10 — EXHAUSTIVE-AUDIT: The Audit Closure Operator Λ₁₀"
+  title: "SZL Holdings v14 Master Thesis — Λ-Invariant Stack + Anatomy-Evolved-v1"
   authors:
     - family-names: Lutar
       given-names: "Stephen P."
       name-suffix: "Jr."
+      email: stephen@szlholdings.com
       affiliation: SZL Holdings
       orcid: "https://orcid.org/0009-0001-0110-4173"
   year: 2026
   month: 5
-  url: "https://github.com/szl-holdings/ouroboros-thesis"
+  publisher:
+    name: Zenodo
+  doi: "10.5281/zenodo.20195368"
+  url: "https://doi.org/10.5281/zenodo.19944926"
   abstract: >-
-    v10 turns the v9 implementation contract into a single computable scalar
-    Lambda_10 = sum_k L_k * prod_j 1[j_k]; auditClosed iff closure ratio = 1.
-    No new physical L-term; the operator is a meta-invariant on the existing
-    family and is strictly inert in the all-operational limit.
+    v14 of the Ouroboros thesis chain consolidates the v1–v13 Λ-invariant
+    development into a single 9-axis production gate (Λ₉) with formal Lean 4
+    proofs for the closed-form axes (cleanliness, ρ-closure composability,
+    deterministic replay) and statistical bounds for the learned axes. The
+    receipt envelope schema is the normative AxesSchema in
+    ouroboros/runtime/types/src/receipt.ts.
 references:
   - type: article
-    title: "Ouroboros Thesis v9 — UNIFIED-OPERATIONAL: The Lutar Invariant Family (v1 → v7 + Ω)"
+    title: "Ouroboros Thesis v13 — Anatomy as Architecture"
     authors:
       - family-names: Lutar
         given-names: "Stephen P."
@@ -75,13 +82,15 @@ references:
         orcid: "https://orcid.org/0009-0001-0110-4173"
     year: 2026
     month: 5
-    url: "https://github.com/szl-holdings/ouroboros-thesis"
+    doi: "10.5281/zenodo.19944926"
   - type: article
-    title: "Holomorphic Unified Field Theory: Curvature, Bianchi Identity, and a Path to Quantization"
+    title: "Ouroboros Thesis v11 — Applied Λ"
     authors:
-      - family-names: Moffat
-        given-names: J. W.
-      - family-names: Toth
-        given-names: V. T.
+      - family-names: Lutar
+        given-names: "Stephen P."
+        name-suffix: "Jr."
+        affiliation: SZL Holdings
+        orcid: "https://orcid.org/0009-0001-0110-4173"
     year: 2026
-    url: "https://arxiv.org/abs/2510.06282"
+    month: 5
+    doi: "10.5281/zenodo.20119582"
