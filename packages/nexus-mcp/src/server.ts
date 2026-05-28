@@ -950,11 +950,13 @@ export class PRAXISMcpServer {
       },
     );
 
+    // ZodRawShape annotation breaks deep inference at the call site (TS2589).
+    const renderAppSchema: ZodRawShape = { appId: z.string().describe('App ID from nexus_list_apps') };
     this._sdk.tool(
       'nexus_render_app',
       'Render a domain micro-dashboard App as inline HTML. The HTML is scoped to the authenticated tenant and generated from live platform data.',
-      { appId: z.string().describe('App ID from nexus_list_apps') },
-      async (args) => {
+      renderAppSchema,
+      async (args: { appId: string }) => {
         const result = await self.renderApp(args.appId);
         if (!result) {
           return { content: [{ type: 'text', text: JSON.stringify({ error: `App '${args.appId}' not found` }) }], isError: true };
