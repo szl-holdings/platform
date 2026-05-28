@@ -1,96 +1,32 @@
 cff-version: 1.2.0
-message: "If you use this software, the Lutar Invariant family, or the Ouroboros Thesis v14, please cite as below."
-title: "SZL Holdings Platform — Λ-Invariant Stack (Ouroboros Thesis v14 implementation)"
+message: "If you reference the SZL Holdings platform repository, please cite as follows. Note: this repository is proprietary; the citation metadata is provided for academic provenance only and does not grant any license."
+title: "SZL Holdings Platform — governed AI decision infrastructure (proprietary)"
 abstract: >-
-  Production TypeScript monorepo implementing the v14 Master Thesis "Λ-Invariant
-  Stack + Anatomy-Evolved-v1". Ships the 9-axis Lutar Invariant Λ₉ gate, ρ-closure
-  receipts with SHA-256 hash chain + BLAKE3 Merkle nodes, the Egyptian-inspectable
-  weight algebra, the ouroboros-invariant package (Λ₆–Λ₉ extended forms with G/I/M/B/N
-  axes for kernel compatibility), the ouroboros-guardrails rail layer, the alloy-runtime
-  HTTP gate, and a multi-tenant Drizzle schema. Receipt envelope schema is
-  zod-validated in ouroboros/runtime/types/src/receipt.ts; benchmark constants
-  (K01 build 11.5 µs p50, K04 gate 3.12 µs p50, K06 ρ = 100% on 8000/8000) are
-  recorded in v11 (10.5281/zenodo.20119582).
+  Monorepo for SZL Holdings' governed AI decision infrastructure, including
+  the ouroboros-guardrails receipt-chain runtime, the ouroboros-invariant
+  Lutar Invariant Λ implementation, and supporting policy/evidence
+  packages. This repository is proprietary (see LICENSE). The associated
+  thesis (Ouroboros Thesis v10 — EXHAUSTIVE-AUDIT) is published separately
+  at szl-holdings/ouroboros-thesis under CC-BY-4.0 and should be cited via
+  that repository's CITATION.cff if you are citing the thesis text.
 type: software
 authors:
   - family-names: Lutar
     given-names: "Stephen P."
     name-suffix: "Jr."
-    email: stephen@szlholdings.com
     affiliation: SZL Holdings
     orcid: "https://orcid.org/0009-0001-0110-4173"
 identifiers:
-  - description: "Concept DOI — always resolves to the latest thesis version"
-    type: doi
-    value: "10.5281/zenodo.19944926"
-  - description: "Ouroboros Thesis v14 (current)"
-    type: doi
-    value: "10.5281/zenodo.20195368"
-  - description: "Ouroboros Thesis v11 — Applied Λ (benchmark source)"
-    type: doi
-    value: "10.5281/zenodo.20119582"
   - description: ORCID iD of the principal author
     type: other
     value: "https://orcid.org/0009-0001-0110-4173"
-repository-code: "https://github.com/szl-holdings/szl-holdings-platform"
-url: "https://github.com/szl-holdings/ouroboros-thesis"
+repository-code: "https://github.com/szl-holdings/platform"
+url: "https://github.com/szl-holdings/platform"
 keywords:
+  - governed-decision
   - ouroboros
   - lutar-invariant
-  - lambda-9-gate
-  - rho-closure
-  - receipt-as-proof
-  - egyptian-fractions
-  - blake3-merkle-dag
-  - scitt
-  - ai-governance
-  - typescript-monorepo
-license: Apache-2.0
-version: "14.0.0"
+  - receipt-chain
+  - proprietary
+license: LicenseRef-SZL-Proprietary
 date-released: "2026-05-28"
-preferred-citation:
-  type: article
-  title: "SZL Holdings v14 Master Thesis — Λ-Invariant Stack + Anatomy-Evolved-v1"
-  authors:
-    - family-names: Lutar
-      given-names: "Stephen P."
-      name-suffix: "Jr."
-      email: stephen@szlholdings.com
-      affiliation: SZL Holdings
-      orcid: "https://orcid.org/0009-0001-0110-4173"
-  year: 2026
-  month: 5
-  publisher:
-    name: Zenodo
-  doi: "10.5281/zenodo.20195368"
-  url: "https://doi.org/10.5281/zenodo.19944926"
-  abstract: >-
-    v14 of the Ouroboros thesis chain consolidates the v1–v13 Λ-invariant
-    development into a single 9-axis production gate (Λ₉) with formal Lean 4
-    proofs for the closed-form axes (cleanliness, ρ-closure composability,
-    deterministic replay) and statistical bounds for the learned axes. The
-    receipt envelope schema is the normative AxesSchema in
-    ouroboros/runtime/types/src/receipt.ts.
-references:
-  - type: article
-    title: "Ouroboros Thesis v13 — Anatomy as Architecture"
-    authors:
-      - family-names: Lutar
-        given-names: "Stephen P."
-        name-suffix: "Jr."
-        affiliation: SZL Holdings
-        orcid: "https://orcid.org/0009-0001-0110-4173"
-    year: 2026
-    month: 5
-    doi: "10.5281/zenodo.19944926"
-  - type: article
-    title: "Ouroboros Thesis v11 — Applied Λ"
-    authors:
-      - family-names: Lutar
-        given-names: "Stephen P."
-        name-suffix: "Jr."
-        affiliation: SZL Holdings
-        orcid: "https://orcid.org/0009-0001-0110-4173"
-    year: 2026
-    month: 5
-    doi: "10.5281/zenodo.20119582"
