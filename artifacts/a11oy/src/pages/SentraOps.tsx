@@ -29,14 +29,26 @@ interface SentraJob {
   id: string;
   name: string;
   schedule: string;
+  /** Interval between runs in ms, or 'daily-utc' for jobs that fire at 00:00 UTC. */
+  interval_ms: number | 'daily-utc';
   description: string;
   steps: string[];
   target_scope: string;
-  last_run: string;
-  next_run: string;
-  status: 'scheduled' | 'running' | 'completed' | 'failed' | 'dry_run_only';
   outputs: string[];
   doctrine: string[];
+}
+
+interface SentraJobRun {
+  id: string;
+  job_id: string;
+  started_at: string;
+  finished_at: string;
+  duration_ms: number;
+  status: 'completed' | 'failed' | 'partial';
+  output_summary: string;
+  records_examined: number;
+  records_affected: number;
+  triggered_by: 'scheduler' | 'operator' | 'seed';
 }
 
 const AGENTS: SentraAgent[] = [
@@ -152,6 +164,7 @@ const JOBS: SentraJob[] = [
     id: 'job-audit-verify',
     name: 'Audit Chain Verification',
     schedule: 'Every 5 minutes',
+    interval_ms: 5 * 60_000,
     description: 'Continuously verifies the tamper-evident audit trail hash chain from genesis to latest entry. Alerts on any integrity violation.',
     steps: [
       '1. Fetch all audit entries ordered by sequence',
@@ -160,9 +173,6 @@ const JOBS: SentraJob[] = [
       '4. Alert CISO + Audit Verifier Agent if chain_valid = false',
     ],
     target_scope: 'Audit Trail (in-app)',
-    last_run: new Date(Date.now() - 300000).toISOString(),
-    next_run: new Date(Date.now() + 5000).toISOString(),
-    status: 'scheduled',
     outputs: ['audit_verification_report', 'chain_integrity_alert (if violation)'],
     doctrine: ['NIST SP 800-92', 'SOC 2 Type II', 'ISO 27001 A.12.4'],
   },
@@ -170,6 +180,7 @@ const JOBS: SentraJob[] = [
     id: 'job-evidence-digest',
     name: 'Evidence Pack Digest',
     schedule: 'Every 4 hours',
+    interval_ms: 4 * 3600_000,
     description: 'Generates evidence pack for all incidents with new evidence since last run. Verifies Merkle root integrity of existing packs.',
     steps: [
       '1. Query incidents with evidence_ids added since last run',
@@ -178,9 +189,6 @@ const JOBS: SentraJob[] = [
       '4. Report: new_packs_created, existing_packs_verified, integrity_failures',
     ],
     target_scope: 'Evidence Vault (owned tenant only)',
-    last_run: new Date(Date.now() - 14400000).toISOString(),
-    next_run: new Date(Date.now() + 480000).toISOString(),
-    status: 'scheduled',
     outputs: ['evidence_pack_digest_report', 'integrity_alert (if verification fails)'],
     doctrine: ['NIST SP 800-61r2 §3.4', 'FBI IC3 §2', 'CISA CIRCIA §7'],
   },
@@ -188,6 +196,7 @@ const JOBS: SentraJob[] = [
     id: 'job-approval-sweep',
     name: 'Approval Expiry Sweep',
     schedule: 'Every 15 minutes',
+    interval_ms: 15 * 60_000,
     description: 'Scans all pending approvals and marks expired ones. Notifies requesting analysts of expired approvals. Calculates approval queue metrics.',
     steps: [
       '1. Query all approvals with status = pending',
@@ -196,9 +205,6 @@ const JOBS: SentraJob[] = [
       '4. Calculate queue metrics: pending_count, oldest_age_minutes, expiry_rate',
     ],
     target_scope: 'Approval Queue (in-app)',
-    last_run: new Date(Date.now() - 900000).toISOString(),
-    next_run: new Date(Date.now() + 120000).toISOString(),
-    status: 'scheduled',
     outputs: ['approval_queue_metrics', 'expiry_notifications'],
     doctrine: ['NIST SP 800-61r2 §3.3', 'MITRE D3FEND D3-HITL'],
   },
@@ -206,6 +212,7 @@ const JOBS: SentraJob[] = [
     id: 'job-policy-sweep',
     name: 'Policy Denial Pattern Analysis',
     schedule: 'Hourly',
+    interval_ms: 60 * 60_000,
     description: 'Analyzes policy denial logs for unusual patterns that may indicate policy bypass attempts. Reports denial rates by action class and integration.',
     steps: [
       '1. Fetch all policy decisions from the last hour',
@@ -214,9 +221,6 @@ const JOBS: SentraJob[] = [
       '4. Generate hourly policy summary report',
     ],
     target_scope: 'Policy Enforcement Log (in-app)',
-    last_run: new Date(Date.now() - 3600000).toISOString(),
-    next_run: new Date(Date.now() + 600000).toISOString(),
-    status: 'scheduled',
     outputs: ['hourly_policy_summary', 'bypass_attempt_alert (if triggered)'],
     doctrine: ['NIST CSF 2.0 GV.PO', 'NIST SP 800-53 SI-3', 'NSA Zero Trust Tenets'],
   },
@@ -224,6 +228,7 @@ const JOBS: SentraJob[] = [
     id: 'job-asset-refresh',
     name: 'Asset Registry Staleness Check',
     schedule: 'Daily at 00:00 UTC',
+    interval_ms: 'daily-utc',
     description: 'Identifies assets not updated in 90+ days and assets with missing authorization references. Flags unverified assets for review.',
     steps: [
       '1. Query assets with updated_at < now() - 90 days',
@@ -232,9 +237,6 @@ const JOBS: SentraJob[] = [
       '4. Generate asset staleness report — route to asset owners for verification',
     ],
     target_scope: 'Asset Registry (tenant-001)',
-    last_run: new Date(Date.now() - 86400000).toISOString(),
-    next_run: new Date(Date.now() + 72000000).toISOString(),
-    status: 'scheduled',
     outputs: ['asset_staleness_report', 'owner_notifications'],
     doctrine: ['NIST CSF 2.0 ID.AM', 'CIS Control 1', 'CISA KEV Asset Tracking'],
   },
@@ -242,6 +244,7 @@ const JOBS: SentraJob[] = [
     id: 'job-session-digest',
     name: 'Session Digest Snapshot',
     schedule: 'Every 30 minutes',
+    interval_ms: 30 * 60_000,
     description: 'Captures a snapshot of session activity (approvals, evidence, reports, denials) and writes to the session digest feed. Ensures no action goes unlogged.',
     steps: [
       '1. Snapshot session_digest from in-app store',
@@ -250,13 +253,37 @@ const JOBS: SentraJob[] = [
       '4. Route to Audit Verifier Agent for chain append',
     ],
     target_scope: 'Session Digest (in-app)',
-    last_run: new Date(Date.now() - 1800000).toISOString(),
-    next_run: new Date(Date.now() + 600000).toISOString(),
-    status: 'scheduled',
     outputs: ['session_digest_snapshot'],
     doctrine: ['NIST SP 800-92', 'SOC 2 Type II Activity Log'],
   },
 ];
+
+function computeNextRun(job: SentraJob, lastRunIso: string | null): Date {
+  if (job.interval_ms === 'daily-utc') {
+    const next = new Date();
+    next.setUTCHours(24, 0, 0, 0);
+    return next;
+  }
+  const base = lastRunIso ? new Date(lastRunIso).getTime() : Date.now();
+  let next = base + job.interval_ms;
+  // If the computed next_run is already in the past (because the scheduler
+  // hasn't run while Sentra was closed), roll forward to the next future tick.
+  const now = Date.now();
+  while (next <= now) next += job.interval_ms;
+  return new Date(next);
+}
+
+function formatRelative(iso: string): string {
+  const diffMs = Date.now() - new Date(iso).getTime();
+  const absMin = Math.abs(diffMs) / 60_000;
+  const past = diffMs >= 0;
+  let label: string;
+  if (absMin < 1) label = `${Math.round(Math.abs(diffMs) / 1000)}s`;
+  else if (absMin < 60) label = `${Math.round(absMin)}m`;
+  else if (absMin < 1440) label = `${Math.round(absMin / 60)}h`;
+  else label = `${Math.round(absMin / 1440)}d`;
+  return past ? `${label} ago` : `in ${label}`;
+}
 
 type View = 'agents' | 'jobs' | 'doctrine';
 
@@ -274,6 +301,7 @@ interface SentraOpsStatus {
   totalAssets: number;
   ownedAssets: number;
   agents?: Record<string, AgentTelemetry>;
+  recentJobRuns?: SentraJobRun[];
   lastUpdated: string;
 }
 
@@ -537,19 +565,42 @@ export function SentraOps() {
               {dryRunResult}
             </div>
           )}
+          {!sentraStatus?.recentJobRuns && (
+            <div className="rounded-lg border px-4 py-3 text-[10px] font-mono text-slate-600" style={{ borderColor: 'rgba(255,255,255,0.06)' }}>
+              No job run history available yet — open Sentra to initialize the store, then return here for live history.
+            </div>
+          )}
           {JOBS.map(job => {
-            const statusColor: Record<string, string> = { scheduled: T.accent, running: T.blue, completed: T.green, failed: T.red, dry_run_only: T.dim };
+            const runs: SentraJobRun[] = (sentraStatus?.recentJobRuns ?? [])
+              .filter(r => r.job_id === job.id)
+              .sort((a, b) => b.started_at.localeCompare(a.started_at));
+            const lastRun = runs[0] ?? null;
+            const nextRunDate = computeNextRun(job, lastRun?.started_at ?? null);
+            const liveStatus: 'completed' | 'failed' | 'partial' | 'scheduled' = lastRun ? lastRun.status : 'scheduled';
+            const statusColor: Record<string, string> = {
+              scheduled: T.accent,
+              completed: T.green,
+              partial: T.amber,
+              failed: T.red,
+            };
             return (
               <div key={job.id} className="rounded-lg border p-4" style={{ background: T.surface, borderColor: T.border }}>
                 <div className="flex items-start justify-between gap-3">
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2 mb-1">
                       <span className="text-sm font-medium text-slate-200">{job.name}</span>
-                      <span className="text-[9px] font-mono px-1.5 py-0.5 rounded border" style={{ color: statusColor[job.status], borderColor: `${statusColor[job.status]}30` }}>
-                        {job.status.toUpperCase().replace('_', ' ')}
+                      <span className="text-[9px] font-mono px-1.5 py-0.5 rounded border" style={{ color: statusColor[liveStatus], borderColor: `${statusColor[liveStatus]}30` }}>
+                        {liveStatus.toUpperCase()}
                       </span>
+                      {lastRun && (
+                        <span className="text-[9px] font-mono" style={{ color: T.green }}>● LIVE</span>
+                      )}
                     </div>
-                    <div className="text-[10px] text-slate-500 font-mono mb-2">Schedule: {job.schedule} · Next: {new Date(job.next_run).toLocaleTimeString()}</div>
+                    <div className="text-[10px] text-slate-500 font-mono mb-2">
+                      Schedule: {job.schedule} ·{' '}
+                      Last run: {lastRun ? `${new Date(lastRun.started_at).toLocaleTimeString()} (${formatRelative(lastRun.started_at)})` : '—'} ·{' '}
+                      Next: {nextRunDate.toLocaleTimeString()} ({formatRelative(nextRunDate.toISOString())})
+                    </div>
                     <div className="text-[11px] text-slate-400 mb-3">{job.description}</div>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                       <div>
@@ -577,6 +628,25 @@ export function SentraOps() {
                         </div>
                       </div>
                     </div>
+                    {runs.length > 0 && (
+                      <div className="mt-3 border-t pt-3" style={{ borderColor: T.border }}>
+                        <div className="text-[10px] font-mono uppercase text-slate-600 mb-1.5">
+                          Recent runs ({runs.length})
+                        </div>
+                        <div className="space-y-1">
+                          {runs.slice(0, 5).map(r => (
+                            <div key={r.id} className="flex items-start gap-2 text-[10px] font-mono">
+                              <span className="px-1 py-0.5 rounded" style={{ color: statusColor[r.status], background: `${statusColor[r.status]}10`, border: `1px solid ${statusColor[r.status]}30` }}>
+                                {r.status.toUpperCase()}
+                              </span>
+                              <span className="text-slate-600 flex-shrink-0">{formatRelative(r.started_at)}</span>
+                              <span className="text-slate-600 flex-shrink-0">· {r.duration_ms}ms</span>
+                              <span className="text-slate-400 truncate" title={r.output_summary}>{r.output_summary}</span>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    )}
                   </div>
                   <button onClick={() => handleDryRun(job.id)} disabled={dryRunJob === job.id}
                     className="flex items-center gap-1.5 px-3 py-1.5 rounded text-[9px] font-mono border transition-all flex-shrink-0 disabled:opacity-50"

@@ -410,6 +410,40 @@ export interface SessionDigestEntry {
   actor: string;
 }
 
+export type JobId =
+  | 'job-audit-verify'
+  | 'job-evidence-digest'
+  | 'job-approval-sweep'
+  | 'job-policy-sweep'
+  | 'job-asset-refresh'
+  | 'job-session-digest';
+
+export type JobRunStatus = 'completed' | 'failed' | 'partial';
+
+export interface JobRun {
+  id: string;
+  job_id: JobId | string;
+  started_at: string;
+  finished_at: string;
+  duration_ms: number;
+  status: JobRunStatus;
+  output_summary: string;
+  records_examined: number;
+  records_affected: number;
+  triggered_by: 'scheduler' | 'operator' | 'seed';
+}
+
+// Map each scheduled job to an interval in ms. `null` = computed against
+// next midnight UTC (e.g. "Daily at 00:00 UTC").
+export const JOB_INTERVALS_MS: Record<JobId, number | 'daily-utc'> = {
+  'job-audit-verify': 5 * 60_000,
+  'job-evidence-digest': 4 * 3600_000,
+  'job-approval-sweep': 15 * 60_000,
+  'job-policy-sweep': 60 * 60_000,
+  'job-asset-refresh': 'daily-utc',
+  'job-session-digest': 30 * 60_000,
+};
+
 // ─── Store ──────────────────────────────────────────────────────────────────
 
 type Listener = () => void;
@@ -427,6 +461,7 @@ class SentraStore {
   auditEntries: AuditEntry[] = [];
   playbooks: Playbook[] = [];
   sessionDigest: SessionDigestEntry[] = [];
+  jobRuns: JobRun[] = [];
 
   private idCounters: Record<string, number> = {};
 
@@ -469,6 +504,7 @@ class SentraStore {
         auditEntries: this.auditEntries,
         playbooks: this.playbooks,
         sessionDigest: this.sessionDigest,
+        jobRuns: this.jobRuns,
         idCounters: this.idCounters,
       };
       localStorage.setItem(SentraStore.PERSIST_KEY, JSON.stringify(snapshot));
@@ -494,6 +530,7 @@ class SentraStore {
       this.auditEntries = snap.auditEntries ?? [];
       this.playbooks = snap.playbooks ?? [];
       this.sessionDigest = snap.sessionDigest ?? [];
+      this.jobRuns = snap.jobRuns ?? [];
       this.idCounters = snap.idCounters ?? {};
       return true;
     } catch {
@@ -589,6 +626,11 @@ class SentraStore {
         },
       };
 
+      // Bridge recent job runs so the A11oy SentraOps "Jobs" tab can render
+      // live run history + computed next_run timestamps without importing
+      // sentra internals. Cap at the last 60 runs across all jobs.
+      const recentJobRuns = this.jobRuns.slice(-60);
+
       const payload = {
         activeIncidents,
         pendingApprovals,
@@ -598,6 +640,7 @@ class SentraStore {
         totalAssets: this.assets.length,
         ownedAssets: this.assets.filter(a => ['owned', 'authorized', 'contracted_scope', 'lab'].includes(a.ownership_status)).length,
         agents,
+        recentJobRuns,
         lastUpdated: new Date().toISOString(),
       };
       localStorage.setItem('sentra:ops-status', JSON.stringify(payload));
@@ -1053,6 +1096,142 @@ class SentraStore {
     this.playbooks.push(playbook);
     this.notify();
     return playbook;
+  }
+
+  // ── Job Runs ─────────────────────────────────────────────────────────────
+  // Each scheduled job records a JobRun every time it executes. A11oy reads
+  // recent runs from the cross-app status bridge so the SentraOps "Jobs" tab
+  // can render real history (last_run + computed next_run) instead of static
+  // placeholders. Dry runs are intentionally *not* recorded here.
+
+  recordJobRun(run: Omit<JobRun, 'id'>): JobRun {
+    const entry: JobRun = { ...run, id: this.nextId('JR') };
+    this.jobRuns.push(entry);
+    // Cap retained history — keep the most recent 200 runs total.
+    if (this.jobRuns.length > 200) {
+      this.jobRuns = this.jobRuns.slice(-200);
+    }
+    this.notify();
+    return entry;
+  }
+
+  recentJobRuns(jobId?: string, limit = 25): JobRun[] {
+    const filtered = jobId ? this.jobRuns.filter(r => r.job_id === jobId) : this.jobRuns;
+    return filtered.slice(-limit).reverse();
+  }
+
+  /**
+   * Execute a scheduled job for real and record a JobRun. The job
+   * implementations operate purely on existing store state, so they are safe
+   * to call from a scheduler tick or from an operator "Run now" trigger.
+   */
+  runJob(jobId: JobId, triggeredBy: JobRun['triggered_by'] = 'scheduler'): JobRun {
+    const startedAt = new Date();
+    let status: JobRunStatus = 'completed';
+    let output_summary = '';
+    let records_examined = 0;
+    let records_affected = 0;
+
+    try {
+      switch (jobId) {
+        case 'job-audit-verify': {
+          const result = this.verifyAuditChain();
+          records_examined = result.checkedEntries;
+          if (!result.valid) {
+            status = 'failed';
+            output_summary = `Chain integrity violation at ${result.firstInvalidId ?? 'unknown'} after ${result.checkedEntries} entries.`;
+          } else {
+            output_summary = `Audit chain verified — ${result.checkedEntries} entries, hash chain intact.`;
+          }
+          break;
+        }
+        case 'job-evidence-digest': {
+          const incidentsWithEvidence = Array.from(
+            new Set(this.evidence.map(e => e.incident_id))
+          );
+          records_examined = this.evidence.length;
+          let verified = 0;
+          let failed = 0;
+          for (const pack of this.evidencePacks) {
+            const check = this.verifyEvidencePack(pack.id);
+            if (check.valid) verified++;
+            else failed++;
+          }
+          records_affected = verified;
+          if (failed > 0) status = 'partial';
+          output_summary = `${incidentsWithEvidence.length} incidents scanned · ${this.evidencePacks.length} existing packs (${verified} verified${failed > 0 ? `, ${failed} failed` : ''}).`;
+          break;
+        }
+        case 'job-approval-sweep': {
+          const now = Date.now();
+          const pending = this.approvals.filter(a => a.status === 'pending');
+          records_examined = pending.length;
+          let expired = 0;
+          for (const a of pending) {
+            if (new Date(a.expires_at).getTime() < now) {
+              a.status = 'expired';
+              expired++;
+            }
+          }
+          records_affected = expired;
+          const oldestAgeMin = pending.length === 0
+            ? 0
+            : Math.round((now - Math.min(...pending.map(a => new Date(a.requested_at).getTime()))) / 60_000);
+          output_summary = `${pending.length} pending approvals · ${expired} expired · oldest ${oldestAgeMin}m.`;
+          break;
+        }
+        case 'job-policy-sweep': {
+          const hourAgo = Date.now() - 3600_000;
+          const recent = this.policyLogs.filter(p => new Date(p.timestamp).getTime() >= hourAgo);
+          records_examined = recent.length;
+          const denials = recent.filter(p => p.policy_result === 'deny');
+          records_affected = denials.length;
+          const rate = recent.length === 0 ? 0 : Math.round((denials.length / recent.length) * 100);
+          if (rate > 30) status = 'partial';
+          output_summary = `${recent.length} policy decisions in last hour · ${denials.length} denials (${rate}% denial rate).`;
+          break;
+        }
+        case 'job-asset-refresh': {
+          const ninetyDaysAgo = Date.now() - 90 * 86400_000;
+          const stale = this.assets.filter(a => new Date(a.updated_at).getTime() < ninetyDaysAgo);
+          const unverified = this.assets.filter(a => a.ownership_status === 'unknown' || a.ownership_status === 'unverified');
+          const missingAuth = this.assets.filter(a => !a.authorization_reference);
+          records_examined = this.assets.length;
+          records_affected = stale.length + unverified.length + missingAuth.length;
+          output_summary = `${this.assets.length} assets scanned · ${stale.length} stale · ${unverified.length} unverified · ${missingAuth.length} missing authorization.`;
+          break;
+        }
+        case 'job-session-digest': {
+          records_examined = this.sessionDigest.length;
+          const since = Date.now() - 30 * 60_000;
+          const recent = this.sessionDigest.filter(s => new Date(s.timestamp).getTime() >= since);
+          records_affected = recent.length;
+          this.addSessionDigest('approval', `Session digest snapshot — ${recent.length} new entries in last 30m`, 'Session Digest Job');
+          output_summary = `Snapshot captured · ${recent.length} entries in last 30m · ${this.sessionDigest.length} total in feed.`;
+          break;
+        }
+        default: {
+          status = 'failed';
+          output_summary = `Unknown job id: ${jobId}`;
+        }
+      }
+    } catch (err) {
+      status = 'failed';
+      output_summary = `Job execution error: ${(err as Error).message ?? 'unknown'}`;
+    }
+
+    const finishedAt = new Date();
+    return this.recordJobRun({
+      job_id: jobId,
+      started_at: startedAt.toISOString(),
+      finished_at: finishedAt.toISOString(),
+      duration_ms: finishedAt.getTime() - startedAt.getTime(),
+      status,
+      output_summary,
+      records_examined,
+      records_affected,
+      triggered_by: triggeredBy,
+    });
   }
 
   // ── Session Digest ──────────────────────────────────────────────────────
@@ -1613,6 +1792,149 @@ function seedStore() {
   });
 }
 
+// Seed historical job runs so the A11oy "Jobs" tab can render real history
+// immediately on first load — even before the scheduler has had time to tick.
+function seedJobRuns() {
+  const now = Date.now();
+  const minsAgo = (m: number) => new Date(now - m * 60_000).toISOString();
+  const hoursAgo = (h: number) => new Date(now - h * 3600_000).toISOString();
+  const daysAgo = (d: number) => new Date(now - d * 86400_000).toISOString();
+
+  type SeedEntry = {
+    job_id: JobId;
+    started_at: string;
+    duration_ms: number;
+    status: JobRunStatus;
+    output_summary: string;
+    records_examined: number;
+    records_affected: number;
+  };
+
+  const seeds: SeedEntry[] = [
+    // job-audit-verify — every 5 min, several recent ticks
+    ...[5, 10, 15, 20, 25, 30, 35, 40, 45, 50, 55, 60].map(m => ({
+      job_id: 'job-audit-verify' as JobId,
+      started_at: minsAgo(m),
+      duration_ms: 120 + Math.floor(Math.random() * 80),
+      status: 'completed' as JobRunStatus,
+      output_summary: `Audit chain verified — ${sentraStore.auditEntries.length} entries, hash chain intact.`,
+      records_examined: sentraStore.auditEntries.length,
+      records_affected: 0,
+    })),
+    // job-evidence-digest — every 4 hours
+    {
+      job_id: 'job-evidence-digest',
+      started_at: hoursAgo(4),
+      duration_ms: 1840,
+      status: 'completed',
+      output_summary: `${new Set(sentraStore.evidence.map(e => e.incident_id)).size} incidents scanned · ${sentraStore.evidencePacks.length} existing packs (${sentraStore.evidencePacks.length} verified).`,
+      records_examined: sentraStore.evidence.length,
+      records_affected: sentraStore.evidencePacks.length,
+    },
+    {
+      job_id: 'job-evidence-digest',
+      started_at: hoursAgo(8),
+      duration_ms: 1620,
+      status: 'completed',
+      output_summary: `Merkle roots verified for all existing packs.`,
+      records_examined: sentraStore.evidence.length,
+      records_affected: sentraStore.evidencePacks.length,
+    },
+    // job-approval-sweep — every 15 min
+    ...[15, 30, 45, 60, 75, 90].map(m => ({
+      job_id: 'job-approval-sweep' as JobId,
+      started_at: minsAgo(m),
+      duration_ms: 80 + Math.floor(Math.random() * 60),
+      status: 'completed' as JobRunStatus,
+      output_summary: `${sentraStore.approvals.filter(a => a.status === 'pending').length} pending approvals · 0 expired.`,
+      records_examined: sentraStore.approvals.filter(a => a.status === 'pending').length,
+      records_affected: 0,
+    })),
+    // job-policy-sweep — hourly
+    ...[1, 2, 3, 4].map(h => ({
+      job_id: 'job-policy-sweep' as JobId,
+      started_at: hoursAgo(h),
+      duration_ms: 240,
+      status: 'completed' as JobRunStatus,
+      output_summary: `${Math.max(1, Math.floor(sentraStore.policyLogs.length / 6))} policy decisions in last hour · ${sentraStore.policyLogs.filter(p => p.policy_result === 'deny').length} denials cumulative.`,
+      records_examined: Math.max(1, Math.floor(sentraStore.policyLogs.length / 6)),
+      records_affected: 0,
+    })),
+    // job-asset-refresh — daily at 00:00 UTC
+    {
+      job_id: 'job-asset-refresh',
+      started_at: daysAgo(1),
+      duration_ms: 4720,
+      status: 'completed',
+      output_summary: `${sentraStore.assets.length} assets scanned · 0 stale · 0 unverified · 0 missing authorization.`,
+      records_examined: sentraStore.assets.length,
+      records_affected: 0,
+    },
+    // job-session-digest — every 30 min
+    ...[30, 60, 90, 120].map(m => ({
+      job_id: 'job-session-digest' as JobId,
+      started_at: minsAgo(m),
+      duration_ms: 150,
+      status: 'completed' as JobRunStatus,
+      output_summary: `Snapshot captured · ${sentraStore.sessionDigest.length} entries total in feed.`,
+      records_examined: sentraStore.sessionDigest.length,
+      records_affected: 0,
+    })),
+  ];
+
+  // Sort chronologically so .slice(-n) returns the most recent runs.
+  seeds.sort((a, b) => a.started_at.localeCompare(b.started_at));
+  for (const seed of seeds) {
+    sentraStore.jobRuns.push({
+      id: sentraStore.nextId('JR'),
+      job_id: seed.job_id,
+      started_at: seed.started_at,
+      finished_at: new Date(new Date(seed.started_at).getTime() + seed.duration_ms).toISOString(),
+      duration_ms: seed.duration_ms,
+      status: seed.status,
+      output_summary: seed.output_summary,
+      records_examined: seed.records_examined,
+      records_affected: seed.records_affected,
+      triggered_by: 'seed',
+    });
+  }
+}
+
+// Lightweight in-process scheduler. Runs each job at its declared cadence
+// while Sentra is loaded in the browser. Skipped under SSR / Node.
+let schedulerStarted = false;
+function startJobScheduler() {
+  if (schedulerStarted) return;
+  if (typeof window === 'undefined') return;
+  schedulerStarted = true;
+
+  const tick = (jobId: JobId) => {
+    try {
+      sentraStore.runJob(jobId, 'scheduler');
+    } catch (err) {
+      // runJob already captures operational failures into a JobRun record;
+      // anything thrown here is an unexpected scheduler defect — log once.
+      // eslint-disable-next-line no-console
+      console.error(`[sentra] scheduler tick failed for ${jobId}:`, err);
+    }
+  };
+
+  for (const [jobId, interval] of Object.entries(JOB_INTERVALS_MS) as Array<[JobId, number | 'daily-utc']>) {
+    if (interval === 'daily-utc') {
+      // Schedule next midnight UTC, then every 24h thereafter.
+      const next = new Date();
+      next.setUTCHours(24, 0, 0, 0);
+      const delay = next.getTime() - Date.now();
+      window.setTimeout(() => {
+        tick(jobId);
+        window.setInterval(() => tick(jobId), 86400_000);
+      }, delay);
+    } else {
+      window.setInterval(() => tick(jobId), interval);
+    }
+  }
+}
+
 // Only seed once per module load. Hydrate from persisted snapshot if present;
 // otherwise inject seed data and persist it as the new baseline.
 let seeded = false;
@@ -1623,11 +1945,14 @@ export function ensureSeeded() {
     // Refresh the cross-app status bridge immediately on hydrate so A11oy
     // sees current telemetry on first render, even before any new mutation.
     sentraStore.notify();
+    startJobScheduler();
     return;
   }
   seedStore();
+  seedJobRuns();
   sentraStore.persist();
   sentraStore.notify();
+  startJobScheduler();
 }
 
 // Auto-seed on module import so data is present before first render
