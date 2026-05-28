@@ -33,8 +33,8 @@ import {
   lutarOmega,
   adaptiveWeights,
   // Mathematical primitives
-  bekensteinBound,
-  bekensteinCheck,
+  dpiBound, // F1-4 errata: renamed from bekensteinBound
+  dpiCheck, // F1-4 errata: renamed from bekensteinCheck
   noetherClosureCheck,
   twistorProject,
   aeonRecurrence,
@@ -256,9 +256,9 @@ describe("44 Sovereign Innovations — formula+codex binding", () => {
     // For a 1 m² horizon, bound is ~10^69 nats. Any "confident" cascade
     // assertion must carry info < bound.
     const area = 1.0; // m²
-    const bound = bekensteinBound(area);
+    const bound = dpiBound(area); // F1-4 errata: dpiBound replaces bekensteinBound
     expect(bound).toBeGreaterThan(1e60);
-    const result = bekensteinCheck(1e20, area);
+    const result = dpiCheck(1e20, area); // F1-4 errata: dpiCheck replaces bekensteinCheck
     expect(result.ok).toBe(true); // 1e20 nats << bound
   });
 
