@@ -108,7 +108,8 @@ export {
   e8TrialitySlot,
   priscaGraphRetrieve,
   voteRAG,
-  bekensteinGate,
+  dpiGate,           // F1-4 errata: renamed from bekensteinGate
+  bekensteinGate,    // @deprecated: use dpiGate
   OuroborosConformalMemory,
   KabbalahTieredMemory,
   totPriority,
@@ -272,8 +273,10 @@ export {
   adaptiveWeights,
   evaluateAll,
   twistorProject,
-  bekensteinBound,
-  bekensteinCheck,
+  dpiBound,           // F1-4 errata: renamed from bekensteinBound
+  dpiCheck,           // F1-4 errata: renamed from bekensteinCheck
+  bekensteinBound,   // @deprecated: use dpiBound
+  bekensteinCheck,   // @deprecated: use dpiCheck
   conformalRescale,
   aeonRecurrence,
   rhindCircleArea,

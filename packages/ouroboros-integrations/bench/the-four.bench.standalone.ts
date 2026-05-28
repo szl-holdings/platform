@@ -146,7 +146,8 @@ function benchReceipt(N: number, seed = 1): { build: Stats; verify: Stats; chain
   };
 }
 
-function benchBekenstein(N: number, seed = 2): {
+// F1-4 errata: renamed from benchBekenstein. Mirrors Lutar.DPI.dpiAdmit.
+function benchDpiBound(N: number, seed = 2): {
   stats: Stats;
   fireRate: number;
   meanBoundNats: number;
@@ -298,7 +299,7 @@ function main(): void {
   console.log("─".repeat(72));
 
   benchReceipt(200, 99);
-  benchBekenstein(200, 99);
+  benchDpiBound(200, 99);
   benchLambda9(200, 99);
   benchDualWitness(200, 0.7, 0.92, 0.45, 0.4, 0.65, 99);
 
@@ -308,8 +309,8 @@ function main(): void {
   console.log(`       verify:  p50=${I.verify.p50_us.toFixed(1)}µs  p99=${I.verify.p99_us.toFixed(1)}µs  thr=${I.verify.throughput_per_sec.toFixed(0)}/s`);
   console.log(`       chain:   p50=${I.chain.p50_us.toFixed(1)}µs  p99=${I.chain.p99_us.toFixed(1)}µs  (over N=${N} receipts)`);
 
-  console.log("\n[II] Bekenstein bound");
-  const II = benchBekenstein(N, 2);
+  console.log("\n[II] DPI receipt-chain entropy bound (F1-4 errata: renamed from Bekenstein)");
+  const II = benchDpiBound(N, 2);
   console.log(`       p50=${II.stats.p50_us.toFixed(3)}µs  p99=${II.stats.p99_us.toFixed(3)}µs`);
   console.log(`       fire rate: ${(II.fireRate * 100).toFixed(1)}%`);
   console.log(`       mean bound: ${II.meanBoundNats.toExponential(2)} nats`);

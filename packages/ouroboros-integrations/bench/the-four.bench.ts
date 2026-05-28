@@ -177,9 +177,11 @@ function benchReceipt(N: number, seed = 1): { build: Stats; verify: Stats; chain
 }
 
 // ───────────────────────────────────────────────────────────────────────────
-// Mechanism II — Bekenstein bound check.
+// Mechanism II — DPI receipt-chain entropy bound check.
+// F1-4 errata: renamed from benchBekenstein. Deprecated alias kept below.
+// Mirrors Lean theorem: Lutar.DPI.dpiAdmit (Lutar/DPI/DPIBound.lean).
 // ───────────────────────────────────────────────────────────────────────────
-function benchBekenstein(N: number, seed = 2): {
+function benchDpiBound(N: number, seed = 2): {
   stats: Stats;
   fireRate: number;
   meanBoundNats: number;
@@ -475,7 +477,7 @@ function main(): void {
 
   // Warm-up.
   benchReceipt(200, 99);
-  benchBekenstein(200, 99);
+  benchDpiBound(200, 99);
   benchLambda9(200, 99);
   benchDualWitness(200, 0.7, 0.92, 0.45, 0.4, 0.65, 99);
 
@@ -491,8 +493,8 @@ function main(): void {
     `       chain:   p50=${I.chain.p50_us.toFixed(1)}µs  p99=${I.chain.p99_us.toFixed(1)}µs  (over N=${N} receipts, ${I.chain.n} reps)`,
   );
 
-  console.log("\n[II] Bekenstein — bound check");
-  const II = benchBekenstein(N, 2);
+  console.log("\n[II] DPI receipt-chain entropy bound check (F1-4 errata: renamed from Bekenstein)");
+  const II = benchDpiBound(N, 2);
   console.log(
     `       per-call: p50=${II.stats.p50_us.toFixed(3)}µs  p99=${II.stats.p99_us.toFixed(3)}µs`,
   );

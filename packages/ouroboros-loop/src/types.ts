@@ -3,6 +3,10 @@ export type Verdict =
   | "REFUSED_LAMBDA_GATE"
   | "REFUSED_DUAL_WITNESS_DIVERGE"
   | "REFUSED_FLUXIONS_BARE_CLAIM"
+  /** F1-4 errata: REFUSED_DPI_OVERFLOW replaces REFUSED_BEKENSTEIN_OVERFLOW.
+   *  Mirrors Lean theorem Lutar.DPI.dpiAdmit (Lutar/DPI/DPIBound.lean). */
+  | "REFUSED_DPI_OVERFLOW"
+  /** @deprecated Use REFUSED_DPI_OVERFLOW. Kept for one release per F1-4 errata. */
   | "REFUSED_BEKENSTEIN_OVERFLOW"
   | "REFUSED_FORECAST_DIVERGENT"
   | "REFUSED_WITNESS_DIVERSITY"
@@ -18,6 +22,15 @@ export interface OuroborosInput<T> {
     lambdaGate?: (x: T) => boolean;
     dualWitness?: (x: T) => { match: boolean };
     fluxionsReceipt?: (x: T) => boolean;
+    /**
+     * DPI receipt-chain entropy bound check.
+     * Mirrors Lean theorem: Lutar.DPI.dpiAdmit (Lutar/DPI/DPIBound.lean).
+     * Author: Lutar, Stephen P. · ORCID 0009-0001-0110-4173 · F1-4 errata.
+     * Returns true if the receipt is within capacity; false triggers REFUSED_DPI_OVERFLOW.
+     */
+    dpiCheck?: (x: T) => boolean;
+    /** @deprecated Use dpiCheck. The physical Bekenstein bound (2πRE/ℏc·ln2) is
+     *  not the bound implemented here. F1-4 errata / ouroboros-thesis CHANGELOG.md. */
     bekensteinCheck?: (x: T) => boolean;
     /** Gauss-forecast: returns predicted residual norm of next iter; if it
      *  exceeds tolerance the loop short-circuits with REFUSED_FORECAST_DIVERGENT. */
