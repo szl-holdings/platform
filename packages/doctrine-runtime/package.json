@@ -1,0 +1,74 @@
+{
+  "name": "@workspace/doctrine-runtime",
+  "version": "0.3.1",
+  "private": false,
+  "type": "module",
+  "description": "SZL Doctrine v6 runtime layer — policy composition (R1), SCITT-Rekor adapter (R2), vertical policy gate (R3), A15 persistent homology (R4), xoshiro256** PRNG (R5), K10_v2 replay root (R6).",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./src/index.ts"
+    },
+    "./composer": {
+      "types": "./dist/composer/doctrine_composer.d.ts",
+      "import": "./src/composer/doctrine_composer.ts"
+    },
+    "./composer/metrics": {
+      "types": "./dist/composer/prometheus-exporter.d.ts",
+      "import": "./src/composer/prometheus-exporter.ts"
+    },
+    "./scitt": {
+      "types": "./dist/scitt/scitt_adapter.d.ts",
+      "import": "./src/scitt/scitt_adapter.ts"
+    },
+    "./scitt/verifier": {
+      "types": "./dist/scitt/dpi_chain_verifier.d.ts",
+      "import": "./src/scitt/dpi_chain_verifier.ts"
+    },
+    "./scitt/dag": {
+      "types": "./dist/scitt/merkle_dag_b7.d.ts",
+      "import": "./src/scitt/merkle_dag_b7.ts"
+    },
+    "./policy": {
+      "types": "./dist/policy/policy_gate.d.ts",
+      "import": "./src/policy/policy_gate.ts"
+    },
+    "./policy/bus": {
+      "types": "./dist/policy/policy_event_bus.d.ts",
+      "import": "./src/policy/policy_event_bus.ts"
+    },
+    "./a15": {
+      "types": "./dist/a15/index.d.ts",
+      "import": "./src/a15/index.ts"
+    },
+    "./prng": {
+      "types": "./dist/prng/xoshiro256ss.d.ts",
+      "import": "./src/prng/xoshiro256ss.ts"
+    },
+    "./k10": {
+      "types": "./dist/k10/k10v2_replay_root.d.ts",
+      "import": "./src/k10/k10v2_replay_root.ts"
+    }
+  },
+  "dependencies": {},
+  "devDependencies": {
+    "@types/node": "catalog:",
+    "@types/react": "catalog:",
+    "vitest": "^4.1.7"
+  },
+  "peerDependencies": {
+    "react": "^18.0.0"
+  },
+  "peerDependenciesMeta": {
+    "react": { "optional": true }
+  },
+  "scripts": {
+    "lint": "biome lint ./src",
+    "lint:ci": "biome lint ./src",
+    "format": "biome format --write ./src",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:integration": "vitest run --config vitest.integration.config.ts"
+  }
+}
