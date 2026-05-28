@@ -264,3 +264,60 @@ were committed at any point in this repository's history. No rotation is require
 ---
 
 *Add new gaps below this line using the same table format.*
+
+---
+
+## GAP-DD-001 — Three concurrent axis-name sets for the 9-axis Lutar Invariant
+
+| Field | Value |
+|-------|-------|
+| **Status** | IN-PROGRESS (documented; downstream code unchanged) |
+| **Surfaced** | 2026-05-28 (fix/doc-drift audit) |
+| **Severity** | Low (cosmetic / docs) — no runtime impact |
+
+**Description.** Three distinct axis-name sets ship simultaneously:
+
+1. **Normative runtime schema** (canonical): `ouroboros/runtime/types/src/receipt.ts` — `AxesSchema` with `{moralGrounding, measurabilityHonesty, epistemicHumility, harmAvoidance, logicalCoherence, citationIntegrity, noveltyContribution, reproducibility, stakeholderAlignment}`. Zod-validated; used by gate runtime and tests.
+2. **Historical thesis names** (deprecated, but preserved in published v1–v13 papers as historical record): `{counterfactualAwareness, temporalConsistency, evidenceProvenance, actorIdentity, axiomConsistency, coherence}` for axes 4–9.
+3. **Kernel-compat names** (internal, not the receipt schema): `platform/packages/ouroboros-invariant/src/lutar-invariant-9.ts` — `{cleanliness, horizon, resonance, frustum, gaussClosure, invariance, moralGrounding, ontologicalGrounding, measurabilityHonesty}`.
+
+**Resolution path.** Thesis v14 §3.4 (papers/v14, arxiv_pkg_v14, phd_thesis, arxiv_pkg, main_v2_ml_ai) now uses set (1) and documents (2) and (3) explicitly. Kernel set (3) is retained for `ouroboros-invariant` backwards compatibility and is not changed.
+
+---
+
+## GAP-DD-002 — SECURITY-CHECKLIST.md cited non-existent middleware
+
+| Field | Value |
+|-------|-------|
+| **Status** | RESOLVED 2026-05-28 |
+| **Severity** | Medium (documentation accuracy) |
+
+**Description.** The original SECURITY-CHECKLIST.md cited `artifacts/api-server/src/middlewares/{auth,csrf,admin-guard}.ts`, `artifacts/api-server/src/lib/startup-validation.ts`, and `artifacts/api-server/src/routes/{admin/index,alloy-governance,ai-engine,mcp}.ts`. Of those, only `global-auth-enforcer.ts` actually exists under `artifacts/api-server/`.
+
+**Resolution.** Paths corrected to real implementations (`apps/alloy-runtime-api/src/middleware/auth.ts`, `packages/auth-shared/src/server/csrf.ts`). Controls without real implementations are now marked `NOT YET IMPLEMENTED` rather than fabricated. See SECURITY-CHECKLIST.md drift note.
+
+---
+
+## GAP-DD-003 — Performance targets stated as achievements
+
+| Field | Value |
+|-------|-------|
+| **Status** | RESOLVED 2026-05-28 (thesis side); platform RELEASE_READINESS_SCORECARD.md has no perf claims to correct |
+| **Severity** | Medium (claim integrity) |
+
+**Description.** Earlier draft sections in phd_thesis/main.tex.md, arxiv_pkg/main.tex.md, and phd_thesis/main_v2_ml_ai.md stated the Merkle-DAG batch (4.3 µs at B=7) and pre-allocated receipt pool (0.85 µs gate) as measured results. Production measurements are 11.5 µs (K01) and 3.12 µs (K04) — the smaller numbers are projections from Math-2 estimates, not measurements.
+
+**Resolution.** Re-labelled as `[projected]` in all three files; Theorem 8 (Merkle-DAG Batching) re-stated as Proposition 8 with explicit `projected, not yet measured in production` qualifier.
+
+---
+
+## GAP-DD-004 — platform/CITATION.cff at v10 while thesis is at v14
+
+| Field | Value |
+|-------|-------|
+| **Status** | RESOLVED 2026-05-28 |
+| **Severity** | Low (citation drift) |
+
+**Description.** `platform/CITATION.cff` referenced the v10 thesis only, in a v14 ecosystem.
+
+**Resolution.** Bumped to v14.0.0; preferred-citation now points at the v14 master thesis DOI (10.5281/zenodo.20195368) with concept DOI 10.5281/zenodo.19944926.
