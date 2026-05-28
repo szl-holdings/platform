@@ -18,8 +18,12 @@ export function run<T>(input: OuroborosInput<T>): OuroborosReceipt<T> {
   if (mechanisms.fluxionsReceipt && !mechanisms.fluxionsReceipt(x)) {
     return finish("REFUSED_FLUXIONS_BARE_CLAIM", x, trace, false, "Newton fluxions-receipt: bare claim");
   }
-  if (mechanisms.bekensteinCheck && !mechanisms.bekensteinCheck(x)) {
-    return finish("REFUSED_BEKENSTEIN_OVERFLOW", x, trace, false, "Bekenstein bound exceeded");
+  // F1-4 errata: renamed bekensteinCheck → dpiCheck (DPI = Data Processing Inequality
+  // receipt-chain entropy bound). See ouroboros-thesis/CHANGELOG.md TH6 relabel.
+  // Mirrors Lean theorem: Lutar.DPI.dpiAdmit (Lutar/DPI/DPIBound.lean).
+  const dpiCheckFn = mechanisms.dpiCheck ?? mechanisms.bekensteinCheck; // deprecated alias
+  if (dpiCheckFn && !dpiCheckFn(x)) {
+    return finish("REFUSED_DPI_OVERFLOW", x, trace, false, "DPI receipt-chain entropy bound exceeded");
   }
 
   let witnessInfo: OuroborosReceipt<T>["witnessDiversity"];

@@ -360,14 +360,34 @@ export function twistorProject(Z: [number, number, number, number]): [number, nu
   return [Z[0] + Z[2], Z[0] - Z[2], Z[1] + Z[3], Z[1] - Z[3]];
 }
 
-export function bekensteinBound(area_m2: number): number {
+/**
+ * DPI receipt-chain entropy bound (renamed from bekensteinBound per F1-4 errata).
+ *
+ * NOTE: This function uses the physical area formula (area_m2 / 4A_Planck),
+ * which was historically called the "Bekenstein gate". The F1-4 errata
+ * (ouroboros-thesis/CHANGELOG.md) clarify that the physical Bekenstein bound
+ * (2πRE/ℏc·ln2) is NOT the bound implemented in the SZL codebase. The
+ * receipt-chain DPI bound is dpiEntropyBound = sizeBytes * 8 bits
+ * (Lutar/DPI/DPIBound.lean). This function is the area-parameterised gate;
+ * use dpiEntropyBound (Lean-anchored) for byte-count admission.
+ *
+ * Mirrors (partially): Lutar.DPI.dpiAdmit (Lutar/DPI/DPIBound.lean).
+ * Author: Lutar, Stephen P. · ORCID 0009-0001-0110-4173 · Doctrine V6.
+ */
+export function dpiBound(area_m2: number): number {
   return area_m2 / (4.0 * A_PLANCK);
 }
 
-export function bekensteinCheck(S_total_nats: number, area_m2: number): { ok: boolean; bound: number } {
-  const bound = bekensteinBound(area_m2);
+export function dpiCheck(S_total_nats: number, area_m2: number): { ok: boolean; bound: number } {
+  const bound = dpiBound(area_m2);
   return { ok: S_total_nats <= bound, bound };
 }
+
+/** @deprecated Use dpiBound. F1-4 errata: physical Bekenstein name retracted. */
+export const bekensteinBound = dpiBound;
+
+/** @deprecated Use dpiCheck. F1-4 errata: physical Bekenstein name retracted. */
+export const bekensteinCheck = dpiCheck;
 
 export function conformalRescale(L_value: number, Omega: number): number {
   return Omega * Omega * L_value;

@@ -274,13 +274,27 @@ export function voteRAG(query: string, k = 5, nRetrievers = 3): RetrievalResult[
     .map(([id, score]) => ({ ...byId[id]!, score }));
 }
 
-export function bekensteinGate(
+/**
+ * DPI admission gate for content (renamed from bekensteinGate per F1-4 errata).
+ *
+ * Checks: S = byteLength(content) * ln2 < areaM2 / (4 * A_Planck).
+ * NOTE: This uses the area-parameterised physical formula. The byte-count
+ * Lean-anchored DPI bound (sizeBytes * 8 bits) is in Lutar/DPI/DPIBound.lean.
+ *
+ * Mirrors (partially): Lutar.DPI.dpiAdmit · Lean theorem Lutar.DPI.dpi_bound_positive.
+ * Author: Lutar, Stephen P. · ORCID 0009-0001-0110-4173 · F1-4 errata · Doctrine V6.
+ */
+export function dpiGate(
   content: string,
   areaM2 = 1e30,
 ): boolean {
   const S = Buffer.byteLength(content, "utf8") * LN2;
   return S < areaM2 / (4.0 * A_PLANCK);
 }
+
+/** @deprecated Use dpiGate. F1-4 errata: physical Bekenstein name retracted.
+ *  See ouroboros-thesis/CHANGELOG.md TH6 relabel. */
+export const bekensteinGate = dpiGate;
 
 export interface MemoryItem {
   k: string;
