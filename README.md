@@ -12,7 +12,7 @@
 [![Node.js](https://img.shields.io/badge/Node.js-24+-339933?style=flat-square&logo=node.js&logoColor=white)](https://nodejs.org/)
 [![pnpm](https://img.shields.io/badge/pnpm-9+-F69220?style=flat-square&logo=pnpm&logoColor=white)](https://pnpm.io/)
 [![DOI](https://img.shields.io/badge/DOI-10.5281%2Fzenodo.20434276-805AD5?style=flat-square&logo=doi&logoColor=white)](https://doi.org/10.5281/zenodo.20434276)
-[![Series-A Engineering](https://img.shields.io/badge/Series--A-Engineering-28251D?style=flat-square)](https://szlholdings.com)
+[![Series-A Engineering](https://img.shields.io/badge/Series--A-Engineering-28251D?style=flat-square)](https://github.com/szl-holdings)
 [![Doctrine v6](https://img.shields.io/badge/Doctrine-v6-01696F?style=flat-square)](https://github.com/szl-holdings/platform/blob/main/docs/doctrine/szl-doctrine.md)
 
 > **Frontier Capability:** First Λ-monotone AI runtime substrate with kernel-checked governance — `Lutar.GradientLambda` (v18.0 Frontier 1 · [Ouroboros Thesis DOI 10.5281/zenodo.20434276](https://doi.org/10.5281/zenodo.20434276)).
@@ -165,7 +165,7 @@ pnpm run typecheck
 pnpm run lint && pnpm run test
 ```
 
-For the full monorepo orientation, see [`media/WALKTHROUGH.md`](./media/WALKTHROUGH.md) and the [Developer Walkthrough video](https://szlholdings.com/szl-demo-video/).
+For the full monorepo orientation, see [`media/WALKTHROUGH.md`](./media/WALKTHROUGH.md) and the [Developer Walkthrough video](./media/WALKTHROUGH.md).
 
 ---
 
@@ -321,7 +321,7 @@ This repository is proprietary. Source code, architecture, and implementation de
 **Stephen Lutar** — Founder and CEO, SZL Holdings
 
 **Email:** inquiries@szlholdings.com  
-**Website:** [szlholdings.com](https://szlholdings.com)  
+**Website:** [github.com/szl-holdings](https://github.com/szl-holdings)  
 **LinkedIn:** [linkedin.com/in/stephen-l-279315240](https://linkedin.com/in/stephen-l-279315240)
 
 ---
@@ -334,3 +334,25 @@ This repository and all contents are the sole and exclusive property of SZL Hold
 
 SZL Holdings, Alloy, Sentra, Terra, Vessels, Counsel, Lyte, Pulse, Command, Carlota Jo, and IMPERIUM are trademarks of SZL Holdings.
 
+
+---
+
+## Related repositories in the SZL substrate
+
+The 13 substrate repos cross-link reciprocally. This footer is maintained by GH Admin #1 (org-wide).
+
+- [`a11oy`](https://github.com/szl-holdings/a11oy) — vertical alignment substrate (policy · measurement · knowledge · QEC-integrity)
+- [`amaru`](https://github.com/szl-holdings/amaru) — Shor-encoded receipt minting (Cardano-anchored)
+- [`rosie`](https://github.com/szl-holdings/rosie) — CSS-ingress receipt orchestration
+- [`sentra`](https://github.com/szl-holdings/sentra) — Kitaev-surface drift detection on audit fibers
+- [`uds-mesh`](https://github.com/szl-holdings/uds-mesh) — UDS span schemas + governance receipts
+- [`lutar-lean`](https://github.com/szl-holdings/lutar-lean) — Lean 4 + Mathlib v4.13.0 kernel proofs (30 GREEN modules)
+- [`ouroboros`](https://github.com/szl-holdings/ouroboros) — bounded-recursion runtime
+- [`ouroboros-thesis`](https://github.com/szl-holdings/ouroboros-thesis) — DOI-pinned thesis substrate (v3 → v18)
+- [`platform`](https://github.com/szl-holdings/platform) — composing monorepo (76 packages, 1,220 tests)
+- [`szl-brand`](https://github.com/szl-holdings/szl-brand) — anatomy + visual doctrine (PDFs hosted in-repo)
+- [`szl-cookbook`](https://github.com/szl-holdings/szl-cookbook) — governed-AI recipes
+- [`agi-forecast`](https://github.com/szl-holdings/agi-forecast) — PAC-Bayes + Bekenstein governance-trajectory forecasts
+- [`vsp-otel`](https://github.com/szl-holdings/vsp-otel) — OpenTelemetry exporter for Λ-axis spans
+
+Org page: [github.com/szl-holdings](https://github.com/szl-holdings) · Doctrine v6 · 11 axioms · 30 GREEN modules · v18.0 DOI [`10.5281/zenodo.20434276`](https://doi.org/10.5281/zenodo.20434276)
