@@ -2,21 +2,79 @@
 
 > SZL Holdings monorepo — Ouroboros runtime, Lutar formulas, dual-witness adapters, agent-tooling, and CI substrate
 
-[![CI](https://github.com/szl-holdings/szl-holdings-platform/actions/workflows/ci.yml/badge.svg)](https://github.com/szl-holdings/szl-holdings-platform/actions/workflows/ci.yml) [![CodeQL](https://github.com/szl-holdings/szl-holdings-platform/actions/workflows/codeql.yml/badge.svg)](https://github.com/szl-holdings/szl-holdings-platform/actions/workflows/codeql.yml) [![Security](https://github.com/szl-holdings/szl-holdings-platform/actions/workflows/security.yml/badge.svg)](https://github.com/szl-holdings/szl-holdings-platform/actions/workflows/security.yml) [![License](https://img.shields.io/badge/license-BSL--1.1-28251D?style=flat-square)](./LICENSE) [![TypeScript](https://img.shields.io/badge/TypeScript-5.x-blue)](https://www.typescriptlang.org/) [![pnpm](https://img.shields.io/badge/pnpm-monorepo-orange)](https://pnpm.io/) [![DOI](https://img.shields.io/badge/DOI-10.5281%2Fzenodo.20431181-805AD5?style=flat-square&logo=doi&logoColor=white)](https://doi.org/10.5281/zenodo.20431181)
+<!-- CI + security badges (verified URLs: szl-holdings/platform, not szl-holdings-platform) -->
+[![CI](https://github.com/szl-holdings/platform/actions/workflows/ci.yml/badge.svg)](https://github.com/szl-holdings/platform/actions/workflows/ci.yml)
+[![Build Check](https://github.com/szl-holdings/platform/actions/workflows/build.yml/badge.svg)](https://github.com/szl-holdings/platform/actions/workflows/build.yml)
+[![CodeQL](https://github.com/szl-holdings/platform/actions/workflows/codeql.yml/badge.svg)](https://github.com/szl-holdings/platform/actions/workflows/codeql.yml)
+[![Security Audit](https://github.com/szl-holdings/platform/actions/workflows/security.yml/badge.svg)](https://github.com/szl-holdings/platform/actions/workflows/security.yml)
+[![License](https://img.shields.io/badge/license-BSL--1.1-28251D?style=flat-square)](./LICENSE)
+[![TypeScript](https://img.shields.io/badge/TypeScript-5.x-3178C6?style=flat-square&logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
+[![Node.js](https://img.shields.io/badge/Node.js-24+-339933?style=flat-square&logo=node.js&logoColor=white)](https://nodejs.org/)
+[![pnpm](https://img.shields.io/badge/pnpm-9+-F69220?style=flat-square&logo=pnpm&logoColor=white)](https://pnpm.io/)
+[![DOI](https://img.shields.io/badge/DOI-10.5281%2Fzenodo.20434276-805AD5?style=flat-square&logo=doi&logoColor=white)](https://doi.org/10.5281/zenodo.20434276)
+[![Series-A Engineering](https://img.shields.io/badge/Series--A-Engineering-28251D?style=flat-square)](https://szlholdings.com)
+[![Doctrine v6](https://img.shields.io/badge/Doctrine-v6-01696F?style=flat-square)](https://github.com/szl-holdings/platform/blob/main/docs/doctrine/szl-doctrine.md)
 
-> Signal detection, AI-governed recommendations, human approval gates, cryptographic proof of every outcome — across eight enterprise verticals from a single platform.
+> **Frontier Capability:** First Λ-monotone AI runtime substrate with kernel-checked governance — `Lutar.GradientLambda` (v18.0 Frontier 1 · [Ouroboros Thesis DOI 10.5281/zenodo.20434276](https://doi.org/10.5281/zenodo.20434276)).
 
-**What this is in 30 seconds:** SZL Holdings is a TypeScript monorepo containing 14 deployable artifacts — a governed AI decision platform across cybersecurity, real estate, maritime, legal, defense, and advisory verticals. Every product shares one API backend, one authentication model, one design system, and one audit infrastructure. The defining capability is **Alloy**: a seven-layer fabric that connects live signals to human-confirmed actions with cryptographic proof at every step. No action executes autonomously — governance is structural, not advisory.
+Signal detection, AI-governed recommendations, human approval gates, cryptographic proof of every outcome — across eight enterprise verticals from a single TypeScript pnpm monorepo. Every consequential action executes through Covenant Policy; no AI agent operates outside a human confirmation gate.
 
 ---
 
-## The Problem
+<details>
+<summary>Table of Contents</summary>
 
-Enterprise operations have an accountability gap. Dashboards show what happened. Alerts surface what is wrong. Neither tells operators *what to do next*, *who authorized it*, or *whether a recommended action is safe to execute*.
+- [Architecture](#architecture)
+- [What SZL Holdings Builds](#what-szl-holdings-builds)
+- [Core Fabric — Lyte + Alloy](#core-fabric--lyte--alloy)
+- [Product Portfolio](#product-portfolio)
+- [Quick Start](#quick-start)
+- [Tech Stack](#tech-stack)
+- [Platform Scale](#platform-scale)
+- [Platform Status](#platform-status)
+- [Directory Structure](#directory-structure)
+- [Security Posture](#security-posture)
+- [Alloy Doctrine](#alloy-doctrine)
+- [How to Cite](#how-to-cite)
+- [Contributing](#contributing)
+- [Contact](#contact)
+- [Legal](#legal)
 
-AI tools compound the problem: they add recommendation volume without governance. Operators accumulate more data, more noise, and more untracked decisions.
+</details>
 
-**The problem is not insight — it is accountability.**
+---
+
+## Architecture
+
+The seven-layer Alloy fabric connects live enterprise signals to human-confirmed decisions with cryptographic proof at each transition:
+
+```mermaid
+flowchart LR
+    subgraph Sense["1 — Sense"]
+        S1[Signal Ingress\nSentra · Terra · Vessels\nCounsel · Lyte · Carlota Jo]
+    end
+    subgraph Structure["2 — Structure"]
+        P1[PRISM Correlation\nPeople · Revenue\nInfra · Security · Market]
+    end
+    subgraph Correlate["3 — Correlate"]
+        P2[Outcome Graph\nBaseline Drift Scoring]
+    end
+    subgraph Explain["4 — Explain"]
+        P3[AI Reasoning\nMulti-provider · Policy-routed]
+    end
+    subgraph Recommend["5 — Recommend"]
+        P4[Governed Recommendation\nConfidence + Source + Constraint]
+    end
+    subgraph Approve["6 — Approve"]
+        G1[Covenant Policy Engine\nApproval Queue · Role Gates]
+    end
+    subgraph Execute["7 — Execute"]
+        E1[Durable Workflow\nProof Chain Seal]
+    end
+    Sense --> Structure --> Correlate --> Explain --> Recommend --> Approve --> Execute
+```
+
+**Key invariant:** No action reaches layer 7 without layer 6 approval. This is structurally enforced, not policy-configured.
 
 ---
 
@@ -38,65 +96,24 @@ Every step in the pipeline has a traceable owner, a policy constraint, and an im
 
 ---
 
-## Platform Screenshots
+## Core Fabric — Lyte + Alloy
 
-Screenshots depict the alpha demo state of the platform (development environment, seeded data). Screenshots are not committed to the git repository and cannot be independently verified as unmodified captures.
+### Lyte — Operational Intelligence Layer
 
-### SZL Holdings — Governed Decision Operating System
+Lyte is the observe-and-understand surface. It aggregates live signals from every connected domain, scores them against historical baselines and policy thresholds, and surfaces the prioritized governed decision queue to operators.
 
-![SZL Holdings — Platform Dashboard](.github/assets/screenshots/szl-holdings-hero.jpg)
+Lyte does not act. It observes, understands, and presents.
 
-*Parent company dashboard — governed infrastructure for high-consequence decisions across eight enterprise verticals.*
+### Alloy — Governed Execution Fabric
 
-### Alloy — Live Enterprise Execution Fabric
+Alloy is the govern-and-act layer. Every recommended action routes through Covenant Policy, collects required approvals, executes as a durable workflow, and seals an immutable Proof Chain entry.
 
-![Alloy — Execution Fabric](.github/assets/screenshots/a11oy-hero.jpg)
-
-*Alloy — seven-layer governed agentic fabric, live signal mesh, and cryptographic proof ledger.*
-
-### Unified Command — Operations Surface
-
-![Unified Command](.github/assets/screenshots/command-hero.jpg)
-
-*Cross-domain operator surface with governed decision loop, signal timeline, and approval queue.*
-
-### Domain Pack Verticals
-
-| Sentra — Cyber Resilience | Counsel — Legal Matter Command |
-|---|---|
-| ![ Sentra](.github/assets/screenshots/sentra-hero.jpg) | ![Counsel](.github/assets/screenshots/counsel-hero.jpg) |
-| Cyber posture, recovery readiness, and live incident command | Matter tracking, obligation mapping, and legal exposure management |
-
-| Terra — Real Estate Intelligence | Vessels — Maritime Intelligence |
-|---|---|
-| ![Terra](.github/assets/screenshots/terra-hero.jpg) | ![Vessels](.github/assets/screenshots/vessels-hero.jpg) |
-| Deal pipeline, portfolio analytics, and market intelligence | Fleet command, route optimization, and maritime operations |
-
-| Aegis — Defense & Intelligence |
-|---|
-| ![Aegis](.github/assets/screenshots/aegis-hero.jpg) |
-| Threat intelligence, defense operations command, and spatial analytics |
-
-> Screenshots captured from the alpha demo environment (development build, seeded data) — 2026-04-27. Screenshots are not tracked in the git repository.
-> Canonical screenshots are in [`.github/assets/screenshots/`](.github/assets/screenshots/). All captures are from the live platform — no mockups or AI-generated imagery.
-
----
-
-## Demo Videos
-
-### SZL Holdings — Governed Autonomy Platform Demo
-
-> Full platform walkthrough: Alloy execution fabric, domain packs, governed decision loop, and cryptographic proof chain.
-
-**[Watch on szlholdings.com →](https://szlholdings.com/szl-demo-video/)**
-
-The demo covers the end-to-end governed decision loop: signal ingestion → AI recommendation → human approval gate → Proof Chain record. All domain packs are shown with live seeded data.
-
-### Developer Walkthrough (~90s)
-
-> Monorepo orientation: repo open → API server up → artifact running → preview pane live → readme:check green.
-
-See [`media/WALKTHROUGH.md`](./media/WALKTHROUGH.md) for the step-by-step script (start commands, directory map, and verification steps). The full platform demo above covers the same product flow with all domain packs.
+**What Alloy does:**
+- Routes every action through Covenant Policy before execution — AI cannot bypass the gate
+- Manages approval queues: who must approve, in what order, under what conditions
+- Executes confirmed actions as audited, durable workflows with failure recovery
+- Writes an immutable Proof Chain entry: signal → recommendation → approval → execution → outcome
+- Exposes 2,816 governed API endpoints across all domain verticals
 
 ---
 
@@ -117,34 +134,54 @@ See [`media/WALKTHROUGH.md`](./media/WALKTHROUGH.md) for the step-by-step script
 
 ---
 
-## Core Fabric — Lyte + Alloy
+## Quick Start
 
-The platform's observability and execution layers are distinct but inseparable.
+Prerequisites: Node.js 24+, pnpm 9+
 
-### Lyte — Operational Intelligence Layer
+```bash
+# Enable corepack to use pnpm
+corepack enable
 
-Lyte is the observe-and-understand surface. It continuously ingests signals from connected systems, correlates them across the PRISM framework (People, Revenue, Infrastructure, Security, Market), scores them by urgency and impact, and surfaces the prioritized picture of operational drift to operators.
+# Install all workspace dependencies
+pnpm install
 
-**What Lyte does:**
-- Aggregates live signals from every connected domain (security events, fleet exceptions, deal movements, legal deadlines, revenue anomalies)
-- Scores and ranks signals against historical baselines and policy thresholds
-- Presents the governed decision queue — the prioritized set of situations that require operator attention
-- Tracks decision quality over time via the Outcome Graph, closing the learning loop
+# Start the development server
+pnpm run dev
+```
 
-Lyte does not act. It observes, understands, and presents.
+To run a specific artifact:
 
-### Alloy — Governed Execution Fabric
+```bash
+# Run the SZL Holdings dashboard
+pnpm --filter @szl-holdings/platform dev
 
-Alloy is the govern-and-act layer. Once an operator is ready to respond to a signal surfaced by Lyte, Alloy takes over — routing the recommended action through policy gates, collecting required approvals, executing the confirmed action as a durable workflow, and sealing a cryptographic proof record.
+# Run Sentra (cyber resilience vertical)
+pnpm --filter @szl-holdings/sentra dev
 
-**What Alloy does:**
-- Routes every recommended action through Covenant Policy before execution — AI cannot bypass the gate
-- Manages approval queues: who must approve, in what order, under what conditions
-- Executes confirmed actions as audited, durable workflows with failure recovery
-- Writes an immutable Proof Chain entry linking signal → recommendation → approval → execution → outcome
-- Exposes 2,816 governed API endpoints across all domain verticals
+# Run all type checks
+pnpm run typecheck
 
-**Together:** Lyte tells operators what is happening and what matters. Alloy ensures that what happens next is governed, auditable, and human-confirmed. The seven-layer fabric — Sense → Structure → Correlate → Explain → Recommend → Approve → Execute — runs across every domain pack from a single shared infrastructure.
+# Run CI locally
+pnpm run lint && pnpm run test
+```
+
+For the full monorepo orientation, see [`media/WALKTHROUGH.md`](./media/WALKTHROUGH.md) and the [Developer Walkthrough video](https://szlholdings.com/szl-demo-video/).
+
+---
+
+## Tech Stack
+
+| Layer | Stack |
+|-------|-------|
+| **Language** | TypeScript 5.x (full stack, strict mode) |
+| **Frontend** | React, Vite, Tailwind CSS, Framer Motion |
+| **Mobile** | Expo / React Native |
+| **Backend** | Express, Node.js 24+ |
+| **Database** | PostgreSQL, Drizzle ORM |
+| **AI** | Multi-provider (governed routing with policy constraints) |
+| **Auth** | OIDC/PKCE, multi-role RBAC, deny-by-default enforcement |
+| **Infra** | pnpm monorepo, GitHub Actions CI/CD |
+| **Package Manager** | pnpm 9+ workspace |
 
 ---
 
@@ -155,56 +192,11 @@ Alloy is the govern-and-act layer. Once an operator is ready to respond to a sig
 | Deployable artifacts | 14 |
 | Shared packages | 40 |
 | Operator products | 8 |
+| Governed API endpoints | 2,816 |
 
 ---
 
-## Tech Stack
-
-| Layer | Stack |
-|-------|-------|
-| **Language** | TypeScript (full stack, strict mode) |
-| **Frontend** | React, Vite, Tailwind CSS, Framer Motion |
-| **Mobile** | Expo / React Native |
-| **Backend** | Express, Node.js |
-| **Database** | PostgreSQL, Drizzle ORM |
-| **AI** | Multi-provider (governed routing with policy constraints) |
-| **Auth** | OIDC/PKCE, multi-role RBAC, deny-by-default enforcement |
-| **Infra** | pnpm monorepo, GitHub Actions CI/CD |
-
----
-
-## Platform Status & Audits
-
-- **Machine gap audit (latest, 2026-05-05):** [`docs/audits/machine-gap-audit.md`](docs/audits/machine-gap-audit.md) — full P0/P1/P2/P3 inventory across all artifacts, libs, workers, and routes. Net result this pass: **P0 = 0**.
-- **Best-of-breed adoption survey:** [`docs/research/best-of-breed-adoption.md`](docs/research/best-of-breed-adoption.md) — per-domain OSS landscape with adopt / inspire / decline decisions and license-compliance posture.
-- **A11oy governance hub:** in-app at `/a11oy/operations/alloy-governance`; module overview in [`artifacts/a11oy/README.md`](artifacts/a11oy/README.md).
-
----
-
-## Security Posture
-
-- **Access control:** Multi-role RBAC with deny-by-default enforcement. All routes require authentication. All queries are org-scoped.
-- **AI governance:** Advisory agents only. Covenant Policy enforces approval gates at the fabric layer. AI cannot bypass human confirmation.
-- **Audit trail:** Every consequential action writes an immutable proof entry with actor attribution, timestamp, and decision context.
-- **Multi-tenancy:** Cross-tenant access is architecturally prevented, not only policy-controlled.
-- **Vulnerability disclosure:** Responsible disclosure only. See [SECURITY.md](SECURITY.md).
-
----
-
-## Roadmap
-
-| Item | Status |
-|------|--------|
-| Alloy Phase 1 — Foundation (type system, fabric primitives, demo seed, read API) | ✅ Complete |
-| Alloy Phase 2 — Workcell engine with live AI reasoning | 🔜 In Progress |
-| Alloy Phase 3 — Full proof-carrying execution with live connectors | 🔜 Planned |
-| Mobile Command (unified iOS + Android command) | 🔜 Planned |
-| SOC 2 Type 1 audit readiness | 🔜 Roadmap |
-| Production customer onboarding | 🔜 Roadmap |
-
----
-
-## Current Status
+## Platform Status
 
 **Alpha — last runtime verification 2026-04-27. Web surfaces serve in development. Build pipeline has active failures (see below).**
 
@@ -212,56 +204,31 @@ Alloy is the govern-and-act layer. Once an operator is ready to respond to a sig
 |---|---|
 | `alpha working` | SZL Holdings, API Server, Carlota Jo, Counsel, Pulse (5) |
 | `alpha partial` | Vessels, Terra, Command, Sentra, Lyte (5) |
-| `build failing` | Alloy, SZL Demo Video (2) — cascaded from SDK dependency |
-| `not started` | Mobile Command — scaffold complete, workflow not active |
+| `build failing` | Alloy (cascaded from SDK dependency) |
+| `not started` | Mobile Command — scaffold complete |
 | `demo-only` | SZL Demo Video (1) |
-| `internal only` | Mockup Sandbox (1) |
 
-- Alloy Phase 1: code present; Phase 2 workcell engine in progress; artifact build currently fails
-- Six domain pack verticals serve in development; all use seeded/demo data; see matrix for live data gaps
-- AI recommendations: multi-provider routing with governed policy constraints — live
-- Authentication: OIDC/PKCE with multi-role RBAC — auth gates in place
-- Known gaps: `/api/sentra/risks` route missing; Terra maps require Mapbox token; AIS telemetry simulated (not live); TypeScript build fails for `@szl-holdings/sdk` and 9 dependent packages
-- Full evidence: [`docs/RELEASE_READINESS_SCORECARD.md`](docs/RELEASE_READINESS_SCORECARD.md)
+Known gaps: `/api/sentra/risks` route missing; Terra maps require Mapbox token; AIS telemetry simulated; TypeScript build fails for `@szl-holdings/sdk` and 9 dependent packages. Full evidence: [`docs/RELEASE_READINESS_SCORECARD.md`](docs/RELEASE_READINESS_SCORECARD.md)
 
 ---
 
-## Alloy Doctrine
+## Platform Screenshots
 
-The Alloy Doctrine is the permanent governance framework that defines how all AI agents, contributors, and automated systems operate inside this codebase. Every agent and contributor must read the applicable doctrine before making changes.
+Screenshots depict the alpha demo state of the platform (development environment, seeded data).
 
-| Document | Purpose |
-|----------|---------|
-| [`AGENTS.md`](./AGENTS.md) | Root operating contract — execution loop, forbidden actions, naming rules, definition of done |
-| [`docs/A11OY_DOCTRINE.md`](./docs/A11OY_DOCTRINE.md) | Core product thesis and operating philosophy |
-| [`docs/A11OY_OPERATING_PRINCIPLES.md`](./docs/A11OY_OPERATING_PRINCIPLES.md) | Governing principles for all platform decisions |
-| [`docs/A11OY_AGENT_DOCTRINE.md`](./docs/A11OY_AGENT_DOCTRINE.md) | 18 named agent roles, scopes, and proof obligations |
-| [`docs/A11OY_NON_NEGOTIABLES.md`](./docs/A11OY_NON_NEGOTIABLES.md) | Absolute rules that cannot be overridden |
-| [`docs/A11OY_PRODUCT_LANGUAGE.md`](./docs/A11OY_PRODUCT_LANGUAGE.md) | Approved terminology, naming conventions, voice rules |
-| [`docs/A11OY_WORKCELL_DOCTRINE.md`](./docs/A11OY_WORKCELL_DOCTRINE.md) | How workcells are structured, scoped, and executed |
-| [`docs/A11OY_PROOF_DOCTRINE.md`](./docs/A11OY_PROOF_DOCTRINE.md) | Proof requirements for every consequential action |
-| [`docs/A11OY_SCREENSHOT_DOCTRINE.md`](./docs/A11OY_SCREENSHOT_DOCTRINE.md) | Screenshot capture, labeling, and freshness standards |
-| [`docs/A11OY_PUBLIC_CLAIMS_DOCTRINE.md`](./docs/A11OY_PUBLIC_CLAIMS_DOCTRINE.md) | Rules for all claims made on public-facing surfaces |
-| [`docs/A11OY_SECURITY_DOCTRINE.md`](./docs/A11OY_SECURITY_DOCTRINE.md) | Security rules, secret handling, and audit requirements |
-| [`docs/A11OY_RELEASE_DOCTRINE.md`](./docs/A11OY_RELEASE_DOCTRINE.md) | Release gates, promotion criteria, and rollback policy |
-| [`docs/A11OY_REPLIT_CODEX_DOCTRINE.md`](./docs/A11OY_REPLIT_CODEX_DOCTRINE.md) | Replit Agent and Codex-specific operating rules |
-| [`docs/A11OY_DEFINITION_OF_DONE.md`](./docs/A11OY_DEFINITION_OF_DONE.md) | Universal definition of done for all work in this repo |
-| [`skills/a11oy-code/SKILL.md`](./skills/a11oy-code/SKILL.md) | Reusable skill — prompts, checklists, and agent roster |
-| [`audit/A11OY_DOCTRINE_INSTALL_REPORT.md`](./audit/A11OY_DOCTRINE_INSTALL_REPORT.md) | Doctrine install validation and gap closure report |
+### SZL Holdings — Governed Decision Operating System
 
-The doctrine is grounded in [`docs/doctrine/szl-doctrine.md`](./docs/doctrine/szl-doctrine.md) (the Four Pillars) and [`docs/strategy/FRONTIER_DOCTRINE.md`](./docs/strategy/FRONTIER_DOCTRINE.md) (layer-by-layer platform mapping).
+![SZL Holdings — Platform Dashboard](.github/assets/screenshots/szl-holdings-hero.jpg)
+
+*Parent company dashboard — governed infrastructure for high-consequence decisions across eight enterprise verticals.*
+
+### Alloy — Live Enterprise Execution Fabric
+
+![Alloy — Execution Fabric](.github/assets/screenshots/a11oy-hero.jpg)
+
+*Alloy — seven-layer governed agentic fabric, live signal mesh, and cryptographic proof ledger.*
 
 ---
-
-## Access & Collaboration
-
-This repository is proprietary. Source code, architecture, and implementation details are confidential.
-
-**For investors:** We welcome due diligence conversations and guided platform walkthroughs. Contact us to schedule a demo or request access to detailed technical documentation.
-
-**For enterprise evaluation:** Design partner conversations and pilot programs are available for qualified organizations.
-
-**For all other inquiries:** Please reach out via the contact information below.
 
 ## Directory Structure
 
@@ -276,30 +243,76 @@ This repository is proprietary. Source code, architecture, and implementation de
 | `packages/` | Domain packages: design system, substrate, agent core, evidence ledger, policy guard |
 | `scripts/` | Seed scripts, QA scripts, screenshot capture, deployment utilities |
 | `docs/` | Architecture, trust, investor, and operational documentation |
-| `docs/assets/screenshots/current/` | Verified current screenshots — only source for README images |
 | `audit/` | Audit reports, QA reports, asset reports |
 | `ops/` | Infrastructure configuration, environment matrix, runbooks |
 | `.github/workflows/` | CI, CodeQL, security, deploy, and README QA pipelines |
 
-**Artifact inventory:**
+---
 
-> Status labels reflect runtime verification as of 2026-04-27. See [`audit/runtime/app-status-classification.md`](audit/runtime/app-status-classification.md) for full evidence and upgrade paths.
+## Security Posture
 
-| Artifact | Kind | Preview | Runtime Status |
-|----------|------|---------|----------------|
-| SZL Holdings Dashboard | web | `/` | `alpha working` — all routes live, KPIs seeded |
-| Alloy — Governed Agentic Execution Fabric | web | `/a11oy/` | `build failing` — Phase 1 complete, Phase 2 in progress; SDK dep build issue |
-| API Server | web | `/api/` | `alpha working` — demo mode; auth-gated routes correct |
-| Command — Unified Command Portal | web | `/command/` | `alpha partial` — CORTEX badge counts not wired to live API |
-| Sentra — Cyber Resilience Command | web | `/sentra/` | `alpha partial` — UI complete; `/api/sentra/risks` route missing |
-| Counsel — Legal Matter Command | web | `/counsel/` | `alpha working` — matter tracking functional; CourtListener token pending |
-| Terra — Real Estate Intelligence | web | `/terra/` | `alpha partial` — maps blank (Mapbox token not configured) |
-| Vessels — Maritime Intelligence | web | `/vessels/` | `alpha partial` — AIS simulated; 3 commercial modules not wired |
-| Carlota Jo Consulting | web | `/carlota-jo/` | `alpha working` — most complete artifact; live integrations active |
-| Lyte — Decision Intelligence | web | `/lyte/` | `alpha partial` — routes functional; legacy path alias missing |
-| Pulse — AI Executive Briefing | web | `/pulse/` | `alpha working` — AI multi-provider routing active |
-| SZL Holdings — Governed Autonomy Demo | video | `/szl-demo-video/` | `demo-only` — promotional video artifact |
-| SZL Holdings — Mobile Command | mobile | `/szl-holdings-mobile/` | `not started` — scaffold complete; splash/icon and push linking pending |
+- **Access control:** Multi-role RBAC with deny-by-default enforcement. All routes require authentication. All queries are org-scoped.
+- **AI governance:** Advisory agents only. Covenant Policy enforces approval gates at the fabric layer. AI cannot bypass human confirmation.
+- **Audit trail:** Every consequential action writes an immutable proof entry with actor attribution, timestamp, and decision context.
+- **Multi-tenancy:** Cross-tenant access is architecturally prevented, not only policy-controlled.
+- **Vulnerability disclosure:** Responsible disclosure only. See [SECURITY.md](SECURITY.md).
+
+---
+
+## Alloy Doctrine
+
+The Alloy Doctrine is the permanent governance framework that defines how all AI agents, contributors, and automated systems operate inside this codebase.
+
+| Document | Purpose |
+|----------|---------|
+| [`AGENTS.md`](./AGENTS.md) | Root operating contract — execution loop, forbidden actions, naming rules, definition of done |
+| [`docs/A11OY_DOCTRINE.md`](./docs/A11OY_DOCTRINE.md) | Core product thesis and operating philosophy |
+| [`docs/A11OY_OPERATING_PRINCIPLES.md`](./docs/A11OY_OPERATING_PRINCIPLES.md) | Governing principles for all platform decisions |
+| [`docs/A11OY_AGENT_DOCTRINE.md`](./docs/A11OY_AGENT_DOCTRINE.md) | 18 named agent roles, scopes, and proof obligations |
+| [`docs/A11OY_NON_NEGOTIABLES.md`](./docs/A11OY_NON_NEGOTIABLES.md) | Absolute rules that cannot be overridden |
+| [`docs/A11OY_PROOF_DOCTRINE.md`](./docs/A11OY_PROOF_DOCTRINE.md) | Proof requirements for every consequential action |
+| [`docs/A11OY_SECURITY_DOCTRINE.md`](./docs/A11OY_SECURITY_DOCTRINE.md) | Security rules, secret handling, and audit requirements |
+
+---
+
+## How to Cite
+
+If you use this software in research or production, please cite the Ouroboros Thesis v18.0:
+
+```bibtex
+@software{szl_holdings_platform_2026,
+  title  = {SZL Holdings Platform — Governed Agentic Decision Infrastructure},
+  author = {{SZL Holdings}},
+  year   = {2026},
+  doi    = {10.5281/zenodo.20434276},
+  url    = {https://github.com/szl-holdings/platform}
+}
+```
+
+[![DOI](https://img.shields.io/badge/DOI-10.5281%2Fzenodo.20434276-805AD5?style=flat-square&logo=doi&logoColor=white)](https://doi.org/10.5281/zenodo.20434276)
+[![ORCID](https://img.shields.io/badge/ORCID-0009--0001--0110--4173-A6CE39?style=flat-square&logo=orcid&logoColor=white)](https://orcid.org/0009-0001-0110-4173)
+
+Companion repositories: [`szl-holdings/a11oy`](https://github.com/szl-holdings/a11oy) · [`szl-holdings/sentra`](https://github.com/szl-holdings/sentra) · [`szl-holdings/rosie`](https://github.com/szl-holdings/rosie) · [`szl-holdings/szl-cookbook`](https://github.com/szl-holdings/szl-cookbook)
+
+---
+
+## Contributing
+
+See [CONTRIBUTING.md](CONTRIBUTING.md) for the engineering workflow (branch naming, commit conventions, PR template, and governance gate).
+
+All contributions require: (1) a linked issue, (2) CI green on all required checks, (3) one reviewer approval. Doctrine v6 tone required in PR descriptions. Branch naming: `<type>/<scope>`.
+
+This repository is proprietary. External contributions are not accepted without a signed CLA. Internal agents: consult [`AGENTS.md`](./AGENTS.md) before any change.
+
+---
+
+## Access & Collaboration
+
+This repository is proprietary. Source code, architecture, and implementation details are confidential.
+
+**For investors:** We welcome due diligence conversations and guided platform walkthroughs. Contact us to schedule a demo or request access to detailed technical documentation.
+
+**For enterprise evaluation:** Design partner conversations and pilot programs are available for qualified organizations.
 
 ---
 
@@ -307,8 +320,8 @@ This repository is proprietary. Source code, architecture, and implementation de
 
 **Stephen Lutar** — Founder and CEO, SZL Holdings
 
-**Email:** inquiries@szlholdings.com
-**Website:** [szlholdings.com](https://szlholdings.com)
+**Email:** inquiries@szlholdings.com  
+**Website:** [szlholdings.com](https://szlholdings.com)  
 **LinkedIn:** [linkedin.com/in/stephen-l-279315240](https://linkedin.com/in/stephen-l-279315240)
 
 ---
@@ -317,6 +330,7 @@ This repository is proprietary. Source code, architecture, and implementation de
 
 Copyright (c) 2024-2026 SZL Holdings. All rights reserved.
 
-This repository and all contents — including source code, architecture, documentation, and brand assets — are the sole and exclusive property of SZL Holdings. No license, right, or interest is granted by virtue of access. See [LICENSE](./LICENSE).
+This repository and all contents are the sole and exclusive property of SZL Holdings. No license, right, or interest is granted by virtue of access. See [LICENSE](./LICENSE).
 
-SZL Holdings, Alloy, Sentra, Terra, Vessels, Counsel, Lyte, Pulse, Command, Carlota Jo, and IMPERIUM are trademarks of SZL Holdings. Certain methods and architectures may be the subject of pending or future patent applications.
+SZL Holdings, Alloy, Sentra, Terra, Vessels, Counsel, Lyte, Pulse, Command, Carlota Jo, and IMPERIUM are trademarks of SZL Holdings.
+
