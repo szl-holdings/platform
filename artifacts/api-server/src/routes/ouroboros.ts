@@ -55,7 +55,7 @@ import {
   adaptiveWeights,
   evaluateAll,
   twistorProject,
-  bekensteinBound,
+  dpiBound, // F1-4 errata: renamed from bekensteinBound
   bekensteinCheck,
   conformalRescale,
   aeonRecurrence,
@@ -782,7 +782,7 @@ router.get('/prisca/twistor-project', (req: Request, res: Response) => {
 
 router.get('/prisca/bekenstein-bound', (req: Request, res: Response) => {
   const area = parseFloat(req.query.area_m2 as string) || 1.0;
-  const bound = bekensteinBound(area);
+  const bound = dpiBound(area); // F1-4 errata: dpiBound replaces bekensteinBound
   return res.json({
     area_m2: area,
     bound_nats: bound,
