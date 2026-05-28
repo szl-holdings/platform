@@ -1,15 +1,13 @@
 cff-version: 1.2.0
 message: "If you reference the SZL Holdings platform repository, please cite as follows. Note: this repository is proprietary; the citation metadata is provided for academic provenance only and does not grant any license."
 title: "SZL Holdings Platform — governed AI decision infrastructure (proprietary)"
-version: "1.0.1"
-date-released: "2026-05-28"
 abstract: >-
   Monorepo for SZL Holdings' governed AI decision infrastructure, including
-  the Ouroboros runtime (Λ-monotone governance substrate), the Lutar Invariant Λ
-  implementation, and supporting policy/evidence packages. This repository is
-  proprietary (see LICENSE). The associated thesis (Ouroboros Thesis v18 —
-  Multi-track Substrate Expansion) is published separately at
-  szl-holdings/ouroboros-thesis under CC-BY-4.0 and should be cited via
+  the ouroboros-guardrails receipt-chain runtime, the ouroboros-invariant
+  Lutar Invariant Λ implementation, and supporting policy/evidence
+  packages. This repository is proprietary (see LICENSE). The associated
+  thesis (Ouroboros Thesis v10 — EXHAUSTIVE-AUDIT) is published separately
+  at szl-holdings/ouroboros-thesis under CC-BY-4.0 and should be cited via
   that repository's CITATION.cff if you are citing the thesis text.
 type: software
 authors:
@@ -22,12 +20,6 @@ identifiers:
   - description: ORCID iD of the principal author
     type: other
     value: "https://orcid.org/0009-0001-0110-4173"
-  - description: Ouroboros Thesis v18 — platform research foundation (Zenodo)
-    type: doi
-    value: "10.5281/zenodo.20434276"
-  - description: Ouroboros Thesis concept DOI — always-latest
-    type: doi
-    value: "10.5281/zenodo.19944926"
 repository-code: "https://github.com/szl-holdings/platform"
 url: "https://github.com/szl-holdings/platform"
 keywords:
@@ -36,6 +28,5 @@ keywords:
   - lutar-invariant
   - receipt-chain
   - proprietary
-  - szl-holdings
-  - ai-governance
 license: LicenseRef-SZL-Proprietary
+date-released: "2026-05-28"

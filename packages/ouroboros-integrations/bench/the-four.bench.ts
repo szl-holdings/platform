@@ -14,7 +14,7 @@
  *       Source: packages/ouroboros-guardrails/src/receipt.ts
  *
  *   II. Bekenstein bound — entropy-bound check on a planar horizon area.
- *       APIs:   dpiBound, dpiCheck (F1-4 errata: renamed from bekensteinBound, bekensteinCheck)
+ *       APIs:   bekensteinBound, bekensteinCheck
  *       Source: packages/ouroboros-integrations/src/lutar-formulas.ts
  *
  *   III. Λ-gate (Λ_9) — full 9-axis aggregated invariant evaluation.
@@ -61,7 +61,7 @@ import {
   verifyReceiptChain,
   type RailDecision,
 } from "@workspace/ouroboros-guardrails";
-import { dpiBound, dpiCheck } from "@workspace/ouroboros-integrations"; // F1-4 errata: dpiBound/dpiCheck replace bekensteinBound/bekensteinCheck
+import { bekensteinBound, bekensteinCheck } from "@workspace/ouroboros-integrations";
 import { lutarInvariant9, verifyLutarBoundN, type LutarAxes9 } from "@workspace/ouroboros-invariant";
 
 // ───────────────────────────────────────────────────────────────────────────
@@ -198,8 +198,8 @@ function benchDpiBound(N: number, seed = 2): {
     const area = 0.5 + r() * 4.5;
     // Multiplier in [0.4, 1.6] approximately uniform; ~37.5% fire.
     const mult = 0.4 + r() * 1.2;
-    const claimed = mult * dpiBound(area); // F1-4 errata: dpiBound replaces bekensteinBound
-    const { result, us } = time(() => dpiCheck(claimed, area)); // F1-4 errata: dpiCheck replaces bekensteinCheck
+    const claimed = mult * bekensteinBound(area);
+    const { result, us } = time(() => bekensteinCheck(claimed, area));
     samples.push(us);
     if (!result.ok) fires++;
     sumBound += result.bound;

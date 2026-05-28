@@ -32,8 +32,8 @@ import {
 import type { RailDecision } from "../../ouroboros-guardrails/src/types.ts";
 
 import {
-  dpiBound,   // F1-4 errata: renamed from bekensteinBound
-  dpiCheck,   // F1-4 errata: renamed from bekensteinCheck
+  bekensteinBound,
+  bekensteinCheck,
 } from "../src/lutar-formulas.ts";
 
 import {
@@ -159,8 +159,8 @@ function benchDpiBound(N: number, seed = 2): {
 
   for (let i = 0; i < N; i++) {
     const area = 0.5 + r() * 4.5;
-    const claimed = (1 + r() * 3) * dpiBound(area); // F1-4 errata: dpiBound replaces bekensteinBound
-    const { result, us } = time(() => dpiCheck(claimed, area)); // F1-4 errata: dpiCheck replaces bekensteinCheck
+    const claimed = (1 + r() * 3) * bekensteinBound(area);
+    const { result, us } = time(() => bekensteinCheck(claimed, area));
     samples.push(us);
     if (!result.ok) fires++;
     sumBound += result.bound;
