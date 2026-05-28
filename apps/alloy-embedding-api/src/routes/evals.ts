@@ -13,6 +13,7 @@ evalsRouter.post("/v1/evals/run", (async (req: Request, res: Response) => {
   }
 
   const body = parseResult.data;
+  const tenantId: string = body.tenantId;
   const traceId = req.traceId;
 
   logger.info(
@@ -22,7 +23,7 @@ evalsRouter.post("/v1/evals/run", (async (req: Request, res: Response) => {
 
   try {
     const run = await submitRetrievalEval({
-      tenantId: body.tenantId as string,
+      tenantId,
       profileId: body.profileId,
       datasetId: body.datasetId,
       queries: body.queries.map((q) => ({

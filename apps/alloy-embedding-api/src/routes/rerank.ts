@@ -19,6 +19,7 @@ rerankRouter.post("/v1/rerank", (async (req: Request, res: Response) => {
   }
 
   const body = parseResult.data;
+  const tenantId: string = body.tenantId;
   const traceId = req.traceId;
   const requestedAt = new Date().toISOString();
 
@@ -32,14 +33,14 @@ rerankRouter.post("/v1/rerank", (async (req: Request, res: Response) => {
 
   const policyDecision = policyEngine.evaluate({
     requestId: body.requestId,
-    tenantId: body.tenantId as string,
+    tenantId: tenantId,
     profileId: profile.profileId,
     hasProvenance: false,
     metadata: body.metadata,
   });
 
   if (!policyDecision.allow) {
-    errorBudgetCounter.inc({ kind: "policy_denied", tenant_id: body.tenantId as string });
+    errorBudgetCounter.inc({ kind: "policy_denied", tenant_id: tenantId });
     res.status(403).json({ error: "Request blocked by policy", reasons: policyDecision.reasons, traceId });
     return;
   }
@@ -62,7 +63,7 @@ rerankRouter.post("/v1/rerank", (async (req: Request, res: Response) => {
       { useFallback: false },
     );
   } catch (err) {
-    errorBudgetCounter.inc({ kind: "rerank_error", tenant_id: body.tenantId as string });
+    errorBudgetCounter.inc({ kind: "rerank_error", tenant_id: tenantId });
     logger.error({ traceId, error: String(err) }, "Rerank request failed");
     res.status(502).json({ error: "Rerank backend error", detail: String(err), traceId });
     return;
@@ -75,7 +76,7 @@ rerankRouter.post("/v1/rerank", (async (req: Request, res: Response) => {
     const entry = {
       entryId: randomUUID(),
       requestId: body.requestId,
-      tenantId: body.tenantId as string,
+      tenantId: tenantId,
       profileId: profile.profileId,
       profileVersion: profile.version,
       chunkId: r.id,

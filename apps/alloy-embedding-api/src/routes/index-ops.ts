@@ -13,6 +13,7 @@ indexOpsRouter.post("/v1/index/rebuild", (async (req: Request, res: Response) =>
   }
 
   const body = parseResult.data;
+  const tenantId: string = body.tenantId;
   const traceId = req.traceId;
 
   logger.info(
@@ -22,7 +23,7 @@ indexOpsRouter.post("/v1/index/rebuild", (async (req: Request, res: Response) =>
 
   try {
     const run = await submitRebuildIndex({
-      tenantId: body.tenantId as string,
+      tenantId,
       profileId: body.profileId,
       fullRebuild: body.fullRebuild,
       sourceIds: body.sourceIds,
@@ -55,13 +56,14 @@ indexOpsRouter.post("/v1/index/verify", (async (req: Request, res: Response) => 
   }
 
   const body = parseResult.data;
+  const tenantId: string = body.tenantId;
   const traceId = req.traceId;
 
   logger.info({ traceId, requestId: body.requestId }, "index verify dispatched to orchestrator");
 
   try {
     const run = await submitVerifyIndexHealth({
-      tenantId: body.tenantId as string,
+      tenantId,
       profileId: body.profileId,
     });
 

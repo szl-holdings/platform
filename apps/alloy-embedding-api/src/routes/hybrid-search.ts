@@ -21,6 +21,7 @@ hybridSearchRouter.post("/v1/hybrid-search", (async (req: Request, res: Response
   }
 
   const body = parseResult.data;
+  const tenantId: string = body.tenantId;
   const traceId = req.traceId;
   const requestedAt = new Date().toISOString();
 
@@ -34,14 +35,14 @@ hybridSearchRouter.post("/v1/hybrid-search", (async (req: Request, res: Response
 
   const policyDecision = policyEngine.evaluate({
     requestId: body.requestId,
-    tenantId: body.tenantId as string,
+    tenantId: tenantId,
     profileId: profile.profileId,
     hasProvenance: body.includeProvenance,
     metadata: body.metadata,
   });
 
   if (!policyDecision.allow) {
-    errorBudgetCounter.inc({ kind: "policy_denied", tenant_id: body.tenantId as string });
+    errorBudgetCounter.inc({ kind: "policy_denied", tenant_id: tenantId });
     res.status(403).json({ error: "Request blocked by policy", reasons: policyDecision.reasons, traceId });
     return;
   }
@@ -60,7 +61,7 @@ hybridSearchRouter.post("/v1/hybrid-search", (async (req: Request, res: Response
     });
     queryVector = vec!;
   } catch (err) {
-    errorBudgetCounter.inc({ kind: "embed_error", tenant_id: body.tenantId as string });
+    errorBudgetCounter.inc({ kind: "embed_error", tenant_id: tenantId });
     res.status(502).json({ error: "Query embedding failed", detail: String(err), traceId });
     return;
   }
@@ -133,7 +134,7 @@ hybridSearchRouter.post("/v1/hybrid-search", (async (req: Request, res: Response
     const entry = {
       entryId: randomUUID(),
       requestId: body.requestId,
-      tenantId: body.tenantId as string,
+      tenantId: tenantId,
       profileId: profile.profileId,
       profileVersion: profile.version,
       chunkId: c.chunkId,
