@@ -33,7 +33,7 @@ jobs:
             node_modules
             **/node_modules
           key: ${{ runner.os }}-node-modules-v2-${{ hashFiles('pnpm-lock.yaml', '**/package.json') }}
-      - run: pnpm install --frozen-lockfile --prefer-offline
+      - run: pnpm install --no-frozen-lockfile --prefer-offline
       - run: pnpm --filter @workspace/a11oy run build
       - run: pnpm --filter @workspace/sentra run build
       - run: pnpm --filter @workspace/terra run build

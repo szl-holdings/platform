@@ -193,7 +193,7 @@
       "react-dom": "$react-dom",
       "path-to-regexp": "8.4.2",
       "brace-expansion": "2.1.0",
-      "vite": "7.3.2",
+      "vite": "8.0.14",
       "lodash": "4.18.1",
       "micromatch>picomatch": "2.3.2",
       "tinyglobby>picomatch": "4.0.4",
