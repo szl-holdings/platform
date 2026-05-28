@@ -13,6 +13,7 @@ ingestRouter.post("/v1/ingest", (async (req: Request, res: Response) => {
   }
 
   const body = parseResult.data;
+  const tenantId: string = body.tenantId;
   const traceId = req.traceId;
 
   logger.info(
@@ -25,7 +26,7 @@ ingestRouter.post("/v1/ingest", (async (req: Request, res: Response) => {
     body.documents.map(async (doc) => {
       try {
         const run = await submitIngestDocument({
-          tenantId: body.tenantId as string,
+          tenantId,
           profileId: body.metadata?.profileId as string | undefined,
           sourceId: doc.sourceId,
           content: doc.content,
