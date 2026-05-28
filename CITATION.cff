@@ -1,18 +1,14 @@
 cff-version: 1.2.0
-message: "If you use this software, the Lutar Invariant family, the Audit Closure Operator Λ₁₀, or the Ouroboros Thesis v10, please cite as below."
-title: "Ouroboros Thesis v10 — EXHAUSTIVE-AUDIT: The Audit Closure Operator Λ₁₀ over the Lutar Invariant Family (v1 → v7 + Ω)"
+message: "If you reference the SZL Holdings platform repository, please cite as follows. Note: this repository is proprietary; the citation metadata is provided for academic provenance only and does not grant any license."
+title: "SZL Holdings Platform — governed AI decision infrastructure (proprietary)"
 abstract: >-
-  v10 of the Ouroboros thesis chain introduces the Audit Closure Operator
-  Lambda_10, a machine-verifiable meta-invariant over the v1..v7+Omega Lutar
-  family established in v9. For each layer L_k, A_k = L_k * product over six
-  artefact-presence indicators (CODE, CODEX, API, TEST, THESIS, SURFACE);
-  Lambda_10 = sum_k A_k. Closure theorem: Lambda_10 / sum L_k = 1 iff every
-  artefact is present for every layer. Strictly inert in the all-operational
-  limit and quantifies operational drift exactly otherwise. Shipping artefacts:
-  lutarV10Audit (TypeScript), POST /api/ouroboros/lutar/v10, codex node
-  lutar_v10, an 8-test contract suite, A11oy /thesis row v10, and Sentra
-  /thesis mirror. v10 introduces no new physical L-term; it formalises the
-  v9 implementation contract.
+  Monorepo for SZL Holdings' governed AI decision infrastructure, including
+  the ouroboros-guardrails receipt-chain runtime, the ouroboros-invariant
+  Lutar Invariant Λ implementation, and supporting policy/evidence
+  packages. This repository is proprietary (see LICENSE). The associated
+  thesis (Ouroboros Thesis v10 — EXHAUSTIVE-AUDIT) is published separately
+  at szl-holdings/ouroboros-thesis under CC-BY-4.0 and should be cited via
+  that repository's CITATION.cff if you are citing the thesis text.
 type: software
 authors:
   - family-names: Lutar
@@ -24,64 +20,13 @@ identifiers:
   - description: ORCID iD of the principal author
     type: other
     value: "https://orcid.org/0009-0001-0110-4173"
-repository-code: "https://github.com/szl-holdings/szl-holdings-platform"
-url: "https://github.com/szl-holdings/ouroboros-thesis"
+repository-code: "https://github.com/szl-holdings/platform"
+url: "https://github.com/szl-holdings/platform"
 keywords:
+  - governed-decision
   - ouroboros
   - lutar-invariant
-  - audit-closure-operator
-  - meta-invariant
-  - software-contract
-  - machine-verifiable
-  - holographic-principle
-  - twistor-theory
-  - bekenstein-bound
-  - conformal-cyclic-cosmology
-  - bianchi-identity
-  - fiber-bundle
-  - noether-closure
-  - prisca-sapientia
-  - ai-governance
-  - decision-intelligence
-  - supreme-knowledge-codex
-license: CC-BY-4.0
-version: "10.0.0"
-date-released: "2026-05-05"
-preferred-citation:
-  type: article
-  title: "Ouroboros Thesis v10 — EXHAUSTIVE-AUDIT: The Audit Closure Operator Λ₁₀"
-  authors:
-    - family-names: Lutar
-      given-names: "Stephen P."
-      name-suffix: "Jr."
-      affiliation: SZL Holdings
-      orcid: "https://orcid.org/0009-0001-0110-4173"
-  year: 2026
-  month: 5
-  url: "https://github.com/szl-holdings/ouroboros-thesis"
-  abstract: >-
-    v10 turns the v9 implementation contract into a single computable scalar
-    Lambda_10 = sum_k L_k * prod_j 1[j_k]; auditClosed iff closure ratio = 1.
-    No new physical L-term; the operator is a meta-invariant on the existing
-    family and is strictly inert in the all-operational limit.
-references:
-  - type: article
-    title: "Ouroboros Thesis v9 — UNIFIED-OPERATIONAL: The Lutar Invariant Family (v1 → v7 + Ω)"
-    authors:
-      - family-names: Lutar
-        given-names: "Stephen P."
-        name-suffix: "Jr."
-        affiliation: SZL Holdings
-        orcid: "https://orcid.org/0009-0001-0110-4173"
-    year: 2026
-    month: 5
-    url: "https://github.com/szl-holdings/ouroboros-thesis"
-  - type: article
-    title: "Holomorphic Unified Field Theory: Curvature, Bianchi Identity, and a Path to Quantization"
-    authors:
-      - family-names: Moffat
-        given-names: J. W.
-      - family-names: Toth
-        given-names: V. T.
-    year: 2026
-    url: "https://arxiv.org/abs/2510.06282"
+  - receipt-chain
+  - proprietary
+license: LicenseRef-SZL-Proprietary
+date-released: "2026-05-28"
