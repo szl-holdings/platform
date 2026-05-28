@@ -43,6 +43,9 @@ See `/docs/releases/versioning-policy.md` for the full versioning policy.
 
 ## [Unreleased]
 
+### Changed (`fix/lambda-unification`)
+- **Λ scalar canonicalised to the weighted geometric mean.** No behaviour change in `packages/ouroboros-guardrails/src/lambda.ts` — `lambdaScore` already computed the geomean. The companion `ouroboros/runtime/lambda-gate/src/gate.ts` previously returned the MIN-fold under the same field name; that has been unified to also return the geomean. The two surfaces now agree byte-for-byte on any axes vector. Verified: 10,000-vector random scan, zero verdict mismatches; cross-implementation parity confirmed against the worked example in `f2_lambda/regression_check.md`. The canonical reference is `lutar-lean/Lutar/Invariant.lean` and `ouroboros/docs/lambda-spec.md`.
+
 ### Changed
 - **Alloy → Continuum rebrand (Task #3196):** The governed agentic execution layer previously known as "Alloy" / "Alloy Execution Fabric" / "AEEP" is now **Continuum — Business Observability Fabric**. The rename is brand-deep and behavior-preserving — architecture, governance primitives, Outcome Graph, Proof Chain, and Covenant Policy are unchanged. Code identifiers updated: `@workspace/alloy` → `@workspace/continuum`, `aef-*` → `cf-*`, `useAlloyWebSocket` → `useContinuumWebSocket`, `ALLOY_INTERNAL_TOKEN` → `CONTINUUM_INTERNAL_TOKEN`, GraphQL domain `alloy.ts` → `continuum.ts`, mobile routes `portfolio/alloy` → `portfolio/continuum`. DB table renames applied via new migration.
 
