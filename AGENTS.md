@@ -475,3 +475,53 @@ discovery/governed two-plane execution model, the JSON-artifact
 convention, PCPR format, and the recipe for plugging in the seven
 follow-up vertical packs (Pulse, Finance/Fincept, Lyte/KORA, Terra,
 Vessels, PRISM Counsel, Marketing/Growth).
+
+---
+
+## Cursor Cloud specific instructions
+
+### Node.js version
+
+This repo requires **Node.js >=24**. The VM ships with Node 22 via nvm; the update script activates Node 24 automatically. If you see engine-mismatch errors, ensure Node 24 is active: `nvm use 24`.
+
+### Starting services (no database required)
+
+The **alloy-fabric-api** (port 4200) is the primary backend service for development. It uses **in-memory storage** and requires no PostgreSQL connection. To start it:
+
+```bash
+set -a && source /workspace/.env && set +a
+cd /workspace/services/alloy-fabric-api && pnpm dev
+```
+
+The **A11oy UI** (Vite, port 4110) is the main frontend:
+
+```bash
+set -a && source /workspace/.env && set +a
+cd /workspace/artifacts/a11oy && pnpm dev
+```
+
+### Environment variables
+
+A minimal `.env` at the workspace root is required. Key variables:
+- `AEF_BEARER_TOKEN=dev-insecure-key` — required for fabric API auth
+- `AEF_S2S_SECRET=dev-s2s-secret` — service-to-service auth
+- `AEF_STORAGE_ADAPTER=in-memory` — avoids needing a real database
+- `SESSION_SECRET=<any-random-string>` — session signing
+- `DATABASE_URL` — set to any value (not used in demo/in-memory mode)
+
+The `.env` is NOT auto-loaded by services. You must `source /workspace/.env` or export vars before starting services.
+
+### Lint / Typecheck / Test
+
+- **Lint:** `pnpm lint` — runs Biome. Pre-existing warnings (~7k) are baseline; only check for new errors.
+- **Typecheck:** `pnpm typecheck` — runs via Turbo across all packages. Some packages have pre-existing failures.
+- **Tests:** `pnpm test` — runs via Turbo. ~27/57 tasks pass in baseline (remaining have pre-existing failures unrelated to env setup).
+
+### API verification
+
+The fabric API exposes:
+- `GET /health` — returns `{"status":"ok"}`
+- `POST /v1/embed` — requires `Authorization: Bearer dev-insecure-key`, `X-Tenant-Id: szl-dev`, body: `{"requestId":"...","tenantId":"szl-dev","texts":["..."]}`
+- `POST /v1/hybrid-search` — same auth, body: `{"requestId":"...","tenantId":"szl-dev","query":"...","topK":N}`
+- `GET /metrics` — Prometheus format
+- `GET /docs` — OpenAPI spec
