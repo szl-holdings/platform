@@ -482,55 +482,59 @@ Vessels, PRISM Counsel, Marketing/Growth).
 
 ### Node.js version
 
-This repo requires **Node.js >=24**. The VM ships with Node 22 via nvm; the update script activates Node 24 automatically. If you see engine-mismatch errors, ensure Node 24 is active: `nvm use 24`.
+This repo requires **Node.js ≥ 24** (`engines` field in root `package.json`). The VM's default `/exec-daemon/node` is v22. The update script installs Node 24 via nvm and prepends it to `PATH`. After the update script runs, confirm with `node --version` that v24 is active before running any pnpm commands.
 
-### PostgreSQL setup
+### Starting development
 
-PostgreSQL 16 with `pgvector` extension is required for the full database (1,053 tables). To set up from scratch:
+1. Ensure a `.env` file exists at the workspace root (gitignored). Minimum vars for demo mode:
+   ```
+   NODE_ENV=development
+   PORT=3000
+   SESSION_SECRET=<any random hex string>
+   DATABASE_URL=postgresql://user:password@localhost:5432/szlholdings
+   DEMO_MODE=true
+   RUNTIME_MODE=local-dev
+   ```
+2. `pnpm install` — installs all 193 workspace packages.
+3. `pnpm --filter @workspace/a11oy dev` — starts the A11oy Vite frontend on port 4110.
+4. Other Vite frontends: vessels, terra, sentra, counsel, carlota-jo (each has `dev` script).
 
-```bash
-sudo pg_ctlcluster 16 main start
-sudo -u postgres psql -c "CREATE EXTENSION IF NOT EXISTS vector;" -d szlholdings
+### Running services
+
+- **Vite frontends** do NOT need a database or backend to render in dev mode (they use in-memory/demo data in the fabric library).
+- **Backend services** (`alloy-runtime-api`, `alloy-embedding-api`, `alloy-fabric-api`) require `DATABASE_URL` pointing to a real PostgreSQL 16 instance.
+- **Phase 1 operates in Demo Mode** — all fabric data is in-memory and deterministic; no external API keys are needed.
+
+### Key commands
+
+| Task | Command |
+|------|---------|
+| Install deps | `pnpm install` |
+| Typecheck | `pnpm typecheck` |
+| Lint | `pnpm lint` |
+| Tests (all via Turbo) | `pnpm test` |
+| Tests (vitest direct) | `pnpm test:api` |
+| Dev (all) | `pnpm dev` |
+| Dev (single app) | `pnpm --filter @workspace/a11oy dev` |
+| Python tests | `cd services/lyte-metrics-store && pytest tests/ -v` |
+
+### Known baseline issues
+
+- `pnpm typecheck` has cascading failures from `@szl-holdings/sdk` and ~9 dependent packages. This is a known gap (see README "Platform Status").
+- `pnpm lint` reports ~7,292 warnings and 2 errors (existing baseline).
+- `pnpm test:api` runs 22,000+ tests; ~116 fail due to the sdk cascade. This is normal.
+- The `pnpm-lock.yaml` may drift from `package.json` changes — use `pnpm install` (not `--frozen-lockfile`) in dev.
+
+### Python services
+
+The `services/lyte-metrics-store/` package has a working test suite (12 tests). Install with:
 ```
+cd services/lyte-metrics-store && pip install -e ".[dev]"
+```
+Run tests with `pytest tests/ -v`.
 
-Migration uses `pnpm migrate` (non-interactive drizzle-kit push). Seed with `pnpm seed` then `pnpm seed:demo`.
+### Gotchas
 
-### Starting services
-
-The `.env` is NOT auto-loaded by services. Always source it first: `set -a && source /workspace/.env && set +a`
-
-The **alloy-fabric-api** is the primary backend. It uses in-memory storage by default (no DB needed for embedding/search):
-- Starts on the `PORT` env var value (default 4200 if unset)
-- Requires `AEF_BEARER_TOKEN` env var to start
-
-The **A11oy UI** (Vite, port 4110) is the main frontend:
-- `cd /workspace/artifacts/a11oy && pnpm dev`
-
-Other Vite frontends: Vessels (8099), Terra (6000), Sentra (4099), Carlota Jo (8098).
-
-### Environment variables
-
-Key `.env` variables for local dev:
-- `PORT=3000` — sets the fabric API port (or use `AEF_API_PORT=4200`)
-- `AEF_BEARER_TOKEN=dev-insecure-key` — required for fabric API auth
-- `AEF_S2S_SECRET=dev-s2s-secret` — service-to-service auth
-- `AEF_STORAGE_ADAPTER=in-memory` — avoids needing pgvector for the fabric API
-- `DATABASE_URL=postgresql://szldev:szldev123@localhost:5432/szlholdings`
-- `SESSION_SECRET=<any-random-string>` — session signing
-- `DEMO_MODE=true` — enables demo/fallback behavior
-
-### Lint / Typecheck / Test
-
-- **Lint:** `pnpm lint` — runs Biome. Pre-existing ~7k warnings are baseline; only check for new errors.
-- **Typecheck:** `pnpm typecheck` — runs via Turbo. Some packages have pre-existing failures (baseline ~16/77 pass on first run due to dependency ordering; improves with cache).
-- **Tests:** `pnpm test` — runs via Turbo. ~27/57 tasks pass in baseline.
-- **Pre-commit hook:** runs `biome format`, `oxlint`, `biome lint`, and `pnpm docs:claims-check`. The claims-check has pre-existing failures (use `--no-verify` if needed for unrelated changes).
-
-### API verification
-
-The fabric API exposes:
-- `GET /health` — returns `{"status":"ok"}`
-- `POST /v1/embed` — requires `Authorization: Bearer dev-insecure-key`, `X-Tenant-Id: szl-dev`, body: `{"requestId":"...","tenantId":"szl-dev","texts":["..."]}`
-- `POST /v1/hybrid-search` — same auth, body: `{"requestId":"...","tenantId":"szl-dev","query":"...","topK":N}`
-- `GET /metrics` — Prometheus format
-- `GET /docs` — OpenAPI spec
+- The `preinstall` script in root `package.json` rejects npm/yarn — must use pnpm.
+- The `pnpm.onlyBuiltDependencies` field is not set; pnpm will warn about ignored build scripts for `core-js` and `protobufjs`. This is safe to ignore.
+- The `.husky/pre-commit` hook runs `biome format`, `oxlint`, and `biome lint` on staged files, plus `pnpm docs:claims-check`. These run automatically on `git commit`.
