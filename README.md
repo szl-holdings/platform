@@ -43,6 +43,16 @@ Signal detection, AI-governed recommendations, human approval gates, cryptograph
 
 ---
 
+## On Hugging Face
+
+This repository's org showcase lives on the [SZLHOLDINGS Hugging Face org](https://huggingface.co/SZLHOLDINGS):
+
+| Surface | Hugging Face artifact |
+|---------|---------------------|
+| **Org showcase** | [SZLHOLDINGS on Hugging Face](https://huggingface.co/SZLHOLDINGS) — 22 datasets · 19+ Spaces · 2 models |
+
+> Note: The platform dataset is private; public artifacts are accessible via the org page above.
+
 ## Architecture
 
 The seven-layer Alloy fabric connects live enterprise signals to human-confirmed decisions with cryptographic proof at each transition:
