@@ -41,14 +41,17 @@ jobs:
       - run: pnpm install --frozen-lockfile --prefer-offline
 
       - name: Validate PR commit messages
+        env:
+          PR_BASE_SHA: ${{ github.event.pull_request.base.sha }}
+          PR_HEAD_SHA: ${{ github.event.pull_request.head.sha }}
         run: |
           # On pull_request events, lint only PR commits.
           # On workflow_dispatch (manual), lint just the most recent commit
           # so we don't fail on pre-existing history outside our control.
           if [[ "${{ github.event_name }}" == "pull_request" ]]; then
             pnpm exec commitlint \
-              --from "${{ github.event.pull_request.base.sha }}" \
-              --to   "${{ github.event.pull_request.head.sha }}" \
+              --from "$PR_BASE_SHA" \
+              --to   "$PR_HEAD_SHA" \
               --verbose
           else
             pnpm exec commitlint --from HEAD~1 --to HEAD --verbose

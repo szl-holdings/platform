@@ -75,6 +75,10 @@ jobs:
           gitleaks version
 
       - name: Run Gitleaks — detect committed secrets
+
+        env:
+          PR_BASE_SHA: ${{ github.event.pull_request.base.sha }}
+          PR_HEAD_SHA: ${{ github.event.pull_request.head.sha }}
         run: |
           # On a pull_request event scan only the commits in the PR; on push/schedule
           # scan the entire current HEAD tree.
@@ -82,7 +86,7 @@ jobs:
             gitleaks detect \
               --source . \
               --config .gitleaks.toml \
-              --log-opts "${{ github.event.pull_request.base.sha }}..${{ github.event.pull_request.head.sha }}" \
+              --log-opts "$PR_BASE_SHA..$PR_HEAD_SHA" \
               --redact \
               --verbose \
               --exit-code 1
