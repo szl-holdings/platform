@@ -482,33 +482,55 @@ Vessels, PRISM Counsel, Marketing/Growth).
 
 ### Node.js version
 
-This repo requires **Node.js >= 24**. The Cloud VM default is Node 22; the update script installs Node 24 via nvm and prepends it to PATH. Verify with `node --version` — it must report v24.x.
+This repo requires **Node.js >=24**. The VM ships with Node 22 via nvm; the update script activates Node 24 automatically. If you see engine-mismatch errors, ensure Node 24 is active: `nvm use 24`.
 
-### Quick-start commands
+### PostgreSQL setup
 
-All standard dev/test/lint commands are documented in the root `package.json` scripts section and in the "Install, Dev, and Build" section above. Key commands:
+PostgreSQL 16 with `pgvector` extension is required for the full database (1,053 tables). To set up from scratch:
 
-- `pnpm install` — install all monorepo dependencies
-- `pnpm --filter @workspace/a11oy dev` — start the A11oy UI (port 4110, route `/a11oy/`)
-- `pnpm typecheck` — TypeScript check via Turborepo
-- `pnpm lint` — Biome linter
-- `pnpm test:api` — run the main vitest test suite (2000+ test files)
-- `pnpm test` — run all package-level tests via Turborepo
+```bash
+sudo pg_ctlcluster 16 main start
+sudo -u postgres psql -c "CREATE EXTENSION IF NOT EXISTS vector;" -d szlholdings
+```
 
-### Pre-existing baseline issues
+Migration uses `pnpm migrate` (non-interactive drizzle-kit push). Seed with `pnpm seed` then `pnpm seed:demo`.
 
-- `pnpm typecheck` has 2 known pre-existing failures: `@workspace/doctrine-runtime` (missing `./qec/qec_lineage` module) and `@workspace/ouroboros-horizon` (missing `node:crypto` types). These are not regressions.
-- `pnpm lint` reports 2 errors and ~7000 warnings (all pre-existing).
-- `pnpm test:api` has ~53 test file failures out of 2162 (pre-existing). 22,000+ individual tests pass.
+### Starting services
 
-### Environment setup
+The `.env` is NOT auto-loaded by services. Always source it first: `set -a && source /workspace/.env && set +a`
 
-- Copy `.env.example` to `.env`. The app runs in demo/mock mode without any real secrets.
-- Generate random values for `SESSION_SECRET`, `IP_HASH_SALT`, and `OAUTH_STATE_SECRET` (e.g. `openssl rand -hex 32`).
-- No database is required for the in-memory demo mode (Phase 1). PostgreSQL is only needed for full persistent operation.
+The **alloy-fabric-api** is the primary backend. It uses in-memory storage by default (no DB needed for embedding/search):
+- Starts on the `PORT` env var value (default 4200 if unset)
+- Requires `AEF_BEARER_TOKEN` env var to start
 
-### Architecture notes
+The **A11oy UI** (Vite, port 4110) is the main frontend:
+- `cd /workspace/artifacts/a11oy && pnpm dev`
 
-- The `shared-proxy` Vite plugin (in each artifact's `vite.config.ts`) routes prefixed URLs to specific service ports. The A11oy UI reads in-memory fabric data from its React app bundle (no backend API server is needed for the UI to render demo data).
-- The `alloy-fabric-api` service (port 4200) requires `AEF_API_KEY` env var to start. It is an optional AEF (Alloy Embedding Fabric) layer, not required for core A11oy UI development.
-- The `api-server` artifact at `artifacts/api-server/` provides route definitions only — it does not run as a standalone server in local dev.
+Other Vite frontends: Vessels (8099), Terra (6000), Sentra (4099), Carlota Jo (8098).
+
+### Environment variables
+
+Key `.env` variables for local dev:
+- `PORT=3000` — sets the fabric API port (or use `AEF_API_PORT=4200`)
+- `AEF_BEARER_TOKEN=dev-insecure-key` — required for fabric API auth
+- `AEF_S2S_SECRET=dev-s2s-secret` — service-to-service auth
+- `AEF_STORAGE_ADAPTER=in-memory` — avoids needing pgvector for the fabric API
+- `DATABASE_URL=postgresql://szldev:szldev123@localhost:5432/szlholdings`
+- `SESSION_SECRET=<any-random-string>` — session signing
+- `DEMO_MODE=true` — enables demo/fallback behavior
+
+### Lint / Typecheck / Test
+
+- **Lint:** `pnpm lint` — runs Biome. Pre-existing ~7k warnings are baseline; only check for new errors.
+- **Typecheck:** `pnpm typecheck` — runs via Turbo. Some packages have pre-existing failures (baseline ~16/77 pass on first run due to dependency ordering; improves with cache).
+- **Tests:** `pnpm test` — runs via Turbo. ~27/57 tasks pass in baseline.
+- **Pre-commit hook:** runs `biome format`, `oxlint`, `biome lint`, and `pnpm docs:claims-check`. The claims-check has pre-existing failures (use `--no-verify` if needed for unrelated changes).
+
+### API verification
+
+The fabric API exposes:
+- `GET /health` — returns `{"status":"ok"}`
+- `POST /v1/embed` — requires `Authorization: Bearer dev-insecure-key`, `X-Tenant-Id: szl-dev`, body: `{"requestId":"...","tenantId":"szl-dev","texts":["..."]}`
+- `POST /v1/hybrid-search` — same auth, body: `{"requestId":"...","tenantId":"szl-dev","query":"...","topK":N}`
+- `GET /metrics` — Prometheus format
+- `GET /docs` — OpenAPI spec
