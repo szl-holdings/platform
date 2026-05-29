@@ -365,3 +365,15 @@ The 13 substrate repos cross-link reciprocally. This footer is maintained by GH 
 - [`vsp-otel`](https://github.com/szl-holdings/vsp-otel) — OpenTelemetry exporter for Λ-axis spans
 
 Org page: [github.com/szl-holdings](https://github.com/szl-holdings) · Doctrine v6 · 11 axioms · 30 GREEN modules · v18.0 DOI [`10.5281/zenodo.20434276`](https://doi.org/10.5281/zenodo.20434276)
+
+
+---
+
+## What platform Is NOT
+
+Doctrine v6 honest scoping:
+
+- **Not a product for external customers (yet).** `platform` is the internal composition monorepo; externally-facing products are served via dedicated repos (`a11oy`, `sentra`, etc.).
+- **Not microservices.** The platform is a TypeScript/Rust monorepo with a single deployment surface; it is not a distributed microservices mesh.
+- **Not replacing human authority.** All 76 packages implement enforcement of human-confirmed governance; no package overrides founder authority.
+- **Not feature-complete.** v1.0 is the Series-A baseline; the ROADMAP tracks the 30+ planned modules.
