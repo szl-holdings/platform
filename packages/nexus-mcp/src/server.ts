@@ -952,6 +952,8 @@ export class PRAXISMcpServer {
 
     // ZodRawShape annotation breaks deep inference at the call site (TS2589).
     const renderAppSchema: ZodRawShape = { appId: z.string().describe('App ID from nexus_list_apps') };
+    // @ts-expect-error TS2589 — type instantiation depth exceeds limit at this call site.
+    // ZodRawShape typed arg breaks tsc's inference graph; runtime behaviour is correct.
     this._sdk.tool(
       'nexus_render_app',
       'Render a domain micro-dashboard App as inline HTML. The HTML is scoped to the authenticated tenant and generated from live platform data.',

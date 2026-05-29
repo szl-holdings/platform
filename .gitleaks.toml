@@ -132,6 +132,37 @@ useDefault = true
     # Ref: artifacts/sentra/src/data/agent-mesh.ts line 569
     "artifacts/sentra/src/data/agent-mesh\\.ts",
 
+    # Backstage service catalog files — 'api: <service-name>' is the spec.type
+    # field (e.g. 'api: alloy-runtime') identifying the catalog entity kind.
+    # These are infrastructure metadata, not API credentials.
+    # Verified as false positive: commit 15c00b61167ab244b0075a89862a04398555719b
+    # Rule generic-api-key, entropy 3.641250 — low entropy confirms non-credential.
+    "apps/.*/catalog-info\\.yaml",
+    "services/.*/catalog-info\\.yaml",
+    "workers/.*/catalog-info\\.yaml",
+    "catalog-info\\.yaml",
+
+    # Endpoint and model profile JSON files — 'api_key_env' is a config field
+    # holding the NAME of an environment variable (e.g. 'OPENAI_API_KEY'), not
+    # an actual API key value. The value is always resolved at runtime from the
+    # environment; no credential is stored in the file.
+    # Verified as false positive: commit 7eb623f8b870128e615ac6be9880e0265204b454
+    # Rule generic-api-key, entropy 3.521641 — env var name, not key material.
+    "endpoint-profiles/.*\\.json",
+    "model-profiles/.*\\.json",
+
+    # Service taxonomy documentation — Markdown table containing a column header
+    # 'api: <endpoint-path>' as a documentation shorthand for REST interface
+    # descriptions. Not a credential pattern.
+    # Verified as false positive: commit 69b236a68c02b764c617e6ffe8e09f98480b9db3
+    "docs/service-taxonomy\\.md",
+
+    # Deception-grid component — intentional honeypot display items with
+    # self-documenting fake token values (type: 'Fake API Key', 'Fake AWS Key').
+    # These are UI labels for the threat-detection dashboard, not real credentials.
+    # Verified as false positive: commit 50026f3a571ec0b31da21dac09432bac3453bfb4
+    "artifacts/sentra/src/pages/deception-grid\\.tsx",
+
     # GitHub package/auth documentation: contains example export commands with
     # ghp_your_token_here / ghp_your_pat_here placeholder patterns for
     # developer reference. All values are clearly labeled as examples.

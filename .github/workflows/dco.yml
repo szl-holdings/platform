@@ -20,7 +20,7 @@ jobs:
     name: DCO sign-off check (PR)
     if: github.event_name == 'pull_request'
     runs-on: ubuntu-latest
-    uses: szl-holdings/.github/.github/workflows/reusable-dco.yml@main
+    uses: szl-holdings/.github/.github/workflows/reusable-dco.yml@ab4573f2f89d2310a41d71b0490d7e495c6c8c13 # main
     secrets: inherit
 
   dco-push:
