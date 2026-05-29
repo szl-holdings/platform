@@ -186,12 +186,15 @@ jobs:
           sudo mv gitleaks /usr/local/bin/gitleaks
 
       - name: Run Gitleaks
+        env:
+          PR_BASE_SHA: ${{ github.event.pull_request.base.sha }}
+          PR_HEAD_SHA: ${{ github.event.pull_request.head.sha }}
         run: |
           if [[ "${{ github.event_name }}" == "pull_request" ]]; then
             gitleaks detect \
               --source . \
               --config .gitleaks.toml \
-              --log-opts "${{ github.event.pull_request.base.sha }}..${{ github.event.pull_request.head.sha }}" \
+              --log-opts "$PR_BASE_SHA..$PR_HEAD_SHA" \
               --redact \
               --exit-code 1
           else
