@@ -265,7 +265,7 @@ Also includes `a15-homology`, `xoshiro-prng`, `k10v2-replay` packages. Bundle-le
 14. Vigna, S. Reference C implementation (public domain). https://prng.di.unimi.it/xoshiro256starstar.c
 15. Lamport, L. (1978). Time, clocks, and the ordering of events in a distributed system. *CACM*, 21(7), 558–565. doi:10.1145/359545.359563
 16. Helland, P. (2015). Immutability Changes Everything. *acmqueue*, 13(9). https://queue.acm.org/detail.cfm?id=2884038
-17. Kreps, J., Narkhede, N., & Rao, J. (2011). Kafka: A distributed messaging system for log processing. *NetDB 2011*. https://www.microsoft.com/en-us/research/wp-content/uploads/2017/09/Kafka.pdf
+17. Kreps, J., Narkhede, N., & Rao, J. (2011). Kafka: A distributed messaging system for log processing. *NetDB 2011*. https://notes.stephenholiday.com/Kafka.pdf
 18. Leijon et al. (2022). Geometric Mean Aggregation for Distributed Policy Lattices. *IEEE TDSC*. doi:10.1109/TDSC.2022.3154491
 19. OWASP Authorization Cheat Sheet. https://cheatsheetseries.owasp.org/cheatsheets/Authorization_Cheat_Sheet.html
 20. Zomorodian, A., & Carlsson, G. (2005). Computing Persistent Homology. *Discrete & Computational Geometry*, 33(2), 249–274. doi:10.1007/s00454-004-1146-y

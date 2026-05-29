@@ -126,7 +126,7 @@ const DEMO_INDICATORS: StixIndicator[] = [
     confidence: 93,
     labels: ["malicious-activity", "blackcat", "alphv", "ransomware"],
     killChainPhases: ["exfiltration"],
-    externalReferences: [{ sourceName: "FBI Flash", url: "https://www.ic3.gov/Media/News/2024/240219.pdf" }],
+    externalReferences: [{ sourceName: "FBI Flash", url: "https://www.cisa.gov/news-events/cybersecurity-advisories/aa23-353a" }],
   },
 ];
 

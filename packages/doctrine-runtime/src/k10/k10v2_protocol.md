@@ -36,7 +36,7 @@ This allows:
 
 3. Kreps, J., Narkhede, N., & Rao, J. (2011). Kafka: A distributed
    messaging system for log processing. *NetDB 2011*.
-   https://www.microsoft.com/en-us/research/wp-content/uploads/2017/09/Kafka.pdf
+   https://notes.stephenholiday.com/Kafka.pdf
 
 4. Doctrine v6 §11 "K10_v2 Replay Protocol" (internal).
 
