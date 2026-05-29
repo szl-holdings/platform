@@ -475,3 +475,66 @@ discovery/governed two-plane execution model, the JSON-artifact
 convention, PCPR format, and the recipe for plugging in the seven
 follow-up vertical packs (Pulse, Finance/Fincept, Lyte/KORA, Terra,
 Vessels, PRISM Counsel, Marketing/Growth).
+
+---
+
+## Cursor Cloud specific instructions
+
+### Node.js version
+
+This repo requires **Node.js ≥ 24** (`engines` field in root `package.json`). The VM's default `/exec-daemon/node` is v22. The update script installs Node 24 via nvm and prepends it to `PATH`. After the update script runs, confirm with `node --version` that v24 is active before running any pnpm commands.
+
+### Starting development
+
+1. Ensure a `.env` file exists at the workspace root (gitignored). Minimum vars for demo mode:
+   ```
+   NODE_ENV=development
+   PORT=3000
+   SESSION_SECRET=<any random hex string>
+   DATABASE_URL=postgresql://user:password@localhost:5432/szlholdings
+   DEMO_MODE=true
+   RUNTIME_MODE=local-dev
+   ```
+2. `pnpm install` — installs all 193 workspace packages.
+3. `pnpm --filter @workspace/a11oy dev` — starts the A11oy Vite frontend on port 4110.
+4. Other Vite frontends: vessels, terra, sentra, counsel, carlota-jo (each has `dev` script).
+
+### Running services
+
+- **Vite frontends** do NOT need a database or backend to render in dev mode (they use in-memory/demo data in the fabric library).
+- **Backend services** (`alloy-runtime-api`, `alloy-embedding-api`, `alloy-fabric-api`) require `DATABASE_URL` pointing to a real PostgreSQL 16 instance.
+- **Phase 1 operates in Demo Mode** — all fabric data is in-memory and deterministic; no external API keys are needed.
+
+### Key commands
+
+| Task | Command |
+|------|---------|
+| Install deps | `pnpm install` |
+| Typecheck | `pnpm typecheck` |
+| Lint | `pnpm lint` |
+| Tests (all via Turbo) | `pnpm test` |
+| Tests (vitest direct) | `pnpm test:api` |
+| Dev (all) | `pnpm dev` |
+| Dev (single app) | `pnpm --filter @workspace/a11oy dev` |
+| Python tests | `cd services/lyte-metrics-store && pytest tests/ -v` |
+
+### Known baseline issues
+
+- `pnpm typecheck` has cascading failures from `@szl-holdings/sdk` and ~9 dependent packages. This is a known gap (see README "Platform Status").
+- `pnpm lint` reports ~7,292 warnings and 2 errors (existing baseline).
+- `pnpm test:api` runs 22,000+ tests; ~116 fail due to the sdk cascade. This is normal.
+- The `pnpm-lock.yaml` may drift from `package.json` changes — use `pnpm install` (not `--frozen-lockfile`) in dev.
+
+### Python services
+
+The `services/lyte-metrics-store/` package has a working test suite (12 tests). Install with:
+```
+cd services/lyte-metrics-store && pip install -e ".[dev]"
+```
+Run tests with `pytest tests/ -v`.
+
+### Gotchas
+
+- The `preinstall` script in root `package.json` rejects npm/yarn — must use pnpm.
+- The `pnpm.onlyBuiltDependencies` field is not set; pnpm will warn about ignored build scripts for `core-js` and `protobufjs`. This is safe to ignore.
+- The `.husky/pre-commit` hook runs `biome format`, `oxlint`, and `biome lint` on staged files, plus `pnpm docs:claims-check`. These run automatically on `git commit`.
