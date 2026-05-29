@@ -1,0 +1,11 @@
+name: DCO
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+permissions:
+  contents: read
+  pull-requests: read
+jobs:
+  dco:
+    uses: szl-holdings/.github/.github/workflows/reusable-dco.yml@main
+    secrets: inherit
