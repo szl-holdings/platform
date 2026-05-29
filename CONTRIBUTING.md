@@ -1,6 +1,6 @@
 # Contributing to SZL Holdings Platform
 
-> [Platform Repo](https://github.com/szl-holdings/szl-holdings-platform) | [Security](./SECURITY.md) | [Code of Conduct](./CODE_OF_CONDUCT.md) | [Architecture](./docs/architecture/architecture.md) | [Contact](https://szlholdings.com)
+> [Platform Repo](https://github.com/szl-holdings/platform) | [Security](./SECURITY.md) | [Code of Conduct](./CODE_OF_CONDUCT.md) | [Architecture](./docs/architecture/architecture.md) | [Contact](https://szlholdings.com)
 
 The SZL Holdings platform is a **proprietary, founder-led governed decision infrastructure platform**. This repository is a public mirror for evaluation, transparency, and technical review purposes — not an open-source project accepting community contributions.
 
@@ -100,7 +100,7 @@ The following standards apply to all work on the SZL Holdings platform:
 - All API routes require authentication unless explicitly designated public. The `globalAuthEnforcer` middleware enforces deny-by-default.
 - Destructive operations require multi-step confirmation and audit log entries via Proof Chain.
 - AI agents are advisory-only — all consequential actions require human approval via Covenant Policy gates.
-- The api-server **security test suite** (`pnpm --filter @workspace/api-server test`, including `security-middleware.test.ts`, `security-routes.test.ts`, and `security-hardening.test.ts`) runs automatically in CI on every push and pull request via the [Security workflow](./.github/workflows/security.yml) ([![Security](https://github.com/szl-holdings/szl-holdings-platform/actions/workflows/security.yml/badge.svg)](https://github.com/szl-holdings/szl-holdings-platform/actions/workflows/security.yml)). The `Security Gate (blocking)` job is a required status check on the default branch, so failures block merges. Run the suite locally before pushing to avoid red builds.
+- The api-server **security test suite** (`pnpm --filter @workspace/api-server test`, including `security-middleware.test.ts`, `security-routes.test.ts`, and `security-hardening.test.ts`) runs automatically in CI on every push and pull request via the [Security workflow](./.github/workflows/security.yml) ([![Security](https://github.com/szl-holdings/platform/actions/workflows/security.yml/badge.svg)](https://github.com/szl-holdings/platform/actions/workflows/security.yml)). The `Security Gate (blocking)` job is a required status check on the default branch, so failures block merges. Run the suite locally before pushing to avoid red builds.
 
 ### Design Conventions
 
@@ -133,9 +133,22 @@ For full monorepo conventions, see `docs/architecture/architecture.md` and `docs
 
 ---
 
+## Developer Certificate of Origin (DCO)
+
+All commits to this repository must carry a Developer Certificate of Origin sign-off, per the [DCO v1.1](https://developercertificate.org/). This applies to all contributors — internal, partner, and external. Add it with:
+
+```bash
+git commit -s -m "your commit message"
+# Produces: Signed-off-by: Name <email>
+```
+
+PRs without a DCO sign-off on every commit will be blocked by CI. By signing off, you certify you wrote the code or have the right to contribute it under the repository's license.
+
+---
+
 ## Licensing
 
-All content in this repository is proprietary. See [LICENSE.md](LICENSE.md).
+All content in this repository is proprietary. See [LICENSE](./LICENSE).
 
 ---
 

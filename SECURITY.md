@@ -1,6 +1,6 @@
 # Security Policy
 
-→ [Platform Repo](https://github.com/szl-holdings/szl-holdings-platform) | [Architecture](./docs/architecture/architecture.md) | [Trust Center](./docs/trust/trust-center.md) | [Contact](https://szlholdings.com)
+→ [Platform Repo](https://github.com/szl-holdings/platform) | [Architecture](./docs/architecture/architecture.md) | [Trust Center](./docs/trust/trust-center.md) | [Contact](https://szlholdings.com)
 
 ## Supported Versions
 
