@@ -190,6 +190,76 @@ useDefault = true
     # idempotency key values (e.g. idem_20260416_abc123) and example Bearer
     # tokens. None are real credentials (see KNOWN-GAPS.md Finding 3).
     "ops/benchmark/api-idempotency-and-events\\.md",
+
+    # ── Round 2 false positives (2026-05-29) ──────────────────────────────────
+
+    # Mathlib vendored Lean4 dependency — entire .lake subtree is upstream
+    # third-party code checked in as a Lake workspace dependency. Any credential-
+    # shaped pattern inside it (curl -u, math variable names, etc.) is either
+    # upstream CI referencing GitHub Secrets at runtime, or Lean4 math notation
+    # whose identifiers happen to match a scanner pattern.
+    # Fingerprints confirmed false positive:
+    #   f52df3ec:nightly_detect_failure.yml:curl-auth-user:53 (admin:${{secrets.SPEED}})
+    #   f52df3ec:LevyProkhorovMetric.lean:expo-eas-token:60,73,79 (math var 'meas')
+    "packages/lean-formulas/\\.lake/",
+
+    # Defense-Unicorns proposal HTML source — third-party generated documentation
+    # containing PostHog analytics snippet with the Defense-Unicorns project's
+    # own analytics key. SZL Holdings does not own or control this key; it is
+    # present in vendored HTML docs only.
+    # Fingerprints confirmed false positive:
+    #   9dc57ab:uds-cli-install.html:posthog-project-key:28,31
+    "docs/proposals/defense-unicorns/_sources/",
+
+    # Payload CMS raw file — 'key' is a JSON field name in a forecast gauge
+    # spec (e.g. 'key': 'METR-th50-hours'). This is domain data, not an API key.
+    # Fingerprint confirmed false positive:
+    #   fa39cf32:operational_spec.md:generic-api-key:176
+    "packages/payload/raw/_files/",
+
+    # Benchmarks script — 'ALLOY_API_KEY=bench-key-szl-v11-truth' is the
+    # documented os.environ.get fallback used when running benchmarks locally.
+    # The docstring explicitly shows this value in the 'Run:' example command;
+    # it is a hardcoded benchmark default, not a production credential.
+    # Fingerprint confirmed false positive:
+    #   ba834a5b:run_benchmarks.py:generic-api-key:16
+    "benchmarks/run_benchmarks\\.py",
+
+    # AI-engine profile JSON — 'api_key_env' field holds the NAME of an
+    # environment variable (e.g. 'QWEN36_API_KEY'), not the key value itself.
+    # Pattern identical to model-profiles/endpoint-profiles already allowlisted.
+    # Fingerprint confirmed false positive:
+    #   0e3295d1:qwen3_6_27b_szl_profile.json:generic-api-key:23
+    "lib/ai-engine/profiles/",
+
+    # PQC identity library — 'this._ed25519PrivateKey = opts.ed25519PrivateKey'
+    # is a constructor assignment storing a Uint8Array parameter; no key
+    # material is hardcoded. File inspected at commit ec8ff738.
+    # Fingerprint confirmed false positive:
+    #   ec8ff738:hybrid-signer.ts:generic-api-key:21
+    "lib/pqc-identity/src/hybrid-signer\\.ts",
+
+    # API-server runtime config — 'key:' is an object field name in an array
+    # of configuration descriptors (e.g. key: 'slo_latency_p99_ms'). The
+    # 'key' field names a config parameter, not an API credential.
+    # Fingerprint confirmed false positive:
+    #   f5c0d142:runtime-config.ts:generic-api-key:190
+    "artifacts/api-server/src/lib/runtime-config\\.ts",
+
+    # API-server terra-live route — 'cacheKey:' is a field name in a data
+    # source descriptor array (e.g. cacheKey: 'terra-noaa-climate-USW00094728').
+    # These are Redis cache key strings for public API data, not credentials.
+    # Fingerprints confirmed false positive:
+    #   4b325cf4:terra-live.ts:generic-api-key:1144,1145
+    "artifacts/api-server/src/routes/terra-live\\.ts",
+
+    # Command cognitive memory page — 'key:' field in a memory capsule
+    # descriptor array (e.g. key: 'cii_rating_thresholds_2026'). Domain
+    # data identifier, not an API credential. Two commits, same false positive.
+    # Fingerprints confirmed false positive:
+    #   d7d8936b:memory.tsx:generic-api-key:174
+    #   36c17af9:memory.tsx:generic-api-key:167
+    "artifacts/command/src/pages/cognitive/memory\\.tsx",
   ]
 
   # ── Regex patterns that are always safe ─────────────────────────────────────
@@ -327,6 +397,11 @@ useDefault = true
     # benchmark/API design documentation (e.g. idem_20260416_abc123).
     # Pattern: idem_ + date digits + underscore + short alphanumeric label.
     "idem_[0-9]{8}_[a-z0-9]+",
+
+    # Benchmark harness default API key — documented os.environ.get fallback
+    # value used when ALLOY_API_KEY is not set. Shown in the run_benchmarks.py
+    # docstring as the canonical local-run example value. Not a production key.
+    "bench-key-szl-v[0-9]+-[a-z]+",
   ]
 
   # ── Commit-level stop-list ────────────────────────────────────────────────
@@ -466,4 +541,29 @@ useDefault = true
       # Truncated example shown with ellipsis — not a real token
       "a3f9e2c4b1d8",
       "szl_live_a1b2c3d4e5f6",
+    ]
+
+# ── curl-auth-user rule: suppress Mathlib vendored dependency ─────────────────
+# The built-in curl-auth-user rule fires on the Mathlib vendored Git dependency
+# (packages/lean-formulas/.lake/packages/mathlib). The file in question
+# (nightly_detect_failure.yml) uses `curl -u "admin:${{ secrets.SPEED }}"` where
+# the secret value is resolved from GitHub Actions Secrets at runtime — never
+# hardcoded. This is upstream Mathlib CI code, not SZL Holdings source.
+[[rules]]
+  id          = "curl-auth-user"
+  description = "curl basic-auth flag with username:password"
+  regex       = '''curl.{0,30}-u\s+["']?[a-zA-Z0-9_.-]+:([^\s"']+)'''
+  secretGroup = 1
+  tags        = ["curl", "auth"]
+
+  [rules.allowlist]
+    paths = [
+      # Mathlib vendored Lean4 dependency — upstream CI workflow that references
+      # ${{ secrets.SPEED }} via GitHub Actions Secrets (never a committed value).
+      "packages/lean-formulas/\\.lake/packages/mathlib/\\.github/",
+    ]
+    regexes = [
+      # GitHub Actions secret reference: the value is resolved at runtime from
+      # GitHub Secrets; the string committed to source is the reference itself.
+      "\\$\\{\\{\\s*secrets\\.",
     ]
