@@ -358,7 +358,7 @@ The 13 substrate repos cross-link reciprocally. This footer is maintained by GH 
 - [`lutar-lean`](https://github.com/szl-holdings/lutar-lean) — Lean 4 + Mathlib v4.13.0 kernel proofs (30 GREEN modules)
 - [`ouroboros`](https://github.com/szl-holdings/ouroboros) — bounded-recursion runtime
 - [`ouroboros-thesis`](https://github.com/szl-holdings/ouroboros-thesis) — DOI-pinned thesis substrate (v3 → v18)
-- [`platform`](https://github.com/szl-holdings/platform) — composing monorepo (76 packages, 1,220 tests)
+- [`platform`](https://github.com/szl-holdings/platform) — composing monorepo (131 packages, 291 test files)
 - [`szl-brand`](https://github.com/szl-holdings/szl-brand) — anatomy + visual doctrine (PDFs hosted in-repo)
 - [`szl-cookbook`](https://github.com/szl-holdings/szl-cookbook) — governed-AI recipes
 - [`agi-forecast`](https://github.com/szl-holdings/agi-forecast) — PAC-Bayes + Bekenstein governance-trajectory forecasts
@@ -375,5 +375,5 @@ Doctrine v6 honest scoping:
 
 - **Not a product for external customers (yet).** `platform` is the internal composition monorepo; externally-facing products are served via dedicated repos (`a11oy`, `sentra`, etc.).
 - **Not microservices.** The platform is a TypeScript/Rust monorepo with a single deployment surface; it is not a distributed microservices mesh.
-- **Not replacing human authority.** All 76 packages implement enforcement of human-confirmed governance; no package overrides founder authority.
+- **Not replacing human authority.** All 131 packages implement enforcement of human-confirmed governance; no package overrides founder authority.
 - **Not feature-complete.** v1.0 is the Series-A baseline; the ROADMAP tracks the 30+ planned modules.
