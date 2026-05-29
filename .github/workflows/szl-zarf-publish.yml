@@ -11,10 +11,16 @@ name: Publish SZL Zarf packages and UDS bundle
 #
 # Auth:
 #   - Built-in GITHUB_TOKEN with `packages: write` for GHCR pushes — no PAT.
-#   - Optional cosign signing via repo secrets ZARF_COSIGN_PRIVATE_KEY (PEM)
-#     and COSIGN_PASSWORD. When both are present, packages are signed at
-#     publish time and the local key is shredded on exit (per
-#     docs/proposals/defense-unicorns/szl-holdings/uds-mesh/README.md).
+#   - Cosign signing uses OIDC keyless signing (Sigstore Rekor transparency log).
+#     No private key stored in secrets. Every signature is publicly verifiable
+#     via: cosign verify --certificate-identity-regexp github.com/szl-holdings
+#           --certificate-oidc-issuer https://token.actions.githubusercontent.com
+#           <image>
+#
+# Migration note (2026-05-28): Previously used PEM key from ZARF_COSIGN_PRIVATE_KEY
+# secret. Migrated to keyless OIDC signing for Sigstore Rekor transparency.
+# The ZARF_COSIGN_PRIVATE_KEY and COSIGN_PASSWORD secrets can be removed after
+# this PR is merged and validated.
 
 on:
   push:
@@ -23,14 +29,14 @@ on:
   workflow_dispatch:
     inputs:
       sign:
-        description: 'Sign packages with cosign (requires ZARF_COSIGN_PRIVATE_KEY + COSIGN_PASSWORD secrets)'
+        description: 'Sign packages with cosign keyless (OIDC, Rekor transparency)'
         type: boolean
         default: true
 
 permissions:
   contents: read
   packages: write
-  id-token: write
+  id-token: write   # Required for OIDC keyless cosign signing (Sigstore Rekor)
 
 env:
   REGISTRY: ghcr.io
@@ -40,9 +46,7 @@ env:
 jobs:
   # ---------------------------------------------------------------------------
   # 0. Guardrail: package versions in each zarf.yaml MUST match the
-  #    corresponding ref: in uds-mesh/uds-bundle.yaml, or the published
-  #    bundle would reference packages that don't exist (or worse, stale
-  #    versions). Fail fast before touching the registry.
+  #    corresponding ref: in uds-mesh/uds-bundle.yaml.
   # ---------------------------------------------------------------------------
   check-version-sync:
     name: Check package ↔ bundle version sync
@@ -94,7 +98,7 @@ jobs:
           } >> "$GITHUB_OUTPUT"
 
   # ---------------------------------------------------------------------------
-  # 1. Build + (optionally sign) + publish each Zarf package in parallel.
+  # 1. Build + (keyless) sign + publish each Zarf package in parallel.
   # ---------------------------------------------------------------------------
   publish-packages:
     name: zarf publish ${{ matrix.package }}
@@ -104,6 +108,10 @@ jobs:
       fail-fast: false
       matrix:
         package: [a11oy, sentra, amaru]
+    permissions:
+      contents: read
+      packages: write
+      id-token: write   # Required for keyless cosign signing
     steps:
       - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
 
@@ -112,8 +120,8 @@ jobs:
         with:
           download-init-package: false
 
-      - name: Install cosign
-        uses: sigstore/cosign-installer@398d4b0eeef1380460a10c8013a76f728fb906ac # v3
+      - name: Install cosign (keyless OIDC)
+        uses: sigstore/cosign-installer@6f9f17788090df1f26f669e9d70d6ae9567deba6 # v4.1.2
 
       - name: Log in to GHCR
         run: |
@@ -121,60 +129,45 @@ jobs:
             | zarf tools registry login ${{ env.REGISTRY }} \
                 -u "${{ github.actor }}" --password-stdin
 
-      - name: Materialize cosign key (if signing secrets present)
-        id: cosign_key
-        env:
-          COSIGN_KEY_PEM: ${{ secrets.ZARF_COSIGN_PRIVATE_KEY }}
-        run: |
-          set -euo pipefail
-          if [[ -n "${COSIGN_KEY_PEM}" && -n "${{ secrets.COSIGN_PASSWORD }}" ]]; then
-            install -m 600 /dev/null "$RUNNER_TEMP/cosign.key"
-            printf '%s' "${COSIGN_KEY_PEM}" > "$RUNNER_TEMP/cosign.key"
-            echo "key_path=$RUNNER_TEMP/cosign.key" >> "$GITHUB_OUTPUT"
-            echo "sign=true"                       >> "$GITHUB_OUTPUT"
-          else
-            echo "::notice::ZARF_COSIGN_PRIVATE_KEY / COSIGN_PASSWORD not set — publishing unsigned"
-            echo "sign=false" >> "$GITHUB_OUTPUT"
-          fi
-
       - name: zarf package create
         working-directory: ${{ env.SZL_ROOT }}/${{ matrix.package }}/deploy
-        env:
-          COSIGN_PASSWORD: ${{ secrets.COSIGN_PASSWORD }}
         run: |
           set -euo pipefail
-          if [[ "${{ steps.cosign_key.outputs.sign }}" == "true" ]]; then
-            zarf package create . --confirm --output . \
-              --signing-key "${{ steps.cosign_key.outputs.key_path }}"
-          else
-            zarf package create . --confirm --output .
-          fi
+          zarf package create . --confirm --output .
 
       - name: zarf package publish
         working-directory: ${{ env.SZL_ROOT }}/${{ matrix.package }}/deploy
-        env:
-          COSIGN_PASSWORD: ${{ secrets.COSIGN_PASSWORD }}
         run: |
           set -euo pipefail
           pkg=$(ls zarf-package-${{ matrix.package }}-*.tar.zst | head -n1)
           echo "Publishing $pkg → oci://${REGISTRY}/${ORG}/packages"
-          if [[ "${{ steps.cosign_key.outputs.sign }}" == "true" ]]; then
-            zarf package publish "$pkg" \
-              "oci://${REGISTRY}/${ORG}/packages" \
-              --signing-key "${{ steps.cosign_key.outputs.key_path }}"
-          else
-            zarf package publish "$pkg" "oci://${REGISTRY}/${ORG}/packages"
-          fi
+          zarf package publish "$pkg" "oci://${REGISTRY}/${ORG}/packages"
 
-      - name: Shred cosign key
-        if: always() && steps.cosign_key.outputs.sign == 'true'
-        run: shred -u "${{ steps.cosign_key.outputs.key_path }}" || true
+      - name: Sign with cosign keyless (Sigstore Rekor transparency)
+        env:
+          COSIGN_EXPERIMENTAL: "1"
+        run: |
+          set -euo pipefail
+          pkg_path="${{ env.SZL_ROOT }}/${{ matrix.package }}/deploy"
+          pkg=$(ls "$pkg_path"/zarf-package-${{ matrix.package }}-*.tar.zst | head -n1)
+          echo "Signing $pkg with keyless cosign (OIDC → Rekor)"
+          # Sign the OCI artifact in the registry (keyless — no private key required)
+          cosign sign --yes \
+            "${REGISTRY}/${ORG}/packages/${{ matrix.package }}:$(yq '.metadata.version' "${{ env.SZL_ROOT }}/${{ matrix.package }}/deploy/zarf.yaml")"
+          # Also sign the local tarball for release attachment
+          cosign sign-blob --yes \
+            --bundle "${pkg}.cosign.bundle" \
+            "$pkg"
+          echo "Signature bundle: ${pkg}.cosign.bundle"
+          echo "Verify OCI: cosign verify --certificate-identity-regexp github.com/szl-holdings --certificate-oidc-issuer https://token.actions.githubusercontent.com ${REGISTRY}/${ORG}/packages/${{ matrix.package }}"
 
       - name: Upload package artifact (for auditing)
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
         with:
           name: zarf-package-${{ matrix.package }}
-          path: ${{ env.SZL_ROOT }}/${{ matrix.package }}/deploy/zarf-package-${{ matrix.package }}-*.tar.zst
+          path: |
+            ${{ env.SZL_ROOT }}/${{ matrix.package }}/deploy/zarf-package-${{ matrix.package }}-*.tar.zst
+            ${{ env.SZL_ROOT }}/${{ matrix.package }}/deploy/*.cosign.bundle
           retention-days: 14
           if-no-files-found: error
 
@@ -185,6 +178,10 @@ jobs:
     name: uds bundle publish szl-mesh
     needs: [check-version-sync, publish-packages]
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+      id-token: write
     steps:
       - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
 
@@ -195,6 +192,9 @@ jobs:
 
       - name: Install uds-cli
         uses: defenseunicorns/setup-uds@ab842abcad1f7a3305c2538e3dd1950d0daacfa5 # main
+
+      - name: Install cosign (keyless OIDC)
+        uses: sigstore/cosign-installer@6f9f17788090df1f26f669e9d70d6ae9567deba6 # v4.1.2
 
       - name: Log in to GHCR
         run: |
@@ -214,10 +214,28 @@ jobs:
           echo "Publishing $bundle → oci://${REGISTRY}/${ORG}/bundles"
           uds publish "$bundle" "oci://${REGISTRY}/${ORG}/bundles"
 
+      - name: Sign bundle with cosign keyless (Sigstore Rekor transparency)
+        working-directory: ${{ env.SZL_ROOT }}/uds-mesh
+        env:
+          COSIGN_EXPERIMENTAL: "1"
+        run: |
+          set -euo pipefail
+          bundle=$(ls uds-bundle-szl-mesh-*.tar.zst | head -n1)
+          bundle_version=$(yq '.metadata.version' uds-bundle.yaml)
+          echo "Signing UDS bundle with keyless cosign"
+          cosign sign --yes \
+            "${REGISTRY}/${ORG}/bundles/szl-mesh:${bundle_version}"
+          cosign sign-blob --yes \
+            --bundle "${bundle}.cosign.bundle" \
+            "$bundle"
+
       - name: Upload bundle artifact (for auditing)
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
         with:
           name: uds-bundle-szl-mesh
-          path: ${{ env.SZL_ROOT }}/uds-mesh/uds-bundle-szl-mesh-*.tar.zst
+          path: |
+            ${{ env.SZL_ROOT }}/uds-mesh/uds-bundle-szl-mesh-*.tar.zst
+            ${{ env.SZL_ROOT }}/uds-mesh/*.cosign.bundle
           retention-days: 30
           if-no-files-found: error
+
