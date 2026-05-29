@@ -1,0 +1,68 @@
+name: SLSA Level 3 Provenance
+
+# Generates SLSA Level 3 provenance attestation for release artifacts.
+# Pinned: slsa-framework/slsa-github-generator v2.1.0
+# SHA: f7dd8c54c2067bafc12ca7a55595d5ee9b75204a (2025-02-24)
+#
+# IMPORTANT: Founder review required before merge.
+
+on:
+  release:
+    types: [published]
+
+permissions:
+  id-token: write
+  contents: write
+  actions: read
+
+jobs:
+  build:
+    name: Build release artifact
+    runs-on: ubuntu-latest
+    outputs:
+      artifact-name: ${{ steps.set-output.outputs.artifact-name }}
+      artifact-sha256: ${{ steps.hash.outputs.sha256 }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+
+      - name: Create release archive
+        id: set-output
+        run: |
+          set -euo pipefail
+          ARTIFACT="platform-${{ github.event.release.tag_name }}.tar.gz"
+          git archive --format=tar.gz \
+            --prefix="platform-${{ github.event.release.tag_name }}/" \
+            HEAD \
+            -o "$ARTIFACT"
+          echo "artifact-name=$ARTIFACT" >> "$GITHUB_OUTPUT"
+
+      - name: Compute SHA-256
+        id: hash
+        run: |
+          set -euo pipefail
+          ARTIFACT="${{ steps.set-output.outputs.artifact-name }}"
+          SHA=$(sha256sum "$ARTIFACT" | awk '{print $1}')
+          echo "sha256=$SHA" >> "$GITHUB_OUTPUT"
+
+      - name: Upload artifact for provenance job
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: release-artifact
+          path: ${{ steps.set-output.outputs.artifact-name }}
+          retention-days: 1
+          if-no-files-found: error
+
+  provenance:
+    name: Generate SLSA provenance
+    needs: [build]
+    permissions:
+      id-token: write
+      contents: write
+      actions: read
+    uses: slsa-framework/slsa-github-generator/.github/workflows/generator_generic_slsa3.yml@f7dd8c54c2067bafc12ca7a55595d5ee9b75204a
+    with:
+      base64-subjects: ${{ needs.build.outputs.artifact-sha256 }}
+      upload-assets: true
+      provenance-name: platform-${{ github.event.release.tag_name }}.intoto.jsonl
+
