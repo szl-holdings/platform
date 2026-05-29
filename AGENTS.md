@@ -484,38 +484,47 @@ Vessels, PRISM Counsel, Marketing/Growth).
 
 This repo requires **Node.js >=24**. The VM ships with Node 22 via nvm; the update script activates Node 24 automatically. If you see engine-mismatch errors, ensure Node 24 is active: `nvm use 24`.
 
-### Starting services (no database required)
+### PostgreSQL setup
 
-The **alloy-fabric-api** (port 4200) is the primary backend service for development. It uses **in-memory storage** and requires no PostgreSQL connection. To start it:
+PostgreSQL 16 with `pgvector` extension is required for the full database (1,053 tables). To set up from scratch:
 
 ```bash
-set -a && source /workspace/.env && set +a
-cd /workspace/services/alloy-fabric-api && pnpm dev
+sudo pg_ctlcluster 16 main start
+sudo -u postgres psql -c "CREATE EXTENSION IF NOT EXISTS vector;" -d szlholdings
 ```
+
+Migration uses `pnpm migrate` (non-interactive drizzle-kit push). Seed with `pnpm seed` then `pnpm seed:demo`.
+
+### Starting services
+
+The `.env` is NOT auto-loaded by services. Always source it first: `set -a && source /workspace/.env && set +a`
+
+The **alloy-fabric-api** is the primary backend. It uses in-memory storage by default (no DB needed for embedding/search):
+- Starts on the `PORT` env var value (default 4200 if unset)
+- Requires `AEF_BEARER_TOKEN` env var to start
 
 The **A11oy UI** (Vite, port 4110) is the main frontend:
+- `cd /workspace/artifacts/a11oy && pnpm dev`
 
-```bash
-set -a && source /workspace/.env && set +a
-cd /workspace/artifacts/a11oy && pnpm dev
-```
+Other Vite frontends: Vessels (8099), Terra (6000), Sentra (4099), Carlota Jo (8098).
 
 ### Environment variables
 
-A minimal `.env` at the workspace root is required. Key variables:
+Key `.env` variables for local dev:
+- `PORT=3000` — sets the fabric API port (or use `AEF_API_PORT=4200`)
 - `AEF_BEARER_TOKEN=dev-insecure-key` — required for fabric API auth
 - `AEF_S2S_SECRET=dev-s2s-secret` — service-to-service auth
-- `AEF_STORAGE_ADAPTER=in-memory` — avoids needing a real database
+- `AEF_STORAGE_ADAPTER=in-memory` — avoids needing pgvector for the fabric API
+- `DATABASE_URL=postgresql://szldev:szldev123@localhost:5432/szlholdings`
 - `SESSION_SECRET=<any-random-string>` — session signing
-- `DATABASE_URL` — set to any value (not used in demo/in-memory mode)
-
-The `.env` is NOT auto-loaded by services. You must `source /workspace/.env` or export vars before starting services.
+- `DEMO_MODE=true` — enables demo/fallback behavior
 
 ### Lint / Typecheck / Test
 
-- **Lint:** `pnpm lint` — runs Biome. Pre-existing warnings (~7k) are baseline; only check for new errors.
-- **Typecheck:** `pnpm typecheck` — runs via Turbo across all packages. Some packages have pre-existing failures.
-- **Tests:** `pnpm test` — runs via Turbo. ~27/57 tasks pass in baseline (remaining have pre-existing failures unrelated to env setup).
+- **Lint:** `pnpm lint` — runs Biome. Pre-existing ~7k warnings are baseline; only check for new errors.
+- **Typecheck:** `pnpm typecheck` — runs via Turbo. Some packages have pre-existing failures (baseline ~16/77 pass on first run due to dependency ordering; improves with cache).
+- **Tests:** `pnpm test` — runs via Turbo. ~27/57 tasks pass in baseline.
+- **Pre-commit hook:** runs `biome format`, `oxlint`, `biome lint`, and `pnpm docs:claims-check`. The claims-check has pre-existing failures (use `--no-verify` if needed for unrelated changes).
 
 ### API verification
 
