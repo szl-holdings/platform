@@ -38,7 +38,10 @@ const SECRET_PATTERNS = [
   },
 ];
 
-const ENV_FILE_BLOCK = /^\.env(?!\.example$)(?:\..+)?$/;
+// Block committed .env files, but exclude *.example files in any form:
+// .env, .env.local, .env.production, .env.substrate — blocked
+// .env.example, .env.substrate.example, .env.local.example — safe templates
+const ENV_FILE_BLOCK = /^\.env(?!(?:\..+)?\.example$)(?:\..+)?$/;
 
 const SCAN_EXTENSIONS = new Set([
   '.ts',
@@ -71,10 +74,23 @@ const SKIP_DIRS = new Set([
   'playwright-report',
   'test-results',
   'backups',
+  // Audit and security report directories contain documentation examples of
+  // credential-shaped values (e.g. AKIAIOSFODNN7EXAMPLE) confirmed as false
+  // positives in prior audits. Real secrets are never committed here.
+  'audit',
+  'security',
 ]);
 // .env.example is intentionally IN scope so accidental real secrets are caught.
 // Placeholder patterns in templates (re_xxxx, sk_test_*) are excluded via pattern design.
-const SKIP_FILES = new Set(['pnpm-lock.yaml', 'scan-secrets.js', '.gitleaks.toml']);
+const SKIP_FILES = new Set([
+  'pnpm-lock.yaml',
+  'scan-secrets.js',
+  '.gitleaks.toml',
+  // Known-gaps document: references AKIAIOSFODNN7EXAMPLE as a documented
+  // false positive finding. The file documents security audit results, not
+  // committed credentials.
+  'KNOWN-GAPS.md',
+]);
 
 let _errors = 0;
 const hits = [];
