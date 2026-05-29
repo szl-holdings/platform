@@ -7,5 +7,5 @@ permissions:
   pull-requests: read
 jobs:
   dco:
-    uses: szl-holdings/.github/.github/workflows/reusable-dco.yml@main
+    uses: szl-holdings/.github/.github/workflows/reusable-dco.yml@9095ae9ef3bac93a2a6faf6c7120186177b3a9ec # main
     secrets: inherit
