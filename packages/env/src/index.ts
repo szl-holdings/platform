@@ -199,6 +199,15 @@ export const envSchema = z.object({
   // ── Observability ────────────────────────────────────────────────────────
   OTEL_SERVICE_NAME: z.string().optional().default("szl-holdings-api"),
   OTEL_EXPORTER_OTLP_ENDPOINT: optionalUrl,
+  // Comma-separated key=value pairs sent as OTLP export headers. Used to carry
+  // backend auth at deploy time (e.g. Grafana Cloud basic-auth token or an
+  // Azure Monitor ingestion key) without code changes. Format follows the OTEL
+  // spec for OTEL_EXPORTER_OTLP_HEADERS, e.g.
+  //   "Authorization=Basic <b64>" or "x-api-key=<key>,x-tenant=acme".
+  OTEL_EXPORTER_OTLP_HEADERS: optionalStr,
+  // Comma-separated key=value resource attributes merged onto every span,
+  // following the OTEL spec for OTEL_RESOURCE_ATTRIBUTES.
+  OTEL_RESOURCE_ATTRIBUTES: optionalStr,
   OTLP_ENDPOINT: optionalUrl,
   OTEL_IN_MEMORY: booleanFromString,
   OTEL_CONSOLE_EXPORT: booleanFromString,

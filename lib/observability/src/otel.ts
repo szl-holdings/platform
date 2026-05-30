@@ -20,9 +20,38 @@ export interface OtelConfig {
   serviceName: string;
   serviceVersion?: string;
   otlpEndpoint?: string;
+  /**
+   * OTLP export headers as either a parsed record or a raw comma-separated
+   * "key=value" string (the OTEL_EXPORTER_OTLP_HEADERS wire format). Used to
+   * carry backend auth at deploy time so the same build can target Grafana
+   * Cloud or Azure Monitor purely via environment configuration.
+   */
+  otlpHeaders?: Record<string, string> | string;
   exportToAzureMonitor?: boolean;
   exportToNewRelic?: boolean;
   exportToConsole?: boolean;
+}
+
+/**
+ * Parse the OTEL_EXPORTER_OTLP_HEADERS / OTEL_RESOURCE_ATTRIBUTES wire format:
+ * a comma-separated list of `key=value` pairs. Values may themselves contain
+ * `=` (e.g. base64 padding in an Authorization header), so only the first `=`
+ * in each pair is treated as the separator. Empty/malformed pairs are skipped.
+ */
+export function parseOtlpKeyValueList(raw?: string): Record<string, string> {
+  const out: Record<string, string> = {};
+  if (!raw) return out;
+  for (const pair of raw.split(',')) {
+    const trimmed = pair.trim();
+    if (!trimmed) continue;
+    const eq = trimmed.indexOf('=');
+    if (eq <= 0) continue;
+    const key = trimmed.slice(0, eq).trim();
+    const value = trimmed.slice(eq + 1).trim();
+    if (!key) continue;
+    out[key] = value;
+  }
+  return out;
 }
 
 export interface ActorContext {
@@ -268,7 +297,17 @@ export async function initializeOpenTelemetry(config: OtelConfig): Promise<void>
     const otlpUrl = normalizedEndpoint.endsWith('/v1/traces')
       ? normalizedEndpoint
       : `${normalizedEndpoint}/v1/traces`;
-    const otlpExporter = new OTLPTraceExporter({ url: otlpUrl });
+    // Headers carry backend auth (Grafana Cloud basic-auth, Azure Monitor /
+    // New Relic ingestion keys, tenant routing) and are driven entirely by
+    // OTEL_EXPORTER_OTLP_HEADERS at deploy time. Explicit config.otlpHeaders
+    // (record or raw string) wins over the env var when both are present.
+    const headers =
+      typeof config.otlpHeaders === 'string'
+        ? parseOtlpKeyValueList(config.otlpHeaders)
+        : (config.otlpHeaders ?? parseOtlpKeyValueList(_env.OTEL_EXPORTER_OTLP_HEADERS));
+    const otlpExporter = new OTLPTraceExporter(
+      Object.keys(headers).length > 0 ? { url: otlpUrl, headers } : { url: otlpUrl },
+    );
     spanProcessors.push(new BatchSpanProcessor(otlpExporter));
     activeExporters.push(`otlp:${otlpEndpoint}`);
   }
@@ -282,6 +321,10 @@ export async function initializeOpenTelemetry(config: OtelConfig): Promise<void>
     'service.name': config.serviceName,
     'service.version': config.serviceVersion ?? process.env.npm_package_version ?? '0.0.0',
     'deployment.environment': _env.NODE_ENV,
+    // Deploy-time resource attributes (e.g. cloud.region, service.namespace)
+    // merged from OTEL_RESOURCE_ATTRIBUTES. Explicit fields above take
+    // precedence over anything supplied via the env var.
+    ...parseOtlpKeyValueList(_env.OTEL_RESOURCE_ATTRIBUTES),
   });
 
   const tracerProvider = new BasicTracerProvider({ spanProcessors, resource });
@@ -302,6 +345,8 @@ export function isOtelInitialized(): boolean {
 export function getOtelConfig(): {
   serviceName: string;
   otlpEndpoint?: string;
+  /** Number of OTLP export headers configured. Count only — values are never surfaced. */
+  otlpHeaderCount: number;
   azureMonitor: boolean;
   newRelic: boolean;
   initialized: boolean;
@@ -311,6 +356,7 @@ export function getOtelConfig(): {
   return {
     serviceName: _env.OTEL_SERVICE_NAME,
     ...(otlpEndpoint !== undefined ? { otlpEndpoint } : {}),
+    otlpHeaderCount: Object.keys(parseOtlpKeyValueList(_env.OTEL_EXPORTER_OTLP_HEADERS)).length,
     azureMonitor: !!_env.AZURE_APP_INSIGHTS_CONNECTION_STRING,
     newRelic: !!_env.NEW_RELIC_LICENSE_KEY,
     initialized: otelInitialized,

@@ -39,6 +39,7 @@ export {
   getTracer,
   initializeOpenTelemetry,
   isOtelInitialized,
+  parseOtlpKeyValueList,
   shutdownTracer,
 } from './otel.js';
 export * from './simulators/index.js';
