@@ -154,7 +154,7 @@ The following tables appear in `lib/db/src/schema/` but have no identifiable mig
 Two journal entries have auto-generated (meaningless) Drizzle-Kit names:
 
 - Entry 45: `0045_eager_bloodstorm`
-- Entry 46: `0046_sparkling_edwin_jarvis`
+- Entry 46: `0046_cognitive_runtime_schema`
 
 These names provide no information about what schema change they represent. The files should be inspected and the tags in `_journal.json` updated to descriptive names.
 
@@ -188,7 +188,7 @@ Findings from the parallel Phase B audit that are subsumed or extended by the se
 | `0028` | `0028_crdt_change_events.sql`, `0028_knowledge_graph_vector_embeddings.sql`, `0028_multi_channel_notifications.sql` | §2.2 — orphans resolved as `0092_register_crdt_change_events.sql`, `0093_register_multi_channel_notifications.sql` |
 | `0044` | `0044_constellation_graph.sql`, `0044_trace_graph.sql` | Both registered — verify journal tags distinguish them |
 | `0045` | `0045_deployments_registry.sql`, `0045_eager_bloodstorm.sql` | Auto-named — see §7 |
-| `0046` | `0046_guardian_tool_mesh.sql`, `0046_sparkling_edwin_jarvis.sql` | Auto-named — see §7 |
+| `0046` | `0046_guardian_tool_mesh.sql`, `0046_cognitive_runtime_schema.sql` | Auto-named — see §7 |
 | `0053` | `0053_fund_inbound_deals_attachments.sql`, `0053_lp_portal_data_room.sql`, `0053_ot_ics_decoder.sql` | Verify all three registered |
 | `0060` | `0060_business_events_composite_idx.sql`, `0060_szl_decisioning_tables.sql` | Verify both registered |
 | `0065` | `0065_session_lifecycle_hardening.sql`, `0065_signal_mesh_persistence.sql` | Verify both registered |

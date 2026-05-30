@@ -147,7 +147,7 @@ No new migration needed — the index already exists in the database.
 
 Rename the opaque auto-generated tags in `_journal.json`:
 - Entry 45: `0045_eager_bloodstorm` → inspect file, rename to descriptive tag
-- Entry 46: `0046_sparkling_edwin_jarvis` → inspect file, rename to descriptive tag
+- Entry 46: `0046_cognitive_runtime_schema` → inspect file, rename to descriptive tag
 
 Tag renames in `_journal.json` are safe — they do not affect the migration hash or applied status.
 

@@ -4,7 +4,7 @@
 
 This document describes the persistence foundation for the SZL self-modeling cognitive runtime. These tables form the substrate that every cognitive subsystem (self-model, world-model, memory, planner, verifier, reflection, skills, traces, evals, policies, approvals, actions) reads and writes against.
 
-Migration file: `lib/db/drizzle/0046_sparkling_edwin_jarvis.sql`  
+Migration file: `lib/db/drizzle/0046_cognitive_runtime_schema.sql`  
 Schema file: `lib/db/src/schema/cognitive_runtime.ts`
 
 ---
