@@ -26,10 +26,6 @@ author = "agent"
 task = "workflow.run"
 args = "artifacts/counsel: web"
 
-[[workflows.workflow.tasks]]
-task = "workflow.run"
-args = "artifacts/conduit: web"
-
 [[workflows.workflow]]
 name = "artifacts/counsel: web"
 author = "agent"
@@ -40,15 +36,6 @@ args = "bash -c 'cd /home/runner/workspace/artifacts/counsel && exec node_module
 
 [workflows.workflow.metadata]
 outputType = "webview"
-
-[[workflows.workflow]]
-name = "artifacts/conduit: web"
-author = "agent"
-
-[[workflows.workflow.tasks]]
-task = "shell.exec"
-args = "bash -c 'cd /home/runner/workspace/artifacts/conduit && exec node_modules/.bin/vite --config vite.config.ts --host ::'"
-waitForPort = 5300
 
 [workflows.workflow.metadata]
 outputType = "webview"
