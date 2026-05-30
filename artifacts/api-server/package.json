@@ -1,9 +1,9 @@
 {
   "name": "@workspace/api-server",
-  "version": "1.0.0",
+  "version": "0.1.0",
   "private": true,
   "type": "module",
-  "description": "Express HTTP transport for SZL Holdings platform. Mounts 5,500+ endpoints across 11 product surfaces (a11oy, sentra, amaru, vessels, terra, counsel, carlota-jo, pulse, lyte, holdings, ouroboros). Pure transport — business logic lives in @workspace/ouroboros-integrations and lib/*.",
+  "description": "Stub package — historical placeholder. The real Express HTTP servers live in apps/alloy-runtime-api (unified v1 surface), apps/alloy-embedding-api (embedding gateway), and apps/alloy-ingestion-orchestrator (ingestion control plane). Additional service-tier servers in services/* and workers/*. This stub retains the single ouroboros route export for backward-compatibility with any direct import path consumers; new transport work goes in the apps/* servers.",
   "exports": {
     "./routes/ouroboros": {
       "workspace": "./src/routes/ouroboros.ts",
