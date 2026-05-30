@@ -297,6 +297,12 @@ export const envSchema = z.object({
   SESSION_TTL_MS: optionalInt(String(7 * 24 * 60 * 60 * 1000)),
 
   // ── Security ─────────────────────────────────────────────────────────────
+  // Comma-separated allowlist of hosts permitted as outbound webhook delivery
+  // destinations (SSRF guard, KG020b). An entry like ".hooks.example.com"
+  // matches that host and any subdomain. When set, any host not on the list is
+  // refused; when unset, delivery still blocks private/loopback/link-local/
+  // metadata IP ranges.
+  WEBHOOK_HOST_ALLOWLIST: optionalStr,
   FIELD_ENCRYPTION_KEY: optionalStr,
   SECRET_ENCRYPTION_KEY: optionalStr,
   IP_HASH_SALT: optionalStr,

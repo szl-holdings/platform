@@ -1,4 +1,5 @@
 import { ServiceAdapter, type ServiceStatus } from "../base.js";
+import { assertWebhookUrlAllowed } from "../integrations/webhook-ssrf-guard.js";
 
 export interface SlackMessageResult {
   sent: boolean;
@@ -182,6 +183,10 @@ export class SlackAdapter extends ServiceAdapter {
     if (options?.username) body.username = options.username;
     if (options?.iconEmoji) body.icon_emoji = options.iconEmoji;
     if (options?.blocks) body.blocks = options.blocks;
+
+    // SSRF guard (P1-C / KG020b): refuse delivery to a non-allowlisted or
+    // internal-range host before any outbound request is made.
+    await assertWebhookUrlAllowed(this.webhookUrl!);
 
     const response = await fetch(this.webhookUrl!, {
       method: "POST",

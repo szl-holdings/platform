@@ -253,6 +253,13 @@ export {
   type WebhookVerifyResult,
 } from './integrations/webhook-verifier.js';
 export {
+  assertWebhookUrlAllowed,
+  validateWebhookUrl,
+  WebhookSsrfError,
+  type WebhookUrlValidationOptions,
+  type WebhookUrlValidationResult,
+} from './integrations/webhook-ssrf-guard.js';
+export {
   type AIBriefing,
   type BookingAppointment,
   bookingMockProvider,
