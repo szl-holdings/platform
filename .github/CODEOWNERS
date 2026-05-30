@@ -28,10 +28,26 @@
 /lib/forge-runtime/  @stephenlutar2-hash
 /lib/prism-bus/  @stephenlutar2-hash
 
-# ── API Server ────────────────────────────────────────────────────────────────
+# ── Application servers (apps/) ───────────────────────────────────────────────
+# Deployable services. Each Express/runtime server gets an explicit rule so a PR
+# touching it requires owner review even if a broader default would also match.
+/apps/  @stephenlutar2-hash
+/apps/alloy-runtime-api/  @stephenlutar2-hash
+/apps/alloy-embedding-api/  @stephenlutar2-hash
+/apps/alloy-ingestion-orchestrator/  @stephenlutar2-hash
+/apps/substrate-inference/  @stephenlutar2-hash
+/apps/eval-runner/  @stephenlutar2-hash
+
+# ── Workspace packages (packages/) ────────────────────────────────────────────
+# The bulk of the codebase lives here (130 packages). Owned at the directory
+# level so new packages inherit ownership without a per-package rule.
+/packages/  @stephenlutar2-hash
+
+# ── API Server (stub) ─────────────────────────────────────────────────────────
+# artifacts/api-server is a historical placeholder; the real HTTP servers live
+# in apps/. The src/routes/ tree currently contains only ouroboros.ts.
 /artifacts/api-server/  @stephenlutar2-hash
 /artifacts/api-server/src/routes/  @stephenlutar2-hash
-/artifacts/api-server/src/routes/admin/  @stephenlutar2-hash
 
 # ── Platform command surfaces ──────────────────────────────────────────────────
 /artifacts/szl-holdings/  @stephenlutar2-hash
