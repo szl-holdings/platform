@@ -15,7 +15,8 @@ on:
 
 permissions:
   contents: read
-  checks: write
+
+# Note: jobs that need checks:write use job-level permissions.
 
 concurrency:
   group: post-deploy-smoke-${{ github.ref }}
