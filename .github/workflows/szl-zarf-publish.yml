@@ -35,8 +35,6 @@ on:
 
 permissions:
   contents: read
-  packages: write
-  id-token: write   # Required for OIDC keyless cosign signing (Sigstore Rekor)
 
 env:
   REGISTRY: ghcr.io
