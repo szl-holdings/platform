@@ -5,6 +5,8 @@
 [![CI](https://github.com/szl-holdings/platform/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/szl-holdings/platform/actions/workflows/ci.yml)
 [![Tests](https://github.com/szl-holdings/platform/actions/workflows/tests.yml/badge.svg?branch=main)](https://github.com/szl-holdings/platform/actions/workflows/tests.yml)
 [![CodeQL](https://github.com/szl-holdings/platform/actions/workflows/codeql.yml/badge.svg?branch=main)](https://github.com/szl-holdings/platform/actions/workflows/codeql.yml)
+[![GHAS Code Security](https://img.shields.io/badge/GHAS-Code_Security-2DA44E.svg?style=flat-square&logo=github)](https://github.com/szl-holdings/platform/security/code-scanning)
+[![Secret Protection](https://img.shields.io/badge/GHAS-Secret_Protection-2DA44E.svg?style=flat-square&logo=github)](https://github.com/szl-holdings/platform/security/secret-scanning)
 [![SBOM](https://github.com/szl-holdings/platform/actions/workflows/sbom.yml/badge.svg?branch=main)](https://github.com/szl-holdings/platform/actions/workflows/sbom.yml)
 [![SLSA 3](https://github.com/szl-holdings/platform/actions/workflows/slsa.yml/badge.svg?branch=main)](https://github.com/szl-holdings/platform/actions/workflows/slsa.yml)
 [![DCO](https://github.com/szl-holdings/platform/actions/workflows/dco.yml/badge.svg?branch=main)](https://github.com/szl-holdings/platform/actions/workflows/dco.yml)
