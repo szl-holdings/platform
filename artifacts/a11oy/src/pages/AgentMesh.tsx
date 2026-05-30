@@ -167,7 +167,7 @@ const ROUTING_RULES = [
   { pattern: 'Inline code completion', routed: 'GitHub Copilot', reason: 'Lowest latency (340ms), highest throughput for keystroke-level suggestions', fallback: 'Windsurf' },
   { pattern: 'Multi-file refactoring', routed: 'Claude Code', reason: 'Strongest multi-step reasoning, highest trust score for complex changes', fallback: 'Cursor' },
   { pattern: 'Full issue-to-PR', routed: 'Devin', reason: 'Highest autonomy, handles complete SDLC workflows', fallback: 'Codex' },
-  { pattern: 'UI component generation', routed: 'v0', reason: 'Best-in-class generative UI with React/Tailwind', fallback: 'Replit Agent' },
+  { pattern: 'UI component generation', routed: 'v0', reason: 'Strong generative UI with React/Tailwind', fallback: 'Replit Agent' },
   { pattern: 'Code generation (bulk)', routed: 'OpenAI Codex', reason: 'Cloud sandboxed execution, subagent parallelism, best cost/throughput', fallback: 'Claude Code' },
   { pattern: 'CI/CD automation', routed: 'OpenAI Codex', reason: 'Non-interactive mode, GitHub Actions, worktree isolation', fallback: 'Devin' },
   { pattern: 'Codebase exploration', routed: 'OpenAI Codex (Subagents)', reason: 'Parallel subagents — one per concern (security, tests, maintainability)', fallback: 'Claude Code' },

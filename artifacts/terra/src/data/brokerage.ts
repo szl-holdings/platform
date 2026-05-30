@@ -954,7 +954,7 @@ export const listings: Listing[] = [
     teamId: 'team-001',
     listDate: '2026-03-01',
     photos: 38,
-    description: 'Premier Willows neighborhood home sold above asking.',
+    description: 'Willows neighborhood home sold above asking.',
     riskLevel: 'low',
     riskFlags: [],
     buyerActivity: 34,
@@ -992,7 +992,7 @@ export const listings: Listing[] = [
     teamId: 'team-001',
     listDate: '2026-02-14',
     photos: 20,
-    description: 'Premier SoMa Class-A office floor with sweeping skyline views.',
+    description: 'SoMa Class-A office floor with sweeping skyline views.',
     riskLevel: 'high',
     riskFlags: [
       '44 DOM — stale commercial listing',

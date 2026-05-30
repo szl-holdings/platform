@@ -117,7 +117,7 @@ Every step in the pipeline has a traceable owner, a policy constraint, and an im
 - **Human-Gated Autonomy** — no consequential action executes without human confirmation, enforced structurally
 - **Cryptographic Proof** — append-only audit trail linking every decision to actor, policy, and outcome
 - **Digital Twin Simulation** — probabilistic modeling before any high-stakes action
-- **Multi-Provider AI** — policy-governed routing across leading AI providers
+- **Multi-Provider AI** — policy-governed routing across major AI providers
 - **Executive Briefing** — board-ready decision surfaces with full attribution chain
 
 ---

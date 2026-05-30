@@ -286,7 +286,7 @@ export default function DarpaMtoHub() {
       ) : showRepos ? (
         <div className="space-y-4">
           <h2 className="text-[15px] font-medium text-white">
-            Leading Open-Source Cybersecurity & PQC Repositories
+            Notable Open-Source Cybersecurity & PQC Repositories
           </h2>
           <div className="bg-white/[0.02] border border-white/[0.06] rounded-xl overflow-hidden">
             <div className="grid grid-cols-12 gap-3 px-5 py-2.5 border-b border-white/[0.04] text-[10px] font-mono uppercase tracking-wider text-white/25">

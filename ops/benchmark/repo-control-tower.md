@@ -137,7 +137,7 @@ An investor or diligence engineer reviewing this repo can verify:
 ## Competitive Repo Quality Benchmarks
 
 ### Stripe (Open-Source SDKs)
-- Immaculate README with quickstart
+- Clean README with quickstart
 - Comprehensive API reference linked from repo
 - Every release has detailed changelog with migration guides
 - Clean, consistent code style across all packages
