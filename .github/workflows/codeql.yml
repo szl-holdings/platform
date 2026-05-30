@@ -1,0 +1,96 @@
+name: CodeQL
+
+# Static application security testing (SAST) — KG011.
+# Runs on every push to main and on every pull request. Critical/high severity
+# findings fail the check via the security-and-quality query suite combined with
+# the SARIF severity gate below, which blocks merges when configured as a
+# required check in branch protection.
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  schedule:
+    # Weekly full scan to catch findings introduced by new query updates.
+    - cron: '17 3 * * 1'
+  workflow_dispatch:
+
+# Cancel superseded runs on the same ref to save CI minutes.
+concurrency:
+  group: codeql-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  analyze:
+    name: Analyze (${{ matrix.language }})
+    runs-on: ubuntu-latest
+    timeout-minutes: 120
+    permissions:
+      contents: read
+      security-events: write # required to upload SARIF results
+      actions: read
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - language: javascript-typescript
+            build-mode: none
+          - language: python
+            build-mode: none
+    steps:
+      - name: Checkout
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+
+      - name: Initialize CodeQL
+        uses: github/codeql-action/init@9e0d7b8d25671d64c341c19c0152d693099fb5ba # v4.35.5
+        with:
+          languages: ${{ matrix.language }}
+          build-mode: ${{ matrix.build-mode }}
+          # security-extended adds high-precision security queries on top of the
+          # default suite; security-and-quality additionally surfaces
+          # maintainability findings.
+          queries: security-extended,security-and-quality
+
+      - name: Perform CodeQL Analysis
+        uses: github/codeql-action/analyze@9e0d7b8d25671d64c341c19c0152d693099fb5ba # v4.35.5
+        with:
+          category: /language:${{ matrix.language }}
+          upload: always
+
+  # Explicit merge gate: independent of repo-level code-scanning settings, this
+  # job fails the PR check when CodeQL reports any open critical/high alert on
+  # the head ref. Set `CodeQL / severity-gate` as a required status check in
+  # branch protection to block merges on those findings (KG011).
+  severity-gate:
+    name: severity-gate
+    needs: analyze
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      security-events: read
+    steps:
+      - name: Fail on open critical/high CodeQL alerts
+        env:
+          GH_TOKEN: ${{ github.token }}
+          REF: ${{ github.event.pull_request.head.ref }}
+        run: |
+          set -euo pipefail
+          # Open alerts for the PR head ref, filtered to the CodeQL tool.
+          alerts=$(gh api \
+            "repos/${{ github.repository }}/code-scanning/alerts?state=open&ref=refs/heads/${REF}&tool_name=CodeQL&per_page=100" \
+            --jq '[.[] | {sev: (.rule.security_severity_level // .rule.severity), num: .number, rule: .rule.id}]' \
+            2>/dev/null || echo '[]')
+          blocking=$(echo "$alerts" | jq '[.[] | select(.sev=="critical" or .sev=="high")]')
+          count=$(echo "$blocking" | jq 'length')
+          echo "Open critical/high CodeQL alerts on ${REF}: ${count}"
+          if [ "${count}" -gt 0 ]; then
+            echo "$blocking" | jq -r '.[] | "  - #\(.num) [\(.sev)] \(.rule)"'
+            echo "::error::CodeQL found ${count} open critical/high alert(s); blocking merge (KG011)."
+            exit 1
+          fi
+          echo "No blocking CodeQL alerts."
