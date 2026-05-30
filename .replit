@@ -1,7 +1,7 @@
 modules = ["nodejs-24", "python-3.11", "javascript", "postgresql-16"]
 
 [[artifacts]]
-id = "apps/alloy-runtime-api"
+id = "artifacts/api-server"
 
 [[artifacts]]
 id = "artifacts/mockup-sandbox"
