@@ -5,7 +5,7 @@ export class GroqConnector extends ToolConnector {
   readonly id = 'groq';
   readonly name = 'Groq';
   readonly description =
-    'Groq — ultra-fast LLM inference via LPU hardware. Supports Llama 3, Mixtral, Gemma, and Whisper with industry-leading token throughput';
+    'Groq — ultra-fast LLM inference via LPU hardware. Supports Llama 3, Mixtral, Gemma, and Whisper with high token throughput';
   readonly category: ConnectorCategory = 'ai_inference';
   readonly version = '1.0.0';
 

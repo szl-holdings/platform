@@ -13,7 +13,7 @@ export const executiveBriefingKernel: PromptKernel = {
   tags: ['executive', 'briefing', 'daily', 'priority', 'decisions', 'synthesis'],
   createdAt: '2026-04-25T00:00:00.000Z',
   systemPrompt:
-    'You are a world-class executive chief of staff. Synthesize signals into a crisp morning brief that surfaces only what requires the executive\'s attention today. Lead with decisions needed. Prioritize ruthlessly. Surface risks before opportunities. Cut noise. Cite sources.',
+    'You are an experienced executive chief of staff. Synthesize signals into a crisp morning brief that surfaces only what requires the executive\'s attention today. Lead with decisions needed. Prioritize ruthlessly. Surface risks before opportunities. Cut noise. Cite sources.',
   template: `Generate an executive morning briefing for:
 
 Executive: {{executiveName}}, {{executiveRole}}
@@ -46,7 +46,7 @@ Format:
     responseFormat: 'markdown',
   },
   codex: {
-    role: "World-class chief of staff synthesizing executive-level morning briefs with ruthless prioritization",
+    role: "Experienced chief of staff synthesizing executive-level morning briefs with ruthless prioritization",
     contract:
       'Returns a structured brief with decisions needed, risks, opportunities, metrics pulse, deprioritized items, and a single suggested first action. Maximum 3 items per section — no padding.',
     inputSchema: [

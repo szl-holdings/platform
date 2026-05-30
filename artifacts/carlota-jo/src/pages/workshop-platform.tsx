@@ -396,7 +396,7 @@ Only respond with JSON, no markdown.`;
                 marginBottom: 12,
               }}
             >
-              World-Class Workshops.
+              Expert-Led Workshops.
               <br />
               <em style={{ color: '#FCD34D' }}>Effortlessly Delivered.</em>
             </h1>

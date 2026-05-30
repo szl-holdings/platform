@@ -40,7 +40,7 @@ Dimensions:
 | Motion | 5 | 150ms transitions. Reduced-motion CSS present. |
 | Nav | 5 | AppShell + SideNav pattern. Consistent with design system. |
 | States | 4 | EmptyState and error states present. Loading skeletons could be more consistent. |
-| **Overall** | **4.9** | Best-in-class command surface. |
+| **Overall** | **4.9** | Strong command surface. |
 
 ### Pulse (`/pulse/`)
 

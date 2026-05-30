@@ -118,7 +118,7 @@ const OS_MODULES = [
     id: 'workshops',
     icon: GraduationCap,
     title: 'Workshop & Training Platform',
-    subtitle: 'World-class workshops, effortlessly',
+    subtitle: 'Expert-led workshops, effortlessly',
     description:
       'Template-driven creation, participant management, AI-customised content by industry. Session recordings with AI-generated summaries, action items, and follow-up plans.',
     href: '/workshop-platform',

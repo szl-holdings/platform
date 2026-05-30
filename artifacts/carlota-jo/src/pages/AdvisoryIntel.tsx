@@ -24,7 +24,7 @@ const advisoryMetrics = [
   {
     label: 'Client Retention',
     value: metricDisplay(CARLOTA_JO_RETENTION),
-    change: 'Industry leading',
+    change: 'Top quartile',
     icon: Star,
     accent: '#10b981',
   },
