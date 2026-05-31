@@ -1,26 +1,26 @@
 import { useState } from 'react';
 import { Layout } from '../components/layout';
 import { PageHeader, Card, SectionTitle, KpiCard, CodeBlock, StatusBadge, InfoRow } from '../components/ui';
-import { MYTHOS_SPEC_KINDS, MYTHOS_SPEC_VERSION } from '../data/mythosDoctrine';
+import { HATUN_SPEC_KINDS, HATUN_SPEC_VERSION } from '../data/hatunDoctrine';
 
-const SPEC_BASE = `https://a11oy.io/spec/mythos-doctrine/${MYTHOS_SPEC_VERSION}`;
+const SPEC_BASE = `https://a11oy.io/spec/hatun-doctrine/${HATUN_SPEC_VERSION}`;
 
-export function MythosSpec() {
-  const [active, setActive] = useState(MYTHOS_SPEC_KINDS[0].kind);
-  const current = MYTHOS_SPEC_KINDS.find(k => k.kind === active) ?? MYTHOS_SPEC_KINDS[0];
+export function HatunSpec() {
+  const [active, setActive] = useState(HATUN_SPEC_KINDS[0].kind);
+  const current = HATUN_SPEC_KINDS.find(k => k.kind === active) ?? HATUN_SPEC_KINDS[0];
 
   return (
     <Layout>
       <PageHeader
         label="DOCTRINE · OPEN SPEC"
-        title="Mythos Doctrine Open Spec"
-        subtitle={`Version ${MYTHOS_SPEC_VERSION} · CC-BY-4.0 · authored and operated by A11oy. Adopt the format; A11oy is one implementation among many.`}
+        title="Hatun Doctrine Specification"
+        subtitle={`Version ${HATUN_SPEC_VERSION} · CC-BY-4.0 · authored and operated by A11oy. Adopt the format; A11oy is one implementation among many.`}
         status="LIVE"
       />
 
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-6">
-        <KpiCard label="VERSION" value={MYTHOS_SPEC_VERSION} sub="SemVer" accent="#c9b787" />
-        <KpiCard label="ARTIFACT KINDS" value={MYTHOS_SPEC_KINDS.length} sub="discriminated union" accent="#c9b787" />
+        <KpiCard label="VERSION" value={HATUN_SPEC_VERSION} sub="SemVer" accent="#c9b787" />
+        <KpiCard label="ARTIFACT KINDS" value={HATUN_SPEC_KINDS.length} sub="discriminated union" accent="#c9b787" />
         <KpiCard label="LICENSE" value="CC-BY-4.0" sub="permissive, attribution" accent="#c9b787" />
         <KpiCard label="STATUS" value="ADOPT-OPEN" sub="external implementations welcome" accent="#c9b787" />
       </div>
@@ -37,13 +37,13 @@ export function MythosSpec() {
 curl ${SPEC_BASE}/schemas/<kind>.json
 
 # TypeScript companion types
-import type { Constitution, SystemCard, RiskReport } from "@mythos-doctrine/spec/types";`}</CodeBlock>
+import type { Constitution, SystemCard, RiskReport } from "@hatun-doctrine/spec/types";`}</CodeBlock>
       </Card>
 
       <div className="grid lg:grid-cols-[260px_1fr] gap-4">
         <div className="flex flex-col gap-1">
           <div className="text-xs font-mono mb-1" style={{ color: 'var(--color-a11oy-text-ghost)' }}>ARTIFACT KINDS</div>
-          {MYTHOS_SPEC_KINDS.map(k => (
+          {HATUN_SPEC_KINDS.map(k => (
             <button
               key={k.kind}
               onClick={() => setActive(k.kind)}

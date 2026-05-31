@@ -14,7 +14,7 @@ export const ARGO_TAGLINE =
 
 // ---------------------------------------------------------------------------
 // 1. DOCTRINE PILLARS
-// Quoted from the Sentra Defensive Executive Summary and the Mythos/Glasswing
+// Quoted from the Sentra Defensive Executive Summary and the Hatun Doctrine/Glasswing
 // research brief. Every seed must satisfy at least one pillar and violate none.
 // ---------------------------------------------------------------------------
 
@@ -69,7 +69,7 @@ export const DOCTRINE_PILLARS: readonly DoctrinePillar[] = [
   {
     id: 'public-inputs-only',
     pillar: 'Public inputs only. No leaks, no scraped weights.',
-    citation: 'Mythos doctrine — Ethical/Legal/IP Considerations',
+    citation: 'Hatun Doctrine — Ethical/Legal/IP Considerations',
     quote:
       'We rely solely on published research, official repos, and licensed data. Reverse-engineering proprietary weights or using leaked artifacts is forbidden.',
     enforcedBy: 'Hephaestus provenance gate · SLSA-style supply-chain attestation',

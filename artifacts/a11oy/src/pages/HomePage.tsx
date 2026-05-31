@@ -122,7 +122,7 @@ const PRIMITIVES = [
     desc: 'Closes the loop. Records the real-world consequence of each decision and feeds the result back to calibrate future confidence.',
   },
   {
-    name: 'Mythos Doctrine',
+    name: 'Hatun Doctrine',
     num: '05',
     desc: 'Frontier-grade alignment governance — versioned constitutions, behavioral audit, reward-hacking watchdog, red-team probes, agent welfare telemetry, and per-agent system cards. Open Spec (CC-BY-4.0).',
   },

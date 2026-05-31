@@ -1,6 +1,6 @@
-name: 'Mythos Doctrine — PR Governance Check'
+name: 'Hatun Doctrine — PR Governance Check'
 description: >
-  Runs the Mythos Doctrine PR-time governance subset against changed agents:
+  Runs the Hatun Doctrine PR-time governance subset against changed agents:
   Constitution DSL lint (suggest-only), a Petri-style behavioral-audit subset,
   and an Adversarial Robustness delta vs. the baseline snapshot. Posts a single
   PR comment summarizing findings. Never blocks; never auto-merges.
@@ -11,7 +11,7 @@ branding:
 
 inputs:
   spec-version:
-    description: 'Mythos Doctrine Open Spec version this run targets.'
+    description: 'Hatun Doctrine Specification version this run targets.'
     required: false
     default: '0.1.0'
   agent-id:

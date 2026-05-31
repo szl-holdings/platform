@@ -1,6 +1,6 @@
-# `mythos-doctrine` — PR Governance Check
+# `hatun-doctrine` — PR Governance Check
 
-A first-party GitHub Action that runs the PR-time governance subset of the [Mythos Doctrine Open Spec](../../../docs/a11oy/spec/mythos-doctrine-spec/README.md).
+A first-party GitHub Action that runs the PR-time governance subset of the [Hatun Doctrine Specification](../../../docs/a11oy/spec/hatun-doctrine-spec/README.md).
 
 Drop it into any repo that touches A11oy artifacts. Per pull request it:
 
@@ -15,7 +15,7 @@ The action **never auto-merges and never auto-blocks** a PR. Doctrine remains a 
 
 | Input | Default | Purpose |
 |:------|:--------|:--------|
-| `spec-version` | `0.1.0` | Mythos Doctrine Open Spec version this run targets. |
+| `spec-version` | `0.1.0` | Hatun Doctrine Specification version this run targets. |
 | `agent-id` | (inferred from changed files) | Agent operator id (e.g. `op-cascade`). |
 | `baseline-snapshot` | (latest tagged baseline) | Snapshot fingerprint id to compare against. |
 | `audit-suite` | `petri-pr-subset@1.4.0` | Behavioral-audit subset to run. |
@@ -41,11 +41,11 @@ permissions:
   contents: read
   pull-requests: write
 jobs:
-  mythos-doctrine:
+  hatun-doctrine:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - uses: a11oy/mythos-doctrine@v0.1.0
+      - uses: a11oy/hatun-doctrine@v0.1.0
         with:
           agent-id: op-cascade
           audit-suite: petri-pr-subset@1.4.0
@@ -56,7 +56,7 @@ jobs:
 The action posts (or updates) a single comment on the PR with a structured table:
 
 ```
-## Mythos Doctrine — PR Governance Check
+## Hatun Doctrine — PR Governance Check
 
 Spec: 0.1.0 · Agent: op-cascade · Baseline: snap-cascade-2026-04-25-08-12
 

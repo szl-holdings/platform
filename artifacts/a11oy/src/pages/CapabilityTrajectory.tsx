@@ -1,7 +1,7 @@
 import { Layout } from '../components/layout';
 import { PageHeader, Card, SectionTitle, KpiCard } from '../components/ui';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend } from 'recharts';
-import { CAPABILITY_TRAJECTORY, AGENT_LABEL, DOCTRINE_AGENT_IDS } from '../data/mythosDoctrine';
+import { CAPABILITY_TRAJECTORY, AGENT_LABEL, DOCTRINE_AGENT_IDS } from '../data/hatunDoctrine';
 
 const GOLD = '#c9b787';
 const COLORS: Record<string, string> = {

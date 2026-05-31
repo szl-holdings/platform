@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://a11oy.io/spec/mythos-doctrine/0.1.0/schemas/constitution.json",
+  "$id": "https://a11oy.io/spec/hatun-doctrine/0.1.0/schemas/constitution.json",
   "title": "Constitution",
   "description": "Versioned, machine-readable behavior contract for an agent. Authored by the operator org and ratified through a Pre-Deployment Alignment Review Gate before deployment.",
   "type": "object",

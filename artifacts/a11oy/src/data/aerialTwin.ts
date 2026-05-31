@@ -305,7 +305,7 @@ export const INNOVATION_SEEDS: readonly InnovationSeed[] = [
     id: 'planner-over-ran-graph',
     name: 'A11oy planner over the RAN policy graph',
     oneLine:
-      'Natural-language ops directives decompose into typed RIC actions. Same Mythos Layer pattern as the patch loop.',
+      'Natural-language ops directives decompose into typed RIC actions. Same Hatun Layer pattern as the patch loop.',
     novelty:
       'Brings the A11oy planner discipline (typed plans, Constitution admission, dual-key approval) to a domain where most automation today is bash and Helm.',
     status: 'distilled',
@@ -317,7 +317,7 @@ export const INNOVATION_SEEDS: readonly InnovationSeed[] = [
     oneLine:
       'Jamming, spoofing, and rogue-cell scenarios run in the twin only. Outcomes feed the Sentra Risk Engine.',
     novelty:
-      'The frontier red-teaming pattern from the Mythos Layer transposed onto the RF surface. No live spectrum is ever touched.',
+      'The frontier red-teaming pattern from the Hatun Layer transposed onto the RF surface. No live spectrum is ever touched.',
     status: 'observed',
     module: 'Sentra Sandbox + Adversarial Resilience',
   },

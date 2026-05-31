@@ -39,7 +39,7 @@ import {
   fmtUsd,
   fmtPct,
   type DoctrineAgentId,
-} from '../data/mythosDoctrine';
+} from '../data/hatunDoctrine';
 const BASE = (import.meta.env.BASE_URL ?? '/a11oy/').replace(/\/$/, '');
 const GOLD = '#c9b787';
 
@@ -102,7 +102,7 @@ export function SystemCard() {
       <PageHeader
         label={`DOCTRINE · SYSTEM CARD · ${cst.version}`}
         title={`${AGENT_LABEL[id]} — System Card`}
-        subtitle="The Mythos-style per-agent system card. Constitution, behaviors, audits, welfare, lift, and capability trajectory in a single page."
+        subtitle="The Hatun-style per-agent system card. Constitution, behaviors, audits, welfare, lift, and capability trajectory in a single page."
         status="LIVE"
       />
 

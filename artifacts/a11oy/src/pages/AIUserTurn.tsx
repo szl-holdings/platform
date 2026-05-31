@@ -1,6 +1,6 @@
 import { Layout } from '../components/layout';
 import { PageHeader, Card, SectionTitle, KpiCard, ProgressBar, StatusBadge } from '../components/ui';
-import { USER_TURN_SIGNALS } from '../data/mythosDoctrine';
+import { USER_TURN_SIGNALS } from '../data/hatunDoctrine';
 
 const VERDICT_STATUS: Record<string, 'ok' | 'warn' | 'error' | 'info'> = {
   human: 'ok', 'likely-human': 'ok', uncertain: 'warn', 'likely-ai': 'error', ai: 'error',

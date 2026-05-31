@@ -142,7 +142,7 @@ const NAV_GROUPS = [
   {
     label: 'DOCTRINE',
     items: [
-      { href: '/doctrine', label: 'Mythos Overview' },
+      { href: '/doctrine', label: 'Hatun Overview' },
       { href: '/risk-reports', label: 'Risk Reports' },
       { href: '/behavioral-audit', label: 'Behavioral Audit' },
       { href: '/covenant-lift', label: 'Covenant Lift' },
@@ -173,7 +173,7 @@ const NAV_GROUPS = [
   {
     label: 'GLASSWING',
     items: [
-      { href: '/mythos-spec', label: 'Open Spec' },
+      { href: '/hatun-spec', label: 'Open Spec' },
       { href: '/glasswing-partners', label: 'Partners' },
       { href: '/cavd', label: 'CAVD' },
       { href: '/robustness-wall', label: 'Robustness Wall' },

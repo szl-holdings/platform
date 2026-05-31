@@ -1,8 +1,8 @@
 # A11OY Public Claims Doctrine
 
-> Every public claim A11oy makes about its governance posture must be representable as a published artifact in the Mythos Doctrine Open Spec. This document specifies which claims map to which artifact kinds, who signs them, and how claims are retracted.
+> Every public claim A11oy makes about its governance posture must be representable as a published artifact in the Hatun Doctrine Specification. This document specifies which claims map to which artifact kinds, who signs them, and how claims are retracted.
 >
-> Companion: [`A11OY_DOCTRINE.md`](./A11OY_DOCTRINE.md). Grounding: [`MYTHOS_RESEARCH_SWEEP.md`](./MYTHOS_RESEARCH_SWEEP.md).
+> Companion: [`A11OY_DOCTRINE.md`](./A11OY_DOCTRINE.md). Grounding: [`HATUN_RESEARCH_SWEEP.md`](./HATUN_RESEARCH_SWEEP.md).
 
 ---
 

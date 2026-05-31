@@ -1,9 +1,9 @@
 import { Layout } from '../components/layout';
 import { PageHeader, Card, SectionTitle, KpiCard, InfoRow, StatusBadge } from '../components/ui';
 import {
-  CONSTITUTIONS, AGENT_LABEL, MYTHOS_SPEC_VERSION,
+  CONSTITUTIONS, AGENT_LABEL, HATUN_SPEC_VERSION,
   TRANSPARENCY_REPORTS_90D, ROBUSTNESS_WALL, CAVD_RECORDS, DEFENDER_CREDIT_POOL,
-} from '../data/mythosDoctrine';
+} from '../data/hatunDoctrine';
 import { Link } from 'wouter';
 
 const BASE = (import.meta.env.BASE_URL ?? '/a11oy/').replace(/\/$/, '');
@@ -26,7 +26,7 @@ export function PublicTrustPortal() {
       />
 
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-6">
-        <KpiCard label="OPEN SPEC" value={MYTHOS_SPEC_VERSION} sub="CC-BY-4.0" accent="#c9b787" />
+        <KpiCard label="OPEN SPEC" value={HATUN_SPEC_VERSION} sub="CC-BY-4.0" accent="#c9b787" />
         <KpiCard label="GLASSWING AGENTS" value={publicSnapshots.length} sub="public scores" accent="#c9b787" />
         <KpiCard label="CAVD DISCLOSED" value={disclosed.length} sub={`${intakeAnchored.length} anchored`} accent="#c9b787" />
         <KpiCard label="DEFENDER POOL" value={fmtCurrency(DEFENDER_CREDIT_POOL.totalCommitted)} sub={`${fmtCurrency(DEFENDER_CREDIT_POOL.totalPaid)} paid`} accent="#c9b787" />
@@ -36,10 +36,10 @@ export function PublicTrustPortal() {
         <Card>
           <SectionTitle>Open Spec</SectionTitle>
           <p className="text-xs mb-3" style={{ color: 'var(--color-a11oy-text-sub)', lineHeight: 1.7 }}>
-            The Mythos Doctrine Open Spec is the format every artifact below conforms to. Version pinned to{' '}
-            <span className="font-mono" style={{ color: '#c9b787' }}>{MYTHOS_SPEC_VERSION}</span>.
+            The Hatun Doctrine Specification is the format every artifact below conforms to. Version pinned to{' '}
+            <span className="font-mono" style={{ color: '#c9b787' }}>{HATUN_SPEC_VERSION}</span>.
           </p>
-          <Link href={link('/mythos-spec')} className="text-xs font-mono" style={{ color: '#c9b787' }}>
+          <Link href={link('/hatun-spec')} className="text-xs font-mono" style={{ color: '#c9b787' }}>
             View spec ›
           </Link>
         </Card>
@@ -141,7 +141,7 @@ export function PublicTrustPortal() {
       <Card>
         <SectionTitle>Notes</SectionTitle>
         <p className="text-xs" style={{ color: 'var(--color-a11oy-text-sub)', lineHeight: 1.7 }}>
-          Every claim on this portal maps to a published artifact under the Mythos Doctrine Open Spec. If a claim cannot be backed by an artifact,
+          Every claim on this portal maps to a published artifact under the Hatun Doctrine Specification. If a claim cannot be backed by an artifact,
           it is not posted here. Retractions are published next to originals; originals are never edited or deleted.
         </p>
       </Card>

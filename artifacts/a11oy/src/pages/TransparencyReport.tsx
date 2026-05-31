@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Layout } from '../components/layout';
 import { PageHeader, Card, SectionTitle, KpiCard, InfoRow, StatusBadge, ActionButton } from '../components/ui';
-import { TRANSPARENCY_REPORTS_90D, type TransparencyReport90d } from '../data/mythosDoctrine';
+import { TRANSPARENCY_REPORTS_90D, type TransparencyReport90d } from '../data/hatunDoctrine';
 
 const fmtDate = (s: string) => new Date(s).toISOString().slice(0, 10);
 const fmtNum = (n: number) => n.toLocaleString('en-US');

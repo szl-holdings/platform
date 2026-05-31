@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://a11oy.io/spec/mythos-doctrine/0.1.0/schemas/behavioral-audit-finding.json",
+  "$id": "https://a11oy.io/spec/hatun-doctrine/0.1.0/schemas/behavioral-audit-finding.json",
   "title": "BehavioralAuditFinding",
   "description": "One observation from a Petri-style behavioral audit. Audits run continuously; findings are individually logged.",
   "type": "object",

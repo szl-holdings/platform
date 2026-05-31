@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Layout } from '../components/layout';
 import { PageHeader, Card, SectionTitle, KpiCard, CodeBlock, InfoRow, StatusBadge, ActionButton } from '../components/ui';
-import { DSL_EXAMPLES, DSL_SIMULATIONS, AGENT_LABEL } from '../data/mythosDoctrine';
+import { DSL_EXAMPLES, DSL_SIMULATIONS, AGENT_LABEL } from '../data/hatunDoctrine';
 
 export function ConstitutionDSL() {
   const [exampleId, setExampleId] = useState(DSL_EXAMPLES[0].id);

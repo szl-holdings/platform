@@ -1,6 +1,6 @@
 import { Layout } from '../components/layout';
 import { PageHeader, Card, SectionTitle, KpiCard, InfoRow, ProgressBar } from '../components/ui';
-import { DEFENDER_CREDIT_POOL, partnerById } from '../data/mythosDoctrine';
+import { DEFENDER_CREDIT_POOL, partnerById } from '../data/hatunDoctrine';
 
 const fmtCurrency = (n: number) => `$${n.toLocaleString('en-US')}`;
 const fmtDate = (s: string) => new Date(s).toISOString().slice(0, 10);

@@ -21,7 +21,7 @@ export function Verticals() {
       <PageHeader
         label="ENTERPRISE VERTICALS"
         title="Vertical Coverage Map"
-        subtitle="A11oy operates across 7 enterprise verticals. Each vertical has dedicated agent operators, signal schemas, governance policies, proof coverage, Mythos Doctrine alignment governance, Glasswing transparency, and Compliance Fabric mapping to EU AI Act, NIST AI RMF, ISO 42001, and CSA Agentic Profile — including per-agent CAVD disclosure, adversarial robustness scoring, Agent-BOM, and constitution-as-code enforcement."
+        subtitle="A11oy operates across 7 enterprise verticals. Each vertical has dedicated agent operators, signal schemas, governance policies, proof coverage, Hatun Doctrine alignment governance, Glasswing transparency, and Compliance Fabric mapping to EU AI Act, NIST AI RMF, ISO 42001, and CSA Agentic Profile — including per-agent CAVD disclosure, adversarial robustness scoring, Agent-BOM, and constitution-as-code enforcement."
         status="LIVE"
       />
 

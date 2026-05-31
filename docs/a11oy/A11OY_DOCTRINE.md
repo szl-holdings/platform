@@ -1,21 +1,21 @@
 # A11OY Doctrine
 
-> The internal operating doctrine for A11oy as the author and operator of the Mythos Doctrine Open Spec. This document tells engineers, partners, and reviewers how A11oy treats the spec, the Glasswing Partner program, and the surfaces that depend on them.
+> The internal operating doctrine for A11oy as the author and operator of the Hatun Doctrine Specification. This document tells engineers, partners, and reviewers how A11oy treats the spec, the Glasswing Partner program, and the surfaces that depend on them.
 >
-> Companion: [`A11OY_PUBLIC_CLAIMS_DOCTRINE.md`](./A11OY_PUBLIC_CLAIMS_DOCTRINE.md). Grounding: [`MYTHOS_RESEARCH_SWEEP.md`](./MYTHOS_RESEARCH_SWEEP.md).
+> Companion: [`A11OY_PUBLIC_CLAIMS_DOCTRINE.md`](./A11OY_PUBLIC_CLAIMS_DOCTRINE.md). Grounding: [`HATUN_RESEARCH_SWEEP.md`](./HATUN_RESEARCH_SWEEP.md).
 
 ---
 
 ## 1. A11oy's role with respect to the Open Spec
 
-A11oy authored the Mythos Doctrine Open Spec. A11oy is also one of its implementations. These are deliberately separate roles.
+A11oy authored the Hatun Doctrine Specification. A11oy is also one of its implementations. These are deliberately separate roles.
 
 - As **author**, A11oy treats the spec as public infrastructure — versioned under SemVer, licensed under CC-BY-4.0, and changed only through a posted review window.
 - As **implementation**, A11oy emits and consumes every artifact kind in the spec and stays current with the latest published version.
 
 **Conflict-of-interest rule.** A spec change that exclusively benefits A11oy's implementation must either (a) become a `MAJOR` revision with a public migration path, or (b) be re-shaped to benefit any conformant implementation. The 90-day Transparency Report logs every spec revision and the parties who proposed it.
 
-## 2. Backward compatibility with #3993 (Mythos Doctrine primitives)
+## 2. Backward compatibility with #3993 (Hatun Doctrine primitives)
 
 Task #3994 is **strictly additive** on top of the #3993 primitives:
 - Constitutions, System Cards, Behavioral Audit findings, Welfare telemetry, Snapshot fingerprints, Red Team probes, Capability Trajectory, Reward Hacking watchdog, Alignment Reviews, Covenant Lift samples — **all retained as authored in #3993**, no field renames, no removals.
@@ -130,9 +130,9 @@ A budgeted pool that finances independent reporters of valid CAVD intakes. The p
 
 Allocation rule: per-finding allocation is set at triage from a published rubric (severity × novelty × proof-quality). Allocations and payouts are visible on the Public Trust Portal.
 
-## 12. The `mythos-doctrine` GitHub Action
+## 12. The `hatun-doctrine` GitHub Action
 
-A first-party GitHub Action lives at `tools/github-actions/mythos-doctrine/`. Drop it into any repo that touches A11oy artifacts. Per PR:
+A first-party GitHub Action lives at `tools/github-actions/hatun-doctrine/`. Drop it into any repo that touches A11oy artifacts. Per PR:
 
 1. **Lint** Constitutions in the DSL (suggest-only; never blocks).
 2. **Run** a small Petri-style behavioral-audit subset against the changed agent.
