@@ -73,6 +73,13 @@ ENV SUBSTRATE_MODELS_DIR=/data/models \
 EXPOSE 8070
 
 HEALTHCHECK --interval=30s --timeout=10s --start-period=60s --retries=3 \
-    CMD python3.11 -c "import urllib.request; urllib.request.urlopen('http://localhost:${SUBSTRATE_INFERENCE_PORT:-8070}/health')" || exit 1
+    CMD python3.11 -c "import urllib.request; urllib.request.urlopen('http://localhost:${SUBSTRATE_INFERENCE_PORT:-8070}/healthz')" || exit 1
+
+LABEL org.opencontainers.image.source="https://github.com/szl-holdings/platform" \
+      org.opencontainers.image.title="substrate-inference" \
+      org.opencontainers.image.description="Substrate Edge Inference — oLLM-powered local GPU inference service with an OpenAI-compatible API." \
+      org.opencontainers.image.licenses="LicenseRef-SZL-Proprietary" \
+      org.opencontainers.image.version="0.1.0" \
+      org.opencontainers.image.vendor="SZL Holdings"
 
 CMD ["python3.11", "-m", "src.main"]

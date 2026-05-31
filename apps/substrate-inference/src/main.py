@@ -7,6 +7,7 @@ Provides OpenAI-compatible API endpoints for local GPU inference:
   POST /v1/models/load       — Hot-load a model into GPU memory (auth required)
   POST /v1/models/unload     — Unload a model from GPU memory (auth required)
   GET  /health               — GPU/VRAM status and service health
+  GET  /healthz              — Lightweight liveness probe (process up; no GPU query)
 
 Environment variables:
   SUBSTRATE_INFERENCE_PORT    — Port to listen on (default: 8070)
@@ -363,6 +364,18 @@ async def unload_model(request: ModelLoadRequest, _: None = Depends(_require_api
         message=f"Model '{request.model_id}' unloaded successfully",
         model_id=request.model_id,
     )
+
+
+@app.get("/healthz")
+async def healthz() -> dict:
+    """Lightweight liveness probe.
+
+    Returns 200 as soon as the process can serve requests. Unlike ``/health``,
+    this does not query the GPU or runtime metrics, so it is cheap enough for
+    frequent container/orchestrator liveness checks (and is what the Docker
+    HEALTHCHECK targets).
+    """
+    return {"status": "ok"}
 
 
 @app.get("/health")
