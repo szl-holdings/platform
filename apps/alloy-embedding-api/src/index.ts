@@ -99,7 +99,7 @@ app.use(((err: unknown, _req: express.Request, res: express.Response, _next: exp
 }) as ErrorRequestHandler);
 
 app.listen(PORT, "0.0.0.0", () => {
-  logger.info({ port: PORT, basePath: BASE_PATH }, "Counsel Embedding Fabric API started");
+  logger.info({ port: PORT, basePath: BASE_PATH }, "Alloy Embedding Fabric API started");
 });
 
 export default app;
