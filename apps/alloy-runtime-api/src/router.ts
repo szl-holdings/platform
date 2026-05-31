@@ -37,6 +37,7 @@
  */
 import { Router } from 'express';
 import { apiKeyGuard } from './middleware/auth.js';
+import { buildHealthReport, buildReadinessReport } from './health.js';
 import embedRouter from './routes/v1/embed.js';
 import evalsRouter from './routes/v1/evals.js';
 import indexRouter from './routes/v1/index.js';
@@ -100,13 +101,18 @@ export function createRouter(): Router {
     });
   });
 
-  // Standard Kubernetes probe aliases
+  // Liveness probe: reports the running build (git SHA + version), boot time,
+  // and uptime so a deployed container is self-identifying. See src/health.ts.
   router.get('/healthz', (_req, res) => {
-    res.status(200).json({ status: 'ok' });
+    res.status(200).json(buildHealthReport());
   });
 
+  // Readiness probe: runs real probes against the dependencies a request
+  // traverses (memory store, run registry, workflow-runtime) and returns 503
+  // when any probe fails so a load balancer pulls the instance.
   router.get('/readyz', (_req, res) => {
-    res.status(200).json({ ready: true });
+    const report = buildReadinessReport();
+    res.status(report.ready ? 200 : 503).json(report);
   });
 
   router.get('/metrics', (_req, res) => {

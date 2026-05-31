@@ -44,6 +44,15 @@ RUN pnpm --filter @workspace/alloy-runtime-api deploy --prod --legacy /app/deplo
 FROM node:22-alpine AS runtime
 RUN apk add --no-cache libc6-compat
 WORKDIR /app
+
+# Build provenance: pass these at build time so /healthz reports the exact
+# commit and build the container was produced from, e.g.
+#   docker build -f apps/alloy-runtime-api/Dockerfile \
+#     --build-arg COMMIT_SHA=$(git rev-parse HEAD) \
+#     --build-arg BUILD_TIMESTAMP=$(date -u +%Y-%m-%dT%H:%M:%SZ) .
+ARG COMMIT_SHA=unknown
+ARG BUILD_TIMESTAMP
+ARG BUILD_VERSION=0.1.0
 # uid/gid 1000 non-root user
 RUN addgroup -g 1000 -S app && adduser -u 1000 -S app -G app
 # Production node_modules (resolved workspace deps) + compiled output only.
@@ -54,12 +63,18 @@ COPY --from=builder --chown=app:app /app/apps/alloy-runtime-api/package.json ./p
 USER app
 
 ENV NODE_ENV=production \
-    PORT=4010
+    PORT=4010 \
+    COMMIT_SHA=$COMMIT_SHA \
+    BUILD_TIMESTAMP=$BUILD_TIMESTAMP \
+    BUILD_VERSION=$BUILD_VERSION
 # Server binds process.env.PORT, defaulting to 4010 (src/server.ts).
 EXPOSE 4010
 
-# No /healthz endpoint exists in src/server.ts, so no HEALTHCHECK is declared
-# (declaring one would be fake). Add a probe here once /healthz lands.
+# Liveness probe against the real /healthz endpoint (src/health.ts). Uses the
+# bundled node runtime (no curl/wget in the minimal image) and exits non-zero
+# on a non-200 so the orchestrator restarts a wedged container.
+HEALTHCHECK --interval=30s --timeout=5s --start-period=15s --retries=3 \
+  CMD node -e "require('http').get('http://127.0.0.1:'+(process.env.PORT||4010)+'/healthz',r=>process.exit(r.statusCode===200?0:1)).on('error',()=>process.exit(1))"
 
 # start script: node --enable-source-maps dist/server.js
 CMD ["node", "--enable-source-maps", "dist/server.js"]
@@ -69,4 +84,5 @@ LABEL org.opencontainers.image.source="https://github.com/szl-holdings/platform"
       org.opencontainers.image.description="AEEP Alloy Runtime API — unified v1 surface for tasks, memory, and workflow execution." \
       org.opencontainers.image.licenses="LicenseRef-SZL-Proprietary" \
       org.opencontainers.image.version="0.1.0" \
+      org.opencontainers.image.revision="$COMMIT_SHA" \
       org.opencontainers.image.vendor="SZL Holdings"
