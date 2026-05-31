@@ -12,8 +12,8 @@
  *   - "sorry"             = carries an undischarged sorry (e.g. CAUCHY_ND).
  *   - "shell"             = `:= True` tracked-obligation placeholder.
  *
- * Canonical Lean numbers (AGENT_DOCTRINE_ENFORCEMENT.md @ 3de37e5, main builds
- * clean): 752 declarations / 15 raw axioms (14 unique) / 160 sorry tokens.
+ * Canonical Lean numbers (AGENT_DOCTRINE_ENFORCEMENT.md @ c7c0ba17, main builds
+ * clean): 749 declarations / 15 raw axioms (14 unique) / 163 sorry tokens.
  * Source of truth: szl-holdings/.github/.github/data/lean_numbers.json.
  *
  * NO new axiom is introduced here (Doctrine v7 §3). This module only NAMES
@@ -67,11 +67,11 @@ export const LEAN_REGISTRY: readonly LeanEntry[] = [
 
 /** Canonical Lean corpus numbers (do not fabricate — source: lean_numbers.json). */
 export const LEAN_NUMBERS = {
-  declarations: 752,
+  declarations: 749,
   rawAxioms: 15,
   uniqueAxioms: 14,
-  sorryTokens: 160,
-  buildingSha: "3de37e5",
+  sorryTokens: 163,
+  buildingSha: "c7c0ba17",
   source: "szl-holdings/.github/.github/data/lean_numbers.json",
 } as const;
 
@@ -107,7 +107,7 @@ export function getCanonicalNumbers(): CanonicalNumbers {
       source: j.source ?? LEAN_NUMBERS.source,
     };
   } catch {
-    // Fall back to the embedded constant (still the live 3de37e5 figures).
+    // Fall back to the embedded constant (still the live c7c0ba17 figures).
     return { ...LEAN_NUMBERS };
   }
 }
