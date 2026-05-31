@@ -51,6 +51,16 @@ import * as khipu from "./khipu/index.ts";
 import * as forecast from "./forecast/index.ts";
 import * as lean from "./lean/index.ts";
 
+// Canonical "Paper to Receipt" branch operators (founder diagram, 2026-05-31).
+// Each hangs off the Λ Audit-Closure Operator (invariants/Λ_audit_closure):
+//   amaru  — Cardano-anchored Shor receipts            (qec + memory)
+//   rosie  — CSS-ingress, canonical byte-strings        (qec + ledger)
+//   sentra — Kitaev-surface drift detection             (qec + gates)
+//   mesh   — Span schemas, OTEL — UDS-Mesh + VSP-OTEL Λ-axis span exporter (mesh)
+//   a11oy  — policy + measurement + knowledge + QEC     (gates + ledger + qec)
+// These are doc-stamped aliases over the wired modules above — not renames.
+export { amaru, rosie, sentra, meshBranch, a11oy, CANONICAL_BRANCHES } from "./branches.ts";
+
 /** Options for kernel.start(). */
 export interface KernelStartOptions {
   /** Process environment to scan (defaults to process.env). */
