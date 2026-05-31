@@ -1,10 +1,14 @@
-# Changelog — Mythos Doctrine Open Spec
+# Changelog — Hatun Doctrine Specification
 
 All notable changes to this spec are documented here. The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and the spec follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Renamed] 2026-05-31
+
+This spec is now formally the **Hatun Doctrine Specification**, completing a full rename. The prior internal codename has been retired. Quechua "hatun" = great, supreme, foundational. The mathematical, schema, and validation content is unchanged; only the name is updated to reflect SZL's cultural-naming convention (matching Kanchay, Kallpa, Yuyay, etc.). Backwards-compatible aliases are NOT provided — downstream consumers should update to the new schema URLs.
+
 ## [0.1.0] — 2026-04-26
 
-Initial public draft. Authored and operated by A11oy. Grounded in `MYTHOS_RESEARCH_SWEEP.md`.
+Initial public draft. Authored and operated by A11oy. Grounded in the prior-art sweep document (see `HATUN_RESEARCH_SWEEP.md` at `docs/a11oy/`).
 
 ### Added
 - `Constitution` — versioned, machine-readable behavior contract for an agent.

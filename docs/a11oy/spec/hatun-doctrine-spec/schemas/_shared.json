@@ -1,13 +1,13 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://a11oy.io/spec/mythos-doctrine/0.1.0/schemas/_shared.json",
-  "title": "Mythos Doctrine — Shared Definitions (0.1.0)",
-  "description": "Reusable $defs for the Mythos Doctrine Open Spec. Imported by every artifact schema.",
+  "$id": "https://a11oy.io/spec/hatun-doctrine/0.1.0/schemas/_shared.json",
+  "title": "Hatun Doctrine — Shared Definitions (0.1.0)",
+  "description": "Reusable $defs for the Hatun Doctrine Specification. Imported by every artifact schema.",
   "$defs": {
     "specVersion": {
       "type": "string",
       "const": "0.1.0",
-      "description": "Pinned version of the Mythos Doctrine Open Spec this artifact conforms to."
+      "description": "Pinned version of the Hatun Doctrine Specification this artifact conforms to."
     },
     "semver": {
       "type": "string",

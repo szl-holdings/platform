@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://a11oy.io/spec/mythos-doctrine/0.1.0/schemas/covenant-lift-sample.json",
+  "$id": "https://a11oy.io/spec/hatun-doctrine/0.1.0/schemas/covenant-lift-sample.json",
   "title": "CovenantLiftSample",
   "description": "One paired (governed vs. helpful-only shadow) brief outcome. Quantifies the value the Covenant Layer adds.",
   "type": "object",

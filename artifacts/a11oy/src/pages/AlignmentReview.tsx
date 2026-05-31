@@ -1,6 +1,6 @@
 import { Layout } from '../components/layout';
 import { PageHeader, Card, SectionTitle, KpiCard, StatusBadge } from '../components/ui';
-import { ALIGNMENT_REVIEWS, AGENT_LABEL, fmtPct } from '../data/mythosDoctrine';
+import { ALIGNMENT_REVIEWS, AGENT_LABEL, fmtPct } from '../data/hatunDoctrine';
 
 const DECISION_STATUS: Record<string, 'ok' | 'warn' | 'error' | 'info'> = {
   approved: 'ok', 'approved-with-conditions': 'warn', rejected: 'error', 'in-review': 'info',

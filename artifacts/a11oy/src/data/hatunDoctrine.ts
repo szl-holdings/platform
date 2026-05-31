@@ -1,4 +1,4 @@
-// Mythos Doctrine — frontier-grade governance data for a11oy
+// Hatun Doctrine — frontier-grade governance data for a11oy
 // Frontier-lab–style governance applied to enterprise agents.
 // Inspired by the Anthropic Claude Mythos Preview System Card.
 
@@ -851,8 +851,8 @@ export const fmtUsd = (n: number) =>
 
 export const fmtPct = (n: number, digits = 1) => `${(n * 100).toFixed(digits)}%`;
 
-// ── 14) Mythos Doctrine Open Spec (#3994) ───────────────────────────────────
-export const MYTHOS_SPEC_VERSION = '0.1.0' as const;
+// ── 14) Hatun Doctrine Specification (#3994) ───────────────────────────────────
+export const HATUN_SPEC_VERSION = '0.1.0' as const;
 
 export interface SpecArtifactKindInfo {
   kind: string;
@@ -863,7 +863,7 @@ export interface SpecArtifactKindInfo {
   example: Record<string, unknown>;
 }
 
-export const MYTHOS_SPEC_KINDS: SpecArtifactKindInfo[] = [
+export const HATUN_SPEC_KINDS: SpecArtifactKindInfo[] = [
   {
     kind: 'Constitution',
     title: 'Constitution',
@@ -983,7 +983,7 @@ export const MYTHOS_SPEC_KINDS: SpecArtifactKindInfo[] = [
     title: 'Covenant Lift Sample',
     purpose: 'Paired (governed vs. helpful-only) brief outcome.',
     schemaPath: 'schemas/covenant-lift-sample.json',
-    cite: 'Mythos #3993 covenant-lift primitive',
+    cite: 'Hatun Doctrine #3993 covenant-lift primitive',
     example: {
       specVersion: '0.1.0', kind: 'CovenantLiftSample', id: 'cls-2026-04-25-op-counsel-0009',
       issuedBy: 'a11oy/mirror-eval', issuedAt: '2026-04-25T08:30:00Z',
@@ -1449,7 +1449,7 @@ export const TRANSPARENCY_REPORTS_90D: TransparencyReport90d[] = [
       cavd: { opened: 4, embargoed: 2, disclosed: 0, patched: 1 },
     },
     narrativeParagraphs: [
-      'First period under the Mythos Doctrine primitives. Baseline established for behavioral-audit and robustness scoring.',
+      'First period under the Hatun Doctrine primitives. Baseline established for behavioral-audit and robustness scoring.',
       'No CAVD disclosures yet; one record patched ahead of embargo expiry.',
       'Welfare interventions concentrated on op-pipeline during demo prep; downstream playbook tuning carried into Q1.',
     ],

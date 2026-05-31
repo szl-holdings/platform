@@ -299,6 +299,11 @@ The Alloy Doctrine is the permanent governance framework that defines how all AI
 | [`docs/A11OY_PROOF_DOCTRINE.md`](./docs/A11OY_PROOF_DOCTRINE.md) | Proof requirements for every consequential action |
 | [`docs/A11OY_SECURITY_DOCTRINE.md`](./docs/A11OY_SECURITY_DOCTRINE.md) | Security rules, secret handling, and audit requirements |
 
+### Hatun Doctrine Specification
+
+[`docs/a11oy/spec/hatun-doctrine-spec/`](docs/a11oy/spec/hatun-doctrine-spec/) — the constitutional governance schema for the SZL substrate. Ten machine-checkable JSON Schemas covering constitution, system-card, risk-report, behavioral-audit-finding, adversarial-robustness-score, coordinated-agent-vulnerability-disclosure, covenant-lift-sample, welfare-telemetry-sample, snapshot-fingerprint, and glasswing-partner-attestation. Enforced in CI via [`tools/github-actions/hatun-doctrine`](tools/github-actions/hatun-doctrine). Quechua "hatun" = great, supreme, foundational. Cite as Lutar 2026; DOI pending Zenodo deposit.
+
+
 ---
 
 ## How to Cite

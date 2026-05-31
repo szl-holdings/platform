@@ -6,7 +6,7 @@ import {
   COVENANT_LIFT, REWARD_HACKING_INCIDENTS, ALIGNMENT_REVIEWS, SNAPSHOTS,
   USER_TURN_SIGNALS, AGENT_WELFARE, RED_TEAM_PROBES, RISK_REPORTS,
   AGENT_LABEL, fmtUsd, fmtPct,
-} from '../data/mythosDoctrine';
+} from '../data/hatunDoctrine';
 
 const BASE = (import.meta.env.BASE_URL ?? '/a11oy/').replace(/\/$/, '');
 const b = (p: string) => `${BASE}${p}`;
@@ -40,7 +40,7 @@ export function DoctrineOverview() {
   return (
     <Layout>
       <PageHeader
-        label={`MYTHOS DOCTRINE · v${DOCTRINE_VERSION}`}
+        label={`HATUN DOCTRINE · v${DOCTRINE_VERSION}`}
         title="Doctrine Layer L8"
         subtitle={DOCTRINE_TAGLINE}
         status="LIVE"
@@ -62,7 +62,7 @@ export function DoctrineOverview() {
           <div>
             <SectionTitle>Why this layer exists</SectionTitle>
             <p className="text-sm" style={{ color: 'var(--color-a11oy-text-sub)', lineHeight: 1.7, maxWidth: '78ch' }}>
-              Frontier AI labs treat their models the way Mythos is treated: a constitution, a behavioral audit pipeline,
+              Frontier AI labs treat their models the way Hatun is treated: a constitution, a behavioral audit pipeline,
               a helpful-only counterfactual, an alignment review before deployment, and a model card after. Enterprise
               agents almost never get the same treatment — even when they touch matters that are far more consequential
               than a chat reply. The Doctrine Layer brings frontier-lab governance to every governed agent in a11oy.

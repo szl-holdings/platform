@@ -284,8 +284,8 @@ const GlasswingPage = lazy(() =>
 const ArgoForgePage = lazy(() =>
   import('./pages/ArgoForge').then((m) => ({ default: m.ArgoForge })),
 );
-const MythosLayerPage = lazy(() =>
-  import('./pages/MythosLayer').then((m) => ({ default: m.MythosLayer })),
+const HatunLayerPage = lazy(() =>
+  import('./pages/HatunLayer').then((m) => ({ default: m.HatunLayer })),
 );
 const AerialTwinPage = lazy(() =>
   import('./pages/AerialTwin').then((m) => ({ default: m.AerialTwin })),
@@ -299,8 +299,8 @@ const SystemCard = lazy(() =>
 const CapabilityTrajectory = lazy(() =>
   import('./pages/CapabilityTrajectory').then((m) => ({ default: m.CapabilityTrajectory })),
 );
-const MythosSpec = lazy(() =>
-  import('./pages/MythosSpec').then((m) => ({ default: m.MythosSpec })),
+const HatunSpec = lazy(() =>
+  import('./pages/HatunSpec').then((m) => ({ default: m.HatunSpec })),
 );
 const GlasswingPartners = lazy(() =>
   import('./pages/GlasswingPartners').then((m) => ({ default: m.GlasswingPartners })),
@@ -490,7 +490,7 @@ export default function App() {
           <Route path={`${base}/red-team`} component={RedTeam} />
           <Route path={`${base}/glasswing`} component={GlasswingPage} />
           <Route path={`${base}/argo`} component={ArgoForgePage} />
-          <Route path={`${base}/mythos-layer`} component={MythosLayerPage} />
+          <Route path={`${base}/hatun-layer`} component={HatunLayerPage} />
           <Route path={`${base}/aerial-twin`} component={AerialTwinPage} />
           <Route path={`${base}/aerial-twin/:milestone`} component={AerialTwinMilestonePage} />
           <Route path={`${base}/system-card/:id`} component={SystemCard} />
@@ -503,7 +503,7 @@ export default function App() {
           <Route path={`${base}/compartments`} component={CapabilityCompartments} />
           <Route path={`${base}/cyber-resilience`} component={CyberResilience} />
           <Route path={`${base}/sim-governance`} component={SimGovernance} />
-          <Route path={`${base}/mythos-spec`} component={MythosSpec} />
+          <Route path={`${base}/hatun-spec`} component={HatunSpec} />
           <Route path={`${base}/glasswing-partners`} component={GlasswingPartners} />
           <Route path={`${base}/cavd`} component={CAVDPage} />
           <Route path={`${base}/transparency-report`} component={TransparencyReport} />

@@ -145,9 +145,9 @@ const STAGES = [
   },
   {
     step: 11,
-    title: 'Mythos Doctrine — Frontier Alignment Governance',
+    title: 'Hatun Doctrine — Frontier Alignment Governance',
     category: 'GOVERNANCE',
-    body: 'Layer 8 of the A11oy fabric. Every agent carries a versioned constitution, behavioral audit trail, reward-hacking watchdog, and per-agent system card. Red-team probes run continuously. The Glasswing distinction layer adds coordinated agent-vulnerability disclosure (CAVD), 90-day public transparency reports, an adversarial robustness wall, a constitution-as-code DSL with a Petri-net simulator, welfare intervention playbooks, and a defender credit pool. The Mythos Doctrine Open Spec (CC-BY-4.0) publishes the format so anyone can verify.',
+    body: 'Layer 8 of the A11oy fabric. Every agent carries a versioned constitution, behavioral audit trail, reward-hacking watchdog, and per-agent system card. Red-team probes run continuously. The Glasswing distinction layer adds coordinated agent-vulnerability disclosure (CAVD), 90-day public transparency reports, an adversarial robustness wall, a constitution-as-code DSL with a Petri-net simulator, welfare intervention playbooks, and a defender credit pool. The Hatun Doctrine Specification (CC-BY-4.0) publishes the format so anyone can verify.',
     metrics: [
       { label: 'Capabilities', value: '22', sub: 'Cross-cutting governance' },
       { label: 'Open Spec', value: 'CC-BY-4.0', sub: '10 artifact schemas' },

@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Layout } from '../components/layout';
 import { PageHeader, Card, SectionTitle, KpiCard, SeverityBadge } from '../components/ui';
-import { RISK_REPORTS } from '../data/mythosDoctrine';
+import { RISK_REPORTS } from '../data/hatunDoctrine';
 
 export function RiskReports() {
   const [selectedId, setSelectedId] = useState(RISK_REPORTS[0].id);

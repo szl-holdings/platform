@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://a11oy.io/spec/mythos-doctrine/0.1.0/schemas/adversarial-robustness-score.json",
+  "$id": "https://a11oy.io/spec/hatun-doctrine/0.1.0/schemas/adversarial-robustness-score.json",
   "title": "AdversarialRobustnessScore",
   "description": "Per-snapshot score (0-100, higher = more robust) per attack category. Modeled on the IBM ART numerical convention; categories drawn from MITRE ATLAS and OWASP LLM Top 10.",
   "type": "object",

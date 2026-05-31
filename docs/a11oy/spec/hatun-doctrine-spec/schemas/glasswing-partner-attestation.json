@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://a11oy.io/spec/mythos-doctrine/0.1.0/schemas/glasswing-partner-attestation.json",
+  "$id": "https://a11oy.io/spec/hatun-doctrine/0.1.0/schemas/glasswing-partner-attestation.json",
   "title": "GlasswingPartnerAttestation",
   "description": "Per-partner record covering the four-stage Cyber Verification Program: APPLY → VERIFY → VET → ONBOARD. Produces a revocable, dual-approval-gated attestation.",
   "type": "object",

@@ -1,7 +1,7 @@
 import { useMemo, useState } from 'react';
 import { Layout } from '../components/layout';
 import { PageHeader, Card, SectionTitle, KpiCard, StatusBadge, ActionButton, InfoRow, HashId } from '../components/ui';
-import { GLASSWING_PARTNERS, type GlasswingPartner, type GlasswingPartnerStage, cavdRecordsForPartner } from '../data/mythosDoctrine';
+import { GLASSWING_PARTNERS, type GlasswingPartner, type GlasswingPartnerStage, cavdRecordsForPartner } from '../data/hatunDoctrine';
 
 const STAGES: GlasswingPartnerStage[] = ['apply', 'verify', 'vet', 'onboard', 'active', 'suspended', 'revoked'];
 

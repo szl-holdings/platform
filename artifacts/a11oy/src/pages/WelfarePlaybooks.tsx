@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Layout } from '../components/layout';
 import { PageHeader, Card, SectionTitle, KpiCard, InfoRow, StatusBadge } from '../components/ui';
-import { WELFARE_PLAYBOOKS, AGENT_LABEL } from '../data/mythosDoctrine';
+import { WELFARE_PLAYBOOKS, AGENT_LABEL } from '../data/hatunDoctrine';
 
 export function WelfarePlaybooks() {
   const [activeId, setActiveId] = useState(WELFARE_PLAYBOOKS[0].id);

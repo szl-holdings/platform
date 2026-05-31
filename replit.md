@@ -53,8 +53,8 @@ The platform is built as a pnpm monorepo using TypeScript 5.9, React 19, Vite, a
 - **Forecast & Anomaly Fabric:** Unified forecasting and anomaly detection services.
 - **Advanced Cybersecurity Modules:** Including DARPA MTO Innovation Hub, Post-Quantum Cryptography Readiness, and Adversarial ML Defense Console.
 - **Continuum ARGO — Field Intelligence Forge:** Fuses external signals with defensive doctrines.
-- **Continuum Aerial Twin & Mythos Layer:** Doctrine hubs for digital-twin and defensive architecture.
-- **Mythos Doctrine Governance (DB-backed):** Doctrine governance pages wired to PostgreSQL tables.
+- **Continuum Aerial Twin & Hatun Layer:** Doctrine hubs for digital-twin and defensive architecture.
+- **Hatun Doctrine Governance (DB-backed):** Doctrine governance pages wired to PostgreSQL tables.
 - **Continuum Observability AI Layer:** Advanced ML-driven observability pages for forecasting, causal root-cause analysis, and self-healing.
 - **Alloy WorkGraph — Governed Workspace Intelligence Layer (`/alloy/workgraph`, `/alloy/workspace/*`):** A full semantic workspace intelligence layer with Explorer & Answer Engine, Skills Studio, Project Memory, and Admin Control Center.
 - **OS-Layer API (`/api/v1/os/*`):** Live API endpoints for Decision Center data backed by PostgreSQL tables.

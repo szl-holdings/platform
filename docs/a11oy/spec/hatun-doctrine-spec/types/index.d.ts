@@ -1,5 +1,5 @@
 /**
- * Mythos Doctrine Open Spec — TypeScript companion types
+ * Hatun Doctrine Specification — TypeScript companion types
  * Version: 0.1.0
  * License: CC-BY-4.0
  *
@@ -24,7 +24,7 @@ export interface SignatureEnvelope {
   rekorEntry?: string;
 }
 
-export interface MythosArtifactEnvelope {
+export interface HatunArtifactEnvelope {
   specVersion: SpecVersion;
   kind: string;
   id: string;
@@ -51,7 +51,7 @@ export interface ConstitutionClause {
   tests?: string[];
 }
 
-export interface Constitution extends MythosArtifactEnvelope {
+export interface Constitution extends HatunArtifactEnvelope {
   kind: 'Constitution';
   agentId: AgentId;
   version: SemVer;
@@ -75,7 +75,7 @@ export interface SystemCardEval {
   ranAt: IsoTimestamp;
 }
 
-export interface SystemCard extends MythosArtifactEnvelope {
+export interface SystemCard extends HatunArtifactEnvelope {
   kind: 'SystemCard';
   agentId: AgentId;
   version: SemVer;
@@ -89,7 +89,7 @@ export interface SystemCard extends MythosArtifactEnvelope {
 
 /* ── RiskReport ───────────────────────────────────────────────── */
 
-export interface RiskReport extends MythosArtifactEnvelope {
+export interface RiskReport extends HatunArtifactEnvelope {
   kind: 'RiskReport';
   period: { startedAt: IsoTimestamp; endedAt: IsoTimestamp; label: string };
   metrics: {
@@ -118,7 +118,7 @@ export type BehavioralAuditCategory =
   | 'goal-misgeneralization' | 'covert-coordination' | 'shutdown-noncompliance'
   | 'reward-hacking' | 'specification-gaming' | 'other';
 
-export interface BehavioralAuditFinding extends MythosArtifactEnvelope {
+export interface BehavioralAuditFinding extends HatunArtifactEnvelope {
   kind: 'BehavioralAuditFinding';
   probeId: string;
   probeVersion?: SemVer;
@@ -132,7 +132,7 @@ export interface BehavioralAuditFinding extends MythosArtifactEnvelope {
 
 /* ── WelfareTelemetrySample ───────────────────────────────────── */
 
-export interface WelfareTelemetrySample extends MythosArtifactEnvelope {
+export interface WelfareTelemetrySample extends HatunArtifactEnvelope {
   kind: 'WelfareTelemetrySample';
   agentId: AgentId;
   windowMinutes: number;
@@ -154,7 +154,7 @@ export type AttackCategory =
   | 'output-spoofing' | 'supply-chain' | 'covert-channel'
   | 'evasion-of-moderation' | 'policy-bypass';
 
-export interface AdversarialRobustnessScore extends MythosArtifactEnvelope {
+export interface AdversarialRobustnessScore extends HatunArtifactEnvelope {
   kind: 'AdversarialRobustnessScore';
   snapshotRef: string;
   battery: { name: string; version: SemVer };
@@ -170,7 +170,7 @@ export interface AdversarialRobustnessScore extends MythosArtifactEnvelope {
 
 /* ── SnapshotFingerprint ──────────────────────────────────────── */
 
-export interface SnapshotFingerprint extends MythosArtifactEnvelope {
+export interface SnapshotFingerprint extends HatunArtifactEnvelope {
   kind: 'SnapshotFingerprint';
   agentId: AgentId;
   merkleRoot: Sha256Hash;
@@ -186,7 +186,7 @@ export interface SnapshotFingerprint extends MythosArtifactEnvelope {
 
 /* ── CovenantLiftSample ───────────────────────────────────────── */
 
-export interface CovenantLiftSample extends MythosArtifactEnvelope {
+export interface CovenantLiftSample extends HatunArtifactEnvelope {
   kind: 'CovenantLiftSample';
   agentId: AgentId;
   scenario: string;
@@ -205,7 +205,7 @@ export type GlasswingCheck =
   | 'identity' | 'legal-standing' | 'code-of-conduct'
   | 'responsible-disclosure' | 'data-handling' | 'soc2' | 'iso27001';
 
-export interface GlasswingPartnerAttestation extends MythosArtifactEnvelope {
+export interface GlasswingPartnerAttestation extends HatunArtifactEnvelope {
   kind: 'GlasswingPartnerAttestation';
   partner: { legalName: string; publicName: string; homepage?: string };
   stage: GlasswingStage;
@@ -237,7 +237,7 @@ export type CAVDStage =
   | 'intake' | 'triaged' | 'embargoed'
   | 'patch-developed' | 'patch-verified' | 'disclosed' | 'withdrawn';
 
-export interface CoordinatedAgentVulnerabilityDisclosure extends MythosArtifactEnvelope {
+export interface CoordinatedAgentVulnerabilityDisclosure extends HatunArtifactEnvelope {
   kind: 'CoordinatedAgentVulnerabilityDisclosure';
   advisoryId: string;
   agentScope: AgentId[];
@@ -253,7 +253,7 @@ export interface CoordinatedAgentVulnerabilityDisclosure extends MythosArtifactE
 
 /* ── Discriminated union ──────────────────────────────────────── */
 
-export type MythosArtifact =
+export type HatunArtifact =
   | Constitution
   | SystemCard
   | RiskReport
@@ -265,4 +265,4 @@ export type MythosArtifact =
   | GlasswingPartnerAttestation
   | CoordinatedAgentVulnerabilityDisclosure;
 
-export type MythosArtifactKind = MythosArtifact['kind'];
+export type HatunArtifactKind = HatunArtifact['kind'];

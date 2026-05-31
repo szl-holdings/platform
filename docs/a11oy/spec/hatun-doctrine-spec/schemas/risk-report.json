@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://a11oy.io/spec/mythos-doctrine/0.1.0/schemas/risk-report.json",
+  "$id": "https://a11oy.io/spec/hatun-doctrine/0.1.0/schemas/risk-report.json",
   "title": "RiskReport",
   "description": "Periodic, board-ready aggregate of governed posture. The 90-Day Transparency Report is one cadence of this kind.",
   "type": "object",

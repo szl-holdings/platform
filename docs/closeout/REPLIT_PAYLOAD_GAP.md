@@ -30,7 +30,7 @@ The `REPLIT_SZL_SINGLE.py` payload contains 77 files intended for GitHub. None o
 - `OUROBOROS_RUN_ALL.py` — master runner
 - `a11oy_v19_opus48_substrate.py`
 - `uds_v18_24_substrate.py`
-- `mythos_substrate.py`
+- `hatun_substrate.py`
 - `slsa_dsse_substrate.py`
 - 28 additional modules: `v14_lutar_calculus.py`, `v15_knot_calculus.py`, `v16_feynman_gates.py`, `v17_wheeler_shannon_qec.py`, `v17_the_four.py`, `gnn_substrate.py`, `mathonto_substrate.py`, `a11oy_code_blueprint.py`, `uds_airgap_drone.py`, `eng_substrate.py`, `mila_substrate.py`, `founder_substrate.py`, `production_substrate.py`, `agent_tooling.py`, `quantum_substrate.py`, `community_substrate.py`, `observability_substrate.py`, `ai_observability_substrate.py`, `apm_substrate.py`, `palantir_substrate.py`, `pyg_substrate.py`, `dsa_substrate.py`, `cedric_mo_substrate.py`, `cursor_claude_substrate.py`, `iqt_substrate.py`, `turbovec_substrate.py`, `nvidia_rtr_substrate.py`, `openmdw_substrate.py`, `scientistone_coe_substrate.py`
 

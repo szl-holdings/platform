@@ -1,6 +1,6 @@
 import { Layout } from '../components/layout';
 import { PageHeader, Card, SectionTitle, KpiCard, SeverityBadge, StatusBadge } from '../components/ui';
-import { RH_WATCHDOG_RULES, REWARD_HACKING_INCIDENTS, AGENT_LABEL } from '../data/mythosDoctrine';
+import { RH_WATCHDOG_RULES, REWARD_HACKING_INCIDENTS, AGENT_LABEL } from '../data/hatunDoctrine';
 
 const STATUS_LABEL: Record<string, 'ok' | 'warn' | 'error' | 'info'> = {
   blocked: 'ok', 'rolled-back': 'ok', allowlisted: 'info', investigating: 'warn',

@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Layout } from '../components/layout';
 import { PageHeader, Card, SectionTitle, KpiCard, InfoRow, ActionButton, StatusBadge } from '../components/ui';
-import { SNAPSHOTS } from '../data/mythosDoctrine';
+import { SNAPSHOTS } from '../data/hatunDoctrine';
 
 export function SnapshotProvenance() {
   const [selected, setSelected] = useState(SNAPSHOTS[0].workcellRef);

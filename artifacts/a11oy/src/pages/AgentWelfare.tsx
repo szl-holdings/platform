@@ -1,6 +1,6 @@
 import { Layout } from '../components/layout';
 import { PageHeader, Card, SectionTitle, KpiCard, ProgressBar, StatusBadge } from '../components/ui';
-import { AGENT_WELFARE, AGENT_LABEL, fmtPct } from '../data/mythosDoctrine';
+import { AGENT_WELFARE, AGENT_LABEL, fmtPct } from '../data/hatunDoctrine';
 
 const INTENSITY_STATUS: Record<string, 'ok' | 'warn' | 'error' | 'info'> = {
   low: 'ok', medium: 'warn', high: 'error',

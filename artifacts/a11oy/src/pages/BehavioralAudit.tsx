@@ -1,7 +1,7 @@
 import { useState, useMemo } from 'react';
 import { Layout } from '../components/layout';
 import { PageHeader, Card, SectionTitle, KpiCard, SeverityBadge, StatusBadge } from '../components/ui';
-import { BEHAVIORAL_AUDITS, AGENT_LABEL } from '../data/mythosDoctrine';
+import { BEHAVIORAL_AUDITS, AGENT_LABEL } from '../data/hatunDoctrine';
 
 const CATEGORY_LABELS: Record<string, string> = {
   'sycophancy': 'Sycophancy',

@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Layout } from '../components/layout';
 import { PageHeader, Card, SectionTitle, KpiCard, StatusBadge, InfoRow, ProgressBar } from '../components/ui';
-import { ROBUSTNESS_WALL, AGENT_LABEL } from '../data/mythosDoctrine';
+import { ROBUSTNESS_WALL, AGENT_LABEL } from '../data/hatunDoctrine';
 
 const fmtDate = (s: string) => new Date(s).toISOString().slice(0, 16).replace('T', ' ');
 const fmtSigned = (n: number) => `${n >= 0 ? '+' : ''}${n.toFixed(1)}`;

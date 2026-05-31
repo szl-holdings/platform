@@ -3,10 +3,10 @@ import {
   PageHeader, Card, SectionTitle, KpiCard, StatusBadge, InfoRow,
 } from '../components/ui';
 import {
-  MYTHOS_LAYER_VERSION, MYTHOS_LAYER_TAGLINE,
-  ORCHESTRATION_STEPS, SCANNERS, RL_PIPELINE, GUARDRAILS, ROADMAP, MODEL_REFERENCES, MYTHOS_LAYER_CITATIONS,
+  HATUN_LAYER_VERSION, HATUN_LAYER_TAGLINE,
+  ORCHESTRATION_STEPS, SCANNERS, RL_PIPELINE, GUARDRAILS, ROADMAP, MODEL_REFERENCES, HATUN_LAYER_CITATIONS,
   type LoopActor, type ScannerSurface, type RoadmapPhase,
-} from '../data/mythosLayer';
+} from '../data/hatunLayer';
 
 const GOLD = '#c9b787';
 const TEXT = 'var(--color-a11oy-text)';
@@ -46,15 +46,15 @@ function ActorChip({ actor }: { actor: LoopActor }) {
   );
 }
 
-export function MythosLayer() {
+export function HatunLayer() {
   const phases: RoadmapPhase[] = ['0–6', '7–12', '13–24'];
 
   return (
     <Layout>
       <PageHeader
         label="DOCTRINE · DEFENSIVE LAYER"
-        title="Mythos Layer"
-        subtitle={`${MYTHOS_LAYER_TAGLINE} · v${MYTHOS_LAYER_VERSION}`}
+        title="Hatun Layer"
+        subtitle={`${HATUN_LAYER_TAGLINE} · v${HATUN_LAYER_VERSION}`}
         status="GATED"
       />
 
@@ -70,7 +70,7 @@ export function MythosLayer() {
       <Card className="mb-6">
         <SectionTitle>What this surface is</SectionTitle>
         <p className="text-xs mb-2" style={{ color: SUB, lineHeight: 1.7 }}>
-          The Mythos Layer codifies how A11oy and Sentra compose into a defensive AI layer when frontier models become a force multiplier
+          The Hatun Layer codifies how A11oy and Sentra compose into a defensive AI layer when frontier models become a force multiplier
           on both sides of the asymmetry. It is a static doctrine surface, not a live runtime. Every claim here resolves to public research,
           official tool documentation, or a first-principle reconstruction. No leaks, no scraped weights, no telemetry.
         </p>
@@ -250,7 +250,7 @@ export function MythosLayer() {
       <SectionTitle className="mt-2">Citations</SectionTitle>
       <Card>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-x-4">
-          {MYTHOS_LAYER_CITATIONS.map((c) => (
+          {HATUN_LAYER_CITATIONS.map((c) => (
             <div key={c.tag} className="flex gap-2 py-1.5 text-[11px]" style={{ color: SUB, lineHeight: 1.5 }}>
               <span className="font-mono shrink-0" style={{ color: GOLD }}>[{c.tag}]</span>
               <span>{c.source}</span>

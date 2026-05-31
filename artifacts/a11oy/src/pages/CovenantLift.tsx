@@ -1,6 +1,6 @@
 import { Layout } from '../components/layout';
 import { PageHeader, Card, SectionTitle, KpiCard } from '../components/ui';
-import { COVENANT_LIFT, AGENT_LABEL, fmtUsd, fmtPct } from '../data/mythosDoctrine';
+import { COVENANT_LIFT, AGENT_LABEL, fmtUsd, fmtPct } from '../data/hatunDoctrine';
 
 export function CovenantLift() {
   const totalLift = COVENANT_LIFT.reduce((a, c) => a + c.estimatedHarmAvoidedUsd, 0);
