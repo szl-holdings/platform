@@ -28,6 +28,8 @@
     "@workspace/aef-policy-guard": "workspace:*",
     "@workspace/aef-retrieval-core": "workspace:*",
     "@workspace/approvals-inbox": "workspace:*",
+    "@szl-holdings/env": "workspace:*",
+    "@szl-holdings/observability": "workspace:*",
     "cors": "^2.8.5",
     "express": "^5",
     "zod": "catalog:"
