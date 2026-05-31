@@ -14,7 +14,7 @@
  *     → sentra Kitaev-surface drift check (qec.vertexParity)
  *     → uds-mesh + vsp-otel export the Λ-axis span (mesh/ W3C TraceContext)
  *
- * Input:  a Paper (Ouroboros thesis citation + receipt-bus σ-algebra config).
+ * Input:  a Paper (Ouroboros thesis citation + receipt-bus config: the receipts to fold under Λ).
  * Output: a ByteStringReceipt (the Cardano-anchored hash via amaru), carrying the
  *         graded Λ-closure and the OTEL span. Every step runs real component code;
  *         the single unwired piece (Cardano submit) is honestly named and the
@@ -42,7 +42,7 @@ export interface Paper {
   /** Ouroboros thesis citation (Zenodo DOI + version, CC-BY 4.0). */
   readonly thesisDoi: string;
   readonly thesisVersion: string; // e.g. "v18"
-  /** Receipt-bus σ-algebra config: the receipts to fold under Λ. */
+  /** Receipt-bus config: the receipts to fold under Λ (hash-linked append-only log). */
   readonly receiptBus: readonly BusReceipt[];
   /** Logical receipt payload byte to anchor (0–255). */
   readonly payloadByte: number;

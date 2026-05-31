@@ -61,10 +61,14 @@ const closure = Λ_audit_closure(receiptBus, DOCTRINE_V7_AXIOMS);
 //     bekensteinRespected, reidemeisterClass, ... }
 ```
 
-The Λ-axis is a measurable governance operator on the receipt-bus σ-algebra. It
-composes axiom-by-axiom (Doctrine v7: 15 axioms, 14 unique) under a monotone
-geometric mean, with three named bounds, each exported as its own primitive and
-tested individually:
+The Λ aggregator is proved in Lean 4 against 749 declarations / 14 unique axioms /
+163 tracked sorries (Mathlib v4.13.0). Every gate decision emits a DSSE-signed
+receipt onto a hash-linked Khipu Merkle DAG with summation-checked integrity. The
+receipt chain is a SHA-256 prefix-hash append-only log; the Khipu DAG is a
+three-tier Merkle structure (rootValue = Σ pendantValues). These form a
+tamper-evident audit substrate (no measure-theoretic space is constructed; this
+is a hash-linked log with summation invariants, which is enough). Three named
+bounds are exported as individual primitives and tested:
 
 - `pacBayesTailBound(prior, posterior, sampleSize, delta)` — McAllester (2003)
   PAC-Bayes tail bound on the confidence margin.
