@@ -10,16 +10,17 @@
 # a pnpm workspace package): it has no package.json, no workspace:* deps, and
 # is driven by requirements.txt + run.py (Procfile: `web: python run.py`).
 #
-# HONEST RUNTIME CAVEAT (verify before deploy):
-#   run.py launches uvicorn with the import target "src.main:app", but the
-#   apps/eval-runner/ directory in this repo contains only run.py, conftest.py,
-#   test_suite_reproducibility.py, requirements.txt, Procfile, and README.md —
-#   there is NO src/ package and therefore NO src/main:app to import. This
-#   image builds, but the container will fail at startup until the FastAPI
-#   application module (src/main.py exposing `app`) is added. No stub app was
-#   fabricated here; the missing module is reported rather than papered over.
-#   The OCI version label is set to 0.0.0 because eval-runner declares no
-#   version field anywhere (no package.json / pyproject version for this app).
+# RUNTIME NOTE:
+#   run.py launches uvicorn with the import target "src.main:app". The src/
+#   package is now present (src/main.py exposes the FastAPI `app`, backed by
+#   src/suites.py graders and src/lm_eval_bridge.py). The earlier caveat that
+#   the container would fail at startup for lack of src/main:app no longer
+#   applies: the image both builds and boots. The app serves /healthz plus a
+#   real /eval endpoint that scores eval suites through their graders.
+#   Offline by default (EVAL_OFFLINE_FALLBACK): the standard suite uses the
+#   built-in offline baseline; the lm-eval online adapters require the GPU
+#   extras documented in requirements.txt.
+#   The OCI version label is set to the app version declared in src/main.py.
 
 # ─── Stage 1: dependency builder ─────────────────────────────────────────────
 FROM python:3.11-slim AS builder
@@ -64,8 +65,9 @@ ENV NODE_ENV=production \
 # run.py reads process env PORT, defaulting to 8001, and binds 0.0.0.0.
 EXPOSE 8001
 
-# No HTTP health endpoint is defined for this service (no /healthz, and the
-# FastAPI app module is absent), so no HEALTHCHECK is declared.
+# /healthz is served by src/main.py; declare a container healthcheck against it.
+HEALTHCHECK --interval=30s --timeout=3s --start-period=10s --retries=3 \
+    CMD python -c "import os,urllib.request; urllib.request.urlopen('http://127.0.0.1:'+os.environ.get('PORT','8001')+'/healthz').read()" || exit 1
 
 # Documented entry (Procfile: `web: python run.py`).
 CMD ["python", "run.py"]
@@ -74,5 +76,5 @@ LABEL org.opencontainers.image.source="https://github.com/szl-holdings/platform"
       org.opencontainers.image.title="eval-runner" \
       org.opencontainers.image.description="Eval Runner — FastAPI reproducibility harness that runs the guardrails test suite and emits deterministic CPS proof-chain artifacts." \
       org.opencontainers.image.licenses="LicenseRef-SZL-Proprietary" \
-      org.opencontainers.image.version="0.0.0" \
+      org.opencontainers.image.version="0.1.0" \
       org.opencontainers.image.vendor="SZL Holdings"
