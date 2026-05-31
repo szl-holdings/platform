@@ -35,8 +35,8 @@ licenses. Each is listed below with its license and attribution, as required.
 ## Formal-corpus reference
 
 - **Lutar-Lean** — Lean 4 + Mathlib v4.13.0 formal kernel. Live canonical
-  numbers @ `main` HEAD `3de37e5`: **752 declarations / 15 raw axioms (14
-  unique) / 160 sorry tokens**. Source of truth:
+  numbers @ `main` HEAD `c7c0ba17`: **749 declarations / 15 raw axioms (14
+  unique) / 163 sorry tokens**. Source of truth:
   `szl-holdings/.github/.github/data/lean_numbers.json` (mirrored locally at
   `.github/data/lean_numbers.json`, read by `getCanonicalNumbers()`).
   Mathlib is licensed Apache License 2.0; the Lutar-Lean corpus © SZL Holdings.

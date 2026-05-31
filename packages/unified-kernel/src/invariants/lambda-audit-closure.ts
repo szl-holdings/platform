@@ -21,7 +21,7 @@
  *
  * Historical note (founder screenshot, 2026-05-31): the diagram captioned
  * lutar-lean as "626 decls / 44 gates". The LIVE canonical kernel at SHA
- * 3de37e5 reads 752 declarations / 14 unique axioms / 160 sorries; the kernel
+ * c7c0ba17 reads 749 declarations / 14 unique axioms / 163 sorries; the kernel
  * cites the LIVE numbers (see lean/ and getCanonicalNumbers()). The 626/44
  * figures are documented as historical in AGENT_DOCTRINE_ENFORCEMENT.md.
  *
