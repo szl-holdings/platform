@@ -3,6 +3,8 @@ export * from './local-fs.js';
 export { createLocalFsStorageBundle } from './local-fs.js';
 export * from './sqlite.js';
 export { createSqliteStorageBundle } from './sqlite.js';
+export * from './pgvector.js';
+export { createPgVectorStorageBundle } from './pgvector.js';
 export * from './stubs.js';
 export { InMemoryStorageBundle } from './stubs.js';
 

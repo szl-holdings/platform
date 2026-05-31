@@ -23,17 +23,52 @@ export { WarmPool } from './warm-pool.js';
 import { AzureEmbeddingBackendStub } from './backends/azure-stub.js';
 import { CpuLocalEmbeddingBackend } from './backends/cpu-local.js';
 import { DevHashEmbeddingBackend } from './backends/dev-hash.js';
+import { ExternalHttpEmbeddingBackend } from './backends/external-http.js';
 import { GpuEmbeddingBackendStub } from './backends/gpu-stub.js';
 import type { EmbeddingBackend } from './backends/interface.js';
 import { MicroBatchQueue } from './batch-queue.js';
 import { WarmPool } from './warm-pool.js';
+
+/**
+ * Build the real-model embedding backend (id `external-http`) when an inference
+ * endpoint is configured. Routes to bge-m3 (1024-dim) by default. When unset,
+ * returns null and the worker stays on the dev/CPU backends only.
+ *
+ * Env:
+ *   SUBSTRATE_EMBED_URL  base URL of the embedding inference service (required to enable)
+ *   HF_EMBED_MODEL       model id (default BAAI/bge-m3)
+ *   VECTOR_DIM           embedding dimension (default 1024 — must match the store)
+ *   SUBSTRATE_EMBED_API_KEY  optional bearer token
+ */
+function buildExternalHttpBackend(): ExternalHttpEmbeddingBackend | null {
+  const baseUrl = process.env.SUBSTRATE_EMBED_URL ?? process.env.HF_EMBED_URL;
+  if (!baseUrl) return null;
+  return new ExternalHttpEmbeddingBackend({
+    backendId: 'external-http',
+    displayName: 'External HTTP embedder (bge-m3)',
+    baseUrl,
+    model: process.env.HF_EMBED_MODEL ?? 'BAAI/bge-m3',
+    dimensions: Number(process.env.VECTOR_DIM ?? 1024),
+    maxTokens: Number(process.env.AEF_EMBED_MAX_TOKENS ?? 8192),
+    ...(process.env.SUBSTRATE_EMBED_API_KEY
+      ? { apiKey: process.env.SUBSTRATE_EMBED_API_KEY }
+      : {}),
+  });
+}
+
+/** True when a real embedding inference endpoint is configured. */
+export function hasRealEmbedderConfigured(): boolean {
+  return Boolean(process.env.SUBSTRATE_EMBED_URL ?? process.env.HF_EMBED_URL);
+}
 
 let _defaultQueue: MicroBatchQueue | undefined;
 let _defaultWarmPool: WarmPool | undefined;
 
 export function getDefaultEmbedWorker(): { queue: MicroBatchQueue; warmPool: WarmPool } {
   if (!_defaultQueue || !_defaultWarmPool) {
+    const externalHttp = buildExternalHttpBackend();
     const backends: EmbeddingBackend[] = [
+      ...(externalHttp ? [externalHttp] : []),
       new CpuLocalEmbeddingBackend(),
       new GpuEmbeddingBackendStub(),
       new AzureEmbeddingBackendStub(),

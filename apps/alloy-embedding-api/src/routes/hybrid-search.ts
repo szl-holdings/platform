@@ -9,6 +9,7 @@ import { randomUUID } from "node:crypto";
 import { logger } from "../middleware/logger.js";
 import { getProfile } from "../profiles/default.js";
 import { errorBudgetCounter } from "../middleware/prometheus.js";
+import { getRetrievalStore, getEmbedderSelection } from "../retrieval-store.js";
 
 export const hybridSearchRouter: IRouter = Router();
 const policyEngine = new PolicyEngine();
@@ -49,13 +50,15 @@ hybridSearchRouter.post("/v1/hybrid-search", (async (req: Request, res: Response
 
   const start = Date.now();
 
-  const devHashMode = !process.env.SUBSTRATE_EMBED_URL && process.env.NODE_ENV !== "production";
+  // ── Embedder: real model backend (bge-m3, 1024-dim) when SUBSTRATE_EMBED_URL
+  //    is configured; dev-hash fallback only when no real endpoint exists.
+  const embedder = getEmbedderSelection();
 
   let queryVector: number[];
   try {
     const [vec] = await embedTexts([body.query], {
-      backendId: devHashMode ? "dev-hash" : "cpu-local",
-      model: "aef-dev-hash",
+      backendId: embedder.backendId,
+      model: embedder.model,
       pooling: "mean",
       normalize: true,
     });
@@ -69,26 +72,45 @@ hybridSearchRouter.post("/v1/hybrid-search", (async (req: Request, res: Response
   const topK = body.topK;
   const candidatePool = body.candidatePool;
 
-  const denseHits = Array.from({ length: Math.min(candidatePool, 5) }, (_, i) => ({
-    chunkId: `synthetic-chunk-${i}`,
-    sourceId: `synthetic-source-${Math.floor(i / 2)}`,
-    score: 0.9 - i * 0.1,
-    vector: queryVector,
-    metadata: {
-      sourceUri: `https://example.com/doc/${i}`,
-      title: `Synthetic Document ${i}`,
-      page: i + 1,
-      section: "section-1",
-      text: `This is synthetic document ${i} matching query: ${body.query}`,
-    },
-  }));
+  // ── Retrieval: query the real store (pgvector cosine ANN + Postgres FTS when
+  //    DATABASE_URL is set; in-memory for local dev). No synthetic fabrication.
+  const { bundle, backend: storeBackend } = getRetrievalStore();
 
-  const keywordHits = Array.from({ length: Math.min(candidatePool, 5) }, (_, i) => ({
-    chunkId: `synthetic-chunk-${i}`,
-    sourceId: `synthetic-source-${Math.floor(i / 2)}`,
-    score: 0.8 - i * 0.08,
-    metadata: denseHits[i]?.metadata ?? {},
-  }));
+  let denseHits: Array<{
+    chunkId: string;
+    sourceId: string;
+    score: number;
+    vector?: number[];
+    metadata: Record<string, unknown>;
+  }>;
+  let keywordHits: Array<{
+    chunkId: string;
+    sourceId: string;
+    score: number;
+    highlights?: string[];
+    metadata: Record<string, unknown>;
+  }>;
+  try {
+    [denseHits, keywordHits] = await Promise.all([
+      bundle.vectors.similaritySearch({
+        vector: queryVector,
+        topK: candidatePool,
+        tenantId,
+        ...(body.profileId ? { profileId: body.profileId } : {}),
+        ...(body.metadataFilter ? { metadataFilter: body.metadataFilter } : {}),
+      }),
+      bundle.metadataIndex.keywordSearch({
+        terms: body.query,
+        topK: candidatePool,
+        tenantId,
+        ...(body.metadataFilter ? { metadataFilter: body.metadataFilter } : {}),
+      }),
+    ]);
+  } catch (err) {
+    errorBudgetCounter.inc({ kind: "retrieval_error", tenant_id: tenantId });
+    res.status(502).json({ error: "Retrieval failed", detail: String(err), traceId });
+    return;
+  }
 
   const fused = reciprocalRankFusion(denseHits, keywordHits, {
     denseWeight: body.denseWeight,
@@ -152,6 +174,10 @@ hybridSearchRouter.post("/v1/hybrid-search", (async (req: Request, res: Response
       policyAllow: true,
       policyReasons: policyDecision.reasons,
       redactedFields: policyDecision.redactions,
+      // Backend attribution: which embedder + store produced this hit.
+      // `backendId` uses the canonical EvidenceEntry field; embed model + store
+      // are recorded in scoreBreakdown-adjacent metadata via the response too.
+      backendId: `${embedder.backendId}+${storeBackend}`,
       requestedAt,
       completedAt,
     };
@@ -200,7 +226,24 @@ hybridSearchRouter.post("/v1/hybrid-search", (async (req: Request, res: Response
     processingMs,
     traceId,
     policyReasons: policyDecision.reasons,
+    // Backend transparency: which embedder + store actually served this request.
+    backends: {
+      embedModel: embedder.model,
+      embedBackend: embedder.backendId,
+      embedReal: embedder.isReal,
+      retrievalBackend: storeBackend,
+    },
   });
 
-  logger.info({ traceId, requestId: body.requestId, hitCount: hits.length, processingMs }, "hybrid-search completed");
+  logger.info(
+    {
+      traceId,
+      requestId: body.requestId,
+      hitCount: hits.length,
+      processingMs,
+      embedBackend: embedder.backendId,
+      retrievalBackend: storeBackend,
+    },
+    "hybrid-search completed",
+  );
 }) as unknown as RequestHandler);

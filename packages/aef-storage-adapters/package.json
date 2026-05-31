@@ -3,7 +3,7 @@
   "version": "0.0.0",
   "private": false,
   "type": "module",
-  "description": "Alloy Embedding Fabric — unified storage adapter interface with working local-filesystem and SQLite implementations for development, plus interface stubs for pgvector, Azure AI Search, and object storage for production scale.",
+  "description": "Alloy Embedding Fabric — unified storage adapter interface with working local-filesystem, SQLite, and pgvector implementations, plus interface stubs for Azure AI Search and object storage.",
   "exports": {
     ".": {
       "types": "./dist/index.d.ts",
@@ -21,6 +21,10 @@
       "types": "./dist/sqlite.d.ts",
       "import": "./src/sqlite.ts"
     },
+    "./pgvector": {
+      "types": "./dist/pgvector.d.ts",
+      "import": "./src/pgvector.ts"
+    },
     "./stubs": {
       "types": "./dist/stubs.d.ts",
       "import": "./src/stubs.ts"
@@ -29,6 +33,9 @@
   "dependencies": {
     "@workspace/aef-contracts": "workspace:*",
     "zod": "catalog:"
+  },
+  "optionalDependencies": {
+    "pg": "^8.20.0"
   },
   "devDependencies": {
     "@types/node": "catalog:",
