@@ -7,7 +7,8 @@
   "author": "Stephen P. Lutar Jr. <stephenlutar2@gmail.com>",
   "exports": {
     ".": "./src/index.ts",
-    "./schemas": "./src/schemas.ts"
+    "./schemas": "./src/schemas.ts",
+    "./spans": "./src/spans.ts"
   },
   "files": ["src", "schema"],
   "scripts": {

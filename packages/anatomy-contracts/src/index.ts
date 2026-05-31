@@ -314,3 +314,6 @@ export {
   spanHeadersSchema,
   meshReceiptSchema,
 } from "./schemas.ts";
+
+// Wire E — in-memory span recorder for verifying traceparent propagation.
+export { SpanRecorder, parseTraceparent, type RecordedSpan } from "./spans.ts";
