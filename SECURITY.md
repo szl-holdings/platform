@@ -2,6 +2,12 @@
 
 → [Platform Repo](https://github.com/szl-holdings/platform) | [Architecture](./docs/architecture/architecture.md) | [Trust Center](./docs/trust/trust-center.md) | [Contact](https://szlholdings.com)
 
+
+## Trust Tier
+
+**Trust Tier 1** — SZL Holdings is committed to coordinated, responsible disclosure for all SZL Holdings repositories.
+
+
 ## Supported Versions
 
 The SZL Holdings platform is currently in active pre-commercial development. Security issues are taken seriously regardless of commercial status.
