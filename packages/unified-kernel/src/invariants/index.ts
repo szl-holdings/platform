@@ -16,7 +16,32 @@
  * Honest gap: uniqueness (lutar_unique / lutar_is_geomean) carries the
  * CAUCHY_ND sorry in Lean — the *forward* direction (Λ satisfies A1–A4) is
  * proven and implemented here; *uniqueness* is not machine-checked. See lean/.
+ *
+ * PUBLIC API note: the canonical "Paper to Receipt" architecture promotes the
+ * Λ-axis from a value-returning function to an OPERATOR. `lambda(values)` below
+ * stays as the internal monotone-geometric-mean helper; the public Λ-axis API is
+ * the `Λ_audit_closure` Operator re-exported here from ./lambda-audit-closure.ts,
+ * together with the three named bounds (PAC-Bayes, Bekenstein, Reidemeister).
  */
+
+// The Λ Audit-Closure Operator (public API) + the three named bound primitives.
+export {
+  Λ_audit_closure,
+  DOCTRINE_V7_AXIOMS,
+  type Receipt,
+  type ReceiptBus,
+  type Axiom,
+  type AxiomContribution,
+  type GradedClosure,
+} from "./lambda-audit-closure.ts";
+export { pacBayesTailBound, klDivergence } from "./pac-bayes.ts";
+export { bekensteinCap, withinBekensteinCap, HBAR_J_S, C_M_S } from "./bekenstein.ts";
+export {
+  reidemeisterClass,
+  type Crossing,
+  type ReceiptKnotChain,
+  type ReidemeisterClass,
+} from "./reidemeister.ts";
 
 export interface LambdaResult {
   readonly lambda: number;

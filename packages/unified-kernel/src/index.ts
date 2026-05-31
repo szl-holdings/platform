@@ -25,6 +25,31 @@ export type {
 } from "./types.ts";
 export { NotYetError } from "./types.ts";
 
+// The Λ Audit-Closure Operator (THE central operator of the canonical
+// "Paper to Receipt" architecture) and its three named bound primitives.
+export {
+  Λ_audit_closure,
+  DOCTRINE_V7_AXIOMS,
+  pacBayesTailBound,
+  bekensteinCap,
+  reidemeisterClass,
+} from "./invariants/index.ts";
+export type {
+  Receipt,
+  ReceiptBus,
+  Axiom,
+  GradedClosure,
+  ReceiptKnotChain,
+  ReidemeisterClass,
+} from "./invariants/index.ts";
+
+// The full canonical Paper-to-Receipt flow.
+export { paperToReceipt } from "./paper-to-receipt.ts";
+export type { Paper, ByteStringReceipt } from "./paper-to-receipt.ts";
+
+// Canonical Lean numbers (live, from .github/data/lean_numbers.json).
+export { getCanonicalNumbers } from "./lean/index.ts";
+
 // Thesis modules (the software).
 export * as invariants from "./invariants/index.ts"; // T01
 export * as loop from "./loop/index.ts"; // T02 (wired ouroboros v6.3.0)
