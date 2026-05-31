@@ -1,0 +1,21 @@
+{
+  "$id": "https://schemas.szlholdings.com/anatomy/reason-request.v1.json",
+  "title": "ReasonRequest",
+  "type": "object",
+  "required": [
+    "actionId",
+    "chakra",
+    "envelope"
+  ],
+  "properties": {
+    "actionId": {
+      "type": "string"
+    },
+    "chakra": {
+      "type": "string"
+    },
+    "envelope": {
+      "type": "object"
+    }
+  }
+}
