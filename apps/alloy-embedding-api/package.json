@@ -28,6 +28,7 @@
     "@workspace/aef-evidence-ledger": "workspace:*",
     "@workspace/aef-policy-guard": "workspace:*",
     "@workspace/aef-retrieval-core": "workspace:*",
+    "@workspace/aef-storage-adapters": "workspace:*",
     "@workspace/alloy-embed-worker": "workspace:*",
     "@workspace/alloy-ingestion-orchestrator": "workspace:*",
     "@workspace/alloy-rerank-worker": "workspace:*",
