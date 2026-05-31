@@ -14,7 +14,13 @@
 import { start, verifyInitReceipt } from "./kernel.ts";
 
 async function main(): Promise<void> {
+  // Measure the REAL kernel init time. The canonical Λ-axis paragraph claims a
+  // 0.59 ms/request median Λ overhead in the ouroboros bench harness; that is a
+  // per-request Λ-operator figure, NOT the full kernel boot. We measure and
+  // report the actual boot here — no faked 0.59 ms (Doctrine v7 §2).
+  const t0 = performance.now();
   const handle = await start();
+  const bootMs = performance.now() - t0;
   const r = handle.initReceipt;
 
   // eslint-disable-next-line no-console
@@ -50,6 +56,8 @@ async function main(): Promise<void> {
 
   const passed = r.checks.filter((c) => c.pass).length;
   console.log(`\nsummary: ${passed}/${r.checks.length} checks passed; kernel status ${handle.status}`);
+  // Real measured boot time (not the 0.59 ms/request Λ-overhead claim).
+  console.log(`boot time (measured): ${bootMs.toFixed(3)} ms (full kernel init)`);
   console.log("=".repeat(72));
 
   // Real exit code: non-zero on FAIL so CI/that demo reflects reality.
