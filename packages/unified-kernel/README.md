@@ -43,6 +43,79 @@ T07+T08 `memory/`, T09 `khipu/`, T10 `qec/`, T11 `doctrine/`, T12 `forecast/`,
 T13+T16 `mesh/`, T14 `anatomy/`, T15 `slsa/`, T17 `rag/`, T18 `tamper/`,
 T19 `lean/`. Plus `codex/` (codex-kernel v1.0.2 four contracts).
 
+## Canonical "Paper to Receipt" architecture
+
+The founder's canonical architecture (diagram, 2026-05-31) flows top-down:
+Ouroboros Thesis v3–v18 (Zenodo DOIs, CC-BY 4.0) → Lutar-Lean (Lean 4 +
+Mathlib v4.13.0) → Ouroboros Runtime (bounded loops, Apache 2.0) → the **Λ
+Audit-Closure Operator** (THE central operator) → the branch operators
+(amaru, rosie, sentra, UDS-Mesh, VSP-OTEL, a11oy) → Platform.
+
+### The Λ Audit-Closure Operator
+
+```ts
+import { Λ_audit_closure, DOCTRINE_V7_AXIOMS } from "@szl-holdings/unified-kernel";
+
+const closure = Λ_audit_closure(receiptBus, DOCTRINE_V7_AXIOMS);
+// → { compositeLambda, perAxiom, pacBayesTailBound, bekensteinCapBits,
+//     bekensteinRespected, reidemeisterClass, ... }
+```
+
+The Λ-axis is a measurable governance operator on the receipt-bus σ-algebra. It
+composes axiom-by-axiom (Doctrine v7: 15 axioms, 14 unique) under a monotone
+geometric mean, with three named bounds, each exported as its own primitive and
+tested individually:
+
+- `pacBayesTailBound(prior, posterior, sampleSize, delta)` — McAllester (2003)
+  PAC-Bayes tail bound on the confidence margin.
+- `bekensteinCap(energyJ, radiusM)` — Bekenstein (1981) information-density cap
+  (bits) on per-receipt entropy.
+- `reidemeisterClass(receiptKnotChain)` — Reidemeister (1927) R1/R2/R3
+  equivalence class of a receipt-knot chain.
+
+The closure is proved in Lean 4 (Mathlib v4.13.0). `paperToReceipt(paper)`
+demonstrates the full canonical path end to end (cite → Lean Λ-gate → Ouroboros
+Runtime → rosie CSS-ingress → amaru Shor anchor → sentra Kitaev drift →
+uds-mesh + vsp-otel span export).
+
+### Canonical Lean numbers (live)
+
+Live canonical corpus @ `main` HEAD `3de37e5` (builds clean): **752
+declarations / 14 unique axioms (15 raw) / 160 sorries**. The kernel exports
+`getCanonicalNumbers()`, which reads `.github/data/lean_numbers.json` (the Trust
+Tier 1 reproducibility-script output) and falls back to the embedded constant.
+
+The screenshot architecture diagram (founder, 2026-05-31) shows earlier
+canonical numbers (626 / 14 / 189 + 44 gates); these are documented at
+`AGENT_DOCTRINE_ENFORCEMENT.md` and refresh as the corpus evolves. (The
+`lutar-lean` v18.0.0 tag's "zero sorry, zero axioms" claim is not used — the
+kernel cites the live `main` numbers, per the Real-Realness Auditor's
+REALNESS_LEDGER.md.)
+
+### Platform-level totals
+
+The canonical diagram cites the platform as **76 packages · 1220 tests · BSL
+1.1**. These are the diagram's figures; the live monorepo count drifts as it
+grows (a local `main` clone read ~128 packages with a `package.json` and ~205
+colocated `*.test.ts` files at audit time — the platform-wide 1220-test total
+was not re-run here, it is out of this package's scope). This package itself
+ships **23 test files / 91 tests** (all passing — see ARCH_ALIGNMENT_REPORT.md).
+
+### Boot performance (measured, not claimed)
+
+The canonical Λ-axis paragraph bounds the **per-request Λ overhead** at 0.59 ms
+median in the ouroboros bench harness. That is a per-request figure, not the
+full kernel boot. The actual full-kernel `start()` init, measured by
+`boot-demo.ts` (`pnpm boot`), is on the order of **~20–26 ms** in this
+environment — reported as measured, never faked.
+
+## License
+
+This package is published under **BSL 1.1** (platform inheritance). It composes
+Apache 2.0 (Ouroboros Runtime, codex-kernel, Mathlib) and CC-BY 4.0 (Ouroboros
+theses) components; every imported component is listed with attribution in
+`NOTICE.md`.
+
 ## Doctrine v7
 
 No mocks. No `() => true` shells — a module with no real backing exports a
@@ -52,4 +125,4 @@ a real caller-supplied implementation. All formulas are real math. See
 UDS transport) and the open formal gaps.
 
 Author: Stephen P. Lutar Jr. &lt;stephenlutar2@gmail.com&gt; (ORCID 0009-0001-0110-4173)
-License: Apache-2.0
+License: BSL-1.1 (platform inheritance) — see NOTICE.md for imported-component attribution

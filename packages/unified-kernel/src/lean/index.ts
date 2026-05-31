@@ -22,6 +22,9 @@
  */
 
 import type { ThesisId } from "../types.ts";
+import { readFileSync } from "node:fs";
+import { fileURLToPath } from "node:url";
+import { dirname, join } from "node:path";
 
 export interface LeanEntry {
   readonly thesis: ThesisId;
@@ -71,6 +74,43 @@ export const LEAN_NUMBERS = {
   buildingSha: "3de37e5",
   source: "szl-holdings/.github/.github/data/lean_numbers.json",
 } as const;
+
+export interface CanonicalNumbers {
+  readonly declarations: number;
+  readonly rawAxioms: number;
+  readonly uniqueAxioms: number;
+  readonly sorryTokens: number;
+  readonly buildingSha: string;
+  readonly source: string;
+}
+
+/**
+ * getCanonicalNumbers — read the live canonical Lean numbers from
+ * .github/data/lean_numbers.json (the Trust Tier 1 reproducibility-script
+ * output, mirrored from szl-holdings/.github). Falls back to the embedded
+ * LEAN_NUMBERS constant if the data file is unreadable, so the kernel never
+ * fabricates and never crashes the boot on a missing file. Doctrine v7 §2.
+ */
+export function getCanonicalNumbers(): CanonicalNumbers {
+  try {
+    const here = dirname(fileURLToPath(import.meta.url));
+    // src/lean/index.ts → package root is two levels up.
+    const dataPath = join(here, "..", "..", ".github", "data", "lean_numbers.json");
+    const raw = readFileSync(dataPath, "utf8");
+    const j = JSON.parse(raw) as Partial<CanonicalNumbers>;
+    return {
+      declarations: j.declarations ?? LEAN_NUMBERS.declarations,
+      rawAxioms: j.rawAxioms ?? LEAN_NUMBERS.rawAxioms,
+      uniqueAxioms: j.uniqueAxioms ?? LEAN_NUMBERS.uniqueAxioms,
+      sorryTokens: j.sorryTokens ?? LEAN_NUMBERS.sorryTokens,
+      buildingSha: j.buildingSha ?? LEAN_NUMBERS.buildingSha,
+      source: j.source ?? LEAN_NUMBERS.source,
+    };
+  } catch {
+    // Fall back to the embedded constant (still the live 3de37e5 figures).
+    return { ...LEAN_NUMBERS };
+  }
+}
 
 /** All registry entries for a thesis. */
 export function theoremsFor(thesis: ThesisId): LeanEntry[] {
