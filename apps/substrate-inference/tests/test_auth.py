@@ -8,7 +8,6 @@ the app in an isolated module instance to assert the bearer-token gate on
 from __future__ import annotations
 
 import importlib
-import os
 import sys
 
 import pytest
