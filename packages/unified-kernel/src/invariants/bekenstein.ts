@@ -13,8 +13,8 @@
  *
  *   bekensteinCap = I_max = (2π R E) / (ħ c ln 2)   bits
  *
- * In the receipt-bus σ-algebra this caps the information content a single
- * bounded-region receipt may carry: a receipt whose canonical byte-string
+ * In the tamper-evident receipt audit log this caps the information content a
+ * single bounded-region receipt may carry: a receipt whose canonical byte-string
  * encodes more bits than its physical bounded region admits is rejected.
  *
  * Citation: Bekenstein, J. D. (1981). "Universal upper bound on the

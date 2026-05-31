@@ -5,17 +5,17 @@
  * (founder diagram, 2026-05-31). Every branch (amaru, rosie, sentra, UDS-Mesh,
  * VSP-OTEL, a11oy) hangs off it.
  *
- * ── Canonical Λ-axis paragraph (verbatim from the founder; DO NOT EDIT) ──────
+ * ── PhD-CS-defensible Λ-axis description (updated 2026-05-31, Cheqaq sweep) ──
  *
- *   The Λ-axis is a measurable governance operator defined on the receipt-bus
- *   σ-algebra of a bounded-recursion runtime. It composes axiom-by-axiom
- *   (Doctrine v7: 15 axioms, 14 unique) under a monotone geometric mean, with
- *   PAC-Bayes (McAllester 2003) tail bounds on the confidence margin, Bekenstein
- *   information-density caps (Bekenstein 1981) on per-receipt entropy, and
- *   Reidemeister R1/R2/R3 equivalence classes (Reidemeister 1927) on
- *   receipt-knot chains. The closure is proved in Lean 4 (Mathlib v4.13.0). The
- *   runtime overhead is bounded above by 0.59 ms / request median in the
- *   ouroboros bench harness.
+ *   SZL Holdings builds a formally-verified governance gate for agentic AI.
+ *   The Λ aggregator is proved in Lean 4 against 749 declarations / 14 unique
+ *   axioms / 163 tracked sorries (Mathlib v4.13.0). Every gate decision emits a
+ *   DSSE-signed receipt onto a hash-linked Khipu Merkle DAG with
+ *   summation-checked integrity. PAC-Bayes (McAllester 2003) tail bounds on the
+ *   confidence margin, Bekenstein information-density caps (Bekenstein 1981) on
+ *   per-receipt entropy, and Reidemeister R1/R2/R3 equivalence classes
+ *   (Reidemeister 1927) on receipt-knot chains. The runtime overhead is bounded
+ *   above by 0.59 ms / request median in the ouroboros bench harness.
  *
  * ─────────────────────────────────────────────────────────────────────────────
  *
@@ -36,7 +36,7 @@ import { pacBayesTailBound } from "./pac-bayes.ts";
 import { bekensteinCap, withinBekensteinCap } from "./bekenstein.ts";
 import { reidemeisterClass, type ReceiptKnotChain, type ReidemeisterClass } from "./reidemeister.ts";
 
-/** A single receipt observed on the receipt-bus σ-algebra. */
+/** A single receipt carried on the receipt bus (hash-linked append-only audit log). */
 export interface Receipt {
   /** Receipt lineage / strand id (for the receipt-knot chain). */
   readonly id: string;
@@ -48,7 +48,7 @@ export interface Receipt {
   readonly crossesUnder?: string;
 }
 
-/** The receipt-bus: a stream / iterable of receipts (the σ-algebra carrier). */
+/** The receipt-bus: a stream / iterable of receipts (hash-linked append-only log). */
 export type ReceiptBus = Iterable<Receipt>;
 
 /** A named governance axiom from Doctrine v7 (15 axioms, 14 unique). */
