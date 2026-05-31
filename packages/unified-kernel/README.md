@@ -80,8 +80,8 @@ uds-mesh + vsp-otel span export).
 
 ### Canonical Lean numbers (live)
 
-Live canonical corpus @ `main` HEAD `3de37e5` (builds clean): **752
-declarations / 14 unique axioms (15 raw) / 160 sorries**. The kernel exports
+Live canonical corpus @ `main` HEAD `c7c0ba17` (builds clean): **749
+declarations / 14 unique axioms (15 raw) / 163 sorries**. The kernel exports
 `getCanonicalNumbers()`, which reads `.github/data/lean_numbers.json` (the Trust
 Tier 1 reproducibility-script output) and falls back to the embedded constant.
 
