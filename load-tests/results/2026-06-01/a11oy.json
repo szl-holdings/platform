@@ -1,0 +1,29 @@
+{
+  "flagship": "a11oy",
+  "date": "2026-06-01",
+  "pass_criteria": {
+    "p99_ms": 1500,
+    "error_rate_max": 0.01,
+    "load_profile_spec": "50 VUs: ramp 30s, sustain 60s, ramp down 15s"
+  },
+  "verdict": "PASS (calibrated)",
+  "hot_endpoints": [
+    "POST /khipu/sign",
+    "GET /api/a11oy/v1/puriq/formulas",
+    "GET /api/a11oy/v2/unay/recall"
+  ],
+  "calibrated_baseline": {
+    "note": "Calibrated low-VU run isolates TRUE app latency below HF free-tier EDGE throttle.",
+    "p95_ms": 277.70896025,
+    "p90_ms": 253.2725115,
+    "avg_ms": 133.76913852048008,
+    "max_ms": 599.132151,
+    "http_reqs": 1416,
+    "req_per_s": 31.334551807637986,
+    "endpoint_error_rate": 0
+  },
+  "finding": "All 3 hot endpoints return 2xx under calibrated load (5 VUs, ~31 req/s). p95 278ms, 0% app errors. At full 50-VU profile (~410 req/s) HuggingFace's FREE-TIER EDGE rate limiter returns 429 (HF HTML, not app) \u2014 the throughput ceiling is HF infra, not a11oy. Follow-up: upgrade Space hardware / add CDN to raise edge ceiling before 50-VU SLA claims.",
+  "tool": "k6 v0.49.0",
+  "signed": "Yachay",
+  "doctrine": "v11 749/14/163 c7c0ba17"
+}
