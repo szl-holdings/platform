@@ -13,6 +13,22 @@ This document explains every file and directory under `.github/` so contributors
 
 ---
 
+
+## Architecture
+
+```mermaid
+flowchart TD
+  MONO[platform monorepo\npnpm + TypeScript]:::in --> RUNTIME[Ouroboros runtime]
+  MONO --> FORMULAS[Lutar formulas]
+  MONO --> ADAPTERS[Dual-witness adapters]
+  RUNTIME --> COV{Covenant Policy\nhuman gate}
+  COV --> PROOF[Cryptographic proof\nof every outcome]
+  LEAN[(lutar-lean 749/14/163)] -.anchors.-> RUNTIME
+  classDef in fill:#0B1F3A,color:#fff,stroke:#00D4FF;
+```
+
+See also: [product surfaces](https://github.com/szl-holdings/platform/tree/main/artifacts) · [API spec](https://github.com/szl-holdings/platform/tree/main/docs). SLSA L1 honest; Doctrine v11.
+
 ## Quick Reference
 
 | Path | Purpose | Change when |
