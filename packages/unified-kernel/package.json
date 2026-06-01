@@ -19,6 +19,7 @@
     "boot": "tsx src/boot-demo.ts"
   },
   "devDependencies": {
+    "@types/node": "catalog:",
     "vitest": "catalog:",
     "typescript": "^6.0.3",
     "tsx": "^4.19.0"
