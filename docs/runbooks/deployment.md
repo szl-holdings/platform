@@ -12,8 +12,13 @@
 Every SZL flagship ships through a **staging gate** before prod. Staging Spaces
 build from the **same source as prod** (the prod HF Space repo is cloned at Docker
 build time) and run with the environment variable **`SZL_ENV=staging`**. The only
-behavioral difference is that `/healthz` reports `env: "staging"` so smoke tests can
-distinguish the two environments.
+behavioral difference is that the health endpoint reports `env: "staging"` so smoke
+tests can distinguish the two environments.
+
+> **Health path is per-flagship.** Some flagships expose a bare `/healthz`; others
+> namespace it (e.g. killinchu exposes `/api/killinchu/healthz` and `/api/killinchu/readyz`,
+> not a bare `/healthz`). The staging wrapper registers **both** `/healthz` and
+> `/api/<flagship>/healthz`. Smoke against whichever the prod app actually defines.
 
 | Flagship  | Prod Space | Staging Space | Staging URL |
 |-----------|-----------|---------------|-------------|
@@ -38,16 +43,36 @@ A staging Space is a thin Docker wrapper around the prod source:
    `git clone https://huggingface.co/spaces/SZLHOLDINGS/<flagship>` into
    `/app/prod-src` (so staging always tracks the exact prod source). A build-arg
    `SZL_PROD_REF` (default `main`) pins an exact ref when promoting.
-2. **`serve_staging.py`** sets `SZL_ENV=staging`, imports the prod `app` from
-   `serve.py` verbatim, strips any stale `/healthz` route, and re-registers an
-   env-aware `/healthz` (and `/api/<flagship>/healthz`) that reports `env: "staging"`.
-3. **`CMD ["python", "/app/serve_staging.py"]`** on port 7860.
+2. **Mirror prod's absolute `/app/*` layout.** Prod serve.py reads **absolute**
+   paths (`STATIC_DIR=/app/static`, `/app/gates_manifest.json`, `/app/drones_db.json`,
+   etc.) because the prod Dockerfile uses per-file `COPY <file> ./<file>`. The staging
+   Dockerfile therefore does `cp -a /app/prod-src/. /app/` (then removes `.git`) so the
+   imported prod app resolves the identical paths. (Earlier revision cloned only into
+   `/app/prod-src` and the prod app 500'd on missing `/app/static` — this mirror step
+   fixes that.)
+3. **Reproduce out-of-repo build dependencies.** a11oy's FastAPI startup event launches
+   a **Node receipt-substrate backend on :8081** via
+   `node --experimental-strip-types /app/a11oy-src/packages/receipt-substrate/src/serve.ts`.
+   That source is **not** in the HF Space repo — prod sparse-clones it from the **public**
+   GitHub repo `szl-holdings/a11oy.git`. The a11oy staging Dockerfile reproduces this clone,
+   else `/api/a11oy/*` returns 503 ("Node serve on :8081 is not running") and `/openapi.json`
+   500s. Flagships without a Node sidecar (e.g. killinchu) skip this step.
+4. **`serve_staging.py`** sets `SZL_ENV=staging`, imports the prod `app` from `serve.py`
+   verbatim, strips any stale health route, and **inserts** env-aware `/healthz` +
+   `/api/<flagship>/healthz` **at the FRONT of the router**. This ordering matters:
+   appending with `@app.get(...)` places the route *after* the SPA history-fallback
+   catch-all `/{full_path:path}`, where FastAPI's ordered matching never reaches it
+   (symptom: health path returns the catch-all's `{"error":"not found"}`). Front-insert fixes it.
+5. **`CMD ["python", "/app/serve_staging.py"]`** on port 7860 — this fires prod's
+   lifespan/startup (incl. the Node launch) exactly as prod.
 
 This is **additive** — prod source is never modified. To stand up a new staging
 Space for amaru / sentra / rosie, copy `Dockerfile.<flagship>-staging` +
 `serve_staging.py` + `README.<flagship>.md` and create
 `SZLHOLDINGS/<flagship>-staging` (docker SDK, public). Templates live in this repo's
-PR history and in the agent workspace under `_staging_work/`.
+PR history and in the agent workspace under `_staging_work/`. **Before declaring a new
+staging Space green, verify the prod app's absolute-path and out-of-repo build deps are
+reproduced** (steps 2–3) — these are the two failure modes seen on first build.
 
 ---
 
@@ -94,7 +119,8 @@ prod. The tag is the human approval signal.
 
 ```bash
 BASE=https://szlholdings-a11oy-staging.hf.space
-# 1. env marker
+# 1. env marker (use the health path the prod app actually defines;
+#    a11oy = /healthz, killinchu = /api/killinchu/healthz)
 curl -fsS "$BASE/healthz" | grep -q '"env": *"staging"' && echo "OK env=staging"
 # 2. core routes return 2xx
 for p in / /khipu/ledger /api/a11oy/v1/honest; do
