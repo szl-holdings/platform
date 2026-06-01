@@ -1,0 +1,10 @@
+BRANCH_PROTECTION.md
+CODEOWNERS
+copilot-instructions.md
+dependabot.yml
+instructions
+ISSUE_TEMPLATE
+PROTECTION_SETUP_REPORT.md
+pull_request_template.md
+PULL_REQUEST_TEMPLATE.md
+workflows

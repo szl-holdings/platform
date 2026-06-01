@@ -1,0 +1,24 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "szl-khipu-lmdb"
+version = "1.0.0"
+description = "Khipu-LMDB: durable LMDB persistence backend for the hash-chained Khipu receipt log."
+readme = "README.md"
+requires-python = ">=3.10"
+license = { text = "Apache-2.0" }
+authors = [{ name = "Stephen P. Lutar / SZL Holdings", email = "yachay@szlholdings.dev" }]
+keywords = ["szl", "doctrine-v11", "khipu", "lmdb", "receipts"]
+dependencies = ["lmdb>=1.4"]
+
+[project.urls]
+Homepage = "https://github.com/szl-holdings/platform"
+
+[tool.setuptools]
+packages = ["khipu_lmdb"]
+
+# Doctrine v11 — 749 declarations / 14 unique axioms / 163 sorries.
+# doctrine_locked_at = c7c0ba17. Λ = Conjecture 1 (NOT a theorem). SLSA L1 (honest).
+# Reed-Solomon != holographic; event-sourcing != time travel.

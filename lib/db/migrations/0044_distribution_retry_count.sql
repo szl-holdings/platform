@@ -1,0 +1,2 @@
+ALTER TABLE report_distributions
+  ADD COLUMN IF NOT EXISTS retry_count INTEGER NOT NULL DEFAULT 0;

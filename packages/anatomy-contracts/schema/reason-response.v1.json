@@ -1,0 +1,49 @@
+{
+  "$id": "https://schemas.szlholdings.com/anatomy/reason-response.v1.json",
+  "title": "ReasonResponse",
+  "type": "object",
+  "required": [
+    "actionId",
+    "chakra",
+    "rationale",
+    "provenance",
+    "evaluation",
+    "traceparent"
+  ],
+  "properties": {
+    "actionId": {
+      "type": "string"
+    },
+    "chakra": {
+      "type": "string"
+    },
+    "rationale": {
+      "type": "string"
+    },
+    "provenance": {
+      "type": "object",
+      "required": [
+        "source",
+        "chakra"
+      ],
+      "properties": {
+        "source": {
+          "type": "string"
+        },
+        "chakra": {
+          "type": "string"
+        },
+        "amaruVersion": {
+          "type": "string"
+        }
+      }
+    },
+    "evaluation": {
+      "type": "object"
+    },
+    "traceparent": {
+      "type": "string",
+      "pattern": "^00-[0-9a-f]{32}-[0-9a-f]{16}-[0-9a-f]{2}$"
+    }
+  }
+}

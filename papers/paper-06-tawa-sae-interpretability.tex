@@ -1,0 +1,146 @@
+# Tawa Sparse Autoencoder: Ceque-Indexed Dictionary Learning for Neural Network Interpretability
+
+**Author:** Stephen Paul Lutar Jr.
+**Affiliation:** SZL Consulting Ltd
+**ORCID:** [0009-0001-0110-4173](https://orcid.org/0009-0001-0110-4173)
+**Contact:** stephenlutar2@gmail.com
+**Date:** 4 May 2026
+**Version:** v9
+**Companion papers:** v1--v8 (see References)
+**Reference implementation:** [github.com/szl-holdings/szl-holdings-platform](https://github.com/szl-holdings/szl-holdings-platform) -- `packages/ouroboros-integrations/src/sovereign-engine.ts` (TSA class)
+**License:** CC BY 4.0
+
+---
+
+## Abstract
+
+We present the Tawa Sparse Autoencoder (TSA), a dictionary learning framework for neural network interpretability that indexes learned features using the 41-line Inca ceque system. Standard sparse autoencoders (Cunningham et al., 2023; Bricken et al., 2023) learn overcomplete dictionaries of monosemantic features but lack structured organization of the learned feature space. TSA assigns each dictionary atom to one of 41 ceque lines based on its activation pattern, creating a radial taxonomy of neural features that mirrors the spatial organization of Cusco's huaca system. The 8x expansion factor yields 656 hidden features from 82 input dimensions (matching the Anthropic SAE methodology), with L1 sparsity encouraging monosemantic activation. This extends the thesis lineage from v8 (active inference) to interpretability.
+
+This paper does **not** claim that TSA produces more interpretable features than standard SAEs on established benchmarks. The contribution is the ceque-indexed organizational structure.
+
+---
+
+## 1. Motivation and Continuity from v3--v8
+
+The v3--v8 papers established trust aggregation, quality evaluation, retrieval, safety, memory, and active inference. The present paper addresses *interpretability*: understanding what learned representations encode. This is critical for the v6 safety guardrails (HCG/NJE) because guard effectiveness depends on knowing what features the model is activating.
+
+Sparse autoencoders have emerged as the leading method for extracting interpretable features from neural network activations (Cunningham et al., 2023; Bricken et al., 2023). The key insight is that neural activations are superpositions of many monosemantic features, and an overcomplete dictionary with L1 sparsity can recover these features.
+
+---
+
+## 2. Tawa Sparse Autoencoder Architecture
+
+### 2.1 Encoder-Decoder
+
+Given input \( \mathbf{x} \in \mathbb{R}^d \) (where \( d = 82 \) is the base feature count):
+
+**Encoder:**
+\[
+\mathbf{h} = \text{ReLU}(W_e \mathbf{x} + \mathbf{b}_e) \in \mathbb{R}^{d \cdot k}
+\]
+
+**Decoder:**
+\[
+\hat{\mathbf{x}} = W_d \mathbf{h} + \mathbf{b}_d \in \mathbb{R}^d
+\]
+
+where \( k = 8 \) is the expansion factor (following Anthropic methodology), yielding \( d \cdot k = 656 \) hidden features.
+
+### 2.2 Training Objective
+
+\[
+\mathcal{L} = \|\mathbf{x} - \hat{\mathbf{x}}\|^2 + \lambda_1 \|\mathbf{h}\|_1
+\]
+
+The L1 penalty \( \lambda_1 \) encourages sparse activation, pushing most hidden units to zero and producing monosemantic features.
+
+### 2.3 Ceque Indexing
+
+Each of the 656 hidden features is assigned to one of 41 ceque lines:
+
+\[
+\text{ceque}(j) = j \bmod 41
+\]
+
+This creates a structured taxonomy where features sharing a ceque line are expected to encode related concepts (analogous to huacas along the same ceque line encoding related ritual functions in the Inca system).
+
+The four suyus (Chinchaysuyu, Antisuyu, Collasuyu, Cuntisuyu) partition the ceque lines into four quadrants, providing a coarser grouping of features by suyu sector.
+
+---
+
+## 3. Feature Interpretation
+
+### 3.1 Activation Analysis
+
+For a given input, the TSA returns:
+
+- **Sparse code:** \( \mathbf{h} \) with most entries zero
+- **Active features:** indices where \( h_j > 0 \)
+- **Ceque distribution:** count of active features per ceque line
+- **Suyu distribution:** count of active features per suyu
+
+### 3.2 Feature Naming Convention
+
+Features are named by their ceque line and position:
+
+\[
+\text{name}(j) = \text{``ceque-''} \| \text{ceque}(j) \| \text{``/feature-''} \| \lfloor j / 41 \rfloor
+\]
+
+For example, feature 85 maps to ceque-3/feature-2 (the third feature on ceque line 3).
+
+---
+
+## 4. Connection to v4 ICRC
+
+The ceque indexing connects directly to the v4 Inca Ceque Radial Calculator:
+
+- **ICRC \( L_1 \)** (geometric ratio): the ratio of active ceques to total ceques provides a sparsity-aware version of the 41/328 ratio
+- **ICRC \( L_2 \)** (suyu entropy): the entropy over suyu activation counts measures feature distribution balance
+- **ICRC \( L_3 \)** (alchemy coherence): the coherence of feature activations across alchemical categories
+
+This creates a bidirectional link: ICRC metrics evaluate the quality of SAE features, and SAE features provide the interpretable substrate for ICRC computation.
+
+---
+
+## 5. Reconstruction Error and Quality
+
+The reconstruction error:
+
+\[
+\text{RE} = \frac{\|\mathbf{x} - \hat{\mathbf{x}}\|^2}{\|\mathbf{x}\|^2}
+\]
+
+connects to the v4 Omega Formalism via \( L_2 \): the information preserved by the SAE reconstruction is bounded by the Bekenstein limit of the input.
+
+---
+
+## 6. What this paper does and does not claim
+
+**Claims:**
+1. The TSA architecture follows established SAE methodology (8x expansion, L1 sparsity).
+2. The ceque indexing provides a structured taxonomy of learned features.
+3. The connection to ICRC metrics is well-defined.
+4. The implementation is public.
+
+**Non-claims:**
+- No claim of superior interpretability over standard SAEs on Anthropic's feature interpretation benchmarks.
+- No claim that ceque-indexed features are more monosemantic than randomly indexed features.
+- No claim of deployed production use.
+
+---
+
+## 7. Conclusion
+
+The Tawa Sparse Autoencoder demonstrates that structured feature indexing using the Inca ceque system provides an organizationally principled approach to neural network interpretability. The integration with ICRC metrics and the v4 Omega Formalism connects interpretability to the broader thesis lineage.
+
+---
+
+## References
+
+1. Cunningham, H. et al. (2023). Sparse autoencoders find highly interpretable features in language models. *arXiv:2309.08600*.
+2. Bricken, T. et al. (2023). Towards monosemanticity: Decomposing language models with dictionary learning. Anthropic Research.
+3. Olah, C. et al. (2020). Zoom in: An introduction to circuits. *Distill*.
+4. Elhage, N. et al. (2022). Toy models of superposition. Anthropic Research.
+5. Zuidema, W. (2006). Cusco's ceque system. *Latin American Antiquity*, 17(4).
+6. Lutar, S.P. (2026a--h). Ouroboros Thesis series v1--v8. See companion papers.

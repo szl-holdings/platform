@@ -1,0 +1,39 @@
+{
+  "name": "@szl-holdings/marketing",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Shared public-site primitives for SZL Holdings marketing surfaces — hero, how-it-works, diagnostic funnel, role tabs, architecture section, pricing CTA, and lead-qualification analytics.",
+  "exports": {
+    ".": "./src/index.ts",
+    "./hero": "./src/components/Hero.tsx",
+    "./how-it-works": "./src/components/HowItWorks.tsx",
+    "./diagnostic-funnel": "./src/components/DiagnosticFunnel.tsx",
+    "./role-tabs": "./src/components/RoleTabs.tsx",
+    "./architecture-section": "./src/components/ArchitectureSection.tsx",
+    "./pricing-cta": "./src/components/PricingCTA.tsx",
+    "./use-lead-qualification": "./src/hooks/useLeadQualification.ts"
+  },
+  "peerDependencies": {
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0"
+  },
+  "devDependencies": {
+    "@types/react": "catalog:",
+    "@types/react-dom": "catalog:",
+    "typescript": "catalog:"
+  },
+  "dependencies": {
+    "clsx": "catalog:",
+    "framer-motion": "catalog:",
+    "lucide-react": "catalog:",
+    "tailwind-merge": "catalog:",
+    "@szl-holdings/brand-registry": "workspace:*"
+  },
+  "scripts": {
+    "lint": "biome lint ./src",
+    "lint:ci": "biome lint ./src",
+    "format": "biome format --write ./src",
+    "typecheck": "tsc -p tsconfig.json --noEmit"
+  }
+}

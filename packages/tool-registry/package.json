@@ -1,0 +1,19 @@
+{
+  "name": "@workspace/tool-registry",
+  "version": "1.0.0",
+  "type": "module",
+  "description": "Tool Registry — typed catalog of all tools available to Alloy specialists. Provides tool metadata, schema validation stubs, and capability linking.",
+  "exports": {
+    ".": "./src/index.ts",
+    "./registry": "./src/registry.ts"
+  },
+  "scripts": {
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "zod": "catalog:"
+  },
+  "devDependencies": {
+    "typescript": "catalog:"
+  }
+}

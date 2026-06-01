@@ -1,0 +1,513 @@
+{
+  "nav": {
+    "services": "Servicios",
+    "whoWeServe": "A Quién Servimos",
+    "howWeWork": "Cómo Trabajamos",
+    "about": "Sobre Carlota Jo",
+    "requestConsultation": "Solicitar Consulta",
+    "openMenu": "Abrir menú",
+    "closeMenu": "Cerrar menú"
+  },
+  "footer": {
+    "consulting": "Consultoría",
+    "contact": "Contacto",
+    "requestConsultation": "Solicitar una consulta →",
+    "copyright": "© {{year}} Carlota Jo Consulting. Una empresa de SZL Holdings. Todos los derechos reservados.",
+    "privacy": "Política de Privacidad",
+    "terms": "Términos de Uso"
+  },
+  "hero": {
+    "badge": "Asesoría Privada",
+    "headline": "Silenciosamente estructurado.",
+    "headlineEmphasis": "Ejecutado con precisión.",
+    "subheadline": "Gestión de patrimonio y operaciones residenciales para familias de alto patrimonio — a través de un único operador de confianza.",
+    "cta": "Solicitar una Consulta Confidencial",
+    "stats": {
+      "retention": {
+        "value": "100%",
+        "label": "Retención"
+      },
+      "response": {
+        "value": "< 2h",
+        "label": "Respuesta"
+      },
+      "discreet": {
+        "value": "Discreta",
+        "label": "Por Diseño"
+      }
+    },
+    "practiceAreas": "Áreas de Práctica",
+    "areas": {
+      "residenceOps": "Operaciones de Residencia",
+      "propertyCoord": "Coordinación de Propiedades",
+      "householdSystems": "Sistemas del Hogar",
+      "vendorManagement": "Gestión de Proveedores",
+      "lifestyleAdmin": "Estilo de Vida y Administración",
+      "specialProjects": "Proyectos Especiales"
+    },
+    "location": "Londres · Nueva York",
+    "email": "inquiries@carlotajo.com"
+  },
+  "services": {
+    "badge": "Servicios",
+    "headline": "Seis áreas de práctica.",
+    "headlineEmphasis": "Un estándar claro.",
+    "description": "Precisión interdisciplinaria y discreción absoluta en cada compromiso.",
+    "inquire": "Consultar",
+    "scope": "Alcance"
+  },
+  "servicesPage": {
+    "badge": "Servicios",
+    "headline": "Seis áreas de práctica.",
+    "headlineEmphasis": "Un estándar sin concesiones.",
+    "description": "Cada compromiso se gestiona directamente con Rosa. Sin asociados, sin traspasos, sin modelos de servicio estandarizados.",
+    "beginConversation": "Iniciar una conversación",
+    "discretionNote": "Todas las conversaciones se realizan con absoluta discreción.",
+    "requestConsultation": "Solicitar una Consulta",
+    "scope": "Alcance",
+    "inquire": "Consultar"
+  },
+  "rosa": {
+    "badge": "La Principal",
+    "name": "Carlota Jo",
+    "title": "Directora Fraccionada de Propiedades y Residencia",
+    "company": "SZL Holdings",
+    "bio1": "Rosa fundó Carlota Jo para directivos que necesitan una persona en quien confiar plenamente para gestionar la capa operativa de su vida residencial — con calidez, atención al detalle y la discreción que las familias de alto patrimonio exigen como base.",
+    "bio2": "Con experiencia en múltiples residencias, propiedades internacionales y la plena complejidad de las operaciones del hogar de alto patrimonio, Rosa aporta un enfoque estructurado y profesional a cada compromiso.",
+    "contactInfo": {
+      "responseTime": "Tiempo de respuesta",
+      "responseValue": "En dos días hábiles",
+      "locations": "Ubicaciones",
+      "locationsValue": "Londres · Nueva York, NY",
+      "contact": "Contacto",
+      "contactValue": "inquiries@carlotajo.com"
+    }
+  },
+  "trust": {
+    "badge": "Nuestros Compromisos",
+    "headline": "Cinco principios.",
+    "headlineEmphasis": "No negociables.",
+    "pillars": {
+      "discretion": {
+        "name": "Discreción",
+        "desc": "Cada compromiso se lleva a cabo con absoluta confidencialidad. Sus asuntos, su personal y su residencia nunca se comentan."
+      },
+      "responsiveness": {
+        "name": "Capacidad de Respuesta",
+        "desc": "Recibirá respuesta en dos horas durante el horario laboral. Para asuntos urgentes, el mismo día — siempre."
+      },
+      "structure": {
+        "name": "Estructura",
+        "desc": "Las operaciones se basan en sistemas documentados, no en la memoria. Cada proceso está registrado, cada proveedor verificado, cada tarea asignada."
+      },
+      "professionalism": {
+        "name": "Profesionalismo",
+        "desc": "La comunicación es clara, precisa y adecuadamente formal. La representamos ante proveedores, personal y terceros a su nivel."
+      },
+      "execution": {
+        "name": "Ejecución de Alto Nivel",
+        "desc": "El nivel de atención que esperaría de un COO personal — aplicado a la capa operativa de su hogar y vida."
+      }
+    }
+  },
+  "process": {
+    "badge": "Cómo Funciona",
+    "headline": "Estructurado desde",
+    "headlineEmphasis": "el primer día.",
+    "steps": {
+      "discovery": {
+        "step": "01",
+        "label": "Llamada de Descubrimiento",
+        "desc": "Una conversación confidencial para comprender su hogar, prioridades y el apoyo que busca. Sin compromiso."
+      },
+      "assessment": {
+        "step": "02",
+        "label": "Evaluación de Necesidades",
+        "desc": "Rosa visita la propiedad, conoce al equipo del hogar y forma su propia visión independiente de la situación operativa."
+      },
+      "plan": {
+        "step": "03",
+        "label": "Plan de Servicio",
+        "desc": "Un plan personalizado que define el alcance, protocolos y umbrales de decisión — preparado con usted, no impuesto a usted."
+      },
+      "onboarding": {
+        "step": "04",
+        "label": "Incorporación",
+        "desc": "Rosa asume la supervisión, confirma las relaciones con proveedores, documenta los estándares y se integra limpiamente en el compromiso."
+      },
+      "management": {
+        "step": "05",
+        "label": "Gestión Activa",
+        "desc": "Gestión proactiva y continua. Resúmenes mensuales. Revisiones trimestrales. Usted está informado, no sobrecargado."
+      }
+    }
+  },
+  "inquiry": {
+    "headline": "Inicie una conversación",
+    "headlineEmphasis": "confidencial.",
+    "description": "Rosa acepta un número limitado de nuevos clientes cada año. Todas las consultas se manejan con absoluta confidencialidad.",
+    "cta": "Solicitar una Consulta"
+  },
+  "about": {
+    "badge": "Acerca de",
+    "headline": "Una práctica de asesoría",
+    "headlineEmphasis": "residencial diferente.",
+    "bio1": "Carlota Jo fue fundada para directivos que necesitan un único operador de confianza para gestionar la capa operativa de su vida residencial — no una agencia, no personal rotativo, sino alguien que entiende su estándar y lo mantiene de manera consistente.",
+    "bio2": "Una práctica pequeña por diseño. Cada cliente recibe la atención directa de Rosa. Esto limita cuántos clientes puede servir — y ese es precisamente el punto.",
+    "whatWeAreNot": {
+      "heading": "Lo que Carlota Jo no es",
+      "items": [
+        "Una empresa tradicional de administración de propiedades",
+        "Una agencia de personal doméstico",
+        "Un servicio de conserjería con gestores de cuenta rotatorios",
+        "Estructurada en torno a la escala o el volumen"
+      ]
+    },
+    "beginConversation": "Iniciar una conversación",
+    "quote": "\"El estándar no es lo que se espera. Es lo que se merece.\"",
+    "limitedNote": "Rosa acepta un número limitado de nuevos clientes cada año. Todas las consultas se manejan con absoluta confidencialidad.",
+    "ctaBegin": "Iniciar una Conversación"
+  },
+  "founder": {
+    "badge": "Carlota Jo",
+    "headline": "La operadora de confianza",
+    "headlineEmphasis": "para directivos que exigen más.",
+    "qualities": {
+      "warmth": {
+        "title": "Calidez antes que estructura",
+        "desc": "Rosa construye relaciones genuinas con directivos, equipos del hogar y proveedores por igual — la confianza es el fundamento de todo."
+      },
+      "precision": {
+        "title": "Precisión operativa",
+        "desc": "Cada proceso está documentado, cada tarea asignada, cada brecha cerrada antes de convertirse en problema."
+      },
+      "discretion": {
+        "title": "Discreción por encima de todo",
+        "desc": "La confidencialidad no es una característica del servicio. Es el estándar no negociable del que todo lo demás se deriva."
+      },
+      "contact": {
+        "title": "Punto único de contacto",
+        "desc": "Un número. Una persona. Responsabilidad total — sin traspasos, sin cadenas de delegación, sin excusas."
+      },
+      "anticipatory": {
+        "title": "Anticipatoria por naturaleza",
+        "desc": "Rosa identifica lo que necesita atención antes de que usted lo note. Resuelve en silencio, escala con precisión y nunca genera ruido."
+      }
+    },
+    "expertise": "Áreas de experiencia",
+    "philosophy": "Filosofía",
+    "profile": {
+      "background": "Trayectoria",
+      "geographies": "Geografías",
+      "geographiesValue": "Reino Unido, Europa, EE.UU., Oriente Medio",
+      "portfolio": "Cartera",
+      "portfolioValue": "Múltiples residencias simultáneas, hasta 6",
+      "languages": "Idiomas",
+      "languagesValue": "Inglés, español, francés conversacional"
+    },
+    "philosophy_items": [
+      "Las mejores operaciones son invisibles. Cuando una residencia funciona perfectamente, los directivos no lo notan — simplemente viven bien.",
+      "Los sistemas superan a la memoria. Cada procedimiento que vive en un documento supera a cualquier individuo. Rosa construye hogares que funcionan sin ella.",
+      "La discreción es binaria. No existe confidencialidad parcial. Cada compromiso se lleva a cabo como si los detalles operativos del hogar fueran la información más sensible de la sala.",
+      "El estándar del directivo es el estándar. No una aproximación, no una interpretación razonable — el estándar real, mantenido de manera consistente por cada proveedor y cada miembro del equipo."
+    ]
+  },
+  "whoWeServe": {
+    "badge": "A Quién Servimos",
+    "headline": "Un número limitado de directivos.",
+    "headlineEmphasis": "Cuidadosamente seleccionados.",
+    "description": "Carlota Jo trabaja con una base de clientes deliberadamente pequeña. La profundidad del compromiso es el producto, no una característica.",
+    "indicators": "Señales de que puede ser el cliente adecuado",
+    "readyToSpeak": "¿Listo para hablar con Rosa?",
+    "confidentialNote": "Todas las conversaciones se manejan con absoluta confidencialidad.",
+    "beginConversation": "Iniciar una Conversación",
+    "viewServices": "Ver Servicios"
+  },
+  "approach": {
+    "badge": "Enfoque",
+    "headline": "Cómo trabajamos",
+    "description": "Nuestra metodología se basa en la profundidad del compromiso, no en el volumen de entregables. Cada fase se gana el derecho a la siguiente.",
+    "engagementPhases": "Fases del compromiso",
+    "corePrinciples": "Principios fundamentales",
+    "phases": {
+      "discovery": {
+        "title": "Descubrimiento",
+        "description": "Cada compromiso comienza con una sesión de orientación profunda. No empezamos a asesorar hasta que entendemos la historia, las limitaciones, la dinámica y lo que realmente está en juego."
+      },
+      "diagnosis": {
+        "title": "Diagnóstico",
+        "description": "Antes de recomendar algo, trazamos un mapa de lo que realmente estamos resolviendo — distinguiendo síntomas de causas raíz y desafíos comerciales de problemas estructurales."
+      },
+      "strategy": {
+        "title": "Estrategia",
+        "description": "Desarrollamos una posición estratégica estructurada — no una presentación de diapositivas, sino un punto de vista claro sobre hacia dónde ir, por qué y qué necesitará creer para que sea correcto."
+      },
+      "activation": {
+        "title": "Activación",
+        "description": "La estrategia sin implementación es análisis. Permanecemos comprometidos durante la activación — asegurando que las decisiones se traduzcan en resultados y los resultados en impulso."
+      },
+      "review": {
+        "title": "Revisión Continua",
+        "description": "Los mercados cambian. Las organizaciones evolucionan. La mejor estrategia es la que se adapta. Los compromisos continuos incluyen cadencias de revisión periódicas para anticiparse al entorno."
+      }
+    },
+    "principles": {
+      "founderFirst": {
+        "title": "Fundadores primero",
+        "body": "Trabajamos con fundadores y líderes senior que son responsables de los resultados — no delegando estrategia a un equipo junior."
+      },
+      "smallBase": {
+        "title": "Base de clientes pequeña, compromiso profundo",
+        "body": "Limitamos deliberadamente nuestra cartera de clientes. La profundidad del compromiso es el producto, no una característica."
+      },
+      "confidentiality": {
+        "title": "Confidencialidad por defecto",
+        "body": "Las relaciones con clientes y los detalles de los compromisos nunca se divulgan. Nuestro historial se demuestra por resultados, no por mencionar nombres."
+      },
+      "noRetainers": {
+        "title": "Sin retenciones sin intención",
+        "body": "No mantenemos relaciones por su propio bien. Cada compromiso tiene un propósito claro y terminamos los compromisos cuando los han cumplido."
+      }
+    },
+    "readyToSpeak": "¿Listo para hablar con Rosa?",
+    "confidentialNote": "Todas las conversaciones se manejan con absoluta confidencialidad.",
+    "beginConversation": "Iniciar una Conversación"
+  },
+  "contact": {
+    "badge": "Solicitar una Consulta Confidencial",
+    "headline": "Inicie una conversación",
+    "headlineEmphasis": "con absoluta discreción.",
+    "paths": {
+      "newClient": {
+        "title": "Estoy explorando si Carlota Jo es la opción adecuada",
+        "desc": "Está considerando incorporar apoyo operativo para una residencia o entorno doméstico y quiere entender cómo trabaja Rosa."
+      },
+      "existingClient": {
+        "title": "Soy un cliente existente",
+        "desc": "Para comunicaciones de clientes existentes, utilice su canal de contacto seguro designado o contacte a Rosa directamente.",
+        "action": "Enviar email a Rosa directamente",
+        "note": "Los clientes existentes tienen un protocolo de contacto dedicado."
+      },
+      "referral": {
+        "title": "Estoy recomendando a alguien que puede ser un buen encaje",
+        "desc": "Las presentaciones de contactos de confianza son bienvenidas. Rosa responderá personalmente y con absoluta discreción."
+      },
+      "estatePartner": {
+        "title": "Represento un patrimonio o una family office",
+        "desc": "Directivos de family offices, administradores de patrimonios y asesores de riqueza privada que exploran apoyo operativo para el entorno residencial de un director."
+      },
+      "inquiry": {
+        "title": "Tengo una situación específica",
+        "desc": "Transiciones urgentes, proyectos especiales o situaciones inusuales que no encajan en las categorías estándar — descríbala y Rosa responderá personalmente."
+      }
+    },
+    "form": {
+      "name": "Su nombre",
+      "email": "Dirección de correo electrónico",
+      "message": "¿Cómo puede ayudarle Rosa?",
+      "howHeard": "¿Cómo conoció a Carlota Jo?",
+      "submit": "Enviar Mensaje",
+      "submitting": "Enviando...",
+      "success": "Gracias",
+      "successMessage": "Rosa responderá personalmente, con absoluta discreción, en dos días hábiles.",
+      "error": "Algo salió mal. Por favor, inténtelo de nuevo o envíe un email a Rosa directamente."
+    }
+  },
+  "common": {
+    "requestConsultation": "Solicitar una Consulta",
+    "beginConversation": "Iniciar una Conversación",
+    "viewServices": "Ver Servicios",
+    "inquire": "Consultar",
+    "email": "inquiries@carlotajo.com",
+    "locations": "Londres · Nueva York, NY",
+    "save": "Guardar",
+    "saving": "Guardando…",
+    "cancel": "Cancelar",
+    "edit": "Editar",
+    "delete": "Eliminar",
+    "add": "Añadir",
+    "load": "Cargar",
+    "loading": "Cargando…",
+    "error": "Algo salió mal",
+    "retry": "Reintentar",
+    "confirmDelete": "¿Eliminar?",
+    "curated": "Curado",
+    "curatedLong": "Curado por Carlota Jo"
+  },
+  "expertNetwork": {
+    "title": "Red de Expertos y Ensamblaje de Equipos",
+    "headline": "El Equipo Correcto.",
+    "headlineAccent": "En Cada Proyecto.",
+    "subtitle": "La IA vincula habilidades con necesidades del proyecto de forma instantánea. Seguimiento de disponibilidad, gestión de tarifas y puntuación de desempeño en un solo lugar.",
+    "statsSize": "Tamaño de la Red",
+    "statsAvail": "Disponibles Ahora",
+    "statsRating": "Valoración Media",
+    "statsIndustries": "Sectores",
+    "searchPlaceholder": "Buscar expertos, habilidades, sectores…",
+    "filterAll": "Toda Disponibilidad",
+    "filterTier": "Todos los Niveles",
+    "addExpert": "Añadir Experto",
+    "editExpert": "Editar Experto",
+    "emptyTitle": "No se encontraron expertos",
+    "emptySearch": "Intenta ajustar tu búsqueda o filtros",
+    "emptyNetwork": "Añade tu primer experto a la red",
+    "engagements": "proyectos",
+    "recentWork": "TRABAJO RECIENTE",
+    "skills": "HABILIDADES",
+    "languages": "IDIOMAS",
+    "requestBrief": "Solicitar Briefing",
+    "assembleTitle": "Ensamblaje de Equipo con IA",
+    "assembleSubtitle": "Describe el proyecto y la IA seleccionará el equipo óptimo de expertos disponibles.",
+    "assemblePlaceholder": "p.ej. Estrategia de entrada al mercado para una fintech del Reino Unido que se expande al Sudeste Asiático…",
+    "assemble": "Ensamblar Equipo",
+    "assembling": "Ensamblando…",
+    "deleteWarning": "Eliminar",
+    "deleteWarning2": "Esta acción no se puede deshacer.",
+    "formName": "Nombre Completo",
+    "formTitle": "Título / Función",
+    "formLocation": "Ubicación",
+    "formBio": "Biografía",
+    "formRecentWork": "Trabajo Reciente",
+    "formTier": "Nivel",
+    "formAvailability": "Disponibilidad",
+    "formDayRate": "Tarifa Diaria (£)",
+    "formRating": "Valoración (0–5)",
+    "formSkills": "Habilidades",
+    "formIndustries": "Sectores",
+    "formLanguages": "Idiomas",
+    "tiers": {
+      "principal": "Principal",
+      "senior": "Consultor Senior",
+      "specialist": "Experto en la Materia",
+      "associate": "Asociado"
+    },
+    "availability": {
+      "available": "Disponible",
+      "limited": "Disponibilidad Limitada",
+      "booked": "Sin Disponibilidad",
+      "onEngagement": "En Proyecto"
+    }
+  },
+  "knowledgeVault": {
+    "title": "Bóveda de Conocimiento",
+    "headline": "Inteligencia",
+    "headlineAccent": "Institucional.",
+    "subtitle": "Repositorio con búsqueda de marcos, guías, plantillas y casos de estudio — gestionados, versionados y vinculados a cada proyecto.",
+    "statsItems": "Total de Elementos",
+    "statsUses": "Usos Totales",
+    "statsTypes": "Tipos de Contenido",
+    "statsIndustries": "Sectores",
+    "searchPlaceholder": "Buscar marcos, guías, casos de estudio…",
+    "filterAll": "Todos los Tipos",
+    "addItem": "Añadir Elemento",
+    "editItem": "Editar Elemento de Conocimiento",
+    "emptyTitle": "No se encontraron elementos",
+    "emptySearch": "Intenta ajustar tu búsqueda o filtros",
+    "emptyVault": "Añade tu primer elemento de conocimiento",
+    "uses": "usos",
+    "rating": "VALORACIÓN",
+    "tags": "ETIQUETAS",
+    "industries": "SECTORES",
+    "by": "Por",
+    "aiSearch": "Búsqueda IA",
+    "aiResultLabel": "Coincidencia IA",
+    "useItem": "Usar en Proyecto",
+    "deleteWarning": "Eliminar",
+    "deleteWarning2": "Esta acción no se puede deshacer.",
+    "formType": "Tipo",
+    "formTitle": "Título",
+    "formDescription": "Descripción",
+    "formAuthor": "Autor",
+    "formLastUpdated": "Última Actualización",
+    "formTags": "Etiquetas",
+    "formIndustries": "Sectores",
+    "formEngagements": "Proyectos Relacionados",
+    "types": {
+      "framework": "Marco",
+      "playbook": "Guía",
+      "template": "Plantilla",
+      "caseStudy": "Caso de Estudio",
+      "research": "Investigación"
+    }
+  },
+  "proposalGenerator": {
+    "title": "Generador de Propuestas",
+    "headline": "Propuesta en",
+    "headlineAccent": "Horas, No Semanas.",
+    "subtitle": "Propuestas generadas por IA, revisadas por expertos y adaptadas a cada cliente. Exportar a PDF. Guardar borradores.",
+    "label": "Propuesta de Proyecto",
+    "saved": "Guardado",
+    "preparedFor": "Preparado para",
+    "newProposal": "Nueva Propuesta",
+    "exportPDF": "Exportar PDF",
+    "generate": "Generar Propuesta",
+    "generating": "Generando Propuesta…",
+    "saveDraft": "Guardar Borrador",
+    "savedDrafts": "Borradores Guardados",
+    "noDrafts": "Sin borradores guardados. Genera una propuesta para empezar.",
+    "selectTemplate": "Seleccionar Plantilla",
+    "prospectDetails": "Datos del Cliente Potencial",
+    "engagementDetails": "Detalles del Proyecto",
+    "formProspectName": "Nombre del Cliente",
+    "formProspectTitle": "Cargo del Cliente",
+    "formCompany": "Nombre de la Empresa",
+    "formIndustry": "Sector",
+    "formEngagementType": "Tipo de Proyecto",
+    "formBudget": "Presupuesto Orientativo",
+    "formTimeline": "Calendario de Inicio",
+    "formChallenge": "Reto Principal",
+    "formGoals": "Objetivos Estratégicos",
+    "formContext": "Contexto Adicional",
+    "execSummary": "Resumen Ejecutivo",
+    "situation": "Evaluación de la Situación",
+    "scopeOfWork": "Alcance del Trabajo",
+    "team": "Composición del Equipo",
+    "caseStudies": "Casos de Estudio Relevantes",
+    "investment": "Estructura de Inversión",
+    "timeline": "CALENDARIO",
+    "nextSteps": "PRÓXIMOS PASOS",
+    "mostPopular": "Más Popular",
+    "confidential": "Esta propuesta es confidencial y ha sido preparada exclusivamente para el destinatario indicado.",
+    "templates": {
+      "standard": { "name": "Proyecto Estándar", "desc": "Propuesta completa con entrega por fases" },
+      "rapid": { "name": "Diagnóstico Rápido", "desc": "Proyecto corto de 2 a 4 semanas" },
+      "retainer": { "name": "Asesoramiento Continuo", "desc": "Relación de asesoría mensual continua" }
+    },
+    "engagementTypes": [
+      "Estrategia de Entrada al Mercado",
+      "Posicionamiento de Marca",
+      "Estrategia de Crecimiento",
+      "Transformación Organizativa",
+      "Estrategia Digital",
+      "Inteligencia Competitiva",
+      "Asesoría en Fusiones y Adquisiciones",
+      "Estrategia de Precios",
+      "Estrategia de Producto",
+      "Otro"
+    ],
+    "budgets": [
+      "< £20.000",
+      "£20.000 – £50.000",
+      "£50.000 – £100.000",
+      "£100.000 – £250.000",
+      "£250.000+",
+      "Por definir / Flexible"
+    ],
+    "timelines": [
+      "Lo antes posible",
+      "En 1 mes",
+      "1 – 3 meses",
+      "3 – 6 meses",
+      "6 – 12 meses",
+      "Asesoría continua"
+    ]
+  },
+  "clientIntel": {
+    "sources": {
+      "nps": "Encuesta NPS",
+      "crm": "Señales CRM",
+      "churn": "Modelo de Abandono",
+      "billing": "Datos de Facturación"
+    }
+  }
+}

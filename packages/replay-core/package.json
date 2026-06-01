@@ -1,0 +1,44 @@
+{
+  "name": "@workspace/replay-core",
+  "version": "0.0.0",
+  "private": false,
+  "type": "module",
+  "description": "Replay infrastructure — captures real incidents, flows, and cases into sanitized replayable datasets and re-runs workflows against historical context",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./src/index.ts"
+    },
+    "./capture": {
+      "types": "./dist/capture.d.ts",
+      "import": "./src/capture.ts"
+    },
+    "./snapshot": {
+      "types": "./dist/snapshot.d.ts",
+      "import": "./src/snapshot.ts"
+    },
+    "./replay": {
+      "types": "./dist/replay.d.ts",
+      "import": "./src/replay.ts"
+    },
+    "./scenarios": {
+      "types": "./dist/scenarios.d.ts",
+      "import": "./src/scenarios.ts"
+    }
+  },
+  "dependencies": {
+    "zod": "catalog:"
+  },
+  "devDependencies": {
+    "@types/node": "catalog:",
+    "vitest": "^4.1.7"
+  },
+  "scripts": {
+    "lint": "biome lint ./src",
+    "lint:ci": "biome lint ./src",
+    "format": "biome format --write ./src",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "test": "vitest run",
+    "test:watch": "vitest"
+  }
+}

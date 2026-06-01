@@ -1,0 +1,5 @@
+
+> workspace@0.0.0 brand:strings /home/runner/workspace
+> tsx scripts/check-banned-brand-strings.ts
+
+✓  Banned brand-string check passed — scanned 4010 files, no new violations beyond the audit baseline.

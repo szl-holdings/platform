@@ -1,0 +1,66 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://a11oy.io/spec/hatun-doctrine/0.1.0/schemas/_shared.json",
+  "title": "Hatun Doctrine — Shared Definitions (0.1.0)",
+  "description": "Reusable $defs for the Hatun Doctrine Specification. Imported by every artifact schema.",
+  "$defs": {
+    "specVersion": {
+      "type": "string",
+      "const": "0.1.0",
+      "description": "Pinned version of the Hatun Doctrine Specification this artifact conforms to."
+    },
+    "semver": {
+      "type": "string",
+      "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+(-[0-9A-Za-z.-]+)?$",
+      "description": "Semantic version string (MAJOR.MINOR.PATCH[-prerelease])."
+    },
+    "isoTimestamp": {
+      "type": "string",
+      "format": "date-time",
+      "description": "ISO 8601 UTC timestamp."
+    },
+    "sha256Hash": {
+      "type": "string",
+      "pattern": "^(0x)?[0-9a-f]{8,64}$",
+      "description": "Hex-encoded SHA-256 hash, optionally 0x-prefixed and truncated for display."
+    },
+    "agentId": {
+      "type": "string",
+      "pattern": "^[a-z][a-z0-9-]{1,63}$",
+      "description": "Stable agent operator identifier (e.g. 'op-cascade', 'op-counsel')."
+    },
+    "actorRef": {
+      "type": "string",
+      "description": "Issuer or actor reference, typically '<fabric>/<agentId>' or '<org>/<role>'."
+    },
+    "severity": {
+      "type": "string",
+      "enum": ["info", "low", "medium", "high", "critical"],
+      "description": "Standardized severity ladder (CVSS-style five-stop)."
+    },
+    "signatureEnvelope": {
+      "type": "object",
+      "description": "Optional Sigstore-style signed-attestation envelope.",
+      "required": ["alg", "value"],
+      "properties": {
+        "alg": { "type": "string", "enum": ["ed25519", "ecdsa-p256", "rsa-pss-sha256"] },
+        "value": { "type": "string", "description": "Base64-encoded signature value." },
+        "keyRef": { "type": "string", "description": "Key reference (e.g. KMS ARN, Sigstore identity)." },
+        "rekorEntry": { "type": "string", "description": "Optional transparency-log entry URL." }
+      }
+    },
+    "envelopeFields": {
+      "type": "object",
+      "description": "Common discriminator + provenance fields present on every artifact.",
+      "required": ["specVersion", "kind", "id", "issuedBy", "issuedAt"],
+      "properties": {
+        "specVersion": { "$ref": "#/$defs/specVersion" },
+        "kind": { "type": "string" },
+        "id": { "type": "string", "description": "Stable, human-readable identifier." },
+        "issuedBy": { "$ref": "#/$defs/actorRef" },
+        "issuedAt": { "$ref": "#/$defs/isoTimestamp" },
+        "signature": { "$ref": "#/$defs/signatureEnvelope" }
+      }
+    }
+  }
+}

@@ -1,0 +1,56 @@
+{
+  "$id": "https://schemas.szlholdings.com/anatomy/action-proposal.v1.json",
+  "title": "ActionProposal",
+  "type": "object",
+  "required": [
+    "actionId",
+    "summary",
+    "severity",
+    "decisionClass",
+    "confidence",
+    "witnesses",
+    "principal"
+  ],
+  "properties": {
+    "actionId": {
+      "type": "string"
+    },
+    "summary": {
+      "type": "string"
+    },
+    "severity": {
+      "type": "string",
+      "enum": [
+        "low",
+        "medium",
+        "high",
+        "critical"
+      ]
+    },
+    "decisionClass": {
+      "type": "string",
+      "enum": [
+        "autonomous",
+        "advisory",
+        "human-required"
+      ]
+    },
+    "confidence": {
+      "type": "number",
+      "minimum": 0,
+      "maximum": 1
+    },
+    "witnesses": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "principal": {
+      "type": "string"
+    },
+    "payload": {
+      "type": "object"
+    }
+  }
+}

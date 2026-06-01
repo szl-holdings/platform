@@ -1,0 +1,32 @@
+cff-version: 1.2.0
+title: Hatun Doctrine Specification
+message: "If you use the Hatun Doctrine Specification, please cite it as below."
+type: software
+authors:
+  - family-names: Lutar
+    given-names: Stephen P.
+    name-suffix: Jr.
+    orcid: "https://orcid.org/0009-0001-0110-4173"
+    affiliation: "SZL Holdings, Inc."
+abstract: >
+  The Hatun Doctrine Specification is the constitutional governance schema for
+  agentic AI systems in the SZL substrate. It defines machine-checkable JSON
+  Schemas for ten governance artifacts: constitution, system-card, risk-report,
+  snapshot-fingerprint, behavioral-audit-finding, adversarial-robustness-score,
+  coordinated-agent-vulnerability-disclosure, covenant-lift-sample,
+  welfare-telemetry-sample, and glasswing-partner-attestation. Each schema is
+  enforceable via the companion GitHub Action (tools/github-actions/hatun-doctrine).
+  Quechua "hatun" = great, supreme, foundational.
+keywords:
+  - AI governance
+  - JSON Schema
+  - constitutional AI
+  - agentic systems
+  - Lean 4
+  - DSSE attestation
+  - SZL doctrine
+license: LicenseRef-SZL-Proprietary
+version: "1.0.0"
+date-released: "2026-05-31"
+url: "https://github.com/szl-holdings/platform/tree/main/docs/a11oy/spec/hatun-doctrine-spec"
+repository-code: "https://github.com/szl-holdings/platform"

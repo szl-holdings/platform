@@ -1,0 +1,31 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 400" fill="none">
+  <rect width="800" height="400" fill="#080c14"/>
+  <text x="400" y="35" text-anchor="middle" fill="#e2e8f0" font-family="system-ui" font-size="16" font-weight="600">SZL Holdings — Ecosystem</text>
+  <rect x="250" y="55" width="300" height="35" rx="4" fill="#0f1520" stroke="#d4a054" stroke-width="1.5"/>
+  <text x="400" y="78" text-anchor="middle" fill="#d4a054" font-family="system-ui" font-size="13" font-weight="600">SZL Holdings</text>
+  <rect x="60" y="120" width="160" height="60" rx="6" fill="#0f1520" stroke="#d4a054" stroke-width="1.5"/>
+  <text x="140" y="148" text-anchor="middle" fill="#d4a054" font-family="system-ui" font-size="13" font-weight="600">KORA</text>
+  <text x="140" y="165" text-anchor="middle" fill="#94a3b8" font-family="system-ui" font-size="10">Decision Intelligence</text>
+  <rect x="240" y="120" width="160" height="60" rx="6" fill="#0f1520" stroke="#8b7ac8" stroke-width="1.5"/>
+  <text x="320" y="148" text-anchor="middle" fill="#8b7ac8" font-family="system-ui" font-size="13" font-weight="600">Alloy</text>
+  <text x="320" y="165" text-anchor="middle" fill="#94a3b8" font-family="system-ui" font-size="10">Execution Fabric</text>
+  <rect x="420" y="120" width="160" height="60" rx="6" fill="#0f1520" stroke="#c45a4a" stroke-width="1"/>
+  <text x="500" y="148" text-anchor="middle" fill="#c45a4a" font-family="system-ui" font-size="13" font-weight="600">PARAGON</text>
+  <text x="500" y="165" text-anchor="middle" fill="#94a3b8" font-family="system-ui" font-size="10">Defense &amp; Intelligence</text>
+  <rect x="600" y="120" width="160" height="60" rx="6" fill="#0f1520" stroke="#4a90b8" stroke-width="1"/>
+  <text x="680" y="148" text-anchor="middle" fill="#4a90b8" font-family="system-ui" font-size="13" font-weight="600">Vessels</text>
+  <text x="680" y="165" text-anchor="middle" fill="#94a3b8" font-family="system-ui" font-size="10">Maritime Intelligence</text>
+  <rect x="60" y="210" width="160" height="60" rx="6" fill="#0f1520" stroke="#c8953c" stroke-width="1"/>
+  <text x="140" y="238" text-anchor="middle" fill="#c8953c" font-family="system-ui" font-size="13" font-weight="600">DOMAINE</text>
+  <text x="140" y="255" text-anchor="middle" fill="#94a3b8" font-family="system-ui" font-size="10">Real Estate Intelligence</text>
+  <rect x="240" y="210" width="160" height="60" rx="6" fill="#0f1520" stroke="#94a3b8" stroke-width="1"/>
+  <text x="320" y="238" text-anchor="middle" fill="#e2e8f0" font-family="system-ui" font-size="13" font-weight="600">Carlota Jo</text>
+  <text x="320" y="255" text-anchor="middle" fill="#94a3b8" font-family="system-ui" font-size="10">Premium Advisory</text>
+  <rect x="420" y="210" width="340" height="60" rx="6" fill="#0f1520" stroke="#1e293b" stroke-width="1"/>
+  <text x="590" y="235" text-anchor="middle" fill="#94a3b8" font-family="system-ui" font-size="12">Shared Infrastructure</text>
+  <text x="590" y="255" text-anchor="middle" fill="#64748b" font-family="system-ui" font-size="10">PostgreSQL · AI Engine · Auth · Audit · RBAC</text>
+  <rect x="60" y="310" width="700" height="40" rx="4" fill="#0f1520" stroke="#1e293b" stroke-width="1"/>
+  <text x="410" y="335" text-anchor="middle" fill="#64748b" font-family="system-ui" font-size="11">TypeScript · React · Express 5 · Drizzle ORM · Expo · pnpm Monorepo · Azure</text>
+  <rect x="60" y="360" width="700" height="25" rx="4" fill="none" stroke="none"/>
+  <text x="410" y="380" text-anchor="middle" fill="#475569" font-family="system-ui" font-size="10">16 artifacts · 120+ database tables · 6 mobile apps · Functional alpha</text>
+</svg>

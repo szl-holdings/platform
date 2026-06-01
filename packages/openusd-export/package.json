@@ -1,0 +1,30 @@
+{
+  "name": "@szl-holdings/openusd-export",
+  "version": "0.0.0",
+  "private": false,
+  "description": "OpenUSD digital twin and simulation export for spatial domain workflows (Vessels routes, Terra properties, Aegis scenarios)",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/szl-holdings/platform.git",
+    "directory": "packages/openusd-export"
+  },
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts",
+    "./vessel-usd": "./src/vessel-usd.ts",
+    "./property-usd": "./src/property-usd.ts",
+    "./scenario-usd": "./src/scenario-usd.ts",
+    "./serializer": "./src/serializer.ts"
+  },
+  "dependencies": {
+    "pino": "^9"
+  },
+  "devDependencies": {
+    "@types/node": "catalog:"
+  },
+  "scripts": {
+    "lint": "biome lint ./src",
+    "lint:ci": "biome lint ./src",
+    "format": "biome format --write ./src"
+  }
+}

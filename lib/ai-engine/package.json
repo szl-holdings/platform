@@ -1,0 +1,78 @@
+{
+  "name": "@szl-holdings/ai-engine",
+  "version": "0.0.0",
+  "private": false,
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/szl-holdings/platform.git",
+    "directory": "lib/ai-engine"
+  },
+  "publishConfig": {
+    "registry": "https://npm.pkg.github.com",
+    "access": "public"
+  },
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts",
+    "./nuro-mesh": "./src/nuro-mesh.ts",
+    "./a2a/agent-registry": "./src/a2a/agent-registry.ts",
+    "./a2a/agent-delegation": "./src/a2a/agent-delegation.ts",
+    "./skills/skill-registry": "./src/skills/skill-registry.ts",
+    "./skills/skill-manager": "./src/skills/skill-manager.ts",
+    "./connectors": "./src/connectors/index.ts",
+    "./connectors/connector-registry": "./src/connectors/connector-registry.ts",
+    "./learning/self-improvement": "./src/learning/self-improvement.ts",
+    "./rag/knowledge-store": "./src/rag/knowledge-store.ts",
+    "./embedding-pipeline": "./src/embedding-pipeline.ts",
+    "./knowledge-graph": "./src/knowledge-graph.ts",
+    "./semantic-search": "./src/semantic-search.ts",
+    "./domain-embedding-hooks": "./src/domain-embedding-hooks.ts",
+    "./ml-pipeline": "./src/ml-pipeline/index.ts",
+    "./ontology/ontology-engine": "./src/ontology/ontology-engine.ts",
+    "./ontology/graph-rag": "./src/ontology/graph-rag.ts",
+    "./providers/anthropic": "./src/providers/anthropic/index.ts",
+    "./providers/anthropic/batch": "./src/providers/anthropic/batch/index.ts",
+    "./providers/gemini": "./src/providers/gemini/index.ts",
+    "./providers/gemini/batch": "./src/providers/gemini/batch/index.ts",
+    "./providers/gemini/image": "./src/providers/gemini/image/index.ts",
+    "./providers/openai": "./src/providers/openai/index.ts",
+    "./providers/openai/batch": "./src/providers/openai/batch/index.ts",
+    "./providers/openai/image": "./src/providers/openai/image/index.ts",
+    "./providers/openai/audio": "./src/providers/openai/audio/index.ts",
+    "./providers/openai/audio/multilingual": "./src/providers/openai/audio/multilingual.ts",
+    "./fine-tuned-router": "./src/fine-tuned-router.ts",
+    "./digital-twins/twin-engine-spatial": "./src/digital-twins/twin-engine-spatial.ts",
+    "./provenance": "./src/provenance.ts",
+    "./market-data": "./src/market-data/index.ts",
+    "./multi-agent-coordinator": "./src/multi-agent-coordinator.ts",
+    "./agent-tool-loop": "./src/agent-tool-loop.ts",
+    "./tool-bridge": "./src/tool-bridge.ts",
+    "./data-fabric": "./src/data-fabric/index.ts"
+  },
+  "dependencies": {
+    "@anthropic-ai/sdk": "^0.98.0",
+    "@google/genai": "^1.44.0",
+    "@szl-holdings/db": "workspace:*",
+    "@szl-holdings/env": "workspace:*",
+    "@szl-holdings/schemas": "workspace:*",
+    "@szl-holdings/substrate-adapters": "workspace:*",
+    "@szl-holdings/monte-carlo": "workspace:*",
+    "@szl-holdings/proof-chain": "workspace:*",
+    "@szl-holdings/services": "workspace:*",
+    "@workspace/tool-mesh": "workspace:*",
+    "drizzle-orm": "catalog:",
+    "openai": "^6.27.0",
+    "p-limit": "^7.3.0",
+    "p-retry": "^7.1.1",
+    "pino": "^9"
+  },
+  "devDependencies": {
+    "@types/node": "catalog:"
+  },
+  "scripts": {
+    "lint": "biome lint ./src",
+    "lint:ci": "biome lint ./src",
+    "format": "biome format --write ./src",
+    "typecheck": "tsc -b tsconfig.json"
+  }
+}

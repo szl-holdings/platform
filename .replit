@@ -1,0 +1,152 @@
+modules = ["nodejs-24", "python-3.11", "javascript", "postgresql-16"]
+
+[[artifacts]]
+id = "artifacts/api-server"
+
+[[artifacts]]
+id = "artifacts/mockup-sandbox"
+
+[deployment]
+router = "application"
+deploymentTarget = "autoscale"
+
+[deployment.postBuild]
+args = ["pnpm", "store", "prune"]
+env = { "CI" = "true" }
+
+[workflows]
+runButton = "Project"
+
+[[workflows.workflow]]
+name = "Project"
+mode = "parallel"
+author = "agent"
+
+[[workflows.workflow.tasks]]
+task = "workflow.run"
+args = "artifacts/counsel: web"
+
+[[workflows.workflow]]
+name = "artifacts/counsel: web"
+author = "agent"
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "bash -c 'cd /home/runner/workspace/artifacts/counsel && exec node_modules/.bin/vite --config vite.config.ts --host ::'"
+
+[workflows.workflow.metadata]
+outputType = "webview"
+
+[workflows.workflow.metadata]
+outputType = "webview"
+
+[agent]
+stack = "PNPM_WORKSPACE"
+expertMode = true
+integrations = ["github:1.0.0"]
+
+[postMerge]
+path = "scripts/post-merge.sh"
+timeoutMs = 1200000
+
+[nix]
+channel = "stable-25_05"
+packages = ["freetype", "lcms2", "libimagequant", "libjpeg", "libtiff", "libwebp", "libxcrypt", "openjpeg", "tcl", "tesseract", "tk", "zlib"]
+
+[userenv]
+
+[userenv.production]
+NODE_ENV = "production"
+LOG_LEVEL = "info"
+CORS_ORIGINS = "https://*.replit.app,https://*.replit.dev,https://*.repl.co"
+PUBLIC_APP_URL = "https://szlholdings.replit.app"
+GUARDIAN_ENFORCE = "true"
+DB_CONNECT_TIMEOUT_MS = "90000"
+
+[userenv.shared]
+VAPID_PUBLIC_KEY = "BIe1uJr8KS1Ilhz9KWTwRwfV_BC6C2FDdo6gbn-KDt1QS14KaOIMHuWVhzzJFUYIP0iKiWZOLh4xbcUiay2ZrEc"
+VAPID_SUBJECT = "mailto:platform@szlholdings.com"
+EXPO_PUBLIC_POSTHOG_HOST = "https://us.i.posthog.com"
+X_API_KEY = "REPLACE_ME_when_x_developer_account_is_paid"
+X_API_SECRET = "REPLACE_ME_when_x_developer_account_is_paid"
+X_ACCESS_TOKEN = "REPLACE_ME_when_x_developer_account_is_paid"
+X_ACCESS_TOKEN_SECRET = "REPLACE_ME_when_x_developer_account_is_paid"
+SUBSTRATE_GATEWAY_PORT = "8077"
+AEF_GATEWAY_URL = "http://localhost:4200"
+VITE_AEF_GATEWAY_URL = "http://localhost:4200"
+AEF_TENANT_ID = "szl-holdings"
+VITE_AEF_TENANT_ID = "szl-holdings"
+ENABLE_DEMO_SEED = "true"
+DB_POOL_MAX = "40"
+TRACE_HYDRATE_LIMIT = "50"
+MEMORY_HYDRATE_LIMIT = "100"
+PERSISTENCE_FLUSH_INTERVAL_MS = "60000"
+EMAIL_PROVIDER = "resend"
+
+[userenv.development]
+OT_ICS_FEED_ENABLED = "true"
+DB_CONNECT_TIMEOUT_MS = "30000"
+
+[[ports]]
+localPort = 3002
+externalPort = 3003
+
+[[ports]]
+localPort = 3010
+externalPort = 8000
+
+[[ports]]
+localPort = 4099
+externalPort = 3002
+
+[[ports]]
+localPort = 4110
+externalPort = 4200
+
+[[ports]]
+localPort = 5300
+externalPort = 8099
+
+[[ports]]
+localPort = 6000
+externalPort = 6800
+
+[[ports]]
+localPort = 6100
+externalPort = 6000
+
+[[ports]]
+localPort = 7099
+externalPort = 9000
+
+[[ports]]
+localPort = 8008
+externalPort = 8008
+
+[[ports]]
+localPort = 8077
+externalPort = 5173
+
+[[ports]]
+localPort = 8080
+externalPort = 80
+
+[[ports]]
+localPort = 8085
+externalPort = 8081
+
+[[ports]]
+localPort = 8097
+externalPort = 5000
+
+[[ports]]
+localPort = 8098
+externalPort = 8080
+
+[[ports]]
+localPort = 9090
+externalPort = 3000
+
+[[ports]]
+localPort = 21130
+externalPort = 3001

@@ -1,0 +1,14 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Security Vulnerability
+    url: mailto:security@szlholdings.com
+    about: "Do NOT open a public issue for security vulnerabilities. Email security@szlholdings.com directly."
+  - name: Enterprise Evaluation Inquiry
+    url: mailto:inquiries@szlholdings.com
+    about: "For enterprise access, investor data room, or partnership inquiries."
+  - name: Platform Wiki & Documentation
+    url: https://github.com/szl-holdings/platform/wiki
+    about: "Architecture, trust, buyer use cases, investor overview, FAQ, and glossary."
+  - name: In-Repo Documentation
+    url: https://github.com/szl-holdings/platform/tree/main/docs
+    about: "Full documentation for architecture, trust, investor materials, and deployment."

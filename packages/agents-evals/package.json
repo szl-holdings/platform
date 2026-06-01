@@ -1,0 +1,44 @@
+{
+  "name": "@workspace/agents-evals",
+  "version": "0.1.0",
+  "private": false,
+  "type": "module",
+  "description": "Agents Evals — eval suites wired to agents-tools and agents-prompts registries. Auto-generates tool-reliability and prompt-eval suites; supports deterministic trace replay evals.",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./src/index.ts"
+    },
+    "./suite-builders": {
+      "types": "./dist/suite-builders.d.ts",
+      "import": "./src/suite-builders.ts"
+    },
+    "./replay-eval": {
+      "types": "./dist/replay-eval.d.ts",
+      "import": "./src/replay-eval.ts"
+    },
+    "./runner": {
+      "types": "./dist/runner.d.ts",
+      "import": "./src/runner.ts"
+    }
+  },
+  "dependencies": {
+    "@workspace/eval-forge": "workspace:*",
+    "@workspace/replay-core": "workspace:*",
+    "@workspace/trace-graph": "workspace:*",
+    "@workspace/agents-core": "workspace:*",
+    "@workspace/agents-tools": "workspace:*",
+    "@workspace/agents-prompts": "workspace:*",
+    "zod": "catalog:"
+  },
+  "devDependencies": {
+    "@types/node": "catalog:",
+    "vitest": "^4.1.7"
+  },
+  "scripts": {
+    "lint": "biome lint ./src",
+    "lint:ci": "biome lint ./src",
+    "format": "biome format --write ./src",
+    "typecheck": "tsc -p tsconfig.json --noEmit"
+  }
+}

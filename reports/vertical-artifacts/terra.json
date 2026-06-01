@@ -1,0 +1,81 @@
+{
+  "brief": {
+    "capex_overrun_pct": 12.0,
+    "evidence_count": 3,
+    "headline": "Close the Phase-II environmental diligence gap before close",
+    "next_action": "Commission Phase-II environmental and re-price downside contingency by 4%.",
+    "noi_forecast_placeholder": "stable_with_downside_skew",
+    "property_risk_index": 0.74
+  },
+  "evidence": [
+    {
+      "claim": "Asset within FEMA AE flood zone (1% annual probability)",
+      "from_signal": "sig_terra_flood_zone",
+      "id": "ev_terra_sig_terra_flood_zone",
+      "source": "geo"
+    },
+    {
+      "claim": "Phase-1 capex tracking 12% above bid",
+      "from_signal": "sig_terra_capex_overrun",
+      "id": "ev_terra_sig_terra_capex_overrun",
+      "source": "manual"
+    },
+    {
+      "claim": "Environmental Phase-II report still outstanding",
+      "from_signal": "sig_terra_diligence_gap",
+      "id": "ev_terra_sig_terra_diligence_gap",
+      "source": "diligence"
+    }
+  ],
+  "forecast": {
+    "capex_overrun_pct": 12.0,
+    "confidence": 0.55,
+    "horizon": "next_12_months",
+    "method": "noi-baseline-v0",
+    "noi_forecast_placeholder": "stable_with_downside_skew",
+    "property_risk_index": 0.74
+  },
+  "generated_at": "2026-04-26T13:38:38.713210Z",
+  "recommendation": {
+    "confidence": 0.55,
+    "evidence_ids": [
+      "ev_terra_sig_terra_flood_zone",
+      "ev_terra_sig_terra_capex_overrun",
+      "ev_terra_sig_terra_diligence_gap"
+    ],
+    "id": "rec_terra_close_diligence_gap",
+    "input_class": "terra_acquisition_signals_v1",
+    "model": "gpt-5.5-2026-04-23",
+    "next_action": "Commission Phase-II environmental and re-price downside contingency by 4%.",
+    "output_class": "terra_acquisition_recommendation_v1",
+    "owner": "terra-deal-lead@szl",
+    "requires_human_approval": true,
+    "rollback_path": "If Phase-II is clean, restore original price and reduce contingency.",
+    "title": "Close the Phase-II environmental diligence gap before close",
+    "vertical": "terra"
+  },
+  "signals": [
+    {
+      "id": "sig_terra_flood_zone",
+      "kind": "property_risk",
+      "source": "geo",
+      "summary": "Asset within FEMA AE flood zone (1% annual probability)",
+      "weight": 0.75
+    },
+    {
+      "id": "sig_terra_capex_overrun",
+      "kind": "capex_risk",
+      "source": "manual",
+      "summary": "Phase-1 capex tracking 12% above bid",
+      "weight": 0.65
+    },
+    {
+      "id": "sig_terra_diligence_gap",
+      "kind": "diligence_gap",
+      "source": "diligence",
+      "summary": "Environmental Phase-II report still outstanding",
+      "weight": 0.8
+    }
+  ],
+  "vertical": "terra"
+}

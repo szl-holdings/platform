@@ -1,0 +1,140 @@
+{
+  "$comment": "Central allowlist for the brand-string validation check (scripts/check-banned-brand-strings.ts). Add new banned trademarks to `bannedStrings`. Add legitimate occurrences to `lineAllowlist` (preferred) or `fileAllowlist` (whole-file exemption). Source of truth: ORIGINALITY_REPORT.md rename map. The check direction is: BAN the OLD pre-rename codenames, REPLACE with the canonical post-rename brand names.",
+  "$bannedStringsComment": "Each entry matches case-sensitively with strict boundaries (no adjacency to word chars, hyphens, underscores, slashes, colons). To catch a brand in multiple casings, add separate entries for `Pascal` and `UPPER` variants. The audit intentionally preserved lowercase URL slugs (e.g. /aegis/) so do NOT add lowercase variants.",
+  "bannedStrings": [
+    {
+      "term": "TENAX",
+      "replacement": "Sentra",
+      "reason": "Old internal codename — canonical product name is Sentra (Cyber Resilience Command)"
+    },
+    {
+      "term": "LUMINA",
+      "replacement": "Pulse",
+      "reason": "Old internal codename — canonical product name is Pulse (AI Executive Briefing)"
+    },
+    {
+      "term": "CORTEX",
+      "replacement": "APEX",
+      "reason": "Old internal codename — canonical product name is APEX (also avoids Palo Alto Networks trademark)"
+    },
+    {
+      "term": "Cortex",
+      "replacement": "APEX",
+      "reason": "Old internal codename — canonical product name is APEX (also avoids Palo Alto Networks trademark)"
+    },
+    {
+      "term": "INCA",
+      "replacement": "Counsel",
+      "reason": "Old internal codename — canonical product name is Counsel (Legal Matter Command)"
+    },
+    {
+      "term": "NEXUS",
+      "replacement": "PRAXIS",
+      "reason": "Trademark conflict (HubSpot, Salesforce, dozens of enterprise products); canonical name is PRAXIS"
+    },
+    {
+      "term": "Nexus",
+      "replacement": "PRAXIS",
+      "reason": "Trademark conflict (HubSpot, Salesforce, dozens of enterprise products); canonical name is PRAXIS"
+    },
+    {
+      "term": "PRISM Counsel",
+      "replacement": "Counsel",
+      "reason": "PRISM has NSA program brand association; prefix removed — canonical name is Counsel"
+    },
+    {
+      "term": "PRISM-Counsel",
+      "replacement": "Counsel",
+      "reason": "PRISM has NSA program brand association; prefix removed — canonical name is Counsel"
+    }
+  ],
+  "$fileAllowlistComment": "Whole-file exemptions. Use sparingly; prefer lineAllowlist. Globs are not supported — list explicit paths relative to repo root, or directory prefixes ending with '/'.",
+  "fileAllowlist": [
+    "scripts/banned-brand-strings.json",
+    "scripts/check-banned-brand-strings.ts",
+    "scripts/brand-check.ts",
+    "scripts/check-originality.sh",
+    "scripts/check-design-tokens-drift.ts",
+    "packages/tokens/",
+    "artifacts/mockup-sandbox/src/pages/TokensGovernance.tsx",
+    "artifacts/mockup-sandbox/src/data/",
+    "artifacts/a11oy/src/data/",
+    "packages/brand-registry/",
+    "packages/alloy/",
+    "lib/services/",
+    "lib/ai-engine/",
+    "lib/cognitive-runtime/",
+    "lib/cognitive-observability/",
+    "lib/observability/",
+    "lib/reflection-engine/",
+    "lib/memory-fabric/",
+    "lib/planner/",
+    "lib/verifier/",
+    "lib/trace-graph/",
+    "lib/evals-core/",
+    "lib/eval-forge/",
+    "lib/eval-os/",
+    "lib/replay-core/",
+    "lib/self-model/",
+    "lib/skill-library/",
+    "lib/tool-registry/",
+    "lib/tool-mesh/",
+    "lib/prompt-registry/",
+    "lib/policy-engine/",
+    "lib/telemetry-standards/",
+    "lib/nvidia-adapters/",
+    "artifacts/command/src/pages/operations/forge.tsx",
+    "artifacts/api-server/"
+  ],
+  "$lineAllowlistComment": "Per-line exemptions. Each entry: { file, line, term, reason }. The check matches by exact file path + line number + matched term.",
+  "lineAllowlist": [
+    {
+      "file": "tests/api/innovations-formula-codex-binding.test.ts",
+      "line": 7,
+      "term": "INCA",
+      "reason": "Historical Inca civilization reference — INCA_CEQUES=41 and INCA_HUACAS=328 are real ceque-system metrics, not the banned product codename"
+    },
+    {
+      "file": "tests/api/innovations-formula-codex-binding.test.ts",
+      "line": 54,
+      "term": "INCA",
+      "reason": "Historical Inca civilization reference — Q_I_INCA is the ceques/huacas ratio constant, not the banned product codename"
+    },
+    {
+      "file": "tests/api/innovations-formula-codex-binding.test.ts",
+      "line": 100,
+      "term": "INCA",
+      "reason": "Historical Inca civilization reference — test description for ceques/huacas ratio, not the banned product codename"
+    },
+    {
+      "file": "tests/api/innovations-formula-codex-binding.test.ts",
+      "line": 101,
+      "term": "INCA",
+      "reason": "Historical Inca civilization reference — Q_I_INCA constant assertion, not the banned product codename"
+    },
+    {
+      "file": "tests/api/innovations-formula-codex-binding.test.ts",
+      "line": 102,
+      "term": "INCA",
+      "reason": "Historical Inca civilization reference — incaCequeHuacasPerDay() function assertion, not the banned product codename"
+    },
+    {
+      "file": "tests/api/innovations-formula-codex-binding.test.ts",
+      "line": 434,
+      "term": "INCA",
+      "reason": "Historical Inca civilization reference — test #25 title referencing ceques and huacas, not the banned product codename"
+    },
+    {
+      "file": "tests/api/innovations-formula-codex-binding.test.ts",
+      "line": 435,
+      "term": "INCA",
+      "reason": "Historical Inca civilization reference — Q_I_INCA constant assertion, not the banned product codename"
+    },
+    {
+      "file": "tests/api/innovations-formula-codex-binding.test.ts",
+      "line": 436,
+      "term": "INCA",
+      "reason": "Historical Inca civilization reference — incaCequeHuacasPerDay() function assertion, not the banned product codename"
+    }
+  ]
+}

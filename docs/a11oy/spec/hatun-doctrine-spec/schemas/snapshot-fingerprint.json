@@ -1,0 +1,26 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://a11oy.io/spec/hatun-doctrine/0.1.0/schemas/snapshot-fingerprint.json",
+  "title": "SnapshotFingerprint",
+  "description": "Bit-exact identity of a workcell snapshot. Anchors replayability across the proof chain.",
+  "type": "object",
+  "allOf": [{ "$ref": "_shared.json#/$defs/envelopeFields" }],
+  "required": ["kind", "agentId", "merkleRoot", "captureTime", "stack"],
+  "properties": {
+    "kind": { "const": "SnapshotFingerprint" },
+    "agentId": { "$ref": "_shared.json#/$defs/agentId" },
+    "merkleRoot": { "$ref": "_shared.json#/$defs/sha256Hash" },
+    "captureTime": { "$ref": "_shared.json#/$defs/isoTimestamp" },
+    "stack": {
+      "type": "object",
+      "required": ["modelHash", "constitutionRef", "toolsetHash"],
+      "properties": {
+        "modelHash": { "$ref": "_shared.json#/$defs/sha256Hash" },
+        "constitutionRef": { "type": "string" },
+        "toolsetHash": { "$ref": "_shared.json#/$defs/sha256Hash" },
+        "promptStackHash": { "$ref": "_shared.json#/$defs/sha256Hash" }
+      }
+    },
+    "supersedes": { "type": "string" }
+  }
+}

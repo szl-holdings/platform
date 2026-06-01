@@ -1,0 +1,217 @@
+version: 2
+
+updates:
+  # Root workspace (covers all pnpm packages in the monorepo)
+  - package-ecosystem: npm
+    directory: /
+    schedule:
+      interval: weekly
+      day: monday
+      time: "09:00"
+      timezone: "America/New_York"
+    open-pull-requests-limit: 10
+    labels:
+      - dependencies
+      - automated
+    commit-message:
+      prefix: "chore(deps)"
+    groups:
+      react-ecosystem:
+        patterns:
+          - "react"
+          - "react-dom"
+          - "react-router*"
+          - "@types/react*"
+      vite-build:
+        patterns:
+          - "vite"
+          - "@vitejs/*"
+          - "vite-*"
+      testing:
+        patterns:
+          - "@playwright/*"
+          - "playwright"
+          - "vitest"
+          - "@vitest/*"
+      typescript:
+        patterns:
+          - "typescript"
+          - "@typescript-eslint/*"
+          - "eslint*"
+      ui-components:
+        patterns:
+          - "@radix-ui/*"
+          - "lucide-react"
+          - "framer-motion"
+          - "tailwindcss"
+          - "@tailwindcss/*"
+      database:
+        patterns:
+          - "drizzle-orm"
+          - "drizzle-kit"
+          - "@neondatabase/*"
+          - "postgres"
+      tanstack:
+        patterns:
+          - "@tanstack/*"
+
+  # Python workers (substrate-python, substrate-py-workers, lyte-metrics-store)
+  - package-ecosystem: pip
+    directory: /workers/substrate-python
+    schedule:
+      interval: weekly
+      day: monday
+      time: "09:00"
+      timezone: "America/New_York"
+    open-pull-requests-limit: 3
+    labels:
+      - dependencies
+      - python
+      - automated
+    commit-message:
+      prefix: "chore(deps-py)"
+
+  - package-ecosystem: pip
+    directory: /services/substrate-py-workers
+    schedule:
+      interval: weekly
+      day: monday
+      time: "09:00"
+      timezone: "America/New_York"
+    open-pull-requests-limit: 3
+    labels:
+      - dependencies
+      - python
+      - automated
+    commit-message:
+      prefix: "chore(deps-py)"
+
+  - package-ecosystem: pip
+    directory: /services/lyte-metrics-store
+    schedule:
+      interval: weekly
+      day: monday
+      time: "09:00"
+      timezone: "America/New_York"
+    open-pull-requests-limit: 3
+    labels:
+      - dependencies
+      - python
+      - automated
+    commit-message:
+      prefix: "chore(deps-py)"
+
+  - package-ecosystem: pip
+    directory: /scripts/media
+    schedule:
+      interval: weekly
+      day: monday
+      time: "09:00"
+      timezone: "America/New_York"
+    open-pull-requests-limit: 3
+    labels:
+      - dependencies
+      - python
+      - automated
+    commit-message:
+      prefix: "chore(deps-py)"
+
+  # Docker base images (api-server and artifact Dockerfiles)
+  - package-ecosystem: docker
+    directory: /artifacts/api-server
+    schedule:
+      interval: weekly
+      day: monday
+      time: "09:00"
+      timezone: "America/New_York"
+    open-pull-requests-limit: 3
+    labels:
+      - dependencies
+      - docker
+      - automated
+    commit-message:
+      prefix: "chore(deps-docker)"
+
+  - package-ecosystem: docker
+    directory: /artifacts/szl-holdings
+    schedule:
+      interval: weekly
+      day: monday
+      time: "09:00"
+      timezone: "America/New_York"
+    open-pull-requests-limit: 3
+    labels:
+      - dependencies
+      - docker
+      - automated
+    commit-message:
+      prefix: "chore(deps-docker)"
+
+  - package-ecosystem: docker
+    directory: /artifacts/vessels
+    schedule:
+      interval: weekly
+      day: monday
+      time: "09:00"
+      timezone: "America/New_York"
+    open-pull-requests-limit: 3
+    labels:
+      - dependencies
+      - docker
+      - automated
+    commit-message:
+      prefix: "chore(deps-docker)"
+
+  - package-ecosystem: docker
+    directory: /artifacts/terra
+    schedule:
+      interval: weekly
+      day: monday
+      time: "09:00"
+      timezone: "America/New_York"
+    open-pull-requests-limit: 3
+    labels:
+      - dependencies
+      - docker
+      - automated
+    commit-message:
+      prefix: "chore(deps-docker)"
+
+  - package-ecosystem: docker
+    directory: /artifacts/carlota-jo
+    schedule:
+      interval: weekly
+      day: monday
+      time: "09:00"
+      timezone: "America/New_York"
+    open-pull-requests-limit: 3
+    labels:
+      - dependencies
+      - docker
+      - automated
+    commit-message:
+      prefix: "chore(deps-docker)"
+
+  # GitHub Actions
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: weekly
+      day: monday
+      time: "09:00"
+      timezone: "America/New_York"
+    open-pull-requests-limit: 5
+    labels:
+      - github-actions
+      - automated
+    commit-message:
+      prefix: "chore(ci)"
+    groups:
+      github-actions:
+        patterns:
+          - "actions/*"
+          - "github/*"
+          - "treosh/*"
+          - "softprops/*"
+          - "pnpm/*"
+          - "gitleaks/*"

@@ -1,0 +1,19 @@
+{
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    "outDir": "./dist",
+    "rootDir": "./src",
+    "declaration": true,
+    "declarationMap": true,
+    "composite": true,
+    "types": ["node"]
+  },
+  "references": [
+    { "path": "../guardian" },
+    { "path": "../tool-mesh" },
+    { "path": "../trace-graph" },
+    { "path": "../action-engine" }
+  ],
+  "include": ["src/**/*"],
+  "exclude": ["src/**/*.test.ts"]
+}
