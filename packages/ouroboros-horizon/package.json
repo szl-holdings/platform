@@ -15,7 +15,8 @@
     "typecheck": "tsc --noEmit"
   },
   "devDependencies": {
-    "typescript": "*"
+    "typescript": "*",
+    "@types/node": "catalog:"
   },
   "dependencies": {
     "@opentelemetry/api": "^1.9.1"
