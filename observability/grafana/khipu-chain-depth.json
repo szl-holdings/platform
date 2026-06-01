@@ -1,0 +1,143 @@
+{
+  "annotations": {
+    "list": []
+  },
+  "editable": true,
+  "schemaVersion": 39,
+  "title": "Khipu \u2014 Chain Depth",
+  "uid": "szl-khipu-chain-depth",
+  "tags": [
+    "szl",
+    "doctrine-v11",
+    "flagship-mesh"
+  ],
+  "timezone": "utc",
+  "time": {
+    "from": "now-6h",
+    "to": "now"
+  },
+  "refresh": "1m",
+  "templating": {
+    "list": [
+      {
+        "name": "flagship",
+        "type": "custom",
+        "label": "Flagship",
+        "query": "a11oy,amaru,sentra,rosie,killinchu,hatun-mcp",
+        "current": {
+          "text": "a11oy",
+          "value": "a11oy"
+        },
+        "options": [
+          {
+            "text": "a11oy",
+            "value": "a11oy"
+          },
+          {
+            "text": "amaru",
+            "value": "amaru"
+          },
+          {
+            "text": "sentra",
+            "value": "sentra"
+          },
+          {
+            "text": "rosie",
+            "value": "rosie"
+          },
+          {
+            "text": "killinchu",
+            "value": "killinchu"
+          },
+          {
+            "text": "hatun-mcp",
+            "value": "hatun-mcp"
+          }
+        ]
+      }
+    ]
+  },
+  "panels": [
+    {
+      "id": 1,
+      "title": "Chain depth (seq)",
+      "type": "timeseries",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${DS_PROM}"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "x": 0,
+        "y": 0,
+        "w": 12,
+        "h": 8
+      },
+      "targets": [
+        {
+          "expr": "max by (organ) (khipu_chain_seq)",
+          "refId": "A"
+        }
+      ]
+    },
+    {
+      "id": 2,
+      "title": "Chain growth rate (entries/min)",
+      "type": "timeseries",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${DS_PROM}"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "opm"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "x": 12,
+        "y": 0,
+        "w": 12,
+        "h": 8
+      },
+      "targets": [
+        {
+          "expr": "rate(khipu_chain_seq[5m]) * 60",
+          "refId": "A"
+        }
+      ]
+    },
+    {
+      "id": 3,
+      "title": "Chain verification status (1=verified)",
+      "type": "stat",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${DS_PROM}"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "x": 0,
+        "y": 8,
+        "w": 24,
+        "h": 6
+      },
+      "targets": [
+        {
+          "expr": "min by (organ) (khipu_chain_verified)",
+          "refId": "A"
+        }
+      ]
+    }
+  ]
+}
