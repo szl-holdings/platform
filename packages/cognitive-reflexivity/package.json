@@ -1,0 +1,49 @@
+{
+  "name": "@workspace/cognitive-reflexivity",
+  "version": "0.0.0",
+  "private": false,
+  "type": "module",
+  "description": "Cognitive Reflexivity Engine — typed cognitive-reflexive signal contract, dialectical reasoning trigger, governed strategy persistence, model router adaptation, memory consolidation, and Cognitive Health Score.",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./src/index.ts"
+    },
+    "./types": {
+      "types": "./dist/types.d.ts",
+      "import": "./src/types.ts"
+    },
+    "./engine": {
+      "types": "./dist/engine.d.ts",
+      "import": "./src/engine.ts"
+    },
+    "./strategies": {
+      "types": "./dist/strategies.d.ts",
+      "import": "./src/strategies.ts"
+    },
+    "./health": {
+      "types": "./dist/health.d.ts",
+      "import": "./src/health.ts"
+    },
+    "./consolidation": {
+      "types": "./dist/consolidation.d.ts",
+      "import": "./src/consolidation.ts"
+    },
+    "./router-integration": {
+      "types": "./dist/router-integration.d.ts",
+      "import": "./src/router-integration.ts"
+    }
+  },
+  "dependencies": {
+    "@workspace/ontology": "workspace:*",
+    "@szl-holdings/signal-mesh": "workspace:*",
+    "zod": "catalog:"
+  },
+  "devDependencies": {
+    "typescript": "catalog:",
+    "vitest": "catalog:"
+  },
+  "scripts": {
+    "test": "vitest run --passWithNoTests"
+  }
+}
