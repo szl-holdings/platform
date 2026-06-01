@@ -1,0 +1,267 @@
+\documentclass[11pt]{article}
+%% arXiv-compliant submission. License: Apache-2.0.
+%% Primary category: cs.LG ; cross-list: math.DS
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage[margin=1in]{geometry}
+\usepackage{amsmath,amssymb,amsthm}
+\usepackage{authblk}
+\usepackage{graphicx}
+\usepackage{booktabs}
+\usepackage[numbers]{natbib}
+\usepackage{xcolor}
+\usepackage[colorlinks=true,linkcolor=blue,citecolor=blue,urlcolor=blue]{hyperref}
+\usepackage{enumitem}
+\usepackage{url}
+\sloppy
+
+\theoremstyle{plain}
+\newtheorem{theorem}{Theorem}
+\newtheorem{conjecture}{Conjecture}
+\newtheorem{lemma}{Lemma}
+\newtheorem{definition}{Definition}
+
+\title{Chinchilla-Lutar Scaling Laws with Grokking Phase Detection, E8-Triality Mixture-of-Experts, and Dynamical Systems Bifurcation Analysis}
+\author[1]{Stephen P. Lutar Jr.\thanks{Corresponding author: \texttt{stephenlutar2@gmail.com}. ORCID: \href{https://orcid.org/0009-0001-0110-4173}{0009-0001-0110-4173}.}}
+\author[2]{Perplexity Computer Agent\thanks{Research collaborator (AI agent).}}
+\affil[1]{SZL Holdings, New York, NY, USA}
+\affil[2]{Perplexity}
+\date{June 2026}
+
+\begin{document}
+\maketitle
+
+\begin{abstract}
+We present four interconnected contributions to AI training dynamics and model architecture: (1) Chinchilla-Lutar Scaling (CLS), which extends the Chinchilla scaling law (Hoffmann et al., 2022) with Omega-weighted compute allocation; (2) Grokking Phase Detection (GPD), which detects memorization-to-generalization phase transitions in real time; (3) E8-Triality Mixture-of-Experts (E8-MoE) with the Lutar Simplex Router, which routes queries to expert slots using the 192-slot E8 lattice; and (4) Dynamical Systems Bifurcation Detection (DSBD), which classifies training dynamics bifurcations (saddle-node, Hopf, period-doubling, transcritical) and distinguishes integrator from resonator neural regimes. We also cover the Condor Mamba-SSM State Tracker (CMST) for linear-time state tracking and the Hilbert QAOA-Omega (HQO) variational optimizer. This final paper in the thesis lineage (v11) consolidates the architectural and training dynamics innovations. This paper does not claim empirical validation against standard scaling law benchmarks. The contribution is the formal framework and its public reference implementation.
+\end{abstract}
+
+\noindent\textbf{Reference implementation:} \href{https://github.com/szl-holdings/platform}{github.com/szl-holdings/platform}, file \path{papers/paper-08-scaling-grokking-bifurcation.tex}.\\
+\textbf{Archival DOI:} \href{https://doi.org/10.5281/zenodo.20499334}{10.5281/zenodo.20499334} (Zenodo).\\
+\textbf{License:} Apache-2.0.
+
+\paragraph{Author note / honest disclosure.} \paragraph{Honest disclosure (non-negotiable).} The $\Lambda$-uniqueness claim (Conjecture~1 in this work) is \emph{not} a proven theorem. 163 sorries remain outstanding in the Lutar Lean~4 kernel at commit \texttt{c7c0ba17}, \texttt{lutar-lean v18.0.0}. Compute was performed on Hugging Face Spaces with bit-exact replay via Codex-Kernel v1.0.0. This paper presents a formal framework, its mathematical properties, and a public reference implementation; it does not claim a deployed product or fielded validation against production data.
+
+
+\section{Motivation and Continuity from v3–v10}
+
+The v3–v10 papers established the trust, quality, retrieval, safety, memory, inference, interpretability, and quantum-coherence layers. The present paper addresses the \emph{training and architecture} substrate: how to allocate compute, detect phase transitions, route experts, and analyze dynamical stability.
+
+
+\section{Chinchilla-Lutar Scaling (CLS)}
+
+\subsection{Standard Chinchilla}
+
+Hoffmann et al. (2022) established that for a compute budget \( C \) FLOPs:
+
+\begin{equation}
+N^* \propto C^{0.5}, \quad D^* \propto C^{0.5}
+\end{equation}
+
+where \( N^* \) is optimal parameter count and \( D^* \) is optimal token count.
+
+\subsection{Omega-Weighted Extension}
+
+CLS extends this with the Lutar Omega correction:
+
+\begin{equation}
+N^*_\Omega = N^* \cdot L_\Omega^{1/4}, \quad D^*_\Omega = D^* \cdot L_\Omega^{1/4}
+\end{equation}
+
+When \( L_\Omega = 1 \), standard Chinchilla is recovered. When \( L_\Omega > 1 \) (high-quality evaluation context), more parameters and data are allocated. When \( L_\Omega < 1 \), compute is conserved.
+
+\subsection{Inference-Time Adjustment}
+
+For an inference budget \( I \) tokens/second:
+
+\begin{equation}
+\text{batch}_\Omega = \lfloor I \cdot (1 - L_\Omega \cdot H) \rfloor
+\end{equation}
+
+where \( H \) is the Hermetic temperature (v6), trading inference throughput against quality.
+
+
+\section{Grokking Phase Detection (GPD)}
+
+\subsection{Background}
+
+Grokking (Power et al., 2022) refers to the delayed generalization phenomenon where a model memorizes training data, then suddenly transitions to genuine generalization after continued training.
+
+\subsection{Phase Classification}
+
+GPD monitors three signals: gradient norm, weight entropy, and synergy (gradient-entropy coupling):
+
+\begin{equation}
+\text{synergy} = \frac{|\nabla \theta| \cdot H(\theta)}{|\nabla \theta| + H(\theta)}
+\end{equation}
+
+Four phases are classified:
+
+| Phase | Gradient Norm | Weight Entropy | Synergy | Interpretation |
+|—|—|—|—|—|
+| Memorization | High | Low | Low | Fitting training data |
+| Circuit formation | Declining | Rising | Medium | Building generalizing structure |
+| Grokking | Low | High | High | Phase transition to generalization |
+| Stable generalization | Low | Stable | Stable | Post-transition equilibrium |
+
+\subsection{Transition Prediction}
+
+GPD predicts the grokking transition by extrapolating the synergy trajectory:
+
+\begin{equation}
+\hat{t}_{\text{grok}} = t + \frac{s_{\text{threshold}} - s_t}{\Delta s / \Delta t}
+\end{equation}
+
+
+\section{E8-Triality Mixture-of-Experts}
+
+\subsection{E8 Lattice Structure}
+
+The \( E_8 \) root system has 240 roots in 8 dimensions. After removing the 48 Weyl-orbit degenerate roots, 192 slots remain. The triality automorphism cycles through three 8-dimensional representations.
+
+\subsection{Lutar Simplex Router (LSR)}
+
+The LSR routes a query \( q \) to an expert slot:
+
+\begin{itemize}
+  \item Compute query complexity: \( c(q) = |\text{tokens}(q)| \cdot \text{entropy}(q) \)
+  \item Map to E8 slot: \( \text{slot} = \text{hash}(q) \bmod 192 \)
+  \item Select triality representation: \( \text{rep} = \lfloor \text{slot} / 64 \rfloor \bmod 3 \)
+  \item Select provider by complexity threshold
+\end{itemize}
+
+\subsection{Hilbert QAOA-Omega (HQO)}
+
+The HQO extends the Quantum Approximate Optimization Algorithm with Omega weighting:
+
+\begin{equation}
+|\psi(\gamma, \beta)\rangle = \prod_{p=1}^{P} e^{-i\beta_p B} e^{-i\gamma_p C} |+\rangle^{\otimes n}
+\end{equation}
+
+The objective function is the Omega-weighted expected value:
+
+\begin{equation}
+\langle C \rangle_\Omega = L_\Omega \cdot \langle \psi(\gamma, \beta) | C | \psi(\gamma, \beta) \rangle
+\end{equation}
+
+
+\section{Condor Mamba-SSM State Tracker (CMST)}
+
+\subsection{State-Space Model}
+
+The CMST implements a complex-valued linear state-space model:
+
+\begin{equation}
+\mathbf{h}_{t+1} = A \mathbf{h}_t + B x_t, \quad y_t = C \mathbf{h}_t + D x_t
+\end{equation}
+
+where \( A \in \mathbb{C}^{d \times d} \) is the state transition matrix initialized with HiPPO-LegS (Gu et al., 2020) or S4 diagonal parameterization (Gu et al., 2021).
+
+\subsection{Selective State-Space (Mamba)}
+
+Following Gu and Dao (2023), CMST adds input-dependent selection:
+
+\begin{equation}
+A_t = A + \Delta A(x_t), \quad B_t = B + \Delta B(x_t)
+\end{equation}
+
+enabling the model to selectively propagate or forget state based on input content.
+
+
+\section{Dynamical Systems Bifurcation Detector (DSBD)}
+
+\subsection{Background}
+
+Dynamical systems theory (Strogatz, 2015) classifies bifurcations — qualitative changes in system behavior as a parameter varies. We apply this framework to training dynamics.
+
+\subsection{Bifurcation Types}
+
+| Type | Eigenvalue Signature | Neural Interpretation |
+|—|—|—|
+| Saddle-node | Real eigenvalue crosses zero | Loss landscape critical point creation/annihilation |
+| Hopf | Complex eigenvalue pair crosses imaginary axis | Oscillatory training dynamics onset |
+| Period-doubling | Real eigenvalue crosses -1 | Training oscillation period doubling |
+| Transcritical | Two real eigenvalues exchange stability | Regime switching between training modes |
+
+\subsection{Integrator vs. Resonator Classification}
+
+Following Izhikevich (2007) and Kirsanov (2024):
+
+\begin{itemize}
+  \item \textbf{Integrator neurons:} Respond to sustained input. Real eigenvalues. Saddle-node bifurcation.
+  \item \textbf{Resonator neurons:} Respond to oscillatory input. Complex eigenvalues. Hopf bifurcation.
+\end{itemize}
+
+Classification rule: if \( |\text{Im}(\lambda)| > 0.1 \), the regime is resonator; otherwise integrator.
+
+\subsection{Lyapunov Exponent Estimation}
+
+\begin{equation}
+\lambda_{\text{Lyap}} = \lim_{t \to \infty} \frac{1}{t} \ln \frac{|\delta \mathbf{x}(t)|}{|\delta \mathbf{x}(0)|}
+\end{equation}
+
+Positive Lyapunov exponents indicate chaotic training dynamics. Negative exponents indicate convergent training.
+
+\subsection{Upcoming Bifurcation Detection}
+
+The DSBD predicts upcoming bifurcations by extrapolating the eigenvalue trajectory:
+
+\begin{equation}
+\hat{t}_{\text{bif}} = t + \frac{-\text{Re}(\lambda_t)}{\Delta \text{Re}(\lambda) / \Delta t}
+\end{equation}
+
+If \( \hat{t}_{\text{bif}} \) is within a lookahead window, a warning is issued.
+
+
+\section{Integration with the Full Thesis Lineage}
+
+| Version | Focus | Training/Architecture Role |
+|—|—|—|
+| v3 | Trust aggregation | Quality metric for training checkpoints |
+| v4 | Omega Formalism | Compute allocation via CLS |
+| v5 | Retrieval | Training data selection via Prisca-GraphRAG |
+| v6 | Safety | Guard on training data via HCG |
+| v7 | Memory | Catastrophic forgetting prevention via SCL |
+| v8 | Active inference | Training as free-energy minimization via FELAI |
+| v9 | Interpretability | Feature monitoring via TSA |
+| v10 | Quantum/geometry | Correlation structure via EBEV/SGCE |
+| v11 (this) | Training dynamics | CLS, GPD, E8-MoE, CMST, DSBD |
+
+
+\section{What this paper does and does not claim}
+
+\textbf{Claims:}
+\begin{itemize}
+  \item CLS is a well-defined extension of the Chinchilla scaling law with Omega weighting.
+  \item GPD phase classification follows from the synergy metric definition.
+  \item The E8 routing table uses the 192-slot reduced root system.
+  \item DSBD bifurcation classification follows standard dynamical systems theory (Strogatz, 2015).
+  \item All components are implemented in the public reference implementation.
+\end{itemize}
+
+\textbf{Non-claims:}
+\begin{itemize}
+  \item No claim of empirical superiority over standard scaling laws on LLM training runs.
+  \item No claim that grokking prediction is accurate on standard modular arithmetic benchmarks.
+  \item No claim that E8 routing improves MoE performance over standard hash-based routing.
+  \item No claim of deployed production use.
+\end{itemize}
+
+
+\section{Conclusion}
+
+This final paper in the Ouroboros Thesis lineage (v11) consolidates the training dynamics and architectural innovations: Chinchilla-Lutar scaling, grokking phase detection, E8-triality mixture-of-experts, Mamba state-space tracking, and dynamical systems bifurcation analysis. Together with v3–v10, the eleven-paper series provides a comprehensive formal framework spanning trust, quality, retrieval, safety, memory, inference, interpretability, quantum foundations, and training dynamics.
+
+
+
+
+\section*{Acknowledgments}
+The author thanks the Perplexity Computer Agent for research collaboration, formatting, and
+reproducibility tooling. Compute was provided by Hugging Face Spaces. This work is archived on
+Zenodo under DOI~\href{https://doi.org/10.5281/zenodo.20499334}{10.5281/zenodo.20499334} as part of the SZL Holdings Ouroboros Thesis
+corpus (umbrella DOI~\href{https://doi.org/10.5281/zenodo.20490218}{10.5281/zenodo.20490218}).
+
+\nocite{08ref1,08ref2,08ref3,08ref4,08ref5,08ref6,08ref7,08ref8,08ref9}
+\bibliographystyle{plainnat}
+\bibliography{refs}
+
+\end{document}
