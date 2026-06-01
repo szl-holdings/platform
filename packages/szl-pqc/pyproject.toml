@@ -1,0 +1,39 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "szl-pqc"
+version = "0.1.0"
+description = "Post-quantum and hybrid (ECDSA P-256 + ML-DSA-65) signing for SZL DSSE envelopes. Doctrine v11 LOCKED (749/14/163)."
+readme = "README.md"
+license = { text = "Apache-2.0" }
+requires-python = ">=3.11"
+authors = [{ name = "Yachay", email = "yachay@szlholdings.dev" }]
+keywords = ["post-quantum", "ML-DSA", "Dilithium", "DSSE", "FIPS-204", "hybrid-signing"]
+dependencies = [
+    "cryptography>=42.0.0,<49.0.0",
+]
+
+[project.optional-dependencies]
+# Production PQC backend: liboqs via oqs-python. liboqs is a C library that is
+# not always installable, hence an optional extra.
+oqs = [
+    "oqs>=0.10.0",
+]
+# Pure-Python reference backend (FIPS 204 / FIPS 203) for environments without
+# liboqs. Used by CI and the test suite.
+pyref = [
+    "dilithium-py>=1.0.0",
+    "kyber-py>=1.0.0",
+]
+test = [
+    "pytest>=8.0.0,<9.0.0",
+    "dilithium-py>=1.0.0",
+]
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/szl_pqc"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
