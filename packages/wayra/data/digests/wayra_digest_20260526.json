@@ -1,0 +1,118 @@
+{
+  "organ": "WAYRA",
+  "kind": "hatun-willay-daily-digest",
+  "generated_at": "2026-05-26T10:00:00+00:00",
+  "daily_digest_cap": 50,
+  "selected": 5,
+  "totals": {
+    "events": 120,
+    "chain_verified": true,
+    "chain_depth": 120
+  },
+  "top": [
+    {
+      "content_hash": "5fb93354e1df8f89007e89ad5dfb9d49576361ee90f989d434580f3e9502031b",
+      "source": "hf_hub",
+      "source_detail": "Qwen",
+      "timestamp": "2026-05-28 08:07:27+00:00",
+      "ingested_at": "2026-06-01T06:40:32Z",
+      "title": "HF model: Qwen/Qwen-Image-Bench",
+      "url": "https://huggingface.co/Qwen/Qwen-Image-Bench",
+      "license": "apache-2.0",
+      "parsed_summary": "New/updated model `Qwen/Qwen-Image-Bench` on the Hugging Face Hub. License: apache-2.0. Pipeline: image-text-to-text. Downloads: 2580, likes: 36. Tags: transformers, safetensors, qwen3_5, image-text-to-text, judge-model, text-to-image, evaluation, benchmark.",
+      "yuyay_score": 1.0,
+      "novelty_score": 1.0,
+      "wayra_factor": 1.0,
+      "decision": "accept",
+      "organ_routing": [
+        "a11oy"
+      ]
+    },
+    {
+      "content_hash": "3603cadc5eef30c3f83d0eba04edcaa844b38139d8beacebf80c82607857f908",
+      "source": "arxiv",
+      "source_detail": "cs.LO",
+      "timestamp": "Mon, 01 Jun 2026 00:00:00 -0400",
+      "ingested_at": "2026-06-01T09:08:51Z",
+      "title": "Value Functions as Supermartingale Certificates",
+      "url": "https://arxiv.org/abs/2605.31524",
+      "license": "arxiv-abstract-cc",
+      "parsed_summary": "[cs.LO] arXiv:2605.31524v1 Announce Type: cross Abstract: Certification methods for stochastic systems provide sufficient proof rules, based on real-valued supermartingale certificates, to determine the almost-sure satisfaction of $\\omega$-regular properties (and therefore of linear temporal logic) over general state spaces, encompassing both countably infinite and continuous state spaces. Conversely, reinforcement learning (RL) methods for $\\omega$-regular tasks have received considerable attention, but they typically lack formal guarantees that the learned policy satisfies the specification, except possibly for finite state and action spaces. We bridge these two lines of research by establishing a novel theoretical connection: under an appropriate reward, the value function associated to a policy that almost surely satisfies an $\\omega$-regular property encodes a Streett supermartingale certificate for that specification. Our results, validated experimentally on finite Markov decision processes, hold for finite, countably infinite, and continuous state spaces, suggesting a principled route to certificate synthesis via RL.",
+      "yuyay_score": 0.9853,
+      "novelty_score": 1.0,
+      "wayra_factor": 0.8813,
+      "decision": "accept",
+      "organ_routing": [
+        "puriq",
+        "a11oy"
+      ]
+    },
+    {
+      "content_hash": "c4cf93e0ac29889e91398c78787076cf64733c44e4557d39d5d52834e5b29634",
+      "source": "standards",
+      "source_detail": "W3C-news",
+      "timestamp": "Thu, 28 May 2026 13:59:00 +0000",
+      "ingested_at": "2026-06-01T06:41:15Z",
+      "title": "W3C-news: W3C initiates leadership transition",
+      "url": "https://www.w3.org/news/2026/w3c-initiates-leadership-transition/",
+      "license": "standards-public",
+      "parsed_summary": "The W3C Board of Directors has appointed Dominique Haza\u00ebl-Massieux Interim CEO with immediate effect as the World Wide Web Consortium is undergoing a leadership transition.",
+      "yuyay_score": 0.9853,
+      "novelty_score": 1.0,
+      "wayra_factor": 0.8813,
+      "decision": "accept",
+      "organ_routing": [
+        "a11oy"
+      ]
+    },
+    {
+      "content_hash": "9347eaa1b4654f012d98d821bcbbc867c7b93375be48306782df8e5d70c45302",
+      "source": "standards",
+      "source_detail": "IETF-new-RFCs",
+      "timestamp": "Sat, 30 May 2026 00:00:00 GMT",
+      "ingested_at": "2026-06-01T06:41:09Z",
+      "title": "IETF-new-RFCs: RFC 9993: RTP Payload Format for Haptics",
+      "url": "https://www.rfc-editor.org/info/rfc9993/",
+      "license": "standards-public",
+      "parsed_summary": "This memo specifies an RTP payload format for MPEG-I haptic data. A haptic media stream is composed of MPEG-I Haptic Stream (MIHS) units including a MIHS unit header and zero or more MIHS packets. The RTP payload header format allows for packetization of a MIHS unit in an RTP packet payload as well as fragmentation of a MIHS unit into multiple RTP packets. The original subtype registration for 'haptics/hmpg' (RFC 9695) did not include any required or optional parameters. This memo updates RFC 9695 and the 'haptics/hmpg' registration to add optional parameters. It also provides Session Description Protocol (SDP) usage information for the 'haptics' media type.",
+      "yuyay_score": 0.9853,
+      "novelty_score": 1.0,
+      "wayra_factor": 0.8813,
+      "decision": "accept",
+      "organ_routing": [
+        "sentra",
+        "a11oy"
+      ]
+    },
+    {
+      "content_hash": "06c1d2ea4638359b7de7fc9f914a72e32de79847be2e0b15d73a8f8a2f7f9bdd",
+      "source": "arxiv",
+      "source_detail": "cs.LO",
+      "timestamp": "Mon, 01 Jun 2026 00:00:00 -0400",
+      "ingested_at": "2026-06-01T06:41:01Z",
+      "title": "Reducing Arbitrary Metric Temporal Formulas into Logic Programs under Answer Set Semantics",
+      "url": "https://arxiv.org/abs/2605.30618",
+      "license": "arxiv-abstract-cc",
+      "parsed_summary": "[cs.LO] arXiv:2605.30618v1 Announce Type: new Abstract: Metric temporal equilibrium logic (\\MEL) extends temporal equilibrium logic (\\TEL) by incorporating quantitative timing constraints, enabling the specification and analysis of deadlines and durations. \\MEL\\ is particularly suited for domains where time-bound properties are crucial, such as embedded systems, cyber-physical systems, and real-time software. It facilitates the precise expression of timing behaviors, such as the requirement that an event must occur within 5 milliseconds of a trigger, which often elude traditional qualitative temporal logics. In this paper, we present a Tseitin-like translation that maps any metric temporal formula into a logic programming fragment restricted to past operators. This translation provides a formal bridge to leverage existing Answer Set Programming (ASP) solvers for reasoning about metric temporal constraints. By restricting the target fragment to past operators, we enable more effective evaluation and integration with current ASP-based toolchains for multi-shot solving.",
+      "yuyay_score": 0.9853,
+      "novelty_score": 1.0,
+      "wayra_factor": 0.8813,
+      "decision": "accept",
+      "organ_routing": [
+        "puriq",
+        "a11oy"
+      ]
+    }
+  ],
+  "transcript": "Hatun-Willay morning briefing. WAYRA breathed in the world overnight.\nThe empire's lungs logged 232 items across 5 streams; the Khipu chain verifies intact.\nTop five by WAYRA factor:\n1. HF model: Qwen/Qwen-Image-Bench \u2014 from hf_hub, WAYRA factor 1.00, routed to a11oy.\n2. Value Functions as Supermartingale Certificates \u2014 from arxiv, WAYRA factor 0.88, routed to puriq, a11oy.\n3. W3C-news: W3C initiates leadership transition \u2014 from standards, WAYRA factor 0.88, routed to a11oy.\n4. IETF-new-RFCs: RFC 9993: RTP Payload Format for Haptics \u2014 from standards, WAYRA factor 0.88, routed to sentra, a11oy.\n5. Reducing Arbitrary Metric Temporal Formulas into Logic Programs under Answer Set Semantics \u2014 from arxiv, WAYRA factor 0.88, routed to puriq, a11oy.\nThat is the breath of the world, made ours. \u2014 Wallpa, for WAYRA.",
+  "voice": "wallpa-synthetic-timbre",
+  "tts_engines": [
+    "coqui-xtts-v2",
+    "piper",
+    "openvoice"
+  ],
+  "author": "Yachay",
+  "digest_date": "2026-05-26",
+  "backfilled": true,
+  "events_basis": 120
+}

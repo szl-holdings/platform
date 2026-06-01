@@ -1,0 +1,21 @@
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "szl-khipu-os"
+version = "1.0.0"
+description = "KHIPU-OS — the self-driving (agentic) Khipu DAG: self-prune, self-Merkle-checkpoint, self-verify, self-link-suggest, self-publish, self-prosecute (HUKLLA T22)."
+readme = "README.md"
+requires-python = ">=3.10"
+license = { text = "Apache-2.0" }
+authors = [{ name = "Lutar, Stephen P. (SZL Holdings)" }]
+keywords = ["agentic", "dag", "merkle", "khipu", "puriq", "provenance"]
+dependencies = []   # pure stdlib core; optional: huggingface_hub for cold-store upload
+
+[project.optional-dependencies]
+hf = ["huggingface_hub>=0.20"]
+test = ["pytest>=7.0"]
+
+[tool.setuptools.packages.find]
+include = ["khipu_os*"]

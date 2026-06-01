@@ -1,0 +1,9 @@
+{"amount": 10.0, "entry_hash": "4f6bc4fc7b3621d781786d3da2fd15a0abc8611becf3f53da06a1fc2f59290c4", "organ": "amaru", "pair_id": "p1", "prev_hash": "GENESIS", "resource": "gpu_min", "seq": 0, "side": "take", "ts": 100.0}
+{"amount": 10.0, "entry_hash": "b009df3df89285b5ef5743b75f0653ad723faaff81fe7a84ef936161670651c2", "organ": "sentra", "pair_id": "p1", "prev_hash": "4f6bc4fc7b3621d781786d3da2fd15a0abc8611becf3f53da06a1fc2f59290c4", "resource": "gpu_min", "seq": 1, "side": "give", "ts": 100.0}
+{"amount": 5.0, "entry_hash": "1835a47af11558fed97edd3bced9b2d51b97035990ce2db3d334e27d5e3b048b", "organ": "rosie", "pair_id": "p2", "prev_hash": "b009df3df89285b5ef5743b75f0653ad723faaff81fe7a84ef936161670651c2", "resource": "tokens", "seq": 2, "side": "take", "ts": 200.0}
+{"amount": 5.0, "entry_hash": "6d81a0ce95e2310feab62b999e6eaa3086a64cdaab10fcf42f97970c92f64404", "organ": "vessels", "pair_id": "p2", "prev_hash": "1835a47af11558fed97edd3bced9b2d51b97035990ce2db3d334e27d5e3b048b", "resource": "tokens", "seq": 3, "side": "give", "ts": 200.0}
+{"amount": 10.0, "entry_hash": "5f93f335b658304119889cbdcfd3e7ff60b6be3d8c2402fa2a94a96c0a3c5488", "organ": "sentra", "pair_id": "p1", "prev_hash": "6d81a0ce95e2310feab62b999e6eaa3086a64cdaab10fcf42f97970c92f64404", "resource": "gpu_min", "seq": 4, "side": "give", "ts": 300.0}
+CHAIN_OK: True
+AYNI amaru: 0.0 sentra: 1.0
+HALT: True deficits: ['amaru', 'rosie']
+REWIND@150 n_entries: 2 amaru bal: -10.0

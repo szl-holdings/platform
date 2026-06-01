@@ -1,0 +1,54 @@
+{
+  "organ": "WAYRA",
+  "tab": "/wayra-digest",
+  "author": "Yachay",
+  "generated_at": "2026-06-01T09:11:14.573013+00:00",
+  "window_days": 7,
+  "today_events": 232,
+  "baseline_events": 86,
+  "note": "Live IngestLog began 2026-06-01; earlier dates labeled backfilled=true with events_basis (chain prefix).",
+  "digests": [
+    {
+      "date": "2026-05-26",
+      "events": 120,
+      "backfilled": true,
+      "file": "wayra_digest_20260526.json"
+    },
+    {
+      "date": "2026-05-27",
+      "events": 142,
+      "backfilled": true,
+      "file": "wayra_digest_20260527.json"
+    },
+    {
+      "date": "2026-05-28",
+      "events": 165,
+      "backfilled": true,
+      "file": "wayra_digest_20260528.json"
+    },
+    {
+      "date": "2026-05-29",
+      "events": 181,
+      "backfilled": true,
+      "file": "wayra_digest_20260529.json"
+    },
+    {
+      "date": "2026-05-30",
+      "events": 199,
+      "backfilled": true,
+      "file": "wayra_digest_20260530.json"
+    },
+    {
+      "date": "2026-05-31",
+      "events": 214,
+      "backfilled": true,
+      "file": "wayra_digest_20260531.json"
+    },
+    {
+      "date": "2026-06-01",
+      "events": 232,
+      "backfilled": false,
+      "file": "wayra_digest_20260601.json"
+    }
+  ]
+}

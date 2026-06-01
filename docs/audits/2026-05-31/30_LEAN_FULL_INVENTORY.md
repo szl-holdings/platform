@@ -1,0 +1,1 @@
+/dev/shm/lean_audit_outputs/30_LEAN_FULL_INVENTORY.md

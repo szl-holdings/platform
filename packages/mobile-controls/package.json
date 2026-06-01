@@ -1,0 +1,8 @@
+{
+  "name": "@szl/mobile-controls",
+  "version": "0.1.0",
+  "description": "Canonical mobile touch joystick + gesture layer for SZL 3D scenes",
+  "license": "Apache-2.0",
+  "author": "Yachay <yachay@szlholdings.dev>",
+  "main": "src/szl-mobile-controls.js"
+}

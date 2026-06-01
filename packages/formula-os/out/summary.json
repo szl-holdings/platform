@@ -1,0 +1,234 @@
+{
+  "n_agents": 23,
+  "all_chains_verified": true,
+  "total_ticks": 2300,
+  "harness_total_passed": 2300,
+  "harness_total": 2300,
+  "harness_per_formula": {
+    "F1": {
+      "passed": 100,
+      "total": 100
+    },
+    "F2": {
+      "passed": 100,
+      "total": 100
+    },
+    "F3": {
+      "passed": 100,
+      "total": 100
+    },
+    "F4": {
+      "passed": 100,
+      "total": 100
+    },
+    "F5": {
+      "passed": 100,
+      "total": 100
+    },
+    "F6": {
+      "passed": 100,
+      "total": 100
+    },
+    "F7": {
+      "passed": 100,
+      "total": 100
+    },
+    "F8": {
+      "passed": 100,
+      "total": 100
+    },
+    "F9": {
+      "passed": 100,
+      "total": 100
+    },
+    "F10": {
+      "passed": 100,
+      "total": 100
+    },
+    "F11": {
+      "passed": 100,
+      "total": 100
+    },
+    "F12": {
+      "passed": 100,
+      "total": 100
+    },
+    "F13": {
+      "passed": 100,
+      "total": 100
+    },
+    "F14": {
+      "passed": 100,
+      "total": 100
+    },
+    "F15": {
+      "passed": 100,
+      "total": 100
+    },
+    "F16": {
+      "passed": 100,
+      "total": 100
+    },
+    "F17": {
+      "passed": 100,
+      "total": 100
+    },
+    "F18": {
+      "passed": 100,
+      "total": 100
+    },
+    "F19": {
+      "passed": 100,
+      "total": 100
+    },
+    "F20": {
+      "passed": 100,
+      "total": 100
+    },
+    "F21": {
+      "passed": 100,
+      "total": 100
+    },
+    "F22": {
+      "passed": 100,
+      "total": 100
+    },
+    "F23": {
+      "passed": 100,
+      "total": 100
+    }
+  },
+  "chains_verified": {
+    "F1": true,
+    "F2": true,
+    "F3": true,
+    "F4": true,
+    "F5": true,
+    "F6": true,
+    "F7": true,
+    "F8": true,
+    "F9": true,
+    "F10": true,
+    "F11": true,
+    "F12": true,
+    "F13": true,
+    "F14": true,
+    "F15": true,
+    "F16": true,
+    "F17": true,
+    "F18": true,
+    "F19": true,
+    "F20": true,
+    "F21": true,
+    "F22": true,
+    "F23": true
+  },
+  "sprint": {
+    "F1": {
+      "theorem": "euler_char_def",
+      "outcome": "PROVED",
+      "proved_tactic": "rfl",
+      "verifier": "local-lean(lean)",
+      "elapsed_s": 0.116,
+      "attempts": [
+        {
+          "attempt": 1,
+          "tactic": "rfl",
+          "ok": true,
+          "detail": "exit=0"
+        }
+      ]
+    },
+    "F11": {
+      "theorem": "frustum_degenerates_core",
+      "outcome": "PROVED",
+      "proved_tactic": "simp",
+      "verifier": "local-lean(lean)",
+      "elapsed_s": 0.584,
+      "attempts": [
+        {
+          "attempt": 1,
+          "tactic": "rfl",
+          "ok": false,
+          "detail": "/tmp/tmpw4gl_z7_.lean:7:2: error: tactic 'rfl' failed, the left-hand side\n  a ^ 2 + a * 0 + 0 ^ 2\nis not definitionally equal to the right-hand side\n  a ^ 2\na : Int\n\u22a2 a ^ 2 + a * 0 + 0 ^ 2 = a ^ 2\n"
+        },
+        {
+          "attempt": 2,
+          "tactic": "decide",
+          "ok": false,
+          "detail": "/tmp/tmp1ilfuaie.lean:7:2: error: expected type must not contain free or meta variables\n  a ^ 2 + a * 0 + 0 ^ 2 = a ^ 2\n"
+        },
+        {
+          "attempt": 3,
+          "tactic": "norm_num",
+          "ok": false,
+          "detail": "/tmp/tmp85tc60lz.lean:7:3: error: unknown tactic\n/tmp/tmp85tc60lz.lean:5:70: error: unsolved goals\na : Int\n\u22a2 a ^ 2 + a * 0 + 0 ^ 2 = a ^ 2\n"
+        },
+        {
+          "attempt": 4,
+          "tactic": "ring",
+          "ok": false,
+          "detail": "/tmp/tmp05glyqg7.lean:7:3: error: unknown tactic\n/tmp/tmp05glyqg7.lean:5:70: error: unsolved goals\na : Int\n\u22a2 a ^ 2 + a * 0 + 0 ^ 2 = a ^ 2\n"
+        },
+        {
+          "attempt": 5,
+          "tactic": "simp",
+          "ok": true,
+          "detail": "exit=0"
+        }
+      ]
+    },
+    "F12": {
+      "theorem": "crt_7_12",
+      "outcome": "PROVED",
+      "proved_tactic": "rfl",
+      "verifier": "local-lean(lean)",
+      "elapsed_s": 0.103,
+      "attempts": [
+        {
+          "attempt": 1,
+          "tactic": "rfl",
+          "ok": true,
+          "detail": "exit=0"
+        }
+      ]
+    },
+    "F18": {
+      "theorem": "programs_k10",
+      "outcome": "PROVED",
+      "proved_tactic": "rfl",
+      "verifier": "local-lean(lean)",
+      "elapsed_s": 0.108,
+      "attempts": [
+        {
+          "attempt": 1,
+          "tactic": "rfl",
+          "ok": true,
+          "detail": "exit=0"
+        }
+      ]
+    },
+    "F19": {
+      "theorem": "fuel_halts_3",
+      "outcome": "PROVED",
+      "proved_tactic": "rfl",
+      "verifier": "local-lean(lean)",
+      "elapsed_s": 0.127,
+      "attempts": [
+        {
+          "attempt": 1,
+          "tactic": "rfl",
+          "ok": true,
+          "detail": "exit=0"
+        }
+      ]
+    }
+  },
+  "sprint_outcomes": {
+    "F1": "PROVED",
+    "F11": "PROVED",
+    "F12": "PROVED",
+    "F18": "PROVED",
+    "F19": "PROVED"
+  }
+}

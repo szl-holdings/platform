@@ -1,0 +1,17 @@
+# WAYRA — Hatun-Willay daily digest (systemd service unit)
+# Place in /etc/systemd/system/wayra-digest.service alongside wayra-digest.timer
+# Organ: WAYRA (4th organ, additive) · Author: Yachay · Zero Bandaid
+[Unit]
+Description=WAYRA Hatun-Willay daily digest (Wallpa-narrated top-5)
+After=network-online.target
+
+[Service]
+Type=oneshot
+Environment=TZ=America/New_York
+WorkingDirectory=/app
+ExecStart=/usr/bin/python3 /app/daily_digest.py --emit-audio
+# RECEIVE-ONLY hardening
+ProtectSystem=strict
+ReadWritePaths=/app/data /var/log
+PrivateTmp=true
+NoNewPrivileges=true

@@ -1,0 +1,417 @@
+{
+  "F1": {
+    "id": "F1",
+    "name": "Euler-Khipu DAG Identity",
+    "organ": "Khipu",
+    "primitive": "Euler chi=V-E+F=2",
+    "lean_name": "wellFormed_iff",
+    "lean_status": "PROVED",
+    "proof_status": "PROVED",
+    "proved_tactic": "rfl",
+    "identity_doc": "euler_char(V,E,F) == V-E+F (definitional)",
+    "harness": {
+      "passed": 100,
+      "total": 100
+    },
+    "invoked_by": [
+      "Khipu"
+    ]
+  },
+  "F2": {
+    "id": "F2",
+    "name": "Egyptian-Kallpa Allocation",
+    "organ": "Kallpa",
+    "primitive": "Egyptian unit fractions (Rhind/Fibonacci-Sylvester)",
+    "lean_name": "egyptian_sum_eq",
+    "lean_status": "SKELETON",
+    "proof_status": "UNATTEMPTED",
+    "proved_tactic": null,
+    "identity_doc": "greedy expansion sums to q; denominators distinct & increasing",
+    "harness": {
+      "passed": 100,
+      "total": 100
+    },
+    "invoked_by": [
+      "Kallpa"
+    ]
+  },
+  "F3": {
+    "id": "F3",
+    "name": "Noether-Khipu Conservation",
+    "organ": "Khipu",
+    "primitive": "Noether 1918 symmetry->conservation",
+    "lean_name": "noether_conservation",
+    "lean_status": "PROVED",
+    "proof_status": "UNATTEMPTED",
+    "proved_tactic": null,
+    "identity_doc": "symmetry (permutation) mutation preserves sum-charge Q",
+    "harness": {
+      "passed": 100,
+      "total": 100
+    },
+    "invoked_by": [
+      "Khipu"
+    ]
+  },
+  "F4": {
+    "id": "F4",
+    "name": "Gauss-Yuyay Aggregation",
+    "organ": "Yuyay",
+    "primitive": "Gauss/CLT max-entropy",
+    "lean_name": "gaussYuyayPass",
+    "lean_status": "SKELETON",
+    "proof_status": "UNATTEMPTED",
+    "proved_tactic": null,
+    "identity_doc": "lowerBound = mu - 1.645*sigma/sqrt(13)",
+    "harness": {
+      "passed": 100,
+      "total": 100
+    },
+    "invoked_by": [
+      "Yuyay"
+    ]
+  },
+  "F5": {
+    "id": "F5",
+    "name": "Euler-Lagrange Agency",
+    "organ": "A/agency",
+    "primitive": "Euler-Lagrange least action",
+    "lean_name": "isStationary",
+    "lean_status": "SKELETON",
+    "proof_status": "UNATTEMPTED",
+    "proved_tactic": null,
+    "identity_doc": "harmonic minimizer satisfies q''+k q = 0 (EL residual ~ 0)",
+    "harness": {
+      "passed": 100,
+      "total": 100
+    },
+    "invoked_by": [
+      "A/agency"
+    ]
+  },
+  "F6": {
+    "id": "F6",
+    "name": "Newton Risk-Velocity Tripwire",
+    "organ": "HUKLLA",
+    "primitive": "Newton fluxion d(risk)/dt",
+    "lean_name": "velocity_tripwire_sound",
+    "lean_status": "SKELETON",
+    "proof_status": "UNATTEMPTED",
+    "proved_tactic": null,
+    "identity_doc": "risk' <= vmax => risk(t+h) <= risk(t)+vmax*h",
+    "harness": {
+      "passed": 100,
+      "total": 100
+    },
+    "invoked_by": [
+      "HUKLLA"
+    ]
+  },
+  "F7": {
+    "id": "F7",
+    "name": "Inverse-Square/Zeta Provenance",
+    "organ": "Khipu/Kallpa",
+    "primitive": "Newton 1/r^2 + Riemann zeta",
+    "lean_name": "provenance_converges",
+    "lean_status": "SKELETON",
+    "proof_status": "UNATTEMPTED",
+    "proved_tactic": null,
+    "identity_doc": "sum_{d>=1} d^-s converges for s>1; s=2 -> pi^2/6 (Basel)",
+    "harness": {
+      "passed": 100,
+      "total": 100
+    },
+    "invoked_by": [
+      "Khipu",
+      "Kallpa"
+    ]
+  },
+  "F8": {
+    "id": "F8",
+    "name": "Newton-Parsimony Pick",
+    "organ": "HUKLLA",
+    "primitive": "Newton Principia Rule 1/4 (Occam)",
+    "lean_name": "parsimony_minimal",
+    "lean_status": "SKELETON",
+    "proof_status": "UNATTEMPTED",
+    "proved_tactic": null,
+    "identity_doc": "parsimonyPick returns element of minimal justification count",
+    "harness": {
+      "passed": 100,
+      "total": 100
+    },
+    "invoked_by": [
+      "HUKLLA"
+    ]
+  },
+  "F9": {
+    "id": "F9",
+    "name": "Sulba Yuyay Mass-Conservation",
+    "organ": "Yuyay",
+    "primitive": "Sulba area-preserving altar",
+    "lean_name": "yuyay_mass_conserved",
+    "lean_status": "PROVED",
+    "proof_status": "UNATTEMPTED",
+    "proved_tactic": null,
+    "identity_doc": "sum(map(x)) == sum(x) for mass-preserving reweight",
+    "harness": {
+      "passed": 100,
+      "total": 100
+    },
+    "invoked_by": [
+      "Yuyay"
+    ]
+  },
+  "F10": {
+    "id": "F10",
+    "name": "Baudhayana Orthogonality Bound",
+    "organ": "Lambda-spine",
+    "primitive": "Baudhayana Sulba sqrt2=577/408",
+    "lean_name": "baudhayana_iterate",
+    "lean_status": "PROVED",
+    "proof_status": "UNATTEMPTED",
+    "proved_tactic": null,
+    "identity_doc": "heronStep(17/12)==577/408 ; |577/408 - sqrt2| < 1.5e-6",
+    "harness": {
+      "passed": 100,
+      "total": 100
+    },
+    "invoked_by": [
+      "Lambda-spine"
+    ]
+  },
+  "F11": {
+    "id": "F11",
+    "name": "Frustum A-Shrink Law",
+    "organ": "A",
+    "primitive": "Moscow Papyrus frustum",
+    "lean_name": "frustum_degenerates_to_pyramid",
+    "lean_status": "PROVED",
+    "proof_status": "PROVED",
+    "proved_tactic": "simp",
+    "identity_doc": "Vol=(h/3)(a^2+ab+b^2); b->0 => pyramid; nonneg",
+    "harness": {
+      "passed": 100,
+      "total": 100
+    },
+    "invoked_by": [
+      "A/agency"
+    ]
+  },
+  "F12": {
+    "id": "F12",
+    "name": "CRT-Hukulla Schedule",
+    "organ": "HUKLLA",
+    "primitive": "Bible-numerics mod-structure + Gauss CRT",
+    "lean_name": "crt_collision_period",
+    "lean_status": "SKELETON",
+    "proof_status": "PROVED",
+    "proved_tactic": "rfl",
+    "identity_doc": "coprime moduli: residue pair recurs exactly mod m1*m2 = lcm",
+    "harness": {
+      "passed": 100,
+      "total": 100
+    },
+    "invoked_by": [
+      "HUKLLA"
+    ]
+  },
+  "F13": {
+    "id": "F13",
+    "name": "Gauss-Bonnet Spine Curvature",
+    "organ": "Lambda-spine",
+    "primitive": "Gauss-Bonnet",
+    "lean_name": "curvatureConsistent",
+    "lean_status": "CONJ",
+    "proof_status": "UNATTEMPTED",
+    "proved_tactic": null,
+    "identity_doc": "total curvature = 2*pi*chi (=4pi when chi=2); residual==0",
+    "harness": {
+      "passed": 100,
+      "total": 100
+    },
+    "invoked_by": [
+      "Lambda-spine"
+    ]
+  },
+  "F14": {
+    "id": "F14",
+    "name": "Ramanujan A-Partition Bound",
+    "organ": "A",
+    "primitive": "Hardy-Ramanujan p(n)",
+    "lean_name": "hardyRamanujan",
+    "lean_status": "CONJ",
+    "proof_status": "UNATTEMPTED",
+    "proved_tactic": null,
+    "identity_doc": "exact p(n) via pentagonal recurrence; HR asymptotic within band",
+    "harness": {
+      "passed": 100,
+      "total": 100
+    },
+    "invoked_by": [
+      "A/agency"
+    ]
+  },
+  "F15": {
+    "id": "F15",
+    "name": "Grothendieck Organ Functor",
+    "organ": "compose",
+    "primitive": "category theory / schemes",
+    "lean_name": "organ_comp_assoc",
+    "lean_status": "SKELETON",
+    "proof_status": "UNATTEMPTED",
+    "proved_tactic": null,
+    "identity_doc": "comp(comp f g) h == comp f (comp g h) (associativity)",
+    "harness": {
+      "passed": 100,
+      "total": 100
+    },
+    "invoked_by": [
+      "compose"
+    ]
+  },
+  "F16": {
+    "id": "F16",
+    "name": "von-Neumann-Hukulla Minimax",
+    "organ": "HUKLLA",
+    "primitive": "von Neumann minimax theorem",
+    "lean_name": "minimax_exists",
+    "lean_status": "SKELETON",
+    "proof_status": "UNATTEMPTED",
+    "proved_tactic": null,
+    "identity_doc": "max min == min max == V for zero-sum 2x2 game",
+    "harness": {
+      "passed": 100,
+      "total": 100
+    },
+    "invoked_by": [
+      "HUKLLA"
+    ]
+  },
+  "F17": {
+    "id": "F17",
+    "name": "Shannon-Kallpa Capacity",
+    "organ": "Kallpa",
+    "primitive": "Shannon channel capacity/entropy",
+    "lean_name": "entropy_nonneg",
+    "lean_status": "SKELETON",
+    "proof_status": "UNATTEMPTED",
+    "proved_tactic": null,
+    "identity_doc": "H(X) = -sum p log2 p >= 0",
+    "harness": {
+      "passed": 100,
+      "total": 100
+    },
+    "invoked_by": [
+      "Kallpa"
+    ]
+  },
+  "F18": {
+    "id": "F18",
+    "name": "Kolmogorov A-Description Cap",
+    "organ": "A",
+    "primitive": "Kolmogorov complexity",
+    "lean_name": "actions_bounded_by_K",
+    "lean_status": "SKELETON",
+    "proof_status": "PROVED",
+    "proved_tactic": "rfl",
+    "identity_doc": "#programs length<=k == 2^(k+1)-1",
+    "harness": {
+      "passed": 100,
+      "total": 100
+    },
+    "invoked_by": [
+      "A/agency"
+    ]
+  },
+  "F19": {
+    "id": "F19",
+    "name": "Turing-Fuel Halting Safety",
+    "organ": "core",
+    "primitive": "Turing halting problem",
+    "lean_name": "fuel_total",
+    "lean_status": "PROVED",
+    "proof_status": "PROVED",
+    "proved_tactic": "rfl",
+    "identity_doc": "fuel-bounded run terminates in <= fuel steps",
+    "harness": {
+      "passed": 100,
+      "total": 100
+    },
+    "invoked_by": [
+      "PURIQ-core"
+    ]
+  },
+  "F20": {
+    "id": "F20",
+    "name": "Schrodinger Action Superposition",
+    "organ": "A",
+    "primitive": "Schrodinger wavefunction",
+    "lean_name": "superposition_normalized",
+    "lean_status": "PROVED",
+    "proof_status": "UNATTEMPTED",
+    "proved_tactic": null,
+    "identity_doc": "normalized amplitudes: sum c_a^2 == 1",
+    "harness": {
+      "passed": 100,
+      "total": 100
+    },
+    "invoked_by": [
+      "A/agency"
+    ]
+  },
+  "F21": {
+    "id": "F21",
+    "name": "Dirac-Commit Projection",
+    "organ": "Khipu",
+    "primitive": "Dirac bra-ket measurement",
+    "lean_name": "projections_sum_one",
+    "lean_status": "PROVED",
+    "proof_status": "UNATTEMPTED",
+    "proved_tactic": null,
+    "identity_doc": "select(a)=c_a^2 ; sum select == 1",
+    "harness": {
+      "passed": 100,
+      "total": 100
+    },
+    "invoked_by": [
+      "Khipu"
+    ]
+  },
+  "F22": {
+    "id": "F22",
+    "name": "Feynman-Puriq Path Integral",
+    "organ": "A",
+    "primitive": "Feynman path integral",
+    "lean_name": "puriqPathWeight",
+    "lean_status": "CONJ",
+    "proof_status": "UNATTEMPTED",
+    "proved_tactic": null,
+    "identity_doc": "Z = (1/|T_a|) sum Lambda(t) (arithmetic mean, definitional)",
+    "harness": {
+      "passed": 100,
+      "total": 100
+    },
+    "invoked_by": [
+      "A/agency"
+    ]
+  },
+  "F23": {
+    "id": "F23",
+    "name": "Bekenstein A-Cap",
+    "organ": "A",
+    "primitive": "Bekenstein bound + 't Hooft holography",
+    "lean_name": "actionSpaceBounded",
+    "lean_status": "SKELETON",
+    "proof_status": "UNATTEMPTED",
+    "proved_tactic": null,
+    "identity_doc": "|A| <= min(exp(2 pi R E/hbar c), 2^(Kmax+1)-1)",
+    "harness": {
+      "passed": 100,
+      "total": 100
+    },
+    "invoked_by": [
+      "A/agency"
+    ]
+  }
+}

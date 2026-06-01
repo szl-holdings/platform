@@ -1,0 +1,2275 @@
+{
+  "F1": {
+    "id": "F1",
+    "name": "Euler-Khipu DAG Identity",
+    "organ": "Khipu",
+    "primitive": "Euler chi=V-E+F=2",
+    "lean_name": "wellFormed_iff",
+    "lean_status": "PROVED",
+    "proof_status": "PROVED",
+    "proved_tactic": "rfl",
+    "identity_doc": "euler_char(V,E,F) == V-E+F (definitional)",
+    "current_value": -13,
+    "last_eval_ts": 1780304719.1275218,
+    "identity_holds": true,
+    "harness": {
+      "passed": 100,
+      "total": 100
+    },
+    "invoked_by": [
+      "Khipu"
+    ],
+    "chain_verified": true,
+    "tick_count": 100,
+    "last_receipts": [
+      {
+        "seq": 97,
+        "ts": 1780304719.1274328,
+        "formula_id": "F1",
+        "kind": "evaluate",
+        "payload": {
+          "value": 88,
+          "identity_holds": true,
+          "args": "(24, 7, 71)",
+          "error": null,
+          "tick": 98
+        },
+        "prev": "dfbe89bde598bcbac0fe70ce093708c3088bf8c1c5592c717343b77cd5846cd1",
+        "self_hash": "210b2e7d069a1ca46161266de3818ed2a71eda7d72b1022a880f9ea52af87c84"
+      },
+      {
+        "seq": 98,
+        "ts": 1780304719.1274772,
+        "formula_id": "F1",
+        "kind": "evaluate",
+        "payload": {
+          "value": 27,
+          "identity_holds": true,
+          "args": "(45, 28, 10)",
+          "error": null,
+          "tick": 99
+        },
+        "prev": "210b2e7d069a1ca46161266de3818ed2a71eda7d72b1022a880f9ea52af87c84",
+        "self_hash": "8f5bf2a25d27d86857e88814b09d427f5c666d091617e93b5444e945198dda0d"
+      },
+      {
+        "seq": 99,
+        "ts": 1780304719.1275249,
+        "formula_id": "F1",
+        "kind": "evaluate",
+        "payload": {
+          "value": -13,
+          "identity_holds": true,
+          "args": "(17, 58, 28)",
+          "error": null,
+          "tick": 100
+        },
+        "prev": "8f5bf2a25d27d86857e88814b09d427f5c666d091617e93b5444e945198dda0d",
+        "self_hash": "e76dad881cf379895290f1e326972cb8af055275d6e39e5c2876b057b1737a5d"
+      },
+      {
+        "seq": 100,
+        "ts": 1780304719.1277096,
+        "formula_id": "F1",
+        "kind": "test",
+        "payload": {
+          "passed": 100,
+          "total": 100,
+          "ok": true,
+          "failures": []
+        },
+        "prev": "e76dad881cf379895290f1e326972cb8af055275d6e39e5c2876b057b1737a5d",
+        "self_hash": "d8a50596671583f5af9acd10d719656a6df68d2645fba50eb7d8f0d89bd691c6"
+      },
+      {
+        "seq": 101,
+        "ts": 1780304720.507336,
+        "formula_id": "F1",
+        "kind": "prove",
+        "payload": {
+          "theorem": "euler_char_def",
+          "outcome": "PROVED",
+          "proved_tactic": "rfl",
+          "verifier": "local-lean(lean)"
+        },
+        "prev": "d8a50596671583f5af9acd10d719656a6df68d2645fba50eb7d8f0d89bd691c6",
+        "self_hash": "7c78cd70b9f0a633433dd44ab9541c7366494556fb7523bfe6161843442cebaa"
+      }
+    ]
+  },
+  "F2": {
+    "id": "F2",
+    "name": "Egyptian-Kallpa Allocation",
+    "organ": "Kallpa",
+    "primitive": "Egyptian unit fractions (Rhind/Fibonacci-Sylvester)",
+    "lean_name": "egyptian_sum_eq",
+    "lean_status": "SKELETON",
+    "proof_status": "UNATTEMPTED",
+    "proved_tactic": null,
+    "identity_doc": "greedy expansion sums to q; denominators distinct & increasing",
+    "current_value": null,
+    "last_eval_ts": 1780304719.1376436,
+    "identity_holds": true,
+    "harness": {
+      "passed": 100,
+      "total": 100
+    },
+    "invoked_by": [
+      "Kallpa"
+    ],
+    "chain_verified": true,
+    "tick_count": 100,
+    "last_receipts": [
+      {
+        "seq": 96,
+        "ts": 1780304719.137449,
+        "formula_id": "F2",
+        "kind": "evaluate",
+        "payload": {
+          "value": null,
+          "identity_holds": true,
+          "args": "(6, 58)",
+          "error": null,
+          "tick": 97
+        },
+        "prev": "15e80a8f6887954ec44e92690ca9854fb07a4efc0b68bd51d331cba9b0007c78",
+        "self_hash": "44cf3218249b1945e8380d646a913a8941726486790a209ad47cd7eb731fc068"
+      },
+      {
+        "seq": 97,
+        "ts": 1780304719.137512,
+        "formula_id": "F2",
+        "kind": "evaluate",
+        "payload": {
+          "value": null,
+          "identity_holds": true,
+          "args": "(4, 42)",
+          "error": null,
+          "tick": 98
+        },
+        "prev": "44cf3218249b1945e8380d646a913a8941726486790a209ad47cd7eb731fc068",
+        "self_hash": "a767599c3d972da72865f3c260e295df88ac4d64e0316888ecd83cf4674fb2f6"
+      },
+      {
+        "seq": 98,
+        "ts": 1780304719.1375818,
+        "formula_id": "F2",
+        "kind": "evaluate",
+        "payload": {
+          "value": null,
+          "identity_holds": true,
+          "args": "(6, 13)",
+          "error": null,
+          "tick": 99
+        },
+        "prev": "a767599c3d972da72865f3c260e295df88ac4d64e0316888ecd83cf4674fb2f6",
+        "self_hash": "28bf66ac204bf02df5008bb96418782d46459dfd63180f7eff78292ee159065a"
+      },
+      {
+        "seq": 99,
+        "ts": 1780304719.1376464,
+        "formula_id": "F2",
+        "kind": "evaluate",
+        "payload": {
+          "value": null,
+          "identity_holds": true,
+          "args": "(6, 88)",
+          "error": null,
+          "tick": 100
+        },
+        "prev": "28bf66ac204bf02df5008bb96418782d46459dfd63180f7eff78292ee159065a",
+        "self_hash": "1148cc822c73ffc7ae3e9eed0b4c6da43e278748585cbb336cef9a18b1cd6cf0"
+      },
+      {
+        "seq": 100,
+        "ts": 1780304719.1388733,
+        "formula_id": "F2",
+        "kind": "test",
+        "payload": {
+          "passed": 100,
+          "total": 100,
+          "ok": true,
+          "failures": []
+        },
+        "prev": "1148cc822c73ffc7ae3e9eed0b4c6da43e278748585cbb336cef9a18b1cd6cf0",
+        "self_hash": "cf25f095cf609e91db99d28bc947323a65062cfdcc74a5fd7ec9282e055b42a4"
+      }
+    ]
+  },
+  "F3": {
+    "id": "F3",
+    "name": "Noether-Khipu Conservation",
+    "organ": "Khipu",
+    "primitive": "Noether 1918 symmetry->conservation",
+    "lean_name": "noether_conservation",
+    "lean_status": "PROVED",
+    "proof_status": "UNATTEMPTED",
+    "proved_tactic": null,
+    "identity_doc": "symmetry (permutation) mutation preserves sum-charge Q",
+    "current_value": null,
+    "last_eval_ts": 1780304719.1456418,
+    "identity_holds": true,
+    "harness": {
+      "passed": 100,
+      "total": 100
+    },
+    "invoked_by": [
+      "Khipu"
+    ],
+    "chain_verified": true,
+    "tick_count": 100,
+    "last_receipts": [
+      {
+        "seq": 96,
+        "ts": 1780304719.1454628,
+        "formula_id": "F3",
+        "kind": "evaluate",
+        "payload": {
+          "value": null,
+          "identity_holds": true,
+          "args": "([-9.750888395329698, -6.606078930550172, 2.3071174562753445, -9.467089022408048, 7.661714054640896, -5.229072524527181], [5, 4, 1, 3, 0, 2])",
+          "error": null,
+          "tick": 97
+        },
+        "prev": "98f05d2953a98c24093449db2e74878e1175f56a5dbb6f2601d0322ccbdc1c86",
+        "self_hash": "f98d204326ec4fd9a278ca161f48df2e9d7333369cb2650ca9267bbb45ceba6b"
+      },
+      {
+        "seq": 97,
+        "ts": 1780304719.145524,
+        "formula_id": "F3",
+        "kind": "evaluate",
+        "payload": {
+          "value": null,
+          "identity_holds": true,
+          "args": "([-8.426164694862141, 0.3163270848776438, -4.33273792472006, 1.1044980037226857, -5.934223783545233, -7.145153823949273], [3, 1, 5, 4, 2, 0])",
+          "error": null,
+          "tick": 98
+        },
+        "prev": "f98d204326ec4fd9a278ca161f48df2e9d7333369cb2650ca9267bbb45ceba6b",
+        "self_hash": "c741499aff599b7c8ca1c53e3a25391b95bfd25d050052fc7ed36072527e2fdf"
+      },
+      {
+        "seq": 98,
+        "ts": 1780304719.1455867,
+        "formula_id": "F3",
+        "kind": "evaluate",
+        "payload": {
+          "value": null,
+          "identity_holds": true,
+          "args": "([9.834319523693349, -4.0160033000547095, 6.473576841478351, -6.279020497850141, 1.0910855053799295, -9.723419937264522, -0.4101019347330759], [6, 1, 5, 2, 3, 0, 4])",
+          "error": null,
+          "tick": 99
+        },
+        "prev": "c741499aff599b7c8ca1c53e3a25391b95bfd25d050052fc7ed36072527e2fdf",
+        "self_hash": "3603097ee32e63410d61583e2978d7ab854b952d14f9c6874c60eddca21e709c"
+      },
+      {
+        "seq": 99,
+        "ts": 1780304719.1456497,
+        "formula_id": "F3",
+        "kind": "evaluate",
+        "payload": {
+          "value": null,
+          "identity_holds": true,
+          "args": "([-5.894044478188962, -5.122716825765703, 9.977904230060965, -9.885496570394423, 0.925124012780854, -4.158559372100978, 4.121380617516198, -3.653885116806106], [7, 4, 2, 5, 1, 3, 0, 6])",
+          "error": null,
+          "tick": 100
+        },
+        "prev": "3603097ee32e63410d61583e2978d7ab854b952d14f9c6874c60eddca21e709c",
+        "self_hash": "f52f0d8369ec8310d52454dc91ea6d56902173201591e0dc12ce07419d576cd0"
+      },
+      {
+        "seq": 100,
+        "ts": 1780304719.1462686,
+        "formula_id": "F3",
+        "kind": "test",
+        "payload": {
+          "passed": 100,
+          "total": 100,
+          "ok": true,
+          "failures": []
+        },
+        "prev": "f52f0d8369ec8310d52454dc91ea6d56902173201591e0dc12ce07419d576cd0",
+        "self_hash": "95a19bd77868e7833925b26faad007011c6f70e42234b75a57baa512c70790c8"
+      }
+    ]
+  },
+  "F4": {
+    "id": "F4",
+    "name": "Gauss-Yuyay Aggregation",
+    "organ": "Yuyay",
+    "primitive": "Gauss/CLT max-entropy",
+    "lean_name": "gaussYuyayPass",
+    "lean_status": "SKELETON",
+    "proof_status": "UNATTEMPTED",
+    "proved_tactic": null,
+    "identity_doc": "lowerBound = mu - 1.645*sigma/sqrt(13)",
+    "current_value": 0.782387,
+    "last_eval_ts": 1780304719.1516182,
+    "identity_holds": true,
+    "harness": {
+      "passed": 100,
+      "total": 100
+    },
+    "invoked_by": [
+      "Yuyay"
+    ],
+    "chain_verified": true,
+    "tick_count": 100,
+    "last_receipts": [
+      {
+        "seq": 96,
+        "ts": 1780304719.1514788,
+        "formula_id": "F4",
+        "kind": "evaluate",
+        "payload": {
+          "value": 0.404992,
+          "identity_holds": true,
+          "args": "(0.5266262791327455, 0.2666002608784716)",
+          "error": null,
+          "tick": 97
+        },
+        "prev": "35f0f3bd452f8cd77f5864ddc4a59ce48f32b8d3992960336c53189b7b2d3949",
+        "self_hash": "5830f33be67cae593839fd7d0acfa736ec9272a965e5313c7d51a586838f864a"
+      },
+      {
+        "seq": 97,
+        "ts": 1780304719.151528,
+        "formula_id": "F4",
+        "kind": "evaluate",
+        "payload": {
+          "value": 0.336199,
+          "identity_holds": true,
+          "args": "(0.3711939819441592, 0.07670259181123487)",
+          "error": null,
+          "tick": 98
+        },
+        "prev": "5830f33be67cae593839fd7d0acfa736ec9272a965e5313c7d51a586838f864a",
+        "self_hash": "cac9701d273ba65d303740874aac1e1b96d8332edace11993cfc0036d30638fc"
+      },
+      {
+        "seq": 98,
+        "ts": 1780304719.1515756,
+        "formula_id": "F4",
+        "kind": "evaluate",
+        "payload": {
+          "value": 0.67296,
+          "identity_holds": true,
+          "args": "(0.7982361912853946, 0.2745829390258539)",
+          "error": null,
+          "tick": 99
+        },
+        "prev": "cac9701d273ba65d303740874aac1e1b96d8332edace11993cfc0036d30638fc",
+        "self_hash": "2dbbf5bda6037e6d53a177db4368b8a7742eb087c5ad32c7183d7d22c2a7fc04"
+      },
+      {
+        "seq": 99,
+        "ts": 1780304719.151622,
+        "formula_id": "F4",
+        "kind": "evaluate",
+        "payload": {
+          "value": 0.782387,
+          "identity_holds": true,
+          "args": "(0.8282297372583595, 0.10047902721771262)",
+          "error": null,
+          "tick": 100
+        },
+        "prev": "2dbbf5bda6037e6d53a177db4368b8a7742eb087c5ad32c7183d7d22c2a7fc04",
+        "self_hash": "64a453564d2530a8f3fe75a778a2ece1c2a190df69edb60b644796d790f7ef40"
+      },
+      {
+        "seq": 100,
+        "ts": 1780304719.1517496,
+        "formula_id": "F4",
+        "kind": "test",
+        "payload": {
+          "passed": 100,
+          "total": 100,
+          "ok": true,
+          "failures": []
+        },
+        "prev": "64a453564d2530a8f3fe75a778a2ece1c2a190df69edb60b644796d790f7ef40",
+        "self_hash": "f003fb7998324ee18bae4aa8e79f10205b1ba3a0282618aa6b369de987ffd037"
+      }
+    ]
+  },
+  "F5": {
+    "id": "F5",
+    "name": "Euler-Lagrange Agency",
+    "organ": "A/agency",
+    "primitive": "Euler-Lagrange least action",
+    "lean_name": "isStationary",
+    "lean_status": "SKELETON",
+    "proof_status": "UNATTEMPTED",
+    "proved_tactic": null,
+    "identity_doc": "harmonic minimizer satisfies q''+k q = 0 (EL residual ~ 0)",
+    "current_value": null,
+    "last_eval_ts": 1780304719.1587257,
+    "identity_holds": true,
+    "harness": {
+      "passed": 100,
+      "total": 100
+    },
+    "invoked_by": [
+      "A/agency"
+    ],
+    "chain_verified": true,
+    "tick_count": 100,
+    "last_receipts": [
+      {
+        "seq": 96,
+        "ts": 1780304719.1585858,
+        "formula_id": "F5",
+        "kind": "evaluate",
+        "payload": {
+          "value": null,
+          "identity_holds": true,
+          "args": "(3.016161697809391, 2.4152883425672806, 2.2587917896855867)",
+          "error": null,
+          "tick": 97
+        },
+        "prev": "d1de332feacbc322750c2bf18cf495b48464f08d84704d6cb97698de277a984e",
+        "self_hash": "57c7875eb8167b16244f4cabac066fa3ff66bc336b02da19cde6a6858edcbed9"
+      },
+      {
+        "seq": 97,
+        "ts": 1780304719.1586332,
+        "formula_id": "F5",
+        "kind": "evaluate",
+        "payload": {
+          "value": null,
+          "identity_holds": true,
+          "args": "(3.4165153053129846, 1.4537019111565352, 3.054879538676445)",
+          "error": null,
+          "tick": 98
+        },
+        "prev": "57c7875eb8167b16244f4cabac066fa3ff66bc336b02da19cde6a6858edcbed9",
+        "self_hash": "cf3bd362c90ca40980a7f9ea155a902a9fd20ecfe3a6b20aed1e82f6cda94546"
+      },
+      {
+        "seq": 98,
+        "ts": 1780304719.158681,
+        "formula_id": "F5",
+        "kind": "evaluate",
+        "payload": {
+          "value": null,
+          "identity_holds": true,
+          "args": "(2.036119088689149, 0.6674366284743739, 5.533942363123229)",
+          "error": null,
+          "tick": 99
+        },
+        "prev": "cf3bd362c90ca40980a7f9ea155a902a9fd20ecfe3a6b20aed1e82f6cda94546",
+        "self_hash": "0847311cce1ae8cc09522365ae224c9fee66813d6864434f3972695a13307d1c"
+      },
+      {
+        "seq": 99,
+        "ts": 1780304719.1587298,
+        "formula_id": "F5",
+        "kind": "evaluate",
+        "payload": {
+          "value": null,
+          "identity_holds": true,
+          "args": "(0.5838026371596508, 2.722811805645832, 4.3332502463410885)",
+          "error": null,
+          "tick": 100
+        },
+        "prev": "0847311cce1ae8cc09522365ae224c9fee66813d6864434f3972695a13307d1c",
+        "self_hash": "91c0c7a40b99c329bec1bfebc097194c4db89efa7034762cbbc17113a7ed0491"
+      },
+      {
+        "seq": 100,
+        "ts": 1780304719.1589596,
+        "formula_id": "F5",
+        "kind": "test",
+        "payload": {
+          "passed": 100,
+          "total": 100,
+          "ok": true,
+          "failures": []
+        },
+        "prev": "91c0c7a40b99c329bec1bfebc097194c4db89efa7034762cbbc17113a7ed0491",
+        "self_hash": "56b939a259c21e8e8f93b1f86a01e8cba7bef01af658788d087ae12f55cd6ad7"
+      }
+    ]
+  },
+  "F6": {
+    "id": "F6",
+    "name": "Newton Risk-Velocity Tripwire",
+    "organ": "HUKLLA",
+    "primitive": "Newton fluxion d(risk)/dt",
+    "lean_name": "velocity_tripwire_sound",
+    "lean_status": "SKELETON",
+    "proof_status": "UNATTEMPTED",
+    "proved_tactic": null,
+    "identity_doc": "risk' <= vmax => risk(t+h) <= risk(t)+vmax*h",
+    "current_value": null,
+    "last_eval_ts": 1780304719.1642954,
+    "identity_holds": true,
+    "harness": {
+      "passed": 100,
+      "total": 100
+    },
+    "invoked_by": [
+      "HUKLLA"
+    ],
+    "chain_verified": true,
+    "tick_count": 100,
+    "last_receipts": [
+      {
+        "seq": 96,
+        "ts": 1780304719.1641586,
+        "formula_id": "F6",
+        "kind": "evaluate",
+        "payload": {
+          "value": null,
+          "identity_holds": true,
+          "args": "(0.14849883455480828, 1.225657185676715, 3.8119000654376056, 1.921720493561438)",
+          "error": null,
+          "tick": 97
+        },
+        "prev": "2b349782b733ba5e178be1f1a497c7cd16518c4e01ef776fbf763a7ddb75d259",
+        "self_hash": "fc64670689c44acd2a3f06ea3cccd969a32e0c56f0bc21e6161a7b5c06b9e9f8"
+      },
+      {
+        "seq": 97,
+        "ts": 1780304719.1642044,
+        "formula_id": "F6",
+        "kind": "evaluate",
+        "payload": {
+          "value": null,
+          "identity_holds": true,
+          "args": "(3.4629521485389434, 1.905929292469818, 4.952567440909952, 1.3451225752399742)",
+          "error": null,
+          "tick": 98
+        },
+        "prev": "fc64670689c44acd2a3f06ea3cccd969a32e0c56f0bc21e6161a7b5c06b9e9f8",
+        "self_hash": "9d1ef56b43fae02cc2f9f8be944205fad4a97b31835ab9f2a3112a4d3c364908"
+      },
+      {
+        "seq": 98,
+        "ts": 1780304719.164253,
+        "formula_id": "F6",
+        "kind": "evaluate",
+        "payload": {
+          "value": null,
+          "identity_holds": true,
+          "args": "(0.2677571877887164, 0.3192074609433222, 2.156824719548152, 0.45099213783322534)",
+          "error": null,
+          "tick": 99
+        },
+        "prev": "9d1ef56b43fae02cc2f9f8be944205fad4a97b31835ab9f2a3112a4d3c364908",
+        "self_hash": "a68e85acae89319c86c1f25f64f1f5d11a9c113626221ae64acc5dfe54c3830b"
+      },
+      {
+        "seq": 99,
+        "ts": 1780304719.1642997,
+        "formula_id": "F6",
+        "kind": "evaluate",
+        "payload": {
+          "value": null,
+          "identity_holds": true,
+          "args": "(0.4747305444391531, 1.9850877666096851, 3.887155110281326, 2.2724853928660833)",
+          "error": null,
+          "tick": 100
+        },
+        "prev": "a68e85acae89319c86c1f25f64f1f5d11a9c113626221ae64acc5dfe54c3830b",
+        "self_hash": "89c70cd903dfac004a62228f91b398528e0e9ecb4eb69138804f6835a803d076"
+      },
+      {
+        "seq": 100,
+        "ts": 1780304719.1644242,
+        "formula_id": "F6",
+        "kind": "test",
+        "payload": {
+          "passed": 100,
+          "total": 100,
+          "ok": true,
+          "failures": []
+        },
+        "prev": "89c70cd903dfac004a62228f91b398528e0e9ecb4eb69138804f6835a803d076",
+        "self_hash": "6852707036b5ac78cb9b8f94f55db571a482c311e4c04c310246cfc5c70ecc2c"
+      }
+    ]
+  },
+  "F7": {
+    "id": "F7",
+    "name": "Inverse-Square/Zeta Provenance",
+    "organ": "Khipu/Kallpa",
+    "primitive": "Newton 1/r^2 + Riemann zeta",
+    "lean_name": "provenance_converges",
+    "lean_status": "SKELETON",
+    "proof_status": "UNATTEMPTED",
+    "proved_tactic": null,
+    "identity_doc": "sum_{d>=1} d^-s converges for s>1; s=2 -> pi^2/6 (Basel)",
+    "current_value": 2.584092,
+    "last_eval_ts": 1780304719.7723286,
+    "identity_holds": true,
+    "harness": {
+      "passed": 100,
+      "total": 100
+    },
+    "invoked_by": [
+      "Khipu",
+      "Kallpa"
+    ],
+    "chain_verified": true,
+    "tick_count": 100,
+    "last_receipts": [
+      {
+        "seq": 96,
+        "ts": 1780304719.7497852,
+        "formula_id": "F7",
+        "kind": "evaluate",
+        "payload": {
+          "value": 2.584092,
+          "identity_holds": true,
+          "args": "(1.5,)",
+          "error": null,
+          "tick": 97
+        },
+        "prev": "c5bdf8966c7567dd755a1348290c8d36570f32666fce578791570954d3a6a512",
+        "self_hash": "a8d6fdea04f884b5c8eed977f70bbf32892e08bda93c285a6331894d7c12ead1"
+      },
+      {
+        "seq": 97,
+        "ts": 1780304719.7508965,
+        "formula_id": "F7",
+        "kind": "evaluate",
+        "payload": {
+          "value": 1.202057,
+          "identity_holds": true,
+          "args": "(3.0,)",
+          "error": null,
+          "tick": 98
+        },
+        "prev": "a8d6fdea04f884b5c8eed977f70bbf32892e08bda93c285a6331894d7c12ead1",
+        "self_hash": "673ea44235d32461b8e71fd24deff0434b3f3f6c021b833f8b4180b628d0bcbe"
+      },
+      {
+        "seq": 98,
+        "ts": 1780304719.7712295,
+        "formula_id": "F7",
+        "kind": "evaluate",
+        "payload": {
+          "value": 1.644734,
+          "identity_holds": true,
+          "args": "(2.0,)",
+          "error": null,
+          "tick": 99
+        },
+        "prev": "673ea44235d32461b8e71fd24deff0434b3f3f6c021b833f8b4180b628d0bcbe",
+        "self_hash": "00ca78de295c5e803003a6e507c187f5f7e25591404519f60c31d84ffaba6676"
+      },
+      {
+        "seq": 99,
+        "ts": 1780304719.772335,
+        "formula_id": "F7",
+        "kind": "evaluate",
+        "payload": {
+          "value": 2.584092,
+          "identity_holds": true,
+          "args": "(1.5,)",
+          "error": null,
+          "tick": 100
+        },
+        "prev": "00ca78de295c5e803003a6e507c187f5f7e25591404519f60c31d84ffaba6676",
+        "self_hash": "846530bb00a807aa2601bd515416d19ae5501588aa68a64ea291d795f201b72c"
+      },
+      {
+        "seq": 100,
+        "ts": 1780304720.2747726,
+        "formula_id": "F7",
+        "kind": "test",
+        "payload": {
+          "passed": 100,
+          "total": 100,
+          "ok": true,
+          "failures": []
+        },
+        "prev": "846530bb00a807aa2601bd515416d19ae5501588aa68a64ea291d795f201b72c",
+        "self_hash": "f509d1a8b28770123bf3829724c364226e2bd10cb3731da41547fa50bd6fd079"
+      }
+    ]
+  },
+  "F8": {
+    "id": "F8",
+    "name": "Newton-Parsimony Pick",
+    "organ": "HUKLLA",
+    "primitive": "Newton Principia Rule 1/4 (Occam)",
+    "lean_name": "parsimony_minimal",
+    "lean_status": "SKELETON",
+    "proof_status": "UNATTEMPTED",
+    "proved_tactic": null,
+    "identity_doc": "parsimonyPick returns element of minimal justification count",
+    "current_value": null,
+    "last_eval_ts": 1780304720.2810628,
+    "identity_holds": true,
+    "harness": {
+      "passed": 100,
+      "total": 100
+    },
+    "invoked_by": [
+      "HUKLLA"
+    ],
+    "chain_verified": true,
+    "tick_count": 100,
+    "last_receipts": [
+      {
+        "seq": 96,
+        "ts": 1780304720.2808948,
+        "formula_id": "F8",
+        "kind": "evaluate",
+        "payload": {
+          "value": null,
+          "identity_holds": true,
+          "args": "([('a', 6), ('b', 2), ('c', 5), ('d', 5), ('e', 7)],)",
+          "error": null,
+          "tick": 97
+        },
+        "prev": "7fc04f74ca6a61f20eb2ac386d4a0730a6b0494f1d08d0158adaa99726d17a59",
+        "self_hash": "af816b1ea6e9e0b5d44ec2538a7d5476e2079f61c44eb741e7d049a568e5bd63"
+      },
+      {
+        "seq": 97,
+        "ts": 1780304720.2809515,
+        "formula_id": "F8",
+        "kind": "evaluate",
+        "payload": {
+          "value": null,
+          "identity_holds": true,
+          "args": "([('a', 4), ('b', 4), ('c', 3), ('d', 8), ('e', 8)],)",
+          "error": null,
+          "tick": 98
+        },
+        "prev": "af816b1ea6e9e0b5d44ec2538a7d5476e2079f61c44eb741e7d049a568e5bd63",
+        "self_hash": "1d5c847e30b8d6f41ce37ad33100770b6bb3c04459dab31c381601a8b847bde0"
+      },
+      {
+        "seq": 98,
+        "ts": 1780304720.281006,
+        "formula_id": "F8",
+        "kind": "evaluate",
+        "payload": {
+          "value": null,
+          "identity_holds": true,
+          "args": "([('a', 3), ('b', 5), ('c', 9), ('d', 5)],)",
+          "error": null,
+          "tick": 99
+        },
+        "prev": "1d5c847e30b8d6f41ce37ad33100770b6bb3c04459dab31c381601a8b847bde0",
+        "self_hash": "4795ec33af48db64fb92a94f0920250686edff55a33aa82b326b63d0643bf33b"
+      },
+      {
+        "seq": 99,
+        "ts": 1780304720.2810678,
+        "formula_id": "F8",
+        "kind": "evaluate",
+        "payload": {
+          "value": null,
+          "identity_holds": true,
+          "args": "([('a', 1), ('b', 2), ('c', 1), ('d', 4), ('e', 7), ('f', 2)],)",
+          "error": null,
+          "tick": 100
+        },
+        "prev": "4795ec33af48db64fb92a94f0920250686edff55a33aa82b326b63d0643bf33b",
+        "self_hash": "be6fe04842a27ad607c0c7020e71a8a95ccdba06472a67b5113594cedf43bf3b"
+      },
+      {
+        "seq": 100,
+        "ts": 1780304720.2815018,
+        "formula_id": "F8",
+        "kind": "test",
+        "payload": {
+          "passed": 100,
+          "total": 100,
+          "ok": true,
+          "failures": []
+        },
+        "prev": "be6fe04842a27ad607c0c7020e71a8a95ccdba06472a67b5113594cedf43bf3b",
+        "self_hash": "82a093a9c9d65560da2ab30f7ac128a453c1770ee6ee73753022dd480265c808"
+      }
+    ]
+  },
+  "F9": {
+    "id": "F9",
+    "name": "Sulba Yuyay Mass-Conservation",
+    "organ": "Yuyay",
+    "primitive": "Sulba area-preserving altar",
+    "lean_name": "yuyay_mass_conserved",
+    "lean_status": "PROVED",
+    "proof_status": "UNATTEMPTED",
+    "proved_tactic": null,
+    "identity_doc": "sum(map(x)) == sum(x) for mass-preserving reweight",
+    "current_value": null,
+    "last_eval_ts": 1780304720.2887251,
+    "identity_holds": true,
+    "harness": {
+      "passed": 100,
+      "total": 100
+    },
+    "invoked_by": [
+      "Yuyay"
+    ],
+    "chain_verified": true,
+    "tick_count": 100,
+    "last_receipts": [
+      {
+        "seq": 96,
+        "ts": 1780304720.2885597,
+        "formula_id": "F9",
+        "kind": "evaluate",
+        "payload": {
+          "value": null,
+          "identity_holds": true,
+          "args": "([4.142177704885297, -3.627321030006867, -0.15138418212943794, -0.3227568831791947, 4.6519294621763425, 2.867285160120389, -2.296180998792221, 3.0611508608829023, 0.21014288592822972, 3.51552532063802",
+          "error": null,
+          "tick": 97
+        },
+        "prev": "208d8d7265537e4b536dd6a8ae9d10d6f4857429b8b0b1c4b344c798cc7504ab",
+        "self_hash": "8b25ad8f3f5f356f11e220af09dc657ceb38b9e87a0471c2f6054ea233a5edea"
+      },
+      {
+        "seq": 97,
+        "ts": 1780304720.2886186,
+        "formula_id": "F9",
+        "kind": "evaluate",
+        "payload": {
+          "value": null,
+          "identity_holds": true,
+          "args": "([3.437129931485991, 1.853976779682041, -2.1702431993563986, 3.168170534100593, 4.760649302235539, -3.00481897543483, -0.4547857318283608, -0.3494482252298763, 2.892299785580872, 2.89515521089484, 2.1",
+          "error": null,
+          "tick": 98
+        },
+        "prev": "8b25ad8f3f5f356f11e220af09dc657ceb38b9e87a0471c2f6054ea233a5edea",
+        "self_hash": "92bbd6dbd1c6f787cfa8d37c98eee5644f8bc769a23a37929404aa16f1b3ee85"
+      },
+      {
+        "seq": 98,
+        "ts": 1780304720.2886765,
+        "formula_id": "F9",
+        "kind": "evaluate",
+        "payload": {
+          "value": null,
+          "identity_holds": true,
+          "args": "([3.7968790397953143, -4.194532953725122, -3.1266311361369468, 1.5684726400581672, -0.6684412220707667, 3.803477983103196, 1.444849179122122, -4.034911214653841, 3.8344698971645226, 3.7175429732823897",
+          "error": null,
+          "tick": 99
+        },
+        "prev": "92bbd6dbd1c6f787cfa8d37c98eee5644f8bc769a23a37929404aa16f1b3ee85",
+        "self_hash": "b7c47a6b7e83dfc09888ba0edbef9f3c41e732ece86aeda92aa61a9ab451af58"
+      },
+      {
+        "seq": 99,
+        "ts": 1780304720.288735,
+        "formula_id": "F9",
+        "kind": "evaluate",
+        "payload": {
+          "value": null,
+          "identity_holds": true,
+          "args": "([-1.843519124216976, -3.9965662239631294, 3.2908496427501106, 0.20065164467779528, -4.713411909568254, -3.3289882790751903, -0.8606197243230191, -3.5458802723271434, -1.682868364588077, 2.24779880955",
+          "error": null,
+          "tick": 100
+        },
+        "prev": "b7c47a6b7e83dfc09888ba0edbef9f3c41e732ece86aeda92aa61a9ab451af58",
+        "self_hash": "c70268429a6bcba6a2b4a6eae5832b197522baa6600c4e1ee8ba2485a41f2038"
+      },
+      {
+        "seq": 100,
+        "ts": 1780304720.289179,
+        "formula_id": "F9",
+        "kind": "test",
+        "payload": {
+          "passed": 100,
+          "total": 100,
+          "ok": true,
+          "failures": []
+        },
+        "prev": "c70268429a6bcba6a2b4a6eae5832b197522baa6600c4e1ee8ba2485a41f2038",
+        "self_hash": "51cd8a9a1442946c69e48b108789df039682c2da2be8a0212d8e38f246d20c09"
+      }
+    ]
+  },
+  "F10": {
+    "id": "F10",
+    "name": "Baudhayana Orthogonality Bound",
+    "organ": "Lambda-spine",
+    "primitive": "Baudhayana Sulba sqrt2=577/408",
+    "lean_name": "baudhayana_iterate",
+    "lean_status": "PROVED",
+    "proof_status": "UNATTEMPTED",
+    "proved_tactic": null,
+    "identity_doc": "heronStep(17/12)==577/408 ; |577/408 - sqrt2| < 1.5e-6",
+    "current_value": 1.4142156862745099,
+    "last_eval_ts": 1780304720.2977567,
+    "identity_holds": true,
+    "harness": {
+      "passed": 100,
+      "total": 100
+    },
+    "invoked_by": [
+      "Lambda-spine"
+    ],
+    "chain_verified": true,
+    "tick_count": 100,
+    "last_receipts": [
+      {
+        "seq": 96,
+        "ts": 1780304720.2975981,
+        "formula_id": "F10",
+        "kind": "evaluate",
+        "payload": {
+          "value": 1.4142156862745099,
+          "identity_holds": true,
+          "args": "(None,)",
+          "error": null,
+          "tick": 97
+        },
+        "prev": "5f0ce576c00f00950f7f78b500e44cb050074c574e732186dc154729fc8f93e7",
+        "self_hash": "4f57081b49f2d69745a59c96434e4d66dd74559ed5d01b02d75077ba4352be61"
+      },
+      {
+        "seq": 97,
+        "ts": 1780304720.2976525,
+        "formula_id": "F10",
+        "kind": "evaluate",
+        "payload": {
+          "value": 1.4142156862745099,
+          "identity_holds": true,
+          "args": "(None,)",
+          "error": null,
+          "tick": 98
+        },
+        "prev": "4f57081b49f2d69745a59c96434e4d66dd74559ed5d01b02d75077ba4352be61",
+        "self_hash": "a4e280dafe507c9dffb807531880f55bec9d4f318646688f7c3c8d23ccab1a0b"
+      },
+      {
+        "seq": 98,
+        "ts": 1780304720.2977057,
+        "formula_id": "F10",
+        "kind": "evaluate",
+        "payload": {
+          "value": 1.4142156862745099,
+          "identity_holds": true,
+          "args": "(None,)",
+          "error": null,
+          "tick": 99
+        },
+        "prev": "a4e280dafe507c9dffb807531880f55bec9d4f318646688f7c3c8d23ccab1a0b",
+        "self_hash": "60a075314680cdb88ef9cfd7f920b0d8ef39f85db500036ac85a14f051be11b9"
+      },
+      {
+        "seq": 99,
+        "ts": 1780304720.2977593,
+        "formula_id": "F10",
+        "kind": "evaluate",
+        "payload": {
+          "value": 1.4142156862745099,
+          "identity_holds": true,
+          "args": "(None,)",
+          "error": null,
+          "tick": 100
+        },
+        "prev": "60a075314680cdb88ef9cfd7f920b0d8ef39f85db500036ac85a14f051be11b9",
+        "self_hash": "5adf3defda33230bdaa15e429865e7b6a00c4f97c54f9d90585385b92c6bdeec"
+      },
+      {
+        "seq": 100,
+        "ts": 1780304720.305851,
+        "formula_id": "F10",
+        "kind": "test",
+        "payload": {
+          "passed": 100,
+          "total": 100,
+          "ok": true,
+          "failures": []
+        },
+        "prev": "5adf3defda33230bdaa15e429865e7b6a00c4f97c54f9d90585385b92c6bdeec",
+        "self_hash": "8b8b9e0bab49c033931d12d2bc93b386203b0e1aa4ee8b9b98d2af2c06ae415c"
+      }
+    ]
+  },
+  "F11": {
+    "id": "F11",
+    "name": "Frustum A-Shrink Law",
+    "organ": "A",
+    "primitive": "Moscow Papyrus frustum",
+    "lean_name": "frustum_degenerates_to_pyramid",
+    "lean_status": "PROVED",
+    "proof_status": "PROVED",
+    "proved_tactic": "simp",
+    "identity_doc": "Vol=(h/3)(a^2+ab+b^2); b->0 => pyramid; nonneg",
+    "current_value": 40.127273,
+    "last_eval_ts": 1780304720.3116474,
+    "identity_holds": true,
+    "harness": {
+      "passed": 100,
+      "total": 100
+    },
+    "invoked_by": [
+      "A/agency"
+    ],
+    "chain_verified": true,
+    "tick_count": 100,
+    "last_receipts": [
+      {
+        "seq": 97,
+        "ts": 1780304720.3115454,
+        "formula_id": "F11",
+        "kind": "evaluate",
+        "payload": {
+          "value": 27.973604,
+          "identity_holds": true,
+          "args": "(3.917784491467824, 3.124284329734822)",
+          "error": null,
+          "tick": 98
+        },
+        "prev": "42ba1e2fbc005d125b058fc075682670576512fede42c70e36e3471184d9e248",
+        "self_hash": "90d4f1ca39fe07d0a8ad20cd36c1f0103fc8a3541188484424ec21c4712cdf3d"
+      },
+      {
+        "seq": 98,
+        "ts": 1780304720.3115997,
+        "formula_id": "F11",
+        "kind": "evaluate",
+        "payload": {
+          "value": 0.724274,
+          "identity_holds": true,
+          "args": "(1.686941372076275, 0.4363008399673074)",
+          "error": null,
+          "tick": 99
+        },
+        "prev": "90d4f1ca39fe07d0a8ad20cd36c1f0103fc8a3541188484424ec21c4712cdf3d",
+        "self_hash": "38e736f03a39bc56fd6cd332f149966d8551c55ded9b8de1f8d3cc3f1c9405de"
+      },
+      {
+        "seq": 99,
+        "ts": 1780304720.311651,
+        "formula_id": "F11",
+        "kind": "evaluate",
+        "payload": {
+          "value": 40.127273,
+          "identity_holds": true,
+          "args": "(4.048369105287643, 4.197228894373188)",
+          "error": null,
+          "tick": 100
+        },
+        "prev": "38e736f03a39bc56fd6cd332f149966d8551c55ded9b8de1f8d3cc3f1c9405de",
+        "self_hash": "8f0fb9bfaa0940ddd87eab726d1ab7b87251dba8a5e63eac4daade726910c88e"
+      },
+      {
+        "seq": 100,
+        "ts": 1780304720.3117812,
+        "formula_id": "F11",
+        "kind": "test",
+        "payload": {
+          "passed": 100,
+          "total": 100,
+          "ok": true,
+          "failures": []
+        },
+        "prev": "8f0fb9bfaa0940ddd87eab726d1ab7b87251dba8a5e63eac4daade726910c88e",
+        "self_hash": "74c0889b3bb7b892dba1ac977821466656e35c3e90de2928c0f86837ff28695b"
+      },
+      {
+        "seq": 101,
+        "ts": 1780304721.0914931,
+        "formula_id": "F11",
+        "kind": "prove",
+        "payload": {
+          "theorem": "frustum_degenerates_core",
+          "outcome": "PROVED",
+          "proved_tactic": "simp",
+          "verifier": "local-lean(lean)"
+        },
+        "prev": "74c0889b3bb7b892dba1ac977821466656e35c3e90de2928c0f86837ff28695b",
+        "self_hash": "3c299d36aa6436e328806fd999a4998162ecf31f96c86b4fa785bdcb53e6ded8"
+      }
+    ]
+  },
+  "F12": {
+    "id": "F12",
+    "name": "CRT-Hukulla Schedule",
+    "organ": "HUKLLA",
+    "primitive": "Bible-numerics mod-structure + Gauss CRT",
+    "lean_name": "crt_collision_period",
+    "lean_status": "SKELETON",
+    "proof_status": "PROVED",
+    "proved_tactic": "rfl",
+    "identity_doc": "coprime moduli: residue pair recurs exactly mod m1*m2 = lcm",
+    "current_value": null,
+    "last_eval_ts": 1780304720.3171723,
+    "identity_holds": true,
+    "harness": {
+      "passed": 100,
+      "total": 100
+    },
+    "invoked_by": [
+      "HUKLLA"
+    ],
+    "chain_verified": true,
+    "tick_count": 100,
+    "last_receipts": [
+      {
+        "seq": 97,
+        "ts": 1780304720.317075,
+        "formula_id": "F12",
+        "kind": "evaluate",
+        "payload": {
+          "value": null,
+          "identity_holds": true,
+          "args": "(7, 12, 94)",
+          "error": null,
+          "tick": 98
+        },
+        "prev": "af6c78e7552486b6f4d0ba2829a5039f1c0029d7ec396a23c1f9c97d24631259",
+        "self_hash": "23707ca38f83965992a7181c03399a6de56771d4d907cc036336bd74d48ea655"
+      },
+      {
+        "seq": 98,
+        "ts": 1780304720.3171268,
+        "formula_id": "F12",
+        "kind": "evaluate",
+        "payload": {
+          "value": null,
+          "identity_holds": true,
+          "args": "(7, 4, 30)",
+          "error": null,
+          "tick": 99
+        },
+        "prev": "23707ca38f83965992a7181c03399a6de56771d4d907cc036336bd74d48ea655",
+        "self_hash": "4d3c332d6c0ce059ed832f213bfee4c22219156e5f38955d6a1979948d7dcc7b"
+      },
+      {
+        "seq": 99,
+        "ts": 1780304720.3171747,
+        "formula_id": "F12",
+        "kind": "evaluate",
+        "payload": {
+          "value": null,
+          "identity_holds": true,
+          "args": "(11, 4, 161)",
+          "error": null,
+          "tick": 100
+        },
+        "prev": "4d3c332d6c0ce059ed832f213bfee4c22219156e5f38955d6a1979948d7dcc7b",
+        "self_hash": "b1eaf782850997e463dd032773dd128d8018eddfb298b468805f1d31a4ec17e4"
+      },
+      {
+        "seq": 100,
+        "ts": 1780304720.3174033,
+        "formula_id": "F12",
+        "kind": "test",
+        "payload": {
+          "passed": 100,
+          "total": 100,
+          "ok": true,
+          "failures": []
+        },
+        "prev": "b1eaf782850997e463dd032773dd128d8018eddfb298b468805f1d31a4ec17e4",
+        "self_hash": "c8a03aca55a906bff37ffb1b3a799320137a4a6e0067769f635daadd03ed8160"
+      },
+      {
+        "seq": 101,
+        "ts": 1780304721.1942601,
+        "formula_id": "F12",
+        "kind": "prove",
+        "payload": {
+          "theorem": "crt_7_12",
+          "outcome": "PROVED",
+          "proved_tactic": "rfl",
+          "verifier": "local-lean(lean)"
+        },
+        "prev": "c8a03aca55a906bff37ffb1b3a799320137a4a6e0067769f635daadd03ed8160",
+        "self_hash": "56e228847388ad59b6aaa9b37fd3246b781c434d46daa13e4da08f3cfd05187d"
+      }
+    ]
+  },
+  "F13": {
+    "id": "F13",
+    "name": "Gauss-Bonnet Spine Curvature",
+    "organ": "Lambda-spine",
+    "primitive": "Gauss-Bonnet",
+    "lean_name": "curvatureConsistent",
+    "lean_status": "CONJ",
+    "proof_status": "UNATTEMPTED",
+    "proved_tactic": null,
+    "identity_doc": "total curvature = 2*pi*chi (=4pi when chi=2); residual==0",
+    "current_value": 12.566371,
+    "last_eval_ts": 1780304720.3227062,
+    "identity_holds": true,
+    "harness": {
+      "passed": 100,
+      "total": 100
+    },
+    "invoked_by": [
+      "Lambda-spine"
+    ],
+    "chain_verified": true,
+    "tick_count": 100,
+    "last_receipts": [
+      {
+        "seq": 96,
+        "ts": 1780304720.322566,
+        "formula_id": "F13",
+        "kind": "evaluate",
+        "payload": {
+          "value": 12.566371,
+          "identity_holds": true,
+          "args": "(2,)",
+          "error": null,
+          "tick": 97
+        },
+        "prev": "57ad5a13d3a15ce27e887e669afa465b0a50852352090e85ffd2466d0ee4aac6",
+        "self_hash": "eb9c567e40a2e86f55367285a3e6c8b41747a4f283259b56eda68c95ce493b70"
+      },
+      {
+        "seq": 97,
+        "ts": 1780304720.3226175,
+        "formula_id": "F13",
+        "kind": "evaluate",
+        "payload": {
+          "value": 12.566371,
+          "identity_holds": true,
+          "args": "(2,)",
+          "error": null,
+          "tick": 98
+        },
+        "prev": "eb9c567e40a2e86f55367285a3e6c8b41747a4f283259b56eda68c95ce493b70",
+        "self_hash": "6ab1591d53de82592bf67b94ee9114f9abd578eae486c112bb9fee6007181949"
+      },
+      {
+        "seq": 98,
+        "ts": 1780304720.3226638,
+        "formula_id": "F13",
+        "kind": "evaluate",
+        "payload": {
+          "value": 12.566371,
+          "identity_holds": true,
+          "args": "(2,)",
+          "error": null,
+          "tick": 99
+        },
+        "prev": "6ab1591d53de82592bf67b94ee9114f9abd578eae486c112bb9fee6007181949",
+        "self_hash": "04e9e635de6a0dbfc3a45af8e36563aa1ab8e5ffd90377b3e56e1bc8f7f08eb7"
+      },
+      {
+        "seq": 99,
+        "ts": 1780304720.3227084,
+        "formula_id": "F13",
+        "kind": "evaluate",
+        "payload": {
+          "value": 12.566371,
+          "identity_holds": true,
+          "args": "(2,)",
+          "error": null,
+          "tick": 100
+        },
+        "prev": "04e9e635de6a0dbfc3a45af8e36563aa1ab8e5ffd90377b3e56e1bc8f7f08eb7",
+        "self_hash": "857a46bc82de80942e01ff5abc7327395807ef0559a94816e4db47025eed6db3"
+      },
+      {
+        "seq": 100,
+        "ts": 1780304720.322863,
+        "formula_id": "F13",
+        "kind": "test",
+        "payload": {
+          "passed": 100,
+          "total": 100,
+          "ok": true,
+          "failures": []
+        },
+        "prev": "857a46bc82de80942e01ff5abc7327395807ef0559a94816e4db47025eed6db3",
+        "self_hash": "05247174f00452e484644f51f41f582420653883a41ba1ea2226bf9070c6c384"
+      }
+    ]
+  },
+  "F14": {
+    "id": "F14",
+    "name": "Ramanujan A-Partition Bound",
+    "organ": "A",
+    "primitive": "Hardy-Ramanujan p(n)",
+    "lean_name": "hardyRamanujan",
+    "lean_status": "CONJ",
+    "proof_status": "UNATTEMPTED",
+    "proved_tactic": null,
+    "identity_doc": "exact p(n) via pentagonal recurrence; HR asymptotic within band",
+    "current_value": 386155,
+    "last_eval_ts": 1780304720.3331683,
+    "identity_holds": true,
+    "harness": {
+      "passed": 100,
+      "total": 100
+    },
+    "invoked_by": [
+      "A/agency"
+    ],
+    "chain_verified": true,
+    "tick_count": 100,
+    "last_receipts": [
+      {
+        "seq": 96,
+        "ts": 1780304720.3328476,
+        "formula_id": "F14",
+        "kind": "evaluate",
+        "payload": {
+          "value": 21637,
+          "identity_holds": true,
+          "args": "(37,)",
+          "error": null,
+          "tick": 97
+        },
+        "prev": "ccb1b8d0851af2afe95f814bacad506663bda2c0f130486d02996cb2425b2fcf",
+        "self_hash": "2090708d1eeec5b057105f039a23cd4cbbd40fd0359dcf09b55a424c84f717d3"
+      },
+      {
+        "seq": 97,
+        "ts": 1780304720.3329127,
+        "formula_id": "F14",
+        "kind": "evaluate",
+        "payload": {
+          "value": 22,
+          "identity_holds": true,
+          "args": "(8,)",
+          "error": null,
+          "tick": 98
+        },
+        "prev": "2090708d1eeec5b057105f039a23cd4cbbd40fd0359dcf09b55a424c84f717d3",
+        "self_hash": "0c536ec4d17a70f682ea8717e927bfd34f3caaa617b34c995c95499fbba02f95"
+      },
+      {
+        "seq": 98,
+        "ts": 1780304720.333027,
+        "formula_id": "F14",
+        "kind": "evaluate",
+        "payload": {
+          "value": 89134,
+          "identity_holds": true,
+          "args": "(45,)",
+          "error": null,
+          "tick": 99
+        },
+        "prev": "0c536ec4d17a70f682ea8717e927bfd34f3caaa617b34c995c95499fbba02f95",
+        "self_hash": "f58be9b0bdfd8a4fda3c79351664c8ee73db1096a459eaadf8c3804588feb43d"
+      },
+      {
+        "seq": 99,
+        "ts": 1780304720.3331711,
+        "formula_id": "F14",
+        "kind": "evaluate",
+        "payload": {
+          "value": 386155,
+          "identity_holds": true,
+          "args": "(54,)",
+          "error": null,
+          "tick": 100
+        },
+        "prev": "f58be9b0bdfd8a4fda3c79351664c8ee73db1096a459eaadf8c3804588feb43d",
+        "self_hash": "76c868b0e3c1e895b42377d9e49b82cf7d027d7864890a41d7c9123174f4a57b"
+      },
+      {
+        "seq": 100,
+        "ts": 1780304720.3354547,
+        "formula_id": "F14",
+        "kind": "test",
+        "payload": {
+          "passed": 100,
+          "total": 100,
+          "ok": true,
+          "failures": []
+        },
+        "prev": "76c868b0e3c1e895b42377d9e49b82cf7d027d7864890a41d7c9123174f4a57b",
+        "self_hash": "0bfa2a571eb03e401e7b3de875e479e01088bc91af9421436eb47469e0a68a01"
+      }
+    ]
+  },
+  "F15": {
+    "id": "F15",
+    "name": "Grothendieck Organ Functor",
+    "organ": "compose",
+    "primitive": "category theory / schemes",
+    "lean_name": "organ_comp_assoc",
+    "lean_status": "SKELETON",
+    "proof_status": "UNATTEMPTED",
+    "proved_tactic": null,
+    "identity_doc": "comp(comp f g) h == comp f (comp g h) (associativity)",
+    "current_value": null,
+    "last_eval_ts": 1780304720.340868,
+    "identity_holds": true,
+    "harness": {
+      "passed": 100,
+      "total": 100
+    },
+    "invoked_by": [
+      "compose"
+    ],
+    "chain_verified": true,
+    "tick_count": 100,
+    "last_receipts": [
+      {
+        "seq": 96,
+        "ts": 1780304720.3406906,
+        "formula_id": "F15",
+        "kind": "evaluate",
+        "payload": {
+          "value": null,
+          "identity_holds": true,
+          "args": "(15.939752141073747,)",
+          "error": null,
+          "tick": 97
+        },
+        "prev": "4e54a7db2908015d860d04a4863b301e5e43fb803b9093d8f3cb66db96dbfcae",
+        "self_hash": "04eb0515625a12ad26a1e16e37e5ece8ef39bfb6cc69a4458dc4423366ead9f9"
+      },
+      {
+        "seq": 97,
+        "ts": 1780304720.3407373,
+        "formula_id": "F15",
+        "kind": "evaluate",
+        "payload": {
+          "value": null,
+          "identity_holds": true,
+          "args": "(-2.8581858363666086,)",
+          "error": null,
+          "tick": 98
+        },
+        "prev": "04eb0515625a12ad26a1e16e37e5ece8ef39bfb6cc69a4458dc4423366ead9f9",
+        "self_hash": "e39b5ff2dbc71c285457916b11d6ed664dd241eff8b7cabf95da99b8b2ffac61"
+      },
+      {
+        "seq": 98,
+        "ts": 1780304720.3407834,
+        "formula_id": "F15",
+        "kind": "evaluate",
+        "payload": {
+          "value": null,
+          "identity_holds": true,
+          "args": "(-6.227590386694985,)",
+          "error": null,
+          "tick": 99
+        },
+        "prev": "e39b5ff2dbc71c285457916b11d6ed664dd241eff8b7cabf95da99b8b2ffac61",
+        "self_hash": "3167afc3110b786ab506aa0441cf98c8cf2c11dd76875460e2e036213b6f85c7"
+      },
+      {
+        "seq": 99,
+        "ts": 1780304720.3408723,
+        "formula_id": "F15",
+        "kind": "evaluate",
+        "payload": {
+          "value": null,
+          "identity_holds": true,
+          "args": "(-16.23430438423585,)",
+          "error": null,
+          "tick": 100
+        },
+        "prev": "3167afc3110b786ab506aa0441cf98c8cf2c11dd76875460e2e036213b6f85c7",
+        "self_hash": "b6c38271d025d7f0a50ace26ae21d7ae7575defde10ca6852c478f1d1c8f8f26"
+      },
+      {
+        "seq": 100,
+        "ts": 1780304720.3410985,
+        "formula_id": "F15",
+        "kind": "test",
+        "payload": {
+          "passed": 100,
+          "total": 100,
+          "ok": true,
+          "failures": []
+        },
+        "prev": "b6c38271d025d7f0a50ace26ae21d7ae7575defde10ca6852c478f1d1c8f8f26",
+        "self_hash": "43d06f7ede49b103d0ddfe8b91e181e46203627c768ab517cae1f636acb010db"
+      }
+    ]
+  },
+  "F16": {
+    "id": "F16",
+    "name": "von-Neumann-Hukulla Minimax",
+    "organ": "HUKLLA",
+    "primitive": "von Neumann minimax theorem",
+    "lean_name": "minimax_exists",
+    "lean_status": "SKELETON",
+    "proof_status": "UNATTEMPTED",
+    "proved_tactic": null,
+    "identity_doc": "max min == min max == V for zero-sum 2x2 game",
+    "current_value": -1.160274,
+    "last_eval_ts": 1780304720.3467422,
+    "identity_holds": true,
+    "harness": {
+      "passed": 100,
+      "total": 100
+    },
+    "invoked_by": [
+      "HUKLLA"
+    ],
+    "chain_verified": true,
+    "tick_count": 100,
+    "last_receipts": [
+      {
+        "seq": 96,
+        "ts": 1780304720.3465946,
+        "formula_id": "F16",
+        "kind": "evaluate",
+        "payload": {
+          "value": -1.736486,
+          "identity_holds": true,
+          "args": "(-1.7160429397410337, -1.8192320037199297, -2.50867896246757, 1.3890163474154171)",
+          "error": null,
+          "tick": 97
+        },
+        "prev": "fa3b6d52ace3fcf63fb44366d9d5c5b25b6435afcdfb7d16c1e7115b4200e551",
+        "self_hash": "fa64033e7f2186a5f0b4bfab54dbdf1f9c8d9a76e94ea6367dd7dbe281064873"
+      },
+      {
+        "seq": 97,
+        "ts": 1780304720.3466434,
+        "formula_id": "F16",
+        "kind": "evaluate",
+        "payload": {
+          "value": -3.05463,
+          "identity_holds": true,
+          "args": "(3.822910921830676, 0.9272871869152173, -0.38305710530499226, -1.5078589067857227)",
+          "error": null,
+          "tick": 98
+        },
+        "prev": "fa64033e7f2186a5f0b4bfab54dbdf1f9c8d9a76e94ea6367dd7dbe281064873",
+        "self_hash": "ba0efc5c9fc98f50767222072224dfce2a6dd70a209eda863bd2665b472f19d3"
+      },
+      {
+        "seq": 98,
+        "ts": 1780304720.3466933,
+        "formula_id": "F16",
+        "kind": "evaluate",
+        "payload": {
+          "value": 0.387802,
+          "identity_holds": true,
+          "args": "(1.0186782703943535, 4.404613207817075, 0.418816820062319, 0.5852727324370672)",
+          "error": null,
+          "tick": 99
+        },
+        "prev": "ba0efc5c9fc98f50767222072224dfce2a6dd70a209eda863bd2665b472f19d3",
+        "self_hash": "04301f77549276b802ffefc30bb93e8a5c9c7b41b2a1675c6d040e0e1f59f788"
+      },
+      {
+        "seq": 99,
+        "ts": 1780304720.3467476,
+        "formula_id": "F16",
+        "kind": "evaluate",
+        "payload": {
+          "value": -1.160274,
+          "identity_holds": true,
+          "args": "(-4.951648692035214, -0.39706119717036614, 1.3342727325554087, -1.6624331860326835)",
+          "error": null,
+          "tick": 100
+        },
+        "prev": "04301f77549276b802ffefc30bb93e8a5c9c7b41b2a1675c6d040e0e1f59f788",
+        "self_hash": "ae307f5569a72f52c26b778566be190f4817837dcf3ad6845bbafa2150e04657"
+      },
+      {
+        "seq": 100,
+        "ts": 1780304720.3469405,
+        "formula_id": "F16",
+        "kind": "test",
+        "payload": {
+          "passed": 100,
+          "total": 100,
+          "ok": true,
+          "failures": []
+        },
+        "prev": "ae307f5569a72f52c26b778566be190f4817837dcf3ad6845bbafa2150e04657",
+        "self_hash": "8c66353e292434549c93138d71908b6af2e92ff53eda5e2551a6829bb9cd9206"
+      }
+    ]
+  },
+  "F17": {
+    "id": "F17",
+    "name": "Shannon-Kallpa Capacity",
+    "organ": "Kallpa",
+    "primitive": "Shannon channel capacity/entropy",
+    "lean_name": "entropy_nonneg",
+    "lean_status": "SKELETON",
+    "proof_status": "UNATTEMPTED",
+    "proved_tactic": null,
+    "identity_doc": "H(X) = -sum p log2 p >= 0",
+    "current_value": 2.417761,
+    "last_eval_ts": 1780304720.3532465,
+    "identity_holds": true,
+    "harness": {
+      "passed": 100,
+      "total": 100
+    },
+    "invoked_by": [
+      "Kallpa"
+    ],
+    "chain_verified": true,
+    "tick_count": 100,
+    "last_receipts": [
+      {
+        "seq": 96,
+        "ts": 1780304720.3530707,
+        "formula_id": "F17",
+        "kind": "evaluate",
+        "payload": {
+          "value": 0.998007,
+          "identity_holds": true,
+          "args": "([0.7669403740388873, 0.8520103208068528],)",
+          "error": null,
+          "tick": 97
+        },
+        "prev": "774ff2df09c5be0dcb59ff317d873d419521ec6d96a4e902875d15dc12f911b7",
+        "self_hash": "4a99130caf075144b95545245a6db1b003bf6bb262ee0a1b4208e835cdcc12a3"
+      },
+      {
+        "seq": 97,
+        "ts": 1780304720.3531327,
+        "formula_id": "F17",
+        "kind": "evaluate",
+        "payload": {
+          "value": 2.364215,
+          "identity_holds": true,
+          "args": "([0.1499278633313672, 0.5326961326343417, 0.12135549653829814, 0.1103109871407526, 0.6912587907870644, 0.19674941961072068, 0.9826981675727974],)",
+          "error": null,
+          "tick": 98
+        },
+        "prev": "4a99130caf075144b95545245a6db1b003bf6bb262ee0a1b4208e835cdcc12a3",
+        "self_hash": "0d7081913fbb71f5eea9e43ecd1f55e349c129dccfcd16c9678cd58b73550ff9"
+      },
+      {
+        "seq": 98,
+        "ts": 1780304720.353188,
+        "formula_id": "F17",
+        "kind": "evaluate",
+        "payload": {
+          "value": 1.381144,
+          "identity_holds": true,
+          "args": "([0.39547601929515774, 0.2519582661470082, 0.08971440960396793],)",
+          "error": null,
+          "tick": 99
+        },
+        "prev": "0d7081913fbb71f5eea9e43ecd1f55e349c129dccfcd16c9678cd58b73550ff9",
+        "self_hash": "822e2b3473632c0877db652b734060f6cfa7b66a682198adbd9c4a13684e2620"
+      },
+      {
+        "seq": 99,
+        "ts": 1780304720.3532534,
+        "formula_id": "F17",
+        "kind": "evaluate",
+        "payload": {
+          "value": 2.417761,
+          "identity_holds": true,
+          "args": "([0.6002393502525739, 0.30556539417392303, 0.5422960622415418, 0.1292519697726522, 0.78948376884096, 0.41194031197168923],)",
+          "error": null,
+          "tick": 100
+        },
+        "prev": "822e2b3473632c0877db652b734060f6cfa7b66a682198adbd9c4a13684e2620",
+        "self_hash": "1a2b3c0a2e30ad698dc6d541cb7477676aab549da985178c5a7c18596c3509a7"
+      },
+      {
+        "seq": 100,
+        "ts": 1780304720.3535864,
+        "formula_id": "F17",
+        "kind": "test",
+        "payload": {
+          "passed": 100,
+          "total": 100,
+          "ok": true,
+          "failures": []
+        },
+        "prev": "1a2b3c0a2e30ad698dc6d541cb7477676aab549da985178c5a7c18596c3509a7",
+        "self_hash": "21471bf30ce49a2873cc3b536832a823e31ba3f889f9f141855974216ebdbfae"
+      }
+    ]
+  },
+  "F18": {
+    "id": "F18",
+    "name": "Kolmogorov A-Description Cap",
+    "organ": "A",
+    "primitive": "Kolmogorov complexity",
+    "lean_name": "actions_bounded_by_K",
+    "lean_status": "SKELETON",
+    "proof_status": "PROVED",
+    "proved_tactic": "rfl",
+    "identity_doc": "#programs length<=k == 2^(k+1)-1",
+    "current_value": 127,
+    "last_eval_ts": 1780304720.3596072,
+    "identity_holds": true,
+    "harness": {
+      "passed": 100,
+      "total": 100
+    },
+    "invoked_by": [
+      "A/agency"
+    ],
+    "chain_verified": true,
+    "tick_count": 100,
+    "last_receipts": [
+      {
+        "seq": 97,
+        "ts": 1780304720.3595064,
+        "formula_id": "F18",
+        "kind": "evaluate",
+        "payload": {
+          "value": 131071,
+          "identity_holds": true,
+          "args": "(16,)",
+          "error": null,
+          "tick": 98
+        },
+        "prev": "f39a698455bafeeefadcceaf3016afddc47dbd31a5412212387fa4901f3481ee",
+        "self_hash": "aafd5afc783ea97c0de0957a417ebd56e6cad30d13309024e0213ade3c4be4f6"
+      },
+      {
+        "seq": 98,
+        "ts": 1780304720.3595605,
+        "formula_id": "F18",
+        "kind": "evaluate",
+        "payload": {
+          "value": 3,
+          "identity_holds": true,
+          "args": "(1,)",
+          "error": null,
+          "tick": 99
+        },
+        "prev": "aafd5afc783ea97c0de0957a417ebd56e6cad30d13309024e0213ade3c4be4f6",
+        "self_hash": "bb11e6a55fe33d8267234729925f19eb5ac961cf3d659a3199b144b50a350a0a"
+      },
+      {
+        "seq": 99,
+        "ts": 1780304720.3596098,
+        "formula_id": "F18",
+        "kind": "evaluate",
+        "payload": {
+          "value": 127,
+          "identity_holds": true,
+          "args": "(6,)",
+          "error": null,
+          "tick": 100
+        },
+        "prev": "bb11e6a55fe33d8267234729925f19eb5ac961cf3d659a3199b144b50a350a0a",
+        "self_hash": "9f1760dbbdcfbb894c776e2bf9d3d56ca83001415040085468982e5b623d0f62"
+      },
+      {
+        "seq": 100,
+        "ts": 1780304720.3598328,
+        "formula_id": "F18",
+        "kind": "test",
+        "payload": {
+          "passed": 100,
+          "total": 100,
+          "ok": true,
+          "failures": []
+        },
+        "prev": "9f1760dbbdcfbb894c776e2bf9d3d56ca83001415040085468982e5b623d0f62",
+        "self_hash": "835683450704d03b4c576c32fdff3560cf5f00057aa469332add3aef9ee3cf20"
+      },
+      {
+        "seq": 101,
+        "ts": 1780304721.3024735,
+        "formula_id": "F18",
+        "kind": "prove",
+        "payload": {
+          "theorem": "programs_k10",
+          "outcome": "PROVED",
+          "proved_tactic": "rfl",
+          "verifier": "local-lean(lean)"
+        },
+        "prev": "835683450704d03b4c576c32fdff3560cf5f00057aa469332add3aef9ee3cf20",
+        "self_hash": "de3cb6054311d2ce589cdd56a737bd8d7d89521d7fd3456e0394ab0014c38605"
+      }
+    ]
+  },
+  "F19": {
+    "id": "F19",
+    "name": "Turing-Fuel Halting Safety",
+    "organ": "core",
+    "primitive": "Turing halting problem",
+    "lean_name": "fuel_total",
+    "lean_status": "PROVED",
+    "proof_status": "PROVED",
+    "proved_tactic": "rfl",
+    "identity_doc": "fuel-bounded run terminates in <= fuel steps",
+    "current_value": null,
+    "last_eval_ts": 1780304720.365106,
+    "identity_holds": true,
+    "harness": {
+      "passed": 100,
+      "total": 100
+    },
+    "invoked_by": [
+      "PURIQ-core"
+    ],
+    "chain_verified": true,
+    "tick_count": 100,
+    "last_receipts": [
+      {
+        "seq": 97,
+        "ts": 1780304720.3650084,
+        "formula_id": "F19",
+        "kind": "evaluate",
+        "payload": {
+          "value": null,
+          "identity_holds": true,
+          "args": "(13, 52)",
+          "error": null,
+          "tick": 98
+        },
+        "prev": "19b96b7f9dbf0f75b4350bfb82272398b7f27f6144b241ff51efff885ec9a61f",
+        "self_hash": "93a82cecb69f82236892843c8179e6985731c9f35fc0fdbb87107e24a41077a8"
+      },
+      {
+        "seq": 98,
+        "ts": 1780304720.3650615,
+        "formula_id": "F19",
+        "kind": "evaluate",
+        "payload": {
+          "value": null,
+          "identity_holds": true,
+          "args": "(35, 50)",
+          "error": null,
+          "tick": 99
+        },
+        "prev": "93a82cecb69f82236892843c8179e6985731c9f35fc0fdbb87107e24a41077a8",
+        "self_hash": "1b7f556614dd32b9b6ccb4e1bef7b34557c74c3386d1891c90849e6f1053ae53"
+      },
+      {
+        "seq": 99,
+        "ts": 1780304720.3651087,
+        "formula_id": "F19",
+        "kind": "evaluate",
+        "payload": {
+          "value": null,
+          "identity_holds": true,
+          "args": "(12, 58)",
+          "error": null,
+          "tick": 100
+        },
+        "prev": "1b7f556614dd32b9b6ccb4e1bef7b34557c74c3386d1891c90849e6f1053ae53",
+        "self_hash": "148e1d07fe1de3d1994ef5e6211326076f0a0bdc12181494734cf9f2b9e3d3fe"
+      },
+      {
+        "seq": 100,
+        "ts": 1780304720.3653836,
+        "formula_id": "F19",
+        "kind": "test",
+        "payload": {
+          "passed": 100,
+          "total": 100,
+          "ok": true,
+          "failures": []
+        },
+        "prev": "148e1d07fe1de3d1994ef5e6211326076f0a0bdc12181494734cf9f2b9e3d3fe",
+        "self_hash": "8022fc0cc3e1517c4cc539229f579bd98887f3914ce4f735003b7046efae5c09"
+      },
+      {
+        "seq": 101,
+        "ts": 1780304721.4298496,
+        "formula_id": "F19",
+        "kind": "prove",
+        "payload": {
+          "theorem": "fuel_halts_3",
+          "outcome": "PROVED",
+          "proved_tactic": "rfl",
+          "verifier": "local-lean(lean)"
+        },
+        "prev": "8022fc0cc3e1517c4cc539229f579bd98887f3914ce4f735003b7046efae5c09",
+        "self_hash": "8f2e11abd328ae055a01d9774db44c5a138067cb075de1609ed1b0375a372a99"
+      }
+    ]
+  },
+  "F20": {
+    "id": "F20",
+    "name": "Schrodinger Action Superposition",
+    "organ": "A",
+    "primitive": "Schrodinger wavefunction",
+    "lean_name": "superposition_normalized",
+    "lean_status": "PROVED",
+    "proof_status": "UNATTEMPTED",
+    "proved_tactic": null,
+    "identity_doc": "normalized amplitudes: sum c_a^2 == 1",
+    "current_value": null,
+    "last_eval_ts": 1780304720.372459,
+    "identity_holds": true,
+    "harness": {
+      "passed": 100,
+      "total": 100
+    },
+    "invoked_by": [
+      "A/agency"
+    ],
+    "chain_verified": true,
+    "tick_count": 100,
+    "last_receipts": [
+      {
+        "seq": 96,
+        "ts": 1780304720.3722854,
+        "formula_id": "F20",
+        "kind": "evaluate",
+        "payload": {
+          "value": null,
+          "identity_holds": true,
+          "args": "([2.1688406587930738, -0.1813426207858555, -2.8692221634165445, 0.4045548585645471, -1.9909535834130665, -2.807940482048169],)",
+          "error": null,
+          "tick": 97
+        },
+        "prev": "6f9c5f386b654e4ac247b8c53e128631c692456bf71d3dae836d36f91d1ef274",
+        "self_hash": "e4a9183fb2b9f7e646d349ddab72a6667902b2f455e6b13bcbfc8dc34aa3af79"
+      },
+      {
+        "seq": 97,
+        "ts": 1780304720.3723423,
+        "formula_id": "F20",
+        "kind": "evaluate",
+        "payload": {
+          "value": null,
+          "identity_holds": true,
+          "args": "([2.5585479824422777, 1.0651883349886395, -1.2768848627052036, -2.468297763639817, -0.07909265917549702],)",
+          "error": null,
+          "tick": 98
+        },
+        "prev": "e4a9183fb2b9f7e646d349ddab72a6667902b2f455e6b13bcbfc8dc34aa3af79",
+        "self_hash": "637bb7158b43a6f4da151c996a3a4ef33f4640ec1a30daceb1d8208bf0d8abc5"
+      },
+      {
+        "seq": 98,
+        "ts": 1780304720.3723996,
+        "formula_id": "F20",
+        "kind": "evaluate",
+        "payload": {
+          "value": null,
+          "identity_holds": true,
+          "args": "([0.53694613436469, -1.3488237431638004, 1.4955646684472539, 0.45550467074812273, -2.543913369637572, -1.5660464877554072, 0.9070971308550377],)",
+          "error": null,
+          "tick": 99
+        },
+        "prev": "637bb7158b43a6f4da151c996a3a4ef33f4640ec1a30daceb1d8208bf0d8abc5",
+        "self_hash": "8c7c30161effe52781062b2cfb4103e67b61c4600d3523cb0e869e01cb30d6af"
+      },
+      {
+        "seq": 99,
+        "ts": 1780304720.372467,
+        "formula_id": "F20",
+        "kind": "evaluate",
+        "payload": {
+          "value": null,
+          "identity_holds": true,
+          "args": "([0.024632135466818195, 1.2701324751269638, 2.587518726696821, 0.9628678579859842],)",
+          "error": null,
+          "tick": 100
+        },
+        "prev": "8c7c30161effe52781062b2cfb4103e67b61c4600d3523cb0e869e01cb30d6af",
+        "self_hash": "a889be1c57f4dbd99477f8779142cf53092cf6169f1d91d4bef2c883bd5ab480"
+      },
+      {
+        "seq": 100,
+        "ts": 1780304720.3728993,
+        "formula_id": "F20",
+        "kind": "test",
+        "payload": {
+          "passed": 100,
+          "total": 100,
+          "ok": true,
+          "failures": []
+        },
+        "prev": "a889be1c57f4dbd99477f8779142cf53092cf6169f1d91d4bef2c883bd5ab480",
+        "self_hash": "6ef1595f9972e4b24d21e729e8571b9e471d96d7bf5769132d77cecc9566dfa5"
+      }
+    ]
+  },
+  "F21": {
+    "id": "F21",
+    "name": "Dirac-Commit Projection",
+    "organ": "Khipu",
+    "primitive": "Dirac bra-ket measurement",
+    "lean_name": "projections_sum_one",
+    "lean_status": "PROVED",
+    "proof_status": "UNATTEMPTED",
+    "proved_tactic": null,
+    "identity_doc": "select(a)=c_a^2 ; sum select == 1",
+    "current_value": null,
+    "last_eval_ts": 1780304720.3791,
+    "identity_holds": true,
+    "harness": {
+      "passed": 100,
+      "total": 100
+    },
+    "invoked_by": [
+      "Khipu"
+    ],
+    "chain_verified": true,
+    "tick_count": 100,
+    "last_receipts": [
+      {
+        "seq": 96,
+        "ts": 1780304720.378924,
+        "formula_id": "F21",
+        "kind": "evaluate",
+        "payload": {
+          "value": null,
+          "identity_holds": true,
+          "args": "([2.9605138404573195, 2.767885733250636, -0.41589158837117246, -0.5638040387440251],)",
+          "error": null,
+          "tick": 97
+        },
+        "prev": "af62409b4bc7881be9991cad814b771e5eb2fbe80137878fa2bb537b507bde73",
+        "self_hash": "2bb17f0ac53d24e990b8316040c87807bb1bc28992a773b65faef618d6f261ca"
+      },
+      {
+        "seq": 97,
+        "ts": 1780304720.378985,
+        "formula_id": "F21",
+        "kind": "evaluate",
+        "payload": {
+          "value": null,
+          "identity_holds": true,
+          "args": "([2.733469702852344, -0.4964309963389004, -1.2630054522419, -0.14207092609125738],)",
+          "error": null,
+          "tick": 98
+        },
+        "prev": "2bb17f0ac53d24e990b8316040c87807bb1bc28992a773b65faef618d6f261ca",
+        "self_hash": "49aaa7b24a0894cccbf233d4239a81057574ec4efb1677e7d7c6d0f85cc8f28a"
+      },
+      {
+        "seq": 98,
+        "ts": 1780304720.3790412,
+        "formula_id": "F21",
+        "kind": "evaluate",
+        "payload": {
+          "value": null,
+          "identity_holds": true,
+          "args": "([0.4649758411699825, -1.2332946442972421, -1.544483767949169, 2.3102804150556944, 1.6082114519827062, 2.094601015649694],)",
+          "error": null,
+          "tick": 99
+        },
+        "prev": "49aaa7b24a0894cccbf233d4239a81057574ec4efb1677e7d7c6d0f85cc8f28a",
+        "self_hash": "a2a64ef807fcea5574bb5dee789b600d02964c969cff36a1488078490e3dd1b3"
+      },
+      {
+        "seq": 99,
+        "ts": 1780304720.3791065,
+        "formula_id": "F21",
+        "kind": "evaluate",
+        "payload": {
+          "value": null,
+          "identity_holds": true,
+          "args": "([-1.017514864403897, 1.854759286267222, -0.843814953309916, -1.7108218451189052, 2.7335107754533476, -2.5919133679215562],)",
+          "error": null,
+          "tick": 100
+        },
+        "prev": "a2a64ef807fcea5574bb5dee789b600d02964c969cff36a1488078490e3dd1b3",
+        "self_hash": "c27a2dda06cab43605c51d6c4ad35220a0828fcbd52558f27f12abd49aa4e5cd"
+      },
+      {
+        "seq": 100,
+        "ts": 1780304720.3795223,
+        "formula_id": "F21",
+        "kind": "test",
+        "payload": {
+          "passed": 100,
+          "total": 100,
+          "ok": true,
+          "failures": []
+        },
+        "prev": "c27a2dda06cab43605c51d6c4ad35220a0828fcbd52558f27f12abd49aa4e5cd",
+        "self_hash": "e3625eae62ab47d719b6c50b7c1d78944210e449fae5231f05f2392893801ebc"
+      }
+    ]
+  },
+  "F22": {
+    "id": "F22",
+    "name": "Feynman-Puriq Path Integral",
+    "organ": "A",
+    "primitive": "Feynman path integral",
+    "lean_name": "puriqPathWeight",
+    "lean_status": "CONJ",
+    "proof_status": "UNATTEMPTED",
+    "proved_tactic": null,
+    "identity_doc": "Z = (1/|T_a|) sum Lambda(t) (arithmetic mean, definitional)",
+    "current_value": null,
+    "last_eval_ts": 1780304720.385194,
+    "identity_holds": true,
+    "harness": {
+      "passed": 100,
+      "total": 100
+    },
+    "invoked_by": [
+      "A/agency"
+    ],
+    "chain_verified": true,
+    "tick_count": 100,
+    "last_receipts": [
+      {
+        "seq": 96,
+        "ts": 1780304720.3850386,
+        "formula_id": "F22",
+        "kind": "evaluate",
+        "payload": {
+          "value": null,
+          "identity_holds": true,
+          "args": "([1.4547292111059589, 1.444290924008878],)",
+          "error": null,
+          "tick": 97
+        },
+        "prev": "ab5a0bb2f8d5159f32467b4acc01a4b8a358e7ccbd48049f33e94975f507f8f1",
+        "self_hash": "7f9617c85173a32d1b22fc1b0d683b8518cbb43893de308ade4e943178db5b11"
+      },
+      {
+        "seq": 97,
+        "ts": 1780304720.3851,
+        "formula_id": "F22",
+        "kind": "evaluate",
+        "payload": {
+          "value": null,
+          "identity_holds": true,
+          "args": "([1.9846147822218285, 2.078593268762945, 2.1758741446242524],)",
+          "error": null,
+          "tick": 98
+        },
+        "prev": "7f9617c85173a32d1b22fc1b0d683b8518cbb43893de308ade4e943178db5b11",
+        "self_hash": "83d5351da998b7b738072a1658fc8e33199defecdaaa62386032dc7e92e58f71"
+      },
+      {
+        "seq": 98,
+        "ts": 1780304720.3851502,
+        "formula_id": "F22",
+        "kind": "evaluate",
+        "payload": {
+          "value": null,
+          "identity_holds": true,
+          "args": "([4.655221623862172, 2.7337533000484395, 4.517883171897045, 4.247521941995976],)",
+          "error": null,
+          "tick": 99
+        },
+        "prev": "83d5351da998b7b738072a1658fc8e33199defecdaaa62386032dc7e92e58f71",
+        "self_hash": "358b31dab5ceae7e5393474251aa47be7842757f55310247356e560381ae144c"
+      },
+      {
+        "seq": 99,
+        "ts": 1780304720.3851974,
+        "formula_id": "F22",
+        "kind": "evaluate",
+        "payload": {
+          "value": null,
+          "identity_holds": true,
+          "args": "([1.118622370459127],)",
+          "error": null,
+          "tick": 100
+        },
+        "prev": "358b31dab5ceae7e5393474251aa47be7842757f55310247356e560381ae144c",
+        "self_hash": "3653990262076dfd0062d51f1718bb0883b34574ce2b91fd00a3b4a8b81f743d"
+      },
+      {
+        "seq": 100,
+        "ts": 1780304720.3854213,
+        "formula_id": "F22",
+        "kind": "test",
+        "payload": {
+          "passed": 100,
+          "total": 100,
+          "ok": true,
+          "failures": []
+        },
+        "prev": "3653990262076dfd0062d51f1718bb0883b34574ce2b91fd00a3b4a8b81f743d",
+        "self_hash": "37f9058f10bbd288a86dbe59a9043013a2679145518ce367d272c026750a6fe9"
+      }
+    ]
+  },
+  "F23": {
+    "id": "F23",
+    "name": "Bekenstein A-Cap",
+    "organ": "A",
+    "primitive": "Bekenstein bound + 't Hooft holography",
+    "lean_name": "actionSpaceBounded",
+    "lean_status": "SKELETON",
+    "proof_status": "UNATTEMPTED",
+    "proved_tactic": null,
+    "identity_doc": "|A| <= min(exp(2 pi R E/hbar c), 2^(Kmax+1)-1)",
+    "current_value": 31,
+    "last_eval_ts": 1780304720.391276,
+    "identity_holds": true,
+    "harness": {
+      "passed": 100,
+      "total": 100
+    },
+    "invoked_by": [
+      "A/agency"
+    ],
+    "chain_verified": true,
+    "tick_count": 100,
+    "last_receipts": [
+      {
+        "seq": 96,
+        "ts": 1780304720.3911216,
+        "formula_id": "F23",
+        "kind": "evaluate",
+        "payload": {
+          "value": 1.1081,
+          "identity_holds": true,
+          "args": "(0.8738153338560077, 0.018702868284872665, 8, 4659)",
+          "error": null,
+          "tick": 97
+        },
+        "prev": "aa913a6f2b252b8a5bae91ab51cac7af17fdfebc3f350aed75326af6e7d140f3",
+        "self_hash": "bdf10a2dfd47ef4caee7317d9ae70c133cd9662053574b0701260f071c2ab272"
+      },
+      {
+        "seq": 97,
+        "ts": 1780304720.3911777,
+        "formula_id": "F23",
+        "kind": "evaluate",
+        "payload": {
+          "value": 7,
+          "identity_holds": true,
+          "args": "(0.7083875414245646, 1.2983518828253602, 2, 1171)",
+          "error": null,
+          "tick": 98
+        },
+        "prev": "bdf10a2dfd47ef4caee7317d9ae70c133cd9662053574b0701260f071c2ab272",
+        "self_hash": "ea2104ec9b2c9d35789f1d980354f26452ff0f53572be330745422b6f96c7ae4"
+      },
+      {
+        "seq": 98,
+        "ts": 1780304720.3912292,
+        "formula_id": "F23",
+        "kind": "evaluate",
+        "payload": {
+          "value": 3,
+          "identity_holds": true,
+          "args": "(1.3590455488246604, 1.6877554716127239, 1, 1631)",
+          "error": null,
+          "tick": 99
+        },
+        "prev": "ea2104ec9b2c9d35789f1d980354f26452ff0f53572be330745422b6f96c7ae4",
+        "self_hash": "5bf7ecbd9b480ede29159d118f12ba740276fd967f5f0484059da75b771ac63b"
+      },
+      {
+        "seq": 99,
+        "ts": 1780304720.3912797,
+        "formula_id": "F23",
+        "kind": "evaluate",
+        "payload": {
+          "value": 31,
+          "identity_holds": true,
+          "args": "(1.7774488992543565, 1.139345663749433, 4, 4369)",
+          "error": null,
+          "tick": 100
+        },
+        "prev": "5bf7ecbd9b480ede29159d118f12ba740276fd967f5f0484059da75b771ac63b",
+        "self_hash": "b711a4a5efbed401084f7dd85298896476d520fd35cd9805c7a967c2f06442da"
+      },
+      {
+        "seq": 100,
+        "ts": 1780304720.391548,
+        "formula_id": "F23",
+        "kind": "test",
+        "payload": {
+          "passed": 100,
+          "total": 100,
+          "ok": true,
+          "failures": []
+        },
+        "prev": "b711a4a5efbed401084f7dd85298896476d520fd35cd9805c7a967c2f06442da",
+        "self_hash": "e442fe6a3cfeaf6ce06c12d4042cc83da0004d41e14cda07324aa57a997bc62d"
+      }
+    ]
+  }
+}

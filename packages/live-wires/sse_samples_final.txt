@@ -1,0 +1,35 @@
+########## a11oy SSE (12s) ##########
+
+########## amaru SSE (12s) ##########
+event: pulse
+data: {"schema": "szl.wire_pulse/v1", "wire_letter": "D", "source_flagship": "amaru", "target_flagship": null, "receipt_hash": "5ea66b3f6a4e1de2", "timestamp": "2026-06-01T09:27:44.095851+00:00", "yuyay_score": null, "hukulla_tripwires": [], "lambda_value": null, "formula_factor": "\\mathrm{OTel}(x)", "latency_ms": 12, "throughput_eps": 0.2, "honesty": "Khipu DAG in-memory; signature=PLACEHOLDER (Sigstore CI not wired)", "boe_ref": "/api/amaru/v1/wires/boe/5ea66b3f6a4e1de2"}
+
+event: pulse
+data: {"schema": "szl.wire_pulse/v1", "wire_letter": "D", "source_flagship": "amaru", "target_flagship": null, "receipt_hash": "241c230817e0e24d", "timestamp": "2026-06-01T09:29:54.382561+00:00", "yuyay_score": null, "hukulla_tripwires": [], "lambda_value": null, "formula_factor": "\\mathrm{OTel}(x)", "latency_ms": 12, "throughput_eps": 0.36, "honesty": "Khipu DAG in-memory; signature=PLACEHOLDER (Sigstore CI not wired)", "boe_ref": "/api/amaru/v1/wires/boe/241c230817e0e24d"}
+
+
+########## sentra SSE (12s) ##########
+event: pulse
+data: {"schema": "szl.wire_pulse/v1", "wire_letter": "D", "source_flagship": "sentra", "target_flagship": null, "receipt_hash": "f2c7993a4e043b53", "timestamp": "2026-06-01T09:24:33.118089+00:00", "yuyay_score": null, "hukulla_tripwires": [], "lambda_value": null, "formula_factor": "\\mathrm{OTel}(x)", "latency_ms": 12, "throughput_eps": 0.2, "honesty": "Khipu DAG in-memory; signature=PLACEHOLDER (Sigstore CI not wired)", "boe_ref": "/api/sentra/v1/wires/boe/f2c7993a4e043b53"}
+
+event: pulse
+data: {"schema": "szl.wire_pulse/v1", "wire_letter": "D", "source_flagship": "sentra", "target_flagship": null, "receipt_hash": "2d5371ad3b3d06d5", "timestamp": "2026-06-01T09:25:47.572856+00:00", "yuyay_score": null, "hukulla_tripwires": [], "lambda_value": null, "formula_factor": "\\mathrm{OTel}(x)", "latency_ms": 12, "throughput_eps": 0.36, "honesty": "Khipu DAG in-memory; signature=PLACEHOLDER (Sigstore CI not wired)", "boe_ref": "/api/sentra/v1/wires/boe/2d5371ad3b3d06d5"}
+
+
+########## killinchu SSE (12s) ##########
+
+########## rosie SSE (12s) ##########
+event: pulse
+data: {"schema": "szl.wire_pulse/v1", "wire_letter": "D", "source_flagship": "rosie", "target_flagship": null, "receipt_hash": "717c478b5544a59b", "timestamp": "2026-06-01T09:24:21.185709+00:00", "yuyay_score": null, "hukulla_tripwires": [], "lambda_value": null, "formula_factor": "\\mathrm{OTel}(x)", "latency_ms": 12, "throughput_eps": 1.0, "honesty": "Khipu DAG in-memory; signature=PLACEHOLDER (Sigstore CI not wired)", "boe_ref": "/api/rosie/v1/wires/boe/717c478b5544a59b"}
+
+event: pulse
+data: {"schema": "szl.wire_pulse/v1", "wire_letter": "D", "source_flagship": "rosie", "target_flagship": null, "receipt_hash": "498177289250ba80", "timestamp": "2026-06-01T09:24:21.535471+00:00", "yuyay_score": null, "hukulla_tripwires": [], "lambda_value": null, "formula_factor": "\\mathrm{OTel}(x)", "latency_ms": 12, "throughput_eps": 1.0, "honesty": "Khipu DAG in-memory; signature=PLACEHOLDER (Sigstore CI not wired)", "boe_ref": "/api/rosie/v1/wires/boe/498177289250ba80"}
+
+
+########## a11oy SSE heartbeat (17s) ##########
+event: heartbeat
+data: {"schema": "szl.wire_heartbeat/v1", "ns": "a11oy", "wires": {"B": 0.0, "C": 0.0, "D": 0.0, "E": 0.0, "F": 0.0, "G": 0.0, "H": 0.0}, "ts": "2026-06-01T09:39:06.862510+00:00"}
+
+
+########## killinchu SSE heartbeat (17s) ##########
+

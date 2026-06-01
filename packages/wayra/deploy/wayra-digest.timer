@@ -1,0 +1,13 @@
+# WAYRA — Hatun-Willay daily digest (systemd timer unit)
+# Enable:  systemctl enable --now wayra-digest.timer
+# Organ: WAYRA (4th organ, additive) · Author: Yachay · Zero Bandaid
+[Unit]
+Description=Run WAYRA daily digest at 06:00 America/New_York
+
+[Timer]
+OnCalendar=*-*-* 06:00:00
+Persistent=true
+Unit=wayra-digest.service
+
+[Install]
+WantedBy=timers.target

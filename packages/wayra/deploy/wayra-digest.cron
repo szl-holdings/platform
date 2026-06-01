@@ -1,0 +1,12 @@
+# WAYRA — Hatun-Willay daily digest (crontab fragment)
+# Install:  crontab wayra-digest.cron   (or paste into `crontab -e`)
+# Runs 06:00 every day in the container's local TZ (set TZ=America/New_York).
+#
+# Organ: WAYRA (4th organ, additive) · Author: Yachay · Zero Bandaid
+# RECEIVE-ONLY: reads the local Khipu IngestLog; writes nothing to third parties.
+
+SHELL=/bin/bash
+TZ=America/New_York
+
+# m h dom mon dow   command
+0 6 * * *  cd /app && /usr/bin/python3 daily_digest.py --emit-audio >> /var/log/wayra_digest.log 2>&1

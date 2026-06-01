@@ -1,0 +1,74 @@
+# UNSHIPPED RECOMMENDATIONS — Final Sweep
+
+## Critical (founder explicitly requested, not yet real)
+- **Send the UDS trademark/no-objection email to Andrew Greene** — Source: `/home/user/workspace/szl/audit_2026-05-29_evening/cto_final_sweep/MISSED_ITEMS.md:L10-L21`. What it requires: founder sends the prepared email or authorizes connector send; if denied, trigger rename backstop. Current state: staged, not sent. Effort: S.
+- **Resolve the UDS naming conflict path if Andrew declines or stays silent** — Source: `/home/user/workspace/szl/audit_2026-05-29_evening/cto_final_sweep/MISSED_ITEMS.md:L13-L21`. What it requires: execute rename plan/script across repos. Current state: operational plan exists, not triggered. Effort: M.
+- **Add `HF_TOKEN` to `szl-holdings/.github` org secrets** — Source: `/home/user/workspace/szl/FOUNDER_ACTION_QUEUE_2026-05-29.md:L36-L52`. What it requires: org secret in GitHub Actions so daily workflow can run. Current state: missing. Effort: S.
+- **Confirm ORCID bio is intentionally blank or fill it** — Source: `/home/user/workspace/szl/FOUNDER_ACTION_QUEUE_2026-05-29.md:L36-L43`. What it requires: founder UI action on ORCID profile. Current state: not verified/shipped. Effort: S.
+- **Confirm `betterwithage` Hugging Face profile is intentionally unconfigured or fill it** — Source: `/home/user/workspace/szl/FOUNDER_ACTION_QUEUE_2026-05-29.md:L36-L43`. What it requires: HF profile fields. Current state: not verified/shipped. Effort: S.
+- **Set the correct tagline / canonical org header text** — Source: `/home/user/workspace/szl/series_a_polish/RECOMMENDATIONS.md:L7-L16`. What it requires: choose one tagline and publish it in org profile README. Current state: recommendation only. Effort: S.
+- **Replace placeholder contact email across org docs** — Source: `/home/user/workspace/szl/series_a_polish/RECOMMENDATIONS.md:L19-L27`. What it requires: fill `stephen@szl.holdings` or another confirmed email in multiple docs. Current state: placeholders remain. Effort: S.
+- **Publish/replace website URL placeholders** — Source: `/home/user/workspace/szl/series_a_polish/RECOMMENDATIONS.md:L30-L33`. What it requires: live URL or remove dead link lines. Current state: placeholder state. Effort: S.
+- **Create LinkedIn org page if it doesn’t exist** — Source: `/home/user/workspace/szl/series_a_polish/RECOMMENDATIONS.md:L36-L40`. What it requires: linkedin.com/company/szl-holdings page. Current state: not confirmed live. Effort: S.
+- **Set pinned repos in the recommended order** — Source: `/home/user/workspace/szl/series_a_polish/RECOMMENDATIONS.md:L52-L63`. What it requires: GitHub org profile customization. Current state: not verified shipped. Effort: S.
+- **Fix the live `lutar-lean` DOI badge** — Source: `/home/user/workspace/szl/series_a_polish/RECOMMENDATIONS.md:L75-L80`. What it requires: replace broken `zenodo.PENDING` badge with real DOI or pending badge. Current state: live issue noted, not confirmed fixed. Effort: S.
+- **Publish `uds-mesh` bundle release (`uds-v0.1.0`)** — Source: `/home/user/workspace/szl/series_a_polish/RECOMMENDATIONS.md:L84-L92`. What it requires: GitHub release assets + signature bundle. Current state: no release yet. Effort: M.
+- **Confirm GHCR images are published and pullable** — Source: `/home/user/workspace/szl/series_a_polish/RECOMMENDATIONS.md:L95-L103`. What it requires: push `a11oy`, `sentra`, `amaru` images. Current state: must be verified before bundle release. Effort: S.
+- **Run the full Warhacker demo dry-run on real hardware** — Source: `/home/user/workspace/szl/series_a_polish/RECOMMENDATIONS.md:L106-L114`. What it requires: end-to-end walk-through, USB, backup cluster. Current state: not yet executed. Effort: M.
+- **Fill `$TBD/mo` pricing in PILOT_AGREEMENT.md** — Source: `/home/user/workspace/szl/FOUNDER_ACTION_QUEUE_2026-05-29.md:L116-L128`. What it requires: founder review of contract pricing. Current state: founder-only task, not done. Effort: S.
+- **Flash USB sticks for Warhacker** — Source: `/home/user/workspace/szl/FOUNDER_ACTION_QUEUE_2026-05-29.md:L120-L129`. What it requires: physical prep of 3 sticks. Current state: not done. Effort: S.
+- **Rehearse Warhacker talk track twice and do a friendly-observer dry run** — Source: `/home/user/workspace/szl/FOUNDER_ACTION_QUEUE_2026-05-29.md:L120-L129`. What it requires: founder rehearsal sessions. Current state: not done. Effort: S/M.
+- **Create the 5 deep-dive HF Spaces that link back from READMEs** — Source: `/home/user/workspace/szl/audit_2026-05-29_evening/cto_final_sweep/MISSED_ITEMS.md:L191-L195` and `L238-L250`. What it requires: create amaru/rosie/sentra/szl-cookbook/vsp-otel deep-dive spaces after rate limit reset. Current state: called out as critical gap. Effort: M.
+- **Stage a Lean theorem stub for `bekenstein_bound` in `lutar-lean`** — Source: `/home/user/workspace/szl/audit_2026-05-29_evening/cto_final_sweep/MISSED_ITEMS.md:L210-L213` and `L240-L246`. What it requires: add a theorem file, even if sorry-backed. Current state: recommended, not shipped. Effort: M.
+- **Add `szl.formula.name=bekenstein_bound` OTel spans to `vsp-otel`** — Source: `/home/user/workspace/szl/audit_2026-05-29_evening/cto_final_sweep/MISSED_ITEMS.md:L210-L213` and `L240-L246`. What it requires: runtime span instrumentation. Current state: not shipped. Effort: M.
+
+## High value (I recommended, founder didn't object, not yet shipped)
+- **Set GitHub org/profile pinned repos and featured Spaces to the recommended order** — Source: `/home/user/workspace/szl/FOUNDER_ACTION_QUEUE_2026-05-29.md:L94-L105`. What it requires: UI pinning of repos/spaces. Current state: queued, not verified. Effort: S.
+- **Enable the daily-stats GitHub Actions workflow** — Source: `/home/user/workspace/szl/FOUNDER_ACTION_QUEUE_2026-05-29.md:L94-L100`. What it requires: UI toggle on personal repo. Current state: not verified. Effort: S.
+- **Submit `uds-package-szl-receipts` after Warhacker** — Source: `/home/user/workspace/szl/FOUNDER_ACTION_QUEUE_2026-05-29.md:L106-L115`. What it requires: public repo + DU community discussion. Current state: staged, not submitted. Effort: M.
+- **Submit `pepr-dsse-receipts` after Warhacker** — Source: `/home/user/workspace/szl/FOUNDER_ACTION_QUEUE_2026-05-29.md:L106-L115`. What it requires: public repo + issue/PR. Current state: staged, not submitted. Effort: M.
+- **Submit `uds-docs-otel-dsse-chapter` after Warhacker** — Source: `/home/user/workspace/szl/FOUNDER_ACTION_QUEUE_2026-05-29.md:L106-L115`. What it requires: PR to defenseunicorns/uds-docs. Current state: staged, not submitted. Effort: M.
+- **Open/merge the 13 repo-wide SLSA L3 truth-correction PRs** — Source: `/home/user/workspace/szl/audit_2026-05-29_evening/cto_final_sweep/MISSED_ITEMS.md:L65-L69`. What it requires: batch PRs for remaining repos. Current state: only a11oy fixed. Effort: L.
+- **Resolve `lutar-lean` internal sorry-count contradiction** — Source: `/home/user/workspace/szl/audit_2026-05-29_evening/cto_final_sweep/MISSED_ITEMS.md:L70-L74`. What it requires: update README state table / merge docs PR. Current state: open PR not merged. Effort: S.
+- **Fix the `a11oy-receipts-playground` HF Space build error** — Source: `/home/user/workspace/szl/audit_2026-05-29_evening/cto_final_sweep/MISSED_ITEMS.md:L75-L79`. What it requires: requirements pin correction. Current state: build_error. Effort: S.
+- **Add the CII Best Practices badge across the recommended repo set** — Source: `/home/user/workspace/szl/FOUNDER_ACTION_QUEUE_2026-05-29.md:L132-L143`. What it requires: CII project entries for 15 repos. Current state: not started. Effort: L.
+- **Update ORCID bio if missing** — Source: `/home/user/workspace/szl/FOUNDER_ACTION_QUEUE_2026-05-29.md:L132-L138`. What it requires: founder profile update. Current state: not verified. Effort: S.
+- **Update the HF org description/header if still blank** — Source: `/home/user/workspace/szl/audit_2026-05-29_evening/cto_final_sweep/MISSED_ITEMS.md:L60-L64`. What it requires: HF org settings write action. Current state: still placeholder/empty per audit. Effort: S.
+- **Push the missing `vessels` container image** — Source: `/home/user/workspace/szl/audit_2026-05-29_evening/cto_final_sweep/MISSED_ITEMS.md:L40-L43`. What it requires: GHCR publish. Current state: not pushed. Effort: S.
+- **Create the `v0.3.1` tag / keyless signing bootstrap for UDS deployment** — Source: `/home/user/workspace/szl/audit_2026-05-29_evening/cto_final_sweep/MISSED_ITEMS.md:L45-L49`. What it requires: git tag and provenance bootstrap. Current state: not done. Effort: S.
+- **Set DMARC for `@szl.holdings`** — Source: `/home/user/workspace/szl/audit_2026-05-29_evening/cto_final_sweep/MISSED_ITEMS.md:L50-L53`. What it requires: DNS provider update. Current state: not verified. Effort: S.
+- **Add `ANTHROPIC_API_KEY` org secret** — Source: `/home/user/workspace/szl/audit_2026-05-29_evening/cto_final_sweep/MISSED_ITEMS.md:L55-L58`. What it requires: GitHub secret for judge_runner live runs. Current state: not set. Effort: S.
+- **Fill the HF org description field** — Source: `/home/user/workspace/szl/audit_2026-05-29_evening/cto_final_sweep/MISSED_ITEMS.md:L60-L64`. What it requires: HF settings update. Current state: empty/N/A per API audit. Effort: S.
+- **Correct Putnam messaging to avoid mixing runtime-verification with Lean proof completion** — Source: `/home/user/workspace/szl/audit_2026-05-29_evening/cto_final_sweep/MISSED_ITEMS.md:L85-L89`. What it requires: docs copy edits. Current state: claimed 10/12 figure is misleading. Effort: S.
+- **Submit the UDS catalog sponsor application only after image/signing prerequisites** — Source: `/home/user/workspace/szl/audit_2026-05-29_evening/cto_final_sweep/MISSED_ITEMS.md:L80-L84`. What it requires: defer submission until prerequisites are real. Current state: ready-to-edit but not submit-ready. Effort: S.
+- **Re-upload ouroboros-thesis lineage addendum to Zenodo** — Source: `/home/user/workspace/szl/audit_2026-05-29_evening/cto_final_sweep/MISSED_ITEMS.md:L114-L116`. What it requires: new Zenodo version so DOI matches current GitHub content. Current state: recommended, not done. Effort: M.
+- **Build DSSE receipts that point to real Lean SHAs for IQ gates** — Source: `/home/user/workspace/szl/audit_2026-05-29_evening/cto_final_sweep/MISSED_ITEMS.md:L118-L120`. What it requires: actual gate receipts with real theorem SHAs. Current state: not started. Effort: L.
+
+## Nice-to-have (mentioned in passing, no clear founder ask)
+- **Post the HF community intro to the forum / Discord showcase channels** — Source: `/home/user/workspace/szl/FOUNDER_ACTION_QUEUE_2026-05-29.md:L146-L153`. What it requires: copy/paste already drafted text. Current state: optional. Effort: S.
+- **Submit the arXiv draft** — Source: `/home/user/workspace/szl/FOUNDER_ACTION_QUEUE_2026-05-29.md:L146-L153`. What it requires: portal upload. Current state: optional. Effort: S.
+- **Create a GitHub Discussions category for `platform`** — Source: `/home/user/workspace/szl/FOUNDER_ACTION_QUEUE_2026-05-29.md:L146-L153`. What it requires: GitHub UI only. Current state: optional. Effort: S.
+- **Provisional ATO/FedRAMP/STIG documentation package** — Source: `/home/user/workspace/szl/series_a_polish/RECOMMENDATIONS.md:L123-L131`. What it requires: SSP skeleton, alignment notes, boundary diagram, STIG notes. Current state: explicitly post-seed. Effort: L.
+- **Get a representative customer/partner quote** — Source: `/home/user/workspace/szl/series_a_polish/RECOMMENDATIONS.md:L135-L138`. What it requires: honest attributed quote. Current state: helpful but not required. Effort: S.
+- **Keep the Pepr admission webhook as a future v0.2.0 milestone** — Source: `/home/user/workspace/szl/series_a_polish/RECOMMENDATIONS.md:L117-L120`. What it requires: none now; just avoid overstating timeline. Current state: planned, not built. Effort: L.
+
+## Founder-blocked (waiting on founder UI action — can't be agent-shipped)
+- **HF org secret / settings actions in GitHub and Hugging Face UI** — Source: `/home/user/workspace/szl/FOUNDER_ACTION_QUEUE_2026-05-29.md:L36-L52` and `L94-L105`. Examples: `HF_TOKEN`, pinned repos, featured Spaces, daily-stats enablement. Current state: requires founder UI access. Effort: S.
+- **ORCID profile edits** — Source: `/home/user/workspace/szl/FOUNDER_ACTION_QUEUE_2026-05-29.md:L36-L43` and `L132-L138`. Current state: founder-owned profile fields. Effort: S.
+- **DMARC / DNS changes** — Source: `/home/user/workspace/szl/audit_2026-05-29_evening/cto_final_sweep/MISSED_ITEMS.md:L50-L53`. Current state: registrar/DNS UI. Effort: S.
+- **GitHub branch protection / merge blockers / ruleset toggles** — Source: `/home/user/workspace/szl/audit_2026-05-29_evening/cto_final_sweep/MISSED_ITEMS.md:L34-L38` and `L65-L69`. Current state: blocked by permissions. Effort: S.
+- **HF org description / profile fields** — Source: `/home/user/workspace/szl/audit_2026-05-29_evening/cto_final_sweep/MISSED_ITEMS.md:L60-L64`. Current state: UI update needed. Effort: S.
+
+## Already shipped — duplicate detection log
+- **Killinchu Space live on HF** — excluded because already confirmed shipped this session (`szlholdings-killinchu.hf.space`, SHA 43e422fc).
+- **a11oy.code orchestrator live** — excluded because already confirmed shipped (SHA f1e76d01).
+- **Yachay /yachay tab live** — excluded because already confirmed shipped (SHA cc343d86).
+- **Sentra↔Killinchu /drone-cyber live** — excluded because already confirmed shipped (SHA 157e9258).
+- **3D Anatomy V2 / Rosie 3D / Rosie live** — excluded because already confirmed shipped (SHAs 8c30023f, cc11413d, 768fd823).
+- **Amaru/Sentra/Vessels green counts** — excluded because already confirmed shipped (47/47, 43/43, 59/59).
+- **HF cleanup README** — excluded because already confirmed shipped (SHA f57d85c6).
+- **WAYRA ingestion update** — excluded because already confirmed shipped (SHA a3d8be0a).
+- **Doctrine v11 corpus / Khipu Lean / Yuyay-v3 / K-Verify / brand kit / site / repos polished / model / cap table / warhacker packs / thesis / avatar / throne room / hatun-mcp / AYNI-OS / KIPU+QILLQAQ / edge organs / signed bundles / flagships / Reed-Solomon / agentic DAG** — excluded because all were listed as already real and operational in the thread context.
+- **Items explicitly in-flight** — excluded: master HF sweep, live 3D wires, frontier visualizations, WAYRA+Rosie backend+portal, agentic formulas, Wire D + DSSE signing, master manual + USB bundle, Unay+Khipu persistence + CI fixes.
+
+TOTAL UNSHIPPED: 34 | CRITICAL: 17 | HIGH: 13 | NICE: 4 | FOUNDER-BLOCKED: 5

@@ -1,0 +1,12 @@
+[project]
+name = "szl-rosie-v3"
+version = "0.1.0"
+description = "Rosie v3 — reusable 16-command operator console library"
+license = { text = "Apache-2.0" }
+authors = [{ name = "Yachay", email = "yachay@szlholdings.dev" }]
+requires-python = ">=3.10"
+readme = "README.md"
+
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"

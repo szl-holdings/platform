@@ -1,0 +1,8 @@
+USER: betterwithage
+ORGS: ['SZLHOLDINGS']
+SPACE a11oy: sha=a44b38bd2a sdk=docker stage=RUNNING
+SPACE amaru: sha=5c57d846f6 sdk=docker stage=RUNNING
+SPACE sentra: sha=ed91f0347b sdk=docker stage=RUNNING
+SPACE killinchu: sha=d0da315276 sdk=docker stage=RUNNING
+SPACE rosie: sha=2045b12b8c sdk=docker stage=RUNTIME_ERROR
+SPACE vessels: sha=16547a1bd6 sdk=docker stage=RUNNING

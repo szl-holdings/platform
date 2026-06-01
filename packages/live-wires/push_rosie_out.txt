@@ -1,0 +1,2 @@
+app.py changed: True | Dockerfile changed: True | dock COPYs added: ['szl_provenance.py', 'szl_live_wires.py', 'live_wires.html', 'live_wires_3d.js']
+ROSIE PUSHED oid= 656d439d4e

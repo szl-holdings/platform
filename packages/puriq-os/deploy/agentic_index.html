@@ -1,0 +1,49 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>/agentic — PURIQ-OS Doctrine v14</title>
+<style>
+:root{--bg:#0b0e14;--card:#121826;--ink:#e8eef7;--mut:#8aa0bf;--acc:#5ad1c0;--line:#243149}
+*{box-sizing:border-box}body{margin:0;font:15px/1.55 -apple-system,Segoe UI,Roboto,Arial,sans-serif;background:var(--bg);color:var(--ink)}
+.wrap{max-width:1060px;margin:0 auto;padding:32px 20px 80px}
+h1{font-size:26px;margin:0 0 4px}h2{font-size:18px;margin:28px 0 10px;border-bottom:1px solid var(--line);padding-bottom:6px}
+.sub{color:var(--mut);margin:0 0 18px}.card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:16px 18px;margin:14px 0}
+table{width:100%;border-collapse:collapse;font-size:13px}th,td{text-align:left;padding:6px 8px;border-bottom:1px solid var(--line)}
+th{color:var(--mut);font-weight:600}code{background:#0a1626;padding:1px 5px;border-radius:5px;color:var(--acc);font-size:12px}
+.b{display:inline-block;padding:1px 8px;border-radius:999px;font-size:11px;font-weight:700}.green{background:#0f3a2e;color:#5ad1c0}
+.kpis{display:flex;gap:10px;flex-wrap:wrap;margin:10px 0}.kpi{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:10px 14px;min-width:120px}.kpi b{font-size:20px;display:block;color:var(--acc)}
+.foot{margin-top:36px;color:var(--mut);font-size:12px;border-top:1px solid var(--line);padding-top:14px}a{color:var(--acc);text-decoration:none}
+</style></head><body><div class="wrap">
+<h1>/agentic</h1>
+<p class="sub">PURIQ-OS · Doctrine v14 · every organ runs an autonomous Wiener loop
+(observe → decide via argmax U₁₃ → execute → sign Khipu → reflect → Bayesian-update → loop).
+Cybernetics, not mysticism. Live data: <code>GET /v1/agentic/status</code>.</p>
+<div class="kpis">
+  <div class="kpi"><b>16</b>organs looping</div>
+  <div class="kpi"><b>20</b>HUKLLA tripwires</div>
+  <div class="kpi"><b>749</b>Lean declarations</div>
+  <div class="kpi"><b>14</b>unique axioms</div>
+  <div class="kpi"><b>163</b>tracked sorries</div>
+</div>
+<h2>Live loop status</h2>
+<div class="card"><table id="tbl">
+<tr><th>Organ</th><th>Role</th><th>Status</th><th>Ticks</th><th>U₁₃</th></tr>
+</table>
+<p class="sub">Pause/resume is an <b>admin</b> action behind a <b>2-person Yuyay gate</b>. HUKLLA is the sole halt-authority.</p></div>
+<div class="foot">Additive surface — existing routes preserved. ZERO BANDAID. LOCKED numbers (749/14/163) unchanged. Sign: Yachay · Perplexity Computer Agent.</div>
+<script>
+async function poll(){
+  try{
+    const base=location.pathname.replace(/\/agentic.*/,'');
+    const r=await fetch('/v1/agentic/status').catch(()=>fetch(base+'/v1/agentic/status'));
+    const j=await r.json(); const tbl=document.getElementById('tbl');
+    tbl.innerHTML='<tr><th>Organ</th><th>Role</th><th>Status</th><th>Ticks</th><th>U₁₃</th></tr>';
+    for(const o of (j.organs||[])){
+      const tr=document.createElement('tr');
+      tr.innerHTML=`<td><b>${o.organ}</b></td><td>${o.role||''}</td><td><span class="b green">${o.status}</span></td><td>${o.tick_count}</td><td>${o.last_decision_value}</td>`;
+      tbl.appendChild(tr);
+    }
+  }catch(e){}
+}
+poll(); setInterval(poll,4000);
+</script>
+</div></body></html>

@@ -1,0 +1,12 @@
+[project]
+name = "szl-formula-os"
+version = "0.1.0"
+description = "Formula-OS — 23 agentic formulas, 5 PROVED in Lean"
+license = { text = "Apache-2.0" }
+authors = [{ name = "Yachay", email = "yachay@szlholdings.dev" }]
+requires-python = ">=3.10"
+readme = "README.md"
+
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"

@@ -1,0 +1,9 @@
+Hatun-Willay morning briefing. WAYRA breathed in the world overnight.
+The empire's lungs logged 232 items across 5 streams; the Khipu chain verifies intact.
+Top five by WAYRA factor:
+1. HF model: Qwen/Qwen-Image-Bench — from hf_hub, WAYRA factor 1.00, routed to a11oy.
+2. Value Functions as Supermartingale Certificates — from arxiv, WAYRA factor 0.88, routed to puriq, a11oy.
+3. W3C-news: W3C initiates leadership transition — from standards, WAYRA factor 0.88, routed to a11oy.
+4. IETF-new-RFCs: RFC 9993: RTP Payload Format for Haptics — from standards, WAYRA factor 0.88, routed to sentra, a11oy.
+5. Reducing Arbitrary Metric Temporal Formulas into Logic Programs under Answer Set Semantics — from arxiv, WAYRA factor 0.88, routed to puriq, a11oy.
+That is the breath of the world, made ours. — Wallpa, for WAYRA.

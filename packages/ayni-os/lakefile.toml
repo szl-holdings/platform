@@ -1,0 +1,5 @@
+name = "ayni"
+defaultTargets = ["AyniConservation"]
+
+[[lean_lib]]
+name = "AyniConservation"

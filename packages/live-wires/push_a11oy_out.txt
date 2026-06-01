@@ -1,0 +1,2 @@
+to_add: ['szl_live_wires.py', 'live_wires.html', 'live_wires_3d.js', 'szl_wire.py', 'szl_jack.py', 'szl_khipu.py']
+A11OY PUSHED oid= c4bb25ed16
