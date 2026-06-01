@@ -1,11 +1,11 @@
 {
-  "uid": "szl-wire-d-signing",
-  "title": "SZL \u00b7 Wire D Signing",
+  "uid": "szl-gate-pass-rate",
+  "title": "SZL \u00b7 Yuyay-13 Gate Pass Rate",
   "tags": [
     "szl",
     "o11y",
-    "wire-d",
-    "signing"
+    "gate",
+    "yuyay"
   ],
   "schemaVersion": 39,
   "version": 1,
@@ -79,7 +79,7 @@
     {
       "id": 1,
       "type": "timeseries",
-      "title": "DSSE Signs / sec",
+      "title": "Yuyay-13 Gate Pass Rate (per organ)",
       "datasource": {
         "type": "prometheus",
         "uid": "${DS_PROMETHEUS}"
@@ -87,59 +87,7 @@
       "gridPos": {
         "x": 0,
         "y": 0,
-        "w": 12,
-        "h": 8
-      },
-      "fieldConfig": {
-        "defaults": {
-          "unit": "ops",
-          "custom": {
-            "drawStyle": "line",
-            "fillOpacity": 10,
-            "lineWidth": 2,
-            "showPoints": "never"
-          },
-          "color": {
-            "mode": "palette-classic"
-          }
-        },
-        "overrides": []
-      },
-      "options": {
-        "legend": {
-          "displayMode": "list",
-          "placement": "bottom"
-        },
-        "tooltip": {
-          "mode": "multi"
-        }
-      },
-      "targets": [
-        {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
-          },
-          "expr": "sum by (organ) (rate(szl_signing_total[5m]))",
-          "legendFormat": "{{organ}}",
-          "refId": "A",
-          "format": "time_series",
-          "range": true
-        }
-      ]
-    },
-    {
-      "id": 2,
-      "type": "timeseries",
-      "title": "Verify Success Rate",
-      "datasource": {
-        "type": "prometheus",
-        "uid": "${DS_PROMETHEUS}"
-      },
-      "gridPos": {
-        "x": 12,
-        "y": 0,
-        "w": 12,
+        "w": 24,
         "h": 8
       },
       "fieldConfig": {
@@ -172,8 +120,8 @@
             "type": "prometheus",
             "uid": "${DS_PROMETHEUS}"
           },
-          "expr": "sum(rate(szl_verify_success_total[5m])) / sum(rate(szl_verify_total[5m]))",
-          "legendFormat": "verify success",
+          "expr": "sum by (organ) (rate(szl_gate_pass_total[5m])) / sum by (organ) (rate(szl_gate_requests_total[5m]))",
+          "legendFormat": "{{organ}}",
           "refId": "A",
           "format": "time_series",
           "range": true
@@ -181,9 +129,9 @@
       ]
     },
     {
-      "id": 3,
+      "id": 2,
       "type": "timeseries",
-      "title": "Signature Failures / sec",
+      "title": "Gate Pass/Fail per Axis",
       "datasource": {
         "type": "prometheus",
         "uid": "${DS_PROMETHEUS}"
@@ -191,7 +139,7 @@
       "gridPos": {
         "x": 0,
         "y": 8,
-        "w": 12,
+        "w": 24,
         "h": 8
       },
       "fieldConfig": {
@@ -224,65 +172,20 @@
             "type": "prometheus",
             "uid": "${DS_PROMETHEUS}"
           },
-          "expr": "sum by (organ) (rate(szl_signing_failures_total[5m]))",
-          "legendFormat": "{{organ}}",
+          "expr": "sum by (axis) (rate(szl_gate_pass_total[5m]))",
+          "legendFormat": "pass {{axis}}",
           "refId": "A",
           "format": "time_series",
           "range": true
-        }
-      ]
-    },
-    {
-      "id": 4,
-      "type": "stat",
-      "title": "Key Fingerprint Changes (1h)",
-      "datasource": {
-        "type": "prometheus",
-        "uid": "${DS_PROMETHEUS}"
-      },
-      "gridPos": {
-        "x": 12,
-        "y": 8,
-        "w": 12,
-        "h": 8
-      },
-      "fieldConfig": {
-        "defaults": {
-          "unit": "short",
-          "thresholds": {
-            "mode": "absolute",
-            "steps": [
-              {
-                "color": "green",
-                "value": null
-              },
-              {
-                "color": "red",
-                "value": 1
-              }
-            ]
-          }
         },
-        "overrides": []
-      },
-      "options": {
-        "colorMode": "value",
-        "graphMode": "area",
-        "reduceOptions": {
-          "calcs": [
-            "lastNotNull"
-          ]
-        }
-      },
-      "targets": [
         {
           "datasource": {
             "type": "prometheus",
             "uid": "${DS_PROMETHEUS}"
           },
-          "expr": "changes(szl_wire_d_pubkey_fingerprint_hash[1h])",
-          "legendFormat": "fp changes",
-          "refId": "A",
+          "expr": "sum by (axis) (rate(szl_gate_failures_total[5m]))",
+          "legendFormat": "fail {{axis}}",
+          "refId": "B",
           "format": "time_series",
           "range": true
         }

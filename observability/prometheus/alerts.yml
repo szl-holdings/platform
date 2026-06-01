@@ -1,0 +1,145 @@
+# SPDX-License-Identifier: Apache-2.0
+# SZL O11Y — Prometheus alert rules (12 critical alerts).
+# Validated with `promtool check rules alerts.yml`.
+# Doctrine v11 — LOCKED, verbatim: 749 declarations / 14 unique axioms / 163 sorries.
+# Signed: Yachay <yachay@szlholdings.dev>
+# Co-Authored-By: Perplexity Computer Agent
+groups:
+  - name: szl-flagship-mesh
+    rules:
+      - alert: FlagshipDown
+        expr: up{job="szl-flagship"} == 0
+        for: 2m
+        labels:
+          severity: page
+          team: szl-oncall
+        annotations:
+          summary: "Flagship {{ $labels.flagship }} is down"
+          description: "up{job=\"szl-flagship\"} == 0 for 2m on {{ $labels.instance }}."
+          runbook_url: "https://github.com/szl-holdings/platform/blob/main/docs/runbooks/alerts/FlagshipDown.md"
+
+      - alert: SigningFailureSpike
+        expr: rate(szl_signing_failures_total[5m]) > 0.01
+        for: 5m
+        labels:
+          severity: page
+          team: szl-oncall
+        annotations:
+          summary: "Wire D signing failure spike on {{ $labels.organ }}"
+          description: "szl_signing_failures_total rate > 0.01/s over 5m."
+          runbook_url: "https://github.com/szl-holdings/platform/blob/main/docs/runbooks/alerts/SigningFailureSpike.md"
+
+      - alert: ChainIntegrityBroken
+        expr: szl_khipu_chain_verified == 0
+        for: 1m
+        labels:
+          severity: page
+          team: szl-oncall
+        annotations:
+          summary: "Khipu chain integrity broken on {{ $labels.flagship }}"
+          description: "szl_khipu_chain_verified == 0 — the canonical audit chain failed verification."
+          runbook_url: "https://github.com/szl-holdings/platform/blob/main/docs/runbooks/alerts/ChainIntegrityBroken.md"
+
+      - alert: GateFailRateHigh
+        expr: rate(szl_gate_failures_total[5m]) / rate(szl_gate_requests_total[5m]) > 0.05
+        for: 5m
+        labels:
+          severity: warning
+          team: szl-oncall
+        annotations:
+          summary: "Yuyay-13 gate fail rate high on {{ $labels.organ }}"
+          description: "Gate failure ratio > 5% over 5m."
+          runbook_url: "https://github.com/szl-holdings/platform/blob/main/docs/runbooks/alerts/GateFailRateHigh.md"
+
+      - alert: SiblingUnreachable
+        expr: szl_sibling_health{state="up"} < 4
+        for: 3m
+        labels:
+          severity: warning
+          team: szl-oncall
+        annotations:
+          summary: "Fewer than 4 of 5 sibling flagships reachable"
+          description: "szl_sibling_health{state=\"up\"} < 4 (5 expected)."
+          runbook_url: "https://github.com/szl-holdings/platform/blob/main/docs/runbooks/alerts/SiblingUnreachable.md"
+
+      - alert: P99LatencyHigh
+        expr: histogram_quantile(0.99, sum by (le, flagship) (rate(szl_request_duration_seconds_bucket[5m]))) > 1.0
+        for: 10m
+        labels:
+          severity: warning
+          team: szl-oncall
+        annotations:
+          summary: "p99 latency > 1s on {{ $labels.flagship }}"
+          description: "histogram_quantile(0.99, szl_request_duration_seconds) > 1.0 for 10m."
+          runbook_url: "https://github.com/szl-holdings/platform/blob/main/docs/runbooks/alerts/P99LatencyHigh.md"
+
+      - alert: UnayPersistenceFailed
+        expr: szl_unay_lmdb_durable == 0
+        for: 10m
+        labels:
+          severity: page
+          team: szl-oncall
+        annotations:
+          summary: "Unay LMDB persistence not durable on {{ $labels.flagship }}"
+          description: "szl_unay_lmdb_durable == 0 for 10m — memory writes may be lost."
+          runbook_url: "https://github.com/szl-holdings/platform/blob/main/docs/runbooks/alerts/UnayPersistenceFailed.md"
+
+      - alert: WireDFingerprintChanged
+        expr: changes(szl_wire_d_pubkey_fingerprint_hash[1h]) > 0
+        for: 0m
+        labels:
+          severity: page
+          team: szl-oncall
+        annotations:
+          summary: "Wire D public-key fingerprint changed (possible key rotation)"
+          description: "changes(szl_wire_d_pubkey_fingerprint_hash[1h]) > 0 — confirm this rotation was intentional."
+          runbook_url: "https://github.com/szl-holdings/platform/blob/main/docs/runbooks/alerts/WireDFingerprintChanged.md"
+
+      - alert: SLOBudgetBurning
+        expr: |
+          (
+            (1 - (sum by (flagship) (rate(szl_request_total{status!~"5.."}[1h]))
+                  / sum by (flagship) (rate(szl_request_total[1h]))))
+            / (1 - 0.995)
+          ) > 14
+        for: 5m
+        labels:
+          severity: page
+          team: szl-oncall
+        annotations:
+          summary: "SLO error budget burning >14x on {{ $labels.flagship }}"
+          description: "Error-budget burn rate exceeds 14x normal against the 99.5% SLO."
+          runbook_url: "https://github.com/szl-holdings/platform/blob/main/docs/runbooks/alerts/SLOBudgetBurning.md"
+
+      - alert: RSErasureExceeded
+        expr: szl_khipu_rs_recovery_failures_total > 0
+        for: 1m
+        labels:
+          severity: page
+          team: szl-oncall
+        annotations:
+          summary: "Khipu RS(10,6) erasure recovery exceeded on {{ $labels.flagship }}"
+          description: "szl_khipu_rs_recovery_failures_total > 0 — unrecoverable chain segment."
+          runbook_url: "https://github.com/szl-holdings/platform/blob/main/docs/runbooks/alerts/RSErasureExceeded.md"
+
+      - alert: MCPClientErrors
+        expr: rate(szl_mcp_400_total[5m]) > 0.1
+        for: 5m
+        labels:
+          severity: warning
+          team: szl-oncall
+        annotations:
+          summary: "Hatun-MCP 4xx client error rate high"
+          description: "rate(szl_mcp_400_total[5m]) > 0.1 — check the transport handshake."
+          runbook_url: "https://github.com/szl-holdings/platform/blob/main/docs/runbooks/alerts/MCPClientErrors.md"
+
+      - alert: AYNIReplayStaleness
+        expr: time() - szl_ayni_last_event_ts > 600
+        for: 0m
+        labels:
+          severity: warning
+          team: szl-oncall
+        annotations:
+          summary: "AYNI replay stream stale (> 10m since last event)"
+          description: "time() - szl_ayni_last_event_ts > 600 — replay pipeline may be stalled."
+          runbook_url: "https://github.com/szl-holdings/platform/blob/main/docs/runbooks/alerts/AYNIReplayStaleness.md"

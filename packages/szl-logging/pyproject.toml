@@ -1,14 +1,31 @@
+# SPDX-License-Identifier: Apache-2.0
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
 [project]
 name = "szl-logging"
-version = "0.1.0"
-description = "Structured JSON logging for SZL flagships (Doctrine v11)."
+version = "1.0.0"
+description = "Pydantic-validated structured JSON logging for the SZL flagship mesh"
+readme = "README.md"
 requires-python = ">=3.9"
-authors = [{ name = "SZL Holdings", email = "yachay@szlholdings.dev" }]
 license = { text = "Apache-2.0" }
+authors = [{ name = "Yachay", email = "yachay@szlholdings.dev" }]
+keywords = ["logging", "observability", "opentelemetry", "structured-logging", "szl"]
+dependencies = [
+    "pydantic>=2.0,<3.0",
+]
 
-[build-system]
-requires = ["setuptools>=61"]
-build-backend = "setuptools.build_meta"
+[project.optional-dependencies]
+otel = ["opentelemetry-api>=1.20.0"]
+dev = ["pytest>=7.0", "opentelemetry-api>=1.20.0", "opentelemetry-sdk>=1.20.0"]
 
-[tool.setuptools]
-py-modules = ["szl_logging", "__init__"]
+[project.urls]
+Homepage = "https://github.com/szl-holdings/platform"
+Source = "https://github.com/szl-holdings/platform/tree/main/packages/szl-logging"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/szl_logging"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
