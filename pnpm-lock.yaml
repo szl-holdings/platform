@@ -360,9 +360,6 @@ importers:
       '@workspace/ouroboros-invariant':
         specifier: workspace:*
         version: link:../../packages/ouroboros-invariant
-      '@workspace/szl-lean-dna':
-        specifier: workspace:*
-        version: link:../../packages/szl-lean-dna
       express:
         specifier: ^5
         version: 5.2.1
