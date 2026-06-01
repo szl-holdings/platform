@@ -1,0 +1,170 @@
+{
+  "annotations": {
+    "list": []
+  },
+  "editable": true,
+  "schemaVersion": 39,
+  "title": "Unay \u2014 Recall Latency",
+  "uid": "szl-unay-recall-latency",
+  "tags": [
+    "szl",
+    "doctrine-v11",
+    "flagship-mesh"
+  ],
+  "timezone": "utc",
+  "time": {
+    "from": "now-6h",
+    "to": "now"
+  },
+  "refresh": "1m",
+  "templating": {
+    "list": [
+      {
+        "name": "flagship",
+        "type": "custom",
+        "label": "Flagship",
+        "query": "a11oy,amaru,sentra,rosie,killinchu,hatun-mcp",
+        "current": {
+          "text": "a11oy",
+          "value": "a11oy"
+        },
+        "options": [
+          {
+            "text": "a11oy",
+            "value": "a11oy"
+          },
+          {
+            "text": "amaru",
+            "value": "amaru"
+          },
+          {
+            "text": "sentra",
+            "value": "sentra"
+          },
+          {
+            "text": "rosie",
+            "value": "rosie"
+          },
+          {
+            "text": "killinchu",
+            "value": "killinchu"
+          },
+          {
+            "text": "hatun-mcp",
+            "value": "hatun-mcp"
+          }
+        ]
+      }
+    ]
+  },
+  "panels": [
+    {
+      "id": 1,
+      "title": "p99 recall latency",
+      "type": "timeseries",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${DS_PROM}"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "s"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "x": 0,
+        "y": 0,
+        "w": 12,
+        "h": 8
+      },
+      "targets": [
+        {
+          "expr": "histogram_quantile(0.99, sum by (le) (rate(unay_recall_duration_seconds_bucket[5m])))",
+          "refId": "A"
+        }
+      ]
+    },
+    {
+      "id": 2,
+      "title": "p50 recall latency",
+      "type": "timeseries",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${DS_PROM}"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "s"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "x": 12,
+        "y": 0,
+        "w": 12,
+        "h": 8
+      },
+      "targets": [
+        {
+          "expr": "histogram_quantile(0.50, sum by (le) (rate(unay_recall_duration_seconds_bucket[5m])))",
+          "refId": "A"
+        }
+      ]
+    },
+    {
+      "id": 3,
+      "title": "Recall QPS",
+      "type": "timeseries",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${DS_PROM}"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "reqps"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "x": 0,
+        "y": 8,
+        "w": 12,
+        "h": 8
+      },
+      "targets": [
+        {
+          "expr": "sum(rate(unay_recall_total[1m]))",
+          "refId": "A"
+        }
+      ]
+    },
+    {
+      "id": 4,
+      "title": "Recall hit ratio",
+      "type": "timeseries",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${DS_PROM}"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "percentunit"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "x": 12,
+        "y": 8,
+        "w": 12,
+        "h": 8
+      },
+      "targets": [
+        {
+          "expr": "sum(rate(unay_recall_hit_total[5m])) / sum(rate(unay_recall_total[5m]))",
+          "refId": "A"
+        }
+      ]
+    }
+  ]
+}

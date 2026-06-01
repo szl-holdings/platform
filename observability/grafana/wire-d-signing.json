@@ -1,0 +1,170 @@
+{
+  "annotations": {
+    "list": []
+  },
+  "editable": true,
+  "schemaVersion": 39,
+  "title": "Wire-D \u2014 DSSE Signing",
+  "uid": "szl-wire-d-signing",
+  "tags": [
+    "szl",
+    "doctrine-v11",
+    "flagship-mesh"
+  ],
+  "timezone": "utc",
+  "time": {
+    "from": "now-6h",
+    "to": "now"
+  },
+  "refresh": "1m",
+  "templating": {
+    "list": [
+      {
+        "name": "flagship",
+        "type": "custom",
+        "label": "Flagship",
+        "query": "a11oy,amaru,sentra,rosie,killinchu,hatun-mcp",
+        "current": {
+          "text": "a11oy",
+          "value": "a11oy"
+        },
+        "options": [
+          {
+            "text": "a11oy",
+            "value": "a11oy"
+          },
+          {
+            "text": "amaru",
+            "value": "amaru"
+          },
+          {
+            "text": "sentra",
+            "value": "sentra"
+          },
+          {
+            "text": "rosie",
+            "value": "rosie"
+          },
+          {
+            "text": "killinchu",
+            "value": "killinchu"
+          },
+          {
+            "text": "hatun-mcp",
+            "value": "hatun-mcp"
+          }
+        ]
+      }
+    ]
+  },
+  "panels": [
+    {
+      "id": 1,
+      "title": "p99 /khipu/sign latency",
+      "type": "timeseries",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${DS_PROM}"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "s"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "x": 0,
+        "y": 0,
+        "w": 12,
+        "h": 8
+      },
+      "targets": [
+        {
+          "expr": "histogram_quantile(0.99, sum by (le,organ) (rate(http_request_duration_seconds_bucket{endpoint=\"/khipu/sign\"}[5m])))",
+          "refId": "A"
+        }
+      ]
+    },
+    {
+      "id": 2,
+      "title": "Signed-receipt success rate",
+      "type": "timeseries",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${DS_PROM}"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "percentunit"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "x": 12,
+        "y": 0,
+        "w": 12,
+        "h": 8
+      },
+      "targets": [
+        {
+          "expr": "sum by (organ) (rate(khipu_sign_success_total[5m])) / sum by (organ) (rate(khipu_sign_total[5m]))",
+          "refId": "A"
+        }
+      ]
+    },
+    {
+      "id": 3,
+      "title": "Wire-D verification success (target 100%)",
+      "type": "timeseries",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${DS_PROM}"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "percentunit"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "x": 0,
+        "y": 8,
+        "w": 12,
+        "h": 8
+      },
+      "targets": [
+        {
+          "expr": "sum by (organ) (rate(wire_d_verify_success_total[5m])) / sum by (organ) (rate(wire_d_verify_total[5m]))",
+          "refId": "A"
+        }
+      ]
+    },
+    {
+      "id": 4,
+      "title": "DSSE envelopes signed/min",
+      "type": "timeseries",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${DS_PROM}"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "opm"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "x": 12,
+        "y": 8,
+        "w": 12,
+        "h": 8
+      },
+      "targets": [
+        {
+          "expr": "sum by (organ) (rate(khipu_sign_total[1m]))",
+          "refId": "A"
+        }
+      ]
+    }
+  ]
+}

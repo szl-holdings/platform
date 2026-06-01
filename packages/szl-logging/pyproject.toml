@@ -1,0 +1,14 @@
+[project]
+name = "szl-logging"
+version = "0.1.0"
+description = "Structured JSON logging for SZL flagships (Doctrine v11)."
+requires-python = ">=3.9"
+authors = [{ name = "SZL Holdings", email = "yachay@szlholdings.dev" }]
+license = { text = "Apache-2.0" }
+
+[build-system]
+requires = ["setuptools>=61"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools]
+py-modules = ["szl_logging", "__init__"]
