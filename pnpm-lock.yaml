@@ -360,6 +360,9 @@ importers:
       '@workspace/ouroboros-invariant':
         specifier: workspace:*
         version: link:../../packages/ouroboros-invariant
+      '@workspace/szl-lean-dna':
+        specifier: workspace:*
+        version: link:../../packages/szl-lean-dna
       express:
         specifier: ^5
         version: 5.2.1
@@ -2044,6 +2047,10 @@ importers:
       '@szl-holdings/forge-runtime':
         specifier: workspace:*
         version: link:../forge-runtime
+    devDependencies:
+      '@types/node':
+        specifier: 'catalog:'
+        version: 25.3.5
 
   lib/worldline:
     dependencies:
@@ -2523,6 +2530,9 @@ importers:
 
   packages/anatomy-contracts:
     devDependencies:
+      '@types/node':
+        specifier: 'catalog:'
+        version: 25.3.5
       typescript:
         specifier: 'catalog:'
         version: 6.0.3
@@ -3138,6 +3148,8 @@ importers:
       vitest:
         specifier: ^4.1.7
         version: 4.1.7(@opentelemetry/api@1.9.1)(@types/node@25.3.5)(@vitest/coverage-v8@4.1.7)(@vitest/ui@4.1.7)(esbuild@0.27.3)(happy-dom@20.8.9)(jiti@2.6.1)(terser@5.46.1)(tsx@4.21.0)(yaml@2.8.3)
+
+  packages/local-llm: {}
 
   packages/marketing:
     dependencies:
@@ -4067,6 +4079,18 @@ importers:
         specifier: ^4.1.7
         version: 4.1.7(@opentelemetry/api@1.9.1)(@types/node@25.3.5)(@vitest/coverage-v8@4.1.7)(@vitest/ui@4.1.7)(esbuild@0.27.3)(happy-dom@20.8.9)(jiti@2.6.1)(terser@5.46.1)(tsx@4.21.0)(yaml@2.8.3)
 
+  packages/szl-lean-dna:
+    devDependencies:
+      '@types/node':
+        specifier: 'catalog:'
+        version: 25.3.5
+      typescript:
+        specifier: 'catalog:'
+        version: 6.0.3
+      vitest:
+        specifier: 'catalog:'
+        version: 4.1.7(@opentelemetry/api@1.9.1)(@types/node@25.3.5)(@vitest/coverage-v8@4.1.7)(@vitest/ui@4.1.7)(esbuild@0.27.3)(happy-dom@20.8.9)(jiti@2.6.1)(terser@5.46.1)(tsx@4.21.0)(yaml@2.8.3)
+
   packages/szl-sdk:
     devDependencies:
       typescript:
@@ -4176,6 +4200,9 @@ importers:
 
   packages/unified-kernel:
     devDependencies:
+      '@types/node':
+        specifier: 'catalog:'
+        version: 25.3.5
       tsx:
         specifier: ^4.19.0
         version: 4.21.0
@@ -4184,7 +4211,7 @@ importers:
         version: 6.0.3
       vitest:
         specifier: 'catalog:'
-        version: 4.1.7(@opentelemetry/api@1.9.1)(@types/node@25.6.0)(@vitest/coverage-v8@4.1.7)(@vitest/ui@4.1.7)(esbuild@0.27.3)(happy-dom@20.8.9)(jiti@2.6.1)(terser@5.46.1)(tsx@4.21.0)(yaml@2.8.3)
+        version: 4.1.7(@opentelemetry/api@1.9.1)(@types/node@25.3.5)(@vitest/coverage-v8@4.1.7)(@vitest/ui@4.1.7)(esbuild@0.27.3)(happy-dom@20.8.9)(jiti@2.6.1)(terser@5.46.1)(tsx@4.21.0)(yaml@2.8.3)
 
   packages/verifier:
     dependencies:
