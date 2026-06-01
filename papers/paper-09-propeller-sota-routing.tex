@@ -1,0 +1,287 @@
+# Propeller-Drive Thrust Governance and State-of-the-Art Agentic Routing via the Lutar Omega Simplex
+
+**Author:** Stephen Paul Lutar Jr.
+**Affiliation:** SZL Consulting Ltd
+**ORCID:** [0009-0001-0110-4173](https://orcid.org/0009-0001-0110-4173)
+**Contact:** stephenlutar2@gmail.com
+**Date:** 4 May 2026
+**Version:** v12
+**Companion papers:** v1--v11 (see References)
+**Reference implementation:** [github.com/szl-holdings/szl-holdings-platform](https://github.com/szl-holdings/szl-holdings-platform) -- `packages/ouroboros-integrations/src/sovereign-engine.ts` (PropellerDrive, SOTAAgenticRouter, SOTA_MODELS, LUTAR_GENS classes)
+**License:** CC BY 4.0
+
+---
+
+## Abstract
+
+We introduce two tightly coupled innovations that complete the A11oy operational routing layer: (1) A11oy Propeller Drive (APD), a thrust-governed model-routing discipline derived from propeller theory, where the routing magnitude P_Lambda is the product of information density rho_I, swept cognitive area A_omega, velocity gain delta_v, Froude propulsive efficiency eta_F, and goal-alignment cosine cos theta; and (2) the SOTA Agentic Router (SAR), which operationalises the Lutar Omega simplex L_Omega = sum(w_k * L_k) across six named scalar functionals (Bekenstein, Newton, Chinchilla, Friston, Noether, Omega) with mode-dependent weight presets on the 5-simplex. Both systems are implemented as stateless TypeScript classes within the SZL Holdings sovereign engine (40 innovations total) and exposed through production API endpoints. This paper does **not** claim empirical validation on standard benchmarks. The contribution is the formal framework, its physical analogies, and the public reference implementation.
+
+---
+
+## 1. Motivation and Continuity from v1--v11
+
+The preceding papers established trust evaluation (v1, Lutar Omega formalism), retrieval (v2, Prisca-GraphRAG), safety (v3, Hermetic guardrails), memory (v4, Sefirot-Kabbalah Hopfield), inference dynamics (v5, free-energy predictive coding), interpretability (v6, Tawa SAE), quantum coherence (v7, EPR-Bell sacred geometry), and training dynamics (v8/v11, Chinchilla-Lutar scaling with grokking phase detection and dynamical bifurcation analysis).
+
+The present paper addresses the *routing decision layer*: given a heterogeneous fleet of foundation models (May 2026 state of the art), how does the system (a) select the optimal model for each query, and (b) govern iterative agentic loops so that they converge rather than drift. We draw on two physical analogies: propeller thrust mechanics for (a), and simplex optimisation for (b).
+
+---
+
+## 2. The Lutar Omega Simplex (L_Omega)
+
+### 2.1 Six Scalar Functionals (Generations)
+
+Each candidate model m and query q yield six non-negative scores:
+
+| Generation | Name | Formula | Physical Analogy |
+|---|---|---|---|
+| L1 | Bekenstein | (I * ln(1 + t_in)) / C | Information density per Bekenstein bound |
+| L2 | Newton | tps^2 / latency_ms | Force = mass * acceleration (throughput force) |
+| L3 | Chinchilla | ln(1 + headroom) * I | Compute-optimal context fit (Hoffmann 2022) |
+| L4 | Friston | exp(match) / (1 + cost_in) | Free-energy minimisation (strength match) |
+| L5 | Noether | I / max(discount, 0.1) | Symmetry conservation (batch stability) |
+| L6 | Omega | sqrt(L1 * L2) | Self-referential meta-score |
+
+where I = intelligence rating, C = max(cost_in + cost_out, 1e-6), t_in = input tokens, tps = tokens per second, headroom = context - t_in - t_out, match = count of required strengths present, and discount = 1 - batch_discount when batching.
+
+### 2.2 Min-Max Normalisation
+
+For k candidates, each L_i is min-max normalised across the candidate set:
+
+L_i^norm(m) = (L_i(m) - min_j L_i(j)) / max(max_j L_i(j) - min_j L_i(j), 1e-9)
+
+This projects all generations onto [0, 1] before weighting.
+
+### 2.3 Weighted Simplex
+
+The composite score is:
+
+L_Omega(m) = sum_{i=1}^{6} w_i * L_i^norm(m), where sum(w_i) = 1, w_i >= 0
+
+The weight vector w lives on the 5-simplex. Six mode presets retune w for different operational postures:
+
+| Mode | w1 | w2 | w3 | w4 | w5 | w6 | Bias |
+|---|---|---|---|---|---|---|---|
+| agentic | 0.15 | 0.20 | 0.10 | 0.25 | 0.10 | 0.20 | Balanced tool use |
+| supreme | 0.10 | 0.05 | 0.25 | 0.30 | 0.05 | 0.25 | Reasoning heavy |
+| cheap | 0.45 | 0.05 | 0.10 | 0.25 | 0.10 | 0.05 | Cost dominates |
+| fast | 0.05 | 0.55 | 0.05 | 0.15 | 0.10 | 0.10 | Throughput dominates |
+| batch | 0.25 | 0.10 | 0.15 | 0.15 | 0.25 | 0.10 | Discount/symmetry |
+| propel | 0.10 | 0.25 | 0.15 | 0.20 | 0.05 | 0.25 | Thrust-aligned |
+
+Each preset sums to 1.0, verified programmatically at startup.
+
+---
+
+## 3. A11oy Propeller Drive (APD)
+
+### 3.1 Physical Analogy
+
+The propeller drive draws on marine propulsion theory. In naval architecture, propeller thrust T is:
+
+T = rho * A * delta_v * eta_F
+
+where rho is fluid density, A is swept disc area, delta_v is velocity increment through the disc, and eta_F is Froude propulsive efficiency (Froude 1878; Carlton 2018).
+
+We map this to model routing:
+
+- rho_I (information density): I / max(cost_in + cost_out, 1e-6) -- intelligence per dollar, analogous to fluid density
+- A_omega (swept cognitive area): heads * ln(1 + headroom_k) -- the number of attention heads (approximated as I/4) multiplied by the log of available context headroom in kilotokens
+- delta_v (velocity gain): max(omega_out - omega_in, 1e-6) -- the L_Omega improvement from one agentic step to the next
+- eta_F (Froude efficiency): 2 / (1 + v_ratio) where v_ratio = omega_out / max(omega_in, 1e-6) -- bounded in (0, 2], penalising diminishing returns
+- cos theta (goal alignment): cosine similarity between the goal vector and the step vector, in [-1, 1]
+
+### 3.2 The P_Lambda Formula
+
+P_Lambda = rho_I * A_omega * delta_v * eta_F * cos theta
+
+This is a signed scalar. Positive P_Lambda indicates thrust toward the goal. Negative P_Lambda (anti-aligned steps) is penalised. The router selects the model that maximises P_Lambda across the candidate set.
+
+### 3.3 Step and Goal Vectors
+
+The goal vector g = (g1, g2, g3) defaults to (1.0, 0.8, 0.6), encoding preferences for thrust magnitude, efficiency, and cost sensitivity. The step vector s = (score, tps/400, 1/(1+cost_in)) is computed per candidate, projecting the candidate's operational profile into the same space.
+
+Alignment is computed via standard cosine similarity:
+
+cos theta = (g . s) / (||g|| * ||s||)
+
+### 3.4 Thrust-Governed Agentic Iteration
+
+In multi-step agentic loops, P_Lambda serves as a convergence criterion. If thrust falls below a minimum threshold (default 0.25), the loop halts -- the system has reached closure. This prevents unbounded iteration and wasted compute.
+
+---
+
+## 4. SOTA Model Registry (May 2026)
+
+The router operates over the following frontier models:
+
+| Model | Provider | Intelligence | Context | TPS | Input Cost | Output Cost | Batch Discount |
+|---|---|---|---|---|---|---|---|
+| gpt-5.5 | OpenAI | 60 | 400K | 120 | 1.25 | 10.00 | 50% |
+| claude-opus-4.7 | Anthropic | 57 | 1M | 85 | 15.00 | 75.00 | 50% |
+| gemini-3.1-pro | Google | 57 | 2M | 180 | 1.25 | 10.00 | 50% |
+| kimi-k2.6 | Moonshot | 54 | 262K | 140 | 0.55 | 2.20 | 0% |
+| gpt-5-nano | OpenAI | 46 | 400K | 180 | 0.05 | 0.40 | 50% |
+| gemini-2.5-flash-lite | Google | 44 | 1M | 250 | 0.10 | 0.40 | 50% |
+| mistral-small-free | Mistral/OR | 38 | 128K | 90 | 0.00 | 0.00 | 0% |
+| groq-llama-3.3-70b | Groq | 41 | 131K | 394 | 0.59 | 0.79 | 0% |
+
+Intelligence ratings are ordinal, derived from public arena leaderboards (LMSYS Chatbot Arena, Artificial Analysis). Costs are per million tokens in USD. TPS is tokens per second at the provider's stated throughput.
+
+---
+
+## 5. Routing Algorithm
+
+### 5.1 SAR (L_Omega-only) Routing
+
+1. Estimate input tokens: t_in = max(1, floor(len(prompt) / 4))
+2. Filter candidates: context >= t_in + max_out
+3. Compute raw L1..L6 for each candidate
+4. Min-max normalise across candidates
+5. Weighted sum with mode weights
+6. Select argmax
+
+### 5.2 APD (Propeller-augmented) Routing
+
+Steps 1--5 as SAR, then:
+
+6. For each candidate, simulate one agentic step:
+   - omega_in = raw_omega * 0.5 (baseline)
+   - omega_out = raw_omega * (1 + 0.1 * score) (projected improvement)
+   - step_vec = (score, tps/400, 1/(1+cost_in))
+7. Compute P_Lambda for each candidate
+8. Select argmax(P_Lambda)
+
+The two-phase approach means APD always considers both the simplex score and the thrust dynamics. A model with a high L_Omega score but poor alignment or efficiency may be outranked by one with moderate score but superior thrust.
+
+---
+
+## 6. Properties and Invariants
+
+**Simplex constraint:** All mode weight vectors sum to 1.0, verified at construction time. The default weights [0.22, 0.18, 0.15, 0.20, 0.10, 0.15] also sum to 1.0.
+
+**Froude efficiency bound:** eta_F = 2/(1 + v_ratio) is in (0, 2] for all positive v_ratio. When omega_out = omega_in (no improvement), eta_F = 1.0. When omega_out >> omega_in (large gain), eta_F approaches 0 (diminishing returns). This models the actuator disc limit from Froude-Rankine momentum theory.
+
+**Alignment symmetry:** cos theta is symmetric in g and s, and antisymmetric under negation of either vector. A step directly opposed to the goal produces negative P_Lambda, correctly penalising regression.
+
+**Context safety:** Both routers filter candidates by context window before scoring, preventing context overflow.
+
+**Determinism:** Both routers are fully deterministic for the same input (prompt, mode, require, batch). No randomness is involved.
+
+---
+
+## 7. Relationship to Prior Work
+
+### 7.1 Model Routing
+
+FrugalGPT (Chen et al., 2023) introduced cascaded LLM routing with cost awareness. RouteLLM (Ong et al., 2024) added quality-aware routing with learned preference models. The Lutar Simplex Router (v1) extended these with a multi-axis simplex that integrates cost, speed, quality, and domain fitness simultaneously. APD further extends LSR by adding thrust dynamics and convergence governance to the routing decision.
+
+### 7.2 Froude Efficiency in AI
+
+The application of Froude propulsive efficiency to iterative AI systems appears to be novel. The Froude-Rankine actuator disc model (Froude, 1878; Rankine, 1865) has been applied in wind turbine optimisation (Betz limit) and marine propulsion, but not previously to agentic loop convergence. The analogy maps cleanly: the "fluid" is the information stream, the "disc" is the model's attention mechanism, and the "thrust" is the improvement in L_Omega per step.
+
+### 7.3 Agentic Loop Governance
+
+ReAct (Yao et al., 2023), Reflexion (Shinn et al., 2023), and LATS (Zhou et al., 2024) introduced structured agentic iteration. However, none provide a formal convergence criterion grounded in propulsive efficiency. APD's thrust threshold provides a principled halting condition.
+
+---
+
+## 8. Implementation
+
+Both APD and SAR are implemented as stateless TypeScript classes in `sovereign-engine.ts`:
+
+- `PropellerDrive.computePropeller(model, inTok, outTok, omegaIn, omegaOut, goalVec, stepVec)` returns a `PropellerReading` with thrust, froudeEff, alignment, pLambda, vector, and notes
+- `PropellerDrive.route(prompt, maxOut, mode, require, batch, goalVec)` returns a `PropellerRouteResult` with model selection, score, thrust components, cost estimate, and latency estimate
+- `SOTAAgenticRouter.route(prompt, maxOut, mode, require, batch)` returns a `SOTARouteResult` with model, score, cost, latency, weights, breakdown, and reason
+- `SOTAAgenticRouter.lutarTable(inTok, outTok, require, batch, weights?)` returns the full L1..L6 and L_Omega table for all models
+
+API endpoints:
+- POST /api/ouroboros/sovereign/propeller/compute
+- POST /api/ouroboros/sovereign/propeller/route
+- GET /api/ouroboros/sovereign/propeller/models
+- GET /api/ouroboros/sovereign/propeller/formula
+- POST /api/ouroboros/sovereign/sota/route
+- POST /api/ouroboros/sovereign/sota/lutar
+- GET /api/ouroboros/sovereign/sota/models
+- GET /api/ouroboros/sovereign/sota/modes
+
+All endpoints are stateless, compute-only, and publicly accessible (no PII, no session state).
+
+---
+
+## 9. Innovation Manifest Position
+
+With APD (innovation 39) and SAR (innovation 40), the sovereign engine now contains 40 innovations spanning routing, retrieval, safety, memory, evaluation, multimodal fusion, tool orchestration, privacy, observability, reasoning, synthetic data, edge inference, self-play, quantum optimisation, world modelling, continual learning, scaling analysis, grokking detection, active inference, radial computation, sparse autoencoders, red-teaming, state-space tracking, entanglement validation, associative memory, predictive coding, sacred geometry, cognitive mapping, bifurcation detection, MIMO state-space modelling, reflection routing, knowledge compression, evolutionary optimisation, thrust-governed routing, and agentic simplex routing.
+
+---
+
+## 10. Limitations and Future Directions
+
+1. Intelligence ratings are ordinal proxies, not cardinal measures. A calibrated intelligence metric grounded in information-theoretic bounds would strengthen the L1 (Bekenstein) generation.
+
+2. The goal and step vectors are currently 3-dimensional. Higher-dimensional embeddings of operational objectives could capture more nuanced alignment.
+
+3. Froude efficiency assumes a single-disc model. Multi-stage propeller analogies (contra-rotating propellers, ducted fans) could model multi-agent cascades more accurately.
+
+4. The model registry is a snapshot of May 2026 pricing and capabilities. Automated registry updates from provider APIs would keep the router current.
+
+5. Empirical validation against standard routing benchmarks (RouterBench, RouteLLM eval suite) remains future work.
+
+---
+
+## References
+
+Betz, A. (1920). Das Maximum der theoretisch moglichen Ausnutzung des Windes durch Windmotoren. Zeitschrift fur das gesamte Turbinenwesen, 26, 307--309.
+
+Carlton, J. (2018). Marine Propellers and Propulsion (4th ed.). Butterworth-Heinemann.
+
+Chen, L., Zaharia, M., & Zou, J. (2023). FrugalGPT: How to Use Large Language Models While Reducing Cost and Improving Performance. arXiv:2305.05176.
+
+Froude, W. (1878). On the elementary relation between pitch, slip, and propulsive efficiency. Transactions of the Institution of Naval Architects, 19, 47--65.
+
+Hoffmann, J., Borgeaud, S., Mensch, A., et al. (2022). Training Compute-Optimal Large Language Models. arXiv:2203.15556.
+
+Ong, I., Srivatsa, A., Agrawal, S., et al. (2024). RouteLLM: Learning to Route LLMs with Preference Data. arXiv:2406.18665.
+
+Rankine, W. J. M. (1865). On the mechanical principles of the action of propellers. Transactions of the Institution of Naval Architects, 6, 13--39.
+
+Shinn, N., Cassano, F., Gopinath, A., et al. (2023). Reflexion: Language Agents with Verbal Reinforcement Learning. NeurIPS 2023.
+
+Yao, S., Zhao, J., Yu, D., et al. (2023). ReAct: Synergizing Reasoning and Acting in Language Models. ICLR 2023.
+
+Zhou, A., Yan, K., Shlapentokh-Rothman, M., Wang, H., & Wang, Y.-X. (2024). Language Agent Tree Search Unifies Reasoning, Acting, and Planning in Language Models. ICML 2024.
+
+---
+
+## Appendix A: Simplex Weight Verification
+
+For each mode preset M in {agentic, supreme, cheap, fast, batch, propel}:
+
+assert |sum(w_i for w_i in M) - 1.0| < 1e-9
+
+This is checked programmatically at class construction time and in the self-test suite.
+
+## Appendix B: Froude Efficiency Derivation
+
+The ideal propulsive efficiency of an actuator disc is:
+
+eta_ideal = 2 / (1 + v_out/v_in)
+
+where v_in is the free-stream velocity and v_out is the slipstream velocity (Froude, 1878). For our mapping:
+
+- v_in = omega_in (baseline L_Omega score before the step)
+- v_out = omega_out (projected L_Omega score after the step)
+
+When the step produces no improvement (v_out = v_in), eta = 1.0 (perfect efficiency, no waste). When the step produces large improvement (v_out >> v_in), eta approaches 0 (diminishing returns, analogous to the Betz limit). This correctly penalises models that promise large gains but with decreasing marginal utility.
+
+## Appendix C: Cosine Alignment Geometry
+
+The cosine similarity between goal vector g and step vector s is:
+
+cos theta = sum(g_i * s_i) / (||g|| * ||s||)
+
+For the default goal vector g = (1.0, 0.8, 0.6):
+- A step vector s = (1.0, 0.8, 0.6) yields cos theta = 1.0 (perfect alignment)
+- A step vector s = (-1.0, -0.8, -0.6) yields cos theta = -1.0 (perfect anti-alignment)
+- Orthogonal steps yield cos theta = 0 (no thrust, neutral)
+
+This geometry ensures that only goal-directed steps contribute positive thrust.
