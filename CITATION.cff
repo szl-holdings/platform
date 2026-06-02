@@ -39,3 +39,123 @@ keywords:
   - szl-holdings
   - ai-governance
 license: LicenseRef-SZL-Proprietary
+
+# --- Appended: 8 published Zenodo papers + umbrella concept DOI ---
+references:
+  - type: article
+    title: "Lutar Omega Formalism"
+    authors:
+      - family-names: Lutar
+        given-names: "Stephen P."
+        name-suffix: "Jr."
+        orcid: "https://orcid.org/0009-0001-0110-4173"
+    year: 2026
+    publisher:
+      name: Zenodo
+    doi: "10.5281/zenodo.20499315"
+    url: "https://doi.org/10.5281/zenodo.20499315"
+    license: CC-BY-4.0
+  - type: article
+    title: "Prisca-GraphRAG"
+    authors:
+      - family-names: Lutar
+        given-names: "Stephen P."
+        name-suffix: "Jr."
+        orcid: "https://orcid.org/0009-0001-0110-4173"
+    year: 2026
+    publisher:
+      name: Zenodo
+    doi: "10.5281/zenodo.20499317"
+    url: "https://doi.org/10.5281/zenodo.20499317"
+    license: CC-BY-4.0
+  - type: article
+    title: "Hermetic Constitutional Guardrails"
+    authors:
+      - family-names: Lutar
+        given-names: "Stephen P."
+        name-suffix: "Jr."
+        orcid: "https://orcid.org/0009-0001-0110-4173"
+    year: 2026
+    publisher:
+      name: Zenodo
+    doi: "10.5281/zenodo.20499319"
+    url: "https://doi.org/10.5281/zenodo.20499319"
+    license: CC-BY-4.0
+  - type: article
+    title: "Sefirot Continual Learning"
+    authors:
+      - family-names: Lutar
+        given-names: "Stephen P."
+        name-suffix: "Jr."
+        orcid: "https://orcid.org/0009-0001-0110-4173"
+    year: 2026
+    publisher:
+      name: Zenodo
+    doi: "10.5281/zenodo.20499322"
+    url: "https://doi.org/10.5281/zenodo.20499322"
+    license: CC-BY-4.0
+  - type: article
+    title: "Free-Energy-Lutar Active Inference"
+    authors:
+      - family-names: Lutar
+        given-names: "Stephen P."
+        name-suffix: "Jr."
+        orcid: "https://orcid.org/0009-0001-0110-4173"
+    year: 2026
+    publisher:
+      name: Zenodo
+    doi: "10.5281/zenodo.20499324"
+    url: "https://doi.org/10.5281/zenodo.20499324"
+    license: CC-BY-4.0
+  - type: article
+    title: "Tawa Sparse Autoencoder"
+    authors:
+      - family-names: Lutar
+        given-names: "Stephen P."
+        name-suffix: "Jr."
+        orcid: "https://orcid.org/0009-0001-0110-4173"
+    year: 2026
+    publisher:
+      name: Zenodo
+    doi: "10.5281/zenodo.20499328"
+    url: "https://doi.org/10.5281/zenodo.20499328"
+    license: CC-BY-4.0
+  - type: article
+    title: "EPR-Bell Entanglement Validation"
+    authors:
+      - family-names: Lutar
+        given-names: "Stephen P."
+        name-suffix: "Jr."
+        orcid: "https://orcid.org/0009-0001-0110-4173"
+    year: 2026
+    publisher:
+      name: Zenodo
+    doi: "10.5281/zenodo.20499330"
+    url: "https://doi.org/10.5281/zenodo.20499330"
+    license: CC-BY-4.0
+  - type: article
+    title: "Chinchilla-Lutar Scaling Laws"
+    authors:
+      - family-names: Lutar
+        given-names: "Stephen P."
+        name-suffix: "Jr."
+        orcid: "https://orcid.org/0009-0001-0110-4173"
+    year: 2026
+    publisher:
+      name: Zenodo
+    doi: "10.5281/zenodo.20499334"
+    url: "https://doi.org/10.5281/zenodo.20499334"
+    license: CC-BY-4.0
+  - type: generic
+    title: "SZL Holdings Research Corpus (umbrella concept record)"
+    authors:
+      - family-names: Lutar
+        given-names: "Stephen P."
+        name-suffix: "Jr."
+        orcid: "https://orcid.org/0009-0001-0110-4173"
+    year: 2026
+    publisher:
+      name: Zenodo
+    doi: "10.5281/zenodo.19944926"
+    url: "https://doi.org/10.5281/zenodo.19944926"
+    notes: "Concept DOI (always-latest). Umbrella v21: 10.5281/zenodo.20490218"

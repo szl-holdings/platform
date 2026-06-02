@@ -306,6 +306,47 @@ The Alloy Doctrine is the permanent governance framework that defines how all AI
 
 ---
 
+## Research
+
+SZL Holdings research is publicly disseminated and DOI-archived on Zenodo under CC-BY-4.0, sole author **Stephen P. Lutar Jr.** ([ORCID 0009-0001-0110-4173](https://orcid.org/0009-0001-0110-4173)). All DOIs below resolve live.
+
+**Eight published papers (Zenodo DOIs):**
+
+1. **Lutar Omega Formalism** — [10.5281/zenodo.20499315](https://doi.org/10.5281/zenodo.20499315)
+2. **Prisca-GraphRAG** — [10.5281/zenodo.20499317](https://doi.org/10.5281/zenodo.20499317)
+3. **Hermetic Constitutional Guardrails** — [10.5281/zenodo.20499319](https://doi.org/10.5281/zenodo.20499319)
+4. **Sefirot Continual Learning** — [10.5281/zenodo.20499322](https://doi.org/10.5281/zenodo.20499322)
+5. **Free-Energy-Lutar Active Inference** — [10.5281/zenodo.20499324](https://doi.org/10.5281/zenodo.20499324)
+6. **Tawa Sparse Autoencoder** — [10.5281/zenodo.20499328](https://doi.org/10.5281/zenodo.20499328)
+7. **EPR-Bell Entanglement Validation** — [10.5281/zenodo.20499330](https://doi.org/10.5281/zenodo.20499330)
+8. **Chinchilla-Lutar Scaling Laws** — [10.5281/zenodo.20499334](https://doi.org/10.5281/zenodo.20499334)
+
+**Public dissemination surfaces:**
+
+- Hugging Face papers landing — [SZL Holdings org card](https://huggingface.co/SZLHOLDINGS) (RESEARCH section)
+- Dedicated Papers Space — [betterwithage/szl-papers-live](https://huggingface.co/spaces/betterwithage/szl-papers-live)
+- Machine-readable citation metadata — [`CITATION.cff`](./CITATION.cff)
+
+**Cite the corpus (umbrella concept DOI — always resolves to latest):**
+
+```bibtex
+@misc{lutar2026szlcorpus,
+  author       = {Lutar, Stephen P. Jr.},
+  title        = {SZL Holdings Research Corpus (umbrella concept record)},
+  year         = {2026},
+  publisher    = {Zenodo},
+  doi          = {10.5281/zenodo.19944926},
+  url          = {https://doi.org/10.5281/zenodo.19944926},
+  note         = {Concept DOI (always resolves to latest version). Umbrella v21: 10.5281/zenodo.20490218. ORCID: 0009-0001-0110-4173}
+}
+```
+
+> Umbrella v21: [10.5281/zenodo.20490218](https://doi.org/10.5281/zenodo.20490218) · Concept: [10.5281/zenodo.19944926](https://doi.org/10.5281/zenodo.19944926)
+
+<sub>Lineage: Architecture grounded in Hickok & Poeppel 2007 (Nat Rev Neurosci 8:393) · Hickok 2025 *Wired for Words* (MIT Press).</sub>
+
+---
+
 ## How to Cite
 
 If you use this software in research or production, please cite the Ouroboros Thesis v18.0:
