@@ -1,5 +1,5 @@
 <!-- SPDX-License-Identifier: Apache-2.0 -->
-<!-- Sign: Yachay <yachay@szlholdings.dev> · Doctrine v12 · machine source: genome.json -->
+<!-- Sign: Yachay <yachay@szlholdings.dev> · Doctrine v11 · machine source: genome.json -->
 
 # SZL Anatomy GENOME
 
@@ -8,7 +8,7 @@
 > This Markdown is a thin **index**. The machine-consumable source of truth is
 > [`genome.json`](./genome.json) (JSON Schema 2020-12). Tools consume the JSON; humans read this.
 
-- **Doctrine:** v12
+- **Doctrine:** v11
 - **Lean pin:** lutar-lean@main — 749 declarations / 14 unique axioms / 163 tracked sorries — replay hash c7c0ba17
 - **SLSA:** L1 (honest)
 - **Λ-aggregator (F23):** Conjecture 1 — NOT a theorem — bounty: [`BOUNTY.md`](https://github.com/szl-holdings/lutar-lean/blob/main/BOUNTY.md)
