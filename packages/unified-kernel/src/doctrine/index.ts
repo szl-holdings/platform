@@ -1,15 +1,15 @@
 /**
- * doctrine/ — T11 Doctrine v7 enforcer.
+ * doctrine/ — T11 Doctrine v11 LOCKED 749/14/163 enforcer.
  *
  * Backing (REAL): mirrors the doctrine CI scanner (doctrine-v6-scan.js) and
  * a11oy/packages/policy/src/gates/{doctrineCompleteness,doctrineEnforcement}_
  * gate.ts. Formal layer: Lutar/Doctrine/CrossComponentInvariant.lean
- * (doctrine_cross_invariant — proven). Spec: .github/doctrine/DOCTRINE_V7.md.
+ * (doctrine_cross_invariant — proven). Spec: .github/doctrine/DOCTRINE_V11.md.
  *
  * Real string scanning + real boolean composition. No mocks.
  */
 
-/** Doctrine v7 §1 banned marketing superlatives (from AGENT_DOCTRINE_ENFORCEMENT.md). */
+/** Doctrine v11 LOCKED 749/14/163 §1 banned marketing superlatives (from AGENT_DOCTRINE_ENFORCEMENT.md). */
 export const BANNED_MARKETING = [
   "revolutionary",
   "unprecedented",
