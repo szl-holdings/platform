@@ -1,4 +1,4 @@
-# .doctrine-allowlist — Doctrine v7 false-positive exemptions
+# .doctrine-allowlist — Doctrine v11 LOCKED 749/14/163 false-positive exemptions
 #
 # Files listed here are EXEMPTED from the banned-token grep gate.
 # Exemption is NARROW: only use for files whose sole purpose is to enumerate
@@ -8,7 +8,7 @@
 # The sweep tool matches against the b-side path in the unified diff
 # (e.g. "packages/foo/src/bar.ts" without the leading "b/").
 #
-# Authority: Doctrine v7 STRICT — Founder Stephen P. Lutar Jr.
+# Authority: Doctrine v11 LOCKED 749/14/163 — Founder Stephen P. Lutar Jr.
 # Added: 2026-05-31 — allowlist PR fix(ci): doctrine scanner test fixtures (unified-kernel)
 #
 # ── unified-kernel doctrine scanner (packages/unified-kernel/src/doctrine/) ──
