@@ -54,9 +54,9 @@ Audit-Closure Operator** (THE central operator) → the branch operators
 ### The Λ Audit-Closure Operator
 
 ```ts
-import { Λ_audit_closure, DOCTRINE_V7_AXIOMS } from "@szl-holdings/unified-kernel";
+import { Λ_audit_closure, DOCTRINE_V11_AXIOMS } from "@szl-holdings/unified-kernel";
 
-const closure = Λ_audit_closure(receiptBus, DOCTRINE_V7_AXIOMS);
+const closure = Λ_audit_closure(receiptBus, DOCTRINE_V11_AXIOMS);
 // → { compositeLambda, perAxiom, pacBayesTailBound, bekensteinCapBits,
 //     bekensteinRespected, reidemeisterClass, ... }
 ```
@@ -120,7 +120,7 @@ Apache 2.0 (Ouroboros Runtime, codex-kernel, Mathlib) and CC-BY 4.0 (Ouroboros
 theses) components; every imported component is listed with attribution in
 `NOTICE.md`.
 
-## Doctrine v7
+## Doctrine v11 LOCKED 749/14/163
 
 No mocks. No `() => true` shells — a module with no real backing exports a
 clearly-named function that throws `NotYetError` naming the gap, or delegates to
