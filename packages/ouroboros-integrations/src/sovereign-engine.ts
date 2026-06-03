@@ -282,7 +282,7 @@ export function voteRAG(query: string, k = 5, nRetrievers = 3): RetrievalResult[
  * Lean-anchored DPI bound (sizeBytes * 8 bits) is in Lutar/DPI/DPIBound.lean.
  *
  * Mirrors (partially): Lutar.DPI.dpiAdmit · Lean theorem Lutar.DPI.dpi_bound_positive.
- * Author: Lutar, Stephen P. · ORCID 0009-0001-0110-4173 · F1-4 errata · Doctrine V7.
+ * Author: Lutar, Stephen P. · ORCID 0009-0001-0110-4173 · F1-4 errata · Doctrine v11 LOCKED 749/14/163.
  */
 export function dpiGate(
   content: string,
