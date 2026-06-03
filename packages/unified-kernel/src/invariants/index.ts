@@ -27,7 +27,7 @@
 // The Λ Audit-Closure Operator (public API) + the three named bound primitives.
 export {
   Λ_audit_closure,
-  DOCTRINE_V7_AXIOMS,
+  DOCTRINE_V11_AXIOMS,
   type Receipt,
   type ReceiptBus,
   type Axiom,
