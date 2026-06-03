@@ -1,7 +1,7 @@
 # SPDX-License-Identifier: Apache-2.0
 # © 2026 SZL Holdings — Yachay (Perplexity Computer Agent)
 """
-szl-puriq-os — the PURIQ-OS agentic loop runtime (honest layer over Doctrine v12).
+szl-puriq-os — the PURIQ-OS agentic loop runtime (additive layer built on Doctrine v11 LOCKED).
 
 PURIQ-OS adds a scheduler + loop runtime that turns the 12 canonical organs into
 autonomous agents. Each organ runs a Wiener (1948) feedback loop —
@@ -21,7 +21,7 @@ Open-source deps only: APScheduler, FastAPI, pydantic, sqlite (stdlib).
 from __future__ import annotations
 
 __version__ = "1.0.0"
-DOCTRINE_LAYER = "PURIQ-OS (additive over Doctrine v12)"
+DOCTRINE_LAYER = "PURIQ-OS (additive over Doctrine v11 LOCKED — v12 not yet promoted)"
 
 LOCKED = {
     "declarations": 749,
