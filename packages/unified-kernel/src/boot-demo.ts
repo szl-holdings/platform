@@ -17,7 +17,7 @@ async function main(): Promise<void> {
   // Measure the REAL kernel init time. The canonical Λ-axis paragraph claims a
   // 0.59 ms/request median Λ overhead in the ouroboros bench harness; that is a
   // per-request Λ-operator figure, NOT the full kernel boot. We measure and
-  // report the actual boot here — no faked 0.59 ms (Doctrine v7 §2).
+  // report the actual boot here — no faked 0.59 ms (Doctrine v11 LOCKED 749/14/163 §2 — no fabrication).
   const t0 = performance.now();
   const handle = await start();
   const bootMs = performance.now() - t0;
