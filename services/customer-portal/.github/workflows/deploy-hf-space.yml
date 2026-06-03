@@ -1,0 +1,36 @@
+name: deploy-hf-space
+
+# Mirror the customer-portal repo to the HF Space SZLHOLDINGS/customer-portal
+# (sdk: docker). Requires the HF_TOKEN repo secret (founder one-time action).
+# Sovereign: portal boots with no external API keys; OIDC/keymint are optional env.
+# Doctrine v11 LOCKED 749/14/163 locked_at c7c0ba17. Author: Yachay.
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    if: ${{ secrets.HF_TOKEN != '' }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v6
+        with: { python-version: '3.12' }
+      - name: Push to HF Space
+        env:
+          HF_TOKEN: ${{ secrets.HF_TOKEN }}
+        run: |
+          pip install --quiet huggingface_hub
+          python - <<'PY'
+          import os
+          from huggingface_hub import HfApi
+          api = HfApi(token=os.environ["HF_TOKEN"])
+          api.create_repo("SZLHOLDINGS/customer-portal", repo_type="space",
+                          space_sdk="docker", exist_ok=True)
+          api.upload_folder(folder_path=".", repo_id="SZLHOLDINGS/customer-portal",
+                            repo_type="space",
+                            ignore_patterns=[".git*", "*.db", "*.db-*", "branding/*"])
+          print("deployed to https://szlholdings-customer-portal.hf.space")
+          PY
