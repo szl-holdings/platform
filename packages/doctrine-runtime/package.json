@@ -3,7 +3,7 @@
   "version": "0.3.1",
   "private": false,
   "type": "module",
-  "description": "SZL Doctrine v7 runtime layer — policy composition (R1), SCITT-Rekor adapter (R2), vertical policy gate (R3), A15 persistent homology (R4), xoshiro256** PRNG (R5), K10_v2 replay root (R6).",
+  "description": "SZL Doctrine v11 LOCKED 749/14/163 runtime layer — policy composition (R1), SCITT-Rekor adapter (R2), vertical policy gate (R3), A15 persistent homology (R4), xoshiro256** PRNG (R5), K10_v2 replay root (R6).",
   "exports": {
     ".": {
       "types": "./dist/index.d.ts",
