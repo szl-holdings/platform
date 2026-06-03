@@ -6,7 +6,7 @@
  * sorries; the related competition-math benchmark is 4/12 and quarantined. Per
  * the census action: present the forecasting runtime as a statistical model — do
  * NOT present TH12 or that benchmark as proven (the banned product token for it
- * is intentionally not written here, per Doctrine v7). The function below
+ * is intentionally not written here, per Doctrine v11 LOCKED 749/14/163). The function below
  * computes a real Catoni-style PAC-Bayes bound value;
  * it is labelled a model output, not a theorem.
  */
