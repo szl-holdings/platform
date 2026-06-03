@@ -5,9 +5,9 @@
  */
 import { describe, it, expect } from "vitest";
 import { paperToReceipt, type Paper } from "./paper-to-receipt.ts";
-import { DOCTRINE_V7_AXIOMS, type Receipt } from "./invariants/index.ts";
+import { DOCTRINE_V11_AXIOMS, type Receipt } from "./invariants/index.ts";
 
-const AX = DOCTRINE_V7_AXIOMS;
+const AX = DOCTRINE_V11_AXIOMS;
 
 function makePaper(): Paper {
   const bus: Receipt[] = [
