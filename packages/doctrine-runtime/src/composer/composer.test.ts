@@ -43,8 +43,8 @@ const DEFAULT_CFG: CompositionConfig = {
 // Tests
 // ─────────────────────────────────────────────────────────────────────────────
 
-describe("Doctrine v7 Scanner", () => {
-  it("T01 — accepts valid Doctrine v7 policy", () => {
+describe("Doctrine v11 LOCKED 749/14/163 Scanner", () => {
+  it("T01 — accepts valid Doctrine v11 LOCKED 749/14/163 policy", () => {
     const p = makePolicy({ lambda: 0.8 });
     const result = scanDoctrineV6(p);
     assert.equal(result.version, 6);
