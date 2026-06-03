@@ -72,7 +72,7 @@ def sign_khipu_receipt(agent: str, payload: dict) -> dict:
 
     Signing key: env KHIPU_SIGNING_KEY_B64 (raw 32-byte Ed25519 seed, base64).
     If absent, the envelope is honestly marked unsigned: signed=false. We never
-    emit a fabricated signature (Doctrine v7 §2 anti-fake-green).
+    emit a fabricated signature (Doctrine v11 LOCKED 749/14/163 §2 — anti-fake-green).
     """
     body = {
         "schema": "szl.readiness.receipt/v1",
