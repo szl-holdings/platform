@@ -4,7 +4,7 @@
  * Census status: PARTIAL.
  *  - T07 (amaru memory-attestation): the durable memory store and its
  *    attestation API live in the amaru service. That is a network dependency,
- *    not code we can run in-process. Per Doctrine v7 §2 we do NOT fake it: the
+ *    not code we can run in-process. Per Doctrine v11 LOCKED 749/14/163 §2 we do NOT fake it: the
  *    network read/write is a NotYetError naming the amaru endpoint until a real
  *    client is supplied. No mock store, no `() => true`.
  *  - T08 (Yuyay critique-gate): the critique-gate is REAL, deterministic logic
