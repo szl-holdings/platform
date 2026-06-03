@@ -30,7 +30,10 @@ RUN apk add --no-cache libc6-compat
 RUN corepack enable
 WORKDIR /app
 COPY --from=deps /app/node_modules ./node_modules
-COPY . .
+COPY services/alloy-fabric-api/ ./services/alloy-fabric-api/
+COPY lib/ ./lib/
+COPY packages/ ./packages/ 2>/dev/null || true
+# Per-file COPY — Doctrine v11 (no COPY . .)
 ENV NODE_ENV=production
 RUN --mount=type=cache,id=pnpm-store,target=/root/.local/share/pnpm/store \
     pnpm install --frozen-lockfile --offline --ignore-scripts
