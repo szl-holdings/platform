@@ -16,7 +16,7 @@
  * clean): 749 declarations / 15 raw axioms (14 unique) / 163 sorry tokens.
  * Source of truth: szl-holdings/.github/.github/data/lean_numbers.json.
  *
- * NO new axiom is introduced here (Doctrine v7 §3). This module only NAMES
+ * NO new axiom is introduced here (Doctrine v11 LOCKED 749/14/163 §3). This module only NAMES
  * existing theorems and points each at a runtime assertion already implemented
  * in another module — it asserts nothing in Lean.
  */
@@ -89,7 +89,7 @@ export interface CanonicalNumbers {
  * .github/data/lean_numbers.json (the Trust Tier 1 reproducibility-script
  * output, mirrored from szl-holdings/.github). Falls back to the embedded
  * LEAN_NUMBERS constant if the data file is unreadable, so the kernel never
- * fabricates and never crashes the boot on a missing file. Doctrine v7 §2.
+ * fabricates and never crashes the boot on a missing file. Doctrine v11 LOCKED 749/14/163 §2.
  */
 export function getCanonicalNumbers(): CanonicalNumbers {
   try {
