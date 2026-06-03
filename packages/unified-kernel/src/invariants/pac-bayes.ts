@@ -14,7 +14,7 @@
  * NOT a full generalization guarantee — the underlying sub-Gaussian MGF
  * concentration inequality is an undischarged AXIOM in the Lean layer
  * (Lutar/PACBayes/PACBayes.lean::MomentSubGaussian). It is a real numeric
- * formula, returned as a statistical estimate, not a proof (Doctrine v7 §2).
+ * formula, returned as a statistical estimate, not a proof (Doctrine v11 LOCKED 749/14/163 §2 — no fabrication).
  *
  * Citation: McAllester, D. (2003). "PAC-Bayesian Stochastic Model Selection."
  *   Machine Learning 51, 5–21. DOI 10.1023/A:1021840411064.
