@@ -1,161 +1,40 @@
 cff-version: 1.2.0
-message: "If you reference the SZL Holdings platform repository, please cite as follows. Note: this repository is proprietary; the citation metadata is provided for academic provenance only and does not grant any license."
-title: "SZL Holdings Platform — governed AI decision infrastructure (proprietary)"
-version: "1.0.1"
-date-released: "2026-05-28"
-abstract: >-
-  Monorepo for SZL Holdings' governed AI decision infrastructure, including
-  the Ouroboros runtime (Λ-monotone governance substrate), the Lutar Invariant Λ
-  implementation, and supporting policy/evidence packages. This repository is
-  proprietary (see LICENSE). The associated thesis (Ouroboros Thesis v18 —
-  Multi-track Substrate Expansion) is published separately at
-  szl-holdings/ouroboros-thesis under CC-BY-4.0 and should be cited via
-  that repository's CITATION.cff if you are citing the thesis text.
+message: "If you use this software, please cite it as below."
 type: software
-authors:
-  - family-names: Lutar
-    given-names: "Stephen P."
-    name-suffix: "Jr."
-    affiliation: SZL Holdings
-    orcid: "https://orcid.org/0009-0001-0110-4173"
-identifiers:
-  - description: ORCID iD of the principal author
-    type: other
-    value: "https://orcid.org/0009-0001-0110-4173"
-  - description: Ouroboros Thesis v18 — platform research foundation (Zenodo)
-    type: doi
-    value: "10.5281/zenodo.20434276"
-  - description: Ouroboros Thesis concept DOI — always-latest
-    type: doi
-    value: "10.5281/zenodo.19944926"
+title: "SZL Holdings — platform"
+version: "1.0.0"
+date-released: "2026-06-09"
+license: Apache-2.0
 repository-code: "https://github.com/szl-holdings/platform"
-url: "https://github.com/szl-holdings/platform"
+url: "https://szlholdings.ai"
+abstract: >
+  SZL Holdings flagship software suite — Doctrine v11 compliant,
+  SLSA Build Level 1, Section 889 attested, OpenTelemetry instrumented.
+  Built for defense-grade governance and sovereign AI workloads.
 keywords:
-  - governed-decision
-  - ouroboros
-  - lutar-invariant
-  - receipt-chain
-  - proprietary
-  - szl-holdings
-  - ai-governance
-license: LicenseRef-SZL-Proprietary
-
-# --- Appended: 8 published Zenodo papers + umbrella concept DOI ---
+  - defense
+  - governance
+  - uds
+  - slsa
+  - sigstore
+  - opentelemetry
+  - sovereign-ai
+authors:
+  - name: "SZL Holdings"
+    website: "https://szlholdings.ai"
+    email: "hello@szlholdings.ai"
+  - name: "Yachay"
+    email: "yachay@szlholdings.ai"
+contact:
+  - email: "hello@szlholdings.ai"
+    name: "SZL Holdings"
 references:
   - type: article
-    title: "Lutar Omega Formalism"
-    authors:
-      - family-names: Lutar
-        given-names: "Stephen P."
-        name-suffix: "Jr."
-        orcid: "https://orcid.org/0009-0001-0110-4173"
-    year: 2026
-    publisher:
-      name: Zenodo
-    doi: "10.5281/zenodo.20499315"
-    url: "https://doi.org/10.5281/zenodo.20499315"
-    license: CC-BY-4.0
-  - type: article
-    title: "Prisca-GraphRAG"
-    authors:
-      - family-names: Lutar
-        given-names: "Stephen P."
-        name-suffix: "Jr."
-        orcid: "https://orcid.org/0009-0001-0110-4173"
-    year: 2026
-    publisher:
-      name: Zenodo
-    doi: "10.5281/zenodo.20499317"
-    url: "https://doi.org/10.5281/zenodo.20499317"
-    license: CC-BY-4.0
-  - type: article
-    title: "Hermetic Constitutional Guardrails"
-    authors:
-      - family-names: Lutar
-        given-names: "Stephen P."
-        name-suffix: "Jr."
-        orcid: "https://orcid.org/0009-0001-0110-4173"
-    year: 2026
-    publisher:
-      name: Zenodo
-    doi: "10.5281/zenodo.20499319"
-    url: "https://doi.org/10.5281/zenodo.20499319"
-    license: CC-BY-4.0
-  - type: article
-    title: "Sefirot Continual Learning"
-    authors:
-      - family-names: Lutar
-        given-names: "Stephen P."
-        name-suffix: "Jr."
-        orcid: "https://orcid.org/0009-0001-0110-4173"
-    year: 2026
-    publisher:
-      name: Zenodo
-    doi: "10.5281/zenodo.20499322"
-    url: "https://doi.org/10.5281/zenodo.20499322"
-    license: CC-BY-4.0
-  - type: article
-    title: "Free-Energy-Lutar Active Inference"
-    authors:
-      - family-names: Lutar
-        given-names: "Stephen P."
-        name-suffix: "Jr."
-        orcid: "https://orcid.org/0009-0001-0110-4173"
-    year: 2026
-    publisher:
-      name: Zenodo
-    doi: "10.5281/zenodo.20499324"
-    url: "https://doi.org/10.5281/zenodo.20499324"
-    license: CC-BY-4.0
-  - type: article
-    title: "Tawa Sparse Autoencoder"
-    authors:
-      - family-names: Lutar
-        given-names: "Stephen P."
-        name-suffix: "Jr."
-        orcid: "https://orcid.org/0009-0001-0110-4173"
-    year: 2026
-    publisher:
-      name: Zenodo
-    doi: "10.5281/zenodo.20499328"
-    url: "https://doi.org/10.5281/zenodo.20499328"
-    license: CC-BY-4.0
-  - type: article
-    title: "EPR-Bell Entanglement Validation"
-    authors:
-      - family-names: Lutar
-        given-names: "Stephen P."
-        name-suffix: "Jr."
-        orcid: "https://orcid.org/0009-0001-0110-4173"
-    year: 2026
-    publisher:
-      name: Zenodo
-    doi: "10.5281/zenodo.20499330"
-    url: "https://doi.org/10.5281/zenodo.20499330"
-    license: CC-BY-4.0
-  - type: article
-    title: "Chinchilla-Lutar Scaling Laws"
-    authors:
-      - family-names: Lutar
-        given-names: "Stephen P."
-        name-suffix: "Jr."
-        orcid: "https://orcid.org/0009-0001-0110-4173"
-    year: 2026
-    publisher:
-      name: Zenodo
-    doi: "10.5281/zenodo.20499334"
-    url: "https://doi.org/10.5281/zenodo.20499334"
-    license: CC-BY-4.0
-  - type: generic
-    title: "SZL Holdings Research Corpus (umbrella concept record)"
-    authors:
-      - family-names: Lutar
-        given-names: "Stephen P."
-        name-suffix: "Jr."
-        orcid: "https://orcid.org/0009-0001-0110-4173"
-    year: 2026
-    publisher:
-      name: Zenodo
-    doi: "10.5281/zenodo.19944926"
-    url: "https://doi.org/10.5281/zenodo.19944926"
-    notes: "Concept DOI (always-latest). Umbrella v21: 10.5281/zenodo.20490218"
+    title: "SLSA: Ensuring the Integrity of Software Supply Chains"
+    url: "https://slsa.dev/spec/v1.0/levels"
+  - type: standard
+    title: "NDAA Section 889 — Prohibition on Certain Telecommunications"
+    url: "https://www.congress.gov/bill/115th-congress/house-bill/5515/text"
+  - type: standard
+    title: "EO 14028 — Improving the Nation's Cybersecurity (SBOM mandate)"
+    url: "https://www.federalregister.gov/documents/2021/05/17/2021-10460/improving-the-nations-cybersecurity"
