@@ -1,3 +1,0 @@
-# Output directory for `pnpm run verticals:brief` (one JSON per vertical pack).
-# Files are regenerated on every run; this .gitkeep just ensures the directory
-# exists in fresh checkouts so the CLI does not have to create it from scratch.
