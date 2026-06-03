@@ -372,7 +372,7 @@ export function twistorProject(Z: [number, number, number, number]): [number, nu
  * use dpiEntropyBound (Lean-anchored) for byte-count admission.
  *
  * Mirrors (partially): Lutar.DPI.dpiAdmit (Lutar/DPI/DPIBound.lean).
- * Author: Lutar, Stephen P. · ORCID 0009-0001-0110-4173 · Doctrine v7.
+ * Author: Lutar, Stephen P. · ORCID 0009-0001-0110-4173 · Doctrine v11 LOCKED 749/14/163.
  */
 export function dpiBound(area_m2: number): number {
   return area_m2 / (4.0 * A_PLANCK);
