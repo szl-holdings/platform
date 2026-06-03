@@ -22,7 +22,9 @@ RUN corepack enable pnpm && pnpm install --frozen-lockfile --ignore-scripts
 FROM base AS builder
 WORKDIR /app
 COPY --from=deps /app/node_modules ./node_modules
-COPY . .
+COPY lib/ ./lib/
+COPY artifacts/terra/ ./artifacts/terra/
+# Per-file COPY — Doctrine v11 (no COPY . .)
 ENV NODE_ENV=production
 RUN corepack enable pnpm && pnpm --filter "terra" run build
 
