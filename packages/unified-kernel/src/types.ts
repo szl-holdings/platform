@@ -88,7 +88,7 @@ export type ThesisId =
 
 /**
  * NotYetError — thrown by modules that have no real backing code anywhere in
- * szl-holdings. Doctrine v7 §2: no fake `() => true`. A module that is not ready
+ * szl-holdings. Doctrine v11 LOCKED 749/14/163 §2: no fake `() => true`. A module that is not ready
  * exports a clearly-named NOT_YET function that throws this, naming the gap.
  */
 export class NotYetError extends Error {
