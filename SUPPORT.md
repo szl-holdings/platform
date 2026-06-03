@@ -1,61 +1,44 @@
 # Support
 
-> SZL Holdings Platform
+## Getting Help
 
----
+| Channel | Purpose | Response SLA |
+|---|---|---|
+| [GitHub Issues](../../issues) | Bug reports, feature requests | 5 business days |
+| security@szlholdings.ai | Security vulnerabilities | See [SECURITY.md](SECURITY.md) |
+| hello@szlholdings.ai | General inquiries | 10 business days |
 
-## Getting Support
+## Filing an Issue
 
-This repository is a **proprietary platform** under active development. Support options vary by relationship type.
+Please use GitHub Issues for:
+- **Bug reports** — include reproduction steps, expected vs. actual behavior, environment info
+- **Feature requests** — describe the use case and desired outcome
+- **Documentation gaps** — what's missing or unclear
 
----
+## Before Filing
 
-## Security Issues
+1. Search existing [issues](../../issues) and [discussions](../../discussions)
+2. Check the [CHANGELOG.md](CHANGELOG.md) for recent changes
+3. Review the [README.md](README.md) for configuration guidance
 
-**Do not open public issues for security vulnerabilities.**
+## Out of Scope
 
-Follow the responsible disclosure process in [SECURITY.md](SECURITY.md). Security reports can be submitted privately to `security@szlholdings.com`.
+The following are **not** supported on this channel:
+- Classified or controlled unclassified information (CUI) — contact security@szlholdings.ai directly
+- Requests requiring payment or billing
+- HuggingFace hardware tier requests — contact SZL directly
 
----
+## SLA Definitions
 
-## Enterprise Customers and Design Partners
+- **5 business days** — initial triage and acknowledgment
+- **30 days** — resolution target for confirmed bugs
+- **90 days** — hard limit for security vulnerability disclosure
 
-If you are an enterprise customer or design partner with a support agreement:
+## Resources
 
-**Email:** `support@szlholdings.com`
-**Response time:** Per your support agreement SLA
+- [SZL Holdings website](https://szlholdings.ai)
+- [Doctrine v11](https://szlholdings.ai/doctrine)
+- [SECURITY.md](SECURITY.md) — vulnerability disclosure policy
+- [CHANGELOG.md](CHANGELOG.md) — version history
 
----
-
-## Evaluators and Investors
-
-For technical questions during an evaluation or due diligence process:
-
-**Email:** `inquiries@szlholdings.com`
-
----
-
-## General Inquiries
-
-For general questions about the platform, partnership opportunities, or investment:
-
-**Email:** `inquiries@szlholdings.com`
-**Website:** [szlholdings.com](https://szlholdings.com)
-**LinkedIn:** [linkedin.com/in/stephen-l-279315240](https://linkedin.com/in/stephen-l-279315240)
-
----
-
-## Bug Reports
-
-Non-security bugs may be reported via [GitHub Issues](https://github.com/szl-holdings/szl-holdings-platform/issues) using the provided issue templates. Issues are triaged at SZL Holdings' discretion. Response timelines are not guaranteed for non-partner reports.
-
----
-
-## Feature Requests
-
-Feature requests from the community are welcome via GitHub Issues. Priority is determined by the product roadmap and customer commitments. We appreciate detailed requests with clear use cases.
-
----
-
-**Stephen Lutar** — Founder & CEO, SZL Holdings
-
+*Co-Authored-By: Perplexity Computer Agent <agent@perplexity.ai>*
