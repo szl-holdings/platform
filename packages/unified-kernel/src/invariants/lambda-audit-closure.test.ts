@@ -2,11 +2,11 @@
 import { describe, it, expect } from "vitest";
 import {
   Λ_audit_closure,
-  DOCTRINE_V7_AXIOMS,
+  DOCTRINE_V11_AXIOMS,
   type Receipt,
 } from "./lambda-audit-closure.ts";
 
-const AX = DOCTRINE_V7_AXIOMS;
+const AX = DOCTRINE_V11_AXIOMS;
 
 function receipt(id: string, value: number, opts: Partial<Receipt> = {}): Receipt {
   return {
@@ -25,7 +25,7 @@ describe("Λ_audit_closure operator", () => {
     // composite Λ is the geometric mean of the per-axiom contributions, bounded.
     expect(closure.compositeLambda).toBeGreaterThan(0);
     expect(closure.compositeLambda).toBeLessThanOrEqual(1);
-    // Doctrine v7: 15 axioms, 14 unique.
+    // Doctrine v11 LOCKED 749/14/163: 15 axioms, 14 unique.
     expect(closure.axiomCount).toBe(15);
     expect(closure.uniqueAxiomCount).toBe(14);
     expect(closure.perAxiom).toHaveLength(15);
