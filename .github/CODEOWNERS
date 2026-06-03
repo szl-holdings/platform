@@ -1,99 +1,31 @@
-# CODEOWNERS
+# CODEOWNERS — SZL Holdings
+# https://docs.github.com/en/repositories/managing-your-repositorys-settings-and-features/customizing-your-repository/about-code-owners
 #
-# SZL Holdings Platform — Code Ownership Declaration
-# Each line maps a path pattern to its owner(s).
-# Owners are required reviewers for pull requests touching those paths.
-#
-# Syntax: pattern  @owner
-# Reference: https://docs.github.com/en/repositories/managing-your-repositorys-settings-and-features/customizing-your-repository/about-code-owners
+# Default: founder + Yachay own everything
+* @szl-holdings/core-team
 
-# Default owner — all files not matched by a more specific rule
-*  @stephenlutar2-hash
+# CI/CD and security-critical workflows — devops team
+.github/workflows/ @szl-holdings/devops @szl-holdings/core-team
 
-# ── Platform primitives & shared libraries ─────────────────────────────────────
-/lib/  @stephenlutar2-hash
-/lib/db/  @stephenlutar2-hash
-/lib/auth/  @stephenlutar2-hash
-/lib/audit/  @stephenlutar2-hash
-/lib/ai-engine/  @stephenlutar2-hash
-/lib/shared-ui/  @stephenlutar2-hash
-/lib/api-zod/  @stephenlutar2-hash
-/lib/services/  @stephenlutar2-hash
-/lib/outcome-graph/  @stephenlutar2-hash
-/lib/proof-chain/  @stephenlutar2-hash
-/lib/covenant-policy/  @stephenlutar2-hash
-/lib/monte-carlo/  @stephenlutar2-hash
-/lib/workflow-engine/  @stephenlutar2-hash
-/lib/observability/  @stephenlutar2-hash
-/lib/forge-runtime/  @stephenlutar2-hash
-/lib/prism-bus/  @stephenlutar2-hash
+# Doctrine and lean kernel — core-team only
+*.lean @szl-holdings/core-team
+lean/ @szl-holdings/core-team
 
-# ── Application servers (apps/) ───────────────────────────────────────────────
-# Deployable services. Each Express/runtime server gets an explicit rule so a PR
-# touching it requires owner review even if a broader default would also match.
-/apps/  @stephenlutar2-hash
-/apps/alloy-runtime-api/  @stephenlutar2-hash
-/apps/alloy-embedding-api/  @stephenlutar2-hash
-/apps/alloy-ingestion-orchestrator/  @stephenlutar2-hash
-/apps/substrate-inference/  @stephenlutar2-hash
-/apps/eval-runner/  @stephenlutar2-hash
+# Security policy — core-team only
+SECURITY.md @szl-holdings/core-team
+.github/SECURITY.md @szl-holdings/core-team
 
-# ── Workspace packages (packages/) ────────────────────────────────────────────
-# The bulk of the codebase lives here (130 packages). Owned at the directory
-# level so new packages inherit ownership without a per-package rule.
-/packages/  @stephenlutar2-hash
+# Dockerfile — per-file COPY enforced, devops reviews
+Dockerfile @szl-holdings/devops @szl-holdings/core-team
+Dockerfile.* @szl-holdings/devops @szl-holdings/core-team
 
-# ── API Server (stub) ─────────────────────────────────────────────────────────
-# artifacts/api-server is a historical placeholder; the real HTTP servers live
-# in apps/. The src/routes/ tree currently contains only ouroboros.ts.
-/artifacts/api-server/  @stephenlutar2-hash
-/artifacts/api-server/src/routes/  @stephenlutar2-hash
+# Python source — dev-team
+*.py @szl-holdings/dev-team @szl-holdings/core-team
 
-# ── Platform command surfaces ──────────────────────────────────────────────────
-/artifacts/szl-holdings/  @stephenlutar2-hash
-/artifacts/command/  @stephenlutar2-hash
+# Zarf bundles — devops
+zarf.yaml @szl-holdings/devops @szl-holdings/core-team
+uds-bundle.yaml @szl-holdings/devops @szl-holdings/core-team
 
-# ── Domain packs ──────────────────────────────────────────────────────────────
-/artifacts/terra/  @stephenlutar2-hash
-/artifacts/vessels/  @stephenlutar2-hash
-/artifacts/carlota-jo/  @stephenlutar2-hash
-
-# ── Mobile (APEX) ───────────────────────────────────────────────────────────
-/artifacts/szl-holdings-mobile/  @stephenlutar2-hash
-# /artifacts/cortex-mobile/  — archived; superseded by szl-holdings-mobile
-
-# ── Internal tooling ──────────────────────────────────────────────────────────
-/artifacts/mockup-sandbox/  @stephenlutar2-hash
-
-# ── Infrastructure & CI/CD ───────────────────────────────────────────────────
-/infra/  @stephenlutar2-hash
-/.github/  @stephenlutar2-hash
-/.github/workflows/  @stephenlutar2-hash
-
-# ── Operational docs ─────────────────────────────────────────────────────────
-/ops/  @stephenlutar2-hash
-
-# ── Documentation ────────────────────────────────────────────────────────────
-/docs/  @stephenlutar2-hash
-README.md  @stephenlutar2-hash
-CHANGELOG.md  @stephenlutar2-hash
-
-# ── Database schema & migrations ─────────────────────────────────────────────
-**/migrations/  @stephenlutar2-hash
-**/schema.ts  @stephenlutar2-hash
-
-# ── Security-sensitive files ──────────────────────────────────────────────────
-SECURITY.md  @stephenlutar2-hash
-INCIDENT_RESPONSE.md  @stephenlutar2-hash
-SUPPORT.md  @stephenlutar2-hash
-threat_model.md  @stephenlutar2-hash
-KNOWN-GAPS.md  @stephenlutar2-hash
-AUDIT_FINDINGS_REGISTER.md  @stephenlutar2-hash
-CODE_OF_CONDUCT.md  @stephenlutar2-hash
-LICENSE.md  @stephenlutar2-hash
-.env.example  @stephenlutar2-hash
-.gitleaks.toml  @stephenlutar2-hash
-/security/  @stephenlutar2-hash
-/audit/security/  @stephenlutar2-hash
-/docs/trust/  @stephenlutar2-hash
-/docs/security/  @stephenlutar2-hash
+# Docs
+docs/ @szl-holdings/core-team
+*.md @szl-holdings/core-team
