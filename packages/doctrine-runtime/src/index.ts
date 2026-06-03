@@ -1,5 +1,5 @@
 /**
- * @workspace/doctrine-runtime — Doctrine v7 Runtime Layer
+ * @workspace/doctrine-runtime — Doctrine v11 LOCKED 749/14/163 Runtime Layer
  *
  * R1: Policy composition (doctrine_composer, prometheus-exporter)
  * R2: SCITT-Rekor adapter (scitt_adapter, dpi_chain_verifier, merkle_dag_b7)
