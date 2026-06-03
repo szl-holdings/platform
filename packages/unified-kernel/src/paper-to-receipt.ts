@@ -25,7 +25,7 @@
 
 import {
   Λ_audit_closure,
-  DOCTRINE_V7_AXIOMS,
+  DOCTRINE_V11_AXIOMS,
   type Receipt as BusReceipt,
   type GradedClosure,
 } from "./invariants/index.ts";
@@ -99,7 +99,7 @@ export async function paperToReceipt(
     "lambda_satisfiesAxioms";
 
   // 2. Λ Audit-Closure Operator folds the receipt-bus into a graded closure.
-  const closure = Λ_audit_closure(paper.receiptBus, DOCTRINE_V7_AXIOMS);
+  const closure = Λ_audit_closure(paper.receiptBus, DOCTRINE_V11_AXIOMS);
 
   // 3. Ouroboros Runtime emits a trace under the SHA-pinned config (v6.3.0).
   //    terminates() runs the real wired kernel over a bounded contraction map.
@@ -123,7 +123,7 @@ export async function paperToReceipt(
   let cardanoAnchor: { anchored: false; pending: string };
   if (opts.submitToCardano) {
     // The on-chain submit is a network dependency not present in this checkout.
-    // Doctrine v7 §2: no fake green — throw a clearly-named gap error.
+    // Doctrine v11 LOCKED 749/14/163 §2: no fake green — throw a clearly-named gap error.
     throw new NotYetError(
       "T07",
       "amaru Cardano on-chain anchor (network: amaru tx-submit endpoint)",
