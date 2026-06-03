@@ -1,5 +1,5 @@
 # OpenSSF Scorecard workflow — supply-chain posture scanner
-# Doctrine v7: Series-A repos run scorecard weekly to keep the badge HEAD-200.
+# Doctrine v11 LOCKED 749/14/163: Series-A repos run scorecard weekly to keep the badge HEAD-200.
 name: scorecard
 on:
   workflow_dispatch:
