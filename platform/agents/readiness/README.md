@@ -55,7 +55,7 @@ SZLHOLDINGS/readiness-runs
 ```
 
 If the signing key or `HF_TOKEN` is absent, the envelope is honestly marked
-`signed:false` / `published:false` — **never a fabricated signature** (Doctrine v7
+`signed:false` / `published:false` — **never a fabricated signature** (Doctrine v11 LOCKED 749/14/163
 §2 anti-fake-green, preserved under v11).
 
 ## Dashboard
