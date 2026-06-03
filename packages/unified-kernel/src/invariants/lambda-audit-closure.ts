@@ -51,7 +51,7 @@ export interface Receipt {
 /** The receipt-bus: a stream / iterable of receipts (hash-linked append-only log). */
 export type ReceiptBus = Iterable<Receipt>;
 
-/** A named governance axiom from Doctrine v7 (15 axioms, 14 unique). */
+/** A named governance axiom from Doctrine v11 LOCKED 749/14/163 (15 axioms, 14 unique). */
 export interface Axiom {
   readonly name: string;
   /** True if this axiom is a duplicate of an earlier one (the 15→14 collapse). */
@@ -95,7 +95,7 @@ const BEKENSTEIN_RADIUS_M = 1;
  * Λ_audit_closure — the Λ Audit-Closure Operator.
  *
  * Folds a receipt-bus (stream of receipts) under a graded closure: it composes
- * the Doctrine-v7 axioms axiom-by-axiom under a monotone geometric mean
+ * the Doctrine v11 LOCKED 749/14/163 axioms axiom-by-axiom under a monotone geometric mean
  * (delegating to the `lambda` helper), attaches a PAC-Bayes (McAllester 2003)
  * tail bound on the confidence margin, a Bekenstein (1981) per-receipt entropy
  * cap, and the Reidemeister (1927) equivalence class of the receipt-knot chain
@@ -158,8 +158,8 @@ export function Λ_audit_closure(receiptBus: ReceiptBus, axioms: readonly Axiom[
   };
 }
 
-/** Doctrine v7 axiom set: 15 axioms, 14 unique (one duplicate collapses). */
-export const DOCTRINE_V7_AXIOMS: readonly Axiom[] = [
+/** Doctrine v11 LOCKED 749/14/163 axiom set: 15 axioms, 14 unique (one duplicate collapses). */
+export const DOCTRINE_V11_AXIOMS: readonly Axiom[] = [
   { name: "A01-monotone" },
   { name: "A02-homogeneous" },
   { name: "A03-diagonal-normalized" },
