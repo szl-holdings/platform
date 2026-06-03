@@ -100,7 +100,7 @@ jobs:
             echo "contract present: $fn"
           done
 
-      - name: Doctrine v7 §1 — banned-token grep (kernel diff surface)
+      - name: Doctrine v11 LOCKED 749/14/163 §1 — banned-token grep (kernel diff surface)
         run: |
           set -euo pipefail
           # Whole-word marketing superlatives + retired product names.
