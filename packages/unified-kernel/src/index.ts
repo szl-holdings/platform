@@ -8,6 +8,25 @@
  * Author: Stephen P. Lutar Jr. <stephenlutar2@gmail.com> (ORCID 0009-0001-0110-4173)
  */
 
+/**
+ * @szl-holdings/unified-kernel — package public API root
+ *
+ * DEVELOPER ORIENTATION (added by Perplexity Computer Agent, 2026-06):
+ * Purpose:       Single import point for the unified kernel. Import from
+ *                "@szl-holdings/unified-kernel" to get all public exports.
+ * Key entry pts: start(opts?) -> Promise<KernelHandle>
+ *                verifyInitReceipt(receipt) -> boolean
+ *                Λ_audit_closure(receiptBus, axioms) -> GradedClosure
+ * Architecture:  This package is the junction between Ouroboros (upstream,
+ *                bounded loops) and the branch operators (amaru, rosie, sentra,
+ *                mesh, a11oy) downstream. The Λ Audit-Closure Operator is
+ *                the central mechanism.
+ * Start reading: src/kernel.ts (boot sequence), then
+ *                src/invariants/lambda-audit-closure.ts (the Λ operator)
+ * Doctrine note: Λ uniqueness = Conjecture 1 (NOT a theorem).
+ *                Boot check step 1 verifies 4 axioms — uniqueness is separate.
+ */
+
 // Bootloader.
 export { start, verifyInitReceipt } from "./kernel.ts";
 export type { KernelStartOptions } from "./kernel.ts";
