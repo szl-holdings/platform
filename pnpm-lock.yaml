@@ -2645,6 +2645,25 @@ importers:
         specifier: ^4.1.7
         version: 4.1.7(@opentelemetry/api@1.9.1)(@types/node@25.3.5)(@vitest/coverage-v8@4.1.7)(@vitest/ui@4.1.7)(esbuild@0.27.3)(happy-dom@20.8.9)(jiti@2.6.1)(terser@5.46.1)(tsx@4.21.0)(yaml@2.8.3)
 
+  packages/cognitive-reflexivity:
+    dependencies:
+      '@szl-holdings/signal-mesh':
+        specifier: workspace:*
+        version: link:../signal-mesh
+      '@workspace/ontology':
+        specifier: workspace:*
+        version: link:../ontology
+      zod:
+        specifier: 'catalog:'
+        version: 3.25.76
+    devDependencies:
+      typescript:
+        specifier: 'catalog:'
+        version: 6.0.3
+      vitest:
+        specifier: 'catalog:'
+        version: 4.1.7(@opentelemetry/api@1.9.1)(@types/node@25.3.5)(@vitest/coverage-v8@4.1.7)(@vitest/ui@4.1.7)(esbuild@0.27.3)(happy-dom@20.8.9)(jiti@2.6.1)(terser@5.46.1)(tsx@4.21.0)(yaml@2.8.3)
+
   packages/cognitive-runtime:
     dependencies:
       '@szl-holdings/contracts':
