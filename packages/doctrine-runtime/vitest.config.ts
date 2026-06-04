@@ -21,5 +21,8 @@ export default defineConfig({
     testTimeout: 15000,
     hookTimeout: 10000,
     teardownTimeout: 10000,
+    // All .test.ts files in this package use node:test or raw node:assert —
+    // none are vitest suites. Pass gracefully rather than error on empty suite.
+    passWithNoTests: true,
   },
 });

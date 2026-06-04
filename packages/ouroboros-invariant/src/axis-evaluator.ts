@@ -23,7 +23,7 @@
  *   N — Non-measurability (Lara: Jamneshan-Shalom-Tao gap)
  */
 
-import { type LutarAxes9, LutarReportN, lutarInvariant9 } from "./lutar-invariant-9.js";
+import { type LutarAxes9, type LutarReportN, lutarInvariant9 } from "./lutar-invariant-9.js";
 
 export interface AxisEvaluatorInput {
   cleanliness: number;
