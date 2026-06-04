@@ -32,8 +32,7 @@ import {
   SEMRESATTRS_DEPLOYMENT_ENVIRONMENT,
 } from "@opentelemetry/semantic-conventions";
 import { getNodeAutoInstrumentations } from "@opentelemetry/auto-instrumentations-node";
-import { W3CTraceContextPropagator } from "@opentelemetry/core";
-import { CompositePropagator, W3CBaggagePropagator } from "@opentelemetry/core";
+import { W3CTraceContextPropagator, CompositePropagator, W3CBaggagePropagator } from "@opentelemetry/core";
 import { ParentBasedSampler, TraceIdRatioBasedSampler } from "@opentelemetry/sdk-trace-base";
 
 const serviceName = process.env.OTEL_SERVICE_NAME ?? "szl-unknown-service";

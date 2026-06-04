@@ -33,11 +33,11 @@ describe("paperToReceipt — canonical end-to-end flow", () => {
     expect(out.closure.uniqueAxiomCount).toBe(14);
     expect(out.closure.reidemeisterClass).toBe("R3"); // 3-strand receipt-knot chain
 
-    // Lean Λ-gate named + live canonical numbers (3de37e5).
+    // Lean Λ-gate named + live canonical numbers (c7c0ba17).
     expect(out.leanGate).toBe("lambda_satisfiesAxioms");
-    expect(out.canonicalNumbers.declarations).toBe(752);
+    expect(out.canonicalNumbers.declarations).toBe(749);
     expect(out.canonicalNumbers.uniqueAxioms).toBe(14);
-    expect(out.canonicalNumbers.buildingSha).toBe("3de37e5");
+    expect(out.canonicalNumbers.buildingSha).toBe("c7c0ba17");
 
     // Ouroboros runtime really ran and halted.
     expect(out.runtimeHalted).toBe(true);

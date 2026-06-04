@@ -17,8 +17,7 @@
  */
 
 import type { CognitiveHealthScore } from './types';
-import type { StrategyRegistry } from './strategies';
-import { defaultStrategyRegistry } from './strategies';
+import { type StrategyRegistry, defaultStrategyRegistry } from './strategies';
 
 export interface HealthInputs {
   windowMinutes?: number;

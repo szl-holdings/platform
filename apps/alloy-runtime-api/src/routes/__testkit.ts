@@ -7,8 +7,7 @@
  * is covered by otel.test.ts), so the assertions exercise actual handler logic.
  */
 import type { AddressInfo } from 'node:net';
-import type { Server } from 'node:http';
-import { request } from 'node:http';
+import { type Server, request } from 'node:http';
 import express, { type IRouter } from 'express';
 import { apiKeyGuard } from '../middleware/auth.js';
 

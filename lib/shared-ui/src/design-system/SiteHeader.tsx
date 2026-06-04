@@ -1,5 +1,4 @@
-import type * as React from 'react';
-import { useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { cn } from '../utils';
 
 export interface NavItem {

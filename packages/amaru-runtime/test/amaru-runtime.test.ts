@@ -1,9 +1,8 @@
 import { describe, it, expect } from "vitest";
 import fc from "fast-check";
 import { verify, scoreFleetSync, sekedToPhase } from "../src/index.js";
-import type { LutarAxes9 } from "@workspace/ouroboros-invariant";
+import { type LutarAxes9, lutarInvariant9, verifyLutarBoundN } from "@workspace/ouroboros-invariant";
 import { computeSeked } from "@workspace/reconciliation";
-import { lutarInvariant9, verifyLutarBoundN } from "@workspace/ouroboros-invariant";
 
 // ---- helpers --------------------------------------------------------------
 const cleanAxes = (v = 0.9): LutarAxes9 => ({

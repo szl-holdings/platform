@@ -21,8 +21,7 @@
  * api-server bootstraps the wiring.
  */
 
-import type { Signal } from '@workspace/ontology/signal';
-import { createSignal } from '@workspace/ontology/signal';
+import { type Signal, createSignal } from '@workspace/ontology/signal';
 import { defaultSignalBus, type SignalBus } from '@szl-holdings/signal-mesh/bus';
 import { randomUUID } from 'node:crypto';
 import {

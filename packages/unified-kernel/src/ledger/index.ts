@@ -10,8 +10,7 @@
  * No mocks.
  */
 
-import { chainAppend, hashJson, verifyChain } from "../tamper/index.ts";
-import type { ChainLink } from "../tamper/index.ts";
+import { chainAppend, hashJson, verifyChain, type ChainLink } from "../tamper/index.ts";
 
 export interface LedgerEntry {
   readonly sequence: number;

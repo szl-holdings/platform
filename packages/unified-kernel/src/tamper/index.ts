@@ -14,8 +14,7 @@
  * relies on the standard NIST FIPS 180-4 assumption, honestly labelled.
  */
 
-import { createHash, generateKeyPairSync, sign as edSign, verify as edVerify } from "node:crypto";
-import type { KeyObject } from "node:crypto";
+import { createHash, generateKeyPairSync, sign as edSign, verify as edVerify, type KeyObject } from "node:crypto";
 
 /** Real SHA-256 hex digest over a UTF-8 string. */
 export function sha256Hex(input: string): string {

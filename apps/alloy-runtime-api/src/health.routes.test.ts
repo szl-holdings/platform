@@ -7,8 +7,7 @@
  * report builders.
  */
 import type { AddressInfo } from 'node:net';
-import type { Server } from 'node:http';
-import { request } from 'node:http';
+import { type Server, request } from 'node:http';
 import express from 'express';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import { createRouter } from './router.js';

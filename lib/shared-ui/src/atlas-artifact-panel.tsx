@@ -1,5 +1,4 @@
-import * as React from 'react';
-import { useCallback, useState } from 'react';
+import React, { useCallback, useState } from 'react';
 
 const BG = { surface: '#0c1018', elevated: '#10141e', card: '#111620' };
 const BORDER = { subtle: 'rgba(255,255,255,0.04)', muted: 'rgba(255,255,255,0.07)' };

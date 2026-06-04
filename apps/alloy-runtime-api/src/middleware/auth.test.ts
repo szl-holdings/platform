@@ -2,8 +2,7 @@
  * Tests for the API key guard + tenant context middleware.
  */
 import type { AddressInfo } from 'node:net';
-import type { Server } from 'node:http';
-import { request } from 'node:http';
+import { type Server, request } from 'node:http';
 import express from 'express';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import { apiKeyGuard } from './auth.js';

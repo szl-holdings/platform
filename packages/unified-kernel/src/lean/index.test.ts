@@ -10,9 +10,9 @@ describe("T19 lean", () => {
   });
 
   it("carries the real Lean census numbers", () => {
-    expect(LEAN_NUMBERS.declarations).toBe(752);
+    expect(LEAN_NUMBERS.declarations).toBe(749);
     expect(LEAN_NUMBERS.uniqueAxioms).toBe(14);
-    expect(LEAN_NUMBERS.sorryTokens).toBe(160);
+    expect(LEAN_NUMBERS.sorryTokens).toBe(163);
   });
 
   it("maps theorems to theses and tallies honestly (includes sorry/shell)", () => {

@@ -9,11 +9,9 @@
  * to authenticate against Grafana Cloud / Azure Monitor at deploy time.
  */
 import type { AddressInfo } from 'node:net';
-import type { Server } from 'node:http';
-import { request } from 'node:http';
+import { type Server, request } from 'node:http';
 import { afterAll, beforeAll, beforeEach, describe, expect, it } from 'vitest';
-import { flushInMemorySpans, getInMemorySpans } from '@szl-holdings/observability';
-import { parseOtlpKeyValueList } from '@szl-holdings/observability';
+import { flushInMemorySpans, getInMemorySpans, parseOtlpKeyValueList } from '@szl-holdings/observability';
 import { resetEnvCache } from '@szl-holdings/env';
 import { createApp } from './server.js';
 

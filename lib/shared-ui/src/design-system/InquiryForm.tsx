@@ -1,5 +1,4 @@
-import type * as React from 'react';
-import { useState } from 'react';
+import React, { useState } from 'react';
 import { cn } from '../utils';
 
 export type InquiryType = 'investor' | 'client' | 'partner' | 'recruiter' | 'general';

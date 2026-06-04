@@ -12,8 +12,7 @@
  * runtime where the trust score IS the cost optimizer.
  */
 
-import type { LutarAxes9, LutarReportN } from "@workspace/ouroboros-invariant";
-import { lutarInvariant9, verifyLutarBoundN } from "@workspace/ouroboros-invariant";
+import { type LutarAxes9, LutarReportN, lutarInvariant9, verifyLutarBoundN } from "@workspace/ouroboros-invariant";
 
 export interface Lambda9Result {
   invariant: number;

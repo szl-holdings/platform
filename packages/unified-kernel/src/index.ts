@@ -29,7 +29,7 @@ export { NotYetError } from "./types.ts";
 // "Paper to Receipt" architecture) and its three named bound primitives.
 export {
   Λ_audit_closure,
-  DOCTRINE_V7_AXIOMS,
+  DOCTRINE_V11_AXIOMS,
   pacBayesTailBound,
   bekensteinCap,
   reidemeisterClass,

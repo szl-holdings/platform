@@ -9,8 +9,7 @@ import {
   type SensorObservation,
   type DefenderReading,
 } from "../src/index.js";
-import type { LutarAxes9 } from "@workspace/ouroboros-invariant";
-import { lutarInvariant9, verifyLutarBoundN } from "@workspace/ouroboros-invariant";
+import { type LutarAxes9, lutarInvariant9, verifyLutarBoundN } from "@workspace/ouroboros-invariant";
 
 // ---- helpers --------------------------------------------------------------
 const cleanAxes = (v = 0.9): Omit<LutarAxes9, "gaussClosure"> => ({

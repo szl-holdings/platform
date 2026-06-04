@@ -12,8 +12,7 @@
  * proven; n-axis Schur-concavity is axiom-structured — see lean/).
  */
 
-import { lambda as coreLambda } from "../invariants/index.ts";
-import type { LambdaResult } from "../invariants/index.ts";
+import { lambda as coreLambda, type LambdaResult } from "../invariants/index.ts";
 
 /** The 9 axis names from the Λ-Axis spec (chapters/02_mathematical_foundations). */
 export const NINE_AXES = [

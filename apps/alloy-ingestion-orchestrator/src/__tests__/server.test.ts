@@ -12,8 +12,7 @@
  * It also covers the OTLP header wire-format parser used to carry backend auth
  * (Grafana Cloud / Azure Monitor) at deploy time.
  */
-import { request } from 'node:http';
-import type { Server } from 'node:http';
+import { request, type Server } from 'node:http';
 import type { AddressInfo } from 'node:net';
 import { resetEnvCache } from '@szl-holdings/env';
 import {
