@@ -1,0 +1,23 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "szl-qrng"
+version = "0.1.0"
+description = "Entropy source for SZL nonce generation: OS CSPRNG default, optional QRNG mode. Doctrine v11 LOCKED (749/14/163)."
+readme = "README.md"
+license = { text = "Apache-2.0" }
+requires-python = ">=3.11"
+authors = [{ name = "Yachay", email = "yachay@szlholdings.dev" }]
+keywords = ["qrng", "csprng", "entropy", "nonce", "ecdsa"]
+dependencies = []
+
+[project.optional-dependencies]
+test = ["pytest>=8.0.0,<9.0.0"]
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/szl_qrng"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]

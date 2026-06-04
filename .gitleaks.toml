@@ -1,0 +1,569 @@
+# ─────────────────────────────────────────────────────────────────────────────
+# SZL Holdings — Gitleaks Configuration
+#
+# Gitleaks scans every commit in a pull request for high-confidence credential
+# patterns and blocks the merge if any are found.
+#
+# This file extends the built-in gitleaks default rule set (which covers 150+
+# provider-specific patterns) and layers on project-specific allowlists to
+# suppress well-understood false positives.
+#
+# Docs: https://github.com/gitleaks/gitleaks
+#
+# ── Tuning history ────────────────────────────────────────────────────────────
+# Initial config  — pre-CI baseline (known static patterns in source tree)
+# 2026-04-23 tune — post first real CI runs; added suppressions for patterns
+#                   observed as false positives and tightened custom rules
+#                   based on actual scan output (Task #1443).
+# ─────────────────────────────────────────────────────────────────────────────
+
+title = "SZL Holdings — Secret Scanning Policy"
+
+# ── Extend the upstream default rule set ─────────────────────────────────────
+# The default set is maintained by the gitleaks team and covers OpenAI, AWS,
+# GitHub, GCP, Stripe, Twilio, Resend, and 140+ other providers.
+[extend]
+useDefault = true
+
+# ── Global allowlist ──────────────────────────────────────────────────────────
+# Entries here suppress matches across ALL rules.
+# Policy: prefer targeted regex suppressions over broad path/directory skips.
+# Only add a path entry when a regex cannot cleanly describe the false positive.
+[allowlist]
+  description = "Global false-positive suppressions for SZL Holdings"
+
+  # ── Files / directories that are safe to skip entirely ──────────────────────
+  paths = [
+    # Lock files contain package hashes, not secrets.
+    "pnpm-lock.yaml",
+    "package-lock.json",
+    "yarn.lock",
+
+    # The internal scanner script contains regex patterns for detection;
+    # those patterns are not credentials.
+    "scripts/qa/scan-secrets.js",
+
+    # This config file itself contains allowlist regex fragments.
+    ".gitleaks.toml",
+
+    # Generated test/build output — never contain real source credentials.
+    "playwright-report",
+    "test-results",
+    "coverage",
+
+    # Replit platform env-var definition file. Values here are dev-environment
+    # variables managed by the Replit platform (not production credentials).
+    # Production secrets are stored in Replit Secrets and never committed.
+    "\\.replit",
+
+    # Generated staging-test mirror of the monorepo. Any finding in the mirror
+    # is always a duplicate of a finding in the original source path, so
+    # suppressions on the originals are sufficient.
+    "\\.mirror-staging-test",
+
+    # .env.example files are developer-facing template files with explicit
+    # placeholder values. They are never real credentials.
+    "\\.env\\.example$",
+
+    # Firebase config template files for the mobile app. These files only
+    # contain PLACEHOLDER_* values; real google-services.json and
+    # GoogleService-Info.plist are generated at EAS build time from secrets
+    # and are gitignored.
+    # Ref: artifacts/szl-holdings-mobile/google-services.json
+    # Ref: artifacts/szl-holdings-mobile/GoogleService-Info.plist
+    "artifacts/szl-holdings-mobile/google-services\\.json",
+    "artifacts/szl-holdings-mobile/GoogleService-Info\\.plist",
+    "artifacts/szl-holdings-mobile/google-services\\.json\\.template",
+    "artifacts/szl-holdings-mobile/GoogleService-Info\\.plist\\.template",
+    "artifacts/szl-holdings-mobile/google-services\\.example\\.json",
+    "artifacts/szl-holdings-mobile/GoogleService-Info\\.example\\.plist",
+    "artifacts/szl-holdings-mobile/google-play-service-account\\.json\\.template",
+    "artifacts/szl-holdings-mobile/google-play-service-account\\.example\\.json",
+
+    # ── Specific source files with named false positives ─────────────────────
+
+    # Certification readiness route: `requirementKey` is a domain data field
+    # (e.g. 'ownership_51', 'citizenship') in requirement record objects, not
+    # an API credential.
+    "artifacts/api-server/src/routes/certification-readiness\\.ts",
+
+    # Seed script for certification data: same requirementKey field pattern.
+    "artifacts/api-server/src/scripts/seed-capital-cert\\.ts",
+
+    # React cognitive-memory page: uses `key:` as a JavaScript object field
+    # name in an array of memory capsule descriptors, not as an API key.
+    "artifacts/a11oy/src/pages/cognitive/memory\\.tsx",
+
+    # Developer portal UI: renders truncated example API key values for
+    # developer documentation purposes. Values are clearly placeholder strings.
+    "artifacts/szl-holdings/src/pages/distribution-os/developer-api\\.tsx",
+    "artifacts/szl-holdings/src/alloy-platform/pages/Developer\\.tsx",
+
+    # localStorage namespace constant ("szl-deal-submissions-v1").
+    # KV store bucket names, not API credentials.
+    "artifacts/szl-holdings/src/lib/dealSubmissions\\.ts",
+
+    # Vessels BoL HMAC module: current code uses an explicitly labeled
+    # dev-only fallback. Historical commits in this file are also safe
+    # (the value was always a dev-only constant, not a real production secret).
+    "artifacts/api-server/src/routes/vessels-modules\\.ts",
+
+    # Live-server integration test: LIVE_TOKEN reads from the
+    # INTEGRATION_TEST_TOKEN environment variable and defaults to "".
+    # No hardcoded token value is present in source.
+    "tests/api/server-live\\.test\\.ts",
+
+    # Vitest test bootstrap: sets ALLOY_INTERNAL_TOKEN to a clearly-labeled
+    # non-secret 'vitest-internal-token-...' constant when the env var is
+    # absent, so tests can boot without real credentials.
+    # Ref: artifacts/api-server/src/__tests__/helpers/test-env-bootstrap.ts
+    "artifacts/api-server/src/__tests__/helpers/test-env-bootstrap\\.ts",
+
+    # Stripe gate test: sets STRIPE_SECRET_KEY to 'sk_live_FAKE_LIVE_KEY_DO_NOT_USE'
+    # and 'sk_test_FAKE_TEST_KEY_DO_NOT_USE' as fixtures that exercise the
+    # live/test mode-detection branch. The key names explicitly call out their
+    # non-production nature ("FAKE", "DO_NOT_USE").
+    # Ref: artifacts/api-server/src/__tests__/stripe-gate.test.ts
+    "artifacts/api-server/src/__tests__/stripe-gate\\.test\\.ts",
+
+    # Sentra agent-mesh data file: contains a documentation example MCP server
+    # config string showing "GITHUB_TOKEN": "ghp_xxxx..." as a template value.
+    # This is display text rendered in the Sentra UI, not a credential.
+    # Ref: artifacts/sentra/src/data/agent-mesh.ts line 569
+    "artifacts/sentra/src/data/agent-mesh\\.ts",
+
+    # Backstage service catalog files — 'api: <service-name>' is the spec.type
+    # field (e.g. 'api: alloy-runtime') identifying the catalog entity kind.
+    # These are infrastructure metadata, not API credentials.
+    # Verified as false positive: commit 15c00b61167ab244b0075a89862a04398555719b
+    # Rule generic-api-key, entropy 3.641250 — low entropy confirms non-credential.
+    "apps/.*/catalog-info\\.yaml",
+    "services/.*/catalog-info\\.yaml",
+    "workers/.*/catalog-info\\.yaml",
+    "catalog-info\\.yaml",
+
+    # Endpoint and model profile JSON files — 'api_key_env' is a config field
+    # holding the NAME of an environment variable (e.g. 'OPENAI_API_KEY'), not
+    # an actual API key value. The value is always resolved at runtime from the
+    # environment; no credential is stored in the file.
+    # Verified as false positive: commit 7eb623f8b870128e615ac6be9880e0265204b454
+    # Rule generic-api-key, entropy 3.521641 — env var name, not key material.
+    "endpoint-profiles/.*\\.json",
+    "model-profiles/.*\\.json",
+
+    # Service taxonomy documentation — Markdown table containing a column header
+    # 'api: <endpoint-path>' as a documentation shorthand for REST interface
+    # descriptions. Not a credential pattern.
+    # Verified as false positive: commit 69b236a68c02b764c617e6ffe8e09f98480b9db3
+    "docs/service-taxonomy\\.md",
+
+    # Deception-grid component — intentional honeypot display items with
+    # self-documenting fake token values (type: 'Fake API Key', 'Fake AWS Key').
+    # These are UI labels for the threat-detection dashboard, not real credentials.
+    # Verified as false positive: commit 50026f3a571ec0b31da21dac09432bac3453bfb4
+    "artifacts/sentra/src/pages/deception-grid\\.tsx",
+
+    # GitHub package/auth documentation: contains example export commands with
+    # ghp_your_token_here / ghp_your_pat_here placeholder patterns for
+    # developer reference. All values are clearly labeled as examples.
+    "docs/github/packages",
+    "docs/github/packages-security\\.md",
+
+    # ops/github shell scripts: comment blocks instruct operators to export
+    # GH_WORKFLOW_TOKEN=ghp_xxx... before running. These are instructions,
+    # not committed credentials.
+    "ops/github/push-workflows\\.sh",
+    "scripts/github/publish-npm-packages\\.sh",
+    "scripts/github/audit-packages\\.ts",
+
+    # Audit and security report documents reference credential-shaped example
+    # values (e.g. AKIAIOSFODNN7EXAMPLE) for documentation purposes only.
+    # All values in these specific files were confirmed false positives in prior
+    # audits (see KNOWN-GAPS.md Finding 1).
+    "audit/FINAL_DETAILED_REPORT\\.md",
+    "audit/FINAL_EXEC_SUMMARY\\.md",
+    "audit/phase-a-report\\.md",
+    "audit/security/auth-review\\.md",
+    "security/secret-audit\\.md",
+
+    # Benchmark API design docs contain HTTP request examples with synthetic
+    # idempotency key values (e.g. idem_20260416_abc123) and example Bearer
+    # tokens. None are real credentials (see KNOWN-GAPS.md Finding 3).
+    "ops/benchmark/api-idempotency-and-events\\.md",
+
+    # ── Round 2 false positives (2026-05-29) ──────────────────────────────────
+
+    # Mathlib vendored Lean4 dependency — entire .lake subtree is upstream
+    # third-party code checked in as a Lake workspace dependency. Any credential-
+    # shaped pattern inside it (curl -u, math variable names, etc.) is either
+    # upstream CI referencing GitHub Secrets at runtime, or Lean4 math notation
+    # whose identifiers happen to match a scanner pattern.
+    # Fingerprints confirmed false positive:
+    #   f52df3ec:nightly_detect_failure.yml:curl-auth-user:53 (admin:${{secrets.SPEED}})
+    #   f52df3ec:LevyProkhorovMetric.lean:expo-eas-token:60,73,79 (math var 'meas')
+    "packages/lean-formulas/\\.lake/",
+
+    # Defense-Unicorns proposal HTML source — third-party generated documentation
+    # containing PostHog analytics snippet with the Defense-Unicorns project's
+    # own analytics key. SZL Holdings does not own or control this key; it is
+    # present in vendored HTML docs only.
+    # Fingerprints confirmed false positive:
+    #   9dc57ab:uds-cli-install.html:posthog-project-key:28,31
+    "docs/proposals/defense-unicorns/_sources/",
+
+    # Payload CMS raw file — 'key' is a JSON field name in a forecast gauge
+    # spec (e.g. 'key': 'METR-th50-hours'). This is domain data, not an API key.
+    # Fingerprint confirmed false positive:
+    #   fa39cf32:operational_spec.md:generic-api-key:176
+    "packages/payload/raw/_files/",
+
+    # Benchmarks script — 'ALLOY_API_KEY=bench-key-szl-v11-truth' is the
+    # documented os.environ.get fallback used when running benchmarks locally.
+    # The docstring explicitly shows this value in the 'Run:' example command;
+    # it is a hardcoded benchmark default, not a production credential.
+    # Fingerprint confirmed false positive:
+    #   ba834a5b:run_benchmarks.py:generic-api-key:16
+    "benchmarks/run_benchmarks\\.py",
+
+    # AI-engine profile JSON — 'api_key_env' field holds the NAME of an
+    # environment variable (e.g. 'QWEN36_API_KEY'), not the key value itself.
+    # Pattern identical to model-profiles/endpoint-profiles already allowlisted.
+    # Fingerprint confirmed false positive:
+    #   0e3295d1:qwen3_6_27b_szl_profile.json:generic-api-key:23
+    "lib/ai-engine/profiles/",
+
+    # PQC identity library — 'this._ed25519PrivateKey = opts.ed25519PrivateKey'
+    # is a constructor assignment storing a Uint8Array parameter; no key
+    # material is hardcoded. File inspected at commit ec8ff738.
+    # Fingerprint confirmed false positive:
+    #   ec8ff738:hybrid-signer.ts:generic-api-key:21
+    "lib/pqc-identity/src/hybrid-signer\\.ts",
+
+    # API-server runtime config — 'key:' is an object field name in an array
+    # of configuration descriptors (e.g. key: 'slo_latency_p99_ms'). The
+    # 'key' field names a config parameter, not an API credential.
+    # Fingerprint confirmed false positive:
+    #   f5c0d142:runtime-config.ts:generic-api-key:190
+    "artifacts/api-server/src/lib/runtime-config\\.ts",
+
+    # API-server terra-live route — 'cacheKey:' is a field name in a data
+    # source descriptor array (e.g. cacheKey: 'terra-noaa-climate-USW00094728').
+    # These are Redis cache key strings for public API data, not credentials.
+    # Fingerprints confirmed false positive:
+    #   4b325cf4:terra-live.ts:generic-api-key:1144,1145
+    "artifacts/api-server/src/routes/terra-live\\.ts",
+
+    # Command cognitive memory page — 'key:' field in a memory capsule
+    # descriptor array (e.g. key: 'cii_rating_thresholds_2026'). Domain
+    # data identifier, not an API credential. Two commits, same false positive.
+    # Fingerprints confirmed false positive:
+    #   d7d8936b:memory.tsx:generic-api-key:174
+    #   36c17af9:memory.tsx:generic-api-key:167
+    "artifacts/command/src/pages/cognitive/memory\\.tsx",
+  ]
+
+  # ── Regex patterns that are always safe ─────────────────────────────────────
+  # These patterns match documentation examples, placeholder values, and CI
+  # fixture strings that look like real credentials but are not.
+  regexes = [
+    # Generic placeholder strings used in .env.example and docs
+    "your[-_]?(?:api[-_]?)?(?:key|secret|token|password|credential)(?:[-_]?here)?",
+    "placeholder",
+    "changeme",
+    "replace[-_]?me",
+    "example[-_]?only",
+
+    # Stripe test-mode keys (not live).
+    # sk_test_ and pk_test_ keys are non-billable; they cannot charge real cards.
+    "sk_test_[a-zA-Z0-9]+",
+    "pk_test_[a-zA-Z0-9]+",
+    "rk_test_[a-zA-Z0-9]+",
+    "whsec_test_[a-zA-Z0-9]+",
+
+    # Stripe fixture keys used in unit tests — names contain "FAKE" and
+    # "DO_NOT_USE" to document their non-production nature.
+    # Ref: artifacts/api-server/src/__tests__/stripe-gate.test.ts
+    "sk_live_FAKE[A-Z0-9_]+DO_NOT_USE",
+    "sk_test_FAKE[A-Z0-9_]+DO_NOT_USE",
+
+    # AWS example / documentation account IDs used in ARN examples
+    "AKIAIOSFODNN7EXAMPLE",
+    "AKIA0000000000EXAMPLE",
+
+    # GitHub token examples and placeholders from documentation and shell scripts.
+    # The built-in rule targets real 36-char alphanumeric tokens; these patterns
+    # are visibly not real:
+    #  - ghp_[a-f0-9]{26}: hex-only, 26 chars — not a real 36-char mixed-case PAT
+    #  - ghp_xxxx...: clearly truncated
+    #  - ghp_your_*: generic placeholder form
+    "ghp_[a-f0-9]{26}",
+    "ghp_xxxx",
+    "ghp_your",
+    "ghp_abc123",
+
+    # OpenAI placeholder keys that appear in docs / templates
+    "sk-proj-[A-Za-z0-9_-]{20}XXXXXXXXXX",
+    "sk-[Xx]{20,}",
+
+    # Resend placeholder keys used in .env.example
+    "re_[Xx]{24,}",
+    "re_0000[a-zA-Z0-9]{20}",
+
+    # JWT example from README / docs — recognisable by all-zero payload
+    "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9\\.eyJzdWIiOiIxMjM0NTY3ODkwIn0\\.",
+
+    # Postgres DSN used in integration tests (local CI service; not production)
+    "postgresql://postgres:postgres@localhost",
+
+    # Replit deployment URLs — not secrets
+    "REPLIT_DEV_DOMAIN",
+    "replit\\.app",
+    "replit\\.dev",
+
+    # Dev-environment API keys carried under the szl_dev_ prefix.
+    # Production keys use szl_live_ and are never committed to source.
+    "szl_dev_[a-zA-Z0-9]+",
+
+    # Internal token format used in the Replit dev environment (.replit file).
+    # The prefix "szl-" followed by 64 hex chars identifies dev-only tokens.
+    "szl-[0-9a-f]{64}",
+
+    # Dev-only HMAC fallback in vessels-modules.ts — the constant name itself
+    # includes "-dev-only" to document its non-production nature.
+    "vessels-bol-chain-secret-dev-only",
+
+    # Known dev substrate signing key canary value in startup-validation.ts.
+    # Deliberately kept in source so the validator can warn when the default
+    # value is still in use (i.e. no real key has been configured).
+    "5228884b12bc50c3be1c0f8345d5f5475baf5bc2ccb265d5e9bc02674c04258a",
+
+    # Synthetic MLS listing keys in lib/services/src/adapters/reso-mls.ts.
+    # These are fixture data records (mls-rbny-2024001, etc.), not real keys.
+    "mls-[a-z]+-[0-9]+",
+
+    # Azure Key Vault Secrets User built-in role definition ID.
+    # This is a Microsoft-published public GUID, not a secret.
+    # Ref: https://learn.microsoft.com/en-us/azure/key-vault/general/rbac-guide
+    "4633458b-17de-408a-b874-0445c86b69e6",
+
+    # Truncated example tokens shown in developer portal UI for developers.
+    # Clearly non-real (ellipsis notation: "a3f9e2c4b1d8...", "szl_live_a1b2...").
+    "a3f9e2c4b1d8",
+    "szl_live_a1b2c3d4e5f6",
+
+    # Shell env-var references in curl documentation examples — the value comes
+    # from the shell environment and is never a hardcoded secret.
+    "Bearer \\$[A-Z_][A-Z0-9_]*",
+
+    # Mapbox placeholder token value in .env.example files — base64 encoding of
+    # the literal strings "your-username" and "your-token", not a real token.
+    "pk\\.eyJ1IjoieW91ci11c2VybmFtZSIsImEiOiJ5b3VyLXRva2VufQ",
+
+    # localStorage bucket name constants (e.g. "szl-deal-submissions-v1").
+    # These are storage namespace strings, not API credentials.
+    "szl-[a-z-]+-v[0-9]+",
+
+    # CI session secret: used in ci.yml and security.yml readiness-gate jobs.
+    # The string is explicitly labeled "-not-for-production" to document its
+    # non-production nature. Ref: .github/workflows/ci.yml (integration-test
+    # and readiness-gate jobs).
+    "ci-test-session-secret-not-for-production",
+
+    # Vitest test bootstrap token: 'vitest-internal-token-padding-padding-*'
+    # set in test-env-bootstrap.ts when ALLOY_INTERNAL_TOKEN is absent.
+    # Clearly non-production by its prefix and "padding" filler.
+    # Ref: artifacts/api-server/src/__tests__/helpers/test-env-bootstrap.ts
+    "vitest-internal-token",
+
+    # Slack bot token placeholder pattern used in .env.example and connector
+    # documentation. "xoxb-your-slack-bot-token" is the canonical example form.
+    "xoxb-your-",
+
+    # PostHog placeholder key format used in mobile and web .env.example files:
+    # "phc_YOUR_PROJECT_API_KEY". phc_ is the PostHog key prefix; the all-caps
+    # suffix is visibly a placeholder.
+    # Ref: artifacts/szl-holdings-mobile/.env.example
+    # Ref: artifacts/szl-holdings/.env.example
+    "phc_YOUR_PROJECT_API_KEY",
+
+    # Firebase / Google placeholder API key value used in committed mobile
+    # scaffold files (google-services.json, GoogleService-Info.plist, and
+    # their .template and .example variants). Real keys are populated at
+    # EAS build time from secrets and never committed.
+    "PLACEHOLDER_API_KEY",
+    "PLACEHOLDER_PRIVATE_KEY",
+
+    # Synthetic idempotency key values used in HTTP request examples in
+    # benchmark/API design documentation (e.g. idem_20260416_abc123).
+    # Pattern: idem_ + date digits + underscore + short alphanumeric label.
+    "idem_[0-9]{8}_[a-z0-9]+",
+
+    # Benchmark harness default API key — documented os.environ.get fallback
+    # value used when ALLOY_API_KEY is not set. Shown in the run_benchmarks.py
+    # docstring as the canonical local-run example value. Not a production key.
+    "bench-key-szl-v[0-9]+-[a-z]+",
+  ]
+
+  # ── Commit-level stop-list ────────────────────────────────────────────────
+  # These commit SHAs are known historical commits that pre-date this policy.
+  # Any new leaked secrets must be rotated AND the commit re-evaluated.
+  commits = []
+
+# ── Custom rule: detect high-entropy base64 private keys ─────────────────────
+# The default gitleaks set already covers PEM blocks; this is an additional
+# defence for unusual wrapping formats.
+[[rules]]
+  id          = "private-key-bare"
+  description = "Bare high-entropy private key block (non-standard wrapping)"
+  regex       = '''(?i)-----BEGIN[ A-Z]*PRIVATE KEY[ A-Z]*-----'''
+  tags        = ["key", "credential"]
+
+  [rules.allowlist]
+    paths = [
+      # .env.example deliberately contains a commented-out example block
+      "\\.env\\.example",
+      # documentation may quote key format without real key content
+      "SECRETS_SETUP\\.md",
+      # Mobile scaffold files: private_key field contains PLACEHOLDER_PRIVATE_KEY
+      "artifacts/szl-holdings-mobile/google-play-service-account\\.json\\.template",
+      "artifacts/szl-holdings-mobile/google-play-service-account\\.example\\.json",
+    ]
+    regexes = [
+      # Google service account template files use PLACEHOLDER_PRIVATE_KEY as
+      # the value for the private_key JSON field — not a real key.
+      "PLACEHOLDER_PRIVATE_KEY",
+    ]
+
+# ── Custom rule: Expo / EAS token ────────────────────────────────────────────
+[[rules]]
+  id          = "expo-eas-token"
+  description = "Expo EAS / Expo account token"
+  regex       = '''eas_[a-zA-Z0-9_-]{40,}'''
+  tags        = ["expo", "credential"]
+
+# ── Custom rule: Resend production key ───────────────────────────────────────
+# The built-in Resend rule can fire on test keys; this scoped rule targets only
+# production-style keys (mixed case, min 28 chars, not matching the allowlist
+# placeholder pattern above).
+[[rules]]
+  id          = "resend-production-key"
+  description = "Resend production API key"
+  regex       = '''re_[a-zA-Z0-9]{28,}'''
+  tags        = ["resend", "credential"]
+
+  [rules.allowlist]
+    regexes = [
+      "re_[Xx]{24,}",
+      "re_0000[a-zA-Z0-9]{20}",
+    ]
+
+# ── Custom rule: Stripe live key ─────────────────────────────────────────────
+# Extends / tightens detection of Stripe live-mode keys beyond the built-in
+# rule. The allowlist explicitly carves out the fixture keys used in unit tests
+# (names contain FAKE and DO_NOT_USE) and docs/ops files that reference the
+# key format without real values.
+[[rules]]
+  id          = "stripe-live-key"
+  description = "Stripe live-mode secret or restricted key"
+  regex       = '''(sk|rk)_live_[a-zA-Z0-9]{20,}'''
+  tags        = ["stripe", "credential"]
+
+  [rules.allowlist]
+    # Fixture keys in the stripe-gate test; names are self-documenting.
+    regexes = [
+      "sk_live_FAKE[A-Z0-9_]+DO_NOT_USE",
+    ]
+    # Documentation and ops files that reference the key format, not real keys.
+    paths = [
+      "docs/",
+      "ops/",
+      "audit/",
+      "launch/",
+      "BILLING\\.md",
+      "replit\\.md",
+    ]
+
+# ── Custom rule: PostHog project API key ─────────────────────────────────────
+# PostHog keys start with phc_ and are 40+ chars. The built-in gitleaks
+# default set does not include a PostHog rule, so we add one here.
+[[rules]]
+  id          = "posthog-project-key"
+  description = "PostHog project API key"
+  regex       = '''phc_[a-zA-Z0-9]{38,}'''
+  tags        = ["posthog", "analytics", "credential"]
+
+  [rules.allowlist]
+    regexes = [
+      # The canonical placeholder from all .env.example files — all-caps suffix
+      # is visibly not a real key.
+      "phc_YOUR_PROJECT_API_KEY",
+    ]
+
+# ── Custom rule: Slack bot token ─────────────────────────────────────────────
+# The built-in rule may not cover all Slack token variants. This rule
+# explicitly targets xoxb- (bot) tokens beyond the placeholder pattern.
+[[rules]]
+  id          = "slack-bot-token"
+  description = "Slack bot OAuth token"
+  regex       = '''xoxb-[0-9]{10,13}-[0-9]{10,13}-[a-zA-Z0-9]{24}'''
+  tags        = ["slack", "credential"]
+
+  [rules.allowlist]
+    regexes = [
+      # Placeholder form used in .env.example: "xoxb-your-slack-bot-token"
+      "xoxb-your-",
+    ]
+
+# ── curl-auth-header rule: suppress documentation example endpoints ───────────
+# The built-in curl-auth-header rule fires on markdown documentation files that
+# contain example curl commands with Bearer token placeholders. Override the
+# rule to add an allowlist for known documentation files where the Bearer value
+# is visibly an example (localhost URL, example.com host, [host] placeholder).
+[[rules]]
+  id          = "curl-auth-header"
+  description = "Authorization header with Bearer token"
+  regex       = '''(?i)(Authorization\s*[:=]\s*["']?\s*Bearer\s+)([a-zA-Z0-9\-._~+/]+=*)'''
+  secretGroup = 2
+  tags        = ["auth", "credential"]
+
+  [rules.allowlist]
+    # Documentation files that contain example curl commands with placeholder tokens.
+    paths = [
+      "docs/aef/README\\.md",
+      "docs/aef/implementation-plan\\.md",
+      "ops/benchmark/api-integration-quickstart\\.md",
+      "ops/benchmark/api-idempotency-and-events\\.md",
+    ]
+    # Bearer tokens that are clearly placeholder/example values.
+    regexes = [
+      # Shell environment variable reference — not a real token
+      "Bearer \\$[A-Z_][A-Z0-9_]*",
+      # Truncated example shown with ellipsis — not a real token
+      "a3f9e2c4b1d8",
+      "szl_live_a1b2c3d4e5f6",
+    ]
+
+# ── curl-auth-user rule: suppress Mathlib vendored dependency ─────────────────
+# The built-in curl-auth-user rule fires on the Mathlib vendored Git dependency
+# (packages/lean-formulas/.lake/packages/mathlib). The file in question
+# (nightly_detect_failure.yml) uses `curl -u "admin:${{ secrets.SPEED }}"` where
+# the secret value is resolved from GitHub Actions Secrets at runtime — never
+# hardcoded. This is upstream Mathlib CI code, not SZL Holdings source.
+[[rules]]
+  id          = "curl-auth-user"
+  description = "curl basic-auth flag with username:password"
+  regex       = '''curl.{0,30}-u\s+["']?[a-zA-Z0-9_.-]+:([^\s"']+)'''
+  secretGroup = 1
+  tags        = ["curl", "auth"]
+
+  [rules.allowlist]
+    paths = [
+      # Mathlib vendored Lean4 dependency — upstream CI workflow that references
+      # ${{ secrets.SPEED }} via GitHub Actions Secrets (never a committed value).
+      "packages/lean-formulas/\\.lake/packages/mathlib/\\.github/",
+    ]
+    regexes = [
+      # GitHub Actions secret reference: the value is resolved at runtime from
+      # GitHub Secrets; the string committed to source is the reference itself.
+      "\\$\\{\\{\\s*secrets\\.",
+    ]

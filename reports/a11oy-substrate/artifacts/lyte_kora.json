@@ -1,0 +1,79 @@
+{
+  "vertical": "lyte_kora",
+  "generated_at": "2026-04-25T22:20:37.685307+00:00",
+  "brief": {
+    "headline": "Collapse 5-person approval chain to named approvers",
+    "decision_debt_days": 18,
+    "bottleneck": "5-person approval chain with 2 OOO",
+    "evidence_gap": "Infrastructure migration decision lacks benchmarks",
+    "evidence_count": 3
+  },
+  "signals": [
+    {
+      "id": "sig_lyte_approval_bottleneck",
+      "kind": "bottleneck",
+      "source": "linear",
+      "summary": "5-person approval chain with 2 OOO blocking vendor contract",
+      "weight": 0.85
+    },
+    {
+      "id": "sig_lyte_evidence_gap",
+      "kind": "evidence_gap",
+      "source": "governance_db",
+      "summary": "Infrastructure migration decision lacks benchmark-backed alternatives",
+      "weight": 0.7
+    },
+    {
+      "id": "sig_lyte_decision_age",
+      "kind": "decision_age",
+      "source": "slack",
+      "summary": "3 decisions pending > 7 days without owner escalation",
+      "weight": 0.6
+    }
+  ],
+  "evidence": [
+    {
+      "id": "ev_lyte_kora_sig_lyte_approval_bottleneck",
+      "from_signal": "sig_lyte_approval_bottleneck",
+      "claim": "5-person approval chain with 2 OOO blocking vendor contract",
+      "source": "linear"
+    },
+    {
+      "id": "ev_lyte_kora_sig_lyte_evidence_gap",
+      "from_signal": "sig_lyte_evidence_gap",
+      "claim": "Infrastructure migration decision lacks benchmark-backed alternatives",
+      "source": "governance_db"
+    },
+    {
+      "id": "ev_lyte_kora_sig_lyte_decision_age",
+      "from_signal": "sig_lyte_decision_age",
+      "claim": "3 decisions pending > 7 days without owner escalation",
+      "source": "slack"
+    }
+  ],
+  "forecast": {
+    "horizon": "this_week",
+    "method": "decision-debt-baseline-v0",
+    "confidence": 0.6,
+    "decision_debt_days": 18,
+    "bottleneck_severity": "high"
+  },
+  "recommendation": {
+    "id": "rec_lyte_collapse_approval_chain",
+    "title": "Collapse 5-person approval chain to named approvers",
+    "next_action": "Identify the 2 OOO approvers, delegate to alternates, and re-submit for approval.",
+    "rollback_path": "If delegation fails, escalate to COO for emergency sign-off within 24h.",
+    "input_class": "decision_signals_v1",
+    "output_class": "decision_debt_report_v1",
+    "confidence": 0.6,
+    "vertical": "lyte_kora",
+    "owner": "ops@szl",
+    "model": "gpt-5.5-2026-04-23",
+    "requires_human_approval": true,
+    "evidence_ids": [
+      "ev_lyte_kora_sig_lyte_approval_bottleneck",
+      "ev_lyte_kora_sig_lyte_evidence_gap",
+      "ev_lyte_kora_sig_lyte_decision_age"
+    ]
+  }
+}

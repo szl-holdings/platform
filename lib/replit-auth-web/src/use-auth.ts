@@ -1,0 +1,73 @@
+import { useCallback, useEffect, useState } from 'react';
+
+export interface AuthUser {
+  id: string | number;
+  username?: string | null;
+  email?: string | null;
+  name?: string | null;
+  displayName?: string | null;
+  avatarUrl?: string | null;
+  roles?: string[];
+}
+
+interface AuthState {
+  user: AuthUser | null;
+  isLoading: boolean;
+  isAuthenticated: boolean;
+  login: () => void;
+  logout: () => void;
+}
+
+export function useAuth(): AuthState {
+  const [user, setUser] = useState<AuthUser | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    let cancelled = false;
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 8_000);
+
+    fetch('/api/auth/user', { credentials: 'include', signal: controller.signal })
+      .then((res) => {
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        return res.json() as Promise<{ user: AuthUser | null }>;
+      })
+      .then((data) => {
+        if (!cancelled) {
+          setUser(data.user ?? null);
+          setIsLoading(false);
+        }
+      })
+      .catch(() => {
+        if (!cancelled) {
+          setUser(null);
+          setIsLoading(false);
+        }
+      })
+      .finally(() => clearTimeout(timeout));
+
+    return () => {
+      cancelled = true;
+      controller.abort();
+      clearTimeout(timeout);
+    };
+  }, []);
+
+  const login = useCallback(() => {
+    const currentPath =
+      window.location.pathname + window.location.search + window.location.hash;
+    window.location.href = `/api/login?returnTo=${encodeURIComponent(currentPath)}`;
+  }, []);
+
+  const logout = useCallback(() => {
+    window.location.href = '/api/logout';
+  }, []);
+
+  return {
+    user,
+    isLoading,
+    isAuthenticated: !!user,
+    login,
+    logout,
+  };
+}

@@ -1,0 +1,180 @@
+# Free-Energy-Lutar Active Inference with Hierarchical Predictive Coding and Cognitive Map Navigation
+
+**Author:** Stephen Paul Lutar Jr.
+**Affiliation:** SZL Consulting Ltd
+**ORCID:** [0009-0001-0110-4173](https://orcid.org/0009-0001-0110-4173)
+**Contact:** stephenlutar2@gmail.com
+**Date:** 4 May 2026
+**Version:** v8
+**Companion papers:** v1--v7 (see References)
+**Reference implementation:** [github.com/szl-holdings/szl-holdings-platform](https://github.com/szl-holdings/szl-holdings-platform) -- `packages/ouroboros-integrations/src/sovereign-engine.ts` (FELAI, PCEM, CMN classes)
+**License:** CC BY 4.0
+
+---
+
+## Abstract
+
+We extend Friston's Free Energy Principle (FEP) with the Lutar Omega signature (v4) to create Free-Energy-Lutar Active Inference (FELAI). FELAI replaces the standard KL divergence with an Omega-weighted divergence \( D_\Omega[q \| p] = D_{KL}[q \| p] \cdot L_\Omega \), coupling thermodynamic efficiency to the seven-version Lutar hierarchy. We integrate two neuroscience-inspired modules: (1) a Predictive Coding Error Minimizer (PCEM) implementing Rao-Ballard (1999) hierarchical prediction error minimization as a biologically plausible alternative to backpropagation, and (2) a Cognitive Map Navigator (CMN) implementing Tolman (1948) cognitive maps with O'Keefe-Moser grid cells for latent space navigation. This extends the thesis lineage from v7 (memory) to active inference and navigation.
+
+This paper does **not** claim that FELAI outperforms standard active inference on control benchmarks. The contribution is the formal integration.
+
+---
+
+## 1. Motivation and Continuity from v3--v7
+
+The v7 paper established the memory substrate (SCL, KTM, HAAM, OCM). The present paper addresses how an agent *acts* using that memory: active inference selects actions that minimize expected free energy, predictive coding generates expectations about the world, and cognitive maps provide the navigational scaffold.
+
+The Free Energy Principle (Friston, 2010) proposes that biological systems minimize variational free energy \( F = D_{KL}[q(\theta) \| p(\theta | y)] - \ln p(y) \). Active inference extends this by treating action as a means of minimizing expected free energy. Predictive coding (Rao and Ballard, 1999) provides a neural implementation. Cognitive maps (Tolman, 1948; O'Keefe and Moser, 2014 Nobel) provide the spatial scaffold.
+
+---
+
+## 2. Free-Energy-Lutar Active Inference (FELAI)
+
+### 2.1 Lutar Free Energy
+
+\[
+F_{\text{Lutar}} = L_\Omega \cdot D_{KL}[q(\theta) \| p(\theta)] + H[q(\theta)] - L_\Omega \cdot \mathbb{E}_q[\ln p(y | \theta)]
+\]
+
+where \( L_\Omega \) is the v4 Lutar Omega composite signature and \( H[\cdot] \) is entropy.
+
+When \( L_\Omega = 1 \): FELAI reduces to standard FEP. When \( L_\Omega < 1 \): KL penalty attenuated, broader exploration. When \( L_\Omega > 1 \): penalty amplified, tighter inference.
+
+### 2.2 Active Inference Policy Selection
+
+Given policies \( \pi_1, \ldots, \pi_K \):
+
+\[
+\pi^* = \arg\min_{\pi_k} \sum_{t=1}^{T} \mathbb{E}_{q(\theta|\pi_k)}\left[ F_{\text{Lutar}}^{(t)} \right]
+\]
+
+Monte Carlo rollouts estimate the expected free energy over \( T \)-step horizons.
+
+---
+
+## 3. Predictive Coding Error Minimizer (PCEM)
+
+### 3.1 Hierarchical Predictive Model
+
+A predictive coding hierarchy with \( L \) layers maintains:
+
+- Representations \( \mathbf{r}^{(l)} \) at each layer
+- Top-down weight matrices \( W^{(l)} \) generating predictions
+- Prediction errors \( \boldsymbol{\varepsilon}^{(l)} = \mathbf{r}^{(l)} - f(W^{(l)} \mathbf{r}^{(l+1)}) \) where \( f = \tanh \)
+
+Total free energy across the hierarchy:
+
+\[
+F_{\text{total}} = \sum_{l=0}^{L-2} \frac{1}{2} \|\mathbf{r}^{(l)} - f(W^{(l)} \mathbf{r}^{(l+1)})\|^2
+\]
+
+### 3.2 Biologically Plausible Update Rules
+
+Unlike backpropagation (which requires non-local weight transport), predictive coding updates are local:
+
+\[
+\Delta \mathbf{r}^{(l)} = -\eta_r \left( \boldsymbol{\varepsilon}^{(l)} - (W^{(l-1)})^T \boldsymbol{\varepsilon}^{(l-1)} \right)
+\]
+
+\[
+\Delta W^{(l)} = -\eta_w \, \boldsymbol{\varepsilon}^{(l)} \, (\mathbf{r}^{(l+1)})^T
+\]
+
+The first equation adjusts representations using only local prediction errors from adjacent layers. The second is a Hebbian-like rule involving only pre-synaptic activity and post-synaptic prediction error.
+
+**Convergence:** Under Lipschitz continuity of \( f \) and bounded weights, the predictive coding update rules converge to a local minimum of \( F_{\text{total}} \) (Millidge et al., 2021).
+
+### 3.3 Omega-Weighted Prediction Error
+
+\[
+\bar{\varepsilon}_\Omega = \frac{1}{L-1} \sum_{l=0}^{L-2} \|\boldsymbol{\varepsilon}^{(l)}\| \cdot w_l
+\]
+
+where \( w_l \) is the v4 Omega weight for layer \( l \), assigning higher importance to prediction errors at more abstract levels.
+
+---
+
+## 4. Cognitive Map Navigator (CMN)
+
+### 4.1 Cognitive Map Graph
+
+A cognitive map \( G_{\text{cog}} = (V, E, \tau, \mathbf{p}) \) consists of:
+
+- Nodes \( V \) representing spatial or conceptual locations
+- Edges \( E \) representing navigable transitions
+- Cell type function \( \tau: V \to \{\text{place, grid, head\_direction, boundary}\} \)
+- Position function \( \mathbf{p}: V \to \mathbb{R}^2 \)
+
+### 4.2 Grid Cell Firing Model
+
+\[
+g(x, y) = \frac{1}{3} \sum_{k=0}^{2} \cos\left(\frac{2\pi f}{\lambda} (x \cos\theta_k + y \sin\theta_k)\right)
+\]
+
+where \( f \) is spatial frequency, \( \lambda \) is grid spacing, and \( \theta_k = k \cdot \pi/3 \) are the three hexagonal orientations.
+
+### 4.3 Path Integration and Spatial Coherence
+
+Head direction signal:
+
+\[
+\text{HD}(\mathbf{p}_1, \mathbf{p}_2) = \arctan\left(\frac{p_{2,y} - p_{1,y}}{p_{2,x} - p_{1,x}}\right)
+\]
+
+Spatial coherence (ratio of direct distance to path distance):
+
+\[
+C_{\text{spatial}} = \frac{d_{\text{direct}}(\text{start}, \text{goal})}{d_{\text{path}}(\text{start}, \text{goal})}
+\]
+
+A coherent navigation achieves \( C_{\text{spatial}} = 1 \) (straight-line path).
+
+---
+
+## 5. Integration: FELAI + PCEM + CMN
+
+The three modules integrate in a biologically inspired architecture:
+
+1. **CMN** provides the latent space topology --- the map of possible states
+2. **PCEM** generates predictions about the next state and computes prediction errors
+3. **FELAI** uses Omega-weighted free energy to select actions minimizing expected surprise
+
+This mirrors hippocampal cognitive maps informing cortical predictive coding, which drives active inference through the basal ganglia.
+
+### 5.1 Connection to v7 Memory
+
+The v7 HAAM (Hopfield associative memory) provides rapid pattern completion for CMN node lookup. KTM stores the cognitive map structure in its Core tier. OCM maintains session-local navigation context. SCL prevents catastrophic forgetting of learned maps during continual learning.
+
+---
+
+## 6. What this paper does and does not claim
+
+**Claims:**
+1. FELAI is a well-defined extension of the FEP with Omega weighting.
+2. PCEM convergence follows from standard predictive coding theory (Millidge et al., 2021).
+3. The CMN grid cell model follows the Hafting et al. (2005) parameterization.
+4. All components are implemented in the public reference implementation.
+
+**Non-claims:**
+- No claim of empirical superiority over standard active inference on control tasks.
+- No claim that the biological analogies have literal neuroscientific validity.
+- No claim of deployed production use.
+
+---
+
+## 7. Conclusion
+
+FELAI + PCEM + CMN provide a unified framework bridging active inference, predictive processing, and spatial cognition for AI systems. The integration extends the v3--v7 thesis lineage to the action-selection and navigation layers.
+
+---
+
+## References
+
+1. Friston, K. (2010). The free-energy principle: a unified brain theory? *Nature Reviews Neuroscience*, 11:127--138.
+2. Rao, R.P.N. and Ballard, D.H. (1999). Predictive coding in the visual cortex. *Nature Neuroscience*, 2:79--87.
+3. Tolman, E.C. (1948). Cognitive maps in rats and men. *Psychological Review*, 55(4):189--208.
+4. O'Keefe, J. and Dostrovsky, J. (1971). The hippocampus as a spatial map. *Brain Research*, 34:171--175.
+5. Hafting, T. et al. (2005). Microstructure of a spatial map in the entorhinal cortex. *Nature*, 436:801--806.
+6. Millidge, B. et al. (2021). Predictive coding approximates backprop along arbitrary computation graphs. *NeurIPS*.
+7. Kirsanov, A. (2024). How Your Brain Organizes Information. YouTube lecture series.
+8. Lutar, S.P. (2026a--g). Ouroboros Thesis series v1--v7. See companion papers.

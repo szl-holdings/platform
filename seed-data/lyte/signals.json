@@ -1,0 +1,227 @@
+[
+  {
+    "id": 1,
+    "source": "AWS CloudWatch",
+    "sourceType": "monitoring",
+    "severity": "critical",
+    "title": "RDS Primary (prod-db-01) replication lag exceeds 120s — us-east-1",
+    "status": "new",
+    "offsetMinutes": 2
+  },
+  {
+    "id": 2,
+    "source": "PagerDuty",
+    "sourceType": "alerting",
+    "severity": "critical",
+    "title": "P1 Escalation: Payment processing pipeline stalled — Stripe webhook queue depth 14.2k",
+    "status": "new",
+    "offsetMinutes": 4
+  },
+  {
+    "id": 3,
+    "source": "Datadog APM",
+    "sourceType": "monitoring",
+    "severity": "critical",
+    "title": "API Gateway p99 latency 8.4s (threshold 2s) — Kong ingress controller",
+    "status": "acknowledged",
+    "offsetMinutes": 8
+  },
+  {
+    "id": 4,
+    "source": "Sentry",
+    "sourceType": "error_tracking",
+    "severity": "high",
+    "title": "TypeError: Cannot read properties of undefined — auth-service v3.14.2 (2.4k events/hr)",
+    "status": "new",
+    "offsetMinutes": 12
+  },
+  {
+    "id": 5,
+    "source": "AWS CloudWatch",
+    "sourceType": "monitoring",
+    "severity": "high",
+    "title": "EKS cluster prod-k8s-01 node group at 94% capacity — autoscaler throttled",
+    "status": "acknowledged",
+    "offsetMinutes": 18
+  },
+  {
+    "id": 6,
+    "source": "Grafana",
+    "sourceType": "monitoring",
+    "severity": "high",
+    "title": "Redis cluster (elasticache-prod) memory utilization 91% — eviction policy active",
+    "status": "new",
+    "offsetMinutes": 25
+  },
+  {
+    "id": 7,
+    "source": "Datadog",
+    "sourceType": "monitoring",
+    "severity": "medium",
+    "title": "Lambda function order-processor cold starts increased 340% after deployment",
+    "status": "new",
+    "offsetMinutes": 35
+  },
+  {
+    "id": 8,
+    "source": "Stripe",
+    "sourceType": "webhook",
+    "severity": "high",
+    "title": "Payment decline rate 12.3% (baseline 2.1%) — issuer_decline_code: insufficient_funds spike",
+    "status": "acknowledged",
+    "offsetMinutes": 40
+  },
+  {
+    "id": 9,
+    "source": "CloudFlare",
+    "sourceType": "cdn",
+    "severity": "medium",
+    "title": "Edge cache hit ratio dropped to 62% (baseline 94%) — purge event detected",
+    "status": "new",
+    "offsetMinutes": 50
+  },
+  {
+    "id": 10,
+    "source": "GitHub Actions",
+    "sourceType": "ci_cd",
+    "severity": "medium",
+    "title": "Deploy pipeline main→prod timed out after 45m — Docker build stage OOM killed",
+    "status": "new",
+    "offsetMinutes": 55
+  },
+  {
+    "id": 11,
+    "source": "AWS GuardDuty",
+    "sourceType": "security",
+    "severity": "high",
+    "title": "UnauthorizedAccess:IAMUser/InstanceCredentialExfiltration — prod account 441902834",
+    "status": "new",
+    "offsetMinutes": 60
+  },
+  {
+    "id": 12,
+    "source": "Datadog",
+    "sourceType": "monitoring",
+    "severity": "medium",
+    "title": "PostgreSQL connection pool exhaustion — RDS proxy max_connections 95% utilized",
+    "status": "acknowledged",
+    "offsetMinutes": 75
+  },
+  {
+    "id": 13,
+    "source": "PagerDuty",
+    "sourceType": "alerting",
+    "severity": "low",
+    "title": "Scheduled maintenance window approaching — us-west-2 RDS Multi-AZ failover test",
+    "status": "acknowledged",
+    "offsetMinutes": 90
+  },
+  {
+    "id": 14,
+    "source": "Sentry",
+    "sourceType": "error_tracking",
+    "severity": "medium",
+    "title": "New issue regression: CORS preflight failures on /api/v2/checkout (Chrome 122+)",
+    "status": "new",
+    "offsetMinutes": 100
+  },
+  {
+    "id": 15,
+    "source": "AWS CloudTrail",
+    "sourceType": "audit",
+    "severity": "low",
+    "title": "Unusual S3 bucket policy modification detected — bucket: prod-analytics-datalake",
+    "status": "resolved",
+    "offsetMinutes": 120
+  },
+  {
+    "id": 16,
+    "source": "New Relic",
+    "sourceType": "monitoring",
+    "severity": "medium",
+    "title": "Apdex score degraded to 0.72 (target 0.90) — user-facing search service",
+    "status": "new",
+    "offsetMinutes": 140
+  },
+  {
+    "id": 17,
+    "source": "Datadog",
+    "sourceType": "monitoring",
+    "severity": "low",
+    "title": "Kafka consumer group lag increasing on topic: order-events (partition 3, lag: 45k)",
+    "status": "acknowledged",
+    "offsetMinutes": 160
+  },
+  {
+    "id": 18,
+    "source": "Zendesk",
+    "sourceType": "support",
+    "severity": "info",
+    "title": "Daily support digest: 142 tickets (12 escalated), CSAT 94.2%, avg response 4.1m",
+    "status": "dismissed",
+    "offsetMinutes": 180
+  },
+  {
+    "id": 19,
+    "source": "AWS Cost Explorer",
+    "sourceType": "finops",
+    "severity": "low",
+    "title": "Daily spend anomaly: $2,847 above 30-day rolling average — NAT Gateway data transfer",
+    "status": "new",
+    "offsetMinutes": 200
+  },
+  {
+    "id": 20,
+    "source": "Prometheus",
+    "sourceType": "monitoring",
+    "severity": "info",
+    "title": "Kubernetes HPA scaled deployment/checkout-api from 8 to 14 replicas — CPU trigger",
+    "status": "resolved",
+    "offsetMinutes": 240
+  },
+  {
+    "id": 21,
+    "source": "Splunk",
+    "sourceType": "siem",
+    "severity": "medium",
+    "title": "Brute force pattern detected: 847 failed login attempts from CIDR 203.0.113.0/24",
+    "status": "acknowledged",
+    "offsetMinutes": 280
+  },
+  {
+    "id": 22,
+    "source": "CloudFlare",
+    "sourceType": "cdn",
+    "severity": "info",
+    "title": "WAF rule triggered 2.1k times in 1hr — managed rule: SQL injection attempts blocked",
+    "status": "dismissed",
+    "offsetMinutes": 320
+  },
+  {
+    "id": 23,
+    "source": "Datadog Synthetics",
+    "sourceType": "monitoring",
+    "severity": "low",
+    "title": "Synthetic check failing: /health endpoint returning 503 on canary deployment v3.15.0-rc1",
+    "status": "new",
+    "offsetMinutes": 360
+  },
+  {
+    "id": 24,
+    "source": "AWS CloudWatch",
+    "sourceType": "monitoring",
+    "severity": "info",
+    "title": "CloudFront distribution E2K4G1XYZABC invalidation completed — 12,847 objects purged",
+    "status": "resolved",
+    "offsetMinutes": 400
+  },
+  {
+    "id": 25,
+    "source": "Vessels Maritime AI",
+    "sourceType": "security",
+    "severity": "critical",
+    "title": "[CROSS-APP] EXC-001 — Crimson Voyager AIS-dark vessel approach, Persian Gulf — escalated by INCA SENTINEL-GAT-v4 (94% confidence)",
+    "status": "new",
+    "receivedAt": "2026-03-30T04:41:02Z"
+  }
+]

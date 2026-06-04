@@ -1,0 +1,29 @@
+{
+  "name": "@szl-holdings/nvidia-adapters",
+  "version": "0.0.0",
+  "private": false,
+  "description": "Optional NVIDIA-ready adapters — NIM model endpoints, NeMo evaluation hooks, agent profiling. No GPU dependency required for development.",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/szl-holdings/platform.git",
+    "directory": "packages/nvidia-adapters"
+  },
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts",
+    "./nim-endpoint": "./src/nim-endpoint.ts",
+    "./nemo-hooks": "./src/nemo-hooks.ts",
+    "./agent-profiler": "./src/agent-profiler.ts"
+  },
+  "dependencies": {
+    "pino": "^9"
+  },
+  "devDependencies": {
+    "@types/node": "catalog:"
+  },
+  "scripts": {
+    "lint": "biome lint ./src",
+    "lint:ci": "biome lint ./src",
+    "format": "biome format --write ./src"
+  }
+}

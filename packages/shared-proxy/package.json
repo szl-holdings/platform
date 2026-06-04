@@ -1,0 +1,16 @@
+{
+  "name": "@szl-holdings/shared-proxy",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Production-grade shared reverse-proxy Vite plugin used by all SZL sub-path artifacts. Provides HTTP forwarding with proper X-Forwarded-* headers, WebSocket upgrade tunnelling with liveness detection, and a /__proxy/status diagnostics endpoint.",
+  "exports": {
+    ".": {
+      "import": "./src/index.ts"
+    }
+  },
+  "devDependencies": {
+    "@types/node": "catalog:",
+    "typescript": "catalog:"
+  }
+}

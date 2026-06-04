@@ -1,0 +1,2 @@
+atlassian-connect
+salesforce-appexchange

@@ -1,0 +1,19 @@
+{
+  "name": "@szl-holdings/evidence-ledger",
+  "version": "0.1.0",
+  "type": "module",
+  "description": "AEEP evidence-ledger — immutable ledger entries, proof envelope assembly, and evidence package compilation",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "scripts": {
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@szl-holdings/shared-contracts": "workspace:*"
+  },
+  "devDependencies": {
+    "typescript": "catalog:",
+    "zod": "catalog:"
+  }
+}

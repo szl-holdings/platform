@@ -1,0 +1,50 @@
+# SPDX-License-Identifier: Apache-2.0
+# SZL cost-burn Prometheus alert rules — Doctrine v11 749/14/163 c7c0ba17 — Yachay
+#
+# Wire into Prometheus:  rule_files: [ "observability/cost/cost_alerts.yml" ]
+# Requires a gauge `szl_daily_cost_usd` (exported by track_cost.py via a textfile
+# collector / pushgateway, or scraped from cost/latest.json by a small exporter).
+groups:
+  - name: szl-cost
+    rules:
+      - alert: CostBurnRateHigh
+        # Threshold starts at $20/day (conservative). Raise to $50 once paid HF
+        # hardware + GitHub Actions paid minutes are in steady state.
+        expr: szl_daily_cost_usd > 20
+        for: 0m
+        labels:
+          severity: warning
+          team: ops
+          doctrine: v11
+        annotations:
+          summary: "SZL daily cost burn is high"
+          description: >
+            Daily estimated cost {{ $value | printf "%.2f" }} USD exceeds the $20/day
+            budget. Check GitHub Actions paid minutes and HF compute tier. Source:
+            SZLHOLDINGS/status cost/latest.json (track_cost.py).
+          runbook: "platform/observability/cost/README.md"
+
+      - alert: CostBurnRateCritical
+        expr: szl_daily_cost_usd > 50
+        for: 0m
+        labels:
+          severity: critical
+          team: ops
+          doctrine: v11
+        annotations:
+          summary: "SZL daily cost burn is CRITICAL (> $50/day)"
+          description: >
+            Daily estimated cost {{ $value | printf "%.2f" }} USD exceeds the $50/day
+            hard ceiling. Investigate runaway Actions workflows or a paid-tier Space.
+          runbook: "platform/observability/cost/README.md"
+
+      - alert: CostSnapshotStale
+        # track_cost.py should run daily; alert if the snapshot gauge is absent/old.
+        expr: absent(szl_daily_cost_usd) or (time() - szl_cost_snapshot_timestamp_seconds) > 129600
+        for: 10m
+        labels:
+          severity: warning
+          team: ops
+        annotations:
+          summary: "SZL cost snapshot is stale (> 36h)"
+          description: "track_cost.py has not published a fresh snapshot to SZLHOLDINGS/status."

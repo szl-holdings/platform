@@ -1,0 +1,80 @@
+[
+  {
+    "id": 1,
+    "vesselId": 10,
+    "vesselName": "TORM HELLAS",
+    "port": "Constanta",
+    "inspectionDate": "2026-03-01",
+    "deficiencyCode": "01302",
+    "description": "Fire detection system — smoke detector in engine room No. 2 zone inoperative. Non-compliance with SOLAS Ch. II-2/Reg. 7.2.2.",
+    "severity": "High",
+    "status": "Open",
+    "rectifiedDate": null,
+    "mouRegime": "Paris MOU"
+  },
+  {
+    "id": 2,
+    "vesselId": 4,
+    "vesselName": "NORDIC WOLVERINE",
+    "port": "Fujairah",
+    "inspectionDate": "2026-02-15",
+    "deficiencyCode": "07410",
+    "description": "MARPOL Annex I — oil water separator discharge exceeding 15 ppm limit. Sample analysis showed 22 ppm. OWS alarm not functioning.",
+    "severity": "High",
+    "status": "Rectified",
+    "rectifiedDate": "2026-02-20",
+    "mouRegime": "Riyadh MOU"
+  },
+  {
+    "id": 3,
+    "vesselId": 5,
+    "vesselName": "OLDENDORFF BRISBANE",
+    "port": "Qingdao",
+    "inspectionDate": "2026-03-10",
+    "deficiencyCode": "06110",
+    "description": "Lifesaving appliances — lifeboat on-load release mechanism requires servicing per MSC.1/Circ.1206/Rev.2. Annual maintenance record incomplete.",
+    "severity": "Medium",
+    "status": "Open",
+    "rectifiedDate": null,
+    "mouRegime": "Tokyo MOU"
+  },
+  {
+    "id": 4,
+    "vesselId": 18,
+    "vesselName": "MINERVA SOPHIA",
+    "port": "Trieste",
+    "inspectionDate": "2026-01-20",
+    "deficiencyCode": "09510",
+    "description": "MLC 2006 — crew rest hour records incomplete for Chief Officer and 2nd Engineer. Work/rest analysis shows potential non-compliance with Standard A2.3.",
+    "severity": "Low",
+    "status": "Rectified",
+    "rectifiedDate": "2026-01-25",
+    "mouRegime": "Paris MOU"
+  },
+  {
+    "id": 5,
+    "vesselId": 9,
+    "vesselName": "PACIFIC BASIN TIANJIN",
+    "port": "Tanjung Priok",
+    "inspectionDate": "2026-03-05",
+    "deficiencyCode": "04315",
+    "description": "Navigation equipment — ECDIS backup arrangement not compliant with SOLAS Ch. V/Reg. 19.2.1.4. Backup ECDIS showing chart datum error.",
+    "severity": "Medium",
+    "status": "Open",
+    "rectifiedDate": null,
+    "mouRegime": "Tokyo MOU"
+  },
+  {
+    "id": 6,
+    "vesselId": 12,
+    "vesselName": "DANUBIA STAR",
+    "port": "Constanta",
+    "inspectionDate": "2026-02-28",
+    "deficiencyCode": "01520",
+    "description": "Structural safety — wastage found on main deck plating exceeding 20% of original thickness. Class condition noted by Romanian Naval Authority.",
+    "severity": "High",
+    "status": "Open",
+    "rectifiedDate": null,
+    "mouRegime": "Paris MOU"
+  }
+]

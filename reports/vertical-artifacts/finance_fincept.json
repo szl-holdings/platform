@@ -1,0 +1,81 @@
+{
+  "brief": {
+    "evidence_count": 3,
+    "headline": "Stage a pricing response to the entry-tier cut",
+    "market_timing": "watch",
+    "next_action": "Approve a 30-day pricing experiment on the entry tier with packaged-feature gating.",
+    "pricing_pressure": "elevated",
+    "runway_pressure": "moderate"
+  },
+  "evidence": [
+    {
+      "claim": "Cash runway: 14.3 months at current burn",
+      "from_signal": "sig_fin_runway_months",
+      "id": "ev_fin_sig_fin_runway_months",
+      "source": "manual"
+    },
+    {
+      "claim": "Net-new ARR up 7.4% MoM",
+      "from_signal": "sig_fin_arr_growth",
+      "id": "ev_fin_sig_fin_arr_growth",
+      "source": "stripe"
+    },
+    {
+      "claim": "Champion competitor cut entry-tier price by 18%",
+      "from_signal": "sig_fin_pricing_pressure",
+      "id": "ev_fin_sig_fin_pricing_pressure",
+      "source": "competitive"
+    }
+  ],
+  "forecast": {
+    "confidence": 0.58,
+    "horizon": "next_quarter",
+    "market_timing": "watch",
+    "method": "baseline-pressure-index-v0",
+    "pricing_pressure": "elevated",
+    "runway_pressure": "moderate"
+  },
+  "generated_at": "2026-04-26T13:38:38.702308Z",
+  "recommendation": {
+    "confidence": 0.58,
+    "evidence_ids": [
+      "ev_fin_sig_fin_runway_months",
+      "ev_fin_sig_fin_arr_growth",
+      "ev_fin_sig_fin_pricing_pressure"
+    ],
+    "id": "rec_fin_pricing_response",
+    "input_class": "finance_signals_v1",
+    "model": "gpt-5.5-2026-04-23",
+    "next_action": "Approve a 30-day pricing experiment on the entry tier with packaged-feature gating.",
+    "output_class": "capital_weather_recommendation_v1",
+    "owner": "cfo@szl",
+    "requires_human_approval": true,
+    "rollback_path": "If win-rate worsens by >5 pts in week 2, restore prior pricing within 24h.",
+    "title": "Stage a pricing response to the entry-tier cut",
+    "vertical": "finance_fincept"
+  },
+  "signals": [
+    {
+      "id": "sig_fin_runway_months",
+      "kind": "runway",
+      "source": "manual",
+      "summary": "Cash runway: 14.3 months at current burn",
+      "weight": 0.9
+    },
+    {
+      "id": "sig_fin_arr_growth",
+      "kind": "revenue",
+      "source": "stripe",
+      "summary": "Net-new ARR up 7.4% MoM",
+      "weight": 0.55
+    },
+    {
+      "id": "sig_fin_pricing_pressure",
+      "kind": "pricing",
+      "source": "competitive",
+      "summary": "Champion competitor cut entry-tier price by 18%",
+      "weight": 0.7
+    }
+  ],
+  "vertical": "finance_fincept"
+}

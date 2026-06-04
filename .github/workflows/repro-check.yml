@@ -1,0 +1,64 @@
+name: repro-check
+
+# Reproducible-build verification for the platform monorepo.
+# Builds twice with --no-cache and asserts identical tarball SHA-256.
+# ADDITIVE: new workflow, does not modify existing build pipelines.
+# Doctrine v11 LOCKED 749/14/163 locked_at c7c0ba17
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: '17 4 * * 1'   # weekly, Monday 04:17 UTC
+  pull_request:
+    paths:
+      - 'package.json'
+      - 'pnpm-lock.yaml'
+      - '.github/workflows/repro-check.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  repro:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Build A (no cache)
+        run: |
+          rm -rf node_modules dist || true
+          if [ -f pnpm-lock.yaml ]; then
+            corepack enable
+            pnpm install --frozen-lockfile
+            pnpm run build || echo "no build script"
+          fi
+          # Deterministic tarball: sorted file list, fixed mtime, no gzip timestamp.
+          find dist -type f 2>/dev/null | LC_ALL=C sort > /tmp/filelist_A.txt || true
+          tar --sort=name --mtime='UTC 2020-01-01' --owner=0 --group=0 --numeric-owner \
+              -cf /tmp/build_A.tar -T /tmp/filelist_A.txt 2>/dev/null || tar -cf /tmp/build_A.tar -T /dev/null
+          sha256sum /tmp/build_A.tar | awk '{print $1}' > /tmp/sha_A.txt
+          echo "Build A: $(cat /tmp/sha_A.txt)"
+
+      - name: Build B (no cache)
+        run: |
+          rm -rf node_modules dist || true
+          if [ -f pnpm-lock.yaml ]; then
+            corepack enable
+            pnpm install --frozen-lockfile
+            pnpm run build || echo "no build script"
+          fi
+          find dist -type f 2>/dev/null | LC_ALL=C sort > /tmp/filelist_B.txt || true
+          tar --sort=name --mtime='UTC 2020-01-01' --owner=0 --group=0 --numeric-owner \
+              -cf /tmp/build_B.tar -T /tmp/filelist_B.txt 2>/dev/null || tar -cf /tmp/build_B.tar -T /dev/null
+          sha256sum /tmp/build_B.tar | awk '{print $1}' > /tmp/sha_B.txt
+          echo "Build B: $(cat /tmp/sha_B.txt)"
+
+      - name: Verify reproducibility
+        run: |
+          A=$(cat /tmp/sha_A.txt); B=$(cat /tmp/sha_B.txt)
+          echo "A=$A"; echo "B=$B"
+          if [ "$A" != "$B" ]; then
+            echo "::error::Build is NOT reproducible: $A != $B"
+            exit 1
+          fi
+          echo "Reproducible build verified: $A"

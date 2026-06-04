@@ -1,0 +1,62 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://a11oy.io/spec/hatun-doctrine/0.1.0/schemas/system-card.json",
+  "title": "SystemCard",
+  "description": "Per-agent disclosure document. One System Card per agent operator. Modeled after MLCommons Model Card 2.0 with Hatun extensions.",
+  "type": "object",
+  "allOf": [{ "$ref": "_shared.json#/$defs/envelopeFields" }],
+  "required": ["kind", "agentId", "version", "purpose", "scope", "evals", "residualRisks"],
+  "properties": {
+    "kind": { "const": "SystemCard" },
+    "agentId": { "$ref": "_shared.json#/$defs/agentId" },
+    "version": { "$ref": "_shared.json#/$defs/semver" },
+    "purpose": { "type": "string", "description": "What this agent is for, in plain language." },
+    "scope": {
+      "type": "object",
+      "required": ["allowed", "disallowed"],
+      "properties": {
+        "allowed": { "type": "array", "items": { "type": "string" } },
+        "disallowed": { "type": "array", "items": { "type": "string" } }
+      }
+    },
+    "modelStack": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["provider", "model"],
+        "properties": {
+          "provider": { "type": "string" },
+          "model": { "type": "string" },
+          "role": { "type": "string", "enum": ["primary", "shadow", "verifier", "fallback"] }
+        }
+      }
+    },
+    "evals": {
+      "type": "array",
+      "description": "Pre-deployment and continuous evaluation results.",
+      "items": {
+        "type": "object",
+        "required": ["suite", "version", "score", "ranAt"],
+        "properties": {
+          "suite": { "type": "string", "description": "Eval suite identifier (e.g. 'petri', 'shade-arena', 'atlas-cyber')." },
+          "version": { "$ref": "_shared.json#/$defs/semver" },
+          "score": { "type": "number", "minimum": 0, "maximum": 100 },
+          "ranAt": { "$ref": "_shared.json#/$defs/isoTimestamp" }
+        }
+      }
+    },
+    "residualRisks": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["risk", "severity"],
+        "properties": {
+          "risk": { "type": "string" },
+          "severity": { "$ref": "_shared.json#/$defs/severity" },
+          "mitigation": { "type": "string" }
+        }
+      }
+    },
+    "constitutionRef": { "type": "string", "description": "Constitution id governing this agent." }
+  }
+}

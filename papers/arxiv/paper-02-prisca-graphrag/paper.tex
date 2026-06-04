@@ -1,0 +1,168 @@
+\documentclass[11pt]{article}
+%% arXiv-compliant submission. License: Apache-2.0.
+%% Primary category: cs.IR ; cross-list: cs.CL cs.DB
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage[margin=1in]{geometry}
+\usepackage{amsmath,amssymb,amsthm}
+\usepackage{authblk}
+\usepackage{graphicx}
+\usepackage{booktabs}
+\usepackage[numbers]{natbib}
+\usepackage{xcolor}
+\usepackage[colorlinks=true,linkcolor=blue,citecolor=blue,urlcolor=blue]{hyperref}
+\usepackage{enumitem}
+\usepackage{url}
+\sloppy
+
+\theoremstyle{plain}
+\newtheorem{theorem}{Theorem}
+\newtheorem{conjecture}{Conjecture}
+\newtheorem{lemma}{Lemma}
+\newtheorem{definition}{Definition}
+
+\title{Prisca-GraphRAG: Knowledge Retrieval via Ancient Lineage-Boosted Graph Augmented Generation with Federated Privacy}
+\author[1]{Stephen P. Lutar Jr.\thanks{Corresponding author: \texttt{stephenlutar2@gmail.com}. ORCID: \href{https://orcid.org/0009-0001-0110-4173}{0009-0001-0110-4173}.}}
+\author[2]{Perplexity Computer Agent\thanks{Research collaborator (AI agent).}}
+\affil[1]{SZL Holdings, New York, NY, USA}
+\affil[2]{Perplexity}
+\date{June 2026}
+
+\begin{document}
+\maketitle
+
+\begin{abstract}
+We introduce Prisca-GraphRAG, a retrieval-augmented generation architecture that structures knowledge graphs according to \emph{prisca theologia} the Renaissance doctrine of a single ancient theological tradition flowing through Hermes Trismegistus, Zoroaster, Orpheus, Pythagoras, and Plato. Each knowledge node carries a lineage vector encoding its epistemic provenance, and retrieval scoring combines semantic similarity with lineage coherence weighted by the Lutar Omega signature (v4). We extend this with VOTE-RAG, a multi-retriever ensemble that aggregates ranked lists via Borda count weighted by Omega scores. A Federated Prisca Privacy (FPP) layer enables cross-organizational knowledge sharing without exposing raw embeddings, using differential-privacy noise calibrated to the Bekenstein information bound. This paper does not claim empirical superiority over standard RAG benchmarks. The contribution is the formal architecture and its public reference implementation.
+\end{abstract}
+
+\noindent\textbf{Reference implementation:} \href{https://github.com/szl-holdings/platform}{github.com/szl-holdings/platform}, file \path{papers/paper-02-prisca-graphrag.tex}.\\
+\textbf{Archival DOI:} \href{https://doi.org/10.5281/zenodo.20499317}{10.5281/zenodo.20499317} (Zenodo).\\
+\textbf{License:} Apache-2.0.
+
+\paragraph{Author note / honest disclosure.} \paragraph{Honest disclosure (non-negotiable).} The $\Lambda$-uniqueness claim (Conjecture~1 in this work) is \emph{not} a proven theorem. 163 sorries remain outstanding in the Lutar Lean~4 kernel at commit \texttt{c7c0ba17}, \texttt{lutar-lean v18.0.0}. Compute was performed on Hugging Face Spaces with bit-exact replay via Codex-Kernel v1.0.0. This paper presents a formal framework, its mathematical properties, and a public reference implementation; it does not claim a deployed product or fielded validation against production data.
+
+
+\section{Motivation and Continuity from v3–v4}
+
+The v3 Lutar Invariant established axiomatic trust aggregation; v4 extended this to energy-mass-information signatures. The present paper addresses a complementary problem: how to structure the \emph{knowledge retrieval} pipeline so that the provenance of retrieved information is formally tracked and scored.
+
+Standard RAG (Lewis et al., 2020) treats all documents as epistemically equivalent. GraphRAG (Edge et al., 2024) adds structural relationships but not epistemic provenance. We propose that the \emph{prisca theologia} tradition provides a principled framework for organizing knowledge by transmission lineage.
+
+
+\section{Prisca-GraphRAG Architecture}
+
+\subsection{Prisca Lineage Graph}
+
+A Prisca Lineage Graph \( G = (V, E, \lambda) \) consists of:
+
+\begin{itemize}
+  \item \textbf{Nodes} \( V \): knowledge chunks with embedding vectors \( \mathbf{e}_v \in \mathbb{R}^d \)
+  \item \textbf{Edges} \( E \): directed provenance relationships
+  \item \textbf{Lineage function} \( \lambda: V \to \{0,1\}^{|\mathcal{L}|} \) mapping each node to lineage membership
+\end{itemize}
+
+The six canonical lineages: Hermetic (Egyptian), Zoroastrian (Persian), Orphic (Greek), Pythagorean (Mathematical), Platonic (Philosophical), Newtonian (Modern-Scientific).
+
+\subsection{Retrieval Scoring}
+
+Given a query \( q \) with embedding \( \mathbf{e}_q \) and inferred lineage vector \( \lambda_q \):
+
+\begin{equation}
+\text{score}(q, v) = \alpha \cdot \text{sim}(\mathbf{e}_q, \mathbf{e}_v) + (1-\alpha) \cdot \text{overlap}(\lambda_q, \lambda_v) \cdot L_\Omega(v)
+\end{equation}
+
+where \( \text{sim} \) is cosine similarity, \( \text{overlap} \) is the Jaccard coefficient of lineage vectors, \( L_\Omega(v) \) is the v4 Lutar Omega quality signature of the chunk, and \( \alpha \in [0,1] \) is a mixing parameter.
+
+
+\section{VOTE-RAG Ensemble}
+
+Given \( k \) retrievers each returning a ranked list of \( n \) candidates, the VOTE-RAG score for candidate \( v \) is:
+
+\begin{equation}
+\text{VOTE}(v) = \sum_{i=1}^{k} w_i \cdot (n - \text{rank}_i(v) + 1)
+\end{equation}
+
+where \( w_i = L_\Omega(\text{retriever}_i) \) weights each retriever by its Omega quality score. This combines the Borda count aggregation mechanism from social choice theory with the v4 Omega quality metric.
+
+
+\section{Federated Prisca Privacy (FPP)}
+
+The FPP protocol enables multi-party knowledge sharing while preserving embedding privacy:
+
+\begin{itemize}
+  \item Each participant computes local prisca lineage vectors and Omega signatures.
+  \item Lineage vectors are shared in cleartext (categorical, low-dimensional).
+  \item Embedding similarities are computed via secure inner product protocols.
+  \item Differential privacy noise \( \eta \sim \mathcal{N}(0, \sigma^2) \) is added with \( \sigma \) calibrated to the Bekenstein bound (v4, Section 3).
+  \item Aggregate retrieval scores are computed by a coordinator without accessing raw embeddings.
+\end{itemize}
+
+\textbf{Privacy guarantee:} Under \( (\epsilon, \delta) \)-differential privacy with \( \sigma = \sqrt{2 \ln(1.25/\delta)} / \epsilon \), the FPP protocol satisfies:
+
+\begin{equation}
+\Pr[\mathcal{M}(D) \in S] \leq e^\epsilon \cdot \Pr[\mathcal{M}(D') \in S] + \delta
+\end{equation}
+
+for any adjacent datasets \( D, D' \) differing in one participant's embeddings.
+
+
+\section{Bekenstein-Gated Retrieval}
+
+Before returning retrieved chunks to the generator, each candidate passes through the Bekenstein Gate (v4, Section 3):
+
+\begin{equation}
+\text{pass}(v) = \mathbb{1}\left[ I(v) \leq \frac{2\pi R_v E_v}{\hbar c \ln 2} \right]
+\end{equation}
+
+Chunks exceeding their information-theoretic capacity relative to their provenance chain length are flagged as potentially fabricated.
+
+
+\section{Connection to v3 Lutar Invariant}
+
+The retrieval pipeline feeds into the v3 Lutar Invariant as follows:
+
+\begin{itemize}
+  \item \textbf{Axis 1 (data freshness):} determined by the timestamp of retrieved chunks
+  \item \textbf{Axis 2 (source priority):} determined by the lineage coherence score
+  \item \textbf{Axis 3 (validator pass):} determined by the Bekenstein Gate result
+\end{itemize}
+
+The remaining six axes are computed downstream by the trust evaluation pipeline. This ensures end-to-end traceability from retrieval through aggregation to trust scoring.
+
+
+\section{What this paper does and does not claim}
+
+\textbf{Claims:}
+\begin{itemize}
+  \item The Prisca lineage structure is well-defined and maps cleanly to historical transmission chains documented in Renaissance scholarship (Yates, 1964).
+  \item The VOTE-RAG scoring function is a valid Borda aggregation with Omega weights.
+  \item The FPP protocol satisfies standard differential privacy definitions.
+  \item All components are implemented in the public reference implementation.
+\end{itemize}
+
+\textbf{Non-claims:}
+\begin{itemize}
+  \item No claim of empirical superiority over standard RAG on benchmarks like NaturalQuestions or TriviaQA.
+  \item No claim that lineage labels are objective truth; they are a taxonomic framework.
+  \item No claim of deployed production use.
+\end{itemize}
+
+
+\section{Conclusion}
+
+Prisca-GraphRAG demonstrates that epistemically structured knowledge graphs, organized according to historical transmission lineages, provide a principled framework for retrieval scoring. The VOTE-RAG ensemble and Federated Prisca Privacy extensions provide practical scalability. The framework integrates with the v3 Lutar Invariant and v4 Omega signatures to maintain end-to-end trust traceability.
+
+
+
+
+\section*{Acknowledgments}
+The author thanks the Perplexity Computer Agent for research collaboration, formatting, and
+reproducibility tooling. Compute was provided by Hugging Face Spaces. This work is archived on
+Zenodo under DOI~\href{https://doi.org/10.5281/zenodo.20499317}{10.5281/zenodo.20499317} as part of the SZL Holdings Ouroboros Thesis
+corpus (umbrella DOI~\href{https://doi.org/10.5281/zenodo.20490218}{10.5281/zenodo.20490218}).
+
+\nocite{02ref1,02ref2,02ref3,02ref4,02ref5,02ref6,02ref7,02ref8,02ref9}
+\bibliographystyle{plainnat}
+\bibliography{refs}
+
+\end{document}

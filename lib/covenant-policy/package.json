@@ -1,0 +1,38 @@
+{
+  "name": "@szl-holdings/covenant-policy",
+  "version": "0.0.0",
+  "private": false,
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/szl-holdings/platform.git",
+    "directory": "lib/covenant-policy"
+  },
+  "publishConfig": {
+    "registry": "https://npm.pkg.github.com",
+    "access": "public"
+  },
+  "type": "module",
+  "scripts": {
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "test": "vitest run",
+    "lint": "biome lint ./src",
+    "lint:ci": "biome lint ./src",
+    "format": "biome format --write ./src",
+    "test:watch": "vitest"
+  },
+  "exports": {
+    ".": "./src/index.ts",
+    "./engine": "./src/engine.ts",
+    "./templates": "./src/templates.ts",
+    "./decisions": "./src/decisions.ts"
+  },
+  "dependencies": {
+    "@szl-holdings/db": "workspace:*",
+    "@szl-holdings/prism-bus": "workspace:*",
+    "@szl-holdings/auth": "workspace:*",
+    "drizzle-orm": "catalog:"
+  },
+  "devDependencies": {
+    "@types/node": "catalog:"
+  }
+}

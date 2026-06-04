@@ -1,0 +1,49 @@
+{
+  "name": "@workspace/aef-evals",
+  "version": "0.0.0",
+  "private": false,
+  "type": "module",
+  "description": "Alloy Embedding Fabric — retrieval evaluation harness with recall@k, nDCG, MRR, exact-match recovery, latency/throughput benchmarks, smoke tests, and hand-curated golden fixtures for the six SZL domain profiles.",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./src/index.ts"
+    },
+    "./runner": {
+      "types": "./dist/runner.d.ts",
+      "import": "./src/runner.ts"
+    },
+    "./metrics": {
+      "types": "./dist/metrics.d.ts",
+      "import": "./src/metrics.ts"
+    },
+    "./harness": {
+      "types": "./dist/harness.d.ts",
+      "import": "./src/harness.ts"
+    },
+    "./fixtures": {
+      "types": "./dist/fixtures/index.d.ts",
+      "import": "./src/fixtures/index.ts"
+    },
+    "./smoke": {
+      "types": "./dist/smoke.d.ts",
+      "import": "./src/smoke.ts"
+    }
+  },
+  "dependencies": {
+    "@workspace/aef-contracts": "workspace:*",
+    "@workspace/aef-domain-profiles": "workspace:*",
+    "@workspace/aef-retrieval-core": "workspace:*",
+    "zod": "catalog:"
+  },
+  "devDependencies": {
+    "@types/node": "catalog:",
+    "@workspace/alloy-vector-worker": "workspace:*",
+    "vitest": "^4.1.7"
+  },
+  "scripts": {
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "test": "vitest run",
+    "test:watch": "vitest"
+  }
+}

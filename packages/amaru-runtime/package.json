@@ -1,0 +1,23 @@
+{
+  "name": "@workspace/amaru-runtime",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "main": "src/index.ts",
+  "description": "Amaru — fleet coordination runtime. Wraps seked slope monitoring + unit-fraction thresholds through the Ouroboros loop spine with Λ-gate, Newton fluxions-receipt, and dual-witness verification.",
+  "scripts": {
+    "test": "vitest run --passWithNoTests"
+  },
+  "dependencies": {
+    "@workspace/ouroboros-loop": "workspace:*",
+    "@workspace/ouroboros-invariant": "workspace:*",
+    "@workspace/ouroboros-resonance": "workspace:*",
+    "@workspace/reconciliation": "workspace:*"
+  },
+  "devDependencies": {
+    "vitest": "catalog:",
+    "fast-check": "^3.23.0",
+    "typescript": "^6.0.3",
+    "tsx": "^4.19.0"
+  }
+}

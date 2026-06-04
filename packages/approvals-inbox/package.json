@@ -1,0 +1,31 @@
+{
+  "name": "@workspace/approvals-inbox",
+  "version": "0.0.0",
+  "private": false,
+  "type": "module",
+  "description": "Shared approvals inbox — receives approval actions from Decision Center and other surfaces, stores them with full provenance (verdict, proof ref, simulation ID, actor).",
+  "scripts": {
+    "build": "tsc --build",
+    "lint": "biome lint ./src",
+    "lint:ci": "biome lint ./src",
+    "format": "biome format --write ./src",
+    "typecheck": "tsc -p tsconfig.json --noEmit"
+  },
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./src/index.ts"
+    },
+    "./governed": {
+      "types": "./dist/governed-store.d.ts",
+      "import": "./src/governed-store.ts"
+    }
+  },
+  "dependencies": {
+    "@szl-holdings/contracts": "workspace:*",
+    "@workspace/guardian": "workspace:*"
+  },
+  "devDependencies": {
+    "@types/node": "catalog:"
+  }
+}

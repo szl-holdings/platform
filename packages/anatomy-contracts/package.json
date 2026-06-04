@@ -1,0 +1,22 @@
+{
+  "name": "@szl-holdings/anatomy-contracts",
+  "version": "0.1.0",
+  "type": "module",
+  "description": "Shared wire contracts for the SZL anatomy mesh: action proposals, policy decisions, reason requests, mesh receipts, and W3C span headers. Zero runtime dependencies; TS types + emitted JSON Schema for non-TS consumers.",
+  "license": "Apache-2.0",
+  "author": "Stephen P. Lutar Jr. <stephenlutar2@gmail.com>",
+  "exports": {
+    ".": "./src/index.ts",
+    "./schemas": "./src/schemas.ts"
+  },
+  "files": ["src", "schema"],
+  "scripts": {
+    "emit": "node --experimental-strip-types scripts/emit-schemas.ts",
+    "test": "node --experimental-strip-types --test src/__tests__/*.test.ts",
+    "typecheck": "tsc --noEmit"
+  },
+  "devDependencies": {
+    "@types/node": "catalog:",
+    "typescript": "catalog:"
+  }
+}

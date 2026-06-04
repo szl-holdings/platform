@@ -1,0 +1,4 @@
+
+> workspace@0.0.0 audit:copy /home/runner/workspace
+> node --experimental-vm-modules scripts/qa/audit-copy.js
+

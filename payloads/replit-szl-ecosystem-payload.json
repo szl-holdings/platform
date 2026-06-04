@@ -1,0 +1,55 @@
+{
+  "payloadType": "replit-ecosystem",
+  "version": "1.0.0",
+  "generated": "2026-04-25",
+  "title": "SZL Holdings — Replit Ecosystem Payload",
+  "description": "Full ecosystem configuration payload for onboarding Codex agents to the SZL Holdings monorepo",
+  "replitConfig": {
+    "organization": "SZL Holdings",
+    "monorepRoot": "/home/runner/workspace",
+    "packageManager": "pnpm",
+    "nodeVersion": "20",
+    "framework": "turborepo"
+  },
+  "artifactInventory": {
+    "source": "data/szl-ecosystem.json",
+    "count": 6,
+    "artifacts": ["a11oy", "sentra", "terra", "carlota-jo", "counsel", "vessels"],
+    "categories": ["Substrate", "Intelligence", "Domain"]
+  },
+  "mcpActivation": {
+    "configFile": ".mcp.json",
+    "servers": [
+      {
+        "name": "alloy",
+        "url": "https://${REPLIT_DEV_DOMAIN}/api/mcp",
+        "authHeader": "Authorization: Bearer ${ALLOY_INTERNAL_TOKEN}"
+      }
+    ]
+  },
+  "devCommands": {
+    "install": "pnpm install",
+    "dev": "pnpm --filter @workspace/a11oy run dev",
+    "build": "pnpm turbo build",
+    "test": "pnpm turbo test",
+    "validate": "node scripts/validate.mjs",
+    "typecheck": "pnpm turbo typecheck",
+    "lint": "pnpm turbo lint"
+  },
+  "agentsContext": {
+    "agentsMdPath": "AGENTS.md",
+    "keyFiles": [
+      "pnpm-workspace.yaml",
+      "turbo.json",
+      "lib/db/src/schema/",
+      "artifacts/a11oy/",
+      "packages/tool-registry/",
+      "packages/skill-library/"
+    ]
+  },
+  "scheduledChats": {
+    "source": "data/automations.json",
+    "count": 6,
+    "cadences": ["daily", "weekly", "monthly", "event-triggered", "on-demand"]
+  }
+}

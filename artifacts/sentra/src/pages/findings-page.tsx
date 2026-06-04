@@ -1,0 +1,387 @@
+import { useStandardMutation, useStandardQuery } from '@szl-holdings/api-client-react';
+import { AnimatedCounter } from '@szl-holdings/shared-ui/animated-counter';
+import { EmptyState } from '@szl-holdings/shared-ui/design-system';
+import { Badge } from '@szl-holdings/shared-ui/ui/badge';
+import { Button } from '@szl-holdings/shared-ui/ui/button';
+import { Card, CardContent } from '@szl-holdings/shared-ui/ui/card';
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from '@szl-holdings/shared-ui/ui/dialog';
+import { Input } from '@szl-holdings/shared-ui/ui/input';
+import { Label } from '@szl-holdings/shared-ui/ui/label';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@szl-holdings/shared-ui/ui/select';
+import { toast } from '@szl-holdings/shared-ui/ui/sonner';
+import { Textarea } from '@szl-holdings/shared-ui/ui/textarea';
+import { useQueryClient } from '@tanstack/react-query';
+import { AlertTriangle, Bug, CheckCircle, Plus, Search, Shield, XCircle } from 'lucide-react';
+import { useState } from 'react';
+import { api } from '@/lib/api';
+
+const severityColors: Record<string, string> = {
+  info: 'bg-[#c9b787]/10 text-[#c9b787] border-[#c9b787]/20',
+  low: 'bg-[#c9b787]/10 text-[#c9b787] border-[#c9b787]/20',
+  medium: 'bg-[#c9b787]/10 text-[#c9b787] border-[#c9b787]/20',
+  high: 'bg-[#c9b787]/10 text-[#c9b787] border-[#c9b787]/20',
+  critical: 'bg-[#f5f5f5]/10 text-[#f5f5f5] border-[#f5f5f5]/20',
+};
+
+const _statusColors: Record<string, string> = {
+  open: 'bg-[#f5f5f5]/10 text-[#f5f5f5] border-[#f5f5f5]/20',
+  confirmed: 'bg-[#c9b787]/10 text-[#c9b787] border-[#c9b787]/20',
+  mitigated: 'bg-[#c9b787]/10 text-[#c9b787] border-[#c9b787]/20',
+  accepted: 'bg-[#c9b787]/10 text-[#c9b787] border-[#c9b787]/20',
+  false_positive: 'bg-zinc-500/10 text-zinc-400 border-zinc-500/20',
+};
+
+function FindingSkeleton() {
+  return (
+    <Card className="bg-card border-border">
+      <CardContent className="p-4">
+        <div className="flex items-start justify-between">
+          <div className="flex-1 space-y-2">
+            <div className="skeleton h-4 w-48" />
+            <div className="skeleton h-3 w-full" />
+            <div className="skeleton h-3 w-40" />
+          </div>
+          <div className="flex gap-2 ml-4">
+            <div className="skeleton h-5 w-16 rounded-full" />
+            <div className="skeleton h-7 w-28 rounded" />
+          </div>
+        </div>
+      </CardContent>
+    </Card>
+  );
+}
+
+export default function FindingsPage() {
+  const qc = useQueryClient();
+  const { data: findings = [], isLoading } = useStandardQuery({
+    queryKey: ['findings'],
+    queryFn: () => api.findings.list(),
+  });
+  const { data: assessments = [] } = useStandardQuery({
+    queryKey: ['assessments'],
+    queryFn: api.assessments.list,
+  });
+  const [open, setOpen] = useState(false);
+  const [filter, setFilter] = useState('all');
+  const [form, setForm] = useState({
+    title: '',
+    severity: 'medium',
+    assessmentId: '',
+    description: '',
+    affectedAsset: '',
+  });
+
+  const createMut = useStandardMutation({
+    mutationFn: (data: any) => api.findings.create(data),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ['findings'] });
+      setOpen(false);
+      toast.success('Finding created');
+    },
+    onError: (e: any) => toast.error(e.message),
+  });
+
+  const updateMut = useStandardMutation({
+    mutationFn: ({ id, data }: { id: number; data: any }) => api.findings.update(id, data),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ['findings'] });
+      toast.success('Finding updated');
+    },
+  });
+
+  const filtered = filter === 'all' ? findings : findings.filter((f: any) => f.severity === filter);
+  const criticalCount = findings.filter((f: any) => f.severity === 'critical').length;
+  const highCount = findings.filter((f: any) => f.severity === 'high').length;
+  const openCount = findings.filter((f: any) => f.status === 'open').length;
+
+  return (
+    <div className="p-6 space-y-6">
+      <div className="flex items-center justify-between animate-fade-in-up">
+        <div>
+          <h1 className="font-display text-2xl font-bold">Findings</h1>
+          <p className="text-sm text-muted-foreground mt-1">
+            Findings with CVSS scores, affected assets, and remediation status
+          </p>
+        </div>
+        <Dialog open={open} onOpenChange={setOpen}>
+          <DialogTrigger asChild>
+            <Button>
+              <Plus className="w-4 h-4 mr-2" /> Add Finding
+            </Button>
+          </DialogTrigger>
+          <DialogContent className="bg-card border-border">
+            <DialogHeader>
+              <DialogTitle className="font-display">New Finding</DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4">
+              <div>
+                <Label>Title</Label>
+                <Input
+                  value={form.title}
+                  onChange={(e) => setForm((p) => ({ ...p, title: e.target.value }))}
+                  placeholder="e.g. SQL Injection in Login"
+                />
+              </div>
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <Label>Severity</Label>
+                  <Select
+                    value={form.severity}
+                    onValueChange={(v) => setForm((p) => ({ ...p, severity: v }))}
+                  >
+                    <SelectTrigger>
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="info">Info</SelectItem>
+                      <SelectItem value="low">Low</SelectItem>
+                      <SelectItem value="medium">Medium</SelectItem>
+                      <SelectItem value="high">High</SelectItem>
+                      <SelectItem value="critical">Critical</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div>
+                  <Label>Assessment</Label>
+                  <Select
+                    value={form.assessmentId}
+                    onValueChange={(v) => setForm((p) => ({ ...p, assessmentId: v }))}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {assessments.map((a: any) => (
+                        <SelectItem key={a.id} value={String(a.id)}>
+                          {a.name}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+              <div>
+                <Label>Affected Asset</Label>
+                <Input
+                  value={form.affectedAsset}
+                  onChange={(e) => setForm((p) => ({ ...p, affectedAsset: e.target.value }))}
+                  placeholder="e.g. api.example.com"
+                />
+              </div>
+              <div>
+                <Label>Description</Label>
+                <Textarea
+                  value={form.description}
+                  onChange={(e) => setForm((p) => ({ ...p, description: e.target.value }))}
+                  rows={3}
+                  placeholder="Describe the finding..."
+                />
+              </div>
+              <Button
+                onClick={() => {
+                  if (!form.title || !form.assessmentId) {
+                    toast.error('Title and assessment required');
+                    return;
+                  }
+                  createMut.mutate({
+                    ...form,
+                    assessmentId: Number(form.assessmentId),
+                    status: 'open',
+                  });
+                }}
+                disabled={createMut.isPending}
+                className="w-full"
+              >
+                {createMut.isPending ? 'Creating...' : 'Create Finding'}
+              </Button>
+            </div>
+          </DialogContent>
+        </Dialog>
+      </div>
+
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+        <Card className="bg-card border-border animate-fade-in-up stagger-1 hover:border-primary/20 transition-all duration-300 group">
+          <CardContent className="p-4 flex items-center justify-between">
+            <div>
+              <p className="text-xs text-muted-foreground uppercase tracking-wider">Total</p>
+              <p className="text-2xl font-bold font-display mt-1">
+                <AnimatedCounter value={findings.length} />
+              </p>
+            </div>
+            <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center group-hover:scale-110 transition-transform">
+              <Bug className="w-5 h-5 text-primary" />
+            </div>
+          </CardContent>
+        </Card>
+        <Card
+          className={`bg-card border-border animate-fade-in-up stagger-2 hover:border-[#f5f5f5]/20 transition-all duration-300 group ${criticalCount > 0 ? 'ring-1 ring-red-500/10' : ''}`}
+        >
+          <CardContent className="p-4 flex items-center justify-between">
+            <div>
+              <p className="text-xs text-muted-foreground uppercase tracking-wider">Critical</p>
+              <p
+                className={`text-2xl font-bold font-display mt-1 text-[#f5f5f5] ${criticalCount > 0 ? 'animate-threat-pulse' : ''}`}
+              >
+                <AnimatedCounter value={criticalCount} />
+              </p>
+            </div>
+            <div
+              className={`w-10 h-10 rounded-lg bg-[#f5f5f5]/10 flex items-center justify-center group-hover:scale-110 transition-transform ${criticalCount > 0 ? 'animate-pulse' : ''}`}
+            >
+              <AlertTriangle className="w-5 h-5 text-[#f5f5f5]" />
+            </div>
+          </CardContent>
+        </Card>
+        <Card className="bg-card border-border animate-fade-in-up stagger-3 hover:border-[#c9b787]/20 transition-all duration-300 group">
+          <CardContent className="p-4 flex items-center justify-between">
+            <div>
+              <p className="text-xs text-muted-foreground uppercase tracking-wider">High</p>
+              <p className="text-2xl font-bold font-display mt-1 text-[#c9b787]">
+                <AnimatedCounter value={highCount} />
+              </p>
+            </div>
+            <div className="w-10 h-10 rounded-lg bg-[#c9b787]/10 flex items-center justify-center group-hover:scale-110 transition-transform">
+              <Shield className="w-5 h-5 text-[#c9b787]" />
+            </div>
+          </CardContent>
+        </Card>
+        <Card className="bg-card border-border animate-fade-in-up stagger-4 hover:border-chart-3/20 transition-all duration-300 group">
+          <CardContent className="p-4 flex items-center justify-between">
+            <div>
+              <p className="text-xs text-muted-foreground uppercase tracking-wider">Open</p>
+              <p className="text-2xl font-bold font-display mt-1 text-chart-3">
+                <AnimatedCounter value={openCount} />
+              </p>
+            </div>
+            <div className="w-10 h-10 rounded-lg bg-chart-3/10 flex items-center justify-center group-hover:scale-110 transition-transform">
+              <XCircle className="w-5 h-5 text-chart-3" />
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+
+      <div className="flex items-center gap-2 flex-wrap animate-fade-in-up stagger-5">
+        {['all', 'critical', 'high', 'medium', 'low', 'info'].map((sev) => (
+          <Button
+            key={sev}
+            variant={filter === sev ? 'default' : 'outline'}
+            size="sm"
+            onClick={() => setFilter(sev)}
+          >
+            {sev === 'all'
+              ? `All (${findings.length})`
+              : `${sev.charAt(0).toUpperCase() + sev.slice(1)} (${findings.filter((f: any) => f.severity === sev).length})`}
+          </Button>
+        ))}
+      </div>
+
+      {isLoading ? (
+        <div className="space-y-3">
+          {[...Array(4)].map((_, i) => (
+            <FindingSkeleton key={i} />
+          ))}
+        </div>
+      ) : filtered.length === 0 ? (
+        <EmptyState
+          icon={filter === 'all' ? CheckCircle : Search}
+          headline={filter === 'all' ? 'No open findings' : `No ${filter}-severity findings`}
+          description={
+            filter === 'all'
+              ? 'Recent assessments produced no findings — the surface area is clean. New issues will appear here as scans, hunts, and assessments complete.'
+              : `No findings match severity “${filter}.” Switch to “All” to review every finding from recent assessments.`
+          }
+          accentColor={filter === 'all' ? '#c9b787' : '#8b7ac8'}
+          className="animate-fade-in-up stagger-6 border border-dashed border-border rounded-lg"
+        />
+      ) : (
+        <div className="space-y-3">
+          {filtered.map((finding: any, i: number) => {
+            const assessment = assessments.find((a: any) => a.id === finding.assessmentId);
+            const isCritical = finding.severity === 'critical';
+            const isOpen = finding.status === 'open';
+            return (
+              <Card
+                key={finding.id}
+                className={`bg-card border-border hover:border-primary/20 transition-all duration-300 animate-fade-in-up stagger-${Math.min((i % 6) + 1, 8)} ${isCritical && isOpen ? 'ring-1 ring-red-500/10' : ''}`}
+              >
+                <CardContent className="p-4">
+                  <div className="flex items-start justify-between">
+                    <div className="flex-1">
+                      <div className="flex items-center gap-2 mb-1">
+                        <h3 className="font-semibold text-sm">{finding.title}</h3>
+                      </div>
+                      <p className="text-sm text-muted-foreground line-clamp-2 mb-2">
+                        {finding.description || 'No description'}
+                      </p>
+                      <div className="flex items-center gap-3 text-xs text-muted-foreground flex-wrap">
+                        {assessment && (
+                          <span className="flex items-center gap-1">
+                            <Shield className="w-3 h-3" /> {assessment.name}
+                          </span>
+                        )}
+                        {finding.affectedAsset && (
+                          <span className="font-mono bg-muted px-1.5 py-0.5 rounded">
+                            {finding.affectedAsset}
+                          </span>
+                        )}
+                        {finding.cvssScore && (
+                          <span>CVSS: {Number(finding.cvssScore).toFixed(1)}</span>
+                        )}
+                        {finding.cveId && <span className="font-mono">{finding.cveId}</span>}
+                      </div>
+                      {finding.recommendation && (
+                        <p className="text-xs text-[#c9b787]/80 mt-2 flex items-center gap-1">
+                          <CheckCircle className="w-3 h-3" /> {finding.recommendation}
+                        </p>
+                      )}
+                    </div>
+                    <div className="flex items-center gap-2 ml-4">
+                      <Badge
+                        variant="outline"
+                        className={`${severityColors[finding.severity] || ''} ${isCritical && isOpen ? 'animate-threat-pulse' : ''}`}
+                      >
+                        {isCritical && isOpen && (
+                          <span className="w-1.5 h-1.5 rounded-full bg-[#f5f5f5] mr-1.5 animate-pulse-dot" />
+                        )}
+                        {finding.severity}
+                      </Badge>
+                      <Select
+                        value={finding.status}
+                        onValueChange={(v) =>
+                          updateMut.mutate({ id: finding.id, data: { status: v } })
+                        }
+                      >
+                        <SelectTrigger className="w-32 h-7 text-xs">
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="open">Open</SelectItem>
+                          <SelectItem value="confirmed">Confirmed</SelectItem>
+                          <SelectItem value="mitigated">Mitigated</SelectItem>
+                          <SelectItem value="accepted">Accepted</SelectItem>
+                          <SelectItem value="false_positive">False Positive</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            );
+          })}
+        </div>
+      )}
+    </div>
+  );
+}

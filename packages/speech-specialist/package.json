@@ -1,0 +1,38 @@
+{
+  "name": "@szl-holdings/speech-specialist",
+  "version": "0.0.0",
+  "private": false,
+  "type": "module",
+  "description": "Multilingual voice specialist — TTS, ASR, and diarization/turn-detection with provider-adapter slots. Executive briefing audio render path for Lyte, Command Portal, and CORTEX.",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./src/index.ts"
+    },
+    "./types": {
+      "types": "./dist/types.d.ts",
+      "import": "./src/types.ts"
+    },
+    "./adapters": {
+      "types": "./dist/adapters.d.ts",
+      "import": "./src/adapters.ts"
+    },
+    "./briefing-audio": {
+      "types": "./dist/briefing-audio.d.ts",
+      "import": "./src/briefing-audio.ts"
+    },
+    "./specialist": {
+      "types": "./dist/specialist.d.ts",
+      "import": "./src/specialist.ts"
+    }
+  },
+  "scripts": {
+    "lint": "biome lint ./src",
+    "lint:ci": "biome lint ./src",
+    "format": "biome format --write ./src",
+    "typecheck": "tsc -p tsconfig.json --noEmit"
+  },
+  "devDependencies": {
+    "@types/node": "catalog:"
+  }
+}

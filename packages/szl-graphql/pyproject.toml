@@ -1,0 +1,33 @@
+# SPDX-License-Identifier: Apache-2.0
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "szl-graphql"
+version = "1.0.0"
+description = "Unified Strawberry GraphQL gateway over the SZL flagship mesh, signing a Khipu receipt on every operation"
+readme = "README.md"
+requires-python = ">=3.9"
+license = { text = "Apache-2.0" }
+authors = [{ name = "Yachay", email = "yachay@szlholdings.dev" }]
+keywords = ["graphql", "strawberry", "federation", "gateway", "observability", "szl"]
+dependencies = [
+    "strawberry-graphql==0.316.0",
+    "httpx>=0.27",
+]
+
+[project.optional-dependencies]
+server = ["fastapi>=0.110", "uvicorn>=0.29"]
+dev = ["pytest>=7.0", "httpx>=0.27"]
+
+[project.urls]
+Homepage = "https://github.com/szl-holdings/platform"
+Source = "https://github.com/szl-holdings/platform/tree/main/packages/szl-graphql"
+Space = "https://szlholdings-graphql-gateway.hf.space"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/szl_graphql"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]

@@ -1,0 +1,44 @@
+{
+  "name": "@workspace/self-model",
+  "version": "0.0.0",
+  "private": false,
+  "type": "module",
+  "description": "Self-model — persistent runtime identity, capability map, continuity state and confidence/uncertainty profile for the SZL cognitive runtime.",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./src/index.ts"
+    },
+    "./types": {
+      "types": "./dist/types.d.ts",
+      "import": "./src/types.ts"
+    },
+    "./schema": {
+      "types": "./dist/schema.d.ts",
+      "import": "./src/schema.ts"
+    },
+    "./store": {
+      "types": "./dist/store.d.ts",
+      "import": "./src/store.ts"
+    },
+    "./update": {
+      "types": "./dist/update.d.ts",
+      "import": "./src/update.ts"
+    }
+  },
+  "dependencies": {
+    "zod": "catalog:"
+  },
+  "devDependencies": {
+    "@types/node": "catalog:",
+    "vitest": "^4.1.7"
+  },
+  "scripts": {
+    "lint": "biome lint ./src",
+    "lint:ci": "biome lint ./src",
+    "format": "biome format --write ./src",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "test": "vitest run",
+    "test:watch": "vitest"
+  }
+}

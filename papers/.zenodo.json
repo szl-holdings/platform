@@ -1,0 +1,92 @@
+{
+  "title": "SZL Holdings Standalone Papers Corpus (paper-01 through paper-08)",
+  "upload_type": "publication",
+  "publication_type": "report",
+  "description": "8-paper corpus of the SZL Holdings Ouroboros Thesis. Each paper carries its own Zenodo sub-DOI (linked under the umbrella concept DOI 10.5281/zenodo.19944926). Honest disclosure: Lambda-uniqueness = Conjecture 1, NOT a theorem; 163 sorries outstanding in Lutar Lean 4 kernel @ c7c0ba17. Compute on Hugging Face Spaces with bit-exact Codex-Kernel v1.0.0 replay.",
+  "creators": [
+    {
+      "name": "Lutar Jr., Stephen P.",
+      "affiliation": "SZL Holdings, Inc.",
+      "orcid": "0009-0001-0110-4173"
+    },
+    {
+      "name": "Perplexity Computer Agent",
+      "affiliation": "Perplexity AI (research collaborator)"
+    }
+  ],
+  "version": "1.0.0",
+  "language": "eng",
+  "license": "Apache-2.0",
+  "access_right": "open",
+  "keywords": [
+    "agentic-ai",
+    "lutar-invariant",
+    "ouroboros-thesis",
+    "doctrine-v11",
+    "szl-holdings",
+    "8-paper-corpus"
+  ],
+  "related_identifiers": [
+    {
+      "identifier": "10.5281/zenodo.20490218",
+      "relation": "isPartOf",
+      "scheme": "doi",
+      "resource_type": "publication-report"
+    },
+    {
+      "identifier": "10.5281/zenodo.19944926",
+      "relation": "isPartOf",
+      "scheme": "doi",
+      "resource_type": "publication-report"
+    },
+    {
+      "identifier": "10.5281/zenodo.20499315",
+      "relation": "hasPart",
+      "scheme": "doi",
+      "resource_type": "publication-article"
+    },
+    {
+      "identifier": "10.5281/zenodo.20499317",
+      "relation": "hasPart",
+      "scheme": "doi",
+      "resource_type": "publication-article"
+    },
+    {
+      "identifier": "10.5281/zenodo.20499319",
+      "relation": "hasPart",
+      "scheme": "doi",
+      "resource_type": "publication-article"
+    },
+    {
+      "identifier": "10.5281/zenodo.20499322",
+      "relation": "hasPart",
+      "scheme": "doi",
+      "resource_type": "publication-article"
+    },
+    {
+      "identifier": "10.5281/zenodo.20499324",
+      "relation": "hasPart",
+      "scheme": "doi",
+      "resource_type": "publication-article"
+    },
+    {
+      "identifier": "10.5281/zenodo.20499328",
+      "relation": "hasPart",
+      "scheme": "doi",
+      "resource_type": "publication-article"
+    },
+    {
+      "identifier": "10.5281/zenodo.20499330",
+      "relation": "hasPart",
+      "scheme": "doi",
+      "resource_type": "publication-article"
+    },
+    {
+      "identifier": "10.5281/zenodo.20499334",
+      "relation": "hasPart",
+      "scheme": "doi",
+      "resource_type": "publication-article"
+    }
+  ],
+  "notes": "Signed Yachay <yachay@szlholdings.dev>. 8 sub-DOIs already minted (Phase 6, 2026-06-01). Future paper-corpus GitHub releases (papers-v*) will auto-mint a new corpus DOI under the umbrella concept 10.5281/zenodo.19944926, IF the Zenodo<->GitHub webhook is enabled for szl-holdings/platform. Founder action: zenodo.org > Linked accounts > GitHub > enable for szl-holdings/platform."
+}

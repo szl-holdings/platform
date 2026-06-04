@@ -1,0 +1,79 @@
+{
+  "vertical": "prism_counsel",
+  "generated_at": "2026-04-25T22:20:37.690761+00:00",
+  "brief": {
+    "headline": "Lock response brief draft and escalate review",
+    "deadline_pressure": "critical",
+    "obligation_coverage": "78%",
+    "regulatory_watch": "SEC disclosure rule change pending",
+    "evidence_count": 3
+  },
+  "signals": [
+    {
+      "id": "sig_counsel_deadline_risk",
+      "kind": "deadline_risk",
+      "source": "docket",
+      "summary": "Response brief due in 72h; first draft at 40% completion",
+      "weight": 0.9
+    },
+    {
+      "id": "sig_counsel_contract_gap",
+      "kind": "obligation_gap",
+      "source": "contracts",
+      "summary": "Vendor MSA redline missing indemnification clause (Section 8.2)",
+      "weight": 0.8
+    },
+    {
+      "id": "sig_counsel_regulatory_watch",
+      "kind": "regulatory_change",
+      "source": "regulatory",
+      "summary": "Proposed SEC rule change may affect quarterly disclosure timing",
+      "weight": 0.5
+    }
+  ],
+  "evidence": [
+    {
+      "id": "ev_prism_counsel_sig_counsel_deadline_risk",
+      "from_signal": "sig_counsel_deadline_risk",
+      "claim": "Response brief due in 72h; first draft at 40% completion",
+      "source": "docket"
+    },
+    {
+      "id": "ev_prism_counsel_sig_counsel_contract_gap",
+      "from_signal": "sig_counsel_contract_gap",
+      "claim": "Vendor MSA redline missing indemnification clause (Section 8.2)",
+      "source": "contracts"
+    },
+    {
+      "id": "ev_prism_counsel_sig_counsel_regulatory_watch",
+      "from_signal": "sig_counsel_regulatory_watch",
+      "claim": "Proposed SEC rule change may affect quarterly disclosure timing",
+      "source": "regulatory"
+    }
+  ],
+  "forecast": {
+    "horizon": "72h",
+    "method": "matter-risk-baseline-v0",
+    "confidence": 0.65,
+    "deadline_pressure": "critical",
+    "obligation_coverage": 0.78
+  },
+  "recommendation": {
+    "id": "rec_counsel_lock_response_brief",
+    "title": "Lock response brief draft and escalate review",
+    "next_action": "Assign senior associate to complete draft by EOD+1; schedule partner review.",
+    "rollback_path": "If draft is not reviewable by EOD+1, request 7-day extension from court.",
+    "input_class": "matter_signals_v1",
+    "output_class": "matter_risk_v1",
+    "confidence": 0.65,
+    "vertical": "prism_counsel",
+    "owner": "gc@szl",
+    "model": "gpt-5.5-2026-04-23",
+    "requires_human_approval": true,
+    "evidence_ids": [
+      "ev_prism_counsel_sig_counsel_deadline_risk",
+      "ev_prism_counsel_sig_counsel_contract_gap",
+      "ev_prism_counsel_sig_counsel_regulatory_watch"
+    ]
+  }
+}

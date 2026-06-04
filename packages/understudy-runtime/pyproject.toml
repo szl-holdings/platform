@@ -1,0 +1,28 @@
+# SPDX-License-Identifier: Apache-2.0
+# © 2026 Lutar, Stephen P. — SZL Holdings · ORCID 0009-0001-0110-4173 · Doctrine v11
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "understudy-runtime"
+version = "0.1.0"
+description = "Provenanced understudy layer — turns any SZL flagship into a failover-ready a11oy substitute (LLM router, agentic RAG, MCP, PURIQ organs, formulas, AYNI, WAYRA, Khipu DAG) under its own vertical namespace."
+readme = "README.md"
+requires-python = ">=3.10"
+license = { text = "Apache-2.0" }
+authors = [{ name = "Stephen P. Lutar", email = "yachay@szlholdings.dev" }]
+keywords = ["agentic", "rag", "mcp", "llm-router", "provenance", "dsse", "doctrine-v11"]
+
+dependencies = [
+  "fastapi>=0.110",
+]
+
+[project.optional-dependencies]
+# Real RAG backends (honest 503 fallback if absent)
+rag = ["lancedb", "sentence-transformers"]
+rag-qdrant = ["qdrant-client", "sentence-transformers"]
+rag-milvus = ["pymilvus", "sentence-transformers"]
+
+[tool.setuptools]
+py-modules = ["szl_understudy"]

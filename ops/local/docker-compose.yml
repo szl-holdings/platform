@@ -1,0 +1,127 @@
+version: '3.9'
+
+# SZL Holdings — Local Multi-Service Development Compose
+# Usage: docker-compose up --build
+# Individual service: docker-compose up api-server szl-holdings
+#
+# Prerequisites:
+#   - Docker Desktop or Docker Engine with Buildx
+#   - .env file with required secrets (copy from .env.example)
+#   - GitHub token with read:packages scope for pulling from ghcr.io
+
+x-common-env: &common-env
+  NODE_ENV: production
+
+x-healthcheck-defaults: &healthcheck-defaults
+  interval: 30s
+  timeout: 10s
+  retries: 3
+  start_period: 40s
+
+services:
+  # ---- Infrastructure ----
+  postgres:
+    image: postgres:16-alpine
+    container_name: szl-postgres
+    environment:
+      POSTGRES_DB: szl_platform
+      POSTGRES_USER: szl_platform_user
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-local_dev_only}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U szl_platform_user -d szl_platform"]
+      <<: *healthcheck-defaults
+
+  # ---- API Server ----
+  api-server:
+    build:
+      context: .
+      dockerfile: artifacts/api-server/Dockerfile
+    image: ghcr.io/szl-holdings/api-server:local
+    container_name: szl-api-server
+    environment:
+      <<: *common-env
+      PORT: 3000
+      DATABASE_URL: postgres://szl_platform_user:${POSTGRES_PASSWORD:-local_dev_only}@postgres:5432/szl_platform
+      ANTHROPIC_API_KEY: ${ANTHROPIC_API_KEY:-}
+      OPENAI_API_KEY: ${OPENAI_API_KEY:-}
+      GEMINI_API_KEY: ${GEMINI_API_KEY:-}
+      SESSION_SECRET: ${SESSION_SECRET:-local_dev_secret_change_in_prod}
+      REPLIT_DOMAINS: ${REPLIT_DOMAINS:-localhost}
+    ports:
+      - "3000:3000"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://localhost:3000/api/health"]
+      <<: *healthcheck-defaults
+    restart: unless-stopped
+
+  # ---- Web Applications ----
+  szl-holdings:
+    build:
+      context: .
+      dockerfile: artifacts/szl-holdings/Dockerfile
+    image: ghcr.io/szl-holdings/szl-holdings-web:local
+    container_name: szl-holdings-web
+    environment:
+      <<: *common-env
+    ports:
+      - "4000:8080"
+    depends_on:
+      - api-server
+    restart: unless-stopped
+
+  vessels:
+    build:
+      context: .
+      dockerfile: artifacts/vessels/Dockerfile
+    image: ghcr.io/szl-holdings/vessels:local
+    container_name: szl-vessels
+    environment:
+      <<: *common-env
+    ports:
+      - "4002:8080"
+    depends_on:
+      - api-server
+    restart: unless-stopped
+
+  terra:
+    build:
+      context: .
+      dockerfile: artifacts/terra/Dockerfile
+    image: ghcr.io/szl-holdings/terra:local
+    container_name: szl-terra
+    environment:
+      <<: *common-env
+    ports:
+      - "4003:8080"
+    depends_on:
+      - api-server
+    restart: unless-stopped
+
+  carlota-jo:
+    build:
+      context: .
+      dockerfile: artifacts/carlota-jo/Dockerfile
+    image: ghcr.io/szl-holdings/carlota-jo:local
+    container_name: szl-carlota-jo
+    environment:
+      <<: *common-env
+    ports:
+      - "4005:8080"
+    depends_on:
+      - api-server
+    restart: unless-stopped
+
+volumes:
+  postgres_data:
+    driver: local
+
+networks:
+  default:
+    name: szl-holdings-network

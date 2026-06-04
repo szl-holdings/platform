@@ -1,0 +1,303 @@
+import type { GoldenQuery } from '../metrics.js';
+
+export const LYTE_GOLDEN_QUERIES: GoldenQuery[] = [
+  {
+    queryId: 'lyte-q001',
+    query: 'Which approval chains have been stalled for more than 14 days?',
+    relevantChunkIds: ['lyte-chunk-001', 'lyte-chunk-002', 'lyte-chunk-003'],
+    exactMatchBoostTerms: ['approval chain', 'stalled'],
+    metadata: { domain: 'lyte', entityTypes: ['approval_chain'], queryType: 'natural_language' },
+  },
+  {
+    queryId: 'lyte-q002',
+    query: 'Show me the highest-risk opportunities without an assigned owner.',
+    relevantChunkIds: ['lyte-chunk-004', 'lyte-chunk-005'],
+    exactMatchBoostTerms: ['opportunity', 'ownership gap'],
+    metadata: { domain: 'lyte', entityTypes: ['opportunity'], queryType: 'natural_language' },
+  },
+  {
+    queryId: 'lyte-q003',
+    query: 'What projects are currently at risk of missing their delivery deadline?',
+    relevantChunkIds: ['lyte-chunk-006', 'lyte-chunk-007', 'lyte-chunk-008'],
+    exactMatchBoostTerms: ['project', 'risk signal', 'deliverable'],
+    metadata: {
+      domain: 'lyte',
+      entityTypes: ['project', 'deliverable'],
+      queryType: 'natural_language',
+    },
+  },
+  {
+    queryId: 'lyte-q004',
+    query: 'List stakeholders who have not engaged with the Q2 governance review.',
+    relevantChunkIds: ['lyte-chunk-009', 'lyte-chunk-010'],
+    exactMatchBoostTerms: ['stakeholder', 'governance'],
+    metadata: { domain: 'lyte', entityTypes: ['stakeholder'], queryType: 'natural_language' },
+  },
+  {
+    queryId: 'lyte-q005',
+    query: 'What escalations occurred in the last 30 days and how were they resolved?',
+    relevantChunkIds: ['lyte-chunk-011', 'lyte-chunk-012'],
+    exactMatchBoostTerms: ['escalation', 'approval chain'],
+    metadata: {
+      domain: 'lyte',
+      entityTypes: ['approval_chain', 'outcome'],
+      queryType: 'natural_language',
+    },
+  },
+  {
+    queryId: 'lyte-q006',
+    query: 'Which deliverables are overdue and blocking downstream milestones?',
+    relevantChunkIds: ['lyte-chunk-013', 'lyte-chunk-014'],
+    exactMatchBoostTerms: ['deliverable', 'stalled'],
+    metadata: {
+      domain: 'lyte',
+      entityTypes: ['deliverable', 'project'],
+      queryType: 'natural_language',
+    },
+  },
+  {
+    queryId: 'lyte-q007',
+    query: 'AC-2024-Q2-07',
+    relevantChunkIds: ['lyte-chunk-001', 'lyte-chunk-011'],
+    exactMatchBoostTerms: ['approval chain'],
+    metadata: { domain: 'lyte', entityTypes: ['approval_chain'], queryType: 'structured_id' },
+  },
+  {
+    queryId: 'lyte-q008',
+    query: 'opportunity OPP-2024-447 status',
+    relevantChunkIds: ['lyte-chunk-004', 'lyte-chunk-005'],
+    exactMatchBoostTerms: ['opportunity'],
+    metadata: { domain: 'lyte', entityTypes: ['opportunity'], queryType: 'structured_id' },
+  },
+  {
+    queryId: 'lyte-q009',
+    query: 'PROJ-2024-INFRA-09 risk profile',
+    relevantChunkIds: ['lyte-chunk-006', 'lyte-chunk-007'],
+    exactMatchBoostTerms: ['project', 'risk signal'],
+    metadata: { domain: 'lyte', entityTypes: ['project'], queryType: 'structured_id' },
+  },
+  {
+    queryId: 'lyte-q010',
+    query: "Tell me everything about Sarah Chen's outstanding approvals.",
+    relevantChunkIds: ['lyte-chunk-001', 'lyte-chunk-015'],
+    exactMatchBoostTerms: ['approval chain', 'owner'],
+    metadata: {
+      domain: 'lyte',
+      entityTypes: ['approval_chain', 'stakeholder'],
+      queryType: 'natural_language',
+    },
+  },
+  {
+    queryId: 'lyte-q011',
+    query: 'Which policy exceptions were granted in Q2 and who approved them?',
+    relevantChunkIds: ['lyte-chunk-012', 'lyte-chunk-016'],
+    exactMatchBoostTerms: ['policy exception'],
+    metadata: { domain: 'lyte', entityTypes: ['outcome'], queryType: 'natural_language' },
+  },
+  {
+    queryId: 'lyte-q012',
+    query: 'Find SLA breaches across the procurement workflow.',
+    relevantChunkIds: ['lyte-chunk-003', 'lyte-chunk-017'],
+    exactMatchBoostTerms: ['SLA', 'approval chain'],
+    metadata: { domain: 'lyte', entityTypes: ['approval_chain'], queryType: 'natural_language' },
+  },
+  {
+    queryId: 'lyte-q013',
+    query: 'approval chain stalled and stakeholder unengaged on the same initiative',
+    relevantChunkIds: ['lyte-chunk-002', 'lyte-chunk-009', 'lyte-chunk-018'],
+    exactMatchBoostTerms: ['approval chain', 'stakeholder', 'stalled'],
+    metadata: {
+      domain: 'lyte',
+      entityTypes: ['approval_chain', 'stakeholder'],
+      queryType: 'multi_entity',
+    },
+  },
+  {
+    queryId: 'lyte-q014',
+    query: "thing about that approval that wasn't moving forward",
+    relevantChunkIds: ['lyte-chunk-001', 'lyte-chunk-002', 'lyte-chunk-003'],
+    exactMatchBoostTerms: ['approval chain', 'stalled'],
+    metadata: { domain: 'lyte', entityTypes: ['approval_chain'], queryType: 'ambiguous' },
+  },
+  {
+    queryId: 'lyte-q015',
+    query: 'Outcomes log: how many escalations in the past 90 days led to a documented exception?',
+    relevantChunkIds: ['lyte-chunk-012', 'lyte-chunk-016', 'lyte-chunk-019'],
+    exactMatchBoostTerms: ['escalation', 'policy exception'],
+    metadata: { domain: 'lyte', entityTypes: ['outcome'], queryType: 'natural_language' },
+  },
+  {
+    queryId: 'lyte-q016',
+    query: 'Proof chain PC-0847 lineage',
+    relevantChunkIds: ['lyte-chunk-012'],
+    exactMatchBoostTerms: ['proof chain'],
+    metadata: { domain: 'lyte', entityTypes: ['outcome'], queryType: 'structured_id' },
+  },
+  {
+    queryId: 'lyte-q017',
+    query: 'Who owns deliverable DEL-CRM-03-FINAL and what is blocking it?',
+    relevantChunkIds: ['lyte-chunk-008'],
+    exactMatchBoostTerms: ['deliverable', 'owner'],
+    metadata: { domain: 'lyte', entityTypes: ['deliverable'], queryType: 'structured_id' },
+  },
+  {
+    queryId: 'lyte-q018',
+    query: 'Recommend recipes for traditional Japanese ramen broth preparation.',
+    relevantChunkIds: [],
+    expectedRelevant: 0,
+    exactMatchBoostTerms: [],
+    metadata: { domain: 'lyte', queryType: 'adversarial', reason: 'off-domain culinary topic' },
+  },
+  {
+    queryId: 'lyte-q019',
+    query: 'alpine skiing waxing techniques cold powder snow',
+    relevantChunkIds: [],
+    expectedRelevant: 0,
+    exactMatchBoostTerms: [],
+    metadata: { domain: 'lyte', queryType: 'adversarial', reason: 'off-domain recreation' },
+  },
+  {
+    queryId: 'lyte-q020',
+    query: 'macrame wall hanging knotting bohemian fiber yarn',
+    relevantChunkIds: [],
+    expectedRelevant: 0,
+    exactMatchBoostTerms: [],
+    metadata: { domain: 'lyte', queryType: 'adversarial', reason: 'off-domain handicraft' },
+  },
+];
+
+export const LYTE_MOCK_CORPUS = new Map<string, { text: string; boostTerms: string[] }>([
+  [
+    'lyte-chunk-001',
+    {
+      text: 'Approval chain AC-2024-Q2-07 has been stalled at the CFO sign-off step for 22 days. Estimated value at risk: $1.4M. Owner: Sarah Chen.',
+      boostTerms: ['approval chain', 'stalled', 'owner'],
+    },
+  ],
+  [
+    'lyte-chunk-002',
+    {
+      text: 'Approval chain AC-2024-Q3-12 stalled: no response from legal counsel for 16 days on the enterprise SaaS contract renewal.',
+      boostTerms: ['approval chain', 'stalled'],
+    },
+  ],
+  [
+    'lyte-chunk-003',
+    {
+      text: 'Governance review flagged three approval chains with stall periods exceeding 14-day SLA threshold: AC-07, AC-12, AC-19.',
+      boostTerms: ['approval chain', 'stalled', 'governance', 'SLA'],
+    },
+  ],
+  [
+    'lyte-chunk-004',
+    {
+      text: 'Opportunity OPP-2024-447 classified as high-risk with no ownership assignment. Estimated close value: $3.2M. Days in qualification stage: 34.',
+      boostTerms: ['opportunity', 'ownership gap'],
+    },
+  ],
+  [
+    'lyte-chunk-005',
+    {
+      text: 'Three unassigned opportunities in negotiation stage: OPP-441, OPP-447, OPP-452. Combined estimated value: $7.8M. Ownership gap risk: HIGH.',
+      boostTerms: ['opportunity', 'ownership gap'],
+    },
+  ],
+  [
+    'lyte-chunk-006',
+    {
+      text: 'Project PROJ-2024-INFRA-09 classified at-risk. Delivery deadline: June 30, 2024. Blocker count: 4. Value at risk: $820,000.',
+      boostTerms: ['project', 'risk signal', 'deliverable'],
+    },
+  ],
+  [
+    'lyte-chunk-007',
+    {
+      text: 'Risk signal: PROJ-2024-INFRA-09 and PROJ-2024-CRM-03 both showing delivery deadline risk. Combined estimated exposure: $2.1M.',
+      boostTerms: ['risk signal', 'project'],
+    },
+  ],
+  [
+    'lyte-chunk-008',
+    {
+      text: 'Deliverable DEL-CRM-03-FINAL overdue by 8 days. Blocking phase 2 launch. Project owner: Marcus Webb.',
+      boostTerms: ['deliverable', 'project', 'owner'],
+    },
+  ],
+  [
+    'lyte-chunk-009',
+    {
+      text: 'Stakeholder engagement audit — Q2 governance review: 7 of 14 primary stakeholders have not opened the briefing document as of June 15.',
+      boostTerms: ['stakeholder', 'governance'],
+    },
+  ],
+  [
+    'lyte-chunk-010',
+    {
+      text: 'Non-engaged stakeholders list: VP Engineering, CPO, Regional Director EMEA, Director of Procurement, Head of Legal (all showing zero Q2 governance review interaction).',
+      boostTerms: ['stakeholder'],
+    },
+  ],
+  [
+    'lyte-chunk-011',
+    {
+      text: 'Escalation log June 2024: 4 approval chain escalations triggered. 3 resolved within 48h. 1 escalation (AC-2024-Q2-07) remains open pending CFO availability.',
+      boostTerms: ['escalation', 'approval chain'],
+    },
+  ],
+  [
+    'lyte-chunk-012',
+    {
+      text: 'Resolution record: Escalation ESC-2024-06-22 resolved by interim CFO sign-off. Policy exception documented. Proof chain ID: PC-0847.',
+      boostTerms: ['escalation', 'policy exception', 'proof chain'],
+    },
+  ],
+  [
+    'lyte-chunk-013',
+    {
+      text: 'Deliverable DEL-PROJ-19-ARCH overdue 12 days. Blocking DEL-PROJ-19-IMPL. Root cause: design review feedback not acted on.',
+      boostTerms: ['deliverable', 'stalled'],
+    },
+  ],
+  [
+    'lyte-chunk-014',
+    {
+      text: '4 overdue deliverables are blocking downstream milestones across 2 active projects. Aggregate value at risk from delays: $1.7M.',
+      boostTerms: ['deliverable', 'stalled'],
+    },
+  ],
+  [
+    'lyte-chunk-015',
+    {
+      text: 'Owner workload report: Sarah Chen currently owns 6 active approval chains, 2 of which are stalled (AC-2024-Q2-07 and AC-2024-Q2-11).',
+      boostTerms: ['approval chain', 'owner'],
+    },
+  ],
+  [
+    'lyte-chunk-016',
+    {
+      text: 'Q2 policy exception register: 5 exceptions granted. Approver breakdown — interim CFO (3), Chief Risk Officer (1), General Counsel (1). All linked to escalations from approval chains.',
+      boostTerms: ['policy exception', 'escalation'],
+    },
+  ],
+  [
+    'lyte-chunk-017',
+    {
+      text: 'Procurement workflow SLA breach summary: 9 purchase orders exceeded the 10-day approval SLA in May. Average breach duration: 6.3 days.',
+      boostTerms: ['SLA', 'approval chain'],
+    },
+  ],
+  [
+    'lyte-chunk-018',
+    {
+      text: 'Initiative INIT-2024-NORTHSTAR: approval chain AC-2024-Q3-12 stalled and key stakeholder (VP Engineering) flagged as non-engaged in Q2 governance review.',
+      boostTerms: ['approval chain', 'stakeholder', 'stalled'],
+    },
+  ],
+  [
+    'lyte-chunk-019',
+    {
+      text: '90-day escalation outcomes: 11 escalations triggered, 5 closed without exception, 4 closed with documented policy exception, 2 still open pending review.',
+      boostTerms: ['escalation', 'policy exception'],
+    },
+  ],
+]);
