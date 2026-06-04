@@ -1,143 +1,331 @@
 {
-  "annotations": {
-    "list": []
-  },
-  "editable": true,
-  "schemaVersion": 39,
-  "title": "Khipu \u2014 Chain Depth",
   "uid": "szl-khipu-chain-depth",
+  "title": "SZL \u00b7 Khipu Chain Depth",
   "tags": [
     "szl",
-    "doctrine-v11",
-    "flagship-mesh"
+    "o11y",
+    "khipu",
+    "audit"
   ],
-  "timezone": "utc",
+  "schemaVersion": 39,
+  "version": 1,
+  "editable": true,
+  "graphTooltip": 1,
   "time": {
     "from": "now-6h",
     "to": "now"
   },
-  "refresh": "1m",
+  "refresh": "30s",
+  "timezone": "",
   "templating": {
     "list": [
       {
-        "name": "flagship",
-        "type": "custom",
-        "label": "Flagship",
-        "query": "a11oy,amaru,sentra,rosie,killinchu,hatun-mcp",
-        "current": {
-          "text": "a11oy",
-          "value": "a11oy"
+        "name": "DS_PROMETHEUS",
+        "label": "Prometheus",
+        "type": "datasource",
+        "query": "prometheus",
+        "current": {},
+        "hide": 0,
+        "refresh": 1,
+        "regex": "",
+        "options": [],
+        "multi": false,
+        "includeAll": false
+      },
+      {
+        "name": "DS_TEMPO",
+        "label": "Tempo",
+        "type": "datasource",
+        "query": "tempo",
+        "current": {},
+        "hide": 0,
+        "refresh": 1,
+        "regex": "",
+        "options": [],
+        "multi": false,
+        "includeAll": false
+      },
+      {
+        "name": "DS_LOKI",
+        "label": "Loki",
+        "type": "datasource",
+        "query": "loki",
+        "current": {},
+        "hide": 0,
+        "refresh": 1,
+        "regex": "",
+        "options": [],
+        "multi": false,
+        "includeAll": false
+      }
+    ]
+  },
+  "annotations": {
+    "list": [
+      {
+        "builtIn": 1,
+        "datasource": {
+          "type": "grafana",
+          "uid": "-- Grafana --"
         },
-        "options": [
-          {
-            "text": "a11oy",
-            "value": "a11oy"
-          },
-          {
-            "text": "amaru",
-            "value": "amaru"
-          },
-          {
-            "text": "sentra",
-            "value": "sentra"
-          },
-          {
-            "text": "rosie",
-            "value": "rosie"
-          },
-          {
-            "text": "killinchu",
-            "value": "killinchu"
-          },
-          {
-            "text": "hatun-mcp",
-            "value": "hatun-mcp"
-          }
-        ]
+        "enable": true,
+        "hide": true,
+        "name": "Annotations & Alerts",
+        "type": "dashboard"
       }
     ]
   },
   "panels": [
     {
       "id": 1,
-      "title": "Chain depth (seq)",
       "type": "timeseries",
+      "title": "Chain Growth Rate (receipts/min per flagship)",
       "datasource": {
         "type": "prometheus",
-        "uid": "${DS_PROM}"
-      },
-      "fieldConfig": {
-        "defaults": {
-          "unit": "short"
-        },
-        "overrides": []
+        "uid": "${DS_PROMETHEUS}"
       },
       "gridPos": {
         "x": 0,
         "y": 0,
-        "w": 12,
+        "w": 24,
         "h": 8
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short",
+          "custom": {
+            "drawStyle": "line",
+            "fillOpacity": 10,
+            "lineWidth": 2,
+            "showPoints": "never"
+          },
+          "color": {
+            "mode": "palette-classic"
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "legend": {
+          "displayMode": "list",
+          "placement": "bottom"
+        },
+        "tooltip": {
+          "mode": "multi"
+        }
       },
       "targets": [
         {
-          "expr": "max by (organ) (khipu_chain_seq)",
-          "refId": "A"
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${DS_PROMETHEUS}"
+          },
+          "expr": "sum by (flagship) (rate(szl_khipu_chain_depth[5m])) * 60",
+          "legendFormat": "{{flagship}}",
+          "refId": "A",
+          "format": "time_series",
+          "range": true
         }
       ]
     },
     {
       "id": 2,
-      "title": "Chain growth rate (entries/min)",
-      "type": "timeseries",
+      "type": "stat",
+      "title": "Chain Integrity (1=ok)",
       "datasource": {
         "type": "prometheus",
-        "uid": "${DS_PROM}"
+        "uid": "${DS_PROMETHEUS}"
+      },
+      "gridPos": {
+        "x": 0,
+        "y": 8,
+        "w": 8,
+        "h": 6
       },
       "fieldConfig": {
         "defaults": {
-          "unit": "opm"
+          "unit": "short",
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "red",
+                "value": null
+              },
+              {
+                "color": "green",
+                "value": 1
+              }
+            ]
+          }
         },
         "overrides": []
       },
-      "gridPos": {
-        "x": 12,
-        "y": 0,
-        "w": 12,
-        "h": 8
+      "options": {
+        "colorMode": "value",
+        "graphMode": "area",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ]
+        }
       },
       "targets": [
         {
-          "expr": "rate(khipu_chain_seq[5m]) * 60",
-          "refId": "A"
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${DS_PROMETHEUS}"
+          },
+          "expr": "min(szl_khipu_chain_verified)",
+          "legendFormat": "integrity",
+          "refId": "A",
+          "format": "time_series",
+          "range": true
         }
       ]
     },
     {
       "id": 3,
-      "title": "Chain verification status (1=verified)",
-      "type": "stat",
+      "type": "timeseries",
+      "title": "RS(10,6) Recovery Events / sec",
       "datasource": {
         "type": "prometheus",
-        "uid": "${DS_PROM}"
+        "uid": "${DS_PROMETHEUS}"
+      },
+      "gridPos": {
+        "x": 8,
+        "y": 8,
+        "w": 16,
+        "h": 6
       },
       "fieldConfig": {
         "defaults": {
-          "unit": "short"
+          "unit": "ops",
+          "custom": {
+            "drawStyle": "line",
+            "fillOpacity": 10,
+            "lineWidth": 2,
+            "showPoints": "never"
+          },
+          "color": {
+            "mode": "palette-classic"
+          }
         },
         "overrides": []
       },
-      "gridPos": {
-        "x": 0,
-        "y": 8,
-        "w": 24,
-        "h": 6
+      "options": {
+        "legend": {
+          "displayMode": "list",
+          "placement": "bottom"
+        },
+        "tooltip": {
+          "mode": "multi"
+        }
       },
       "targets": [
         {
-          "expr": "min by (organ) (khipu_chain_verified)",
-          "refId": "A"
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${DS_PROMETHEUS}"
+          },
+          "expr": "sum(rate(szl_khipu_rs_recovery_total[5m]))",
+          "legendFormat": "rs recovery",
+          "refId": "A",
+          "format": "time_series",
+          "range": true
+        }
+      ]
+    },
+    {
+      "id": 4,
+      "type": "timeseries",
+      "title": "Total Chain Depth (per flagship)",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${DS_PROMETHEUS}"
+      },
+      "gridPos": {
+        "x": 0,
+        "y": 14,
+        "w": 24,
+        "h": 8
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short",
+          "custom": {
+            "drawStyle": "line",
+            "fillOpacity": 10,
+            "lineWidth": 2,
+            "showPoints": "never"
+          },
+          "color": {
+            "mode": "palette-classic"
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "legend": {
+          "displayMode": "list",
+          "placement": "bottom"
+        },
+        "tooltip": {
+          "mode": "multi"
+        }
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${DS_PROMETHEUS}"
+          },
+          "expr": "szl_khipu_chain_depth",
+          "legendFormat": "{{flagship}}",
+          "refId": "A",
+          "format": "time_series",
+          "range": true
         }
       ]
     }
-  ]
+  ],
+  "__requires": [
+    {
+      "type": "grafana",
+      "id": "grafana",
+      "name": "Grafana",
+      "version": "10.0.0"
+    },
+    {
+      "type": "datasource",
+      "id": "prometheus",
+      "name": "Prometheus",
+      "version": "1.0.0"
+    },
+    {
+      "type": "datasource",
+      "id": "tempo",
+      "name": "Tempo",
+      "version": "1.0.0"
+    },
+    {
+      "type": "datasource",
+      "id": "loki",
+      "name": "Loki",
+      "version": "1.0.0"
+    },
+    {
+      "type": "panel",
+      "id": "timeseries",
+      "name": "Time series",
+      "version": ""
+    },
+    {
+      "type": "panel",
+      "id": "stat",
+      "name": "Stat",
+      "version": ""
+    }
+  ],
+  "description": "SZL O11Y \u2014 Doctrine v11 749/14/163. Signed Yachay <yachay@szlholdings.dev>."
 }

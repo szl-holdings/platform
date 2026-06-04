@@ -1,11 +1,10 @@
 {
-  "uid": "szl-wire-d-signing",
-  "title": "SZL \u00b7 Wire D Signing",
+  "uid": "szl-slo-burndown",
+  "title": "SZL \u00b7 SLO Burndown (99.5%)",
   "tags": [
     "szl",
     "o11y",
-    "wire-d",
-    "signing"
+    "slo"
   ],
   "schemaVersion": 39,
   "version": 1,
@@ -79,7 +78,7 @@
     {
       "id": 1,
       "type": "timeseries",
-      "title": "DSSE Signs / sec",
+      "title": "a11oy \u00b7 99.5% SLO error-budget burn",
       "datasource": {
         "type": "prometheus",
         "uid": "${DS_PROMETHEUS}"
@@ -87,12 +86,12 @@
       "gridPos": {
         "x": 0,
         "y": 0,
-        "w": 12,
-        "h": 8
+        "w": 24,
+        "h": 5
       },
       "fieldConfig": {
         "defaults": {
-          "unit": "ops",
+          "unit": "short",
           "custom": {
             "drawStyle": "line",
             "fillOpacity": 10,
@@ -120,8 +119,8 @@
             "type": "prometheus",
             "uid": "${DS_PROMETHEUS}"
           },
-          "expr": "sum by (organ) (rate(szl_signing_total[5m]))",
-          "legendFormat": "{{organ}}",
+          "expr": "(1 - (sum(rate(szl_request_total{flagship=\"a11oy\",status!~\"5..\"}[1h])) / sum(rate(szl_request_total{flagship=\"a11oy\"}[1h])))) / (1 - 0.995)",
+          "legendFormat": "burn rate (\u00d7budget)",
           "refId": "A",
           "format": "time_series",
           "range": true
@@ -131,20 +130,20 @@
     {
       "id": 2,
       "type": "timeseries",
-      "title": "Verify Success Rate",
+      "title": "amaru \u00b7 99.5% SLO error-budget burn",
       "datasource": {
         "type": "prometheus",
         "uid": "${DS_PROMETHEUS}"
       },
       "gridPos": {
-        "x": 12,
-        "y": 0,
-        "w": 12,
-        "h": 8
+        "x": 0,
+        "y": 5,
+        "w": 24,
+        "h": 5
       },
       "fieldConfig": {
         "defaults": {
-          "unit": "percentunit",
+          "unit": "short",
           "custom": {
             "drawStyle": "line",
             "fillOpacity": 10,
@@ -172,8 +171,8 @@
             "type": "prometheus",
             "uid": "${DS_PROMETHEUS}"
           },
-          "expr": "sum(rate(szl_verify_success_total[5m])) / sum(rate(szl_verify_total[5m]))",
-          "legendFormat": "verify success",
+          "expr": "(1 - (sum(rate(szl_request_total{flagship=\"amaru\",status!~\"5..\"}[1h])) / sum(rate(szl_request_total{flagship=\"amaru\"}[1h])))) / (1 - 0.995)",
+          "legendFormat": "burn rate (\u00d7budget)",
           "refId": "A",
           "format": "time_series",
           "range": true
@@ -183,20 +182,20 @@
     {
       "id": 3,
       "type": "timeseries",
-      "title": "Signature Failures / sec",
+      "title": "sentra \u00b7 99.5% SLO error-budget burn",
       "datasource": {
         "type": "prometheus",
         "uid": "${DS_PROMETHEUS}"
       },
       "gridPos": {
         "x": 0,
-        "y": 8,
-        "w": 12,
-        "h": 8
+        "y": 10,
+        "w": 24,
+        "h": 5
       },
       "fieldConfig": {
         "defaults": {
-          "unit": "ops",
+          "unit": "short",
           "custom": {
             "drawStyle": "line",
             "fillOpacity": 10,
@@ -224,8 +223,8 @@
             "type": "prometheus",
             "uid": "${DS_PROMETHEUS}"
           },
-          "expr": "sum by (organ) (rate(szl_signing_failures_total[5m]))",
-          "legendFormat": "{{organ}}",
+          "expr": "(1 - (sum(rate(szl_request_total{flagship=\"sentra\",status!~\"5..\"}[1h])) / sum(rate(szl_request_total{flagship=\"sentra\"}[1h])))) / (1 - 0.995)",
+          "legendFormat": "burn rate (\u00d7budget)",
           "refId": "A",
           "format": "time_series",
           "range": true
@@ -234,44 +233,40 @@
     },
     {
       "id": 4,
-      "type": "stat",
-      "title": "Key Fingerprint Changes (1h)",
+      "type": "timeseries",
+      "title": "rosie \u00b7 99.5% SLO error-budget burn",
       "datasource": {
         "type": "prometheus",
         "uid": "${DS_PROMETHEUS}"
       },
       "gridPos": {
-        "x": 12,
-        "y": 8,
-        "w": 12,
-        "h": 8
+        "x": 0,
+        "y": 15,
+        "w": 24,
+        "h": 5
       },
       "fieldConfig": {
         "defaults": {
           "unit": "short",
-          "thresholds": {
-            "mode": "absolute",
-            "steps": [
-              {
-                "color": "green",
-                "value": null
-              },
-              {
-                "color": "red",
-                "value": 1
-              }
-            ]
+          "custom": {
+            "drawStyle": "line",
+            "fillOpacity": 10,
+            "lineWidth": 2,
+            "showPoints": "never"
+          },
+          "color": {
+            "mode": "palette-classic"
           }
         },
         "overrides": []
       },
       "options": {
-        "colorMode": "value",
-        "graphMode": "area",
-        "reduceOptions": {
-          "calcs": [
-            "lastNotNull"
-          ]
+        "legend": {
+          "displayMode": "list",
+          "placement": "bottom"
+        },
+        "tooltip": {
+          "mode": "multi"
         }
       },
       "targets": [
@@ -280,8 +275,60 @@
             "type": "prometheus",
             "uid": "${DS_PROMETHEUS}"
           },
-          "expr": "changes(szl_wire_d_pubkey_fingerprint_hash[1h])",
-          "legendFormat": "fp changes",
+          "expr": "(1 - (sum(rate(szl_request_total{flagship=\"rosie\",status!~\"5..\"}[1h])) / sum(rate(szl_request_total{flagship=\"rosie\"}[1h])))) / (1 - 0.995)",
+          "legendFormat": "burn rate (\u00d7budget)",
+          "refId": "A",
+          "format": "time_series",
+          "range": true
+        }
+      ]
+    },
+    {
+      "id": 5,
+      "type": "timeseries",
+      "title": "killinchu \u00b7 99.5% SLO error-budget burn",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${DS_PROMETHEUS}"
+      },
+      "gridPos": {
+        "x": 0,
+        "y": 20,
+        "w": 24,
+        "h": 5
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short",
+          "custom": {
+            "drawStyle": "line",
+            "fillOpacity": 10,
+            "lineWidth": 2,
+            "showPoints": "never"
+          },
+          "color": {
+            "mode": "palette-classic"
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "legend": {
+          "displayMode": "list",
+          "placement": "bottom"
+        },
+        "tooltip": {
+          "mode": "multi"
+        }
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${DS_PROMETHEUS}"
+          },
+          "expr": "(1 - (sum(rate(szl_request_total{flagship=\"killinchu\",status!~\"5..\"}[1h])) / sum(rate(szl_request_total{flagship=\"killinchu\"}[1h])))) / (1 - 0.995)",
+          "legendFormat": "burn rate (\u00d7budget)",
           "refId": "A",
           "format": "time_series",
           "range": true

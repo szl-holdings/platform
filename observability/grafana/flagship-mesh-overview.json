@@ -1,170 +1,394 @@
 {
-  "annotations": {
-    "list": []
-  },
-  "editable": true,
-  "schemaVersion": 39,
-  "title": "Flagship Mesh \u2014 Overview",
   "uid": "szl-mesh-overview",
+  "title": "SZL \u00b7 Flagship Mesh Overview",
   "tags": [
     "szl",
-    "doctrine-v11",
-    "flagship-mesh"
+    "o11y",
+    "mesh"
   ],
-  "timezone": "utc",
+  "schemaVersion": 39,
+  "version": 1,
+  "editable": true,
+  "graphTooltip": 1,
   "time": {
     "from": "now-6h",
     "to": "now"
   },
-  "refresh": "1m",
+  "refresh": "30s",
+  "timezone": "",
   "templating": {
     "list": [
       {
-        "name": "flagship",
-        "type": "custom",
-        "label": "Flagship",
-        "query": "a11oy,amaru,sentra,rosie,killinchu,hatun-mcp",
-        "current": {
-          "text": "a11oy",
-          "value": "a11oy"
+        "name": "DS_PROMETHEUS",
+        "label": "Prometheus",
+        "type": "datasource",
+        "query": "prometheus",
+        "current": {},
+        "hide": 0,
+        "refresh": 1,
+        "regex": "",
+        "options": [],
+        "multi": false,
+        "includeAll": false
+      },
+      {
+        "name": "DS_TEMPO",
+        "label": "Tempo",
+        "type": "datasource",
+        "query": "tempo",
+        "current": {},
+        "hide": 0,
+        "refresh": 1,
+        "regex": "",
+        "options": [],
+        "multi": false,
+        "includeAll": false
+      },
+      {
+        "name": "DS_LOKI",
+        "label": "Loki",
+        "type": "datasource",
+        "query": "loki",
+        "current": {},
+        "hide": 0,
+        "refresh": 1,
+        "regex": "",
+        "options": [],
+        "multi": false,
+        "includeAll": false
+      }
+    ]
+  },
+  "annotations": {
+    "list": [
+      {
+        "builtIn": 1,
+        "datasource": {
+          "type": "grafana",
+          "uid": "-- Grafana --"
         },
-        "options": [
-          {
-            "text": "a11oy",
-            "value": "a11oy"
-          },
-          {
-            "text": "amaru",
-            "value": "amaru"
-          },
-          {
-            "text": "sentra",
-            "value": "sentra"
-          },
-          {
-            "text": "rosie",
-            "value": "rosie"
-          },
-          {
-            "text": "killinchu",
-            "value": "killinchu"
-          },
-          {
-            "text": "hatun-mcp",
-            "value": "hatun-mcp"
-          }
-        ]
+        "enable": true,
+        "hide": true,
+        "name": "Annotations & Alerts",
+        "type": "dashboard"
       }
     ]
   },
   "panels": [
     {
       "id": 1,
-      "title": "/healthz availability (5m)",
-      "type": "timeseries",
+      "type": "stat",
+      "title": "Flagships Up",
       "datasource": {
         "type": "prometheus",
-        "uid": "${DS_PROM}"
-      },
-      "fieldConfig": {
-        "defaults": {
-          "unit": "percentunit"
-        },
-        "overrides": []
+        "uid": "${DS_PROMETHEUS}"
       },
       "gridPos": {
         "x": 0,
         "y": 0,
-        "w": 12,
-        "h": 8
+        "w": 6,
+        "h": 4
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short",
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "red",
+                "value": null
+              },
+              {
+                "color": "yellow",
+                "value": 4
+              },
+              {
+                "color": "green",
+                "value": 5
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "colorMode": "value",
+        "graphMode": "area",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ]
+        }
       },
       "targets": [
         {
-          "expr": "avg by (organ) (probe_success{job=\"szl-flagships\"})",
-          "refId": "A"
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${DS_PROMETHEUS}"
+          },
+          "expr": "sum(up{job=\"szl-flagship\"})",
+          "legendFormat": "up",
+          "refId": "A",
+          "format": "time_series",
+          "range": true
         }
       ]
     },
     {
       "id": 2,
-      "title": "p99 /healthz latency",
-      "type": "timeseries",
+      "type": "stat",
+      "title": "Mesh Uptime %",
       "datasource": {
         "type": "prometheus",
-        "uid": "${DS_PROM}"
+        "uid": "${DS_PROMETHEUS}"
+      },
+      "gridPos": {
+        "x": 6,
+        "y": 0,
+        "w": 6,
+        "h": 4
       },
       "fieldConfig": {
         "defaults": {
-          "unit": "s"
+          "unit": "percent",
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "red",
+                "value": null
+              },
+              {
+                "color": "yellow",
+                "value": 99
+              },
+              {
+                "color": "green",
+                "value": 99.5
+              }
+            ]
+          }
         },
         "overrides": []
       },
-      "gridPos": {
-        "x": 12,
-        "y": 0,
-        "w": 12,
-        "h": 8
+      "options": {
+        "colorMode": "value",
+        "graphMode": "area",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ]
+        }
       },
       "targets": [
         {
-          "expr": "histogram_quantile(0.99, sum by (le,organ) (rate(http_request_duration_seconds_bucket{endpoint=\"/healthz\"}[5m])))",
-          "refId": "A"
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${DS_PROMETHEUS}"
+          },
+          "expr": "avg(avg_over_time(up{job=\"szl-flagship\"}[24h])) * 100",
+          "legendFormat": "uptime",
+          "refId": "A",
+          "format": "time_series",
+          "range": true
         }
       ]
     },
     {
       "id": 3,
-      "title": "5xx rate by organ",
       "type": "timeseries",
+      "title": "Request Rate (per flagship)",
       "datasource": {
         "type": "prometheus",
-        "uid": "${DS_PROM}"
-      },
-      "fieldConfig": {
-        "defaults": {
-          "unit": "reqps"
-        },
-        "overrides": []
+        "uid": "${DS_PROMETHEUS}"
       },
       "gridPos": {
         "x": 0,
-        "y": 8,
+        "y": 4,
         "w": 12,
         "h": 8
       },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "reqps",
+          "custom": {
+            "drawStyle": "line",
+            "fillOpacity": 10,
+            "lineWidth": 2,
+            "showPoints": "never"
+          },
+          "color": {
+            "mode": "palette-classic"
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "legend": {
+          "displayMode": "list",
+          "placement": "bottom"
+        },
+        "tooltip": {
+          "mode": "multi"
+        }
+      },
       "targets": [
         {
-          "expr": "sum by (organ) (rate(http_responses_total{code=~\"5..\"}[5m]))",
-          "refId": "A"
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${DS_PROMETHEUS}"
+          },
+          "expr": "sum by (flagship) (rate(szl_request_total{job=\"szl-flagship\"}[5m]))",
+          "legendFormat": "{{flagship}}",
+          "refId": "A",
+          "format": "time_series",
+          "range": true
         }
       ]
     },
     {
       "id": 4,
-      "title": "Doctrine number drift (0=ok)",
-      "type": "stat",
+      "type": "timeseries",
+      "title": "Error Rate (5xx ratio)",
       "datasource": {
         "type": "prometheus",
-        "uid": "${DS_PROM}"
-      },
-      "fieldConfig": {
-        "defaults": {
-          "unit": "short"
-        },
-        "overrides": []
+        "uid": "${DS_PROMETHEUS}"
       },
       "gridPos": {
         "x": 12,
-        "y": 8,
+        "y": 4,
         "w": 12,
         "h": 8
       },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "percentunit",
+          "custom": {
+            "drawStyle": "line",
+            "fillOpacity": 10,
+            "lineWidth": 2,
+            "showPoints": "never"
+          },
+          "color": {
+            "mode": "palette-classic"
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "legend": {
+          "displayMode": "list",
+          "placement": "bottom"
+        },
+        "tooltip": {
+          "mode": "multi"
+        }
+      },
       "targets": [
         {
-          "expr": "max by (organ) (szl_doctrine_drift)",
-          "refId": "A"
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${DS_PROMETHEUS}"
+          },
+          "expr": "sum by (flagship) (rate(szl_request_total{status=~\"5..\",job=\"szl-flagship\"}[5m])) / sum by (flagship) (rate(szl_request_total{job=\"szl-flagship\"}[5m]))",
+          "legendFormat": "{{flagship}}",
+          "refId": "A",
+          "format": "time_series",
+          "range": true
+        }
+      ]
+    },
+    {
+      "id": 5,
+      "type": "timeseries",
+      "title": "p99 Latency (per flagship)",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${DS_PROMETHEUS}"
+      },
+      "gridPos": {
+        "x": 0,
+        "y": 12,
+        "w": 24,
+        "h": 8
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "s",
+          "custom": {
+            "drawStyle": "line",
+            "fillOpacity": 10,
+            "lineWidth": 2,
+            "showPoints": "never"
+          },
+          "color": {
+            "mode": "palette-classic"
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "legend": {
+          "displayMode": "list",
+          "placement": "bottom"
+        },
+        "tooltip": {
+          "mode": "multi"
+        }
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${DS_PROMETHEUS}"
+          },
+          "expr": "histogram_quantile(0.99, sum by (le, flagship) (rate(szl_request_duration_seconds_bucket{job=\"szl-flagship\"}[5m])))",
+          "legendFormat": "{{flagship}}",
+          "refId": "A",
+          "format": "time_series",
+          "range": true
         }
       ]
     }
-  ]
+  ],
+  "__requires": [
+    {
+      "type": "grafana",
+      "id": "grafana",
+      "name": "Grafana",
+      "version": "10.0.0"
+    },
+    {
+      "type": "datasource",
+      "id": "prometheus",
+      "name": "Prometheus",
+      "version": "1.0.0"
+    },
+    {
+      "type": "datasource",
+      "id": "tempo",
+      "name": "Tempo",
+      "version": "1.0.0"
+    },
+    {
+      "type": "datasource",
+      "id": "loki",
+      "name": "Loki",
+      "version": "1.0.0"
+    },
+    {
+      "type": "panel",
+      "id": "timeseries",
+      "name": "Time series",
+      "version": ""
+    },
+    {
+      "type": "panel",
+      "id": "stat",
+      "name": "Stat",
+      "version": ""
+    }
+  ],
+  "description": "SZL O11Y \u2014 Doctrine v11 749/14/163. Signed Yachay <yachay@szlholdings.dev>."
 }

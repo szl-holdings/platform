@@ -1,11 +1,11 @@
 {
-  "uid": "szl-wire-d-signing",
-  "title": "SZL \u00b7 Wire D Signing",
+  "uid": "szl-ouroboros-flow",
+  "title": "SZL \u00b7 Ouroboros Flow",
   "tags": [
     "szl",
     "o11y",
-    "wire-d",
-    "signing"
+    "ouroboros",
+    "mesh"
   ],
   "schemaVersion": 39,
   "version": 1,
@@ -79,7 +79,7 @@
     {
       "id": 1,
       "type": "timeseries",
-      "title": "DSSE Signs / sec",
+      "title": "Ouroboros Flow \u2014 stages/min (intent\u2192sign\u2192gate\u2192chain\u2192memory\u2192replay)",
       "datasource": {
         "type": "prometheus",
         "uid": "${DS_PROMETHEUS}"
@@ -87,12 +87,12 @@
       "gridPos": {
         "x": 0,
         "y": 0,
-        "w": 12,
-        "h": 8
+        "w": 24,
+        "h": 9
       },
       "fieldConfig": {
         "defaults": {
-          "unit": "ops",
+          "unit": "short",
           "custom": {
             "drawStyle": "line",
             "fillOpacity": 10,
@@ -120,9 +120,64 @@
             "type": "prometheus",
             "uid": "${DS_PROMETHEUS}"
           },
-          "expr": "sum by (organ) (rate(szl_signing_total[5m]))",
-          "legendFormat": "{{organ}}",
+          "expr": "sum(rate(szl_ouroboros_stage_total{stage=\"intent\"}[1m])) * 60",
+          "legendFormat": "intent",
           "refId": "A",
+          "format": "time_series",
+          "range": true
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${DS_PROMETHEUS}"
+          },
+          "expr": "sum(rate(szl_ouroboros_stage_total{stage=\"sign\"}[1m])) * 60",
+          "legendFormat": "sign",
+          "refId": "B",
+          "format": "time_series",
+          "range": true
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${DS_PROMETHEUS}"
+          },
+          "expr": "sum(rate(szl_ouroboros_stage_total{stage=\"gate\"}[1m])) * 60",
+          "legendFormat": "gate",
+          "refId": "C",
+          "format": "time_series",
+          "range": true
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${DS_PROMETHEUS}"
+          },
+          "expr": "sum(rate(szl_ouroboros_stage_total{stage=\"chain\"}[1m])) * 60",
+          "legendFormat": "chain",
+          "refId": "D",
+          "format": "time_series",
+          "range": true
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${DS_PROMETHEUS}"
+          },
+          "expr": "sum(rate(szl_ouroboros_stage_total{stage=\"memory\"}[1m])) * 60",
+          "legendFormat": "memory",
+          "refId": "E",
+          "format": "time_series",
+          "range": true
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${DS_PROMETHEUS}"
+          },
+          "expr": "sum(rate(szl_ouroboros_stage_total{stage=\"replay\"}[1m])) * 60",
+          "legendFormat": "replay",
+          "refId": "F",
           "format": "time_series",
           "range": true
         }
@@ -131,20 +186,20 @@
     {
       "id": 2,
       "type": "timeseries",
-      "title": "Verify Success Rate",
+      "title": "Replay Rate / min",
       "datasource": {
         "type": "prometheus",
         "uid": "${DS_PROMETHEUS}"
       },
       "gridPos": {
-        "x": 12,
-        "y": 0,
+        "x": 0,
+        "y": 9,
         "w": 12,
-        "h": 8
+        "h": 7
       },
       "fieldConfig": {
         "defaults": {
-          "unit": "percentunit",
+          "unit": "short",
           "custom": {
             "drawStyle": "line",
             "fillOpacity": 10,
@@ -172,8 +227,8 @@
             "type": "prometheus",
             "uid": "${DS_PROMETHEUS}"
           },
-          "expr": "sum(rate(szl_verify_success_total[5m])) / sum(rate(szl_verify_total[5m]))",
-          "legendFormat": "verify success",
+          "expr": "sum(rate(szl_ouroboros_stage_total{stage=\"replay\"}[1m])) * 60",
+          "legendFormat": "replay/min",
           "refId": "A",
           "format": "time_series",
           "range": true
@@ -183,20 +238,20 @@
     {
       "id": 3,
       "type": "timeseries",
-      "title": "Signature Failures / sec",
+      "title": "Bottleneck \u2014 slowest stage p99",
       "datasource": {
         "type": "prometheus",
         "uid": "${DS_PROMETHEUS}"
       },
       "gridPos": {
-        "x": 0,
-        "y": 8,
+        "x": 12,
+        "y": 9,
         "w": 12,
-        "h": 8
+        "h": 7
       },
       "fieldConfig": {
         "defaults": {
-          "unit": "ops",
+          "unit": "s",
           "custom": {
             "drawStyle": "line",
             "fillOpacity": 10,
@@ -224,64 +279,8 @@
             "type": "prometheus",
             "uid": "${DS_PROMETHEUS}"
           },
-          "expr": "sum by (organ) (rate(szl_signing_failures_total[5m]))",
-          "legendFormat": "{{organ}}",
-          "refId": "A",
-          "format": "time_series",
-          "range": true
-        }
-      ]
-    },
-    {
-      "id": 4,
-      "type": "stat",
-      "title": "Key Fingerprint Changes (1h)",
-      "datasource": {
-        "type": "prometheus",
-        "uid": "${DS_PROMETHEUS}"
-      },
-      "gridPos": {
-        "x": 12,
-        "y": 8,
-        "w": 12,
-        "h": 8
-      },
-      "fieldConfig": {
-        "defaults": {
-          "unit": "short",
-          "thresholds": {
-            "mode": "absolute",
-            "steps": [
-              {
-                "color": "green",
-                "value": null
-              },
-              {
-                "color": "red",
-                "value": 1
-              }
-            ]
-          }
-        },
-        "overrides": []
-      },
-      "options": {
-        "colorMode": "value",
-        "graphMode": "area",
-        "reduceOptions": {
-          "calcs": [
-            "lastNotNull"
-          ]
-        }
-      },
-      "targets": [
-        {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
-          },
-          "expr": "changes(szl_wire_d_pubkey_fingerprint_hash[1h])",
-          "legendFormat": "fp changes",
+          "expr": "max by (stage) (histogram_quantile(0.99, sum by (le, stage) (rate(szl_ouroboros_stage_duration_seconds_bucket[5m]))))",
+          "legendFormat": "{{stage}}",
           "refId": "A",
           "format": "time_series",
           "range": true
