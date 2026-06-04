@@ -320,7 +320,7 @@ function main(): void {
   console.log(`       base:     p50=${III.baseStats.p50_us.toFixed(2)}µs  p99=${III.baseStats.p99_us.toFixed(2)}µs`);
   console.log(`       composed: p50=${III.composedStats.p50_us.toFixed(2)}µs  p99=${III.composedStats.p99_us.toFixed(2)}µs`);
   console.log(`       baseline (arith-mean) error rate: ${(III.baselineErrorRate * 100).toFixed(1)}%`);
-  console.log(`       Λ_9 error rate: ${(III.composedErrorRate * 100).toFixed(1)}% (must be 0 by bound theorem)`);
+  console.log(`       Λ_9 error rate: ${(III.composedErrorRate * 100).toFixed(1)}% (must be 0 per bound invariant — Λ-uniqueness is Conjecture 1, NOT a theorem)`);
   console.log(`       relative error reduction: ${(III.errorReduction * 100).toFixed(1)}%`);
 
   console.log("\n[IV] Dual-witness");
