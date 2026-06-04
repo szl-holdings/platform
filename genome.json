@@ -4,7 +4,7 @@
   "version": "1.0.0",
   "generated": "2026-06-02",
   "signed": "Yachay <yachay@szlholdings.dev>",
-  "doctrine": "v12",
+  "doctrine": "v11",
   "lean_pin": "lutar-lean@main — 749 declarations / 14 unique axioms / 163 tracked sorries — replay hash c7c0ba17",
   "slsa": "L1 (honest)",
   "lambda_conjecture": {
