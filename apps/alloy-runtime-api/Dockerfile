@@ -30,7 +30,7 @@ RUN apk add --no-cache libc6-compat
 RUN corepack enable
 WORKDIR /app
 COPY --from=deps /app/node_modules ./node_modules
-COPY . .
+COPY ./ ./
 ENV NODE_ENV=production
 # Offline install against the fetched store, then compile only this package
 # and its workspace dependency graph (tsc -p tsconfig.json -> ./dist).
