@@ -14,7 +14,7 @@
 - **Λ-aggregator (F23):** Conjecture 1 — NOT a theorem — bounty: [`BOUNTY.md`](https://github.com/szl-holdings/lutar-lean/blob/main/BOUNTY.md)
 - **Live receipts (2026-06-02):** 50 total — {"a11oy": 13, "amaru": 13, "rosie": 13, "sentra": 11, "slsa_chain": 5}
 
-> **Provenance honesty.** Quechua / heritage organ names are brand naming and analogy only — no prior-art or mystical claims. Formula statuses quoted verbatim from in-repo codex_formula_provenance.json (PROVED = {F1,F11,F12,F18,F19}; F23 = Conjecture 1; all others SORRY_PURIQ_OPEN).
+> **Provenance honesty.** Quechua / heritage organ names are brand naming and analogy only — no prior-art or mystical claims. Formula statuses quoted verbatim from in-repo codex_formula_provenance.json (PROVED = {F1,F4,F7,F11,F12,F18,F19,F22}; F4/F7/F22 added 2026-06-04 with real zero-sorry Lean proofs in lutar-lean `Lutar/Puriq/Formulas/ProvedFormulas.lean`; F23 = Conjecture 1; all others SORRY_PURIQ_OPEN). Locked Doctrine v11 kernel count 749/14/163 UNCHANGED (PURIQ formula scope excluded from that counter).
 
 ---
 
@@ -44,17 +44,17 @@ Receipt schema for every organ: **UDS Governance Receipt** — DSSE-wrapped in-t
 
 ## Formula → Organ map (F1–F23)
 
-Proof class is quoted verbatim from the in-repo audit `codex_formula_provenance.json`: **PROVED** = {F1, F11, F12, F18, F19}; **Conjecture 1** = F23; all others **Roadmap (sorry/open)**.
+Proof class is quoted verbatim from the in-repo audit `codex_formula_provenance.json`: **PROVED** = {F1, F4, F7, F11, F12, F18, F19, F22} (F4/F7/F22 closed 2026-06-04 — real zero-sorry Lean proofs, see `lutar-lean Lutar/Puriq/Formulas/ProvedFormulas.lean`); **Conjecture 1** = F23; all others **Roadmap (sorry/open)**.
 
 | Formula | Name | Organ | Lean theorem | Proof class | Live endpoint |
 |---|---|---|---|---|---|
 | **F1** | Replay-hash determinism / idempotent replay | YAWAR (`yawar`) | `PuriqFormulaLean.lean:L35-L53 (idempotent fold over Nat/List)` | PROVED | [link](https://szlholdings-a11oy.hf.space/governance) |
 | **F2** | Scheduler liveness / round-robin fairness | AMARU (`amaru`) | `PuriqFormulaLean.lean:L132-L139` | Roadmap (sorry/open) | [link](https://szlholdings-amaru.hf.space/chakras) |
 | **F3** | Organ boot gating soundness | HATUN (`hatun`) | `PuriqFormulaLean.lean:L137-L140` | Roadmap (sorry/open) | [link](https://szlholdings-a11oy.hf.space/frontier/hatun-willay) |
-| **F4** | Khipu DAG acyclicity preservation | KHIPU (`khipu`) | `PuriqFormulaLean.lean:L144-L149` | Roadmap (sorry/open) | [link](https://szlholdings-rosie.hf.space/) |
+| **F4** | Khipu DAG acyclicity preservation | KHIPU (`khipu`) | `ProvedFormulas.lean (f4_khipu_dag_acyclic) — 0 sorry, core axioms; 2026-06-04` | PROVED | [link](https://szlholdings-rosie.hf.space/) |
 | **F5** | Unay receipt-keyed recall correctness | UNAY (`unay`) | `PuriqFormulaLean.lean:L150-L154` | Roadmap (sorry/open) | [link](https://szlholdings-rosie.hf.space/) |
 | **F6** | LMDB persistence durability | UNAY (`unay`) | `PuriqFormulaLean.lean:L153-L154` | Roadmap (sorry/open) | [link](https://szlholdings-rosie.hf.space/) |
-| **F7** | Chaski FIFO reception ordering | CHASKI (`chaski`) | `PuriqFormulaLean.lean:L156-L157` | Roadmap (sorry/open) | [link](https://szlholdings-a11oy.hf.space/chaski) |
+| **F7** | Chaski FIFO reception ordering | CHASKI (`chaski`) | `ProvedFormulas.lean (f7_chaski_fifo + helpers) — 0 sorry, core axioms; 2026-06-04` | PROVED | [link](https://szlholdings-a11oy.hf.space/chaski) |
 | **F8** | Wallpa governed-voice OSS-only safety | WALLPA (`wallpa`) | `PuriqFormulaLean.lean:L159-L160` | Roadmap (sorry/open) | [link](https://szlholdings-a11oy.hf.space/wallpa) |
 | **F9** | Wasi-Rikuq advisory non-interference | WASI-RIKUQ (`wasi-rikuq`) | `PuriqFormulaLean.lean:L162-L163` | Roadmap (sorry/open) | [link](https://szlholdings-a11oy.hf.space/wasi-rikuq) |
 | **F10** | Hatun-MCP tool-call idempotency | HATUN (`hatun`) | `PuriqFormulaLean.lean:L165-L166` | Roadmap (sorry/open) | [link](https://szlholdings-a11oy.hf.space/frontier/hatun-willay) |
@@ -69,7 +69,7 @@ Proof class is quoted verbatim from the in-repo audit `codex_formula_provenance.
 | **F19** | Bekenstein additive scaffolding / budget monotonicity | LAMBDA SPINE (`lambda`) | `PuriqFormulaLean.lean:L109-L124 (monotone budget scaffold; full inequality NOT proved)` | PROVED | [link](https://szlholdings-a11oy.hf.space/lambda) |
 | **F20** | Mobile input-event equivalence (touch/pointer parity) | KANCHAY (`kanchay`) | `PuriqFormulaLean.lean:L183-L184` | Roadmap (sorry/open) | [link](https://szlholdings-a11oy.hf.space/) |
 | **F21** | Genome TOML validation totality | HATUN (`hatun`) | `PuriqFormulaLean.lean:L186-L187` | Roadmap (sorry/open) | [link](https://szlholdings-a11oy.hf.space/frontier/hatun-willay) |
-| **F22** | Khipu emit append-only monotonicity | KHIPU (`khipu`) | `PuriqFormulaLean.lean:L189-L190` | Roadmap (sorry/open) | [link](https://szlholdings-rosie.hf.space/) |
+| **F22** | Khipu emit append-only monotonicity | KHIPU (`khipu`) | `ProvedFormulas.lean (f22_khipu_emit_monotone + helpers) — 0 sorry, core axioms; 2026-06-04` | PROVED | [link](https://szlholdings-rosie.hf.space/) |
 | **F23** | Λ-aggregator soundness (9-axis geometric-mean uniqueness) | LAMBDA SPINE (`lambda`) | `Uniqueness.lean (TH10) + lambda-bounty/Lambda/Lambda.lean — Conjecture 1, NOT a theorem; open CAUCHY_ND sorry Uniqueness.lean:120` | Conjecture 1 | [link](https://szlholdings-a11oy.hf.space/lambda) |
 
 ### Visual diagram
@@ -82,6 +82,9 @@ graph LR
     F12[F12 additive/CRT]:::p --> HUKLLA((HUKLLA · immune)):::org
     F18[F18 Reed-Solomon]:::p --> KHIPU((KHIPU · DAG)):::org
     F19[F19 Bekenstein budget]:::p --> LAMBDA((LAMBDA SPINE)):::org
+    F4[F4 DAG acyclicity]:::p --> KHIPU
+    F22[F22 append-only monotone]:::p --> KHIPU
+    F7[F7 FIFO reception]:::p --> CHASKI((CHASKI · reception)):::org
   end
   subgraph CONJ["Conjecture 1 (OPEN bounty)"]
     F23[F23 Λ-aggregator uniqueness]:::c --> LAMBDA
@@ -89,9 +92,8 @@ graph LR
   subgraph OPEN["Roadmap (sorry / open)"]
     F2[F2 scheduler]:::o --> AMARU((AMARU · cortex)):::org
     F3F10F21[F3/F10/F21 doctrine+MCP]:::o --> HATUN((HATUN · doctrine)):::org
-    F4F15F22[F4/F15/F22 DAG+log]:::o --> KHIPU
+    F15[F15 Rekor inclusion]:::o --> KHIPU
     F5F6[F5/F6 recall+durability]:::o --> UNAY((UNAY · memory)):::org
-    F7[F7 FIFO reception]:::o --> CHASKI((CHASKI · reception)):::org
     F8[F8 governed voice]:::o --> WALLPA((WALLPA · voice)):::org
     F9[F9 advisory non-interfere]:::o --> WASI((WASI-RIKUQ · observ.)):::org
     F13[F13 ingest chain]:::o --> WAYRA((WAYRA · learning-wind · roadmap)):::org
