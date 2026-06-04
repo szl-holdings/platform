@@ -74,7 +74,7 @@ assert ledger.verify()   # replay the receipt chain
 ```
 
 `signature: null` means **honestly UNSIGNED** (no cosign secret present) — matching
-the flagship provenance policy (SLSA L1 (honest); L2 in progress when build-service signing is verified, never falsely L3).
+the flagship provenance policy (SLSA L1 (honest — not L2, not L3; build-service signing pending)).
 
 ## Tests
 
