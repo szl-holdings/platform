@@ -56,9 +56,9 @@ A11oy's production control plane runs on the following infrastructure:
 | Layer | Provider | FedRAMP status |
 |---|---|---|
 | Compute (production) | Commercial cloud — non-government deployments (provider TBD) | Not FedRAMP authorized |
-| Compute (US-only deployments) | AWS GovCloud (US) — pilot-scoped, on request | FedRAMP High inheritable |
+| Compute (US-only deployments) | AWS GovCloud (US) — pilot-scoped, on request | upstream provider FedRAMP High inheritable (AWS authorization; SZL application layer not FedRAMP authorized) |
 | Database | Neon (Postgres) — non-government deployments | Not FedRAMP authorized |
-| Database (US gov pilots) | AWS RDS Postgres in GovCloud — pilot-scoped, on request | FedRAMP High inheritable |
+| Database (US gov pilots) | AWS RDS Postgres in GovCloud — pilot-scoped, on request | upstream provider FedRAMP High inheritable (AWS authorization; SZL application layer not FedRAMP authorized) |
 | CI/CD | GitHub Actions (commercial) | Not FedRAMP authorized |
 | Object storage | AWS S3 (commercial or GovCloud per deployment) | Variable |
 
@@ -80,7 +80,7 @@ Until FedRAMP authorization is complete, A11oy's customers are protected by the 
 
 ## 7. Inheritance and shared-responsibility statement
 
-When deployed on AWS GovCloud (US), A11oy inherits the AWS FedRAMP High baseline for the IaaS/PaaS layer. SZL Holdings is responsible for application-layer controls and the controls in §6. A complete shared-responsibility matrix is published as Annex A on request.
+When deployed on AWS GovCloud (US), A11oy uses the upstream AWS FedRAMP High baseline for the IaaS/PaaS layer only; SZL application layer controls are distinct and do not carry FedRAMP authorization. SZL Holdings is responsible for application-layer controls and the controls in §6. A complete shared-responsibility matrix is published as Annex A on request.
 
 ## 8. Buyer attestation
 
