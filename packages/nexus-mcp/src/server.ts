@@ -950,15 +950,20 @@ export class PRAXISMcpServer {
       },
     );
 
-    // ZodRawShape annotation breaks deep inference at the call site (TS2589).
-    const renderAppSchema: ZodRawShape = { appId: z.string().describe('App ID from nexus_list_apps') };
-    // @ts-expect-error TS2589 — type instantiation depth exceeds limit at this call site.
-    // ZodRawShape typed arg breaks tsc's inference graph; runtime behaviour is correct.
-    this._sdk.tool(
+    // Use registerTool (not deprecated .tool()) with an explicit cast to bypass TS2589
+    // "type instantiation excessively deep". The .tool() overload with a ZodRawShape arg
+    // triggers unbounded generic inference in TS >=6; registerTool with a cast avoids it.
+    // Pattern matches the existing sdkRegister cast used in PRAXISMcpServer.registerTool.
+    const _renderAppRegister = this._sdk.registerTool.bind(this._sdk) as (
+      name: string,
+      config: { description: string; inputSchema: ZodRawShape },
+      cb: (args: Record<string, unknown>) => Promise<{ content: Array<{ type: string; text: string }>; isError?: boolean }>,
+    ) => void;
+    _renderAppRegister(
       'nexus_render_app',
-      'Render a domain micro-dashboard App as inline HTML. The HTML is scoped to the authenticated tenant and generated from live platform data.',
-      renderAppSchema,
-      async (args: { appId: string }) => {
+      { description: 'Render a domain micro-dashboard App as inline HTML. The HTML is scoped to the authenticated tenant and generated from live platform data.', inputSchema: { appId: z.string().describe('App ID from nexus_list_apps') } },
+      async (rawArgs: Record<string, unknown>) => {
+        const args = rawArgs as { appId: string };
         const result = await self.renderApp(args.appId);
         if (!result) {
           return { content: [{ type: 'text', text: JSON.stringify({ error: `App '${args.appId}' not found` }) }], isError: true };
