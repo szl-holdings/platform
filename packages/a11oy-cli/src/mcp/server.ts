@@ -86,6 +86,7 @@ export async function startMcpServer(services: string[]) {
         const rawMsg = typeof e?.message === 'string' ? e.message : 'parse error';
         const safeMsg = rawMsg
           // eslint-disable-next-line no-control-regex
+          // biome-ignore lint/suspicious/noControlCharactersInRegex: intentional XSS sanitizer (CodeQL js/xss-through-exception)
           .replace(/[\u0000-\u001f\u007f<>]/g, '')
           .slice(0, 200);
         res.writeHead(400, { 'Content-Type': 'application/json' });

@@ -52,12 +52,12 @@ Nothing is opaque. Nothing executes without attribution.
 
 | Layer | Path | Contents |
 |-------|------|----------|
-| Artifacts (surfaces) | `artifacts/` | 14 registered web, mobile, video, and design apps |
+| Artifacts (surfaces) | `artifacts/` | 7 artifact directories; 6 have registered `artifact.toml` (a11oy, carlota-jo, counsel, sentra, terra, vessels) + api-server |
 | API Server | `apps/`, `services/`, `artifacts/api-server/` | Express 5, 30 route files across `apps/alloy-*`, `services/alloy-fabric-api`, and `artifacts/api-server` |
 | Lib packages | `lib/` | Shared runtime libraries (db, ai-engine, proof-chain, etc.) |
 | Workspace packages | `packages/` | Policy engine, reflection engine, shared-ui, etc. |
 | Scripts | `scripts/` | Seed, smoke, metrics, and CI utilities |
-| Database | `lib/db/src/schema/` | 170 schema files, 939 pgTable definitions |
+| Database | `lib/db/src/schema/` | 197 schema files, 1,066 pgTable definitions |
 
 ---
 
@@ -65,9 +65,9 @@ Nothing is opaque. Nothing executes without attribution.
 
 | Metric | Value |
 |--------|-------|
-| Registered artifacts | 14 |
+| Registered artifacts (artifact.toml) | 6 |
 | API route files | 30 |
-| Database schema files | 170 across lib/db/src/schema/ |
+| Database schema files | 197 across lib/db/src/schema/ |
 | Provisioned DB tables (live) | 730 |
 | Governance primitives | 6 (shared by all surfaces) |
 | Platform surfaces | 10 web + 1 mobile + 1 video + 1 design + 1 API |
