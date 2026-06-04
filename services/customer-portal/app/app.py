@@ -106,7 +106,7 @@ class KeyReq(BaseModel):
 
 @app.get("/healthz")
 def healthz():
-    return {"status": "ok", "service": "customer-portal", "doctrine": "v12",
+    return {"status": "ok", "service": "customer-portal", "doctrine": "v11",
             "replay_hash": REPLAY_HASH, "khipu_signature": "cosign PLACEHOLDER"}
 
 
