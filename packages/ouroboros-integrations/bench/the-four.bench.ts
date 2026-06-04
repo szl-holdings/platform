@@ -515,7 +515,7 @@ function main(): void {
     `       baseline arithmetic-mean error rate (above min-axis): ${(III.baselineErrorRate * 100).toFixed(1)}%`,
   );
   console.log(
-    `       Λ_9 error rate (above min-axis): ${(III.composedErrorRate * 100).toFixed(1)}%   (Λ_9 must equal 0 by bound theorem)`,
+    `       Λ_9 error rate (above min-axis): ${(III.composedErrorRate * 100).toFixed(1)}%   (Λ_9 must equal 0 per bound invariant — Λ-uniqueness is Conjecture 1, NOT a theorem)`,
   );
   console.log(
     `       relative error reduction: ${(III.errorReduction * 100).toFixed(1)}%`,
