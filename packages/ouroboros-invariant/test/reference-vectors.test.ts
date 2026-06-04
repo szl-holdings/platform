@@ -63,7 +63,7 @@ describe("Λ₉ reference vectors — TS canonical reproducibility", () => {
     });
   }
 
-  it("every vector lies within its bound (Λ-bound theorem holds empirically)", () => {
+  it("every vector lies within its bound (Λ-bound invariant holds empirically (Λ-uniqueness is Conjecture 1, NOT a proven theorem))", () => {
     for (const v of data.vectors) {
       expect(v.lambda).toBeGreaterThanOrEqual(v.bound.lower - 1e-12);
       expect(v.lambda).toBeLessThanOrEqual(v.bound.upper + 1e-12);
