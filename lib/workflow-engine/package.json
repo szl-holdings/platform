@@ -11,6 +11,9 @@
   "dependencies": {
     "@szl-holdings/forge-runtime": "workspace:*"
   },
+  "devDependencies": {
+    "@types/node": "catalog:"
+  },
   "scripts": {
     "lint": "biome lint ./src",
     "lint:ci": "biome lint ./src",
