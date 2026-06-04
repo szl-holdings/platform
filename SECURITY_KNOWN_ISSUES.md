@@ -2,7 +2,7 @@
 
 > **Scope:** This document records security findings that are **known, triaged, and
 > currently accepted or deferred** under the SZL Holdings vulnerability-management
-> process. It exists to satisfy **CMMC Level 2** practice **RA.L2-3.11.2 / RA.L2-3.11.3**
+> process. It follows good vulnerability-management hygiene (identification, remediation, documented risk acceptance) — SZL makes NO CMMC, FedRAMP, or certification claim
 > (vulnerability identification, remediation, and documented risk acceptance) and to
 > provide an auditable trail of transitive / unfixable vulnerabilities.
 >
@@ -61,7 +61,7 @@ here as **accepted/deferred risk** with the listed mitigations.
 - Dependabot security updates are **enabled**; fixed versions will be adopted automatically as they publish.
 
 > **Review cadence:** This register is re-evaluated each dependency sweep and at every
-> CMMC self-assessment cycle. Any advisory that gains a fixed version is removed here
+> vulnerability-management triage cycle (no CMMC claim). Any advisory that gains a fixed version is removed here
 > and remediated via a Dependabot/founder-reviewed PR.
 
 ---

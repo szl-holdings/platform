@@ -1,4 +1,0 @@
-
-> workspace@0.0.0 check-boundaries /home/runner/workspace
-> tsx scripts/check-package-boundaries.ts
-

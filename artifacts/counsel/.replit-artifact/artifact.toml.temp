@@ -1,8 +1,0 @@
-id = "artifacts/counsel"
-title = "Counsel — Legal Matter Command"
-previewPath = "/counsel/"
-port = 4199
-
-[[hints]]
-regex = 'artifacts/counsel/src/App\.tsx'
-message = 'Standard Counsel App.tsx layout'
