@@ -1,7 +1,7 @@
 import { drizzle } from "drizzle-orm/node-postgres";
 import pg from "pg";
 import { getEnv } from "@szl-holdings/env";
-import * as schema from "./schema";
+import * as schema from "./schema/index.js";
 
 const { Pool } = pg;
 
@@ -379,4 +379,4 @@ const _sweeperInterval = _sweeperEnabled ? setInterval(() => {
 }, 5_000) : null;
 _sweeperInterval?.unref?.();
 
-export * from "./schema";
+export * from "./schema/index.js";
