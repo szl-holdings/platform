@@ -40,7 +40,11 @@ COPY --from=deps /app/node_modules ./node_modules
 # Full root context (workspace:* deps only resolve from root). .dockerignore
 # already excludes node_modules/dist/.git/*.md/etc., so this is auditable.
 COPY ./ ./
-ENV NODE_ENV=production
+# CI=true so pnpm may non-interactively reconcile the node_modules dir that
+# `pnpm fetch` populated (without a TTY pnpm aborts the modules-dir refresh:
+# ERR_PNPM_ABORTED_REMOVE_MODULES_DIR_NO_TTY).
+ENV NODE_ENV=production \
+    CI=true
 # Offline, frozen install against the fetched store (no network, deterministic),
 # then build ONLY @workspace/vessels and its workspace dependency graph.
 RUN --mount=type=cache,id=pnpm-store,target=/root/.local/share/pnpm/store \
