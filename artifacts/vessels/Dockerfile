@@ -45,10 +45,14 @@ COPY ./ ./
 # ERR_PNPM_ABORTED_REMOVE_MODULES_DIR_NO_TTY).
 ENV NODE_ENV=production \
     CI=true
-# Offline, frozen install against the fetched store (no network, deterministic),
-# then build ONLY @workspace/vessels and its workspace dependency graph.
+# Frozen, deterministic install against the warmed pnpm store (cache-mounted,
+# shared with the deps stage by id). We do NOT pass --offline: `pnpm fetch`
+# warms most of the store, but a few transitive tarballs (e.g. cors) are not
+# covered by fetch's default set, so a strict --offline install fails with
+# ERR_PNPM_NO_OFFLINE_TARBALL. --frozen-lockfile still guarantees the resolved
+# graph matches pnpm-lock.yaml exactly (no resolution drift).
 RUN --mount=type=cache,id=pnpm-store,target=/root/.local/share/pnpm/store \
-    pnpm install --frozen-lockfile --offline --ignore-scripts
+    pnpm install --frozen-lockfile --ignore-scripts
 # Vite emits to artifacts/vessels/dist/public (see vite.config.ts outDir).
 RUN pnpm --filter "@workspace/vessels" run build
 
