@@ -1,4 +1,0 @@
-api
-components
-e2e
-utils

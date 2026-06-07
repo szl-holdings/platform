@@ -1,2 +1,0 @@
-primary: cs.AI
-cross-list: cs.CY, cs.LG

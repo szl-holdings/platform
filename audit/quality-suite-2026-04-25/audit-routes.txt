@@ -1,5 +1,0 @@
-
-> workspace@0.0.0 audit:routes /home/runner/workspace
-> node --experimental-vm-modules scripts/qa/audit-routes.js
-
- ELIFECYCLE  Command failed with exit code 1.
