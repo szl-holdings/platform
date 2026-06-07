@@ -1,0 +1,47 @@
+{
+  "$id": "https://schemas.szlholdings.com/anatomy/mesh-receipt.v1.json",
+  "title": "MeshReceipt",
+  "type": "object",
+  "required": [
+    "receiptId",
+    "eventType",
+    "actorId",
+    "toolName",
+    "payloadHash",
+    "prevReceiptHash",
+    "timestampIso8601",
+    "traceId"
+  ],
+  "properties": {
+    "receiptId": {
+      "type": "string"
+    },
+    "eventType": {
+      "type": "string"
+    },
+    "actorId": {
+      "type": "string"
+    },
+    "toolName": {
+      "type": "string"
+    },
+    "payloadHash": {
+      "type": "string"
+    },
+    "prevReceiptHash": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "timestampIso8601": {
+      "type": "string"
+    },
+    "traceId": {
+      "type": [
+        "string",
+        "null"
+      ]
+    }
+  }
+}

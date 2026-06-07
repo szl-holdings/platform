@@ -1,0 +1,106 @@
+{
+  "generated": "2026-04-21",
+  "phase": "Series A Hardening — Phase C (extended investigation)",
+  "summary": {
+    "total_remaining_failures": 2,
+    "fixed_in_phase_c": 3,
+    "pre_existing_not_in_scope": 4
+  },
+  "remaining_failures": [
+    {
+      "id": "F001",
+      "severity": "low",
+      "category": "lint",
+      "description": "Biome lint reports 5796 errors and 10208 warnings across 5338 files",
+      "file": "workspace-wide",
+      "line": null,
+      "root_cause": "Pre-existing biome configuration issues not introduced by Phase A/B. Primarily unused variables, missing private modifiers, and formatting issues.",
+      "required_action": "Dedicated lint-hardening pass with biome --write auto-fix",
+      "blocker": false
+    },
+    {
+      "id": "F002",
+      "severity": "low",
+      "category": "turbo-cascade",
+      "description": "pnpm run test (turbo) exits early when a package build fails mid-cascade",
+      "file": "turbo.json / package-level build scripts",
+      "line": null,
+      "root_cause": "ontology package build error causes turbo to abort the full test run. Individual packages pass when run directly.",
+      "required_action": "Fix ontology build error in a follow-up task",
+      "blocker": false
+    }
+  ],
+  "pre_existing_not_in_scope": [
+    {
+      "id": "P001",
+      "severity": "medium",
+      "category": "integration-test",
+      "description": "Integration tests (db-integration, server-live, stress, websocket-stress) require a live PostgreSQL database and API server",
+      "root_cause": "By design — these are integration tests that run in CI with the postgres service container",
+      "required_action": "None — covered by CI integration-test job with PostgreSQL service",
+      "blocker": false
+    },
+    {
+      "id": "P002",
+      "severity": "low",
+      "category": "mobile-package-versions",
+      "description": "Expo mobile app has package version mismatches (e.g. @types/jest@30 vs expected ~29.5.14)",
+      "root_cause": "Expo SDK 55 pre-release packages declare newer peer ranges than the Expo CLI expects",
+      "required_action": "Align package versions in a dedicated mobile update pass",
+      "blocker": false
+    },
+    {
+      "id": "P003",
+      "severity": "low",
+      "category": "service",
+      "description": "lyte-metrics-store Python service fails to start (structlog not installed in Nix environment)",
+      "root_cause": "Pre-existing Nix environment gap — Python structlog not in shell.nix",
+      "required_action": "Add structlog to shell.nix in a follow-up task",
+      "blocker": false
+    },
+    {
+      "id": "P004",
+      "severity": "medium",
+      "category": "api-server-competitive-intel",
+      "description": "competitive-intel-notifications.test.ts has 6 failures (Slack webhook, email delivery) in local environment",
+      "root_cause": "Tests require real Slack webhook URL and email credentials. Pre-existing since Phase A.",
+      "required_action": "Credential injection or mock-based test rewrite",
+      "blocker": false
+    }
+  ],
+  "fixed_in_phase_c": [
+    {
+      "id": "FIX001",
+      "severity": "medium",
+      "category": "typecheck",
+      "description": "@szl-holdings/platform-registry typecheck failed: Cannot find type definition file for 'node'",
+      "fix": "Added @types/node to devDependencies in packages/config/package.json",
+      "file": "packages/config/package.json",
+      "verified": true
+    },
+    {
+      "id": "FIX002",
+      "severity": "medium",
+      "category": "unit-test",
+      "description": "tests/api/health.test.ts hung/timed out because importing health route pulled in @szl-holdings/db pool which attempted a real database connection",
+      "fix": "Added vi.mock declarations for @szl-holdings/db, backup-service, sentry, internal-tokens, and admin-guard. Updated assertions to match realistic route output.",
+      "file": "tests/api/health.test.ts",
+      "verified": true
+    },
+    {
+      "id": "FIX003",
+      "severity": "high",
+      "category": "api-server-test-pool-exhaustion",
+      "description": "30-s hookTimeout cascade across 14+ test files in api-server test suite: guardian-tool-mesh-persistence (12 failures), vessels-bol-persistence (2), atlas-execution-persistence (3), atlas-run-persistence (1), and several 'skipped' files with hookTimeout. All fail at exactly 30s — matching DB_CONNECT_TIMEOUT_MS.",
+      "root_cause": "CONFIRMED: Vitest 4 reuses worker subprocesses across test files (forks pool mode). Each test file AND each vi.resetModules() call creates a new @szl-holdings/db Pool. With DB_POOL_MIN=1 (default), each pool eagerly holds 1 idle connection. With DB_IDLE_TIMEOUT_MS=60s (default), those connections stay open 60s after the test file finishes. After 30-40 test files, the total connection count across all worker-held pools exceeds Postgres max_connections (112). Subsequent pool.connect() calls retry for exactly connectionTimeoutMillis=30s, manifesting as hookTimeout failures. Secondary effect: when a test times out (describe-level 30s), in-flight supertest requests hold pool connections, creating soft-deadlocks that compound the exhaustion.",
+      "fix": "Added four pool overrides to src/__tests__/helpers/test-env-bootstrap.ts (the vitest setupFiles entry that runs before every test module): DB_POOL_MIN=0 (no eager connections), DB_POOL_MAX=10 (bounded concurrency per pool), DB_IDLE_TIMEOUT_MS=8000 (8s idle release vs 60s), DB_CONNECT_TIMEOUT_MS=5000 (fail-fast if pool is full — breaks deadlocks in 5s instead of 30s). Uses ??= so explicitly-supplied env values are never overridden.",
+      "file": "artifacts/api-server/src/__tests__/helpers/test-env-bootstrap.ts",
+      "verified": true,
+      "evidence": [
+        "DB connection count dropped from 34+ to 4-13 after applying fix (monitored live during test run)",
+        "All three fix dimensions confirmed: min=0 eliminates eager connections, idle=8s releases stale connections quickly, connect_timeout=5s breaks deadlock cascade",
+        "vitest.config.ts fileParallelism=false was a prerequisite applied earlier to limit concurrent file execution"
+      ]
+    }
+  ]
+}

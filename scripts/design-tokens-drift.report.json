@@ -1,0 +1,620 @@
+{
+  "generatedAt": "2026-05-02T15:42:29.948Z",
+  "threshold": 50,
+  "averageScore": 44,
+  "totalArtifacts": 6,
+  "artifacts": [
+    {
+      "id": "a11oy",
+      "dir": "artifacts/a11oy",
+      "title": "A11oy — Genetic AI Substrate",
+      "kind": "web",
+      "lines": 62291,
+      "files": 190,
+      "violations": 3965,
+      "score": 36,
+      "top": [
+        {
+          "file": "artifacts/a11oy/src/pages/DevPlatform.tsx",
+          "count": 111,
+          "examples": [
+            "#0a0a0a",
+            "#f5f5f5",
+            "#8a8a8a"
+          ]
+        },
+        {
+          "file": "artifacts/a11oy/src/pages/Praxis.tsx",
+          "count": 105,
+          "examples": [
+            "#0c0c0c",
+            "#c9b787",
+            "#c9b787"
+          ]
+        },
+        {
+          "file": "artifacts/a11oy/src/components/ui.tsx",
+          "count": 85,
+          "examples": [
+            "#c9b787",
+            "#5e5e5e",
+            "#c9b787"
+          ]
+        },
+        {
+          "file": "artifacts/a11oy/src/pages/CommandSurface.tsx",
+          "count": 79,
+          "examples": [
+            "#c9b787",
+            "#c9b787",
+            "#8a8a8a"
+          ]
+        },
+        {
+          "file": "artifacts/a11oy/src/pages/WorkcellDetail.tsx",
+          "count": 76,
+          "examples": [
+            "#c9b787",
+            "#8a8a8a",
+            "#c9b787"
+          ]
+        },
+        {
+          "file": "artifacts/a11oy/src/pages/Tools.tsx",
+          "count": 74,
+          "examples": [
+            "#8a8a8a",
+            "#c9b787",
+            "#c9b787"
+          ]
+        },
+        {
+          "file": "artifacts/a11oy/src/pages/MirrorEval.tsx",
+          "count": 73,
+          "examples": [
+            "#c9b787",
+            "#22c55e",
+            "#f97316"
+          ]
+        },
+        {
+          "file": "artifacts/a11oy/src/pages/AgenticRag.tsx",
+          "count": 69,
+          "examples": [
+            "#8b5cf6",
+            "#3b82f6",
+            "#f59e0b"
+          ]
+        },
+        {
+          "file": "artifacts/a11oy/src/pages/NowBoard.tsx",
+          "count": 63,
+          "examples": [
+            "#c9b787",
+            "#8a8a8a",
+            "#8a8a8a"
+          ]
+        },
+        {
+          "file": "artifacts/a11oy/src/pages/Memory.tsx",
+          "count": 62,
+          "examples": [
+            "#c9b787",
+            "#8a8a8a",
+            "#f5f5f5"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "sentra",
+      "dir": "artifacts/sentra",
+      "title": "Sentra — Cyber Resilience Command",
+      "kind": "web",
+      "lines": 133954,
+      "files": 280,
+      "violations": 12313,
+      "score": 8,
+      "top": [
+        {
+          "file": "artifacts/sentra/src/pages/crisis-arena-engagements.tsx",
+          "count": 207,
+          "examples": [
+            "#f5f5f5",
+            "#c9b787",
+            "#c9b787"
+          ]
+        },
+        {
+          "file": "artifacts/sentra/src/pages/xdr-incident-workbench.tsx",
+          "count": 171,
+          "examples": [
+            "#f5f5f5",
+            "#c9b787",
+            "#8a8a8a"
+          ]
+        },
+        {
+          "file": "artifacts/sentra/src/pages/consciousness.tsx",
+          "count": 170,
+          "examples": [
+            "#f5f5f5",
+            "#f5f5f5",
+            "#f5f5f5"
+          ]
+        },
+        {
+          "file": "artifacts/sentra/src/pages/command-home.tsx",
+          "count": 162,
+          "examples": [
+            "#0a0a0a",
+            "#f5f5f5",
+            "#f5f5f5"
+          ]
+        },
+        {
+          "file": "artifacts/sentra/src/pages/intel/agent-autonomy.tsx",
+          "count": 150,
+          "examples": [
+            "#c9b787",
+            "#f5f5f5",
+            "#c9b787"
+          ]
+        },
+        {
+          "file": "artifacts/sentra/src/pages/soc-dashboard.tsx",
+          "count": 144,
+          "examples": [
+            "#c9b787",
+            "#f5f5f5",
+            "#8a8a8a"
+          ]
+        },
+        {
+          "file": "artifacts/sentra/src/pages/adversary-narrative-engine.tsx",
+          "count": 139,
+          "examples": [
+            "#2041",
+            "#c9b787",
+            "#c9b787"
+          ]
+        },
+        {
+          "file": "artifacts/sentra/src/pages/threat-twin-view.tsx",
+          "count": 136,
+          "examples": [
+            "#c9b787",
+            "#c9b787",
+            "#64748b"
+          ]
+        },
+        {
+          "file": "artifacts/sentra/src/pages/crisis-arena-architect.tsx",
+          "count": 126,
+          "examples": [
+            "#c9b787",
+            "#c9b787",
+            "#c9b787"
+          ]
+        },
+        {
+          "file": "artifacts/sentra/src/pages/threat-intel-feed.tsx",
+          "count": 120,
+          "examples": [
+            "#c9b787",
+            "#c9b787",
+            "#c9b787"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "terra",
+      "dir": "artifacts/terra",
+      "title": "Terra — Real Estate Intelligence",
+      "kind": "web",
+      "lines": 70480,
+      "files": 129,
+      "violations": 4174,
+      "score": 41,
+      "top": [
+        {
+          "file": "artifacts/terra/src/pages/property-detail.tsx",
+          "count": 223,
+          "examples": [
+            "#10b981",
+            "#f59e0b",
+            "#10b981"
+          ]
+        },
+        {
+          "file": "artifacts/terra/src/pages/pro-forma.tsx",
+          "count": 194,
+          "examples": [
+            "#b8943c",
+            "#3a7ad4",
+            "#40856a"
+          ]
+        },
+        {
+          "file": "artifacts/terra/src/pages/diligence-room.tsx",
+          "count": 166,
+          "examples": [
+            "#40856a",
+            "#40856a",
+            "#4a7dc8"
+          ]
+        },
+        {
+          "file": "artifacts/terra/src/pages/why-this-property-now.tsx",
+          "count": 164,
+          "examples": [
+            "#40856a",
+            "#ef4444",
+            "#f59e0b"
+          ]
+        },
+        {
+          "file": "artifacts/terra/src/pages/lender-report.tsx",
+          "count": 139,
+          "examples": [
+            "#10b981",
+            "#40856a",
+            "#3b82f6"
+          ]
+        },
+        {
+          "file": "artifacts/terra/src/pages/atlas-runtime.tsx",
+          "count": 116,
+          "examples": [
+            "#2d6a4f",
+            "#c8953c",
+            "#4a90b8"
+          ]
+        },
+        {
+          "file": "artifacts/terra/src/pages/covenant-monitoring.tsx",
+          "count": 108,
+          "examples": [
+            "#40856a",
+            "#c04a2a",
+            "#c8a060"
+          ]
+        },
+        {
+          "file": "artifacts/terra/src/pages/market-analytics.tsx",
+          "count": 99,
+          "examples": [
+            "#34d399",
+            "#d4a054",
+            "#f97316"
+          ]
+        },
+        {
+          "file": "artifacts/terra/src/pages/spatial-walkthrough.tsx",
+          "count": 99,
+          "examples": [
+            "#34d399",
+            "#60a5fa",
+            "#fbbf24"
+          ]
+        },
+        {
+          "file": "artifacts/terra/src/pages/property-desk.tsx",
+          "count": 97,
+          "examples": [
+            "#40856a",
+            "#40856a",
+            "#c08a2c"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "carlota-jo",
+      "dir": "artifacts/carlota-jo",
+      "title": "Carlota Jo Consulting",
+      "kind": "web",
+      "lines": 45597,
+      "files": 103,
+      "violations": 2375,
+      "score": 48,
+      "top": [
+        {
+          "file": "artifacts/carlota-jo/src/pages/time-tracking.tsx",
+          "count": 153,
+          "examples": [
+            "#0284C7",
+            "#7C3AED",
+            "#D97706"
+          ]
+        },
+        {
+          "file": "artifacts/carlota-jo/src/pages/expert-network.tsx",
+          "count": 151,
+          "examples": [
+            "#B8960C",
+            "#7C3AED",
+            "#0284C7"
+          ]
+        },
+        {
+          "file": "artifacts/carlota-jo/src/pages/ClientPortal.tsx",
+          "count": 147,
+          "examples": [
+            "#f9f6f1",
+            "#f9f6f1",
+            "#0e0c09"
+          ]
+        },
+        {
+          "file": "artifacts/carlota-jo/src/pages/knowledge-vault.tsx",
+          "count": 127,
+          "examples": [
+            "#7C3AED",
+            "#0284C7",
+            "#059669"
+          ]
+        },
+        {
+          "file": "artifacts/carlota-jo/src/pages/proposal-generator.tsx",
+          "count": 111,
+          "examples": [
+            "#E5E0D8",
+            "#fff",
+            "#2C2416"
+          ]
+        },
+        {
+          "file": "artifacts/carlota-jo/src/pages/knowledge-graph.tsx",
+          "count": 101,
+          "examples": [
+            "#7C3AED",
+            "#B8960C",
+            "#059669"
+          ]
+        },
+        {
+          "file": "artifacts/carlota-jo/src/pages/revenue-intelligence.tsx",
+          "count": 96,
+          "examples": [
+            "#94A3B8",
+            "#0284C7",
+            "#D97706"
+          ]
+        },
+        {
+          "file": "artifacts/carlota-jo/src/pages/atlas-execute.tsx",
+          "count": 85,
+          "examples": [
+            "#d4af37",
+            "#ef4444",
+            "#f59e0b"
+          ]
+        },
+        {
+          "file": "artifacts/carlota-jo/src/pages/capacity-planner.tsx",
+          "count": 85,
+          "examples": [
+            "#059669",
+            "#ECFDF5",
+            "#DC2626"
+          ]
+        },
+        {
+          "file": "artifacts/carlota-jo/src/pages/workshop-platform.tsx",
+          "count": 82,
+          "examples": [
+            "#0284C7",
+            "#D97706",
+            "#059669"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "counsel",
+      "dir": "artifacts/counsel",
+      "title": "Counsel — Legal Matter Command",
+      "kind": "web",
+      "lines": 9818,
+      "files": 29,
+      "violations": 316,
+      "score": 68,
+      "top": [
+        {
+          "file": "artifacts/counsel/src/pages/counsel-landing.tsx",
+          "count": 88,
+          "examples": [
+            "#c9b787",
+            "#c9b787",
+            "#8a8a8a"
+          ]
+        },
+        {
+          "file": "artifacts/counsel/src/pages/matter-knowledge.tsx",
+          "count": 40,
+          "examples": [
+            "#8b5cf6",
+            "#ede9fe",
+            "#130f24"
+          ]
+        },
+        {
+          "file": "artifacts/counsel/src/pages/legal-nlp.tsx",
+          "count": 38,
+          "examples": [
+            "#8b5cf6",
+            "#8b5cf6",
+            "#f59e0b"
+          ]
+        },
+        {
+          "file": "artifacts/counsel/src/index.css",
+          "count": 37,
+          "examples": [
+            "#9b7cc8",
+            "#020a14",
+            "hsl(...)"
+          ]
+        },
+        {
+          "file": "artifacts/counsel/src/pages/drafting-agent.tsx",
+          "count": 23,
+          "examples": [
+            "#8b5cf6",
+            "#10b981",
+            "#f59e0b"
+          ]
+        },
+        {
+          "file": "artifacts/counsel/src/App.tsx",
+          "count": 13,
+          "examples": [
+            "#8b5cf6",
+            "#ef4444",
+            "#4d8fcc"
+          ]
+        },
+        {
+          "file": "artifacts/counsel/src/pages/clause-genome.tsx",
+          "count": 13,
+          "examples": [
+            "#8b5cf6",
+            "#10b981",
+            "#f59e0b"
+          ]
+        },
+        {
+          "file": "artifacts/counsel/src/pages/risk-diff.tsx",
+          "count": 13,
+          "examples": [
+            "#8b5cf6",
+            "#0a0614",
+            "#6d28d9cc"
+          ]
+        },
+        {
+          "file": "artifacts/counsel/src/pages/risk-exposure-desk.tsx",
+          "count": 9,
+          "examples": [
+            "#8b5cf6",
+            "#1a0e30",
+            "#0a0614"
+          ]
+        },
+        {
+          "file": "artifacts/counsel/src/pages/decision-center.tsx",
+          "count": 7,
+          "examples": [
+            "#8b5cf6",
+            "#0a0614",
+            "#0a0614"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "vessels",
+      "dir": "artifacts/vessels",
+      "title": "Vessels Maritime Intelligence",
+      "kind": "web",
+      "lines": 64421,
+      "files": 148,
+      "violations": 2511,
+      "score": 61,
+      "top": [
+        {
+          "file": "artifacts/vessels/src/pages/marketing-home.tsx",
+          "count": 99,
+          "examples": [
+            "#111111",
+            "#c9b787",
+            "#5e5e5e"
+          ]
+        },
+        {
+          "file": "artifacts/vessels/src/pages/voyage-desk.tsx",
+          "count": 90,
+          "examples": [
+            "#40856a",
+            "#c08a2c",
+            "#c04a2a"
+          ]
+        },
+        {
+          "file": "artifacts/vessels/src/pages/fleet-dashboard.tsx",
+          "count": 81,
+          "examples": [
+            "#060e1a",
+            "#0d2847",
+            "#060e1a"
+          ]
+        },
+        {
+          "file": "artifacts/vessels/src/pages/ais-live-tracking.tsx",
+          "count": 73,
+          "examples": [
+            "#38bdf8",
+            "#060a10",
+            "#090d14"
+          ]
+        },
+        {
+          "file": "artifacts/vessels/src/pages/atlas-execute.tsx",
+          "count": 72,
+          "examples": [
+            "#3b82f6",
+            "#f87171",
+            "#fff"
+          ]
+        },
+        {
+          "file": "artifacts/vessels/src/pages/exception-queue.tsx",
+          "count": 71,
+          "examples": [
+            "#f87171",
+            "#9b1c1c08",
+            "#9b1c1c35"
+          ]
+        },
+        {
+          "file": "artifacts/vessels/src/index.css",
+          "count": 69,
+          "examples": [
+            "#4d8fcc",
+            "#020a14",
+            "#6ea8d8"
+          ]
+        },
+        {
+          "file": "artifacts/vessels/src/pages/vessels-approval-review.tsx",
+          "count": 69,
+          "examples": [
+            "#c08a2c",
+            "#c08a2c20",
+            "#40856a"
+          ]
+        },
+        {
+          "file": "artifacts/vessels/src/pages/command-overview.tsx",
+          "count": 68,
+          "examples": [
+            "#0a1628",
+            "#0a1628",
+            "#0a1628"
+          ]
+        },
+        {
+          "file": "artifacts/vessels/src/pages/commodity-flow-intelligence.tsx",
+          "count": 66,
+          "examples": [
+            "#f97316",
+            "#38bdf8",
+            "#f59e0b"
+          ]
+        }
+      ]
+    }
+  ]
+}

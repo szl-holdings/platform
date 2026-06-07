@@ -1,0 +1,22 @@
+{
+  "name": "@workspace/eval-os",
+  "version": "1.0.0",
+  "type": "module",
+  "description": "Eval-OS — Domain-jury evaluator pipeline. Scores consequential recommendations on grounding, actionability, policy compliance, reversibility, and confidence. Persists jury verdicts alongside each recommendation ID.",
+  "exports": {
+    ".": "./src/index.ts",
+    "./jury": "./src/jury.ts",
+    "./scorer": "./src/scorer.ts",
+    "./store": "./src/store.ts"
+  },
+  "scripts": {
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "zod": "catalog:"
+  },
+  "devDependencies": {
+    "@types/node": "catalog:",
+    "typescript": "catalog:"
+  }
+}

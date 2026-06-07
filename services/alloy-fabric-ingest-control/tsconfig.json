@@ -1,0 +1,18 @@
+{
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    "outDir": "./dist",
+    "rootDir": "./src",
+    "types": ["node"],
+    "noUnusedLocals": false
+  },
+  "references": [
+    { "path": "../../packages/aef-contracts" },
+    { "path": "../../packages/aef-evidence-ledger" },
+    { "path": "../../packages/aef-policy-guard" },
+    { "path": "../../packages/aef-workflow-runtime" },
+    { "path": "../../packages/aef-storage-adapters" },
+    { "path": "../../packages/aef-domain-profiles" }
+  ],
+  "include": ["src/**/*"]
+}

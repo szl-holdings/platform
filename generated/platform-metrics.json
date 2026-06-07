@@ -1,0 +1,171 @@
+{
+  "generated_at": "2026-04-27T03:50:50.019Z",
+  "generator": "scripts/audit/generate-platform-metrics.ts",
+  "repository": {
+    "typescript_files": 3801,
+    "tsx_files": 2434,
+    "total_ts_tsx": 6235,
+    "python_files": 145,
+    "css_files": 19,
+    "markdown_docs": 1679,
+    "screenshot_assets": 0
+  },
+  "architecture": {
+    "artifacts": 19,
+    "artifact_list": [
+      {
+        "name": "@workspace/a11oy",
+        "kind": "web"
+      },
+      {
+        "name": "@workspace/aegis",
+        "kind": "web"
+      },
+      {
+        "name": "@workspace/api-server",
+        "kind": "backend"
+      },
+      {
+        "name": "audit",
+        "kind": "web"
+      },
+      {
+        "name": "@workspace/carlota-jo",
+        "kind": "web"
+      },
+      {
+        "name": "@workspace/command",
+        "kind": "web"
+      },
+      {
+        "name": "@workspace/conduit",
+        "kind": "web"
+      },
+      {
+        "name": "@workspace/counsel",
+        "kind": "web"
+      },
+      {
+        "name": "@workspace/helios",
+        "kind": "web"
+      },
+      {
+        "name": "@workspace/lyte-command-center",
+        "kind": "web"
+      },
+      {
+        "name": "@workspace/mockup-sandbox",
+        "kind": "design"
+      },
+      {
+        "name": "@workspace/pluginmesh",
+        "kind": "web"
+      },
+      {
+        "name": "@workspace/pulse",
+        "kind": "web"
+      },
+      {
+        "name": "@workspace/sentra",
+        "kind": "web"
+      },
+      {
+        "name": "@workspace/szl-demo-video",
+        "kind": "video"
+      },
+      {
+        "name": "@workspace/szl-holdings",
+        "kind": "web"
+      },
+      {
+        "name": "@workspace/szl-holdings-mobile",
+        "kind": "mobile"
+      },
+      {
+        "name": "@workspace/terra",
+        "kind": "web"
+      },
+      {
+        "name": "@workspace/vessels",
+        "kind": "web"
+      }
+    ],
+    "lib_packages": 51,
+    "standalone_packages": 101,
+    "total_packages": 152
+  },
+  "api_surface": {
+    "route_files_recursive": 180,
+    "route_handlers": 6063,
+    "db_tables_defined": 1047,
+    "migrations": 59
+  },
+  "quality": {
+    "test_files": 387,
+    "ci_workflows": 25
+  },
+  "platform_primitives": [
+    {
+      "name": "Outcome Graph",
+      "package": "lib/outcome-graph",
+      "status": "implemented"
+    },
+    {
+      "name": "Proof Chain",
+      "package": "lib/proof-chain",
+      "status": "implemented"
+    },
+    {
+      "name": "Decision Replay",
+      "package": "packages/replay-core",
+      "status": "implemented"
+    },
+    {
+      "name": "Trace Graph",
+      "package": "packages/trace-graph",
+      "status": "implemented"
+    },
+    {
+      "name": "Policy Engine (Covenant)",
+      "package": "lib/covenant-policy",
+      "status": "implemented"
+    },
+    {
+      "name": "Policy Enforcer (Guardian)",
+      "package": "packages/guardian",
+      "status": "implemented"
+    },
+    {
+      "name": "Event Fabric (Signal Mesh)",
+      "package": "packages/signal-mesh",
+      "status": "implemented"
+    },
+    {
+      "name": "Event Bus (PRISM Bus)",
+      "package": "lib/prism-bus",
+      "status": "implemented"
+    },
+    {
+      "name": "Simulation Engine (Monte Carlo)",
+      "package": "lib/monte-carlo",
+      "status": "implemented"
+    },
+    {
+      "name": "Skill Forge Runtime",
+      "package": "lib/forge-runtime",
+      "status": "implemented"
+    },
+    {
+      "name": "Skill Library",
+      "package": "packages/skill-library",
+      "status": "implemented"
+    },
+    {
+      "name": "Document Engine",
+      "package": "lib/shared-ui",
+      "status": "implemented"
+    }
+  ],
+  "primitives_implemented": 12,
+  "primitives_total": 12
+}

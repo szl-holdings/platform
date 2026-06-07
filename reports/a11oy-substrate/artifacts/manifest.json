@@ -1,0 +1,78 @@
+{
+  "generated_at": "2026-04-25T22:20:37.694547+00:00",
+  "engine": "a11oy-substrate",
+  "schema_version": "1.0.0",
+  "artifact_count": 7,
+  "verticals": [
+    {
+      "id": "finance_fincept",
+      "title": "Finance / Fincept",
+      "purpose": "Capital Weather",
+      "artifact_path": "reports/a11oy-substrate/artifacts/finance_fincept.json",
+      "confidence": 0.58,
+      "recommendation_id": "rec_fin_pricing_response",
+      "requires_human_approval": true,
+      "sha256": "30d837a3488753aa3cb7d5c06dfa84949486259d3d6ec670eeafb90d2c3ec842"
+    },
+    {
+      "id": "lyte_kora",
+      "title": "Lyte / KORA",
+      "purpose": "Decision Debt Ledger",
+      "artifact_path": "reports/a11oy-substrate/artifacts/lyte_kora.json",
+      "confidence": 0.6,
+      "recommendation_id": "rec_lyte_collapse_approval_chain",
+      "requires_human_approval": true,
+      "sha256": "f29996a23af8bbbe8429923b1e5d6fd8974db62bf9df30e2c074d6a77d3a6b34"
+    },
+    {
+      "id": "marketing_growth",
+      "title": "Marketing / Growth",
+      "purpose": "Proof-To-Pipeline Engine",
+      "artifact_path": "reports/a11oy-substrate/artifacts/marketing_growth.json",
+      "confidence": 0.55,
+      "recommendation_id": "rec_growth_proof_to_pipeline",
+      "requires_human_approval": true,
+      "sha256": "2b74210cde506a12ee01c8164f0c87c9b0e92d6c4d756d13f6d321c09ddfcf3e"
+    },
+    {
+      "id": "prism_counsel",
+      "title": "PRISM Counsel",
+      "purpose": "Matter Flight Recorder",
+      "artifact_path": "reports/a11oy-substrate/artifacts/prism_counsel.json",
+      "confidence": 0.65,
+      "recommendation_id": "rec_counsel_lock_response_brief",
+      "requires_human_approval": true,
+      "sha256": "2050c7e92cf0edcd6c74df5867c75dd6a603b4db3ba8196e314d615e2900d3d8"
+    },
+    {
+      "id": "pulse",
+      "title": "Pulse",
+      "purpose": "Founder Operating Channel",
+      "artifact_path": "reports/a11oy-substrate/artifacts/pulse.json",
+      "confidence": 0.62,
+      "recommendation_id": "rec_pulse_release_freeze_review",
+      "requires_human_approval": true,
+      "sha256": "c45664ad41bc022ff1adc9c990ec700d9cc2df85d1ba2213ed4df8d483b2be2c"
+    },
+    {
+      "id": "terra",
+      "title": "Terra",
+      "purpose": "Acquisition Time Machine",
+      "artifact_path": "reports/a11oy-substrate/artifacts/terra.json",
+      "confidence": 0.55,
+      "recommendation_id": "rec_terra_close_diligence_gap",
+      "requires_human_approval": true,
+      "sha256": "639261827d2b226d16b8f72b5e9c69484401c1dd9092e6065479384af3a51a0e"
+    },
+    {
+      "id": "vessels",
+      "title": "Vessels",
+      "purpose": "Voyage Risk Exchange",
+      "artifact_path": "reports/a11oy-substrate/artifacts/vessels.json",
+      "confidence": 0.6,
+      "recommendation_id": "rec_vessels_refresh_sanctions_screen",
+      "requires_human_approval": true,
+      "sha256": "a5d0578faea35ed1e31cd8418fbd92cb7d28d0a12e9407bc22342306fbdb8136"
+    }
+  ]
+}

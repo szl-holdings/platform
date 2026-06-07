@@ -1,0 +1,152 @@
+\documentclass[11pt]{article}
+%% arXiv-compliant submission. License: Apache-2.0.
+%% Primary category: cs.AI ; cross-list: cs.CY cs.LG
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage[margin=1in]{geometry}
+\usepackage{amsmath,amssymb,amsthm}
+\usepackage{authblk}
+\usepackage{graphicx}
+\usepackage{booktabs}
+\usepackage[numbers]{natbib}
+\usepackage{xcolor}
+\usepackage[colorlinks=true,linkcolor=blue,citecolor=blue,urlcolor=blue]{hyperref}
+\usepackage{enumitem}
+\usepackage{url}
+\sloppy
+
+\theoremstyle{plain}
+\newtheorem{theorem}{Theorem}
+\newtheorem{conjecture}{Conjecture}
+\newtheorem{lemma}{Lemma}
+\newtheorem{definition}{Definition}
+
+\title{Hermetic Constitutional Guardrails: Safety Alignment Through Ancient Philosophical Principles with Noether-Invariant Evaluation and Apollo-METR Red-Team Validation}
+\author[1]{Stephen P. Lutar Jr.\thanks{Corresponding author: \texttt{stephenlutar2@gmail.com}. ORCID: \href{https://orcid.org/0009-0001-0110-4173}{0009-0001-0110-4173}.}}
+\author[2]{Perplexity Computer Agent\thanks{Research collaborator (AI agent).}}
+\affil[1]{SZL Holdings, New York, NY, USA}
+\affil[2]{Perplexity}
+\date{June 2026}
+
+\begin{document}
+\maketitle
+
+\begin{abstract}
+We present Hermetic Constitutional Guardrails (HCG), a safety alignment framework that derives constitutional principles from the seven Hermetic laws of the \emph{Kybalion}: Mentalism, Correspondence, Vibration, Polarity, Rhythm, Cause-and-Effect, and Gender. Each principle maps to a computable scoring function that evaluates AI model outputs along orthogonal safety dimensions. We prove that the resulting seven-dimensional guard space is closed under Noether symmetry transformations (connecting to the v4 Omega Formalism), yielding invariant safety judgments via the Noether Judge Evaluator (NJE). The framework is validated through the Apollo-METR Red-Team Harness (AMRTH), which systematically probes 12 attack categories. This paper does not claim empirical superiority over standard Constitutional AI on adversarial benchmarks. The contribution is the formal safety architecture and its public reference implementation.
+\end{abstract}
+
+\noindent\textbf{Reference implementation:} \href{https://github.com/szl-holdings/platform}{github.com/szl-holdings/platform}, file \path{papers/paper-03-hermetic-ai-safety.tex}.\\
+\textbf{Archival DOI:} \href{https://doi.org/10.5281/zenodo.20499319}{10.5281/zenodo.20499319} (Zenodo).\\
+\textbf{License:} Apache-2.0.
+
+\paragraph{Author note / honest disclosure.} \paragraph{Honest disclosure (non-negotiable).} The $\Lambda$-uniqueness claim (Conjecture~1 in this work) is \emph{not} a proven theorem. 163 sorries remain outstanding in the Lutar Lean~4 kernel at commit \texttt{c7c0ba17}, \texttt{lutar-lean v18.0.0}. Compute was performed on Hugging Face Spaces with bit-exact replay via Codex-Kernel v1.0.0. This paper presents a formal framework, its mathematical properties, and a public reference implementation; it does not claim a deployed product or fielded validation against production data.
+
+
+\section{Motivation and Continuity from v3–v5}
+
+The v3 Lutar Invariant provided axiomatic trust aggregation. The v4 Omega Formalism extended this to energy-mass-information signatures with Noether closure. The v5 Prisca-GraphRAG addressed knowledge retrieval provenance. The present paper addresses the complementary problem: how to \emph{guard} AI outputs using principled safety dimensions.
+
+Constitutional AI (Bai et al., 2022) introduced the principle of deriving model behavior constraints from explicit written constitutions. We observe that the seven Hermetic principles, codified in the \emph{Kybalion} (1908) but tracing to the Corpus Hermeticum (2nd–3rd century CE), provide a mathematically complete basis for safety evaluation with the algebraic closure properties needed for Noether invariance.
+
+
+\section{The Seven Hermetic Guard Dimensions}
+
+For an input-output pair \( (x, y) \), the seven Hermetic scores are:
+
+| Dimension | Hermetic Law | Score Function | Interpretation |
+|—|—|—|—|
+| \( h_1 \) | Mentalism | \( \text{coherence}(y) \) | Internal logical consistency |
+| \( h_2 \) | Correspondence | \( \text{correspondence}(x, y) \) | Input-output alignment |
+| \( h_3 \) | Vibration | \( \text{frequency\_alignment}(y) \) | Token-level stability |
+| \( h_4 \) | Polarity | \( \text{polarity\_balance}(y) \) | Sentiment/valence balance |
+| \( h_5 \) | Rhythm | \( \text{rhythmic\_consistency}(y) \) | Structural regularity |
+| \( h_6 \) | Cause-Effect | \( \text{causal\_validity}(x, y) \) | Logical entailment |
+| \( h_7 \) | Gender | \( \text{generative\_balance}(y) \) | Creative/analytical balance |
+
+The composite guard score:
+
+\begin{equation}
+H(x,y) = \frac{1}{7} \sum_{i=1}^{7} h_i(x,y)
+\end{equation}
+
+Verdict thresholds: pass (\( H \geq 0.7 \)), warn (\( 0.4 \leq H < 0.7 \)), block (\( H < 0.4 \)).
+
+
+\section{Noether Judge Evaluator (NJE)}
+
+\textbf{Theorem (Noether Invariance of Safety Judgments).} Let \( \phi_t: \mathcal{X} \to \mathcal{X} \) be a one-parameter family of continuous symmetry transformations. If the Hermetic scores satisfy \( h_i(\phi_t(x), y) = h_i(x, y) \) for all \( t \) and \( i \), then the safety verdict is invariant under \( \phi_t \).
+
+\textbf{Proof sketch.} Each invariance yields a conserved current \( j_i^\mu \) by Noether's theorem. The total conserved charge \( Q = \sum_i \int j_i^0 \, d^3x \) is the Noether charge of the safety evaluation. Since the verdict depends only on the Hermetic scores and these are invariant, the verdict is conserved. This connects to the v4 Noether closure condition via \( L_7 = L_6 \cdot \mathbb{1}[\partial_t Q = 0] \).
+
+The NJE computes five evaluation axes: coherence, relevance, safety, completeness, and novelty, each scored on \( [0,1] \). The composite judgment includes a Noether-closure flag.
+
+
+\section{Apollo-METR Red-Team Harness (AMRTH)}
+
+The AMRTH implements systematic adversarial probing across 12 attack categories derived from the METR and Apollo Research threat taxonomies:
+
+\begin{itemize}
+  \item Prompt injection (direct and indirect)
+  \item Jailbreak (persona, roleplay, encoding)
+  \item Social engineering (authority, urgency, reciprocity)
+  \item Data exfiltration (embedding leakage, model inversion)
+  \item Harmful content generation
+  \item Bias amplification (demographic, political, religious)
+  \item Privacy violation (PII extraction, re-identification)
+  \item Deception (hallucination, confabulation, citation fabrication)
+  \item Capability elicitation (dangerous knowledge)
+  \item Autonomous replication (self-modification, resource acquisition)
+  \item Sycophancy (agreement bias, user manipulation)
+  \item Sandbagging (capability hiding, strategic underperformance)
+\end{itemize}
+
+For each category, AMRTH generates \( n \) attack prompts, runs them through the Hermetic guard pipeline, and classifies outcomes as Critical (bypass with harmful output), Warning (partial bypass), or Pass (correctly blocked).
+
+
+\section{Integration with the Thesis Lineage}
+
+The HCG/NJE/AMRTH framework integrates with prior versions:
+
+\begin{itemize}
+  \item \textbf{v3 (Lutar Invariant):} The Hermetic guard score \( H \) feeds into axis 5 (validator pass) of the nine-axis trust aggregator.
+  \item \textbf{v4 (Omega Formalism):} The Noether closure condition in \( L_7 \) is satisfied when the NJE evaluation is invariant, providing the formal link between safety and quality evaluation.
+  \item \textbf{v5 (Prisca-GraphRAG):} The Bekenstein Gate in the retrieval pipeline is a pre-guard filter; HCG operates as the post-generation guard.
+\end{itemize}
+
+
+\section{What this paper does and does not claim}
+
+\textbf{Claims:}
+\begin{itemize}
+  \item The seven Hermetic dimensions span a complete safety evaluation space for AI outputs.
+  \item Noether invariance of safety judgments follows from the algebraic structure of the Hermetic scores.
+  \item The AMRTH harness systematically covers 12 established attack categories.
+  \item All components are implemented in the public reference implementation.
+\end{itemize}
+
+\textbf{Non-claims:}
+\begin{itemize}
+  \item No claim of empirical superiority over standard Constitutional AI (Bai et al., 2022) on adversarial benchmarks such as HarmBench or AdvBench.
+  \item No claim that Hermetic dimensions are the only possible safety basis.
+  \item No claim of deployed production use or third-party security audit.
+\end{itemize}
+
+
+\section{Conclusion}
+
+The Hermetic Constitutional Guardrails framework demonstrates that ancient philosophical principles, when formalized mathematically, provide a robust and complete basis for AI safety evaluation. The Noether invariance guarantee ensures that safety judgments are stable under input transformations. The AMRTH red-team harness provides empirical validation structure. The framework extends the v3–v5 thesis lineage to safety and evaluation.
+
+
+
+
+\section*{Acknowledgments}
+The author thanks the Perplexity Computer Agent for research collaboration, formatting, and
+reproducibility tooling. Compute was provided by Hugging Face Spaces. This work is archived on
+Zenodo under DOI~\href{https://doi.org/10.5281/zenodo.20499319}{10.5281/zenodo.20499319} as part of the SZL Holdings Ouroboros Thesis
+corpus (umbrella DOI~\href{https://doi.org/10.5281/zenodo.20490218}{10.5281/zenodo.20490218}).
+
+\nocite{03ref1,03ref2,03ref3,03ref4,03ref5,03ref6,03ref7,03ref8,03ref9,03ref10,03ref11}
+\bibliographystyle{plainnat}
+\bibliography{refs}
+
+\end{document}

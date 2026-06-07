@@ -1,0 +1,56 @@
+{
+  "name": "@workspace/aef-retrieval-core",
+  "version": "0.0.0",
+  "private": false,
+  "type": "module",
+  "description": "Alloy Embedding Fabric — pure retrieval functions: query normalization, reciprocal rank fusion, exact-match boost rules, metadata filtering, score normalization, citation assembly, and pluggable dense/keyword/rerank adapter interfaces.",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./src/index.ts"
+    },
+    "./adapters": {
+      "types": "./dist/adapters.d.ts",
+      "import": "./src/adapters.ts"
+    },
+    "./fusion": {
+      "types": "./dist/fusion.d.ts",
+      "import": "./src/fusion.ts"
+    },
+    "./boost": {
+      "types": "./dist/boost.d.ts",
+      "import": "./src/boost.ts"
+    },
+    "./filter": {
+      "types": "./dist/filter.d.ts",
+      "import": "./src/filter.ts"
+    },
+    "./normalize": {
+      "types": "./dist/normalize.d.ts",
+      "import": "./src/normalize.ts"
+    },
+    "./citations": {
+      "types": "./dist/citations.d.ts",
+      "import": "./src/citations.ts"
+    },
+    "./query-normalizer": {
+      "types": "./dist/query-normalizer.d.ts",
+      "import": "./src/query-normalizer.ts"
+    }
+  },
+  "dependencies": {
+    "@workspace/aef-contracts": "workspace:*"
+  },
+  "devDependencies": {
+    "@types/node": "catalog:",
+    "vitest": "^4.1.7"
+  },
+  "scripts": {
+    "lint": "biome lint ./src",
+    "lint:ci": "biome lint ./src",
+    "format": "biome format --write ./src",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "test": "vitest run",
+    "test:watch": "vitest"
+  }
+}

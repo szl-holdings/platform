@@ -1,0 +1,47 @@
+{
+  "payloadType": "alloy-meridian",
+  "version": "1.0.0",
+  "generated": "2026-04-25",
+  "title": "Alloy Meridian — Cognitive Agentic Layer Payload",
+  "description": "Activation payload for the Alloy Meridian governed agentic orchestration system",
+  "blueprint": {
+    "source": "data/alloy-cognitive-agentic-blueprint.json",
+    "codename": "Meridian",
+    "layers": 5,
+    "approvalClasses": ["auto", "review", "admin_only"]
+  },
+  "mcpTools": {
+    "transport": "http",
+    "endpoint": "/api/mcp",
+    "authentication": "Bearer token via Authorization header",
+    "tools": [
+      "alloy_launch_workflow",
+      "alloy_workflow_status",
+      "alloy_create_artifact",
+      "alloy_research",
+      "alloy_decision_status",
+      "alloy_approve_decision",
+      "alloy_skill_list",
+      "alloy_skill_invoke",
+      "connector_hub_discover",
+      "connector_hub_execute",
+      "connector_hub_health"
+    ]
+  },
+  "skillRegistrySchema": {
+    "requiredFields": ["slug", "name", "description", "approvalClass", "inputSchema"],
+    "registryPath": "packages/skill-library/src/registry.ts",
+    "validApprovalClasses": ["auto", "review", "admin_only"]
+  },
+  "governanceRules": [
+    "Never bypass plugin installation or OAuth flows",
+    "All decisions with admin_only class require explicit human approval",
+    "Audit log must be written for every tool invocation",
+    "Rollback plan required before executing schema migrations",
+    "Credential rotation requires secrets-audit skill invocation"
+  ],
+  "connectors": {
+    "registryPath": "packages/tool-mesh/src/connectors/",
+    "activeConnectors": ["jira", "slack", "pagerduty", "salesforce", "siem", "groq", "fal-ai", "honeyhive", "huggingface", "elevenlabs"]
+  }
+}

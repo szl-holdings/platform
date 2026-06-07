@@ -1,0 +1,81 @@
+{
+  "brief": {
+    "deadline_risk": "high",
+    "evidence_count": 3,
+    "evidence_state": "incomplete",
+    "headline": "Lock the response-brief outline and assign drafting today",
+    "next_action": "Approve outline, assign sections to two associates, confirm preservation notices.",
+    "obligation_gap_count": 1
+  },
+  "evidence": [
+    {
+      "claim": "Response brief due in 6 days; draft 0% complete",
+      "from_signal": "sig_counsel_deadline",
+      "id": "ev_counsel_sig_counsel_deadline",
+      "source": "matter_calendar"
+    },
+    {
+      "claim": "Indemnification carve-out missing from MSA-2026-014 redline",
+      "from_signal": "sig_counsel_obligation",
+      "id": "ev_counsel_sig_counsel_obligation",
+      "source": "contract"
+    },
+    {
+      "claim": "Two custodian preservation notices unconfirmed",
+      "from_signal": "sig_counsel_evidence_pending",
+      "id": "ev_counsel_sig_counsel_evidence_pending",
+      "source": "discovery"
+    }
+  ],
+  "forecast": {
+    "confidence": 0.65,
+    "deadline_risk": "high",
+    "evidence_state": "incomplete",
+    "horizon": "next_7_days",
+    "method": "matter-risk-baseline-v0",
+    "obligation_gap_count": 1
+  },
+  "generated_at": "2026-04-26T13:38:38.724133Z",
+  "recommendation": {
+    "confidence": 0.65,
+    "evidence_ids": [
+      "ev_counsel_sig_counsel_deadline",
+      "ev_counsel_sig_counsel_obligation",
+      "ev_counsel_sig_counsel_evidence_pending"
+    ],
+    "id": "rec_counsel_lock_response_brief",
+    "input_class": "counsel_matter_signals_v1",
+    "model": "gpt-5.5-2026-04-23",
+    "next_action": "Approve outline, assign sections to two associates, confirm preservation notices.",
+    "output_class": "matter_flight_recorder_v1",
+    "owner": "lead-counsel@szl",
+    "requires_human_approval": true,
+    "rollback_path": "If outline changes, re-cut assignments and notify the matter team within 12h.",
+    "title": "Lock the response-brief outline and assign drafting today",
+    "vertical": "prism_counsel"
+  },
+  "signals": [
+    {
+      "id": "sig_counsel_deadline",
+      "kind": "deadline_risk",
+      "source": "matter_calendar",
+      "summary": "Response brief due in 6 days; draft 0% complete",
+      "weight": 0.9
+    },
+    {
+      "id": "sig_counsel_obligation",
+      "kind": "obligation_gap",
+      "source": "contract",
+      "summary": "Indemnification carve-out missing from MSA-2026-014 redline",
+      "weight": 0.75
+    },
+    {
+      "id": "sig_counsel_evidence_pending",
+      "kind": "evidence_state",
+      "source": "discovery",
+      "summary": "Two custodian preservation notices unconfirmed",
+      "weight": 0.7
+    }
+  ],
+  "vertical": "prism_counsel"
+}

@@ -1,0 +1,28 @@
+{
+  "name": "@szl-holdings/substrate-adapters",
+  "version": "0.0.0",
+  "private": false,
+  "description": "Substrate Edge Inference adapters — oLLM-powered local GPU inference with OpenAI-compatible API surface. Zero-cost, air-gapped, 80B+ parameter models on consumer GPUs.",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/szl-holdings/platform.git",
+    "directory": "packages/substrate-adapters"
+  },
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts",
+    "./substrate-endpoint": "./src/substrate-endpoint.ts",
+    "./substrate-models": "./src/substrate-models.ts"
+  },
+  "dependencies": {
+    "pino": "^9"
+  },
+  "devDependencies": {
+    "@types/node": "catalog:"
+  },
+  "scripts": {
+    "lint": "biome lint ./src",
+    "lint:ci": "biome lint ./src",
+    "format": "biome format --write ./src"
+  }
+}

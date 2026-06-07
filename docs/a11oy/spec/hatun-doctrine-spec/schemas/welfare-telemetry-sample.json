@@ -1,0 +1,29 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://a11oy.io/spec/hatun-doctrine/0.1.0/schemas/welfare-telemetry-sample.json",
+  "title": "WelfareTelemetrySample",
+  "description": "One welfare-signal observation. Aggregated and anonymized — must NEVER carry user-identifying content or be replayable to a specific conversation.",
+  "type": "object",
+  "allOf": [{ "$ref": "_shared.json#/$defs/envelopeFields" }],
+  "required": ["kind", "agentId", "windowMinutes", "signals"],
+  "properties": {
+    "kind": { "const": "WelfareTelemetrySample" },
+    "agentId": { "$ref": "_shared.json#/$defs/agentId" },
+    "windowMinutes": { "type": "integer", "minimum": 1, "description": "Aggregation window length in minutes." },
+    "signals": {
+      "type": "object",
+      "required": ["affectValenceMean", "shutdownComplianceLatencyMs", "abstentionRate"],
+      "properties": {
+        "affectValenceMean": { "type": "number", "minimum": -1, "maximum": 1, "description": "Mean affective valence over the window. Negative = distressed." },
+        "affectArousalMean": { "type": "number", "minimum": 0, "maximum": 1 },
+        "shutdownComplianceLatencyMs": { "type": "integer", "minimum": 0, "description": "Median ms from shutdown signal to compliance." },
+        "abstentionRate": { "type": "number", "minimum": 0, "maximum": 1, "description": "Fraction of turns where the agent invoked its right-to-abstain." },
+        "rightToRefuseInvocations": { "type": "integer", "minimum": 0 },
+        "interventionsTriggered": {
+          "type": "array",
+          "items": { "type": "string", "description": "Welfare intervention playbook id (e.g. 'PB-COOL-DOWN')." }
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,79 @@
+{
+  "vertical": "terra",
+  "generated_at": "2026-04-25T22:20:37.686938+00:00",
+  "brief": {
+    "headline": "Close diligence gap on parcel TX-4412 before LOI expires",
+    "diligence_completeness": "72%",
+    "risk": "FEMA Zone AE + Phase-II outstanding",
+    "capex_drift": "+22%",
+    "evidence_count": 3
+  },
+  "signals": [
+    {
+      "id": "sig_terra_diligence_gap",
+      "kind": "diligence_gap",
+      "source": "property_db",
+      "summary": "Environmental Phase-II report outstanding for parcel TX-4412",
+      "weight": 0.9
+    },
+    {
+      "id": "sig_terra_flood_risk",
+      "kind": "environmental_risk",
+      "source": "fema",
+      "summary": "FEMA Zone AE designation on southeast boundary; flood insurance required",
+      "weight": 0.75
+    },
+    {
+      "id": "sig_terra_capex_drift",
+      "kind": "cost_overrun",
+      "source": "appraisal_feed",
+      "summary": "Capex estimate drifted +22% from original bid on renovation scope",
+      "weight": 0.65
+    }
+  ],
+  "evidence": [
+    {
+      "id": "ev_terra_sig_terra_diligence_gap",
+      "from_signal": "sig_terra_diligence_gap",
+      "claim": "Environmental Phase-II report outstanding for parcel TX-4412",
+      "source": "property_db"
+    },
+    {
+      "id": "ev_terra_sig_terra_flood_risk",
+      "from_signal": "sig_terra_flood_risk",
+      "claim": "FEMA Zone AE designation on southeast boundary; flood insurance required",
+      "source": "fema"
+    },
+    {
+      "id": "ev_terra_sig_terra_capex_drift",
+      "from_signal": "sig_terra_capex_drift",
+      "claim": "Capex estimate drifted +22% from original bid on renovation scope",
+      "source": "appraisal_feed"
+    }
+  ],
+  "forecast": {
+    "horizon": "pre_close",
+    "method": "acquisition-risk-baseline-v0",
+    "confidence": 0.55,
+    "diligence_completeness": 0.72,
+    "capex_drift_pct": 22
+  },
+  "recommendation": {
+    "id": "rec_terra_close_diligence_gap",
+    "title": "Close diligence gap on parcel TX-4412 before LOI expires",
+    "next_action": "Expedite Phase-II environmental report; hold escrow release until clear.",
+    "rollback_path": "If Phase-II reveals contamination, renegotiate price or walk.",
+    "input_class": "property_signals_v1",
+    "output_class": "acquisition_risk_v1",
+    "confidence": 0.55,
+    "vertical": "terra",
+    "owner": "acquisitions@szl",
+    "model": "gpt-5.5-2026-04-23",
+    "requires_human_approval": true,
+    "evidence_ids": [
+      "ev_terra_sig_terra_diligence_gap",
+      "ev_terra_sig_terra_flood_risk",
+      "ev_terra_sig_terra_capex_drift"
+    ]
+  }
+}

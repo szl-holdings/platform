@@ -1,0 +1,70 @@
+{
+  "name": "@workspace/sandbox-runtime",
+  "version": "0.1.0",
+  "private": false,
+  "type": "module",
+  "description": "Sandbox Runtime — governed Unix-local execution environments following the OpenAI sandbox architecture. Every operation flows through Guardian, Policy Engine, and Tool Mesh for full audit coverage.",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./src/index.ts"
+    },
+    "./types": {
+      "types": "./dist/types.d.ts",
+      "import": "./src/types.ts"
+    },
+    "./session": {
+      "types": "./dist/session.d.ts",
+      "import": "./src/session.ts"
+    },
+    "./agent": {
+      "types": "./dist/agent.d.ts",
+      "import": "./src/agent.ts"
+    },
+    "./client": {
+      "types": "./dist/client.d.ts",
+      "import": "./src/client.ts"
+    },
+    "./capabilities/shell": {
+      "types": "./dist/capabilities/shell.d.ts",
+      "import": "./src/capabilities/shell.ts"
+    },
+    "./capabilities/filesystem": {
+      "types": "./dist/capabilities/filesystem.d.ts",
+      "import": "./src/capabilities/filesystem.ts"
+    },
+    "./capabilities/memory": {
+      "types": "./dist/capabilities/memory.d.ts",
+      "import": "./src/capabilities/memory.ts"
+    },
+    "./tool-registrations": {
+      "types": "./dist/tool-registrations.d.ts",
+      "import": "./src/tool-registrations.ts"
+    },
+    "./init": {
+      "types": "./dist/init.d.ts",
+      "import": "./src/init.ts"
+    }
+  },
+  "dependencies": {
+    "@workspace/agents-core": "workspace:*",
+    "@workspace/tool-mesh": "workspace:*",
+    "@workspace/cognitive-observability": "workspace:*",
+    "@workspace/trace-graph": "workspace:*",
+    "@workspace/guardian": "workspace:*",
+    "@workspace/memory-fabric": "workspace:*",
+    "zod": "catalog:"
+  },
+  "devDependencies": {
+    "@types/node": "catalog:",
+    "vitest": "^4.1.7"
+  },
+  "scripts": {
+    "lint": "biome lint ./src",
+    "lint:ci": "biome lint ./src",
+    "format": "biome format --write ./src",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "test": "vitest run",
+    "test:watch": "vitest"
+  }
+}

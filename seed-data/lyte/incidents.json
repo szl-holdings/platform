@@ -1,0 +1,122 @@
+[
+  {
+    "id": 101,
+    "title": "Payment Processing Pipeline Complete Failure",
+    "description": "Stripe webhook ingestion pipeline stalled at 14.2k queued events. Customer-facing checkout returns 500 errors. Revenue impact estimated at $47k/hr. Root cause suspected: RDS primary connection pool exhaustion cascading into order-service timeout spiral.",
+    "severity": "critical",
+    "status": "investigating",
+    "assignee": "Alex Chen (SRE Lead)",
+    "createdOffsetMinutes": 12
+  },
+  {
+    "id": 102,
+    "title": "API Gateway Cascading Latency Degradation",
+    "description": "Kong ingress controller reporting p99 latency of 8.4s across all upstream services. Circuit breakers triggered on auth-service, inventory-service, and notification-service. Customer-facing SLA breach imminent. EKS pod restarts increasing — suspected memory leak in gateway plugin v2.8.1.",
+    "severity": "critical",
+    "status": "mitigating",
+    "assignee": "Priya Patel (Platform Eng)",
+    "createdOffsetMinutes": 25
+  },
+  {
+    "id": 103,
+    "title": "RDS Multi-AZ Failover — Replication Lag Critical",
+    "description": "Primary RDS instance prod-db-01 (db.r6g.4xlarge) reporting replication lag >120s to standby. Write IOPS at 42k (provisioned 40k). Automatic failover may trigger if lag exceeds 300s. Application team notified to prepare for potential 30-60s connection drop. Binlog position: mysql-bin.004847:position 847291.",
+    "severity": "critical",
+    "status": "open",
+    "assignee": "Jordan Kim (DBA)",
+    "createdOffsetMinutes": 8
+  },
+  {
+    "id": 104,
+    "title": "Authentication Service Crash Loop — OAuth Token Validation",
+    "description": "auth-service v3.14.2 entering CrashLoopBackOff on EKS cluster prod-k8s-01. Sentry capturing TypeError at token validation middleware. Affects SSO login for enterprise customers. 2.4k error events/hr. Rollback to v3.14.1 prepared but blocked by DB migration dependency.",
+    "severity": "high",
+    "status": "investigating",
+    "assignee": "Sarah Martinez (Backend Lead)",
+    "createdOffsetMinutes": 35
+  },
+  {
+    "id": 105,
+    "title": "Redis Cluster Memory Pressure — Eviction Active",
+    "description": "ElastiCache cluster elasticache-prod (cache.r6g.2xlarge, 6-node) at 91% memory. Volatile-lru eviction policy actively removing session keys. Session loss reports from customer support increasing. Need to evaluate key TTL policies and potentially upsize cluster. Current key count: 847M.",
+    "severity": "high",
+    "status": "mitigating",
+    "assignee": "Marcus Thompson (Infrastructure)",
+    "createdOffsetMinutes": 50
+  },
+  {
+    "id": 106,
+    "title": "CDN Cache Purge — Origin Load Spike",
+    "description": "CloudFront distribution cache hit ratio dropped from 94% to 62% following unplanned purge event. Origin server load increased 4x. ALB target group healthy host count at minimum. Auto-scaling group launching additional instances. ETA to cache warm: ~45 minutes.",
+    "severity": "medium",
+    "status": "investigating",
+    "assignee": "David Park (DevOps)",
+    "createdOffsetMinutes": 55
+  },
+  {
+    "id": 107,
+    "title": "CI/CD Pipeline Failure — Production Deploy Blocked",
+    "description": "GitHub Actions workflow main→prod failed at Docker build stage. OOM killed after 45 minutes. Build context size 14GB (expected 2GB). Suspected: node_modules cache invalidation caused full rebuild. Production hotfix deploy for INC-101 blocked until pipeline restored.",
+    "severity": "medium",
+    "status": "open",
+    "assignee": "Elena Rodriguez (Release Eng)",
+    "createdOffsetMinutes": 60
+  },
+  {
+    "id": 108,
+    "title": "IAM Credential Exfiltration Alert — GuardDuty Finding",
+    "description": "AWS GuardDuty flagged UnauthorizedAccess:IAMUser/InstanceCredentialExfiltration on account 441902834. EC2 instance metadata credentials used from external IP 198.51.100.42. Instance role: prod-worker-node-role. Immediate credential rotation initiated. Security team engaged for forensic analysis.",
+    "severity": "high",
+    "status": "investigating",
+    "assignee": "Lisa Wang (Security Eng)",
+    "createdOffsetMinutes": 65
+  },
+  {
+    "id": 109,
+    "title": "Kafka Consumer Lag — Order Event Processing Delayed",
+    "description": "Consumer group order-processor showing increasing lag on topic order-events, partition 3. Current lag: 45k messages. Processing throughput dropped from 12k/s to 2.1k/s. Root cause: downstream inventory-service circuit breaker open causing consumer backpressure. Customer order confirmations delayed 15-20 minutes.",
+    "severity": "medium",
+    "status": "mitigating",
+    "assignee": "Ryan Foster (Backend)",
+    "createdOffsetMinutes": 90
+  },
+  {
+    "id": 110,
+    "title": "Mobile App Crash — iOS 17.4 WebView Regression",
+    "description": "Crash rate spiked to 4.2% on iOS 17.4+ devices after App Store release v5.8.0. WKWebView rendering crash in checkout flow. Firebase Crashlytics showing 8.4k crashes in 6 hours. Hotfix v5.8.1 submitted for expedited App Store review. Temporary server-side feature flag disabled WebView checkout for affected OS versions.",
+    "severity": "high",
+    "status": "resolved",
+    "assignee": "Mike Dawson (Mobile Lead)",
+    "createdOffsetMinutes": 1080,
+    "resolvedOffsetMinutes": 120
+  },
+  {
+    "id": 111,
+    "title": "DNS Resolution Failures — Route 53 Health Check",
+    "description": "Route 53 health check for api.production.szl.io intermittently failing from eu-west-1 and ap-southeast-1 regions. TTL-based failover to secondary endpoints activating. Investigating potential BGP routing issue with upstream provider. Customer reports of intermittent 'server not found' errors from European users.",
+    "severity": "high",
+    "status": "resolved",
+    "assignee": "Carlos Mendez (Network Eng)",
+    "createdOffsetMinutes": 1440,
+    "resolvedOffsetMinutes": 360
+  },
+  {
+    "id": 112,
+    "title": "Delayed Email Notifications — SES Sending Quota",
+    "description": "AWS SES sending rate throttled at 85% of quota. Transactional emails (order confirmations, password resets) delayed 5-15 minutes. Marketing campaign blast consumed 60% of daily quota ahead of schedule. Temporary rate limiting applied to non-critical notification channels. Quota increase request submitted.",
+    "severity": "medium",
+    "status": "resolved",
+    "assignee": "Nina Johansson (Comms Eng)",
+    "createdOffsetMinutes": 2160,
+    "resolvedOffsetMinutes": 720
+  },
+  {
+    "id": 113,
+    "title": "Maritime Security Escalation — Crimson Voyager AIS-Dark Incident [WF-MAR-001]",
+    "description": "Cross-platform escalation workflow triggered at 04:41 UTC. Vessels fleet telemetry (IMO 9654321 — Crimson Voyager, Persian Gulf corridor) detected AIS-dark vessel approach at <800m. INCA SENTINEL-GAT-v4 (confidence 94%) flagged STS transfer signature and pushed intelligence package to Firestorm SOC (case FIR-2026-0330). Lyte AIOps auto-generated this incident and initiated coordination runbook: (1) Coast Guard notification sent, (2) Carlota Jo maritime operations advisor loop-in pending, (3) KPI impact flag raised — maritime TCE at risk $12.4M. Awaiting Firestorm case resolution for incident close.",
+    "severity": "critical",
+    "status": "investigating",
+    "assignee": "Alex Chen (SRE Lead)",
+    "createdAt": "2026-03-30T04:41:02Z"
+  }
+]

@@ -1,0 +1,55 @@
+{
+  "payloadType": "mcp-activation",
+  "version": "1.0.0",
+  "generated": "2026-04-25",
+  "title": "Replit MCP Activation Payload",
+  "description": "Complete MCP server activation configuration for the SZL Holdings + PluginMesh ecosystem",
+  "mcpConfigFile": ".mcp.json",
+  "mcpAppConfigFile": ".app.json",
+  "servers": [
+    {
+      "name": "pluginmesh",
+      "type": "stdio",
+      "command": "node",
+      "args": ["scripts/mcp-server.mjs"],
+      "env": {},
+      "tools": 12,
+      "description": "PluginMesh plugin broker — zero-dependency, no auth required"
+    },
+    {
+      "name": "alloy",
+      "type": "http",
+      "url": "https://${REPLIT_DEV_DOMAIN}/api/mcp",
+      "headers": {
+        "Authorization": "Bearer ${ALLOY_INTERNAL_TOKEN}",
+        "Content-Type": "application/json"
+      },
+      "tools": 23,
+      "description": "SZL Holdings Alloy orchestration MCP server — requires ALLOY_INTERNAL_TOKEN"
+    },
+    {
+      "name": "github",
+      "type": "stdio",
+      "command": "npx",
+      "args": ["-y", "@modelcontextprotocol/server-github"],
+      "env": {
+        "GITHUB_PERSONAL_ACCESS_TOKEN": "${GITHUB_PERSONAL_ACCESS_TOKEN}"
+      },
+      "tools": 15,
+      "description": "GitHub MCP server — requires GITHUB_PERSONAL_ACCESS_TOKEN"
+    }
+  ],
+  "activationSteps": [
+    "1. Copy .mcp.json to your Codex workspace root",
+    "2. Set ALLOY_INTERNAL_TOKEN in Replit Secrets",
+    "3. Set GITHUB_PERSONAL_ACCESS_TOKEN in Replit Secrets",
+    "4. Run: node scripts/validate.mjs to verify data integrity",
+    "5. Open Codex — all MCP tools should appear in the tool picker"
+  ],
+  "credentialRequirements": {
+    "required": ["ALLOY_INTERNAL_TOKEN"],
+    "optional": ["GITHUB_PERSONAL_ACCESS_TOKEN", "BRAVE_API_KEY", "SLACK_BOT_TOKEN"],
+    "neverHardcode": true,
+    "useReplitSecrets": true
+  }
+}

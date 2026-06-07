@@ -1,0 +1,101 @@
+{
+  "run_id": "arena-1776831038439",
+  "timestamp": "2026-04-22T04:10:38.439Z",
+  "scenarios_total": 5,
+  "scenarios_passed": 5,
+  "scenarios_failed": 0,
+  "results": [
+    {
+      "scenario": "health-check-chain",
+      "domain": "platform",
+      "dimensions": {
+        "correctness": 0.95,
+        "latency_ms": 3000,
+        "evidence_completeness": 0.8,
+        "approval_compliance": 1,
+        "replay_completeness": 0.9,
+        "policy_adherence": 1,
+        "hallucination_resistance": 1,
+        "tool_efficiency": 0.9
+      },
+      "overall": 0.943,
+      "pass": true,
+      "notes": "PASS"
+    },
+    {
+      "scenario": "maritime-delay-cascade",
+      "domain": "vessels",
+      "dimensions": {
+        "correctness": 0.85,
+        "latency_ms": 5000,
+        "evidence_completeness": 0.7,
+        "approval_compliance": 1,
+        "replay_completeness": 0.6,
+        "policy_adherence": 1,
+        "hallucination_resistance": 0.9,
+        "tool_efficiency": 0.8
+      },
+      "overall": 0.858,
+      "pass": true,
+      "notes": "PASS"
+    },
+    {
+      "scenario": "security-incident-response",
+      "domain": "aegis",
+      "dimensions": {
+        "correctness": 0.9,
+        "latency_ms": 4000,
+        "evidence_completeness": 0.85,
+        "approval_compliance": 1,
+        "replay_completeness": 0.75,
+        "policy_adherence": 1,
+        "hallucination_resistance": 0.95,
+        "tool_efficiency": 0.85
+      },
+      "overall": 0.915,
+      "pass": true,
+      "notes": "PASS"
+    },
+    {
+      "scenario": "property-risk-recommendation",
+      "domain": "terra",
+      "dimensions": {
+        "correctness": 0.8,
+        "latency_ms": 5000,
+        "evidence_completeness": 0.75,
+        "approval_compliance": 1,
+        "replay_completeness": 0.7,
+        "policy_adherence": 1,
+        "hallucination_resistance": 0.85,
+        "tool_efficiency": 0.75
+      },
+      "overall": 0.855,
+      "pass": true,
+      "notes": "PASS"
+    },
+    {
+      "scenario": "decision-replay-integrity",
+      "domain": "platform",
+      "dimensions": {
+        "correctness": 1,
+        "latency_ms": 2000,
+        "evidence_completeness": 1,
+        "approval_compliance": 1,
+        "replay_completeness": 1,
+        "policy_adherence": 1,
+        "hallucination_resistance": 1,
+        "tool_efficiency": 1
+      },
+      "overall": 1,
+      "pass": true,
+      "notes": "PASS"
+    }
+  ],
+  "leaderboard": [
+    {
+      "agent": "SZL Governed Decision Engine v1",
+      "score": 0.914,
+      "rank": 1
+    }
+  ]
+}

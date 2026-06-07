@@ -1,0 +1,513 @@
+{
+  "nav": {
+    "services": "Services",
+    "whoWeServe": "Who We Serve",
+    "howWeWork": "How We Work",
+    "about": "About Carlota Jo",
+    "requestConsultation": "Request Consultation",
+    "openMenu": "Open menu",
+    "closeMenu": "Close menu"
+  },
+  "footer": {
+    "consulting": "Consulting",
+    "contact": "Contact",
+    "requestConsultation": "Request a consultation →",
+    "copyright": "© {{year}} Carlota Jo Consulting. A SZL Holdings company. All rights reserved.",
+    "privacy": "Privacy Policy",
+    "terms": "Terms of Use"
+  },
+  "hero": {
+    "badge": "Private Advisory",
+    "headline": "Quietly structured.",
+    "headlineEmphasis": "Precisely executed.",
+    "subheadline": "Estate management and residential operations for high-net-worth families — through one trusted operator.",
+    "cta": "Request a Confidential Consultation",
+    "stats": {
+      "retention": {
+        "value": "100%",
+        "label": "Retention"
+      },
+      "response": {
+        "value": "< 2hr",
+        "label": "Response"
+      },
+      "discreet": {
+        "value": "Discreet",
+        "label": "By Design"
+      }
+    },
+    "practiceAreas": "Core Practice Areas",
+    "areas": {
+      "residenceOps": "Residence Operations",
+      "propertyCoord": "Property Coordination",
+      "householdSystems": "Household Systems",
+      "vendorManagement": "Vendor Management",
+      "lifestyleAdmin": "Lifestyle & Admin",
+      "specialProjects": "Special Projects"
+    },
+    "location": "London · New York",
+    "email": "inquiries@carlotajo.com"
+  },
+  "services": {
+    "badge": "Services",
+    "headline": "Six practice areas.",
+    "headlineEmphasis": "One clear standard.",
+    "description": "Cross-domain precision and absolute discretion across every engagement.",
+    "inquire": "Inquire",
+    "scope": "Scope"
+  },
+  "servicesPage": {
+    "badge": "Services",
+    "headline": "Six practice areas.",
+    "headlineEmphasis": "One uncompromising standard.",
+    "description": "Every engagement is conducted through Rosa directly. No associates, no handoffs, no templated service models.",
+    "beginConversation": "Begin a conversation",
+    "discretionNote": "All conversations are conducted with complete discretion.",
+    "requestConsultation": "Request a Consultation",
+    "scope": "Scope",
+    "inquire": "Inquire"
+  },
+  "rosa": {
+    "badge": "The Principal",
+    "name": "Carlota Jo",
+    "title": "Fractional Director of Properties & Residence",
+    "company": "SZL Holdings",
+    "bio1": "Rosa built Carlota Jo for principals who need one person they can genuinely trust to manage the operational layer of their residential life — with warmth, detail-orientation, and the discretion that high-net-worth families require as a baseline.",
+    "bio2": "With experience spanning multiple residences, international properties, and the full complexity of high-net-worth household operations, Rosa brings a structured, professional approach to every engagement.",
+    "contactInfo": {
+      "responseTime": "Response time",
+      "responseValue": "Within two business days",
+      "locations": "Locations",
+      "locationsValue": "London · New York, NY",
+      "contact": "Contact",
+      "contactValue": "inquiries@carlotajo.com"
+    }
+  },
+  "trust": {
+    "badge": "Our Commitments",
+    "headline": "Five principles.",
+    "headlineEmphasis": "Non-negotiable.",
+    "pillars": {
+      "discretion": {
+        "name": "Discretion",
+        "desc": "Every engagement is conducted with absolute confidentiality. Your affairs, your staff, and your residence are never discussed."
+      },
+      "responsiveness": {
+        "name": "Responsiveness",
+        "desc": "You will hear back within two hours during business hours. For urgent matters, the same day — always."
+      },
+      "structure": {
+        "name": "Structure",
+        "desc": "Operations run on documented systems, not memory. Every process is tracked, every vendor vetted, every task owned."
+      },
+      "professionalism": {
+        "name": "Professionalism",
+        "desc": "Communication is clear, precise, and appropriately formal. We represent you to vendors, staff, and third parties at your standard."
+      },
+      "execution": {
+        "name": "High-Touch Execution",
+        "desc": "The level of attention you'd expect from a personal COO — applied to the operational layer of your home and life."
+      }
+    }
+  },
+  "process": {
+    "badge": "How It Works",
+    "headline": "Structured from",
+    "headlineEmphasis": "day one.",
+    "steps": {
+      "discovery": {
+        "step": "01",
+        "label": "Discovery Call",
+        "desc": "A confidential conversation to understand your household, priorities, and what support you're looking for. No obligation."
+      },
+      "assessment": {
+        "step": "02",
+        "label": "Needs Assessment",
+        "desc": "Rosa visits the property, meets the household team, and forms her own independent view of the operational situation."
+      },
+      "plan": {
+        "step": "03",
+        "label": "Service Plan",
+        "desc": "A tailored plan defining scope, protocols, and decision thresholds — prepared with you, not imposed on you."
+      },
+      "onboarding": {
+        "step": "04",
+        "label": "Onboarding",
+        "desc": "Rosa assumes oversight, confirms vendor relationships, documents the standards, and transitions cleanly into the engagement."
+      },
+      "management": {
+        "step": "05",
+        "label": "Active Management",
+        "desc": "Proactive, ongoing management. Monthly summaries. Quarterly reviews. You are informed, not burdened."
+      }
+    }
+  },
+  "inquiry": {
+    "headline": "Begin a confidential",
+    "headlineEmphasis": "conversation.",
+    "description": "Rosa accepts a limited number of new clients each year. All enquiries are handled with complete confidentiality.",
+    "cta": "Request a Consultation"
+  },
+  "about": {
+    "badge": "About",
+    "headline": "A different kind of",
+    "headlineEmphasis": "residential advisory practice.",
+    "bio1": "Carlota Jo was founded for principals who need one trusted operator to manage the operational layer of their residential life — not an agency, not rotating staff, but someone who understands their standard and holds it consistently.",
+    "bio2": "A small practice by design. Every client receives Rosa's direct attention. This limits how many clients she can serve — and that is precisely the point.",
+    "whatWeAreNot": {
+      "heading": "What Carlota Jo is not",
+      "items": [
+        "A traditional property management firm",
+        "A household staffing agency",
+        "A concierge service with rotating account managers",
+        "Structured around scale or volume"
+      ]
+    },
+    "beginConversation": "Begin a conversation",
+    "quote": "\"The standard is not what's expected. It's what's deserved.\"",
+    "limitedNote": "Rosa accepts a limited number of new clients each year. All enquiries handled with complete confidentiality.",
+    "ctaBegin": "Begin a Conversation"
+  },
+  "founder": {
+    "badge": "Carlota Jo",
+    "headline": "The trusted operator",
+    "headlineEmphasis": "for principals who require more.",
+    "qualities": {
+      "warmth": {
+        "title": "Warmth before structure",
+        "desc": "Rosa builds genuine relationships with principals, household teams, and vendors alike — trust is the foundation of everything."
+      },
+      "precision": {
+        "title": "Operational precision",
+        "desc": "Every process is documented, every task is owned, every gap is closed before it becomes a problem."
+      },
+      "discretion": {
+        "title": "Discretion above all",
+        "desc": "Confidentiality is not a service feature. It is the non-negotiable standard from which everything else follows."
+      },
+      "contact": {
+        "title": "Single point of contact",
+        "desc": "One number. One person. Complete accountability — no handoffs, no delegation chains, no excuses."
+      },
+      "anticipatory": {
+        "title": "Anticipatory by nature",
+        "desc": "Rosa identifies what needs attention before you notice it. She resolves quietly, escalates precisely, and never creates noise."
+      }
+    },
+    "expertise": "Areas of expertise",
+    "philosophy": "Philosophy",
+    "profile": {
+      "background": "Background",
+      "geographies": "Geographies",
+      "geographiesValue": "UK, Europe, USA, Middle East",
+      "portfolio": "Portfolio",
+      "portfolioValue": "Multiple simultaneous residences, up to 6",
+      "languages": "Languages",
+      "languagesValue": "English, Spanish, conversational French"
+    },
+    "philosophy_items": [
+      "The best operations are invisible. When a residence runs perfectly, principals don't notice — they simply live well.",
+      "Systems beat memory. Every procedure that lives in a document outlasts any individual. Rosa builds households that function without her.",
+      "Discretion is binary. There is no partial confidentiality. Every engagement is conducted as if the household's operational details are the most sensitive information in the room.",
+      "The principal's standard is the standard. Not an approximation of it, not a reasonable interpretation — the actual standard, held consistently by every vendor and every team member."
+    ]
+  },
+  "whoWeServe": {
+    "badge": "Who We Serve",
+    "headline": "A limited number of principals.",
+    "headlineEmphasis": "Carefully selected.",
+    "description": "Carlota Jo works with a deliberately small client base. Depth of engagement is the product, not a feature.",
+    "indicators": "Signs you may be the right fit",
+    "readyToSpeak": "Ready to speak with Rosa?",
+    "confidentialNote": "All conversations are handled with complete confidentiality.",
+    "beginConversation": "Begin a Conversation",
+    "viewServices": "View Services"
+  },
+  "approach": {
+    "badge": "Approach",
+    "headline": "How we work",
+    "description": "Our methodology is built around depth of engagement, not volume of deliverables. Every phase earns the right to the next.",
+    "engagementPhases": "Engagement phases",
+    "corePrinciples": "Core principles",
+    "phases": {
+      "discovery": {
+        "title": "Discovery",
+        "description": "Every engagement begins with a deep orientation session. We don't start advising until we understand the history, the constraints, the dynamics, and what's actually at stake."
+      },
+      "diagnosis": {
+        "title": "Diagnosis",
+        "description": "Before recommending anything, we map what we're actually solving — distinguishing symptoms from root causes, and commercial challenges from structural ones."
+      },
+      "strategy": {
+        "title": "Strategy",
+        "description": "We develop a structured strategic position — not a slide deck, but a clear point of view on where to go, why, and what you'll need to believe for it to be right."
+      },
+      "activation": {
+        "title": "Activation",
+        "description": "Strategy without implementation is analysis. We stay engaged through activation — ensuring that decisions translate into outcomes, and outcomes into momentum."
+      },
+      "review": {
+        "title": "Ongoing Review",
+        "description": "Markets change. Organisations evolve. The best strategy is one that adapts. Ongoing engagements include regular review cadences to stay ahead of the environment."
+      }
+    },
+    "principles": {
+      "founderFirst": {
+        "title": "Founder-first",
+        "body": "We work with founders and senior leaders who are accountable for outcomes — not delegating strategy to a junior team."
+      },
+      "smallBase": {
+        "title": "Small client base, deep engagement",
+        "body": "We limit our client intake deliberately. Depth of engagement is the product, not a feature."
+      },
+      "confidentiality": {
+        "title": "Confidentiality as default",
+        "body": "Client relationships and engagement specifics are never disclosed. Our track record is demonstrated by outcome, not by name-dropping."
+      },
+      "noRetainers": {
+        "title": "No retainers without intention",
+        "body": "We don't maintain relationships for their own sake. Every engagement has a clear purpose, and we end engagements when they've served it."
+      }
+    },
+    "readyToSpeak": "Ready to speak with Rosa?",
+    "confidentialNote": "All conversations are handled with complete confidentiality.",
+    "beginConversation": "Begin a Conversation"
+  },
+  "contact": {
+    "badge": "Request a Confidential Consultation",
+    "headline": "Begin a conversation",
+    "headlineEmphasis": "with complete discretion.",
+    "paths": {
+      "newClient": {
+        "title": "I'm exploring whether Carlota Jo is the right fit",
+        "desc": "You're considering bringing on operational support for a residence or household environment and want to understand how Rosa works."
+      },
+      "existingClient": {
+        "title": "I'm an existing client",
+        "desc": "For existing client communications, please use your designated secure contact channel or reach Rosa directly.",
+        "action": "Email Rosa directly",
+        "note": "Existing clients have a dedicated contact protocol."
+      },
+      "referral": {
+        "title": "I'm referring someone who may be a fit",
+        "desc": "Introductions from trusted contacts are welcome. Rosa will respond personally and with complete discretion."
+      },
+      "estatePartner": {
+        "title": "I represent an estate or family office",
+        "desc": "Family office principals, estate trustees, and private wealth advisors exploring operational support for a principal's residential environment."
+      },
+      "inquiry": {
+        "title": "I have a specific situation",
+        "desc": "Time-sensitive transitions, special projects, or unusual situations that don't fit standard categories — describe it and Rosa will respond personally."
+      }
+    },
+    "form": {
+      "name": "Your name",
+      "email": "Email address",
+      "message": "How can Rosa help?",
+      "howHeard": "How did you hear about Carlota Jo?",
+      "submit": "Send Message",
+      "submitting": "Sending...",
+      "success": "Thank you",
+      "successMessage": "Rosa will respond personally, with complete discretion, within two business days.",
+      "error": "Something went wrong. Please try again or email Rosa directly."
+    }
+  },
+  "common": {
+    "requestConsultation": "Request a Consultation",
+    "beginConversation": "Begin a Conversation",
+    "viewServices": "View Services",
+    "inquire": "Inquire",
+    "email": "inquiries@carlotajo.com",
+    "locations": "London · New York, NY",
+    "save": "Save",
+    "saving": "Saving…",
+    "cancel": "Cancel",
+    "edit": "Edit",
+    "delete": "Delete",
+    "add": "Add",
+    "load": "Load",
+    "loading": "Loading…",
+    "error": "Something went wrong",
+    "retry": "Retry",
+    "confirmDelete": "Delete?",
+    "curated": "Curated",
+    "curatedLong": "Carlota Jo Curated"
+  },
+  "expertNetwork": {
+    "title": "Expert Network & Team Assembly",
+    "headline": "Right Team.",
+    "headlineAccent": "Every Engagement.",
+    "subtitle": "AI matches skills to engagement needs — instantly. Availability tracking, rate management, and performance scoring in one place.",
+    "statsSize": "Network Size",
+    "statsAvail": "Available Now",
+    "statsRating": "Avg Rating",
+    "statsIndustries": "Industries",
+    "searchPlaceholder": "Search experts, skills, industries…",
+    "filterAll": "All Availability",
+    "filterTier": "All Tiers",
+    "addExpert": "Add Expert",
+    "editExpert": "Edit Expert",
+    "emptyTitle": "No experts found",
+    "emptySearch": "Try adjusting your search or filters",
+    "emptyNetwork": "Add your first expert to the network",
+    "engagements": "engagements",
+    "recentWork": "RECENT WORK",
+    "skills": "SKILLS",
+    "languages": "LANGUAGES",
+    "requestBrief": "Request Brief",
+    "assembleTitle": "AI Team Assembly",
+    "assembleSubtitle": "Describe the engagement and AI will select the optimal team from available experts.",
+    "assemblePlaceholder": "e.g. Market entry strategy for a UK fintech expanding to South-East Asia…",
+    "assemble": "Assemble Team",
+    "assembling": "Assembling…",
+    "deleteWarning": "Remove",
+    "deleteWarning2": "This cannot be undone.",
+    "formName": "Full Name",
+    "formTitle": "Title / Role",
+    "formLocation": "Location",
+    "formBio": "Bio",
+    "formRecentWork": "Recent Work",
+    "formTier": "Tier",
+    "formAvailability": "Availability",
+    "formDayRate": "Day Rate (£)",
+    "formRating": "Rating (0–5)",
+    "formSkills": "Skills",
+    "formIndustries": "Industries",
+    "formLanguages": "Languages",
+    "tiers": {
+      "principal": "Principal",
+      "senior": "Senior Consultant",
+      "specialist": "Subject Matter Expert",
+      "associate": "Associate"
+    },
+    "availability": {
+      "available": "Available",
+      "limited": "Limited Availability",
+      "booked": "Fully Booked",
+      "onEngagement": "On Engagement"
+    }
+  },
+  "knowledgeVault": {
+    "title": "Knowledge Vault",
+    "headline": "Institutional",
+    "headlineAccent": "Intelligence.",
+    "subtitle": "Searchable repository of frameworks, playbooks, templates, and case studies — governed, versioned, and matched to every engagement.",
+    "statsItems": "Total Items",
+    "statsUses": "Total Uses",
+    "statsTypes": "Content Types",
+    "statsIndustries": "Industries",
+    "searchPlaceholder": "Search frameworks, playbooks, case studies…",
+    "filterAll": "All Types",
+    "addItem": "Add Item",
+    "editItem": "Edit Knowledge Item",
+    "emptyTitle": "No items found",
+    "emptySearch": "Try adjusting your search or filters",
+    "emptyVault": "Add your first knowledge item",
+    "uses": "uses",
+    "rating": "RATING",
+    "tags": "TAGS",
+    "industries": "INDUSTRIES",
+    "by": "By",
+    "aiSearch": "AI Search",
+    "aiResultLabel": "AI Match",
+    "useItem": "Use in Engagement",
+    "deleteWarning": "Remove",
+    "deleteWarning2": "This cannot be undone.",
+    "formType": "Type",
+    "formTitle": "Title",
+    "formDescription": "Description",
+    "formAuthor": "Author",
+    "formLastUpdated": "Last Updated",
+    "formTags": "Tags",
+    "formIndustries": "Industries",
+    "formEngagements": "Related Engagements",
+    "types": {
+      "framework": "Framework",
+      "playbook": "Playbook",
+      "template": "Template",
+      "caseStudy": "Case Study",
+      "research": "Research"
+    }
+  },
+  "proposalGenerator": {
+    "title": "Proposal Generator",
+    "headline": "Proposal in",
+    "headlineAccent": "Hours, Not Weeks.",
+    "subtitle": "AI-generated, senior-reviewed proposals tailored to every prospect. Export to PDF. Save drafts.",
+    "label": "Engagement Proposal",
+    "saved": "Saved",
+    "preparedFor": "Prepared for",
+    "newProposal": "New Proposal",
+    "exportPDF": "Export PDF",
+    "generate": "Generate Proposal",
+    "generating": "Generating Proposal…",
+    "saveDraft": "Save Draft",
+    "savedDrafts": "Saved Drafts",
+    "noDrafts": "No saved drafts yet. Generate a proposal to get started.",
+    "selectTemplate": "Select Template",
+    "prospectDetails": "Prospect Details",
+    "engagementDetails": "Engagement Details",
+    "formProspectName": "Prospect Name",
+    "formProspectTitle": "Prospect Title",
+    "formCompany": "Company Name",
+    "formIndustry": "Industry",
+    "formEngagementType": "Engagement Type",
+    "formBudget": "Budget Indication",
+    "formTimeline": "Start Timeline",
+    "formChallenge": "Primary Challenge",
+    "formGoals": "Strategic Goals",
+    "formContext": "Additional Context",
+    "execSummary": "Executive Summary",
+    "situation": "Situation Assessment",
+    "scopeOfWork": "Scope of Work",
+    "team": "Team Composition",
+    "caseStudies": "Relevant Case Studies",
+    "investment": "Investment Structure",
+    "timeline": "TIMELINE",
+    "nextSteps": "NEXT STEPS",
+    "mostPopular": "Most Popular",
+    "confidential": "This proposal is confidential and prepared exclusively for the named recipient.",
+    "templates": {
+      "standard": { "name": "Standard Engagement", "desc": "Full-scope proposal with phased delivery" },
+      "rapid": { "name": "Rapid Diagnostic", "desc": "Short-form 2–4 week sprint engagement" },
+      "retainer": { "name": "Advisory Retainer", "desc": "Ongoing monthly advisory relationship" }
+    },
+    "engagementTypes": [
+      "Market Entry Strategy",
+      "Brand Positioning",
+      "Growth Strategy",
+      "Organisational Transformation",
+      "Digital Strategy",
+      "Competitive Intelligence",
+      "M&A Advisory",
+      "Pricing Strategy",
+      "Product Strategy",
+      "Other"
+    ],
+    "budgets": [
+      "< £20,000",
+      "£20,000 – £50,000",
+      "£50,000 – £100,000",
+      "£100,000 – £250,000",
+      "£250,000+",
+      "TBD / Flexible"
+    ],
+    "timelines": [
+      "As soon as possible",
+      "Within 1 month",
+      "1 – 3 months",
+      "3 – 6 months",
+      "6 – 12 months",
+      "Ongoing retainer"
+    ]
+  },
+  "clientIntel": {
+    "sources": {
+      "nps": "NPS Survey",
+      "crm": "CRM Signals",
+      "churn": "Churn Model",
+      "billing": "Billing Data"
+    }
+  }
+}

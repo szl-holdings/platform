@@ -1,0 +1,87 @@
+{
+  "name": "@szl-holdings/constellation",
+  "version": "0.0.0",
+  "private": false,
+  "type": "module",
+  "description": "Constellation \u2014 cross-domain ontology and intelligence graph for the SZL platform",
+  "exports": {
+    ".": {
+      "types": "./src/index.ts",
+      "import": "./src/index.ts"
+    },
+    "./schema": {
+      "types": "./src/schema.ts",
+      "import": "./src/schema.ts"
+    },
+    "./types": {
+      "types": "./src/types.ts",
+      "import": "./src/types.ts"
+    },
+    "./adapter": {
+      "types": "./src/adapter.ts",
+      "import": "./src/adapter.ts"
+    },
+    "./store": {
+      "types": "./src/store.ts",
+      "import": "./src/store.ts"
+    },
+    "./query": {
+      "types": "./src/query.ts",
+      "import": "./src/query.ts"
+    },
+    "./registry": {
+      "types": "./src/registry.ts",
+      "import": "./src/registry.ts"
+    },
+    "./adapters/*": {
+      "types": "./src/adapters/*.ts",
+      "import": "./src/adapters/*.ts"
+    },
+    "./entity-resolution": {
+      "types": "./src/entity-resolution.ts",
+      "import": "./src/entity-resolution.ts"
+    },
+    "./relationship-inference": {
+      "types": "./src/relationship-inference.ts",
+      "import": "./src/relationship-inference.ts"
+    },
+    "./contradiction-detection": {
+      "types": "./src/contradiction-detection.ts",
+      "import": "./src/contradiction-detection.ts"
+    },
+    "./evidence-ranking": {
+      "types": "./src/evidence-ranking.ts",
+      "import": "./src/evidence-ranking.ts"
+    },
+    "./freshness-decay": {
+      "types": "./src/freshness-decay.ts",
+      "import": "./src/freshness-decay.ts"
+    },
+    "./confidence-fusion": {
+      "types": "./src/confidence-fusion.ts",
+      "import": "./src/confidence-fusion.ts"
+    },
+    "./cross-domain": {
+      "types": "./src/cross-domain.ts",
+      "import": "./src/cross-domain.ts"
+    }
+  },
+  "dependencies": {
+    "@szl-holdings/atlas-core": "workspace:*",
+    "@szl-holdings/db": "workspace:*",
+    "@workspace/agents-evals": "workspace:*",
+    "@workspace/tool-mesh": "workspace:*",
+    "drizzle-orm": "catalog:",
+    "zod": "catalog:"
+  },
+  "devDependencies": {
+    "@types/node": "catalog:",
+    "vitest": "^4.1.7"
+  },
+  "scripts": {
+    "lint": "biome lint ./src",
+    "lint:ci": "biome lint ./src",
+    "format": "biome format --write ./src",
+    "typecheck": "tsc -p tsconfig.json --noEmit"
+  }
+}

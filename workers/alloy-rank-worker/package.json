@@ -1,0 +1,25 @@
+{
+  "name": "@workspace/alloy-rank-worker",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Alloy Embedding Fabric \u2014 cross-encoder reranking worker. Runs per-profile cross-encoder scoring in CPU mode with a lightweight fallback mode (score inversion) when no model is loaded. Accepts candidates from the hybrid-search pipeline and returns ranked results with score breakdowns.",
+  "main": "src/index.ts",
+  "types": "dist/index.d.ts",
+  "dependencies": {
+    "@workspace/aef-contracts": "workspace:*",
+    "express": "^5.0.0",
+    "zod": "catalog:"
+  },
+  "devDependencies": {
+    "@types/express": "^5.0.0",
+    "@types/node": "catalog:",
+    "tsx": "catalog:",
+    "typescript": "catalog:"
+  },
+  "scripts": {
+    "dev": "tsx watch src/server.ts",
+    "start": "tsx src/server.ts",
+    "typecheck": "tsc -p tsconfig.json --noEmit"
+  }
+}

@@ -1,0 +1,24 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 500" fill="none">
+  <rect width="800" height="500" fill="#080c14"/>
+  <text x="400" y="40" text-anchor="middle" fill="#e2e8f0" font-family="system-ui" font-size="18" font-weight="600">SZL Holdings — Platform Map</text>
+  <rect x="280" y="70" width="240" height="50" rx="6" fill="#0f1520" stroke="#d4a054" stroke-width="1.5"/>
+  <text x="400" y="100" text-anchor="middle" fill="#d4a054" font-family="system-ui" font-size="14" font-weight="600">KORA — Decision Intelligence</text>
+  <line x1="400" y1="120" x2="400" y2="150" stroke="#1e293b" stroke-width="1"/>
+  <rect x="280" y="150" width="240" height="50" rx="6" fill="#0f1520" stroke="#8b7ac8" stroke-width="1.5"/>
+  <text x="400" y="180" text-anchor="middle" fill="#8b7ac8" font-family="system-ui" font-size="14" font-weight="600">Alloy — Execution Fabric</text>
+  <line x1="400" y1="200" x2="400" y2="240" stroke="#1e293b" stroke-width="1"/>
+  <line x1="400" y1="240" x2="160" y2="280" stroke="#1e293b" stroke-width="1"/>
+  <line x1="400" y1="240" x2="400" y2="280" stroke="#1e293b" stroke-width="1"/>
+  <line x1="400" y1="240" x2="640" y2="280" stroke="#1e293b" stroke-width="1"/>
+  <rect x="60" y="280" width="200" height="50" rx="6" fill="#0f1520" stroke="#c45a4a" stroke-width="1"/>
+  <text x="160" y="310" text-anchor="middle" fill="#c45a4a" font-family="system-ui" font-size="13" font-weight="500">PARAGON — Defense &amp; Intelligence</text>
+  <rect x="300" y="280" width="200" height="50" rx="6" fill="#0f1520" stroke="#4a90b8" stroke-width="1"/>
+  <text x="400" y="310" text-anchor="middle" fill="#4a90b8" font-family="system-ui" font-size="13" font-weight="500">Vessels — Maritime Intel</text>
+  <rect x="540" y="280" width="200" height="50" rx="6" fill="#0f1520" stroke="#c8953c" stroke-width="1"/>
+  <text x="640" y="310" text-anchor="middle" fill="#c8953c" font-family="system-ui" font-size="13" font-weight="500">DOMAINE — Real Estate Intel</text>
+  <line x1="400" y1="330" x2="400" y2="370" stroke="#1e293b" stroke-width="1"/>
+  <rect x="200" y="370" width="400" height="40" rx="6" fill="#0f1520" stroke="#1e293b" stroke-width="1"/>
+  <text x="400" y="395" text-anchor="middle" fill="#94a3b8" font-family="system-ui" font-size="12">PostgreSQL · Drizzle ORM · Express 5 · React · Expo</text>
+  <rect x="200" y="430" width="400" height="40" rx="6" fill="#0f1520" stroke="#1e293b" stroke-width="1"/>
+  <text x="400" y="455" text-anchor="middle" fill="#94a3b8" font-family="system-ui" font-size="12">AI Engine · RBAC · Audit Trail · Signal Pipeline</text>
+</svg>

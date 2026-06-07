@@ -1,0 +1,29 @@
+# .doctrine-allowlist — Doctrine v11 LOCKED 749/14/163 false-positive exemptions
+#
+# Files listed here are EXEMPTED from the banned-token grep gate.
+# Exemption is NARROW: only use for files whose sole purpose is to enumerate
+# or test banned tokens — never for production code.
+#
+# Format: one glob pattern per line. Blank lines and # comments are ignored.
+# The sweep tool matches against the b-side path in the unified diff
+# (e.g. "packages/foo/src/bar.ts" without the leading "b/").
+#
+# Authority: Doctrine v11 LOCKED 749/14/163 — Founder Stephen P. Lutar Jr.
+# Added: 2026-05-31 — allowlist PR fix(ci): doctrine scanner test fixtures (unified-kernel)
+#
+# ── unified-kernel doctrine scanner (packages/unified-kernel/src/doctrine/) ──
+#
+# These files MUST contain the banned-token strings because they implement
+# and test the scanner that DETECTS those tokens. Exempting them is correct
+# doctrine; the scanner cannot detect a token it doesn't know about.
+#
+packages/unified-kernel/src/doctrine/index.ts
+packages/unified-kernel/src/doctrine/index.test.ts
+#
+# ── unified-kernel kernel integration tests ──
+#
+# kernel.test.ts exercises the banned-token FAIL path end-to-end.
+# The test must inject a banned string as a fixture to prove the scanner
+# catches it. This is correct; exempting it is not weakening the gate.
+#
+packages/unified-kernel/src/kernel.test.ts

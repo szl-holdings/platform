@@ -1,0 +1,218 @@
+{
+  "_schema_version": "1.0.0",
+  "_comment": "Alloy Meridian MCP server registry — all server entries must be signed and every capability ID must be globally unique.",
+  "governance_policy": {
+    "read_first_enforced": true,
+    "write_requires_approval": true,
+    "unknown_server_denied": true
+  },
+  "servers": [
+    {
+      "id": "github",
+      "display_name": "GitHub",
+      "description": "Repository, PR, issue, and release management",
+      "signed": true,
+      "activation_order": 1,
+      "capabilities": [
+        {
+          "id": "github.list_prs",
+          "kind": "read",
+          "description": "List open pull requests"
+        },
+        {
+          "id": "github.get_pr",
+          "kind": "read",
+          "description": "Get a single pull request by number"
+        },
+        {
+          "id": "github.create_issue",
+          "kind": "write",
+          "description": "Create a new issue",
+          "requires_approval": true
+        },
+        {
+          "id": "github.merge_pr",
+          "kind": "write",
+          "description": "Merge a pull request",
+          "requires_approval": true
+        }
+      ]
+    },
+    {
+      "id": "linear",
+      "display_name": "Linear",
+      "description": "Engineering project and issue tracker",
+      "signed": true,
+      "activation_order": 2,
+      "capabilities": [
+        {
+          "id": "linear.list_issues",
+          "kind": "read",
+          "description": "List issues in a team"
+        },
+        {
+          "id": "linear.create_issue",
+          "kind": "write",
+          "description": "Create a new Linear issue",
+          "requires_approval": true
+        },
+        {
+          "id": "linear.update_issue",
+          "kind": "write",
+          "description": "Update an existing Linear issue",
+          "requires_approval": true
+        }
+      ]
+    },
+    {
+      "id": "sentry",
+      "display_name": "Sentry",
+      "description": "Error monitoring and alerting",
+      "signed": true,
+      "activation_order": 3,
+      "capabilities": [
+        {
+          "id": "sentry.list_issues",
+          "kind": "read",
+          "description": "List unresolved error issues"
+        },
+        {
+          "id": "sentry.get_issue",
+          "kind": "read",
+          "description": "Get details of a specific Sentry issue"
+        },
+        {
+          "id": "sentry.resolve_issue",
+          "kind": "write",
+          "description": "Mark an issue as resolved",
+          "requires_approval": true
+        }
+      ]
+    },
+    {
+      "id": "posthog",
+      "display_name": "PostHog",
+      "description": "Product analytics and feature flags",
+      "signed": true,
+      "activation_order": 4,
+      "capabilities": [
+        {
+          "id": "posthog.query_events",
+          "kind": "read",
+          "description": "Query event data"
+        },
+        {
+          "id": "posthog.get_feature_flags",
+          "kind": "read",
+          "description": "List feature flags and their rollout state"
+        },
+        {
+          "id": "posthog.update_feature_flag",
+          "kind": "write",
+          "description": "Update a feature flag rollout",
+          "requires_approval": true
+        }
+      ]
+    },
+    {
+      "id": "amplitude",
+      "display_name": "Amplitude",
+      "description": "User behaviour analytics",
+      "signed": true,
+      "activation_order": 5,
+      "capabilities": [
+        {
+          "id": "amplitude.query_chart",
+          "kind": "read",
+          "description": "Query an Amplitude chart by ID"
+        },
+        {
+          "id": "amplitude.export_events",
+          "kind": "read",
+          "description": "Export raw event data for a date range"
+        }
+      ]
+    },
+    {
+      "id": "notion",
+      "display_name": "Notion",
+      "description": "Team wiki and knowledge base",
+      "signed": true,
+      "activation_order": 6,
+      "capabilities": [
+        {
+          "id": "notion.search",
+          "kind": "read",
+          "description": "Full-text search across Notion workspace"
+        },
+        {
+          "id": "notion.get_page",
+          "kind": "read",
+          "description": "Retrieve a Notion page by ID"
+        },
+        {
+          "id": "notion.create_page",
+          "kind": "write",
+          "description": "Create a new Notion page",
+          "requires_approval": true
+        }
+      ]
+    },
+    {
+      "id": "pagerduty",
+      "display_name": "PagerDuty",
+      "description": "On-call scheduling and incident management",
+      "signed": true,
+      "activation_order": 7,
+      "capabilities": [
+        {
+          "id": "pagerduty.list_incidents",
+          "kind": "read",
+          "description": "List active incidents"
+        },
+        {
+          "id": "pagerduty.get_oncall",
+          "kind": "read",
+          "description": "Get current on-call schedule"
+        },
+        {
+          "id": "pagerduty.trigger_incident",
+          "kind": "write",
+          "description": "Trigger a new incident",
+          "requires_approval": true
+        },
+        {
+          "id": "pagerduty.resolve_incident",
+          "kind": "write",
+          "description": "Resolve an active incident",
+          "requires_approval": true
+        }
+      ]
+    },
+    {
+      "id": "slack",
+      "display_name": "Slack",
+      "description": "Team communications and notifications",
+      "signed": true,
+      "activation_order": 8,
+      "capabilities": [
+        {
+          "id": "slack.list_channels",
+          "kind": "read",
+          "description": "List public channels"
+        },
+        {
+          "id": "slack.get_messages",
+          "kind": "read",
+          "description": "Read recent messages in a channel"
+        },
+        {
+          "id": "slack.post_message",
+          "kind": "write",
+          "description": "Post a message to a channel",
+          "requires_approval": true
+        }
+      ]
+    }
+  ]
+}

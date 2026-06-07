@@ -1,0 +1,109 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+
+  <!-- ============================================================
+       SZL Holdings — Maven Package Template
+       GitHub Packages Registry: https://maven.pkg.github.com/szl-holdings/szl-holdings-platform
+       
+       Usage: Copy this file to your Java/Kotlin package directory and
+       update groupId, artifactId, and name fields.
+       See docs/github/packages/maven/SETUP.md for activation guide.
+       ============================================================ -->
+
+  <groupId>com.szlholdings</groupId>
+  <artifactId>szl-holdings-template</artifactId>
+  <version>0.1.0</version>
+  <packaging>jar</packaging>
+
+  <name>SZL Holdings — Template Package</name>
+  <description>Template for SZL Holdings Java/Kotlin packages on GitHub Packages</description>
+  <url>https://github.com/szl-holdings/szl-holdings-platform</url>
+
+  <licenses>
+    <license>
+      <name>UNLICENSED</name>
+    </license>
+  </licenses>
+
+  <developers>
+    <developer>
+      <id>szl-holdings</id>
+      <name>SZL Holdings</name>
+      <email>engineering@szlholdings.com</email>
+      <organization>SZL Holdings</organization>
+      <organizationUrl>https://szlholdings.com</organizationUrl>
+    </developer>
+  </developers>
+
+  <scm>
+    <connection>scm:git:git://github.com/szl-holdings/szl-holdings-platform.git</connection>
+    <developerConnection>scm:git:ssh://github.com/szl-holdings/szl-holdings-platform.git</developerConnection>
+    <url>https://github.com/szl-holdings/szl-holdings-platform</url>
+  </scm>
+
+  <properties>
+    <maven.compiler.source>21</maven.compiler.source>
+    <maven.compiler.target>21</maven.compiler.target>
+    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+  </properties>
+
+  <!-- GitHub Packages Distribution Management -->
+  <distributionManagement>
+    <repository>
+      <id>github</id>
+      <name>GitHub Packages — SZL Holdings</name>
+      <url>https://maven.pkg.github.com/szl-holdings/szl-holdings-platform</url>
+    </repository>
+    <snapshotRepository>
+      <id>github</id>
+      <name>GitHub Packages Snapshots — SZL Holdings</name>
+      <url>https://maven.pkg.github.com/szl-holdings/szl-holdings-platform</url>
+    </snapshotRepository>
+  </distributionManagement>
+
+  <!-- GitHub Packages as source for SZL Holdings internal dependencies -->
+  <repositories>
+    <repository>
+      <id>github</id>
+      <name>GitHub Packages — SZL Holdings</name>
+      <url>https://maven.pkg.github.com/szl-holdings/szl-holdings-platform</url>
+      <releases><enabled>true</enabled></releases>
+      <snapshots><enabled>true</enabled></snapshots>
+    </repository>
+  </repositories>
+
+  <dependencies>
+    <!-- Add your dependencies here -->
+  </dependencies>
+
+  <build>
+    <plugins>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-source-plugin</artifactId>
+        <version>3.3.1</version>
+        <executions>
+          <execution>
+            <id>attach-sources</id>
+            <goals><goal>jar-no-fork</goal></goals>
+          </execution>
+        </executions>
+      </plugin>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-javadoc-plugin</artifactId>
+        <version>3.10.1</version>
+        <executions>
+          <execution>
+            <id>attach-javadocs</id>
+            <goals><goal>jar</goal></goals>
+          </execution>
+        </executions>
+      </plugin>
+    </plugins>
+  </build>
+
+</project>

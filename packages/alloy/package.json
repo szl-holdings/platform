@@ -1,0 +1,27 @@
+{
+  "name": "@workspace/alloy",
+  "version": "1.0.0",
+  "type": "module",
+  "description": "Alloy — governed multi-agent coordinator. Composes specialist sub-agents, persists tool-call ledger, and returns Open-Responses-style envelopes.",
+  "exports": {
+    ".": "./src/index.ts",
+    "./envelope": "./src/envelope.ts",
+    "./specialists": "./src/specialists.ts",
+    "./coordinator": "./src/coordinator.ts"
+  },
+  "scripts": {
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@workspace/eval-os": "workspace:*",
+    "@workspace/planner": "workspace:*",
+    "@workspace/run-ledger": "workspace:*",
+    "@szl-holdings/policy-guard": "workspace:*",
+    "@szl-holdings/retrieval-core": "workspace:*",
+    "@szl-holdings/shared-contracts": "workspace:*",
+    "zod": "catalog:"
+  },
+  "devDependencies": {
+    "typescript": "catalog:"
+  }
+}

@@ -1,0 +1,1032 @@
+{
+  "generatedAt": "2026-04-20T19:35:19.906Z",
+  "note": "Scanned all tracked .ts/.tsx/.js/.jsx files",
+  "processEnvUsage": [
+    {
+      "varName": "EXPO_PUBLIC_DOMAIN",
+      "usageCount": 140
+    },
+    {
+      "varName": "NODE_ENV",
+      "usageCount": 83
+    },
+    {
+      "varName": "REPLIT_DEV_DOMAIN",
+      "usageCount": 37
+    },
+    {
+      "varName": "GOMAXPROCS",
+      "usageCount": 24
+    },
+    {
+      "varName": "STRIPE_SECRET_KEY",
+      "usageCount": 24
+    },
+    {
+      "varName": "DATABASE_URL",
+      "usageCount": 23
+    },
+    {
+      "varName": "ALLOY_INTERNAL_TOKEN",
+      "usageCount": 22
+    },
+    {
+      "varName": "REPL_ID",
+      "usageCount": 17
+    },
+    {
+      "varName": "VITE_APP_URL",
+      "usageCount": 16
+    },
+    {
+      "varName": "APP_ENV",
+      "usageCount": 16
+    },
+    {
+      "varName": "EXPO_PUBLIC_API_BASE_URL",
+      "usageCount": 15
+    },
+    {
+      "varName": "PORT",
+      "usageCount": 14
+    },
+    {
+      "varName": "GOOGLE_MAPS_API_KEY",
+      "usageCount": 13
+    },
+    {
+      "varName": "BASE_PATH",
+      "usageCount": 12
+    },
+    {
+      "varName": "APP_URL",
+      "usageCount": 12
+    },
+    {
+      "varName": "BASE_URL",
+      "usageCount": 12
+    },
+    {
+      "varName": "SENTRY_DSN",
+      "usageCount": 11
+    },
+    {
+      "varName": "VITE_PORT",
+      "usageCount": 10
+    },
+    {
+      "varName": "SLACK_WEBHOOK_URL",
+      "usageCount": 10
+    },
+    {
+      "varName": "AI_INTEGRATIONS_OPENAI_API_KEY",
+      "usageCount": 9
+    },
+    {
+      "varName": "SLACK_BOT_TOKEN",
+      "usageCount": 8
+    },
+    {
+      "varName": "SZL_BASE_PATH",
+      "usageCount": 8
+    },
+    {
+      "varName": "SENDGRID_API_KEY",
+      "usageCount": 7
+    },
+    {
+      "varName": "RESEND_API_KEY",
+      "usageCount": 7
+    },
+    {
+      "varName": "MAPBOX_ACCESS_TOKEN",
+      "usageCount": 7
+    },
+    {
+      "varName": "OTLP_ENDPOINT",
+      "usageCount": 6
+    },
+    {
+      "varName": "OTEL_EXPORTER_OTLP_ENDPOINT",
+      "usageCount": 6
+    },
+    {
+      "varName": "AI_INTEGRATIONS_ANTHROPIC_API_KEY",
+      "usageCount": 6
+    },
+    {
+      "varName": "SZL_INTERNAL_EMAIL",
+      "usageCount": 6
+    },
+    {
+      "varName": "COMPETITIVE_INTEL_EMAIL_RECIPIENTS",
+      "usageCount": 5
+    },
+    {
+      "varName": "SESSION_SECRET",
+      "usageCount": 5
+    },
+    {
+      "varName": "AI_INTEGRATIONS_GEMINI_API_KEY",
+      "usageCount": 5
+    },
+    {
+      "varName": "AZURE_APP_INSIGHTS_CONNECTION_STRING",
+      "usageCount": 5
+    },
+    {
+      "varName": "AI_INTEGRATIONS_OPENAI_BASE_URL",
+      "usageCount": 5
+    },
+    {
+      "varName": "GITHUB_TOKEN",
+      "usageCount": 5
+    },
+    {
+      "varName": "API_BASE_URL",
+      "usageCount": 5
+    },
+    {
+      "varName": "AZURE_AD_CLIENT_ID",
+      "usageCount": 4
+    },
+    {
+      "varName": "REDIS_URL",
+      "usageCount": 4
+    },
+    {
+      "varName": "HUGGINGFACE_API_KEY",
+      "usageCount": 4
+    },
+    {
+      "varName": "CONNECTOR_ENCRYPTION_KEY",
+      "usageCount": 4
+    },
+    {
+      "varName": "DEMO_MODE",
+      "usageCount": 4
+    },
+    {
+      "varName": "GITHUB_STEP_SUMMARY",
+      "usageCount": 4
+    },
+    {
+      "varName": "COMMAND_BASE_PATH",
+      "usageCount": 4
+    },
+    {
+      "varName": "__FAST_START_SERVER",
+      "usageCount": 3
+    },
+    {
+      "varName": "OTEL_SERVICE_NAME",
+      "usageCount": 3
+    },
+    {
+      "varName": "OTEL_CONSOLE_EXPORT",
+      "usageCount": 3
+    },
+    {
+      "varName": "CORS_ORIGINS",
+      "usageCount": 3
+    },
+    {
+      "varName": "SLACK_ALERT_CHANNEL",
+      "usageCount": 3
+    },
+    {
+      "varName": "AZURE_AD_TENANT_ID",
+      "usageCount": 3
+    },
+    {
+      "varName": "AZURE_AD_CLIENT_SECRET",
+      "usageCount": 3
+    },
+    {
+      "varName": "SMTP_HOST",
+      "usageCount": 3
+    },
+    {
+      "varName": "SMTP_USER",
+      "usageCount": 3
+    },
+    {
+      "varName": "AZURE_REDIS_CONNECTION_STRING",
+      "usageCount": 3
+    },
+    {
+      "varName": "FIELD_ENCRYPTION_KEY",
+      "usageCount": 3
+    },
+    {
+      "varName": "STRIPE_WEBHOOK_SECRET",
+      "usageCount": 3
+    },
+    {
+      "varName": "ADMIN_PIN",
+      "usageCount": 3
+    },
+    {
+      "varName": "POSTHOG_API_KEY",
+      "usageCount": 3
+    },
+    {
+      "varName": "VITE_POSTHOG_KEY",
+      "usageCount": 3
+    },
+    {
+      "varName": "VITE_AMPLITUDE_API_KEY",
+      "usageCount": 3
+    },
+    {
+      "varName": "VITE_MAPBOX_TOKEN",
+      "usageCount": 3
+    },
+    {
+      "varName": "SUBSTRATE_GATEWAY_API_KEY",
+      "usageCount": 3
+    },
+    {
+      "varName": "CHROMIUM_PATH",
+      "usageCount": 3
+    },
+    {
+      "varName": "PUPPETEER_EXECUTABLE_PATH",
+      "usageCount": 3
+    },
+    {
+      "varName": "AEGIS_BASE_PATH",
+      "usageCount": 3
+    },
+    {
+      "varName": "OBJECT_STORAGE_BUCKET_ID",
+      "usageCount": 2
+    },
+    {
+      "varName": "NEW_RELIC_LICENSE_KEY",
+      "usageCount": 2
+    },
+    {
+      "varName": "SMTP_PASS",
+      "usageCount": 2
+    },
+    {
+      "varName": "PRIVATE_OBJECT_DIR",
+      "usageCount": 2
+    },
+    {
+      "varName": "ALLOY_DIGEST_SLACK_CHANNEL",
+      "usageCount": 2
+    },
+    {
+      "varName": "FOUNDER_ALERT_EMAIL",
+      "usageCount": 2
+    },
+    {
+      "varName": "MFA_SECRET_ENCRYPTION_KEY",
+      "usageCount": 2
+    },
+    {
+      "varName": "OAUTH_STATE_SECRET",
+      "usageCount": 2
+    },
+    {
+      "varName": "RUNTIME_MODE",
+      "usageCount": 2
+    },
+    {
+      "varName": "AI_EXECUTION_MODE",
+      "usageCount": 2
+    },
+    {
+      "varName": "STRIPE_PUBLISHABLE_KEY",
+      "usageCount": 2
+    },
+    {
+      "varName": "MICROSOFT_TENANT_ID",
+      "usageCount": 2
+    },
+    {
+      "varName": "PURVIEW_ENABLED",
+      "usageCount": 2
+    },
+    {
+      "varName": "VITE_ADMIN_PIN",
+      "usageCount": 2
+    },
+    {
+      "varName": "SELF_HEALING_DEMO_SEED",
+      "usageCount": 2
+    },
+    {
+      "varName": "PLAYWRIGHT_CHROMIUM_EXECUTABLE",
+      "usageCount": 2
+    },
+    {
+      "varName": "EXPO_PUBLIC_APP_MODE",
+      "usageCount": 2
+    },
+    {
+      "varName": "EXPO_PUBLIC_ISSUER_URL",
+      "usageCount": 2
+    },
+    {
+      "varName": "EXPO_PUBLIC_REPL_ID",
+      "usageCount": 2
+    },
+    {
+      "varName": "EXPO_PUBLIC_DEMO_MODE",
+      "usageCount": 2
+    },
+    {
+      "varName": "EXPO_PUBLIC_",
+      "usageCount": 2
+    },
+    {
+      "varName": "PLAYWRIGHT_BASE_URL",
+      "usageCount": 2
+    },
+    {
+      "varName": "PLAYWRIGHT_CHROMIUM_PATH",
+      "usageCount": 2
+    },
+    {
+      "varName": "GH_TOKEN",
+      "usageCount": 2
+    },
+    {
+      "varName": "REPL_IDENTITY",
+      "usageCount": 2
+    },
+    {
+      "varName": "WEB_REPL_RENEWAL",
+      "usageCount": 2
+    },
+    {
+      "varName": "API_URL",
+      "usageCount": 2
+    },
+    {
+      "varName": "VITE_SENTRY_DSN",
+      "usageCount": 2
+    },
+    {
+      "varName": "SEED_ORG_ID",
+      "usageCount": 2
+    },
+    {
+      "varName": "INTEGRATION_TEST_TOKEN",
+      "usageCount": 2
+    },
+    {
+      "varName": "CARLOTA_BASE_PATH",
+      "usageCount": 2
+    },
+    {
+      "varName": "VESSELS_BASE_PATH",
+      "usageCount": 2
+    },
+    {
+      "varName": "TERRA_BASE_PATH",
+      "usageCount": 2
+    },
+    {
+      "varName": "LYTE_BASE_PATH",
+      "usageCount": 2
+    },
+    {
+      "varName": "CHECKPOINT_RUN_TAG",
+      "usageCount": 1
+    },
+    {
+      "varName": "SUBSTRATE_GATEWAY_PORT",
+      "usageCount": 1
+    },
+    {
+      "varName": "COMMIT_SHA",
+      "usageCount": 1
+    },
+    {
+      "varName": "BUILD_TIMESTAMP",
+      "usageCount": 1
+    },
+    {
+      "varName": "ATLAS_SCHEMA_VERSION",
+      "usageCount": 1
+    },
+    {
+      "varName": "REDIS_HOST",
+      "usageCount": 1
+    },
+    {
+      "varName": "S3_BUCKET",
+      "usageCount": 1
+    },
+    {
+      "varName": "OBJECT_STORE_BUCKET",
+      "usageCount": 1
+    },
+    {
+      "varName": "EXPO_ACCESS_TOKEN",
+      "usageCount": 1
+    },
+    {
+      "varName": "AI_TRACE_HYDRATE_LIMIT",
+      "usageCount": 1
+    },
+    {
+      "varName": "AI_REVIEW_HYDRATE_LIMIT",
+      "usageCount": 1
+    },
+    {
+      "varName": "ISSUER_URL",
+      "usageCount": 1
+    },
+    {
+      "varName": "BACKUP_DIR",
+      "usageCount": 1
+    },
+    {
+      "varName": "COMPETITIVE_INTEL_SLACK_CHANNEL",
+      "usageCount": 1
+    },
+    {
+      "varName": "SYNTHETIC_ALERTS",
+      "usageCount": 1
+    },
+    {
+      "varName": "GUARDIAN_TIER_CACHE_TTL_MS",
+      "usageCount": 1
+    },
+    {
+      "varName": "SMTP_PORT",
+      "usageCount": 1
+    },
+    {
+      "varName": "EMAIL_PROVIDER",
+      "usageCount": 1
+    },
+    {
+      "varName": "STEPHEN_ADMIN_EMAIL",
+      "usageCount": 1
+    },
+    {
+      "varName": "CARLOTA_ADMIN_EMAIL",
+      "usageCount": 1
+    },
+    {
+      "varName": "GUARDIAN_POLICY_SYNC_INTERVAL_MS",
+      "usageCount": 1
+    },
+    {
+      "varName": "HEALTH_DEGRADED_ALERT_CHANNEL",
+      "usageCount": 1
+    },
+    {
+      "varName": "HEALTH_DEGRADED_ALERT_SEVERITY",
+      "usageCount": 1
+    },
+    {
+      "varName": "OPENAI_BASE_URL",
+      "usageCount": 1
+    },
+    {
+      "varName": "OPENAI_API_KEY",
+      "usageCount": 1
+    },
+    {
+      "varName": "AIS_FEED_ENABLED",
+      "usageCount": 1
+    },
+    {
+      "varName": "STIX_FEED_ENABLED",
+      "usageCount": 1
+    },
+    {
+      "varName": "SANCTIONS_FEED_ENABLED",
+      "usageCount": 1
+    },
+    {
+      "varName": "LEGAL_FEED_ENABLED",
+      "usageCount": 1
+    },
+    {
+      "varName": "LOG_LEVEL",
+      "usageCount": 1
+    },
+    {
+      "varName": "MICROSOFT_TEAMS_WEBHOOK_URL",
+      "usageCount": 1
+    },
+    {
+      "varName": "PUBLIC_OBJECT_SEARCH_PATHS",
+      "usageCount": 1
+    },
+    {
+      "varName": "UPTIME_MONITOR_ID",
+      "usageCount": 1
+    },
+    {
+      "varName": "TRACE_RETENTION_DAYS",
+      "usageCount": 1
+    },
+    {
+      "varName": "MEMORY_EPHEMERAL_MAX_AGE_MIN",
+      "usageCount": 1
+    },
+    {
+      "varName": "SIGNAL_RETENTION_DAYS",
+      "usageCount": 1
+    },
+    {
+      "varName": "EVIDENCE_RETENTION_DAYS",
+      "usageCount": 1
+    },
+    {
+      "varName": "RECOMMENDATION_RETENTION_DAYS",
+      "usageCount": 1
+    },
+    {
+      "varName": "ENTITY_SNAPSHOT_RETENTION_DAYS",
+      "usageCount": 1
+    },
+    {
+      "varName": "CHECKPOINT_RETENTION_HOURS",
+      "usageCount": 1
+    },
+    {
+      "varName": "PERSISTENCE_RETENTION_INTERVAL_MS",
+      "usageCount": 1
+    },
+    {
+      "varName": "PERSISTENCE_FLUSH_INTERVAL_MS",
+      "usageCount": 1
+    },
+    {
+      "varName": "TRACE_HYDRATE_LIMIT",
+      "usageCount": 1
+    },
+    {
+      "varName": "MEMORY_HYDRATE_LIMIT",
+      "usageCount": 1
+    },
+    {
+      "varName": "ATLAS_RETENTION_DAYS",
+      "usageCount": 1
+    },
+    {
+      "varName": "PROOF_CHAIN_DIGEST_EMAIL_RECIPIENTS",
+      "usageCount": 1
+    },
+    {
+      "varName": "PROOF_CHAIN_DIGEST_SLACK_CHANNEL",
+      "usageCount": 1
+    },
+    {
+      "varName": "STUCK_RUN_HARD_TIMEOUT_MS",
+      "usageCount": 1
+    },
+    {
+      "varName": "SENTRY_TRACES_SAMPLE_RATE",
+      "usageCount": 1
+    },
+    {
+      "varName": "SENTRY_PROFILES_SAMPLE_RATE",
+      "usageCount": 1
+    },
+    {
+      "varName": "PUBLIC_APP_URL",
+      "usageCount": 1
+    },
+    {
+      "varName": "SERVICE_ROLE_KEY",
+      "usageCount": 1
+    },
+    {
+      "varName": "ALLOY_REQUIRE_APPROVAL_CRITICAL",
+      "usageCount": 1
+    },
+    {
+      "varName": "DEFAULT_ORG_STORAGE_QUOTA_BYTES",
+      "usageCount": 1
+    },
+    {
+      "varName": "VAPID_PUBLIC_KEY",
+      "usageCount": 1
+    },
+    {
+      "varName": "VAPID_PRIVATE_KEY",
+      "usageCount": 1
+    },
+    {
+      "varName": "VAPID_SUBJECT",
+      "usageCount": 1
+    },
+    {
+      "varName": "GUARDIAN_ENFORCE",
+      "usageCount": 1
+    },
+    {
+      "varName": "SUPPORT_EMAIL_NOTIFICATIONS",
+      "usageCount": 1
+    },
+    {
+      "varName": "FEDERATION_API_TOKENS",
+      "usageCount": 1
+    },
+    {
+      "varName": "SLACK_SIGNING_SECRET",
+      "usageCount": 1
+    },
+    {
+      "varName": "ALLOY_EMAIL_INGEST_SECRET",
+      "usageCount": 1
+    },
+    {
+      "varName": "STRIPE_PRICE_STRATEGY_SESSION",
+      "usageCount": 1
+    },
+    {
+      "varName": "STRIPE_PRICE_PORTFOLIO_REVIEW",
+      "usageCount": 1
+    },
+    {
+      "varName": "STRIPE_PRICE_ADVISORY_RETAINER",
+      "usageCount": 1
+    },
+    {
+      "varName": "STRIPE_PRICE_AEGIS_ENTERPRISE",
+      "usageCount": 1
+    },
+    {
+      "varName": "CORTEX_SNAPSHOT_RETENTION_DAYS",
+      "usageCount": 1
+    },
+    {
+      "varName": "AMPLITUDE_API_KEY",
+      "usageCount": 1
+    },
+    {
+      "varName": "DOCUSIGN_BASE_URL",
+      "usageCount": 1
+    },
+    {
+      "varName": "DOCUSIGN_ACCOUNT_ID",
+      "usageCount": 1
+    },
+    {
+      "varName": "DOCUSIGN_CLIENT_ID",
+      "usageCount": 1
+    },
+    {
+      "varName": "DOCUSIGN_USER_ID",
+      "usageCount": 1
+    },
+    {
+      "varName": "DOCUSIGN_PRIVATE_KEY",
+      "usageCount": 1
+    },
+    {
+      "varName": "DOCUSIGN_AUTH_URL",
+      "usageCount": 1
+    },
+    {
+      "varName": "DOCUSIGN_CONNECT_HMAC_KEY",
+      "usageCount": 1
+    },
+    {
+      "varName": "HUBSPOT_ACCESS_TOKEN",
+      "usageCount": 1
+    },
+    {
+      "varName": "AZURE_STORAGE_CONNECTION_STRING",
+      "usageCount": 1
+    },
+    {
+      "varName": "DATAVERSE_ORG_URL",
+      "usageCount": 1
+    },
+    {
+      "varName": "DATAVERSE_TENANT_ID",
+      "usageCount": 1
+    },
+    {
+      "varName": "DATAVERSE_CLIENT_ID",
+      "usageCount": 1
+    },
+    {
+      "varName": "DATAVERSE_CLIENT_SECRET",
+      "usageCount": 1
+    },
+    {
+      "varName": "HF_TOKEN",
+      "usageCount": 1
+    },
+    {
+      "varName": "BUILD_VERSION",
+      "usageCount": 1
+    },
+    {
+      "varName": "MICROSOFT_CLIENT_ID",
+      "usageCount": 1
+    },
+    {
+      "varName": "MICROSOFT_CLIENT_SECRET",
+      "usageCount": 1
+    },
+    {
+      "varName": "ENABLE_DEMO_SEED",
+      "usageCount": 1
+    },
+    {
+      "varName": "APP_BASE_URL",
+      "usageCount": 1
+    },
+    {
+      "varName": "SUPPORT_ADMIN_EMAIL",
+      "usageCount": 1
+    },
+    {
+      "varName": "EQUIFAX_API_KEY",
+      "usageCount": 1
+    },
+    {
+      "varName": "USAGE_EVENT_SERVICE_TOKEN",
+      "usageCount": 1
+    },
+    {
+      "varName": "VESSELS_BOL_HMAC_SECRET",
+      "usageCount": 1
+    },
+    {
+      "varName": "COURT_LISTENER_API_KEY",
+      "usageCount": 1
+    },
+    {
+      "varName": "AZURE_DOC_INTEL_ENDPOINT",
+      "usageCount": 1
+    },
+    {
+      "varName": "AZURE_DOC_INTEL_KEY",
+      "usageCount": 1
+    },
+    {
+      "varName": "MICROSOFT_GRAPH_TOKEN",
+      "usageCount": 1
+    },
+    {
+      "varName": "GOOGLE_SERVICE_INFO_PLIST",
+      "usageCount": 1
+    },
+    {
+      "varName": "GOOGLE_SERVICES_JSON",
+      "usageCount": 1
+    },
+    {
+      "varName": "EXPO_PUBLIC_PULSE_URL",
+      "usageCount": 1
+    },
+    {
+      "varName": "EXPO_PUBLIC_STRIPE_PRICE_MOBILE",
+      "usageCount": 1
+    },
+    {
+      "varName": "EXPO_PUBLIC_POSTHOG_KEY",
+      "usageCount": 1
+    },
+    {
+      "varName": "EXPO_PUBLIC_POSTHOG_HOST",
+      "usageCount": 1
+    },
+    {
+      "varName": "EXPO_PUBLIC_AMPLITUDE_API_KEY",
+      "usageCount": 1
+    },
+    {
+      "varName": "EXPO_PUBLIC_SANDBOX_API_BASE",
+      "usageCount": 1
+    },
+    {
+      "varName": "EXPO_PUBLIC_SENTRY_DSN",
+      "usageCount": 1
+    },
+    {
+      "varName": "EXPO_PUBLIC_APP_ENV",
+      "usageCount": 1
+    },
+    {
+      "varName": "EXPO_PORT",
+      "usageCount": 1
+    },
+    {
+      "varName": "SZL_WEBHOOK_SECRET",
+      "usageCount": 1
+    },
+    {
+      "varName": "EXPO_PUBLIC_API_URL",
+      "usageCount": 1
+    },
+    {
+      "varName": "SZL_API_BASE",
+      "usageCount": 1
+    },
+    {
+      "varName": "SZL_INTERNAL_TOKEN",
+      "usageCount": 1
+    },
+    {
+      "varName": "CI",
+      "usageCount": 1
+    },
+    {
+      "varName": "GITHUB_OWNER",
+      "usageCount": 1
+    },
+    {
+      "varName": "GITHUB_REPO",
+      "usageCount": 1
+    },
+    {
+      "varName": "REPLIT_CONNECTORS_HOSTNAME",
+      "usageCount": 1
+    },
+    {
+      "varName": "HEALTH_TIMEOUT",
+      "usageCount": 1
+    },
+    {
+      "varName": "SKIP_E2E",
+      "usageCount": 1
+    },
+    {
+      "varName": "SMOKE_TIMEOUT_MS",
+      "usageCount": 1
+    },
+    {
+      "varName": "SMOKE_TIMEOUT",
+      "usageCount": 1
+    },
+    {
+      "varName": "SMOKE_CONCURRENCY",
+      "usageCount": 1
+    },
+    {
+      "varName": "SZL_URL",
+      "usageCount": 1
+    },
+    {
+      "varName": "AEGIS_URL",
+      "usageCount": 1
+    },
+    {
+      "varName": "TERRA_URL",
+      "usageCount": 1
+    },
+    {
+      "varName": "VESSELS_URL",
+      "usageCount": 1
+    },
+    {
+      "varName": "CJ_URL",
+      "usageCount": 1
+    },
+    {
+      "varName": "CMD_URL",
+      "usageCount": 1
+    },
+    {
+      "varName": "API_PORT",
+      "usageCount": 1
+    },
+    {
+      "varName": "E2E_VESSEL_ID",
+      "usageCount": 1
+    },
+    {
+      "varName": "E2E_TERRA_PROPERTY_ID",
+      "usageCount": 1
+    },
+    {
+      "varName": "E2E_PRISM_MATTER_ID",
+      "usageCount": 1
+    },
+    {
+      "varName": "E2E_AEGIS_FINDING_ID",
+      "usageCount": 1
+    },
+    {
+      "varName": "E2E_CARLOTA_INQUIRY_ID",
+      "usageCount": 1
+    },
+    {
+      "varName": "E2E_LYTE_ENTITY_ID",
+      "usageCount": 1
+    },
+    {
+      "varName": "COUNSEL_BASE_PATH",
+      "usageCount": 1
+    },
+    {
+      "varName": "FORGE_BASE_PATH",
+      "usageCount": 1
+    },
+    {
+      "varName": "IMPERIUM_BASE_PATH",
+      "usageCount": 1
+    },
+    {
+      "varName": "PRISM_BASE_PATH",
+      "usageCount": 1
+    },
+    {
+      "varName": "PULSE_BASE_PATH",
+      "usageCount": 1
+    },
+    {
+      "varName": "SENTRA_BASE_PATH",
+      "usageCount": 1
+    },
+    {
+      "varName": "STEPHEN_BASE_PATH",
+      "usageCount": 1
+    }
+  ],
+  "importMetaEnvUsage": [
+    {
+      "varName": "BASE_URL",
+      "usageCount": 118
+    },
+    {
+      "varName": "VITE_API_URL",
+      "usageCount": 39
+    },
+    {
+      "varName": "DEV",
+      "usageCount": 19
+    },
+    {
+      "varName": "VITE_PLAUSIBLE_DOMAIN",
+      "usageCount": 7
+    },
+    {
+      "varName": "VITE_DEPLOY_ENV",
+      "usageCount": 3
+    },
+    {
+      "varName": "PROD",
+      "usageCount": 3
+    },
+    {
+      "varName": "VITE_DEMO_ALLOWED",
+      "usageCount": 3
+    },
+    {
+      "varName": "VITE_IS_DEMO",
+      "usageCount": 1
+    },
+    {
+      "varName": "VITE_SUBSTRATE_GATEWAY_URL",
+      "usageCount": 1
+    },
+    {
+      "varName": "VITE_SUBSTRATE_DEMO_MODE",
+      "usageCount": 1
+    },
+    {
+      "varName": "VITE_STRIPE_PRICE_PULSE_EXECUTIVE",
+      "usageCount": 1
+    },
+    {
+      "varName": "VITE_STRIPE_PRICE_SZL_PRO",
+      "usageCount": 1
+    },
+    {
+      "varName": "VITE_APP_MODE",
+      "usageCount": 1
+    },
+    {
+      "varName": "VITE_SANDBOX_API_BASE",
+      "usageCount": 1
+    },
+    {
+      "varName": "VITE_POSTHOG_KEY",
+      "usageCount": 1
+    },
+    {
+      "varName": "VITE_POSTHOG_HOST",
+      "usageCount": 1
+    },
+    {
+      "varName": "VITE_PLAUSIBLE_SHARED_URL",
+      "usageCount": 1
+    },
+    {
+      "varName": "MODE",
+      "usageCount": 1
+    },
+    {
+      "varName": "VITE_STRIPE_PRICE_VESSELS_ENTERPRISE",
+      "usageCount": 1
+    }
+  ]
+}

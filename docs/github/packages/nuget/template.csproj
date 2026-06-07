@@ -1,0 +1,44 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <!-- ============================================================
+       SZL Holdings — NuGet Package Template (.csproj)
+       GitHub Packages Registry: https://nuget.pkg.github.com/szl-holdings
+       
+       Usage: Copy this file to your .NET package directory and
+       update PackageId, Description, and other metadata fields.
+       See docs/github/packages/nuget/SETUP.md for activation guide.
+       ============================================================ -->
+
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+
+    <!-- Package Metadata -->
+    <PackageId>SzlHoldings.TemplateName</PackageId>
+    <Version>0.1.0</Version>
+    <Authors>SZL Holdings</Authors>
+    <Company>SZL Holdings</Company>
+    <Product>SZL Holdings Platform</Product>
+    <Description>Template for SZL Holdings .NET packages on GitHub Packages.</Description>
+    <PackageTags>szl-holdings;enterprise;platform</PackageTags>
+    <PackageProjectUrl>https://github.com/szl-holdings/szl-holdings-platform</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/szl-holdings/szl-holdings-platform</RepositoryUrl>
+    <RepositoryType>git</RepositoryType>
+    <PackageLicenseExpression>LicenseRef-UNLICENSED</PackageLicenseExpression>
+
+    <!-- Publishing -->
+    <GeneratePackageOnBuild>false</GeneratePackageOnBuild>
+    <IncludeSymbols>true</IncludeSymbols>
+    <SymbolPackageFormat>snupkg</SymbolPackageFormat>
+
+    <!-- Source Link for debugging -->
+    <PublishRepositoryUrl>true</PublishRepositoryUrl>
+    <EmbedUntrackedSources>true</EmbedUntrackedSources>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.SourceLink.GitHub" Version="8.0.0" PrivateAssets="All"/>
+  </ItemGroup>
+
+</Project>

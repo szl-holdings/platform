@@ -1,0 +1,93 @@
+{
+  "schema_version": "1.0.0",
+  "engine": "a11oy-substrate",
+  "project": "SZL Holdings",
+  "mode": "engine-only",
+  "generated_model": "gpt-5.5-2026-04-23",
+  "output_dir": "reports/a11oy-substrate/artifacts",
+  "security": {
+    "output_restricted_to": "reports/a11oy-substrate/artifacts",
+    "atomic_writes": true,
+    "redact_absolute_paths": true,
+    "artifact_file_mode": "0600"
+  },
+  "verticals": [
+    {
+      "id": "pulse",
+      "title": "Pulse",
+      "purpose": "Founder Operating Channel",
+      "artifact_dir": "artifacts/pulse",
+      "twin_type": "founder_twin",
+      "signal_sources": ["github", "linear", "sentry"],
+      "output_class": "pulse_daily_brief_v1",
+      "owner": "founder@szl"
+    },
+    {
+      "id": "finance_fincept",
+      "title": "Finance / Fincept",
+      "purpose": "Capital Weather",
+      "artifact_dir": "artifacts/szl-holdings",
+      "twin_type": "capital_twin",
+      "signal_sources": ["quickbooks", "stripe", "market_feed"],
+      "output_class": "capital_weather_v1",
+      "owner": "cfo@szl"
+    },
+    {
+      "id": "lyte_kora",
+      "title": "Lyte / KORA",
+      "purpose": "Decision Debt Ledger",
+      "artifact_dir": "artifacts/lyte-command-center",
+      "twin_type": "decision_twin",
+      "signal_sources": ["linear", "slack", "governance_db"],
+      "output_class": "decision_debt_report_v1",
+      "owner": "ops@szl"
+    },
+    {
+      "id": "terra",
+      "title": "Terra",
+      "purpose": "Acquisition Time Machine",
+      "artifact_dir": "artifacts/terra",
+      "twin_type": "property_twin",
+      "signal_sources": ["property_db", "fema", "appraisal_feed"],
+      "output_class": "acquisition_risk_v1",
+      "owner": "acquisitions@szl"
+    },
+    {
+      "id": "vessels",
+      "title": "Vessels",
+      "purpose": "Voyage Risk Exchange",
+      "artifact_dir": "artifacts/vessels",
+      "twin_type": "fleet_twin",
+      "signal_sources": ["ais", "weather", "compliance"],
+      "output_class": "voyage_risk_recommendation_v1",
+      "owner": "vessels-ops@szl"
+    },
+    {
+      "id": "prism_counsel",
+      "title": "PRISM Counsel",
+      "purpose": "Matter Flight Recorder",
+      "artifact_dir": "artifacts/counsel",
+      "twin_type": "matter_twin",
+      "signal_sources": ["docket", "contracts", "regulatory"],
+      "output_class": "matter_risk_v1",
+      "owner": "gc@szl"
+    },
+    {
+      "id": "marketing_growth",
+      "title": "Marketing / Growth",
+      "purpose": "Proof-To-Pipeline Engine",
+      "artifact_dir": "artifacts/carlota-jo",
+      "twin_type": "pipeline_twin",
+      "signal_sources": ["hubspot", "linkedin", "analytics"],
+      "output_class": "pipeline_brief_v1",
+      "owner": "growth@szl"
+    }
+  ],
+  "strategy_assets": {
+    "blueprint": "reports/a11oy-substrate/website/a11oy_web_blueprint.json",
+    "landing_copy": "reports/a11oy-substrate/website/landing_page_copy.md",
+    "competitive_outline": "reports/a11oy-substrate/website/competitive_pdf_outline.md",
+    "execution_plan": "reports/a11oy-substrate/website/next_week_execution_plan.md",
+    "bundle_export": "reports/a11oy-substrate/website/export_strategy_bundle.py"
+  }
+}

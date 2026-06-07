@@ -1,0 +1,33 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 700 350" fill="none">
+  <rect width="700" height="350" fill="#080c14"/>
+  <text x="350" y="30" text-anchor="middle" fill="#e2e8f0" font-family="system-ui" font-size="16" font-weight="600">Source of Truth → Public Mirror</text>
+  <rect x="40" y="60" width="280" height="240" rx="8" fill="#0f1520" stroke="#d4a054" stroke-width="1.5"/>
+  <text x="180" y="85" text-anchor="middle" fill="#d4a054" font-family="system-ui" font-size="13" font-weight="600">Replit Workspace (Source of Truth)</text>
+  <text x="60" y="115" fill="#94a3b8" font-family="system-ui" font-size="11">artifacts/    — 16 apps</text>
+  <text x="60" y="135" fill="#94a3b8" font-family="system-ui" font-size="11">lib/          — shared libraries</text>
+  <text x="60" y="155" fill="#94a3b8" font-family="system-ui" font-size="11">docs/         — architecture, trust</text>
+  <text x="60" y="175" fill="#94a3b8" font-family="system-ui" font-size="11">infra/        — IaC templates</text>
+  <text x="60" y="195" fill="#94a3b8" font-family="system-ui" font-size="11">.github/      — templates</text>
+  <text x="60" y="225" fill="#c45a4a" font-family="system-ui" font-size="11">backups/      — EXCLUDED</text>
+  <text x="60" y="245" fill="#c45a4a" font-family="system-ui" font-size="11">.archive/     — EXCLUDED</text>
+  <text x="60" y="265" fill="#c45a4a" font-family="system-ui" font-size="11">secrets/env   — EXCLUDED</text>
+  <text x="60" y="285" fill="#c45a4a" font-family="system-ui" font-size="11">test-results/ — EXCLUDED</text>
+  <line x1="320" y1="180" x2="380" y2="180" stroke="#d4a054" stroke-width="1.5"/>
+  <polygon points="375,175 385,180 375,185" fill="#d4a054"/>
+  <rect x="380" y="110" width="130" height="140" rx="6" fill="#0f1520" stroke="#8b7ac8" stroke-width="1"/>
+  <text x="445" y="135" text-anchor="middle" fill="#8b7ac8" font-family="system-ui" font-size="12" font-weight="500">Mirror Scripts</text>
+  <text x="395" y="160" fill="#94a3b8" font-family="system-ui" font-size="10">prepare</text>
+  <text x="395" y="180" fill="#94a3b8" font-family="system-ui" font-size="10">validate</text>
+  <text x="395" y="200" fill="#94a3b8" font-family="system-ui" font-size="10">detect-noisy</text>
+  <text x="395" y="220" fill="#94a3b8" font-family="system-ui" font-size="10">report</text>
+  <line x1="510" y1="180" x2="540" y2="180" stroke="#8b7ac8" stroke-width="1.5"/>
+  <polygon points="535,175 545,180 535,185" fill="#8b7ac8"/>
+  <rect x="540" y="100" width="140" height="80" rx="6" fill="#0f1520" stroke="#4a90b8" stroke-width="1.5"/>
+  <text x="610" y="125" text-anchor="middle" fill="#4a90b8" font-family="system-ui" font-size="12" font-weight="600">GitHub Public</text>
+  <text x="610" y="145" text-anchor="middle" fill="#94a3b8" font-family="system-ui" font-size="10">szl-holdings-platform</text>
+  <text x="610" y="165" text-anchor="middle" fill="#64748b" font-family="system-ui" font-size="9">Curated mirror</text>
+  <rect x="540" y="210" width="140" height="60" rx="6" fill="#0f1520" stroke="#1e293b" stroke-width="1"/>
+  <text x="610" y="235" text-anchor="middle" fill="#e2e8f0" font-family="system-ui" font-size="12" font-weight="500">Profile README</text>
+  <text x="610" y="255" text-anchor="middle" fill="#64748b" font-family="system-ui" font-size="9">stephenlutar2-hash</text>
+  <text x="350" y="330" text-anchor="middle" fill="#475569" font-family="system-ui" font-size="10">Proprietary content excluded · Trust docs included · Architecture visuals included</text>
+</svg>

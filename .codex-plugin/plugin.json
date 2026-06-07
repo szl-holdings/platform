@@ -1,0 +1,36 @@
+{
+  "schemaVersion": "1.0",
+  "name": "PluginMesh",
+  "slug": "pluginmesh",
+  "version": "1.0.0",
+  "description": "Safe plugin broker for Codex. Searches a catalog of 50+ plugins across 7 categories, maps user goals to the best primary and supporting plugins, and generates .app.json, .mcp.json, and Replit payloads for plugin development. Never bypasses plugin installation, OAuth, or user consent.",
+  "author": "SZL Holdings",
+  "homepage": "https://szlholdings.com/pluginmesh",
+  "repository": "https://github.com/szl-holdings/monorepo",
+  "license": "MIT",
+  "permissions": ["tools", "filesystem.read"],
+  "mcpServer": {
+    "transport": "stdio",
+    "command": "node",
+    "args": ["scripts/mcp-server.mjs"]
+  },
+  "tools": [
+    "pluginmesh_search",
+    "pluginmesh_get",
+    "pluginmesh_categories",
+    "pluginmesh_route",
+    "pluginmesh_app_manifest_template",
+    "pluginmesh_replit_payload",
+    "pluginmesh_automation_catalog",
+    "pluginmesh_alloy_commands",
+    "pluginmesh_replit_ecosystem_payload",
+    "pluginmesh_hf_model_router",
+    "pluginmesh_alloy_meridian_blueprint",
+    "pluginmesh_replit_mcp_activation"
+  ],
+  "security": {
+    "neverBypassAuth": true,
+    "neverClaimUnauthenticatedAccess": true,
+    "generateSetupTemplatesOnly": true
+  }
+}

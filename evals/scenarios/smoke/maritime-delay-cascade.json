@@ -1,0 +1,26 @@
+{
+  "name": "maritime-delay-cascade",
+  "domain": "vessels",
+  "description": "Port delay signal triggers cross-domain cascade to Terra and Legal",
+  "trigger": {
+    "type": "signal",
+    "domain": "vessels",
+    "signal": "port_delay_hours",
+    "value": 48
+  },
+  "expected_cascade": [
+    "terra",
+    "prism-counsel"
+  ],
+  "expectations": {
+    "correctness": 0.85,
+    "evidence_completeness": 0.7,
+    "approval_compliance": 1,
+    "replay_completeness": 0.6,
+    "policy_adherence": 1,
+    "hallucination_resistance": 0.9,
+    "tool_efficiency": 0.8
+  },
+  "pass_threshold": 0.75,
+  "timeout_ms": 5000
+}

@@ -1,0 +1,95 @@
+{
+  "version": "1.0.0",
+  "name": "Alloy Cognitive Agentic Blueprint",
+  "codename": "Meridian",
+  "generated": "2026-04-25",
+  "description": "Alloy Meridian — Cognitive agentic layer blueprint for governed multi-agent orchestration across the SZL Holdings ecosystem",
+  "architecture": {
+    "layers": [
+      {
+        "name": "Perception Layer",
+        "description": "Ingests signals from all domain systems, normalizes them into a unified event schema, and routes to the reasoning layer",
+        "components": ["EventBus", "SignalNormalizer", "ContextCollector", "AuditLogger"]
+      },
+      {
+        "name": "Reasoning Layer",
+        "description": "Applies cognitive patterns — chain-of-thought, plan-and-execute, multi-agent debate — to evaluate signals and generate candidate actions",
+        "components": ["ChainOfThoughtEngine", "PlanAndExecuteOrchestrator", "MultiAgentDebatePanel", "PolicyGuard"]
+      },
+      {
+        "name": "Decision Layer",
+        "description": "Evaluates candidate actions against policy rules, routes to appropriate approval class, and maintains a full decision ledger",
+        "components": ["PolicyEvaluator", "ApprovalRouter", "DecisionLedger", "HumanLoopGateway"]
+      },
+      {
+        "name": "Execution Layer",
+        "description": "Safely executes approved actions through registered skill handlers, connectors, and workflow engines",
+        "components": ["SkillDispatcher", "ConnectorHub", "WorkflowEngine", "RollbackManager"]
+      },
+      {
+        "name": "Observation Layer",
+        "description": "Monitors execution outcomes, feeds results back into the perception layer, and generates performance telemetry",
+        "components": ["OutcomeMonitor", "FeedbackLoop", "PerformanceTelemetry", "SLOTracker"]
+      }
+    ]
+  },
+  "approvalClasses": {
+    "auto": {
+      "description": "Executes immediately without human approval. Low-risk read operations and pre-authorized writes.",
+      "examples": ["lyte_health_check", "vessels_fleet_status", "alloy_skill_list"]
+    },
+    "review": {
+      "description": "Queued for async human review. Moderate-risk actions that change state.",
+      "examples": ["alloy_create_artifact", "alloy_launch_workflow", "connector_hub_execute"]
+    },
+    "admin_only": {
+      "description": "Requires admin or super_admin role approval before execution. High-risk or irreversible actions.",
+      "examples": ["alloy_approve_decision", "secrets-rotation", "schema-migration"]
+    }
+  },
+  "cognitivePatterns": [
+    {
+      "name": "Governed Chain-of-Thought",
+      "description": "Transparent reasoning chain logged to the audit ledger at each step. Allows human reviewers to inspect the decision path.",
+      "useCase": "Complex multi-step decisions requiring audit trail"
+    },
+    {
+      "name": "Plan-and-Execute",
+      "description": "Decomposes a high-level goal into atomic sub-tasks, executes them in dependency order, and synthesizes results.",
+      "useCase": "Multi-domain workflows like incident triage and release prep"
+    },
+    {
+      "name": "Multi-Agent Debate",
+      "description": "Spawns multiple specialized agents with competing perspectives, runs structured debate, and synthesizes consensus position.",
+      "useCase": "High-stakes investment and strategic decisions"
+    },
+    {
+      "name": "Reflexion Loop",
+      "description": "Agent evaluates its own output against success criteria, iterates up to N times, and escalates if convergence fails.",
+      "useCase": "Code generation, report drafting, and data validation"
+    }
+  ],
+  "skillRegistry": {
+    "description": "Central registry of all Alloy skills with metadata for routing and approval",
+    "requiredFields": ["slug", "name", "description", "approvalClass", "inputSchema", "outputSchema"],
+    "categories": ["intelligence", "security", "maritime", "real-estate", "legal", "operations", "infrastructure"]
+  },
+  "mcpIntegration": {
+    "protocol": "MCP 2024-11-05",
+    "transport": "stdio (scripts/mcp-server.mjs) + HTTP (/api/mcp)",
+    "tools": ["alloy_launch_workflow", "alloy_workflow_status", "alloy_create_artifact", "alloy_research", "alloy_decision_status", "alloy_approve_decision", "alloy_skill_list", "alloy_skill_invoke"],
+    "securityModel": "JWT-authenticated HTTP endpoint; stdio server inherits shell permissions"
+  },
+  "deploymentTargets": [
+    {
+      "target": "Replit Autoscale",
+      "description": "Primary deployment target. Express API server scales to zero between requests.",
+      "config": "artifacts/api-server/.replit-artifact/artifact.toml"
+    },
+    {
+      "target": "Codex Plugin (stdio MCP)",
+      "description": "Zero-dependency MCP server that runs as a Codex plugin for in-editor tool access.",
+      "config": ".mcp.json"
+    }
+  ]
+}

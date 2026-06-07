@@ -1,0 +1,79 @@
+{
+  "vertical": "finance_fincept",
+  "generated_at": "2026-04-25T22:20:37.683742+00:00",
+  "brief": {
+    "headline": "Evaluate pricing response to competitor cut",
+    "runway_months": 13.8,
+    "arr_growth": "+12% MoM",
+    "risk": "Competitor cut enterprise pricing 15%",
+    "evidence_count": 3
+  },
+  "signals": [
+    {
+      "id": "sig_fin_runway_watch",
+      "kind": "runway_alert",
+      "source": "quickbooks",
+      "summary": "Cash runway drops below 14 months at current burn",
+      "weight": 0.75
+    },
+    {
+      "id": "sig_fin_arr_growth",
+      "kind": "revenue_signal",
+      "source": "stripe",
+      "summary": "Net-new ARR growth +12% MoM; churn flat at 2.1%",
+      "weight": 0.6
+    },
+    {
+      "id": "sig_fin_competitor_pricing",
+      "kind": "market_signal",
+      "source": "market_feed",
+      "summary": "Competitor cut enterprise tier pricing 15% this week",
+      "weight": 0.7
+    }
+  ],
+  "evidence": [
+    {
+      "id": "ev_finance_fincept_sig_fin_runway_watch",
+      "from_signal": "sig_fin_runway_watch",
+      "claim": "Cash runway drops below 14 months at current burn",
+      "source": "quickbooks"
+    },
+    {
+      "id": "ev_finance_fincept_sig_fin_arr_growth",
+      "from_signal": "sig_fin_arr_growth",
+      "claim": "Net-new ARR growth +12% MoM; churn flat at 2.1%",
+      "source": "stripe"
+    },
+    {
+      "id": "ev_finance_fincept_sig_fin_competitor_pricing",
+      "from_signal": "sig_fin_competitor_pricing",
+      "claim": "Competitor cut enterprise tier pricing 15% this week",
+      "source": "market_feed"
+    }
+  ],
+  "forecast": {
+    "horizon": "this_quarter",
+    "method": "capital-baseline-v0",
+    "confidence": 0.58,
+    "runway_months": 13.8,
+    "burn_trend": "stable"
+  },
+  "recommendation": {
+    "id": "rec_fin_pricing_response",
+    "title": "Evaluate pricing response to competitor cut",
+    "next_action": "Run a 30-day experiment: offer 10% discount on annual enterprise plans to new pipeline.",
+    "rollback_path": "If conversion lift < 5%, revert pricing and invest in feature differentiation.",
+    "input_class": "capital_signals_v1",
+    "output_class": "capital_weather_v1",
+    "confidence": 0.58,
+    "vertical": "finance_fincept",
+    "owner": "cfo@szl",
+    "model": "gpt-5.5-2026-04-23",
+    "requires_human_approval": true,
+    "evidence_ids": [
+      "ev_finance_fincept_sig_fin_runway_watch",
+      "ev_finance_fincept_sig_fin_arr_growth",
+      "ev_finance_fincept_sig_fin_competitor_pricing"
+    ]
+  }
+}

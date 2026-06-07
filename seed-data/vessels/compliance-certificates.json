@@ -1,0 +1,122 @@
+[
+  {
+    "id": 1,
+    "vesselId": 10,
+    "vesselName": "TORM HELLAS",
+    "certificateType": "Safety Management Certificate (SMC)",
+    "issuer": "Lloyd's Register",
+    "issuedDate": "2022-06-15",
+    "expiryDate": "2026-04-10",
+    "status": "Expiring Soon",
+    "daysUntilExpiry": 15,
+    "regulation": "ISM Code Ch. 13"
+  },
+  {
+    "id": 2,
+    "vesselId": 4,
+    "vesselName": "NORDIC WOLVERINE",
+    "certificateType": "International Oil Pollution Prevention (IOPP)",
+    "issuer": "DNV",
+    "issuedDate": "2022-09-01",
+    "expiryDate": "2027-09-01",
+    "status": "Valid",
+    "daysUntilExpiry": 524,
+    "regulation": "MARPOL Annex I, Reg. 7"
+  },
+  {
+    "id": 3,
+    "vesselId": 5,
+    "vesselName": "OLDENDORFF BRISBANE",
+    "certificateType": "ISM Document of Compliance (DOC)",
+    "issuer": "Germanischer Lloyd",
+    "issuedDate": "2023-01-15",
+    "expiryDate": "2026-05-15",
+    "status": "Expiring Soon",
+    "daysUntilExpiry": 50,
+    "regulation": "ISM Code Ch. 13.2"
+  },
+  {
+    "id": 4,
+    "vesselId": 3,
+    "vesselName": "COSCO SHANGHAI",
+    "certificateType": "SOLAS Safety Equipment Certificate (SEC)",
+    "issuer": "China Classification Society",
+    "issuedDate": "2023-03-20",
+    "expiryDate": "2028-03-20",
+    "status": "Valid",
+    "daysUntilExpiry": 724,
+    "regulation": "SOLAS Ch. I/Reg. 12"
+  },
+  {
+    "id": 5,
+    "vesselId": 6,
+    "vesselName": "MAERSK EDINBURGH",
+    "certificateType": "Energy Efficiency Existing Ship Index (EEXI)",
+    "issuer": "DNV",
+    "issuedDate": "2023-01-01",
+    "expiryDate": "2028-01-01",
+    "status": "Valid",
+    "daysUntilExpiry": 645,
+    "regulation": "MARPOL Annex VI Reg. 23"
+  },
+  {
+    "id": 6,
+    "vesselId": 18,
+    "vesselName": "MINERVA SOPHIA",
+    "certificateType": "International Air Pollution Prevention (IAPP)",
+    "issuer": "Lloyd's Register",
+    "issuedDate": "2021-03-30",
+    "expiryDate": "2026-03-30",
+    "status": "Expired",
+    "daysUntilExpiry": -4,
+    "regulation": "MARPOL Annex VI Reg. 6"
+  },
+  {
+    "id": 7,
+    "vesselId": 9,
+    "vesselName": "PACIFIC BASIN TIANJIN",
+    "certificateType": "Ballast Water Management (BWM)",
+    "issuer": "ClassNK",
+    "issuedDate": "2022-08-15",
+    "expiryDate": "2027-08-15",
+    "status": "Valid",
+    "daysUntilExpiry": 507,
+    "regulation": "BWM Convention Art. 9"
+  },
+  {
+    "id": 8,
+    "vesselId": 16,
+    "vesselName": "ARCTIC AURORA",
+    "certificateType": "Polar Ship Certificate (PSC)",
+    "issuer": "DNV",
+    "issuedDate": "2024-01-10",
+    "expiryDate": "2029-01-10",
+    "status": "Valid",
+    "daysUntilExpiry": 1021,
+    "regulation": "SOLAS Ch. XIV / Polar Code"
+  },
+  {
+    "id": 9,
+    "vesselId": 8,
+    "vesselName": "EURONAV DANUBE",
+    "certificateType": "International Sewage Pollution Prevention (ISPP)",
+    "issuer": "Bureau Veritas",
+    "issuedDate": "2023-05-10",
+    "expiryDate": "2028-05-10",
+    "status": "Valid",
+    "daysUntilExpiry": 775,
+    "regulation": "MARPOL Annex IV Reg. 5"
+  },
+  {
+    "id": 10,
+    "vesselId": 11,
+    "vesselName": "MSC AURORA",
+    "certificateType": "Energy Efficiency Management Plan (SEEMP Part III)",
+    "issuer": "RINA",
+    "issuedDate": "2024-03-01",
+    "expiryDate": "2029-03-01",
+    "status": "Valid",
+    "daysUntilExpiry": 1070,
+    "regulation": "MARPOL Annex VI Reg. 26"
+  }
+]

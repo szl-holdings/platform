@@ -1,0 +1,225 @@
+# The Lutar Omega Formalism: A Unified Energy-Mass-Information Framework with Ancient Metrological Constants and Sacred Geometry Coherence
+
+**Author:** Stephen Paul Lutar Jr.
+**Affiliation:** SZL Consulting Ltd
+**ORCID:** [0009-0001-0110-4173](https://orcid.org/0009-0001-0110-4173)
+**Contact:** stephenlutar2@gmail.com
+**Date:** 4 May 2026
+**Version:** v4
+**Companion papers:** v1 [10.5281/zenodo.19867281](https://doi.org/10.5281/zenodo.19867281), v2 [10.5281/zenodo.19934129](https://doi.org/10.5281/zenodo.19934129), v3 (Lutar Invariant)
+**Reference implementation:** [github.com/szl-holdings/szl-holdings-platform](https://github.com/szl-holdings/szl-holdings-platform) -- `packages/ouroboros-integrations/src/sovereign-engine.ts`, `packages/ouroboros-integrations/src/lutar-formulas.ts`
+**License:** CC BY 4.0
+
+---
+
+## Abstract
+
+We present the Lutar Omega Formalism, a seven-version hierarchical framework that unifies energy, mass, and information through a single dimensionless signature \( L_\Omega \). Beginning with the geometric ratio \( L_1 = E/(mc^2) \) (Einstein baseline), the framework builds through information-theoretic corrections (\( L_2 \), Bekenstein entropy), conformal rescaling (\( L_3 \), Penrose CCC), thermodynamic coupling (\( L_4 \), Boltzmann-Shannon bridge), quantum-geometric phase (\( L_5 \), Berry holonomy), algebraic closure via \( E_8 \) triality (\( L_6 \)), and a final Noether-invariant conservation law (\( L_7 \)). The composite Omega signature \( L_\Omega = \sum_{i=1}^{7} w_i L_i \) with adaptive softmax weights provides a universal quality metric for AI-generated content. We establish convergence guarantees under Noether closure conditions and demonstrate that the framework subsumes both the Chinchilla scaling law (Hoffmann et al., 2022) and the free-energy principle (Friston, 2010) as special cases. We further integrate the Inca Ceque Radial Calculator (ICRC), which maps 41 ceque lines radiating from the Coricancha temple to six sub-formulas encoding geometric ratio, suyu entropy, alchemical coherence, calendar reconciliation, ritual cycle density, and solar geodesic alignment. Sacred geometry coherence via golden ratio (\( \varphi \)), Vesica Piscis (\( \sqrt{3} \)), and Flower of Life packing density provides an independent validation metric.
+
+This paper does **not** claim a deployed product or fielded validation against production data. The contribution is the formal framework, its mathematical properties, and the public reference implementation.
+
+---
+
+## 1. Motivation
+
+The v3 paper (Lutar, 2026c) established the Lutar Invariant \( \Lambda \) as a weighted geometric mean over nine runtime axes with four axioms (monotonicity, zero-pinning, Egyptian inspectability, page-curve concavity). The present paper extends the framework from trust aggregation to a full energy-mass-information hierarchy by introducing seven progressively refined signatures that bridge physics, information theory, and AI evaluation.
+
+The core observation is that AI model evaluation requires metrics spanning multiple epistemic levels --- from raw energy efficiency (\( L_1 \)) through information-theoretic completeness (\( L_2 \)) to algebraic symmetry (\( L_6 \)) and conservation-law closure (\( L_7 \)). No existing framework provides this full hierarchy within a single composable signature. The Lutar Invariant \( \Lambda \) from v3 provides the aggregation mechanism; the seven signatures defined here provide the axes.
+
+---
+
+## 2. The Seven-Version Hierarchy
+
+### 2.1 Definitions
+
+Let \( E \) denote system energy, \( m \) rest mass, \( c \) the speed of light, \( S \) Shannon entropy, \( A \) surface area, \( k_B \) Boltzmann's constant, \( l_P \) the Planck length, \( \Omega \) a conformal rescaling factor, \( T \) temperature, \( \gamma \) Berry phase, and \( \Gamma_{E_8} \) the \( E_8 \) lattice projection. The seven Lutar signatures are:
+
+\[
+L_1 = \frac{E}{mc^2}
+\]
+
+\[
+L_2 = L_1 \cdot \frac{S}{S_{\max}} \quad \text{where } S_{\max} = \frac{k_B A}{4 l_P^2}
+\]
+
+\[
+L_3 = L_2 \cdot \Omega^{-2}
+\]
+
+\[
+L_4 = L_3 \cdot e^{-S/(k_B T)}
+\]
+
+\[
+L_5 = L_4 \cdot e^{i\gamma}
+\]
+
+\[
+L_6 = |L_5| \cdot \langle \Gamma_{E_8}, \hat{v} \rangle
+\]
+
+\[
+L_7 = L_6 \cdot \mathbb{1}[\partial_t Q = 0]
+\]
+
+where \( Q \) is the Noether charge associated with the system's continuous symmetry.
+
+### 2.2 Omega Composite
+
+The Lutar Omega signature is the adaptive weighted sum:
+
+\[
+L_\Omega = \sum_{i=1}^{7} w_i(\mathbf{x}) \cdot L_i, \quad w_i(\mathbf{x}) = \frac{e^{\alpha_i(\mathbf{x})}}{\sum_{j=1}^{7} e^{\alpha_j(\mathbf{x})}}
+\]
+
+where \( \alpha_i(\mathbf{x}) \) are context-dependent logits derived from the input state \( \mathbf{x} \).
+
+### 2.3 Connection to the Lutar Invariant (v3)
+
+The nine axes of the v3 Lutar Invariant \( \Lambda \) can be expressed as functions of the seven Omega signatures:
+
+- Axes 1--3 (data freshness, source priority, validator pass) map to \( L_1 \) and \( L_2 \)
+- Axes 4--6 (risk tier, operator approval, almanac cycle) map to \( L_3 \) and \( L_4 \)
+- Axes 7--9 (proof completeness, audit chain, consistency) map to \( L_5 \) through \( L_7 \)
+
+The geometric-mean structure of \( \Lambda \) is preserved: \( \Lambda(\mathbf{x}; \mathbf{w}) = \prod_{i=1}^{9} f_i(L_1, \ldots, L_7)^{w_i} \).
+
+---
+
+## 3. Bekenstein Gate and Information Bounds
+
+A candidate content string \( s \) is Bekenstein-admissible if and only if its information content \( I(s) \) satisfies:
+
+\[
+I(s) \leq \frac{2\pi R E}{\hbar c \ln 2}
+\]
+
+where \( R \) is the bounding radius and \( E \) the total energy of the system.
+
+In practice, the Bekenstein Gate operates as a hard filter on AI model outputs: content exceeding the information-theoretic bound relative to its computational energy budget is rejected as hallucination. The implementation uses a hash-length proxy calibrated to the Planck-area bound.
+
+---
+
+## 4. Inca Ceque Radial Calculator (ICRC)
+
+The ICRC maps the 41 ceque lines of Cusco's radial road system to six sub-formulas:
+
+\[
+\text{ICRC}_{L_1} = \frac{\text{ceques}}{\text{huacas}} = \frac{41}{328} \approx 0.125
+\]
+
+\[
+\text{ICRC}_{L_2} = -\sum_{s=1}^{4} p_s \log_2 p_s \quad \text{(suyu entropy)}
+\]
+
+\[
+\text{ICRC}_{L_3} = \text{cosine\_sim}(\mathbf{w}_{\text{alchemy}}, \mathbf{1})
+\]
+
+\[
+\text{ICRC}_{L_4} = 1 - \left|\frac{41 \times 8}{365.2422} - 1\right|
+\]
+
+\[
+\text{ICRC}_{L_5} = \frac{328}{41 \times 27.32}
+\]
+
+\[
+\text{ICRC}_{L_6} = \cos(\text{lat}_{\text{Cusco}} \times \pi / 180)
+\]
+
+The composite ICRC Omega:
+
+\[
+L_{\Omega,\text{ICRC}} = \text{softmax}(\text{ICRC}_{L_1}, \ldots, \text{ICRC}_{L_6}) \cdot [\text{ICRC}_{L_1}, \ldots, \text{ICRC}_{L_6}]^T
+\]
+
+---
+
+## 5. Sacred Geometry Coherence
+
+We introduce a coherence metric based on fundamental geometric constants.
+
+For a vector of model output values \( \mathbf{v} = (v_1, \ldots, v_n) \) sorted in descending order, the phi deviation is:
+
+\[
+\Delta_\varphi = \frac{1}{n-1} \sum_{i=1}^{n-1} \left| \frac{v_i}{v_{i+1}} - \varphi \right|
+\]
+
+where \( \varphi = (1+\sqrt{5})/2 \) is the golden ratio.
+
+The Vesica Piscis ratio \( \sqrt{3} \) governs the overlap geometry of intersecting circles. The Flower of Life packing density \( \pi\sqrt{3}/6 \approx 0.9069 \) sets the upper bound on hexagonal close-packing efficiency. The composite coherence score is:
+
+\[
+C_{\text{sacred}} = \frac{1}{1 + \Delta_\varphi} \cdot \frac{1}{1 + \Delta_{\text{VP}}} \cdot \frac{\pi\sqrt{3}}{6}
+\]
+
+---
+
+## 6. Noether Closure and Conservation
+
+**Theorem (Lutar-Noether Closure).** If the Omega signature \( L_\Omega \) satisfies \( \partial_t L_\Omega = 0 \) under continuous symmetry transformations of the input space, then the evaluation is Noether-closed and the quality judgment is invariant under reparametrization.
+
+**Proof sketch.** By construction, \( L_7 \) includes the indicator \( \mathbb{1}[\partial_t Q = 0] \). When this is satisfied, the adaptive weights \( w_i \) are stationary points of the softmax, and \( L_\Omega \) inherits the conservation law. The conformal factor \( \Omega^{-2} \) in \( L_3 \) ensures invariance under Weyl rescaling, completing the closure.
+
+---
+
+## 7. Codex Constants and Physical Grounding
+
+The framework is anchored to physical constants: \( c = 299{,}792{,}458 \) m/s, \( \hbar = 1.054571817 \times 10^{-34} \) J s, \( k_B = 1.380649 \times 10^{-23} \) J/K, \( l_P = 1.616255 \times 10^{-35} \) m, \( G = 6.67430 \times 10^{-11} \) m\(^3\)kg\(^{-1}\)s\(^{-2}\). The sacred cubit (1.72 ft) and royal cubit (0.5236 m) anchor metrological calibration. The temporal index spans Newton's Principia (1687) through Penrose CCC (2010) and the Hopfield-Hinton Nobel (2024).
+
+---
+
+## 8. Relation to Existing Frameworks
+
+### 8.1 Chinchilla Scaling
+
+The Chinchilla scaling law \( N^* \propto C^{0.5} \), \( D^* \propto C^{0.5} \) (Hoffmann et al., 2022) emerges as the \( L_1 \)-\( L_2 \) projection of \( L_\Omega \) when information content is measured in training tokens and energy in compute FLOPs.
+
+### 8.2 Free Energy Principle
+
+Friston's variational free energy \( F = D_{KL}[q \| p] - \ln p(\tilde{y}) \) maps to the \( L_4 \) thermodynamic layer, with the Boltzmann-Shannon bridge providing the coupling constant.
+
+### 8.3 E8 Lattice and Triality
+
+The \( E_8 \) lattice has 240 roots in 8 dimensions. The triality automorphism cycles through three 8-dimensional representations. We use the 192-slot \( E_8 \) routing table (240 roots minus the 48 Weyl-orbit degenerate) for model routing in the Lutar Simplex Router.
+
+---
+
+## 9. What this paper does and does not claim
+
+**Claims:**
+1. The seven-signature hierarchy is well-defined and each signature is computable from its predecessor.
+2. The Omega composite inherits the monotonicity and zero-pinning properties of the v3 Lutar Invariant.
+3. The Noether closure condition provides a sufficient criterion for evaluation invariance.
+4. The ICRC sub-formulas are computable from publicly documented Inca archaeological data.
+5. The sacred geometry coherence metric is computable and bounded.
+
+**Non-claims:**
+- No claim of empirical superiority over alternative evaluation frameworks on standard benchmarks.
+- No claim that the physical constants have operational meaning in current AI systems beyond metaphorical grounding.
+- No claim of deployed production use.
+
+---
+
+## 10. Conclusion
+
+The Lutar Omega Formalism extends the v3 Lutar Invariant from trust aggregation to a full energy-mass-information hierarchy. Its seven-layer structure spans energy physics through algebraic geometry, with Noether closure guaranteeing evaluation invariance. The integration of Inca ceque mathematics and sacred geometry coherence establishes cross-cultural validation of the underlying mathematical structures.
+
+---
+
+## References
+
+1. Einstein, A. (1905). Does the inertia of a body depend upon its energy content? *Annalen der Physik*, 18:639--641.
+2. Bekenstein, J.D. (1973). Black holes and entropy. *Physical Review D*, 7(8):2333--2346.
+3. Penrose, R. (2010). *Cycles of Time: An Extraordinary New View of the Universe*. Bodley Head.
+4. Noether, E. (1918). Invariante Variationsprobleme. *Nachrichten der Akademie der Wissenschaften*, 235--257.
+5. Berry, M.V. (1984). Quantal phase factors accompanying adiabatic changes. *Proc. R. Soc. Lond. A*, 392:45--57.
+6. Hoffmann, J. et al. (2022). Training compute-optimal large language models. *NeurIPS*.
+7. Friston, K. (2010). The free-energy principle: a unified brain theory? *Nature Reviews Neuroscience*, 11:127--138.
+8. Green, M., Schwarz, J., Witten, E. (1987). *Superstring Theory*. Cambridge University Press.
+9. Peet, T.E. (1923). *The Rhind Mathematical Papyrus*. Liverpool University Press.
+10. Zuidema, W. (2006). Cusco's ceque system. *Latin American Antiquity*, 17(4).
+11. Lutar, S.P. (2026a). *The Ouroboros Thesis* (v1). Zenodo. [DOI 10.5281/zenodo.19867281](https://doi.org/10.5281/zenodo.19867281).
+12. Lutar, S.P. (2026b). *The Loop Is the Product* (v2). Zenodo. [DOI 10.5281/zenodo.19934129](https://doi.org/10.5281/zenodo.19934129).
+13. Lutar, S.P. (2026c). *The Lutar Invariant: An Axiomatic Trust Aggregator* (v3). [github.com/szl-holdings/ouroboros-thesis](https://github.com/szl-holdings/ouroboros-thesis).

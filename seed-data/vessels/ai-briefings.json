@@ -1,0 +1,79 @@
+[
+  {
+    "id": 1,
+    "title": "Black Sea Fleet CII Performance Analysis",
+    "category": "Performance",
+    "severity": "Warning",
+    "summary": "Black Sea Division fleet-wide CII trending 8% above required thresholds. TORM HELLAS rated D and OLDENDORFF BRISBANE at C boundary — both at risk of operational restrictions under IMO MEPC.352(78) 2026 tightening.",
+    "details": "9-month emission data analysis per MARPOL Annex VI Regulation 28 shows attained CII deterioration across 4 vessels. Primary contributors: TORM HELLAS (attained 9.82 vs required 6.88) and OLDENDORFF BRISBANE (4.52 vs 4.10). Hull fouling penalty estimated at 12-15% fuel increase. Constanta Shipyard drydock capacity available Q2 2026. Wind-assisted propulsion (Norsepower Rotor Sail) retrofit estimated ROI: 18 months.",
+    "confidence": 91,
+    "generatedAt": "2026-03-26T14:00:00Z",
+    "actionItems": [
+      "Submit CII Corrective Action Plan to flag state per MEPC.355(78) by June 2026",
+      "Schedule hull cleaning for TORM HELLAS at Constanta Shipyard during current drydock",
+      "Implement JIT arrival optimization for Bosporus transit to reduce idle time emissions",
+      "Evaluate Norsepower Rotor Sail retrofit for OLDENDORFF BRISBANE (est. 8% fuel saving)"
+    ],
+    "affectedVessels": ["TORM HELLAS", "OLDENDORFF BRISBANE", "MINERVA SOPHIA"]
+  },
+  {
+    "id": 2,
+    "title": "Bosporus Strait Congestion — Route Optimization Required",
+    "category": "Operations",
+    "severity": "Warning",
+    "summary": "Turkish Straits VTS reporting 72-hour northbound transit delays. 23 vessels queued at southern anchorage. CMA CGM BOSPHORUS anchored since March 26. Revenue loss estimated at $45,000/day for detained fleet.",
+    "details": "Kıyı Emniyeti (Turkish Coastal Safety) data shows abnormal congestion due to combined factors: (1) Russian grain export surge, (2) seasonal LPG traffic increase from Ceyhan, (3) maintenance at İstanbul Strait radar station. Historical analysis suggests congestion will persist 5-7 days. Alternative routing via Suez Canal adds 4 days but avoids $180K demurrage exposure. JIT arrival coordination with Constanta Port Authority recommended.",
+    "confidence": 87,
+    "generatedAt": "2026-03-26T13:00:00Z",
+    "actionItems": [
+      "Coordinate JIT arrival with Constanta Port Authority (APMC) for STENA POLARIS",
+      "Request priority transit slot for CMA CGM BOSPHORUS via agent (Marline Agency Istanbul)",
+      "Evaluate Suez Canal alternative for non-time-critical Black Sea cargoes",
+      "Brief commercial team on potential 5-7 day delay impact on Q1 performance"
+    ],
+    "affectedVessels": ["CMA CGM BOSPHORUS", "STENA POLARIS", "CONSTANTA SPIRIT"]
+  },
+  {
+    "id": 3,
+    "title": "EU ETS Maritime Compliance — Q1 Allowance Deadline",
+    "category": "Compliance",
+    "severity": "Critical",
+    "summary": "EU ETS maritime phase-in requires 40% of 2026 emissions covered by allowances. Submission deadline April 30. 8 vessels in fleet have EU port calls requiring reporting under Regulation 2023/959.",
+    "details": "Under EU ETS Directive 2003/87/EC as amended by 2023/959, maritime emissions for voyages to/from EU ports must be covered. Fleet exposure: estimated 42,000 EU Allowances (EUAs) at current price €85/EUA = €3.57M obligation. Vessels affected: MAERSK EDINBURGH, EURONAV DANUBE, MINERVA SOPHIA, CMA CGM BOSPHORUS, MSC AURORA, TORM HELLAS, CONSTANTA SPIRIT, DANUBIA STAR. MRV data from Thetis-MRV must reconcile with ETS reporting.",
+    "confidence": 95,
+    "generatedAt": "2026-03-26T12:00:00Z",
+    "actionItems": [
+      "Verify EU MRV emissions data in Thetis-MRV for all 8 vessels with EU port calls",
+      "Purchase 42,000 EUAs before April 30 deadline at current spot price",
+      "Implement FuelEU Maritime preparedness for 2025 well-to-wake intensity targets",
+      "Update voyage P&L models to include EU ETS cost per voyage for commercial team"
+    ],
+    "affectedVessels": [
+      "MAERSK EDINBURGH",
+      "EURONAV DANUBE",
+      "MINERVA SOPHIA",
+      "CMA CGM BOSPHORUS",
+      "MSC AURORA",
+      "TORM HELLAS",
+      "CONSTANTA SPIRIT",
+      "DANUBIA STAR"
+    ]
+  },
+  {
+    "id": 4,
+    "title": "Predictive Maintenance Alert — PACIFIC BASIN TIANJIN Stern Tube",
+    "category": "Maintenance",
+    "severity": "Warning",
+    "summary": "ML vibration analysis predicts 73% probability of stern tube bearing failure within 45 days. ClassNK Rule Part C 5.2 requires docking survey. Tanjung Priok offers lowest-cost repair window.",
+    "details": "SKF Copperhead vibration monitoring trend: propeller shaft 2x RPM harmonic increasing at 0.3 mm/s per week (current: 4.2 mm/s, ClassNK limit: 4.5 mm/s). Pattern matches pre-failure signature from fleet database (87% match to PACIFIC BASIN WUHAN failure 2024). Stern tube oil consumption: 1.2L/day (normal: 0.3L/day). PT United Shipyard Tanjung Priok quoted $95K for emergency docking incl. bearing replacement. Lead time for Wartsila lip seal assembly: 14 days.",
+    "confidence": 73,
+    "generatedAt": "2026-03-26T11:00:00Z",
+    "actionItems": [
+      "Schedule emergency docking at PT United Shipyard Tanjung Priok (earliest slot: April 8)",
+      "Order replacement Wartsila lip seal assembly — DDP Jakarta (14-day lead)",
+      "Increase vibration monitoring to 4-hour intervals",
+      "Prepare ClassNK surveyor request for tail shaft survey per Rule Part C 5.2"
+    ],
+    "affectedVessels": ["PACIFIC BASIN TIANJIN"]
+  }
+]

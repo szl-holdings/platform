@@ -1,0 +1,79 @@
+{
+  "vertical": "marketing_growth",
+  "generated_at": "2026-04-25T22:20:37.692812+00:00",
+  "brief": {
+    "headline": "Convert Vessels proof point into pipeline fuel",
+    "pipeline_velocity": "-18% MoM",
+    "best_channel": "organic (founder LinkedIn)",
+    "proof_point": "Vessels customer cut review time 41%",
+    "evidence_count": 3
+  },
+  "signals": [
+    {
+      "id": "sig_growth_proof_point",
+      "kind": "proof_point",
+      "source": "hubspot",
+      "summary": "Vessels customer cut review time 41%; usable as case study",
+      "weight": 0.8
+    },
+    {
+      "id": "sig_growth_channel_gap",
+      "kind": "channel_performance",
+      "source": "analytics",
+      "summary": "Organic (founder LinkedIn) drives 3x demo bookings vs paid",
+      "weight": 0.65
+    },
+    {
+      "id": "sig_growth_pipeline_velocity",
+      "kind": "pipeline_signal",
+      "source": "hubspot",
+      "summary": "Pipeline velocity slowed 18% MoM; top-of-funnel needs refresh",
+      "weight": 0.7
+    }
+  ],
+  "evidence": [
+    {
+      "id": "ev_marketing_growth_sig_growth_proof_point",
+      "from_signal": "sig_growth_proof_point",
+      "claim": "Vessels customer cut review time 41%; usable as case study",
+      "source": "hubspot"
+    },
+    {
+      "id": "ev_marketing_growth_sig_growth_channel_gap",
+      "from_signal": "sig_growth_channel_gap",
+      "claim": "Organic (founder LinkedIn) drives 3x demo bookings vs paid",
+      "source": "analytics"
+    },
+    {
+      "id": "ev_marketing_growth_sig_growth_pipeline_velocity",
+      "from_signal": "sig_growth_pipeline_velocity",
+      "claim": "Pipeline velocity slowed 18% MoM; top-of-funnel needs refresh",
+      "source": "hubspot"
+    }
+  ],
+  "forecast": {
+    "horizon": "this_month",
+    "method": "pipeline-baseline-v0",
+    "confidence": 0.55,
+    "pipeline_velocity_trend": "declining",
+    "best_channel": "organic_linkedin"
+  },
+  "recommendation": {
+    "id": "rec_growth_proof_to_pipeline",
+    "title": "Convert Vessels proof point into pipeline fuel",
+    "next_action": "Draft case study from Vessels 41% metric; schedule founder LinkedIn post for Monday.",
+    "rollback_path": "If case study approval stalls, use anonymized version with permission.",
+    "input_class": "pipeline_signals_v1",
+    "output_class": "pipeline_brief_v1",
+    "confidence": 0.55,
+    "vertical": "marketing_growth",
+    "owner": "growth@szl",
+    "model": "gpt-5.5-2026-04-23",
+    "requires_human_approval": true,
+    "evidence_ids": [
+      "ev_marketing_growth_sig_growth_proof_point",
+      "ev_marketing_growth_sig_growth_channel_gap",
+      "ev_marketing_growth_sig_growth_pipeline_velocity"
+    ]
+  }
+}
