@@ -1,0 +1,149 @@
+# Copyright 2026 SZL Holdings
+# SPDX-License-Identifier: Apache-2.0
+#
+# Build + push the vessels OCI image to GHCR.
+# =============================================================================
+# Clears UDS founder-action FA-001: the image ghcr.io/szl-holdings/vessels
+# (referenced by the killinchu/vessels bundle as uds-v0.3.0) was never published,
+# so `uds deploy` stalled pulling it.
+#
+# This is the standard GHCR push from GitHub Actions — it uses the built-in
+# GITHUB_TOKEN with `packages: write`. It does NOT require a founder secret to
+# PUBLISH the image. It mirrors the proven receipts-server workflow
+# (szl-uds-deployment/.github/workflows/receipts-server-image.yml) that already
+# published ghcr.io/szl-holdings/szl-receipts-server:uds-v0.3.1.
+#
+# The vessels build is a pnpm-workspace build, so the build CONTEXT is the repo
+# root and the Dockerfile is artifacts/vessels/Dockerfile (workspace:* deps only
+# resolve from root).
+#
+# Two ways to run it:
+#   1. gh workflow run vessels-image.yml -R szl-holdings/platform -f version=uds-v0.3.0
+#   2. push a tag matching  vessels-v*   (e.g. vessels-v0.3.0)
+#
+# Signing (FA-001 scope): no founder secret is required. If repo secrets
+# COSIGN_PRIVATE_KEY (+ COSIGN_PASSWORD) are present the pushed image is signed
+# with that key-pair; otherwise it is signed KEYLESSLY via OIDC (Fulcio cert +
+# Rekor transparency log). Either way the image is always verifiable. Nothing is
+# faked when the key is missing. FA-002 (cosign signing of the *bundle* with the
+# founder org key) is out of scope here and remains documented in the bundle.
+#
+# Refs:
+#   GHCR from Actions: https://docs.github.com/en/actions/use-cases-and-examples/publishing-packages/publishing-docker-images
+#   cosign:            https://github.com/sigstore/cosign
+
+name: Build + push vessels image
+
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: "Image tag to publish (e.g. uds-v0.3.0)"
+        required: true
+        default: "uds-v0.3.0"
+  push:
+    tags:
+      - "vessels-v*"
+
+permissions:
+  contents: read
+  packages: write
+  id-token: write # keyless cosign (OIDC -> Fulcio -> Rekor)
+
+env:
+  IMAGE: ghcr.io/${{ github.repository_owner }}/vessels
+  # pnpm-workspace build: context is the repo root; Dockerfile lives in the package.
+  CONTEXT: .
+  DOCKERFILE: artifacts/vessels/Dockerfile
+
+jobs:
+  build-push:
+    name: Build + push (+ sign) vessels
+    runs-on: ubuntu-latest
+    env:
+      # secrets.* cannot be used directly in step-level `if:` expressions, so we
+      # surface presence of the cosign key as a job env flag here.
+      HAS_COSIGN_KEY: ${{ secrets.COSIGN_PRIVATE_KEY != '' }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
+
+      - name: Resolve version tag
+        id: ver
+        run: |
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            V="${{ github.event.inputs.version }}"
+          else
+            # tag vessels-vX.Y.Z -> uds-vX.Y.Z (matches the bundle ref)
+            RAW="${GITHUB_REF_NAME#vessels-}"
+            V="uds-${RAW}"
+          fi
+          echo "version=${V}" >> "$GITHUB_OUTPUT"
+          echo "Publishing ${IMAGE}:${V}"
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@988b5a0280414f521da01fcc63a27aeeb4b104db # v3.6.1
+
+      - name: Log in to GHCR
+        uses: docker/login-action@9780b0c442fbb1117ed29e0efdff1e18412f7567 # v3.3.0
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build + push image (by digest)
+        id: build
+        uses: docker/build-push-action@5cd11c3a4ced054e52742c5fd54dca954e0edd85 # v6.7.0
+        with:
+          context: ${{ env.CONTEXT }}
+          file: ${{ env.DOCKERFILE }}
+          push: true
+          tags: |
+            ${{ env.IMAGE }}:${{ steps.ver.outputs.version }}
+            ${{ env.IMAGE }}:latest
+          provenance: true
+          sbom: true
+
+      - name: Show published digest
+        run: |
+          echo "Published ${IMAGE}:${{ steps.ver.outputs.version }}"
+          echo "digest=${{ steps.build.outputs.digest }}"
+
+      - name: Install cosign
+        uses: sigstore/cosign-installer@59acb6260d9c0ba8f4a2f9d9b48431a222b68e20 # v3.5.0
+
+      # FA-001 scope: prefer the committed cosign key-pair if a founder has
+      # provisioned COSIGN_PRIVATE_KEY (+ COSIGN_PASSWORD) repo secrets; otherwise
+      # fall back to keyless OIDC so the image is ALWAYS signed (no founder block).
+      - name: Sign image with cosign key-pair (if secret present)
+        id: keysign
+        if: ${{ env.HAS_COSIGN_KEY == 'true' }}
+        env:
+          COSIGN_PASSWORD: ${{ secrets.COSIGN_PASSWORD }}
+          COSIGN_PRIVATE_KEY: ${{ secrets.COSIGN_PRIVATE_KEY }}
+        run: |
+          printf '%s' "$COSIGN_PRIVATE_KEY" > /tmp/cosign.key
+          REF="${IMAGE}@${{ steps.build.outputs.digest }}"
+          cosign sign --yes --key /tmp/cosign.key "${REF}"
+          rm -f /tmp/cosign.key
+          echo "Signed ${REF} with COSIGN_PRIVATE_KEY (key-pair)"
+
+      - name: Sign image keylessly (OIDC fallback)
+        if: ${{ env.HAS_COSIGN_KEY != 'true' }}
+        env:
+          COSIGN_EXPERIMENTAL: "1"
+        run: |
+          REF="${IMAGE}@${{ steps.build.outputs.digest }}"
+          cosign sign --yes "${REF}"
+          echo "Signed ${REF} keylessly via OIDC (Fulcio cert, recorded in Rekor)"
+
+      - name: Verify keyless signature (capture Rekor entry)
+        if: ${{ env.HAS_COSIGN_KEY != 'true' }}
+        env:
+          COSIGN_EXPERIMENTAL: "1"
+        run: |
+          REF="${IMAGE}@${{ steps.build.outputs.digest }}"
+          cosign verify \
+            --certificate-identity-regexp "https://github.com/${{ github.repository }}/.github/workflows/.+" \
+            --certificate-oidc-issuer "https://token.actions.githubusercontent.com" \
+            "${REF}"
