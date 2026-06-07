@@ -1,5 +1,0 @@
-
-> workspace@0.0.0 security:audit /home/runner/workspace
-> node scripts/qa/generate-sbom.js && node scripts/qa/generate-vuln-report.js && node scripts/qa/generate-license-report.js
-
- ELIFECYCLE  Command failed with exit code 1.

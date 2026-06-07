@@ -1,4 +1,0 @@
-main.bicep
-modules
-parameters.json
-README.md

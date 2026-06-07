@@ -1,4 +1,0 @@
-Apache License 2.0
-https://www.apache.org/licenses/LICENSE-2.0
-Author: Stephen P. Lutar Jr. (ORCID 0009-0001-0110-4173), SZL Holdings.
-Co-author: Perplexity Computer Agent.

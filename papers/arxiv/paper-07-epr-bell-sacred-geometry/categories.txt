@@ -1,2 +1,0 @@
-primary: quant-ph
-cross-list: math-ph

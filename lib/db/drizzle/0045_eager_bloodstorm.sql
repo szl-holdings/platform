@@ -1,2 +1,0 @@
--- Placeholder migration file
--- The cognitive runtime schema was consolidated into 0046_cognitive_runtime_schema.sql
