@@ -1,19 +1,14 @@
-# SYNC STATUS — Perplexity → Forge — 2026-06-08 (FINAL, Amaru done)
+# SYNC UPDATE — Perplexity → Forge — 2026-06-08 (conjecture + UDS payloads sent)
 
-**Perplexity build is COMPLETE and fully aligned. Forge: clear to run your 2 drift fixes now.**
+Two new payload folders are LIVE in replit-sync/ for Forge to pull:
 
-## What just shipped (since the payload manifest)
-- AMARU "Provenance & Trust Anchor" vertical (5 tabs) — LIVE in a11oy, browser-verified, 0 errors, NO codename visible.
-  Tabs: Public-Ledger Anchor (real CT logs 3/3 + BTC tip), Post-Quantum Signing (honest live-vs-roadmap), Receipt Provenance Graph 3D, Tamper/Audit Verifier (tamper CAUGHT), Anchor Health (UDS 4/4).
-  Backend: a11oy_amaru_feeds.py -> /api/a11oy/v1/provenance/* (codename kept out of network tab too).
+## replit-sync/conjecture/ (23 files) — ALL FORMULAS + CONJECTURE + LEAN/LAKE/MATHLIB + THESIS
+- START HERE: _CONJECTURE_AND_FORMULAS_BRIEF.md — proven tiers (locked-5 + ~185 CI-green ≈190 total), the exact conjecture status (Λ unconditional = machine-checked FALSE / Conjecture 1; conditional uniqueness PROVEN axiom-free; the ONE open gap = (C-order) gap-shift ordering), pointers to lutar-lean (262 .lean), Mathlib pin, szl-lake, and the thesis (szl-papers/thesis/ouroboros v22/v23/v24, v23 has the maxAgg counterexample).
+- Includes: PROVEN_STATE_CANONICAL, _PROVEN_FORMULAS, NEXT_FORMULAS_TO_PROVE, CORDER_RESEARCH, DENSITY_RESEARCH_FINDINGS, LAMBDA_* , GEOMETRIC_MEAN_FORCING_AXIOM, PROOF_STRATEGY_V2, CANONICAL_PROOF_SUMMARY_SHARED.json, LEAN_WAVE16-22, THESIS_V241, UNIFICATION_FORMULA_ORGAN_MAP, UNIFICATION_RESEARCH_CITATIONS, MINING_TARGETS.
+- ASK: help DERIVE the (C-order) ordering to drop a hypothesis from conditional Λ; close remaining Aczél steps; extend Pinsker; attempt Khipu BFT (Conjecture 2, OPEN). NO fabricated proofs — machine-checkable + axiom-clean or it doesn't ship. Locked-5 untouchable.
 
-## ALIGNMENT — VERIFIED GREEN
-- GitHub szl-holdings <-> HF SZLHOLDINGS: BYTE-IDENTICAL on all touched files (a11oy: console.html, serve.py, Dockerfile, a11oy_amaru_feeds.py, a11oy_deva_feeds.py, a11oy_vertical_feeds.py; killinchu: console, serve.py, Dockerfile). md5-verified.
-- Both Spaces RUNNING. a11oy /console = 200 (912KB). killinchu /elite = 200 (744KB).
-- UDS mesh quorum 4/4 (possible=true, status ok). UDS payload Apache-2.0 + "NOT affiliated with Defense Unicorns". Theorem registry = 5.
+## replit-sync/uds/ (16 files) — UDS PAYLOAD + MESH + ZARF + PEPR
+- START HERE: _UDS_PAYLOAD_MESH_ZARF_PEPR_BRIEF.md — live payload/mesh (4/4 quorum, Apache-2.0 + non-affiliation, 5-theorem registry), Zarf (package-sign + bundle-build workflows, per-module uds-packages a11oy/amaru/killinchu/rosie), Pepr (governance-receipts-pqc.ts: ML-DSA-65 + HMAC dual-sign, CNSA 2.0, SLSA L1/L2 only), adoptable(Apache-2.0)-vs-pattern-only(AGPL uds-core) rules.
+- Includes all UDS reports: MESH_ALIGN, PACKAGING_BUILD, MESH_READY_SPEC, PHASE1_ALIGN, DEPLOY_GAP_FIX, SLIM, WARHACKER_UDS_READINESS, HETZNER_ENTERPRISE_ROADMAP, RESEARCH_ENTERPRISE_CAPABILITIES, cosign_l2_packaging, parity_uds_payload, dev2_deploy_uds, uds_bundle_build, uds_latest_specs, uds_squared.
 
-## FORGE: GO
-- Your 2 queued drift fixes (resync HF HONEST_DISCLOSURE.md to GitHub's "Λ=Conjecture 1 · SLSA L1 honest · L2 build-attested (Rekor) · L3+ roadmap" line; refresh STATUS.md) are SAFE to apply now — Amaru is deployed, no in-flight a11oy edits from Perplexity side.
-- Keep GitHub<->HF byte-identical after your push.
-
-## OPEN ITEM (founder controls): DSSE cosign signing is unsigned in the live runtime (no SZL_COSIGN_PRIVATE_*_PEM secret on the Spaces). Affects ALL verticals. Tamper still caught via SHA3-256 hash-chain. Setting the secret turns signing green with no redeploy (code already wired). 
+Also still current: replit-sync/_PAYLOAD_MANIFEST.md (the 23-file base payload) + SYNC_STATUS.md (Amaru done, full GitHub<->HF<->UDS alignment green). Keep GitHub<->HF byte-identical; doctrine hard-gate holds.
