@@ -17,9 +17,17 @@ updates:
         patterns:
           - "*"
 
-  # Python pip dependencies
+  # Python (pip) dependencies
   - package-ecosystem: "pip"
-    directory: "/"
+    directories:
+      - "/"
+      - "/apps/*"
+      - "/apps/substrate-inference/engine/*"
+      - "/packages/*"
+      - "/scripts/*"
+      - "/services/*"
+      - "/substrate"
+      - "/workers/*"
     schedule:
       interval: "weekly"
       day: "monday"
@@ -33,9 +41,13 @@ updates:
         patterns:
           - "*"
 
-  # Docker dependencies
+  # Docker base images
   - package-ecosystem: "docker"
-    directory: "/"
+    directories:
+      - "/apps/*"
+      - "/artifacts/*"
+      - "/services/*"
+      - "/workers/*"
     schedule:
       interval: "weekly"
       day: "monday"
@@ -45,3 +57,34 @@ updates:
       - "dependencies"
       - "security"
     open-pull-requests-limit: 3
+    groups:
+      docker-deps:
+        patterns:
+          - "*"
+
+  # npm / Node dependencies
+  - package-ecosystem: "npm"
+    directories:
+      - "/"
+      - "/apps/*"
+      - "/artifacts/*"
+      - "/lib/*"
+      - "/lib/services/connectors/*"
+      - "/packages/*"
+      - "/scripts"
+      - "/services/*"
+      - "/services/vsp-otel/stubs/*"
+      - "/workers/*"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "08:00"
+      timezone: "America/New_York"
+    labels:
+      - "dependencies"
+      - "security"
+    open-pull-requests-limit: 10
+    groups:
+      npm-deps:
+        patterns:
+          - "*"
