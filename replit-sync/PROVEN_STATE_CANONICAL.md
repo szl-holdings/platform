@@ -45,3 +45,30 @@ CF-23 full Pinsker (needs derivative analysis absent from Mathlib v4.18.0), CF-2
 - ALL Wave19/20/21 theorems #print axioms ⊆ {propext, Classical.choice, Quot.sound}; NO sorry; NO new axiom.
 - Drift UNCHANGED 307/254 (decl 1323, axioms 23/22). Locked-proven STAYS EXACTLY 5. Λ STAYS Conjecture 1.
 - GitHub<->HF aligned (a11oy 5/5, killinchu 9/9). UDS payload/mesh wired (theorem_ref + lake_receipt, honest). a11oy Code IDE LIVE.
+
+## MILESTONE 2026-06-08 ~18:30 EDT — Wave22 MERGED + Wave23 OPENED (BFT frontier)
+- main @ da013be5. ALL CI GREEN (CI / Tests / Doctrine / DCO / gitleaks / SBOM).
+- **Wave22 (PR #212) MERGED**: CUT-1 "last formula" DONE — (C-order) gap-shift ordering DERIVED
+  (not assumed); CUT-1 fully closed on stated hypotheses; sharpest conditional Λ
+  (`cut1_sharp_conditional_lambda`: separability+slice-multiplicativity+slice-monotonicity ⟹ Φ=Λ,
+  bisymmetry+unit-norm shown REDUNDANT). Λ UNCONDITIONAL STAYS Conjecture 1 (FALSE). Sharp boundary.
+- **Wave23 (PR #214, OPEN, base main, NOT merged @ 36c8abcf)**: attacks the GENUINE open conjecture
+  — Khipu BFT safety (Conjecture 2). Proves **CONDITIONAL agreement / no split-brain**, axiom-clean:
+  `khipu_quorum_safety_conditional` — under {n≥3f+1, |faulty|≤f, |Qᵢ|≥n−f, HONEST NON-EQUIVOCATION},
+  two quorums certifying v₁,v₂ ⟹ v₁=v₂. Votes are a RELATION (faulty organs MAY equivocate);
+  honest non-equivocation under signed votes is the WEAKEST CHECKABLE hypothesis — the BFT analog of
+  slice-multiplicativity for Λ. `exists_honest_in_inter` DISCHARGES the non-faulty-witness `sorry`
+  the kernel/Round12 `ubuntu_quorum_safety` left deferred (Finset.not_subset + card_le_card).
+  5 decls, all #print axioms ⊆ {propext, Classical.choice, Quot.sound}; NO new axiom; no
+  placeholders; LOCAL `lake build` EXIT 0; CI `lake build + numbers` + `build` + `doctrine` +
+  `tests` + `DCO` GREEN. (One pre-existing CI-infra RED: the conventional-commit title-lint pins an
+  unresolvable action SHA `amannn/action-semantic-pull-request@0723387f` — environmental, affects
+  all PRs, NOT a Wave23 content issue; needs founder re-pin.)
+- **UNCONDITIONAL Byzantine BFT safety STAYS Conjecture 2** (sharp boundary — both n≥3f+1 and honest
+  non-equivocation are necessary). The `opaque canonicalHistory` kernel form is NOT touched (an
+  opaque predicate cannot be derived; it stays the honest Conjecture-2 token). LIVENESS = Conjecture
+  3, untouched. Drift UNCHANGED 307/254 (decl 1323, axioms 23/22). Locked-proven STAYS EXACTLY 5
+  {F1,F11,F12,F18,F19}. Λ STAYS Conjecture 1. Wave23 counted under EXPERIMENTAL_SCOPES (Lutar/Wave23/).
+- HONEST ONE-LINER: "CUT-1 last formula DONE (Wave22 merged). Conjecture 2 (BFT safety) now has an
+  axiom-clean CONDITIONAL agreement theorem (Wave23, PR #214) under honest non-equivocation; the
+  UNCONDITIONAL conjecture stays open at its sharp boundary."
