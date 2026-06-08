@@ -1,0 +1,451 @@
+{
+  "_meta": {
+    "title": "SZL Holdings \u2014 Canonical HF Asset Manifest",
+    "author": "Opus 4.8 (Dev3 \u2014 Rosie ingest + HF assets instill)",
+    "generated": "2026-06-08",
+    "hf_org": "SZLHOLDINGS",
+    "resolve_pattern_dataset": "https://huggingface.co/datasets/SZLHOLDINGS/<repo>/resolve/main/<path>",
+    "resolve_pattern_model": "https://huggingface.co/SZLHOLDINGS/<repo>/resolve/main/<path>",
+    "counts": {
+      "models": 3,
+      "datasets": 28,
+      "collections": 14
+    },
+    "doctrine": {
+      "locked_formulas": [
+        "F1",
+        "F11",
+        "F12",
+        "F18",
+        "F19"
+      ],
+      "lambda": "Conjecture 1",
+      "slsa": "L1 honest; L2 build-attestation present; L2-verified/L3=roadmap",
+      "banned_codenames_user_visible": [
+        "amaru",
+        "sentra",
+        "rosie",
+        "jarvis"
+      ],
+      "runtime_cdn": 0
+    },
+    "placement_guides": [
+      "team/UNIFICATION_FORMULA_ORGAN_MAP.md",
+      "team/UNIFICATION_CAPABILITY_TAB_MAP.md"
+    ]
+  },
+  "datasets": {
+    "rag-corpus-v1": {
+      "what": "Agentic-RAG corpus (762 chunks, ~512-token) + per-organ FAISS indexes (BAAI/bge-base-en-v1.5, 768-dim).",
+      "a11oy": "Knowledge / RAG (ask) \u2192 szl_rag.py snapshot_download",
+      "killinchu": "Knowledge & Formulas (edge RAG)",
+      "resolve": [
+        "https://huggingface.co/datasets/SZLHOLDINGS/rag-corpus-v1/resolve/main/corpus.jsonl",
+        "https://huggingface.co/datasets/SZLHOLDINGS/rag-corpus-v1/resolve/main/indexes/manifest.json"
+      ],
+      "extra": [
+        "https://huggingface.co/datasets/SZLHOLDINGS/rag-corpus-v1/resolve/main/indexes/all.faiss",
+        "https://huggingface.co/datasets/SZLHOLDINGS/rag-corpus-v1/resolve/main/indexes/cortex.faiss",
+        "https://huggingface.co/datasets/SZLHOLDINGS/rag-corpus-v1/resolve/main/indexes/gate.faiss",
+        "https://huggingface.co/datasets/SZLHOLDINGS/rag-corpus-v1/resolve/main/indexes/immune.faiss",
+        "https://huggingface.co/datasets/SZLHOLDINGS/rag-corpus-v1/resolve/main/indexes/nervous.faiss",
+        "https://huggingface.co/datasets/SZLHOLDINGS/rag-corpus-v1/resolve/main/indexes/receipt.faiss"
+      ],
+      "wired": "ALREADY (szl_rag.py DATASET_REPO) \u2014 manifest-confirmed"
+    },
+    "lean-proofs-v1": {
+      "what": "Complete Lean 4 theorem library (70 .lean files) for the Ouroboros Invariant programme.",
+      "a11oy": "Formulas (kbformulas) / Lambda \u2192 szl_math_corpus.py",
+      "killinchu": "13-axis \u039b / Edge Formulas",
+      "resolve": [
+        "https://huggingface.co/datasets/SZLHOLDINGS/lean-proofs-v1/resolve/main/Lutar.lean",
+        "https://huggingface.co/datasets/SZLHOLDINGS/lean-proofs-v1/resolve/main/Lutar/Bound.lean"
+      ],
+      "extra": [
+        "https://huggingface.co/datasets/SZLHOLDINGS/lean-proofs-v1/resolve/main/Lutar/Bound.lean",
+        "https://huggingface.co/datasets/SZLHOLDINGS/lean-proofs-v1/resolve/main/Lutar/DPI/DPIBound.lean",
+        "https://huggingface.co/datasets/SZLHOLDINGS/lean-proofs-v1/resolve/main/Lutar/PACBayes/MadhavaBound.lean",
+        "https://huggingface.co/datasets/SZLHOLDINGS/lean-proofs-v1/resolve/main/Lutar/Axioms.lean"
+      ],
+      "wired": "ALREADY (szl_math_corpus.py)"
+    },
+    "canonical-formulas-v1": {
+      "what": "Canonical SZL formula registry \u2014 21 typed no-IO Python formulas + matching Lean 4 obligation theorems.",
+      "a11oy": "Formulas (kbformulas) \u2192 szl_math_corpus.py + szl_puriq_formulas.py",
+      "killinchu": "13-axis \u039b / Edge Formulas",
+      "resolve": [
+        "https://huggingface.co/datasets/SZLHOLDINGS/canonical-formulas-v1/resolve/main/code/lean/Formulas.lean",
+        "https://huggingface.co/datasets/SZLHOLDINGS/canonical-formulas-v1/resolve/main/README.md"
+      ],
+      "wired": "ALREADY (szl_math_corpus.py)"
+    },
+    "thesis-corpus-v18": {
+      "what": "Thesis corpus v18 \u2014 claims, formal blocks, per-version Lean delta ledger.",
+      "a11oy": "Knowledge Ontology (ontology) / What We Claim (honest)",
+      "killinchu": "Anatomy / About",
+      "resolve": [
+        "https://huggingface.co/datasets/SZLHOLDINGS/thesis-corpus-v18/resolve/main/claims_v18_extracted.json"
+      ],
+      "wired": "ALREADY (szl_math_corpus.py)"
+    },
+    "doctrine-v10-v11": {
+      "what": "Locked governance doctrine v10+v11 (13-axis yuyay_v3 canonical) + Mythos\u2192Hatun-Willay rename rule + canonical wedge.",
+      "a11oy": "Safety Gates (gates) / What We Claim (honest)",
+      "killinchu": "ROE / Safety",
+      "resolve": [
+        "https://huggingface.co/datasets/SZLHOLDINGS/doctrine-v10-v11/resolve/main/DOCTRINE_V11_LOCKED_2026-06-01_0145.md"
+      ],
+      "wired": "ALREADY (szl_math_corpus.py)"
+    },
+    "szl-lake": {
+      "what": "Append-only DSSE receipt + attestation data lake (Merkle DAG; cosign/SLSA innovations inn-01..).",
+      "a11oy": "Receipt Ledger (ledger3d/chain) \u2192 infra/lake/szl_lake_query.py",
+      "killinchu": "DSSE Verifier / Receipts",
+      "resolve": [
+        "https://huggingface.co/datasets/SZLHOLDINGS/szl-lake/resolve/main/README.md",
+        "https://huggingface.co/datasets/SZLHOLDINGS/szl-lake/resolve/main/attestations/innovations/inn-01-khipuemitmonotone.json",
+        "https://huggingface.co/datasets/SZLHOLDINGS/szl-lake/resolve/main/attestations/innovations/inn-02-dssetransferconservation.json",
+        "https://huggingface.co/datasets/SZLHOLDINGS/szl-lake/resolve/main/attestations/innovations/inn-03-frostepochvrfrotation.json",
+        "https://huggingface.co/datasets/SZLHOLDINGS/szl-lake/resolve/main/attestations/innovations/inn-04-graphonfleetcompliance.json"
+      ],
+      "wired": "PARTIAL (szl_lake_query.py LAKE_BASE \u2014 stub) \u2192 completed by instill helper"
+    },
+    "szl-evidence": {
+      "what": "Evidence bucket \u2014 455 audit artifacts, DSSE-signed receipts, CI attestations, closeout reports.",
+      "a11oy": "Signed Receipts (receipts) / Evidence \u2192 szl_evidence_research.py",
+      "killinchu": "Evidence / DSSE Verifier",
+      "resolve": [
+        "https://huggingface.co/datasets/SZLHOLDINGS/szl-evidence/resolve/main/README.md"
+      ],
+      "extra": [
+        "https://huggingface.co/datasets/SZLHOLDINGS/szl-evidence/resolve/main/closeout/ADINKRA_PLUS_SIXTH_PASS.md",
+        "https://huggingface.co/datasets/SZLHOLDINGS/szl-evidence/resolve/main/closeout/AGPL_RELICENSE_ASSESSMENT.md",
+        "https://huggingface.co/datasets/SZLHOLDINGS/szl-evidence/resolve/main/closeout/ANTHROPIC_FEEL_VISUALS.md",
+        "https://huggingface.co/datasets/SZLHOLDINGS/szl-evidence/resolve/main/closeout/ANTHROPIC_VISUAL_RESEARCH.md",
+        "https://huggingface.co/datasets/SZLHOLDINGS/szl-evidence/resolve/main/closeout/ARXIV_PAPER_DRAFT.md",
+        "https://huggingface.co/datasets/SZLHOLDINGS/szl-evidence/resolve/main/closeout/ARXIV_SUBMISSION_READY.md"
+      ],
+      "wired": "NEW (instill helper) \u2192 Evidence tab"
+    },
+    "thesis-formula-index": {
+      "what": "Thesis \u2192 formula index map (formula id \u2194 thesis section \u2194 Lean theorem).",
+      "a11oy": "Knowledge Ontology (ontology) / Formulas (kbformulas)",
+      "killinchu": "13-axis \u039b / Knowledge & Formulas",
+      "resolve": [
+        "https://huggingface.co/datasets/SZLHOLDINGS/thesis-formula-index/resolve/main/data/thesis_formula_index.json"
+      ],
+      "wired": "NEW (instill helper)"
+    },
+    "lean-theorem-tree": {
+      "what": "Lean theorem dependency tree (theorem \u2192 dependencies, axioms used).",
+      "a11oy": "Lambda (lambda) / Formulas lineage",
+      "killinchu": "13-axis \u039b lean-receipt trace",
+      "resolve": [
+        "https://huggingface.co/datasets/SZLHOLDINGS/lean-theorem-tree/resolve/main/data/lean_theorem_tree.json"
+      ],
+      "wired": "NEW (instill helper)"
+    },
+    "uds-governance-receipts": {
+      "what": "UDS governance receipts (extended DSSE attestations, UDS catalog readiness).",
+      "a11oy": "Signed Receipts (receipts) / Readiness & Compliance (govatlas)",
+      "killinchu": "DSSE Verifier / Readiness & Compliance",
+      "resolve": [
+        "https://huggingface.co/datasets/SZLHOLDINGS/uds-governance-receipts/resolve/main/extended-attestations.jsonl"
+      ],
+      "wired": "NEW (instill helper)"
+    },
+    "uds-spans-receipts": {
+      "what": "UDS OTel span + receipt samples + JSON schemas (span_schema.json, receipt_schema.json).",
+      "a11oy": "MELT / Observability (melt)",
+      "killinchu": "MELT (service-graph observability)",
+      "resolve": [
+        "https://huggingface.co/datasets/SZLHOLDINGS/uds-spans-receipts/resolve/main/data/spans_sample.jsonl",
+        "https://huggingface.co/datasets/SZLHOLDINGS/uds-spans-receipts/resolve/main/data/receipts_sample.jsonl",
+        "https://huggingface.co/datasets/SZLHOLDINGS/uds-spans-receipts/resolve/main/schemas/span_schema.json"
+      ],
+      "wired": "NEW (instill helper)"
+    },
+    "k-verify-benchmark-v1": {
+      "what": "K-Verify benchmark \u2014 100 items measuring whether a claimed answer is verifiable via provenance (refusal-aware).",
+      "a11oy": "What We Claim (honest) / Arena (arena)",
+      "killinchu": "Threat DB / Model Atlas eval",
+      "resolve": [
+        "https://huggingface.co/datasets/SZLHOLDINGS/k-verify-benchmark-v1/resolve/main/k_verify_v1.jsonl",
+        "https://huggingface.co/datasets/SZLHOLDINGS/k-verify-benchmark-v1/resolve/main/k_verify_v1.manifest.json"
+      ],
+      "wired": "NEW (instill helper)"
+    },
+    "yuyay-v3-axis-labels-v1": {
+      "what": "Yuyay-v3 13-axis label dataset (non-compensatory gate; train/eval/all splits + stats).",
+      "a11oy": "Lambda (lambda) / Safety Gates (gates)",
+      "killinchu": "13-axis \u039b (Trust)",
+      "resolve": [
+        "https://huggingface.co/datasets/SZLHOLDINGS/yuyay-v3-axis-labels-v1/resolve/main/all.jsonl",
+        "https://huggingface.co/datasets/SZLHOLDINGS/yuyay-v3-axis-labels-v1/resolve/main/stats.json"
+      ],
+      "wired": "NEW (instill helper)"
+    },
+    "anatomy-alive-harness": {
+      "what": "Living-anatomy harness \u2014 organ liveness/animation fixtures for the anatomy 3D viz.",
+      "a11oy": "Living Organism (organism) / Operator organ",
+      "killinchu": "Anatomy",
+      "resolve": [
+        "https://huggingface.co/datasets/SZLHOLDINGS/anatomy-alive-harness/resolve/main/README.md"
+      ],
+      "wired": "NEW (instill helper) \u2014 backs Operator/Anatomy organ liveness"
+    },
+    "szl-visual-identity": {
+      "what": "Brand kit + anatomy + motion/mockups (living-organism visuals).",
+      "a11oy": "Living Organism (organism) brand assets",
+      "killinchu": "Anatomy brand assets",
+      "resolve": [
+        "https://huggingface.co/datasets/SZLHOLDINGS/szl-visual-identity/resolve/main/README.md"
+      ],
+      "wired": "asset-reference (no live fetch needed)"
+    },
+    "why-we-lead": {
+      "what": "Why-we-lead narrative deck / competitive positioning corpus.",
+      "a11oy": "What We Claim (honest)",
+      "killinchu": "About",
+      "resolve": [
+        "https://huggingface.co/datasets/SZLHOLDINGS/why-we-lead/resolve/main/README.md"
+      ],
+      "wired": "NEW (instill helper, honest narrative source)"
+    },
+    "ouroboros-arxiv-preprint": {
+      "what": "Ouroboros arXiv preprint (paper PDF/source).",
+      "a11oy": "Knowledge Ontology (ontology) / What We Claim (honest)",
+      "killinchu": "About / Anatomy citations",
+      "resolve": [
+        "https://huggingface.co/datasets/SZLHOLDINGS/ouroboros-arxiv-preprint/resolve/main/README.md"
+      ],
+      "wired": "citation-reference"
+    },
+    "szl-charts": {
+      "what": "Chart/figure assets for decks & dashboards.",
+      "a11oy": "Business Observability (business)",
+      "killinchu": "MELT charts",
+      "resolve": [
+        "https://huggingface.co/datasets/SZLHOLDINGS/szl-charts/resolve/main/README.md"
+      ],
+      "wired": "asset-reference"
+    },
+    "szl-artifacts": {
+      "what": "Build/release artifacts (SBOMs, provenance, bundles).",
+      "a11oy": "Deploy (deploy) / Readiness",
+      "killinchu": "Deploy / UDS Edition",
+      "resolve": [
+        "https://huggingface.co/datasets/SZLHOLDINGS/szl-artifacts/resolve/main/README.md"
+      ],
+      "wired": "asset-reference"
+    },
+    "szl-org-infra": {
+      "what": "Org infrastructure manifests (the topology the Operator organ visualizes).",
+      "a11oy": "Operator organ (operator) infra topology",
+      "killinchu": "Mesh",
+      "resolve": [
+        "https://huggingface.co/datasets/SZLHOLDINGS/szl-org-infra/resolve/main/README.md"
+      ],
+      "wired": "NEW \u2014 Operator organ topology source"
+    },
+    "szl-payloads": {
+      "what": "Payload fixtures (currently empty/placeholder).",
+      "a11oy": "\u2014",
+      "killinchu": "\u2014",
+      "resolve": [],
+      "wired": "empty \u2014 cleanup candidate"
+    },
+    "uds-bundles-v1": {
+      "what": "UDS Zarf bundles for a11oy + killinchu (airgap, cosign, SLSA L1+L2).",
+      "a11oy": "Deploy (deploy)",
+      "killinchu": "Deploy / UDS Edition",
+      "resolve": [
+        "https://huggingface.co/datasets/SZLHOLDINGS/uds-bundles-v1/resolve/main/README.md"
+      ],
+      "wired": "deploy-reference"
+    },
+    "usb-bundle-v1": {
+      "what": "USB/airgap bundle (likely superseded by uds-bundles-v1).",
+      "a11oy": "Deploy (deploy)",
+      "killinchu": "Deploy",
+      "resolve": [
+        "https://huggingface.co/datasets/SZLHOLDINGS/usb-bundle-v1/resolve/main/README.md"
+      ],
+      "wired": "superseded \u2014 cleanup candidate"
+    },
+    "readiness-runs": {
+      "what": "Readiness/compliance run outputs (192 files \u2014 OSCAL/Lula validations).",
+      "a11oy": "Readiness & Compliance (govatlas/oversight)",
+      "killinchu": "Readiness & Compliance",
+      "resolve": [
+        "https://huggingface.co/datasets/SZLHOLDINGS/readiness-runs/resolve/main/README.md"
+      ],
+      "wired": "compliance-reference"
+    },
+    "test-results": {
+      "what": "CI test result artifacts.",
+      "a11oy": "System Health (command)",
+      "killinchu": "Ops Control",
+      "resolve": [
+        "https://huggingface.co/datasets/SZLHOLDINGS/test-results/resolve/main/README.md"
+      ],
+      "wired": "ci-reference"
+    },
+    "org-card-assets": {
+      "what": "Org profile card assets (2 files).",
+      "a11oy": "\u2014",
+      "killinchu": "\u2014",
+      "resolve": [
+        "https://huggingface.co/datasets/SZLHOLDINGS/org-card-assets/resolve/main/README.md"
+      ],
+      "wired": "asset-reference \u2014 possible cleanup"
+    },
+    "thesis-v18-formal-verification": {
+      "what": "Thesis v18 formal-verification corpus (133 files; large superset of thesis-formula-index/thesis-corpus-v18).",
+      "a11oy": "Knowledge Ontology (ontology)",
+      "killinchu": "About",
+      "resolve": [
+        "https://huggingface.co/datasets/SZLHOLDINGS/thesis-v18-formal-verification/resolve/main/README.md"
+      ],
+      "wired": "reference \u2014 overlaps thesis-corpus-v18"
+    },
+    "SZLHOLDINGS": {
+      "what": "Org-level meta dataset (org card, 2 files).",
+      "a11oy": "\u2014",
+      "killinchu": "\u2014",
+      "resolve": [
+        "https://huggingface.co/datasets/SZLHOLDINGS/SZLHOLDINGS/resolve/main/README.md"
+      ],
+      "wired": "org-meta"
+    }
+  },
+  "models": {
+    "a11oy-v19-substrate": {
+      "what": "a11oy v19 substrate model artifacts (36 files) \u2014 the governed-substrate model package.",
+      "a11oy": "Model Router (llm/modelatlas) / Command Center",
+      "killinchu": "Model Atlas",
+      "resolve": [
+        "https://huggingface.co/SZLHOLDINGS/a11oy-v19-substrate/resolve/main/README.md"
+      ],
+      "wired": "NEW (instill helper, Model Atlas card)"
+    },
+    "szl-papers": {
+      "what": "szl-papers model repo (academic corpus / preprint lineage, 2 files).",
+      "a11oy": "Knowledge Ontology (ontology) / What We Claim (honest)",
+      "killinchu": "About",
+      "resolve": [
+        "https://huggingface.co/SZLHOLDINGS/szl-papers/resolve/main/README.md"
+      ],
+      "wired": "citation-reference"
+    },
+    "SZLHOLDINGS": {
+      "what": "Org-level meta model (org card).",
+      "a11oy": "\u2014",
+      "killinchu": "\u2014",
+      "resolve": [
+        "https://huggingface.co/SZLHOLDINGS/SZLHOLDINGS/resolve/main/README.md"
+      ],
+      "wired": "org-meta"
+    }
+  },
+  "collections": {
+    "szl-holdings-live-products": {
+      "slug": "SZLHOLDINGS/szl-holdings-live-products-6a1f8a13e7da494f247c63b6",
+      "title": "SZL Holdings \u2014 Live Products",
+      "items": 2,
+      "what": "Live shipped products (a11oy, killinchu).",
+      "app": "a11oy Command Center / killinchu Live Track Board"
+    },
+    "szl-holdings-products-series-a": {
+      "slug": "SZLHOLDINGS/szl-holdings-products-series-a-6a1f80700813690c53c70502",
+      "title": "SZL Holdings \u2014 Products (Series-A)",
+      "items": 3,
+      "what": "Series-A product set.",
+      "app": "a11oy What We Claim (honest)"
+    },
+    "deep-dives": {
+      "slug": "SZLHOLDINGS/deep-dives-6a1d53197e526d7fb306fa62",
+      "title": "Deep Dives",
+      "items": 4,
+      "what": "Technical deep-dive corpora.",
+      "app": "a11oy Knowledge Ontology (ontology)"
+    },
+    "datasets": {
+      "slug": "SZLHOLDINGS/datasets-6a1d24edcff89db09a646769",
+      "title": "Datasets",
+      "items": 4,
+      "what": "Curated dataset index.",
+      "app": "a11oy Knowledge (knowledge)"
+    },
+    "math-substrate": {
+      "slug": "SZLHOLDINGS/math-substrate-6a1d24edb47a5dc3cb6ef465",
+      "title": "Math Substrate",
+      "items": 4,
+      "what": "Lean proofs + formulas + theorem tree + formula index.",
+      "app": "a11oy Formulas (kbformulas) / killinchu 13-axis \u039b"
+    },
+    "uds-ecosystem": {
+      "slug": "SZLHOLDINGS/uds-ecosystem-6a1d24ed5dd65b050c512a8e",
+      "title": "UDS Ecosystem",
+      "items": 4,
+      "what": "UDS bundles + spans + governance receipts + deployment.",
+      "app": "a11oy Deploy / MELT \u00b7 killinchu UDS Edition"
+    },
+    "warhacker-2026-demo": {
+      "slug": "SZLHOLDINGS/warhacker-2026-demo-6a19bcee41aa598ff99a0006",
+      "title": "Warhacker 2026 Demo",
+      "items": 4,
+      "what": "Sovereign Warhacker dry-run assets.",
+      "app": "a11oy Run a Demo (demo) \u00b7 killinchu Warboard"
+    },
+    "szl-anatomy-visual-identity": {
+      "slug": "SZLHOLDINGS/szl-anatomy-visual-identity-6a19bceb89a9cfd05a87f960",
+      "title": "SZL Anatomy + Visual Identity",
+      "items": 3,
+      "what": "Anatomy 3D + brand kit assets.",
+      "app": "a11oy Living Organism (organism) / Operator organ \u00b7 killinchu Anatomy"
+    },
+    "ai-safety-alignment": {
+      "slug": "SZLHOLDINGS/ai-safety-alignment-6a19bce81a986dda4c7d4edb",
+      "title": "AI Safety + Alignment",
+      "items": 4,
+      "what": "Safety/alignment corpus (yuyay labels, doctrine, k-verify).",
+      "app": "a11oy Safety Gates (gates) / Lambda"
+    },
+    "series-a-diligence-packets": {
+      "slug": "SZLHOLDINGS/series-a-diligence-packets-6a19bce3447ed909ef14264c",
+      "title": "Series-A Diligence Packets",
+      "items": 3,
+      "what": "Diligence evidence packets.",
+      "app": "a11oy Signed Receipts (receipts) / Evidence"
+    },
+    "opentelemetry-for-ai-governance": {
+      "slug": "SZLHOLDINGS/opentelemetry-for-ai-governance-6a19bce01061848fe7dbeb6c",
+      "title": "OpenTelemetry for AI Governance",
+      "items": 2,
+      "what": "OTel span schemas + receipts for governance.",
+      "app": "a11oy MELT (melt) \u00b7 killinchu MELT"
+    },
+    "dsse-governance-receipts": {
+      "slug": "SZLHOLDINGS/dsse-governance-receipts-6a19bcdc14ed232317ee8dc5",
+      "title": "DSSE Governance Receipts",
+      "items": 3,
+      "what": "DSSE-signed governance receipt sets.",
+      "app": "a11oy Signed Receipts (receipts) \u00b7 killinchu DSSE Verifier"
+    },
+    "lean-4-governance-proofs": {
+      "slug": "SZLHOLDINGS/lean-4-governance-proofs-6a19bcd8039cfb1a5d8b1e57",
+      "title": "Lean 4 Governance Proofs",
+      "items": 2,
+      "what": "Lean 4 proofs backing governance gates.",
+      "app": "a11oy Lambda / Formulas \u00b7 killinchu 13-axis \u039b"
+    },
+    "szl-holdings-formal-verification-governance-receipts": {
+      "slug": "SZLHOLDINGS/szl-holdings-formal-verification-governance-receipts-6a18fd20a8a1fcf8d60cfe3c",
+      "title": "SZL Holdings \u2014 Formal Verification + Governance Receipts",
+      "items": 4,
+      "what": "Combined formal-verification + governance-receipt showcase.",
+      "app": "a11oy What We Claim (honest) / Receipts"
+    }
+  }
+}
