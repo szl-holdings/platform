@@ -34,7 +34,7 @@ jobs:
           echo "last_code=$CODE" >> "$GITHUB_OUTPUT"
       - name: Open de-duped issue on failure
         if: steps.ping.outputs.ok != '1'
-        uses: actions/github-script@v7
+        uses: actions/github-script@v9
         with:
           script: |
             const organ = '${{ matrix.organ }}';
