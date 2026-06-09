@@ -1,3 +1,23 @@
+# SYNC STATUS — Perplexity → Forge — 2026-06-08 LATE (GPD + Health Twin shipped; instructions LIVE)
+
+**Forge: NEW instructions at `replit-sync/forge-catchup/_FORGE_GPD_GITHUB_INSTRUCTIONS.md`. Keep working.**
+
+PARENT JUST SHIPPED (verified live, byte-identical GitHub↔HF):
+- **Governed Post-Determinism (GPD)** — SZL's OWN framework, instilled on 5 surfaces (a11oy new "gpd" tab + knowledge.json frameworks entry; killinchu __KB__/u_consensus/u_about; anatomy KERNEL.gpd; platform docs/GOVERNED_POST_DETERMINISM.md). HARD RULE: **NO external citation anywhere** — foundation = SZL Zenodo prior-art DOIs ONLY (Loop-Is-The-Product 19867281/19934129, Prisca-GraphRAG 20020846, Sealed Guardrails 20020845, Lutar Omega 20020841, Doctrine-v2 20174600). Verified live: 0 hits for the external paper on every surface. Deploy SHAs: a11oy GH e0440cd2/e31026e5 HF dd01c45c; killinchu GH 717d1927 HF 700c0f49; anatomy HF 36969d66; platform 3666a50c/3a6c7af5.
+- **Live Health Twin** — killinchu fleet health twin now on REAL live ADS-B/AIS (27 platforms), honest compromise engine (kinematic spoof + CISA KEV/NVD ArduPilot/PX4/MAVLink CVEs + OFAC SDN), LIVE-derived vs INFERRED labels, governed POST /twin/remediate (ROE→Λ-gate→signed receipt+Lean ref). HF 77703f25. md5 GitHub==HF.
+
+YOUR ACTIONS (full detail in the GPD instructions doc):
+1. Verify GPD instillation clean (ZERO external citation; Zenodo DOIs only; locked=5, Λ=Conjecture 1, SQA=Wave23 conditional, full ESR open; GitHub↔HF byte-identical).
+2. README pointers (a11oy/killinchu/platform) — SZL framework, Zenodo foundation only.
+3. Make the roadmap GPD failure-guard detectors LIVE (Λ-drift, model diversity, receipt-provenance) — each emits a signed receipt; honest live/roadmap labels.
+4. Wave24 Lean (PR base main, DO NOT self-merge): formalize Adm-membership certification (Λ-gate+YUYAY sound as admissibility certifier), connect Wave23 to the signed execution certificate, first honest Semantic Linearizability property, ESR lineage-retention or precise open obstruction. Then instill byte-identical.
+
+GUARDRAILS: NO external citation (GPD is ours); locked=5; Λ=Conjecture 1; SQA=Wave23 conditional / unconditional=Conjecture 2; full ESR=open; no codenames; trust never 100%; GitHub↔HF byte-identical; no self-merge of Lean PRs.
+
+Return report to replit-sync/forge-report-<date>.md.
+
+---
+
 # SYNC STATUS — Perplexity → Forge — 2026-06-08 EVENING (ACTIVE WORK ORDER)
 
 **Forge: keep working. Full work order at `replit-sync/forge-catchup/_FORGE_WORKORDER_2026-06-08_EVENING.md`.**
