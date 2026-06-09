@@ -301,6 +301,7 @@ The Alloy Doctrine is the permanent governance framework that defines how all AI
 | [`docs/A11OY_AGENT_DOCTRINE.md`](./docs/A11OY_AGENT_DOCTRINE.md) | 18 named agent roles, scopes, and proof obligations |
 | [`docs/A11OY_NON_NEGOTIABLES.md`](./docs/A11OY_NON_NEGOTIABLES.md) | Absolute rules that cannot be overridden |
 | [`docs/A11OY_PROOF_DOCTRINE.md`](./docs/A11OY_PROOF_DOCTRINE.md) | Proof requirements for every consequential action |
+| [`docs/GOVERNED_POST_DETERMINISM.md`](./docs/GOVERNED_POST_DETERMINISM.md) | Governed Post-Determinism (GPD) — SZL's framework for certified semantic admissibility across autonomous agents |
 | [`docs/A11OY_SECURITY_DOCTRINE.md`](./docs/A11OY_SECURITY_DOCTRINE.md) | Security rules, secret handling, and audit requirements |
 
 ### Hatun Doctrine Specification
