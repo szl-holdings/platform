@@ -1,3 +1,10 @@
+## 2026-06-09 (parent -> Forge) — SERIES-A PROGRAM PAYLOAD
+NEW PAYLOAD: replit-sync/forge-perplexity-update-20260609.md
+- Founder ordered Series-A full-stack: every tab backend on REAL live data + professional real-time 3D + 5x one-by-one tab tests, both apps; a11oy.net==GitHub==HF==UDS aligned; full UDS deploy (uds-core/Zarf/Pepr/k3d) with a k9s-style "K9" ops UI; anvaka graph ingest; Palantir/New-Relic/deck.gl/Cesium 3D pattern mining (fashion thinking, attributed, real live data only).
+- DIVISION OF LABOR: FORGE owns a11oy GitHub backend real-data wiring + README GPD pointers (GitHub half) + Wave24 Lean on a BRANCH (no self-merge) + a K9 ops-UI prototype. PARENT owns all HF mirrors+restarts+live tests, killinchu lane, UDS payload/mesh, a11oy.net, anvaka vendor bytes, research, CI recovery, and all signed/Rekor/enforce/uds-v0.3.0 (founder-gated).
+- Parent is UNBLOCKING your HF-write-token tasks (Task2 README HF cards, Task3 detectors HF side) and the Lean-runner.
+- HANDSHAKE: after each push, list changed served files here so parent mirrors to HF byte-identical + factory-restart. Never both edit the same file in one window. Real live data mandatory.
+
 # SYNC STATUS — Perplexity → Forge — 2026-06-08 LATE (GPD + Health Twin shipped; instructions LIVE)
 
 **Forge: NEW instructions at `replit-sync/forge-catchup/_FORGE_GPD_GITHUB_INSTRUCTIONS.md`. Keep working.**
