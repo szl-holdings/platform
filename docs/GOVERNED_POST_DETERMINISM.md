@@ -28,9 +28,9 @@ GPD is not a whitepaper abstraction. Every pillar maps to a component SZL alread
 
 | Pillar | SZL component (live) | Proof artifact | Status |
 |---|---|---|---|
-| **Protocol-Driven Development** | a11oy governed-decision loop + YUYAY 13-axis conjunctive gate (deny-by-default) | Lean: gate soundness over locked F-set (A1 soundnessAxiom) | LIVE - gate proven sound (locked F-set) |
-| **Verifiable Agentic Infrastructure** | DSSE-signed receipt chain + Lean-theorem trace (Provable-Interdiction) | Receipt: ECDSA-P256 signed, SHA-256 hash-chain tamper-evident | LIVE - ECDSA-P256 signing, hash-chained |
-| **Autonomous State Control Planes** | Ouroboros bounded-recursion loop (P1-P6) + sandboxed agent + mission ledger | Lean: loop invariants proven (agentic-loop wave) | LIVE - loop invariants proven |
+| **Protocol-Bounded Execution** | a11oy governed-decision loop + YUYAY 13-axis conjunctive gate (deny-by-default) | Lean: gate soundness over locked F-set (A1 soundnessAxiom) | LIVE - gate proven sound (locked F-set) |
+| **Verifiable Intent-to-Execution** | DSSE-signed receipt chain + Lean-theorem trace (Provable-Interdiction) | Receipt: ECDSA-P256 signed, SHA-256 hash-chain tamper-evident | LIVE - ECDSA-P256 signing, hash-chained |
+| **Bounded-Recursion Control Plane** | Ouroboros bounded-recursion loop (P1-P6) + sandboxed agent + mission ledger | Lean: loop invariants proven (agentic-loop wave) | LIVE - loop invariants proven |
 | **Semantic Quorum Assurance** | Khipu BFT quorum + Wave23 conditional safety theorem (agreement under non-equivocation) | Lean theorem TH_L5 khipu_quorum_safety_conditional (CONDITIONAL, axiom-clean) | CONDITIONAL THEOREM (Wave23); unconditional = Conjecture 2 |
 | **Epistemic State Replication** | YAWAR append-only SHA-256 receipt bus + deterministic replay + Verifiable Semantic Rollback | Receipt: deterministic replay verified; full ESR semantics = open R&D | PARTIAL - receipts/replay LIVE; full ESR = ROADMAP (open) |
 
@@ -57,10 +57,10 @@ GPD is grounded **entirely** in SZL's own prior, DOI-stamped published work. The
 
 | Date | Record | DOI | Grounds |
 |---|---|---|---|
-| 2026-04-28 | The Loop Is the Product (v1): Bounded Recursion as a System Primitive | [10.5281/zenodo.19867281](https://doi.org/10.5281/zenodo.19867281) | Autonomous State Control Planes (Ouroboros P1-P6 bounded-recursion loop) |
-| 2026-04-30 | The Loop Is the Product (v2): Empirical Companion | [10.5281/zenodo.19934129](https://doi.org/10.5281/zenodo.19934129) | Autonomous State Control Planes (empirical loop behavior) |
+| 2026-04-28 | The Loop Is the Product (v1): Bounded Recursion as a System Primitive | [10.5281/zenodo.19867281](https://doi.org/10.5281/zenodo.19867281) | Bounded-Recursion Control Plane (Ouroboros P1-P6 bounded-recursion loop) |
+| 2026-04-30 | The Loop Is the Product (v2): Empirical Companion | [10.5281/zenodo.19934129](https://doi.org/10.5281/zenodo.19934129) | Bounded-Recursion Control Plane (empirical loop behavior) |
 | 2026-05-04 | Lineage-Aware Retrieval-Augmented Generation (v5): Prisca-GraphRAG | [10.5281/zenodo.20020846](https://doi.org/10.5281/zenodo.20020846) | Epistemic State Replication (belief-lineage / YAWAR receipt bus) |
-| 2026-05-04 | Sealed Constitutional Guardrails (v6): Chinchilla-Lutar Scaling | [10.5281/zenodo.20020845](https://doi.org/10.5281/zenodo.20020845) | Protocol-Driven Development (governed-decision loop + YUYAY gate) |
+| 2026-05-04 | Sealed Constitutional Guardrails (v6): Chinchilla-Lutar Scaling | [10.5281/zenodo.20020845](https://doi.org/10.5281/zenodo.20020845) | Protocol-Bounded Execution (governed-decision loop + YUYAY gate) |
 | 2026-05-04 | The Lutar Omega Formalism (v4) | [10.5281/zenodo.20020841](https://doi.org/10.5281/zenodo.20020841) | Formal substrate for admissibility certification |
 | 2026-05-14 | SZL Doctrine v2 - 9 Canonical Axes (Lambda DOI) | [10.5281/zenodo.20174600](https://doi.org/10.5281/zenodo.20174600) | Admissibility / Lambda canonical trust axes |
 
