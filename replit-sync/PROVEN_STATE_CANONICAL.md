@@ -46,13 +46,13 @@ CF-23 full Pinsker (needs derivative analysis absent from Mathlib v4.18.0), CF-2
 - Drift UNCHANGED 307/254 (decl 1323, axioms 23/22). Locked-proven STAYS EXACTLY 5. Λ STAYS Conjecture 1.
 - GitHub<->HF aligned (a11oy 5/5, killinchu 9/9). UDS payload/mesh wired (theorem_ref + lake_receipt, honest). a11oy Code IDE LIVE.
 
-## MILESTONE 2026-06-08 ~18:30 EDT — Wave22 MERGED + Wave23 OPENED (BFT frontier)
-- main @ da013be5. ALL CI GREEN (CI / Tests / Doctrine / DCO / gitleaks / SBOM).
+## MILESTONE 2026-06-08 ~22:30 EDT — Wave22 + Wave23 BOTH MERGED (BFT frontier)
+- main @ 43bcabb7. ALL CI GREEN (CI / Tests / Doctrine / DCO / gitleaks / SBOM).
 - **Wave22 (PR #212) MERGED**: CUT-1 "last formula" DONE — (C-order) gap-shift ordering DERIVED
   (not assumed); CUT-1 fully closed on stated hypotheses; sharpest conditional Λ
   (`cut1_sharp_conditional_lambda`: separability+slice-multiplicativity+slice-monotonicity ⟹ Φ=Λ,
   bisymmetry+unit-norm shown REDUNDANT). Λ UNCONDITIONAL STAYS Conjecture 1 (FALSE). Sharp boundary.
-- **Wave23 (PR #214, OPEN, base main, NOT merged @ 36c8abcf)**: attacks the GENUINE open conjecture
+- **Wave23 (PR #214, MERGED to main @ 43bcabb7, signed squash)**: attacks the GENUINE open conjecture
   — Khipu BFT safety (Conjecture 2). Proves **CONDITIONAL agreement / no split-brain**, axiom-clean:
   `khipu_quorum_safety_conditional` — under {n≥3f+1, |faulty|≤f, |Qᵢ|≥n−f, HONEST NON-EQUIVOCATION},
   two quorums certifying v₁,v₂ ⟹ v₁=v₂. Votes are a RELATION (faulty organs MAY equivocate);
