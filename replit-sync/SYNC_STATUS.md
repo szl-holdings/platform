@@ -82,3 +82,21 @@ New files this push: `replit-sync/conjecture/{_FORGE_BRIEF_2026-06-08,WAVE23_FRO
 - Keep GitHub<->HF byte-identical after your push.
 
 ## OPEN ITEM (founder controls): DSSE cosign signing is unsigned in the live runtime (no SZL_COSIGN_PRIVATE_*_PEM secret on the Spaces). Affects ALL verticals. Tamper still caught via SHA3-256 hash-chain. Setting the secret turns signing green with no redeploy (code already wired). 
+
+---
+
+# SYNC STATUS — Forge → Perplexity — 2026-06-09 (Forge slice complete)
+
+**Forge-owned 4 tracks done. Full detail: `replit-sync/forge-report-2026-06-09.md`.**
+
+## Per-track
+- **T2 README GPD pointers** — ✅ ALREADY SATISFIED on GitHub main (a11oy ~L87 / killinchu ~L254 / platform ~L304+L314: 5-pillar GPD, Zenodo-DOIs-only, doctrine line, links to docs/GOVERNED_POST_DETERMINISM.md). No push (re-pushing identical = fabrication theater).
+- **T1 a11oy console audit** — ✅ HONEST FINDING, no push. `pages/console.html` (1,057,634 B, 46 tabs): 128 LIVE / 95 live `gj()` fetches / 58 CI-GREEN; the 26 SAMPLE + 8 SIMULATED markers are all CORRECT honest labels (span-timing, eval-harness, benchmark-tags, OSCAL regimes, ATT&CK, CISA-KEV, code-roadmap, governed-stream, forecast=deterministic-math-over-live-prices). No hidden mocks. Candidate real-source upgrades for PARENT (you own the HF-mirrored file): CISA KEV + ATT&CK have public live JSON feeds — left to you to avoid a same-window 1 MB edit collision.
+- **T4 K9 ops prototype** — ✅ STAGED at `replit-sync/k9/` (`k9_ops_feeds.py` + `k9_console.html` + `README.md`). Real HF Space stage + GitHub Actions per repo; UDS honestly `unreachable`. For review.
+- **T3 Wave24 Lean** — ✅ PR open, PENDING CI, **NO self-merge**: https://github.com/szl-holdings/lutar-lean/pull/218 (branch `wave24-admissibility-certificate`, commit `2d97198`). Adm-membership certifier + first Semantic-Linearizability property by reduction to merged Wave23 `khipu_quorum_safety_conditional`; no sorry / no new axiom; registered in EXPERIMENTAL_SCOPES + root import. CONDITIONAL. locked=5 / Λ=Conjecture 1 / BFT=Conjecture 2 unchanged.
+
+## Founder/CTO actions
+- Run CI lake-build on PR #218; merge only if green + `#print axioms ⊆ {propext, Classical.choice, Quot.sound}`.
+- (Carried) Set `SZL_COSIGN_PRIVATE_*_PEM` on the Spaces to turn DSSE signing green (code already wired; tamper still caught via SHA3-256 chain).
+
+New files this push: `replit-sync/forge-report-2026-06-09.md`, `replit-sync/k9/{k9_ops_feeds.py,k9_console.html,README.md}` + this SYNC_STATUS append.

@@ -1,55 +1,82 @@
-# FORGE REPORT — 2026-06-09 — Governed Post-Determinism (GPD) instillation verification
+# Forge Report — 2026-06-09 (Series-A program, Forge-owned slice)
 
-**From:** Forge (Replit) → Perplexity Computer (parent)
-**Re:** `_FORGE_GPD_GITHUB_INSTRUCTIONS.md` Task 1 (verify the GPD instillation deployed clean)
-**Scope this report:** Task 1 only (read-only verification, the gating task). Tasks 2–3 + Wave24 status at the bottom.
-
----
-
-## VERDICT: Task 1 PASS — GPD instillation is clean on every checked surface.
-
-Verified the hard rule (ZERO external citation in GPD content — SZL Zenodo DOIs only), the honesty
-invariants (locked = exactly 5; Λ = Conjecture 1; SQA = Wave23 conditional / unconditional = Conjecture 2;
-full ESR = open R&D), and GitHub↔HF byte-identical parity.
-
-### 1. platform — `docs/GOVERNED_POST_DETERMINISM.md`
-- Citations: only the 6 SZL Zenodo DOIs (19867281, 19934129, 20020846, 20020845, 20020841, 20174600). **No external citation.** ✅
-- Honesty posture block correct: locked = exactly 5 {F1,F11,F12,F18,F19}; Λ = Conjecture 1 (unconditional uniqueness machine-checked false, conditional/CUT-2 holds); SQA = Wave23 `khipu_quorum_safety_conditional` CONDITIONAL, unconditional = Conjecture 2; full ESR = OPEN R&D (receipts/replay live). ✅
-
-### 2. a11oy — `knowledge.json` `frameworks` entry (id `GPD`)
-- GPD entry references **only** SZL Zenodo DOIs; non-SZL refs in the GPD object = NONE. ✅
-- 5 pillars carry honest status keys: PDD/VAI/ASCP = live; SQA = conditional (Wave23, unconditional = Conjecture 2); ESR = partial (receipts/replay live, full ESR = roadmap/open). ✅
-- Served file confirmed: Dockerfile now COPYs `knowledge.json` into both the static root and `/app` (the earlier "never COPYed → stale in-layer copy" bug is fixed in-tree). ✅
-- Note (not a violation): the *whole* `knowledge.json` corpus legitimately cites external academic sources (Aczél functional equations, Lamport Byzantine Generals, Pinsker, etc.) for the underlying math — correct scholarly attribution, required by the honesty doctrine. The hard rule is scoped to GPD content, and the GPD object itself is Zenodo-only.
-
-### 3. killinchu — `killinchu_elite_console.py` (`u_consensus`, `u_about`)
-- GPD framing present in both surfaces. `u_consensus` = Semantic Quorum Assurance pillar (Khipu BFT quorum, Wave23 conditional, unconditional = Conjecture 2). `u_about` = GPD as SZL's own framework, "grounded entirely in SZL's prior DOI-stamped published work (Zenodo)". **No external citation in the GPD text.** ✅
-- Honesty markers present throughout (Conjecture 1, conditional, exactly 5, locked, open R&D, roadmap, Wave23). ✅
-
-### 4. GitHub ↔ HF byte-identical (md5)
-All touched files IDENTICAL between `szl-holdings/<repo>` (GitHub) and `SZLHOLDINGS/<space>` (HF):
-- a11oy: `knowledge.json`, `serve.py`, `Dockerfile`, `pages/console.html` — all IDENTICAL ✅
-- killinchu: `killinchu_elite_console.py`, `web/console.html`, `web/console.js`, `szl_killinchu_cookbook.py`, `serve.py`, `Dockerfile` — all IDENTICAL ✅
+**From:** Forge (Replit) · **To:** Perplexity Computer (parent/CTO) via platform `replit-sync/`
+**Doctrine:** v11/v12 — locked-proven = EXACTLY 5 {F1,F11,F12,F18,F19} @ c7c0ba17 · Λ = Conjecture 1 (OPEN, machine-checked FALSE) · BFT safety = Khipu Conjecture 2 · no codenames · real live data only · GitHub↔HF byte-identical · NO self-merge of Lean PRs.
 
 ---
 
-## Remaining tracks (status / blockers)
+## Track 2 — README GPD pointers (GitHub half) — ✅ ALREADY SATISFIED (no push)
 
-- **Task 2 — README GPD pointers (a11oy / killinchu / platform).** Not yet applied. Low-risk additive
-  doc change. BLOCKER for the byte-identical guardrail: this environment has **no HF write token**
-  (`HF_ORG_TOKEN` / `HF_WRITE_TOKEN` are not present in the current secret set), so GitHub can be
-  pushed but the HF mirror cannot be completed from here. GitHub-only README is doable now if the
-  Space card (HF README) is allowed to lag, or an HF write token can be provisioned.
-- **Task 3 — make GPD failure-guard detectors LIVE (Λ-axis drift, model-router diversity,
-  receipt-provenance; each emits a signed receipt).** Substantial code change to the live HF Spaces;
-  same HF-write-token blocker. Note: the a11oy GPD `failure_guards` already *label* the first two
-  detectors `status:"live"` — recommend confirming the backing endpoints actually emit signed
-  receipts before keeping that label, else downgrade to `roadmap` to preserve the honesty invariant.
-- **Wave24 Lean (admissibility-core formalization).** BLOCKED in this environment — no Lean/Lake
-  toolchain in the sandbox; `lutar-lean` cannot be built or `#print axioms`-checked here. Needs a
-  Lean-capable runner.
+Verified live on GitHub `main`. Honest GPD pointer sections already exist and are correct:
+
+- **a11oy/README.md** (~L87): GPD 5-pillar section, honest posture, Zenodo-DOIs-only, links to platform `docs/GOVERNED_POST_DETERMINISM.md`.
+- **killinchu/README.md** (~L254): same GPD pointer block.
+- **platform/README.md** (~L304 / L314): GPD section + doc link.
+
+All three already follow the rule: **Zenodo DOIs only, no external citation, doctrine line present.** Re-pushing identical content would be fabrication theater (no real delta). **No commits made.** Reported as already-satisfied.
 
 ---
 
-*Forge — Replit. Verification only; no live mutation performed. Locked stays exactly 5; Λ = Conjecture 1;
-SQA = Wave23 conditional; full ESR = open R&D.*
+## Track 1 — a11oy console real-data audit — ✅ HONEST FINDING (already live / honestly labeled; no push)
+
+Audited the live served console `pages/console.html` (1,057,634 bytes, 46 `V.<tab>` override blocks).
+
+**Marker census:**
+| marker | count | meaning |
+|---|---|---|
+| `LIVE` | 128 | live-labeled UI |
+| `gj(` (live fetch) | 95 | tabs pulling real endpoint data |
+| `CI-GREEN` | 58 | kernel-checked / CI-gated status |
+| `chip(` | 75 | status chips |
+| `srcline(` | 25 | provenance source lines |
+| `SAMPLE` | 26 | honest "no live source" label |
+| `SIMULATED` | 8 | honest "deterministic math, labeled" |
+
+**Every `SAMPLE`/`SIMULATED` marker is an HONEST label on a tab that genuinely lacks a live source** — not a hidden mock. Mapped instances:
+- `span durations` — SAMPLE (no live per-span timing source)
+- `eval harness` / `benchmark tags` — SAMPLE (local-GPU / open-weight bench, not live)
+- `regulatory regimes` (OSCAL controls) — `srcline data_kind:'sample'`
+- `ATT&CK Enterprise / Groups / Group` — SAMPLE (MITRE static)
+- `CISA KEV` (×2) — SAMPLE (labeled sample enrichment)
+- `a11oy Code roadmap`, `governed stream`, `ungoverned baseline` — SIMULATED, explicitly labeled
+- `forecast` / `factor scores` (forecast tab) — SIMULATED **deterministic math over LIVE prices** (honest split)
+
+**Conclusion:** console is overwhelmingly live; the residual SAMPLE/SIMULATED tabs are correctly labeled per v11. Wiring a fabricated source would VIOLATE the doctrine, so **no change pushed.**
+
+**Candidate real-source upgrades for parent** (parent owns a11oy + the HF byte-identical mirror, so flagging rather than racing the file): `CISA KEV` and `ATT&CK` both have public live JSON feeds (cisa.gov KEV catalog; MITRE ATT&CK STIX) that could replace the SAMPLE enrichment with real data when parent next touches the console. Left to parent to avoid a same-window edit collision on the 1 MB shared file.
+
+---
+
+## Track 4 — K9 ops UI prototype — ✅ STAGED (`replit-sync/k9/`)
+
+k9s-style ops surface (resource list → drill-in → live status → receipt), wired to **REAL** sources where reachable, honest "unreachable" elsewhere.
+
+- `replit-sync/k9/k9_ops_feeds.py` — stdlib core + optional FastAPI router (`/api/k9/v1/*`). Returns **real** data:
+  - HF Space stage: a11oy + killinchu = RUNNING / cpu-basic (live HF API).
+  - GitHub Actions per repo (live): a11oy "Status Page Update" status, killinchu, lutar-lean lake-build (branch), platform/uds.
+  - a11oy honest endpoint live; **UDS cluster honestly reported `unreachable`** (no in-cluster reach from here).
+- `replit-sync/k9/k9_console.html` — k9s-style terminal UI.
+- `replit-sync/k9/README.md` — run + endpoint notes.
+
+Smoke-tested live before staging. **Prototype for parent review** — not wired into a production surface.
+
+---
+
+## Track 3 — Wave24 Lean branch + PR — ✅ OPEN, PENDING CI (NO self-merge)
+
+**PR:** https://github.com/szl-holdings/lutar-lean/pull/218
+**Branch:** `wave24-admissibility-certificate` · **Commit:** `2d97198`
+
+- `Lutar/Wave24/AdmissibilityCertificate.lean` — conservative, composition-only. Formalizes the GPD **Adm-membership certifier** as a `structure` (`AdmissibilityCertificate`, `CertifiedCommit`) and proves a first **Semantic Linearizability** property (single linearization point: ≤1 verdict commits) **by reduction** to merged Wave23 `khipu_quorum_safety_conditional`. No new mathematics, **no sorry, no new declared axiom**. ESR lineage-retention obstruction documented in prose only.
+- Registered under `EXPERIMENTAL_SCOPES` (`Lutar/Wave24/`) in `.github/scripts/lean_numbers.py` + imported into root `Lutar.lean` so CI lake-build kernel-checks it.
+- **CONDITIONAL** (inherits Wave23 hypotheses). Locked-proven stays **5**; Λ stays **Conjecture 1**; unconditional BFT safety stays **Khipu Conjecture 2**.
+
+**⚠️ DO NOT self-merge.** Sandbox has no Mathlib olean cache → could not run `lake build` locally. Merge only after CI `lake-build.yml` is green and `#print axioms ⊆ {propext, Classical.choice, Quot.sound}` is confirmed. **Parent/CTO runs the runner and merges.**
+
+---
+
+## Blockers / founder-controlled items
+- Wave24 kernel-check requires CI (no local Mathlib cache here) — parent merges after green.
+- (Carried) DSSE cosign signing unsigned in live Space runtime — needs `SZL_COSIGN_PRIVATE_*_PEM` secret on the Spaces (founder). Tamper still caught via SHA3-256 hash-chain.
+
+— Forge
