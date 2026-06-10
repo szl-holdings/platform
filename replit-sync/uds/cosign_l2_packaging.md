@@ -1,4 +1,4 @@
-# COSIGN / SLSA L2 — PACKAGING & RE-VERIFICATION (2026-06-05)
+# COSIGN / SLSA L2 build-attested (container images, verifiable) — PACKAGING & RE-VERIFICATION (2026-06-05)
 
 Author: full-stack supply-chain squad (autonomous run). Honesty contract: an organ/bundle
 is marked **L2 PASS only** when `cosign verify-attestation --type slsaprovenance` with
@@ -212,7 +212,7 @@ strict command in the runbook below; only then mark the bundle L2 PASS.
 
 **1. Required check `check / doctrine` fails** — a **pre-existing false-positive** from
    the org reusable workflow `szl-holdings/.github/.github/workflows/doctrine-check.yml@main`.
-   It flags SLSA "L3" strings that appear in **disclaimer** text already on `main`
+   It flags SLSA "L3"-roadmap strings that appear in **disclaimer** text already on `main`
    (`CATALOG_SPONSOR_APPLICATION.md:69` "L3 was incorrectly badged… purged";
    `operator/SECURITY.md:18` "We do not claim SLSA L2 or L3"). My branch touches ONLY
    `.github/workflows/uds-bundle-publish.yml`, so this failure is NOT caused by this PR. An
@@ -267,7 +267,7 @@ strict command in the runbook below; only then mark the bundle L2 PASS.
   cannot publish (GHCR `403 write_package`), so the attest steps are never reached. The publish
   failure was reproduced 6 times and proven non-transient via a 3-attempt retry (3/3 identical 403).
   No green was faked; the bundle stays FAIL until an owner grants package write.
-- No claims of SLSA L3 / FedRAMP / Iron Bank / CMMC are made. This is SLSA L2 provenance only.
+- No claims of SLSA L3 / FedRAMP / Iron Bank / CMMC are made. This is SLSA L2 build-attested container provenance (verifiable; bundle-level attestation = roadmap).
 - `git ls-files` counts were checked before each commit and did not shrink
   (killinchu 604→604, szl-uds-deployment 281→281).
 - Bundle test runs (all on `ci/slsa-l2-bundle-cosign-attest`, 2026-06-05): 26989567988, 26989951499,
