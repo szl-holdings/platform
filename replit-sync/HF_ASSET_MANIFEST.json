@@ -256,7 +256,7 @@
       "wired": "empty \u2014 cleanup candidate"
     },
     "uds-bundles-v1": {
-      "what": "UDS Zarf bundles for a11oy + killinchu (airgap, cosign, SLSA L1+L2).",
+      "what": "UDS Zarf bundles for a11oy + killinchu (airgap, cosign-signed; SLSA L2 build-attested on container images (verifiable; bundle-level = roadmap)).",
       "a11oy": "Deploy (deploy)",
       "killinchu": "Deploy / UDS Edition",
       "resolve": [
