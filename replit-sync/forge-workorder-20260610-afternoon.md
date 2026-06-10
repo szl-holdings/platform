@@ -38,7 +38,7 @@ Per `UNIFICATION_CAPABILITY_TAB_MAP.md` + `LIVE_SOURCES_VERIFIED.md`. **Server-s
 
 ## 4. agentic a11oy + UDS/mesh
 - Keep the governed loop (Ouroboros P1–P6) + YUYAY 13-axis gate + Khipu quorum honest. a11oy signs receipts **ECDSA P-256** (verified against a11oy `/cosign.pub`); shared `szl-receipts` chain = **Ed25519** — two distinct layers, do not unify without proving cross-verification.
-- szl-uds-deployment #51 (SLSA L2 provenance, 5 organs) + #57 (verify receipt signing): rebase onto main (post-#73), resolve the flagged conflicts (#57: Ed25519 verifier; #51: publish workflow + 5 organ zarf.yaml), keep SLSA language L1-honest.
+- szl-uds-deployment #51 (SLSA L2 provenance roadmap — bundle-level not yet earned, 5 organs) + #57 (verify receipt signing): rebase onto main (post-#73), resolve the flagged conflicts (#57: Ed25519 verifier; #51: publish workflow + 5 organ zarf.yaml), keep SLSA language L1-honest.
 
 ## 5. NEXT (do not overstate)
 - Wave24 Lean: admissibility-certification soundness (conditional, axiom-clean); connect Wave23 BFT to the signed execution certificate; first honest Semantic Linearizability definition + one proven property. Statement-only until kernel-verified.
