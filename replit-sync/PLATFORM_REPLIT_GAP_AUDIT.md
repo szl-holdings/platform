@@ -12,7 +12,7 @@ different question: **does the platform repo expose an app-facing capability (vi
 private/empty; contents API returns content. All platform paths below are verified-present this session.
 
 **Honesty doctrine carried through (ABSOLUTE):** Λ = **Conjecture 1**, never a theorem. Proved formulas = exactly
-5 {F1,F11,F12,F18,F19}. SLSA **L1+L2** only (no L3/FedRAMP/Iron Bank/CMMC). No user-visible jargon. **No mock** —
+5 {F1,F11,F12,F18,F19}. SLSA **L1 honest · L2 build-attested** on container images (verifiable; bundle-level = roadmap) (Not Iron Bank/FedRAMP/CMMC/ATO; SLSA L3 roadmap.). No user-visible jargon. **No mock** —
 every "make-real" below names a real source; where there's no live backend, the wiring is an HONEST "roadmap"
 state, never fabricated numbers. Seed JSON from the platform repo is real, citable demo content (clearly labelled
 "sample / not a live feed"), which is the same honest posture both apps already use today.
