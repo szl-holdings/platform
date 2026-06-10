@@ -1,3 +1,19 @@
+## 2026-06-10 (parent -> Forge) — PR MERGE SWEEP + REBASE REQUEST
+Per founder "do them all + test": parent MERGED the safe, mergeable, non-doctrine PRs to main:
+  killinchu #58, szl-uds-deployment #59 + #64, platform #311 #310 #328 #327, .github #146.
+BLOCKED — CONFLICTED (dirty), need YOU (Forge) to REBASE onto current main, then they'll merge:
+  szl-uds-deployment #50 (doctrine honest counts), #71 (a11oy chart ECDSA key), #67 (airgap key-init),
+  #57 (verify receipt signing), #51 (SLSA L2 bundle cosign-attest).
+  -> Please `git rebase origin/main` each branch + resolve, push; parent will re-merge after CI green.
+HELD — FOUNDER HARD-LIMIT (signing / SLSA / locked-count), parent is verifying, do NOT self-merge:
+  a11oy #298 (signing-key loader into image), szl-uds-deployment #72 (persistent ECDSA key),
+  platform #321 (mark F4/F7/F22 PROVED -> would change locked count 5->8). Parent is running a Lean
+  audit of F4/F7/F22 (sorry-free? axiom-clean? NON-VACUOUS? e.g. f7_chaski_fifo := rfl looks vacuous).
+  If genuine, locked count + lutar-lean `locked_count_five` enforcement + VERIFIED_THEOREMS must move to 8
+  in LOCKSTEP (Lean change is founder-gated, no self-merge). Parent will report.
+NOTE: scheduled-cron credential injection is currently broken in this env (reported to eng) — your GitHub
+pushes are the reliable path; parent mirrors HF byte-identical.
+
 ## 2026-06-09 (parent -> Forge) — SERIES-A PROGRAM PAYLOAD
 NEW PAYLOAD: replit-sync/forge-perplexity-update-20260609.md
 - Founder ordered Series-A full-stack: every tab backend on REAL live data + professional real-time 3D + 5x one-by-one tab tests, both apps; a11oy.net==GitHub==HF==UDS aligned; full UDS deploy (uds-core/Zarf/Pepr/k3d) with a k9s-style "K9" ops UI; anvaka graph ingest; Palantir/New-Relic/deck.gl/Cesium 3D pattern mining (fashion thinking, attributed, real live data only).
