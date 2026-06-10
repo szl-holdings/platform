@@ -18,7 +18,7 @@ See replit-sync/conjecture/ for the full set. Summary:
 - **CI-GREEN proven ≈ 185** (Waves 11–22): all axiom-clean (⊆ {propext, Classical.choice, Quot.sound}), no sorry. Incl CF-22 (DPO KL≥0 simplex), Wave17 (full binary Pinsker), Wave16 (Aczél quasi-arithmetic + Λ scale-invariance), Wave18–22 (BKS density + CUT-1 closure on stated hypotheses).
 - **UNPROVEN / OPEN (the frontier — see NEXT_FORMULAS_TO_PROVE.md + CORDER_RESEARCH.md):**
   - **Conjecture 1 — Λ unconditional uniqueness = machine-checked FALSE.** Counterexample proven (maxAgg & min satisfy A1–A5 but ≠ Λ; thesis v23 maxAgg_counterexample.md). Stays a conjecture in unconditional form. The CONDITIONAL uniqueness (under separability/slice-multiplicativity) IS proven, axiom-free.
-  - **The ONE open hypothesis to close on conditional Λ: the (C-order) gap-shift ordering** (BKS 4th step, eqs 8–9). DERIVE it → drop a hypothesis → tightest possible conditional theorem. THIS is the highest-value math ask.
+  - **The ONE open hypothesis to close on conditional Λ: the (C-order) gap-shift ordering** (BKS 4th step, eqs 8–9). DERIVE it → drop a hypothesis → tightest possible conditional result (Theorem U); Λ stays Conjecture 1 unconditionally, never a theorem. THIS is the highest-value math ask.
   - **Conjecture 2 — Khipu BFT safety (3-of-4 multi-party-witnessed agreement) = OPEN.** Bigger swing if formalized.
   - DPO klDivergence/pinsker FALSE-as-stated unconditionally; CF-22/23 repair conditionally.
 
