@@ -44,7 +44,7 @@ Other GET routes exist but are **HTML/UI or SSE, not JSON data** (skip for data 
 | POST | `/api/amaru/v1/trajectory/triage` | **Trajectory / anomaly triage** (Cyber RTS): checks orbital track vs envelopes | `{"track_id":str,"track":{"altitude_km":…,"velocity_kms":…,"inclination_deg":…}}` | `{"ok":true,"triage":{"verdict":"NOMINAL","flags":[],"contextualization":["altitude 420 km vs LEO 160–2000 km"]},"grounded_confidence":1.0}` |
 | POST | `/api/amaru/v1/intel/answer` | **Defensible intel answer** (sources-only, refuses if unsupported) | `{"question":str,"sources":[{"text","url"}]}` | `{"ok":true,"verdict":"ANSWERED","answer":"The container build is SLSA L2 build-attested (verifiable) [s1]","citations":["s1"],"supporting":[{"support":0.5}],"grounded_confidence":0.5}` |
 | POST | `/api/amaru/v1/reason` | Full reasoning w/ live arxiv citation resolution + Khipu receipt | `{"question":str}` (NOT "query") | `{"ok":true,"answer":"…theorems=['TH1','TH8','TH10']","citations":["arxiv…"],"citation_resolution":{…200},"khipu_signed":…}` — **SLOW / VARIABLE (1s–30s+, timed out once)** |
-| POST | `/api/amaru/v1/brain/reason` | Lightweight reason: Λ + chakras + cited theorems | `{"query":str}` | `{"lambda":0.9,"chakras":["root",…7],"theorems_cited":{"TH1":{"status":"CONJECTURE"}},"llm_route":…}` (~1.5KB, fast) |
+| POST | `/api/amaru/v1/brain/reason` | Lightweight reason: Λ (Conjecture 1, never a theorem) + chakras + cited theorems | `{"query":str}` | `{"lambda":0.9,"chakras":["root",…7],"theorems_cited":{"TH1":{"status":"CONJECTURE"}},"llm_route":…}` (~1.5KB, fast) |
 | POST | `/api/amaru/v1/confidence` | Hallucination-risk / confidence scorer for a claim | `{"question":str,"answer":str,"sources":[{"text","url"}]}` | `{"ok":true,"scores":{"citation_coverage":0.0,"cove_consistency":0.5,"lambda_score":1.0},"confidence":0.0008,"hallucination_risk":true,"risk_label":"HIGH"}` — **SLOW (≈23s)** |
 | POST | `/api/amaru/v1/eval` | Same scorer as confidence (eval alias) | `{"question":str,"answer":str,"sources":[…]}` | similar to `/confidence` — **SLOW (≈7.7s)** |
 | POST | `/api/amaru/v1/llm/route` | Honest LLM-tier routing decision (no model key wired → stub) | `{"prompt":str,"task":str}` | `{"response":"[HONEST STUB] would route to claude_opus_4_8…","tier_used":"claude_opus_4_8","tier_rank":3}` |
@@ -78,7 +78,7 @@ Secondary nice-to-haves: **Confidence / hallucination risk** (`POST /confidence`
   - `GET /api/amaru/v1/formulas/index` ≈ **6s**, and **timed out once** before succeeding on retry — treat as flaky/slow.
   - `GET /api/amaru/v1/formula/hnsw` ≈ **2.8s** (borderline).
   - `POST /api/amaru/v1/confidence` ≈ **23s**; `POST /api/amaru/v1/eval` ≈ **7.7s**.
-  - `POST /api/amaru/v1/reason` is **highly variable: 1s to 30s+, timed out at 30s once** (it resolves live arxiv citation URLs). Prefer `POST /brain/reason` (~1.5s) for a fast Λ+chakras+theorems summary if speed matters.
+  - `POST /api/amaru/v1/reason` is **highly variable: 1s to 30s+, timed out at 30s once** (it resolves live arxiv citation URLs). Prefer `POST /brain/reason` (~1.5s) for a fast Λ (Conjecture 1, never a theorem) + chakras + theorems summary if speed matters.
 - **EMPTY (honest, not broken):**
   - `GET /api/amaru/v1/receipts` → `count:0, khipu_root:null, nodes:[]`. No signing key wired → honest "UNSIGNED (no key)". Render an empty state, do not fake.
   - `GET /api/amaru/v1/cortex/3d` → `graph:{nodes:[],edges:[]}, live:false`. IDLE until a `POST /reason` populates a chain. Wire it to run after a reason call, else show "IDLE — no reasoning yet".
