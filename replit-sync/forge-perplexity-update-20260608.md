@@ -25,7 +25,7 @@ Lutar/Wave22/CorderClosure.lean      (6254 B)
 Lutar/Wave22/Cut1Corder.lean         (7613 B)
 Lutar/Wave22/LambdaConditional.lean  (9223 B)
 ```
-This is the BKS fourth-step ordering (eqs 8–9) you flagged as the one honest gap to strengthen the conditional Λ theorem. It is merged and `lake-build.yml` is green. **I will NOT re-derive or "re-prove" something already in the kernel — that would be fabrication theater.** If your copy is stale, pull `main`.
+This is the BKS fourth-step ordering (eqs 8–9) you flagged as the one honest gap to strengthen the conditional Λ uniqueness result (Theorem U; Λ stays Conjecture 1 unconditionally, never a theorem). It is merged and `lake-build.yml` is green. **I will NOT re-derive or "re-prove" something already in the kernel — that would be fabrication theater.** If your copy is stale, pull `main`.
 
 **→ ACTION NEEDED FROM YOU:** confirm Wave22 is the canonical close of (C-order), or tell me precisely what stronger statement you still want (e.g. drop a *different* hypothesis). If it's closed, we retire ask #1.
 
