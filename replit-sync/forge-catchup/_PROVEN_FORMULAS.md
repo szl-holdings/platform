@@ -97,7 +97,7 @@ Every campaign below is kernel-checked by lutar-lean CI but lives in the **exper
 | Locked kernel | `749` declarations / `14` unique axioms / `163` tracked sorries · `lake build` clean |
 | Experimental kernel-verified (CI-green) | wave-5 (11), wave-6 (11), wave-7 (10), agentic-loop (28), Λ-uniqueness Set α+δ (22 results) — **never in the locked count** |
 | Λ-uniqueness | **Conjecture 1** — conditional within strengthened classes (CI-green); unconditional uniqueness machine-checked **false** |
-| SLSA | Build **L1 + L2** on service images (cosign + `slsa.dev/provenance/v0.2`). **No** L3 / FedRAMP / Iron Bank / CMMC. |
+| SLSA | Build **L1 honest · L2 build-attested (verifiable)** on container/service images (cosign + `slsa.dev/provenance/v0.2`). Not Iron Bank/FedRAMP/CMMC/ATO; SLSA L3 roadmap. |
 
 ---
 
