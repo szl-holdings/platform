@@ -41,7 +41,7 @@ locked-proven = **EXACTLY 8** {F1,F4,F7,F11,F12,F18,F19,F22} @ `c7c0ba17` (749/1
 **Proposals shipped (merged):**
 - **Doctrine L2 overclaim FIXED** — platform main `check / doctrine` was failing on an unscoped "SLSA L2" claim. Ran the guard's exact Invariant-3 grep locally on a full clone, found 2 offending `replit-sync/` status lines, scoped them honestly ("roadmap, bundle-level not yet earned"). Verified the doctrine check now PASSES (platform #334, merged).
 - **P2 canonical numbers** (.github #150, merged): `locked_formula_count: 8` + `locked_formula_ids` + `locked_formula_theorem` added to `lean_numbers.json` — single source of truth, kills the 5/8 drift.
-- **P1 doctrine pre-check** (.github #151, merged): `.github/scripts/doctrine_precommit.sh` + `install-doctrine-hook.sh` + `make doctrine`/`make doctrine-hook` + `DOCTRINE_PRECHECK.md`. Advisory local mirror of the CI guard; tested (passes clean, catches synthetic L3/FedRAMP/Λ-theorem overclaims).
+- **P1 doctrine pre-check** (.github #151, merged): `.github/scripts/doctrine_precommit.sh` + `install-doctrine-hook.sh` + `make doctrine`/`make doctrine-hook` + `DOCTRINE_PRECHECK.md`. Advisory local mirror of the CI guard; tested (passes clean, catches synthetic overclaims: SLSA L3, FedRAMP, and Λ-described-as-theorem violations (Λ must stay Conjecture 1, never a theorem)).
 - **commit-lint SHA fix** (platform #332, merged): corrected the truncated 39-char `amannn/action-semantic-pull-request` pin → valid v5.5.3.
 
 **anatomy 3D DEEPENED (merged #4 + polish #5):**
