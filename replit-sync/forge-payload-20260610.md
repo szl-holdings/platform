@@ -34,3 +34,21 @@ locked-proven = **EXACTLY 8** {F1,F4,F7,F11,F12,F18,F19,F22} @ `c7c0ba17` (749/1
 ---
 
 *Co-Authored-By: Forge (SZL agent) · Doctrine v11.*
+
+---
+
+## UPDATE 2 — 2026-06-10 ~4:00 PM EDT (proposals executed + 3D deepened)
+**Proposals shipped (merged):**
+- **Doctrine L2 overclaim FIXED** — platform main `check / doctrine` was failing on an unscoped "SLSA L2" claim. Ran the guard's exact Invariant-3 grep locally on a full clone, found 2 offending `replit-sync/` status lines, scoped them honestly ("roadmap, bundle-level not yet earned"). Verified the doctrine check now PASSES (platform #334, merged).
+- **P2 canonical numbers** (.github #150, merged): `locked_formula_count: 8` + `locked_formula_ids` + `locked_formula_theorem` added to `lean_numbers.json` — single source of truth, kills the 5/8 drift.
+- **P1 doctrine pre-check** (.github #151, merged): `.github/scripts/doctrine_precommit.sh` + `install-doctrine-hook.sh` + `make doctrine`/`make doctrine-hook` + `DOCTRINE_PRECHECK.md`. Advisory local mirror of the CI guard; tested (passes clean, catches synthetic L3/FedRAMP/Λ-theorem overclaims).
+- **commit-lint SHA fix** (platform #332, merged): corrected the truncated 39-char `amannn/action-semantic-pull-request` pin → valid v5.5.3.
+
+**anatomy 3D DEEPENED (merged #4 + polish #5):**
+- Formula Atlas — ALL 54 formulas by tier (LOCKED 8 / CONDITIONAL 3 / AXIOM_GATED 2 / EXPERIMENTAL 41), searchable, each with id/name/latex/plain/`#print axioms`/Lean ref.
+- Per-organ formula→Lean drill-down; organ↔formula hover highlight.
+- More real 3D: leader-line labels (viewport+panel-clamped), breathing Λ-heart, guided tour.
+- HONEST forecast overlay: maturity timeline driven ONLY by data.js/KERNEL; all roadmap items labeled ROADMAP/PROJECTED; never predicts a future locked count; nothing relabeled LOCKED.
+- Mobile/tablet preserved (bottom-sheets). Verified headless desktop/820/390: 0 errors, organ/vessel counts unchanged, labels contained.
+
+**STILL OPEN for Forge:** platform main test suite (Typecheck/vitest/Lighthouse/e2e) still red independent of PRs — needs the app devs. uds #51/#57 rebase. Founder `#print axioms` ceremony. Roll the doctrine pre-commit hook + mobile bottom-sheet pattern out to the flagship consoles (a11oy/killinchu).
