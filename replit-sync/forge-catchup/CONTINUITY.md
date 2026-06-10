@@ -23,7 +23,7 @@ All 5 organs link to each other via a **cross-flag switcher** in the top bar (th
 ## 2. HONESTY DOCTRINE — locked, must hold everywhere
 - **Λ (F23) = Conjecture 1, NEVER a theorem.**
 - **Proved formulas = exactly 5: {F1, F11, F12, F18, F19}** (Lean, sorry-free). Never claim 8.
-- **SLSA Build L2 on all 5 organ images** (cosign-signed + slsa.dev/provenance/v0.2 `.att` referrer on GHCR; `cosign verify-attestation --type slsaprovenance` passes). **No L3 / FedRAMP / Iron Bank / CMMC.**
+- **SLSA Build L2 on all 5 organ images** (cosign-signed + slsa.dev/provenance/v0.2 `.att` referrer on GHCR; `cosign verify-attestation --type slsaprovenance` passes). **Not Iron Bank/FedRAMP/CMMC/ATO; SLSA L3 roadmap.**
 - Section 889 = exactly 5 vendors (Huawei, ZTE, Hytera, Hikvision, Dahua).
 - Receipts are **real DSSE** when a cosign key is present, **honest UNSIGNED** otherwise — never fabricated.
 - Doctrine v11 LOCKED: 749 declarations / 14 axioms / 163 sorries @ kernel c7c0ba17.
@@ -91,7 +91,7 @@ No leader cryptographically signs individual AI decisions — that is our defens
 - `ENDPOINT_CONTRACTS.md` — exact live endpoint contracts per organ (1,220 lines).
 - `UNIFIED_APP_SPEC.md` — the full-application spec + vision (mesh, Warhacker, leader-grade).
 - `GITHUB_AUDIT_REPORT.md` — repo-by-repo audit + categorized repo map.
-- `COSIGN_L2_GROUND_TRUTH.md` — the SLSA L2 attestation evidence.
+- `COSIGN_L2_GROUND_TRUTH.md` — the container-image L2 build-attestation evidence (verifiable via `cosign verify-attestation`; bundle-level attestation = roadmap).
 
 ---
 
