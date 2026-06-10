@@ -23,7 +23,7 @@ Industry max ≈ **6–9 top-level sidebar items** (Datadog 8, Palantir Foundry 
 - HONEST gaps: bundle build-provenance ATTESTATION not yet earned (token lacks `attestations:write`); organ IMAGES are L1+L2 (`slsa.dev/provenance/v0.2` `.att`, verified). Missing UDS v0.3.1 tags on a11oy/rosie/uds-mesh = a founder cut step.
 
 ## Honesty doctrine (ABSOLUTE)
-Λ = Conjecture 1. Proved formulas = exactly 5 {F1,F11,F12,F18,F19} (+ substantive new lemmas F4/F7/F22/F2/F3/F5/F10/F13/F15/F17/F20/F21 in experimental scope, parent-verified sorry-free). SLSA L1+L2 (images) — NO L3/FedRAMP/Iron Bank/CMMC. Section 889 = 5 vendors.
+Λ = Conjecture 1. Proved formulas = exactly 5 {F1,F11,F12,F18,F19} (+ substantive new lemmas F4/F7/F22/F2/F3/F5/F10/F13/F15/F17/F20/F21 in experimental scope, parent-verified sorry-free). SLSA L1 honest · L2 build-attested on container images (verifiable) — Not Iron Bank/FedRAMP/CMMC/ATO; SLSA L3 roadmap. Section 889 = 5 vendors.
 - **v3 axiom drift (IMG_6234):** lutar-lean v3 Zenodo (10.5281/zenodo.19983066) proved Λ-uniqueness against A2="zero-pinning", A4="page-curve concavity". Current HEAD `c7c0ba17` redefines A2=positive homogeneity (deg 1), A4=bounded-by-max-axis. DISTINCT properties → v3 proof claims do NOT carry over without re-verification. MUST be disclosed (matches our F23 finding: 1-homogeneity is load-bearing).
 
 ## Closing checklist before Warhacker (the "last small things")
