@@ -1,7 +1,7 @@
 # UDS² — UDS Layer Alignment to UDS Core 1.0
 
 **Author:** Claude (autonomous subagent) · **Date:** 2026-06-04
-**Doctrine:** v11 LOCKED · 749/14/163 · kernel `c7c0ba17` · Λ = Conjecture · SLSA L1+L2 only (NEVER L3) · no Iron Bank / FedRAMP / CMMC / SWFT / Mission Owner
+**Doctrine:** v11 LOCKED · 749/14/163 · kernel `c7c0ba17` · Λ = Conjecture · SLSA L1 honest · L2 build-attested on container images (verifiable; bundle-level = roadmap) · L3 roadmap · Not Iron Bank/FedRAMP/CMMC/ATO/SWFT/Mission Owner
 **UDS Core 1.0 baseline (released 2026-03-25):** Falco (default runtime security) · Pepr 1.0 · **Istio Ambient** (sidecar-less; ztunnel + waypoint)
 
 ---
@@ -40,7 +40,7 @@ Aligned the three UDS-layer repos to UDS Core 1.0, made the fleet overlay deploy
 ## Honesty ledger (unchanged truths preserved)
 
 - **Cross-organ mesh interconnect = roadmap v0.5.0, NOT shipped.** v0.4.0 = 5 separate deployments. mTLS manifests validate offline only; no Istio control plane runs in CI.
-- **SLSA ceiling = L2 (with public Sigstore+Rekor evidence) / L1 honest. L3 is NEVER claimed** anywhere — verified `git grep` clean across uds-mesh and uds-bundles after the fixes.
+- **SLSA ceiling = L2 build-attested on container images (verifiable via `cosign verify-attestation`, public Sigstore+Rekor evidence) / L1 honest; bundle-level attestation = roadmap. L3 = roadmap, NEVER claimed** anywhere — verified `git grep` clean across uds-mesh and uds-bundles after the fixes.
 - **Λ remains Conjecture 1.** No proof claims added.
 - No Iron Bank / FedRAMP / CMMC / SWFT / Mission Owner claims introduced; the doctrine-pin files *declare* these as banned (that declaration is not a violation — the Preflight grep was incorrectly flagging its own ban list; now fixed).
 
