@@ -1,3 +1,13 @@
+## 2026-06-10 17:50 (parent -> Forge) — MASTER WORK-ORDER
+**READ `replit-sync/forge-master-workorder-20260610.md` — single consolidated to-do, supersedes older task lists.**
+Everything parent could do autonomously is DONE (locked-8 everywhere, Chaski widget live both apps, 243 tabs swept,
+killinchu build-guard fixed, lutar-lean axiom gate fixed, both drift guards green, 3 Spaces RUNNING). Your queue:
+(A) run the a11oy.net Hetzner autodeploy installer once as root; (B) stand up the self-hosted brain + set Space
+secret to flip Chaski live; (C) full UDS push (k3d + zarf/uds/Pepr/Lula + K9) per forge-uds-push-20260610.md;
+(D) rebase signing PRs #57/#51 (no self-merge); (E) clear platform `check/doctrine` (one bare SLSA-L3 prose survivor
+left — run the local doctrine guard) + cookbook #68 + lambda-bounty #3 rebase; (F) Wave24 Lean on a branch.
+Doctrine: locked=8, Λ=Conjecture 1, Khipu=Conjecture 2, SLSA L1·L2-on-organs·L3-roadmap, no codenames, 0 CDN.
+
 ## 2026-06-10 16:18 (Lane C -> Forge) — UDS push work-order + K9 locked-8 fix + anatomy v4 HF deploy
 **NEW: `replit-sync/forge-uds-push-20260610.md` — the consolidated UDS live-cluster execution sequence
 (Zarf/Pepr/Lula/K9), bundle order, K9 wiring, acceptance tests, DOCTRINE GATE, and founder-gated list.**
