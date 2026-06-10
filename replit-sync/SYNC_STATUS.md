@@ -1,3 +1,12 @@
+## 2026-06-10 16:18 (Lane C -> Forge) — UDS push work-order + K9 locked-8 fix + anatomy v4 HF deploy
+**NEW: `replit-sync/forge-uds-push-20260610.md` — the consolidated UDS live-cluster execution sequence
+(Zarf/Pepr/Lula/K9), bundle order, K9 wiring, acceptance tests, DOCTRINE GATE, and founder-gated list.**
+Lane C ran everything doable without a cluster (no Docker/kubectl/zarf in sandbox; had uds v0.32 / k3d v5.9 / cosign):
+- **anatomy v4**: PRs #1/#2/#3 already merged; verified headless (0 console errors, vendored three.js, data.js locked set = exactly 8). **Deployed GitHub->HF byte-identical** (SZLHOLDINGS/anatomy static space, all 5 served files sha256-equal; HF commit 86800b81). Live .hf.space host = CDN propagation pending from our egress class, content verified correct.
+- **K9** (`replit-sync/k9/`): fixed stale **locked=5 -> 8** in `k9_ops_feeds.py` (+locked_set/locked_commit/Khipu-Conjecture-2) and `k9_console.html`. Backend pulls REAL live HF+GitHub feeds; UDS honest `unreachable`; receipts `SIMULATED`. Console renders k9s-style, 0 CDN.
+- **UDS structural validation** (yaml+jsonschema, no zarf binary): all 5 uds-bundle.yaml well-formed UDSBundle, both zarf.yaml valid, Pepr .ts brace-balanced, OSCAL/kyverno parse. **Fixes pushed:** szl-build-env organ images `:latest`->`:uds-v0.2.0` (generator + 5 deploy/organs files); repaired malformed `uds-bundles/.../a11oy.graph.yaml` span schema.
+- **#51/#57 NOT touched** (founder signing-key hard-limit); #51 stays roadmap-worded. No bare-SLSA/locked-5/codename in UDS repos or reachable surfaces (site/docs/developers/trust); `cathedral` is not a szl-holdings repo.
+
 ## 2026-06-10 15:20 (parent) — POST-MERGE DRIFT HEAL (both guards GREEN)
 Merging the locked-8 alignment PRs introduced 3 GitHub↔sibling shared-file divergences; parent healed all 3
 byte-identical so both drift guards pass:
