@@ -14,7 +14,7 @@
 |----------|-------------------|--------------|------------|
 | Signed airgap bundle (OCI tarball) | Defense Unicorns UDS Core ([uds-core](https://github.com/defenseunicorns/uds-core)) — `uds create` + `uds deploy` | ✅ YES | `uds-bundle-szl-mesh-amd64-0.4.0.tar.zst` built by CI run 26963594879 |
 | All images baked at create-time (no pull at deploy) | Zarf ([docs.zarf.dev/ref/packages](https://docs.zarf.dev/ref/packages/)) | ✅ YES | 5 organs × real images confirmed in CI log (188 MB / 113 MB / 449 MB / 3.08 GB / 126 MB) |
-| Content-addressed image refs (SHA256 digest pins) | Iron Bank / Chainguard ([chainguard.dev](https://www.chainguard.dev/)) | ✅ YES | All 5 packages have `sha256:…` refs in `uds inspect` output; README uses digest-pinned table |
+| Content-addressed image refs (SHA256 digest pins) | benchmark: Chainguard ([chainguard.dev](https://www.chainguard.dev/)); not Iron Bank (benchmark only, not claimed) | ✅ YES | All 5 packages have `sha256:…` refs in `uds inspect` output; README uses digest-pinned table |
 | Keyless cosign signing of bundle (OIDC, Rekor) | Sigstore ([docs.sigstore.dev](https://docs.sigstore.dev/cosign/verifying/attestation/)) | ✅ YES | Cosign keyless sign in CI; Rekor logIndex 1713162450 for `:0.4.0` |
 | SLSA build provenance (SLSA v1.0) | SLSA framework + GitHub Actions | ✅ L1 honest | `actions/attest-build-provenance` in CI (`continue-on-error: true`); annotated `attestations: write` org permission needed for L2 |
 | SBOM in bundle (SPDX 2.3 + CycloneDX 1.4) | Defense Unicorns best practice, Chainguard | ✅ YES | Each organ has `sbom/` component in `zarf.yaml`; Syft-generated SBOMs in CI |
@@ -87,11 +87,11 @@ CI log line pattern: `INF saving image name=ghcr.io/szl-holdings/<organ>:uds-v0.
 
 ## 3. Gaps Closed (This Session)
 
-### Gap 1: SLSA L2 claims in uds-bundles README (Doctrine invariant 3 violation)
+### Gap 1: bare SLSA L2 claims in uds-bundles README, rescoped to L2 build-attested container provenance (Doctrine invariant 3)
 
 **Symptom:** Doctrine CI workflow failing on every push with:
 ```
-::error::SLSA L2/L3 claim — must be L1 honest
+historical doctrine annotation (resolved): a bare SLSA-L2-or-L3 claim must be rescoped to L1 honest + L2 build-attested (verifiable) container provenance + L3 roadmap
 ::error::Banned compliance positive claim — must be absent or scoped
 ```
 
@@ -100,7 +100,7 @@ Per Doctrine v11 invariant 3, no L2/L3 claims are permitted anywhere in shipped 
 
 **Fix committed:**
 ```
-fix(readme): downgrade SLSA L2 claims to L1 honest — doctrine invariant 3
+fix(readme): rescope bare SLSA L2 claims to L1 honest + L2 build-attested (verifiable) container provenance — doctrine invariant 3
 uds-bundles/README.md — new SHA: c665d3efe78b31f0a6897fd6a95ae7633d0cee1f
 ```
 
@@ -460,7 +460,7 @@ kubectl get deploy -n szl-a11oy szl-a11oy -o json | \
 | Workflow | Status before | Fix | Status after |
 |----------|--------------|-----|-------------|
 | `UDS Bundle Build + Publish` | ✅ SUCCESS (run 26963594879) | N/A | ✅ GREEN |
-| `Doctrine` | ❌ FAILED (SLSA L2 claims) | README rewritten, L2→L1 honest | ✅ Expect GREEN on next push |
+| `Doctrine` | ❌ FAILED (bare SLSA L2 claims) | README rewritten: L1 honest + L2 build-attested (verifiable) container provenance | ✅ Expect GREEN on next push |
 | `gitleaks` | ❌ FAILED (missing license) | GITHUB_TOKEN env var, no license | ✅ Expect GREEN on next push |
 | `Trivy + Grype` | ❌ FAILED (SARIF path) | Step id + continue-on-error | ✅ Expect GREEN on next push (CVE caveat below) |
 | `SBOM — CycloneDX via Syft` | ✅ SUCCESS | N/A | ✅ GREEN |
@@ -498,7 +498,7 @@ kubectl get deploy -n szl-a11oy szl-a11oy -o json | \
 
 | Repo | SHA prefix | Message |
 |------|-----------|---------|
-| `uds-bundles` | `c665d3ef` | `fix(readme): downgrade SLSA L2 claims to L1 honest — doctrine invariant 3` |
+| `uds-bundles` | `c665d3ef` | `fix(readme): rescope bare SLSA L2 claims to L1 honest + L2 build-attested (verifiable) — doctrine invariant 3` |
 | `uds-bundles` | `9ed4b47a` | `fix(ci/gitleaks): use GITHUB_TOKEN env var for OSS scan mode` |
 | `uds-bundles` | `da9008e2` | `fix(ci/trivy): add step id + continue-on-error to Grype SARIF upload` |
 | `uds-mesh` | `d83330d4` | `fix(ci/release-please): remove deprecated package-name input + pin to main` |
