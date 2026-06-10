@@ -11,7 +11,7 @@
 This is the single entry point to the org-wide unification. It indexes three map files and
 flags the **top-10 instill-next** items. Every claim is honest: **locked proven = exactly 5**
 {F1, F11, F12, F18, F19}; **Λ = Conjecture 1** (unconditional uniqueness machine-checked FALSE);
-**Khipu BFT safety = Conjecture 2, OPEN**; F12/F19 = additive fragment only; SLSA L1+L2 (no L3).
+**Khipu BFT safety = Conjecture 2, OPEN**; F12/F19 = additive fragment only; SLSA L1 honest · L2 build-attested on container images (verifiable; bundle-level = roadmap); L3 roadmap.
 Source of truth: [PROVEN_STATE_CANONICAL.md](./PROVEN_STATE_CANONICAL.md) · [lutar-lean PROVEN_FORMULAS.md](https://github.com/szl-holdings/lutar-lean/blob/main/PROVEN_FORMULAS.md).
 
 ## The three maps
@@ -58,7 +58,7 @@ Source of truth: [PROVEN_STATE_CANONICAL.md](./PROVEN_STATE_CANONICAL.md) · [lu
 - locked-proven = **exactly 5**; never inflate.
 - Λ = **Conjecture 1** (unconditional uniqueness machine-checked FALSE; conditional results are axiom-free + cited).
 - Khipu **BFT safety = Conjecture 2, OPEN**; P5 = axiom-gated; F12/F19 = additive fragment only.
-- SLSA **L1 + L2** only (no L3 / FedRAMP / Iron Bank / CMMC).
+- SLSA **L1 honest · L2 build-attested** on container images (verifiable; bundle-level = roadmap). Not Iron Bank/FedRAMP/CMMC/ATO; SLSA L3 roadmap.
 - uds-core **AGPL = pattern-only**, no code; Defense-Unicorns **non-affiliation NOTICE** intact.
 - Real data only (live feeds OK; CoT/AIS/forecast SAMPLE labeled). 3D only where real data backs it. 0 CDN.
 - User-visible labels use plain words (Trust score, Signed receipt, Consensus, Forecast) — no Λ/Khipu/DSSE jargon.
