@@ -23,4 +23,4 @@ Amaru = PROVENANCE ANCHOR: public-ledger anchoring + post-quantum (PQC) hardenin
 - Powers the 'court-admissible provenance' claim that de-risks every other vertical (RealEstate/Finance/Legal/Enterprise/Warhacker).
 - Rosie (Operator organ, already ingested) = receipt orchestration; Amaru = anchoring + PQC. They pair: Rosie orchestrates, Amaru anchors+hardens.
 
-## HONESTY: locked=5; Λ=Conjecture 1; PQC posture labeled live-vs-roadmap honestly; no fabricated anchors; SAMPLE labeled; 0 CDN; no user-visible 'amaru'.
+## HONESTY: locked=8 {F1,F4,F7,F11,F12,F18,F19,F22}; Λ=Conjecture 1; PQC posture labeled live-vs-roadmap honestly; no fabricated anchors; SAMPLE labeled; 0 CDN; no user-visible 'amaru'.

@@ -2,8 +2,12 @@
 # main @ 99d07509 (Wave11..17 all merged, CI-green, drift-clean)
 # Use this for instillation into anatomy/apps, the thesis, and the LinkedIn post. DO NOT overstate.
 
-## LOCKED-PROVEN (kernel-verified, the ONLY "locked" claim) = EXACTLY 5
-F1, F11, F12, F18, F19. @ c7c0ba17 (749/14/163). NEVER inflate this number.
+## LOCKED-PROVEN (kernel-verified, the ONLY "locked" claim) = EXACTLY 8
+F1, F4, F7, F11, F12, F18, F19, F22. @ c7c0ba17 (749/14/163). NEVER inflate this number.
+(Grew from 5 to 8 on 2026-06-10 when F4/F7 were upgraded from vacuous placeholders to genuine
+non-vacuous proofs — Khipu-DAG acyclicity, Chaski FIFO — joining the already-genuine F22; the count
+is itself a no-axiom Lean theorem `Lutar.Wave8.AxiomDisclosure.locked_count_eight`. Kernel c7c0ba17
+UNCHANGED.)
 
 ## Λ (F23) — THE CONJECTURE, honestly framed
 - UNCONDITIONAL uniqueness = machine-checked **FALSE** → stays **Conjecture 1**, unconditionally.
@@ -11,7 +15,7 @@ F1, F11, F12, F18, F19. @ c7c0ba17 (749/14/163). NEVER inflate this number.
 - **NEW (Wave12, axiom-free, CI-green, MERGED):** `Lutar.Round13.lambda_unique_of_separable` — Λ uniqueness is a THEOREM **CONDITIONAL** on {A1,A2,A3,A5 + slice-multiplicativity (separability)}. #print axioms = {propext, Classical.choice, Quot.sound}. This gets Λ **off bare conjecture** (conditional, honest), WITHOUT a new axiom (unlike the older A6-gated route).
 - HONEST ONE-LINER: "Λ unconditional remains Conjecture 1 (unconditional uniqueness is provably false for A1–A5); we proved the strongest axiom-free CONDITIONAL uniqueness (slice-multiplicativity ⇒ Λ), machine-checked."
 
-## EXPERIMENTAL · CI-GREEN tier (separate from locked-5, NEVER folded in)
+## EXPERIMENTAL · CI-GREEN tier (separate from locked-8, NEVER folded in)
 main = 1323 declarations / 23 axioms (22 unique) / sorries_raw 307 / CI-green @ d0e78ca3.
 
 ### NEW kernel-clean theorems merged this session (all #print axioms ⊆ {propext, Classical.choice, Quot.sound}, NO new axiom, NO sorry):

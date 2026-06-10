@@ -51,7 +51,7 @@ These are referenced by the wired asset endpoints / manifest and must stay:
 ---
 
 ## Doctrine compliance of this proposal
-- locked formulas = EXACTLY 5 {F1, F11, F12, F18, F19} — unchanged by any cleanup here.
+- locked formulas = EXACTLY 8 {F1, F4, F7, F11, F12, F18, F19, F22} — unchanged by any cleanup here.
 - Λ = Conjecture 1 — unchanged.
 - No user-visible banned codenames introduced; `rosie` ingest surfaced as **Operator**.
 - No fabricated data — every "safe to delete" tied to an observed live state or a concrete redundancy.
