@@ -112,14 +112,14 @@ Per the UDS docs ([UDS llms-full](https://uds.defenseunicorns.com/llms-full.txt)
 
 | Item | Standard / expectation | Our state | Honest read |
 |---|---|---|---|
-| **SLSA Build L2** | Hosted build service + **authenticated (signed) provenance** | **MET on all 5 organ images** — `cosign verify-attestation --type slsaprovenance` passes with strict per-org identity, keyless Fulcio+Rekor, `predicateType=slsa.dev/provenance/v0.2` | Defensible. Honest to demo. ([SLSA v1.0 requirements](https://slsa.dev/spec/v1.0/requirements), [GitHub: SLSA L2/L3 via attestations](https://github.blog/enterprise-software/devsecops/enhance-build-security-and-reach-slsa-level-3-with-github-artifact-attestations/)) |
+| **SLSA L2 build-attested (container images, verifiable)** | Hosted build service + **authenticated (signed) provenance** | **MET on all 5 organ images** — `cosign verify-attestation --type slsaprovenance` passes with strict per-org identity, keyless Fulcio+Rekor, `predicateType=slsa.dev/provenance/v0.2` | Defensible. Honest to demo. ([SLSA v1.0 requirements](https://slsa.dev/spec/v1.0/requirements), [GitHub: SLSA L2 build-attested, L3 roadmap, via attestations](https://github.blog/enterprise-software/devsecops/enhance-build-security-and-reach-slsa-level-3-with-github-artifact-attestations/)) |
 | **SLSA Build L3** | **Non-falsifiable** provenance: signing isolated on dedicated infra via a **reusable workflow**; build steps cannot access signing material | **NOT earned** | The jump from L2→L3 is "use a reusable workflow for provenance so signing is separated from the build job" — *achievable* but not done. Do **not** claim L3. ([GitHub SLSA L3](https://github.blog/enterprise-software/devsecops/enhance-build-security-and-reach-slsa-level-3-with-github-artifact-attestations/)) |
 | **Bundle-level attestation** | Provenance attestation on the **bundle** artifact itself | **NOT earned** — CI token lacks `attestations:write`; the **cosign signature** is the only bundle-level provenance (`szl-mesh:0.4.0` signed; `a11oy-bundle`/`killinchu-bundle` not built/signed yet) | Real, documented gap. The signature ≠ a SLSA attestation. |
 | **Iron Bank (`registry1`)** | "Often required on DoD contracts"; UDS `registry1` flavor pulls Platform One Ironbank images (amd64-only) | **NOT used** — we ship our own GHCR images | **Roadmap, not a Warhacker blocker.** Warhacker is a build/deploy hackathon, not an ATO gate. Iron Bank matters for production ATO, not the demo. ([UDS llms-full](https://uds.defenseunicorns.com/llms-full.txt)) |
 | **RKE2 / STIG-hardened k8s** | Production DoD clusters commonly run RKE2 (STIG/FIPS) | **NOT required for demo** — we deploy to k3d / our tower for the demo | Roadmap. RKE2 Government is the STIG/FIPS-hardened distro for production. ([Rancher Government certifications](https://ranchergovernment.com/security-certifications)) |
 | **IL4 / IL5 ATO** | FedRAMP-baseline + DISA Impact Level controls, US-person access, NIPRNet/BCAP, granular supply-chain provenance | **NOT in scope at this stage** | IL5 is a fundamental architectural divergence (dedicated hardware, ~200 NSS controls). **Not expected for an inaugural hackathon demo**; it's the long-horizon production roadmap. ([SecondFront IL4 vs IL5](https://www.secondfront.com/resources/blog/achieving-dod-cc-srg-compliance-navigating-fedramp-and-disa-impact-levels-il4-vs-il5/), [Microsoft IL5](https://learn.microsoft.com/en-us/azure/compliance/offerings/offering-dod-il5)) |
 
-**Bottom line on supply chain:** **SLSA L2 on the images is honest and acceptable to demo.** Iron Bank / RKE2 /
+**Bottom line on supply chain:** **SLSA L2 build-attested (verifiable) on the container images is honest and acceptable to demo; bundle-level attestation = roadmap. Not Iron Bank/FedRAMP/CMMC/ATO.** RKE2 /
 STIG / IL4-5 are **production-ATO roadmap, not a Warhacker bar.** The one credible knock a judge could land is
 the **missing bundle-level attestation** — own it (cosign signature is the bundle provenance today).
 
@@ -137,7 +137,7 @@ Ordered by **demo-criticality** (top items block the demo first).
 | 4 | **Bundle path references resolve at build time** | **MET** (verified 2026-06-06) | Resolved. The workflow now pre-builds each per-organ Zarf package into a `.tar.zst` (`zarf package create bundles/szl-<organ> -o bundles/szl-<organ>`) **before** `uds create`, so the `path: ../szl-<organ>` references resolve. `uds create` + `uds publish` both succeed in CI for both bundles. |
 | 5 | **UDS `Package` CR present + schema-valid** | **MET** | `szl-uds-deployment/packages/*/uds-package.yaml` + the in-package `manifests/uds-package.yaml` use correct `uds.dev/v1alpha1` schema (sso, network.allow/expose, monitor). Verified against the official v1alpha1 reference. |
 | 6 | **Network allow/expose matrix (zero-trust)** | **MET** | Cross-organ allow/expose authored and correct. Default-deny is auto-applied by the Operator. |
-| 7 | **Images on OCI, signed, SBOM, SLSA L2** | **MET** | All 5 organ images on GHCR carry `.sig` + `.att` (SLSA prov v0.2). SBOMs (SPDX+CycloneDX) vendored in each Zarf package. |
+| 7 | **Images on OCI, signed, SBOM, SLSA L2 build-attested (verifiable)** | **MET** | All 5 organ images on GHCR carry `.sig` + `.att` (SLSA prov v0.2). SBOMs (SPDX+CycloneDX) vendored in each Zarf package. |
 | 8 | **Air-gap offline deploy proven** (`uds pull` → `uds deploy <tarball>` with cable pulled) | **PARTIAL** | Design is air-gap-correct (`yolo:false`, images vendored). **Not yet executed end-to-end** for the new bundles. Once #1 builds, run `uds pull oci://…a11oy-bundle:0.5.0` then deploy from the tarball offline on the tower to prove it. |
 | 9 | **Baseline assumptions match current UDS Core** | **PARTIAL** | Stop assuming **NeuVector**; current baseline is **Falco + ambient Istio**. Our `serviceMesh.mode: sidecar` is valid but should be a deliberate, documented choice. Verify our AuthorizationPolicies still apply under the deployed Core version. |
 | 10 | **Bundle-level SLSA attestation** | **GAP** | CI token lacks `attestations:write`. Either grant the token `attestations:write` + add `attest-build-provenance` for the bundle, or keep the cosign signature as the documented bundle provenance and **say so honestly**. Not a demo blocker. |
@@ -171,7 +171,7 @@ not a point solution. Cannonico is real today; the rest stand up on the same sub
 ### Q1: Are we demo-ready for the **HF live demo**? → **YES.**
 - a11oy is a live, self-contained 26-tab command platform (commit `c255b252`), **0 console errors across all 26 tabs**, real 3D/charts/live public data, mesh **5/5 reachable** on HF.
 - a11oy `/warhacker` launches **all 5 problems green** with real data + receipts; killinchu serves genuinely **cosign-signed** DSSE receipts verifiable offline.
-- Honesty posture is clean and on-screen (trust=conjecture, 5/100 proven, SLSA L2, "unsigned-no-key" labeled where true).
+- Honesty posture is clean and on-screen (trust=conjecture, 5/100 proven, SLSA L2 build-attested (container images, verifiable), "unsigned-no-key" labeled where true).
 - **The HF demo works today.** Lead with a11oy `/warhacker`; for the "anyone can verify" thesis, use killinchu's `/cosign.pub` + `/receipt/export` offline-verify.
 
 ### Q2: Are the **UDS bundles deployable into a UDS Core cluster** today? → **BUILT, PUBLISHED + SIGNED; air-gap deploy still to be proven once.**
@@ -189,7 +189,7 @@ Status (updated 2026-06-06):
 6. **🟢 (Optional / roadmap, NOT June):** make OTEL/receipts/lake/vessels images public + add Zarf packages; Iron Bank `registry1` flavor; RKE2/STIG; IL4/5. None are Warhacker blockers.
 
 ### Doctrine kept honest (unchanged)
-Trust score = **research conjecture** (never a theorem) · **5** Lean-proven formulas (of 100) · **SLSA Build L2**
+Trust score = **research conjecture** (never a theorem) · **5** Lean-proven formulas (of 100) · **SLSA L2 build-attested on container images (verifiable via `cosign verify-attestation`)**
 on organ images, **NOT L3 / NOT Iron Bank** · **bundle-level attestation NOT earned** (cosign signature is the bundle
 provenance) · Doctrine **v11 LOCKED 749/14/163 @ c7c0ba17** · Λ = **Conjecture 1** · Section 889 = exactly 5 vendors ·
 No FedRAMP / CMMC / Iron Bank claims.
@@ -205,9 +205,9 @@ No FedRAMP / CMMC / Iron Bank claims.
 - UDS Package v1alpha1 CR reference: https://uds.defenseunicorns.com/reference/configuration/custom-resources/packages-v1alpha1-cr/
 - UDS Core releases (live API → v1.5.0): https://api.github.com/repos/defenseunicorns/uds-core/releases/latest
 - UDS Core releases page: https://github.com/defenseunicorns/uds-core/releases
-- SLSA v1.0 requirements (L1/L2/L3 producer + build-platform table): https://slsa.dev/spec/v1.0/requirements
+- SLSA v1.0 requirements (L1 honest / L2 build-attested / L3 roadmap producer + build-platform table): https://slsa.dev/spec/v1.0/requirements
 - SLSA security levels summary: https://slsa.dev/spec/v0.1/levels
-- GitHub blog — SLSA L2/L3 via artifact attestations: https://github.blog/enterprise-software/devsecops/enhance-build-security-and-reach-slsa-level-3-with-github-artifact-attestations/
+- GitHub blog — SLSA L2 (build-attested) / L3 (roadmap) via artifact attestations: https://github.blog/enterprise-software/devsecops/enhance-build-security-and-reach-slsa-level-3-with-github-artifact-attestations/
 - DoD CC SRG IL4 vs IL5 (SecondFront): https://www.secondfront.com/resources/blog/achieving-dod-cc-srg-compliance-navigating-fedramp-and-disa-impact-levels-il4-vs-il5/
 - Microsoft Learn — DoD IL5: https://learn.microsoft.com/en-us/azure/compliance/offerings/offering-dod-il5
 - Rancher Government — RKE2 security certifications (STIG/FIPS): https://ranchergovernment.com/security-certifications
