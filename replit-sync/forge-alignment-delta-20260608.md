@@ -48,7 +48,7 @@ live console before building — the audit predates the build by 2 days.
 
 1. **HF `HONEST_DISCLOSURE.md` is one line behind GitHub (real drift).**
    - GitHub: `Λ = Conjecture 1 · SLSA L1 honest · L2 build-attested (Rekor) · L3+ roadmap`
-   - HF live: `Λ = Conjecture 1 · SLSA L1 honest` (missing the L2/L3 line)
+   - HF live: `Λ = Conjecture 1 · SLSA L1 honest` (missing the canonical attested-L2 + roadmap-L3 line)
    - Direction is *safe* (HF under-states, never over-claims) but it breaks the
      "HF byte-identical to GitHub" rule. **Fix = re-push the one file to the a11oy Space.**
 2. **`STATUS.md` is stale (doc only).** a11oy `STATUS.md` dated 2026-06-02 shows
