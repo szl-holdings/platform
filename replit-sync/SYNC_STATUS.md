@@ -156,3 +156,47 @@ locked=5 (pending honest F4/F7); Λ=Conjecture 1 (never unconditional theorem); 
 - **docs-site**: set Pages source → "GitHub Actions".
 - **Lean PR #218** + **F4/F7 PR** (when opened): run CI lake-build + `#print axioms`, merge only if green & axiom-clean. NO self-merge by agents.
 - Set `SZL_COSIGN_PRIVATE_*_PEM` on the Spaces to turn DSSE signing green (carried).
+
+---
+
+# SYNC STATUS — Perplexity → Forge — 2026-06-10 ~00:25 EDT (T-6 to Warhacker)
+
+Big session since the 01:23 UTC note. Parent (Perplexity) ran a full re-run + 5× self-verification + drift-heal. State below is CURRENT and verified live one-by-one. Forge pickups + recommendations at the bottom.
+
+## WHAT PARENT DID THIS SESSION (all live-verified)
+1. **5× independent tab/view verification, both apps (parent's own Playwright eyes):**
+   - a11oy: 107 tabs × 5 passes → **0 page errors, 0 4xx, 0 visible codenames.**
+   - killinchu: 107 views × 5 passes → **0 JS errors, 0 visible codenames.**
+   - anatomy: renders, live 3D canvas, 8 controls all work, 0 errors.
+   - Fixed an entire **intermittent null-deref class** in a11oy the prior wave missed: `_whcRun` (whCannonico), `_whTamperRun` (Warhacker Tamper), 23 deferred `H(id, E(id).innerHTML+…)` note-append READS → `(E(id)||{}).innerHTML`, and all 10 direct `E(id).onclick=` → `(E(id)||{}).onclick=`. Root cause = deferred fetch/auto-run callbacks firing AFTER navigating away from a tab. **Forge: when you add JS handlers, ALWAYS null-guard deferred writes** (setTimeout/poll/fetch.then that touch E('id')). Use the existing null-safe `H()/setHTML()/setTxt()/elS()` helpers, never bare `E('id').innerHTML=`/`.onclick=` in a deferred path.
+   - Fixed killinchu `engage_select` null `.value` read (guarded `el('eng-track')`).
+   - Fixed a11oy **vendor font 404s** (/vendor/fonts/*.woff2) → now HTTP 200, 0 runtime CDN preserved.
+2. **HF org card** (`SZLHOLDINGS/README` static space): the prior wave edited `README.md` but the space SERVES `index.html` — none of it was live. Fixed the served index.html: prominent 6-pill proof-status bar (locked-5 · ~185 machine-checked Waves 11-22 · Λ=Conjecture 1 · Khipu=Conjecture 2 · SLSA L1·L2 build-attested·L3 roadmap · cosign), responsive headline, canonical numbers `c7c0ba17`. **Lesson for Forge: for HF static cards edit the SERVED file (index.html), confirm via `/tree/main?recursive=1`.**
+3. **New live-data tabs** (additive, real sources): a11oy CVE/KEV now pulls LIVE CISA KEV (1617 vulns) + kevgate/feedpulse/routerarena; killinchu swarm_intent (40 live tracks), mesh_resilience (λ2=0.3725), retask_board (live drift). a11oy 104→107 tabs.
+4. **Shared-module drift FULLY HEALED — all 30 shared top-level modules now BYTE-IDENTICAL across a11oy↔killinchu (GitHub + HF).** 8 auto-synced; 2 union-merged by parent:
+   - `szl_formulas.py` — kept a11oy DSSE/Rekor layer (`dsse_envelope_real`, `sign_dsse_or_placeholder`, `verify_dsse_real`, `_dsse_pae`, `_detect_oidc_token`, `real_signing_available`, `DsseSigningUnavailable`) + Tier-A base64/PAE fixes AND ported killinchu's `slo_burn_rate`. dsse_envelope now base64 payload per DSSE spec (was hex on killinchu) — **Forge: if any killinchu code consumed the OLD hex `dsse_envelope` payload, it must now decode base64.** (serve.py had 0 direct callers, verified.)
+   - `szl_brain.py` — kept a11oy `model_weight_sha256` receipt binding + adopted killinchu's Doctrine v10→v11 bump. Now `DOCTRINE="v11"` with model-weight fields.
+   - **HARD RULE going forward: never let shared `szl_*.py`/`*.js` diverge. Edit BOTH apps identically in the same change, or the drift guard goes red.**
+
+## LIVE STATE (verified 00:2x EDT)
+All 3 HF Spaces RUNNING. a11oy.net HTTP 200. 30 shared modules byte-identical. Doctrine intact everywhere: locked=5, Λ=Conjecture 1, Khipu=Conjecture 2, honest SLSA, 0 user-visible codenames, 0 fabricated data.
+
+## TWO RED CI JOBS (both PRE-EXISTING, neither breaks the live product) — recommend Forge or founder
+1. **a11oy `llama-wheel-guard` = RED.** The pinned `llama-cpp-python==0.3.19` prebuilt cp312/linux_x86_64 wheel vanished from the abetlen CPU index. The Dockerfile masks it with `|| echo` so the image still builds and the OPTIONAL local-model "alloy" tier degrades to the honest tower-side label (verified live). **FIX = bump llama-cpp-python in the root Dockerfile to a version that still publishes a cp312 x86_64 wheel on https://abetlen.github.io/llama-cpp-python/whl/cpu, update the guard's parse in lockstep.** This is a dep bump → founder-gated per hard-limit; Forge can PROPOSE the version (verify the wheel exists) on a branch, founder merges.
+2. **a11oy `Banned-token scan (Doctrine v7 §1)` = RED (pre-existing, failing on every recent commit incl. dependabot/doc commits).** This gate scans MARKETING-HYPE words (revolutionary/world-class/seamless/cutting-edge/Jarvis/Bo11y/Bolly/bare "leading"), NOT amaru/rosie/sentra. Some file in the full tree trips it and isn't in `.doctrine-allowlist`. **FIX = find the offending file (`grep -nEi '(revolutionary|unprecedented|world-class|seamless|industry-leading|cutting-edge|game-changing|breakthrough|best-in-class|immaculate|state-of-the-art|premier|Bo11y|Bolly|Jarvis)' ` across the tree minus allowlist, plus bare `\bleading\b` not in a Tailwind `leading-*` class), then either reword the prose or add the path to `.doctrine-allowlist` with a justification comment.** Forge: please run this down and PR the allowlist/prose fix — the live product is already honest, this is CI hygiene.
+
+## REBASE ASK — still open (Forge-only)
+The 5 conflicted szl-uds-deployment PRs remain dirty: **#50** (doctrine counts), **#57** (verify receipt signing), **#67** (airgap ECDSA key-init), **#71** (persistent ECDSA chart key), + **a11oy #298** (COPY signing-key loader). Rebase onto current main → parent auto-merges #57/#67/#71/#298 once green (verified clean by the Lean audit §8). **#51** (SLSA L2 bundle) stays HELD as an over-claim until the `cosign verify-attestation` L2 gate is genuinely green (GHCR 403 write_package).
+
+## LEAN — founder-gated, do NOT self-merge
+- **PR #219** (lutar-lean, branch `feat-f4-f7-real-proofs`) OPEN: genuine non-vacuous F4 (Khipu DAG acyclicity over a real edge list) + F7 (Chaski FIFO ordering) proofs + lockstep `locked_count_five`→`locked_count_eight`. Honestly takes locked 5→8 ONCE founder runs `lake build` + `#print axioms ⊆ {propext,funext,Classical.choice,Quot.sound}, 0 sorryAx` and merges. Then platform #321 + served surfaces mirror to 8. Until merged, EVERY surface stays 5.
+- Forge's Wave24 PR #218 — still awaiting founder CI + merge (different files, no conflict with #219).
+
+## RECOMMENDED FORGE PICKUPS (parent's recommendations — founder will confirm "it's tee")
+1. **Run down + fix the Banned-token scan red** (CI hygiene, see above) — highest-value quick win to get a11oy CI green.
+2. **Propose the llama-cpp-python wheel bump** on a branch (verify the cp312 x86_64 wheel exists for the new version) for founder merge.
+3. **K9 ops UI**: take your staged `replit-sync/k9/` prototype to the next step — wire it against the LIVE drift-guard + CI + HF-stage feeds (honest "UDS unreachable until k3d/uds-core up"). Parent is folding K9 into the UDS deploy track.
+4. **UDS mesh deploy**: progress the uds-core/k3d + Zarf/Pepr full deploy so a11oy.net runs ON UDS (currently Hetzner nginx). Keep SLSA wording honest (L1·L2 build-attested·L3 roadmap; bundle attestation roadmap).
+5. **Keep shared szl_*.py byte-identical** in every change you push — the drift guard now enforces it and parent just spent real effort healing 10 diverged modules.
+
+Doctrine reminders unchanged: locked=5 (pending #219 founder merge); Λ=Conjecture 1; Khipu=Conjecture 2; honest SLSA; no user-visible codenames (amaru/rosie/sentra/jarvis → Provenance Anchor/Operator/Policy; Quechua organ names OK); trust never 100%; no fabricated data; GitHub↔HF byte-identical; never commit a key; never weaken a gate; no Lean self-merge.
