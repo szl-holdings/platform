@@ -87,7 +87,7 @@ Per doctrine: **Zarf package names that are deploy targets are OK** (`szl-a11oy`
    - Both UDS Package CRs carry annotation **`szl.io/slsa-level: "L1"`**.
    - The root `uds-bundle.yaml` (szl-mesh) header comment says **"SLSA L1 honest — not L3"**.
    These are **stale**: current ground truth (verified §3) is that all 5 organ images carry `.att`
-   = `slsa.dev/provenance/v0.2` (genuine **SLSA Build L2**). The canonical `a11oy.uds`/`killinchu.uds`
+   = `slsa.dev/provenance/v0.2` (genuine **SLSA L2 build-attested** container provenance, verifiable via `cosign verify-attestation`). The canonical `a11oy.uds`/`killinchu.uds`
    bundle headers already say **L2** correctly; the per-organ zarf.yaml + CR annotations + szl-mesh
    header lag at "L1". **Honest fix:** bump these strings/annotations to "L2" so the in-bundle metadata
    matches the attested reality. (Conservative under-claim, not an over-claim — not a falsehood, but
@@ -173,8 +173,8 @@ packaged content (Zarf-produced). **SBOM present.** ✅
 
 ### 3.4 HONEST SLSA STATUS (unchanged, kept absolute)
 
-- **SLSA Build L2 — on the ORGAN IMAGES only** (`.att` = `slsa.dev/provenance/v0.2`, cosign-verifiable).
-- **NOT SLSA L3. NOT Iron Bank. NO FedRAMP / CMMC.**
+- **SLSA L2 build-attested — on the ORGAN container IMAGES only** (`.att` = `slsa.dev/provenance/v0.2`, cosign-verifiable; bundle-level attestation = roadmap).
+- Not Iron Bank/FedRAMP/CMMC/ATO; SLSA L3 roadmap.
 - **Bundle-level build-provenance attestation NOT earned** — the CI `attest-build-provenance` step is
   `continue-on-error` and fails as expected (token lacks `attestations:write`: "Resource not accessible
   by integration"). **The cosign SIGNATURE is the bundle provenance.** A bundle SLSA attestation is NOT
@@ -267,13 +267,13 @@ cosign verify ghcr.io/szl-holdings/a11oy-bundle:0.5.0 \
 
 ### Optional honesty-alignment edits (low-risk, recommend before/with re-pin)
 - Bump `szl.io/slsa-level: "L1"` → `"L2"` in both `bundles/szl-{a11oy,killinchu}/manifests/uds-package.yaml`.
-- Change "SLSA L1 provenance" → "SLSA L2 provenance" in `bundles/szl-{a11oy,killinchu}/zarf.yaml`
+- Change "SLSA L1 provenance" → "SLSA L2 build-attested provenance (verifiable)" in `bundles/szl-{a11oy,killinchu}/zarf.yaml`
   `*-sbom-attest` component descriptions.
 - Update root `uds-bundle.yaml` header comment "SLSA L1 honest — not L3" → "SLSA L2 on organ images — not L3".
 - Delete or reface `mesh/uds-bundle.yaml` (stale szl-mesh:0.1.0 skeleton with `a11oy/sentra/amaru`
   package names) so the repo carries no contradictory organ-named bundle definition.
 All four are doctrine-honest corrections (under-claim → attested truth; remove dead organ-named file);
-none claim L3/Iron Bank.
+No bundle claims SLSA L3; Not Iron Bank/FedRAMP/CMMC/ATO; SLSA L3 roadmap.
 
 ---
 
