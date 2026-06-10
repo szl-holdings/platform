@@ -146,5 +146,5 @@ Source of truth: [PROVEN_STATE_CANONICAL.md](./PROVEN_STATE_CANONICAL.md), [luta
 - **Λ = Conjecture 1**: unconditional uniqueness machine-checked **FALSE**; conditional axiom-free results are the strongest honest claim.
 - **Khipu BFT safety = Conjecture 2, OPEN.** **P5 tamper-evidence = axiom-gated** (collision-resistance).
 - **F12 / F19 = additive fragment only.** Never "Kuramoto sync proved" / "Bekenstein bound proved".
-- **SLSA**: L1 honest + L2 on service images (cosign + slsa.dev/provenance/v0.2). **No** L3 / FedRAMP / Iron Bank / CMMC.
+- **SLSA**: L1 honest + L2 build-attested (verifiable) on container/service images (cosign + slsa.dev/provenance/v0.2). Not Iron Bank/FedRAMP/CMMC/ATO; SLSA L3 roadmap.
 - Everything in the **CI-green-experimental** tier is real and kernel-checked but is **never** folded into the locked count of 5.
