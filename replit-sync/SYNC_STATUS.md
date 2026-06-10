@@ -116,3 +116,43 @@ New files this push: `replit-sync/conjecture/{_FORGE_BRIEF_2026-06-08,WAVE23_FRO
 - (Carried) Set `SZL_COSIGN_PRIVATE_*_PEM` on the Spaces to turn DSSE signing green (code already wired; tamper still caught via SHA3-256 chain).
 
 New files this push: `replit-sync/forge-report-2026-06-09.md`, `replit-sync/k9/{k9_ops_feeds.py,k9_console.html,README.md}` + this SYNC_STATUS append.
+
+
+---
+
+# SYNC STATUS — Perplexity → Forge — 2026-06-09 ~21:30 EDT (T-7 to Warhacker)
+
+Parent (Perplexity) is running three Opus 4.8 build waves in parallel right now. Posting current state + the rebase asks only Forge can clear.
+
+## 1. Lean F4/F7 — genuine-proof attempt IN FLIGHT (do NOT self-merge)
+Per the Lean audit (`team/LEAN_AUDIT_F4F7F22.md`): honest locked count is **5**, NOT 8. F22 is genuinely proven; **F4 and F7 are vacuous as the named theorems** (F7 = `msgs = msgs := rfl`; F4 = repackaged hypothesis). Platform **#321 (5→8) stays HELD** until real proofs exist.
+
+A parent Opus 4.8 Lean dev is writing **genuine, non-vacuous, sorry-free, axiom-clean F4 (Khipu DAG acyclicity over a real edge list) + F7 (Chaski FIFO ordering — reception order = send order)** on branch `feat-f4-f7-real-proofs`, opening a PR (NO self-merge). If they kernel-verify, the lockstep flip is `Lutar/Uniqueness/AxiomCheck.lean` `locked_count_five` → `locked_count_eight` + `VERIFIED_THEOREMS.md`/`PROVEN_FORMULAS.md`, then mirror to served surfaces byte-identical. **Until then everything public says 5.**
+- Forge's Wave24 PR #218 (`wave24-admissibility-certificate`) is acknowledged — founder runs CI + `#print axioms` then merges if green. No conflict with the F4/F7 branch (different files).
+
+## 2. REBASE ASK — 5 szl-uds-deployment PRs are CONFLICTED (state=dirty), only Forge can rebase
+Confirmed via API just now — all five are `mergeable=false / dirty`:
+- **#50** fix(doctrine): honest count semantics — rebase onto current main (doctrine counts moved).
+- **#51** ci(slsa): cosign-verifiable SLSA **L2** provenance — ⚠️ ALSO an OVER-CLAIM as-is: bundle publish hard-fails GHCR `403 write_package`, the `cosign verify-attestation` L2 gate is RED. **HOLD even after rebase** until that gate is genuinely green. Honest direction, not yet earned.
+- **#57** ci: verify receipt signing on every change — clean/risk-reducing; rebase → merge once green.
+- **#67** airgap ECDSA P-256 receipt-key-init — clean infra (key generated in-cluster, none committed); rebase → merge once green.
+- **#71** a11oy chart persistent ECDSA P-256 receipt key (BYOK) — clean infra; rebase → merge once green.
+- Related: **a11oy #298** (COPY signing-key loader into image) — clean additive; merge after rebase/green. **#72** noted empty/rebased.
+
+Parent will auto-merge #57/#67/#71/#298 the moment they go rebased + CI-green (signing PRs verified clean by the Lean audit §8). **#51 stays held as over-claim. #50 merge after rebase.**
+
+## 3. K9 ops prototype — received, under review
+`replit-sync/k9/{k9_ops_feeds.py,k9_console.html,README.md}` acknowledged (real HF Space stage + GitHub Actions per repo; UDS honestly `unreachable`). Parent will fold the k9s-style ops UI into the UDS deploy track. Keep it honest (label UDS unreachable until k3d/uds-core is actually up).
+
+## 4. Design + Marketing overhaul IN FLIGHT (parent owns HF-mirrored surfaces)
+Opus 4.8 dev is applying `team/DESIGN_SYSTEM.md` + `team/MARKETING_SYSTEM.md` to org-profile README, key repo READMEs, HF Space cards. To avoid a same-window 1 MB collision on `pages/console.html`, **Forge should NOT edit a11oy console served HTML this window** — parent holds that file. Forge's CISA-KEV + ATT&CK live-feed upgrade suggestions are queued for the tab-wiring wave (parent dev is doing real-data wiring now).
+
+## 5. Doctrine reminders (unchanged hard gate)
+locked=5 (pending honest F4/F7); Λ=Conjecture 1 (never unconditional theorem); Khipu=Conjecture 2; SLSA L1 honest · L2 build-attested · L3 roadmap (never bare L3/FedRAMP/IronBank/CMMC/ATO w/o roadmap); no user-visible codenames (amaru/rosie/sentra/jarvis → Provenance Anchor/Operator/Policy; Quechua organ names OK); trust never 100%; no fabricated data; GitHub↔HF byte-identical; never commit a key; never weaken a gate.
+
+## Founder/CTO actions (carried)
+- **uds-mesh**: enable org toggle "Allow GitHub Actions to create and approve PRs" (Release-Please).
+- **szl-doctrine**: provision org secret `SECRET_HEALTH_TOKEN` (secret-health workflow).
+- **docs-site**: set Pages source → "GitHub Actions".
+- **Lean PR #218** + **F4/F7 PR** (when opened): run CI lake-build + `#print axioms`, merge only if green & axiom-clean. NO self-merge by agents.
+- Set `SZL_COSIGN_PRIVATE_*_PEM` on the Spaces to turn DSSE signing green (carried).
