@@ -3,7 +3,7 @@
 **Base URL:** `https://szlholdings-amaru.hf.space`
 **Organ role:** Reasoner / Provenance (memory cortex).
 **Health path:** `/healthz` (NOT `/api/health`).
-**Doctrine (honest, must stay true):** Λ = **Conjecture 1** (never a theorem) · locked kernel **749 decls / 14 axioms / 163 sorries** @ `c7c0ba17`, doctrine v11 · SLSA **Build L2** · proved core formulas = **5** {F1,F11,F12,F18,F19}.
+**Doctrine (honest, must stay true):** Λ = **Conjecture 1** (never a theorem) · locked kernel **749 decls / 14 axioms / 163 sorries** @ `c7c0ba17`, doctrine v11 · SLSA **L2 build-attested** on container images (verifiable via `cosign verify-attestation`) · proved core formulas = **5** {F1,F11,F12,F18,F19}.
 Probed live 2026-06-05 ~19:10 EDT. All endpoints returned HTTP 200 unless noted. NO deploy/edits made — map only.
 
 ---
@@ -42,7 +42,7 @@ Other GET routes exist but are **HTML/UI or SSE, not JSON data** (skip for data 
 |---|---|---|---|---|
 | POST | `/api/amaru/v1/readiness/assess` | **Deployment-readiness gate** (HANGAR2APPS): clears/refuses on submitted records | `{"subject":str,"records":{…}}` | `{"ok":true,"assessment":{"verdict":"NEEDS_REVIEW","criteria_total":5,"criteria_cleared":0,"criteria_gaps":5,"checks":[{"criterion":"medical_clearance","result":"GAP"}…]},"grounded_confidence":…}` |
 | POST | `/api/amaru/v1/trajectory/triage` | **Trajectory / anomaly triage** (Cyber RTS): checks orbital track vs envelopes | `{"track_id":str,"track":{"altitude_km":…,"velocity_kms":…,"inclination_deg":…}}` | `{"ok":true,"triage":{"verdict":"NOMINAL","flags":[],"contextualization":["altitude 420 km vs LEO 160–2000 km"]},"grounded_confidence":1.0}` |
-| POST | `/api/amaru/v1/intel/answer` | **Defensible intel answer** (sources-only, refuses if unsupported) | `{"question":str,"sources":[{"text","url"}]}` | `{"ok":true,"verdict":"ANSWERED","answer":"The build is SLSA L2 [s1]","citations":["s1"],"supporting":[{"support":0.5}],"grounded_confidence":0.5}` |
+| POST | `/api/amaru/v1/intel/answer` | **Defensible intel answer** (sources-only, refuses if unsupported) | `{"question":str,"sources":[{"text","url"}]}` | `{"ok":true,"verdict":"ANSWERED","answer":"The container build is SLSA L2 build-attested (verifiable) [s1]","citations":["s1"],"supporting":[{"support":0.5}],"grounded_confidence":0.5}` |
 | POST | `/api/amaru/v1/reason` | Full reasoning w/ live arxiv citation resolution + Khipu receipt | `{"question":str}` (NOT "query") | `{"ok":true,"answer":"…theorems=['TH1','TH8','TH10']","citations":["arxiv…"],"citation_resolution":{…200},"khipu_signed":…}` — **SLOW / VARIABLE (1s–30s+, timed out once)** |
 | POST | `/api/amaru/v1/brain/reason` | Lightweight reason: Λ + chakras + cited theorems | `{"query":str}` | `{"lambda":0.9,"chakras":["root",…7],"theorems_cited":{"TH1":{"status":"CONJECTURE"}},"llm_route":…}` (~1.5KB, fast) |
 | POST | `/api/amaru/v1/confidence` | Hallucination-risk / confidence scorer for a claim | `{"question":str,"answer":str,"sources":[{"text","url"}]}` | `{"ok":true,"scores":{"citation_coverage":0.0,"cove_consistency":0.5,"lambda_score":1.0},"confidence":0.0008,"hallucination_risk":true,"risk_label":"HIGH"}` — **SLOW (≈23s)** |
