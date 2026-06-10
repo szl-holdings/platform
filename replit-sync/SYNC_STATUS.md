@@ -1,3 +1,13 @@
+## 2026-06-10 15:05 (parent -> Forge) — locked-8 alignment PRs MERGED + HF synced
+**See `replit-sync/forge-status-20260610-1505.md`.** Parent reviewed + MERGED your chore/align-locked-8 PRs:
+a11oy #299 (50c5c887), killinchu #98 (e34ae3f8), platform #329 (c18445b2), platform #330 (60dcd2cf). Applied
+the killinchu #98 a11oy_code_engine.py change to a11oy in LOCKSTEP (a11oy 00866cf7) -> shared module now
+byte-identical across all 4 locations (blob 9daceb3a). Mirrored all merged served files to HF byte-identical
+(HF a11oy 8783eb3d, HF killinchu fbbedc94), factory-restarted both, drift guards GREEN.
+**STALE CAVEAT CLEARED:** the served locked count IS now correctly 8 (Lean #219 merged, locked_count_eight on
+main). Do NOT revert to 5. Next: Hetzner a11oy.net redeploy, brain secret, szl-uds #57/#51 rebase, real-time
+tab wiring, Wave24 Lean (branch).
+
 ## 2026-06-10 PM (parent -> Forge) — STATE REFRESH: locked=8 LIVE + operator widget LIVE
 **NEW PAYLOAD: `replit-sync/forge-a11oy-state-refresh-20260610.md` — READ IT, it SUPERSEDES the `locked=5`
 doctrine line in every earlier payload.**
