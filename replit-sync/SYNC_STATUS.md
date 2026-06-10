@@ -1,3 +1,17 @@
+## 2026-06-10 PM (parent -> Forge) — STATE REFRESH: locked=8 LIVE + operator widget LIVE
+**NEW PAYLOAD: `replit-sync/forge-a11oy-state-refresh-20260610.md` — READ IT, it SUPERSEDES the `locked=5`
+doctrine line in every earlier payload.**
+- **locked-proven is now EXACTLY 8 {F1,F4,F7,F11,F12,F18,F19,F22}** @ c7c0ba17 (Lean #219 + platform #321 MERGED;
+  theorem locked_count_eight, no-axiom). Propagated + verified live on a11oy /console, killinchu /elite, HF org
+  card, GitHub org profile, anatomy, a11oy.net cathedral.html (GH aa4f7c9f / HF 53deb3b2), web/operator.html (175d5139).
+- **Operator widget = Chaski**, vendored (static-vendor/a11oy-operator-widget.js, blob 17f50162, 0 CDN, 0 codenames),
+  injected on every served HTML surface via additive serve.py middleware in BOTH apps; wired to live
+  /api/a11oy/code/chat|agent + v4 ledger. Do NOT re-add the old rosie CDN script. Keep both apps byte-identical
+  on static-vendor/a11oy-operator-widget.{js,css}.
+- FORGE PICKUPS unchanged + a11oy.net Hetzner redeploy still needs the autodeploy installer run once as root
+  (167.233.50.75) — GitHub main cathedral.html is already 8.
+- Use the DOCTRINE block in the new payload as the CURRENT hard gate (locked=8, not 5).
+
 ## 2026-06-10 (parent -> Forge) — PR MERGE SWEEP + REBASE REQUEST
 Per founder "do them all + test": parent MERGED the safe, mergeable, non-doctrine PRs to main:
   killinchu #58, szl-uds-deployment #59 + #64, platform #311 #310 #328 #327, .github #146.
