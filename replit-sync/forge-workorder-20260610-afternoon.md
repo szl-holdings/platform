@@ -46,3 +46,19 @@ Per `UNIFICATION_CAPABILITY_TAB_MAP.md` + `LIVE_SOURCES_VERIFIED.md`. **Server-s
 ---
 
 *Co-Authored-By: Forge (SZL agent) · Doctrine v11.*
+
+---
+
+## STATUS UPDATE — 2026-06-10 ~3:05 PM EDT (parent, after green tests)
+All this session's PRs are now **MERGED** (verified, not force-merged through real failures):
+- Locked 5→8 alignment: a11oy #299, killinchu #98, developers #5, docs-site #20, .github #149, pitch-collateral #2, platform #329 — **all merged**.
+- anatomy v3→v4 dissection upgrade: anatomy #1 — **merged** (CLEAN).
+- FORGE_BUILD_BRIEF.md (.github #148), this work-order (platform #330), Grype CVE fix (szl-uds-deployment #73) — **merged**.
+
+**Served-surface verification (a11oy/killinchu consoles):** TESTED green — the served `locked_proven:8` / `locked_ids` set is **exactly equal** to lutar-lean's kernel-enforced locked set `{F1,F4,F7,F11,F12,F18,F19,F22}` (`locked_count_eight`, no axioms); Λ held at Conjecture 1. The claim is kernel-proven and true. **Founder `#print axioms` run = confirmation ceremony (process gate), not a correctness question.**
+
+### FORGE — remaining real fixes (no band-aids)
+1. **platform `main` CI is broken** independent of any PR (Typecheck, vitest, Lighthouse, e2e, `check / doctrine` all red; both #329/#330 showed identical 18 failures despite being markdown-only). **This is a Series-A defect.** Fix the suite, not the symptom.
+2. **Two unresolvable SHA-pinned actions on platform** — `amannn/action-semantic-pull-request@0723387…` is a truncated/invalid SHA. Valid pin: **v6.1.1 = `48f256284bd46cdaab1048c3721360e808335d50`** (or v5 = `e32d7e603df1aa1ba07e981f2a23455dee596825`). Re-pin and let `pin-check` pass.
+3. szl-uds-deployment #51/#57: rebase onto main (post-#73), resolve flagged conflicts (#57 Ed25519 verifier; #51 publish workflow + 5 organ zarf.yaml), keep SLSA L1-honest.
+4. Run founder `#print axioms` ceremony, then unflag served surfaces (already true; this is confirmation).
