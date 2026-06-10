@@ -200,3 +200,18 @@ The 5 conflicted szl-uds-deployment PRs remain dirty: **#50** (doctrine counts),
 5. **Keep shared szl_*.py byte-identical** in every change you push — the drift guard now enforces it and parent just spent real effort healing 10 diverged modules.
 
 Doctrine reminders unchanged: locked=5 (pending #219 founder merge); Λ=Conjecture 1; Khipu=Conjecture 2; honest SLSA; no user-visible codenames (amaru/rosie/sentra/jarvis → Provenance Anchor/Operator/Policy; Quechua organ names OK); trust never 100%; no fabricated data; GitHub↔HF byte-identical; never commit a key; never weaken a gate; no Lean self-merge.
+
+---
+
+## ADDENDUM — Banned-token scan investigation (parent, 2026-06-10 ~00:4x EDT)
+
+Parent ran this down as far as the egress-blocked CI logs allow. The check annotation says **exactly 2 banned-token hits**. Findings:
+
+- **NOT a hype word.** Code-searched every BANNED token (revolutionary/world-class/seamless/cutting-edge/game-changing/best-in-class/state-of-the-art/unprecedented/industry-leading/premier/Jarvis/Bo11y/Bolly) across szl-holdings/a11oy — **every hit is already in an allowlisted path** (.doctrine-allowlist, docs/cookbook/, docs/papers/ouroboros-archive/, proofs/, console/assets/, wayra_snapshot.json, YACHAY_SYSTEM_PROMPT.md, ayni_os_serve.py, szl_yachay_organ.py, web/src/data/, .github/workflows/doctrine-grep.yml).
+- **So the 2 hits are bare `\bleading\b` (Pass 2)** in a non-allowlisted file used as prose (not a Tailwind `leading-*` class). Parent fetched + applied the exact two-pass logic to all 19 non-allowlisted `web/src/components/**` files that contain "leading" AND all 31 top-level prose files — **ALL clean** (Tailwind-only or allowlisted). The 2 offending lines are in a file the GitHub code-search index under-covers (likely a nested `.json`/`.md`/data file, or a path code-search skipped).
+- **One-step close (needs the CI log which names the files — egress-blocked for parent):** open the failed `Banned-token scan` run, read the `Report and fail on hits` step output (it prints `file:line:content` for both hits), then EITHER reword the bare "leading" → "leading-edge"/"foremost"/"top" if it's marketing prose, OR add the path to `.doctrine-allowlist` with a justification comment if it's technical ("leading bytes/digits/whitespace", "leading principal minors", a CVE feed, etc.). Re-run the gate.
+- Reproduction locally (founder/Forge in a clone): 
+  `git ls-files | <drop .doctrine-allowlist paths> | xargs grep -nEi '\bleading\b' | grep -vEi 'leading-(none|tight|snug|normal|relaxed|loose|[0-9]+)'`
+  the 2 lines that survive are the hits.
+
+This gate is MARKETING-word hygiene, not doctrine-truth — the live product is verified honest. Non-blocking for Warhacker but worth closing for a fully-green board.
