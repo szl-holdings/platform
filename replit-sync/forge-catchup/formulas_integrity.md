@@ -121,7 +121,7 @@ Probed 8 formula endpoints on 2026-06-09 (curl, no proxy):
 
 ## 4. Observations (Not Fixed — Out of Scope or Pre-existing)
 
-### amaru `/honest` SLSA L2 claim
+### amaru `/honest` SLSA L2 build-attested (container images, verifiable) claim
 `slsa_evidence.level = "L2"` on the amaru honest endpoint. The doctrine (Invariant 3) says "SLSA L1 honest — no live L2/L3 positive claims." However, the accompanying note clarifies "verified via GitHub Attestations API + offline DSSE crypto + live Rekor inclusion" and explicitly flags killinchu as L1. This is a borderline case — amaru appears to have a verified L2 Sigstore provenance, and the note is transparent. **Not fixed** here: this requires CTO evaluation of whether the evidence meets the threshold for an honest L2 claim before any change.
 
 ### szl_puriq_formulas.py "PURIQ-primitive" vs "canonical genome" numbering
