@@ -21,7 +21,7 @@
 # -> filtered `pnpm --filter @workspace/vessels run build`.
 
 # ─── Stage 1: dependency cache (pnpm fetch from root) ────────────────────────
-FROM node:24-alpine AS deps
+FROM node:26-alpine AS deps
 RUN apk add --no-cache libc6-compat
 RUN corepack enable
 WORKDIR /app
@@ -32,7 +32,7 @@ RUN --mount=type=cache,id=pnpm-store,target=/root/.local/share/pnpm/store \
     pnpm fetch
 
 # ─── Stage 2: builder (install + filtered Vite build) ────────────────────────
-FROM node:24-alpine AS builder
+FROM node:26-alpine AS builder
 RUN apk add --no-cache libc6-compat
 RUN corepack enable
 WORKDIR /app
