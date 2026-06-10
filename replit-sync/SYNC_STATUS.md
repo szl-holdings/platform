@@ -1,3 +1,14 @@
+## 2026-06-10 15:20 (parent) — POST-MERGE DRIFT HEAL (both guards GREEN)
+Merging the locked-8 alignment PRs introduced 3 GitHub↔sibling shared-file divergences; parent healed all 3
+byte-identical so both drift guards pass:
+- `a11oy_code_engine.py` (shared module): a11oy synced to killinchu's locked-8 (a11oy 00866cf7) -> all 4 locations blob 9daceb3a.
+- `web/operator.html`: killinchu synced to a11oy canonical (locked-8 + honest Yawar/Yuyay roles) -> blob 102c66bf both repos. HF killinchu 23fcddd3.
+- `web/v4_fleet_panel.html`: a11oy synced to killinchu canonical (honest Wire labels 'Orchestrator↔Policy/Operator', no codename endpoints) -> blob 562001326 both repos. HF a11oy 4258c06c.
+- `corpus/lean/lutar-lean__README.md`: killinchu synced to a11oy locked-8 (killinchu 17296f70, HF 96edfb5c) -> blob a2fb59dd both repos.
+RESULT: Shared-source drift guard = SUCCESS; HF Space module-drift guard = SUCCESS. 3 Spaces RUNNING.
+FORGE NOTE: when you merge a PR that touches a file COPY'd in BOTH Dockerfiles (shared module OR web/* OR
+corpus/*), apply the SAME change to the sibling repo in the same window, else the drift guard goes red.
+
 ## 2026-06-10 15:05 (parent -> Forge) — locked-8 alignment PRs MERGED + HF synced
 **See `replit-sync/forge-status-20260610-1505.md`.** Parent reviewed + MERGED your chore/align-locked-8 PRs:
 a11oy #299 (50c5c887), killinchu #98 (e34ae3f8), platform #329 (c18445b2), platform #330 (60dcd2cf). Applied
