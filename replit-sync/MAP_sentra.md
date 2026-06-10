@@ -3,7 +3,7 @@
 **Base URL:** `https://szlholdings-sentra.hf.space`
 **API prefix:** `/api/sentra/v1` (canonical). A few `/v1/*` sidecar aliases also exist.
 **Probed:** 2026-06-05 ~23:11 UTC, live. All endpoints responded HTTP 200 in **~0.26 s** (no slow paths observed).
-**Doctrine (must stay honest in a11oy too):** Λ = **Conjecture 1** (never a theorem) · proved formulas = **5** {F1,F11,F12,F18,F19} · SLSA **Build L2** · kernel 749 decls / 14 axioms / 163 sorries @ c7c0ba17, doctrine v11.
+**Doctrine (must stay honest in a11oy too):** Λ = **Conjecture 1** (never a theorem) · proved formulas = **5** {F1,F11,F12,F18,F19} · SLSA **L2 build-attested** on container images (verifiable via `cosign verify-attestation`) · kernel 749 decls / 14 axioms / 163 sorries @ c7c0ba17, doctrine v11.
 
 > Note for the parent: the `/console` HTML lives in the repo at `console/index.html` (served by `serve.py` from `/app/console`), **not** inside the Python file. Nothing was edited or deployed — this is map-only.
 
