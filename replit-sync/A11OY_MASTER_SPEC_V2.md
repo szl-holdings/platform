@@ -57,7 +57,7 @@ LIVE: GitHub/HF activity, public status/incident JSON, econ feeds. Salesforce/M3
 - GraphRouter (ft2023): model-routing-as-graph viz for Model Router tab.
 - Style: New Relic (observability narrative), Datadog (live dashboards), Palantir (entity/ontology graphs), NVIDIA (dark high-saturation), Boss-Tech (5-domain observability spine).
 
-## HONESTY (hard gate) — locked=5 {F1,F11,F12,F18,F19}; Λ=Conjecture 1; SLSA 'L1 honest; L2 build-attestation present; L2-verified/L3=roadmap'; NO user-visible banned codenames (product brands Counsel/Sentra/Terra OK); no fabricated data, SAMPLE labeled, premium=connect-ready not fake; 0 runtime CDN.
+## HONESTY (hard gate) — locked=8 {F1,F4,F7,F11,F12,F18,F19,F22}; Λ=Conjecture 1; SLSA 'L1 honest; L2 build-attestation present; L2-verified/L3=roadmap'; NO user-visible banned codenames (product brands Counsel/Sentra/Terra OK); no fabricated data, SAMPLE labeled, premium=connect-ready not fake; 0 runtime CDN.
 
 ## AFTER a11oy: KILLINCHU — UDS-faced, drones+vessels ONLY (Navy/Army audience). Organize tabs better, every tab unique+real+live. Then GitHub<->HF<->UDS align. Then ZOOM-OUT assessment.
 

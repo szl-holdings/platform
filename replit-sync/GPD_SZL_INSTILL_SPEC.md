@@ -55,6 +55,6 @@ special case (exactly one admissible `(a,r)`). SZL operates in the post-determin
 
 ## Guardrails
 - NO reference to any external paper anywhere. Foundation citations = SZL Zenodo DOIs only.
-- locked-proven=EXACTLY 5; Λ=Conjecture 1; SQA safety=Wave23 CONDITIONAL (Conjecture 2 unconditional);
+- locked-proven=EXACTLY 8 {F1,F4,F7,F11,F12,F18,F19,F22}; Λ=Conjecture 1; SQA safety=Wave23 CONDITIONAL (Conjecture 2 unconditional);
   full ESR=OPEN (roadmap). No fabricated data; roadmap detectors labeled roadmap; no codenames; trust
   never 100%; GitHub↔HF byte-identical.

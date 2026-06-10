@@ -9,7 +9,7 @@
 2. LIVE DATA, ALWAYS RECORDING — auto-poll a REAL feed on an interval (~10-15s; respect HF throttle, use 10s min, jittered). NOT button-only fake data. Show a live-updating counter/stream + "last updated" + the rolling receipt log.
 3. SIGNED RECEIPTS visible — every governed action emits a real receipt; show the rolling chain.
 4. 3D where it adds meaning, FRAMED (zoomToFit after force-settle; globes pointOfView alt ~2.5). Fix the Three.js Timer skew (matched libs, 0 CDN).
-5. DOCTRINE: locked=EXACTLY 5 {F1,F11,F12,F18,F19}; Λ=Conjecture 1 (uncond FALSE; conditional axiom-free); SLSA 'L1 honest; L2 build-attestation present; L2-verified/L3=roadmap' (never bare Level 2); NO user-visible banned codenames amaru/sentra/rosie/jarvis; a11oy Code='best GOVERNED LLM'; killinchu UDS non-affiliation notice; Fleet C2 'effector simulated'; no fabricated data, SIMULATED labeled; 0 runtime CDN.
+5. DOCTRINE: locked=EXACTLY 8 {F1,F4,F7,F11,F12,F18,F19,F22}; Λ=Conjecture 1 (uncond FALSE; conditional axiom-free); SLSA 'L1 honest; L2 build-attestation present; L2-verified/L3=roadmap' (never bare Level 2); NO user-visible banned codenames amaru/sentra/rosie/jarvis; a11oy Code='best GOVERNED LLM'; killinchu UDS non-affiliation notice; Fleet C2 'effector simulated'; no fabricated data, SIMULATED labeled; 0 runtime CDN.
 
 ## KILLINCHU — target ~18 unique tabs (consolidate 69)
 CONSOLIDATION MAP (merge clusters):
