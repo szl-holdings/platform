@@ -131,7 +131,7 @@ const RISK_REGISTER = [
     owner: 'Vendor Risk',
     status: 'Monitoring',
     dueDate: 'Q3 2025',
-    mitigations: ['SBOM program initiated', 'Top 20 vendors assessed', 'GitHub SLSA L2 target'],
+    mitigations: ['SBOM program initiated', 'Top 20 vendors assessed', 'GitHub SLSA L2 (roadmap)'],
   },
   {
     id: 'RR-004',
