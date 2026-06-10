@@ -85,7 +85,7 @@ Both new bundles are now **built, published, and cosign-signed** on GHCR, verifi
 2. **No bundle-level SLSA attestation.** The CI token lacks `attestations: write`; the `attest-build-provenance` step is expected to fail (kept non-blocking, documented). The cosign **signature** is the real bundle provenance. Organ images carry their own SLSA **L2** `.att`. **No L3.**
 3. **OTEL / receipts / lake / vessels prerequisites** are roadmap (private/absent images). Once public, add the Zarf package + uncomment the bundle entry.
 4. **`-bundle` publish path** is an engineering choice to avoid image-vs-bundle GHCR collision; if the org prefers a different OCI path (e.g. `bundles/a11oy`), the workflow `PUBLISH_REPO` var is the single place to change it.
-5. **No L3 / FedRAMP / CMMC / Iron Bank.** Λ = Conjecture 1. Doctrine v11 LOCKED 749/14/163 @ c7c0ba17. Section 889 = 5 vendors.
+5. **Not Iron Bank/FedRAMP/CMMC/ATO; SLSA L3 roadmap.** Λ = Conjecture 1. Doctrine v11 LOCKED 749/14/163 @ c7c0ba17. Section 889 = 5 vendors.
 6. **Untouched (per instructions):** HF Spaces, a11oy/killinchu app code, no repos deleted, `szl-mesh:0.4.0` and its `uds-bundle-publish.yml` left working/unchanged.
 
 ---
