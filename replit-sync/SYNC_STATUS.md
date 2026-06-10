@@ -38,7 +38,7 @@ Per founder "do them all + test": parent MERGED the safe, mergeable, non-doctrin
   killinchu #58, szl-uds-deployment #59 + #64, platform #311 #310 #328 #327, .github #146.
 BLOCKED — CONFLICTED (dirty), need YOU (Forge) to REBASE onto current main, then they'll merge:
   szl-uds-deployment #50 (doctrine honest counts), #71 (a11oy chart ECDSA key), #67 (airgap key-init),
-  #57 (verify receipt signing), #51 (SLSA L2 bundle cosign-attest).
+  #57 (verify receipt signing), #51 (SLSA L2 bundle cosign-attest — roadmap, bundle-level not yet earned).
   -> Please `git rebase origin/main` each branch + resolve, push; parent will re-merge after CI green.
 HELD — FOUNDER HARD-LIMIT (signing / SLSA / locked-count), parent is verifying, do NOT self-merge:
   a11oy #298 (signing-key loader into image), szl-uds-deployment #72 (persistent ECDSA key),

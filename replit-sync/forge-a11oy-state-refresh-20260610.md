@@ -42,7 +42,7 @@
    `https://brain.a11oy.net` with OUR OWN bearer). Update `szl-local` `model_slug` placeholder → `qwen2.5-coder:32b`
    so routing receipts stay truthful. See `team/SELF_HOSTED_BRAIN.md`.
 2. **4 szl-uds-deployment PRs** — REBASE then parent merges the clean ones: #57 (verify receipt signing),
-   #67 (airgap key-init), #71 (a11oy chart ECDSA key). **#51 (SLSA L2 bundle cosign-attest) stays HELD**
+   #67 (airgap key-init), #71 (a11oy chart ECDSA key). **#51 (SLSA L2 bundle cosign-attest — roadmap, bundle-level not yet earned) stays HELD**
    as over-claim until wording is decided. (PR #50 already merged.) These are signing-key infra =
    founder hard-limit; do not self-merge.
 3. **a11oy.net Hetzner redeploy** — the box (167.233.50.75) still serves the OLD 5-set even though
