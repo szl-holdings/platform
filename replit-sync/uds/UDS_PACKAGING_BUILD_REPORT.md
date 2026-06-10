@@ -159,7 +159,7 @@ the default schema set; full CR validation occurs at `uds deploy` time via the U
 | Lula OSCAL: 5 controls each, OPA/Rego over live K8s | **REAL** structure (lint valid, Rego runs); **deploy-time** verdict |
 | AU-9 WAL tamper detection; AC-7 denial Prometheus metric | **ROADMAP** |
 | SLSA Build **L1** | **REAL** (honest baseline) |
-| SLSA Build **L2** on 5 organ images (cosign `.sig`+`.att`) | **REAL** |
+| SLSA **L2 build-attested** on 5 organ container images (cosign `.sig`+`.att`, verifiable; bundle-level attestation = roadmap) | **REAL** |
 | Bundle-level attestation | **NOT earned (ROADMAP)** — cosign signature = bundle provenance only |
 | L3 / Iron Bank / FedRAMP / CMMC | **NOT claimed** |
 | Doctrine v11 | **LOCKED** 749/14/163 @ `958c09f9` (roadmap also cites `c7c0ba17` as kernel commit) |
