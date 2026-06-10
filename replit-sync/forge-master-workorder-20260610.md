@@ -87,6 +87,22 @@ Detailed sequence is in `platform/replit-sync/forge-uds-push-20260610.md`. Summa
 Admissibility-certification soundness (conditional, axiom-clean); connect Wave23 BFT to the signed execution
 certificate; first honest Semantic Linearizability definition + one proven property. Statement-only until kernel-verified.
 
+
+### G. lutar-lean Lake build — regenerate VERIFIED_THEOREMS.md (needs the Lean build env)
+The kernel is sound: `locked_count_eight` proves and the axiom-hygiene gate PASSES (parent fixed a
+"sorry-free" comment false-positive at commit `861357ea`). The Lake build now fails ONLY at the
+"Drift gate (VERIFIED_THEOREMS.md out of date vs build)" step — the committed `VERIFIED_THEOREMS.md`
+is stale vs the build (which now includes the genuine F4/F7/F22 proofs). Parent cannot regenerate it
+(no Lean/Mathlib toolchain + the generated artifact download redirects to blob storage the sandbox
+can't reach). **You (or the CI) fix it in one step:**
+```
+lake build
+python3 .github/scripts/gen_verified_theorems.py --repo-path . --out VERIFIED_THEOREMS.md
+git add VERIFIED_THEOREMS.md && git commit -s -m "chore(verified): regen VERIFIED_THEOREMS.md vs build (locked-8 / F4,F7,F22 real)" && git push
+```
+(Or: download the `verified-theorems-861357ea…` artifact from the failed run and commit it as `VERIFIED_THEOREMS.md`.)
+This is NOT a content edit — it's the build's own machine-generated ledger. After it, the Lake build goes green.
+
 ## 3. HANDSHAKE
 After each push, list changed served files in `replit-sync/SYNC_STATUS.md` so parent mirrors to HF byte-identical +
 factory-restart. Never both edit the same file in one window. Real live data only. Report to `replit-sync/forge-report-<date>.md`.
