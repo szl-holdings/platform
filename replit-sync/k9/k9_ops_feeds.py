@@ -191,8 +191,11 @@ def k9_snapshot() -> dict:
         "uds": fetch_uds(),
         "receipts": fetch_receipts(),
         "doctrine": {
-            "locked_proven": 5,
+            "locked_proven": 8,
+            "locked_set": ["F1", "F4", "F7", "F11", "F12", "F18", "F19", "F22"],
+            "locked_commit": "c7c0ba17",
             "lambda": "Conjecture 1 (unconditional uniqueness machine-checked false; conditional holds)",
+            "khipu_bft_safety": "Conjecture 2 (Wave23 conditional safety theorem; unconditional open)",
             "real_data_only": True,
         },
     }
