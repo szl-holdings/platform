@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>K9 — SZL cluster-ops</title>
+<style>
+  :root{
+    --bg:#0b0f14; --panel:#0f1620; --line:#1c2733; --fg:#cfe3f2;
+    --dim:#5d7488; --green:#39d98a; --red:#ff5d6c; --yellow:#ffce5a; --cyan:#42c2d6;
+    --accent:#7aa2f7; --hl:#13202e;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--fg);
+    font:13px/1.5 ui-monospace,SFMono-Regular,Menlo,Consolas,monospace}
+  header{display:flex;align-items:center;gap:18px;padding:8px 14px;
+    background:linear-gradient(90deg,#0d1622,#0b0f14);border-bottom:1px solid var(--line)}
+  header .logo{font-weight:700;letter-spacing:2px;color:var(--accent)}
+  header .ctx{color:var(--dim)}
+  header .ctx b{color:var(--fg)}
+  header .doctrine{margin-left:auto;color:var(--dim);font-size:11px}
+  header .doctrine b{color:var(--yellow)}
+  nav{display:flex;gap:0;border-bottom:1px solid var(--line);background:var(--panel)}
+  nav button{background:none;border:none;color:var(--dim);padding:8px 16px;cursor:pointer;
+    font:inherit;border-bottom:2px solid transparent}
+  nav button.on{color:var(--fg);border-bottom-color:var(--accent);background:var(--hl)}
+  nav .right{margin-left:auto;display:flex;align-items:center;gap:10px;padding-right:12px;color:var(--dim)}
+  nav .right button{padding:6px 10px}
+  main{display:grid;grid-template-columns:1.4fr 1fr;gap:0;height:calc(100vh - 86px)}
+  .list{overflow:auto;border-right:1px solid var(--line)}
+  table{width:100%;border-collapse:collapse}
+  th{position:sticky;top:0;background:var(--panel);text-align:left;color:var(--dim);
+    font-weight:600;padding:6px 12px;border-bottom:1px solid var(--line);font-size:11px;text-transform:uppercase;letter-spacing:1px}
+  td{padding:7px 12px;border-bottom:1px solid #131c26;cursor:pointer;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  tr:hover td{background:var(--hl)}
+  tr.sel td{background:#16263a}
+  .dot{display:inline-block;width:8px;height:8px;border-radius:50%;margin-right:7px;vertical-align:middle}
+  .ok{background:var(--green)} .bad{background:var(--red)} .warn{background:var(--yellow)} .unk{background:var(--dim)}
+  .badge{font-size:10px;padding:1px 7px;border-radius:10px;border:1px solid var(--line)}
+  .badge.live{color:var(--green);border-color:#1c4} .badge.unreach{color:var(--yellow);border-color:#553}
+  .badge.sim{color:var(--cyan);border-color:#255}
+  .detail{overflow:auto;padding:14px 16px;background:#0a0e13}
+  .detail h2{margin:0 0 4px;font-size:15px;color:var(--fg)}
+  .detail .sub{color:var(--dim);margin-bottom:14px}
+  .kv{display:grid;grid-template-columns:140px 1fr;gap:4px 10px;margin-bottom:14px}
+  .kv .k{color:var(--dim)} .kv .v{color:var(--fg);word-break:break-all}
+  .actions{display:flex;gap:8px;flex-wrap:wrap;margin:10px 0}
+  .actions button{background:#14202e;border:1px solid var(--line);color:var(--fg);
+    padding:6px 12px;border-radius:5px;cursor:pointer;font:inherit}
+  .actions button:hover{border-color:var(--accent)}
+  pre{background:#070a0e;border:1px solid var(--line);border-radius:6px;padding:10px;
+    overflow:auto;color:#bcd;font-size:12px;white-space:pre-wrap;word-break:break-word}
+  a{color:var(--accent)}
+  footer{position:fixed;bottom:0;left:0;right:0;background:var(--panel);border-top:1px solid var(--line);
+    color:var(--dim);font-size:11px;padding:4px 14px;display:flex;gap:18px}
+  .empty{color:var(--dim);padding:30px;text-align:center}
+</style>
+</head>
+<body>
+<header>
+  <span class="logo">⬡ K9</span>
+  <span class="ctx">context <b id="ctx">SZL fleet</b> · refreshed <b id="ts">—</b></span>
+  <span class="doctrine">doctrine: locked=<b>5</b> · Λ=<b>Conjecture&nbsp;1</b> · real-data-only</span>
+</header>
+
+<nav>
+  <button data-kind="spaces" class="on">Spaces</button>
+  <button data-kind="fleet">Fleet&nbsp;(CI)</button>
+  <button data-kind="uds">UDS</button>
+  <button data-kind="receipts">Receipts</button>
+  <span class="right">
+    <span id="status">loading…</span>
+    <button id="refresh">↻ refresh</button>
+  </span>
+</nav>
+
+<main>
+  <div class="list">
+    <table>
+      <thead><tr id="cols"></tr></thead>
+      <tbody id="rows"></tbody>
+    </table>
+    <div class="empty" id="empty" hidden></div>
+  </div>
+  <div class="detail" id="detail">
+    <div class="empty">Select a resource to drill in.</div>
+  </div>
+</main>
+
+<footer>
+  <span>k9s-pattern reimplemented (Apache-2.0, attributed) — not k9s code</span>
+  <span>● live = real source reachable</span>
+  <span style="color:var(--yellow)">● unreachable = honestly labelled, never fabricated</span>
+  <span style="color:var(--cyan)">● SIMULATED = command demonstration (no signing key in K9)</span>
+</footer>
+
+<script>
+const params = new URLSearchParams(location.search);
+const BASE = (params.get("base") || "").replace(/\/$/,"");
+const api = p => BASE + "/api/k9/v1" + p;
+let current = "spaces";
+let cache = {};
+let selected = null;
+
+const COLS = {
+  spaces:  ["", "Space", "Stage", "Hardware", "SDK", "Source"],
+  fleet:   ["", "Repo", "Workflow", "Conclusion", "Branch", "Source"],
+  uds:     ["", "Package", "Namespace", "Phase", "Source", ""],
+  receipts:["", "Endpoint", "Doctrine", "", "", "Source"],
+};
+
+function dot(item){
+  if(item.source==="unreachable") return '<span class="dot warn"></span>';
+  if(item.healthy===true) return '<span class="dot ok"></span>';
+  if(item.healthy===false) return '<span class="dot bad"></span>';
+  if(item.status==="in_progress"||item.status==="building") return '<span class="dot warn"></span>';
+  return '<span class="dot unk"></span>';
+}
+function srcBadge(s){
+  if(s==="live") return '<span class="badge live">live</span>';
+  if(s==="unreachable") return '<span class="badge unreach">unreachable</span>';
+  return '<span class="badge">'+(s||"—")+'</span>';
+}
+function rowCells(kind,it){
+  if(kind==="spaces") return [dot(it),it.id,it.stage||it.reason||"—",it.hardware||"—",it.sdk||"—",srcBadge(it.source)];
+  if(kind==="fleet")  return [dot(it),it.id,it.workflow||"—",it.conclusion||it.status||it.reason||"—",it.branch||"—",srcBadge(it.source)];
+  if(kind==="uds")    return [dot(it),it.id,it.namespace||"—",it.phase||it.reason||"—",srcBadge(it.source),""];
+  if(kind==="receipts")return [dot(it),it.id,it.doctrine||"—","","",srcBadge(it.source)];
+  return [];
+}
+
+async function load(kind){
+  current = kind;
+  document.querySelectorAll("nav button[data-kind]").forEach(b=>b.classList.toggle("on",b.dataset.kind===kind));
+  document.getElementById("cols").innerHTML = COLS[kind].map(c=>`<th>${c}</th>`).join("");
+  document.getElementById("status").textContent = "loading "+kind+"…";
+  let items=[];
+  try{
+    if(kind==="receipts"){
+      const r = await fetch(api("/receipts")); const d = await r.json();
+      items = [{id:d.base||"a11oy", doctrine:(d.doctrine_lock?JSON.stringify(d.doctrine_lock):"—"), source:d.source, _raw:d, healthy:d.source==="live"}];
+    }else{
+      const r = await fetch(api("/"+kind)); const d = await r.json();
+      items = d.items||[];
+    }
+    document.getElementById("status").textContent = items.length+" "+kind;
+  }catch(e){
+    document.getElementById("status").textContent = "backend unreachable — wire k9_ops_feeds.py";
+    items=[];
+  }
+  cache[kind]=items;
+  const tb=document.getElementById("rows"); tb.innerHTML="";
+  const empty=document.getElementById("empty");
+  if(!items.length){empty.hidden=false; empty.textContent="No "+kind+" (or backend not wired). Mount k9_ops_feeds.py: app.include_router(build_router())";}
+  else empty.hidden=true;
+  items.forEach((it,i)=>{
+    const tr=document.createElement("tr");
+    tr.innerHTML=rowCells(kind,it).map(c=>`<td>${c}</td>`).join("");
+    tr.onclick=()=>{document.querySelectorAll("#rows tr").forEach(x=>x.classList.remove("sel"));tr.classList.add("sel");drill(kind,it);};
+    tb.appendChild(tr);
+  });
+  document.getElementById("ts").textContent=new Date().toLocaleTimeString();
+}
+
+function drill(kind,it){
+  selected={kind,it};
+  const d=document.getElementById("detail");
+  const kv=Object.entries(it).filter(([k])=>!k.startsWith("_")).map(([k,v])=>
+    `<div class="k">${k}</div><div class="v">${typeof v==="object"?JSON.stringify(v):(v===null?"null":v)}</div>`).join("");
+  const link = it.url?`<div class="actions"><a href="${it.url}" target="_blank" rel="noopener">open ↗</a></div>`:"";
+  d.innerHTML=`<h2>${it.id}</h2><div class="sub">${it.kind||kind} · ${srcBadge(it.source)}</div>
+    <div class="kv">${kv}</div>${link}
+    <div class="actions">
+      <button onclick="act('describe')">describe</button>
+      <button onclick="act('restart')">restart</button>
+      <button onclick="act('logs')">logs</button>
+    </div>
+    <div id="receipt"></div>`;
+}
+
+async function act(action){
+  if(!selected)return;
+  const {it}=selected;
+  const u=api(`/action?kind=${encodeURIComponent(it.kind||current)}&id=${encodeURIComponent(it.id)}&action=${action}`);
+  let body;
+  try{ body=await (await fetch(u)).json(); }
+  catch(e){ body={status:"SIMULATED",would_emit:{kind:it.kind,resource:it.id,action,note:"backend not wired"}}; }
+  document.getElementById("receipt").innerHTML=
+    `<div style="margin:10px 0 4px">action receipt <span class="badge sim">${body.status||"SIMULATED"}</span></div>
+     <pre>${JSON.stringify(body,null,2)}</pre>`;
+}
+
+document.querySelectorAll("nav button[data-kind]").forEach(b=>b.onclick=()=>load(b.dataset.kind));
+document.getElementById("refresh").onclick=()=>load(current);
+load("spaces");
+</script>
+</body>
+</html>

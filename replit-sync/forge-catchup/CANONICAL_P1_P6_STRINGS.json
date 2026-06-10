@@ -1,0 +1,18 @@
+{
+ "p1_p6_canonical_strings": {
+  "P1_receipt_completeness": "Every step of a governed run leaves exactly one signed receipt; the log is append-only and gap-free -> an auditor can reconstruct the whole run.",
+  "P2_gate_soundness": "An action is allowed only if BOTH the policy check AND the kernel/doctrine check return ALLOW; a single failing check is absorbing and cannot be overridden downstream.",
+  "P3_non_interference": "HEADLINE: prompt-injection / poisoned retrieval provably cannot flip a DENY into an ALLOW. The untrusted context is recorded in the audit log yet quarantined from the decision (Goguen-Meseguer information-flow security).",
+  "P4_replay_determinism": "Re-running a recorded run from the same state reproduces a byte-identical receipt chain -> deterministic replay audit. Extends F1 from one step to the whole pipeline.",
+  "P5_tamper_evidence": "Any single-receipt payload tampering that doesn't recompute its hash makes chain re-verification reject -> forgery is detectable. Gated on the standard hash collision-resistance idealization (NIST FIPS 180-4).",
+  "P6_monotone_auditability": "An auditor who accepted the chain up to a point never has to retract that as the log grows -> streaming/incremental audit without re-checking history."
+ },
+ "maturity": {
+  "P1_receipt_completeness": "proven sorry-free (experimental)",
+  "P2_gate_soundness": "proven sorry-free (experimental)",
+  "P3_non_interference": "proven sorry-free (experimental); core axiom-free",
+  "P4_replay_determinism": "proven sorry-free (experimental)",
+  "P5_tamper_evidence": "axiom-gated (declared)",
+  "P6_monotone_auditability": "proven sorry-free (experimental)"
+ }
+}

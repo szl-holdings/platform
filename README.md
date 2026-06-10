@@ -301,6 +301,7 @@ The Alloy Doctrine is the permanent governance framework that defines how all AI
 | [`docs/A11OY_AGENT_DOCTRINE.md`](./docs/A11OY_AGENT_DOCTRINE.md) | 18 named agent roles, scopes, and proof obligations |
 | [`docs/A11OY_NON_NEGOTIABLES.md`](./docs/A11OY_NON_NEGOTIABLES.md) | Absolute rules that cannot be overridden |
 | [`docs/A11OY_PROOF_DOCTRINE.md`](./docs/A11OY_PROOF_DOCTRINE.md) | Proof requirements for every consequential action |
+| [`docs/GOVERNED_POST_DETERMINISM.md`](./docs/GOVERNED_POST_DETERMINISM.md) | Governed Post-Determinism (GPD) — SZL's framework for certified semantic admissibility across autonomous agents |
 | [`docs/A11OY_SECURITY_DOCTRINE.md`](./docs/A11OY_SECURITY_DOCTRINE.md) | Security rules, secret handling, and audit requirements |
 
 ### Hatun Doctrine Specification
@@ -309,6 +310,24 @@ The Alloy Doctrine is the permanent governance framework that defines how all AI
 
 
 ---
+
+## Governed Post-Determinism (GPD)
+
+**Governed Post-Determinism (GPD)** is SZL's own framework. Classical systems demand that every correct node produce the *same bytes*; autonomous agents produce *different but still-correct* reasoning paths — so the unit of agreement shifts from "identical output" to **certified semantic admissibility**, and SZL proves that certification with a signed, Lean-anchored receipt.
+
+Five pillars, each mapped to a component SZL runs in production with an honest proof artifact:
+
+- **Protocol-Bounded Execution** — governed-decision loop + YUYAY 13-axis conjunctive gate (deny-by-default). *Gate soundness proven over the locked F-set.*
+- **Verifiable Intent-to-Execution** — DSSE-signed receipt chain + Lean-theorem trace. *ECDSA-P256 signed, SHA-256 hash-chained, tamper-evident.*
+- **Bounded-Recursion Control Plane** — Ouroboros bounded-recursion loop (P1–P6). *Loop invariants proven.*
+- **Semantic Quorum Assurance** — Khipu BFT quorum + Wave23 conditional safety theorem (`khipu_quorum_safety_conditional`, agreement under non-equivocation). *Conditional theorem; unconditional Byzantine safety = Conjecture 2 (open).*
+- **Epistemic State Replication** — YAWAR append-only receipt bus + deterministic replay + Verifiable Semantic Rollback. *Receipts/replay live; full ESR semantics = open R&D (roadmap).*
+
+**Honest posture:** locked-proven = exactly 5 {F1, F11, F12, F18, F19}; Λ (trust score) = **Conjecture 1** (unconditional uniqueness machine-checked false; conditional uniqueness holds); Semantic Quorum Assurance safety = Wave23 **conditional** (unconditional = Conjecture 2); full Epistemic State Replication = **open R&D**.
+
+**Foundation — SZL's own prior art only (no external citation):** *The Loop Is the Product* v1/v2 ([Zenodo 19867281](https://doi.org/10.5281/zenodo.19867281), [19934129](https://doi.org/10.5281/zenodo.19934129)), *Lineage-Aware RAG / Prisca-GraphRAG v5* ([20020846](https://doi.org/10.5281/zenodo.20020846)), *Sealed Constitutional Guardrails v6* ([20020845](https://doi.org/10.5281/zenodo.20020845)), *The Lutar Omega Formalism v4* ([20020841](https://doi.org/10.5281/zenodo.20020841)), *SZL Doctrine v2 — 9 Canonical Axes* ([20174600](https://doi.org/10.5281/zenodo.20174600)) — all Stephen P. Lutar, ORCID 0009-0001-0110-4173.
+
+See [`docs/GOVERNED_POST_DETERMINISM.md`](./docs/GOVERNED_POST_DETERMINISM.md) for the full write-up.
 
 ## Research
 
@@ -371,7 +390,7 @@ If you use this software in research or production, please cite the Ouroboros Th
 
 > **NOTE:** SLSA Level 1 (source + build provenance documented). L2/L3 require Sigstore + isolated builders (roadmap).
 
-Companion repositories: [`szl-holdings/a11oy`](https://github.com/szl-holdings/a11oy) · [`szl-holdings/sentra`](https://github.com/szl-holdings/sentra) · [`szl-holdings/rosie`](https://github.com/szl-holdings/rosie) · [`szl-holdings/szl-cookbook`](https://github.com/szl-holdings/szl-cookbook)
+Companion repositories: [`szl-holdings/a11oy`](https://github.com/szl-holdings/a11oy) · [`szl-holdings/killinchu`](https://github.com/szl-holdings/killinchu) · [`szl-holdings/szl-cookbook`](https://github.com/szl-holdings/szl-cookbook)
 
 ---
 
@@ -418,23 +437,19 @@ SZL Holdings, Alloy, Sentra, Terra, Vessels, Counsel, Lyte, Pulse, Command, Carl
 
 ## Related repositories in the SZL substrate
 
-The 13 substrate repos cross-link reciprocally. This footer is maintained by GH Admin #1 (org-wide).
+The substrate repos cross-link reciprocally. Links below point only to live repositories.
 
-- [`a11oy`](https://github.com/szl-holdings/a11oy) — vertical alignment substrate (policy · measurement · knowledge · QEC-integrity)
-- [`amaru`](https://github.com/szl-holdings/amaru) — Shor-encoded receipt minting (Cardano-anchored)
-- [`rosie`](https://github.com/szl-holdings/rosie) — CSS-ingress receipt orchestration
-- [`sentra`](https://github.com/szl-holdings/sentra) — Kitaev-surface drift detection on audit fibers
+- [`a11oy`](https://github.com/szl-holdings/a11oy) — governed command platform (policy · measurement · knowledge · QEC-integrity)
+- [`killinchu`](https://github.com/szl-holdings/killinchu) — drones & vessels counter-UAS Λ-gate
 - [`uds-mesh`](https://github.com/szl-holdings/uds-mesh) — UDS span schemas + governance receipts
-- [`lutar-lean`](https://github.com/szl-holdings/lutar-lean) — Lean 4 + Mathlib v4.13.0 kernel proofs (32 GREEN modules)
+- [`lutar-lean`](https://github.com/szl-holdings/lutar-lean) — Lean 4 + Mathlib kernel proofs (5 locked theorems, kernel `c7c0ba17`)
 - [`ouroboros`](https://github.com/szl-holdings/ouroboros) — bounded-recursion runtime
-- [`ouroboros-thesis`](https://github.com/szl-holdings/ouroboros-thesis) — DOI-pinned thesis substrate (v3 → v18)
-- [`platform`](https://github.com/szl-holdings/platform) — composing monorepo (131 packages, 291 test files)
-- [`szl-brand`](https://github.com/szl-holdings/szl-brand) — anatomy + visual doctrine (PDFs hosted in-repo)
+- [`platform`](https://github.com/szl-holdings/platform) — composing monorepo
+- [`szl-brand`](https://github.com/szl-holdings/szl-brand) — visual doctrine (PDFs hosted in-repo)
 - [`szl-cookbook`](https://github.com/szl-holdings/szl-cookbook) — governed-AI recipes
-- [`agi-forecast`](https://github.com/szl-holdings/agi-forecast) — PAC-Bayes + Bekenstein governance-trajectory forecasts
 - [`vsp-otel`](https://github.com/szl-holdings/vsp-otel) — OpenTelemetry exporter for Λ-axis spans
 
-Org page: [github.com/szl-holdings](https://github.com/szl-holdings) · Doctrine v11 · 15 axioms (14 unique) · 32 GREEN modules · v18.0 DOI [`10.5281/zenodo.20434276`](https://doi.org/10.5281/zenodo.20434276)
+Org page: [github.com/szl-holdings](https://github.com/szl-holdings) · Doctrine v11 LOCKED — 749 decl / 14 axioms / 163 sorries · kernel `c7c0ba17` · Λ = Conjecture 1 · v18.0 DOI [`10.5281/zenodo.20434276`](https://doi.org/10.5281/zenodo.20434276)
 
 
 ---
@@ -443,7 +458,7 @@ Org page: [github.com/szl-holdings](https://github.com/szl-holdings) · Doctrine
 
 Doctrine v11 honest scoping:
 
-- **Not a product for external customers (yet).** `platform` is the internal composition monorepo; externally-facing products are served via dedicated repos (`a11oy`, `sentra`, etc.).
+- **Not a product for external customers (yet).** `platform` is the internal composition monorepo; externally-facing products are served via dedicated repos (`a11oy`, `killinchu`).
 - **Not microservices.** The platform is a TypeScript/Rust monorepo with a single deployment surface; it is not a distributed microservices mesh.
 - **Not replacing human authority.** All 131 packages implement enforcement of human-confirmed governance; no package overrides founder authority.
 - **Not feature-complete.** v1.0 is the Series-A baseline; the ROADMAP tracks the 30+ planned modules.
