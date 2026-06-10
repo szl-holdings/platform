@@ -15,7 +15,7 @@ Everything we've done with UDS packaging, the consensus mesh, Zarf, and Pepr. Ho
 - Pattern: Zarf airgap package -> cosign sign -> UDS bundle publish (workflows in szl-uds-deployment/.github/workflows: uds-package-release.yml, uds-bundle-publish.yml).
 
 ## PEPR (real capability, in uds-mesh/pepr/)
-- `governance-receipts-pqc.ts` — PQC-upgraded governance receipt signing: **ML-DSA-65 (FIPS 204) + HMAC-SHA-256 dual-sign transition**. STAGED-ADVISORY v0.4.0-alpha.1 (PQC dual-sign promoted in v0.5.0 sprint). DoD NSM-10 / CNSA 2.0 aligned. SLSA L1/L2 only — never L3. Pepr 1.0 compatible (pure node:crypto + @noble/post-quantum; no Pepr SDK coupling). This is the cluster-side admission capability that signs every governance receipt — pairs with Amaru (anchoring+PQC) and Rosie (receipt orchestration).
+- `governance-receipts-pqc.ts` — PQC-upgraded governance receipt signing: **ML-DSA-65 (FIPS 204) + HMAC-SHA-256 dual-sign transition**. STAGED-ADVISORY v0.4.0-alpha.1 (PQC dual-sign promoted in v0.5.0 sprint). DoD NSM-10 / CNSA 2.0 aligned. SLSA L1 honest · L2 build-attested on container images (verifiable) · L3 roadmap. Pepr 1.0 compatible (pure node:crypto + @noble/post-quantum; no Pepr SDK coupling). This is the cluster-side admission capability that signs every governance receipt — pairs with Amaru (anchoring+PQC) and Rosie (receipt orchestration).
 - uds-mesh also has `bundles/v0.3.1-demo/uds-bundle.yaml` + root `uds-bundle.yaml`.
 
 ## UDS DELIVERABLES THIS PROGRAM (reports in this payload)
@@ -34,7 +34,7 @@ Everything we've done with UDS packaging, the consensus mesh, Zarf, and Pepr. Ho
 - PATTERN-ONLY (do NOT vendor): mjnagel/uds-core (AGPL). Reference the pattern; never copy code.
 
 ## HOW FORGE CAN HELP
-1. Harden the Zarf package-sign + UDS bundle-publish pipeline (Trusted Publishing / keyless cosign; SLSA L2 build-attestation via Rekor — keep honest, no L3 claim).
+1. Harden the Zarf package-sign + UDS bundle-publish pipeline (Trusted Publishing / keyless cosign; SLSA L2 build-attested container provenance via Rekor (verifiable) — keep honest, bundle-level attestation = roadmap, L3 = roadmap).
 2. Promote the Pepr PQC dual-sign from STAGED-ADVISORY (v0.4.0-alpha.1) toward v0.5.0 honestly.
 3. Wire the live cluster cosign key (SZL_COSIGN_PRIVATE_*_PEM) so runtime DSSE receipts sign green (currently unsigned in HF Space runtime; tamper still caught via SHA3 hash-chain).
 4. Keep all UDS bundles GitHub<->HF/registry aligned; honor the non-affiliation notice + AGPL pattern-only rule.
