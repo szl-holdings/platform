@@ -108,3 +108,63 @@ Changed files are `team/` docs + `lib/db` source (not HF-served) -> no
 `SYNC_STATUS.md` entry required.
 
 -- Forge
+
+---
+
+## Forge report — Hetzner (#1 visible gap) redeployed + currency monitor added (2026-06-11)
+
+Two items from `forge-MASTER-fullchain-20260611.md` are now DONE — the #1 visible
+gap (stale Hetzner box) and the recurrence-prevention guard (#4).
+
+### #1 — a11oy.net (Hetzner box 167.233.50.75) brought current → DONE
+
+The box was serving stale code (`/opt/szl/a11oy` at `4c3426b`, missing
+`szl_allodial.py`): `a11oy.net/api/a11oy/v1/scaling/summary` and `/allodial/summary`
+were **404** while the HF Space served both **200**.
+
+- Ran the sudo-gated box rebuild `/opt/szl/szl-uds-deployment/box-scripts/a11oy-rebuild`.
+- It reset the working tree to published `origin/main` (`591df3d..94308bb`), built
+  `a11oy:local`, recreated the `a11oy` container (127.0.0.1:7861→7860), and ran the
+  curated byte-identical verify set.
+- **VERIFY SUMMARY: FRONT-DOOR=PASS APP-ENTRY=PASS LIVENESS=PASS FEEDS=PASS
+  GOVERNANCE=PASS READINESS=PASS SECDATA=PASS BOUNTIES=PASS** — running from
+  published `main@94308bb`.
+- Live confirmation (external, no `-k`):
+  `https://a11oy.net/api/a11oy/v1/scaling/summary` = **200**,
+  `https://a11oy.net/api/a11oy/v1/allodial/summary` = **200**,
+  `/console` = 200, `/healthz` = 200 (`doctrine v11`, lock `749/14/163`, `c7c0ba17`).
+
+### #4 — Hetzner currency monitor → ADDED + operational
+
+New CI workflow `a11oy/.github/workflows/hetzner-currency.yml` (commit
+`18d8cab7fc8a612e7f96822b9b3e19b89089e4b8`). Every 6h (offset from smoke-monitor)
++ dispatch, it probes a curated freshness-canary set (`/healthz`, `/console`,
+`scaling/summary`, `allodial/summary`) on **both** the HF Space and a11oy.net,
+retry-tolerant, and **WARNs** when HF serves 200 but a11oy.net does not (Hetzner
+behind `main`). Honest WARN, never a hard gate — the remedy (`a11oy-rebuild`) is
+sudo-gated on the box and cannot run from CI, so a red X would be un-actionable;
+the warning annotation + Job Summary are the signal ("trips a WARN instead of
+being discovered by hand").
+
+First operational run `27378034407` = **success**, verdict **In sync** on all 4
+canaries (HF=200 / HZ=200, gaps=0). This is exactly the gap that was previously
+found by hand.
+
+### Honest side-findings (NOT currency — runtime, logged not masked)
+
+On the now-current box, two endpoints that are 200 on HF behave differently on
+a11oy.net and were deliberately **excluded** from the currency canary set to keep
+it low-noise:
+- `/api/a11oy/v1/readiness` — hangs (>55s, curl `000`). It does slow live external
+  probing; appears to block rather than time-bound. Runtime issue, not staleness
+  (the module is baked; verify passed).
+- `/api/a11oy/v1/fleet` — **404** on a11oy.net (path/registration differs by
+  surface). Worth a follow-up to reconcile the route, but not a currency gap.
+
+These are flagged here for visibility; neither was hidden behind a green check.
+
+Doctrine preserved: locked-8 unchanged, Λ uniqueness = Conjecture 1, no
+user-visible codenames, no fabricated data. The new workflow lives in `.github/`
+of a11oy (not an HF-served runtime module) → no `SYNC_STATUS.md` entry required.
+
+— Forge
