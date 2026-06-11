@@ -1,8 +1,16 @@
 # SPDX-License-Identifier: Apache-2.0
-# Warm the flagship Spaces (5 organs + yarqa CFD-tier) so HF never sleeps them (Option A: external cron heartbeat).
-# Every 10 min: GET /healthz on each flagship. On 5xx/unreachable, open a de-duped issue.
+# Warm the flagship Spaces so HF never sleeps them (Option A: external cron heartbeat).
+# Every 10 min: probe each LIVE flagship. On non-200/unreachable, open a de-duped issue.
 # A final job POSTs a wake-receipt to a11oy so the wake itself is signed into the Khipu.
-# Doctrine v11 (749/14/163). Sign: Yachay <yachay@szlholdings.dev>.
+#
+# Roster honesty (Doctrine v11, 749/14/163):
+#   LIVE docker organs (probe /healthz): a11oy, killinchu, yarqa.
+#   LIVE static surface (no /healthz; probe served asset): anatomy (sdk: static).
+#   RETIRED — consolidated into a11oy, intentionally NOT probed (no Space exists):
+#     amaru -> a11oy Memory, sentra -> a11oy Sentinel, rosie -> a11oy Operator.
+#   hatun-mcp is governed separately and is added here only once its Space serves a
+#     200 /healthz (avoid falsely marking it 'expected live').
+# Sign: Yachay <yachay@szlholdings.dev>.
 name: warm-flagships
 on:
   schedule:
@@ -17,19 +25,27 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        organ: [amaru, a11oy, sentra, rosie, killinchu, yarqa]
+        include:
+          - organ: a11oy
+            probe: "https://szlholdings-a11oy.hf.space/healthz"
+          - organ: killinchu
+            probe: "https://szlholdings-killinchu.hf.space/healthz"
+          - organ: yarqa
+            probe: "https://szlholdings-yarqa.hf.space/healthz"
+          - organ: anatomy
+            probe: "https://szlholdings-anatomy.static.hf.space/index.html"
     steps:
-      - name: Ping flagship /healthz
+      - name: Ping flagship
         id: ping
         run: |
           set +e
-          BASE="https://szlholdings-${{ matrix.organ }}.hf.space"
-          # a11oy/amaru/sentra/killinchu namespace healthz under /api/<organ>/healthz; rosie+yarqa at /healthz
-          for path in "/healthz" "/api/${{ matrix.organ }}/healthz"; do
-            CODE=$(curl -s -o /tmp/body -w "%{http_code}" --max-time 25 "$BASE$path")
-            echo "GET $BASE$path -> $CODE"
-            if [ "$CODE" = "200" ]; then echo "ok=1" >> "$GITHUB_OUTPUT"; cat /tmp/body | head -c 400; exit 0; fi
-          done
+          CODE=$(curl -sL -o /tmp/body -w "%{http_code}" --max-time 25 "${{ matrix.probe }}")
+          echo "GET ${{ matrix.probe }} -> $CODE"
+          if [ "$CODE" = "200" ]; then
+            echo "ok=1" >> "$GITHUB_OUTPUT"
+            head -c 400 /tmp/body
+            exit 0
+          fi
           echo "ok=0" >> "$GITHUB_OUTPUT"
           echo "last_code=$CODE" >> "$GITHUB_OUTPUT"
       - name: Open de-duped issue on failure
@@ -38,12 +54,14 @@ jobs:
         with:
           script: |
             const organ = '${{ matrix.organ }}';
+            const probe = '${{ matrix.probe }}';
             const title = `flagship ${organ} unhealthy (warm-flagships)`;
             const q = `repo:${context.repo.owner}/${context.repo.repo} is:issue is:open in:title "${title}"`;
             const found = await github.rest.search.issuesAndPullRequests({ q });
-            const body = `Automated warm-flagships probe could not reach a 200 /healthz on **${organ}** ` +
-                         `(last code ${{ steps.ping.outputs.last_code }}). The Space may be down, still building, or sleeping. ` +
-                         `Check the Space build logs (and /api/${organ}/v3/kernels for kernel organs). Doctrine v11. — Yachay`;
+            const body = `Automated warm-flagships probe could not reach a 200 on **${organ}** ` +
+                         `(\`${probe}\`, last code ${{ steps.ping.outputs.last_code }}). ` +
+                         `The Space may be down, still building, or sleeping. ` +
+                         `Check the HF Space build logs. Doctrine v11. — Yachay`;
             if (found.data.total_count === 0) {
               await github.rest.issues.create({ owner: context.repo.owner, repo: context.repo.repo, title, body, labels: ['flagship','availability'] });
             }
