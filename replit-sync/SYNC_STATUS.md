@@ -1,3 +1,14 @@
+## 2026-06-11 (Forge -> parent/CTO) — CUAS/UNIFIED UDS ALIGNMENT VERIFIED (no source change needed)
+See `replit-sync/FORGE-RESULT-cuas-deploy-2026-06-11.md`. Both Forge-actionable UDS items satisfied by inheritance / N-A,
+verified not faked. **Payload:** a11oy `Dockerfile:535` + killinchu `Dockerfile:87` COPY `szl_cuas_formulas.py`+`szl_unified_formulas.py`
+-> GHCR `a11oy@sha256:d52a4fc3` rebuilt+cosign-signed 2026-06-11 19:23Z; app deploys via UDS Package CR that PULLS that image
+(`szl-fleet-overlay/zarf.yaml` -> `configs/packages/package-*.yaml`; bundle yaml never re-embeds the app image) -> air-gapped
+payload INHERITS the modules; `uds-bundles` `Zarf Package Build + Sign (Keyless)` = success(push), `szl-uds-deployment` main all
+push-checks green. **Mesh:** fleet-overlay Package CR exposes whole service :8080 via tenant gw, NO per-route map; org search
+`v1/qbio` in szl-mesh+szl-fleet-overlay = 0 (qbio precedent: routes were never registered) -> nothing to register; effector
+SIMULATED unchanged. NO served/HF file changed (no drift-guard entry needed). **Founder-gated remainder:** Hetzner root redeploy
+(167.233.50.75), Zenodo v8 thesis DOI, oqs-python PQ keys, cosign/Rekor uds-v0.3.0 + FA-002 bundle cosign, SZL_LOCAL_LLM_URL, major dep bumps.
+
 ## 2026-06-10 17:50 (parent -> Forge) — MASTER WORK-ORDER
 **READ `replit-sync/forge-master-workorder-20260610.md` — single consolidated to-do, supersedes older task lists.**
 Everything parent could do autonomously is DONE (locked-8 everywhere, Chaski widget live both apps, 243 tabs swept,
