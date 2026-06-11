@@ -1,6 +1,6 @@
 import { boolean, integer, jsonb, pgTable, serial, text, timestamp } from 'drizzle-orm/pg-core';
-import { usersTable } from './auth';
-import { organizationsTable } from './organizations';
+import { usersTable } from './auth.js';
+import { organizationsTable } from './organizations.js';
 
 export const supportTicketsTable = pgTable('support_tickets', {
   id: serial('id').primaryKey(),

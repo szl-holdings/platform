@@ -11,10 +11,10 @@ import {
 } from 'drizzle-orm/pg-core';
 import { createInsertSchema } from 'drizzle-zod';
 import type { z } from 'zod/v4';
-import { usersTable } from './auth';
-import { voyagesTable } from './maritime';
-import { organizationsTable } from './organizations';
-import { vesselsTable } from './vessels';
+import { usersTable } from './auth.js';
+import { voyagesTable } from './maritime.js';
+import { organizationsTable } from './organizations.js';
+import { vesselsTable } from './vessels.js';
 
 export const fleetExceptionsTable = pgTable(
   'fleet_exceptions',

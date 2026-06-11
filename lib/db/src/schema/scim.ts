@@ -10,8 +10,8 @@ import {
 } from 'drizzle-orm/pg-core';
 import { createInsertSchema } from 'drizzle-zod';
 import type { z } from 'zod/v4';
-import { usersTable } from './auth';
-import { azureTenantsTable } from './azure_tenants';
+import { usersTable } from './auth.js';
+import { azureTenantsTable } from './azure_tenants.js';
 
 export const scimTokensTable = pgTable('scim_tokens', {
   id: serial('id').primaryKey(),

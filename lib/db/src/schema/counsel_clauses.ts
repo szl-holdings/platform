@@ -9,7 +9,7 @@ import {
   text,
   timestamp,
 } from 'drizzle-orm/pg-core';
-import { organizationsTable } from './organizations';
+import { organizationsTable } from './organizations.js';
 
 export const counselClausesTable = pgTable(
   'counsel_clauses',

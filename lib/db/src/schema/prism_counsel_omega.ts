@@ -10,7 +10,7 @@ import {
   timestamp,
   uniqueIndex,
 } from 'drizzle-orm/pg-core';
-import { pcMattersTable } from './prism_counsel';
+import { pcMattersTable } from './prism_counsel.js';
 
 /* ─── RBAC / Roles ──────────────────────────────────────────────────────── */
 

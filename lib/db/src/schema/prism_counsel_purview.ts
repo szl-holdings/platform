@@ -8,7 +8,7 @@ import {
   text,
   timestamp,
 } from 'drizzle-orm/pg-core';
-import { pcConnectorAccountsTable, pcMattersTable } from './prism_counsel';
+import { pcConnectorAccountsTable, pcMattersTable } from './prism_counsel.js';
 
 export const pcPurviewCaseLinksTable = pgTable(
   'pc_purview_case_links',

@@ -1,5 +1,5 @@
 import { boolean, integer, jsonb, pgTable, serial, text, timestamp } from 'drizzle-orm/pg-core';
-import { usersTable } from './auth';
+import { usersTable } from './auth.js';
 
 export const pushNotificationHistoryTable = pgTable('push_notification_history', {
   id: serial('id').primaryKey(),

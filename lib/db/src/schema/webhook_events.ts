@@ -1,7 +1,7 @@
 import { integer, jsonb, pgTable, serial, text, timestamp } from 'drizzle-orm/pg-core';
 import { createInsertSchema } from 'drizzle-zod';
 import type { z } from 'zod/v4';
-import { connectorsTable } from './connectors';
+import { connectorsTable } from './connectors.js';
 
 export const webhookEventsTable = pgTable('webhook_events', {
   id: serial('id').primaryKey(),

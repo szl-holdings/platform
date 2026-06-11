@@ -13,7 +13,7 @@ import {
 import { sql } from 'drizzle-orm';
 import { createInsertSchema } from 'drizzle-zod';
 import type { z } from 'zod/v4';
-import { organizationsTable } from './organizations';
+import { organizationsTable } from './organizations.js';
 
 export const billingPlansTable = pgTable('billing_plans', {
   id: serial('id').primaryKey(),

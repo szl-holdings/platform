@@ -10,7 +10,7 @@ import {
 } from 'drizzle-orm/pg-core';
 import { createInsertSchema, createSelectSchema } from 'drizzle-zod';
 import type { z } from 'zod/v4';
-import { usersTable } from './auth';
+import { usersTable } from './auth.js';
 
 /**
  * crisis_arena_engagements — client-posted crisis scenario briefs.

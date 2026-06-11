@@ -2,8 +2,8 @@ import { index, integer, jsonb, pgTable, serial, text, timestamp } from 'drizzle
 import { sql } from 'drizzle-orm';
 import { createInsertSchema } from 'drizzle-zod';
 import type { z } from 'zod/v4';
-import { usersTable } from './auth';
-import { organizationsTable } from './organizations';
+import { usersTable } from './auth.js';
+import { organizationsTable } from './organizations.js';
 
 export const auditLogsTable = pgTable(
   'audit_logs',

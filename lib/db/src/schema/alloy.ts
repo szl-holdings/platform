@@ -11,7 +11,7 @@ import {
   timestamp,
   uniqueIndex,
 } from 'drizzle-orm/pg-core';
-import { usersTable } from './auth';
+import { usersTable } from './auth.js';
 
 // ─── Owner ────────────────────────────────────────────────────────────────────
 

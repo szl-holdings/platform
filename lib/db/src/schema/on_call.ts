@@ -30,7 +30,7 @@ import {
 } from 'drizzle-orm/pg-core';
 import { createInsertSchema } from 'drizzle-zod';
 import type { z } from 'zod/v4';
-import { usersTable } from './auth';
+import { usersTable } from './auth.js';
 
 /**
  * One row per team that has a configured rotation. Teams without a row fall

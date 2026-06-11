@@ -11,8 +11,8 @@ import {
   uniqueIndex,
 } from 'drizzle-orm/pg-core';
 import { createInsertSchema } from 'drizzle-zod';
-import { usersTable } from './auth';
-import { organizationsTable } from './organizations';
+import { usersTable } from './auth.js';
+import { organizationsTable } from './organizations.js';
 
 // ─────────────────────────────────────────────────────────────────────────────
 // TIER 1: Platform-wide defaults  (super_admin only)

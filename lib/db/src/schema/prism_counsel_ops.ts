@@ -10,7 +10,7 @@ import {
   timestamp,
 } from 'drizzle-orm/pg-core';
 import { createInsertSchema } from 'drizzle-zod';
-import { pcConnectorAccountsTable, pcMattersTable } from './prism_counsel';
+import { pcConnectorAccountsTable, pcMattersTable } from './prism_counsel.js';
 
 export const pcBackgroundJobsTable = pgTable(
   'pc_background_jobs',

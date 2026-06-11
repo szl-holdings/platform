@@ -10,7 +10,7 @@ import {
   text,
   timestamp,
 } from 'drizzle-orm/pg-core';
-import { pcMattersTable } from './prism_counsel';
+import { pcMattersTable } from './prism_counsel.js';
 
 /* ─── Insurer Pressure Snapshots ─────────────────────────────────────────── */
 

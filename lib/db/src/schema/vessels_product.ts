@@ -1,7 +1,7 @@
 import { integer, jsonb, numeric, pgTable, serial, text, timestamp } from 'drizzle-orm/pg-core';
 import { createInsertSchema } from 'drizzle-zod';
 import type { z } from 'zod/v4';
-import { organizationsTable } from './organizations';
+import { organizationsTable } from './organizations.js';
 
 export const fleetsTable = pgTable('fleets', {
   id: serial('id').primaryKey(),

@@ -14,7 +14,7 @@
  */
 
 import { index, integer, jsonb, pgTable, real, text, timestamp } from 'drizzle-orm/pg-core';
-import { GLOBAL_TENANT_SENTINEL } from './command_inbox_alert_states';
+import { GLOBAL_TENANT_SENTINEL } from './command_inbox_alert_states.js';
 
 export const commandDirectivesTable = pgTable(
   'command_directives',

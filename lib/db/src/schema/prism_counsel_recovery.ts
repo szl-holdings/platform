@@ -10,7 +10,7 @@ import {
   timestamp,
 } from 'drizzle-orm/pg-core';
 import { createInsertSchema } from 'drizzle-zod';
-import { pcMattersTable } from './prism_counsel';
+import { pcMattersTable } from './prism_counsel.js';
 
 export const pcRecoveryItemsTable = pgTable(
   'pc_recovery_items',

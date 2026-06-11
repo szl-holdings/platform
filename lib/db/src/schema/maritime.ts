@@ -10,9 +10,9 @@ import {
 } from 'drizzle-orm/pg-core';
 import { createInsertSchema } from 'drizzle-zod';
 import type { z } from 'zod/v4';
-import { usersTable } from './auth';
-import { platformSignalsTable } from './canonical';
-import { organizationsTable } from './organizations';
+import { usersTable } from './auth.js';
+import { platformSignalsTable } from './canonical.js';
+import { organizationsTable } from './organizations.js';
 
 export const portsTable = pgTable(
   'ports',

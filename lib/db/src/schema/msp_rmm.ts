@@ -8,7 +8,7 @@ import {
   text,
   timestamp,
 } from 'drizzle-orm/pg-core';
-import { mspClientsTable, mspDevicesTable, mspTicketsTable } from './msp';
+import { mspClientsTable, mspDevicesTable, mspTicketsTable } from './msp.js';
 
 export const mspRmmConnectorsTable = pgTable('msp_rmm_connectors', {
   id: serial('id').primaryKey(),

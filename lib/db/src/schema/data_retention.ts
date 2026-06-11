@@ -7,8 +7,8 @@ import {
   text,
   timestamp,
 } from 'drizzle-orm/pg-core';
-import { usersTable } from './auth';
-import { organizationsTable } from './organizations';
+import { usersTable } from './auth.js';
+import { organizationsTable } from './organizations.js';
 
 export const dataRetentionPoliciesTable = pgTable('data_retention_policies', {
   id: serial('id').primaryKey(),

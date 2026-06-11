@@ -9,7 +9,7 @@ import {
   uuid,
 } from 'drizzle-orm/pg-core';
 import { createInsertSchema } from 'drizzle-zod';
-import { usersTable } from './auth';
+import { usersTable } from './auth.js';
 
 export const reportTemplatesTable = pgTable('report_templates', {
   id: serial('id').primaryKey(),

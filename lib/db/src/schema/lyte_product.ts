@@ -10,8 +10,8 @@ import {
 } from 'drizzle-orm/pg-core';
 import { createInsertSchema } from 'drizzle-zod';
 import type { z } from 'zod/v4';
-import { usersTable } from './auth';
-import { lyteSignalsTable } from './lyte';
+import { usersTable } from './auth.js';
+import { lyteSignalsTable } from './lyte.js';
 
 export const lyteDashboardsTable = pgTable(
   'lyte_dashboards',

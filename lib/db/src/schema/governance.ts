@@ -9,7 +9,7 @@ import {
   text,
   timestamp,
 } from 'drizzle-orm/pg-core';
-import { organizationsTable } from './organizations';
+import { organizationsTable } from './organizations.js';
 
 export const alloyLegacyPoliciesTable = pgTable(
   'alloy_policies',

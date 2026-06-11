@@ -1,7 +1,7 @@
 import { boolean, index, integer, pgTable, serial, text, timestamp } from 'drizzle-orm/pg-core';
 import { createInsertSchema } from 'drizzle-zod';
 import type { z } from 'zod/v4';
-import { usersTable } from './auth';
+import { usersTable } from './auth.js';
 
 /**
  * Append-only audit log of team-page events fired from the deployments

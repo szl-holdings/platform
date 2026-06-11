@@ -11,7 +11,7 @@ import {
 import { sql } from 'drizzle-orm';
 import { createInsertSchema } from 'drizzle-zod';
 import type { z } from 'zod/v4';
-import { usersTable } from './auth';
+import { usersTable } from './auth.js';
 
 export const notificationsTable = pgTable(
   'notifications',

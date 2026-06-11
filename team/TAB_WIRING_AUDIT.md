@@ -49,7 +49,7 @@
 | Leader-Grade | `lineage` | Knowledge Lineage | — | self/static | n/a | d3-sankey · ngraph.path PROOF |
 | Leader-Grade | `mission` | Mission Health | `…/v1/formulas/selftest`, `…/v1/lambda`, `…/v1/observability/summary` | live | shared | `…/v1/formulas/selftest` not in serve.py (submodule-registered or fallback) |
 | Leader-Grade | `replay` | Reasoning Replay | `…/v1/formulas/selftest` | live+SAMPLE | shared | `…/v1/formulas/selftest` not in serve.py (submodule-registered or fallback) |
-| Frontier (3D·Live) | `deploy` | Deploy Posture | `…/v1/observability/summary` | live | shared | DEPLOY-MARKER TIMELINE · COSIGN · SLSA L1+L2 attes |
+| Frontier (3D·Live) | `deploy` | Deploy Posture | `…/v1/observability/summary` | live | shared | DEPLOY-MARKER TIMELINE · COSIGN · SLSA L1 + L2 on organ images · L3 roadmap |
 | Frontier (3D·Live) | `govatlas` | Governance Atlas | — | live+SAMPLE | n/a | d3-geo MAP · jurisdiction coverage |
 | Frontier (3D·Live) | `modelatlas` | Model Atlas | `…/v1/llm/registry` | live+SAMPLE | shared | FORCELAYOUT GALAXY · benchmark Jaccard |
 | Frontier (3D·Live) | `oversight` | AI Oversight | — | self/static | n/a | GOVERNED LOOP · NON-INTERFERENCE PROVEN (P3) |

@@ -11,7 +11,7 @@ import {
 } from 'drizzle-orm/pg-core';
 import { createInsertSchema } from 'drizzle-zod';
 import type { z } from 'zod/v4';
-import { organizationsTable } from './organizations';
+import { organizationsTable } from './organizations.js';
 
 export const internationalPaymentMethodsTable = pgTable(
   'international_payment_methods',

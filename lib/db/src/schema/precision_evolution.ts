@@ -15,8 +15,8 @@
  */
 
 import { boolean, index, integer, jsonb, numeric, pgTable, real, serial, text, timestamp } from 'drizzle-orm/pg-core';
-import { organizationsTable } from './organizations';
-import { usersTable } from './auth';
+import { organizationsTable } from './organizations.js';
+import { usersTable } from './auth.js';
 
 // ─── 1. Candidate Policies ─────────────────────────────────────────────────
 

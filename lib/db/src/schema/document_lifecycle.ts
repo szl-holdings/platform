@@ -9,8 +9,8 @@ import {
 } from 'drizzle-orm/pg-core';
 import { createInsertSchema } from 'drizzle-zod';
 import type { z } from 'zod/v4';
-import { organizationsTable } from './organizations';
-import { usersTable } from './auth';
+import { organizationsTable } from './organizations.js';
+import { usersTable } from './auth.js';
 
 export const documentLifecycleTable = pgTable(
   'document_lifecycle',

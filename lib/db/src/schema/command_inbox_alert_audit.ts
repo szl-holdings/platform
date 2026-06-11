@@ -1,7 +1,7 @@
 import { index, integer, pgTable, serial, text, timestamp } from 'drizzle-orm/pg-core';
 import { createInsertSchema } from 'drizzle-zod';
 import type { z } from 'zod/v4';
-import { GLOBAL_TENANT_SENTINEL } from './command_inbox_alert_states';
+import { GLOBAL_TENANT_SENTINEL } from './command_inbox_alert_states.js';
 
 /**
  * Immutable audit log for operator actions on Command Inbox alerts.

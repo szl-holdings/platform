@@ -8,7 +8,7 @@ import {
   timestamp,
   uniqueIndex,
 } from 'drizzle-orm/pg-core';
-import { usersTable } from './auth';
+import { usersTable } from './auth.js';
 
 export const webPushSubscriptionsTable = pgTable(
   'web_push_subscriptions',

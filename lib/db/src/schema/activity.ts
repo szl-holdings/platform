@@ -1,7 +1,7 @@
 import { integer, jsonb, pgTable, real, serial, text, timestamp } from 'drizzle-orm/pg-core';
 import { createInsertSchema } from 'drizzle-zod';
 import type { z } from 'zod/v4';
-import { usersTable } from './auth';
+import { usersTable } from './auth.js';
 
 export const activityLogTable = pgTable('activity_log', {
   id: serial('id').primaryKey(),

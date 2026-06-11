@@ -8,7 +8,7 @@ import {
 } from 'drizzle-orm/pg-core';
 import { createInsertSchema } from 'drizzle-zod';
 import type { z } from 'zod/v4';
-import { usersTable } from './auth';
+import { usersTable } from './auth.js';
 
 export const pushTokensTable = pgTable('push_tokens', {
   id: serial('id').primaryKey(),

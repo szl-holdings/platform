@@ -10,7 +10,7 @@ import {
   timestamp,
   uuid,
 } from 'drizzle-orm/pg-core';
-import { entitiesTable } from './entities';
+import { entitiesTable } from './entities.js';
 
 export const traceStatusEnum = pgEnum('trace_status', [
   'running',
