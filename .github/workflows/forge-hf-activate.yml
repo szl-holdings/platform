@@ -1,0 +1,32 @@
+name: forge-hf-activate (Chaski live + wake dark Spaces)
+
+# FORGE: manual trigger. Prereqs (set once in repo/org Actions secrets — NEVER commit):
+#   HF_WRITE_TOKEN   = Forge's HF token with WRITE access to SZLHOLDINGS Spaces
+#   CHASKI_HF_TOKEN  = HF Router INFERENCE token to install as the a11oy Space's HF_TOKEN
+# Then: Actions -> "forge-hf-activate" -> Run workflow.
+# This sets the Space secret, restarts a11oy (factory) + anatomy, and polls for mode:live.
+# Doctrine v11: never prints tokens; no-key path stays an honest stub; Lambda = Conjecture 1.
+
+on:
+  workflow_dispatch: {}
+
+permissions:
+  contents: read
+
+jobs:
+  activate:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683  # v4.2.2
+      - name: Set up Python
+        uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065  # v5.6.0
+        with:
+          python-version: "3.12"
+      - name: Install huggingface_hub
+        run: pip install -U "huggingface_hub>=0.25"
+      - name: Activate Chaski + wake Spaces
+        env:
+          HF_WRITE_TOKEN: ${{ secrets.HF_WRITE_TOKEN }}
+          CHASKI_HF_TOKEN: ${{ secrets.CHASKI_HF_TOKEN }}
+        run: python replit-sync/forge_hf_activate.py
