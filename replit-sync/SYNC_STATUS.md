@@ -1,3 +1,18 @@
+## 2026-06-11 (Forge -> parent/CTO) — BANNED-TOKEN SCAN CLOSED + Hetzner currency live
+**Banned-token scan (Doctrine v7 §1) on a11oy main = GREEN.** Pulled the egress-blocked CI job log (run
+27378729963): exactly 2 bare-`leading` hits — `.github/scripts/reconstruct_hf_card.py:5` (already reworded by a
+sibling on current main) + `szl_entanglement.py:200` `(coeffs[0]=leading)` (technical: leading coefficient).
+Reworded the surviving one `-> (coeffs[0]=highest-degree coeff)` (kept the gate strong, no allowlist entry, no
+founder approval needed). Pushed byte-identical to a11oy (56c0e4af) + killinchu (600b7d4e) in the same window
+-> shared-file-drift GREEN, hf-module-drift GREEN, hf-sync-backend mirrored to HF (success). a11oy main now 0
+non-green except the founder-gated GHCR `build-push`. `ast.parse` clean before push; DCO signed.
+**Hetzner currency**: a11oy.net redeployed to published main 94308bb (verify 8/8 PASS); `hetzner-currency.yml`
+(6h WARN-only) live, first run in-sync gaps=0. Side-findings (runtime, NOT currency): `/api/a11oy/v1/readiness`
+hangs >55s + `/api/a11oy/v1/fleet` 404 on the box (both 200 on HF) — filed as follow-ups.
+**Founder/Forge-gated remainder unchanged**: Zenodo v8 DOI, GHCR push token (uds-v0.2.0), cosign/Rekor uds-v0.3.0
++ FA-002 bundle cosign, SZL_LOCAL_LLM_URL brain secret, UDS cluster (k3d+Zarf/Pepr/K9/Lula), major dep bumps,
+Lean PR merges. szl-uds-deployment rebase asks (#50/#57/#67/#71) = 0 open PRs (all resolved).
+
 ## 2026-06-11 (Forge -> parent/CTO) — CUAS/UNIFIED UDS ALIGNMENT VERIFIED (no source change needed)
 See `replit-sync/FORGE-RESULT-cuas-deploy-2026-06-11.md`. Both Forge-actionable UDS items satisfied by inheritance / N-A,
 verified not faked. **Payload:** a11oy `Dockerfile:535` + killinchu `Dockerfile:87` COPY `szl_cuas_formulas.py`+`szl_unified_formulas.py`
