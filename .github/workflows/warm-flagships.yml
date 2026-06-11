@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: Apache-2.0
-# Warm the 5 flagship Spaces so HF never sleeps them (Option A: external cron heartbeat).
+# Warm the flagship Spaces (5 organs + yarqa CFD-tier) so HF never sleeps them (Option A: external cron heartbeat).
 # Every 10 min: GET /healthz on each flagship. On 5xx/unreachable, open a de-duped issue.
 # A final job POSTs a wake-receipt to a11oy so the wake itself is signed into the Khipu.
 # Doctrine v11 (749/14/163). Sign: Yachay <yachay@szlholdings.dev>.
@@ -17,14 +17,14 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        organ: [amaru, a11oy, sentra, rosie, killinchu]
+        organ: [amaru, a11oy, sentra, rosie, killinchu, yarqa]
     steps:
       - name: Ping flagship /healthz
         id: ping
         run: |
           set +e
           BASE="https://szlholdings-${{ matrix.organ }}.hf.space"
-          # a11oy/amaru/sentra/killinchu namespace healthz under /api/<organ>/healthz; rosie at /healthz
+          # a11oy/amaru/sentra/killinchu namespace healthz under /api/<organ>/healthz; rosie+yarqa at /healthz
           for path in "/healthz" "/api/${{ matrix.organ }}/healthz"; do
             CODE=$(curl -s -o /tmp/body -w "%{http_code}" --max-time 25 "$BASE$path")
             echo "GET $BASE$path -> $CODE"
@@ -42,8 +42,8 @@ jobs:
             const q = `repo:${context.repo.owner}/${context.repo.repo} is:issue is:open in:title "${title}"`;
             const found = await github.rest.search.issuesAndPullRequests({ q });
             const body = `Automated warm-flagships probe could not reach a 200 /healthz on **${organ}** ` +
-                         `(last code ${{ steps.ping.outputs.last_code }}). Kernels may have stopped emitting heartbeats. ` +
-                         `Check the Space logs and /api/${organ}/v3/kernels. Doctrine v11. — Yachay`;
+                         `(last code ${{ steps.ping.outputs.last_code }}). The Space may be down, still building, or sleeping. ` +
+                         `Check the Space build logs (and /api/${organ}/v3/kernels for kernel organs). Doctrine v11. — Yachay`;
             if (found.data.total_count === 0) {
               await github.rest.issues.create({ owner: context.repo.owner, repo: context.repo.repo, title, body, labels: ['flagship','availability'] });
             }
