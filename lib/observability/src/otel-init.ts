@@ -1,5 +1,5 @@
 /**
- * SZL Holdings — TypeScript OpenTelemetry SDK bootstrap
+ * SZL Holdings — TypeScript OpenTelemetry SDK bootstrap (OpenTelemetry JS 2.x)
  *
  * Usage: import this module as the FIRST statement in your service entrypoint.
  *   import "./otel-init.js"; // must run before any other import
@@ -10,36 +10,47 @@
  * Environment variables expected (see .env.example):
  *   OTEL_SERVICE_NAME       — required; matches package.json "name"
  *   OTEL_SERVICE_VERSION    — required; matches package.json "version"
- *   OTEL_EXPORTER_OTLP_ENDPOINT — defaults to http://localhost:4317 in dev
+ *   OTEL_EXPORTER_OTLP_ENDPOINT — defaults to http://localhost:4318 in dev
  *   DEPLOYMENT_ENV          — development | staging | production
  *   OTEL_TRACES_SAMPLER     — parentbased_traceidratio (default), always_on, always_off
  *   OTEL_TRACES_SAMPLER_ARG — sampling ratio (0.0–1.0); default 1.0 in dev, 0.1 in prod
  */
 
+import type { IncomingMessage } from "node:http";
 import { NodeSDK } from "@opentelemetry/sdk-node";
-import { OTLPTraceExporter } from "@opentelemetry/exporter-trace-otlp-grpc";
-import { OTLPMetricExporter } from "@opentelemetry/exporter-metrics-otlp-grpc";
-import { OTLPLogExporter } from "@opentelemetry/exporter-logs-otlp-grpc";
+import { OTLPTraceExporter } from "@opentelemetry/exporter-trace-otlp-http";
+import { OTLPMetricExporter } from "@opentelemetry/exporter-metrics-otlp-http";
+import { OTLPLogExporter } from "@opentelemetry/exporter-logs-otlp-http";
 import {
   PeriodicExportingMetricReader,
   ConsoleMetricExporter,
 } from "@opentelemetry/sdk-metrics";
 import { BatchLogRecordProcessor } from "@opentelemetry/sdk-logs";
-import { Resource } from "@opentelemetry/resources";
 import {
-  SEMRESATTRS_SERVICE_NAME,
-  SEMRESATTRS_SERVICE_VERSION,
-  SEMRESATTRS_DEPLOYMENT_ENVIRONMENT,
+  defaultResource,
+  resourceFromAttributes,
+} from "@opentelemetry/resources";
+import {
+  ATTR_SERVICE_NAME,
+  ATTR_SERVICE_VERSION,
 } from "@opentelemetry/semantic-conventions";
 import { getNodeAutoInstrumentations } from "@opentelemetry/auto-instrumentations-node";
-import { W3CTraceContextPropagator, CompositePropagator, W3CBaggagePropagator } from "@opentelemetry/core";
-import { ParentBasedSampler, TraceIdRatioBasedSampler } from "@opentelemetry/sdk-trace-base";
+import {
+  W3CTraceContextPropagator,
+  CompositePropagator,
+  W3CBaggagePropagator,
+} from "@opentelemetry/core";
+import {
+  ParentBasedSampler,
+  TraceIdRatioBasedSampler,
+} from "@opentelemetry/sdk-trace-base";
 
 const serviceName = process.env.OTEL_SERVICE_NAME ?? "szl-unknown-service";
 const serviceVersion = process.env.OTEL_SERVICE_VERSION ?? "0.0.0";
 const deploymentEnv = process.env.DEPLOYMENT_ENV ?? "development";
+// OTLP/HTTP default port is 4318 (gRPC is 4317).
 const otlpEndpoint =
-  process.env.OTEL_EXPORTER_OTLP_ENDPOINT ?? "http://localhost:4317";
+  process.env.OTEL_EXPORTER_OTLP_ENDPOINT ?? "http://localhost:4318";
 
 // Sampling: 100% in dev/staging, 10% in production (configurable)
 const samplerArg =
@@ -49,16 +60,19 @@ const samplerArg =
       ? 0.1
       : 1.0;
 
-const resource = Resource.default().merge(
-  new Resource({
-    [SEMRESATTRS_SERVICE_NAME]: serviceName,
-    [SEMRESATTRS_SERVICE_VERSION]: serviceVersion,
-    [SEMRESATTRS_DEPLOYMENT_ENVIRONMENT]: deploymentEnv,
+// OTel JS 2.x: Resource is constructed via factory functions, not `new Resource()`.
+const resource = defaultResource().merge(
+  resourceFromAttributes({
+    [ATTR_SERVICE_NAME]: serviceName,
+    [ATTR_SERVICE_VERSION]: serviceVersion,
+    "deployment.environment.name": deploymentEnv,
     "szl.platform": "szl-holdings",
-  })
+  }),
 );
 
-const traceExporter = new OTLPTraceExporter({ url: `${otlpEndpoint}/v1/traces` });
+const traceExporter = new OTLPTraceExporter({
+  url: `${otlpEndpoint}/v1/traces`,
+});
 
 const metricExporter =
   deploymentEnv === "development"
@@ -77,12 +91,12 @@ const sdk = new NodeSDK({
     exporter: metricExporter,
     exportIntervalMillis: 30_000,
   }),
-  logRecordProcessor: new BatchLogRecordProcessor(logExporter),
+  logRecordProcessors: [new BatchLogRecordProcessor(logExporter)],
   instrumentations: [
     getNodeAutoInstrumentations({
       "@opentelemetry/instrumentation-http": {
         // Suppress health probe noise
-        ignoreIncomingRequestHook: (req) => {
+        ignoreIncomingRequestHook: (req: IncomingMessage) => {
           const url = req.url ?? "";
           return url === "/health" || url === "/ready" || url === "/metrics";
         },
@@ -90,12 +104,14 @@ const sdk = new NodeSDK({
       "@opentelemetry/instrumentation-express": { enabled: true },
       "@opentelemetry/instrumentation-pg": { enabled: true },
       "@opentelemetry/instrumentation-ioredis": { enabled: true },
-      "@opentelemetry/instrumentation-fetch": { enabled: true },
       "@opentelemetry/instrumentation-fs": { enabled: false }, // too noisy
     }),
   ],
   textMapPropagator: new CompositePropagator({
-    propagators: [new W3CTraceContextPropagator(), new W3CBaggagePropagator()],
+    propagators: [
+      new W3CTraceContextPropagator(),
+      new W3CBaggagePropagator(),
+    ],
   }),
 });
 
