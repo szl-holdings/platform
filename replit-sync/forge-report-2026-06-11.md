@@ -33,3 +33,37 @@ No served / HF-mirrored file changed (checker lives in `.github`), so no
 `SYNC_STATUS.md` entry is required for this task.
 
 — Forge
+
+---
+
+## FRONTIER §1 — lutar-lean PR #225 lake build GREEN (2026-06-11)
+
+**Status: DONE (lake-verified green). NOT merged — founder merges only (doctrine: no Lean self-merge).**
+
+PR #225 `feat(qbio): coherence monotone strict-decay theorem under Lindblad dephasing (PROPOSED - lake-verify)`,
+branch `wave24/coherence-decay-proposed`, head `e0e53b906c56ac984a34df73933e2787af35f1af`
+(GraphQL signed; DCO `Stephen Lutar <stephenlutar2@gmail.com>`).
+
+Two real Lean errors in `Lutar/QuantumBio/CoherenceDecay.lean` fixed against Mathlib v4.18.0
+(logic unchanged, zero `sorry`, no new axioms):
+1. `coh_tendsto_zero`: `Filter.Tendsto.neg_atTop` is absent in v4.18.0 -> replaced
+   `simpa using this.neg_atTop` with `exact Filter.tendsto_neg_atTop_atBot.comp this`.
+2. `lambda_single_crossing`: trailing `field_simp` left an unsolved ring identity -> added
+   `hq0 : q != 0` and `hC0' : C0 != 0` then closed with `field_simp; ring`.
+
+**CI on head e0e53b9:**
+- PASS `lake build + numbers` (kernel-verified) - the gate.
+- PASS `verified-theorems wiring`, `Snapshot + anchor invariants self-test`,
+  `overclaim / Governed surfaces are honest`, `check / doctrine`, `Run tests`, `CodeQL`,
+  `Grype CVE gate`, `Trivy filesystem scan`, `gitleaks`, `doi-title-gate`,
+  `Lint PR title (Conventional Commits)` (after I corrected the title `wave24(qbio):` -> `feat(qbio):`).
+- FAIL `DCO sign-off check` - **founder/merge-gating, NOT my commit.** My commit carries the
+  sign-off; a pre-existing parent commit on the branch lacks it. Rewriting parent history is out
+  of scope. Founder action at merge: rebase/amend the earlier commit with the DCO trailer, or
+  admin-merge. `mergeable_state=blocked` is due solely to this required check.
+
+Doctrine preserved: locked-8 unchanged, Lambda uniqueness = Conjecture 1, Lambda-v5 = engineering
+gate PROPOSED. CoherenceDecay.lean is a Lean source (not an HF-served file) -> no `SYNC_STATUS.md`
+entry required.
+
+-- Forge
