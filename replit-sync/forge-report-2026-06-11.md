@@ -36,3 +36,44 @@
 - No token values are included in this report or in any logs.
 - Both the public HF Space and the public box site (a11oy.net) now run Chaski
   in generative mode via the HF inference router.
+
+---
+
+## Addendum (23:50Z) — Box catch-up: entangle + neuroplasticity now live on a11oy.net ✅
+
+**Instruction:** `forge-MASTER-zoomout-20260611-pm.md` gap #1 — "a11oy.net behind HF (entangle/neuro 404)."
+**Operator:** Forge (Replit task agent)
+
+### Finding (ground-truth, verified live)
+The box `a11oy:local` container (built 21:08Z; last rebuild log `…205446-allodial`)
+predated the entanglement + neuroplasticity modules landing in `a11oy@main`:
+- box `localhost:7861` `entangle/summary` → **404**, `neuro/summary` → **404**
+  (scaling / allodial / qbio / router already 200).
+- HF Space served all of them 200. → real drift, box-only.
+
+### Action
+Ran `/opt/szl/szl-uds-deployment/box-scripts/a11oy-rebuild` (resets the box build tree to
+published `origin/main`, rebuilds the image, recreates the container, injects
+`/etc/szl-contracting.env`). Build pinned to `origin/main = 45dac33`. Confirmed both modules
+are COPY'd in the Dockerfile and `register()`'d in `serve.py` on main before rebuilding.
+The script's own front-door VERIFY passed (console.html md5 matches main).
+
+### Verify — three-surface parity (probed from OUTSIDE the box)
+| path | a11oy.net (box) | HF Space |
+|---|---|---|
+| entangle/summary | **200** (was 404) | 200 |
+| neuro/summary | **200** (was 404) | 200 |
+| scaling/summary | 200 | 200 |
+| code/summary | 404 | 404 (parity — the code engine exposes no `/summary` sub-route; not a gap) |
+| /healthz | `commit=c7c0ba17 doctrine=v11 lock=749/14/163` | identical |
+
+All three surfaces (box localhost, HF, public a11oy.net) now serve byte-identical
+`commit c7c0ba17`. **Gap #1 CLOSED & verified.**
+
+### Honesty / invariants
+- Doctrine-count-agnostic action: the rebuild deploys exactly what the team already published
+  to `a11oy@main`; no honesty claims authored, no proofs fabricated.
+- The strict-tier llama.cpp compile is honestly skipped on the constrained box builder
+  (`A11OY_REQUIRE_LOCAL_LLM!=1` → tower-side label, `served_locally=False`, never fake output);
+  the GHCR-published image compiles + boot-verifies real local output.
+- No token values in this report or any logs.
