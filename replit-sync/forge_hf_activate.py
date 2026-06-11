@@ -13,7 +13,8 @@ WHAT IT DOES (idempotent):
      includes PR #308 (runtime token resolution) — without that the orchestrator
      stays stub even with the token.
   3. Restarts the anatomy Space (currently 404 dark) to wake it.
-  4. Polls /api/a11oy/v1/code/health until mode == "live", or reports honestly.
+  4. Polls /api/a11oy/v1/code/health until the brain is live (inference hf-router,
+     mode generative/live), or reports honestly.
 
 SECRETS THIS SCRIPT READS FROM THE ENVIRONMENT (set as Actions secrets,
 NEVER hard-code, NEVER print):
@@ -77,7 +78,8 @@ def main() -> int:
     except Exception as e:  # noqa: BLE001
         print(f"      anatomy restart skipped/failed (non-fatal): {e!r}")
 
-    print("[4/4] polling Chaski health for mode:live (up to ~8 min for rebuild) ...")
+    print("[4/4] polling Chaski health for live brain "
+          "(inference:hf-router, mode generative/live; up to ~8 min for rebuild) ...")
     deadline = time.time() + 8 * 60
     last = None
     while time.time() < deadline:
@@ -86,8 +88,8 @@ def main() -> int:
                 d = json.loads(r.read().decode("utf-8", "replace"))
             last = (d.get("mode"), d.get("inference"))
             print(f"      mode={last[0]} inference={last[1]}")
-            if last[0] == "live":
-                print("CHASKI IS LIVE -- mode:live, brain wired. "
+            if last[1] == "hf-router" and last[0] in ("live", "generative"):
+                print(f"CHASKI IS LIVE -- mode:{last[0]} inference:hf-router, brain wired. "
                       "Run one coding turn to confirm a real model answer + signed receipt.")
                 return 0
         except Exception as e:  # noqa: BLE001
@@ -96,7 +98,8 @@ def main() -> int:
 
     print(f"Secret set + restarts requested, but health still shows {last} after timeout. "
           f"Honest status: NOT yet live -- check the a11oy Space build logs on HF. "
-          f"Do NOT claim live until /code/health reports mode:live.")
+          f"Do NOT claim live until /code/health reports inference:hf-router "
+          f"with mode generative or live.")
     return 1
 
 
