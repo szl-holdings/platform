@@ -67,3 +67,44 @@ gate PROPOSED. CoherenceDecay.lean is a Lean source (not an HF-served file) -> n
 entry required.
 
 -- Forge
+
+---
+
+## Forge report — platform 2 RED CI checks on main -> BOTH GREEN (2026-06-11)
+
+Fixed the two failing required checks on `platform` main. Root-cause fixes, no
+gate weakened, no bandaid. Commit `8e15a1d3` (GraphQL signed; DCO
+`Stephen Lutar <stephenlutar2@gmail.com>`).
+
+**1. Doctrine (was RED) -> GREEN.**
+- Root cause: the sole `::error::` was Invariant 3 (no bare SLSA L2 without
+  evidence/roadmap). Log header showed `repo=platform verified_L2=0`, so the
+  "SLSA L1+L2" banner exemption (a11oy/killinchu only) does NOT apply to platform.
+  The offending line was a cell in my own `team/TAB_WIRING_AUDIT.md`.
+- Fix: scoped the cell to `SLSA L1 + L2 on organ images - L3 roadmap` (both
+  "L2 on organ images" and "roadmap" are the Inv3 evidence-gate exemptions).
+  Reproduced the full Inv3 grep locally -> no violations remain.
+
+**2. Tests / Unit tests (vitest) (was RED) -> GREEN.**
+- Root cause: 133 `TS2835` errors. `@workspace/alloy-ingestion-orchestrator`
+  (`tsc -p tsconfig.json`, `moduleResolution: nodenext`) type-checks
+  `../../lib/db/src/schema/*.ts`, where 134 relative imports across 90 files were
+  extensionless. nodenext requires explicit `.js`. `lib/db/src/schema/index.ts`
+  already uses `.js` -> the 90 files had drifted off-convention.
+- Fix: appended `.js` to all 134 extensionless relative imports across the 90
+  schema files (convention-matching, not a gate change).
+- Verified with the REAL CI command (`pnpm --filter
+  @workspace/alloy-ingestion-orchestrator run build`), before/after via git stash:
+  `TS2835` 133 -> 0, total `error TS` 133 -> 0, zero new errors. Confirmed again in
+  the actual CI Tests run log (0 TS2835 / 0 error TS).
+
+**CI confirmation:** my commit's first Tests run was concurrency-cancelled
+(`cancel-in-progress`) ~2.5 min in by sibling push `d09251cb` (a `replit-sync/`
+doc) -- NOT a failure. My fixes are intact on `d09251cb` (it touched none of my
+files). On the live tip `d09251cb`: **Doctrine = success, Tests = success.**
+
+Doctrine preserved: locked-8 unchanged, Lambda uniqueness = Conjecture 1.
+Changed files are `team/` docs + `lib/db` source (not HF-served) -> no
+`SYNC_STATUS.md` entry required.
+
+-- Forge
