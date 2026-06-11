@@ -8,8 +8,7 @@
 #   LIVE static surface (no /healthz; probe served asset): anatomy (sdk: static).
 #   RETIRED — consolidated into a11oy, intentionally NOT probed (no Space exists):
 #     amaru -> a11oy Memory, sentra -> a11oy Sentinel, rosie -> a11oy Operator.
-#   hatun-mcp is governed separately and is added here only once its Space serves a
-#     200 /healthz (avoid falsely marking it 'expected live').
+#   hatun-mcp (the great context MCP gateway): LIVE docker Space (probe /healthz).
 # Sign: Yachay <yachay@szlholdings.dev>.
 name: warm-flagships
 on:
@@ -32,6 +31,8 @@ jobs:
             probe: "https://szlholdings-killinchu.hf.space/healthz"
           - organ: yarqa
             probe: "https://szlholdings-yarqa.hf.space/healthz"
+          - organ: hatun-mcp
+            probe: "https://szlholdings-hatun-mcp.hf.space/healthz"
           - organ: anatomy
             probe: "https://szlholdings-anatomy.static.hf.space/index.html"
     steps:
