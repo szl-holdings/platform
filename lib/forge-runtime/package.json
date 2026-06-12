@@ -26,7 +26,7 @@
     "@szl-holdings/prism-bus": "workspace:*",
     "@szl-holdings/services": "workspace:*",
     "drizzle-orm": "catalog:",
-    "esbuild": "^0.25",
+    "esbuild": "^0.28",
     "pino": "^9",
     "pino-pretty": "^13"
   },
