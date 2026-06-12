@@ -57,3 +57,8 @@
   - The upgraded probe reports per-vertical live/stale/unavailable counts. If you
 - Reachability snapshot: https://a11oy.net/healthz -> 200
 - NOTE: no Forge agent endpoint configured (FORGE_AGENT_URL / FORGE_DISPATCH_CMD) — actionable items are reported + the founder is pinged; wire the endpoint to make execution fully hands-off.
+
+## Auto-loop pass — order `b0ad74a4` — 2026-06-12T19:02:25Z
+
+- Order is **idle / no-action sentinel** — handshake confirmed, nothing to execute.
+- Reachability snapshot: https://a11oy.net/healthz -> 200
