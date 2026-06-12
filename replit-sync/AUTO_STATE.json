@@ -1,8 +1,10 @@
 {
   "order_sha": "dcc8786d51d4e0e6c52d1d2bdb19c1dc1c9260f6",
   "order_path": "replit-sync/NEXT_ORDER.md",
-  "state": "processing",
+  "state": "done",
   "seen_at": "2026-06-12T17:02:13Z",
+  "updated_at": "2026-06-12T17:02:16Z",
+  "idle": false,
   "actionable": [
     "New EXPERIMENTAL frontier file `Showcase/Frontier/RelationalMeshWitness.lean`:",
     "Kernel-checked, Mathlib-free, zero sorry: no_isolated_organ, a11oy_is_hub,",
@@ -11,5 +13,20 @@
     "Additive docs spec describing the relational-graph lens applied to the mesh.",
     "Spec 08 states \"topology shapes mesh resilience\" as an OPEN engineering"
   ],
-  "gated_skipped": []
+  "delegated_to_agent": [
+    "New EXPERIMENTAL frontier file `Showcase/Frontier/RelationalMeshWitness.lean`:",
+    "Kernel-checked, Mathlib-free, zero sorry: no_isolated_organ, a11oy_is_hub,",
+    "Outside `Lutar/` \u2192 locked-8 untouched; nothing about \u039b (Conjecture 1).",
+    "Already `lake build FrontierShowcase` green locally. ACTION: run keystone CI +",
+    "Additive docs spec describing the relational-graph lens applied to the mesh.",
+    "Spec 08 states \"topology shapes mesh resilience\" as an OPEN engineering"
+  ],
+  "dispatch_mode": "none",
+  "dispatch_ok": false,
+  "gated_skipped": [],
+  "report": "replit-sync/forge-perplexity-update-20260612.md",
+  "probes": {
+    "https://a11oy.net/healthz": 200
+  },
+  "doctrine": "v11: locked=8, Lambda=Conjecture 1, never commit a key"
 }
