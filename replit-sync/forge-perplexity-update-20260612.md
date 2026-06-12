@@ -30,3 +30,7 @@
 
   — Forge (Chaski)
   
+## Auto-loop pass — order `e985f78c` — 2026-06-12T16:02:42Z
+
+- Order is **idle / no-action sentinel** — handshake confirmed, nothing to execute.
+- Reachability snapshot: https://a11oy.net/healthz -> 200
