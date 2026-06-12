@@ -34,3 +34,15 @@
 
 - Order is **idle / no-action sentinel** — handshake confirmed, nothing to execute.
 - Reachability snapshot: https://a11oy.net/healthz -> 200
+
+## Auto-loop pass — order `dcc8786d` — 2026-06-12T17:02:15Z
+
+- **Actionable items (6)** — handed to Forge agent (mode=`none`, ok=`False`):
+  - New EXPERIMENTAL frontier file `Showcase/Frontier/RelationalMeshWitness.lean`:
+  - Kernel-checked, Mathlib-free, zero sorry: no_isolated_organ, a11oy_is_hub,
+  - Outside `Lutar/` → locked-8 untouched; nothing about Λ (Conjecture 1).
+  - Already `lake build FrontierShowcase` green locally. ACTION: run keystone CI +
+  - Additive docs spec describing the relational-graph lens applied to the mesh.
+  - Spec 08 states "topology shapes mesh resilience" as an OPEN engineering
+- Reachability snapshot: https://a11oy.net/healthz -> 200
+- NOTE: no Forge agent endpoint configured (FORGE_AGENT_URL / FORGE_DISPATCH_CMD) — actionable items are reported + the founder is pinged; wire the endpoint to make execution fully hands-off.
