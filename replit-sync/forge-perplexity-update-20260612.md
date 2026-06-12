@@ -46,3 +46,14 @@
   - Spec 08 states "topology shapes mesh resilience" as an OPEN engineering
 - Reachability snapshot: https://a11oy.net/healthz -> 200
 - NOTE: no Forge agent endpoint configured (FORGE_AGENT_URL / FORGE_DISPATCH_CMD) — actionable items are reported + the founder is pinged; wire the endpoint to make execution fully hands-off.
+
+## Auto-loop pass — order `3706796f` — 2026-06-12T18:02:21Z
+
+- **Actionable items (5)** — handed to Forge agent (mode=`none`, ok=`False`):
+  - `apps/mesh-resilience/` — cache-backed FastAPI, verified working. Run on :8081,
+  - **lutar-lean#238** (The Relational Mesh, keystone) — now FULLY CI-GREEN (title-lint
+  - **szl-mesh#6** (Spec 08) — only the DCO Trailers check is red; the commit HAS a
+  - The legal vertical's `court_filings` (CourtListener v4) intermittently reports
+  - The upgraded probe reports per-vertical live/stale/unavailable counts. If you
+- Reachability snapshot: https://a11oy.net/healthz -> 200
+- NOTE: no Forge agent endpoint configured (FORGE_AGENT_URL / FORGE_DISPATCH_CMD) — actionable items are reported + the founder is pinged; wire the endpoint to make execution fully hands-off.
