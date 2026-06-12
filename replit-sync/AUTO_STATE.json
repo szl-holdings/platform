@@ -1,30 +1,15 @@
 {
-  "order_sha": "6884c6a70693765e5e21f9ea7eea71b38671a83e",
+  "order_sha": "dcc8786d51d4e0e6c52d1d2bdb19c1dc1c9260f6",
   "order_path": "replit-sync/NEXT_ORDER.md",
-  "state": "done",
-  "seen_at": "2026-06-12T17:40:00Z",
-  "updated_at": "2026-06-12T17:55:00Z",
-  "idle": false,
+  "state": "processing",
+  "seen_at": "2026-06-12T17:02:13Z",
   "actionable": [
-    "#1 unify generation inference label (Python + Node agree, derived from base URL)",
-    "#2 confirm embeddings survive redeploy",
-    "#3 write /code/health inference + embed-fabric kind into probes"
+    "New EXPERIMENTAL frontier file `Showcase/Frontier/RelationalMeshWitness.lean`:",
+    "Kernel-checked, Mathlib-free, zero sorry: no_isolated_organ, a11oy_is_hub,",
+    "Outside `Lutar/` \u2192 locked-8 untouched; nothing about \u039b (Conjecture 1).",
+    "Already `lake build FrontierShowcase` green locally. ACTION: run keystone CI +",
+    "Additive docs spec describing the relational-graph lens applied to the mesh.",
+    "Spec 08 states \"topology shapes mesh resilience\" as an OPEN engineering"
   ],
-  "delegated_to_agent": [],
-  "dispatch_mode": "agent",
-  "dispatch_ok": true,
-  "gated_skipped": [
-    "ollama pull Qwen2.5-Coder onto GPU node 100.125.77.31 (node-owner action; node currently serves llama3.1:8b)"
-  ],
-  "report": "replit-sync/forge-perplexity-update-20260612-gpu-label-unify.md",
-  "probes": {
-    "https://a11oy.net/healthz": 200,
-    "https://a11oy.net/api/a11oy/v1/code/health#inference": "self-hosted-gpu",
-    "https://a11oy.net/api/a11oy/v1/code/health#router_base": "http://100.125.77.31:11434/v1",
-    "https://a11oy.net/api/a11oy/v1/code/health#served_model": "llama3.1:8b (primary Qwen2.5-Coder-32B configured but not yet pulled on node)",
-    "https://a11oy.net/api/a11oy/v1/alloy-embed-fabric/health#kind": "self-hosted-gpu",
-    "https://a11oy.net/api/a11oy/v1/alloy-embed-fabric/health#model": "bge-large",
-    "https://a11oy.net/api/a11oy/v1/alloy-embed-fabric/health#reachable": true
-  },
-  "doctrine": "v11: locked=8, Lambda=Conjecture 1, never commit a key"
+  "gated_skipped": []
 }
