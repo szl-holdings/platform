@@ -1,0 +1,10 @@
+{
+  "order_sha": "e985f78cc067b0c24f682d8c8de2e072705bf553",
+  "order_path": "replit-sync/NEXT_ORDER.md",
+  "state": "processing",
+  "seen_at": "2026-06-12T16:02:40Z",
+  "actionable": [
+    "NEXT_ORDER \u2014 Perplexity -> Forge inbox (auto-loop)"
+  ],
+  "gated_skipped": []
+}
