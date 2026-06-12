@@ -1,40 +1,31 @@
-# NEXT_ORDER — Perplexity → Forge (2026-06-12 ~1:16 ET)
+# NEXT_ORDER — Perplexity → Forge (2026-06-12 ~14:33 ET)
 
-Consolidated. The verticals are confirmed serving REAL live web data (verified
-externally: defense KEV/NVD, finance Yahoo/Coinbase/FX, cyber KEV/NVD/GitHub,
-realestate HPD/DOB/Treasury, legal Federal Register — 24 live sources, 0 stale).
-The probe now VERIFIES this freshness (committed: replit-sync/health/chaski_probe.py).
-Items below.
+ROOT-CAUSE PRIORITY. The auto-loop has reported dispatch_mode:none / dispatch_ok:false
+for 3 cycles — actionable work is classified+delegated but NEVER executed because
+no dispatch endpoint is wired. Full guide: replit-sync/FORGE_DISPATCH_WIRING.md.
 
-## 1. Deploy mesh-resilience backend (carryover from order 3bb20688)
-- `apps/mesh-resilience/` — cache-backed FastAPI, verified working. Run on :8081,
-  surface at `/api/a11oy/v1/mesh-resilience/*`, systemd-persist. Mandatory
-  measured-simulation / OPEN-hypothesis labels (already in responses). No new keys.
+## 1. WIRE YOUR OWN DISPATCH (highest priority — unblocks everything)
+On the box (you have shell + the capable agent that merged #229/#230/#231):
+- Set FORGE_DISPATCH_CMD (or FORGE_AGENT_URL+TOKEN) in /etc/forge-perplexity.env
+  to invoke your Forge agent on the order body. Exact copy-paste in the guide.
+- Restart forge-perplexity-poll.timer, run one poll, and confirm AUTO_STATE.json
+  shows dispatch_mode != none AND dispatch_ok: true.
+- If your agent genuinely cannot be invoked headlessly, say so in gated_skipped
+  with the precise reason so the founder can wire it — do NOT fake dispatch_ok.
 
-## 2. Merge the two ready PRs
-- **lutar-lean#238** (The Relational Mesh, keystone) — now FULLY CI-GREEN (title-lint
-  fixed). Run your keystone gate and merge.
-- **szl-mesh#6** (Spec 08) — only the DCO Trailers check is red; the commit HAS a
-  valid `Signed-off-by: stephenlutar2-hash <stephenlutar2@gmail.com>`. Likely a
-  squash-base/parent quirk. Re-sign/rebase as needed and merge.
+## 2. THEN execute the backlog (now that dispatch works)
+- Deploy apps/mesh-resilience on :8081, surface /api/a11oy/v1/mesh-resilience/*,
+  systemd-persist. Confirm /healthz -> 200. (Box-shell; you have it, I don't.)
+- CourtListener box resilience (timeout + polite UA + retry + honest stale
+  fallback) — source+URL verified fine from outside; box call is the flaky part.
 
-## 3. CourtListener (legal vertical) resilience — box-side
-- The legal vertical's `court_filings` (CourtListener v4) intermittently reports
-  `unavailable` on the live box, BUT the exact URL our code builds returns HTTP
-  200 with 7106 results from MY network. So the source + our URL are FINE — the
-  box's outbound call is failing intermittently (likely UA block, rate-limit, or
-  too-tight timeout). Fix on the box: (a) raise the CourtListener fetch timeout,
-  (b) add a polite UA + a short retry/backoff, (c) on failure keep serving the
-  last good cached result with an honest `stale` label instead of `unavailable`.
-  Federal Register stays live regardless, so legal never goes fully dark.
-
-## 4. Wire live-source counts into the digest (nice-to-have)
-- The upgraded probe reports per-vertical live/stale/unavailable counts. If you
-  surface a verticals card on a11oy, show those counts + freshness — honest,
-  real, and it makes a degraded source visible immediately.
+## DONE since last order (FYI, no action):
+- lutar-lean#238 (Relational Mesh) merged with explicit founder authorization
+  (you structurally couldn't — dispatch unwired). Keystone now has the witness.
+- szl-mesh#6 (Spec 08) merged. Frontier Explorer updated + redeployed.
+- Probe upgraded to verify live vertical freshness.
 
 ## Honesty floor (v11)
-locked=8 · Λ=Conjecture 1 · Khipu BFT=Conjecture 2 · SLSA L1 · open-weight serving
-only · killinchu SIMULATED · all vertical data carries honest live/stale/unavailable
-freshness labels — never fabricate freshness · "live" requires a real fetch · never
-commit a key · no Lean self-merge beyond your gate. Skip+report anything founder-gated.
+NEVER keystone self-merge · NEVER commit a key · NEVER weaken/silence a gate ·
+box-shell work is real here, label live only on a real 200 · locked=8 ·
+Λ=Conjecture 1 · Khipu BFT=Conjecture 2. Skip+report anything you genuinely can't do.
