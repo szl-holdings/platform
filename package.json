@@ -198,7 +198,7 @@
       "micromatch>picomatch": "2.3.2",
       "tinyglobby>picomatch": "4.0.4",
       "@tootallnate/once": "3.0.1",
-      "@esbuild-kit/core-utils>esbuild": "0.27.3",
+      "@esbuild-kit/core-utils>esbuild": "0.28.1",
       "protobufjs": "^7.5.8",
       "protocol-buffers-schema": "^3.6.1",
       "@xmldom/xmldom": "^0.9.10",
@@ -208,7 +208,12 @@
       "qs": "^6.15.2",
       "ws": "^8.20.1",
       "hono": "^4.12.21",
-      "shell-quote": "^1.8.4"
+      "shell-quote": "^1.8.4",
+      "esbuild": "0.28.1",
+      "tsx>esbuild": "0.28.1",
+      "vite>esbuild": "0.28.1",
+      "drizzle-kit>esbuild": "0.28.1",
+      "esbuild-register>esbuild": "0.28.1"
     }
   }
 }
