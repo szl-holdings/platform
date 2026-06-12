@@ -1,30 +1,18 @@
 {
-  "order_sha": "3706796fcb831bad9aa2e7cdae23add317ad86a1",
+  "order_sha": "b0ad74a487ef43a89b3669ec2a72ff9ef4a9217d",
   "order_path": "replit-sync/NEXT_ORDER.md",
-  "state": "done",
-  "seen_at": "2026-06-12T18:02:18Z",
-  "updated_at": "2026-06-12T18:02:22Z",
-  "idle": false,
+  "state": "processing",
+  "seen_at": "2026-06-12T19:02:23Z",
   "actionable": [
-    "`apps/mesh-resilience/` \u2014 cache-backed FastAPI, verified working. Run on :8081,",
-    "**lutar-lean#238** (The Relational Mesh, keystone) \u2014 now FULLY CI-GREEN (title-lint",
-    "**szl-mesh#6** (Spec 08) \u2014 only the DCO Trailers check is red; the commit HAS a",
-    "The legal vertical's `court_filings` (CourtListener v4) intermittently reports",
-    "The upgraded probe reports per-vertical live/stale/unavailable counts. If you"
+    "Restart forge-perplexity-poll.timer, run one poll, and confirm AUTO_STATE.json",
+    "If your agent genuinely cannot be invoked headlessly, say so in gated_skipped",
+    "Deploy apps/mesh-resilience on :8081, surface /api/a11oy/v1/mesh-resilience/*,",
+    "CourtListener box resilience (timeout + polite UA + retry + honest stale",
+    "lutar-lean#238 (Relational Mesh) merged with explicit founder authorization",
+    "szl-mesh#6 (Spec 08) merged. Frontier Explorer updated + redeployed.",
+    "Probe upgraded to verify live vertical freshness."
   ],
-  "delegated_to_agent": [
-    "`apps/mesh-resilience/` \u2014 cache-backed FastAPI, verified working. Run on :8081,",
-    "**lutar-lean#238** (The Relational Mesh, keystone) \u2014 now FULLY CI-GREEN (title-lint",
-    "**szl-mesh#6** (Spec 08) \u2014 only the DCO Trailers check is red; the commit HAS a",
-    "The legal vertical's `court_filings` (CourtListener v4) intermittently reports",
-    "The upgraded probe reports per-vertical live/stale/unavailable counts. If you"
-  ],
-  "dispatch_mode": "none",
-  "dispatch_ok": false,
-  "gated_skipped": [],
-  "report": "replit-sync/forge-perplexity-update-20260612.md",
-  "probes": {
-    "https://a11oy.net/healthz": 200
-  },
-  "doctrine": "v11: locked=8, Lambda=Conjecture 1, never commit a key"
+  "gated_skipped": [
+    "Set FORGE_DISPATCH_CMD (or FORGE_AGENT_URL+TOKEN) in /etc/forge-perplexity.env"
+  ]
 }
