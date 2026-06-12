@@ -1,36 +1,40 @@
-# NEXT_ORDER — Perplexity → Forge (2026-06-12 ~1:05 ET)
+# NEXT_ORDER — Perplexity → Forge (2026-06-12 ~1:16 ET)
 
-New operational backend committed at `apps/mesh-resilience/` (platform commit
-ffed09c). It is REAL and verified locally (healthz 200, /resilience returns
-measured correlations). Make it live on the box and keep it running. This is the
-"make the resilience study real and operational" deliverable.
+Consolidated. The verticals are confirmed serving REAL live web data (verified
+externally: defense KEV/NVD, finance Yahoo/Coinbase/FX, cyber KEV/NVD/GitHub,
+realestate HPD/DOB/Treasury, legal Federal Register — 24 live sources, 0 stale).
+The probe now VERIFIES this freshness (committed: replit-sync/health/chaski_probe.py).
+Items below.
 
-## 1. Deploy the mesh-resilience backend on the box (primary)
-- Source: `apps/mesh-resilience/` (engine.py, server.py, cache.json, FINDINGS.md).
-- It is a FastAPI app, cache-backed → instant startup, pure stdlib + fastapi/uvicorn.
-  Run: `pip install fastapi uvicorn && python3 -m uvicorn server:app --host 0.0.0.0 --port 8081`
-  (cwd = the app dir so it finds cache.json + engine.py).
-- Surface it behind a11oy at `/api/a11oy/v1/mesh-resilience/*` (proxy to :8081),
-  exposing: `/healthz`, `/resilience`, `/resilience/sweep`, `/resilience/score`.
-- Add it to forge-deploy.sh / your systemd unit set so it survives redeploy +
-  reboot, same pattern as the other organ services. Confirm
-  `https://a11oy.net/api/a11oy/v1/mesh-resilience/healthz` → 200 and
-  `/resilience` returns the JSON (corr L_vs_R2 ≈ -0.95, perfect_R2_count = 26).
-- Write the public healthz URL + status into AUTO_STATE.json probes.
+## 1. Deploy mesh-resilience backend (carryover from order 3bb20688)
+- `apps/mesh-resilience/` — cache-backed FastAPI, verified working. Run on :8081,
+  surface at `/api/a11oy/v1/mesh-resilience/*`, systemd-persist. Mandatory
+  measured-simulation / OPEN-hypothesis labels (already in responses). No new keys.
 
-## 2. Honesty labels on the surface (MANDATORY)
-- Every response already carries `"kind":"measured-simulation"` + the honesty
-  note. Do NOT relabel it as proven, a theorem, or BFT safety. If you add a UI
-  card on a11oy, it MUST say "measured/simulated · OPEN hypothesis · BFT =
-  Conjecture 2" — never "proven". "Topology shapes resilience" stays a hypothesis.
+## 2. Merge the two ready PRs
+- **lutar-lean#238** (The Relational Mesh, keystone) — now FULLY CI-GREEN (title-lint
+  fixed). Run your keystone gate and merge.
+- **szl-mesh#6** (Spec 08) — only the DCO Trailers check is red; the commit HAS a
+  valid `Signed-off-by: stephenlutar2-hash <stephenlutar2@gmail.com>`. Likely a
+  squash-base/parent quirk. Re-sign/rebase as needed and merge.
 
-## 3. (Founder-gated — skip + report if so) any new org/key/secret
-- Do NOT provision new secrets or keys for this. It needs none (no DB, no auth,
-  read-only compute). If your box policy requires a key for a new route, list it
-  in gated_skipped for the founder.
+## 3. CourtListener (legal vertical) resilience — box-side
+- The legal vertical's `court_filings` (CourtListener v4) intermittently reports
+  `unavailable` on the live box, BUT the exact URL our code builds returns HTTP
+  200 with 7106 results from MY network. So the source + our URL are FINE — the
+  box's outbound call is failing intermittently (likely UA block, rate-limit, or
+  too-tight timeout). Fix on the box: (a) raise the CourtListener fetch timeout,
+  (b) add a polite UA + a short retry/backoff, (c) on failure keep serving the
+  last good cached result with an honest `stale` label instead of `unavailable`.
+  Federal Register stays live regardless, so legal never goes fully dark.
+
+## 4. Wire live-source counts into the digest (nice-to-have)
+- The upgraded probe reports per-vertical live/stale/unavailable counts. If you
+  surface a verticals card on a11oy, show those counts + freshness — honest,
+  real, and it makes a degraded source visible immediately.
 
 ## Honesty floor (v11)
-locked=8 · Λ=Conjecture 1 · Khipu BFT=Conjecture 2 · SLSA L1 honest · open-weight
-serving only (this backend is pure compute, not a model — fine) · killinchu
-SIMULATED · "live" requires a real 200 · never commit a key · no Lean self-merge.
-The Opus 4.8 analysis touched only the offline study data, never the serving path.
+locked=8 · Λ=Conjecture 1 · Khipu BFT=Conjecture 2 · SLSA L1 · open-weight serving
+only · killinchu SIMULATED · all vertical data carries honest live/stale/unavailable
+freshness labels — never fabricate freshness · "live" requires a real fetch · never
+commit a key · no Lean self-merge beyond your gate. Skip+report anything founder-gated.
