@@ -62,3 +62,8 @@
 
 - Order is **idle / no-action sentinel** — handshake confirmed, nothing to execute.
 - Reachability snapshot: https://a11oy.net/healthz -> 200
+
+## Auto-loop pass — order `0c2b3c1c` — 2026-06-12T22:03:20Z
+
+- Order is **idle / no-action sentinel** — handshake confirmed, nothing to execute.
+- Reachability snapshot: https://a11oy.net/healthz -> 200
