@@ -120,3 +120,31 @@ browser can recompute the digest client-side and MATCH the ledger `receipt_id`.
   - HOTFIX during freeze: only for a demo-blocking defect WITH explicit founder approval, minimal,
 - Reachability snapshot: https://a11oy.net/healthz -> 200
 - NOTE: no Forge agent endpoint configured (FORGE_AGENT_URL / FORGE_DISPATCH_CMD) — actionable items are reported + the founder is pinged; wire the endpoint to make execution fully hands-off.
+
+## Forge (Replit) — hardening deploy + GPU-fabric verification — 2026-06-13 (manual pass)
+
+Re TOP order **R-DEPLOY-THE-HARDENING** + founder green-light: "power the whole ecosystem with all nodes + GPU (5050) + chaski".
+
+### a11oy live == main (hardening deployed)
+- Rebuilt a11oy image FROM MAIN via `/usr/local/sbin/a11oy-rebuild` → "running from published main@929779d", ALL VERIFY PASS (front-door / app-entry / liveness / feeds / governance / readiness / secdata / bounties).
+- Live latency: `GET /compute-pool` -> **200 in 0.013s** (well under the <1s target; breaker/cache are live).
+- Surfaces 200: `/healthz` (doctrine v11, locked=8, commit-lock c7c0ba17), `/ayni`, `/research/prereg`, `/research/verify`, `/research/{id}`, `/harvest/datacenters`.
+
+### GPU fabric — the ecosystem IS powered by the RTX
+- tailnet (`tailscale status`): a11oy-box `100.96.129.45` online; **betterwithage (RTX 5050) `100.125.77.31` ACTIVE/direct**; replit-chaski `100.76.58.50` OFFLINE.
+- betterwithage Ollama serving (live `/api/tags` 200): `qwen2.5-coder:7b` + `bge-large:latest`.
+- a11oy container wired: `A11OY_MODEL_BASE_URL=http://100.125.77.31:11434/v1`, `A11OY_GPU_TOKEN` set.
+- **PROOF a11oy uses the GPU**: live `/v1/embeddings` via `bge-large` returned a real embedding vector (200).
+- **DURABILITY FIX**: `/etc/a11oy-gpu.env` was EMPTY (next rebuild would have silently dropped GPU power) -> persisted live `MODEL_BASE_URL`+`GPU_TOKEN` back to it (0600, backup kept). Rebuilds now keep GPU power.
+
+### CHASKI — honest blocker (Doctrine v11: never fabricate reachability)
+- replit-chaski `100.76.58.50` is OFFLINE at the MACHINE level: tailscale "offline, last seen 1d ago, rx 0"; `:11434` connection TIMED OUT.
+- Cannot be powered on remotely from the box (no wake path to a sleeping replit-hosted node). `gpu_nodes_reachable` stays 1 (betterwithage only); chaski=False — reported honestly, NOT faked.
+- **ACTION NEEDED (founder)**: wake chaski's host + start its Ollama durable; it then auto-joins the fabric (reachable flips true).
+
+### HOLD / not-done this pass
+- **VAST**: held (founder flips last).
+- szl-router PRIVATE live + `x_szl_provenance`, LiteLLM single-endpoint proxy, weight-mirroring: large items, not done this pass.
+- HF `SZLHOLDINGS/energy`: published earlier (static Space, 200).
+
+— Forge (Replit)
