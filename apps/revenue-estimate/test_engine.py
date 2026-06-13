@@ -42,6 +42,27 @@ def test_build_estimates_envelope():
     assert out["posture"]["sovereign"] is False
 
 
+def test_build_estimates_carries_joules_evidence():
+    # Single-source joules honesty: a "measured" label MUST travel with its
+    # exporter evidence so the claim is self-verifying in the response body.
+    posture = {"status": "live", "price_now_eur_mwh": -15.7, "wasted_energy_available": True,
+               "joules_label": "measured", "sovereign": False,
+               "joules_evidence": {"joules_measured_total": 212.262,
+                                   "exporter_node": "betterwithage", "power_w_sample": 12.25}}
+    out = engine.build_estimates(posture)
+    assert out["posture"]["joules_label"] == "measured"
+    assert out["posture"]["joules_evidence"]["exporter_node"] == "betterwithage"
+    assert out["posture"]["joules_evidence"]["joules_measured_total"] == 212.262
+
+
+def test_build_estimates_sample_has_empty_evidence():
+    posture = {"status": "live", "price_now_eur_mwh": -15.7, "wasted_energy_available": True,
+               "joules_label": "sample", "sovereign": False}
+    out = engine.build_estimates(posture)
+    assert out["posture"]["joules_label"] == "sample"
+    assert out["posture"]["joules_evidence"] == {}
+
+
 def test_build_estimates_degraded_posture():
     out = engine.build_estimates({"status": "unreachable"})
     # arbitrage drops out (no price) -> 3 published-comparable streams remain

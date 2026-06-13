@@ -283,6 +283,9 @@ def build_estimates(posture: dict) -> dict:
             "grid_price_eur_mwh": price,
             "wasted_energy_available": posture.get("wasted_energy_available") if isinstance(posture, dict) else None,
             "joules_label": posture.get("joules_label", "sample") if isinstance(posture, dict) else "sample",
+            # Single-source joules honesty: carry the exporter evidence next to the label
+            # so a "measured" claim is self-verifying in this body (never a bare label).
+            "joules_evidence": posture.get("joules_evidence", {}) if isinstance(posture, dict) else {},
             "sovereign": posture.get("sovereign", False) if isinstance(posture, dict) else False,
         },
         "streams": streams,
