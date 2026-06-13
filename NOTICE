@@ -10,5 +10,15 @@ Use of these names, logos, or marks is subject to the trademark policy
 described in the LICENSE file. Nothing in this repository grants any
 trademark license.
 
+Third-party acknowledgements
+----------------------------
+tools/szl_estate_auditor.py: the CLI approach (a single command that
+auto-analyzes a project's structure/health and emits a developer report) is
+inspired by jkdevcode/repo-inspector (https://github.com/jkdevcode/repo-inspector),
+a permissively-licensed open-source project (MIT per its About metadata; ISC
+per its LICENSE file). SZL's implementation is independent and original; no
+upstream source code was copied. Credit is given as required by the upstream
+permissive license.
+
 For permissions, partnerships, or licensing inquiries:
 licensing@szlholdings.com  ·  https://szlholdings.com
