@@ -1,38 +1,60 @@
 {
-  "order_sha": "a724f0dcb536ab106dca4cb56ebfd0568804debd",
+  "order_sha": "b3bfddabd28084570ad81d5f29a67d6dcbb5f942",
   "order_path": "replit-sync/NEXT_ORDER.md",
   "state": "done",
-  "seen_at": "2026-06-13T15:06:33Z",
-  "updated_at": "2026-06-13T15:06:36Z",
-  "idle": false,
-  "actionable": [
-    "szl_research_infra.py are ALL on main now. FORGE: rebuild+push the a11oy image FROM MAIN (cleaner than the deploy",
-    "From `activates_at` (2026-06-16 00:00 ET) through `lifts_at` (2026-06-19): go **READ-ONLY**.",
-    "DO: monitor (healthz, drift, doctrine grep, CI status), report status to AUTO_STATE.",
-    "DO NOT: commit, deploy, NDJSON-commit to HF, factory-restart for changes, auto-merge",
-    "Recovery-only: a Space that is SLEEPING/errored may be restarted to its last-good build",
-    "Before `activates_at`: you may continue normal queued software-side work, but the estate is",
-    "Air-gap UDS deploy proof (Raven proof). 2. Bundle-level SLSA L2 attestation.",
-    "Doctrine v11 reconciliation in org .github + szl-doctrine. 4. Progressive-delivery pipeline."
-  ],
-  "delegated_to_agent": [
-    "szl_research_infra.py are ALL on main now. FORGE: rebuild+push the a11oy image FROM MAIN (cleaner than the deploy",
-    "From `activates_at` (2026-06-16 00:00 ET) through `lifts_at` (2026-06-19): go **READ-ONLY**.",
-    "DO: monitor (healthz, drift, doctrine grep, CI status), report status to AUTO_STATE.",
-    "DO NOT: commit, deploy, NDJSON-commit to HF, factory-restart for changes, auto-merge",
-    "Recovery-only: a Space that is SLEEPING/errored may be restarted to its last-good build",
-    "Before `activates_at`: you may continue normal queued software-side work, but the estate is",
-    "Air-gap UDS deploy proof (Raven proof). 2. Bundle-level SLSA L2 attestation.",
-    "Doctrine v11 reconciliation in org .github + szl-doctrine. 4. Progressive-delivery pipeline."
-  ],
-  "dispatch_mode": "none",
-  "dispatch_ok": false,
-  "gated_skipped": [
-    "HOTFIX during freeze: only for a demo-blocking defect WITH explicit founder approval, minimal,"
-  ],
-  "report": "replit-sync/forge-perplexity-update-20260613.md",
-  "probes": {
-    "https://a11oy.net/healthz": 200
+  "seen_at": "2026-06-13T15:21:00Z",
+  "updated_at": "2026-06-13T15:21:00Z",
+  "idle": true,
+  "dispatch_mode": "deploy-branch",
+  "freeze": {
+    "active": true,
+    "activates_at": "2026-06-16T00:00:00-04:00",
+    "lifts_at": "2026-06-19T23:59:00-04:00",
+    "policy_now": "pre-freeze: monitor + small safe items only; no merges/box/serve.py this pass"
   },
-  "doctrine": "v11: locked=8, Lambda=Conjecture 1, never commit a key"
+  "replit_verify": {
+    "by": "Forge (Replit-side, founder-invoked check)",
+    "at": "2026-06-13T15:21Z",
+    "report": "replit-sync/forge-report-2026-06-13-replit-verify-scoreboard-20260613T152117Z.md",
+    "scoreboard_live_200": [
+      "a11oy.net /healthz", "energy/budget", "engine/status", "/proof",
+      "formula/sovereign", "formula/allodial", "formula/entanglement",
+      "anatomy/loop (API)", "/anatomy/loop (HTML)",
+      "killinchu /healthz + /killinchu/healthz + /elite/wiring/health"
+    ],
+    "scoreboard_live_404": [
+      "a11oy research/prereg (DEPLOY GAP: on main e8e855f0, served image stale)",
+      "a11oy research/verify + research/trial + harvest/datacenters (CODE GAP: not route-registered on main, PR #344)"
+    ],
+    "corrections": [
+      "formula/sovereign+allodial+entanglement+anatomy/loop now 200 (were 404 in cached finish-it-all scoreboard)",
+      "serve.py write-storm SETTLED (last serve edit e8e855f0 14:41Z; HEAD 15:01Z = doctrine labels)",
+      "allodial/entanglement routes registered IN modules not serve.py -> serve.py-string route guard would false-negative; use live-probe"
+    ]
+  },
+  "forge_manual_deploy": {
+    "by": "Forge (Replit-side, manual)",
+    "report": "replit-sync/forge-perplexity-update-20260613-r7-deploy-finish.md",
+    "deployed": [
+      "a11oy deploy/finish-it-all-20260613@f0a5875 -> a11oy.net image rebuilt (anatomy/loop, research/*, formula/sovereign+allodial+entanglement, ayni/tinkuy/replay 200)",
+      "killinchu deploy/finish-it-all-20260613@eb6b769 -> killinchu.a11oy.net image rebuilt (realestate/*, elite/wiring 48-view audit #115, finance/fx, /elite 200)"
+    ],
+    "doctrine": "DEPLOY not merge: PRs #341-344 + #115 OPEN, main untouched on both repos",
+    "reds_green": "killinchu Shared-source drift guard = success on main (evidence_research drift allow-listed)"
+  },
+  "blocked_source_missing": [
+    "HF static Space SZLHOLDINGS/energy: source hf_energy_space/ not on box, not in workspace, not in any repo"
+  ],
+  "gated_skipped": [
+    "a11oy.net image rebuild to flip research/prereg live (code on main; founder/Forge deploy side)",
+    "research/verify + research/trial + harvest/datacenters route registration on main (PR #344, founder-merge)",
+    "CHASKI replit-chaski 100.76.58.50 OFFLINE (ollama 000, ssh closed) — founder powers on + ollama serve",
+    "marketplace keys VAST/AKASH/IONET/RUNPOD — founder pastes into /etc/*.env",
+    "lutar-lean #239-242 founder-only",
+    "platform #357/358/360 on-box no --admin",
+    "receipt-schema canonical-vs-crosswalk decision"
+  ],
+  "pending_code": [
+    "R-FOLD: wire szl_research_infra source=verified-research into szl_anatomy_loop, joules->experiment receipt, cite #239/#240/#242 (handlers in PR #344; needs route registration landed first)"
+  ]
 }
