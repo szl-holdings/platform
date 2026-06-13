@@ -31,6 +31,7 @@ import engine
 import body
 import reverse
 import fabric_nodes
+import budget as ebudget  # ENERGY-BUDGET-PATCH
 
 app = FastAPI(title="SZL Energy Harvest", version="1.1.0")
 
@@ -114,6 +115,28 @@ def compute_pool():
     sovereign=False; no node is fabricated; Brev slots stay empty until launched +
     joined to Tailscale. No energy/joule claim. Lambda = Conjecture 1."""
     return fabric_nodes.compute_pool()
+
+
+@app.get("/budget")
+def budget():
+    """ENERGY-BUDGET-PATCH: honest compute-energy budget for the current grid
+    posture, bounded by the proven physical formulas (Bekenstein cap #239,
+    Landauer floor #240). Realized budget counts ONLY measured joules
+    (settle-to-count); none yet (joules SAMPLE). Never fabricates a joule."""
+    out = ebudget.energy_budget(engine.posture_summary(allow_network=True))
+    out["honesty"] = DOCTRINE_NOTE
+    return out
+
+
+@app.get("/provenance")
+def provenance():
+    """ENERGY-BUDGET-PATCH: honest provenance chain of measured-joule
+    EnergyReservoir entries -> DSSE receipt citing #239/#240 -> validate vs
+    canonical-formulas-v1 / lean-proofs-v1 -> Ayni F11. Genesis (0 entries) until
+    the first NVML-measured joule. Never fabricates a receipt."""
+    out = ebudget.energy_provenance(engine.posture_summary(allow_network=True))
+    out["honesty"] = DOCTRINE_NOTE
+    return out
 
 
 def _g(name, val, help_, typ="gauge"):
