@@ -1,12 +1,26 @@
 {
   "order_sha": "4dcafc5ddf03eac5c5024bdeeee21f692fb927b6",
   "order_path": "replit-sync/NEXT_ORDER.md",
-  "state": "processing",
+  "state": "done",
   "seen_at": "2026-06-13T05:04:29Z",
+  "updated_at": "2026-06-13T05:04:44Z",
+  "idle": false,
   "actionable": [
     "a11oy: /api/a11oy/v1/{honest,formulas,gates,qbio/lambda,qbio/summary,ledger}",
     "killinchu: /api/killinchu/v1/{honest,...}, /counter-uas/evaluate, /khipu/sign|verify, /receipt/export",
     "maritime/vessel fusion endpoints return honest live/SAMPLE-labeled data for the new killinchu site to embed."
   ],
-  "gated_skipped": []
+  "delegated_to_agent": [
+    "a11oy: /api/a11oy/v1/{honest,formulas,gates,qbio/lambda,qbio/summary,ledger}",
+    "killinchu: /api/killinchu/v1/{honest,...}, /counter-uas/evaluate, /khipu/sign|verify, /receipt/export",
+    "maritime/vessel fusion endpoints return honest live/SAMPLE-labeled data for the new killinchu site to embed."
+  ],
+  "dispatch_mode": "none",
+  "dispatch_ok": false,
+  "gated_skipped": [],
+  "report": "replit-sync/forge-perplexity-update-20260613.md",
+  "probes": {
+    "https://a11oy.net/healthz": 200
+  },
+  "doctrine": "v11: locked=8, Lambda=Conjecture 1, never commit a key"
 }
