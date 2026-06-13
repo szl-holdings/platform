@@ -1,0 +1,94 @@
+# agentic-gpu-harvest.service — systemd unit for the wasted-energy harvest runner
+# =====================================================================================
+# INSTALL (user unit — recommended for Forge on betterwithage RTX 5000):
+#
+#   mkdir -p ~/.config/systemd/user
+#   cp deploy/agentic-gpu-harvest.service ~/.config/systemd/user/
+#   systemctl --user daemon-reload
+#   systemctl --user enable --now agentic-gpu-harvest.service
+#   journalctl --user -u agentic-gpu-harvest.service -f
+#
+# INSTALL (system unit — requires root; replaces %h and User/Group fields):
+#
+#   sudo cp deploy/agentic-gpu-harvest.service /etc/systemd/system/
+#   # Edit WorkingDirectory, User, Group, and %h paths below to match deployment
+#   sudo systemctl daemon-reload
+#   sudo systemctl enable --now agentic-gpu-harvest.service
+#   sudo journalctl -u agentic-gpu-harvest.service -f
+#
+# STOP cleanly (sends SIGTERM — harvest_runner handles it gracefully):
+#   systemctl --user stop agentic-gpu-harvest.service
+#
+# CHECK status:
+#   systemctl --user status agentic-gpu-harvest.service
+#
+# ENVIRONMENT OVERRIDES (set real endpoint URLs for the box):
+#   Edit the Environment= lines below, or use an EnvironmentFile= drop-in:
+#     mkdir -p ~/.config/systemd/user/agentic-gpu-harvest.service.d/
+#     cat > ~/.config/systemd/user/agentic-gpu-harvest.service.d/env.conf <<EOF
+#     [Service]
+#     Environment="HARVEST_OLLAMA_ENDPOINT=http://127.0.0.1:11434/v1"
+#     Environment="HARVEST_VLLM_ENDPOINT=http://127.0.0.1:8000/v1"
+#     EOF
+#     systemctl --user daemon-reload && systemctl --user restart agentic-gpu-harvest.service
+#
+# NVML NOTE: on the betterwithage RTX 5000 with nvidia-smi installed, the runner
+# will read real NVML power.draw and label joules 'measured:nvml'. Off-box (CI,
+# dev) nvidia-smi is absent and joules stay labelled 'sample'. The service does
+# NOT need special GPU access — nvidia-smi is a user-space tool.
+# =====================================================================================
+
+[Unit]
+Description=SZL Wasted-Energy Harvest Runner (resident soak loop, RTX 5000)
+Documentation=https://github.com/szl-holdings/platform/tree/feat/harvest-ops/apps/agentic-gpu/OPERATE.md
+# Start after network is up (feeds are live HTTP)
+After=network-online.target
+Wants=network-online.target
+# If Ollama is running as a service, we can optionally depend on it
+# After=ollama.service
+# Requires=ollama.service
+
+[Service]
+Type=simple
+# --- Runtime location ---
+# Adjust to the actual checkout path on the box.
+WorkingDirectory=%h/platform/apps/agentic-gpu
+ExecStart=/usr/bin/python3 %h/platform/apps/agentic-gpu/harvest_runner.py run_forever --interval 60
+
+# --- Clean stop ---
+# SIGTERM triggers the signal handler in run_forever() for a graceful shutdown.
+KillSignal=SIGTERM
+TimeoutStopSec=30
+
+# --- Resilience ---
+Restart=always
+RestartSec=15
+# Back off if we crash repeatedly (don't hammer the free feeds)
+StartLimitIntervalSec=300
+StartLimitBurst=5
+
+# --- Environment ---
+# Endpoint URLs for the local model server (override via drop-in if needed)
+Environment="HARVEST_OLLAMA_ENDPOINT=http://100.125.77.31:11434/v1"
+Environment="HARVEST_VLLM_ENDPOINT=http://100.125.77.31:8000/v1"
+# Python path includes the agentic-gpu app directory so sibling imports resolve
+Environment="PYTHONPATH=%h/platform/apps/agentic-gpu"
+# Unbuffered stdout → journald gets JSON log lines immediately
+Environment="PYTHONUNBUFFERED=1"
+
+# --- Logging ---
+# Structured JSON goes to stdout → journald. Read with:
+#   journalctl --user -u agentic-gpu-harvest.service -o json-pretty
+StandardOutput=journal
+StandardError=journal
+SyslogIdentifier=agentic-gpu-harvest
+
+# --- Hardening (NoNewPrivileges, PrivateTmp) ---
+# These are compatible with nvidia-smi (user-space binary) and free HTTP feeds.
+NoNewPrivileges=true
+PrivateTmp=true
+# ProtectSystem=strict would block nvidia-smi's /proc access; omit for GPU box.
+# ProtectHome=read-only conflicts with WorkingDirectory in %h; omit for user unit.
+
+[Install]
+WantedBy=default.target

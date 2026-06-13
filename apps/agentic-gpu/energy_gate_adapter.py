@@ -175,6 +175,112 @@ def provenance(joules_est: Optional[float] = None, now=None) -> dict:
 
 
 # ===========================================================================
+# FORMULA-GROUNDED SOAK BRIDGE (PR #370 + harvest_budget.py)
+# ===========================================================================
+# When should_soak_wasted_energy() is True, the daemon admits batch jobs ONLY
+# up to the Bekenstein-additive cap, logs each into the monotone SoakLedger,
+# and stops at the Ouroboros bound.  This is the proven-bounded upgrade to the
+# heuristic sponge.
+#
+# Proven bounds enforced (all kernel-checked or test-checked):
+#   1. Bekenstein additive cap (information bound)
+#      — bekenstein_bound_additive / info_within_bound
+#        [EnergyBudgetWitness.lean, lutar-lean PR #239, keystone, 0-sorry]
+#   2. Landauer floor (energy lower bound, anti-over-unity)
+#      — landauer_floor_pos / energyFloor n q = n*q
+#        [LandauerFloorWitness.lean, lutar-lean PR #240]
+#   3. Monotone SoakLedger (append-only accrual)
+#      — energy_ledger_monotone / ledger_step_monotone (= f19_budget_monotone)
+#        [EnergyBudgetWitness.lean, lutar-lean PR #239]
+#   4. Ouroboros bounded recursion (hard loop cap)
+#      — runLoop({ maxSteps }) 'budgetExhausted'
+#        [szl-holdings/ouroboros packages/ouroboros/src/loop-kernel.ts]
+#
+# Joule figures stay SAMPLE/ESTIMATE throughout; the information/bit bounds ARE
+# provable and kernel-checked; energy values wait for real on-box NVML.
+
+try:
+    import harvest_budget as _hb  # type: ignore
+    _HAVE_HARVEST_BUDGET = True
+except Exception:  # noqa: BLE001
+    _hb = None  # type: ignore
+    _HAVE_HARVEST_BUDGET = False
+
+
+def plan_soak(
+    window: Optional[dict] = None,
+    jobs: Optional[list] = None,
+    window_cap_bytes: Optional[int] = None,
+    allow_network: bool = False,
+) -> dict:
+    """Admit batch jobs into the soak window, bounded by proven formulas.
+
+    When should_soak_wasted_energy() is True:
+      - Computes the Bekenstein-additive cap for the window.
+      - Admits jobs only while the cap holds (info_within_bound).
+      - Logs each admitted job into the monotone SoakLedger.
+      - Stops at the Ouroboros max-steps bound.
+      - Checks each SAMPLE joule estimate against the Landauer floor.
+
+    If harvest_budget is not present or window is not a soak window, returns
+    a conservative empty plan (admits nothing).
+
+    Args:
+      window    — harvest posture dict. If None, fetches via harvest_posture_bridge.
+      jobs      — list of job dicts (each: id, info_bits, joules_est).
+      window_cap_bytes — Bekenstein window cap in bytes; None → auto.
+      allow_network    — whether to call live feeds for posture.
+
+    Returns:
+      dict with keys: admitted, refused, bekenstein_cap_bits, bekenstein_used_bits,
+        ouroboros_steps_taken, ouroboros_max_steps, ouroboros_exit_reason,
+        proven_bounds_respected, joules_label, honest_note.
+
+    Proven bounds respected: see module docstring above.
+    """
+    if jobs is None:
+        jobs = []
+
+    if window is None:
+        window = harvest_posture_bridge(allow_network=allow_network)
+
+    # Conservative fallback if harvest_budget module is not present
+    if not _HAVE_HARVEST_BUDGET:
+        return {
+            "admitted": [],
+            "refused": jobs,
+            "bekenstein_cap_bits": 0,
+            "bekenstein_used_bits": 0,
+            "ouroboros_steps_taken": 0,
+            "ouroboros_max_steps": 0,
+            "ouroboros_exit_reason": "harvest_budget_unavailable",
+            "proven_bounds_respected": [
+                "harvest_budget module not present; all jobs held (conservative)"
+            ],
+            "joules_label": "sample",
+            "honest_note": "harvest_budget module unavailable; conservative default.",
+        }
+
+    plan = _hb.plan_soak(
+        window=window,
+        jobs=jobs,
+        window_cap_bytes=window_cap_bytes,
+    )
+    return {
+        "admitted": plan.admitted,
+        "refused": plan.refused,
+        "bekenstein_cap_bits": plan.bekenstein_cap_bits,
+        "bekenstein_used_bits": plan.bekenstein_used_bits,
+        "ouroboros_steps_taken": plan.ouroboros_steps_taken,
+        "ouroboros_max_steps": plan.ouroboros_max_steps,
+        "ouroboros_exit_reason": plan.ouroboros_exit_reason,
+        "proven_bounds_respected": plan.proven_bounds_respected,
+        "joules_label": "sample",
+        "honest_note": plan.honest_note,
+    }
+
+
+# ===========================================================================
 # SELF-TEST — no network. Exercises the adapter against the real feed when
 # present, and the conservative-honest path when it is not.
 # ===========================================================================
@@ -199,6 +305,44 @@ def _selftest() -> dict:
     check("provenance_has_energy_source", "energy_source" in prov)
     check("provenance_joules_labeled",
           prov.get("joules_est_label") == "SAMPLE/ESTIMATE")
+
+    # plan_soak with normal posture admits nothing (reactive preemption wins).
+    normal_window = {
+        "posture": "normal",
+        "wasted_energy_available": False,
+        "soak_hard": False,
+        "joules_label": "sample",
+    }
+    plan_normal = plan_soak(
+        window=normal_window,
+        jobs=[{"id": "j1", "info_bits": 100, "joules_est": 0.0}],
+        window_cap_bytes=200,
+    )
+    check("plan_soak_normal_admits_nothing", len(plan_normal["admitted"]) == 0)
+    check("plan_soak_joules_label_sample", plan_normal["joules_label"] == "sample")
+
+    # plan_soak with negative-price posture admits jobs within Bekenstein cap.
+    neg_window = {
+        "posture": "negative-price",
+        "wasted_energy_available": True,
+        "soak_hard": True,
+        "joules_label": "sample",
+    }
+    plan_neg = plan_soak(
+        window=neg_window,
+        jobs=[
+            {"id": "j1", "info_bits": 40, "joules_est": 0.0},
+            {"id": "j2", "info_bits": 30, "joules_est": 0.0},
+            {"id": "j3", "info_bits": 20, "joules_est": 0.0},  # exceeds 80-bit cap
+        ],
+        window_cap_bytes=10,  # cap = 80 bits
+    )
+    check("plan_soak_negprice_admits_two", len(plan_neg["admitted"]) == 2)
+    check("plan_soak_negprice_refuses_one", len(plan_neg["refused"]) == 1)
+    check("plan_soak_bekenstein_respected",
+          plan_neg["bekenstein_used_bits"] <= plan_neg["bekenstein_cap_bits"])
+    check("plan_soak_proven_bounds_present",
+          len(plan_neg["proven_bounds_respected"]) >= 4)
 
     if _HAVE_SIGNAL:
         # With the feed present, gate value must agree with the live window.
@@ -226,7 +370,9 @@ def _selftest() -> dict:
     out["ok"] = True
     out["doctrine"] = ("energy admission reads the SAMPLE power-WINDOW label, "
                        "not a measured joule; conservative-honest (NOT cheap) "
-                       "on missing/failed signal; reactive never energy-gated.")
+                       "on missing/failed signal; reactive never energy-gated; "
+                       "soak bounded by Bekenstein cap + Landauer floor + "
+                       "monotone ledger + Ouroboros loop bound.")
     return out
 
 
