@@ -1,32 +1,34 @@
 {
-  "order_sha": "b3bfddabd28084570ad81d5f29a67d6dcbb5f942",
+  "order_sha": "7c275a96f52ca94fa89ca6d3f74ccf71ec690141",
   "order_path": "replit-sync/NEXT_ORDER.md",
   "state": "done",
-  "seen_at": "2026-06-13T12:00:00Z",
-  "updated_at": "2026-06-13T12:00:00Z",
-  "idle": true,
-  "dispatch_mode": "deploy-branch",
-  "forge_manual_deploy": {
-    "by": "Forge (Replit-side, manual)",
-    "report": "replit-sync/forge-perplexity-update-20260613-r7-deploy-finish.md",
-    "deployed": [
-      "a11oy deploy/finish-it-all-20260613@f0a5875 -> a11oy.net image rebuilt (anatomy/loop, research/*, formula/sovereign+allodial+entanglement, ayni/tinkuy/replay 200)",
-      "killinchu deploy/finish-it-all-20260613@eb6b769 -> killinchu.a11oy.net image rebuilt (realestate/*, elite/wiring 48-view audit #115, finance/fx, /elite 200)"
-    ],
-    "doctrine": "DEPLOY not merge: PRs #341-344 + #115 OPEN, main untouched on both repos",
-    "reds_green": "killinchu Shared-source drift guard = success on main (evidence_research drift allow-listed)"
+  "seen_at": "2026-06-13T14:43:58Z",
+  "updated_at": "2026-06-13T14:43:58Z",
+  "idle": false,
+  "order_kind": "freeze-hold",
+  "dispatch_mode": "monitor-hold",
+  "freeze_ack": {
+    "acknowledged_by": "Forge (Replit-side, founder-invoked, manual)",
+    "freeze_active": true,
+    "activates_at": "2026-06-16T00:00:00-04:00",
+    "lifts_at": "2026-06-19T23:59:00-04:00",
+    "reason": "Defense Unicorns Warhacker demo freeze - lock verified-GO state (doctrine v11, locked=8 @ c7c0ba17).",
+    "posture": "Pre-freeze now: normal work allowed, preferring monitor + small safe items. From activates_at to lifts_at: READ-ONLY (monitor + recovery-restart of sleeping/errored Space to last-good build only). NO commits/deploys/HF-NDJSON/auto-merge/auto-sync/doctrine/box/signed-artifact changes during freeze. Hotfix only with explicit founder approval.",
+    "frozen_heads_noted": {
+      "a11oy": "7105f28e",
+      "killinchu": "74d03688",
+      "anatomy": "f6d15087",
+      "lutar-lean": "b675cd84",
+      "uds-bundles": "729e6de8",
+      "platform": "f30e09ef"
+    }
   },
-  "blocked_source_missing": [
-    "HF static Space SZLHOLDINGS/energy: source hf_energy_space/ not on box, not in workspace, not in any repo"
+  "doctrine": "v11 | locked=8 {F1,F4,F7,F11,F12,F18,F19,F22} @ kernel c7c0ba17 | Lambda=Conjecture 1 | Khipu=Conjecture 2 | trust never 100% | never commit a key",
+  "post_freeze_queue": [
+    "Air-gap UDS deploy proof (Raven proof)",
+    "Bundle-level SLSA L2 attestation",
+    "Doctrine v11 reconciliation in org .github + szl-doctrine",
+    "Progressive-delivery pipeline"
   ],
-  "gated_skipped": [
-    "CHASKI replit-chaski 100.76.58.50 OFFLINE (ollama 000, ssh closed) — founder powers on + ollama serve",
-    "marketplace keys VAST/AKASH/IONET/RUNPOD — founder pastes into /etc/*.env",
-    "lutar-lean #239-242 founder-only",
-    "platform #357/358/360 on-box no --admin",
-    "receipt-schema canonical-vs-crosswalk decision"
-  ],
-  "pending_code": [
-    "R-FOLD: wire szl_research_infra source=verified-research into szl_anatomy_loop, joules->experiment receipt, cite #239/#240/#242 (now unblocked, needs authoring)"
-  ]
+  "supersedes": "prior order b3bfddab (idle seed, marked done 2026-06-13T12:00Z). This ack registers the FREEZE HOLD order the box auto-loop poller had not yet recorded (idle-seed gap)."
 }
