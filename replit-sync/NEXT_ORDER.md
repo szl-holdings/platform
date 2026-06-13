@@ -1,3 +1,29 @@
+## R-REVERSE-LOOP (founder: jack the electricity, reverse-loop the semiconductors — TEST NOW) — real physics, honest
+Founder's instinct maps to TWO REAL published techniques (no fantasy): (1) ADIABATIC / REVERSIBLE CMOS —
+charge is ramped down in REVERSE order and RECOVERED to source via a resonator, not dumped; Vaire's "Ice
+River" 22nm test chip demonstrated NET energy recovery (Sept 2025); published 76-90% switching-energy
+recovery. BUT this needs chip-level hardware (a resonator) — software cannot flip an existing RTX 5000 into
+reverse-recovery mode. (2) GPU WASTE-HEAT RECOVERY via thermoelectric Seebeck — TEGs on a 60-90C GPU recover
+real electrical power from wasted heat (published, boosted to 5V). The bidirectional Seebeck<->Peltier loop
+is the honest "reverse loop" and is MEASURABLE on our GPU NOW via the thermal sensor.
+HONEST DISTINCTION: the RTX 5000 is NOT an adiabatic chip; we can't reverse-recover its switching energy in
+software. We CAN measure the recoverable WASTE-HEAT envelope from real NVML thermal data + bound it with our
+formulas. That is the testable reverse-loop today.
+FORGE — TEST NOW on the box: (1) nvidia-smi --query-gpu=temperature.gpu,power.draw,power.limit --format=csv
+— read real GPU temp + power; (2) compute the Seebeck waste-heat RECOVERY ENVELOPE: recoverable_W estimate =
+Seebeck eff (ZT-based, ~5-8% of thermal flux, documented factor) * (P_draw as heat proxy) over (T_gpu -
+T_ambient); label SAMPLE/ESTIMATE — it is the recoverable envelope, NOT captured power (no TEG hardware
+mounted). (3) Add szl_energy_reverse_recovery_envelope_w + szl_gpu_temp_c to /metrics. (4) Bound it honestly:
+the recovery can NEVER exceed Carnot/Landauer — cite our Landauer floor (#240) + the Penrose irreducible-mass
+analogue (you can recover wasted heat, never beat the floor). (5) Paste raw nvidia-smi thermal + the envelope
+estimate to replit-sync. This is the reverse-loop TESTED honestly: real thermal data, real recoverable
+envelope, bounded by our proven formulas — with the honest note that ACTUAL recovery needs a TEG mounted on
+the GPU (founder hardware step), exactly like the published GPU-WHR study.
+DOCTRINE: no free-energy/over-unity (reverse-recovery + Seebeck RECYCLE already-spent energy, never create
+it; bounded by Landauer/Carnot); SAMPLE until a real TEG meter; no key; reactive never starves; Lambda=Conj1;
+locked-8 untouched. Adiabatic-CMOS reverse-recovery = a FUTURE hardware roadmap (Vaire-style), label it
+roadmap, never claim our current GPU does it. Test the thermal envelope NOW; do NOT merge.
+
 ## R-TAKE-IT-NOW (URGENT TOP — window OPEN this minute) — soak the wasted energy on the RTX 5000 NOW
 THE WASTED-ENERGY WINDOW IS OPEN RIGHT NOW (verified live): aWATTar DE = -4.92 EUR/MWh (grid PAYING to
 offload), 9/14 windows ahead negative, deepest -45.87; your harvest confirms szl_energy_harvest_wasted_energy 1.
