@@ -1,12 +1,12 @@
 ---
 title: SZL Energy
 emoji: ⚡
-colorFrom: teal
+colorFrom: blue
 colorTo: indigo
 sdk: static
 app_file: index.html
 pinned: false
-short_description: Live energy loop — harvest stranded watts, prove bounded compute, circulate Ayni-balanced joules.
+short_description: "Live SZL energy loop: measured joules, bounded compute"
 ---
 
 # SZL HOLDINGS — ENERGY
