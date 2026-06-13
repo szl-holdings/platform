@@ -58,3 +58,8 @@ browser can recompute the digest client-side and MATCH the ledger `receipt_id`.
   - FREE TIERS into the LiteLLM router as zero-cost fallback model_names (keys via secret store,
 - Reachability snapshot: https://a11oy.net/healthz -> 200
 - NOTE: no Forge agent endpoint configured (FORGE_AGENT_URL / FORGE_DISPATCH_CMD) — actionable items are reported + the founder is pinged; wire the endpoint to make execution fully hands-off.
+
+## Auto-loop pass — order `ab1198d8` — 2026-06-13T08:04:54Z
+
+- Order is **idle / no-action sentinel** — handshake confirmed, nothing to execute.
+- Reachability snapshot: https://a11oy.net/healthz -> 200
