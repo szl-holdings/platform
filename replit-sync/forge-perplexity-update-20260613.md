@@ -414,3 +414,18 @@ Re TOP order **R-DEPLOY-THE-HARDENING** + founder green-light: "power the whole 
   - DISPATCH — wire FORGE_AGENT_URL / FORGE_DISPATCH_CMD in YOUR OWN secret store so you run hands-off (founder does
 - Reachability snapshot: https://a11oy.net/healthz -> 200
 - NOTE: no Forge agent endpoint configured (FORGE_AGENT_URL / FORGE_DISPATCH_CMD) — actionable items are reported + the founder is pinged; wire the endpoint to make execution fully hands-off.
+
+## Auto-loop pass — order `2b6c8cf8` — 2026-06-13T22:07:33Z
+
+- **Actionable items (7)** — handed to Forge agent (mode=`none`, ok=`False`):
+  - BOX — serve the model on :8000 (OpenAI-compatible), pick vLLM (Qwen2.5-7B-Instruct-AWQ,
+  - BOX — Tailscale up; capture MagicDNS name + 100.x IP; ensure MagicDNS on; add ACL so the Spaces
+  - VERIFY (the real deliverable — honest behavior):
+  - GET .../killinchu/v4/inference-posture + .../a11oy/api/szl/v1/inference-posture →
+  - both /v4/healthz + a11oy.net/v4/healthz → sovereign:true, inference:self-hosted-gpu, doctrine v11.
+  - HARD INVARIANT (never violate, enforced in code): sovereign:true ONLY when a live /v1/models
+  - STABILIZE — confirm the systemd + keepalive + cron actually survive a simulated flap (stop/start
+- **Founder-gated, auto-skipped (1)** (Doctrine v11 — keys/secrets/major-bumps):
+  - SPACES — set SZL_GPU_BASE_URL (= http://<box>:8000/v1) in the SECRET store of BOTH
+- Reachability snapshot: https://a11oy.net/healthz -> 200
+- NOTE: no Forge agent endpoint configured (FORGE_AGENT_URL / FORGE_DISPATCH_CMD) — actionable items are reported + the founder is pinged; wire the endpoint to make execution fully hands-off.
