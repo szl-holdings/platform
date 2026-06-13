@@ -1,45 +1,38 @@
-# SZL Forge — ORDER: full alignment + maritime/GPU upgrades (Series-A push)
+# SZL Forge — EXECUTE: bring SZL inference onto the founder's GPU (Forge has full box access + tokens)
 
-Read replit-sync/FREEZE.json FIRST and obey the freeze rule (below).
+Read replit-sync/FREEZE.json first (not yet active → execution allowed). Founder has authorized Forge
+to RUN the box bring-up directly (full access, full tokens). Source of truth for the steps:
+team/AUDIT/gpu/BOX_GPU_RUNBOOK.md — follow it exactly. NO bandaids, NO overclaim, NEVER commit a key.
 
-## CONTEXT (what just shipped — verify + keep aligned)
-A 10+-Opus-dev wave shipped to killinchu (+ shared modules with a11oy):
-- REAL live feeds: /feeds/aircraft (OpenSky+adsb.lol, theaters incl. China/Taiwan/SCS/ECS),
-  /feeds/vessels (global AIS, 10 theaters, redundancy chain), /feeds/remoteid, /osint/intel (UN-1718+USGS).
-- MARITIME INTEL: /maritime/{dark,spoof,riskarc,risk,forecast} (dark-fleet/AIS-spoof/going-dark
-  detection + Λ governed risk score + vessel forecasting, advisory/human-on-loop, DSSE-signed).
-- ASW (honest): /asw/{osint,forecast,negative-space} — OSINT-LIVE, FORECAST/INFERENCE labeled,
-  NO fake sub tracks.
-- 3D holographic maritime globe at /elite/globe + /jackin/globe (real tracks, China-Seas board).
-- GPU ROUTING: shared operator_shell_v4.py now resolves LLM base from SZL_GPU_BASE_URL (Tailscale
-  box GPU) with honest fallback + /inference-posture endpoints. Fails closed honestly when GPU down.
-- CHAOS-001 fixed (/khipu/sign rejects garbage 4xx). locked=5→8 swept. v7→v11 swept. Pin Check green.
+## EXECUTE (in order; stop + notify on any hard failure, do not fake success)
+1. BOX — serve the model on :8000 (OpenAI-compatible), pick vLLM (Qwen2.5-7B-Instruct-AWQ,
+   served-model-name Qwen2.5-7B-Instruct-AWQ) OR Ollama (qwen2.5:7b-instruct + set SZL_LOCAL_LLM_MODEL).
+   Smoke: GET http://localhost:8000/v1/models must return 200 (that 200 is what the apps probe).
+2. BOX — Tailscale up; capture MagicDNS name + 100.x IP; ensure MagicDNS on; add ACL so the Spaces
+   reach box:8000. Make it auto-reconnect (Step 4 of the runbook: systemd szl-gpu.service +
+   --keepalive + cron health-kick) so the flapping self-heals.
+3. SPACES — set SZL_GPU_BASE_URL (= http://<box>:8000/v1) in the SECRET store of BOTH
+   SZLHOLDINGS/a11oy and SZLHOLDINGS/killinchu (by name only, key never in repo). Set SZL_GPU_TOKEN /
+   SZL_LOCAL_LLM_MODEL only if needed. Factory-restart both Spaces so they re-read the secret.
+4. VERIFY (the real deliverable — honest behavior):
+   - GET .../killinchu/v4/inference-posture + .../a11oy/api/szl/v1/inference-posture →
+     where:gpu, sovereign:true, gpu_reachable:true, local_llm_online:true.
+   - both /v4/healthz + a11oy.net/v4/healthz → sovereign:true, inference:self-hosted-gpu, doctrine v11.
+   - HARD INVARIANT (never violate, enforced in code): sovereign:true ONLY when a live /v1/models
+     probe succeeded THIS request. If the link is down you MUST see honest offline/fallback —
+     do NOT force/patch sovereign:true. A dropped link showing sovereign:true is a defect, not a goal.
+5. STABILIZE — confirm the systemd + keepalive + cron actually survive a simulated flap (stop/start
+   tailscaled once; posture should drop to offline/fallback honestly, then auto-return to sovereign
+   within ~1-2 min). Report the flap-recovery time.
 
-## YOUR ALIGNMENT JOB (keep the estate coherent)
-1. GITHUB: confirm szl-holdings/killinchu + a11oy main are CI-green; the new maritime/ASW/globe/feeds
-   modules are each in serve.py register + Dockerfile COPY + hf-sync.yml APP_FILES/on.push.paths
-   (lockstep — a missing module in any of the three breaks the HF build). Fix any drift.
-2. HF: confirm both Spaces RUNNING on the latest commit, byte-identical to GitHub for all shared
-   szl_*.py + operator_shell_v4.py + a11oy_agent_loop.py + a11oy_org_rag.py + the new maritime/feeds
-   modules. Re-mirror via workflow_dispatch if the per-push detect-gate skipped a module.
-3. a11oy.net (box) — FOUNDER-GATED: do NOT touch. The founder runs BOX_GPU_RUNBOOK.md
-   (team/AUDIT/gpu/) to bring up vLLM/Ollama + Tailscale + set SZL_GPU_BASE_URL secret in BOTH Spaces.
-   Your part: once the secret is set, confirm /inference-posture flips to sovereign:true honestly.
-4. killinchu: confirm the new /elite views + /jackin tabs all render; effector stays SIMULATED.
+## DO / DON'T
+DO: run the box steps, set secrets, restart Spaces, stabilize the link, verify honestly.
+DON'T: commit any key/token/auth-key to a repo (use the secret store / local env only); weaken any
+gate; fabricate a completion or force sovereign; touch cosign-signed artifacts or Rekor without
+founder approval; change the effector (stays SIMULATED).
 
-## UPGRADES TO CARRY (after freeze lifts / when founder approves)
-- Promote Asia/chokepoint vessel theaters from SAMPLE→LIVE by adding SZL_AISSTREAM_API_KEY to the
-  Space secret store (no code change). 
-- Graduate HarvestBudgetWitness.lean (energy) from experimental branch to main (founder-gated, DO-NOT-MERGE tag).
-- Author canonical .github DOCTRINE_V11.md (founder-gated); then the §N clause-ref sweep.
-- Bundle-level SLSA attestation + air-gap proof run (founder-gated, see PROPOSALS.md).
+## DOCTRINE: locked=8 {F1,F4,F7,F11,F12,F18,F19,F22} @ c7c0ba17 · Λ=Conjecture 1 · effector SIMULATED ·
+0 runtime CDN · GitHub↔HF byte-identical · sovereign only on a live successful GPU probe · never commit a key.
 
-## DOCTRINE HARD GATE (never violate)
-locked=8 {F1,F4,F7,F11,F12,F18,F19,F22} @ c7c0ba17 · Λ=Conjecture 1 (never "unique") · Khipu=Conjecture 2 ·
-trust never 100% · SLSA "L1 honest · L2 attested · L3 roadmap" · no user-visible codenames · effector
-SIMULATED human-on-loop · no vessel control · real data LIVE / projections FORECAST / SAMPLE labeled ·
-0 runtime CDN · GitHub↔HF byte-identical · ast.parse/node --check before push · never commit a key · box=founder gate.
-
-## FREEZE RULE
-FREEZE.json activates 2026-06-16. BEFORE then: alignment + safe pushes allowed. FROM 06-16→06-19:
-read-only; any change = hotfix requiring explicit founder approval. Report status to AUTO_STATE.
+## NOTIFY: "SZL sovereign LIVE on the GPU" (with posture/healthz proof + flap-recovery time) when done;
+or the exact failing step + error if the box bring-up hits a hard failure. Report progress to AUTO_STATE.
