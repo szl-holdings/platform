@@ -1,55 +1,18 @@
 {
-  "order_sha": "f30b21bb306d0381cc69fd59959e15c6d17a2742",
+  "order_sha": "2b6c8cf84818fb19413fa48d8aea3f5ae4d7c39f",
   "order_path": "replit-sync/NEXT_ORDER.md",
-  "state": "done",
-  "seen_at": "2026-06-13T22:04:42Z",
-  "updated_at": "2026-06-13T22:04:42Z",
-  "idle": false,
-  "summary": "EXECUTE: bring SZL inference onto the founder's GPU \u2014 DONE on the box-served public surfaces (a11oy.net + killinchu). Honest live-probe sovereignty; hard invariant verified under a simulated tailnet flap.",
-  "done": [
-    "Reality check: the box (167.233.50.75) has NO GPU (Virtio VGA, no nvidia-smi). The runbook's on-box RTX premise is FALSE. Real GPU = Tailscale node 'betterwithage' (100.125.77.31, Windows) serving Ollama (qwen2.5-coder:7b + bge-large), reachable from the box. This is the SOVEREIGN_GPU_WIRING_SPEC.md path, not FOUNDER_GPU_RUNBOOK.md.",
-    "killinchu: created /etc/szl-gpu.env (0600; SZL_GPU_BASE_URL=http://100.125.77.31:11434/v1, SZL_LOCAL_LLM_MODEL=qwen2.5-coder:7b, token mirrored server-side, never echoed/committed); patched killinchu-rebuild with a durable gpu-env-file-patch (mirrors a11oy-rebuild); recreated container from killinchu:local (NO rebuild \u2014 avoids pulling sibling commits pre-freeze).",
-    "a11oy: appended SZL_GPU_BASE_URL/SZL_LOCAL_LLM_MODEL/SZL_GPU_TOKEN to /etc/a11oy-gpu.env; recreated from a11oy:local (NO rebuild) via the rebuild script's env-file pattern.",
-    "VERIFIED sovereign (live /v1/models probe THIS request, never forced): killinchu /api/killinchu/v4/{healthz,inference-posture} sovereign:true where:gpu online:true model:qwen2.5-coder:7b; a11oy /api/szl/v1/inference-posture sovereign:true; a11oy legacy /code/health stays self-hosted-gpu.",
-    "PUBLIC verified: a11oy.net/api/szl/v1/inference-posture sovereign:true; killinchu.a11oy.net + elite.a11oy.net /api/killinchu/v4/healthz sovereign:true.",
-    "STABILIZE: installed /usr/local/sbin/szl-gpu-healthkick.sh + /etc/cron.d/szl-gpu-healthkick (every 2 min) that restarts tailscaled if the GPU /v1/models probe fails (self-heals the BOX side of the link).",
-    "FLAP TEST: stopped tailscaled -> posture honestly dropped to sovereign:false/offline (HARD INVARIANT held, no fake sovereign); health-kick restored sovereign:true in 12 seconds; tailnet reconnected (betterwithage active).",
-    "Replit-side corroboration (independent): a11oy.net /api/szl/v1/inference-posture + killinchu /api/killinchu/v4/healthz both sovereign:true gpu_reachable:true model:qwen2.5-coder:7b on a live /v1/models probe; live-probe gate proven fail-closed read-only (resolve_llm(probe=False).sovereign=False).",
-    "Durability reconciliation (no bandaid): converged killinchu sovereign env to ONE source of truth /etc/szl-gpu.env (canonical /usr/local/sbin/killinchu-rebuild injects it; repointed secondary /root/killinchu-rebuild.sh to it; deleted redundant /etc/killinchu-gpu.env). a11oy stays /etc/a11oy-gpu.env."
+  "state": "processing",
+  "seen_at": "2026-06-13T22:07:23Z",
+  "actionable": [
+    "BOX \u2014 serve the model on :8000 (OpenAI-compatible), pick vLLM (Qwen2.5-7B-Instruct-AWQ,",
+    "BOX \u2014 Tailscale up; capture MagicDNS name + 100.x IP; ensure MagicDNS on; add ACL so the Spaces",
+    "VERIFY (the real deliverable \u2014 honest behavior):",
+    "GET .../killinchu/v4/inference-posture + .../a11oy/api/szl/v1/inference-posture \u2192",
+    "both /v4/healthz + a11oy.net/v4/healthz \u2192 sovereign:true, inference:self-hosted-gpu, doctrine v11.",
+    "HARD INVARIANT (never violate, enforced in code): sovereign:true ONLY when a live /v1/models",
+    "STABILIZE \u2014 confirm the systemd + keepalive + cron actually survive a simulated flap (stop/start"
   ],
-  "honest_constraints": [
-    "HF-hosted Spaces (SZLHOLDINGS/a11oy, SZLHOLDINGS/killinchu) run on HF infra and are NOT on the founder's tailnet, so they CANNOT reach the private GPU at 100.125.77.31. Setting SZL_GPU_BASE_URL there would only fail-closed (honest offline). Did NOT set a misleading secret pointing at an unreachable private IP. The order's verify targets (a11oy.net + killinchu) are the box surfaces and ARE sovereign.",
-    "Sovereignty is live only while 'betterwithage' is awake. When the founder's PC sleeps, posture honestly reports offline; the box-side health-kick heals the tailnet link but cannot wake a sleeping GPU (founder-only: set OLLAMA_KEEP_ALIVE=-1 / keep the node awake).",
-    "Current order framing (BOX_GPU_RUNBOOK on-box vLLM :8000) is INFEASIBLE: the box (167.233.50.75) has NO compute GPU (Red Hat Virtio 1.0 virtual VGA, no nvidia-smi/CUDA). On-box vLLM AWQ serving is physically impossible; sovereign inference is served via the founder's Tailscale GPU per SOVEREIGN_GPU_WIRING_SPEC.md (live+verified). Not a failure to execute \u2014 the only viable path, already done."
-  ],
-  "dispatch_mode": "none",
-  "dispatch_ok": false,
   "gated_skipped": [
-    "Wake/keep-awake of 'betterwithage' GPU node \u2014 founder-only (no box access to the Windows host).",
-    "Setting SZL_GPU_BASE_URL on the HF-hosted Spaces \u2014 futile (HF infra can't reach the private tailnet); intentionally skipped to preserve the honest invariant."
-  ],
-  "doctrine": "v11: locked=8, Lambda=Conjecture 1, effector simulated, never commit a key",
-  "report": "replit-sync/forge-perplexity-update-20260613-sovereign-gpu.md",
-  "prior_report": "replit-sync/forge-perplexity-update-20260613-hf-spaces-genuine-push.md",
-  "forge_sovereign_gpu_verify": {
-    "by": "Forge (Replit task session \u2014 SOVEREIGN-GPU order 2b6c8cf)",
-    "at": "2026-06-13T21:58:03Z",
-    "gpu_node": "betterwithage 100.125.77.31 (Tailscale, Windows) \u2014 Ollama qwen2.5-coder:7b + bge-large",
-    "a11oy_posture": "https://a11oy.net/api/szl/v1/inference-posture -> sovereign:true where:gpu online:true model:qwen2.5-coder:7b (live probe)",
-    "killinchu_posture": "https://killinchu.a11oy.net/api/killinchu/v4/healthz -> sovereign:true inference:self-hosted-gpu (live probe)",
-    "flap_recovery_seconds": 12,
-    "hard_invariant": "VERIFIED \u2014 tailscaled stopped => posture sovereign:false/offline (no forced sovereign); restored on live probe success only.",
-    "persistence": "/etc/szl-gpu.env (killinchu) + /etc/a11oy-gpu.env (a11oy SZL_* appended); both rebuild scripts inject via --env-file so future rebuilds keep sovereign wiring; containers recreated from stable tags (no rebuild).",
-    "deviation": "Box has no local GPU; served via the founder's Tailscale GPU per SOVEREIGN_GPU_WIRING_SPEC (not the on-box RTX runbook). HF-hosted Spaces left honestly non-sovereign (unreachable private tailnet)."
-  },
-  "replit_corroboration_report": "replit-sync/forge-perplexity-update-20260613-2204-sovereign-gpu-corroborate.md",
-  "forge_replit_corroboration": {
-    "by": "Forge (Replit task session) \u2014 corroborating order f30b21bb306d0381cc69fd59959e15c6d17a2742",
-    "at": "2026-06-13T22:04:42Z",
-    "a11oy": "https://a11oy.net/api/szl/v1/inference-posture -> sovereign:true where:gpu gpu_reachable:true model:qwen2.5-coder:7b (live probe)",
-    "killinchu": "/api/killinchu/v4/healthz -> sovereign:true inference:self-hosted-gpu (live probe)",
-    "hard_invariant": "VERIFIED read-only \u2014 probe=False => sovereign=False; never forced.",
-    "durability": "ONE env file /etc/szl-gpu.env (killinchu) + /etc/a11oy-gpu.env (a11oy); deduped divergent /etc/killinchu-gpu.env.",
-    "box_gpu": "NONE (Virtio VGA) \u2014 on-box vLLM runbook infeasible; Tailscale GPU path is the served+verified one."
-  }
+    "SPACES \u2014 set SZL_GPU_BASE_URL (= http://<box>:8000/v1) in the SECRET store of BOTH"
+  ]
 }
