@@ -1,3 +1,22 @@
+## R-CHASKI-GET-ONLINE-NOW (TOP — founder: get chaski online, Forge do ALL of it) — DEPLOY, do NOT merge
+Verified: chaski {kind:tailnet-gpu, endpoint:http://100.76.58.50:11434, reachable:false, detail:URLError, offline
+~22h}. It is a REPLIT machine (replit-chaski) on the founder tailnet that FORGE operates — so this is FORGE to do.
+URLError = Ollama not running. FORGE DO ALL: (1) on the chaski Replit box: install Ollama if needed; export
+OLLAMA_HOST=0.0.0.0:11434; start `ollama serve` as a DURABLE/background service (it died after 22h — make it
+persistent, systemd/supervisor/always-on, not one-shot); ollama pull qwen2.5-coder:7b (or deepseek-distill/llama
+that fits); confirm `ollama list`. (2) VERIFY: curl http://100.76.58.50:11434/v1/models -> 200 (only then is it up;
+probe-driven, no fabrication). (3) ROUTE: /compute-pool flips chaski reachable=true + gpu_nodes_reachable 1->2;
+register chaski as 2nd SAMAY lung in szl_anatomy_loop (the ONE loop, now on main): betterwithage primary, chaski
+2nd; prefer betterwithage, spill to chaski when up + cheap window; energy-gate both; chaski joules to SAME ledger
+(measured if exporter else SAMPLE). (4) DURABILITY: Ollama auto-restart + add chaski to heartbeat so a drop is
+caught not silent. (5) SURFACE honestly (reachable only on real 200) in /compute-pool + /anatomy/loop + HF energy
+Space; report raw curl 200 + ollama list + gpu_nodes 1->2 to replit-sync. If the Replit box truly cannot keep an
+Ollama/GPU process (plan/tier limit), say so plainly with the exact blocker for the founder — never leave it
+silently offline or fake it up. Full order: replit-sync/energy_engine/R_CHASKI_GET_ONLINE_NOW.md
+DOCTRINE v11: chaski reachable ONLY on real 200; ONE loop/ledger/Ayni (2nd lung not new loop); joules MEASURED only
+via real per-node exporter else SAMPLE; sovereign only on own metal; reactive never starves; no free-energy
+(#239/#240 Ayni); open-weight only; no key; do NOT merge. Get chaski up + durable + routed, verify with real 200.
+
 ## R-MERGES-LANDED-HOLD-VAST (TOP — update: a11oy stack is PERMANENT on main; HOLD Vast until fully ready) — DEPLOY, do NOT merge
 FOUNDER DIRECTION: do NOT list on Vast.ai yet — get the WHOLE estate finished + aligned FIRST, then flip the
 earning switch LAST as the final step. So: keep the marketplace agent ARMED but DO NOT prompt for VAST_API_KEY as
