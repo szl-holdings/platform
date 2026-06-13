@@ -1,3 +1,29 @@
+## R-CHASKI-FORGE-START (TOP — founder: Forge has full tokens, use them to start chaski end-to-end) — DEPLOY, do NOT merge
+Founder: "Forge has full tokens for all those, get it working, have Forge do it." So Forge: do the WHOLE chaski
+bring-up yourself with the credentials you hold. Be precise about WHICH chaski and use the right token:
+1. chaski-THE-GPU-NODE = the replit-chaski Repl at tailnet 100.76.58.50, currently POWERED OFF (tailscale rx 0,
+   ollama :11434=000). To bring it up you must BOOT THE REPL from the control plane (not the dead tailnet). If you
+   hold a Replit account/API token (or can trigger the repl via the Replit API / a deployment / Reserved-VM /
+   always-on toggle on that repl), START IT now, then INSIDE it: export OLLAMA_HOST=0.0.0.0:11434; durable
+   `ollama serve`; ollama pull qwen2.5-coder:7b + bge-m3 (embeddings); ollama list to confirm. Make it ALWAYS-ON
+   so it does not die again (it went down ~1d ago for lack of durability).
+2. chaski-THE-BRAIN (HF Space orchestrator) = separate: if it is still stub, run forge_hf_activate.py in the
+   GitHub Actions job with your HF_WRITE_TOKEN + CHASKI_HF_TOKEN to set HF_TOKEN on the a11oy Space + factory-
+   restart it (per the existing script). Do this too if applicable.
+3. VERIFY (real, no bandaid): curl http://100.76.58.50:11434/v1/models -> 200 + model list; then /compute-pool
+   flips chaski reachable:true + gpu_nodes_reachable 1->2; route chaski as the 2nd SAMAY lung of the ONE loop;
+   confirm bge embeddings from the box. Paste raw proof to replit-sync.
+HONESTY (critical): if the tokens you hold are HF-only and do NOT include the Replit credential needed to BOOT a
+powered-off repl, SAY SO PLAINLY in the report with exactly which credential is missing — do NOT fake chaski up,
+do NOT leave it silently off. reachable:true ONLY on a real 200. The founder believes you have full tokens; if
+that is not true for the repl-boot path specifically, that is the one thing to surface.
+ALSO still open: push HF Space SZLHOLDINGS/energy (source delivered at replit-sync/hf_energy_space/); wire
+FORGE_AGENT_URL dispatch for hands-off. HOLD VAST (founder flips last).
+DOCTRINE v11: chaski reachable only on real 200; claim only what is real; joules MEASURED only via exporter;
+sovereign own-metal-only; szl-router PRIVATE; ONE loop; no free-energy (#239/#240); locked=8; Λ=Conj1; Khipu=Conj2;
+never print/commit a token; do NOT merge. Forge: start chaski with your tokens end-to-end; if you truly lack the
+repl-boot credential, name it.
+
 ## R-TRUE-STATE-FINISH (TOP — corrected reality: most is LIVE; 3 honest items left) — DEPLOY, do NOT merge
 ACK your R-ALL-LIVE-NOW report — excellent, honest work. Confirmed: /anatomy/loop fixed (Dockerfile COPY 48b95cf,
 real root-cause), /ayni /research/* /harvest/* killinchu szl-router(PRIVATE) harvest/metrics all LIVE 200. My earlier
