@@ -1,8 +1,10 @@
 {
   "order_sha": "ab1198d83d6f7cde50d13918f369f76f983c21c0",
   "order_path": "replit-sync/NEXT_ORDER.md",
-  "state": "processing",
+  "state": "done",
   "seen_at": "2026-06-13T08:04:52Z",
+  "updated_at": "2026-06-13T08:04:56Z",
+  "idle": true,
   "actionable": [
     "the lean comment as the PHYSICS grounding that our no-free-energy stance is a conservation law, not",
     "confirm live negative price on the box (curl aWATTar);",
@@ -26,8 +28,16 @@
     "[FOUNDER+Forge] Tailscale HA: >=2 subnet routers so the tailnet survives any node dropping.",
     "honest SAMPLE fallback, CTO doctrine-clean. Founder runs the box GPS step at home. Doctrine v11 throughout."
   ],
+  "delegated_to_agent": [],
+  "dispatch_mode": "none",
+  "dispatch_ok": false,
   "gated_skipped": [
     "J5 WattTime v3 (api.watttime.org/v3): 401 \u2014 reachable, needs token; stays SAMPLE until keyed (never commit).",
     "FREE TIERS into the LiteLLM router as zero-cost fallback model_names (keys via secret store,"
-  ]
+  ],
+  "report": "replit-sync/forge-perplexity-update-20260613.md",
+  "probes": {
+    "https://a11oy.net/healthz": 200
+  },
+  "doctrine": "v11: locked=8, Lambda=Conjecture 1, never commit a key"
 }
