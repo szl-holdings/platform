@@ -493,6 +493,47 @@ def _selftest() -> dict:
         check("scheduler_wiring_skipped_cleanly", True)
 
     out["scheduler_integration_exercised"] = sched_checked
+
+    # --- REACTIVE IS NEVER GATED (defense-in-depth structural guard): even when
+    #     the gate is built to deny ALL proactive work, a reactive task is still
+    #     admitted by the gate itself (mirrors scheduler.Priority). -------------
+    class _ReactiveTask:
+        priority = Priority.REACTIVE
+
+    class _ProactiveTask:
+        priority = Priority.PROACTIVE
+
+    deny_all = make_immune_gate(evidence_fn=conservative_evidence, model=model)
+    check("reactive_task_always_admitted_by_guard", deny_all(_ReactiveTask()) is True)
+    check("proactive_task_still_denied_by_deny_default",
+          deny_all(_ProactiveTask()) is False)
+    check("is_reactive_recognises_reactive", is_reactive(_ReactiveTask()) is True)
+    check("is_reactive_rejects_proactive", is_reactive(_ProactiveTask()) is False)
+    check("is_reactive_no_priority_is_not_reactive", is_reactive(object()) is False)
+
+    # --- ALPHA CONTROL IS HONEST & MONOTONE: raising alpha (bigger false-admit
+    #     budget) lowers the threshold => admits MORE; lowering alpha admits LESS.
+    #     Count H0-sample admits at three alphas and assert strict monotonicity.
+    import random as _random
+    rng2 = _random.Random(424242)
+    h0 = [[min(1.0, max(0.0, rng2.gauss(model.mu0, model.sigma))) for _ in range(4)]
+          for _ in range(5000)]
+    def _admit_count(a):
+        thr = threshold_for_alpha(model, a)
+        return sum(1 for f in h0 if model.log_lr(f) >= thr)
+    lo, mid, hi = _admit_count(0.01), _admit_count(0.05), _admit_count(0.20)
+    out["alpha_monotonicity"] = {"alpha_0.01": lo, "alpha_0.05": mid, "alpha_0.20": hi}
+    check("raising_alpha_admits_more", lo <= mid <= hi)
+    check("alpha_band_is_strict", lo < hi)
+    # And the derived threshold itself is monotone decreasing in alpha (exact).
+    check("threshold_decreases_as_alpha_rises",
+          threshold_for_alpha(model, 0.01) > threshold_for_alpha(model, 0.20))
+
+    # --- LIVE SENTRA PROBE never raises and (off-box) falls back to local NP.
+    reachable = sentra_gates_reachable(timeout=0.2)
+    out["sentra_endpoint_reachable"] = bool(reachable)
+    check("sentra_probe_never_raises", isinstance(reachable, bool))
+
     out["example_admit"] = d_strong.as_dict()
     out["example_deny"] = d_weak.as_dict()
     out["ok"] = True
