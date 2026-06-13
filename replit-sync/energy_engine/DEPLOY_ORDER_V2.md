@@ -1,109 +1,147 @@
-# DEPLOY ORDER V2 — Agentic-GPU / Proven Energy Engine (26 PRs)
+# DEPLOY ORDER V2 — from 26 open PRs to a live, MEASURED joule on the RTX 5000
 
-**For:** Forge (box) + Replit (app) operators
-**From:** Perplexity CTO/integrator lane · **Date:** 2026-06-13 · **Doctrine:** v11/v12
-**Engine:** NVIDIA RTX 5000 @ betterwithage (Ollama `:11434/v1` today → vLLM `:8000/v1`)
+2026-06-13. CTO/program-manager finisher. **No PR is merged yet — this is the order to merge them in.**
+The organism is BUILT and WIRED in source but DEPLOYED nowhere. This doc is the Forge/box-executable
+sequence: how to land 26 PRs without breaking a seam, and the shortest path to the first real number.
 
-**Principle (unchanged):** harvest WASTED energy + PROVE bounded work (Bekenstein).
-No free-energy/over-unity. Every joule is **SAMPLE/ESTIMATE until a real meter**.
-Reactive never starves (preemptive). sovereign:true ONLY when a local node serves.
-Consent-only swarm. Open-weight only. Never commit a key. Λ = Conjecture 1; Khipu
-BFT = Conjecture 2; locked-proven = 8 (kernel c7c0ba17). The "half-state" (banner
-says sovereign while turns route to HF router) is the ONLY unacceptable outcome.
-
-This supersedes FORGE_ENERGY_ENGINE_ORDER.md (which covered the first 13 PRs). The
-full build is now **26 open PRs** — all built, self-tested, doctrine-clean, **none
-agent-merged**. Full prioritized plan: `UNIFIED_BUILD_ORDER.md` (companion file).
+Doctrine held throughout: meter REAL flow, never energy-from-nothing; SAMPLE until a real meter feeds the
+field; source claims match the signal; Λ=Conjecture 1; locked-8 untouched; no key committed; half-state forbidden.
 
 ---
 
-## THE 26 PRs (by repo)
+## INTEGRATION VERDICT — do the pieces fit?
 
-**lutar-lean (KEYSTONE proofs — founder-gated, do NOT `--admin` merge):**
-- #239 EnergyBudgetWitness (Bekenstein additive + ledger monotone + Kuramoto + coherence shadow; 0-sorry, core-axioms only)
-- #240 LandauerFloorWitness (minimum energy per irreversible bit)
-- #241 AgenticBodyWitness (organ-pipeline / heartbeat / fleet / self-heal; 0-sorry)
+**Yes, with three documented gaps (none blocking the demo slice; two are 1-line field/URL fixes).**
 
-**platform — apps/agentic-gpu/ (many stacked on #357's branch; merge in order):**
-- #356 energy-source signal feed (off-peak clock + wholesale stub)
-- #357 resident scheduler + daemon (Agent.xpu pattern, reactive-preempt) + energy_gate_adapter.py
-- #358 swarm control-plane (consent-based, anchor-rooted)
-- #359 Bekenstein batch sponge (soak curtailed/negative-price power)
-- #360 energy-proportional proactive admission (NVML headroom + Landauer)
-- #361 vLLM backend + /metrics slack signal
-- #362 immune Neyman-Pearson admission gate (deny-by-default)
-- #363 brain belief-update admission (PAC-Bayes)
-- #364 nervous Shannon-alarm drift detection + daemon self-heal
-- #365 skeleton lean-spine claim→theorem traceability (conjecture-honest)
-- #366 yarqa plug-flow router for swarm energy/compute circulation
-- #367 organ bus — daemon calls live anatomy organs end-to-end
-- #368 fleet topology invariants (Euler/Călugăreanu)
-- #369 real energy data sources (NVML measured joules + aWATTar + CAISO)
+The seams checked (by reading PR diffs + the energy_engine copies — nothing merged):
 
-**a11oy (app surface + receipts):**
-- #328 energy-budget receipt + `GET /v1/energy/budget` (Bekenstein gate)
-- #329 per-turn energy receipt (fail-open)
-- #330 console agentic-GPU operator tab (scheduler + energy window)
-- #331 tamper-evident energy provenance chain (hash-linked)
-- #332 energy engine dashboard (honest GPU + Bekenstein budget view)
-- #334 heart-blood receipt heartbeat (sigma-bus + DSSE)
-- #335 unified `GET /v1/engine/status` (whole-organism honest aggregate)
-- #336 **3D holographic command bridge** (web/hologram.html, Three.js, living-organism view)
+| Seam | Status |
+|---|---|
+| scheduler #357 energy gate ← energy_signal #356 | FITS — #357 stacks on #356, imports the PowerPosture |
+| energy_signal #356 ← real sources #369 | FITS — #369 is disjoint new files under `energy_signal/`, extends #356's off-peak clock as the always-real window floor; aggregator fuses NVML+aWATTar/CAISO |
+| organ-bus #367 → brain #363 / immune #362 / nervous #364 / heart-blood #333 | FITS BY CONTRACT — #367 reaches organs over **HTTP** (amaru.szl.ai / sentra.szl.ai), not by importing the Python modules. Honest-degrades (immune unreachable→DENY, brain unreachable→DEFER). |
+| unified status #335 aggregates mind+organs+energy+swarm | FITS — concurrent honest probes, degrade to reachable:false, sovereign only from /code/healthz |
+| hologram #336 + dashboards read status | **GAP 1 (wiring)** — hologram polls endpoints DIRECTLY (`/code/healthz`, `/v1/energy/budget`, per-organ probes), does NOT consume #335's `/v1/engine/status` |
+| status #335 reads the real budget #328 | **GAP 2 (field-name mismatch)** — see below |
+| status #335 / organ-bus #367 reach amaru/sentra | **GAP 3 (routing)** — those hosts are unrouted; organs read reachable:false until deployed |
 
-**anatomy:**
-- #7 live body view — organs pulse as the agentic-GPU mind acts
+### GAP 1 — hologram #336 does not consume the unified status #335
+`hologram.html` `pollData()` fans out to `/code/healthz`, `/v1/energy/budget`, each organ probe, `/v1/gates`
+directly. It works and is honest (dims to unknown on null), but it bypasses the single aggregator #335 was
+built to be. **Fix (small, post-merge):** repoint `pollData()` at `GET /api/a11oy/v1/engine/status` and map
+the one payload to mind/organs/energy/swarm. Until then the two surfaces can drift.
 
----
+### GAP 2 — budget #328 field names ≠ status #335 expected names
+#335 `_energy_from_budget` reads `window`, `source`, `joules`, `joules_label`. The live #328 budget endpoint
+emits `energy_source`, `joules_est`, `joules_est_label`, and has **no `window` field**. Result: #335 would
+show `window:null, source:null, joules.value:null` from a live #328 — but the label defaults to `"sample"`,
+so it is **honest-degrading, not a doctrine break** (it under-claims, never over-claims). **Fix (1-line):**
+either add aliases to #335's reader (`source` ← `energy_source`, `joules` ← `joules_est`, `joules_label` ←
+`joules_est_label`) or have #328 also emit the canonical names. Add `window` to #328 from the off-peak clock.
 
-## MERGE ORDER (founder/CI-gated; agents do NOT merge)
-
-Bottom-up so each layer's dependency exists first:
-
-1. **Proofs first:** lutar-lean #239 → #240 → #241. `lake build` GREEN, 0-sorry.
-   Only blocker on #239 is cosmetic PR-title-lint (uppercase subject) — founder
-   lowercases the **title**, do not touch the file. **Never `--admin` lutar-lean.**
-2. **platform spine:** #356 (feed) → #357 (scheduler+daemon+adapter) → then the
-   organ/swarm stack #358–#369 (they import the spine). #369 (real data sources)
-   last so NVML/aWATTar/CAISO providers land on top of the feed.
-3. **a11oy surface:** #328 (receipt route) → #329/#331 (receipt emit + chain) →
-   #330/#332/#335 (console/dashboard/status) → #334 (heartbeat) → #336 (hologram).
-4. **anatomy #7** any time after the organ bus (#367) so the body view has organs.
-
-> Pre-existing app-suite Lighthouse/e2e fails on platform are unrelated (these PRs
-> touch only `apps/agentic-gpu/`); do not block on them. The "Build image + SBOM"
-> job is not a required check.
+### GAP 3 — organ hosts unrouted
+Both #335 and #367 probe `amaru.szl.ai` / `sentra.szl.ai` (or same-origin proxy paths). Those are not routed
+in the deploy target yet, so every organ reads `reachable:false`. This is **correct honest behavior**, not a
+bug — but it means "6/6 organs green" is impossible until the proxy/routing lands (Phase 2).
 
 ---
 
-## BOX BRING-UP (Forge — needs real box access; NOT done by Perplexity agent)
+## PHASE 0 — MERGE SEQUENCE (all 26, grouped + ordered)
 
-On the RTX 5000 @ betterwithage:
-1. Confirm Ollama `:11434/v1` serving (`/v1/models` answers → daemon reports sovereign:true).
-2. vLLM upgrade: `vllm serve qwen2.5-coder:32b --enable-prefix-caching --gpu-memory-utilization 0.92 --port 8000`. Flip daemon `endpoint=VLLM_ENDPOINT`; keep Ollama fallback.
-3. systemd unit for `daemon.py run_forever()` (resident, Restart=always) — survives laptop off.
-4. Wire real Chaski reactive ingress into `reactive_ingress(now)` so user turns preempt the proactive agenda ON-DEVICE.
-5. Wire vLLM `/metrics` into slack detection for finer piggybacking.
-6. **First measured joule:** NVML `power.draw` × task_seconds → joules → feed `joules_est` → flip that field SAMPLE→MEASURED in the receipt. This is the single highest-value demo.
+**Rule:** stacked PRs merge base-first; never merge a child before its parent or the diff inverts. Three repos
+carry the organism. Within a repo, merge in dependency order; across repos there is no hard ordering except
+that the **lutar keystone** (the kernel-checked EnergyBudgetWitness) should land before anything claims to
+honor a proven bound.
+
+### Group K — lutar (the proof keystone) — MERGE FIRST
+- **#239** EnergyBudgetWitness (Lean, kernel-checked, 0-sorry) — keystone; everything energy-honest cites it.
+- **#240, #241** — the dependent lutar PRs; rebase onto main after #239, then merge in their stacked order.
+  > Founder convention: lowercase the PR title before merge.
+
+### Group P — platform `apps/agentic-gpu/` (stacked on `feat/agentic-gpu-scheduler`, NOT on main)
+Merge the stack base→tip. The base branch `feat/agentic-gpu-scheduler` must land on main first (it carries the
+`apps/agentic-gpu/` tree that none of these can exist without).
+1. **#356** energy_signal (PowerPosture aggregator + off-peak clock) — base of the energy stack.
+2. **#369** real energy sources (NVML/aWATTar/CAISO + real_aggregator) — stacks on #356.
+3. **#357** scheduler/daemon/energy-gate — stacks on #356; rebase past #369 so the gate sees the real aggregator.
+4. **#362** immune (Neyman-Pearson 8 gates), **#363** brain (PAC-Bayes belief), **#364** nervous (Shannon alarm)
+   — organ modules; base `feat/agentic-gpu-scheduler`; rebase onto the merged tip, merge in any order (disjoint).
+5. **#367** organ-bus (HTTP pipeline immune→brain→run→heart/blood→nervous) — rebase last; depends on the organ
+   contracts existing.
+6. **#358** swarm/registry, **#360** energy-proportional admission, **#361** vllm metrics, **#366** yarqa router
+   — rebase onto the tip; merge after the organs+bus (they consume node/posture signals). Disjoint → any order.
+
+### Group A — a11oy (the Space that serves + proxies)
+- **#328** energy budget endpoint — base of the a11oy energy stack (keystone for the Space).
+- **#329** (depends on #328), **#331** energy-provenance-chain (stacks on #328), **#334** — merge after #328.
+- **#333** heart+blood (receipt σ-bus + DSSE Merkle ledger) — stacks on #331; merge after #331.
+- **#335** unified status API — merge after #328 (so it has a real budget to read); apply GAP-2 alias fix here.
+- **#330, #332** dashboards, **#336** hologram — merge LAST in this repo (read surfaces); apply GAP-1 fix to #336.
+
+> Anything not enumerated above among the 26 that is a doc/vision/aux PR: merge anytime, no code seam. Count is
+> approximate per repo; reconcile the exact list against `gh pr list` per repo at merge time.
 
 ---
 
-## STAYS SAMPLE until a real meter
-`joules_est`, `price_signal`, `energy_spent_sample_units` remain SAMPLE/ESTIMATE
-until NVML/PDU/clamp feeds them. The Lean ledger proves monotonicity of whatever
-nonneg draws are logged — not their physical truth. The only REAL signals today:
-off-peak clock (zero-dep) and the live **aWATTar** wholesale feed (no key, already
-fetched successfully — first REAL energy price signal). CAISO/ENTSO-E next.
+## PHASE 1 — FIRST MEASURED JOULE (the demo slice — smallest set that yields one real number)
 
-## DEFINITION OF DONE (operational)
-Resident daemon on the box, vLLM serving, Chaski turns preempting on-device, the
-energy gate driven by a REAL stranded-power signal, receipts through `/v1/energy/budget`
-with a METERED `joules_est`, hologram + `/v1/engine/status` live, Lean witnesses
-(#239/#240/#241) referenced as formal backing. Until then: **proven + built + wired,
-not deployed.**
+**Goal:** one live receipt carrying a `joules` figure labeled **MEASURED**, shown on the hologram/dashboard.
 
-## CTO RECOMMENDATION (honest)
-The #1 gap is NOT more code — it is that 26 PRs are open, ZERO merged, NOTHING
-deployed. FREEZE new frontiers. Ship ONE vertical slice deployed + measured on the
-RTX 5000 (the "first measured joule" demo): merge the spine (#239,#356,#357,#369,
-#328), bring up the daemon on-box, wire NVML, emit one MEASURED receipt through the
-Bekenstein gate, show it on the hologram. That single slice proves the whole thesis.
+Merge ONLY: **#356 + #357 + #369** (platform energy stack) and **#328 + #329** (a11oy budget), plus the lutar
+keystone **#239** for the honored bound. Then on the **RTX 5000 @ betterwithage**:
+
+1. Land `feat/agentic-gpu-scheduler` → main; merge #356, #369, #357 (rebased) in that order.
+2. Merge a11oy #328, #329; apply the GAP-2 field alias so #335 (or the budget consumer) reads canonical names.
+3. **Deploy the resident daemon on the box.** It runs the #357 proactive loop; the energy gate reads the #356
+   aggregator, which now calls #369's `real_aggregator.current_real_posture()`.
+4. **NVML goes MEASURED on-box.** `nvml_provider.read_gpu_power()` shells to `nvidia-smi` on the RTX 5000 →
+   real `power.draw_W`; `joules = power_draw_W × task_seconds`. THIS is the first measured number.
+5. The daemon writes **one live receipt** carrying that measured joule figure with `joules_label:"measured"`.
+6. Surface it: `/api/a11oy/v1/engine/status` (#335) reports `energy.joules.label == "measured"`; the hologram
+   #336 / dashboard #332 render it. (For the demo, #336 may keep its direct `/v1/energy/budget` probe — GAP 1
+   does not block the number from appearing; wire #336→#335 right after.)
+
+**Acceptance:** a receipt + a status payload both showing a MEASURED joule produced by NVML on the box, while
+the price signal is whatever aWATTar/CAISO honestly returns (already proven live: real curtailed price off-box).
+
+> Milestone already in hand: in THIS env, `real_aggregator` live-fetched a **real aWATTar curtailed price**
+> (`measured_price:true`) while NVML stayed SAMPLE off-box → overall `measured:false`. The half-state was
+> refused by construction. On-box, NVML flips MEASURED → overall MEASURED. The only unchecked item is on-box NVML.
+
+---
+
+## PHASE 2 — FULL BODY (organ-bus + swarm + sponge)
+
+1. Route `amaru.szl.ai` / `sentra.szl.ai` (or same-origin proxy paths) so the organ endpoints in #335/#367
+   resolve (closes GAP 3). Until this, organs are honestly `reachable:false`.
+2. Merge organs #362/#363/#364, organ-bus #367, heart+blood #333. The bus pipeline runs admission→belief→
+   run→receipt/ledger→alarm; #335 now reads real organ statuses.
+3. Merge swarm #358, energy-proportional #360, vllm metrics #361, yarqa #366. The router sends work to the node
+   on live surplus; the batch sponge floods Bekenstein-gated work when surplus flows, drains to reactive-only otherwise.
+4. Apply GAP 1: repoint hologram #336 `pollData()` at #335 so all surfaces read one aggregated truth.
+
+---
+
+## PHASE 3 — WHAT STAYS SAMPLE (honest until a real meter lands)
+
+- **Price/window off-box:** when no provider key is set and the clock is the only signal, window is the REAL
+  off-peak clock fact but the price stays SAMPLE. aWATTar/CAISO (no key) flip price→MEASURED when reachable.
+- **Carbon (`carbon_moer`):** SAMPLE until WattTime (free tier) is keyed. No carbon claim before then.
+- **Heart/blood signing:** tamper-EVIDENT with a SAMPLE placeholder HMAC, NOT "signed," until a real signing
+  key is provisioned via env/secret store. The receipt says so.
+- **Swarm "10 supercomputers":** only consented, probe-confirmed nodes count; everything else is SAMPLE capacity.
+- **Λ-uniqueness:** stays a CONJECTURE. Only `lambda_unique_conditional` (explicit hypotheses) is a real
+  conditional theorem. The skeleton says "Conjecture 1" plainly — never "theorem."
+
+These remain SAMPLE/ESTIMATE-labeled by construction. Relabeling MEASURED requires the named real meter.
+
+---
+
+## PHASE 4 — EVOLVE
+
+- Add keyed providers (ENTSO-E, Tibber, GridStatus.io, EIA, WattTime) → broaden MEASURED coverage region by region.
+- Provision the real signing key → heart/blood goes from tamper-evident to truly signed; anchor DSSE to Cardano.
+- Add a PDU/wall-meter alongside NVML → whole-box joules, not just GPU draw.
+- Drive the proactive loop continuously (LIVE_FLOW_HARVEST): follow surplus around the clock; the swarm router
+  chases the node sitting on live surplus.
+- Promote conditional Lean theorems toward discharging hypotheses; never restate the conjecture as proven.

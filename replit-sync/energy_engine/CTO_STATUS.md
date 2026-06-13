@@ -1,68 +1,64 @@
-# CTO STATUS — Proven Energy Engine (1-page)
+# CTO STATUS — Agentic-GPU Organism (1-page)
 
 **Date:** 2026-06-13 · **Author:** CTO/integrator lane · **Doctrine:** v11/v12
-**Verdict:** Pieces **fit and are wired**. All self-tests green. Nothing on the
-box yet — this is proven code + spec, not a deployed engine.
+**Verdict:** The body is **built and wired in source across 26 open PRs in 3 repos.**
+Self-tests green where built. **Nothing is merged, nothing is deployed.** This is
+proven code + spec, not a running engine. First MEASURED joule needs NVML on the box.
 
 ---
 
-## What is PROVEN (kernel / test level)
-| Claim | Backing | Status |
-|---|---|---|
-| Info budget ≤ Bekenstein `n·8` bits, additive across tasks | `EnergyBudgetWitness.lean` `bekenstein_bound_additive`, `info_within_bound` (composes F19+TH6) | **kernel-checked, 0-sorry, core-axioms only** (PR #239) |
-| Energy ledger monotone (only accrues) | `energy_ledger_monotone` (composes f19_budget_monotone) | kernel-checked (#239) |
-| Multi-node coupling additive (no phantom energy) | `node_coupling_additive` (composes F12) | kernel-checked (#239) |
-| Usable advantage never exceeds initial (anti-overclaim) | `usable_never_exceeds_initial` (discrete-geometric shadow of coherence-decay) | kernel-checked (#239) |
-| `lake build FrontierShowcase` | — | **Build completed successfully** |
+## The organism (MIND + 6 organs + flow + skeleton)
+| Part | Formula / role | PR(s) | Built |
+|---|---|---|---|
+| MIND | RTX 5000 resident daemon + energy-gated scheduler | #357 | yes (3 scenarios + 8-check adapter) |
+| Energy feed | PowerPosture aggregator + off-peak clock | #356 | yes (26 checks) |
+| Real sources | NVML joules + aWATTar/CAISO live price | **#369** | yes (4 modules, 96 checks total) |
+| Budget | Bekenstein gate + `/v1/energy/budget` receipt | #328 | yes (6 checks) |
+| IMMUNE | Neyman-Pearson, 8 deny-by-default gates | #362 | yes (27 checks) |
+| BRAIN | PAC-Bayes (McAllester) belief update | #363 | yes |
+| NERVOUS | Shannon-alarm OTEL + drift | #364 | yes |
+| HEART+BLOOD | σ-receipt bus + DSSE Merkle ledger | #333 | yes (tamper-EVIDENT, SAMPLE HMAC) |
+| SKELETON | Λ-spine (Lean); Λ = **Conjecture 1** | #239/+ | kernel-checked, 0-sorry |
+| ORGAN-BUS | HTTP pipeline immune→brain→run→heart/blood→nervous | #367 | yes (honest-degrade) |
+| STATUS | one `/v1/engine/status` aggregating all | #335 | yes (7 scenarios) |
+| HOLOGRAM + dashboards | 3D command bridge + read surfaces | #336, #330/#332 | yes |
+| FLOW / swarm / sponge | yarqa router, registry, energy-proportional, vllm metrics | #366/#358/#360/#361 | yes |
 
-## What is BUILT (runnable, tested, NOT deployed)
-| Component | File / PR | Self-test |
-|---|---|---|
-| Energy-signal feed (`current_posture`, honest off-peak clock + wholesale stub) | `harvest/energy_signal.py` · PR **#356** | `ok:true`, 26 checks |
-| Energy-budget receipt + `GET /v1/energy/budget` (Bekenstein gate) | `backend/szl_energy_budget.py` + `serve.py` · PR **#328** | `ok:True`, 6 checks |
-| Preemptive resident scheduler (reactive-preempt, energy-gated proactive) | `agentic/scheduler.py` · PR **#357** | `ok:true`, 3 scenarios |
-| Resident daemon skeleton (honest probe, due-agenda) | `agentic/daemon.py` · PR **#357** | `ok:true`, preempt+resume |
-| **Integration seam (NEW): feed → scheduler gate** | `agentic/energy_gate_adapter.py` · PR **#357** (commit `1917970`) | `ok:true`, 8 checks (wired path tracks live window) |
+## PROVEN (kernel-checked, lutar #239) — the energy keystone
+Bekenstein bound additive (`info_within_bound`), ledger monotone, node-coupling additive (no phantom energy),
+usable-advantage never exceeds initial. **0-sorry, core axioms only.** Everything energy-honest cites this.
 
-## What is DEPLOYED on the betterwithage RTX 5000
-**Nothing.** No box access used or assumed. Ollama (`:11434/v1`) is the current
-open-weight server; vLLM (`:8000/v1`) upgrade not done; no systemd unit; no real
-Chaski ingress wired; **no power meter → all joules stay SAMPLE/ESTIMATE.**
+## DEPLOYED on the betterwithage RTX 5000
+**Nothing.** No merge, no systemd unit, no vLLM upgrade, no routed organ hosts, no power meter on the receipt.
 
 ---
 
-## Integration verdict — DO THE PIECES FIT? **YES (now wired).**
-- **Gap found + closed:** `scheduler.EnergyGate` / `daemon.PowerSignal` were
-  abstract callbacks that did NOT import the feed. Added `energy_gate_adapter.py`
-  bridging `current_posture().window == cheap` → the gate; daemon default is now
-  `default_power_signal` (feed-driven, conservative-honest when feed absent).
-- **Receipt shape matches:** `energy_provenance()` emits exactly the receipt's
-  `energy_source` / `joules_est` (SAMPLE) fields — verified key-for-key.
-- **#356 ⊕ #357 merge clean:** disjoint files under `apps/agentic-gpu/`
-  (`energy_signal/` vs `scheduler.py`+`daemon.py`+`energy_gate_adapter.py`).
+## MILESTONE — first REAL energy signal proven live (off-box)
+PR #369's `real_aggregator` live-fetched a **real aWATTar curtailed price** (`measured_price:true`) in this
+env, while NVML stayed SAMPLE off-box → overall **`measured:false`**. The half-state was refused by construction
+(a sampled joule was never labeled measured; a sampled price never upgraded the window). On the box, NVML flips
+MEASURED → overall MEASURED. **This is the first real number the engine has ever touched.**
 
-## CI status (per PR, at write time)
-- **#239 lutar-lean (KEYSTONE):** `lake build` GREEN; PR-title-lint RED (subject
-  starts uppercase — cosmetic, not substance). **Do NOT merge** (founder-gated).
-- **#328 a11oy:** registration + handler smoke green locally; CI founder-gated.
-- **#356 platform:** energy work green; unrelated app Lighthouse/e2e fails are
-  pre-existing (touches only `apps/agentic-gpu/`).
-- **#357 platform:** prior commit-lint RED (109-char header) → FIXED by new
-  69-char header `1917970`; app-suite fails pre-existing. Re-running.
+## Doctrine flags — scan CLEAN
+No free-energy / over-unity claims in code. No joule mislabeled MEASURED without a real meter (the aggregator
+under-claims honestly). Λ = Conjecture 1, said plainly (only a *conditional* theorem exists). No key committed
+(NVML/aWATTar/CAISO all keyless; only env-var URL names). locked-8 round9 formulas untouched. (Pre-existing note:
+one "FREE ENERGY = $0-marginal solar" line in `shared/ALLODIAL_FREE_COMPUTE_VISION.md` — vision doc, means
+cheap-solar not over-unity; recommend relabel "$0-MARGINAL SOLAR".)
 
-## Doctrine flags
-- **No free-energy claims** in any of the 5 PRs. (One "FREE ENERGY = solar,
-  $0 marginal cost" line lives in `shared/ALLODIAL_FREE_COMPUTE_VISION.md` — a
-  pre-existing vision doc, not a shipped artifact; means cheap-solar, not
-  over-unity. Recommend relabel to "$0-MARGINAL SOLAR" to avoid confusion.)
-- All joule/price figures **SAMPLE/ESTIMATE**-labeled. Λ = Conjecture 1
-  untouched. QuantumBio = EXPERIMENTAL. locked-8 / `Lutar/` untouched. No keys.
+## Integration verdict — pieces FIT, with 3 documented gaps (none block the demo)
+1. **Hologram #336 → status #335 not wired** — #336 probes endpoints directly instead of consuming the unified
+   aggregator. Honest, but the surfaces can drift. 1-fn fix post-merge.
+2. **Budget #328 ↔ status #335 field-name mismatch** — #328 emits `energy_source`/`joules_est`/`joules_est_label`,
+   no `window`; #335 expects `source`/`joules`/`joules_label`/`window`. #335 under-claims (label→sample), so
+   **honest-degrading, not a doctrine break.** 1-line alias fix.
+3. **Organ hosts (amaru/sentra) unrouted** — #335 + #367 probe them; until routed, organs read reachable:false
+   (correct honest behavior, not a bug). Closes in Phase 2.
 
-## Top 3 gaps to "operational on the GPU"
-1. **No box deployment** — no systemd daemon, no vLLM, no real Chaski ingress.
-2. **No power meter** — `joules_est`/`price_signal` stay SAMPLE; the only REAL
-   signal today is the off-peak clock + (when keyed) a wholesale API.
-3. **Live app does not import the receipt/scheduler yet** — `serve.py` registers
-   the receipt route but the resident daemon + gate run nowhere live.
+## Top 3 gaps to "live, measured, demoable on the RTX 5000"
+1. **Nothing merged or deployed** — 26 PRs open; no daemon on the box.
+2. **First MEASURED joule needs NVML on-box** — `joules = power.draw_W × task_seconds` only goes real on the
+   RTX 5000; everything else stays SAMPLE until a meter feeds the field.
+3. **Read surfaces not unified + organs unrouted** — hologram bypasses #335; amaru/sentra unrouted → organs dark.
 
-> Full prioritized, Forge/box-executable plan: **`UNIFIED_BUILD_ORDER.md`**.
+> Full merge sequence + the FIRST-MEASURED-JOULE demo slice: **`DEPLOY_ORDER_V2.md`**.
