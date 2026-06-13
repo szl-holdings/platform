@@ -42,6 +42,18 @@ iteration scheduler.
 - `daemon.py` — the always-on resident loop *skeleton*: health/warmth probe of
   the local endpoint, energy-signal gate, due-based proactive agenda, one
   scheduler tick per loop. Runnable self-test: `python3 daemon.py`.
+- `vllm_backend.py` — the endpoint **adapter** the daemon flips to for the vLLM
+  upgrade: prefers vLLM (`:8000/v1`, exposes `/health` + `/metrics`), falls back
+  honestly to Ollama (`:11434/v1`), and to router fallback when neither local
+  endpoint answers. `select_backend()` → `daemon_kwargs()` feeds the daemon's
+  injectable `endpoint=`/`probe=` (no scheduler change). `sovereign:true` ONLY
+  when a local endpoint served. Self-test: `python3 vllm_backend.py` → `{ok:true}`.
+- `vllm_metrics.py` — parses vLLM's Prometheus `/metrics` (running/waiting
+  requests, GPU KV-cache usage, prefix-cache hit rate) into a **slack signal**
+  `∈[0,1]` for finer slack-aware piggybacking; admits proactive work only with
+  real headroom and **no** queue backpressure. Off-box (no `/metrics`) it falls
+  back to a clearly-labeled **SAMPLE** slack model. Self-test:
+  `python3 vllm_metrics.py` → `{ok:true}`.
 - `README.md` — this file.
 
 ## How it maps to Agent.xpu (reactive / proactive / energy)
@@ -67,21 +79,46 @@ that call lives in the box deployment, not in this control-plane skeleton.
 
 ## vLLM upgrade path (from Ollama)
 Ollama is the current open-weight, no-key server. The throughput upgrade
-(Agent.xpu STEP 1) is **vLLM** on the RTX 5000:
+(Agent.xpu STEP 1) is **vLLM** on the RTX 5000. This is a **Forge/box step** —
+**not run here** (this control plane is off-box; do not infer box access):
 
 ```bash
 # On the box (Forge step — not run here):
 vllm serve qwen2.5-coder:32b \
   --enable-prefix-caching --gpu-memory-utilization 0.92 \
   --port 8000            # OpenAI-compatible at http://100.125.77.31:8000/v1
-# /health + /metrics wired; keep Ollama (:11434) as fallback.
+# /health + /metrics wired; keep Ollama (:11434) as the honest fallback.
 ```
 
-The daemon already knows both endpoints (`LOCAL_ENDPOINT` = Ollama `:11434/v1`,
-`VLLM_ENDPOINT` = vLLM `:8000/v1`); flipping `endpoint=` (or probing vLLM first,
-Ollama as fallback) is the only change. vLLM's `/metrics` then feeds GPU-idle
-detection for finer slack-aware piggybacking. No scheduler change required —
-the preemption guarantee is endpoint-agnostic.
+`qwen2.5-coder:32b` is **open-weight** and served **no-key** on the LAN — the
+same model Ollama serves today, so the upgrade is a server swap, not a model
+swap. The control-plane side of the flip is already coded here:
+
+- **`vllm_backend.py`** resolves the backend honestly — `select_backend()`
+  prefers vLLM when `/health` answers, falls back to Ollama, then to router
+  fallback (NOT sovereign) when neither local endpoint serves. `daemon_kwargs()`
+  hands the daemon's injectable `endpoint=`/`probe=` straight in:
+
+  ```python
+  from vllm_backend import daemon_kwargs
+  from daemon import ResidentDaemon
+  kw = daemon_kwargs()                       # probes; picks vLLM, else Ollama
+  daemon = ResidentDaemon(endpoint=kw["endpoint"], probe=kw["probe"])
+  ```
+
+- **`vllm_metrics.py`** turns vLLM's `/metrics` into a slack signal the
+  scheduler polls (`slack_signal_fn()`), so proactive piggybacking only fires
+  when there is real GPU headroom and no queue backpressure. Off-box it returns
+  a SAMPLE slack (labeled), never a measured one.
+
+**No scheduler change required** — the preemption guarantee is endpoint-agnostic,
+and the slack signal only *permits* proactive admission; reactive turns still
+preempt within one tick and are never starved.
+
+```bash
+python3 vllm_backend.py   # {ok:true} — vLLM-preferred, Ollama fallback, honest router fallback
+python3 vllm_metrics.py   # {ok:true} — /metrics → slack signal, SAMPLE fallback off-box
+```
 
 ## Run (self-tests, local, no GPU)
 ```bash
