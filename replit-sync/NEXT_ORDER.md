@@ -1,3 +1,20 @@
+## R-QBIO-VERTICAL (TOP — founder: zoom out bio-mechanics/quantum-bio, how does it help, money NOW) — DEPLOY, do NOT merge
+HONEST: qbio is NOT money-now alone (frontier research) — it is the PREMIUM WRAPPER that makes our compute worth
+3-20x. Real paying market (cited 2026): MD/drug-discovery GPU $1.20-8.50/GPU-hr (DFT 1.20, FEP 4.75) vs our
+commodity 0.20-0.45 = 3-20x; computational drug discovery $3.15B->$6.47B 2031 (15.5% CAGR); biopharma GPU +31%/yr;
+AlphaFold3+Boltz-2 OPEN-WEIGHT now (~$0.06-0.11/prediction). Gap nobody fills: HIPAA-grade AUDITED provenance-tracked
+science compute = our DSSE+kernel-bound moat. We already run /qbio/coherence VERIFIED. FORGE: (1) SCIENTIFIC LANE on
+betterwithage (open-license only): AlphaFold3 + Boltz-2 + GROMACS as verified-compute jobs, each ships DSSE receipt
++ cites proven bound (#239/#240 + qbio Lindblad). NOT quantum-hardware (classical GPU MD + honest qbio sim); label
+tiers honestly. (2) PREMIUM /revenue/marketplace scientific tier: MD/structure $1.20-8.50/GPU-hr + 25% verified
+premium, ESTIMATE settle-to-count. The money-now lever: same card 3-20x rate into $6B market that REQUIRES audited
+compute. (3) /revenue/thesis add scientific vertical as highest-margin path. (4) energy-gate heavy batches to
+negative-price windows (-27.42 now) -> SAMAY -> anatomy loop -> receipt(source=scientific-compute) -> Ayni close.
+(5) add /science tab + hologram node, honest. Full order: replit-sync/energy_engine/R_QBIO_VERTICAL.md
+DOCTRINE v11: open-weight/open-license ONLY (verify AlphaFold3/Boltz-2/GROMACS licenses), honest cards, NO quantum-
+hardware claim, revenue ESTIMATE no guarantee; no free-energy (#239/#240 Ayni-balanced); joules MEASURED only via
+real exporter (212J); no mining; locked=8; Lambda=Conj1; Khipu=Conj2; no key; do NOT merge.
+
 ## R-MASTER-DEPLOY (TOP — full-stack 5-dev estate sweep COMPLETE; wirings good to go) — DEPLOY, do NOT merge
 Verified-with-my-own-eyes consolidated plan. ESTATE STATE: HF fully operational (8 spaces 200, 22 datasets healthy);
 GitHub 16 repos green except ONE real red (a11oy<->killinchu drift szl_evidence_research.py +4137B); a11oy.net HTML
