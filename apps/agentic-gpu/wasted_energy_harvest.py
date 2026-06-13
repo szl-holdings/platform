@@ -275,6 +275,81 @@ def scan_global_resources() -> dict:
     return {"sites": out, "best_wind_site": best, "best_wind_kmh": winds.get(best) if best else None}
 
 
+# FLARED GAS — the biggest wasted-energy source on Earth: 151 bcm burned to nothing in
+# 2024 (World Bank). Top flaring nations: Russia, Iran, Iraq, USA, Venezuela, Algeria,
+# Nigeria, Libya, Mexico. Tracked LIVE & FREE by NASA VIIRS satellite (Flaring Monitor,
+# open data). The outside-the-box play: a flare site is STRANDED energy + heat that is
+# being destroyed — the ideal place to PLACE a consented sovereign compute node that runs
+# on gas otherwise torched. This jack maps WHERE the wasted flare energy is, by operator.
+_FLARE_OPERATOR_CSV = ("https://raw.githubusercontent.com/flaringmonitor/viirs-flare-data/"
+                       "main/processed/flaring_monitor_company_stats_satellite_modeled.csv")
+
+
+def jack_flared_gas(top_n: int = 8) -> FeedReading:
+    """Flaring Monitor satellite-modeled flared-gas volumes by operator (VIIRS, free).
+    Returns the leaderboard of operators burning the most gas (latest column with data).
+    Honest: this is a RESOURCE/WASTE map (who flares how much), NOT a claim we capture it.
+    The flared gas is wasted energy that could power a consented on-site node instead."""
+    try:
+        req = urllib.request.Request(_FLARE_OPERATOR_CSV, headers=UA)
+        with urllib.request.urlopen(req, timeout=TIMEOUT) as r:
+            text = r.read().decode("utf-8", "replace")
+    except Exception:
+        return FeedReading("flared_gas_viirs", False, False, note="unreachable")
+    lines = [ln for ln in text.splitlines() if ln.strip()]
+    if len(lines) < 2:
+        return FeedReading("flared_gas_viirs", True, False, note="empty")
+    header = lines[0].split(",")
+    # find the last month column that has any data; sum 'sat estimated volume' rows per operator
+    try:
+        ci_company = header.index("company_name")
+        ci_ptype = header.index("product_type")
+    except ValueError:
+        return FeedReading("flared_gas_viirs", True, False, note="unexpected schema")
+    month_cols = list(range(ci_ptype + 2, len(header)))  # month columns trail the metadata
+    totals: dict = {}
+    for ln in lines[1:]:
+        cells = ln.split(",")
+        if len(cells) <= ci_ptype:
+            continue
+        if cells[ci_ptype].strip() != "sat estimated volume":
+            continue
+        company = cells[ci_company].strip()
+        # latest non-empty month value for this row
+        val = None
+        for mc in reversed(month_cols):
+            if mc < len(cells) and cells[mc].strip():
+                try:
+                    val = float(cells[mc])
+                    break
+                except ValueError:
+                    continue
+        if val:
+            totals[company] = totals.get(company, 0.0) + val
+    if not totals:
+        return FeedReading("flared_gas_viirs", True, False, note="no volume rows")
+    leaders = sorted(totals.items(), key=lambda kv: kv[1], reverse=True)[:top_n]
+    top = leaders[0]
+    note = "; ".join(f"{n}:{int(v)}Mcf" for n, v in leaders[:5])
+    return FeedReading("flared_gas_viirs", True, True, round(top[1], 0), "Mcf (top flarer, latest)",
+                       f"leaders — {note}")
+
+
+def flared_gas_leaderboard(top_n: int = 10) -> dict:
+    """Structured flared-gas-by-operator leaderboard for the API/UI."""
+    fr = jack_flared_gas(top_n=top_n)
+    return {
+        "reachable": fr.reachable,
+        "top_flarer_mcf_latest": fr.value,
+        "leaders_note": fr.note,
+        "source": "Flaring Monitor / NASA VIIRS satellite (open data)",
+        "global_2024_bcm": 151,
+        "top_flaring_nations": ["Russia", "Iran", "Iraq", "USA", "Venezuela",
+                                "Algeria", "Nigeria", "Libya", "Mexico"],
+        "doctrine": "flared gas is WASTED energy (burned to nothing); a consented on-site node could run on it. We map it; we do not claim to capture it. No free-energy.",
+    }
+
+
 def jack_caiso() -> FeedReading:
     """CAISO OASIS reachability (US California public LMP). Probe-only here (zip payload)."""
     try:
