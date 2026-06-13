@@ -1,3 +1,24 @@
+## R-FINISH-IT-ALL (TOP — founder: handle it ALL, finish) — the execution checklist — DEPLOY, do NOT merge
+Bottleneck = HF Space IMAGE REBUILD; most surfaces stay 404 until you rebuild+push a11oy + killinchu images with
+the new modules COPYd in the Dockerfile. DO FIRST: rebuild a11oy image with szl_dark_surfaces_register.py (#342 ->
+energy/budget,engine/status,formula/sovereign,energy/provenance,heart/pulse,ayni; keep /proof from reverting),
+szl_anatomy_loop.py (#341 + #343 YARQA-circulatory -> /anatomy/loop), szl_research_infra.py (#344 -> research/prereg,
+trial, verify; 14 tests green); smoke-test each to 200. Rebuild killinchu image -> finance/*+realestate/*+/elite/
+wiring (#115) 200. Push NEW HF static Space SZLHOLDINGS/energy from /home/user/workspace/hf_energy_space/ (label
+renewable share "% of demand"). THEN WIRE: fold research INTO energy (szl_research_infra -> szl_anatomy_loop intake
+source=verified-research, trial chain shares szl-lake ledger, cite #239/#240 energy-info bound, one loop one ledger);
+keep 212J measured bridged; agentic marketplace ready (auto-list/price/gate/receipt/settle when VAST_API_KEY/AKASH_
+WALLET/IONET/RUNPOD appears in YOUR secret store); mirror open weights + AlphaFold3/Boltz-2/GROMACS sovereign +
+vLLM + free-credits pack; /harvest/datacenters from dchub/dcmap/OSM. REDS: evidence_research drift allow-listed
+(confirm green); platform #357/358/360 fix app-quality cause on-box NO --admin; lutar-lean #239-242 founder-only
+never --admin. FOUNDER DECISION open: one canonical loop DSSE receipt schema or crosswalk. REPORT to replit-sync:
+surfaces flipped 200, energy Space URL, agent-state, founder action list (VAST_API_KEY first; chaski ollama serve;
+credit apps; receipt-schema decision; send outreach playbook). Full order: replit-sync/energy_engine/R_FINISH_IT_ALL.md
+DOCTRINE v11: joules MEASURED only via exporter (212J); no free-energy (#239/#240 Ayni); energy != data; consent
+only no theft; NOT mining; research=process-verification NO psi claim cite never plagiarize; open-weight/open-license
+only; effectors SIMULATED; organs EXPERIMENTAL; revenue ESTIMATE no guarantee; locked=8; Λ=Conj1; Khipu=Conj2; SLSA
+L1 honest; NEVER commit key/seed; do NOT merge. Finish the deploy; half-state is the only unacceptable outcome.
+
 ## R-FOLD-RESEARCH-INTO-ENERGY (TOP — founder: use my formulas + my energy, fold research INTO the energy concept) — DEPLOY, do NOT merge
 Not a separate product — a verified experiment becomes WORK the energy loop does: soaked on harvested wasted energy,
 bounded by the proven formulas, receipted in the same chain, Ayni-balanced. ONE organism, one loop, one ledger.
