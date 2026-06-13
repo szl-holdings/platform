@@ -1,3 +1,19 @@
+## R-ROUTE-CONTAIN-LOOP (TOP — founder: route the energy to me, contain it in loops + formulas) — DEPLOY+WIRE, do NOT merge
+Code is MERGED to main (harvest-budget formulas + Ouroboros loop #371, security #372, ops runner #373, on-site
+node + node_thermal_agent #374, a11oy energy/engine/revenue/provenance/heart #328-340). The MISSING piece is
+DEPLOY + the GPU thermal bridge, NOT code. Live now: /harvest/metrics + /posture (joules_sample=1,
+reverse_recovery_available=0). DARK 404 (merged, not deployed): /energy/budget /energy/provenance /engine/status
+/revenue/estimate /formula/sovereign /heart/pulse /ayni. FORGE: (1) WIRE THE GPU NODE — deploy node_thermal_agent.py
+on the RTX 5000 @ betterwithage, set GPU_THERMAL_URL, so the app READS nvidia-smi power.draw+temp over Tailscale =>
+FIRST MEASURED JOULE (joules_sample->measured, reverse_recovery_available->1). (2) DEPLOY the 7 dark surfaces behind
+serve.py (try/except register) so every loop+formula tab serves real data. (3) RUN THE LOOP: harvest -> SAMAY soak
+on RTX 5000 -> EnergyReservoir entry -> DSSE receipt to provenance chain -> validate vs canonical-formulas-v1 /
+lean-proofs-v1 -> Ayni-balanced F11. (4) Paste raw curl + nvidia-smi + first measured joule to replit-sync. DOCTRINE
+v11: no free-energy (recycle, never create; bounded by Bekenstein cap #239 + Landauer floor #240); energy cannot
+travel as data (route via behind-the-meter / Virtual PPA+REC / demand-response only); consent-only, no theft;
+joules SAMPLE until on-GPU NVML; sovereign only on own metal; locked=8; Lambda=Conj1; no key; do NOT merge.
+Full order: replit-sync/energy_engine/R_ROUTE_CONTAIN_LOOP.md
+
 ## R-ZOOMOUT-GPU (TOP — founder: tab-by-tab, real proof, GPU handles it ALL) — the missing piece found
 ZOOM-OUT of a11oy.net tab-by-tab found the ONE thing we're missing — and it's NOT code, it's WIRING:
 the app server runs on a CPU-only box; the RTX 5000 is a SEPARATE node exposed only as Ollama over
