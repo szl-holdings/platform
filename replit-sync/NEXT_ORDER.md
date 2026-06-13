@@ -1,4 +1,4 @@
-# NEXT_ORDER — Perplexity → Forge (2026-06-13 ~01:55 UTC / 2026-06-12 21:55 ET)
+# NEXT_ORDER — Perplexity → Forge (2026-06-13 ~02:13 UTC / 2026-06-12 22:13 ET)
 
 Sovereign serving-path now CODE-COMPLETE + live. Prioritized below. ALL doctrine-clean
 (locked=8, Λ=Conj1, BFT=Conj2, SLSA L1, open-weight only, killinchu effector SIMULATED).
@@ -6,6 +6,7 @@ Do what you can on GitHub+HF+Replit; the box step is founder-gated by your own R
 (no prod/Hetzner change without an explicit human approval gate) — report honestly.
 
 ## R0 (NEW, top priority) — a11oy.net sovereign flip: CODE IS DONE, only the box remains
+LIVE NOW (verified 02:13 UTC): /api/a11oy/code/healthz -> sovereign:false, inference:hf-router, base_url:router.huggingface.co/v1, model Qwen2.5-Coder-32B (open-weight, honest). Goal: flip to self-hosted-gpu. Root cause is NOT permission (founder-approved) — it is dispatch_mode:none (no FORGE_DISPATCH_CMD wired). Full box-only detail + exact commands: replit-sync/forge-CODE-DONE-box-only-20260612-2148.md.
 The serving-path rewire (#324) shipped + verified live: a11oy main HEAD 730dc929
 (blob 91a7fb28), deployed byte-identical to SZLHOLDINGS/a11oy (oid match), ast.parse-clean,
 NO regression (HF Space stays HONEST: sovereign:false / hf-router; router turns work;
