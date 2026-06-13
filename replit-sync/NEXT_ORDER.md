@@ -1,3 +1,24 @@
+## R-EVOLVE-FREE (TOP — founder: evolve + upgrade for free, take the world incl China, make it ours) — DEPLOY, do NOT merge
+HARD LINE: take ONLY openly-licensed inputs — NO dark-web/stolen/covert (tainted provenance kills the SLSA/DSSE
+moat + breaks consent-doctrine). The legit path is huge: mirror the worlds best OPEN weights to our HF org + run
+sovereign on our metal = "make it ours" done right.
+1. MIRROR BEST OPEN WEIGHTS (verify license on each card first): DeepSeek V4 (MIT), Qwen 3.x coder/general
+(Apache-2.0), GLM-5 (MIT), Mistral Small (Apache-2.0), Llama 4 (check community license), Kimi K2.x (check). For
+each: confirm license allows mirror+sovereign use, mirror to SZLHOLDINGS HF with honest card citing upstream+
+license (NEVER claim we trained it), pull the RTX-5000-fitting ones (qwen, deepseek-distill, GLM) into Ollama on
+betterwithage. Add served_by+license to receipts.
+2. FREE CREDITS (~$500K stackable, FOUNDER applies — Forge preps replit-sync/credits_application_pack.md with
+eligibility+links+SZL facts): NVIDIA Inception (free, unlocks AWS Activate $100K), Microsoft Founders Hub ($150K,
+apply first), Google Cloud for Startups ($350K incl TPU), HF ZeroGPU/GPU grant, Together AI ($15-50K).
+3. FASTER INFERENCE FREE: stand up vLLM (OpenAI-compatible, best default) as a 2nd sovereign backend on
+betterwithage alongside Ollama, behind the router; SGLang for RAG latency; report tok/s before/after on real
+qwen2.5-coder batch.
+4. WIRE: new models + vLLM register in /compute-pool on rtx-betterwithage; anatomy SAMAY soaks heavier batches in
+negative-price windows (more work_credits, Bekenstein/Landauer-bounded, Ayni-balanced); marketplace lists upgraded
+capability (higher $/GPU-hr, honest ESTIMATE, settle-to-count). Full order: replit-sync/energy_engine/R_EVOLVE_FREE.md
+DOCTRINE v11: openly-licensed ONLY; honest model cards; open-weight; no free-energy; joules SAMPLE; locked=8;
+Lambda=Conj1; no key; do NOT merge. Founder applies to credit programs; everything else is Forge.
+
 ## R-ANATOMY-LIVE + WAKE-CHASKI (TOP — founder: route all jacked-in energy into anatomy loop + get chaski online) — DEPLOY, do NOT merge
 ACK: verified live — /revenue/marketplace 200 (honest $108-244/mo ESTIMATE, settled=$0, energy_gated -15.7,
 NO mining); /compute-pool 200 (6-node fabric, rtx-betterwithage sovereign-live, chaski offline ~22h honest);
