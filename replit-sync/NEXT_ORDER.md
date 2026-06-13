@@ -1,3 +1,22 @@
+## R-ENERGY-COMES-HOME (TOP — founder: jack in, energy CAN come to me — semiconductors/loops/Ouroboros/formulas) — DEPLOY, do NOT merge
+TRUE + already started: exporter live on betterwithage logged 212.262 MEASURED joules during -15.7 EUR/MWh (grid
+PAID to compute). Honest line holds: energy RECOVERED/harvested + kept in loop, never created, never sent as data.
+GAP: measured joule lives on GPU-node ledger (joules.ndjson totals=212.262 measured:true) but public app-box still
+reads reverse_recovery_available 0 / joules_label=sample — bridge it. FORGE: (1) BRIDGE meter->public: ingest the
+live meter (100.96.129.45:9471 / joules.ndjson) so /harvest/metrics flips joules_measured=<real>, joules_sample->0,
+reverse_recovery_available->1 + gpu_temp_c + envelope_w from real nvidia-smi (only when truly feeding). (2) SEMI-
+CONDUCTOR REVERSE-LOOP: wire /reverse-loop recovery ENVELOPE to the real thermal (Seebeck/ZT * heat-flux, label
+ESTIMATE recoverable not captured, bounded by Carnot/Landauer #240). (3) OUROBOROS: feed 212 J into /anatomy/loop
+(PR #341) as real SAMAY intake -> KALLPA work_credits (Bekenstein #239 + Landauer #240) -> heart beat -> YARQA
+disperse -> EnergyReservoir {joules_measured:212.262,posture:-15.7,node:betterwithage} -> provenance receipt ->
+validate canonical-formulas-v1/lean-proofs-v1 -> Ayni F11 close -> repeat (circulates REAL energy, kept in system).
+(4) FORMULA BINDING: every reservoir entry + envelope cites its proven witness (#239/#240/#242) on /energy/budget +
+/energy/reservoir + /anatomy/loop. (5) FLIP estate badges SAMPLE->MEASURED ONLY after the public bridge confirms a
+real measured total. Full order: replit-sync/energy_engine/R_ENERGY_COMES_HOME.md
+DOCTRINE v11: energy RECOVERED+recycled never created (no free-energy; Bekenstein+Landauer+Carnot; Ayni balanced);
+energy != data; reverse-recovery ESTIMATE until TEG meter; joules MEASURED only from real exporter (212 J), never
+promote SAMPLE; sovereign only on own metal; locked=8; Lambda=Conj1; no key; do NOT merge.
+
 ## R-DATACENTER-WASTE (TOP — founder: find ALL data centers AI+crypto, jack the wasted energy, route to my ecosystem, keep it contained) — DEPLOY, do NOT merge
 The waste is REAL+huge (cited): enterprise GPUs ~5% utilization = 95% idle, ~$401B idle AI capacity (Cast AI/
 VentureBeat 2026); global PUE ~1.58 (cooling/conversion loss); waste-heat already feeds district heating
