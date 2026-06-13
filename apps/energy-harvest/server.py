@@ -30,6 +30,7 @@ from fastapi.responses import FileResponse, JSONResponse, PlainTextResponse
 import engine
 import body
 import reverse
+import fabric_nodes
 
 app = FastAPI(title="SZL Energy Harvest", version="1.1.0")
 
@@ -104,6 +105,17 @@ def reverse_loop():
     return reverse.reverse_loop_status()
 
 
+@app.get("/compute-pool")
+def compute_pool():
+    """Honest multi-node compute fabric registry: every reachable compute endpoint
+    the box can run inference / ML-proof-search / Lean kernel builds across. Each
+    node is LIVE only on a REAL probe this scrape; sovereign=True only for owned
+    self-hosted hardware (the RTX + the box). Brev cloud GPUs and hosted APIs are
+    sovereign=False; no node is fabricated; Brev slots stay empty until launched +
+    joined to Tailscale. No energy/joule claim. Lambda = Conjecture 1."""
+    return fabric_nodes.compute_pool()
+
+
 def _g(name, val, help_, typ="gauge"):
     if val is None:
         return ""
@@ -141,6 +153,7 @@ def metrics():
         _g("szl_energy_harvest_joules_sample", 1,
            "1 = joules are SAMPLE (no on-box NVML meter yet), never measured here."),
         reverse.metrics_lines(_g),
+        fabric_nodes.metrics_lines(_g),
     ])
     return PlainTextResponse(body_txt, media_type="text/plain; version=0.0.4")
 
