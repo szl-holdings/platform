@@ -1,12 +1,12 @@
 ---
 title: SZL Energy
 emoji: ⚡
-colorFrom: teal
+colorFrom: green
 colorTo: indigo
 sdk: static
 app_file: index.html
 pinned: false
-short_description: Live energy command view — harvest stranded watts, prove bounded compute, circulate Ayni-balanced joules. 212.262 measured joules at negative price.
+short_description: "Live energy view: stranded watts, bounded compute, joules"
 ---
 
 # SZL HOLDINGS — ENERGY
