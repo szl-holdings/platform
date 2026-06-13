@@ -1,4 +1,27 @@
-## R-FRONTIER (TOP — zoom-out finding) — ALLODIAL backbone is PROVEN but un-served; now wired (PR #337)
+## R-JACK-IN (TOP — founder: TEST THE JACK BEFORE THE WIRING) — probe every energy/data jack, then wire, ALL GPU-side tests on the box
+Founder directive: probe each jack live and confirm it responds BEFORE building any adapter against it.
+The agent sandbox CANNOT reach the Tailscale GPU, so ALL GPU-box jacks (NVML/vLLM/Chaski/systemd) are
+yours to probe+wire+test on the box. Full order: replit-sync/energy_engine/R_JACK_IN_ORDER.md.
+AGENT-SANDBOX PROBES ALREADY DONE (off-box jacks, 2026-06-13):
+  - J2a aWATTar (api.awattar.de/v1/marketdata, no key): PASS — LIVE and showing NEGATIVE PRICES NOW
+    (-1.11 and -4.92 Eur/MWh). This is REAL stranded/curtailed power: the grid is paying to offload.
+    The harvest signal the founder described is real and confirmed.
+  - J2b CAISO OASIS (oasis.caiso.com/oasisapi PRC_LMP): PASS — HTTP 200.
+  - J5 WattTime v3 (api.watttime.org/v3): 401 — reachable, needs token; stays SAMPLE until keyed (never commit).
+FORGE PROBES FIRST on the box (before wiring): J1 NVML `nvidia-smi --query-gpu=power.draw,...` (live watts?),
+J3 vLLM (`vllm --version`; does a 32b fit RTX 5000 VRAM? be ready to drop to 14b/7b), J4 systemd+daemon import.
+Report the PHASE-A probe table FIRST; only wire jacks that PASSED. Then PHASE-B wire+test, leading with
+JACK 1 = FIRST MEASURED JOULE: serve one qwen2.5-coder:7b turn, capture power.draw before/after,
+joules = W x seconds, emit ONE receipt through the Bekenstein /v1/energy/budget gate with
+joules_label:"measured" (on-box NVML path only; everything off-box stays SAMPLE). JACK 2: map aWATTar
+NEGATIVE price -> posture negative-price -> scheduler ADMITS batch in the negative window, DEFERS in an
+expensive one. JACK 3: vLLM + /metrics slack. JACK 4: systemd resident daemon + Chaski reactive preempt.
+Report raw test output per jack with honest MEASURED-vs-SAMPLE labels to replit-sync/forge-jackin-report-<UTCstamp>.md.
+Doctrine: no free-energy; joules SAMPLE until a real meter; sovereign only when local serves (half-state
+forbidden); never commit a key; Λ=Conj1; locked-8 untouched. You do NOT merge; never --admin lutar-lean.
+The single demo slice = JACK 1 producing one MEASURED joule on the box.
+
+## R-FRONTIER (zoom-out finding) — ALLODIAL backbone is PROVEN but un-served; now wired (PR #337)
 Zoom-out across all 30 repos + a11oy + lutar-lean + thesis v1->v26 found the real frontier lever: the
 founder's central "allodial, no kill-switch, no one can switch it off" vision already has a KERNEL-CHECKED,
 0-sorry Lean backbone (Lutar/Allodial.lean #229, EXPERIMENTAL tier) that was NOT served anywhere. a11oy
