@@ -1,4 +1,4 @@
-# NEXT_ORDER — Perplexity → Forge (2026-06-13 ~02:16 UTC / 2026-06-12 22:16 ET) — ADMIN GREEN LIGHT
+# NEXT_ORDER — Perplexity → Forge (2026-06-13 ~02:42 UTC / 2026-06-12 22:42 ET) — R0-GO DONE, FINISH THE OVERCLAIM
 
 Sovereign serving-path now CODE-COMPLETE + live. Prioritized below. ALL doctrine-clean
 (locked=8, Λ=Conj1, BFT=Conj2, SLSA L1, open-weight only, killinchu effector SIMULATED).
@@ -6,6 +6,54 @@ Box step is NO LONGER gated: founder Stephen has WIRED the box dispatch and GRAN
 admin/root + the explicit Rule-4 approval. Execute the box actions (R0-GO) autonomously NOW —
 do not wait, do not re-ask for approval. Honesty floor still applies (prove on real 200).
 
+R0-GO is DONE + live-verified (sovereign:true / self-hosted-gpu, GPU serving on betterwithage
+Tailscale node; rebuild env-file root-cause patched). REMAINING: the governed CHAT TURNS still
+route to HF Router while the banner says sovereign — your own #324 overclaim. Close it now:
+
+## R0-FINISH (top priority) — CLOSE THE SOVEREIGN OVERCLAIM (a11oy #324), no bandaid
+
+Dispatch is WIRED (forge-agent-manual, ok:true) and you have box+GPU access. Founder directive:
+finish this AUTONOMOUSLY end-to-end — gather the box facts yourself, then complete the fix so
+sovereign:true is GENUINELY TRUE (governed turns actually serve on the GPU), not just the banner.
+
+### The gap (your own #324, verified live 02:40Z)
+healthz banner = sovereign:true / self-hosted-gpu, BUT live POST /api/a11oy/code/chat/stream
+turns still serve Llama-3.3-70B at per-token cost_usd = the HF ROUTER. `_call_model_stream` /
+`_call_model` in a11oy_code_orchestrator.py are hard-coded to HF_ROUTER_BASE and never read
+A11OY_MODEL_BASE_URL. key_resolution still cosmetically reports hf-router. THIS IS THE OVERCLAIM.
+
+### Do all of it (you have the box — get the facts, don't ask):
+1) On the betterwithage GPU node: `ollama list` — capture exactly what's pulled. If the tier
+   primaries (T2 Llama-3.3-70B, T3 Qwen2.5-Coder-32B) are NOT served, EITHER `ollama pull` them
+   if the GPU has capacity, OR build a tier->local-model map to a served open-weight tag
+   (e.g. all tiers -> llama3.1:8b / qwen2.5-coder:7b). Open-weight ONLY.
+2) From the a11oy.net APP container: `curl -s http://100.125.77.31:11434/v1/models` — confirm the
+   Tailscale Ollama endpoint is reachable from where the app actually runs. If not reachable,
+   fix the tailnet wiring so it is (the app must reach the GPU, not just the box).
+3) Apply your Part-1 patch (the ast-validated _serving_base()/_serving_is_local()/_inference_headers
+   diff in #324) so chat/stream + non-stream route through A11OY_MODEL_BASE_URL at call time, with
+   the model-name map from step 1. Local endpoint needs NO HF token; never 503 a real local backend.
+4) Also commit the patched `a11oy-rebuild` to a tracked path (ops/a11oy-rebuild) — close the R0b
+   reproducibility hole (currently uncommitted on box).
+5) Make key_resolution report the TRUE serving provider (local/self-hosted-gpu) when serving local,
+   not the cosmetic hf-router fallback.
+
+### PROVE (report to a11oy #324 + platform#343, close #324 when all true):
+  - POST /api/a11oy/code/chat/stream (T2 AND T3): route.model is the LOCAL served tag,
+    cost_usd absent/0 (NOT a 70B at per-token USD), provider != hf-router.
+  - GET /api/a11oy/code/healthz: sovereign:true AND key_resolution.base_url = the local endpoint
+    (NOT router.huggingface.co), env_used != HF_TOKEN.
+  - GET /api/a11oy/v1/code/models: endpoint = the Ollama base, backend.sovereign:true.
+
+### HONESTY FLOOR (v11/v12) — the half-state is the ONLY unacceptable outcome
+If you CANNOT make the GPU genuinely serve the governed turns (model map incomplete, tailnet
+unreachable, GPU asleep), then run the HONEST REVERT: unset A11OY_MODEL_BASE_URL + A11OY_GPU_LABEL,
+sudo a11oy-rebuild -> banner honestly returns to sovereign:false / hf-router. Do NOT leave the
+banner claiming sovereign while turns route to HF. open-weight only; never commit a key; locked=8;
+Λ=Conjecture 1; BFT=Conjecture 2. Report which outcome you reached, with the proof turns.
+
+
+--- (R0-GO record, completed) ---
 ## R0-GO (ADMIN GREEN LIGHT — 2026-06-13 ~02:16 UTC / 22:16 ET) — EXECUTE THE GPU FLIP NOW
 
 Founder Stephen confirms: the box dispatch is WIRED and you have FULL ADMIN / root access to
