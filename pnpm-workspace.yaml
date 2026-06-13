@@ -37,7 +37,7 @@ catalog:
   recharts: 2.15.4
   tailwind-merge: 3.5.0
   tailwindcss: ^4.3.0
-  tsx: 4.21.0
+  tsx: 4.22.4
   typescript: ^6.0.3
   vite: ^8.0.14
   vitest: 4.1.7
@@ -47,6 +47,9 @@ catalog:
 minimumReleaseAge: 1440
 
 minimumReleaseAgeExclude:
+  - esbuild  # GHSA-gv7w-rqvm-qjhr security patch (0.28.1)
+  - '@esbuild/*'  # esbuild platform binaries for 0.28.1
+  - tsx      # required to allow esbuild 0.28.x
   - '@replit/*'
   - stripe-replit-sync
   - vite
@@ -92,7 +95,7 @@ overrides:
   '@tailwindcss/oxide>@tailwindcss/oxide-linux-x64-musl': '-'
   '@tailwindcss/oxide>@tailwindcss/oxide-win32-arm64-msvc': '-'
   '@tailwindcss/oxide>@tailwindcss/oxide-win32-x64-msvc': '-'
-  esbuild: 0.27.3
+  esbuild: 0.28.1
   esbuild>@esbuild/aix-ppc64: '-'
   esbuild>@esbuild/android-arm: '-'
   esbuild>@esbuild/android-arm64: '-'

@@ -12,6 +12,6 @@
   "devDependencies": {
     "vitest": "catalog:",
     "typescript": "^6.0.3",
-    "tsx": "^4.19.0"
+    "tsx": "^4.22.4"
   }
 }
