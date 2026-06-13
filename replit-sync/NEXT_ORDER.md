@@ -1,3 +1,22 @@
+## R-TAKE-IT-NOW (URGENT TOP — window OPEN this minute) — soak the wasted energy on the RTX 5000 NOW
+THE WASTED-ENERGY WINDOW IS OPEN RIGHT NOW (verified live): aWATTar DE = -4.92 EUR/MWh (grid PAYING to
+offload), 9/14 windows ahead negative, deepest -45.87; your harvest confirms szl_energy_harvest_wasted_energy 1.
+Founder: TAKE IT NOW. Agent can't move electrons; YOU have the box. Full order: replit-sync/energy_engine/R_TAKE_IT_NOW.md.
+TAKE: (1) confirm negative price on box; (2) nvidia-smi power.draw idle; (3) SOAK A REAL BATCH on the
+sovereign GPU NOW (precompute bge-large embeddings / qwen2.5-coder:7b cache burst / an eval — useful +
+Bekenstein-bounded), time it, read power under load; (4) MEASURE joules=avg(P_idle,P_load)*seconds = FIRST
+MEASURED JOULE; (5) STORE one EnergyReservoir entry {ts,joules_measured,posture:negative-price,grid_price:-4.92,
+work_credits,artifact_ref}+DSSE receipt, add szl_energy_harvest_joules_measured + szl_energy_reservoir_* to live /metrics.
+DISPERSE: (6) serve the just-produced artifacts to a11oy cache / killinchu precompute / an organ — work done
+with wasted power flows out; each dispersal emits "served from reservoir, produced at -4.92 EUR/MWh" receipt,
+Ayni-balanced (F11), reactive/critical never throttled; (7) hologram + /metrics + /reservoir show it live.
+REPORT raw to replit-sync/forge-take-it-now-<UTCstamp>.md: two nvidia-smi readings, seconds, computed
+MEASURED joule, reservoir entry, dispersal receipt, live negative price. SPEED MATTERS — negative windows
+close; take what you can THIS window, the deepest -45.87 is still ahead. DOCTRINE: no free-energy (the joule
+is energy WE spent on OUR GPU doing real work while grid paid to dump power); MEASURED only via on-box NVML;
+store WORK+accounting not bottled electricity; consent-only dispersal; no key; reactive never starves;
+Lambda=Conj1; locked-8 untouched. If NVML unavailable, say so honestly + still cache the soak work. Do NOT merge.
+
 ## R-REVENUE (founder: make me rich — are we groundbreaking) — honest business thesis + revenue layer
 Straight answer: the stranded-energy->compute idea is NOT novel — Crusoe Energy already did it ($3B
 valuation, 250+ wellhead data centers, pivoted Bitcoin->AI; flare gas = $16B/yr; a 100MW node earns
