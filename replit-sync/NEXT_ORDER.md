@@ -1,3 +1,26 @@
+## R-WAKE-FINISH-FIX (TOP — WAKE: finish the open queue + fix the one regression) — DEPLOY, do NOT merge (founder gate)
+Forge idle ~2.5h since r7 deploy (b3bfddab). Loop LIVE (/anatomy/loop,/formula/sovereign,/energy/budget,/heart/pulse,
+/revenue/marketplace 200; joules MEASURED; grid -19.17). FOUR GAPS:
+GAP 1 REGRESSION (fix FIRST): /api/a11oy/v1/compute-pool is DOWN (HTTP 000/timeout, twice) — the multi-GPU fabric
+surface (both lungs + chaski). Was 200 earlier. Diagnose + restore to 200.
+GAP 2 FINISH 404s (deploy-branch like r7): /ayni, /research/prereg, /research/verify, /research/{id},
+/harvest/datacenters still 404 — fold szl_research_infra.py (#344, 14 tests), /ayni route, datacenter_waste source
+into the a11oy deploy branch, rebuild+push image, smoke-test 200. Also push NEW HF static Space SZLHOLDINGS/energy
+from /home/user/workspace/hf_energy_space/ (404/401 now, not published).
+GAP 3 WAKE CHASKI (2nd SAMAY lung): on 100.76.58.50 set OLLAMA_HOST=0.0.0.0:11434, ollama serve, confirm curl
+http://100.76.58.50:11434/v1/models -> 200; /compute-pool flips chaski reachable=true + gpu_nodes 1->2 (real probe).
+If founder hands needed, say so. Never fake up before Ollama answers.
+GAP 4 MAKE PERMANENT: a11oy #341/#342/#343/#344 are deploy-branch but NOT merged to main — confirm each green +
+mergeable, REPORT merge-readiness per PR for the FOUNDER to land (Forge does not merge). lutar-lean #239-242 + platform
+#357/358/360 = founder/on-box, never --admin.
+FOUNDER (Forge cannot, surface in report): VAST_API_KEY = marketplace EARNING (settled None/not_listed today = #1
+money switch); chaski ollama serve; free-credit apps (~$500K); canonical loop receipt-schema decision; send outreach
+playbook. Full order: replit-sync/energy_engine/R_WAKE_FINISH_FIX.md
+DOCTRINE v11: joules MEASURED only via exporter (212J); ONE loop/ledger/Ayni; chaski reachable only on real 200; no
+free-energy (#239/#240 Ayni); energy != data; consent only; NOT mining; research=process-verification NO psi claim;
+revenue ESTIMATE no guarantee; effectors SIMULATED; organs EXPERIMENTAL; locked=8; Λ=Conj1; Khipu=Conj2; no key/seed;
+do NOT merge (founder gate). Fix compute-pool first.
+
 ## R-CHASKI-ONLINE-ONELOOP (TOP — founder: chaski should be on, route it properly, agent chooses the loop) — DEPLOY, do NOT merge
 VERIFIED: /compute-pool shows chaski (100.76.58.50, tailnet-gpu) reachable=FALSE — Ollama not answering (registered
 honestly, never faked up). betterwithage = live sovereign GPU. LOOP DECISION LOCKED (agent chose): ONE UNIFIED LOOP
