@@ -1,12 +1,26 @@
 {
   "order_sha": "297b855a682c543c1f920459d649f0de694fd075",
   "order_path": "replit-sync/NEXT_ORDER.md",
-  "state": "processing",
+  "state": "done",
   "seen_at": "2026-06-13T04:04:29Z",
+  "updated_at": "2026-06-13T04:04:32Z",
+  "idle": false,
   "actionable": [
     "serve open-weight model OpenAI-compatible on betterwithage: `ollama pull qwen2.5-coder:7b` (keep llama3.1:8b);",
     "set on the a11oy.net deploy env: A11OY_MODEL_BASE_URL=http://127.0.0.1:11434/v1 ;",
     "sudo a11oy-rebuild. PROVE: healthz base_url = LOCAL endpoint (NOT router), env_used != HF_TOKEN,"
   ],
-  "gated_skipped": []
+  "delegated_to_agent": [
+    "serve open-weight model OpenAI-compatible on betterwithage: `ollama pull qwen2.5-coder:7b` (keep llama3.1:8b);",
+    "set on the a11oy.net deploy env: A11OY_MODEL_BASE_URL=http://127.0.0.1:11434/v1 ;",
+    "sudo a11oy-rebuild. PROVE: healthz base_url = LOCAL endpoint (NOT router), env_used != HF_TOKEN,"
+  ],
+  "dispatch_mode": "none",
+  "dispatch_ok": false,
+  "gated_skipped": [],
+  "report": "replit-sync/forge-perplexity-update-20260613.md",
+  "probes": {
+    "https://a11oy.net/healthz": 200
+  },
+  "doctrine": "v11: locked=8, Lambda=Conjecture 1, never commit a key"
 }
