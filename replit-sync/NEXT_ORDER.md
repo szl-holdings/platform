@@ -1,3 +1,21 @@
+## R-CHASKI-ONLINE-ONELOOP (TOP — founder: chaski should be on, route it properly, agent chooses the loop) — DEPLOY, do NOT merge
+VERIFIED: /compute-pool shows chaski (100.76.58.50, tailnet-gpu) reachable=FALSE — Ollama not answering (registered
+honestly, never faked up). betterwithage = live sovereign GPU. LOOP DECISION LOCKED (agent chose): ONE UNIFIED LOOP
+= the anatomy circulation loop /anatomy/loop (#341 + #343 YARQA-circulatory). NOT two loops -> one receipt chain,
+one Ayni balance, no double-count/drift. Both GPUs = DUAL INTAKE LUNGS of the SAME loop: betterwithage=primary,
+chaski=second lung (capacity+redundancy); if chaski drops the loop keeps breathing on betterwithage (reactive never
+starves). FORGE: (1) WAKE CHASKI on the box: on 100.76.58.50 set OLLAMA_HOST=0.0.0.0:11434, start `ollama serve`,
+confirm `ollama list`; verify curl http://100.76.58.50:11434/v1/models -> 200. If founder hands needed on that
+machine, say so with exact commands; do NOT fake reachable before Ollama answers. (2) ROUTE: when it answers,
+/compute-pool flips chaski reachable=true + gpu_nodes_reachable 1->2 (real probe driven); register chaski as 2nd
+SAMAY lung in szl_anatomy_loop so the ONE loop circulates across both; prefer betterwithage, spill to chaski when up
++ window open; energy-gate both; chaski joules accrue to the SAME ledger (measured if exporter, else SAMPLE honest).
+(3) FAILOVER clean, never stall/starve/fabricate; surface both lungs honestly in /anatomy/loop + /compute-pool + HF
+energy Space (chaski lights only on real 200). Full order: replit-sync/energy_engine/R_CHASKI_ONLINE_ONELOOP.md
+DOCTRINE v11: chaski reachable only on real probe 200; ONE loop one ledger one Ayni; joules MEASURED only via real
+per-node exporter else SAMPLE; sovereign only on own metal; no free-energy (#239/#240 Ayni); reactive never starves;
+locked=8; Λ=Conj1; Khipu=Conj2; no key/seed; do NOT merge.
+
 ## R-FINISH-IT-ALL (TOP — founder: handle it ALL, finish) — the execution checklist — DEPLOY, do NOT merge
 Bottleneck = HF Space IMAGE REBUILD; most surfaces stay 404 until you rebuild+push a11oy + killinchu images with
 the new modules COPYd in the Dockerfile. DO FIRST: rebuild a11oy image with szl_dark_surfaces_register.py (#342 ->
