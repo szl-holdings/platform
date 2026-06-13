@@ -1,3 +1,28 @@
+## R-ZOOMOUT-GPU (TOP — founder: tab-by-tab, real proof, GPU handles it ALL) — the missing piece found
+ZOOM-OUT of a11oy.net tab-by-tab found the ONE thing we're missing — and it's NOT code, it's WIRING:
+the app server runs on a CPU-only box; the RTX 5000 is a SEPARATE node exposed only as Ollama over
+Tailscale. The harvest /metrics says it honestly: szl_energy_harvest_joules_sample 1, and reverse_recovery
+note "no reachable GPU thermal source (CPU-only box; GPU node exposes Ollama only) — feed GPU_THERMAL_URL
+or on-node nvidia-smi to enable." THAT split is why there is no measured joule and why the GPU isn't
+"handling it all." Close it.
+LIVE tabs (real, proof-backed): /healthz 200, /formulas/index 200 (12 REAL Lean theorems cited by name+
+commit — proof, not just receipts), /harvest/metrics + /harvest/posture 200 (live -4.92 EUR/MWh,
+wasted_energy=1), /qbio/coherence 200 (live Lindblad compute), /proven-formulas 200, /console 200.
+DARK tabs (built in open PRs, NOT deployed to the box — wire them to real data): /energy/budget (a11oy
+#328), /engine/status (#335), /revenue/estimate (#340), /formula/sovereign (#337), /ayni. Deploy these to
+the box behind serve.py (same try/except register pattern) so every tab is live on real data.
+FORGE — do these in order: (1) WIRE THE GPU NODE so the app can READ it: set GPU_THERMAL_URL or run a tiny
+on-node agent on the RTX 5000 that exposes nvidia-smi power.draw+temperature.gpu to the app box over
+Tailscale. This is THE missing piece — once the app can read the GPU's NVML, the FIRST MEASURED JOULE
+flips szl_energy_harvest_joules_sample 0 and joules_measured appears (R-TAKE-IT-NOW + R-REVERSE-LOOP both
+unblock). (2) DEPLOY the 5 dark tabs (#328/#335/#337/#340 + /ayni) to the box so they serve real live
+metrics, not 404. (3) Confirm each tab tab-by-tab returns real data, paste the curl results to replit-sync.
+REAL PROOF NOT RECEIPTS: the formula tabs already cite kernel-checked Lean theorems (the proof IS the
+backing, the receipt just points to it) — keep that; the new measured joule is the missing REAL physical
+proof. DOCTRINE: no free-energy; joules MEASURED only once the app reads on-GPU NVML (then honest measured),
+SAMPLE until then; sovereign only on own metal; no key; locked-8 untouched; Lambda=Conj1. The GPU "handling
+it all" = the app reading the GPU's real telemetry + the soak running on it. Wire the node FIRST. Do NOT merge.
+
 ## R-REVERSE-LOOP (founder: jack the electricity, reverse-loop the semiconductors — TEST NOW) — real physics, honest
 Founder's instinct maps to TWO REAL published techniques (no fantasy): (1) ADIABATIC / REVERSIBLE CMOS —
 charge is ramped down in REVERSE order and RECOVERED to source via a resonator, not dumped; Vaire's "Ice
