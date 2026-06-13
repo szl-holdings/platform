@@ -197,6 +197,23 @@ REGISTRY: tuple[VerticalSpec, ...] = (
         ),
     ),
     VerticalSpec(
+        id="szl_mechanics",
+        title="SZL Mechanics",
+        purpose="Verified Solid-Mechanics Solver (FE-NO) — Receipt-Verified Compute",
+        module="services.verticals.szl_mechanics",
+        pack_status="live",
+        research_seams=(
+            "FE-NO clean-room solver (method attribution: arXiv:2606.08796)",
+            "DeepONet operator learning (Lu et al. 2021, doi:10.1038/s42256-021-00302-5)",
+            "Schwarz / domain-decomposition iterative solvers",
+            "Sovereign GPU fabric (own-metal verified compute)",
+        ),
+        # No MCP capabilities: the szl_lake/khipu DSSE signing path is an
+        # internal provenance path (see szl_mechanics/receipt.py + MOAT.md),
+        # NOT a public MCP-registry capability. Declaring it here would orphan
+        # the meridian:check MCP gate; honesty + additive = leave it empty.
+    ),
+    VerticalSpec(
         id="constellation_graph",
         title="Constellation Graph",
         purpose="Cross-Domain Intelligence Graph",
