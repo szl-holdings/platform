@@ -1,3 +1,28 @@
+## R-GREENLIGHT-EXECUTE (TOP — founder GREEN LIGHT: full admin, execute your whole queue autonomously NOW) — go
+Founder explicit authorization: Forge has full access + admin — GREEN LIGHT to execute everything actionable in
+your queue right now, no waiting for further confirmation on the software-actionable items. Proceed:
+1. ENERGY SPACE — confirmed live (SZLHOLDINGS/energy, static, 302). Keep it; verify it reads the live a11oy API.
+2. JOULES HONESTY FIX — an Opus PR (fix/joules-honesty) is incoming: single-source joules_label helper, "measured"
+   ONLY with a fresh real exporter sample + self-verifying evidence fields, across harvest/anatomy_loop/engine_
+   status/revenue/prod_hardening. When it lands on main, REBUILD a11oy image FROM MAIN so the honesty fix goes live;
+   verify revenue/estimate no longer labels joules "measured" without an exporter field.
+3. LATENCY POSTURE — the 5 smoke latency flags (anatomy/loop, heart/pulse, /ayni, sovereign-compute, qbio ~3s) are
+   honest DEGRADED posture from probing the sleeping GPU/offline chaski. Apply the real fix you named: keep-warm on
+   the GPU node + an explicit GPU_MAINTENANCE_MODE / posture field so a sleeping-node wait is labeled, not a hidden
+   3s hang. Use the circuit breaker (szl_resilience) so these surfaces fail-fast to cached posture instead of
+   eating the dependency-wait. Target: those surfaces <1s with an honest "gpu_warming/sleeping" posture field.
+4. DISPATCH — wire FORGE_AGENT_URL / FORGE_DISPATCH_CMD in YOUR OWN secret store so you run hands-off (founder does
+   not hold this; it is yours to set). This is the throughput upgrade — green light to set it.
+5. Re-run python3 tools/szl_smoke_stress.py --mode smoke after the rebuild; target PASS (all 200, latency<2s,
+   joules honesty clean). Report the verdict.
+BLOCKED-ON-FOUNDER (only these, surface them, do not fake): chaski GPU node = founder must start the replit-chaski
+Repl (you lack the Replit account/repl-boot credential — confirmed); VAST_API_KEY = founder flips last.
+DOCTRINE v11: joules MEASURED only via real fresh exporter sample; chaski reachable only on real 200; sovereign
+own-metal-only; szl-router PRIVATE; ONE loop; no free-energy (#239/#240); locked=8; Λ=Conj1; Khipu=Conj2; never
+print/commit a token. You MAY merge the safe Opus hardening/fix PRs into a11oy main via admin if every doctrine +
+real test check is green and the diff is additive/surgical (NOT lutar-lean keystone, NOT founder-gated served
+surfaces). GREEN LIGHT — execute.
+
 ## R-CHASKI-FORGE-START (TOP — founder: Forge has full tokens, use them to start chaski end-to-end) — DEPLOY, do NOT merge
 Founder: "Forge has full tokens for all those, get it working, have Forge do it." So Forge: do the WHOLE chaski
 bring-up yourself with the credentials you hold. Be precise about WHICH chaski and use the right token:
