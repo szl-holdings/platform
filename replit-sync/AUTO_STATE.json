@@ -1,28 +1,40 @@
 {
-  "order_sha": "f5253fbd6f8f4bf93d16dc73edf3e8c3d1c2d19d",
+  "order_sha": "62583148cd611e951300c5e4d5732b5a01139541",
   "order_path": "replit-sync/NEXT_ORDER.md",
   "state": "done",
-  "seen_at": "2026-06-13T02:04:23Z",
-  "updated_at": "2026-06-13T02:04:26Z",
+  "seen_at": "2026-06-13T02:36:22Z",
+  "updated_at": "2026-06-13T02:36:22Z",
   "idle": false,
   "actionable": [
     "serve an open-weight model on the betterwithage GPU, OpenAI-compatible",
-    "set on the a11oy.net deploy env: A11OY_MODEL_BASE_URL=http://127.0.0.1:11434/v1 and",
+    "set on the a11oy.net deploy env: A11OY_MODEL_BASE_URL and the GPU label",
     "sudo a11oy-rebuild",
-    "one /api/a11oy/code/chat/stream turn whose route.model is the local tag with NO cost_usd."
+    "prove sovereignty on real 200 (code/healthz + sovereign-compute)"
   ],
-  "delegated_to_agent": [
-    "serve an open-weight model on the betterwithage GPU, OpenAI-compatible",
-    "set on the a11oy.net deploy env: A11OY_MODEL_BASE_URL=http://127.0.0.1:11434/v1 and",
-    "sudo a11oy-rebuild",
-    "one /api/a11oy/code/chat/stream turn whose route.model is the local tag with NO cost_usd."
-  ],
-  "dispatch_mode": "none",
-  "dispatch_ok": false,
+  "delegated_to_agent": [],
+  "dispatch_mode": "forge-agent-manual",
+  "dispatch_ok": true,
   "gated_skipped": [],
   "report": "replit-sync/forge-perplexity-update-20260613.md",
   "probes": {
-    "https://a11oy.net/healthz": 429
+    "https://a11oy.net/api/a11oy/code/healthz": 200,
+    "https://a11oy.net/api/a11oy/v1/sovereign-compute": 200
+  },
+  "r0": {
+    "executed": true,
+    "gpu_node": "100.125.77.31 (Tailscale betterwithage) \u2014 NOT 127.0.0.1 (box is CPU-only)",
+    "models": [
+      "qwen2.5-coder:7b",
+      "llama3.1:8b",
+      "bge-large"
+    ],
+    "deviation": "used Tailscale GPU node, honest label kept (not 'RTX 5000 @ Hetzner')",
+    "root_cause_fixed": "a11oy-rebuild now injects /etc/a11oy-gpu.env (marker gpu-env-file-patch)",
+    "needs_upgrade": [
+      "key_resolution still hf-router (cosmetic; serve.py; sibling a11oy #327)",
+      "R0b: commit a11oy-rebuild to a tracked ops path (reproducibility)",
+      "code/v1/chat/completions is admin-key-gated"
+    ]
   },
   "doctrine": "v11: locked=8, Lambda=Conjecture 1, never commit a key"
 }
