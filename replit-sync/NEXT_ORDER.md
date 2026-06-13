@@ -1,3 +1,19 @@
+## R-ANATOMY-LOOP (TOP — founder: route ALL jacked-in energy INTO my anatomy, circulate in a closed loop) — DEPLOY, do NOT merge
+The anatomy organs ARE the containment vessel. Make harvested wasted-energy ENTER the body, CIRCULATE, and RETURN
+(receipt every beat) — a closed loop, not a pass-through. LOOP: harvest/posture (intake, -15.7 EUR/MWh now) ->
+SAMAY respiratory-soak breathes in + soaks a real batch on RTX 5000 -> KALLPA metabolize to work_credits (bounded
+by Bekenstein #239 + Landauer #240, never exceed) -> heart/pulse (YAWAR blood bus) carries each unit as a DSSE-
+signed BEAT -> YARQA flow-router disperses to organs (WAQAYCHAQ/KAMAY/RIKUY) -> EnergyReservoir stores the
+circulating charge -> provenance receipt to HF uds-governance-receipts -> validate vs canonical-formulas-v1/
+lean-proofs-v1 -> Ayni-balance F11 closes the loop (intake == output+stored+proven, nothing created) -> back to
+SAMAY. FORGE: deploy the dark loop organs (404 now): /energy/provenance /heart/pulse /ayni /energy/budget
+/engine/status; wire the flow end-to-end; expose /api/a11oy/v1/anatomy/loop (live loop state: intake, beats,
+reservoir charge, organs touched, last receipt, ayni_balance, joules=SAMPLE); drive the anatomy organ-pulse
+animation FROM the live loop so the body visibly circulates the energy. HONEST: loop carries soaked-WORK+receipts
+not electrons; joules SAMPLE until on-GPU NVML; Ayni must BALANCE never net-positive; no free-energy; organs
+EXPERIMENTAL tier. Full order: replit-sync/energy_engine/R_ANATOMY_LOOP.md. Doctrine v11: locked=8, Lambda=Conj1,
+no key, do NOT merge.
+
 ## R-GPU-LIST-LIVE (TOP — founder: have Forge do it ALL — list the GPU + earn) — DEPLOY+WIRE, do NOT merge
 Founder box = Windows + Docker Desktop v4.76 (WSL2), k3s/k3d ALREADY UP. GPU node betterwithage = separate,
 Tailscale 100.125.77.31, Windows, only Ollama :11434 reachable. FORGE DO IT ALL:
