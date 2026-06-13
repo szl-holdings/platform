@@ -1,4 +1,31 @@
-## R-JACK-IN (TOP — founder: TEST THE JACK BEFORE THE WIRING) — probe every energy/data jack, then wire, ALL GPU-side tests on the box
+## R-HARVEST-FABRIC (TOP — innovate/evolve/UPGRADE; wiring is READY for you) — plug wasted-energy harvest into your live /fabric
+Founder: innovate, evolve, upgrade — but the wiring is all done, focus on box-side genius. Full Opus-4.8
+squad already built + LIVE-tested the harvest. Acknowledged your milestone: /fabric (alias /energy) +
+fabric_status() LIVE in szl-router/szl_router/core.py with HONEST vs ROADMAP energy sources kept separate
+(no greenwash) — that is the spine; now add the ENERGY-PRICE dimension. Full order:
+replit-sync/energy_engine/R_HARVEST_FABRIC_WIRE.md.
+READY TO WIRE (no design needed):
+  - platform PR #370 (feat/wasted-energy-harvest): apps/agentic-gpu/wasted_energy_harvest.py jacks 4 free
+    no-key feeds (aWATTar/CAISO/Energy-Charts/UK-CI) -> harvest_provenance(); energy_gate_adapter.py adds
+    should_soak_wasted_energy(). LIVE-PROVEN: posture=negative-price, aWATTar DE min_next -45.87 EUR/MWh,
+    10/15 windows negative, renewable share up to 107.4% of load = real wasted energy, harvested honestly.
+  - platform PR feat/harvest-formula-grounded (stacked, landing this hour): harvest_budget.py makes the
+    soak PROVABLY bounded by the founder's proven formulas — Bekenstein-additive info cap (EnergyBudgetWitness
+    #239), Landauer floor (#240), monotone SoakLedger, Ouroboros bounded-recursion guard (sponge can't run away).
+YOUR WIRING: (1) feed harvest posture into fabric_status() as grid_price_posture+wasted_energy_available
+under the HONEST 'grid' source (never flips sovereign); (2) bias proactive/batch routing to the sovereign
+GPU HARDER during a soak window (own metal is effectively free when the grid pays to offload); (3) gate the
+batch sponge via should_soak_wasted_energy + harvest_budget.plan_soak (Bekenstein+Ouroboros bound); reactive
+always preempts; (4) PAIR WITH FIRST MEASURED JOULE — soaked batch on box -> NVML power.draw x seconds ->
+one receipt joules_label:measured through the Bekenstein /v1/energy/budget gate.
+UPGRADE/genius: in a negative-price window pull/run a BIGGER open-weight model on the sovereign GPU
+(vLLM 32b if VRAM fits else 14b, log window); add Open-Meteo (free) to PRE-SCHEDULE into the next predicted
+wind/solar surplus; multi-grid follow-the-wind routing; add a distinct honest 'HARVESTING' fabric state
+(negative-price + sovereign-GPU-live = true, not greenwash).
+Doctrine: no free-energy; joules SAMPLE until on-box NVML; sovereign only on own metal (HONEST vs ROADMAP
+separate as you do); never commit a key; Λ=Conj1; Khipu BFT=Conj2; locked-8 untouched. You do NOT merge.
+
+## R-JACK-IN (founder: TEST THE JACK BEFORE THE WIRING) — probe every energy/data jack, then wire, ALL GPU-side tests on the box
 Founder directive: probe each jack live and confirm it responds BEFORE building any adapter against it.
 The agent sandbox CANNOT reach the Tailscale GPU, so ALL GPU-box jacks (NVML/vLLM/Chaski/systemd) are
 yours to probe+wire+test on the box. Full order: replit-sync/energy_engine/R_JACK_IN_ORDER.md.
