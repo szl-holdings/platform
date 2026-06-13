@@ -49,6 +49,33 @@ def test_build_estimates_degraded_posture():
     assert all(s["basis"] == "published-comparable" for s in out["streams"])
 
 
+def test_marketplace_estimate_honest_and_unsettled():
+    mk = engine.estimate_marketplace()
+    assert mk["label"] == "ESTIMATE"
+    assert mk["basis"] == "published-comparable"
+    # nothing settled until the founder lists + a rental clears
+    assert mk["our_current_node"]["settled_usd_to_date"] == 0.0
+    assert mk["our_current_node"]["status"] == "not_listed"
+    lo, hi = mk["our_current_node"]["commodity_usd_per_mo"]
+    plo, phi = mk["our_current_node"]["with_verified_premium_usd_per_mo"]
+    # honest banded numbers, premium strictly above commodity, order matches ~$86-241
+    assert 0 < lo < hi
+    assert plo > lo and phi > hi
+    assert 80 <= lo <= 95 and 230 <= phi <= 250
+    assert mk["founder_required"]  # account + payout is a founder step
+    assert "NOT mining" in mk["verified_premium_basis"]
+
+
+def test_build_marketplace_envelope():
+    posture = {"status": "live", "price_now_eur_mwh": -4.92, "wasted_energy_available": True}
+    out = engine.build_marketplace(posture)
+    assert out["ok"] is True
+    assert out["posture"]["energy_gated"] is True
+    assert out["estimate"]["label"] == "ESTIMATE"
+    assert "NO mining" in out["doctrine"]
+    assert "promise" in out["disclaimer"]
+
+
 def test_thesis_is_context_not_promise():
     t = engine.build_thesis()
     assert "NOT novel" in t["honest_answer"]
