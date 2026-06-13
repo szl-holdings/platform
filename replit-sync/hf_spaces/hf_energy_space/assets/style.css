@@ -273,3 +273,76 @@ main{padding:0 clamp(16px,4vw,48px) 60px;max-width:1200px;margin:0 auto}
   .organ[data-flow]::after{display:none}
   .conn-badge .dot{animation:none}
 }
+
+/* ===========================================================
+   DEV B · MOBILE REFINEMENT (investor-grade on a phone)
+   12px type floor · 44px touch targets · safe-area · 0 CDN.
+   Honesty v11 preserved (MEASURED/SAMPLE/EST tags untouched).
+   =========================================================== */
+
+/* Safe-area: notch / home-bar clearance (viewport-fit=cover) */
+.topbar{ padding-top:max(18px, env(safe-area-inset-top)) }
+main{ padding-left:max(clamp(16px,4vw,48px), env(safe-area-inset-left));
+      padding-right:max(clamp(16px,4vw,48px), env(safe-area-inset-right));
+      padding-bottom:max(60px, calc(40px + env(safe-area-inset-bottom))) }
+
+/* Never let any readable text dip under 12px on phones/tablets */
+@media (max-width:768px){
+  .brand-line1{font-size:13px}
+  .conn-ts{font-size:12px}
+  .conn-badge{font-size:12px}
+  .eyebrow{font-size:12px}
+  .kv-unit{font-size:13px}
+  .kv-list li{font-size:13px}
+  .kv-list li b.mono{font-size:12px}
+  .card-head h3{font-size:12px}
+  .src-badge{font-size:12px}
+  .card-note{font-size:12px}
+  .tag,.tag-mini{font-size:12px}
+  .anatomy-lead{font-size:13px}
+  .organ-name{font-size:13px}
+  .organ-role{font-size:12px}
+  .node{font-size:13px}
+  .node-kind,.node-tag{font-size:12px}
+  .section-title{font-size:13px}
+  .stages li{font-size:13px}
+  .stages li small{font-size:12px}
+  .proof-unit{font-size:12px}
+  .proof-desc{font-size:13px}
+  .proof-head h3{font-size:13px}
+  .venue-label,.venue-chip{font-size:12px}
+  .foot{font-size:12px}
+  .hero-evidence li{font-size:12px}
+  .hero-evidence li b{font-size:14px}
+}
+
+/* Touch targets — interactive/status chips ≥44px hit area where tappable */
+@media (pointer:coarse), (max-width:768px){
+  .stages li{ min-height:44px }
+  .conn-badge{ min-height:36px } /* status indicator, not a control */
+  .src-badge{ min-height:28px }
+  .venue-chip{ min-height:34px }
+  /* the verify widget buttons inherit their own ≥44 sizing below */
+}
+
+/* Kill any residual horizontal overflow at 320px:
+   long mono hashes / unbroken tokens wrap instead of pushing width. */
+@media (max-width:480px){
+  .kv-list li b, .hero-evidence li b{ overflow-wrap:anywhere; word-break:break-word; max-width:60% }
+  .kv-big{ flex-wrap:wrap }
+  .badge-strip{ padding:14px 12px }
+  .doctrine{ padding:22px 16px }
+  .hero-evidence{ gap:10px 14px; padding:14px 14px }
+}
+
+/* Single column on phones: the .two-up grid forces a 340px min track that
+   overflows a 320px viewport (340+16 = 356). Collapse both grids to 1 col ≤700px. */
+@media (max-width:700px){
+  .hud-grid, .hud-grid.two-up{ grid-template-columns:1fr; }
+}
+/* Belt-and-braces: nothing renders wider than the viewport on tiny phones. */
+@media (max-width:360px){
+  .card{ max-width:100%; }
+  .organ{ min-width:0; }
+  .rev-detail .kv-list, .venue-block{ min-width:0; }
+}

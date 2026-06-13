@@ -385,8 +385,8 @@ table.witness td.mono { font-family: var(--font-mono); font-size: var(--text-xs)
 .node-box.free { stroke: #38e0ff; }
 .node-box.paid { stroke: #9a6bff; }
 .node-box.src { stroke: rgba(255,255,255,0.4); }
-.node-label { font-family: var(--font-mono); font-size: 12px; fill: var(--text); }
-.node-sub { font-family: var(--font-mono); font-size: 9.5px; fill: var(--text-faint); }
+.node-label { font-family: var(--font-mono); font-size: 14px; fill: var(--text); }
+.node-sub { font-family: var(--font-mono); font-size: 12px; fill: var(--text-faint); }
 
 /* ---------- Tier ladder ---------- */
 .ladder { display: grid; gap: var(--space-3); }
@@ -436,3 +436,46 @@ table.witness td.mono { font-family: var(--font-mono); font-size: var(--text-xs)
   .rung { grid-template-columns: auto 1fr; }
   .rung-flag { grid-column: 2; }
 }
+
+/* ===========================================================
+   DEV B · MOBILE REFINEMENT (investor-grade on a phone)
+   12px type floor · 44px touch targets · safe-area · 0 CDN
+   Doctrine v11 honest · system fonts only.
+   =========================================================== */
+
+/* Safe-area: notch / home-bar clearance (viewport-fit=cover) */
+.topbar { padding-top: env(safe-area-inset-top, 0px); }
+.topbar-inner { padding-inline: max(0px, env(safe-area-inset-left)) max(0px, env(safe-area-inset-right)); }
+.footer { padding-bottom: max(var(--space-10), calc(var(--space-6) + env(safe-area-inset-bottom))); }
+
+/* Type floor — nothing readable under 12px. Caption tokens bumped on phones. */
+@media (max-width: 768px) {
+  :root {
+    --text-xs: clamp(0.78rem, 0.74rem + 0.2vw, 0.85rem);   /* 12.5px floor */
+    --text-sm: clamp(0.875rem, 0.83rem + 0.25vw, 0.95rem); /* 14px floor */
+  }
+  .brand-sub { font-size: 0.78rem; }                        /* was 11.5px */
+  .footer-doctrine, .stamp, .kpi-label, .kpi-meta,
+  .provider-note, .prov-field code, .chip, .badge,
+  .live-pill, .seg button, .rung-flag, table.witness td.mono,
+  .receipt, .step-num { font-size: 0.78rem; }
+  .node-label { font-size: 15px; }
+  .node-sub { font-size: 12.5px; }
+}
+
+/* Touch targets ≥ 44px hit area (WCAG 2.5.5). Links lifted via padding. */
+@media (pointer: coarse), (max-width: 768px) {
+  .footer-links a,
+  .topbar a, .brand,
+  .prov-field, .provider-card { -webkit-tap-highlight-color: transparent; }
+  .footer-links { gap: var(--space-3) var(--space-6); }
+  .footer-links a {
+    display: inline-flex; align-items: center;
+    min-height: 44px; padding-block: 2px;
+  }
+  .brand { min-height: 44px; }   /* wordmark link — full 44px tap height */
+  .hero-cta .btn { min-height: 44px; }
+  .badge, .chip, .live-pill { min-height: 30px; } /* non-interactive status pills: legible, not tap targets */
+}
+
+/* Focus rings already present (:focus-visible). AA contrast retained. */

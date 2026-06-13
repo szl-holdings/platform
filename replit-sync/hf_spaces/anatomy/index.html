@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="utf-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2, viewport-fit=cover" />
 <title>SZL Agent Body v4 (deepen) — Living Anatomy · Formula Atlas + honest forecast</title>
 <meta name="description" content="The SZL Agent Body v4 — a genuine anatomical organism. Two bodies (a11oy + killinchu) sharing one circulatory (YAWAR receipt bus) + nervous (span lineage) mesh, with proven formulas flowing through the organs and the Λ heart beating at the center." />
 <style>
@@ -868,7 +868,174 @@
   #verify-modal .vm-close:hover{color:var(--a11oy)}
   #verify-modal .vm-lede{color:var(--text-muted);font:12px/1.5 var(--font-m);margin:0 0 12px;max-width:660px}
   @media (prefers-reduced-motion:reduce){#verify-modal{transition:none}}
-  @media (max-width:680px){#verify-fab{left:50%;transform:translateX(-50%);bottom:14px}}
+  @media (max-width:680px){#verify-fab{left:50%;transform:translateX(-50%);bottom:max(14px, env(safe-area-inset-bottom))}}
+
+
+/* ===========================================================
+   DEV B · MOBILE TYPE FLOOR (anatomy · ADDITIVE / CSS-ONLY)
+   Raises every sub-12px label to ≥12px on phones/tablets.
+   Does NOT touch the V8/V9 dual-body scene, app.js, or data.js.
+   Honesty preserved: organs EXPERIMENTAL, Λ=Conjecture 1 (advisory),
+   Khipu BFT=Conjecture 2, effectors SIMULATED, SLSA L1 honest.
+   =========================================================== */
+@media (max-width: 768px){
+#verify-fab,
+#title .eyebrow,
+.body-tag,
+#honesty .hdr,
+#honesty .row,
+.chip,
+#legend h3,
+.sys-row .qn,
+.sys-row .fnx,
+.btn,
+#panel .ph .sys-pill,
+#panel .axes,
+.sec-h,
+.formula .fid,
+.formula .fplain,
+.formula .fax,
+.formula .fref,
+.gpd-cell .gpd-k,
+.gpd-dois .doi span,
+.lambda-honesty .lh-h,
+#tip .tt,
+#tip .tm,
+#vf-static .vf-sys,
+#vf-static .vf-chip,
+#vf-static .vf-plain,
+#vf-static .vf-ax,
+#vf-static .vf-ref,
+#dissect .dz-head,
+.dz-sec > .dz-label,
+.dz-layer .lname,
+.dz-row,
+.dz-row .val,
+.dz-axis button,
+.dz-mini,
+.dz-results li,
+.dz-results li .rk,
+.dz-results li .rt,
+#vis-hud .vh-head,
+#vis-hud .vh-stat .k,
+#vis-hud .vh-stat .v.conj,
+#vis-hud .vh-foot,
+#atlas .at-eyebrow,
+#atlas .at-note,
+.at-pill,
+.at-pill .ct,
+.at-tier-h,
+.at-tier-h .tc,
+.at-tier-h .td,
+.at-empty,
+.fdrill summary,
+.fdrill .fax2,
+.lean-link,
+#forecast .fc-eyebrow,
+#forecast .fc-note,
+.fc-spark .sp-h,
+.fc-legend,
+.fc-sec-h,
+.fc-event .ev-when,
+.fc-event .ev-what,
+.fc-tag,
+.fc-disc,
+#qbio .qb-eyebrow,
+#qbio .qb-note,
+.qb-card .qc-h,
+.qb-card .qc-row,
+.qb-card .qc-row b,
+.qb-card .qc-math,
+.qb-card .qc-plain,
+.qb-stat,
+.qb-sec-h,
+.qb-leader,
+.qb-src,
+.qb-src .qs-tag,
+.qb-thm .qt-id,
+.qb-thm .qt-lean,
+.qb-thm .qt-plain,
+.qb-disc,
+.qb-organ .qo-h,
+.qb-organ .qo-grid,
+.qb-organ .qo-verdict,
+.olabel,
+.olabel .od,
+#tour .tr-step,
+#tour .tr-prog,
+#tour .tr-body,
+#tour .tr-ctrl button,
+.v8-title,
+.v8-head,
+.v8-state,
+.v8-k,
+.v8-v code,.v8-vitals code,
+.v8-note,
+.v8-load,
+.v8-tag,
+#v8-vitals .v8-vrow,
+#v8-vitals .v8-vk,
+#v8-vitals #v8-vitals-locked,
+#v8-flow .v8-flow-eyebrow,
+#v8-flow .v8-flow-sub,
+#v8-flow-run,
+.v8-flow-head,
+.v8-step-l,
+.v8-step-d,
+#v9-master #v9-master-state,
+#v9-master-ago,
+#v9-master-rate,#v9-master-lambda,
+#v9-master-proxy,
+#v9-beat-pause,
+#v9-tour .v9-tour-eyebrow,
+#v9-tour-prog,
+#v9-tour-body,
+#v9-tour .v9-tour-ctrl button,
+.v9-trace-head,.v9-k-head,
+.v9-trace-k,
+.v9-trace-v,
+.v9-trace-v code,
+.v9-dim,
+.v9-trace-note,
+body.ux2 #title .sub,
+.ux-trust-head .tlabel,
+.ux-tchip,
+.ux-details > summary,
+body.ux2 #ux-tabbar .uxt{
+    font-size:12px !important; line-height:1.5 !important;
+  }
+}
+
+/* ---- Touch targets >= 44px (additive; dense scientific UI -> 44px primary) ---- */
+@media (pointer:coarse),(max-width: 768px){
+  #tour .tr-ctrl button, #v9-tour .v9-tour-ctrl button,
+  .dz-axis button, .dz-mini, .btn, .lean-link,
+  #v8-flow-run, #v8-flow-fab, .at-pill, .ux-tchip,
+  .fdrill summary, .ux-details > summary{
+    min-height:44px !important; display:inline-flex !important;
+    align-items:center !important; justify-content:center !important;
+  }
+  .dz-toggle{ min-height:44px !important; min-width:44px !important; }
+  #verify-fab{ min-height:44px !important; }
+  #panel .close, #dissect .at-close, .at-close, #tip .close,
+  #legend .close, #honesty .close, #atlas .at-close, #vf-close,
+  button[aria-label="close"], button[aria-label^="close"], .close{
+    min-width:44px !important; min-height:44px !important;
+    display:inline-flex !important; align-items:center !important; justify-content:center !important;
+  }
+  input, select, textarea{ min-height:44px !important; }
+}
+
+/* ---- safe-area insets (notch / home-bar) ; viewport-fit=cover added to meta ---- */
+@media (max-width: 768px){
+  #vis-hud{ padding-bottom:max(8px, env(safe-area-inset-bottom)) !important; }
+  #dissect{ padding-bottom:max(12px, calc(12px + env(safe-area-inset-bottom))) !important; }
+  #ux-tabbar{ padding-bottom:max(0px, env(safe-area-inset-bottom)) !important; }
+  #honesty, #title{ padding-left:max(0px, env(safe-area-inset-left)); padding-right:max(0px, env(safe-area-inset-right)); }
+  /* long Lean axiom lines / DOIs must wrap, never cause horizontal overflow */
+  code, .vf-ax, .v9-trace-v code, .v8-v code, .gpd-dois .doi span,
+  .formula .fax, .fdrill .fax2{ overflow-wrap:anywhere !important; word-break:break-word !important; }
+}
 
 </style>
 </head>

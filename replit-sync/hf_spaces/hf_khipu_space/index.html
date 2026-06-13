@@ -2,7 +2,7 @@
 <html lang="en" data-theme="dark">
 <head>
 <meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
 <title>SZL Khipu Constellation — witnessed-agreement mesh</title>
 <meta name="description" content="A live 3D constellation of SZL's Khipu witnessed-agreement layer: BFT-style quorum across sovereign and hosted compute witnesses. Khipu BFT safety/liveness is Conjecture 2 — proposed, not proven." />
 <meta property="og:title" content="SZL Khipu Constellation" />
@@ -63,13 +63,16 @@
         <div class="graph-overlay">
           <span class="badge teal" id="quorum-readout">witness set</span>
         </div>
-        <div class="graph-legend" aria-hidden="true">
-          <div class="legend-row"><span class="legend-swatch" style="background:#ffd76b"></span> khipu cord (head)</div>
-          <div class="legend-row"><span class="legend-swatch" style="background:#2bd9c8"></span> sovereign witness</div>
-          <div class="legend-row"><span class="legend-swatch" style="background:#9a6bff"></span> hosted fallback</div>
-          <div class="legend-row"><span class="legend-swatch" style="background:#38e0ff"></span> CPU / verify node</div>
-          <div class="legend-row"><span class="legend-swatch" style="background:#e8736a"></span> unreachable</div>
-        </div>
+        <details class="graph-legend" id="graph-legend">
+          <summary class="legend-toggle" aria-label="Toggle constellation legend"><span class="legend-dotsw"></span>legend</summary>
+          <div class="legend-rows">
+            <div class="legend-row"><span class="legend-swatch" style="background:#ffd76b"></span> khipu cord (head)</div>
+            <div class="legend-row"><span class="legend-swatch" style="background:#2bd9c8"></span> sovereign witness</div>
+            <div class="legend-row"><span class="legend-swatch" style="background:#9a6bff"></span> hosted fallback</div>
+            <div class="legend-row"><span class="legend-swatch" style="background:#38e0ff"></span> CPU / verify node</div>
+            <div class="legend-row"><span class="legend-swatch" style="background:#e8736a"></span> unreachable</div>
+          </div>
+        </details>
         <div id="graph" role="img" aria-label="3D constellation of witnessed-agreement nodes; sovereign witnesses, hosted fallbacks, and attestation edges to the central khipu cord"></div>
         <div class="graph-controls">
           <span class="seg" role="group" aria-label="constellation view">

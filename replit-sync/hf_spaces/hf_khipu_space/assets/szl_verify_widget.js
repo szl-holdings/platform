@@ -138,8 +138,15 @@
     '.szlv-trust{color:#797876}',
     '.szlv-state{font-size:12px;padding:8px 10px;border-radius:8px}',
     '.szlv-state.fail{background:rgba(209,99,167,.10);color:#d163a7}',
-    '.szlv-state.muted{background:#211f1d;color:#a9a8a5}'
-  ].join('');
+    '.szlv-state.muted{background:#211f1d;color:#a9a8a5}',
+    /* DEV B mobile refinement: 12px type floor + 44px touch targets (additive, no logic change) */
+    '@media (max-width:768px){',
+    '.szlv-adv,.szlv-kinds,.szlv-chk .szlv-det,.szlv-foot,.szlv-pill{font-size:12px}',
+    '.szlv button{min-height:44px;padding:11px 18px;font-size:14px}',
+    '.szlv input[type=text]{min-height:44px;font-size:13px}',
+    '.szlv textarea{font-size:13px}',
+    '.szlv-sub,.szlv-load,.szlv-detail,.szlv-state{font-size:13px}',
+    '}'].join('');
 
   function injectCSS(){
     if(document.getElementById('szlv-css')) return;

@@ -92,18 +92,58 @@ html,body{margin:0;height:100%;background:var(--indigo-900);overflow:hidden;colo
 .title-card{position:fixed;z-index:8;left:50%;bottom:74px;transform:translateX(-50%);text-align:center;pointer-events:none}
 .title-card .t1{font:700 15px var(--mono);color:var(--hatun-300);letter-spacing:.18em;text-transform:uppercase}
 .title-card .t2{color:var(--ink-dim);font-size:12px;margin-top:4px}
+/* Toggle FAB + scrim are desktop-hidden; revealed only on phones below. */
+.hud-toggle-cb{position:fixed;opacity:0;pointer-events:none;width:0;height:0}
+.hud-fab,.hud-scrim{display:none}
+
 @media(max-width:680px){
-  .legend{display:none}
-  .plaque{max-width:58vw;padding:11px 12px}
-  .plaque .value{font-size:12px;margin-bottom:6px;padding-bottom:6px}
-  .plaque .line{font-size:10.5px;line-height:1.45}
-  .plaque .line.m-hide{display:none}
-  .status{min-width:0;max-width:34vw;padding:9px 10px}
-  .status .h{font-size:9px}
-  .row{font-size:9.5px;gap:5px}.row .meta{font-size:9px}
-  .feed,.ticker .tk{font-size:9px}.ticker .th{font-size:8.5px}
-  .title-card{bottom:14px}.title-card .t1{font-size:12px}.title-card .t2{font-size:10px;max-width:88vw}
-  #inspector{width:92vw}
+  /* ---- Collapse the floating HUD corners into ONE scrollable bottom sheet ----
+     Scene stays fully clear for touch-orbit; user taps ◈ panels to reveal honest facts. */
+  #hud-sheet{position:fixed;left:0;right:0;bottom:0;top:auto;z-index:32;
+    max-height:76vh;overflow-y:auto;-webkit-overflow-scrolling:touch;
+    display:flex;flex-direction:column;gap:14px;
+    background:rgba(7,8,21,0.97);border-top:1px solid var(--hud-border);border-radius:18px 18px 0 0;
+    box-shadow:0 -16px 48px rgba(0,0,0,0.6);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);
+    padding:20px 18px calc(24px + env(safe-area-inset-bottom,0px));
+    padding-left:max(18px,env(safe-area-inset-left));padding-right:max(18px,env(safe-area-inset-right));
+    transform:translateY(calc(100% + 40px));transition:transform .34s cubic-bezier(.2,.8,.2,1)}
+  #hud-sheet::before{content:"";position:sticky;top:0;align-self:center;width:42px;height:4px;
+    border-radius:3px;background:rgba(215,185,107,0.5);margin-bottom:2px;flex:none}
+  /* each HUD becomes a flat card in the column — drop fixed positioning & corner anchoring */
+  .hud.plaque,.hud.status,.hud.legend,.hud.links{position:static;inset:auto;max-width:none;min-width:0;width:100%;
+    border:0;border-radius:0;background:transparent;box-shadow:none;backdrop-filter:none;-webkit-backdrop-filter:none;
+    padding:0;margin:0;text-align:left}
+  .hud.legend{display:block}
+  .hud.status,.hud.legend,.hud.links{border-top:1px solid rgba(215,185,107,0.16);padding-top:14px}
+
+  /* Type floor: nothing under 12px on phone */
+  .plaque .title{font-size:12px}
+  .plaque .value{font-size:13px;margin-bottom:8px;padding-bottom:8px}
+  .plaque .line{font-size:12px;line-height:1.55}
+  .plaque .line.m-hide{display:block}      /* sheet has room — keep full honesty doctrine visible */
+  .status .h{font-size:12px}
+  .row{font-size:12px;gap:7px}.row .meta{font-size:12px}
+  .feed{font-size:12px}.ticker .tk{font-size:12px;white-space:normal}.ticker .th{font-size:12px}
+  .legend{font-size:12px}.legend .item{font-size:12px}.legend .hint{font-size:12px}
+  .title-card .t1{font-size:13px}.title-card .t2{font-size:12px;max-width:88vw}
+  .links{font-size:12px}.links a{font-size:12px}
+  #inspector{width:92vw}#inspector .iplain{font-size:13px}#inspector li{font-size:12px}#inspector .ih{font-size:12px}
+
+  /* FAB opens/closes the sheet; scrim dims scene when sheet open */
+  .hud-fab{display:inline-flex;align-items:center;gap:7px;position:fixed;z-index:34;
+    right:max(12px,env(safe-area-inset-right));bottom:max(14px,env(safe-area-inset-bottom));
+    min-height:44px;min-width:44px;padding:0 16px;cursor:pointer;
+    background:var(--hud-bg);border:1px solid var(--hud-border);border-radius:24px;
+    color:var(--hatun-300);font:600 13px var(--mono);letter-spacing:.04em;
+    backdrop-filter:blur(9px);-webkit-backdrop-filter:blur(9px);box-shadow:0 10px 34px rgba(0,0,0,0.5)}
+  .hud-fab .hud-fab-i{font-size:14px}
+  .hud-scrim{display:block;position:fixed;inset:0;z-index:31;background:rgba(4,5,12,0);
+    pointer-events:none;transition:background .34s ease}
+
+  /* When sheet OPEN (checkbox is a sibling of #hud-sheet): slide sheet up, dim scene */
+  #hud-toggle:checked ~ #hud-sheet{transform:translateY(0)}
+  #hud-toggle:checked ~ .hud-scrim{background:rgba(4,5,12,0.45);pointer-events:auto}
+  #hud-toggle:checked ~ .hud-fab{color:#7fe0db;border-color:rgba(127,224,219,.5)}
 }
 @media(prefers-reduced-motion:reduce){
   #inspector{transition:none}#boot{transition:none}#boot .spin{animation:none;border-top-color:rgba(215,185,107,0.25)}
@@ -125,14 +165,57 @@ html,body{margin:0;height:100%;background:var(--indigo-900);overflow:hidden;colo
   font-size:24px;background:none;border:0;line-height:1}
 #verify-modal .vm-close:hover{color:var(--hatun-300)}
 #verify-modal .vm-lede{color:var(--ink-dim);font:12px/1.5 var(--mono);margin:0 0 12px;max-width:660px}
-@media(max-width:680px){#verify-fab{bottom:auto;top:56px;left:50%;transform:translateX(-50%)}}
+@media(max-width:680px){
+  #verify-fab{bottom:auto;top:max(56px,calc(env(safe-area-inset-top) + 12px));left:50%;transform:translateX(-50%);min-height:44px;padding:0 14px;display:inline-flex;align-items:center}
+}
+/* ===========================================================
+   DEV B · MOBILE REFINEMENT (cathedral · investor-grade on phone)
+   12px type floor · 44px touch · bottom-sheet HUD · safe-area · 0 CDN.
+   Honesty v11 verbatim · locked-proven=8 · single gold a11oy sun.
+   =========================================================== */
+@media(pointer:coarse),(max-width:680px){
+  .links a{display:flex;align-items:center;min-height:44px;padding:8px 0}
+  #inspector .close{min-width:44px;min-height:44px;display:flex;align-items:center;justify-content:center;
+    font-size:24px;top:6px;right:8px}
+  #verify-modal .vm-close{min-width:44px;min-height:44px;display:flex;align-items:center;justify-content:center;top:-44px}
+  #insp-close{min-width:44px;min-height:44px}
+  .dot{width:10px;height:10px}
+}
+/* Safe-area clearance so inspector + verify modal never sit under notch / home-bar */
+#inspector{padding-bottom:max(18px,calc(18px + env(safe-area-inset-bottom)))}
+#verify-modal{padding-top:max(6vh,calc(env(safe-area-inset-top) + 24px))}
+/* Type floor across the full tablet range (≤768px), above the 680px sheet-collapse breakpoint too.
+   Keeps every label ≥12px on iPad-portrait / small tablets while the HUD stays in its desktop corners. */
+@media(max-width:768px){
+  .plaque .title{font-size:12px}
+  .status .h{font-size:12px}
+  .row,.row .meta{font-size:12px}
+  .feed,.ticker .tk{font-size:12px}.ticker .th{font-size:12px}
+  .legend,.legend .item,.legend .hint{font-size:12px}
+  .links,.links a{font-size:12px}
+  #inspector .ih,#inspector li{font-size:12px}
+  #verify-fab,#verify-modal .vm-lede{font-size:12px}
+}
+@media(max-width:768px){
+  .links a{min-height:44px;display:flex;align-items:center;padding:6px 0}
+  #verify-fab{min-height:44px;display:inline-flex;align-items:center}
+}
 </style>
 </head>
 <body>
+  <!-- ADDITIVE (mobile-only, CSS-driven): collapse floating HUD corners into one bottom sheet
+       so the 3D scene stays clear for touch-orbit on phones. No scene/app.js logic touched. -->
+  <input type="checkbox" id="hud-toggle" class="hud-toggle-cb" aria-hidden="true" tabindex="-1" />
+  <label for="hud-toggle" id="hud-fab" class="hud-fab" role="button" tabindex="0"
+         aria-label="Show or hide the fabric panels"><span class="hud-fab-i" aria-hidden="true">◈</span><span class="hud-fab-t">panels</span></label>
+  <label for="hud-toggle" id="hud-scrim" class="hud-scrim" aria-hidden="true"></label>
+
   <canvas id="scene" aria-label="3D scene: a11oy brain-sun with orbiting internal capabilities, killinchu field node, and a live Khipu receipt constellation"></canvas>
 
   <div id="boot"><div class="b1">SZL CATHEDRAL</div><div class="b2">vendoring sovereign 3D · no CDN · loading live mesh…</div><div class="spin" role="status" aria-label="loading"></div></div>
 
+  <!-- ADDITIVE wrapper: groups the three corner HUDs so phones can fold them into one bottom sheet. -->
+  <div id="hud-sheet">
   <div class="hud plaque" aria-live="polite">
     <div class="title">SZL Cathedral · Constellation · Khipu</div>
     <div class="value"><span class="em">Sovereign verified-compute fabric</span> — every result carries a signed provenance receipt.</div>
@@ -173,6 +256,7 @@ html,body{margin:0;height:100%;background:var(--indigo-900);overflow:hidden;colo
     <a href="https://github.com/szl-holdings/lutar-lean" target="_blank" rel="noopener">lutar-lean · proofs ↗</a>
     <a href="https://doi.org/10.5281/zenodo.19944926" target="_blank" rel="noopener">thesis · DOI 10.5281/zenodo.19944926 ↗</a>
   </div>
+  </div><!-- /#hud-sheet -->
 
   <div id="inspector" role="dialog" aria-modal="false">
     <button class="close" id="insp-close" aria-label="Close">×</button>

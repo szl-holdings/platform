@@ -238,12 +238,22 @@ p { text-wrap: pretty; }
 }
 .seg button[aria-pressed="true"] { background: rgba(43,217,200,0.18); color: var(--teal-bright); }
 .graph-legend {
-  position: absolute; top: var(--space-3); right: var(--space-3); z-index: 5;
-  display: flex; flex-direction: column; gap: var(--space-2);
+  position: absolute; top: var(--space-3); right: var(--space-3); z-index: 6;
   font-size: var(--text-xs); font-family: var(--font-mono);
-  background: rgba(5,8,15,0.6); padding: var(--space-3); border-radius: var(--radius-md);
-  border: 1px solid var(--border); backdrop-filter: blur(8px);
+  background: rgba(5,8,15,0.72); border-radius: var(--radius-md);
+  border: 1px solid var(--border); backdrop-filter: blur(8px); overflow: hidden;
 }
+.legend-toggle {
+  display: flex; align-items: center; gap: var(--space-2);
+  list-style: none; cursor: pointer; color: var(--text-muted);
+  padding: var(--space-2) var(--space-3); min-height: 36px;
+  font-family: var(--font-mono); letter-spacing: 0.06em; user-select: none;
+}
+.legend-toggle::-webkit-details-marker { display: none; }
+.legend-dotsw { width: 12px; height: 12px; border-radius: 50%; flex-shrink: 0;
+  background: conic-gradient(#ffd76b, #2bd9c8, #9a6bff, #38e0ff, #e8736a, #ffd76b); }
+.graph-legend[open] .legend-toggle { border-bottom: 1px solid var(--border); }
+.legend-rows { display: flex; flex-direction: column; gap: var(--space-2); padding: var(--space-3); }
 .legend-row { display: flex; align-items: center; gap: var(--space-2); color: var(--text-muted); }
 .legend-swatch { width: 12px; height: 12px; border-radius: 50%; flex-shrink: 0; }
 
@@ -343,13 +353,10 @@ table.witness td.mono { font-family: var(--font-mono); font-size: var(--text-xs)
   .hero-grid { grid-template-columns: 1fr; gap: var(--space-8); }
   .hero-lede { max-width: none; }
   #graph { height: 380px; }
-  .graph-legend { position: static; margin: var(--space-3); }
 }
 @media (max-width: 560px) {
   .topbar-inner { gap: var(--space-2); }
-  .brand-sub { display: none; }
   #graph { height: 340px; }
-  .graph-legend { display: none; }
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -357,4 +364,48 @@ table.witness td.mono { font-family: var(--font-mono); font-size: var(--text-xs)
     animation-duration: 0.01ms !important; animation-iteration-count: 1 !important;
     transition-duration: 0.01ms !important; scroll-behavior: auto !important;
   }
+}
+
+/* ===========================================================
+   DEV B · MOBILE REFINEMENT (investor-grade on a phone)
+   12px type floor · 44px touch · legend toggle · safe-area · 0 CDN.
+   Khipu BFT = Conjecture 2 (honest); system fonts only.
+   =========================================================== */
+
+/* Safe-area: notch / home-bar clearance (viewport-fit=cover) */
+.topbar { padding-top: env(safe-area-inset-top, 0px); }
+.topbar-inner { padding-inline: max(0px, env(safe-area-inset-left)) max(0px, env(safe-area-inset-right)); }
+.footer { padding-bottom: max(var(--space-10), calc(var(--space-6) + env(safe-area-inset-bottom))); }
+
+@media (max-width: 768px) {
+  :root {
+    --text-xs: clamp(0.78rem, 0.74rem + 0.2vw, 0.85rem);   /* 12.5px floor */
+    --text-sm: clamp(0.875rem, 0.83rem + 0.25vw, 0.95rem);
+  }
+  .brand-sub { font-size: 0.78rem; }       /* keep visible on mobile, 12.5px */
+  .footer-doctrine, .stamp, .kpi-label, .kpi-meta,
+  .badge, .live-pill, .seg button, .legend-row, .legend-toggle,
+  .step-num, table.witness td.mono, .receipt,
+  table.witness thead th { font-size: 0.78rem; }
+  .graph-legend { font-size: 0.78rem; }
+}
+
+/* Touch targets ≥44px hit area (WCAG 2.5.5) */
+@media (pointer: coarse), (max-width: 768px) {
+  .seg button { min-height: 44px; padding-inline: var(--space-4); }
+  .legend-toggle { min-height: 44px; }
+  .brand { min-height: 44px; }   /* wordmark link — full 44px tap height */
+  .footer-links { gap: var(--space-3) var(--space-6); }
+  .footer-links a { display: inline-flex; align-items: center; min-height: 44px; }
+  .hero-cta .btn { min-height: 44px; }
+  .badge, .live-pill { min-height: 30px; }  /* status pills, not tap targets */
+}
+
+/* Kill residual horizontal overflow at 320/360 (long hashes / wide pills) */
+@media (max-width: 560px) {
+  .badge, .live-pill { white-space: normal; }
+  .hero-badges .badge { max-width: 100%; }
+  .receipt { font-size: 0.78rem; line-height: 1.55; }   /* mono code block: 12.5px floor, scrolls */
+  table.witness td.mono { overflow-wrap: anywhere; }
+  .graph-controls { width: calc(100% - 1rem); }
 }
