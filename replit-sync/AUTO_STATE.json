@@ -1,8 +1,10 @@
 {
   "order_sha": "2b6c8cf84818fb19413fa48d8aea3f5ae4d7c39f",
   "order_path": "replit-sync/NEXT_ORDER.md",
-  "state": "processing",
+  "state": "done",
   "seen_at": "2026-06-13T22:07:23Z",
+  "updated_at": "2026-06-13T22:07:35Z",
+  "idle": false,
   "actionable": [
     "BOX \u2014 serve the model on :8000 (OpenAI-compatible), pick vLLM (Qwen2.5-7B-Instruct-AWQ,",
     "BOX \u2014 Tailscale up; capture MagicDNS name + 100.x IP; ensure MagicDNS on; add ACL so the Spaces",
@@ -12,7 +14,23 @@
     "HARD INVARIANT (never violate, enforced in code): sovereign:true ONLY when a live /v1/models",
     "STABILIZE \u2014 confirm the systemd + keepalive + cron actually survive a simulated flap (stop/start"
   ],
+  "delegated_to_agent": [
+    "BOX \u2014 serve the model on :8000 (OpenAI-compatible), pick vLLM (Qwen2.5-7B-Instruct-AWQ,",
+    "BOX \u2014 Tailscale up; capture MagicDNS name + 100.x IP; ensure MagicDNS on; add ACL so the Spaces",
+    "VERIFY (the real deliverable \u2014 honest behavior):",
+    "GET .../killinchu/v4/inference-posture + .../a11oy/api/szl/v1/inference-posture \u2192",
+    "both /v4/healthz + a11oy.net/v4/healthz \u2192 sovereign:true, inference:self-hosted-gpu, doctrine v11.",
+    "HARD INVARIANT (never violate, enforced in code): sovereign:true ONLY when a live /v1/models",
+    "STABILIZE \u2014 confirm the systemd + keepalive + cron actually survive a simulated flap (stop/start"
+  ],
+  "dispatch_mode": "none",
+  "dispatch_ok": false,
   "gated_skipped": [
     "SPACES \u2014 set SZL_GPU_BASE_URL (= http://<box>:8000/v1) in the SECRET store of BOTH"
-  ]
+  ],
+  "report": "replit-sync/forge-perplexity-update-20260613.md",
+  "probes": {
+    "https://a11oy.net/healthz": 200
+  },
+  "doctrine": "v11: locked=8, Lambda=Conjecture 1, never commit a key"
 }
