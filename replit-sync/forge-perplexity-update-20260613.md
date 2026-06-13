@@ -9,3 +9,30 @@
   - one /api/a11oy/code/chat/stream turn whose route.model is the local tag with NO cost_usd.
 - Reachability snapshot: https://a11oy.net/healthz -> 429
 - NOTE: no Forge agent endpoint configured (FORGE_AGENT_URL / FORGE_DISPATCH_CMD) — actionable items are reported + the founder is pinged; wire the endpoint to make execution fully hands-off.
+---
+
+## R0 GPU FLIP — EXECUTED + LIVE-VERIFIED — order `62583148` — 2026-06-13
+
+**Status: DONE. Public a11oy.net is sovereign on a real GPU.**
+
+Live proof (real 200 through nginx on the public host):
+- `GET https://a11oy.net/api/a11oy/code/healthz` -> `sovereign:true`, `inference:self-hosted-gpu`, `gpu:"NVIDIA GPU @ betterwithage (Tailscale) - Ollama llama3.1:8b"`
+- `GET https://a11oy.net/api/a11oy/v1/sovereign-compute` -> `summary:"SOVEREIGN-GPU LIVE"`, `sovereign_any:true`; brain = `LIVE-SOVEREIGN / self-hosted-gpu / generative`; embeddings = `LIVE-SOVEREIGN / bge-large / reachable:true`
+- Direct generation on the GPU node (`qwen2.5-coder:7b`) returns real output.
+
+What was done:
+- Served open-weight models on the GPU, OpenAI-compatible: `qwen2.5-coder:7b` (code, pulled this pass), `llama3.1:8b` (general), `bge-large` (embeddings).
+- Set on the a11oy.net deploy env (`/etc/a11oy-gpu.env`, NOT committed): `A11OY_MODEL_BASE_URL=http://100.125.77.31:11434/v1`, `A11OY_LOCAL_CODE_MODEL=qwen2.5-coder:7b`, `A11OY_LOCAL_GENERAL_MODEL=llama3.1:8b`, honest `A11OY_GPU_LABEL`.
+- `a11oy-rebuild` -> main@cb3a82a, all VERIFY PASS, container healthy.
+
+**DEVIATION (defensible — flagged):** the order specified `127.0.0.1:11434` + label "NVIDIA RTX 5000 @ Hetzner". The Hetzner box (167.233.50.75) is **CPU-only** — there is no local GPU at 127.0.0.1. The real GPU is the Tailscale node **100.125.77.31** ("betterwithage"), which the founder pointed to directly. Used that node and kept an **honest** label (a Tailscale-reachable GPU, not physically "@ Hetzner"). Sovereignty is genuine; the label does not overclaim.
+
+**ROOT CAUSE FIXED (no bandaid):** `a11oy-rebuild` only injected `--env-file /etc/szl-contracting.env`, silently dropping `/etc/a11oy-gpu.env` — so `A11OY_MODEL_BASE_URL` never reached the container and the brain fell back to hf-router on every rebuild. Patched `ENV_ARGS` to inject a second `--env-file /etc/a11oy-gpu.env` (marker `gpu-env-file-patch`; backup kept). Verified the env survives a full rebuild.
+
+**NEEDS UPGRADES (notes, no bandaids applied):**
+1. `code/healthz.key_resolution` still reports `provider:hf-router / env_used:HF_TOKEN`. Serving is local regardless, but the key-resolver fallback chain omits `A11OY_GPU_TOKEN`, so the cosmetic block contradicts the sovereign path. `serve.py` change; left untouched to avoid colliding with the active sibling edit (a11oy #327, GPU Bearer auth). Verify after merge.
+2. `/api/a11oy/code/v1/chat/completions` is admin-API-key-gated (`/v1/keys`); an end-to-end OpenAI-compat turn needs an issued key. Sovereignty attested via healthz + sovereign-compute (both derive from a live backend check) instead of issuing admin keys.
+3. **Reproducibility (R0b):** the `a11oy-rebuild` fix is live on the box but the script remains **uncommitted** (no tracked source for `/usr/local/sbin/a11oy-rebuild`). Should be committed to a tracked ops path so the fix survives a from-scratch box rebuild.
+4. The GPU node **sleeps**. When asleep, `sovereign-compute` honestly reports `reachable:false` (DEGRADED), never fake-sovereign — sovereignty is live only while the node is awake.
+
+Not touched this pass (serialized / sibling-owned / gated): R1–R7 — serve.py refactor has an active sibling; keyed-signing items remain founder-gated.
