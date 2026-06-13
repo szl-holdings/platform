@@ -28,6 +28,17 @@ import datetime
 from dataclasses import dataclass, field, asdict
 from typing import Optional
 
+# ---------------------------------------------------------------------------
+# Security layer — import defensively so the module still works standalone
+# if harvest_security is not yet deployed alongside it.
+# ---------------------------------------------------------------------------
+try:
+    from harvest_security import safe_get as _secure_get, EgressDenied
+    _SECURITY_ENABLED = True
+except ImportError:  # pragma: no cover — fallback for standalone use
+    _secure_get = None  # type: ignore[assignment]
+    _SECURITY_ENABLED = False
+
 UA = {"User-Agent": "szl-wasted-energy-harvest/1.0 (+https://a11oy.net)"}
 TIMEOUT = 12
 
@@ -42,8 +53,28 @@ POSTURE_RANK = {
 
 
 def _get_json(url: str) -> Optional[object]:
-    """Best-effort GET → JSON. Returns None on any failure (honest: feed unreachable
-    or returned non-JSON, e.g. a rate-limit/empty body). Never raises."""
+    """Best-effort GET → JSON.
+
+    When ``harvest_security`` is available the request is routed through
+    ``safe_get``, which enforces the egress allowlist (anti-SSRF), IP
+    resolution checks, per-host rate limiting, and the secret-leak guard
+    before a single byte leaves the host.
+
+    Falls back to the original bare ``urllib`` path only when
+    ``harvest_security`` is absent (standalone / legacy mode), so the module
+    continues to work without the security layer present.
+
+    Returns None on any non-fatal failure (feed unreachable, non-JSON body,
+    rate-limit / empty response).  Never raises under normal operation.
+    """
+    if _SECURITY_ENABLED:
+        try:
+            return _secure_get(url)
+        except Exception:
+            # EgressDenied and other security exceptions are non-fatal here
+            # so that posture aggregation can continue with remaining feeds.
+            return None
+    # --- fallback: original bare path (standalone / legacy mode) ---
     try:
         req = urllib.request.Request(url, headers=UA)
         with urllib.request.urlopen(req, timeout=TIMEOUT) as r:
