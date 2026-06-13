@@ -85,6 +85,58 @@ def power_signal_from_feed() -> bool:
     return posture_is_cheap()
 
 
+# --- LIVE WASTED-ENERGY HARVEST bridge (free public feeds, no key) ---------
+# Optional sibling module `wasted_energy_harvest.py` jacks into FREE, no-token
+# grid feeds (aWATTar wholesale, CAISO OASIS, Energy-Charts/Fraunhofer renewable
+# share, UK Carbon Intensity) and reports a real harvest posture. When the grid
+# is in a NEGATIVE-PRICE / curtailed-renewable window, that is genuinely-wasted
+# energy we can soak with Bekenstein-gated batch work. This bridge is network-
+# touching, so it is OPT-IN (allow_network=True) and conservative-honest on any
+# failure. It NEVER asserts a measured joule: joules stay SAMPLE off-box.
+try:
+    import wasted_energy_harvest as _harvest  # type: ignore
+    _HAVE_HARVEST = True
+except Exception:  # noqa: BLE001
+    _harvest = None  # type: ignore
+    _HAVE_HARVEST = False
+
+
+def harvest_posture_bridge(allow_network: bool = False) -> dict:
+    """Return the live wasted-energy posture from the free feeds.
+
+    Conservative-honest: if the harvest module is absent, network is disallowed,
+    or any feed call fails, returns a benign `normal` posture with
+    `wasted_energy_available=False` (never overclaims cheap/free power).
+
+    Returns a dict with: posture, wasted_energy_available, soak_hard,
+    price_measured (real price signal y/n), joules_label (always 'sample').
+    """
+    benign = {
+        "posture": "normal",
+        "wasted_energy_available": False,
+        "soak_hard": False,
+        "price_measured": False,
+        "joules_label": "sample",
+        "source": "none (harvest feed not consulted)",
+    }
+    if not (_HAVE_HARVEST and allow_network):
+        return benign
+    try:
+        prov = _harvest.harvest_provenance()
+        # joules MUST stay sample off-box no matter what the price feed says.
+        prov["joules_label"] = "sample"
+        return prov
+    except Exception:  # noqa: BLE001 - any failure => stay honest, benign.
+        return benign
+
+
+def should_soak_wasted_energy(allow_network: bool = False) -> bool:
+    """True iff the live grid is in a negative-price/curtailed window worth
+    flooding the Bekenstein batch sponge. Reactive turns are NEVER gated by
+    this; it only governs PROACTIVE batch admission."""
+    return bool(harvest_posture_bridge(allow_network=allow_network).get("soak_hard"))
+
+
 def make_energy_gate(now_fn: Optional[Callable[[], object]] = None) -> Callable:
     """Build a `scheduler.EnergyGate` driven by the energy-signal feed.
 
