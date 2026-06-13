@@ -1,3 +1,31 @@
+## R-LEADERS-TECH-DEPLOY (TOP — innovate+evolve: adopt the leaders proven deploy/resilience tech, no band-aids) — DEPLOY, do NOT merge
+Researched how the top eng orgs fix exactly our problems (deploy flapping, slow fan-out, hanging deps). Applying
+their PROVEN patterns as SZL-native (our own implementation, patterns credited). Incoming PR feat/resilience adds a
+Hystrix-style CIRCUIT BREAKER + K8s-style LIVENESS/READINESS split. FORGE — apply these to the LIVE deploy pipeline:
+1. READINESS-GATED DEPLOY (Kubernetes maxUnavailable:0 pattern — THE flapping fix): when rebuilding the a11oy/
+   killinchu HF Space image, the NEW image must pass /api/a11oy/v1/health/ready (200, all dark-surface modules
+   registered + harvest reader live) BEFORE it replaces the old one. Never swap to an image whose /health/ready is
+   503. This is why surfaces flip 404 today — deploys go live before ready. Gate it.
+2. DEPLOYMENT CIRCUIT BREAKER w/ AUTO-ROLLBACK (AWS ECS pattern): if the new image fails /health/ready within a
+   window, AUTO-ROLLBACK to the last-good image. A bad deploy must self-revert, not leave a half-state.
+3. ONE CANONICAL DEPLOY PATH from main — kill any competing branch/older-image redeploy that reverts surfaces.
+   After deploy, run python3 tools/szl_smoke_stress.py smoke (on main) and require ALL surfaces 200 AND STAY 200
+   across 2 consecutive runs before declaring done.
+4. CIRCUIT BREAKER on the fabric (Hystrix pattern, from the incoming feat/resilience PR): wire it around the GPU
+   node probes so when chaski is down the breaker OPENS and compute-pool fail-fasts (no timeout paid) — composes
+   with the merged backend-hardening cache. compute-pool must be <1s always.
+5. /health/live (trivial 200) + /health/ready (deps healthy) live on a11oy — use /health/ready as the deploy gate
+   and a heartbeat.
+ALSO via the same gated rebuild: finish /ayni, /research/prereg, /research/verify, /harvest/datacenters (a11oy from
+main), killinchu finance/realestate, szl-router live (PRIVATE, honest provenance), chaski 2nd lung, push HF energy
+Space; add joules EVIDENCE fields (joules_measured_total, exporter_node, exporter_last_seen_ts, power_w_sample) so
+measured is self-verifying; fix harvest/metrics valid-JSON+timeout; tune smoke scanner (betterwithage IS own metal).
+HOLD VAST (founder flips last). REPORT: smoke verdict (all 200 + STAY 200), compute-pool latency, /health/ready
+status, joules evidence present.
+DOCTRINE v11: no band-aids — root-cause via leaders proven patterns; honest breaker/readiness/joules-evidence;
+sovereign own-metal-only (betterwithage IS own metal); joules MEASURED only via real exporter; ONE loop; no
+free-energy (#239/#240); locked=8; Λ=Conj1; Khipu=Conj2; no key; do NOT merge.
+
 ## R-ROOTCAUSE-HARDEN (TOP — founder: get it done, NO band-aids; fix root causes) — DEPLOY, do NOT merge
 3 hardening PRs MERGED to main: a11oy #346 (backend: concurrent+cached+timeout fabric/engine probes — compute-pool
 6.9s->subsecond, kills the 000s), a11oy #345 (prod hardening: OWASP headers, per-IP rate-limit 429+Retry-After,
