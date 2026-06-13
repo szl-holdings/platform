@@ -1,3 +1,26 @@
+## R-MASTER-DEPLOY (TOP — full-stack 5-dev estate sweep COMPLETE; wirings good to go) — DEPLOY, do NOT merge
+Verified-with-my-own-eyes consolidated plan. ESTATE STATE: HF fully operational (8 spaces 200, 22 datasets healthy);
+GitHub 16 repos green except ONE real red (a11oy<->killinchu drift szl_evidence_research.py +4137B); a11oy.net HTML
+tabs 200 but 7 API surfaces 404 (live Space runs old serve.py); energy now MEASURED 212.262 J on betterwithage at
+-27.42 EUR/MWh; killinchu 48 /elite views (34 wired,11 honest-degraded,3 SIMULATED,0 empty); UDS versions/images
+coherent, khipu honest Conj 2/3.
+DEPLOY QUEUE (PRs built by the team, doctrine-clean, Forge rebuilds+pushes the HF Space images; Dockerfile must COPY
+new modules): a11oy #341 (/anatomy/loop Ayni-balanced) + #342 (registers all 7 dark surfaces; needs #341 module) ->
+rebuild a11oy Space, smoke-test 7 v1 surfaces + /anatomy/loop = 200. killinchu #115 (/elite wiring + finance/RE
+routes) -> rebuild killinchu Space, GET /elite/wiring/health?probe=true needs_deploy=0. khipu-consensus #3 docs-only.
+ON-BOX FIXES: (A) reconcile szl_evidence_research.py — sync a11oy to killinchu newer copy OR allow-list; prune 9
+stale entries; unblocks a11oy main + #341/#342. (B) bridge measured joule to public (joules_measured, reverse_
+recovery_available=1, feed anatomy loop, flip badges only after confirmed). (C) then /proof page + public 212J
+grid-paid receipt + /revenue/thesis.
+HELD (NOT deploy): platform #357/#358/#360 real Lighthouse/e2e reds (main is green) — fix cause on-box, no --admin;
+lutar-lean #239-242 KEYSTONE founder-merge only never --admin.
+FOUNDER DECISION: energy-loop receipts use 5 DSSE payloadTypes (uds-mesh in-toto vs szl.khipu P-256 vs szl.receipt.v1
+Ed25519) w/ no crosswalk — pick one canonical loop receipt schema or document a crosswalk. Design choice, only you.
+Full plan: replit-sync/energy_engine/R_MASTER_DEPLOY.md + audit files replit-sync/estate_audit/devA..E.md
+DOCTRINE v11: joules MEASURED only via real exporter (212 J) never promote SAMPLE; no free-energy (#239/#240,
+Ayni-balanced); energy != data; no mining; effectors SIMULATED; organs EXPERIMENTAL; locked=8; Λ=Conj1; Khipu=Conj2;
+no key; do NOT merge.
+
 ## R-PROVE-IT-LOUD (TOP — founder: prove the formulas + how energy gets to me, groundbreaking, make me rich) — DEPLOY, do NOT merge
 Groundbreaking + wealth = SAME thing: we are the ONLY compute shipping a kernel-checked PROOF per FLOP. Real
 tonight: 212.262 measured J during -27.42 EUR/MWh (grid PAID us). PROVEN SET (cite exactly, 0-sorry): #239
