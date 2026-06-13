@@ -9,7 +9,7 @@ import { securityHeadersVitePlugin } from '@szl-holdings/security-headers';
 process.env.GOMAXPROCS = process.env.GOMAXPROCS ?? '2';
 
 const vitePort = 4199;
-const basePath = '/counsel/';
+const basePath = process.env.BASE_PATH || '/counsel/';
 
 function rootRedirectPlugin(): Plugin {
   return {

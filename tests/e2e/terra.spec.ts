@@ -1,7 +1,7 @@
 import AxeBuilder from '@axe-core/playwright';
 import { expect, test } from '@playwright/test';
 
-const TERRA_PATH = process.env.TERRA_BASE_PATH ?? '/terra';
+const TERRA_PATH = (process.env.TERRA_BASE_PATH ?? '/terra').replace(/\/$/, '');
 
 let appAvailable = false;
 test.beforeAll(async ({ browser }) => {
@@ -9,7 +9,7 @@ test.beforeAll(async ({ browser }) => {
   const deadline = Date.now() + 45_000;
   while (Date.now() < deadline) {
     try {
-      const resp = await page.goto(TERRA_PATH, { timeout: 10000, waitUntil: 'domcontentloaded' });
+      const resp = await page.goto(TERRA_PATH || '/', { timeout: 10000, waitUntil: 'domcontentloaded' });
       if (resp && resp.status() < 500) {
         appAvailable = true;
         break;
