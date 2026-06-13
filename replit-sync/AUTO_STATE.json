@@ -1,11 +1,14 @@
 {
-  "order_sha": "cefd7babe4b91a4f497074357b80bef327a874d6",
+  "order_sha": "d3b52584854cfd11a351af18bbefd59d0527bfbf",
   "order_path": "replit-sync/NEXT_ORDER.md",
-  "state": "done",
-  "seen_at": "2026-06-13T09:05:21Z",
-  "updated_at": "2026-06-13T09:05:24Z",
-  "idle": true,
+  "state": "processing",
+  "seen_at": "2026-06-13T10:05:23Z",
   "actionable": [
+    "MIRROR BEST OPEN WEIGHTS (verify license on each card first): DeepSeek V4 (MIT), Qwen 3.x coder/general",
+    "FREE CREDITS (~$500K stackable, FOUNDER applies \u2014 Forge preps replit-sync/credits_application_pack.md with",
+    "FASTER INFERENCE FREE: stand up vLLM (OpenAI-compatible, best default) as a 2nd sovereign backend on",
+    "WIRE: new models + vLLM register in /compute-pool on rtx-betterwithage; anatomy SAMAY soaks heavier batches in",
+    "R_FORGE_REPLY_DEPLOY.md. DOCTRINE v11: no free-energy/no mining; energy != data; consent-only; joules SAMPLE",
     "the lean comment as the PHYSICS grounding that our no-free-energy stance is a conservation law, not",
     "confirm live negative price on the box (curl aWATTar);",
     "nvidia-smi power.draw idle -> run ONE real qwen2.5-coder:7b inference via",
@@ -28,16 +31,8 @@
     "[FOUNDER+Forge] Tailscale HA: >=2 subnet routers so the tailnet survives any node dropping.",
     "honest SAMPLE fallback, CTO doctrine-clean. Founder runs the box GPS step at home. Doctrine v11 throughout."
   ],
-  "delegated_to_agent": [],
-  "dispatch_mode": "none",
-  "dispatch_ok": false,
   "gated_skipped": [
     "J5 WattTime v3 (api.watttime.org/v3): 401 \u2014 reachable, needs token; stays SAMPLE until keyed (never commit).",
     "FREE TIERS into the LiteLLM router as zero-cost fallback model_names (keys via secret store,"
-  ],
-  "report": "replit-sync/forge-perplexity-update-20260613.md",
-  "probes": {
-    "https://a11oy.net/healthz": 200
-  },
-  "doctrine": "v11: locked=8, Lambda=Conjecture 1, never commit a key"
+  ]
 }
