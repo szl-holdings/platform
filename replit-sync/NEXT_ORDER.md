@@ -1,3 +1,22 @@
+## R-MERGES-LANDED-HOLD-VAST (TOP — update: a11oy stack is PERMANENT on main; HOLD Vast until fully ready) — DEPLOY, do NOT merge
+FOUNDER DIRECTION: do NOT list on Vast.ai yet — get the WHOLE estate finished + aligned FIRST, then flip the
+earning switch LAST as the final step. So: keep the marketplace agent ARMED but DO NOT prompt for VAST_API_KEY as
+the next action; the key is the last step after everything else is green.
+MERGES LANDED (founder/agent did the permanence gate): a11oy #341 (/anatomy/loop), #342 (dark-surfaces register),
+#344 (research infra) are MERGED to main; #343 YARQA consolidation content is ON main (closed as superseded — verified
+szl_anatomy_loop.py on main has the circulatory consolidation). So szl_anatomy_loop.py + szl_dark_surfaces_register.py
++ szl_research_infra.py are ALL on main now. FORGE: rebuild+push the a11oy image FROM MAIN (cleaner than the deploy
+branch) so the live loop is the permanent main version.
+STILL FINISH (before we flip Vast): (1) fix/confirm /compute-pool stays 200 (it recovered from a transient 000).
+(2) Get the 404 surfaces to 200 from the main build: /ayni, /research/prereg, /research/verify, /research/{id},
+/harvest/datacenters. (3) Push the NEW HF static Space SZLHOLDINGS/energy from /home/user/workspace/hf_energy_space/.
+(4) WAKE CHASKI (2nd SAMAY lung): on 100.76.58.50 OLLAMA_HOST=0.0.0.0:11434 + ollama serve; /compute-pool flips
+gpu_nodes 1->2 on real 200 probe. (5) Report what is green so the founder can decide the canonical loop receipt
+schema and THEN provide VAST_API_KEY as the final go-live step.
+DOCTRINE v11: joules MEASURED only via exporter (212J); ONE loop/ledger/Ayni; chaski reachable only on real 200; no
+free-energy (#239/#240 Ayni); energy != data; consent only; NOT mining; research=process-verification NO psi claim;
+revenue ESTIMATE no guarantee; locked=8; Λ=Conj1; Khipu=Conj2; no key/seed; do NOT merge. Vast is the LAST switch.
+
 # SZL Forge — NEXT ORDER
 
 ## ORDER: FREEZE HOLD (demo window)
