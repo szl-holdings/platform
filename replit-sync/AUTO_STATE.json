@@ -1,10 +1,8 @@
 {
-  "order_sha": "c9168b427ce8d8bcc10554b0b8e60f9e6bf9418e",
+  "order_sha": "7155e0f775b61e40a21527e3182f77730f116dda",
   "order_path": "replit-sync/NEXT_ORDER.md",
-  "state": "done",
-  "seen_at": "2026-06-13T06:04:43Z",
-  "updated_at": "2026-06-13T06:04:46Z",
-  "idle": false,
+  "state": "processing",
+  "seen_at": "2026-06-13T07:04:51Z",
   "actionable": [
     "OWN THE WEIGHTS: mirror glm-4.6 + qwen2.5-coder:32b + a deepseek coder to the SZL HF org (open",
     "ENERGY-AWARE SCHEDULER: gate heavy/batch inference + model pulls to cheap/negative-price /",
@@ -15,24 +13,7 @@
     "[FOUNDER+Forge] Tailscale HA: >=2 subnet routers so the tailnet survives any node dropping.",
     "honest SAMPLE fallback, CTO doctrine-clean. Founder runs the box GPS step at home. Doctrine v11 throughout."
   ],
-  "delegated_to_agent": [
-    "OWN THE WEIGHTS: mirror glm-4.6 + qwen2.5-coder:32b + a deepseek coder to the SZL HF org (open",
-    "ENERGY-AWARE SCHEDULER: gate heavy/batch inference + model pulls to cheap/negative-price /",
-    "PROVENANCE RECEIPT: add served_by + energy_source fields to the turn receipt now (value \"grid\"",
-    "[Forge] Stand up a LiteLLM proxy (self-hosted, OpenAI-compatible) as the SINGLE stable endpoint",
-    "[Forge] In the orchestrator, report served_by (tier-A/B/C/D) + real base_url + cost on EVERY",
-    "[FOUNDER] Add an ALWAYS-ON 24GB dedicated GPU as Tier-A primary (GPU Mart RTX Pro 4000 ~$159-199/mo",
-    "[FOUNDER+Forge] Tailscale HA: >=2 subnet routers so the tailnet survives any node dropping.",
-    "honest SAMPLE fallback, CTO doctrine-clean. Founder runs the box GPS step at home. Doctrine v11 throughout."
-  ],
-  "dispatch_mode": "none",
-  "dispatch_ok": false,
   "gated_skipped": [
     "FREE TIERS into the LiteLLM router as zero-cost fallback model_names (keys via secret store,"
-  ],
-  "report": "replit-sync/forge-perplexity-update-20260613.md",
-  "probes": {
-    "https://a11oy.net/healthz": 200
-  },
-  "doctrine": "v11: locked=8, Lambda=Conjecture 1, never commit a key"
+  ]
 }
