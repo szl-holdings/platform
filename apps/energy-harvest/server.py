@@ -18,6 +18,7 @@ Endpoints:
   GET /posture     compact one-glance posture for the frontend
   GET /fabric      energy/sovereignty posture overlay (honest)
   GET /soak        proactive-batch admission gate boolean
+  GET /body/self   honest body self-model (proprioception across organs)
 """
 import os
 
@@ -26,8 +27,9 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse, JSONResponse, PlainTextResponse
 
 import engine
+import body
 
-app = FastAPI(title="SZL Energy Harvest", version="1.0.0")
+app = FastAPI(title="SZL Energy Harvest", version="1.1.0")
 
 # Public read-only grid data — allow both a11oy.net and the HF Space console to read.
 app.add_middleware(
@@ -82,6 +84,14 @@ def soak():
             "honesty": DOCTRINE_NOTE}
 
 
+@app.get("/body/self")
+def body_self():
+    """Honest body self-model (proprioception): each organ's
+    {live, maturity, sovereign, measured_or_sample}. Composes existing proven
+    pieces; PLANNED organs are declared dark, never faked."""
+    return body.body_self()
+
+
 def _g(name, val, help_, typ="gauge"):
     if val is None:
         return ""
@@ -100,7 +110,7 @@ def metrics():
     except Exception:
         p = {}
     wasted = 1 if p.get("wasted_energy_available") else 0
-    body = "".join([
+    body_txt = "".join([
         _g("szl_energy_harvest_up", 1, "Energy-harvest backend is serving."),
         _g("szl_energy_harvest_feeds_live", p.get("feeds_live"),
            "Number of grid feeds returning live 200 data this scrape."),
@@ -119,7 +129,7 @@ def metrics():
         _g("szl_energy_harvest_joules_sample", 1,
            "1 = joules are SAMPLE (no on-box NVML meter yet), never measured here."),
     ])
-    return PlainTextResponse(body, media_type="text/plain; version=0.0.4")
+    return PlainTextResponse(body_txt, media_type="text/plain; version=0.0.4")
 
 
 @app.get("/fabric")
