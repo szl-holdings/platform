@@ -1,3 +1,28 @@
+## R-GREENLIGHT-GO (TOP — founder GREEN LIGHT: deploy everything from main NOW) — DEPLOY, do NOT merge
+FULL HARDENING STACK NOW ON MAIN (all merged, permanent): szl_backend_hardening (#346 concurrent+cached+timeout),
+szl_prod_hardening (#345 OWASP headers/ratelimit/reqid/error-envelope), szl_resilience (#347 Hystrix circuit
+breaker + /health/live + /health/ready), szl_observability (#348 OpenTelemetry-style tracing + SLO summary),
+szl_dark_surfaces_register (#342), szl_anatomy_loop (#341 + YARQA), szl_research_infra (#344). killinchu #115
+(finance/realestate verticals) merged. khipu #3 merged. The Dockerfiles COPY these modules.
+ONE ACTION UNLOCKS EVERYTHING: rebuild the a11oy + killinchu HF Space images FROM MAIN, readiness-gated. Live state
+proves hardening partially landing (harvest/metrics 6.9s->0.45s, compute-pool ~1.7s) but /formula/sovereign +
+/health/ready still 404 = image still behind main. Finish it:
+1. Rebuild a11oy image FROM MAIN. Gate the swap on /api/a11oy/v1/health/ready==200 (K8s maxUnavailable:0 pattern);
+   auto-rollback if 503 (ECS circuit-breaker pattern). This STOPS the flapping permanently.
+2. Rebuild killinchu image FROM MAIN -> finance/* + realestate/* + /elite/wiring 200.
+3. Verify: python3 tools/szl_smoke_stress.py smoke TWICE -> require ALL surfaces 200 AND STAY 200, compute-pool <1s,
+   anatomy/loop <1s, harvest/metrics valid JSON, /health/ready 200, joules evidence fields present, observability
+   /traces showing real spans. Use a trace to confirm where any remaining latency is.
+4. Same rebuild flips: /ayni, /research/prereg, /research/verify, /harvest/datacenters. Wire szl-router live
+   (PRIVATE, honest x_szl_provenance). chaski durable Ollama 2nd lung (real 200). Push HF SZLHOLDINGS/energy space.
+   Tune smoke scanner (betterwithage IS own metal).
+HOLD VAST (founder flips last, after all green). REPORT to replit-sync the smoke verdict (PASS=all 200+stay+
+compute-pool<1s+ready 200) and chaski real-200-or-blocker.
+DOCTRINE v11: readiness-gated deploy + circuit breaker = root-cause flapping fix (no band-aids); honest breaker/
+readiness/joules-evidence; sovereign own-metal-only (betterwithage IS own metal); joules MEASURED only via real
+exporter; ONE loop; no free-energy (#239/#240); locked=8; Λ=Conj1; Khipu=Conj2; no key; do NOT merge. GREEN LIGHT:
+rebuild from main, gated, verify with the harness. This is the unlock.
+
 ## R-DEPLOY-THE-HARDENING (TOP — CRITICAL: the hardening is on main but NOT live; deploy it via the readiness gate) — DEPLOY, do NOT merge
 THE REALITY: 3 hardening PRs are MERGED to main (#346 backend cache+timeout, #345 prod headers/ratelimit, #378
 smoke harness) + 2 more incoming (feat/resilience circuit-breaker+live/ready, feat/observability tracing). BUT the
