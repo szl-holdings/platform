@@ -1,13 +1,28 @@
 {
   "order_sha": "f5253fbd6f8f4bf93d16dc73edf3e8c3d1c2d19d",
   "order_path": "replit-sync/NEXT_ORDER.md",
-  "state": "processing",
+  "state": "done",
   "seen_at": "2026-06-13T02:04:23Z",
+  "updated_at": "2026-06-13T02:04:26Z",
+  "idle": false,
   "actionable": [
     "serve an open-weight model on the betterwithage GPU, OpenAI-compatible",
     "set on the a11oy.net deploy env: A11OY_MODEL_BASE_URL=http://127.0.0.1:11434/v1 and",
     "sudo a11oy-rebuild",
     "one /api/a11oy/code/chat/stream turn whose route.model is the local tag with NO cost_usd."
   ],
-  "gated_skipped": []
+  "delegated_to_agent": [
+    "serve an open-weight model on the betterwithage GPU, OpenAI-compatible",
+    "set on the a11oy.net deploy env: A11OY_MODEL_BASE_URL=http://127.0.0.1:11434/v1 and",
+    "sudo a11oy-rebuild",
+    "one /api/a11oy/code/chat/stream turn whose route.model is the local tag with NO cost_usd."
+  ],
+  "dispatch_mode": "none",
+  "dispatch_ok": false,
+  "gated_skipped": [],
+  "report": "replit-sync/forge-perplexity-update-20260613.md",
+  "probes": {
+    "https://a11oy.net/healthz": 429
+  },
+  "doctrine": "v11: locked=8, Lambda=Conjecture 1, never commit a key"
 }
