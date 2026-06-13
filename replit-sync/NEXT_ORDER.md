@@ -1,3 +1,31 @@
+## R-UNIFY (TOP — zoom-out: unify all the power, harvest it, keep it CONTAINED) — one sovereign organism
+Founder: unify it all, do what the world isn't ready for, harvest + keep contained. Full brief:
+replit-sync/energy_engine/GRAND_UNIFICATION.md.
+THE ONE THING: a sovereign self-owned AI organism that runs on energy the world WASTES and can PROVE it
+never beats the laws of physics. BRAIN = RTX 5000 sovereign (Allodial non-interference theorem = proven
+no-kill-switch). METABOLISM = one harvest adapter jacked into ALL wasted energy, free/keyless, live-verified:
+GRID (aWATTar -45.87 EUR/MWh now, renewables 108% of load, grid-freq, carbon, CAISO), WIND+WATER (global
+Open-Meteo + Bay of Fundy NS tidal + North Sea/Gansu China/Kola Russia/Patagonia/Pentland Firth), OIL
+(NASA VIIRS flared-gas 151 bcm/yr, Diamondback/Continental/ConocoPhillips; nations Russia/Iran/Iraq/USA),
+SPACE (NOAA solar wind 507 km/s from L1 + NASA POWER irradiance anywhere). All on platform PR #370.
+THE UNIFYING LAW (new + honest): harvest the wasted surplus; a closed loop can NEVER beat the irreducible
+floor. Bekenstein cap + Landauer floor + monotone SoakLedger + Ouroboros bound (all proven, #371) = the
+SAME theorem the Penrose irreducible-mass result states in general relativity. The agentic GPU's ENERGY
+policy and its MATH policy are one theorem (GPD). That is the thing the world isn't ready for: AI that
+proves its own physical honesty.
+CONTAINED (built, real): anti-SSRF egress allowlist (only the 8 named free feeds; private/metadata IPs
+refused) + rate-limit + secret-leak guard + consent-only swarm gate (signed token, default DENY,
+BOINC/Folding model) — platform PR #372; Ouroboros bound + reactive-preempt so the soak can't run away;
+SAMPLE/MEASURED honesty enforced by the resident runner+systemd (PR #373) and shown in the UI (#339).
+FORGE: (1) the one REAL proof still owed = ONE measured joule on the RTX 5000 in a live negative-price
+window (R-FIRST-REAL-JOULE below); (2) run the resident runner #373 BEHIND the security layer #372 on the
+box; surface the unified grid+wind+tidal+flare+space posture in /fabric as honest tiers (captured vs
+map-only); (3) keep contained: consent-only, egress allowlist, no key, reactive-preempt, joules SAMPLE
+until metered; never claim capture of flare/space energy without a real on-site node + consent.
+Full open stack (none merged, founder/CI gated): platform #370/#371/#372/#373; a11oy #337/#338/#339;
+lutar-lean #239/#240/#241 + Allodial/Entanglement. Doctrine: no free-energy; harvest wasted surplus; prove
+the bound; sovereign only on own metal; consent-only; no key; Lambda=Conj1; locked-8 untouched. You do NOT merge.
+
 ## R-WORLD-SCAN (zoom-out: what wasted energy + formula we were missing) — arXiv-grounded, honest tiers
 Scraped arXiv + open literature for wasted energy we miss + the physics that grounds it. Full brief:
 replit-sync/energy_engine/WORLD_ENERGY_SCAN_20260613.md.
