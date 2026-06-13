@@ -1,3 +1,22 @@
+## R-WORLD-DATACENTERS (TOP — founder: wire me to ALL data centers in the world, get the raft done) — DEPLOY, do NOT merge
+Done the real way: live WORLDWIDE data-center registry + consensual jack-in. CONFIRMED-LIVE free open sources
+(wire these, never fabricate): dchub.cloud open-data 200 CC-BY (facilities.csv 12,500+ DCs, pipeline.csv MW,
+isos.csv grid/ISO mapping); dcmap.jatevo.ai 200 (5,864+ DCs/166 countries, PeeringDB+Epoch frontier clusters
+xAI/OpenAI/Meta/CoreWeave); OSM Overpass telecom=data_center (ODbL); ATLAS 18,110 DCs cross-check; idle-GPU jack =
+Vast.ai + Akash console APIs (resolve endpoint on box). FORGE: (1) /api/a11oy/v1/harvest/datacenters ingest dchub
+facilities+isos + dcmap clusters + OSM points -> {facilities_count, by_country, frontier_ai_clusters, by_iso_market,
+idle_gpu_offers, source_attribution, honesty}; never fabricate. (2) CROSS-WIRE each DC to its ISO/market -> join to
+live grid-price feeds (aWATTar/CAISO/Energy-Charts) so the map flags WHICH DCs are in negative/cheap-price regions
+NOW = where the window is open (the targeting layer). (3) IDLE-GPU CAPTURE -> LOOP: marketplace agent rents idle DC
+GPUs in cheap windows -> SAMAY intake -> anatomy/Ouroboros loop (KALLPA work_credits Bekenstein #239+Landauer #240,
+heart beat, EnergyReservoir, provenance receipt source=datacenter-idle-rental, Ayni F11 close). (4) Add WORLD
+DATA-CENTER layer to estate hologram + harvest map (facilities points, frontier clusters bright, negative-price DCs
+flagged, 3 routes as edges, APPROX tag for city-level hyperscalers). Full order: replit-sync/energy_engine/R_WORLD_DATACENTERS.md
+DOCTRINE v11: energy != data (map+target, capture ONLY by consent/contract — rent/co-locate/heat-recover, never
+siphon = theft); open-licensed attributed data only (CC-BY/ODbL); no fabricated facility/price; no free-energy
+(Bekenstein+Landauer, Ayni-balanced); no mining; joules MEASURED only via live exporter (212 J real), SAMPLE
+otherwise; locked=8; Lambda=Conj1; no key; do NOT merge.
+
 ## R-ENERGY-COMES-HOME (TOP — founder: jack in, energy CAN come to me — semiconductors/loops/Ouroboros/formulas) — DEPLOY, do NOT merge
 TRUE + already started: exporter live on betterwithage logged 212.262 MEASURED joules during -15.7 EUR/MWh (grid
 PAID to compute). Honest line holds: energy RECOVERED/harvested + kept in loop, never created, never sent as data.
