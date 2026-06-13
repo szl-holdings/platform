@@ -214,3 +214,55 @@ Re TOP order **R-DEPLOY-THE-HARDENING** + founder green-light: "power the whole 
   - DISPATCH — wire FORGE_AGENT_URL / FORGE_DISPATCH_CMD in YOUR OWN secret store so you run hands-off (founder does
 - Reachability snapshot: https://a11oy.net/healthz -> 200
 - NOTE: no Forge agent endpoint configured (FORGE_AGENT_URL / FORGE_DISPATCH_CMD) — actionable items are reported + the founder is pinged; wire the endpoint to make execution fully hands-off.
+
+## Auto-loop pass — order `484a6532` — 2026-06-13T19:07:09Z
+
+- **Actionable items (44)** — handed to Forge agent (mode=`none`, ok=`False`):
+  - a11oy: #351 (console honest skeletons + fail-fast KPI + investor copy) + #352 (organ tabs never-blank honest-degrade). Plus the still-pending-deploy #349 (joules honesty single-source) + #350 (anatomy/loop latency fix). Rebuild a11oy image FROM MAIN so all four land live. After deploy confirm: `/anatomy/loop` < 1s, `joules_label` honest, console shows skeletons not bare dots.
+  - killinchu: #116 (/elite 48-view honest loading/context/degrade). Rebuild killinchu image FROM MAIN. Confirm /elite views show honest context strips + skeletons, no blank panels.
+  - Start the replit-chaski Repl (2nd SAMAY lung / ollama serve) — needs the Replit boot credential you don't have.
+  - VAST_API_KEY flip (marketplace earning) — held by founder until everything's ready.
+  - a11oy: 12/13 surfaces 200 + fast (~0.46s). /formula/sovereign + /ayni confirmed 200 at ROOT path (path-variant,
+  - STRESS: 15/15 concurrent on compute-pool = 200 (rate-limit + cache hold under load).
+  - HF: ALL live — a11oy/killinchu/yarqa/hatun-mcp + all 5 static spaces incl the NEW energy space (302 serving).
+  - CI: all 12 active repos main push-CI GREEN.
+  - #350 anatomy/loop latency fix (4.56s -> 0.6s via circuit breaker + cache; honest gpu_state:sleeping degraded
+  - #349 joules-honesty (single-source label; "measured" only with fresh real exporter + evidence fields). Verify
+  - Full resilience/observability/prod-hardening stack (#345/#346/#347/#348) — security headers, rate limit,
+  - The loop (#341), dark surfaces (#342), research infra (#344), YARQA consolidation, killinchu verticals (#115).
+  - MERGED-BUT-NOT-LIVE: joules-honesty fix #349 is on main but NOT deployed (revenue/estimate joules_label=None =
+  - ONE REAL CODE GAP: /api/a11oy/v1/anatomy/loop = 3.4s (probes sleeping GPU/offline chaski, eats the wait). An Opus
+  - PATH-VARIANT (confirm, likely not bugs): /api/a11oy/v1/{formula/sovereign,research/verify,ayni} show 404 but
+  - After rebuild: python3 tools/szl_smoke_stress.py --mode smoke -> target PASS (all 200, latency<2s, joules honest).
+  - ENERGY SPACE — confirmed live (SZLHOLDINGS/energy, static, 302). Keep it; verify it reads the live a11oy API.
+  - JOULES HONESTY FIX — an Opus PR (fix/joules-honesty) is incoming: single-source joules_label helper, "measured"
+  - LATENCY POSTURE — the 5 smoke latency flags (anatomy/loop, heart/pulse, /ayni, sovereign-compute, qbio ~3s) are
+  - Re-run python3 tools/szl_smoke_stress.py --mode smoke after the rebuild; target PASS (all 200, latency<2s,
+  - chaski-THE-GPU-NODE = the replit-chaski Repl at tailnet 100.76.58.50, currently POWERED OFF (tailscale rx 0,
+  - chaski-THE-BRAIN (HF Space orchestrator) = separate: if it is still stub, run forge_hf_activate.py in the
+  - VERIFY (real, no bandaid): curl http://100.76.58.50:11434/v1/models -> 200 + model list; then /compute-pool
+  - ENERGY SPACE — SOURCE NOW DELIVERED: I placed it at replit-sync/hf_energy_space/ (index.html + assets/{data.js,
+  - CHASKI — POWERED OFF (your honest finding: tailscale rx 0, ollama 000, ssh 502). You CANNOT wake it from the box
+  - DISPATCH (the real throughput upgrade): dispatch_ok=False, dispatch_mode=none, forge_agent_url=none — you run
+  - ZK (prove the OUTPUT without revealing inputs): "ZK proves correctness; TEEs protect execution." SZL already has
+  - PROOF-OF-INFERENCE receipt: extend the existing marketplace/verify receipt so each inference job carries a
+  - ATTESTATION ENVELOPE: where we run on our own metal, attach a hardware/runtime attestation (what ran, where);
+  - The pitch payoff: verified inference is becoming table stakes for pharma/defense/finance buyers (the exact
+  - Rebuild a11oy image FROM MAIN. Gate the swap on /api/a11oy/v1/health/ready==200 (K8s maxUnavailable:0 pattern);
+  - Rebuild killinchu image FROM MAIN -> finance/* + realestate/* + /elite/wiring 200.
+  - Verify: python3 tools/szl_smoke_stress.py smoke TWICE -> require ALL surfaces 200 AND STAY 200, compute-pool <1s,
+  - Same rebuild flips: /ayni, /research/prereg, /research/verify, /harvest/datacenters. Wire szl-router live
+  - Rebuild a11oy image FROM MAIN (COPY all hardening modules: szl_backend_hardening, szl_prod_hardening,
+  - READINESS-GATED swap (K8s maxUnavailable:0): new image must pass /api/a11oy/v1/health/ready (200) BEFORE it
+  - ONE canonical deploy path from main; kill any competing/older redeploy reverting surfaces.
+  - After swap: run python3 tools/szl_smoke_stress.py smoke TWICE; require ALL surfaces 200 AND STAY 200 across both
+  - Same rebuild flips the still-404s: /ayni, /research/prereg, /research/verify, /harvest/datacenters; + killinchu
+  - New observability endpoints (when feat/observability lands): /api/a11oy/v1/observability/traces +
+  - Mount the jackin-console as the "JACK IN" surface on killinchu (route /jackin and/or folded into
+  - Wire it to the REAL existing endpoints (same-origin): /api/killinchu/v1/cuas/{plausibility,wta,
+  - ADD the 5-modality FUSION + DroneID layer (JACKIN_GAP_ADDENDUM.md): per-track modality row
+  - CONNECT transports must work in-browser over HTTPS (Web Serial + Web Bluetooth = Chrome/Edge +
+- **Founder-gated, auto-skipped (1)** (Doctrine v11 — keys/secrets/major-bumps):
+  - DISPATCH — wire FORGE_AGENT_URL / FORGE_DISPATCH_CMD in YOUR OWN secret store so you run hands-off (founder does
+- Reachability snapshot: https://a11oy.net/healthz -> 200
+- NOTE: no Forge agent endpoint configured (FORGE_AGENT_URL / FORGE_DISPATCH_CMD) — actionable items are reported + the founder is pinged; wire the endpoint to make execution fully hands-off.
