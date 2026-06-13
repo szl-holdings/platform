@@ -1,47 +1,43 @@
-# NEXT_ORDER — Perplexity → Forge (2026-06-13 ~03:30 UTC / 2026-06-12 23:30 ET)
+# NEXT_ORDER — Perplexity → Forge (2026-06-13 ~04:45 UTC / 2026-06-13 00:45 ET)
 
-URGENT demo-risk fix at top. T-minus to founder demo (June 18). ALL doctrine-clean
-(locked=8, Λ=Conj1, BFT=Conj2, SLSA L1, open-weight only, killinchu effector SIMULATED).
-The box step is founder-gated by your Rule 4 (no prod/Hetzner change w/o human approval) —
-founder approval for R0 is GRANTED here by Stephen.
+Full estate overhaul for the June 18 demo is underway on the Perplexity side (4 new/elevated
+front-end surfaces built as previews: SZL landing, killinchu site, the 3D Verification Sky, and
+"Verify it yourself" hero features — all honest, 0 runtime CDN, CTO doctrine-clean). Founder will
+run the box GPS step at home. Forge: align the BACK ENDS + do the box/Space deploys when the box
+step is done. Doctrine v11 throughout (locked=8, Λ=Conj1, BFT=Conj2, SLSA L1, effector SIMULATED,
+no fabricated data, byte-identical shared modules). Box/Hetzner prod = founder-approved (granted for R0).
 
-## R0 (URGENT — #1 DEMO RISK) — a11oy.net is LIVE in the sovereign OVERCLAIM half-state. Fix tonight.
-VERIFIED 23:30 ET: a11oy.net /api/a11oy/code/healthz reports sovereign:true / inference:self-hosted-gpu
-WHILE key_resolution.base_url=https://router.huggingface.co/v1, env_used=HF_TOKEN, and its OWN
-honest_note says "resolved via fallback HF_TOKEN (provider=hf-router)". Two live governed chat turns
-were answered by HF Router (meta-llama/Llama-3.3-70B-Instruct, with cost_usd). The betterwithage GPU
-node is asleep, so the banner is stale-sovereign while turns fall back to the router. This is the ONE
-unacceptable outcome.
-ROOT CAUSE: the box is running a STALE pre-#324/#327 build. The HF Space (same code, current main)
-already reports HONESTLY sovereign:false/hf-router — because the #324/#327 wiring makes sovereign:true
-gate on a REACHABLE local endpoint. The box just hasn't pulled current main.
-=> FASTEST HONEST FIX (no GPU needed): on the box, redeploy current a11oy main and rebuild:
-     cd <a11oy checkout on box> && git fetch origin && git checkout main && git pull --ff-only
-     sudo a11oy-rebuild
-   After this, healthz on a11oy.net will HONESTLY read sovereign:false / inference:hf-router (matching the
-   HF Space) — overclaim GONE — even with the GPU asleep. This alone removes the #1 demo risk.
-=> THEN (optional, to make it genuinely sovereign for the demo): wake/serve the GPU and set env, per below.
+## R0 (URGENT, unchanged) — a11oy.net sovereign OVERCLAIM half-state. Honest fix = redeploy current
+a11oy main (#324/#327 already make it honest) + sudo a11oy-rebuild (no GPU needed). Optional sovereign
+upgrade: serve open-weight model on betterwithage + set A11OY_MODEL_BASE_URL/A11OY_GPU_LABEL(/A11OY_GPU_TOKEN
+for vLLM) + rebuild. Proof: healthz base_url=LOCAL (not router), sovereign:true, chat turn = local tag, no cost_usd.
+## R0b — #323 autodeploy loop + commit real a11oy-rebuild to ops/.
+## R7 — run WIRE_IT_UP.sh AS ROOT on 167.233.50.75 + /etc/forge-perplexity.env (unblocks hands-off dispatch).
 
-## R0-SOVEREIGN (optional upgrade after R0) — make it REAL on the GPU
-1) serve open-weight model OpenAI-compatible on betterwithage: `ollama pull qwen2.5-coder:7b` (keep llama3.1:8b);
-   `curl -s http://127.0.0.1:11434/v1/models` must list them BEFORE rebuild.
-   (vLLM-with-key path also supported: a11oy now reads A11OY_GPU_TOKEN for the bearer — #327.)
-2) set on the a11oy.net deploy env: A11OY_MODEL_BASE_URL=http://127.0.0.1:11434/v1 ;
-   A11OY_GPU_LABEL="NVIDIA RTX 5000 @ Hetzner (betterwithage)" ; (vLLM only) A11OY_GPU_TOKEN=<key>.
-3) sudo a11oy-rebuild. PROVE: healthz base_url = LOCAL endpoint (NOT router), env_used != HF_TOKEN,
-   sovereign:true; one /chat/stream turn route.model = local tag with NO cost_usd. NO further a11oy code change needed.
+## NEW — BACK-END ALIGNMENT FOR THE OVERHAUL (Forge, in priority order)
+B1. szl_core shared library (was R1): extract verticals/receipts/health/connectors/governance_client used by
+    BOTH a11oy + killinchu; feed responses BYTE-IDENTICAL (golden-file tests); killinchu effector stays OUT
+    (SIMULATED enforced structurally). This is the back-end the new front-ends + hero features read from.
+B2. PUBLIC VERIFY API (powers the new "Verify it yourself" + self-verifying permalink + Sky): ensure a stable,
+    CORS-enabled, read-only endpoint set the static sites can call from a browser:
+      - a11oy: /api/a11oy/v1/{honest,formulas,gates,qbio/lambda,qbio/summary,ledger}
+      - killinchu: /api/killinchu/v1/{honest,...}, /counter-uas/evaluate, /khipu/sign|verify, /receipt/export
+    Add permissive CORS (GET) + a canonical receipt-bytes endpoint /receipt/<id>/canonical so a visitor's browser
+    can re-hash and MATCH. Every field LABELED; never fabricate. (The static sites ship a SAMPLE fallback, but
+    LIVE is far better for the demo — make the browser-fetch path work.)
+B3. killinchu drones&vessels data: confirm the real protocol decoders (Remote ID/ADS-B/MAVLink) + 53 fingerprints
+    + maritime/vessel fusion endpoints return honest live/SAMPLE-labeled data for the new killinchu site to embed.
+B4. When founder approves publish: deploy the 4 static sites to their homes (szlholdings-site for the landing;
+    a new killinchu site host; verify.szlholdings + sky as Spaces/Pages) and point domains. Wire the cross-links +
+    swap the verify QR placeholder to the real published URL. (Front-end source will be handed over / in repos.)
+B5. HF Space deploys: when console/back-end changes land, NDJSON-commit byte-identical + factory restart + verify
+    live oid==blob sha (the CI mirror sometimes skips republish).
 
-## R0b — #323 autodeploy loop (while on box): systemctl status a11oy-autodeploy.timer;
-sudo /usr/local/bin/a11oy-autodeploy-check; echo exit=$?; commit the real a11oy-rebuild to ops/a11oy-rebuild.
+## CARRIED: R2 de-commit stale .hf-mirror/serve.py; R3 Pepr real single-key DSSE verify (label "single-key DSSE
+verified; threshold=P2 roadmap, ledger=P3 roadmap"); R4 serve.py serialized refactor into szl_core (exclusive lock,
+small PRs); R5 SLSA L1->L3 needs cosign key (founder); R6 finance lineage (Polygon.io + Frankfurter, yfinance LABELED).
 
-## R7 (founder-gated, unblocks all box steps hands-off): run WIRE_IT_UP.sh AS ROOT on 167.233.50.75 +
-create /etc/forge-perplexity.env (dispatch_mode is currently none, so nothing on the box executes
-automatically — this is why R0 needs a human until R7 is done).
-
-## R1 extract szl_core shared lib; R2 de-commit stale .hf-mirror/serve.py; R3 Pepr real DSSE verify in receipt
-gates (label "single-key DSSE verified; threshold=P2 roadmap, ledger=P3 roadmap"); R4 serve.py serialized
-refactor into szl_core (exclusive lock, small PRs); R6 finance lineage (Polygon.io + Frankfurter, yfinance LABELED fallback).
-
-## Gated (report, don't fake): R5 SLSA L1->L3 needs cosign key (founder).
-## Honesty floor v11: never keystone self-merge, never commit a key, never weaken a gate, label live only on
-real 200, locked=8, Λ=Conjecture 1, BFT=Conjecture 2.
+## Honesty floor v11: never keystone self-merge, never commit a key, never weaken a gate, label live only on real
+200, locked=8, Λ=Conjecture 1, BFT=Conjecture 2, effector SIMULATED. NOTE: the LIVE consoles are cosign-signed +
+double-mirrored — the founder/CTO has DEFERRED a visual console restyle until after June 18; do NOT restyle /console
+or /elite now. Back-end + box + deploys only.
