@@ -67,7 +67,7 @@ const CAPABILITIES = [
   },
   {
     id: 'operator', title: 'Operator · Ask / Act / Approvals',
-    color: 0xe58e54, angle: 4.189,
+    color: 0x8a7fd6, angle: 4.189,
     plain: 'The governed run loop: ask, act with approvals, and emit replayable signed receipts — an internal a11oy function.',
     functions: [
       'governed run loop P1–P6 (sign → gate → chain → memory → replay)',

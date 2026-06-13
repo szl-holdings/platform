@@ -108,7 +108,24 @@ html,body{margin:0;height:100%;background:var(--indigo-900);overflow:hidden;colo
 @media(prefers-reduced-motion:reduce){
   #inspector{transition:none}#boot{transition:none}#boot .spin{animation:none;border-top-color:rgba(215,185,107,0.25)}
   .ticker .tk{white-space:normal}
+  #verify-modal{transition:none}
 }
+/* ADDITIVE: “ask the fabric” verify launcher + modal (no 3D / scene logic touched) */
+#verify-fab{position:fixed;z-index:18;left:50%;transform:translateX(-50%);bottom:20px;cursor:pointer;
+  background:var(--hud-bg);border:1px solid var(--hud-border);border-radius:10px;
+  color:var(--hatun-300);font:600 12px var(--mono);letter-spacing:.04em;padding:9px 13px;
+  backdrop-filter:blur(9px);-webkit-backdrop-filter:blur(9px);box-shadow:0 10px 34px rgba(0,0,0,0.5)}
+#verify-fab:hover{color:#7fe0db;border-color:rgba(127,224,219,.5)}
+#verify-modal{position:fixed;z-index:40;inset:0;display:none;align-items:flex-start;justify-content:center;
+  background:rgba(4,5,12,0.72);backdrop-filter:blur(4px);-webkit-backdrop-filter:blur(4px);
+  padding:6vh 14px;overflow:auto;transition:opacity .25s ease}
+#verify-modal.show{display:flex}
+#verify-modal .vm-inner{position:relative;width:100%;max-width:660px}
+#verify-modal .vm-close{position:absolute;top:-34px;right:0;cursor:pointer;color:var(--ink-dim);
+  font-size:24px;background:none;border:0;line-height:1}
+#verify-modal .vm-close:hover{color:var(--hatun-300)}
+#verify-modal .vm-lede{color:var(--ink-dim);font:12px/1.5 var(--mono);margin:0 0 12px;max-width:660px}
+@media(max-width:680px){#verify-fab{bottom:auto;top:56px;left:50%;transform:translateX(-50%)}}
 </style>
 </head>
 <body>
@@ -166,6 +183,18 @@ html,body{margin:0;height:100%;background:var(--indigo-900);overflow:hidden;colo
 
   <div class="title-card"><div class="t1">The Cathedral</div><div class="t2">drag / touch to orbit · scroll or pinch to zoom · click a body to fly &amp; inspect</div></div>
 
+  <!-- ADDITIVE: “ask the fabric” verify launcher (additive only — no scene logic touched) -->
+  <button id="verify-fab" type="button" aria-haspopup="dialog" aria-controls="verify-modal">◈ ask the fabric · verify a receipt</button>
+  <div id="verify-modal" role="dialog" aria-modal="true" aria-label="Ask the fabric — verify a receipt">
+    <div class="vm-inner">
+      <button class="vm-close" id="verify-close" aria-label="Close">×</button>
+      <p class="vm-lede">Paste a Khipu receipt / DSSE envelope / in-toto statement (or load the sample) and
+        submit it to the <b>live</b> a11oy verify endpoint. Unsigned → <b>STRUCTURAL-ONLY</b> (advisory,
+        never a false green). Verifies receipts / DSSE / in-toto — not arbitrary text. Λ = Conjecture 1.</p>
+      <div id="szl-verify"></div>
+    </div>
+  </div>
+
   <!-- Sovereign importmap: ONLY vendored local files. No CDN. -->
   <script type="importmap">
   {
@@ -176,5 +205,24 @@ html,body{margin:0;height:100%;background:var(--indigo-900);overflow:hidden;colo
   }
   </script>
   <script type="module" src="./app.js"></script>
+  <!-- ADDITIVE: vendored, self-contained verify widget (0 CDN, system fonts, honest fallback) -->
+  <script src="./vendor/szl_verify_widget.js"></script>
+  <script>
+    (function(){
+      var fab=document.getElementById('verify-fab');
+      var modal=document.getElementById('verify-modal');
+      var close=document.getElementById('verify-close');
+      var mounted=false;
+      function open(){
+        if(!mounted && window.SZLVerify){ SZLVerify.mount('#szl-verify',{base:'https://a11oy.net'}); mounted=true; }
+        modal.classList.add('show');
+      }
+      function hide(){ modal.classList.remove('show'); }
+      if(fab) fab.addEventListener('click', open);
+      if(close) close.addEventListener('click', hide);
+      if(modal) modal.addEventListener('click', function(e){ if(e.target===modal) hide(); });
+      document.addEventListener('keydown', function(e){ if(e.key==='Escape') hide(); });
+    })();
+  </script>
 </body>
 </html>

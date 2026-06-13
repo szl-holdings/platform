@@ -9,9 +9,7 @@
 <meta property="og:description" content="Witnessed-agreement mesh visualization. Khipu BFT = Conjecture 2 (proposed, not proven)." />
 <meta property="og:type" content="website" />
 <link rel="icon" type="image/svg+xml" href="assets/logo.svg" />
-<link rel="preconnect" href="https://fonts.googleapis.com" />
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+<!-- SOVEREIGN: 0 runtime CDN · system fonts only (declared in style.css). No Google Fonts. -->
 <link rel="stylesheet" href="assets/style.css" />
 </head>
 <body>
@@ -227,6 +225,20 @@
 }</pre>
   </section>
 
+  <!-- ===== Ask the fabric — interactive verify widget (live) ===== -->
+  <section class="section wrap" id="verify">
+    <div class="section-head">
+      <p class="eyebrow">Ask the fabric — verify a knot yourself</p>
+      <h2>Don't trust us — verify a receipt live</h2>
+      <p>Paste a Khipu receipt / DSSE envelope / in-toto statement (or load the sample) and submit it
+         to the <strong>live</strong> a11oy verify endpoint. The verdict is the fabric's real, honest
+         output: unsigned receipts return <strong>STRUCTURAL-ONLY</strong> (advisory amber, never a
+         false green). The endpoint verifies <strong>receipts / DSSE / in-toto statements</strong>, not
+         arbitrary text. Khipu BFT remains <strong>Conjecture 2</strong>.</p>
+    </div>
+    <div id="szl-verify"></div>
+  </section>
+
   <!-- ===== Honesty callout ===== -->
   <section class="section wrap">
     <div class="callout glass">
@@ -262,6 +274,11 @@
   </div>
 </footer>
 
+<!-- SOVEREIGN: vendored 3d-force-graph (MIT, self-contained UMD, bundles three) — 0 runtime CDN -->
+<script src="vendor/3d-force-graph.min.js"></script>
 <script type="module" src="assets/app.js"></script>
+<!-- Vendored, self-contained verify widget (0 CDN, system fonts, honest fallback) -->
+<script src="assets/szl_verify_widget.js"></script>
+<script>SZLVerify.mount('#szl-verify', { base: 'https://a11oy.net' });</script>
 </body>
 </html>

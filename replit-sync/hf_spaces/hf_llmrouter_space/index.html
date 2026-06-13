@@ -9,9 +9,7 @@
 <meta property="og:description" content="Sovereign-first routing: own metal → free tiers → paid fallback. Public status only — no private logic, no keys." />
 <meta property="og:type" content="website" />
 <link rel="icon" type="image/svg+xml" href="assets/logo.svg" />
-<link rel="preconnect" href="https://fonts.googleapis.com" />
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+<!-- SOVEREIGN: 0 runtime CDN · system fonts only (declared in style.css). No Google Fonts. -->
 <link rel="stylesheet" href="assets/style.css" />
 </head>
 <body>
@@ -219,6 +217,54 @@
     </div>
   </section>
 
+  <!-- ===== What the router guarantees (agentic explainer) ===== -->
+  <section class="section wrap" id="guarantees">
+    <div class="section-head">
+      <p class="eyebrow">What the router guarantees</p>
+      <h2>Promises you can check, not take on faith</h2>
+      <p>The router internals stay <strong>private</strong>, but its <em>guarantees</em> are public and
+         auditable. Each promise below is enforceable by the honest <code>x_szl_provenance</code> stamp
+         on every routed response — and any signed routing receipt can be re-checked live in the box at
+         the foot of this section.</p>
+    </div>
+    <div class="prov-grid">
+      <article class="prov-field glass">
+        <div class="prov-key">G1 · sovereign-first</div>
+        <p>Own metal is tried <strong>first</strong>, every time. The router only leaves your hardware
+           when it must — and the <code>tier</code> field records exactly how far down the ladder a
+           request fell.</p>
+      </article>
+      <article class="prov-field glass">
+        <div class="prov-key">G2 · sovereign is never overstated</div>
+        <p><code>sovereign: true</code> appears <strong>only</strong> for SZL-owned metal. Every hosted
+           free/paid provider is stamped <code>sovereign: false</code>. We never claim hosted compute
+           as ours.</p>
+      </article>
+      <article class="prov-field glass">
+        <div class="prov-key">G3 · no free-energy</div>
+        <p><code>energy_source</code> is a plain descriptor (<code>self-hosted</code> / <code>grid</code>)
+           — never a joule count or zero-cost-energy assertion. Λ remains <strong>Conjecture 1</strong>.</p>
+      </article>
+      <article class="prov-field glass">
+        <div class="prov-key">G4 · honest degrade</div>
+        <p>When a status endpoint is unreachable this page shows a clearly-labeled <strong>SNAPSHOT</strong>,
+           never fabricated data and never a false “all green.” The <code>/router/*</code> endpoints have
+           no CORS, so a browser sees the honest snapshot here by design.</p>
+      </article>
+    </div>
+
+    <div class="section-head" style="margin-top: var(--space-7)">
+      <p class="eyebrow">Ask the fabric — verify a routing receipt</p>
+      <h2>Re-check a signed receipt yourself</h2>
+      <p>Paste a routing / DSSE / in-toto receipt (or load the sample) and submit it to the
+         <strong>live</strong> a11oy verify endpoint. The verdict is the fabric's real, honest output:
+         unsigned receipts return <strong>STRUCTURAL-ONLY</strong> (advisory amber, never a false green).
+         The endpoint verifies <strong>receipts / DSSE / in-toto statements</strong>, not arbitrary text
+         — and never exposes any router internals or keys.</p>
+    </div>
+    <div id="szl-verify"></div>
+  </section>
+
   <!-- ===== Private notice + honesty ===== -->
   <section class="section wrap">
     <div class="private-note glass" style="margin-bottom: var(--space-6)">
@@ -263,5 +309,8 @@
 </footer>
 
 <script type="module" src="assets/app.js"></script>
+<!-- Vendored, self-contained verify widget (0 CDN, system fonts, honest fallback) -->
+<script src="assets/szl_verify_widget.js"></script>
+<script>SZLVerify.mount('#szl-verify', { base: 'https://a11oy.net' });</script>
 </body>
 </html>

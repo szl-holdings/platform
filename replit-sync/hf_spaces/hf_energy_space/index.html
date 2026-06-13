@@ -7,10 +7,11 @@
 <meta name="description" content="Live energy command view: harvest stranded watts, prove bounded compute, circulate Ayni-balanced joules. 212.262 measured joules during a negative-price grid window." />
 <link rel="icon" href="assets/favicon.svg" type="image/svg+xml" />
 <link rel="stylesheet" href="assets/style.css" />
+<!-- SOVEREIGN: 0 runtime CDN. three.js r160 (MIT) VENDORED locally under assets/. See assets/THREE_LICENSE.txt. -->
 <script type="importmap">
 {
   "imports": {
-    "three": "https://unpkg.com/three@0.160.0/build/three.module.js"
+    "three": "./assets/three.module.min.js"
   }
 }
 </script>
@@ -231,6 +232,20 @@
       </div>
     </section>
 
+    <!-- ASK THE FABRIC — interactive verify widget (live) -->
+    <section class="proof" aria-label="Ask the fabric — verify a receipt">
+      <h2 class="section-title">ASK THE FABRIC — VERIFY A RECEIPT, DON'T TRUST US</h2>
+      <p class="intro-line" style="max-width:880px">
+        Don't take the joule headline on faith. Paste a Khipu receipt / DSSE envelope / in-toto
+        statement below (or load the sample) and submit it to the <strong>live</strong>
+        a11oy verify endpoint. The verdict you see is the fabric's real, honest output — unsigned
+        receipts return <strong>STRUCTURAL-ONLY</strong> (advisory amber, never a false green).
+        The endpoint verifies <strong>receipts / DSSE / in-toto statements</strong>, not arbitrary text.
+        <span class="tag tag-conj">Λ = Conjecture&nbsp;1</span>
+      </p>
+      <div id="szl-verify"></div>
+    </section>
+
     <!-- REVENUE THESIS -->
     <section class="rev-section" aria-label="Revenue thesis">
       <article class="card card-wide" id="card-rev">
@@ -287,5 +302,8 @@
 
   <script type="module" src="assets/loop.js"></script>
   <script type="module" src="assets/data.js"></script>
+  <!-- Vendored, self-contained verify widget (0 CDN, system fonts, honest fallback) -->
+  <script src="assets/szl_verify_widget.js"></script>
+  <script>SZLVerify.mount('#szl-verify', { base: 'https://a11oy.net' });</script>
 </body>
 </html>

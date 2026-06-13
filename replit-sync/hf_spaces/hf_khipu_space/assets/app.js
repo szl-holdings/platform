@@ -6,7 +6,9 @@
    Doctrine v11. Khipu BFT = Conjecture 2 (PROPOSED, NOT proven).
    =========================================================== */
 
-import ForceGraph3D from 'https://esm.sh/3d-force-graph@1.73.4';
+// SOVEREIGN: 3d-force-graph (MIT) vendored as a self-contained UMD bundle under ../vendor/ and
+// loaded via a <script> tag in index.html (exposes window.ForceGraph3D). 0 runtime CDN.
+const ForceGraph3D = window.ForceGraph3D;
 
 const API = 'https://a11oy.net/api/a11oy/v1/compute-pool';
 const SNAPSHOT_URL = 'assets/snapshot-compute-pool.json';
