@@ -14,8 +14,8 @@ permissions:
   contents: read
 
 concurrency:
-  group: ci-${{ github.ref }}
-  cancel-in-progress: ${{ github.ref != 'refs/heads/main' && github.ref != 'refs/heads/master' }}
+  group: ci-${{ github.head_ref || github.sha }}
+  cancel-in-progress: true
 
 env:
   NODE_OPTIONS: --max-old-space-size=6144
