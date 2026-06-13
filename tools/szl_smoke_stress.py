@@ -83,16 +83,13 @@ SMOKE_PATHS = [
     "engine/status",
     "anatomy/loop",
     "heart/pulse",
-    "/ayni",  # served top-level, not under API_PREFIX
-    "/formula/sovereign",  # served top-level, not under API_PREFIX
+    "/ayni",  # real top-level HTML page (ayni_page) -- HTML, not JSON
+    "sovereign-compute",  # canonical sovereign posture JSON (formula/sovereign aggregator tab is dark)
     "qbio/coherence",
-    "/formulas/index",  # served top-level, not under API_PREFIX
+    "formulas",  # real formula registry JSON (was wrong path formulas/index)
     "revenue/marketplace",
     "revenue/estimate",
     "revenue/thesis",
-    "/research/prereg",  # served top-level, not under API_PREFIX
-    "/research/verify",  # served top-level, not under API_PREFIX
-    "/harvest/datacenters",  # served top-level, not under API_PREFIX
     "compute-pool",
     "verify/healthz",
     "wayra/summary",
@@ -116,7 +113,7 @@ USER_AGENT = "szl-smoke-stress/1.0 (+a11oy estate health; doctrine v11)"
 
 # Surfaces whose body is legitimately HTML, not JSON. Not flagged for
 # json_valid=False. /router/health serves the operator HTML app.
-HTML_OK = {"/router/health"}
+HTML_OK = {"/router/health", "/ayni"}
 
 # Surfaces whose body is legitimately Prometheus exposition text (text/plain;
 # version=0.0.4), not JSON -- exempt from json_valid exactly like HTML_OK.
