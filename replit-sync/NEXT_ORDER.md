@@ -1,3 +1,29 @@
+## R-FRONTIER-VERIFIABLE-INFERENCE (ROADMAP — next moat evolution; lower priority than the GREENLIGHT deploy) — DEPLOY-when-ready, do NOT merge
+Frontier scan (cited 2026): verifiable inference is now a FUNDED, near-regulatory category racing toward where SZL
+already is — Inference Labs $6.3M (Proof of Inference, ZK tamper-evident receipts), DAiFi $20M (verifiable
+intelligence), Hyperbolic Proof-of-Sampling (UC Berkeley/Columbia, proves inference computed correctly), DePIN GPU
+market $19B (+265% YoY), 2/3 of AI compute is now inference. The leaders pair TEE (hardware attestation of WHAT ran)
++ ZK (prove the OUTPUT without revealing inputs): "ZK proves correctness; TEEs protect execution." SZL already has
+the DSSE-receipt + Lean-bound layer — the next moat evolution is a VERIFIABLE-INFERENCE ATTESTATION ENVELOPE.
+PRIORITY NOTE: this is ROADMAP/R&D, NOT this week. The GREENLIGHT deploy (R-GREENLIGHT-GO: rebuild a11oy+killinchu
+from main, readiness-gated) comes FIRST — finish the live estate before any new frontier code. This is a design
+direction to scope, not a rush.
+SCOPE (when capacity frees up, build SZL-native, openly-licensed primitives only, honest):
+1. PROOF-OF-INFERENCE receipt: extend the existing marketplace/verify receipt so each inference job carries a
+   tamper-evident proof that THIS model + THESE weights produced THIS output on unaltered input — start with a
+   sampling/commit-reveal scheme (Hyperbolic PoSP style, our own impl), not full ZK yet (ZK circuits are heavy;
+   stage it). Anchor it in the existing szl-lake DSSE chain.
+2. ATTESTATION ENVELOPE: where we run on our own metal, attach a hardware/runtime attestation (what ran, where);
+   honest about the trust boundary (we are SLSA L1 honest, NOT claiming TEE we do not have — only claim what is
+   real).
+3. The pitch payoff: verified inference is becoming table stakes for pharma/defense/finance buyers (the exact
+   verticals in our outreach) — this defends the moat against the funded entrants. Wire it into /revenue/thesis as
+   the differentiator.
+DOCTRINE v11: claim ONLY what is real (no TEE claim without TEE hardware; no ZK claim without a real circuit;
+sampling-proof labeled as such); openly-licensed primitives only + cite; verified-PROCESS not outcome; joules
+MEASURED only via exporter; sovereign own-metal-only; locked=8; Λ=Conj1; Khipu=Conj2; no key; do NOT merge.
+ROADMAP — after the live estate is green. Full context: this order. The frontier is real; deploy what exists first.
+
 ## R-GREENLIGHT-GO (TOP — founder GREEN LIGHT: deploy everything from main NOW) — DEPLOY, do NOT merge
 FULL HARDENING STACK NOW ON MAIN (all merged, permanent): szl_backend_hardening (#346 concurrent+cached+timeout),
 szl_prod_hardening (#345 OWASP headers/ratelimit/reqid/error-envelope), szl_resilience (#347 Hystrix circuit
