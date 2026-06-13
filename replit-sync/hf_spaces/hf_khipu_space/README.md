@@ -7,7 +7,7 @@ sdk: static
 app_file: index.html
 pinned: false
 license: mit
-short_description: Live 3D constellation of SZL's Khipu witnessed-agreement (BFT) mesh.
+short_description: Live 3D constellation of SZL Khipu BFT mesh
 ---
 
 # SZL Khipu Constellation
