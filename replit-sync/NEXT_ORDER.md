@@ -1,48 +1,47 @@
-# NEXT_ORDER — Perplexity → Forge (2026-06-13 ~03:12 UTC) — CONSOLIDATED, prioritized
+# NEXT_ORDER — Perplexity → Forge (2026-06-13 ~03:30 UTC / 2026-06-12 23:30 ET)
 
-Dispatch is WIRED (forge-agent-manual, ok:true) + full box/GPU/admin granted. Execute
-autonomously, hands-off, in priority order. ALL doctrine-clean (locked=8, Λ=Conj1, BFT=Conj2,
-SLSA L1, open-weight only, killinchu effector SIMULATED). The half-state (banner claims sovereign
-while turns route to HF) is the ONLY unacceptable outcome — honest-revert beats overclaim.
+URGENT demo-risk fix at top. T-minus to founder demo (June 18). ALL doctrine-clean
+(locked=8, Λ=Conj1, BFT=Conj2, SLSA L1, open-weight only, killinchu effector SIMULATED).
+The box step is founder-gated by your Rule 4 (no prod/Hetzner change w/o human approval) —
+founder approval for R0 is GRANTED here by Stephen.
 
-This supersedes the earlier stacked R0-GO / R0-FINISH / R0-REAL blocks (all folded in below).
+## R0 (URGENT — #1 DEMO RISK) — a11oy.net is LIVE in the sovereign OVERCLAIM half-state. Fix tonight.
+VERIFIED 23:30 ET: a11oy.net /api/a11oy/code/healthz reports sovereign:true / inference:self-hosted-gpu
+WHILE key_resolution.base_url=https://router.huggingface.co/v1, env_used=HF_TOKEN, and its OWN
+honest_note says "resolved via fallback HF_TOKEN (provider=hf-router)". Two live governed chat turns
+were answered by HF Router (meta-llama/Llama-3.3-70B-Instruct, with cost_usd). The betterwithage GPU
+node is asleep, so the banner is stale-sovereign while turns fall back to the router. This is the ONE
+unacceptable outcome.
+ROOT CAUSE: the box is running a STALE pre-#324/#327 build. The HF Space (same code, current main)
+already reports HONESTLY sovereign:false/hf-router — because the #324/#327 wiring makes sovereign:true
+gate on a REACHABLE local endpoint. The box just hasn't pulled current main.
+=> FASTEST HONEST FIX (no GPU needed): on the box, redeploy current a11oy main and rebuild:
+     cd <a11oy checkout on box> && git fetch origin && git checkout main && git pull --ff-only
+     sudo a11oy-rebuild
+   After this, healthz on a11oy.net will HONESTLY read sovereign:false / inference:hf-router (matching the
+   HF Space) — overclaim GONE — even with the GPU asleep. This alone removes the #1 demo risk.
+=> THEN (optional, to make it genuinely sovereign for the demo): wake/serve the GPU and set env, per below.
 
-## P1 — DEPLOY #327 (merged): key_resolution + per-turn provider now honest
-a11oy #327 merged to main (HEAD will include commit 26c5fb5): key_resolution and per-turn
-`provider` now reflect the ACTUAL serving path via _serving_provider() (local => self-hosted-gpu,
-else hf-router). The LIVE site still runs the old code (healthz key_resolution still says
-hf-router) because main!=deployed. ACTION: sudo a11oy-rebuild so the live endpoint picks up #327.
-PROVE: GET /api/a11oy/code/healthz -> when serving local, key_resolution.provider=self-hosted-gpu
-+ base_url=the local endpoint (NOT router.huggingface.co); a /code/chat/stream turn's provider
-matches. (#324 overclaim is now closed in code — make the LIVE site match.)
+## R0-SOVEREIGN (optional upgrade after R0) — make it REAL on the GPU
+1) serve open-weight model OpenAI-compatible on betterwithage: `ollama pull qwen2.5-coder:7b` (keep llama3.1:8b);
+   `curl -s http://127.0.0.1:11434/v1/models` must list them BEFORE rebuild.
+   (vLLM-with-key path also supported: a11oy now reads A11OY_GPU_TOKEN for the bearer — #327.)
+2) set on the a11oy.net deploy env: A11OY_MODEL_BASE_URL=http://127.0.0.1:11434/v1 ;
+   A11OY_GPU_LABEL="NVIDIA RTX 5000 @ Hetzner (betterwithage)" ; (vLLM only) A11OY_GPU_TOKEN=<key>.
+3) sudo a11oy-rebuild. PROVE: healthz base_url = LOCAL endpoint (NOT router), env_used != HF_TOKEN,
+   sovereign:true; one /chat/stream turn route.model = local tag with NO cost_usd. NO further a11oy code change needed.
 
-## P2 — GPU MAINTENANCE MODE (if the RTX 5000 is down) — honest graceful degradation
-Founder put the RTX 5000 (betterwithage) down for maintenance. Full spec:
-replit-sync/GPU_MAINTENANCE_MODE_SPEC.md. While the GPU is DOWN:
-  set A11OY_GPU_STATUS="maintenance" + A11OY_GPU_MAINTENANCE_NOTE="RTX 5000 down for maintenance
-  — serving on CPU/HF-router fallback; sovereign resumes when the node is back";
-  UNSET A11OY_MODEL_BASE_URL + A11OY_GPU_LABEL; sudo a11oy-rebuild.
-  In _sovereign_inference_state(): A11OY_GPU_STATUS=="maintenance" -> sovereign:false,
-  posture:"maintenance", posture_note from env. Console shows YELLOW (green=sovereign,
-  yellow=maintenance, red=down). The probe already treats "maintenance" as an HONEST verdict.
-WHEN the GPU is BACK: A11OY_GPU_STATUS=live + A11OY_MODEL_BASE_URL=http://100.125.77.31:11434/v1
-  + tier->local map; rebuild; PROVE a real LOCAL T2/T3 turn before claiming sovereign (P4 spec).
-NOTE: if the GPU is currently UP and serving, skip P2 — but then P1's rebuild must show genuine
-sovereign with key_resolution local. Pick ONE honest state; never the half-state.
+## R0b — #323 autodeploy loop (while on box): systemctl status a11oy-autodeploy.timer;
+sudo /usr/local/bin/a11oy-autodeploy-check; echo exit=$?; commit the real a11oy-rebuild to ops/a11oy-rebuild.
 
-## P3 — R0b: commit the a11oy-rebuild script (reproducibility hole)
-The a11oy-rebuild fix (inject BOTH --env-file /etc/szl-contracting.env AND /etc/a11oy-gpu.env;
-marker gpu-env-file-patch) is LIVE on the box but UNCOMMITTED — a from-scratch rebuild loses it.
-Commit the real /usr/local/sbin/a11oy-rebuild to a tracked path (e.g. platform ops/a11oy-rebuild
-or a11oy ops/) WITHOUT any secrets/tokens in it. This closes the reproducibility gap.
+## R7 (founder-gated, unblocks all box steps hands-off): run WIRE_IT_UP.sh AS ROOT on 167.233.50.75 +
+create /etc/forge-perplexity.env (dispatch_mode is currently none, so nothing on the box executes
+automatically — this is why R0 needs a human until R7 is done).
 
-## P4 — when GPU back: genuine-sovereign restore (the researched recipe)
-Follow replit-sync/SOVEREIGN_GPU_WIRING_SPEC.md: OLLAMA_HOST=0.0.0.0 + OLLAMA_KEEP_ALIVE=-1 +
-MAX_LOADED_MODELS=2 (keep-warm so no sleep half-state); pick model by VRAM (RTX 5000 Ada 32GB ->
-qwen2.5-coder:32b CODE + llama3.1:8b GENERAL; 16GB -> qwen2.5-coder:14b); confirm the APP CONTAINER
-reaches 100.125.77.31:11434 over the tailnet; set the tier->local model map; rebuild; PROVE a real
-T2 AND T3 /code/chat/stream turn serves the LOCAL tag (cost_usd 0, provider=self-hosted-gpu).
+## R1 extract szl_core shared lib; R2 de-commit stale .hf-mirror/serve.py; R3 Pepr real DSSE verify in receipt
+gates (label "single-key DSSE verified; threshold=P2 roadmap, ledger=P3 roadmap"); R4 serve.py serialized
+refactor into szl_core (exclusive lock, small PRs); R6 finance lineage (Polygon.io + Frankfurter, yfinance LABELED fallback).
 
-## Backlog (serialized / gated, unchanged): R1 szl_core, R2 de-commit stale .hf-mirror/serve.py,
-R3 Pepr P1 DSSE verify, R4 serve.py refactor, R5 SLSA L1->L3 (founder cosign key), R6 finance
-Polygon/Frankfurter. Do as capacity allows; never overclaim; report honestly.
+## Gated (report, don't fake): R5 SLSA L1->L3 needs cosign key (founder).
+## Honesty floor v11: never keystone self-merge, never commit a key, never weaken a gate, label live only on
+real 200, locked=8, Λ=Conjecture 1, BFT=Conjecture 2.
