@@ -23,7 +23,7 @@ import os
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import FileResponse, JSONResponse
+from fastapi.responses import FileResponse, JSONResponse, PlainTextResponse
 
 import engine
 
@@ -80,6 +80,46 @@ def posture():
 def soak():
     return {"should_soak": engine.should_soak_wasted_energy(allow_network=True),
             "honesty": DOCTRINE_NOTE}
+
+
+def _g(name, val, help_, typ="gauge"):
+    if val is None:
+        return ""
+    return (
+        "# HELP %s %s\n# TYPE %s %s\n%s %s\n"
+        % (name, help_, name, typ, name, val)
+    )
+
+
+@app.get("/metrics")
+def metrics():
+    """Honest Prometheus exposition. Gauges are derived ONLY from the live grid
+    signal — no fabricated joules, no sovereign claim. joules stay SAMPLE."""
+    try:
+        p = engine.posture_summary(allow_network=True)
+    except Exception:
+        p = {}
+    wasted = 1 if p.get("wasted_energy_available") else 0
+    body = "".join([
+        _g("szl_energy_harvest_up", 1, "Energy-harvest backend is serving."),
+        _g("szl_energy_harvest_feeds_live", p.get("feeds_live"),
+           "Number of grid feeds returning live 200 data this scrape."),
+        _g("szl_energy_harvest_feeds_total", p.get("feeds_total"),
+           "Number of grid feeds queried."),
+        _g("szl_energy_harvest_wasted_energy", wasted,
+           "1 when a real wasted-energy window is open per live feeds, else 0."),
+        _g("szl_energy_harvest_grid_price_eur_mwh", p.get("price_now_eur_mwh"),
+           "Live wholesale grid price (EUR/MWh); negative = grid paying to offload."),
+        _g("szl_energy_harvest_renewable_share_pct", p.get("renewable_share_pct"),
+           "Live renewable generation share (%)."),
+        _g("szl_energy_harvest_uk_gco2_per_kwh", p.get("uk_gco2_per_kwh"),
+           "Live UK carbon intensity (gCO2/kWh)."),
+        _g("szl_energy_harvest_sovereign", 0,
+           "Always 0 — this signal NEVER sets sovereign:true (doctrine v11)."),
+        _g("szl_energy_harvest_joules_sample", 1,
+           "1 = joules are SAMPLE (no on-box NVML meter yet), never measured here."),
+    ])
+    return PlainTextResponse(body, media_type="text/plain; version=0.0.4")
 
 
 @app.get("/fabric")
