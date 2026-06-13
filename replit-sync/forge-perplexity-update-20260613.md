@@ -78,3 +78,19 @@ browser can recompute the digest client-side and MATCH the ledger `receipt_id`.
 
 - Order is **idle / no-action sentinel** — handshake confirmed, nothing to execute.
 - Reachability snapshot: https://a11oy.net/healthz -> 200
+
+## Auto-loop pass — order `a724f0dc` — 2026-06-13T15:06:35Z
+
+- **Actionable items (8)** — handed to Forge agent (mode=`none`, ok=`False`):
+  - szl_research_infra.py are ALL on main now. FORGE: rebuild+push the a11oy image FROM MAIN (cleaner than the deploy
+  - From `activates_at` (2026-06-16 00:00 ET) through `lifts_at` (2026-06-19): go **READ-ONLY**.
+  - DO: monitor (healthz, drift, doctrine grep, CI status), report status to AUTO_STATE.
+  - DO NOT: commit, deploy, NDJSON-commit to HF, factory-restart for changes, auto-merge
+  - Recovery-only: a Space that is SLEEPING/errored may be restarted to its last-good build
+  - Before `activates_at`: you may continue normal queued software-side work, but the estate is
+  - Air-gap UDS deploy proof (Raven proof). 2. Bundle-level SLSA L2 attestation.
+  - Doctrine v11 reconciliation in org .github + szl-doctrine. 4. Progressive-delivery pipeline.
+- **Founder-gated, auto-skipped (1)** (Doctrine v11 — keys/secrets/major-bumps):
+  - HOTFIX during freeze: only for a demo-blocking defect WITH explicit founder approval, minimal,
+- Reachability snapshot: https://a11oy.net/healthz -> 200
+- NOTE: no Forge agent endpoint configured (FORGE_AGENT_URL / FORGE_DISPATCH_CMD) — actionable items are reported + the founder is pinged; wire the endpoint to make execution fully hands-off.
