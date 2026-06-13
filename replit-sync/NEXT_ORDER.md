@@ -1,3 +1,29 @@
+## R-AGENTIC-ANATOMY (TOP — evolve the body; what ELSE agentic we need) — agentic anatomy from agentic GPU
+Founder: evolve my anatomy to a new frontier — agentic anatomy comes from agentic GPU; zoom out what else
+agentic I need; wire it. Full: replit-sync/energy_engine/R_AGENTIC_ANATOMY_FRONTIER.md.
+WIRING NOW (dev squad): the 3D Living Anatomy gains 5 NEW AGENTIC ORGANS born from the agentic GPU
+(anatomy PR feat/agentic-organs, honest tiers): METABOLISM (wasted-energy harvest, LIVE metrics, F19
+LOCKED + Landauer EXPERIMENTAL), IMMUNE (security layer: anti-SSRF allowlist + secret-leak + consent gate,
+deny-by-default), ENDOCRINE (energy-posture scheduler = hormone gating proactive batch, reactive never
+starves), RESPIRATORY (soak breath: inhale Bekenstein-bounded batch when wasted_energy=1, Ouroboros-bounded),
+SENSES (global feeds aWATTar/Energy-Charts/VIIRS-flare/NOAA-solar-wind/Open-Meteo — resource-map tier).
+Plus a deployed 3D hologram showcase (honest SAMPLE/MEASURED badges).
+ZOOM-OUT — what ELSE agentic (gaps to a complete agentic body): (1) MEMORY/hippocampus — recallable
+long-term memory + self-history (we have episodic YAWAR receipts, no consolidated memory); (2) WILL/goal
+loop — bounded Ouroboros pursuit of a standing objective (e.g. maximize MEASURED soaked joules within the
+proven budget), reactive preempts; (3) SELF-MODEL/proprioception — one honest body self-model (organs
+LIVE/dark, sovereign/half-state, MEASURED/SAMPLE); (4) HEALING/homeostasis — auto-repair a dark organ
+within consent+bounds; (5) VOICE — honest NL self-report ("what I am doing + why + my honest confidence");
+(6) consented REPRODUCTION — consent-gated node-birth inheriting organs+doctrine (BOINC model, never reach
+un-consented host).
+RECOMMENDATION priority: SELF-MODEL first (everything needs it) -> MEMORY -> WILL/goal-loop -> HEALING ->
+VOICE -> consented REPRODUCTION. Each composes existing proven pieces; none inflates a label.
+FORGE: after agentic-organs lands in anatomy, wire SELF-MODEL first (/api/<ns>/v1/body/self returning each
+organ {live,maturity,sovereign,measured_or_sample}), then MEMORY + WILL loops, all Ouroboros-bounded +
+consent-gated + behind the security layer; surface new organs in the live anatomy Space. DOCTRINE: never
+inflate a maturity label (locked-8 fixed, Lambda=Conj1, BFT=Conj2); no free-energy; joules SAMPLE until NVML;
+sovereign only on own metal; consent-only; no key; reactive never starves. Operate/verify; do NOT merge.
+
 ## R-FLAGSHIP-FRONTIER (recommendation: unify a11oy + killinchu into ONE governed sovereign mesh)
 Founder: take all of a11oy.net + killinchu to a new frontier; what do I recommend. Full: replit-sync/energy_engine/R_FLAGSHIP_FRONTIER.md.
 THE LEVER: both flagships run on the SAME proven substrate (13-axis Lambda, Khipu BFT Conj2-conditional,
