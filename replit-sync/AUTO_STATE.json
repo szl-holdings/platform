@@ -3,7 +3,7 @@
   "order_path": "replit-sync/NEXT_ORDER.md",
   "state": "done",
   "seen_at": "2026-06-13T21:07:23Z",
-  "updated_at": "2026-06-13T21:07:26Z",
+  "updated_at": "2026-06-13T21:19:30Z",
   "idle": false,
   "actionable": [
     "killinchu **#117** \u2014 /elite mobile + elegance (type floor \u226512px, \u226544px taps, nav no-clip). ALL checks green.",
@@ -158,7 +158,38 @@
   ],
   "report": "replit-sync/forge-perplexity-update-20260613.md",
   "probes": {
-    "https://a11oy.net/healthz": 200
+    "https://szlholdings-cathedral.static.hf.space/app.js": "200 34195b locked=8",
+    "https://szlholdings-energy.static.hf.space/index.html": "200 verify-widget 0-CDN",
+    "https://szlholdings-khipu-constellation.static.hf.space/index.html": "200 verify-widget 0-CDN",
+    "https://szlholdings-llm-router-live.static.hf.space/index.html": "200 verify-widget public-status-only",
+    "https://szlholdings-anatomy.static.hf.space/index.html": "200 verify-widget dual-body intact",
+    "https://a11oy.net/cathedral": "200 locked=8",
+    "https://a11oy.net/console": "200 mobile-live 65 hints",
+    "https://killinchu (elite)": "200 mobile-live 49 hints",
+    "https://szlholdings-hatun-mcp.hf.space/ (html)": "200 console",
+    "https://szlholdings-hatun-mcp.hf.space/ (json)": "200 original JSON",
+    "http://100.76.58.50:11434/v1/models (chaski)": "000 POWERED OFF (founder-only)"
   },
-  "doctrine": "v11: locked=8, Lambda=Conjecture 1, never commit a key"
+  "doctrine": "v11: locked=8, Lambda=Conjecture 1, never commit a key",
+  "forge_interactive_verify": {
+    "by": "Forge (Replit task session)",
+    "at": "2026-06-13T21:19:30Z",
+    "finding": "forge-auto marked 506aee3d done with ONE probe (a11oy.net/healthz) and never pushed the 5 HF static spaces; HF cathedral was STALE at locked=5 while GitHub source + a11oy.net/cathedral were locked=8.",
+    "action": "Pushed all 5 HF static spaces VERBATIM (content files only; HF README/config preserved; cathedral source README is a corrupted HTML render, intentionally NOT pushed).",
+    "commits": {
+      "cathedral": "d8d998a7",
+      "energy": "24380513",
+      "khipu-constellation": "23a400a2",
+      "llm-router-live": "019db85f",
+      "anatomy": "a719df88"
+    },
+    "live_verified": "cathedral app.js=34KB locked=8; all 5 serve + verify-widget; energy+khipu 0 runtime CDN.",
+    "already_live_no_rebuild": "a11oy.net/cathedral locked=8, a11oy.net/console mobile (65 hints), killinchu /elite mobile (49 hints), hatun content-negotiation; a11oy main CI all green @ ee9fa6e8. Image rebuild not a genuine gap; not performed (no needless pre-freeze risk).",
+    "founder_only_blockers": [
+      "replit-chaski POWERED OFF (curl 000)",
+      "VAST_API_KEY flip",
+      "amaru/sentra/rosie codename ruling"
+    ],
+    "report": "replit-sync/forge-perplexity-update-20260613-hf-spaces-genuine-push.md"
+  }
 }
