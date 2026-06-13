@@ -1,4 +1,30 @@
-## R-ENERGY (TOP) — Proven Energy Engine: 13 PRs ready, deploy to the RTX 5000
+## R-ENGINE-V2 (TOP — supersedes R-ENERGY) — Full agentic-GPU engine: 26 PRs ready
+The engine is now COMPLETE across **26 open PRs** (FE+BE+3 Lean proofs) — built, self-tested,
+doctrine-clean, NONE agent-merged. This includes the finishing wave the founder asked for:
+3D HOLOGRAPHIC command bridge (a11oy #336, web/hologram.html, Three.js living-organism view),
+real data sources (platform #369: NVML measured-joule path + LIVE aWATTar price feed + CAISO),
+unified /v1/engine/status (a11oy #335), and the organ-bus end-to-end (platform #367).
+Full order + merge sequence + box bring-up: replit-sync/energy_engine/DEPLOY_ORDER_V2.md
+(companion: UNIFIED_BUILD_ORDER.md, CTO_STATUS.md, HOLOGRAM_NOTES.md, REAL_SOURCES.md, ENGINE_STATUS.md).
+Engine = RTX 5000 @ betterwithage.
+PRs by repo:
+  lutar-lean #239/#240/#241 (KEYSTONE proofs — founder-gated, NEVER --admin merge);
+  platform #356/#357/#358/#359/#360/#361/#362/#363/#364/#365/#366/#367/#368/#369;
+  a11oy #328/#329/#330/#331/#332/#334/#335/#336; anatomy #7.
+Merge bottom-up: proofs first; then platform spine #356->#357->organ/swarm stack->#369;
+then a11oy #328->receipt/console/dashboard/status->#334->#336; then anatomy #7.
+Box: confirm Ollama, vLLM upgrade (qwen2.5-coder:32b :8000), systemd the daemon (resident,
+Restart=always — survives laptop off), wire Chaski reactive ingress + /metrics slack.
+CTO PRIORITY: the #1 gap is NOT more code — it's that 26 PRs are open, ZERO merged, NOTHING
+deployed. FREEZE new frontiers; ship ONE vertical slice deployed+MEASURED: merge spine
+(#239,#356,#357,#369,#328), bring up daemon on-box, wire NVML power.draw -> joules -> emit ONE
+MEASURED receipt through the Bekenstein /v1/energy/budget gate, show it on the hologram. That
+single slice = first measured joule = proves the whole thesis.
+joules stay SAMPLE until a real meter (aWATTar price is the only LIVE real signal today).
+Reactive never starves; sovereign only when local serves; consent-only swarm; never commit a key;
+Λ=Conj1; Khipu BFT=Conj2; locked-8 untouched. The half-state is the ONLY unacceptable outcome.
+
+## R-ENERGY (was TOP) — Proven Energy Engine: 13 PRs ready, deploy to the RTX 5000
 The full agentic-GPU energy engine is BUILT + PROVEN + WIRED across 13 open PRs (FE+BE+2 Lean
 proofs), all doctrine-clean, none agent-merged. Complete order + merge sequence + box bring-up:
 replit-sync/energy_engine/FORGE_ENERGY_ENGINE_ORDER.md. Engine = RTX 5000 @ betterwithage.
