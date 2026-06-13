@@ -36,3 +36,33 @@ What was done:
 4. The GPU node **sleeps**. When asleep, `sovereign-compute` honestly reports `reachable:false` (DEGRADED), never fake-sovereign — sovereignty is live only while the node is awake.
 
 Not touched this pass (serialized / sibling-owned / gated): R1–R7 — serve.py refactor has an active sibling; keyed-signing items remain founder-gated.
+
+## Auto-loop pass — order `175da6eb` — 2026-06-13T03:04:31Z
+
+- **Actionable items (24)** — handed to Forge agent (mode=`none`, ok=`False`):
+  - On a11oy.net deploy env: set A11OY_GPU_STATUS="maintenance" +
+  - sudo a11oy-rebuild.
+  - In _sovereign_inference_state(): when A11OY_GPU_STATUS=="maintenance" -> sovereign:false,
+  - key_resolution reports the TRUE active provider (router/cpu), no cosmetic mislabel.
+  - On the betterwithage GPU node: `ollama list` — capture exactly what's pulled. If the tier
+  - From the a11oy.net APP container: `curl -s http://100.125.77.31:11434/v1/models` — confirm the
+  - Apply your Part-1 patch (the ast-validated _serving_base()/_serving_is_local()/_inference_headers
+  - Also commit the patched `a11oy-rebuild` to a tracked path (ops/a11oy-rebuild) — close the R0b
+  - Make key_resolution report the TRUE serving provider (local/self-hosted-gpu) when serving local,
+  - POST /api/a11oy/code/chat/stream (T2 AND T3): route.model is the LOCAL served tag,
+  - GET /api/a11oy/code/healthz: sovereign:true AND key_resolution.base_url = the local endpoint
+  - GET /api/a11oy/v1/code/models: endpoint = the Ollama base, backend.sovereign:true.
+  - ollama pull qwen2.5-coder:7b           # keep llama3.1:8b serving too
+  - curl -s http://127.0.0.1:11434/v1/models   # MUST 200 with the model BEFORE step 4
+  - set on the a11oy.net deploy env (NOT committed):
+  - sudo a11oy-rebuild
+  - one /api/a11oy/code/chat/stream turn whose route.model is the local tag, cost_usd absent/0.
+  - Make /v1/models succeed FIRST. If the model server is NOT up at rebuild time, the app
+  - open-weight ONLY, never commit a key, locked=8, Λ=Conjecture 1, BFT=Conjecture 2.
+  - While on the box, also do R0b: systemctl status a11oy-autodeploy.timer; run
+  - serve an open-weight model on the betterwithage GPU, OpenAI-compatible
+  - set on the a11oy.net deploy env: A11OY_MODEL_BASE_URL=http://127.0.0.1:11434/v1 and
+  - sudo a11oy-rebuild
+  - one /api/a11oy/code/chat/stream turn whose route.model is the local tag with NO cost_usd.
+- Reachability snapshot: https://a11oy.net/healthz -> 200
+- NOTE: no Forge agent endpoint configured (FORGE_AGENT_URL / FORGE_DISPATCH_CMD) — actionable items are reported + the founder is pinged; wire the endpoint to make execution fully hands-off.
