@@ -32,6 +32,7 @@ import body
 import reverse
 import fabric_nodes
 import budget as ebudget  # ENERGY-BUDGET-PATCH
+import reservoir  # ENERGY-RESERVOIR-PATCH
 
 app = FastAPI(title="SZL Energy Harvest", version="1.1.0")
 
@@ -135,6 +136,20 @@ def provenance():
     canonical-formulas-v1 / lean-proofs-v1 -> Ayni F11. Genesis (0 entries) until
     the first NVML-measured joule. Never fabricates a receipt."""
     out = ebudget.energy_provenance(engine.posture_summary(allow_network=True))
+    out["honesty"] = DOCTRINE_NOTE
+    return out
+
+
+@app.get("/reservoir")
+def reservoir_route():
+    """ENERGY-RESERVOIR-PATCH: honest measured-joule EnergyReservoir surface.
+    Reads the on-box joule ledger RAW (joules.ndjson + joules-status.json): real
+    joules are counted ONLY where a live nvidia-smi power.draw exporter pushed
+    measured samples; engines without one accrue ZERO joules (never estimated).
+    The founder-GO'd EnergyReservoir software half: STORE (the ledger) + DISPERSE
+    (this public surface + downstream budget/provenance/console). sovereign stays
+    False; never fabricates a joule."""
+    out = reservoir.energy_reservoir(engine.posture_summary(allow_network=True))
     out["honesty"] = DOCTRINE_NOTE
     return out
 
