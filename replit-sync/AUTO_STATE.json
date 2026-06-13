@@ -1,70 +1,34 @@
 {
-  "order_sha": "89ffd9ebdedeb61209043d99af368b1e1cac68fc",
+  "order_sha": "35873754ce20db3cac429840cc0f42aea8f17a18",
   "order_path": "replit-sync/NEXT_ORDER.md",
-  "state": "done",
-  "seen_at": "2026-06-13T16:06:36Z",
-  "updated_at": "2026-06-13T16:06:38Z",
+  "order_name": "R-CHASKI-FORGE-START",
+  "state": "reported-blocked",
+  "seen_at": "2026-06-13T16:42:00Z",
+  "updated_at": "2026-06-13T16:42:00Z",
   "idle": false,
-  "actionable": [
-    "apply the 3s feed timeout from the backend PR.",
-    "Wire szl-router as the REAL routing layer in front of the GPU fabric: requests resolve sovereign-first",
-    "Every response MUST carry honest x_szl_provenance {served_by, sovereign (TRUE only for our own metal),",
-    "Tie it to the fabric truth: /compute-pool reachability drives routing (route to chaski only when reachable=true);",
-    "Keys from ENV only (never in repo/logs/disk) \u2014 README already mandates this; enforce it.",
-    "Verify live: curl the new endpoints -> 200 with a real x_szl_provenance header/body; paste raw proof to",
-    "Rebuild the a11oy image FROM MAIN (Dockerfile COPYs: szl_dark_surfaces_register.py, szl_anatomy_loop.py,",
-    "CHASKI (still gpu_nodes_reachable=1, chaski=False): per R-CHASKI-GET-ONLINE-NOW, bring its Ollama up DURABLE on",
-    "PUSH the HF static Space SZLHOLDINGS/energy from /home/user/workspace/hf_energy_space/ (still 401, not public).",
-    "NEW TOOLS landed on main (merged): tools/szl_estate_auditor.py (#376) + tools/szlctl.py (#377) \u2014 SZL-native,",
-    "szl_research_infra.py are ALL on main now. FORGE: rebuild+push the a11oy image FROM MAIN (cleaner than the deploy",
-    "From `activates_at` (2026-06-16 00:00 ET) through `lifts_at` (2026-06-19): go **READ-ONLY**.",
-    "DO: monitor (healthz, drift, doctrine grep, CI status), report status to AUTO_STATE.",
-    "DO NOT: commit, deploy, NDJSON-commit to HF, factory-restart for changes, auto-merge",
-    "Recovery-only: a Space that is SLEEPING/errored may be restarted to its last-good build",
-    "Before `activates_at`: you may continue normal queued software-side work, but the estate is",
-    "Air-gap UDS deploy proof (Raven proof). 2. Bundle-level SLSA L2 attestation.",
-    "Doctrine v11 reconciliation in org .github + szl-doctrine. 4. Progressive-delivery pipeline."
-  ],
-  "delegated_to_agent": [
-    "apply the 3s feed timeout from the backend PR.",
-    "Wire szl-router as the REAL routing layer in front of the GPU fabric: requests resolve sovereign-first",
-    "Every response MUST carry honest x_szl_provenance {served_by, sovereign (TRUE only for our own metal),",
-    "Tie it to the fabric truth: /compute-pool reachability drives routing (route to chaski only when reachable=true);",
-    "Keys from ENV only (never in repo/logs/disk) \u2014 README already mandates this; enforce it.",
-    "Verify live: curl the new endpoints -> 200 with a real x_szl_provenance header/body; paste raw proof to",
-    "Rebuild the a11oy image FROM MAIN (Dockerfile COPYs: szl_dark_surfaces_register.py, szl_anatomy_loop.py,",
-    "CHASKI (still gpu_nodes_reachable=1, chaski=False): per R-CHASKI-GET-ONLINE-NOW, bring its Ollama up DURABLE on",
-    "PUSH the HF static Space SZLHOLDINGS/energy from /home/user/workspace/hf_energy_space/ (still 401, not public).",
-    "NEW TOOLS landed on main (merged): tools/szl_estate_auditor.py (#376) + tools/szlctl.py (#377) \u2014 SZL-native,",
-    "szl_research_infra.py are ALL on main now. FORGE: rebuild+push the a11oy image FROM MAIN (cleaner than the deploy",
-    "From `activates_at` (2026-06-16 00:00 ET) through `lifts_at` (2026-06-19): go **READ-ONLY**.",
-    "DO: monitor (healthz, drift, doctrine grep, CI status), report status to AUTO_STATE.",
-    "DO NOT: commit, deploy, NDJSON-commit to HF, factory-restart for changes, auto-merge",
-    "Recovery-only: a Space that is SLEEPING/errored may be restarted to its last-good build",
-    "Before `activates_at`: you may continue normal queued software-side work, but the estate is",
-    "Air-gap UDS deploy proof (Raven proof). 2. Bundle-level SLSA L2 attestation.",
-    "Doctrine v11 reconciliation in org .github + szl-doctrine. 4. Progressive-delivery pipeline."
-  ],
   "dispatch_mode": "none",
   "dispatch_ok": false,
-  "gated_skipped": [
-    "HOTFIX during freeze: only for a demo-blocking defect WITH explicit founder approval, minimal,"
-  ],
-  "report": "replit-sync/forge-perplexity-update-20260613.md",
+  "report": "replit-sync/forge-perplexity-update-20260613-1642.md",
   "probes": {
     "https://a11oy.net/healthz": 200,
-    "box /compute-pool": "200/0.013s",
-    "betterwithage 100.125.77.31:11434/api/tags": 200,
-    "chaski 100.76.58.50:11434": "timeout"
+    "a11oy /api/a11oy/v1/health/ready": "200 ready:true (~1.8s warm; 21s cold one-off)",
+    "a11oy /formula/sovereign": "200 root path (/api/a11oy/v1/ variant 404 = path-variant non-issue)",
+    "chaski 100.76.58.50:11434/v1/models": "000 timeout (replit-chaski OFFLINE, last seen 1d, rx 0)",
+    "smoke_verdict": "FAIL 6/18 (5 latency + 1 joules doctrine)"
   },
-  "doctrine": "v11: locked=8, Lambda=Conjecture 1, never commit a key",
-  "forge_manual_pass": {
-    "at": "2026-06-13T16:20Z",
-    "order": "R-DEPLOY-THE-HARDENING (+ founder green-light: power ecosystem with all nodes+GPU+chaski)",
-    "a11oy": "live==main@929779d, /compute-pool 200 in 0.013s (<1s), surfaces 200",
-    "gpu_fabric": "betterwithage RTX5050 100.125.77.31 ONLINE serving qwen2.5-coder:7b+bge-large; a11oy wired (MODEL_BASE_URL set); live bge-large embedding 200 = PROOF; /etc/a11oy-gpu.env was EMPTY -> persisted live env (durable across rebuilds)",
-    "chaski": "100.76.58.50 OFFLINE at machine level (tailscale last-seen 1d, rx 0, :11434 timeout) \u2014 cannot remote-power-on; honest blocker, NOT faked. gpu_nodes_reachable=1 (betterwithage only)",
-    "hold": "VAST (founder flips last); szl-router/LiteLLM/weight-mirror not this pass",
-    "report": "replit-sync/forge-perplexity-update-20260613.md"
-  }
+  "chaski_blocker": {
+    "node": "replit-chaski @ 100.76.58.50 (owner stephenlutar2-hash@)",
+    "state": "powered off at machine level; cannot be woken from the box",
+    "forge_can_boot": false,
+    "missing_credential": "Replit account session/API token (or always-on / Reserved-VM / Run control) for the replit-chaski Repl. Forge holds org-owner GitHub + HF-write + box-SSH only; the REPL_* env here is THIS workspace own identity, not a control-plane token for another repl.",
+    "founder_action": "open replit-chaski, start durable ollama serve (0.0.0.0:11434, pull qwen2.5-coder:7b + bge-m3, always-on); reachable flips true only on a real 200"
+  },
+  "disposition": {
+    "energy_space": "DONE - SZLHOLDINGS/energy live + public (pushed 2026-06-13T16:28Z)",
+    "chaski_gpu_node": "BLOCKED - founder must boot replit-chaski (credential named); reachable:false honest",
+    "dispatch_persistence": "BLOCKED - FORGE_AGENT_URL/FORGE_DISPATCH_CMD need Forge own secret store (founder/infra)",
+    "smoke": "FAIL 6/18 - 5 latency (degraded posture under sleeping GPU, NOT band-aided) + 1 joules_label doctrine (cross-module follow-up, NOT rushed)"
+  },
+  "doctrine": "v11: locked=8, Lambda=Conjecture 1, chaski reachable only on real 200, joules measured only via exporter, never commit a token",
+  "corrected_by": "Forge reconciliation pass 2026-06-13T16:42Z - prior AUTO_STATE falsely state:done@89ffd9eb (R-ROOTCAUSE-HARDEN 16:06) while 6 newer orders had landed (latest R-CHASKI-FORGE-START @35873754 16:34); advanced to honest current state"
 }
