@@ -1,3 +1,23 @@
+## R-PRIORITY-AND-VERTICALS (TOP — THE SEQUENCE: free first, then money; evolve all verticals) — DEPLOY, do NOT merge
+Inbox has many "(TOP)" orders — all valid, execute IN THIS ORDER (this supersedes ordering confusion).
+TIER 1 FREE/FINISH: (1) finish deploy — rebuild a11oy+killinchu HF images so still-404 surfaces go live (a11oy
+formula/sovereign, ayni, anatomy/loop[#341], proof, harvest/datacenters; killinchu finance/*, realestate/*[#115]);
+already LIVE: energy/budget, engine/status, energy/provenance, heart/pulse, revenue/marketplace, revenue/thesis.
+(2) fix a11oy<->killinchu szl_evidence_research.py drift. (3) bridge measured joule 212J->public, flip badges only
+after confirmed. (4) R-EVOLVE-FREE mirror open weights + vLLM + credits pack.
+TIER 2 VERTICALS (already built in killinchu PR #115, free/no-key — DEPLOY + wrap in proof): FINANCE (fx ECB live,
+crypto Coinbase live, macro FRED honest-disabled, risk FFIEC/FinCEN), PREDICTION MARKETS (Polymarket Gamma live),
+LEGAL/RISK/SECURITY (EPSS, MITRE ATT&CK, NIST 800-207), REAL-ESTATE (Case-Shiller/Census/HUD curated-sample).
+EVOLVE = each vertical answer ships a DSSE receipt + source citation + honest data_kind label = verified
+provenance-tracked intelligence, the moat applied to finance/legal/markets. NEVER fabricate; NEVER give regulated
+advice (info+citations only).
+TIER 3 MONEY (after free live): (5) list GPU Vast/Akash (founder account only). (6) qbio/scientific premium
+AlphaFold3/Boltz-2/GROMACS $1.20-8.50/hr. (7) world data-center registry + rent idle GPUs. (8) wake chaski (founder
+ollama serve) -> 2nd lung. Full order: replit-sync/energy_engine/R_PRIORITY_AND_VERTICALS.md
+DOCTRINE v11: free/open-licensed first; consent only; energy != data; joules MEASURED only via real exporter (212J);
+no free-energy (#239/#240 Ayni); no mining; verticals = info+citations NEVER advice NEVER fabricated, honest labels;
+effectors SIMULATED; revenue ESTIMATE no guarantee; locked=8; Λ=Conj1; Khipu=Conj2; no key; do NOT merge.
+
 ## R-QBIO-VERTICAL (TOP — founder: zoom out bio-mechanics/quantum-bio, how does it help, money NOW) — DEPLOY, do NOT merge
 HONEST: qbio is NOT money-now alone (frontier research) — it is the PREMIUM WRAPPER that makes our compute worth
 3-20x. Real paying market (cited 2026): MD/drug-discovery GPU $1.20-8.50/GPU-hr (DFT 1.20, FEP 4.75) vs our
