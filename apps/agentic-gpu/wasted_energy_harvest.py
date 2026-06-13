@@ -71,7 +71,7 @@ class HarvestPosture:
     readings: list = field(default_factory=list)  # list[FeedReading]
     measured_any: bool = False     # at least one real feed responded
     timestamp_utc: str = ""
-    citation: str = "FREE public feeds: aWATTar, CAISO OASIS, Energy-Charts/Fraunhofer, UK Carbon Intensity, Open-Meteo"
+    citation: str = "FREE no-key feeds: aWATTar, CAISO OASIS, Energy-Charts/Fraunhofer (price+renshare+grid-frequency), UK Carbon Intensity, Open-Meteo forecast; Energinet (DK, intermittent) candidate"
     doctrine: str = "harvests wasted grid energy; no free-energy claim; joules stay SAMPLE until on-box NVML meter"
 
 
@@ -116,6 +116,55 @@ def jack_uk_carbon() -> FeedReading:
                        "gCO2/kWh", f"index={intensity.get('index')}")
 
 
+def jack_grid_frequency(country: str = "de") -> FeedReading:
+    """Energy-Charts grid frequency (Hz). The PUREST oversupply tell: when supply
+    exceeds demand the frequency drifts ABOVE 50.00 Hz (under-frequency <50 = deficit).
+    A sustained reading >50.00 corroborates a curtailed/negative-price surplus window."""
+    d = _get_json(f"https://api.energy-charts.info/frequency?country={country}")
+    if not d or "data" not in d and "frequency" not in d:
+        # energy-charts returns {unix_seconds:[...], data:[...]} or similar; be defensive
+        freq = None
+        if isinstance(d, dict):
+            for k in ("data", "frequency", "values"):
+                v = d.get(k)
+                if isinstance(v, list) and v:
+                    freq = v[-1]
+                    break
+        if freq is None:
+            return FeedReading("grid_frequency", bool(d), False, note="reachable, no parse")
+        return FeedReading("grid_frequency", True, True, float(freq), "Hz",
+                           f"{'surplus(>50)' if float(freq) >= 50.0 else 'deficit(<50)'}")
+    arr = d.get("data") or d.get("frequency") or []
+    if not arr:
+        return FeedReading("grid_frequency", True, False, note="empty")
+    freq = float(arr[-1])
+    return FeedReading("grid_frequency", True, True, freq, "Hz",
+                       f"{'surplus(>=50)' if freq >= 50.0 else 'deficit(<50)'}")
+
+
+def jack_open_meteo_forecast(lat: float = 52.5, lon: float = 13.4) -> FeedReading:
+    """Open-Meteo (free, no key): wind speed @100m + shortwave radiation forecast.
+    High wind+sun in coming hours = a FUTURE surplus/negative-price window we can
+    PRE-SCHEDULE batch work into before the price even drops. Returns a 0-100ish
+    'surplus_outlook' score (normalized wind+solar) for the next 6h."""
+    d = _get_json(
+        f"https://api.open-meteo.com/v1/forecast?latitude={lat}&longitude={lon}"
+        f"&hourly=wind_speed_100m,shortwave_radiation&forecast_days=1")
+    if not d or "hourly" not in d:
+        return FeedReading("open_meteo_forecast", False, False, note="unreachable")
+    h = d["hourly"]
+    ws = [x for x in (h.get("wind_speed_100m") or [])[:6] if x is not None]
+    sr = [x for x in (h.get("shortwave_radiation") or [])[:6] if x is not None]
+    if not ws:
+        return FeedReading("open_meteo_forecast", True, False, note="no wind data")
+    # crude normalized outlook: wind (km/h, cap 60) + solar (W/m2, cap 800)
+    wind_score = min(sum(ws) / len(ws), 60) / 60 * 50
+    solar_score = (min(sum(sr) / len(sr), 800) / 800 * 50) if sr else 0
+    outlook = round(wind_score + solar_score, 1)
+    return FeedReading("open_meteo_forecast", True, True, outlook, "surplus_outlook_0_100",
+                       f"next6h wind~{sum(ws)/len(ws):.0f}km/h solar~{(sum(sr)/len(sr)) if sr else 0:.0f}W/m2")
+
+
 def jack_caiso() -> FeedReading:
     """CAISO OASIS reachability (US California public LMP). Probe-only here (zip payload)."""
     try:
@@ -141,6 +190,10 @@ def current_harvest_posture() -> HarvestPosture:
     ren = jack_energy_charts_renshare("de")
     readings.append(ren)
     readings.append(jack_uk_carbon())
+    freq = jack_grid_frequency("de")
+    readings.append(freq)
+    forecast = jack_open_meteo_forecast()
+    readings.append(forecast)
     readings.append(jack_caiso())
 
     measured_any = any(r.measured for r in readings)
@@ -167,6 +220,14 @@ def current_harvest_posture() -> HarvestPosture:
         drivers.append(f"renewable share {ren.value:.1f}% of load — surplus wind/solar")
     elif ren.measured and ren.value is not None:
         drivers.append(f"renewable share {ren.value:.1f}% of load")
+
+    # Grid frequency corroboration: sustained >50 Hz = real-time oversupply.
+    if freq.measured and freq.value is not None and freq.value >= 50.0:
+        drivers.append(f"grid frequency {freq.value:.3f} Hz (>=50 = live oversupply)")
+
+    # Forecast: high surplus outlook = a soak window is coming even if price is normal now.
+    if forecast.measured and forecast.value is not None and forecast.value >= 50:
+        drivers.append(f"surplus outlook {forecast.value:.0f}/100 next 6h (pre-schedule next soak)")
 
     rank = POSTURE_RANK[posture]
     return HarvestPosture(
