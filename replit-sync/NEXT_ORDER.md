@@ -1,3 +1,30 @@
+## R-DEPLOY-THE-HARDENING (TOP — CRITICAL: the hardening is on main but NOT live; deploy it via the readiness gate) — DEPLOY, do NOT merge
+THE REALITY: 3 hardening PRs are MERGED to main (#346 backend cache+timeout, #345 prod headers/ratelimit, #378
+smoke harness) + 2 more incoming (feat/resilience circuit-breaker+live/ready, feat/observability tracing). BUT the
+LIVE image is STALE — verified now: compute-pool STILL 7.3s, anatomy/loop 7.2s, /formula/sovereign STILL 404
+flapping. NONE of the hardening is live. The single blocking action: rebuild the a11oy HF Space image FROM MAIN.
+Everything else waits on this. DO IT NOW with the leader-tech deploy discipline:
+1. Rebuild a11oy image FROM MAIN (COPY all hardening modules: szl_backend_hardening, szl_prod_hardening,
+   szl_dark_surfaces_register, szl_anatomy_loop, szl_research_infra + szl_resilience + szl_observability when those
+   PRs merge). 
+2. READINESS-GATED swap (K8s maxUnavailable:0): new image must pass /api/a11oy/v1/health/ready (200) BEFORE it
+   replaces the old — this STOPS the 404 flapping. If ready=503, do not swap; auto-rollback to last-good (ECS
+   deployment-circuit-breaker pattern).
+3. ONE canonical deploy path from main; kill any competing/older redeploy reverting surfaces.
+4. After swap: run python3 tools/szl_smoke_stress.py smoke TWICE; require ALL surfaces 200 AND STAY 200 across both
+   runs, compute-pool <1s (the breaker+cache must be live), harvest/metrics valid JSON, joules evidence fields
+   present (joules_measured_total, exporter_node, exporter_last_seen_ts, power_w_sample).
+5. Same rebuild flips the still-404s: /ayni, /research/prereg, /research/verify, /harvest/datacenters; + killinchu
+   image from main for finance/realestate; + szl-router live PRIVATE w/ honest x_szl_provenance; + chaski 2nd lung
+   durable; + push HF SZLHOLDINGS/energy space; + tune smoke scanner (betterwithage IS own metal, not a violation).
+6. New observability endpoints (when feat/observability lands): /api/a11oy/v1/observability/traces +
+   /health-summary — use a trace to CONFIRM where the compute-pool time went, prove the breaker fixed it.
+HOLD VAST (founder flips last). REPORT to replit-sync: the szl_smoke_stress smoke verdict (PASS = all 200 + stay
+200 + compute-pool <1s), /health/ready status, joules evidence present, chaski real-200-or-blocker.
+DOCTRINE v11: no band-aids — readiness-gated deploy + circuit breaker = the root-cause flapping/latency fix; honest
+breaker/readiness/joules-evidence; sovereign own-metal-only; joules MEASURED only via real exporter; ONE loop; no
+free-energy (#239/#240); locked=8; Λ=Conj1; Khipu=Conj2; no key; do NOT merge. The rebuild-from-main IS the unlock.
+
 # SZL Forge — ORDER: killinchu "JACK IN" Mission Console (build + the 5-modality/DroneID layer)
 
 PRIORITY: high. Read `replit-sync/FREEZE.json` FIRST and obey it (see FREEZE RULE below).
