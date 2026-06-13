@@ -36,6 +36,15 @@ import urllib.request
 
 from scheduler import AgenticGpuScheduler, Task, EnergyGate
 
+# Integration seam (PR #356 <-> #357): the energy-signal feed drives the gate.
+# Defensive — if the feed module is not present on this branch, the adapter
+# falls back to the SAME conservative-honest behaviour as power_not_cheap()
+# (returns False), so this import never weakens the doctrine default.
+try:
+    from energy_gate_adapter import power_signal_from_feed as _feed_power_signal
+except Exception:  # noqa: BLE001 - adapter/feed absent => keep stdlib default.
+    _feed_power_signal = None
+
 
 LOCAL_ENDPOINT = "http://100.125.77.31:11434/v1"  # Ollama today; vLLM :8000/v1 next.
 VLLM_ENDPOINT = "http://100.125.77.31:8000/v1"      # STEP 1 upgrade target.
@@ -73,6 +82,19 @@ def power_not_cheap() -> bool:
     return False
 
 
+def default_power_signal() -> bool:
+    """The wired default: use the energy-signal feed when present, else honest.
+
+    When the energy_signal feed (PR #356) is importable, proactive admission
+    follows its honest power WINDOW (cheap/normal/dear). When it is not, this
+    is identical to `power_not_cheap` (never assume cheap power). Either way,
+    no joule figure is measured here — the window is a SAMPLE policy signal.
+    """
+    if _feed_power_signal is not None:
+        return _feed_power_signal()
+    return power_not_cheap()
+
+
 @dataclass
 class ProactiveJob:
     """A recurring on-device proactive task (the self-directed agenda)."""
@@ -105,7 +127,7 @@ class ResidentDaemon:
     """The always-on resident loop. Owns proactive agenda; reactive preempts."""
 
     def __init__(self, agenda: Optional[list[ProactiveJob]] = None,
-                 power_signal: PowerSignal = power_not_cheap,
+                 power_signal: PowerSignal = default_power_signal,
                  reactive_ingress: Optional[Callable[[int], list[tuple[str, int]]]] = None,
                  endpoint: str = LOCAL_ENDPOINT,
                  probe: Callable[[str], bool] = probe_endpoint) -> None:
