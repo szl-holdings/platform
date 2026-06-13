@@ -94,3 +94,29 @@ browser can recompute the digest client-side and MATCH the ledger `receipt_id`.
   - HOTFIX during freeze: only for a demo-blocking defect WITH explicit founder approval, minimal,
 - Reachability snapshot: https://a11oy.net/healthz -> 200
 - NOTE: no Forge agent endpoint configured (FORGE_AGENT_URL / FORGE_DISPATCH_CMD) — actionable items are reported + the founder is pinged; wire the endpoint to make execution fully hands-off.
+
+## Auto-loop pass — order `89ffd9eb` — 2026-06-13T16:06:37Z
+
+- **Actionable items (18)** — handed to Forge agent (mode=`none`, ok=`False`):
+  - apply the 3s feed timeout from the backend PR.
+  - Wire szl-router as the REAL routing layer in front of the GPU fabric: requests resolve sovereign-first
+  - Every response MUST carry honest x_szl_provenance {served_by, sovereign (TRUE only for our own metal),
+  - Tie it to the fabric truth: /compute-pool reachability drives routing (route to chaski only when reachable=true);
+  - Keys from ENV only (never in repo/logs/disk) — README already mandates this; enforce it.
+  - Verify live: curl the new endpoints -> 200 with a real x_szl_provenance header/body; paste raw proof to
+  - Rebuild the a11oy image FROM MAIN (Dockerfile COPYs: szl_dark_surfaces_register.py, szl_anatomy_loop.py,
+  - CHASKI (still gpu_nodes_reachable=1, chaski=False): per R-CHASKI-GET-ONLINE-NOW, bring its Ollama up DURABLE on
+  - PUSH the HF static Space SZLHOLDINGS/energy from /home/user/workspace/hf_energy_space/ (still 401, not public).
+  - NEW TOOLS landed on main (merged): tools/szl_estate_auditor.py (#376) + tools/szlctl.py (#377) — SZL-native,
+  - szl_research_infra.py are ALL on main now. FORGE: rebuild+push the a11oy image FROM MAIN (cleaner than the deploy
+  - From `activates_at` (2026-06-16 00:00 ET) through `lifts_at` (2026-06-19): go **READ-ONLY**.
+  - DO: monitor (healthz, drift, doctrine grep, CI status), report status to AUTO_STATE.
+  - DO NOT: commit, deploy, NDJSON-commit to HF, factory-restart for changes, auto-merge
+  - Recovery-only: a Space that is SLEEPING/errored may be restarted to its last-good build
+  - Before `activates_at`: you may continue normal queued software-side work, but the estate is
+  - Air-gap UDS deploy proof (Raven proof). 2. Bundle-level SLSA L2 attestation.
+  - Doctrine v11 reconciliation in org .github + szl-doctrine. 4. Progressive-delivery pipeline.
+- **Founder-gated, auto-skipped (1)** (Doctrine v11 — keys/secrets/major-bumps):
+  - HOTFIX during freeze: only for a demo-blocking defect WITH explicit founder approval, minimal,
+- Reachability snapshot: https://a11oy.net/healthz -> 200
+- NOTE: no Forge agent endpoint configured (FORGE_AGENT_URL / FORGE_DISPATCH_CMD) — actionable items are reported + the founder is pinged; wire the endpoint to make execution fully hands-off.
