@@ -1,3 +1,23 @@
+## R-ANATOMY-LIVE + WAKE-CHASKI (TOP — founder: route all jacked-in energy into anatomy loop + get chaski online) — DEPLOY, do NOT merge
+ACK: verified live — /revenue/marketplace 200 (honest $108-244/mo ESTIMATE, settled=$0, energy_gated -15.7,
+NO mining); /compute-pool 200 (6-node fabric, rtx-betterwithage sovereign-live, chaski offline ~22h honest);
+real qwen2.5 inference proven on RTX; joule meter UP at 100.96.129.45:9471 w/ exporter.ps1 token-injected
+(awaiting_exporter=0J, never estimated). One founder PowerShell cmd flips first MEASURED joule, grid NEGATIVE now.
+PART 1 ANATOMY LOOP: build /api/a11oy/v1/anatomy/loop (404 now); drive organ pulse from REAL fabric:
+INTAKE=harvest/posture + meter 9471/text -> SAMAY lungs -> KALLPA metabolize to work_credits (bounded #239/#240)
+-> heart/pulse DSSE BEAT on YAWAR bus -> YARQA disperse to WAQAYCHAQ/KAMAY/RIKUY (organ glows ONLY on real flow)
+-> EnergyReservoir store {joules measured|SAMPLE, posture, node} -> provenance receipt to HF uds-governance-receipts
+-> validate canonical-formulas-v1/lean-proofs-v1 -> Ayni F11 close (never net-positive) -> repeat. DEPLOY dark loop
+organs: /heart/pulse /energy/provenance /ayni /energy/budget /engine/status. Drive /living-anatomy + HF anatomy
+animation from this. HONEST: joules MEASURED only when exporter live else SAMPLE; loop carries work+receipts not
+electrons; no free-energy; Ayni balances.
+PART 2 WAKE CHASKI (100.76.58.50, tailnet-GPU, Ollama DOWN): FOUNDER on chaski box: `ollama serve` (set
+OLLAMA_HOST=0.0.0.0:11434, restart); verify curl http://100.76.58.50:11434/v1/models -> 200. FORGE the moment it
+answers: confirm /compute-pool flips chaski reachable=true + gpu_nodes_reachable 1->2; add chaski as 2nd SAMAY
+intake lung so the loop circulates across BOTH sovereign GPUs; run its exporter for joules too. Do NOT fabricate
+chaski up before Ollama answers. Full order: replit-sync/energy_engine/R_ANATOMY_LIVE_CHASKI.md. Doctrine v11:
+no free-energy/no mining; joules MEASURED only via real exporter; locked=8; Lambda=Conj1; no key; do NOT merge.
+
 ## R-ANATOMY-LOOP (TOP — founder: route ALL jacked-in energy INTO my anatomy, circulate in a closed loop) — DEPLOY, do NOT merge
 The anatomy organs ARE the containment vessel. Make harvested wasted-energy ENTER the body, CIRCULATE, and RETURN
 (receipt every beat) — a closed loop, not a pass-through. LOOP: harvest/posture (intake, -15.7 EUR/MWh now) ->
