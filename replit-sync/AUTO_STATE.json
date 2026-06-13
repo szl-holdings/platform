@@ -1,49 +1,32 @@
 {
-  "order_sha": "cb71ac5034936f816482374d3206389e33752d7e",
+  "order_sha": "b3bfddabd28084570ad81d5f29a67d6dcbb5f942",
   "order_path": "replit-sync/NEXT_ORDER.md",
   "state": "done",
-  "seen_at": "2026-06-13T11:05:27Z",
-  "updated_at": "2026-06-13T11:05:30Z",
+  "seen_at": "2026-06-13T12:00:00Z",
+  "updated_at": "2026-06-13T12:00:00Z",
   "idle": true,
-  "actionable": [
-    "cites proven bound (#239/#240 + qbio Lindblad). NOT quantum-hardware (classical GPU MD + honest qbio sim); label",
-    "MIRROR BEST OPEN WEIGHTS (verify license on each card first): DeepSeek V4 (MIT), Qwen 3.x coder/general",
-    "FREE CREDITS (~$500K stackable, FOUNDER applies \u2014 Forge preps replit-sync/credits_application_pack.md with",
-    "FASTER INFERENCE FREE: stand up vLLM (OpenAI-compatible, best default) as a 2nd sovereign backend on",
-    "WIRE: new models + vLLM register in /compute-pool on rtx-betterwithage; anatomy SAMAY soaks heavier batches in",
-    "R_FORGE_REPLY_DEPLOY.md. DOCTRINE v11: no free-energy/no mining; energy != data; consent-only; joules SAMPLE",
-    "the lean comment as the PHYSICS grounding that our no-free-energy stance is a conservation law, not",
-    "confirm live negative price on the box (curl aWATTar);",
-    "nvidia-smi power.draw idle -> run ONE real qwen2.5-coder:7b inference via",
-    "joules = avg(P_idle,P_load) * elapsed_seconds = FIRST REAL MEASURED JOULE;",
-    "emit ONE receipt through Bekenstein /v1/energy/budget with joules_measured, power readings,",
-    "paste RAW unedited terminal output (both nvidia-smi readings, timestamps, computed joule, receipt",
-    "platform PR #370 (feat/wasted-energy-harvest): apps/agentic-gpu/wasted_energy_harvest.py jacks 4 free",
-    "platform PR feat/harvest-formula-grounded (stacked, landing this hour): harvest_budget.py makes the",
-    "J2a aWATTar (api.awattar.de/v1/marketdata, no key): PASS \u2014 LIVE and showing NEGATIVE PRICES NOW",
-    "J2b CAISO OASIS (oasis.caiso.com/oasisapi PRC_LMP): PASS \u2014 HTTP 200.",
-    "/api/a11oy/v1/formula/allodial  (allodiality/dominance/non-interference; cites Allodial.lean #229 EXPERIMENTAL)",
-    "/api/a11oy/v1/formula/entanglement (capBound=C0*e^(-gamma*t) CAPACITY bound; cites Entanglement.lean #230 EXPERIMENTAL)",
-    "/api/a11oy/v1/formula/sovereign (NEW SOVEREIGNTY GATE: sovereign:true ONLY when local_node_serving;",
-    "OWN THE WEIGHTS: mirror glm-4.6 + qwen2.5-coder:32b + a deepseek coder to the SZL HF org (open",
-    "ENERGY-AWARE SCHEDULER: gate heavy/batch inference + model pulls to cheap/negative-price /",
-    "PROVENANCE RECEIPT: add served_by + energy_source fields to the turn receipt now (value \"grid\"",
-    "[Forge] Stand up a LiteLLM proxy (self-hosted, OpenAI-compatible) as the SINGLE stable endpoint",
-    "[Forge] In the orchestrator, report served_by (tier-A/B/C/D) + real base_url + cost on EVERY",
-    "[FOUNDER] Add an ALWAYS-ON 24GB dedicated GPU as Tier-A primary (GPU Mart RTX Pro 4000 ~$159-199/mo",
-    "[FOUNDER+Forge] Tailscale HA: >=2 subnet routers so the tailnet survives any node dropping.",
-    "honest SAMPLE fallback, CTO doctrine-clean. Founder runs the box GPS step at home. Doctrine v11 throughout."
-  ],
-  "delegated_to_agent": [],
-  "dispatch_mode": "none",
-  "dispatch_ok": false,
-  "gated_skipped": [
-    "J5 WattTime v3 (api.watttime.org/v3): 401 \u2014 reachable, needs token; stays SAMPLE until keyed (never commit).",
-    "FREE TIERS into the LiteLLM router as zero-cost fallback model_names (keys via secret store,"
-  ],
-  "report": "replit-sync/forge-perplexity-update-20260613.md",
-  "probes": {
-    "https://a11oy.net/healthz": 200
+  "dispatch_mode": "deploy-branch",
+  "forge_manual_deploy": {
+    "by": "Forge (Replit-side, manual)",
+    "report": "replit-sync/forge-perplexity-update-20260613-r7-deploy-finish.md",
+    "deployed": [
+      "a11oy deploy/finish-it-all-20260613@f0a5875 -> a11oy.net image rebuilt (anatomy/loop, research/*, formula/sovereign+allodial+entanglement, ayni/tinkuy/replay 200)",
+      "killinchu deploy/finish-it-all-20260613@eb6b769 -> killinchu.a11oy.net image rebuilt (realestate/*, elite/wiring 48-view audit #115, finance/fx, /elite 200)"
+    ],
+    "doctrine": "DEPLOY not merge: PRs #341-344 + #115 OPEN, main untouched on both repos",
+    "reds_green": "killinchu Shared-source drift guard = success on main (evidence_research drift allow-listed)"
   },
-  "doctrine": "v11: locked=8, Lambda=Conjecture 1, never commit a key"
+  "blocked_source_missing": [
+    "HF static Space SZLHOLDINGS/energy: source hf_energy_space/ not on box, not in workspace, not in any repo"
+  ],
+  "gated_skipped": [
+    "CHASKI replit-chaski 100.76.58.50 OFFLINE (ollama 000, ssh closed) — founder powers on + ollama serve",
+    "marketplace keys VAST/AKASH/IONET/RUNPOD — founder pastes into /etc/*.env",
+    "lutar-lean #239-242 founder-only",
+    "platform #357/358/360 on-box no --admin",
+    "receipt-schema canonical-vs-crosswalk decision"
+  ],
+  "pending_code": [
+    "R-FOLD: wire szl_research_infra source=verified-research into szl_anatomy_loop, joules->experiment receipt, cite #239/#240/#242 (now unblocked, needs authoring)"
+  ]
 }
