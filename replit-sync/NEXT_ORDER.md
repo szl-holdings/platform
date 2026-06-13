@@ -1,3 +1,26 @@
+## R-ACTIVATE-FROM-MAIN (TOP — focused: the ONE bottleneck is the a11oy image rebuild from main) — DEPLOY, do NOT merge
+Verified 15:06Z: Forge ALIVE + active (good). Loop live (/anatomy/loop, /energy/budget, /compute-pool 200). The 4
+remaining 404s are ALL gated behind ONE action: rebuild+push the a11oy HF Space image FROM MAIN. The code is already
+MERGED to main (szl_dark_surfaces_register.py #342, szl_anatomy_loop.py #341, szl_research_infra.py #344). The live
+image is still an older build. DO THIS:
+1. Rebuild the a11oy image FROM MAIN (Dockerfile COPYs: szl_dark_surfaces_register.py, szl_anatomy_loop.py,
+   szl_research_infra.py + the ayni + datacenter_waste modules). Push. Then smoke-test these JSON feeds to 200:
+   /api/a11oy/v1/ayni, /research/prereg, /research/verify, /research/{id}, /harvest/datacenters. (anatomy/loop +
+   energy/budget already 200 — keep them.)
+2. CHASKI (still gpu_nodes_reachable=1, chaski=False): per R-CHASKI-GET-ONLINE-NOW, bring its Ollama up DURABLE on
+   the replit-chaski box (100.76.58.50), pull a model, verify curl :11434/v1/models -> 200, route as 2nd SAMAY lung
+   (gpu_nodes 1->2), add heartbeat. Report raw 200 + ollama list, OR the exact blocker if the Replit box cannot hold
+   it. Do not fake it up.
+3. PUSH the HF static Space SZLHOLDINGS/energy from /home/user/workspace/hf_energy_space/ (still 401, not public).
+4. NEW TOOLS landed on main (merged): tools/szl_estate_auditor.py (#376) + tools/szlctl.py (#377) — SZL-native,
+   MIT-attributed, no upstream code copied. Maintain replit-sync/ADOPTED_OSS.md attribution manifest.
+HOLD VAST: do NOT prompt for VAST_API_KEY; founder provides it LATER as the final go-live switch. Keep agent armed.
+REPORT to replit-sync: which of the 4 surfaces flipped 200, chaski state (real 200 or blocker), energy Space URL.
+DOCTRINE v11: joules MEASURED only via exporter (212J); ONE loop/ledger/Ayni; chaski reachable only on real 200; no
+free-energy (#239/#240 Ayni); energy != data; consent only; NOT mining; openly-licensed+attributed only; research=
+process-verification NO psi claim; locked=8; Λ=Conj1; Khipu=Conj2; no key/seed; do NOT merge. Rebuild from main = the
+one unlock.
+
 ## R-ADOPT-AND-FINISH (TOP — adopt MIT pieces cleanly + finish the estate; Vast LATER per founder) — DEPLOY, do NOT merge
 FASHION-THINKING doctrine (founder + agent agreed): take what is OPENLY LICENSED (MIT/Apache), rebuild it SZL-native
 WITH ATTRIBUTION, transform-by-proof; NEVER copy NO-LICENSE code (all-rights-reserved = injecting infringing code =
