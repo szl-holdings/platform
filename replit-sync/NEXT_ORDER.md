@@ -1,3 +1,30 @@
+## R-ALL-LIVE-NOW (TOP — founder: get it ALL live now; full sweep, nothing missed) — DEPLOY, do NOT merge
+Full estate sweep done. 16 surfaces LIVE (good). EXACTLY these gaps remain, all "built+merged, not deployed" — do
+ALL in the next pass:
+A. REBUILD a11oy IMAGE FROM MAIN (the master unlock for 4 surfaces): modules are on main (szl_dark_surfaces_register
+   #342, szl_anatomy_loop #341, szl_research_infra #344, + ayni + datacenter_waste). Rebuild+push. Smoke-test to 200:
+   /api/a11oy/v1/ayni, /research/prereg, /research/verify, /research/{id}, /harvest/datacenters.
+B. REBUILD killinchu IMAGE FROM MAIN (#115 merged-or-on-branch): get /api/killinchu/v1/finance/* + realestate/* +
+   /elite/wiring to 200.
+C. WIRE szl-router LIVE (R-ROUTER-PRIVATE-LIVE; keep PRIVATE): expose /api/a11oy/v1/router/health + /router/route +
+   /router/models with honest x_szl_provenance {served_by, sovereign(own-metal-only), energy_source, tier, attempts}
+   on every answer; sovereign-first routing (betterwithage -> chaski-when-up -> free -> paid). Verify with real
+   provenance header.
+D. CHASKI durable Ollama up on replit-chaski (100.76.58.50), verify real :11434/v1/models 200, route as 2nd SAMAY
+   lung, gpu_nodes 1->2, heartbeat. Report raw proof OR exact blocker.
+E. PUSH HF static Space SZLHOLDINGS/energy from /home/user/workspace/hf_energy_space/ (still 401).
+F. Confirm /api/a11oy/v1/harvest/metrics stays 200 (returned a transient 000 once — verify stable).
+G. NEW TOOLS on main: tools/szl_estate_auditor.py + tools/szlctl.py (#376/#377 merged). Maintain replit-sync/
+   ADOPTED_OSS.md attribution manifest. You can RUN python3 tools/szlctl.py surfaces to self-verify A-F after deploy.
+HOLD VAST: do NOT prompt for VAST_API_KEY — founder flips it LAST. Keep marketplace agent armed.
+REPORT to replit-sync: each of A-F surface state after deploy (use szlctl surfaces), chaski real-200-or-blocker,
+energy Space URL, router provenance proof.
+DOCTRINE v11: joules MEASURED only via exporter (212J, now -4.22 grid); ONE loop/ledger/Ayni; szl-router PRIVATE
+always + sovereign=true only on own metal + honest provenance; chaski reachable only on real 200; no free-energy
+(#239/#240 Ayni); energy != data; consent only; NOT mining; openly-licensed+attributed only; research=process-
+verification NO psi claim; effectors SIMULATED; organs EXPERIMENTAL; locked=8; Λ=Conj1; Khipu=Conj2; no key/seed;
+do NOT merge. Two image rebuilds (a11oy + killinchu) + router wire + chaski + energy Space = everything live.
+
 ## R-ROUTER-PRIVATE-LIVE (TOP — founder: keep szl-router PRIVATE + make it fully operational/real) — DEPLOY, do NOT merge
 FOUNDER DIRECTION (standing rule): szl-router MUST stay PRIVATE. It is verified private now (good) — NEVER make it
 public. It is core moat IP: the sovereign-first OpenAI-compatible LLM router that stamps x_szl_provenance
