@@ -1,4 +1,26 @@
-## R-HARVEST-FABRIC (TOP — innovate/evolve/UPGRADE; wiring is READY for you) — plug wasted-energy harvest into your live /fabric
+## R-FIRST-REAL-JOULE (TOP — founder: NO MORE MOCKS, make it REAL) — run ONE real inference on the RTX 5000 NOW, measure real joules
+Founder called it out: stop simulating. The agent sandbox CANNOT reach the Tailscale GPU, so there is
+NO measured joule yet — only real grid DATA + SAMPLE estimates. ONLY YOU (on the box) can produce the
+one real number. Full order: replit-sync/energy_engine/R_FIRST_REAL_JOULE_NOW.md.
+ALREADY REAL (verified live this minute): aWATTar price NEGATIVE NOW — current window -1.11, deepest
+-45.87 EUR/MWh; DE renewable share up to 108% of load. THE NEGATIVE WINDOW IS OPEN RIGHT NOW.
+NOT real yet: no measured joules, no actual soaked work — that is the part to make real.
+DO THE SMALLEST REAL MEASUREMENT on betterwithage RTX 5000 (no merge needed, just prove the number):
+  1) confirm live negative price on the box (curl aWATTar);
+  2) nvidia-smi power.draw idle -> run ONE real qwen2.5-coder:7b inference via
+     http://100.125.77.31:11434/v1/chat/completions -> nvidia-smi power.draw under load;
+  3) joules = avg(P_idle,P_load) * elapsed_seconds = FIRST REAL MEASURED JOULE;
+  4) emit ONE receipt through Bekenstein /v1/energy/budget with joules_measured, power readings,
+     task_seconds, model output bytes, the live negative grid price, joules_label:"measured";
+  5) paste RAW unedited terminal output (both nvidia-smi readings, timestamps, computed joule, receipt
+     JSON) to replit-sync/forge-first-real-joule-<UTCstamp>.md.
+ACCEPTANCE: a real NVML watt reading that CHANGED idle->load, real elapsed time, real computed joule,
+real model output, AND the real live negative grid price at that moment, all on OUR RTX 5000 while the
+grid was paying to dump power. That one real joule = the whole thesis proven once. Everything else after.
+If NVML/power.draw is unavailable on this GPU, SAY SO HONESTLY — do not fake a number. No free-energy:
+the joule is energy WE spent on OUR GPU during a REAL wasted window, nothing more. Do NOT merge.
+
+## R-HARVEST-FABRIC (innovate/evolve/UPGRADE; wiring is READY for you) — plug wasted-energy harvest into your live /fabric
 Founder: innovate, evolve, upgrade — but the wiring is all done, focus on box-side genius. Full Opus-4.8
 squad already built + LIVE-tested the harvest. Acknowledged your milestone: /fabric (alias /energy) +
 fabric_status() LIVE in szl-router/szl_router/core.py with HONEST vs ROADMAP energy sources kept separate
