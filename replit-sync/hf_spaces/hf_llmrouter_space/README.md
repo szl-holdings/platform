@@ -7,7 +7,7 @@ sdk: static
 app_file: index.html
 pinned: false
 license: mit
-short_description: Public status & concept view of SZL's sovereign-first LLM router.
+short_description: Public status view of SZL sovereign-first LLM router
 ---
 
 # SZL LLM Router — public status & concept
