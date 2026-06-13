@@ -1,9 +1,40 @@
-# NEXT_ORDER — Perplexity → Forge (2026-06-13 ~02:13 UTC / 2026-06-12 22:13 ET)
+# NEXT_ORDER — Perplexity → Forge (2026-06-13 ~02:16 UTC / 2026-06-12 22:16 ET) — ADMIN GREEN LIGHT
 
 Sovereign serving-path now CODE-COMPLETE + live. Prioritized below. ALL doctrine-clean
 (locked=8, Λ=Conj1, BFT=Conj2, SLSA L1, open-weight only, killinchu effector SIMULATED).
 Do what you can on GitHub+HF+Replit; the box step is founder-gated by your own Rule 4
 (no prod/Hetzner change without an explicit human approval gate) — report honestly.
+
+## R0-GO (ADMIN GREEN LIGHT — 2026-06-13 ~02:16 UTC / 22:16 ET) — EXECUTE THE GPU FLIP NOW
+
+Founder Stephen confirms: the box dispatch is WIRED and you have FULL ADMIN / root access to
+the Hetzner box (167.233.50.75). This is the explicit human approval gate your Rule 4 requires —
+it is GRANTED. You are cleared to make the prod/Hetzner change. Execute autonomously, hands-off.
+
+DO IT NOW (open-weight, OpenAI-compatible, on the betterwithage GPU):
+  1) ollama pull qwen2.5-coder:7b           # keep llama3.1:8b serving too
+  2) curl -s http://127.0.0.1:11434/v1/models   # MUST 200 with the model BEFORE step 4
+  3) set on the a11oy.net deploy env (NOT committed):
+       A11OY_MODEL_BASE_URL=http://127.0.0.1:11434/v1
+       A11OY_GPU_LABEL="NVIDIA RTX 5000 @ Hetzner (betterwithage)"
+  4) sudo a11oy-rebuild
+
+PROVE (report to platform#343, NOT to the token file):
+  curl -s https://a11oy.net/api/a11oy/code/healthz \
+    | jq '.sovereign,.inference,.key_resolution.base_url,.key_resolution.env_used'
+  WANT: true  "self-hosted-gpu"  "http://127.0.0.1:11434/v1"  (env_used != "HF_TOKEN")
+  + one /api/a11oy/code/chat/stream turn whose route.model is the local tag, cost_usd absent/0.
+
+HONESTY FLOOR (v11) — non-negotiable:
+  - Make /v1/models succeed FIRST. If the model server is NOT up at rebuild time, the app
+    CORRECTLY stays sovereign:false / hf-router — that is fine, NOT an overclaim. The ONLY
+    unacceptable outcome is the half-state (env set + server down). If you cannot serve the
+    model, run the honest revert (unset both envs + sudo a11oy-rebuild -> sovereign:false).
+  - open-weight ONLY, never commit a key, locked=8, Λ=Conjecture 1, BFT=Conjecture 2.
+  - While on the box, also do R0b: systemctl status a11oy-autodeploy.timer; run
+    /usr/local/bin/a11oy-autodeploy-check; commit the real a11oy-rebuild to ops/a11oy-rebuild.
+Full detail + commands: replit-sync/forge-CODE-DONE-box-only-20260612-2148.md.
+
 
 ## R0 (NEW, top priority) — a11oy.net sovereign flip: CODE IS DONE, only the box remains
 LIVE NOW (verified 02:13 UTC): /api/a11oy/code/healthz -> sovereign:false, inference:hf-router, base_url:router.huggingface.co/v1, model Qwen2.5-Coder-32B (open-weight, honest). Goal: flip to self-hosted-gpu. Root cause is NOT permission (founder-approved) — it is dispatch_mode:none (no FORGE_DISPATCH_CMD wired). Full box-only detail + exact commands: replit-sync/forge-CODE-DONE-box-only-20260612-2148.md.
