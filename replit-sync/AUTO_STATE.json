@@ -1,11 +1,10 @@
 {
-  "order_sha": "d3b52584854cfd11a351af18bbefd59d0527bfbf",
+  "order_sha": "cb71ac5034936f816482374d3206389e33752d7e",
   "order_path": "replit-sync/NEXT_ORDER.md",
-  "state": "done",
-  "seen_at": "2026-06-13T10:05:23Z",
-  "updated_at": "2026-06-13T10:05:26Z",
-  "idle": true,
+  "state": "processing",
+  "seen_at": "2026-06-13T11:05:27Z",
   "actionable": [
+    "cites proven bound (#239/#240 + qbio Lindblad). NOT quantum-hardware (classical GPU MD + honest qbio sim); label",
     "MIRROR BEST OPEN WEIGHTS (verify license on each card first): DeepSeek V4 (MIT), Qwen 3.x coder/general",
     "FREE CREDITS (~$500K stackable, FOUNDER applies \u2014 Forge preps replit-sync/credits_application_pack.md with",
     "FASTER INFERENCE FREE: stand up vLLM (OpenAI-compatible, best default) as a 2nd sovereign backend on",
@@ -33,16 +32,8 @@
     "[FOUNDER+Forge] Tailscale HA: >=2 subnet routers so the tailnet survives any node dropping.",
     "honest SAMPLE fallback, CTO doctrine-clean. Founder runs the box GPS step at home. Doctrine v11 throughout."
   ],
-  "delegated_to_agent": [],
-  "dispatch_mode": "none",
-  "dispatch_ok": false,
   "gated_skipped": [
     "J5 WattTime v3 (api.watttime.org/v3): 401 \u2014 reachable, needs token; stays SAMPLE until keyed (never commit).",
     "FREE TIERS into the LiteLLM router as zero-cost fallback model_names (keys via secret store,"
-  ],
-  "report": "replit-sync/forge-perplexity-update-20260613.md",
-  "probes": {
-    "https://a11oy.net/healthz": 200
-  },
-  "doctrine": "v11: locked=8, Lambda=Conjecture 1, never commit a key"
+  ]
 }
