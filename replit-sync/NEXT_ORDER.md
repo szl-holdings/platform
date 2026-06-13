@@ -1,3 +1,20 @@
+## R-DATACENTER-WASTE (TOP — founder: find ALL data centers AI+crypto, jack the wasted energy, route to my ecosystem, keep it contained) — DEPLOY, do NOT merge
+The waste is REAL+huge (cited): enterprise GPUs ~5% utilization = 95% idle, ~$401B idle AI capacity (Cast AI/
+VentureBeat 2026); global PUE ~1.58 (cooling/conversion loss); waste-heat already feeds district heating
+(Microsoft Finland 40% of 2 TWh via Fortum; NTT Berlin 8 MW, ~6000 t CO2/yr). PHYSICS+DOCTRINE: electricity
+CANNOT travel as data; NEVER siphon power without a contract (theft = moat death). Capture the THREE legit ways:
+(1) IDLE-GPU CAPTURE today, zero hardware — the marketplace agent RENTS idle data-center GPUs cheap in their idle
+windows, runs our bounded useful work, routes WORK+receipts into the anatomy loop (consensual, contracted, full
+provenance) = the real jack-in. (2) WASTE-HEAT recovery via heat-pump/district-heat or TEG/ORC (Seebeck reverse-
+loop at facility scale) — co-located contract, SAMPLE/ESTIMATE until metered. (3) CO-LOCATION behind-the-meter.
+FORGE: build datacenter_waste.py harvest source + /api/a11oy/v1/harvest/datacenters {idle_gpu_offers, waste_heat_
+refs(cited), pue_context, honesty} (never fabricate a feed); wire idle-GPU rentals as SAMAY intake into the
+anatomy loop (receipt source=datacenter-idle-rental); add a DATA-CENTER node cluster to the estate hologram +
+harvest map with the 3 routes as edges, honest badges. Full order: replit-sync/energy_engine/R_DATACENTER_WASTE.md
+DOCTRINE v11: energy != data; consent/contract ONLY (rent/co-locate/heat-recover, never take = theft); waste-heat/
+co-location SAMPLE until metered; no free-energy (Bekenstein #239+Landauer #240, Ayni-balanced); no mining; joules
+MEASURED only via live exporter (212 J now real on betterwithage); locked=8; Lambda=Conj1; no key; do NOT merge.
+
 ## R-EVOLVE-FREE (TOP — founder: evolve + upgrade for free, take the world incl China, make it ours) — DEPLOY, do NOT merge
 HARD LINE: take ONLY openly-licensed inputs — NO dark-web/stolen/covert (tainted provenance kills the SLSA/DSSE
 moat + breaks consent-doctrine). The legit path is huge: mirror the worlds best OPEN weights to our HF org + run
