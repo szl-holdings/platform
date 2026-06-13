@@ -25,7 +25,7 @@ import os
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import FileResponse, JSONResponse, PlainTextResponse
+from fastapi.responses import FileResponse, HTMLResponse, JSONResponse, PlainTextResponse
 
 import engine
 import body
@@ -33,6 +33,7 @@ import reverse
 import fabric_nodes
 import budget as ebudget  # ENERGY-BUDGET-PATCH
 import reservoir  # ENERGY-RESERVOIR-PATCH
+import proof as eproof  # ENERGY-PROOF-PATCH
 
 app = FastAPI(title="SZL Energy Harvest", version="1.1.0")
 
@@ -152,6 +153,26 @@ def reservoir_route():
     out = reservoir.energy_reservoir(engine.posture_summary(allow_network=True))
     out["honesty"] = DOCTRINE_NOTE
     return out
+
+
+@app.get("/proof.json")
+def proof_json_route():
+    """ENERGY-PROOF-PATCH: machine-readable public PROOF envelope. The three proven
+    energy witnesses (#239/#240/#242, lutar-lean, 0-sorry) + the RAW measured-joule
+    receipt + the browser re-hash path. Everything is recomputable trusting no one.
+    Reachable at /energy/proof.json and /api/a11oy/v1/harvest/proof.json."""
+    out = eproof.proof_json()
+    out["honesty"] = DOCTRINE_NOTE
+    return out
+
+
+@app.get("/proof")
+def proof_route():
+    """ENERGY-PROOF-PATCH: public PROOF page (self-contained HTML) — 'the proof IS the
+    product'. Surfaces the proven witnesses + the measured-joule receipt honestly and
+    links to the public verify API so a visitor recomputes it themselves. Reachable at
+    /energy/proof and /api/a11oy/v1/harvest/proof. serve.py untouched (LOCKED)."""
+    return HTMLResponse(eproof.proof_html())
 
 
 def _g(name, val, help_, typ="gauge"):
