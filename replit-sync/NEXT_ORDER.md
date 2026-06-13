@@ -1,3 +1,26 @@
+## R-REVENUE (founder: make me rich — are we groundbreaking) — honest business thesis + revenue layer
+Straight answer: the stranded-energy->compute idea is NOT novel — Crusoe Energy already did it ($3B
+valuation, 250+ wellhead data centers, pivoted Bitcoin->AI; flare gas = $16B/yr; a 100MW node earns
+$8-15M/yr demand-response; capacity payments ~$5/MWh pay-for-availability). The energy harvest alone won't
+make us rich — the HARDWARE at the wellhead is the capital play. What IS novel + ours: PROVEN GOVERNANCE.
+Crusoe sells cheap FLOPs; SZL can sell VERIFIED SOVEREIGN COMPUTE — every joule + every AI decision carries
+a kernel-checked (Bekenstein #239/#242, Landauer #240, monotone ledger) + DSSE-signed receipt. That premium
+(green/carbon-credit-eligible, auditable, defense-grade via killinchu) is the margin nobody else can claim.
+RECOMMENDATION (priority): (1) sell the PROOF not the watts — "Verified Sovereign Compute" product; (2)
+demand-response = cash floor (register the sovereign GPU/nodes as flexible load, paid to be available,
+recurring $5/MWh); (3) flare carbon credits (Verra VM0049) off the VIIRS flared-gas map we already have;
+(4) land ONE wellhead/curtailed-wind pilot node (founder/capital step — a Crusoe-style container; agent
+builds the software that runs+proves it, can't deploy hardware).
+WIRING NOW (dev): an honest REVENUE LAYER on a11oy (PR feat/revenue-layer): /api/a11oy/v1/revenue/estimate
+(demand-response + arbitrage + flare-carbon-credit + verified-compute-premium ESTIMATES computed from the
+LIVE harvest price + real flared-gas volumes, every figure labeled ESTIMATE) + /revenue/thesis (market
+comparables + SZL differentiator, market-context not a promise).
+FORGE: after first measured joule + EnergyReservoir, surface /revenue/estimate from the LIVE box data so the
+founder sees a real (estimated) dollar/credit value of each soak window. HONEST: every $/credit figure is an
+ESTIMATE from real inputs, NEVER a fabricated promise; no free-energy; joules SAMPLE until NVML; consent-only;
+no key; Lambda=Conj1; locked-8 untouched. The real money needs hardware (founder) + a paying customer; the
+software moat (proven governance) is what commands the premium. You operate/verify; do NOT merge.
+
 ## R-STORE-DISPERSE (TOP — founder: have Forge DO IT, then store the energy + disperse it across the ecosystem)
 Full order: replit-sync/energy_engine/R_STORE_DISPERSE.md.
 DO IT FIRST: the FIRST MEASURED JOULE on the RTX 5000 — during a live wasted_energy=1 window run ONE real
