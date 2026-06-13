@@ -19,7 +19,7 @@ The seams checked (by reading PR diffs + the energy_engine copies — nothing me
 |---|---|
 | scheduler #357 energy gate ← energy_signal #356 | FITS — #357 stacks on #356, imports the PowerPosture |
 | energy_signal #356 ← real sources #369 | FITS — #369 is disjoint new files under `energy_signal/`, extends #356's off-peak clock as the always-real window floor; aggregator fuses NVML+aWATTar/CAISO |
-| organ-bus #367 → brain #363 / immune #362 / nervous #364 / heart-blood #333 | FITS BY CONTRACT — #367 reaches organs over **HTTP** (amaru.szl.ai / sentra.szl.ai), not by importing the Python modules. Honest-degrades (immune unreachable→DENY, brain unreachable→DEFER). |
+| organ-bus #367 → brain #363 / immune #362 / nervous #364 / heart-blood #334 | FITS BY CONTRACT — #367 reaches organs over **HTTP** (amaru.szl.ai / sentra.szl.ai), not by importing the Python modules. Honest-degrades (immune unreachable→DENY, brain unreachable→DEFER). |
 | unified status #335 aggregates mind+organs+energy+swarm | FITS — concurrent honest probes, degrade to reachable:false, sovereign only from /code/healthz |
 | hologram #336 + dashboards read status | **GAP 1 (wiring)** — hologram polls endpoints DIRECTLY (`/code/healthz`, `/v1/energy/budget`, per-organ probes), does NOT consume #335's `/v1/engine/status` |
 | status #335 reads the real budget #328 | **GAP 2 (field-name mismatch)** — see below |
@@ -73,8 +73,8 @@ Merge the stack base→tip. The base branch `feat/agentic-gpu-scheduler` must la
 
 ### Group A — a11oy (the Space that serves + proxies)
 - **#328** energy budget endpoint — base of the a11oy energy stack (keystone for the Space).
-- **#329** (depends on #328), **#331** energy-provenance-chain (stacks on #328), **#334** — merge after #328.
-- **#333** heart+blood (receipt σ-bus + DSSE Merkle ledger) — stacks on #331; merge after #331.
+- **#329** (depends on #328), **#331** energy-provenance-chain (stacks on #328) — merge after #328.
+- **#334** heart+blood (receipt σ-bus + DSSE Merkle ledger) — the OPEN heart-blood PR (the earlier #333 is CLOSED/superseded — do NOT merge #333); stacks on #331; merge after #331.
 - **#335** unified status API — merge after #328 (so it has a real budget to read); apply GAP-2 alias fix here.
 - **#330, #332** dashboards, **#336** hologram — merge LAST in this repo (read surfaces); apply GAP-1 fix to #336.
 
@@ -114,7 +114,7 @@ the price signal is whatever aWATTar/CAISO honestly returns (already proven live
 
 1. Route `amaru.szl.ai` / `sentra.szl.ai` (or same-origin proxy paths) so the organ endpoints in #335/#367
    resolve (closes GAP 3). Until this, organs are honestly `reachable:false`.
-2. Merge organs #362/#363/#364, organ-bus #367, heart+blood #333. The bus pipeline runs admission→belief→
+2. Merge organs #362/#363/#364, organ-bus #367, heart+blood #334 (NOT the closed #333). The bus pipeline runs admission→belief→
    run→receipt/ledger→alarm; #335 now reads real organ statuses.
 3. Merge swarm #358, energy-proportional #360, vllm metrics #361, yarqa #366. The router sends work to the node
    on live surplus; the batch sponge floods Bekenstein-gated work when surplus flows, drains to reactive-only otherwise.
