@@ -19,6 +19,7 @@ Endpoints:
   GET /fabric      energy/sovereignty posture overlay (honest)
   GET /soak        proactive-batch admission gate boolean
   GET /body/self   honest body self-model (proprioception across organs)
+  GET /reverse-loop  honest GPU waste-heat recovery ENVELOPE (Carnot/Landauer-bounded)
 """
 import os
 
@@ -28,6 +29,7 @@ from fastapi.responses import FileResponse, JSONResponse, PlainTextResponse
 
 import engine
 import body
+import reverse
 
 app = FastAPI(title="SZL Energy Harvest", version="1.1.0")
 
@@ -92,6 +94,16 @@ def body_self():
     return body.body_self()
 
 
+@app.get("/reverse-loop")
+def reverse_loop():
+    """Honest GPU waste-heat recovery ENVELOPE (Seebeck), bounded by Carnot and the
+    Landauer floor (#240). Real thermal when a source is reachable; otherwise an
+    explicitly ILLUSTRATIVE envelope — never a measurement, never charted. The
+    RTX 5000 is NOT an adiabatic chip; reverse-recovering its OWN switching energy
+    is a hardware ROADMAP (Vaire-style), never claimed here. sovereign stays False."""
+    return reverse.reverse_loop_status()
+
+
 def _g(name, val, help_, typ="gauge"):
     if val is None:
         return ""
@@ -128,6 +140,7 @@ def metrics():
            "Always 0 — this signal NEVER sets sovereign:true (doctrine v11)."),
         _g("szl_energy_harvest_joules_sample", 1,
            "1 = joules are SAMPLE (no on-box NVML meter yet), never measured here."),
+        reverse.metrics_lines(_g),
     ])
     return PlainTextResponse(body_txt, media_type="text/plain; version=0.0.4")
 
