@@ -1,3 +1,22 @@
+## R-AGENTIC-MARKETPLACE (TOP — founder: make it agentic + which keys for Vast/other sites) — DEPLOY, do NOT merge
+KEYS founder provides (read by PRESENCE only, never log/commit value): Vast.ai (DO FIRST, host acct vast.ai/host
+email-only) env VAST_API_KEY; Akash (rides our k3s) env AKASH_WALLET (~5 AKT funded, founder holds SEED, paste only
+address/funded flag NEVER seed); io.net env IONET_API_KEY; RunPod env RUNPOD_API_KEY. Founder pastes into FORGE
+secret store on box, never in chat/commit. Agent already returns needs_founder_input when absent — keep honest.
+MAKE IT AGENTIC (compute_marketplace_agent.py self-driving loop when a key present): (1) AUTO-LIST node on keyed
+venue. (2) AUTO-PRICE from live market comparable (commodity $0.20-0.45; scientific $1.20-8.50 for MD/AlphaFold/
+Boltz/GROMACS), re-price on schedule. (3) ENERGY-GATE accept/scheduling to cheap/negative windows (-27.42 now),
+never refuse an already-profitable lease. (4) AUTO-RECEIPT every job: DSSE {gpu_seconds,flops,posture,grid_price,
+settlement,witness #239/#240} -> provenance -> validate -> Ayni F11 -> feed anatomy loop (source=marketplace-rental).
+(5) SETTLE-TO-COUNT: settled_usd_to_date from real payouts only, never promote ESTIMATE. (6) SELF-HEAL + honest halt;
+expose /revenue/marketplace/agent-state {venue,listed,current_price,last_settlement,posture_gated,autonomy}.
+ALSO free-first this pass: finish still-404 (ayni, anatomy/loop, formula/sovereign, proof, harvest/datacenters), fix
+a11oy<->killinchu szl_evidence_research.py drift, deploy killinchu finance/*+realestate/* (#115), and incoming PRs:
+HF energy Space (push as SZLHOLDINGS/energy) + YARQA->anatomy consolidation. Full order: replit-sync/energy_engine/R_AGENTIC_MARKETPLACE.md
+DOCTRINE v11: agentic WITHIN doctrine — consent/contract only no siphon; NOT mining; keys by presence never log/commit
+key/seed; revenue ESTIMATE settle-to-count no guarantee; joules MEASURED only via real exporter (212J); no free-energy
+(#239/#240 Ayni); organs EXPERIMENTAL; sovereign own metal only; locked=8; Λ=Conj1; Khipu=Conj2; do NOT merge.
+
 ## R-PRIORITY-AND-VERTICALS (TOP — THE SEQUENCE: free first, then money; evolve all verticals) — DEPLOY, do NOT merge
 Inbox has many "(TOP)" orders — all valid, execute IN THIS ORDER (this supersedes ordering confusion).
 TIER 1 FREE/FINISH: (1) finish deploy — rebuild a11oy+killinchu HF images so still-404 surfaces go live (a11oy
