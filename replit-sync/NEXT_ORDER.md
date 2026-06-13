@@ -1,3 +1,29 @@
+## R-FLAGSHIP-FRONTIER (recommendation: unify a11oy + killinchu into ONE governed sovereign mesh)
+Founder: take all of a11oy.net + killinchu to a new frontier; what do I recommend. Full: replit-sync/energy_engine/R_FLAGSHIP_FRONTIER.md.
+THE LEVER: both flagships run on the SAME proven substrate (13-axis Lambda, Khipu BFT Conj2-conditional,
+Chaski FIFO, DSSE/Merkle receipts, locked-8 kernel). a11oy.net is LIVE (formulas, harvest/metrics 200
+wasted_energy=1 price -1.11, qbio coherence, sovereign GPU); killinchu is the counter-UAS app (sensor
+fusion via covariance-intersection + Mahalanobis + chi2 spoof, ROE, 13-axis Lambda, 3-of-4 BFT, DSSE
+receipt per interdiction, drone digital-twin, swarm) — honest-tiered (EFFECTOR SIMULATED, SLSA L1, Lambda=Conj1).
+THE FRONTIER (new, honest): a sovereign, ENERGY-AWARE, provably-GOVERNED EDGE MESH. killinchu already
+governs mobile field nodes with fusion+BFT+signed receipts; the harvest knows WHERE wasted energy is
+(grid/wind/tidal/flare/space). Fuse them: each node harvests LOCAL wasted energy to power its own sovereign
+compute, fuses sensors, agrees via 3-of-4 BFT, emits a DSSE receipt — the SAME substrate governs energy
+admission (Bekenstein/Landauer soak budget) AND field decisions (ROE/engageability). One conscience, many bodies.
+RECOMMENDATION (priority): (1) UNIFY THE RECEIPT — killinchu per-interdiction DSSE + a11oy per-turn energy
+receipt share ONE schema + ONE Khipu/Merkle chain so every action (inference, soak job, fusion, simulated
+interdiction) is one hash-linked provable record — the estate becomes auditable as ONE organism. (2)
+ENERGY-AWARE EDGE NODE — a field node reports its local wasted-energy window (same free feeds by lat/lon)
+and gates NON-CRITICAL compute (digital-twin sims, threat-DB) to cheap/curtailed windows; CRITICAL/reactive
+defense tasks NEVER energy-gated. (3) ONE 13-axis Lambda across both, with energy-honesty as an axis
+(Lambda stays Conj1 advisory; Theorem U conditional is the real one). (4) SHARED consent-only Byzantine
+node registry (killinchu 3-of-4 BFT + harvest consent gate are the same pattern, Conj2 conditional).
+FORGE: start with (1) unify the DSSE receipt schema + (2) energy-aware edge gating (critical never gated);
+surface /api/<ns>/v1/mesh/status {sovereign, energy_posture, lambda_axes, last_receipt}; keep contained
+(egress allowlist + consent gate — doubly critical for a defense mesh). DOCTRINE: killinchu effectors
+SIMULATED (keep label); SLSA L1 honest; Lambda=Conj1; Khipu=Conj2; no free-energy; joules SAMPLE until NVML;
+consent-only (NEVER reach an un-consented node); no key. You operate/verify, do NOT merge.
+
 ## R-EVOLVE-DEEPER (TOP — harvest is LIVE on the box; go deeper) — verified milestone
 MILESTONE CONFIRMED from outside the box: GET https://a11oy.net/api/a11oy/v1/harvest/metrics = HTTP 200,
 Prometheus format, LIVE + public on the sovereign box: szl_energy_harvest_up 1, feeds_live 3,
