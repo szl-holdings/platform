@@ -28,6 +28,17 @@ import datetime
 from dataclasses import dataclass, field, asdict
 from typing import Optional
 
+# ---------------------------------------------------------------------------
+# Security layer — import defensively so the module still works standalone
+# if harvest_security is not yet deployed alongside it.
+# ---------------------------------------------------------------------------
+try:
+    from harvest_security import safe_get as _secure_get, EgressDenied
+    _SECURITY_ENABLED = True
+except ImportError:  # pragma: no cover — fallback for standalone use
+    _secure_get = None  # type: ignore[assignment]
+    _SECURITY_ENABLED = False
+
 UA = {"User-Agent": "szl-wasted-energy-harvest/1.0 (+https://a11oy.net)"}
 TIMEOUT = 12
 
@@ -42,8 +53,28 @@ POSTURE_RANK = {
 
 
 def _get_json(url: str) -> Optional[object]:
-    """Best-effort GET → JSON. Returns None on any failure (honest: feed unreachable
-    or returned non-JSON, e.g. a rate-limit/empty body). Never raises."""
+    """Best-effort GET → JSON.
+
+    When ``harvest_security`` is available the request is routed through
+    ``safe_get``, which enforces the egress allowlist (anti-SSRF), IP
+    resolution checks, per-host rate limiting, and the secret-leak guard
+    before a single byte leaves the host.
+
+    Falls back to the original bare ``urllib`` path only when
+    ``harvest_security`` is absent (standalone / legacy mode), so the module
+    continues to work without the security layer present.
+
+    Returns None on any non-fatal failure (feed unreachable, non-JSON body,
+    rate-limit / empty response).  Never raises under normal operation.
+    """
+    if _SECURITY_ENABLED:
+        try:
+            return _secure_get(url)
+        except Exception:
+            # EgressDenied and other security exceptions are non-fatal here
+            # so that posture aggregation can continue with remaining feeds.
+            return None
+    # --- fallback: original bare path (standalone / legacy mode) ---
     try:
         req = urllib.request.Request(url, headers=UA)
         with urllib.request.urlopen(req, timeout=TIMEOUT) as r:
@@ -273,121 +304,6 @@ def scan_global_resources() -> dict:
     winds = {k: v["wind_kmh"] for k, v in out.items() if v.get("wind_kmh") is not None}
     best = max(winds, key=winds.get) if winds else None
     return {"sites": out, "best_wind_site": best, "best_wind_kmh": winds.get(best) if best else None}
-
-
-# FLARED GAS — the biggest wasted-energy source on Earth: 151 bcm burned to nothing in
-# 2024 (World Bank). Top flaring nations: Russia, Iran, Iraq, USA, Venezuela, Algeria,
-# Nigeria, Libya, Mexico. Tracked LIVE & FREE by NASA VIIRS satellite (Flaring Monitor,
-# open data). The outside-the-box play: a flare site is STRANDED energy + heat that is
-# being destroyed — the ideal place to PLACE a consented sovereign compute node that runs
-# on gas otherwise torched. This jack maps WHERE the wasted flare energy is, by operator.
-_FLARE_OPERATOR_CSV = ("https://raw.githubusercontent.com/flaringmonitor/viirs-flare-data/"
-                       "main/processed/flaring_monitor_company_stats_satellite_modeled.csv")
-
-
-def jack_flared_gas(top_n: int = 8) -> FeedReading:
-    """Flaring Monitor satellite-modeled flared-gas volumes by operator (VIIRS, free).
-    Returns the leaderboard of operators burning the most gas (latest column with data).
-    Honest: this is a RESOURCE/WASTE map (who flares how much), NOT a claim we capture it.
-    The flared gas is wasted energy that could power a consented on-site node instead."""
-    try:
-        req = urllib.request.Request(_FLARE_OPERATOR_CSV, headers=UA)
-        with urllib.request.urlopen(req, timeout=TIMEOUT) as r:
-            text = r.read().decode("utf-8", "replace")
-    except Exception:
-        return FeedReading("flared_gas_viirs", False, False, note="unreachable")
-    lines = [ln for ln in text.splitlines() if ln.strip()]
-    if len(lines) < 2:
-        return FeedReading("flared_gas_viirs", True, False, note="empty")
-    header = lines[0].split(",")
-    # find the last month column that has any data; sum 'sat estimated volume' rows per operator
-    try:
-        ci_company = header.index("company_name")
-        ci_ptype = header.index("product_type")
-    except ValueError:
-        return FeedReading("flared_gas_viirs", True, False, note="unexpected schema")
-    month_cols = list(range(ci_ptype + 2, len(header)))  # month columns trail the metadata
-    totals: dict = {}
-    for ln in lines[1:]:
-        cells = ln.split(",")
-        if len(cells) <= ci_ptype:
-            continue
-        if cells[ci_ptype].strip() != "sat estimated volume":
-            continue
-        company = cells[ci_company].strip()
-        # latest non-empty month value for this row
-        val = None
-        for mc in reversed(month_cols):
-            if mc < len(cells) and cells[mc].strip():
-                try:
-                    val = float(cells[mc])
-                    break
-                except ValueError:
-                    continue
-        if val:
-            totals[company] = totals.get(company, 0.0) + val
-    if not totals:
-        return FeedReading("flared_gas_viirs", True, False, note="no volume rows")
-    leaders = sorted(totals.items(), key=lambda kv: kv[1], reverse=True)[:top_n]
-    top = leaders[0]
-    note = "; ".join(f"{n}:{int(v)}Mcf" for n, v in leaders[:5])
-    return FeedReading("flared_gas_viirs", True, True, round(top[1], 0), "Mcf (top flarer, latest)",
-                       f"leaders — {note}")
-
-
-def flared_gas_leaderboard(top_n: int = 10) -> dict:
-    """Structured flared-gas-by-operator leaderboard for the API/UI."""
-    fr = jack_flared_gas(top_n=top_n)
-    return {
-        "reachable": fr.reachable,
-        "top_flarer_mcf_latest": fr.value,
-        "leaders_note": fr.note,
-        "source": "Flaring Monitor / NASA VIIRS satellite (open data)",
-        "global_2024_bcm": 151,
-        "top_flaring_nations": ["Russia", "Iran", "Iraq", "USA", "Venezuela",
-                                "Algeria", "Nigeria", "Libya", "Mexico"],
-        "doctrine": "flared gas is WASTED energy (burned to nothing); a consented on-site node could run on it. We map it; we do not claim to capture it. No free-energy.",
-    }
-
-
-def jack_solar_wind() -> FeedReading:
-    """NOAA SWPC solar-wind plasma from the L1 Lagrange point (keyless, real-time).
-    The Sun streams a continuous wind of energy past Earth; high speed/density =
-    more space-weather energy flux. SPACE is the ultimate wasted-energy frontier:
-    space-based solar harvests sunlight 24/7 with no night and no atmosphere.
-    Honest: this is a SPACE-WEATHER FLUX signal (resource/context), NOT terrestrial power."""
-    d = _get_json("https://services.swpc.noaa.gov/products/solar-wind/plasma-1-day.json")
-    if not isinstance(d, list) or len(d) < 2:
-        return FeedReading("solar_wind_l1", bool(d), False, note="unreachable")
-    last = d[-1]  # [time, density, speed, temperature]
-    try:
-        speed = float(last[2])
-    except (ValueError, IndexError):
-        return FeedReading("solar_wind_l1", True, False, note="no parse")
-    return FeedReading("solar_wind_l1", True, True, speed, "km/s solar wind",
-                       f"density={last[1]} temp={last[3]}K @ L1 (space-weather flux)")
-
-
-def jack_solar_irradiance(lat: float = 52.5, lon: float = 13.4) -> FeedReading:
-    """NASA POWER all-sky surface solar irradiance at any lat/lon (keyless). The Sun is
-    the largest wasted-energy source: most sunlight hitting Earth is never captured.
-    Higher irradiance = more harvestable solar at that site."""
-    import datetime as _dt
-    end = _dt.datetime.now(_dt.timezone.utc)
-    start = end - _dt.timedelta(days=9)
-    d = _get_json(
-        "https://power.larc.nasa.gov/api/temporal/daily/point?parameters=ALLSKY_SFC_SW_DWN"
-        f"&community=RE&longitude={lon}&latitude={lat}"
-        f"&start={start:%Y%m%d}&end={end:%Y%m%d}&format=JSON")
-    if not isinstance(d, dict):
-        return FeedReading("solar_irradiance", False, False, note="unreachable")
-    param = d.get("properties", {}).get("parameter", {}).get("ALLSKY_SFC_SW_DWN", {})
-    vals = [v for v in param.values() if isinstance(v, (int, float)) and v > -900]
-    if not vals:
-        return FeedReading("solar_irradiance", True, False, note="no data")
-    avg = sum(vals) / len(vals)
-    return FeedReading("solar_irradiance", True, True, round(avg, 2), "kWh/m2/day",
-                       f"recent avg solar at ({lat},{lon}) — NASA POWER")
 
 
 def jack_caiso() -> FeedReading:

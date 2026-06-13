@@ -54,6 +54,12 @@ iteration scheduler.
   real headroom and **no** queue backpressure. Off-box (no `/metrics`) it falls
   back to a clearly-labeled **SAMPLE** slack model. Self-test:
   `python3 vllm_metrics.py` → `{ok:true}`.
+- `immune_gate.py` — the **IMMUNE** organ: a Neyman-Pearson *most-powerful*
+  admission test for PROACTIVE work, **deny-by-default**, composing with the
+  existing `EnergyGate` via `compose_gates(...)`. Reactive is **never** gated.
+  Backed by the proven **ImmuneNeymanPearson** formula (lutar-lean round9); live
+  runtime is sentra `/api/sentra/v1/gates` (8 gates). Self-test:
+  `python3 immune_gate.py` → `{ok:true}`. See [IMMUNE admission](#immune-admission-neyman-pearson-deny-by-default).
 - `README.md` — this file.
 
 ## How it maps to Agent.xpu (reactive / proactive / energy)
@@ -120,11 +126,58 @@ python3 vllm_backend.py   # {ok:true} — vLLM-preferred, Ollama fallback, hones
 python3 vllm_metrics.py   # {ok:true} — /metrics → slack signal, SAMPLE fallback off-box
 ```
 
+## IMMUNE admission (Neyman-Pearson, deny-by-default)
+`immune_gate.py` upgrades proactive admission from a single power-window gate to
+a provably **most-powerful** statistical test — the **IMMUNE** organ of the
+anatomy shell (`energy_engine/anatomy/ANATOMY_SHELL_AGENTIC_BODY.md`).
+
+**Proven backing — ImmuneNeymanPearson (lutar-lean round9, kernel-proven).**
+The Neyman-Pearson lemma: among all tests of H0 vs H1 with false-positive
+(type-I) rate ≤ α, the likelihood-ratio test `Λ(x) = p₁(x)/p₀(x) ≥ k` is the
+**most powerful** — no other size-α test admits more genuinely-good work. The
+gate therefore thresholds the log-LR at the `log k(α)` derived from α against the
+H0 distribution (a *derived* cutoff, not a tuned constant):
+
+- **H0** — do **not** admit now (power dear / no headroom / unsafe).
+- **H1** — admit now (cheap/stranded power + GPU headroom + safe + valuable).
+- Evidence `x = (power_cheap, gpu_headroom, task_safety, task_value)`, each in
+  [0,1] and **SAMPLE/ESTIMATE** (policy signals, not metered joules), modeled as
+  shared-variance Gaussians; `log Λ` is then linear in `x`, so under H0 it is
+  Gaussian with closed-form mean/SD and `log k(α) = μ₀ + z₁₋α·σ₀`.
+- **ADMIT** iff `log Λ(x) ≥ log k(α)`, else **DENY** (deny-by-default).
+
+**Live runtime — IMMUNE = sentra `/api/sentra/v1/gates` (8 deny-by-default
+gates).** The 8 gates (`overclaim`, `sovereignty`, `energy_honesty`, `consent`,
+`key_exposure`, `open_weight`, `provenance`, `safety`) are *hard* binary gates: a
+single rejection short-circuits to DENY regardless of the soft LR. The endpoint
+is read-only/advisory and **off-box here**; the control-plane test never depends
+on it being reachable (deny-by-default if it is not).
+
+**Composition (no scheduler change).** The immune gate is a
+`scheduler.EnergyGate`-shaped callable; `compose_gates(energy_gate, immune_gate)`
+ANDs them so **both** the power-window policy and the NP safety/value test must
+pass. Any gate that denies (or raises) denies the whole — fail-closed.
+
+```python
+from immune_gate import make_immune_gate, compose_gates
+from energy_gate_adapter import make_energy_gate
+gate = compose_gates(make_energy_gate(), make_immune_gate(evidence_fn=...))
+scheduler = AgenticGpuScheduler(energy_gate=gate)   # proactive only; reactive never gated
+```
+
+**Doctrine.** Deny-by-default; **reactive is NEVER gated** (the scheduler routes
+reactive work around every gate — verified in the self-test); the test is honest
+(the self-test Monte-Carlo's the H0 null and confirms the realized false-admit
+rate is controlled at ≈α with power ≫ α); evidence is SAMPLE/ESTIMATE;
+open-weight only; no key. Traces to the proven formula; does not touch Λ
+(Conjecture 1) or the locked-8.
+
 ## Run (self-tests, local, no GPU)
 ```bash
 cd apps/agentic-gpu
-python3 scheduler.py   # prints {"ok": true, ...} — preempt+resume, no-starve, energy gate
-python3 daemon.py      # prints {"ok": true, ...} — resident loop, reactive preempts mid-batch
+python3 scheduler.py     # prints {"ok": true, ...} — preempt+resume, no-starve, energy gate
+python3 daemon.py        # prints {"ok": true, ...} — resident loop, reactive preempts mid-batch
+python3 immune_gate.py   # prints {"ok": true, ...} — NP admit/deny, deny-by-default, reactive never gated
 ```
 
 ## Deployment
