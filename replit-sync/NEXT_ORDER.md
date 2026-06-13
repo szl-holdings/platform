@@ -1,4 +1,24 @@
-## R-ENGINE-V2 (TOP — supersedes R-ENERGY) — Full agentic-GPU engine: 26 PRs ready
+## R-FRONTIER (TOP — zoom-out finding) — ALLODIAL backbone is PROVEN but un-served; now wired (PR #337)
+Zoom-out across all 30 repos + a11oy + lutar-lean + thesis v1->v26 found the real frontier lever: the
+founder's central "allodial, no kill-switch, no one can switch it off" vision already has a KERNEL-CHECKED,
+0-sorry Lean backbone (Lutar/Allodial.lean #229, EXPERIMENTAL tier) that was NOT served anywhere. a11oy
+already runs a LIVE formula rail (GET /api/a11oy/v1/formula/<name> + /formulas/index, live at
+https://a11oy.net/api/a11oy/v1/formulas/index 200). We extended that rail with ONE tight PR:
+  a11oy #337 (feat/allodial-frontier-formulas, +994, OPEN, NOT merged) adds:
+   - /api/a11oy/v1/formula/allodial  (allodiality/dominance/non-interference; cites Allodial.lean #229 EXPERIMENTAL)
+   - /api/a11oy/v1/formula/entanglement (capBound=C0*e^(-gamma*t) CAPACITY bound; cites Entanglement.lean #230 EXPERIMENTAL)
+   - /api/a11oy/v1/formula/sovereign (NEW SOVEREIGNTY GATE: sovereign:true ONLY when local_node_serving;
+     banner-sovereign + external routing -> half_state:true,sovereign:false; grounded in the proven
+     non-interference theorem ni_low_independent_of_high). This operationalizes our #1 doctrine invariant
+     (the half-state is the ONLY unacceptable outcome) as a live, formally-cited endpoint.
+  Self-tests green: allodial ok:true/12, entanglement ok:true/9, gate ok:true/10. EXPERIMENTAL-tier throughout:
+  locked-8 untouched, NO Lambda claim, NO free-energy, NO key. Brief: replit-sync/energy_engine/FRONTIER_ZOOMOUT_20260613.md.
+MERGE ORDER for #337: it only adds new formula modules + index entries on the existing rail (disjoint from
+the energy stack); merge any time after a11oy #328 lands (same file a11oy_formula_endpoints.py touched lightly).
+This does NOT change the real bottleneck: 27 PRs open, ZERO merged, NOTHING on the RTX 5000 — first measured
+joule still the top operational move.
+
+## R-ENGINE-V2 (supersedes R-ENERGY) — Full agentic-GPU engine: 26 PRs ready
 The engine is now COMPLETE across **26 open PRs** (FE+BE+3 Lean proofs) — built, self-tested,
 doctrine-clean, NONE agent-merged. This includes the finishing wave the founder asked for:
 3D HOLOGRAPHIC command bridge (a11oy #336, web/hologram.html, Three.js living-organism view),
