@@ -350,6 +350,46 @@ def flared_gas_leaderboard(top_n: int = 10) -> dict:
     }
 
 
+def jack_solar_wind() -> FeedReading:
+    """NOAA SWPC solar-wind plasma from the L1 Lagrange point (keyless, real-time).
+    The Sun streams a continuous wind of energy past Earth; high speed/density =
+    more space-weather energy flux. SPACE is the ultimate wasted-energy frontier:
+    space-based solar harvests sunlight 24/7 with no night and no atmosphere.
+    Honest: this is a SPACE-WEATHER FLUX signal (resource/context), NOT terrestrial power."""
+    d = _get_json("https://services.swpc.noaa.gov/products/solar-wind/plasma-1-day.json")
+    if not isinstance(d, list) or len(d) < 2:
+        return FeedReading("solar_wind_l1", bool(d), False, note="unreachable")
+    last = d[-1]  # [time, density, speed, temperature]
+    try:
+        speed = float(last[2])
+    except (ValueError, IndexError):
+        return FeedReading("solar_wind_l1", True, False, note="no parse")
+    return FeedReading("solar_wind_l1", True, True, speed, "km/s solar wind",
+                       f"density={last[1]} temp={last[3]}K @ L1 (space-weather flux)")
+
+
+def jack_solar_irradiance(lat: float = 52.5, lon: float = 13.4) -> FeedReading:
+    """NASA POWER all-sky surface solar irradiance at any lat/lon (keyless). The Sun is
+    the largest wasted-energy source: most sunlight hitting Earth is never captured.
+    Higher irradiance = more harvestable solar at that site."""
+    import datetime as _dt
+    end = _dt.datetime.now(_dt.timezone.utc)
+    start = end - _dt.timedelta(days=9)
+    d = _get_json(
+        "https://power.larc.nasa.gov/api/temporal/daily/point?parameters=ALLSKY_SFC_SW_DWN"
+        f"&community=RE&longitude={lon}&latitude={lat}"
+        f"&start={start:%Y%m%d}&end={end:%Y%m%d}&format=JSON")
+    if not isinstance(d, dict):
+        return FeedReading("solar_irradiance", False, False, note="unreachable")
+    param = d.get("properties", {}).get("parameter", {}).get("ALLSKY_SFC_SW_DWN", {})
+    vals = [v for v in param.values() if isinstance(v, (int, float)) and v > -900]
+    if not vals:
+        return FeedReading("solar_irradiance", True, False, note="no data")
+    avg = sum(vals) / len(vals)
+    return FeedReading("solar_irradiance", True, True, round(avg, 2), "kWh/m2/day",
+                       f"recent avg solar at ({lat},{lon}) — NASA POWER")
+
+
 def jack_caiso() -> FeedReading:
     """CAISO OASIS reachability (US California public LMP). Probe-only here (zip payload)."""
     try:
