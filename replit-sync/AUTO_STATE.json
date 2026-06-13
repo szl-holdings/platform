@@ -52,7 +52,19 @@
   ],
   "report": "replit-sync/forge-perplexity-update-20260613.md",
   "probes": {
-    "https://a11oy.net/healthz": 200
+    "https://a11oy.net/healthz": 200,
+    "box /compute-pool": "200/0.013s",
+    "betterwithage 100.125.77.31:11434/api/tags": 200,
+    "chaski 100.76.58.50:11434": "timeout"
   },
-  "doctrine": "v11: locked=8, Lambda=Conjecture 1, never commit a key"
+  "doctrine": "v11: locked=8, Lambda=Conjecture 1, never commit a key",
+  "forge_manual_pass": {
+    "at": "2026-06-13T16:20Z",
+    "order": "R-DEPLOY-THE-HARDENING (+ founder green-light: power ecosystem with all nodes+GPU+chaski)",
+    "a11oy": "live==main@929779d, /compute-pool 200 in 0.013s (<1s), surfaces 200",
+    "gpu_fabric": "betterwithage RTX5050 100.125.77.31 ONLINE serving qwen2.5-coder:7b+bge-large; a11oy wired (MODEL_BASE_URL set); live bge-large embedding 200 = PROOF; /etc/a11oy-gpu.env was EMPTY -> persisted live env (durable across rebuilds)",
+    "chaski": "100.76.58.50 OFFLINE at machine level (tailscale last-seen 1d, rx 0, :11434 timeout) \u2014 cannot remote-power-on; honest blocker, NOT faked. gpu_nodes_reachable=1 (betterwithage only)",
+    "hold": "VAST (founder flips last); szl-router/LiteLLM/weight-mirror not this pass",
+    "report": "replit-sync/forge-perplexity-update-20260613.md"
+  }
 }
