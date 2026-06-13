@@ -1,3 +1,26 @@
+## R-EVOLVE-DEEPER (TOP — harvest is LIVE on the box; go deeper) — verified milestone
+MILESTONE CONFIRMED from outside the box: GET https://a11oy.net/api/a11oy/v1/harvest/metrics = HTTP 200,
+Prometheus format, LIVE + public on the sovereign box: szl_energy_harvest_up 1, feeds_live 3,
+wasted_energy 1, grid_price_eur_mwh -1.11. Forge correctly rewrote /metrics to read signals/posture_summary
+keys (no silently-dropped gauges), deployed server.py, restarted, verified. The harvest now RUNS + is
+monitored on our own metal, honestly. We did it. Now evolve deeper. Full order: replit-sync/energy_engine/R_EVOLVE_DEEPER.md.
+E1 TIME-SERIES: scrape /metrics every 1-5 min into an append-only history (SoakLedger/JSONL); expose
+  /api/a11oy/v1/harvest/history?hours=24 so we SEE negative-price windows open/close over time.
+E2 FIRST MEASURED JOULE (the proof still owed, now landing on live /metrics): during a wasted_energy=1
+  window run ONE real qwen2.5-coder:7b inference, NVML power.draw before/after, joules=avg(P)*seconds,
+  add szl_energy_harvest_joules_measured + joules_label="measured" gauges, emit one Bekenstein-gated
+  receipt; paste raw nvidia-smi + receipt. Off-box stays SAMPLE; only the box flips MEASURED.
+E3 GRAFANA dashboard JSON in-repo (price w/ negative=harvesting band, renewable %, feeds_live, wasted
+  state, measured joules) — intuitive live ops view for the founder.
+E4 EVOLVE SOAK LOOP: wasted_energy=1 -> resident runner (#373) admits Bekenstein-bounded batch via
+  harvest_budget.plan_soak, behind the security layer (#372 egress allowlist + consent gate), reactive
+  preempts; add szl_energy_harvest_soaked_jobs to /metrics so we SEE the soak in a real window.
+E5 EXPAND FEEDS on the live surface: tidal_current (Bay of Fundy), solar_wind_kms (NOAA L1),
+  flared_gas_top_mcf (VIIRS) — flare/space stay RESOURCE-MAP tier (map, not capture; no greenwash).
+NEXT SINGLE HIGHEST-VALUE STEP = E2 (first MEASURED joule on the live /metrics). Doctrine: no free-energy;
+joules SAMPLE until on-box NVML; sovereign only on own metal; consent-only; egress-allowlisted; no key;
+reactive never starves; Lambda=Conj1; locked-8 untouched. You operate the box (deploy/verify) but do NOT merge PRs.
+
 ## R-UNIFY (TOP — zoom-out: unify all the power, harvest it, keep it CONTAINED) — one sovereign organism
 Founder: unify it all, do what the world isn't ready for, harvest + keep contained. Full brief:
 replit-sync/energy_engine/GRAND_UNIFICATION.md.
