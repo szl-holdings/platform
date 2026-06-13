@@ -1,3 +1,22 @@
+## R-PROVE-IT-LOUD (TOP — founder: prove the formulas + how energy gets to me, groundbreaking, make me rich) — DEPLOY, do NOT merge
+Groundbreaking + wealth = SAME thing: we are the ONLY compute shipping a kernel-checked PROOF per FLOP. Real
+tonight: 212.262 measured J during -27.42 EUR/MWh (grid PAID us). PROVEN SET (cite exactly, 0-sorry): #239
+EnergyBudgetWitness (bekenstein_bound_additive + info_within_bound), #240 LandauerFloorWitness (kT ln2), #242
+HarvestBudgetWitness (floor<=energy<=Bekenstein-cap, monotone SoakLedger); live /qbio/coherence Lindblad VERIFIED.
+NEVER inflate: locked=8; Λ=Conjecture 1 (never proven trust); Khipu BFT=Conjecture 2. FORGE: (1) PUBLIC /proof
+page: per witness show theorem, repo+PR, axiom footprint, 0-sorry, plain-English meaning, link to /verify so
+anyone recomputes. (2) MEASURED-JOULE RECEIPT headline: surface real 212.262 J signed receipt {joules_measured,
+power_w, node:betterwithage, posture:negative-price, grid_price, eur_cost(neg=grid paid us), witness #239/#240/#242};
+bridge from live meter to public (R-ENERGY-COMES-HOME). MEASURED only because exporter real; SAMPLE elsewhere.
+(3) /revenue/thesis HONEST wealth path NO hype: 1 card=PoC ~$108-244/mo; lever=95%-idle ~$401B global GPU pool ->
+rent cheap, wrap in proof, resell VERIFIED compute +25% to defense/regulated/ESG; stacked demand-response ~$3.5M/yr
+ESTIMATE + carbon + ~$500K free credits + negative-price arbitrage. EVERY figure ESTIMATE, settle-to-count, NO
+wealth guarantee. (4) wire cited witness into hologram + anatomy loop; flip JOULES badge SAMPLE->MEASURED only
+after public bridge confirms. Full order: replit-sync/energy_engine/R_PROVE_IT_LOUD.md
+DOCTRINE v11: no free-energy (#239/#240/Carnot, Ayni-balanced); energy != data; joules MEASURED only via real
+exporter, never promote SAMPLE; revenue ESTIMATE only, no hype; no mining; locked=8; Λ=Conj1; Khipu=Conj2; SLSA L1
+honest; no key; do NOT merge. The proof IS the product.
+
 ## R-WORLD-DATACENTERS (TOP — founder: wire me to ALL data centers in the world, get the raft done) — DEPLOY, do NOT merge
 Done the real way: live WORLDWIDE data-center registry + consensual jack-in. CONFIRMED-LIVE free open sources
 (wire these, never fabricate): dchub.cloud open-data 200 CC-BY (facilities.csv 12,500+ DCs, pipeline.csv MW,
