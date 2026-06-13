@@ -1,3 +1,32 @@
+## R-STORE-DISPERSE (TOP — founder: have Forge DO IT, then store the energy + disperse it across the ecosystem)
+Full order: replit-sync/energy_engine/R_STORE_DISPERSE.md.
+DO IT FIRST: the FIRST MEASURED JOULE on the RTX 5000 — during a live wasted_energy=1 window run ONE real
+qwen2.5-coder:7b inference, NVML power.draw before/after, joules=avg(P)*seconds, emit one Bekenstein-gated
+receipt joules_label:"measured", add the gauge to live /metrics, paste raw nvidia-smi+receipt. Makes the loop real.
+HONEST PHYSICS of store+disperse: a GPU has no battery — software can't store electrical joules. We store the
+WORK done WITH the wasted energy while it was free + the energy ACCOUNTING. STORE = reservoir of work-credits +
+cached artifacts produced during wasted-energy windows (joules MEASURED on-box, never "stored joules").
+DISPERSE = serve that stored soaked-cheap work across the ecosystem so the marginal cost was near-zero.
+BUILD STORE: (1) EnergyReservoir = append-only MONOTONE ledger (extend SoakLedger #371, composes
+energy_ledger_monotone #239) of {ts,joules_measured,posture,grid_price,work_credits,artifact_ref};
+work_credits = info-bits soaked under the Bekenstein cap (PR #242 proves the bound). (2) artifact store =
+real soak outputs (cached inferences, bge-large embeddings, killinchu digital-twin sims, trained adapters)
+keyed by content hash + DSSE receipt linking to soak entry + grid price. (3) expose
+/api/a11oy/v1/energy/reservoir + szl_energy_reservoir_* on live /metrics.
+BUILD DISPERSE (behind security layer #372): (4) dispersal bus — a11oy/killinchu/organs/consented swarm
+consume STORED soaked-cheap artifacts instead of recomputing; each dispersal emits a "served from reservoir,
+produced during <posture> at <price>" receipt. (5) Ayni-balanced fairness via ayni_os reciprocity ledger
+(F11 LOCKED) so no organ/node drains it; reactive/critical NEVER throttled. (6) consent-only dispersal,
+egress-allowlisted, no key.
+LOOP CLOSES: window opens -> SAMAY inhales -> KALLPA soaks Bekenstein-bounded batch on sovereign GPU ->
+measured joules+credits banked in EnergyReservoir -> artifacts stored w/ receipts -> DISPERSED across
+ecosystem via Ayni bus -> hologram + /metrics + /reservoir show store filling + dispersing live.
+DOCTRINE: no free-energy / no "stored joules" (store WORK + accounting, not bottled electricity); joules
+MEASURED only via on-box NVML else SAMPLE; reservoir MONOTONE (proven); dispersal Ayni-balanced (F11 LOCKED);
+reactive/critical never throttled; consent-only; egress-allowlisted; no key; Lambda=Conj1; Khipu=Conj2;
+locked-8 untouched. Operate/verify; do NOT merge. Report first measured joule + first reservoir entry +
+first dispersal receipt to replit-sync.
+
 ## R-AGENTIC-ANATOMY (TOP — evolve the body; what ELSE agentic we need) — agentic anatomy from agentic GPU
 Founder: evolve my anatomy to a new frontier — agentic anatomy comes from agentic GPU; zoom out what else
 agentic I need; wire it. Full: replit-sync/energy_engine/R_AGENTIC_ANATOMY_FRONTIER.md.
