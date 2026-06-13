@@ -1,3 +1,28 @@
+## R-DEPLOY-MERGED-FIXES (TOP — zoom-out done; ONE real gap + deploy the merged fixes) — go, full admin green light
+Honest zoom-out (verified live): 11/14 surfaces 200 + fast (~0.46s). Real findings:
+1. MERGED-BUT-NOT-LIVE: joules-honesty fix #349 is on main but NOT deployed (revenue/estimate joules_label=None =
+   stale image). compute-pool 1.66s (breaker not fully active live). REBUILD a11oy image FROM MAIN now (you have
+   green light + admin) so #349 (single-source joules_label + evidence fields) + the resilience/observability stack
+   go live. Verify: revenue/estimate + harvest/posture joules_label is "sample" (no fresh exporter) WITH evidence
+   fields, never bare "measured".
+2. ONE REAL CODE GAP: /api/a11oy/v1/anatomy/loop = 3.4s (probes sleeping GPU/offline chaski, eats the wait). An Opus
+   PR fix/anatomy-loop-latency is incoming — wraps the GPU-node probe in the circuit breaker + TTL cache so the loop
+   returns <1s with honest degraded posture (gpu_state:sleeping, joules SAMPLE). When it lands green + additive,
+   you MAY admin-merge it (safe, surgical, not keystone/founder-gated), then rebuild from main. Target anatomy/loop
+   <1s.
+3. PATH-VARIANT (confirm, likely not bugs): /api/a11oy/v1/{formula/sovereign,research/verify,ayni} show 404 but
+   probably serve at root /formula/sovereign etc. (your earlier correction). Confirm the canonical path + make sure
+   the intended public path is 200; if a real COPY/registration is missing (like the anatomy/loop 48b95cf case),
+   fix it; if just path-variant, note it.
+4. After rebuild: python3 tools/szl_smoke_stress.py --mode smoke -> target PASS (all 200, latency<2s, joules honest).
+   Report the verdict + the joules_label evidence proof + anatomy/loop latency.
+ALSO still in motion (your green light stands): latency keep-warm posture, FORGE_AGENT_URL dispatch.
+BLOCKED-ON-FOUNDER (surface, do not fake): chaski repl start (you lack the Replit boot credential — confirmed);
+VAST_API_KEY (founder flips last).
+DOCTRINE v11: joules MEASURED only via fresh real exporter + evidence; chaski reachable only on real 200; sovereign
+own-metal-only; szl-router PRIVATE; ONE loop; no free-energy (#239/#240); locked=8; Λ=Conj1; Khipu=Conj2; no token
+printed/committed. You may admin-merge safe additive a11oy fix PRs when green. GREEN LIGHT — deploy the merged fixes.
+
 ## R-GREENLIGHT-EXECUTE (TOP — founder GREEN LIGHT: full admin, execute your whole queue autonomously NOW) — go
 Founder explicit authorization: Forge has full access + admin — GREEN LIGHT to execute everything actionable in
 your queue right now, no waiting for further confirmation on the software-actionable items. Proceed:
