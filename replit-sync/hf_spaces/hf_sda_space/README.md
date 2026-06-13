@@ -1,12 +1,12 @@
 ---
 title: SZL SDA
 emoji: 🛰️
-colorFrom: teal
+colorFrom: green
 colorTo: indigo
 sdk: static
 app_file: index.html
 pinned: false
-short_description: Sovereign domain superiority — anomaly detection + track fusion with a signed receipt for every verdict.
+short_description: Sovereign domain superiority; signed receipt per verdict.
 ---
 
 # SZL HOLDINGS — SDA (Sovereign Domain Superiority)
