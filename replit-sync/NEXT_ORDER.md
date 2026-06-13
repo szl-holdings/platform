@@ -1,3 +1,23 @@
+## R-FOLD-RESEARCH-INTO-ENERGY (TOP — founder: use my formulas + my energy, fold research INTO the energy concept) — DEPLOY, do NOT merge
+Not a separate product — a verified experiment becomes WORK the energy loop does: soaked on harvested wasted energy,
+bounded by the proven formulas, receipted in the same chain, Ayni-balanced. ONE organism, one loop, one ledger.
+UNIFICATION: (1) INTAKE — a prereg (szl_research_infra /research/prereg, PR incoming) + its compute queues as SAMAY
+intake into a negative-price window (-45.87 now) so verification runs on HARVESTED energy. (2) METABOLIZE — KALLPA
+runs the experiment/qbio sim on the sovereign GPU; energy MEASURED (212J), BOUNDED by Bekenstein #239 (info<=energy)
++ Landauer #240 + HarvestBudget #242 -> a NEW honest anti-p-hacking bound: a result cannot encode more verified
+information than its compute energy budget allows. (3) CIRCULATE — heart beats one DSSE receipt/trial, YARQA
+disperses, the trial-receipt chain IS a strand of the same szl-lake provenance ledger. (4) STORE — EnergyReservoir
+entry binds joules_measured + experiment receipt {prereg_hash, trial_chain_head, witness #239/#240/#242}. (5) CLOSE
+— validate canonical-formulas-v1/lean-proofs-v1, Ayni F11 balance, repeat. FORGE: wire szl_research_infra into
+szl_anatomy_loop as intake source=verified-research; share the provenance ledger; bind joules to experiment receipt;
+cite the energy-information bound on /research/verify + /anatomy/loop (HONEST: bounds info the compute carries, does
+NOT prove/disprove psi); surface a "verified research" intake node on the HF energy Space + hologram. Full order:
+replit-sync/energy_engine/R_FOLD_RESEARCH_INTO_ENERGY.md
+DOCTRINE v11: formulas BOUND energy+information (no free-energy/no free-information, #239/#240 Ayni); VERIFY PROCESS
+make NO psi claim; cite never plagiarize; joules MEASURED only via exporter (212J); energy != data; consent only;
+organs EXPERIMENTAL; locked=8; Λ=Conj1; Khipu=Conj2; no key; do NOT merge. One concept: energy soaks research,
+formulas govern it, loop contains it, receipt proves it.
+
 ## R-TAKE-EVOLVE (TOP — founder: take openly + make it ours by PROOF, innovate, evolve) — DEPLOY, do NOT merge
 Doctrine: take what is FREELY GIVEN (open weights/data/science), make it ours by stamping a DSSE receipt + kernel
 bound (inputs=commodity, PROOF=the IP); NEVER plagiarize/relabel/steal (taints the moat we sell); cite + transform.
