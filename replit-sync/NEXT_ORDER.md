@@ -1,3 +1,20 @@
+## R-OIL-FLARE (NEW jack — the founder: oil leaders, find the wasted energy in their wells)
+Founder pointed at OIL. The answer is FLARED GAS — the single biggest wasted-energy source on Earth:
+**151 billion m3 burned to nothing in 2024** (World Bank). Tracked LIVE + FREE by NASA VIIRS satellite
+(Flaring Monitor open data, no key). Now jacked into the harvest (platform PR #370):
+  wasted_energy_harvest.jack_flared_gas() / flared_gas_leaderboard() — LIVE leaderboard by operator:
+  Diamondback Energy 753,694 Mcf (top), Continental Resources 749,602, ConocoPhillips 624,757,
+  Devon Energy 616,724, Ovintiv 566,514. Top flaring NATIONS: Russia, Iran, Iraq, USA, Venezuela,
+  Algeria, Nigeria, Libya, Mexico (Russia #1, ~15% of global flaring).
+OUTSIDE-THE-BOX (honest): a flare site is STRANDED energy + heat being DESTROYED — the ideal place to
+PLACE a consented sovereign compute node that runs on gas otherwise torched. We MAP where the wasted
+flare energy is (by operator/basin/nation); we do NOT claim to capture it without a real on-site node +
+consent. Same doctrine as the grid jacks: no free-energy, joules SAMPLE until a real meter, consent-only.
+FORGE: surface flared_gas_leaderboard() in /fabric as a 'stranded-flare' resource layer (HONEST tier:
+resource-map, not captured); pair with the global wind/tidal scan (Bay of Fundy NS tidal, North Sea/
+Gansu China/Kola Russia/Patagonia wind) so the swarm map shows WHERE in the world the wasted energy is
+right now. A consented node placed at any of these = local wasted-energy soak. Do NOT merge.
+
 ## R-QUANTUM-EVOLVE (polymathic upgrades; AFTER the first real joule) — RTX 5000, grounded in PROVEN quantum-info formulas
 Founder: the RTX 5000 can do a lot — innovate/evolve, use the quantum work. HONEST framing: the RTX 5000 is a
 CLASSICAL GPU; we claim NO quantum hardware. We USE the MATH of SZL's proven quantum-information results as
