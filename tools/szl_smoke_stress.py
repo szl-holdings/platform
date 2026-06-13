@@ -83,16 +83,16 @@ SMOKE_PATHS = [
     "engine/status",
     "anatomy/loop",
     "heart/pulse",
-    "ayni",
-    "formula/sovereign",
+    "/ayni",  # served top-level, not under API_PREFIX
+    "/formula/sovereign",  # served top-level, not under API_PREFIX
     "qbio/coherence",
-    "formulas/index",
+    "/formulas/index",  # served top-level, not under API_PREFIX
     "revenue/marketplace",
     "revenue/estimate",
     "revenue/thesis",
-    "research/prereg",
-    "research/verify",
-    "harvest/datacenters",
+    "/research/prereg",  # served top-level, not under API_PREFIX
+    "/research/verify",  # served top-level, not under API_PREFIX
+    "/harvest/datacenters",  # served top-level, not under API_PREFIX
     "compute-pool",
     "verify/healthz",
     "wayra/summary",
@@ -118,6 +118,10 @@ USER_AGENT = "szl-smoke-stress/1.0 (+a11oy estate health; doctrine v11)"
 # json_valid=False. /router/health serves the operator HTML app.
 HTML_OK = {"/router/health"}
 
+# Surfaces whose body is legitimately Prometheus exposition text (text/plain;
+# version=0.0.4), not JSON -- exempt from json_valid exactly like HTML_OK.
+PROM_OK = {"harvest/metrics"}
+
 # Doctrine v11 §1 banned overclaim marketing tokens (mirrors
 # packages/unified-kernel/src/doctrine/index.ts BANNED_MARKETING + contextual).
 BANNED_TOKENS = [
@@ -137,9 +141,17 @@ BANNED_TOKENS = [
 
 # Fields that, if present and truthy, mean a "measured" joules claim IS backed
 # by a real exporter/meter — so it is honest, not a violation.
-EXPORTER_FIELDS = ("exporter", "power_meter", "meter", "power_exporter", "watt_meter")
+EXPORTER_FIELDS = ("exporter", "power_meter", "meter", "power_exporter", "watt_meter",
+                   # self-verifying evidence emitted next to a "measured" label
+                   # by the energy-harvest service (engine.joules_evidence):
+                   "exporter_node", "joules_measured_total", "exporter_last_seen_ts",
+                   "power_w_sample", "joules_evidence")
 
 UNREACHABLE = "unreachable"
+
+# Hosts we own and self-host -- sovereign=True is HONEST on these: the Hetzner
+# box itself and the founder's self-hosted RTX on the tailnet (betterwithage).
+OWN_METAL_HOSTS = ("100.125.77.31", "167.233.50.75")
 
 
 # --------------------------------------------------------------------------- #
@@ -185,6 +197,23 @@ def _walk(obj):
             yield from _walk(v)
 
 
+def _has_exporter_evidence(d: dict) -> bool:
+    """True when a dict carries real exporter/meter evidence for a measured-joule
+    claim -- either as direct keys or inside a nested 'joules_evidence' block
+    (engine.joules_evidence). A truthy joules_measured_total/exporter_node is the
+    strongest signal; mere presence of an exporter field also counts."""
+    cands = [d]
+    ev = d.get("joules_evidence")
+    if isinstance(ev, dict):
+        cands.append(ev)
+    for c in cands:
+        if any(c.get(f) for f in EXPORTER_FIELDS):
+            return True
+        if any(f in c for f in EXPORTER_FIELDS):
+            return True
+    return False
+
+
 def scan_doctrine(parsed) -> list[str]:
     """Scan a parsed JSON body for doctrine violations.
 
@@ -207,9 +236,7 @@ def scan_doctrine(parsed) -> list[str]:
             if "joule" in lk and "label" in lk and isinstance(val, str):
                 if "measured" in val.lower() and "estimate" not in val.lower() \
                         and "sample" not in val.lower():
-                    has_exporter = any(
-                        d.get(f) for f in EXPORTER_FIELDS
-                    ) or any(f in d for f in EXPORTER_FIELDS)
+                    has_exporter = _has_exporter_evidence(d)
                     if not has_exporter:
                         violations.append(
                             f"joules labelled '{val}' via '{key}' with no exporter field"
@@ -217,8 +244,7 @@ def scan_doctrine(parsed) -> list[str]:
             # bare joules_label == "measured"
             elif lk in ("joules_label", "joule_label") and isinstance(val, str):
                 if val.strip().lower() == "measured":
-                    has_exporter = any(d.get(f) for f in EXPORTER_FIELDS) \
-                        or any(f in d for f in EXPORTER_FIELDS)
+                    has_exporter = _has_exporter_evidence(d)
                     if not has_exporter:
                         violations.append(
                             f"joules_label='measured' with no exporter field"
@@ -232,6 +258,7 @@ def scan_doctrine(parsed) -> list[str]:
                 or "self" in endpoint
                 or "127.0.0.1" in endpoint
                 or "localhost" in endpoint
+                or any(h in endpoint for h in OWN_METAL_HOSTS)
             )
             # Only treat as node-scoped if this dict looks like a node (has a
             # name + endpoint); top-level sovereign flags are reported but the
@@ -306,7 +333,8 @@ def smoke_surface(path: str, base: str = BASE_URL) -> dict:
     flags: list[str] = []
     json_valid = None
     parsed = None
-    expects_html = path in HTML_OK
+    # HTML and Prometheus-text surfaces are legitimately non-JSON.
+    expects_text = path in HTML_OK or path in PROM_OK
 
     # decode body for scanning
     text = ""
@@ -317,8 +345,8 @@ def smoke_surface(path: str, base: str = BASE_URL) -> dict:
             text = ""
 
     # JSON validity
-    if expects_html:
-        json_valid = None  # not applicable
+    if expects_text:
+        json_valid = None  # not applicable (HTML or Prometheus text surface)
     else:
         try:
             parsed = json.loads(text) if text else None
@@ -335,7 +363,7 @@ def smoke_surface(path: str, base: str = BASE_URL) -> dict:
     if latency is not None and latency > SLOW_THRESHOLD_S:
         flags.append(f"slow latency {latency:.2f}s > {SLOW_THRESHOLD_S}s")
 
-    if not expects_html and json_valid is False and status == 200:
+    if not expects_text and json_valid is False and status == 200:
         flags.append("invalid JSON body")
 
     # doctrine: banned tokens (scan raw text for any surface)
