@@ -172,6 +172,100 @@ def estimate_verified_compute_premium():
     }
 
 
+# --- GPU marketplace (R-MONEY-NOW A) ----------------------------------------
+# Published consumer-tier GPU-rental rates. We sell the RTX-class node's
+# wasted-window capacity for REAL useful AI work (NOT mining). A dollar is only
+# real once a rental SETTLES; until the founder creates the host account + payout
+# this is an ESTIMATE and settled_usd_to_date is exactly 0.0.
+MARKETPLACE = {
+    "price_low_usd_per_gpu_hr": 0.20,    # published consumer-tier floor
+    "price_high_usd_per_gpu_hr": 0.45,   # published consumer-tier ceiling
+    "uptime_fraction": 0.70,             # realistic energy-gated availability
+    "marketplace_fee_fraction": 0.15,    # platform take (~15%) -> net 0.85
+    "verified_premium_fraction": 0.25,   # +25% for DSSE + Lean-bounded proof
+    "candidate_venues": [
+        {"name": "Vast.ai", "start": "email-only", "payout": "Wise/PayPal/Stripe or crypto",
+         "note": "fastest consumer-tier start; one-line Linux host agent"},
+        {"name": "RunPod", "start": "account", "payout": "USD/crypto",
+         "note": "community-cloud GPU listing"},
+        {"name": "io.net", "start": "account", "payout": "IO (crypto rail only)",
+         "note": "decentralized; crypto = payment rail, never speculate the box"},
+        {"name": "Akash", "start": "fund provider wallet ~5+ AKT", "payout": "USDC",
+         "note": "ride existing k3s; provider-services + nvidia device plugin"},
+    ],
+}
+
+
+def estimate_marketplace():
+    """Published-comparable: monthly revenue from renting the node's wasted-window
+    capacity on a consumer GPU marketplace, with the +25% verified-compute premium.
+
+    HONEST: nothing is listed yet (no founder account/payout) so settled = $0.0.
+    Energy-gated: the estimate assumes jobs run in cheap/negative-price windows so
+    marginal power cost approaches zero. NOT mining — proven, attestable compute.
+    """
+    m = MARKETPLACE
+    net = 1.0 - m["marketplace_fee_fraction"]
+    hrs = HOURS_PER_MONTH * m["uptime_fraction"]
+    base_low = m["price_low_usd_per_gpu_hr"] * hrs * net
+    base_high = m["price_high_usd_per_gpu_hr"] * hrs * net
+    prem = 1.0 + m["verified_premium_fraction"]
+    return {
+        "stream": "gpu_marketplace_rental",
+        "label": "ESTIMATE",
+        "basis": "published-comparable",
+        "currency": "USD",
+        "assumptions": {
+            "price_usd_per_gpu_hr": [m["price_low_usd_per_gpu_hr"], m["price_high_usd_per_gpu_hr"]],
+            "uptime_fraction": m["uptime_fraction"],
+            "marketplace_fee_fraction": m["marketplace_fee_fraction"],
+            "verified_premium_fraction": m["verified_premium_fraction"],
+            "hours_per_month": HOURS_PER_MONTH,
+        },
+        "our_current_node": {
+            "commodity_usd_per_mo": [_round(base_low), _round(base_high)],
+            "with_verified_premium_usd_per_mo": [_round(base_low * prem), _round(base_high * prem)],
+            "unit": "USD/month per RTX-class card",
+            "settled_usd_to_date": 0.0,
+            "status": "not_listed",
+        },
+        "energy_gate": ("count value only in cheap/negative-price windows (reuse live "
+                        "harvest posture); marginal power cost -> ~0 then."),
+        "verified_premium_basis": ("+25% over commodity FLOPs because every job ships a "
+                                   "DSSE receipt + kernel-checked Lean bound (Bekenstein "
+                                   "#239, Landauer #240) -> provenance chain. NOT mining."),
+        "founder_required": [
+            "create a host account on a candidate venue (Vast.ai is email-only to start)",
+            "set a payout method (Wise/PayPal/Stripe for USD, or BTC/IO/USDC for crypto)",
+            "paste the venue API key to the secret store (NEVER commit it)",
+        ],
+        "candidate_venues": m["candidate_venues"],
+        "note": ("A dollar is real only when a rental SETTLES; until listed this stays "
+                 "ESTIMATE with settled_usd_to_date = 0.0. Crypto = payment rail only."),
+        "source": "published consumer GPU-marketplace rates (Vast.ai/RunPod/io.net/Akash)",
+    }
+
+
+def build_marketplace(posture: dict) -> dict:
+    price = posture.get("price_now_eur_mwh") if isinstance(posture, dict) else None
+    return {
+        "ok": True,
+        "product": "Verified Sovereign Compute — GPU marketplace",
+        "posture": {
+            "status": posture.get("status") if isinstance(posture, dict) else "unknown",
+            "grid_price_eur_mwh": price,
+            "wasted_energy_available": posture.get("wasted_energy_available") if isinstance(posture, dict) else None,
+            "energy_gated": True,
+        },
+        "estimate": estimate_marketplace(),
+        "disclaimer": DISCLAIMER,
+        "doctrine": "v11: ESTIMATE not revenue (settle to count); NO mining/PoW; "
+                    "crypto = payment rail only; joules SAMPLE; sovereign untouched; "
+                    "locked-8 untouched; Lambda=Conjecture 1; no key committed.",
+        "ts": time.time(),
+    }
+
+
 def build_estimates(posture: dict) -> dict:
     price = posture.get("price_now_eur_mwh") if isinstance(posture, dict) else None
     streams = [
