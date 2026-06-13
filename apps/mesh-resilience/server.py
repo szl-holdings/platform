@@ -34,6 +34,7 @@ _RECS = _CACHE["records"]
 _SZL = _CACHE["szl"]
 
 
+@app.get("/health")
 @app.get("/healthz")
 def healthz():
     return {"status": "ok", "service": "szl-mesh-resilience", "doctrine": "v11",
