@@ -65,6 +65,11 @@ def probe() -> dict:
     # SOVEREIGN upgrade — strictly more live than hf-router, never a stub.
     is_live = (mode in ("live", "generative")) and (inference in ("hf-router", "self-hosted-gpu"))
     is_sovereign = (inference == "self-hosted-gpu")
+    # HONEST graceful-degradation: a planned GPU-maintenance posture is an honest
+    # state (yellow), NOT a failure and NOT an overclaim. When the GPU is down for
+    # maintenance the app serves on CPU/router fallback and says so via posture.
+    posture = h.get("posture")  # green/sovereign | maintenance | down
+    is_maintenance = (posture == "maintenance") or (h.get("gpu_status") == "maintenance")
     roster = h.get("roster", [])
     open_weight = bool(roster) and all(m.get("open_weight") for m in roster)
     out["checks"]["liveness"] = {"pass": live, "http": code, "doctrine": h.get("doctrine")}
@@ -75,7 +80,10 @@ def probe() -> dict:
         "token_source": h.get("token_source"),
         "live": is_live,
         "sovereign": is_sovereign,
-        "honest": True,  # stub is an HONEST state, not a failure
+        "posture": posture or ("sovereign" if is_sovereign else ("maintenance" if is_maintenance else "live")),
+        "maintenance": is_maintenance,
+        "posture_note": h.get("posture_note") or h.get("gpu_maintenance_note"),
+        "honest": True,  # stub AND maintenance are HONEST states, not failures
         "primary_model": h.get("primary_model"),
     }
     out["checks"]["open_weight_self_run"] = {
@@ -173,6 +181,10 @@ def probe() -> dict:
     consolidation = out["checks"]["verticals_live"]["pass"] and out["checks"]["anatomy_live"]["pass"]
     if not core_live:
         out["verdict"] = "DOWN — Chaski health endpoint not reachable"
+    elif is_live and consolidation and is_maintenance:
+        note = out["checks"]["mode"].get("posture_note") or "GPU down for maintenance — CPU/router fallback"
+        out["verdict"] = ("MAINTENANCE (honest) — GPU under maintenance, serving on %s fallback; "
+                          "verticals/anatomy consolidated. %s" % (inference, note))
     elif is_live and consolidation:
         _sov = "SOVEREIGN-GPU " if is_sovereign else ""
         out["verdict"] = ("%sONE-OF-ONE LIVE — brain wired (mode=%s, inference=%s, open-weight self-run) "

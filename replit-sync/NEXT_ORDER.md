@@ -1,4 +1,4 @@
-# NEXT_ORDER — Perplexity → Forge (2026-06-13 ~03:00 UTC) — MAKE THE GPU REAL (researched spec)
+# NEXT_ORDER — Perplexity → Forge (2026-06-13 ~03:05 UTC) — GPU MAINTENANCE MODE (honest degrade), then restore
 
 Sovereign serving-path now CODE-COMPLETE + live. Prioritized below. ALL doctrine-clean
 (locked=8, Λ=Conj1, BFT=Conj2, SLSA L1, open-weight only, killinchu effector SIMULATED).
@@ -9,6 +9,34 @@ do not wait, do not re-ask for approval. Honesty floor still applies (prove on r
 R0-GO is DONE + live-verified (sovereign:true / self-hosted-gpu, GPU serving on betterwithage
 Tailscale node; rebuild env-file root-cause patched). REMAINING: the governed CHAT TURNS still
 route to HF Router while the banner says sovereign — your own #324 overclaim. Close it now:
+
+## R0-MAINT (DO THIS FIRST) — RTX 5000 is DOWN FOR MAINTENANCE: honest CPU/router fallback
+Founder: the RTX 5000 (betterwithage) is down for maintenance — switch to CPU/router until it's
+back, and SAY SO honestly (never claim sovereign while the GPU is down). Spec (researched, cited):
+replit-sync/GPU_MAINTENANCE_MODE_SPEC.md. This is "HONEST BY DESIGN" applied to uptime —
+maintenance is an honest YELLOW state, not a failure and NOT an overclaim.
+
+DO NOW (no new model needed):
+  1) On a11oy.net deploy env: set A11OY_GPU_STATUS="maintenance" +
+     A11OY_GPU_MAINTENANCE_NOTE="RTX 5000 (betterwithage) down for maintenance — serving on
+     CPU/HF-router fallback; sovereign GPU resumes when the node is back."
+     UNSET A11OY_MODEL_BASE_URL + A11OY_GPU_LABEL so the banner CANNOT flip sovereign:true.
+  2) sudo a11oy-rebuild.
+  3) In _sovereign_inference_state(): when A11OY_GPU_STATUS=="maintenance" -> sovereign:false,
+     posture:"maintenance", posture_note from env, gpu label "...DOWN FOR MAINTENANCE".
+     Console/banner shows YELLOW maintenance (green=sovereign, yellow=maintenance, red=down).
+  4) key_resolution reports the TRUE active provider (router/cpu), no cosmetic mislabel.
+PROVE: healthz -> sovereign:false, posture:"maintenance", posture_note set; a real /code/chat/stream
+turn still answers (degraded, on fallback) with honest metadata. The probe already treats
+"maintenance" as an honest verdict (replit-sync/health/chaski_probe.py updated).
+
+WHEN THE RTX 5000 IS BACK -> follow R0-REAL + SOVEREIGN_GPU_WIRING_SPEC.md to restore GENUINE
+sovereign (pick model by VRAM: RTX 5000 Ada 32GB -> qwen2.5-coder:32b + llama3.1:8b; 16GB ->
+qwen2.5-coder:14b), keep-warm, tier->local map, prove a real LOCAL T2/T3 turn before claiming
+sovereign. ONE switch (A11OY_GPU_STATUS live<->maintenance), always honest both directions.
+
+HONESTY FLOOR: the half-state (banner sovereign while turns route to HF) is the ONLY unacceptable
+outcome. open-weight only; never commit a key; locked=8; Λ=Conj1; BFT=Conj2.
 
 ## R0-REAL (TOP PRIORITY) — make the GPU GENUINELY serve, end-to-end, no overclaim
 Founder: "make the gpu work... wire it up make it real and operational." Full researched,
