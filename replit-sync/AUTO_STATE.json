@@ -1,34 +1,33 @@
 {
   "order_sha": "35873754ce20db3cac429840cc0f42aea8f17a18",
   "order_path": "replit-sync/NEXT_ORDER.md",
-  "order_name": "R-CHASKI-FORGE-START",
-  "state": "reported-blocked",
-  "seen_at": "2026-06-13T16:42:00Z",
-  "updated_at": "2026-06-13T16:42:00Z",
-  "idle": false,
-  "dispatch_mode": "none",
-  "dispatch_ok": false,
-  "report": "replit-sync/forge-perplexity-update-20260613-1642.md",
-  "probes": {
-    "https://a11oy.net/healthz": 200,
-    "a11oy /api/a11oy/v1/health/ready": "200 ready:true (~1.8s warm; 21s cold one-off)",
-    "a11oy /formula/sovereign": "200 root path (/api/a11oy/v1/ variant 404 = path-variant non-issue)",
-    "chaski 100.76.58.50:11434/v1/models": "000 timeout (replit-chaski OFFLINE, last seen 1d, rx 0)",
-    "smoke_verdict": "FAIL 6/18 (5 latency + 1 joules doctrine)"
-  },
-  "chaski_blocker": {
-    "node": "replit-chaski @ 100.76.58.50 (owner stephenlutar2-hash@)",
-    "state": "powered off at machine level; cannot be woken from the box",
-    "forge_can_boot": false,
-    "missing_credential": "Replit account session/API token (or always-on / Reserved-VM / Run control) for the replit-chaski Repl. Forge holds org-owner GitHub + HF-write + box-SSH only; the REPL_* env here is THIS workspace own identity, not a control-plane token for another repl.",
-    "founder_action": "open replit-chaski, start durable ollama serve (0.0.0.0:11434, pull qwen2.5-coder:7b + bge-m3, always-on); reachable flips true only on a real 200"
-  },
-  "disposition": {
-    "energy_space": "DONE - SZLHOLDINGS/energy live + public (pushed 2026-06-13T16:28Z)",
-    "chaski_gpu_node": "BLOCKED - founder must boot replit-chaski (credential named); reachable:false honest",
-    "dispatch_persistence": "BLOCKED - FORGE_AGENT_URL/FORGE_DISPATCH_CMD need Forge own secret store (founder/infra)",
-    "smoke": "FAIL 6/18 - 5 latency (degraded posture under sleeping GPU, NOT band-aided) + 1 joules_label doctrine (cross-module follow-up, NOT rushed)"
-  },
-  "doctrine": "v11: locked=8, Lambda=Conjecture 1, chaski reachable only on real 200, joules measured only via exporter, never commit a token",
-  "corrected_by": "Forge reconciliation pass 2026-06-13T16:42Z - prior AUTO_STATE falsely state:done@89ffd9eb (R-ROOTCAUSE-HARDEN 16:06) while 6 newer orders had landed (latest R-CHASKI-FORGE-START @35873754 16:34); advanced to honest current state"
+  "state": "processing",
+  "seen_at": "2026-06-13T17:06:53Z",
+  "actionable": [
+    "chaski-THE-GPU-NODE = the replit-chaski Repl at tailnet 100.76.58.50, currently POWERED OFF (tailscale rx 0,",
+    "chaski-THE-BRAIN (HF Space orchestrator) = separate: if it is still stub, run forge_hf_activate.py in the",
+    "VERIFY (real, no bandaid): curl http://100.76.58.50:11434/v1/models -> 200 + model list; then /compute-pool",
+    "ENERGY SPACE \u2014 SOURCE NOW DELIVERED: I placed it at replit-sync/hf_energy_space/ (index.html + assets/{data.js,",
+    "CHASKI \u2014 POWERED OFF (your honest finding: tailscale rx 0, ollama 000, ssh 502). You CANNOT wake it from the box",
+    "DISPATCH (the real throughput upgrade): dispatch_ok=False, dispatch_mode=none, forge_agent_url=none \u2014 you run",
+    "ZK (prove the OUTPUT without revealing inputs): \"ZK proves correctness; TEEs protect execution.\" SZL already has",
+    "PROOF-OF-INFERENCE receipt: extend the existing marketplace/verify receipt so each inference job carries a",
+    "ATTESTATION ENVELOPE: where we run on our own metal, attach a hardware/runtime attestation (what ran, where);",
+    "The pitch payoff: verified inference is becoming table stakes for pharma/defense/finance buyers (the exact",
+    "Rebuild a11oy image FROM MAIN. Gate the swap on /api/a11oy/v1/health/ready==200 (K8s maxUnavailable:0 pattern);",
+    "Rebuild killinchu image FROM MAIN -> finance/* + realestate/* + /elite/wiring 200.",
+    "Verify: python3 tools/szl_smoke_stress.py smoke TWICE -> require ALL surfaces 200 AND STAY 200, compute-pool <1s,",
+    "Same rebuild flips: /ayni, /research/prereg, /research/verify, /harvest/datacenters. Wire szl-router live",
+    "Rebuild a11oy image FROM MAIN (COPY all hardening modules: szl_backend_hardening, szl_prod_hardening,",
+    "READINESS-GATED swap (K8s maxUnavailable:0): new image must pass /api/a11oy/v1/health/ready (200) BEFORE it",
+    "ONE canonical deploy path from main; kill any competing/older redeploy reverting surfaces.",
+    "After swap: run python3 tools/szl_smoke_stress.py smoke TWICE; require ALL surfaces 200 AND STAY 200 across both",
+    "Same rebuild flips the still-404s: /ayni, /research/prereg, /research/verify, /harvest/datacenters; + killinchu",
+    "New observability endpoints (when feat/observability lands): /api/a11oy/v1/observability/traces +",
+    "Mount the jackin-console as the \"JACK IN\" surface on killinchu (route /jackin and/or folded into",
+    "Wire it to the REAL existing endpoints (same-origin): /api/killinchu/v1/cuas/{plausibility,wta,",
+    "ADD the 5-modality FUSION + DroneID layer (JACKIN_GAP_ADDENDUM.md): per-track modality row",
+    "CONNECT transports must work in-browser over HTTPS (Web Serial + Web Bluetooth = Chrome/Edge +"
+  ],
+  "gated_skipped": []
 }
