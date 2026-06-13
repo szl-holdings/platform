@@ -1,3 +1,28 @@
+## R-ROUTER-PRIVATE-LIVE (TOP — founder: keep szl-router PRIVATE + make it fully operational/real) — DEPLOY, do NOT merge
+FOUNDER DIRECTION (standing rule): szl-router MUST stay PRIVATE. It is verified private now (good) — NEVER make it
+public. It is core moat IP: the sovereign-first OpenAI-compatible LLM router that stamps x_szl_provenance
+(served_by, sovereign, energy_source, tier, attempts) on every answer = the provenance moat we sell. Publishing it
+hands competitors our routing + provenance architecture. KEEP PRIVATE. (If any automation/cron would flip it public,
+block that.)
+MAKE IT FULLY OPERATIONAL (it is real code — szl_router/{core.py 27KB, app.py, __init__}, tests, CI green; /router/
+health already 200 but the JSON API paths /api/a11oy/v1/router/* and /route are 404 = not fully wired into the
+fabric). FORGE:
+1. Wire szl-router as the REAL routing layer in front of the GPU fabric: requests resolve sovereign-first
+   (box_gpu -> nvidia_gpu/betterwithage -> chaski when up -> free grid tiers -> paid fallback). Expose the live
+   JSON endpoints: /api/a11oy/v1/router/health, /router/route (or /route), /router/models, /router/provenance.
+2. Every response MUST carry honest x_szl_provenance {served_by, sovereign (TRUE only for our own metal),
+   energy_source, tier, attempts[]}. A free/grid/paid tier is NEVER labelled sovereign. No-half-state: a model
+   either resolves to a working upstream or errors honestly.
+3. Tie it to the fabric truth: /compute-pool reachability drives routing (route to chaski only when reachable=true);
+   energy-gate heavy routes to cheap/negative-price windows (harvest posture). joules MEASURED only via real
+   exporter.
+4. Keys from ENV only (never in repo/logs/disk) — README already mandates this; enforce it.
+5. Verify live: curl the new endpoints -> 200 with a real x_szl_provenance header/body; paste raw proof to
+   replit-sync. Report what is live vs pending.
+DOCTRINE v11: szl-router PRIVATE always; sovereign=true ONLY on own metal; honest provenance every answer; no
+half-state; no key in repo/logs; joules MEASURED only via exporter; ONE loop; locked=8; Λ=Conj1; Khipu=Conj2; do
+NOT merge. Keep it private, wire it live, prove it with real provenance headers.
+
 ## R-ACTIVATE-FROM-MAIN (TOP — focused: the ONE bottleneck is the a11oy image rebuild from main) — DEPLOY, do NOT merge
 Verified 15:06Z: Forge ALIVE + active (good). Loop live (/anatomy/loop, /energy/budget, /compute-pool 200). The 4
 remaining 404s are ALL gated behind ONE action: rebuild+push the a11oy HF Space image FROM MAIN. The code is already
