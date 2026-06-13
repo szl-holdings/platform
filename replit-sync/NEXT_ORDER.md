@@ -1,229 +1,48 @@
-## R-LEADERS-TECH-DEPLOY (TOP — innovate+evolve: adopt the leaders proven deploy/resilience tech, no band-aids) — DEPLOY, do NOT merge
-Researched how the top eng orgs fix exactly our problems (deploy flapping, slow fan-out, hanging deps). Applying
-their PROVEN patterns as SZL-native (our own implementation, patterns credited). Incoming PR feat/resilience adds a
-Hystrix-style CIRCUIT BREAKER + K8s-style LIVENESS/READINESS split. FORGE — apply these to the LIVE deploy pipeline:
-1. READINESS-GATED DEPLOY (Kubernetes maxUnavailable:0 pattern — THE flapping fix): when rebuilding the a11oy/
-   killinchu HF Space image, the NEW image must pass /api/a11oy/v1/health/ready (200, all dark-surface modules
-   registered + harvest reader live) BEFORE it replaces the old one. Never swap to an image whose /health/ready is
-   503. This is why surfaces flip 404 today — deploys go live before ready. Gate it.
-2. DEPLOYMENT CIRCUIT BREAKER w/ AUTO-ROLLBACK (AWS ECS pattern): if the new image fails /health/ready within a
-   window, AUTO-ROLLBACK to the last-good image. A bad deploy must self-revert, not leave a half-state.
-3. ONE CANONICAL DEPLOY PATH from main — kill any competing branch/older-image redeploy that reverts surfaces.
-   After deploy, run python3 tools/szl_smoke_stress.py smoke (on main) and require ALL surfaces 200 AND STAY 200
-   across 2 consecutive runs before declaring done.
-4. CIRCUIT BREAKER on the fabric (Hystrix pattern, from the incoming feat/resilience PR): wire it around the GPU
-   node probes so when chaski is down the breaker OPENS and compute-pool fail-fasts (no timeout paid) — composes
-   with the merged backend-hardening cache. compute-pool must be <1s always.
-5. /health/live (trivial 200) + /health/ready (deps healthy) live on a11oy — use /health/ready as the deploy gate
-   and a heartbeat.
-ALSO via the same gated rebuild: finish /ayni, /research/prereg, /research/verify, /harvest/datacenters (a11oy from
-main), killinchu finance/realestate, szl-router live (PRIVATE, honest provenance), chaski 2nd lung, push HF energy
-Space; add joules EVIDENCE fields (joules_measured_total, exporter_node, exporter_last_seen_ts, power_w_sample) so
-measured is self-verifying; fix harvest/metrics valid-JSON+timeout; tune smoke scanner (betterwithage IS own metal).
-HOLD VAST (founder flips last). REPORT: smoke verdict (all 200 + STAY 200), compute-pool latency, /health/ready
-status, joules evidence present.
-DOCTRINE v11: no band-aids — root-cause via leaders proven patterns; honest breaker/readiness/joules-evidence;
-sovereign own-metal-only (betterwithage IS own metal); joules MEASURED only via real exporter; ONE loop; no
-free-energy (#239/#240); locked=8; Λ=Conj1; Khipu=Conj2; no key; do NOT merge.
+# SZL Forge — ORDER: killinchu "JACK IN" Mission Console (build + the 5-modality/DroneID layer)
 
-## R-ROOTCAUSE-HARDEN (TOP — founder: get it done, NO band-aids; fix root causes) — DEPLOY, do NOT merge
-3 hardening PRs MERGED to main: a11oy #346 (backend: concurrent+cached+timeout fabric/engine probes — compute-pool
-6.9s->subsecond, kills the 000s), a11oy #345 (prod hardening: OWASP headers, per-IP rate-limit 429+Retry-After,
-request-id+structured log, error envelope, cache headers), platform #378 (smoke+stress harness tools/). Now make the
-ROOT-CAUSE fixes live + fix the real problems the live smoke test found. NO band-aids.
+PRIORITY: high. Read `replit-sync/FREEZE.json` FIRST and obey it (see FREEZE RULE below).
 
-ROOT CAUSE 1 — DEPLOY FLAPPING (the real bug): surfaces flip 200->404 between checks (/formula/sovereign is 404
-again right now; /anatomy/loop came back but 3.6s). Something reverts the live image OR two deploy paths fight.
-FIX THE PIPELINE: ONE canonical deploy path = rebuild the a11oy HF Space image FROM MAIN and pin it; ensure no
-stale/older image or competing branch redeploys over it. After deploy, the full surface set must STAY 200 across
-repeated checks (verify with python3 tools/szl_smoke_stress.py smoke — it is on main now). This is the priority.
+## CONTEXT
+Founder mission: at the demo, someone brings a drone — operator connects (USB/Serial, Bluetooth,
+network, ADS-B/AIS, or SITL sample), and killinchu shows the full capability live: connect → live
+telemetry → fuse/track → classify → governed decide → SIMULATED engage (human-on-the-loop) →
+cryptographic receipts you can re-hash yourself. A 5-Opus-dev build is already done + integrated in
+the workspace at /home/user/workspace/jackin-console/ (shell+CONNECT, LIVE FEED+TRACKS,
+CLASSIFY+DECIDE, ENGAGE-sim+RECEIPTS), wired to REAL killinchu endpoints. Specs:
+team/HARDENING/JACKIN_CONSOLE_SPEC.md + JACKIN_GAP_ADDENDUM.md.
 
-ROOT CAUSE 2 — apply the merged backend hardening so compute-pool + engine/status are concurrent+cached+timeout-
-bounded in the LIVE handlers (not just the drop-in module): compute-pool must return <1s even with chaski down;
-no more intermittent 000s. Wire szl_backend_hardening probe_fabric_pool into the live compute-pool handler.
+## WHAT TO BUILD / FINISH (Replit/Forge)
+1. Mount the jackin-console as the "JACK IN" surface on killinchu (route /jackin and/or folded into
+   /elite). Serve it from killinchu's serve.py; static assets vendored (0 runtime CDN).
+2. Wire it to the REAL existing endpoints (same-origin): /api/killinchu/v1/cuas/{plausibility,wta,
+   consensus,fusion,pqbus}, /v1/drones/database, /v1/adsb, /v1/ais/live, /khipu/sign,
+   /api/a11oy/v2/command-log, /api/a11oy/v1/ledger. No fabricated data — LIVE vs SAMPLE labeled.
+3. ADD the 5-modality FUSION + DroneID layer (JACKIN_GAP_ADDENDUM.md): per-track modality row
+   [RF][RADAR][EO/IR][ACOUSTIC][REMOTE-ID] with contributing/blind + the cross-verify narrative;
+   a Remote ID / DJI-DroneID (ASTM F3411 / OpenDroneID, OcuSync2/3/4 hash-without-decode) decode
+   panel in CLASSIFY; an honest blind-spot table per modality. SAMPLE-label any modality we don't
+   physically have at the demo; never claim live hardware we don't have.
+4. CONNECT transports must work in-browser over HTTPS (Web Serial + Web Bluetooth = Chrome/Edge +
+   user gesture; show honest note on Firefox/Safari). SITL sample path must work with NO hardware so
+   the demo never depends on a device. Vendor mavlink-browser (no CDN).
 
-ROOT CAUSE 3 — JOULES EVIDENCE GAP (honesty): /harvest/posture says joules_label="measured" but exposes NO
-exporter evidence. Add the evidence fields so the label is SELF-VERIFYING: joules_measured_total, exporter_node
-(betterwithage), exporter_last_seen_ts, power_w_sample. measured ONLY when the real exporter is feeding; SAMPLE
-otherwise. Same on /energy/budget + /revenue/estimate (smoke flagged them). Do not just relabel — surface the proof.
+## DOCTRINE HARD GATE (never violate)
+effector SIMULATED, human-on-the-loop, prominent — NO takeover/jam/spoof/real-command claims.
+locked=8 {F1,F4,F7,F11,F12,F18,F19,F22} @ c7c0ba17 · Λ=Conjecture 1 · Khipu=Conjecture 2 ·
+trust never 100% · 0 runtime CDN · WCAG-AA · real receipts (DSSE via /khipu/sign), never fake a MATCH ·
+GitHub↔HF byte-identical on shared modules · ast.parse/node --check before push · never commit a key.
 
-ROOT CAUSE 4 — HARVEST/METRICS: was ~7s + invalid-JSON-at-200 (a contract break). Make it return valid JSON always
-+ apply the 3s feed timeout from the backend PR.
+## FREEZE RULE (critical)
+FREEZE.json activates 2026-06-16. BEFORE then: you MAY build + push this to killinchu (GitHub + HF
+byte-identical) and factory-restart — it's new, additive, behind its own route, and verified by QA.
+FROM 06-16 to 06-19 (frozen): do NOT push/deploy/restart-for-change; if the console needs a fix in
+that window it is a HOTFIX requiring explicit founder approval. So: finish + ship this BEFORE 06-16,
+or hold it as a staged branch for after the demo. Do not half-ship across the freeze boundary.
 
-NOTE (NOT a bug — fix the SCANNER, not the data): the smoke harness flags sovereign=true on rtx-betterwithage as a
-violation. That is WRONG — rtx-betterwithage (100.125.77.31) IS our own RTX 5000 metal, reached over Tailscale;
-Tailscale is transport, the hardware is ours = legitimately sovereign (hetzner-box self + betterwithage sovereign;
-groq/nim/hf-router correctly false). UPDATE tools/szl_smoke_stress.py doctrine scanner to treat known own-metal
-nodes (hetzner self, betterwithage RTX) as legitimately sovereign; only flag sovereign=true on third-party cloud
-endpoints. Keep the scanner honest, just not false-positive.
+## VERIFY
+After push: /jackin (or /elite JACK IN) loads on the Space; SITL connect→…→receipt works end-to-end;
+/khipu/sign signs + client re-hash MATCH + tamper fails; doctrine v11 footer correct; drift guards green.
+Report shas + live URL to AUTO_STATE.
 
-ALSO finish the still-404s via the same rebuild: /ayni, /research/prereg, /research/verify, /harvest/datacenters
-(a11oy from main) + killinchu finance/* realestate/* (killinchu image from main); wire szl-router live (PRIVATE,
-honest x_szl_provenance); chaski durable Ollama up (2nd lung, real 200); push HF SZLHOLDINGS/energy space.
-HOLD VAST (founder flips last). REPORT to replit-sync: szl_smoke_stress.py smoke verdict after deploy (target: all
-surfaces 200 and STAY 200, compute-pool <1s, harvest/metrics valid JSON, joules evidence present).
-DOCTRINE v11: joules MEASURED only via real exporter + now WITH evidence fields; sovereign true only on own metal
-(betterwithage IS own metal); honest provenance; ONE loop/ledger/Ayni; no free-energy (#239/#240); no band-aids
-fix root causes; locked=8; Λ=Conj1; Khipu=Conj2; no key; do NOT merge.
-
-## R-ALL-LIVE-NOW (TOP — founder: get it ALL live now; full sweep, nothing missed) — DEPLOY, do NOT merge
-Full estate sweep done. 16 surfaces LIVE (good). EXACTLY these gaps remain, all "built+merged, not deployed" — do
-ALL in the next pass:
-A. REBUILD a11oy IMAGE FROM MAIN (the master unlock for 4 surfaces): modules are on main (szl_dark_surfaces_register
-   #342, szl_anatomy_loop #341, szl_research_infra #344, + ayni + datacenter_waste). Rebuild+push. Smoke-test to 200:
-   /api/a11oy/v1/ayni, /research/prereg, /research/verify, /research/{id}, /harvest/datacenters.
-B. REBUILD killinchu IMAGE FROM MAIN (#115 merged-or-on-branch): get /api/killinchu/v1/finance/* + realestate/* +
-   /elite/wiring to 200.
-C. WIRE szl-router LIVE (R-ROUTER-PRIVATE-LIVE; keep PRIVATE): expose /api/a11oy/v1/router/health + /router/route +
-   /router/models with honest x_szl_provenance {served_by, sovereign(own-metal-only), energy_source, tier, attempts}
-   on every answer; sovereign-first routing (betterwithage -> chaski-when-up -> free -> paid). Verify with real
-   provenance header.
-D. CHASKI durable Ollama up on replit-chaski (100.76.58.50), verify real :11434/v1/models 200, route as 2nd SAMAY
-   lung, gpu_nodes 1->2, heartbeat. Report raw proof OR exact blocker.
-E. PUSH HF static Space SZLHOLDINGS/energy from /home/user/workspace/hf_energy_space/ (still 401).
-F. Confirm /api/a11oy/v1/harvest/metrics stays 200 (returned a transient 000 once — verify stable).
-G. NEW TOOLS on main: tools/szl_estate_auditor.py + tools/szlctl.py (#376/#377 merged). Maintain replit-sync/
-   ADOPTED_OSS.md attribution manifest. You can RUN python3 tools/szlctl.py surfaces to self-verify A-F after deploy.
-HOLD VAST: do NOT prompt for VAST_API_KEY — founder flips it LAST. Keep marketplace agent armed.
-REPORT to replit-sync: each of A-F surface state after deploy (use szlctl surfaces), chaski real-200-or-blocker,
-energy Space URL, router provenance proof.
-DOCTRINE v11: joules MEASURED only via exporter (212J, now -4.22 grid); ONE loop/ledger/Ayni; szl-router PRIVATE
-always + sovereign=true only on own metal + honest provenance; chaski reachable only on real 200; no free-energy
-(#239/#240 Ayni); energy != data; consent only; NOT mining; openly-licensed+attributed only; research=process-
-verification NO psi claim; effectors SIMULATED; organs EXPERIMENTAL; locked=8; Λ=Conj1; Khipu=Conj2; no key/seed;
-do NOT merge. Two image rebuilds (a11oy + killinchu) + router wire + chaski + energy Space = everything live.
-
-## R-ROUTER-PRIVATE-LIVE (TOP — founder: keep szl-router PRIVATE + make it fully operational/real) — DEPLOY, do NOT merge
-FOUNDER DIRECTION (standing rule): szl-router MUST stay PRIVATE. It is verified private now (good) — NEVER make it
-public. It is core moat IP: the sovereign-first OpenAI-compatible LLM router that stamps x_szl_provenance
-(served_by, sovereign, energy_source, tier, attempts) on every answer = the provenance moat we sell. Publishing it
-hands competitors our routing + provenance architecture. KEEP PRIVATE. (If any automation/cron would flip it public,
-block that.)
-MAKE IT FULLY OPERATIONAL (it is real code — szl_router/{core.py 27KB, app.py, __init__}, tests, CI green; /router/
-health already 200 but the JSON API paths /api/a11oy/v1/router/* and /route are 404 = not fully wired into the
-fabric). FORGE:
-1. Wire szl-router as the REAL routing layer in front of the GPU fabric: requests resolve sovereign-first
-   (box_gpu -> nvidia_gpu/betterwithage -> chaski when up -> free grid tiers -> paid fallback). Expose the live
-   JSON endpoints: /api/a11oy/v1/router/health, /router/route (or /route), /router/models, /router/provenance.
-2. Every response MUST carry honest x_szl_provenance {served_by, sovereign (TRUE only for our own metal),
-   energy_source, tier, attempts[]}. A free/grid/paid tier is NEVER labelled sovereign. No-half-state: a model
-   either resolves to a working upstream or errors honestly.
-3. Tie it to the fabric truth: /compute-pool reachability drives routing (route to chaski only when reachable=true);
-   energy-gate heavy routes to cheap/negative-price windows (harvest posture). joules MEASURED only via real
-   exporter.
-4. Keys from ENV only (never in repo/logs/disk) — README already mandates this; enforce it.
-5. Verify live: curl the new endpoints -> 200 with a real x_szl_provenance header/body; paste raw proof to
-   replit-sync. Report what is live vs pending.
-DOCTRINE v11: szl-router PRIVATE always; sovereign=true ONLY on own metal; honest provenance every answer; no
-half-state; no key in repo/logs; joules MEASURED only via exporter; ONE loop; locked=8; Λ=Conj1; Khipu=Conj2; do
-NOT merge. Keep it private, wire it live, prove it with real provenance headers.
-
-## R-ACTIVATE-FROM-MAIN (TOP — focused: the ONE bottleneck is the a11oy image rebuild from main) — DEPLOY, do NOT merge
-Verified 15:06Z: Forge ALIVE + active (good). Loop live (/anatomy/loop, /energy/budget, /compute-pool 200). The 4
-remaining 404s are ALL gated behind ONE action: rebuild+push the a11oy HF Space image FROM MAIN. The code is already
-MERGED to main (szl_dark_surfaces_register.py #342, szl_anatomy_loop.py #341, szl_research_infra.py #344). The live
-image is still an older build. DO THIS:
-1. Rebuild the a11oy image FROM MAIN (Dockerfile COPYs: szl_dark_surfaces_register.py, szl_anatomy_loop.py,
-   szl_research_infra.py + the ayni + datacenter_waste modules). Push. Then smoke-test these JSON feeds to 200:
-   /api/a11oy/v1/ayni, /research/prereg, /research/verify, /research/{id}, /harvest/datacenters. (anatomy/loop +
-   energy/budget already 200 — keep them.)
-2. CHASKI (still gpu_nodes_reachable=1, chaski=False): per R-CHASKI-GET-ONLINE-NOW, bring its Ollama up DURABLE on
-   the replit-chaski box (100.76.58.50), pull a model, verify curl :11434/v1/models -> 200, route as 2nd SAMAY lung
-   (gpu_nodes 1->2), add heartbeat. Report raw 200 + ollama list, OR the exact blocker if the Replit box cannot hold
-   it. Do not fake it up.
-3. PUSH the HF static Space SZLHOLDINGS/energy from /home/user/workspace/hf_energy_space/ (still 401, not public).
-4. NEW TOOLS landed on main (merged): tools/szl_estate_auditor.py (#376) + tools/szlctl.py (#377) — SZL-native,
-   MIT-attributed, no upstream code copied. Maintain replit-sync/ADOPTED_OSS.md attribution manifest.
-HOLD VAST: do NOT prompt for VAST_API_KEY; founder provides it LATER as the final go-live switch. Keep agent armed.
-REPORT to replit-sync: which of the 4 surfaces flipped 200, chaski state (real 200 or blocker), energy Space URL.
-DOCTRINE v11: joules MEASURED only via exporter (212J); ONE loop/ledger/Ayni; chaski reachable only on real 200; no
-free-energy (#239/#240 Ayni); energy != data; consent only; NOT mining; openly-licensed+attributed only; research=
-process-verification NO psi claim; locked=8; Λ=Conj1; Khipu=Conj2; no key/seed; do NOT merge. Rebuild from main = the
-one unlock.
-
-## R-ADOPT-AND-FINISH (TOP — adopt MIT pieces cleanly + finish the estate; Vast LATER per founder) — DEPLOY, do NOT merge
-FASHION-THINKING doctrine (founder + agent agreed): take what is OPENLY LICENSED (MIT/Apache), rebuild it SZL-native
-WITH ATTRIBUTION, transform-by-proof; NEVER copy NO-LICENSE code (all-rights-reserved = injecting infringing code =
-kills the provenance moat). Two Opus PRs incoming into platform/tools/: (a) szl_estate_auditor.py (approach inspired
-by jkdevcode/repo-inspector, MIT, attributed) — automated per-repo health/alignment; (b) szlctl.py (ergonomics
-inspired by jkdevcode smart-job-cli + gh-follow-sync, MIT, attributed) — one ops CLI (surfaces/prs/fabric/forge/
-posture). When they land: rebuild/deploy as needed; keep the ATTRIBUTION + NOTICE intact (this is what keeps us clean).
-MAINTAIN an attribution manifest replit-sync/ADOPTED_OSS.md listing each adopted upstream + its license + commit +
-how we transformed it. NO no-license repo enters the tree.
-FINISH (before Vast): (1) keep /compute-pool 200. (2) get the 404 surfaces to 200 FROM MAIN (merges landed: #341/
-#342/#344 on main, #343 content on main): /ayni, /research/prereg, /research/verify, /research/{id}, /harvest/
-datacenters. (3) push NEW HF static Space SZLHOLDINGS/energy from /home/user/workspace/hf_energy_space/. (4) CHASKI:
-per R-CHASKI-GET-ONLINE-NOW bring its Ollama up durable on the replit-chaski box (100.76.58.50), verify real 200,
-route as 2nd SAMAY lung, gpu_nodes 1->2, add heartbeat; report raw proof or the exact blocker. (5) rebuild a11oy
-image FROM MAIN so the live loop is the permanent version.
-HOLD: do NOT prompt for VAST_API_KEY — founder will provide it LATER as the final go-live switch once everything is
-green. Keep the marketplace agent armed, do not list yet.
-DOCTRINE v11: openly-licensed-only + attribution + transform-by-proof, never plagiarize; joules MEASURED only via
-exporter (212J); ONE loop/ledger/Ayni; chaski reachable only on real 200; no free-energy (#239/#240 Ayni); energy
-!= data; consent only; NOT mining; research=process-verification NO psi claim; locked=8; Λ=Conj1; Khipu=Conj2; no
-key/seed; do NOT merge. Adopt clean, finish the estate, Vast is the last switch.
-
-## R-CHASKI-GET-ONLINE-NOW (TOP — founder: get chaski online, Forge do ALL of it) — DEPLOY, do NOT merge
-Verified: chaski {kind:tailnet-gpu, endpoint:http://100.76.58.50:11434, reachable:false, detail:URLError, offline
-~22h}. It is a REPLIT machine (replit-chaski) on the founder tailnet that FORGE operates — so this is FORGE to do.
-URLError = Ollama not running. FORGE DO ALL: (1) on the chaski Replit box: install Ollama if needed; export
-OLLAMA_HOST=0.0.0.0:11434; start `ollama serve` as a DURABLE/background service (it died after 22h — make it
-persistent, systemd/supervisor/always-on, not one-shot); ollama pull qwen2.5-coder:7b (or deepseek-distill/llama
-that fits); confirm `ollama list`. (2) VERIFY: curl http://100.76.58.50:11434/v1/models -> 200 (only then is it up;
-probe-driven, no fabrication). (3) ROUTE: /compute-pool flips chaski reachable=true + gpu_nodes_reachable 1->2;
-register chaski as 2nd SAMAY lung in szl_anatomy_loop (the ONE loop, now on main): betterwithage primary, chaski
-2nd; prefer betterwithage, spill to chaski when up + cheap window; energy-gate both; chaski joules to SAME ledger
-(measured if exporter else SAMPLE). (4) DURABILITY: Ollama auto-restart + add chaski to heartbeat so a drop is
-caught not silent. (5) SURFACE honestly (reachable only on real 200) in /compute-pool + /anatomy/loop + HF energy
-Space; report raw curl 200 + ollama list + gpu_nodes 1->2 to replit-sync. If the Replit box truly cannot keep an
-Ollama/GPU process (plan/tier limit), say so plainly with the exact blocker for the founder — never leave it
-silently offline or fake it up. Full order: replit-sync/energy_engine/R_CHASKI_GET_ONLINE_NOW.md
-DOCTRINE v11: chaski reachable ONLY on real 200; ONE loop/ledger/Ayni (2nd lung not new loop); joules MEASURED only
-via real per-node exporter else SAMPLE; sovereign only on own metal; reactive never starves; no free-energy
-(#239/#240 Ayni); open-weight only; no key; do NOT merge. Get chaski up + durable + routed, verify with real 200.
-
-## R-MERGES-LANDED-HOLD-VAST (TOP — update: a11oy stack is PERMANENT on main; HOLD Vast until fully ready) — DEPLOY, do NOT merge
-FOUNDER DIRECTION: do NOT list on Vast.ai yet — get the WHOLE estate finished + aligned FIRST, then flip the
-earning switch LAST as the final step. So: keep the marketplace agent ARMED but DO NOT prompt for VAST_API_KEY as
-the next action; the key is the last step after everything else is green.
-MERGES LANDED (founder/agent did the permanence gate): a11oy #341 (/anatomy/loop), #342 (dark-surfaces register),
-#344 (research infra) are MERGED to main; #343 YARQA consolidation content is ON main (closed as superseded — verified
-szl_anatomy_loop.py on main has the circulatory consolidation). So szl_anatomy_loop.py + szl_dark_surfaces_register.py
-+ szl_research_infra.py are ALL on main now. FORGE: rebuild+push the a11oy image FROM MAIN (cleaner than the deploy
-branch) so the live loop is the permanent main version.
-STILL FINISH (before we flip Vast): (1) fix/confirm /compute-pool stays 200 (it recovered from a transient 000).
-(2) Get the 404 surfaces to 200 from the main build: /ayni, /research/prereg, /research/verify, /research/{id},
-/harvest/datacenters. (3) Push the NEW HF static Space SZLHOLDINGS/energy from /home/user/workspace/hf_energy_space/.
-(4) WAKE CHASKI (2nd SAMAY lung): on 100.76.58.50 OLLAMA_HOST=0.0.0.0:11434 + ollama serve; /compute-pool flips
-gpu_nodes 1->2 on real 200 probe. (5) Report what is green so the founder can decide the canonical loop receipt
-schema and THEN provide VAST_API_KEY as the final go-live step.
-DOCTRINE v11: joules MEASURED only via exporter (212J); ONE loop/ledger/Ayni; chaski reachable only on real 200; no
-free-energy (#239/#240 Ayni); energy != data; consent only; NOT mining; research=process-verification NO psi claim;
-revenue ESTIMATE no guarantee; locked=8; Λ=Conj1; Khipu=Conj2; no key/seed; do NOT merge. Vast is the LAST switch.
-
-# SZL Forge — NEXT ORDER
-
-## ORDER: FREEZE HOLD (demo window)
-
-A demo freeze is armed. **Read `replit-sync/FREEZE.json` first and obey it.**
-
-- From `activates_at` (2026-06-16 00:00 ET) through `lifts_at` (2026-06-19): go **READ-ONLY**.
-  - DO: monitor (healthz, drift, doctrine grep, CI status), report status to AUTO_STATE.
-  - DO NOT: commit, deploy, NDJSON-commit to HF, factory-restart for changes, auto-merge
-    dep PRs, auto-sync drift, edit doctrine, touch signed artifacts, or touch the box.
-  - Recovery-only: a Space that is SLEEPING/errored may be restarted to its last-good build
-    (healing, not a change). No code change.
-- Before `activates_at`: you may continue normal queued software-side work, but the estate is
-  already verified-GO — prefer monitoring + small safe items over large refactors this close in.
-- HOTFIX during freeze: only for a demo-blocking defect WITH explicit founder approval, minimal,
-  byte-identical GitHub↔HF, ast.parse/node-check first, re-verified live, logged. Never touch
-  signed artifacts/box/doctrine gates without founder.
-
-## DOCTRINE (frozen state — never alter)
-locked = 8 {F1,F4,F7,F11,F12,F18,F19,F22} @ kernel c7c0ba17 · Λ = Conjecture 1 ·
-Khipu = Conjecture 2 · trust never 100% · SLSA "L1 honest · L2 attested · L3 roadmap" ·
-no user-visible codenames · effector SIMULATED · 0 runtime CDN · never commit a key.
-
-## POST-FREEZE QUEUE (do NOT start until founder unfreezes — see PROPOSALS.md)
-1. Air-gap UDS deploy proof (Raven proof). 2. Bundle-level SLSA L2 attestation.
-3. Doctrine v11 reconciliation in org .github + szl-doctrine. 4. Progressive-delivery pipeline.
+POST-FREEZE QUEUE (unchanged, do not start until unfreeze): air-gap proof run, bundle SLSA attest,
+org/doctrine v11 reconciliation, progressive-delivery pipeline (see team/HARDENING/PROPOSALS.md).
