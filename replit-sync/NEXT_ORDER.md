@@ -1,3 +1,24 @@
+## R-FINAL-DEPLOY (TOP — ALL fixes merged to main; ONE rebuild brings the complete estate live) — go, full admin green light
+The full a11oy stack is now MERGED + PERMANENT on main (0 open PRs of mine). Final deploy: rebuild the a11oy image
+FROM MAIN once and the entire hardened, honest estate goes live:
+- #350 anatomy/loop latency fix (4.56s -> 0.6s via circuit breaker + cache; honest gpu_state:sleeping degraded
+  posture, joules SAMPLE). Verify anatomy/loop <1s live.
+- #349 joules-honesty (single-source label; "measured" only with fresh real exporter + evidence fields). Verify
+  revenue/estimate + harvest/posture show honest joules_label with evidence, never bare "measured".
+- Full resilience/observability/prod-hardening stack (#345/#346/#347/#348) — security headers, rate limit,
+  circuit breaker, /health/live + /health/ready, OpenTelemetry tracing, structured logs.
+- The loop (#341), dark surfaces (#342), research infra (#344), YARQA consolidation, killinchu verticals (#115).
+DEPLOY DISCIPLINE (leader-tech, no band-aids): readiness-gated swap (new image must pass /health/ready=200 before
+replacing old), auto-rollback if 503, ONE canonical path from main. After: run python3 tools/szl_smoke_stress.py
+--mode smoke -> target PASS (all 200, latency<2s incl anatomy/loop<1s, joules honest). Report the verdict + the
+anatomy/loop latency + the joules evidence proof.
+CONFIRM path-variants (/formula/sovereign etc serve at root not /api/a11oy/v1/ — verify intended public path is 200).
+BLOCKED-ON-FOUNDER (surface, never fake): chaski repl start (you lack the Replit boot credential); VAST_API_KEY
+(founder flips last). DISPATCH: wire FORGE_AGENT_URL in your own secret store for hands-off (your green light stands).
+DOCTRINE v11: joules MEASURED only via fresh real exporter + evidence; chaski reachable only on real 200; sovereign
+own-metal-only; szl-router PRIVATE; ONE loop; no free-energy (#239/#240); locked=8; Λ=Conj1; Khipu=Conj2; no token
+printed/committed. GREEN LIGHT, full admin — one rebuild from main = the complete estate live + fast + honest.
+
 ## R-DEPLOY-MERGED-FIXES (TOP — zoom-out done; ONE real gap + deploy the merged fixes) — go, full admin green light
 Honest zoom-out (verified live): 11/14 surfaces 200 + fast (~0.46s). Real findings:
 1. MERGED-BUT-NOT-LIVE: joules-honesty fix #349 is on main but NOT deployed (revenue/estimate joules_label=None =
