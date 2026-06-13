@@ -52,6 +52,12 @@ def estimate():
     return JSONResponse(engine.build_estimates(posture))
 
 
+@app.get("/marketplace")
+def marketplace():
+    posture = engine.fetch_posture(HARVEST_URL)
+    return JSONResponse(engine.build_marketplace(posture))
+
+
 @app.get("/thesis")
 def thesis():
     return JSONResponse(engine.build_thesis())
@@ -91,6 +97,7 @@ site <b>and</b> a paying customer. SZL's defensible margin is proven governance,
 <div class="card">
 <p><b>API</b></p>
 <p>· <a href="estimate">/estimate</a> — 4 honest revenue ESTIMATE streams (JSON)</p>
+<p>· <a href="marketplace">/marketplace</a> — GPU-rental ESTIMATE (settle to count; not mining) (JSON)</p>
 <p>· <a href="thesis">/thesis</a> — market comparables + SZL differentiator (JSON)</p>
 <p>· <a href="healthz">/healthz</a> — liveness (JSON)</p>
 </div>
