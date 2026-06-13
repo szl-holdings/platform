@@ -1,34 +1,19 @@
 {
-  "order_sha": "7c275a96f52ca94fa89ca6d3f74ccf71ec690141",
+  "order_sha": "a724f0dcb536ab106dca4cb56ebfd0568804debd",
   "order_path": "replit-sync/NEXT_ORDER.md",
-  "state": "done",
-  "seen_at": "2026-06-13T14:43:58Z",
-  "updated_at": "2026-06-13T14:43:58Z",
-  "idle": false,
-  "order_kind": "freeze-hold",
-  "dispatch_mode": "monitor-hold",
-  "freeze_ack": {
-    "acknowledged_by": "Forge (Replit-side, founder-invoked, manual)",
-    "freeze_active": true,
-    "activates_at": "2026-06-16T00:00:00-04:00",
-    "lifts_at": "2026-06-19T23:59:00-04:00",
-    "reason": "Defense Unicorns Warhacker demo freeze - lock verified-GO state (doctrine v11, locked=8 @ c7c0ba17).",
-    "posture": "Pre-freeze now: normal work allowed, preferring monitor + small safe items. From activates_at to lifts_at: READ-ONLY (monitor + recovery-restart of sleeping/errored Space to last-good build only). NO commits/deploys/HF-NDJSON/auto-merge/auto-sync/doctrine/box/signed-artifact changes during freeze. Hotfix only with explicit founder approval.",
-    "frozen_heads_noted": {
-      "a11oy": "7105f28e",
-      "killinchu": "74d03688",
-      "anatomy": "f6d15087",
-      "lutar-lean": "b675cd84",
-      "uds-bundles": "729e6de8",
-      "platform": "f30e09ef"
-    }
-  },
-  "doctrine": "v11 | locked=8 {F1,F4,F7,F11,F12,F18,F19,F22} @ kernel c7c0ba17 | Lambda=Conjecture 1 | Khipu=Conjecture 2 | trust never 100% | never commit a key",
-  "post_freeze_queue": [
-    "Air-gap UDS deploy proof (Raven proof)",
-    "Bundle-level SLSA L2 attestation",
-    "Doctrine v11 reconciliation in org .github + szl-doctrine",
-    "Progressive-delivery pipeline"
+  "state": "processing",
+  "seen_at": "2026-06-13T15:06:33Z",
+  "actionable": [
+    "szl_research_infra.py are ALL on main now. FORGE: rebuild+push the a11oy image FROM MAIN (cleaner than the deploy",
+    "From `activates_at` (2026-06-16 00:00 ET) through `lifts_at` (2026-06-19): go **READ-ONLY**.",
+    "DO: monitor (healthz, drift, doctrine grep, CI status), report status to AUTO_STATE.",
+    "DO NOT: commit, deploy, NDJSON-commit to HF, factory-restart for changes, auto-merge",
+    "Recovery-only: a Space that is SLEEPING/errored may be restarted to its last-good build",
+    "Before `activates_at`: you may continue normal queued software-side work, but the estate is",
+    "Air-gap UDS deploy proof (Raven proof). 2. Bundle-level SLSA L2 attestation.",
+    "Doctrine v11 reconciliation in org .github + szl-doctrine. 4. Progressive-delivery pipeline."
   ],
-  "supersedes": "prior order b3bfddab (idle seed, marked done 2026-06-13T12:00Z). This ack registers the FREEZE HOLD order the box auto-loop poller had not yet recorded (idle-seed gap)."
+  "gated_skipped": [
+    "HOTFIX during freeze: only for a demo-blocking defect WITH explicit founder approval, minimal,"
+  ]
 }
