@@ -1,0 +1,135 @@
+# docker-compose.yml — SZL On-Site Sovereign Node
+# Crusoe-style: "move compute to the energy."
+#
+# DOCTRINE:
+#   - No credentials committed. Set CONSENT_TOKEN and HOME_URL via .env file
+#     or Docker secrets. NEVER commit a .env file with real values.
+#   - GPU passthrough requires the NVIDIA Container Toolkit on the host.
+#     Without --gpus, joules stay SAMPLE/ESTIMATE (honest and safe to run).
+#   - node_thermal_agent binds to BIND_ADDR. In production, set this to your
+#     Tailscale IP (e.g. 100.x.x.x) so only the tailnet can read GPU metrics.
+#   - node_agent calls HOME_URL only when CONSENT_TOKEN is set and valid.
+#
+# Setup:
+#   1. Copy .env.example to .env and fill in the values.
+#   2. docker compose up   (add --gpus all for MEASURED joules)
+#
+# Verify harvesting:
+#   curl http://localhost:9101/gpu          # GPU telemetry
+#   curl http://localhost:9101/health       # liveness
+#   docker compose logs node-agent         # see posture + receipts
+
+version: "3.9"
+
+x-common-env: &common-env
+  NODE_LAT: ${NODE_LAT:-52.5}
+  NODE_LON: ${NODE_LON:-13.4}
+  SITE_NAME: ${SITE_NAME:-onsite-node-1}
+  MAX_JOULES_PER_WINDOW: ${MAX_JOULES_PER_WINDOW:-3600}
+  PYTHONPATH: "/app/agentic-gpu:/app/onsite-node"
+
+services:
+
+  # ------------------------------------------------------------------
+  # node-agent: the sovereign compute loop.
+  # Polls local energy posture, runs bounded workloads during surplus
+  # windows, signs receipts, posts result-hashes home (consent-gated).
+  # ------------------------------------------------------------------
+  node-agent:
+    build:
+      context: ../..
+      dockerfile: apps/onsite-node/Dockerfile
+    image: szl-onsite-node:latest
+    container_name: szl-node-agent
+    restart: unless-stopped
+    # GPU passthrough: remove if no GPU on this node
+    # (joules stay SAMPLE/ESTIMATE without it — honest and safe)
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: all
+              capabilities: [gpu]
+    environment:
+      <<: *common-env
+      HOME_URL: ${HOME_URL:-}
+      # CONSENT_TOKEN and RECEIPT_SIGN_KEY come from secrets below
+      NODE_LOOP_INTERVAL: ${NODE_LOOP_INTERVAL:-60}
+    secrets:
+      - consent_token
+      - receipt_sign_key
+    # Inject secrets into env via entrypoint (operator wires this)
+    # The entrypoint reads CONSENT_TOKEN / RECEIPT_SIGN_KEY from env.
+    # With Docker secrets, set them in the secret files (see below).
+    command: >
+      sh -c '
+        [ -f /run/secrets/consent_token ] &&
+          export CONSENT_TOKEN="$(cat /run/secrets/consent_token)";
+        [ -f /run/secrets/receipt_sign_key ] &&
+          export RECEIPT_SIGN_KEY="$(cat /run/secrets/receipt_sign_key)";
+        python3 /app/onsite-node/node_agent.py --loop
+          --lat "${NODE_LAT:-52.5}"
+          --lon "${NODE_LON:-13.4}"
+          --interval "${NODE_LOOP_INTERVAL:-60}"
+      '
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+  # ------------------------------------------------------------------
+  # node-thermal-agent: GPU telemetry HTTP endpoint on the tailnet.
+  # Exposes /gpu and /health for the home app box to read via Tailscale.
+  # This is the GPU_THERMAL_URL that closes the app↔GPU split.
+  # ------------------------------------------------------------------
+  node-thermal:
+    build:
+      context: ../..
+      dockerfile: apps/onsite-node/Dockerfile
+    image: szl-onsite-node:latest
+    container_name: szl-node-thermal
+    restart: unless-stopped
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: all
+              capabilities: [gpu]
+    environment:
+      <<: *common-env
+      BIND_ADDR: ${BIND_ADDR:-0.0.0.0}
+      BIND_PORT: ${BIND_PORT:-9101}
+    ports:
+      # Bind to localhost or Tailscale IP on the host.
+      # In production: set BIND_ADDR to 100.x.x.x (Tailscale) and
+      # remove the ports section, relying on Tailscale routing.
+      - "${BIND_ADDR:-0.0.0.0}:${BIND_PORT:-9101}:${BIND_PORT:-9101}"
+    command: >
+      python3 /app/onsite-node/node_thermal_agent.py
+        --addr "${BIND_ADDR:-0.0.0.0}"
+        --port "${BIND_PORT:-9101}"
+    healthcheck:
+      test: ["CMD", "curl", "-sf", "http://localhost:${BIND_PORT:-9101}/health"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+    logging:
+      driver: json-file
+      options:
+        max-size: "5m"
+        max-file: "2"
+
+# ------------------------------------------------------------------
+# Docker secrets — set these files at runtime, NEVER commit real values
+# Create the secret files on the host:
+#   echo "your-signed-consent-token" > /run/secrets/consent_token
+#   echo "your-receipt-signing-key"  > /run/secrets/receipt_sign_key
+# ------------------------------------------------------------------
+secrets:
+  consent_token:
+    file: ${CONSENT_TOKEN_FILE:-./secrets/consent_token.txt}
+  receipt_sign_key:
+    file: ${RECEIPT_SIGN_KEY_FILE:-./secrets/receipt_sign_key.txt}
