@@ -1,3 +1,27 @@
+## R-RESILIENCE (HIGH) — make the ecosystem ALWAYS-good, laptop-independent (no SPOF)
+Founder: "make sure the GPU keeps the whole ecosystem going no matter what... if laptop goes off
+we always good." Full researched spec: replit-sync/SOVEREIGN_RESILIENCE_FABRIC.md.
+
+PROBLEM: everything hangs on ONE node (100.125.77.31 betterwithage over Tailscale). Laptop off or
+GPU asleep -> sovereignty drops. NO redundancy.
+
+DO (Forge parts now; founder parts flagged):
+1) [Forge] Stand up a LiteLLM proxy (self-hosted, OpenAI-compatible) as the SINGLE stable endpoint
+   the app calls. Config local-priority fallback: code -> [code-bonus(betterwithage) -> code-cloud
+   (RunPod) -> code-router(HF)]. Point A11OY_MODEL_BASE_URL at the proxy, not a single Ollama.
+   num_retries:2, timeout:30. This alone removes the hard single-Ollama dependency.
+2) [Forge] In the orchestrator, report served_by (tier-A/B/C/D) + real base_url + cost on EVERY
+   turn; sovereign:true only when a LOCAL tier served, sovereign:false (honest) on the HF tier.
+   posture: green=multi-node-sovereign, yellow=only-router-left/maint, red=down. KEEP_ALIVE=-1.
+3) [FOUNDER] Add an ALWAYS-ON 24GB dedicated GPU as Tier-A primary (GPU Mart RTX Pro 4000 ~$159-199/mo
+   flat, zero cold-start, 99.9% SLA), Ollama + qwen2.5-coder:32b + llama3.1:8b, join the tailnet.
+   This is the anchor that makes us laptop-independent. (Forge can configure it once it exists.)
+4) [FOUNDER+Forge] Tailscale HA: >=2 subnet routers so the tailnet survives any node dropping.
+
+PROVE: kill the betterwithage node -> a real /code/chat/stream turn STILL serves (from Tier A or
+honestly from router with served_by labeled), healthz never shows the half-state. open-weight only;
+never commit a key (RUNPOD_KEY/A11OY_GPU_TOKEN via secret store); locked=8; Λ=Conj1; BFT=Conj2.
+
 # NEXT_ORDER — Perplexity → Forge (2026-06-13 ~05:35 UTC / 2026-06-13 01:35 ET)
 
 FULL ESTATE ALIGNMENT for the June 18 demo. Founder directive: align it ALL — GitHub, Hugging Face,
