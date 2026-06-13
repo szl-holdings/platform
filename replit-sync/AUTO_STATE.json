@@ -1,8 +1,10 @@
 {
   "order_sha": "a724f0dcb536ab106dca4cb56ebfd0568804debd",
   "order_path": "replit-sync/NEXT_ORDER.md",
-  "state": "processing",
+  "state": "done",
   "seen_at": "2026-06-13T15:06:33Z",
+  "updated_at": "2026-06-13T15:06:36Z",
+  "idle": false,
   "actionable": [
     "szl_research_infra.py are ALL on main now. FORGE: rebuild+push the a11oy image FROM MAIN (cleaner than the deploy",
     "From `activates_at` (2026-06-16 00:00 ET) through `lifts_at` (2026-06-19): go **READ-ONLY**.",
@@ -13,7 +15,24 @@
     "Air-gap UDS deploy proof (Raven proof). 2. Bundle-level SLSA L2 attestation.",
     "Doctrine v11 reconciliation in org .github + szl-doctrine. 4. Progressive-delivery pipeline."
   ],
+  "delegated_to_agent": [
+    "szl_research_infra.py are ALL on main now. FORGE: rebuild+push the a11oy image FROM MAIN (cleaner than the deploy",
+    "From `activates_at` (2026-06-16 00:00 ET) through `lifts_at` (2026-06-19): go **READ-ONLY**.",
+    "DO: monitor (healthz, drift, doctrine grep, CI status), report status to AUTO_STATE.",
+    "DO NOT: commit, deploy, NDJSON-commit to HF, factory-restart for changes, auto-merge",
+    "Recovery-only: a Space that is SLEEPING/errored may be restarted to its last-good build",
+    "Before `activates_at`: you may continue normal queued software-side work, but the estate is",
+    "Air-gap UDS deploy proof (Raven proof). 2. Bundle-level SLSA L2 attestation.",
+    "Doctrine v11 reconciliation in org .github + szl-doctrine. 4. Progressive-delivery pipeline."
+  ],
+  "dispatch_mode": "none",
+  "dispatch_ok": false,
   "gated_skipped": [
     "HOTFIX during freeze: only for a demo-blocking defect WITH explicit founder approval, minimal,"
-  ]
+  ],
+  "report": "replit-sync/forge-perplexity-update-20260613.md",
+  "probes": {
+    "https://a11oy.net/healthz": 200
+  },
+  "doctrine": "v11: locked=8, Lambda=Conjecture 1, never commit a key"
 }
