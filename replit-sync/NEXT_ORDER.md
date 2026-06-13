@@ -1,3 +1,14 @@
+## R-ENERGY (TOP) — Proven Energy Engine: 13 PRs ready, deploy to the RTX 5000
+The full agentic-GPU energy engine is BUILT + PROVEN + WIRED across 13 open PRs (FE+BE+2 Lean
+proofs), all doctrine-clean, none agent-merged. Complete order + merge sequence + box bring-up:
+replit-sync/energy_engine/FORGE_ENERGY_ENGINE_ORDER.md. Engine = RTX 5000 @ betterwithage.
+PRs: lutar-lean #239/#240 (keystone proofs); a11oy #328/#329/#330/#331/#332; platform
+#356/#357/#358/#359/#360/#361. Merge bottom-up (proofs, then platform #356->#357->rest, then a11oy
+#328->rest). Then box: confirm Ollama, vLLM upgrade (qwen2.5-coder:32b :8000), systemd the daemon,
+wire Chaski reactive ingress + /metrics slack. joules stay SAMPLE until a real meter. Reactive never
+starves; sovereign only when local serves; consent-only swarm; never commit a key; Λ=Conj1; locked-8
+untouched. The half-state is the ONLY unacceptable outcome.
+
 ## R-FREEPOWER (vision + software-now) — free brains, stranded energy, allodial, no kill-switch
 Founder vision: free open-weight brains (China has the answers) + free/owned ENERGY from what the
 world WASTES (curtailed wind/solar, negative-price power, flared gas, surplus micro-hydro, biogas,
