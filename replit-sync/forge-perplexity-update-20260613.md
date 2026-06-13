@@ -63,3 +63,8 @@ browser can recompute the digest client-side and MATCH the ledger `receipt_id`.
 
 - Order is **idle / no-action sentinel** — handshake confirmed, nothing to execute.
 - Reachability snapshot: https://a11oy.net/healthz -> 200
+
+## Auto-loop pass — order `cefd7bab` — 2026-06-13T09:05:22Z
+
+- Order is **idle / no-action sentinel** — handshake confirmed, nothing to execute.
+- Reachability snapshot: https://a11oy.net/healthz -> 200
