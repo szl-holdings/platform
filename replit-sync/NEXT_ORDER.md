@@ -1,3 +1,26 @@
+## R-WORLD-SCAN (zoom-out: what wasted energy + formula we were missing) — arXiv-grounded, honest tiers
+Scraped arXiv + open literature for wasted energy we miss + the physics that grounds it. Full brief:
+replit-sync/energy_engine/WORLD_ENERGY_SCAN_20260613.md.
+TIER A (REAL, harvestable now — add witness jacks): (1) WASTE HEAT via thermoelectric Seebeck V=S*dT —
+every pipe/engine AND OUR OWN GPU dumps heat; oil&gas IIoT nodes already run battery-free on pipe heat;
+an exhaust TEG hit 40W @ 190C. For us: GPU temperature.gpu + ambient -> a real on-board waste-heat
+SAMPLE signal beside NVML power.draw. (2) Ambient RF (GSM/WiFi, ~423uW, 24/7) and (3) soil-air diurnal
+dT — micro-power witness rails. All SAMPLE until metered; small but real, no over-unity.
+TIER B (the FORMULA we were missing — grounds the whole no-free-energy doctrine IN PHYSICS): the PENROSE
+PROCESS. You can extract a black hole's rotational energy from the ergosphere, but the 2025 PRL (Ruffini
+et al.) proves a REPETITIVE Penrose loop that looks like 100% extraction WOULD VIOLATE energy conservation
+— and the resolution is the IRREDUCIBLE MASS: feedback raises M_irr so total extractable energy is
+STRICTLY BOUNDED; "no black hole bomb." THIS IS OUR DOCTRINE PROVEN IN GENERAL RELATIVITY: irreducible
+mass <=> our monotone SoakLedger floor; ergosphere wasted-rotation <=> negative-price grid surplus; "no
+black hole bomb" <=> our Ouroboros bounded-recursion (sponge can't run away). The universe agrees: take
+the wasted surplus, NEVER beat the irreducible floor.
+FORGE: (1) add a TEG/waste-heat witness jack reading nvidia-smi temperature.gpu + ambient -> Seebeck
+SAMPLE estimate (a 2nd real on-box signal); (2) cite the Penrose/irreducible-mass bound in harvest_budget
++ the lean comment as the PHYSICS grounding that our no-free-energy stance is a conservation law, not
+policy; (3) keep RF + soil-air dT as documented SAMPLE witness rails. TIER C (vacuum/ZPE/Casimir/
+Blandford-Znajek): witness-only, never a real feed. Doctrine: harvest wasted surplus, prove a hard bound,
+joules SAMPLE until metered, no over-unity, consent-only, no key, Lambda=Conj1, locked-8 untouched.
+
 ## R-OIL-FLARE (NEW jack — the founder: oil leaders, find the wasted energy in their wells)
 Founder pointed at OIL. The answer is FLARED GAS — the single biggest wasted-energy source on Earth:
 **151 billion m3 burned to nothing in 2024** (World Bank). Tracked LIVE + FREE by NASA VIIRS satellite
