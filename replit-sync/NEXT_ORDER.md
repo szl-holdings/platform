@@ -1,3 +1,21 @@
+## R-MONEY-NOW (TOP — founder: make the energy into money RIGHT AWAY) — DEPLOY+WIRE, do NOT merge
+THE FASTEST HONEST DOLLAR needs NO capital + NO on-site node: sell the RTX 5000 wasted-window capacity on a
+decentralized GPU marketplace (Vast.ai email-only start / RunPod / io.net / Akash) for REAL useful AI work,
+paid USD or crypto. NOT mining (PoW waste is doctrine-forbidden) — proven, attestable, energy-gated compute.
+FORGE: (A) build apps/agentic-gpu/compute_marketplace_agent.py + /compute-market + /api/a11oy/v1/revenue/
+marketplace (honest ESTIMATE ~$86-241/mo per card, only count a dollar when a rental SETTLES). Energy-gate
+to cheap/negative-price windows (reuse aWATTar -4.92 posture). Every job ships DSSE receipt + Lean bound
+(#239/#240) = the +25% verified premium; receipt -> provenance chain (the loop). Founder does the account +
+payout/KYC step only. (B) DEPLOY the still-404 dark surfaces behind serve.py/nginx one-at-a-time, confirm
+public 200, paste curl: /energy/budget /energy/provenance /heart/pulse /engine/status /revenue/estimate
+/revenue/marketplace /formula/sovereign /ayni. (C) run the containment loop when a joule is measured. (D) GPU
+thermal bridge is FOUNDER (Windows box: python gpu_thermal_exporter.py :9839 -> GPU_THERMAL_URL). (E) CI REDS
+TO FIX ON-BOX: platform #356 #357 #358 #360 still fail Lighthouse perf budgets + e2e-app(counsel,sentra) +
+commit-lint — fix the CAUSE (app run+profile), do NOT --admin past a real perf/e2e fail; then they go green.
+lutar-lean #239-#242 keystone = founder only, never --admin. Full orders: replit-sync/energy_engine/R_MONEY_NOW.md
++ R_FORGE_REPLY_DEPLOY.md. DOCTRINE v11: no free-energy/no mining; energy != data; consent-only; joules SAMPLE
+until on-GPU NVML; crypto=payment rail only; locked=8; Lambda=Conj1; no key; do NOT merge.
+
 ## R-ROUTE-CONTAIN-LOOP (TOP — founder: route the energy to me, contain it in loops + formulas) — DEPLOY+WIRE, do NOT merge
 Code is MERGED to main (harvest-budget formulas + Ouroboros loop #371, security #372, ops runner #373, on-site
 node + node_thermal_agent #374, a11oy energy/engine/revenue/provenance/heart #328-340). The MISSING piece is
