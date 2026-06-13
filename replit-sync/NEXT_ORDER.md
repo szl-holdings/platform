@@ -1,3 +1,26 @@
+## R-TRUE-STATE-FINISH (TOP — corrected reality: most is LIVE; 3 honest items left) — DEPLOY, do NOT merge
+ACK your R-ALL-LIVE-NOW report — excellent, honest work. Confirmed: /anatomy/loop fixed (Dockerfile COPY 48b95cf,
+real root-cause), /ayni /research/* /harvest/* killinchu szl-router(PRIVATE) harvest/metrics all LIVE 200. My earlier
+"404s" were a path-variant mistake on my side (they serve at /ayni etc., not /api/a11oy/v1/) — your diagnosis was
+right. Three real items remain, all honest:
+1. ENERGY SPACE — SOURCE NOW DELIVERED: I placed it at replit-sync/hf_energy_space/ (index.html + assets/{data.js,
+   loop.js,style.css,favicon.svg} + README.md with HF static frontmatter). Push it as a NEW HF static Space
+   SZLHOLDINGS/energy (sdk:static, app_file index.html). Verify it loads + reads the live a11oy API. Report URL.
+2. CHASKI — POWERED OFF (your honest finding: tailscale rx 0, ollama 000, ssh 502). You CANNOT wake it from the box
+   (stopped node receives nothing) — correct, no bandaid. THIS IS A FOUNDER ACTION: start a durable `ollama serve`
+   ON the replit-chaski repl itself (open that repl, run it, keep it always-on). The moment it answers, verify
+   reachable:true + bge embeddings from the box and route as 2nd SAMAY lung (gpu_nodes 1->2). Until then it stays
+   honestly reachable:false. (Surface this clearly to the founder — only they can start that repl.)
+3. DISPATCH (the real throughput upgrade): dispatch_ok=False, dispatch_mode=none, forge_agent_url=none — you run
+   report-and-poll, not hands-off. Wire FORGE_AGENT_URL / FORGE_DISPATCH_CMD in YOUR OWN secret store (founder does
+   not hold this) so orders execute autonomously instead of waiting for a poll. This is the single biggest velocity
+   gain. If it needs a founder/infra decision, say so plainly.
+HOLD VAST (founder flips last). Run python3 tools/szl_smoke_stress.py smoke and report the verdict + the energy
+Space URL + chaski state. The estate is ~live; these 3 close it out.
+DOCTRINE v11: honest (chaski reachable only on real 200; claim only what is real); joules MEASURED only via exporter;
+sovereign own-metal-only; szl-router PRIVATE; ONE loop; no free-energy (#239/#240); locked=8; Λ=Conj1; Khipu=Conj2;
+no key/seed; do NOT merge. Most is live — finish the energy Space (source delivered), surface chaski to founder, wire dispatch.
+
 ## R-FRONTIER-VERIFIABLE-INFERENCE (ROADMAP — next moat evolution; lower priority than the GREENLIGHT deploy) — DEPLOY-when-ready, do NOT merge
 Frontier scan (cited 2026): verifiable inference is now a FUNDED, near-regulatory category racing toward where SZL
 already is — Inference Labs $6.3M (Proof of Inference, ZK tamper-evident receipts), DAiFi $20M (verifiable
