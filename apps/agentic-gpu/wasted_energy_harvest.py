@@ -28,6 +28,17 @@ import datetime
 from dataclasses import dataclass, field, asdict
 from typing import Optional
 
+# ---------------------------------------------------------------------------
+# Security layer — import defensively so the module still works standalone
+# if harvest_security is not yet deployed alongside it.
+# ---------------------------------------------------------------------------
+try:
+    from harvest_security import safe_get as _secure_get, EgressDenied
+    _SECURITY_ENABLED = True
+except ImportError:  # pragma: no cover — fallback for standalone use
+    _secure_get = None  # type: ignore[assignment]
+    _SECURITY_ENABLED = False
+
 UA = {"User-Agent": "szl-wasted-energy-harvest/1.0 (+https://a11oy.net)"}
 TIMEOUT = 12
 
@@ -42,11 +53,35 @@ POSTURE_RANK = {
 
 
 def _get_json(url: str) -> Optional[object]:
-    """Best-effort GET → JSON. Returns None on any failure (honest: feed unreachable)."""
+    """Best-effort GET → JSON.
+
+    When ``harvest_security`` is available the request is routed through
+    ``safe_get``, which enforces the egress allowlist (anti-SSRF), IP
+    resolution checks, per-host rate limiting, and the secret-leak guard
+    before a single byte leaves the host.
+
+    Falls back to the original bare ``urllib`` path only when
+    ``harvest_security`` is absent (standalone / legacy mode), so the module
+    continues to work without the security layer present.
+
+    Returns None on any non-fatal failure (feed unreachable, non-JSON body,
+    rate-limit / empty response).  Never raises under normal operation.
+    """
+    if _SECURITY_ENABLED:
+        try:
+            return _secure_get(url)
+        except Exception:
+            # EgressDenied and other security exceptions are non-fatal here
+            # so that posture aggregation can continue with remaining feeds.
+            return None
+    # --- fallback: original bare path (standalone / legacy mode) ---
     try:
         req = urllib.request.Request(url, headers=UA)
         with urllib.request.urlopen(req, timeout=TIMEOUT) as r:
-            return json.loads(r.read().decode("utf-8", "replace"))
+            body = r.read().decode("utf-8", "replace").strip()
+        if not body:
+            return None
+        return json.loads(body)
     except Exception:
         return None
 
@@ -163,6 +198,112 @@ def jack_open_meteo_forecast(lat: float = 52.5, lon: float = 13.4) -> FeedReadin
     outlook = round(wind_score + solar_score, 1)
     return FeedReading("open_meteo_forecast", True, True, outlook, "surplus_outlook_0_100",
                        f"next6h wind~{sum(ws)/len(ws):.0f}km/h solar~{(sum(sr)/len(sr)) if sr else 0:.0f}W/m2")
+
+
+# Energy-Charts covers 40+ European countries/zones from ONE no-key endpoint.
+WORLD_ZONES = ["de", "fr", "es", "it", "pl", "nl", "be", "ch", "at", "cz",
+               "dk", "no", "se", "fi", "pt", "gr", "ro", "hu", "sk", "ie"]
+
+
+def scan_world_renshare(zones: Optional[list] = None, cap: int = 8) -> dict:
+    """FOLLOW-THE-WIND scanner: find which country has the highest renewable share
+    of load right now (the deepest surplus = best place to route batch work).
+    Free, no key (Energy-Charts). Caps the number of zones probed per call to be
+    polite to the free endpoint. Returns {zone: share} for reachable zones +
+    the best zone."""
+    zones = (zones or WORLD_ZONES)[:cap]
+    shares: dict = {}
+    for z in zones:
+        d = _get_json(f"https://api.energy-charts.info/ren_share?country={z}")
+        if isinstance(d, list) and d and isinstance(d[0], dict):
+            data = d[0].get("data")
+            if data:
+                shares[z] = round(float(data[0]), 1)
+    best = max(shares, key=shares.get) if shares else None
+    return {"shares": shares, "best_zone": best,
+            "best_share": shares.get(best) if best else None,
+            "reachable": len(shares)}
+
+
+def jack_elexon_uk() -> FeedReading:
+    """UK Elexon BMRS live fuel mix (MW), no key. Nuclear baseload + wind + negative
+    interconnector exports (INT* < 0 = UK dumping surplus abroad = wasted-energy tell)."""
+    d = _get_json("https://data.elexon.co.uk/bmrs/api/v1/datasets/FUELINST?format=json")
+    rows = d.get("data") if isinstance(d, dict) else (d if isinstance(d, list) else None)
+    if not rows:
+        return FeedReading("elexon_uk_fuelmix", bool(d), False, note="reachable, no parse")
+    last = {}
+    for r in rows[-40:]:
+        last[r.get("fuelType")] = r.get("generation")
+    neg_exports = sum(v for k, v in last.items() if k and k.startswith("INT") and isinstance(v, (int, float)) and v < 0)
+    nuclear = last.get("NUCLEAR")
+    return FeedReading("elexon_uk_fuelmix", True, True, nuclear, "MW (nuclear)",
+                       f"neg_interconnector_exports={neg_exports}MW (surplus dumped abroad)")
+
+
+# Marquee global wasted-energy sites the founder named + the world's strongest resources.
+# Open-Meteo gives wind + ocean/tidal current for ANY lat/lon, free, no key — so we can jack
+# into ANY country's wasted wind/water (Nova Scotia, Russia, China, anywhere).
+GLOBAL_SITES = {
+    "bay_of_fundy_ns": (45.3, -64.4),   # Bay of Fundy, Nova Scotia — strongest tides on Earth
+    "north_sea_wind": (56.0, 3.0),       # North Sea offshore wind
+    "gansu_china_wind": (40.0, 97.0),    # Gansu wind corridor, China
+    "kola_russia": (69.0, 33.0),         # Kola Peninsula, Russia — wind + hydro
+    "patagonia_wind": (-51.0, -69.0),    # Patagonia — fierce constant wind
+    "pentland_firth_uk": (58.7, -3.1),   # Pentland Firth — top UK tidal site
+}
+
+
+def jack_tidal_current(lat: float = 45.3, lon: float = -64.4, name: str = "bay_of_fundy_ns") -> FeedReading:
+    """Open-Meteo Marine API (free, no key): ocean/tidal current velocity. The Bay of
+    Fundy (default) has the highest tides on Earth — a massive untapped wasted-energy
+    resource. Higher current = more harvestable tidal flow. Honest: this is a RESOURCE
+    signal (how much flow is there), NOT a claim that we are extracting it."""
+    d = _get_json(
+        f"https://marine-api.open-meteo.com/v1/marine?latitude={lat}&longitude={lon}"
+        f"&hourly=ocean_current_velocity")
+    if not d or "hourly" not in d:
+        return FeedReading(f"tidal_{name}", False, False, note="unreachable")
+    v = [x for x in (d["hourly"].get("ocean_current_velocity") or [])[:6] if x is not None]
+    if not v:
+        return FeedReading(f"tidal_{name}", True, False, note="no current data")
+    avg = sum(v) / len(v)
+    return FeedReading(f"tidal_{name}", True, True, round(avg, 2), "km/h current",
+                       f"peak6h={max(v):.1f} (tidal flow resource @ {name})")
+
+
+def jack_site_wind(lat: float, lon: float, name: str) -> FeedReading:
+    """Open-Meteo wind@100m at any global site (free, no key). High wind = surplus wind
+    energy at that location — where a consented node could soak it locally."""
+    d = _get_json(
+        f"https://api.open-meteo.com/v1/forecast?latitude={lat}&longitude={lon}"
+        f"&hourly=wind_speed_100m")
+    if not d or "hourly" not in d:
+        return FeedReading(f"wind_{name}", False, False, note="unreachable")
+    w = [x for x in (d["hourly"].get("wind_speed_100m") or [])[:6] if x is not None]
+    if not w:
+        return FeedReading(f"wind_{name}", True, False, note="no wind data")
+    avg = sum(w) / len(w)
+    return FeedReading(f"wind_{name}", True, True, round(avg, 1), "km/h wind@100m",
+                       f"peak6h={max(w):.0f} (wind resource @ {name})")
+
+
+def scan_global_resources() -> dict:
+    """FOLLOW-THE-WIND-AND-WATER: scan the marquee global sites for the strongest live
+    wind + tidal resource right now. Free, no key. Returns each site's wind + tidal
+    reading and the best wind site. This is WHERE a consented swarm node would harvest."""
+    out = {}
+    for name, (lat, lon) in GLOBAL_SITES.items():
+        w = jack_site_wind(lat, lon, name)
+        out[name] = {"wind_kmh": w.value, "reachable": w.reachable}
+    # tidal for the two big tidal sites
+    for name in ("bay_of_fundy_ns", "pentland_firth_uk"):
+        lat, lon = GLOBAL_SITES[name]
+        t = jack_tidal_current(lat, lon, name)
+        out.setdefault(name, {})["tidal_current_kmh"] = t.value
+    winds = {k: v["wind_kmh"] for k, v in out.items() if v.get("wind_kmh") is not None}
+    best = max(winds, key=winds.get) if winds else None
+    return {"sites": out, "best_wind_site": best, "best_wind_kmh": winds.get(best) if best else None}
 
 
 def jack_caiso() -> FeedReading:
