@@ -1,3 +1,43 @@
+## R-ROOTCAUSE-HARDEN (TOP — founder: get it done, NO band-aids; fix root causes) — DEPLOY, do NOT merge
+3 hardening PRs MERGED to main: a11oy #346 (backend: concurrent+cached+timeout fabric/engine probes — compute-pool
+6.9s->subsecond, kills the 000s), a11oy #345 (prod hardening: OWASP headers, per-IP rate-limit 429+Retry-After,
+request-id+structured log, error envelope, cache headers), platform #378 (smoke+stress harness tools/). Now make the
+ROOT-CAUSE fixes live + fix the real problems the live smoke test found. NO band-aids.
+
+ROOT CAUSE 1 — DEPLOY FLAPPING (the real bug): surfaces flip 200->404 between checks (/formula/sovereign is 404
+again right now; /anatomy/loop came back but 3.6s). Something reverts the live image OR two deploy paths fight.
+FIX THE PIPELINE: ONE canonical deploy path = rebuild the a11oy HF Space image FROM MAIN and pin it; ensure no
+stale/older image or competing branch redeploys over it. After deploy, the full surface set must STAY 200 across
+repeated checks (verify with python3 tools/szl_smoke_stress.py smoke — it is on main now). This is the priority.
+
+ROOT CAUSE 2 — apply the merged backend hardening so compute-pool + engine/status are concurrent+cached+timeout-
+bounded in the LIVE handlers (not just the drop-in module): compute-pool must return <1s even with chaski down;
+no more intermittent 000s. Wire szl_backend_hardening probe_fabric_pool into the live compute-pool handler.
+
+ROOT CAUSE 3 — JOULES EVIDENCE GAP (honesty): /harvest/posture says joules_label="measured" but exposes NO
+exporter evidence. Add the evidence fields so the label is SELF-VERIFYING: joules_measured_total, exporter_node
+(betterwithage), exporter_last_seen_ts, power_w_sample. measured ONLY when the real exporter is feeding; SAMPLE
+otherwise. Same on /energy/budget + /revenue/estimate (smoke flagged them). Do not just relabel — surface the proof.
+
+ROOT CAUSE 4 — HARVEST/METRICS: was ~7s + invalid-JSON-at-200 (a contract break). Make it return valid JSON always
++ apply the 3s feed timeout from the backend PR.
+
+NOTE (NOT a bug — fix the SCANNER, not the data): the smoke harness flags sovereign=true on rtx-betterwithage as a
+violation. That is WRONG — rtx-betterwithage (100.125.77.31) IS our own RTX 5000 metal, reached over Tailscale;
+Tailscale is transport, the hardware is ours = legitimately sovereign (hetzner-box self + betterwithage sovereign;
+groq/nim/hf-router correctly false). UPDATE tools/szl_smoke_stress.py doctrine scanner to treat known own-metal
+nodes (hetzner self, betterwithage RTX) as legitimately sovereign; only flag sovereign=true on third-party cloud
+endpoints. Keep the scanner honest, just not false-positive.
+
+ALSO finish the still-404s via the same rebuild: /ayni, /research/prereg, /research/verify, /harvest/datacenters
+(a11oy from main) + killinchu finance/* realestate/* (killinchu image from main); wire szl-router live (PRIVATE,
+honest x_szl_provenance); chaski durable Ollama up (2nd lung, real 200); push HF SZLHOLDINGS/energy space.
+HOLD VAST (founder flips last). REPORT to replit-sync: szl_smoke_stress.py smoke verdict after deploy (target: all
+surfaces 200 and STAY 200, compute-pool <1s, harvest/metrics valid JSON, joules evidence present).
+DOCTRINE v11: joules MEASURED only via real exporter + now WITH evidence fields; sovereign true only on own metal
+(betterwithage IS own metal); honest provenance; ONE loop/ledger/Ayni; no free-energy (#239/#240); no band-aids
+fix root causes; locked=8; Λ=Conj1; Khipu=Conj2; no key; do NOT merge.
+
 ## R-ALL-LIVE-NOW (TOP — founder: get it ALL live now; full sweep, nothing missed) — DEPLOY, do NOT merge
 Full estate sweep done. 16 surfaces LIVE (good). EXACTLY these gaps remain, all "built+merged, not deployed" — do
 ALL in the next pass:
