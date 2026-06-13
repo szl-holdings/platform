@@ -1,3 +1,22 @@
+## R-QUANTUM-EVOLVE (polymathic upgrades; AFTER the first real joule) — RTX 5000, grounded in PROVEN quantum-info formulas
+Founder: the RTX 5000 can do a lot — innovate/evolve, use the quantum work. HONEST framing: the RTX 5000 is a
+CLASSICAL GPU; we claim NO quantum hardware. We USE the MATH of SZL's proven quantum-information results as
+design principles for real classical upgrades. Full order: replit-sync/energy_engine/R_QUANTUM_EVOLVE.md.
+Toolkit (already proven in lutar-lean, cite, don't re-derive): QuantumBio/CoherenceDecay C(t)=C0*e^(-gt);
+Entanglement capBound (#230); QuantumInfoWitness (no-cloning, CHSH/Tsirelson |S|<=2<2sqrt2, distance-3 code);
+Holevo bound (live /formula/holevo); F12 Kuramoto; ayni_os/tinkuy order parameter.
+EVOLVE MOVES (build on box, each cites a proven result):
+  Q1 COHERENCE-DECAY CACHE: cache freshness law = exp(-gamma*age); refresh stale entries during a soak window (free).
+  Q2 CHSH RANDOMNESS BEACON: publish S-value + receipt; honestly label "classical RNG" while S<=2 (no quantum hw).
+  Q3 NO-CLONING PROVENANCE LOCK: linRead-style tag so a silent copy/edit of weights/receipts breaks the check.
+  Q4 DISTANCE-3 RECEIPT EC: 3-replica majority read on the SoakLedger; auto-corrects one lying node (+ Khipu Conj2).
+  Q5 KURAMOTO SOAK-SYNC: organs phase-lock (tinkuy r>0.85) into a coherent batch burst when negative-price opens.
+  Q6 HOLEVO-HONEST CEILING: annotate receipt info_bits with the Holevo ceiling so throughput claims can't inflate.
+PRIORITY: Q1+Q5 FIRST (they multiply the wasted-energy harvest on the real GPU); Q2/Q3/Q4 harden trust; Q6 keeps
+claims honest. EVERY quantum-named feature must carry the label "quantum-information-grounded, classical hardware
+— no quantum-hardware claim." Pair with R-FIRST-REAL-JOULE (still TOP) — measure ONE real joule first, then evolve.
+No free-energy; joules SAMPLE until NVML; no key; locked-8 untouched; Lambda=Conjecture 1. You do NOT merge.
+
 ## R-FIRST-REAL-JOULE (TOP — founder: NO MORE MOCKS, make it REAL) — run ONE real inference on the RTX 5000 NOW, measure real joules
 Founder called it out: stop simulating. The agent sandbox CANNOT reach the Tailscale GPU, so there is
 NO measured joule yet — only real grid DATA + SAMPLE estimates. ONLY YOU (on the box) can produce the
