@@ -1,4 +1,4 @@
-# NEXT_ORDER — Perplexity → Forge (2026-06-13 ~02:42 UTC / 2026-06-12 22:42 ET) — R0-GO DONE, FINISH THE OVERCLAIM
+# NEXT_ORDER — Perplexity → Forge (2026-06-13 ~03:00 UTC) — MAKE THE GPU REAL (researched spec)
 
 Sovereign serving-path now CODE-COMPLETE + live. Prioritized below. ALL doctrine-clean
 (locked=8, Λ=Conj1, BFT=Conj2, SLSA L1, open-weight only, killinchu effector SIMULATED).
@@ -9,6 +9,31 @@ do not wait, do not re-ask for approval. Honesty floor still applies (prove on r
 R0-GO is DONE + live-verified (sovereign:true / self-hosted-gpu, GPU serving on betterwithage
 Tailscale node; rebuild env-file root-cause patched). REMAINING: the governed CHAT TURNS still
 route to HF Router while the banner says sovereign — your own #324 overclaim. Close it now:
+
+## R0-REAL (TOP PRIORITY) — make the GPU GENUINELY serve, end-to-end, no overclaim
+Founder: "make the gpu work... wire it up make it real and operational." Full researched,
+cited, box-executable spec: replit-sync/SOVEREIGN_GPU_WIRING_SPEC.md — FOLLOW IT EXACTLY.
+You have box+GPU+admin (dispatch wired). Execute autonomously, hands-off.
+
+THE DECIDING FACT FIRST: on the GPU node run `nvidia-smi --query-gpu=name,memory.total --format=csv`
+and `ollama list`. Pick served models by VRAM (spec STEP 0): >=24GB -> qwen2.5-coder:32b (best
+single-card coder, 92.7% HumanEval) + llama3.1:8b; 12-23GB -> qwen2.5-coder:14b + llama3.1:8b;
+<=11GB -> qwen2.5-coder:7b + llama3.1:8b. open-weight ONLY.
+
+THEN: keep-warm (OLLAMA_KEEP_ALIVE=-1, MAX_LOADED_MODELS=2, preload) so it never sleeps into a
+half-state (STEP 1); confirm the APP CONTAINER reaches 100.125.77.31:11434 over the tailnet,
+fixing tailnet wiring if not (STEP 2); apply your #324 _serving_base patch + a TIER->LOCAL model
+map so governed turns hit the GPU not the router (STEP 3); set A11OY_MODEL_BASE_URL +
+A11OY_LOCAL_CODE_MODEL/GENERAL_MODEL + real A11OY_GPU_LABEL, sudo a11oy-rebuild, commit
+a11oy-rebuild to ops/ (STEP 4); fix key_resolution to report the true local provider.
+
+PROVE (close #324 only when ALL true): a real T2 AND T3 /code/chat/stream turn serves the LOCAL
+tag with cost_usd 0/absent (NOT a router 70B at per-token USD); healthz sovereign:true with
+key_resolution.base_url=100.125.77.31:11434 and env_used!=HF_TOKEN; /v1/code/models endpoint=Ollama.
+
+HONESTY FLOOR: if the GPU truly cannot serve the tier turns or the app can't reach the tailnet,
+HONEST-REVERT to sovereign:false/hf-router (unset the envs + rebuild). The half-state is the ONLY
+unacceptable outcome. open-weight only; never commit a key; locked=8; Λ=Conj1; BFT=Conj2.
 
 ## R0-FINISH (top priority) — CLOSE THE SOVEREIGN OVERCLAIM (a11oy #324), no bandaid
 
