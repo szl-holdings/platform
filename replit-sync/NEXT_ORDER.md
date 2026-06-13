@@ -1,3 +1,23 @@
+## R-TAKE-EVOLVE (TOP — founder: take openly + make it ours by PROOF, innovate, evolve) — DEPLOY, do NOT merge
+Doctrine: take what is FREELY GIVEN (open weights/data/science), make it ours by stamping a DSSE receipt + kernel
+bound (inputs=commodity, PROOF=the IP); NEVER plagiarize/relabel/steal (taints the moat we sell); cite + transform.
+DEPLOY QUEUE (Forge rebuild+push images, no agent merge): a11oy #341 (/anatomy/loop), #342 (7 dark surfaces), #343
+(YARQA consolidated as CIRCULATORY organ inside /anatomy/loop — one body/one loop/one receipt chain; heart=pump,
+YARQA=vessels; /yarqa alias kept; stacked on #341); killinchu #115 (/elite + finance/* + realestate/*); khipu #3
+docs. NEW HF ENERGY SPACE ready at /home/user/workspace/hf_energy_space/ (static) — Forge push as NEW HF static
+Space SZLHOLDINGS/energy (the missing energy space; shows 212 measured J + live loop; label renewable share as
+"% of demand" since >100%=surplus=why price negative, not an error). Smoke-test all after deploy.
+EVOLVE — CONSCIOUSNESS/QUANTUM-BIO VERIFIED-RESEARCH INFRASTRUCTURE (new legit vertical, free): the field
+(Radin/IONS, Bancel, GCP, Orch-OR, radical-pair, 2DES) is rigor-starved; its OWN fix = pre-registration +
+tamper-proof time-stamped repos + regenerable analysis = OUR PRODUCT. Build: /research/prereg (DSSE-signed
+time-stamped hypothesis+analysis lock BEFORE data, kills p-hacking), /research/trial-receipt (hash-chain each
+trial, observer-independent, verify via /verify), reuse /qbio/coherence + verified GPU for the sims. HONEST: we
+provide RIGOR, make NO claim psi is real — we make experiments TRUSTWORTHY; cite every source, never relabel.
+Lawful + fundable (NIST SBIR). Full order: replit-sync/energy_engine/R_TAKE_EVOLVE.md
+DOCTRINE v11: openly-licensed only + always cite + transform-by-proof never plagiarize; no empirical psi claim;
+open-weight; no free-energy (#239/#240 Ayni); energy != data; joules MEASURED only via exporter (212J); consent
+only; revenue ESTIMATE no guarantee; organs EXPERIMENTAL; locked=8; Λ=Conj1; Khipu=Conj2; no key; do NOT merge.
+
 ## R-AGENTIC-MARKETPLACE (TOP — founder: make it agentic + which keys for Vast/other sites) — DEPLOY, do NOT merge
 KEYS founder provides (read by PRESENCE only, never log/commit value): Vast.ai (DO FIRST, host acct vast.ai/host
 email-only) env VAST_API_KEY; Akash (rides our k3s) env AKASH_WALLET (~5 AKT funded, founder holds SEED, paste only
