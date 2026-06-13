@@ -15,8 +15,9 @@ HONESTY (the whole point): we report the ledger RAW. A measured joule is counted
 ONLY where a real exporter pushed a real power.draw sample (`measured: true`); we
 never fabricate, estimate, or round up a joule. sovereign stays False at the signal
 level (owned-hardware classification lives in /compute-pool). Bounds cited #239
-(Bekenstein cap) / #240 (Landauer floor); Ayni-balance F11; not one of the
-locked-8; Lambda = Conjecture 1.
+(Bekenstein cap) / #240 (Landauer floor) / #242 (HarvestBudgetWitness — floor <=
+energy <= cap, monotone soak ledger); Ayni-balance F11; not one of the locked-8;
+Lambda = Conjecture 1.
 """
 from __future__ import annotations
 
@@ -29,11 +30,31 @@ from typing import Any, Dict, List
 _LEDGER_STATUS = os.environ.get("SZL_JOULES_STATUS", "/var/lib/szl/joules-status.json")
 _LEDGER_NDJSON = os.environ.get("SZL_JOULES_NDJSON", "/var/lib/szl/joules.ndjson")
 
-# Cited kernel-checked Lean bounds (resolve commit via lutar-lean). REAL proofs that
-# BOUND the reservoir; NOT a claim that any joule was measured.
+# Cited kernel-checked Lean bounds (resolve commit via lutar-lean). REAL 0-sorry proofs
+# that BOUND the reservoir; NOT a claim that any joule was measured. Mirrors the witness
+# set surfaced on /energy/budget (#239/#240) plus #242 which binds the soak ledger.
 _BOUNDS_CITED = {
-    "bekenstein_cap": {"id": "#239", "role": "UPPER bound on useful bits per joule"},
-    "landauer_floor": {"id": "#240", "role": "LOWER bound joules per irreversible bit"},
+    "bekenstein_cap": {
+        "id": "#239",
+        "name": "Bekenstein bound (EnergyBudgetWitness)",
+        "formula": "I_max = 2*pi*R*E / (hbar*c*ln2)  bits",
+        "role": "UPPER bound: a measured joule admits at most this many useful bits of computation in a bounded region.",
+        "status": "REAL kernel-checked Lean theorem (lutar-lean #239, 0-sorry); cite by commit.",
+    },
+    "landauer_floor": {
+        "id": "#240",
+        "name": "Landauer floor (LandauerFloorWitness)",
+        "formula": "E_min = k_B*T*ln2  joules per irreversible bit erased",
+        "role": "LOWER bound: each irreversible bit erasure costs at least this; waste heat may be recovered but the floor is never beaten.",
+        "status": "REAL kernel-checked Lean theorem (lutar-lean #240, 0-sorry); cite by commit.",
+    },
+    "harvest_budget": {
+        "id": "#242",
+        "name": "HarvestBudgetWitness",
+        "formula": "floor <= energy <= Bekenstein-cap, with a monotone SoakLedger",
+        "role": "BINDS the reservoir between the Landauer floor and the Bekenstein cap, and proves the soak ledger is monotone — energy is accumulated, never fabricated or reversed.",
+        "status": "REAL kernel-checked Lean theorem (lutar-lean #242, 0-sorry); cite by commit.",
+    },
 }
 
 
