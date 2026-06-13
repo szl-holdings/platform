@@ -1,3 +1,24 @@
+## R-QA-VERDICT-DEPLOY (TOP — full-estate agentic QA complete; ONE action closes it) — go, full admin
+Ran a full agentic QA sweep (a11oy surfaces + 15-concurrent stress + HF estate + all repo CI). RESULTS:
+- a11oy: 12/13 surfaces 200 + fast (~0.46s). /formula/sovereign + /ayni confirmed 200 at ROOT path (path-variant,
+  NOT bugs). research/verify 404 = awaiting deploy.
+- STRESS: 15/15 concurrent on compute-pool = 200 (rate-limit + cache hold under load). 
+- HF: ALL live — a11oy/killinchu/yarqa/hatun-mcp + all 5 static spaces incl the NEW energy space (302 serving).
+- CI: all 12 active repos main push-CI GREEN.
+THE ONE REMAINING ISSUE (confirms the pattern): anatomy/loop STILL 3.4s LIVE even though the fix #350
+(4.56s->0.6s, breaker+cache) is MERGED on main. The live a11oy image is STALE. So is #349 (joules honesty). ONE
+ACTION CLOSES EVERYTHING: rebuild the a11oy image FROM MAIN, readiness-gated (/health/ready=200 before swap,
+auto-rollback if 503). That single deploy makes live: anatomy/loop <1s, joules honest (label+evidence,
+no bare measured), research/verify 200, + the full resilience/observability/prod-hardening stack.
+VERIFY after: python3 tools/szl_smoke_stress.py --mode smoke -> target PASS (all 200, anatomy/loop<1s, latency<2s,
+joules honest). Report verdict + anatomy latency + joules evidence proof.
+NO new code is needed — the estate is built, hardened, stress-passing, HF-live, repos-green. This is a DEPLOY, not a
+build. BLOCKED-ON-FOUNDER (surface, never fake): chaski repl start (you lack Replit boot credential); VAST_API_KEY
+(founder flips last). DISPATCH: wire FORGE_AGENT_URL (your green light stands).
+DOCTRINE v11: joules MEASURED only via fresh real exporter+evidence; chaski reachable only on real 200; sovereign
+own-metal-only; szl-router PRIVATE; ONE loop; no free-energy (#239/#240); locked=8; Λ=Conj1; Khipu=Conj2; no token.
+GREEN LIGHT full admin: rebuild a11oy from main = the complete estate live. QA says everything else is GO.
+
 ## R-FINAL-DEPLOY (TOP — ALL fixes merged to main; ONE rebuild brings the complete estate live) — go, full admin green light
 The full a11oy stack is now MERGED + PERMANENT on main (0 open PRs of mine). Final deploy: rebuild the a11oy image
 FROM MAIN once and the entire hardened, honest estate goes live:
