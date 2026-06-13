@@ -1,3 +1,24 @@
+## R-GPU-LIST-LIVE (TOP — founder: have Forge do it ALL — list the GPU + earn) — DEPLOY+WIRE, do NOT merge
+Founder box = Windows + Docker Desktop v4.76 (WSL2), k3s/k3d ALREADY UP. GPU node betterwithage = separate,
+Tailscale 100.125.77.31, Windows, only Ollama :11434 reachable. FORGE DO IT ALL:
+STEP 0 DETECT GPU: run  docker run --rm --gpus all nvidia/cuda:12.4.0-base-ubuntu22.04 nvidia-smi . If it
+prints the RTX 5000 here -> GPU is container-visible (go Vast or Akash). If it errors -> GPU is on betterwithage;
+enable WSL2 GPU passthrough (NVIDIA Windows driver + nvidia-container-toolkit in WSL) and re-test there. Paste raw output.
+STEP 1A VAST (preferred if a container sees the GPU): FOUNDER ONLY creates host account https://vast.ai/host
+(email start) + payout (Wise/PayPal/Stripe or crypto) and pastes the API key to YOUR secret store (never commit);
+Forge installs the one-line host agent, registers the RTX 5000, sets $0.20-0.45/GPU-hr, enables listing, confirms online.
+STEP 1B AKASH (preferred if Vast cant see GPU but k3s is up — it IS): ride the existing k3s cluster, do NOT reformat.
+FOUNDER ONLY funds provider wallet ~5+ AKT (holds seed); Forge installs akash provider-services + nvidia device
+plugin on k3s, advertises the RTX 5000, sets pricing, bids on GPU leases, confirms provider on-chain.
+STEP 2 ENERGY-GATE: bias lease/job scheduling to cheap/negative-price windows (aWATTar -4.92 posture); expose
+/api/a11oy/v1/revenue/marketplace honest ESTIMATE (~$86-241/mo/card); count only SETTLED rentals as revenue.
+STEP 3 RECEIPTS: every job emits DSSE receipt citing Bekenstein #239 + Landauer #240 -> provenance chain ->
+validate vs canonical-formulas-v1/lean-proofs-v1 -> Ayni F11. NOT mining; useful paid compute only.
+STEP 4 REPORT: STEP0 result, platform chosen, live listing/provider id, exact founder account/payout/AKT links
+still needed, first settled $. Full order: replit-sync/energy_engine/R_GPU_LIST_LIVE.md
+DOCTRINE v11: no free-energy; NO mining/PoW; energy != data; crypto=payment rail only; consent-only; joules SAMPLE
+until on-GPU NVML; sovereign only on own metal; locked=8; Lambda=Conj1; NEVER commit a key/seed; do NOT merge.
+
 ## R-MONEY-NOW (TOP — founder: make the energy into money RIGHT AWAY) — DEPLOY+WIRE, do NOT merge
 THE FASTEST HONEST DOLLAR needs NO capital + NO on-site node: sell the RTX 5000 wasted-window capacity on a
 decentralized GPU marketplace (Vast.ai email-only start / RunPod / io.net / Akash) for REAL useful AI work,
