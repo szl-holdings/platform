@@ -1,3 +1,29 @@
+## R-FREEPOWER (vision + software-now) — free brains, stranded energy, allodial, no kill-switch
+Founder vision: free open-weight brains (China has the answers) + free/owned ENERGY from what the
+world WASTES (curtailed wind/solar, negative-price power, flared gas, surplus micro-hydro, biogas,
+waste heat) -> allodial sovereign compute no one can switch off. Researched + cited specs:
+replit-sync/ALLODIAL_FREE_COMPUTE_VISION.md + replit-sync/STRANDED_ENERGY_SOVEREIGN_COMPUTE.md.
+
+DO NOW [Forge] (software-first, no hardware needed):
+1) FREE TIERS into the LiteLLM router as zero-cost fallback model_names (keys via secret store,
+   NEVER committed): Zhipu GLM-Flash (PERMANENTLY free, open.bigmodel.cn/api/paas/v4), SiliconFlow
+   free (Qwen3-8B/DeepSeek-R1-Distill, api.siliconflow.cn/v1), Groq free, GitHub Models, OVH Kepler
+   anon (no key), NVIDIA NIM. Label every free-tier turn served_by + sovereign:false (honest).
+2) OWN THE WEIGHTS: mirror glm-4.6 + qwen2.5-coder:32b + a deepseek coder to the SZL HF org (open
+   weights = ours forever, no landlord).
+3) ENERGY-AWARE SCHEDULER: gate heavy/batch inference + model pulls to cheap/negative-price /
+   off-peak windows (grid-price feed or simple off-peak time window); LOG the energy window used.
+4) PROVENANCE RECEIPT: add served_by + energy_source fields to the turn receipt now (value "grid"
+   today) so the honest-power plumbing exists for when stranded-energy nodes come online.
+
+[Founder] Tier-0 solar+LiFePO4 anchor (Mac mini M4) = unkillable allodial floor; then scout ONE
+behind-the-meter curtailed-renewable / micro-hydro partner (WinDC/Soluna/Greensparc model) for a
+real stranded-energy sovereign node. SZL edge: governed, verifiable open-weight inference on
+energy others waste — "honest AI on honest power," carbon-cutting, no grid, no kill-switch.
+
+DOCTRINE: open-weight only; never commit a key; sovereign:true ONLY on own metal; free/grid tiers
+honest sovereign:false; energy_source claims must be REAL (no greenwashing); half-state forbidden.
+
 ## R-RESILIENCE (HIGH) — make the ecosystem ALWAYS-good, laptop-independent (no SPOF)
 Founder: "make sure the GPU keeps the whole ecosystem going no matter what... if laptop goes off
 we always good." Full researched spec: replit-sync/SOVEREIGN_RESILIENCE_FABRIC.md.
