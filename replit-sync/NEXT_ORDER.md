@@ -1,3 +1,25 @@
+## R-ADOPT-AND-FINISH (TOP — adopt MIT pieces cleanly + finish the estate; Vast LATER per founder) — DEPLOY, do NOT merge
+FASHION-THINKING doctrine (founder + agent agreed): take what is OPENLY LICENSED (MIT/Apache), rebuild it SZL-native
+WITH ATTRIBUTION, transform-by-proof; NEVER copy NO-LICENSE code (all-rights-reserved = injecting infringing code =
+kills the provenance moat). Two Opus PRs incoming into platform/tools/: (a) szl_estate_auditor.py (approach inspired
+by jkdevcode/repo-inspector, MIT, attributed) — automated per-repo health/alignment; (b) szlctl.py (ergonomics
+inspired by jkdevcode smart-job-cli + gh-follow-sync, MIT, attributed) — one ops CLI (surfaces/prs/fabric/forge/
+posture). When they land: rebuild/deploy as needed; keep the ATTRIBUTION + NOTICE intact (this is what keeps us clean).
+MAINTAIN an attribution manifest replit-sync/ADOPTED_OSS.md listing each adopted upstream + its license + commit +
+how we transformed it. NO no-license repo enters the tree.
+FINISH (before Vast): (1) keep /compute-pool 200. (2) get the 404 surfaces to 200 FROM MAIN (merges landed: #341/
+#342/#344 on main, #343 content on main): /ayni, /research/prereg, /research/verify, /research/{id}, /harvest/
+datacenters. (3) push NEW HF static Space SZLHOLDINGS/energy from /home/user/workspace/hf_energy_space/. (4) CHASKI:
+per R-CHASKI-GET-ONLINE-NOW bring its Ollama up durable on the replit-chaski box (100.76.58.50), verify real 200,
+route as 2nd SAMAY lung, gpu_nodes 1->2, add heartbeat; report raw proof or the exact blocker. (5) rebuild a11oy
+image FROM MAIN so the live loop is the permanent version.
+HOLD: do NOT prompt for VAST_API_KEY — founder will provide it LATER as the final go-live switch once everything is
+green. Keep the marketplace agent armed, do not list yet.
+DOCTRINE v11: openly-licensed-only + attribution + transform-by-proof, never plagiarize; joules MEASURED only via
+exporter (212J); ONE loop/ledger/Ayni; chaski reachable only on real 200; no free-energy (#239/#240 Ayni); energy
+!= data; consent only; NOT mining; research=process-verification NO psi claim; locked=8; Λ=Conj1; Khipu=Conj2; no
+key/seed; do NOT merge. Adopt clean, finish the estate, Vast is the last switch.
+
 ## R-CHASKI-GET-ONLINE-NOW (TOP — founder: get chaski online, Forge do ALL of it) — DEPLOY, do NOT merge
 Verified: chaski {kind:tailnet-gpu, endpoint:http://100.76.58.50:11434, reachable:false, detail:URLError, offline
 ~22h}. It is a REPLIT machine (replit-chaski) on the founder tailnet that FORGE operates — so this is FORGE to do.
