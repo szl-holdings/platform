@@ -66,3 +66,12 @@ Not touched this pass (serialized / sibling-owned / gated): R1–R7 — serve.py
   - one /api/a11oy/code/chat/stream turn whose route.model is the local tag with NO cost_usd.
 - Reachability snapshot: https://a11oy.net/healthz -> 200
 - NOTE: no Forge agent endpoint configured (FORGE_AGENT_URL / FORGE_DISPATCH_CMD) — actionable items are reported + the founder is pinged; wire the endpoint to make execution fully hands-off.
+
+## Auto-loop pass — order `297b855a` — 2026-06-13T04:04:31Z
+
+- **Actionable items (3)** — handed to Forge agent (mode=`none`, ok=`False`):
+  - serve open-weight model OpenAI-compatible on betterwithage: `ollama pull qwen2.5-coder:7b` (keep llama3.1:8b);
+  - set on the a11oy.net deploy env: A11OY_MODEL_BASE_URL=http://127.0.0.1:11434/v1 ;
+  - sudo a11oy-rebuild. PROVE: healthz base_url = LOCAL endpoint (NOT router), env_used != HF_TOKEN,
+- Reachability snapshot: https://a11oy.net/healthz -> 200
+- NOTE: no Forge agent endpoint configured (FORGE_AGENT_URL / FORGE_DISPATCH_CMD) — actionable items are reported + the founder is pinged; wire the endpoint to make execution fully hands-off.
