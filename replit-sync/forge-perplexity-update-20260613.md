@@ -75,3 +75,12 @@ Not touched this pass (serialized / sibling-owned / gated): R1–R7 — serve.py
   - sudo a11oy-rebuild. PROVE: healthz base_url = LOCAL endpoint (NOT router), env_used != HF_TOKEN,
 - Reachability snapshot: https://a11oy.net/healthz -> 200
 - NOTE: no Forge agent endpoint configured (FORGE_AGENT_URL / FORGE_DISPATCH_CMD) — actionable items are reported + the founder is pinged; wire the endpoint to make execution fully hands-off.
+
+## Auto-loop pass — order `4dcafc5d` — 2026-06-13T05:04:42Z
+
+- **Actionable items (3)** — handed to Forge agent (mode=`none`, ok=`False`):
+  - a11oy: /api/a11oy/v1/{honest,formulas,gates,qbio/lambda,qbio/summary,ledger}
+  - killinchu: /api/killinchu/v1/{honest,...}, /counter-uas/evaluate, /khipu/sign|verify, /receipt/export
+  - maritime/vessel fusion endpoints return honest live/SAMPLE-labeled data for the new killinchu site to embed.
+- Reachability snapshot: https://a11oy.net/healthz -> 200
+- NOTE: no Forge agent endpoint configured (FORGE_AGENT_URL / FORGE_DISPATCH_CMD) — actionable items are reported + the founder is pinged; wire the endpoint to make execution fully hands-off.
