@@ -1,9 +1,9 @@
 {
-  "order_sha": "9100ef293c51e4abbae55a949e65b209e9d8fb69",
+  "order_sha": "9100ef293c51",
   "order_path": "replit-sync/NEXT_ORDER.md",
-  "state": "done",
-  "seen_at": "2026-06-14T08:58:42Z",
-  "updated_at": "2026-06-14T08:59:15Z",
+  "state": "reported",
+  "seen_at": "2026-06-14T09:04:22Z",
+  "updated_at": "2026-06-14T09:04:22Z",
   "idle": false,
   "actionable": [
     "a11oy resumable SIGNED ReAct agent loop + Generative-Agents memory + Reflexion + Voyager skill library (/agent-loop).",
@@ -45,9 +45,10 @@
     "J/token + carbon energy in EVERY signed receipt + speculative-decode/LMCache/LiteLLM/RouteLLM app-layer (/energy).",
     "a11oy \"Doctrine \u2014 banned-token grep gate\" = failure. This is the MARKETING-HYPE hygiene gate (flags words like"
   ],
-  "report": "replit-sync/forge-perplexity-update-20260614.md",
+  "report": "replit-sync/forge-report-20260614T090421Z-agentic-wave-nemo-honesty-live.md",
   "probes": {
     "https://a11oy.net/healthz": 200
   },
-  "doctrine": "v11: locked=8, Lambda=Conjecture 1, never commit a key"
+  "doctrine": "v11: locked=8, Lambda=Conjecture 1, never commit a key",
+  "forge_manual_note": "Founder 'NO BANDAIDS' pass: landed nemo/tiers model-aware honesty fix (a11oy 02b41d9, live); items 1/2/4 blocked on founder GPU hardware (single 7B-class GPU reachable, chaski asleep, no 2nd card, no 32B/vLLM); item 3 NIM needs approval (signed receipts HARD LIMIT); item 5 convenience. dispatch_mode still none; FREEZE 06-16."
 }
