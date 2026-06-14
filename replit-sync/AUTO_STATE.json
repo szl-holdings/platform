@@ -1,8 +1,10 @@
 {
   "order_sha": "21244f1b8e235eeb07168ff42bc282ab97f7c210",
   "order_path": "replit-sync/NEXT_ORDER.md",
-  "state": "processing",
+  "state": "done",
   "seen_at": "2026-06-14T14:10:03Z",
+  "updated_at": "2026-06-14T14:10:37Z",
+  "idle": false,
   "actionable": [
     "a11oy resumable SIGNED ReAct agent loop + Generative-Agents memory + Reflexion + Voyager skill library (/agent-loop).",
     "\u03c4-bench eval harness (MEASURED) + ECE/Brier calibration + conformal-prediction wrapper + Colang policy + IETF receipt",
@@ -24,9 +26,37 @@
     "F3 killinchu /elite/globe holographic battlespace globe: C2 layer (LIVE ADS-B + CBF-QP tubes + EFE + BFT + signed engage, SIMULATED/no-weapons) + Maritime layer (LIVE AIS + \u039b-risk trust spheres + dark-fleet + AIS-spoof ghosts + 5-modality).",
     "F5 a11oy /constitution-3d + /quant-3d + THE UNIFIED ESTATE HOLOGRAM at /estate-hologram (globe+proof-DAG+\u039b-sphere+mesh+organism, signed-decision light-flows)."
   ],
+  "delegated_to_agent": [
+    "a11oy resumable SIGNED ReAct agent loop + Generative-Agents memory + Reflexion + Voyager skill library (/agent-loop).",
+    "\u03c4-bench eval harness (MEASURED) + ECE/Brier calibration + conformal-prediction wrapper + Colang policy + IETF receipt",
+    "killinchu BFT quorum (n\u22653f+1) + CBF-QP safety filter + EFE act/ask gate + Fiedler \u03bb2 + organism NCA self-repair",
+    "active-flux observer (Li Yu / IEEE 911711) generalized \u2192 killinchu sensor-fusion crossover + a11oy router crossover",
+    "SZL-NEMO core: governed-MoE domain-expert router (\u039b-gated, SIGNED per selection) + MTP default + self-improvement loop",
+    "GOVERNED AUTO-REVIEW (Cursor pattern, made ours): inline classifier, autonomy DIAL L0-L5, verdict \u039b-gated + DSSE-SIGNED",
+    "OPA/Rego\u2192OSCAL/NIST-AI-RMF + conformal/flapping. killinchu engage/ROE ESCALATES even at L5 (effector SIMULATED). (/autoreview)",
+    "FABRO governed factory (DOT-graph workflows + verification gates + Working\u2192Verify\u2192Merge, signed nodes) + Constitutional",
+    "Sovereign GPU-QUANT engine: Ledoit-Wolf+Marchenko-Pastur PCA / TDA-fracture / HJB-Kelly (SAMPLE_SIGNAL|NO_BACKTEST),",
+    "killinchu PLATFORM DYNAMICS (6DOF + Moore-Penrose allocation, MODELED) + a11oy GRC alignment (ISO 42001/NIST AI RMF",
+    "SZL-NEMO (FORGE_SZL_NEMO.md): QLoRA/LoRA post-train Qwen3-32B into the SZL-Nemo checkpoint on the doctrine + our agent",
+    "2-GPU SERVE + THROTTLE (FORGE_2GPU_ENERGY.md): vLLM tensor-parallel TP=2 across main GPU + RTX 4000 OR role-split",
+    "NIM CLOUD TIER: register NVIDIA NIM (build.nvidia.com) Nemotron-Ultra as a routed cloud tier in LiteLLM/RouteLLM",
+    "ENERGY EXPORTER (FORGE_BOX_ENERGY.md): nvidia-smi power.draw \u2192 vLLM /metrics hook so joules_consumed in receipts goes",
+    "OSCAL: the a11oy OSCAL component-definition + OPA/Rego policies are in a11oy/compliance/oscal/ \u2014 wire the OSCAL/Trestle",
+    "F1 holographic substrate kit (scene/graph/globe/\u039b-trust-sphere/signed-pulse/time-replay, WebGL2+WebGPU+2D-fallback), byte-identical both apps.",
+    "F2 a11oy /factory 3D (signed-node pulses + verify locks) + /autoreview 3D (autonomy dial L0-L5 + \u039b verdict sphere).",
+    "F3 killinchu /elite/globe holographic battlespace globe: C2 layer (LIVE ADS-B + CBF-QP tubes + EFE + BFT + signed engage, SIMULATED/no-weapons) + Maritime layer (LIVE AIS + \u039b-risk trust spheres + dark-fleet + AIS-spoof ghosts + 5-modality).",
+    "F5 a11oy /constitution-3d + /quant-3d + THE UNIFIED ESTATE HOLOGRAM at /estate-hologram (globe+proof-DAG+\u039b-sphere+mesh+organism, signed-decision light-flows)."
+  ],
+  "dispatch_mode": "dispatch-cmd",
+  "dispatch_ok": true,
   "gated_skipped": [
     "J/token + carbon energy in EVERY signed receipt + speculative-decode/LMCache/LiteLLM/RouteLLM app-layer (/energy).",
     "a11oy \"Doctrine \u2014 banned-token grep gate\" = failure. This is the MARKETING-HYPE hygiene gate (flags words like",
     "F4 a11oy /nemo+/energy+/grc 3D (signed MoE token-flows, OSCAL coverage spheres) + killinchu /elite/mesh 3D (Fiedler \u03bb2 self-heal)."
-  ]
+  ],
+  "report": "replit-sync/forge-perplexity-update-20260614.md",
+  "probes": {
+    "https://a11oy.net/healthz": 200
+  },
+  "doctrine": "v11: locked=8, Lambda=Conjecture 1, never commit a key"
 }
