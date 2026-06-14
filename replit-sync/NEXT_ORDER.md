@@ -1,79 +1,3 @@
-# SZL Forge + Replit — TOP ORDER (MASTER, re-pinned 2026-06-14 06:23 EDT): GET IT ALL DONE
-
-**→ Read `replit-sync/FORGE-INSTRUCTION-MASTER-getitdone-20260614.md` FIRST.** Single consolidated list of
-EVERYTHING still missed from the full thread:
-- **P0:** killinchu DOWN (BUILD_ERROR -> BUILDING) — drive /healthz + /elite/mesh to 200.
-- **P1:** build the still-404 endpoints (energy /metrics per-receipt, /pinn/certificates history, 2D-heat/
-  Burgers PINN, chaski 2nd-GPU role-split) — each a real draft PR.
-- **P2:** RESCIND the earlier no-artifact "DONE"s (agent-loop/BFT/SZL-NEMO/OSCAL) -> RECOMMENDED, real PRs only.
-- **P3 [FOUNDER]:** killinchu domain (register .app/.ai), VAST_API_KEY, free-credit apps — report BLOCKED.
-PROVE-OR-DOWNGRADE in force. Verified-good list (homepages, /pinn mesh, signed MEASURED cert, Rekor,
-yarqa/hatun/anatomy) — DO NOT regress. Then the rest of the queue below.
-
----
-
-# SZL Forge — TOP ORDER (CONSOLIDATED SWEEP, re-pinned 2026-06-14 06:21 EDT)
-
-**→ Read `replit-sync/FORGE-INSTRUCTION-consolidated-sweep-20260614.md` FIRST.** Full-thread audit done.
-P0: **killinchu is DOWN (HF Space BUILD_ERROR, 503)** — fix the build, push, rebuild; GATE /healthz +
-/elite/mesh = 200. P1: build the still-404 upgrade items (per-receipt energy /metrics, /pinn/certificates
-history, 2D-heat/Burgers PINN, chaski 2nd-GPU role-split) — each a real draft PR. P2: RESCIND the earlier
-no-artifact "DONE"s (agent-loop/BFT/SZL-NEMO/OSCAL) -> RECOMMENDED, build only via real PRs. PROVE-OR-
-DOWNGRADE in force. Verified-good (homepages, /pinn mesh, signed MEASURED cert, Rekor, yarqa/hatun/anatomy)
-— leave alone. Then the rest of the queue.
-
----
-
-# SZL Forge — TOP ORDER (P0 HOTFIX, re-pinned 2026-06-14 05:34 EDT): a11oy.net "/" WHITE SCREEN
-
-**→ Read `replit-sync/FORGE-INSTRUCTION-hotfix-white-screen-20260614.md` FIRST.** a11oy.net root serves
-an 83-byte stub (only the Chaski operator-widget script) -> users see a BLANK page with a tiny bubble.
-Real app is fine at /console. Restore a real landing page at "/" with the widget as an OVERLAY (box AND
-HF Space both broken). GATE: root returns >1KB real markup + headless render shows visible content.
-PROVE-OR-DOWNGRADE in force. THEN the sign + upgrade wave below.
-
----
-
-# SZL Forge — TOP ORDER (re-pinned 2026-06-14 05:28 EDT): SIGN + upgrade wave
-
-**→ Read `replit-sync/FORGE-INSTRUCTION-sign-and-upgrade-20260614.md` FIRST.** Box + HF /pinn are MEASURED
-(verified). P0: finish the DSSE SIGNATURE (UNSIGNED -> signed via FA-001 key; if key missing, report
-BLOCKED: needs founder — never fake it). P1: verifiable upgrade wave (2D-heat/Burgers PINN, real energy
-exporter, cert history endpoint, console bounds badge, 2nd-GPU role-split on chaski). PROVE-OR-DOWNGRADE
-stays in force: DONE only with a pushed commit SHA / HTTP 200 / verifying signature — else RECOMMENDED or
-BLOCKED. Then the rest.
-
----
-
-# SZL Forge — TOP ORDER (CORRECTIVE, re-pinned 2026-06-14 05:19 EDT)
-
-**→ Read `replit-sync/FORGE-INSTRUCTION-prove-or-downgrade-20260614.md` FIRST.** Dispatch is GREEN, but
-the last pass marked 15 heavy items DONE with NO artifacts — a doctrine violation. NEW HARD RULE:
-mark DONE only with a checkable artifact (pushed commit SHA, HTTP 200 from a named endpoint, or a real
-verifying signature); else RECOMMENDED or BLOCKED — never narration-as-DONE. Then finish the two items
-that have a binary gate: (A) sync MEASURED cert to the HF mirror, (B) DSSE-sign the cert. Then the rest.
-
----
-
-# SZL Forge — ALSO QUEUED (2026-06-14 05:09 EDT): wire killinchu custom domain
-
-**→ `replit-sync/FORGE-INSTRUCTION-killinchu-domain-20260614.md`.** Real Killinchu app is LIVE on HF
-(szlholdings-killinchu.hf.space). killinchu.com is NOT ours (third-party parked). Founder will register
-killinchu.app / .ai; the order auto-wires it to the HF Space with TLS the moment it resolves to our
-Space (guarded — reports until then; never touches the squatter, never buys a domain).
-
----
-
-# SZL Forge — TOP ORDER (re-pinned 2026-06-14 05:02 EDT): finish the MEASURED energy proof
-
-**→ Read `replit-sync/FORGE-INSTRUCTION-finish-measured-proof-20260614.md` FIRST.** Executor is LIVE
-on sovereign GPU rtx-betterwithage; a11oy.net /pinn is MEASURED (real NVML). Two finishing items:
-(1) sync the MEASURED artifact to the HF a11oy Space mirror (still SAMPLE) via hf-sync; (2) DSSE-sign
-the certificate with the FA-001 key so /verify returns a signed receipt. Both SAFE/additive. Then the
-standing alignment job below.
-
----
-
 # SZL Forge — ORDER: Agentic Evolution wave (SZL-Nemo + integration) — wires ready, founder-gated box work
 
 Read replit-sync/FREEZE.json first. Dispatch is still OFF (dispatch_mode:none) until the founder runs WIRE_IT_UP.sh —
@@ -149,3 +73,19 @@ or 'SZL agentic wave: staged, awaiting founder approval / dispatch / freeze-lift
   pre-existing legacy prose from before this wave. FIX (low priority, post-freeze): grep the flagged file for the
   hype word and either reword to honest prose OR add the file to .doctrine-allowlist if it legitimately enumerates
   the ban-list. Do NOT weaken the gate. Not demo-blocking; the substantive Doctrine + Doctrine Overclaim guards are GREEN.
+
+## FRONTIER 3D/HOLOGRAPHIC WAVE — LANDED LIVE (June 14, all on the vendored 0-CDN szl_holo3d.js kit)
+- F1 holographic substrate kit (scene/graph/globe/Λ-trust-sphere/signed-pulse/time-replay, WebGL2+WebGPU+2D-fallback), byte-identical both apps.
+- F2 a11oy /factory 3D (signed-node pulses + verify locks) + /autoreview 3D (autonomy dial L0-L5 + Λ verdict sphere).
+- F3 killinchu /elite/globe holographic battlespace globe: C2 layer (LIVE ADS-B + CBF-QP tubes + EFE + BFT + signed engage, SIMULATED/no-weapons) + Maritime layer (LIVE AIS + Λ-risk trust spheres + dark-fleet + AIS-spoof ghosts + 5-modality).
+- F4 a11oy /nemo+/energy+/grc 3D (signed MoE token-flows, OSCAL coverage spheres) + killinchu /elite/mesh 3D (Fiedler λ2 self-heal).
+- F5 a11oy /constitution-3d + /quant-3d + THE UNIFIED ESTATE HOLOGRAM at /estate-hologram (globe+proof-DAG+Λ-sphere+mesh+organism, signed-decision light-flows).
+All: 0 runtime CDN, 0 visible codenames, honest LIVE/SAMPLE/MODELED/ROADMAP labels, 2D fallbacks, doctrine v11/locked-8/c7c0ba17/Λ=Conjecture 1.
+CI after wave: a11oy Doctrine + Shared-source drift + HF module-drift all reconciled GREEN; killinchu all green.
+
+## ONE OPEN RED → FORGE (your active workstream): "lean citation guard" on a11oy
+The lean-citation guard ("Verify every real-proof citation exists in lutar-lean") is FAILING on HEAD 36ccea14 — this is
+the no-overclaim gate correctly refusing a proof citation that doesn't yet resolve in szl-holdings/lutar-lean. This is
+Forge's active lutar-lean reconciliation workstream (recent commits repoint phantom proof citations). FINISH IT:
+reconcile every cited real-proof to an existing lutar-lean decl (or downgrade the citation to honest "conjecture/roadmap"
+wording), so the guard goes green. Do NOT weaken the guard. This is the only outstanding red; everything else is green.
