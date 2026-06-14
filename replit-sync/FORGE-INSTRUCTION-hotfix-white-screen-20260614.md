@@ -1,38 +1,37 @@
-# SZL Forge — ORDER (P0 HOTFIX): a11oy.net "/" is a WHITE SCREEN — restore the landing page
+# SZL Forge — ORDER (P0 HOTFIX, ROOT-CAUSED): a11oy.net "/" white screen = STALE /app/cathedral.html
 
-**Verified bug (probed live, headless-rendered):** `https://a11oy.net/` returns an 83-byte stub whose
-ONLY content is `<script src="/vendor/a11oy-operator-widget.js" data-surface="a11oy" defer></script>`.
-The Chaski operator widget loads (200, 35KB) and renders a tiny floating bubble bottom-right, but there
-is NO landing page around it -> the user sees a BLANK WHITE PAGE with only a "CHASKI" bubble. The real
-app is fine at `https://a11oy.net/console` (200, 1.55MB SPA). The HF Space root is the SAME 83-byte stub,
-so this shipped from main — NOT a stale box. The Chaski widget is a floating HELPER, never the page body.
+**ROOT CAUSE (now pinned down — verified):** The `/` handler in serve.py returns
+`FileResponse(Path("/app/cathedral.html"))`. The REPO `cathedral.html` is the correct 142,486-byte hero
+(both in szl-holdings/a11oy main AND in the SZLHOLDINGS/a11oy Space repo — confirmed 142486 bytes raw).
+BUT the live box AND the live Space serve only ~83 bytes at `/` (just the operator-widget tag the
+injector appends to an essentially-EMPTY body). => the BUILT IMAGE's `/app/cathedral.html` is STALE/empty.
+The operator-widget injector is innocent (additive-only, verified). `/console` works (1.5MB). This is a
+STALE-DEPLOY bug, NOT a code bug.
 
-## ROOT CAUSE TO CONFIRM
-The route/handler (or static index) for "/" was replaced by the operator-widget loader and lost the real
-landing HTML (the page skeleton / SPA mount the widget is supposed to overlay). Find where "/" is served
-(serve.py root route OR the static index.html) and why it now emits only the 83-byte widget tag.
-
-## FIX (pick the correct one for how "/" is actually served)
-- If "/" should be the SPA: serve the real index/landing HTML at "/" (same content as /console's shell, or
-  the prior homepage), and KEEP the operator-widget script tag as an OVERLAY inside that full page.
-- OR, if "/" is intended to be the operator surface only: it must still render a real page body
-  (hero + nav + the .aow-root mounted into a styled full-height layout), not an empty document.
-- Simplest correct interim: make "/" serve the same shell as `/console` (which works), with the Chaski
-  widget layered on top. Do NOT leave "/" as a bare 83-byte script tag.
-
-## GATE (PROVE-OR-DOWNGRADE — mark DONE only if BOTH pass; paste the output)
+## FIX = rebuild /app from current main on BOTH surfaces
+### Box (167.233.50.75) — only you can do this:
 ```bash
-# 1) root must return a real page (not ~83 bytes) with a visible body:
-curl -s -o /tmp/r.html -w 'root: HTTP %{http_code} | %{size_download} bytes\n' https://a11oy.net/
-#    PASS = clearly > 1KB and contains real landing markup (a root/app container, nav, or hero), not just the script tag.
-# 2) headless render shows visible content (not blank):
-#    confirm document.body.innerText is non-empty and there is a full-height layout, not only the 56px bubble.
+cd "$(for d in /opt/a11oy /srv/a11oy /root/a11oy /home/*/a11oy; do [ -d "$d/.git" ] && echo "$d" && break; done)"
+git fetch --all && git reset --hard origin/main
+# rebuild the image so /app/cathedral.html = the real 142KB file (no docker-cp bandaid):
+docker compose build --no-cache a11oy && docker compose up -d a11oy   || sudo systemctl restart a11oy.service
+sleep 8
+curl -s -o /dev/null -w 'box / size: %{size_download} bytes (want >100000)\n' http://127.0.0.1:8081/
 ```
-If you cannot safely restore it this pass, mark **BLOCKED** with the exact file/route at fault — do NOT
-ship a fake "fixed". Apply the same fix to the box AND the HF Space (both serve the 83-byte stub).
+### HF Space — factory rebuild (CTO already triggered forge-hf-activate run 27495202325; verify it took):
+```bash
+curl -s -o /dev/null -w 'HF / size: %{size_download} bytes (want >100000)\n' https://szlholdings-a11oy.hf.space/
+```
 
-## DOCTRINE v11
-No fabricated DONE. Clean-room. 0 runtime CDN (the widget is already vendored — keep it). Honest fallback.
-Never commit a key. Λ = Conjecture 1.
+## GATE (PROVE-OR-DOWNGRADE — DONE only if BOTH > 100KB and render visible)
+```bash
+for h in https://a11oy.net https://szlholdings-a11oy.hf.space; do
+  echo "$h/ -> $(curl -s -o /dev/null -w '%{http_code} %{size_download}b' $h/)"
+done   # PASS = 200 and ~142KB, NOT 83 bytes
+```
+If the build still serves 83 bytes, the COPY of cathedral.html into /app is failing — check the Dockerfile
+COPY line (it IS listed) and that the file isn't being overwritten by a later step. Mark BLOCKED with the
+exact build step if so. Never ship a fake fix.
 
-— Sign-off: Stephen P. Lutar Jr. <stephenlutar2@gmail.com> · Doctrine v11 LOCKED
+## DOCTRINE v11 — no fabricated DONE; clean-room; 0 CDN; never commit a key; Λ = Conjecture 1.
+— Sign-off: Stephen P. Lutar Jr. <stephenlutar2@gmail.com>
