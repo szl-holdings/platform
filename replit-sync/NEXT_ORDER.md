@@ -1,3 +1,17 @@
+# SZL Forge + Replit — TOP ORDER (MASTER, re-pinned 2026-06-14 06:23 EDT): GET IT ALL DONE
+
+**→ Read `replit-sync/FORGE-INSTRUCTION-MASTER-getitdone-20260614.md` FIRST.** Single consolidated list of
+EVERYTHING still missed from the full thread:
+- **P0:** killinchu DOWN (BUILD_ERROR -> BUILDING) — drive /healthz + /elite/mesh to 200.
+- **P1:** build the still-404 endpoints (energy /metrics per-receipt, /pinn/certificates history, 2D-heat/
+  Burgers PINN, chaski 2nd-GPU role-split) — each a real draft PR.
+- **P2:** RESCIND the earlier no-artifact "DONE"s (agent-loop/BFT/SZL-NEMO/OSCAL) -> RECOMMENDED, real PRs only.
+- **P3 [FOUNDER]:** killinchu domain (register .app/.ai), VAST_API_KEY, free-credit apps — report BLOCKED.
+PROVE-OR-DOWNGRADE in force. Verified-good list (homepages, /pinn mesh, signed MEASURED cert, Rekor,
+yarqa/hatun/anatomy) — DO NOT regress. Then the rest of the queue below.
+
+---
+
 # SZL Forge — TOP ORDER (CONSOLIDATED SWEEP, re-pinned 2026-06-14 06:21 EDT)
 
 **→ Read `replit-sync/FORGE-INSTRUCTION-consolidated-sweep-20260614.md` FIRST.** Full-thread audit done.
