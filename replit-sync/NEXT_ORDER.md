@@ -12,6 +12,18 @@ PROVE-OR-DOWNGRADE: never force a pillar green; numpy-less honesty preserved.
 
 ---
 
+# SZL Forge — ORDER #2 (pinned 2026-06-14 12:50 EDT): DEPLOY 9-SURFACE 3D HOLOGRAPHIC ESTATE
+
+**-> Read `replit-sync/FORGE-INSTRUCTION-deploy-3d-holographic-20260614.md`.** A 10-dev Opus-4.8 wave built
+~135 live-data 3D demos across all 9 a11oy+killinchu surfaces (energy MEASURED-joules funnel, fabric, pnt,
+counter-uas, governance, pinn, router, anatomy, unified estate hologram). Integrated + QA'd in PR #390
+(branch 3d/09-integration): 129 tests pass / 0 fail / 0 CDN. Rebase on main, merge the stack, MESH THE 5
+GOVERNANCE GAP ROUTES (/assurance/artifact,/credential,/compliance,/attest,/forge/ledger — engines already
+in repo root), rebuild box+HF, PROVE /holographic 200 + every surface endpoint 200-or-honest-BLOCKED.
+0 CDN, no fabricated 200s, honesty labels preserved. (Do F1 order above FIRST — the pnt surface cites it.)
+
+---
+
 # SZL Forge — TOP ORDER (re-pinned 2026-06-14 11:08 EDT): CLOSE ALL 6 GAPS
 
 **-> Read `replit-sync/FORGE-INSTRUCTION-close-all-gaps-20260614.md` FIRST.** A 6-dev Opus-4.8 team is
@@ -143,4 +155,5 @@ the no-overclaim gate correctly refusing a proof citation that doesn't yet resol
 Forge's active lutar-lean reconciliation workstream (recent commits repoint phantom proof citations). FINISH IT:
 reconcile every cited real-proof to an existing lutar-lean decl (or downgrade the citation to honest "conjecture/roadmap"
 wording), so the guard goes green. Do NOT weaken the guard. This is the only outstanding red; everything else is green.
+
 
