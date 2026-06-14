@@ -1,36 +1,22 @@
 {
-  "order_sha": "2b6c8cf84818fb19413fa48d8aea3f5ae4d7c39f",
+  "order_sha": "c49ff87267b82a08575379a0d3a041b3727a4ebf",
   "order_path": "replit-sync/NEXT_ORDER.md",
-  "state": "done",
-  "seen_at": "2026-06-13T22:07:23Z",
-  "updated_at": "2026-06-13T22:07:35Z",
-  "idle": false,
+  "state": "processing",
+  "seen_at": "2026-06-14T00:08:02Z",
   "actionable": [
-    "BOX \u2014 serve the model on :8000 (OpenAI-compatible), pick vLLM (Qwen2.5-7B-Instruct-AWQ,",
-    "BOX \u2014 Tailscale up; capture MagicDNS name + 100.x IP; ensure MagicDNS on; add ACL so the Spaces",
-    "VERIFY (the real deliverable \u2014 honest behavior):",
-    "GET .../killinchu/v4/inference-posture + .../a11oy/api/szl/v1/inference-posture \u2192",
-    "both /v4/healthz + a11oy.net/v4/healthz \u2192 sovereign:true, inference:self-hosted-gpu, doctrine v11.",
-    "HARD INVARIANT (never violate, enforced in code): sovereign:true ONLY when a live /v1/models",
-    "STABILIZE \u2014 confirm the systemd + keepalive + cron actually survive a simulated flap (stop/start"
+    "szl-holdings/szl-mesh: real NODE RUNTIME (src/szl_mesh/) \u2014 CRDT two-track state, DSSE-receipted state",
+    "Real 3-of-4 KHIPU QUORUM wired from khipu-consensus (ECDSA-P256 DSSE; matches deterministic test vectors;",
+    "killinchu: killinchu_mesh.py serving /api/killinchu/v1/mesh/{topology,nodes,enroll,write,quorum,",
+    "Live surface https://szlholdings-killinchu.hf.space/elite/mesh (real topology, quorum lights, receipt",
+    "PERMANENT FIX: copy-sync-lockstep-guard CI now GREEN on a11oy + killinchu \u2014 fails the build if a module",
+    "GITHUB: szl-mesh + khipu-consensus + killinchu main CI green; the lockstep guard green on a11oy+killinchu;",
+    "HF: killinchu Space RUNNING on latest; killinchu_mesh.py + the mesh view byte-identical GitHub\u2194HF and in",
+    "szl-fleet-overlay (peat-mesh nodes, Helm/Zarf/k3d): confirm the 5-surface overlay packages still build;",
+    "Run the mesh across REAL separate nodes (box + a Space + a peer) over Tailscale, not just in-process.",
+    "Graduate szl-mesh specs 03/07 (skip-layer aggregation, governance metrics) from design \u2192 impl.",
+    "Bundle the mesh into the UDS fleet-overlay air-gap proof."
   ],
-  "delegated_to_agent": [
-    "BOX \u2014 serve the model on :8000 (OpenAI-compatible), pick vLLM (Qwen2.5-7B-Instruct-AWQ,",
-    "BOX \u2014 Tailscale up; capture MagicDNS name + 100.x IP; ensure MagicDNS on; add ACL so the Spaces",
-    "VERIFY (the real deliverable \u2014 honest behavior):",
-    "GET .../killinchu/v4/inference-posture + .../a11oy/api/szl/v1/inference-posture \u2192",
-    "both /v4/healthz + a11oy.net/v4/healthz \u2192 sovereign:true, inference:self-hosted-gpu, doctrine v11.",
-    "HARD INVARIANT (never violate, enforced in code): sovereign:true ONLY when a live /v1/models",
-    "STABILIZE \u2014 confirm the systemd + keepalive + cron actually survive a simulated flap (stop/start"
-  ],
-  "dispatch_mode": "none",
-  "dispatch_ok": false,
   "gated_skipped": [
-    "SPACES \u2014 set SZL_GPU_BASE_URL (= http://<box>:8000/v1) in the SECRET store of BOTH"
-  ],
-  "report": "replit-sync/forge-perplexity-update-20260613.md",
-  "probes": {
-    "https://a11oy.net/healthz": 200
-  },
-  "doctrine": "v11: locked=8, Lambda=Conjecture 1, never commit a key"
+    "a11oy.net / box: founder-gated. When the GPU secret + dispatch are wired (founder's runbook + WIRE_IT_UP.sh),"
+  ]
 }
