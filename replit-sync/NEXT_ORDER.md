@@ -65,3 +65,11 @@ Khipu=Conjecture 2; SLSA L1/L2/L3-roadmap; effectors SIMULATED; 889 vendors=5; n
 ## NOTIFY
 Report what you executed (or that you're holding for approval/freeze). Title 'SZL agentic wave: executed N box item(s)'
 or 'SZL agentic wave: staged, awaiting founder approval / dispatch / freeze-lift'.
+
+## KNOWN NON-BLOCKING RED (report-but-not-alarm, pre-existing, cleanup item)
+- a11oy "Doctrine — banned-token grep gate" = failure. This is the MARKETING-HYPE hygiene gate (flags words like
+  revolutionary/world-class/seamless/cutting-edge/bare "leading"), NOT the codename gate (codename-gate = GREEN,
+  0 visible amaru/rosie/sentra/jarvis). The integration-wave files are CLEAN of hype tokens (verified). The red is
+  pre-existing legacy prose from before this wave. FIX (low priority, post-freeze): grep the flagged file for the
+  hype word and either reword to honest prose OR add the file to .doctrine-allowlist if it legitimately enumerates
+  the ban-list. Do NOT weaken the gate. Not demo-blocking; the substantive Doctrine + Doctrine Overclaim guards are GREEN.
