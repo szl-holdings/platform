@@ -1,3 +1,12 @@
+# SZL Forge — ALSO QUEUED (2026-06-14 05:09 EDT): wire killinchu custom domain
+
+**→ `replit-sync/FORGE-INSTRUCTION-killinchu-domain-20260614.md`.** Real Killinchu app is LIVE on HF
+(szlholdings-killinchu.hf.space). killinchu.com is NOT ours (third-party parked). Founder will register
+killinchu.app / .ai; the order auto-wires it to the HF Space with TLS the moment it resolves to our
+Space (guarded — reports until then; never touches the squatter, never buys a domain).
+
+---
+
 # SZL Forge — TOP ORDER (re-pinned 2026-06-14 05:02 EDT): finish the MEASURED energy proof
 
 **→ Read `replit-sync/FORGE-INSTRUCTION-finish-measured-proof-20260614.md` FIRST.** Executor is LIVE
