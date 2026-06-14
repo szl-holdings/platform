@@ -48,3 +48,26 @@ HF Spaces = warm failover/mirror. Honest sovereign labeling preserved (sovereign
 send_notification when both apps are served always-up from the box (title 'SZL always-up: a11oy + killinchu live on sovereign box'
 with the public URLs + restart-recovery confirmation + sovereign-probe state), or if you hit a blocker (DNS ownership for
 killinchu.net, TLS, 5050 unreachable) listing exactly what the founder must do.
+
+## FULL-THREAD CTO AUDIT (June 14 ~2PM) — 3 ISSUES TO CLOSE (estate otherwise ALL GREEN)
+HF Spaces fully green; both repos CI all-green (a11oy 33 wf @ d333b997, killinchu 22 wf @ 50b3a950); 0 shared-module drift;
+doctrine v11/locked-8/c7c0ba17/Λ=Conjecture 1 everywhere; 0 visible codenames; 0 runtime CDN. The always-up order is
+PARTIALLY DONE — killinchu.a11oy.net is LIVE with 5050 sovereign inference wired (sovereign:true via Tailscale 100.125.77.31). Remaining:
+
+### ISSUE #1 (FORGE box redeploy — PRIORITY, demo host is behind):
+The public Hetzner box a11oy.net is running an image that PREDATES the frontier 3D + Restraint waves:
+- a11oy.net/static/shared/szl_holo3d.js → 404 (200 on HF) → 3D/holographic surfaces (/estate-hologram, /holo, *-3d) degraded on the public demo host
+- a11oy.net/api/a11oy/v1/restraint/{info,bench} → 404 (200 on HF) → Restraint degraded on the box
+FIX: rebuild/redeploy the a11oy container on the Hetzner box (167.233.50.75) to current GitHub main d333b997 (or newer),
+so the public box == HF == GitHub byte-identical. Verify a11oy.net/static/shared/szl_holo3d.js 200, /restraint/info 200,
+/estate-hologram renders, /honest still locked=8 @ c7c0ba17. Same for killinchu.a11oy.net → current killinchu main.
+This is the always-up demo host — it MUST serve the full current estate, not a stale image.
+
+### ISSUE #2 (FOUNDER action — DNS): killinchu.net apex has NO DNS. killinchu is live at killinchu.a11oy.net (200, sovereign).
+If the founder wants the clean killinchu.net, point its A-record → 167.233.50.75 (Hetzner). Until then killinchu.a11oy.net is the demo URL.
+
+### ISSUE #3 (FORGE lean-citation, your workstream): a11oy "lean citation guard" regressed to FAILURE @ 36ccea14
+(was SUCCESS @ 1f23ab2f). A cited real-proof no longer resolves in szl-holdings/lutar-lean. Reconcile every cited proof to
+an existing lutar-lean decl OR downgrade the citation to honest conjecture/roadmap wording so the guard goes green. Do NOT weaken it.
+
+NOTIFY when the box is redeployed to current main (Issue #1) with the verify URLs, and when lean-citation is green (Issue #3).
