@@ -359,3 +359,25 @@
   - https://a11oy.net/energy-holographic  -> 200 (18-graph showcase)
   - Then optional: #379 F1 (all 4 /pnt/limits pillars wired) + the other 3D surfaces #381-#390.
 - Reachability snapshot: https://a11oy.net/healthz -> 200
+
+## Auto-loop pass — order `c47162f2` — 2026-06-14T20:55:57Z
+
+- **Actionable items (17)** — handed to Forge agent (mode=`dispatch-cmd`, ok=`True`):
+  - Rebuild/redeploy the a11oy container on Hetzner 167.233.50.75 (a11oy.net) to current GitHub main (d333b997 or newer)
+  - Then HARD-PROVE by curling these EXACT URLs from the box's public hostname and pasting the real HTTP codes + a content sniff:
+  - https://a11oy.net/static/shared/szl_holo3d.js   -> MUST be 200, content-type application/javascript (was 404 stale)
+  - https://a11oy.net/api/a11oy/v1/restraint/info     -> MUST be 200 JSON (was 404 stale)
+  - https://a11oy.net/api/a11oy/v1/restraint/bench     -> MUST be 200 JSON (was 404 stale)
+  - https://a11oy.net/estate-hologram                  -> 200
+  - https://a11oy.net/nemo, /autoreview, /factory, /constitution, /quant, /grc, /restraint -> all 200
+  - https://a11oy.net/api/a11oy/v1/honest -> 200 with locked=8 @ c7c0ba17, Λ=Conjecture 1, doctrine v11
+  - https://killinchu.a11oy.net/elite, /elite/globe, /elite/restraint, /api/killinchu/v1/restraint/info -> all 200
+  - sovereign probe: confirm sovereign:true ONLY if the 5050 (Tailscale 100.125.77.31) is live; else honest sovereign:false
+  - Confirm restart-recovery: simulate a container restart, confirm both apps auto-recover <60s (systemd/restart:always).
+  - https://a11oy.net/static/shared/szl_holo3d.js                    -> 200 (application/javascript) — fixes the 3D demo
+  - https://a11oy.net/api/a11oy/v1/restraint/info  AND  /restraint/bench -> 200 JSON
+  - https://a11oy.net/api/a11oy/v1/energy/operator/status            -> 200, jobs_done>0, joules_measured_total>0 (MEASURED)
+  - https://a11oy.net/api/a11oy/v1/energy/ledger                     -> 200, signed receipts + chain integrity ok
+  - https://a11oy.net/api/a11oy/v1/energy/projection?window=running  -> 200, 1-day numbers (MODELED, math shown)
+  - https://a11oy.net/energy-ops  AND  /energy-holographic  AND  /holographic  AND  /estate-hologram -> all 200
+- Reachability snapshot: https://a11oy.net/healthz -> 200
