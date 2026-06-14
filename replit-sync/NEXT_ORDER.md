@@ -8,6 +8,15 @@ Then the rest of the queue.
 
 ---
 
+**ALSO QUEUED -> `replit-sync/FORGE-INSTRUCTION-upgrades-wave-20260614.md`:** after the PNT mesh +
+Holographic Ops land, run the UPGRADES wave — GPU-real PNT certificates (MEASURED, signed via FA-001 DSSE),
+/pnt/resilience history, the WebGPU volumetric estate-hologram hero, hex-heightmap auto-include of the new
+RTX-4000 rig, Λ-gate verdict ticker, and unify both physics pillars under one fundamental-limits index.
+PROVE-OR-DOWNGRADE in force.
+
+---
+
+
 # SZL Forge — ORDER: Agentic Evolution wave (SZL-Nemo + integration) — wires ready, founder-gated box work
 
 Read replit-sync/FREEZE.json first. Dispatch is still OFF (dispatch_mode:none) until the founder runs WIRE_IT_UP.sh —
