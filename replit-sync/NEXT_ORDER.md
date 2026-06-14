@@ -25,24 +25,24 @@ Do NOT claim done by inference — paste the real codes. Doctrine v11 unchanged;
 
 ---
 
-## CTO ADDENDUM (2026-06-14 15:34 EDT) — INCLUDE the energy operator + holographic stack in this same box rebuild
+## CTO ADDENDUM v2 (2026-06-14 16:05 EDT) — PRs ARE MERGED. NOW JUST REBUILD THE BOX.
 
-The box rebuild above pulls "current main" — but the demo's press-play energy centerpiece + the 18-graph holographic
-showcase are in OPEN, TESTED PRs not yet on main. MERGE these to main FIRST (CI green, additive, no gate weakened),
-THEN the box rebuild serves them. Merge order:
-1. #397 energy/06-holographic — bundles the szl3d toolkit + 18 live 3D graphs. THIS IS WHAT MAKES szl_holo3d.js / the
-   holographic surfaces resolve. (If a different holo3d.js already exists on main, reconcile — keep both byte-identical
-   GitHub==HF==box.)
-2. #394 energy/01-operator, #391 energy/02-ledger, #393 energy/03-projection, #392 energy/04-dashboard — the press-play
-   operator stack. After deploy, START the operator on the box (real jobs -> sovereign 5050 -> MEASURED joules ->
-   signed JouleCharge receipts), leave it RUNNING, and HARD-PROVE these URLs (paste real codes):
-   - https://a11oy.net/api/a11oy/v1/energy/operator/status  -> 200, jobs_done>0, joules_measured_total>0 (MEASURED)
-   - https://a11oy.net/api/a11oy/v1/energy/ledger            -> 200, signed receipts + chain-integrity ok
-   - https://a11oy.net/api/a11oy/v1/energy/projection?window=running -> 200, 1-day numbers (MODELED, math shown)
-   - https://a11oy.net/energy-ops          -> 200 (press-play Today console)
-   - https://a11oy.net/energy-holographic  -> 200 (18-graph showcase)
-3. Then optional: #379 F1 (all 4 /pnt/limits pillars wired) + the other 3D surfaces #381-#390.
+UPDATE: The CTO merged the full energy + holographic stack to a11oy main himself (admin, all CI green). Main SHA
+e24c8374 (or newer) now contains: static/shared/szl_holo3d.js (32412 B), szl_energy_operator.py, szl_energy_ledger.py,
+szl_energy_projection.py, joule_billing.py, pages/energy-ops.html, static/3d/energy_showcase/showcase.js + the szl3d
+toolkit. 36 energy tests green; serve.py registers operator+ledger+projection+dashboard routes. NO MERGE WORK LEFT.
 
-DEADLINE: demo-sound before June 16 (founder request). If any PR can't merge cleanly (conflict/CI red), say which + why +
-fix; do NOT force-merge anything that weakens a gate or touches lutar-lean. Revenue stays DRY-RUN/MODELED (no Stripe key).
-Report the actual measured 1-day number from the running operator — that is the figure the founder asked for.
+YOUR ONE JOB NOW (demo-critical #1): REBUILD/REDEPLOY the a11oy container on Hetzner 167.233.50.75 from current main
+(e24c8374+), byte-identical GitHub==box. Then START the energy operator on the box and leave it RUNNING. Then HARD-PROVE
+by curling these EXACT URLs from a11oy.net and pasting the REAL HTTP codes (the box is currently STALE — all below are
+404 right now and MUST become 200 after the rebuild):
+   - https://a11oy.net/static/shared/szl_holo3d.js                    -> 200 (application/javascript) — fixes the 3D demo
+   - https://a11oy.net/api/a11oy/v1/restraint/info  AND  /restraint/bench -> 200 JSON
+   - https://a11oy.net/api/a11oy/v1/energy/operator/status            -> 200, jobs_done>0, joules_measured_total>0 (MEASURED)
+   - https://a11oy.net/api/a11oy/v1/energy/ledger                     -> 200, signed receipts + chain integrity ok
+   - https://a11oy.net/api/a11oy/v1/energy/projection?window=running  -> 200, 1-day numbers (MODELED, math shown)
+   - https://a11oy.net/energy-ops  AND  /energy-holographic  AND  /holographic  AND  /estate-hologram -> all 200
+REPORT the actual measured 1-day number from the running operator (the figure the founder asked for) + the box image
+commit it's running. sovereign:true ONLY on a live 5050 probe; degrade honest if down. Revenue stays DRY-RUN/MODELED
+(no Stripe key). Do NOT claim done by inference — paste the real codes. If any stays 404, say exactly which + why + fix.
+Deadline: demo-sound before June 16.
