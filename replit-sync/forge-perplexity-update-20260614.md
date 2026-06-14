@@ -293,3 +293,23 @@
   - a11oy "Doctrine — banned-token grep gate" = failure. This is the MARKETING-HYPE hygiene gate (flags words like
   - F4 a11oy /nemo+/energy+/grc 3D (signed MoE token-flows, OSCAL coverage spheres) + killinchu /elite/mesh 3D (Fiedler λ2 self-heal).
 - Reachability snapshot: https://a11oy.net/healthz -> 200
+
+## Auto-loop pass — order `8acc79f6` — 2026-06-14T17:55:47Z
+
+- **Actionable items (15)** — handed to Forge agent (mode=`dispatch-cmd`, ok=`True`):
+  - a11oy.net = PUBLIC Hetzner server 167.233.50.75 — always-on, already serving a11oy API at https://a11oy.net (200, ~0.37s).
+  - The sovereign GPU brain = founder's RTX 5050, joined to Tailscale at 100.125.77.31 (PRIVATE tailnet, inference only).
+  - killinchu.net has NO DNS yet. killinchu currently only lives on the HF free Space (sleeps).
+  - HF Spaces are free cpu-basic; gcTimeout 48h but they pause on rebuilds/platform pressure → the flicker the founder sees.
+  - HOST BOTH APPS ON THE HETZNER BOX (a11oy.net): docker compose up a11oy + killinchu containers on 167.233.50.75
+  - https://a11oy.net  → a11oy container
+  - https://killinchu.net (once DNS set) OR https://killinchu.a11oy.net (subdomain, works immediately) → killinchu container
+  - INFERENCE → SOVEREIGN 5050: both containers' model calls route to the 5050 over Tailscale (http://100.125.77.31:11434
+  - ALWAYS-ON: systemd units (or docker compose restart:always) for both app containers + the reverse proxy + the
+  - DNS: point killinchu.net A-record → 167.233.50.75 if the founder owns it (else use killinchu.a11oy.net subdomain now,
+  - HF AS FAILOVER: keep the HF Spaces running (the hourly uptime cron 84b8f79a already auto-restarts them). Optionally add
+  - VERIFY: curl https://a11oy.net/api/a11oy/v1/honest (locked=8 @ c7c0ba17, Λ=Conjecture 1, v11) + the killinchu public
+  - sovereign:true ONLY on a live per-GPU gpu_reachable probe — NEVER fake it; degrade honestly if the 5050 is down.
+  - Keep GitHub↔HF↔box byte-identical on shared modules; never weaken a gate; never commit a key (TLS/Tailscale/NIM keys
+  - This is a box production change → it's founder-approved for hosting/exposing the apps; but anything touching a
+- Reachability snapshot: https://a11oy.net/healthz -> 200
