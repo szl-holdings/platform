@@ -1,0 +1,18 @@
+# SZL unified inference gateway. Run on a Linux host that is ON the Tailscale tailnet
+# (the Hetzner box qualifies). Outbound docker-bridge routing reaches 100.x via the host.
+#   docker compose up -d        # light it up
+#   docker compose down         # turn it off
+services:
+  litellm:
+    image: ghcr.io/berriai/litellm:main-stable
+    container_name: szl-litellm
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:4000:4000"        # private to host; expose via nginx if needed
+    env_file:
+      - /opt/alloyscape/.env          # GITHUB_MODELS_TOKEN, HF_TOKEN, GROQ_API_KEY, NVIDIA_NIM_API_KEY
+    volumes:
+      - ./litellm.config.yaml:/app/config.yaml:ro
+    command: ["--config", "/app/config.yaml", "--port", "4000", "--host", "0.0.0.0"]
+    mem_limit: 700m                    # cap so it can never starve a11oy/killinchu
+    memswap_limit: 1200m

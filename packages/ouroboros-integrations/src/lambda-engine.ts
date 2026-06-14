@@ -38,7 +38,7 @@
  *                    I^(1/9) * M^(1/9) * B^(1/9) * N^(1/9)
  */
 
-import { type LutarAxes9, LutarReportN, lutarInvariant9, verifyLutarBoundN } from "@workspace/ouroboros-invariant";
+import { type LutarAxes9, type LutarReportN, lutarInvariant9, verifyLutarBoundN } from "@workspace/ouroboros-invariant";
 
 export type ModelTier = "frontier" | "mid" | "workhorse";
 export type VerificationDepth = 1 | 2 | 3;

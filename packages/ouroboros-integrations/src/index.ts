@@ -22,9 +22,6 @@ export {
   A11oyOrchestrator,
   type A11oyGuardRequest,
   type A11oyGuardResult,
-  type A11oySovereignResult,
-  type A11oyInnovationRegistry,
-  type A11oyInnovationRegistryEntry,
   type A11oyOrchestratorStats,
 } from "./a11oy-orchestrator.js";
 
