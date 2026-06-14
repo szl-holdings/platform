@@ -1,3 +1,13 @@
+# SZL Forge — TOP ORDER (re-pinned 2026-06-14 05:02 EDT): finish the MEASURED energy proof
+
+**→ Read `replit-sync/FORGE-INSTRUCTION-finish-measured-proof-20260614.md` FIRST.** Executor is LIVE
+on sovereign GPU rtx-betterwithage; a11oy.net /pinn is MEASURED (real NVML). Two finishing items:
+(1) sync the MEASURED artifact to the HF a11oy Space mirror (still SAMPLE) via hf-sync; (2) DSSE-sign
+the certificate with the FA-001 key so /verify returns a signed receipt. Both SAFE/additive. Then the
+standing alignment job below.
+
+---
+
 # SZL Forge — ORDER: Agentic Evolution wave (SZL-Nemo + integration) — wires ready, founder-gated box work
 
 Read replit-sync/FREEZE.json first. Dispatch is still OFF (dispatch_mode:none) until the founder runs WIRE_IT_UP.sh —
