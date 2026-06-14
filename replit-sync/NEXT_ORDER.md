@@ -1,3 +1,17 @@
+# SZL Forge — TOP ORDER (re-pinned 2026-06-14 11:38 EDT): LAND FLY-HIGH F1 (/pnt/limits 4 pillars) + GITLEAKS FIX
+
+**-> Read `replit-sync/FORGE-INSTRUCTION-flyhigh-f1-deploy-and-gitleaks-20260614.md` FIRST.** PR #379
+(branch flyhigh/f1-compute-bounds) wires all four /pnt/limits pillars honestly (compute_bounds via
+szl_pinn_bounds Landauer/ML/Bremermann/Bekenstein SAMPLE; pnt_resilience + nav_coasting via closed_form_stdlib
+in the numpy-less HF image; quantum_sensor MODELED). It is CONFLICTING (rebase on main) and the Gitleaks
+job fails on a WHOLE-TREE false positive (`private_key:` = a function PARAMETER NAME in the runtime-attestation
+module, not a secret — scope an allowlist in .gitleaks.toml, do NOT disable the rule). Rebase → fix gitleaks
+allowlist → verify guard+gitleaks+pnt-tests green → squash-merge --admin → rebuild box+HF → PROVE all four
+pillars wired:true at https://a11oy.net/api/a11oy/v1/pnt/limits. This is DARPA-critical (PINPOINT EOI due July 13).
+PROVE-OR-DOWNGRADE: never force a pillar green; numpy-less honesty preserved.
+
+---
+
 # SZL Forge — TOP ORDER (re-pinned 2026-06-14 11:08 EDT): CLOSE ALL 6 GAPS
 
 **-> Read `replit-sync/FORGE-INSTRUCTION-close-all-gaps-20260614.md` FIRST.** A 6-dev Opus-4.8 team is
@@ -129,3 +143,4 @@ the no-overclaim gate correctly refusing a proof citation that doesn't yet resol
 Forge's active lutar-lean reconciliation workstream (recent commits repoint phantom proof citations). FINISH IT:
 reconcile every cited real-proof to an existing lutar-lean decl (or downgrade the citation to honest "conjecture/roadmap"
 wording), so the guard goes green. Do NOT weaken the guard. This is the only outstanding red; everything else is green.
+
