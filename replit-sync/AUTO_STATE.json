@@ -1,9 +1,9 @@
 {
-  "order_sha": "a618927ff7cc89e9a3c4ce3e6ef156787a74c1be",
+  "order_sha": "f22120f03458a65c72fb3836e8b2c410b36f815f",
   "order_path": "replit-sync/NEXT_ORDER.md",
   "state": "done",
-  "seen_at": "2026-06-14T10:09:31Z",
-  "updated_at": "2026-06-14T10:10:16Z",
+  "seen_at": "2026-06-14T10:17:39Z",
+  "updated_at": "2026-06-14T10:17:39Z",
   "idle": false,
   "actionable": [
     "a11oy resumable SIGNED ReAct agent loop + Generative-Agents memory + Reflexion + Voyager skill library (/agent-loop).",
@@ -39,15 +39,18 @@
     "ENERGY EXPORTER (FORGE_BOX_ENERGY.md): nvidia-smi power.draw \u2192 vLLM /metrics hook so joules_consumed in receipts goes",
     "OSCAL: the a11oy OSCAL component-definition + OPA/Rego policies are in a11oy/compliance/oscal/ \u2014 wire the OSCAL/Trestle"
   ],
-  "dispatch_mode": "dispatch-cmd",
+  "dispatch_mode": "deploy-only",
   "dispatch_ok": true,
   "gated_skipped": [
     "J/token + carbon energy in EVERY signed receipt + speculative-decode/LMCache/LiteLLM/RouteLLM app-layer (/energy).",
     "a11oy \"Doctrine \u2014 banned-token grep gate\" = failure. This is the MARKETING-HYPE hygiene gate (flags words like"
   ],
-  "report": "replit-sync/forge-perplexity-update-20260614.md",
+  "report": "replit-sync/forge-report-20260614T101738Z-p0-white-screen.md",
   "probes": {
+    "https://a11oy.net/ (bytes)": 142766,
+    "https://szlholdings-a11oy.hf.space/ (bytes)": 142715,
     "https://a11oy.net/healthz": 200
   },
-  "doctrine": "v11: locked=8, Lambda=Conjecture 1, never commit a key"
+  "doctrine": "v11: locked=8, Lambda=Conjecture 1, never commit a key",
+  "last_order": "P0 HOTFIX a11oy.net / white-screen -> DONE (deploy-only, both surfaces proven)"
 }
