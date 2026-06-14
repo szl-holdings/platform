@@ -1,3 +1,19 @@
+# R-SDA-OPERATIONAL-REPOST (TOP) — execute the SDA build-out the moment dispatch is wired · go, full admin
+
+NOTE TO FORGE POLLER: this re-pins the SDA operational order to the TOP (an older mesh order had floated above it). Until the founder runs WIRE_IT_UP.sh (dispatch_mode flips from `none`), REPORT these; execute hands-off once dispatched. Founder runbook for the wire-up: replit-sync/FOUNDER_WIREUP_AND_SDA_OPERATIONAL.md.
+
+## EXECUTE (when dispatched) — full detail in R-SDA-OPERATIONAL below
+1. BUILD + cosign-sign + SLSA-attest `ghcr.io/szl-holdings/khipu-sda-core:uds-v0.4.0` from the now-live repo `szl-holdings/khipu-sda-core` (FA-001 = founder cosign key; if absent, STOP at sign + report `needs: cosign key`, leave digest BLANK, never fake).
+2. REBUILD a11oy + killinchu images FROM MAIN → ships /api/.../mosaic/* + the Governed-Anomalies tab + the Mosaic/Domain-Superiority COP view; redeploy both HF Spaces; confirm 200.
+3. PUSH the new SDA static space to SZLHOLDINGS/sda (source: replit-sync/hf_spaces/hf_sda_space/).
+4. TRAIN the SDA engine on real data on the GPU fabric, capture MEASURED precision/recall + walltime + a REAL signed DSSE receipt (needs chaski started — founder gate; else run on rtx-betterwithage + report).
+5. BUILD + airgap-test the szl-sda UDS bundle (build_sign_all.sh -> airgap_test.sh; same FA-001 signing gate).
+6. VAST_API_KEY (founder) for marketplace earning — flag `needs:` when all else green.
+
+DOCTRINE v11: Λ=Conjecture 1 advisory · locked=8 · Khipu BFT=Conjecture 2 · orbital-SDA=ROADMAP (air/maritime live) · SLSA L1 honest (L2 roadmap until signed) · sovereign own-metal only · NEVER fabricate signatures/digests/numbers · cite-not-plagiarize (inspired by True Anomaly Mosaic, NOT affiliated; clean-room) · no banned codenames user-visible · szl-router PRIVATE. Report each `needs:` honestly into AUTO_STATE.json.
+
+---
+
 # SZL Forge — ORDER: szl-mesh alignment + keep-it-live (NEW: the mesh is now REAL & operational)
 
 Read replit-sync/FREEZE.json first (not yet active → alignment allowed). Note: Forge dispatch is still
