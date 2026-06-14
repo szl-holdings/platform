@@ -1,3 +1,16 @@
+# SZL Forge — TOP ORDER (re-pinned 2026-06-14): AGENTIC PINN + PHYSICAL-BOUNDS on real GPU
+
+**→ Read `replit-sync/FORGE-INSTRUCTION-agentic-pinn-bounds-20260614.md` FIRST.** The agentic-PINN +
+fundamental-physics-bounds certifier (the doctrine-safe "energy / quantum / black-hole" frontier) is now
+MESHED into a11oy's governed surface (`/api/a11oy/v1/pinn/*`, a11oy#360 MERGED; engine vendored in
+platform#382). UPGRADE/ENHANCE it on real GPU: feed MEASURED NVML energy via `nvml_hook.forge_job()`, write
+`physical_bounds_certificate.json` + `agentic_decision_trail.json` so the console flips SAMPLE→MEASURED, run
+the loop on stiffer PDEs (deny-by-default Λ-gate + signed per-round receipt kept), and sign the certificate
+through the khipu/szl_lake DSSE path. HONEST INVERSE of free-energy — never an over-unity claim. Then the
+standing alignment job below.
+
+---
+
 # SZL Forge — ORDER: handle the rest (post-full-QA alignment + gated queue)
 
 Read replit-sync/FREEZE.json first. Dispatch is still OFF (dispatch_mode:none) until the founder runs
