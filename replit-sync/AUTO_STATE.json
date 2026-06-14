@@ -1,10 +1,8 @@
 {
-  "order_sha": "21450a57d403a88d5b09637fbac42b94ff5d80d9",
+  "order_sha": "a618927ff7cc89e9a3c4ce3e6ef156787a74c1be",
   "order_path": "replit-sync/NEXT_ORDER.md",
-  "state": "done",
-  "seen_at": "2026-06-14T09:09:23Z",
-  "updated_at": "2026-06-14T09:10:25Z",
-  "idle": false,
+  "state": "processing",
+  "seen_at": "2026-06-14T10:09:31Z",
   "actionable": [
     "a11oy resumable SIGNED ReAct agent loop + Generative-Agents memory + Reflexion + Voyager skill library (/agent-loop).",
     "\u03c4-bench eval harness (MEASURED) + ECE/Brier calibration + conformal-prediction wrapper + Colang policy + IETF receipt",
@@ -22,32 +20,8 @@
     "ENERGY EXPORTER (FORGE_BOX_ENERGY.md): nvidia-smi power.draw \u2192 vLLM /metrics hook so joules_consumed in receipts goes",
     "OSCAL: the a11oy OSCAL component-definition + OPA/Rego policies are in a11oy/compliance/oscal/ \u2014 wire the OSCAL/Trestle"
   ],
-  "delegated_to_agent": [
-    "a11oy resumable SIGNED ReAct agent loop + Generative-Agents memory + Reflexion + Voyager skill library (/agent-loop).",
-    "\u03c4-bench eval harness (MEASURED) + ECE/Brier calibration + conformal-prediction wrapper + Colang policy + IETF receipt",
-    "killinchu BFT quorum (n\u22653f+1) + CBF-QP safety filter + EFE act/ask gate + Fiedler \u03bb2 + organism NCA self-repair",
-    "active-flux observer (Li Yu / IEEE 911711) generalized \u2192 killinchu sensor-fusion crossover + a11oy router crossover",
-    "SZL-NEMO core: governed-MoE domain-expert router (\u039b-gated, SIGNED per selection) + MTP default + self-improvement loop",
-    "GOVERNED AUTO-REVIEW (Cursor pattern, made ours): inline classifier, autonomy DIAL L0-L5, verdict \u039b-gated + DSSE-SIGNED",
-    "OPA/Rego\u2192OSCAL/NIST-AI-RMF + conformal/flapping. killinchu engage/ROE ESCALATES even at L5 (effector SIMULATED). (/autoreview)",
-    "FABRO governed factory (DOT-graph workflows + verification gates + Working\u2192Verify\u2192Merge, signed nodes) + Constitutional",
-    "Sovereign GPU-QUANT engine: Ledoit-Wolf+Marchenko-Pastur PCA / TDA-fracture / HJB-Kelly (SAMPLE_SIGNAL|NO_BACKTEST),",
-    "killinchu PLATFORM DYNAMICS (6DOF + Moore-Penrose allocation, MODELED) + a11oy GRC alignment (ISO 42001/NIST AI RMF",
-    "SZL-NEMO (FORGE_SZL_NEMO.md): QLoRA/LoRA post-train Qwen3-32B into the SZL-Nemo checkpoint on the doctrine + our agent",
-    "2-GPU SERVE + THROTTLE (FORGE_2GPU_ENERGY.md): vLLM tensor-parallel TP=2 across main GPU + RTX 4000 OR role-split",
-    "NIM CLOUD TIER: register NVIDIA NIM (build.nvidia.com) Nemotron-Ultra as a routed cloud tier in LiteLLM/RouteLLM",
-    "ENERGY EXPORTER (FORGE_BOX_ENERGY.md): nvidia-smi power.draw \u2192 vLLM /metrics hook so joules_consumed in receipts goes",
-    "OSCAL: the a11oy OSCAL component-definition + OPA/Rego policies are in a11oy/compliance/oscal/ \u2014 wire the OSCAL/Trestle"
-  ],
-  "dispatch_mode": "dispatch-cmd",
-  "dispatch_ok": true,
   "gated_skipped": [
     "J/token + carbon energy in EVERY signed receipt + speculative-decode/LMCache/LiteLLM/RouteLLM app-layer (/energy).",
     "a11oy \"Doctrine \u2014 banned-token grep gate\" = failure. This is the MARKETING-HYPE hygiene gate (flags words like"
-  ],
-  "report": "replit-sync/forge-perplexity-update-20260614.md",
-  "probes": {
-    "https://a11oy.net/healthz": 200
-  },
-  "doctrine": "v11: locked=8, Lambda=Conjecture 1, never commit a key"
+  ]
 }
