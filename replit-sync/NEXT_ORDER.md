@@ -1,3 +1,18 @@
+
+# SZL Forge — ORDER #2 (pinned 2026-06-14 14:20 EDT): WARHACKER JUNE 18 DEMO STACK (after hosting)
+
+**-> Read `replit-sync/FORGE-INSTRUCTION-warhacker-demo-stack-20260614.md`.** KEEP the ALWAYS-UP hosting order
+above as #1 (demo-critical). THEN merge+deploy these EXISTING TESTED PRs onto the always-up box so they are IN
+the June 18 demo: (1) energy operator stack #394 operator + #391 ledger + #393 projection + #392 dashboard —
+press-play → REAL jobs → MEASURED joules → signed JouleCharge receipts → /energy-ops "Today" console; START it on
+the box, let it run, and REPORT the actual measured 1-day number + leave it running. (2) #397 holographic 18-graph
+energy showcase on /holographic + /energy-holographic + the HF energy Space (web/energy.html). (3) #379 F1 PNT
+pillars (rebase + gitleaks param-name allowlist) so all 4 /pnt/limits wired. (4) optional: the other 8 3D surfaces
+#381-#390 + mesh the 5 governance gap routes. PROVE every endpoint live or BLOCKED-honestly; 0 CDN; no fabricated
+joules/dollars/200s; revenue stays DRY-RUN/MODELED (no Stripe key); joules MEASURED only via NVML. This is the
+"press play and it earns, shown in holographic 3D, provable" demo the founder asked for.
+
+---
 # SZL Forge — ORDER: ALWAYS-UP demo hosting on the sovereign estate (a11oy + killinchu off HF free tier)
 
 PRIORITY: founder has a demo (Defense Unicorns Warhacker, founder demos June 18). The HF free Spaces
@@ -71,3 +86,4 @@ If the founder wants the clean killinchu.net, point its A-record → 167.233.50.
 an existing lutar-lean decl OR downgrade the citation to honest conjecture/roadmap wording so the guard goes green. Do NOT weaken it.
 
 NOTIFY when the box is redeployed to current main (Issue #1) with the verify URLs, and when lean-citation is green (Issue #3).
+
