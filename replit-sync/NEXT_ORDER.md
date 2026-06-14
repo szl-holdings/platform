@@ -1,3 +1,14 @@
+# SZL Forge — TOP ORDER (re-pinned 2026-06-14 05:28 EDT): SIGN + upgrade wave
+
+**→ Read `replit-sync/FORGE-INSTRUCTION-sign-and-upgrade-20260614.md` FIRST.** Box + HF /pinn are MEASURED
+(verified). P0: finish the DSSE SIGNATURE (UNSIGNED -> signed via FA-001 key; if key missing, report
+BLOCKED: needs founder — never fake it). P1: verifiable upgrade wave (2D-heat/Burgers PINN, real energy
+exporter, cert history endpoint, console bounds badge, 2nd-GPU role-split on chaski). PROVE-OR-DOWNGRADE
+stays in force: DONE only with a pushed commit SHA / HTTP 200 / verifying signature — else RECOMMENDED or
+BLOCKED. Then the rest.
+
+---
+
 # SZL Forge — TOP ORDER (CORRECTIVE, re-pinned 2026-06-14 05:19 EDT)
 
 **→ Read `replit-sync/FORGE-INSTRUCTION-prove-or-downgrade-20260614.md` FIRST.** Dispatch is GREEN, but
