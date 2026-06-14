@@ -1,3 +1,16 @@
+# SZL Forge — DEMO-CRITICAL ADDENDUM (2026-06-14 18:48 EDT): MAKE JOULES MEASURED ON BLACKWELL + MINT RECEIPTS
+
+**-> Read `replit-sync/FORGE-INSTRUCTION-joules-measured-on-blackwell-20260614.md`.** Your FORGE_LLM_SPEC cutover was
+correct (inference->mesh, energy monitors->raw GPU, reversible). BUT joules_measured_total is STUCK at 22899.74 (stale
+stub figure, not climbing) and ledger receipts STUCK at 318 — the NVML meter isn't reading the live Blackwell RTX 5050
+yet and no new JouleCharge receipts are minting. SURGICAL FIX: point the energy-metering path (szl-joule.env / NVML
+exporter) at the now-reachable raw Blackwell GPU (100.125.77.31:11434, NOT the router); confirm joules CLIMB (MEASURED,
+fresh); ensure JobRecords carry real joules so receipts mint (chain length > 318 climbing); drop 'local-stub' from
+nodes_computing. PROVE with two operator readings a minute apart showing joules increasing + new receipts. If NVML genuinely
+can't read the Windows GPU over tailnet, report BLOCKED honestly (we'll demo the 318 receipts + honest reason). Do NOT
+revert the inference cutover. Revenue DRY-RUN. This is the heart of the energy demo.
+
+---
 # SZL Forge — TOP ORDER (pinned 2026-06-14 18:18 EDT): WIRE FOUNDER LAPTOP AS SOVEREIGN BRAIN + SECONDARY HOST
 
 **-> Read `replit-sync/FORGE-INSTRUCTION-laptop-brain-blackwell-arc-20260614.md`** (full steps) and
