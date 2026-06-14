@@ -1,8 +1,10 @@
 {
   "order_sha": "13150ba0ee3d4dcc4d4a473f6c8d1c1a354e12b1",
   "order_path": "replit-sync/NEXT_ORDER.md",
-  "state": "processing",
+  "state": "done",
   "seen_at": "2026-06-14T01:08:21Z",
+  "updated_at": "2026-06-14T01:08:24Z",
+  "idle": false,
   "actionable": [
     "Perf fixed: /feeds/vessels/stats 17.5s->0.26s (parallel+cache+single-flight); /feeds/aircraft 14s->0.4s",
     "copy-sync-lockstep guard GREEN on a11oy+killinchu (permanent fix for the COPY<->mirror class).",
@@ -16,7 +18,27 @@
     "Air-gap UDS deploy proof run + bundle-level SLSA attestation (P-2-a/P-2-b).",
     "AISStream key -> Asia vessel theaters LIVE (SZL_AISSTREAM_API_KEY in Space secrets)."
   ],
+  "delegated_to_agent": [
+    "Perf fixed: /feeds/vessels/stats 17.5s->0.26s (parallel+cache+single-flight); /feeds/aircraft 14s->0.4s",
+    "copy-sync-lockstep guard GREEN on a11oy+killinchu (permanent fix for the COPY<->mirror class).",
+    "Mobile: all surfaces 0 overflow / 0 console errors at 390px. szl-mesh live + operational",
+    "Keep CI green across szl-holdings/{a11oy,killinchu,szl-mesh,khipu-consensus,uds-bundles,szl-fleet-overlay}",
+    "Keep GitHub<->HF byte-identical on all shared + maritime + mesh + feeds modules; re-mirror via",
+    "Keep the GPU-sovereign posture honest: sovereign:true ONLY with a live gpu_reachable probe. If the",
+    "szl-fleet-overlay: confirm the peat-mesh node packages build; amaru/rosie/sentra are internal-only",
+    "Author canonical .github DOCTRINE_V11.md (P-C-a) + reconcile org FORGE_BUILD_BRIEF stale-5 (P-2-c) +",
+    "Run szl-mesh across REAL separate nodes (box + Space + peer over Tailscale), not just in-process.",
+    "Air-gap UDS deploy proof run + bundle-level SLSA attestation (P-2-a/P-2-b).",
+    "AISStream key -> Asia vessel theaters LIVE (SZL_AISSTREAM_API_KEY in Space secrets)."
+  ],
+  "dispatch_mode": "none",
+  "dispatch_ok": false,
   "gated_skipped": [
     "Gaps fixed: uds-bundles gitleaks red->green (allow on published cosign pubkey fp); killinchu HF"
-  ]
+  ],
+  "report": "replit-sync/forge-perplexity-update-20260614.md",
+  "probes": {
+    "https://a11oy.net/healthz": 200
+  },
+  "doctrine": "v11: locked=8, Lambda=Conjecture 1, never commit a key"
 }
