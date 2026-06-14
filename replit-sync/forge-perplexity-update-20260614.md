@@ -259,3 +259,37 @@
   - a11oy "Doctrine — banned-token grep gate" = failure. This is the MARKETING-HYPE hygiene gate (flags words like
   - F4 a11oy /nemo+/energy+/grc 3D (signed MoE token-flows, OSCAL coverage spheres) + killinchu /elite/mesh 3D (Fiedler λ2 self-heal).
 - Reachability snapshot: https://a11oy.net/healthz -> 200
+
+## Auto-loop pass — order `66291ab8` — 2026-06-14T16:55:53Z
+
+- **Actionable items (25)** — handed to Forge agent (mode=`dispatch-cmd`, ok=`True`):
+  - a11oy resumable SIGNED ReAct agent loop + Generative-Agents memory + Reflexion + Voyager skill library (/agent-loop).
+  - τ-bench eval harness (MEASURED) + ECE/Brier calibration + conformal-prediction wrapper + Colang policy + IETF receipt
+  - killinchu BFT quorum (n≥3f+1) + CBF-QP safety filter + EFE act/ask gate + Fiedler λ2 + organism NCA self-repair
+  - active-flux observer (Li Yu / IEEE 911711) generalized → killinchu sensor-fusion crossover + a11oy router crossover
+  - SZL-NEMO core: governed-MoE domain-expert router (Λ-gated, SIGNED per selection) + MTP default + self-improvement loop
+  - GOVERNED AUTO-REVIEW (Cursor pattern, made ours): inline classifier, autonomy DIAL L0-L5, verdict Λ-gated + DSSE-SIGNED
+  - OPA/Rego→OSCAL/NIST-AI-RMF + conformal/flapping. killinchu engage/ROE ESCALATES even at L5 (effector SIMULATED). (/autoreview)
+  - FABRO governed factory (DOT-graph workflows + verification gates + Working→Verify→Merge, signed nodes) + Constitutional
+  - Sovereign GPU-QUANT engine: Ledoit-Wolf+Marchenko-Pastur PCA / TDA-fracture / HJB-Kelly (SAMPLE_SIGNAL|NO_BACKTEST),
+  - killinchu PLATFORM DYNAMICS (6DOF + Moore-Penrose allocation, MODELED) + a11oy GRC alignment (ISO 42001/NIST AI RMF
+  - SZL-NEMO (FORGE_SZL_NEMO.md): QLoRA/LoRA post-train Qwen3-32B into the SZL-Nemo checkpoint on the doctrine + our agent
+  - 2-GPU SERVE + THROTTLE (FORGE_2GPU_ENERGY.md): vLLM tensor-parallel TP=2 across main GPU + RTX 4000 OR role-split
+  - NIM CLOUD TIER: register NVIDIA NIM (build.nvidia.com) Nemotron-Ultra as a routed cloud tier in LiteLLM/RouteLLM
+  - ENERGY EXPORTER (FORGE_BOX_ENERGY.md): nvidia-smi power.draw → vLLM /metrics hook so joules_consumed in receipts goes
+  - OSCAL: the a11oy OSCAL component-definition + OPA/Rego policies are in a11oy/compliance/oscal/ — wire the OSCAL/Trestle
+  - F1 holographic substrate kit (scene/graph/globe/Λ-trust-sphere/signed-pulse/time-replay, WebGL2+WebGPU+2D-fallback), byte-identical both apps.
+  - F2 a11oy /factory 3D (signed-node pulses + verify locks) + /autoreview 3D (autonomy dial L0-L5 + Λ verdict sphere).
+  - F3 killinchu /elite/globe holographic battlespace globe: C2 layer (LIVE ADS-B + CBF-QP tubes + EFE + BFT + signed engage, SIMULATED/no-weapons) + Maritime layer (LIVE AIS + Λ-risk trust spheres + dark-fleet + AIS-spoof ghosts + 5-modality).
+  - F5 a11oy /constitution-3d + /quant-3d + THE UNIFIED ESTATE HOLOGRAM at /estate-hologram (globe+proof-DAG+Λ-sphere+mesh+organism, signed-decision light-flows).
+  - a11oy Restraint core: 6-rung frugality ladder (YAGNI→stdlib→native→installed-deps→one-line→minimal), lite/full/ultra,
+  - Wired into SZL-Nemo code path (/nemo) + ReAct agent loop (/agent-loop): every code diff routes through the ladder, signed.
+  - killinchu + Chaski: shared szl_restraint.py byte-identical both apps; /api/killinchu/v1/restraint/*; Chaski transport badges
+  - Energy tie-in: frugality→joules-saved panel on /energy (honest SAMPLE until live GPU probe); MEASURED benchmark dashboard
+  - Governance: Auto-Review rule AR-006-prefer-minimal-diff (bloated diff → narrow verdict, OSCAL SA-8/SA-15/CM-7, NIST MANAGE 2.3,
+  - Cited Ponytail (github.com/DietrichGebert/ponytail, MIT) honestly as "adopted + governed", not invented.
+- **Founder-gated, auto-skipped (3)** (Doctrine v11 — keys/secrets/major-bumps):
+  - J/token + carbon energy in EVERY signed receipt + speculative-decode/LMCache/LiteLLM/RouteLLM app-layer (/energy).
+  - a11oy "Doctrine — banned-token grep gate" = failure. This is the MARKETING-HYPE hygiene gate (flags words like
+  - F4 a11oy /nemo+/energy+/grc 3D (signed MoE token-flows, OSCAL coverage spheres) + killinchu /elite/mesh 3D (Fiedler λ2 self-heal).
+- Reachability snapshot: https://a11oy.net/healthz -> 200
