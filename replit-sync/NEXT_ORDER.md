@@ -1,3 +1,13 @@
+# SZL Forge — TOP ORDER (re-pinned 2026-06-14 07:17 EDT): PNT mesh + WebGPU Holographic Ops
+
+**-> Read `replit-sync/FORGE-INSTRUCTION-pnt-mesh-and-holographic-ops-20260614.md` FIRST.**
+P0: wire the 5 PNT engine files (already on a11oy main) into serve.py + Dockerfile -> /api/a11oy/v1/pnt/*
+(sensor, resilience, coast, limits) 200 on box + HF. P1: build the WebGPU Holographic Ops tab (6 live-bound
+3D views + mandatory 2D fallback, glassmorphic, 0 CDN, MEASURED/MODELED labels). PROVE-OR-DOWNGRADE in force.
+Then the rest of the queue.
+
+---
+
 # SZL Forge — ORDER: Agentic Evolution wave (SZL-Nemo + integration) — wires ready, founder-gated box work
 
 Read replit-sync/FREEZE.json first. Dispatch is still OFF (dispatch_mode:none) until the founder runs WIRE_IT_UP.sh —
