@@ -1,57 +1,67 @@
-# SZL Forge — TOP ORDER (re-pinned 2026-06-14): AGENTIC PINN + PHYSICAL-BOUNDS on real GPU
+# SZL Forge — ORDER: Agentic Evolution wave (SZL-Nemo + integration) — wires ready, founder-gated box work
 
-**→ Read `replit-sync/FORGE-INSTRUCTION-agentic-pinn-bounds-20260614.md` FIRST.** The agentic-PINN +
-fundamental-physics-bounds certifier (the doctrine-safe "energy / quantum / black-hole" frontier) is now
-MESHED into a11oy's governed surface (`/api/a11oy/v1/pinn/*`, a11oy#360 MERGED; engine vendored in
-platform#382). UPGRADE/ENHANCE it on real GPU: feed MEASURED NVML energy via `nvml_hook.forge_job()`, write
-`physical_bounds_certificate.json` + `agentic_decision_trail.json` so the console flips SAMPLE→MEASURED, run
-the loop on stiffer PDEs (deny-by-default Λ-gate + signed per-round receipt kept), and sign the certificate
-through the khipu/szl_lake DSSE path. HONEST INVERSE of free-energy — never an over-unity claim. Then the
-standing alignment job below.
+Read replit-sync/FREEZE.json first. Dispatch is still OFF (dispatch_mode:none) until the founder runs WIRE_IT_UP.sh —
+REPORT these until then; execute box items once dispatch is on AND the founder approves. The ecosystem is sovereign on
+the GPU (sovereign:true ONLY with a live gpu_reachable probe — keep it honest, never fake). Defense Unicorns Warhacker
+June 16-19. FREEZE activates 2026-06-16 00:00 ET → read-only; the items below are STAGED for execution after approval.
 
----
+## WHAT LANDED THIS WAVE (all LIVE on HF, byte-identical GitHub↔HF, CI green, doctrine v11 clean)
+Two waves of 5 Opus devs each, fully verified live (locked=8 @ c7c0ba17, Λ=Conjecture 1 <1.0, 0 visible codenames,
+0 CDN, effectors SIMULATED, trust<100%, signed DSSE receipts, honest MEASURED/SAMPLE/MODELED/ROADMAP labels):
 
-# SZL Forge — ORDER: handle the rest (post-full-QA alignment + gated queue)
+WAVE 1 (foundation):
+- a11oy resumable SIGNED ReAct agent loop + Generative-Agents memory + Reflexion + Voyager skill library (/agent-loop).
+- τ-bench eval harness (MEASURED) + ECE/Brier calibration + conformal-prediction wrapper + Colang policy + IETF receipt
+  alignment (draft-marques-asqav-compliance-receipts-05) (/governance).
+- J/token + carbon energy in EVERY signed receipt + speculative-decode/LMCache/LiteLLM/RouteLLM app-layer (/energy).
+- killinchu BFT quorum (n≥3f+1) + CBF-QP safety filter + EFE act/ask gate + Fiedler λ2 + organism NCA self-repair
+  (/elite/autonomy, /elite/organism).
+- active-flux observer (Li Yu / IEEE 911711) generalized → killinchu sensor-fusion crossover + a11oy router crossover
+  (/elite/active-flux), conformal-set gated.
 
-Read replit-sync/FREEZE.json first. Dispatch is still OFF (dispatch_mode:none) until the founder runs
-WIRE_IT_UP.sh — REPORT these until then; execute once dispatch is on. The founder HAS brought the GPU
-up: the ecosystem is now sovereign (sovereign:true/where:gpu/gpu_reachable:true, Qwen2.5 via vLLM over
-Tailscale, base a11oy.net) on a11oy + killinchu — verified honest (no half-state). Keep it that way.
+WAVE 2 (integration / "make it ours"):
+- SZL-NEMO core: governed-MoE domain-expert router (Λ-gated, SIGNED per selection) + MTP default + self-improvement loop
+  (τ-bench 42.86%→100% signed) on OPEN base Qwen3-32B (Apache-2.0). NEVER from-scratch/550B/local-Ultra. (/nemo)
+- GOVERNED AUTO-REVIEW (Cursor pattern, made ours): inline classifier, autonomy DIAL L0-L5, verdict Λ-gated + DSSE-SIGNED
+  + OPA/Rego→OSCAL/NIST-AI-RMF + conformal/flapping. killinchu engage/ROE ESCALATES even at L5 (effector SIMULATED). (/autoreview)
+- FABRO governed factory (DOT-graph workflows + verification gates + Working→Verify→Merge, signed nodes) + Constitutional
+  engines (Causal Ledger/Audit/Constitutional Memory/Ontological Registry ACTIVE; State/Legitimacy/Immunology IN-DEV;
+  Governance-Evolution ROADMAP). (/factory, /constitution)
+- Sovereign GPU-QUANT engine: Ledoit-Wolf+Marchenko-Pastur PCA / TDA-fracture / HJB-Kelly (SAMPLE_SIGNAL|NO_BACKTEST),
+  killinchu TDA-fracture on AIS (MODELED), 2-GPU tier panel + verify-the-claims. (/quant)
+- killinchu PLATFORM DYNAMICS (6DOF + Moore-Penrose allocation, MODELED) + a11oy GRC alignment (ISO 42001/NIST AI RMF
+  coverage matrix, Λ→MEASURE mapping, OPA/Rego + OSCAL component-def in repo) + estate nav/cross-link wire-up. (/grc, /elite/platform-dynamics)
 
-## STATE AFTER TODAY'S FULL QA/DEBUG/STRESS/SMOKE (all green, verified live)
-- Perf fixed: /feeds/vessels/stats 17.5s->0.26s (parallel+cache+single-flight); /feeds/aircraft 14s->0.4s
-  (cache+single-flight). mesh/write now validates (422 on garbage, never signs garbage).
-- Gaps fixed: uds-bundles gitleaks red->green (allow on published cosign pubkey fp); killinchu HF
-  szl_khipu_consensus.py stale-5 -> canonical locked-8 mirrored + hf-sync allowlist updated.
-- copy-sync-lockstep guard GREEN on a11oy+killinchu (permanent fix for the COPY<->mirror class).
-- Mobile: all surfaces 0 overflow / 0 console errors at 390px. szl-mesh live + operational
-  (/elite/mesh, real 3-of-4 quorum, CRDT convergence, re-hashable receipts).
+## CI STATE (honestly green)
+Both repos' latest main: copy-sync lockstep guard, Shared-source drift guard, Dockerfile build-file guard, hf-sync,
+HF Space module-drift guard, codename gate, knowledge-corpus-in-sync = ALL SUCCESS. Both Spaces RUNNING.
 
-## YOUR ALIGNMENT JOB (report now; execute when dispatch on)
-1. Keep CI green across szl-holdings/{a11oy,killinchu,szl-mesh,khipu-consensus,uds-bundles,szl-fleet-overlay}
-   incl. the lockstep guard + gitleaks + hf-sync paths-guard. Known-intentional reds (lambda-bounty,
-   founder-gated llama-cpp wheel / banned-token) report-but-don't-alarm.
-2. Keep GitHub<->HF byte-identical on all shared + maritime + mesh + feeds modules; re-mirror via
-   workflow_dispatch if a per-push detect gate skips a module. Keep the lockstep guard green.
-3. Keep the GPU-sovereign posture honest: sovereign:true ONLY with a live gpu_reachable probe. If the
-   Tailscale link flaps, it must honestly degrade (offline/fallback) — never a half-state. Notify if you
-   ever see sovereign:true with gpu_reachable:false (that's a defect).
-4. szl-fleet-overlay: confirm the peat-mesh node packages build; amaru/rosie/sentra are internal-only
-   (HONEST_ROLES.md) — keep them out of any user-visible served surface.
+## YOUR EXECUTION JOB (report now; execute after founder approval + dispatch on; NOT during freeze)
+The box-gated commands are written out in three files in this repo's history / the team workspace — apply them on the
+founder's hardware (a11oy.net main GPU + NVIDIA RTX 4000 Ada second card; vLLM/Ollama behind Tailscale). Honesty contract:
+sovereign:true ONLY with a live per-GPU gpu_reachable probe; publish OUR measured numbers in signed receipts, never a
+vendor datasheet number; never claim local Nemotron-Ultra; never weaken a gate; never commit a key.
 
-## GATED QUEUE (founder approval / after freeze — see PROPOSALS.md)
-- Author canonical .github DOCTRINE_V11.md (P-C-a) + reconcile org FORGE_BUILD_BRIEF stale-5 (P-2-c) +
-  lutar-lean lean_numbers stale-5 (P-2-d).
-- Run szl-mesh across REAL separate nodes (box + Space + peer over Tailscale), not just in-process.
-- Air-gap UDS deploy proof run + bundle-level SLSA attestation (P-2-a/P-2-b).
-- AISStream key -> Asia vessel theaters LIVE (SZL_AISSTREAM_API_KEY in Space secrets).
+1. SZL-NEMO (FORGE_SZL_NEMO.md): QLoRA/LoRA post-train Qwen3-32B into the SZL-Nemo checkpoint on the doctrine + our agent
+   traces; serve via vLLM with --speculative-model (MTP/draft) so MTP α flips ROADMAP→MEASURED; register the local
+   sovereign tier. Flip /nemo tiers sovereign-local from ROADMAP→MEASURED only on a live probe.
+2. 2-GPU SERVE + THROTTLE (FORGE_2GPU_ENERGY.md): vLLM tensor-parallel TP=2 across main GPU + RTX 4000 OR role-split
+   (RTX 4000 = Auto-Review classifier + speculative draft + embeddings); nvidia-smi -pl power caps on BOTH cards; MPS/MIG;
+   extend the per-GPU power.draw→/metrics exporter to 2 GPUs. Flip /energy + /quant 2-GPU panels ROADMAP→MEASURED on live probe.
+3. NIM CLOUD TIER: register NVIDIA NIM (build.nvidia.com) Nemotron-Ultra as a routed cloud tier in LiteLLM/RouteLLM
+   (sovereign:false, cloud — honest). Add the NIM key as a box/Space secret (founder-set; never commit). Then run our
+   τ-bench + J/token harness against it and publish OUR measured numbers (signed) into the verify-the-claims panel.
+4. ENERGY EXPORTER (FORGE_BOX_ENERGY.md): nvidia-smi power.draw → vLLM /metrics hook so joules_consumed in receipts goes
+   from SAMPLE→MEASURED; Carbon-Aware scheduling for batch jobs.
+5. OSCAL: the a11oy OSCAL component-definition + OPA/Rego policies are in a11oy/compliance/oscal/ — wire the OSCAL/Trestle
+   CI pipeline (compliance-trestle) when convenient; this is alignment, never a certification claim.
 
-## DOCTRINE HARD GATE
-locked=8 {F1,F4,F7,F11,F12,F18,F19,F22} @ c7c0ba17 · Λ=Conjecture 1 · Khipu=Conjecture 2 (soft-safety AP,
-never claim unconditional BFT proven) · trust never 100% · SLSA "L1 honest·L2 attested·L3 roadmap" · no
-user-visible codenames · effector SIMULATED · no vessel control · real data LIVE/FORECAST/OSINT/SAMPLE
-labeled · 0 runtime CDN · GitHub<->HF byte-identical · lockstep guard green · sovereign only on live probe ·
-never commit a key · box=founder gate.
+## HARD LIMITS (approval, never auto)
+Any cosign-signed artifact / Rekor / warn→enforce / MAJOR dep bump / box production change → send_notification asking
+founder approval, never auto. Doctrine locked: EXACTLY 8 {F1,F4,F7,F11,F12,F18,F19,F22} @ c7c0ba17; Λ=Conjecture 1;
+Khipu=Conjecture 2; SLSA L1/L2/L3-roadmap; effectors SIMULATED; 889 vendors=5; never weaken a gate; never commit a key.
+"The half-state — claiming more than is real — is the only unacceptable outcome."
 
-## FREEZE activates 06-16. Alignment/report now; read-only in the window. NOTIFY on: CI red (real),
-byte-drift, lockstep/gitleaks red, codename leak, half-state sovereign, or fabricated data.
+## NOTIFY
+Report what you executed (or that you're holding for approval/freeze). Title 'SZL agentic wave: executed N box item(s)'
+or 'SZL agentic wave: staged, awaiting founder approval / dispatch / freeze-lift'.
