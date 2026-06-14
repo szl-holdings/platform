@@ -1,3 +1,23 @@
+# SZL Forge — TOP ORDER (pinned 2026-06-14 18:18 EDT): WIRE FOUNDER LAPTOP AS SOVEREIGN BRAIN + SECONDARY HOST
+
+**-> Read `replit-sync/FORGE-INSTRUCTION-laptop-brain-blackwell-arc-20260614.md`** (full steps) and
+`replit-sync/mesh/FORGE_MESH_ORDER.md` (see the 2026-06-14 Blackwell/Arc ADDENDUM + verification checklist).
+Founder confirmed live from his `ollama serve` log: laptop `betterwithage` (Tailscale 100.125.77.31) has a
+**Blackwell RTX 5050 (CUDA 13.3, compute 12.0, 8GB)** + an **Intel Arc 140T iGPU (16GB SHARED RAM, not VRAM)**
+currently idle. DO: (1) `OLLAMA_HOST=0.0.0.0:11434` to expose the brain to the tailnet (Task Scheduler owns
+`ollama serve`, detached); (2) `OLLAMA_IGPU_ENABLE=1` to add the Arc as a 2nd lane (Vulkan already on);
+(3) extend `mesh/mesh_join.sh` probe to be multi-backend (nvidia-smi AND vulkan/ollama) so the Arc is detected;
+(4) coordinator places SZL-Nemo (governed Qwen3-32B Apache, Q4/FP4) on the 5050 + a small model on the Arc —
+NEVER shard 32B onto the shared-RAM iGPU; (5) point a11oy `A11OY_MODEL_BASE_URL` at the coordinator, keep HF
+failover; (6) ALSO run a11oy+killinchu locally on the laptop as a SECONDARY tailnet host, but KEEP HETZNER
+a11oy.net (167.233.50.75) as PRIMARY PUBLIC host (laptop not always-on; demo must not depend on it); (7) fold in
+tonight's RTX 4000 + other nodes via the existing any-GPU auto-detect (`FORGE-INSTRUCTION-rtx4000-rig-onboard-20260614.md`).
+DOCTRINE: SZL-Nemo = OPEN Qwen3-32B Apache (never from-scratch/Ultra-local); 5050=8GB discrete Blackwell, Arc=shared-RAM
+(label honestly); trust never 100%; never commit a key (TS/HF/coordinator tokens = secret store only); 0 CDN;
+locked=8 @ c7c0ba17; Λ=Conjecture 1. Honest BLOCKED beats a fake "wired." PASTE PROOF: 100.125.77.31:11434/api/version
+reachable from another tailnet node + both devices listed + placement table + laptop secondary reachable + Hetzner still primary.
+
+---
 # SZL Forge — TOP ORDER (pinned 2026-06-14 17:28 EDT): FULL UDS ALIGNMENT + DEPLOYABILITY (WarHacker)
 
 **-> Read `replit-sync/FORGE-INSTRUCTION-uds-full-alignment-20260614.md`.** Founder needs GitHub<->HF<->a11oy.net<->killinchu
@@ -60,3 +80,4 @@ REPORT the actual measured 1-day number from the running operator (the figure th
 commit it's running. sovereign:true ONLY on a live 5050 probe; degrade honest if down. Revenue stays DRY-RUN/MODELED
 (no Stripe key). Do NOT claim done by inference — paste the real codes. If any stays 404, say exactly which + why + fix.
 Deadline: demo-sound before June 16.
+
