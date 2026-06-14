@@ -1,56 +1,54 @@
 {
-  "order_sha": "f22120f03458a65c72fb3836e8b2c410b36f815f",
+  "order_sha": "8200a2f611a3f2b90c7f347057da2044813a417f",
   "order_path": "replit-sync/NEXT_ORDER.md",
+  "order_pin_commit": "785493d0",
   "state": "done",
-  "seen_at": "2026-06-14T10:17:39Z",
-  "updated_at": "2026-06-14T10:17:39Z",
+  "seen_at": "2026-06-14T10:36:00Z",
+  "updated_at": "2026-06-14T10:36:00Z",
   "idle": false,
-  "actionable": [
-    "a11oy resumable SIGNED ReAct agent loop + Generative-Agents memory + Reflexion + Voyager skill library (/agent-loop).",
-    "\u03c4-bench eval harness (MEASURED) + ECE/Brier calibration + conformal-prediction wrapper + Colang policy + IETF receipt",
-    "killinchu BFT quorum (n\u22653f+1) + CBF-QP safety filter + EFE act/ask gate + Fiedler \u03bb2 + organism NCA self-repair",
-    "active-flux observer (Li Yu / IEEE 911711) generalized \u2192 killinchu sensor-fusion crossover + a11oy router crossover",
-    "SZL-NEMO core: governed-MoE domain-expert router (\u039b-gated, SIGNED per selection) + MTP default + self-improvement loop",
-    "GOVERNED AUTO-REVIEW (Cursor pattern, made ours): inline classifier, autonomy DIAL L0-L5, verdict \u039b-gated + DSSE-SIGNED",
-    "OPA/Rego\u2192OSCAL/NIST-AI-RMF + conformal/flapping. killinchu engage/ROE ESCALATES even at L5 (effector SIMULATED). (/autoreview)",
-    "FABRO governed factory (DOT-graph workflows + verification gates + Working\u2192Verify\u2192Merge, signed nodes) + Constitutional",
-    "Sovereign GPU-QUANT engine: Ledoit-Wolf+Marchenko-Pastur PCA / TDA-fracture / HJB-Kelly (SAMPLE_SIGNAL|NO_BACKTEST),",
-    "killinchu PLATFORM DYNAMICS (6DOF + Moore-Penrose allocation, MODELED) + a11oy GRC alignment (ISO 42001/NIST AI RMF",
-    "SZL-NEMO (FORGE_SZL_NEMO.md): QLoRA/LoRA post-train Qwen3-32B into the SZL-Nemo checkpoint on the doctrine + our agent",
-    "2-GPU SERVE + THROTTLE (FORGE_2GPU_ENERGY.md): vLLM tensor-parallel TP=2 across main GPU + RTX 4000 OR role-split",
-    "NIM CLOUD TIER: register NVIDIA NIM (build.nvidia.com) Nemotron-Ultra as a routed cloud tier in LiteLLM/RouteLLM",
-    "ENERGY EXPORTER (FORGE_BOX_ENERGY.md): nvidia-smi power.draw \u2192 vLLM /metrics hook so joules_consumed in receipts goes",
-    "OSCAL: the a11oy OSCAL component-definition + OPA/Rego policies are in a11oy/compliance/oscal/ \u2014 wire the OSCAL/Trestle"
-  ],
-  "delegated_to_agent": [
-    "a11oy resumable SIGNED ReAct agent loop + Generative-Agents memory + Reflexion + Voyager skill library (/agent-loop).",
-    "\u03c4-bench eval harness (MEASURED) + ECE/Brier calibration + conformal-prediction wrapper + Colang policy + IETF receipt",
-    "killinchu BFT quorum (n\u22653f+1) + CBF-QP safety filter + EFE act/ask gate + Fiedler \u03bb2 + organism NCA self-repair",
-    "active-flux observer (Li Yu / IEEE 911711) generalized \u2192 killinchu sensor-fusion crossover + a11oy router crossover",
-    "SZL-NEMO core: governed-MoE domain-expert router (\u039b-gated, SIGNED per selection) + MTP default + self-improvement loop",
-    "GOVERNED AUTO-REVIEW (Cursor pattern, made ours): inline classifier, autonomy DIAL L0-L5, verdict \u039b-gated + DSSE-SIGNED",
-    "OPA/Rego\u2192OSCAL/NIST-AI-RMF + conformal/flapping. killinchu engage/ROE ESCALATES even at L5 (effector SIMULATED). (/autoreview)",
-    "FABRO governed factory (DOT-graph workflows + verification gates + Working\u2192Verify\u2192Merge, signed nodes) + Constitutional",
-    "Sovereign GPU-QUANT engine: Ledoit-Wolf+Marchenko-Pastur PCA / TDA-fracture / HJB-Kelly (SAMPLE_SIGNAL|NO_BACKTEST),",
-    "killinchu PLATFORM DYNAMICS (6DOF + Moore-Penrose allocation, MODELED) + a11oy GRC alignment (ISO 42001/NIST AI RMF",
-    "SZL-NEMO (FORGE_SZL_NEMO.md): QLoRA/LoRA post-train Qwen3-32B into the SZL-Nemo checkpoint on the doctrine + our agent",
-    "2-GPU SERVE + THROTTLE (FORGE_2GPU_ENERGY.md): vLLM tensor-parallel TP=2 across main GPU + RTX 4000 OR role-split",
-    "NIM CLOUD TIER: register NVIDIA NIM (build.nvidia.com) Nemotron-Ultra as a routed cloud tier in LiteLLM/RouteLLM",
-    "ENERGY EXPORTER (FORGE_BOX_ENERGY.md): nvidia-smi power.draw \u2192 vLLM /metrics hook so joules_consumed in receipts goes",
-    "OSCAL: the a11oy OSCAL component-definition + OPA/Rego policies are in a11oy/compliance/oscal/ \u2014 wire the OSCAL/Trestle"
-  ],
   "dispatch_mode": "deploy-only",
   "dispatch_ok": true,
-  "gated_skipped": [
-    "J/token + carbon energy in EVERY signed receipt + speculative-decode/LMCache/LiteLLM/RouteLLM app-layer (/energy).",
-    "a11oy \"Doctrine \u2014 banned-token grep gate\" = failure. This is the MARKETING-HYPE hygiene gate (flags words like"
-  ],
-  "report": "replit-sync/forge-report-20260614T101738Z-p0-white-screen.md",
-  "probes": {
-    "https://a11oy.net/ (bytes)": 142766,
-    "https://szlholdings-a11oy.hf.space/ (bytes)": 142715,
-    "https://a11oy.net/healthz": 200
+  "dispositions": {
+    "P0 killinchu down": "DONE-PROVEN (szlholdings-killinchu.hf.space/healthz=200, /elite/mesh=200)",
+    "P1.1 energy/metrics": "SHIPPED draft PR #362 (commit e2734b5); live-MEASURED founder-exporter-gated",
+    "P1.2 pinn/certificates": "DONE on box (a11oy.net=200, MEASURED ed25519+cosign); HF 404 only RUNNING_BUILDING",
+    "P1.3 2D-heat/Burgers PINN": "RECOMMENDED (needs live-GPU solve on betterwithage; not sandbox-executable)",
+    "P1.4 chaski 2nd-GPU": "BLOCKED (chaski 100.76.58.50 /api/tags=000 asleep; remote wake = founder)",
+    "P2 rescind artifact-less DONEs": "RESCINDED->RECOMMENDED (delegated_to_agent cleared; each needs own draft PR)",
+    "P3 domain/VAST/credits": "BLOCKED (founder-only)"
   },
-  "doctrine": "v11: locked=8, Lambda=Conjecture 1, never commit a key",
-  "last_order": "P0 HOTFIX a11oy.net / white-screen -> DONE (deploy-only, both surfaces proven)"
+  "rescinded_no_artifact": [
+    "a11oy resumable SIGNED ReAct agent loop",
+    "tau-bench eval harness + calibration",
+    "killinchu BFT quorum + CBF-QP + EFE gate",
+    "active-flux observer crossover",
+    "SZL-NEMO governed-MoE router",
+    "GOVERNED AUTO-REVIEW (DSSE-signed)",
+    "OPA/Rego->OSCAL",
+    "FABRO governed factory",
+    "Sovereign GPU-QUANT engine",
+    "killinchu PLATFORM DYNAMICS 6DOF",
+    "SZL-NEMO QLoRA post-train",
+    "2-GPU SERVE+THROTTLE TP=2",
+    "NIM CLOUD TIER",
+    "ENERGY EXPORTER nvidia-smi->/metrics",
+    "OSCAL component-definition wiring"
+  ],
+  "delegated_to_agent": [],
+  "gated_skipped": [
+    "P1.3 2D-heat/Burgers PINN (live-GPU solve)",
+    "P1.4 chaski 2nd-GPU (rig asleep)",
+    "P3 killinchu.com domain / VAST_API_KEY / free-credit signups (founder)"
+  ],
+  "report": "replit-sync/forge-report-20260614T103600Z-master-getitdone.md",
+  "probes": {
+    "https://szlholdings-killinchu.hf.space/healthz": 200,
+    "https://szlholdings-killinchu.hf.space/elite/mesh": 200,
+    "https://a11oy.net/api/a11oy/v1/pinn/certificates": 200,
+    "https://szlholdings-a11oy.hf.space/api/a11oy/v1/pinn/certificates": "404 (RUNNING_BUILDING)",
+    "betterwithage 100.125.77.31:11434/api/tags": 200,
+    "chaski 100.76.58.50:11434/api/tags": "000 (asleep)"
+  },
+  "doctrine": "v11: locked=8, Lambda=Conjecture 1, never commit a key; PROVE-OR-DOWNGRADE",
+  "last_order": "MASTER getitdone -> P0 DONE, P1.1 draft PR#362, P1.2 box-proven (HF build-pending), P1.3 recommended, P1.4 blocked, P2 rescinded, P3 founder"
 }
