@@ -1,0 +1,9 @@
+# SZL PINN core — sovereign, own-metal-only dependencies.
+# Pure-numpy implementation: the MLP, the EXACT analytic PDE derivatives
+# (forward-mode) and the reverse-over-forward gradient + Adam optimizer are all
+# built from scratch, so NO heavy ML framework (torch/tensorflow/jax) is
+# required. This keeps the solver sovereign and trivially auditable.
+numpy>=1.24
+matplotlib>=3.6
+# pytest is optional; tests also run directly via `python tests/test_szl_pinn.py`.
+pytest>=7.0   # optional (test runner)

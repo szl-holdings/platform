@@ -1,0 +1,36 @@
+{
+  "active": true,
+  "activates_at": "2026-06-16T00:00:00-04:00",
+  "lifts_at": "2026-06-19T23:59:00-04:00",
+  "reason": "Defense Unicorns Warhacker demo freeze \u2014 lock verified-GO state (doctrine v11, locked=8 @ c7c0ba17, sovereign-honesty resolved).",
+  "policy": "Before activates_at: normal work. From activates_at to lifts_at: READ-ONLY for Forge + all SZL crons (monitor + recovery-restart only; NO commits/deploys/auto-fixes/auto-merges/auto-sync). Recovery restart of a sleeping/errored Space to last-good build is allowed (healing, not change).",
+  "hotfix": "Permitted ONLY for a demo-blocking defect, with explicit founder approval, minimal + byte-identical GitHub<->HF, ast.parse/node-check first, re-verified live, logged. Never touch signed artifacts/box/doctrine gates without founder.",
+  "frozen_state": {
+    "doctrine": "v11",
+    "locked": 8,
+    "locked_ids": [
+      "F1",
+      "F4",
+      "F7",
+      "F11",
+      "F12",
+      "F18",
+      "F19",
+      "F22"
+    ],
+    "kernel": "c7c0ba17",
+    "lambda": "Conjecture 1",
+    "khipu": "Conjecture 2"
+  },
+  "frozen_heads": {
+    "a11oy": "929779d5",
+    "killinchu": "e0498b94",
+    "anatomy": "f6d15087",
+    "lutar-lean": "b675cd84",
+    "uds-bundles": "b5f6bae0",
+    "platform": "7c275a96"
+  },
+  "set_by": "estate-hardening program",
+  "set_at": "2026-06-13T10:31:00-04:00",
+  "updated_note": "frozen_heads refreshed 2026-06-13 after v12-label fix (a11oy/killinchu) + air-gap proof (uds-bundles). Box orchestrator git-pull pending (founder)."
+}

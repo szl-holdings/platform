@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>SZL HOLDINGS — ENERGY</title>
+<meta name="description" content="Live energy loop: harvest stranded watts, prove bounded compute, circulate Ayni-balanced joules." />
+<link rel="icon" href="assets/favicon.svg" type="image/svg+xml" />
+<link rel="stylesheet" href="assets/style.css" />
+<script type="importmap">
+{
+  "imports": {
+    "three": "https://unpkg.com/three@0.160.0/build/three.module.js"
+  }
+}
+</script>
+</head>
+<body>
+  <canvas id="loop-canvas" aria-hidden="true"></canvas>
+  <div id="vignette" aria-hidden="true"></div>
+
+  <header class="topbar">
+    <div class="brand">
+      <svg class="logo" viewBox="0 0 48 48" fill="none" aria-label="SZL energy mark">
+        <circle cx="24" cy="24" r="21" stroke="#28E0D0" stroke-width="2" opacity="0.5"/>
+        <path d="M30 11 L17 26 H24 L18 37 L31 22 H24 L30 11 Z" fill="#28E0D0"/>
+        <circle cx="24" cy="24" r="21" stroke="#7C5CFF" stroke-width="1" opacity="0.35" stroke-dasharray="3 5"/>
+      </svg>
+      <div class="brand-text">
+        <span class="brand-line1">SZL HOLDINGS</span>
+        <span class="brand-line2">ENERGY</span>
+      </div>
+    </div>
+    <div class="status-cluster">
+      <span id="conn-badge" class="conn-badge live"><span class="dot"></span><span id="conn-label">LIVE</span></span>
+      <span id="conn-ts" class="conn-ts">—</span>
+    </div>
+  </header>
+
+  <main>
+    <!-- HERO / MEASURED JOULE HEADLINE -->
+    <section class="hero">
+      <p class="eyebrow">THE MILESTONE</p>
+      <h1 class="headline">
+        <span class="big-num" id="measured-joules">212.262</span>
+        <span class="unit">measured joules</span>
+      </h1>
+      <p class="sub">
+        Real energy from the <strong>betterwithage</strong> job —
+        <span class="tag tag-measured">joules_label: MEASURED</span>
+        no longer a sample.
+      </p>
+      <p class="sub2">
+        It landed during a <strong>negative-price</strong> grid window
+        (<span id="milestone-price">−27.42</span> EUR/MWh) — the grid
+        <strong>paid us to compute</strong>. We soak already-wasted energy.
+        <span class="tag tag-warn">NO free-energy</span>
+      </p>
+    </section>
+
+    <!-- HONESTY BADGE STRIP -->
+    <section class="badge-strip" aria-label="Honesty badges">
+      <span class="tag tag-measured">joules MEASURED (now real)</span>
+      <span class="tag tag-sample">elsewhere: SAMPLE/ESTIMATE</span>
+      <span class="tag tag-off">sovereign = false</span>
+      <span class="tag tag-exp">organs EXPERIMENTAL</span>
+      <span class="tag tag-conj">Λ = Conjecture 1</span>
+      <span class="tag tag-warn">NO free-energy</span>
+      <span class="tag tag-est">revenue = ESTIMATE</span>
+    </section>
+
+    <!-- THE LOOP LABEL -->
+    <section class="loop-legend" aria-label="The loop stages">
+      <h2 class="section-title">THE LOOP</h2>
+      <ol class="stages">
+        <li data-stage="0"><span class="s-dot"></span>harvest</li>
+        <li data-stage="1"><span class="s-dot"></span>SAMAY soak<small>RTX 5000</small></li>
+        <li data-stage="2"><span class="s-dot"></span>KALLPA metabolize</li>
+        <li data-stage="3"><span class="s-dot"></span>heart / blood circulate</li>
+        <li data-stage="4"><span class="s-dot"></span>YARQA disperse</li>
+        <li data-stage="5"><span class="s-dot"></span>EnergyReservoir</li>
+        <li data-stage="6"><span class="s-dot"></span>provenance receipt</li>
+        <li data-stage="7"><span class="s-dot"></span>Ayni-balance</li>
+      </ol>
+    </section>
+
+    <!-- LIVE HUD GRID -->
+    <section class="hud-grid" aria-label="Live metrics">
+
+      <article class="card" id="card-harvest">
+        <header class="card-head">
+          <h3>HARVEST POSTURE</h3>
+          <span class="src-badge" data-src="harvest">LIVE</span>
+        </header>
+        <div class="kv-big">
+          <span class="kv-num" id="grid-price">—</span>
+          <span class="kv-unit">EUR/MWh</span>
+        </div>
+        <ul class="kv-list">
+          <li><span>should soak</span><b id="should-soak">—</b></li>
+          <li><span>grid posture</span><b id="grid-posture">—</b></li>
+          <li><span>renewable share</span><b id="renewable">—</b></li>
+          <li><span>UK carbon</span><b id="carbon">—</b></li>
+          <li><span>feeds live</span><b id="feeds">—</b></li>
+          <li><span>joules_label</span><b id="joules-label" class="hl">—</b></li>
+        </ul>
+      </article>
+
+      <article class="card" id="card-budget">
+        <header class="card-head">
+          <h3>ENERGY BUDGET</h3>
+          <span class="src-badge" data-src="budget">LIVE</span>
+        </header>
+        <ul class="kv-list">
+          <li><span>status</span><b id="budget-status">—</b></li>
+          <li><span>tasks</span><b id="task-count">—</b></li>
+          <li><span>Σ joules est</span><b id="budget-joules">—</b></li>
+          <li><span>within Bekenstein bound</span><b id="within-bound">—</b></li>
+        </ul>
+        <p class="card-note">Bekenstein-gated: Σ shannon_bits ≤ Σ bytes·8. <span class="tag-mini tag-est">EST</span></p>
+      </article>
+
+      <article class="card" id="card-prov">
+        <header class="card-head">
+          <h3>PROVENANCE</h3>
+          <span class="src-badge" data-src="prov">LIVE</span>
+        </header>
+        <ul class="kv-list">
+          <li><span>chain status</span><b id="prov-status">—</b></li>
+          <li><span>links intact</span><b id="links-intact">—</b></li>
+          <li><span>entries</span><b id="prov-len">—</b></li>
+          <li><span>gate all pass</span><b id="gate-pass">—</b></li>
+        </ul>
+        <p class="card-note">Tamper-EVIDENT, not "measured". Hash-linked receipts.</p>
+      </article>
+
+      <article class="card" id="card-heart">
+        <header class="card-head">
+          <h3>HEART / BLOOD</h3>
+          <span class="src-badge" data-src="heart">LIVE</span>
+        </header>
+        <ul class="kv-list">
+          <li><span>σ-bus closed</span><b id="sigma-ok">—</b></li>
+          <li><span>blood Merkle intact</span><b id="blood-ok">—</b></li>
+          <li><span>beats</span><b id="beat-count">—</b></li>
+          <li><span>signing</span><b id="signing" class="hl">—</b></li>
+        </ul>
+        <p class="card-note">SAMPLE local digest — NOT cryptographically signed. <span class="tag-mini tag-exp">EXPERIMENTAL</span></p>
+      </article>
+
+      <article class="card card-wide" id="card-rev">
+        <header class="card-head">
+          <h3>REVENUE — VERIFIED SOVEREIGN COMPUTE</h3>
+          <span class="src-badge" data-src="rev">LIVE</span>
+        </header>
+        <div class="rev-row">
+          <div class="rev-figure">
+            <span class="kv-num" id="rev-range">—</span>
+            <span class="kv-unit">USD / mo per RTX-class card · <span class="tag-mini tag-est">ESTIMATE</span></span>
+          </div>
+          <div class="rev-figure">
+            <span class="kv-num" id="rev-settled">—</span>
+            <span class="kv-unit">USD settled to date</span>
+          </div>
+        </div>
+        <p class="card-note">A dollar is real only when a rental SETTLES. Crypto = payment rail only. NOT mining. NOT a forecast.</p>
+      </article>
+
+    </section>
+
+    <section class="doctrine">
+      <h2 class="section-title">DOCTRINE</h2>
+      <p>
+        We harvest <strong>already-wasted</strong> energy (negative wholesale price / curtailed renewables)
+        and PROVE bounded work. <strong>No free-energy claims.</strong> Energy figures are SAMPLE/ESTIMATE
+        until a real meter — except the headline <strong>212.262 J</strong>, which is metered and labeled
+        <em>measured</em>. The app runs off our metal (<code>sovereign = false</code>); the locked-8 are untouched;
+        Λ remains <strong>Conjecture 1</strong>. Open-weight only. Never commit a key.
+      </p>
+    </section>
+
+    <footer class="foot">
+      <span>SZL HOLDINGS — ENERGY · static HF Space</span>
+      <span>data: a11oy.net/api/a11oy/v1 · CORS open · degrades honestly to SNAPSHOT</span>
+    </footer>
+  </main>
+
+  <script type="module" src="assets/loop.js"></script>
+  <script type="module" src="assets/data.js"></script>
+</body>
+</html>

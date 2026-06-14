@@ -11,7 +11,7 @@ permissions:
   contents: read
 
 concurrency:
-  group: e2e-${{ github.ref }}
+  group: e2e-${{ github.head_ref || github.sha }}
   cancel-in-progress: true
 
 env:

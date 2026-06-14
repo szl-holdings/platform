@@ -1,0 +1,25 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" fill="none" aria-label="SZL Khipu">
+  <defs>
+    <linearGradient id="kg" x1="0" y1="0" x2="48" y2="48" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#2bd9c8"/>
+      <stop offset="0.5" stop-color="#38e0ff"/>
+      <stop offset="1" stop-color="#9a6bff"/>
+    </linearGradient>
+  </defs>
+  <!-- main cord -->
+  <path d="M6 8 H42" stroke="url(#kg)" stroke-width="2.4" stroke-linecap="round"/>
+  <!-- pendant cords with knots (witnessed records) -->
+  <g stroke="url(#kg)" stroke-width="1.8" stroke-linecap="round">
+    <path d="M12 8 V30"/>
+    <path d="M22 8 V38"/>
+    <path d="M32 8 V26"/>
+    <path d="M40 8 V34"/>
+  </g>
+  <g fill="#05080f" stroke="url(#kg)" stroke-width="1.8">
+    <circle cx="12" cy="22" r="2.6"/>
+    <circle cx="22" cy="18" r="2.6"/>
+    <circle cx="22" cy="30" r="2.6"/>
+    <circle cx="32" cy="20" r="2.6"/>
+    <circle cx="40" cy="24" r="2.6"/>
+  </g>
+</svg>

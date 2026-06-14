@@ -1,7 +1,7 @@
 import AxeBuilder from '@axe-core/playwright';
 import { expect, test } from '@playwright/test';
 
-const VESSELS_PATH = process.env.VESSELS_BASE_PATH ?? '/vessels';
+const VESSELS_PATH = (process.env.VESSELS_BASE_PATH ?? '/vessels').replace(/\/$/, '');
 
 let appAvailable = false;
 test.beforeAll(async ({ browser }) => {
@@ -9,7 +9,7 @@ test.beforeAll(async ({ browser }) => {
   const deadline = Date.now() + 45_000;
   while (Date.now() < deadline) {
     try {
-      const resp = await page.goto(VESSELS_PATH, { timeout: 10000, waitUntil: 'domcontentloaded' });
+      const resp = await page.goto(VESSELS_PATH || '/', { timeout: 10000, waitUntil: 'domcontentloaded' });
       if (resp && resp.status() < 500) {
         appAvailable = true;
         break;

@@ -130,10 +130,10 @@ export default function SentraLandingPage() {
 
           <h1 className="text-[clamp(2.5rem,5.5vw,4.5rem)] font-semibold leading-[1.08] tracking-[-0.03em] text-white mb-6">
             Cyber resilience,{' '}
-            <span className="text-white/40">unified.</span>
+            <span className="text-white/55">unified.</span>
           </h1>
 
-          <p className="text-[17px] leading-relaxed text-white/45 max-w-xl mx-auto mb-12">
+          <p className="text-[17px] leading-relaxed text-white/55 max-w-xl mx-auto mb-12">
             Sentra brings SOC operations, threat intelligence, compliance, and incident response into a single
             command surface — 80+ modules powered by the a11oy orchestration layer.
           </p>
@@ -158,13 +158,13 @@ export default function SentraLandingPage() {
       <section className="px-6 py-24 border-t border-white/[0.04]">
         <div className="max-w-5xl mx-auto">
           <div className="text-center mb-16">
-            <p className="text-[11px] font-mono uppercase tracking-[0.2em] text-white/30 mb-4">
+            <p className="text-[11px] font-mono uppercase tracking-[0.2em] text-white/55 mb-4">
               Platform
             </p>
             <h2 className="text-3xl font-semibold tracking-tight text-white mb-4">
               Everything security teams need.
               <br />
-              <span className="text-white/35">Nothing they don't.</span>
+              <span className="text-white/55">Nothing they don't.</span>
             </h2>
           </div>
 
@@ -175,13 +175,13 @@ export default function SentraLandingPage() {
                 className="bg-[#09090b] p-7 hover:bg-white/[0.015] transition-colors group"
               >
                 <div className="flex items-start justify-between mb-4">
-                  <pillar.icon className="w-5 h-5 text-white/30 group-hover:text-white/50 transition-colors" />
-                  <span className="text-[10px] font-mono uppercase tracking-wider text-white/20">
+                  <pillar.icon className="w-5 h-5 text-white/55 group-hover:text-white/50 transition-colors" />
+                  <span className="text-[10px] font-mono uppercase tracking-wider text-white/55">
                     {pillar.count}
                   </span>
                 </div>
                 <h3 className="text-[15px] font-medium text-white mb-2">{pillar.title}</h3>
-                <p className="text-[13px] leading-relaxed text-white/35">{pillar.desc}</p>
+                <p className="text-[13px] leading-relaxed text-white/55">{pillar.desc}</p>
               </div>
             ))}
           </div>
@@ -191,7 +191,7 @@ export default function SentraLandingPage() {
       <section className="px-6 py-24 border-t border-white/[0.04]">
         <div className="max-w-4xl mx-auto">
           <div className="text-center mb-14">
-            <p className="text-[11px] font-mono uppercase tracking-[0.2em] text-white/30 mb-4">
+            <p className="text-[11px] font-mono uppercase tracking-[0.2em] text-white/55 mb-4">
               Live signal
             </p>
             <h2 className="text-3xl font-semibold tracking-tight text-white">
@@ -203,18 +203,18 @@ export default function SentraLandingPage() {
             <div className="flex items-center justify-between px-5 py-3 border-b border-white/[0.04] bg-white/[0.015]">
               <div className="flex items-center gap-2.5">
                 <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
-                <span className="text-[11px] font-mono tracking-wider text-white/40">
+                <span className="text-[11px] font-mono tracking-wider text-white/55">
                   DECISION STREAM
                 </span>
               </div>
-              <span className="text-[10px] font-mono text-white/20">us-east-1</span>
+              <span className="text-[10px] font-mono text-white/55">us-east-1</span>
             </div>
             <div className="divide-y divide-white/[0.03]">
               {SIGNAL_ITEMS.map((item) => (
                 <div key={item.text} className="flex items-center gap-4 px-5 py-3.5">
                   <span className={cn('w-1.5 h-1.5 rounded-full shrink-0', SEVERITY_DOT[item.severity])} />
                   <span className="text-[13px] text-white/50 flex-1">{item.text}</span>
-                  <span className="text-[11px] text-white/20 shrink-0">{item.time}</span>
+                  <span className="text-[11px] text-white/55 shrink-0">{item.time}</span>
                 </div>
               ))}
             </div>
@@ -224,7 +224,7 @@ export default function SentraLandingPage() {
 
       <section className="px-6 py-24 border-t border-white/[0.04]">
         <div className="max-w-4xl mx-auto text-center">
-          <p className="text-[11px] font-mono uppercase tracking-[0.2em] text-white/30 mb-4">
+          <p className="text-[11px] font-mono uppercase tracking-[0.2em] text-white/55 mb-4">
             Capabilities
           </p>
           <h2 className="text-3xl font-semibold tracking-tight text-white mb-12">
@@ -237,8 +237,8 @@ export default function SentraLandingPage() {
                 key={cap.label}
                 className="flex flex-col items-center gap-2.5 py-4 px-3 rounded-lg border border-white/[0.04] hover:border-white/[0.08] hover:bg-white/[0.015] transition-all"
               >
-                <cap.icon className="w-4 h-4 text-white/25" />
-                <span className="text-[11px] text-white/40">{cap.label}</span>
+                <cap.icon className="w-4 h-4 text-white/55" />
+                <span className="text-[11px] text-white/55">{cap.label}</span>
               </div>
             ))}
           </div>
@@ -258,11 +258,11 @@ export default function SentraLandingPage() {
               </div>
               <div>
                 <p className="text-[13px] font-medium text-white">a11oy Orchestration Layer</p>
-                <p className="text-[11px] text-white/30">Powering every Sentra module</p>
+                <p className="text-[11px] text-white/55">Powering every Sentra module</p>
               </div>
             </div>
 
-            <p className="text-[14px] leading-relaxed text-white/40 mb-8">
+            <p className="text-[14px] leading-relaxed text-white/55 mb-8">
               Every module in Sentra is orchestrated by a11oy — the governance-aware AI layer that enforces
               policy boundaries, routes decisions through approval chains, and ensures every autonomous action
               has an auditable provenance trail. a11oy connects Sentra to the broader SZL Holdings ecosystem:
@@ -279,7 +279,7 @@ export default function SentraLandingPage() {
               ].map((stat) => (
                 <div key={stat.label} className="text-center py-3 rounded-lg bg-white/[0.03]">
                   <p className="text-lg font-semibold text-white">{stat.value}</p>
-                  <p className="text-[10px] uppercase tracking-wider text-white/25 mt-0.5">{stat.label}</p>
+                  <p className="text-[10px] uppercase tracking-wider text-white/55 mt-0.5">{stat.label}</p>
                 </div>
               ))}
             </div>
@@ -292,7 +292,7 @@ export default function SentraLandingPage() {
           <h2 className="text-3xl font-semibold tracking-tight text-white mb-4">
             Ready to unify your security operations?
           </h2>
-          <p className="text-[15px] text-white/35 mb-8">
+          <p className="text-[15px] text-white/55 mb-8">
             See how Sentra brings every signal, every decision, and every compliance requirement into one surface.
           </p>
           <div className="flex items-center justify-center gap-3">
@@ -315,17 +315,17 @@ export default function SentraLandingPage() {
       <footer className="px-6 py-12 border-t border-white/[0.04]">
         <div className="max-w-5xl mx-auto flex flex-col md:flex-row items-center justify-between gap-4">
           <div className="flex items-center gap-2.5">
-            <Shield className="w-4 h-4 text-white/20" />
-            <span className="text-[13px] font-medium text-white/30">Sentra</span>
-            <span className="text-[11px] text-white/15 ml-1">by SZL Holdings</span>
+            <Shield className="w-4 h-4 text-white/55" />
+            <span className="text-[13px] font-medium text-white/55">Sentra</span>
+            <span className="text-[11px] text-white/55 ml-1">by SZL Holdings</span>
           </div>
           <div className="flex items-center gap-1.5">
-            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" className="text-white/15">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" className="text-white/55">
               <path d="M12 2L2 7l10 5 10-5-10-5z" stroke="currentColor" strokeWidth="1.5" strokeLinejoin="round" />
               <path d="M2 17l10 5 10-5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
               <path d="M2 12l10 5 10-5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
             </svg>
-            <span className="text-[10px] text-white/15">Orchestrated by a11oy</span>
+            <span className="text-[10px] text-white/55">Orchestrated by a11oy</span>
           </div>
         </div>
       </footer>

@@ -1,11 +1,11 @@
 {
   "_schema_version": "1.0.0",
-  "_comment": "Machine-readable registry of all Alloy Meridian vertical packs. Python source-of-truth is services/verticals/registry.py — keep in sync. This file is consumed by tooling, CI checks, and the meridian:check gate.",
+  "_comment": "Machine-readable registry of all Alloy Meridian vertical packs. Python source-of-truth is services/verticals/registry.py \u2014 keep in sync. This file is consumed by tooling, CI checks, and the meridian:check gate.",
   "verticals": [
     {
       "id": "platform",
       "title": "Platform / AgentOps",
-      "purpose": "AgentOps Source Of Truth — Release Gate Intelligence",
+      "purpose": "AgentOps Source Of Truth \u2014 Release Gate Intelligence",
       "module": "services.verticals.platform",
       "pack_status": "live",
       "owner": "eng-vp@szl",
@@ -196,6 +196,40 @@
       "pack_status": "stub",
       "owner": "eng-vp@szl",
       "required_paths": [],
+      "mcp_capabilities": []
+    },
+    {
+      "id": "szl_mechanics",
+      "title": "SZL Mechanics",
+      "purpose": "Verified Solid-Mechanics Solver (FE-NO) \u2014 Receipt-Verified Compute",
+      "module": "services.verticals.szl_mechanics",
+      "pack_status": "live",
+      "owner": "verified-compute@szl",
+      "required_paths": [
+        "services/verticals/szl_mechanics/__init__.py",
+        "services/verticals/szl_mechanics/signals.py",
+        "services/verticals/szl_mechanics/forecast.py",
+        "services/verticals/szl_mechanics/evidence.py",
+        "services/verticals/szl_mechanics/recommendations.py",
+        "services/verticals/szl_mechanics/brief.py"
+      ],
+      "mcp_capabilities": []
+    },
+    {
+      "id": "szl_pinn",
+      "title": "SZL PINN",
+      "purpose": "Verified Physics-Informed NN Solver (heat / GPU-die thermal) \u2014 Receipt-Verified Compute",
+      "module": "services.verticals.szl_pinn",
+      "pack_status": "live",
+      "owner": "verified-compute@szl",
+      "required_paths": [
+        "services/verticals/szl_pinn/__init__.py",
+        "services/verticals/szl_pinn/signals.py",
+        "services/verticals/szl_pinn/forecast.py",
+        "services/verticals/szl_pinn/evidence.py",
+        "services/verticals/szl_pinn/recommendations.py",
+        "services/verticals/szl_pinn/brief.py"
+      ],
       "mcp_capabilities": []
     },
     {

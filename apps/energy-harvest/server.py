@@ -25,12 +25,15 @@ import os
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import FileResponse, JSONResponse, PlainTextResponse
+from fastapi.responses import FileResponse, HTMLResponse, JSONResponse, PlainTextResponse
 
 import engine
 import body
 import reverse
 import fabric_nodes
+import budget as ebudget  # ENERGY-BUDGET-PATCH
+import reservoir  # ENERGY-RESERVOIR-PATCH
+import proof as eproof  # ENERGY-PROOF-PATCH
 
 app = FastAPI(title="SZL Energy Harvest", version="1.1.0")
 
@@ -114,6 +117,62 @@ def compute_pool():
     sovereign=False; no node is fabricated; Brev slots stay empty until launched +
     joined to Tailscale. No energy/joule claim. Lambda = Conjecture 1."""
     return fabric_nodes.compute_pool()
+
+
+@app.get("/budget")
+def budget():
+    """ENERGY-BUDGET-PATCH: honest compute-energy budget for the current grid
+    posture, bounded by the proven physical formulas (Bekenstein cap #239,
+    Landauer floor #240). Realized budget counts ONLY measured joules
+    (settle-to-count); none yet (joules SAMPLE). Never fabricates a joule."""
+    out = ebudget.energy_budget(engine.posture_summary(allow_network=True))
+    out["honesty"] = DOCTRINE_NOTE
+    return out
+
+
+@app.get("/provenance")
+def provenance():
+    """ENERGY-BUDGET-PATCH: honest provenance chain of measured-joule
+    EnergyReservoir entries -> DSSE receipt citing #239/#240 -> validate vs
+    canonical-formulas-v1 / lean-proofs-v1 -> Ayni F11. Genesis (0 entries) until
+    the first NVML-measured joule. Never fabricates a receipt."""
+    out = ebudget.energy_provenance(engine.posture_summary(allow_network=True))
+    out["honesty"] = DOCTRINE_NOTE
+    return out
+
+
+@app.get("/reservoir")
+def reservoir_route():
+    """ENERGY-RESERVOIR-PATCH: honest measured-joule EnergyReservoir surface.
+    Reads the on-box joule ledger RAW (joules.ndjson + joules-status.json): real
+    joules are counted ONLY where a live nvidia-smi power.draw exporter pushed
+    measured samples; engines without one accrue ZERO joules (never estimated).
+    The founder-GO'd EnergyReservoir software half: STORE (the ledger) + DISPERSE
+    (this public surface + downstream budget/provenance/console). sovereign stays
+    False; never fabricates a joule."""
+    out = reservoir.energy_reservoir(engine.posture_summary(allow_network=True))
+    out["honesty"] = DOCTRINE_NOTE
+    return out
+
+
+@app.get("/proof.json")
+def proof_json_route():
+    """ENERGY-PROOF-PATCH: machine-readable public PROOF envelope. The three proven
+    energy witnesses (#239/#240/#242, lutar-lean, 0-sorry) + the RAW measured-joule
+    receipt + the browser re-hash path. Everything is recomputable trusting no one.
+    Reachable at /energy/proof.json and /api/a11oy/v1/harvest/proof.json."""
+    out = eproof.proof_json()
+    out["honesty"] = DOCTRINE_NOTE
+    return out
+
+
+@app.get("/proof")
+def proof_route():
+    """ENERGY-PROOF-PATCH: public PROOF page (self-contained HTML) — 'the proof IS the
+    product'. Surfaces the proven witnesses + the measured-joule receipt honestly and
+    links to the public verify API so a visitor recomputes it themselves. Reachable at
+    /energy/proof and /api/a11oy/v1/harvest/proof. serve.py untouched (LOCKED)."""
+    return HTMLResponse(eproof.proof_html())
 
 
 def _g(name, val, help_, typ="gauge"):
