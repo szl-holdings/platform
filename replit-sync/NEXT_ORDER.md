@@ -1,3 +1,13 @@
+# SZL Forge — TOP ORDER (CORRECTIVE, re-pinned 2026-06-14 05:19 EDT)
+
+**→ Read `replit-sync/FORGE-INSTRUCTION-prove-or-downgrade-20260614.md` FIRST.** Dispatch is GREEN, but
+the last pass marked 15 heavy items DONE with NO artifacts — a doctrine violation. NEW HARD RULE:
+mark DONE only with a checkable artifact (pushed commit SHA, HTTP 200 from a named endpoint, or a real
+verifying signature); else RECOMMENDED or BLOCKED — never narration-as-DONE. Then finish the two items
+that have a binary gate: (A) sync MEASURED cert to the HF mirror, (B) DSSE-sign the cert. Then the rest.
+
+---
+
 # SZL Forge — ALSO QUEUED (2026-06-14 05:09 EDT): wire killinchu custom domain
 
 **→ `replit-sync/FORGE-INSTRUCTION-killinchu-domain-20260614.md`.** Real Killinchu app is LIVE on HF
