@@ -21,3 +21,28 @@ DO THIS (box-side, you have on-box access; FREEZE-aware — this is verification
 NOTIFY with the actual pasted HTTP codes for EVERY URL above (this is the founder's hard proof), the box image sha/commit
 it's running, and the sovereign-probe state. If any URL is NOT 200 after redeploy, say exactly which + why + the fix.
 Do NOT claim done by inference — paste the real codes. Doctrine v11 unchanged; never weaken a gate; never commit a key.
+
+
+---
+
+## CTO ADDENDUM (2026-06-14 15:34 EDT) — INCLUDE the energy operator + holographic stack in this same box rebuild
+
+The box rebuild above pulls "current main" — but the demo's press-play energy centerpiece + the 18-graph holographic
+showcase are in OPEN, TESTED PRs not yet on main. MERGE these to main FIRST (CI green, additive, no gate weakened),
+THEN the box rebuild serves them. Merge order:
+1. #397 energy/06-holographic — bundles the szl3d toolkit + 18 live 3D graphs. THIS IS WHAT MAKES szl_holo3d.js / the
+   holographic surfaces resolve. (If a different holo3d.js already exists on main, reconcile — keep both byte-identical
+   GitHub==HF==box.)
+2. #394 energy/01-operator, #391 energy/02-ledger, #393 energy/03-projection, #392 energy/04-dashboard — the press-play
+   operator stack. After deploy, START the operator on the box (real jobs -> sovereign 5050 -> MEASURED joules ->
+   signed JouleCharge receipts), leave it RUNNING, and HARD-PROVE these URLs (paste real codes):
+   - https://a11oy.net/api/a11oy/v1/energy/operator/status  -> 200, jobs_done>0, joules_measured_total>0 (MEASURED)
+   - https://a11oy.net/api/a11oy/v1/energy/ledger            -> 200, signed receipts + chain-integrity ok
+   - https://a11oy.net/api/a11oy/v1/energy/projection?window=running -> 200, 1-day numbers (MODELED, math shown)
+   - https://a11oy.net/energy-ops          -> 200 (press-play Today console)
+   - https://a11oy.net/energy-holographic  -> 200 (18-graph showcase)
+3. Then optional: #379 F1 (all 4 /pnt/limits pillars wired) + the other 3D surfaces #381-#390.
+
+DEADLINE: demo-sound before June 16 (founder request). If any PR can't merge cleanly (conflict/CI red), say which + why +
+fix; do NOT force-merge anything that weakens a gate or touches lutar-lean. Revenue stays DRY-RUN/MODELED (no Stripe key).
+Report the actual measured 1-day number from the running operator — that is the figure the founder asked for.
