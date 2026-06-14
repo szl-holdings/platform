@@ -15,7 +15,14 @@
     "P1.3 2D-heat/Burgers PINN": "RECOMMENDED (needs live-GPU solve on betterwithage; not sandbox-executable)",
     "P1.4 chaski 2nd-GPU": "BLOCKED (chaski 100.76.58.50 /api/tags=000 asleep; remote wake = founder)",
     "P2 rescind artifact-less DONEs": "RESCINDED->RECOMMENDED (delegated_to_agent cleared; each needs own draft PR)",
-    "P3 domain/VAST/credits": "BLOCKED (founder-only)"
+    "P3 domain/VAST/credits": "BLOCKED (founder-only)",
+    "P0_killinchu": "DONE (healthz 200)",
+    "P1.1_energy_metrics": "DONE (live a11oy.net 200, real MEASURED joules; route on main; redundant PR#362 closed superseded)",
+    "P1.2_pinn_certificates": "DONE on box (200); HF RUNNING_BUILDING (404 transient)",
+    "P1.3_pinn_2dheat_burgers": "RECOMMENDED (needs live-GPU solve, not sandbox-executable)",
+    "P1.4_chaski_2nd_gpu": "BLOCKED (chaski 100.76.58.50 asleep / 000)",
+    "P2_rescind_no_artifact_dones": "DONE (rescinded -> RECOMMENDED, PR-only)",
+    "P3_founder": "BLOCKED (domain reg / VAST_API_KEY / credits \u2014 founder-only)"
   },
   "rescinded_no_artifact": [
     "a11oy resumable SIGNED ReAct agent loop",
@@ -50,5 +57,6 @@
     "chaski 100.76.58.50:11434/api/tags": "000 (asleep)"
   },
   "doctrine": "v11: locked=8, Lambda=Conjecture 1, never commit a key; PROVE-OR-DOWNGRADE",
-  "last_order": "MASTER getitdone -> P0 DONE, P1.1 draft PR#362, P1.2 box-proven (HF build-pending), P1.3 recommended, P1.4 blocked, P2 rescinded, P3 founder"
+  "last_order": "MASTER getitdone -> re-check 2026-06-14T1048Z: P1.1 energy/metrics now DONE on main + LIVE box 200 (measured joules, sibling-delivered) -> closed redundant PR#362; P0 killinchu 200; P1.2 box 200 / HF building; P1.3 RECOMMENDED; P1.4 BLOCKED chaski asleep; P2 rescinded; P3 founder.",
+  "recheck_at": "2026-06-14T10:48:00Z"
 }
