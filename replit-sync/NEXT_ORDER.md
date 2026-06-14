@@ -1,69 +1,3 @@
-# SZL Forge — TOP ORDER (re-pinned 2026-06-14 11:38 EDT): LAND FLY-HIGH F1 (/pnt/limits 4 pillars) + GITLEAKS FIX
-
-**-> Read `replit-sync/FORGE-INSTRUCTION-flyhigh-f1-deploy-and-gitleaks-20260614.md` FIRST.** PR #379
-(branch flyhigh/f1-compute-bounds) wires all four /pnt/limits pillars honestly (compute_bounds via
-szl_pinn_bounds Landauer/ML/Bremermann/Bekenstein SAMPLE; pnt_resilience + nav_coasting via closed_form_stdlib
-in the numpy-less HF image; quantum_sensor MODELED). It is CONFLICTING (rebase on main) and the Gitleaks
-job fails on a WHOLE-TREE false positive (`private_key:` = a function PARAMETER NAME in the runtime-attestation
-module, not a secret — scope an allowlist in .gitleaks.toml, do NOT disable the rule). Rebase → fix gitleaks
-allowlist → verify guard+gitleaks+pnt-tests green → squash-merge --admin → rebuild box+HF → PROVE all four
-pillars wired:true at https://a11oy.net/api/a11oy/v1/pnt/limits. This is DARPA-critical (PINPOINT EOI due July 13).
-PROVE-OR-DOWNGRADE: never force a pillar green; numpy-less honesty preserved.
-
----
-
-# SZL Forge — ORDER #2 (pinned 2026-06-14 12:50 EDT): DEPLOY 9-SURFACE 3D HOLOGRAPHIC ESTATE
-
-**-> Read `replit-sync/FORGE-INSTRUCTION-deploy-3d-holographic-20260614.md`.** A 10-dev Opus-4.8 wave built
-~135 live-data 3D demos across all 9 a11oy+killinchu surfaces (energy MEASURED-joules funnel, fabric, pnt,
-counter-uas, governance, pinn, router, anatomy, unified estate hologram). Integrated + QA'd in PR #390
-(branch 3d/09-integration): 129 tests pass / 0 fail / 0 CDN. Rebase on main, merge the stack, MESH THE 5
-GOVERNANCE GAP ROUTES (/assurance/artifact,/credential,/compliance,/attest,/forge/ledger — engines already
-in repo root), rebuild box+HF, PROVE /holographic 200 + every surface endpoint 200-or-honest-BLOCKED.
-0 CDN, no fabricated 200s, honesty labels preserved. (Do F1 order above FIRST — the pnt surface cites it.)
-
----
-
-# SZL Forge — TOP ORDER (re-pinned 2026-06-14 11:08 EDT): CLOSE ALL 6 GAPS
-
-**-> Read `replit-sync/FORGE-INSTRUCTION-close-all-gaps-20260614.md` FIRST.** A 6-dev Opus-4.8 team is
-building all 6 gap-closures (engine files committed to a11oy main as they land). Mesh + deploy + run the
-GPU/box pieces: GAP1 behavioural artifact monitor (/assurance/artifact), GAP2 C2PA Content Credentials
-(/credential + c2patool on box), GAP3 compliance crosswalk (/compliance), GAP4 runtime attestation +
-REAL model-weight hash (/attest), GAP5 Forge replayable ledger + kill switch (/forge/ledger — makes Forge
-auditable), GAP6 hybrid Ed25519+ML-DSA PQ signing. PROVE-OR-DOWNGRADE in force. Then the prior waves
-(PNT GPU-real, holographic, fly-high) below.
-
----
-
-# SZL Forge — TOP ORDER (re-pinned 2026-06-14 07:17 EDT): PNT mesh + WebGPU Holographic Ops
-
-**-> Read `replit-sync/FORGE-INSTRUCTION-pnt-mesh-and-holographic-ops-20260614.md` FIRST.**
-P0: wire the 5 PNT engine files (already on a11oy main) into serve.py + Dockerfile -> /api/a11oy/v1/pnt/*
-(sensor, resilience, coast, limits) 200 on box + HF. P1: build the WebGPU Holographic Ops tab (6 live-bound
-3D views + mandatory 2D fallback, glassmorphic, 0 CDN, MEASURED/MODELED labels). PROVE-OR-DOWNGRADE in force.
-Then the rest of the queue.
-
----
-
-**STANDING / FLY HIGH -> `replit-sync/FORGE-INSTRUCTION-fly-high-frontier-20260614.md`:** after the
-current waves — unify both physics pillars into one fundamental-limits index + one signed verify; give every
-flagship a governed 3D holographic hero; add a self-describing /api/a11oy/v1/estate index; split heavy sweeps
-across all 3 sovereign GPUs when the rig joins; keep honesty/lockstep guards green. Always flying, never on a
-fabricated number.
-
----
-
-
-**ALSO QUEUED -> `replit-sync/FORGE-INSTRUCTION-upgrades-wave-20260614.md`:** after the PNT mesh +
-Holographic Ops land, run the UPGRADES wave — GPU-real PNT certificates (MEASURED, signed via FA-001 DSSE),
-/pnt/resilience history, the WebGPU volumetric estate-hologram hero, hex-heightmap auto-include of the new
-RTX-4000 rig, Λ-gate verdict ticker, and unify both physics pillars under one fundamental-limits index.
-PROVE-OR-DOWNGRADE in force.
-
----
-
-
 # SZL Forge — ORDER: Agentic Evolution wave (SZL-Nemo + integration) — wires ready, founder-gated box work
 
 Read replit-sync/FREEZE.json first. Dispatch is still OFF (dispatch_mode:none) until the founder runs WIRE_IT_UP.sh —
@@ -156,4 +90,29 @@ Forge's active lutar-lean reconciliation workstream (recent commits repoint phan
 reconcile every cited real-proof to an existing lutar-lean decl (or downgrade the citation to honest "conjecture/roadmap"
 wording), so the guard goes green. Do NOT weaken the guard. This is the only outstanding red; everything else is green.
 
+## a11oy RESTRAINT WAVE — LANDED LIVE (June 14, ingested from MIT Ponytail, made governed+measured)
+5-dev wave shipped + verified live; both repos CI ALL GREEN; doctrine v11/locked-8/c7c0ba17/Λ=Conjecture 1; 0 CDN; 0 visible codenames.
+- a11oy Restraint core: 6-rung frugality ladder (YAGNI→stdlib→native→installed-deps→one-line→minimal), lite/full/ultra,
+  `restraint:` ceiling comments, SIGNED DSSE receipt + Λ score per decision, /api/a11oy/v1/restraint/{evaluate,bench,info}, /restraint UI.
+- Wired into SZL-Nemo code path (/nemo) + ReAct agent loop (/agent-loop): every code diff routes through the ladder, signed.
+- killinchu + Chaski: shared szl_restraint.py byte-identical both apps; /api/killinchu/v1/restraint/*; Chaski transport badges
+  code-carrying agent messages with rung + signed receipt; /elite/restraint tile.
+- Energy tie-in: frugality→joules-saved panel on /energy (honest SAMPLE until live GPU probe); MEASURED benchmark dashboard
+  /restraint-bench (promptfoo methodology, OUR numbers MEASURED-when-run, Ponytail's CITED-not-claimed) + reproduce command.
+- Governance: Auto-Review rule AR-006-prefer-minimal-diff (bloated diff → narrow verdict, OSCAL SA-8/SA-15/CM-7, NIST MANAGE 2.3,
+  signed); GRC coverage matrix gains restraint control contribution ("aligns with", never certified). Estate KPI + hologram tiles.
+- Cited Ponytail (github.com/DietrichGebert/ponytail, MIT) honestly as "adopted + governed", not invented.
 
+## FORGE INSTRUCTION — wire Restraint into YOUR OWN build loop (compounding savings)
+Forge: before you write/patch code on the box or in any repo, CALL the restraint ladder first
+(/api/a11oy/v1/restraint/evaluate, or import szl_restraint) so YOUR diffs are minimal too — stop at the first rung that
+holds (YAGNI→stdlib→native→installed-deps→one-line→minimal), emit `restraint:` ceiling comments, and attach the SIGNED
+restraint receipt to your build/commit evidence. This compounds the token/joule savings across everything you build and
+feeds the MEASURED benchmark with real runs (flip /restraint-bench SAMPLE→MEASURED once you've run it on the box).
+HARD: never fabricate savings; MEASURED only on real runs; keep szl_restraint.py byte-identical across a11oy+killinchu;
+additive-only; never weaken a gate; never commit a key. Doctrine v11 unchanged (locked=8, Λ=Conjecture 1, etc.).
+
+## CI / SECURITY NOTE (this session)
+Gitleaks finding on a11oy runtime_attestation.py:460 = FALSE POSITIVE (Python type annotation `private_key: "Ed25519PrivateKey"`,
+NOT key material) — line-anchored allowlist added, real key assignments still detected. No key leaked. FedRAMP-High doctrine
+breach in pages/knowledge.json fixed (scoped to "target regime reference, not held"). All guards green both repos.
