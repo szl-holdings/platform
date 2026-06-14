@@ -214,6 +214,24 @@ REGISTRY: tuple[VerticalSpec, ...] = (
         # the meridian:check MCP gate; honesty + additive = leave it empty.
     ),
     VerticalSpec(
+        id="szl_pinn",
+        title="SZL PINN",
+        purpose="Verified Physics-Informed NN Solver (heat / GPU-die thermal) \u2014 Receipt-Verified Compute",
+        module="services.verticals.szl_pinn",
+        pack_status="live",
+        research_seams=(
+            "PINN clean-room core (method attribution: Raissi/Perdikaris/Karniadakis 2019, doi:10.1016/j.jcp.2018.10.045)",
+            "NVIDIA Modulus/PhysicsNeMo (Apache-2.0) + neurodiffeq (MIT) prior art, NOT copied",
+            "DeepXDE (LGPL-2.1) method-only, NOT vendored",
+            "Split-conformal honest error band + Lambda free-energy guard (innovations/)",
+            "MODELED Landauer thermodynamic floor (Landauer 1961) for thermal-aware scheduling",
+            "Sovereign GPU fabric (own-metal verified compute)",
+        ),
+        # No MCP capabilities: same internal szl_lake/khipu DSSE signing path as
+        # szl_mechanics, NOT a public MCP-registry capability. Leaving empty keeps
+        # the meridian:check MCP gate un-orphaned (honest + additive).
+    ),
+    VerticalSpec(
         id="constellation_graph",
         title="Constellation Graph",
         purpose="Cross-Domain Intelligence Graph",

@@ -216,6 +216,23 @@
       "mcp_capabilities": []
     },
     {
+      "id": "szl_pinn",
+      "title": "SZL PINN",
+      "purpose": "Verified Physics-Informed NN Solver (heat / GPU-die thermal) \u2014 Receipt-Verified Compute",
+      "module": "services.verticals.szl_pinn",
+      "pack_status": "live",
+      "owner": "verified-compute@szl",
+      "required_paths": [
+        "services/verticals/szl_pinn/__init__.py",
+        "services/verticals/szl_pinn/signals.py",
+        "services/verticals/szl_pinn/forecast.py",
+        "services/verticals/szl_pinn/evidence.py",
+        "services/verticals/szl_pinn/recommendations.py",
+        "services/verticals/szl_pinn/brief.py"
+      ],
+      "mcp_capabilities": []
+    },
+    {
       "id": "constellation_graph",
       "title": "Constellation Graph",
       "purpose": "Cross-Domain Intelligence Graph",
