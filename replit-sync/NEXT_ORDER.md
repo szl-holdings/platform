@@ -1,3 +1,15 @@
+# SZL Forge — TOP ORDER (re-pinned 2026-06-14 11:08 EDT): CLOSE ALL 6 GAPS
+
+**-> Read `replit-sync/FORGE-INSTRUCTION-close-all-gaps-20260614.md` FIRST.** A 6-dev Opus-4.8 team is
+building all 6 gap-closures (engine files committed to a11oy main as they land). Mesh + deploy + run the
+GPU/box pieces: GAP1 behavioural artifact monitor (/assurance/artifact), GAP2 C2PA Content Credentials
+(/credential + c2patool on box), GAP3 compliance crosswalk (/compliance), GAP4 runtime attestation +
+REAL model-weight hash (/attest), GAP5 Forge replayable ledger + kill switch (/forge/ledger — makes Forge
+auditable), GAP6 hybrid Ed25519+ML-DSA PQ signing. PROVE-OR-DOWNGRADE in force. Then the prior waves
+(PNT GPU-real, holographic, fly-high) below.
+
+---
+
 # SZL Forge — TOP ORDER (re-pinned 2026-06-14 07:17 EDT): PNT mesh + WebGPU Holographic Ops
 
 **-> Read `replit-sync/FORGE-INSTRUCTION-pnt-mesh-and-holographic-ops-20260614.md` FIRST.**
