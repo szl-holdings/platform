@@ -1,10 +1,8 @@
 {
-  "order_sha": "8acc79f669b5f7f3f91ef770b9e00e0d118c2e13",
+  "order_sha": "b57d5d8161ec86edcc030927c9f4805d7a48e310",
   "order_path": "replit-sync/NEXT_ORDER.md",
-  "state": "done",
-  "seen_at": "2026-06-14T17:55:18Z",
-  "updated_at": "2026-06-14T17:55:49Z",
-  "idle": false,
+  "state": "processing",
+  "seen_at": "2026-06-14T18:55:27Z",
   "actionable": [
     "a11oy.net = PUBLIC Hetzner server 167.233.50.75 \u2014 always-on, already serving a11oy API at https://a11oy.net (200, ~0.37s).",
     "The sovereign GPU brain = founder's RTX 5050, joined to Tailscale at 100.125.77.31 (PRIVATE tailnet, inference only).",
@@ -20,31 +18,9 @@
     "VERIFY: curl https://a11oy.net/api/a11oy/v1/honest (locked=8 @ c7c0ba17, \u039b=Conjecture 1, v11) + the killinchu public",
     "sovereign:true ONLY on a live per-GPU gpu_reachable probe \u2014 NEVER fake it; degrade honestly if the 5050 is down.",
     "Keep GitHub\u2194HF\u2194box byte-identical on shared modules; never weaken a gate; never commit a key (TLS/Tailscale/NIM keys",
-    "This is a box production change \u2192 it's founder-approved for hosting/exposing the apps; but anything touching a"
+    "This is a box production change \u2192 it's founder-approved for hosting/exposing the apps; but anything touching a",
+    "a11oy.net/static/shared/szl_holo3d.js \u2192 404 (200 on HF) \u2192 3D/holographic surfaces (/estate-hologram, /holo, *-3d) degraded on the public demo host",
+    "a11oy.net/api/a11oy/v1/restraint/{info,bench} \u2192 404 (200 on HF) \u2192 Restraint degraded on the box"
   ],
-  "delegated_to_agent": [
-    "a11oy.net = PUBLIC Hetzner server 167.233.50.75 \u2014 always-on, already serving a11oy API at https://a11oy.net (200, ~0.37s).",
-    "The sovereign GPU brain = founder's RTX 5050, joined to Tailscale at 100.125.77.31 (PRIVATE tailnet, inference only).",
-    "killinchu.net has NO DNS yet. killinchu currently only lives on the HF free Space (sleeps).",
-    "HF Spaces are free cpu-basic; gcTimeout 48h but they pause on rebuilds/platform pressure \u2192 the flicker the founder sees.",
-    "HOST BOTH APPS ON THE HETZNER BOX (a11oy.net): docker compose up a11oy + killinchu containers on 167.233.50.75",
-    "https://a11oy.net  \u2192 a11oy container",
-    "https://killinchu.net (once DNS set) OR https://killinchu.a11oy.net (subdomain, works immediately) \u2192 killinchu container",
-    "INFERENCE \u2192 SOVEREIGN 5050: both containers' model calls route to the 5050 over Tailscale (http://100.125.77.31:11434",
-    "ALWAYS-ON: systemd units (or docker compose restart:always) for both app containers + the reverse proxy + the",
-    "DNS: point killinchu.net A-record \u2192 167.233.50.75 if the founder owns it (else use killinchu.a11oy.net subdomain now,",
-    "HF AS FAILOVER: keep the HF Spaces running (the hourly uptime cron 84b8f79a already auto-restarts them). Optionally add",
-    "VERIFY: curl https://a11oy.net/api/a11oy/v1/honest (locked=8 @ c7c0ba17, \u039b=Conjecture 1, v11) + the killinchu public",
-    "sovereign:true ONLY on a live per-GPU gpu_reachable probe \u2014 NEVER fake it; degrade honestly if the 5050 is down.",
-    "Keep GitHub\u2194HF\u2194box byte-identical on shared modules; never weaken a gate; never commit a key (TLS/Tailscale/NIM keys",
-    "This is a box production change \u2192 it's founder-approved for hosting/exposing the apps; but anything touching a"
-  ],
-  "dispatch_mode": "dispatch-cmd",
-  "dispatch_ok": true,
-  "gated_skipped": [],
-  "report": "replit-sync/forge-perplexity-update-20260614.md",
-  "probes": {
-    "https://a11oy.net/healthz": 200
-  },
-  "doctrine": "v11: locked=8, Lambda=Conjecture 1, never commit a key"
+  "gated_skipped": []
 }
