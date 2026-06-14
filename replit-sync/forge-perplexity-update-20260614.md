@@ -125,3 +125,26 @@
   - J/token + carbon energy in EVERY signed receipt + speculative-decode/LMCache/LiteLLM/RouteLLM app-layer (/energy).
   - a11oy "Doctrine — banned-token grep gate" = failure. This is the MARKETING-HYPE hygiene gate (flags words like
 - Reachability snapshot: https://a11oy.net/healthz -> 200
+
+## Auto-loop pass — order `a618927f` — 2026-06-14T10:10:14Z
+
+- **Actionable items (15)** — handed to Forge agent (mode=`dispatch-cmd`, ok=`True`):
+  - a11oy resumable SIGNED ReAct agent loop + Generative-Agents memory + Reflexion + Voyager skill library (/agent-loop).
+  - τ-bench eval harness (MEASURED) + ECE/Brier calibration + conformal-prediction wrapper + Colang policy + IETF receipt
+  - killinchu BFT quorum (n≥3f+1) + CBF-QP safety filter + EFE act/ask gate + Fiedler λ2 + organism NCA self-repair
+  - active-flux observer (Li Yu / IEEE 911711) generalized → killinchu sensor-fusion crossover + a11oy router crossover
+  - SZL-NEMO core: governed-MoE domain-expert router (Λ-gated, SIGNED per selection) + MTP default + self-improvement loop
+  - GOVERNED AUTO-REVIEW (Cursor pattern, made ours): inline classifier, autonomy DIAL L0-L5, verdict Λ-gated + DSSE-SIGNED
+  - OPA/Rego→OSCAL/NIST-AI-RMF + conformal/flapping. killinchu engage/ROE ESCALATES even at L5 (effector SIMULATED). (/autoreview)
+  - FABRO governed factory (DOT-graph workflows + verification gates + Working→Verify→Merge, signed nodes) + Constitutional
+  - Sovereign GPU-QUANT engine: Ledoit-Wolf+Marchenko-Pastur PCA / TDA-fracture / HJB-Kelly (SAMPLE_SIGNAL|NO_BACKTEST),
+  - killinchu PLATFORM DYNAMICS (6DOF + Moore-Penrose allocation, MODELED) + a11oy GRC alignment (ISO 42001/NIST AI RMF
+  - SZL-NEMO (FORGE_SZL_NEMO.md): QLoRA/LoRA post-train Qwen3-32B into the SZL-Nemo checkpoint on the doctrine + our agent
+  - 2-GPU SERVE + THROTTLE (FORGE_2GPU_ENERGY.md): vLLM tensor-parallel TP=2 across main GPU + RTX 4000 OR role-split
+  - NIM CLOUD TIER: register NVIDIA NIM (build.nvidia.com) Nemotron-Ultra as a routed cloud tier in LiteLLM/RouteLLM
+  - ENERGY EXPORTER (FORGE_BOX_ENERGY.md): nvidia-smi power.draw → vLLM /metrics hook so joules_consumed in receipts goes
+  - OSCAL: the a11oy OSCAL component-definition + OPA/Rego policies are in a11oy/compliance/oscal/ — wire the OSCAL/Trestle
+- **Founder-gated, auto-skipped (2)** (Doctrine v11 — keys/secrets/major-bumps):
+  - J/token + carbon energy in EVERY signed receipt + speculative-decode/LMCache/LiteLLM/RouteLLM app-layer (/energy).
+  - a11oy "Doctrine — banned-token grep gate" = failure. This is the MARKETING-HYPE hygiene gate (flags words like
+- Reachability snapshot: https://a11oy.net/healthz -> 200
