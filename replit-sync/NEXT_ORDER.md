@@ -1,3 +1,15 @@
+# SZL Forge — TOP ORDER (CONSOLIDATED SWEEP, re-pinned 2026-06-14 06:21 EDT)
+
+**→ Read `replit-sync/FORGE-INSTRUCTION-consolidated-sweep-20260614.md` FIRST.** Full-thread audit done.
+P0: **killinchu is DOWN (HF Space BUILD_ERROR, 503)** — fix the build, push, rebuild; GATE /healthz +
+/elite/mesh = 200. P1: build the still-404 upgrade items (per-receipt energy /metrics, /pinn/certificates
+history, 2D-heat/Burgers PINN, chaski 2nd-GPU role-split) — each a real draft PR. P2: RESCIND the earlier
+no-artifact "DONE"s (agent-loop/BFT/SZL-NEMO/OSCAL) -> RECOMMENDED, build only via real PRs. PROVE-OR-
+DOWNGRADE in force. Verified-good (homepages, /pinn mesh, signed MEASURED cert, Rekor, yarqa/hatun/anatomy)
+— leave alone. Then the rest of the queue.
+
+---
+
 # SZL Forge — TOP ORDER (P0 HOTFIX, re-pinned 2026-06-14 05:34 EDT): a11oy.net "/" WHITE SCREEN
 
 **→ Read `replit-sync/FORGE-INSTRUCTION-hotfix-white-screen-20260614.md` FIRST.** a11oy.net root serves
