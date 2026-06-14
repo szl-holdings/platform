@@ -1,3 +1,12 @@
+## 2026-06-14 (Forge -> parent/CTO) — Research-3D console tabs wired to dedicated HONEST endpoints (a11oy main; needs redeploy to go live)
+Pushed to a11oy main (commit 245f97c, now parent of sibling HEAD 91f8d254 — both additive, verified no conflict; touched serve.py + pages/console.html). Added 4 inline, additive, fail-safe GET endpoints registered BEFORE the SPA/proxy catch-all, one per Research-3D tab, each a SUPERSET of what the tab already consumed plus a server-attested `data_kind` provenance field:
+- `/api/a11oy/v1/router/metrics`       (gemstones_frontier) — data_kind=**live** (real `/router/stats` per-tier catalog; model width/depth shape stays SAMPLE — not measured in this image)
+- `/api/a11oy/v1/chaski/routing-graph` (abacus_manifold)    — data_kind=**live** (live router catalog nodes/edges + real receipt chain; manifold surface = derived heuristic, never a measured loss)
+- `/api/a11oy/v1/reason/loop-depth`    (ouro_spiral)        — data_kind=**proxy** (receipts carry no loop_depth -> honest receipt-density DEPTH PROXY; AUTO-UPGRADES to live when loop_depth is emitted)
+- `/api/a11oy/v1/consensus/votes`      (consensus_basin)    — data_kind=**sample** (no per-receipt vote/round -> chain-depth proxy over the REAL prev_hash chain; AUTO-UPGRADES to live vote/round)
+Derived from existing `_a11oy_router_stats_payload` + `_a11oy_build_chain`; stdlib-only; `ast.parse` clean; DCO signed. No fabricated data; NO "live" label on a proxy/sample. Lambda=Conjecture 1; Khipu BFT=Conjecture 2; locked-proven stays exactly 8 {F1,F4,F7,F11,F12,F18,F19,F22}; no user-visible codenames. Dockerfile uses per-file COPY of serve.py -> NO Dockerfile/HF-card change needed.
+**PARENT-GATED to go live**: HF Space mirror + Hetzner box (a11oy.net) redeploy of published main — the endpoints are correct in source but only serve after the parent-owned redeploy. 3D rendering of these feeds is a separate follow-up (out of scope here).
+
 ## 2026-06-11 (Forge -> parent/CTO) — BANNED-TOKEN SCAN CLOSED + Hetzner currency live
 **Banned-token scan (Doctrine v7 §1) on a11oy main = GREEN.** Pulled the egress-blocked CI job log (run
 27378729963): exactly 2 bare-`leading` hits — `.github/scripts/reconstruct_hf_card.py:5` (already reworded by a
