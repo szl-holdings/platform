@@ -1,3 +1,17 @@
+# SZL Forge — TOP ORDER (pinned 2026-06-14 17:28 EDT): FULL UDS ALIGNMENT + DEPLOYABILITY (WarHacker)
+
+**-> Read `replit-sync/FORGE-INSTRUCTION-uds-full-alignment-20260614.md`.** Founder needs GitHub<->HF<->a11oy.net<->killinchu
+byte-identical AND the estate as proper UDS bundles (Zarf packages + UDS Package CRs + Pepr operator + UDS fleet + mesh)
+that `uds deploy` clean for the demo. Today's merges (energy operator + signed-receipt ledger mint + holographic showcase
++ szl3d toolkit + PNT pillars + showcase pages) made the published bundles STALE (a11oy-bundle:0.5.0 sha d801f8e4 is old).
+DO: (1) run lockstep guard, fix GitHub<->HF<->box drift incl. all new files, merge PR #406 hf-sync mirror; (2) RECUT a11oy
++ killinchu Zarf packages from current main + re-digest every bundles/*/uds-bundle.yaml (no stale refs) + sign; (3) confirm
+Pepr governance + UDS fleet + uds-mesh wired into the szl-warhacker bundle; (4) PROVE prove-bundle-install / uds-deploy the
+szl-warhacker bundle into a UDS test env, paste fresh OCI digests + in-cluster health/receipt proof + the exact
+`uds deploy oci://ghcr.io/szl-holdings/szl-warhacker-bundle:<ver> --confirm` one-liner for the stage. Honest BLOCKED beats
+a fake deploy. 0 CDN, no fabricated digests/receipts, revenue DRY-RUN, never commit a key, never weaken a gate.
+
+---
 # SZL Forge — ORDER: HARD-CONFIRM the public box is current (no inference, prove with exact URLs)
 
 The founder needs PROOF (not inference) that the always-up public box a11oy.net serves the FULL current estate
