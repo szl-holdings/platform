@@ -8,6 +8,15 @@ Then the rest of the queue.
 
 ---
 
+**STANDING / FLY HIGH -> `replit-sync/FORGE-INSTRUCTION-fly-high-frontier-20260614.md`:** after the
+current waves — unify both physics pillars into one fundamental-limits index + one signed verify; give every
+flagship a governed 3D holographic hero; add a self-describing /api/a11oy/v1/estate index; split heavy sweeps
+across all 3 sovereign GPUs when the rig joins; keep honesty/lockstep guards green. Always flying, never on a
+fabricated number.
+
+---
+
+
 **ALSO QUEUED -> `replit-sync/FORGE-INSTRUCTION-upgrades-wave-20260614.md`:** after the PNT mesh +
 Holographic Ops land, run the UPGRADES wave — GPU-real PNT certificates (MEASURED, signed via FA-001 DSSE),
 /pnt/resilience history, the WebGPU volumetric estate-hologram hero, hex-heightmap auto-include of the new
