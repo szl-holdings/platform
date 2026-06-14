@@ -1,3 +1,52 @@
+# ⚡ EXECUTION TARGET LOCKED (re-pinned 2026-06-14 02:30 EDT) — read this header first
+
+**STATUS NOW (verified live this minute, not reported — actually probed):**
+- ✅ The `/api/a11oy/v1/pinn/*` mesh is **LIVE on the HF Space** `szlholdings-a11oy.hf.space`
+  (certificate/solve/residual/index all 200; SAMPLE certificate, physically_bounded=true,
+  2.09e10× above Landauer). The harvest console bounds card is live there too.
+- ⚠️ **`a11oy.net` (the box, nginx @ 167.233.50.75) is serving a STALE build** — `/pinn/*` is 404 there
+  while older routes are 200. The box never pulled latest `main` + restarted. THIS is the real backlog
+  symptom of `dispatch_mode:none`: merged → HF auto-mirrors → but the BOX deploy step is the part that
+  needs dispatch, so it gets reported, not executed.
+
+**TWO concrete execution steps (do the moment dispatch is on — or a human runs step A once):**
+
+### A. UN-STALE THE BOX (highest priority — closes the visible gap)
+On 167.233.50.75, pull latest main and restart the a11oy service so the box matches HF:
+```bash
+cd /opt/a11oy && git fetch --all && git reset --hard origin/main \
+  && (docker compose up -d --build a11oy 2>/dev/null || sudo systemctl restart a11oy.service) \
+  && sleep 6 && curl -s -o /dev/null -w 'box /pinn after redeploy: %{http_code}\n' http://127.0.0.1:8081/api/a11oy/v1/pinn/certificate
+# adjust /opt/a11oy + service/compose name to this box's actual layout
+```
+Expected after: `a11oy.net/api/a11oy/v1/pinn/certificate` → 200 (matches HF).
+
+### B. RUN THE AGENTIC PINN ON THE LIVE SOVEREIGN GPU — node **`rtx-betterwithage`**
+The compute-pool probe shows ONE GPU reachable and sovereign: **`rtx-betterwithage`**
+(`http://100.125.77.31:11434`, kind=sovereign-gpu, reachable=true). chaski (100.76.58.50) is still OFF —
+do NOT block on it; run on `rtx-betterwithage`. Steps:
+```bash
+cd /opt/a11oy   # repo root that holds the vendored engine (or platform/services/verticals/szl_pinn/_vendor)
+# 1) MEASURED energy from the real NVML exporter (NOT sample). Feed the readings you already collect:
+python3 - <<'PY'
+import json, services.verticals.szl_pinn._vendor.nvml_hook as nh
+import services.verticals.szl_pinn._vendor.physics_bounds as pb
+import services.verticals.szl_pinn._vendor.agentic_pinn as ap
+job = nh.read_nvml_job()                  # refuses to fabricate; real GPU power×time
+cert = pb.certify(job)                     # label MUST be MEASURED only if reading is real
+res  = ap.AgenticPINN(cfg=ap.AgenticConfig(seed=0)).run(verbose=False)
+open('physical_bounds_certificate.json','w').write(json.dumps(cert.to_dict(), indent=2))
+open('agentic_decision_trail.json','w').write(json.dumps(res.to_dict(), indent=2))
+print('wrote MEASURED certificate + decision trail; bounded=', cert.physically_bounded)
+PY
+# 2) place both JSON next to szl_pinn_bounds.py (or export SZL_PINN_ARTIFACT_DIR) so the mesh serves them
+# 3) restart a11oy -> /api/a11oy/v1/pinn/certificate flips label SAMPLE -> MEASURED on BOTH box + HF
+# 4) sign through the khipu/szl_lake Ed25519 DSSE path -> /api/a11oy/v1/verify returns a real signed verify
+```
+HARD: energy = MEASURED power × MEASURED time only. `label:"MEASURED"` ONLY when the NVML reading is real.
+Keep the deny-by-default Λ-gate + signed per-round receipt. Honest inverse of free-energy — never over-unity.
+
+---
 # SZL Forge — INSTRUCTION: upgrade/enhance the AGENTIC PINN + PHYSICAL-BOUNDS certifier on real GPU
 
 Read `replit-sync/FREEZE.json` first. **Dispatch is still OFF** (`dispatch_mode:none`) until the founder runs
