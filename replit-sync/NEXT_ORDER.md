@@ -1,3 +1,13 @@
+# SZL Forge — TOP ORDER (P0 HOTFIX, re-pinned 2026-06-14 05:34 EDT): a11oy.net "/" WHITE SCREEN
+
+**→ Read `replit-sync/FORGE-INSTRUCTION-hotfix-white-screen-20260614.md` FIRST.** a11oy.net root serves
+an 83-byte stub (only the Chaski operator-widget script) -> users see a BLANK page with a tiny bubble.
+Real app is fine at /console. Restore a real landing page at "/" with the widget as an OVERLAY (box AND
+HF Space both broken). GATE: root returns >1KB real markup + headless render shows visible content.
+PROVE-OR-DOWNGRADE in force. THEN the sign + upgrade wave below.
+
+---
+
 # SZL Forge — TOP ORDER (re-pinned 2026-06-14 05:28 EDT): SIGN + upgrade wave
 
 **→ Read `replit-sync/FORGE-INSTRUCTION-sign-and-upgrade-20260614.md` FIRST.** Box + HF /pinn are MEASURED
