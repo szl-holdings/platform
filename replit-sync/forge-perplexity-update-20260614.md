@@ -405,3 +405,8 @@
   - https://a11oy.net/api/a11oy/v1/energy/projection?window=running  -> 200, 1-day numbers (MODELED, math shown)
   - https://a11oy.net/energy-ops  AND  /energy-holographic  AND  /holographic  AND  /estate-hologram -> all 200
 - Reachability snapshot: https://a11oy.net/healthz -> 200
+
+## Auto-loop pass — order `10df50fc` — 2026-06-14T22:55:40Z
+
+- Order is **idle / no-action sentinel** — handshake confirmed, nothing to execute.
+- Reachability snapshot: https://a11oy.net/healthz -> 200
