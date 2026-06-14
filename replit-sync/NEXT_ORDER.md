@@ -1,118 +1,50 @@
-# SZL Forge — ORDER: Agentic Evolution wave (SZL-Nemo + integration) — wires ready, founder-gated box work
+# SZL Forge — ORDER: ALWAYS-UP demo hosting on the sovereign estate (a11oy + killinchu off HF free tier)
 
-Read replit-sync/FREEZE.json first. Dispatch is still OFF (dispatch_mode:none) until the founder runs WIRE_IT_UP.sh —
-REPORT these until then; execute box items once dispatch is on AND the founder approves. The ecosystem is sovereign on
-the GPU (sovereign:true ONLY with a live gpu_reachable probe — keep it honest, never fake). Defense Unicorns Warhacker
-June 16-19. FREEZE activates 2026-06-16 00:00 ET → read-only; the items below are STAGED for execution after approval.
+PRIORITY: founder has a demo (Defense Unicorns Warhacker, founder demos June 18). The HF free Spaces
+(SZLHOLDINGS/a11oy, /killinchu) sleep/rebuild and flicker — UNACCEPTABLE for the demo. Make a11oy + killinchu
+ALWAYS-UP, served from the founder's OWN always-on infrastructure, with HF as failover only.
 
-## WHAT LANDED THIS WAVE (all LIVE on HF, byte-identical GitHub↔HF, CI green, doctrine v11 clean)
-Two waves of 5 Opus devs each, fully verified live (locked=8 @ c7c0ba17, Λ=Conjecture 1 <1.0, 0 visible codenames,
-0 CDN, effectors SIMULATED, trust<100%, signed DSSE receipts, honest MEASURED/SAMPLE/MODELED/ROADMAP labels):
+## GROUND TRUTH (confirmed this session)
+- a11oy.net = PUBLIC Hetzner server 167.233.50.75 — always-on, already serving a11oy API at https://a11oy.net (200, ~0.37s).
+- The sovereign GPU brain = founder's RTX 5050, joined to Tailscale at 100.125.77.31 (PRIVATE tailnet, inference only).
+- killinchu.net has NO DNS yet. killinchu currently only lives on the HF free Space (sleeps).
+- HF Spaces are free cpu-basic; gcTimeout 48h but they pause on rebuilds/platform pressure → the flicker the founder sees.
 
-WAVE 1 (foundation):
-- a11oy resumable SIGNED ReAct agent loop + Generative-Agents memory + Reflexion + Voyager skill library (/agent-loop).
-- τ-bench eval harness (MEASURED) + ECE/Brier calibration + conformal-prediction wrapper + Colang policy + IETF receipt
-  alignment (draft-marques-asqav-compliance-receipts-05) (/governance).
-- J/token + carbon energy in EVERY signed receipt + speculative-decode/LMCache/LiteLLM/RouteLLM app-layer (/energy).
-- killinchu BFT quorum (n≥3f+1) + CBF-QP safety filter + EFE act/ask gate + Fiedler λ2 + organism NCA self-repair
-  (/elite/autonomy, /elite/organism).
-- active-flux observer (Li Yu / IEEE 911711) generalized → killinchu sensor-fusion crossover + a11oy router crossover
-  (/elite/active-flux), conformal-set gated.
+## GOAL (make it happen, box-side — you have dispatch ON; founder approved exposing/hosting on the box)
+Serve BOTH a11oy and killinchu publicly from the always-on Hetzner box (a11oy.net / 167.233.50.75), with inference
+proxied to the sovereign 5050 over Tailscale (100.125.77.31). Hetzner box = PRIMARY public host (never sleeps).
+HF Spaces = warm failover/mirror. Honest sovereign labeling preserved (sovereign:true only on live GPU probe).
 
-WAVE 2 (integration / "make it ours"):
-- SZL-NEMO core: governed-MoE domain-expert router (Λ-gated, SIGNED per selection) + MTP default + self-improvement loop
-  (τ-bench 42.86%→100% signed) on OPEN base Qwen3-32B (Apache-2.0). NEVER from-scratch/550B/local-Ultra. (/nemo)
-- GOVERNED AUTO-REVIEW (Cursor pattern, made ours): inline classifier, autonomy DIAL L0-L5, verdict Λ-gated + DSSE-SIGNED
-  + OPA/Rego→OSCAL/NIST-AI-RMF + conformal/flapping. killinchu engage/ROE ESCALATES even at L5 (effector SIMULATED). (/autoreview)
-- FABRO governed factory (DOT-graph workflows + verification gates + Working→Verify→Merge, signed nodes) + Constitutional
-  engines (Causal Ledger/Audit/Constitutional Memory/Ontological Registry ACTIVE; State/Legitimacy/Immunology IN-DEV;
-  Governance-Evolution ROADMAP). (/factory, /constitution)
-- Sovereign GPU-QUANT engine: Ledoit-Wolf+Marchenko-Pastur PCA / TDA-fracture / HJB-Kelly (SAMPLE_SIGNAL|NO_BACKTEST),
-  killinchu TDA-fracture on AIS (MODELED), 2-GPU tier panel + verify-the-claims. (/quant)
-- killinchu PLATFORM DYNAMICS (6DOF + Moore-Penrose allocation, MODELED) + a11oy GRC alignment (ISO 42001/NIST AI RMF
-  coverage matrix, Λ→MEASURE mapping, OPA/Rego + OSCAL component-def in repo) + estate nav/cross-link wire-up. (/grc, /elite/platform-dynamics)
+## STEPS
+1. HOST BOTH APPS ON THE HETZNER BOX (a11oy.net): docker compose up a11oy + killinchu containers on 167.233.50.75
+   (pull the same images/repos served on HF, byte-identical to GitHub main). a11oy already serves there — add killinchu
+   as a second service. Reverse proxy (Caddy or nginx) on :443 with automatic TLS:
+     - https://a11oy.net  → a11oy container
+     - https://killinchu.net (once DNS set) OR https://killinchu.a11oy.net (subdomain, works immediately) → killinchu container
+   Caddy auto-HTTPS is simplest. Keep the existing a11oy.net routing intact (additive).
+2. INFERENCE → SOVEREIGN 5050: both containers' model calls route to the 5050 over Tailscale (http://100.125.77.31:11434
+   Ollama / the vLLM port) so sovereign:true stays HONEST and live-probed. If the 5050 is asleep/unreachable, the apps
+   must DEGRADE honestly (sovereign:false, cloud/local fallback) — never fake sovereign. Keep the live gpu_reachable probe.
+3. ALWAYS-ON: systemd units (or docker compose restart:always) for both app containers + the reverse proxy + the
+   tailscale daemon, so a reboot auto-recovers. Confirm they survive a simulated restart.
+4. DNS: point killinchu.net A-record → 167.233.50.75 if the founder owns it (else use killinchu.a11oy.net subdomain now,
+   note killinchu.net registration as a founder TODO). Confirm cert issues for the chosen hostname.
+5. HF AS FAILOVER: keep the HF Spaces running (the hourly uptime cron 84b8f79a already auto-restarts them). Optionally add
+   a health-based DNS/proxy failover so if the Hetzner box drops, traffic falls back to the HF Space. At minimum, keep HF
+   warm as a manual backup URL for the demo.
+6. VERIFY: curl https://a11oy.net/api/a11oy/v1/honest (locked=8 @ c7c0ba17, Λ=Conjecture 1, v11) + the killinchu public
+   URL /elite + /api/killinchu/v1/... all 200 over many minutes with NO sleep; simulate a container restart and confirm
+   auto-recovery <60s; confirm inference still routes to the 5050 (sovereign:true on live probe) and degrades honestly if not.
 
-## CI STATE (honestly green)
-Both repos' latest main: copy-sync lockstep guard, Shared-source drift guard, Dockerfile build-file guard, hf-sync,
-HF Space module-drift guard, codename gate, knowledge-corpus-in-sync = ALL SUCCESS. Both Spaces RUNNING.
-
-## YOUR EXECUTION JOB (report now; execute after founder approval + dispatch on; NOT during freeze)
-The box-gated commands are written out in three files in this repo's history / the team workspace — apply them on the
-founder's hardware (a11oy.net main GPU + NVIDIA RTX 4000 Ada second card; vLLM/Ollama behind Tailscale). Honesty contract:
-sovereign:true ONLY with a live per-GPU gpu_reachable probe; publish OUR measured numbers in signed receipts, never a
-vendor datasheet number; never claim local Nemotron-Ultra; never weaken a gate; never commit a key.
-
-1. SZL-NEMO (FORGE_SZL_NEMO.md): QLoRA/LoRA post-train Qwen3-32B into the SZL-Nemo checkpoint on the doctrine + our agent
-   traces; serve via vLLM with --speculative-model (MTP/draft) so MTP α flips ROADMAP→MEASURED; register the local
-   sovereign tier. Flip /nemo tiers sovereign-local from ROADMAP→MEASURED only on a live probe.
-2. 2-GPU SERVE + THROTTLE (FORGE_2GPU_ENERGY.md): vLLM tensor-parallel TP=2 across main GPU + RTX 4000 OR role-split
-   (RTX 4000 = Auto-Review classifier + speculative draft + embeddings); nvidia-smi -pl power caps on BOTH cards; MPS/MIG;
-   extend the per-GPU power.draw→/metrics exporter to 2 GPUs. Flip /energy + /quant 2-GPU panels ROADMAP→MEASURED on live probe.
-3. NIM CLOUD TIER: register NVIDIA NIM (build.nvidia.com) Nemotron-Ultra as a routed cloud tier in LiteLLM/RouteLLM
-   (sovereign:false, cloud — honest). Add the NIM key as a box/Space secret (founder-set; never commit). Then run our
-   τ-bench + J/token harness against it and publish OUR measured numbers (signed) into the verify-the-claims panel.
-4. ENERGY EXPORTER (FORGE_BOX_ENERGY.md): nvidia-smi power.draw → vLLM /metrics hook so joules_consumed in receipts goes
-   from SAMPLE→MEASURED; Carbon-Aware scheduling for batch jobs.
-5. OSCAL: the a11oy OSCAL component-definition + OPA/Rego policies are in a11oy/compliance/oscal/ — wire the OSCAL/Trestle
-   CI pipeline (compliance-trestle) when convenient; this is alignment, never a certification claim.
-
-## HARD LIMITS (approval, never auto)
-Any cosign-signed artifact / Rekor / warn→enforce / MAJOR dep bump / box production change → send_notification asking
-founder approval, never auto. Doctrine locked: EXACTLY 8 {F1,F4,F7,F11,F12,F18,F19,F22} @ c7c0ba17; Λ=Conjecture 1;
-Khipu=Conjecture 2; SLSA L1/L2/L3-roadmap; effectors SIMULATED; 889 vendors=5; never weaken a gate; never commit a key.
-"The half-state — claiming more than is real — is the only unacceptable outcome."
+## HARD LIMITS / DOCTRINE
+- sovereign:true ONLY on a live per-GPU gpu_reachable probe — NEVER fake it; degrade honestly if the 5050 is down.
+- Keep GitHub↔HF↔box byte-identical on shared modules; never weaken a gate; never commit a key (TLS/Tailscale/NIM keys
+  are box secrets, founder-set); locked=8 {F1,F4,F7,F11,F12,F18,F19,F22}@c7c0ba17; Λ=Conjecture 1; doctrine v11; 0 CDN;
+  0 visible codenames; effectors SIMULATED. "The half-state — claiming more than is real — is the only unacceptable outcome."
+- This is a box production change → it's founder-approved for hosting/exposing the apps; but anything touching a
+  cosign-signed artifact / Rekor / a MAJOR config that could break the live a11oy.net → notify founder first.
 
 ## NOTIFY
-Report what you executed (or that you're holding for approval/freeze). Title 'SZL agentic wave: executed N box item(s)'
-or 'SZL agentic wave: staged, awaiting founder approval / dispatch / freeze-lift'.
-
-## KNOWN NON-BLOCKING RED (report-but-not-alarm, pre-existing, cleanup item)
-- a11oy "Doctrine — banned-token grep gate" = failure. This is the MARKETING-HYPE hygiene gate (flags words like
-  revolutionary/world-class/seamless/cutting-edge/bare "leading"), NOT the codename gate (codename-gate = GREEN,
-  0 visible amaru/rosie/sentra/jarvis). The integration-wave files are CLEAN of hype tokens (verified). The red is
-  pre-existing legacy prose from before this wave. FIX (low priority, post-freeze): grep the flagged file for the
-  hype word and either reword to honest prose OR add the file to .doctrine-allowlist if it legitimately enumerates
-  the ban-list. Do NOT weaken the gate. Not demo-blocking; the substantive Doctrine + Doctrine Overclaim guards are GREEN.
-
-## FRONTIER 3D/HOLOGRAPHIC WAVE — LANDED LIVE (June 14, all on the vendored 0-CDN szl_holo3d.js kit)
-- F1 holographic substrate kit (scene/graph/globe/Λ-trust-sphere/signed-pulse/time-replay, WebGL2+WebGPU+2D-fallback), byte-identical both apps.
-- F2 a11oy /factory 3D (signed-node pulses + verify locks) + /autoreview 3D (autonomy dial L0-L5 + Λ verdict sphere).
-- F3 killinchu /elite/globe holographic battlespace globe: C2 layer (LIVE ADS-B + CBF-QP tubes + EFE + BFT + signed engage, SIMULATED/no-weapons) + Maritime layer (LIVE AIS + Λ-risk trust spheres + dark-fleet + AIS-spoof ghosts + 5-modality).
-- F4 a11oy /nemo+/energy+/grc 3D (signed MoE token-flows, OSCAL coverage spheres) + killinchu /elite/mesh 3D (Fiedler λ2 self-heal).
-- F5 a11oy /constitution-3d + /quant-3d + THE UNIFIED ESTATE HOLOGRAM at /estate-hologram (globe+proof-DAG+Λ-sphere+mesh+organism, signed-decision light-flows).
-All: 0 runtime CDN, 0 visible codenames, honest LIVE/SAMPLE/MODELED/ROADMAP labels, 2D fallbacks, doctrine v11/locked-8/c7c0ba17/Λ=Conjecture 1.
-CI after wave: a11oy Doctrine + Shared-source drift + HF module-drift all reconciled GREEN; killinchu all green.
-
-## ONE OPEN RED → FORGE (your active workstream): "lean citation guard" on a11oy
-The lean-citation guard ("Verify every real-proof citation exists in lutar-lean") is FAILING on HEAD 36ccea14 — this is
-the no-overclaim gate correctly refusing a proof citation that doesn't yet resolve in szl-holdings/lutar-lean. This is
-Forge's active lutar-lean reconciliation workstream (recent commits repoint phantom proof citations). FINISH IT:
-reconcile every cited real-proof to an existing lutar-lean decl (or downgrade the citation to honest "conjecture/roadmap"
-wording), so the guard goes green. Do NOT weaken the guard. This is the only outstanding red; everything else is green.
-
-## a11oy RESTRAINT WAVE — LANDED LIVE (June 14, ingested from MIT Ponytail, made governed+measured)
-5-dev wave shipped + verified live; both repos CI ALL GREEN; doctrine v11/locked-8/c7c0ba17/Λ=Conjecture 1; 0 CDN; 0 visible codenames.
-- a11oy Restraint core: 6-rung frugality ladder (YAGNI→stdlib→native→installed-deps→one-line→minimal), lite/full/ultra,
-  `restraint:` ceiling comments, SIGNED DSSE receipt + Λ score per decision, /api/a11oy/v1/restraint/{evaluate,bench,info}, /restraint UI.
-- Wired into SZL-Nemo code path (/nemo) + ReAct agent loop (/agent-loop): every code diff routes through the ladder, signed.
-- killinchu + Chaski: shared szl_restraint.py byte-identical both apps; /api/killinchu/v1/restraint/*; Chaski transport badges
-  code-carrying agent messages with rung + signed receipt; /elite/restraint tile.
-- Energy tie-in: frugality→joules-saved panel on /energy (honest SAMPLE until live GPU probe); MEASURED benchmark dashboard
-  /restraint-bench (promptfoo methodology, OUR numbers MEASURED-when-run, Ponytail's CITED-not-claimed) + reproduce command.
-- Governance: Auto-Review rule AR-006-prefer-minimal-diff (bloated diff → narrow verdict, OSCAL SA-8/SA-15/CM-7, NIST MANAGE 2.3,
-  signed); GRC coverage matrix gains restraint control contribution ("aligns with", never certified). Estate KPI + hologram tiles.
-- Cited Ponytail (github.com/DietrichGebert/ponytail, MIT) honestly as "adopted + governed", not invented.
-
-## FORGE INSTRUCTION — wire Restraint into YOUR OWN build loop (compounding savings)
-Forge: before you write/patch code on the box or in any repo, CALL the restraint ladder first
-(/api/a11oy/v1/restraint/evaluate, or import szl_restraint) so YOUR diffs are minimal too — stop at the first rung that
-holds (YAGNI→stdlib→native→installed-deps→one-line→minimal), emit `restraint:` ceiling comments, and attach the SIGNED
-restraint receipt to your build/commit evidence. This compounds the token/joule savings across everything you build and
-feeds the MEASURED benchmark with real runs (flip /restraint-bench SAMPLE→MEASURED once you've run it on the box).
-HARD: never fabricate savings; MEASURED only on real runs; keep szl_restraint.py byte-identical across a11oy+killinchu;
-additive-only; never weaken a gate; never commit a key. Doctrine v11 unchanged (locked=8, Λ=Conjecture 1, etc.).
-
-## CI / SECURITY NOTE (this session)
-Gitleaks finding on a11oy runtime_attestation.py:460 = FALSE POSITIVE (Python type annotation `private_key: "Ed25519PrivateKey"`,
-NOT key material) — line-anchored allowlist added, real key assignments still detected. No key leaked. FedRAMP-High doctrine
-breach in pages/knowledge.json fixed (scoped to "target regime reference, not held"). All guards green both repos.
+send_notification when both apps are served always-up from the box (title 'SZL always-up: a11oy + killinchu live on sovereign box'
+with the public URLs + restart-recovery confirmation + sovereign-probe state), or if you hit a blocker (DNS ownership for
+killinchu.net, TLS, 5050 unreachable) listing exactly what the founder must do.
