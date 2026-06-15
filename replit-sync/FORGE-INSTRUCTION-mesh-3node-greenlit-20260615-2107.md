@@ -45,3 +45,17 @@ The box resolver will find chaski's CURRENT tailnet IP automatically — no hard
 - [ ] a11oy CI green after f0145e11 (doctrine/build/drift/security gates); GitHub↔HF in sync.
 - [ ] When OMEN serves: `gpu_nodes_reachable` >= 2, energy `nodes_computing` includes the home node — by REAL probe only.
 - [ ] Report DONE vs FOUNDER-GATED (chaski wake). Never fake a node up.
+---
+
+## ADDENDUM 2026-06-15 17:13 ET — BOX REDEPLOY IS THE #1 GATE (founder verified live)
+
+**Verified live this session:**
+- HF Space `szlholdings-a11oy.hf.space` git_sha = **f0145e11** ✅ (my OMEN-node + resolver patch deployed).
+- **a11oy.net (Hetzner box) git_sha = cfefcc32 — STALE.** The box serves /compute-pool-hardened, so until it redeploys to f0145e11 the OMEN node + dynamic tailscale resolver are NOT live there — that is the ONLY reason `omen-betterwithage` is not yet in the box's node list.
+- The box has a systemd autodeploy timer (`ops/install-a11oy-autodeploy.sh`, polls origin/main every 3 min → `a11oy-rebuild`). It has not pulled f0145e11.
+
+**FORGE #1 (drive to done):** get a11oy.net redeployed to current main (f0145e11). Either (a) confirm the `a11oy-autodeploy.timer` is installed + active on the box and let it pull within ~3 min, or (b) if it is not installed/running, that is a founder-SSH step — see `team/AUDIT/remediation/BOX_SSH_RUNBOOK.md` (run `a11oy-rebuild` or install the autodeploy unit). PROVE: `GET https://a11oy.net/api/a11oy/v1/honest` git_sha == f0145e11, AND `GET https://a11oy.net/api/a11oy/v1/compute-pool-hardened` lists `omen-betterwithage` with resolver detail `via tailscale-*`.
+
+**chaski (node 3) is UP — confirmed:** AUTO_STATE says chaski LIVE at **100.102.173.88:11434 (8 models)**; stale 100.76.58.50 is fallback only. Once the box redeploys f0145e11, the dynamic resolver will find chaski at its live IP automatically → it should flip reachable. Also execute `replit-sync/energy_engine/R_CHASKI_BOOT_AND_KEEP_ALIVE_20260615.md` to make chaski's Ollama durable (it died after ~22h) and wire it as the 2nd energy lung (A11OY_ENERGY_CHASKI_ENABLED=1 + URL), honest joules (MEASURED only on real per-job reading).
+
+**Expected end-state once box redeploys + OMEN serves + chaski durable:** `gpu_nodes_reachable` = 3 (rtx-betterwithage laptop + omen-betterwithage desktop + chaski), all by REAL probe. Energy operator nodes_computing includes all live nodes. NEVER claim combined VRAM — horizontal scale only.
