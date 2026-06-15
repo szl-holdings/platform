@@ -28,7 +28,10 @@
       "!playwright-report",
       "!test-results",
       "!output",
-      "!pnpm-lock.yaml"
+      "!pnpm-lock.yaml",
+      "!**/src/generated",
+      "!**/drizzle/meta",
+      "!**/*.min.js"
     ]
   },
   "formatter": {
