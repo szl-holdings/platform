@@ -1,3 +1,17 @@
+# SZL Forge — HOT RECOVERY (pinned 2026-06-15 02:18 ET): energy operator worker STOPPED — fix FIRST
+
+**-> Read `replit-sync/FORGE-INSTRUCTION-energy-worker-recovery-20260615.md`.** The live energy meter (demo
+crescendo) has stalled: operator `running:false`, `uptime_s:0`, `power_w_sample:null`, `node_status` all `idle`,
+0 receipts minting in the running window — while tokens keep climbing (inference unmetered). Totals are FROZEN at
+271,855 J / 9,885 jobs (do NOT reset/backfill). The recent redeploy restarted the a11oy service (chaski-standby
+code e67b073 IS now live — `nodes_standby` field present) but did NOT re-arm the measurement worker. FIX: (1) on
+the laptop `betterwithage`, confirm/restart the NVML exporter at http://100.96.129.45:9471/; (2) on the box,
+restart the energy operator measurement worker so `running` flips true and it RESUMES sampling rtx-betterwithage
+forward from 271,855 J; (3) prove joules climbing again + a fresh JouleCharge receipt minted. HONEST: if the
+exporter can't be revived, report BLOCKED and demo the EXISTING signed receipts — never fabricate a power sample
+or reset the totals. Do this BEFORE the other MASTER ORDER jobs below.
+
+---
 # SZL Forge — TOP ORDER (2026-06-15 01:25 EDT): use founder secrets TS_AUTHKEY + LLAMA_API_KEY (NEVER commit), harden home box headless
 
 **-> Read `replit-sync/FORGE-INSTRUCTION-secrets-tsauthkey-llamakey-20260615.md`.** Founder set TWO secrets in the
