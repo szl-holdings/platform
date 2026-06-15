@@ -58,7 +58,9 @@ The box-redeploy-to-current-main order already pinned above this one MUST run �
 
 `local-stub` is already gone from `nodes_computing` (good). The remaining blemish: `chaski` reads `DEGRADED` because it's unreachable (founder must start the replit-chaski Repl — known founder-only action, do NOT escalate). For the demo, a node that is **configured but intentionally not started** should read `standby`, not the alarming `DEGRADED` (which should mean "supposed to be up but failed").
 
-DO (a11oy `szl_energy_operator.py`, reversible — CTO may land this as a PR; if so, just redeploy):
+**STATUS: CODE ALREADY LANDED by CTO** — PR #417 merged to a11oy main as `e67b073` (hotfix/chaski-standby-label, single signed `[demo-hotfix]` commit through the demo-freeze escape hatch, closes #416). 10/10 operator tests green. Forge: you do NOT need to write this code — it is in main. Just ensure the box redeploy picks it up, then set `A11OY_CHASKI_STANDBY=1` (default) so chaski reads `standby` until the founder starts the replit-chaski Repl (then `=0`).
+
+Reference (already implemented):
 1. Add an env-gated standby concept: a node flagged standby (e.g. `A11OY_CHASKI_STANDBY=1`, default on until the Repl is up) that is unreachable reports `standby` instead of `DEGRADED`. If a standby node DOES respond, it computes normally (never suppress real compute).
 2. `status()` should surface `nodes_standby` separately from `nodes_degraded`. Keep the strict rule: a node that fails MID-JOB is still `DEGRADED` (real failure), never downgraded to standby.
 
