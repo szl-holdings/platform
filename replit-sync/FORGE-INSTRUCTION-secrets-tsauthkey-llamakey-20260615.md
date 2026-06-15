@@ -40,3 +40,18 @@ hardened, headless, always-on sovereign brain — no human at the keyboard after
 32B). Cloud Llama (if that's the key) = labeled CLOUD failover, never "sovereign". Trust never 100%.
 0 CDN. Tailnet-only exposure (Tailscale ACL), never public 11434. NEVER commit either key. Honest BLOCKED
 beats fake green.
+
+
+## ADDENDUM (2026-06-15 01:26 EDT) — the "Llama key" is an OLLAMA key (founder clarified: "Ollama")
+Treat `LLAMA_API_KEY` (a.k.a. set it as `OLLAMA_API_KEY` if that's what the runtime expects) as an
+OLLAMA credential, NOT a cloud llama.com key. Determine which of these it is by probing, and wire honestly:
+- **(A) Ollama Cloud / Turbo key** (authenticates to ollama.com hosted models): register as a CLOUD
+  FAILOVER tier only — labeled CLOUD, never "sovereign". The sovereign-local brain remains the founder's
+  OWN `ollama serve` on the home 4060 Ti (governed Qwen3 / qwen2.5-coder 7-14B, 8GB).
+- **(B) Local-server auth key** (the founder's `ollama serve` expects an auth header / OLLAMA_API_KEY):
+  set it so the mesh coordinator + a11oy authenticate to the LOCAL Ollama over the tailnet. This is the
+  more likely case for a sovereign setup.
+Probe order: try the local server first (curl the tailnet ollama /api/version with and without the key);
+if local needs it, it's (B). If local works keyless AND the key validates against ollama.com, it's (A) =
+cloud failover. Either way: read from secret store, NEVER commit, label the cloud tier honestly.
+The PRIMARY sovereign path is always the local 4060 Ti ollama — the key never downgrades that to "cloud".
