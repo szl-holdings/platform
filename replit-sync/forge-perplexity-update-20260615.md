@@ -45,3 +45,13 @@
   - rearm-energy-worker  (restart exporter 100.96.129.45:9471 + box operator loop; running->true; joules climb past 271855; mint receipts; NEVER reset/fabricate)
   - turn-dispatch-on     (set FORGE_DISPATCH_CMD + flip dispatch_ok:true so this loop EXECUTES not reports)
 - Reachability snapshot: https://a11oy.net/healthz -> 429
+
+## Auto-loop pass — order `e09f1704` — 2026-06-15T17:33:28Z
+
+- **Actionable items (3)** — handed to Forge agent (mode=`dispatch-cmd`, ok=`True`):
+  - box-redeploy-verify (confirm box on current main: /pnt + /pinn distinct surfaces, /fabric live pool, /energy-ops graphs, git_sha==GitHub HEAD on /honest)
+  - serve-governance-backend (stand up /api/a11oy/v1/assurance/{artifact,credential,compliance,attest} + /forge/ledger — all 404 now; real data or honest STRUCTURAL-ONLY, never fabricate)
+  - jtoken-measured (run NVML /metrics exporter LOCALLY on betterwithage, set A11OY_VLLM_METRICS_URL; flip /energy/jtoken ROADMAP->MEASURED; honest BLOCKED if exporter can't emit over tailnet)
+- **Founder-gated, auto-skipped (1)** (Doctrine v11 — keys/secrets/major-bumps):
+  - uds-bundle-recut (recut szl-warhacker bundle from current main, un-stage a11oy+killinchu, fresh digests, prove-bundle-install; leave cosign sign for founder)
+- Reachability snapshot: https://a11oy.net/healthz -> 200
