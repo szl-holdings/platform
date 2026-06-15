@@ -1,28 +1,26 @@
 {
-  "order_sha": "384f7324928f1a1fa9835a9d85324aed999aeaca",
+  "order_sha": "9bf204ed2078e26120100b311045329f3505dfb1",
   "order_path": "replit-sync/NEXT_ORDER.md",
-  "state": "done",
-  "seen_at": "2026-06-15T18:33:17Z",
-  "updated_at": "2026-06-15T18:33:52Z",
-  "idle": false,
+  "state": "processing",
+  "seen_at": "2026-06-15T19:33:18Z",
   "actionable": [
-    "serve-governance-backend (CONTINUE \u2014 /assurance/artifact already 200; finish credential/compliance/attest + /forge/ledger with real or honest STRUCTURAL-ONLY data, never fabricate)",
-    "box-redeploy-verify (git_sha now on /honest = c8a1d51c; confirm /pnt+/pinn distinct, /fabric live, /energy-ops graphs, /governance rewired, /anatomy/loop 307 all live)",
-    "jtoken-measured (PHYSICAL CONSTRAINT: the NVML exporter must read the Blackwell GPU, which is on the LAPTOP betterwithage \u2014 NOT on the box. The box has no Blackwell to measure. The laptop is already on the tailnet and already running the energy exporter. So: start the Prometheus /metrics exporter ON THE LAPTOP via the laptop-resident agent/shell (e.g. the betterwithage Replit agent), publish /metrics over tailnet, set A11OY_VLLM_METRICS_URL on the box reversibly, flip /energy/jtoken ROADMAP->MEASURED. If no laptop-side agent is reachable to start the process, report BLOCKED-need-laptop-agent \u2014 do NOT claim you can read the GPU from the box. Honest BLOCKED beats fake.)"
+    "Sign ONLY bundles you actually recut + prove-installed this run. NEVER sign a bundle you did not build. NEVER fabricate a signature or a \"verified\" line.",
+    "jtoken ALREADY MEASURED (200, label=MEASURED). Keep it; add staleness guard (see ORDER B).",
+    "chaski ALREADY reachable on fabric (compute-pool, gpu_nodes_reachable=2). Real gap = make it a 2nd ENERGY-producing lung (see ORDER A).",
+    "Real deployable bundles live in szl-uds-deployment/bundles/: szl-warhacker, szl-full-stack, szl-uds-bundle, a11oy, killinchu, energy, prove-organs.",
+    "szl-uds-deployment/bundles/szl-full-stack  (the 5-flagship)",
+    "szl-uds-deployment/bundles/szl-uds-bundle   (the published umbrella \u2014 currently ghcr tag uds-v0.2.1 / 0.4.0; recut to a fresh tag from current main)",
+    "szl-uds-deployment/bundles/a11oy",
+    "szl-uds-deployment/bundles/killinchu",
+    "szl-uds-deployment/bundles/energy",
+    "szl-uds-deployment/bundles/prove-organs",
+    "chaski is ALREADY UP at the LIVE IP 100.102.173.88:11434 (8 models) \u2014 confirm on the CURRENT IP (resolve dynamically; old runbooks' 100.76.58.50 is STALE).",
+    "The real job: make Ollama on the chaski Repl DURABLE (it died after ~22h before) via systemd/supervisor/Always-On, then wire it as the 2nd ENERGY lung (= ORDER A above).",
+    "Forge does all box/tailnet steps. Only the Replit \"Always On\" toggle may be founder-only \u2014 if so, report the exact click-path. Honest BLOCKED beats fake durable. Probe-driven reachability only; never a flag."
   ],
-  "delegated_to_agent": [
-    "serve-governance-backend (CONTINUE \u2014 /assurance/artifact already 200; finish credential/compliance/attest + /forge/ledger with real or honest STRUCTURAL-ONLY data, never fabricate)",
-    "box-redeploy-verify (git_sha now on /honest = c8a1d51c; confirm /pnt+/pinn distinct, /fabric live, /energy-ops graphs, /governance rewired, /anatomy/loop 307 all live)",
-    "jtoken-measured (PHYSICAL CONSTRAINT: the NVML exporter must read the Blackwell GPU, which is on the LAPTOP betterwithage \u2014 NOT on the box. The box has no Blackwell to measure. The laptop is already on the tailnet and already running the energy exporter. So: start the Prometheus /metrics exporter ON THE LAPTOP via the laptop-resident agent/shell (e.g. the betterwithage Replit agent), publish /metrics over tailnet, set A11OY_VLLM_METRICS_URL on the box reversibly, flip /energy/jtoken ROADMAP->MEASURED. If no laptop-side agent is reachable to start the process, report BLOCKED-need-laptop-agent \u2014 do NOT claim you can read the GPU from the box. Honest BLOCKED beats fake.)"
-  ],
-  "dispatch_mode": "dispatch-cmd",
-  "dispatch_ok": true,
   "gated_skipped": [
-    "uds-bundle-recut (recut szl-warhacker bundle from CURRENT main, un-stage a11oy+killinchu, fresh package digests, run OCI-ref + digest guards, prove-bundle-install into k3d; sign with the box-resident cosign key if present, else BLOCKED-on-key. PROVE: fresh OCI ref+digest + prove-install + in-cluster health 200. Update UDS_DEPLOY_RUNBOOK.md one-liner.)"
-  ],
-  "report": "replit-sync/forge-perplexity-update-20260615.md",
-  "probes": {
-    "https://a11oy.net/healthz": 200
-  },
-  "doctrine": "v11: locked=8, Lambda=Conjecture 1, never commit a key"
+    "Use the key from the box env/secret store ONLY. NEVER print it, NEVER write it into a repo file or log.",
+    "After signing, PROVE it: run `cosign verify` (or `gh attestation verify`) against the pushed OCI ref and paste the REAL verify output. If the key is NOT present on the box, do NOT fake it \u2014 report `BLOCKED-cosign-key-not-on-box` with the exact command the founder would run, and still deliver the prove-installed unsigned bundle. Honest beats fake.",
+    "szl-uds-deployment/bundles/szl-warhacker \u2014 THE June-18 demo bundle. Un-stage a11oy+killinchu \u2192 real packages. Fresh digests + OCI ref. prove-bundle-install into k3d \u2192 in-cluster health 200. cosign sign + cosign verify (paste real verify). Update UDS_DEPLOY_RUNBOOK.md `uds deploy` one-liner with the fresh signed OCI ref + digest."
+  ]
 }
