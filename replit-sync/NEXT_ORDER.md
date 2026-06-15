@@ -1,3 +1,12 @@
+# SZL Forge — FREEZE WINDOW UPDATED (2026-06-14 20:38 EDT, CTO): now starts 2026-06-18 01:00 ET
+
+**Founder moved the demo-freeze start to 2026-06-18 01:00 ET (= 2026-06-18 05:00 UTC).** It was 2026-06-15.
+Landed on a11oy main as `ce7a44e` (hotfix/move-freeze-to-jun18, closes #419): demo-freeze.yml now uses a
+timestamp-precise UTC window `2026-06-18T05:00:00Z .. 2026-06-20T23:59:59Z`. **Until 06-18 05:00 UTC, normal
+`feat/*` branches land freely** — you do NOT need the hotfix escape hatch for routine work right now. Land all
+demo-final work BEFORE 2026-06-18 01:00 ET; after that, only `hotfix/*` + `[demo-hotfix]` + issue-ref + DCO.
+
+---
 # SZL Forge — TOP ORDER (pinned 2026-06-14 20:19 EDT, FOUNDER-AUTHORIZED EXECUTE): TURN DISPATCH ON + RUN EVERYTHING
 
 **-> Read `replit-sync/FORGE-INSTRUCTION-EXECUTE-founder-authorized-20260614-2019.md`.** Founder Stephen Lutar
@@ -9,7 +18,7 @@ git_sha [box still 404s WAQAY/Yupay], (b) laptop-brain Blackwell+Arc mesh, (c) d
 meter — joules stuck 22899.74 / receipts stuck 318 because NVML can't read the Windows Blackwell 5050 over tailnet;
 run the power.draw exporter LOCALLY on the laptop (where it CAN read the 5050) + publish /metrics over tailnet, point
 szl-joule.env there, PROVE joules CLIMB + receipts mint >318. Honest BLOCKED (demo the 318 real receipts) beats a fake
-climbing number. NEVER commit a key even with full admin. Freeze 2026-06-18 02:00 ET — land well before. Report with
+climbing number. NEVER commit a key even with full admin. Freeze starts 2026-06-18 01:00 ET (= 05:00 UTC) — land well before. Report with
 PASTED proof + ping founder.
 
 ---
