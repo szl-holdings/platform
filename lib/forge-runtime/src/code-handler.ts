@@ -100,8 +100,33 @@ export async function runCodeHandler(
     throw new Error(`Counsel code sandbox: TypeScript compilation failed — ${message}`);
   }
 
-  // Late-bind the gateway to avoid circular import at module load time
-  const { defaultGateway } = await import('@workspace/tool-mesh');
+  // Late-bind the gateway via a string-typed dynamic import to avoid a circular
+  // dependency: @workspace/tool-mesh depends on @szl-holdings/forge-runtime (via
+  // forge-runtime/sandbox), so this package must NOT declare tool-mesh as a
+  // dependency — that would form a cyclic build graph in turbo. Typing the
+  // specifier as string keeps the compiler from statically resolving the module
+  // (which would require the dependency); we assert the minimal gateway shape we
+  // use. The runtime module specifier is unchanged.
+  type SandboxToolGateway = {
+    invoke(
+      toolId: string,
+      input: unknown,
+      context: {
+        requestId: string;
+        agentId: string;
+        workflowId: string;
+        dryRun?: boolean;
+      },
+    ): Promise<{
+      success: boolean;
+      error?: string;
+      latencyMs?: number;
+      output?: unknown;
+    }>;
+  };
+  const { defaultGateway } = (await import('@workspace/tool-mesh' as string)) as {
+    defaultGateway: SandboxToolGateway;
+  };
 
   return new Promise<{ result: unknown; costUsd?: number }>((resolve, reject) => {
     const worker = new Worker(SANDBOX_WORKER_PATH, {
