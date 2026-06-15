@@ -1,24 +1,11 @@
 {
-  "order_sha": "03481daab401bb85fd46c8fcc01c57b9f4ba1745",
+  "order_sha": "cd329440d0616c5855b5db6415bc7fd2659b186d",
   "order_path": "replit-sync/NEXT_ORDER.md",
-  "state": "done",
-  "seen_at": "2026-06-15T14:32:50Z",
-  "updated_at": "2026-06-15T14:33:36Z",
-  "idle": false,
+  "state": "processing",
+  "seen_at": "2026-06-15T15:32:54Z",
   "actionable": [
     "rearm-energy-worker  (restart exporter 100.96.129.45:9471 + box operator loop; running->true; joules climb past 271855; mint receipts; NEVER reset/fabricate)",
     "turn-dispatch-on     (set FORGE_DISPATCH_CMD + flip dispatch_ok:true so this loop EXECUTES not reports)"
   ],
-  "delegated_to_agent": [
-    "rearm-energy-worker  (restart exporter 100.96.129.45:9471 + box operator loop; running->true; joules climb past 271855; mint receipts; NEVER reset/fabricate)",
-    "turn-dispatch-on     (set FORGE_DISPATCH_CMD + flip dispatch_ok:true so this loop EXECUTES not reports)"
-  ],
-  "dispatch_mode": "dispatch-cmd",
-  "dispatch_ok": true,
-  "gated_skipped": [],
-  "report": "replit-sync/forge-perplexity-update-20260615.md",
-  "probes": {
-    "https://a11oy.net/healthz": 200
-  },
-  "doctrine": "v11: locked=8, Lambda=Conjecture 1, never commit a key"
+  "gated_skipped": []
 }
