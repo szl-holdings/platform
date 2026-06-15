@@ -1,3 +1,17 @@
+# SZL Forge — TOP ORDER (pinned 2026-06-14 20:06 EDT): REDEPLOY BOX TO CURRENT MAIN + expose git_sha
+
+**-> Read `replit-sync/FORGE-INSTRUCTION-box-redeploy-current-main-20260614-2005.md`.** CTO audit (live) found
+a11oy.net box is PARTIALLY STALE: `/api/a11oy/v1/restraint/info`=200 (good, loop-1 RESOLVED) but
+`/api/a11oy/v1/waqay/doctrine` and `/api/a11oy/v1/yupay/doctrine` = **404** — today's WAQAY + Yupay builds are NOT
+on the box. git-pull + rebuild the box to CURRENT a11oy main (szl_waqay.py, a11oy_waqay_nav.py, szl_yupay.py,
+a11oy_yupay_nav.py, szl_willay_gateway.py, szl_mbse_cosim/nav + serve.py registration + Dockerfile COPYs — all
+already byte-identical on GitHub+HF) AND expose the box `git_sha` at /api/a11oy/v1/honest (currently `n/a`, which
+is why staleness recurs undetected). PROVE with content-types: waqay/yupay doctrine = 200 application/json locked=8
+@ c7c0ba17, /honest git_sha == GitHub HEAD, new tabs serve REAL pages not the 272KB SPA shell. NOTE: /holo3d.js +
+/restraint/info returning text/html is IDENTICAL on box AND HF — NOT a defect, do not chase it. Hetzner stays
+PRIMARY public host. Byte-identical, 0 CDN, never commit a key, honest BLOCKED beats fake done.
+
+---
 # SZL Forge — DEMO-CRITICAL ADDENDUM (2026-06-14 18:48 EDT): MAKE JOULES MEASURED ON BLACKWELL + MINT RECEIPTS
 
 **-> Read `replit-sync/FORGE-INSTRUCTION-joules-measured-on-blackwell-20260614.md`.** Your FORGE_LLM_SPEC cutover was
@@ -93,4 +107,5 @@ REPORT the actual measured 1-day number from the running operator (the figure th
 commit it's running. sovereign:true ONLY on a live 5050 probe; degrade honest if down. Revenue stays DRY-RUN/MODELED
 (no Stripe key). Do NOT claim done by inference — paste the real codes. If any stays 404, say exactly which + why + fix.
 Deadline: demo-sound before June 16.
+
 
