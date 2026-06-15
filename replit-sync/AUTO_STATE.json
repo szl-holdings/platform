@@ -1,8 +1,10 @@
 {
   "order_sha": "7b2fc3b64a2e469047ef268fc61816d0003de895",
   "order_path": "replit-sync/NEXT_ORDER.md",
-  "state": "processing",
+  "state": "done",
   "seen_at": "2026-06-15T20:33:18Z",
+  "updated_at": "2026-06-15T20:33:58Z",
+  "idle": false,
   "actionable": [
     "chaski is ALREADY UP at LIVE IP 100.102.173.88:11434 (8 models). Resolve IP dynamically (tailscale status); old 100.76.58.50 is STALE. Confirm with GET /api/tags == 200.",
     "Make Ollama on the chaski Repl DURABLE (it died after ~22h): install systemd unit OR supervisor restart-loop so it auto-restarts. Full steps in replit-sync/energy_engine/R_CHASKI_BOOT_AND_KEEP_ALIVE_20260615.md \u2014 execute it.",
@@ -10,5 +12,19 @@
     "The ONLY possibly-founder step: Replit \"Always On\" toggle if neither systemd nor supervisor survives a Replit recycle. If so, report the exact click-path (Replit \u2192 replit-chaski Repl \u2192 Tools/Settings \u2192 Always On). Everything else: Forge does it.",
     "PROVE: GET /api/tags 200 + model list; operator/status showing chaski in nodes_computing; which durability method installed + a kill-and-recover proof."
   ],
-  "gated_skipped": []
+  "delegated_to_agent": [
+    "chaski is ALREADY UP at LIVE IP 100.102.173.88:11434 (8 models). Resolve IP dynamically (tailscale status); old 100.76.58.50 is STALE. Confirm with GET /api/tags == 200.",
+    "Make Ollama on the chaski Repl DURABLE (it died after ~22h): install systemd unit OR supervisor restart-loop so it auto-restarts. Full steps in replit-sync/energy_engine/R_CHASKI_BOOT_AND_KEEP_ALIVE_20260615.md \u2014 execute it.",
+    "Wire chaski as the 2nd ENERGY-producing lung: env A11OY_ENERGY_CHASKI_ENABLED=1 + A11OY_ENERGY_CHASKI_URL=http://<liveIP>:11434, persisted. Dispatch MEASURED jobs; receipts node=chaski into the SAME ledger. Honest joules: MEASURED only with a real per-job reading, else MODELED-from-fabric-coefficient. If chaski drops \u2192 clean `offline`, rtx keeps breathing, no alarm.",
+    "The ONLY possibly-founder step: Replit \"Always On\" toggle if neither systemd nor supervisor survives a Replit recycle. If so, report the exact click-path (Replit \u2192 replit-chaski Repl \u2192 Tools/Settings \u2192 Always On). Everything else: Forge does it.",
+    "PROVE: GET /api/tags 200 + model list; operator/status showing chaski in nodes_computing; which durability method installed + a kill-and-recover proof."
+  ],
+  "dispatch_mode": "dispatch-cmd",
+  "dispatch_ok": true,
+  "gated_skipped": [],
+  "report": "replit-sync/forge-perplexity-update-20260615.md",
+  "probes": {
+    "https://a11oy.net/healthz": 200
+  },
+  "doctrine": "v11: locked=8, Lambda=Conjecture 1, never commit a key"
 }
