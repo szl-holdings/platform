@@ -1,3 +1,5 @@
+> [2026-06-15 GREEN LIGHT] 3-node mesh: OMEN sovereign GPU (100.70.130.45) added to box + dynamic tailscale-IP resolver shipped (a11oy f0145e11). See replit-sync/FORGE-INSTRUCTION-mesh-3node-greenlit-20260615-2107.md. Verify box redeploys main, omen-betterwithage appears in /compute-pool-hardened, flips reachable when founder's Ollama serves. chaski (node 3, Replit) wake is founder-gated. Never claim VRAM fusion; horizontal scale only.
+
 > [2026-06-15 founder GREEN LIGHT] cosign-prep + DNS: see replit-sync/FORGE-INSTRUCTION-cosign-dns-greenlit-20260615-1958.md. a11oy drift RED (live_wires.html) FIXED at root (commit 8de31122, drift errors=0). Cosign sign (FA-001) + killinchu.net registration remain FOUNDER-GATED by doctrine (private key / registrar account stay founder-held even under green light). Forge: keep organ digests + bundles fresh; do NOT sign or touch the key.
 
 # FORGE MASTER ORDER — 2026-06-15 15:45 ET (founder: Stephen) — SUPERSEDES 1525
