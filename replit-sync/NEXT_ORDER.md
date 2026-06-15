@@ -1,3 +1,12 @@
+# SZL Forge — TOP ORDER (2026-06-14 21:05 EDT): git_sha at /honest — QUIET WINDOW OPEN
+
+**-> Read `replit-sync/FORGE-INSTRUCTION-gitsha-quiet-window-20260614-2105.md`.** Box-redeploy + joules
+MEASURED are DONE/verified. a11oy serve.py wave cooled (~27 min quiet) — land the git_sha hook NOW so
+/api/a11oy/v1/honest returns real git_sha == GitHub HEAD (self-detecting staleness forever), byte-identical
+GitHub+HF+box. Then prep the UN-SIGNED UDS recut from current main so the founder only runs the final
+`cosign sign` (FA-001 key, founder-held). Doctrine v11, never commit a key, honest BLOCKED beats fake green.
+
+---
 # SZL Forge — FREEZE WINDOW UPDATED (2026-06-14 20:38 EDT, CTO): now starts 2026-06-18 01:00 ET
 
 **Founder moved the demo-freeze start to 2026-06-18 01:00 ET (= 2026-06-18 05:00 UTC).** It was 2026-06-15.
@@ -144,6 +153,7 @@ REPORT the actual measured 1-day number from the running operator (the figure th
 commit it's running. sovereign:true ONLY on a live 5050 probe; degrade honest if down. Revenue stays DRY-RUN/MODELED
 (no Stripe key). Do NOT claim done by inference — paste the real codes. If any stays 404, say exactly which + why + fix.
 Deadline: demo-sound before June 16.
+
 
 
 
