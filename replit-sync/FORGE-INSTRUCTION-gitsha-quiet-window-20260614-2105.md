@@ -29,3 +29,11 @@ you can land it cleanly, wait for the next quiet window — do not collide.
 ## REMAINING after this: UDS recut + cosign sign — that's FOUNDER-GATED (cosign FA-001 key).
 Do the UN-SIGNED recut prep (recut bundle from current main, stage the digests) so the founder only
 has to run the final `cosign sign` step. Leave clear instructions in a forge-report for the founder.
+
+
+## ADDENDUM (2026-06-14 21:31 EDT) — ALIGN FREEZE TIME TO CANONICAL 02:00 ET
+Your a11oy `.github/workflows/demo-freeze.yml` was set to `2026-06-18 01:00 ET`, but the CANONICAL
+source-of-truth `replit-sync/FREEZE.json` (what every cron reads) is `activates_at: 2026-06-18T02:00:00-04:00`.
+Fix demo-freeze.yml (+ demo-freeze-hotfix-validate.yml + killinchu's equivalent) to **02:00 ET**, matching
+FREEZE.json exactly, so the CI freeze gate doesn't start rejecting commits an hour early during the founder's
+June 16-17 on-site prep. FREEZE.json is authoritative — align the CI workflow to it, not the reverse.
