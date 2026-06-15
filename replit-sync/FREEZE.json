@@ -1,8 +1,8 @@
 {
   "active": true,
-  "activates_at": "2026-06-18T01:00:00-04:00",
+  "activates_at": "2026-06-18T15:00:00-04:00",
   "lifts_at": "2026-06-19T23:59:00-04:00",
-  "reason": "Defense Unicorns Warhacker demo freeze \u2014 founder demos June 18; freeze locks verified-GO state the morning of the demo (doctrine v11, locked=8 @ c7c0ba17). Build/prep days June 16-17 remain editable.",
+  "reason": "Defense Unicorns Warhacker demo freeze \u2014 founder demos June 18 (afternoon). Freeze now activates 3:00 PM ET June 18 (moved from 01:00 to allow morning build/expansion of the orbital/edge sovereign-compute play). Locks verified-GO state (doctrine v11, locked=8 @ c7c0ba17). Build/prep June 16-18-morning remain editable.",
   "policy": "Before activates_at: normal work. From activates_at to lifts_at: READ-ONLY for Forge + all SZL crons (monitor + recovery-restart only; NO commits/deploys/auto-fixes/auto-merges/auto-sync). Recovery restart of a sleeping/errored Space to last-good build is allowed (healing, not change).",
   "hotfix": "Permitted ONLY for a demo-blocking defect, with explicit founder approval, minimal + byte-identical GitHub<->HF, ast.parse/node-check first, re-verified live, logged. Never touch signed artifacts/box/doctrine gates without founder.",
   "frozen_state": {
