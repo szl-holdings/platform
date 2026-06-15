@@ -51,3 +51,11 @@ DO NOT: sign a bundle you didn't build this run; claim a verify you didn't run; 
 REPORT
 ================================================================
 Append a dated section to replit-sync/forge-perplexity-update-20260615.md. For ORDER A, B: DONE / armed / blocked + real probe output. For ORDER C: a per-bundle table — bundle | recut(y/n) | fresh OCI ref+digest | prove-install health | signed(y/n) + real cosign verify line | deploy one-liner. Update replit-sync/AUTO_STATE.json uds section with Tier-1 result first. Honest doctrine v11. Per-bundle truth only — never a blanket "all signed" unless every line truly is.
+
+================================================================
+ORDER A+ — CHASKI BOOT + KEEP-ALIVE (founder: "Forge has full command of my stuff")
+================================================================
+Execute replit-sync/energy_engine/R_CHASKI_BOOT_AND_KEEP_ALIVE_20260615.md NOW.
+- chaski is ALREADY UP at the LIVE IP 100.102.173.88:11434 (8 models) — confirm on the CURRENT IP (resolve dynamically; old runbooks' 100.76.58.50 is STALE).
+- The real job: make Ollama on the chaski Repl DURABLE (it died after ~22h before) via systemd/supervisor/Always-On, then wire it as the 2nd ENERGY lung (= ORDER A above). 
+- Forge does all box/tailnet steps. Only the Replit "Always On" toggle may be founder-only — if so, report the exact click-path. Honest BLOCKED beats fake durable. Probe-driven reachability only; never a flag.
