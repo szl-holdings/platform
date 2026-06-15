@@ -1,10 +1,8 @@
 {
-  "order_sha": "10df50fcc2e853646df15e8056c14f47f925dc8a",
+  "order_sha": "63c4a4682eb27c93bdbb7986cf331505b5ea3f94",
   "order_path": "replit-sync/NEXT_ORDER.md",
-  "state": "done",
-  "seen_at": "2026-06-14T22:55:38Z",
-  "updated_at": "2026-06-14T22:55:41Z",
-  "idle": true,
+  "state": "processing",
+  "seen_at": "2026-06-15T00:55:47Z",
   "actionable": [
     "szl3d toolkit + PNT pillars + showcase pages) made the published bundles STALE (a11oy-bundle:0.5.0 sha d801f8e4 is old).",
     "killinchu Zarf packages from current main + re-digest every bundles/*/uds-bundle.yaml (no stale refs) + sign; (3) confirm",
@@ -26,13 +24,5 @@
     "https://a11oy.net/api/a11oy/v1/energy/projection?window=running  -> 200, 1-day numbers (MODELED, math shown)",
     "https://a11oy.net/energy-ops  AND  /energy-holographic  AND  /holographic  AND  /estate-hologram -> all 200"
   ],
-  "delegated_to_agent": [],
-  "dispatch_mode": "none",
-  "dispatch_ok": false,
-  "gated_skipped": [],
-  "report": "replit-sync/forge-perplexity-update-20260614.md",
-  "probes": {
-    "https://a11oy.net/healthz": 200
-  },
-  "doctrine": "v11: locked=8, Lambda=Conjecture 1, never commit a key"
+  "gated_skipped": []
 }
