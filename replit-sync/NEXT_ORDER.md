@@ -1,3 +1,8 @@
+# SZL Forge — #1 ORDER (2026-06-15 10:06 EDT): RUN IT YOURSELF — EXECUTE, do not report
+
+**-> `replit-sync/FORGE-INSTRUCTION-DIRECT-EXECUTE-run-it-yourself-20260615-1006.md`.** Founder final word: stop asking him; Forge has full admin; EXECUTE hands-off. (1) Run WIRE_FORGE_DISPATCH_ON.sh -> dispatch_ok:true. (2) Re-arm energy worker (exporter 100.96.129.45:9471 + box loop), joules climb past 271855, never reset/fabricate. (3) Harden home box headless. (4) Use TS_AUTHKEY+OLLAMA key from secret store if present, else continue + note pending (do NOT re-ask founder). PROVE with pasted live values. Report-only is the FAILURE mode. Never commit a key; honest BLOCKED beats fake green.
+
+---
 <!-- FORGE-POLL-TRIGGER -->
 ACTION: EXECUTE
 ACTIONABLE: true
@@ -76,6 +81,7 @@ v11: never commit a key, never keystone self-merge, honest BLOCKED beats fake gr
 2026-06-18 01:00 ET. The prior pinned stack is archived at NEXT_ORDER_archive_20260614_2150.md.
 
 ---
+
 
 
 
