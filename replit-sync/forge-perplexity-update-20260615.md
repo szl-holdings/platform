@@ -65,3 +65,25 @@
 - **Founder-gated, auto-skipped (1)** (Doctrine v11 — keys/secrets/major-bumps):
   - uds-bundle-recut (recut szl-warhacker bundle from CURRENT main, un-stage a11oy+killinchu, fresh package digests, run OCI-ref + digest guards, prove-bundle-install into k3d; sign with the box-resident cosign key if present, else BLOCKED-on-key. PROVE: fresh OCI ref+digest + prove-install + in-cluster health 200. Update UDS_DEPLOY_RUNBOOK.md one-liner.)
 - Reachability snapshot: https://a11oy.net/healthz -> 200
+
+## Auto-loop pass — order `9bf204ed` — 2026-06-15T19:33:45Z
+
+- **Actionable items (13)** — handed to Forge agent (mode=`dispatch-cmd`, ok=`True`):
+  - Sign ONLY bundles you actually recut + prove-installed this run. NEVER sign a bundle you did not build. NEVER fabricate a signature or a "verified" line.
+  - jtoken ALREADY MEASURED (200, label=MEASURED). Keep it; add staleness guard (see ORDER B).
+  - chaski ALREADY reachable on fabric (compute-pool, gpu_nodes_reachable=2). Real gap = make it a 2nd ENERGY-producing lung (see ORDER A).
+  - Real deployable bundles live in szl-uds-deployment/bundles/: szl-warhacker, szl-full-stack, szl-uds-bundle, a11oy, killinchu, energy, prove-organs.
+  - szl-uds-deployment/bundles/szl-full-stack  (the 5-flagship)
+  - szl-uds-deployment/bundles/szl-uds-bundle   (the published umbrella — currently ghcr tag uds-v0.2.1 / 0.4.0; recut to a fresh tag from current main)
+  - szl-uds-deployment/bundles/a11oy
+  - szl-uds-deployment/bundles/killinchu
+  - szl-uds-deployment/bundles/energy
+  - szl-uds-deployment/bundles/prove-organs
+  - chaski is ALREADY UP at the LIVE IP 100.102.173.88:11434 (8 models) — confirm on the CURRENT IP (resolve dynamically; old runbooks' 100.76.58.50 is STALE).
+  - The real job: make Ollama on the chaski Repl DURABLE (it died after ~22h before) via systemd/supervisor/Always-On, then wire it as the 2nd ENERGY lung (= ORDER A above).
+  - Forge does all box/tailnet steps. Only the Replit "Always On" toggle may be founder-only — if so, report the exact click-path. Honest BLOCKED beats fake durable. Probe-driven reachability only; never a flag.
+- **Founder-gated, auto-skipped (3)** (Doctrine v11 — keys/secrets/major-bumps):
+  - Use the key from the box env/secret store ONLY. NEVER print it, NEVER write it into a repo file or log.
+  - After signing, PROVE it: run `cosign verify` (or `gh attestation verify`) against the pushed OCI ref and paste the REAL verify output. If the key is NOT present on the box, do NOT fake it — report `BLOCKED-cosign-key-not-on-box` with the exact command the founder would run, and still deliver the prove-installed unsigned bundle. Honest beats fake.
+  - szl-uds-deployment/bundles/szl-warhacker — THE June-18 demo bundle. Un-stage a11oy+killinchu → real packages. Fresh digests + OCI ref. prove-bundle-install into k3d → in-cluster health 200. cosign sign + cosign verify (paste real verify). Update UDS_DEPLOY_RUNBOOK.md `uds deploy` one-liner with the fresh signed OCI ref + digest.
+- Reachability snapshot: https://a11oy.net/healthz -> 200
