@@ -31,3 +31,10 @@
   - rearm-energy-worker  (restart exporter 100.96.129.45:9471 + box operator loop; running->true; joules climb past 271855; mint receipts; NEVER reset/fabricate)
   - turn-dispatch-on     (set FORGE_DISPATCH_CMD + flip dispatch_ok:true so this loop EXECUTES not reports)
 - Reachability snapshot: https://a11oy.net/healthz -> 200
+
+## Auto-loop pass — order `cd329440` — 2026-06-15T15:33:41Z
+
+- **Actionable items (2)** — handed to Forge agent (mode=`dispatch-cmd`, ok=`True`):
+  - rearm-energy-worker  (restart exporter 100.96.129.45:9471 + box operator loop; running->true; joules climb past 271855; mint receipts; NEVER reset/fabricate)
+  - turn-dispatch-on     (set FORGE_DISPATCH_CMD + flip dispatch_ok:true so this loop EXECUTES not reports)
+- Reachability snapshot: https://a11oy.net/healthz -> 200
