@@ -1,3 +1,8 @@
+# SZL Forge — #1 (2026-06-15 11:31 EDT): NO BANDAIDS — disable energy stub fallback on LIVE box
+
+**-> `replit-sync/FORGE-INSTRUCTION-no-bandaid-disable-energy-stub-20260615-1131.md`.** Energy is live+climbing (385839 J MEASURED, stub_mode:false) — GOOD. Harden: start the live operator with allow_stub=False (A11OY_ENERGY_ALLOW_STUB=0) so GPU-gone => DEGRADED+loud, NEVER a silent unmetered stub job; clear the stale phantom local-stub from live by_node/node_status (only rtx-betterwithage computing + chaski standby remain). PRESERVE joules_measured_total 385839 + measured_jobs + receipts — only drop the phantom node. PROVE: no local-stub in by_node, allow_stub false, joules still MEASURED+climbing, GPU-kill test => DEGRADED not stub. Never bill SAMPLE; never reset; never commit a key.
+
+---
 # SZL Forge — #1 EXECUTE (2026-06-15 10:44 EDT): dispatch is ON -> RESTART ENERGY WORKER FOR REAL
 
 **-> `replit-sync/FORGE-INSTRUCTION-EXECUTE-energy-restart-dispatch-live-20260615-1044.md`.** dispatch_mode=dispatch-cmd, dispatch_ok=true confirmed. Run the real restart: laptop exporter 100.96.129.45:9471 + box energy-operator worker (systemctl restart the a11oy/energy/operator unit), resume forward from 271855 J (NEVER reset). PROVE: running:true + power_w_sample real + joules climbing past 271855 + receipts minting (two reads 60s apart). "RECOMMENDED/cannot verify" is NOT acceptable now dispatch is live — actually execute. Honest BLOCKED only with the exact error. Never reset/fabricate; never commit a key.
@@ -103,6 +108,7 @@ v11: never commit a key, never keystone self-merge, honest BLOCKED beats fake gr
 2026-06-18 01:00 ET. The prior pinned stack is archived at NEXT_ORDER_archive_20260614_2150.md.
 
 ---
+
 
 
 
