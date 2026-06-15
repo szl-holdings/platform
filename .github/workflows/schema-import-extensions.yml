@@ -1,0 +1,45 @@
+name: Schema import extensions
+
+# Guards against the TS2835 regression that turned the "Tests" check RED:
+# extensionless relative imports in lib/db/src/schema/**/*.ts break NodeNext
+# consumers (e.g. apps/alloy-ingestion-orchestrator) that type-check the schema
+# source directly. See scripts/check-schema-import-extensions.mjs.
+#
+# Runs on EVERY push/PR (no path filter) so it can safely be made a required
+# check without the "skipped-but-required" trap.
+
+on:
+  push:
+    branches: [main]
+    paths-ignore:
+      - 'replit-sync/**'
+  pull_request:
+    branches: [master, main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: schema-import-extensions-${{ github.head_ref || github.sha }}
+  cancel-in-progress: true
+
+jobs:
+  guard:
+    name: Relative imports carry an extension
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
+      - uses: actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e # v6.4.0
+        with:
+          node-version: '24'
+      # Self-test first: a deliberately bad import MUST be detected, so the guard
+      # can never silently no-op. If this step fails, the detector is broken.
+      - name: Self-test the detector (negative fixture)
+        run: node scripts/check-schema-import-extensions.mjs --selftest
+      # Then scan the committed schema tree.
+      - name: Scan lib/db/src/schema for extensionless relative imports
+        run: node scripts/check-schema-import-extensions.mjs
