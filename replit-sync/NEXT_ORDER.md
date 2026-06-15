@@ -1,3 +1,18 @@
+# SZL Forge — TOP ORDER (pinned 2026-06-14 20:19 EDT, FOUNDER-AUTHORIZED EXECUTE): TURN DISPATCH ON + RUN EVERYTHING
+
+**-> Read `replit-sync/FORGE-INSTRUCTION-EXECUTE-founder-authorized-20260614-2019.md`.** Founder Stephen Lutar
+EXPLICITLY authorizes full execution NOW: "Tell Forge to do it — he has full admin of my computer and all software."
+This is the standing approval the box/dispatch work was gated on. JOB 0: turn YOUR OWN dispatch ON
+(FORGE_AGENT_URL/FORGE_DISPATCH_CMD / WIRE_IT_UP.sh) — AUTO_STATE shows dispatch_mode:none, you've been report-only;
+flip dispatch_ok:true and EXECUTE. JOB 1: run the pinned orders hands-off — (a) box-redeploy to current main + expose
+git_sha [box still 404s WAQAY/Yupay], (b) laptop-brain Blackwell+Arc mesh, (c) demo-final v2. JOB 2: FIX the NVML
+meter — joules stuck 22899.74 / receipts stuck 318 because NVML can't read the Windows Blackwell 5050 over tailnet;
+run the power.draw exporter LOCALLY on the laptop (where it CAN read the 5050) + publish /metrics over tailnet, point
+szl-joule.env there, PROVE joules CLIMB + receipts mint >318. Honest BLOCKED (demo the 318 real receipts) beats a fake
+climbing number. NEVER commit a key even with full admin. Freeze 2026-06-18 02:00 ET — land well before. Report with
+PASTED proof + ping founder.
+
+---
 # SZL Forge — TOP ORDER (pinned 2026-06-14 20:10 EDT, CTO): DEMO-FINAL PAYLOAD v2
 
 **-> Read `replit-sync/FORGE-INSTRUCTION-demo-final-v2-20260614-2010.md`.** Four demo-critical jobs, refreshed to
@@ -120,5 +135,6 @@ REPORT the actual measured 1-day number from the running operator (the figure th
 commit it's running. sovereign:true ONLY on a live 5050 probe; degrade honest if down. Revenue stays DRY-RUN/MODELED
 (no Stripe key). Do NOT claim done by inference — paste the real codes. If any stays 404, say exactly which + why + fix.
 Deadline: demo-sound before June 16.
+
 
 
