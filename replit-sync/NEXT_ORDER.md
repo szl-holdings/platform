@@ -3,6 +3,23 @@
 **-> `replit-sync/FORGE-INSTRUCTION-DIRECT-EXECUTE-run-it-yourself-20260615-1006.md`.** Founder final word: stop asking him; Forge has full admin; EXECUTE hands-off. (1) Run WIRE_FORGE_DISPATCH_ON.sh -> dispatch_ok:true. (2) Re-arm energy worker (exporter 100.96.129.45:9471 + box loop), joules climb past 271855, never reset/fabricate. (3) Harden home box headless. (4) Use TS_AUTHKEY+OLLAMA key from secret store if present, else continue + note pending (do NOT re-ask founder). PROVE with pasted live values. Report-only is the FAILURE mode. Never commit a key; honest BLOCKED beats fake green.
 
 ---
+
+# SZL Forge — BUILD ORDER (2026-06-15 10:45 EDT): a11oy BEAUTIFUL LIVE GRAPHS + 15 LIVE DEMOS
+
+**-> `replit-sync/FORGE-SPEC-a11oy-live-demos-graphs-20260615.md`** (+ eyes-on defects in
+`replit-sync/FORGE-a11oy-defect-list-20260615.md`). Founder reviewed a11oy.net with his eyes: the ENERGY tab (and
+all demo tabs) are EMPTY/not-graphed — he wants BEAUTIFUL live graphs + ~15 REAL interactive demos wired to real
+data that updates constantly. FIRST the broken basics (CTO's Opus team has a PR in flight: /holographic renderer
+dead, /energy-ops not reading the live operator endpoint, command-center async hangs, /pnt+/pinn routing, 2 HF
+Space `.static`->bare URL fixes). THEN build the chart layer against the 12 LIVE endpoints (all 200): energy
+joules-climb area chart, power gauge, tokens/sec, receipt-mint rate + scrolling feed + click-to-verify hash-chain,
+grid-price/carbon panel, 1-day projection (MEASURED solid / MODELED dashed), GPU fabric topology, PNT sensor
+curves, PINN cert card + residual, trust-posture radar, gate ALLOW/DENY signed-verdict demo, receipt-chain
+tamper viz. Match killinchu/elite's polish. 0 runtime CDN (vendor charts same-origin). Every value labeled
+MEASURED/MODELED/SAMPLE; honest empty-state beats a fake graph; NEVER fabricate a datapoint. Energy-tab graphs
+FIRST (founder called it out). Land before the 2026-06-18 01:00 ET freeze.
+
+---
 <!-- FORGE-POLL-TRIGGER -->
 ACTION: EXECUTE
 ACTIONABLE: true
