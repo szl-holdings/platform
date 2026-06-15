@@ -44,16 +44,14 @@ FIRST (founder called it out). Land before the 2026-06-18 01:00 ET freeze.
 ACTION: EXECUTE
 ACTIONABLE: true
 IDLE_SENTINEL: false
-DISPATCH_REQUIRED: false
 PRIORITY: P0-DEMO-CRITICAL
-NOTE: dispatch_ok is already TRUE and the energy meter is already running (474k+ J climbing) — the OLD items (rearm-energy-worker, turn-dispatch-on) are DONE; stop re-handing them.
-TASK_1: box-redeploy-verify (confirm box on current main: /pnt + /pinn distinct surfaces, /fabric live pool, /energy-ops graphs, git_sha==GitHub HEAD on /honest)
-TASK_2: serve-governance-backend (stand up /api/a11oy/v1/assurance/{artifact,credential,compliance,attest} + /forge/ledger — all 404 now; real data or honest STRUCTURAL-ONLY, never fabricate)
-TASK_3: jtoken-measured (run NVML /metrics exporter LOCALLY on betterwithage, set A11OY_VLLM_METRICS_URL; flip /energy/jtoken ROADMAP->MEASURED; honest BLOCKED if exporter can't emit over tailnet)
-TASK_4: uds-bundle-recut (recut szl-warhacker bundle from current main, un-stage a11oy+killinchu, fresh digests, prove-bundle-install; leave cosign sign for founder)
-ON_BLOCKED: report BLOCKED with exact error; never fabricate a value/joule/digest/200
-FOUNDER_AUTHORIZED: true (Stephen Lutar, full admin, 2026-06-15)
-DETAIL: see replit-sync/FORGE-MASTER-ORDER-20260614-2150.md (refreshed 2026-06-15 13:00 ET)
+FOUNDER_GREENLIGHT_UDS: true (Stephen Lutar, 2026-06-15 14:16 ET — explicit go on the UDS bundle recut INCLUDING cosign sign IF the cosign key is already in the box secret store; do NOT auto-skip as founder-gated anymore. If the cosign key is NOT in the secret store, do everything up to signing, then report BLOCKED-on-key with the exact key name needed — never commit/print a key.)
+TASK_1: uds-bundle-recut (recut szl-warhacker bundle from CURRENT main, un-stage a11oy+killinchu, fresh package digests, run OCI-ref + digest guards, prove-bundle-install into k3d; sign with the box-resident cosign key if present, else BLOCKED-on-key. PROVE: fresh OCI ref+digest + prove-install + in-cluster health 200. Update UDS_DEPLOY_RUNBOOK.md one-liner.)
+TASK_2: serve-governance-backend (CONTINUE — /assurance/artifact already 200; finish credential/compliance/attest + /forge/ledger with real or honest STRUCTURAL-ONLY data, never fabricate)
+TASK_3: box-redeploy-verify (git_sha now on /honest = c8a1d51c; confirm /pnt+/pinn distinct, /fabric live, /energy-ops graphs, /governance rewired, /anatomy/loop 307 all live)
+TASK_4: jtoken-measured (PHYSICAL CONSTRAINT: the NVML exporter must read the Blackwell GPU, which is on the LAPTOP betterwithage — NOT on the box. The box has no Blackwell to measure. The laptop is already on the tailnet and already running the energy exporter. So: start the Prometheus /metrics exporter ON THE LAPTOP via the laptop-resident agent/shell (e.g. the betterwithage Replit agent), publish /metrics over tailnet, set A11OY_VLLM_METRICS_URL on the box reversibly, flip /energy/jtoken ROADMAP->MEASURED. If no laptop-side agent is reachable to start the process, report BLOCKED-need-laptop-agent — do NOT claim you can read the GPU from the box. Honest BLOCKED beats fake.)
+ON_BLOCKED: report BLOCKED with exact reason (BLOCKED-on-key / BLOCKED-need-laptop-agent / other); never fabricate a value/joule/digest/200.
+DETAIL: replit-sync/FORGE-MASTER-ORDER-20260614-2150.md
 <!-- /FORGE-POLL-TRIGGER -->
 
 # SZL Forge — TOP ORDER (2026-06-15 10:03 EDT): RE-ARM ENERGY WORKER + DISPATCH ON
