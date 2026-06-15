@@ -1,8 +1,18 @@
 {
   "order_sha": "59b840654281a90108112dd563a5a85cf1cb59b0",
   "order_path": "replit-sync/NEXT_ORDER.md",
-  "state": "processing",
+  "state": "done",
   "seen_at": "2026-06-15T06:56:09Z",
+  "updated_at": "2026-06-15T06:56:13Z",
+  "idle": true,
   "actionable": [],
-  "gated_skipped": []
+  "delegated_to_agent": [],
+  "dispatch_mode": "none",
+  "dispatch_ok": false,
+  "gated_skipped": [],
+  "report": "replit-sync/forge-perplexity-update-20260615.md",
+  "probes": {
+    "https://a11oy.net/healthz": 200
+  },
+  "doctrine": "v11: locked=8, Lambda=Conjecture 1, never commit a key"
 }
