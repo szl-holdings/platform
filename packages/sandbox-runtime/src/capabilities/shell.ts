@@ -241,10 +241,15 @@ export class ShellCapability implements SandboxCapability {
     const result = await new Promise<ShellExecResult>((resolve_) => {
       let timedOut = false;
 
+      // Timeout is enforced solely by the explicit timer below, which sets
+      // `timedOut` synchronously before killing the child. We deliberately do
+      // NOT pass exec()'s built-in `timeout` option: it would send its own
+      // SIGTERM at the same deadline, racing the manual timer — the `close`
+      // event could then fire before `timedOut` is set, yielding a result with
+      // `timedOut: false` for a command that was in fact timed out.
       const child = exec(command, {
         cwd,
         env,
-        timeout: timeoutMs,
         maxBuffer: this.maxOutputBytes * 2, // give exec room, we'll truncate after
       });
 
