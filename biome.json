@@ -31,7 +31,8 @@
       "!pnpm-lock.yaml",
       "!**/src/generated",
       "!**/drizzle/meta",
-      "!**/*.min.js"
+      "!**/*.min.js",
+      "!**/hf_spaces"
     ]
   },
   "formatter": {
