@@ -16,7 +16,7 @@
  *                                             Theoria motus 1809)
  */
 
-export * from "./least-squares.ts";
-export * from "./conformal.ts";
-export * from "./class-number.ts";
-export * from "./residual-fit.ts";
+export * from "./least-squares.js";
+export * from "./conformal.js";
+export * from "./class-number.js";
+export * from "./residual-fit.js";
