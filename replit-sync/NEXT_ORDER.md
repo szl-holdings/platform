@@ -1,3 +1,16 @@
+# SZL Forge — TOP ORDER (pinned 2026-06-14 20:10 EDT, CTO): DEMO-FINAL PAYLOAD v2
+
+**-> Read `replit-sync/FORGE-INSTRUCTION-demo-final-v2-20260614-2010.md`.** Four demo-critical jobs, refreshed to
+live state (operator already MEASURED ~83,582 J climbing; local-stub already dropped; CTO landed 8+/10 of the 3D
+genius-surface PRs into a11oy main). JOBS: (1) flip `/energy/jtoken` ROADMAP->MEASURED via `A11OY_VLLM_METRICS_URL`
+Prometheus exposure; (2) recut the szl-warhacker UDS bundle to UN-STAGE a11oy+killinchu from CURRENT main + sign +
+prove-install; (3) the box-redeploy order pinned just below now ALSO carries the full 3D surface set live — run it,
+then prove per-tab 3D panels render on the live box bound to REAL data; (4) make `chaski` read honest `standby`
+(founder-gated, not started) instead of alarming `DEGRADED`. Doctrine v11, every value labeled, 0 CDN, reversible,
+honest BLOCKED beats fake green. PRIORITY: box-redeploy (below) + JOB1 + JOB2 first — they change what the founder
+can SAY/SHOW on stage.
+
+---
 # SZL Forge — TOP ORDER (pinned 2026-06-14 20:06 EDT): REDEPLOY BOX TO CURRENT MAIN + expose git_sha
 
 **-> Read `replit-sync/FORGE-INSTRUCTION-box-redeploy-current-main-20260614-2005.md`.** CTO audit (live) found
