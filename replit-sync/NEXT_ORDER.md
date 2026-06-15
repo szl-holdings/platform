@@ -1,3 +1,8 @@
+# SZL Forge — #1 EXECUTE (2026-06-15 10:44 EDT): dispatch is ON -> RESTART ENERGY WORKER FOR REAL
+
+**-> `replit-sync/FORGE-INSTRUCTION-EXECUTE-energy-restart-dispatch-live-20260615-1044.md`.** dispatch_mode=dispatch-cmd, dispatch_ok=true confirmed. Run the real restart: laptop exporter 100.96.129.45:9471 + box energy-operator worker (systemctl restart the a11oy/energy/operator unit), resume forward from 271855 J (NEVER reset). PROVE: running:true + power_w_sample real + joules climbing past 271855 + receipts minting (two reads 60s apart). "RECOMMENDED/cannot verify" is NOT acceptable now dispatch is live — actually execute. Honest BLOCKED only with the exact error. Never reset/fabricate; never commit a key.
+
+---
 # SZL Forge — #1 ORDER (2026-06-15 10:06 EDT): RUN IT YOURSELF — EXECUTE, do not report
 
 **-> `replit-sync/FORGE-INSTRUCTION-DIRECT-EXECUTE-run-it-yourself-20260615-1006.md`.** Founder final word: stop asking him; Forge has full admin; EXECUTE hands-off. (1) Run WIRE_FORGE_DISPATCH_ON.sh -> dispatch_ok:true. (2) Re-arm energy worker (exporter 100.96.129.45:9471 + box loop), joules climb past 271855, never reset/fabricate. (3) Harden home box headless. (4) Use TS_AUTHKEY+OLLAMA key from secret store if present, else continue + note pending (do NOT re-ask founder). PROVE with pasted live values. Report-only is the FAILURE mode. Never commit a key; honest BLOCKED beats fake green.
@@ -98,6 +103,7 @@ v11: never commit a key, never keystone self-merge, honest BLOCKED beats fake gr
 2026-06-18 01:00 ET. The prior pinned stack is archived at NEXT_ORDER_archive_20260614_2150.md.
 
 ---
+
 
 
 
