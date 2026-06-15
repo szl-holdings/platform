@@ -1,14 +1,28 @@
 {
   "order_sha": "e09f17048fbd1d4cf1a0063eb6f0342c7c0d2193",
   "order_path": "replit-sync/NEXT_ORDER.md",
-  "state": "processing",
+  "state": "done",
   "seen_at": "2026-06-15T17:32:56Z",
+  "updated_at": "2026-06-15T17:33:29Z",
+  "idle": false,
   "actionable": [
     "box-redeploy-verify (confirm box on current main: /pnt + /pinn distinct surfaces, /fabric live pool, /energy-ops graphs, git_sha==GitHub HEAD on /honest)",
     "serve-governance-backend (stand up /api/a11oy/v1/assurance/{artifact,credential,compliance,attest} + /forge/ledger \u2014 all 404 now; real data or honest STRUCTURAL-ONLY, never fabricate)",
     "jtoken-measured (run NVML /metrics exporter LOCALLY on betterwithage, set A11OY_VLLM_METRICS_URL; flip /energy/jtoken ROADMAP->MEASURED; honest BLOCKED if exporter can't emit over tailnet)"
   ],
+  "delegated_to_agent": [
+    "box-redeploy-verify (confirm box on current main: /pnt + /pinn distinct surfaces, /fabric live pool, /energy-ops graphs, git_sha==GitHub HEAD on /honest)",
+    "serve-governance-backend (stand up /api/a11oy/v1/assurance/{artifact,credential,compliance,attest} + /forge/ledger \u2014 all 404 now; real data or honest STRUCTURAL-ONLY, never fabricate)",
+    "jtoken-measured (run NVML /metrics exporter LOCALLY on betterwithage, set A11OY_VLLM_METRICS_URL; flip /energy/jtoken ROADMAP->MEASURED; honest BLOCKED if exporter can't emit over tailnet)"
+  ],
+  "dispatch_mode": "dispatch-cmd",
+  "dispatch_ok": true,
   "gated_skipped": [
     "uds-bundle-recut (recut szl-warhacker bundle from current main, un-stage a11oy+killinchu, fresh digests, prove-bundle-install; leave cosign sign for founder)"
-  ]
+  ],
+  "report": "replit-sync/forge-perplexity-update-20260615.md",
+  "probes": {
+    "https://a11oy.net/healthz": 200
+  },
+  "doctrine": "v11: locked=8, Lambda=Conjecture 1, never commit a key"
 }
