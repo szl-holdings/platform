@@ -1,7 +1,7 @@
 {
   "order_sha": "03481daab401bb85fd46c8fcc01c57b9f4ba1745",
   "order_path": "replit-sync/NEXT_ORDER.md",
-  "state": "done",
+  "state": "force-reprocess",
   "seen_at": "2026-06-15T14:22:41Z",
   "updated_at": "2026-06-15T14:23:00Z",
   "idle": true,
