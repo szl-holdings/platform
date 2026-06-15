@@ -1,3 +1,14 @@
+# SZL Forge — TOP ORDER (2026-06-15 01:20 EDT): DESKTOP = ALWAYS-ON HEADLESS SOVEREIGN BRAIN
+
+**-> Read `replit-sync/FORGE-INSTRUCTION-desktop-alwayson-headless-brain-20260615.md`.** Founder takes the
+LAPTOP to Cali; the DESKTOP (Ryzen 8700G + RTX 4060 Ti) STAYS HOME always-on HEADLESS. Set up the desktop as
+the PRIMARY persistent brain: Tailscale + ollama as BOOT SERVICES (survive reboot, no GUI/login), OLLAMA_HOST=
+0.0.0.0:11434, KEEP_ALIVE=-1, detect 4060 Ti VRAM (16GB->serve governed Qwen3-32B Q4 primary; 8GB->7-14B
+primary), disable sleep/hibernate, watchdog restarts ollama. a11oy A11OY_MODEL_BASE_URL -> desktop MagicDNS;
+LAPTOP 5050 = failover; HF = tertiary; Hetzner = public web. PROVE: reboot desktop -> TS+ollama auto-return,
+api/version 200 from laptop; a11oy sovereign gpu_reachable:true; joules MEASURED. Never commit a key; tailnet-only.
+
+---
 # SZL Forge — TOP ORDER (URGENT 2026-06-15 01:15 EDT): laptop tailnet IP changed -> 100.70.130.45
 
 **-> Read `replit-sync/FORGE-INSTRUCTION-URGENT-ip-fix-100.70.130.45-20260615.md`.** Founder's live Tailscale
@@ -22,4 +33,5 @@ v11: never commit a key, never keystone self-merge, honest BLOCKED beats fake gr
 2026-06-18 01:00 ET. The prior pinned stack is archived at NEXT_ORDER_archive_20260614_2150.md.
 
 ---
+
 
