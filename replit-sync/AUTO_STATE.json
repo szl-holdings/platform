@@ -1,11 +1,24 @@
 {
   "order_sha": "94b42bdbba12b70c193e400585818fabe10ff66d",
   "order_path": "replit-sync/NEXT_ORDER.md",
-  "state": "processing",
+  "state": "done",
   "seen_at": "2026-06-15T16:32:53Z",
+  "updated_at": "2026-06-15T16:33:26Z",
+  "idle": false,
   "actionable": [
     "rearm-energy-worker  (restart exporter 100.96.129.45:9471 + box operator loop; running->true; joules climb past 271855; mint receipts; NEVER reset/fabricate)",
     "turn-dispatch-on     (set FORGE_DISPATCH_CMD + flip dispatch_ok:true so this loop EXECUTES not reports)"
   ],
-  "gated_skipped": []
+  "delegated_to_agent": [
+    "rearm-energy-worker  (restart exporter 100.96.129.45:9471 + box operator loop; running->true; joules climb past 271855; mint receipts; NEVER reset/fabricate)",
+    "turn-dispatch-on     (set FORGE_DISPATCH_CMD + flip dispatch_ok:true so this loop EXECUTES not reports)"
+  ],
+  "dispatch_mode": "dispatch-cmd",
+  "dispatch_ok": true,
+  "gated_skipped": [],
+  "report": "replit-sync/forge-perplexity-update-20260615.md",
+  "probes": {
+    "https://a11oy.net/healthz": 429
+  },
+  "doctrine": "v11: locked=8, Lambda=Conjecture 1, never commit a key"
 }
