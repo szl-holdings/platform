@@ -87,3 +87,13 @@
   - After signing, PROVE it: run `cosign verify` (or `gh attestation verify`) against the pushed OCI ref and paste the REAL verify output. If the key is NOT present on the box, do NOT fake it — report `BLOCKED-cosign-key-not-on-box` with the exact command the founder would run, and still deliver the prove-installed unsigned bundle. Honest beats fake.
   - szl-uds-deployment/bundles/szl-warhacker — THE June-18 demo bundle. Un-stage a11oy+killinchu → real packages. Fresh digests + OCI ref. prove-bundle-install into k3d → in-cluster health 200. cosign sign + cosign verify (paste real verify). Update UDS_DEPLOY_RUNBOOK.md `uds deploy` one-liner with the fresh signed OCI ref + digest.
 - Reachability snapshot: https://a11oy.net/healthz -> 200
+
+## Auto-loop pass — order `7b2fc3b6` — 2026-06-15T20:33:57Z
+
+- **Actionable items (5)** — handed to Forge agent (mode=`dispatch-cmd`, ok=`True`):
+  - chaski is ALREADY UP at LIVE IP 100.102.173.88:11434 (8 models). Resolve IP dynamically (tailscale status); old 100.76.58.50 is STALE. Confirm with GET /api/tags == 200.
+  - Make Ollama on the chaski Repl DURABLE (it died after ~22h): install systemd unit OR supervisor restart-loop so it auto-restarts. Full steps in replit-sync/energy_engine/R_CHASKI_BOOT_AND_KEEP_ALIVE_20260615.md — execute it.
+  - Wire chaski as the 2nd ENERGY-producing lung: env A11OY_ENERGY_CHASKI_ENABLED=1 + A11OY_ENERGY_CHASKI_URL=http://<liveIP>:11434, persisted. Dispatch MEASURED jobs; receipts node=chaski into the SAME ledger. Honest joules: MEASURED only with a real per-job reading, else MODELED-from-fabric-coefficient. If chaski drops → clean `offline`, rtx keeps breathing, no alarm.
+  - The ONLY possibly-founder step: Replit "Always On" toggle if neither systemd nor supervisor survives a Replit recycle. If so, report the exact click-path (Replit → replit-chaski Repl → Tools/Settings → Always On). Everything else: Forge does it.
+  - PROVE: GET /api/tags 200 + model list; operator/status showing chaski in nodes_computing; which durability method installed + a kill-and-recover proof.
+- Reachability snapshot: https://a11oy.net/healthz -> 200
