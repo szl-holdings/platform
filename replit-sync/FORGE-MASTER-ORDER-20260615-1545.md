@@ -1,0 +1,45 @@
+# FORGE MASTER ORDER — 2026-06-15 15:45 ET (founder: Stephen) — SUPERSEDES 1525
+
+Doctrine v11 throughout. Never fabricate a 200 / receipt / joule / digest / signature. joules MEASURED only via real NVML. Λ = Conjecture 1 (advisory). Never touch lutar-lean (keystone). Honest BLOCKED beats fake green. Never weaken a CI gate. Never write a credential into a repo file or log.
+
+## MACHINE FLAG (parser + agent must both honor)
+FOUNDER_SIGNING_AUTHORIZED = TRUE  (date 2026-06-15, verbatim: "I signed them all green light have it done yes do it")
+Effect: bundle attestation/publish of bundles BUILT THIS RUN is now an ACTIONABLE founder-authorized step, NOT a gated step. The per-line keyword auto-skip MUST treat any line tagged `[AUTH-OK]` as ACTIONABLE even if it names attestation tooling. Lines WITHOUT `[AUTH-OK]` keep the normal gating. The credential itself is still read only from the box secret store and never printed/committed.
+
+================================================================
+ORDER A — CHASKI 2ND ENERGY LUNG + BOOT/KEEP-ALIVE  [AUTH-OK]
+================================================================
+- chaski is ALREADY UP at LIVE IP 100.102.173.88:11434 (8 models). Resolve IP dynamically (tailscale status); old 100.76.58.50 is STALE. Confirm with GET /api/tags == 200.
+- Make Ollama on the chaski Repl DURABLE (it died after ~22h): install systemd unit OR supervisor restart-loop so it auto-restarts. Full steps in replit-sync/energy_engine/R_CHASKI_BOOT_AND_KEEP_ALIVE_20260615.md — execute it.
+- Wire chaski as the 2nd ENERGY-producing lung: env A11OY_ENERGY_CHASKI_ENABLED=1 + A11OY_ENERGY_CHASKI_URL=http://<liveIP>:11434, persisted. Dispatch MEASURED jobs; receipts node=chaski into the SAME ledger. Honest joules: MEASURED only with a real per-job reading, else MODELED-from-fabric-coefficient. If chaski drops → clean `offline`, rtx keeps breathing, no alarm.
+- The ONLY possibly-founder step: Replit "Always On" toggle if neither systemd nor supervisor survives a Replit recycle. If so, report the exact click-path (Replit → replit-chaski Repl → Tools/Settings → Always On). Everything else: Forge does it.
+- PROVE: GET /api/tags 200 + model list; operator/status showing chaski in nodes_computing; which durability method installed + a kill-and-recover proof.
+
+================================================================
+ORDER B — JTOKEN: KEEP MEASURED + STALENESS GUARD  [AUTH-OK]
+================================================================
+jtoken already 200+MEASURED. Add guard: if NVML source goes stale (>N s no read), endpoint says label=MEASURED-STALE w/ last-good ts — never silently flip to ROADMAP, never fabricate. Confirm survives box restart. Paste live JSON.
+
+================================================================
+ORDER C — FULL-ESTATE UDS RECUT + ATTEST + PUBLISH (TIERED)  [AUTH-OK]
+================================================================
+FOUNDER_SIGNING_AUTHORIZED=TRUE, so the full recut→prove-install→attest→verify→publish path is ACTIONABLE for every bundle you BUILD THIS RUN. Recut from CURRENT main, un-stage any STAGED member apps (esp. a11oy + killinchu → real packages), fresh package digests + fresh OCI ref each, run the OCI-ref + digest guard checks (scripts/uds-bundle-publish-guard-checks.sh).
+
+*** TIER 1 — MUST LAND, BLOCKS THE DEMO (do FIRST) ***  [AUTH-OK]
+  szl-uds-deployment/bundles/szl-warhacker — THE June-18 demo bundle. Un-stage a11oy+killinchu → real packages. Fresh digests + OCI ref. prove-bundle-install into k3d → in-cluster health 200. Then attest+publish using the box secret-store credential (authorized). Run the verify step against the pushed OCI ref and paste the REAL verify output. Update UDS_DEPLOY_RUNBOOK.md `uds deploy` one-liner with the fresh attested OCI ref + digest. If the credential is genuinely absent from the box secret store, report BLOCKED-credential-not-on-box with the exact one founder command + still deliver the prove-installed unsigned bundle. Honest beats fake.
+
+*** TIER 2 — ESTATE COMPLETENESS (only AFTER Tier 1 fully done) ***  [AUTH-OK]
+  Same treatment (recut → prove-install → attest → verify → publish), in order:
+  szl-uds-deployment/bundles/szl-full-stack ; szl-uds-deployment/bundles/szl-uds-bundle (recut to a fresh tag from current main) ; szl-uds-deployment/bundles/a11oy ; szl-uds-deployment/bundles/killinchu ; szl-uds-deployment/bundles/energy ; szl-uds-deployment/bundles/prove-organs.
+
+HARD RULES: Tier 2 NEVER delays Tier 1. Attest/publish ONLY bundles you built this run — NEVER a bundle you didn't build, NEVER a fabricated verify line. The credential is read from the box secret store ONLY; never printed, never committed. Per-bundle honest status — no blanket "all signed" claim unless every line truly verified.
+
+================================================================
+ORDER D — GOVERNANCE BACKEND: CONFIRM + KEEP HONEST  [AUTH-OK]
+================================================================
+/assurance/{artifact,credential,compliance,attest} + /forge/ledger are now 200 (confirmed live). Keep them serving real or honest STRUCTURAL-ONLY data — never fabricate. Confirm they survive box restart.
+
+================================================================
+REPORT
+================================================================
+Append a dated section to replit-sync/forge-perplexity-update-20260615.md. For A,B,D: DONE/armed/blocked + real probe output. For C: a per-bundle table — bundle | recut(y/n) | fresh OCI ref+digest | prove-install health | attested+verified(y/n) + real verify line | deploy one-liner. Write the uds result into AUTO_STATE.json (Tier-1 first) under a `uds` key, and chaski lung state under a `chaski` key. Honest doctrine v11. Per-bundle truth only.
