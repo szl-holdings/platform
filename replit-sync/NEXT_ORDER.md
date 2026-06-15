@@ -1,3 +1,5 @@
+> [2026-06-15 founder GREEN LIGHT] cosign-prep + DNS: see replit-sync/FORGE-INSTRUCTION-cosign-dns-greenlit-20260615-1958.md. a11oy drift RED (live_wires.html) FIXED at root (commit 8de31122, drift errors=0). Cosign sign (FA-001) + killinchu.net registration remain FOUNDER-GATED by doctrine (private key / registrar account stay founder-held even under green light). Forge: keep organ digests + bundles fresh; do NOT sign or touch the key.
+
 # FORGE MASTER ORDER — 2026-06-15 15:45 ET (founder: Stephen) — SUPERSEDES 1525
 
 Doctrine v11 throughout. Never fabricate a 200 / receipt / joule / digest / signature. joules MEASURED only via real NVML. Λ = Conjecture 1 (advisory). Never touch lutar-lean (keystone). Honest BLOCKED beats fake green. Never weaken a CI gate. Never write a credential into a repo file or log.
