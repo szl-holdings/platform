@@ -44,12 +44,16 @@ FIRST (founder called it out). Land before the 2026-06-18 01:00 ET freeze.
 ACTION: EXECUTE
 ACTIONABLE: true
 IDLE_SENTINEL: false
-DISPATCH_REQUIRED: true
+DISPATCH_REQUIRED: false
 PRIORITY: P0-DEMO-CRITICAL
-TASK_1: rearm-energy-worker  (restart exporter 100.96.129.45:9471 + box operator loop; running->true; joules climb past 271855; mint receipts; NEVER reset/fabricate)
-TASK_2: turn-dispatch-on     (set FORGE_DISPATCH_CMD + flip dispatch_ok:true so this loop EXECUTES not reports)
-ON_BLOCKED: report BLOCKED with exact error + demo existing 271855 J + signed receipts honestly
+NOTE: dispatch_ok is already TRUE and the energy meter is already running (474k+ J climbing) — the OLD items (rearm-energy-worker, turn-dispatch-on) are DONE; stop re-handing them.
+TASK_1: box-redeploy-verify (confirm box on current main: /pnt + /pinn distinct surfaces, /fabric live pool, /energy-ops graphs, git_sha==GitHub HEAD on /honest)
+TASK_2: serve-governance-backend (stand up /api/a11oy/v1/assurance/{artifact,credential,compliance,attest} + /forge/ledger — all 404 now; real data or honest STRUCTURAL-ONLY, never fabricate)
+TASK_3: jtoken-measured (run NVML /metrics exporter LOCALLY on betterwithage, set A11OY_VLLM_METRICS_URL; flip /energy/jtoken ROADMAP->MEASURED; honest BLOCKED if exporter can't emit over tailnet)
+TASK_4: uds-bundle-recut (recut szl-warhacker bundle from current main, un-stage a11oy+killinchu, fresh digests, prove-bundle-install; leave cosign sign for founder)
+ON_BLOCKED: report BLOCKED with exact error; never fabricate a value/joule/digest/200
 FOUNDER_AUTHORIZED: true (Stephen Lutar, full admin, 2026-06-15)
+DETAIL: see replit-sync/FORGE-MASTER-ORDER-20260614-2150.md (refreshed 2026-06-15 13:00 ET)
 <!-- /FORGE-POLL-TRIGGER -->
 
 # SZL Forge — TOP ORDER (2026-06-15 10:03 EDT): RE-ARM ENERGY WORKER + DISPATCH ON
