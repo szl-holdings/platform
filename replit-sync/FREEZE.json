@@ -1,8 +1,8 @@
 {
   "active": true,
-  "activates_at": "2026-06-18T02:00:00-04:00",
+  "activates_at": "2026-06-18T01:00:00-04:00",
   "lifts_at": "2026-06-19T23:59:00-04:00",
-  "reason": "Defense Unicorns Warhacker demo freeze — founder demos June 18; freeze locks verified-GO state the morning of the demo (doctrine v11, locked=8 @ c7c0ba17). Build/prep days June 16-17 remain editable.",
+  "reason": "Defense Unicorns Warhacker demo freeze \u2014 founder demos June 18; freeze locks verified-GO state the morning of the demo (doctrine v11, locked=8 @ c7c0ba17). Build/prep days June 16-17 remain editable.",
   "policy": "Before activates_at: normal work. From activates_at to lifts_at: READ-ONLY for Forge + all SZL crons (monitor + recovery-restart only; NO commits/deploys/auto-fixes/auto-merges/auto-sync). Recovery restart of a sleeping/errored Space to last-good build is allowed (healing, not change).",
   "hotfix": "Permitted ONLY for a demo-blocking defect, with explicit founder approval, minimal + byte-identical GitHub<->HF, ast.parse/node-check first, re-verified live, logged. Never touch signed artifacts/box/doctrine gates without founder.",
   "frozen_state": {
@@ -32,5 +32,5 @@
   },
   "set_by": "estate-hardening program",
   "set_at": "2026-06-13T10:31:00-04:00",
-  "updated_note": "Freeze activation moved from 2026-06-16 00:00 ET to 2026-06-18 02:00 ET per founder (working 16/17/18 on-site to prep; demos the 18th — estate stays editable through the 17th, locks the morning of the demo). frozen_heads will be re-stamped at activation."
+  "updated_note": "Freeze activation set to 2026-06-18 01:00 ET (= 05:00 UTC) per founder (was 02:00 ET). Founder works 16/17/18 on-site to prep; demos the 18th \u2014 estate stays editable through the 17th, locks 1 AM ET the morning of the demo. frozen_heads re-stamped at activation."
 }
