@@ -3,6 +3,8 @@ name: Deploy — Staging
 on:
   push:
     branches: [main, master]
+    paths-ignore:
+      - 'replit-sync/**'
 
 permissions:
   contents: read

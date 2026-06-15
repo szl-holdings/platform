@@ -3,6 +3,8 @@ name: SBOM — CycloneDX via Syft
 on:
   push:
     branches: [ main ]
+    paths-ignore:
+      - 'replit-sync/**'
     tags:
       - 'v*'
   release:

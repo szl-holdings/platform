@@ -4,6 +4,8 @@ on:
   branch_protection_rule:
   push:
     branches: [ main ]
+    paths-ignore:
+      - 'replit-sync/**'
   schedule:
     - cron: '30 1 * * 6'  # Weekly Saturday 01:30 UTC
 

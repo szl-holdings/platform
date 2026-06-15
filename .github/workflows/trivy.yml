@@ -9,6 +9,8 @@ name: Trivy + Grype container vulnerability scan
 on:
   push:
     branches: [ main ]
+    paths-ignore:
+      - 'replit-sync/**'
   pull_request:
     branches: [ main ]
   schedule:
