@@ -1,3 +1,8 @@
+# SZL Forge — #1 (2026-06-15 11:34 EDT): BOX SERVES STALE FRONT-END (founder: site does not update)
+
+**-> `replit-sync/FORGE-INSTRUCTION-1-box-stale-frontend-redeploy-20260615-1134.md`.** ROOT CAUSE FOUND: box API is FRESH (joules 393k climbing) but the box serves an OLD front-end — /energy-3d is the 272KB blank SPA shell with NO energy-API wiring, and /honest git_sha=MISSING. Current main (e42082a6) HAS the real live energy pages (web/energy.html, pages/energy-ops.html, energy_showcase.js). The prior redeploy landed BACKEND only. FIX: deploy current-main FRONT-END to the box (energy pages + console bundle + willay/waqay/yupay/qhawaq/sapa/mbse tabs) + STAMP git_sha. PROVE: git_sha==HEAD (not missing); /energy-ops served HTML contains energy/operator/status wiring (not the blank shell); tab shows joules climbing live. Never serve a stale shell + call it done.
+
+---
 # SZL Forge — #1 (2026-06-15 11:31 EDT): NO BANDAIDS — disable energy stub fallback on LIVE box
 
 **-> `replit-sync/FORGE-INSTRUCTION-no-bandaid-disable-energy-stub-20260615-1131.md`.** Energy is live+climbing (385839 J MEASURED, stub_mode:false) — GOOD. Harden: start the live operator with allow_stub=False (A11OY_ENERGY_ALLOW_STUB=0) so GPU-gone => DEGRADED+loud, NEVER a silent unmetered stub job; clear the stale phantom local-stub from live by_node/node_status (only rtx-betterwithage computing + chaski standby remain). PRESERVE joules_measured_total 385839 + measured_jobs + receipts — only drop the phantom node. PROVE: no local-stub in by_node, allow_stub false, joules still MEASURED+climbing, GPU-kill test => DEGRADED not stub. Never bill SAMPLE; never reset; never commit a key.
@@ -108,6 +113,7 @@ v11: never commit a key, never keystone self-merge, honest BLOCKED beats fake gr
 2026-06-18 01:00 ET. The prior pinned stack is archived at NEXT_ORDER_archive_20260614_2150.md.
 
 ---
+
 
 
 
