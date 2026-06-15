@@ -1,3 +1,15 @@
+# SZL Forge — TOP ORDER (2026-06-15 01:25 EDT): use founder secrets TS_AUTHKEY + LLAMA_API_KEY (NEVER commit), harden home box headless
+
+**-> Read `replit-sync/FORGE-INSTRUCTION-secrets-tsauthkey-llamakey-20260615.md`.** Founder set TWO secrets in the
+secret store: `TS_AUTHKEY` (Tailscale) + `LLAMA_API_KEY` (Llama model API). Read from secret store ONLY — never echo,
+never write to git, never in a report (show present:true / masked last-4 only). Founder is going to SLEEP. Make the
+HOME box (RTX 4060 Ti 8GB, llama running, on Tailscale) a hardened headless always-on sovereign brain: tailscale up
+--authkey=$TS_AUTHKEY as boot service (reusable, non-ephemeral, survives reboot); wire LLAMA_API_KEY as model-API
+cred (CLOUD failover if cloud key, else local-server auth); ollama boot service OLLAMA_HOST=0.0.0.0 KEEP_ALIVE=-1;
+disable sleep; watchdog. a11oy -> home box via MagicDNS. PROVE: reboot -> TS+ollama auto-return, api/version 200,
+sovereign chat, joules MEASURED, ZERO key leakage in repo. Local = governed Qwen3 7-14B (8GB), 32B=ROADMAP. Doctrine v11.
+
+---
 # SZL Forge — TOP ORDER (2026-06-15 01:20 EDT): DESKTOP = ALWAYS-ON HEADLESS SOVEREIGN BRAIN
 
 **-> Read `replit-sync/FORGE-INSTRUCTION-desktop-alwayson-headless-brain-20260615.md`.** Founder takes the
@@ -33,5 +45,6 @@ v11: never commit a key, never keystone self-merge, honest BLOCKED beats fake gr
 2026-06-18 01:00 ET. The prior pinned stack is archived at NEXT_ORDER_archive_20260614_2150.md.
 
 ---
+
 
 
