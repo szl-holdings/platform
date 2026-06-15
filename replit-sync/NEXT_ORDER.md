@@ -1,3 +1,8 @@
+# SZL Forge — TOP ORDER (2026-06-15 10:03 EDT): RE-ARM ENERGY WORKER + DISPATCH ON
+
+**-> `replit-sync/FORGE-INSTRUCTION-TOP-rearm-energy-dispatch-20260615-1003.md`.** Energy worker running:false (joules frozen 271855 PRESERVED, inference unmetered) — restart laptop exporter 100.96.129.45:9471 + box operator loop, climb forward, never reset/fabricate. THEN turn your own dispatch ON (dispatch_mode:none now = blocking everything; founder authorized full execute) + run pinned orders. Finish headless harden when TS_AUTHKEY+OLLAMA key land in secret store. Never commit a key. Honest BLOCKED beats fake green.
+
+---
 # SZL Forge — HOT RECOVERY (pinned 2026-06-15 02:18 ET): energy operator worker STOPPED — fix FIRST
 
 **-> Read `replit-sync/FORGE-INSTRUCTION-energy-worker-recovery-20260615.md`.** The live energy meter (demo
@@ -59,6 +64,7 @@ v11: never commit a key, never keystone self-merge, honest BLOCKED beats fake gr
 2026-06-18 01:00 ET. The prior pinned stack is archived at NEXT_ORDER_archive_20260614_2150.md.
 
 ---
+
 
 
 
