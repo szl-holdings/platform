@@ -9,3 +9,8 @@
   - The ONLY possibly-founder step: Replit "Always On" toggle if neither systemd nor supervisor survives a Replit recycle. If so, report the exact click-path (Replit → replit-chaski Repl → Tools/Settings → Always On). Everything else: Forge does it.
   - PROVE: GET /api/tags 200 + model list; operator/status showing chaski in nodes_computing; which durability method installed + a kill-and-recover proof.
 - Reachability snapshot: https://a11oy.net/healthz -> 200
+
+## Auto-loop pass — order `10221c5f` — 2026-06-16T01:34:13Z
+
+- Order is **idle / no-action sentinel** — handshake confirmed, nothing to execute.
+- Reachability snapshot: https://a11oy.net/healthz -> 200
