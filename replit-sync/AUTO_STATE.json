@@ -1,24 +1,23 @@
 {
   "order_sha": "609bab4049bdf661c5c310db9d6042ba24a1d2c0",
   "order_path": "replit-sync/NEXT_ORDER.md",
-  "state": "done",
+  "state": "pending",
   "seen_at": "2026-06-16T04:34:21Z",
-  "updated_at": "2026-06-16T04:34:24Z",
-  "idle": true,
+  "updated_at": "2026-06-16T04:38:00Z",
+  "idle": false,
   "actionable": [
-    "chaski is ALREADY UP at LIVE IP 100.102.173.88:11434 (8 models). Resolve IP dynamically (tailscale status); old 100.76.58.50 is STALE. Confirm with GET /api/tags == 200.",
-    "Make Ollama on the chaski Repl DURABLE (it died after ~22h): install systemd unit OR supervisor restart-loop so it auto-restarts. Full steps in replit-sync/energy_engine/R_CHASKI_BOOT_AND_KEEP_ALIVE_20260615.md \u2014 execute it.",
-    "Wire chaski as the 2nd ENERGY-producing lung: env A11OY_ENERGY_CHASKI_ENABLED=1 + A11OY_ENERGY_CHASKI_URL=http://<liveIP>:11434, persisted. Dispatch MEASURED jobs; receipts node=chaski into the SAME ledger. Honest joules: MEASURED only with a real per-job reading, else MODELED-from-fabric-coefficient. If chaski drops \u2192 clean `offline`, rtx keeps breathing, no alarm.",
-    "The ONLY possibly-founder step: Replit \"Always On\" toggle if neither systemd nor supervisor survives a Replit recycle. If so, report the exact click-path (Replit \u2192 replit-chaski Repl \u2192 Tools/Settings \u2192 Always On). Everything else: Forge does it.",
-    "PROVE: GET /api/tags 200 + model list; operator/status showing chaski in nodes_computing; which durability method installed + a kill-and-recover proof."
+    "REBUILD the SZLHOLDINGS/a11oy HF Space from current main HEAD (factory rebuild) so it serves the new web/immune.html + web/materials.html + the honest pages/docs.html. GitHub is the honest source of truth; the HF Space module-drift guard goes/stays green once the Space bakes the new image. Do NOT blind-overwrite GitHub. PROVE: curl https://szlholdings-a11oy.hf.space/materials -> 200 text/html with markers 'Verifiable Alloy'/'Q'allariy'; curl /immune -> 200 'Immune (Hukulla)'.",
+    "WIRE immune.a11oy.net (subdomain). Box=167.233.50.75, nginx/1.28.3 Host-header vhost (mirror killinchu.a11oy.net server block). PART A: add nginx server { server_name immune.a11oy.net; } proxying to the a11oy app, location / redirect/proxy to /immune; reuse/extend the *.a11oy.net TLS cert (certbot --nginx -d immune.a11oy.net AFTER the A-record resolves); nginx -t + reload; do not touch a11oy/killinchu blocks. PART B: add DNS A-record immune -> 167.233.50.75 (TTL 300) at registrar (nameservers dns1/dns2.registrar-servers.com) — founder green-lit DNS. If registrar unreachable, report honest BLOCKED with the exact record to add; never fake a cert/DNS. Full steps: replit-sync/FORGE-INSTRUCTION-EXECUTE-immune-subdomain-20260616-0330.md. PROVE: dig +short immune.a11oy.net A == 167.233.50.75 AND curl -sI https://immune.a11oy.net/immune == 200 valid (non-self-signed) cert.",
+    "KEEP the box auto-deploying main so the new /api/a11oy/v1/{immune,materials}/* commits + pages stay live (they are already live now; just don't let the box fall behind HEAD).",
+    "PROVE every DONE with a real live curl — narrated-DONE without a curl is forbidden. If a step needs the cosign private key or a registrar credential you lack, report honest BLOCKED with the exact command/record for the founder; never weaken a gate, never commit a key."
   ],
   "delegated_to_agent": [],
-  "dispatch_mode": "none",
-  "dispatch_ok": false,
+  "dispatch_mode": "dispatch-cmd",
+  "dispatch_ok": true,
   "gated_skipped": [],
   "report": "replit-sync/forge-perplexity-update-20260616.md",
   "probes": {
     "https://a11oy.net/healthz": 200
   },
-  "doctrine": "v11: locked=8, Lambda=Conjecture 1, never commit a key"
+  "doctrine": "v11: locked=8 {F1,F4,F7,F11,F12,F18,F19,F22} @ c7c0ba17; Lambda=Conjecture 1; Khipu=Conjecture 2; trust never 100%; no user-visible codenames; never commit a key; honest BLOCKED beats fake green"
 }
