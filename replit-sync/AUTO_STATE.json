@@ -1,8 +1,10 @@
 {
   "order_sha": "5ed6372abe75aa8240fa5fd67c080640d0bc25e9",
   "order_path": "replit-sync/NEXT_ORDER.md",
-  "state": "processing",
+  "state": "done",
   "seen_at": "2026-06-16T06:34:47Z",
+  "updated_at": "2026-06-16T06:34:50Z",
+  "idle": true,
   "actionable": [
     "ALL box surfaces 200: /healthz /frontier /orbital /holographic /energy-ops /energy-holographic /pnt /pinn /fabric /governance /console /elite /signature-is-not-proof /harvest /estate-hologram. ALL API 200: /honest /frontier/manifest /energy/operator/status /energy/ledger /compute-pool /restraint/info /pnt/limits. killinchu/elite 200.",
     "ENERGY loop running:true, stub_mode:false, jobs_done 32,341, joules_measured_total 982,577 J MEASURED, tokens 15.2M. nodes_computing=[rtx-betterwithage, chaski]; omen-betterwithage standby. jtoken MEASURED.",
@@ -17,5 +19,13 @@
     "UDS bundle stays published + keyless-signed; if uds-bundle-publish.yml or prove-bundle-install.yml goes red, report ref+digest+failing step honestly.",
     "Keep the GitHub org surface honest: locked=8, Lambda=Conjecture 1, Khipu BFT=Conjecture 2, SLSA L1 honest, joules MEASURED only via real exporter."
   ],
-  "gated_skipped": []
+  "delegated_to_agent": [],
+  "dispatch_mode": "none",
+  "dispatch_ok": false,
+  "gated_skipped": [],
+  "report": "replit-sync/forge-perplexity-update-20260616.md",
+  "probes": {
+    "https://a11oy.net/healthz": 200
+  },
+  "doctrine": "v11: locked=8, Lambda=Conjecture 1, never commit a key"
 }
