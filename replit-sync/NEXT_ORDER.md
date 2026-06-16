@@ -1,49 +1,36 @@
-<!-- FREEZE UPDATE 2026-06-16 12:52 ET: HOLD — demo-freeze pushed to 2026-06-20 01:00 ET (=05:00 UTC), lift 2026-06-21 23:59 ET (=2026-06-22 03:59 UTC). BOTH platform/FREEZE.json AND a11oy/.github/workflows/demo-freeze.yml updated + aligned. Estate stays EDITABLE through 06-19 — normal main work + non-hotfix PRs land until 06-20 05:00Z. Re-tighten pending exact demo-day confirmation. The prior order below (OMEN 3rd lung + HF a11oy rebuild + hold) STILL STANDS. -->
+<!-- NEXT_ORDER updated 2026-06-16 13:00 ET. PRIORITY EXECUTE (do NOT auto-skip as founder-gated): run the box-side tailnet probe to OMEN (tailscale ping/nc/curl from the box) — it is a plain network diagnostic, NOT a secret task. The prior OMEN order was wrongly skipped. Freeze HELD to 06-20 01:00 ET — estate editable. -->
 
-<!-- NEXT_ORDER updated 2026-06-16 12:24 ET by CTO. PRIORITY: OMEN Ollama is bound 0.0.0.0 + listening (founder-confirmed) but box->OMEN tailnet probe TIMES OUT (hardened pool). Diagnose+fix the box->OMEN path (likely tailnet ACL or OMEN firewall EdgeTraversal), then light OMEN as 3rd lung. Also confirm HF a11oy Space rebuild lands green. Hold stack on chaski. -->
+# FORGE ORDER — RUN THE BOX->OMEN REACHABILITY PROBE (execute, do NOT skip) — 2026-06-16 13:00 ET
 
-# FORGE ORDER — LIGHT OMEN AS 3RD LUNG + HF a11oy REBUILD + HOLD — 2026-06-16 12:24 ET
+Doctrine v11: reachable=REAL-PROBE-ONLY (never fabricate up); honest BLOCKED beats fake green; never touch lutar-lean. Estate is EDITABLE (freeze held to 2026-06-20 01:00 ET).
 
-Doctrine v11 (hard): reachable=REAL-PROBE-ONLY (never fabricate a node up); joules MEASURED only via real per-node NVML else honest label; never claim combined/fused VRAM (horizontal scale only); Lambda=Conjecture 1; never commit a key; never touch lutar-lean; honest BLOCKED beats fake green. FREEZE arms 2026-06-18 15:00 ET — monitor-only inside freeze, hotfix/* only.
+## WHY THIS ORDER (read first)
+The prior OMEN order was auto-skipped as "founder-gated" because it mentioned network-policy words. THAT WAS WRONG. The diagnostic below is a PLAIN box-side network probe — it is NOT a secret/credential task and is NOT founder-gated. EXECUTE IT. Run every command from the Hetzner box over the tailnet and record real output.
 
-## SITUATION (verified by founder screenshots + box probes, 12:24 ET)
-The founder fixed OMEN's Ollama. CONFIRMED ON THE OMEN SIDE (screenshots, do not re-litigate):
-- OMEN Ollama server log: `OLLAMA_HOST:http://0.0.0.0:11434` and `msg="Listening on [::]:11434 (version 0.30.8)"` — bound to ALL interfaces (NOT 127.0.0.1 anymore).
-- GPU: NVIDIA GeForce RTX 4060 Ti, total 8.0 GiB / available 6.9 GiB, driver 596.36, CUDA 13.2.
-- Local self-probes 200: GET/POST /api/tags, /api/ps, /api/pull. `ollama run llama3.1:8b "say ready"` -> READY. Model resident.
-- `tailscale status` on OMEN: `100.70.130.45  betterwithage  stephenlutar2@  windows` (OMEN is UP on the tailnet; hostname = betterwithage).
-- OMEN Windows firewall rule "Ollama tailnet" Inbound/TCP/11434/Allow exists, Enabled=True (NOTE: EdgeTraversalPolicy=Block on that rule).
+## CONFIRMED (founder screenshots — do not re-check OMEN side)
+OMEN desktop (host `betterwithage`, tailnet 100.70.130.45) has Ollama listening on 0.0.0.0:11434 ([::]:11434), GPU RTX 4060 Ti ready, local /api/tags = 200, model resident. OMEN side is GOOD. The gap is the box cannot reach it: /api/a11oy/v1/compute-pool-hardened shows omen-betterwithage detail=timeout.
 
-BUT the box DISAGREES. GET /api/a11oy/v1/compute-pool-hardened shows:
-  omen-betterwithage  http://100.70.130.45:11434  reachable=FALSE  detail=timeout
-So Ollama IS bound and listening on OMEN, yet the BOX's outbound probe to 100.70.130.45:11434 TIMES OUT. This is now a BOX<->OMEN TAILNET PATH problem, NOT an Ollama bind problem. The plain /compute-pool node list doesn't even include OMEN (only the hardened resolver does) — so the energy operator never considers OMEN. Right now nodes_computing=['chaski'] only.
+## EXECUTE NOW — box-side layered probe (record real output for each)
+Run these FROM THE BOX and paste actual results into the report:
+1. `tailscale status` — is host `betterwithage` (100.70.130.45) listed as a peer from the BOX view? direct or relay? Paste the betterwithage line.
+2. `tailscale ping 100.70.130.45` and `tailscale ping betterwithage` — does it complete? direct path or via DERP relay? how many ms? Paste 3 lines.
+3. `nc -vz -w 5 100.70.130.45 11434` — is TCP port 11434 OPEN from the box?
+4. `curl -m 8 http://100.70.130.45:11434/api/tags` — does it return the model list (200)?
+5. `ping -c 3 100.70.130.45` — basic ICMP over tailnet.
 
-## TASK 1 — DIAGNOSE + FIX THE BOX->OMEN TAILNET PATH (priority)
-From the Hetzner box (over tailnet), run a real layered probe to 100.70.130.45 and report each result honestly:
-  a) `tailscale ping 100.70.130.45` (and `tailscale ping betterwithage`) — does the box see OMEN as a peer? direct vs DERP-relayed?
-  b) `tailscale status | grep -i betterwithage` — is OMEN listed as a peer from the BOX's view (it may be in a different tailnet/tailnet-lock state, or not sharing the box's tailnet)?
-  c) `nc -vz -w 5 100.70.130.45 11434` then `curl -m 8 http://100.70.130.45:11434/api/tags` — TCP open? HTTP 200?
-Then resolve the most likely root causes IN ORDER, honest about which fixes it:
-  - **Tailscale ACL**: if `tailscale ping` works but :11434 is refused/timeout, the tailnet ACL likely doesn't permit box->OMEN:11434. Check the policy; if the box's tailscale identity can't reach OMEN's tag/port, that is the fix (ACL grant). This may be FOUNDER-GATED (tailnet admin console) — if so, report the EXACT ACL stanza to add (src = box node/tag, dst = OMEN node, port = 11434) so the founder pastes it.
-  - **OMEN firewall EdgeTraversal**: the inbound rule shows EdgeTraversalPolicy=Block. Tailscale traffic arrives on the Tailscale virtual adapter; confirm the rule applies to that adapter/profile (Any profile). If the rule is scoped to the wrong profile or blocks the tailscale interface, that's the miss — give the founder the corrected `New-NetFirewallRule` (Profile Any, InterfaceAlias Tailscale, EdgeTraversalPolicy Allow) as a FOUNDER step.
-  - **Box resolver caching a stale dead state**: if path is actually open now, force the hardened resolver to re-probe (restart the resolver / clear its cache / redeploy) and re-check reachable flips true.
-Do NOT mark OMEN reachable unless YOUR real box-side curl returns 200. Never fake it.
+## DECIDE root cause from the real output (honest):
+- If step 2 fails entirely (no tailnet path): OMEN and the box may be on different tailnets, or OMEN's tailnet identity isn't shared with the box. This is a tailnet-membership thing the founder resolves in the admin console. Report the exact host/peer state so the founder can fix it.
+- If step 2 (tailnet ping) WORKS but step 3 (TCP 11434) is refused/filtered: the block is at OMEN's host firewall on the tailscale adapter. The founder's existing inbound rule had EdgeTraversalPolicy=Block and may be bound to the wrong network profile. Report this precisely; give the founder the corrected one-line PowerShell inbound rule scoped to Profile=Any so tailscale-adapter traffic on 11434 is permitted.
+- If step 3 (TCP) is OPEN but step 4 (curl) fails: an app-level issue — re-probe; likely the box resolver cached the old dead state. Restart/clear the hardened resolver cache (or redeploy the box) and re-check the hardened pool flips omen reachable=true.
+- If steps 3 AND 4 BOTH succeed now: GREAT — the path is open. Force the hardened resolver to re-probe, confirm omen-betterwithage flips reachable=true in /compute-pool-hardened, then proceed to make OMEN an energy lung (see below).
 
-## TASK 2 — WHEN BOX REACHES OMEN: REGISTER IT AS A REAL ENERGY LUNG
-Once box-side `curl http://100.70.130.45:11434/api/tags` == 200:
-  - Confirm omen-betterwithage flips reachable:true,sovereign:true in BOTH /compute-pool and /compute-pool-hardened; gpu_nodes_reachable rises to >=2 (chaski + omen; rtx still travels).
-  - Confirm the ENERGY operator picks OMEN up: /api/a11oy/v1/energy/operator/status nodes_computing INCLUDES 'omen-betterwithage', minting node=omen receipts. Honest joules: MEASURED only on a real per-job NVML reading from OMEN; else MODELED-from-fabric-coefficient, labeled. (chaski stays PENDING_EXPORTER until its own meter lands — do not fake.)
-  - If the plain /compute-pool node list is what the energy loop reads (and it currently omits OMEN), wire the loop to read the hardened/resolved list so OMEN is a candidate lung. Open a normal PR for this BEFORE freeze; if it can't land clean by 06-18 15:00 ET, park it (chaski lung already carries the demo).
-  - OMEN is the 24/7 ANCHOR (home, never travels). Prefer it as anchor worker; rtx (laptop) + chaski are additional horizontal workers; clean fallback if any drops. NEVER claim combined VRAM.
+## IF/WHEN THE BOX REACHES OMEN (step 4 == 200):
+- Wire OMEN as an energy lung the same way chaski was wired: persisted env `A11OY_ENERGY_OMEN_ENABLED=1` + `A11OY_ENERGY_OMEN_URL=http://100.70.130.45:11434`, dispatch MEASURED jobs, receipts node=omen into the SAME ledger. OMEN has a real RTX NVML GPU, so its per-job joules CAN be MEASURED (unlike chaski PENDING_EXPORTER) — wire the real NVML reading; if not available per-job, label MODELED-from-fabric-coefficient honestly.
+- Confirm /api/a11oy/v1/energy/operator/status nodes_computing INCLUDES omen-betterwithage and gpu_nodes_reachable rises. OMEN is the 24/7 home anchor — prefer it as anchor worker. NEVER claim combined VRAM.
+- Open a normal PR if a code change is needed for the energy loop to read OMEN from the resolved node list (estate is editable until 06-20 01:00 ET).
 
-## TASK 3 — HF a11oy SPACE REBUILD (was BUILD_ERROR, now BUILDING)
-The SZLHOLDINGS/a11oy HF Space hit BUILD_ERROR (docker build exit 1 on a COPY/runtime step) at ~15:01 UTC and is now BUILDING. CONFIRM it lands STAGE=RUNNING + serves 200 at https://szlholdings-a11oy.hf.space. If it BUILD_ERRORs again, read the build log, identify the failing COPY/RUN step, and fix it (likely a path that doesn't exist in the build context, or the cpu-basic constrained-builder llama path). This is the MIRROR Space — the demo runs off the box (a11oy.net, all 200), so this is NOT demo-critical, but get the mirror green. Report the failing step + fix honestly.
+## ALSO: HF a11oy Space rebuild
+Currently STAGE=BUILDING. Confirm it lands STAGE=RUNNING + serves 200 at szlholdings-a11oy.hf.space. If it BUILD_ERRORs, read the build log, fix the failing COPY/RUN step, push. Mirror Space — not demo-critical (demo runs off the box) but get it green.
 
-## TASK 4 — HOLD THE STACK (founder traveling, laptop off)
-- chaski is the sole live lung carrying the demo — keep it 200 + in nodes_computing; its systemd unit auto-recovers (proven). rtx offline = EXPECTED (laptop travels) — do NOT alarm.
-- Keep ALL served surfaces 200 (a11oy.net /healthz /frontier /orbital /holographic /energy-ops /pnt /pinn /fabric /governance /signature-is-not-proof + APIs + killinchu/elite). Route guard test catches drops.
-- Ledger persistence: /data mount, chain.ok=true, survives_redeploy:true — do NOT trigger gratuitous prod redeploys; if one happens, confirm chain CONTINUES (no genesis reset).
-- Energy loop running:true; if a redeploy leaves running:false WHILE a lung is reachable, POST /api/a11oy/v1/energy/operator/start.
-
-## REPORT (append to replit-sync/forge-perplexity-update-20260616.md + AUTO_STATE.json mesh key)
-Per item DONE vs FOUNDER-GATED: (1) box->OMEN layered probe results (ping/tcp/http) + root cause + fix applied or exact founder ACL/firewall stanza; (2) OMEN lung lit? gpu_nodes_reachable + nodes_computing truth; (3) HF a11oy Space stage (RUNNING?); (4) surfaces/chaski/ledger hold state. Founder is offline — only send_notification for: OMEN successfully lit as 3rd lung (good news) OR chaski down + not auto-recovering (emergency). Everything else: log; the watchdog cron alerts. Honest doctrine v11. Never fake a node up or a joule.
+## REPORT
+Append to replit-sync/forge-perplexity-update-20260616.md: the 5 real probe outputs verbatim, the root-cause verdict, what you fixed box-side, and (only if truly needed) the exact one-line founder step. If OMEN goes live as a lung, send_notification (in_app) titled 'OMEN 3rd lung LIT' with gpu_nodes_reachable + nodes_computing truth. Never fake a node up or a joule.
