@@ -1,8 +1,10 @@
 {
   "order_sha": "b84c007d7fb0360f55002555f2a87d002c401d08",
   "order_path": "replit-sync/NEXT_ORDER.md",
-  "state": "processing",
+  "state": "done",
   "seen_at": "2026-06-16T05:34:39Z",
+  "updated_at": "2026-06-16T05:34:42Z",
+  "idle": true,
   "actionable": [
     "chaski is ALREADY UP at LIVE IP 100.102.173.88:11434 (8 models). Resolve IP dynamically (tailscale status); old 100.76.58.50 is STALE. Confirm with GET /api/tags == 200.",
     "Make Ollama on the chaski Repl DURABLE (it died after ~22h): install systemd unit OR supervisor restart-loop so it auto-restarts. Full steps in replit-sync/energy_engine/R_CHASKI_BOOT_AND_KEEP_ALIVE_20260615.md \u2014 execute it.",
@@ -10,5 +12,13 @@
     "The ONLY possibly-founder step: Replit \"Always On\" toggle if neither systemd nor supervisor survives a Replit recycle. If so, report the exact click-path (Replit \u2192 replit-chaski Repl \u2192 Tools/Settings \u2192 Always On). Everything else: Forge does it.",
     "PROVE: GET /api/tags 200 + model list; operator/status showing chaski in nodes_computing; which durability method installed + a kill-and-recover proof."
   ],
-  "gated_skipped": []
+  "delegated_to_agent": [],
+  "dispatch_mode": "none",
+  "dispatch_ok": false,
+  "gated_skipped": [],
+  "report": "replit-sync/forge-perplexity-update-20260616.md",
+  "probes": {
+    "https://a11oy.net/healthz": 200
+  },
+  "doctrine": "v11: locked=8, Lambda=Conjecture 1, never commit a key"
 }
