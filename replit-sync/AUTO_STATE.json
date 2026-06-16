@@ -1,24 +1,21 @@
 {
-  "order_sha": "b84c007d7fb0360f55002555f2a87d002c401d08",
+  "order_sha": "5ed6372abe75aa8240fa5fd67c080640d0bc25e9",
   "order_path": "replit-sync/NEXT_ORDER.md",
-  "state": "done",
-  "seen_at": "2026-06-16T05:34:39Z",
-  "updated_at": "2026-06-16T05:34:42Z",
-  "idle": true,
+  "state": "processing",
+  "seen_at": "2026-06-16T06:34:47Z",
   "actionable": [
-    "chaski is ALREADY UP at LIVE IP 100.102.173.88:11434 (8 models). Resolve IP dynamically (tailscale status); old 100.76.58.50 is STALE. Confirm with GET /api/tags == 200.",
-    "Make Ollama on the chaski Repl DURABLE (it died after ~22h): install systemd unit OR supervisor restart-loop so it auto-restarts. Full steps in replit-sync/energy_engine/R_CHASKI_BOOT_AND_KEEP_ALIVE_20260615.md \u2014 execute it.",
-    "Wire chaski as the 2nd ENERGY-producing lung: env A11OY_ENERGY_CHASKI_ENABLED=1 + A11OY_ENERGY_CHASKI_URL=http://<liveIP>:11434, persisted. Dispatch MEASURED jobs; receipts node=chaski into the SAME ledger. Honest joules: MEASURED only with a real per-job reading, else MODELED-from-fabric-coefficient. If chaski drops \u2192 clean `offline`, rtx keeps breathing, no alarm.",
-    "The ONLY possibly-founder step: Replit \"Always On\" toggle if neither systemd nor supervisor survives a Replit recycle. If so, report the exact click-path (Replit \u2192 replit-chaski Repl \u2192 Tools/Settings \u2192 Always On). Everything else: Forge does it.",
-    "PROVE: GET /api/tags 200 + model list; operator/status showing chaski in nodes_computing; which durability method installed + a kill-and-recover proof."
+    "ALL box surfaces 200: /healthz /frontier /orbital /holographic /energy-ops /energy-holographic /pnt /pinn /fabric /governance /console /elite /signature-is-not-proof /harvest /estate-hologram. ALL API 200: /honest /frontier/manifest /energy/operator/status /energy/ledger /compute-pool /restraint/info /pnt/limits. killinchu/elite 200.",
+    "ENERGY loop running:true, stub_mode:false, jobs_done 32,341, joules_measured_total 982,577 J MEASURED, tokens 15.2M. nodes_computing=[rtx-betterwithage, chaski]; omen-betterwithage standby. jtoken MEASURED.",
+    "LEDGER chain.ok=true, length 264, links+receipts intact. persistence path /data/szl_energy_ledger.jsonl, survives_redeploy:true, label MEASURED \u2014 i.e. the HF persistent volume IS mounted now. KEEP it that way; the chain must NOT reset to seq 0 on the next redeploy. Prove with a redeploy + seq-continues check.",
+    "chaski by_node: real jobs computed (4,906) but joules_label PENDING_EXPORTER (no per-node NVML reading yet). That is HONEST and correct \u2014 do NOT fake chaski joules. If/when a real per-node meter attributes joules to chaski, flip it to MEASURED; until then PENDING_EXPORTER stays.",
+    "All main CI green (a11oy, killinchu, lutar-lean, anatomy, szl-uds-deployment, uds-mesh). UDS bundle published + keyless-signed (Sigstore OIDC) + SBOM-attested: oci://ghcr.io/szl-holdings/szl-uds-bundle:uds-v0.3.0.",
+    "anatomy: https://szlholdings-anatomy.hf.space  (200 \u2014 bare root serves)",
+    "energy:  https://szlholdings-energy.hf.space   (200 \u2014 bare root serves; it has NO /healthz route, so probe the bare root, not /healthz)",
+    "OpenAI joined the C2PA steering committee + is embedding SynthID alongside Content Credentials (2026-05-19); Google announced C2PA verify + SynthID detect at I/O 2026. Provenance-for-content is now table stakes.",
+    "arXiv 2606.00279 \"Bit-Exact AI Inference Verification Without Performance Tradeoffs\" + the Confidential-AI-Compute attestation wave: verifying AI workload claims for governance against covert adversaries.",
+    "Confirm the frontier/orbital READMEs + UDS cross-links (#471) point at the LIVE URLs (a11oy.net/frontier, /orbital, the docker HF spaces above) \u2014 fix any stale .static links there too.",
+    "UDS bundle stays published + keyless-signed; if uds-bundle-publish.yml or prove-bundle-install.yml goes red, report ref+digest+failing step honestly.",
+    "Keep the GitHub org surface honest: locked=8, Lambda=Conjecture 1, Khipu BFT=Conjecture 2, SLSA L1 honest, joules MEASURED only via real exporter."
   ],
-  "delegated_to_agent": [],
-  "dispatch_mode": "none",
-  "dispatch_ok": false,
-  "gated_skipped": [],
-  "report": "replit-sync/forge-perplexity-update-20260616.md",
-  "probes": {
-    "https://a11oy.net/healthz": 200
-  },
-  "doctrine": "v11: locked=8, Lambda=Conjecture 1, never commit a key"
+  "gated_skipped": []
 }
