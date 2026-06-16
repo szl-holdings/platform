@@ -1,3 +1,5 @@
+<!-- FREEZE UPDATE 2026-06-16 12:52 ET: HOLD — demo-freeze pushed to 2026-06-20 01:00 ET (=05:00 UTC), lift 2026-06-21 23:59 ET (=2026-06-22 03:59 UTC). BOTH platform/FREEZE.json AND a11oy/.github/workflows/demo-freeze.yml updated + aligned. Estate stays EDITABLE through 06-19 — normal main work + non-hotfix PRs land until 06-20 05:00Z. Re-tighten pending exact demo-day confirmation. The prior order below (OMEN 3rd lung + HF a11oy rebuild + hold) STILL STANDS. -->
+
 <!-- NEXT_ORDER updated 2026-06-16 12:24 ET by CTO. PRIORITY: OMEN Ollama is bound 0.0.0.0 + listening (founder-confirmed) but box->OMEN tailnet probe TIMES OUT (hardened pool). Diagnose+fix the box->OMEN path (likely tailnet ACL or OMEN firewall EdgeTraversal), then light OMEN as 3rd lung. Also confirm HF a11oy Space rebuild lands green. Hold stack on chaski. -->
 
 # FORGE ORDER — LIGHT OMEN AS 3RD LUNG + HF a11oy REBUILD + HOLD — 2026-06-16 12:24 ET
