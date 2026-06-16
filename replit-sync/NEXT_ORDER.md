@@ -1,36 +1,47 @@
-<!-- NEXT_ORDER updated 2026-06-16 11:07 ET by CTO. TRAVEL MODE: founder in flight, laptop OFF. Hold the stack autonomously; chaski is the sole lung — protect it. rtx offline is EXPECTED. -->
+<!-- NEXT_ORDER updated 2026-06-16 12:24 ET by CTO. PRIORITY: OMEN Ollama is bound 0.0.0.0 + listening (founder-confirmed) but box->OMEN tailnet probe TIMES OUT (hardened pool). Diagnose+fix the box->OMEN path (likely tailnet ACL or OMEN firewall EdgeTraversal), then light OMEN as 3rd lung. Also confirm HF a11oy Space rebuild lands green. Hold stack on chaski. -->
 
-# FORGE TRAVEL-MODE ORDER — 2026-06-16 11:07 ET — FOUNDER IN FLIGHT, LAPTOP OFF
+# FORGE ORDER — LIGHT OMEN AS 3RD LUNG + HF a11oy REBUILD + HOLD — 2026-06-16 12:24 ET
 
-Doctrine v11 (hard): never fabricate a 200/joule/receipt/signature/digest/label; joules MEASURED only via real NVML else honest label; reachable=REAL-PROBE-ONLY (never fake a node up); never claim combined VRAM; Lambda=Conjecture 1; never commit a key; never touch lutar-lean; honest BLOCKED beats fake green; never weaken/bypass a doctrine/CI gate. FREEZE arms 2026-06-18 15:00 ET — monitor-only inside freeze, hotfix/* only.
+Doctrine v11 (hard): reachable=REAL-PROBE-ONLY (never fabricate a node up); joules MEASURED only via real per-node NVML else honest label; never claim combined/fused VRAM (horizontal scale only); Lambda=Conjecture 1; never commit a key; never touch lutar-lean; honest BLOCKED beats fake green. FREEZE arms 2026-06-18 15:00 ET — monitor-only inside freeze, hotfix/* only.
 
-## SITUATION
-Founder is traveling to San Diego (WarHacker, founder demos June 18). LAPTOP IS OFF for the flight. That means:
-- rtx-betterwithage (the laptop lung) is OFFLINE / will flap offline — this is EXPECTED AND HONEST. Do NOT alarm on rtx going offline. Do NOT try to revive it.
-- OMEN (100.70.130.45) is still founder-side-unbound — leave as honest-down, do NOT mark reachable without a real /api/tags 200.
-- chaski (real systemd VM, tailnet) is the SOLE LUNG keeping the energy loop breathing. THIS IS THE THING TO PROTECT.
+## SITUATION (verified by founder screenshots + box probes, 12:24 ET)
+The founder fixed OMEN's Ollama. CONFIRMED ON THE OMEN SIDE (screenshots, do not re-litigate):
+- OMEN Ollama server log: `OLLAMA_HOST:http://0.0.0.0:11434` and `msg="Listening on [::]:11434 (version 0.30.8)"` — bound to ALL interfaces (NOT 127.0.0.1 anymore).
+- GPU: NVIDIA GeForce RTX 4060 Ti, total 8.0 GiB / available 6.9 GiB, driver 596.36, CUDA 13.2.
+- Local self-probes 200: GET/POST /api/tags, /api/ps, /api/pull. `ollama run llama3.1:8b "say ready"` -> READY. Model resident.
+- `tailscale status` on OMEN: `100.70.130.45  betterwithage  stephenlutar2@  windows` (OMEN is UP on the tailnet; hostname = betterwithage).
+- OMEN Windows firewall rule "Ollama tailnet" Inbound/TCP/11434/Allow exists, Enabled=True (NOTE: EdgeTraversalPolicy=Block on that rule).
 
-The whole served stack (a11oy.net) runs on the Hetzner box (167.233.50.75), NOT the laptop — so it stays up regardless. Verified 11:07 ET: /healthz 200, energy running:true on chaski, loop actively minting (jobs 38804->38806 in 9s), ledger chain.ok=true, persistence survives_redeploy:true on /data.
+BUT the box DISAGREES. GET /api/a11oy/v1/compute-pool-hardened shows:
+  omen-betterwithage  http://100.70.130.45:11434  reachable=FALSE  detail=timeout
+So Ollama IS bound and listening on OMEN, yet the BOX's outbound probe to 100.70.130.45:11434 TIMES OUT. This is now a BOX<->OMEN TAILNET PATH problem, NOT an Ollama bind problem. The plain /compute-pool node list doesn't even include OMEN (only the hardened resolver does) — so the energy operator never considers OMEN. Right now nodes_computing=['chaski'] only.
 
-## YOUR JOB WHILE FOUNDER IS DARK: KEEP IT UP, KEEP IT HONEST, DON'T BREAK IT
-1. CHASKI IS THE PRIORITY. It is the only lung. Its systemd unit is already enabled + Restart=always (you proved kill-recover 06-16). Keep verifying every loop pass: box -> http://chaski:11434/v1/models == 200 AND /energy/operator/status shows chaski in nodes_computing. If chaski drops AND the unit does not auto-recover within ~2 min, that is the ONE thing worth escalating — try `systemctl restart ollama` on chaski via the offbox key, re-prove 200, and log it. If it still won't come back, send_notification (in_app) titled 'chaski lung down — stack on box only' with the honest state (loop will idle-honest, served surfaces stay 200).
+## TASK 1 — DIAGNOSE + FIX THE BOX->OMEN TAILNET PATH (priority)
+From the Hetzner box (over tailnet), run a real layered probe to 100.70.130.45 and report each result honestly:
+  a) `tailscale ping 100.70.130.45` (and `tailscale ping betterwithage`) — does the box see OMEN as a peer? direct vs DERP-relayed?
+  b) `tailscale status | grep -i betterwithage` — is OMEN listed as a peer from the BOX's view (it may be in a different tailnet/tailnet-lock state, or not sharing the box's tailnet)?
+  c) `nc -vz -w 5 100.70.130.45 11434` then `curl -m 8 http://100.70.130.45:11434/api/tags` — TCP open? HTTP 200?
+Then resolve the most likely root causes IN ORDER, honest about which fixes it:
+  - **Tailscale ACL**: if `tailscale ping` works but :11434 is refused/timeout, the tailnet ACL likely doesn't permit box->OMEN:11434. Check the policy; if the box's tailscale identity can't reach OMEN's tag/port, that is the fix (ACL grant). This may be FOUNDER-GATED (tailnet admin console) — if so, report the EXACT ACL stanza to add (src = box node/tag, dst = OMEN node, port = 11434) so the founder pastes it.
+  - **OMEN firewall EdgeTraversal**: the inbound rule shows EdgeTraversalPolicy=Block. Tailscale traffic arrives on the Tailscale virtual adapter; confirm the rule applies to that adapter/profile (Any profile). If the rule is scoped to the wrong profile or blocks the tailscale interface, that's the miss — give the founder the corrected `New-NetFirewallRule` (Profile Any, InterfaceAlias Tailscale, EdgeTraversalPolicy Allow) as a FOUNDER step.
+  - **Box resolver caching a stale dead state**: if path is actually open now, force the hardened resolver to re-probe (restart the resolver / clear its cache / redeploy) and re-check reachable flips true.
+Do NOT mark OMEN reachable unless YOUR real box-side curl returns 200. Never fake it.
 
-2. KEEP ALL SERVED SURFACES 200. Probe each loop pass: a11oy.net /healthz /frontier /orbital /holographic /energy-ops /pnt /pinn /fabric /governance /console /elite /signature-is-not-proof + the energy/mesh/manifest APIs + killinchu.a11oy.net/elite. Any 200->non-200 on a demo-critical route is a real regression — the route guard test should catch it in CI; if a deploy drops a route, do NOT silently repair-and-hide: fix it AND log what dropped + the commit. Inside freeze (after 06-18 15:00 ET) do NOT push non-hotfix changes.
+## TASK 2 — WHEN BOX REACHES OMEN: REGISTER IT AS A REAL ENERGY LUNG
+Once box-side `curl http://100.70.130.45:11434/api/tags` == 200:
+  - Confirm omen-betterwithage flips reachable:true,sovereign:true in BOTH /compute-pool and /compute-pool-hardened; gpu_nodes_reachable rises to >=2 (chaski + omen; rtx still travels).
+  - Confirm the ENERGY operator picks OMEN up: /api/a11oy/v1/energy/operator/status nodes_computing INCLUDES 'omen-betterwithage', minting node=omen receipts. Honest joules: MEASURED only on a real per-job NVML reading from OMEN; else MODELED-from-fabric-coefficient, labeled. (chaski stays PENDING_EXPORTER until its own meter lands — do not fake.)
+  - If the plain /compute-pool node list is what the energy loop reads (and it currently omits OMEN), wire the loop to read the hardened/resolved list so OMEN is a candidate lung. Open a normal PR for this BEFORE freeze; if it can't land clean by 06-18 15:00 ET, park it (chaski lung already carries the demo).
+  - OMEN is the 24/7 ANCHOR (home, never travels). Prefer it as anchor worker; rtx (laptop) + chaski are additional horizontal workers; clean fallback if any drops. NEVER claim combined VRAM.
 
-3. PROTECT PERSISTENCE. The ledger writes to /data (HF persistent mount). Do NOT trigger an unnecessary prod redeploy while founder is dark. If a redeploy happens (CI/auto), confirm the chain length CONTINUES (does not reset to genesis) and chain.ok stays true. If /data ever unmounts and the chain resets, report EPHEMERAL honestly — never fake continuity.
+## TASK 3 — HF a11oy SPACE REBUILD (was BUILD_ERROR, now BUILDING)
+The SZLHOLDINGS/a11oy HF Space hit BUILD_ERROR (docker build exit 1 on a COPY/runtime step) at ~15:01 UTC and is now BUILDING. CONFIRM it lands STAGE=RUNNING + serves 200 at https://szlholdings-a11oy.hf.space. If it BUILD_ERRORs again, read the build log, identify the failing COPY/RUN step, and fix it (likely a path that doesn't exist in the build context, or the cpu-basic constrained-builder llama path). This is the MIRROR Space — the demo runs off the box (a11oy.net, all 200), so this is NOT demo-critical, but get the mirror green. Report the failing step + fix honestly.
 
-4. ENERGY LOOP MUST STAY running:true. If a redeploy leaves running:false WHILE chaski is reachable, POST /api/a11oy/v1/energy/operator/start to restart it (the #464 auto-start should handle this, but verify). If running:false AND no lung reachable, that is honest-idle — leave it, do not force.
+## TASK 4 — HOLD THE STACK (founder traveling, laptop off)
+- chaski is the sole live lung carrying the demo — keep it 200 + in nodes_computing; its systemd unit auto-recovers (proven). rtx offline = EXPECTED (laptop travels) — do NOT alarm.
+- Keep ALL served surfaces 200 (a11oy.net /healthz /frontier /orbital /holographic /energy-ops /pnt /pinn /fabric /governance /signature-is-not-proof + APIs + killinchu/elite). Route guard test catches drops.
+- Ledger persistence: /data mount, chain.ok=true, survives_redeploy:true — do NOT trigger gratuitous prod redeploys; if one happens, confirm chain CONTINUES (no genesis reset).
+- Energy loop running:true; if a redeploy leaves running:false WHILE a lung is reachable, POST /api/a11oy/v1/energy/operator/start.
 
-5. CI HYGIENE (outside freeze only): if a push-event main run goes red on platform/a11oy/killinchu/szl-uds-deployment, file the standard 'FORGE: main CI red — <repo>' issue with the failing job + first error line. Do NOT auto-merge anything risky; do NOT --admin past a failing required DCO/Scorecard gate. The pre-existing non-blockers (a11oy 'Operator & reason endpoint tests', szl-uds 'Receipts cosign verify exact identity') are NOT alarms.
-
-6. UDS BUNDLE stays published + keyless-signed (oci://ghcr.io/szl-holdings/szl-uds-bundle:uds-v0.3.0). If uds-bundle-publish.yml or prove-bundle-install.yml goes red, report ref+digest+failing step. No founder cosign step exists — do not invent one.
-
-## DO NOT (while founder is dark)
-- Do NOT alarm on rtx-betterwithage offline (laptop off — expected).
-- Do NOT mark OMEN reachable without a real probe.
-- Do NOT push non-hotfix changes inside the freeze.
-- Do NOT trigger gratuitous prod redeploys.
-- Do NOT fabricate any 200/joule/receipt/signature to make state look better than it is.
-
-## REPORT
-Append to replit-sync/forge-perplexity-update-20260616.md each pass: chaski lung state (200? recovered?), served-surface 200 truth, energy running flag, ledger chain.ok + continuity, any CI red filed. Founder is offline — only send_notification for the ONE escalation case: chaski down AND not auto-recovering (everything else: log silently, the watchdog cron covers alerting). Honest doctrine v11. Hold the line; keep the loop breathing on chaski.
+## REPORT (append to replit-sync/forge-perplexity-update-20260616.md + AUTO_STATE.json mesh key)
+Per item DONE vs FOUNDER-GATED: (1) box->OMEN layered probe results (ping/tcp/http) + root cause + fix applied or exact founder ACL/firewall stanza; (2) OMEN lung lit? gpu_nodes_reachable + nodes_computing truth; (3) HF a11oy Space stage (RUNNING?); (4) surfaces/chaski/ledger hold state. Founder is offline — only send_notification for: OMEN successfully lit as 3rd lung (good news) OR chaski down + not auto-recovering (emergency). Everything else: log; the watchdog cron alerts. Honest doctrine v11. Never fake a node up or a joule.
