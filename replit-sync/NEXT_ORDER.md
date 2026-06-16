@@ -34,3 +34,12 @@ Currently STAGE=BUILDING. Confirm it lands STAGE=RUNNING + serves 200 at szlhold
 
 ## REPORT
 Append to replit-sync/forge-perplexity-update-20260616.md: the 5 real probe outputs verbatim, the root-cause verdict, what you fixed box-side, and (only if truly needed) the exact one-line founder step. If OMEN goes live as a lung, send_notification (in_app) titled 'OMEN 3rd lung LIT' with gpu_nodes_reachable + nodes_computing truth. Never fake a node up or a joule.
+
+---
+## ADDED 2026-06-16 13:05 ET — CONVERT HF a11oy SPACE TO STATIC FRONT-DOOR (founder directive)
+The full-repo docker build of SZLHOLDINGS/a11oy keeps hitting BUILD_ERROR on the cpu-basic builder. Founder directive: STOP fighting the docker build. Replace the Space with a lightweight STATIC front-door that connects to a11oy.net (the demo runs off the box anyway; the Space just needs to be an always-on green front door).
+- The static files are staged at platform/replit-sync/hf-a11oy-static/ (README.md with `sdk: static`, and index.html — a polished landing page linking into a11oy.net + key surfaces).
+- ACTION: sync those two files to the SZLHOLDINGS/a11oy HF Space via the org GitHub->HF sync path you already use (the Perplexity HF token 'betterwithage' can only PR, not push to main — use the org sync). This converts the Space from sdk:docker to sdk:static. Remove/disable the old docker build files so the static SDK takes over cleanly.
+- PROVE: GET https://szlholdings-a11oy.hf.space returns 200 with the static landing page (stage RUNNING, sdk static). It must NOT BUILD_ERROR anymore.
+- Do the SAME pattern is available for other failing heavyweight Spaces later, but ONLY a11oy now.
+- Honest: this Space is a front-door/mirror; the real live platform is a11oy.net. Don't claim the Space itself runs the backend.
