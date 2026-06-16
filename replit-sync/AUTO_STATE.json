@@ -1,31 +1,14 @@
 {
-  "order_sha": "8e836d1dd82b3210924700cb13c849a5247715aa",
+  "order_sha": "10221c5f869620baedea8d04cf7b5428910e69bd",
   "order_path": "replit-sync/NEXT_ORDER.md",
-  "state": "pending",
-  "seen_at": "2026-06-16T00:34:11Z",
-  "updated_at": "2026-06-16T00:34:56Z",
-  "idle": false,
+  "state": "processing",
+  "seen_at": "2026-06-16T01:34:11Z",
   "actionable": [
-    "BOX REDEPLOY: a11oy.net is on git_sha b73d7709 (STALE). git reset --hard origin/main in /opt/szl/a11oy, docker build --build-arg SZL_GIT_SHA=$(git rev-parse HEAD), recreate container, re-press energy operator. PROVE: GET https://a11oy.net/api/a11oy/v1/honest git_sha == GitHub a11oy main HEAD.",
-    "OMEN GREEN: on the box set env A11OY_GPU_NODE_OMEN_BETTERWITHAGE_IP=100.70.130.45 + A11OY_GPU_NODE_CHASKI_IP=100.102.173.88, restart. The OMEN is serving (llama3.1:8b 100% GPU). PROVE by REAL probe: GET /api/a11oy/v1/compute-pool-hardened shows omen-betterwithage reachable:true. If the box's TCP probe to 100.70.130.45:11434 cannot connect, that is an honest tailnet-route block -> report the exact failing curl, never bluff it up.",
-    "COORDINATOR CUTOVER: run szl-router mesh_coordinator.py on the box (docs/MESH_COORDINATOR.md, port 11500), set A11OY_MODEL_BASE_URL=http://127.0.0.1:11500/v1. PROVE: a /v1 request returns x-szl-serve-tier + served_by + sovereign(true only owned metal); a down node never claimed serving.",
-    "COSIGN (founder hand on FA-001 key only): recut+publish+sign TAWANTIN bundle (szl-uds-deployment bundles/tawantin) + szl-warhacker bundle; cosign verify with .github/cosign.pub PASS. Commands in bundles/tawantin/README.md. NEVER commit the key.",
-    "PROVE-IT in your forge-report with REAL public curls (code+content-type+bytes): gpu_nodes_reachable target 3 by real probe; box git_sha==HEAD; /tawantin 200; coordinator answering /v1 honest provenance; bundles cosign-verify PASS. Do NOT mark DONE without a live curl. Honest BLOCKED beats narrated-DONE."
+    "chaski is ALREADY UP at LIVE IP 100.102.173.88:11434 (8 models). Resolve IP dynamically (tailscale status); old 100.76.58.50 is STALE. Confirm with GET /api/tags == 200.",
+    "Make Ollama on the chaski Repl DURABLE (it died after ~22h): install systemd unit OR supervisor restart-loop so it auto-restarts. Full steps in replit-sync/energy_engine/R_CHASKI_BOOT_AND_KEEP_ALIVE_20260615.md \u2014 execute it.",
+    "Wire chaski as the 2nd ENERGY-producing lung: env A11OY_ENERGY_CHASKI_ENABLED=1 + A11OY_ENERGY_CHASKI_URL=http://<liveIP>:11434, persisted. Dispatch MEASURED jobs; receipts node=chaski into the SAME ledger. Honest joules: MEASURED only with a real per-job reading, else MODELED-from-fabric-coefficient. If chaski drops \u2192 clean `offline`, rtx keeps breathing, no alarm.",
+    "The ONLY possibly-founder step: Replit \"Always On\" toggle if neither systemd nor supervisor survives a Replit recycle. If so, report the exact click-path (Replit \u2192 replit-chaski Repl \u2192 Tools/Settings \u2192 Always On). Everything else: Forge does it.",
+    "PROVE: GET /api/tags 200 + model list; operator/status showing chaski in nodes_computing; which durability method installed + a kill-and-recover proof."
   ],
-  "delegated_to_agent": [
-    "BOX REDEPLOY: a11oy.net is on git_sha b73d7709 (STALE). git reset --hard origin/main in /opt/szl/a11oy, docker build --build-arg SZL_GIT_SHA=$(git rev-parse HEAD), recreate container, re-press energy operator. PROVE: GET https://a11oy.net/api/a11oy/v1/honest git_sha == GitHub a11oy main HEAD.",
-    "OMEN GREEN: on the box set env A11OY_GPU_NODE_OMEN_BETTERWITHAGE_IP=100.70.130.45 + A11OY_GPU_NODE_CHASKI_IP=100.102.173.88, restart. The OMEN is serving (llama3.1:8b 100% GPU). PROVE by REAL probe: GET /api/a11oy/v1/compute-pool-hardened shows omen-betterwithage reachable:true. If the box's TCP probe to 100.70.130.45:11434 cannot connect, that is an honest tailnet-route block -> report the exact failing curl, never bluff it up.",
-    "COORDINATOR CUTOVER: run szl-router mesh_coordinator.py on the box (docs/MESH_COORDINATOR.md, port 11500), set A11OY_MODEL_BASE_URL=http://127.0.0.1:11500/v1. PROVE: a /v1 request returns x-szl-serve-tier + served_by + sovereign(true only owned metal); a down node never claimed serving.",
-    "COSIGN (founder hand on FA-001 key only): recut+publish+sign TAWANTIN bundle (szl-uds-deployment bundles/tawantin) + szl-warhacker bundle; cosign verify with .github/cosign.pub PASS. Commands in bundles/tawantin/README.md. NEVER commit the key.",
-    "PROVE-IT in your forge-report with REAL public curls (code+content-type+bytes): gpu_nodes_reachable target 3 by real probe; box git_sha==HEAD; /tawantin 200; coordinator answering /v1 honest provenance; bundles cosign-verify PASS. Do NOT mark DONE without a live curl. Honest BLOCKED beats narrated-DONE."
-  ],
-  "dispatch_mode": "dispatch-cmd",
-  "dispatch_ok": true,
-  "gated_skipped": [],
-  "report": "replit-sync/forge-perplexity-update-20260616.md",
-  "probes": {
-    "https://a11oy.net/healthz": 200
-  },
-  "doctrine": "v11: locked=8, Lambda=Conjecture 1, never commit a key",
-  "note": "Stale chaski-done loop CLEARED 2026-06-15 by founder session. chaski is already reachable+green; do not re-emit it. Focus = the 3 box/key items + box redeploy."
+  "gated_skipped": []
 }
