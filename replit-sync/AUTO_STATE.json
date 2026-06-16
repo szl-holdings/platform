@@ -1,8 +1,10 @@
 {
   "order_sha": "f64461a95ae5151db916143a486d5d29a06ff0fe",
   "order_path": "replit-sync/NEXT_ORDER.md",
-  "state": "processing",
+  "state": "done",
   "seen_at": "2026-06-16T15:35:24Z",
+  "updated_at": "2026-06-16T15:35:27Z",
+  "idle": true,
   "actionable": [
     "rtx-betterwithage (the laptop lung) is OFFLINE / will flap offline \u2014 this is EXPECTED AND HONEST. Do NOT alarm on rtx going offline. Do NOT try to revive it.",
     "OMEN (100.70.130.45) is still founder-side-unbound \u2014 leave as honest-down, do NOT mark reachable without a real /api/tags 200.",
@@ -17,8 +19,16 @@
     "Do NOT trigger gratuitous prod redeploys.",
     "Do NOT fabricate any 200/joule/receipt/signature to make state look better than it is."
   ],
+  "delegated_to_agent": [],
+  "dispatch_mode": "none",
+  "dispatch_ok": false,
   "gated_skipped": [
     "CI HYGIENE (outside freeze only): if a push-event main run goes red on platform/a11oy/killinchu/szl-uds-deployment, file the standard 'FORGE: main CI red \u2014 <repo>' issue with the failing job + first error line. Do NOT auto-merge anything risky; do NOT --admin past a failing required DCO/Scorecard gate. The pre-existing non-blockers (a11oy 'Operator & reason endpoint tests', szl-uds 'Receipts cosign verify exact identity') are NOT alarms.",
     "UDS BUNDLE stays published + keyless-signed (oci://ghcr.io/szl-holdings/szl-uds-bundle:uds-v0.3.0). If uds-bundle-publish.yml or prove-bundle-install.yml goes red, report ref+digest+failing step. No founder cosign step exists \u2014 do not invent one."
-  ]
+  ],
+  "report": "replit-sync/forge-perplexity-update-20260616.md",
+  "probes": {
+    "https://a11oy.net/healthz": 200
+  },
+  "doctrine": "v11: locked=8, Lambda=Conjecture 1, never commit a key"
 }
