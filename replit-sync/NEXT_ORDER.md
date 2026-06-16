@@ -1,3 +1,5 @@
+<!-- ADDED 2026-06-16 14:15 ET — USEFUL-WORK + ENERGY-HARNESS upgrade (founder: 'more jobs that help the software run + harness the energy'). Full order appended below the wiring fixes. SAFE-scope, pre-freeze PRs, must not destabilize the chaski lung. -->
+
 > [2026-06-16 18:10 ET — FIX, founder green light] a11oy HF Space BUILD_ERROR — ROOT CAUSE FOUND: web/dns.html is on GitHub (blob eac8df5b) + COPYd by the Dockerfile but ABSENT from the Space repo (resolve 404; siblings energy/materials/immune/sda .html = 307). The build COPY fails there. Interactive agent CANNOT push to Space main (connector is write-PR-only, 403). FORGE: mirror web/dns.html (+ audit all Dockerfile-COPYd web/*.html, mirror any 404) byte-identical from GitHub to the Space, extend hf-sync so web/*.html mirrors going forward (no bandaid), then factory-rebuild + prove stage RUNNING / console 200 / resolve dns.html 307. Box a11oy.net is LIVE + current (HEAD 57a88617) — Space is the only gap. Full steps: replit-sync/FORGE-INSTRUCTION-restart-a11oy-space-20260616-1805.md. Doctrine: honest content (no jarvis codename), never fake RUNNING.
 
 <!-- NEXT_ORDER updated 2026-06-16 14:10 ET. Opus-4.8 wiring audit found 2 BLOCKERs (precise file:line): (1) /frontier/manifest mints+signs a Khipu receipt per GET = 4s block + chain pollution -> cache it / stop signing per-view; (2) OMEN can't be an energy lung because the energy loop reads _default_nodes() not the hardened pool -> set A11OY_OMEN_BASE_URL + A11OY_OMEN_STANDBY=0 AND add a code fallback. Plus the box->OMEN tailnet probe + HF a11oy static conversion still stand. Estate EDITABLE (freeze held to 06-20 01:00 ET). -->
@@ -44,3 +46,41 @@ Only `/compute-pool-hardened` exists; there is no plain `/compute-pool` API rout
 
 ## REPORT
 Append to replit-sync/forge-perplexity-update-20260616.md: BLOCKER1 manifest timing before/after + chain-length-stable proof; BLOCKER2 env set + (when path open) OMEN lung truth; WARN4 the 8 bare-page render results (the silent-failure check); PR numbers. Honest doctrine v11.
+
+
+# FORGE ORDER — USEFUL-WORK LOOP + CARBON/PRICE-AWARE HARNESS — 2026-06-16 14:15 ET
+
+Doctrine v11: joules MEASURED only via real NVML; reachable=REAL-PROBE-ONLY; honest BLOCKED beats fake green; never fabricate a receipt/joule/carbon number; carbon stays MODELED until a real live feed makes it MEASURED; never touch lutar-lean. Estate EDITABLE until 2026-06-20 01:00 ET (freeze held) — open normal PRs. Keep the demo stable: scope SAFE, keep backpressure, do NOT destabilize the single chaski lung.
+
+## WHY (founder directive: "more jobs that help the software run + harness the energy")
+Today the energy loop runs REAL inference but on THROWAWAY content: 4 canned prompts (_GEN_PROMPTS) + 3 canned texts (_EMBED_TEXTS) at szl_energy_operator.py:218-231. The GPU genuinely computes (joules honestly MEASURED) but the OUTPUT IS DISCARDED. Meanwhile a11oy_org_rag.py (Agentic RAG over the SZL corpus, hybrid FTS5+dense) is STARVING for embeddings — it degrades to lexical-only "when the embedding model is loadable." And the loop READS the grid price (_update_grid_price, szl_energy_operator.py:734) + harvest posture exposes should_soak/grid_price/renewable% — but the loop NEVER ACTS on it (observe-only). Close both gaps.
+
+## TASK 1 — USEFUL-WORK LOOP (replace throwaway workload with real corpus work)
+Make the loop's jobs produce artifacts the software KEEPS. Keep every job small + backpressured (the loop must stay gentle on chaski). Two job kinds, both honest-metered exactly as today:
+1a. CORPUS EMBEDDING (highest value): instead of embedding the 3 canned _EMBED_TEXTS, pull REAL un-embedded chunks from the SZL corpus (a11oy_org_rag.py corpus dir / INDEX.json) and embed them, WRITING the vectors into the live RAG dense index. Each embed job advances the corpus index by one chunk. Honest fallback: if the corpus dir / embedding model is unavailable, fall back to the current canned embed (labeled) — NEVER fabricate an indexed chunk (a11oy_org_rag.py already refuses fake indexes — respect that).
+1b. DEMO-WARM QUERIES: precompute + cache embeddings for the exact queries you'll run on stage (keep a short A11OY_DEMO_WARM_QUERIES list) so the demo RAG is instant/warm, not cold.
+- The generate jobs (_GEN_PROMPTS) can stay as light keep-warm, OR (nice-to-have) summarize recent merged PRs/commits into corpus-indexable text. Keep it gentle.
+- DO NOT change the joule metering: MEASURED only on a real fresh NVML delta, exactly as szl_energy_operator.py:644-672 does now. Useful work changes WHAT is computed, not HOW joules are measured.
+VERIFY: /energy/operator/status recent_jobs show kind=embed against real corpus chunks; the RAG dense index chunk-count INCREASES over time; a RAG query returns dense+lexical hits (not FTS5-only). Report before/after index size.
+
+## TASK 2 — CARBON/PRICE-AWARE MODULATION (the actual "harness": observe -> ACT)
+The loop already fetches grid price + the harvest posture endpoint already computes should_soak / grid_price_posture / renewable_share_pct / next_negative_windows. Wire the loop to MODULATE its useful-work rate on that signal (a closed loop: measure -> decide -> act -> measure):
+- When posture is should_soak=true (cheap / negative-priced / high-renewable): SOAK — raise the useful-work rate (drain more corpus-embedding backlog) within safe backpressure caps.
+- When grid_price_posture="expensive" (e.g. now 181 EUR/MWh): THROTTLE to baseline — keep the lung warm + demo-warm + freshness only; DEFER heavy batch embedding to the next cheap/green window.
+- Expose the current mode honestly in /energy/operator/status (e.g. work_mode: "soak"|"baseline"|"throttle", and WHY — the grid signal that set it). Never claim a soak/throttle that didn't happen.
+- Keep it gentle: modulation must respect the existing per-node in-flight cap + inter-job sleep (szl_energy_operator.py:52). Never overwhelm chaski (sole lung now).
+VERIFY: flipping the grid signal (or a forced test posture) visibly changes work_mode and the job rate; status reports the mode + the grid reason honestly.
+
+## TASK 3 — CARBON-ATTESTED RECEIPTS (do if clean; else note as roadmap)
+jtoken already computes carbon_g_co2eq_per_token. Stamp each energy provenance receipt (the ledger JobRecord) with the carbon intensity AT THE MOMENT OF COMPUTE (from the harvest feed's gCO2/kWh). Then the ledger proves what ran + joules + HOW CLEAN those joules were. KEEP IT HONEST: carbon stays MODELED (label it) until Task 4's live feed lands — do not stamp a MEASURED carbon number off a static assumption. If this can't be done cleanly pre-freeze, leave it as a labeled roadmap field, do not half-wire it.
+
+## TASK 4 (ROADMAP — note only, don't build under freeze pressure) — LIVE CARBON FEED
+harvest/posture shows carbon_feed_live=false (static 380 g/kWh assumption). Wiring a real live carbon-intensity API (e.g. a public grid carbon feed) would make the carbon numbers MEASURED instead of MODELED. Note it as the next honest upgrade; build post-demo. Until then carbon is MODELED, labeled.
+
+## GUARDRAILS
+- SAFE-scope only. None of this may destabilize the demo or the chaski lung. If any task risks the single-lung stability, park it and report.
+- Open normal PRs (pre-freeze). If a task can't land clean by 2026-06-20 01:00 ET, park it post-demo — the loop already works honestly today.
+- Doctrine v11 throughout: real metering, honest labels, no fabrication, honest fallback when a corpus/feed/model is unavailable.
+
+## REPORT
+Append to replit-sync/forge-perplexity-update-20260616.md: Task1 (RAG index size before/after + recent_jobs kind), Task2 (work_mode modulation proof + grid reason), Task3 (carbon-stamp done or roadmap), PR numbers. Honest doctrine v11.
