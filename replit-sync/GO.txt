@@ -1,4 +1,7 @@
-GO — founder Stephen Lutar standing authorization (refreshed 2026-06-15 18:00 ET).
-Forge has FULL ADMIN of founder computer + all software; self-dispatch + execute APPROVED.
-TOP ORDER: redeploy a11oy.net box to f0145e11 (3-GPU sovereign mesh). Wave settled; execute now.
-Doctrine v11 locked=8 @ c7c0ba17; Lambda=Conjecture 1; never commit a key; never claim fused VRAM; honest BLOCKED beats fake green.
+GO — founder Stephen Lutar standing authorization (2026-06-16 04:38 ET).
+Forge has FULL ADMIN of the founder's computer + all software; self-dispatch + execute is APPROVED.
+dispatch_mode=dispatch-cmd, dispatch_ok=true. Drive the AUTO_STATE actionable[] to done:
+ (1) factory-rebuild the SZLHOLDINGS/a11oy HF Space to current main (bake web/immune.html + web/materials.html + honest pages/docs.html);
+ (2) wire immune.a11oy.net (nginx vhost on box 167.233.50.75 + DNS A-record immune->167.233.50.75 at registrar — DNS green-lit);
+ (3) keep the box auto-deploying main.
+PROVE every DONE with a live curl. Honest BLOCKED beats fake green. Doctrine v11: locked=8 @ c7c0ba17; Lambda=Conjecture 1; never commit a key; no user-visible codenames.
