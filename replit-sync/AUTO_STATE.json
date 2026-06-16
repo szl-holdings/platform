@@ -1,30 +1,14 @@
 {
-  "order_sha": "10221c5f869620baedea8d04cf7b5428910e69bd",
+  "order_sha": "33d226eedc66a3c1abd9f8d96389972a72ea84cd",
   "order_path": "replit-sync/NEXT_ORDER.md",
-  "state": "pending",
-  "seen_at": "2026-06-16T01:34:11Z",
-  "updated_at": "2026-06-16T01:34:14Z",
-  "idle": false,
+  "state": "processing",
+  "seen_at": "2026-06-16T02:34:18Z",
   "actionable": [
-    "DIAGNOSE box->OMEN: tailscale status (is 100.70.130.45 peer online?), tailscale ping 100.70.130.45, curl -v http://100.70.130.45:11434/api/tags \u2014 paste real output.",
-    "FIX by cause: OMEN offline->BLOCKED-founder(report); ACL/firewall blocking box->100.70.130.45:11434->fix tailnet ACL in console if you have admin, else report; connection-refused->Ollama not bound->BLOCKED-founder.",
-    "On success confirm omen-betterwithage reachable:true by REAL curl (gpu_nodes_reachable->3); then coordinator cutover (mesh_coordinator.py:11500 + A11OY_MODEL_BASE_URL).",
-    "cosign TAWANTIN+warhacker bundles = founder FA-001 key only; never commit key.",
-    "REPORT diagnostic outputs + cause + fix-or-honest-BLOCKED. Never narrate DONE without a live curl."
+    "chaski is ALREADY UP at LIVE IP 100.102.173.88:11434 (8 models). Resolve IP dynamically (tailscale status); old 100.76.58.50 is STALE. Confirm with GET /api/tags == 200.",
+    "Make Ollama on the chaski Repl DURABLE (it died after ~22h): install systemd unit OR supervisor restart-loop so it auto-restarts. Full steps in replit-sync/energy_engine/R_CHASKI_BOOT_AND_KEEP_ALIVE_20260615.md \u2014 execute it.",
+    "Wire chaski as the 2nd ENERGY-producing lung: env A11OY_ENERGY_CHASKI_ENABLED=1 + A11OY_ENERGY_CHASKI_URL=http://<liveIP>:11434, persisted. Dispatch MEASURED jobs; receipts node=chaski into the SAME ledger. Honest joules: MEASURED only with a real per-job reading, else MODELED-from-fabric-coefficient. If chaski drops \u2192 clean `offline`, rtx keeps breathing, no alarm.",
+    "The ONLY possibly-founder step: Replit \"Always On\" toggle if neither systemd nor supervisor survives a Replit recycle. If so, report the exact click-path (Replit \u2192 replit-chaski Repl \u2192 Tools/Settings \u2192 Always On). Everything else: Forge does it.",
+    "PROVE: GET /api/tags 200 + model list; operator/status showing chaski in nodes_computing; which durability method installed + a kill-and-recover proof."
   ],
-  "delegated_to_agent": [
-    "DIAGNOSE box->OMEN: tailscale status (is 100.70.130.45 peer online?), tailscale ping 100.70.130.45, curl -v http://100.70.130.45:11434/api/tags \u2014 paste real output.",
-    "FIX by cause: OMEN offline->BLOCKED-founder(report); ACL/firewall blocking box->100.70.130.45:11434->fix tailnet ACL in console if you have admin, else report; connection-refused->Ollama not bound->BLOCKED-founder.",
-    "On success confirm omen-betterwithage reachable:true by REAL curl (gpu_nodes_reachable->3); then coordinator cutover (mesh_coordinator.py:11500 + A11OY_MODEL_BASE_URL).",
-    "cosign TAWANTIN+warhacker bundles = founder FA-001 key only; never commit key.",
-    "REPORT diagnostic outputs + cause + fix-or-honest-BLOCKED. Never narrate DONE without a live curl."
-  ],
-  "dispatch_mode": "none",
-  "dispatch_ok": false,
-  "gated_skipped": [],
-  "report": "replit-sync/forge-perplexity-update-20260616.md",
-  "probes": {
-    "https://a11oy.net/healthz": 200
-  },
-  "doctrine": "v11: locked=8, Lambda=Conjecture 1, never commit a key"
+  "gated_skipped": []
 }
