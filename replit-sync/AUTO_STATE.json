@@ -1,8 +1,10 @@
 {
   "order_sha": "a13f4b978580de385d7cddd91b47879c84dee3ea",
   "order_path": "replit-sync/NEXT_ORDER.md",
-  "state": "processing",
+  "state": "done",
   "seen_at": "2026-06-16T20:36:07Z",
+  "updated_at": "2026-06-16T20:36:11Z",
+  "idle": true,
   "actionable": [
     "PR #477  fix(frontier): stop minting a signed receipt per /frontier/manifest GET + cache build",
     "PR #476  fix(energy): energy-loop OMEN falls back to hardened node IP (single source of truth)",
@@ -40,8 +42,16 @@
     "DEMO: a BLOCKED malicious cell (socket exfil + key theft -> hard-gate DENY, no exec, signed deny-receipt) next to an ALLOWED NumPy compose->inspect (runs, signed receipt, MEASURED/SAMPLE energy) \u2014 same governed path. Governance, not theater.",
     "HONEST: subprocess-tier isolation now (container/microVM = ROADMAP); Lambda advisory; joules MEASURED only with real NVML else SAMPLE; no accuracy claims without the golden eval."
   ],
+  "delegated_to_agent": [],
+  "dispatch_mode": "none",
+  "dispatch_ok": false,
   "gated_skipped": [
     "Pre-flight: verify Space secrets set (TAVILY_API_KEY, AISSTREAM_*, HF tokens, SZL_COSIGN_PRIVATE_PEM).",
     "HF a11oy Space: BUILD_ERROR root cause (missing web/dns.html) was found+fixed; Space is RUNNING 200 (docker). Optional: convert to the static front-door staged at platform/replit-sync/hf-a11oy-static/ via the org GitHub->HF sync (the Perplexity HF token can only PR). Only if you want the lighter always-green front door; the docker Space is healthy now."
-  ]
+  ],
+  "report": "replit-sync/forge-perplexity-update-20260616.md",
+  "probes": {
+    "https://a11oy.net/healthz": 200
+  },
+  "doctrine": "v11: locked=8, Lambda=Conjecture 1, never commit a key"
 }
