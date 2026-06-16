@@ -89,3 +89,8 @@
 - **Founder-gated, auto-skipped (1)** (Doctrine v11 — keys/secrets/major-bumps):
   - ACTION: sync those two files to the SZLHOLDINGS/a11oy HF Space via the org GitHub->HF sync path you already use (the Perplexity HF token 'betterwithage' can only PR, not push to main — use the org sync). This converts the Space from sdk:docker to sdk:static. Remove/disable the old docker build files so the static SDK takes over cleanly.
 - Reachability snapshot: https://a11oy.net/healthz -> 200
+
+## Auto-loop pass — order `eea796e0` — 2026-06-16T18:35:51Z
+
+- Order is **idle / no-action sentinel** — handshake confirmed, nothing to execute.
+- Reachability snapshot: https://a11oy.net/healthz -> 200
