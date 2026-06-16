@@ -1,8 +1,8 @@
 {
   "active": true,
-  "activates_at": "2026-06-18T15:00:00-04:00",
-  "lifts_at": "2026-06-19T23:59:00-04:00",
-  "reason": "Defense Unicorns Warhacker demo freeze \u2014 founder demos June 18 (afternoon). Freeze now activates 3:00 PM ET June 18 (moved from 01:00 to allow morning build/expansion of the orbital/edge sovereign-compute play). Locks verified-GO state (doctrine v11, locked=8 @ c7c0ba17). Build/prep June 16-18-morning remain editable.",
+  "activates_at": "2026-06-20T01:00:00-04:00",
+  "lifts_at": "2026-06-21T23:59:00-04:00",
+  "reason": "Defense Unicorns WarHacker demo freeze. HOLD: freeze pushed to 2026-06-20 01:00 ET per founder (was 06-18 15:00 ET) pending exact demo-day confirmation. Founder traveling/on-site; estate stays editable through 06-19 to keep building hard. Will re-tighten once demo day is locked. Locks verified-GO state (doctrine v11, locked=8).",
   "policy": "Before activates_at: normal work. From activates_at to lifts_at: READ-ONLY for Forge + all SZL crons (monitor + recovery-restart only; NO commits/deploys/auto-fixes/auto-merges/auto-sync). Recovery restart of a sleeping/errored Space to last-good build is allowed (healing, not change).",
   "hotfix": "Permitted ONLY for a demo-blocking defect, with explicit founder approval, minimal + byte-identical GitHub<->HF, ast.parse/node-check first, re-verified live, logged. Never touch signed artifacts/box/doctrine gates without founder.",
   "frozen_state": {
@@ -32,5 +32,5 @@
   },
   "set_by": "estate-hardening program",
   "set_at": "2026-06-13T10:31:00-04:00",
-  "updated_note": "Freeze activation set to 2026-06-18 01:00 ET (= 05:00 UTC) per founder (was 02:00 ET). Founder works 16/17/18 on-site to prep; demos the 18th \u2014 estate stays editable through the 17th, locks 1 AM ET the morning of the demo. frozen_heads re-stamped at activation."
+  "updated_note": "2026-06-16 12:52 ET: founder pushed freeze activation to 2026-06-20 01:00 ET (=05:00 UTC), lift 2026-06-21 23:59 ET (=2026-06-22 03:59 UTC). This is a HOLD until the exact demo day is confirmed; will re-tighten then. frozen_heads re-stamped at activation."
 }
