@@ -1,3 +1,4 @@
+<!-- WAKE-NOW 2026-06-16T17:16Z (founder requested off-cycle): On THIS poll tick, EXECUTE the box->OMEN tailnet probe FIRST (tailscale ping/nc/curl from the box — plain network diagnostic, NOT founder-gated, do NOT skip). Then the HF a11oy static conversion. Report results to forge-perplexity-update-20260616.md. -->
 <!-- NEXT_ORDER updated 2026-06-16 13:00 ET. PRIORITY EXECUTE (do NOT auto-skip as founder-gated): run the box-side tailnet probe to OMEN (tailscale ping/nc/curl from the box) — it is a plain network diagnostic, NOT a secret task. The prior OMEN order was wrongly skipped. Freeze HELD to 06-20 01:00 ET — estate editable. -->
 
 # FORGE ORDER — RUN THE BOX->OMEN REACHABILITY PROBE (execute, do NOT skip) — 2026-06-16 13:00 ET
