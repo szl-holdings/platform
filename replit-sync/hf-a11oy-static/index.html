@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>a11oy — Sovereign Governed Compute · SZL Holdings</title>
+<meta name="description" content="a11oy: sovereign governed-compute platform by SZL Holdings. Live at a11oy.net."/>
+<style>
+  :root{
+    --bg:#0a0c12; --panel:#11141d; --line:#1d2230;
+    --ink:#e8ecf5; --muted:#8b93a7; --accent:#7c8cff; --accent2:#54e0c7;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html,body{height:100%}
+  body{
+    background:radial-gradient(1200px 700px at 50% -10%, #161a28 0%, var(--bg) 60%);
+    color:var(--ink); font:16px/1.55 -apple-system,BlinkMacSystemFont,"Segoe UI",Inter,Roboto,sans-serif;
+    min-height:100%; display:flex; flex-direction:column; align-items:center; justify-content:center;
+    padding:32px 20px; text-align:center;
+  }
+  .glyph{font-size:54px; line-height:1; margin-bottom:18px; filter:drop-shadow(0 0 24px rgba(124,140,255,.45))}
+  h1{font-size:clamp(28px,6vw,46px); letter-spacing:-.02em; font-weight:700}
+  h1 .accent{background:linear-gradient(90deg,var(--accent),var(--accent2)); -webkit-background-clip:text; background-clip:text; -webkit-text-fill-color:transparent}
+  .tag{color:var(--muted); margin-top:12px; max-width:560px; font-size:clamp(14px,2.6vw,17px)}
+  .cta{margin-top:30px; display:flex; gap:14px; flex-wrap:wrap; justify-content:center}
+  a.btn{
+    text-decoration:none; padding:13px 24px; border-radius:12px; font-weight:600; font-size:15px;
+    border:1px solid var(--line); color:var(--ink); background:var(--panel); transition:.18s ease;
+  }
+  a.btn.primary{background:linear-gradient(90deg,var(--accent),#6878ff); border-color:transparent; color:#0a0c12}
+  a.btn:hover{transform:translateY(-2px); border-color:var(--accent)}
+  .grid{margin-top:38px; display:grid; grid-template-columns:repeat(auto-fit,minmax(150px,1fr)); gap:12px; max-width:720px; width:100%}
+  .card{background:var(--panel); border:1px solid var(--line); border-radius:12px; padding:14px 12px}
+  .card a{color:var(--accent2); text-decoration:none; font-weight:600; font-size:14px}
+  .card a:hover{text-decoration:underline}
+  .card .d{color:var(--muted); font-size:12px; margin-top:4px}
+  footer{margin-top:40px; color:var(--muted); font-size:12.5px}
+  .pulse{display:inline-block;width:8px;height:8px;border-radius:50%;background:var(--accent2);margin-right:7px;box-shadow:0 0 0 0 rgba(84,224,199,.6);animation:p 2s infinite}
+  @keyframes p{0%{box-shadow:0 0 0 0 rgba(84,224,199,.5)}70%{box-shadow:0 0 0 9px rgba(84,224,199,0)}100%{box-shadow:0 0 0 0 rgba(84,224,199,0)}}
+</style>
+</head>
+<body>
+  <div class="glyph">🜂</div>
+  <h1>a11oy · <span class="accent">Sovereign Governed Compute</span></h1>
+  <p class="tag"><span class="pulse"></span>The live platform runs at <strong>a11oy.net</strong> — sovereign metal, doctrine v11. This is the always-on front door.</p>
+
+  <div class="cta">
+    <a class="btn primary" href="https://a11oy.net" target="_blank" rel="noopener">Enter a11oy.net →</a>
+    <a class="btn" href="https://a11oy.net/frontier" target="_blank" rel="noopener">Frontier Showcase</a>
+  </div>
+
+  <div class="grid">
+    <div class="card"><a href="https://a11oy.net/energy-ops" target="_blank" rel="noopener">Energy Ops</a><div class="d">Measured-joule ledger</div></div>
+    <div class="card"><a href="https://a11oy.net/holographic" target="_blank" rel="noopener">Holographic</a><div class="d">3D live ops</div></div>
+    <div class="card"><a href="https://a11oy.net/pinn" target="_blank" rel="noopener">PINN</a><div class="d">Physics-informed</div></div>
+    <div class="card"><a href="https://a11oy.net/pnt" target="_blank" rel="noopener">P/N/T</a><div class="d">Resilient timing</div></div>
+    <div class="card"><a href="https://a11oy.net/governance" target="_blank" rel="noopener">Governance</a><div class="d">Assurance backend</div></div>
+    <div class="card"><a href="https://a11oy.net/signature-is-not-proof" target="_blank" rel="noopener">Sig ≠ Proof</a><div class="d">Provenance doctrine</div></div>
+  </div>
+
+  <footer>SZL Holdings · a11oy · doctrine v11 · honest by construction</footer>
+</body>
+</html>
