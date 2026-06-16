@@ -66,3 +66,26 @@
 - **Founder-gated, auto-skipped (1)** (Doctrine v11 — keys/secrets/major-bumps):
   - **Tailscale ACL**: if `tailscale ping` works but :11434 is refused/timeout, the tailnet ACL likely doesn't permit box->OMEN:11434. Check the policy; if the box's tailscale identity can't reach OMEN's tag/port, that is the fix (ACL grant). This may be FOUNDER-GATED (tailnet admin console) — if so, report the EXACT ACL stanza to add (src = box node/tag, dst = OMEN node, port = 11434) so the founder pastes it.
 - Reachability snapshot: https://a11oy.net/healthz -> 200
+
+## Auto-loop pass — order `dfcbd55f` — 2026-06-16T17:45:54Z
+
+- **Actionable items (16)** — handed to Forge agent (mode=`dispatch-cmd`, ok=`False`):
+  - `tailscale status` — is host `betterwithage` (100.70.130.45) listed as a peer from the BOX view? direct or relay? Paste the betterwithage line.
+  - `tailscale ping 100.70.130.45` and `tailscale ping betterwithage` — does it complete? direct path or via DERP relay? how many ms? Paste 3 lines.
+  - `nc -vz -w 5 100.70.130.45 11434` — is TCP port 11434 OPEN from the box?
+  - `curl -m 8 http://100.70.130.45:11434/api/tags` — does it return the model list (200)?
+  - `ping -c 3 100.70.130.45` — basic ICMP over tailnet.
+  - If step 2 fails entirely (no tailnet path): OMEN and the box may be on different tailnets, or OMEN's tailnet identity isn't shared with the box. This is a tailnet-membership thing the founder resolves in the admin console. Report the exact host/peer state so the founder can fix it.
+  - If step 2 (tailnet ping) WORKS but step 3 (TCP 11434) is refused/filtered: the block is at OMEN's host firewall on the tailscale adapter. The founder's existing inbound rule had EdgeTraversalPolicy=Block and may be bound to the wrong network profile. Report this precisely; give the founder the corrected one-line PowerShell inbound rule scoped to Profile=Any so tailscale-adapter traffic on 11434 is permitted.
+  - If step 3 (TCP) is OPEN but step 4 (curl) fails: an app-level issue — re-probe; likely the box resolver cached the old dead state. Restart/clear the hardened resolver cache (or redeploy the box) and re-check the hardened pool flips omen reachable=true.
+  - If steps 3 AND 4 BOTH succeed now: GREAT — the path is open. Force the hardened resolver to re-probe, confirm omen-betterwithage flips reachable=true in /compute-pool-hardened, then proceed to make OMEN an energy lung (see below).
+  - Wire OMEN as an energy lung the same way chaski was wired: persisted env `A11OY_ENERGY_OMEN_ENABLED=1` + `A11OY_ENERGY_OMEN_URL=http://100.70.130.45:11434`, dispatch MEASURED jobs, receipts node=omen into the SAME ledger. OMEN has a real RTX NVML GPU, so its per-job joules CAN be MEASURED (unlike chaski PENDING_EXPORTER) — wire the real NVML reading; if not available per-job, label MODELED-from-fabric-coefficient honestly.
+  - Confirm /api/a11oy/v1/energy/operator/status nodes_computing INCLUDES omen-betterwithage and gpu_nodes_reachable rises. OMEN is the 24/7 home anchor — prefer it as anchor worker. NEVER claim combined VRAM.
+  - Open a normal PR if a code change is needed for the energy loop to read OMEN from the resolved node list (estate is editable until 06-20 01:00 ET).
+  - The static files are staged at platform/replit-sync/hf-a11oy-static/ (README.md with `sdk: static`, and index.html — a polished landing page linking into a11oy.net + key surfaces).
+  - PROVE: GET https://szlholdings-a11oy.hf.space returns 200 with the static landing page (stage RUNNING, sdk static). It must NOT BUILD_ERROR anymore.
+  - Do the SAME pattern is available for other failing heavyweight Spaces later, but ONLY a11oy now.
+  - Honest: this Space is a front-door/mirror; the real live platform is a11oy.net. Don't claim the Space itself runs the backend.
+- **Founder-gated, auto-skipped (1)** (Doctrine v11 — keys/secrets/major-bumps):
+  - ACTION: sync those two files to the SZLHOLDINGS/a11oy HF Space via the org GitHub->HF sync path you already use (the Perplexity HF token 'betterwithage' can only PR, not push to main — use the org sync). This converts the Space from sdk:docker to sdk:static. Remove/disable the old docker build files so the static SDK takes over cleanly.
+- Reachability snapshot: https://a11oy.net/healthz -> 200
