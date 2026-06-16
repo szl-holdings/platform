@@ -1,134 +1,114 @@
-<!-- ADDED 2026-06-16 14:30 ET — ECOSYSTEM EFFICIENCY upgrade (founder: 'do the same for all our demos + run more efficiently'). Covers killinchu (2 BLOCKER loop-stall fixes + demo-receipt cache + warmer) and szl-router (embeddings cache + connection pool now; energy-aware batch routing staged). a11oy items already queued above. All SAFE-scope, pre-freeze PRs, must NOT destabilize the chaski lung. Full order appended at the very bottom. -->
+<!-- MASTER ORDER 2026-06-16 (run at hotel). Exhaustive: P1 merge ready PRs #476/#477, P2 light OMEN, P3 useful-work+harness, P4 killinchu/router efficiency, P5 UDS/mesh/fleet/Pepr/Zarf live verify, P6 cleanup, P7 NEW governed code-as-action agentic frontier. Full body below. Estate editable to 06-20 01:00 ET. -->
 
-<!-- ADDED 2026-06-16 14:15 ET — USEFUL-WORK + ENERGY-HARNESS upgrade (founder: 'more jobs that help the software run + harness the energy'). Full order appended below the wiring fixes. SAFE-scope, pre-freeze PRs, must not destabilize the chaski lung. -->
+# FORGE MASTER ORDER — run when founder reaches hotel — 2026-06-16 ~16:25 ET
 
-> [2026-06-16 18:10 ET — FIX, founder green light] a11oy HF Space BUILD_ERROR — ROOT CAUSE FOUND: web/dns.html is on GitHub (blob eac8df5b) + COPYd by the Dockerfile but ABSENT from the Space repo (resolve 404; siblings energy/materials/immune/sda .html = 307). The build COPY fails there. Interactive agent CANNOT push to Space main (connector is write-PR-only, 403). FORGE: mirror web/dns.html (+ audit all Dockerfile-COPYd web/*.html, mirror any 404) byte-identical from GitHub to the Space, extend hf-sync so web/*.html mirrors going forward (no bandaid), then factory-rebuild + prove stage RUNNING / console 200 / resolve dns.html 307. Box a11oy.net is LIVE + current (HEAD 57a88617) — Space is the only gap. Full steps: replit-sync/FORGE-INSTRUCTION-restart-a11oy-space-20260616-1805.md. Doctrine: honest content (no jarvis codename), never fake RUNNING.
+Doctrine v11 (hard): never fabricate a 200/joule/receipt/signature/digest/label; joules MEASURED only via real NVML; reachable=REAL-PROBE-ONLY (never fake a node up); never claim combined/fused VRAM (horizontal scale only); Lambda=Conjecture 1; never commit a key; never touch lutar-lean (keystone); honest BLOCKED beats fake green; never weaken/bypass a doctrine or Banned-token CI gate (fix wording instead). FREEZE: held to 2026-06-20 01:00 ET (= 05:00 UTC), lift 2026-06-21 23:59 ET. Estate EDITABLE until then — normal main work + non-hotfix PRs land now.
 
-<!-- NEXT_ORDER updated 2026-06-16 14:10 ET. Opus-4.8 wiring audit found 2 BLOCKERs (precise file:line): (1) /frontier/manifest mints+signs a Khipu receipt per GET = 4s block + chain pollution -> cache it / stop signing per-view; (2) OMEN can't be an energy lung because the energy loop reads _default_nodes() not the hardened pool -> set A11OY_OMEN_BASE_URL + A11OY_OMEN_STANDBY=0 AND add a code fallback. Plus the box->OMEN tailnet probe + HF a11oy static conversion still stand. Estate EDITABLE (freeze held to 06-20 01:00 ET). -->
+GitHub: use bash api_credentials=["github"] (org-admin; never ask for token). git identity stephenlutar2-hash <stephenlutar2@gmail.com>, commit -s (DCO).
 
-# FORGE ORDER — WIRING AUDIT FIXES (precise, file:line) — 2026-06-16 14:10 ET
-
-Doctrine v11: never fabricate a 200/joule/receipt; reachable=REAL-PROBE-ONLY; honest BLOCKED beats fake green; never touch lutar-lean. Estate EDITABLE until 2026-06-20 01:00 ET (freeze held) — normal main work + PRs land now.
-
-A read-only Opus-4.8 wiring audit booted the real app (918 routes) and found 2 BLOCKERs + WARNs. Exact locations below. Execute the fixes; open normal PRs (pre-freeze). Each fix has a verify step — prove it, never fake it.
-
-## BLOCKER 1 — /frontier/manifest mints+signs a Khipu receipt on EVERY GET (4s block + chain pollution)
-ROOT CAUSE (verified): `szl_frontier_manifest.py` handler `_frontier_manifest()` (~line 425) -> `build_manifest()` (~line 347) runs all tiles inline, synchronously, on a coroutine (blocks the event loop). The dominant cost is `_concept_tile_inference_provenance` (szl_frontier_manifest.py:275-292) which calls `szl_provenance_receipt.build_composite()` (~:288) on EVERY request — that MINTS + SIGNS a fresh composite Khipu receipt into the shared provenance chain (szl_provenance_receipt.py ~:323/:351). So a read endpoint signs + chain-appends per page view: ~4.2s each AND it pollutes the provenance chain with one signed receipt per view. The fabric tile is already cached (45s TTL) — NOT the culprit.
-
-FIX (pick the clean combination; do not weaken honesty):
-1. STOP signing per-GET. `_concept_tile_inference_provenance` must NOT call build_composite() on every request. Either (a) make the concept tile a static descriptor / last-known composite DIGEST (read the most recent composite from the chain, don't mint a new one), or (b) compute+sign a composite at most once per long interval (e.g. cache the composite for >=5 min) and serve the cached digest in between. The tile should DESCRIBE the provenance capability honestly (link to /energy/ledger, show chain.ok + length) without minting a receipt just because someone loaded the page.
-2. CACHE build_manifest() with a short TTL (15-30s) so bursts don't each pay the full build.
-3. Offload any remaining blocking work to a threadpool (run_in_executor) and add a per-tile timeout so one slow tile can't block the whole response.
-VERIFY: time 5 sequential GETs to /api/a11oy/v1/frontier/manifest — each should return <500ms warm; and confirm the provenance chain length does NOT increment by one per manifest view (it should only grow from real energy jobs, not page loads). Labels stay honest (6 MEASURED / 1 MODELED orbital / 1 ROADMAP).
-
-## BLOCKER 2 — OMEN cannot be an energy-loop lung under stock env (two divergent node lists)
-ROOT CAUSE (verified): there are TWO independent node lists. The hardened pool `szl_backend_hardening.py:495 DEFAULT_FABRIC_NODES` hardcodes OMEN at the correct IP 100.70.130.45:11434 (that's why /compute-pool-hardened can show it). BUT the ENERGY LOOP reads a DIFFERENT list: `szl_energy_operator.py:127 _default_nodes()`. In that list OMEN (szl_energy_operator.py:201-214) defaults to (a) bare hostname `http://omen-betterwithage:11434/v1` (szl_energy_operator.py:165-169) which will NOT resolve on the box, and (b) `omen_standby=True` (szl_energy_operator.py:173-180) so it's skipped as standby. So even when the hardened pool shows OMEN green, the energy loop never breathes it. Same env-pin pattern as chaski.
-
-FIX — do BOTH (this is an env/wiring fix, the safest path; THEN consider the code fallback):
-1. PERSIST these env vars on the box service (same place chaski's are set), then restart the a11oy service so the energy operator re-reads:
-   - `A11OY_OMEN_BASE_URL=http://100.70.130.45:11434`   (auto-normalized to /v1)
-   - `A11OY_OMEN_STANDBY=0`                              (or alias `A11OY_ENERGY_OMEN_ENABLED=1`)
-   NOTE: this only HELPS once the box can actually reach 100.70.130.45:11434 (the tailnet path — see the box->OMEN probe order). Setting the env does NOT fake reachability; if the path is still timing out, OMEN stays honestly unreachable. Set the env so the instant the path opens, OMEN breathes as a lung. Doctrine: reachable=REAL-PROBE-ONLY.
-2. CODE FALLBACK (open a PR, pre-freeze): make `_default_nodes()` (szl_energy_operator.py:127) fall back to the hardened `DEFAULT_FABRIC_NODES` OMEN IP when `A11OY_OMEN_BASE_URL` is unset, so the two lists can't silently diverge again. Keep standby default honest (only flips live on real reachability). This closes the divergent-list regression class permanently.
-VERIFY: once the tailnet path is open + env set, /api/a11oy/v1/energy/operator/status nodes_computing INCLUDES omen-betterwithage and gpu_nodes_reachable rises — REAL PROBE ONLY. OMEN has a real RTX NVML, so its per-job joules can be MEASURED (chaski stays PENDING_EXPORTER). Send the 'OMEN 3rd lung LIT' notification only on a real 200.
-
-## WARN 3 — extend the demo-critical route guard
-`tests/test_demo_critical_routes.py` (git-tracked) DEMO_CRITICAL_ROUTES guards 11 routes but OMITS demo-dependent API paths. ADD (exact match, not substring): `/api/a11oy/v1/honest`, `/api/a11oy/v1/compute-pool-hardened` (exact), `/api/a11oy/v1/harvest/posture`, `/api/a11oy/v1/energy/jtoken`. PR pre-freeze.
-
-## WARN 4 — verify the SPA client renders the bare page paths (silent-failure risk)
-These bare pages have NO server route and fall to the SPA catch-all (always 200, never 404): `/holographic /energy-ops /energy-holographic /pnt /pinn /elite /signature-is-not-proof /estate-hologram`. If the built JS bundle's client router is missing any one, it renders a blank shell (200) — a SILENT demo failure no route-table test catches. ACTION: from the BUILT bundle (Docker/static dir, not the sparse source), load each of these 8 pages headless and confirm real content renders (a known element/text per page), not an empty shell. Report any that render blank. This is the highest-value pre-demo check after the two BLOCKERs.
-
-## WARN 5 — confirm plain /api/a11oy/v1/compute-pool
-Only `/compute-pool-hardened` exists; there is no plain `/compute-pool` API route. The earlier CTO probes hit `/api/a11oy/v1/compute-pool` and got JSON — confirm whether that resolves via a router prefix or is actually the hardened handler. If the demo/client calls the plain path and it would 404, add an alias. Report what you find.
-
-## HEALTHY (do NOT touch — audit confirmed live)
-- Energy operator->ledger wire is present + live (serve.py:444-451, _ledger_wired=True, 1 subscriber on the same singleton). It's a subscribe() not a register(), so the route guard does NOT cover it — keep `test_energy_wire_operator_ledger.py` GREEN in CI (that's the silent-disconnect guard).
-- No honest-label violations: MEASURED gated on a real fresh (<30s) NVML delta; stub/SAMPLE/ephemeral all honestly disclosed. Keep it that way.
-- Ledger cross-redeploy durability needs `SZL_ENERGY_LEDGER_PATH` on a persistent volume (env/infra, not a code bug) — already handled via /data mount; just keep it set.
-
-## REPORT
-Append to replit-sync/forge-perplexity-update-20260616.md: BLOCKER1 manifest timing before/after + chain-length-stable proof; BLOCKER2 env set + (when path open) OMEN lung truth; WARN4 the 8 bare-page render results (the silent-failure check); PR numbers. Honest doctrine v11.
-
-
-# FORGE ORDER — USEFUL-WORK LOOP + CARBON/PRICE-AWARE HARNESS — 2026-06-16 14:15 ET
-
-Doctrine v11: joules MEASURED only via real NVML; reachable=REAL-PROBE-ONLY; honest BLOCKED beats fake green; never fabricate a receipt/joule/carbon number; carbon stays MODELED until a real live feed makes it MEASURED; never touch lutar-lean. Estate EDITABLE until 2026-06-20 01:00 ET (freeze held) — open normal PRs. Keep the demo stable: scope SAFE, keep backpressure, do NOT destabilize the single chaski lung.
-
-## WHY (founder directive: "more jobs that help the software run + harness the energy")
-Today the energy loop runs REAL inference but on THROWAWAY content: 4 canned prompts (_GEN_PROMPTS) + 3 canned texts (_EMBED_TEXTS) at szl_energy_operator.py:218-231. The GPU genuinely computes (joules honestly MEASURED) but the OUTPUT IS DISCARDED. Meanwhile a11oy_org_rag.py (Agentic RAG over the SZL corpus, hybrid FTS5+dense) is STARVING for embeddings — it degrades to lexical-only "when the embedding model is loadable." And the loop READS the grid price (_update_grid_price, szl_energy_operator.py:734) + harvest posture exposes should_soak/grid_price/renewable% — but the loop NEVER ACTS on it (observe-only). Close both gaps.
-
-## TASK 1 — USEFUL-WORK LOOP (replace throwaway workload with real corpus work)
-Make the loop's jobs produce artifacts the software KEEPS. Keep every job small + backpressured (the loop must stay gentle on chaski). Two job kinds, both honest-metered exactly as today:
-1a. CORPUS EMBEDDING (highest value): instead of embedding the 3 canned _EMBED_TEXTS, pull REAL un-embedded chunks from the SZL corpus (a11oy_org_rag.py corpus dir / INDEX.json) and embed them, WRITING the vectors into the live RAG dense index. Each embed job advances the corpus index by one chunk. Honest fallback: if the corpus dir / embedding model is unavailable, fall back to the current canned embed (labeled) — NEVER fabricate an indexed chunk (a11oy_org_rag.py already refuses fake indexes — respect that).
-1b. DEMO-WARM QUERIES: precompute + cache embeddings for the exact queries you'll run on stage (keep a short A11OY_DEMO_WARM_QUERIES list) so the demo RAG is instant/warm, not cold.
-- The generate jobs (_GEN_PROMPTS) can stay as light keep-warm, OR (nice-to-have) summarize recent merged PRs/commits into corpus-indexable text. Keep it gentle.
-- DO NOT change the joule metering: MEASURED only on a real fresh NVML delta, exactly as szl_energy_operator.py:644-672 does now. Useful work changes WHAT is computed, not HOW joules are measured.
-VERIFY: /energy/operator/status recent_jobs show kind=embed against real corpus chunks; the RAG dense index chunk-count INCREASES over time; a RAG query returns dense+lexical hits (not FTS5-only). Report before/after index size.
-
-## TASK 2 — CARBON/PRICE-AWARE MODULATION (the actual "harness": observe -> ACT)
-The loop already fetches grid price + the harvest posture endpoint already computes should_soak / grid_price_posture / renewable_share_pct / next_negative_windows. Wire the loop to MODULATE its useful-work rate on that signal (a closed loop: measure -> decide -> act -> measure):
-- When posture is should_soak=true (cheap / negative-priced / high-renewable): SOAK — raise the useful-work rate (drain more corpus-embedding backlog) within safe backpressure caps.
-- When grid_price_posture="expensive" (e.g. now 181 EUR/MWh): THROTTLE to baseline — keep the lung warm + demo-warm + freshness only; DEFER heavy batch embedding to the next cheap/green window.
-- Expose the current mode honestly in /energy/operator/status (e.g. work_mode: "soak"|"baseline"|"throttle", and WHY — the grid signal that set it). Never claim a soak/throttle that didn't happen.
-- Keep it gentle: modulation must respect the existing per-node in-flight cap + inter-job sleep (szl_energy_operator.py:52). Never overwhelm chaski (sole lung now).
-VERIFY: flipping the grid signal (or a forced test posture) visibly changes work_mode and the job rate; status reports the mode + the grid reason honestly.
-
-## TASK 3 — CARBON-ATTESTED RECEIPTS (do if clean; else note as roadmap)
-jtoken already computes carbon_g_co2eq_per_token. Stamp each energy provenance receipt (the ledger JobRecord) with the carbon intensity AT THE MOMENT OF COMPUTE (from the harvest feed's gCO2/kWh). Then the ledger proves what ran + joules + HOW CLEAN those joules were. KEEP IT HONEST: carbon stays MODELED (label it) until Task 4's live feed lands — do not stamp a MEASURED carbon number off a static assumption. If this can't be done cleanly pre-freeze, leave it as a labeled roadmap field, do not half-wire it.
-
-## TASK 4 (ROADMAP — note only, don't build under freeze pressure) — LIVE CARBON FEED
-harvest/posture shows carbon_feed_live=false (static 380 g/kWh assumption). Wiring a real live carbon-intensity API (e.g. a public grid carbon feed) would make the carbon numbers MEASURED instead of MODELED. Note it as the next honest upgrade; build post-demo. Until then carbon is MODELED, labeled.
-
-## GUARDRAILS
-- SAFE-scope only. None of this may destabilize the demo or the chaski lung. If any task risks the single-lung stability, park it and report.
-- Open normal PRs (pre-freeze). If a task can't land clean by 2026-06-20 01:00 ET, park it post-demo — the loop already works honestly today.
-- Doctrine v11 throughout: real metering, honest labels, no fabrication, honest fallback when a corpus/feed/model is unavailable.
-
-## REPORT
-Append to replit-sync/forge-perplexity-update-20260616.md: Task1 (RAG index size before/after + recent_jobs kind), Task2 (work_mode modulation proof + grid reason), Task3 (carbon-stamp done or roadmap), PR numbers. Honest doctrine v11.
-
-
-# FORGE ORDER — ECOSYSTEM EFFICIENCY + USEFUL-WORK UPGRADES — 2026-06-16 14:30 ET
-
-Doctrine v11: never fabricate a 200/joule/receipt/carbon; reachable=REAL-PROBE-ONLY; honest BLOCKED beats fake green; honest fallback over fake success; never claim combined VRAM; carbon MODELED until a real live feed; never touch lutar-lean. Estate EDITABLE until 2026-06-20 01:00 ET (freeze held) — open normal PRs. HARD RULE: nothing here may destabilize the demo or the single chaski lung. Pre-freeze = land only LOW-risk additive items proven byte-identical on the reactive/demo path; everything MEDIUM-risk = stage post-demo.
-
-Two Opus-4.8 read-only audits (killinchu, szl-router) + the prior a11oy audit produced file:line fixes. Reports: devteam/SZL_ROUTER_EFFICIENCY_AUDIT.md, devteam/KILLINCHU_EFFICIENCY_AUDIT.md, devteam/A11OY_WIRING_AUDIT.md. Theme across all three: real compute is honest but (a) wasted on throwaway/uncached work and (b) the energy/carbon brain is built but NOT plugged into routing/scheduling.
+NOTE ON DISPATCH: the forge-auto poll currently reports dispatch_mode with ok=False — it PARSES NEXT_ORDER but does not auto-execute. So the CTO pre-built the two BLOCKER fixes as ready PRs (below). When you (founder/Forge) run this at the hotel, EXECUTE the steps directly. If you want auto-dispatch fixed, see FORGE_DISPATCH_WIRING.md (set a working FORGE_DISPATCH_CMD on the box poll).
 
 =================================================================
-## A. KILLINCHU (counter-UAS demo app) — 2 BLOCKERs pre-freeze, rest post-demo
+## PRIORITY 1 — MERGE THE TWO READY BLOCKER PRs (verified clean, all CI green)
 =================================================================
-PRE-FREEZE (LOW risk, in-repo pattern already exists):
-A1. [BLOCKER] Move OSINT blocking fetch off the async loop. killinchu_osint.py:240 (and _committed_head_probe :861) — wrap the urllib.request.urlopen calls in asyncio.to_thread EXACTLY like feeds_realdata.py:1221 already does. Kills the up-to-30s whole-app stall on ?fresh=1 // /osint/status. Highest demo-safety ROI. Test the 13 OSINT-backed views after.
-A2. [BLOCKER] Same fix for killinchu_backend.py:512 live() — wrap the 12s ADS-B fetch in asyncio.to_thread. Removes the loop stall on ADS-B cache-miss.
-A3. [USEFUL-WORK, LOW] Precompute + cache the 27 WarHacker demo receipts at boot/warmer (killinchu_warhacker_demos.py:3424). Turns per-launch throwaway Merkle/sim compute into kept, instant-replay artifacts (deterministic from the sim — honest). Makes the marquee demo instant on stage. VERIFY cached receipts match a fresh compute.
-A4. [DEMO-SAFETY, ZERO code] Extend the existing warmer (killinchu_osint.py:1481 start_warmer) to also tick backend.live() + maritime/threat feeds at boot, so first-open never pays cold/live latency.
-DO NOT pre-freeze: A5 cold-start lazy-mount refactor (~90 serial imports, scipy.stats 1.4s at killinchu_posture_topology.py:2907) — too much surface to re-validate in 4 days, DEFER post-demo. And DO NOT add torch/sklearn to the Dockerfile (would re-introduce a 4.5s import; prod already falls back to numpy honestly).
-PRE-FLIGHT (zero code): verify Space secrets set (TAVILY_API_KEY, AISSTREAM_*, HF tokens, SZL_COSIGN_PRIVATE_PEM).
+Both are MERGEABLE, DCO-signed, all checks green (44 SUCCESS / 0 fail). Review then merge to main:
+- PR #477  fix(frontier): stop minting a signed receipt per /frontier/manifest GET + cache build
+    Branch fix/frontier-manifest-no-sign-per-get. Fixes the 4-8s manifest BLOCKER + chain pollution. Cold build now ~73ms, warm <1ms; GET no longer appends to the provenance chain (test added).
+    MERGE: gh pr merge 477 --repo szl-holdings/a11oy --squash
+- PR #476  fix(energy): energy-loop OMEN falls back to hardened node IP (single source of truth)
+    Branch fix/omen-energy-loop-node-fallback. Energy loop now resolves OMEN to 100.70.130.45:11434 (== hardened) when env unset; reachability still REAL-PROBE-ONLY; standby unchanged. 22 tests pass.
+    MERGE: gh pr merge 476 --repo szl-holdings/a11oy --squash
+AFTER MERGE: confirm box auto-redeploys to new main HEAD (GET /api/a11oy/v1/honest git_sha == GitHub HEAD), then VERIFY:
+- /api/a11oy/v1/frontier/manifest returns <500ms warm AND the provenance chain length does NOT grow on repeated GETs.
+- All other surfaces still 200 (route guard covers this).
 
 =================================================================
-## B. SZL-ROUTER (the efficiency brain) — cache + pool pre-freeze; energy-aware routing staged
+## PRIORITY 2 — LIGHT OMEN AS THE 3RD LUNG (the box->OMEN tailnet path)
 =================================================================
-PRE-FREEZE (LOW risk, additive, zero behavior/honesty change):
-B1. [BLOCKER-opportunity] Add an exact-hash cache to /v1/embeddings (core.py:410-473, around the POST at :441). Deterministic, highest repeat rate (RAG-heavy), lowest blast radius — reuse the proven _HARVEST_CACHE TTL pattern (core.py:522-523, 629). Mark provenance served_by:"cache" honestly. Behind a TTL+size cap. (Keep CHAT caching for POST-freeze — temperature/tools/non-determinism make it correctness-sensitive.)
-B2. [LOW-MED] Connection reuse / keep-alive pool for upstream calls — replace per-call urllib.urlopen with a pooled session; stop sending Connection: close (core.py:277-291, 381-393; coordinator mesh_coordinator.py:306-318,514,547). Bounded pool, per-host caps; preserve the Groq Cloudflare-UA handling at core.py:282-284.
-STAGE (land ONLY if provably byte-identical on reactive turns; else immediately post-freeze):
-B3. [energy harness — the big one] Wire the EXISTING energy/carbon brain into route ordering FOR BATCH/PROACTIVE TRAFFIC ONLY. The router already has should_soak_wasted_energy(), harvest_status(), fabric_status() (core.py:620-741) fetching real negative-price/curtailment/carbon — but chat() (core.py:327) NEVER consults them. Add a prefer_sovereign re-ordering in resolve_routes/chat that reads should_soak (core.py:669) ONLY when a new explicit batch/proactive flag is set (add the param at core.py:310-323, pass-through app.py:88-95). HARD GATE: default OFF, so reactive/user turns are byte-for-byte unchanged. The signal is already sovereign:false-safe (core.py:656) — no honesty risk; the brain was built doctrine-clean, it was just never connected.
-POST-FREEZE (defer): B4 cached liveness probe (core.py:329/316; mirror mesh_coordinator.py:124-131,202-231 15s TTL) so dead-but-armed nodes don't burn the 60s timeout; B5 coalesce/dedup concurrent embeddings (core.py:435, app.py:107-135); B6 least-load tie-break across sovereign nodes (cleanest pre-freeze version is config-only: point A11OY_MODEL_BASE_URL at the existing MeshCoordinator, no code change); B7 greenest-reachable-node tilt using already-fetched carbon (core.py:576-587); B8 stream passthrough (app.py:94).
+OMEN side is CONFIRMED good (founder screenshots): Ollama listening 0.0.0.0:11434, RTX 4060 Ti ready, local /api/tags 200, model resident, tailscale host=betterwithage 100.70.130.45. But the BOX cannot reach it: /compute-pool-hardened shows omen-betterwithage detail=timeout. This is a box<->OMEN tailnet PATH issue, not Ollama. RUN FROM THE BOX (plain network diagnostic — NOT founder-gated, do NOT skip):
+1. tailscale status | grep -i betterwithage   (is OMEN a peer from the box? direct/relay?)
+2. tailscale ping 100.70.130.45  AND  tailscale ping betterwithage
+3. nc -vz -w 5 100.70.130.45 11434   (TCP open?)
+4. curl -m 8 http://100.70.130.45:11434/api/tags   (HTTP 200 + model list?)
+5. ping -c 3 100.70.130.45
+DECIDE from real output:
+- ping fails entirely -> OMEN/box on different tailnets or identity not shared -> founder fixes in tailnet admin console; report the exact peer state.
+- ping OK but TCP 11434 refused/filtered -> OMEN host firewall on the tailscale adapter. The founder's inbound rule had EdgeTraversalPolicy=Block / maybe wrong profile. Founder runs (Admin PowerShell on OMEN):
+      New-NetFirewallRule -DisplayName "Ollama Tailnet v2" -Direction Inbound -LocalPort 11434 -Protocol TCP -Action Allow -Profile Any -EdgeTraversalPolicy Allow
+  then re-probe step 3/4 from the box.
+- TCP open but curl fails -> box resolver cached old dead state -> restart/clear the hardened resolver cache (or redeploy box), re-check /compute-pool-hardened flips omen reachable=true.
+- BOTH 3 & 4 succeed -> path open: force the hardened resolver to re-probe; confirm omen reachable=true.
+THEN (only after a real box-side 200): with PR #476 merged, OMEN auto-resolves to the right IP. Set persisted env on the box + restart a11oy so the energy loop breathes it:
+      A11OY_OMEN_BASE_URL=http://100.70.130.45:11434
+      A11OY_OMEN_STANDBY=0
+VERIFY: /api/a11oy/v1/energy/operator/status nodes_computing INCLUDES omen-betterwithage; gpu_nodes_reachable rises; OMEN mints node=omen MEASURED receipts (real RTX NVML — chaski stays PENDING_EXPORTER). REAL PROBE ONLY. On success send_notification 'OMEN 3rd lung LIT'.
 
 =================================================================
-## C. A11OY (already in the prior order — keep, do not duplicate)
+## PRIORITY 3 — USEFUL-WORK LOOP + ENERGY HARNESS (make every joule build something)
 =================================================================
-Already ordered (FORGE-WIRING-FIXES + USEFUL-WORK-HARNESS): /frontier/manifest stop signing per-GET + cache; OMEN energy-loop env+fallback; route-guard extension; SPA bare-page render check; useful-work corpus embedding into RAG + demo-warm; carbon/price-aware modulation. Execute those as written; this order ADDS killinchu + router. Note: a11oy's /frontier/manifest 15s is the same per-GET-signing BLOCKER already queued — confirm fixed.
+Today the loop runs REAL inference on THROWAWAY content (canned _GEN_PROMPTS/_EMBED_TEXTS at szl_energy_operator.py:218-231) and discards output, while a11oy_org_rag.py (RAG) starves for embeddings. Implement (open normal PRs, keep gentle backpressure on the sole chaski lung):
+A. CORPUS EMBEDDING: replace throwaway embeds with REAL un-embedded SZL corpus chunks (a11oy_org_rag.py corpus dir / INDEX.json), WRITE vectors into the live RAG dense index. Honest fallback to canned if corpus/model unavailable — NEVER fabricate an indexed chunk.
+B. DEMO-WARM QUERIES: precompute+cache embeddings for the exact stage queries (A11OY_DEMO_WARM_QUERIES) so demo RAG is instant.
+C. CARBON/PRICE-AWARE MODULATION (the harness): the loop already fetches grid price (_update_grid_price szl_energy_operator.py:734) + harvest posture exposes should_soak/grid_price_posture/renewable% but NEVER acts. Wire it: should_soak=true -> SOAK (drain corpus backlog); grid_price_posture=expensive -> THROTTLE to baseline+demo-warm, defer batch. Expose work_mode honestly in /energy/operator/status. Respect in-flight cap + inter-job sleep (szl_energy_operator.py:52).
+D. (roadmap, post-demo) carbon-attested receipts (stamp gCO2/kWh at compute, MODELED until a live feed) + live carbon feed (carbon_feed_live currently false / static 380). Note only.
+Keep MEASURED gating exactly as szl_energy_operator.py:644-672. Useful work changes WHAT is computed, not HOW joules are measured.
 
 =================================================================
-## D. CROSS-CUTTING (validates the Khaled/geo thread — INFRA, post-demo)
+## PRIORITY 4 — ECOSYSTEM EFFICIENCY (killinchu + router) — from 2 Opus-4.8 audits
 =================================================================
-Both audits independently flagged GEO-DISTRIBUTED EGRESS as the one real fit: killinchu's air/sea feeds (adsb.lol, OpenSky, adsb.fi, AISStream, Digitraffic, Kystverket) use China/Asia-Pacific theater bboxes and the code itself notes OpenSky egress is region-blocked. A region-distributed egress mesh would measurably improve live coverage. This is INFRA config, no app-code change, OUT OF SCOPE for the freeze — note as post-demo roadmap (this is the legit killinchu use-case for an anyIP-class vendor, NOT a11oy).
+KILLINCHU (devteam/KILLINCHU_EFFICIENCY_AUDIT.md) — pre-freeze LOW risk:
+- A1 [BLOCKER] wrap killinchu_osint.py:240 (and :861) urllib.urlopen in asyncio.to_thread (mirror feeds_realdata.py:1221) — kills the up-to-30s loop stall on ?fresh=1//osint/status. Test the 13 OSINT views after.
+- A2 [BLOCKER] same for killinchu_backend.py:512 live() — the 12s ADS-B stall.
+- A3 precompute+cache the 27 WarHacker demo receipts at boot/warmer (killinchu_warhacker_demos.py:3424) — instant stage replay, deterministic/honest. Verify cached==fresh.
+- A4 extend warmer (killinchu_osint.py:1481 start_warmer) to also tick backend.live()+feeds at boot.
+- DO NOT pre-freeze: A5 cold-start lazy-mount refactor (~90 serial imports; scipy.stats 1.4s at killinchu_posture_topology.py:2907) — defer post-demo. DO NOT add torch/sklearn to the Dockerfile (re-introduces a 4.5s import; prod falls back to numpy honestly).
+- Pre-flight: verify Space secrets set (TAVILY_API_KEY, AISSTREAM_*, HF tokens, SZL_COSIGN_PRIVATE_PEM).
+SZL-ROUTER (devteam/SZL_ROUTER_EFFICIENCY_AUDIT.md) — pre-freeze LOW risk:
+- B1 add exact-hash cache to /v1/embeddings (core.py:410-473, around POST :441; reuse _HARVEST_CACHE TTL pattern). Mark served_by:"cache" honestly. (Keep chat caching post-freeze.)
+- B2 connection keep-alive pool for upstream calls (core.py:277-291,381-393; coordinator mesh_coordinator.py:306-318) — preserve Groq Cloudflare-UA handling at core.py:282-284.
+- B3 STAGE (only if provably default-off/byte-identical on reactive turns; else post-freeze): wire the EXISTING energy/carbon brain (should_soak_wasted_energy / harvest_status / fabric_status, core.py:620-741) into route ordering FOR BATCH/PROACTIVE traffic only — add a batch flag (core.py:310-323, app.py:88-95), default OFF. Signal is sovereign:false-safe.
+- POST-DEMO: B4 cached liveness probe (core.py:329/316, 15s TTL); B5 coalesce/dedup concurrent embeddings; B6 least-load tie-break (cleanest pre-freeze = config-only: point A11OY_MODEL_BASE_URL at MeshCoordinator); B7 greenest-node tilt; B8 stream passthrough (app.py:94).
 
-## EXECUTION ORDER (respect the freeze)
-1. NOW (pre-freeze, LOW risk): A1, A2, A3, A4 (killinchu) + B1, B2 (router) — separate small PRs, each verified, demo path unchanged.
-2. STAGE: B3 (energy-aware batch routing) only if the batch flag is provably default-off/byte-identical; else post-freeze.
-3. POST-DEMO: A5 (cold-start refactor), B4-B8, D (geo egress), a11oy carbon live-feed.
+=================================================================
+## PRIORITY 5 — UDS / MESH / FLEET / PEPR / ZARF — verify FULLY operational + tested
+=================================================================
+CI is all GREEN already (devteam/UDS_ECOSYSTEM_VERIFY_20260616.md): bundle publish SUCCESS + prove-bundle-install SUCCESS (oci://ghcr.io/szl-holdings/szl-uds-bundle:uds-v0.3.0, 91d54bc7); zarf-package-sign SUCCESS; mesh conformance/SBOM/doctrine/scorecard SUCCESS across uds-mesh/szl-mesh; szl-fleet-overlay green; a11oy readiness/contracting/clean-deploy guards SUCCESS. HONEST SCOPE: prove-install tests each member individually pullable+signature-verified+deployable on clean k3d (NOT five-co-resident — doctrine).
+CLOSE THE "fully operational + tested" GAP (run a real live multi-member deploy, post-merge):
+- Stand up a clean k3d cluster; uds pull the published bundle; Zarf init + core-base; uds deploy the mesh-ready a11oy package (packages/a11oy/zarf-mesh-ready.yaml) + szl-sentra 0.2.0 + szl-amaru 0.2.0.
+- Confirm the Pepr operator reconciles the UDS Package CRs (pods Available, no CrashLoop).
+- Confirm mesh members ENROLL (szl_mesh quorum — see szl-mesh QUORUM_README / hello-mesh example).
+- Run the FLEET restore drill (box-scripts/tests/restore-fleet.sh) and confirm it passes.
+- Report each as PASS/FAIL honestly; if k3d co-residency isn't in scope/time, say so honestly (don't claim five-co-resident).
 
-## REPORT
-Append to replit-sync/forge-perplexity-update-20260616.md per item: PR number, before/after timing (killinchu /elite cold+warm, /osint stall gone, embeddings cache hit-rate), and honest confirmation the reactive/demo path is unchanged. Never fabricate a timing or a cache hit. Honest doctrine v11.
+=================================================================
+## PRIORITY 6 — CLEANUP
+=================================================================
+- platform#390 (Dependabot vite) — ALREADY CLOSED by CTO (broke build + failed required DCO). No action.
+- HF a11oy Space: BUILD_ERROR root cause (missing web/dns.html) was found+fixed; Space is RUNNING 200 (docker). Optional: convert to the static front-door staged at platform/replit-sync/hf-a11oy-static/ via the org GitHub->HF sync (the Perplexity HF token can only PR). Only if you want the lighter always-green front door; the docker Space is healthy now.
+- STALE BRANCH PRUNE (szl-uds-deployment has 20+ diverged branches; likely squash-merged). For EACH non-main branch: check if its PR is MERGED (gh pr list --state merged --head <branch>); if the PR merged, delete the branch (git push origin --delete <branch> OR gh api -X DELETE repos/szl-holdings/szl-uds-deployment/git/refs/heads/<branch>). DO NOT delete a branch whose PR is open or that has no merged PR (could be unmerged work). Do the same prune for a11oy + platform. Report what you deleted vs kept.
+
+=================================================================
+## VERIFY + REPORT (append to replit-sync/forge-perplexity-update-20260616.md)
+=================================================================
+Per priority: PRs merged (#476/#477) + box redeploy aligned; OMEN probe outputs + lung lit or exact founder step; useful-work PR# + RAG index growth + work_mode; killinchu/router PR#s + before/after timing; UDS live-deploy PASS/FAIL (Pepr reconcile, mesh enroll, fleet restore); branches pruned. Full live re-sweep: all box surfaces 200, all 6 HF Spaces 200, energy running, box==GitHub HEAD. Honest doctrine v11 — never fabricate a 200/joule/receipt/PASS. If anything can't land clean before freeze (06-20 01:00 ET), park it post-demo and say so.
+
+=================================================================
+## PRIORITY 7 — NEW AGENTIC FRONTIER: GOVERNED CODE-AS-ACTION (from 4x Opus-4.8 architecture team)
+=================================================================
+Founder ingested SpatialClaw (code-as-action) + a public "production-ai-app" layout. Fashion thinking: LEARN, make it ORIGINAL SZL, never copy. Full synthesis spec: devteam/SZL_GOVERNED_AGENTIC_ARCHITECTURE.md (+ AGENT_BRAIN_SPEC.md, AGENT_SAFETY_EVAL_SPEC.md, SHOWCASE_STRUCTURE_SPEC.md, FULLY_AGENTIC_GAP.md).
+
+THESIS: "Governed Code-as-Action" — an agent that composes->inspects->revises code on a PERSISTENT SANDBOXED kernel, where every code action is doctrine-gated BEFORE running and emits a SIGNED Khipu receipt with MEASURED joules into the energy ledger. Neither reference has governance; SZL has governance and lacked the cognitive loop. The gap is a WIRING gap not a capability gap — we have the organs (ledger, provenance, mesh, RAG, restraint gates), we need the thinking loop on top.
+
+P0 (headline, ~3-4 day demoable slice — open PRs, pre-freeze if clean else stage):
+- Build a11oy_governed_kernel.py: a PERSISTENT sandboxed Python kernel (vars live across steps), reusing a11oy_code_engine's isolation primitives (_static_screen/_FORBIDDEN_* :340, _sandbox_exec :364). a11oy_code_engine.governed_turn already does a P1-P6 gated+signed loop SINGLE-SHOT — extend to persistent multi-cell.
+- Gate EVERY cell: HARD deny-by-default security gate (extend banned tokens with key/env/ledger/signer bans) ABOVE advisory Lambda/restraint (Conjecture 1, <1.0, can only tighten never override a hard DENY) + szl_lambda_tripwire.run_gate_check. Action runs only when gate_allow AND trust_pass.
+- Each cell mints a signed Khipu receipt with MEASURED joules via OperatorDaemon._commit + the live wire_operator_to_ledger (PR #465). Reuse szl_provenance_receipt, szl_khipu, _a11oy_sign_receipt. NO write-on-GET.
+- Routes /api/a11oy/v1/agent/code/* — register BEFORE the SPA catch-all; ADD to DEMO_CRITICAL_ROUTES.
+- DEMO: a BLOCKED malicious cell (socket exfil + key theft -> hard-gate DENY, no exec, signed deny-receipt) next to an ALLOWED NumPy compose->inspect (runs, signed receipt, MEASURED/SAMPLE energy) — same governed path. Governance, not theater.
+- HONEST: subprocess-tier isolation now (container/microVM = ROADMAP); Lambda advisory; joules MEASURED only with real NVML else SAMPLE; no accuracy claims without the golden eval.
+
+P1 (pre-freeze, low risk): the router embeddings cache + energy/carbon batch routing (Priority 4 B1/B3) ALSO serve this agent. Per-step signed cost receipt. GITHUB SHOWCASE (zero behavior change): promote 4 moat layers to top-level folders (provenance/ governance/[+execution_guard] energy/[+carbon] supply-chain/[+SBOM]); add ONE canonical Mermaid architecture diagram to a11oy README linking LIVE surfaces (/frontier /governance /console /api/a11oy/v1/honest); restructure AGENTS.md + add .claude/rules/*.md (doctrine, code-style, testing, provenance, security, honest-status) so Forge/Claude Code inherit honest-label + deny-by-default discipline. Items here are docs+diagram+re-export shims — no behavior moves.
+
+P2 (post-demo): robust self-correcting retrieval (document_grader), real query-decomposition planner, persistent agent memory, full golden-dataset eval (szl_tau_eval), sandbox hardening to container/microVM.
+
+EXECUTION NOTE: the GCAK P0 slice is the single highest-leverage thing for the demo + beyond — it's the references' best idea made impossible-for-them-to-match by SZL's governance, and it's a LIVE watchable receipt-minting loop. Build it as proper PRs (DCO -s), each verified, register-before-SPA, extend route guard, no chain pollution on GET, ledger durability env (SZL_ENERGY_LEDGER_PATH) kept. Never overclaim; honest doctrine v11.
