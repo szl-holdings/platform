@@ -1,54 +1,19 @@
 {
-  "order_sha": "dfcbd55faf4f401b21341a83f69ff77445861536",
+  "order_sha": "eea796e017501221e18e6f827b6c10d238a90ca6",
   "order_path": "replit-sync/NEXT_ORDER.md",
-  "state": "done",
-  "seen_at": "2026-06-16T17:35:25Z",
-  "updated_at": "2026-06-16T17:45:55Z",
-  "idle": false,
+  "state": "processing",
+  "seen_at": "2026-06-16T18:35:49Z",
   "actionable": [
-    "`tailscale status` \u2014 is host `betterwithage` (100.70.130.45) listed as a peer from the BOX view? direct or relay? Paste the betterwithage line.",
-    "`tailscale ping 100.70.130.45` and `tailscale ping betterwithage` \u2014 does it complete? direct path or via DERP relay? how many ms? Paste 3 lines.",
-    "`nc -vz -w 5 100.70.130.45 11434` \u2014 is TCP port 11434 OPEN from the box?",
-    "`curl -m 8 http://100.70.130.45:11434/api/tags` \u2014 does it return the model list (200)?",
-    "`ping -c 3 100.70.130.45` \u2014 basic ICMP over tailnet.",
-    "If step 2 fails entirely (no tailnet path): OMEN and the box may be on different tailnets, or OMEN's tailnet identity isn't shared with the box. This is a tailnet-membership thing the founder resolves in the admin console. Report the exact host/peer state so the founder can fix it.",
-    "If step 2 (tailnet ping) WORKS but step 3 (TCP 11434) is refused/filtered: the block is at OMEN's host firewall on the tailscale adapter. The founder's existing inbound rule had EdgeTraversalPolicy=Block and may be bound to the wrong network profile. Report this precisely; give the founder the corrected one-line PowerShell inbound rule scoped to Profile=Any so tailscale-adapter traffic on 11434 is permitted.",
-    "If step 3 (TCP) is OPEN but step 4 (curl) fails: an app-level issue \u2014 re-probe; likely the box resolver cached the old dead state. Restart/clear the hardened resolver cache (or redeploy the box) and re-check the hardened pool flips omen reachable=true.",
-    "If steps 3 AND 4 BOTH succeed now: GREAT \u2014 the path is open. Force the hardened resolver to re-probe, confirm omen-betterwithage flips reachable=true in /compute-pool-hardened, then proceed to make OMEN an energy lung (see below).",
-    "Wire OMEN as an energy lung the same way chaski was wired: persisted env `A11OY_ENERGY_OMEN_ENABLED=1` + `A11OY_ENERGY_OMEN_URL=http://100.70.130.45:11434`, dispatch MEASURED jobs, receipts node=omen into the SAME ledger. OMEN has a real RTX NVML GPU, so its per-job joules CAN be MEASURED (unlike chaski PENDING_EXPORTER) \u2014 wire the real NVML reading; if not available per-job, label MODELED-from-fabric-coefficient honestly.",
-    "Confirm /api/a11oy/v1/energy/operator/status nodes_computing INCLUDES omen-betterwithage and gpu_nodes_reachable rises. OMEN is the 24/7 home anchor \u2014 prefer it as anchor worker. NEVER claim combined VRAM.",
-    "Open a normal PR if a code change is needed for the energy loop to read OMEN from the resolved node list (estate is editable until 06-20 01:00 ET).",
-    "The static files are staged at platform/replit-sync/hf-a11oy-static/ (README.md with `sdk: static`, and index.html \u2014 a polished landing page linking into a11oy.net + key surfaces).",
-    "PROVE: GET https://szlholdings-a11oy.hf.space returns 200 with the static landing page (stage RUNNING, sdk static). It must NOT BUILD_ERROR anymore.",
-    "Do the SAME pattern is available for other failing heavyweight Spaces later, but ONLY a11oy now.",
-    "Honest: this Space is a front-door/mirror; the real live platform is a11oy.net. Don't claim the Space itself runs the backend."
+    "STOP signing per-GET. `_concept_tile_inference_provenance` must NOT call build_composite() on every request. Either (a) make the concept tile a static descriptor / last-known composite DIGEST (read the most recent composite from the chain, don't mint a new one), or (b) compute+sign a composite at most once per long interval (e.g. cache the composite for >=5 min) and serve the cached digest in between. The tile should DESCRIBE the provenance capability honestly (link to /energy/ledger, show chain.ok + length) without minting a receipt just because someone loaded the page.",
+    "CACHE build_manifest() with a short TTL (15-30s) so bursts don't each pay the full build.",
+    "Offload any remaining blocking work to a threadpool (run_in_executor) and add a per-tile timeout so one slow tile can't block the whole response.",
+    "PERSIST these env vars on the box service (same place chaski's are set), then restart the a11oy service so the energy operator re-reads:",
+    "`A11OY_OMEN_BASE_URL=http://100.70.130.45:11434`   (auto-normalized to /v1)",
+    "`A11OY_OMEN_STANDBY=0`                              (or alias `A11OY_ENERGY_OMEN_ENABLED=1`)",
+    "CODE FALLBACK (open a PR, pre-freeze): make `_default_nodes()` (szl_energy_operator.py:127) fall back to the hardened `DEFAULT_FABRIC_NODES` OMEN IP when `A11OY_OMEN_BASE_URL` is unset, so the two lists can't silently diverge again. Keep standby default honest (only flips live on real reachability). This closes the divergent-list regression class permanently.",
+    "Energy operator->ledger wire is present + live (serve.py:444-451, _ledger_wired=True, 1 subscriber on the same singleton). It's a subscribe() not a register(), so the route guard does NOT cover it \u2014 keep `test_energy_wire_operator_ledger.py` GREEN in CI (that's the silent-disconnect guard).",
+    "No honest-label violations: MEASURED gated on a real fresh (<30s) NVML delta; stub/SAMPLE/ephemeral all honestly disclosed. Keep it that way.",
+    "Ledger cross-redeploy durability needs `SZL_ENERGY_LEDGER_PATH` on a persistent volume (env/infra, not a code bug) \u2014 already handled via /data mount; just keep it set."
   ],
-  "delegated_to_agent": [
-    "`tailscale status` \u2014 is host `betterwithage` (100.70.130.45) listed as a peer from the BOX view? direct or relay? Paste the betterwithage line.",
-    "`tailscale ping 100.70.130.45` and `tailscale ping betterwithage` \u2014 does it complete? direct path or via DERP relay? how many ms? Paste 3 lines.",
-    "`nc -vz -w 5 100.70.130.45 11434` \u2014 is TCP port 11434 OPEN from the box?",
-    "`curl -m 8 http://100.70.130.45:11434/api/tags` \u2014 does it return the model list (200)?",
-    "`ping -c 3 100.70.130.45` \u2014 basic ICMP over tailnet.",
-    "If step 2 fails entirely (no tailnet path): OMEN and the box may be on different tailnets, or OMEN's tailnet identity isn't shared with the box. This is a tailnet-membership thing the founder resolves in the admin console. Report the exact host/peer state so the founder can fix it.",
-    "If step 2 (tailnet ping) WORKS but step 3 (TCP 11434) is refused/filtered: the block is at OMEN's host firewall on the tailscale adapter. The founder's existing inbound rule had EdgeTraversalPolicy=Block and may be bound to the wrong network profile. Report this precisely; give the founder the corrected one-line PowerShell inbound rule scoped to Profile=Any so tailscale-adapter traffic on 11434 is permitted.",
-    "If step 3 (TCP) is OPEN but step 4 (curl) fails: an app-level issue \u2014 re-probe; likely the box resolver cached the old dead state. Restart/clear the hardened resolver cache (or redeploy the box) and re-check the hardened pool flips omen reachable=true.",
-    "If steps 3 AND 4 BOTH succeed now: GREAT \u2014 the path is open. Force the hardened resolver to re-probe, confirm omen-betterwithage flips reachable=true in /compute-pool-hardened, then proceed to make OMEN an energy lung (see below).",
-    "Wire OMEN as an energy lung the same way chaski was wired: persisted env `A11OY_ENERGY_OMEN_ENABLED=1` + `A11OY_ENERGY_OMEN_URL=http://100.70.130.45:11434`, dispatch MEASURED jobs, receipts node=omen into the SAME ledger. OMEN has a real RTX NVML GPU, so its per-job joules CAN be MEASURED (unlike chaski PENDING_EXPORTER) \u2014 wire the real NVML reading; if not available per-job, label MODELED-from-fabric-coefficient honestly.",
-    "Confirm /api/a11oy/v1/energy/operator/status nodes_computing INCLUDES omen-betterwithage and gpu_nodes_reachable rises. OMEN is the 24/7 home anchor \u2014 prefer it as anchor worker. NEVER claim combined VRAM.",
-    "Open a normal PR if a code change is needed for the energy loop to read OMEN from the resolved node list (estate is editable until 06-20 01:00 ET).",
-    "The static files are staged at platform/replit-sync/hf-a11oy-static/ (README.md with `sdk: static`, and index.html \u2014 a polished landing page linking into a11oy.net + key surfaces).",
-    "PROVE: GET https://szlholdings-a11oy.hf.space returns 200 with the static landing page (stage RUNNING, sdk static). It must NOT BUILD_ERROR anymore.",
-    "Do the SAME pattern is available for other failing heavyweight Spaces later, but ONLY a11oy now.",
-    "Honest: this Space is a front-door/mirror; the real live platform is a11oy.net. Don't claim the Space itself runs the backend."
-  ],
-  "dispatch_mode": "dispatch-cmd",
-  "dispatch_ok": false,
-  "gated_skipped": [
-    "ACTION: sync those two files to the SZLHOLDINGS/a11oy HF Space via the org GitHub->HF sync path you already use (the Perplexity HF token 'betterwithage' can only PR, not push to main \u2014 use the org sync). This converts the Space from sdk:docker to sdk:static. Remove/disable the old docker build files so the static SDK takes over cleanly."
-  ],
-  "report": "replit-sync/forge-perplexity-update-20260616.md",
-  "probes": {
-    "https://a11oy.net/healthz": 200
-  },
-  "doctrine": "v11: locked=8, Lambda=Conjecture 1, never commit a key"
+  "gated_skipped": []
 }
