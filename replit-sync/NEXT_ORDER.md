@@ -1,3 +1,5 @@
+<!-- ADDED 2026-06-16 14:30 ET — ECOSYSTEM EFFICIENCY upgrade (founder: 'do the same for all our demos + run more efficiently'). Covers killinchu (2 BLOCKER loop-stall fixes + demo-receipt cache + warmer) and szl-router (embeddings cache + connection pool now; energy-aware batch routing staged). a11oy items already queued above. All SAFE-scope, pre-freeze PRs, must NOT destabilize the chaski lung. Full order appended at the very bottom. -->
+
 <!-- ADDED 2026-06-16 14:15 ET — USEFUL-WORK + ENERGY-HARNESS upgrade (founder: 'more jobs that help the software run + harness the energy'). Full order appended below the wiring fixes. SAFE-scope, pre-freeze PRs, must not destabilize the chaski lung. -->
 
 > [2026-06-16 18:10 ET — FIX, founder green light] a11oy HF Space BUILD_ERROR — ROOT CAUSE FOUND: web/dns.html is on GitHub (blob eac8df5b) + COPYd by the Dockerfile but ABSENT from the Space repo (resolve 404; siblings energy/materials/immune/sda .html = 307). The build COPY fails there. Interactive agent CANNOT push to Space main (connector is write-PR-only, 403). FORGE: mirror web/dns.html (+ audit all Dockerfile-COPYd web/*.html, mirror any 404) byte-identical from GitHub to the Space, extend hf-sync so web/*.html mirrors going forward (no bandaid), then factory-rebuild + prove stage RUNNING / console 200 / resolve dns.html 307. Box a11oy.net is LIVE + current (HEAD 57a88617) — Space is the only gap. Full steps: replit-sync/FORGE-INSTRUCTION-restart-a11oy-space-20260616-1805.md. Doctrine: honest content (no jarvis codename), never fake RUNNING.
@@ -84,3 +86,49 @@ harvest/posture shows carbon_feed_live=false (static 380 g/kWh assumption). Wiri
 
 ## REPORT
 Append to replit-sync/forge-perplexity-update-20260616.md: Task1 (RAG index size before/after + recent_jobs kind), Task2 (work_mode modulation proof + grid reason), Task3 (carbon-stamp done or roadmap), PR numbers. Honest doctrine v11.
+
+
+# FORGE ORDER — ECOSYSTEM EFFICIENCY + USEFUL-WORK UPGRADES — 2026-06-16 14:30 ET
+
+Doctrine v11: never fabricate a 200/joule/receipt/carbon; reachable=REAL-PROBE-ONLY; honest BLOCKED beats fake green; honest fallback over fake success; never claim combined VRAM; carbon MODELED until a real live feed; never touch lutar-lean. Estate EDITABLE until 2026-06-20 01:00 ET (freeze held) — open normal PRs. HARD RULE: nothing here may destabilize the demo or the single chaski lung. Pre-freeze = land only LOW-risk additive items proven byte-identical on the reactive/demo path; everything MEDIUM-risk = stage post-demo.
+
+Two Opus-4.8 read-only audits (killinchu, szl-router) + the prior a11oy audit produced file:line fixes. Reports: devteam/SZL_ROUTER_EFFICIENCY_AUDIT.md, devteam/KILLINCHU_EFFICIENCY_AUDIT.md, devteam/A11OY_WIRING_AUDIT.md. Theme across all three: real compute is honest but (a) wasted on throwaway/uncached work and (b) the energy/carbon brain is built but NOT plugged into routing/scheduling.
+
+=================================================================
+## A. KILLINCHU (counter-UAS demo app) — 2 BLOCKERs pre-freeze, rest post-demo
+=================================================================
+PRE-FREEZE (LOW risk, in-repo pattern already exists):
+A1. [BLOCKER] Move OSINT blocking fetch off the async loop. killinchu_osint.py:240 (and _committed_head_probe :861) — wrap the urllib.request.urlopen calls in asyncio.to_thread EXACTLY like feeds_realdata.py:1221 already does. Kills the up-to-30s whole-app stall on ?fresh=1 // /osint/status. Highest demo-safety ROI. Test the 13 OSINT-backed views after.
+A2. [BLOCKER] Same fix for killinchu_backend.py:512 live() — wrap the 12s ADS-B fetch in asyncio.to_thread. Removes the loop stall on ADS-B cache-miss.
+A3. [USEFUL-WORK, LOW] Precompute + cache the 27 WarHacker demo receipts at boot/warmer (killinchu_warhacker_demos.py:3424). Turns per-launch throwaway Merkle/sim compute into kept, instant-replay artifacts (deterministic from the sim — honest). Makes the marquee demo instant on stage. VERIFY cached receipts match a fresh compute.
+A4. [DEMO-SAFETY, ZERO code] Extend the existing warmer (killinchu_osint.py:1481 start_warmer) to also tick backend.live() + maritime/threat feeds at boot, so first-open never pays cold/live latency.
+DO NOT pre-freeze: A5 cold-start lazy-mount refactor (~90 serial imports, scipy.stats 1.4s at killinchu_posture_topology.py:2907) — too much surface to re-validate in 4 days, DEFER post-demo. And DO NOT add torch/sklearn to the Dockerfile (would re-introduce a 4.5s import; prod already falls back to numpy honestly).
+PRE-FLIGHT (zero code): verify Space secrets set (TAVILY_API_KEY, AISSTREAM_*, HF tokens, SZL_COSIGN_PRIVATE_PEM).
+
+=================================================================
+## B. SZL-ROUTER (the efficiency brain) — cache + pool pre-freeze; energy-aware routing staged
+=================================================================
+PRE-FREEZE (LOW risk, additive, zero behavior/honesty change):
+B1. [BLOCKER-opportunity] Add an exact-hash cache to /v1/embeddings (core.py:410-473, around the POST at :441). Deterministic, highest repeat rate (RAG-heavy), lowest blast radius — reuse the proven _HARVEST_CACHE TTL pattern (core.py:522-523, 629). Mark provenance served_by:"cache" honestly. Behind a TTL+size cap. (Keep CHAT caching for POST-freeze — temperature/tools/non-determinism make it correctness-sensitive.)
+B2. [LOW-MED] Connection reuse / keep-alive pool for upstream calls — replace per-call urllib.urlopen with a pooled session; stop sending Connection: close (core.py:277-291, 381-393; coordinator mesh_coordinator.py:306-318,514,547). Bounded pool, per-host caps; preserve the Groq Cloudflare-UA handling at core.py:282-284.
+STAGE (land ONLY if provably byte-identical on reactive turns; else immediately post-freeze):
+B3. [energy harness — the big one] Wire the EXISTING energy/carbon brain into route ordering FOR BATCH/PROACTIVE TRAFFIC ONLY. The router already has should_soak_wasted_energy(), harvest_status(), fabric_status() (core.py:620-741) fetching real negative-price/curtailment/carbon — but chat() (core.py:327) NEVER consults them. Add a prefer_sovereign re-ordering in resolve_routes/chat that reads should_soak (core.py:669) ONLY when a new explicit batch/proactive flag is set (add the param at core.py:310-323, pass-through app.py:88-95). HARD GATE: default OFF, so reactive/user turns are byte-for-byte unchanged. The signal is already sovereign:false-safe (core.py:656) — no honesty risk; the brain was built doctrine-clean, it was just never connected.
+POST-FREEZE (defer): B4 cached liveness probe (core.py:329/316; mirror mesh_coordinator.py:124-131,202-231 15s TTL) so dead-but-armed nodes don't burn the 60s timeout; B5 coalesce/dedup concurrent embeddings (core.py:435, app.py:107-135); B6 least-load tie-break across sovereign nodes (cleanest pre-freeze version is config-only: point A11OY_MODEL_BASE_URL at the existing MeshCoordinator, no code change); B7 greenest-reachable-node tilt using already-fetched carbon (core.py:576-587); B8 stream passthrough (app.py:94).
+
+=================================================================
+## C. A11OY (already in the prior order — keep, do not duplicate)
+=================================================================
+Already ordered (FORGE-WIRING-FIXES + USEFUL-WORK-HARNESS): /frontier/manifest stop signing per-GET + cache; OMEN energy-loop env+fallback; route-guard extension; SPA bare-page render check; useful-work corpus embedding into RAG + demo-warm; carbon/price-aware modulation. Execute those as written; this order ADDS killinchu + router. Note: a11oy's /frontier/manifest 15s is the same per-GET-signing BLOCKER already queued — confirm fixed.
+
+=================================================================
+## D. CROSS-CUTTING (validates the Khaled/geo thread — INFRA, post-demo)
+=================================================================
+Both audits independently flagged GEO-DISTRIBUTED EGRESS as the one real fit: killinchu's air/sea feeds (adsb.lol, OpenSky, adsb.fi, AISStream, Digitraffic, Kystverket) use China/Asia-Pacific theater bboxes and the code itself notes OpenSky egress is region-blocked. A region-distributed egress mesh would measurably improve live coverage. This is INFRA config, no app-code change, OUT OF SCOPE for the freeze — note as post-demo roadmap (this is the legit killinchu use-case for an anyIP-class vendor, NOT a11oy).
+
+## EXECUTION ORDER (respect the freeze)
+1. NOW (pre-freeze, LOW risk): A1, A2, A3, A4 (killinchu) + B1, B2 (router) — separate small PRs, each verified, demo path unchanged.
+2. STAGE: B3 (energy-aware batch routing) only if the batch flag is provably default-off/byte-identical; else post-freeze.
+3. POST-DEMO: A5 (cold-start refactor), B4-B8, D (geo egress), a11oy carbon live-feed.
+
+## REPORT
+Append to replit-sync/forge-perplexity-update-20260616.md per item: PR number, before/after timing (killinchu /elite cold+warm, /osint stall gone, embeddings cache hit-rate), and honest confirmation the reactive/demo path is unchanged. Never fabricate a timing or a cache hit. Honest doctrine v11.
