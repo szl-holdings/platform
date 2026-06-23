@@ -29,7 +29,7 @@ function boot(): Promise<void> {
   app.get('/guarded', apiKeyGuard, (req, res) => {
     res.status(200).json({ tenant: req.tenantCtx ?? null });
   });
-  return new Promise((resolve) => {
+  return new Promise<void>((resolve) => {
     server = app.listen(0, () => resolve());
     baseUrl = '';
   }).then(() => {

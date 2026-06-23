@@ -346,12 +346,18 @@ importers:
       '@szl-holdings/agent-core':
         specifier: workspace:*
         version: link:../../packages/agent-core
+      '@szl-holdings/env':
+        specifier: workspace:*
+        version: link:../../packages/env
       '@szl-holdings/evidence-ledger':
         specifier: workspace:*
         version: link:../../packages/evidence-ledger
       '@szl-holdings/memory-core':
         specifier: workspace:*
         version: link:../../packages/memory-core
+      '@szl-holdings/observability':
+        specifier: workspace:*
+        version: link:../../lib/observability
       '@szl-holdings/policy-guard':
         specifier: workspace:*
         version: link:../../packages/policy-guard
