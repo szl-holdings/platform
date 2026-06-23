@@ -43,6 +43,7 @@
     "vitest": "^4.1.7"
   },
   "scripts": {
+    "build": "tsc --build",
     "test": "vitest run",
     "test:watch": "vitest",
     "lint": "biome lint ./src",
