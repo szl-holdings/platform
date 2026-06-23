@@ -20,6 +20,7 @@
     "typescript": "catalog:"
   },
   "scripts": {
+    "build": "tsc --build",
     "dev": "tsx watch src/server.ts",
     "start": "tsx src/server.ts",
     "typecheck": "tsc -p tsconfig.json --noEmit"

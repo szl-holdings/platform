@@ -3,13 +3,7 @@
   "compilerOptions": {
     "outDir": "./dist",
     "types": ["node"],
-    "noUnusedLocals": false,
-    "paths": {
-      "@workspace/alloy-vector-worker": ["../../workers/alloy-vector-worker/src/index.ts"],
-      "@workspace/alloy-rank-worker": ["../../workers/alloy-rank-worker/src/index.ts"],
-      "@workspace/aef-evals": ["../../packages/aef-evals/src/index.ts"],
-      "@workspace/aef-workflow-runtime": ["../../packages/aef-workflow-runtime/src/index.ts"]
-    }
+    "noUnusedLocals": false
   },
   "references": [
     { "path": "../../packages/aef-contracts" },
