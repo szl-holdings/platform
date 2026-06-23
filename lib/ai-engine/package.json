@@ -52,9 +52,11 @@
   "dependencies": {
     "@anthropic-ai/sdk": "^0.98.0",
     "@google/genai": "^1.44.0",
+    "@szl-holdings/covenant-policy": "workspace:*",
     "@szl-holdings/db": "workspace:*",
     "@szl-holdings/env": "workspace:*",
     "@szl-holdings/schemas": "workspace:*",
+    "@szl-holdings/shared-contracts": "workspace:*",
     "@szl-holdings/substrate-adapters": "workspace:*",
     "@szl-holdings/monte-carlo": "workspace:*",
     "@szl-holdings/proof-chain": "workspace:*",
