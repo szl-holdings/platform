@@ -11,7 +11,7 @@
 
 import { randomUUID } from 'node:crypto';
 import { z } from 'zod';
-import { tool, type FunctionTool } from '@openai/agents';
+import { tool } from '@openai/agents';
 import { type ToolManifest, ToolMeshGateway, defaultToolRegistry } from '@workspace/tool-mesh';
 
 export interface SzlToolAdapterOptions {
@@ -101,9 +101,14 @@ function jsonSchemaNodeToZod(node: JsonSchemaNode): z.ZodTypeAny {
  * Convert a Tool Mesh manifest's inputSchema (JSON Schema) to a Zod schema
  * suitable for the SDK's tool() function.
  */
-function manifestSchemaToZod(manifest: ToolManifest): z.ZodTypeAny {
+function manifestSchemaToZod(manifest: ToolManifest): z.ZodObject<z.ZodRawShape> {
   if (manifest.inputSchema && typeof manifest.inputSchema === 'object') {
-    return jsonSchemaNodeToZod(manifest.inputSchema as JsonSchemaNode);
+    const schema = jsonSchemaNodeToZod(manifest.inputSchema as JsonSchemaNode);
+    if (schema instanceof z.ZodObject) {
+      return schema as z.ZodObject<z.ZodRawShape>;
+    }
+    // SDK tool parameters must be object-shaped; wrap non-object top-level schemas.
+    return z.object({ input: schema });
   }
 
   // No inputSchema — accept a single freeform string input
@@ -118,7 +123,7 @@ export function adaptToolManifest(
   manifest: ToolManifest,
   gateway: ToolMeshGateway,
   opts: { agentId?: string; sessionId?: string } = {},
-): FunctionTool {
+) {
   const zodSchema = manifestSchemaToZod(manifest);
   const approvalRequired = manifest.approvalRequired;
   const manifestId = manifest.id;
@@ -166,7 +171,7 @@ export class SzlToolAdapter {
   /**
    * Adapt a single manifest into an SDK FunctionTool.
    */
-  adapt(manifest: ToolManifest): FunctionTool {
+  adapt(manifest: ToolManifest) {
     return adaptToolManifest(manifest, this.gateway, {
       agentId: this.agentId,
       sessionId: this.sessionId,
@@ -176,14 +181,14 @@ export class SzlToolAdapter {
   /**
    * Adapt all manifests from a list.
    */
-  adaptAll(manifests: ToolManifest[]): FunctionTool[] {
+  adaptAll(manifests: ToolManifest[]) {
     return manifests.map((m) => this.adapt(m));
   }
 
   /**
    * Look up manifests by tool ID from the registry and adapt them.
    */
-  adaptByIds(toolIds: string[]): FunctionTool[] {
+  adaptByIds(toolIds: string[]) {
     return toolIds.flatMap((id) => {
       const manifest = defaultToolRegistry.get(id);
       if (!manifest) {

@@ -43,9 +43,9 @@ vi.mock('@workspace/trace-graph', () => {
 });
 
 vi.mock('@openai/agents', () => {
-  function MockAgent(config: Record<string, unknown>) {
-    Object.assign(this as any, config);
-    (this as any)._type = 'Agent';
+  function MockAgent(this: Record<string, unknown>, config: Record<string, unknown>) {
+    Object.assign(this, config);
+    this._type = 'Agent';
   }
 
   return { Agent: MockAgent };
