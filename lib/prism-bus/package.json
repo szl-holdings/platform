@@ -13,6 +13,7 @@
   },
   "type": "module",
   "scripts": {
+    "build": "tsc --build",
     "typecheck": "tsc -p tsconfig.json --noEmit",
     "test": "vitest run",
     "lint": "biome lint ./src",
@@ -21,13 +22,13 @@
     "test:watch": "vitest"
   },
   "exports": {
-    ".": "./src/index.ts",
-    "./context": "./src/context.ts",
-    "./connectors": "./src/connectors.ts",
-    "./bus": "./src/bus.ts",
-    "./hooks": "./src/hooks.tsx",
-    "./provider": "./src/provider.tsx",
-    "./bridge": "./src/bridge.ts"
+    ".": { "types": "./dist/index.d.ts", "import": "./src/index.ts" },
+    "./context": { "types": "./dist/context.d.ts", "import": "./src/context.ts" },
+    "./connectors": { "types": "./dist/connectors.d.ts", "import": "./src/connectors.ts" },
+    "./bus": { "types": "./dist/bus.d.ts", "import": "./src/bus.ts" },
+    "./hooks": { "types": "./dist/hooks.d.ts", "import": "./src/hooks.tsx" },
+    "./provider": { "types": "./dist/provider.d.ts", "import": "./src/provider.tsx" },
+    "./bridge": { "types": "./dist/bridge.d.ts", "import": "./src/bridge.ts" }
   },
   "dependencies": {
     "@szl-holdings/mcp-client": "workspace:*"
