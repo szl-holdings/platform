@@ -19,7 +19,7 @@
 #     -p 9101:9101 \
 #     szl-onsite-node:latest
 
-FROM python:3.12-slim
+FROM python:3.14-slim
 
 LABEL maintainer="szl-holdings" \
       org.opencontainers.image.title="szl-onsite-node" \
