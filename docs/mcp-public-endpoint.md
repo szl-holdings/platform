@@ -1,92 +1,44 @@
-# Substrate MCP Gateway — Public Endpoint Reference
+# Substrate MCP Gateway — Public Endpoint
 
-**File:** `services/substrate-mcp-gateway/`
-**Status:** BUILT. Port 3700 (HTTP+SSE). Port bind in Dockerfile.
-**Wire path:** Expose via reverse-proxy at `https://api.a11oy.ai/mcp` — see §3 Wiring-1 in `team/deepwire/DEVP.md`.
-
----
-
-## Connection
-
-```json
-{
-  "mcpServers": {
-    "szl-substrate": {
-      "url": "https://api.a11oy.ai/mcp",
-      "transport": "streamable-http",
-      "headers": { "Authorization": "Bearer <SUBSTRATE_GATEWAY_API_KEY>" }
-    }
-  }
-}
-```
-
-Discovery: `GET https://api.a11oy.ai/.well-known/mcp`
-OAuth metadata: `GET https://api.a11oy.ai/.well-known/oauth-authorization-server`
-
----
+URL: https://api.a11oy.ai/mcp
+Transport: Streamable HTTP (MCP 2025-11-25)
+Auth: Bearer token (SUBSTRATE_GATEWAY_API_KEY)
+Discovery: https://api.a11oy.ai/.well-known/mcp
 
 ## 11 Governed Tools
 
-| Tool | Description |
-|------|-------------|
-| `substrate_submit_run` | Submit a governed workflow — policy-compiled, approval-gated, DSSE-signed |
-| `substrate_get_run` | Poll run state, stage results, evidence bundle |
-| `substrate_replay` | Deterministic replay for governance audit |
-| `substrate_counterfactual` | Model/policy substitution diff — auditor counterfactual |
-| `substrate_list_approvals` | Pending human-approval gates |
-| `substrate_approve` | Approve a gate (actor + note recorded in proof entry) |
-| `substrate_reject` | Reject a gate (reason written to evidence chain) |
-| `substrate_list_workflows` | Enumerate registered workflows |
-| `search_available_servers` | Discover NuroMesh MCP servers by query |
-| `enable_server` | On-demand connect to a NuroMesh domain server |
-| `disable_server` | Disconnect a server, free context allocation |
-| `agent_delegate` | Delegate task to NuroMesh domain agent (policy-gated) |
+- `substrate_submit_run` — submit a governed workflow run
+- `substrate_get_run` — poll run state + evidence bundle
+- `substrate_replay` — deterministic replay audit
+- `substrate_counterfactual` — model/policy substitution diff
+- `substrate_list_approvals` — pending human-approval gates
+- `substrate_approve` / `substrate_reject` — resolve approval gates
+- `substrate_list_workflows` — enumerate registered workflows
+- `search_available_servers` / `enable_server` / `disable_server` — NuroMesh fabric
+- `agent_delegate` — delegate to NuroMesh domain agent (policy-gated)
 
----
+## PRAXIS Resources (MCP Resources)
 
-## PRAXIS Intelligence Fabric Resources (MCP Resources)
+```
+nexus://convergence/active
+nexus://signals/{domain}
+nexus://agents/registry
+nexus://evidence/graph
+nexus://evidence/trace/{id}
+```
 
-| URI | Description |
-|-----|-------------|
-| `nexus://convergence/active` | Live cross-domain intelligence correlations |
-| `nexus://convergence/history` | Recent convergence events with resolution status |
-| `nexus://signals/maritime` | Real-time maritime domain signal stream |
-| `nexus://signals/security` | Real-time cybersecurity signal stream |
-| `nexus://signals/all` | Aggregate signal stream across all SZL domains |
-| `nexus://agents/registry` | Discoverable NuroMesh domain agent registry |
-| `nexus://evidence/graph` | Evidence items with provenance chains |
-| `nexus://evidence/trace/{id}` | Full provenance trace for any AI decision |
+## Internal architecture
 
----
+Service: `services/substrate-mcp-gateway/`
+Internal port: 3700 (see `Dockerfile`)
+MCP config: `.mcp.json` → `${REPLIT_DEV_DOMAIN}/api/mcp` (dev/internal)
+Local stdio config: `services/substrate-mcp-gateway/claude_desktop_config.json`
 
-## Interactive MCP Apps (ui:// resources)
+To expose publicly, reverse-proxy `/mcp/*` → `substrate-mcp-gateway:3700/mcp/*`
+and set `SUBSTRATE_GATEWAY_API_KEY` + `SUBSTRATE_SIGNING_KEY`.
 
-Tools with `_meta.ui` render interactive HTML micro-dashboards inline in Claude Desktop:
+## Labels
 
-| Resource | Renders |
-|----------|---------|
-| `ui://szl/data-table` | Sortable/filterable table with CSV export |
-| `ui://szl/chart` | Line, bar, pie, area, scatter, donut charts |
-| `ui://szl/approval-form` | Governed approval/rejection form |
-| `ui://szl/metrics` | KPI card grid with trend indicators |
-| `ui://szl/timeline` | Chronological audit trail with severity badges |
-
----
-
-## Honest Labels
-
-- Every run: DSSE-signed receipt (`SUBSTRATE_SIGNING_KEY` HMAC).
-- Λ = **Conjecture 1 — advisory gate, NOT a theorem.**
-- SLSA L1 (honest). L2 build-attested on container image.
-- Extensions: `szl/governed-autonomy`, `szl/counterfactual-replay`, `szl/praxis-consciousness`, `szl/praxis-convergence`, `szl/praxis-federation`.
-
----
-
-## Environment
-
-| Variable | Description |
-|----------|-------------|
-| `SUBSTRATE_GATEWAY_PORT` | HTTP port (default: 3700) |
-| `SUBSTRATE_GATEWAY_API_KEY` | Bearer token for write operations |
-| `SUBSTRATE_SIGNING_KEY` | 32-byte hex HMAC key for evidence bundles |
-| `NODE_ENV` | `production` enforces API key requirement |
+Every run produces a DSSE-signed receipt.
+Λ = Conjecture 1 (advisory gate, NOT a theorem).
+SLSA L1 (honest).
