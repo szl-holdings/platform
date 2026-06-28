@@ -148,7 +148,14 @@ UNREACHABLE = "unreachable"
 
 # Hosts we own and self-host -- sovereign=True is HONEST on these: the Hetzner
 # box itself and the founder's self-hosted RTX on the tailnet (betterwithage).
-OWN_METAL_HOSTS = ("100.125.77.31", "167.233.50.75")
+# Sourced from the SZL_OWN_METAL_HOSTS env var (comma-separated host/IP
+# substrings) so no private/tailnet address is committed to source; the operator
+# pins the real values at run time. Empty by default.
+OWN_METAL_HOSTS = tuple(
+    h.strip()
+    for h in os.environ.get("SZL_OWN_METAL_HOSTS", "").split(",")
+    if h.strip()
+)
 
 
 # --------------------------------------------------------------------------- #
