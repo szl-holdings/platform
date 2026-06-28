@@ -18,6 +18,8 @@
     "@szl-holdings/shared-contracts": "workspace:*",
     "@szl-holdings/evidence-ledger": "workspace:*",
     "@szl-holdings/policy-guard": "workspace:*",
+    "@szl-holdings/env": "workspace:*",
+    "@szl-holdings/observability": "workspace:*",
     "@workspace/ouroboros-integrations": "workspace:*",
     "@workspace/ouroboros-invariant": "workspace:*",
     "express": "^5",

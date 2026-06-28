@@ -13,9 +13,11 @@ export interface TenantContext {
   apiKeyPrefix: string;
 }
 
-declare module 'express' {
-  interface Request {
-    tenantCtx?: TenantContext;
+declare global {
+  namespace Express {
+    interface Request {
+      tenantCtx?: TenantContext;
+    }
   }
 }
 

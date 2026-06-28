@@ -348,12 +348,18 @@ importers:
       '@szl-holdings/agent-core':
         specifier: workspace:*
         version: link:../../packages/agent-core
+      '@szl-holdings/env':
+        specifier: workspace:*
+        version: link:../../packages/env
       '@szl-holdings/evidence-ledger':
         specifier: workspace:*
         version: link:../../packages/evidence-ledger
       '@szl-holdings/memory-core':
         specifier: workspace:*
         version: link:../../packages/memory-core
+      '@szl-holdings/observability':
+        specifier: workspace:*
+        version: link:../../lib/observability
       '@szl-holdings/policy-guard':
         specifier: workspace:*
         version: link:../../packages/policy-guard
@@ -1202,6 +1208,9 @@ importers:
       '@google/genai':
         specifier: ^1.44.0
         version: 1.52.0(@modelcontextprotocol/sdk@1.29.0)
+      '@szl-holdings/covenant-policy':
+        specifier: workspace:*
+        version: link:../covenant-policy
       '@szl-holdings/db':
         specifier: workspace:*
         version: link:../db
@@ -1220,6 +1229,9 @@ importers:
       '@szl-holdings/services':
         specifier: workspace:*
         version: link:../services
+      '@szl-holdings/shared-contracts':
+        specifier: workspace:*
+        version: link:../../packages/shared-contracts
       '@szl-holdings/substrate-adapters':
         specifier: workspace:*
         version: link:../../packages/substrate-adapters

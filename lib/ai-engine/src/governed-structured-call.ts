@@ -394,7 +394,7 @@ export async function governedStructuredCall<T extends z.ZodTypeAny>(
   const { domain, schemaName, agentId = 'alloy', covenantRules = [], riskTier = 'medium', softBlock = false } = options;
 
   // Build schema description for the prompt
-  const schemaShape = (schema as z.ZodObject<z.ZodRawShape>)._def?.shape?.() ?? {};
+  const schemaShape = (schema as unknown as z.ZodObject<z.ZodRawShape>)._def?.shape?.() ?? {};
   const fieldNames = Object.keys(schemaShape);
 
   // Inject structured output instruction into system message

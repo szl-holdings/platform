@@ -100,7 +100,11 @@ jobs:
       - name: Serve ${{ matrix.app }} on port ${{ matrix.port }}
         run: |
           npm install -g serve
-          serve ${{ matrix.dist }} -l ${{ matrix.port }} &
+          # -s (single-page application mode) rewrites unmatched routes to
+          # index.html. Without it `serve` returns its own 404 page for deep
+          # client-side routes (e.g. /deals, /fleet-dashboard), so the SPA never
+          # boots and route content never renders — only the `/` smoke tests pass.
+          serve ${{ matrix.dist }} -s -l ${{ matrix.port }} &
           sleep 3
         shell: bash
 

@@ -13,7 +13,8 @@ export type RouteClass =
   | 'embedding'
   | 'classification'
   | 'summarization'
-  | 'generation';
+  | 'generation'
+  | 'code';
 
 export interface ModelEndpoint {
   provider: ProviderType;
@@ -189,6 +190,7 @@ const ROUTE_CLASS_TAGS: Record<RouteClass, string[]> = {
   classification: ['classification', 'triage'],
   summarization: ['summarization'],
   generation: ['generation', 'reasoning'],
+  code: ['code', 'generation', 'reasoning'],
 };
 
 class ModelRouter {

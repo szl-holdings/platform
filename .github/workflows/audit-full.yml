@@ -44,6 +44,11 @@ jobs:
         env:
           CI: 'true'
           NODE_ENV: test
+          # Cap turbo fan-out so the full-repo typecheck (composite tsc builds,
+          # each allowed --max-old-space-size=6144) does not exhaust the 16 GB
+          # runner and get OOM-killed mid-run ("The operation was canceled").
+          # Matches the standalone Typecheck job in ci.yml.
+          TURBO_CONCURRENCY: '3'
 
       - name: Upload audit evidence
         if: always()

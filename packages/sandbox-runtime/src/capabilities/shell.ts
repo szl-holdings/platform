@@ -11,7 +11,7 @@
  * - Registered as Tool Mesh tool: sandbox.shell (operator-assisted tier)
  */
 
-import { exec } from 'node:child_process';
+import { spawn } from 'node:child_process';
 import { join, normalize, resolve } from 'node:path';
 import type { SandboxCapability, ShellExecOptions, ShellExecResult } from '../types.js';
 import { validateWorkspacePath } from '../materializer.js';
@@ -242,30 +242,47 @@ export class ShellCapability implements SandboxCapability {
       let timedOut = false;
 
       // Timeout is enforced solely by the explicit timer below, which sets
-      // `timedOut` synchronously before killing the child. We deliberately do
-      // NOT pass exec()'s built-in `timeout` option: it would send its own
-      // SIGTERM at the same deadline, racing the manual timer — the `close`
-      // event could then fire before `timedOut` is set, yielding a result with
-      // `timedOut: false` for a command that was in fact timed out.
-      const child = exec(command, {
+      // `timedOut` synchronously before killing the child.
+      //
+      // `detached: true` makes the spawned shell a process-group leader so the
+      // timeout handler can SIGKILL the entire group via `process.kill(-pid)`.
+      // Killing only the `sh` parent would leave grandchildren (e.g. `sleep`)
+      // alive holding the inherited stdio pipes open, which delays the `close`
+      // event until the grandchild exits on its own — defeating the timeout.
+      // (Note: `exec`'s `detached` is not honoured the same way, so we use
+      // `spawn` with `shell: true` and bound the output buffers manually.)
+      const child = spawn(command, {
         cwd,
         env,
-        maxBuffer: this.maxOutputBytes * 2, // give exec room, we'll truncate after
+        detached: true,
+        shell: true,
       });
 
+      const bufferCap = this.maxOutputBytes * 2; // truncated to maxOutputBytes later
       let stdoutBuf = '';
       let stderrBuf = '';
 
       child.stdout?.on('data', (chunk: string | Buffer) => {
-        stdoutBuf += chunk.toString();
+        if (stdoutBuf.length < bufferCap) stdoutBuf += chunk.toString();
       });
       child.stderr?.on('data', (chunk: string | Buffer) => {
-        stderrBuf += chunk.toString();
+        if (stderrBuf.length < bufferCap) stderrBuf += chunk.toString();
       });
 
       const timer = setTimeout(() => {
         timedOut = true;
-        child.kill('SIGKILL');
+        // Kill the entire process group (negative pid) so shell grandchildren
+        // are terminated too; fall back to killing just the child if the group
+        // signal fails (e.g. process already gone).
+        try {
+          if (typeof child.pid === 'number') {
+            process.kill(-child.pid, 'SIGKILL');
+          } else {
+            child.kill('SIGKILL');
+          }
+        } catch {
+          child.kill('SIGKILL');
+        }
       }, timeoutMs);
 
       child.on('close', (code) => {
