@@ -55,7 +55,7 @@ jobs:
       amaru: ${{ steps.read.outputs.amaru }}
       bundle: ${{ steps.read.outputs.bundle }}
     steps:
-      - uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
+      - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
 
       - name: Install yq
         run: |
@@ -111,7 +111,7 @@ jobs:
       packages: write
       id-token: write   # Required for keyless cosign signing
     steps:
-      - uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
+      - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
 
       - name: Install zarf
         uses: defenseunicorns/setup-zarf@745f0990f3d0611774b552930ea053ac61ebf0a6 # main
@@ -181,7 +181,7 @@ jobs:
       packages: write
       id-token: write
     steps:
-      - uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
+      - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
 
       - name: Install zarf
         uses: defenseunicorns/setup-zarf@745f0990f3d0611774b552930ea053ac61ebf0a6 # main
