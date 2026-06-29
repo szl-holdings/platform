@@ -19,7 +19,7 @@ in-flight sibling SDA/mesh program + known founder-gated reds → marked read. I
   (betterwithage RTX), `env_used A11OY_GPU_TOKEN`, `key_present true` (no longer hf-router/HF_TOKEN).
   `/api/szl/v1/inference-posture` → `sovereign:true, where:gpu`. `/healthz` 200. Closed w/ evidence.
 - **platform#379** "a11oy unhealthy (warm-flagships)" — already auto-closed 23:52Z (probe recovered;
-  a11oy.net/healthz 200 confirmed). No action.
+  a-11-oy.com/healthz 200 confirmed). No action.
 
 **Founder-gated (NOT closed — closing would hide your action items):**
 - **szl-doctrine#3** — org secret `SECRET_HEALTH_TOKEN` (least-priv fine-grained PAT). Founder sets.

@@ -12,7 +12,7 @@
 2. `server.py metrics()` — re-applied: emits `szl_energy_harvest_joules_measured` (212.262) and flips `szl_energy_harvest_joules_sample`→0 from the same ledger.
 3. `index.html` — wired the static chip (`id=joulesChip`) + footer code (`id=jlCode`) to the live `joules_label` already fetched from `/posture`.
 
-## Verified (public, a11oy.net)
+## Verified (public, a-11-oy.com)
 - `/api/a11oy/v1/harvest/metrics`: `joules_measured 212.262`, `joules_sample 0`.
 - `/harvest` + `/posture` JSON: `joules_label=measured`, `sovereign=false`.
 - Rendered tab badge (screenshot): **JOULES · MEASURED** (green); SOVEREIGN · UNCHANGED, NOT LOCKED-8, Λ=Conjecture 1 all intact.

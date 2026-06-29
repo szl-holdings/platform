@@ -6,7 +6,7 @@ Zoom out: what else agentic do I need. Wire it, give it to Forge.**
 ## DONE / WIRING NOW (a dev squad is building these)
 The 3D Living Anatomy (HEART/YUYAY, BRAIN/YACHAY, CIRCULATORY/YAWAR, NERVOUS/OTel, SKELETON) is getting
 **5 NEW AGENTIC ORGANS born from the agentic GPU** (anatomy PR `feat/agentic-organs`, honest tiers):
-- **METABOLISM** — the wasted-energy harvest (LIVE at a11oy.net/.../harvest/metrics). F19 Bekenstein
+- **METABOLISM** — the wasted-energy harvest (LIVE at a-11-oy.com/.../harvest/metrics). F19 Bekenstein
   (LOCKED) + Landauer (EXPERIMENTAL). Converts wasted external energy into work; joules SAMPLE off-box.
 - **IMMUNE** — the security layer (anti-SSRF egress allowlist + secret-leak + consent-only gate,
   deny-by-default). Neyman-Pearson gate + L2 deny-by-default uniqueness (EXPERIMENTAL).

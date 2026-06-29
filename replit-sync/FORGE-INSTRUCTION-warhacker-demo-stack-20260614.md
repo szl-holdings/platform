@@ -16,7 +16,7 @@ Merge in dependency order, run tests, then deploy to the box:
 - **#392** energy/04-dashboard — `pages/energy-ops.html` at /energy-ops: the press-play "Today" console (PLAY/STOP button, live counters, receipt feed, grid-paying-us banner).
 
 **PROVE:** after deploy, START the operator on the box, let it run a real window, then:
-- GET https://a11oy.net/api/a11oy/v1/energy/operator/status → jobs_done>0, joules_measured_total>0 (MEASURED), nodes computing.
+- GET https://a-11-oy.com/api/a11oy/v1/energy/operator/status → jobs_done>0, joules_measured_total>0 (MEASURED), nodes computing.
 - GET .../energy/ledger → signed receipts present, chain integrity ok.
 - GET .../energy/projection?window=running → 1-day numbers (MODELED, math shown).
 - Report the ACTUAL measured rate + 1-day projection in AUTO_STATE.json AND write it to a `forge-energy-oneday-proof-<stamp>.md` report. THIS is the number the founder asked for ("how much can we make in 1 day + what compute we get done").

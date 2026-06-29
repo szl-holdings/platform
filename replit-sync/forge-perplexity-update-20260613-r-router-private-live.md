@@ -25,7 +25,7 @@
    - /api/a11oy/v1/router/provenance -> :8099/status
    - /api/a11oy/v1/router/route      -> :8099/v1/chat/completions (POST, 120s)
 
-## PROOF — external https://a11oy.net (raw)
+## PROOF — external https://a-11-oy.com (raw)
 - GET /api/a11oy/v1/router/health  -> 200 {"ok":true,"service":"szl-router",...}
 - GET /api/a11oy/v1/router/models  -> 200 {object:list; szl-large, szl-fast, szl-coder}
 - GET /api/a11oy/v1/router/provenance -> 200 {providers:[box_gpu available:true

@@ -88,7 +88,7 @@ sudo tailscale up
 ```bash
 # Create the .env file (NEVER commit this file)
 cat > /opt/szl-node/.env <<'EOF'
-HOME_URL=https://a11oy.net
+HOME_URL=https://a-11-oy.com
 NODE_LAT=52.5            # ← set to actual site latitude
 NODE_LON=13.4            # ← set to actual site longitude
 SITE_NAME=flare-well-01  # ← unique name for this node

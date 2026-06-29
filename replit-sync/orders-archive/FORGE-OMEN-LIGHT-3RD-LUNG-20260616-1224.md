@@ -35,11 +35,11 @@ Once box-side `curl http://100.70.130.45:11434/api/tags` == 200:
   - OMEN is the 24/7 ANCHOR (home, never travels). Prefer it as anchor worker; rtx (laptop) + chaski are additional horizontal workers; clean fallback if any drops. NEVER claim combined VRAM.
 
 ## TASK 3 — HF a11oy SPACE REBUILD (was BUILD_ERROR, now BUILDING)
-The SZLHOLDINGS/a11oy HF Space hit BUILD_ERROR (docker build exit 1 on a COPY/runtime step) at ~15:01 UTC and is now BUILDING. CONFIRM it lands STAGE=RUNNING + serves 200 at https://szlholdings-a11oy.hf.space. If it BUILD_ERRORs again, read the build log, identify the failing COPY/RUN step, and fix it (likely a path that doesn't exist in the build context, or the cpu-basic constrained-builder llama path). This is the MIRROR Space — the demo runs off the box (a11oy.net, all 200), so this is NOT demo-critical, but get the mirror green. Report the failing step + fix honestly.
+The SZLHOLDINGS/a11oy HF Space hit BUILD_ERROR (docker build exit 1 on a COPY/runtime step) at ~15:01 UTC and is now BUILDING. CONFIRM it lands STAGE=RUNNING + serves 200 at https://szlholdings-a11oy.hf.space. If it BUILD_ERRORs again, read the build log, identify the failing COPY/RUN step, and fix it (likely a path that doesn't exist in the build context, or the cpu-basic constrained-builder llama path). This is the MIRROR Space — the demo runs off the box (a-11-oy.com, all 200), so this is NOT demo-critical, but get the mirror green. Report the failing step + fix honestly.
 
 ## TASK 4 — HOLD THE STACK (founder traveling, laptop off)
 - chaski is the sole live lung carrying the demo — keep it 200 + in nodes_computing; its systemd unit auto-recovers (proven). rtx offline = EXPECTED (laptop travels) — do NOT alarm.
-- Keep ALL served surfaces 200 (a11oy.net /healthz /frontier /orbital /holographic /energy-ops /pnt /pinn /fabric /governance /signature-is-not-proof + APIs + killinchu/elite). Route guard test catches drops.
+- Keep ALL served surfaces 200 (a-11-oy.com /healthz /frontier /orbital /holographic /energy-ops /pnt /pinn /fabric /governance /signature-is-not-proof + APIs + killinchu/elite). Route guard test catches drops.
 - Ledger persistence: /data mount, chain.ok=true, survives_redeploy:true — do NOT trigger gratuitous prod redeploys; if one happens, confirm chain CONTINUES (no genesis reset).
 - Energy loop running:true; if a redeploy leaves running:false WHILE a lung is reachable, POST /api/a11oy/v1/energy/operator/start.
 

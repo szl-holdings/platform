@@ -2,6 +2,6 @@ GO — founder Stephen Lutar standing authorization (2026-06-16 04:38 ET).
 Forge has FULL ADMIN of the founder's computer + all software; self-dispatch + execute is APPROVED.
 dispatch_mode=dispatch-cmd, dispatch_ok=true. Drive the AUTO_STATE actionable[] to done:
  (1) factory-rebuild the SZLHOLDINGS/a11oy HF Space to current main (bake web/immune.html + web/materials.html + honest pages/docs.html);
- (2) wire immune.a11oy.net (nginx vhost on box 167.233.50.75 + DNS A-record immune->167.233.50.75 at registrar — DNS green-lit);
+ (2) wire immune.a-11-oy.com (nginx vhost on box 167.233.50.75 + DNS A-record immune->167.233.50.75 at registrar — DNS green-lit);
  (3) keep the box auto-deploying main.
 PROVE every DONE with a live curl. Honest BLOCKED beats fake green. Doctrine v11: locked=8 @ c7c0ba17; Lambda=Conjecture 1; never commit a key; no user-visible codenames.

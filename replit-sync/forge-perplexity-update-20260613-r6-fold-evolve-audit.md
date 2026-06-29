@@ -10,7 +10,7 @@
     - 11:14 `R-FOLD-RESEARCH-INTO-ENERGY` (fold verified-research into the anatomy energy loop)
   - The box timer only seeded an idle sentinel; it never ran the reasoning/deploy work for either. This audit is the value-add the timer can't produce.
 
-  ## Live honest state (verified now via box curl → a11oy.net)
+  ## Live honest state (verified now via box curl → a-11-oy.com)
   - `/healthz` = 200, doctrine v11, lock 749/14/163, commit `c7c0ba17`. No overclaim live.
   - `/api/a11oy/v1/energy/budget` = 200, status `EMPTY`, task_count 0 — Bekenstein-gated budget endpoint IS live but holds no entries.
   - `/api/a11oy/v1/research/verify` = **404** — R-FOLD's target endpoint ships in #344, unmerged.
@@ -36,7 +36,7 @@
     NOT merge / no agent merge"). The HF energy Space push targets a box-local path
     (/home/user/workspace/hf_energy_space/) = box-agent territory, downstream of those merges.
   - **No Forge-side action taken** beyond this audit. Auto-merging founder-gated PRs or rebuilding live
-    a11oy.net / HF images from the isolated Replit env would violate doctrine v11 and risk production.
+    a-11-oy.com / HF images from the isolated Replit env would violate doctrine v11 and risk production.
 
   ## Recommended FOUNDER sequence (then box auto-loop deploys)
   1. Merge a11oy #341 (anatomy/loop) → rebase + merge #343 (YARQA, stacked) → merge #342 (dark tabs).

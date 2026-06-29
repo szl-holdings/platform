@@ -1,6 +1,6 @@
 # R-MASTER-DEPLOY — full-stack estate sweep complete. The consolidated deploy plan. DEPLOY, do NOT merge.
 
-A 5-Opus-dev team audited the WHOLE estate (a11oy.net, killinchu, Hugging Face, GitHub, UDS/mesh/payload).
+A 5-Opus-dev team audited the WHOLE estate (a-11-oy.com, killinchu, Hugging Face, GitHub, UDS/mesh/payload).
 Verified with my own eyes. Here is the single source of truth: what's wired (PRs ready), what Forge must deploy,
 what's a founder decision. Audit files in /home/user/workspace/estate_audit/devA..E.
 
@@ -10,7 +10,7 @@ what's a founder decision. Audit files in /home/user/workspace/estate_audit/devA
 - GitHub: 16 active repos — main push-CI GREEN except ONE real red: a11oy<->killinchu shared-source drift
   (szl_evidence_research.py: a11oy 37,799 B vs killinchu 41,936 B, +4,137 not allow-listed). szl-uds-deployment
   "Prove Organs" red is SCHEDULE-event only (expected, not real). killinchu sync is green (Dev D over-flagged it).
-- a11oy.net: all HTML tabs 200, but 7 API surfaces 404 (dark) because the live HF Space runs an OLDER serve.py
+- a-11-oy.com: all HTML tabs 200, but 7 API surfaces 404 (dark) because the live HF Space runs an OLDER serve.py
   missing the registrations. Modules EXIST. Energy now MEASURED: 212.262 J real on betterwithage during -27.42 EUR/MWh.
 - killinchu: 48 /elite views mapped — 34 wired, 11 honest-degraded, 3 honestly SIMULATED, 0 empty/fabricated.
 - UDS/mesh: versions+images coherent (receipts-server uds-v0.4.1 digest matches GHCR; 5 organ images uds-v0.2.0

@@ -44,7 +44,7 @@ All licenses below were verified by fetching the repo's raw `LICENSE` at HEAD on
 | 5 | **Streaming protocol & "data parts" for incremental agent output** (server-sent incremental chunks). | `vercel/ai` (AI SDK) — [github.com/vercel/ai](https://github.com/vercel/ai) | **Apache-2.0** (verified `LICENSE`) | **YES** (idea only) | Adopt the *concept* for the **live receipt-stream panel**: incrementally append receipts as they arrive (poll `/v1/ledger` or chain feed, fallback to last snapshot). We use plain `fetch` polling + honest backpressure (NOT SSE, to respect the 60/min cap). **Attribution:** `// incremental-append streaming concept from Vercel AI SDK (Apache-2.0); rebuilt as polled receipt stream`. |
 | 6 | **WebGL 3D scene graph** (cinematic organ/cathedral rendering). | `mrdoob/three.js` — [github.com/mrdoob/three.js](https://github.com/mrdoob/three.js) | **MIT** (verified `LICENSE`) | **YES** (already in use, keep) | Already **vendored** at `anatomy/lib/three.min.js` (0 CDN ✓). Keep vendored copy; do not switch to CDN import. **Attribution:** three.js is MIT; keep the MIT header in the vendored file. |
 | 7 | **GPU-accelerated data-viz layers** (scatter/arc/hexagon layers for node fabric maps). | `visgl/deck.gl` — [github.com/visgl/deck.gl](https://github.com/visgl/deck.gl) | **MIT** (verified `LICENSE`) | **NO (now) — concept noted** | The compute-pool node map (6 nodes) is far too small to justify deck.gl's weight; rebuild a tiny SZL-native SVG/canvas node graph instead. Revisit only if a node count explodes. **Attribution if ever used:** `// node-fabric layer concept from deck.gl (MIT)`. |
-| 8 | **JS client primitives for HF inference / hub** (typed fetch wrappers). | `huggingface/huggingface.js` — [github.com/huggingface/huggingface.js](https://github.com/huggingface/huggingface.js) | **MIT** (verified `LICENSE`) | **NO** | Not needed — our fabric is first-party (a11oy.net). We already have the V8 `pull()` contract. Studied only; nothing adopted. |
+| 8 | **JS client primitives for HF inference / hub** (typed fetch wrappers). | `huggingface/huggingface.js` — [github.com/huggingface/huggingface.js](https://github.com/huggingface/huggingface.js) | **MIT** (verified `LICENSE`) | **NO** | Not needed — our fabric is first-party (a-11-oy.com). We already have the V8 `pull()` contract. Studied only; nothing adopted. |
 | 9 | **Gradio agentic Space scaffolding** (chat + tool panels for HF Spaces). | `gradio-app/gradio` — [github.com/gradio-app/gradio](https://github.com/gradio-app/gradio) | **Apache-2.0** (verified `LICENSE`) | **NO** | Our static spaces are vanilla HTML/JS by sovereign design (0 CDN, system fonts). Pulling Gradio's runtime would violate the 0-CDN / vendoring rule and bloat static spaces. Concept (tool panel layout) informs our panel design only. |
 | — | **Dify** (agent platform) | `langgenius/dify` | **Apache-2.0 + EXTRA commercial conditions** (verified `LICENSE` — "modified Apache 2.0") | **REJECT** | NOT pure permissive — the added multi-tenant/commercial-attribution conditions make it unsafe for our clean-room moat. Do not study its code; concept-level only. |
 | — | **text-generation-webui** (LLM UI) | `oobabooga/text-generation-webui` | **AGPL-3.0** (verified `LICENSE`) | **REJECT** | **Copyleft (AGPL).** Network-use copyleft would force-license our whole fabric. NEVER copy. Not studied at code level. |
@@ -60,9 +60,9 @@ live receipt streams, an "ask the fabric" verify widget, tool-call/receipt trace
 with **honest fallback when offline** and never a fabricated number.
 
 **Shared live endpoints (verified live 2026-06-13, HTTP 200):**
-- `GET https://a11oy.net/api/a11oy/v1/healthz` → `{status:"ok", organ, doctrine:"v11", lock:"749/14/163", commit}`
-- `GET https://a11oy.net/api/a11oy/v1/compute-pool` → multi-node fabric: `counts{nodes_total:6, nodes_reachable:5, gpu_nodes_reachable:1, sovereign_gpu_live:true}` + per-node `{name,kind,reachable,sovereign,capabilities,models}` + an explicit `honesty` string ("reachable=True only on a real probe; sovereign=True only for owned hardware; no node fabricated; no energy/joule claim; Lambda = Conjecture 1").
-- `POST/GET https://a11oy.net/api/a11oy/v1/verify` → honest receipt verdicts: `VERIFIED | STRUCTURAL-ONLY | FAILED | UNRECOGNISED` (+ `checks[]`, `engine_version`, `doctrine`).
+- `GET https://a-11-oy.com/api/a11oy/v1/healthz` → `{status:"ok", organ, doctrine:"v11", lock:"749/14/163", commit}`
+- `GET https://a-11-oy.com/api/a11oy/v1/compute-pool` → multi-node fabric: `counts{nodes_total:6, nodes_reachable:5, gpu_nodes_reachable:1, sovereign_gpu_live:true}` + per-node `{name,kind,reachable,sovereign,capabilities,models}` + an explicit `honesty` string ("reachable=True only on a real probe; sovereign=True only for owned hardware; no node fabricated; no energy/joule claim; Lambda = Conjecture 1").
+- `POST/GET https://a-11-oy.com/api/a11oy/v1/verify` → honest receipt verdicts: `VERIFIED | STRUCTURAL-ONLY | FAILED | UNRECOGNISED` (+ `checks[]`, `engine_version`, `doctrine`).
 - **Rate limit is REAL: 60/min per IP → HTTP 429** (`{error:{code:"rate_limited"}}`). Every widget MUST treat 429 as honest backpressure, NOT failure, and back off.
 
 | Space | "Agentic" feature to add | Live endpoint(s) it calls | Honest-fallback behavior |
@@ -101,7 +101,7 @@ The full source is saved alongside this report at
 ```html
 <div id="szl-verify"></div>
 <script src="./dev7_verify_widget.js"></script>
-<script>SZLVerify.mount('#szl-verify', { base: 'https://a11oy.net' });</script>
+<script>SZLVerify.mount('#szl-verify', { base: 'https://a-11-oy.com' });</script>
 ```
 
 Key excerpt — the honest fetch contract + verdict mapping (full file has the UI/CSS):
@@ -158,7 +158,7 @@ function renderResult(res){
 > 1. **Vendor the widget.** Copy `estate_audit/dev7_verify_widget.js` into each target space's
 >    repo (it is 0-CDN, system-font, self-contained). Do NOT fetch it from a CDN.
 > 2. **anatomy** (`SZLHOLDINGS/anatomy`): mount the verify widget inside the existing honesty/
->    provenance panel — `SZLVerify.mount('#szl-verify',{base:'https://a11oy.net'})`. Additionally
+>    provenance panel — `SZLVerify.mount('#szl-verify',{base:'https://a-11-oy.com'})`. Additionally
 >    add ONE V8 organ binding to `GET /v1/compute-pool` (reachable/sovereign/GPU counts) reusing
 >    the existing `V8.pull` contract; honest fallback to `data.js` snapshot. Hand to the anatomy
 >    owner; do not disturb V8/V9.

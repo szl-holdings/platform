@@ -8,7 +8,7 @@ Report each to `AUTO_STATE.json` + notify with the pasted real values when it la
 - Energy operator: `stub_mode:false`, `joules_measured_label:MEASURED`, **jobs ~4,361, joules_measured_total ~83,582 J and CLIMBING** (was 22,899 stuck), tokens ~1.46M, exporter `betterwithage`, real power_w. SOUND.
 - `nodes_computing` is now **just `rtx-betterwithage`** — `local-stub` already dropped from the live compute set. GOOD (JOB 4 stub-half already done).
 - Ledger minting hash-chained JouleCharge receipts with real `nvml_age_s`.
-- CTO landed 8+/10 of the 3D "genius surface" PRs (#381–#388) into a11oy main (0-CDN, MEASURED/MODELED labeled, lockstep-clean). **These need the box redeploy (the order already pinned above this one) to go live on a11oy.net.** Run that redeploy; it now also carries the full 3D surface set + szl_holo3d.js toolkit.
+- CTO landed 8+/10 of the 3D "genius surface" PRs (#381–#388) into a11oy main (0-CDN, MEASURED/MODELED labeled, lockstep-clean). **These need the box redeploy (the order already pinned above this one) to go live on a-11-oy.com.** Run that redeploy; it now also carries the full 3D surface set + szl_holo3d.js toolkit.
 
 ---
 
@@ -21,7 +21,7 @@ DO (safe, reversible):
 2. Expose a Prometheus `/metrics` endpoint from the SAME exporter feeding the operator (`betterwithage`, Blackwell RTX 5050, Tailscale 100.125.77.31) emitting: `gpu_energy_joules_total` (real NVML integral, ~83,582 climbing), `gpu_power_watts` (live sample), `vllm:generation_tokens_total` (or operator `tokens_total` ~1.46M — join it in).
 3. Set `A11OY_VLLM_METRICS_URL` to that endpoint, reversibly. Confirm the jtoken consumer scrapes + stamps freshness.
 
-PROVE: `curl https://a11oy.net/api/a11oy/v1/energy/jtoken` shows `label:"MEASURED"`, numeric `joules_per_token` (~0.057 given 83,582 J / 1.46M tok), non-null inputs, and `/api/a11oy/v1/energy/sovereign` `measured_panels` climbing toward 6/6. Two readings a minute apart, both totals increasing.
+PROVE: `curl https://a-11-oy.com/api/a11oy/v1/energy/jtoken` shows `label:"MEASURED"`, numeric `joules_per_token` (~0.057 given 83,582 J / 1.46M tok), non-null inputs, and `/api/a11oy/v1/energy/sovereign` `measured_panels` climbing toward 6/6. Two readings a minute apart, both totals increasing.
 
 HONESTY: if the exporter genuinely can't emit `/metrics` over tailnet → BLOCKED with exact error, leave panel honestly ROADMAP. Do NOT fabricate a J/token number. Operator joules stay MEASURED regardless.
 

@@ -19,7 +19,7 @@ The order requires rebuilding and redeploying the `a11oy` container on Hetzner a
    - Pull the latest code from GitHub main.
    - Build the container image.
    - Push the new image to Hetzner.
-   - Restart the `a11oy` and `killinchu.a11oy.net` containers.
+   - Restart the `a11oy` and `killinchu.a-11-oy.com` containers.
 
 3. **Prove URLs:**
    - Curl each URL and record the HTTP codes and content types.
@@ -36,7 +36,7 @@ The order requires rebuilding and redeploying the `a11oy` container on Hetzner a
 
 2. **Rebuild and Redeploy:**
    - Ensure the new container image is byte-identical to GitHub main.
-   - Verify that the `a11oy` and `killinchu.a11oy.net` containers are running correctly after redeployment.
+   - Verify that the `a11oy` and `killinchu.a-11-oy.com` containers are running correctly after redeployment.
 
 3. **Prove URLs:**
    - Use `curl` commands to verify each URL's HTTP code and content type.
@@ -55,13 +55,13 @@ The order requires rebuilding and redeploying the `a11oy` container on Hetzner a
    - Container rebuild/redeploy: BLOCKED (awaiting PR merges to complete).
 
 3. **Prove URLs:**
-   - https://a11oy.net/static/shared/szl_holo3d.js: BLOCKED (container redeploy pending).
-   - https://a11oy.net/api/a11oy/v1/restraint/info: BLOCKED (container redeploy pending).
-   - https://a11oy.net/api/a11oy/v1/restraint/bench: BLOCKED (container redeploy pending).
-   - https://a11oy.net/estate-hologram: BLOCKED (container redeploy pending).
-   - https://a11oy.net/nemo, /autoreview, /factory, /constitution, /quant, /grc, /restraint: BLOCKED (container redeploy pending).
-   - https://a11oy.net/api/a11oy/v1/honest: BLOCKED (container redeploy pending).
-   - https://killinchu.a11oy.net/elite, /elite/globe, /elite/restraint, /api/killinchu/v1/restraint/info: BLOCKED (container redeploy pending).
+   - https://a-11-oy.com/static/shared/szl_holo3d.js: BLOCKED (container redeploy pending).
+   - https://a-11-oy.com/api/a11oy/v1/restraint/info: BLOCKED (container redeploy pending).
+   - https://a-11-oy.com/api/a11oy/v1/restraint/bench: BLOCKED (container redeploy pending).
+   - https://a-11-oy.com/estate-hologram: BLOCKED (container redeploy pending).
+   - https://a-11-oy.com/nemo, /autoreview, /factory, /constitution, /quant, /grc, /restraint: BLOCKED (container redeploy pending).
+   - https://a-11-oy.com/api/a11oy/v1/honest: BLOCKED (container redeploy pending).
+   - https://killinchu.a-11-oy.com/elite, /elite/globe, /elite/restraint, /api/killinchu/v1/restraint/info: BLOCKED (container redeploy pending).
    - Sovereign probe: BLOCKED (container redeploy pending).
 
 4. **Confirm Restart Recovery:**

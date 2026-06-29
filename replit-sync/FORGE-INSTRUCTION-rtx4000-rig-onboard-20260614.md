@@ -12,7 +12,7 @@ the tailnet and run ollama on :11434, same pattern as rtx-betterwithage (100.125
    ```
 3. Confirm it shows in the pool:
    ```bash
-   curl -s https://a11oy.net/api/a11oy/v1/compute-pool | python3 -c 'import sys,json;[print(n["name"],n["endpoint"],n["reachable"]) for n in json.load(sys.stdin)["nodes"]]'
+   curl -s https://a-11-oy.com/api/a11oy/v1/compute-pool | python3 -c 'import sys,json;[print(n["name"],n["endpoint"],n["reachable"]) for n in json.load(sys.stdin)["nodes"]]'
    ```
    GATE: the rig appears with reachable=true; gpu_nodes_reachable increments to 3.
 4. Honest posture: sovereign:true for the rig ONLY while its live probe is reachable; degrade honestly if

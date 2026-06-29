@@ -1,4 +1,4 @@
-# Dev A — a11oy.net dark-tab wiring audit & fix
+# Dev A — a-11-oy.com dark-tab wiring audit & fix
 
 **Owner:** Opus Dev A (SZL Holdings) · **Repo:** szl-holdings/a11oy
 **Branch:** `feat/wire-dark-tabs` · **Identity:** stephenlutar2-hash <stephenlutar2@gmail.com> (commit -s)
@@ -8,7 +8,7 @@
 
 ## TL;DR
 
-Every dark a11oy.net tab now has its v1 API surface wired through ONE additive aggregator
+Every dark a-11-oy.com tab now has its v1 API surface wired through ONE additive aggregator
 (`szl_dark_surfaces_register.py`) plus ONE additive try/except register line in `serve.py`.
 All 7 surfaces register on a fresh FastAPI app; `test_dark_surfaces.py` passes **5/5**.
 The fix is **code-complete and merge-ready**, but the live tabs stay dark **until Forge
@@ -99,7 +99,7 @@ entanglement, **sovereign**) + `/api/a11oy/v1/formulas/index`.
 **Wired in code (all 7) — register confirmed on a fresh app:**
 energy/budget · engine/status · formula/sovereign · energy/provenance · heart/pulse · ayni · anatomy/loop.
 
-**Need Forge to DEPLOY (all 7) — they stay 404 on a11oy.net until the running HF Space picks
+**Need Forge to DEPLOY (all 7) — they stay 404 on a-11-oy.com until the running HF Space picks
 up the new `serve.py` + `szl_dark_surfaces_register.py`:** every surface above. The code is
 correct; the live Space is simply running an older image where these registrations are absent
 or were silently skipped at boot.

@@ -25,4 +25,4 @@ Auto-managed / tracker (by design, leave open): .github#158 (rolling CI Health D
 Real open incident (honest, needs investigation — not false-closed): **a11oy#325** HF Corpus Re-verify — a SIGNED published receipt no longer re-verifies; requires real corpus/signing investigation, not a sweep close.
 
 ## Reachability
-a11oy.net/healthz 200 · szl-mesh main CI GREEN (run 27483506146) · killinchu /elite/mesh 200 · inbox 0 unread.
+a-11-oy.com/healthz 200 · szl-mesh main CI GREEN (run 27483506146) · killinchu /elite/mesh 200 · inbox 0 unread.

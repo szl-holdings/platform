@@ -14,8 +14,8 @@ After the dev's push: confirm GitHub `git/trees/main?recursive=1` blob shas == H
 - **UDS payload (uds-bundles / szl-uds-deployment):** add szl_cuas_formulas.py to the a11oy + killinchu app images that the UDS bundle packages (mirror the Dockerfile COPY). Rebuild the UDS bundle (zarf.yaml / uds-bundle.yaml) so the counter-UAS endpoints ship in the air-gapped payload. Verify `Bundle Build Guard` GREEN on a PUSH event (the only current red is a credential-less SCHEDULED run — not real; confirm push-triggered build is green).
 - **UDS mesh (szl-mesh / szl-fleet-overlay):** if the mesh overlay advertises app capabilities/endpoints, register the new /v1/cuas/* routes in the mesh service map so meshed nodes can discover the counter-UAS C2 surface. Keep effector SIMULATED across the mesh.
 
-## 3. HETZNER / a11oy.net
-- a11oy.net (167.233.50.75) serves the a11oy image. After the GHCR image rebuilds with szl_cuas_formulas.py, the autodeploy (`ops/install-a11oy-autodeploy.sh`) pulls it. **Hetzner root redeploy is FOUNDER-GATED** — do NOT run it; LIST it for the founder with the exact command. Verify a11oy.net serves /api/a11oy/v1/cuas/summary once redeployed.
+## 3. HETZNER / a-11-oy.com
+- a-11-oy.com (167.233.50.75) serves the a11oy image. After the GHCR image rebuilds with szl_cuas_formulas.py, the autodeploy (`ops/install-a11oy-autodeploy.sh`) pulls it. **Hetzner root redeploy is FOUNDER-GATED** — do NOT run it; LIST it for the founder with the exact command. Verify a-11-oy.com serves /api/a11oy/v1/cuas/summary once redeployed.
 
 ## 4. killinchu
 killinchu is the PRIMARY home of these tabs (counter-UAS C2). Confirm /elite shows the 6 new tabs live, effector SIMULATED everywhere, evidence/readiness tabs still un-hung, 107+6 tabs all render. GHCR uds-v0.2.0 push stays FOUNDER-GATED (your token).

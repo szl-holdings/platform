@@ -23,7 +23,7 @@ HONEST by construction (Doctrine v11):
 
 Pure stdlib (lazy estimate import) so the workflow logic is unit-testable offline
 and runs anywhere. The live ESTIMATE surface is served at
-a11oy.net/api/a11oy/v1/revenue/marketplace by the revenue-estimate microservice
+a-11-oy.com/api/a11oy/v1/revenue/marketplace by the revenue-estimate microservice
 (this agent shares its estimate maths via apps/revenue-estimate/engine.py).
 """
 from __future__ import annotations

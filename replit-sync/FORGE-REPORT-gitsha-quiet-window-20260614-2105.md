@@ -27,8 +27,8 @@ The order names `/api/.../v1/honest`. The real provenance / self-detect surface 
 Box scripts `/usr/local/sbin/{a11oy,killinchu}-rebuild` patched with `--build-arg SZL_GIT_SHA=$(git rev-parse HEAD)` + `--build-arg SZL_BUILD_TIME=$(date -u …)`. Both organs rebuilt from fetched `origin/main` and container-recreated.
 
 **PROOFS (live, public, 2026-06-15 ~02:31Z):**
-- `GET https://a11oy.net/api/a11oy/v1/version` → `git_sha = ee76af80f991c6d90f04cff37f5cb847c83c6d6d` == a11oy main HEAD ✓ (build_time 2026-06-15T02:25:37Z)
-- `GET https://killinchu.a11oy.net/api/killinchu/v1/version` → `git_sha = ab82fb768dd5da63f2eab734cff9f83f7e75ffc6` == killinchu main HEAD ✓ (build_time 2026-06-15T02:16:40Z)
+- `GET https://a-11-oy.com/api/a11oy/v1/version` → `git_sha = ee76af80f991c6d90f04cff37f5cb847c83c6d6d` == a11oy main HEAD ✓ (build_time 2026-06-15T02:25:37Z)
+- `GET https://killinchu.a-11-oy.com/api/killinchu/v1/version` → `git_sha = ab82fb768dd5da63f2eab734cff9f83f7e75ffc6` == killinchu main HEAD ✓ (build_time 2026-06-15T02:16:40Z)
 - Box container env confirmed: a11oy `SZL_GIT_SHA=ee76af80…`, killinchu `SZL_GIT_SHA=ab82fb76…`.
 
 **INFRA FIX (required, durable):** the a11oy Dockerfile uses `RUN --mount=type=bind,from=llama-build` which REQUIRES BuildKit. The box had NO `docker-buildx` plugin (only `docker-trust`), and docker 29.x routes BuildKit through buildx (the legacy `DOCKER_BUILDKIT=1` integrated path is gone) → a non-interactive (`setsid`) rebuild failed RC=4 ("--mount requires BuildKit"). Fix:
@@ -64,7 +64,7 @@ Honest status: BLOCKED on founder cosign (FA-001 key) + UDS/zarf CLI not availab
    - `cosign sign --key <FA-001> ghcr.io/szl-holdings/killinchu-bundle:<new-tag>`
 6. Re-verify + redeploy: `cosign verify --certificate-identity-regexp=szl-holdings …` then `uds deploy oci://… --confirm`.
 
-**Note:** the box (a11oy.net / killinchu.a11oy.net) runs the LOCAL k3d image path, NOT the UDS GHCR bundle — so the T3/T4 git_sha proofs above are already live regardless of the UDS recut. The recut only affects the Defense-Unicorns Warhacker k8s demo bundle.
+**Note:** the box (a-11-oy.com / killinchu.a-11-oy.com) runs the LOCAL k3d image path, NOT the UDS GHCR bundle — so the T3/T4 git_sha proofs above are already live regardless of the UDS recut. The recut only affects the Defense-Unicorns Warhacker k8s demo bundle.
 
 ## Honest observations / recommended follow-ups (not done; out of explicit scope)
 - **killinchu HF Space reports `git_sha=unknown`** (`https://szlholdings-killinchu.hf.space/api/killinchu/v1/version` → all provenance "unknown"). killinchu has no `hf-git-sha-sync.yml` (only a11oy got one in T1). Recommend mirroring the a11oy `hf-git-sha-sync.yml` to killinchu so its HF Space also self-detects.

@@ -8,13 +8,13 @@
 ---
 
 ## Understanding — 2-4 lines restating the order's intent.
-The order requires setting up both `a11oy.net` and `killinchu.net` to run on a Hetzner server (167.233.50.75) with inference proxied through a sovereign GPU brain (RTX 5050). The setup should ensure that the applications are always up, with HF Spaces serving as a failover option.
+The order requires setting up both `a-11-oy.com` and `killinchu.net` to run on a Hetzner server (167.233.50.75) with inference proxied through a sovereign GPU brain (RTX 5050). The setup should ensure that the applications are always up, with HF Spaces serving as a failover option.
 
 ## Plan — ordered, concrete steps for each actionable item.
-1. **HOST BOTH APPS ON THE HETZNER BOX (a11oy.net):**
+1. **HOST BOTH APPS ON THE HETZNER BOX (a-11-oy.com):**
    - Pull Docker images from GitHub main and byte-identical to HF.
    - Create a `docker-compose.yml` file to run both `a11oy` and `killinchu` containers on the Hetzner server.
-   - Configure Caddy as a reverse proxy with automatic TLS for `https://a11oy.net` and `https://killinchu.net`.
+   - Configure Caddy as a reverse proxy with automatic TLS for `https://a-11-oy.com` and `https://killinchu.net`.
 
 2. **INFERENCE → SOVEREIGN 5050:**
    - Ensure that both application containers route model calls to the sovereign GPU brain over Tailscale.
@@ -25,7 +25,7 @@ The order requires setting up both `a11oy.net` and `killinchu.net` to run on a H
    - Simulate a system restart to confirm that all services recover within 60 seconds.
 
 4. **DNS:**
-   - Point `killinchu.net` A-record to the Hetzner server IP (167.233.50.75) if the founder owns it; otherwise, use `killinchu.a11oy.net`.
+   - Point `killinchu.net` A-record to the Hetzner server IP (167.233.50.75) if the founder owns it; otherwise, use `killinchu.a-11-oy.com`.
    - Confirm that the chosen hostname has valid TLS certificates.
 
 5. **HF AS FAILOVER:**
@@ -45,7 +45,7 @@ The order requires setting up both `a11oy.net` and `killinchu.net` to run on a H
 - **Failover Mechanism:** Setting up a health-based failover mechanism allows for seamless switching between Hetzner and HF Spaces in case of downtime. This provides an additional layer of redundancy.
 
 ## Status — per item: DONE / RECOMMENDED / BLOCKED(reason).
-1. **HOST BOTH APPS ON THE HETZNER BOX (a11oy.net):** RECOMMENDED
+1. **HOST BOTH APPS ON THE HETZNER BOX (a-11-oy.com):** RECOMMENDED
    - A `docker-compose.yml` file needs to be created and tested.
 2. **INFERENCE → SOVEREIGN 5050:** RECOMMENDED
    - Configuration for routing model calls through Tailscale needs to be implemented.

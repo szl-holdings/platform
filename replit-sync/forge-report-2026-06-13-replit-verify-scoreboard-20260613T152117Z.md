@@ -7,9 +7,9 @@ No merges, no box/deploy, no serve.py edits this pass (anti-collision). Doctrine
 is append-only and uniquely named (no collision with sibling reports).
 
 ## Live scoreboard (curl-verified THIS pass — supersedes the cached finish-it-all scoreboard)
-a11oy.net **200:** /healthz, /api/a11oy/v1/energy/budget, engine/status, /proof,
+a-11-oy.com **200:** /healthz, /api/a11oy/v1/energy/budget, engine/status, /proof,
 formula/sovereign, formula/allodial, formula/entanglement, anatomy/loop (API), /anatomy/loop (HTML).
-a11oy.net **404:** /api/a11oy/v1/research/prereg, research/verify, harvest/datacenters.
+a-11-oy.com **404:** /api/a11oy/v1/research/prereg, research/verify, harvest/datacenters.
 killinchu **200:** /healthz, /killinchu/healthz, /elite/wiring/health?probe=true.
 
 NOTE: the earlier finish-it-all scoreboard listed formula/sovereign, allodial, entanglement and
@@ -19,8 +19,8 @@ doctrine-label edits only). The earlier "serve.py is HOT, don't race" condition 
 
 ## Corrected root cause of the 3 remaining a11oy 404s (two distinct gaps, NOT one)
 1. **research/prereg = DEPLOY GAP.** It IS on main (serve.py @main contains the route string;
-   added by e8e855f0). Live a11oy.net is still 404 → the served image predates e8e855f0. An
-   a11oy.net image rebuild flips it. Founder/Forge-deploy side (dispatch_mode deploy-branch);
+   added by e8e855f0). Live a-11-oy.com is still 404 → the served image predates e8e855f0. An
+   a-11-oy.com image rebuild flips it. Founder/Forge-deploy side (dispatch_mode deploy-branch);
    freeze cautions against box touches — pre-freeze a rebuild is permitted, founder's call.
 2. **research/verify, research/trial, harvest/datacenters = CODE GAP.** 0 occurrences in
    serve.py @main → their route handlers are NOT yet registered on main (still in unmerged
@@ -34,7 +34,7 @@ serve.py" guard would false-negative on module-registered routes. A correct surf
 a LIVE-PROBE (or import-and-introspect the app's route table), not a serve.py grep.
 
 ## Founder / gated action list (unblocks the rest — unchanged in substance, sharpened)
-1. Rebuild a11oy.net image → flips research/prereg to 200 (code already on main).
+1. Rebuild a-11-oy.com image → flips research/prereg to 200 (code already on main).
 2. Land research/verify + research/trial + harvest/datacenters route registration on main
    (PR #344), then rebuild → flips the remaining 2 routes.
 3. Marketplace keys by presence (never commit/log): VAST_API_KEY, AKASH_WALLET (addr+funded flag

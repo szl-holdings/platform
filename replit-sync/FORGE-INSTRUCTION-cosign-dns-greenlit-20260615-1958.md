@@ -7,7 +7,7 @@
 
 ## CONTEXT — what is already DONE (verified 2026-06-15 ~19:55 UTC, interactive session)
 
-- **a11oy CI fully GREEN.** The last red (`HF Space module-drift guard` → `live_wires.html ahead=github`) is **fixed at root cause**: `live_wires.html` (root-level served `/live-wires` 3D page) was outside hf-sync's mirror set, so the Space served the old Khipu-Constellation iframe target (dead `frontier-viz` static space). Added `live_wires.html` to a11oy `.github/workflows/hf-sync.yml` (`on.push.paths` + `CATHEDRAL_FILES`) in commit `8de31122`. hf-sync pushed the canonical file → Space now serves sha256 `034630718fed18be` byte-identical to GitHub; CONSTELLATION → `https://a11oy.net/holographic` (live). Re-ran drift guard: **`errors (drift): 0` — OK, conclusion success.** (2 remaining are allowlisted WARNINGS: `static/3d/surfaces/fabric.js`, `static/3d/surfaces/governance.js` — intentional accepted_divergences pending box redeploy; not failures.)
+- **a11oy CI fully GREEN.** The last red (`HF Space module-drift guard` → `live_wires.html ahead=github`) is **fixed at root cause**: `live_wires.html` (root-level served `/live-wires` 3D page) was outside hf-sync's mirror set, so the Space served the old Khipu-Constellation iframe target (dead `frontier-viz` static space). Added `live_wires.html` to a11oy `.github/workflows/hf-sync.yml` (`on.push.paths` + `CATHEDRAL_FILES`) in commit `8de31122`. hf-sync pushed the canonical file → Space now serves sha256 `034630718fed18be` byte-identical to GitHub; CONSTELLATION → `https://a-11-oy.com/holographic` (live). Re-ran drift guard: **`errors (drift): 0` — OK, conclusion success.** (2 remaining are allowlisted WARNINGS: `static/3d/surfaces/fabric.js`, `static/3d/surfaces/governance.js` — intentional accepted_divergences pending box redeploy; not failures.)
 - **killinchu CI green.** Both Spaces RUNNING; box energy MEASURED + climbing (>617k J, stub_mode:false); doctrine v11 / locked 8 / c7c0ba17 / Λ=Conjecture 1 confirmed on the wire at `/api/a11oy/v1/honest`.
 - **Founder personal site** deployed fresh (LinkedIn confirmed `https://www.linkedin.com/in/stephen-lutar-279315240`; fixed a sandbox-forbidden `sessionStorage` use → in-memory cache).
 
@@ -40,12 +40,12 @@ Keep `.github/cosign.pub` fingerprint matched to FA-001 (sentinel cron warns on 
 
 ## TASK 2 — killinchu.net DNS (founder/registrar action)
 
-Verified 2026-06-15: `killinchu.net` returns **NXDOMAIN** (DNS Status 3) and **404 from Verisign RDAP** → the domain is **NOT registered** (no zone, no nameservers). This is NOT an "A-record missing" — there is no zone to edit. `a11oy.net` correctly resolves to `167.233.50.75` (box).
+Verified 2026-06-15: `killinchu.net` returns **NXDOMAIN** (DNS Status 3) and **404 from Verisign RDAP** → the domain is **NOT registered** (no zone, no nameservers). This is NOT an "A-record missing" — there is no zone to edit. `a-11-oy.com` correctly resolves to `167.233.50.75` (box).
 
 **FOUNDER action (registrar — Forge cannot do this, no registrar credentials and must not have them):**
 1. Register `killinchu.net` (or confirm the intended apex domain) at the registrar.
 2. Point nameservers to the DNS host, create zone.
-3. Add `A  @  → 167.233.50.75` (same box as a11oy.net) and `A  www → 167.233.50.75` (or CNAME www→apex).
+3. Add `A  @  → 167.233.50.75` (same box as a-11-oy.com) and `A  www → 167.233.50.75` (or CNAME www→apex).
 4. Box reverse-proxy already serves killinchu paths; once DNS propagates, `https://killinchu.net/elite` should land. Until registered, the live killinchu surface remains `https://szlholdings-killinchu.hf.space/elite` (RUNNING, green).
 
 ---

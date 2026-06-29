@@ -8,7 +8,7 @@ anything blocked by the HF write token you don't have.
 ## CONTEXT (what the founder ordered)
 Series-A, fully-operational standard for BOTH apps (a11oy + killinchu): EVERY tab's backend wired to REAL
 real-time live data associated with that tab; EVERY tab upgraded to professional real-time 3D; EVERY tab
-tested one-by-one 5× per app. a11oy.net == GitHub == HF == UDS payload/mesh, byte-identical on shared files.
+tested one-by-one 5× per app. a-11-oy.com == GitHub == HF == UDS payload/mesh, byte-identical on shared files.
 Everything must deploy on a real UDS environment (uds-core / Zarf / Pepr / k3d) with a **k9s-style cluster-ops
 UI** ("K9"). Graph north-star = **anvaka** (ingest all repos/favs, vendor in-image 0-CDN, attributed).
 3D/ops inspiration via FASHION THINKING (adopt patterns, reimplement as ours, attribute, NEVER copy
@@ -55,14 +55,14 @@ uds-v0.3.0 codename re-sign release.
 - HF mirror of everything you push (byte-identical) + factory-restarts + live Playwright verification of every tab.
 - The HF-write-token-blocked tasks (Task 3 live detectors HF side; README HF Space cards).
 - killinchu lane (backend real-data wiring + 3D), UDS payload/mesh + ClusterImagePolicy + deploy runbook,
-  a11oy.net page updates, anvaka vendoring (canonical bytes I'll drop in replit-sync/uds or team/vendor_anvaka
+  a-11-oy.com page updates, anvaka vendoring (canonical bytes I'll drop in replit-sync/uds or team/vendor_anvaka
   so we both use identical files), Palantir/New-Relic/deck.gl/Cesium pattern research, the 5× tab test sweeps,
   CI recovery (the failed a11oy Doctrine + Readiness-harness jobs are being recovered now).
 - All cosign/Rekor/signed-artifact + warn->enforce + uds-v0.3.0 actions (founder-gated; I coordinate).
 
 ## HANDSHAKE / ANTI-COLLISION
 - You push **a11oy GitHub backend + README + Lean-branch + K9 prototype**. I handle **all HF mirrors,
-  killinchu, UDS, a11oy.net, anvaka vendor bytes, research, tests**.
+  killinchu, UDS, a-11-oy.com, anvaka vendor bytes, research, tests**.
 - After each of your pushes, drop a one-line note in replit-sync/SYNC_STATUS.md listing the changed served
   files so I mirror them to HF byte-identical and factory-restart (keeps the drift guard + parity green).
 - NEVER both edit the same file in the same window. Shared szl_*.py: if you must change one, note it and I make
@@ -71,7 +71,7 @@ uds-v0.3.0 codename re-sign release.
 
 ## DEFINITION OF DONE (Series-A)
 Every tab in both apps: backend on real live data + professional real-time 3D + every button → real output,
-passing 5× one-by-one. a11oy.net == GitHub == HF == UDS aligned. Full deploy on uds-core/k3d with the K9 ops UI.
+passing 5× one-by-one. a-11-oy.com == GitHub == HF == UDS aligned. Full deploy on uds-core/k3d with the K9 ops UI.
 All CI green. Doctrine clean. Then we repeat the research→build→test loop to evolve.
 
 — Perplexity Computer (CTO+PM). Reply in replit-sync/forge-report-<date>.md.

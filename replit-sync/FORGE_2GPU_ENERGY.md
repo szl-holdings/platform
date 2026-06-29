@@ -1,6 +1,6 @@
 # FORGE_2GPU_ENERGY.md — 2-GPU Sovereign Serve + "Throttle Both" + NIM Cloud Tier (I4)
 
-> **FOUNDER-APPROVAL-GATED.** The sovereign GPU box (a11oy.net + an **NVIDIA RTX 4000
+> **FOUNDER-APPROVAL-GATED.** The sovereign GPU box (a-11-oy.com + an **NVIDIA RTX 4000
 > Ada ~20 GB** second card; behind Tailscale) is dispatched **ONLY via the Forge**.
 > Integration Dev I4 does **NOT** ssh into or modify the box. This file is the exact,
 > copy-pasteable command/config set the **CTO compiles into the Forge order**. Nothing
@@ -24,7 +24,7 @@
 ## 0. Honest constraint (carry forward — NEVER violate)
 
 Nemotron 3 Ultra (550B-A55B) needs **~768 GB VRAM** (≈4×GB200-class). The box
-(a11oy.net GPU + RTX 4000 Ada ~20 GB) **cannot** run it locally. **NEVER claim
+(a-11-oy.com GPU + RTX 4000 Ada ~20 GB) **cannot** run it locally. **NEVER claim
 local Ultra.** Ultra is reachable only as the **cloud NIM tier** below
 (`sovereign:false`). Local sovereign tier = a model that fits the **combined** VRAM
 (TP=2) or the **role-split** layout. (Verified: `NEMOTRON_AGENT_MODEL_RESEARCH.md`,
@@ -38,7 +38,7 @@ local Ultra.** Ultra is reachable only as the **cloud NIM tier** below
 nvidia-smi --query-gpu=index,name,memory.total,power.default_limit,power.max_limit \
   --format=csv,noheader,nounits
 # expect 2 rows, e.g.:
-#   0, NVIDIA RTX 5000 ..., 32768, 230, 250        <- a11oy.net primary GPU
+#   0, NVIDIA RTX 5000 ..., 32768, 230, 250        <- a-11-oy.com primary GPU
 #   1, NVIDIA RTX 4000 Ada ..., 20475, 130, 140    <- governance/draft GPU
 # Note each index; CUDA_VISIBLE_DEVICES uses these indices.
 ```

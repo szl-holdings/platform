@@ -26,7 +26,7 @@ application a copy-paste job. Apply in the ORDER below (some unlock others).
    - Apply: https://www.together.ai/  (startup/credits inquiry)
 
 ## SZL facts to paste (PUBLIC + verifiable — strengthen every application)
-- Product: **a11oy** — governed, open-weight AI with cryptographic provenance. Live: https://a11oy.net
+- Product: **a11oy** — governed, open-weight AI with cryptographic provenance. Live: https://a-11-oy.com
 - Org (public): GitHub **github.com/szl-holdings**, Hugging Face **huggingface.co/SZLHOLDINGS**.
 - License posture: **Apache-2.0** on the flagship; open-weight-only roster (Qwen2.5-Coder, Llama, DeepSeek).
 - Differentiator: **SLSA/DSSE supply-chain provenance** on releases + receipts; sovereign self-hosted GPU

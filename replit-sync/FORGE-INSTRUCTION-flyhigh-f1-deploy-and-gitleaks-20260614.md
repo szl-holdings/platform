@@ -26,7 +26,7 @@ The `Gitleaks secret scan` job fails on a WHOLE-TREE finding (NOT in PR #379's f
 1. Confirm PR #379 checks: `guard` pass, `Gitleaks secret scan` pass, doctrine/lint pass. The heavy "Build image + SBOM" job is NOT required — may stay red if pre-existing.
 2. Merge squash --admin ONLY when guard + gitleaks + doctrine + the pnt tests are green.
 3. Rebuild the box + HF image from main so the served surface picks it up.
-4. PROVE: `curl https://a11oy.net/api/a11oy/v1/pnt/limits` must show ALL FOUR pillars `wired:true` with honest labels (compute_bounds SAMPLE, others MODELED) and the `via` field present. Report the exact JSON in AUTO_STATE.json.
+4. PROVE: `curl https://a-11-oy.com/api/a11oy/v1/pnt/limits` must show ALL FOUR pillars `wired:true` with honest labels (compute_bounds SAMPLE, others MODELED) and the `via` field present. Report the exact JSON in AUTO_STATE.json.
 
 ## DO NOT
 - Do NOT force any pillar green. If an engine genuinely can't import, leave it wired:false with the honest MODULE_NOT_WIRED note — that is correct, not a failure.

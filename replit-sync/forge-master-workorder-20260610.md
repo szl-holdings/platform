@@ -24,7 +24,7 @@
 
 ## 1. WHAT PARENT ALREADY SHIPPED THIS SESSION (do NOT redo)
 - locked 5→8 across kernel + a11oy /console + killinchu /elite + HF org card + GitHub org profile + anatomy
-  + a11oy.net `cathedral.html` + K9 ops. Honest/formulas tabs fixed (badges + chart slices). Verified live.
+  + a-11-oy.com `cathedral.html` + K9 ops. Honest/formulas tabs fixed (badges + chart slices). Verified live.
 - **Operator widget = Chaski**: vendored `static-vendor/a11oy-operator-widget.js` (0 CDN, no codenames),
   injected on EVERY served HTML surface via additive serve.py middleware in BOTH apps, wired to live
   `/api/a11oy/code/chat|agent` + v4 ledger. Byte-identical both apps. **Do NOT re-add the old rosie CDN script.**
@@ -35,19 +35,19 @@
 
 ## 2. YOUR TASKS — make the remaining pieces REAL & OPERATIONAL
 
-### A. a11oy.net live (Hetzner) — HIGHEST VISIBILITY
+### A. a-11-oy.com live (Hetzner) — HIGHEST VISIBILITY
 GitHub main `cathedral.html` is locked-8, but the Hetzner box (167.233.50.75) still SERVES the old 5-set.
 The auto-deploy timer isn't picking up commits. **On the box, as root, ONCE:**
 ```
 curl -fsSL https://raw.githubusercontent.com/szl-holdings/a11oy/main/ops/install-a11oy-autodeploy.sh | sudo bash
 ```
-This installs a systemd timer that polls GitHub main every 3 min and runs `a11oy-rebuild`. After it, a11oy.net
-serves locked-8 + the Chaski widget within ~3 min of any push. Verify: `curl -s https://a11oy.net | grep -o "F1, F4, F7"`.
+This installs a systemd timer that polls GitHub main every 3 min and runs `a11oy-rebuild`. After it, a-11-oy.com
+serves locked-8 + the Chaski widget within ~3 min of any push. Verify: `curl -s https://a-11-oy.com | grep -o "F1, F4, F7"`.
 
 ### B. Self-hosted brain — flips Chaski from labeled-stub to live (NO provider token, our own weights)
 `szl_llm_registry.py` already has an `szl-local` provider reading env `SZL_LOCAL_LLM_URL`. On the RTX box:
 1. `ollama pull qwen2.5-coder:32b` (or vLLM serving the AWQ build). Apache-2.0, fits a 24–32GB GPU.
-2. Expose as OUR endpoint via Cloudflare Tunnel → `https://brain.a11oy.net` with OUR OWN bearer (not a provider key).
+2. Expose as OUR endpoint via Cloudflare Tunnel → `https://brain.a-11-oy.com` with OUR OWN bearer (not a provider key).
 3. Set Space secrets on SZLHOLDINGS/{a11oy,killinchu}: `SZL_LOCAL_LLM_URL` (+ `SZL_LOCAL_LLM_KEY`).
 4. Update the `szl-local` registry `model_slug` placeholder → `qwen2.5-coder:32b` so routing receipts stay truthful.
 Chaski flips stub→live the instant the secret resolves. (Honest line: we run open weights we legally downloaded;

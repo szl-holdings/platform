@@ -17,7 +17,7 @@ NOT touch the box. Your job is the INSPECTION + everything around it.
    KEY INVARIANT to verify: sovereign:true ONLY when a live /v1/models probe succeeded this request.
    A dropped link must NEVER show sovereign:true. If you ever see sovereign:true with
    gpu_reachable:false → that's a real defect, notify immediately.
-2. HEALTHZ HONESTY: both Spaces' /v4/healthz + a11oy.net/v4/healthz — doctrine v11, locked=8
+2. HEALTHZ HONESTY: both Spaces' /v4/healthz + a-11-oy.com/v4/healthz — doctrine v11, locked=8
    {F1,F4,F7,F11,F12,F18,F19,F22} @ c7c0ba17, Λ=Conjecture 1. Flag any stale/overclaim.
 3. BYTE-IDENTICAL: operator_shell_v4.py (the LLM router) + shared szl_*.py + the maritime/feeds/asw
    modules — GitHub HEAD == HF Space, all present in serve.py register + Dockerfile COPY + hf-sync
@@ -28,7 +28,7 @@ NOT touch the box. Your job is the INSPECTION + everything around it.
    all 200. Effector SIMULATED everywhere.
 
 ## ON GPU-ONLINE (when posture flips sovereign:true)
-Confirm both Spaces show sovereign:true honestly, the box a11oy.net/v4/healthz shows sovereign:true,
+Confirm both Spaces show sovereign:true honestly, the box a-11-oy.com/v4/healthz shows sovereign:true,
 and notify the founder: "SZL inference now sovereign on your GPU — verified by live /models probe."
 
 ## DOCTRINE HARD GATE

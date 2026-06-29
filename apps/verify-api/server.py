@@ -3,7 +3,7 @@
 # Doctrine v11 LOCKED 749/14/163 · Λ = Conjecture 1 (NOT a theorem)
 """server — public offline-receipt VERIFY API for a11oy.
 
-Served at https://a11oy.net/api/a11oy/v1/verify (standalone systemd unit on
+Served at https://a-11-oy.com/api/a11oy/v1/verify (standalone systemd unit on
 127.0.0.1:8083, fronted by nginx; ADDITIVE — no serve.py edit). CORS is open so
 the public site (and anyone) can call it from a browser.
 

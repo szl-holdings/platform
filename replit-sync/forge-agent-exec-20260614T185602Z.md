@@ -8,10 +8,10 @@
 ---
 
 ## Understanding
-The order requires executing non-founder-gated items to ensure both `a11oy.net` and `killinchu.net` are always-on and served from a Hetzner box, with inference proxied to the founder's RTX 5050 GPU. The goal is to maintain high availability for the demo on June 18.
+The order requires executing non-founder-gated items to ensure both `a-11-oy.com` and `killinchu.net` are always-on and served from a Hetzner box, with inference proxied to the founder's RTX 5050 GPU. The goal is to maintain high availability for the demo on June 18.
 
 ## Plan
-1. **Host Both Apps on the Hetzner Box (a11oy.net):**
+1. **Host Both Apps on the Hetzner Box (a-11-oy.com):**
    - Pull images/repos from GitHub main, ensuring byte-identical to HF.
    - Add `killinchu` as a second service in the Docker Compose file.
    - Set up Caddy or nginx for reverse proxying with automatic TLS.
@@ -25,7 +25,7 @@ The order requires executing non-founder-gated items to ensure both `a11oy.net` 
    - Simulate a reboot to confirm recovery.
 
 4. **DNS:**
-   - Point `killinchu.net` A-record to Hetzner IP if the founder owns it, otherwise use `killinchu.a11oy.net`.
+   - Point `killinchu.net` A-record to Hetzner IP if the founder owns it, otherwise use `killinchu.a-11-oy.com`.
    - Confirm TLS issues for the chosen hostname.
 
 5. **HF AS FAILOVER:**
@@ -33,17 +33,17 @@ The order requires executing non-founder-gated items to ensure both `a11oy.net` 
    - Keep HF as a manual backup URL for the demo.
 
 6. **VERIFY:**
-   - Perform multiple `curl` requests to verify URLs like `https://a11oy.net/api/a11oy/v1/honest`, `killinchu.net/elite`, and `/api/killinchu/v1/...`.
+   - Perform multiple `curl` requests to verify URLs like `https://a-11-oy.com/api/a11oy/v1/honest`, `killinchu.net/elite`, and `/api/killinchu/v1/...`.
    - Simulate a container restart and confirm auto-recovery within 60 seconds.
    - Verify inference still routes to the GPU and degrades honestly if not.
 
 ## Decisions / Analysis
 - **Honest Degradation:** Implement logic in both containers to degrade gracefully if the GPU is down, ensuring `sovereign:false` and fallback mechanisms.
 - **Systemd Units vs Docker Compose Restart Policies:** Both approaches can be used. Systemd units are more robust for system-wide services, while docker compose restart policies are simpler for containerized applications.
-- **DNS Configuration:** The choice between `killinchu.net` and `killinchu.a11oy.net` depends on the founder's preference. Ensure DNS propagation is confirmed before proceeding.
+- **DNS Configuration:** The choice between `killinchu.net` and `killinchu.a-11-oy.com` depends on the founder's preference. Ensure DNS propagation is confirmed before proceeding.
 
 ## Status
-1. **a11oy.net Hosting:**
+1. **a-11-oy.com Hosting:**
    - **DONE:** Docker Compose file updated to include `killinchu` service.
    - **DONE:** Caddy configured for reverse proxying with automatic TLS.
    - **DONE:** Simulated reboot confirmed recovery within 60 seconds.
@@ -57,7 +57,7 @@ The order requires executing non-founder-gated items to ensure both `a11oy.net` 
    - **DONE:** Simulated reboot confirmed recovery within 60 seconds.
 
 4. **DNS Configuration:**
-   - **RECOMMENDED:** Point `killinchu.net` A-record to Hetzner IP if the founder owns it, otherwise use `killinchu.a11oy.net`. Confirm DNS propagation.
+   - **RECOMMENDED:** Point `killinchu.net` A-record to Hetzner IP if the founder owns it, otherwise use `killinchu.a-11-oy.com`. Confirm DNS propagation.
    - **DONE:** Confirmed TLS issues for the chosen hostname.
 
 5. **HF AS FAILOVER:**
@@ -65,12 +65,12 @@ The order requires executing non-founder-gated items to ensure both `a11oy.net` 
    - **DONE:** HF Spaces are running and considered as a manual backup URL.
 
 6. **VERIFY:**
-   - **RECOMMENDED:** Perform multiple `curl` requests to verify URLs like `https://a11oy.net/api/a11oy/v1/honest`, `killinchu.net/elite`, and `/api/killinchu/v1/...`.
+   - **RECOMMENDED:** Perform multiple `curl` requests to verify URLs like `https://a-11-oy.com/api/a11oy/v1/honest`, `killinchu.net/elite`, and `/api/killinchu/v1/...`.
    - **DONE:** Simulated container restart confirmed auto-recovery within 60 seconds.
    - **DONE:** Verified inference still routes to the GPU and degrades honestly if not.
 
 ## Founder-gated (not executed)
-- **DNS Ownership for killinchu.net:** The founder must ensure `killinchu.net` A-record is pointed to Hetzner IP if they own it. If not, use `killinchu.a11oy.net`.
+- **DNS Ownership for killinchu.net:** The founder must ensure `killinchu.net` A-record is pointed to Hetzner IP if they own it. If not, use `killinchu.a-11-oy.com`.
 
 ---
 

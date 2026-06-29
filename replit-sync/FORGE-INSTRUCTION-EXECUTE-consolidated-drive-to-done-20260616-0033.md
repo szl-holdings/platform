@@ -6,7 +6,7 @@ Doctrine v11 HARD GATES (never weaken): locked = EXACTLY 8 {F1,F4,F7,F11,F12,F18
 
 ## STATE (verified 2026-06-15 ~20:28 ET)
 - Flagships GREEN: a11oy HEAD 21393984 (envelope regression FIXED — 8 governed surfaces back to status=REAL), killinchu green. All 4 HF Spaces RUNNING.
-- TAWANTIN fabric LIVE: a11oy.net/tawantin + /fabric (200, real page). Name = TAWANTIN ("four united parts"); Chaski=messenger, Khipu=ledger (no collision with locked F7 Chaski-FIFO).
+- TAWANTIN fabric LIVE: a-11-oy.com/tawantin + /fabric (200, real page). Name = TAWANTIN ("four united parts"); Chaski=messenger, Khipu=ledger (no collision with locked F7 Chaski-FIFO).
 - TAWANTIN Zarf bundle shipped + schema-valid: szl-uds-deployment bundles/tawantin (commit 4b6fbbcf), additive, guard-compatible.
 - Mesh: 2 sovereign GPUs reachable (laptop rtx-betterwithage + chaski 100.102.173.88). Energy MEASURED ~843k J climbing, stub_mode:false, per-node labels live.
 - Multi-GPU coordinator shipped + tested: szl-router mesh_coordinator.py (3652c7b9), runnable, not yet the production front.

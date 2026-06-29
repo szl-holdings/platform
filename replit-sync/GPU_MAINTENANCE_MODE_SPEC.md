@@ -16,7 +16,7 @@ fallback, but say so HONESTLY — never claim sovereign while the GPU is down. T
   unacceptable outcome. Maintenance is an HONEST state, like the deterministic-stub is honest.
 
 ## Now (immediate, no new model needed) — CPU/router fallback, honestly labeled
-Set on the a11oy.net deploy env and rebuild:
+Set on the a-11-oy.com deploy env and rebuild:
   A11OY_GPU_STATUS="maintenance"
   A11OY_GPU_MAINTENANCE_NOTE="RTX 5000 (betterwithage) down for maintenance — serving on CPU/HF-router fallback; sovereign GPU resumes when the node is back."
   # ensure NOT claiming sovereign while GPU down:

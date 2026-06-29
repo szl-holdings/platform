@@ -4,7 +4,7 @@
 (1) sync MEASURED cert to the HF a11oy Space mirror; (2) DSSE-sign the certificate.
 
 ## What was actually true on arrival (order premises corrected against live reality)
-- a11oy.net `/api/a11oy/v1/pinn/certificate` → **MEASURED** (real NVML, sovereign GPU betterwithage / RTX 5050 Laptop: 9.39 W × 8.62 s, Δ80.967 J / 3 live samples). REAL.
+- a-11-oy.com `/api/a11oy/v1/pinn/certificate` → **MEASURED** (real NVML, sovereign GPU betterwithage / RTX 5050 Laptop: 9.39 W × 8.62 s, Δ80.967 J / 3 live samples). REAL.
 - GitHub `szl-holdings/a11oy` main → cert **MEASURED** + **real on-metal Ed25519 DSSE** envelope (`physical_bounds_certificate.dsse.json`, keyid `sha256:80a0cfc7…`, signed with `/root/ed25519.pem` via openssl, self-verified). Already committed (8054ee9, ancestor of main). REAL — not faked.
 - HF Space `szlholdings-a11oy.hf.space` → **SAMPLE** (the gap).
 - Order said run `hf-sync.yml`; that workflow mirrors only README + front-door HTML/JS. `hf-sync-backend.yml` mirrors only **.py + Dockerfile** (derived from Dockerfile COPY sources, filtered to `.py`). **Neither mirrors the cert JSON data files.** So the Space Dockerfile had the `COPY physical_bounds_certificate.json …` line but the **cert JSONs were never uploaded to the Space repo** → it built/served SAMPLE. (Verified: `list_repo_files` → cert files = NONE.)
@@ -14,7 +14,7 @@
 2. Triggered a factory rebuild. Space rebuilt (RUNNING_BUILDING → RUNNING) and **flipped to MEASURED**.
 
 ## Verified end state (all three surfaces consistent)
-- a11oy.net → **MEASURED** (5/5 consecutive hits; earlier flap gone).
+- a-11-oy.com → **MEASURED** (5/5 consecutive hits; earlier flap gone).
 - HF Space → **MEASURED** + DSSE envelope live (keyid `sha256:80a0cfc7…`).
 - GitHub main → **MEASURED** + DSSE.
 

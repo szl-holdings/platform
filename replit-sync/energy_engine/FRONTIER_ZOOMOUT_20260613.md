@@ -19,7 +19,7 @@ honest surface.
 - **a11oy** — already runs a **LIVE formula-serving rail**: `GET /api/a11oy/v1/formula/<name>` for
   pacbayes, welford, quorum, holevo, bloom, kalman, reidemeister, hnsw, bls, plus `/formulas/index`
   returning each formula's {citation, lean_theorem}. Live now at
-  `https://a11oy.net/api/a11oy/v1/formulas/index` (200). This is the rail to extend.
+  `https://a-11-oy.com/api/a11oy/v1/formulas/index` (200). This is the rail to extend.
 - **lutar-lean** — beyond the locked-8, there are THREE kernel-checked, 0-sorry, no-new-axiom
   **EXPERIMENTAL** backbones merged to `main` that are **NOT on the rail**:
   1. `Lutar/Allodial.lean` (#229) — order-theoretic allodiality.

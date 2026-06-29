@@ -21,7 +21,7 @@ The `a11oy` Dockerfile is single-stage and never `COPY . .`; it COPYs source per
 - Container :7861 endpoints `index/world/plan/receipt/posture` → all **200** with REAL data (live aWATTar negative-price; `joules_label:"sample"` off-box, honest).
 
 ## Public-surface clarification (NOT a half-state)
-`a11oy.net /api/a11oy/v1/harvest/*` and `/energy/*` route via nginx to a **separate standalone
+`a-11-oy.com /api/a11oy/v1/harvest/*` and `/energy/*` route via nginx to a **separate standalone
 service on :8082** (`/opt/szl/energy-harvest/`, uvicorn `server:app`) — NOT the :7861 container.
 That service is the canonical public harvest surface and is fully healthy:
 `/energy/{harvest,posture,soak,budget,provenance,reservoir,proof,metrics,body,reverse-loop,compute-pool}`

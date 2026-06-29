@@ -1,7 +1,7 @@
 # SZL Forge — EXECUTE ORDER (2026-06-15 ~16:40 EDT): DRIVE THE 3 BOX ITEMS TO DONE-AND-VERIFIED
 
 **Dispatch is ON** (`AUTO_STATE.json`: `dispatch_mode=dispatch-cmd`, `dispatch_ok=true`). This is an
-EXECUTE order, not a report request. Run the box ops yourself on the Hetzner host (a11oy.net,
+EXECUTE order, not a report request. Run the box ops yourself on the Hetzner host (a-11-oy.com,
 167.233.50.75). Founder Stephen Lutar has granted full admin. **Stop returning "RECOMMENDED" — either
 EXECUTE with pasted proof, or report BLOCKED with the EXACT shell error.** Warhacker demo June 16–19.
 
@@ -54,7 +54,7 @@ checkout path / container name to whatever this host actually uses (the same pla
 
 3. **Re-arm the energy operator** so `running:true` and joules keep climbing (NEVER reset totals):
    ```bash
-   curl -s -X POST https://a11oy.net/api/a11oy/v1/energy/operator/start | head -c 400
+   curl -s -X POST https://a-11-oy.com/api/a11oy/v1/energy/operator/start | head -c 400
    ```
    `allow_stub=False` is now in effect ⇒ if no GPU is reachable it goes DEGRADED + mints NO job
    (never a `local-stub`). `rtx-betterwithage` is reachable, so normal MEASURED operation continues.
@@ -67,16 +67,16 @@ checkout path / container name to whatever this host actually uses (the same pla
 ## PROVE (paste verbatim in your forge-agent-exec report — content matters, not just HTTP 200)
 ```bash
 # Item 2 — git_sha now present AND equals GitHub a11oy main HEAD:
-curl -s https://a11oy.net/api/a11oy/v1/honest | python3 -c 'import sys,json;d=json.load(sys.stdin);print("git_sha:",d.get("git_sha","<MISSING>"))'
+curl -s https://a-11-oy.com/api/a11oy/v1/honest | python3 -c 'import sys,json;d=json.load(sys.stdin);print("git_sha:",d.get("git_sha","<MISSING>"))'
 #   MUST print eb972068a6f65d4213546ab0c37575f636beacf8 (or whatever `git rev-parse HEAD` was), NOT <MISSING>/unknown.
 
 # Item 3 — /energy is the CURRENT 27KB page with live-joules wiring (not the stale 9KB one):
-curl -s https://a11oy.net/energy | wc -c                              # MUST be ~27443, NOT 9065
-curl -s https://a11oy.net/energy | grep -c 'energy/operator/status'   # MUST be >= 1, NOT 0
-curl -s https://a11oy.net/energy-ops | grep -c 'energy/operator/status'  # stays >= 1 (already current)
+curl -s https://a-11-oy.com/energy | wc -c                              # MUST be ~27443, NOT 9065
+curl -s https://a-11-oy.com/energy | grep -c 'energy/operator/status'   # MUST be >= 1, NOT 0
+curl -s https://a-11-oy.com/energy-ops | grep -c 'energy/operator/status'  # stays >= 1 (already current)
 
 # Item 1 — meter still live + honest after redeploy:
-curl -s https://a11oy.net/api/a11oy/v1/energy/operator/status | python3 -c 'import sys,json;d=json.load(sys.stdin);print("running",d["running"],"stub_mode",d["stub_mode"],"joules",d["joules_measured_total"],"by_node",list(d["by_node"].keys()),"node_status",d["node_status"])'
+curl -s https://a-11-oy.com/api/a11oy/v1/energy/operator/status | python3 -c 'import sys,json;d=json.load(sys.stdin);print("running",d["running"],"stub_mode",d["stub_mode"],"joules",d["joules_measured_total"],"by_node",list(d["by_node"].keys()),"node_status",d["node_status"])'
 #   MUST show stub_mode:false, by_node has NO local-stub, joules >= 466685 and climbing, chaski DEGRADED/standby.
 ```
 

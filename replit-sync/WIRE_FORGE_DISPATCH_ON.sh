@@ -2,7 +2,7 @@
 # =============================================================================
 # WIRE_FORGE_DISPATCH_ON.sh
 # ONE paste to turn Forge's hands-off execution ON. Run AS ROOT on the Hetzner
-# box (a11oy.net, 167.233.50.75). This is the single founder/box-operator action
+# box (a-11-oy.com, 167.233.50.75). This is the single founder/box-operator action
 # that flips AUTO_STATE.json from  dispatch_mode:none / dispatch_ok:false  to a
 # real executing loop, so the pinned NEXT_ORDER.md jobs (jtoken MEASURED, UDS
 # recut, box redeploy, chaski standby) actually run instead of being reported.

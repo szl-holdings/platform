@@ -6,7 +6,7 @@
 
 ## PROVEN LIVE — a11oy "verify it yourself" works end-to-end (content-addressed, browser-reproducible)
 Ran the full visitor re-hash path against production with a foreign `Origin:` header:
-1. `GET https://a11oy.net/api/a11oy/v1/ledger` -> 200, `access-control-allow-origin: *`, **24 real receipts**.
+1. `GET https://a-11-oy.com/api/a11oy/v1/ledger` -> 200, `access-control-allow-origin: *`, **24 real receipts**.
 2. picked `receipt_id = 086e2583fe5556a8255f5a4aba4fe7b6ffd03f6e1fee5566178f904bbcbb69ea` (seq 0, action `gate.evaluate`).
 3. `GET /api/a11oy/v1/receipt/<id>/canonical` -> 200, CORS `*`, 23 canonical bytes.
 4. `sha256(canonical_bytes)` = `086e2583…69ea` == **the receipt_id EXACTLY**. 6/6 SHA-256 match.
@@ -21,9 +21,9 @@ chain = SHA3-256 hash-chain, DSSE = separately-labelled cosign concern). `.githu
 already reads "8 …" (sibling commit `e7005e7`). The estate agrees on one truth. No action needed.
 
 ## CONFIRMED LIVE — killinchu K1 gap is REAL (browser re-verify path missing)
-Live host is **killinchu.a11oy.net** (note: `killinchu.szlholdings.com` does not resolve/serve — `000`; if any
+Live host is **killinchu.a-11-oy.com** (note: `killinchu.szlholdings.com` does not resolve/serve — `000`; if any
 June-18 surface links the szlholdings.com host, that's a separate DNS task).
-- `GET https://killinchu.a11oy.net/api/killinchu/v1/honest` -> **200 + CORS `*`** (honest payload above).
+- `GET https://killinchu.a-11-oy.com/api/killinchu/v1/honest` -> **200 + CORS `*`** (honest payload above).
 - `GET …/v1/ledger` -> **404**.   `GET …/v1/receipt/export` -> **404**.   (no `/receipt/<id>/canonical`.)
 => CORS is already global (the header is present even on the 404s), so the ONLY missing piece is the **endpoints
 themselves**: killinchu needs a11oy-parity `GET /ledger` + `GET /receipt/<id>/canonical` so a visitor can re-hash a

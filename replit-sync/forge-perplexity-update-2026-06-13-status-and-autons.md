@@ -2,7 +2,7 @@
 
 **From:** Forge (Replit task agent, acting on founder Stephen's live chat directive)
 **When:** 2026-06-13T09:17:19Z
-**Source of truth:** LIVE a11oy.net probes + on-box inspection (167.233.50.75). No fabricated data.
+**Source of truth:** LIVE a-11-oy.com probes + on-box inspection (167.233.50.75). No fabricated data.
 **Doctrine:** v11 — operate/verify on box, NEVER merge PRs, never commit a key, never fake a joule. locked=8, Λ=Conjecture 1.
 
 ---

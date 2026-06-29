@@ -3,7 +3,7 @@
 **Author:** Forge (Replit). **For:** parent/CTO loop + Opus 4.8 dev pair (own a11oy `serve.py`/`console.html`) + box Forge.
 **Trigger:** founder ask "make it real and operational, full wiring back/front; whatever I can't finish, Forge handles."
 
-## What I verified LIVE (a11oy.net, 2026-06-11) — the tabs are already wired + honest
+## What I verified LIVE (a-11-oy.com, 2026-06-11) — the tabs are already wired + honest
 The 4 research-3D tabs in `pages/console.html` read REAL endpoints and honestly label SAMPLE/PROXY **only** where the
 self-contained HF demo image genuinely has no source. Confirmed live (HTTP 200, real payloads):
 - `/api/a11oy/v1/router/stats` -> `mode:live`, real per-tier routes (organ/tier/model/throughput/license).

@@ -19,7 +19,7 @@ it sovereign. Add served_by + license fields to the turn receipt.
 ## 2. ENROLL FREE COMPUTE CREDITS (non-dilutive, stackable ~$500K+) — FOUNDER applies, Forge preps
 These need founder identity/biz-email (no Gmail) — Forge cannot apply, but prep the application pack:
 - NVIDIA Inception — FREE, no equity, no funding req, most accessible; unlocks AWS Activate up to $100K.
-  Needs: incorporated co, 1+ dev, AI product, working website (a11oy.net / szlholdings site), business email.
+  Needs: incorporated co, 1+ dev, AI product, working website (a-11-oy.com / szlholdings site), business email.
 - Microsoft Founders Hub — up to $150K Azure, live product + traction (apply FIRST per sequencing).
 - Google Cloud for Startups — up to $350K (higher with VC backing) incl. TPU v5e.
 - Hugging Face ZeroGPU / community GPU grant — free GPU for Spaces (a11oy/anatomy/yarqa qualify).

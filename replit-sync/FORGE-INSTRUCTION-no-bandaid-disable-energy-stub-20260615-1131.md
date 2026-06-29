@@ -14,7 +14,7 @@ unmetered stub. So:
 
 1. **On the LIVE box deployment, start the energy operator with `allow_stub=False`** (env or constructor —
    whichever the box launch path uses; add A11OY_ENERGY_ALLOW_STUB=0 support if not present). Keep allow_stub=True
-   available ONLY for true offline sandbox/CI (where there is genuinely no GPU), never on a11oy.net.
+   available ONLY for true offline sandbox/CI (where there is genuinely no GPU), never on a-11-oy.com.
 2. With allow_stub=False: if NO GPU node is reachable, the operator must report DEGRADED honestly and mint NO
    jobs — never a local-stub job. (rtx-betterwithage is reachable now, so normal operation is unaffected.)
 3. **Clear the stale `local-stub` entry from the LIVE by_node/node_status** so the status payload reflects only

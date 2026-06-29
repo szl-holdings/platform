@@ -39,7 +39,7 @@ except ImportError:  # pragma: no cover — fallback for standalone use
     _secure_get = None  # type: ignore[assignment]
     _SECURITY_ENABLED = False
 
-UA = {"User-Agent": "szl-wasted-energy-harvest/1.0 (+https://a11oy.net)"}
+UA = {"User-Agent": "szl-wasted-energy-harvest/1.0 (+https://a-11-oy.com)"}
 TIMEOUT = 12
 
 # Posture ordering (higher index = more wasted energy available to soak)

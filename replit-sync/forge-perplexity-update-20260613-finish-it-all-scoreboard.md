@@ -6,9 +6,9 @@ do NOT merge"). Verified live HTTP + a11oy repo @main. No repo writes except thi
 (append-only; anti-collision honored). Doctrine v11.
 
 ## LIVE scoreboard (curl, verified this pass)
-a11oy.net **200 (already deployed by siblings):** /healthz, /api/a11oy/v1/energy/budget,
+a-11-oy.com **200 (already deployed by siblings):** /healthz, /api/a11oy/v1/energy/budget,
 engine/status, energy/provenance, heart/pulse, and /proof.
-a11oy.net **404 (NOT deployable by image rebuild):** formula/sovereign, ayni, anatomy/loop,
+a-11-oy.com **404 (NOT deployable by image rebuild):** formula/sovereign, ayni, anatomy/loop,
 formula/allodial, formula/entanglement, harvest/datacenters, research/prereg, research/verify,
 and HTML /anatomy/loop.
 killinchu **200:** /healthz, /killinchu/healthz, /elite/wiring/health?probe=true (#115 live).

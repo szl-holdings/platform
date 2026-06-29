@@ -4,10 +4,10 @@ Founder re-issued: "check github for instructions from perplexity and get forge 
 
 ## Audited
 Active order **R-MOBILE-ELEGANT** (506aee3d) + R-FLY-HIGH-2 (8a97ca9c) + R-FLY-HIGH-DEPLOY (484a6532).
-forge-auto marked 506aee3d `state=done` @21:07Z — but with a SINGLE probe (`a11oy.net/healthz:200`), `dispatch_mode=none`. It did NOT verify or perform the FORGE-owned HF static-space pushes.
+forge-auto marked 506aee3d `state=done` @21:07Z — but with a SINGLE probe (`a-11-oy.com/healthz:200`), `dispatch_mode=none`. It did NOT verify or perform the FORGE-owned HF static-space pushes.
 
 ## Band-aid found → genuinely fixed
-HF `SZLHOLDINGS/cathedral` was STALE at **locked-proven = 5** (served app.js 21KB) while the GitHub source AND a11oy.net/cathedral were already **locked = 8**. The order flagged this 3×; the auto-loop never pushed it.
+HF `SZLHOLDINGS/cathedral` was STALE at **locked-proven = 5** (served app.js 21KB) while the GitHub source AND a-11-oy.com/cathedral were already **locked = 8**. The order flagged this 3×; the auto-loop never pushed it.
 
 ## FORGE action — 5 HF static spaces pushed from `replit-sync/hf_spaces/`
 Content files only; HF Space README/config preserved (cathedral source README was a corrupted HTML render — intentionally NOT pushed, to avoid breaking the static-space config).
@@ -21,8 +21,8 @@ Content files only; HF Space README/config preserved (cathedral source README wa
 | anatomy | anatomy/ | a719df88 | verify-widget; V8/V9 dual-body lens intact |
 
 ## Confirmed ALREADY LIVE on the box (no image rebuild needed)
-- a11oy.net/cathedral = **locked 8** (268KB)
-- a11oy.net/console = mobile-live (**65** clamp/44px/safe-area hints, 1.5MB)
+- a-11-oy.com/cathedral = **locked 8** (268KB)
+- a-11-oy.com/console = mobile-live (**65** clamp/44px/safe-area hints, 1.5MB)
 - killinchu /elite = mobile-live (**49** hints, 1.15MB)
 - hatun-mcp content-negotiates: `Accept: text/html`→HTML console 200; `application/json`→original JSON 200
 - a11oy main push-CI all green @ ee9fa6e8 (hf-module-drift is delegated to org `.github`, not an a11oy workflow)

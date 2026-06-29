@@ -17,7 +17,7 @@ replit-sync/GPU_MAINTENANCE_MODE_SPEC.md. This is "HONEST BY DESIGN" applied to 
 maintenance is an honest YELLOW state, not a failure and NOT an overclaim.
 
 DO NOW (no new model needed):
-  1) On a11oy.net deploy env: set A11OY_GPU_STATUS="maintenance" +
+  1) On a-11-oy.com deploy env: set A11OY_GPU_STATUS="maintenance" +
      A11OY_GPU_MAINTENANCE_NOTE="RTX 5000 (betterwithage) down for maintenance — serving on
      CPU/HF-router fallback; sovereign GPU resumes when the node is back."
      UNSET A11OY_MODEL_BASE_URL + A11OY_GPU_LABEL so the banner CANNOT flip sovereign:true.
@@ -80,7 +80,7 @@ A11OY_MODEL_BASE_URL. key_resolution still cosmetically reports hf-router. THIS 
    primaries (T2 Llama-3.3-70B, T3 Qwen2.5-Coder-32B) are NOT served, EITHER `ollama pull` them
    if the GPU has capacity, OR build a tier->local-model map to a served open-weight tag
    (e.g. all tiers -> llama3.1:8b / qwen2.5-coder:7b). Open-weight ONLY.
-2) From the a11oy.net APP container: `curl -s http://100.125.77.31:11434/v1/models` — confirm the
+2) From the a-11-oy.com APP container: `curl -s http://100.125.77.31:11434/v1/models` — confirm the
    Tailscale Ollama endpoint is reachable from where the app actually runs. If not reachable,
    fix the tailnet wiring so it is (the app must reach the GPU, not just the box).
 3) Apply your Part-1 patch (the ast-validated _serving_base()/_serving_is_local()/_inference_headers
@@ -116,13 +116,13 @@ it is GRANTED. You are cleared to make the prod/Hetzner change. Execute autonomo
 DO IT NOW (open-weight, OpenAI-compatible, on the betterwithage GPU):
   1) ollama pull qwen2.5-coder:7b           # keep llama3.1:8b serving too
   2) curl -s http://127.0.0.1:11434/v1/models   # MUST 200 with the model BEFORE step 4
-  3) set on the a11oy.net deploy env (NOT committed):
+  3) set on the a-11-oy.com deploy env (NOT committed):
        A11OY_MODEL_BASE_URL=http://127.0.0.1:11434/v1
        A11OY_GPU_LABEL="NVIDIA RTX 5000 @ Hetzner (betterwithage)"
   4) sudo a11oy-rebuild
 
 PROVE (report to platform#343, NOT to the token file):
-  curl -s https://a11oy.net/api/a11oy/code/healthz \
+  curl -s https://a-11-oy.com/api/a11oy/code/healthz \
     | jq '.sovereign,.inference,.key_resolution.base_url,.key_resolution.env_used'
   WANT: true  "self-hosted-gpu"  "http://127.0.0.1:11434/v1"  (env_used != "HF_TOKEN")
   + one /api/a11oy/code/chat/stream turn whose route.model is the local tag, cost_usd absent/0.
@@ -138,7 +138,7 @@ HONESTY FLOOR (v11) — non-negotiable:
 Full detail + commands: replit-sync/forge-CODE-DONE-box-only-20260612-2148.md.
 
 
-## R0 (NEW, top priority) — a11oy.net sovereign flip: CODE IS DONE, only the box remains
+## R0 (NEW, top priority) — a-11-oy.com sovereign flip: CODE IS DONE, only the box remains
 LIVE NOW (verified 02:13 UTC): /api/a11oy/code/healthz -> sovereign:false, inference:hf-router, base_url:router.huggingface.co/v1, model Qwen2.5-Coder-32B (open-weight, honest). Goal: flip to self-hosted-gpu. Root cause is NOT permission (founder-approved) — it is dispatch_mode:none (no FORGE_DISPATCH_CMD wired). Full box-only detail + exact commands: replit-sync/forge-CODE-DONE-box-only-20260612-2148.md.
 The serving-path rewire (#324) shipped + verified live: a11oy main HEAD 730dc929
 (blob 91a7fb28), deployed byte-identical to SZLHOLDINGS/a11oy (oid match), ast.parse-clean,
@@ -150,15 +150,15 @@ is non-router AND _local_endpoint_reachable() passes — else HF Router; _infere
 (A11OY_LOCAL_CODE_MODEL=qwen2.5-coder:7b, A11OY_LOCAL_GENERAL_MODEL=llama3.1:8b) maps tags;
 cost_usd=0 on local turns. Serving path + reported posture derive from the SAME probe, so
 the overclaim is now STRUCTURALLY impossible.
-=> NO further app-code change is needed. To make a11oy.net genuinely sovereign, the only
+=> NO further app-code change is needed. To make a-11-oy.com genuinely sovereign, the only
 remaining action is ON THE BOX (your Rule-4 founder-gate):
   1) serve an open-weight model on the betterwithage GPU, OpenAI-compatible
      (ollama pull qwen2.5-coder:7b; keep llama3.1:8b) — verify: curl -s http://127.0.0.1:11434/v1/models
-  2) set on the a11oy.net deploy env: A11OY_MODEL_BASE_URL=http://127.0.0.1:11434/v1 and
+  2) set on the a-11-oy.com deploy env: A11OY_MODEL_BASE_URL=http://127.0.0.1:11434/v1 and
      A11OY_GPU_LABEL="NVIDIA RTX 5000 @ Hetzner (betterwithage)"
   3) sudo a11oy-rebuild
 PROVE (report to platform#343, not the token):
-  curl -s https://a11oy.net/api/a11oy/code/healthz | jq '.sovereign,.inference,.key_resolution.base_url,.key_resolution.env_used'
+  curl -s https://a-11-oy.com/api/a11oy/code/healthz | jq '.sovereign,.inference,.key_resolution.base_url,.key_resolution.env_used'
   WANT: true "self-hosted-gpu" "http://127.0.0.1:11434/v1" (NOT router.huggingface.co), env_used != "HF_TOKEN";
   + one /api/a11oy/code/chat/stream turn whose route.model is the local tag with NO cost_usd.
 If the model server isn't reachable at rebuild time the app CORRECTLY stays sovereign:false /

@@ -26,7 +26,7 @@ GATE P0 evidence (PROVE-OR-DOWNGRADE):
 - **Local proof on real app:** `TestClient(serve.app)` → all 5 (`/pnt`, `/pnt/sensor`, `/pnt/resilience`,
   `/pnt/coast`, `/pnt/limits`) = **200** with honest MODELED / deny-by-default / doctrine-v11 labels.
 - copy-sync lockstep guard = OK; serve.py `ast.parse` OK; szl_pnt_mesh self-test `ok=true`.
-- **Box `a11oy.net/api/a11oy/v1/pnt` = 404 → BLOCKED on the founder box git-pull** (FREEZE.json:
+- **Box `a-11-oy.com/api/a11oy/v1/pnt` = 404 → BLOCKED on the founder box git-pull** (FREEZE.json:
   "Box orchestrator git-pull pending (founder)"). Code is complete + proven; the box flip is a
   founder-gated hardware step, never faked.
 

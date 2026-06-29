@@ -4,9 +4,9 @@
 **Trigger:** Founder hand-off of Perplexity state-check ("nothing executed since last talk; run Steps 1→2→3 manually"). Dispatch still `none`/`ok:false`; executed manually as the one actor that can reach inside the box.
 
 ## STEP A — UN-STALE THE BOX  ✅ DONE (the visible win)
-- Root cause confirmed: running `a11oy:local` container image was ~9h old, built BEFORE the `/pinn` merge, so `a11oy.net/api/a11oy/v1/pinn/*` was 404 while older routes were 200. Local tree was only 1 commit behind; the *image* was the stale part.
+- Root cause confirmed: running `a11oy:local` container image was ~9h old, built BEFORE the `/pinn` merge, so `a-11-oy.com/api/a11oy/v1/pinn/*` was 404 while older routes were 200. Local tree was only 1 commit behind; the *image* was the stale part.
 - Ran the canonical `a11oy-rebuild` (resets to origin/main, rebuilds image, recreates container, byte-verifies guarded files). Result: **running from published `main@cbfb109`**; VERIFY SUMMARY all PASS (FRONT-DOOR/APP-ENTRY/LIVENESS/FEEDS/GOVERNANCE/READINESS/SECDATA/BOUNTIES).
-- Verified live: `https://a11oy.net/api/a11oy/v1/pinn` → **200**, `.../pinn/certificate` → **200** (now matches the HF Space). Box no longer stale.
+- Verified live: `https://a-11-oy.com/api/a11oy/v1/pinn` → **200**, `.../pinn/certificate` → **200** (now matches the HF Space). Box no longer stale.
 
 ## STEP B — RUN AGENTIC PINN ON GPU → flip SAMPLE→MEASURED  ⛔ HONESTLY BLOCKED (no fabrication)
 Cannot honestly produce a MEASURED certificate tonight; refused to fabricate per Doctrine v11 ("joules MEASURED only via the real NVML exporter; SAMPLE otherwise; never fabricate a number"). Concrete blockers, all probed live:

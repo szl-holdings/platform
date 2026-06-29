@@ -1,6 +1,6 @@
-# a11oy.net — LIVE DEMOS + BEAUTIFUL GRAPHS spec (founder request 2026-06-15)
+# a-11-oy.com — LIVE DEMOS + BEAUTIFUL GRAPHS spec (founder request 2026-06-15)
 
-GOAL: every demo tab on a11oy.net has BEAUTIFUL live graphs + real, interactive demos wired to REAL data that
+GOAL: every demo tab on a-11-oy.com has BEAUTIFUL live graphs + real, interactive demos wired to REAL data that
 updates constantly (poll every 2-5s). ~15 live demos total across the tabs. killinchu/elite is the polish BAR.
 Doctrine v11: every value labeled MEASURED/MODELED/SAMPLE/ESTIMATE; 0 runtime CDN (charts vendored same-origin —
 use the existing szl3d toolkit / a vendored chart lib, NOT a CDN); never fabricate a datapoint; honest empty-state

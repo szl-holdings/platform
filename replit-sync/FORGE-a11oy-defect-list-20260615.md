@@ -1,4 +1,4 @@
-# a11oy.net Full-Stack Audit — Eyes-On Defect List (2026-06-15, verified via screenshots)
+# a-11-oy.com Full-Stack Audit — Eyes-On Defect List (2026-06-15, verified via screenshots)
 
 Auditor verified each item visually. Demo June 18. killinchu/elite is the BAR — a11oy must match its polish.
 Doctrine v11: every value labeled MEASURED/MODELED/SAMPLE; 0 runtime CDN; never fabricate; honest BLOCKED ok.

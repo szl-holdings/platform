@@ -41,7 +41,7 @@ systemctl restart ollama; then preload:
   curl http://127.0.0.1:11434/api/chat -d '{"model":"llama3.1:8b","messages":[],"keep_alive":-1}'
 
 ## STEP 2 — confirm reachability FROM THE APP CONTAINER (not just the box)
-From wherever a11oy.net actually runs:
+From wherever a-11-oy.com actually runs:
   curl -s http://100.125.77.31:11434/v1/models   # MUST 200 list the served tags
 If not reachable: the app container isn't on the tailnet -> install/authorize tailscale in the
 app's environment (tailscale up; tailscale ip) OR run an in-container SOCKS5/sidecar to the

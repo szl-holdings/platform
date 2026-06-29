@@ -12,7 +12,7 @@ Doctrine v11 held throughout: no fabricated key, no fabricated signature, MEASUR
 only. Where a signature is absent or bad the endpoint reports `verified:false` — never a
 fake green.
 
-## What is now live (proven against `https://a11oy.net`, all HTTP 200)
+## What is now live (proven against `https://a-11-oy.com`, all HTTP 200)
 
 `GET /api/a11oy/v1/pinn/verify` →
 ```

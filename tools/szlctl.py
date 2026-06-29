@@ -15,7 +15,7 @@
 """szlctl — one clean ops entrypoint over the SZL estate.
 
 Subcommands:
-  surfaces   live a11oy.net surface health (green/red 200-vs-down table)
+  surfaces   live a-11-oy.com surface health (green/red 200-vs-down table)
   prs        open PRs across szl-holdings with a 1-line disposition
   fabric     compute-pool: gpu_nodes_reachable + per-node reachable + joules_label
   forge      Forge auto-loop state from replit-sync/AUTO_STATE.json
@@ -39,7 +39,7 @@ import urllib.request
 # Constants
 # ---------------------------------------------------------------------------
 
-A11OY_BASE = "https://a11oy.net"
+A11OY_BASE = "https://a-11-oy.com"
 
 # Founder-facing surface VIEWS (browser tabs). `surfaces` health-checks these:
 # a 200 means the live view is serving. Order is the canonical estate order.
@@ -428,7 +428,7 @@ def build_parser():
     )
     sub = p.add_subparsers(dest="command", required=True)
 
-    sp = sub.add_parser("surfaces", help="live a11oy.net surface health table")
+    sp = sub.add_parser("surfaces", help="live a-11-oy.com surface health table")
     sp.set_defaults(func=cmd_surfaces)
 
     sp = sub.add_parser("prs", help="open PRs across szl-holdings + disposition")

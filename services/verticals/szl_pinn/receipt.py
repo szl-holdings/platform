@@ -63,7 +63,7 @@ SIGNING_NOTE = {
         "the szl_lake signer -> append to DSSE envelope signatures[] -> append "
         "receipt to the khipu append-only chain (packages/formula-os khipu.py)"
     ),
-    "verify_path": "POST https://a11oy.net/api/a11oy/v1/verify  (DSSE PAE + Ed25519)",
+    "verify_path": "POST https://a-11-oy.com/api/a11oy/v1/verify  (DSSE PAE + Ed25519)",
     "consensus": "Khipu BFT = Conjecture 2 (advisory); SLSA L1 (honest).",
 }
 

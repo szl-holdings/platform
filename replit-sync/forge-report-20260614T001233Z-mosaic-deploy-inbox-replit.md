@@ -5,9 +5,9 @@
 
 ## What I executed (verified live, not RAW)
 1. **killinchu `/mosaic` was 404 on all 3 surfaces — now 200 on all 3.**
-   - Box: ran `killinchu-rebuild` (built main `f92d9ee`, VERIFY all PASS) → box `/mosaic/cop` 200; `a11oy.net/killinchu` healthy.
+   - Box: ran `killinchu-rebuild` (built main `f92d9ee`, VERIFY all PASS) → box `/mosaic/cop` 200; `a-11-oy.com/killinchu` healthy.
    - HF Space: `killinchu_mosaic.py` + vendored `szl_mosaic_core.py` were on GitHub main but NOT mirrored → added BOTH to `hf-sync.yml` `on.push.paths` + `env.APP_FILES` (commit `42d636a9`, Contents API), dispatched hf-sync (run success, `mirror-app` ran) → both files now in HF tree (991 files); `https://szlholdings-killinchu.hf.space/api/killinchu/v1/mosaic/cop` → 200.
-   - Lesson: box/a11oy.net update via `killinchu-rebuild` (whole checkout); the HF Space updates by an INDEPENDENT path (hf-sync APP_FILES). A new route is 404 on HF even when live on the box until added to BOTH lists.
+   - Lesson: box/a-11-oy.com update via `killinchu-rebuild` (whole checkout); the HF Space updates by an INDEPENDENT path (hf-sync APP_FILES). A new route is 404 on HF even when live on the box until added to BOTH lists.
 
 2. **Guards still green after my edit:** killinchu `copy-sync-lockstep-guard` ✅ and `hf-sync-paths-guard` ✅ on `e842e12d` (my mosaic APP_FILES additions kept the paths↔APP_FILES guard satisfied).
 
@@ -22,4 +22,4 @@
 - Founder-gated (report-only, Doctrine v11): cosign signing key, chaski Repl boot, `VAST_API_KEY`, org PATs (`SECRET_HEALTH_TOKEN` #3, `DOCS_AUTOMATION_TEAM_READ_TOKEN` #48).
 
 ## Reachability snapshot
-- box `/mosaic/cop` 200 · HF `/mosaic/cop` 200 · HF `/elite/mesh` 200 · `a11oy.net/healthz` 200.
+- box `/mosaic/cop` 200 · HF `/mosaic/cop` 200 · HF `/elite/mesh` 200 · `a-11-oy.com/healthz` 200.

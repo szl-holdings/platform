@@ -18,7 +18,7 @@ A live, self-contained dashboard + 3D visualization of the SZL **energy loop**:
 ## What this shows
 
 - **The measured joule milestone.** `212.262` real measured joules from the `betterwithage` exporter node, landing during a **negative-price** grid window (the grid PAID to compute). `joules_label: measured`, backed by a fresh NVML evidence sample (node, timestamp, power-W) — no longer an estimate.
-- **Fully-populated live a11oy API.** Every panel is fetched at runtime from `https://a11oy.net/api/a11oy/v1/...` (CORS open). Endpoints: `harvest/posture`, `energy/budget`, `energy/provenance`, `heart/pulse`, `anatomy/loop`, `compute-pool`, `revenue/marketplace`.
+- **Fully-populated live a11oy API.** Every panel is fetched at runtime from `https://a-11-oy.com/api/a11oy/v1/...` (CORS open). Endpoints: `harvest/posture`, `energy/budget`, `energy/provenance`, `heart/pulse`, `anatomy/loop`, `compute-pool`, `revenue/marketplace`.
 - **The story, investor-legible.** Milestone → the live loop (harvest → SAMAY soak → KALLPA → heart → YARQA → reservoir → receipt → Ayni) → anatomy circulation + compute fabric → the proof (Bekenstein bound, Landauer floor, Ayni reciprocity) → the revenue thesis (ESTIMATE, settle-to-count).
 - **Honest degradation.** If a fetch fails, that panel is clearly labeled **SNAPSHOT** with a last-known value — never blank, never fabricated.
 - **3D loop.** A `three.js` (CDN, our MIT build) animation of energy particles flowing through every organ of the loop, with a glassmorphism HUD bound to the live numbers. Auto-refresh ~15s. Honors `prefers-reduced-motion`.

@@ -130,7 +130,7 @@ def _resolve_and_check(host: str) -> None:
             )
 
 
-_UA = {"User-Agent": "szl-wasted-energy-harvest/1.0 (+https://a11oy.net)"}
+_UA = {"User-Agent": "szl-wasted-energy-harvest/1.0 (+https://a-11-oy.com)"}
 
 
 def safe_get(url: str, extra_headers: Optional[Dict[str, str]] = None) -> Optional[object]:

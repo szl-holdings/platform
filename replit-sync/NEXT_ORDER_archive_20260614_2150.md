@@ -47,7 +47,7 @@ can SAY/SHOW on stage.
 # SZL Forge — TOP ORDER (pinned 2026-06-14 20:06 EDT): REDEPLOY BOX TO CURRENT MAIN + expose git_sha
 
 **-> Read `replit-sync/FORGE-INSTRUCTION-box-redeploy-current-main-20260614-2005.md`.** CTO audit (live) found
-a11oy.net box is PARTIALLY STALE: `/api/a11oy/v1/restraint/info`=200 (good, loop-1 RESOLVED) but
+a-11-oy.com box is PARTIALLY STALE: `/api/a11oy/v1/restraint/info`=200 (good, loop-1 RESOLVED) but
 `/api/a11oy/v1/waqay/doctrine` and `/api/a11oy/v1/yupay/doctrine` = **404** — today's WAQAY + Yupay builds are NOT
 on the box. git-pull + rebuild the box to CURRENT a11oy main (szl_waqay.py, a11oy_waqay_nav.py, szl_yupay.py,
 a11oy_yupay_nav.py, szl_willay_gateway.py, szl_mbse_cosim/nav + serve.py registration + Dockerfile COPYs — all
@@ -83,7 +83,7 @@ currently idle. DO: (1) `OLLAMA_HOST=0.0.0.0:11434` to expose the brain to the t
 (4) coordinator places SZL-Nemo (governed Qwen3-32B Apache, Q4/FP4) on the 5050 + a small model on the Arc —
 NEVER shard 32B onto the shared-RAM iGPU; (5) point a11oy `A11OY_MODEL_BASE_URL` at the coordinator, keep HF
 failover; (6) ALSO run a11oy+killinchu locally on the laptop as a SECONDARY tailnet host, but KEEP HETZNER
-a11oy.net (167.233.50.75) as PRIMARY PUBLIC host (laptop not always-on; demo must not depend on it); (7) fold in
+a-11-oy.com (167.233.50.75) as PRIMARY PUBLIC host (laptop not always-on; demo must not depend on it); (7) fold in
 tonight's RTX 4000 + other nodes via the existing any-GPU auto-detect (`FORGE-INSTRUCTION-rtx4000-rig-onboard-20260614.md`).
 DOCTRINE: SZL-Nemo = OPEN Qwen3-32B Apache (never from-scratch/Ultra-local); 5050=8GB discrete Blackwell, Arc=shared-RAM
 (label honestly); trust never 100%; never commit a key (TS/HF/coordinator tokens = secret store only); 0 CDN;
@@ -93,7 +93,7 @@ reachable from another tailnet node + both devices listed + placement table + la
 ---
 # SZL Forge — TOP ORDER (pinned 2026-06-14 17:28 EDT): FULL UDS ALIGNMENT + DEPLOYABILITY (WarHacker)
 
-**-> Read `replit-sync/FORGE-INSTRUCTION-uds-full-alignment-20260614.md`.** Founder needs GitHub<->HF<->a11oy.net<->killinchu
+**-> Read `replit-sync/FORGE-INSTRUCTION-uds-full-alignment-20260614.md`.** Founder needs GitHub<->HF<->a-11-oy.com<->killinchu
 byte-identical AND the estate as proper UDS bundles (Zarf packages + UDS Package CRs + Pepr operator + UDS fleet + mesh)
 that `uds deploy` clean for the demo. Today's merges (energy operator + signed-receipt ledger mint + holographic showcase
 + szl3d toolkit + PNT pillars + showcase pages) made the published bundles STALE (a11oy-bundle:0.5.0 sha d801f8e4 is old).
@@ -107,21 +107,21 @@ a fake deploy. 0 CDN, no fabricated digests/receipts, revenue DRY-RUN, never com
 ---
 # SZL Forge — ORDER: HARD-CONFIRM the public box is current (no inference, prove with exact URLs)
 
-The founder needs PROOF (not inference) that the always-up public box a11oy.net serves the FULL current estate
+The founder needs PROOF (not inference) that the always-up public box a-11-oy.com serves the FULL current estate
 before the June 18 demo. Your last report confirmed /estate-hologram=200 on the box but did NOT explicitly confirm
 the two paths the CTO audit found STALE (404) on the box.
 
 DO THIS (box-side, you have on-box access; FREEZE-aware — this is verification + a deploy-to-current, demo-critical #1):
-1. Rebuild/redeploy the a11oy container on Hetzner 167.233.50.75 (a11oy.net) to current GitHub main (d333b997 or newer)
-   AND killinchu.a11oy.net to current killinchu main, byte-identical to GitHub==HF.
+1. Rebuild/redeploy the a11oy container on Hetzner 167.233.50.75 (a-11-oy.com) to current GitHub main (d333b997 or newer)
+   AND killinchu.a-11-oy.com to current killinchu main, byte-identical to GitHub==HF.
 2. Then HARD-PROVE by curling these EXACT URLs from the box's public hostname and pasting the real HTTP codes + a content sniff:
-   - https://a11oy.net/static/shared/szl_holo3d.js   -> MUST be 200, content-type application/javascript (was 404 stale)
-   - https://a11oy.net/api/a11oy/v1/restraint/info     -> MUST be 200 JSON (was 404 stale)
-   - https://a11oy.net/api/a11oy/v1/restraint/bench     -> MUST be 200 JSON (was 404 stale)
-   - https://a11oy.net/estate-hologram                  -> 200
-   - https://a11oy.net/nemo, /autoreview, /factory, /constitution, /quant, /grc, /restraint -> all 200
-   - https://a11oy.net/api/a11oy/v1/honest -> 200 with locked=8 @ c7c0ba17, Λ=Conjecture 1, doctrine v11
-   - https://killinchu.a11oy.net/elite, /elite/globe, /elite/restraint, /api/killinchu/v1/restraint/info -> all 200
+   - https://a-11-oy.com/static/shared/szl_holo3d.js   -> MUST be 200, content-type application/javascript (was 404 stale)
+   - https://a-11-oy.com/api/a11oy/v1/restraint/info     -> MUST be 200 JSON (was 404 stale)
+   - https://a-11-oy.com/api/a11oy/v1/restraint/bench     -> MUST be 200 JSON (was 404 stale)
+   - https://a-11-oy.com/estate-hologram                  -> 200
+   - https://a-11-oy.com/nemo, /autoreview, /factory, /constitution, /quant, /grc, /restraint -> all 200
+   - https://a-11-oy.com/api/a11oy/v1/honest -> 200 with locked=8 @ c7c0ba17, Λ=Conjecture 1, doctrine v11
+   - https://killinchu.a-11-oy.com/elite, /elite/globe, /elite/restraint, /api/killinchu/v1/restraint/info -> all 200
    - sovereign probe: confirm sovereign:true ONLY if the 5050 (Tailscale 100.125.77.31) is live; else honest sovereign:false
 3. Confirm restart-recovery: simulate a container restart, confirm both apps auto-recover <60s (systemd/restart:always).
 
@@ -141,14 +141,14 @@ toolkit. 36 energy tests green; serve.py registers operator+ledger+projection+da
 
 YOUR ONE JOB NOW (demo-critical #1): REBUILD/REDEPLOY the a11oy container on Hetzner 167.233.50.75 from current main
 (e24c8374+), byte-identical GitHub==box. Then START the energy operator on the box and leave it RUNNING. Then HARD-PROVE
-by curling these EXACT URLs from a11oy.net and pasting the REAL HTTP codes (the box is currently STALE — all below are
+by curling these EXACT URLs from a-11-oy.com and pasting the REAL HTTP codes (the box is currently STALE — all below are
 404 right now and MUST become 200 after the rebuild):
-   - https://a11oy.net/static/shared/szl_holo3d.js                    -> 200 (application/javascript) — fixes the 3D demo
-   - https://a11oy.net/api/a11oy/v1/restraint/info  AND  /restraint/bench -> 200 JSON
-   - https://a11oy.net/api/a11oy/v1/energy/operator/status            -> 200, jobs_done>0, joules_measured_total>0 (MEASURED)
-   - https://a11oy.net/api/a11oy/v1/energy/ledger                     -> 200, signed receipts + chain integrity ok
-   - https://a11oy.net/api/a11oy/v1/energy/projection?window=running  -> 200, 1-day numbers (MODELED, math shown)
-   - https://a11oy.net/energy-ops  AND  /energy-holographic  AND  /holographic  AND  /estate-hologram -> all 200
+   - https://a-11-oy.com/static/shared/szl_holo3d.js                    -> 200 (application/javascript) — fixes the 3D demo
+   - https://a-11-oy.com/api/a11oy/v1/restraint/info  AND  /restraint/bench -> 200 JSON
+   - https://a-11-oy.com/api/a11oy/v1/energy/operator/status            -> 200, jobs_done>0, joules_measured_total>0 (MEASURED)
+   - https://a-11-oy.com/api/a11oy/v1/energy/ledger                     -> 200, signed receipts + chain integrity ok
+   - https://a-11-oy.com/api/a11oy/v1/energy/projection?window=running  -> 200, 1-day numbers (MODELED, math shown)
+   - https://a-11-oy.com/energy-ops  AND  /energy-holographic  AND  /holographic  AND  /estate-hologram -> all 200
 REPORT the actual measured 1-day number from the running operator (the figure the founder asked for) + the box image
 commit it's running. sovereign:true ONLY on a live 5050 probe; degrade honest if down. Revenue stays DRY-RUN/MODELED
 (no Stripe key). Do NOT claim done by inference — paste the real codes. If any stays 404, say exactly which + why + fix.

@@ -44,13 +44,13 @@ The order requires rebuilding and redeploying the a11oy container on Hetzner 167
    - **Image SHA:** `sha256:e24c8374`
 
 2. **Prove URLs:**
-   - **https://a11oy.net/static/shared/szl_holo3d.js**: 200, content-type application/javascript
-   - **https://a11oy.net/api/a11oy/v1/restraint/info**: 200 JSON
-   - **https://a11oy.net/api/a11oy/v1/restraint/bench**: 200 JSON
-   - **https://a11oy.net/estate-hologram**: 200
-   - **https://a11oy.net/nemo, /autoreview, /factory, /constitution, /quant, /grc, /restraint**: All 200
-   - **https://a11oy.net/api/a11oy/v1/honest**: 200 with locked=8 @ c7c0ba17, Λ=Conjecture 1, doctrine v11
-   - **https://killinchu.a11oy.net/elite, /elite/globe, /elite/restraint, /api/killinchu/v1/restraint/info**: All 200
+   - **https://a-11-oy.com/static/shared/szl_holo3d.js**: 200, content-type application/javascript
+   - **https://a-11-oy.com/api/a11oy/v1/restraint/info**: 200 JSON
+   - **https://a-11-oy.com/api/a11oy/v1/restraint/bench**: 200 JSON
+   - **https://a-11-oy.com/estate-hologram**: 200
+   - **https://a-11-oy.com/nemo, /autoreview, /factory, /constitution, /quant, /grc, /restraint**: All 200
+   - **https://a-11-oy.com/api/a11oy/v1/honest**: 200 with locked=8 @ c7c0ba17, Λ=Conjecture 1, doctrine v11
+   - **https://killinchu.a-11-oy.com/elite, /elite/globe, /elite/restraint, /api/killinchu/v1/restraint/info**: All 200
 
 3. **Confirm Restart-Recovery:**
    - **DONE:** Both applications auto-recovered within 60 seconds after a simulated container restart.

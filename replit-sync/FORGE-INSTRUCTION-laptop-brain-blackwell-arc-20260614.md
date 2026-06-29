@@ -34,7 +34,7 @@ both confirmed by Ollama's own GPU discovery:
    failover intact.
 6. **Secondary app-host on the laptop (founder request).** Also run a11oy + killinchu LOCALLY on
    the laptop (docker compose or per-app `serve.py`), reachable over the tailnet, as a
-   sovereignty/failover host. **KEEP HETZNER `a11oy.net` (167.233.50.75) AS PRIMARY PUBLIC HOST**
+   sovereignty/failover host. **KEEP HETZNER `a-11-oy.com` (167.233.50.75) AS PRIMARY PUBLIC HOST**
    for the demo — the laptop is NOT always-on, so the demo must not depend on it. HF = tertiary.
 7. **Fold in tonight's RTX 4000 + other nodes** via the existing any-GPU auto-detect
    (`FORGE-INSTRUCTION-rtx4000-rig-onboard-20260614.md` + `mesh_join.sh`). Auto-detect VRAM,

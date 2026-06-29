@@ -5,7 +5,7 @@ Order: replit-sync/NEXT_ORDER.md (current sha f30b21bb306d0381cc69fd59959e15c6d1
 Prior done-state: AUTO_STATE order_sha 2b6c8cf (concurrent Forge agent) — **CORROBORATED, not clobbered.**
 
 ## Independent verification (live, this session)
-- `https://a11oy.net/api/szl/v1/inference-posture` -> where:gpu, sovereign:true, gpu_reachable:true, model:qwen2.5-coder:7b (live /v1/models probe THIS request).
+- `https://a-11-oy.com/api/szl/v1/inference-posture` -> where:gpu, sovereign:true, gpu_reachable:true, model:qwen2.5-coder:7b (live /v1/models probe THIS request).
 - killinchu `/api/killinchu/v4/healthz` -> sovereign:true, inference:self-hosted-gpu, gpu_reachable:true.
 - HARD INVARIANT proven read-only in-container: resolve_llm(probe=True).sovereign=True, resolve_llm(probe=False).sovereign=False; _probe(realGPU)=True / _probe(deadPort)=False -> sovereign is earned ONLY by a live probe, fails closed. Never forced/patched.
 

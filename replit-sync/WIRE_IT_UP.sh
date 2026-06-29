@@ -63,6 +63,6 @@ echo "==> VERIFY"
 sleep 2
 curl -s -o /dev/null -w "local healthz: %{http_code}\n" http://127.0.0.1:8081/healthz || true
 echo "After adding the proxy route + reload:"
-echo "  curl https://a11oy.net/api/a11oy/v1/mesh-resilience/healthz   # expect 200"
+echo "  curl https://a-11-oy.com/api/a11oy/v1/mesh-resilience/healthz   # expect 200"
 echo "  # then next Forge poll: AUTO_STATE.json dispatch_mode != none, dispatch_ok: true"
 echo "==> DONE. Doctrine v11: never keystone self-merge, never commit a key, label live only on real 200."

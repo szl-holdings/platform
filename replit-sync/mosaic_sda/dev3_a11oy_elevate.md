@@ -1,4 +1,4 @@
-# Dev 3 — Elevate a11oy.net (Mosaic Governance Oversight)
+# Dev 3 — Elevate a-11-oy.com (Mosaic Governance Oversight)
 
 **Identity:** Dev 3 (Opus 4.8, full-stack) · SZL Holdings (org `szl-holdings`)
 **Branch:** `feat/mosaic-governance-oversight`
@@ -11,7 +11,7 @@
 
 ## Goal
 
-ELEVATE a11oy.net into the **governance-over-anomalies brain** + **Common-Operating-Picture (COP) oversight surface** for SZL's sovereign answer to True Anomaly's Mosaic. a11oy is the **orchestrator that governs killinchu's anomaly/SDA detections** — every detection passes through a Λ-advisory verdict, a signed (or honestly UNSIGNED) provenance receipt, a Khipu BFT multi-witness quorum, and (for high-impact ROE actions) a human-approval gate.
+ELEVATE a-11-oy.com into the **governance-over-anomalies brain** + **Common-Operating-Picture (COP) oversight surface** for SZL's sovereign answer to True Anomaly's Mosaic. a11oy is the **orchestrator that governs killinchu's anomaly/SDA detections** — every detection passes through a Λ-advisory verdict, a signed (or honestly UNSIGNED) provenance receipt, a Khipu BFT multi-witness quorum, and (for high-impact ROE actions) a human-approval gate.
 
 ---
 
@@ -83,9 +83,9 @@ ELEVATE a11oy.net into the **governance-over-anomalies brain** + **Common-Operat
 
 ## Live fabric (probed, honest)
 
-- `GET https://a11oy.net/healthz` → `{"status":"ok","organ":"a11oy","doctrine":"v11","lock":"749/14/163","commit":"c7c0ba17"}`
-- `GET https://a11oy.net/api/a11oy/v1/compute-pool` → multi-node fabric (live).
-- `GET https://a11oy.net/api/a11oy/v1/mosaic/governed` → **404** (route not deployed to the live HF Space yet — console falls back to honest SNAPSHOT until Forge deploys).
+- `GET https://a-11-oy.com/healthz` → `{"status":"ok","organ":"a11oy","doctrine":"v11","lock":"749/14/163","commit":"c7c0ba17"}`
+- `GET https://a-11-oy.com/api/a11oy/v1/compute-pool` → multi-node fabric (live).
+- `GET https://a-11-oy.com/api/a11oy/v1/mosaic/governed` → **404** (route not deployed to the live HF Space yet — console falls back to honest SNAPSHOT until Forge deploys).
 
 ---
 
@@ -104,7 +104,7 @@ ELEVATE a11oy.net into the **governance-over-anomalies brain** + **Common-Operat
 
 **Post-deploy verification:**
 ```
-curl -s https://a11oy.net/api/a11oy/v1/mosaic/governed | python3 -m json.tool
+curl -s https://a-11-oy.com/api/a11oy/v1/mosaic/governed | python3 -m json.tool
 ```
 Expect top-level keys `cop, receipts, lambda_axes, thresholds, doctrine ("v11"), status, source`. Until the live engine is wired, `source` will be `"snapshot"` and receipts `verified:false` — that is the honest state; the console upgrades the badge automatically when the route returns live, verified data. To wire the **live** governed feed, point `governed_view()` at killinchu's Mosaic engine receipts (Dev 1's `szl.mosaic.receipt/v1`) instead of `_snapshot()`.
 

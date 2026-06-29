@@ -58,9 +58,9 @@ signatures), and CI (push-event green)** and the mesh CR shape. No deploy was fa
 
 ## 4. Founder-gated — exactly what still needs a human secret/approval
 
-1. **Hetzner root redeploy** (167.233.50.75) — pull the fresh signed a11oy image so a11oy.net serves
+1. **Hetzner root redeploy** (167.233.50.75) — pull the fresh signed a11oy image so a-11-oy.com serves
    `/api/a11oy/v1/{cuas,unified,qbio}/*`. Command: `sudo /opt/.../ops/install-a11oy-autodeploy.sh`
-   (founder runs sudo; do not auto). Verify a11oy.net `/api/a11oy/v1/cuas/summary` 200 after.
+   (founder runs sudo; do not auto). Verify a-11-oy.com `/api/a11oy/v1/cuas/summary` 200 after.
 2. **Zenodo DOI token** — mint v8 canonical thesis DOI (`szl-papers/papers/SZL_THESIS_v8.md`;
    `CITATION.cff` + `.zenodo.json` staged).
 3. **oqs-python PQ keys** — flip PQ Provenance tab signature PROXY → real ML-DSA-65 (NIST FIPS 203/204/205).

@@ -15,8 +15,8 @@
   - Graduate szl-mesh specs 03/07 (skip-layer aggregation, governance metrics) from design → impl.
   - Bundle the mesh into the UDS fleet-overlay air-gap proof.
 - **Founder-gated, auto-skipped (1)** (Doctrine v11 — keys/secrets/major-bumps):
-  - a11oy.net / box: founder-gated. When the GPU secret + dispatch are wired (founder's runbook + WIRE_IT_UP.sh),
-- Reachability snapshot: https://a11oy.net/healthz -> 200
+  - a-11-oy.com / box: founder-gated. When the GPU secret + dispatch are wired (founder's runbook + WIRE_IT_UP.sh),
+- Reachability snapshot: https://a-11-oy.com/healthz -> 200
 - NOTE: no Forge agent endpoint configured (FORGE_AGENT_URL / FORGE_DISPATCH_CMD) — actionable items are reported + the founder is pinged; wire the endpoint to make execution fully hands-off.
 
 ## Auto-loop pass — order `13150ba0` — 2026-06-14T01:08:23Z
@@ -35,7 +35,7 @@
   - AISStream key -> Asia vessel theaters LIVE (SZL_AISSTREAM_API_KEY in Space secrets).
 - **Founder-gated, auto-skipped (1)** (Doctrine v11 — keys/secrets/major-bumps):
   - Gaps fixed: uds-bundles gitleaks red->green (allow on published cosign pubkey fp); killinchu HF
-- Reachability snapshot: https://a11oy.net/healthz -> 200
+- Reachability snapshot: https://a-11-oy.com/healthz -> 200
 - NOTE: no Forge agent endpoint configured (FORGE_AGENT_URL / FORGE_DISPATCH_CMD) — actionable items are reported + the founder is pinged; wire the endpoint to make execution fully hands-off.
 
 ## Auto-loop pass — order `ba552b38` — 2026-06-14T05:09:12Z
@@ -54,7 +54,7 @@
   - AISStream key -> Asia vessel theaters LIVE (SZL_AISSTREAM_API_KEY in Space secrets).
 - **Founder-gated, auto-skipped (1)** (Doctrine v11 — keys/secrets/major-bumps):
   - Gaps fixed: uds-bundles gitleaks red->green (allow on published cosign pubkey fp); killinchu HF
-- Reachability snapshot: https://a11oy.net/healthz -> 200
+- Reachability snapshot: https://a-11-oy.com/healthz -> 200
 - NOTE: no Forge agent endpoint configured (FORGE_AGENT_URL / FORGE_DISPATCH_CMD) — actionable items are reported + the founder is pinged; wire the endpoint to make execution fully hands-off.
 
 ## Auto-loop pass — order `bd591fd6` — 2026-06-14T08:09:14Z
@@ -77,7 +77,7 @@
   - OSCAL: the a11oy OSCAL component-definition + OPA/Rego policies are in a11oy/compliance/oscal/ — wire the OSCAL/Trestle
 - **Founder-gated, auto-skipped (1)** (Doctrine v11 — keys/secrets/major-bumps):
   - J/token + carbon energy in EVERY signed receipt + speculative-decode/LMCache/LiteLLM/RouteLLM app-layer (/energy).
-- Reachability snapshot: https://a11oy.net/healthz -> 200
+- Reachability snapshot: https://a-11-oy.com/healthz -> 200
 - NOTE: no Forge agent endpoint configured (FORGE_AGENT_URL / FORGE_DISPATCH_CMD) — actionable items are reported + the founder is pinged; wire the endpoint to make execution fully hands-off.
 
 ## Auto-loop pass — order `9100ef29` — 2026-06-14T08:59:14Z
@@ -101,7 +101,7 @@
 - **Founder-gated, auto-skipped (2)** (Doctrine v11 — keys/secrets/major-bumps):
   - J/token + carbon energy in EVERY signed receipt + speculative-decode/LMCache/LiteLLM/RouteLLM app-layer (/energy).
   - a11oy "Doctrine — banned-token grep gate" = failure. This is the MARKETING-HYPE hygiene gate (flags words like
-- Reachability snapshot: https://a11oy.net/healthz -> 200
+- Reachability snapshot: https://a-11-oy.com/healthz -> 200
 
 ## Auto-loop pass — order `21450a57` — 2026-06-14T09:10:23Z
 
@@ -124,7 +124,7 @@
 - **Founder-gated, auto-skipped (2)** (Doctrine v11 — keys/secrets/major-bumps):
   - J/token + carbon energy in EVERY signed receipt + speculative-decode/LMCache/LiteLLM/RouteLLM app-layer (/energy).
   - a11oy "Doctrine — banned-token grep gate" = failure. This is the MARKETING-HYPE hygiene gate (flags words like
-- Reachability snapshot: https://a11oy.net/healthz -> 200
+- Reachability snapshot: https://a-11-oy.com/healthz -> 200
 
 ## Auto-loop pass — order `a618927f` — 2026-06-14T10:10:14Z
 
@@ -147,7 +147,7 @@
 - **Founder-gated, auto-skipped (2)** (Doctrine v11 — keys/secrets/major-bumps):
   - J/token + carbon energy in EVERY signed receipt + speculative-decode/LMCache/LiteLLM/RouteLLM app-layer (/energy).
   - a11oy "Doctrine — banned-token grep gate" = failure. This is the MARKETING-HYPE hygiene gate (flags words like
-- Reachability snapshot: https://a11oy.net/healthz -> 200
+- Reachability snapshot: https://a-11-oy.com/healthz -> 200
 
 ## Auto-loop pass — order `785493d0` — 2026-06-14T11:11:07Z
 
@@ -174,7 +174,7 @@
 - **Founder-gated, auto-skipped (2)** (Doctrine v11 — keys/secrets/major-bumps):
   - J/token + carbon energy in EVERY signed receipt + speculative-decode/LMCache/LiteLLM/RouteLLM app-layer (/energy).
   - a11oy "Doctrine — banned-token grep gate" = failure. This is the MARKETING-HYPE hygiene gate (flags words like
-- Reachability snapshot: https://a11oy.net/healthz -> 200
+- Reachability snapshot: https://a-11-oy.com/healthz -> 200
 
 ## Auto-loop pass — order `21244f1b` — 2026-06-14T14:10:36Z
 
@@ -202,7 +202,7 @@
   - J/token + carbon energy in EVERY signed receipt + speculative-decode/LMCache/LiteLLM/RouteLLM app-layer (/energy).
   - a11oy "Doctrine — banned-token grep gate" = failure. This is the MARKETING-HYPE hygiene gate (flags words like
   - F4 a11oy /nemo+/energy+/grc 3D (signed MoE token-flows, OSCAL coverage spheres) + killinchu /elite/mesh 3D (Fiedler λ2 self-heal).
-- Reachability snapshot: https://a11oy.net/healthz -> 200
+- Reachability snapshot: https://a-11-oy.com/healthz -> 200
 
 ## Auto-loop pass — order `bde0f996` — 2026-06-14T14:56:20Z
 
@@ -230,7 +230,7 @@
   - J/token + carbon energy in EVERY signed receipt + speculative-decode/LMCache/LiteLLM/RouteLLM app-layer (/energy).
   - a11oy "Doctrine — banned-token grep gate" = failure. This is the MARKETING-HYPE hygiene gate (flags words like
   - F4 a11oy /nemo+/energy+/grc 3D (signed MoE token-flows, OSCAL coverage spheres) + killinchu /elite/mesh 3D (Fiedler λ2 self-heal).
-- Reachability snapshot: https://a11oy.net/healthz -> 200
+- Reachability snapshot: https://a-11-oy.com/healthz -> 200
 
 ## Auto-loop pass — order `3e0d1b63` — 2026-06-14T15:56:53Z
 
@@ -258,7 +258,7 @@
   - J/token + carbon energy in EVERY signed receipt + speculative-decode/LMCache/LiteLLM/RouteLLM app-layer (/energy).
   - a11oy "Doctrine — banned-token grep gate" = failure. This is the MARKETING-HYPE hygiene gate (flags words like
   - F4 a11oy /nemo+/energy+/grc 3D (signed MoE token-flows, OSCAL coverage spheres) + killinchu /elite/mesh 3D (Fiedler λ2 self-heal).
-- Reachability snapshot: https://a11oy.net/healthz -> 200
+- Reachability snapshot: https://a-11-oy.com/healthz -> 200
 
 ## Auto-loop pass — order `66291ab8` — 2026-06-14T16:55:53Z
 
@@ -292,121 +292,121 @@
   - J/token + carbon energy in EVERY signed receipt + speculative-decode/LMCache/LiteLLM/RouteLLM app-layer (/energy).
   - a11oy "Doctrine — banned-token grep gate" = failure. This is the MARKETING-HYPE hygiene gate (flags words like
   - F4 a11oy /nemo+/energy+/grc 3D (signed MoE token-flows, OSCAL coverage spheres) + killinchu /elite/mesh 3D (Fiedler λ2 self-heal).
-- Reachability snapshot: https://a11oy.net/healthz -> 200
+- Reachability snapshot: https://a-11-oy.com/healthz -> 200
 
 ## Auto-loop pass — order `8acc79f6` — 2026-06-14T17:55:47Z
 
 - **Actionable items (15)** — handed to Forge agent (mode=`dispatch-cmd`, ok=`True`):
-  - a11oy.net = PUBLIC Hetzner server 167.233.50.75 — always-on, already serving a11oy API at https://a11oy.net (200, ~0.37s).
+  - a-11-oy.com = PUBLIC Hetzner server 167.233.50.75 — always-on, already serving a11oy API at https://a-11-oy.com (200, ~0.37s).
   - The sovereign GPU brain = founder's RTX 5050, joined to Tailscale at 100.125.77.31 (PRIVATE tailnet, inference only).
   - killinchu.net has NO DNS yet. killinchu currently only lives on the HF free Space (sleeps).
   - HF Spaces are free cpu-basic; gcTimeout 48h but they pause on rebuilds/platform pressure → the flicker the founder sees.
-  - HOST BOTH APPS ON THE HETZNER BOX (a11oy.net): docker compose up a11oy + killinchu containers on 167.233.50.75
-  - https://a11oy.net  → a11oy container
-  - https://killinchu.net (once DNS set) OR https://killinchu.a11oy.net (subdomain, works immediately) → killinchu container
+  - HOST BOTH APPS ON THE HETZNER BOX (a-11-oy.com): docker compose up a11oy + killinchu containers on 167.233.50.75
+  - https://a-11-oy.com  → a11oy container
+  - https://killinchu.net (once DNS set) OR https://killinchu.a-11-oy.com (subdomain, works immediately) → killinchu container
   - INFERENCE → SOVEREIGN 5050: both containers' model calls route to the 5050 over Tailscale (http://100.125.77.31:11434
   - ALWAYS-ON: systemd units (or docker compose restart:always) for both app containers + the reverse proxy + the
-  - DNS: point killinchu.net A-record → 167.233.50.75 if the founder owns it (else use killinchu.a11oy.net subdomain now,
+  - DNS: point killinchu.net A-record → 167.233.50.75 if the founder owns it (else use killinchu.a-11-oy.com subdomain now,
   - HF AS FAILOVER: keep the HF Spaces running (the hourly uptime cron 84b8f79a already auto-restarts them). Optionally add
-  - VERIFY: curl https://a11oy.net/api/a11oy/v1/honest (locked=8 @ c7c0ba17, Λ=Conjecture 1, v11) + the killinchu public
+  - VERIFY: curl https://a-11-oy.com/api/a11oy/v1/honest (locked=8 @ c7c0ba17, Λ=Conjecture 1, v11) + the killinchu public
   - sovereign:true ONLY on a live per-GPU gpu_reachable probe — NEVER fake it; degrade honestly if the 5050 is down.
   - Keep GitHub↔HF↔box byte-identical on shared modules; never weaken a gate; never commit a key (TLS/Tailscale/NIM keys
   - This is a box production change → it's founder-approved for hosting/exposing the apps; but anything touching a
-- Reachability snapshot: https://a11oy.net/healthz -> 200
+- Reachability snapshot: https://a-11-oy.com/healthz -> 200
 
 ## Auto-loop pass — order `b57d5d81` — 2026-06-14T18:56:04Z
 
 - **Actionable items (17)** — handed to Forge agent (mode=`dispatch-cmd`, ok=`True`):
-  - a11oy.net = PUBLIC Hetzner server 167.233.50.75 — always-on, already serving a11oy API at https://a11oy.net (200, ~0.37s).
+  - a-11-oy.com = PUBLIC Hetzner server 167.233.50.75 — always-on, already serving a11oy API at https://a-11-oy.com (200, ~0.37s).
   - The sovereign GPU brain = founder's RTX 5050, joined to Tailscale at 100.125.77.31 (PRIVATE tailnet, inference only).
   - killinchu.net has NO DNS yet. killinchu currently only lives on the HF free Space (sleeps).
   - HF Spaces are free cpu-basic; gcTimeout 48h but they pause on rebuilds/platform pressure → the flicker the founder sees.
-  - HOST BOTH APPS ON THE HETZNER BOX (a11oy.net): docker compose up a11oy + killinchu containers on 167.233.50.75
-  - https://a11oy.net  → a11oy container
-  - https://killinchu.net (once DNS set) OR https://killinchu.a11oy.net (subdomain, works immediately) → killinchu container
+  - HOST BOTH APPS ON THE HETZNER BOX (a-11-oy.com): docker compose up a11oy + killinchu containers on 167.233.50.75
+  - https://a-11-oy.com  → a11oy container
+  - https://killinchu.net (once DNS set) OR https://killinchu.a-11-oy.com (subdomain, works immediately) → killinchu container
   - INFERENCE → SOVEREIGN 5050: both containers' model calls route to the 5050 over Tailscale (http://100.125.77.31:11434
   - ALWAYS-ON: systemd units (or docker compose restart:always) for both app containers + the reverse proxy + the
-  - DNS: point killinchu.net A-record → 167.233.50.75 if the founder owns it (else use killinchu.a11oy.net subdomain now,
+  - DNS: point killinchu.net A-record → 167.233.50.75 if the founder owns it (else use killinchu.a-11-oy.com subdomain now,
   - HF AS FAILOVER: keep the HF Spaces running (the hourly uptime cron 84b8f79a already auto-restarts them). Optionally add
-  - VERIFY: curl https://a11oy.net/api/a11oy/v1/honest (locked=8 @ c7c0ba17, Λ=Conjecture 1, v11) + the killinchu public
+  - VERIFY: curl https://a-11-oy.com/api/a11oy/v1/honest (locked=8 @ c7c0ba17, Λ=Conjecture 1, v11) + the killinchu public
   - sovereign:true ONLY on a live per-GPU gpu_reachable probe — NEVER fake it; degrade honestly if the 5050 is down.
   - Keep GitHub↔HF↔box byte-identical on shared modules; never weaken a gate; never commit a key (TLS/Tailscale/NIM keys
   - This is a box production change → it's founder-approved for hosting/exposing the apps; but anything touching a
-  - a11oy.net/static/shared/szl_holo3d.js → 404 (200 on HF) → 3D/holographic surfaces (/estate-hologram, /holo, *-3d) degraded on the public demo host
-  - a11oy.net/api/a11oy/v1/restraint/{info,bench} → 404 (200 on HF) → Restraint degraded on the box
-- Reachability snapshot: https://a11oy.net/healthz -> 200
+  - a-11-oy.com/static/shared/szl_holo3d.js → 404 (200 on HF) → 3D/holographic surfaces (/estate-hologram, /holo, *-3d) degraded on the public demo host
+  - a-11-oy.com/api/a11oy/v1/restraint/{info,bench} → 404 (200 on HF) → Restraint degraded on the box
+- Reachability snapshot: https://a-11-oy.com/healthz -> 200
 
 ## Auto-loop pass — order `607bee53` — 2026-06-14T19:55:58Z
 
 - **Actionable items (19)** — handed to Forge agent (mode=`dispatch-cmd`, ok=`True`):
-  - Rebuild/redeploy the a11oy container on Hetzner 167.233.50.75 (a11oy.net) to current GitHub main (d333b997 or newer)
+  - Rebuild/redeploy the a11oy container on Hetzner 167.233.50.75 (a-11-oy.com) to current GitHub main (d333b997 or newer)
   - Then HARD-PROVE by curling these EXACT URLs from the box's public hostname and pasting the real HTTP codes + a content sniff:
-  - https://a11oy.net/static/shared/szl_holo3d.js   -> MUST be 200, content-type application/javascript (was 404 stale)
-  - https://a11oy.net/api/a11oy/v1/restraint/info     -> MUST be 200 JSON (was 404 stale)
-  - https://a11oy.net/api/a11oy/v1/restraint/bench     -> MUST be 200 JSON (was 404 stale)
-  - https://a11oy.net/estate-hologram                  -> 200
-  - https://a11oy.net/nemo, /autoreview, /factory, /constitution, /quant, /grc, /restraint -> all 200
-  - https://a11oy.net/api/a11oy/v1/honest -> 200 with locked=8 @ c7c0ba17, Λ=Conjecture 1, doctrine v11
-  - https://killinchu.a11oy.net/elite, /elite/globe, /elite/restraint, /api/killinchu/v1/restraint/info -> all 200
+  - https://a-11-oy.com/static/shared/szl_holo3d.js   -> MUST be 200, content-type application/javascript (was 404 stale)
+  - https://a-11-oy.com/api/a11oy/v1/restraint/info     -> MUST be 200 JSON (was 404 stale)
+  - https://a-11-oy.com/api/a11oy/v1/restraint/bench     -> MUST be 200 JSON (was 404 stale)
+  - https://a-11-oy.com/estate-hologram                  -> 200
+  - https://a-11-oy.com/nemo, /autoreview, /factory, /constitution, /quant, /grc, /restraint -> all 200
+  - https://a-11-oy.com/api/a11oy/v1/honest -> 200 with locked=8 @ c7c0ba17, Λ=Conjecture 1, doctrine v11
+  - https://killinchu.a-11-oy.com/elite, /elite/globe, /elite/restraint, /api/killinchu/v1/restraint/info -> all 200
   - sovereign probe: confirm sovereign:true ONLY if the 5050 (Tailscale 100.125.77.31) is live; else honest sovereign:false
   - Confirm restart-recovery: simulate a container restart, confirm both apps auto-recover <60s (systemd/restart:always).
   - #397 energy/06-holographic — bundles the szl3d toolkit + 18 live 3D graphs. THIS IS WHAT MAKES szl_holo3d.js / the
   - #394 energy/01-operator, #391 energy/02-ledger, #393 energy/03-projection, #392 energy/04-dashboard — the press-play
-  - https://a11oy.net/api/a11oy/v1/energy/operator/status  -> 200, jobs_done>0, joules_measured_total>0 (MEASURED)
-  - https://a11oy.net/api/a11oy/v1/energy/ledger            -> 200, signed receipts + chain-integrity ok
-  - https://a11oy.net/api/a11oy/v1/energy/projection?window=running -> 200, 1-day numbers (MODELED, math shown)
-  - https://a11oy.net/energy-ops          -> 200 (press-play Today console)
-  - https://a11oy.net/energy-holographic  -> 200 (18-graph showcase)
+  - https://a-11-oy.com/api/a11oy/v1/energy/operator/status  -> 200, jobs_done>0, joules_measured_total>0 (MEASURED)
+  - https://a-11-oy.com/api/a11oy/v1/energy/ledger            -> 200, signed receipts + chain-integrity ok
+  - https://a-11-oy.com/api/a11oy/v1/energy/projection?window=running -> 200, 1-day numbers (MODELED, math shown)
+  - https://a-11-oy.com/energy-ops          -> 200 (press-play Today console)
+  - https://a-11-oy.com/energy-holographic  -> 200 (18-graph showcase)
   - Then optional: #379 F1 (all 4 /pnt/limits pillars wired) + the other 3D surfaces #381-#390.
-- Reachability snapshot: https://a11oy.net/healthz -> 200
+- Reachability snapshot: https://a-11-oy.com/healthz -> 200
 
 ## Auto-loop pass — order `c47162f2` — 2026-06-14T20:55:57Z
 
 - **Actionable items (17)** — handed to Forge agent (mode=`dispatch-cmd`, ok=`True`):
-  - Rebuild/redeploy the a11oy container on Hetzner 167.233.50.75 (a11oy.net) to current GitHub main (d333b997 or newer)
+  - Rebuild/redeploy the a11oy container on Hetzner 167.233.50.75 (a-11-oy.com) to current GitHub main (d333b997 or newer)
   - Then HARD-PROVE by curling these EXACT URLs from the box's public hostname and pasting the real HTTP codes + a content sniff:
-  - https://a11oy.net/static/shared/szl_holo3d.js   -> MUST be 200, content-type application/javascript (was 404 stale)
-  - https://a11oy.net/api/a11oy/v1/restraint/info     -> MUST be 200 JSON (was 404 stale)
-  - https://a11oy.net/api/a11oy/v1/restraint/bench     -> MUST be 200 JSON (was 404 stale)
-  - https://a11oy.net/estate-hologram                  -> 200
-  - https://a11oy.net/nemo, /autoreview, /factory, /constitution, /quant, /grc, /restraint -> all 200
-  - https://a11oy.net/api/a11oy/v1/honest -> 200 with locked=8 @ c7c0ba17, Λ=Conjecture 1, doctrine v11
-  - https://killinchu.a11oy.net/elite, /elite/globe, /elite/restraint, /api/killinchu/v1/restraint/info -> all 200
+  - https://a-11-oy.com/static/shared/szl_holo3d.js   -> MUST be 200, content-type application/javascript (was 404 stale)
+  - https://a-11-oy.com/api/a11oy/v1/restraint/info     -> MUST be 200 JSON (was 404 stale)
+  - https://a-11-oy.com/api/a11oy/v1/restraint/bench     -> MUST be 200 JSON (was 404 stale)
+  - https://a-11-oy.com/estate-hologram                  -> 200
+  - https://a-11-oy.com/nemo, /autoreview, /factory, /constitution, /quant, /grc, /restraint -> all 200
+  - https://a-11-oy.com/api/a11oy/v1/honest -> 200 with locked=8 @ c7c0ba17, Λ=Conjecture 1, doctrine v11
+  - https://killinchu.a-11-oy.com/elite, /elite/globe, /elite/restraint, /api/killinchu/v1/restraint/info -> all 200
   - sovereign probe: confirm sovereign:true ONLY if the 5050 (Tailscale 100.125.77.31) is live; else honest sovereign:false
   - Confirm restart-recovery: simulate a container restart, confirm both apps auto-recover <60s (systemd/restart:always).
-  - https://a11oy.net/static/shared/szl_holo3d.js                    -> 200 (application/javascript) — fixes the 3D demo
-  - https://a11oy.net/api/a11oy/v1/restraint/info  AND  /restraint/bench -> 200 JSON
-  - https://a11oy.net/api/a11oy/v1/energy/operator/status            -> 200, jobs_done>0, joules_measured_total>0 (MEASURED)
-  - https://a11oy.net/api/a11oy/v1/energy/ledger                     -> 200, signed receipts + chain integrity ok
-  - https://a11oy.net/api/a11oy/v1/energy/projection?window=running  -> 200, 1-day numbers (MODELED, math shown)
-  - https://a11oy.net/energy-ops  AND  /energy-holographic  AND  /holographic  AND  /estate-hologram -> all 200
-- Reachability snapshot: https://a11oy.net/healthz -> 200
+  - https://a-11-oy.com/static/shared/szl_holo3d.js                    -> 200 (application/javascript) — fixes the 3D demo
+  - https://a-11-oy.com/api/a11oy/v1/restraint/info  AND  /restraint/bench -> 200 JSON
+  - https://a-11-oy.com/api/a11oy/v1/energy/operator/status            -> 200, jobs_done>0, joules_measured_total>0 (MEASURED)
+  - https://a-11-oy.com/api/a11oy/v1/energy/ledger                     -> 200, signed receipts + chain integrity ok
+  - https://a-11-oy.com/api/a11oy/v1/energy/projection?window=running  -> 200, 1-day numbers (MODELED, math shown)
+  - https://a-11-oy.com/energy-ops  AND  /energy-holographic  AND  /holographic  AND  /estate-hologram -> all 200
+- Reachability snapshot: https://a-11-oy.com/healthz -> 200
 
 ## Auto-loop pass — order `c174f8d5` — 2026-06-14T22:00:40Z
 
 - **Actionable items (19)** — handed to Forge agent (mode=`dispatch-cmd`, ok=`False`):
   - szl3d toolkit + PNT pillars + showcase pages) made the published bundles STALE (a11oy-bundle:0.5.0 sha d801f8e4 is old).
   - killinchu Zarf packages from current main + re-digest every bundles/*/uds-bundle.yaml (no stale refs) + sign; (3) confirm
-  - Rebuild/redeploy the a11oy container on Hetzner 167.233.50.75 (a11oy.net) to current GitHub main (d333b997 or newer)
+  - Rebuild/redeploy the a11oy container on Hetzner 167.233.50.75 (a-11-oy.com) to current GitHub main (d333b997 or newer)
   - Then HARD-PROVE by curling these EXACT URLs from the box's public hostname and pasting the real HTTP codes + a content sniff:
-  - https://a11oy.net/static/shared/szl_holo3d.js   -> MUST be 200, content-type application/javascript (was 404 stale)
-  - https://a11oy.net/api/a11oy/v1/restraint/info     -> MUST be 200 JSON (was 404 stale)
-  - https://a11oy.net/api/a11oy/v1/restraint/bench     -> MUST be 200 JSON (was 404 stale)
-  - https://a11oy.net/estate-hologram                  -> 200
-  - https://a11oy.net/nemo, /autoreview, /factory, /constitution, /quant, /grc, /restraint -> all 200
-  - https://a11oy.net/api/a11oy/v1/honest -> 200 with locked=8 @ c7c0ba17, Λ=Conjecture 1, doctrine v11
-  - https://killinchu.a11oy.net/elite, /elite/globe, /elite/restraint, /api/killinchu/v1/restraint/info -> all 200
+  - https://a-11-oy.com/static/shared/szl_holo3d.js   -> MUST be 200, content-type application/javascript (was 404 stale)
+  - https://a-11-oy.com/api/a11oy/v1/restraint/info     -> MUST be 200 JSON (was 404 stale)
+  - https://a-11-oy.com/api/a11oy/v1/restraint/bench     -> MUST be 200 JSON (was 404 stale)
+  - https://a-11-oy.com/estate-hologram                  -> 200
+  - https://a-11-oy.com/nemo, /autoreview, /factory, /constitution, /quant, /grc, /restraint -> all 200
+  - https://a-11-oy.com/api/a11oy/v1/honest -> 200 with locked=8 @ c7c0ba17, Λ=Conjecture 1, doctrine v11
+  - https://killinchu.a-11-oy.com/elite, /elite/globe, /elite/restraint, /api/killinchu/v1/restraint/info -> all 200
   - sovereign probe: confirm sovereign:true ONLY if the 5050 (Tailscale 100.125.77.31) is live; else honest sovereign:false
   - Confirm restart-recovery: simulate a container restart, confirm both apps auto-recover <60s (systemd/restart:always).
-  - https://a11oy.net/static/shared/szl_holo3d.js                    -> 200 (application/javascript) — fixes the 3D demo
-  - https://a11oy.net/api/a11oy/v1/restraint/info  AND  /restraint/bench -> 200 JSON
-  - https://a11oy.net/api/a11oy/v1/energy/operator/status            -> 200, jobs_done>0, joules_measured_total>0 (MEASURED)
-  - https://a11oy.net/api/a11oy/v1/energy/ledger                     -> 200, signed receipts + chain integrity ok
-  - https://a11oy.net/api/a11oy/v1/energy/projection?window=running  -> 200, 1-day numbers (MODELED, math shown)
-  - https://a11oy.net/energy-ops  AND  /energy-holographic  AND  /holographic  AND  /estate-hologram -> all 200
-- Reachability snapshot: https://a11oy.net/healthz -> 200
+  - https://a-11-oy.com/static/shared/szl_holo3d.js                    -> 200 (application/javascript) — fixes the 3D demo
+  - https://a-11-oy.com/api/a11oy/v1/restraint/info  AND  /restraint/bench -> 200 JSON
+  - https://a-11-oy.com/api/a11oy/v1/energy/operator/status            -> 200, jobs_done>0, joules_measured_total>0 (MEASURED)
+  - https://a-11-oy.com/api/a11oy/v1/energy/ledger                     -> 200, signed receipts + chain integrity ok
+  - https://a-11-oy.com/api/a11oy/v1/energy/projection?window=running  -> 200, 1-day numbers (MODELED, math shown)
+  - https://a-11-oy.com/energy-ops  AND  /energy-holographic  AND  /holographic  AND  /estate-hologram -> all 200
+- Reachability snapshot: https://a-11-oy.com/healthz -> 200
 
 ## Auto-loop pass — order `10df50fc` — 2026-06-14T22:55:40Z
 
 - Order is **idle / no-action sentinel** — handshake confirmed, nothing to execute.
-- Reachability snapshot: https://a11oy.net/healthz -> 200
+- Reachability snapshot: https://a-11-oy.com/healthz -> 200

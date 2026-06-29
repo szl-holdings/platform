@@ -1,12 +1,12 @@
-# SZL Forge — ORDER: REDEPLOY a11oy.net BOX to current main (today's builds missing) — PROVE with content-types
+# SZL Forge — ORDER: REDEPLOY a-11-oy.com BOX to current main (today's builds missing) — PROVE with content-types
 
 **Pinned 2026-06-14 ~20:05 EDT. Founder-directed. Demo June 18; freeze 2026-06-18 02:00 ET — land BEFORE freeze.**
 
 ## Evidence gathered by the CTO audit (live, just now)
-The public box `a11oy.net` (Hetzner 167.233.50.75) is PARTIALLY STALE — it has older surfaces
+The public box `a-11-oy.com` (Hetzner 167.233.50.75) is PARTIALLY STALE — it has older surfaces
 but NOT today's new builds. Exact live results:
 
-| Path | Box (a11oy.net) | HF (correct) | Verdict |
+| Path | Box (a-11-oy.com) | HF (correct) | Verdict |
 |---|---|---|---|
 | `/api/a11oy/v1/restraint/info` | **200 JSON** (governed 6-rung ladder) | 200 JSON | ✅ box OK (loop-1 concern RESOLVED) |
 | `/api/a11oy/v1/waqay/doctrine` | **404** | 200 (locked=8) | ❌ WAQAY NOT on box |
@@ -28,9 +28,9 @@ RESOLVED. The real restraint data is at `/api/a11oy/v1/restraint/info` (JSON) an
 3. Same for killinchu on the box/host (its WAQAY+Yupay+MBSE surfaces).
 
 ## PROVE (paste in your report — content-types matter, not just 200)
-- `curl -sD- a11oy.net/api/a11oy/v1/waqay/doctrine` → **200 application/json**, body has `locked_count:8`, `c7c0ba17`.
-- `curl -sD- a11oy.net/api/a11oy/v1/yupay/doctrine` → **200 application/json**, locked=8.
-- `curl -s a11oy.net/api/a11oy/v1/honest` → shows the CURRENT main `git_sha` (not n/a) == GitHub HEAD.
+- `curl -sD- a-11-oy.com/api/a11oy/v1/waqay/doctrine` → **200 application/json**, body has `locked_count:8`, `c7c0ba17`.
+- `curl -sD- a-11-oy.com/api/a11oy/v1/yupay/doctrine` → **200 application/json**, locked=8.
+- `curl -s a-11-oy.com/api/a11oy/v1/honest` → shows the CURRENT main `git_sha` (not n/a) == GitHub HEAD.
 - `/willay`, `/mbse`, `/mbse-6dof`, `/mbse-pipeline`, `/waqay`, `/yupay` serve the REAL page (not the
   272KB SPA shell — check page size + WAQAY/Yupay markers), front-inserted before the catch-all.
 

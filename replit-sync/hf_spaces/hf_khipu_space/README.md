@@ -30,7 +30,7 @@ quorum of witnesses attests and signs a receipt.
 
 ## Data source & honest-degrade
 
-The page live-fetches `https://a11oy.net/api/a11oy/v1/compute-pool`. When that
+The page live-fetches `https://a-11-oy.com/api/a11oy/v1/compute-pool`. When that
 endpoint is unreachable (network or cross-origin restriction), it **degrades to a
 clearly-labeled bundled snapshot** (`assets/snapshot-compute-pool.json`) — never to
 fabricated data and never to a false "all green." The source badge always states

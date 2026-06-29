@@ -83,9 +83,9 @@ def test_surface_list():
 def test_url_building():
     print("\n[3] URL building")
     check("api-prefixed path",
-          ss.surface_url("compute-pool") == "https://a11oy.net/api/a11oy/v1/compute-pool")
+          ss.surface_url("compute-pool") == "https://a-11-oy.com/api/a11oy/v1/compute-pool")
     check("absolute path",
-          ss.surface_url("/router/health") == "https://a11oy.net/router/health")
+          ss.surface_url("/router/health") == "https://a-11-oy.com/router/health")
 
 
 # --------------------------------------------------------------------------- #

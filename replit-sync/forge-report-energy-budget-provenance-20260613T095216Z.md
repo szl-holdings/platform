@@ -8,8 +8,8 @@ merge, no serve.py edit (locked), additive only.
 ## What was dark
 Of the NEXT_ORDER energy surfaces, siblings had already shipped `/engine/status`,
 `/formula/sovereign`, `/heart/pulse`, `/ayni` (all 200). The ONLY remaining 404s were:
-- `https://a11oy.net/energy/budget`
-- `https://a11oy.net/energy/provenance`
+- `https://a-11-oy.com/energy/budget`
+- `https://a-11-oy.com/energy/provenance`
 
 Both nginx-proxy `^~ /energy/` (trailing-slash → prefix stripped) to the box
 `szl-energy-harvest` microservice on `:8082`.
@@ -44,8 +44,8 @@ a joule, a receipt, or a settled budget — same discipline as the marketplace
 
 ## Verification (live)
 - box-local `:8082/budget` = 200, `:8082/provenance` = 200
-- public `a11oy.net/energy/budget` = 200 (live posture `negative-price`, `-15.7 EUR/MWh`)
-- public `a11oy.net/energy/provenance` = 200 (genesis, 0 entries)
+- public `a-11-oy.com/energy/budget` = 200 (live posture `negative-price`, `-15.7 EUR/MWh`)
+- public `a-11-oy.com/energy/provenance` = 200 (genesis, 0 entries)
 - `py_compile` OK; `systemctl is-active szl-energy-harvest` = active
 - GitHub-aligned: `platform/apps/energy-harvest/{budget.py,server.py}` byte-match box
   (md5-verified before push).

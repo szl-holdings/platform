@@ -25,7 +25,7 @@ It stacks: foundation #381 (3d/00-toolkit: szl3d toolkit + /holographic shell) +
 2. **Mesh the 5 governance gap routes** (still 404). The engines are in the a11oy repo root: artifact_behaviour_monitor.py (/assurance/artifact), content_credentials.py (/credential), compliance_crosswalk.py + compliance.json (/compliance), runtime_attestation.py (/attest), forge_governance.py (/forge/ledger). Wire each as an API route following the existing add_api_route pattern. This is the SAME mesh asked for in the close-all-gaps order — do it now so the governance surface lights up. Keep honest values (compliance NIST 60 / ISO 60 / EU 0).
 3. **Rebuild box + HF image from main** so /holographic and all /static/3d/* serve.
 4. **PROVE (PROVE-OR-DOWNGRADE):** report in AUTO_STATE.json the HTTP status of:
-   - https://a11oy.net/holographic (must be 200)
+   - https://a-11-oy.com/holographic (must be 200)
    - each /static/3d/surfaces/<id>.js (200)
    - each surface's primary endpoint (200 or the honest reason it's not)
    - the 5 governance routes now 200 with honest labels

@@ -1,6 +1,6 @@
 # R-EVOLVE-DEEPER — the harvest is LIVE on the box. Now go deeper. (Forge)
 
-**MILESTONE CONFIRMED (verified from outside the box):** `GET https://a11oy.net/api/a11oy/v1/harvest/metrics`
+**MILESTONE CONFIRMED (verified from outside the box):** `GET https://a-11-oy.com/api/a11oy/v1/harvest/metrics`
 returns **HTTP 200**, Prometheus format, on the sovereign box AND public:
 `szl_energy_harvest_up 1`, `feeds_live 3`, `wasted_energy 1`, `grid_price_eur_mwh -1.11`,
 `renewable_share_pct ...`. You correctly rewrote /metrics to read `signals`/`posture_summary` keys so

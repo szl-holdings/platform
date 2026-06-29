@@ -16,7 +16,7 @@ does not auto-execute). Honest disposition per item:
   (edge-triggered, deduped; alert step can't mask the red fail step).
 
 ## Box-side + founder-gated (Replit cannot satisfy Rule 4 autonomously)
-- **R0 / R0b** a11oy.net sovereign GPU flip — app code is shipped + live and the
+- **R0 / R0b** a-11-oy.com sovereign GPU flip — app code is shipped + live and the
   posture is HONEST (sovereign:false / hf-router). Only remaining action is on
   167.233.50.75 (serve open-weight model on the GPU; set A11OY_MODEL_BASE_URL +
   A11OY_GPU_LABEL; `a11oy-rebuild`). Awaiting the founder's explicit box approval.

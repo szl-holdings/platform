@@ -10,7 +10,7 @@ Doctrine v11. Verified-live, no fabrication. Box-side Forge. AUTO_STATE.json lef
 - Files changed: NONE. The box working copy /opt/szl/killinchu was a stale checkout, not canonical/serving.
 
 ## (2) TASK 2 — surfaces (real probes)
-- a11oy.net/healthz 200; /frontier 200; /orbital 200; /energy-ops 200
+- a-11-oy.com/healthz 200; /frontier 200; /orbital 200; /energy-ops 200
 - szlholdings-anatomy.hf.space 200 (docker); .static 404 (expected/retired)
 - szlholdings-energy.hf.space 200 (docker); .static 404 (expected/retired)
 - killinchu /elite serves; anatomy embed 200

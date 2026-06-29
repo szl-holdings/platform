@@ -15,9 +15,9 @@ Fix applied (additive, doctrine v11):
 - Repo: pushed byte-matching change to `apps/mesh-resilience/server.py` (commit 5414716) so GitHub == box.
 
 LIVE PROOF (verified just now):
-- GET https://a11oy.net/api/a11oy/v1/mesh-resilience/health     → 200
-- GET https://a11oy.net/api/a11oy/v1/mesh-resilience/healthz    → 200
-- GET https://a11oy.net/api/a11oy/v1/mesh-resilience/resilience → 200 (n=728; corr(L,R2)=-0.9465; SZL mesh R2=1.0)
+- GET https://a-11-oy.com/api/a11oy/v1/mesh-resilience/health     → 200
+- GET https://a-11-oy.com/api/a11oy/v1/mesh-resilience/healthz    → 200
+- GET https://a-11-oy.com/api/a11oy/v1/mesh-resilience/resilience → 200 (n=728; corr(L,R2)=-0.9465; SZL mesh R2=1.0)
 Honesty preserved verbatim: MEASURED/SIMULATED, OPEN hypothesis, NOT one of the locked-8, BFT=Conjecture 2,
 Λ=Conjecture 1.
 

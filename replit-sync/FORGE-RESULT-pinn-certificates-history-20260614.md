@@ -17,7 +17,7 @@ content-addressed history of signed physical-bounds certificates.
 
 ## Checkable artifacts (proof)
 - **a11oy main commit:** `b1bd8782d3b6c403ca91de2cd56ce5ad508d7632` (szl_pinn_bounds.py; hf-sync auto-mirrors).
-- **HTTP 200 — box-local `:7861`** and **public TLS `https://a11oy.net/api/a11oy/v1/pinn/certificates`**.
+- **HTTP 200 — box-local `:7861`** and **public TLS `https://a-11-oy.com/api/a11oy/v1/pinn/certificates`**.
 - Response: `count=1, returned=1, content_addressed=true`; entry
   `sha256:586cc6cdc81ca57e9f17f945c03df93fe2c0fa28b4400a2f3275512ebf0bb4b6`,
   `signed=true`, signatures `[ed25519_onmetal, cosign_anchored]`, `energy_joules_derived=5112.38`, label `MEASURED`.

@@ -1,6 +1,6 @@
 # Forge CTO MASTER ORDER — 2026-06-11 (zoom-out, everything)
 **From:** CTO (Computer) · **To:** Forge (Replit) + 2 marketers/directors + Opus 4.8 dev pair
-**Mandate (founder):** upgrade EVERYTHING — every tab unique + wired to live real-time data, all 3D upgraded, genius landing page, both apps more user-friendly, anatomy deep, full back-end + front-end, align GitHub/HF/Hetzner/a11oy.net/UDS payload+mesh. T-5 to Warhacker (June 16–19). Doctrine hard-gate applies to all.
+**Mandate (founder):** upgrade EVERYTHING — every tab unique + wired to live real-time data, all 3D upgraded, genius landing page, both apps more user-friendly, anatomy deep, full back-end + front-end, align GitHub/HF/Hetzner/a-11-oy.com/UDS payload+mesh. T-5 to Warhacker (June 16–19). Doctrine hard-gate applies to all.
 
 This is the single source of truth. It cites four research reports in `team/`:
 `QM_LEADERS_RESEARCH_2026-06-10.md`, `CLUSTER_RESEARCH_2026-06-10.md`, `CLUSTER_RESEARCH_PHYSICS_MATH_2026-06-10.md`, `WOJCICKI_DESCI_3D_RESEARCH_2026-06-10.md`, plus `SZL_THESIS_v5.md` and the Λ-v5 layer.
@@ -32,7 +32,7 @@ Use ONLY vendored libs (0 runtime CDN). Build order from that report (A2→A3→
 All HONEST heuristics, never fake proofs; label SAMPLE/proxy where backend not yet live.
 
 ## C. GENIUS LANDING PAGE + USER-FRIENDLY (marketers/directors + Opus 4.8)
-- **Landing page → "genius-grade"**: a11oy.net `cathedral.html` + the HF Space root. Hero: the living 3D anatomy/receipt-graph, one-line honest value prop ("governed AI substrate: every action policy-gated + receipt-sealed"), live status (Spaces up, locked-8, Λ=Conjecture 1), a 30-sec guided demo path. NO hype, NO fake metrics, trust never 100%. The 2 marketers/directors own copy + narrative + the demo script; Opus 4.8 owns implementation. Mobile + tablet responsive.
+- **Landing page → "genius-grade"**: a-11-oy.com `cathedral.html` + the HF Space root. Hero: the living 3D anatomy/receipt-graph, one-line honest value prop ("governed AI substrate: every action policy-gated + receipt-sealed"), live status (Spaces up, locked-8, Λ=Conjecture 1), a 30-sec guided demo path. NO hype, NO fake metrics, trust never 100%. The 2 marketers/directors own copy + narrative + the demo script; Opus 4.8 owns implementation. Mobile + tablet responsive.
 - **Both apps more user-friendly**: a guided "start here" flow, tab search/command palette, plain-language tooltips on every doctrine term (locked-8, Λ, Khipu, Chaski), and a consistent honest-status legend (live/cached/SAMPLE/SIMULATED). Reduce cognitive load: group the 144/107 tabs into clear sections with a top-level "what is this" per section.
 
 ## D. THEORY EVOLUTION — make our own (from QM_LEADERS report Top-6 + thesis)
@@ -59,7 +59,7 @@ Wire these into qbio + anatomy + thesis (all [VERIFIED-math basis / PROPOSED-SZL
 - `lutar-lean/Lutar/QuantumBio/SZL_v5.lean` is committed (3 theorems, proofs, no sorry). Run `lake build` (Lean 4 + Mathlib) in the Forge env to machine-verify, then regen `VERIFIED_THEOREMS.md` so the drift gate passes. These are the engineering Λ-v5 lemmas — do NOT fold into locked-8; Λ uniqueness stays Conjecture 1.
 
 ## H. ALIGNMENT GATE (the definition of "done")
-GitHub == HF == a11oy.net/Hetzner == UDS bundle payload == deployed mesh, on ALL of: same tab sets; shared `szl_*.py`+corpus byte-identical (both drift guards green); qbio endpoints live on both apps + anatomy v5 panel; locked-8 = {F1,F4,F7,F11,F12,F18,F19,F22}; Λ=Conjecture 1; Khipu=Conjecture 2; Λ-v5=engineering gate (PROPOSED); Holographic bound=Conjecture 3; SLSA L1/L2-attested/L3-roadmap; 0 user-visible codenames; effector SIMULATED; trust never 100%; 0 runtime CDN; Kruse=NARRATIVE only; no fabricated data. CI green both repos (killinchu build-push = known gap). UDS: `uds deploy` the bundle (needs GHCR images from B.2 + Zenodo/cosign founder creds).
+GitHub == HF == a-11-oy.com/Hetzner == UDS bundle payload == deployed mesh, on ALL of: same tab sets; shared `szl_*.py`+corpus byte-identical (both drift guards green); qbio endpoints live on both apps + anatomy v5 panel; locked-8 = {F1,F4,F7,F11,F12,F18,F19,F22}; Λ=Conjecture 1; Khipu=Conjecture 2; Λ-v5=engineering gate (PROPOSED); Holographic bound=Conjecture 3; SLSA L1/L2-attested/L3-roadmap; 0 user-visible codenames; effector SIMULATED; trust never 100%; 0 runtime CDN; Kruse=NARRATIVE only; no fabricated data. CI green both repos (killinchu build-push = known gap). UDS: `uds deploy` the bundle (needs GHCR images from B.2 + Zenodo/cosign founder creds).
 
 ## I. FOUNDER/FORGE-GATED (say exactly what you need)
 Hetzner root redeploy (167.233.50.75 autodeploy script); GHCR push token (uds-v0.2.0); Zenodo DOI token; cosign/Rekor signing (uds-v0.3.0); `SZL_LOCAL_LLM_URL` brain secret (flips Chaski stub→live); UDS cluster (k3d + Zarf/UDS/Pepr/K9/Lula).

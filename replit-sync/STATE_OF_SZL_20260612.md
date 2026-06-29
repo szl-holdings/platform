@@ -35,7 +35,7 @@ This is exactly 8. No rounding. No implicit claims about adjacent formulas.
 **Sovereign brain:** Chaski runs Qwen2.5-Coder-32B via Ollama at Tailscale `100.125.77.31:11434`, self-hosted on founder-controlled GPU. Also live: Llama-3.1-8B, DeepSeek-Coder-V2. Probe verdict: `SOVEREIGN-GPU ONE-OF-ONE LIVE` (7/7 checks). All models are open-weight; no proprietary model API dependency for core reasoning.
 
 **Live surfaces (all HTTP 200 as of 2026-06-12):**
-- `a11oy.net` — Hetzner 167.233.50.75
+- `a-11-oy.com` — Hetzner 167.233.50.75
 - `killinchu` — szlholdings-killinchu.hf.space/elite (**effector: SIMULATED**)
 - `yarqa` — live
 - `anatomy` — szlholdings-anatomy.static.hf.space

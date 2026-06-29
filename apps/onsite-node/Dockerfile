@@ -13,7 +13,7 @@
 #
 # Run (see docker-compose.yml for the canonical invocation):
 #   docker run --rm --gpus all \
-#     -e HOME_URL=https://a11oy.net \
+#     -e HOME_URL=https://a-11-oy.com \
 #     -e NODE_LAT=52.5 -e NODE_LON=13.4 \
 #     -e CONSENT_TOKEN=<your-signed-token> \
 #     -p 9101:9101 \

@@ -110,7 +110,7 @@ def body_self():
     # --- BRAIN: code orchestrator (sovereign GPU) ---
     code, st = _probe_json("http://127.0.0.1:7861/api/a11oy/code/healthz")
     if code is None:
-        code, st = _probe_json("https://a11oy.net/api/a11oy/code/healthz")
+        code, st = _probe_json("https://a-11-oy.com/api/a11oy/code/healthz")
     code = code or {}
     brain_live = code.get("mode") == "live"
     brain_sov = code.get("sovereign") is True

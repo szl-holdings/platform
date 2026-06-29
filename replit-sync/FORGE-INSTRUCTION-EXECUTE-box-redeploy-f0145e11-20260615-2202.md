@@ -1,4 +1,4 @@
-# FORGE INSTRUCTION — EXECUTE NOW: redeploy a11oy.net box to f0145e11 (3-GPU mesh)
+# FORGE INSTRUCTION — EXECUTE NOW: redeploy a-11-oy.com box to f0145e11 (3-GPU mesh)
 
 **Founder green light (2026-06-15 18:00 ET): "do what you can, get Forge to do it — Forge has full access to everything."** This is an EXECUTE order, not a RECOMMEND. You have done this exact box redeploy before (see `forge-report-20260615T003000Z-box-redeploy-public-proof.md`: "Box /opt/szl/a11oy reset --hard origin/main, image rebuilt, container recreated, VERIFY all PASS"). Do it again to current main.
 
@@ -7,10 +7,10 @@ Doctrine v11 — never weaken: locked = EXACTLY 8 {F1,F4,F7,F11,F12,F18,F19,F22}
 ## WHY NOW (race concern is GONE)
 - The earlier reason box self-dispatch was held OFF ("racing the live a11oy commit wave") **no longer applies**: the a11oy commit wave has SETTLED — last commit `f0145e11` at 21:06Z, ~55 min quiet since (prior commits were ~13-min apart, now idle).
 - The earlier `git_sha` blocker is RESOLVED: `/api/a11oy/v1/honest` on the HF Space already serves `git_sha` (f0145e112dd1). serve.py is stable.
-- **HF Space = f0145e11 (current). a11oy.net BOX = cfefcc32 (STALE ~3h).** The box is the ONLY lagging surface and it serves /compute-pool-hardened — so the new OMEN node + dynamic tailscale resolver are not visible until the box redeploys.
+- **HF Space = f0145e11 (current). a-11-oy.com BOX = cfefcc32 (STALE ~3h).** The box is the ONLY lagging surface and it serves /compute-pool-hardened — so the new OMEN node + dynamic tailscale resolver are not visible until the box redeploys.
 
 ## EXECUTE — box redeploy (the proven path, Replit-side hands-on OR flip box self-dispatch now that the wave settled)
-On the Hetzner box (a11oy.net, 167.233.50.75), in the a11oy checkout (`/opt/szl/a11oy`):
+On the Hetzner box (a-11-oy.com, 167.233.50.75), in the a11oy checkout (`/opt/szl/a11oy`):
 ```bash
 cd /opt/szl/a11oy
 git fetch origin && git reset --hard origin/main
@@ -36,9 +36,9 @@ Once the box runs f0145e11, `szl_backend_hardening.py` reads the box's own `tail
 - **chaski** (Replit) — confirmed UP at LIVE IP **100.102.173.88:11434 (8 models)**; resolver finds it dynamically (stale 100.76.58.50 is fallback only). Also execute `replit-sync/energy_engine/R_CHASKI_BOOT_AND_KEEP_ALIVE_20260615.md` to make its Ollama durable (died after ~22h) + wire 2nd energy lung (A11OY_ENERGY_CHASKI_ENABLED=1, URL=http://100.102.173.88:11434), honest joules (MEASURED only on real per-job reading).
 
 ## PROVE-IT (paste real public curls in your forge-report — code + content-type + bytes)
-- [ ] `GET https://a11oy.net/api/a11oy/v1/honest` → git_sha == **f0145e112dd1** (or newer), doctrine v11, locked 8, c7c0ba17, Λ=Conjecture 1.
-- [ ] `GET https://a11oy.net/api/a11oy/v1/compute-pool-hardened` → node `omen-betterwithage` PRESENT and `reachable:true, sovereign:true`; resolver `detail` contains `via tailscale-*`; `gpu_nodes_reachable` >= 2 (3 if chaski durable). REAL probe only — never fabricate.
-- [ ] `GET https://a11oy.net/api/a11oy/v1/energy/operator/status` → nodes_computing includes omen-betterwithage (+ chaski if wired); joules MEASURED + climbing; stub_mode:false.
+- [ ] `GET https://a-11-oy.com/api/a11oy/v1/honest` → git_sha == **f0145e112dd1** (or newer), doctrine v11, locked 8, c7c0ba17, Λ=Conjecture 1.
+- [ ] `GET https://a-11-oy.com/api/a11oy/v1/compute-pool-hardened` → node `omen-betterwithage` PRESENT and `reachable:true, sovereign:true`; resolver `detail` contains `via tailscale-*`; `gpu_nodes_reachable` >= 2 (3 if chaski durable). REAL probe only — never fabricate.
+- [ ] `GET https://a-11-oy.com/api/a11oy/v1/energy/operator/status` → nodes_computing includes omen-betterwithage (+ chaski if wired); joules MEASURED + climbing; stub_mode:false.
 - [ ] a11oy CI green on f0145e11; GitHub↔HF shared modules in sync.
 - [ ] autodeploy timer `active`.
 

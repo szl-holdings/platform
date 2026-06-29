@@ -75,7 +75,7 @@ except Exception:  # noqa: BLE001
 # ---------------------------------------------------------------------------
 # Constants (all overridable via env; NO defaults that leak credentials)
 # ---------------------------------------------------------------------------
-HOME_URL: str = os.environ.get("HOME_URL", "")           # e.g. https://a11oy.net
+HOME_URL: str = os.environ.get("HOME_URL", "")           # e.g. https://a-11-oy.com
 NODE_LAT: float = float(os.environ.get("NODE_LAT", "52.5"))
 NODE_LON: float = float(os.environ.get("NODE_LON", "13.4"))
 CONSENT_TOKEN: str = os.environ.get("CONSENT_TOKEN", "")  # operator MUST set this
@@ -91,7 +91,7 @@ _MAX_JOULES_PER_WINDOW: float = float(os.environ.get("MAX_JOULES_PER_WINDOW", "3
 _RESULT_PATH = "/v1/node/result"
 _REGISTER_PATH = "/v1/node/register"
 
-UA = {"User-Agent": "szl-onsite-node/1.0 (+https://a11oy.net)"}
+UA = {"User-Agent": "szl-onsite-node/1.0 (+https://a-11-oy.com)"}
 TIMEOUT = 10
 
 

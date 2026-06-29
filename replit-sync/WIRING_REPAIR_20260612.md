@@ -12,8 +12,8 @@ the Hetzner box (`replit-sync/WIRE_IT_UP.sh`) closes 3 of the 4.
 ## WHAT'S WIRED (verified 200/302, no action)
 | Surface | Endpoint | Status |
 |---|---|---|
-| a11oy platform | https://a11oy.net/healthz | 200 (doctrine v11, kernel c7c0ba17) |
-| Chaski code-brain | https://a11oy.net/api/a11oy/code/healthz | 200 (live, open-weight) |
+| a11oy platform | https://a-11-oy.com/healthz | 200 (doctrine v11, kernel c7c0ba17) |
+| Chaski code-brain | https://a-11-oy.com/api/a11oy/code/healthz | 200 (live, open-weight) |
 | Verticals feed | /api/a11oy/v1/vert/finance/feed | 200 (24 LIVE sources, 0 stale) |
 | yarqa Space | szlholdings-yarqa.hf.space/healthz | 200 |
 | hatun-mcp Space | szlholdings-hatun-mcp.hf.space/healthz | 200 |
@@ -44,19 +44,19 @@ systemctl restart forge-perplexity-poll.timer
 ```
 **Verify:** next poll → `AUTO_STATE.json` shows `dispatch_mode` != none, `dispatch_ok: true`.
 
-## GAP 2 — a11oy.net sovereign GPU flip  [BOX ROOT; auto once GAP 1 wired]
+## GAP 2 — a-11-oy.com sovereign GPU flip  [BOX ROOT; auto once GAP 1 wired]
 **State:** live endpoint = `sovereign:false, inference:hf-router, base_url:router.huggingface.co/v1`.
 App code is DONE (#324) — only the box action remains. Once GAP 1 is wired, Forge does this
 autonomously from order R0-GO. To do it directly:
 ```bash
 ollama pull qwen2.5-coder:7b                  # keep llama3.1:8b
 curl -s http://127.0.0.1:11434/v1/models      # MUST 200 with the model BEFORE rebuild
-# set on a11oy.net deploy env (NOT committed):
+# set on a-11-oy.com deploy env (NOT committed):
 #   A11OY_MODEL_BASE_URL=http://127.0.0.1:11434/v1
 #   A11OY_GPU_LABEL="NVIDIA RTX 5000 @ Hetzner (betterwithage)"
 sudo a11oy-rebuild
 ```
-**Verify:** `curl -s https://a11oy.net/api/a11oy/code/healthz | jq '.sovereign,.inference,.key_resolution.base_url'`
+**Verify:** `curl -s https://a-11-oy.com/api/a11oy/code/healthz | jq '.sovereign,.inference,.key_resolution.base_url'`
 → want `true "self-hosted-gpu" "http://127.0.0.1:11434/v1"`.
 **Honesty floor:** model server MUST be up before rebuild; the half-state (env set + server
 down) is the only unacceptable outcome — else run the honest revert.

@@ -32,7 +32,7 @@ Mount under the HONEST namespace `/api/a11oy/v1/materials/*` (NO codename). New 
 locked-proven = EXACTLY 8 {F1,F4,F7,F11,F12,F18,F19,F22} @ kernel c7c0ba17 (NEVER add materials formulas to it); Λ=Conjecture 1; Khipu=Conjecture 2; PDD-injectivity + McAllester-in-Lean = CONJECTURE/ROADMAP (honest); trust never 100%; SLSA L1/L2/L3-roadmap; effectors simulated; 0 runtime CDN; NO user-visible codenames; never commit a key; byte-identical shared modules; "claiming more than is real is the only unacceptable outcome." Label every datum LIVE/MEASURED/SAMPLE/MODELED/ROADMAP.
 
 ## MECHANICS
-GitHub: bash api_credentials=["github"], gh api -X PUT contents (fresh sha, base64 -w0). ast.parse .py / node --check .js before push. hf-sync mirrors .py to the Space; factory-restart after. Verify LIVE (retry 8-12x; a11oy.net/*.hf.space flap to 000; mind the 60/min rate limit). Distinguish real-200-json from 200-SPA-shell.
+GitHub: bash api_credentials=["github"], gh api -X PUT contents (fresh sha, base64 -w0). ast.parse .py / node --check .js before push. hf-sync mirrors .py to the Space; factory-restart after. Verify LIVE (retry 8-12x; a-11-oy.com/*.hf.space flap to 000; mind the 60/min rate limit). Distinguish real-200-json from 200-SPA-shell.
 
 ## DELIVERABLES
 Each dev writes /home/user/workspace/team/MASTERPLAN/dev/RESULT_MAT_D{1..5}.md with files+shas+LIVE curl proof + honest PROVEN/CONJECTURE labels + any honest BLOCKED.

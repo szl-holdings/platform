@@ -23,7 +23,7 @@ Founder ask: "check github for new instructions to replit forge; make sure no ba
 
 ## No-bandaid wiring proof (R6 finance — a11oy_vertical_feeds.py)
 Verified the R6 finance lineage is genuinely wired end-to-end, not a committed-but-dead file:
-- **LIVE 200**: GET `a11oy.net/api/a11oy/v1/vert/finance/feed`.
+- **LIVE 200**: GET `a-11-oy.com/api/a11oy/v1/vert/finance/feed`.
 - **Polygon (official, key-gated)**: `equities_official` shows `status:"disabled"`,
   `reason:"POLYGON_API_KEY not set"` — honest disabled payload, never a fabricated quote; key sent
   only via `Authorization: Bearer` header, never in the URL/query string.

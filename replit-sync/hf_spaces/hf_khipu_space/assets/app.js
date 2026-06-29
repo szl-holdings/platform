@@ -10,7 +10,7 @@
 // loaded via a <script> tag in index.html (exposes window.ForceGraph3D). 0 runtime CDN.
 const ForceGraph3D = window.ForceGraph3D;
 
-const API = 'https://a11oy.net/api/a11oy/v1/compute-pool';
+const API = 'https://a-11-oy.com/api/a11oy/v1/compute-pool';
 const SNAPSHOT_URL = 'assets/snapshot-compute-pool.json';
 const REFRESH_MS = 15000;
 

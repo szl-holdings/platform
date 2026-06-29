@@ -22,7 +22,7 @@ entries ONLY, never fabricates) and emits:
 Backup saved (`server.py.bak.joulebridge.*`), `py_compile` OK, `szl-energy-harvest.service`
 restarted.
 
-## RAW verification (public a11oy.net, through nginx)
+## RAW verification (public a-11-oy.com, through nginx)
 ```
 szl_energy_harvest_joules_measured 212.262
 szl_energy_harvest_joules_sample 0

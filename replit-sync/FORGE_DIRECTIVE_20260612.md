@@ -10,7 +10,7 @@ Doctrine v11 (unchanged): locked-proven = 8 {F1,F4,F7,F11,F12,F18,F19,F22} @ ker
 - `SZLHOLDINGS/anatomy` is RUNNING but root returns **404** (static-serve glitch; repo has index.html/app.js/data.js/style.css). A **factory rebuild** forces a re-serve.
 - The CTO agent's HF connector can't factory-restart; you can (you hold `HF_WRITE_TOKEN`).
 - Run: set Actions secret `HF_WRITE_TOKEN`, then `python replit-sync/forge_anatomy_rebuild.py`. (A dispatch workflow `forge-anatomy-rebuild.yml` is provided in the PR description / replit-sync notes — add it under `.github/workflows/` directly on GitHub, since the CTO proxy token lacks `workflow` scope and platform's .gitignore excludes that path.)
-- Honesty: do NOT claim it's live until the script's poll sees **200**. The anatomy *consolidation* is already live at `https://a11oy.net/anatomy` (200) regardless — this is just the redundant standalone surface.
+- Honesty: do NOT claim it's live until the script's poll sees **200**. The anatomy *consolidation* is already live at `https://a-11-oy.com/anatomy` (200) regardless — this is just the redundant standalone surface.
 
 ## 2) Validate + merge the two OpenTelemetry Dependabot PRs  →  `replit-sync/forge_validate_dependabot.py`
 - platform **#344** (`@opentelemetry/sdk-node` 0.208→0.217) and **#345** (`auto-instrumentations-node` 0.69→0.75). Touch only `lib/observability/package.json` + `pnpm-lock.yaml`. Both currently **BEHIND** main.

@@ -9,7 +9,7 @@ The killinchu/a11oy GHCR "founder-gated" red was actually a fixable Docker `max 
 The GHCR push uses secrets.GITHUB_TOKEN (repo-native), NOT a founder secret — so future image rebuilds self-heal on push. The new images already contain szl_cuas_formulas.py + szl_unified_formulas.py + all modules → the UDS payload inherits them.
 
 ## FORGE: the GENUINELY remaining gated items (only 4 — all need a human secret/approval)
-1. **Hetzner root redeploy** (167.233.50.75): the GHCR image is now fresh + signed; run the autodeploy so a11oy.net serves /api/a11oy/v1/{cuas,unified,qbio}/*. FOUNDER runs sudo — do not auto. Verify a11oy.net endpoints after.
+1. **Hetzner root redeploy** (167.233.50.75): the GHCR image is now fresh + signed; run the autodeploy so a-11-oy.com serves /api/a11oy/v1/{cuas,unified,qbio}/*. FOUNDER runs sudo — do not auto. Verify a-11-oy.com endpoints after.
 2. **Zenodo DOI token** → mint the v8 canonical thesis DOI (szl-papers/papers/SZL_THESIS_v8.md; CITATION.cff + .zenodo.json staged for v8).
 3. **oqs-python PQ keys** → flip the PQ Provenance tab signature from honest PROXY to real ML-DSA-65 (NIST FIPS 203/204/205).
 4. **cosign/Rekor** (uds-v0.3.0 re-sign), **SZL_LOCAL_LLM_URL** (Chaski stub→live), MAJOR dep bumps → STOP, notify founder.

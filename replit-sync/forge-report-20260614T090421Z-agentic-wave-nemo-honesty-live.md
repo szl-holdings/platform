@@ -5,7 +5,7 @@
 - Founder directive: "NO BANDAIDS — GET IT FULLY OPERATIONAL."
 - Title: SZL agentic wave: staged, awaiting founder hardware/secret/approval (1 honesty fix landed live)
 
-## Ground truth (live probes — box 167.233.50.75 + a11oy.net)
+## Ground truth (live probes — box 167.233.50.75 + a-11-oy.com)
 - ONE GPU reachable: betterwithage 100.125.77.31 -> qwen2.5-coder:7b, bge-large, llama3.1:8b. NO Qwen3-32B, NO Nemotron, NO vLLM.
 - chaski 100.76.58.50 ASLEEP; no 2nd RTX 4000 Ada reachable.
 - Sovereign brain genuinely LIVE + honest: /api/szl/v1/inference-posture sovereign:true gpu_reachable:true model=qwen2.5-coder:7b (live /models probe this request).
@@ -20,7 +20,7 @@ does not exist. Now model-aware:
 - sovereign-local: label:ROADMAP, sovereign:false, gpu_reachable:true (node honest), node_serving_now:"qwen2.5-coder:7b",
   honest note naming the founder-gated hardware blockers. Auto-flips to MEASURED the instant a 32B base is genuinely served.
 - cloud-NIM-frontier: unchanged (already honest: ROADMAP, sovereign:false, cloud).
-Verified live: public a11oy.net/api/a11oy/v1/nemo/tiers = 200; labels confirmed honest.
+Verified live: public a-11-oy.com/api/a11oy/v1/nemo/tiers = 200; labels confirmed honest.
 
 ## STAGED — blocked on founder hardware / secret / approval (no approval changes physics)
 1. SZL-Nemo 32B QLoRA + vLLM MTP (FORGE_SZL_NEMO.md): needs a GPU that can host Qwen3-32B (~24GB+ for 4-bit inference;

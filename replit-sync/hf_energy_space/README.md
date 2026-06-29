@@ -18,7 +18,7 @@ A live, self-contained dashboard + 3D visualization of the SZL **energy loop**:
 ## What this shows
 
 - **The measured joule milestone.** `212.262` real measured joules from the `betterwithage` job, landing during a **negative-price** grid window (the grid PAID to compute). `joules_label: measured` — no longer a sample.
-- **Live a11oy API.** Fetched at runtime from `https://a11oy.net/api/a11oy/v1/...` (CORS open). Endpoints: `harvest/posture`, `energy/budget`, `energy/provenance`, `heart/pulse`, `revenue/marketplace`.
+- **Live a11oy API.** Fetched at runtime from `https://a-11-oy.com/api/a11oy/v1/...` (CORS open). Endpoints: `harvest/posture`, `energy/budget`, `energy/provenance`, `heart/pulse`, `revenue/marketplace`.
 - **Honest degradation.** If a fetch fails, the panel is clearly labeled **SNAPSHOT** with a last-known value — never fabricated.
 - **3D loop.** A `three.js` (CDN) animation of energy particles flowing through every organ of the loop, with a glassmorphism HUD bound to the live numbers.
 

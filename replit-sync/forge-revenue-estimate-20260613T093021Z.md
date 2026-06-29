@@ -9,10 +9,10 @@ code (not a deck, not a promise).
 Standalone FastAPI microservice — built like verify-api / mesh-resilience, deliberately
 **NOT** an edit to the LOCKED serve.py.
 
-- `https://a11oy.net/api/a11oy/v1/revenue/healthz` → 200
-- `https://a11oy.net/api/a11oy/v1/revenue/estimate` → 200 (live grid input)
-- `https://a11oy.net/api/a11oy/v1/revenue/thesis` → 200
-- `https://a11oy.net/api/a11oy/v1/revenue/` → 200 (landing)
+- `https://a-11-oy.com/api/a11oy/v1/revenue/healthz` → 200
+- `https://a-11-oy.com/api/a11oy/v1/revenue/estimate` → 200 (live grid input)
+- `https://a-11-oy.com/api/a11oy/v1/revenue/thesis` → 200
+- `https://a-11-oy.com/api/a11oy/v1/revenue/` → 200 (landing)
 - CORS `*`; nginx marker `REVENUE-API-PROXY`; box systemd `szl-revenue-estimate` :8084.
 
 It reads the **live** wasted-energy posture from the harvest service

@@ -3,7 +3,7 @@
 chaski_probe.py — self-verifying readiness probe for a11oy Code (Chaski).
 
 Honesty doctrine v11. This probe NEVER fabricates a pass. It reports only what
-it can independently verify against the LIVE a11oy.net surface, and labels
+it can independently verify against the LIVE a-11-oy.com surface, and labels
 everything it cannot reach (e.g. M2M-key-gated chat) as "gated/unverified"
 rather than claiming success.
 
@@ -21,7 +21,7 @@ Exit: prints one JSON blob to stdout. Designed to be imported or run by cron.
 from __future__ import annotations
 import json, sys, urllib.request, urllib.error
 
-BASE = "https://a11oy.net"
+BASE = "https://a-11-oy.com"
 TIMEOUT = 20
 
 

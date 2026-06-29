@@ -11,12 +11,12 @@ CPU-only (no nvidia-smi) and the GPU node (betterwithage, Tailscale) exposes Oll
 unavailable, say so — do not fake"), no GPU temp is fabricated.
 
 ## WHAT IS LIVE (verified just now, off-estate HTTP)
-- GET https://a11oy.net/api/a11oy/v1/reverse-loop → 200
+- GET https://a-11-oy.com/api/a11oy/v1/reverse-loop → 200
   measured=false, sovereign=false, joules_label=sample, thermal_source=null.
   Illustrative-only envelope (assumed 75C / 230W TDP): recoverable_w=13.8 W,
   carnot_ceiling_frac=0.1522, applied_recovery_eff=0.06 — labelled
   "ILLUSTRATIVE — assumed inputs, NOT measured, NOT charted".
-- GET https://a11oy.net/api/a11oy/v1/harvest/metrics carries
+- GET https://a-11-oy.com/api/a11oy/v1/harvest/metrics carries
   `szl_energy_reverse_recovery_available 0` (real thermal absent). `szl_gpu_temp_c` and
   `szl_energy_reverse_recovery_envelope_w` are INTENTIONALLY OMITTED until a real read —
   never charted as fabricated data. When a thermal source is reachable they auto-appear.

@@ -11,7 +11,7 @@ Audited the live state, found ONE real gap, and closed it.
 
 ## The gap (now CLOSED)
 Current top order P0 (PNT mesh /api/a11oy/v1/pnt/{,sensor,resilience,coast,limits}) was **404 on the box
-(a11oy.net)** even though the sibling loop had already merged the wiring (commit 36b9c191, PR #369) and
+(a-11-oy.com)** even though the sibling loop had already merged the wiring (commit 36b9c191, PR #369) and
 hf-sync ran green. Root cause = **stale prod container**: the running `a11oy` container + /opt/szl/a11oy tree
 were built before 36b9c191 (PINN live, PNT not). The HF Space had already auto-rebuilt via hf-sync CI; the box
 does not auto-deploy and the sibling loop does not do prod-box writes (its hard boundary).
@@ -23,7 +23,7 @@ Deployed origin/main to the box via fast path: `git show origin/main:<f>` -> `do
 durable source of truth (next a11oy-rebuild reproduces it).
 
 ## GATE P0 — PROVEN (all 200, both surfaces)
-- a11oy.net:        /pnt 200 · /pnt/sensor 200 · /pnt/resilience 200 · /pnt/coast 200 · /pnt/limits 200
+- a-11-oy.com:        /pnt 200 · /pnt/sensor 200 · /pnt/resilience 200 · /pnt/coast 200 · /pnt/limits 200
 - szlholdings-a11oy.hf.space: same five = 200
 - Values honest: label MODELED, status "VERIFIED (MODELED physics) · UNSIGNED (STRUCTURAL-ONLY)" — closed-form
   stdlib web path, no fabricated geometry. P1 Holographic Ops tab (/holographic-ops, /ops) already 200.

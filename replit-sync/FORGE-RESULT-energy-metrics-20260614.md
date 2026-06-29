@@ -6,7 +6,7 @@ Re: `replit-sync/FORGE-INSTRUCTION-MASTER-getitdone-20260614.md`. Every line bel
 ## NEW THIS PASS — P1#1 CLOSED (was 404)
 **`/api/a11oy/v1/energy/metrics`** — per-receipt energy exporter, built honestly off the REAL
 sovereign joule-meter (`http://100.96.129.45:9471/`, NVML-backed).
-- GATE: route **200** (public `https://a11oy.net/api/a11oy/v1/energy/metrics` + in-container) ✅
+- GATE: route **200** (public `https://a-11-oy.com/api/a11oy/v1/energy/metrics` + in-container) ✅
 - Real value: **`label: MEASURED`, `joules_total: 78369.586 J`** (real cumulative energy counter),
   `kwh: 0.0218`, `eur_per_mwh: -14.99`. ✅
 - Honesty: instantaneous **`power_w: null` / `UNAVAILABLE`** — no live NVML `power.draw` from any
@@ -18,7 +18,7 @@ sovereign joule-meter (`http://100.96.129.45:9471/`, NVML-backed).
 
 ## RECONCILED (live-verified) — already GREEN, no regress
 - **P0 killinchu** — `https://szlholdings-killinchu.hf.space/healthz` = **200**, `/elite/mesh` = **200**. ✅
-- **P1#2 cert history** — `https://a11oy.net/api/a11oy/v1/pinn/certificates` = **200**. ✅
+- **P1#2 cert history** — `https://a-11-oy.com/api/a11oy/v1/pinn/certificates` = **200**. ✅
 - a11oy Rekor anchor + MEASURED+SIGNED PINN cert across both surfaces — still green. ✅
 
 ## STILL OPEN — honest status (no fake DONE)

@@ -38,7 +38,7 @@ Commits: a11oy `72c3acda` (B3), `a1ab6fa1` (B4), `f0709f05` (reg() refactor). HF
 - **A2.** killinchu duplicate visible title "Maritime Picture" on `u_maritime` + `maritime` (distinct content). One-line title differentiation each.
 
 ### Founder/Forge-gated (unchanged):
-a11oy.net Hetzner redeploy (root); `SZL_LOCAL_LLM_URL` brain secret (Qwen2.5-Coder-32B-AWQ → flips Chaski stub→live); killinchu GHCR `build-push` (uds-v0.2.0, the only killinchu CI red); platform vitest; lutar-lean VERIFIED_THEOREMS Lake regen; szl-uds-deployment #57/#51 signing; UDS cluster deploy (k3d + Zarf/UDS/Pepr/K9).
+a-11-oy.com Hetzner redeploy (root); `SZL_LOCAL_LLM_URL` brain secret (Qwen2.5-Coder-32B-AWQ → flips Chaski stub→live); killinchu GHCR `build-push` (uds-v0.2.0, the only killinchu CI red); platform vitest; lutar-lean VERIFIED_THEOREMS Lake regen; szl-uds-deployment #57/#51 signing; UDS cluster deploy (k3d + Zarf/UDS/Pepr/K9).
 
 ---
 

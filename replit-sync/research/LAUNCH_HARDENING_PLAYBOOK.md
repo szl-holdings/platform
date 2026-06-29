@@ -1,7 +1,7 @@
 # PRE-DEMO HARDENING + SMOKE-TEST PLAYBOOK
 ## Sovereign GPU Compute Mesh — WarHacker Live Founder Demo
 
-**System:** Distributed GPU energy/inference mesh (3 Tailscale nodes), HTTP API surfaces (a11oy.net), published+keyless-signed UDS/k8s bundle (Sigstore/cosign, SBOM), signed receipt ledgers, ~15 live web surfaces with 3D/WebGPU visualizations.
+**System:** Distributed GPU energy/inference mesh (3 Tailscale nodes), HTTP API surfaces (a-11-oy.com), published+keyless-signed UDS/k8s bundle (Sigstore/cosign, SBOM), signed receipt ledgers, ~15 live web surfaces with 3D/WebGPU visualizations.
 
 **Audience:** Defense Unicorns WarHacker — live founder demo in ≤36 hours.
 
@@ -45,22 +45,22 @@ This prevents test traffic from polluting analytics or triggering billing events
 
 ### 1.2 System-Specific Smoke Checks — Executed NOW
 
-**A. HTTP API layer (a11oy.net)**
+**A. HTTP API layer (a-11-oy.com)**
 ```bash
 # Health/readiness
 curl -sf -o /dev/null -w "%{http_code} %{time_total}s\n" \
-  https://a11oy.net/health
+  https://a-11-oy.com/health
 
 # Core API endpoint — substitute actual golden path
 curl -sf -H "X-Smoke-Test: true" \
-  https://a11oy.net/api/v1/status | jq '{status, version, nodes}'
+  https://a-11-oy.com/api/v1/status | jq '{status, version, nodes}'
 
 # TLS certificate validity (alert if < 14 days)
-echo | openssl s_client -connect a11oy.net:443 -servername a11oy.net 2>/dev/null \
+echo | openssl s_client -connect a-11-oy.com:443 -servername a-11-oy.com 2>/dev/null \
   | openssl x509 -noout -dates
 
 # Check for HTTP→HTTPS redirect
-curl -sI http://a11oy.net/ | grep -i location
+curl -sI http://a-11-oy.com/ | grep -i location
 ```
 
 **B. GPU mesh nodes (Tailscale)**
@@ -94,8 +94,8 @@ docker exec $VLLM_CONTAINER ray status
 ```bash
 # Batch HTTP check — replace with your actual URLs
 SURFACES=(
-  "https://surface1.a11oy.net"
-  "https://surface2.a11oy.net"
+  "https://surface1.a-11-oy.com"
+  "https://surface2.a-11-oy.com"
   # ... all 15
 )
 for URL in "${SURFACES[@]}"; do
@@ -107,7 +107,7 @@ done
 **D. Signed receipt ledger**
 ```bash
 # Verify the ledger API is live and returns a valid signed receipt
-curl -sf https://a11oy.net/api/v1/ledger/latest | jq '{hash, signature, timestamp}'
+curl -sf https://a-11-oy.com/api/v1/ledger/latest | jq '{hash, signature, timestamp}'
 ```
 
 **E. WebGPU surfaces (3D visualizations)**  
@@ -255,7 +255,7 @@ Run a minimal load test **today** (T-24h minimum):
 k6 run --vus 20 --duration 60s - <<'EOF'
 import http from 'k6/http';
 export default function () {
-  const res = http.get('https://a11oy.net/api/v1/status');
+  const res = http.get('https://a-11-oy.com/api/v1/status');
   if (res.status !== 200) throw new Error(`Status ${res.status}`);
 }
 EOF
@@ -627,7 +627,7 @@ Each clip should be **fullscreen on a separate desktop** so the switch is a 3-fi
 # 3. Verify Tailscale works over hotspot (it will — it's designed for this)
 
 # Check DNS resolution for all critical hostnames
-for HOST in a11oy.net node1 node2 node3; do
+for HOST in a-11-oy.com node1 node2 node3; do
   nslookup $HOST || echo "DNS FAIL: $HOST"
 done
 
@@ -694,10 +694,10 @@ Announce the freeze to your team explicitly in Slack/Discord with timestamp.
 | 1.1 | Declare code freeze; tag demo-stable commit | `git tag demo-stable-warhacker-$(date +%Y%m%d) && git push --tags` | Lead | ☐ |
 | 1.2 | Verify all 3 GPU nodes are up and reachable via Tailscale | `tailscale status` on each node | Infra | ☐ |
 | 1.3 | Check GPU health on all nodes | `nvidia-smi` on each node | Infra | ☐ |
-| 1.4 | Verify TLS certs for a11oy.net — must have > 14 days remaining | `echo \| openssl s_client -connect a11oy.net:443 2>/dev/null \| openssl x509 -noout -dates` | Infra | ☐ |
+| 1.4 | Verify TLS certs for a-11-oy.com — must have > 14 days remaining | `echo \| openssl s_client -connect a-11-oy.com:443 2>/dev/null \| openssl x509 -noout -dates` | Infra | ☐ |
 | 1.5 | Check Tailscale auth tokens are not near expiry | `tailscale status --json \| jq '.Self.KeyExpiry'` | Infra | ☐ |
 | 1.6 | Run batch HTTP check on all 15 demo surfaces | See Section 1.2-C script | Dev | ☐ |
-| 1.7 | Confirm all liveness/readiness endpoints return 200 | `curl -sf https://a11oy.net/healthz` | Dev | ☐ |
+| 1.7 | Confirm all liveness/readiness endpoints return 200 | `curl -sf https://a-11-oy.com/healthz` | Dev | ☐ |
 
 ---
 
@@ -723,7 +723,7 @@ Announce the freeze to your team explicitly in Slack/Discord with timestamp.
 | 3.3 | Confirm artifact appears in Rekor transparency log | `rekor-cli search --sha sha256:YOUR_DIGEST` | Security | ☐ |
 | 3.4 | Verify UDS Package CR reports `Ready` | `kubectl get package <name> -o jsonpath='{.status.phase}'` | Infra | ☐ |
 | 3.5 | Run `uds monitor pepr denied` — confirm zero violations | `uds monitor pepr denied` | Infra | ☐ |
-| 3.6 | Check signed receipt ledger API returns valid receipts | `curl https://a11oy.net/api/v1/ledger/latest \| jq` | Dev | ☐ |
+| 3.6 | Check signed receipt ledger API returns valid receipts | `curl https://a-11-oy.com/api/v1/ledger/latest \| jq` | Dev | ☐ |
 
 ---
 
@@ -732,10 +732,10 @@ Announce the freeze to your team explicitly in Slack/Discord with timestamp.
 | # | Action | Command/Method | Owner | Status |
 |---|--------|----------------|-------|--------|
 | 4.1 | Run mini game day: kill GPU node 1, verify mesh degrades gracefully | `tailscale down` on node 1; check API response | Infra | ☐ |
-| 4.2 | Verify API returns `503` (not `500`) when node is down | `curl -v https://a11oy.net/api/v1/mesh/health` | Dev | ☐ |
+| 4.2 | Verify API returns `503` (not `500`) when node is down | `curl -v https://a-11-oy.com/api/v1/mesh/health` | Dev | ☐ |
 | 4.3 | Restore node 1 and verify mesh self-heals | `tailscale up` on node 1; re-check mesh health | Infra | ☐ |
 | 4.4 | Verify circuit breaker fires at correct threshold | Introduce artificial latency; observe breaker state | Dev | ☐ |
-| 4.5 | Confirm rate limiting returns `429` (not `500`) | `for i in $(seq 100); do curl -sf https://a11oy.net/api/v1/status; done` | Dev | ☐ |
+| 4.5 | Confirm rate limiting returns `429` (not `500`) | `for i in $(seq 100); do curl -sf https://a-11-oy.com/api/v1/status; done` | Dev | ☐ |
 | 4.6 | Verify all services restart gracefully | `kubectl rollout restart deployment/<name>` | Infra | ☐ |
 
 ---

@@ -37,7 +37,7 @@ __all__ = [
     "build_router",
 ]
 
-USER_AGENT = "szl-k9-ops/0.1 (+https://a11oy.net)"
+USER_AGENT = "szl-k9-ops/0.1 (+https://a-11-oy.com)"
 DEFAULT_TIMEOUT = 12
 
 # Default fleet (override via env CSV). Real szl-holdings repos / SZLHOLDINGS Spaces.

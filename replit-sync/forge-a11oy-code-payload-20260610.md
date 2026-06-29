@@ -19,8 +19,8 @@ Founder's directive: NO external API tokens — we study the best and run our OW
 - **Recommended brain**: Qwen2.5-Coder-32B-AWQ (Apache-2.0) — best coder that fits a 24–32GB RTX 5000-class GPU. Fallbacks: DeepSeek-Coder-V2-Lite, Qwen2.5-Coder-14B.
 - **FORGE PICKUP #1 — stand up the brain on the founder's RTX box + expose it (no provider token):**
   1. On the RTX box: `ollama pull qwen2.5-coder:32b` (or run vLLM serving the AWQ build).
-  2. Expose it as OUR OWN endpoint via Cloudflare Tunnel → e.g. `https://brain.a11oy.net` (stable, free, survives reboot as a service) with OUR OWN bearer auth (not a provider key). Tailscale Funnel is the simpler alt.
-  3. Set the Space secret on SZLHOLDINGS/a11oy + SZLHOLDINGS/killinchu: `SZL_LOCAL_LLM_URL=https://brain.a11oy.net/...` (+ `SZL_LOCAL_LLM_KEY=<our-own-bearer>`). The agent flips from labeled-stub → live the instant it's set. Update the `szl-local` registry `model_slug` from the `llama3-szl-finetuned-q4` placeholder to `qwen2.5-coder:32b` so routing receipts stay truthful.
+  2. Expose it as OUR OWN endpoint via Cloudflare Tunnel → e.g. `https://brain.a-11-oy.com` (stable, free, survives reboot as a service) with OUR OWN bearer auth (not a provider key). Tailscale Funnel is the simpler alt.
+  3. Set the Space secret on SZLHOLDINGS/a11oy + SZLHOLDINGS/killinchu: `SZL_LOCAL_LLM_URL=https://brain.a-11-oy.com/...` (+ `SZL_LOCAL_LLM_KEY=<our-own-bearer>`). The agent flips from labeled-stub → live the instant it's set. Update the `szl-local` registry `model_slug` from the `llama3-szl-finetuned-q4` placeholder to `qwen2.5-coder:32b` so routing receipts stay truthful.
 - **Cloud fallback (still ours, no provider token)**: an HF GPU Space WE own (L4 ~$0.80/hr) running vLLM serving the open weights; point `SZL_LOCAL_LLM_URL` at it. Config in `team/SELF_HOSTED_BRAIN.md`.
 - HONEST LINE: we run open weights we legally downloaded; we do NOT claim to have trained Opus/GPT/DeepSeek, and a11oy Code is NOT "secretly" any hosted frontier model. The moat is the governance, not the weights.
 
