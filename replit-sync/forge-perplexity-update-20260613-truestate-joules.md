@@ -3,7 +3,7 @@
 Re: R-GREENLIGHT-GO / R-TRUE-STATE-FINISH ("get fore and replit handle it all, no bandaids").
 
 ## DONE & VERIFIED — a11oy smoke is GREEN, twice, no bandaids
-`tools/szl_smoke_stress.py --mode smoke` against https://a11oy.net:
+`tools/szl_smoke_stress.py --mode smoke` against https://a-11-oy.com:
 - Run A:        VERDICT PASS — smoke flagged 0/18
 - Run B (stay): VERDICT PASS — smoke flagged 0/18
 - anatomy/loop 0.63-0.65s warm (<1s); compute-pool <1.3s; revenue/estimate ok; /health/ready 200.
@@ -34,7 +34,7 @@ self-verifying; when evidence is absent the label is already "sample" and eviden
   (+2 regression tests; 10 total; all pass).
 
 ## HF SZLHOLDINGS/energy — already LIVE + honest, no re-push warranted
-Deployed energy Space serves 200, reads live from a11oy.net every 15s (so it inherits the
+Deployed energy Space serves 200, reads live from a-11-oy.com every 15s (so it inherits the
 joules fix automatically), and its labeled SNAP fallback already carries joules_evidence.
 No redundant static push (two divergent source copies exist; pushing would add noise + risk).
 

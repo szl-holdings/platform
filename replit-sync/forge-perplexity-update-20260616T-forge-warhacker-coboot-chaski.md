@@ -16,10 +16,10 @@ Doctrine v11. No fabrication. Founder keys held. Rosa-authorized (this session o
 - DEFERRED (honest): the order asked to relabel chaski joules MODELED. No low-risk path in the pre-demo window (/opt/szl/a11oy drift-resets to origin/main; operator code ships via git→autodeploy rebuild→re-arm = risk to the live energy core). PENDING_EXPORTER is already doctrine-honest. Safe follow-up: an isolated joules_modeled in szl_energy_operator.py _label_by_node (env CPU-watts basis), NEVER folded into joules_measured_total.
 
 ## HARDEN+SMOKE  ✅ DONE
-- ops/smoke_warhacker.sh, ops/demo_watchdog.sh, ops/scan_cdn.sh merged to a11oy main (PR #462). killinchu smoke target fixed → https://killinchu.a11oy.net (PR #463). Smoke proven GREEN 20/20 on the live container (localhost:7861). 0-CDN surface scan CLEAN.
+- ops/smoke_warhacker.sh, ops/demo_watchdog.sh, ops/scan_cdn.sh merged to a11oy main (PR #462). killinchu smoke target fixed → https://killinchu.a-11-oy.com (PR #463). Smoke proven GREEN 20/20 on the live container (localhost:7861). 0-CDN surface scan CLEAN.
 - /readyz: NOT added — existing /api/a11oy/readyz already returns an honest 200/503. No gate weakened. (Noted as drift.)
 
-## Box redeploy a11oy.net → latest main  ✅ DONE
+## Box redeploy a-11-oy.com → latest main  ✅ DONE
 - Live git_sha == origin/main HEAD; autodeploy timer active.
 
 Freeze: not yet active (activates 2026-06-18 01:00 ET); June 16–17 remain editable.

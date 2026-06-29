@@ -5,7 +5,7 @@
   **Scope:** executed the Forge-owned / non-signed items from the newest master order; flagged the founder-gated ones. Honesty doctrine v11 enforced throughout.
 
   ## TL;DR
-  - **Gap #1 (the #1 visible gap) is CLOSED and independently re-verified.** a11oy.net now serves `entangle/`, `scaling/`, `allodial/` `/summary` = **200**, matching the canonical HF Space.
+  - **Gap #1 (the #1 visible gap) is CLOSED and independently re-verified.** a-11-oy.com now serves `entangle/`, `scaling/`, `allodial/` `/summary` = **200**, matching the canonical HF Space.
   - **Gap #5 strengthened.** The Hetzner-currency CI monitor already existed, but its canary set was `healthz / console / scaling / allodial` — it did **not** canary `entangle/*`, the *exact* module that drifted in #1. I added the `entangle/summary` canary so the monitor now catches this class of drift (the recurrence it exists to catch).
   - Founder-gated items (#2 Zenodo concept-id, #4 cosign re-sign, #7 PQ keys / brain secret / major dep bumps / uds re-sign) are **flagged, not touched**.
   - **Concurrency note:** a concurrent Forge process was active this session — it ran the box `a11oy-rebuild` and reported gap #1 in `forge-report-2026-06-11.md` (addendum 23:50Z). My independent rebuild + external probe **corroborate** that result; nothing here conflicts with or clobbers that work. I deliberately did **not** start the larger multi-surface items (#3, #6) to avoid colliding with an active sibling on shared surfaces — they are triaged below with recommended approach.
@@ -13,9 +13,9 @@
   ## Per-item status
 
   ### #1 — Hetzner redeploy (sudo) — ✅ DONE & INDEPENDENTLY VERIFIED
-  Ran `box-scripts/a11oy-rebuild` on 167.233.50.75 → reset build tree to published `origin/main`, rebuilt `a11oy:local`, recreated the container; the script's own front-door VERIFY passed (console.html md5 == main). External probe of a11oy.net (through nginx, from outside the box):
+  Ran `box-scripts/a11oy-rebuild` on 167.233.50.75 → reset build tree to published `origin/main`, rebuilt `a11oy:local`, recreated the container; the script's own front-door VERIFY passed (console.html md5 == main). External probe of a-11-oy.com (through nginx, from outside the box):
 
-  | path | a11oy.net (Hetzner) | HF Space |
+  | path | a-11-oy.com (Hetzner) | HF Space |
   |---|---|---|
   | `/api/a11oy/v1/entangle/summary` | **200** (was 000/404) | 200 |
   | `/api/a11oy/v1/scaling/summary` | 200 | 200 |
@@ -25,7 +25,7 @@
   `entangle/summary` returns honest tiered JSON (RIGOROUS / STRUCTURAL / NARRATIVE / ACTIVE-RESEARCH / CONTESTED) — no overclaiming; the capacity bound is presented as the bridge, not a replacement for the pillars. The strict-tier llama.cpp compile is honestly skipped on the constrained box builder (`A11OY_REQUIRE_LOCAL_LLM!=1` → tower-side label, `served_locally=False`, never fake output).
 
   ### #5 — Hetzner-currency CI guard — ✅ DONE (pre-existing) + IMPROVED
-  `a11oy/.github/workflows/hetzner-currency.yml` (committed 21:17Z) is a complete, honest monitor: it compares canary endpoints across HF and a11oy.net and emits an **honest WARN** (never a hard gate, since the remedy is sudo-gated on the box and un-actionable from CI). It was missing the one endpoint that actually drifted. **My change (commit `0c3629e`):** added `/api/a11oy/v1/entangle/summary` to the canary set and corrected the WHY comment. No gate weakened — still always `exit 0`, warning + Job Summary are the signal.
+  `a11oy/.github/workflows/hetzner-currency.yml` (committed 21:17Z) is a complete, honest monitor: it compares canary endpoints across HF and a-11-oy.com and emits an **honest WARN** (never a hard gate, since the remedy is sudo-gated on the box and un-actionable from CI). It was missing the one endpoint that actually drifted. **My change (commit `0c3629e`):** added `/api/a11oy/v1/entangle/summary` to the canary set and corrected the WHY comment. No gate weakened — still always `exit 0`, warning + Job Summary are the signal.
 
   ### #2 — Zenodo DOI for thesis v8 — ⛔ FOUNDER-GATED (flagged, untouched)
   The auto-write-back Action + `.zenodo.json` stage v8 under concept `20020842`, which the audit found is the **GraphRAG-paper lineage, not the SZL Thesis lineage**. Minting against the wrong concept would poison the DOI chain. **Founder must confirm the correct concept DOI (or mint fresh) before** the Release is cut and `ZENODO_CONCEPT_ID` in `doi-writeback.yml` is set. Not touched.

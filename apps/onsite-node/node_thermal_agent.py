@@ -48,7 +48,7 @@ from typing import Optional
 
 BIND_ADDR: str = os.environ.get("BIND_ADDR", "0.0.0.0")
 BIND_PORT: int = int(os.environ.get("BIND_PORT", "9101"))
-UA = "szl-onsite-thermal/1.0 (+https://a11oy.net)"
+UA = "szl-onsite-thermal/1.0 (+https://a-11-oy.com)"
 
 
 # ---------------------------------------------------------------------------

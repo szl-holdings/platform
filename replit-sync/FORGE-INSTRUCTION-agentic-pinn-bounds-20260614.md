@@ -4,7 +4,7 @@
 - ✅ The `/api/a11oy/v1/pinn/*` mesh is **LIVE on the HF Space** `szlholdings-a11oy.hf.space`
   (certificate/solve/residual/index all 200; SAMPLE certificate, physically_bounded=true,
   2.09e10× above Landauer). The harvest console bounds card is live there too.
-- ⚠️ **`a11oy.net` (the box, nginx @ 167.233.50.75) is serving a STALE build** — `/pinn/*` is 404 there
+- ⚠️ **`a-11-oy.com` (the box, nginx @ 167.233.50.75) is serving a STALE build** — `/pinn/*` is 404 there
   while older routes are 200. The box never pulled latest `main` + restarted. THIS is the real backlog
   symptom of `dispatch_mode:none`: merged → HF auto-mirrors → but the BOX deploy step is the part that
   needs dispatch, so it gets reported, not executed.
@@ -19,7 +19,7 @@ cd /opt/a11oy && git fetch --all && git reset --hard origin/main \
   && sleep 6 && curl -s -o /dev/null -w 'box /pinn after redeploy: %{http_code}\n' http://127.0.0.1:8081/api/a11oy/v1/pinn/certificate
 # adjust /opt/a11oy + service/compose name to this box's actual layout
 ```
-Expected after: `a11oy.net/api/a11oy/v1/pinn/certificate` → 200 (matches HF).
+Expected after: `a-11-oy.com/api/a11oy/v1/pinn/certificate` → 200 (matches HF).
 
 ### B. RUN THE AGENTIC PINN ON THE LIVE SOVEREIGN GPU — node **`rtx-betterwithage`**
 The compute-pool probe shows ONE GPU reachable and sovereign: **`rtx-betterwithage`**

@@ -10,7 +10,7 @@ the dark-surface aggregator (try/except) but had ZERO Dockerfile COPY lines → 
 → route never registered (same class as the 3cae9ba/bb23ff5 fixes).
 FIX: signed commit 48b95cf to a11oy main adds szl_anatomy_loop.py to the line-676 COPY; ran
 forge-deploy.sh (reset --hard origin/main → docker build → atomic swap, healthz=200 rollback-guarded).
-VERIFIED LIVE: a11oy.net /api/a11oy/v1/anatomy/loop = 200, /anatomy 200, /ayni 200, /research/prereg 200,
+VERIFIED LIVE: a-11-oy.com /api/a11oy/v1/anatomy/loop = 200, /anatomy 200, /ayni 200, /research/prereg 200,
 /research/verify 200, /harvest/datacenters 200, /harvest/metrics 200, /healthz 200.
 
 ## B killinchu = LIVE 200 (healthz, finance/fx).  C szl-router PRIVATE = LIVE 200 (router/health, router/models = szl-large/szl-fast/szl-coder).  F harvest/metrics = LIVE 200.
@@ -26,7 +26,7 @@ started I will verify reachable:true + bge embeddings from the box. VAST still o
 
 ## E — HF Space SZLHOLDINGS/energy = page 200/public, content push BLOCKED on source
 hf_energy_space/ source is NOT in the a11oy workspace and NOT on the box (searched /opt /root /home).
-Cannot push a Space without its source. a11oy.net /v1/energy/budget endpoints are separately LIVE 200.
+Cannot push a Space without its source. a-11-oy.com /v1/energy/budget endpoints are separately LIVE 200.
 
 ## NET: A done (real fix shipped). B/C/F live. D needs the chaski repl started (powered off, external).
 E needs the energy Space source. No keys/seeds touched. Doctrine v11; router stays PRIVATE; do NOT merge.

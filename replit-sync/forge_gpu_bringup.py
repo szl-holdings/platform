@@ -192,7 +192,7 @@ def main() -> int:
     print("Set these on the a11oy HF Space (Settings -> Variables/Secrets), then redeploy:")
     print(f"  A11OY_MODEL_BASE_URL = http://<this-box-public-ip-or-tailscale>:{args.port}/v1")
     print(f"  A11OY_GPU_TOKEN      = <contents of {KEY_FILE}>   (NEVER paste the key in chat/issues)")
-    print("Then GET https://a11oy.net/api/a11oy/v1/code/health should report:")
+    print("Then GET https://a-11-oy.com/api/a11oy/v1/code/health should report:")
     print("  inference: self-hosted-gpu   (PR #319 adds that honest label)")
     print(f"  primary_model: {model}")
     print("SECURITY: do NOT expose port", args.port, "to the public internet unauthenticated —")

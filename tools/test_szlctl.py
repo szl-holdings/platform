@@ -64,7 +64,7 @@ class TestSurfaceConstant(unittest.TestCase):
         self.assertEqual(len(set(szlctl.SURFACES)), len(szlctl.SURFACES))
 
     def test_base_and_prefixes(self):
-        self.assertEqual(szlctl.A11OY_BASE, "https://a11oy.net")
+        self.assertEqual(szlctl.A11OY_BASE, "https://a-11-oy.com")
         self.assertEqual(szlctl.SURFACE_VIEW_PREFIX, "/v1/")
         self.assertEqual(szlctl.DATA_API_PREFIX, "/api/a11oy/v1/")
 

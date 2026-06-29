@@ -21,7 +21,7 @@ Doctrine v11: never fabricate a 200/joule/receipt/signature/label; MEASURED only
 A. HF PERSISTENT STORAGE: enable Persistent storage on the SZLHOLDINGS/a11oy HF Space (mounts /data) so the signed receipt chain survives redeploys. The merged code uses /data automatically the instant it exists.
 B. PUBLISH HF SHOWCASE SPACE: publish spaces/orbital/ to SZLHOLDINGS/orbital (static) per spaces/orbital/PUBLISH_CHECKLIST.md → public URL szlholdings-orbital.hf.space.
 C. OMEN bind: on the OMEN desktop set OLLAMA_HOST=0.0.0.0:11434 (Machine scope) + inbound firewall TCP 11434, restart Ollama. Decisive test from OMEN: curl http://100.70.130.45:11434/api/tags.
-D. orbital.a11oy.net subdomain DNS (optional) — /orbital already live on the main host.
+D. orbital.a-11-oy.com subdomain DNS (optional) — /orbital already live on the main host.
 
 ## REPORT
 Append to replit-sync/forge-perplexity-update-20260616.md + AUTO_STATE.json: surface health, receipt persistence state (EPHEMERAL until /data mounted — honest), OMEN real-probe state. Per-surface truth only. Honest doctrine v11.

@@ -8,10 +8,10 @@
 New additive module `proof.py` (marker ENERGY-PROOF-PATCH) + two routes wired into server.py. The literal
 `/proof` belongs to the serve.py SPA (locked), so the page lives in our own nginx namespace and is reachable at
 BOTH prefixes (same :8082 app):
-- `GET https://a11oy.net/energy/proof` -> 200 (self-contained HTML)
-- `GET https://a11oy.net/energy/proof.json` -> 200 (machine-readable)
-- `GET https://a11oy.net/api/a11oy/v1/harvest/proof` -> 200
-- `GET https://a11oy.net/api/a11oy/v1/harvest/proof.json` -> 200
+- `GET https://a-11-oy.com/energy/proof` -> 200 (self-contained HTML)
+- `GET https://a-11-oy.com/energy/proof.json` -> 200 (machine-readable)
+- `GET https://a-11-oy.com/api/a11oy/v1/harvest/proof` -> 200
+- `GET https://a-11-oy.com/api/a11oy/v1/harvest/proof.json` -> 200
 
 It surfaces, HONESTLY:
 1. THE PROVEN SET — #239 EnergyBudgetWitness (bekenstein_bound_additive + info_within_bound), #240

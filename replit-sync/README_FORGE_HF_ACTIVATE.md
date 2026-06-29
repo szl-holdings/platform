@@ -22,7 +22,7 @@ It will:
    token resolution — without that deploy the orchestrator stays stub even with
    the token).
 3. Restart the `SZLHOLDINGS/anatomy` Space (currently 404 dark) to wake it.
-4. Poll `https://a11oy.net/api/a11oy/v1/code/health` until `mode:live`, or report
+4. Poll `https://a-11-oy.com/api/a11oy/v1/code/health` until `mode:live`, or report
    honestly that it is NOT yet live (check the Space build logs).
 
 ## Equivalent one-liner (if you prefer to run locally with your token in env)
@@ -32,7 +32,7 @@ HF_WRITE_TOKEN=... CHASKI_HF_TOKEN=... python replit-sync/forge_hf_activate.py
 ```
 
 ## Verify (paste results to platform#343 — NOT the token)
-- `curl -s https://a11oy.net/api/a11oy/v1/code/health` → `"mode":"live"`, `"inference":"hf-router"`.
+- `curl -s https://a-11-oy.com/api/a11oy/v1/code/health` → `"mode":"live"`, `"inference":"hf-router"`.
 - One coding turn → real model answer + signed Khipu/DSSE receipt.
 - Hard-deny prompt still DENIES (Λ gate on the live path); low-support → i_dont_know.
 

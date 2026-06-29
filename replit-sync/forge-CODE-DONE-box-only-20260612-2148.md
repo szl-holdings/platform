@@ -1,9 +1,9 @@
-# Forge — CODE DONE, BOX-ONLY remains: a11oy.net sovereign GPU flip
+# Forge — CODE DONE, BOX-ONLY remains: a-11-oy.com sovereign GPU flip
 
 Status as of 2026-06-13 ~02:13 UTC (verified live by Perplexity agent).
 
 ## Live posture RIGHT NOW (the thing to fix)
-`curl -s https://a11oy.net/api/a11oy/code/healthz` reports:
+`curl -s https://a-11-oy.com/api/a11oy/code/healthz` reports:
 - `sovereign: false`
 - `inference: hf-router`
 - `key_resolution.base_url: https://router.huggingface.co/v1`
@@ -31,8 +31,8 @@ performs them autonomously on its next poll — OR run them directly now:
 ollama pull qwen2.5-coder:7b        # keep llama3.1:8b too
 curl -s http://127.0.0.1:11434/v1/models   # MUST succeed BEFORE the rebuild
 
-# 2) point a11oy.net's deploy env at the local server
-#    (in the a11oy.net deploy environment, not committed):
+# 2) point a-11-oy.com's deploy env at the local server
+#    (in the a-11-oy.com deploy environment, not committed):
 #    A11OY_MODEL_BASE_URL=http://127.0.0.1:11434/v1
 #    A11OY_GPU_LABEL="NVIDIA RTX 5000 @ Hetzner (betterwithage)"
 
@@ -42,7 +42,7 @@ sudo a11oy-rebuild
 
 ## PROVE (report to platform#343, NOT the token)
 ```bash
-curl -s https://a11oy.net/api/a11oy/code/healthz \
+curl -s https://a-11-oy.com/api/a11oy/code/healthz \
   | jq '.sovereign,.inference,.key_resolution.base_url,.key_resolution.env_used'
 # WANT: true  "self-hosted-gpu"  "http://127.0.0.1:11434/v1"  (env_used != "HF_TOKEN")
 ```

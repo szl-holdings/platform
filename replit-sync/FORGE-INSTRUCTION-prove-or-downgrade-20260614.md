@@ -32,7 +32,7 @@ curl -s https://szlholdings-a11oy.hf.space/api/a11oy/v1/pinn/certificate \
 Run the cert through the existing khipu/szl_lake Ed25519 DSSE signer with the FA-001 key already in the
 box secret store, append to the khipu chain, then:
 ```bash
-curl -s https://a11oy.net/api/a11oy/v1/verify | python3 -m json.tool | head -20
+curl -s https://a-11-oy.com/api/a11oy/v1/verify | python3 -m json.tool | head -20
 ```
 **GATE B:** /verify returns a real signed DSSE receipt (issuer/keyid present, signature verifies). If the
 FA-001 key is NOT in the store, mark BLOCKED: needs founder — do NOT fake a signature.

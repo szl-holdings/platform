@@ -1,6 +1,6 @@
 # SZL Forge — ORDER (CONSOLIDATED SWEEP): fix the real gaps found in full-thread audit
 
-Full live audit done. MOST of the estate is healthy: a11oy.net + HF Space homepages restored (142KB hero,
+Full live audit done. MOST of the estate is healthy: a-11-oy.com + HF Space homepages restored (142KB hero,
 no white screen); /pinn/* mesh 200 on BOTH surfaces; PINN cert MEASURED + SIGNED (DSSE Ed25519 FA-001,
 cosign.pub anchored) on both; yarqa/hatun/anatomy live; 2 GPUs + chaski reachable. PROVE-OR-DOWNGRADE
 stays in force: DONE only with a pushed commit SHA / HTTP 200 from a named endpoint / verifying signature.
@@ -30,7 +30,7 @@ Re-classify ALL of them as RECOMMENDED. Build only via real draft PRs (report PR
 NEVER self-merge a lutar-lean keystone PR. Do NOT mark DONE without a pushed SHA + green checks.
 
 ## VERIFIED-GOOD (leave alone — do not regress)
-a11oy.net/ + Space/ hero (142KB); /console; /harvest + bounds card; /pinn/* mesh; signed MEASURED cert;
+a-11-oy.com/ + Space/ hero (142KB); /console; /harvest + bounds card; /pinn/* mesh; signed MEASURED cert;
 Rekor anchor; yarqa; hatun-mcp; anatomy static; sovereign GPU posture honest (sovereign only on live probe).
 
 ## DOCTRINE v11 (HARD)

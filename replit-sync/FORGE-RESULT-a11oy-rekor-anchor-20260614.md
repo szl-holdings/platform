@@ -7,7 +7,7 @@ Make the a11oy MEASURED physical-bounds energy proof's transparency-log anchorin
 (Sigstore/Rekor, FA-001 path) fully functional across every surface. No half-states.
 
 ## Root cause of the half-state (found + fixed)
-- The live site **a11oy.net** is served by the dockerized `a11oy` container, which reads
+- The live site **a-11-oy.com** is served by the dockerized `a11oy` container, which reads
   artifacts from `SZL_PINN_ARTIFACT_DIR=/data/a11oy` — a bind mount of host
   `/opt/szl/a11oy-data`. Updates to `/opt/szl/a11oy` or to GitHub do **not** move the live
   site. The live dir held a real MEASURED-but-UNSIGNED orphan cert (`586cc6cd`,
@@ -35,7 +35,7 @@ Make the a11oy MEASURED physical-bounds energy proof's transparency-log anchorin
 ## Verification (all green)
 | Surface | signed | label | joules | anchored | uuid match |
 |---|---|---|---|---|---|
-| a11oy.net (live) | True | MEASURED | 5112.38 | True | yes |
+| a-11-oy.com (live) | True | MEASURED | 5112.38 | True | yes |
 | HF Space SZLHOLDINGS/a11oy | True | MEASURED | 5112.38 | True | yes |
 | GitHub szl-holdings/a11oy main | n/a (raw) | MEASURED | 5112.38 | True | yes |
 | Rekor public log | — | — | — | retrievable (HTTP 200) | yes |

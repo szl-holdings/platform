@@ -17,14 +17,14 @@ SZL inference is now served on the **founder's own GPU**, end-to-end, on the box
 ## Verification (live)
 | Surface | Result |
 |---|---|
-| `a11oy.net/api/szl/v1/inference-posture` | `sovereign:true, where:gpu, online:true, model:qwen2.5-coder:7b` |
+| `a-11-oy.com/api/szl/v1/inference-posture` | `sovereign:true, where:gpu, online:true, model:qwen2.5-coder:7b` |
 | `a11oy /api/a11oy/v1/code/health` (legacy) | `inference:self-hosted-gpu` |
-| `killinchu.a11oy.net/api/killinchu/v4/healthz` | `sovereign:true, inference:self-hosted-gpu` |
-| `elite.a11oy.net/api/killinchu/v4/healthz` | `sovereign:true` |
+| `killinchu.a-11-oy.com/api/killinchu/v4/healthz` | `sovereign:true, inference:self-hosted-gpu` |
+| `elite.a-11-oy.com/api/killinchu/v4/healthz` | `sovereign:true` |
 | **Flap test** | tailscaled stopped → `sovereign:false/offline` (invariant held); health-kick restored `sovereign:true` in **12 s** |
 
 ## Honest constraints (not bandaids — reported, not hidden)
-- **HF-hosted Spaces** (`SZLHOLDINGS/a11oy`, `SZLHOLDINGS/killinchu`) run on HF infra, **not** on the founder's tailnet, so they **cannot reach** the private GPU at `100.125.77.31`. Setting `SZL_GPU_BASE_URL` there would only fail-closed. I did **not** set a misleading secret. The order's verify targets are the box surfaces (a11oy.net + killinchu), which **are** sovereign.
+- **HF-hosted Spaces** (`SZLHOLDINGS/a11oy`, `SZLHOLDINGS/killinchu`) run on HF infra, **not** on the founder's tailnet, so they **cannot reach** the private GPU at `100.125.77.31`. Setting `SZL_GPU_BASE_URL` there would only fail-closed. I did **not** set a misleading secret. The order's verify targets are the box surfaces (a-11-oy.com + killinchu), which **are** sovereign.
 - Sovereignty is live only while `betterwithage` is **awake**. When the founder's PC sleeps, posture honestly reports offline; the box health-kick heals the link but cannot wake a sleeping GPU.
 
 ## Founder-only follow-ups

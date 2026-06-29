@@ -1,4 +1,4 @@
-# SZL Forge — ORDER (P0 HOTFIX, ROOT-CAUSED): a11oy.net "/" white screen = STALE /app/cathedral.html
+# SZL Forge — ORDER (P0 HOTFIX, ROOT-CAUSED): a-11-oy.com "/" white screen = STALE /app/cathedral.html
 
 **ROOT CAUSE (now pinned down — verified):** The `/` handler in serve.py returns
 `FileResponse(Path("/app/cathedral.html"))`. The REPO `cathedral.html` is the correct 142,486-byte hero
@@ -25,7 +25,7 @@ curl -s -o /dev/null -w 'HF / size: %{size_download} bytes (want >100000)\n' htt
 
 ## GATE (PROVE-OR-DOWNGRADE — DONE only if BOTH > 100KB and render visible)
 ```bash
-for h in https://a11oy.net https://szlholdings-a11oy.hf.space; do
+for h in https://a-11-oy.com https://szlholdings-a11oy.hf.space; do
   echo "$h/ -> $(curl -s -o /dev/null -w '%{http_code} %{size_download}b' $h/)"
 done   # PASS = 200 and ~142KB, NOT 83 bytes
 ```

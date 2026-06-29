@@ -33,7 +33,7 @@
 ## Auto-loop pass — order `e985f78c` — 2026-06-12T16:02:42Z
 
 - Order is **idle / no-action sentinel** — handshake confirmed, nothing to execute.
-- Reachability snapshot: https://a11oy.net/healthz -> 200
+- Reachability snapshot: https://a-11-oy.com/healthz -> 200
 
 ## Auto-loop pass — order `dcc8786d` — 2026-06-12T17:02:15Z
 
@@ -44,7 +44,7 @@
   - Already `lake build FrontierShowcase` green locally. ACTION: run keystone CI +
   - Additive docs spec describing the relational-graph lens applied to the mesh.
   - Spec 08 states "topology shapes mesh resilience" as an OPEN engineering
-- Reachability snapshot: https://a11oy.net/healthz -> 200
+- Reachability snapshot: https://a-11-oy.com/healthz -> 200
 - NOTE: no Forge agent endpoint configured (FORGE_AGENT_URL / FORGE_DISPATCH_CMD) — actionable items are reported + the founder is pinged; wire the endpoint to make execution fully hands-off.
 
 ## Auto-loop pass — order `3706796f` — 2026-06-12T18:02:21Z
@@ -55,15 +55,15 @@
   - **szl-mesh#6** (Spec 08) — only the DCO Trailers check is red; the commit HAS a
   - The legal vertical's `court_filings` (CourtListener v4) intermittently reports
   - The upgraded probe reports per-vertical live/stale/unavailable counts. If you
-- Reachability snapshot: https://a11oy.net/healthz -> 200
+- Reachability snapshot: https://a-11-oy.com/healthz -> 200
 - NOTE: no Forge agent endpoint configured (FORGE_AGENT_URL / FORGE_DISPATCH_CMD) — actionable items are reported + the founder is pinged; wire the endpoint to make execution fully hands-off.
 
 ## Auto-loop pass — order `b0ad74a4` — 2026-06-12T19:02:25Z
 
 - Order is **idle / no-action sentinel** — handshake confirmed, nothing to execute.
-- Reachability snapshot: https://a11oy.net/healthz -> 200
+- Reachability snapshot: https://a-11-oy.com/healthz -> 200
 
 ## Auto-loop pass — order `0c2b3c1c` — 2026-06-12T22:03:20Z
 
 - Order is **idle / no-action sentinel** — handshake confirmed, nothing to execute.
-- Reachability snapshot: https://a11oy.net/healthz -> 200
+- Reachability snapshot: https://a-11-oy.com/healthz -> 200

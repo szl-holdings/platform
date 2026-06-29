@@ -35,7 +35,7 @@ gh api repos/szl-holdings/platform/contents/replit-sync/AUTO_STATE.json --jq '.c
 # want: dispatch-cmd / ok:true
 ```
 
-## STEP 1 — Un-stale the box (a11oy.net -> matches HF)
+## STEP 1 — Un-stale the box (a-11-oy.com -> matches HF)
 ```bash
 cd /opt/a11oy            # <-- adjust to the box's real a11oy repo path
 git fetch --all && git reset --hard origin/main
@@ -79,7 +79,7 @@ curl -s http://127.0.0.1:8081/api/a11oy/v1/verify | python3 -m json.tool | head 
 gh workflow run hf-sync.yml -R szl-holdings/a11oy                                  # re-mirror to HF if needed
 ```
 **Win check (no box needed):**
-`curl -s https://a11oy.net/api/a11oy/v1/pinn/certificate | grep -o '"label":"[A-Z]*"'`  -> MEASURED
+`curl -s https://a-11-oy.com/api/a11oy/v1/pinn/certificate | grep -o '"label":"[A-Z]*"'`  -> MEASURED
 
 ## HARD RULES (Doctrine v11)
 Energy = MEASURED power x time only; label MEASURED only on a real NVML reading. Honest inverse of

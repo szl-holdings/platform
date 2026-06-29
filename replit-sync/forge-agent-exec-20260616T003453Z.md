@@ -71,7 +71,7 @@ The order requires executing non-founder-gated items to ensure the system remain
 - Cosign-sign TAWANTIN + warhacker bundles with FA-001.
 - UNSTALL THE TWO STALLED ITEMS: CHASKI and UDS.
 - 3-GPU MESH / OMEN-ANCHOR FOR TRAVEL.
-- BOX REDEPLOY a11oy.net to f0145e11.
+- BOX REDEPLOY a-11-oy.com to f0145e11.
 - cosign-prep + DNS.
 
 ---

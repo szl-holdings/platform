@@ -1,5 +1,5 @@
 // ---- Live a11oy fetch with HONEST degrade to SNAPSHOT ----
-const BASE = 'https://a11oy.net/api/a11oy/v1';
+const BASE = 'https://a-11-oy.com/api/a11oy/v1';
 const TIMEOUT = 8000;
 
 // Last-known SNAPSHOT values (clearly labeled if a live fetch fails).

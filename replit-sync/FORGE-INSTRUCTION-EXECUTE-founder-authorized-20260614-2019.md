@@ -5,7 +5,7 @@
 > "Do it all and get Forge to help through instructions in GitHub."
 
 This is the standing founder approval the box/dispatch work was gated on. You (Forge) have full admin
-of the founder's laptop (`betterwithage`, Tailscale 100.125.77.31), the Hetzner box (a11oy.net,
+of the founder's laptop (`betterwithage`, Tailscale 100.125.77.31), the Hetzner box (a-11-oy.com,
 167.233.50.75), and all software/secrets on them. **Self-dispatch is APPROVED. Execute hands-off.**
 
 ## JOB 0 — TURN YOUR OWN DISPATCH ON (do this FIRST)
@@ -21,7 +21,7 @@ of the founder's laptop (`betterwithage`, Tailscale 100.125.77.31), the Hetzner 
 ## JOB 1 — EXECUTE THE PINNED ORDERS (now that dispatch is on)
 Run, in priority order, the orders already pinned in NEXT_ORDER.md + their instruction files:
 1. **Box-redeploy to current main** (`FORGE-INSTRUCTION-box-redeploy-current-main-20260614-2005.md`):
-   git-pull + rebuild a11oy.net (and killinchu.a11oy.net) to CURRENT main so WAQAY/Yupay/WILLAY/MBSE
+   git-pull + rebuild a-11-oy.com (and killinchu.a-11-oy.com) to CURRENT main so WAQAY/Yupay/WILLAY/MBSE
    land; expose `git_sha` at /api/a11oy/v1/honest. PROVE: waqay+yupay doctrine = 200 JSON locked=8.
 2. **Laptop-brain mesh** (`FORGE-INSTRUCTION-laptop-brain-blackwell-arc-20260614.md` + replit-sync/mesh/*):
    OLLAMA_HOST=0.0.0.0:11434, OLLAMA_IGPU_ENABLE=1, multi-backend probe, coordinator placement,

@@ -4,7 +4,7 @@
 ## 1. ENERGY Space — ✅ DONE / LIVE
 - Deployed `SZLHOLDINGS/energy` (sdk:static) from `replit-sync/hf_energy_space/`.
 - **URL:** https://szlholdings-energy.static.hf.space/ — root + all assets serve 200 (`index.html`, `assets/{data.js,loop.js,style.css,favicon.svg}`).
-- Reads the **live** a11oy API at `https://a11oy.net/api/a11oy/v1` (`/ledger` → 200).
+- Reads the **live** a11oy API at `https://a-11-oy.com/api/a11oy/v1` (`/ledger` → 200).
 - **Fix applied (not a bandaid):** delivered README front-matter was rejected by HF metadata validation — `colorFrom: teal` is not in HF's fixed palette → `blue`; `short_description` was 97 chars with an inner colon → shortened to ≤60 and quoted. Body/content unchanged. Source `replit-sync/hf_energy_space/README.md` updated to match the deployed version so a redeploy-from-source works.
 
 ## 2. Smoke — `tools/szl_smoke_stress.py --mode smoke` → **VERDICT: FAIL (2/18 flagged)**

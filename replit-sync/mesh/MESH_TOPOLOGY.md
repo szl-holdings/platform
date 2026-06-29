@@ -43,7 +43,7 @@ other by tailnet IP regardless of physical network/NAT.
 |---|---|---|
 | Control / capability registration | Tailscale IP (`100.x.y.z`) | private overlay, never public |
 | Inference RPC (vLLM/llama.cpp) | Tailscale IP + port | private overlay only |
-| Public ingress | `a11oy.net` `167.233.50.75` (CPU host) | the ONLY public face; reverse-proxies to coordinator over tailnet |
+| Public ingress | `a-11-oy.com` `167.233.50.75` (CPU host) | the ONLY public face; reverse-proxies to coordinator over tailnet |
 | Failover | HF Spaces (HF router) | when mesh unhealthy/empty |
 
 Known fixed nodes (everything else is auto-discovered, not assumed):
@@ -52,7 +52,7 @@ Known fixed nodes (everything else is auto-discovered, not assumed):
 |---|---|---|---|
 | `betterwithage` (laptop, RTX 5050) | `100.125.77.31` | has a GPU, small VRAM | tailnet anchor; GPU worker if up |
 | incoming "RTX 4000" | DHCP on join | **UNKNOWN variant** — Ada 20GB *or* Quadro 8GB | tier decided by probed VRAM |
-| Hetzner `a11oy.net` | DHCP on join | CPU-only, always-on, public | coordinator/gateway + public proxy + failover broker |
+| Hetzner `a-11-oy.com` | DHCP on join | CPU-only, always-on, public | coordinator/gateway + public proxy + failover broker |
 | 6–7 additional nodes | DHCP on join | **UNKNOWN GPU/CPU mix** | each probed, each tiered |
 
 > The "RTX 4000" ambiguity is the canonical reason the mesh probes instead of assumes:

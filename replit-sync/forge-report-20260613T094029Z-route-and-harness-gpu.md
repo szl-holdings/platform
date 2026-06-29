@@ -3,7 +3,7 @@
 Operate/verify on the box (167.233.50.75). No merge, no key committed, additive only. Doctrine v11.
 
 ## 1. ALL NODES ROUTED CORRECTLY — verified live (public)
-`GET https://a11oy.net/api/a11oy/v1/compute-pool` → one fabric, 6 nodes, honest:
+`GET https://a-11-oy.com/api/a11oy/v1/compute-pool` → one fabric, 6 nodes, honest:
 - **rtx-betterwithage** (100.125.77.31) — `sovereign-gpu`, reachable=true, sovereign=true; models
   qwen2.5-coder:7b, bge-large, llama3.1:8b. **Primary sovereign GPU, live + routed.**
 - **chaski** (100.76.58.50) — `tailnet-gpu`, reachable=false (honest: tailnet shows offline ~22h),

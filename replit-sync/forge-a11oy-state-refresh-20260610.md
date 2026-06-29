@@ -17,7 +17,7 @@
   - **F22** = Khipu emit append-only monotonicity
 - ~185 experimental theorems (Waves 11-22) STAY experimental — NEVER folded into the 8.
 - Propagated + verified live: a11oy `/console`, killinchu `/elite`, HF org card headline,
-  GitHub org profile, anatomy, **a11oy.net (`cathedral.html` 5→8, GH commit aa4f7c9f + HF 53deb3b2)**,
+  GitHub org profile, anatomy, **a-11-oy.com (`cathedral.html` 5→8, GH commit aa4f7c9f + HF 53deb3b2)**,
   `web/operator.html` (GH 175d5139).
 
 ### 2. Operator widget consolidated + made real (Chaski)
@@ -39,16 +39,16 @@
 1. **Self-hosted brain (a11oy Code)** — STILL the one thing that flips Chaski stub→live. `szl_llm_registry.py`
    has the `szl-local` provider reading `SZL_LOCAL_LLM_URL`. Founder sets the Space secret on
    SZLHOLDINGS/{a11oy,killinchu} (rec: Qwen2.5-Coder-32B-AWQ on the RTX box via Cloudflare Tunnel →
-   `https://brain.a11oy.net` with OUR OWN bearer). Update `szl-local` `model_slug` placeholder → `qwen2.5-coder:32b`
+   `https://brain.a-11-oy.com` with OUR OWN bearer). Update `szl-local` `model_slug` placeholder → `qwen2.5-coder:32b`
    so routing receipts stay truthful. See `team/SELF_HOSTED_BRAIN.md`.
 2. **4 szl-uds-deployment PRs** — REBASE then parent merges the clean ones: #57 (verify receipt signing),
    #67 (airgap key-init), #71 (a11oy chart ECDSA key). **#51 (SLSA L2 bundle cosign-attest — roadmap, bundle-level not yet earned) stays HELD**
    as over-claim until wording is decided. (PR #50 already merged.) These are signing-key infra =
    founder hard-limit; do not self-merge.
-3. **a11oy.net Hetzner redeploy** — the box (167.233.50.75) still serves the OLD 5-set even though
+3. **a-11-oy.com Hetzner redeploy** — the box (167.233.50.75) still serves the OLD 5-set even though
    `cathedral.html` on GitHub main is now 8. The auto-deploy timer isn't picking it up. **Founder (or Forge
    if it has box access) runs once as root:** `curl -fsSL <raw>/ops/install-a11oy-autodeploy.sh | sudo bash`
-   (polls GitHub main every 3 min → `a11oy-rebuild`). After that a11oy.net serves locked-8 + the widget.
+   (polls GitHub main every 3 min → `a11oy-rebuild`). After that a-11-oy.com serves locked-8 + the widget.
 4. **CI hygiene reds** (founder/hygiene): banned-token scan (2 bare-"leading" prose hits → fix prose or
    `.doctrine-allowlist`); llama-cpp-python wheel guard (dep bump → founder picks a version with a live
    cp312 x86_64 wheel). Org toggles still pending: uds-mesh "Actions create PRs", szl-doctrine

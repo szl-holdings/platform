@@ -19,7 +19,7 @@ Likely cause: the recent box redeploy (which DID land — `nodes_standby` field 
 
 ## DO (box-side, reversible)
 1. On the LAPTOP (`betterwithage`, Tailscale 100.125.77.31 / exporter bound 100.96.129.45:9471): confirm the NVML/Prometheus exporter process is alive and serving — `curl -s http://100.96.129.45:9471/ | head`. If dead, restart it (the systemd unit or the `nvml_exporter`/`gpu_energy_exporter` process that reads the Blackwell RTX 5050 power.draw). It must emit a live `gpu_power_watts` / energy counter.
-2. On the BOX (a11oy.net, 167.233.50.75): restart the energy operator measurement worker so `running` flips true. This is the background task that polls `exporter` (`http://100.96.129.45:9471/`), accumulates `joules_measured_total`, increments `jobs_done`, and mints signed JouleCharge receipts. Restart the a11oy service worker (or send the operator its start/resume signal) WITHOUT resetting the accumulated totals — resume forward from 271,855 J.
+2. On the BOX (a-11-oy.com, 167.233.50.75): restart the energy operator measurement worker so `running` flips true. This is the background task that polls `exporter` (`http://100.96.129.45:9471/`), accumulates `joules_measured_total`, increments `jobs_done`, and mints signed JouleCharge receipts. Restart the a11oy service worker (or send the operator its start/resume signal) WITHOUT resetting the accumulated totals — resume forward from 271,855 J.
 3. Verify the worker re-attaches to `rtx-betterwithage` (`node_status` flips from `idle` -> `computing` while a job runs).
 
 ## PROVE (paste real values)

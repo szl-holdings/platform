@@ -14,14 +14,14 @@ SZL's sovereign GPU mesh + energy-MEASURED-per-goal + Khipu signed receipts + Le
 - Commits land on a11oy / szl-router / platform main. Box already redeployed (git_sha 7f55ec68).
 
 ## FORGE TASKS (execute; you have full box+repo access)
-1. **Keep the box current**: ensure a11oy.net auto-deploys each new main commit from this wave (the autodeploy timer; if not installed, install per ops/install-a11oy-autodeploy.sh). PROVE git_sha tracks main.
+1. **Keep the box current**: ensure a-11-oy.com auto-deploys each new main commit from this wave (the autodeploy timer; if not installed, install per ops/install-a11oy-autodeploy.sh). PROVE git_sha tracks main.
 2. **Set the mesh env-pins on the box** (D3 will document exact names): `A11OY_GPU_NODE_OMEN_BETTERWITHAGE_IP=100.70.130.45`, `A11OY_GPU_NODE_CHASKI_IP=100.102.173.88` (or the canonical names D3 ships) so the OMEN (verified serving llama3.1:8b 100% GPU) + chaski flip reachable by REAL probe. Re-press the energy operator after any rebuild.
 3. **chaski durable** (per replit-sync/energy_engine/R_CHASKI_BOOT_AND_KEEP_ALIVE_20260615.md + the prior wave's szl_energy_operator alias fix ba82860f): make its Ollama durable + wire the 2nd energy lung (A11OY_CHASKI_BASE_URL=http://100.102.173.88:11434/v1). Honest joules only.
 4. **Wire the coordinator** (D4): when D4 ships the multi-GPU load-balancer, point A11OY_MODEL_BASE_URL at it so work spreads across reachable sovereign GPUs (laptop freed to travel). Honest provenance per answer; never fabricate.
 5. **CI green + GitHub<->HF byte-identical** after every commit; drift guards green.
 
 ## PROVE-IT (real public curls in your forge-report: code+content-type+bytes)
-- [ ] a11oy.net/api/a11oy/v1/compute-pool-hardened: omen-betterwithage + chaski reachable:true sovereign:true (REAL probe), gpu_nodes_reachable >= 2 (3 when chaski durable).
+- [ ] a-11-oy.com/api/a11oy/v1/compute-pool-hardened: omen-betterwithage + chaski reachable:true sovereign:true (REAL probe), gpu_nodes_reachable >= 2 (3 when chaski durable).
 - [ ] /api/a11oy/v1/energy/operator/status: joules MEASURED climbing, stub_mode:false, by_node includes the home nodes.
 - [ ] /fabric route 200 (real content, not SPA shell) rendering the unified mesh+energy+roadmap view.
 - [ ] /honest git_sha == a11oy main HEAD; doctrine v11 locked 8 c7c0ba17 Λ=Conjecture 1.

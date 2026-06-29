@@ -1,6 +1,6 @@
 # Forge MASTER Deploy + Align Order — 2026-06-10 ~21:10 EDT
 **From:** CTO (Computer)  **To:** Forge (Replit build env)
-**Mandate (founder):** make a11oy, killinchu, a11oy.net/Hetzner, Hugging Face, and the UDS payload + mesh ALL deployable and ALIGNED. Think for yourself where the runbook leaves a choice. **T-6 to Defense Unicorns Warhacker (June 16–19).** Doctrine hard-gate applies to everything.
+**Mandate (founder):** make a11oy, killinchu, a-11-oy.com/Hetzner, Hugging Face, and the UDS payload + mesh ALL deployable and ALIGNED. Think for yourself where the runbook leaves a choice. **T-6 to Defense Unicorns Warhacker (June 16–19).** Doctrine hard-gate applies to everything.
 
 This is the single "make it real everywhere" order. It supersedes the open deploy items in prior orders. Sections A–E are the five surfaces; F is the cross-surface alignment gate; G is doctrine.
 
@@ -11,11 +11,11 @@ This is the single "make it real everywhere" order. It supersedes the open deplo
 - **killinchu**: HF Space RUNNING; CI green EXCEPT `build-push` (GHCR uds-v0.2.0 private-registry gap — see B). Your per-tab Research/Sources panel (commit aef6a313) is live.
 - **anatomy**: HF Space RUNNING (served at `szlholdings-anatomy.static.hf.space`).
 - **Drift**: I healed two shared-file drifts your commits introduced — `corpus/doctrine/a11oy__HONEST_DISCLOSURE.md` and `corpus/formulas/a11oy__docs__theorem-runtime-manifest.json` — synced byte-identical across a11oy GH+HF and killinchu GH+HF. Both drift guards GREEN. **Going forward: when you edit a shared corpus/szl_* file in one repo, mirror it to the other in the same push** (or the guard reds).
-- **a11oy.net**: reachable (hourly uptime cron confirmed 7:41 PM EDT).
+- **a-11-oy.com**: reachable (hourly uptime cron confirmed 7:41 PM EDT).
 
 ---
 
-## A. a11oy.net / HETZNER — make the box serve the current build (YOU/founder, needs root)
+## A. a-11-oy.com / HETZNER — make the box serve the current build (YOU/founder, needs root)
 Box `167.233.50.75`. The sandbox cannot SSH; this is yours.
 1. **One-time autodeploy install** (idempotent installer already in repo):
    ```bash
@@ -23,9 +23,9 @@ Box `167.233.50.75`. The sandbox cannot SSH; this is yours.
    curl -fsSL https://raw.githubusercontent.com/szl-holdings/a11oy/main/ops/install-a11oy-autodeploy.sh | sudo bash
    ```
    This wires the box to pull `main` and serve the current a11oy (systemd + watcher). Confirm it serves the **143-tab console** (the 6 new research tabs must appear) and `cathedral.html` shows **locked-8** {F1,F4,F7,F11,F12,F18,F19,F22}.
-2. **TLS**: confirm the cert on a11oy.net has >21 days validity (the twice-daily sentinel warns under 21d). Renew via certbot if needed.
+2. **TLS**: confirm the cert on a-11-oy.com has >21 days validity (the twice-daily sentinel warns under 21d). Renew via certbot if needed.
 3. **Self-hosted brain (flips Chaski stub→live)**: set the box's `SZL_LOCAL_LLM_URL` to the Qwen2.5-Coder-32B-AWQ endpoint (and the same as an HF Space secret — see C). Until set, Chaski is an honest labeled stub; do NOT relabel it "live" until the endpoint answers.
-4. **Align check after deploy**: `cathedral.html` / `/console` served on a11oy.net must be byte-equivalent in doctrine + tab set to the HF Space and GitHub `main`. If you changed anything on the box, push it back to GitHub so the three stay aligned (no box-only drift).
+4. **Align check after deploy**: `cathedral.html` / `/console` served on a-11-oy.com must be byte-equivalent in doctrine + tab set to the HF Space and GitHub `main`. If you changed anything on the box, push it back to GitHub so the three stay aligned (no box-only drift).
 
 ## B. HUGGING FACE — keep Spaces aligned + close the GHCR gap
 1. **Byte-identical rule**: HF Spaces do NOT auto-sync from GitHub. Any shared module or served file you change in GitHub must be POSTed to the HF Space (`huggingface.co/api/spaces/SZLHOLDINGS/<app>/commit/main`, NDJSON). Docker Spaces need a rebuild (commit triggers it; `restart?factory=true` after Dockerfile/COPY change).
@@ -57,7 +57,7 @@ Full detail + formula mappings: `team/CLUSTER_RESEARCH_2026-06-10.md` and `team/
 5. **Abacus/xVal numeric encoding** in the routing-envelope + receipt verifier (F22 monotonic ordering of quality scores).
 
 ## F. CROSS-SURFACE ALIGNMENT GATE (the definition of "aligned" — verify before declaring done)
-GitHub `main` == HF Space == a11oy.net/Hetzner == UDS bundle payload == deployed mesh, on ALL of:
+GitHub `main` == HF Space == a-11-oy.com/Hetzner == UDS bundle payload == deployed mesh, on ALL of:
 - same **tab set** (143 on a11oy incl. the 6 new research tabs) and same served HTML;
 - shared `szl_*.py` + corpus/doctrine + corpus/formulas files **byte-identical** across a11oy↔killinchu (both drift guards green);
 - **locked-8** exactly {F1,F4,F7,F11,F12,F18,F19,F22}; **Λ=Conjecture 1**; **Khipu=Conjecture 2**; **SLSA L1 honest·L2 attested·L3 roadmap**;

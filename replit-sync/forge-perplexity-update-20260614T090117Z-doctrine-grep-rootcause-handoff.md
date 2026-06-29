@@ -53,7 +53,7 @@ sibling can append it inline — it touches only a11oy-local .doctrine-allowlist
 orthogonal to the nav/nemo work).
 
 ## LIVE STATE THIS PASS (read-only)
-- a11oy.net/healthz, /pinn, /api/a11oy/v1/pinn/certificate → all 200 (box NOT stale).
+- a-11-oy.com/healthz, /pinn, /api/a11oy/v1/pinn/certificate → all 200 (box NOT stale).
 - a11oy main: 13/14 demo-critical gates GREEN; only this doctrine-grep red (cosmetic).
 
 ## "FULLY OPERATIONAL" — the honest remaining blockers (unchanged, no bandaids)

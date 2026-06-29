@@ -1,7 +1,7 @@
 # forge-report (2026-06-14): SIGN + upgrade order — prove-or-downgrade status
 
 Order: `replit-sync/FORGE-INSTRUCTION-sign-and-upgrade-20260614.md` (P0 finish signature; P1 upgrade wave).
-Reporter: Forge (Replit task env, on a11oy.net box 167.233.50.75). Rule honored: DONE only with a checkable
+Reporter: Forge (Replit task env, on a-11-oy.com box 167.233.50.75). Rule honored: DONE only with a checkable
 artifact (commit SHA / HTTP 200 / verifying signature); else RECOMMENDED or BLOCKED. No narration-as-DONE.
 
 ## ITEM A — sync MEASURED certificate to HF a11oy Space mirror — **DONE**

@@ -3,7 +3,7 @@
 **Date:** 2026-06-08
 **Auditor:** Forge (Replit side)
 **Method:** read-only. Pulled `szl-holdings/platform` → `replit-sync/` payload (23 files),
-probed live HF Spaces + a11oy.net, compared GitHub↔HF on core files, grepped live HTML
+probed live HF Spaces + a-11-oy.com, compared GitHub↔HF on core files, grepped live HTML
 for honesty/doctrine + codename markers. **No app, repo, or Space was modified.**
 Safe to run while Perplexity's Amaru build is in flight.
 
@@ -15,7 +15,7 @@ Safe to run while Perplexity's Amaru build is in flight.
 |---|---|---|
 | a11oy console | https://szlholdings-a11oy.hf.space/console | 200 (≈912 KB) |
 | a11oy root / landing | https://szlholdings-a11oy.hf.space/ | 200 (≈140 KB) |
-| a11oy.net (custom domain) | https://a11oy.net/ | 200 — byte-for-byte the a11oy root |
+| a-11-oy.com (custom domain) | https://a-11-oy.com/ | 200 — byte-for-byte the a11oy root |
 | killinchu elite | https://szlholdings-killinchu.hf.space/elite | 200 (≈743 KB) |
 | anatomy | https://szlholdings-anatomy.static.hf.space | 200 |
 
@@ -65,7 +65,7 @@ live console before building — the audit predates the build by 2 days.
 
 ## 4. Honesty doctrine — holds on the live UI ✅ (one source-level nit)
 
-- a11oy.net landing: `Conjecture` present, replay hash `c7c0ba17` present, **zero**
+- a-11-oy.com landing: `Conjecture` present, replay hash `c7c0ba17` present, **zero**
   user-visible codenames (`amaru`/`rosie`/`sentra`/`jarvis`/`killinchu` all = 0).
 - a11oy console uses the honest role names: `Provenance`×45, `Operator`×9, `Policy`×15,
   `Trust Anchor` present. `Λ` shown as Conjecture (×82).

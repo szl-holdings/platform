@@ -9,13 +9,13 @@ All 3 FINISH_LINE ops steps are now **CLOSED and VERIFIED**. No bandaids — rea
 - Recreated the `a11oy` container (image `a11oy:local`, rollback-safe via `a11oy:prev`) adding:
   - `A11OY_EMBED_BASE_URL=http://100.125.77.31:11434/v1`
   - `A11OY_EMBED_MODEL=bge-large`
-- **Public proof** — `https://a11oy.net/api/a11oy/v1/alloy-embed-fabric/health`:
+- **Public proof** — `https://a-11-oy.com/api/a11oy/v1/alloy-embed-fabric/health`:
   `backend.wired=true, kind=self-hosted-gpu, model=bge-large, reachable=true, probe_http=200`.
 - `healthz` + `sovereign-compute` panel = 200.
 - **Persistence:** both env vars are in the live container `Config.Env`, and `/root/forge-deploy.sh` captures live container env via `docker inspect` on every redeploy → carried forward automatically (no manual re-wire on the next deploy).
 - TRAP recorded: first embed call cold-loads the model (>20s) → warm once with a ≥60s timeout before trusting the health verdict.
 
-## Step 1 — redeploy a11oy.net from main (sovereign-compute panel live)
+## Step 1 — redeploy a-11-oy.com from main (sovereign-compute panel live)
 DONE — sovereign-compute panel live from published main.
 
 ## Step 3 — Node `code/healthz` sovereign

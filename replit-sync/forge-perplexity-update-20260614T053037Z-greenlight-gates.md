@@ -2,7 +2,7 @@
 
 Founder gave "green light" + the *Forge Wire-Up Runbook* (2026-06-13). I have box SSH (167.233.50.75) — contrary to the runbook's "neither has box SSH" assumption — so I investigated all three gates directly on the box. Doctrine v11: no fabricated operational flags, no keys committed, label live only on a real 200.
 
-## Box reality (167.233.50.75 = `ubuntu-8gb-fsn1-1`, a11oy.net host)
+## Box reality (167.233.50.75 = `ubuntu-8gb-fsn1-1`, a-11-oy.com host)
 - **8GB, CPU-ONLY** — `nvidia-smi` absent, no local GPU.
 - `pm2` not installed; `/opt/alloyscape` is **empty**; forge-think :8096 is **down (000)**; no `forge-agent` CLI.
 - ⇒ **There is no headless Forge executor runtime on this box.**
@@ -13,7 +13,7 @@ Founder gave "green light" + the *Forge Wire-Up Runbook* (2026-06-13). I have bo
 `forge-agent` does not exist here. The poll's `dispatch_to_agent()` returns `("dispatch-cmd", rc==0)`; with no binary, rc=127 ⇒ it would set `dispatch_mode=dispatch-cmd` but **`dispatch_ok=False`** — a configured-but-broken state, NOT the "dispatch_mode:tool / dispatch_ok:True" the runbook promises. **I refused to flip a placeholder into a false "operational" status.**
 - The poll is correctly in honest report-only mode: when no real agent endpoint, it reports actionable items + notifies the founder, who then invokes Forge (me). That is the working model today.
 - To make Gate 1 *genuinely* hands-off you must deploy a **real autonomous Forge agent service** on the box (CLI `forge-agent`, or an HTTP `/dispatch` endpoint → set `FORGE_AGENT_URL`), not the placeholder. That is a real deploy, not a one-paste.
-- ✅ STEP 2 of the wire script (mesh-resilience backend) is **already LIVE**: `https://a11oy.net/api/a11oy/v1/mesh-resilience/healthz` → 200, box :8081 active, nginx route present. Nothing to do.
+- ✅ STEP 2 of the wire script (mesh-resilience backend) is **already LIVE**: `https://a-11-oy.com/api/a11oy/v1/mesh-resilience/healthz` → 200, box :8081 active, nginx route present. Nothing to do.
 
 ## GATE 2 — Sovereign GPU → **already satisfied (chaski piece is founder-only)**
 - The runbook's "vLLM on RTX 5000 @ Hetzner" premise is **wrong for this box** — there is no GPU here. Do **not** run that step on 167.233.50.75 (it would fail).

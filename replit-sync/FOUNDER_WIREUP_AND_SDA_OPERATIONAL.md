@@ -6,7 +6,7 @@ Prepared for Stephen P. Lutar Jr. · 2026-06-13 · Doctrine v11
 
 ## The one-line situation
 
-Forge is **alive and healthy** (polling fine, a11oy.net = 200), but it is in **report-only mode**: it reads each order, lists the to-dos, and hands them back — it does **not** build, sign, or deploy on its own. The single reason: the box poll has `dispatch_mode: none` because no executor is wired. **One paste on the box flips it to hands-off.** Everything else (repo, engine, surfaces, PRs) is already green and waiting.
+Forge is **alive and healthy** (polling fine, a-11-oy.com = 200), but it is in **report-only mode**: it reads each order, lists the to-dos, and hands them back — it does **not** build, sign, or deploy on its own. The single reason: the box poll has `dispatch_mode: none` because no executor is wired. **One paste on the box flips it to hands-off.** Everything else (repo, engine, surfaces, PRs) is already green and waiting.
 
 There are **three founder-only gates**, in priority order:
 
@@ -85,7 +85,7 @@ A11OY_GPU_LABEL=NVIDIA RTX 5000 @ Hetzner
 
 **Verify (the sovereign proof):**
 ```bash
-curl -s https://a11oy.net/api/a11oy/v1/code/health | jq '.inference,.primary_model'
+curl -s https://a-11-oy.com/api/a11oy/v1/code/health | jq '.inference,.primary_model'
 #   WANT:  "self-hosted-gpu"  |  "Qwen/Qwen2.5-Coder-..."
 ```
 

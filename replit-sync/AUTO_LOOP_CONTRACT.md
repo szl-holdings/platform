@@ -45,7 +45,7 @@ A dated `forge-perplexity-update-<YYYYMMDD>.md` is also written as a human-reada
   "dispatch_ok": true,
   "gated_skipped": ["..."],
   "report": "replit-sync/forge-perplexity-update-YYYYMMDD.md",
-  "probes": {"https://a11oy.net/healthz": 200},
+  "probes": {"https://a-11-oy.com/healthz": 200},
   "doctrine": "v11: locked=8, Lambda=Conjecture 1, never commit a key"
 }
 ```

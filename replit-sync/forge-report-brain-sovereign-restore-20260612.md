@@ -18,7 +18,7 @@
 
   ## Verification (no overclaims)
   - `GET /api/a11oy/v1/code/health` → `inference:self-hosted-gpu`, `mode:generative`, `token_source:A11OY_GPU_TOKEN`, `router_base:http://100.125.77.31:11434/v1`.
-  - **Public** `GET https://a11oy.net/api/a11oy/v1/sovereign-compute` → `summary: "SOVEREIGN-GPU LIVE"`, brain `sovereign=true` + embeddings sovereign.
+  - **Public** `GET https://a-11-oy.com/api/a11oy/v1/sovereign-compute` → `summary: "SOVEREIGN-GPU LIVE"`, brain `sovereign=true` + embeddings sovereign.
   - GPU node genuinely serves chat (direct probe 200; roster fallback `meta-llama/Llama-3.1-8B-Instruct` is present on the node — Qwen primary 404s then falls through). Real gen path = `_ac_hf_chat` (used by `/code/auto`,`/code/route`).
 
   ## Honest caveats

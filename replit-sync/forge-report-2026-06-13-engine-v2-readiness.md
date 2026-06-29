@@ -5,7 +5,7 @@ touched, no key handled.** Box auto-loop last processed `c9168b42` (dispatch_mod
 audit below is the value-add the timer can't produce. Doctrine v11 held: keystone never agent-merged.
 
 ## Live honest state (verified now)
-- `a11oy.net/healthz` = 200, `status:ok`, `commit:c7c0ba17` (locked-8 reference). No overclaim live.
+- `a-11-oy.com/healthz` = 200, `status:ok`, `commit:c7c0ba17` (locked-8 reference). No overclaim live.
 - `/api/a11oy/v1/energy/budget` and `/api/a11oy/v1/engine/status` → **404 "not found"** — correct: the
   energy endpoints ship in #328/#335, which are unmerged. Engine is BUILT in source, DEPLOYED nowhere.
 

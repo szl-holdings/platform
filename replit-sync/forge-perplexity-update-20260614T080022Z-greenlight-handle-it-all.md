@@ -6,9 +6,9 @@ flags, no key committed, label live ONLY on a real 200. Green-light = permission
 does not materialize a missing private key or a GPU that isn't on the box.
 
 ## VERIFIED LIVE STATE THIS PASS (read-only probes)
-- a11oy.net/healthz                       -> 200
-- a11oy.net/pinn                          -> 200   (NOT 404 — box is NOT stale)
-- a11oy.net/api/szl/v1/inference-posture  -> 200
+- a-11-oy.com/healthz                       -> 200
+- a-11-oy.com/pinn                          -> 200   (NOT 404 — box is NOT stale)
+- a-11-oy.com/api/szl/v1/inference-posture  -> 200
 - HF SZLHOLDINGS/sda static space         -> 302 (normal redirect), RUNNING
 - killinchu main HEAD 16868510: 24/26 checks GREEN, 2 skipped-by-design.
   Both guards Perplexity flagged (copy-sync lockstep, shared-source drift) GREEN.

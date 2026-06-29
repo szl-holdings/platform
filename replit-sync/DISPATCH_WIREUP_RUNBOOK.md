@@ -2,7 +2,7 @@
 
 Flips Forge from **report-only** (`dispatch_mode:none`, `dispatch_ok:false`) to
 **actually executing** the pinned `NEXT_ORDER.md` jobs. Run AS ROOT on the Hetzner
-box (a11oy.net, 167.233.50.75). Doctrine v11: never self-merge a keystone, never
+box (a-11-oy.com, 167.233.50.75). Doctrine v11: never self-merge a keystone, never
 commit a key, label `live` only on a real 200.
 
 ## Run it (the whole thing — copy/paste)

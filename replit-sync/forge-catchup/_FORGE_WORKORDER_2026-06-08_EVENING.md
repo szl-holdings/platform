@@ -36,7 +36,7 @@ Two audiences, one product. Recommendations to implement (and check):
 
 ## 5. WEBPAGE + GITHUB UP TO DATE
 
-- **a11oy.net** landing — verify it reflects current state: Λ value, P1–P6, honest kernel count (locked 5 / ~190 experimental), and ADD the Wave23 conditional-BFT line if the page lists conjecture status. Confirm it deploys from the current source.
+- **a-11-oy.com** landing — verify it reflects current state: Λ value, P1–P6, honest kernel count (locked 5 / ~190 experimental), and ADD the Wave23 conditional-BFT line if the page lists conjecture status. Confirm it deploys from the current source.
 - **GitHub** — verify the public repos READMEs/bios are current (org bio ~185 experimental, NOT inflated): `lutar-lean` (now has Wave23 on main), `khipu-consensus`, `a11oy`, `killinchu`, `lambda-bounty`, `szl-papers`, `developers`. Make sure `lutar-lean` README references the Wave23 result honestly.
 - Confirm GitHub↔HF stays byte-identical on all core app files (md5) after any edit.
 

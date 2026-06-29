@@ -3,7 +3,7 @@
 UTC: 20260613T084317Z · box 167.233.50.75 (CPU-only app box) · GPU node betterwithage 100.125.77.31 (Tailscale)
 Doctrine v11 throughout. Forge OPERATES/VERIFIES — NO PRs merged.
 
-## 1. Tab-by-tab live verification on a11oy.net (R-ZOOMOUT-GPU step 3) — raw curl HTTP codes
+## 1. Tab-by-tab live verification on a-11-oy.com (R-ZOOMOUT-GPU step 3) — raw curl HTTP codes
 LIVE (200): /healthz · /api/a11oy/v1/harvest/metrics · /api/a11oy/v1/harvest/posture · /api/a11oy/v1/body/self
 DARK (404): /api/a11oy/v1/energy/budget · /engine/status · /revenue/estimate · /formula/sovereign · /energy/reservoir
 

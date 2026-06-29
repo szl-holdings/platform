@@ -12,7 +12,7 @@ edit; no PR merge.
 - New `/marketplace` endpoint on the already-deployed `szl-revenue-estimate`
   microservice (box 167.233.50.75 :8084, `/opt/szl/revenue-estimate`), public via
   the existing nginx REVENUE-API-PROXY rule (no nginx change needed).
-- **a11oy.net/api/a11oy/v1/revenue/marketplace = HTTP 200**, honest payload:
+- **a-11-oy.com/api/a11oy/v1/revenue/marketplace = HTTP 200**, honest payload:
   - commodity **$86.87–$195.46/mo**, +25% verified premium **$108.59–$244.32/mo**
     (matches the order's ~$86–241 band).
   - `settled_usd_to_date = 0.0`, `status = not_listed` (settle-to-count).

@@ -24,7 +24,7 @@ curl -s http://localhost:8000/v1/models | jq '.data[].id'
 ```
 
 ## Step 2 — point a11oy at it + restart (same place HF_TOKEN is set today)
-The a11oy.net deployment env lives on this host — the k8s `deploy/manifests/a11oy-deployment.yaml` env block, OR the container's `-e` / `.env`, wherever `HF_TOKEN` is set now. Add:
+The a-11-oy.com deployment env lives on this host — the k8s `deploy/manifests/a11oy-deployment.yaml` env block, OR the container's `-e` / `.env`, wherever `HF_TOKEN` is set now. Add:
 ```
 A11OY_MODEL_BASE_URL=http://127.0.0.1:8000/v1
 A11OY_GPU_TOKEN=<the vLLM --api-key, if you set one; else omit>
@@ -34,9 +34,9 @@ Then restart the a11oy container/deployment (factory rebuild also picks up the m
 
 ## Step 3 — verify (the proof)
 ```bash
-curl -s https://a11oy.net/api/a11oy/v1/code/health | jq '.inference,.primary_model'
+curl -s https://a-11-oy.com/api/a11oy/v1/code/health | jq '.inference,.primary_model'
 #   MUST become:  "self-hosted-gpu"  |  "Qwen/Qwen2.5-Coder-..."
-curl -s https://a11oy.net/api/a11oy/v1/sovereign-compute | jq '.summary'
+curl -s https://a-11-oy.com/api/a11oy/v1/sovereign-compute | jq '.summary'
 #   MUST become:  "PARTIAL SOVEREIGN..." or "SOVEREIGN-GPU LIVE"
 ```
 When `inference: self-hosted-gpu` appears, the agent is running on YOUR GPU — screenshot the `/sovereign-compute` panel for the Day-3 headline.
@@ -52,7 +52,7 @@ Then add to the a11oy env + restart:
 A11OY_EMBED_BASE_URL=http://127.0.0.1:8001/v1
 A11OY_EMBED_MODEL=BAAI/bge-large-en-v1.5
 ```
-Verify: `curl -s https://a11oy.net/api/a11oy/v1/alloy-embed-fabric/health | jq '.backend.kind,.backend.reachable'` → `"self-hosted-gpu", true`.
+Verify: `curl -s https://a-11-oy.com/api/a11oy/v1/alloy-embed-fabric/health | jq '.backend.kind,.backend.reachable'` → `"self-hosted-gpu", true`.
 
 ## If you'd rather Forge do it
 Grant Forge SSH to 167.233.50.75 (a deploy key / least-priv user that can `docker run` + edit the deployment env), then point it at `replit-sync/forge_gpu_bringup.py`. Until then, the box step can only be done by someone with shell on the box.

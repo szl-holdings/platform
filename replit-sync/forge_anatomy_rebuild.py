@@ -156,7 +156,7 @@ def main() -> int:
         return 0
     print(f"Re-serve attempted but {live_url} still HTTP {final} after timeout. "
           f"Honest status: standalone Space still dark — inspect the HF build logs. "
-          f"Consolidation via a11oy.net/anatomy is unaffected (already 200).")
+          f"Consolidation via a-11-oy.com/anatomy is unaffected (already 200).")
     return 1
 
 

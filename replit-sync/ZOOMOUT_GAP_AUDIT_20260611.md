@@ -21,7 +21,7 @@ Full-estate scan after the quantum-bio v5 push. 30 repos, 3 Spaces, all CI + ope
 4. **DOI not minted**: CITATION.cff is generic — no Zenodo DOI for the v5 thesis yet. **Needs founder Zenodo token** → mint DOI, update CITATION.cff, cross-link from anatomy v5 panel + a11oy honest tab.
 
 ## 🟡 FOUNDER/FORGE-GATED (cannot do from sandbox — itemized in the CTO master order)
-- Hetzner root redeploy (a11oy.net autodeploy script) · GHCR push token (killinchu uds-v0.2.0) · cosign/Rekor signing (uds-v0.3.0) · `SZL_LOCAL_LLM_URL` brain secret (flips Chaski stub→live) · UDS cluster deploy (k3d + Zarf/UDS/Pepr/K9/Lula) · lake build to regen VERIFIED_THEOREMS.md.
+- Hetzner root redeploy (a-11-oy.com autodeploy script) · GHCR push token (killinchu uds-v0.2.0) · cosign/Rekor signing (uds-v0.3.0) · `SZL_LOCAL_LLM_URL` brain secret (flips Chaski stub→live) · UDS cluster deploy (k3d + Zarf/UDS/Pepr/K9/Lula) · lake build to regen VERIFIED_THEOREMS.md.
 
 ## 📋 IN-FLIGHT (already specced to Forge in forge-CTO-MASTER-20260611.md)
 All §A–I of the CTO master order: every-tab-unique+live-wiring audit, all-3D upgrades (anvaka/vasturiano/deck.gl, build order A2→A3→A1→A4→A5), genius landing page + user-friendliness (marketers/directors + Opus 4.8), theory evolutions (QM top-6), DeSci/Zenodo hooks, backend endpoints (loop_depth, routing-graph, votes/round, router-metrics). Research reports synced to `platform/replit-sync/research/`.

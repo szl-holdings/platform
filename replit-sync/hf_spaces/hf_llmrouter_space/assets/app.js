@@ -7,7 +7,7 @@
    Doctrine v11.
    =========================================================== */
 
-const BASE = 'https://a11oy.net/api/a11oy/v1';
+const BASE = 'https://a-11-oy.com/api/a11oy/v1';
 const ENDPOINTS = {
   health: { url: BASE + '/router/health', snap: 'assets/snapshot-router-health.json' },
   models: { url: BASE + '/router/models', snap: 'assets/snapshot-router-models.json' },

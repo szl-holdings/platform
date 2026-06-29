@@ -6,7 +6,7 @@ This folder is the Perplexity-Computer → Replit/Forge handoff. Forge: read thi
 - a11oy: https://szlholdings-a11oy.hf.space/console — ~38+ unique views. Built this cycle: Core 5 + 4 WOW adds + 5 organs (Lean/Lake/Mathlib instilled) + 5 verticals (RealEstate, Finance, Legal/Counsel, Enterprise/Sentra, RealEstate/Terra) + Chat + KAMAY coding + upgraded Warhacker. Amaru ("Provenance & Trust Anchor") 5-tab vertical: IN PROGRESS at payload time.
 - killinchu: https://szlholdings-killinchu.hf.space/elite — drones/vessels + UDS + Warhacker; organs instilled; ~18 consolidated surfaces; FRONTIER pins at top.
 - anatomy: https://szlholdings-anatomy.static.hf.space — 5 organs incl Operator (Rosie ingested).
-- a11oy.net = live landing page (Λ 0.919, P1–P6, honest kernel count).
+- a-11-oy.com = live landing page (Λ 0.919, P1–P6, honest kernel count).
 - GitHub szl-holdings ↔ HF SZLHOLDINGS: byte-identical on core files (verified md5). UDS mesh 4/4, theorem registry (5), Apache-2.0 + non-affiliation note.
 
 ## MODULE MESH (5) — honest roles (NEVER show codenames to users)

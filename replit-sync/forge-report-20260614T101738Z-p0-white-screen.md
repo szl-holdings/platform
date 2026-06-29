@@ -1,9 +1,9 @@
-# Forge report — P0 HOTFIX: a11oy.net "/" WHITE SCREEN — DONE (PROVEN)
+# Forge report — P0 HOTFIX: a-11-oy.com "/" WHITE SCREEN — DONE (PROVEN)
 
 Doctrine v11. PROVE-OR-DOWNGRADE in force. Status: **DONE** with checkable artifacts (HTTP 200 + byte counts + headless render).
 
 ## Order
-`replit-sync/NEXT_ORDER.md` TOP ORDER (P0 HOTFIX, re-pinned 2026-06-14 05:34 EDT): a11oy.net "/" served an
+`replit-sync/NEXT_ORDER.md` TOP ORDER (P0 HOTFIX, re-pinned 2026-06-14 05:34 EDT): a-11-oy.com "/" served an
 83-byte stub (only the Chaski operator-widget script) -> blank page + tiny bubble. Restore a real landing
 page at "/" with the widget as an OVERLAY, on BOTH the box and the HF Space.
 GATE: root returns >1KB real markup + headless render shows visible content.
@@ -29,7 +29,7 @@ were STALE (still serving the 83-byte stub). The work was DEPLOY-ONLY.
   backend modules to the Space). No manual push required; Space rebuilt and now serves the full front door.
 
 ## PROOF (checkable artifacts)
-Box  — `https://a11oy.net/`            : HTTP 200, **142766 bytes** (was 83). Has `<body>`, hero
+Box  — `https://a-11-oy.com/`            : HTTP 200, **142766 bytes** (was 83). Has `<body>`, hero
        "Governed intelligence, proven at the frontier.", full nav, CTAs, and the operator widget as a
        floating OVERLAY. Headless render captured = full landing page (not a blank page).
 HF   — `https://szlholdings-a11oy.hf.space/` : HTTP 200, **142715 bytes** (was 83). Has `<body>`,

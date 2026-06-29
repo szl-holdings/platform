@@ -1,6 +1,6 @@
 # R-MOSAIC-SDA (TOP) — SZL's sovereign answer to True Anomaly's Mosaic · merged across the eco · go, full admin
 
-Founder order: research "Mosaic" (True Anomaly's space-superiority software), ingest till expert, fashion-thinking make it OURS built on our eco, innovate/evolve, elevate killinchu + a11oy.net + the full UDS eco with our formulas + all repos, GitHub-align it all, then send to Replit/Forge. No bandaids.
+Founder order: research "Mosaic" (True Anomaly's space-superiority software), ingest till expert, fashion-thinking make it OURS built on our eco, innovate/evolve, elevate killinchu + a-11-oy.com + the full UDS eco with our formulas + all repos, GitHub-align it all, then send to Replit/Forge. No bandaids.
 
 DONE: identified Mosaic (confidence HIGH = True Anomaly Inc.'s space-superiority platform: SDA + C2 + battle-management + sensor-fusion COP + OODA + ML threat-warning; proprietary → clean-room the CAPABILITY from public descriptions + verified-permissive lineage). Built a working clean-room SZL-native engine, wired it across killinchu + a11oy + the UDS eco, all merged to main, GitHub-aligned. Production build/test/deploy is YOURS.
 

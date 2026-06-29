@@ -10,7 +10,7 @@ Founder-invoked live check (Replit-side Forge). DEPLOY-ONLY, no merges, VAST hel
 - replit-chaski (100.76.58.50) — OFFLINE. `tailscale status`: "active; relay ord; offline, last seen 1d ago, tx 3115476 rx 0". ping = 100% packet loss. :11434 unreachable.
 
 ## szl-router (PRIVATE moat — verified private, kept private)
-External via a11oy.net (nginx exact-match proxy → 127.0.0.1:8099):
+External via a-11-oy.com (nginx exact-match proxy → 127.0.0.1:8099):
 - GET /api/a11oy/v1/router/health   → 200
 - GET /api/a11oy/v1/router/models    → 200 (szl-large, szl-fast, szl-coder)
 - GET /api/a11oy/v1/router/provenance→ 200 (full tier table)
@@ -21,7 +21,7 @@ Sovereign-first ladder (honest tiers): box_gpu(sovereign,armed) → nvidia_gpu(s
 groq/nvidia_nim/zhipu/siliconflow(free-grid) → moonshot = **Kimi K2 (paid-grid, strong fallback)**.
 Kimi is present in the fabric as the paid fallback, correctly NOT labelled sovereign.
 
-## Surfaces (a11oy.net, all 200) — note: served at TOP-LEVEL paths, not /api/a11oy/v1/
+## Surfaces (a-11-oy.com, all 200) — note: served at TOP-LEVEL paths, not /api/a11oy/v1/
 healthz, /ayni, /research/prereg, /research/verify, /harvest/datacenters, /harvest/metrics (item F STABLE x3),
 /compute-pool, /energy/budget. a11oy image was rebuilt from origin/main (bb23ff5) ~2 min before this check by a
 sibling pass — NO regression; the /api/a11oy/v1/* prefix 404s are the known prefix trap, not an outage.

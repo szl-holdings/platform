@@ -22,7 +22,7 @@ Brev's control plane wants a Brev-issued session/CLI token, not an `nvapi-` key.
 With that I can enumerate + launch the free nodes and wire them into the router.
 
 ## Nodes genuinely LIVE right now (real 200 this minute — these ARE running together)
-1. Sovereign GPU code tier   a11oy.net/api/a11oy/v1/code/health -> 200  (mode:generative, inference:self-hosted-gpu)
+1. Sovereign GPU code tier   a-11-oy.com/api/a11oy/v1/code/health -> 200  (mode:generative, inference:self-hosted-gpu)
 2. Sovereign GPU node        betterwithage Ollama 100.125.77.31:11434/api/tags -> 200  (qwen2.5-coder:7b, llama3.1:8b, meta-llama/Llama-3.1-8B-Instruct, bge-large)
 3. NVIDIA hosted inference   integrate.api.nvidia.com -> 200  (UNLOCKED by your token today — valid as a router fallback node)
 4. Box joule-meter           joule-meter.service active, :9471/healthz -> 200 (energy telemetry; joules still NVML-gated, see prior report)

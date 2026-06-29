@@ -26,7 +26,7 @@ shell that doesn't read the live endpoints. git_sha MISSING is why this kept sli
 
 ## PROVE (paste real output)
 - box /api/a11oy/v1/honest -> git_sha == e42082a6 (or current HEAD), NOT missing.
-- `curl -s https://a11oy.net/energy-ops` (and /energy) -> served HTML CONTAINS `energy/operator/status` +
+- `curl -s https://a-11-oy.com/energy-ops` (and /energy) -> served HTML CONTAINS `energy/operator/status` +
   the live joules wiring (NOT the 272KB blank SPA shell).
 - Open the energy tab live -> shows joules_measured_total climbing (matches the API ~393k+).
 - Spot-check willay/waqay/yupay/qhawaq/sapa/mbse tabs render REAL content on the box (not stale shell).

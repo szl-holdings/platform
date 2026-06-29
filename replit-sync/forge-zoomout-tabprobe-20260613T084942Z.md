@@ -4,7 +4,7 @@ Founder asked me to zoom out of the GitHub merge thread. Did it. The merge threa
 order in NEXT_ORDER.md ends "Do NOT merge"; the PRs are open WIP by design. The real objective is the GPU-NVML wiring.
 Here is the live, sandbox-reachable proof (off-box HTTP only; LIVE = real 200 + real body).
 
-## LIVE tabs on a11oy.net — all 200, real data
+## LIVE tabs on a-11-oy.com — all 200, real data
 - /healthz                         200  doctrine v11, lock 749/14/163, commit c7c0ba17
 - /console                         200  (app shell)
 - /proven-formulas                 200  (app shell)

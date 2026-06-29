@@ -14,7 +14,7 @@ scope: "make sure everything wired in properly … get the replit-forge instruct
 - Deployed to box 167.233.50.75 at /opt/szl/mesh-resilience (engine.py, server.py, cache.json) in a venv (fastapi+uvicorn; box python=3.14, PEP 668).
 - systemd unit `szl-mesh-resilience.service` (uvicorn :8081, Restart=on-failure, enabled — survives reboot).
 - nginx: added `location ^~ /api/a11oy/v1/mesh-resilience/` → 127.0.0.1:8081/ in /etc/nginx/sites-available/a11oy (marker MESH-RESILIENCE-PROXY, idempotent, before catch-all). `nginx -t` ok, reloaded.
-- Verified PUBLIC: `GET https://a11oy.net/api/a11oy/v1/mesh-resilience/healthz` → 200; `/resilience` → 200. Honesty envelope intact ("MEASURED/SIMULATED … OPEN hypothesis, NOT a theorem, NOT one of the locked-8; BFT safety = Conjecture 2; Λ = Conjecture 1").
+- Verified PUBLIC: `GET https://a-11-oy.com/api/a11oy/v1/mesh-resilience/healthz` → 200; `/resilience` → 200. Honesty envelope intact ("MEASURED/SIMULATED … OPEN hypothesis, NOT a theorem, NOT one of the locked-8; BFT safety = Conjecture 2; Λ = Conjecture 1").
 - Endpoints: /healthz, /resilience, /resilience/sweep, /resilience/score. (NOTE: app path is `/healthz` — earlier docs that said `/health` were wrong.)
 - Durability: a11oy-rebuild rebuilds the :7861 container only; it does not touch nginx or this service. Block is marker-guarded.
 

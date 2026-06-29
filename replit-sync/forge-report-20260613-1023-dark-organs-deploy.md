@@ -18,7 +18,7 @@ A secondary FastAPI trap: `/energy/provenance` and `/heart/pulse` handlers were 
 
 Deployed via `/usr/local/sbin/a11oy-rebuild` (REBUILD_EXIT=0, running `main@4d85d8d`).
 
-## Public verification (https://a11oy.net)
+## Public verification (https://a-11-oy.com)
 | endpoint | before | after |
 |---|---|---|
 | /api/a11oy/v1/energy/budget | 404 | 200 |

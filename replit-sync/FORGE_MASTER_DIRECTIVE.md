@@ -34,7 +34,7 @@ Server-side polls only (FastAPI httpx, 10–15s jittered, honest cached/stale la
 ## 4. DEPLOY / SURFACES
 - **HF Spaces:** deploy anatomy v4 (sdk: static) + flagship consoles; confirm **GitHub↔HF byte-identical (md5)** after each.
 - **Permanent pplx.app link for anatomy v4 is BLOCKED** — org "Website Publishing" is off in Computer settings (needs a Perplexity org admin to enable). Not a code issue.
-- No prod (Hetzner/a11oy.net DNS) changes without explicit human approval.
+- No prod (Hetzner/a-11-oy.com DNS) changes without explicit human approval.
 
 ## 5. FOUNDER-ONLY (cannot be delegated)
 - Run kernel `#print axioms` ceremony → then unflag the served-8 surfaces (a11oy/killinchu consoles already publish locked=8, set-verified equal to kernel; this is confirmation, not correctness).

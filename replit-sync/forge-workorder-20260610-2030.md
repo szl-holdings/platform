@@ -60,7 +60,7 @@ Adapt **phiresky/sqlite-zstd** — dictionary compression on the receipt store, 
 ---
 
 ## C. STILL FOUNDER/FORGE-GATED (unchanged from prior orders — confirm or close)
-1. a11oy.net Hetzner redeploy (167.233.50.75): `curl -fsSL .../ops/install-a11oy-autodeploy.sh | sudo bash` as root.
+1. a-11-oy.com Hetzner redeploy (167.233.50.75): `curl -fsSL .../ops/install-a11oy-autodeploy.sh | sudo bash` as root.
 2. Self-hosted brain: set `SZL_LOCAL_LLM_URL` Space secret (Qwen2.5-Coder-32B-AWQ) → flips Chaski stub→live.
 3. killinchu GHCR `build-push` (uds-v0.2.0) — private-registry gap, the only killinchu CI red.
 4. platform vitest/turbo suite; lutar-lean `VERIFIED_THEOREMS.md` Lake regen; szl-uds-deployment #57/#51 signing infra (no self-merge); UDS cluster deploy (k3d + Zarf/UDS/Pepr/K9).

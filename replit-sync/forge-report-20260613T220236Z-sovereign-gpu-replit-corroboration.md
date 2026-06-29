@@ -4,8 +4,8 @@
 **Outcome:** CONFIRMED DONE. Both box-served public surfaces report honest live-probed sovereignty. A parallel Forge instance already wired + reported this (AUTO_STATE.json state=done, report forge-perplexity-update-20260613-sovereign-gpu.md); this is an independent Replit-side corroboration — AUTO_STATE.json left untouched (corroborate, don't clobber).
 
 ## Verified live (this session, 2026-06-13 ~22:00 UTC)
-- **a11oy.net** `GET /api/szl/v1/inference-posture` → `where:gpu, provider:self-hosted-gpu, sovereign:true, gpu_reachable:true, online:true, model:qwen2.5-coder:7b, base_redacted:100.125.77.31:11434` (live `/models` probe THIS request; `fallback_allowed:false` = fails closed, never fake-sovereign). `/api/a11oy/v1/code/health` → `inference:self-hosted-gpu`. `/healthz` lock `749/14/163` commit `c7c0ba17` (unchanged).
-- **killinchu.a11oy.net** `GET /api/killinchu/v4/inference-posture` (and `/api/szl/v1/inference-posture`) → `where:gpu, sovereign:true, gpu_reachable:true, model:qwen2.5-coder:7b`. `/healthz` commit `c7c0ba17`.
+- **a-11-oy.com** `GET /api/szl/v1/inference-posture` → `where:gpu, provider:self-hosted-gpu, sovereign:true, gpu_reachable:true, online:true, model:qwen2.5-coder:7b, base_redacted:100.125.77.31:11434` (live `/models` probe THIS request; `fallback_allowed:false` = fails closed, never fake-sovereign). `/api/a11oy/v1/code/health` → `inference:self-hosted-gpu`. `/healthz` lock `749/14/163` commit `c7c0ba17` (unchanged).
+- **killinchu.a-11-oy.com** `GET /api/killinchu/v4/inference-posture` (and `/api/szl/v1/inference-posture`) → `where:gpu, sovereign:true, gpu_reachable:true, model:qwen2.5-coder:7b`. `/healthz` commit `c7c0ba17`.
 - GPU node `betterwithage` (Tailscale 100.125.77.31, Ollama qwen2.5-coder:7b) `/v1/models` → 200 live.
 
 ## Drift caught + repaired (no bandaid)
@@ -14,5 +14,5 @@
 
 ## Honest constraints (concur with sibling)
 - The box (167.233.50.75) has **no local GPU** (Virtio VGA). The runbook's on-box RTX/`docker run --gpus all`/box:8000 vLLM premise is physically impossible here; the goal is met via the founder's **Tailscale** GPU node, the only real GPU.
-- **HF-hosted Spaces cannot reach the private tailnet GPU (100.x)** — setting `SZL_GPU_BASE_URL` there would only fail closed. Deliberately NOT set (would be a misleading secret). The order's verify targets (a11oy.net + killinchu) are the box surfaces and ARE sovereign.
+- **HF-hosted Spaces cannot reach the private tailnet GPU (100.x)** — setting `SZL_GPU_BASE_URL` there would only fail closed. Deliberately NOT set (would be a misleading secret). The order's verify targets (a-11-oy.com + killinchu) are the box surfaces and ARE sovereign.
 - Sovereignty is live only while `betterwithage` is awake; when it sleeps, posture honestly drops to offline (founder-only to keep the node awake).

@@ -2,7 +2,7 @@
 # ATTRIBUTION
 # ===========
 # SZL Smoke + Stress Harness — an SZL-native live-estate health + load checker
-# for the a11oy.net API surfaces.
+# for the a-11-oy.com API surfaces.
 #
 # This is an INDEPENDENT, original implementation written by SZL Holdings.
 # It depends ONLY on the Python standard library (urllib + concurrent.futures);
@@ -18,7 +18,7 @@
 # are wall-clock measurements, never invented.
 """SZL Smoke + Stress Harness.
 
-Two modes against the live a11oy.net estate.
+Two modes against the live a-11-oy.com estate.
 
 SMOKE (default)
     GET each live surface once and report a table of:
@@ -70,7 +70,7 @@ from datetime import datetime, timezone
 # --------------------------------------------------------------------------- #
 # Configuration
 # --------------------------------------------------------------------------- #
-BASE_URL = "https://a11oy.net"
+BASE_URL = "https://a-11-oy.com"
 API_PREFIX = "/api/a11oy/v1"
 
 # Full live surface list (per the estate map). Paths under API_PREFIX unless
@@ -630,7 +630,7 @@ def default_report_path() -> str:
 
 
 def parse_args(argv=None):
-    p = argparse.ArgumentParser(description="SZL smoke + stress harness for a11oy.net")
+    p = argparse.ArgumentParser(description="SZL smoke + stress harness for a-11-oy.com")
     p.add_argument("--mode", choices=["smoke", "stress", "both"], default="smoke")
     p.add_argument("--base-url", default=BASE_URL)
     p.add_argument("--stress-target", action="append", default=None,

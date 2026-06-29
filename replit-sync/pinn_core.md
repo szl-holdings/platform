@@ -117,7 +117,7 @@ VERIFIED-SCIENTIFIC-COMPUTE MOAT.
   "_signing": { "status": "UNSIGNED",
                 "signed_by": "szl_lake / khipu-consensus DSSE signer (Ed25519)",
                 "signing_path": "canonicalise -> PAE -> Ed25519 -> envelope.signatures[] -> khipu chain",
-                "verify_path": "POST https://a11oy.net/api/a11oy/v1/verify",
+                "verify_path": "POST https://a-11-oy.com/api/a11oy/v1/verify",
                 "consensus": "Khipu BFT = Conjecture 2 (advisory); SLSA L1 (honest)." }
 }
 ```

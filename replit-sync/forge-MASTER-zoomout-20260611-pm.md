@@ -12,7 +12,7 @@
 
 ## OUTSTANDING — FOUNDER/FORGE-GATED (ranked; never auto-do the signed/sudo ones)
 
-**1. HETZNER REDEPLOY (sudo — #1 visible gap).** a11oy.net now serves scaling/* + allodial/* at 200 but **404s on entangle/*** (one redeploy behind HF). Run `box-scripts/a11oy-rebuild` on 167.233.50.75 → pull current main → serve entangle/* + the Entanglement + Formula Atlas tabs. Re-verify `/api/a11oy/v1/entangle/summary` = 200 on a11oy.net.
+**1. HETZNER REDEPLOY (sudo — #1 visible gap).** a-11-oy.com now serves scaling/* + allodial/* at 200 but **404s on entangle/*** (one redeploy behind HF). Run `box-scripts/a11oy-rebuild` on 167.233.50.75 → pull current main → serve entangle/* + the Entanglement + Formula Atlas tabs. Re-verify `/api/a11oy/v1/entangle/summary` = 200 on a-11-oy.com.
 
 **2. ZENODO DOI for thesis v8 — CONCEPT-ID NEEDS CONFIRMATION FIRST.** The auto-write-back Action + `.zenodo.json` currently stage v8 under concept `20020842`, which the audit found is the **GraphRAG-paper lineage, not the thesis lineage**. BEFORE minting: founder confirms the correct concept DOI for the SZL Thesis series (or mints fresh). Then: enable/confirm Zenodo OAuth for szl-papers, cut a GitHub Release `thesis-v8.0.0` → Zenodo auto-mints → the write-back Action writes the DOI into CITATION.cff + badge. Fix the `ZENODO_CONCEPT_ID` in `.github/workflows/doi-writeback.yml` to the confirmed id.
 
@@ -20,7 +20,7 @@
 
 **4. a11oy UDS bundle RE-PUBLISH (env-gated — Forge can do).** Still STALE (built against old organ image). Re-publish via `.github` `uds-canonical-bundles-publish.yml` (bundle=a11oy), re-verify new digest, update MESH_READY digest line. cosign re-sign sub-step = founder-gated → flag.
 
-**5. HETZNER-CURRENCY CI GUARD (Forge can do — prevents recurrence).** Add a smoke check comparing a11oy.net's endpoint set vs HF (assert scaling/allodial/entangle/summary all 200 on BOTH); honest WARN if Hetzner lags (redeploy is sudo-gated). This would have caught #1 automatically.
+**5. HETZNER-CURRENCY CI GUARD (Forge can do — prevents recurrence).** Add a smoke check comparing a-11-oy.com's endpoint set vs HF (assert scaling/allodial/entangle/summary all 200 on BOTH); honest WARN if Hetzner lags (redeploy is sudo-gated). This would have caught #1 automatically.
 
 **6. SURFACE THE 2 MERGED LEAN THEOREMS downstream (Forge can do, carefully).** Allodial #229 + Entanglement #230 should appear in the thesis "experimental theorems" section + the app honest-tab — but DO NOT inject them into the auto-generated VERIFIED_THEOREMS.md (that would weaken the honesty gate; the audit correctly left it alone). Add an honest "EXPERIMENTAL machine-checked (not locked-8)" index instead.
 

@@ -3,7 +3,7 @@
 # Forge report — energy-harvest signal taken full-vertical (2026-06-13)
 
 **Order:** take the wasted-energy harvest grid signal full-vertical — live
-frontend+backend on a11oy.net, mirrored to HuggingFace, GitHub-aligned, and
+frontend+backend on a-11-oy.com, mirrored to HuggingFace, GitHub-aligned, and
 UDS/Zarf/Pepr/mesh-deployable. Doctrine v11 absolute.
 
 ## Status: DONE (live where it should be; UDS package image-publish gated by design)
@@ -12,13 +12,13 @@ UDS/Zarf/Pepr/mesh-deployable. Doctrine v11 absolute.
 - **Backend** — standalone FastAPI on the box at `/opt/szl/energy-harvest`,
   systemd `szl-energy-harvest` `:8082`, behind nginx
   `^~ /api/a11oy/v1/harvest/` + `^~ /energy/`.
-  - `https://a11oy.net/api/a11oy/v1/harvest/posture` → **200 live**
-  - `https://a11oy.net/api/a11oy/v1/harvest/metrics` → **200** (honest Prometheus:
+  - `https://a-11-oy.com/api/a11oy/v1/harvest/posture` → **200 live**
+  - `https://a-11-oy.com/api/a11oy/v1/harvest/metrics` → **200** (honest Prometheus:
     `feeds_live 3`, `grid_price_eur_mwh -1.11`, `renewable_share_pct`,
     `uk_gco2_per_kwh`, `sovereign 0`, `joules_sample 1`)
-  - `https://a11oy.net/energy/` → **200** HTML tab
+  - `https://a-11-oy.com/energy/` → **200** HTML tab
 - **Console tab** — marker `energy-harvest-tab-patch` present (count 2) on BOTH
-  `a11oy.net/console` and `szlholdings-a11oy.hf.space/console`.
+  `a-11-oy.com/console` and `szlholdings-a11oy.hf.space/console`.
 
 ### GitHub alignment
 - `szl-holdings/platform` → `apps/energy-harvest/{engine.py,server.py,index.html}`

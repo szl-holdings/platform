@@ -23,7 +23,7 @@
 ### Verify — `/api/a11oy/v1/code/health`
 - **HF Space** (`szlholdings-a11oy.hf.space`):
   `mode=generative | inference=hf-router | token_source=HF_TOKEN` ✓ LIVE
-- **a11oy.net** (Hetzner box `167.233.50.75` — a deployment SEPARATE from the
+- **a-11-oy.com** (Hetzner box `167.233.50.75` — a deployment SEPARATE from the
   HF Space): was still `mode=deterministic, token_source=None` because the box
   container had no `HF_TOKEN` in its env. Fixed durably:
   - Added `HF_TOKEN` to `/etc/szl-contracting.env` (the env-file that
@@ -34,14 +34,14 @@
 
 ## Notes
 - No token values are included in this report or in any logs.
-- Both the public HF Space and the public box site (a11oy.net) now run Chaski
+- Both the public HF Space and the public box site (a-11-oy.com) now run Chaski
   in generative mode via the HF inference router.
 
 ---
 
-## Addendum (23:50Z) — Box catch-up: entangle + neuroplasticity now live on a11oy.net ✅
+## Addendum (23:50Z) — Box catch-up: entangle + neuroplasticity now live on a-11-oy.com ✅
 
-**Instruction:** `forge-MASTER-zoomout-20260611-pm.md` gap #1 — "a11oy.net behind HF (entangle/neuro 404)."
+**Instruction:** `forge-MASTER-zoomout-20260611-pm.md` gap #1 — "a-11-oy.com behind HF (entangle/neuro 404)."
 **Operator:** Forge (Replit task agent)
 
 ### Finding (ground-truth, verified live)
@@ -59,7 +59,7 @@ are COPY'd in the Dockerfile and `register()`'d in `serve.py` on main before reb
 The script's own front-door VERIFY passed (console.html md5 matches main).
 
 ### Verify — three-surface parity (probed from OUTSIDE the box)
-| path | a11oy.net (box) | HF Space |
+| path | a-11-oy.com (box) | HF Space |
 |---|---|---|
 | entangle/summary | **200** (was 404) | 200 |
 | neuro/summary | **200** (was 404) | 200 |
@@ -67,7 +67,7 @@ The script's own front-door VERIFY passed (console.html md5 matches main).
 | code/summary | 404 | 404 (parity — the code engine exposes no `/summary` sub-route; not a gap) |
 | /healthz | `commit=c7c0ba17 doctrine=v11 lock=749/14/163` | identical |
 
-All three surfaces (box localhost, HF, public a11oy.net) now serve byte-identical
+All three surfaces (box localhost, HF, public a-11-oy.com) now serve byte-identical
 `commit c7c0ba17`. **Gap #1 CLOSED & verified.**
 
 ### Honesty / invariants

@@ -26,7 +26,7 @@ FOUNDER, the one action that flips chaski live: open the replit-chaski Repl →
 The box will detect the 200 and adopt it automatically.
 
 ## VERIFIED LIVE (raw)
-- `https://a11oy.net/gpu/healthz` → `{"ok":true}`; authed `/gpu/v1/models` → 127 models (auto + sovereign + labeled hosted).
+- `https://a-11-oy.com/gpu/healthz` → `{"ok":true}`; authed `/gpu/v1/models` → 127 models (auto + sovereign + labeled hosted).
 - Real sovereign inference via gateway (`model:auto`) → served_by `qwen2.5-coder:7b` (betterwithage RTX), content "SOVEREIGN OK".
 - `/gpu/status` node truth: betterwithage **awake**, box-cpu **awake**, chaski-rig **asleep**, laptop-rtx5050 **unconfigured**, nvidia-nim **awake (non-sovereign)**.
 - Deployed `gateway.mjs` md5 == repo md5 (byte-identical).

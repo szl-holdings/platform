@@ -21,14 +21,14 @@ Both flagship Dockerfiles use **explicit per-file COPY (no `COPY . .`)**. Each P
 - killinchu: added `COPY killinchu_elite_wiring.py` (#115's only new app module; `register()` is called in serve.py).
 
 ## Surfaces flipped 404 → 200 (verified on container AND public)
-**a11oy.net** (container :7861 + https://a11oy.net):
+**a-11-oy.com** (container :7861 + https://a-11-oy.com):
 - `/api/a11oy/v1/anatomy/loop` (#341) — 200
 - `/api/a11oy/v1/research/prereg` (POST) + `/api/a11oy/v1/research/trial` (POST) + `/api/a11oy/v1/research/verify/{id}` (GET) (#344) — 200
 - `/api/a11oy/v1/formula/sovereign` + `/formula/allodial` + `/formula/entanglement` (#342 + formulas pkg) — 200  ← THE real fix
 - `/v1/ayni` + `/v1/tinkuy` (200), `/v1/replay` (422=needs params), `/ayni` tab (200)
 - energy/budget, heart/pulse, evidence/research — 200
 
-**killinchu.a11oy.net** (container :7862 + https://killinchu.a11oy.net):
+**killinchu.a-11-oy.com** (container :7862 + https://killinchu.a-11-oy.com):
 - `/elite` — 200
 - `/api/killinchu/v1/realestate` + `/realestate/distress-radar` + `/market-pulse` + `/ownership-graph` — 200
 - `/api/killinchu/v1/elite/wiring` + `/elite/wiring/health` (#115, 48 views audited) — 200

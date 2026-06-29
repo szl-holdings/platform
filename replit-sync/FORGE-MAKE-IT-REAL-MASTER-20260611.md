@@ -48,7 +48,7 @@ For EVERY formula in the v5 thesis (`szl-papers/papers/SZL_THESIS_v5.md`) and th
 1. **`SZL_LOCAL_LLM_URL`** brain secret (Qwen2.5-Coder-32B-AWQ) → flips Chaski from HONEST STUB → live `response`. Until then keep the labeled stub.
 2. **Zenodo DOI token** → mint v5 thesis DOI, update `szl-papers/CITATION.cff` (currently generic).
 3. **GHCR push token** → killinchu uds-v0.2.0 image (only RED CI on killinchu).
-4. **Hetzner root redeploy** on 167.233.50.75 (a11oy.net autodeploy script).
+4. **Hetzner root redeploy** on 167.233.50.75 (a-11-oy.com autodeploy script).
 5. **cosign / Rekor** signing for uds-v0.3.0 (HARD LIMIT — approval, never auto).
 6. **Lean lake build** to regenerate `VERIFIED_THEOREMS.md` (no self-merge).
 

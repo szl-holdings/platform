@@ -1,6 +1,6 @@
 # SZL Forge — ORDER: finish the MEASURED energy proof (HF mirror sync + DSSE sign)
 
-**Executor is LIVE** (forge-agent on sovereign GPU rtx-betterwithage). Box a11oy.net is MEASURED.
+**Executor is LIVE** (forge-agent on sovereign GPU rtx-betterwithage). Box a-11-oy.com is MEASURED.
 Two finishing items — both SAFE, additive, no keystone, no new secrets beyond the existing FA-001.
 
 ## 1. Sync the MEASURED artifact to the HF a11oy Space mirror
@@ -17,7 +17,7 @@ git commit -s -m "feat(pinn): publish MEASURED on-metal certificate (sovereign G
 git push
 gh workflow run hf-sync.yml -R szl-holdings/a11oy   # re-mirror to the Space
 # verify both flip MEASURED:
-for h in https://a11oy.net https://szlholdings-a11oy.hf.space; do
+for h in https://a-11-oy.com https://szlholdings-a11oy.hf.space; do
   echo "$h -> $(curl -s $h/api/a11oy/v1/pinn/certificate | python3 -c 'import sys,json;print(json.load(sys.stdin)["certificate"]["measured"]["label"])')"
 done
 ```
@@ -30,7 +30,7 @@ already in the box secret store, so `/api/a11oy/v1/verify` returns a real signed
 # invoke the existing signer the same way it signs the killinchu/a11oy image attestations:
 python3 services/verticals/szl_pinn/_vendor/.. # (use the repo's szl_lake/khipu DSSE signer entrypoint)
 # then confirm:
-curl -s https://a11oy.net/api/a11oy/v1/verify | python3 -m json.tool | head
+curl -s https://a-11-oy.com/api/a11oy/v1/verify | python3 -m json.tool | head
 ```
 
 ## HARD RULES (Doctrine v11)

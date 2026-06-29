@@ -114,7 +114,7 @@ All lanes speak two shared shapes — identical to the receipt path `szl_mechani
 
 ---
 
-### Dev3 — ELEVATE a11oy.net (governance-over-anomalies)
+### Dev3 — ELEVATE a-11-oy.com (governance-over-anomalies)
 **Repo:** `szl-holdings/a11oy` (Apache-2.0).
 **Paths / tabs:**
 - `pages/console.html` — add a **"Domain Awareness"** tab (the COP/oversight surface): live fused-track stream from killinchu, each row showing Λ-axis value + confidence band + receipt link; mobile-elegant (bottom-sheet/drawer + FAB, 390/820 verified).

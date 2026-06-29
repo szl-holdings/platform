@@ -98,7 +98,7 @@ canonicalise statement
   -> append receipt to the khipu append-only chain     (packages/formula-os khipu.py)
 ```
 
-Verify yourself: `POST https://a11oy.net/api/a11oy/v1/verify`. An **unsigned**
+Verify yourself: `POST https://a-11-oy.com/api/a11oy/v1/verify`. An **unsigned**
 statement is **STRUCTURAL-ONLY** there — never a false "verified/green".
 
 ## Endpoints

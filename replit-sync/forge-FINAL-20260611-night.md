@@ -7,7 +7,7 @@
 - **3 Lean theorems MERGED to lutar-lean main**, lake CI green (461e3c47), no sorry, no new axioms, EXPERIMENTAL_SCOPES → locked stays EXACTLY 8: Allodial #229 (783a38d0), Entanglement #230 (7b344e11), Neuroplasticity #231 (9a0dcc77).
 - **Auto-DOI write-back Action** on szl-papers/.github (resolves Zenodo DOI on release → CITATION.cff + badge).
 - **Doctrine CI GREEN both apps** (a11oy 4058c74b, killinchu 07fe10cb) — Inv2 line-grep false-positives reworded to carry honest Conjecture-1 exemptions (never silenced/allowlisted).
-- **Hetzner a11oy.net is CURRENT** — now serves scaling/allodial/entangle/neuro all 200 (the earlier staleness gap is CLOSED; a brief 502 blip self-recovered).
+- **Hetzner a-11-oy.com is CURRENT** — now serves scaling/allodial/entangle/neuro all 200 (the earlier staleness gap is CLOSED; a brief 502 blip self-recovered).
 - Pillar upgrades (additive, cited): hierarchical metabolic scaling (Wang-Zhao 2025), allodial SLSA v1.1 VSA + Sello standards route, agentic OWASP Top-10 + Agent Governance Toolkit framing.
 
 ## OUTSTANDING — GENUINELY GATED (only 2 real items + carryovers)

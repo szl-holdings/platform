@@ -1,10 +1,10 @@
 # R-FLAGSHIP-FRONTIER — unify a11oy + killinchu into ONE governed sovereign mesh (recommendation)
 
-**Founder asked: take all of a11oy.net and killinchu, push us to a new frontier, give it to Forge, and
+**Founder asked: take all of a-11-oy.com and killinchu, push us to a new frontier, give it to Forge, and
 what do I recommend.** Here is the honest recommendation.
 
 ## WHAT THE TWO FLAGSHIPS ACTUALLY SHARE (the lever)
-- **a11oy.net** (orchestrator): LIVE — formulas rail (200), **harvest/metrics (200, wasted_energy=1,
+- **a-11-oy.com** (orchestrator): LIVE — formulas rail (200), **harvest/metrics (200, wasted_energy=1,
   price −1.11)**, qbio/coherence (200), 13-axis Λ trust, 3-of-4 BFT, DSSE receipts, sovereign GPU.
 - **killinchu** (counter-UAS, /elite, 16 views): sensor-FUSION (covariance-intersection, Mahalanobis
   gate, χ² spoof detection), ROE, **13-axis Λ**, **3-of-4 BFT**, **DSSE receipt per interdiction**,

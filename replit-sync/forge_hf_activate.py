@@ -38,7 +38,7 @@ except ImportError:
 
 A11OY_SPACE   = "SZLHOLDINGS/a11oy"
 ANATOMY_SPACE = "SZLHOLDINGS/anatomy"
-HEALTH_URL    = "https://a11oy.net/api/a11oy/v1/code/health"
+HEALTH_URL    = "https://a-11-oy.com/api/a11oy/v1/code/health"
 SECRET_NAME   = "HF_TOKEN"  # Chaski also accepts HUGGING_FACE_HUB_TOKEN / HF_ROUTER_TOKEN / etc.
 
 

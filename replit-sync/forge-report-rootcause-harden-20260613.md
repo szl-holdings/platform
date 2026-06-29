@@ -19,7 +19,7 @@ the live estate:
 
 ## The 3 residual flags (honest classification)
 1. harvest/metrics "slow 2.44s" = NOT a service bug. Direct on box
-   127.0.0.1:8082/metrics = 0.003s (3ms); public a11oy.net steady 0.37s; the >2s
+   127.0.0.1:8082/metrics = 0.003s (3ms); public a-11-oy.com steady 0.37s; the >2s
    reading is sandbox->box TLS/network jitter. Energy-harvest service is healthy.
 2. anatomy/loop 2.98s = serve.py (LOCKED). Already improved 21.4s -> 3.0s as a
    side-effect of the compute-pool concurrency + 3s harvest timeout fix. Residual

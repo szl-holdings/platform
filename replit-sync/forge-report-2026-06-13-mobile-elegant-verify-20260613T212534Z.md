@@ -6,7 +6,7 @@
 **Mode:** dispatch=none. The box auto-poll only ACK'd the order (`a624f7eb` "forge-auto: done 506aee3d"); real execution + live verification done by the Replit agent.
 
 ## LIVE & VERIFIED (all probed from outside the box)
-- **a11oy** — container Up ~2min at main HEAD `ee9fa6e` (mobile-elegant `/console` + front door). `a11oy.net/cathedral` = 200, **locked-proven = 8**, single gold sun. `/healthz` 200, lock 749/14/163. DONE.
+- **a11oy** — container Up ~2min at main HEAD `ee9fa6e` (mobile-elegant `/console` + front door). `a-11-oy.com/cathedral` = 200, **locked-proven = 8**, single gold sun. `/healthz` 200, lock 749/14/163. DONE.
 - **HF cathedral** static space — 200, **locked-proven = 8**, `app.js` 34195B, verify widget present (no longer stale at locked=5). DONE.
 - **HF static spaces** energy / khipu-constellation / llm-router-live / anatomy — all 200 + verify widget present. DONE.
 - **hatun-mcp** — HF Docker space rebuilt to `b13a084` (== GitHub main `61454ce`; source parity reconfirmed via overlay = 0 diff; HF README `sdk:docker` front-matter preserved; founder-local `push_to_hf.py` correctly excluded). Content negotiation now **LIVE**:

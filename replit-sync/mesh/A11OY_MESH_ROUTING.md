@@ -1,6 +1,6 @@
 # A11OY_MESH_ROUTING — point a11oy at the Sovereign GPU Mesh
 
-**Status: DESIGN (PLANNING).** Describes how the always-on public host `a11oy.net`
+**Status: DESIGN (PLANNING).** Describes how the always-on public host `a-11-oy.com`
 (`167.233.50.75`, CPU-only) routes model traffic to the mesh **coordinator over Tailscale**,
 with HF-router failover. No servers are launched by this document.
 

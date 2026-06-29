@@ -104,6 +104,6 @@ run the kernel → [lutar-lean](https://github.com/szl-holdings/lutar-lean).
 
 ---
 
-Canonical source mirror: `szl-holdings/anatomy` (GitHub) ↔ `SZLHOLDINGS/anatomy` (HF Space) · **[a11oy.net](https://a11oy.net)**
+Canonical source mirror: `szl-holdings/anatomy` (GitHub) ↔ `SZLHOLDINGS/anatomy` (HF Space) · **[a-11-oy.com](https://a-11-oy.com)**
 
 <sub>v4 dissection tools (evolves v3) · Doctrine v11 LOCKED · 749/14/163 · kernel `c7c0ba17` · 8 locked-proven + experimental CI-green tier · Λ = Conjecture 1 · Khipu Conjecture 2 open · SLSA L1 honest (static viz) · Apache-2.0</sub>

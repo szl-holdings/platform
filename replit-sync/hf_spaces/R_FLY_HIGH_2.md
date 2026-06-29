@@ -1,6 +1,6 @@
 # R-FLY-HIGH-2 (TOP) — unify cathedrals · genius hatun · agentic everything · GitHub-aligned · go, full admin
 
-Founder order: "Two cathedrals in Hugging Face + hatun-mcp all need to be genius. Wire it all up, GitHub-aligned. a11oy.net + killinchu have it all. Make every space agentic — search the leaders, take it, make it our own. Pass to Forge/Replit to build + make operational + real. Innovate + evolve the whole eco."
+Founder order: "Two cathedrals in Hugging Face + hatun-mcp all need to be genius. Wire it all up, GitHub-aligned. a-11-oy.com + killinchu have it all. Make every space agentic — search the leaders, take it, make it our own. Pass to Forge/Replit to build + make operational + real. Innovate + evolve the whole eco."
 
 We did the build, merged to main, and rebuilt + redeployed every static space in the sandbox (all screenshot-verified, honest, sovereign). Production push is YOURS. Five work-streams below.
 
@@ -9,7 +9,7 @@ The cathedral had diverged into 3+ builds. Now unified to ONE canonical genius T
 - **a11oy `main`** now serves `/cathedral` + `/cathedral/app.js` from `cathedral_genius.html` + `static/cathedral_app.js` (sha256-identical to the HF build), vendored Three.js reused at `/hero/vendor3d/`. 0 runtime CDN. The `/` front door is untouched.
 - **FORGE:** after #353 (already merged): rebuild the **a11oy** Docker image from `main` and the **killinchu** image from `main` (byte-identical mirror — respect the shared-source drift allow-list; cathedral.html/serve.py are intentionally per-repo divergent, do NOT force-converge them).
 - **FORGE:** re-push the canonical genius build to the **HF `SZLHOLDINGS/cathedral`** static space. The live HF cathedral space is STALE at locked=5 — the canonical build says locked-proven = **8**. Source is in `replit-sync/hf_spaces/cathedral_live_src/` (index.html + app.js + vendor/{three.module.min.js,OrbitControls.js,THREE_LICENSE.txt} + szl_verify_widget.js). FIXED this pass: the "Operator" capability was a second orange sun (violated single-sun doctrine) → now a violet capability orb; verify launcher repositioned to bottom-center (was overlapping the legend). Push the folder VERBATIM — keep all vendor/ files.
-- After: GET https://szlholdings-cathedral.static.hf.space/ and https://a11oy.net/cathedral → confirm 200, ONE gold a11oy sun, locked-proven = 8, app.js ~36KB.
+- After: GET https://szlholdings-cathedral.static.hf.space/ and https://a-11-oy.com/cathedral → confirm 200, ONE gold a11oy sun, locked-proven = 8, app.js ~36KB.
 
 ## 2. GENIUS HATUN-MCP — MERGED hatun-mcp PR #32
 hatun-mcp had no human face (JSON only). Now it has a genius agentic console with the MCP protocol intact.
@@ -23,7 +23,7 @@ hatun-mcp had no human face (JSON only). Now it has a genius agentic console wit
 - After: `curl -H 'Accept: text/html' https://szlholdings-hatun-mcp.hf.space/` → HTML console; `curl -H 'Accept: application/json' .../` → original JSON; `/healthz` + `/mcp` initialize still 200.
 
 ## 3. EVERY STATIC SPACE IS NOW AGENTIC (verify-fabric widget + live streams)
-All 5 static spaces got the LIVE-validated "ask the fabric" verify widget (POSTs to https://a11oy.net/api/a11oy/v1/verify, renders the REAL verdict, advisory-amber never green, honest 429/offline fallback) + live compute-pool polling. Sources in `replit-sync/hf_spaces/`:
+All 5 static spaces got the LIVE-validated "ask the fabric" verify widget (POSTs to https://a-11-oy.com/api/a11oy/v1/verify, renders the REAL verdict, advisory-amber never green, honest 429/offline fallback) + live compute-pool polling. Sources in `replit-sync/hf_spaces/`:
 - `cathedral_live_src/` → SZLHOLDINGS/cathedral (see §1)
 - `hf_energy_space/` → SZLHOLDINGS/energy (also de-CDN'd: three.js now vendored, was unpkg)
 - `hf_khipu_space/` → SZLHOLDINGS/khipu-constellation (**de-CDN'd this pass: 3d-force-graph now vendored UMD under vendor/, was esm.sh — now 0 runtime CDN; render-verified**)

@@ -1,7 +1,7 @@
 // ---- Live a11oy fetch with HONEST degrade to labeled SNAPSHOT ----
 // Every panel reads the live a11oy API. If a fetch fails, the panel is
 // clearly labeled SNAPSHOT with a last-known value — never blank, never fabricated.
-const BASE = 'https://a11oy.net/api/a11oy/v1';
+const BASE = 'https://a-11-oy.com/api/a11oy/v1';
 const TIMEOUT = 8000;
 const REFRESH_MS = 15000;
 

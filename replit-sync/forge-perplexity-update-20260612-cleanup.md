@@ -13,7 +13,7 @@ locked-proven = 8 {F1,F4,F7,F11,F12,F18,F19,F22} @ kernel c7c0ba17 (749/14/163);
 - **uds-bundles #16** — same; `Apache-2.0` detected. Closed completed.
 
 ## Verified live / no action (founder-priority #347 + master directive #338)
-Chaski ONE-OF-ONE LIVE; a11oy.net doctrine v11 / c7c0ba17; anatomy live (static host 302->200, a11oy.net/anatomy 200); killinchu 200; org-wide open-PR count = 0 (scaling-proof + Dependabot PRs all merged). Per-item status posted on #347.
+Chaski ONE-OF-ONE LIVE; a-11-oy.com doctrine v11 / c7c0ba17; anatomy live (static host 302->200, a-11-oy.com/anatomy 200); killinchu 200; org-wide open-PR count = 0 (scaling-proof + Dependabot PRs all merged). Per-item status posted on #347.
 
 ## ROUTED TO YOU / FOUNDER (gated above this agent — exact ask per item)
 1. **szl-doctrine #3 — `SECRET_HEALTH_TOKEN` (FOUNDER).** Missing by design; needs a *least-privilege* fine-grained PAT (Secrets:read, Metadata:read, Administration:read) set as org secret. Agent will not mint/paste tokens, and must not substitute the full owner token (least-privilege). -> Founder: create PAT + org secret, re-run secret-health.

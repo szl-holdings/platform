@@ -18,7 +18,7 @@
 - **Remaining (RECOMMENDED):** full per-receipt MEASURED-live joules is gated on the founder wiring a live power exporter (nvidia-smi power.draw / DCGM) on the sovereign GPU. Until then route is honestly OFFLINE-live + MEASURED-snapshot.
 
 ### P1.2 — pinn/certificates history → ✅ DONE on box; 🟡 HF pending its own rebuild
-- `GET https://a11oy.net/api/a11oy/v1/pinn/certificates` → **200**, real signed content-addressed history: `count:1`, `cert_sha256:586cc6cd…`, `label:MEASURED`, `signature_types:[ed25519_onmetal,cosign_anchored]`, `energy_joules_derived:5112.38`.
+- `GET https://a-11-oy.com/api/a11oy/v1/pinn/certificates` → **200**, real signed content-addressed history: `count:1`, `cert_sha256:586cc6cd…`, `label:MEASURED`, `signature_types:[ed25519_onmetal,cosign_anchored]`, `energy_joules_derived:5112.38`.
 - Route is on `main` (`szl_pinn_bounds.py` `_h_certificates`/register) AND byte-identical on the HF Space (35615 bytes); serve.py registers it; Dockerfile COPYs it. HF still 404s **only** because the Space stage is `RUNNING_BUILDING` (serving a stale image, lastModified 10:24:25Z). No code action remains — it serves on build completion.
 
 ### P1.3 — 2D-heat + Burgers PINN solves → 🟦 RECOMMENDED

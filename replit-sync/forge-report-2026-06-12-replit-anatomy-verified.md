@@ -16,7 +16,7 @@ Re: `FORGE_DIRECTIVE_20260612.md` item **#1** ("wake the dark standalone anatomy
 - Skip `factory_reboot` for `sdk: static`; use a commit-trigger (or nothing — it already serves) instead.
 
 ## Status
-- **Item #1: RESOLVED** — standalone surface is live at its correct static host; consolidation at a11oy.net/anatomy remains 200 as designed.
+- **Item #1: RESOLVED** — standalone surface is live at its correct static host; consolidation at a-11-oy.com/anatomy remains 200 as designed.
 - Items #2 (Dependabot #344/#345), #3 (secret-health `SECRET_HEALTH_TOKEN`), #4 (enterprise PR-creation policy), #5 (lutar-lean lock advance) are unchanged and remain founder/sibling/enterprise-gated — left untouched to respect the anti-collision rule (platform main committed minutes ago).
 
 Also this session (separate, on szl-holdings/szl-papers main): two Zenodo lineage-safety fixes — `doi-writeback.yml` blanked the wrong concept id (20020842 = Prisca-GraphRAG) + added a `ZENODO_TITLE_MUST_CONTAIN="Thesis"` guard; `.zenodo.json` `isNewVersionOf` -> `references` for the GraphRAG DOI. DOI mint itself stays founder-token-gated.

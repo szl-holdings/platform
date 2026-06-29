@@ -172,7 +172,7 @@ Ollama startup log to have TWO usable compute devices. Wire BOTH; label honestly
 ### SECONDARY APP-HOST on the laptop (founder request 2026-06-14)
 - In addition to inference, run a11oy + killinchu LOCALLY on the laptop as a SECONDARY host
   (docker compose or `serve.py` per app), reachable over the tailnet.
-- KEEP HETZNER (`a11oy.net`, 167.233.50.75) AS PRIMARY PUBLIC HOST for the demo — the laptop
+- KEEP HETZNER (`a-11-oy.com`, 167.233.50.75) AS PRIMARY PUBLIC HOST for the demo — the laptop
   secondary is for sovereignty/failover proof, NOT the primary public endpoint (laptop is not
   always-on and the demo must not depend on it). HF Spaces = tertiary failover.
 - Use Task Scheduler (per founder's working notes) to own `ollama serve` directly so it survives

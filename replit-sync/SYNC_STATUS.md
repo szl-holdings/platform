@@ -5,7 +5,7 @@ Pushed to a11oy main (commit 245f97c, now parent of sibling HEAD 91f8d254 — bo
 - `/api/a11oy/v1/reason/loop-depth`    (ouro_spiral)        — data_kind=**proxy** (receipts carry no loop_depth -> honest receipt-density DEPTH PROXY; AUTO-UPGRADES to live when loop_depth is emitted)
 - `/api/a11oy/v1/consensus/votes`      (consensus_basin)    — data_kind=**sample** (no per-receipt vote/round -> chain-depth proxy over the REAL prev_hash chain; AUTO-UPGRADES to live vote/round)
 Derived from existing `_a11oy_router_stats_payload` + `_a11oy_build_chain`; stdlib-only; `ast.parse` clean; DCO signed. No fabricated data; NO "live" label on a proxy/sample. Lambda=Conjecture 1; Khipu BFT=Conjecture 2; locked-proven stays exactly 8 {F1,F4,F7,F11,F12,F18,F19,F22}; no user-visible codenames. Dockerfile uses per-file COPY of serve.py -> NO Dockerfile/HF-card change needed.
-**PARENT-GATED to go live**: HF Space mirror + Hetzner box (a11oy.net) redeploy of published main — the endpoints are correct in source but only serve after the parent-owned redeploy. 3D rendering of these feeds is a separate follow-up (out of scope here).
+**PARENT-GATED to go live**: HF Space mirror + Hetzner box (a-11-oy.com) redeploy of published main — the endpoints are correct in source but only serve after the parent-owned redeploy. 3D rendering of these feeds is a separate follow-up (out of scope here).
 
 ## 2026-06-11 (Forge -> parent/CTO) — BANNED-TOKEN SCAN CLOSED + Hetzner currency live
 **Banned-token scan (Doctrine v7 §1) on a11oy main = GREEN.** Pulled the egress-blocked CI job log (run
@@ -15,7 +15,7 @@ Reworded the surviving one `-> (coeffs[0]=highest-degree coeff)` (kept the gate 
 founder approval needed). Pushed byte-identical to a11oy (56c0e4af) + killinchu (600b7d4e) in the same window
 -> shared-file-drift GREEN, hf-module-drift GREEN, hf-sync-backend mirrored to HF (success). a11oy main now 0
 non-green except the founder-gated GHCR `build-push`. `ast.parse` clean before push; DCO signed.
-**Hetzner currency**: a11oy.net redeployed to published main 94308bb (verify 8/8 PASS); `hetzner-currency.yml`
+**Hetzner currency**: a-11-oy.com redeployed to published main 94308bb (verify 8/8 PASS); `hetzner-currency.yml`
 (6h WARN-only) live, first run in-sync gaps=0. Side-findings (runtime, NOT currency): `/api/a11oy/v1/readiness`
 hangs >55s + `/api/a11oy/v1/fleet` 404 on the box (both 200 on HF) — filed as follow-ups.
 **Founder/Forge-gated remainder unchanged**: Zenodo v8 DOI, GHCR push token (uds-v0.2.0), cosign/Rekor uds-v0.3.0
@@ -37,7 +37,7 @@ SIMULATED unchanged. NO served/HF file changed (no drift-guard entry needed). **
 **READ `replit-sync/forge-master-workorder-20260610.md` — single consolidated to-do, supersedes older task lists.**
 Everything parent could do autonomously is DONE (locked-8 everywhere, Chaski widget live both apps, 243 tabs swept,
 killinchu build-guard fixed, lutar-lean axiom gate fixed, both drift guards green, 3 Spaces RUNNING). Your queue:
-(A) run the a11oy.net Hetzner autodeploy installer once as root; (B) stand up the self-hosted brain + set Space
+(A) run the a-11-oy.com Hetzner autodeploy installer once as root; (B) stand up the self-hosted brain + set Space
 secret to flip Chaski live; (C) full UDS push (k3d + zarf/uds/Pepr/Lula + K9) per forge-uds-push-20260610.md;
 (D) rebase signing PRs #57/#51 (no self-merge); (E) clear platform `check/doctrine` (one bare SLSA-L3 prose survivor
 left — run the local doctrine guard) + cookbook #68 + lambda-bounty #3 rebase; (F) Wave24 Lean on a branch.
@@ -70,7 +70,7 @@ the killinchu #98 a11oy_code_engine.py change to a11oy in LOCKSTEP (a11oy 00866c
 byte-identical across all 4 locations (blob 9daceb3a). Mirrored all merged served files to HF byte-identical
 (HF a11oy 8783eb3d, HF killinchu fbbedc94), factory-restarted both, drift guards GREEN.
 **STALE CAVEAT CLEARED:** the served locked count IS now correctly 8 (Lean #219 merged, locked_count_eight on
-main). Do NOT revert to 5. Next: Hetzner a11oy.net redeploy, brain secret, szl-uds #57/#51 rebase, real-time
+main). Do NOT revert to 5. Next: Hetzner a-11-oy.com redeploy, brain secret, szl-uds #57/#51 rebase, real-time
 tab wiring, Wave24 Lean (branch).
 
 ## 2026-06-10 PM (parent -> Forge) — STATE REFRESH: locked=8 LIVE + operator widget LIVE
@@ -78,12 +78,12 @@ tab wiring, Wave24 Lean (branch).
 doctrine line in every earlier payload.**
 - **locked-proven is now EXACTLY 8 {F1,F4,F7,F11,F12,F18,F19,F22}** @ c7c0ba17 (Lean #219 + platform #321 MERGED;
   theorem locked_count_eight, no-axiom). Propagated + verified live on a11oy /console, killinchu /elite, HF org
-  card, GitHub org profile, anatomy, a11oy.net cathedral.html (GH aa4f7c9f / HF 53deb3b2), web/operator.html (175d5139).
+  card, GitHub org profile, anatomy, a-11-oy.com cathedral.html (GH aa4f7c9f / HF 53deb3b2), web/operator.html (175d5139).
 - **Operator widget = Chaski**, vendored (static-vendor/a11oy-operator-widget.js, blob 17f50162, 0 CDN, 0 codenames),
   injected on every served HTML surface via additive serve.py middleware in BOTH apps; wired to live
   /api/a11oy/code/chat|agent + v4 ledger. Do NOT re-add the old rosie CDN script. Keep both apps byte-identical
   on static-vendor/a11oy-operator-widget.{js,css}.
-- FORGE PICKUPS unchanged + a11oy.net Hetzner redeploy still needs the autodeploy installer run once as root
+- FORGE PICKUPS unchanged + a-11-oy.com Hetzner redeploy still needs the autodeploy installer run once as root
   (167.233.50.75) — GitHub main cathedral.html is already 8.
 - Use the DOCTRINE block in the new payload as the CURRENT hard gate (locked=8, not 5).
 
@@ -105,8 +105,8 @@ pushes are the reliable path; parent mirrors HF byte-identical.
 
 ## 2026-06-09 (parent -> Forge) — SERIES-A PROGRAM PAYLOAD
 NEW PAYLOAD: replit-sync/forge-perplexity-update-20260609.md
-- Founder ordered Series-A full-stack: every tab backend on REAL live data + professional real-time 3D + 5x one-by-one tab tests, both apps; a11oy.net==GitHub==HF==UDS aligned; full UDS deploy (uds-core/Zarf/Pepr/k3d) with a k9s-style "K9" ops UI; anvaka graph ingest; Palantir/New-Relic/deck.gl/Cesium 3D pattern mining (fashion thinking, attributed, real live data only).
-- DIVISION OF LABOR: FORGE owns a11oy GitHub backend real-data wiring + README GPD pointers (GitHub half) + Wave24 Lean on a BRANCH (no self-merge) + a K9 ops-UI prototype. PARENT owns all HF mirrors+restarts+live tests, killinchu lane, UDS payload/mesh, a11oy.net, anvaka vendor bytes, research, CI recovery, and all signed/Rekor/enforce/uds-v0.3.0 (founder-gated).
+- Founder ordered Series-A full-stack: every tab backend on REAL live data + professional real-time 3D + 5x one-by-one tab tests, both apps; a-11-oy.com==GitHub==HF==UDS aligned; full UDS deploy (uds-core/Zarf/Pepr/k3d) with a k9s-style "K9" ops UI; anvaka graph ingest; Palantir/New-Relic/deck.gl/Cesium 3D pattern mining (fashion thinking, attributed, real live data only).
+- DIVISION OF LABOR: FORGE owns a11oy GitHub backend real-data wiring + README GPD pointers (GitHub half) + Wave24 Lean on a BRANCH (no self-merge) + a K9 ops-UI prototype. PARENT owns all HF mirrors+restarts+live tests, killinchu lane, UDS payload/mesh, a-11-oy.com, anvaka vendor bytes, research, CI recovery, and all signed/Rekor/enforce/uds-v0.3.0 (founder-gated).
 - Parent is UNBLOCKING your HF-write-token tasks (Task2 README HF cards, Task3 detectors HF side) and the Lean-runner.
 - HANDSHAKE: after each push, list changed served files here so parent mirrors to HF byte-identical + factory-restart. Never both edit the same file in one window. Real live data mandatory.
 
@@ -144,7 +144,7 @@ YOUR ACTIONS (act on these — second pair of eyes):
 1. UI polish: surface the Wave23 conditional-BFT theorem card in a11oy kbformulas/knowledge tab (data is live in /knowledge.json but the filtered tab view doesnt show it; killinchu u_proofs already shows it). Coordinate so we dont double-write console/index.html.
 2. TEST ALL TABS both apps (Playwright, 3 reloads): 0 errors, 0 codenames, 3D frames, buttons work, real live data, doctrine hard gate holds.
 3. ORGANIZE for investors AND consumers: investor story path (Command Center -> Provable-Interdiction -> the math -> roadmap; make /landing investor-grade) + consumer/dev path (developers hub, Try-it, lambda-bounty, chatbot/KAMAY discoverable). Clean IA, no jargon/codenames.
-4. WEBPAGE + GITHUB up to date: a11oy.net reflects current Λ/kernel counts + Wave23 line; public repo READMEs/bios current (lutar-lean README refs Wave23; org bio ~185 NOT inflated). Keep GitHub<->HF byte-identical.
+4. WEBPAGE + GITHUB up to date: a-11-oy.com reflects current Λ/kernel counts + Wave23 line; public repo READMEs/bios current (lutar-lean README refs Wave23; org bio ~185 NOT inflated). Keep GitHub<->HF byte-identical.
 5. KEEP WORKING CONJECTURE+FORMULAS (Lean): Conjecture 2 deeper -> canonicalHistory or liveness link; Conjecture 3 liveness (partial-synchrony); full non-binary Pinsker; full Aczel-Maksa CUT-1. No sorry/new axiom; #print axioms subset {propext,Classical.choice,Quot.sound}; lake build local; PR base main, DO NOT self-merge; then INSTILL byte-identical like Wave23.
 6. FIX PR #176 (round10-quantum): OPEN but RED + stale — rebase green or close with a note. Parent did NOT force-merge a red PR.
 
@@ -268,7 +268,7 @@ Big session since the 01:23 UTC note. Parent (Perplexity) ran a full re-run + 5�
    - **HARD RULE going forward: never let shared `szl_*.py`/`*.js` diverge. Edit BOTH apps identically in the same change, or the drift guard goes red.**
 
 ## LIVE STATE (verified 00:2x EDT)
-All 3 HF Spaces RUNNING. a11oy.net HTTP 200. 30 shared modules byte-identical. Doctrine intact everywhere: locked=5, Λ=Conjecture 1, Khipu=Conjecture 2, honest SLSA, 0 user-visible codenames, 0 fabricated data.
+All 3 HF Spaces RUNNING. a-11-oy.com HTTP 200. 30 shared modules byte-identical. Doctrine intact everywhere: locked=5, Λ=Conjecture 1, Khipu=Conjecture 2, honest SLSA, 0 user-visible codenames, 0 fabricated data.
 
 ## TWO RED CI JOBS (both PRE-EXISTING, neither breaks the live product) — recommend Forge or founder
 1. **a11oy `llama-wheel-guard` = RED.** The pinned `llama-cpp-python==0.3.19` prebuilt cp312/linux_x86_64 wheel vanished from the abetlen CPU index. The Dockerfile masks it with `|| echo` so the image still builds and the OPTIONAL local-model "alloy" tier degrades to the honest tower-side label (verified live). **FIX = bump llama-cpp-python in the root Dockerfile to a version that still publishes a cp312 x86_64 wheel on https://abetlen.github.io/llama-cpp-python/whl/cpu, update the guard's parse in lockstep.** This is a dep bump → founder-gated per hard-limit; Forge can PROPOSE the version (verify the wheel exists) on a branch, founder merges.
@@ -285,7 +285,7 @@ The 5 conflicted szl-uds-deployment PRs remain dirty: **#50** (doctrine counts),
 1. **Run down + fix the Banned-token scan red** (CI hygiene, see above) — highest-value quick win to get a11oy CI green.
 2. **Propose the llama-cpp-python wheel bump** on a branch (verify the cp312 x86_64 wheel exists for the new version) for founder merge.
 3. **K9 ops UI**: take your staged `replit-sync/k9/` prototype to the next step — wire it against the LIVE drift-guard + CI + HF-stage feeds (honest "UDS unreachable until k3d/uds-core up"). Parent is folding K9 into the UDS deploy track.
-4. **UDS mesh deploy**: progress the uds-core/k3d + Zarf/Pepr full deploy so a11oy.net runs ON UDS (currently Hetzner nginx). Keep SLSA wording honest (L1·L2 build-attested·L3 roadmap; bundle attestation roadmap).
+4. **UDS mesh deploy**: progress the uds-core/k3d + Zarf/Pepr full deploy so a-11-oy.com runs ON UDS (currently Hetzner nginx). Keep SLSA wording honest (L1·L2 build-attested·L3 roadmap; bundle attestation roadmap).
 5. **Keep shared szl_*.py byte-identical** in every change you push — the drift guard now enforces it and parent just spent real effort healing 10 diverged modules.
 
 Doctrine reminders unchanged: locked=5 (pending #219 founder merge); Λ=Conjecture 1; Khipu=Conjecture 2; honest SLSA; no user-visible codenames (amaru/rosie/sentra/jarvis → Provenance Anchor/Operator/Policy; Quechua organ names OK); trust never 100%; no fabricated data; GitHub↔HF byte-identical; never commit a key; never weaken a gate; no Lean self-merge.

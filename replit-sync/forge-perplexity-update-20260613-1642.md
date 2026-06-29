@@ -20,7 +20,7 @@ Did NOT merge anything.
 - AUTO_STATE remains `dispatch_mode:none`, `dispatch_ok:false` — report-and-poll, not hands-off. `FORGE_AGENT_URL` / `FORGE_DISPATCH_CMD` must live in Forge's own secret store (founder does not hold it); wiring it is the throughput upgrade but needs that infra decision. Kept honestly `none` — not faked.
 
 ## 4. SMOKE VERDICT — FAIL (6/18) — reported as-is, NOT band-aided
-`python3 tools/szl_smoke_stress.py --mode smoke` @ a11oy.net, 2026-06-13T16:36Z. All 18 surfaces returned 200; VERDICT **FAIL** on 6 flags:
+`python3 tools/szl_smoke_stress.py --mode smoke` @ a-11-oy.com, 2026-06-13T16:36Z. All 18 surfaces returned 200; VERDICT **FAIL** on 6 flags:
 - **LATENCY (5)** — all live-compute surfaces that fan out to optional deps: `anatomy/loop` 3.71s, `heart/pulse` 3.37s, `/ayni` 3.37s, `sovereign-compute` 3.36s, `qbio/coherence` 2.96s (threshold 2.0s). Root cause: these probe the sleeping GPU / offline chaski and eat ~3s of dependency-wait. This is honest DEGRADED posture under a sleeping GPU node, not a correctness failure (static/cached surfaces are 0.02–0.06s). Real fix = keep-warm on the GPU node + an explicit posture field (GPU_MAINTENANCE_MODE_SPEC) — NOT band-aided here.
 - **DOCTRINE (1)** — `revenue/estimate` labels joules `'measured'` via `joules_label` with NO exporter field. Real honesty bug spanning 8+ modules (harvest, anatomy_loop, engine_status, revenue_model/endpoints, prod_hardening). Cross-module refactor — named as a tracked follow-up, NOT rushed into a deploy pass. joules must read MEASURED only when an exporter sample exists.
 

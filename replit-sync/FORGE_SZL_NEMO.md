@@ -1,6 +1,6 @@
 # FORGE_SZL_NEMO.md — Sovereign GPU box order (Lane I1: SZL-Nemo Core)
 
-> **FOUNDER-APPROVAL-GATED.** The sovereign GPU box (a11oy.net main GPU + NVIDIA
+> **FOUNDER-APPROVAL-GATED.** The sovereign GPU box (a-11-oy.com main GPU + NVIDIA
 > RTX 4000 Ada; vLLM behind Tailscale) is dispatched ONLY via the Forge. Integration
 > Dev I1 does **NOT** ssh into or modify the box. This file is the exact,
 > copy-pasteable set of commands/config the **CTO compiles into the Forge order**.
@@ -89,7 +89,7 @@ PY
 
 ## 2. Two-GPU sovereign-local serve (NEMOTRON_TWO_GPU_PLAN.md — pick A or B)
 
-The founder has the **a11oy.net main GPU + NVIDIA RTX 4000 (Ada, ~20 GB)**. Two legit
+The founder has the **a-11-oy.com main GPU + NVIDIA RTX 4000 (Ada, ~20 GB)**. Two legit
 configs — Forge verifies VRAM fit on-box:
 
 ### 2a. Config A — TENSOR PARALLELISM (shard ONE bigger model across both GPUs)
@@ -141,7 +141,7 @@ CUDA_VISIBLE_DEVICES=1 python -m vllm.entrypoints.openai.api_server \
 A11OY_MODEL_BASE_URL    = http://127.0.0.1:8000/v1     # main vLLM (TP=2 or role-split primary)
 A11OY_NEMO_LOCAL_MODEL  = szl-nemo-local
 A11OY_NEMO_DRAFT_URL    = http://127.0.0.1:8001/v1     # Config B only (draft/governance GPU)
-A11OY_GPU_LABEL         = a11oy.net-main + RTX-4000-Ada
+A11OY_GPU_LABEL         = a-11-oy.com-main + RTX-4000-Ada
 A11OY_GPU_TOKEN         = <vllm-api-key>               # vLLM --api-key value
 ```
 
@@ -230,7 +230,7 @@ turns "throttle" into a governed, auditable knob.
 
 ```bash
 # Per-GPU power cap (watts) — set conservative caps; tune to thermal/power budget:
-sudo nvidia-smi -i 0 -pl 300      # a11oy.net main GPU
+sudo nvidia-smi -i 0 -pl 300      # a-11-oy.com main GPU
 sudo nvidia-smi -i 1 -pl 130      # RTX 4000 Ada (lower TDP)
 
 # Concurrency sharing on a card (classifier/draft + embeddings coexist):

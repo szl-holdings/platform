@@ -2,7 +2,7 @@
 
 **Scope:** corroboration/finding for the prove-or-downgrade PINN directive (orig NEXT_ORDER 20f1e854). **Additive only — I did not touch NEXT_ORDER.md or AUTO_STATE.json (channel has moved on to 21450a57).**
 
-## Result (verified live on the box, a11oy.net)
+## Result (verified live on the box, a-11-oy.com)
 - **GATE A** ✓ `certificate.measured.label == "MEASURED"`.
 - **GATE B** ✓ `/api/a11oy/v1/pinn/certificate` → `signed: true`; `/pinn/certificate.dsse` → HTTP 200; **independent openssl verify = "Signature Verified Successfully"** over the exact served bytes.
   - served cert: **5112.38 J** (56.18 W × 91 s sustained on-metal NVML, betterwithage RTX 5050, label MEASURED)

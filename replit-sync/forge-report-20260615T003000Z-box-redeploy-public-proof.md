@@ -3,10 +3,10 @@
   **Orders executed:** FORGE-INSTRUCTION-EXECUTE-founder-authorized-20260614-2019.md (JOB 1 box-redeploy, JOB 2 energy meter) + FORGE-INSTRUCTION-box-redeploy-current-main-20260614-2005.md.
   **Doctrine v11:** locked=8 {F1,F4,F7,F11,F12,F18,F19,F22} @ c7c0ba17, Λ=Conjecture 1. No key committed. No fabricated number. Honest BLOCKED where gated.
 
-  ## JOB 1.1 — a11oy.net redeployed to current main@28144d9 — DONE, PUBLIC-PROVEN
+  ## JOB 1.1 — a-11-oy.com redeployed to current main@28144d9 — DONE, PUBLIC-PROVEN
   Box /opt/szl/a11oy reset --hard origin/main, image rebuilt, container recreated. VERIFY SUMMARY all PASS (front-door / app-entry / liveness / feeds / governance / readiness / secdata / bounties).
 
-  Public curls from https://a11oy.net (real HTTP code + content-type + bytes):
+  Public curls from https://a-11-oy.com (real HTTP code + content-type + bytes):
 
       200 application/javascript 32412b  /static/shared/szl_holo3d.js   (was 404 stale -> FIXED; 3D demo unblocked)
       200 application/json 2312b         /api/a11oy/v1/restraint/info
@@ -17,9 +17,9 @@
 
   Pages all 200 text/html (real pages, NOT the 272KB SPA shell): /estate-hologram 19842b, /energy-ops 28537b, /energy-holographic 5513b, /holographic 8685b, /nemo 42994b, /autoreview 38199b, /factory 27185b, /constitution 9396b, /quant 14307b, /grc 28185b, /restraint 25142b.
 
-  ## JOB 1.1 — killinchu.a11oy.net redeployed to current main@751f2be (was 19 commits behind) — DONE, PUBLIC-PROVEN
+  ## JOB 1.1 — killinchu.a-11-oy.com redeployed to current main@751f2be (was 19 commits behind) — DONE, PUBLIC-PROVEN
 
-      200 text/html 1247695b     https://killinchu.a11oy.net/elite
+      200 text/html 1247695b     https://killinchu.a-11-oy.com/elite
       200 text/html 85615b       /elite/globe
       200 text/html 14999b       /elite/restraint
       200 application/json 2312b  /api/killinchu/v1/restraint/info

@@ -9,7 +9,7 @@ HEADLESS. Forge has full admin of both machines. Do the full setup ("whatever is
   RTX 4060 Ti, reachable over Tailscale from anywhere (incl. the Cali venue). This is the always-on node.
 - **LAPTOP `betterwithage` (travels to Cali) = demo client + FAILOVER brain.** Calls the desktop over
   Tailscale; if venue WiFi can't reach home, the laptop's Blackwell 5050 serves LOCALLY as failover.
-- **HF Spaces = tertiary failover.** Hetzner box a11oy.net stays primary PUBLIC web host.
+- **HF Spaces = tertiary failover.** Hetzner box a-11-oy.com stays primary PUBLIC web host.
 
 ## DO — desktop full setup (best-practice, headless, survives reboot)
 1. **Tailscale**: install + join the founder's tailnet (same account, MagicDNS). Set it to start on boot

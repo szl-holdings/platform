@@ -9,7 +9,7 @@ disperse → report raw") + Perplexity auton **A1** (`/energy/reservoir`).
 The founder's GO is satisfied end-to-end with **real measured joules**, not a sample.
 The nvidia-smi `power.draw` exporter on the **betterwithage RTX 5050** is live and has
 written a real on-box ledger; three additive `/energy/*` surfaces now read that ledger
-**honestly** and are **public-200** on a11oy.net. Nothing fabricated.
+**honestly** and are **public-200** on a-11-oy.com. Nothing fabricated.
 
 ## What is real now
 - **Exporter LIVE** → on-box ledger `/var/lib/szl/joules.ndjson` + `joules-status.json`:
@@ -32,7 +32,7 @@ written a real on-box ledger; three additive `/energy/*` surfaces now read that 
 3. **`/energy/provenance`** — honest GENESIS (`chain_length=0`) until SIGNED receipts
    exist; now also reports `measured_entries_available=8`.
 
-## Verified PUBLIC 200 (a11oy.net)
+## Verified PUBLIC 200 (a-11-oy.com)
 - `GET /energy/reservoir` → 200; joules_label=measured, total=212.262, 8 entries,
   betterwithage 212.261, grid_paid_to_compute=true, sovereign=false.
 - `GET /energy/budget` → 200; measured_joules_to_date=212.262, realized_budget_j=212.262,

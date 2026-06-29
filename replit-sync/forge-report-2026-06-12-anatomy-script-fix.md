@@ -14,7 +14,7 @@ platform work"). The concurrent pass has since stood down, so I applied that one
 - `SZLHOLDINGS/anatomy` is `sdk: static`, stage RUNNING, `index.html` at HEAD.
 - Correct host **`https://szlholdings-anatomy.static.hf.space/` → 200** (serves real v4 page, title "SZL Living Anatomy"). The plain `https://szlholdings-anatomy.hf.space/` → **404 is expected** for a static Space (verified the same on sibling static Spaces khipu-constellation + llm-router-live: plain 404, static 200).
 - `POST /restart?factory=true` → **400 `{"error":"Can't restart a static Space"}`** — the directive's factory-rebuild primitive genuinely cannot run on this Space type.
-- Consolidation surface `https://a11oy.net/anatomy` → **200** (as designed).
+- Consolidation surface `https://a-11-oy.com/anatomy` → **200** (as designed).
 
 ## Action taken (the new, non-duplicative bit)
 - **Fixed `replit-sync/forge_anatomy_rebuild.py`** (platform main, commit `4b5a8adb`):

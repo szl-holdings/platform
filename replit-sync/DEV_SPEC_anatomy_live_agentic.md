@@ -1,5 +1,5 @@
 # DEV SPEC — Anatomy "Living Organs": connect every organ to the live internet, give it real power
-**Dev:** Claude Opus 4.8. **Repo:** szl-holdings/anatomy (GitHub) + SZLHOLDINGS/anatomy (HF **static** Space). **Mirror:** a11oy.net.
+**Dev:** Claude Opus 4.8. **Repo:** szl-holdings/anatomy (GitHub) + SZLHOLDINGS/anatomy (HF **static** Space). **Mirror:** a-11-oy.com.
 **Goal (founder words):** "connect it to our internet, give it the power" — every organ becomes a LIVE agentic lens that reflects a11oy's REAL agent loop / gates / receipts / verified math, pulled over the internet in real time.
 
 ## NON-NEGOTIABLE DOCTRINE GATE (founder restated this explicitly)

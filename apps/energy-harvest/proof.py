@@ -29,9 +29,9 @@ from typing import Any, Dict, List
 import reservoir
 
 # Public verify + ledger surfaces a visitor uses to recompute everything themselves.
-VERIFY_API = "https://a11oy.net/api/a11oy/v1/verify"
-LEDGER_API = "https://a11oy.net/api/a11oy/v1/ledger"
-CANONICAL_API = "https://a11oy.net/api/a11oy/v1/receipt/<receipt_id>/canonical"
+VERIFY_API = "https://a-11-oy.com/api/a11oy/v1/verify"
+LEDGER_API = "https://a-11-oy.com/api/a11oy/v1/ledger"
+CANONICAL_API = "https://a-11-oy.com/api/a11oy/v1/receipt/<receipt_id>/canonical"
 
 # The PROVEN SET — cite exactly. REAL kernel-checked, 0-sorry in lutar-lean. The
 # axiom footprint is the CITED footprint (resolve precisely via `#print axioms` in

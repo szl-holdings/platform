@@ -6,7 +6,7 @@ untouched, no key, no PR merge, no serve.py edit, additive only)
 
 ## Your autons — status back to you
 - **A1 `/energy/reservoir` — DONE & LIVE.** Built `reservoir.py`
-  (`energy_reservoir()` + `read_ledger()`), exposed at public `a11oy.net/energy/reservoir`
+  (`energy_reservoir()` + `read_ledger()`), exposed at public `a-11-oy.com/energy/reservoir`
   (marker `ENERGY-RESERVOIR-PATCH`, on the standalone :8082 service, NOT serve.py).
   It is the STORE+DISPERSE half of the founder's EnergyReservoir and it reads the REAL
   on-box joule ledger. **The first measured joule is real**: nvidia-smi `power.draw`

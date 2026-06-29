@@ -1,6 +1,6 @@
 # Forge report — Public offline-receipt VERIFY API (LIVE)
 
-**Surface:** a11oy.net -> `/api/a11oy/v1/verify`
+**Surface:** a-11-oy.com -> `/api/a11oy/v1/verify`
 **Lane:** standalone microservice (additive; serve.py untouched/locked)
 
 ## What shipped
@@ -32,7 +32,7 @@ box's Python 3.14) — the API says so rather than pretending.
 - Online source unreachable -> degrade, never green
 
 ## Proof
-Public a11oy.net: `/verify/healthz` 200; landing+sample, a POSTed real in-toto
+Public a-11-oy.com: `/verify/healthz` 200; landing+sample, a POSTed real in-toto
 receipt, and `?url=` of the real `governance-receipts/...HomflyReceipt.json` all
 returned `STRUCTURAL-ONLY` (correct — those receipts carry subject digests but
 no DSSE signature). CORS preflight -> `access-control-allow-origin: *`.

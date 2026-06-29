@@ -10,8 +10,8 @@ serve.py→szl_core serialized refactor). Those are NOT auto-actioned here. This
 verification + one additive heal + notes + recommendations.
 
 ## VERIFIED LIVE (one-truth sync)
-- `https://a11oy.net/healthz` → **200**, `commit c7c0ba17` (matches canonical locked=8 @ c7c0ba17).
-- `https://a11oy.net/api/a11oy/v1/honest` → **200**.
+- `https://a-11-oy.com/healthz` → **200**, `commit c7c0ba17` (matches canonical locked=8 @ c7c0ba17).
+- `https://a-11-oy.com/api/a11oy/v1/honest` → **200**.
 - a11oy main @ `045260b9` drift guards: `shared-file-drift` ✅ · `hf-sync-backend` ✅ ·
   `hf-module-drift` ✅ (after heal below).
 

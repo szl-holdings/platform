@@ -11,6 +11,6 @@ license: other
 
 # a11oy — SZL Holdings
 
-This Space is the front door. The live a11oy orchestration platform runs at **[a11oy.net](https://a11oy.net)** (sovereign Hetzner box, doctrine v11).
+This Space is the front door. The live a11oy orchestration platform runs at **[a-11-oy.com](https://a-11-oy.com)** (sovereign Hetzner box, doctrine v11).
 
-Static mirror — always-on, zero build. The real surfaces (energy ledger, holographic ops, PINN, P/N/T, governance, frontier showcase) are served live at a11oy.net.
+Static mirror — always-on, zero build. The real surfaces (energy ledger, holographic ops, PINN, P/N/T, governance, frontier showcase) are served live at a-11-oy.com.

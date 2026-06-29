@@ -10,8 +10,8 @@ The cert is still `VERIFIED (physical bounds) · UNSIGNED (STRUCTURAL-ONLY)` and
 Run the MEASURED cert through the existing khipu/szl_lake Ed25519 DSSE signer with the FA-001 key in the
 box secret store; PAE -> sign -> append to the khipu chain. Then:
 ```bash
-curl -s https://a11oy.net/api/a11oy/v1/verify | python3 -m json.tool | head -20
-curl -s https://a11oy.net/api/a11oy/v1/pinn/certificate | python3 -c 'import sys,json;print(json.load(sys.stdin).get("status"))'
+curl -s https://a-11-oy.com/api/a11oy/v1/verify | python3 -m json.tool | head -20
+curl -s https://a-11-oy.com/api/a11oy/v1/pinn/certificate | python3 -c 'import sys,json;print(json.load(sys.stdin).get("status"))'
 ```
 **GATE B:** /verify returns a real DSSE receipt (keyid + signature that verifies) AND cert status drops
 "UNSIGNED". If FA-001 is NOT in the secret store -> mark **BLOCKED: needs founder FA-001 key drop** and

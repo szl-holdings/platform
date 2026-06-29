@@ -12,7 +12,7 @@ UNMETERED). The box redeploy restarted a11oy but did NOT re-arm the energy opera
 1. **Laptop exporter** (`betterwithage`, exporter bound 100.96.129.45:9471): confirm alive —
    `curl -s http://100.96.129.45:9471/ | head`. If dead, restart the NVML/Prometheus exporter unit
    (`systemctl restart nvml_exporter` || `gpu_energy_exporter`) so it emits live gpu power.draw.
-2. **Box operator worker** (a11oy.net / 167.233.50.75): restart the a11oy energy-operator measurement
+2. **Box operator worker** (a-11-oy.com / 167.233.50.75): restart the a11oy energy-operator measurement
    worker so `running` flips true. Discover the unit: `systemctl list-units --type=service | grep -iE
    'a11oy|energy|operator'`, then `systemctl restart <that-unit>`. OR if the operator exposes a resume
    endpoint, POST its start signal. DO NOT reset totals — resume forward from 271,855 J.

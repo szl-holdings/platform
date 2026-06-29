@@ -25,7 +25,7 @@ After #319 is merged and the GPU server is LIVE, set on the **a11oy HF Space** (
 A11OY_MODEL_BASE_URL = http://<box-ip-or-tailscale>:8000/v1
 A11OY_GPU_TOKEN      = <contents of gpu_api_key.secret>
 ```
-Verify: `GET https://a11oy.net/api/a11oy/v1/code/health` →
+Verify: `GET https://a-11-oy.com/api/a11oy/v1/code/health` →
 ```
 inference: self-hosted-gpu
 primary_model: Qwen/Qwen2.5-Coder-14B-Instruct-AWQ   (or whatever was served)

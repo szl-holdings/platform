@@ -46,7 +46,7 @@ Build only via real draft PRs (report PR numbers); multi-PR efforts. NEVER self-
 ================================================================
 ## VERIFIED-GOOD — DO NOT REGRESS
 ================================================================
-a11oy.net/ + Space/ hero (142KB, no white screen); /console; /harvest + bounds card; /pinn/* mesh (both
+a-11-oy.com/ + Space/ hero (142KB, no white screen); /console; /harvest + bounds card; /pinn/* mesh (both
 surfaces); PINN cert MEASURED + SIGNED (DSSE Ed25519 FA-001, cosign.pub anchored, BOTH surfaces); Rekor
 anchor; yarqa; hatun-mcp; anatomy static; 2 GPUs + chaski reachable; main push-CI clean; pin-SHA 0 flags.
 

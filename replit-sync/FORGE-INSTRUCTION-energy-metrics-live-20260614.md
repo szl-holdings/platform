@@ -12,7 +12,7 @@ but no live feed yet. Wire the real NVML exporter into it so it reports MEASURED
 
 ## GATE (prove-or-downgrade)
 ```bash
-curl -s https://a11oy.net/api/a11oy/v1/energy/metrics | python3 -m json.tool
+curl -s https://a-11-oy.com/api/a11oy/v1/energy/metrics | python3 -m json.tool
 # PASS = power_w is a real number > 0 AND power_w_label == "MEASURED" for at least one live GPU node.
 ```
 If the exporter can't reach a node, mark that node UNAVAILABLE honestly (not a fake 0/number).

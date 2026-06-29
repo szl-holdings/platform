@@ -13,7 +13,7 @@ Effector stays SIMULATED by doctrine (intentional safety, not a defect).
 - box ≡ HF byte-identical behavior at all bare paths (/elite 200, /jackin 307,
   /feeds/aircraft, /maritime/*, /asw/*, /elite/globe, /jackin/globe all 200).
 
-## Live data PROVEN on the box (killinchu.a11oy.net, v1 JSON endpoints)
+## Live data PROVEN on the box (killinchu.a-11-oy.com, v1 JSON endpoints)
 - /feeds/aircraft?theater=scs -> live:true, real OpenSky+adsb.lol, China theater box.
 - /feeds/vessels/stats -> 10 theaters, live fetched_at; South China Sea honestly
   mode:sample / source_live:false (flip->LIVE = founder SZL_AISSTREAM_API_KEY, the

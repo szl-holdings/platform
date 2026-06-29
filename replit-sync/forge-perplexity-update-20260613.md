@@ -12,7 +12,7 @@ browser can recompute the digest client-side and MATCH the ledger `receipt_id`.
   - unknown id → `404`; internal failure → fail-safe `500`
 - Source: a11oy `main` commit `8d54c8d` (additive; marker `receipt-canonical-patch`).
 - Verified (5 receipts each, re-hashed client-side):
-  - public **a11oy.net** → 5/5 MATCH, json.matches=true, unknown→404
+  - public **a-11-oy.com** → 5/5 MATCH, json.matches=true, unknown→404
   - **HF Space** SZLHOLDINGS/a11oy → 5/5 MATCH (auto-mirrored)
   - box 127.0.0.1:7861 → HTTP 200
 - Honesty: the bytes returned are the literal `f"{prev_hash}|{action}|{seq}"` preimage —
@@ -40,7 +40,7 @@ browser can recompute the digest client-side and MATCH the ledger `receipt_id`.
   - honest SAMPLE fallback, CTO doctrine-clean. Founder runs the box GPS step at home. Doctrine v11 throughout.
 - **Founder-gated, auto-skipped (1)** (Doctrine v11 — keys/secrets/major-bumps):
   - FREE TIERS into the LiteLLM router as zero-cost fallback model_names (keys via secret store,
-- Reachability snapshot: https://a11oy.net/healthz -> 200
+- Reachability snapshot: https://a-11-oy.com/healthz -> 200
 - NOTE: no Forge agent endpoint configured (FORGE_AGENT_URL / FORGE_DISPATCH_CMD) — actionable items are reported + the founder is pinged; wire the endpoint to make execution fully hands-off.
 
 ## Auto-loop pass — order `7155e0f7` — 2026-06-13T07:04:53Z
@@ -56,28 +56,28 @@ browser can recompute the digest client-side and MATCH the ledger `receipt_id`.
   - honest SAMPLE fallback, CTO doctrine-clean. Founder runs the box GPS step at home. Doctrine v11 throughout.
 - **Founder-gated, auto-skipped (1)** (Doctrine v11 — keys/secrets/major-bumps):
   - FREE TIERS into the LiteLLM router as zero-cost fallback model_names (keys via secret store,
-- Reachability snapshot: https://a11oy.net/healthz -> 200
+- Reachability snapshot: https://a-11-oy.com/healthz -> 200
 - NOTE: no Forge agent endpoint configured (FORGE_AGENT_URL / FORGE_DISPATCH_CMD) — actionable items are reported + the founder is pinged; wire the endpoint to make execution fully hands-off.
 
 ## Auto-loop pass — order `ab1198d8` — 2026-06-13T08:04:54Z
 
 - Order is **idle / no-action sentinel** — handshake confirmed, nothing to execute.
-- Reachability snapshot: https://a11oy.net/healthz -> 200
+- Reachability snapshot: https://a-11-oy.com/healthz -> 200
 
 ## Auto-loop pass — order `cefd7bab` — 2026-06-13T09:05:22Z
 
 - Order is **idle / no-action sentinel** — handshake confirmed, nothing to execute.
-- Reachability snapshot: https://a11oy.net/healthz -> 200
+- Reachability snapshot: https://a-11-oy.com/healthz -> 200
 
 ## Auto-loop pass — order `d3b52584` — 2026-06-13T10:05:24Z
 
 - Order is **idle / no-action sentinel** — handshake confirmed, nothing to execute.
-- Reachability snapshot: https://a11oy.net/healthz -> 200
+- Reachability snapshot: https://a-11-oy.com/healthz -> 200
 
 ## Auto-loop pass — order `cb71ac50` — 2026-06-13T11:05:29Z
 
 - Order is **idle / no-action sentinel** — handshake confirmed, nothing to execute.
-- Reachability snapshot: https://a11oy.net/healthz -> 200
+- Reachability snapshot: https://a-11-oy.com/healthz -> 200
 
 ## Auto-loop pass — order `a724f0dc` — 2026-06-13T15:06:35Z
 
@@ -92,7 +92,7 @@ browser can recompute the digest client-side and MATCH the ledger `receipt_id`.
   - Doctrine v11 reconciliation in org .github + szl-doctrine. 4. Progressive-delivery pipeline.
 - **Founder-gated, auto-skipped (1)** (Doctrine v11 — keys/secrets/major-bumps):
   - HOTFIX during freeze: only for a demo-blocking defect WITH explicit founder approval, minimal,
-- Reachability snapshot: https://a11oy.net/healthz -> 200
+- Reachability snapshot: https://a-11-oy.com/healthz -> 200
 - NOTE: no Forge agent endpoint configured (FORGE_AGENT_URL / FORGE_DISPATCH_CMD) — actionable items are reported + the founder is pinged; wire the endpoint to make execution fully hands-off.
 
 ## Auto-loop pass — order `89ffd9eb` — 2026-06-13T16:06:37Z
@@ -118,7 +118,7 @@ browser can recompute the digest client-side and MATCH the ledger `receipt_id`.
   - Doctrine v11 reconciliation in org .github + szl-doctrine. 4. Progressive-delivery pipeline.
 - **Founder-gated, auto-skipped (1)** (Doctrine v11 — keys/secrets/major-bumps):
   - HOTFIX during freeze: only for a demo-blocking defect WITH explicit founder approval, minimal,
-- Reachability snapshot: https://a11oy.net/healthz -> 200
+- Reachability snapshot: https://a-11-oy.com/healthz -> 200
 - NOTE: no Forge agent endpoint configured (FORGE_AGENT_URL / FORGE_DISPATCH_CMD) — actionable items are reported + the founder is pinged; wire the endpoint to make execution fully hands-off.
 
 ## Forge (Replit) — hardening deploy + GPU-fabric verification — 2026-06-13 (manual pass)
@@ -176,7 +176,7 @@ Re TOP order **R-DEPLOY-THE-HARDENING** + founder green-light: "power the whole 
   - Wire it to the REAL existing endpoints (same-origin): /api/killinchu/v1/cuas/{plausibility,wta,
   - ADD the 5-modality FUSION + DroneID layer (JACKIN_GAP_ADDENDUM.md): per-track modality row
   - CONNECT transports must work in-browser over HTTPS (Web Serial + Web Bluetooth = Chrome/Edge +
-- Reachability snapshot: https://a11oy.net/healthz -> 200
+- Reachability snapshot: https://a-11-oy.com/healthz -> 200
 - NOTE: no Forge agent endpoint configured (FORGE_AGENT_URL / FORGE_DISPATCH_CMD) — actionable items are reported + the founder is pinged; wire the endpoint to make execution fully hands-off.
 
 ## Auto-loop pass — order `550839ec` — 2026-06-13T18:06:55Z
@@ -212,7 +212,7 @@ Re TOP order **R-DEPLOY-THE-HARDENING** + founder green-light: "power the whole 
   - CONNECT transports must work in-browser over HTTPS (Web Serial + Web Bluetooth = Chrome/Edge +
 - **Founder-gated, auto-skipped (1)** (Doctrine v11 — keys/secrets/major-bumps):
   - DISPATCH — wire FORGE_AGENT_URL / FORGE_DISPATCH_CMD in YOUR OWN secret store so you run hands-off (founder does
-- Reachability snapshot: https://a11oy.net/healthz -> 200
+- Reachability snapshot: https://a-11-oy.com/healthz -> 200
 - NOTE: no Forge agent endpoint configured (FORGE_AGENT_URL / FORGE_DISPATCH_CMD) — actionable items are reported + the founder is pinged; wire the endpoint to make execution fully hands-off.
 
 ## Auto-loop pass — order `484a6532` — 2026-06-13T19:07:09Z
@@ -264,7 +264,7 @@ Re TOP order **R-DEPLOY-THE-HARDENING** + founder green-light: "power the whole 
   - CONNECT transports must work in-browser over HTTPS (Web Serial + Web Bluetooth = Chrome/Edge +
 - **Founder-gated, auto-skipped (1)** (Doctrine v11 — keys/secrets/major-bumps):
   - DISPATCH — wire FORGE_AGENT_URL / FORGE_DISPATCH_CMD in YOUR OWN secret store so you run hands-off (founder does
-- Reachability snapshot: https://a11oy.net/healthz -> 200
+- Reachability snapshot: https://a-11-oy.com/healthz -> 200
 - NOTE: no Forge agent endpoint configured (FORGE_AGENT_URL / FORGE_DISPATCH_CMD) — actionable items are reported + the founder is pinged; wire the endpoint to make execution fully hands-off.
 
 ## Auto-loop pass — order `8a97ca9c` — 2026-06-13T20:07:25Z
@@ -273,7 +273,7 @@ Re TOP order **R-DEPLOY-THE-HARDENING** + founder green-light: "power the whole 
   - **a11oy `main`** now serves `/cathedral` + `/cathedral/app.js` from `cathedral_genius.html` + `static/cathedral_app.js` (sha256-identical to the HF build), vendored Three.js reused at `/hero/vendor3d/`. 0 runtime CDN. The `/` front door is untouched.
   - **FORGE:** after #353 (already merged): rebuild the **a11oy** Docker image from `main` and the **killinchu** image from `main` (byte-identical mirror — respect the shared-source drift allow-list; cathedral.html/serve.py are intentionally per-repo divergent, do NOT force-converge them).
   - **FORGE:** re-push the canonical genius build to the **HF `SZLHOLDINGS/cathedral`** static space. The live HF cathedral space is STALE at locked=5 — the canonical build says locked-proven = **8**. Source is in `replit-sync/hf_spaces/cathedral_live_src/` (index.html + app.js + vendor/{three.module.min.js,OrbitControls.js,THREE_LICENSE.txt} + szl_verify_widget.js). FIXED this pass: the "Operator" capability was a second orange sun (violated single-sun doctrine) → now a violet capability orb; verify launcher repositioned to bottom-center (was overlapping the legend). Push the folder VERBATIM — keep all vendor/ files.
-  - After: GET https://szlholdings-cathedral.static.hf.space/ and https://a11oy.net/cathedral → confirm 200, ONE gold a11oy sun, locked-proven = 8, app.js ~36KB.
+  - After: GET https://szlholdings-cathedral.static.hf.space/ and https://a-11-oy.com/cathedral → confirm 200, ONE gold a11oy sun, locked-proven = 8, app.js ~36KB.
   - **hatun-mcp `main`** now content-negotiates `/`: browsers (Accept: text/html) get the console; MCP/API clients (application/json) get the BYTE-IDENTICAL original JSON. Live 25-tool catalog from the real server-card, pubkey fingerprint, a11oy-fabric probe, honest SNAPSHOT fallback. 48 pytest pass.
   - **FORGE:** after #32 (already merged): rebuild the hatun-mcp image from `main` and publish to HF `SZLHOLDINGS/hatun-mcp` via the repo's `push_to_hf.py`:
   - After: `curl -H 'Accept: text/html' https://szlholdings-hatun-mcp.hf.space/` → HTML console; `curl -H 'Accept: application/json' .../` → original JSON; `/healthz` + `/mcp` initialize still 200.
@@ -333,7 +333,7 @@ Re TOP order **R-DEPLOY-THE-HARDENING** + founder green-light: "power the whole 
   - CONNECT transports must work in-browser over HTTPS (Web Serial + Web Bluetooth = Chrome/Edge +
 - **Founder-gated, auto-skipped (1)** (Doctrine v11 — keys/secrets/major-bumps):
   - DISPATCH — wire FORGE_AGENT_URL / FORGE_DISPATCH_CMD in YOUR OWN secret store so you run hands-off (founder does
-- Reachability snapshot: https://a11oy.net/healthz -> 200
+- Reachability snapshot: https://a-11-oy.com/healthz -> 200
 - NOTE: no Forge agent endpoint configured (FORGE_AGENT_URL / FORGE_DISPATCH_CMD) — actionable items are reported + the founder is pinged; wire the endpoint to make execution fully hands-off.
 
 ## Auto-loop pass — order `506aee3d` — 2026-06-13T21:07:25Z
@@ -352,7 +352,7 @@ Re TOP order **R-DEPLOY-THE-HARDENING** + founder green-light: "power the whole 
   - **a11oy `main`** now serves `/cathedral` + `/cathedral/app.js` from `cathedral_genius.html` + `static/cathedral_app.js` (sha256-identical to the HF build), vendored Three.js reused at `/hero/vendor3d/`. 0 runtime CDN. The `/` front door is untouched.
   - **FORGE:** after #353 (already merged): rebuild the **a11oy** Docker image from `main` and the **killinchu** image from `main` (byte-identical mirror — respect the shared-source drift allow-list; cathedral.html/serve.py are intentionally per-repo divergent, do NOT force-converge them).
   - **FORGE:** re-push the canonical genius build to the **HF `SZLHOLDINGS/cathedral`** static space. The live HF cathedral space is STALE at locked=5 — the canonical build says locked-proven = **8**. Source is in `replit-sync/hf_spaces/cathedral_live_src/` (index.html + app.js + vendor/{three.module.min.js,OrbitControls.js,THREE_LICENSE.txt} + szl_verify_widget.js). FIXED this pass: the "Operator" capability was a second orange sun (violated single-sun doctrine) → now a violet capability orb; verify launcher repositioned to bottom-center (was overlapping the legend). Push the folder VERBATIM — keep all vendor/ files.
-  - After: GET https://szlholdings-cathedral.static.hf.space/ and https://a11oy.net/cathedral → confirm 200, ONE gold a11oy sun, locked-proven = 8, app.js ~36KB.
+  - After: GET https://szlholdings-cathedral.static.hf.space/ and https://a-11-oy.com/cathedral → confirm 200, ONE gold a11oy sun, locked-proven = 8, app.js ~36KB.
   - **hatun-mcp `main`** now content-negotiates `/`: browsers (Accept: text/html) get the console; MCP/API clients (application/json) get the BYTE-IDENTICAL original JSON. Live 25-tool catalog from the real server-card, pubkey fingerprint, a11oy-fabric probe, honest SNAPSHOT fallback. 48 pytest pass.
   - **FORGE:** after #32 (already merged): rebuild the hatun-mcp image from `main` and publish to HF `SZLHOLDINGS/hatun-mcp` via the repo's `push_to_hf.py`:
   - After: `curl -H 'Accept: text/html' https://szlholdings-hatun-mcp.hf.space/` → HTML console; `curl -H 'Accept: application/json' .../` → original JSON; `/healthz` + `/mcp` initialize still 200.
@@ -412,7 +412,7 @@ Re TOP order **R-DEPLOY-THE-HARDENING** + founder green-light: "power the whole 
   - CONNECT transports must work in-browser over HTTPS (Web Serial + Web Bluetooth = Chrome/Edge +
 - **Founder-gated, auto-skipped (1)** (Doctrine v11 — keys/secrets/major-bumps):
   - DISPATCH — wire FORGE_AGENT_URL / FORGE_DISPATCH_CMD in YOUR OWN secret store so you run hands-off (founder does
-- Reachability snapshot: https://a11oy.net/healthz -> 200
+- Reachability snapshot: https://a-11-oy.com/healthz -> 200
 - NOTE: no Forge agent endpoint configured (FORGE_AGENT_URL / FORGE_DISPATCH_CMD) — actionable items are reported + the founder is pinged; wire the endpoint to make execution fully hands-off.
 
 ## Auto-loop pass — order `2b6c8cf8` — 2026-06-13T22:07:33Z
@@ -422,10 +422,10 @@ Re TOP order **R-DEPLOY-THE-HARDENING** + founder green-light: "power the whole 
   - BOX — Tailscale up; capture MagicDNS name + 100.x IP; ensure MagicDNS on; add ACL so the Spaces
   - VERIFY (the real deliverable — honest behavior):
   - GET .../killinchu/v4/inference-posture + .../a11oy/api/szl/v1/inference-posture →
-  - both /v4/healthz + a11oy.net/v4/healthz → sovereign:true, inference:self-hosted-gpu, doctrine v11.
+  - both /v4/healthz + a-11-oy.com/v4/healthz → sovereign:true, inference:self-hosted-gpu, doctrine v11.
   - HARD INVARIANT (never violate, enforced in code): sovereign:true ONLY when a live /v1/models
   - STABILIZE — confirm the systemd + keepalive + cron actually survive a simulated flap (stop/start
 - **Founder-gated, auto-skipped (1)** (Doctrine v11 — keys/secrets/major-bumps):
   - SPACES — set SZL_GPU_BASE_URL (= http://<box>:8000/v1) in the SECRET store of BOTH
-- Reachability snapshot: https://a11oy.net/healthz -> 200
+- Reachability snapshot: https://a-11-oy.com/healthz -> 200
 - NOTE: no Forge agent endpoint configured (FORGE_AGENT_URL / FORGE_DISPATCH_CMD) — actionable items are reported + the founder is pinged; wire the endpoint to make execution fully hands-off.

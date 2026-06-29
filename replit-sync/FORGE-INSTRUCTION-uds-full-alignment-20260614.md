@@ -3,7 +3,7 @@
 Issued: 2026-06-14 by CTO. Doctrine v11. PROVE-OR-DOWNGRADE. Report to AUTO_STATE.json. Demo: Defense Unicorns WarHacker June 16-19.
 
 ## GOAL (founder mandate)
-Everything aligned and fully deployable in a UDS environment: **GitHub ↔ Hugging Face ↔ a11oy.net ↔ killinchu** all byte-identical, AND the estate packaged as proper **UDS bundles** (Zarf packages + UDS Package CRs + Pepr operator + UDS fleet + mesh) that `uds deploy` clean. Today we merged a lot to a11oy main (energy operator + signed-receipt ledger mint + holographic showcase + szl3d toolkit + PNT pillars + the two showcase pages) — the published UDS bundles are now STALE and must be recut.
+Everything aligned and fully deployable in a UDS environment: **GitHub ↔ Hugging Face ↔ a-11-oy.com ↔ killinchu** all byte-identical, AND the estate packaged as proper **UDS bundles** (Zarf packages + UDS Package CRs + Pepr operator + UDS fleet + mesh) that `uds deploy` clean. Today we merged a lot to a11oy main (energy operator + signed-receipt ledger mint + holographic showcase + szl3d toolkit + PNT pillars + the two showcase pages) — the published UDS bundles are now STALE and must be recut.
 
 ## CONTEXT — existing UDS assets (do NOT rebuild from scratch; recut + align)
 - a11oy: `deploy/zarf.yaml`, `deploy/uds-package.yaml`, `artifacts/a11oy-uds/{zarf.yaml,uds-bundle.yaml,scripts/build.sh}`, workflows `zarf-build-and-sign.yml`, `uds-sign-release.yml`, `bundle-ref-check.yml`. Doc `docs/WARHACKER_UDS_PROOF_POINT.md`.
@@ -16,7 +16,7 @@ Everything aligned and fully deployable in a UDS environment: **GitHub ↔ Huggi
 
 ### 1) ALIGNMENT — GitHub ↔ HF ↔ box ↔ bundles byte-identical
 - Run the lockstep guard (COPY ↔ serve.py ↔ hf-sync mirror) on a11oy main; fix any drift so GitHub == HF Space == box. The hf-sync mirror workflow must carry the NEW files merged today: `static/shared/szl_holo3d.js`, `static/3d/**` (szl3d toolkit + energy_showcase), `pages/energy-ops.html`, `web/energy-holographic.html`, `web/signature-is-not-proof.html`, `web/defense-readiness.html`, `szl_energy_{operator,ledger,projection}.py`, `joule_billing.py`. (PR #406 forge/hf-sync-web-html-mirror is already open for the web/*.html mirror — verify it covers ALL of the above, merge it.)
-- Same for killinchu: GitHub ↔ HF killinchu Space ↔ killinchu.a11oy.net byte-identical.
+- Same for killinchu: GitHub ↔ HF killinchu Space ↔ killinchu.a-11-oy.com byte-identical.
 - PROVE: for each shared module, the GitHub blob sha, the HF file, and the box-served file match. Paste the lockstep-guard PASS line.
 
 ### 2) RECUT the stale Zarf packages + UDS bundles from CURRENT main

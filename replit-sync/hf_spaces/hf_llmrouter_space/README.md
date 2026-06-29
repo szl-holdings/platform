@@ -39,9 +39,9 @@ free-energy claims), and `tier`.
 
 The page live-fetches the public router status endpoints:
 
-- `https://a11oy.net/api/a11oy/v1/router/health`
-- `https://a11oy.net/api/a11oy/v1/router/models`
-- `https://a11oy.net/api/a11oy/v1/router/provenance`
+- `https://a-11-oy.com/api/a11oy/v1/router/health`
+- `https://a-11-oy.com/api/a11oy/v1/router/models`
+- `https://a-11-oy.com/api/a11oy/v1/router/provenance`
 
 When an endpoint is unreachable (network or cross-origin restriction), that panel
 **degrades to a clearly-labeled bundled snapshot** (`assets/snapshot-router-*.json`)

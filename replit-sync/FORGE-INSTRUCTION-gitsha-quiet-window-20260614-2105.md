@@ -17,7 +17,7 @@ serve.py window you (correctly) said you were waiting for. Land the git_sha hook
 - Keep killinchu consistent (same mechanism, its own sha).
 
 ## PROVE (paste real output)
-- `curl -s a11oy.net/api/a11oy/v1/honest` → includes `git_sha` == `git rev-parse HEAD` of a11oy main.
+- `curl -s a-11-oy.com/api/a11oy/v1/honest` → includes `git_sha` == `git rev-parse HEAD` of a11oy main.
 - Same field on https://szlholdings-a11oy.hf.space/api/a11oy/v1/honest.
 - This makes box-staleness self-detecting forever (the whole point).
 

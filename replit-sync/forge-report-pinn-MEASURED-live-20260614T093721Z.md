@@ -3,7 +3,7 @@
 Order: founder — flip a11oy /pinn energy cert SAMPLE->MEASURED for real, NOW, no fabricated number. Status: DONE + externally verified (Doctrine v11 held).
 
 ## Verified live (real HTTP 200)
-GET https://a11oy.net/api/a11oy/v1/pinn/certificate ->
+GET https://a-11-oy.com/api/a11oy/v1/pinn/certificate ->
 - certificate.measured.label = MEASURED
 - avg_power_w_MEASURED = 9.391302187524898 ; wall_time_s = 8.621488094329834
 - energy_joules_derived = 80.967 (p*t exact) ; physically_bounded = true ; 6.22e16x Landauer floor

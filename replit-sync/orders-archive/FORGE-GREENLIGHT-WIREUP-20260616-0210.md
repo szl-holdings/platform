@@ -40,14 +40,14 @@ OUR ORIGINAL ANGLE (frontier play #1 from research/FRONTIER_SCAN.md): "compute-s
 Open a normal PR for this BEFORE the freeze (it's a showcase/front+back change, not a hotfix). If you can't land it clean before 15:00 ET 06-18, park it for post-demo — the current /frontier is already demo-ready.
 
 ## TASK 7 — GITHUB / HF / UDS ALIGNMENT (the "all of it aligned" ask)
-- Confirm the frontier/orbital READMEs + UDS cross-links (#471) point at the LIVE URLs (a11oy.net/frontier, /orbital, the docker HF spaces above) — fix any stale .static links there too.
+- Confirm the frontier/orbital READMEs + UDS cross-links (#471) point at the LIVE URLs (a-11-oy.com/frontier, /orbital, the docker HF spaces above) — fix any stale .static links there too.
 - UDS bundle stays published + keyless-signed; if uds-bundle-publish.yml or prove-bundle-install.yml goes red, report ref+digest+failing step honestly.
 - Keep the GitHub org surface honest: locked=8, Lambda=Conjecture 1, Khipu BFT=Conjecture 2, SLSA L1 honest, joules MEASURED only via real exporter.
 
 ## FOUNDER ACTIONS (Forge: do NOT attempt — founder hardware/account)
 A. PUBLISH HF SHOWCASE SPACE: SZLHOLDINGS/orbital does NOT exist yet (sdk=None). Publish spaces/orbital/ to SZLHOLDINGS/orbital (static) per spaces/orbital/PUBLISH_CHECKLIST.md -> szlholdings-orbital.hf.space. (HF persistent storage for a11oy is ALREADY enabled — persistence is live, thank you.)
 B. OMEN bind (Windows PowerShell on the OMEN desktop): set OLLAMA_HOST=0.0.0.0:11434 (Machine scope) + New-NetFirewallRule inbound TCP 11434, restart Ollama (env must exist BEFORE serve starts). Decisive test from OMEN: curl http://100.70.130.45:11434/api/tags
-C. Optional: orbital.a11oy.net subdomain DNS — /orbital already live on the main host.
+C. Optional: orbital.a-11-oy.com subdomain DNS — /orbital already live on the main host.
 D. Optional: Replit "Always On" for chaski IF Forge reports systemd/supervisor can't survive a Replit recycle.
 
 ## REPORT

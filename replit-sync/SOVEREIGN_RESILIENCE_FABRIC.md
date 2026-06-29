@@ -13,7 +13,7 @@ node. One sleepy laptop = the whole brain degrades.
 A health-checked ROUTER in front of a MULTI-NODE compute fabric, local-priority with automatic
 failover. [LiteLLM reliability; SOLLOL; Binadit HAProxy; Rohan-Paul HA inference; Tailscale HA]
 
-  client -> a11oy.net -> [LiteLLM/SOLLOL router] --health-checked--> 
+  client -> a-11-oy.com -> [LiteLLM/SOLLOL router] --health-checked--> 
       Tier A (always-on dedicated GPU, PRIMARY sovereign)   <- new, the "always good" anchor
       Tier B (betterwithage laptop GPU, BONUS sovereign)    <- current node, now optional
       Tier C (cloud burst GPU, RunPod, on-demand sovereign) <- for spikes / both A+B down
@@ -45,7 +45,7 @@ Run LiteLLM proxy (or SOLLOL) on the always-on box (co-located with Tier A). Con
   router_settings: {num_retries: 2, timeout: 30}
   litellm_settings:
     fallbacks: [{code: ["code-bonus","code-cloud","code-router"]}]
-Point a11oy.net's A11OY_MODEL_BASE_URL at the LiteLLM proxy (NOT a single Ollama). Now the app
+Point a-11-oy.com's A11OY_MODEL_BASE_URL at the LiteLLM proxy (NOT a single Ollama). Now the app
 calls ONE stable endpoint and the router handles which node serves + failover.
 
 ## STEP 3 — Tailscale HA mesh (so the tailnet itself survives a node dropping) [founder+Forge]

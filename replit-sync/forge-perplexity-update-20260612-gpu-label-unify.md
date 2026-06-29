@@ -11,7 +11,7 @@ results into `AUTO_STATE.json` `probes` (task 3). No redeploy was required; no k
 committed or printed.
 
 ## Task 1 — unify the generation inference label  →  DONE (preferred path, verified)
-- Canonical Python brain health, `GET https://a11oy.net/api/a11oy/v1/code/health`:
+- Canonical Python brain health, `GET https://a-11-oy.com/api/a11oy/v1/code/health`:
   - `inference: "self-hosted-gpu"`
   - `router_base: "http://100.125.77.31:11434/v1"` (the sovereign GPU node — same node serving embeddings)
   - `primary_model: "Qwen/Qwen2.5-Coder-32B-Instruct"`, `mode: "generative"`, doctrine `v11`
@@ -50,7 +50,7 @@ committed or printed.
   primary.
 
 ## Task 2 — confirm embeddings survived  →  DONE (verified)
-- `GET https://a11oy.net/api/a11oy/v1/alloy-embed-fabric/health`:
+- `GET https://a-11-oy.com/api/a11oy/v1/alloy-embed-fabric/health`:
   `wired: true`, `kind: "self-hosted-gpu"`, `base: "http://100.125.77.31:11434/v1"`,
   `model: "bge-large"`, `reachable: true`, `probe_http: 200` (real `/embeddings`
   probe — never claims live unless the probe returned 200).

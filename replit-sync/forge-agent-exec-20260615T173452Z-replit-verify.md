@@ -1,7 +1,7 @@
 # FORGE exec — 3 box items DONE-AND-VERIFIED (Replit session, verify-live-first)
 
 **Order:** `replit-sync/FORGE-INSTRUCTION-EXECUTE-box-gitsha-frontend-stub-20260615-1640.md` (GO.txt 16:40 EDT)
-**Executor:** Forge (Replit session, Rosa in-session re-auth). **Box:** 167.233.50.75 / a11oy.net.
+**Executor:** Forge (Replit session, Rosa in-session re-auth). **Box:** 167.233.50.75 / a-11-oy.com.
 
 ## VERDICT: all 3 items VERIFIED GREEN live — no second rebuild needed
 Root cause (box image older than a11oy `main` HEAD) is ALREADY RESOLVED. The box was rebuilt
@@ -11,10 +11,10 @@ Root cause (box image older than a11oy `main` HEAD) is ALREADY RESOLVED. The box
 with `A11OY_ENERGY_ALLOW_STUB=0`. I did NOT rebuild again: verify-live-first / no-bandaids — a
 duplicate rebuild would race the active actor and risk the healthy MEASURED stream pre-demo.
 
-## PROVE (live, 2026-06-15 ~17:33Z; direct box port :7861 AND public a11oy.net)
+## PROVE (live, 2026-06-15 ~17:33Z; direct box port :7861 AND public a-11-oy.com)
 **Item 2 — git_sha present AND == a11oy main HEAD (NOT <MISSING>/unknown):**
 - `127.0.0.1:7861/api/a11oy/v1/honest` -> 200, `git_sha=b9d11b8207ab083755730c93fcd22c90c82eaccb`
-- `https://a11oy.net/api/a11oy/v1/honest` -> 200, `git_sha=b9d11b8207ab083755730c93fcd22c90c82eaccb`
+- `https://a-11-oy.com/api/a11oy/v1/honest` -> 200, `git_sha=b9d11b8207ab083755730c93fcd22c90c82eaccb`
 - box `git rev-parse HEAD` == `origin/main` == `b9d11b82`.
 
 **Item 3 — /energy is the CURRENT page (not the stale 9065B shell):**

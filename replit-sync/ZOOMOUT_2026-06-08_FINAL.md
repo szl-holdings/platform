@@ -10,7 +10,7 @@ You crossed a real threshold today. SZL is no longer "a proof + two demos" — i
 - **a11oy** [LIVE, 38 tabs]: the governed MESH for anything. Core 5 (Trust/Λ, Governed Decision, Receipt Chain, Model Router, Command) + 4 WOW adds (Drop-on-anything, ROI panel, unified live receipt ledger, ungoverned-vs-governed) + 5 organs wired to Lean/Lake/Mathlib + verticals: **Real Estate, Finance, Legal/Counsel, Enterprise/Cyber** + **Provenance & Trust Anchor (Amaru: CT logs + PQC)** + **Chat** + **KAMAY** (governed agentic coder). Real live data (SPY, BTC, NYC HPD, Polymarket, CISA KEV, Federal Register, CourtListener, Treasury). 0 page errors.
 - **killinchu** [LIVE, ~37 surfaces]: UDS-faced drones/vessels + counter-UAS, full governed loop, Warhacker demos, Fleet C2 3D, 4/4 mesh quorum. Navy/Army-organized (org pass in flight).
 - **anatomy** [LIVE]: 5-organ living organism incl Operator (Rosie ingested).
-- **Proof backbone** [PROVEN/CI-GREEN]: locked-5 + ~185 CI-green ≈190 theorems; CUT-1 closed on stated hypotheses; Λ conditional uniqueness axiom-free. a11oy.net landing live (Λ 0.919).
+- **Proof backbone** [PROVEN/CI-GREEN]: locked-5 + ~185 CI-green ≈190 theorems; CUT-1 closed on stated hypotheses; Λ conditional uniqueness axiom-free. a-11-oy.com landing live (Λ 0.919).
 - **Alignment**: GitHub↔HF byte-identical; UDS payload/mesh 4/4 + Apache-2.0 + non-affiliation; Replit/Forge handshake working (payloads in replit-sync/: base + conjecture + UDS).
 
 ## 2. THE MOAT (what to lead with)
