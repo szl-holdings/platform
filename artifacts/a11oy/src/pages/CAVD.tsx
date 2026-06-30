@@ -1,7 +1,7 @@
 import { useMemo, useState, useCallback, useEffect } from 'react';
 import { Layout } from '../components/layout';
 import { PageHeader, Card, SectionTitle, KpiCard, StatusBadge, HashId, InfoRow, ActionButton } from '../components/ui';
-import { CAVD_RECORDS, partnerById, GLASSWING_PARTNERS, type CAVDStage, type CAVDRecord, type DoctrineAgentId } from '../data/hatunDoctrine';
+import { CAVD_RECORDS, partnerById, GLASSWING_PARTNERS, type CAVDStage, type CAVDRecord, type CAVDCategory, type DoctrineAgentId } from '../data/hatunDoctrine';
 
 async function sha256(input: string): Promise<string> {
   const data = new TextEncoder().encode(input);
@@ -53,7 +53,7 @@ export function CAVD() {
   const allRecords = useMemo(() => {
     const submittedAsCavd: CAVDRecord[] = submitted.map(s => ({
       advisoryId: s.advisoryId,
-      category: s.category,
+      category: s.category as CAVDCategory,
       severity: s.severity as CAVDRecord['severity'],
       stage: s.stage,
       agentScope: s.agentScope as DoctrineAgentId[],
