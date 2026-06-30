@@ -167,7 +167,7 @@ export function ExecutiveBrief() {
                 <Card key={i} onClick={() => toggle(i)}>
                   <div className="flex items-start justify-between gap-3 mb-2">
                     <div className="flex items-center gap-2 flex-1 min-w-0">
-                      <SeverityDot severity={section.risk === 'critical' ? 'critical' : section.risk === 'high' ? 'high' : section.risk === 'medium' ? 'medium' : 'low'} />
+                      <SeverityDot severity={section.risk} />
                       <div>
                         <div className="flex items-center gap-2">
                           <span className="font-mono text-xs px-1.5 py-0.5 rounded" style={{ backgroundColor: 'rgba(201,183,135,0.1)', color: '#c9b787' }}>
@@ -247,7 +247,7 @@ export function ExecutiveBrief() {
                 return (
                   <div key={i} className="flex items-center justify-between py-1" style={{ borderBottom: '1px solid rgba(255,255,255,0.04)' }}>
                     <div className="flex items-center gap-2">
-                      <SeverityDot severity={s.risk === 'critical' ? 'critical' : s.risk === 'high' ? 'high' : s.risk === 'medium' ? 'medium' : 'low'} />
+                      <SeverityDot severity={s.risk} />
                       <span className="text-xs" style={{ color: '#8a8a8a' }}>{s.domain}</span>
                     </div>
                     <span className="text-xs font-mono" style={{ color: risk.color }}>{risk.label}</span>

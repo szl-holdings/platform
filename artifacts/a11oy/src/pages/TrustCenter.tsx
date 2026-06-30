@@ -266,7 +266,7 @@ export function TrustCenter() {
       <div className="grid md:grid-cols-3 gap-4 mb-8">
         {[
           { category: 'Built & Active', status: 'LIVE' as const, items: ['Proof Ledger with SHA-256 hash chain', 'Policy gate (Covenant Layer) on all actions', 'Signal Mesh — multi-domain ingestion', 'MirrorEval 2.0 — 14-dimension scoring', 'Human approval gate — structural guarantee', 'Connector Firewall — default deny', 'Workcell replay — full audit trail', 'Business twin registry — 7 twins active', '15 named skills — fully operational', 'Boardroom synthesis — 5 packets generated'] },
-          { category: 'Governed Environment', status: 'DEMO' as const, items: ['Live domain connector calls (simulated)', 'Real-time AIS vessel tracking (seeded)', 'Live CRM pipeline sync (seeded)', 'Production LLM inference (simulated)', 'Real matter management integration', 'Real vendor SLA data', 'Live Bloomberg market feed', 'Real court docket sync'] },
+          { category: 'Governed Environment', status: 'GATED' as const, items: ['Live domain connector calls (simulated)', 'Real-time AIS vessel tracking (seeded)', 'Live CRM pipeline sync (seeded)', 'Production LLM inference (simulated)', 'Real matter management integration', 'Real vendor SLA data', 'Live Bloomberg market feed', 'Real court docket sync'] },
           { category: 'Roadmap', status: 'ROADMAP' as const, items: ['SOC 2 Type II certification', 'HIPAA attestation', 'FedRAMP Authorization', 'VPC-isolated deployment', 'Air-gapped on-premises posture', 'Local model inference (Llama 3)', 'ISO 27001 certification', 'CMMC Level 3 (defense)'] },
         ].map(col => (
           <Card key={col.category}>
@@ -277,8 +277,8 @@ export function TrustCenter() {
             <div className="space-y-1.5">
               {col.items.map(item => (
                 <div key={item} className="flex items-start gap-2 text-xs">
-                  <span style={{ color: col.status === 'LIVE' ? '#c9b787' : col.status === 'DEMO' ? '#c9b787' : '#5e5e5e', flexShrink: 0 }}>
-                    {col.status === 'LIVE' ? '✓' : col.status === 'DEMO' ? '◎' : '→'}
+                  <span style={{ color: col.status === 'LIVE' ? '#c9b787' : col.status === 'GATED' ? '#c9b787' : '#5e5e5e', flexShrink: 0 }}>
+                    {col.status === 'LIVE' ? '✓' : col.status === 'GATED' ? '◎' : '→'}
                   </span>
                   <span style={{ color: 'var(--color-a11oy-text-sub)' }}>{item}</span>
                 </div>

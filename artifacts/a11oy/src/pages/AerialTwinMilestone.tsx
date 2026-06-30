@@ -30,7 +30,7 @@ export function AerialTwinMilestone() {
           label="DOCTRINE · AERIAL TWIN"
           title="Milestone not found"
           subtitle={`No operational surface registered for "${slug}".`}
-          status="DRAFT"
+          status="ROADMAP"
         />
         <Card>
           <p className="text-xs mb-3" style={{ color: SUB, lineHeight: 1.6 }}>
@@ -54,7 +54,7 @@ export function AerialTwinMilestone() {
         label={`DOCTRINE · AERIAL TWIN · MILESTONE ${pack.number}`}
         title={pack.title}
         subtitle={`${pack.tagline} · ${PHASE_LABEL[pack.phase] ?? pack.phase}`}
-        status="DELIVERED"
+        status="APPROVED"
       />
 
       {/* KPI strip */}
