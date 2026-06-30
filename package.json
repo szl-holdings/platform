@@ -215,7 +215,8 @@
       "tsx>esbuild": "0.28.1",
       "vite>esbuild": "0.28.1",
       "drizzle-kit>esbuild": "0.28.1",
-      "esbuild-register>esbuild": "0.28.1"
+      "esbuild-register>esbuild": "0.28.1",
+      "undici": ">=6.27.0"
     }
   }
 }
