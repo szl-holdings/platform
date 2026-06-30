@@ -333,7 +333,7 @@ const COMMANDS: Record<string, (args: string[]) => string[]> = {
     const passed = SEED_WORKCELLS.filter(w => w.mirrorEvalResult.verdict === 'pass').length;
     const warned = SEED_WORKCELLS.filter(w => w.mirrorEvalResult.verdict === 'warn').length;
     const blocked = SEED_WORKCELLS.filter(w => w.mirrorEvalResult.verdict === 'fail').length;
-    const avg = Math.round(SEED_WORKCELLS.reduce((s, w) => s + w.mirrorEvalResult.composite, 0) / SEED_WORKCELLS.length * 100);
+    const avg = Math.round(SEED_WORKCELLS.reduce((s, w) => s + w.mirrorEvalResult.score, 0) / SEED_WORKCELLS.length * 100);
     return [
       '── MirrorEval 2.0 Summary ─────────────────────',
       `  Total evaluations:    ${SEED_WORKCELLS.length}`,
