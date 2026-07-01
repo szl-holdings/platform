@@ -257,7 +257,7 @@ def lean_citation(ref: str) -> dict[str, Any]:
     """Check a Lean citation exists in the public lutar-lean repo. Existence,
     NOT re-proof — kernel re-checking is a `lake build`, which we name as the
     stronger step rather than claim to have done it."""
-    m = _LEAN_CITE.search(ref or "")
+    m = _LEAN_CITE.search((ref or "")[:2048])  # bound input: avoid polynomial-ReDoS on _LEAN_CITE
     if not m:
         return {"status": "not_applicable", "detail": "no Lean .lean citation found"}
     path = m.group(1).lstrip("/")
