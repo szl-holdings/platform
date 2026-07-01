@@ -114,7 +114,7 @@ export function extractBearerToken(authorizationHeader: string | undefined): str
   if (!authorizationHeader) {
     throw new AuthError('Missing Authorization header', 'MISSING_TOKEN');
   }
-  const match = /^Bearer\s+(.+)$/i.exec(authorizationHeader.trim());
+  const match = /^Bearer\s+(\S.*)$/i.exec(authorizationHeader.trim());
   if (!match || !match[1]) {
     throw new AuthError('Authorization header must use Bearer scheme', 'MISSING_TOKEN');
   }
