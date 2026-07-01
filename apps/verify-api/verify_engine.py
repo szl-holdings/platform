@@ -250,7 +250,7 @@ def rekor_inclusion(log_index: int) -> dict[str, Any]:
         return {"status": "unreachable", "detail": f"rekor lookup failed: {exc}"}
 
 
-_LEAN_CITE = re.compile(r"([A-Za-z0-9_./-]+\.lean)(?:::([A-Za-z0-9_']+))?")
+_LEAN_CITE = re.compile(r"([A-Za-z0-9_./-]{1,512}\.lean)(?:::([A-Za-z0-9_']{1,128}))?")
 
 
 def lean_citation(ref: str) -> dict[str, Any]:
