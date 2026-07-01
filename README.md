@@ -64,7 +64,7 @@ Every AI action that runs in this platform passes through a policy gate, gets bo
 |---|---|
 | Signed DSSE receipts on every governed action | **LIVE** |
 | 8 formulas locked-proven in Lean 4 (lutar-lean) | **LOCKED · kernel c7c0ba17** |
-| Λ trust aggregator — unconditional uniqueness | **Conjecture 1** (conditional proven axiom-free) |
+| Λ trust aggregator — unconditional uniqueness | **Conjecture 1 · OPEN** — statement-only, machine-checked false as stated; conditional uniqueness = **Theorem U** (axiom-free, modulo ≈Λ under IA; strict only under Anchored/Normalized) |
 | SLSA supply-chain | **L1 honest · L2 build-attested · L3 roadmap** |
 | FedRAMP / ATO / CMMC | **ROADMAP — not claimed today** |
 | OpenSSF Scorecard | [![](https://api.securityscorecards.dev/projects/github.com/szl-holdings/platform/badge)](https://securityscorecards.dev/viewer/?uri=github.com/szl-holdings/platform) |
