@@ -60,57 +60,57 @@ _ssl_ctx = ssl.create_default_context()
 
 
 # --------------------------------------------------------------------------- #
-  # SSRF guard: every outbound fetch must target a PUBLIC host over http(s).
-  # User-influenced URLs (Lean citation paths, fetch_and_verify) would otherwise
-  # let a caller pivot the request at internal / cloud-metadata addresses (e.g.
-  # 169.254.169.254, 127.0.0.1, 10.0.0.0/8). We resolve the host and reject any
-  # private / loopback / link-local / reserved / multicast IP, and re-run the same
-  # check on every redirect hop (redirects are a classic TOCTOU SSRF bypass).
-  # --------------------------------------------------------------------------- #
-  _ALLOWED_SCHEMES = ("http", "https")
+# SSRF guard: every outbound fetch must target a PUBLIC host over http(s).
+# User-influenced URLs (Lean citation paths, fetch_and_verify) would otherwise
+# let a caller pivot the request at internal / cloud-metadata addresses (e.g.
+# 169.254.169.254, 127.0.0.1, 10.0.0.0/8). We resolve the host and reject any
+# private / loopback / link-local / reserved / multicast IP, and re-run the same
+# check on every redirect hop (redirects are a classic TOCTOU SSRF bypass).
+# --------------------------------------------------------------------------- #
+_ALLOWED_SCHEMES = ("http", "https")
 
 
-  def _assert_public_url(url: str) -> None:
-      parts = urlsplit(url)
-      if parts.scheme not in _ALLOWED_SCHEMES:
-          raise ValueError(f"blocked URL scheme: {parts.scheme or '(none)'}")
-      host = parts.hostname
-      if not host:
-          raise ValueError("blocked URL: missing host")
-      try:
-          infos = socket.getaddrinfo(
-              host, parts.port or (443 if parts.scheme == "https" else 80)
-          )
-      except socket.gaierror as exc:
-          raise ValueError(f"blocked URL: cannot resolve host {host!r}: {exc}") from exc
-      for info in infos:
-          ip = ipaddress.ip_address(info[4][0])
-          if (
-              ip.is_private
-              or ip.is_loopback
-              or ip.is_link_local
-              or ip.is_reserved
-              or ip.is_multicast
-              or ip.is_unspecified
-          ):
-              raise ValueError(
-                  f"blocked URL: host {host!r} resolves to non-public address {ip}"
-              )
+def _assert_public_url(url: str) -> None:
+    parts = urlsplit(url)
+    if parts.scheme not in _ALLOWED_SCHEMES:
+        raise ValueError(f"blocked URL scheme: {parts.scheme or '(none)'}")
+    host = parts.hostname
+    if not host:
+        raise ValueError("blocked URL: missing host")
+    try:
+        infos = socket.getaddrinfo(
+            host, parts.port or (443 if parts.scheme == "https" else 80)
+        )
+    except socket.gaierror as exc:
+        raise ValueError(f"blocked URL: cannot resolve host {host!r}: {exc}") from exc
+    for info in infos:
+        ip = ipaddress.ip_address(info[4][0])
+        if (
+            ip.is_private
+            or ip.is_loopback
+            or ip.is_link_local
+            or ip.is_reserved
+            or ip.is_multicast
+            or ip.is_unspecified
+        ):
+            raise ValueError(
+                f"blocked URL: host {host!r} resolves to non-public address {ip}"
+            )
 
 
-  class _SafeRedirectHandler(urllib.request.HTTPRedirectHandler):
-      """Re-validate every redirect target so a public URL cannot be bounced to an
-      internal one."""
+class _SafeRedirectHandler(urllib.request.HTTPRedirectHandler):
+    """Re-validate every redirect target so a public URL cannot be bounced to an
+    internal one."""
 
-      def redirect_request(self, req, fp, code, msg, headers, newurl):  # type: ignore[override]
-          _assert_public_url(newurl)
-          return super().redirect_request(req, fp, code, msg, headers, newurl)
+    def redirect_request(self, req, fp, code, msg, headers, newurl):  # type: ignore[override]
+        _assert_public_url(newurl)
+        return super().redirect_request(req, fp, code, msg, headers, newurl)
 
 
-  _opener = urllib.request.build_opener(
-      _SafeRedirectHandler(),
-      urllib.request.HTTPSHandler(context=_ssl_ctx),
-  )
+_opener = urllib.request.build_opener(
+    _SafeRedirectHandler(),
+    urllib.request.HTTPSHandler(context=_ssl_ctx),
+)
 
 
 # --------------------------------------------------------------------------- #
