@@ -29,12 +29,15 @@ from __future__ import annotations
 import base64
 import binascii
 import hashlib
+import ipaddress
 import json
 import re
+import socket
 import ssl
 import urllib.request
 from typing import Any
 from datetime import datetime, timezone
+from urllib.parse import urlsplit
 
 from cryptography import x509
 from cryptography.exceptions import InvalidSignature
@@ -57,6 +60,60 @@ _ssl_ctx = ssl.create_default_context()
 
 
 # --------------------------------------------------------------------------- #
+# SSRF guard: every outbound fetch must target a PUBLIC host over http(s).
+# User-influenced URLs (Lean citation paths, fetch_and_verify) would otherwise
+# let a caller pivot the request at internal / cloud-metadata addresses (e.g.
+# 169.254.169.254, 127.0.0.1, 10.0.0.0/8). We resolve the host and reject any
+# private / loopback / link-local / reserved / multicast IP, and re-run the same
+# check on every redirect hop (redirects are a classic TOCTOU SSRF bypass).
+# --------------------------------------------------------------------------- #
+_ALLOWED_SCHEMES = ("http", "https")
+
+
+def _assert_public_url(url: str) -> None:
+    parts = urlsplit(url)
+    if parts.scheme not in _ALLOWED_SCHEMES:
+        raise ValueError(f"blocked URL scheme: {parts.scheme or '(none)'}")
+    host = parts.hostname
+    if not host:
+        raise ValueError("blocked URL: missing host")
+    try:
+        infos = socket.getaddrinfo(
+            host, parts.port or (443 if parts.scheme == "https" else 80)
+        )
+    except socket.gaierror as exc:
+        raise ValueError(f"blocked URL: cannot resolve host {host!r}: {exc}") from exc
+    for info in infos:
+        ip = ipaddress.ip_address(info[4][0])
+        if (
+            ip.is_private
+            or ip.is_loopback
+            or ip.is_link_local
+            or ip.is_reserved
+            or ip.is_multicast
+            or ip.is_unspecified
+        ):
+            raise ValueError(
+                f"blocked URL: host {host!r} resolves to non-public address {ip}"
+            )
+
+
+class _SafeRedirectHandler(urllib.request.HTTPRedirectHandler):
+    """Re-validate every redirect target so a public URL cannot be bounced to an
+    internal one."""
+
+    def redirect_request(self, req, fp, code, msg, headers, newurl):  # type: ignore[override]
+        _assert_public_url(newurl)
+        return super().redirect_request(req, fp, code, msg, headers, newurl)
+
+
+_opener = urllib.request.build_opener(
+    _SafeRedirectHandler(),
+    urllib.request.HTTPSHandler(context=_ssl_ctx),
+)
+
+
+# --------------------------------------------------------------------------- #
 # small helpers
 # --------------------------------------------------------------------------- #
 def _b64d(s: str) -> bytes:
@@ -72,8 +129,9 @@ def _b64d(s: str) -> bytes:
 
 
 def _http_get(url: str, accept: str = "application/json") -> tuple[int, bytes]:
+    _assert_public_url(url)
     req = urllib.request.Request(url, headers={"Accept": accept, "User-Agent": "a11oy-verify/1.0"})
-    with urllib.request.urlopen(req, timeout=_HTTP_TIMEOUT, context=_ssl_ctx) as r:
+    with _opener.open(req, timeout=_HTTP_TIMEOUT) as r:
         return r.status, r.read(_MAX_FETCH_BYTES)
 
 
@@ -192,14 +250,14 @@ def rekor_inclusion(log_index: int) -> dict[str, Any]:
         return {"status": "unreachable", "detail": f"rekor lookup failed: {exc}"}
 
 
-_LEAN_CITE = re.compile(r"([A-Za-z0-9_./-]+\.lean)(?:::([A-Za-z0-9_']+))?")
+_LEAN_CITE = re.compile(r"([A-Za-z0-9_./-]{1,512}\.lean)(?:::([A-Za-z0-9_']{1,128}))?")
 
 
 def lean_citation(ref: str) -> dict[str, Any]:
     """Check a Lean citation exists in the public lutar-lean repo. Existence,
     NOT re-proof — kernel re-checking is a `lake build`, which we name as the
     stronger step rather than claim to have done it."""
-    m = _LEAN_CITE.search(ref or "")
+    m = _LEAN_CITE.search((ref or "")[:2048])  # bound input: avoid polynomial-ReDoS on _LEAN_CITE
     if not m:
         return {"status": "not_applicable", "detail": "no Lean .lean citation found"}
     path = m.group(1).lstrip("/")
@@ -208,6 +266,8 @@ def lean_citation(ref: str) -> dict[str, Any]:
     if not path.startswith(("Lutar/", "Showcase/", "src/")):
         candidates += [f"Lutar/{path}", f"src/{path}"]
     for cand in candidates:
+        if ".." in cand.split("/"):
+            continue
         url = f"https://api.github.com/repos/szl-holdings/lutar-lean/contents/{cand}?ref=main"
         try:
             status, body = _http_get(url, accept="application/vnd.github.raw")
