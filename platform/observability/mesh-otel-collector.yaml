@@ -1,0 +1,143 @@
+# Folded from szl-holdings/szl-otel-mesh manifests/otel/collector.yaml
+# Source: https://github.com/szl-holdings/szl-otel-mesh/blob/main/manifests/otel/collector.yaml
+# Doctrine v11 LOCKED 749/14/163 · Λ = Conjecture 1 (never a theorem) · SLSA L1
+#
+# OTel collector for the SZL 5-organ mesh (Layer 5 — observability spine).
+# Receives OTLP gRPC/HTTP from all organ sidecars; forwards to the vsp-otel
+# Λ-gate exporter (Layer 4) at vsp-otel-collector.szl-mesh.svc.cluster.local:4318.
+#
+# Folded here per Dev 3 consolidation (2026-06-30) — szl-otel-mesh archived after this fold.
+#
+# Signed-off-by: Stephen Lutar <stephenlutar2@gmail.com>
+# Co-Authored-By: Perplexity Computer Agent <agent@perplexity.ai>
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: mesh-otel-collector-config
+  namespace: szl-mesh
+  labels:
+    app.kubernetes.io/part-of: szl-mesh
+data:
+  collector.yaml: |
+    extensions:
+      health_check:
+        endpoint: 0.0.0.0:13133
+    receivers:
+      otlp:
+        protocols:
+          grpc:
+            endpoint: 0.0.0.0:4317
+          http:
+            endpoint: 0.0.0.0:4318
+    processors:
+      memory_limiter:
+        check_interval: 5s
+        limit_mib: 256
+      batch:
+        send_batch_size: 512
+        timeout: 5s
+    exporters:
+      otlphttp/vsp-otel:
+        endpoint: http://vsp-otel-collector.szl-mesh.svc.cluster.local:4318
+      debug:
+        verbosity: normal
+    service:
+      extensions: [health_check]
+      pipelines:
+        traces:
+          receivers: [otlp]
+          processors: [memory_limiter, batch]
+          exporters: [otlphttp/vsp-otel, debug]
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: mesh-otlp-collector
+  namespace: szl-mesh
+  labels:
+    app.kubernetes.io/part-of: szl-mesh
+    app: mesh-otlp-collector
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: mesh-otlp-collector
+  template:
+    metadata:
+      labels:
+        app: mesh-otlp-collector
+        szl.mesh/component: collector
+    spec:
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 10001
+        runAsGroup: 10001
+        fsGroup: 10001
+        seccompProfile:
+          type: RuntimeDefault
+      containers:
+        - name: otel-collector
+          image: otel/opentelemetry-collector-contrib:0.104.0@sha256:e07e325e303e86f4a87a617491e921b579a92da6d404007394757ac910bf9587
+          args: ["--config=/etc/otel/collector.yaml"]
+          ports:
+            - name: otlp-grpc
+              containerPort: 4317
+            - name: otlp-http
+              containerPort: 4318
+            - name: health
+              containerPort: 13133
+          resources:
+            requests:
+              cpu: 100m
+              memory: 128Mi
+            limits:
+              cpu: 500m
+              memory: 256Mi
+          livenessProbe:
+            httpGet:
+              path: /
+              port: health
+            initialDelaySeconds: 10
+            periodSeconds: 15
+            timeoutSeconds: 3
+            failureThreshold: 3
+          readinessProbe:
+            httpGet:
+              path: /
+              port: health
+            initialDelaySeconds: 5
+            periodSeconds: 10
+            timeoutSeconds: 3
+            failureThreshold: 3
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            capabilities:
+              drop: ["ALL"]
+          volumeMounts:
+            - name: config
+              mountPath: /etc/otel
+              readOnly: true
+      volumes:
+        - name: config
+          configMap:
+            name: mesh-otel-collector-config
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: mesh-otlp-collector
+  namespace: szl-mesh
+  labels:
+    app.kubernetes.io/part-of: szl-mesh
+spec:
+  selector:
+    app: mesh-otlp-collector
+  ports:
+    - name: otlp-grpc
+      port: 4317
+      targetPort: 4317
+    - name: otlp-http
+      port: 4318
+      targetPort: 4318
