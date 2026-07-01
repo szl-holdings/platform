@@ -47,9 +47,6 @@ on:
 
 permissions:
   contents: read
-  packages: write
-  id-token: write # keyless cosign (OIDC -> Fulcio -> Rekor)
-
 env:
   IMAGE: ghcr.io/${{ github.repository_owner }}/vessels
   # pnpm-workspace build: context is the repo root; Dockerfile lives in the package.
@@ -147,3 +144,7 @@ jobs:
             --certificate-identity-regexp "https://github.com/${{ github.repository }}/.github/workflows/.+" \
             --certificate-oidc-issuer "https://token.actions.githubusercontent.com" \
             "${REF}"
+    permissions:
+      contents: read
+      packages: write
+      id-token: write
