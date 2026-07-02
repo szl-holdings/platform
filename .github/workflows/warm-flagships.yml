@@ -5,9 +5,9 @@
 #
 # Roster honesty (Doctrine v11, 749/14/163):
 #   LIVE docker organs (probe /healthz): a11oy, killinchu, yarqa.
-#   LIVE docker organ serving a static asset (no /healthz; probe index.html):
-#     anatomy (re-homed from sdk:static -> sdk:docker 2026-06-15; the .static.hf.space
-#     host 404s after the re-home, the canonical .hf.space host serves it).
+#   LIVE static organ serving a static asset (no /healthz; probe index.html):
+#     anatomy (sdk:static; HF serves static Spaces from the .static.hf.space host,
+#     so the plain .hf.space host 404s -- probe the .static.hf.space index.html).
 #   RETIRED — consolidated into a11oy, intentionally NOT probed (no Space exists):
 #     amaru -> a11oy Memory, sentra -> a11oy Sentinel, rosie -> a11oy Operator.
 #   hatun-mcp (the great context MCP gateway): LIVE docker Space (probe /healthz).
@@ -35,7 +35,7 @@ jobs:
           - organ: hatun-mcp
             probe: "https://szlholdings-hatun-mcp.hf.space/healthz"
           - organ: anatomy
-            probe: "https://szlholdings-anatomy.hf.space/index.html"
+            probe: "https://szlholdings-anatomy.static.hf.space/index.html"
     steps:
       - name: Ping flagship
         id: ping

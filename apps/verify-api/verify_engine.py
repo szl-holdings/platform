@@ -34,10 +34,10 @@ import json
 import re
 import socket
 import ssl
-import urllib.request
+import http.client
 from typing import Any
 from datetime import datetime, timezone
-from urllib.parse import urlsplit
+from urllib.parse import urljoin, urlsplit
 
 from cryptography import x509
 from cryptography.exceptions import InvalidSignature
@@ -70,19 +70,26 @@ _ssl_ctx = ssl.create_default_context()
 _ALLOWED_SCHEMES = ("http", "https")
 
 
-def _assert_public_url(url: str) -> None:
+def _assert_public_url(url: str) -> tuple[str, str, int, str, str]:
+    """Validate a URL is http(s) to a PUBLIC host and PIN the resolved IP.
+
+    Returns ``(hostname, pinned_ip, port, scheme, path_with_query)``. The caller
+    connects to ``pinned_ip`` directly (with TLS/SNI still bound to ``hostname``)
+    so the DNS answer cannot change between this check and the fetch — closing the
+    rebinding TOCTOU that a plain re-resolve would leave open.
+    """
     parts = urlsplit(url)
     if parts.scheme not in _ALLOWED_SCHEMES:
         raise ValueError(f"blocked URL scheme: {parts.scheme or '(none)'}")
     host = parts.hostname
     if not host:
         raise ValueError("blocked URL: missing host")
+    port = parts.port or (443 if parts.scheme == "https" else 80)
     try:
-        infos = socket.getaddrinfo(
-            host, parts.port or (443 if parts.scheme == "https" else 80)
-        )
+        infos = socket.getaddrinfo(host, port, proto=socket.IPPROTO_TCP)
     except socket.gaierror as exc:
         raise ValueError(f"blocked URL: cannot resolve host {host!r}: {exc}") from exc
+    pinned_ip: str | None = None
     for info in infos:
         ip = ipaddress.ip_address(info[4][0])
         if (
@@ -96,21 +103,42 @@ def _assert_public_url(url: str) -> None:
             raise ValueError(
                 f"blocked URL: host {host!r} resolves to non-public address {ip}"
             )
+        if pinned_ip is None:
+            pinned_ip = info[4][0]
+    if pinned_ip is None:
+        raise ValueError(f"blocked URL: cannot resolve host {host!r}")
+    path = parts.path or "/"
+    if parts.query:
+        path = f"{path}?{parts.query}"
+    return host, pinned_ip, port, parts.scheme, path
 
 
-class _SafeRedirectHandler(urllib.request.HTTPRedirectHandler):
-    """Re-validate every redirect target so a public URL cannot be bounced to an
-    internal one."""
+class _PinnedHTTPSConnection(http.client.HTTPSConnection):
+    """HTTPS connection to a pre-validated IP; TLS SNI + certificate stay bound to
+    the real hostname so pinning the address never weakens certificate checks."""
 
-    def redirect_request(self, req, fp, code, msg, headers, newurl):  # type: ignore[override]
-        _assert_public_url(newurl)
-        return super().redirect_request(req, fp, code, msg, headers, newurl)
+    def __init__(self, host: str, pinned_ip: str, **kw: Any) -> None:
+        super().__init__(host, **kw)
+        self._pinned_ip = pinned_ip
+
+    def connect(self) -> None:
+        sock = socket.create_connection((self._pinned_ip, self.port), self.timeout)
+        self.sock = self._context.wrap_socket(sock, server_hostname=self.host)
 
 
-_opener = urllib.request.build_opener(
-    _SafeRedirectHandler(),
-    urllib.request.HTTPSHandler(context=_ssl_ctx),
-)
+class _PinnedHTTPConnection(http.client.HTTPConnection):
+    """Plain-HTTP connection to a pre-validated IP (Host header stays the real
+    hostname)."""
+
+    def __init__(self, host: str, pinned_ip: str, **kw: Any) -> None:
+        super().__init__(host, **kw)
+        self._pinned_ip = pinned_ip
+
+    def connect(self) -> None:
+        self.sock = socket.create_connection((self._pinned_ip, self.port), self.timeout)
+
+
+_MAX_REDIRECTS = 5
 
 
 # --------------------------------------------------------------------------- #
@@ -129,10 +157,40 @@ def _b64d(s: str) -> bytes:
 
 
 def _http_get(url: str, accept: str = "application/json") -> tuple[int, bytes]:
-    _assert_public_url(url)
-    req = urllib.request.Request(url, headers={"Accept": accept, "User-Agent": "a11oy-verify/1.0"})
-    with _opener.open(req, timeout=_HTTP_TIMEOUT) as r:
-        return r.status, r.read(_MAX_FETCH_BYTES)
+    current = url
+    for _ in range(_MAX_REDIRECTS + 1):
+        host, pinned_ip, port, scheme, path = _assert_public_url(current)
+        if scheme == "https":
+            conn: http.client.HTTPConnection = _PinnedHTTPSConnection(
+                host, pinned_ip, port=port, timeout=_HTTP_TIMEOUT, context=_ssl_ctx
+            )
+        else:
+            conn = _PinnedHTTPConnection(
+                host, pinned_ip, port=port, timeout=_HTTP_TIMEOUT
+            )
+        try:
+            conn.request(
+                "GET",
+                path,
+                headers={
+                    "Host": host,
+                    "Accept": accept,
+                    "User-Agent": "a11oy-verify/1.0",
+                },
+            )
+            resp = conn.getresponse()
+            if resp.status in (301, 302, 303, 307, 308):
+                location = resp.headers.get("Location")
+                resp.read()
+                if not location:
+                    return resp.status, b""
+                # Re-validate + re-pin the redirect target (redirect-based SSRF).
+                current = urljoin(current, location)
+                continue
+            return resp.status, resp.read(_MAX_FETCH_BYTES)
+        finally:
+            conn.close()
+    raise ValueError(f"blocked URL: too many redirects (> {_MAX_REDIRECTS})")
 
 
 def _is_hex(s: str, n: int | None = None) -> bool:

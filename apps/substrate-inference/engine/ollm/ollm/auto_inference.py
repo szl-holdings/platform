@@ -28,16 +28,49 @@ def _safe_log(value: Any) -> str:
     return str(value).replace("\r", " ").replace("\n", " ")
 
 
+def _safe_cache_dir(cache_dir: str) -> str:
+    """Resolve + confine a cache directory so an attacker-influenced value cannot
+    escape the allowed cache root via traversal or an absolute path (CWE-22).
+
+    The root defaults to the system temp dir; deployments that place the SSD KV
+    cache on a dedicated mount set ``OLLM_CACHE_ROOT`` to that path.
+    """
+    if not isinstance(cache_dir, str) or not cache_dir.strip():
+        raise ValueError("cache_dir must be a non-empty string")
+    root = os.path.realpath(os.environ.get("OLLM_CACHE_ROOT") or tempfile.gettempdir())
+    candidate = cache_dir if os.path.isabs(cache_dir) else os.path.join(root, cache_dir)
+    resolved = os.path.realpath(candidate)
+    # Confine to the cache root: commonpath of an escaping path differs from root
+    # (and it raises on drive/relative mismatches), so any traversal or absolute
+    # path outside the root is rejected before it can reach a filesystem sink.
+    if os.path.commonpath((root, resolved)) != root:
+        raise ValueError(
+            f"cache_dir {cache_dir!r} escapes the allowed cache root {root!r}; "
+            "set OLLM_CACHE_ROOT to permit a different location"
+        )
+    return resolved
+
+
 class _SSDKVCacheManager:
     """Manages SSD-backed KV cache storage for large-context inference."""
 
     def __init__(self, cache_dir: str, max_cache_size_gb: float = 64.0):
-        self.cache_dir = cache_dir
+        resolved = _safe_cache_dir(cache_dir)
+        # Re-assert containment in the same scope as the filesystem sink below so
+        # the confinement is a prefix barrier the taint analysis recognizes at
+        # os.makedirs (the guard inside _safe_cache_dir is not visible across its
+        # return; root is an untainted env/temp prefix).
+        root = os.path.realpath(os.environ.get("OLLM_CACHE_ROOT") or tempfile.gettempdir())
+        if not resolved.startswith(root):
+            raise ValueError(
+                f"cache_dir {cache_dir!r} escapes the allowed cache root {root!r}"
+            )
+        self.cache_dir = resolved
         self.max_cache_size_gb = max_cache_size_gb
         self._active = False
 
-        os.makedirs(cache_dir, exist_ok=True)
-        log.info("SSD KV cache initialized at %s (max %.1f GB)", _safe_log(cache_dir), max_cache_size_gb)
+        os.makedirs(resolved, exist_ok=True)
+        log.info("SSD KV cache initialized at %s (max %.1f GB)", _safe_log(self.cache_dir), max_cache_size_gb)
         self._active = True
 
     @property
@@ -46,7 +79,12 @@ class _SSDKVCacheManager:
 
     def get_cache_path(self, model_id: str) -> str:
         safe_name = model_id.replace("/", "_").replace("\\", "_")
-        path = os.path.join(self.cache_dir, f"{safe_name}_kv_cache")
+        # Confine under the untainted cache root (env/temp) with a prefix barrier
+        # the taint analysis recognizes at the os.makedirs sink below (CWE-22).
+        root = os.path.realpath(os.environ.get("OLLM_CACHE_ROOT") or tempfile.gettempdir())
+        path = os.path.realpath(os.path.join(self.cache_dir, f"{safe_name}_kv_cache"))
+        if not path.startswith(root):
+            raise ValueError(f"cache path for {model_id!r} escapes the cache root")
         os.makedirs(path, exist_ok=True)
         return path
 
@@ -135,9 +173,15 @@ class AutoInference:
         }
 
         if cpu_offload_layers > 0:
-            offload_dir = os.path.join(
-                ssd_cache_dir or tempfile.gettempdir(), "cpu_offload"
+            # Confine under the untainted cache root (env/temp) with a prefix
+            # barrier the taint analysis recognizes at the os.makedirs sink below.
+            offload_root = os.path.realpath(
+                os.environ.get("OLLM_CACHE_ROOT") or tempfile.gettempdir()
             )
+            offload_base = _safe_cache_dir(ssd_cache_dir) if ssd_cache_dir else offload_root
+            offload_dir = os.path.realpath(os.path.join(offload_base, "cpu_offload"))
+            if not offload_dir.startswith(offload_root):
+                raise ValueError("cpu offload path escapes the cache root")
             os.makedirs(offload_dir, exist_ok=True)
             model_kwargs["offload_folder"] = offload_dir
             log.info(

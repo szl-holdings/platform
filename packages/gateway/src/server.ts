@@ -84,8 +84,16 @@ export function createServer(config?: GatewayConfig) {
   const basePath = (process.env['BASE_PATH'] ?? '').replace(/\/$/, '');
 
   return createHttpServer(async (req: IncomingMessage, res: ServerResponse) => {
-    const correlationId =
+    const rawCorrelationId =
       (req.headers['x-correlation-id'] as string | undefined) ?? randomUUID();
+    // Confine the caller-supplied id before it reaches any log line or response
+    // body: first strip CR/LF so it cannot forge log entries (CWE-117), then
+    // restrict to a safe charset. Fall back to a fresh id if nothing safe remains.
+    const correlationId =
+      rawCorrelationId
+        .replace(/[\r\n]/g, '')
+        .replace(/[^A-Za-z0-9._-]/g, '')
+        .slice(0, 128) || randomUUID();
     let url = req.url ?? '/';
     if (basePath && url.startsWith(basePath)) {
       url = url.slice(basePath.length) || '/';
@@ -174,7 +182,7 @@ export function createServer(config?: GatewayConfig) {
     } catch (err) {
       // Log full error server-side (with correlationId) for ops; return a generic
       // message so internal details are never leaked to the caller (CWE-209).
-      console.error(`[gateway] request error (correlationId=${correlationId}):`, err);
+      console.error('[gateway] request error (correlationId=%s):', correlationId, err);
       sendJson(res, 500, {
         correlationId,
         status: 'error',
