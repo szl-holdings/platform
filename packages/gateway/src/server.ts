@@ -172,10 +172,13 @@ export function createServer(config?: GatewayConfig) {
       // 404
       sendJson(res, 404, { error: 'Not found', path: url, method });
     } catch (err) {
+      // Log full error server-side (with correlationId) for ops; return a generic
+      // message so internal details are never leaked to the caller (CWE-209).
+      console.error(`[gateway] request error (correlationId=${correlationId}):`, err);
       sendJson(res, 500, {
         correlationId,
         status: 'error',
-        message: err instanceof Error ? err.message : String(err),
+        message: 'Internal server error',
       });
     }
   });

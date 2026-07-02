@@ -23,6 +23,11 @@ from typing import Any, Iterator
 log = logging.getLogger("ollm.auto_inference")
 
 
+def _safe_log(value: Any) -> str:
+    """Strip CR/LF so attacker-influenced values cannot forge log lines (CWE-117)."""
+    return str(value).replace("\r", " ").replace("\n", " ")
+
+
 class _SSDKVCacheManager:
     """Manages SSD-backed KV cache storage for large-context inference."""
 
@@ -32,7 +37,7 @@ class _SSDKVCacheManager:
         self._active = False
 
         os.makedirs(cache_dir, exist_ok=True)
-        log.info("SSD KV cache initialized at %s (max %.1f GB)", cache_dir, max_cache_size_gb)
+        log.info("SSD KV cache initialized at %s (max %.1f GB)", _safe_log(cache_dir), max_cache_size_gb)
         self._active = True
 
     @property
@@ -138,7 +143,7 @@ class AutoInference:
             log.info(
                 "CPU offloading %d layers to %s",
                 cpu_offload_layers,
-                offload_dir,
+                _safe_log(offload_dir),
             )
 
         processor = None
@@ -148,7 +153,7 @@ class AutoInference:
                 cache_dir=cache_dir,
                 trust_remote_code=trust_remote_code,
             )
-            log.info("Loaded multimodal processor for %s", model_name_or_path)
+            log.info("Loaded multimodal processor for %s", _safe_log(model_name_or_path))
         except Exception:
             pass
 
@@ -171,7 +176,7 @@ class AutoInference:
 
         log.info(
             "Model loaded: %s, VRAM: %.1f MB, flash_attn: %s, cpu_offload: %d layers, ssd_cache: %s",
-            model_name_or_path,
+            _safe_log(model_name_or_path),
             vram_used,
             use_flash_attn,
             cpu_offload_layers,
