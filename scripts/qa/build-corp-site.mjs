@@ -13,12 +13,22 @@
  * check-links crawls cleanly. Meta descriptions are apostrophe-free because the
  * metadata check captures content up to the first quote OR apostrophe.
  *
- * Usage: node scripts/qa/build-corp-site.mjs [outDir]   (default /tmp/corp-site)
+ * Usage: node scripts/qa/build-corp-site.mjs <outDir>
+ *
+ * The output directory is a required, caller-supplied argument. We intentionally
+ * do not default to a hardcoded path inside the OS temp dir: a predictable temp
+ * path is a security hazard (symlink / predictable-name attacks) and is flagged
+ * by CodeQL's insecure-temporary-file rule. The audit-full workflow passes an
+ * explicit path (/tmp/corp-site on the ephemeral CI runner) at invocation.
  */
 import { mkdirSync, writeFileSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 
-const OUT = process.argv[2] || '/tmp/corp-site';
+const OUT = process.argv[2];
+if (!OUT) {
+  console.error('usage: node scripts/qa/build-corp-site.mjs <outDir>');
+  process.exit(2);
+}
 const BRAND = 'SZL Holdings';
 
 const NAV = [
