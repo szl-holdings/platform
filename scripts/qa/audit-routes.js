@@ -1,186 +1,115 @@
 #!/usr/bin/env node
 /**
  * audit:routes — SZL Holdings Platform
- * Checks route coverage across all apps: verifies that registered routes exist as page files.
+ * Verifies that every lazily-registered page route resolves to a real page file.
+ *
+ * Historically this used a hand-maintained `knownRoutes` list per app. That list
+ * drifted badly once the monorepo was shrunk to its six product artifacts — it
+ * still referenced deleted apps (szl-holdings, lyte-command-center) and the
+ * pre-restructure api-server route layout, so the guard failed on 69 phantom
+ * routes that no longer exist.
+ *
+ * Instead of re-hardcoding a list that will drift again, this scans each current
+ * product app's router (`src/App.tsx`) for dynamic page imports —
+ * `import('@/pages/...')` / `import('./pages/...')` — and asserts the referenced
+ * page module exists on disk. This keeps the guard self-maintaining and honest:
+ * a page that is still routed but whose file was deleted will fail the audit.
  *
  * Usage:
  *   node scripts/qa/audit-routes.js
  */
 
-import { readdirSync } from 'node:fs';
+import { existsSync, readFileSync, statSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const ROOT = join(__dirname, '../..');
+const ARTIFACTS = join(ROOT, 'artifacts');
 
-const APP_CONFIGS = [
-  {
-    name: 'SZL Holdings',
-    appPath: join(ROOT, 'artifacts/szl-holdings/src'),
-    pagesDir: 'pages',
-    knownRoutes: [
-      'landing',
-      'platform',
-      'design-partners',
-      'contact',
-      'trust-center',
-      'trust',
-      'trust-security',
-      'trust-governance',
-      'trust-architecture',
-      'trust-ai',
-      'trust-approvals',
-      'trust-operations',
-      'ventures',
-      'portfolio',
-      'how-it-works',
-      'solutions',
-      'solutions-aegis',
-      'solutions-vessels',
-      'solutions-terra',
-      'solutions-prism-counsel',
-      'lyte-page',
-      'alloy-page',
-      'docs',
-      'status',
-      'legal-privacy',
-      'legal-terms',
-      'accessibility',
-      'not-found',
-      'founder',
-      'company',
-    ],
-  },
-  {
-    name: 'Lyte Command Center',
-    appPath: join(ROOT, 'artifacts/lyte-command-center/src'),
-    pagesDir: 'pages',
-    knownRoutes: [
-      'action-debt',
-      'aef-knowledge-search',
-      'billing-account',
-      'board-view',
-      'briefing',
-      'brief',
-      'causal-intelligence',
-      'decision-center',
-      'decision-replay',
-      'decision-twin',
-      'entity-graph',
-      'eval-studio',
-      'evidence-explorer',
-      'forecast',
-      'landing',
-      'onboarding',
-      'overview',
-      'ownership-drift',
-      'policy-center',
-      'pressure-map',
-      'run-console',
-      'scenario-composer',
-      'signals-console',
-      'workflow-health',
-    ],
-  },
-  {
-    name: 'API Server',
-    appPath: join(ROOT, 'artifacts/api-server/src'),
-    pagesDir: 'routes',
-    knownRoutes: [
-      'health',
-      'core',
-      'auth',
-      'alloy',
-      'lyte',
-      'vessels',
-      'terra',
-      'billing',
-      'notifications',
-      'connectors',
-      'analytics',
-      'jobs',
-      'webhooks',
-      'exports',
-      'feedback',
-    ],
-  },
-];
+// Current product apps (monorepo was shrunk to these six — see .github/workflows/e2e.yml).
+const APPS = ['a11oy', 'sentra', 'terra', 'carlota-jo', 'counsel', 'vessels'];
 
-function listPageFiles(dir) {
-  try {
-    return readdirSync(dir, { withFileTypes: true })
-      .filter((e) => e.isFile() && /\.(ts|tsx|js|jsx)$/.test(e.name))
-      .map((e) => e.name.replace(/\.(ts|tsx|js|jsx)$/, ''));
-  } catch {
-    return [];
+const PAGE_EXTENSIONS = ['.tsx', '.ts', '.jsx', '.js'];
+
+// Matches static page imports registered in an app router, e.g.
+//   import('@/pages/deals')      import("./pages/dashboard")
+//   import('../pages/foo/bar')   import('src/pages/x')
+// The captured group is the page path relative to the app's `pages` directory.
+const PAGE_IMPORT_RE = /import\(\s*['"](?:@|\.\.?|src)\/pages\/([^'"]+)['"]\s*\)/g;
+
+function pageExists(pagesDir, routePath) {
+  const base = join(pagesDir, routePath);
+  for (const ext of PAGE_EXTENSIONS) {
+    if (existsSync(base + ext)) return true;
   }
+  // A page may also be a directory with an index file.
+  if (existsSync(base) && statSync(base).isDirectory()) {
+    for (const ext of PAGE_EXTENSIONS) {
+      if (existsSync(join(base, `index${ext}`))) return true;
+    }
+  }
+  return false;
 }
 
-function listSubDirs(dir) {
+function collectRoutes(routerFile) {
+  const routes = new Set();
+  let contents;
   try {
-    return readdirSync(dir, { withFileTypes: true })
-      .filter((e) => e.isDirectory())
-      .map((e) => e.name);
+    contents = readFileSync(routerFile, 'utf8');
   } catch {
-    return [];
+    return routes;
   }
+  for (const match of contents.matchAll(PAGE_IMPORT_RE)) {
+    if (match[1]) routes.add(match[1]);
+  }
+  return routes;
 }
 
 function main() {
-
-  let _totalChecks = 0;
-  let _totalPassed = 0;
-  let totalFailed = 0;
+  let totalChecks = 0;
+  let totalPassed = 0;
   const failures = [];
 
-  for (const config of APP_CONFIGS) {
-    const pagesDir = join(config.appPath, config.pagesDir);
-    const existingFiles = new Set(listPageFiles(pagesDir));
-    const _existingSubDirs = new Set(listSubDirs(pagesDir));
+  for (const app of APPS) {
+    const appSrc = join(ARTIFACTS, app, 'src');
+    const pagesDir = join(appSrc, 'pages');
+    const routerFile = join(appSrc, 'App.tsx');
 
-    // Check top-level routes
-    for (const route of config.knownRoutes) {
-      _totalChecks++;
-      if (existingFiles.has(route)) {
-        _totalPassed++;
-      } else {
-        totalFailed++;
-        failures.push({ app: config.name, route, context: 'top-level' });
-      }
+    if (!existsSync(routerFile)) {
+      failures.push({ app, route: 'src/App.tsx', context: 'missing app router' });
+      continue;
     }
 
-    // Check sub-directory routes
-    if (config.subDirRoutes) {
-      for (const { subDir, routes } of config.subDirRoutes) {
-        const subPath = join(pagesDir, subDir);
-        const subFiles = new Set(listPageFiles(subPath));
-
-        for (const route of routes) {
-          _totalChecks++;
-          if (subFiles.has(route)) {
-            _totalPassed++;
-          } else {
-            totalFailed++;
-            failures.push({ app: config.name, route: `${subDir}/${route}`, context: 'sub-dir' });
-          }
-        }
+    const routes = [...collectRoutes(routerFile)].sort();
+    for (const routePath of routes) {
+      totalChecks++;
+      if (pageExists(pagesDir, routePath)) {
+        totalPassed++;
+      } else {
+        failures.push({ app, route: routePath, context: 'top-level' });
       }
     }
   }
 
-  if (totalFailed > 0) {
-    console.error(`\n❌ audit:routes — ${totalFailed} missing route file(s):\n`);
+  if (failures.length > 0) {
+    console.error(`\n❌ audit:routes — ${failures.length} missing route file(s):\n`);
     for (const f of failures) {
       console.error(`  [${f.app}] Missing page file: ${f.route} (${f.context})`);
     }
-    console.error(`\nEnsure each listed route has a corresponding .tsx file in the pages directory,`);
-    console.error(`or remove the route from knownRoutes in scripts/qa/audit-routes.js if intentionally deleted.\n`);
+    console.error(
+      `\nEnsure each listed route has a corresponding page file under artifacts/<app>/src/pages/,`,
+    );
+    console.error(
+      `or remove the dynamic import from the app router if the page was intentionally deleted.\n`,
+    );
     process.exit(1);
-  } else {
-    console.log(`✅ audit:routes — all ${_totalChecks} registered routes have matching page files.`);
-    process.exit(0);
   }
+
+  console.log(
+    `✅ audit:routes — all ${totalPassed}/${totalChecks} registered page routes across ${APPS.length} apps have matching page files.`,
+  );
+  process.exit(0);
 }
 
 main();
