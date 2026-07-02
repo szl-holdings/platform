@@ -74,10 +74,15 @@ jobs:
           serve artifacts/terra/dist/public       -s -l 6100 > /tmp/serve-terra.log      2>&1 &
           serve artifacts/vessels/dist/public     -s -l 8097 > /tmp/serve-vessels.log    2>&1 &
 
-          # Runtime API on :8080 (artifact-ports.js api-server port). It refuses to
-          # listen when NODE_ENV=test (server.ts), so boot it as production.
+          # Runtime API on :8080 (artifact-ports.js api-server port). The internal
+          # @szl-holdings/* packages export TypeScript source (exports -> src/*.ts),
+          # so the app runs from source via tsx — exactly how `pnpm dev` boots it
+          # (dev script: `tsx watch src/server.ts`). Plain `node dist/server.js`
+          # only resolves those src-export deps inside the Docker `pnpm deploy`
+          # image, not in a plain workspace checkout. server.ts refuses to listen
+          # when NODE_ENV=test, so boot it as production.
           ( cd apps/alloy-runtime-api && NODE_ENV=production PORT=8080 \
-              node --enable-source-maps dist/server.js > /tmp/runtime-api.log 2>&1 & )
+              pnpm exec tsx src/server.ts > /tmp/runtime-api.log 2>&1 ) &
 
           # Block until every target answers, so the audit's qa-site step never
           # races server startup.
@@ -88,7 +93,8 @@ jobs:
             port="${hp%%/*}"; path="/${hp#*/}"
             ready=""
             for i in $(seq 1 90); do
-              code=$(curl -s -o /dev/null -w '%{http_code}' "http://127.0.0.1:${port}${path}" || echo 000)
+              code=$(curl -s -o /dev/null -w '%{http_code}' "http://127.0.0.1:${port}${path}" 2>/dev/null || true)
+              code=${code:-000}
               if [ "$code" != "000" ] && [ "$code" -lt 500 ]; then
                 echo "ready: 127.0.0.1:${port}${path} -> ${code}"; ready=1; break
               fi
