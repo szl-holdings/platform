@@ -90,6 +90,37 @@ function isOriginAllowed(origin: string | undefined): boolean {
   }
 }
 
+// Resolve the response's Access-Control-Allow-Origin to an exact, pre-configured
+// allowlist entry (never the raw request header) so it can't be attacker-tainted
+// (CWE-346) — a prerequisite for safely combining it with Allow-Credentials: true.
+function resolveAllowedOrigin(origin: string | undefined): string | undefined {
+  if (!origin || !isOriginAllowed(origin)) return undefined;
+  // Exact match → echo the trusted allowlist entry (a constant), never the raw
+  // request header, so nothing attacker-controlled reaches Access-Control-Allow-Origin.
+  for (const allowed of getAllowedOrigins()) {
+    if (allowed === origin) return allowed;
+  }
+  // Non-production convenience: accept any localhost / 127.0.0.1 dev origin. The
+  // returned value is rebuilt from a literal scheme/host plus a numerically-laundered
+  // port, so it carries no attacker-controlled substring (keeps the CWE-346 barrier).
+  if (!isProd()) {
+    try {
+      const url = new URL(origin);
+      if (url.hostname === 'localhost' || url.hostname === '127.0.0.1') {
+        const scheme = url.protocol === 'https:' ? 'https' : 'http';
+        const host = url.hostname === 'localhost' ? 'localhost' : '127.0.0.1';
+        const portNum = Number(url.port);
+        const port =
+          Number.isInteger(portNum) && portNum > 0 && portNum <= 65535 ? `:${portNum}` : '';
+        return `${scheme}://${host}${port}`;
+      }
+    } catch {
+      return undefined;
+    }
+  }
+  return undefined;
+}
+
 function securityHeaders(_req: Request, res: Response, next: NextFunction): void {
   res.setHeader('X-Content-Type-Options', 'nosniff');
   res.setHeader('X-Frame-Options', 'DENY');
@@ -104,17 +135,22 @@ function securityHeaders(_req: Request, res: Response, next: NextFunction): void
 
 function corsMiddleware(req: Request, res: Response, next: NextFunction): void {
   const origin = req.headers.origin;
-  if (origin && isOriginAllowed(origin)) {
-    res.setHeader('Access-Control-Allow-Origin', origin);
+  const allowedOrigin = resolveAllowedOrigin(origin);
+  // Credentialed CORS is only granted to a resolved, trusted origin (never the raw
+  // request header) so Access-Control-Allow-Origin can't be attacker-tainted (CWE-346).
+  if (allowedOrigin) {
+    res.setHeader('Access-Control-Allow-Origin', allowedOrigin);
     res.setHeader('Vary', 'Origin');
     res.setHeader('Access-Control-Allow-Credentials', 'true');
-    res.setHeader('Access-Control-Allow-Methods', 'GET, POST, DELETE, OPTIONS');
-    res.setHeader(
-      'Access-Control-Allow-Headers',
-      'Content-Type, Authorization, MCP-Session-Id, Last-Event-ID, Accept',
-    );
-    res.setHeader('Access-Control-Expose-Headers', 'MCP-Session-Id');
   }
+  // These headers carry no credential/origin trust, so it is safe — and required for
+  // preflight discovery — to advertise them regardless of origin resolution.
+  res.setHeader('Access-Control-Allow-Methods', 'GET, POST, DELETE, OPTIONS');
+  res.setHeader(
+    'Access-Control-Allow-Headers',
+    'Content-Type, Authorization, MCP-Session-Id, Last-Event-ID, Accept',
+  );
+  res.setHeader('Access-Control-Expose-Headers', 'MCP-Session-Id');
   if (req.method === 'OPTIONS') {
     res.status(204).end();
     return;
@@ -410,8 +446,9 @@ export function createHttpTransport(): express.Router {
     res.setHeader('Mcp-Session-Id', sessionId);
     // CORS for SSE — required for browser EventSource consumers.
     const reqOrigin = req.headers.origin;
-    if (reqOrigin && isOriginAllowed(reqOrigin as string)) {
-      res.setHeader('Access-Control-Allow-Origin', reqOrigin as string);
+    const allowedOrigin = resolveAllowedOrigin(reqOrigin as string | undefined);
+    if (allowedOrigin) {
+      res.setHeader('Access-Control-Allow-Origin', allowedOrigin);
       res.setHeader('Access-Control-Allow-Credentials', 'true');
     }
     res.flushHeaders?.();

@@ -28,11 +28,23 @@
  * accumulator in production).
  */
 
-import { type IRouter, type Request, type Response, Router } from 'express';
+import { type IRouter, type Request, type RequestHandler, type Response, Router } from 'express';
+import rateLimit from 'express-rate-limit';
 import { z } from 'zod';
 import { a11oy, amaru, sentra } from '@workspace/ouroboros-integrations';
 
 const router: IRouter = Router();
+
+// Rate-limit every Ouroboros route (IP-scoped, defence-in-depth on top of apiKeyGuard)
+// so the CPU/allocation-heavy adapters can't be driven into resource exhaustion.
+const ouroborosRateLimit = rateLimit({
+  windowMs: Number(process.env.OUROBOROS_RATE_LIMIT_WINDOW_MS ?? 60_000),
+  limit: Number(process.env.OUROBOROS_RATE_LIMIT_MAX ?? 120),
+  standardHeaders: 'draft-7',
+  legacyHeaders: false,
+  message: { error: 'RATE_LIMITED', detail: 'Too many requests; retry after the window resets.' },
+});
+router.use(ouroborosRateLimit as RequestHandler);
 
 // ---------------------------------------------------------------------------
 // A11oy — three-witness handoff reconciliation (MMP-14 frustum)

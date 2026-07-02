@@ -382,6 +382,9 @@ importers:
       express:
         specifier: ^5
         version: 5.2.1
+      express-rate-limit:
+        specifier: ^8.5.2
+        version: 8.5.2(express@5.2.1)
       zod:
         specifier: 'catalog:'
         version: 3.25.76

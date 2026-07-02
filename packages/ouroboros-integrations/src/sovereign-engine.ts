@@ -1894,7 +1894,9 @@ export class CondorMambaSSM {
   tokensSeen: number;
 
   constructor(stateSize = 16) {
-    this.N = stateSize;
+    // Bound the size so a user-supplied stateSize can't exhaust memory (CWE-770).
+    const size = Math.floor(Number(stateSize)) || 16;
+    this.N = Math.min(Math.max(1, size), 4096);
     this.stateRe = new Array(this.N).fill(0);
     this.stateIm = new Array(this.N).fill(0);
     this.tokensSeen = 0;
@@ -2079,7 +2081,9 @@ export class HopfieldAmaruMemory {
   readonly dim: number;
 
   constructor(dim = 64) {
-    this.dim = dim;
+    // Bound the dimension so a user-supplied dim can't exhaust memory/CPU (CWE-770).
+    const d = Math.floor(Number(dim)) || 64;
+    this.dim = Math.min(Math.max(1, d), 4096);
   }
 
   store(id: string, content: string): HAAMPattern {
@@ -3656,7 +3660,8 @@ export class UltraRouter {
   private _hashKey(prompt: string): string {
     let h = 0;
     const sub = prompt.substring(0, 512);
-    for (let i = 0; i < sub.length; i++) {
+    // Constant upper bound on the loop counter (defense-in-depth vs. loop-bound injection).
+    for (let i = 0; i < sub.length && i < 512; i++) {
       h = ((h << 5) - h + sub.charCodeAt(i)) | 0;
     }
     return `kv_${(h >>> 0).toString(16)}`;
