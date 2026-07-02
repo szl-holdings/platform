@@ -102,9 +102,9 @@ def landing(request: Request) -> JSONResponse:
 async def do_verify(request: Request) -> JSONResponse:
     try:
         body = await request.json()
-    except Exception as exc:  # noqa: BLE001
+    except Exception:  # noqa: BLE001
         return JSONResponse({"ok": False, "verdict": "ERROR",
-                             "detail": f"request body is not valid JSON: {exc}", "checks": []},
+                             "detail": "request body is not valid JSON", "checks": []},
                             status_code=400)
     if isinstance(body, dict) and "target" in body and isinstance(body["target"], dict):
         target = body["target"]
