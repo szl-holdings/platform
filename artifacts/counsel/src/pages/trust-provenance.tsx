@@ -165,11 +165,7 @@ export default function TrustProvenance() {
 
   const { data: mattersData, isLoading: mattersLoading, isError: mattersError } = useQuery<{ matters: ApiMatter[] }>({
     queryKey: ['counsel-matters-list-provenance'],
-    queryFn: async () => {
-      const res = await apiFetch('/counsel/matters');
-      if (!res.ok) throw new Error('Failed to fetch matters');
-      return res.json();
-    },
+    queryFn: () => apiFetch<{ matters: ApiMatter[] }>('/counsel/matters'),
   });
 
   const matters = mattersData?.matters ?? [];
@@ -180,11 +176,9 @@ export default function TrustProvenance() {
 
   const { data: proofChainData, isLoading: proofLoading, isError: proofError } = useQuery<{ matterId: string; entries: ProofChainEntry[] }>({
     queryKey: ['counsel-proof-chain', activeMatterId],
-    queryFn: async () => {
+    queryFn: () => {
       if (!activeMatterId) throw new Error('No matter selected');
-      const res = await apiFetch(`/counsel/proof-chain?matterId=${encodeURIComponent(activeMatterId)}`);
-      if (!res.ok) throw new Error('Failed to fetch proof chain');
-      return res.json();
+      return apiFetch<{ matterId: string; entries: ProofChainEntry[] }>(`/counsel/proof-chain?matterId=${encodeURIComponent(activeMatterId)}`);
     },
     enabled: !!activeMatterId,
   });

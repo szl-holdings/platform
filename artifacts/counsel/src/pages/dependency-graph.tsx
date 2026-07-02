@@ -42,20 +42,12 @@ function statusBadge(status: string) {
 export default function DependencyGraph() {
   const { data: mattersData, isLoading: mattersLoading, isError: mattersError } = useQuery<{ matters: ApiMatter[] }>({
     queryKey: ['counsel-matters-deps'],
-    queryFn: async () => {
-      const res = await apiFetch('/counsel/matters');
-      if (!res.ok) throw new Error('Failed to fetch matters');
-      return res.json();
-    },
+    queryFn: () => apiFetch<{ matters: ApiMatter[] }>('/counsel/matters'),
   });
 
   const { data: obligationsData, isLoading: obligationsLoading, isError: obligationsError } = useQuery<{ obligations: ApiObligation[] }>({
     queryKey: ['counsel-obligations-deps'],
-    queryFn: async () => {
-      const res = await apiFetch('/counsel/obligations');
-      if (!res.ok) throw new Error('Failed to fetch obligations');
-      return res.json();
-    },
+    queryFn: () => apiFetch<{ obligations: ApiObligation[] }>('/counsel/obligations'),
   });
 
   const matters = mattersData?.matters ?? [];
