@@ -23,6 +23,7 @@
     "@workspace/ouroboros-integrations": "workspace:*",
     "@workspace/ouroboros-invariant": "workspace:*",
     "express": "^5",
+    "express-rate-limit": "^8.5.2",
     "zod": "catalog:"
   },
   "devDependencies": {
