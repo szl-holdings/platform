@@ -351,7 +351,7 @@ const queryClient = new QueryClient({
 
 if (typeof window !== 'undefined') {
   persistQueryClient({
-    queryClient,
+    queryClient: queryClient as unknown as Parameters<typeof persistQueryClient>[0]['queryClient'],
     persister: createSyncStoragePersister({
       storage: window.localStorage,
       key: 'vessels-web-rq-cache',
