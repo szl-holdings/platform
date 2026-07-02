@@ -11,7 +11,9 @@ anyio>=4.4.0
 psutil>=5.9.0
 pdfminer.six>=20231228
 pytesseract>=0.3.10
-Pillow>=10.4.0
+# floor raised 10.4.0 -> 12.2.0 to clear PYSEC-2026-165 + GHSA-cfh3/pwv6/r73j/whj4/wjx4
+# (PSD/FITS/PDF/font OOB-write, infinite-loop & decompression-bomb; all fixed by 12.2.0)
+Pillow>=12.2.0
 pdf2image>=1.17.0
 pytest>=8.3.0
 pytest-asyncio>=0.23.0
