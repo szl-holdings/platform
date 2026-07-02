@@ -141,6 +141,7 @@ const convergences = [
   {
     from: 'Labs',
     to: 'Legal',
+    toHref: '/legal',
     icon: Brain,
     desc: 'Contract risk model flags non-standard indemnification language in a managed client agreement with Vantage Partners — liability exposure estimated $2.4M above policy limits. Labs routes the signal to Legal automatically: matter opened, partner attorney assigned, and negotiation brief generated before the contract execution date.',
     color: '#5e5e5e',

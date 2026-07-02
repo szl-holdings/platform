@@ -331,11 +331,11 @@ export default function SentraLandingPage() {
       </footer>
 
       <ContactModal
-        open={demoOpen}
+        isOpen={demoOpen}
         onClose={() => setDemoOpen(false)}
         title="Request a Sentra Demo"
         subtitle="See how Sentra unifies your security operations."
-        product="sentra"
+        app="sentra"
       />
     </div>
   );
