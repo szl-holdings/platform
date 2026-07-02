@@ -24,7 +24,6 @@ import {
   Wifi,
 } from 'lucide-react';
 import { useState } from 'react';
-import { AegisGraphQLPanel } from '@/components/graphql-data-panel';
 
 interface DashboardMetrics {
   metrics: {
@@ -971,7 +970,6 @@ export default function Dashboard() {
       </div>
 
       <ActivityFeed entityType="ticket" title="Service Desk Team Activity" limit={8} compact />
-      <AegisGraphQLPanel />
     </div>
   );
 }
