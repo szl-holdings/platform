@@ -36,7 +36,6 @@ import {
   Trash2,
 } from 'lucide-react';
 import { useEffect, useState } from 'react';
-import { AegisGraphQLPanel } from '@/components/graphql-data-panel';
 import { api } from '@/lib/api';
 
 const statusColors: Record<string, string> = {
@@ -466,8 +465,6 @@ export default function AssessmentDashboard() {
           })}
         </div>
       )}
-
-      <AegisGraphQLPanel />
     </div>
   );
 }
