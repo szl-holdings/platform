@@ -159,6 +159,68 @@ jobs:
           echo "Signature bundle: ${pkg}.cosign.bundle"
           echo "Verify OCI: cosign verify --certificate-identity-regexp github.com/szl-holdings --certificate-oidc-issuer https://token.actions.githubusercontent.com ${REGISTRY}/${ORG}/packages/${{ matrix.package }}"
 
+      - name: Attest SLSA provenance (cosign keyless, verifiable predicate)
+        env:
+          COSIGN_EXPERIMENTAL: "1"
+        run: |
+          set -euo pipefail
+          VERSION=$(yq '.metadata.version' "${{ env.SZL_ROOT }}/${{ matrix.package }}/deploy/zarf.yaml")
+          IMG="${REGISTRY}/${ORG}/packages/${{ matrix.package }}:${VERSION}"
+          # SLSA Provenance v0.2 predicate (matches `cosign ... --type slsaprovenance`).
+          # ADDS a verifiable provenance PREDICATE on top of the cosign signature
+          # above (a signature alone proves identity, not provenance). Mirrors
+          # killinchu/ghcr-build-push.yml. Additive: does not change build/publish.
+          cat > provenance-${{ matrix.package }}.json <<EOF
+          {
+            "builder": {
+              "id": "${{ github.server_url }}/${{ github.repository }}/.github/workflows/szl-zarf-publish.yml@${{ github.ref }}"
+            },
+            "buildType": "https://actions.github.io/buildtypes/workflow/v1",
+            "invocation": {
+              "configSource": {
+                "uri": "git+${{ github.server_url }}/${{ github.repository }}@${{ github.ref }}",
+                "digest": { "sha1": "${{ github.sha }}" },
+                "entryPoint": ".github/workflows/szl-zarf-publish.yml"
+              },
+              "environment": {
+                "event_name": "${{ github.event_name }}",
+                "repository_id": "${{ github.repository_id }}",
+                "runner_environment": "github-hosted"
+              }
+            },
+            "metadata": {
+              "buildInvocationId": "${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}/attempts/${{ github.run_attempt }}",
+              "completeness": { "parameters": true, "environment": false, "materials": false },
+              "reproducible": false
+            },
+            "materials": [
+              {
+                "uri": "git+${{ github.server_url }}/${{ github.repository }}@${{ github.ref }}",
+                "digest": { "sha1": "${{ github.sha }}" }
+              }
+            ]
+          }
+          EOF
+          cosign attest --yes \
+            --type slsaprovenance \
+            --predicate provenance-${{ matrix.package }}.json \
+            "${IMG}"
+          echo "Attested SLSA provenance predicate to ${IMG}"
+
+      - name: Verify SLSA provenance attestation (in-CI honesty gate)
+        env:
+          COSIGN_EXPERIMENTAL: "1"
+        run: |
+          set -euo pipefail
+          VERSION=$(yq '.metadata.version' "${{ env.SZL_ROOT }}/${{ matrix.package }}/deploy/zarf.yaml")
+          IMG="${REGISTRY}/${ORG}/packages/${{ matrix.package }}:${VERSION}"
+          cosign verify-attestation \
+            --type slsaprovenance \
+            --certificate-identity-regexp="github.com/szl-holdings" \
+            --certificate-oidc-issuer="https://token.actions.githubusercontent.com" \
+            "${IMG}" > /dev/null
+          echo "SLSA provenance verified for ${IMG}"
+
       - name: Upload package artifact (for auditing)
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
@@ -226,6 +288,66 @@ jobs:
           cosign sign-blob --yes \
             --bundle "${bundle}.cosign.bundle" \
             "$bundle"
+
+      - name: Attest SLSA provenance for bundle (cosign keyless, verifiable predicate)
+        working-directory: ${{ env.SZL_ROOT }}/uds-mesh
+        env:
+          COSIGN_EXPERIMENTAL: "1"
+        run: |
+          set -euo pipefail
+          bundle_version=$(yq '.metadata.version' uds-bundle.yaml)
+          IMG="${REGISTRY}/${ORG}/bundles/szl-mesh:${bundle_version}"
+          cat > provenance-szl-mesh.json <<EOF
+          {
+            "builder": {
+              "id": "${{ github.server_url }}/${{ github.repository }}/.github/workflows/szl-zarf-publish.yml@${{ github.ref }}"
+            },
+            "buildType": "https://actions.github.io/buildtypes/workflow/v1",
+            "invocation": {
+              "configSource": {
+                "uri": "git+${{ github.server_url }}/${{ github.repository }}@${{ github.ref }}",
+                "digest": { "sha1": "${{ github.sha }}" },
+                "entryPoint": ".github/workflows/szl-zarf-publish.yml"
+              },
+              "environment": {
+                "event_name": "${{ github.event_name }}",
+                "repository_id": "${{ github.repository_id }}",
+                "runner_environment": "github-hosted"
+              }
+            },
+            "metadata": {
+              "buildInvocationId": "${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}/attempts/${{ github.run_attempt }}",
+              "completeness": { "parameters": true, "environment": false, "materials": false },
+              "reproducible": false
+            },
+            "materials": [
+              {
+                "uri": "git+${{ github.server_url }}/${{ github.repository }}@${{ github.ref }}",
+                "digest": { "sha1": "${{ github.sha }}" }
+              }
+            ]
+          }
+          EOF
+          cosign attest --yes \
+            --type slsaprovenance \
+            --predicate provenance-szl-mesh.json \
+            "${IMG}"
+          echo "Attested SLSA provenance predicate to ${IMG}"
+
+      - name: Verify bundle SLSA provenance attestation (in-CI honesty gate)
+        working-directory: ${{ env.SZL_ROOT }}/uds-mesh
+        env:
+          COSIGN_EXPERIMENTAL: "1"
+        run: |
+          set -euo pipefail
+          bundle_version=$(yq '.metadata.version' uds-bundle.yaml)
+          IMG="${REGISTRY}/${ORG}/bundles/szl-mesh:${bundle_version}"
+          cosign verify-attestation \
+            --type slsaprovenance \
+            --certificate-identity-regexp="github.com/szl-holdings" \
+            --certificate-oidc-issuer="https://token.actions.githubusercontent.com" \
+            "${IMG}" > /dev/null
+          echo "SLSA provenance verified for ${IMG}"
 
       - name: Upload bundle artifact (for auditing)
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
