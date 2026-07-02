@@ -43,8 +43,8 @@ const DS = {
   text: {
     primary: 'rgba(255,255,255,0.85)',
     secondary: 'rgba(255,255,255,0.5)',
-    tertiary: 'rgba(255,255,255,0.3)',
-    muted: 'rgba(255,255,255,0.18)',
+    tertiary: 'rgba(255,255,255,0.62)',
+    muted: 'rgba(255,255,255,0.55)',
   },
 };
 

@@ -63,8 +63,8 @@
   --color-terra-border:       rgba(255, 255, 255, 0.06);
   --color-terra-border-hover: rgba(255, 255, 255, 0.11);
   --color-terra-text:         var(--gi-text-primary);
-  --color-terra-text-secondary:var(--gi-text-secondary);
-  --color-terra-text-muted:   var(--gi-text-muted);
+  --color-terra-text-secondary:rgba(255, 255, 255, 0.80);
+  --color-terra-text-muted:   rgba(255, 255, 255, 0.62);
   --color-terra-primary:      #3a8060;
   --color-terra-primary-light:var(--gi-accent-green);
   --color-terra-accent:       #9a7840;

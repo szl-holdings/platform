@@ -21,7 +21,7 @@ const CORE_VIEWS = [
     icon: MapPin,
     title: 'Fleet Map',
     desc: 'Vessel positions, route lines, port locations, and alert indicators in a single command view. Not a generic map widget — a command surface built for operational teams.',
-    color: 'text-[#5e5e5e]',
+    color: 'text-[#8a8a8a]',
   },
   {
     icon: AlertTriangle,
@@ -79,9 +79,9 @@ export default function VesselsLandingPage() {
         <div className="relative z-10 max-w-4xl text-center">
           <div className="flex items-center justify-center gap-2 mb-8">
             <div className="w-10 h-10 rounded-xl bg-white/[0.04] border border-white/[0.08] flex items-center justify-center">
-              <Ship className="w-5 h-5 text-[#5e5e5e]" />
+              <Ship className="w-5 h-5 text-[#8a8a8a]" />
             </div>
-            <span className="text-sm font-medium text-[#5e5e5e]/60">
+            <span className="text-sm font-medium text-[#8a8a8a]">
               Vessels Maritime Command · Powered by Counsel
             </span>
           </div>
@@ -89,10 +89,10 @@ export default function VesselsLandingPage() {
           <h1 className="font-display text-5xl md:text-6xl font-bold text-[#f5f5f5] leading-tight mb-6">
             Turn fleet visibility, voyage performance,
             <br />
-            <span className="text-[#5e5e5e]">and operational exceptions into command.</span>
+            <span className="text-[#8a8a8a]">and operational exceptions into command.</span>
           </h1>
 
-          <p className="text-lg text-[#5e5e5e] max-w-2xl mx-auto mb-10 leading-relaxed">
+          <p className="text-lg text-[#8a8a8a] max-w-2xl mx-auto mb-10 leading-relaxed">
             Vessels is a maritime command platform for operators who need more than a position feed.
             See the exceptions that matter, understand voyage economics, and act before disruptions
             escalate.
@@ -118,7 +118,7 @@ export default function VesselsLandingPage() {
               { icon: AlertTriangle, label: '8 exceptions managed' },
               { icon: Anchor, label: '7 corridors monitored' },
             ].map((s) => (
-              <div key={s.label} className="flex items-center gap-2 text-xs text-[#5e5e5e]">
+              <div key={s.label} className="flex items-center gap-2 text-xs text-[#8a8a8a]">
                 <s.icon className="w-3.5 h-3.5" />
                 {s.label}
               </div>
@@ -130,13 +130,13 @@ export default function VesselsLandingPage() {
       <section className="px-6 py-20 bg-[#0a0a0a] border-y border-white/[0.04]">
         <div className="max-w-6xl mx-auto">
           <div className="text-center mb-12">
-            <p className="text-[10px] font-mono text-[#5e5e5e] uppercase tracking-widest mb-3">
+            <p className="text-[10px] font-mono text-[#8a8a8a] uppercase tracking-widest mb-3">
               What Vessels Does
             </p>
             <h2 className="font-display text-3xl font-bold text-[#f5f5f5] mb-3">
               Fleet command. Not fleet tracking.
             </h2>
-            <p className="text-[#5e5e5e] mt-3 max-w-xl mx-auto text-sm">
+            <p className="text-[#8a8a8a] mt-3 max-w-xl mx-auto text-sm">
               Most fleet tools stop at position. Vessels is built for the complete operational
               picture — from where a vessel is, to what it earns, to what needs to happen now. Every
               view is a command surface, not a status display.
@@ -149,7 +149,7 @@ export default function VesselsLandingPage() {
                 icon: MapPin,
                 title: 'Live Fleet Map',
                 desc: 'Vessel positions, route lines, port locations, and alert indicators in one command view.',
-                color: 'text-[#5e5e5e]',
+                color: 'text-[#8a8a8a]',
               },
               {
                 icon: AlertTriangle,
@@ -179,7 +179,7 @@ export default function VesselsLandingPage() {
                 icon: BarChart3,
                 title: 'Performance Analytics',
                 desc: 'Utilization, on-time arrival trends, route profitability, and corridor analysis.',
-                color: 'text-[#5e5e5e]',
+                color: 'text-[#8a8a8a]',
               },
             ].map((feature) => (
               <div
@@ -188,7 +188,7 @@ export default function VesselsLandingPage() {
               >
                 <feature.icon className={cn('w-5 h-5 mb-3', feature.color)} />
                 <h3 className="text-sm font-bold text-[#f5f5f5] mb-2">{feature.title}</h3>
-                <p className="text-[11px] text-[#5e5e5e] leading-relaxed">{feature.desc}</p>
+                <p className="text-[11px] text-[#8a8a8a] leading-relaxed">{feature.desc}</p>
               </div>
             ))}
           </div>
@@ -197,13 +197,13 @@ export default function VesselsLandingPage() {
 
       <section className="px-6 py-20 max-w-6xl mx-auto">
         <div className="text-center mb-12">
-          <p className="text-[10px] font-mono text-[#5e5e5e] uppercase tracking-widest mb-3">
+          <p className="text-[10px] font-mono text-[#8a8a8a] uppercase tracking-widest mb-3">
             Core Views
           </p>
           <h2 className="font-display text-3xl font-bold text-[#f5f5f5]">
             Four command surfaces. One platform.
           </h2>
-          <p className="text-[#5e5e5e] mt-3 max-w-xl mx-auto text-sm">
+          <p className="text-[#8a8a8a] mt-3 max-w-xl mx-auto text-sm">
             Each view is purpose-built for a specific operational need — not a generic dashboard
             with filters.
           </p>
@@ -217,7 +217,7 @@ export default function VesselsLandingPage() {
             >
               <view.icon className={cn('w-5 h-5 mb-3', view.color)} />
               <h3 className="text-sm font-bold text-[#f5f5f5] mb-2">{view.title}</h3>
-              <p className="text-[12px] text-[#5e5e5e] leading-relaxed">{view.desc}</p>
+              <p className="text-[12px] text-[#8a8a8a] leading-relaxed">{view.desc}</p>
             </div>
           ))}
         </div>
@@ -226,7 +226,7 @@ export default function VesselsLandingPage() {
       <section className="px-6 py-20 bg-[#0a0a0a] border-y border-white/[0.04]">
         <div className="max-w-6xl mx-auto">
           <div className="text-center mb-12">
-            <p className="text-[10px] font-mono text-[#5e5e5e] uppercase tracking-widest mb-3">
+            <p className="text-[10px] font-mono text-[#8a8a8a] uppercase tracking-widest mb-3">
               What It Solves
             </p>
             <h2 className="font-display text-3xl font-bold text-[#f5f5f5] mb-3">
@@ -237,7 +237,7 @@ export default function VesselsLandingPage() {
             {WHAT_IT_SOLVES.map((tile, _i) => (
               <div key={tile} className="bg-[#111111]/80 border border-white/[0.06] rounded-xl p-4">
                 <div className="w-3 h-3 rounded-full border-2 border-white/[0.12] mb-3" />
-                <p className="text-[12px] text-[#5e5e5e] leading-snug">{tile}</p>
+                <p className="text-[12px] text-[#8a8a8a] leading-snug">{tile}</p>
               </div>
             ))}
           </div>
@@ -246,13 +246,13 @@ export default function VesselsLandingPage() {
 
       <section className="px-6 py-20 max-w-6xl mx-auto">
         <div className="text-center mb-12">
-          <p className="text-[10px] font-mono text-[#5e5e5e] uppercase tracking-widest mb-3">
+          <p className="text-[10px] font-mono text-[#8a8a8a] uppercase tracking-widest mb-3">
             Why It Matters
           </p>
           <h2 className="font-display text-3xl font-bold text-[#f5f5f5] mb-4">
             From tracking to command.
           </h2>
-          <p className="text-[#5e5e5e] text-sm max-w-2xl mx-auto leading-relaxed">
+          <p className="text-[#8a8a8a] text-sm max-w-2xl mx-auto leading-relaxed">
             Every maritime operator knows where their vessels are. Very few know what the exceptions
             mean, which voyages are profitable, which vessels are at maintenance risk, and what
             needs to happen in the next four hours. That is the gap Vessels closes.
@@ -276,8 +276,8 @@ export default function VesselsLandingPage() {
           ].map((o) => (
             <div key={o.metric} className="text-center">
               <p className="text-3xl font-bold font-display text-[#8a8a8a] mb-1">{o.metric}</p>
-              <p className="text-[11px] text-[#5e5e5e] leading-relaxed mb-1">{o.label}</p>
-              <p className="text-[9px] font-mono text-[#5e5e5e]">{o.trend}</p>
+              <p className="text-[11px] text-[#8a8a8a] leading-relaxed mb-1">{o.label}</p>
+              <p className="text-[9px] font-mono text-[#8a8a8a]">{o.trend}</p>
             </div>
           ))}
         </div>
@@ -296,11 +296,11 @@ export default function VesselsLandingPage() {
 
       <section className="px-6 py-20 bg-[#0a0a0a] border-t border-white/[0.04]">
         <div className="max-w-4xl mx-auto text-center">
-          <p className="text-[10px] font-mono text-[#5e5e5e] uppercase tracking-widest mb-3">
+          <p className="text-[10px] font-mono text-[#8a8a8a] uppercase tracking-widest mb-3">
             Powered by Counsel · SZL Holdings
           </p>
           <h2 className="font-display text-3xl font-bold text-[#f5f5f5] mb-4">Request a Demo</h2>
-          <p className="text-[#5e5e5e] mb-8 text-sm leading-relaxed max-w-xl mx-auto">
+          <p className="text-[#8a8a8a] mb-8 text-sm leading-relaxed max-w-xl mx-auto">
             Vessels is built for maritime operators who need more than a position feed. Request a
             demo — we will walk through the full command center with your fleet data in mind.
           </p>

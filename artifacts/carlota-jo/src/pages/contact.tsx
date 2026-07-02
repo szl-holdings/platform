@@ -39,7 +39,9 @@ const CONVERSATION_PATHS = [
 ];
 
 export default function ContactPage() {
-  const [selectedPath, setSelectedPath] = useState<string | null>(null);
+  const [selectedPath, setSelectedPath] = useState<string | null>(
+    CONVERSATION_PATHS.find((p) => p.form)?.id ?? null,
+  );
   const [submitted, setSubmitted] = useState(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
