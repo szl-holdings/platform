@@ -1,4 +1,4 @@
-FROM node:26-alpine AS base
+FROM node:26-alpine@sha256:725aeba2364a9b16beae49e180d83bd597dbd0b15c47f1f28875c290bfd255b9 AS base
 WORKDIR /app
 RUN apk add --no-cache libc6-compat
 
@@ -28,7 +28,7 @@ COPY artifacts/carlota-jo/ ./artifacts/carlota-jo/
 ENV NODE_ENV=production
 RUN corepack enable pnpm && pnpm --filter "carlota-jo" run build
 
-FROM nginx:alpine AS runner
+FROM nginx:alpine@sha256:54f2a904c251d5a34adf545a72d32515a15e08418dae0266e23be2e18c66fefa AS runner
 COPY --from=builder /app/artifacts/carlota-jo/dist /usr/share/nginx/html
 RUN printf 'server {\n  listen 8080;\n  root /usr/share/nginx/html;\n  index index.html;\n  location / { try_files $uri $uri/ /index.html; }\n}\n' > /etc/nginx/conf.d/default.conf \
     && sed -i 's|pid\s*/run/nginx.pid;|pid /tmp/nginx.pid;|' /etc/nginx/nginx.conf \

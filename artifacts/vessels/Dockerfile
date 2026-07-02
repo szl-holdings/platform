@@ -21,7 +21,7 @@
 # -> filtered `pnpm --filter @workspace/vessels run build`.
 
 # ─── Stage 1: dependency cache (pnpm fetch from root) ────────────────────────
-FROM node:26-alpine AS deps
+FROM node:26-alpine@sha256:725aeba2364a9b16beae49e180d83bd597dbd0b15c47f1f28875c290bfd255b9 AS deps
 RUN apk add --no-cache libc6-compat
 RUN corepack enable
 WORKDIR /app
@@ -32,7 +32,7 @@ RUN --mount=type=cache,id=pnpm-store,target=/root/.local/share/pnpm/store \
     pnpm fetch
 
 # ─── Stage 2: builder (install + filtered Vite build) ────────────────────────
-FROM node:26-alpine AS builder
+FROM node:26-alpine@sha256:725aeba2364a9b16beae49e180d83bd597dbd0b15c47f1f28875c290bfd255b9 AS builder
 RUN apk add --no-cache libc6-compat
 RUN corepack enable
 WORKDIR /app
@@ -57,7 +57,7 @@ RUN --mount=type=cache,id=pnpm-store,target=/root/.local/share/pnpm/store \
 RUN pnpm --filter "@workspace/vessels" run build
 
 # ─── Stage 3: runtime (nginx, non-root, port 8080) ───────────────────────────
-FROM nginx:alpine AS runner
+FROM nginx:alpine@sha256:54f2a904c251d5a34adf545a72d32515a15e08418dae0266e23be2e18c66fefa AS runner
 # The app is built with Vite base path "/vessels/" (vite.config.ts), so assets
 # are referenced as /vessels/assets/*. Serve the SPA under both / and /vessels/,
 # add a /healthz endpoint (the UDS Package CR uptime check hits /healthz on
