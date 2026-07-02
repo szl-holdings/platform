@@ -107,11 +107,7 @@ function HeadCard({ head }: { head: ForecastHead }) {
 export function ForecastPanel() {
   const { data, isLoading, isError } = useQuery<{ heads: ForecastHead[]; generatedAt: string }>({
     queryKey: ['counsel-forecast'],
-    queryFn: async () => {
-      const res = await apiFetch('/counsel/forecast');
-      if (!res.ok) throw new Error('Failed to fetch forecast data');
-      return res.json();
-    },
+    queryFn: () => apiFetch<{ heads: ForecastHead[]; generatedAt: string }>('/counsel/forecast'),
     staleTime: 5 * 60 * 1000,
   });
 

@@ -112,11 +112,7 @@ export default function Approvals() {
 
   const { data: mattersData, isLoading: mattersLoading, isError: mattersError } = useQuery<{ matters: ApiMatter[] }>({
     queryKey: ['counsel-matters-approvals'],
-    queryFn: async () => {
-      const res = await apiFetch('/counsel/matters');
-      if (!res.ok) throw new Error('Failed to fetch matters');
-      return res.json();
-    },
+    queryFn: () => apiFetch<{ matters: ApiMatter[] }>('/counsel/matters'),
   });
 
   const matterById = useMemo(
