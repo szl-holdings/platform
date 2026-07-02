@@ -56,6 +56,14 @@ jobs:
           # default suite; security-and-quality additionally surfaces
           # maintainability findings.
           queries: security-extended,security-and-quality
+          config: |
+            paths-ignore:
+              - '**/dist/**'
+              - '**/*.min.js'
+              - '**/vendor/**'
+              - '**/vendored/**'
+              - 'archive/**'
+              - 'replit-sync/**'
 
       - name: Perform CodeQL Analysis
         uses: github/codeql-action/analyze@8aad20d150bbac5944a9f9d289da16a4b0d87c1e # v4.36.2
