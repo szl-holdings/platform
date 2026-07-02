@@ -825,6 +825,9 @@ importers:
       '@tanstack/query-sync-storage-persister':
         specifier: ^5.100.14
         version: 5.101.0
+      '@workspace/aef-contracts':
+        specifier: workspace:*
+        version: link:../../packages/aef-contracts
       '@workspace/aef-sdk':
         specifier: workspace:*
         version: link:../../packages/aef-sdk
