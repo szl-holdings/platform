@@ -114,11 +114,19 @@ export function extractBearerToken(authorizationHeader: string | undefined): str
   if (!authorizationHeader) {
     throw new AuthError('Missing Authorization header', 'MISSING_TOKEN');
   }
-  const match = /^Bearer\s+(\S.*)$/i.exec(authorizationHeader.trim());
-  if (!match || !match[1]) {
+  // Linear, backtracking-free parse: match only the bounded scheme + separator
+  // (avoids the \s+\S polynomial-ReDoS on the Authorization header), then take
+  // the remainder as the token.
+  const header = authorizationHeader.trim();
+  const scheme = /^Bearer(\s+)/i.exec(header);
+  if (!scheme) {
     throw new AuthError('Authorization header must use Bearer scheme', 'MISSING_TOKEN');
   }
-  return match[1];
+  const token = header.slice(scheme[0].length);
+  if (!token) {
+    throw new AuthError('Authorization header must use Bearer scheme', 'MISSING_TOKEN');
+  }
+  return token;
 }
 
 export function authenticateCaller(authorizationHeader: string | undefined, secret: string): CallerIdentity {

@@ -27,13 +27,19 @@ export interface RekorSubmitOptions {
 
 const DEFAULT_REKOR_URL = "https://rekor.sigstore.dev";
 
+function stripTrailingSlashes(u: string): string {
+  let end = u.length;
+  while (end > 0 && u.charCodeAt(end - 1) === 47 /* "/" */) end--;
+  return u.slice(0, end);
+}
+
 export async function submitRekorEntry(
   rootHashHex: string,
   signatureBase64: string,
   publicKeyBase64: string,
   options: RekorSubmitOptions = {}
 ): Promise<RekorEntry> {
-  const url = (options.rekorUrl ?? DEFAULT_REKOR_URL).replace(/\/+$/, "");
+  const url = stripTrailingSlashes(options.rekorUrl ?? DEFAULT_REKOR_URL);
   const fetchImpl = options.fetchImpl ?? globalThis.fetch;
   if (!fetchImpl) throw new Error("No fetch implementation available; provide options.fetchImpl");
 
@@ -85,7 +91,7 @@ export async function fetchRekorEntry(
   uuid: string,
   options: RekorSubmitOptions = {}
 ): Promise<unknown> {
-  const url = (options.rekorUrl ?? DEFAULT_REKOR_URL).replace(/\/+$/, "");
+  const url = stripTrailingSlashes(options.rekorUrl ?? DEFAULT_REKOR_URL);
   const fetchImpl = options.fetchImpl ?? globalThis.fetch;
   if (!fetchImpl) throw new Error("No fetch implementation available; provide options.fetchImpl");
 
