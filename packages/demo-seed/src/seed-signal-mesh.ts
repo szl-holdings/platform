@@ -23,6 +23,7 @@ import {
   AISMaritimeDemoAdapter,
   CrmProjectDemoAdapter,
   defaultConnectorRegistry,
+  type DemoAdapterEvent,
   EmailCalendarDemoAdapter,
   LegalMatterDemoAdapter,
   MessagingDemoAdapter,
@@ -33,13 +34,51 @@ import {
 } from '@szl-holdings/connectors';
 import { defaultEvidenceStore, defaultRecommendationStore } from '@szl-holdings/evidence-graph';
 import { defaultPipeline, defaultSignalBus } from '@szl-holdings/signal-mesh';
-import { createEntitySnapshot, defaultEntityRegistry } from '@workspace/ontology';
+import {
+  createEntitySnapshot,
+  defaultEntityRegistry,
+  type SignalDomain,
+  type SignalInput,
+} from '@workspace/ontology';
 import { CARLOTA_JO_ESTATE_NARRATIVE } from './narrative-carlota-jo-estate.js';
 import { COUNSEL_DEADLINE_NARRATIVE } from './narrative-counsel-deadline.js';
 import { clearNarrativeMeshIndex, registerNarrativeMeshEntry } from './narrative-mesh-index.js';
 import { SENTRA_RANSOMWARE_NARRATIVE } from './narrative-sentra-ransomware.js';
 import { SZL_TREASURY_NARRATIVE } from './narrative-szl-treasury.js';
 import { VESSELS_PORT_CONGESTION_NARRATIVE } from './narrative-vessels-port-congestion.js';
+
+/**
+ * Demo adapters emit a lightweight {@link DemoAdapterEvent}; the signal-mesh
+ * pipeline consumes a fully-shaped {@link SignalInput}. This maps one to the
+ * other so the seeded connector stream flows through the real pipeline. The
+ * domain is derived from each adapter's stable `source` id.
+ */
+const DEMO_SOURCE_DOMAINS: Record<string, SignalDomain> = {
+  'ais-maritime-demo': 'maritime',
+  'property-ops-demo': 'real-estate',
+  'legal-matter-demo': 'legal',
+  'security-tools-demo': 'security',
+  'email-calendar-demo': 'workforce',
+  'crm-project-demo': 'platform',
+  'storage-docs-demo': 'platform',
+  'webhook-demo': 'platform',
+  'messaging-demo': 'platform',
+};
+
+function demoEventToSignalInput(event: DemoAdapterEvent): SignalInput {
+  return {
+    source: 'connector',
+    type: 'connector-event',
+    domain: DEMO_SOURCE_DOMAINS[event.source] ?? 'platform',
+    occurredAt: event.occurredAt.toISOString(),
+    freshness: 1,
+    confidence: 0.9,
+    entityRefs: [],
+    rawPayload: { kind: event.kind, source: event.source, ...event.payload },
+    tags: ['demo-connector', event.kind.split('.')[0] ?? 'event'],
+    provenance: { sourceService: event.source },
+  };
+}
 
 export async function seedSignalMesh(opts: { startConnectors?: boolean } = {}): Promise<{
   signalsSeeded: number;
@@ -120,8 +159,8 @@ export async function seedSignalMesh(opts: { startConnectors?: boolean } = {}): 
       new LegalMatterDemoAdapter(),
     ];
 
-    defaultConnectorRegistry.setEmitSignal(async (input) => {
-      const result = await defaultPipeline.process(input);
+    defaultConnectorRegistry.setEmitSignal(async (event) => {
+      const result = await defaultPipeline.process(demoEventToSignalInput(event));
       if (result.recommendation) {
         for (const ev of result.evidenceItems) defaultEvidenceStore.save(ev);
         defaultRecommendationStore.save(result.recommendation);
