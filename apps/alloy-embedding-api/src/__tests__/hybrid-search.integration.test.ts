@@ -103,7 +103,7 @@ beforeAll(async () => {
   );
   const now = new Date().toISOString();
   for (let i = 0; i < CORPUS.length; i++) {
-    const d = CORPUS[i]!;
+    const d = CORPUS[i];
     const metadata = {
       text: d.text,
       title: d.title,
@@ -116,8 +116,8 @@ beforeAll(async () => {
       sourceId: d.sourceId,
       tenantId: TENANT,
       model: MODEL,
-      dimensions: vectors[i]!.length,
-      vector: vectors[i]!,
+      dimensions: vectors[i].length,
+      vector: vectors[i],
       metadata,
       indexedAt: now,
     });

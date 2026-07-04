@@ -121,7 +121,7 @@ embedRouter.post("/v1/embed", (async (req: Request, res: Response) => {
     dimensions,
     vectors: vectors.map((vector, i) => ({
       index: i,
-      text: body.texts[i]!,
+      text: body.texts[i],
       vector,
     })),
     processingMs,

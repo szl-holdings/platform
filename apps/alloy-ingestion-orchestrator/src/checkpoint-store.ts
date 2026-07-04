@@ -35,13 +35,15 @@ export class InMemoryCheckpointStore implements CheckpointStore {
   latest(runId: string): WorkflowCheckpoint | undefined {
     const ids = this.byRun.get(runId);
     if (!ids || ids.length === 0) return undefined;
-    const lastId = ids[ids.length - 1]!;
+    const lastId = ids[ids.length - 1];
     return this.store.get(lastId);
   }
 
   listByRun(runId: string): WorkflowCheckpoint[] {
     const ids = this.byRun.get(runId) ?? [];
-    return ids.map((id) => this.store.get(id)!).filter(Boolean);
+    return ids
+      .map((id) => this.store.get(id))
+      .filter((c): c is WorkflowCheckpoint => c !== undefined);
   }
 
   clear(): void {

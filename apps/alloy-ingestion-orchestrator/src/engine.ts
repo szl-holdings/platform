@@ -234,7 +234,7 @@ export class OrchestratorEngine {
     }
 
     for (let i = startIndex; i < definition.steps.length; i++) {
-      const step = definition.steps[i]!;
+      const step = definition.steps[i];
 
       const resolvedInput = resolveStepInput(step.input, lastOutput, currentRun.runId);
 

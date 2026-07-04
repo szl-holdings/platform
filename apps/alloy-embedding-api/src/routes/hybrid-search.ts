@@ -62,7 +62,7 @@ hybridSearchRouter.post("/v1/hybrid-search", (async (req: Request, res: Response
       pooling: "mean",
       normalize: true,
     });
-    queryVector = vec!;
+    queryVector = vec;
   } catch (err) {
     errorBudgetCounter.inc({ kind: "embed_error", tenant_id: tenantId });
     res.status(502).json({ error: "Query embedding failed", detail: String(err), traceId });
@@ -186,7 +186,7 @@ hybridSearchRouter.post("/v1/hybrid-search", (async (req: Request, res: Response
   });
 
   const hits = finalCitations.map((c, i) => {
-    const evidence = evidenceEntries[i]!;
+    const evidence = evidenceEntries[i];
     const textVal = c.metadata.text;
     return {
       chunkId: c.chunkId,
