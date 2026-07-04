@@ -29,26 +29,21 @@ export interface EmbedderSelection {
   isReal: boolean;
 }
 
-let _bundle: StorageBundle | undefined;
-let _backend: "pgvector" | "in-memory" | undefined;
+let _store: { bundle: StorageBundle; backend: "pgvector" | "in-memory" } | undefined;
 
 /**
  * Resolve the active storage bundle. pgvector in production (DATABASE_URL set),
  * in-memory for local dev. Memoized so the pg.Pool is created once.
  */
 export function getRetrievalStore(): { bundle: StorageBundle; backend: "pgvector" | "in-memory" } {
-  if (!_bundle) {
+  if (!_store) {
     const usePg =
       Boolean(process.env.DATABASE_URL) && process.env.AEF_STORE_BACKEND !== "in-memory";
-    if (usePg) {
-      _bundle = createPgVectorStorageBundle();
-      _backend = "pgvector";
-    } else {
-      _bundle = new InMemoryStorageBundle();
-      _backend = "in-memory";
-    }
+    _store = usePg
+      ? { bundle: createPgVectorStorageBundle(), backend: "pgvector" }
+      : { bundle: new InMemoryStorageBundle(), backend: "in-memory" };
   }
-  return { bundle: _bundle, backend: _backend! };
+  return _store;
 }
 
 /**
@@ -69,6 +64,5 @@ export function getEmbedderSelection(): EmbedderSelection {
 
 /** Test seam: reset memoized state so tests can swap env between cases. */
 export function __resetRetrievalStoreForTests(): void {
-  _bundle = undefined;
-  _backend = undefined;
+  _store = undefined;
 }
