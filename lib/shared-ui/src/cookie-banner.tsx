@@ -94,7 +94,11 @@ export function CookieBanner({
           third-party tracking.{' '}
           <a
             href={privacyUrl}
-            style={{ color: accentColor, textDecoration: 'underline', textUnderlineOffset: '2px' }}
+            style={{
+              color: 'rgba(255,255,255,0.9)',
+              textDecoration: 'underline',
+              textUnderlineOffset: '2px',
+            }}
           >
             Privacy Policy
           </a>
@@ -110,7 +114,7 @@ export function CookieBanner({
             borderRadius: '0.375rem',
             fontSize: '0.75rem',
             fontWeight: 600,
-            color: 'rgba(255,255,255,0.62)',
+            color: 'rgba(255,255,255,0.78)',
             cursor: 'pointer',
             fontFamily: 'Inter, system-ui, sans-serif',
             transition: 'all 0.15s',
@@ -127,7 +131,7 @@ export function CookieBanner({
             borderRadius: '0.375rem',
             fontSize: '0.75rem',
             fontWeight: 600,
-            color: accentColor,
+            color: 'rgba(255,255,255,0.92)',
             cursor: 'pointer',
             fontFamily: 'Inter, system-ui, sans-serif',
             transition: 'all 0.15s',

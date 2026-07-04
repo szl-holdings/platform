@@ -336,7 +336,7 @@ export function DemoNarrativeSidebar({
         <span
           style={{
             fontSize: '10px',
-            color: 'rgba(255,255,255,0.4)',
+            color: 'rgba(255,255,255,0.6)',
             fontVariantNumeric: 'tabular-nums',
           }}
         >
@@ -356,7 +356,7 @@ export function DemoNarrativeSidebar({
             opacity: activeStep === steps.length - 1 ? 0.4 : 1,
             fontSize: '11px',
             fontWeight: 600,
-            color: accentColor,
+            color: 'rgba(255,255,255,0.92)',
             fontFamily: 'Inter, system-ui, sans-serif',
           }}
           data-testid="demo-narrative-next"
