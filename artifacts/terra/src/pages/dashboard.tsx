@@ -494,7 +494,7 @@ export default function TerraIntelligence() {
                   <TrendingUp className="w-3.5 h-3.5" style={{ color: DS.accent.gold }} />
                   <span
                     className="text-[10px] font-bold uppercase tracking-wider"
-                    style={{ color: `${DS.accent.gold}99` }}
+                    style={{ color: DS.accent.gold }}
                   >
                     Opportunity Score Ranking
                   </span>
@@ -639,7 +639,7 @@ export default function TerraIntelligence() {
           <Activity className="w-3.5 h-3.5" style={{ color: DS.accent.blue }} />
           <span
             className="text-[10px] font-bold uppercase tracking-wider"
-            style={{ color: `${DS.accent.blue}99` }}
+            style={{ color: DS.accent.blue }}
           >
             Stage Pipeline
           </span>
@@ -712,7 +712,7 @@ export default function TerraIntelligence() {
               <MapPin className="w-3.5 h-3.5" style={{ color: DS.accent.gold }} />
               <span
                 className="text-[10px] font-bold uppercase tracking-wider"
-                style={{ color: `${DS.accent.gold}99` }}
+                style={{ color: DS.accent.gold }}
               >
                 Opportunity Queue
               </span>
@@ -883,7 +883,7 @@ export default function TerraIntelligence() {
               <Activity className="w-3.5 h-3.5" style={{ color: DS.accent.blue }} />
               <span
                 className="text-[10px] font-bold uppercase tracking-wider"
-                style={{ color: `${DS.accent.blue}99` }}
+                style={{ color: DS.accent.blue }}
               >
                 Deal Pipeline
               </span>
@@ -955,7 +955,7 @@ export default function TerraIntelligence() {
               <AlertTriangle className="w-3.5 h-3.5" style={{ color: DS.accent.gold }} />
               <span
                 className="text-[10px] font-bold uppercase tracking-wider"
-                style={{ color: `${DS.accent.gold}99` }}
+                style={{ color: DS.accent.gold }}
               >
                 Market Signals
               </span>
@@ -1025,7 +1025,7 @@ export default function TerraIntelligence() {
               <Users className="w-3.5 h-3.5" style={{ color: DS.accent.blue }} />
               <span
                 className="text-[10px] font-bold uppercase tracking-wider"
-                style={{ color: `${DS.accent.blue}99` }}
+                style={{ color: DS.accent.blue }}
               >
                 Top Brokers
               </span>

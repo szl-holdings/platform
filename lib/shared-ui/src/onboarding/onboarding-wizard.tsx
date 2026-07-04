@@ -320,7 +320,7 @@ function StepCard({
                 <X className="w-3.5 h-3.5" />
               </button>
             </div>
-            <p className="text-xs text-muted-foreground mt-1 leading-relaxed">{step.description}</p>
+            <p className="text-xs text-foreground/70 mt-1 leading-relaxed">{step.description}</p>
           </div>
         </div>
 

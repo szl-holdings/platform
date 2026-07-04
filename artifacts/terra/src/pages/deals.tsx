@@ -715,6 +715,7 @@ export default function DealsPage() {
             </div>
             <button
               onClick={() => refetch()}
+              aria-label="Refresh deals"
               className="p-2 rounded-lg border border-terra-border bg-terra-surface text-terra-text-muted hover:text-terra-text transition-colors"
             >
               <RefreshCw className="w-4 h-4" />

@@ -586,7 +586,7 @@ export function TerraLayout({ children }: { children: ReactNode }) {
           <span className="font-bold text-sm tracking-tight text-white leading-none">Terra</span>
           <span
             className="text-[9px] uppercase tracking-widest leading-none mt-0.5"
-            style={{ color: colors.text.subtle, fontFamily: 'monospace' }}
+            style={{ color: 'rgba(255,255,255,0.55)', fontFamily: 'monospace' }}
           >
             Property Intelligence
           </span>
@@ -616,12 +616,12 @@ export function TerraLayout({ children }: { children: ReactNode }) {
       >
         <div
           className="text-[9px] uppercase tracking-widest font-semibold"
-          style={{ color: toAlpha(TERRA_BRAND_ACCENT, 0.55) }}
+          style={{ color: '#5aa588' }}
         >
           System State
         </div>
         <div className="flex items-center justify-between">
-          <span className="text-[10px]" style={{ color: colors.text.subtle }}>
+          <span className="text-[10px]" style={{ color: 'rgba(255,255,255,0.55)' }}>
             Data mode
           </span>
           <span className="text-[9px] font-mono font-semibold" style={{ color: sidebarModeColor }}>
@@ -629,7 +629,7 @@ export function TerraLayout({ children }: { children: ReactNode }) {
           </span>
         </div>
         <div className="flex items-center justify-between">
-          <span className="text-[10px]" style={{ color: colors.text.subtle }}>
+          <span className="text-[10px]" style={{ color: 'rgba(255,255,255,0.55)' }}>
             Distress signals
           </span>
           <span
@@ -640,7 +640,7 @@ export function TerraLayout({ children }: { children: ReactNode }) {
           </span>
         </div>
       </div>
-      <div className="flex items-center gap-2" style={{ color: colors.text.subtle }}>
+      <div className="flex items-center gap-2" style={{ color: 'rgba(255,255,255,0.55)' }}>
         <Building2 className="w-3 h-3" />
         <span className="text-[9px]">SZL Holdings · Real Estate</span>
       </div>
@@ -666,7 +666,7 @@ export function TerraLayout({ children }: { children: ReactNode }) {
         />
         <span
           className="hidden sm:block font-mono text-[10px]"
-          style={{ color: colors.text.muted }}
+          style={{ color: 'rgba(255,255,255,0.55)' }}
         >
           Terra · Property Intelligence
         </span>

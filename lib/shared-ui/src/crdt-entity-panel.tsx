@@ -94,7 +94,7 @@ export function CrdtEntityPanel({
               alignItems: 'center',
               gap: 6,
               fontSize: 11,
-              color: isConnected ? '#22c55e' : '#64748b',
+              color: isConnected ? '#22c55e' : '#94a3b8',
             }}
           >
             <span
@@ -103,7 +103,7 @@ export function CrdtEntityPanel({
                 width: 6,
                 height: 6,
                 borderRadius: '50%',
-                background: isConnected ? '#22c55e' : '#64748b',
+                background: isConnected ? '#22c55e' : '#94a3b8',
               }}
             />
             {isConnected ? 'Live sync' : 'Offline'}
@@ -111,7 +111,7 @@ export function CrdtEntityPanel({
         </div>
 
         <div>
-          <label style={{ fontSize: 11, color: '#64748b', display: 'block', marginBottom: 4 }}>
+          <label style={{ fontSize: 11, color: '#94a3b8', display: 'block', marginBottom: 4 }}>
             Status
           </label>
           <input
@@ -134,7 +134,7 @@ export function CrdtEntityPanel({
         </div>
 
         <div>
-          <label style={{ fontSize: 11, color: '#64748b', display: 'block', marginBottom: 4 }}>
+          <label style={{ fontSize: 11, color: '#94a3b8', display: 'block', marginBottom: 4 }}>
             Notes
           </label>
           <textarea
