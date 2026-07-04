@@ -171,7 +171,7 @@ export function SidebarNav({
         {sections.map((section, si) => (
           <div key={section.id ?? si}>
             {section.label && !collapsed && (
-              <p className="px-2.5 mb-1.5 text-[10px] font-semibold uppercase tracking-[0.08em] text-white/25">
+              <p className="px-2.5 mb-1.5 text-[10px] font-semibold uppercase tracking-[0.08em] text-white/55">
                 {section.label}
               </p>
             )}

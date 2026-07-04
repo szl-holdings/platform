@@ -504,11 +504,11 @@ export default function TerraMarketingLanding() {
         <div className="max-w-[1100px] mx-auto flex items-center justify-between">
           <div className="flex items-center gap-2">
             <Building2 size={12} style={{ color: GOLD_LIGHT }} />
-            <span className="text-[11px] font-mono" style={{ color: 'rgba(255,255,255,0.25)' }}>
+            <span className="text-[11px] font-mono" style={{ color: 'rgba(255,255,255,0.55)' }}>
               Terra &middot; SZL Holdings
             </span>
           </div>
-          <span className="text-[10px] font-mono" style={{ color: 'rgba(255,255,255,0.15)' }}>
+          <span className="text-[10px] font-mono" style={{ color: 'rgba(255,255,255,0.55)' }}>
             &copy; {new Date().getFullYear()} SZL Holdings. All rights reserved.
           </span>
         </div>

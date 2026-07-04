@@ -94,18 +94,35 @@ test.describe('Terra — Route Smoke Tests', () => {
 });
 
 test.describe('Terra — User Journey: Browse Portfolio → View Asset → Create Action', () => {
+  // The app-chrome navigation lives in the left SidebarNav (<nav aria-label="Sidebar">),
+  // rendered only on private (non-marketing) routes. The global EcosystemNav renders first
+  // in the DOM, so a bare `nav`/`.first()` selector binds the ecosystem switcher (no deal/
+  // market anchors) or, on `/`, the marketing top-nav — neither can complete the journey.
+  // Scope explicitly to the sidebar and start on a private route.
+  //
+  // First-run onboarding paints a full-screen spotlight overlay (z-9998) that intercepts
+  // clicks; seed its completed flag so the sidebar links are actually clickable.
+  test.beforeEach(async ({ page }) => {
+    await page.addInitScript(() => {
+      try {
+        localStorage.setItem('szl_onboarding_terra', JSON.stringify({ completed: true }));
+      } catch {}
+    });
+  });
+
+  const sidebar = (page: import('@playwright/test').Page) =>
+    page.locator("nav[aria-label='Sidebar']");
+
   test('user navigates from dashboard to deals via nav and Deal Pipeline heading is visible', async ({
     page,
   }) => {
-    await page.goto(`${TERRA_PATH}/`);
+    await page.goto(`${TERRA_PATH}/dashboard`);
     await page.waitForLoadState('networkidle', { timeout: 20000 }).catch(() => null);
 
-    const nav = page.locator("nav, aside, [role='navigation']").first();
+    const nav = sidebar(page);
     await expect(nav).toBeVisible({ timeout: 15000 });
 
-    const dealsLink = nav
-      .locator("a[href*='deal'], a:has-text('Deal'), a:has-text('Pipeline')")
-      .first();
+    const dealsLink = nav.locator("a[href$='/deals']").first();
     await expect(dealsLink).toBeVisible({ timeout: 10000 });
     await dealsLink.click();
     await page.waitForLoadState('networkidle', { timeout: 20000 }).catch(() => null);
@@ -140,16 +157,14 @@ test.describe('Terra — User Journey: Browse Portfolio → View Asset → Creat
     await expect(stageEl).toBeVisible({ timeout: 15000 });
   });
 
-  test('user navigates from deals to analytics via nav', async ({ page }) => {
+  test('user navigates from deals to market analytics via nav', async ({ page }) => {
     await page.goto(`${TERRA_PATH}/deals`);
     await page.waitForLoadState('networkidle', { timeout: 20000 }).catch(() => null);
 
-    const nav = page.locator("nav, aside, [role='navigation']").first();
+    const nav = sidebar(page);
     await expect(nav).toBeVisible({ timeout: 15000 });
 
-    const analyticsLink = nav
-      .locator("a[href*='analytic'], a:has-text('Analytic'), a:has-text('Market')")
-      .first();
+    const analyticsLink = nav.locator("a[href$='/market-analytics']").first();
     await expect(analyticsLink).toBeVisible({ timeout: 10000 });
     await analyticsLink.click();
     await page.waitForLoadState('networkidle', { timeout: 20000 }).catch(() => null);
@@ -157,25 +172,21 @@ test.describe('Terra — User Journey: Browse Portfolio → View Asset → Creat
     const errorBoundary = page.locator('text=Something went wrong').first();
     const hasError = await errorBoundary.isVisible().catch(() => false);
     expect(hasError).toBe(false);
+    await expect(page).toHaveURL(/market-analytics|analytic/i);
     const body = await page.content();
     expect(body.length).toBeGreaterThan(500);
   });
 
   test('documents page renders document management interface', async ({ page }) => {
-    await page.goto(`${TERRA_PATH}/deals`);
-    await page.waitForLoadState('networkidle', { timeout: 20000 }).catch(() => null);
-
-    const nav = page.locator("nav, aside, [role='navigation']").first();
-    await expect(nav).toBeVisible({ timeout: 15000 });
-
-    const docsLink = nav.locator("a[href*='document'], a:has-text('Document')").first();
-    await expect(docsLink).toBeVisible({ timeout: 10000 });
-    await docsLink.click();
+    // Documents is a valid private route but is intentionally not surfaced in the sidebar,
+    // so this journey navigates to it directly rather than via a (non-existent) nav link.
+    await page.goto(`${TERRA_PATH}/documents`);
     await page.waitForLoadState('networkidle', { timeout: 20000 }).catch(() => null);
 
     const errorBoundary = page.locator('text=Something went wrong').first();
     const hasError = await errorBoundary.isVisible().catch(() => false);
     expect(hasError).toBe(false);
+    await expect(page).toHaveURL(/document/i);
     const body = await page.content();
     expect(body.length).toBeGreaterThan(500);
   });

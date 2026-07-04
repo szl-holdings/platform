@@ -369,7 +369,7 @@ export function RoleSelector({
             borderRadius: '6px',
             border: 'none',
             background: currentRole === role.id ? 'rgba(255,255,255,0.08)' : 'transparent',
-            color: currentRole === role.id ? 'rgba(255,255,255,0.85)' : 'rgba(255,255,255,0.35)',
+            color: currentRole === role.id ? 'rgba(255,255,255,0.85)' : 'rgba(255,255,255,0.6)',
             fontSize: '11px',
             fontWeight: currentRole === role.id ? 600 : 400,
             cursor: 'pointer',

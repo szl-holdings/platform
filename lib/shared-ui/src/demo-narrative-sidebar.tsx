@@ -133,7 +133,7 @@ export function DemoNarrativeSidebar({
             style={{
               fontSize: '10px',
               fontWeight: 700,
-              color: accentColor,
+              color: 'rgba(255,255,255,0.6)',
               letterSpacing: '0.1em',
               textTransform: 'uppercase',
               marginBottom: '4px',
@@ -252,7 +252,7 @@ export function DemoNarrativeSidebar({
                       style={{
                         display: 'block',
                         fontSize: '10px',
-                        color: 'rgba(255,255,255,0.4)',
+                        color: 'rgba(255,255,255,0.55)',
                         marginTop: '2px',
                       }}
                     >
