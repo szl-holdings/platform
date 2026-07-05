@@ -21,8 +21,20 @@ test.beforeAll(async ({ browser }) => {
   }
   await page.close();
 }, 60_000);
-test.beforeEach(async ({}, testInfo) => {
+test.beforeEach(async ({ page }, testInfo) => {
   if (!appAvailable) testInfo.skip();
+  // Seed the shared demo token so PrivateAppGuard renders the private dashboard
+  // in the static E2E harness (no auth backend). This mirrors a user who has
+  // already passed the demo PIN modal. It only takes effect when the build sets
+  // VITE_DEMO_ALLOWED (done for vessels in .github/workflows/e2e.yml); production
+  // builds never set that flag, so the real auth guard is never weakened.
+  await page.addInitScript(() => {
+    try {
+      window.sessionStorage.setItem('szl-demo-token', 'e2e-demo');
+    } catch {
+      // sessionStorage unavailable — guard falls back to the sign-in prompt
+    }
+  });
 });
 
 test.describe('Vessels — Smoke Tests', () => {
@@ -95,10 +107,10 @@ test.describe('Vessels — User Journey: View Fleet → Open Exception → Revie
   test('user navigates to fleet dashboard via nav and Fleet Command KPI is visible', async ({
     page,
   }) => {
-    await page.goto(`${VESSELS_PATH}/`);
+    await page.goto(`${VESSELS_PATH}/dashboard`);
     await page.waitForLoadState('networkidle', { timeout: 20000 }).catch(() => null);
 
-    const nav = page.locator("nav, aside, [role='navigation']").first();
+    const nav = page.locator("nav[aria-label='Sidebar']").first();
     await expect(nav).toBeVisible({ timeout: 15000 });
 
     const fleetLink = nav
@@ -121,10 +133,10 @@ test.describe('Vessels — User Journey: View Fleet → Open Exception → Revie
   });
 
   test('user navigates from fleet dashboard to exceptions center via nav', async ({ page }) => {
-    await page.goto(`${VESSELS_PATH}/fleet-dashboard`);
+    await page.goto(`${VESSELS_PATH}/dashboard`);
     await page.waitForLoadState('networkidle', { timeout: 20000 }).catch(() => null);
 
-    const nav = page.locator("nav, aside, [role='navigation']").first();
+    const nav = page.locator("nav[aria-label='Sidebar']").first();
     await expect(nav).toBeVisible({ timeout: 15000 });
 
     const exceptionsLink = nav.locator("a[href*='exception'], a:has-text('Exception')").first();
@@ -142,10 +154,10 @@ test.describe('Vessels — User Journey: View Fleet → Open Exception → Revie
   });
 
   test('user navigates from exceptions to alert center via nav', async ({ page }) => {
-    await page.goto(`${VESSELS_PATH}/exceptions-center`);
+    await page.goto(`${VESSELS_PATH}/dashboard`);
     await page.waitForLoadState('networkidle', { timeout: 20000 }).catch(() => null);
 
-    const nav = page.locator("nav, aside, [role='navigation']").first();
+    const nav = page.locator("nav[aria-label='Sidebar']").first();
     await expect(nav).toBeVisible({ timeout: 15000 });
 
     const alertLink = nav.locator("a[href*='alert'], a:has-text('Alert')").first();
@@ -336,7 +348,7 @@ test.describe('Vessels — Mobile Viewport', () => {
   });
 
   test('fleet dashboard renders on mobile with Fleet Command content', async ({ page }) => {
-    await page.goto(`${VESSELS_PATH}/fleet-dashboard`);
+    await page.goto(`${VESSELS_PATH}/dashboard`);
     await page.waitForLoadState('networkidle', { timeout: 20000 }).catch(() => null);
     const errorBoundary = page.locator('text=Something went wrong').first();
     const hasError = await errorBoundary.isVisible().catch(() => false);

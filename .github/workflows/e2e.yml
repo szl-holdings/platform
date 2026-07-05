@@ -99,6 +99,12 @@ jobs:
         run: pnpm --filter ${{ matrix.filter }} run build
         env:
           BASE_PATH: /
+          # Vessels gates its dashboard behind PrivateAppGuard. Enable the app's
+          # built-in demo mode for the vessels build only so the static E2E
+          # harness (no auth backend) can render private routes; the spec seeds
+          # the demo token. Other apps build without this flag, and production
+          # builds never set it, so the real auth guard is unchanged.
+          VITE_DEMO_ALLOWED: ${{ matrix.app == 'vessels' && 'true' || '' }}
 
       - name: Serve ${{ matrix.app }} on port ${{ matrix.port }}
         run: |

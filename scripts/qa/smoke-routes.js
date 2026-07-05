@@ -2,7 +2,7 @@
 /**
  * Route Smoke Tests — SZL Holdings Ecosystem
  * Each app runs on its own port; routes are tested against the correct server.
- * API routes are tested directly against the api-server.
+ * API health routes are tested directly against the runtime API (apps/alloy-runtime-api).
  *
  * Usage:
  *   node scripts/qa/smoke-routes.js
@@ -30,17 +30,15 @@ const ROUTES_INDEX = join(ROOT, 'artifacts/api-server/src/routes/index.ts');
 
 // Per-app base URLs — env override takes priority; defaults from scripts/lib/artifact-ports.js.
 // To change a port, update artifact-ports.js — one change propagates to all QA scripts.
-const SZL_URL = process.env.SZL_URL || artifactUrl('szl-holdings');
-const AEGIS_URL = process.env.AEGIS_URL || artifactUrl('aegis');
+// Live product artifacts only. The monorepo was shrunk to six web apps + the
+// runtime API (2026-07); szl-holdings, aegis, command, pulse, and lyte were
+// deleted alongside their route configs (see git history for the old surface).
 const TERRA_URL = process.env.TERRA_URL || artifactUrl('terra');
 const VESSELS_URL = process.env.VESSELS_URL || artifactUrl('vessels');
 const CJ_URL = process.env.CJ_URL || artifactUrl('carlota-jo');
-const CMD_URL = process.env.CMD_URL || artifactUrl('command');
 const API_URL = process.env.API_URL || artifactUrl('api-server');
-const PULSE_URL = process.env.PULSE_URL || artifactUrl('pulse');
 const SENTRA_URL = process.env.SENTRA_URL || artifactUrl('sentra');
 const COUNSEL_URL = process.env.COUNSEL_URL || artifactUrl('counsel');
-const LYTE_URL = process.env.LYTE_URL || artifactUrl('lyte-command-center');
 const A11OY_URL = process.env.A11OY_URL || artifactUrl('a11oy');
 
 // Legacy single-base-url override (used by external callers)
@@ -74,64 +72,6 @@ function discoverApiPrefixes(filePath) {
 // Domain config: each entry has a name, baseUrl, and route paths
 // Routes are relative paths appended to baseUrl
 const WEB_DOMAIN_CONFIGS = [
-  {
-    name: 'SZL Holdings (root)',
-    baseUrl: BASE_URL || SZL_URL,
-    routes: [
-      '/',
-      '/about',
-      '/ecosystem',
-      '/platform',
-      '/lyte',
-      '/alloy-fabric',
-      '/solutions',
-      '/solutions/aegis',
-      '/solutions/vessels',
-      '/solutions/terra',
-      '/design-partners',
-      '/contact',
-      '/pricing',
-      '/status',
-      '/how-it-works',
-      '/trust-center',
-      '/trust',
-      '/trust/security',
-      '/trust/governance',
-      '/trust/architecture',
-      '/trust/ai',
-      '/trust/approvals',
-      '/trust/operations',
-      '/legal/privacy',
-      '/legal/terms',
-      '/accessibility',
-      '/nuro-forge',
-      '/nuro-forge/arena',
-      '/nuro-forge/governance',
-      '/nuro-forge/composition',
-      '/nuro-forge/fine-tuning',
-      '/nuro-forge/multimodal',
-    ],
-  },
-  {
-    name: 'Aegis / Aegis',
-    baseUrl: BASE_URL ? `${BASE_URL}` : AEGIS_URL,
-    // Routes use the /aegis/ base path
-    routes: [
-      '/aegis/',
-      '/aegis/incidents',
-      '/aegis/alerts',
-      '/aegis/cases',
-      '/aegis/findings',
-      '/aegis/executive-risk',
-      '/aegis/asset-inventory',
-      '/aegis/command-home',
-      '/aegis/simulation-panel',
-      '/aegis/soc',
-      '/aegis/threat-intel',
-      '/aegis/compliance',
-      '/aegis/adversary-emulation',
-    ],
-  },
   {
     name: 'Terra',
     baseUrl: BASE_URL ? `${BASE_URL}` : TERRA_URL,
@@ -183,28 +123,6 @@ const WEB_DOMAIN_CONFIGS = [
     ],
   },
   {
-    name: 'Command Portal',
-    baseUrl: BASE_URL ? `${BASE_URL}` : CMD_URL,
-    routes: ['/command/'],
-  },
-  {
-    name: 'Pulse — AI Executive Briefing',
-    baseUrl: BASE_URL ? `${BASE_URL}` : PULSE_URL,
-    routes: [
-      '/pulse/',
-      '/pulse/watchlist',
-      '/pulse/library',
-      '/pulse/confidence',
-      '/pulse/custom',
-      '/pulse/dissent',
-      '/pulse/system',
-      '/pulse/settings',
-      '/pulse/constellation',
-      '/pulse/engine',
-      '/pulse/decisions',
-    ],
-  },
-  {
     name: 'Sentra — Cyber Resilience',
     baseUrl: BASE_URL ? `${BASE_URL}` : SENTRA_URL,
     routes: [
@@ -245,25 +163,6 @@ const WEB_DOMAIN_CONFIGS = [
     ],
   },
   {
-    name: 'Lyte — Decision Intelligence',
-    baseUrl: BASE_URL ? `${BASE_URL}` : LYTE_URL,
-    routes: [
-      '/lyte/',
-      '/lyte/overview',
-      '/lyte/decisions',
-      '/lyte/signals',
-      '/lyte/brief',
-      '/lyte/board',
-      '/lyte/forecast',
-      '/lyte/scenarios',
-      '/lyte/causal',
-      '/lyte/pressure-map',
-      '/lyte/action-debt',
-      '/lyte/entities',
-      '/lyte/policies',
-    ],
-  },
-  {
     name: 'A11oy — Brand Orchestration',
     baseUrl: BASE_URL ? `${BASE_URL}` : A11OY_URL,
     routes: [
@@ -287,13 +186,11 @@ const WEB_DOMAIN_CONFIGS = [
   },
 ];
 
-const KNOWN_READ_API_ROUTES = [
-  '/api/health',
-  '/api/health/live',
-  '/api/health/ready',
-  '/api/csrf-token',
-  '/api/docs',
-];
+// The runtime API (apps/alloy-runtime-api) mounts its router at the root, so
+// these are the real unauthenticated 2xx endpoints — NOT the legacy /api/*
+// surface of the retired api-server. /readyz returns 503 (a failure) if any
+// in-process dependency probe fails, so it is a genuine readiness gate.
+const KNOWN_READ_API_ROUTES = ['/health', '/healthz', '/readyz', '/metrics', '/docs'];
 
 async function checkRouteUrl(url, timeout, tier) {
   const controller = new AbortController();

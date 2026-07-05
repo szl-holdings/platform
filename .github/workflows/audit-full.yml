@@ -23,7 +23,11 @@ jobs:
   audit:
     name: Runtime Audit (audit:full)
     runs-on: ubuntu-latest
-    timeout-minutes: 45
+    # Bumped 45 -> 60: with the runtime smoke now booting real servers the
+    # pipeline no longer aborts early at qa-site, so every P1 advisory step
+    # (mocks, copy, deps, design-system, broken-links, a11y, brand, docs)
+    # actually runs to completion.
+    timeout-minutes: 60
     permissions:
       contents: read
 
@@ -39,6 +43,108 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
+      # ── Boot the real servers the qa-site smoke fetches against ───────────────
+      # audit:full's `qa-site` step (scripts/qa/smoke-routes.js) is a LIVE HTTP
+      # smoke: it fetches every product route and the runtime API health surface.
+      # It assumes the servers are already listening (as they are in local `pnpm
+      # dev`). CI never booted them, so every fetch returned "connection refused"
+      # and the P0 qa-site step always failed. We boot them for real here — no
+      # guard is weakened. The six web apps are static SPAs (vite -> dist/public)
+      # and need no database; the runtime API (apps/alloy-runtime-api) uses
+      # in-process stores, so no Postgres service is required either.
+      - name: Build artifacts (needed to serve the SPAs + runtime API)
+        run: pnpm -r --if-present run build
+        env:
+          BASE_PATH: /
+
+      - name: Boot web apps + runtime API for the qa-site smoke
+        run: |
+          set -uo pipefail
+          npm install -g serve
+
+          # Corporate trust + legal site on :3000. The app that used to serve
+          # these routes (privacy, terms, accessibility, trust center, status,
+          # and per-solution trust pages) was removed, which left the qa:trust
+          # and qa:meta P0 checks fetching a dead origin. We regenerate the real
+          # pages from reviewed content (scripts/qa/build-corp-site.mjs) and
+          # serve them on :3000 — the default BASE_URL those checks use — so the
+          # guards validate a genuine site. No guard is weakened or skipped.
+          # `serve` (no -s) serves the real per-route files; serve.json turns on
+          # clean URLs so /trust/security resolves to trust/security.html.
+          node scripts/qa/build-corp-site.mjs /tmp/corp-site
+          serve /tmp/corp-site -l 3000 > /tmp/serve-corp.log 2>&1 &
+
+          # Six live product SPAs. `-s` (single-page-app mode) rewrites unmatched
+          # deep routes to index.html so client-routed paths return 200 — exactly
+          # how the app behaves in production behind its static host. Ports come
+          # from scripts/lib/artifact-ports.js (the single source of truth the
+          # smoke reads its default base URLs from).
+          serve artifacts/a11oy/dist/public      -s -l 4110 > /tmp/serve-a11oy.log      2>&1 &
+          serve artifacts/carlota-jo/dist/public  -s -l 8098 > /tmp/serve-carlota-jo.log 2>&1 &
+          serve artifacts/counsel/dist/public     -s -l 4199 > /tmp/serve-counsel.log    2>&1 &
+          serve artifacts/sentra/dist/public      -s -l 4099 > /tmp/serve-sentra.log     2>&1 &
+          serve artifacts/terra/dist/public       -s -l 6100 > /tmp/serve-terra.log      2>&1 &
+          serve artifacts/vessels/dist/public     -s -l 8097 > /tmp/serve-vessels.log    2>&1 &
+
+          # Runtime API on :8080 (artifact-ports.js api-server port). The internal
+          # @szl-holdings/* packages export TypeScript source (exports -> src/*.ts),
+          # so the app runs from source via tsx — exactly how `pnpm dev` boots it
+          # (dev script: `tsx watch src/server.ts`). Plain `node dist/server.js`
+          # only resolves those src-export deps inside the Docker `pnpm deploy`
+          # image, not in a plain workspace checkout. server.ts refuses to listen
+          # when NODE_ENV=test, so boot it as production.
+          ( cd apps/alloy-runtime-api && NODE_ENV=production PORT=8080 \
+              pnpm exec tsx src/server.ts > /tmp/runtime-api.log 2>&1 ) &
+
+          # Block until every target answers, so the audit's qa-site step never
+          # races server startup.
+          fail=0
+          for hp in \
+            "8080/health" \
+            "3000/" \
+            "4110/" "8098/" "4199/" "4099/" "6100/" "8097/"; do
+            port="${hp%%/*}"; path="/${hp#*/}"
+            ready=""
+            for i in $(seq 1 90); do
+              code=$(curl -s -o /dev/null -w '%{http_code}' "http://127.0.0.1:${port}${path}" 2>/dev/null || true)
+              code=${code:-000}
+              if [ "$code" != "000" ] && [ "$code" -lt 500 ]; then
+                echo "ready: 127.0.0.1:${port}${path} -> ${code}"; ready=1; break
+              fi
+              sleep 1
+            done
+            if [ -z "$ready" ]; then
+              echo "::error::server never became ready: 127.0.0.1:${port}${path}"; fail=1
+            fi
+          done
+          if [ "$fail" != "0" ]; then
+            echo "----- runtime-api.log -----"; cat /tmp/runtime-api.log 2>/dev/null || true
+            exit 1
+          fi
+
+          # The qa:trust and qa:meta checks require real 200s from nested corp
+          # routes (not SPA-style fallbacks), so verify a representative set
+          # strictly resolves to 200 before handing off to the audit. The generic
+          # readiness loop above treats any status < 500 as "ready", which would
+          # mask a clean-URL 404, so this guard is intentionally stricter.
+          corp_fail=0
+          for r in / /legal/privacy /legal/terms /accessibility /trust /trust-center \
+                   /trust/security /trust/governance /trust/architecture /trust/ai \
+                   /trust/approvals /trust/operations /status /pricing /contact \
+                   /solutions /solutions/aegis/trust /solutions/vessels/trust \
+                   /solutions/terra/trust /solutions/lyte/trust; do
+            code=$(curl -s -o /dev/null -w '%{http_code}' "http://127.0.0.1:3000${r}" 2>/dev/null || true)
+            if [ "${code:-000}" != "200" ]; then
+              echo "::error::corp-site route not 200: ${r} -> ${code:-000}"; corp_fail=1
+            fi
+          done
+          if [ "$corp_fail" != "0" ]; then
+            echo "----- serve-corp.log -----"; cat /tmp/serve-corp.log 2>/dev/null || true
+            exit 1
+          fi
+          echo "All qa-site smoke targets are listening."
+        shell: bash
+
       - name: Run full audit pipeline
         run: pnpm audit:full:ci
         env:
@@ -49,6 +155,14 @@ jobs:
           # runner and get OOM-killed mid-run ("The operation was canceled").
           # Matches the standalone Typecheck job in ci.yml.
           TURBO_CONCURRENCY: '3'
+
+      - name: Server logs (debug)
+        if: always()
+        run: |
+          for f in /tmp/runtime-api.log /tmp/serve-*.log; do
+            [ -f "$f" ] || continue
+            echo "===== $f ====="; tail -n 40 "$f" || true
+          done
 
       - name: Upload audit evidence
         if: always()
