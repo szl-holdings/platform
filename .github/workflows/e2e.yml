@@ -30,11 +30,11 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - app: terra
-            filter: "@workspace/terra"
-            dist: artifacts/terra/dist/public
-            port: 3002
-            spec: terra.spec.ts
+          # Terra retired 2026-07-05: the standalone app is superseded by the a11oy
+          # realestate vertical (GET /api/a11oy/v1/vert/realestate ->
+          # consolidated_from:"Terra"). Dropped from the E2E matrix so the E2E Gate
+          # stops gating on a retired app. Source retained in-place under
+          # artifacts/terra/ with a DEPRECATED.md; history preserved.
           - app: vessels
             filter: "@workspace/vessels"
             dist: artifacts/vessels/dist/public
@@ -67,6 +67,9 @@ jobs:
           # (a11oy, sentra, terra, carlota-jo, counsel, vessels). Specs that
           # targeted szl-holdings, command, pulse, mockup-sandbox,
           # lyte-command-center, conduit, etc. were removed alongside their apps.
+          # UPDATE (2026-07-05): terra dropped from the active E2E matrix — the
+          # standalone app is retired/superseded by the a11oy realestate vertical
+          # (see artifacts/terra/DEPRECATED.md). Five artifacts remain gated here.
           # See docs/TESTING_MATRIX.md §4a for the current coverage map.
     steps:
       - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
@@ -114,7 +117,6 @@ jobs:
         env:
           CI: true
           PLAYWRIGHT_BASE_URL: http://localhost:${{ matrix.port }}
-          TERRA_BASE_PATH: /
           VESSELS_BASE_PATH: /
           CARLOTA_BASE_PATH: /
           SENTRA_BASE_PATH: /

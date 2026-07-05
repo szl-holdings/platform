@@ -83,7 +83,7 @@ Run via: `pnpm test:e2e` (full) or per-spec in CI `e2e.yml`
 | `forge.spec.ts` | Nuro Forge (within SZL Holdings at `/nuro-forge`) | `@workspace/szl-holdings` | 3000 |
 | `lyte.spec.ts` | Lyte Command Center (within SZL Holdings at `/lyte`) | `@workspace/szl-holdings` | 3000 |
 | `aegis.spec.ts` | Aegis — Defense & Intelligence | `@workspace/aegis` | 3001 |
-| `terra.spec.ts` | Terra — Real Estate Intelligence | `@workspace/terra` | 3002 |
+| `terra.spec.ts` | Terra — Real Estate Intelligence | `@workspace/terra` | 3002 | _RETIRED 2026-07-05: standalone app superseded by the a11oy `realestate` vertical; dropped from the active E2E matrix (see `artifacts/terra/DEPRECATED.md`)._ |
 | `vessels.spec.ts` | Vessels Maritime Intelligence | `@workspace/vessels` | 3003 |
 | `carlota-jo.spec.ts` | Carlota Jo Consulting | `@workspace/carlota-jo` | 3004 |
 | `command.spec.ts` | Unified Command | `@workspace/command` | 3005 |
