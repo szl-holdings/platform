@@ -27,7 +27,7 @@ Only signed results (hashes + receipts) travel home to the a11oy reservoir.
     where wholesale prices go negative (Germany, Texas, etc.).
 - Tailscale installed on the host for secure private networking to the home
   app box (no public GPU endpoint).
-- A signed CONSENT_TOKEN issued by SZL Holdings (contact ops@a11oy.net).
+- A signed CONSENT_TOKEN issued by SZL Holdings (contact ops@a-11-oy.com).
 
 SZL provides the **software + proof layer**.  The physical tie-in to the local
 energy source is a site-specific hardware and operator step.
