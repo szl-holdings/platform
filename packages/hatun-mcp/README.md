@@ -1,6 +1,12 @@
 # szl-hatun-mcp
 
 > Part of the **szl-holdings/platform** monorepo — Doctrine v11 substrate package.
+>
+> ⚠️ **Non-canonical copy.** The **canonical, live MCP server** is
+> [`szl-holdings/hatun-mcp`](https://github.com/szl-holdings/hatun-mcp) (23 governed
+> tools; this copy exposes 16). Do **not** add new tools here or repoint the live
+> transport — see [`CANONICAL.md`](./CANONICAL.md) for the fold-in plan. This notice
+> is additive; no code is changed and nothing is deleted (CONSOLIDATION SAFETY RULE).
 
 Hatun-MCP: doctrine-aware MCP server (streamable-HTTP). Governance, backends, 16 governed tools.
 
