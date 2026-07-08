@@ -8,7 +8,7 @@ function stripTrailingSlash(path: string) {
 }
 
 const base = stripTrailingSlash(
-  (import.meta.env.BASE_URL ?? '/a11oy/').replace(/\/$/, '') || '/a11oy',
+  (import.meta.env.BASE_URL ?? '/a11oy/').replace(/\/$/, ''),
 );
 
 function Loader() {
