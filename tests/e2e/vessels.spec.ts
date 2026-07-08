@@ -31,6 +31,10 @@ test.beforeEach(async ({ page }, testInfo) => {
   await page.addInitScript(() => {
     try {
       window.sessionStorage.setItem('szl-demo-token', 'e2e-demo');
+      // Mark the product onboarding tour as completed so its full-screen
+      // backdrop (fixed inset-0, z-9998) never intercepts sidebar clicks in
+      // the journey tests. Mirrors a returning user who already saw the tour.
+      window.localStorage.setItem('szl_onboarding_vessels', JSON.stringify({ completed: true }));
     } catch {
       // sessionStorage unavailable — guard falls back to the sign-in prompt
     }

@@ -151,7 +151,10 @@ test.describe('Carlota Jo — User Journey: Browse Services → Start Booking �
     const nav = page.locator('nav').first();
     await expect(nav).toBeVisible({ timeout: 15000 });
 
-    const contactLink = nav.locator("a[href*='contact'], a:has-text('Contact')").first();
+    // The "Request Consultation" contact link lives in the marketing Header nav,
+    // but page.locator('nav').first() resolves to the global EcosystemNav (the
+    // cross-app switcher, which has no contact link). Scope to the whole page.
+    const contactLink = page.locator("a[href*='contact']:visible").first();
     await expect(contactLink).toBeVisible({ timeout: 10000 });
     await contactLink.click();
     await page.waitForLoadState('networkidle', { timeout: 20000 }).catch(() => null);
