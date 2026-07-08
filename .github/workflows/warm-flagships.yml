@@ -1,16 +1,24 @@
 # SPDX-License-Identifier: Apache-2.0
 # Warm the flagship Spaces so HF never sleeps them (Option A: external cron heartbeat).
-# Every 10 min: probe each LIVE flagship. On non-200/unreachable, open a de-duped issue.
+# Every 10 min: probe each LIVE flagship on its CORRECT health URL for its Space type.
+# Honesty rule: only a real non-200 on the correct URL is UNHEALTHY (opens a de-duped
+# issue). Unreachable/timeout (curl connect failure, HTTP code 000) is UNKNOWN /
+# network-flap and MUST NOT open an issue -- a warm cron must never fabricate an outage.
 # A final job POSTs a wake-receipt to a11oy so the wake itself is signed into the Khipu.
 #
 # Roster honesty (Doctrine v11, 749/14/163):
-#   LIVE docker organs (probe /healthz): a11oy, killinchu, yarqa.
-#   LIVE static organ serving a static asset (no /healthz; probe index.html):
-#     anatomy (sdk:static; HF serves static Spaces from the .static.hf.space host,
-#     so the plain .hf.space host 404s -- probe the .static.hf.space index.html).
+#   LIVE docker organs (sdk:docker -> probe the plain .hf.space host at /healthz, 200):
+#     a11oy, killinchu, yarqa, anatomy, hatun-mcp.
+#     NOTE: anatomy is a DOCKER Space (not static). The old probe hit
+#     szlholdings-anatomy.static.hf.space/index.html and 404'd (no static host exists
+#     for a docker Space), opening false "flagship anatomy unhealthy" issues -- fixed to
+#     probe the docker /healthz like the other organs.
+#   LIVE static organs (sdk:static -> HF serves them from the .static.hf.space host;
+#     the plain .hf.space host 404s, so probe the .static host's real served asset):
+#     (none in the current flagship roster; the `static` type is kept wired so a genuinely
+#     static Space can be added with its real served path, not a hardcoded .static default.)
 #   RETIRED — consolidated into a11oy, intentionally NOT probed (no Space exists):
 #     amaru -> a11oy Memory, sentra -> a11oy Sentinel, rosie -> a11oy Operator.
-#   hatun-mcp (the great context MCP gateway): LIVE docker Space (probe /healthz).
 # Sign: Yachay <yachay@szlholdings.dev>.
 name: warm-flagships
 on:
@@ -27,31 +35,47 @@ jobs:
       matrix:
         include:
           - organ: a11oy
+            type: docker
             probe: "https://szlholdings-a11oy.hf.space/healthz"
           - organ: killinchu
+            type: docker
             probe: "https://szlholdings-killinchu.hf.space/healthz"
           - organ: yarqa
+            type: docker
             probe: "https://szlholdings-yarqa.hf.space/healthz"
           - organ: hatun-mcp
+            type: docker
             probe: "https://szlholdings-hatun-mcp.hf.space/healthz"
           - organ: anatomy
-            probe: "https://szlholdings-anatomy.static.hf.space/index.html"
+            type: docker
+            probe: "https://szlholdings-anatomy.hf.space/healthz"
     steps:
       - name: Ping flagship
         id: ping
         run: |
           set +e
           CODE=$(curl -sL -o /tmp/body -w "%{http_code}" --max-time 25 "${{ matrix.probe }}")
-          echo "GET ${{ matrix.probe }} -> $CODE"
+          RC=$?
+          echo "GET ${{ matrix.probe }} (type=${{ matrix.type }}) -> http=$CODE curl_rc=$RC"
+          # Healthy: a real 200 on the correct URL.
           if [ "$CODE" = "200" ]; then
-            echo "ok=1" >> "$GITHUB_OUTPUT"
+            echo "state=ok" >> "$GITHUB_OUTPUT"
             head -c 400 /tmp/body
             exit 0
           fi
-          echo "ok=0" >> "$GITHUB_OUTPUT"
+          # UNKNOWN: curl could not complete (connect/timeout/DNS) or no HTTP status was
+          # returned (code 000). This is a network flap, NOT a proven outage -- do not alert.
+          if [ "$RC" != "0" ] || [ -z "$CODE" ] || [ "$CODE" = "000" ]; then
+            echo "state=unknown" >> "$GITHUB_OUTPUT"
+            echo "last_code=$CODE (curl_rc=$RC)" >> "$GITHUB_OUTPUT"
+            echo "UNKNOWN: probe unreachable (network flap) -- not opening an issue."
+            exit 0
+          fi
+          # UNHEALTHY: a real HTTP response with a non-200 status on the correct URL.
+          echo "state=unhealthy" >> "$GITHUB_OUTPUT"
           echo "last_code=$CODE" >> "$GITHUB_OUTPUT"
-      - name: Open de-duped issue on failure
-        if: steps.ping.outputs.ok != '1'
+      - name: Open de-duped issue on real non-200
+        if: steps.ping.outputs.state == 'unhealthy'
         uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9
         with:
           script: |
@@ -60,9 +84,10 @@ jobs:
             const title = `flagship ${organ} unhealthy (warm-flagships)`;
             const q = `repo:${context.repo.owner}/${context.repo.repo} is:issue is:open in:title "${title}"`;
             const found = await github.rest.search.issuesAndPullRequests({ q });
-            const body = `Automated warm-flagships probe could not reach a 200 on **${organ}** ` +
+            const body = `Automated warm-flagships probe got a real non-200 on **${organ}** ` +
                          `(\`${probe}\`, last code ${{ steps.ping.outputs.last_code }}). ` +
-                         `The Space may be down, still building, or sleeping. ` +
+                         `The Space returned an HTTP error (not merely unreachable), so it ` +
+                         `may be down, still building, or crash-looping. ` +
                          `Check the HF Space build logs. Doctrine v11. — Yachay`;
             if (found.data.total_count === 0) {
               await github.rest.issues.create({ owner: context.repo.owner, repo: context.repo.repo, title, body, labels: ['flagship','availability'] });
