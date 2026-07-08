@@ -84,7 +84,9 @@ Run via: `pnpm test:e2e` (full) or per-spec in CI `e2e.yml`
 | `lyte.spec.ts` | Lyte Command Center (within SZL Holdings at `/lyte`) | `@workspace/szl-holdings` | 3000 |
 | `aegis.spec.ts` | Aegis — Defense & Intelligence | `@workspace/aegis` | 3001 |
 | `terra.spec.ts` | Terra — Real Estate Intelligence | `@workspace/terra` | 3002 | _RETIRED 2026-07-05: standalone app superseded by the a11oy `realestate` vertical; dropped from the active E2E matrix (see `artifacts/terra/DEPRECATED.md`)._ |
-| `vessels.spec.ts` | Vessels Maritime Intelligence | `@workspace/vessels` | 3003 |
+| `vessels.spec.ts` | Vessels Maritime Intelligence | `@workspace/vessels` | 3003 | _RETIRED 2026-07-08: standalone app superseded — maritime functionality consolidated into killinchu (`/api/killinchu/v1/fleet/*` + `/api/killinchu/v1/maritime/*`) and the a11oy `vessels` vertical; dropped from the active E2E matrix (see `artifacts/vessels/DEPRECATED.md`)._ |
+| `counsel.spec.ts` | Counsel — Legal Matter Command | `@workspace/counsel` | 3008 | _RETIRED 2026-07-08: standalone app superseded by the a11oy `legal` vertical (GET /api/a11oy/v1/vert/legal -> consolidated_from:"Counsel"); dropped from the active E2E matrix (see `artifacts/counsel/DEPRECATED.md`)._ |
+| `sentra.spec.ts` | Sentra — Cyber Resilience Command | `@workspace/sentra` | 3007 | _RETIRED 2026-07-08: standalone app superseded by the a11oy `cyber` vertical (GET /api/a11oy/v1/vert/cyber -> consolidated_from:"Sentra"); dropped from the active E2E matrix (see `artifacts/sentra/DEPRECATED.md`)._ |
 | `carlota-jo.spec.ts` | Carlota Jo Consulting | `@workspace/carlota-jo` | 3004 |
 | `command.spec.ts` | Unified Command | `@workspace/command` | 3005 |
 | `governed-decision-loop.spec.ts` | Governed Decision Loop (within Command at `/operations/governed-decision-loop`) | `@workspace/command` | 3005 |
