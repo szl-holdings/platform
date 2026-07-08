@@ -43,7 +43,7 @@ export default function Header() {
       initial={{ opacity: 0, y: -8 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
-      className="fixed top-0 inset-inline-0 z-50 transition-all duration-300"
+      className="fixed top-[48px] inset-inline-0 z-50 transition-all duration-300"
       style={{
         background: scrolled ? 'rgba(249,247,243,0.97)' : 'rgba(12,10,8,0.82)',
         backdropFilter: 'blur(12px)',

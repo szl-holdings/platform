@@ -188,7 +188,7 @@ test.describe('Carlota Jo — Mobile Viewport', () => {
     const errorBoundary = page.locator('text=Something went wrong').first();
     const hasError = await errorBoundary.isVisible().catch(() => false);
     expect(hasError).toBe(false);
-    const practiceAreaStep = page.locator(":text('Practice Area')").first();
+    const practiceAreaStep = page.locator(":text('Practice Area'):visible").first();
     await expect(practiceAreaStep).toBeVisible({ timeout: 15000 });
   });
 });
@@ -226,38 +226,40 @@ test.describe('Carlota Jo — Keyboard Navigation', () => {
   test('Tab key reaches every primary nav link and each shows a visible focus indicator', async ({
     page,
   }) => {
-    const nav = page.locator('nav').first();
+    // The app's primary navigation is the marketing Header's "Main navigation",
+    // not page.locator('nav').first() — that resolves to the global EcosystemNav
+    // (the cross-app switcher chrome) whose focus order carlota-jo does not own.
+    // Scope the assertion to the product's own nav.
+    const nav = page.locator('nav[aria-label="Main navigation"]');
     await expect(nav).toBeVisible({ timeout: 15000 });
 
     // Count only visible nav links — hidden mobile-menu duplicates are excluded.
     const navLinkCount = await nav.locator('a:visible').count();
-    expect(navLinkCount, 'Nav must contain at least one visible <a>').toBeGreaterThan(0);
+    expect(navLinkCount, 'Main navigation must contain at least one visible <a>').toBeGreaterThan(0);
 
-    // Tab from the top of the page and record every nav <a> that receives focus.
+    // Establish keyboard focus at the header brand link (the <a> immediately
+    // before the nav), then Tab through the primary nav. Tabbing keeps focus
+    // keyboard-driven so :focus-visible (and the focus ring) applies.
+    await page.locator('header a').first().focus();
+
     const focusedNavLinks: string[] = [];
-    await page.keyboard.press('Tab');
-
-    for (let i = 0; i < navLinkCount + 30; i++) {
+    for (let i = 0; i < navLinkCount + 12; i++) {
+      await page.keyboard.press('Tab');
       const info = await page.evaluate(() => {
         const el = document.activeElement as HTMLElement | null;
         if (!el) return null;
         return {
           tag: el.tagName.toLowerCase(),
           text: el.textContent?.trim() ?? '',
-          isInNav: !!el.closest('nav'),
-          pastNav: !el.closest('nav') && isPastNav(),
+          inMainNav: !!el.closest('nav[aria-label="Main navigation"]'),
         };
-
-        function isPastNav(): boolean {
-          const nav = document.querySelector('nav');
-          if (!nav || !el) return false;
-          return (nav.compareDocumentPosition(el) & Node.DOCUMENT_POSITION_FOLLOWING) !== 0;
-        }
       });
 
-      if (info?.pastNav && focusedNavLinks.length > 0) break;
+      if (!info) continue;
+      // Once focus leaves the primary nav (after visiting its links), stop.
+      if (!info.inMainNav && focusedNavLinks.length > 0) break;
 
-      if (info?.isInNav && info.tag === 'a') {
+      if (info.inMainNav && info.tag === 'a') {
         // Hard-assert a focus ring on every nav link that receives focus.
         const ring = await hasFocusRing(page);
         expect(
@@ -266,8 +268,6 @@ test.describe('Carlota Jo — Keyboard Navigation', () => {
         ).toBe(true);
         focusedNavLinks.push(info.text);
       }
-
-      await page.keyboard.press('Tab');
     }
 
     expect(
@@ -277,7 +277,7 @@ test.describe('Carlota Jo — Keyboard Navigation', () => {
   });
 
   test('pressing Enter on a focused nav link changes the active route', async ({ page }) => {
-    const nav = page.locator('nav').first();
+    const nav = page.locator('nav[aria-label="Main navigation"]');
     await expect(nav).toBeVisible({ timeout: 15000 });
 
     // Find a nav link with a non-hash, non-root href to serve as the target.
@@ -299,10 +299,12 @@ test.describe('Carlota Jo — Keyboard Navigation', () => {
       return;
     }
 
-    // Tab until that specific link is focused.
+    // Start keyboard focus at the header brand link, then Tab until the target
+    // nav link is focused and activate it with Enter.
+    await page.locator('header a').first().focus();
     let activated = false;
-    await page.keyboard.press('Tab');
-    for (let i = 0; i < 40; i++) {
+    for (let i = 0; i < count + 12; i++) {
+      await page.keyboard.press('Tab');
       const focusedHref = await page.evaluate(
         () => (document.activeElement as HTMLAnchorElement | null)?.getAttribute('href') ?? null,
       );
@@ -317,8 +319,6 @@ test.describe('Carlota Jo — Keyboard Navigation', () => {
         activated = true;
         break;
       }
-
-      await page.keyboard.press('Tab');
     }
 
     expect(activated, `Keyboard Enter on nav link "${targetHref}" did not change the route`).toBe(true);
@@ -333,10 +333,14 @@ test.describe('Carlota Jo — Keyboard Navigation', () => {
     // the kind of regression these smoke tests must catch automatically.
     await expect(form, 'Carlota Jo contact page must render a <form> for keyboard testing').toBeVisible({ timeout: 10000 });
 
-    // Tab to the first form field.
-    await page.keyboard.press('Tab');
+    // Start keyboard traversal from the page's main content region so the walk
+    // exercises the contact form itself rather than the global chrome (the
+    // cross-app EcosystemNav) that precedes every page. The <main> is focusable
+    // (tabIndex={-1}); Tabbing from it advances into the form via the keyboard.
+    await page.locator('#main-content').focus();
     let reachedForm = false;
     for (let i = 0; i < 35; i++) {
+      await page.keyboard.press('Tab');
       const info = await page.evaluate(() => {
         const el = document.activeElement as HTMLElement | null;
         if (!el) return null;
@@ -346,7 +350,6 @@ test.describe('Carlota Jo — Keyboard Navigation', () => {
         reachedForm = true;
         break;
       }
-      await page.keyboard.press('Tab');
     }
     expect(reachedForm, 'Tab key must reach a form field inside <form>').toBe(true);
 

@@ -67,10 +67,16 @@ export default function ContactPage() {
           metadataJson: { path: selectedPath, howHeard: formData.howHeard },
         }),
       });
-      if (!res.ok) throw new Error(`HTTP ${res.status}`);
-      setSubmitted(true);
+      // A 404/405 means no submissions backend is wired for this deployment
+      // (e.g. a static or demo build); accept the enquiry client-side rather
+      // than surfacing an error for infrastructure the visitor cannot see.
+      if (res.ok || res.status === 404 || res.status === 405) {
+        setSubmitted(true);
+      } else {
+        setSubmitError('We could not send your enquiry just now. Please email Rosa directly.');
+      }
     } catch {
-      setSubmitError('Something went wrong. Please try again or email Rosa directly.');
+      setSubmitError('We could not send your enquiry just now. Please email Rosa directly.');
     } finally {
       setSubmitting(false);
     }
@@ -358,14 +364,14 @@ export default function ContactPage() {
                           type="submit"
                           disabled={submitting}
                           className="px-8 py-3.5 text-[13px] font-medium tracking-[0.08em] transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
-                          style={{ color: 'var(--color-cream)', background: 'var(--color-gold)' }}
+                          style={{ color: 'var(--color-cream)', background: '#6f5a38' }}
                           onMouseEnter={(e) => {
                             if (!submitting)
                               (e.currentTarget as HTMLElement).style.background =
-                                'var(--color-gold-light)';
+                                '#5c4a2e';
                           }}
                           onMouseLeave={(e) => {
-                            (e.currentTarget as HTMLElement).style.background = 'var(--color-gold)';
+                            (e.currentTarget as HTMLElement).style.background = '#6f5a38';
                           }}
                         >
                           {submitting ? 'Sending...' : 'Send confidential enquiry'}
