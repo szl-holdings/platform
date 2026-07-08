@@ -33,27 +33,27 @@ jobs:
         app:
           - name: terra
             filter: "@workspace/terra"
-            dist: artifacts/terra/dist
+            dist: artifacts/terra/dist/public
             port: 3002
           - name: vessels
             filter: "@workspace/vessels"
-            dist: artifacts/vessels/dist
+            dist: artifacts/vessels/dist/public
             port: 3003
           - name: carlota-jo
             filter: "@workspace/carlota-jo"
-            dist: artifacts/carlota-jo/dist
+            dist: artifacts/carlota-jo/dist/public
             port: 3004
           - name: sentra
             filter: "@workspace/sentra"
-            dist: artifacts/sentra/dist
+            dist: artifacts/sentra/dist/public
             port: 3007
           - name: counsel
             filter: "@workspace/counsel"
-            dist: artifacts/counsel/dist
+            dist: artifacts/counsel/dist/public
             port: 3008
           - name: a11oy
             filter: "@workspace/a11oy"
-            dist: artifacts/a11oy/dist
+            dist: artifacts/a11oy/dist/public
             port: 3010
     steps:
       - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
@@ -66,6 +66,10 @@ jobs:
 
       - name: Build ${{ matrix.app.name }}
         run: pnpm --filter ${{ matrix.app.filter }} run build
+        env:
+          # Build with root base so the standalone `serve` at localhost:<port>/
+          # resolves assets. Production serves each app under /<app>/ via BASE_PATH.
+          BASE_PATH: /
 
       - name: Install static file server
         run: npm install -g serve
