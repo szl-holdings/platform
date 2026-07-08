@@ -35,6 +35,7 @@ function sanitizeForPrompt(value: unknown, maxLen: number = MAX_FIELD_LEN): stri
   const raw = typeof value === 'string' ? value : String(value ?? '');
   const cleaned = raw
     // collapse CR/LF/tab and any other C0/C1 control chars to a single space
+    // biome-ignore lint/suspicious/noControlCharactersInRegex: intentional — this sanitizer's sole purpose is to strip C0/C1 control chars from untrusted request fields before they are interpolated into the trusted system prompt (system-prompt-injection defense).
     .replace(/[\u0000-\u001F\u007F-\u009F]+/g, ' ')
     // remove backticks / dollar-brace to prevent template-literal style markers
     .replace(/[`]/g, "'")

@@ -536,6 +536,8 @@ export function HomePage() {
 
   return (
     <div
+      id="main-content"
+      tabIndex={-1}
       style={{
         minHeight: '100vh',
         background: T.bg,
