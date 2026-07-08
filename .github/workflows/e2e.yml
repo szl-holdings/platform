@@ -118,7 +118,7 @@ jobs:
         shell: bash
 
       - name: Run E2E tests for ${{ matrix.app }}
-        run: pnpm exec playwright test tests/e2e/${{ matrix.spec }} --project=chromium
+        run: pnpm exec playwright test tests/e2e/${{ matrix.spec }} --project=chromium --reporter=list
         if: ${{ hashFiles(format('tests/e2e/{0}', matrix.spec)) != '' }}
         env:
           CI: true
@@ -172,3 +172,4 @@ jobs:
             exit 1
           fi
           echo "All E2E checks passed"
+
