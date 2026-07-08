@@ -30,47 +30,30 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          # Terra retired 2026-07-05: the standalone app is superseded by the a11oy
-          # realestate vertical (GET /api/a11oy/v1/vert/realestate ->
-          # consolidated_from:"Terra"). Dropped from the E2E matrix so the E2E Gate
-          # stops gating on a retired app. Source retained in-place under
-          # artifacts/terra/ with a DEPRECATED.md; history preserved.
-          - app: vessels
-            filter: "@workspace/vessels"
-            dist: artifacts/vessels/dist/public
-            port: 3003
-            spec: vessels.spec.ts
+          # Terra retired 2026-07-05 (a11oy `realestate` vertical). Consolidation
+          # cleanup 2026-07-08: counsel, sentra, and vessels are PRE-consolidation
+          # standalone copies whose live homes have moved. They are dropped from the
+          # active E2E matrix so the E2E Gate stops gating superseded apps. Each keeps
+          # its source in-place with a DEPRECATED.md. This retires superseded apps — it
+          # does NOT disable a check for a live surface; the live surfaces are governed
+          # and verified in a11oy + killinchu (each has its own CI/readiness harness):
+          #   - counsel -> a11oy `legal`  vertical  (GET /api/a11oy/v1/vert/legal  -> consolidated_from:"Counsel")
+          #   - sentra  -> a11oy `cyber`  vertical  (GET /api/a11oy/v1/vert/cyber  -> consolidated_from:"Sentra")
+          #   - vessels -> killinchu maritime       (GET /api/killinchu/v1/fleet/* + /api/killinchu/v1/maritime/*)
+          # carlota-jo REMAINS gated: its a11oy `carlota` vertical is still [seed] with
+          # no live feed pack, so this standalone app is still its only live home.
           - app: carlota-jo
             filter: "@workspace/carlota-jo"
             dist: artifacts/carlota-jo/dist/public
             port: 3004
             spec: carlota-jo.spec.ts
-          # Sentra — Cyber Resilience Command, port 3007.
-          - app: sentra
-            filter: "@workspace/sentra"
-            dist: artifacts/sentra/dist/public
-            port: 3007
-            spec: sentra.spec.ts
-          # Counsel — Legal Matter Command, port 3008.
-          - app: counsel
-            filter: "@workspace/counsel"
-            dist: artifacts/counsel/dist/public
-            port: 3008
-            spec: counsel.spec.ts
           # a11oy — genetic AI substrate, port 3010.
           - app: a11oy
             filter: "@workspace/a11oy"
             dist: artifacts/a11oy/dist/public
             port: 3010
             spec: a11oy.spec.ts
-          # NOTE (2026-05-02): The monorepo was shrunk to six product artifacts
-          # (a11oy, sentra, terra, carlota-jo, counsel, vessels). Specs that
-          # targeted szl-holdings, command, pulse, mockup-sandbox,
-          # lyte-command-center, conduit, etc. were removed alongside their apps.
-          # UPDATE (2026-07-05): terra dropped from the active E2E matrix — the
-          # standalone app is retired/superseded by the a11oy realestate vertical
-          # (see artifacts/terra/DEPRECATED.md). Five artifacts remain gated here.
-          # See docs/TESTING_MATRIX.md §4a for the current coverage map.
+
     steps:
       - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
 
