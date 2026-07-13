@@ -17,7 +17,7 @@
 # "build" script to package.json would make this explicit — flagged for founder.
 
 # ─── Stage 1: dependency cache (pnpm fetch from root) ────────────────────────
-FROM node:26-alpine@sha256:725aeba2364a9b16beae49e180d83bd597dbd0b15c47f1f28875c290bfd255b9 AS deps
+FROM node:26-alpine@sha256:e88a35be04478413b7c71c455cd9865de9b9360e1f43456be5951032d7ac1a66 AS deps
 RUN apk add --no-cache libc6-compat
 RUN corepack enable
 WORKDIR /app
@@ -26,7 +26,7 @@ RUN --mount=type=cache,id=pnpm-store,target=/root/.local/share/pnpm/store \
     pnpm fetch
 
 # ─── Stage 2: builder (install + filtered tsc --build) ───────────────────────
-FROM node:26-alpine@sha256:725aeba2364a9b16beae49e180d83bd597dbd0b15c47f1f28875c290bfd255b9 AS builder
+FROM node:26-alpine@sha256:e88a35be04478413b7c71c455cd9865de9b9360e1f43456be5951032d7ac1a66 AS builder
 RUN apk add --no-cache libc6-compat
 RUN corepack enable
 WORKDIR /app
@@ -39,7 +39,7 @@ RUN pnpm --filter @workspace/alloy-rank-worker exec tsc --build tsconfig.json
 RUN pnpm --filter @workspace/alloy-rank-worker deploy --prod --legacy /app/deploy
 
 # ─── Stage 3: runtime (minimal) ──────────────────────────────────────────────
-FROM node:26-alpine@sha256:725aeba2364a9b16beae49e180d83bd597dbd0b15c47f1f28875c290bfd255b9 AS runtime
+FROM node:26-alpine@sha256:e88a35be04478413b7c71c455cd9865de9b9360e1f43456be5951032d7ac1a66 AS runtime
 RUN apk add --no-cache libc6-compat
 WORKDIR /app
 RUN addgroup -g 1000 -S app && adduser -u 1000 -S app -G app
