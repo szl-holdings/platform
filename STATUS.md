@@ -7,7 +7,7 @@
 
 | Package | Status | Notes |
 |---------|--------|-------|
-| wire-d | **LIVE** | SSE provenance wire shipped to 4 flagships |
+| wire-d | **LIVE** | SSE provenance wire shipped to the live flagships |
 | puriq-os | **LIVE** | organ loop + Yuyay-13 gate + Λ aggregator |
 | formula-os | **LIVE** | formula registry + prover + citation tracker |
 | khipu-os | **LIVE** | Merkle DAG + Reed-Solomon erasure |
@@ -17,7 +17,7 @@
 | ayni-os | **LIVE** | event-sourced reciprocity ledger |
 | hatun-mcp | **LIVE** | MCP server (SSE + HTTP) |
 | edge-organs | **EXPERIMENTAL** | wasi-rikuq imports optional `szl_khipu` DAG backend lazily at deploy |
-| live-wires | **LIVE** | 3D wire viewer on all 5 flagships |
+| live-wires | **LIVE** | 3D wire viewer on the live flagships |
 | mobile-controls | **LIVE** | console touch controls / viz patch |
 | rosie-v3 | **LIVE** | operator-console companion |
 | wayra | **EXPERIMENTAL** | always-learning ingestion; source set evolving |
@@ -25,15 +25,16 @@
 ## Flagship deploy repos (HF Spaces)
 | Repo | Status | Substrate sourcing |
 |------|--------|--------------------|
-| a11oy | **LIVE** | vendors substrate locally; sync-from-monorepo script NOT yet added (see ledger) |
-| amaru | **LIVE** | vendors szl_dsse / szl_provenance / szl_unay / szl_khipu_lmdb / live_wires |
-| sentra | **LIVE** | vendors same core substrate set as amaru |
-| rosie | **LIVE** | vendors substrate; operator console |
-| killinchu | **LIVE** | vendors szl_dsse / szl_provenance / live_wires |
+| a11oy | **LIVE** | vendors substrate locally; sync-from-monorepo tooling landed 2026-07-14 (a11oy#920) |
+| killinchu | **LIVE** | vendors szl_dsse / szl_provenance / live_wires; sync tooling landed 2026-07-14 (killinchu#220) |
 
-> **Open action (tracked, not yet executed — flagships are audit-only during sibling-agent windows):**
-> add `scripts/sync_from_monorepo.sh` + vendor-attribution headers to each flagship so the
-> monorepo is the explicit source of truth for every vendored file.
+> **Retired flagships (honest consolidation, July 2026):** amaru, sentra, rosie — GitHub repos and
+> HF Spaces removed (404s verified 2026-07-14). This table lists live flagships only.
+
+> **Landed 2026-07-14** (a11oy#920, killinchu#220): `scripts/sync_from_monorepo.sh` +
+> pinned `vendor.manifest.json` shipped to both live flagships (byte-identical mapping at platform@e87ad75ec8e2).
+> Remaining halves, tracked in each PR: apply attribution headers via `sync` in a normal window, and move
+> `scripts/vendor-sync-check.workflow.yml` into `.github/workflows/` (automation token lacks the workflow scope).
 
 ## Standalone repos
 | Class | Repos |

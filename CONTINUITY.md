@@ -3,6 +3,11 @@
 
 This doc lets any engineer (or a fresh AI agent) pick up the project with zero prior context. It is the single source of truth for current state. Honest by doctrine — no overclaiming.
 
+> **Reality update — 2026-07-14:** the five-organ tables below are the June 2026 Warhacker snapshot.
+> Live flagships today are **a11oy** and **killinchu** only; amaru / sentra / rosie were retired in the
+> July 2026 honest consolidation (GitHub repos + HF Spaces removed — 404s verified 2026-07-14).
+> **STATUS.md is the live source of truth** for what runs now.
+
 ---
 
 ## 1. What this is
