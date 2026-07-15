@@ -202,7 +202,7 @@ export const APPLICATIONS: ApplicationEntry[] = [
     registryProfileId: 'aegis',
   },
   {
-    id: 'sentra', name: 'Sentra', vertical: 'Cyber Resilience', sector: 'Cyber',
+    id: 'tenax', name: 'TENAX', vertical: 'Cyber Resilience', sector: 'Cyber',
     status: 'operational', tier: 'Enterprise',
     description: 'Cyber resilience command — posture monitoring, threat surface analysis, CISO intelligence, and incident escalation with governed approval flow.',
     icon: '⬡', color: '#c9b787',

@@ -9,10 +9,10 @@ export const GLASSWING_THESIS = {
   oneLine:
     'Discover → patch → verify → reward → learn → audit — closed-loop, governance-gated, and replay-trained on calibrated risk delta.',
   body:
-    'Adjacent systems ship parts of this loop separately — discovery without patching, runtime gates without learning, or research demos without operationalization. To our knowledge, A11oy × Sentra Glasswing is the first integrated command layer combining all five primitives at once on owned, authorized code: the reward function is the verified delta in a calibrated risk score, the exploration budget is itself a Sentra-gated policy, and every action — including learning — leaves an immutable proof entry.',
+    'Adjacent systems ship parts of this loop separately — discovery without patching, runtime gates without learning, or research demos without operationalization. To our knowledge, A11oy × TENAX Glasswing is the first integrated command layer combining all five primitives at once on owned, authorized code: the reward function is the verified delta in a calibrated risk score, the exploration budget is itself a TENAX-gated policy, and every action — including learning — leaves an immutable proof entry.',
   differentiators: [
     'The reward signal is verified post-patch by re-running the same scanners and the new tests — not a heuristic, not a confidence score.',
-    'Exploration vs exploitation is governed: novel code paths require a Sentra exploration budget; high-confidence fixes execute under approval.',
+    'Exploration vs exploitation is governed: novel code paths require a TENAX exploration budget; high-confidence fixes execute under approval.',
     'Replay buffer entries are linked to immutable audit events — every episode the policy learns from is independently provable.',
     'Cerberus enforces a hard offensive boundary at the action layer — no exploit generation can be requested even by an authorized human.',
     'Compliance mapping is bidirectional — every finding maps to CWE / OWASP / NIST CSF / SOC 2 / ATLAS-defensive in the same record.',
@@ -53,10 +53,10 @@ export const GLASSWING_FIELD_MAP = [
     note: 'Optimizes attack paths, not defense. Out of scope for any defensive platform.',
   },
   {
-    name: 'A11oy × Sentra Glasswing',
+    name: 'A11oy × TENAX Glasswing',
     capability: 'Closed-loop governed patch + verify + learn',
     closesLoop: true,
-    governance: 'Sentra control plane',
+    governance: 'TENAX control plane',
     learning: 'RL on calibrated risk delta',
     note: 'Differentiator: every patch is an RL episode; every reward is a verified, audited, governed risk delta.',
   },
@@ -188,7 +188,7 @@ export const GLASSWING_AGENTS: GlasswingAgentSpec[] = [
     id: 'sentinel', codename: 'Sentinel', role: 'Runtime & Observability',
     myth: 'The watcher of the watchers — every agent action is metered.',
     responsibility: 'Tracks scan duration, FP rate, approval latency, patch acceptance, P1/P2 burn-down.',
-    produces: ['ops_metrics.json', 'sentra_health_report.md'],
+    produces: ['ops_metrics.json', 'tenax_health_report.md'],
     state: 'running', lastAction: 'Metrics OK; approval p95 latency 4m 12s', lastActionAt: '2026-04-27T16:59:50Z',
     episodesContributed: 0,
   },
@@ -284,7 +284,7 @@ export const SAMPLE_FINDINGS: Finding[] = [
     evidenceRedacted: 'router.post("/auth/login", loginHandler) — no rate-limit middleware',
     affectedComponent: 'api/auth', reachability: 'reachable',
     internetExposed: true, authBoundary: true, tenantBoundary: false, dataSensitivity: 'pii',
-    remediation: 'Add express-rate-limit (5/min/IP, 10/hr/account); emit Sentra audit event on lockout.',
+    remediation: 'Add express-rate-limit (5/min/IP, 10/hr/account); emit TENAX audit event on lockout.',
     riskScore: 58, riskBand: 'P3', status: 'patch_proposed',
     createdAt: '2026-04-27T12:48:00Z', updatedAt: '2026-04-27T16:01:00Z',
   },
@@ -407,7 +407,7 @@ export const RL_STATE_NOW: RLState = {
 export const ENGINEERING_LOOP_STAGES = [
   { stage: 'Understand', detail: 'Read repo. Build context. Summarize architecture. Identify constraints.', agent: 'daedalus' },
   { stage: 'Plan',       detail: 'Produce task plan. Identify files to inspect. Identify tests to run. Score risk.', agent: 'silver' },
-  { stage: 'Act',        detail: 'Propose file edits. Propose commands. Request Sentra approval if required.', agent: 'hephaestus' },
+  { stage: 'Act',        detail: 'Propose file edits. Propose commands. Request TENAX approval if required.', agent: 'hephaestus' },
   { stage: 'Verify',     detail: 'Run tests. Re-run scanners. Compare risk delta. Iterate safely.', agent: 'argus' },
   { stage: 'Commit',     detail: 'Generate patch bundle, PR description, evidence pack, rollback note.', agent: 'hermes' },
   { stage: 'Learn',      detail: 'Store outcome. Update replay buffer. Adjust value function. Recalibrate.', agent: 'silver' },
@@ -427,7 +427,7 @@ export const HARD_BOUNDARIES = [
   'No weaponized PoC payloads — risk is communicated as assessment, not as runnable attack.',
   'No unauthorized scanning — owned/authorized targets only, enforced at ingest.',
   'No malware, persistence, lateral movement, evasion, C2, or exfiltration capability.',
-  'No raw secret display — Sentra Vault redacts before any render or log surface.',
-  'No source modification without approval — every patch goes through SentraApprovalGate.',
+  'No raw secret display — TENAX Vault redacts before any render or log surface.',
+  'No source modification without approval — every patch goes through TenaxApprovalGate.',
   'No silent failure — every recommendation carries evidence, confidence, blast radius, rollback.',
 ] as const;

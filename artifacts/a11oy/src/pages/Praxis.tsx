@@ -48,7 +48,7 @@ const SEED_THREADS: Thread[] = [
   { id: 't-2', title: 'Analyze Q2 revenue drift signals', lastMessage: 'Based on the signal mesh data...', timestamp: Date.now() - 3600000, messageCount: 8 },
   { id: 't-3', title: 'Deploy new covenant policy for maritime', lastMessage: 'Covenant COV-MARITIME-7 has been...', timestamp: Date.now() - 7200000, messageCount: 5 },
   { id: 't-4', title: 'MCP connector audit — GitHub integration', lastMessage: 'All 14 MCP endpoints validated...', timestamp: Date.now() - 86400000, messageCount: 23 },
-  { id: 't-5', title: 'Build regression forecast for Sentra', lastMessage: 'The forecast model shows a 12%...', timestamp: Date.now() - 172800000, messageCount: 16 },
+  { id: 't-5', title: 'Build regression forecast for TENAX', lastMessage: 'The forecast model shows a 12%...', timestamp: Date.now() - 172800000, messageCount: 16 },
 ];
 
 const INITIAL_MESSAGES: Message[] = [

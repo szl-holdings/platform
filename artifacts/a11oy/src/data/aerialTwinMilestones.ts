@@ -13,7 +13,7 @@ export type MilestoneSlug =
   | 'sionna-eval'
   | 'vessels-port'
   | 'terra-building'
-  | 'sentra-anomaly'
+  | 'tenax-anomaly'
   | 'federated-ledger'
   | 'ric-binding'
   | 'ai-ran'
@@ -330,7 +330,7 @@ const M3_VESSELS_PORT: MilestonePack = {
     { tag: '3GPP-38901', source: '3GPP TR 38.901 \u2014 channel models 0.5\u2013100 GHz.' },
     { tag: 'ITU-R-P-2040', source: 'ITU-R P.2040 \u2014 building-material EM properties.' },
   ],
-  related: ['sionna-eval', 'sentra-anomaly', 'attestation-soc2'],
+  related: ['sionna-eval', 'tenax-anomaly', 'attestation-soc2'],
 };
 
 // ---------------------------------------------------------------------------
@@ -461,7 +461,7 @@ const M4_TERRA_BUILDING: MilestonePack = {
 // ---------------------------------------------------------------------------
 
 const M5_SENTRA_ANOMALY: MilestonePack = {
-  slug: 'sentra-anomaly',
+  slug: 'tenax-anomaly',
   number: 5,
   phase: '7\u201312',
   title: 'TENAX RF anomaly classifier',
@@ -713,7 +713,7 @@ const M6_FEDERATED_LEDGER: MilestonePack = {
       source: 'Dwork & Roth \u2014 The Algorithmic Foundations of Differential Privacy.',
     },
   ],
-  related: ['sentra-anomaly', 'ric-binding', 'attestation-soc2'],
+  related: ['tenax-anomaly', 'ric-binding', 'attestation-soc2'],
 };
 
 // ---------------------------------------------------------------------------
@@ -845,7 +845,7 @@ const M7_RIC_BINDING: MilestonePack = {
     { tag: 'O-RAN-DMS', source: 'O-RAN Software Community dms (Apache-2.0).' },
     { tag: 'O-RAN-WG3', source: 'O-RAN Alliance WG3 \u2014 Near-RT RIC architecture.' },
   ],
-  related: ['sentra-anomaly', 'ai-ran'],
+  related: ['tenax-anomaly', 'ai-ran'],
 };
 
 // ---------------------------------------------------------------------------
@@ -1100,7 +1100,7 @@ const M9_ATTESTATION_SOC2: MilestonePack = {
     },
     { tag: 'Sionna-RT', source: 'NVlabs/sionna-rt \u2014 reproducibility contract (Apache-2.0).' },
   ],
-  related: ['vessels-port', 'terra-building', 'sentra-anomaly'],
+  related: ['vessels-port', 'terra-building', 'tenax-anomaly'],
 };
 
 // ---------------------------------------------------------------------------

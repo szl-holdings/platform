@@ -1,6 +1,6 @@
 import type { FabricAgent, VerticalId } from './types';
 
-const ALL: readonly VerticalId[] = ['terra', 'vessels', 'counsel', 'carlota', 'aegis', 'lyte', 'sentra'];
+const ALL: readonly VerticalId[] = ['terra', 'vessels', 'counsel', 'carlota', 'aegis', 'lyte', 'tenax'];
 
 export const FABRIC_AGENTS: readonly FabricAgent[] = [
   {
@@ -14,14 +14,14 @@ export const FABRIC_AGENTS: readonly FabricAgent[] = [
     route: '/fabric/twins',
   },
   {
-    id: 'agent-sentra',
-    name: 'Sentra',
+    id: 'agent-tenax',
+    name: 'TENAX',
     role: 'Controls approvals, policy enforcement, audit trail integrity, rollback readiness, and safety gates across all verticals.',
     verticalCoverage: ALL,
     inputTypes: ['approval request', 'policy check', 'action proposal', 'rollback trigger'],
     outputTypes: ['approval decision', 'policy verdict', 'audit entry', 'rollback plan'],
     governanceLimits: ['Cannot self-approve', 'Human escalation required for exceptions', 'No policy creation without review'],
-    route: '/sentra',
+    route: '/tenax',
   },
   {
     id: 'agent-chainlight',
@@ -40,7 +40,7 @@ export const FABRIC_AGENTS: readonly FabricAgent[] = [
     verticalCoverage: ALL,
     inputTypes: ['reasoning trace', 'self-model snapshot', 'objection event', 'revision log'],
     outputTypes: ['governance signal', 'consistency score', 'volition report', 'cognitive health metric'],
-    governanceLimits: ['Observation only', 'No intervention authority', 'Reports to Sentra'],
+    governanceLimits: ['Observation only', 'No intervention authority', 'Reports to TENAX'],
     route: '/fabric/twins',
   },
   {
@@ -90,7 +90,7 @@ export const FABRIC_AGENTS: readonly FabricAgent[] = [
     verticalCoverage: ALL,
     inputTypes: ['decision output', 'remediation requirement', 'rollout plan', 'change request'],
     outputTypes: ['implementation packet', 'remediation plan', 'rollout schedule', 'change summary'],
-    governanceLimits: ['Plan generation only', 'No autonomous execution', 'Sentra approval required before rollout'],
+    governanceLimits: ['Plan generation only', 'No autonomous execution', 'TENAX approval required before rollout'],
     route: '/actions',
   },
   {

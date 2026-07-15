@@ -33,7 +33,7 @@ export const releases: Release[] = [
       { name: 'Design Ops', avatarInitials: 'DO', approved: true }
     ],
     changes: ['DenseTable v4.2.0', 'FilterBar v3.0.0'],
-    targetBrands: ['Sentra', 'Vessels', 'Aegis']
+    targetBrands: ['TENAX', 'Vessels', 'Aegis']
   },
   {
     id: 'r-2',

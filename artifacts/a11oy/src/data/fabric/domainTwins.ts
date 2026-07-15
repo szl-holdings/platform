@@ -134,9 +134,9 @@ export const DOMAIN_TWINS: readonly DomainTwin[] = [
     linkedRoutes: ['/lyte', '/fabric/decisions', '/fabric/outcomes'],
   },
   {
-    id: 'twin-sentra',
-    verticalId: 'sentra',
-    name: 'SentraTwin',
+    id: 'twin-tenax',
+    verticalId: 'tenax',
+    name: 'TenaxTwin',
     description: 'Tracks approvals, blocked actions, policy decisions, audit events, and rollback readiness across the governance plane.',
     healthScore: 94,
     signalVolume: 412,
@@ -153,7 +153,7 @@ export const DOMAIN_TWINS: readonly DomainTwin[] = [
     topSignals: ['Policy exception requested — Terra vendor fast-track', 'Rollback triggered — Aegis firewall rule change reverted', 'Audit compilation deadline — SOC 2 Type II in 14d'],
     topRisks: ['Policy bypass attempt detected — automated action blocked', 'Audit evidence gap — 3 controls missing attestation', 'Approval queue depth — 8 items > 48h old'],
     nextBestActions: ['Review Terra vendor fast-track exception against policy', 'Validate Aegis firewall rollback completeness', 'Assign auditor for SOC 2 evidence gap remediation'],
-    linkedRoutes: ['/sentra', '/fabric/evidence', '/fabric/decisions'],
+    linkedRoutes: ['/tenax', '/fabric/evidence', '/fabric/decisions'],
   },
 ] as const;
 

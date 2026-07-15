@@ -73,7 +73,7 @@ export function AerialTwinMilestone() {
       {/* Deliverables */}
       <SectionTitle className="mt-2">Deliverables</SectionTitle>
       <p className="text-xs mb-3" style={{ color: SUB }}>
-        Each deliverable is bound to a Sentra or A11oy module and required for milestone acceptance.
+        Each deliverable is bound to a TENAX or A11oy module and required for milestone acceptance.
       </p>
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-3 mb-8">
         {pack.deliverables.map((d) => (

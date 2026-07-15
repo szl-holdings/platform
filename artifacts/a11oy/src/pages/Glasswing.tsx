@@ -41,7 +41,7 @@ export function Glasswing() {
     <Layout>
       <PageHeader
         label="DOCTRINE · GLASSWING COMMAND"
-        title="A11oy × Sentra — Glasswing"
+        title="A11oy × TENAX — Glasswing"
         subtitle={GLASSWING_TAGLINE}
         status="LIVE"
       />
@@ -69,7 +69,7 @@ export function Glasswing() {
       <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3 mb-6">
         <KpiCard label="Risk Posture" value={RL_STATE_NOW.riskPosture} sub={`commit ${RL_STATE_NOW.commitSha.slice(0,7)}`} accent={GOLD} trend="down" />
         <KpiCard label="Open P1" value={openP1} sub="critical, awaiting approval" accent="#f5f5f5" />
-        <KpiCard label="Approval Queue" value={pendingApprovals} sub="Sentra-gated" accent={GOLD} />
+        <KpiCard label="Approval Queue" value={pendingApprovals} sub="TENAX-gated" accent={GOLD} />
         <KpiCard label="RL Avg Reward" value={`+${RL_STATE_NOW.historicalContext.avgReward.toFixed(1)}`} sub={`${RL_STATE_NOW.historicalContext.episodesCompleted} episodes`} accent={GOLD} trend="up" />
         <KpiCard label="Audit Chain" value={chainDepth} sub="hash-linked, immutable" accent={GOLD} />
       </div>
@@ -165,13 +165,13 @@ export function Glasswing() {
         })}
       </div>
 
-      {/* SENTRA CONTROL PLANE */}
-      <SectionTitle>Sentra · the security control plane</SectionTitle>
+      {/* TENAX CONTROL PLANE */}
+      <SectionTitle>TENAX · the security control plane</SectionTitle>
       <div className="grid lg:grid-cols-2 gap-4 mb-6">
         {/* Policy Engine */}
         <Card>
           <div className="flex items-center justify-between mb-3">
-            <div className="text-xs font-mono" style={{ color: GOLD }}>SENTRA POLICY ENGINE</div>
+            <div className="text-xs font-mono" style={{ color: GOLD }}>TENAX POLICY ENGINE</div>
             <StatusBadge status="ok" label={`${SENTRA_POLICIES.length} rules`} />
           </div>
           <div className="flex flex-col gap-1.5 max-h-[280px] overflow-y-auto pr-1">
@@ -195,7 +195,7 @@ export function Glasswing() {
         {/* Secrets Vault */}
         <Card>
           <div className="flex items-center justify-between mb-3">
-            <div className="text-xs font-mono" style={{ color: GOLD }}>SENTRA SECRETS VAULT</div>
+            <div className="text-xs font-mono" style={{ color: GOLD }}>TENAX SECRETS VAULT</div>
             <StatusBadge status="ok" label="fingerprint-only" />
           </div>
           <div className="grid grid-cols-2 gap-3 mb-3">
@@ -210,7 +210,7 @@ export function Glasswing() {
         {/* Approval Gate */}
         <Card>
           <div className="flex items-center justify-between mb-3">
-            <div className="text-xs font-mono" style={{ color: GOLD }}>SENTRA APPROVAL GATE</div>
+            <div className="text-xs font-mono" style={{ color: GOLD }}>TENAX APPROVAL GATE</div>
             <StatusBadge status={pendingApprovals > 0 ? 'warn' : 'ok'} label={`${pendingApprovals} pending`} />
           </div>
           <div className="flex flex-col gap-2">
@@ -233,7 +233,7 @@ export function Glasswing() {
         {/* Audit Ledger */}
         <Card>
           <div className="flex items-center justify-between mb-3">
-            <div className="text-xs font-mono" style={{ color: GOLD }}>SENTRA AUDIT LEDGER</div>
+            <div className="text-xs font-mono" style={{ color: GOLD }}>TENAX AUDIT LEDGER</div>
             <StatusBadge status="ok" label="hash-chained" />
           </div>
           <div className="flex flex-col gap-2 max-h-[320px] overflow-y-auto pr-1">
@@ -313,7 +313,7 @@ export function Glasswing() {
             <CodeBlock language="state-machine">
 {`STATE  →  ACTION  →  POLICY GATE  →  EXECUTE  →  VERIFY  →  REWARD  →  REPLAY
   ↓         ↓           ↓               ↓          ↓         ↓         ↓
-findings  scan      Sentra            scanner    re-scan   delta    buffer
+findings  scan      TENAX            scanner    re-scan   delta    buffer
 patches   patch     PolicyEngine      run-ledger new tests  vs       value-fn
 posture   verify    ApprovalGate      approval   diff       baseline  update
                     Cerberus(deny)    (or block)`}
