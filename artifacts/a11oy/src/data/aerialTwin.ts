@@ -4,11 +4,11 @@
 // doctrine surface for A11oy. Grounded in the public open-source leaders
 // (Sionna / Sionna RT, OpenAirInterface, srsRAN, O-RAN Software Community,
 // GNU Radio). Bound to the SZL verticals that can harness site-specific RF
-// physics: Vessels (maritime), Terra (real estate), Sentra (cyber).
+// physics: Vessels (maritime), Terra (real estate), TENAX (cyber).
 //
 // All inputs are public documentation, official open-source repositories, or
 // first-principle reconstructions. No leaked spectrum captures, no scraped
-// proprietary scenes, no live emission. Adoption requires a Sentra approval
+// proprietary scenes, no live emission. Adoption requires a TENAX approval
 // workflow per the Glasswing doctrine.
 
 export const AERIAL_TWIN_VERSION = '0.1.0-seed';
@@ -64,8 +64,7 @@ export const PRIMITIVES: readonly Primitive[] = [
       'For any (transmitter, receiver) pair in the scene, the twin yields a per-tap CIR. Feeds every downstream radio model.',
     detail:
       'CIRs are synthesised by tracing rays per subcarrier, then summing complex-amplitude contributions. Output is a (tx, rx, time, frequency) tensor consumable by physical-layer simulators or ML training pipelines.',
-    groundedIn:
-      'Sionna PHY layer; 3GPP TR 38.901 statistical baseline for sanity comparison.',
+    groundedIn: 'Sionna PHY layer; 3GPP TR 38.901 statistical baseline for sanity comparison.',
   },
   {
     id: 'ru-du-cu-emulation',
@@ -84,8 +83,7 @@ export const PRIMITIVES: readonly Primitive[] = [
       'xApps and rApps see the twin via E2/A1/O1 the same way they see real RAN. Train the controller in twin, ship the policy to production.',
     detail:
       'The RAN Intelligent Controller (Near-RT and Non-RT) consumes E2 telemetry and emits policy. Pointing the RIC at a twin lets ML xApps train safely; once approved, the same xApp can be promoted against the real network.',
-    groundedIn:
-      'O-RAN Software Community (Apache-2.0): ric-plt, dms, smo subprojects.',
+    groundedIn: 'O-RAN Software Community (Apache-2.0): ric-plt, dms, smo subprojects.',
   },
   {
     id: 'ai-ran-inference',
@@ -147,7 +145,7 @@ export const OPEN_SOURCE_LEADERS: readonly OpenSourceLeader[] = [
       'Differentiable ray tracer for radio propagation. The kernel that turns a 3D scene into trainable channel data.',
     primitive: 'differentiable-ray-tracing',
     distillation:
-      'The ray-trace + per-surface gradient flow is the keystone primitive. Sentra wraps it as a sandboxed twin engine; A11oy planner submits jobs against it.',
+      'The ray-trace + per-surface gradient flow is the keystone primitive. TENAX wraps it as a sandboxed twin engine; A11oy planner submits jobs against it.',
   },
   {
     id: 'openairinterface',
@@ -249,9 +247,9 @@ export const VERTICAL_BINDINGS: readonly VerticalBinding[] = [
   },
   {
     id: 'sentra',
-    vertical: 'Sentra \u2014 Cyber Resilience Command',
+    vertical: 'TENAX \u2014 Cyber Resilience Command (ex-Sentra \u2014 organ retired 2026-07)',
     context:
-      'Sentra already operates the EDR mesh, SIEM connectors, and Approval Queue. A site-specific RF twin lets Sentra reason about the RF surface as a first-class asset class.',
+      'TENAX already operates the EDR mesh, SIEM connectors, and Approval Queue. A site-specific RF twin lets TENAX reason about the RF surface as a first-class asset class.',
     useCases: [
       'Rogue base station detection: compare twin-predicted signal envelope to real-world spectrum captures.',
       'IMSI catcher fingerprinting in a known scene context.',
@@ -309,23 +307,23 @@ export const INNOVATION_SEEDS: readonly InnovationSeed[] = [
     novelty:
       'Brings the A11oy planner discipline (typed plans, Constitution admission, dual-key approval) to a domain where most automation today is bash and Helm.',
     status: 'distilled',
-    module: 'A11oy Planner + Sentra Policy Engine',
+    module: 'A11oy Planner + TENAX Policy Engine',
   },
   {
     id: 'defensive-rf-redteam',
     name: 'Defensive RF red-team in twin',
     oneLine:
-      'Jamming, spoofing, and rogue-cell scenarios run in the twin only. Outcomes feed the Sentra Risk Engine.',
+      'Jamming, spoofing, and rogue-cell scenarios run in the twin only. Outcomes feed the TENAX Risk Engine.',
     novelty:
       'The frontier red-teaming pattern from the Hatun Layer transposed onto the RF surface. No live spectrum is ever touched.',
     status: 'observed',
-    module: 'Sentra Sandbox + Adversarial Resilience',
+    module: 'TENAX Sandbox + Adversarial Resilience',
   },
   {
     id: 'coverage-attestation',
     name: 'Site-specific coverage attestation',
     oneLine:
-      'Combine Terra / Vessels asset registry + twin output + Sentra risk engine into a signed coverage report.',
+      'Combine Terra / Vessels asset registry + twin output + TENAX risk engine into a signed coverage report.',
     novelty:
       'Cross-product surface that turns a transient simulation result into a durable, signed artefact bound to a parcel or vessel ID.',
     status: 'adoptable',
@@ -362,7 +360,7 @@ export const ROADMAP: readonly RoadmapMilestone[] = [
     title: 'Sionna RT evaluation harness',
     detail:
       'Stand up a sandboxed twin engine wrapping Sionna RT against a single public scene catalogue entry. Output CIRs reproducible across runs.',
-    module: 'A11oy Mirror Eval + Sentra Sandbox',
+    module: 'A11oy Mirror Eval + TENAX Sandbox',
   },
   {
     id: 'phase1-vessels-port',
@@ -383,10 +381,10 @@ export const ROADMAP: readonly RoadmapMilestone[] = [
   {
     id: 'phase2-sentra-anomaly',
     phase: '7\u201312',
-    title: 'Sentra RF anomaly classifier',
+    title: 'TENAX RF anomaly classifier',
     detail:
       'Train an anomaly classifier on twin-vs-reality deltas. Promote via Mirror Eval. Findings flow into the existing Approval Queue.',
-    module: 'Sentra Risk Engine + Silver RL Planner',
+    module: 'TENAX Risk Engine + Silver RL Planner',
   },
   {
     id: 'phase2-federated-ledger',
@@ -410,7 +408,7 @@ export const ROADMAP: readonly RoadmapMilestone[] = [
     title: 'AI-RAN inference path',
     detail:
       'Twin-trained ML blocks (beam prediction, channel estimation) served via a CUDA-accelerated runtime behind the connector firewall.',
-    module: 'A11oy Model Router + Sentra Connector Firewall',
+    module: 'A11oy Model Router + TENAX Connector Firewall',
   },
   {
     id: 'phase3-attestation-soc2',
@@ -418,7 +416,7 @@ export const ROADMAP: readonly RoadmapMilestone[] = [
     title: 'Coverage attestation as SOC2 artefact',
     detail:
       'Signed coverage attestations cross-referenced into the SOC2 Type II control surface as evidence of connectivity controls.',
-    module: 'Sentra Compliance Engine + Cerberus',
+    module: 'TENAX Compliance Engine + Cerberus',
   },
 ];
 
@@ -435,27 +433,33 @@ export interface Guardrail {
 export const GUARDRAILS: readonly Guardrail[] = [
   {
     layer: 'Inputs',
-    control: 'Public cadastral / lidar / OSM data plus owner-provided geometry only. No scraped proprietary scenes.',
+    control:
+      'Public cadastral / lidar / OSM data plus owner-provided geometry only. No scraped proprietary scenes.',
     enforcedBy: 'A11oy ingestion gate + Hephaestus provenance attestation per scene.',
   },
   {
     layer: 'Emission',
-    control: 'The twin reads. The twin never transmits. No active probing of real spectrum from any twin path.',
-    enforcedBy: 'Sentra connector firewall + capability compartment that strips egress to RF hardware.',
+    control:
+      'The twin reads. The twin never transmits. No active probing of real spectrum from any twin path.',
+    enforcedBy:
+      'TENAX connector firewall + capability compartment that strips egress to RF hardware.',
   },
   {
     layer: 'Tenant scope',
-    control: 'Owner-provided geometry and tenant-specific captures stay on-tenant. Federated layer pools statistics only.',
+    control:
+      'Owner-provided geometry and tenant-specific captures stay on-tenant. Federated layer pools statistics only.',
     enforcedBy: 'A11oy federation contract + Cerberus per-tenant evidence partition.',
   },
   {
     layer: 'Closed-loop approval',
-    control: 'Any RIC xApp promotion against real spectrum requires dual-key approval and a 24h staging soak.',
-    enforcedBy: 'Sentra Approval Queue + Constitution rule engine.',
+    control:
+      'Any RIC xApp promotion against real spectrum requires dual-key approval and a 24h staging soak.',
+    enforcedBy: 'TENAX Approval Queue + Constitution rule engine.',
   },
   {
     layer: 'Provenance',
-    control: 'Scene hash, ruleset version, tool versions, and operator identity captured per twin episode.',
+    control:
+      'Scene hash, ruleset version, tool versions, and operator identity captured per twin episode.',
     enforcedBy: 'Hephaestus provenance gate + Cerberus append-only ledger.',
   },
 ];
@@ -465,14 +469,39 @@ export const GUARDRAILS: readonly Guardrail[] = [
 // ---------------------------------------------------------------------------
 
 export const AERIAL_TWIN_CITATIONS: ReadonlyArray<{ tag: string; source: string }> = [
-  { tag: 'NVIDIA-Aerial-DT', source: 'NVIDIA Aerial Digital Twin overview \u2014 docs.nvidia.com/aerial/aerial-dt/text/overview.html.' },
-  { tag: 'Sionna', source: 'Sionna \u2014 An Open-Source Library for Next-Generation Physical-Layer Research, NVlabs (Apache-2.0).' },
-  { tag: 'Sionna-RT', source: 'Sionna RT \u2014 Differentiable ray tracer for radio propagation, NVlabs (Apache-2.0).' },
+  {
+    tag: 'NVIDIA-Aerial-DT',
+    source:
+      'NVIDIA Aerial Digital Twin overview \u2014 docs.nvidia.com/aerial/aerial-dt/text/overview.html.',
+  },
+  {
+    tag: 'Sionna',
+    source:
+      'Sionna \u2014 An Open-Source Library for Next-Generation Physical-Layer Research, NVlabs (Apache-2.0).',
+  },
+  {
+    tag: 'Sionna-RT',
+    source:
+      'Sionna RT \u2014 Differentiable ray tracer for radio propagation, NVlabs (Apache-2.0).',
+  },
   { tag: 'OAI', source: 'OpenAirInterface 5G \u2014 OAI Software Alliance (Apache-2.0).' },
   { tag: 'srsRAN', source: 'srsRAN Project \u2014 Software Radio Systems (AGPL-3.0).' },
-  { tag: 'O-RAN-SC', source: 'O-RAN Software Community \u2014 Linux Foundation / O-RAN Alliance (Apache-2.0).' },
+  {
+    tag: 'O-RAN-SC',
+    source: 'O-RAN Software Community \u2014 Linux Foundation / O-RAN Alliance (Apache-2.0).',
+  },
   { tag: 'GNURadio', source: 'GNU Radio \u2014 Software-defined radio toolkit (GPL-3.0).' },
-  { tag: '3GPP-38901', source: '3GPP TR 38.901 \u2014 Study on channel model for frequencies from 0.5 to 100 GHz.' },
-  { tag: 'OpenUSD', source: 'OpenUSD \u2014 Universal Scene Description, Pixar / AOUSD (Apache-2.0).' },
-  { tag: 'ITU-R-P-2040', source: 'ITU-R P.2040 \u2014 Effects of building materials and structures on radiowave propagation.' },
+  {
+    tag: '3GPP-38901',
+    source: '3GPP TR 38.901 \u2014 Study on channel model for frequencies from 0.5 to 100 GHz.',
+  },
+  {
+    tag: 'OpenUSD',
+    source: 'OpenUSD \u2014 Universal Scene Description, Pixar / AOUSD (Apache-2.0).',
+  },
+  {
+    tag: 'ITU-R-P-2040',
+    source:
+      'ITU-R P.2040 \u2014 Effects of building materials and structures on radiowave propagation.',
+  },
 ];
