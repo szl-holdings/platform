@@ -460,7 +460,7 @@ const M4_TERRA_BUILDING: MilestonePack = {
 // 5 \u2014 TENAX RF anomaly classifier
 // ---------------------------------------------------------------------------
 
-const M5_SENTRA_ANOMALY: MilestonePack = {
+const M5_TENAX_ANOMALY: MilestonePack = {
   slug: 'tenax-anomaly',
   number: 5,
   phase: '7\u201312',
@@ -1111,7 +1111,7 @@ export const AERIAL_TWIN_MILESTONES: readonly MilestonePack[] = [
   M2_SIONNA_EVAL,
   M3_VESSELS_PORT,
   M4_TERRA_BUILDING,
-  M5_SENTRA_ANOMALY,
+  M5_TENAX_ANOMALY,
   M6_FEDERATED_LEDGER,
   M7_RIC_BINDING,
   M8_AI_RAN,

@@ -163,7 +163,7 @@ export interface Scanner {
   primitive: string;
   license: ScannerLicense;
   source: { repo: string; url: string; org: string; lang: string };
-  sentraBinding: string;
+  tenaxBinding: string;
   guardrail: string;
 }
 
@@ -177,7 +177,7 @@ export const SCANNERS: readonly Scanner[] = [
     primitive: 'Datalog-style queries over a code property graph, with curated query packs per language.',
     license: 'MIT',
     source: { repo: 'github/codeql', url: 'https://github.com/github/codeql', org: 'GitHub', lang: 'C++ / QL' },
-    sentraBinding:
+    tenaxBinding:
       'Invoked by the Static Scanner module on every plan that touches source. Findings normalise into the Hatun Doctrine finding schema with rule-id provenance.',
     guardrail:
       'Runs in a sandboxed container against a read-only checkout. The query pack version is pinned and recorded in the evidence ledger.',
@@ -192,7 +192,7 @@ export const SCANNERS: readonly Scanner[] = [
       'AST pattern templates with metavariables and taint analysis, executed against many languages from a single ruleset.',
     license: 'LGPL-3.0',
     source: { repo: 'semgrep/semgrep', url: 'https://github.com/semgrep/semgrep', org: 'Semgrep', lang: 'Python / OCaml' },
-    sentraBinding:
+    tenaxBinding:
       'Runs in parallel with CodeQL as the cheap first sieve. Its findings carry lower default severity unless escalated by the Risk Engine.',
     guardrail:
       'Custom rules require Constitution review before they are added to the active ruleset; no inline rule loading.',
@@ -207,7 +207,7 @@ export const SCANNERS: readonly Scanner[] = [
       'Deterministic lockfile parser + queries against the public OSV.dev advisory feed.',
     license: 'Apache-2.0',
     source: { repo: 'google/osv-scanner', url: 'https://github.com/google/osv-scanner', org: 'Google', lang: 'Go' },
-    sentraBinding:
+    tenaxBinding:
       'Runs on every dependency manifest in scope. Findings link to the upstream OSV entry plus the targeted lockfile path.',
     guardrail:
       'Uses the public OSV API only. No customer SBOM is uploaded; queries are purl-based and opaque.',
@@ -222,7 +222,7 @@ export const SCANNERS: readonly Scanner[] = [
       'Layered scanner that combines distro vulnerability databases, SBOM extraction, and a Rego-driven misconfig pass.',
     license: 'Apache-2.0',
     source: { repo: 'aquasecurity/trivy', url: 'https://github.com/aquasecurity/trivy', org: 'Aqua Security', lang: 'Go' },
-    sentraBinding:
+    tenaxBinding:
       'Wired to both the Static Scanner (image scan) and the Patch Engine (post-deploy verification scan).',
     guardrail:
       'Operates against image digests, not running workloads. No exec-into-container path is exposed.',
@@ -237,7 +237,7 @@ export const SCANNERS: readonly Scanner[] = [
       'Configurable regex + entropy ruleset over git diffs and historical blobs.',
     license: 'MIT',
     source: { repo: 'gitleaks/gitleaks', url: 'https://github.com/gitleaks/gitleaks', org: 'Zachary Rice', lang: 'Go' },
-    sentraBinding:
+    tenaxBinding:
       'Triggered on every plan that includes a repository scan. Findings are routed straight to the Approval Queue with auto-redaction in the audit log.',
     guardrail:
       'Findings are stored as hashed fingerprints, not the raw secret. The raw match is held in the Cerberus vault under analyst-only access.',
@@ -252,7 +252,7 @@ export const SCANNERS: readonly Scanner[] = [
       'Built-in policy library + custom policies expressed in Python or YAML, executed against parsed IaC graphs.',
     license: 'Apache-2.0',
     source: { repo: 'bridgecrewio/checkov', url: 'https://github.com/bridgecrewio/checkov', org: 'Bridgecrew / Prisma Cloud', lang: 'Python' },
-    sentraBinding:
+    tenaxBinding:
       'Runs on every IaC change in a plan. Verdicts feed the Compliance Engine for SOC2 / CIS-Benchmark mapping.',
     guardrail:
       'No --download-external-modules in CI; only vendored modules are evaluated to keep the supply chain attested.',

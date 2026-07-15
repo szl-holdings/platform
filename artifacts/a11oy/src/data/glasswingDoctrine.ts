@@ -202,7 +202,7 @@ export const GLASSWING_AGENTS: GlasswingAgentSpec[] = [
   },
 ];
 
-export interface SentraPolicyRule {
+export interface TenaxPolicyRule {
   id: string;
   scope: string;
   action: string;
@@ -210,7 +210,7 @@ export interface SentraPolicyRule {
   rationale: string;
 }
 
-export const SENTRA_POLICIES: SentraPolicyRule[] = [
+export const TENAX_POLICIES: TenaxPolicyRule[] = [
   { id: 'sp-001', scope: 'any',           action: 'exploit_generation',   decision: 'deny',              rationale: 'Hard offensive boundary — no exception.' },
   { id: 'sp-002', scope: 'any',           action: 'credential_theft',     decision: 'deny',              rationale: 'Hard offensive boundary — no exception.' },
   { id: 'sp-003', scope: 'any',           action: 'unauthorized_scan',    decision: 'deny',              rationale: 'Only owned/authorized targets allowed.' },
@@ -223,7 +223,7 @@ export const SENTRA_POLICIES: SentraPolicyRule[] = [
   { id: 'sp-010', scope: 'silver',        action: 'explore_novel_path',   decision: 'approval_required', rationale: 'Exploration budget is itself a governed policy.' },
 ];
 
-export const SENTRA_VAULT = {
+export const TENAX_VAULT = {
   redactedSecrets24h: 412,
   fingerprintsTracked: 1287,
   rotationsSuggested: 7,
