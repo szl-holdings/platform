@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useOrg } from '../context/OrgContext';
-import { brandsData, type Brand } from '../data/brands';
+import { BRANDS_DATA_SOURCE, brandsData, type Brand } from '../data/brands';
 import { Badge } from '../components/ui/Badge';
 import { DrawerPanel } from '../components/ui/DrawerPanel';
 import { motion } from 'framer-motion';
@@ -75,9 +75,23 @@ export function AtlasSection() {
       className="p-8 h-full overflow-y-auto"
     >
       <div className="mb-8">
-        <h1 className="text-2xl font-display font-medium text-[var(--color-a11oy-text)]">Atlas</h1>
+        <h1 className="text-2xl font-display font-medium text-[var(--color-a11oy-text)] flex items-center gap-3">
+          Atlas
+          <span
+            className="text-[10px] font-mono uppercase tracking-widest px-2 py-0.5 rounded border"
+            style={{
+              color: '#d7a53f',
+              borderColor: 'rgba(215,165,63,0.45)',
+              backgroundColor: 'rgba(215,165,63,0.08)',
+            }}
+            title="Staged demo dataset — scores, audits, and activity are illustrative, not measured."
+          >
+            {BRANDS_DATA_SOURCE} · staged dataset
+          </span>
+        </h1>
         <p className="text-[var(--color-a11oy-text-sub)] mt-1">
-          Brand health and orchestration overview for {currentOrg.toUpperCase()}.
+          Brand health and orchestration overview for {currentOrg.toUpperCase()} — staged DEMO
+          dataset; no measured brand telemetry is wired yet.
         </p>
       </div>
 
