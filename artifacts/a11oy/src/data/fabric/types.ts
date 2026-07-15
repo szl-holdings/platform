@@ -60,7 +60,7 @@ export interface DomainTwin {
   readonly outcomeVelocity: number;
   readonly evidenceCompleteness: number;
   readonly chainlightConfidence: number;
-  readonly sentraGovernanceState: GovernanceState;
+  readonly tenaxGovernanceState: GovernanceState;
   readonly psycheGovernanceState: GovernanceState;
   readonly argoLearningStatus: string;
   readonly proofChainCoverage: number;
@@ -83,7 +83,7 @@ export interface FabricSignal {
   readonly timestamp: string;
   readonly relatedEntity: string;
   readonly recommendedAction: string;
-  readonly sentraReviewRequired: boolean;
+  readonly tenaxReviewRequired: boolean;
   readonly chainlightScenarioId: string;
   readonly proofChainAnchorId: string;
   readonly status: SignalStatus;
@@ -119,7 +119,7 @@ export interface FabricDecision {
   readonly options: readonly string[];
   readonly recommendedOption: string;
   readonly chainlightConfidence: number;
-  readonly sentraApprovalState: DecisionStatus;
+  readonly tenaxApprovalState: DecisionStatus;
   readonly humanOwner: string;
   readonly deadline: string;
   readonly evidenceIds: readonly string[];

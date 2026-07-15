@@ -173,9 +173,9 @@ export function VerticalsCommand() {
                 <div>
                   <span style={{ color: GHOST }}>Governance</span>{' '}
                   <span
-                    style={{ color: GOVERNANCE_COLORS[twin?.sentraGovernanceState ?? 'green'] }}
+                    style={{ color: GOVERNANCE_COLORS[twin?.tenaxGovernanceState ?? 'green'] }}
                   >
-                    {twin?.sentraGovernanceState?.toUpperCase()}
+                    {twin?.tenaxGovernanceState?.toUpperCase()}
                   </span>
                 </div>
               </div>

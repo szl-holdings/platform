@@ -133,11 +133,11 @@ export function FabricCockpit() {
                 <span
                   className="text-[10px] font-mono px-1.5 py-0.5 rounded"
                   style={{
-                    backgroundColor: `${GOVERNANCE_COLORS[twin.sentraGovernanceState]}18`,
-                    color: GOVERNANCE_COLORS[twin.sentraGovernanceState],
+                    backgroundColor: `${GOVERNANCE_COLORS[twin.tenaxGovernanceState]}18`,
+                    color: GOVERNANCE_COLORS[twin.tenaxGovernanceState],
                   }}
                 >
-                  {twin.sentraGovernanceState.toUpperCase()}
+                  {twin.tenaxGovernanceState.toUpperCase()}
                 </span>
               </div>
               <p className="text-xs mb-3" style={{ color: GHOST }}>
@@ -362,8 +362,8 @@ export function FabricCockpit() {
                     <div className="flex items-center gap-3 mt-0.5 text-[10px] font-mono">
                       <span style={{ color: GHOST }}>Health {t.healthScore}%</span>
                       <span style={{ color: GHOST }}>Signals {t.signalVolume}</span>
-                      <span style={{ color: GOVERNANCE_COLORS[t.sentraGovernanceState] }}>
-                        {t.sentraGovernanceState}
+                      <span style={{ color: GOVERNANCE_COLORS[t.tenaxGovernanceState] }}>
+                        {t.tenaxGovernanceState}
                       </span>
                     </div>
                   </div>

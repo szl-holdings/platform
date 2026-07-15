@@ -43,7 +43,7 @@ const SIGNALS: CrossSignal[] = [
   },
   {
     id: 'sig-003',
-    vertical: 'Sentra',
+    vertical: 'TENAX',
     verticalColor: '#c04a2a',
     icon: Shield,
     summary: 'Cyber posture downgrade on property management vendor affecting 8 portfolio assets',
@@ -63,7 +63,7 @@ const SIGNALS: CrossSignal[] = [
   },
   {
     id: 'sig-005',
-    vertical: 'Sentra',
+    vertical: 'TENAX',
     verticalColor: '#c04a2a',
     icon: Zap,
     summary: 'SCADA vulnerability disclosed in building management systems — 14 high-rises flagged',

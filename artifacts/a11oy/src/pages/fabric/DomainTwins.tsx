@@ -138,11 +138,11 @@ export function DomainTwins() {
                 <span
                   className="text-[10px] font-mono px-1.5 py-0.5 rounded"
                   style={{
-                    backgroundColor: `${GOVERNANCE_COLORS[twin.sentraGovernanceState]}18`,
-                    color: GOVERNANCE_COLORS[twin.sentraGovernanceState],
+                    backgroundColor: `${GOVERNANCE_COLORS[twin.tenaxGovernanceState]}18`,
+                    color: GOVERNANCE_COLORS[twin.tenaxGovernanceState],
                   }}
                 >
-                  {twin.sentraGovernanceState.toUpperCase()}
+                  {twin.tenaxGovernanceState.toUpperCase()}
                 </span>
               </div>
               <p className="text-xs mb-4" style={{ color: SUB }}>
@@ -282,9 +282,9 @@ export function DomainTwins() {
                 </div>
                 <div
                   className="text-sm font-bold"
-                  style={{ color: GOVERNANCE_COLORS[drawerTwin.sentraGovernanceState] }}
+                  style={{ color: GOVERNANCE_COLORS[drawerTwin.tenaxGovernanceState] }}
                 >
-                  {drawerTwin.sentraGovernanceState.toUpperCase()}
+                  {drawerTwin.tenaxGovernanceState.toUpperCase()}
                 </div>
               </Card>
               <Card>

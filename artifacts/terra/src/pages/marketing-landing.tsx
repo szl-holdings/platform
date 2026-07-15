@@ -481,7 +481,7 @@ export default function TerraMarketingLanding() {
                 style={{ color: 'rgba(255,255,255,0.4)' }}
               >
                 Terra operates within A11oy&rsquo;s governed intelligence fabric. Maritime delays
-                from Vessels trigger logistics clause alerts. Cyber posture changes from Sentra
+                from Vessels trigger logistics clause alerts. Cyber posture changes from TENAX
                 affect insured property values. Lease expiry clusters surface in Counsel. Every
                 lane is connected.
               </p>

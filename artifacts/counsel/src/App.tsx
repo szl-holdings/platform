@@ -580,7 +580,7 @@ function AppShell() {
       label: 'Aegis: data breach incident linked to Greenfield',
       description:
         "Aegis's IC-2409 incident is the source event for the Greenfield data breach matter.",
-      href: '/sentra/incident',
+      href: '/tenax/incident',
       preservedContext: { surface: 'counsel', matter: 'greenfield' },
     },
     {

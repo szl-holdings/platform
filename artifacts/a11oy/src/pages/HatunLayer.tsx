@@ -143,7 +143,7 @@ export function HatunLayer() {
               </a>
             } />
             <InfoRow label="Language" value={sc.source.lang} mono />
-            <InfoRow label="TENAX binding" value={sc.sentraBinding} />
+            <InfoRow label="TENAX binding" value={sc.tenaxBinding} />
             <div
               className="text-[11px] px-2 py-1.5 rounded mt-2"
               style={{

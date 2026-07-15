@@ -90,7 +90,7 @@ export function FabricSignalMesh() {
         />
         <KpiCard
           label="TENAX REVIEW"
-          value={FABRIC_SIGNALS.filter((s) => s.sentraReviewRequired).length}
+          value={FABRIC_SIGNALS.filter((s) => s.tenaxReviewRequired).length}
           sub="governance required"
           accent="#f59e0b"
         />
@@ -223,7 +223,7 @@ export function FabricSignalMesh() {
                     </span>
                   </td>
                   <td className="py-2 pr-3">
-                    {s.sentraReviewRequired && (
+                    {s.tenaxReviewRequired && (
                       <span className="text-[10px] font-mono" style={{ color: '#f59e0b' }}>
                         REQUIRED
                       </span>
@@ -292,8 +292,8 @@ export function FabricSignalMesh() {
               <DetailRow label="Entity" value={drawerSignal.relatedEntity} />
               <DetailRow
                 label="TENAX"
-                value={drawerSignal.sentraReviewRequired ? 'Required' : 'Not required'}
-                color={drawerSignal.sentraReviewRequired ? '#f59e0b' : undefined}
+                value={drawerSignal.tenaxReviewRequired ? 'Required' : 'Not required'}
+                color={drawerSignal.tenaxReviewRequired ? '#f59e0b' : undefined}
               />
             </div>
             <div

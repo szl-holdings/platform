@@ -5,7 +5,7 @@ import {
 } from '../components/ui';
 import {
   GLASSWING_TAGLINE, GLASSWING_THESIS, GLASSWING_FIELD_MAP, GLASSWING_CITATIONS,
-  GLASSWING_AGENTS, SENTRA_POLICIES, SENTRA_VAULT,
+  GLASSWING_AGENTS, TENAX_POLICIES, TENAX_VAULT,
   SAMPLE_FINDINGS, SAMPLE_PATCHES, SAMPLE_APPROVALS, SAMPLE_AUDIT,
   RL_STATE_NOW, ENGINEERING_LOOP_STAGES, COMPLIANCE_MAP, HARD_BOUNDARIES,
   GLASSWING_VERSION,
@@ -172,10 +172,10 @@ export function Glasswing() {
         <Card>
           <div className="flex items-center justify-between mb-3">
             <div className="text-xs font-mono" style={{ color: GOLD }}>TENAX POLICY ENGINE</div>
-            <StatusBadge status="ok" label={`${SENTRA_POLICIES.length} rules`} />
+            <StatusBadge status="ok" label={`${TENAX_POLICIES.length} rules`} />
           </div>
           <div className="flex flex-col gap-1.5 max-h-[280px] overflow-y-auto pr-1">
-            {SENTRA_POLICIES.map((p) => {
+            {TENAX_POLICIES.map((p) => {
               const ds = POLICY_DECISION_STYLE[p.decision];
               return (
                 <div key={p.id} className="flex items-start gap-2 text-xs py-1 border-b last:border-0" style={{ borderColor: 'var(--color-a11oy-border)' }}>
@@ -199,12 +199,12 @@ export function Glasswing() {
             <StatusBadge status="ok" label="fingerprint-only" />
           </div>
           <div className="grid grid-cols-2 gap-3 mb-3">
-            <KpiCard label="Redacted (24h)" value={SENTRA_VAULT.redactedSecrets24h} accent={GOLD} />
-            <KpiCard label="Fingerprints" value={SENTRA_VAULT.fingerprintsTracked} accent={GOLD} />
-            <KpiCard label="Rotations Due" value={SENTRA_VAULT.rotationsSuggested} accent="#c9b787" />
-            <KpiCard label="Last Redaction" value={new Date(SENTRA_VAULT.lastRedactionAt).toLocaleTimeString()} accent={GOLD} />
+            <KpiCard label="Redacted (24h)" value={TENAX_VAULT.redactedSecrets24h} accent={GOLD} />
+            <KpiCard label="Fingerprints" value={TENAX_VAULT.fingerprintsTracked} accent={GOLD} />
+            <KpiCard label="Rotations Due" value={TENAX_VAULT.rotationsSuggested} accent="#c9b787" />
+            <KpiCard label="Last Redaction" value={new Date(TENAX_VAULT.lastRedactionAt).toLocaleTimeString()} accent={GOLD} />
           </div>
-          <p className="text-xs" style={{ color: SUB, lineHeight: 1.6 }}>{SENTRA_VAULT.vaultPolicy}</p>
+          <p className="text-xs" style={{ color: SUB, lineHeight: 1.6 }}>{TENAX_VAULT.vaultPolicy}</p>
         </Card>
 
         {/* Approval Gate */}
