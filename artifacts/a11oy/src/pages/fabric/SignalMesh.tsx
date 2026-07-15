@@ -89,7 +89,7 @@ export function FabricSignalMesh() {
           accent="#ef4444"
         />
         <KpiCard
-          label="SENTRA REVIEW"
+          label="TENAX REVIEW"
           value={FABRIC_SIGNALS.filter((s) => s.sentraReviewRequired).length}
           sub="governance required"
           accent="#f59e0b"
@@ -165,7 +165,7 @@ export function FabricSignalMesh() {
                 STATUS
               </th>
               <th className="pb-2 font-mono text-[10px]" style={{ color: GHOST }}>
-                SENTRA
+                TENAX
               </th>
               <th className="pb-2 font-mono text-[10px]" style={{ color: GHOST }}>
                 ACTION
@@ -291,7 +291,7 @@ export function FabricSignalMesh() {
               />
               <DetailRow label="Entity" value={drawerSignal.relatedEntity} />
               <DetailRow
-                label="Sentra"
+                label="TENAX"
                 value={drawerSignal.sentraReviewRequired ? 'Required' : 'Not required'}
                 color={drawerSignal.sentraReviewRequired ? '#f59e0b' : undefined}
               />

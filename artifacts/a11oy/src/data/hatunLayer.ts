@@ -1,4 +1,4 @@
-// HATUN LAYER — A11oy × Sentra defensive orchestration architecture.
+// HATUN LAYER — A11oy × TENAX defensive orchestration architecture.
 //
 // Distillation of the Hatun-class executive summary into a static doctrine
 // surface: the A11oy command-agent orchestration loop, the integrated scanner
@@ -7,19 +7,19 @@
 //
 // All inputs are public research, official tool documentation, or first-principle
 // reconstructions. No leaks, no scraped weights, no telemetry. Adoption requires
-// a Sentra approval workflow per the Glasswing doctrine.
+// a TENAX approval workflow per the Glasswing doctrine.
 
 export const HATUN_LAYER_VERSION = '0.1.0-seed';
 
 export const HATUN_LAYER_TAGLINE =
-  'A11oy plans, Sentra executes, the human approves. Defensive only, evidence-bound, public-input only.';
+  'A11oy plans, TENAX executes, the human approves. Defensive only, evidence-bound, public-input only.';
 
 // ---------------------------------------------------------------------------
 // 1. ORCHESTRATION LOOP
-// The 10-step A11oy → Sentra interaction described in the architecture diagram.
+// The 10-step A11oy → TENAX interaction described in the architecture diagram.
 // ---------------------------------------------------------------------------
 
-export type LoopActor = 'A11oy' | 'Sentra' | 'Human' | 'External';
+export type LoopActor = 'A11oy' | 'TENAX' | 'Human' | 'External';
 
 export interface OrchestrationStep {
   step: number;
@@ -34,17 +34,17 @@ export const ORCHESTRATION_STEPS: readonly OrchestrationStep[] = [
   {
     step: 1,
     from: 'A11oy',
-    to: 'Sentra',
+    to: 'TENAX',
     action: 'plan tasks',
     detail:
-      'A11oy decomposes a natural-language or policy directive (e.g. "scan production Linux fleet for critical CVEs") into a typed task graph and submits it to Sentra\u2019s Policy Engine for admission control.',
+      'A11oy decomposes a natural-language or policy directive (e.g. "scan production Linux fleet for critical CVEs") into a typed task graph and submits it to TENAX\u2019s Policy Engine for admission control.',
     guardrail:
       'Plan is rejected if it requests any action outside the tenant\u2019s registered scope or violates a Constitution rule.',
   },
   {
     step: 2,
     from: 'A11oy',
-    to: 'Sentra',
+    to: 'TENAX',
     action: 'execute scans',
     detail:
       'Approved tasks dispatch the scanner toolchain (CodeQL, Semgrep, OSV-Scanner, Trivy, Gitleaks, Checkov) against the target surface defined in the plan.',
@@ -53,8 +53,8 @@ export const ORCHESTRATION_STEPS: readonly OrchestrationStep[] = [
   },
   {
     step: 3,
-    from: 'Sentra',
-    to: 'Sentra',
+    from: 'TENAX',
+    to: 'TENAX',
     action: 'findings → analyzer',
     detail:
       'Raw scanner output is normalised into the Hatun Doctrine finding schema and fed to the Risk Assessment Engine for de-duplication, severity scoring, and exploitability triage.',
@@ -63,7 +63,7 @@ export const ORCHESTRATION_STEPS: readonly OrchestrationStep[] = [
   },
   {
     step: 4,
-    from: 'Sentra',
+    from: 'TENAX',
     to: 'A11oy',
     action: 'context info → model',
     detail:
@@ -74,16 +74,16 @@ export const ORCHESTRATION_STEPS: readonly OrchestrationStep[] = [
   {
     step: 5,
     from: 'A11oy',
-    to: 'Sentra',
+    to: 'TENAX',
     action: 'propose patch',
     detail:
-      'A11oy generates a candidate patch (diff) and a rationale trace, then submits both to Sentra\u2019s Patch Engine for static validation.',
+      'A11oy generates a candidate patch (diff) and a rationale trace, then submits both to TENAX\u2019s Patch Engine for static validation.',
     guardrail:
       'Patch payload is schema-validated; any non-diff side-channel (shell calls, network IO) is stripped before submission.',
   },
   {
     step: 6,
-    from: 'Sentra',
+    from: 'TENAX',
     to: 'Human',
     action: 'patch suggestion → approval',
     detail:
@@ -94,20 +94,20 @@ export const ORCHESTRATION_STEPS: readonly OrchestrationStep[] = [
   {
     step: 7,
     from: 'Human',
-    to: 'Sentra',
+    to: 'TENAX',
     action: 'commit approved patch',
     detail:
-      'On approve, Sentra commits the patch to the staging branch with the approver\u2019s OIDC-attested signature recorded in the audit ledger.',
+      'On approve, TENAX commits the patch to the staging branch with the approver\u2019s OIDC-attested signature recorded in the audit ledger.',
     guardrail:
       'Approval evidence is appended to the Cerberus vault before the commit lands; rollback is a single-click revert.',
   },
   {
     step: 8,
-    from: 'Sentra',
+    from: 'TENAX',
     to: 'External',
     action: 'apply patch',
     detail:
-      'Sentra deploys the approved patch through the customer\u2019s existing CI/CD path and verifies the targeted finding is resolved on the post-deploy scan.',
+      'TENAX deploys the approved patch through the customer\u2019s existing CI/CD path and verifies the targeted finding is resolved on the post-deploy scan.',
     guardrail:
       'Apply step is idempotent and auto-reverts if the post-deploy scan introduces new criticals.',
   },
@@ -124,7 +124,7 @@ export const ORCHESTRATION_STEPS: readonly OrchestrationStep[] = [
   {
     step: 10,
     from: 'Human',
-    to: 'Sentra',
+    to: 'TENAX',
     action: 'review',
     detail:
       'Analyst reviews the closed loop, marks the disposition (correct / over-cautious / wrong), and the feedback updates the reward model used by step 9.',
@@ -217,7 +217,7 @@ export const SCANNERS: readonly Scanner[] = [
     name: 'Trivy',
     surface: 'containers',
     oneLine:
-      'Container, OS package, and IaC scanner. The default Sentra layer for any image or registry surface.',
+      'Container, OS package, and IaC scanner. The default TENAX layer for any image or registry surface.',
     primitive:
       'Layered scanner that combines distro vulnerability databases, SBOM extraction, and a Rego-driven misconfig pass.',
     license: 'Apache-2.0',
@@ -294,7 +294,7 @@ export const RL_PIPELINE: readonly RLAxis[] = [
     detail:
       'Composite: +1 for verified vulnerability closed, +0.5 for high-severity CVE detected, \u22120.5 for false positive, \u22121 for regression introduced, \u22122 for any policy violation attempt.',
     citation:
-      'Team Atlanta patch RL: reward=1 when patch compiles and fixes the bug. Sentra extends with regression and policy penalties.',
+      'Team Atlanta patch RL: reward=1 when patch compiles and fixes the bug. TENAX extends with regression and policy penalties.',
   },
   {
     id: 'regime',
@@ -342,7 +342,7 @@ export const GUARDRAILS: readonly Guardrail[] = [
   {
     layer: 'Action',
     control: 'Action space restricted to a typed registry. No free-form shell, no dynamic code eval, no network egress outside the tenant scope.',
-    enforcedBy: 'Sentra capability compartments + connector firewall.',
+    enforcedBy: 'TENAX capability compartments + connector firewall.',
   },
   {
     layer: 'Output',
@@ -352,7 +352,7 @@ export const GUARDRAILS: readonly Guardrail[] = [
   {
     layer: 'Approval',
     control: 'Risk-tiered gating: low \u2192 single-key, medium \u2192 dual-key, high \u2192 dual-key plus 24h soak in staging.',
-    enforcedBy: 'Sentra Approval Queue + Constitution rule engine.',
+    enforcedBy: 'TENAX Approval Queue + Constitution rule engine.',
   },
   {
     layer: 'Audit',
@@ -368,7 +368,7 @@ export const GUARDRAILS: readonly Guardrail[] = [
 
 // ---------------------------------------------------------------------------
 // 5. PHASED ROADMAP
-// Translation of the research brief\u2019s 0\u201324 month plan onto Sentra modules.
+// Translation of the research brief\u2019s 0\u201324 month plan onto TENAX modules.
 // ---------------------------------------------------------------------------
 
 export type RoadmapPhase = '0\u20136' | '7\u201312' | '13\u201324';
@@ -388,15 +388,15 @@ export const ROADMAP: readonly RoadmapMilestone[] = [
     title: 'Scanner toolchain wired end-to-end',
     detail:
       'CodeQL + Semgrep + OSV-Scanner + Trivy + Gitleaks + Checkov each producing normalised findings into the Hatun Doctrine schema, with a deterministic merge pass and a single Risk Engine entry point.',
-    module: 'Sentra Static Scanner + Risk Engine',
+    module: 'TENAX Static Scanner + Risk Engine',
   },
   {
     id: 'phase1-orchestrator',
     phase: '0\u20136',
-    title: 'A11oy plan \u2192 Sentra dispatch path',
+    title: 'A11oy plan \u2192 TENAX dispatch path',
     detail:
-      'A11oy decomposes natural-language directives into typed plans; Sentra admits or rejects against the Constitution; approved plans dispatch to the scanner toolchain.',
-    module: 'A11oy Planner + Sentra Policy Engine',
+      'A11oy decomposes natural-language directives into typed plans; TENAX admits or rejects against the Constitution; approved plans dispatch to the scanner toolchain.',
+    module: 'A11oy Planner + TENAX Policy Engine',
   },
   {
     id: 'phase1-approval-loop',
@@ -404,7 +404,7 @@ export const ROADMAP: readonly RoadmapMilestone[] = [
     title: 'Approval Queue with dual-key gating',
     detail:
       'Patch suggestions appear in the Approval Queue with severity, blast radius, and rollback plan. Production changes require two operators; staging requires one.',
-    module: 'Sentra Approval Queue',
+    module: 'TENAX Approval Queue',
   },
   {
     id: 'phase2-rl-offline',
@@ -420,7 +420,7 @@ export const ROADMAP: readonly RoadmapMilestone[] = [
     title: 'RL contextual code retrieval',
     detail:
       'Per Team Atlanta, train a retrieval policy that fetches the exact code pieces required to verify or fix a finding. Cuts token spend and false-positive rate.',
-    module: 'A11oy Retriever + Sentra Patch Engine',
+    module: 'A11oy Retriever + TENAX Patch Engine',
   },
   {
     id: 'phase2-redteam',
@@ -428,7 +428,7 @@ export const ROADMAP: readonly RoadmapMilestone[] = [
     title: 'Continuous defensive red-team in sandbox',
     detail:
       'Strict-policy hacker agent runs in an isolated tenant clone, attempting attacks against staging snapshots. Outcomes feed the Risk Engine\u2019s exploitability score.',
-    module: 'Sentra Sandbox + Adversarial Resilience',
+    module: 'TENAX Sandbox + Adversarial Resilience',
   },
   {
     id: 'phase3-self-play',
@@ -443,8 +443,8 @@ export const ROADMAP: readonly RoadmapMilestone[] = [
     phase: '13\u201324',
     title: 'SOC2 Type II + ISO 42001 attestation',
     detail:
-      'The full A11oy \u00d7 Sentra control set passes a Type II audit with the evidence ledger as the primary control surface. ISO 42001 added for AI-management-system coverage.',
-    module: 'Sentra Compliance Engine + Cerberus Evidence Vault',
+      'The full A11oy \u00d7 TENAX control set passes a Type II audit with the evidence ledger as the primary control surface. ISO 42001 added for AI-management-system coverage.',
+    module: 'TENAX Compliance Engine + Cerberus Evidence Vault',
   },
   {
     id: 'phase3-defender-network',

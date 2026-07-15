@@ -23,7 +23,7 @@ const STATUS_STYLE: Record<SeedStatus, { color: string; bg: string; label: strin
 
 const TARGET_STYLE: Record<ConstellationTarget, { color: string; bg: string }> = {
   A11oy:  { color: GOLD,      bg: 'rgba(201,183,135,0.10)' },
-  Sentra: { color: '#f5f5f5', bg: 'rgba(245,245,245,0.08)' },
+  TENAX: { color: '#f5f5f5', bg: 'rgba(245,245,245,0.08)' },
   Psyche: { color: '#c9b787', bg: 'rgba(201,183,135,0.06)' },
   Argo:   { color: '#5e5e5e', bg: 'rgba(94,94,94,0.12)' },
 };
@@ -143,7 +143,7 @@ export function ArgoForge() {
 
   const groupByTarget = (seeds: CapabilitySeed[]): Record<ConstellationTarget, CapabilitySeed[]> => ({
     A11oy:  seeds.filter(s => s.evolves === 'A11oy'),
-    Sentra: seeds.filter(s => s.evolves === 'Sentra'),
+    TENAX: seeds.filter(s => s.evolves === 'TENAX'),
     Psyche: seeds.filter(s => s.evolves === 'Psyche'),
     Argo:   seeds.filter(s => s.evolves === 'Argo'),
   });
@@ -176,7 +176,7 @@ export function ArgoForge() {
         </span>
         <span>
           External primitives studied with-knowledge-of, not adopted as code · CFAA compliant ·
-          public-input only · Sentra approval gates every adoption · Cerberus enforces hard boundaries.
+          public-input only · TENAX approval gates every adoption · Cerberus enforces hard boundaries.
         </span>
       </div>
 
@@ -185,7 +185,7 @@ export function ArgoForge() {
         <KpiCard label="Capability Seeds" value={total} sub="distilled this cycle" accent={GOLD} />
         <KpiCard label="Ready to Adopt" value={adoptable} sub="adoptable + piloted" accent={GOLD} trend="up" />
         <KpiCard label="OSS · Research" value={`${oss} · ${research}`} sub="primitives · methods" accent="#f5f5f5" />
-        <KpiCard label="Constellations Touched" value={targets} sub="A11oy · Sentra · Psyche" accent={GOLD} />
+        <KpiCard label="Constellations Touched" value={targets} sub="A11oy · TENAX · Psyche" accent={GOLD} />
       </div>
 
       {/* DOCTRINE PILLARS */}
@@ -281,7 +281,7 @@ export function ArgoForge() {
             </div>
             <p className="text-xs mb-4" style={{ color: SUB }}>{meta.subtitle}</p>
 
-            {(['Sentra', 'A11oy', 'Psyche', 'Argo'] as ConstellationTarget[]).map(target => {
+            {(['TENAX', 'A11oy', 'Psyche', 'Argo'] as ConstellationTarget[]).map(target => {
               const targetSeeds = grouped[target];
               if (targetSeeds.length === 0) return null;
               const ts = TARGET_STYLE[target];
@@ -311,14 +311,14 @@ export function ArgoForge() {
       {/* ALIGNMENT MATRIX */}
       <SectionTitle>Doctrine Alignment Matrix</SectionTitle>
       <p className="text-xs mb-4 -mt-3" style={{ color: SUB }}>
-        Mapping each Sentra defensive capability (executive summary §1) to the seeds that satisfy it.
+        Mapping each TENAX defensive capability (executive summary §1) to the seeds that satisfy it.
         Gaps signal where the next forge cycle should focus.
       </p>
       <Card className="mb-6">
         <div className="overflow-x-auto">
           <table className="w-full text-xs">
             <caption className="sr-only">
-              Sentra capability to capability-seed alignment matrix
+              TENAX capability to capability-seed alignment matrix
             </caption>
             <thead>
               <tr style={{ borderBottom: '1px solid rgba(201,183,135,0.20)' }}>
@@ -371,7 +371,7 @@ export function ArgoForge() {
       {/* ROADMAP MAPPING */}
       <SectionTitle>Roadmap Insertion</SectionTitle>
       <p className="text-xs mb-4 -mt-3" style={{ color: SUB }}>
-        Where each seed enters the 24-month Sentra plan. MVP first, hardening last.
+        Where each seed enters the 24-month TENAX plan. MVP first, hardening last.
       </p>
       <div className="grid grid-cols-1 md:grid-cols-3 gap-3 mb-6">
         {(['0\u20136', '7\u201312', '13\u201324'] as RoadmapPhase[]).map(phase => {
@@ -435,7 +435,7 @@ export function ArgoForge() {
         </ul>
         <p className="text-[11px] mt-3 pt-3" style={{ color: GHOST, borderTop: '1px solid rgba(255,255,255,0.04)' }}>
           External code is studied for design patterns; frontier methods are reimplemented from first
-          principles. Adoption requires Sentra approval and a provenance entry in the Cerberus
+          principles. Adoption requires TENAX approval and a provenance entry in the Cerberus
           Evidence Vault. No leaked weights, no scraped private data, no offensive workflows.
         </p>
       </Card>

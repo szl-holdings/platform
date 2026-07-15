@@ -1,11 +1,11 @@
 // ARGO — Field Intelligence Forge
 // Distillation of external open-source primitives + frontier public research
-// + the Sentra defensive doctrine into capability seeds for the
-// A11oy / Sentra / Psyche / Argo constellation.
+// + the TENAX defensive doctrine into capability seeds for the
+// A11oy / TENAX / Psyche / Argo constellation.
 //
 // External code is studied with-knowledge-of, not adopted. Frontier methods are
 // reimplemented from first principles using only public inputs. Adoption requires
-// a Sentra approval workflow per the Glasswing doctrine.
+// a TENAX approval workflow per the Glasswing doctrine.
 
 export const ARGO_VERSION = '0.2.0-seed';
 
@@ -14,7 +14,7 @@ export const ARGO_TAGLINE =
 
 // ---------------------------------------------------------------------------
 // 1. DOCTRINE PILLARS
-// Quoted from the Sentra Defensive Executive Summary and the Hatun Doctrine/Glasswing
+// Quoted from the TENAX Defensive Executive Summary and the Hatun Doctrine/Glasswing
 // research brief. Every seed must satisfy at least one pillar and violate none.
 // ---------------------------------------------------------------------------
 
@@ -48,7 +48,7 @@ export const DOCTRINE_PILLARS: readonly DoctrinePillar[] = [
     citation: 'NIST AI Risk Management Framework',
     quote:
       'For any non-trivial action above a low-risk threshold, the AI\u2019s recommendation triggers a human approval workflow.',
-    enforcedBy: 'Sentra Approval Queue · dual-key gating',
+    enforcedBy: 'TENAX Approval Queue · dual-key gating',
   },
   {
     id: 'evidence-is-evidence',
@@ -81,7 +81,7 @@ export const DOCTRINE_PILLARS: readonly DoctrinePillar[] = [
 // ---------------------------------------------------------------------------
 
 export type SeedStatus = 'observed' | 'distilled' | 'adoptable' | 'piloted';
-export type ConstellationTarget = 'A11oy' | 'Sentra' | 'Psyche' | 'Argo';
+export type ConstellationTarget = 'A11oy' | 'TENAX' | 'Psyche' | 'Argo';
 export type RoadmapPhase = '0\u20136' | '7\u201312' | '13\u201324';
 export type SeedSourceKind = 'open-source' | 'public-research';
 
@@ -140,16 +140,16 @@ export const CAPABILITY_SEEDS: readonly CapabilitySeed[] = [
     id: 'edge-distill',
     name: 'Edge defender via knowledge distillation',
     oneLine:
-      'Distill the heavy detection model into a tiny on-host classifier that runs on offline endpoints. Sentra without the cloud round-trip.',
+      'Distill the heavy detection model into a tiny on-host classifier that runs on offline endpoints. TENAX without the cloud round-trip.',
     primitive:
       'Teacher\u2192student model compression for inference at the edge of a sparse network.',
     sourceKind: 'open-source',
     source: { repo: 'samogonka', url: 'https://github.com/ei-grad/samogonka', author: 'ei-grad/Andrew Grigorev', lang: 'Python' },
-    evolves: 'Sentra',
+    evolves: 'TENAX',
     evolvesAgent: 'Sentinel (endpoint defender)',
     doctrineLink: 'detection-targets',
     defensiveGuardrail:
-      'Distilled student is read-only at the edge; can only emit alerts upstream, never execute remediation locally without Sentra approval.',
+      'Distilled student is read-only at the edge; can only emit alerts upstream, never execute remediation locally without TENAX approval.',
     phase: '7\u201312',
     status: 'distilled',
   },
@@ -162,7 +162,7 @@ export const CAPABILITY_SEEDS: readonly CapabilitySeed[] = [
       'Strict OIDC token verification (issuer, audience, kid, exp) at the action boundary, before the policy engine fires.',
     sourceKind: 'open-source',
     source: { repo: 'verify-oidc-token', url: 'https://github.com/ei-grad/verify-oidc-token', author: 'ei-grad/Andrew Grigorev', lang: 'Python' },
-    evolves: 'Sentra',
+    evolves: 'TENAX',
     evolvesAgent: 'Hephaestus (forge / signing) + Cerberus (vault)',
     doctrineLink: 'evidence-is-evidence',
     defensiveGuardrail:
@@ -174,12 +174,12 @@ export const CAPABILITY_SEEDS: readonly CapabilitySeed[] = [
     id: 'cert-hygiene',
     name: 'Pre-emptive cert expiry scanner',
     oneLine:
-      'Sentra continuously checks customer asset registry for HTTPS certs nearing expiry. A defence that fires before the incident.',
+      'TENAX continuously checks customer asset registry for HTTPS certs nearing expiry. A defence that fires before the incident.',
     primitive:
       'Fast Go scanner that reads cert expiration metadata from a host list and emits warnings on a configurable threshold.',
     sourceKind: 'open-source',
     source: { repo: 'check-expiring-certs', url: 'https://github.com/ei-grad/check-expiring-certs', author: 'ei-grad/Andrew Grigorev', lang: 'Go' },
-    evolves: 'Sentra',
+    evolves: 'TENAX',
     evolvesAgent: 'Argus (perimeter watcher)',
     doctrineLink: 'detection-targets',
     defensiveGuardrail:
@@ -196,7 +196,7 @@ export const CAPABILITY_SEEDS: readonly CapabilitySeed[] = [
       'rsync + hardlink snapshot rotation: unchanged files share inodes across snapshots, reducing storage to delta-only cost.',
     sourceKind: 'open-source',
     source: { repo: 'trinkup', url: 'https://github.com/ei-grad/trinkup', author: 'ei-grad/Andrew Grigorev', lang: 'Bash' },
-    evolves: 'Sentra',
+    evolves: 'TENAX',
     evolvesAgent: 'Cerberus (evidence vault)',
     doctrineLink: 'evidence-is-evidence',
     defensiveGuardrail:
@@ -213,7 +213,7 @@ export const CAPABILITY_SEEDS: readonly CapabilitySeed[] = [
       'libnetfilter_conntrack ctypes binding: emit connection state transitions to the SIEM ingest pipeline.',
     sourceKind: 'open-source',
     source: { repo: 'python-conntrack', url: 'https://github.com/ei-grad/python-conntrack', author: 'ei-grad/Andrew Grigorev', lang: 'Python' },
-    evolves: 'Sentra',
+    evolves: 'TENAX',
     evolvesAgent: 'Argus + Sentinel (telemetry fusion)',
     doctrineLink: 'detection-targets',
     defensiveGuardrail:
@@ -225,12 +225,12 @@ export const CAPABILITY_SEEDS: readonly CapabilitySeed[] = [
     id: 'device-trust',
     name: 'EAP-TLS device trust membrane',
     oneLine:
-      'Operator workstations and field sensors authenticate to the Sentra control plane with mutual TLS over RADIUS. No cert, no console.',
+      'Operator workstations and field sensors authenticate to the TENAX control plane with mutual TLS over RADIUS. No cert, no console.',
     primitive:
       'Minimal EAP-TLS FreeRADIUS image with single-CA + OCSP revocation. Strong device identity, no shared secrets.',
     sourceKind: 'open-source',
     source: { repo: 'docker-freeradius-eap-tls', url: 'https://github.com/ei-grad/docker-freeradius-eap-tls', author: 'ei-grad/Andrew Grigorev', lang: 'Dockerfile' },
-    evolves: 'Sentra',
+    evolves: 'TENAX',
     evolvesAgent: 'Argus (zero-trust admission)',
     doctrineLink: 'human-in-loop',
     defensiveGuardrail:
@@ -242,7 +242,7 @@ export const CAPABILITY_SEEDS: readonly CapabilitySeed[] = [
     id: 'observatory-repl',
     name: 'Governed operator REPL into Psyche',
     oneLine:
-      'IPython-style live console attached to a running Psyche observatory process. Read-only by default; mutation requires Sentra approval.',
+      'IPython-style live console attached to a running Psyche observatory process. Read-only by default; mutation requires TENAX approval.',
     primitive:
       'Replace the framework\u2019s default shell with a richer interactive REPL bound to live application context.',
     sourceKind: 'open-source',
@@ -261,7 +261,7 @@ export const CAPABILITY_SEEDS: readonly CapabilitySeed[] = [
     id: 'skills-standard',
     name: 'Declarative skills with capability scopes',
     oneLine:
-      'Plugin-style skills declared in a manifest with explicit capability scopes. Loaded into agent runtime under Sentra policy, never auto-elevated.',
+      'Plugin-style skills declared in a manifest with explicit capability scopes. Loaded into agent runtime under TENAX policy, never auto-elevated.',
     primitive:
       'Skill manifest pattern (anthropics/skills): name, description, allowed tools, signing authority. Agent picks skills only when policy permits.',
     sourceKind: 'public-research',
@@ -270,7 +270,7 @@ export const CAPABILITY_SEEDS: readonly CapabilitySeed[] = [
     evolvesAgent: 'Hermes (operator channel) + Pallas (plugin governance)',
     doctrineLink: 'human-in-loop',
     defensiveGuardrail:
-      'Every capability scope is a Sentra-policy permission. Skill load is auditable; capability elevation requires re-attestation in the approval queue.',
+      'Every capability scope is a TENAX-policy permission. Skill load is auditable; capability elevation requires re-attestation in the approval queue.',
     phase: '0\u20136',
     status: 'distilled',
   },
@@ -338,7 +338,7 @@ export const CAPABILITY_SEEDS: readonly CapabilitySeed[] = [
     evolvesAgent: 'Pallas (planner-hardener) + Sentinel (endpoint defender)',
     doctrineLink: 'detection-targets',
     defensiveGuardrail:
-      'Red-team operates only against Sentra-owned test fleets. Never against customer assets, never against third-party infrastructure.',
+      'Red-team operates only against TENAX-owned test fleets. Never against customer assets, never against third-party infrastructure.',
     phase: '0\u20136',
     status: 'piloted',
   },

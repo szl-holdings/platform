@@ -25,7 +25,7 @@ const STATUS_STYLE: Record<SeedStatus, { color: string; bg: string; label: strin
 const VERTICAL_ACCENT: Record<VerticalId, string> = {
   vessels: '#c9b787',
   terra:   '#f5f5f5',
-  sentra:  '#c9b787',
+  tenax:  '#c9b787',
 };
 
 const PHASE_LABEL: Record<RoadmapPhase, string> = {
@@ -52,7 +52,7 @@ export function AerialTwin() {
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-6">
         <KpiCard label="PRIMITIVES" value={PRIMITIVES.length} sub="ray-trace → AI-RAN" accent={GOLD} />
         <KpiCard label="OSS LEADERS" value={OPEN_SOURCE_LEADERS.length} sub="public anchors we ground on" accent={GOLD} />
-        <KpiCard label="VERTICALS BOUND" value={VERTICAL_BINDINGS.length} sub="Vessels · Terra · Sentra" accent={GOLD} />
+        <KpiCard label="VERTICALS BOUND" value={VERTICAL_BINDINGS.length} sub="Vessels · Terra · TENAX" accent={GOLD} />
         <KpiCard label="INNOVATION SEEDS" value={INNOVATION_SEEDS.length} sub="what we add" accent={GOLD} />
       </div>
 
@@ -63,7 +63,7 @@ export function AerialTwin() {
           A site-specific wireless digital-twin doctrine for A11oy. Distilled from the public NVIDIA Aerial Digital Twin overview and grounded in the public open-source leaders for differentiable RF physics, software RAN, and the RAN Intelligent Controller. No leaked spectrum captures, no scraped proprietary scenes, no live emission.
         </p>
         <p className="text-xs" style={{ color: SUB, lineHeight: 1.7 }}>
-          The seven sections below — primitives, OSS leaders, vertical bindings, innovation seeds, phased roadmap, guardrails, and citations — bind each element to a Sentra module or a vertical surface. Adoption of any element requires a Constitution review and a Sentra approval workflow.
+          The seven sections below — primitives, OSS leaders, vertical bindings, innovation seeds, phased roadmap, guardrails, and citations — bind each element to a TENAX module or a vertical surface. Adoption of any element requires a Constitution review and a TENAX approval workflow.
         </p>
       </Card>
 
@@ -180,7 +180,7 @@ export function AerialTwin() {
       {/* 4. Innovation seeds */}
       <SectionTitle className="mt-2">4 · Innovation seeds</SectionTitle>
       <p className="text-xs mb-3" style={{ color: SUB }}>
-        What we add on top of the upstream brief. Each seed is novel, defensive, and bound to an A11oy or Sentra module.
+        What we add on top of the upstream brief. Each seed is novel, defensive, and bound to an A11oy or TENAX module.
       </p>
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-3 mb-8">
         {INNOVATION_SEEDS.map((s) => {
@@ -207,7 +207,7 @@ export function AerialTwin() {
       {/* 5. Phased roadmap */}
       <SectionTitle className="mt-2">5 · Phased roadmap</SectionTitle>
       <p className="text-xs mb-3" style={{ color: SUB }}>
-        The 0–24 month plan. Every milestone is testable, Constitution-bound, and mapped onto an A11oy or Sentra module.
+        The 0–24 month plan. Every milestone is testable, Constitution-bound, and mapped onto an A11oy or TENAX module.
       </p>
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-3 mb-8">
         {phases.map((phase) => {

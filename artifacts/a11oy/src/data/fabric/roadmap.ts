@@ -1,6 +1,6 @@
 import type { RoadmapPhase, VerticalId } from './types';
 
-const ALL: readonly VerticalId[] = ['terra', 'vessels', 'counsel', 'carlota', 'aegis', 'lyte', 'sentra'];
+const ALL: readonly VerticalId[] = ['terra', 'vessels', 'counsel', 'carlota', 'aegis', 'lyte', 'tenax'];
 
 export const ROADMAP_PHASES: readonly RoadmapPhase[] = [
   {
@@ -28,7 +28,7 @@ export const ROADMAP_PHASES: readonly RoadmapPhase[] = [
       'Connector adapters for vertical-specific data sources',
       'Ticket and task ingestion from operational systems',
       'Document ingestion with classification and routing',
-      'Approval routing with Sentra governance enforcement',
+      'Approval routing with TENAX governance enforcement',
       'Evidence bundle assembly for audit and compliance',
       'Real-time signal ingestion from connected systems',
     ],
@@ -55,9 +55,9 @@ export const ROADMAP_PHASES: readonly RoadmapPhase[] = [
     id: 'phase-4',
     phase: 4,
     title: 'Governed Execution',
-    description: 'Sentra approval enforcement, rollback readiness, audit trails, and human-reviewed execution across all verticals.',
+    description: 'TENAX approval enforcement, rollback readiness, audit trails, and human-reviewed execution across all verticals.',
     items: [
-      'Sentra approval enforcement for all high-impact actions',
+      'TENAX approval enforcement for all high-impact actions',
       'Automated rollback readiness verification',
       'Immutable audit trails with Proof Chain anchoring',
       'Human-reviewed execution with approval gates',

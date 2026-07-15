@@ -201,7 +201,7 @@ export const OPEN_SOURCE_LEADERS: readonly OpenSourceLeader[] = [
 // 3. VERTICAL BINDINGS — which SZL products harness the twin and how.
 // ---------------------------------------------------------------------------
 
-export type VerticalId = 'vessels' | 'terra' | 'sentra';
+export type VerticalId = 'vessels' | 'terra' | 'tenax';
 
 export interface VerticalBinding {
   id: VerticalId;
@@ -246,7 +246,7 @@ export const VERTICAL_BINDINGS: readonly VerticalBinding[] = [
       'Scene meshes derived from public cadastral data plus owner-provided floor plans. Owner-provided geometry never re-shared across tenants.',
   },
   {
-    id: 'sentra',
+    id: 'tenax',
     vertical: 'TENAX \u2014 Cyber Resilience Command (ex-Sentra \u2014 organ retired 2026-07)',
     context:
       'TENAX already operates the EDR mesh, SIEM connectors, and Approval Queue. A site-specific RF twin lets TENAX reason about the RF surface as a first-class asset class.',
@@ -379,7 +379,7 @@ export const ROADMAP: readonly RoadmapMilestone[] = [
     module: 'Terra + Aerial Twin Engine + Cerberus',
   },
   {
-    id: 'phase2-sentra-anomaly',
+    id: 'phase2-tenax-anomaly',
     phase: '7\u201312',
     title: 'TENAX RF anomaly classifier',
     detail:

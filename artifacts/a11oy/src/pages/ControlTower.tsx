@@ -22,7 +22,7 @@ const ALL_VERTICALS = [
   { id: 'lyte-revenue', label: 'Lyte Revenue', packStatus: 'live' },
   { id: 'carlota-jo', label: 'Carlota Jo', packStatus: 'live' },
   { id: 'alloy-core', label: 'Alloy Core', packStatus: 'live' },
-  { id: 'sentra-cyber', label: 'Sentra Cyber', packStatus: 'stub' },
+  { id: 'tenax-cyber', label: 'TENAX Cyber', packStatus: 'stub' },
   { id: 'firestorm-ops', label: 'Firestorm Ops', packStatus: 'stub' },
   { id: 'nuro-forge', label: 'NuroForge AI', packStatus: 'stub' },
   { id: 'meridian-infra', label: 'Meridian Infra', packStatus: 'stub' },

@@ -31,7 +31,7 @@ interface ForecastPoint {
   upper: number;
 }
 
-const VERTICALS = ['A11oy', 'Terra', 'Sentra', 'Vessels', 'Conduit', 'Counsel', 'Pulse', 'Lyte'] as const;
+const VERTICALS = ['A11oy', 'Terra', 'TENAX', 'Vessels', 'Conduit', 'Counsel', 'Pulse', 'Lyte'] as const;
 const GPU_TYPES = ['H100 SXM', 'A100 80G', 'H200 141G', 'L40S'] as const;
 const METRICS = ['latency_p99', 'throughput_rps', 'error_rate', 'cache_hit_ratio', 'queue_depth', 'memory_pressure'] as const;
 

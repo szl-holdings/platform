@@ -178,7 +178,7 @@ export function EcosystemRoadmap() {
       <SectionTitle>Command Agents</SectionTitle>
       <p className="text-xs mb-4" style={{ color: SUB }}>
         These agents operate within the Command Fabric. They do not have autonomous authority —
-        every high-impact action requires human approval through Sentra.
+        every high-impact action requires human approval through TENAX.
       </p>
       <div className="grid sm:grid-cols-2 gap-3 mb-8">
         {FABRIC_AGENTS.map((agent) => (

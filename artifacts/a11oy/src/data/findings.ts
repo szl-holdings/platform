@@ -13,7 +13,7 @@ export interface Finding {
 export const findings: Finding[] = [
   {
     id: 'f-1',
-    surface: 'Sentra - Dashboard',
+    surface: 'TENAX - Dashboard',
     category: 'contrast',
     severity: 'critical',
     description: 'Insufficient contrast ratio for incident severity text.',

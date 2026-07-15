@@ -278,7 +278,7 @@ export function DomainTwins() {
             <div className="grid grid-cols-2 gap-2 mb-4">
               <Card>
                 <div className="text-[10px] font-mono" style={{ color: GHOST }}>
-                  Sentra
+                  TENAX
                 </div>
                 <div
                   className="text-sm font-bold"

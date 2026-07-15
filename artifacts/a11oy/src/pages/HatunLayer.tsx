@@ -15,7 +15,7 @@ const GHOST = 'var(--color-a11oy-text-ghost)';
 
 const ACTOR_STYLE: Record<LoopActor, { color: string; bg: string }> = {
   A11oy:    { color: GOLD,      bg: 'rgba(201,183,135,0.10)' },
-  Sentra:   { color: '#f5f5f5', bg: 'rgba(245,245,245,0.08)' },
+  TENAX:   { color: '#f5f5f5', bg: 'rgba(245,245,245,0.08)' },
   Human:    { color: '#c9b787', bg: 'rgba(201,183,135,0.06)' },
   External: { color: '#5e5e5e', bg: 'rgba(94,94,94,0.12)' },
 };
@@ -60,7 +60,7 @@ export function HatunLayer() {
 
       {/* KPI strip */}
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-6">
-        <KpiCard label="ORCHESTRATION STEPS" value={ORCHESTRATION_STEPS.length} sub="A11oy ↔ Sentra loop" accent={GOLD} />
+        <KpiCard label="ORCHESTRATION STEPS" value={ORCHESTRATION_STEPS.length} sub="A11oy ↔ TENAX loop" accent={GOLD} />
         <KpiCard label="SCANNERS" value={SCANNERS.length} sub="public, defensively licensed" accent={GOLD} />
         <KpiCard label="GUARDRAIL LAYERS" value={GUARDRAILS.length} sub="input → audit → provenance" accent={GOLD} />
         <KpiCard label="ROADMAP MILESTONES" value={ROADMAP.length} sub="0–24 month plan" accent={GOLD} />
@@ -70,21 +70,21 @@ export function HatunLayer() {
       <Card className="mb-6">
         <SectionTitle>What this surface is</SectionTitle>
         <p className="text-xs mb-2" style={{ color: SUB, lineHeight: 1.7 }}>
-          The Hatun Layer codifies how A11oy and Sentra compose into a defensive AI layer when frontier models become a force multiplier
+          The Hatun Layer codifies how A11oy and TENAX compose into a defensive AI layer when frontier models become a force multiplier
           on both sides of the asymmetry. It is a static doctrine surface, not a live runtime. Every claim here resolves to public research,
           official tool documentation, or a first-principle reconstruction. No leaks, no scraped weights, no telemetry.
         </p>
         <p className="text-xs" style={{ color: SUB, lineHeight: 1.7 }}>
           The five sections below — orchestration loop, scanner toolchain, RL pipeline, guardrails, and phased roadmap — mirror
-          the executive-summary architecture and bind each element to a Sentra module. Adoption of any element requires a Constitution
-          review and a Sentra approval workflow.
+          the executive-summary architecture and bind each element to a TENAX module. Adoption of any element requires a Constitution
+          review and a TENAX approval workflow.
         </p>
       </Card>
 
       {/* 1. Orchestration loop */}
       <SectionTitle className="mt-2">1 · Orchestration loop</SectionTitle>
       <p className="text-xs mb-3" style={{ color: SUB }}>
-        The ten-step A11oy ↔ Sentra interaction. Each step is constrained by a guardrail; no step can side-step the queue.
+        The ten-step A11oy ↔ TENAX interaction. Each step is constrained by a guardrail; no step can side-step the queue.
       </p>
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-3 mb-8">
         {ORCHESTRATION_STEPS.map((s) => (
@@ -123,7 +123,7 @@ export function HatunLayer() {
       {/* 2. Scanner toolchain */}
       <SectionTitle className="mt-2">2 · Scanner toolchain</SectionTitle>
       <p className="text-xs mb-3" style={{ color: SUB }}>
-        Six public, defensively-licensed tools the orchestration layer composes. Each is bound to a Sentra module and a stated guardrail.
+        Six public, defensively-licensed tools the orchestration layer composes. Each is bound to a TENAX module and a stated guardrail.
       </p>
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-3 mb-8">
         {SCANNERS.map((sc) => (
@@ -143,7 +143,7 @@ export function HatunLayer() {
               </a>
             } />
             <InfoRow label="Language" value={sc.source.lang} mono />
-            <InfoRow label="Sentra binding" value={sc.sentraBinding} />
+            <InfoRow label="TENAX binding" value={sc.sentraBinding} />
             <div
               className="text-[11px] px-2 py-1.5 rounded mt-2"
               style={{
@@ -202,7 +202,7 @@ export function HatunLayer() {
       {/* 5. Roadmap */}
       <SectionTitle className="mt-2">5 · Phased roadmap</SectionTitle>
       <p className="text-xs mb-3" style={{ color: SUB }}>
-        The 0–24 month plan from the executive summary, mapped onto Sentra modules. Every milestone is testable and Constitution-bound.
+        The 0–24 month plan from the executive summary, mapped onto TENAX modules. Every milestone is testable and Constitution-bound.
       </p>
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-3 mb-8">
         {phases.map((phase) => {
