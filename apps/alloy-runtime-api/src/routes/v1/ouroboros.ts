@@ -28,10 +28,10 @@
  * accumulator in production).
  */
 
+import { a11oy, amaru, sentra } from '@workspace/ouroboros-integrations';
 import { type IRouter, type Request, type RequestHandler, type Response, Router } from 'express';
 import rateLimit from 'express-rate-limit';
 import { z } from 'zod';
-import { a11oy, amaru, sentra } from '@workspace/ouroboros-integrations';
 
 const router: IRouter = Router();
 
@@ -235,23 +235,42 @@ const VerifyTraceSchema = z.object({
     .max(512),
 });
 
-router.post('/sentra/verify-trace', (req: Request, res: Response): void => {
-  const parsed = VerifyTraceSchema.safeParse(req.body);
-  if (!parsed.success) {
-    res.status(400).json({ error: 'INVALID_TRACE', issues: parsed.error.issues });
-    return;
-  }
-  const trace = {
-    product: BigInt(parsed.data.product),
-    steps: parsed.data.steps.map((s) => ({
-      multiplier: BigInt(s.multiplier),
-      doubled: BigInt(s.doubled),
-      selected: s.selected,
-    })),
-  };
-  const valid = sentra.verifyHSMTrace(trace);
-  res.status(200).json({ valid });
-});
+// Trace verification accepts attacker-controlled arrays and performs BigInt
+// reconstruction plus cryptographic-style arithmetic. Keep a route-local
+// limiter in the registration itself so this expensive handler remains
+// protected even if the router is mounted elsewhere without its global guard.
+export const VERIFY_TRACE_RATE_LIMIT_MAX = 20;
+
+router.post(
+  '/sentra/verify-trace',
+  rateLimit({
+    windowMs: 60_000,
+    limit: VERIFY_TRACE_RATE_LIMIT_MAX,
+    standardHeaders: 'draft-7',
+    legacyHeaders: false,
+    message: {
+      error: 'RATE_LIMITED',
+      detail: 'Too many trace-verification requests; retry after the window resets.',
+    },
+  }),
+  (req: Request, res: Response): void => {
+    const parsed = VerifyTraceSchema.safeParse(req.body);
+    if (!parsed.success) {
+      res.status(400).json({ error: 'INVALID_TRACE', issues: parsed.error.issues });
+      return;
+    }
+    const trace = {
+      product: BigInt(parsed.data.product),
+      steps: parsed.data.steps.map((s) => ({
+        multiplier: BigInt(s.multiplier),
+        doubled: BigInt(s.doubled),
+        selected: s.selected,
+      })),
+    };
+    const valid = sentra.verifyHSMTrace(trace);
+    res.status(200).json({ valid });
+  },
+);
 
 router.get('/sentra/anchor-state', (_req: Request, res: Response): void => {
   res.status(200).json(serializeState(sentraAnchor.snapshot()));
