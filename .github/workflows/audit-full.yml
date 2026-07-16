@@ -60,7 +60,7 @@ jobs:
       - name: Boot web apps + runtime API for the qa-site smoke
         run: |
           set -uo pipefail
-          npm install -g serve
+          npm install -g serve@14.2.6
 
           # Corporate trust + legal site on :3000. The app that used to serve
           # these routes (privacy, terms, accessibility, trust center, status,
