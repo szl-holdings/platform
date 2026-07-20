@@ -57,7 +57,7 @@ RUN --mount=type=cache,id=pnpm-store,target=/root/.local/share/pnpm/store \
 RUN pnpm --filter "@workspace/vessels" run build
 
 # ─── Stage 3: runtime (nginx, non-root, port 8080) ───────────────────────────
-FROM nginx:alpine@sha256:54f2a904c251d5a34adf545a72d32515a15e08418dae0266e23be2e18c66fefa AS runner
+FROM nginx:alpine@sha256:4a73073bd557c65b759505da037898b61f1be6cbcc3c2c3aeac22d2a470c1752 AS runner
 # The app is built with Vite base path "/vessels/" (vite.config.ts), so assets
 # are referenced as /vessels/assets/*. Serve the SPA under both / and /vessels/,
 # add a /healthz endpoint (the UDS Package CR uptime check hits /healthz on
