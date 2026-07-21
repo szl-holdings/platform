@@ -45,16 +45,19 @@ jobs:
         with:
           node-version: '24'
 
-      - name: Prove staging scope and reconstruct exact green tree
+      - name: Verify staging PR changes only this recovery workflow
         shell: bash
         run: |
           set -euxo pipefail
-
           git -C control fetch --no-tags --depth=50 origin "$BASE_SHA"
           staging_changed=$(git -C control diff --name-only "$BASE_SHA" "${{ github.event.pull_request.head.sha }}" | sort)
-          printf 'staging_changed=%s\n' "$staging_changed"
+          printf 'staging_changed=\n%s\n' "$staging_changed"
           test "$staging_changed" = '.github/workflows/recover-platform-453-bot.yml'
 
+      - name: Verify source ancestry and exact three-file scope
+        shell: bash
+        run: |
+          set -euxo pipefail
           git -C work fetch --no-tags --depth=50 origin "$SOURCE_HEAD"
           merge_base=$(git -C work merge-base "$BASE_SHA" "$SOURCE_HEAD")
           printf 'merge_base=%s\n' "$merge_base"
@@ -68,6 +71,10 @@ jobs:
           printf 'source_changed=\n%s\n' "$changed"
           test "$changed" = "$expected"
 
+      - name: Reconstruct and prove byte-identical source files
+        shell: bash
+        run: |
+          set -euxo pipefail
           git -C work checkout "$SOURCE_HEAD" -- \
             .github/workflows/audit-full.yml \
             package.json \
@@ -77,14 +84,18 @@ jobs:
             package.json \
             pnpm-lock.yaml
 
-          git -C work diff --exit-code "$SOURCE_HEAD" -- .
           for path in .github/workflows/audit-full.yml package.json pnpm-lock.yaml; do
             source_blob=$(git -C work rev-parse "$SOURCE_HEAD:$path")
             reconstructed_blob=$(git -C work hash-object "$path")
             printf '%s source=%s reconstructed=%s\n' "$path" "$source_blob" "$reconstructed_blob"
             test "$source_blob" = "$reconstructed_blob"
           done
+          git -C work diff --exit-code "$SOURCE_HEAD" -- .
 
+      - name: Verify disclosed dependency and audit-runtime changes
+        shell: bash
+        run: |
+          set -euxo pipefail
           grep -Fq '"serve": "14.2.6"' work/package.json
           grep -Fq '"serve-handler>path-to-regexp": "3.3.0"' work/package.json
           grep -Fq '"adm-zip": ">=0.6.0"' work/package.json
