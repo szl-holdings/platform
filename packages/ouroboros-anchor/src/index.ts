@@ -23,15 +23,25 @@ export interface AnchorConfig {
   readonly publicKeyBase64?: string;
 }
 
+/**
+ * Domain separation prefixes (RFC 6962 style). Leaf and interior-node hashes
+ * live in disjoint domains, so a leaf value can never be confused with an
+ * encoded node pair (second-preimage hardening).
+ */
+const LEAF_PREFIX = "\u0000";
+const NODE_PREFIX = "\u0001";
+
 export function computeMerkleRoot(leaves: string[]): string {
   if (leaves.length === 0) return sha256("");
-  let layer = leaves.map((l) => sha256(l));
+  let layer = leaves.map((l) => sha256(LEAF_PREFIX + l));
   while (layer.length > 1) {
     const next: string[] = [];
     for (let i = 0; i < layer.length; i += 2) {
-      const a = layer[i];
-      const b = i + 1 < layer.length ? layer[i + 1] : a;
-      next.push(sha256(a + b));
+      // Odd node carries up UNCHANGED. The previous scheme duplicated it
+      // (b = a), which made the root malleable: appending a copy of the
+      // trailing leaf of an odd layer produced the SAME root. fast-check
+      // found the counterexample [[" ", " ", "t"], "t"] in CI (platform#453).
+      next.push(i + 1 < layer.length ? sha256(NODE_PREFIX + layer[i] + layer[i + 1]) : layer[i]);
     }
     layer = next;
   }
