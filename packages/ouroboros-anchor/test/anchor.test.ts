@@ -5,8 +5,8 @@ describe("computeMerkleRoot", () => {
   it("returns a deterministic root for empty input", () => {
     expect(computeMerkleRoot([])).toBe(sha256(""));
   });
-  it("returns sha256 of single leaf for length 1", () => {
-    expect(computeMerkleRoot(["a"])).toBe(sha256("a"));
+  it("returns the domain-separated leaf hash for length 1", () => {
+    expect(computeMerkleRoot(["a"])).toBe(sha256("\u0000a"));
   });
   it("is order-sensitive", () => {
     expect(computeMerkleRoot(["a", "b"])).not.toBe(computeMerkleRoot(["b", "a"]));
@@ -14,10 +14,14 @@ describe("computeMerkleRoot", () => {
   it("is deterministic across calls", () => {
     expect(computeMerkleRoot(["a", "b", "c", "d"])).toBe(computeMerkleRoot(["a", "b", "c", "d"]));
   });
-  it("handles odd count by duplicating last leaf", () => {
+  it("handles odd count by carrying the tail node up (no duplicate-pad malleability)", () => {
     const odd = computeMerkleRoot(["x", "y", "z"]);
     expect(odd).toBeTypeOf("string");
     expect(odd.length).toBe(64);
+  });
+  it("root changes when the tail leaf of an odd tree is appended again (regression: append malleability)", () => {
+    const leaves = [" ", " ", "t"];
+    expect(computeMerkleRoot([...leaves, "t"])).not.toBe(computeMerkleRoot(leaves));
   });
 });
 
