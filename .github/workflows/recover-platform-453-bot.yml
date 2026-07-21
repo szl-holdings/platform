@@ -71,31 +71,25 @@ jobs:
           printf 'source_changed=\n%s\n' "$changed"
           test "$changed" = "$expected"
 
-      - name: Reconstruct and prove byte-identical source files
+      - name: Reconstruct and prove the complete source tree SHA
         shell: bash
         run: |
           set -euxo pipefail
-          for path in .github/workflows/audit-full.yml package.json pnpm-lock.yaml; do
-            mkdir -p "work/$(dirname "$path")"
-            git -C work cat-file blob "$SOURCE_HEAD:$path" > "work/$path"
-          done
-          git -C work add \
-            .github/workflows/audit-full.yml \
-            package.json \
-            pnpm-lock.yaml
+          git -C work switch -C "$BOT_BRANCH" "$BASE_SHA"
+          git -C work read-tree "$SOURCE_HEAD"
+          git -C work checkout-index -a -f
 
-          for path in .github/workflows/audit-full.yml package.json pnpm-lock.yaml; do
-            source_blob=$(git -C work rev-parse "$SOURCE_HEAD:$path")
-            staged_blob=$(git -C work rev-parse ":$path")
-            printf '%s source=%s staged=%s\n' "$path" "$source_blob" "$staged_blob"
-            test "$source_blob" = "$staged_blob"
-          done
+          source_tree=$(git -C work rev-parse "$SOURCE_HEAD^{tree}")
+          reconstructed_tree=$(git -C work write-tree)
+          printf 'source_tree=%s reconstructed_tree=%s\n' "$source_tree" "$reconstructed_tree"
+          test "$reconstructed_tree" = "$source_tree"
 
           reconstructed_changed=$(git -C work diff --cached --name-only "$BASE_SHA" | sort)
           expected=$(printf '%s\n' \
             .github/workflows/audit-full.yml \
             package.json \
             pnpm-lock.yaml | sort)
+          printf 'reconstructed_changed=\n%s\n' "$reconstructed_changed"
           test "$reconstructed_changed" = "$expected"
 
       - name: Verify disclosed dependency and audit-runtime changes
@@ -135,7 +129,6 @@ jobs:
         shell: bash
         run: |
           set -euxo pipefail
-          git switch -C "$BOT_BRANCH"
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
           git commit \
@@ -144,7 +137,7 @@ jobs:
             -m 'Supersedes #453 after independent review.' \
             -m 'Signed-off-by: github-actions[bot] <41898282+github-actions[bot]@users.noreply.github.com>'
           test "$(git rev-parse HEAD^)" = "$BASE_SHA"
-          test "$(git diff --name-only "$SOURCE_HEAD" HEAD)" = ''
+          test "$(git rev-parse HEAD^{tree})" = "$(git rev-parse "$SOURCE_HEAD^{tree}")"
 
           if git ls-remote --exit-code --heads origin "$BOT_BRANCH" >/dev/null 2>&1; then
             git fetch --no-tags origin "$BOT_BRANCH:refs/remotes/origin/$BOT_BRANCH"
@@ -180,7 +173,7 @@ jobs:
 
           - protected base: `c11291e09702c86f3f8995fffcae6167155c7240`
           - verified source head: `87704be92e406804491175e4d5337968f498679d`
-          - replacement content is byte-identical to the all-green source head
+          - replacement Git tree SHA is identical to the all-green source head
           - exactly three changed paths: `.github/workflows/audit-full.yml`, `package.json`, and `pnpm-lock.yaml`
 
           The staging workflow also installed the frozen lockfile and proved that the pinned `serve -s` runtime serves a deep SPA route. All ordinary repository checks must rerun on this bot-authored head before merge.
