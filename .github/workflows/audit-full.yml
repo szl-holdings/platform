@@ -62,9 +62,13 @@ jobs:
           set -uo pipefail
           # 'serve' is a pinned root devDependency installed by the frozen pnpm
           # install above — lockfile-hash-pinned instead of an ad-hoc
-          # `npm install -g` (Scorecard PinnedDependencies). Invoked via
-          # node_modules/.bin directly: `pnpm exec` consumes `-s` as its own
-          # --silent flag, which broke the six SPA serves in the first run.
+          # `npm install -g` (Scorecard PinnedDependencies). NOTE: the global
+          # path-to-regexp@8 security override breaks serve-handler's rewrite
+          # engine (SPA -s mode crashes: `pathToRegExp is not a function`);
+          # the scoped `serve-handler>path-to-regexp: 3.3.0` override in
+          # package.json (ReDoS-patched line with the callable default export)
+          # keeps `serve -s` working. The old `npm install -g serve` only
+          # dodged this because global installs ignore pnpm overrides.
 
           # Corporate trust + legal site on :3000. The app that used to serve
           # these routes (privacy, terms, accessibility, trust center, status,
