@@ -7,8 +7,7 @@ on:
       - .github/workflows/recover-platform-453-bot.yml
 
 permissions:
-  contents: read
-  issues: write
+  contents: write
 
 jobs:
   diagnose-grype:
@@ -31,11 +30,11 @@ jobs:
         with:
           cache-db: false
 
-      - name: Publish exact HIGH and CRITICAL findings
+      - name: Persist exact HIGH and CRITICAL findings to staging
         env:
           GRYPE: ${{ steps.grype.outputs.cmd }}
           GH_TOKEN: ${{ github.token }}
-          PR_NUMBER: ${{ github.event.pull_request.number }}
+          TARGET_BRANCH: ops/recover-platform-453-bot
         shell: bash
         run: |
           set -euo pipefail
@@ -55,12 +54,16 @@ jobs:
             | @tsv
           ' /tmp/grype.json | sort -u > /tmp/high-critical.tsv
           test -s /tmp/high-critical.tsv
-          body=$(printf 'Exact Grype findings for Platform #405 head `ec527694e1362e79c7fd283dd1b0fe14a9768749`:\n\n```text\n%s\n```' "$(cat /tmp/high-critical.tsv)")
-          jq -n --arg body "$body" '{body:$body}' > /tmp/comment.json
+          content=$(base64 -w0 /tmp/high-critical.tsv)
+          jq -n \
+            --arg message 'docs: record exact Grype diagnostic for platform 405' \
+            --arg content "$content" \
+            --arg branch "$TARGET_BRANCH" \
+            '{message:$message,content:$content,branch:$branch}' > /tmp/put.json
           curl --fail-with-body --silent --show-error \
-            -X POST \
+            -X PUT \
             -H 'Accept: application/vnd.github+json' \
             -H "Authorization: Bearer ${GH_TOKEN}" \
             -H 'X-GitHub-Api-Version: 2022-11-28' \
-            "https://api.github.com/repos/${GITHUB_REPOSITORY}/issues/${PR_NUMBER}/comments" \
-            --data-binary @/tmp/comment.json
+            "https://api.github.com/repos/${GITHUB_REPOSITORY}/contents/diagnostics/platform-405-grype.tsv" \
+            --data-binary @/tmp/put.json
