@@ -60,7 +60,9 @@ jobs:
       - name: Boot web apps + runtime API for the qa-site smoke
         run: |
           set -uo pipefail
-          npm install -g serve@14.2.6
+          # 'serve' is a pinned root devDependency installed by the frozen pnpm
+          # install above and invoked via `pnpm exec` — lockfile-hash-pinned
+          # instead of an ad-hoc `npm install -g` (Scorecard PinnedDependencies).
 
           # Corporate trust + legal site on :3000. The app that used to serve
           # these routes (privacy, terms, accessibility, trust center, status,
@@ -72,19 +74,19 @@ jobs:
           # `serve` (no -s) serves the real per-route files; serve.json turns on
           # clean URLs so /trust/security resolves to trust/security.html.
           node scripts/qa/build-corp-site.mjs /tmp/corp-site
-          serve /tmp/corp-site -l 3000 > /tmp/serve-corp.log 2>&1 &
+          pnpm exec serve /tmp/corp-site -l 3000 > /tmp/serve-corp.log 2>&1 &
 
           # Six live product SPAs. `-s` (single-page-app mode) rewrites unmatched
           # deep routes to index.html so client-routed paths return 200 — exactly
           # how the app behaves in production behind its static host. Ports come
           # from scripts/lib/artifact-ports.js (the single source of truth the
           # smoke reads its default base URLs from).
-          serve artifacts/a11oy/dist/public      -s -l 4110 > /tmp/serve-a11oy.log      2>&1 &
-          serve artifacts/carlota-jo/dist/public  -s -l 8098 > /tmp/serve-carlota-jo.log 2>&1 &
-          serve artifacts/counsel/dist/public     -s -l 4199 > /tmp/serve-counsel.log    2>&1 &
-          serve artifacts/sentra/dist/public      -s -l 4099 > /tmp/serve-sentra.log     2>&1 &
-          serve artifacts/terra/dist/public       -s -l 6100 > /tmp/serve-terra.log      2>&1 &
-          serve artifacts/vessels/dist/public     -s -l 8097 > /tmp/serve-vessels.log    2>&1 &
+          pnpm exec serve artifacts/a11oy/dist/public      -s -l 4110 > /tmp/serve-a11oy.log      2>&1 &
+          pnpm exec serve artifacts/carlota-jo/dist/public  -s -l 8098 > /tmp/serve-carlota-jo.log 2>&1 &
+          pnpm exec serve artifacts/counsel/dist/public     -s -l 4199 > /tmp/serve-counsel.log    2>&1 &
+          pnpm exec serve artifacts/sentra/dist/public      -s -l 4099 > /tmp/serve-sentra.log     2>&1 &
+          pnpm exec serve artifacts/terra/dist/public       -s -l 6100 > /tmp/serve-terra.log      2>&1 &
+          pnpm exec serve artifacts/vessels/dist/public     -s -l 8097 > /tmp/serve-vessels.log    2>&1 &
 
           # Runtime API on :8080 (artifact-ports.js api-server port). The internal
           # @szl-holdings/* packages export TypeScript source (exports -> src/*.ts),
