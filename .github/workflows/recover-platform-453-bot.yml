@@ -1,4 +1,4 @@
-name: Repair current Grype blockers on platform 405
+name: Rebuild platform 405 on current main
 
 on:
   pull_request:
@@ -10,7 +10,7 @@ permissions:
   contents: write
 
 jobs:
-  repair:
+  rebuild:
     if: >-
       github.event.pull_request.head.repo.full_name == github.repository &&
       github.event.pull_request.head.ref == 'ops/recover-platform-453-bot' &&
@@ -19,23 +19,35 @@ jobs:
     timeout-minutes: 30
     env:
       TARGET_BRANCH: dependabot/npm_and_yarn/opentelemetry/core-2.8.0
-      EXPECTED_HEAD: ec527694e1362e79c7fd283dd1b0fe14a9768749
+      EXPECTED_MAIN: 284b49a4fdacb57b3f7a31f6a01f75f993b4bc0b
+      EXPECTED_SOURCE: 902f3178ce150acbebffcf8e70a4737a9788c2e5
     steps:
-      - name: Checkout exact Platform 405 branch
+      - name: Checkout staging control
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
-          ref: ${{ env.TARGET_BRANCH }}
+          ref: ops/recover-platform-453-bot
           fetch-depth: 0
 
-      - name: Verify exact starting head and import Pillow fix from PR 457
+      - name: Reconstruct one clean security commit on current main
         shell: bash
         run: |
           set -euo pipefail
-          test "$(git rev-parse HEAD)" = "$EXPECTED_HEAD"
-          git fetch --no-tags origin refs/pull/457/head
-          git checkout FETCH_HEAD -- scripts/media/uv.lock
-          grep -F 'version = "12.3.0"' scripts/media/uv.lock
-          ! grep -F 'name = "pillow"' -A2 scripts/media/uv.lock | grep -F 'version = "12.2.0"'
+          git fetch --no-tags origin main "$TARGET_BRANCH"
+          test "$(git rev-parse origin/main)" = "$EXPECTED_MAIN"
+          test "$(git rev-parse origin/$TARGET_BRANCH)" = "$EXPECTED_SOURCE"
+          git checkout -B clean-security "$EXPECTED_MAIN"
+          git checkout "$EXPECTED_SOURCE" -- \
+            .github/workflows/audit-full.yml \
+            package.json \
+            pnpm-lock.yaml
+          grep -F 'name = "pillow"' -A2 scripts/media/uv.lock | grep -F 'version = "12.3.0"'
+          files=$(git diff --name-only | sort)
+          expected=$(printf '%s\n' \
+            .github/workflows/audit-full.yml \
+            package.json \
+            pnpm-lock.yaml | sort)
+          test "$files" = "$expected"
+          git diff --check
 
       - uses: pnpm/action-setup@0ebf47130e4866e96fce0953f49152a61190b271 # v4
       - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
@@ -43,22 +55,11 @@ jobs:
           node-version: '24'
           cache: pnpm
 
-      - name: Raise exact vulnerable Node packages and regenerate lockfile
+      - name: Validate frozen lockfile and patched resolutions
         shell: bash
         run: |
           set -euo pipefail
-          node <<'NODE'
-          const fs = require('fs');
-          const path = 'package.json';
-          const pkg = JSON.parse(fs.readFileSync(path, 'utf8'));
-          const overrides = pkg.pnpm && pkg.pnpm.overrides;
-          if (!overrides) throw new Error('pnpm.overrides missing');
-          overrides['brace-expansion'] = '2.1.2';
-          overrides['shell-quote'] = '1.9.0';
-          overrides['tar'] = '7.5.19';
-          fs.writeFileSync(path, JSON.stringify(pkg, null, 2) + '\n');
-          NODE
-          pnpm install --lockfile-only --ignore-scripts
+          pnpm install --lockfile-only --frozen-lockfile --ignore-scripts
           grep -F 'brace-expansion: 2.1.2' pnpm-lock.yaml
           grep -F 'shell-quote: 1.9.0' pnpm-lock.yaml
           grep -F 'tar: 7.5.19' pnpm-lock.yaml
@@ -73,7 +74,7 @@ jobs:
         with:
           cache-db: false
 
-      - name: Prove the HIGH and CRITICAL gate is clear before pushing
+      - name: Prove the HIGH and CRITICAL gate is clear
         env:
           GRYPE: ${{ steps.grype.outputs.cmd }}
         shell: bash
@@ -81,15 +82,19 @@ jobs:
           set -euo pipefail
           "$GRYPE" dir:. --fail-on high
 
-      - name: Commit and push the complete security repair
+      - name: Commit and replace the branch with leased force
         shell: bash
         run: |
           set -euo pipefail
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
-          git add package.json pnpm-lock.yaml scripts/media/uv.lock
+          git add .github/workflows/audit-full.yml package.json pnpm-lock.yaml
           git commit \
-            -m 'fix(security): clear current Grype high and critical findings' \
-            -m 'Raise brace-expansion to 2.1.2, shell-quote to 1.9.0, tar to 7.5.19, and import the Pillow 12.3.0 lockfile from PR 457.' \
+            -m 'fix(security): clear current supply-chain findings' \
+            -m 'Pin all current HIGH and CRITICAL dependency fixes.' \
+            -m 'Run audit servers from the frozen lockfile.' \
+            -m 'Preserve secure SPA rewrite compatibility.' \
             -m 'Signed-off-by: github-actions[bot] <41898282+github-actions[bot]@users.noreply.github.com>'
-          git push origin "HEAD:${TARGET_BRANCH}"
+          git push \
+            --force-with-lease="refs/heads/${TARGET_BRANCH}:${EXPECTED_SOURCE}" \
+            origin "HEAD:refs/heads/${TARGET_BRANCH}"
