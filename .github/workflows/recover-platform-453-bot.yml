@@ -1,4 +1,4 @@
-name: Locate canonical platform vulnerability workflow
+name: Diagnose exact Grype findings for platform 405
 
 on:
   pull_request:
@@ -10,26 +10,48 @@ permissions:
   contents: read
 
 jobs:
-  locate-workflow:
+  diagnose-grype:
     if: >-
       github.event.pull_request.head.repo.full_name == github.repository &&
       github.event.pull_request.head.ref == 'ops/recover-platform-453-bot' &&
       github.actor == 'stephenlutar2-hash'
     runs-on: ubuntu-latest
-    timeout-minutes: 5
+    timeout-minutes: 15
     steps:
-      - name: Print vulnerability-related workflow paths
+      - name: Checkout exact platform replacement head
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: ec527694e1362e79c7fd283dd1b0fe14a9768749
+          persist-credentials: false
+
+      - name: Produce Grype JSON without changing the gate
+        id: scan
+        uses: anchore/scan-action@e1165082ffb1fe366ebaf02d8526e7c4989ea9d2 # v7.4.0
+        with:
+          path: '.'
+          fail-build: false
+          severity-cutoff: high
+          output-format: json
+
+      - name: Print only HIGH and CRITICAL findings
         env:
-          GH_TOKEN: ${{ github.token }}
+          REPORT: ${{ steps.scan.outputs.json }}
         shell: bash
         run: |
           set -euo pipefail
-          tree=$(curl --fail-with-body --silent --show-error \
-            -H 'Accept: application/vnd.github+json' \
-            -H "Authorization: Bearer ${GH_TOKEN}" \
-            -H 'X-GitHub-Api-Version: 2022-11-28' \
-            "https://api.github.com/repos/${GITHUB_REPOSITORY}/git/trees/main?recursive=1")
-          jq -r '.tree[].path' <<<"$tree" \
-            | grep '^.github/workflows/' \
-            | grep -Ei 'trivy|grype|vuln|security|scan' \
-            | sort
+          test -s "$REPORT"
+          jq -r '
+            .matches[]
+            | select(.vulnerability.severity == "High" or .vulnerability.severity == "Critical")
+            | [
+                .artifact.name,
+                .artifact.version,
+                .artifact.type,
+                .vulnerability.id,
+                .vulnerability.severity,
+                ((.vulnerability.fix.versions // []) | join(",")),
+                ((.artifact.locations // []) | map(.path) | unique | join(","))
+              ]
+            | @tsv
+          ' "$REPORT" | sort -u | tee /tmp/high-critical.tsv
+          test -s /tmp/high-critical.tsv
