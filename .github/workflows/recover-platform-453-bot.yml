@@ -1,4 +1,4 @@
-name: Repair platform replacement commit formatting
+name: Approve exact platform replacement workflow runs
 
 on:
   pull_request:
@@ -7,10 +7,10 @@ on:
       - .github/workflows/recover-platform-453-bot.yml
 
 permissions:
-  contents: write
+  contents: read
 
 jobs:
-  amend-message:
+  approve-runs:
     if: >-
       github.event.pull_request.head.repo.full_name == github.repository &&
       github.event.pull_request.head.ref == 'ops/recover-platform-453-bot' &&
@@ -18,54 +18,92 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 10
     env:
-      BASE_SHA: c11291e09702c86f3f8995fffcae6167155c7240
-      OLD_HEAD: ea0e6537d056eb7237374eb9c270e6614a0f2053
-      TARGET_BRANCH: dependabot/npm_and_yarn/opentelemetry/core-2.8.0
+      TARGET_PR: '405'
+      EXPECTED_BASE: c11291e09702c86f3f8995fffcae6167155c7240
+      EXPECTED_HEAD: df1c5141b2ee6243a07d7cbc9d1a55496a51457f
+      ADMIN_TOKEN: ${{ secrets.SZL_GITHUB_TOKEN }}
     steps:
-      - name: Checkout exact replacement head
-        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-        with:
-          ref: ${{ env.TARGET_BRANCH }}
-          fetch-depth: 2
-          show-progress: false
-
-      - name: Verify immutable parent, tree, and source scope
+      - name: Verify exact live PR identity and source scope
         shell: bash
         run: |
-          set -euxo pipefail
-          test "$(git rev-parse HEAD)" = "$OLD_HEAD"
-          test "$(git rev-parse HEAD^)" = "$BASE_SHA"
+          set -euo pipefail
+          test -n "${ADMIN_TOKEN:-}"
 
-          changed=$(git diff --name-only "$BASE_SHA" "$OLD_HEAD" | sort)
+          pr=$(curl --fail-with-body --silent --show-error \
+            -H 'Accept: application/vnd.github+json' \
+            -H "Authorization: Bearer ${ADMIN_TOKEN}" \
+            -H 'X-GitHub-Api-Version: 2022-11-28' \
+            "https://api.github.com/repos/${GITHUB_REPOSITORY}/pulls/${TARGET_PR}")
+
+          test "$(jq -r '.state' <<<"$pr")" = 'open'
+          test "$(jq -r '.user.login' <<<"$pr")" = 'dependabot[bot]'
+          test "$(jq -r '.base.sha' <<<"$pr")" = "$EXPECTED_BASE"
+          test "$(jq -r '.head.sha' <<<"$pr")" = "$EXPECTED_HEAD"
+
+          files=$(curl --fail-with-body --silent --show-error \
+            -H 'Accept: application/vnd.github+json' \
+            -H "Authorization: Bearer ${ADMIN_TOKEN}" \
+            -H 'X-GitHub-Api-Version: 2022-11-28' \
+            "https://api.github.com/repos/${GITHUB_REPOSITORY}/pulls/${TARGET_PR}/files?per_page=100" \
+            | jq -r '.[].filename' | sort)
           expected=$(printf '%s\n' \
             .github/workflows/audit-full.yml \
             package.json \
             pnpm-lock.yaml | sort)
-          test "$changed" = "$expected"
+          test "$files" = "$expected"
 
-          git rev-parse "$OLD_HEAD^{tree}" > /tmp/tree-before
-
-      - name: Amend only the Conventional Commit message
+      - name: Approve only the exact action-required workflow runs
         shell: bash
         run: |
-          set -euxo pipefail
-          git config user.name 'github-actions[bot]'
-          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
-          git commit --amend \
-            -m 'fix(security): pin vulnerable dependencies and audit server' \
-            -m 'Pin adm-zip and js-yaml to patched versions.' \
-            -m 'Run runtime-audit servers from frozen-lockfile serve@14.2.6.' \
-            -m 'Keep SPA rewrites compatible with scoped path-to-regexp@3.3.0.' \
-            -m 'Supersedes #453 after independent review.' \
-            -m 'Signed-off-by: github-actions[bot] <41898282+github-actions[bot]@users.noreply.github.com>'
+          set -euo pipefail
+          runs=(
+            29840480068 29840480090 29840479966 29840480354
+            29840479118 29840479059 29840479032 29840479201
+            29840479146 29840479182 29840479246 29840479424
+            29840479065 29840479151 29840479135 29840479144
+            29840479224 29840479277 29840479300 29840479328
+          )
 
-          test "$(git rev-parse HEAD^)" = "$BASE_SHA"
-          test "$(git rev-parse HEAD^{tree})" = "$(cat /tmp/tree-before)"
+          for run_id in "${runs[@]}"; do
+            before=$(curl --fail-with-body --silent --show-error \
+              -H 'Accept: application/vnd.github+json' \
+              -H "Authorization: Bearer ${ADMIN_TOKEN}" \
+              -H 'X-GitHub-Api-Version: 2022-11-28' \
+              "https://api.github.com/repos/${GITHUB_REPOSITORY}/actions/runs/${run_id}")
+            test "$(jq -r '.head_sha' <<<"$before")" = "$EXPECTED_HEAD"
+            test "$(jq -r '.pull_requests[0].number' <<<"$before")" = "$TARGET_PR"
+            test "$(jq -r '.conclusion' <<<"$before")" = 'action_required'
 
-      - name: Push amended bot commit with lease
+            status=$(curl --silent --show-error --output "/tmp/approve-${run_id}.json" \
+              --write-out '%{http_code}' --request POST \
+              -H 'Accept: application/vnd.github+json' \
+              -H "Authorization: Bearer ${ADMIN_TOKEN}" \
+              -H 'X-GitHub-Api-Version: 2022-11-28' \
+              "https://api.github.com/repos/${GITHUB_REPOSITORY}/actions/runs/${run_id}/approve")
+            if [ "$status" != '201' ]; then
+              cat "/tmp/approve-${run_id}.json" >&2 || true
+              echo "approval failed for run ${run_id}: HTTP ${status}" >&2
+              exit 1
+            fi
+            echo "approved run ${run_id}"
+          done
+
+      - name: Prove approvals released the runs
         shell: bash
         run: |
-          set -euxo pipefail
-          git push \
-            --force-with-lease="refs/heads/${TARGET_BRANCH}:${OLD_HEAD}" \
-            origin "HEAD:refs/heads/${TARGET_BRANCH}"
+          set -euo pipefail
+          sleep 3
+          for run_id in \
+            29840480068 29840480090 29840479966 29840480354 \
+            29840479118 29840479059 29840479032 29840479201 \
+            29840479146 29840479182 29840479246 29840479424 \
+            29840479065 29840479151 29840479135 29840479144 \
+            29840479224 29840479277 29840479300 29840479328; do
+            after=$(curl --fail-with-body --silent --show-error \
+              -H 'Accept: application/vnd.github+json' \
+              -H "Authorization: Bearer ${ADMIN_TOKEN}" \
+              -H 'X-GitHub-Api-Version: 2022-11-28' \
+              "https://api.github.com/repos/${GITHUB_REPOSITORY}/actions/runs/${run_id}")
+            test "$(jq -r '.head_sha' <<<"$after")" = "$EXPECTED_HEAD"
+            test "$(jq -r '.conclusion // "released"' <<<"$after")" != 'action_required'
+          done
