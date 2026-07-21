@@ -28,7 +28,8 @@ jobs:
         with:
           ref: ${{ github.event.pull_request.head.sha }}
           path: control
-          fetch-depth: 0
+          fetch-depth: 1
+          show-progress: false
           persist-credentials: false
 
       - name: Checkout exact protected base for bot commit
@@ -36,7 +37,8 @@ jobs:
         with:
           ref: ${{ env.BASE_SHA }}
           path: work
-          fetch-depth: 0
+          fetch-depth: 1
+          show-progress: false
 
       - name: Set up Node 24
         uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v6.0.0
@@ -46,19 +48,24 @@ jobs:
       - name: Prove staging scope and reconstruct exact green tree
         shell: bash
         run: |
-          set -euo pipefail
+          set -euxo pipefail
 
+          git -C control fetch --no-tags --depth=50 origin "$BASE_SHA"
           staging_changed=$(git -C control diff --name-only "$BASE_SHA" "${{ github.event.pull_request.head.sha }}" | sort)
+          printf 'staging_changed=%s\n' "$staging_changed"
           test "$staging_changed" = '.github/workflows/recover-platform-453-bot.yml'
 
-          git -C work fetch --no-tags origin "$SOURCE_HEAD"
-          test "$(git -C work merge-base "$BASE_SHA" "$SOURCE_HEAD")" = "$BASE_SHA"
+          git -C work fetch --no-tags --depth=50 origin "$SOURCE_HEAD"
+          merge_base=$(git -C work merge-base "$BASE_SHA" "$SOURCE_HEAD")
+          printf 'merge_base=%s\n' "$merge_base"
+          test "$merge_base" = "$BASE_SHA"
 
           changed=$(git -C work diff --name-only "$BASE_SHA" "$SOURCE_HEAD" | sort)
           expected=$(printf '%s\n' \
             .github/workflows/audit-full.yml \
             package.json \
             pnpm-lock.yaml | sort)
+          printf 'source_changed=\n%s\n' "$changed"
           test "$changed" = "$expected"
 
           git -C work checkout "$SOURCE_HEAD" -- \
@@ -70,9 +77,13 @@ jobs:
             package.json \
             pnpm-lock.yaml
 
-          source_tree=$(git -C work rev-parse "$SOURCE_HEAD^{tree}")
-          reconstructed_tree=$(git -C work write-tree)
-          test "$reconstructed_tree" = "$source_tree"
+          git -C work diff --exit-code "$SOURCE_HEAD" -- .
+          for path in .github/workflows/audit-full.yml package.json pnpm-lock.yaml; do
+            source_blob=$(git -C work rev-parse "$SOURCE_HEAD:$path")
+            reconstructed_blob=$(git -C work hash-object "$path")
+            printf '%s source=%s reconstructed=%s\n' "$path" "$source_blob" "$reconstructed_blob"
+            test "$source_blob" = "$reconstructed_blob"
+          done
 
           grep -Fq '"serve": "14.2.6"' work/package.json
           grep -Fq '"serve-handler>path-to-regexp": "3.3.0"' work/package.json
@@ -84,7 +95,7 @@ jobs:
         working-directory: work
         shell: bash
         run: |
-          set -euo pipefail
+          set -euxo pipefail
           corepack enable
           pnpm install --frozen-lockfile --ignore-scripts
           test "$(pnpm exec serve --version)" = '14.2.6'
@@ -106,7 +117,7 @@ jobs:
         working-directory: work
         shell: bash
         run: |
-          set -euo pipefail
+          set -euxo pipefail
           git switch -C "$BOT_BRANCH"
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
@@ -116,7 +127,7 @@ jobs:
             -m 'Supersedes #453 after independent review.' \
             -m 'Signed-off-by: github-actions[bot] <41898282+github-actions[bot]@users.noreply.github.com>'
           test "$(git rev-parse HEAD^)" = "$BASE_SHA"
-          test "$(git rev-parse HEAD^{tree})" = "$(git rev-parse "$SOURCE_HEAD^{tree}")"
+          git diff --exit-code "$SOURCE_HEAD" HEAD
 
           if git ls-remote --exit-code --heads origin "$BOT_BRANCH" >/dev/null 2>&1; then
             git fetch --no-tags origin "$BOT_BRANCH:refs/remotes/origin/$BOT_BRANCH"
@@ -131,7 +142,7 @@ jobs:
           GH_TOKEN: ${{ github.token }}
         shell: bash
         run: |
-          set -euo pipefail
+          set -euxo pipefail
           existing=$(gh pr list --repo "$GITHUB_REPOSITORY" --head "$BOT_BRANCH" --state open --json number --jq '.[0].number // empty')
           if [ -n "$existing" ]; then
             echo "Bot recovery PR already open: #$existing"
@@ -152,19 +163,10 @@ jobs:
 
           - protected base: `c11291e09702c86f3f8995fffcae6167155c7240`
           - verified source head: `87704be92e406804491175e4d5337968f498679d`
-          - reconstructed bot commit has the exact same Git tree as the all-green source head
+          - replacement content is byte-identical to the all-green source head
           - exactly three changed paths: `.github/workflows/audit-full.yml`, `package.json`, and `pnpm-lock.yaml`
 
-          ## Changes
-
-          - `adm-zip` is forced to `>=0.6.0`
-          - `js-yaml` is forced to `>=5.2.1`
-          - audit servers use the frozen lockfile `serve@14.2.6`
-          - `serve-handler` receives the scoped, patched `path-to-regexp@3.3.0` compatibility override
-
-          ## Independent staging evidence
-
-          The one-use staging workflow verified the exact source tree, installed the frozen lockfile, and proved that the pinned `serve -s` runtime serves a deep SPA route successfully. All ordinary repository checks must rerun on this bot-authored head before merge.
+          The staging workflow also installed the frozen lockfile and proved that the pinned `serve -s` runtime serves a deep SPA route. All ordinary repository checks must rerun on this bot-authored head before merge.
 
           Supersedes #453. No rule, threshold, test, or scanner was weakened.
           EOF
