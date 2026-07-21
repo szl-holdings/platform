@@ -139,6 +139,7 @@
     "pnpm": ">=10.0.0"
   },
   "devDependencies": {
+    "serve": "14.2.6",
     "@axe-core/playwright": "^4.11.1",
     "@biomejs/biome": "^2.4.12",
     "@commitlint/cli": "^19.8.1",
@@ -192,6 +193,7 @@
       "react": "$react",
       "react-dom": "$react-dom",
       "path-to-regexp": "8.4.2",
+      "serve-handler>path-to-regexp": "3.3.0",
       "brace-expansion": "2.1.0",
       "vite": "8.0.16",
       "form-data@2": "2.5.6",
@@ -217,7 +219,8 @@
       "drizzle-kit>esbuild": "0.28.1",
       "esbuild-register>esbuild": "0.28.1",
       "undici": ">=6.27.0",
-      "js-yaml": ">=4.2.0",
+      "adm-zip": ">=0.6.0",
+      "js-yaml": ">=5.2.1",
       "dompurify": ">=3.4.11",
       "@opentelemetry/core": ">=2.8.0"
     }
