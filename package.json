@@ -221,7 +221,8 @@
       "adm-zip": ">=0.6.0",
       "js-yaml": ">=5.2.1",
       "dompurify": ">=3.4.11",
-      "@opentelemetry/core": ">=2.8.0"
+      "@opentelemetry/core": ">=2.8.0",
+      "serve-handler>path-to-regexp": "3.3.0"
     }
   }
 }
