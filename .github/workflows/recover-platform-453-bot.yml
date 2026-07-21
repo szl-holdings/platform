@@ -1,4 +1,4 @@
-name: Diagnose exact Grype findings for platform 405
+name: Repair current Grype blockers on platform 405
 
 on:
   pull_request:
@@ -10,60 +10,86 @@ permissions:
   contents: write
 
 jobs:
-  diagnose-grype:
+  repair:
     if: >-
       github.event.pull_request.head.repo.full_name == github.repository &&
       github.event.pull_request.head.ref == 'ops/recover-platform-453-bot' &&
       github.actor == 'stephenlutar2-hash'
     runs-on: ubuntu-latest
-    timeout-minutes: 15
+    timeout-minutes: 30
+    env:
+      TARGET_BRANCH: dependabot/npm_and_yarn/opentelemetry/core-2.8.0
+      EXPECTED_HEAD: ec527694e1362e79c7fd283dd1b0fe14a9768749
     steps:
-      - name: Checkout exact platform replacement head
+      - name: Checkout exact Platform 405 branch
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
-          ref: ec527694e1362e79c7fd283dd1b0fe14a9768749
-          persist-credentials: false
+          ref: ${{ env.TARGET_BRANCH }}
+          fetch-depth: 0
 
-      - name: Download the same pinned Grype binary
+      - name: Verify exact starting head and import Pillow fix from PR 457
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse HEAD)" = "$EXPECTED_HEAD"
+          git fetch --no-tags origin refs/pull/457/head
+          git checkout FETCH_HEAD -- scripts/media/uv.lock
+          grep -F 'version = "12.3.0"' scripts/media/uv.lock
+          ! grep -F 'name = "pillow"' -A2 scripts/media/uv.lock | grep -F 'version = "12.2.0"'
+
+      - uses: pnpm/action-setup@0ebf47130e4866e96fce0953f49152a61190b271 # v4
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version: '24'
+          cache: pnpm
+
+      - name: Raise exact vulnerable Node packages and regenerate lockfile
+        shell: bash
+        run: |
+          set -euo pipefail
+          node <<'NODE'
+          const fs = require('fs');
+          const path = 'package.json';
+          const pkg = JSON.parse(fs.readFileSync(path, 'utf8'));
+          const overrides = pkg.pnpm && pkg.pnpm.overrides;
+          if (!overrides) throw new Error('pnpm.overrides missing');
+          overrides['brace-expansion'] = '2.1.2';
+          overrides['shell-quote'] = '1.9.0';
+          overrides['tar'] = '7.5.19';
+          fs.writeFileSync(path, JSON.stringify(pkg, null, 2) + '\n');
+          NODE
+          pnpm install --lockfile-only --ignore-scripts
+          grep -F 'brace-expansion: 2.1.2' pnpm-lock.yaml
+          grep -F 'shell-quote: 1.9.0' pnpm-lock.yaml
+          grep -F 'tar: 7.5.19' pnpm-lock.yaml
+          ! grep -F 'brace-expansion@2.1.0' pnpm-lock.yaml
+          ! grep -F 'shell-quote@1.8.4' pnpm-lock.yaml
+          ! grep -F 'tar@7.5.16' pnpm-lock.yaml
+          git diff --check
+
+      - name: Download the repository-pinned Grype binary
         id: grype
         uses: anchore/scan-action/download-grype@e1165082ffb1fe366ebaf02d8526e7c4989ea9d2 # v7.4.0
         with:
           cache-db: false
 
-      - name: Persist exact HIGH and CRITICAL findings to staging
+      - name: Prove the HIGH and CRITICAL gate is clear before pushing
         env:
           GRYPE: ${{ steps.grype.outputs.cmd }}
-          GH_TOKEN: ${{ github.token }}
-          TARGET_BRANCH: ops/recover-platform-453-bot
         shell: bash
         run: |
           set -euo pipefail
-          "$GRYPE" dir:. -o json > /tmp/grype.json
-          jq -r '
-            .matches[]
-            | select(.vulnerability.severity == "High" or .vulnerability.severity == "Critical")
-            | [
-                .artifact.name,
-                .artifact.version,
-                .artifact.type,
-                .vulnerability.id,
-                .vulnerability.severity,
-                ((.vulnerability.fix.versions // []) | join(",")),
-                ((.artifact.locations // []) | map(.path) | unique | join(","))
-              ]
-            | @tsv
-          ' /tmp/grype.json | sort -u > /tmp/high-critical.tsv
-          test -s /tmp/high-critical.tsv
-          content=$(base64 -w0 /tmp/high-critical.tsv)
-          jq -n \
-            --arg message 'docs: record exact Grype diagnostic for platform 405' \
-            --arg content "$content" \
-            --arg branch "$TARGET_BRANCH" \
-            '{message:$message,content:$content,branch:$branch}' > /tmp/put.json
-          curl --fail-with-body --silent --show-error \
-            -X PUT \
-            -H 'Accept: application/vnd.github+json' \
-            -H "Authorization: Bearer ${GH_TOKEN}" \
-            -H 'X-GitHub-Api-Version: 2022-11-28' \
-            "https://api.github.com/repos/${GITHUB_REPOSITORY}/contents/diagnostics/platform-405-grype.tsv" \
-            --data-binary @/tmp/put.json
+          "$GRYPE" dir:. --fail-on high
+
+      - name: Commit and push the complete security repair
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add package.json pnpm-lock.yaml scripts/media/uv.lock
+          git commit \
+            -m 'fix(security): clear current Grype high and critical findings' \
+            -m 'Raise brace-expansion to 2.1.2, shell-quote to 1.9.0, tar to 7.5.19, and import the Pillow 12.3.0 lockfile from PR 457.' \
+            -m 'Signed-off-by: github-actions[bot] <41898282+github-actions[bot]@users.noreply.github.com>'
+          git push origin "HEAD:${TARGET_BRANCH}"
