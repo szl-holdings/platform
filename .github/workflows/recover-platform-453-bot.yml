@@ -1,4 +1,4 @@
-name: Approve exact platform replacement workflow runs
+name: Publish exact platform replacement tree SHA
 
 on:
   pull_request:
@@ -8,102 +8,55 @@ on:
 
 permissions:
   contents: read
+  issues: write
 
 jobs:
-  approve-runs:
+  publish-tree:
     if: >-
       github.event.pull_request.head.repo.full_name == github.repository &&
       github.event.pull_request.head.ref == 'ops/recover-platform-453-bot' &&
       github.actor == 'stephenlutar2-hash'
     runs-on: ubuntu-latest
-    timeout-minutes: 10
+    timeout-minutes: 5
     env:
       TARGET_PR: '405'
       EXPECTED_BASE: c11291e09702c86f3f8995fffcae6167155c7240
-      EXPECTED_HEAD: df1c5141b2ee6243a07d7cbc9d1a55496a51457f
-      ADMIN_TOKEN: ${{ secrets.SZL_GITHUB_TOKEN }}
+      VERIFIED_BOT_COMMIT: df1c5141b2ee6243a07d7cbc9d1a55496a51457f
     steps:
-      - name: Verify exact live PR identity and source scope
+      - name: Checkout exact verified bot commit
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: ${{ env.VERIFIED_BOT_COMMIT }}
+          fetch-depth: 2
+          persist-credentials: false
+          show-progress: false
+
+      - name: Verify parent and exact source scope
         shell: bash
         run: |
-          set -euo pipefail
-          test -n "${ADMIN_TOKEN:-}"
-
-          pr=$(curl --fail-with-body --silent --show-error \
-            -H 'Accept: application/vnd.github+json' \
-            -H "Authorization: Bearer ${ADMIN_TOKEN}" \
-            -H 'X-GitHub-Api-Version: 2022-11-28' \
-            "https://api.github.com/repos/${GITHUB_REPOSITORY}/pulls/${TARGET_PR}")
-
-          test "$(jq -r '.state' <<<"$pr")" = 'open'
-          test "$(jq -r '.user.login' <<<"$pr")" = 'dependabot[bot]'
-          test "$(jq -r '.base.sha' <<<"$pr")" = "$EXPECTED_BASE"
-          test "$(jq -r '.head.sha' <<<"$pr")" = "$EXPECTED_HEAD"
-
-          files=$(curl --fail-with-body --silent --show-error \
-            -H 'Accept: application/vnd.github+json' \
-            -H "Authorization: Bearer ${ADMIN_TOKEN}" \
-            -H 'X-GitHub-Api-Version: 2022-11-28' \
-            "https://api.github.com/repos/${GITHUB_REPOSITORY}/pulls/${TARGET_PR}/files?per_page=100" \
-            | jq -r '.[].filename' | sort)
+          set -euxo pipefail
+          test "$(git rev-parse HEAD)" = "$VERIFIED_BOT_COMMIT"
+          test "$(git rev-parse HEAD^)" = "$EXPECTED_BASE"
+          changed=$(git diff --name-only "$EXPECTED_BASE" "$VERIFIED_BOT_COMMIT" | sort)
           expected=$(printf '%s\n' \
             .github/workflows/audit-full.yml \
             package.json \
             pnpm-lock.yaml | sort)
-          test "$files" = "$expected"
+          test "$changed" = "$expected"
 
-      - name: Approve only the exact action-required workflow runs
+      - name: Publish immutable tree identifier to the target PR
+        env:
+          GH_TOKEN: ${{ github.token }}
         shell: bash
         run: |
           set -euo pipefail
-          runs=(
-            29840480068 29840480090 29840479966 29840480354
-            29840479118 29840479059 29840479032 29840479201
-            29840479146 29840479182 29840479246 29840479424
-            29840479065 29840479151 29840479135 29840479144
-            29840479224 29840479277 29840479300 29840479328
-          )
-
-          for run_id in "${runs[@]}"; do
-            before=$(curl --fail-with-body --silent --show-error \
-              -H 'Accept: application/vnd.github+json' \
-              -H "Authorization: Bearer ${ADMIN_TOKEN}" \
-              -H 'X-GitHub-Api-Version: 2022-11-28' \
-              "https://api.github.com/repos/${GITHUB_REPOSITORY}/actions/runs/${run_id}")
-            test "$(jq -r '.head_sha' <<<"$before")" = "$EXPECTED_HEAD"
-            test "$(jq -r '.pull_requests[0].number' <<<"$before")" = "$TARGET_PR"
-            test "$(jq -r '.conclusion' <<<"$before")" = 'action_required'
-
-            status=$(curl --silent --show-error --output "/tmp/approve-${run_id}.json" \
-              --write-out '%{http_code}' --request POST \
-              -H 'Accept: application/vnd.github+json' \
-              -H "Authorization: Bearer ${ADMIN_TOKEN}" \
-              -H 'X-GitHub-Api-Version: 2022-11-28' \
-              "https://api.github.com/repos/${GITHUB_REPOSITORY}/actions/runs/${run_id}/approve")
-            if [ "$status" != '201' ]; then
-              cat "/tmp/approve-${run_id}.json" >&2 || true
-              echo "approval failed for run ${run_id}: HTTP ${status}" >&2
-              exit 1
-            fi
-            echo "approved run ${run_id}"
-          done
-
-      - name: Prove approvals released the runs
-        shell: bash
-        run: |
-          set -euo pipefail
-          sleep 3
-          for run_id in \
-            29840480068 29840480090 29840479966 29840480354 \
-            29840479118 29840479059 29840479032 29840479201 \
-            29840479146 29840479182 29840479246 29840479424 \
-            29840479065 29840479151 29840479135 29840479144 \
-            29840479224 29840479277 29840479300 29840479328; do
-            after=$(curl --fail-with-body --silent --show-error \
-              -H 'Accept: application/vnd.github+json' \
-              -H "Authorization: Bearer ${ADMIN_TOKEN}" \
-              -H 'X-GitHub-Api-Version: 2022-11-28' \
-              "https://api.github.com/repos/${GITHUB_REPOSITORY}/actions/runs/${run_id}")
-            test "$(jq -r '.head_sha' <<<"$after")" = "$EXPECTED_HEAD"
-            test "$(jq -r '.conclusion // "released"' <<<"$after")" != 'action_required'
-          done
+          tree=$(git rev-parse "$VERIFIED_BOT_COMMIT^{tree}")
+          body="<!-- platform-405-verified-tree -->\nVERIFIED_TREE_SHA=${tree}\nVERIFIED_COMMIT=${VERIFIED_BOT_COMMIT}\nVERIFIED_PARENT=${EXPECTED_BASE}"
+          existing=$(gh api "repos/${GITHUB_REPOSITORY}/issues/${TARGET_PR}/comments?per_page=100" \
+            --jq '.[] | select(.body | contains("<!-- platform-405-verified-tree -->")) | .id' | head -n1)
+          if [ -n "$existing" ]; then
+            gh api --method PATCH "repos/${GITHUB_REPOSITORY}/issues/comments/${existing}" -f body="$body" >/dev/null
+          else
+            gh api --method POST "repos/${GITHUB_REPOSITORY}/issues/${TARGET_PR}/comments" -f body="$body" >/dev/null
+          fi
+          echo "published verified tree ${tree}"
