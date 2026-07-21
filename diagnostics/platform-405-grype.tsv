@@ -1,0 +1,14 @@
+brace-expansion	2.1.0	npm	GHSA-3jxr-9vmj-r5cp	High	2.1.2	/pnpm-lock.yaml
+pillow	12.2.0	python	GHSA-45hq-cxwh-f6vc	High	12.3.0	/scripts/media/uv.lock
+pillow	12.2.0	python	GHSA-5x94-69rx-g8h2	High	12.3.0	/scripts/media/uv.lock
+pillow	12.2.0	python	GHSA-62p4-gmf7-7g93	High	12.3.0	/scripts/media/uv.lock
+pillow	12.2.0	python	GHSA-6r8x-57c9-28j4	High	12.3.0	/scripts/media/uv.lock
+pillow	12.2.0	python	GHSA-8v84-f9pq-wr9x	High	12.3.0	/scripts/media/uv.lock
+pillow	12.2.0	python	GHSA-9hw9-ch79-4vh6	High	12.3.0	/scripts/media/uv.lock
+pillow	12.2.0	python	GHSA-jjj6-mw9f-p565	High	12.3.0	/scripts/media/uv.lock
+pillow	12.2.0	python	GHSA-phj9-mv4w-65pm	High	12.3.0	/scripts/media/uv.lock
+pillow	12.2.0	python	GHSA-vjc4-5qp5-m44j	High	12.3.0	/scripts/media/uv.lock
+pillow	12.2.0	python	GHSA-xj96-63gp-2gmr	High	12.3.0	/scripts/media/uv.lock
+shell-quote	1.8.4	npm	GHSA-395f-4hp3-45gv	High	1.9.0	/pnpm-lock.yaml
+tar	7.5.16	npm	GHSA-23hp-3jrh-7fpw	Critical	7.5.19	/pnpm-lock.yaml
+tar	7.5.16	npm	GHSA-8x88-c5mf-7j5w	High	7.5.18	/pnpm-lock.yaml
