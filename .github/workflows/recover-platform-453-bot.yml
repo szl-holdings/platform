@@ -1,0 +1,170 @@
+name: Recover platform 453 as bot-authored PR
+
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - .github/workflows/recover-platform-453-bot.yml
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  recover:
+    if: >-
+      github.event.pull_request.head.repo.full_name == github.repository &&
+      github.event.pull_request.head.ref == 'ops/recover-platform-453-bot' &&
+      github.actor == 'stephenlutar2-hash'
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    env:
+      BASE_SHA: c11291e09702c86f3f8995fffcae6167155c7240
+      SOURCE_HEAD: 87704be92e406804491175e4d5337968f498679d
+      BOT_BRANCH: automation/platform-453-supply-chain-bot
+    steps:
+      - name: Checkout exact staging control without credentials
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+          path: control
+          fetch-depth: 0
+          persist-credentials: false
+
+      - name: Checkout exact protected base for bot commit
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: ${{ env.BASE_SHA }}
+          path: work
+          fetch-depth: 0
+
+      - name: Set up Node 24
+        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v6.0.0
+        with:
+          node-version: '24'
+
+      - name: Prove staging scope and reconstruct exact green tree
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          staging_changed=$(git -C control diff --name-only "$BASE_SHA" "${{ github.event.pull_request.head.sha }}" | sort)
+          test "$staging_changed" = '.github/workflows/recover-platform-453-bot.yml'
+
+          git -C work fetch --no-tags origin "$SOURCE_HEAD"
+          test "$(git -C work merge-base "$BASE_SHA" "$SOURCE_HEAD")" = "$BASE_SHA"
+
+          changed=$(git -C work diff --name-only "$BASE_SHA" "$SOURCE_HEAD" | sort)
+          expected=$(printf '%s\n' \
+            .github/workflows/audit-full.yml \
+            package.json \
+            pnpm-lock.yaml | sort)
+          test "$changed" = "$expected"
+
+          git -C work checkout "$SOURCE_HEAD" -- \
+            .github/workflows/audit-full.yml \
+            package.json \
+            pnpm-lock.yaml
+          git -C work add \
+            .github/workflows/audit-full.yml \
+            package.json \
+            pnpm-lock.yaml
+
+          source_tree=$(git -C work rev-parse "$SOURCE_HEAD^{tree}")
+          reconstructed_tree=$(git -C work write-tree)
+          test "$reconstructed_tree" = "$source_tree"
+
+          grep -Fq '"serve": "14.2.6"' work/package.json
+          grep -Fq '"serve-handler>path-to-regexp": "3.3.0"' work/package.json
+          grep -Fq '"adm-zip": ">=0.6.0"' work/package.json
+          grep -Fq '"js-yaml": ">=5.2.1"' work/package.json
+          grep -Fq 'node_modules/.bin/serve' work/.github/workflows/audit-full.yml
+
+      - name: Exercise frozen lockfile and SPA rewrite runtime
+        working-directory: work
+        shell: bash
+        run: |
+          set -euo pipefail
+          corepack enable
+          pnpm install --frozen-lockfile --ignore-scripts
+          test "$(pnpm exec serve --version)" = '14.2.6'
+
+          mkdir -p /tmp/szl-serve-proof
+          printf '%s\n' '<!doctype html><title>serve-proof</title><p>serve-proof</p>' > /tmp/szl-serve-proof/index.html
+          node_modules/.bin/serve /tmp/szl-serve-proof -s -l 4173 > /tmp/szl-serve-proof.log 2>&1 &
+          server_pid=$!
+          trap 'kill "$server_pid" >/dev/null 2>&1 || true; cat /tmp/szl-serve-proof.log || true' EXIT
+          for attempt in $(seq 1 30); do
+            if curl --fail --silent http://127.0.0.1:4173/deep/route > /tmp/szl-serve-response.html; then
+              break
+            fi
+            sleep 1
+          done
+          grep -Fq 'serve-proof' /tmp/szl-serve-response.html
+
+      - name: Create exact DCO-valid GitHub Actions bot commit
+        working-directory: work
+        shell: bash
+        run: |
+          set -euo pipefail
+          git switch -C "$BOT_BRANCH"
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git commit \
+            -m 'fix(security): pin vulnerable dependencies and lock audit server' \
+            -m 'Reproduce the exact all-green PR #453 tree: upgrade adm-zip and js-yaml, scope the serve-handler path-to-regexp compatibility pin, and use the frozen lockfile serve binary in runtime audit.' \
+            -m 'Supersedes #453 after independent review.' \
+            -m 'Signed-off-by: github-actions[bot] <41898282+github-actions[bot]@users.noreply.github.com>'
+          test "$(git rev-parse HEAD^)" = "$BASE_SHA"
+          test "$(git rev-parse HEAD^{tree})" = "$(git rev-parse "$SOURCE_HEAD^{tree}")"
+
+          if git ls-remote --exit-code --heads origin "$BOT_BRANCH" >/dev/null 2>&1; then
+            git fetch --no-tags origin "$BOT_BRANCH:refs/remotes/origin/$BOT_BRANCH"
+            old_remote=$(git rev-parse "refs/remotes/origin/$BOT_BRANCH")
+            git push --force-with-lease="refs/heads/$BOT_BRANCH:$old_remote" origin "HEAD:refs/heads/$BOT_BRANCH"
+          else
+            git push origin "HEAD:refs/heads/$BOT_BRANCH"
+          fi
+
+      - name: Open independently reviewable bot PR
+        env:
+          GH_TOKEN: ${{ github.token }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          existing=$(gh pr list --repo "$GITHUB_REPOSITORY" --head "$BOT_BRANCH" --state open --json number --jq '.[0].number // empty')
+          if [ -n "$existing" ]; then
+            echo "Bot recovery PR already open: #$existing"
+            exit 0
+          fi
+
+          gh pr create \
+            --repo "$GITHUB_REPOSITORY" \
+            --head "$BOT_BRANCH" \
+            --base main \
+            --title 'fix(security): pin vulnerable dependencies and lock audit server' \
+            --body-file - <<'EOF'
+          ## Purpose
+
+          Replace self-authored PR #453 with an independently reviewable GitHub-Actions-authored commit, without weakening branch protection.
+
+          ## Exact-tree proof
+
+          - protected base: `c11291e09702c86f3f8995fffcae6167155c7240`
+          - verified source head: `87704be92e406804491175e4d5337968f498679d`
+          - reconstructed bot commit has the exact same Git tree as the all-green source head
+          - exactly three changed paths: `.github/workflows/audit-full.yml`, `package.json`, and `pnpm-lock.yaml`
+
+          ## Changes
+
+          - `adm-zip` is forced to `>=0.6.0`
+          - `js-yaml` is forced to `>=5.2.1`
+          - audit servers use the frozen lockfile `serve@14.2.6`
+          - `serve-handler` receives the scoped, patched `path-to-regexp@3.3.0` compatibility override
+
+          ## Independent staging evidence
+
+          The one-use staging workflow verified the exact source tree, installed the frozen lockfile, and proved that the pinned `serve -s` runtime serves a deep SPA route successfully. All ordinary repository checks must rerun on this bot-authored head before merge.
+
+          Supersedes #453. No rule, threshold, test, or scanner was weakened.
+          EOF
