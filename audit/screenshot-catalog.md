@@ -608,3 +608,11 @@ Artifact `public/` and `dist/public/` directories contain static assets embedded
 ---
 
 *Catalog generated: 2026-04-21. All numeric claims verifiable by `find screenshots/ -type f | wc -l`.*
+
+---
+
+## SDA canonical verifier repair — 2026-07-22
+
+| Filename | Route | Surface | Capture date | Captured by | Workcell | Proof level | Status | Notes |
+|----------|-------|---------|--------------|-------------|----------|-------------|--------|-------|
+| `docs/assets/screenshots/current/sda-canonical-verifier-2026-07-22.png` | `http://127.0.0.1:8765/proof-harness.html` | SDA ask-the-fabric receipt verifier | 2026-07-22 | CodexSmith | `SDA-CANONICAL-VERIFIER-20260722` | 4 | current | Live browser capture of the patched widget calling the canonical a11oy endpoint. The sample is explicitly unsigned and the returned `INCONCLUSIVE`, `UNSIGNED-LOCAL`, and `UNAVAILABLE` states are visibly non-green. Temporary proof harness removed after capture. |

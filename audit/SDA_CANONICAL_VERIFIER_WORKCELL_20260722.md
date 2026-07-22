@@ -1,0 +1,22 @@
+# SDA canonical verifier Workcell proof
+
+- `workcell_id`: `SDA-CANONICAL-VERIFIER-20260722`
+- `agent`: `CodexSmith`
+- `objective`: Repair the public SDA receipt widget so it uses the live canonical a11oy receipt-verification contract without weakening honest verdict states.
+- `plan_summary`: Update only the canonical SDA widget source and a focused dependency-free contract test. Preserve browser-side public-URL fetching, wrap plain JSON as an explicitly unsigned DSSE envelope, render the verifier's exact verdict vocabulary, capture the modified live surface, and publish through a protected review PR.
+- `success_criteria`: The widget calls `/api/a11oy/v1/verify/receipt`; no legacy `/api/a11oy/v1/verify` call remains; URL mode performs no server-side URL fetch; unsigned or unavailable checks never render green; focused tests pass.
+- `patch_summary`: Updated `assets/szl_verify_widget.js` to call the canonical receipt verifier, normalize DSSE/receipt-id/plain-JSON inputs without inventing signatures, browser-fetch public URLs, and render canonical PASS/PARTIAL/FAIL/INCONCLUSIVE plus per-check honesty states. Added five dependency-free contract tests.
+- `test_results`:
+  - `node --test replit-sync/hf_spaces/hf_sda_space/tests/test_verify_widget.cjs` — exit `0`; 5 passed, 0 failed.
+  - `node --check replit-sync/hf_spaces/hf_sda_space/assets/szl_verify_widget.js` — exit `0`.
+  - Live POST of the sample's explicitly unsigned DSSE shape to `https://a-11-oy.com/api/a11oy/v1/verify/receipt` — HTTP success; verdict `INCONCLUSIVE`; checks `signature:UNSIGNED-LOCAL`, `payload_digest:UNAVAILABLE`, `hash_chain:UNAVAILABLE`.
+  - Repository-wide `pnpm typecheck` baseline did not complete within 120 seconds. The post-patch broad `pnpm brand:check` was blocked before execution because pnpm attempted dependency installation and the Windows host lacks the required `sh` preinstall environment. Focused JavaScript tests do not require workspace dependency installation.
+- `screenshot_refs`: `docs/assets/screenshots/current/sda-canonical-verifier-2026-07-22.png`, route `http://127.0.0.1:8765/proof-harness.html`; temporary harness removed after capture. The running widget shows the live canonical response as amber `INCONCLUSIVE`, never green.
+- `verification_notes`: The source contains only `/api/a11oy/v1/verify/receipt`. URL mode calls `fetch` from the browser and sends only parsed receipt data to a11oy, so no arbitrary-URL server proxy was introduced. Plain JSON is wrapped with `signatures:[]`, and unavailable/unsigned checks map to warning styling.
+- `public_claim_check`: No production, customer, compliance, accuracy, or partnership claim was added. Existing doctrine qualifiers remain intact.
+- `security_check`: No key, token, credential, `.env` content, or server-side arbitrary-URL fetch was added.
+- `known_gaps_update`: No registered known-gap ID covered this stale widget path, so the canonical register was not changed. The observed defect is closed by this patch.
+- `proof_level`: `4` (public-facing change with focused tests, live UI evidence, claim/security review, and gap disposition).
+- `recorded_at`: `2026-07-22T03:27:00Z`
+- `recorded_by`: `CodexSmith`
+- `status`: `READY_FOR_INDEPENDENT_REVIEW`
