@@ -1,138 +1,112 @@
 {
   "meta": {
-    "generated": "2026-04-25",
-    "track": "Moonshot Phase 1 — Truth & Audit",
-    "version": "1.3.0",
-    "note": "Canonical verified counts for the SZL Holdings platform. Every count below was produced by the exact shell command listed. Run from workspace root to reproduce. Downstream tracks should treat these as the ground-truth baseline and re-run commands to verify before making claims. Database table count uses raw grep (= pgTable) — see track4_db_verification for canonical Drizzle count from live DB (730 provisioned tables)."
+    "generated": "2026-07-25",
+    "track": "FRONTIER V2 — Wave 1 Truth Lock",
+    "version": "2.0.0",
+    "measurement_base_commit": "280176de9fd99a33f1cfc2087372014e91d7ce8f",
+    "note": "Canonical reproducible counts for the truth-lock branch, including the source-of-truth workflow introduced by this change. The listed commit is the inspected main baseline, not the eventual merge commit. scripts/audit/validate-source-of-truth.js recomputes metrics from whichever commit is checked out and fails on drift. Runtime and database values not refreshed on 2026-07-25 remain historical snapshots, not current public claims."
   },
   "artifacts": {
     "registered": {
-      "count": 14,
-      "command": "find artifacts -name artifact.toml | wc -l",
-      "computed": "2026-04-25",
+      "count": 6,
+      "command": "Count tracked artifacts/*/(.replit-artifact/)?artifact.toml files",
+      "computed": "2026-07-25",
       "breakdown": {
-        "web": 11,
-        "mobile": 1,
-        "video": 1,
-        "design": 1
+        "orchestration_product": 1,
+        "product_verticals": 5
       },
       "list": [
-        "artifacts/aegis",
-        "artifacts/api-server",
+        "artifacts/a11oy",
         "artifacts/carlota-jo",
-        "artifacts/command",
         "artifacts/counsel",
-        "artifacts/lyte-command-center",
-        "artifacts/mockup-sandbox",
-        "artifacts/pulse",
         "artifacts/sentra",
-        "artifacts/szl-demo-video",
-        "artifacts/szl-holdings-mobile",
-        "artifacts/szl-holdings",
         "artifacts/terra",
         "artifacts/vessels"
       ]
     },
     "on_disk_unregistered": {
-      "count": 0,
-      "command": "for d in artifacts/*/; do [ ! -f \"${d}.replit-artifact/artifact.toml\" ] && echo \"${d}\"; done | wc -l",
-      "computed": "2026-04-25",
-      "list": [],
-      "note": "All previously unregistered artifact directories (audit, cortex-mobile, firestorm, imperium, internal-audit, prism-counsel) have been removed from disk. See ORIGINALITY_REPORT.md §2 Vestigial Directories Removed."
+      "count": 1,
+      "command": "Tracked top-level artifact directories minus registered artifact manifests",
+      "computed": "2026-07-25",
+      "list": ["artifacts/api-server"],
+      "note": "api-server is backend infrastructure and is not counted as a customer-facing product vertical."
     },
     "total_on_disk": {
-      "count": 14,
-      "command": "ls artifacts/ | wc -l",
-      "computed": "2026-04-25"
+      "count": 7,
+      "command": "Count unique tracked top-level children of artifacts/",
+      "computed": "2026-07-25"
     }
   },
   "packages": {
     "domain_packages_dir": {
-      "count": 84,
-      "command": "ls packages/ | wc -l",
-      "computed": "2026-04-25",
-      "note": "Filesystem-verified count of all entries under packages/. +2 since v1.2.0 (2026-04-21). Run 'pnpm metrics:generate' to refresh docs/platform-facts.md."
+      "count": 156,
+      "command": "Count tracked top-level directories under packages/",
+      "computed": "2026-07-25"
     },
     "shared_lib_packages": {
-      "count": 42,
-      "command": "ls lib/ | wc -l",
-      "computed": "2026-04-25"
+      "count": 53,
+      "command": "Count unique tracked top-level children of lib/",
+      "computed": "2026-07-25"
     },
     "total_packages": {
-      "count": 126,
-      "command": "echo $(( $(ls packages/ | wc -l) + $(ls lib/ | wc -l) ))",
-      "computed": "2026-04-25",
-      "note": "packages/ (84) + lib/ (42) = 126. Prior count was 123 (82+41)."
+      "count": 209,
+      "command": "packages/ top-level count plus lib/ top-level count",
+      "computed": "2026-07-25",
+      "note": "packages/ (156 directories) + lib/ (53 directories) = 209. packages/proxy-routes.ts is a file and is not counted as a package."
     },
     "apps": {
-      "count": 3,
-      "command": "ls apps/ | wc -l",
-      "computed": "2026-04-25",
-      "list": ["alloy-embedding-api", "alloy-ingestion-orchestrator", "alloy-runtime-api"]
+      "count": 11,
+      "command": "Count unique tracked top-level children of apps/",
+      "computed": "2026-07-25"
     },
     "services": {
-      "count": 5,
-      "command": "ls services/ | wc -l",
-      "computed": "2026-04-25",
-      "list": ["alloy-fabric-api", "alloy-fabric-ingest-control", "lyte-metrics-store", "substrate-mcp-gateway", "substrate-py-workers"]
+      "count": 11,
+      "command": "Count unique tracked top-level children of services/",
+      "computed": "2026-07-25"
     },
     "workers": {
       "count": 5,
-      "command": "ls workers/ | wc -l",
-      "computed": "2026-04-25",
+      "command": "Count unique tracked top-level children of workers/",
+      "computed": "2026-07-25",
       "list": ["alloy-embed-worker", "alloy-rank-worker", "alloy-rerank-worker", "alloy-vector-worker", "substrate-python"]
     }
   },
   "database": {
     "schema_files": {
-      "count": 170,
-      "command": "find lib/db/src/schema -name '*.ts' | wc -l",
-      "computed": "2026-04-25",
-      "note": "Filesystem-verified. +5 since v1.2.0 (2026-04-21 count was 165)."
+      "count": 197,
+      "command": "Count tracked lib/db/src/schema/**/*.ts files",
+      "computed": "2026-07-25"
     },
-    "table_definitions_raw_grep": {
-      "count": 939,
-      "command": "grep -r '= pgTable' lib/db/src/schema/ --include='*.ts' | wc -l",
-      "computed": "2026-04-25",
-      "note": "Raw grep count; may include re-exports. Canonical live DB provisioned count is 730 (see track4_db_verification). +24 since v1.2.0 (prior raw grep was 915)."
+    "pg_table_call_sites": {
+      "count": 1067,
+      "command": "Count pgTable( call sites in tracked lib/db/src/schema/**/*.ts files",
+      "computed": "2026-07-25",
+      "note": "A source call-site count, not a claim about currently provisioned database tables."
     },
     "migration_files": {
-      "count": 132,
-      "command": "ls lib/db/drizzle/ | grep -v '^meta$' | wc -l",
-      "computed": "2026-04-25",
-      "note": "Includes files with duplicate sequence numbers (parallel branching). +17 since v1.2.0 (prior count 115). Full list: see audit/database-surface.md."
+      "count": 149,
+      "command": "Count tracked lib/db/drizzle/*.sql files",
+      "computed": "2026-07-25",
+      "note": "Includes duplicate sequence numbers from parallel branches; this is a file count, not an applied-migration count."
     },
     "rollback_scripts": {
       "count": 5,
-      "command": "ls scripts/rollback/*.sql | wc -l",
-      "computed": "2026-04-25"
+      "command": "Count tracked scripts/rollback/*.sql files",
+      "computed": "2026-07-25"
     }
   },
   "api": {
-    "route_files": {
-      "count": 357,
-      "command": "find artifacts/api-server/src/routes -name '*.ts' ! -name '*.test.ts' ! -name '*.spec.ts' | wc -l",
-      "computed": "2026-04-25",
-      "note": "+10 since v1.2.0 (2026-04-21 count was 347)."
+    "route_source_files": {
+      "count": 31,
+      "command": "Count non-test route source files under apps/, services/, and artifacts/api-server/",
+      "computed": "2026-07-25",
+      "note": "The v1 registry counted only artifacts/api-server, which no longer represents the runtime layout."
     },
-    "route_groups_top_level": {
-      "count": 12,
-      "command": "find artifacts/api-server/src/routes -mindepth 1 -maxdepth 1 -type d | grep -v '__tests__' | wc -l",
-      "computed": "2026-04-25",
-      "list": [
-        "admin",
-        "control-tower",
-        "distribution-os",
-        "documents",
-        "domain-agents",
-        "firestorm",
-        "groups",
-        "intelligence",
-        "metering",
-        "rmm",
-        "tenant-provisioning",
-        "terra-crm"
-      ]
+    "handler_declarations": {
+      "count": 284,
+      "command": "Count non-test router/app get|post|put|patch|delete|use declarations under apps/, services/, and artifacts/api-server/",
+      "computed": "2026-07-25",
+      "note": "A static declaration count. It does not prove deployment, reachability, authentication, or HTTP 200 behavior."
     }
   },
   "auth": {
@@ -140,44 +114,84 @@
       "count": 11,
       "command": "grep -o '11.role\\|11-role' README.md | head -1",
       "computed": "2026-04-25",
-      "note": "11 consistently cited in README.md, docs/security/access-control-matrix.md, and docs/trust/trust-center.md. Confirmed by cross-document consistency."
+      "status": "HISTORICAL_NOT_REVERIFIED_2026-07-25",
+      "note": "Retained as a historical documentation-consistency claim; it is not part of the automated v2 current-tree metric set."
     }
   },
   "ci": {
     "workflows": {
-      "count": 23,
-      "command": "ls .github/workflows/ | wc -l",
-      "computed": "2026-04-25",
-      "note": "+5 since v1.2.0 (2026-04-21 count was 18)."
+      "count": 44,
+      "command": "Count tracked .github/workflows/*.yml and *.yaml files",
+      "computed": "2026-07-25",
+      "note": "Includes the source-of-truth workflow introduced by this truth-lock change."
     }
   },
   "env": {
     "declared_vars": {
-      "count": 213,
-      "command": "grep -cE '^[A-Z_]+=' .env.example",
-      "computed": "2026-04-25"
+      "count": 238,
+      "command": "Count .env.example lines matching ^[A-Z_]+=",
+      "computed": "2026-07-25"
     }
   },
   "mobile": {
     "registered_mobile_artifacts": {
-      "count": 1,
-      "command": "find artifacts -name artifact.toml | xargs grep -l 'expo\\|mobile' 2>/dev/null | wc -l",
-      "computed": "2026-04-25",
-      "list": ["artifacts/szl-holdings-mobile"],
-      "note": "APEX (szl-holdings-mobile) is the sole registered mobile artifact. cortex-mobile was removed from disk."
+      "count": 0,
+      "command": "Count registered artifact manifest paths containing mobile",
+      "computed": "2026-07-25",
+      "list": [],
+      "note": "No mobile artifact is registered in the current tracked artifacts tree."
     }
   },
-  "domain_packs": {
-    "count": 7,
-    "active": ["TENAX (Sentra)", "SEXTANT (Vessels)", "DOMAINE (Terra)", "Counsel", "Carlota Jo", "LUMINA (Pulse)", "PARAGON (Aegis)"],
-    "archived": ["IMPERIUM", "PRISM Counsel"],
-    "note": "Canonical display names per ORIGINALITY_REPORT.md. PARAGON supersedes Aegis (security/defense). TENAX supersedes Sentra in display; slug /sentra/ retained. LUMINA supersedes Pulse in display; slug /pulse/ retained. Archived packs have API routes and schemas retained but no registered artifact."
+  "product_verticals": {
+    "registered": {
+      "count": 5,
+      "computed": "2026-07-25",
+      "definition": "A registered customer-facing domain artifact. A11oy is counted separately as the orchestration product.",
+      "list": ["Carlota Jo", "Counsel", "Sentra", "Terra", "Vessels"]
+    },
+    "orchestration_product": {
+      "count": 1,
+      "list": ["A11oy"]
+    }
   },
   "platform_primitives": {
     "count": 6,
+    "status": "HISTORICAL_NOT_REVERIFIED_2026-07-25",
     "list": ["Outcome Graph", "Proof Chain", "Covenant Policy", "Decision Simulation", "Workflow Engine", "Event Fabric"]
   },
+  "doctrine_v11": {
+    "kernel_commit": "c7c0ba17",
+    "declarations": {
+      "count": 749,
+      "definition": "Declarations in the frozen Doctrine v11 Lean kernel at c7c0ba17."
+    },
+    "unique_axioms": {
+      "count": 14,
+      "definition": "Unique declared axioms in the frozen kernel; 15 raw occurrences with one duplicate."
+    },
+    "tracked_sorries": {
+      "count": 163,
+      "definition": "Tracked sorry obligations in the frozen kernel snapshot; not a count of locked-proven formulas."
+    },
+    "locked_formulas": {
+      "count": 8,
+      "list": ["F1", "F4", "F7", "F11", "F12", "F18", "F19", "F22"],
+      "definition": "The exact locked-proven set, separately enforced by the no-axiom Lean theorem locked_count_eight."
+    },
+    "lambda_uniqueness": "CONJECTURE_1_OPEN_UNCONDITIONAL"
+  },
+  "github_public_estate": {
+    "observed_at": "2026-07-25T22:03:01Z",
+    "public_repositories": 53,
+    "archived_public_repositories": 12,
+    "active_public_repositories": 41,
+    "verification": "gh api --paginate 'orgs/szl-holdings/repos?per_page=100&type=all' filtered by visibility and archived",
+    "decision_target": 9,
+    "decision_status": "NOT_APPLIED_CONFORMANCE_REQUIRED",
+    "note": "The nine-public-repository target is a future disposition decision, not current state. No repository visibility was changed by this truth lock."
+  },
   "track4_db_verification": {
+    "status": "HISTORICAL_SNAPSHOT_NOT_CURRENT",
     "verified_date": "2026-04-21",
     "track": "Zero-Gap Track 4",
     "live_db": {
