@@ -30,6 +30,8 @@ The source definitions are pinned to upstream commit
 | `pnpm --filter @szl-holdings/otel test` | PASS — 3/3 native-span tests |
 | Strict isolated TypeScript check of changed source | PASS — no diagnostics |
 | Biome check of changed TypeScript | PASS |
+| Canonical source-of-truth validator | PASS — 64/64 |
+| Production dependency audit at HIGH threshold | PASS — 0 HIGH; 5 moderate and 2 low remain |
 | Blank required identifier | PASS — builder throws |
 | Negative token count | PASS — builder throws |
 | Tool content without explicit opt-in | PASS — arguments and result omitted |
