@@ -25,10 +25,10 @@ validator recomputes them from whichever commit is checked out.
 | Registered artifacts | **6** | Tracked `artifacts/*/(.replit-artifact/)?artifact.toml` files |
 | Artifact directories | **7** | Unique tracked top-level children of `artifacts/` |
 | Registered product verticals | **5** | Registered customer-facing domain artifacts; A11oy is counted separately as the orchestration product |
-| Top-level package directories (`packages/`) | **156** | Tracked top-level directories; excludes root file `packages/proxy-routes.ts`; not every directory is a workspace package |
+| Top-level package directories (`packages/`) | **157** | Tracked top-level directories; excludes root file `packages/proxy-routes.ts`; not every directory is a workspace package |
 | Top-level library directories (`lib/`) | **53** | Tracked top-level directories; not every directory is a workspace package |
-| Top-level package and library directories | **209** | Directory inventory only: 156 + 53 |
-| Workspace package manifests | **196** | Tracked `package.json` files included by `pnpm-workspace.yaml`; pnpm reports 197 projects when the root is included |
+| Top-level package and library directories | **210** | Directory inventory only: 157 + 53 |
+| Workspace package manifests | **197** | Tracked `package.json` files included by `pnpm-workspace.yaml`; pnpm reports 198 projects when the root is included |
 | Apps (`apps/`) | **11** | Unique tracked top-level children of `apps/` |
 | Services (`services/`) | **11** | Unique tracked top-level children of `services/` |
 | Workers (`workers/`) | **5** | Unique tracked top-level children of `workers/` |

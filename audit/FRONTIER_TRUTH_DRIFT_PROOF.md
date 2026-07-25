@@ -25,7 +25,7 @@ remained unique to the superseded draft #467.
 - Added `.github/workflows/truth-drift.yml`.
 - Added `docs/OVERCLAIM_LEDGER.md` without crediting CI for a detection it did
   not make.
-- Distinguished 209 top-level package/library directories from 196 actual pnpm
+- Distinguished 210 top-level package/library directories from 197 actual pnpm
   workspace package manifests.
 - Updated the canonical workflow count from 44 to 45 while retaining the merged
   43 route-file and 306 handler-declaration measurements.

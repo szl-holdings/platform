@@ -31,7 +31,7 @@
       "reason": "SOURCE_MISSING"
     },
     "monorepo_packages": {
-      "value": 196,
+      "value": 197,
       "label": "MEASURED",
       "source": "pnpm-workspace.yaml package manifests",
       "definition": "Workspace package manifests included by the canonical pnpm workspace, excluding explicit workspace exclusions."
