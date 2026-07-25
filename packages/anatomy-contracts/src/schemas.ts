@@ -144,6 +144,87 @@ export const meshReceiptSchema = {
   },
 } as const;
 
+export const regulatoryMappingSchema = {
+  $id: "https://schemas.szlholdings.com/anatomy/regulatory-mapping.v1.json",
+  title: "RegulatoryMapping",
+  type: "object",
+  required: ["eu_ai_act", "nist_ai_rmf", "owasp_asi", "iso_42001"],
+  additionalProperties: false,
+  properties: {
+    eu_ai_act: {
+      type: "object",
+      required: [
+        "article",
+        "obligation",
+        "annex_iii_category",
+        "high_risk",
+        "log_retention_class",
+      ],
+      additionalProperties: false,
+      properties: {
+        article: { type: "string", pattern: "^[0-9]+[a-z]?$" },
+        obligation: { type: "string" },
+        annex_iii_category: { type: ["string", "null"] },
+        high_risk: { type: "boolean" },
+        log_retention_class: {
+          type: "string",
+          enum: ["lifetime", "6mo", "session"],
+        },
+      },
+    },
+    nist_ai_rmf: {
+      type: "object",
+      required: ["function", "subcategory"],
+      additionalProperties: false,
+      properties: {
+        function: {
+          type: "string",
+          enum: ["GOVERN", "MAP", "MEASURE", "MANAGE"],
+        },
+        subcategory: { type: "string" },
+      },
+    },
+    owasp_asi: {
+      type: "array",
+      items: { type: "string", pattern: "^ASI[0-9]{2}$" },
+    },
+    iso_42001: {
+      type: "object",
+      required: ["control"],
+      additionalProperties: false,
+      properties: {
+        control: { type: "string" },
+      },
+    },
+  },
+} as const;
+
+/**
+ * Additive v2 receipt schema. The original eight mesh fields remain unchanged.
+ * `schemaVersion` and `regulatory` are optional so v1 receipts remain valid
+ * inputs; new emitters should set both.
+ */
+export const meshReceiptV2Schema = {
+  $id: "https://schemas.szlholdings.com/anatomy/mesh-receipt.v2.json",
+  title: "MeshReceiptV2",
+  type: "object",
+  required: [
+    "receiptId",
+    "eventType",
+    "actorId",
+    "toolName",
+    "payloadHash",
+    "prevReceiptHash",
+    "timestampIso8601",
+    "traceId",
+  ],
+  properties: {
+    ...meshReceiptSchema.properties,
+    schemaVersion: { type: "string", enum: ["2.0"] },
+    regulatory: regulatoryMappingSchema,
+  },
+} as const;
+
 export const ALL_SCHEMAS = {
   "span-headers": spanHeadersSchema,
   "action-proposal": actionProposalSchema,
@@ -151,4 +232,16 @@ export const ALL_SCHEMAS = {
   "reason-request": reasonRequestSchema,
   "reason-response": reasonResponseSchema,
   "mesh-receipt": meshReceiptSchema,
+} as const;
+
+/** Exact output filename -> schema map used by the cross-language emitter. */
+export const EMITTED_SCHEMAS = {
+  "span-headers.v1.json": spanHeadersSchema,
+  "action-proposal.v1.json": actionProposalSchema,
+  "policy-decision.v1.json": policyDecisionSchema,
+  "reason-request.v1.json": reasonRequestSchema,
+  "reason-response.v1.json": reasonResponseSchema,
+  "mesh-receipt.v1.json": meshReceiptSchema,
+  "regulatory-mapping.v1.json": regulatoryMappingSchema,
+  "mesh-receipt.v2.json": meshReceiptV2Schema,
 } as const;

@@ -1,6 +1,7 @@
 #!/usr/bin/env node
 import { Command } from 'commander';
 import chalk from 'chalk';
+import { exportArticle12 } from './article12.js';
 import { client } from './client.js';
 import { formatOutput, type OutputFormat } from './output.js';
 
@@ -424,6 +425,71 @@ program
     } catch (e: any) {
       console.log(chalk.red('✗ API Connectivity: unreachable'));
       console.log(chalk.dim(e.message));
+    }
+  });
+
+// a11oy article12
+program
+  .command('article12')
+  .description('export a signed EU AI Act Article 12 evidence package')
+  .option('--export', 'create a signed Article 12 tar archive')
+  .requiredOption('--from <date>', 'inclusive start date or ISO timestamp')
+  .requiredOption('--to <date>', 'inclusive end date or ISO timestamp')
+  .option(
+    '--input <path>',
+    'Article 12 source JSON',
+    process.env.A11OY_ARTICLE12_SOURCE,
+  )
+  .option(
+    '--signing-key <path>',
+    'Ed25519 private key PEM',
+    process.env.A11OY_ARTICLE12_SIGNING_KEY,
+  )
+  .option('--output <path>', 'output tar path')
+  .action(async (options) => {
+    const format = globalOutputFormat(options);
+    if (!options.export) {
+      localError('--export is required.', format);
+    }
+    if (!options.input) {
+      localError(
+        '--input or A11OY_ARTICLE12_SOURCE is required.',
+        format,
+      );
+    }
+    if (!options.signingKey) {
+      localError(
+        '--signing-key or A11OY_ARTICLE12_SIGNING_KEY is required.',
+        format,
+      );
+    }
+
+    const safeRange = `${options.from}-${options.to}`.replace(
+      /[^0-9A-Za-z._-]+/g,
+      '_',
+    );
+    try {
+      const result = exportArticle12({
+        inputPath: options.input,
+        outputPath: options.output ?? `article12-${safeRange}.tar`,
+        signingKeyPath: options.signingKey,
+        from: options.from,
+        to: options.to,
+      });
+      const envelope: import('./envelope.js').Envelope<typeof result> = {
+        ok: true,
+        data: result,
+        meta: {
+          requestId: `article12-${result.archiveSha256.slice(0, 12)}`,
+          timestamp: new Date().toISOString(),
+        },
+      };
+      formatOutput(envelope, format);
+    } catch (error) {
+      localError(
+        error instanceof Error ? error.message : String(error),
+        format,
+      );
     }
   });
 
