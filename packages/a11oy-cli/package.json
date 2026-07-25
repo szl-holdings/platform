@@ -10,6 +10,7 @@
   "scripts": {
     "build": "tsc",
     "dev": "tsx src/cli.ts",
+    "test": "node --experimental-strip-types --test src/*.test.mjs",
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
