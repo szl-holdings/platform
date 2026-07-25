@@ -8,7 +8,9 @@
 
 This glossary separates four concepts that older documents sometimes called a
 "surface." New or materially revised canonical documentation must use the
-terms below.
+terms below. Canonical counts remain sourced from `SOURCE_OF_TRUTH.md`,
+`audit/source-of-truth.json`, and the generated live-evidence registry at
+`artifacts/SOURCE_OF_TRUTH.json`.
 
 | Canonical term | Definition | Count rule | Do not call it |
 |---|---|---|---|
@@ -26,6 +28,7 @@ terms below.
 | **Public repository** | A GitHub repository whose current visibility is `public`. Repository visibility does not prove conformance or production readiness. |
 | **Conformant vertical** | A product vertical that has passed the current vertical conformance suite at a cited commit and CI run. Until that evidence exists, the status is **UNVERIFIED**. |
 | **Locked doctrine metric** | A frozen measurement tied to a named kernel commit. It is not recalculated from experimental `main`. |
+| **Evidence status** | One of LIVE, MODELED, PLANNED, REPORTED, UNAVAILABLE, CURRENT-TREE, LOCKED, OBSERVED, HISTORICAL, or UNVERIFIED. It describes evidence state and never implies customer traction. |
 
 ## Writing rules
 

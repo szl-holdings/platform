@@ -1,0 +1,3 @@
+# Format: path[:line] # reason: specific, reviewable justification
+# Keep this file empty unless a numeric literal is historical, quoted, or otherwise
+# intentionally distinct from the current metric. Broad globs are not supported.
