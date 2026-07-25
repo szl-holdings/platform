@@ -1,8 +1,16 @@
 # SZL Holdings — Source of Truth
 
-> **Single source of truth** for canonical public metrics, platform names, model profiles, and endpoint references.
-> Every downstream document, README, slide, and investor deck must draw numbers from this file.
-> Do not invent or guess metrics — re-run the documented commands to verify before making claims.
+> **SUPERSEDED 2026-07-25.** This hand-maintained snapshot is retained only as
+> historical audit evidence. Current public measurements live in
+> [`artifacts/SOURCE_OF_TRUTH.json`](artifacts/SOURCE_OF_TRUTH.json), are generated
+> from fresh evidence, and must never be copied from the legacy tables below.
+>
+> **Current status:** the generated artifact is authoritative. Any unavailable
+> measurement is intentionally reported as `null` with label `UNAVAILABLE`.
+>
+> **Obsolete historical instruction (do not follow):** this file once supplied
+> downstream metrics. Regenerate the JSON artifact before making a current claim;
+> do not copy a number from the legacy tables below.
 
 ---
 

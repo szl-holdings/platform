@@ -8,6 +8,35 @@ This document is the canonical reference for known security, quality, and compli
 
 ---
 
+## 2026-07-25 Series A Truth Lock
+
+The generated truth artifact now fails closed when a metric cannot be established
+from a local manifest, a machine-readable test aggregate, or an authorized live
+receipt. The remaining gaps are:
+
+- **Product surfaces:** `0` MEASURED because no qualifying surface manifest or
+  live deployment receipt is available in this repository.
+- **Per-test counts:** the verified workspace graph completed `109/109` test
+  tasks, but no machine-readable `artifacts/test-results.json` aggregate exists,
+  so unit/integration/e2e counts remain `UNAVAILABLE`.
+- **Database tables, Lean sorry count, Lambda count, Hugging Face collections,
+  and receipt-chain depth:** `UNAVAILABLE` pending an authoritative local source
+  or authorized live receipt.
+- **Repository consolidation:** the live organization has `53` public
+  repositories, not the historical target of `9`. Visibility, archival,
+  deletion, and history changes require explicit founder approval and a tested
+  restoration plan.
+- **Hugging Face estate:** `15` models, `26` datasets, and `25` spaces were
+  MEASURED from the public API. No private asset was accessed, exported, or
+  deployed.
+- **Independent review:** the organization currently has no eligible independent
+  collaborator. Do not manufacture or self-approve reviews. Keep required
+  checks, signed commits, linear history, conversation resolution, and exact-head
+  verification; transition to independent review after the first qualified hire
+  without creating a self-deadlock before then.
+
+---
+
 ## Viewer Guide by Persona
 
 ### For Enterprise Architects

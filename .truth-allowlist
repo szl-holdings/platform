@@ -1,0 +1,28 @@
+# Format: relative/path|literal # reason: why the historical or non-metric number is required.
+audit/**|* # reason: Dated audit evidence is retained verbatim and is not a current public metric claim.
+docs/audit/**|* # reason: Dated audit evidence is retained verbatim and is not a current public metric claim.
+docs/reports/**|* # reason: Dated generated reports are retained verbatim and are not a current public metric claim.
+replit-sync/**|* # reason: Historical handoff records are retained verbatim and are not current public metric claims.
+docs/architecture/foundation-audit.md|* # reason: Dated 2026-06-02 subsystem audit uses scoped inventory counts, not current estate metrics.
+docs/CLAIM_RECONCILIATION_MATRIX.md|* # reason: Dated 2026-04-27 claim-audit evidence is retained verbatim for comparison.
+docs/DEMO_PATHS.md|* # reason: Historical demo script remains evidence of the earlier demo configuration and is not current measurement.
+docs/evolve-metrics-audit.md|* # reason: Dated subsystem audit contains local endpoint counts rather than the estate-wide endpoint metric.
+docs/EXECUTIVE_AUDIT_SUMMARY.md|* # reason: Dated 2026-04-25 audit result is an immutable historical snapshot.
+docs/FIX_LOG.md|* # reason: Fix log records the stale numbers it corrected and must retain that historical evidence.
+docs/investor/readiness-gaps.md|* # reason: Dated coverage estimate is a scoped historical risk entry, not the current test result metric.
+docs/launch/green-light-review.md|* # reason: Dated architecture review uses a workspace description rather than the generated monorepo metric.
+docs/OPEN_RISKS.md|* # reason: Dated risk register records the affected-package count for a specific failure, not total packages.
+docs/operations/codex-handoff.md|* # reason: Handoff step numbers sit near the word tests but are not metric claims.
+docs/operations/known-gaps.md|* # reason: Historical gap entries preserve scoped counts as dated evidence.
+docs/TECHNICAL_DUE_DILIGENCE_PACKET.md|* # reason: April 2026 diligence snapshot is retained verbatim and is superseded by the generated truth artifact.
+docs/trust/security-posture.md|* # reason: April 2026 security snapshot contains scoped protection counts, not current estate totals.
+ops/leadership/founder-next-60-days.md|* # reason: Day numbers sit near surface milestones but are schedule identifiers, not metric claims.
+packages/unified-kernel/README.md|* # reason: Kernel-local package and test counts document that subsystem and are not estate-wide metrics.
+dossier/**|* # reason: Dated APEX collateral is a historical snapshot and must not be reused as current measurement.
+proof-pack/**|* # reason: Dated April 2026 proof collateral is retained as historical evidence and is superseded by the generated truth artifact.
+docs/BUYER_READINESS.md|* # reason: Dated 2026-04-28 buyer-readiness snapshot is retained as historical evidence.
+docs/COMPANY_ASCENSION_PLAN.md|* # reason: Dated 2026-04-28 company plan is retained as historical evidence.
+docs/INVESTOR_PLATFORM_BRIEF.md|* # reason: Dated 2026-04-28 confidential brief is retained as historical evidence.
+docs/RELEASE_READINESS_SCORECARD.md|* # reason: Dated 2026-05-11 scorecard is retained as historical evidence and not treated as current verification.
+docs/SECURITY_AND_GOVERNANCE_FAQ.md|* # reason: Dated 2026-04-22 FAQ records the workflow count at publication time.
+SOURCE_OF_TRUTH.md|* # reason: Legacy hand-maintained snapshot is preserved for audit history and explicitly superseded by artifacts/SOURCE_OF_TRUTH.json.
