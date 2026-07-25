@@ -25,6 +25,7 @@ This directory contains all artifacts produced by the Zero-Gap Track 1 audit. Do
 | [`public-claims-reconciliation.md`](./public-claims-reconciliation.md) | Diff of every numeric claim across all public docs vs. verified reality | What was wrong, what was corrected |
 | [`source-of-truth.json`](./source-of-truth.json) | Machine-readable canonical counts with the exact command used to compute each | Single source of truth — use this for downstream automation |
 | [`root-cleanup-report.md`](./root-cleanup-report.md) | What was deleted, archived, or relocated from the root directory, and why | Root hygiene record |
+| [`FRONTIER_F1_PROOF.md`](./FRONTIER_F1_PROOF.md) | Frontier F1 regulatory evidence proof packet | EU AI Act mapping, receipt v2, Article 12 export, and ISO gap verification |
 
 ---
 
