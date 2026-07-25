@@ -54,10 +54,16 @@ public-repository disposition work. Inspection found material drift:
   recorded workflow did not make.
 - Distinguished 209 top-level package/library directories from 196 actual
   workspace package manifests.
+- Counted named Express Router receivers and locked the exact Doctrine formula
+  representation, incorporating the post-audit branch findings.
 - Moved active dependency overrides into `pnpm-workspace.yaml` and upgraded
   seven vulnerable transitive packages to patched releases.
 - Kept Orval on the compatible js-yaml 4.x line while raising its scoped
   override to 4.3.0 for GHSA-52cp-r559-cp3m.
+- Consolidated all active pnpm overrides in `pnpm-workspace.yaml`, preserved
+  native Windows build binaries, and made API codegen cross-platform.
+- Added a narrow dependency-review exception and engineering license record for
+  sharp's enumerated dynamically linked libvips distributions.
 - Closed known gap TD-011 in `docs/operations/known-gaps.md`.
 
 No repository visibility, deployment, production database, public badge, or UI
@@ -84,8 +90,9 @@ This is an environment baseline, not a product pass or failure.
 - 17 tracked-tree metric checks
 - 34 cross-document checks
 - 5 locked Doctrine checks
+- 6 locked Doctrine representation checks
 - 5 vocabulary checks
-- **61/61 total**
+- **67/67 total**
 
 - `node tools/truth/generate-truth.ts --check` — **PASS**
 - `node --test tools/truth/generate-truth.test.ts` — **4/4 PASS**
