@@ -134,6 +134,7 @@ Operational gaps, process health, test coverage, observability, team ownership.
 | TD-008 | Category naming inconsistent across docs — multiple variant terms used across investor-overview.md, platform-thesis.md, CATEGORY_POSITIONING.md, and positioning docs, creating confusion in investor conversations | Doc Accuracy | ✅ Resolved Apr-2026 — Canonical name is now "Governed Decision Infrastructure" across all docs: CATEGORY_POSITIONING.md v2.1, INVESTOR_NARRATIVE.md v3.0, MOAT_MAP.md v2.0, MARKET_POSITIONING.md, COMPANY_FACT_SHEET.md, and investor-overview.md. All variant terminology normalized. |
 | TD-009 | investor-overview.md Evaluation Path referenced "five architectural abstractions" instead of six | Doc Accuracy | ✅ Resolved Apr-2026 — Updated |
 | TD-010 | platform-thesis.md Defensibility section still said "Five platform primitives" and Event Fabric was absent from the primitives table | Doc Accuracy | ✅ Resolved Apr-2026 — Updated table and all count references |
+| TD-011 | Human-readable and machine-readable source-of-truth registries had diverged; the validator measured a removed API layout and was POSIX-shell-dependent | Doc Accuracy / CI | ✅ Resolved Jul-2026 — registry v2.0.0 recomputes tracked-tree metrics cross-platform, cross-checks both Markdown tables, labels historical runtime values, defines Doctrine 749/14/163, and runs in `.github/workflows/source-of-truth.yml` |
 | KG029 | Integration connector test stub in alloy-integrations | API / Quality | Minor UX gap | `routes/alloy-integrations.ts:345` returns hardcoded "Test not implemented for this integration type" for unsupported integrations — implement per-type test logic or document which types are testable |
 | KG034 | IP addresses stored in raw form in audit logs and session records | Privacy / GDPR | ✅ Resolved Apr-2026 — SHA-256 hashing with configurable salt (`IP_HASH_SALT` env var) applied via `hashIp()` in `lib/audit/src/ip-hash.ts`. Hash is deterministic for correlation but not reversible. Applied to all audit log (`activityLogTable`, `alloyAuditLogTable`, `auditEventsTable`) and session storage paths. See `lib/audit/src/index.ts`, `lib/audit/src/enriched.ts`, `artifacts/api-server/src/lib/auth.ts`, `artifacts/api-server/src/middlewares/session-policy.ts`. |
 | AF-010 | Sessions not invalidated on role change (up to 30-day exposure window) | Security / Auth | ✅ Resolved Apr-2026 — `revokeUserSessionsOnRoleChange()` exported from `artifacts/api-server/src/middlewares/session-policy.ts`. Automatically called on SCIM group member add/remove/replace operations. New `PUT /admin/users/:userId/roles` admin endpoint performs role replacement and revokes all active sessions with audit trail. |
@@ -309,6 +310,14 @@ Operational gaps, process health, test coverage, observability, team ownership.
 ---
 
 ## Incident Log
+
+- **2026-07-25 (FRONTIER V2 Wave 1 Truth Lock):** TD-011 resolved. Live
+  tracked-tree inspection found material drift between `SOURCE_OF_TRUTH.md`,
+  `audit/source-of-truth.json`, and the current runtime layout. The canonical
+  registry was rebuilt at v2.0.0, Doctrine `749/14/163` was split into labelled
+  metrics, ambiguous governance vocabulary was defined in `docs/GLOSSARY.md`,
+  and dependency-free drift validation was added to CI. Runtime/database values
+  not refreshed in this pass are retained only as historical snapshots.
 
 - **2026-04-16 (Phase 4–5 Flow & Quality Audit):** Flow audit and quality pass completed. All major user/admin flows documented in FLOW_AUDIT_MATRIX.md. 4 new flow gaps (FLOW-001–004) and 8 test quality gaps (TG-001–008) added to register. 2 test defects fixed: cortex-inca-smoke excluded from unit config; api-version error messages corrected (4 failing tests now pass). Lint baseline documented: 4,519 warnings, 0 errors. Full findings in AUDIT_FINDINGS_REGISTER.md. New QA docs created: TEST_STRATEGY.md, SMOKE_TEST_PLAN.md, REGRESSION_RISK_REGISTER.md, QA_SIGNOFF_CHECKLIST.md.
 

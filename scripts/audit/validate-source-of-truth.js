@@ -1,244 +1,413 @@
 #!/usr/bin/env node
 /**
- * scripts/audit/validate-source-of-truth.js
- *
- * Phase 1: Validates that the key counts in audit/source-of-truth.json match
- * the current filesystem state.
- *
- * Phase 2: Validates that the quick-reference table in audit/README.md is
- * consistent with audit/source-of-truth.json (cross-document consistency).
- *
- * Run from workspace root:
- *   node scripts/audit/validate-source-of-truth.js
+ * Validate the canonical platform metrics without depending on POSIX shell
+ * utilities. Counts come from Git's tracked-file index so the check also works
+ * in a sparse checkout.
  *
  * Exit codes:
  *   0 — all checks passed
- *   1 — one or more checks failed (details printed to stdout)
+ *   1 — one or more checks failed
  */
 
-import { execSync } from 'node:child_process';
-import { readFileSync } from 'node:fs';
-import { resolve, dirname } from 'node:path';
+import { execFileSync } from 'node:child_process';
+import { existsSync, readFileSync } from 'node:fs';
+import { dirname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
-const __dirname = dirname(fileURLToPath(import.meta.url));
-const ROOT = resolve(__dirname, '..', '..');
+const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '..', '..');
 
-function run(cmd) {
-  try {
-    return parseInt(execSync(cmd, { cwd: ROOT, encoding: 'utf8' }).trim(), 10);
-  } catch {
-    return -1;
-  }
+function git(args) {
+  return execFileSync('git', args, {
+    cwd: ROOT,
+    encoding: 'utf8',
+    maxBuffer: 64 * 1024 * 1024,
+  });
 }
 
-const truth = JSON.parse(
-  readFileSync(resolve(ROOT, 'audit', 'source-of-truth.json'), 'utf8')
+function trackedPaths() {
+  return git(['ls-files', '-z']).split('\0').filter(Boolean);
+}
+
+function trackedText(path) {
+  const diskPath = resolve(ROOT, path);
+  if (existsSync(diskPath)) return readFileSync(diskPath, 'utf8');
+  return git(['show', `:${path}`]);
+}
+
+function topLevelDirectories(paths, prefix) {
+  const directories = new Set();
+  const marker = `${prefix}/`;
+  for (const path of paths) {
+    if (!path.startsWith(marker)) continue;
+    const remainder = path.slice(marker.length);
+    const separator = remainder.indexOf('/');
+    if (separator <= 0) continue;
+    directories.add(remainder.slice(0, separator));
+  }
+  return directories;
+}
+
+function countMatches(text, pattern) {
+  return [...text.matchAll(pattern)].length;
+}
+
+const HTTP_ROUTE_METHODS = 'get|post|put|patch|delete|use';
+
+function escapeRegExp(value) {
+  return value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+}
+
+function expressReceiverNames(text) {
+  const names = new Set(['app', 'router']);
+  const declarations = [
+    /\b(?:const|let|var)\s+([A-Za-z_$][\w$]*)\s*=\s*(?:(?:express\s*\.\s*)?Router|express)\s*\(/g,
+    /\b([A-Za-z_$][\w$]*)\s*:\s*(?:Express\s*\.\s*)?I?Router\b/g,
+  ];
+
+  for (const declaration of declarations) {
+    for (const match of text.matchAll(declaration)) names.add(match[1]);
+  }
+
+  return names;
+}
+
+function countExpressHandlerDeclarations(text) {
+  let count = 0;
+  for (const receiver of expressReceiverNames(text)) {
+    count += countMatches(
+      text,
+      new RegExp(
+        `\\b${escapeRegExp(receiver)}\\s*\\.\\s*(?:${HTTP_ROUTE_METHODS})\\s*\\(`,
+        'g'
+      )
+    );
+  }
+  return count;
+}
+
+function parseCountTable(path, valueHeading) {
+  const rows = new Map();
+  const lines = trackedText(path).split('\n');
+  let metricIndex = -1;
+  let valueIndex = -1;
+  let inTable = false;
+
+  for (const raw of lines) {
+    const line = raw.trim();
+    if (!line.startsWith('|')) {
+      inTable = false;
+      continue;
+    }
+
+    const cells = line
+      .slice(1, -1)
+      .split('|')
+      .map((cell) => cell.trim());
+
+    if (cells.includes('Metric') && cells.includes(valueHeading)) {
+      metricIndex = cells.indexOf('Metric');
+      valueIndex = cells.indexOf(valueHeading);
+      inTable = true;
+      continue;
+    }
+
+    if (!inTable || cells.every((cell) => /^:?-+:?$/.test(cell))) continue;
+    const metric = cells[metricIndex]?.replaceAll('`', '');
+    const rawValue = cells[valueIndex]?.replaceAll('*', '').replaceAll(',', '');
+    const numeric = rawValue?.match(/\d+/);
+    if (metric && numeric) rows.set(metric, Number.parseInt(numeric[0], 10));
+  }
+
+  return rows;
+}
+
+const truth = JSON.parse(trackedText('audit/source-of-truth.json'));
+const paths = trackedPaths();
+
+const artifactManifests = paths.filter((path) =>
+  /^artifacts\/[^/]+\/(?:\.replit-artifact\/)?artifact\.toml$/.test(path)
+);
+const registeredArtifactNames = artifactManifests.map((path) => path.split('/')[1]);
+const registeredProductVerticals = registeredArtifactNames.filter(
+  (name) => name !== 'a11oy'
 );
 
-// ─── Phase 1: Filesystem counts vs source-of-truth.json ──────────────────────
+const sourceExtensions = /\.(?:ts|tsx|js|mjs)$/;
+const testPath = /(?:^|\/)(?:__tests__|test|tests)(?:\/|$)|\.(?:test|spec)\./;
+const runtimeSourcePaths = paths.filter(
+  (path) =>
+    /^(?:apps|services|artifacts\/api-server)\//.test(path) &&
+    sourceExtensions.test(path) &&
+    !testPath.test(path)
+);
+const routeHandlerCounts = new Map(
+  runtimeSourcePaths.map((path) => [
+    path,
+    countExpressHandlerDeclarations(trackedText(path)),
+  ])
+);
+const routeSourcePaths = runtimeSourcePaths.filter(
+  (path) => routeHandlerCounts.get(path) > 0
+);
+const dbSchemaPaths = paths.filter((path) =>
+  /^lib\/db\/src\/schema\/.*\.ts$/.test(path)
+);
 
-const fsChecks = [
+const actual = {
+  registeredArtifacts: artifactManifests.length,
+  artifactDirectories: topLevelDirectories(paths, 'artifacts').size,
+  productVerticals: registeredProductVerticals.length,
+  packages: topLevelDirectories(paths, 'packages').size,
+  sharedLibs: topLevelDirectories(paths, 'lib').size,
+  apps: topLevelDirectories(paths, 'apps').size,
+  services: topLevelDirectories(paths, 'services').size,
+  workers: topLevelDirectories(paths, 'workers').size,
+  dbSchemaFiles: dbSchemaPaths.length,
+  dbTableCallSites: dbSchemaPaths.reduce(
+    (sum, path) => sum + countMatches(trackedText(path), /\bpgTable\s*\(/g),
+    0
+  ),
+  dbMigrations: paths.filter((path) =>
+    /^lib\/db\/drizzle\/[^/]+\.sql$/.test(path)
+  ).length,
+  apiRouteSourceFiles: routeSourcePaths.length,
+  apiHandlerDeclarations: [...routeHandlerCounts.values()].reduce(
+    (sum, count) => sum + count,
+    0
+  ),
+  workflows: paths.filter((path) =>
+    /^\.github\/workflows\/[^/]+\.ya?ml$/.test(path)
+  ).length,
+  envVars: trackedText('.env.example')
+    .split('\n')
+    .filter((line) => /^[A-Z_]+=/.test(line)).length,
+};
+
+const filesystemChecks = [
   {
-    name: 'Registered artifacts (artifact.toml)',
+    name: 'Registered artifacts',
     expected: truth.artifacts.registered.count,
-    actual: run("find artifacts -name artifact.toml | wc -l"),
+    actual: actual.registeredArtifacts,
   },
   {
-    name: 'Total artifact directories',
+    name: 'Artifact directories',
     expected: truth.artifacts.total_on_disk.count,
-    actual: run("ls artifacts/ | wc -l"),
+    actual: actual.artifactDirectories,
   },
   {
-    name: 'Domain packages (packages/)',
+    name: 'Registered product verticals',
+    expected: truth.product_verticals.registered.count,
+    actual: actual.productVerticals,
+  },
+  {
+    name: 'Domain packages',
     expected: truth.packages.domain_packages_dir.count,
-    actual: run("ls packages/ | wc -l"),
+    actual: actual.packages,
   },
   {
-    name: 'Shared library packages (lib/)',
+    name: 'Shared library packages',
     expected: truth.packages.shared_lib_packages.count,
-    actual: run("ls lib/ | wc -l"),
+    actual: actual.sharedLibs,
   },
   {
-    name: 'Apps (apps/)',
+    name: 'Total packages',
+    expected: truth.packages.total_packages.count,
+    actual: actual.packages + actual.sharedLibs,
+  },
+  {
+    name: 'Apps',
     expected: truth.packages.apps.count,
-    actual: run("ls apps/ | wc -l"),
+    actual: actual.apps,
   },
   {
-    name: 'Services (services/)',
+    name: 'Services',
     expected: truth.packages.services.count,
-    actual: run("ls services/ | wc -l"),
+    actual: actual.services,
   },
   {
-    name: 'Workers (workers/)',
+    name: 'Workers',
     expected: truth.packages.workers.count,
-    actual: run("ls workers/ | wc -l"),
+    actual: actual.workers,
   },
   {
-    name: 'DB schema files (lib/db/src/schema)',
+    name: 'DB schema files',
     expected: truth.database.schema_files.count,
-    actual: run("find lib/db/src/schema -name '*.ts' | wc -l"),
+    actual: actual.dbSchemaFiles,
   },
   {
-    name: 'DB migration files (lib/db/drizzle/)',
+    name: 'DB pgTable call sites',
+    expected: truth.database.pg_table_call_sites.count,
+    actual: actual.dbTableCallSites,
+  },
+  {
+    name: 'DB migrations',
     expected: truth.database.migration_files.count,
-    actual: run("ls lib/db/drizzle/ | grep -v '^meta$' | wc -l"),
+    actual: actual.dbMigrations,
   },
   {
-    name: 'API route files',
-    expected: truth.api.route_files.count,
-    actual: run("find artifacts/api-server/src/routes -name '*.ts' ! -name '*.test.ts' ! -name '*.spec.ts' | wc -l"),
+    name: 'API route source files',
+    expected: truth.api.route_source_files.count,
+    actual: actual.apiRouteSourceFiles,
   },
   {
-    name: 'API route groups (top-level, excl. __tests__)',
-    expected: truth.api.route_groups_top_level.count,
-    actual: run("find artifacts/api-server/src/routes -mindepth 1 -maxdepth 1 -type d | grep -v '__tests__' | wc -l"),
+    name: 'API handler declarations',
+    expected: truth.api.handler_declarations.count,
+    actual: actual.apiHandlerDeclarations,
   },
   {
-    name: 'CI workflows (.github/workflows/)',
+    name: 'CI workflows',
     expected: truth.ci.workflows.count,
-    actual: run("ls .github/workflows/ | wc -l"),
+    actual: actual.workflows,
   },
   {
-    name: 'Environment variables (.env.example)',
+    name: 'Environment variables',
     expected: truth.env.declared_vars.count,
-    actual: run("grep -cE '^[A-Z_]+=' .env.example"),
+    actual: actual.envVars,
   },
 ];
 
-// ─── Phase 2: Cross-document consistency (audit/README.md vs source-of-truth) ─
+const auditReadme = parseCountTable('audit/README.md', 'Verified Count');
+const humanTruth = parseCountTable('SOURCE_OF_TRUTH.md', 'Canonical Value');
 
-/**
- * Parse the quick-reference table in audit/README.md and extract numeric values.
- * Returns a Map of metric-label → number.
- */
-function parseReadmeQuickRef() {
-  const readmePath = resolve(ROOT, 'audit', 'README.md');
-  const text = readFileSync(readmePath, 'utf8');
-  const map = new Map();
-  const tableRowRe = /^\|([^|]+)\|([^|]+)\|([^|]+)\|/;
-  let inTable = false;
-  for (const raw of text.split('\n')) {
-    const line = raw.trim();
-    if (line.includes('Verified Count')) { inTable = true; continue; }
-    if (inTable && line.startsWith('|---')) continue;
-    if (inTable && !line.startsWith('|')) { inTable = false; continue; }
-    if (!inTable) continue;
-    const m = tableRowRe.exec(line);
-    if (!m) continue;
-    const label = m[1].trim();
-    const rawVal = m[2].trim();
-    const numMatch = /^(\d+)/.exec(rawVal);
-    if (numMatch) map.set(label, parseInt(numMatch[1], 10));
-  }
-  return map;
+const documentationChecks = [
+  ['Registered artifacts', truth.artifacts.registered.count],
+  ['Artifact directories', truth.artifacts.total_on_disk.count],
+  ['Registered product verticals', truth.product_verticals.registered.count],
+  ['Domain packages (packages/)', truth.packages.domain_packages_dir.count],
+  ['Shared library packages (lib/)', truth.packages.shared_lib_packages.count],
+  ['Total packages (packages/ + lib/)', truth.packages.total_packages.count],
+  ['Apps (apps/)', truth.packages.apps.count],
+  ['Services (services/)', truth.packages.services.count],
+  ['Workers (workers/)', truth.packages.workers.count],
+  ['DB schema files', truth.database.schema_files.count],
+  ['DB pgTable call sites', truth.database.pg_table_call_sites.count],
+  ['DB migrations (SQL files)', truth.database.migration_files.count],
+  ['API route source files', truth.api.route_source_files.count],
+  ['API handler declarations', truth.api.handler_declarations.count],
+  ['CI workflows', truth.ci.workflows.count],
+  ['Environment variables (in .env.example)', truth.env.declared_vars.count],
+];
+
+const crossDocumentChecks = [];
+for (const [name, expected] of documentationChecks) {
+  crossDocumentChecks.push({
+    name: `audit/README.md: ${name}`,
+    expected,
+    actual: auditReadme.get(name) ?? -1,
+  });
+  crossDocumentChecks.push({
+    name: `SOURCE_OF_TRUTH.md: ${name}`,
+    expected,
+    actual: humanTruth.get(name) ?? -1,
+  });
 }
 
-const readmeCounts = parseReadmeQuickRef();
+const doctrineChecks = [
+  ['Doctrine declarations', truth.doctrine_v11.declarations.count, 749],
+  ['Doctrine unique axioms', truth.doctrine_v11.unique_axioms.count, 14],
+  ['Doctrine tracked sorries', truth.doctrine_v11.tracked_sorries.count, 163],
+  ['Doctrine locked formulas', truth.doctrine_v11.locked_formulas.count, 8],
+  [
+    'Doctrine kernel commit',
+    truth.doctrine_v11.kernel_commit,
+    'c7c0ba17',
+  ],
+];
 
-// Map README labels → source-of-truth values
-const crossChecks = [
-  {
-    name: 'README ↔ JSON: Registered artifacts',
-    readmeKey: 'Registered artifacts (with artifact.toml)',
-    expected: truth.artifacts.registered.count,
-  },
-  {
-    name: 'README ↔ JSON: Total artifact directories',
-    readmeKey: 'Total artifact directories on disk',
-    expected: truth.artifacts.total_on_disk.count,
-  },
-  {
-    name: 'README ↔ JSON: Domain packages',
-    readmeKey: 'Domain packages (`packages/`)',
-    expected: truth.packages.domain_packages_dir.count,
-  },
-  {
-    name: 'README ↔ JSON: Shared library packages',
-    readmeKey: 'Shared library packages (`lib/`)',
-    expected: truth.packages.shared_lib_packages.count,
-  },
-  {
-    name: 'README ↔ JSON: Apps',
-    readmeKey: 'Apps (`apps/`)',
-    expected: truth.packages.apps.count,
-  },
-  {
-    name: 'README ↔ JSON: Services',
-    readmeKey: 'Services (`services/`)',
-    expected: truth.packages.services.count,
-  },
-  {
-    name: 'README ↔ JSON: Workers',
-    readmeKey: 'Workers (`workers/`)',
-    expected: truth.packages.workers.count,
-  },
-  {
-    name: 'README ↔ JSON: DB schema files',
-    readmeKey: 'DB schema files',
-    expected: truth.database.schema_files.count,
-  },
-  {
-    name: 'README ↔ JSON: DB tables (raw grep)',
-    readmeKey: 'DB tables (raw grep, pgTable declarations)',
-    expected: truth.database.table_definitions_raw_grep.count,
-  },
-  {
-    name: 'README ↔ JSON: DB migrations',
-    readmeKey: 'DB migrations (SQL files)',
-    expected: truth.database.migration_files.count,
-  },
-  {
-    name: 'README ↔ JSON: API route files',
-    readmeKey: 'API route files',
-    expected: truth.api.route_files.count,
-  },
-  {
-    name: 'README ↔ JSON: API route groups',
-    readmeKey: 'API route groups (top-level, excl. __tests__)',
-    expected: truth.api.route_groups_top_level.count,
-  },
-  {
-    name: 'README ↔ JSON: CI workflows',
-    readmeKey: 'CI workflows',
-    expected: truth.ci.workflows.count,
-  },
-  {
-    name: 'README ↔ JSON: Environment variables',
-    readmeKey: 'Environment variables (in .env.example)',
-    expected: truth.env.declared_vars.count,
-  },
-].map(c => ({
-  ...c,
-  actual: readmeCounts.has(c.readmeKey) ? readmeCounts.get(c.readmeKey) : -1,
+const glossary = trackedText('docs/GLOSSARY.md');
+const canonicalTruth = trackedText('SOURCE_OF_TRUTH.md');
+const doctrineTruth = parseCountTable('SOURCE_OF_TRUTH.md', 'Locked Value');
+const expectedLockedFormulas = ['F1', 'F4', 'F7', 'F11', 'F12', 'F18', 'F19', 'F22'];
+const lockedFormulaRow = canonicalTruth
+  .split('\n')
+  .find((line) => /^\|\s*Locked-proven formulas\s*\|/.test(line));
+const documentedLockedFormulas = lockedFormulaRow
+  ? [...lockedFormulaRow.matchAll(/\bF\d+\b/g)].map((match) => match[0])
+  : [];
+const doctrineRepresentationChecks = [
+  ['Declarations', truth.doctrine_v11.declarations.count],
+  ['Unique axioms', truth.doctrine_v11.unique_axioms.count],
+  ['Tracked sorry obligations', truth.doctrine_v11.tracked_sorries.count],
+  ['Locked-proven formulas', truth.doctrine_v11.locked_formulas.count],
+].map(([name, expected]) => ({
+  name: `SOURCE_OF_TRUTH.md Doctrine: ${name}`,
+  expected,
+  actual: doctrineTruth.get(name) ?? -1,
 }));
-
-// ─── Output ───────────────────────────────────────────────────────────────────
+doctrineRepresentationChecks.push(
+  {
+    name: 'source-of-truth.json exact locked formula list',
+    expected: JSON.stringify(expectedLockedFormulas),
+    actual: JSON.stringify(truth.doctrine_v11.locked_formulas.list),
+  },
+  {
+    name: 'SOURCE_OF_TRUTH.md exact locked formula list',
+    expected: JSON.stringify(expectedLockedFormulas),
+    actual: JSON.stringify(documentedLockedFormulas),
+  }
+);
+const vocabularyChecks = [
+  'Holographic state',
+  'Product vertical',
+  'Runtime organ',
+  'Policy gate module',
+].map((term) => ({
+  name: `Glossary defines "${term}"`,
+  expected: true,
+  actual: glossary.includes(`**${term}**`),
+}));
+vocabularyChecks.push({
+  name: 'Canonical truth avoids governed ambiguous-surface phrases',
+  expected: false,
+  actual:
+    /\b(?:holographic|customer-facing|organ|policy gate) surfaces?\b/i.test(
+      canonicalTruth
+    ),
+});
 
 let failures = 0;
 
 function printChecks(title, checks) {
-  console.log(`\n── ${title} ──`);
+  console.log(`\n-- ${title} --`);
   for (const { name, expected, actual } of checks) {
     const ok = expected === actual;
-    if (!ok) failures++;
-    const status = ok ? '✓ PASS' : '✗ FAIL';
+    if (!ok) failures += 1;
+    const status = ok ? 'PASS' : 'FAIL';
     const detail = ok ? `${actual}` : `expected=${expected} actual=${actual}`;
     console.log(`  ${status}  ${name}: ${detail}`);
   }
 }
 
 console.log(`Source-of-truth validation — ${new Date().toISOString()}`);
-console.log(`SOT version: ${truth.meta.version}  generated: ${truth.meta.generated}`);
+console.log(
+  `SOT version: ${truth.meta.version}  generated: ${truth.meta.generated}`
+);
 
-printChecks('Phase 1: Filesystem vs source-of-truth.json', fsChecks);
-printChecks('Phase 2: audit/README.md vs source-of-truth.json', crossChecks);
+printChecks('Tracked tree vs source-of-truth.json', filesystemChecks);
+printChecks('Canonical documents vs source-of-truth.json', crossDocumentChecks);
+printChecks(
+  'Locked Doctrine v11 contract',
+  doctrineChecks.map(([name, actualValue, expectedValue]) => ({
+    name,
+    expected: expectedValue,
+    actual: actualValue,
+  }))
+);
+printChecks('Locked Doctrine v11 representation', doctrineRepresentationChecks);
+printChecks('Canonical vocabulary', vocabularyChecks);
 
-console.log(`\n── Result ──`);
+console.log('\n-- Result --');
 if (failures > 0) {
-  console.log(`  ✗ FAILED — ${failures} check(s) failed`);
+  console.log(`  FAILED — ${failures} check(s) failed`);
   process.exit(1);
-} else {
-  console.log(`  ✓ ALL PASS — ${fsChecks.length + crossChecks.length} checks passed`);
-  process.exit(0);
 }
+
+console.log(
+  `  ALL PASS — ${
+    filesystemChecks.length +
+    crossDocumentChecks.length +
+    doctrineChecks.length +
+    doctrineRepresentationChecks.length +
+    vocabularyChecks.length
+  } checks passed`
+);
