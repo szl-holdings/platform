@@ -28,30 +28,30 @@ This directory contains all artifacts produced by the Zero-Gap Track 1 audit. Do
 
 ---
 
-## Canonical Numbers (Quick Reference)
+## Canonical Current-Tree Numbers (Quick Reference)
 
-> Updated 2026-04-25 by Moonshot Phase 1 audit. Source: `audit/source-of-truth.json` v1.3.0.
+> Updated 2026-07-25 by FRONTIER V2 Wave 1 truth lock. Source:
+> `audit/source-of-truth.json` v2.0.0. Historical runtime/database snapshots
+> remain in the JSON but are not current public claims.
 
 | Metric | Verified Count | Source |
 |--------|---------------|--------|
-| Registered artifacts (with artifact.toml) | 14 | `find artifacts -name artifact.toml \| wc -l` |
-| Total artifact directories on disk | 14 | `ls artifacts/ \| wc -l` |
-| Domain packs (active) | 7 | Inventory (TENAX, SEXTANT, DOMAINE, Counsel, Carlota Jo, LUMINA, PARAGON) |
-| Platform primitives | 6 | Inventory |
-| RBAC roles | 11 | README / trust docs |
-| Domain packages (`packages/`) | 84 | `ls packages/ \| wc -l` |
-| Shared library packages (`lib/`) | 42 | `ls lib/ \| wc -l` |
-| Apps (`apps/`) | 3 | `ls apps/ \| wc -l` |
-| Services (`services/`) | 5 | `ls services/ \| wc -l` |
+| Registered artifacts | 6 | Tracked artifact manifests |
+| Artifact directories | 7 | Tracked top-level `artifacts/` children |
+| Registered product verticals | 5 | Registered domain artifacts; A11oy is separate |
+| Domain packages (`packages/`) | 156 | Tracked top-level package directories |
+| Shared library packages (`lib/`) | 53 | Tracked top-level library directories |
+| Total packages (`packages/` + `lib/`) | 209 | 156 + 53 |
+| Apps (`apps/`) | 11 | Tracked top-level `apps/` children |
+| Services (`services/`) | 11 | Tracked top-level `services/` children |
 | Workers (`workers/`) | 5 | `ls workers/ \| wc -l` |
-| DB schema files | 170 | `find lib/db/src/schema -name '*.ts' \| wc -l` |
-| DB tables (raw grep, pgTable declarations) | 939 | `grep -r '= pgTable' lib/db/src/schema/ --include='*.ts' \| wc -l` |
-| DB tables (live, provisioned via drizzle push) | 730 | Track 4 DB verification (2026-04-21) |
-| DB migrations (SQL files) | 132 | `ls lib/db/drizzle/ \| grep -v meta \| wc -l` |
-| API route files | 357 | `find artifacts/api-server/src/routes -name '*.ts' ! -name '*.test.ts' ! -name '*.spec.ts' \| wc -l` |
-| API route groups (top-level, excl. __tests__) | 12 | `find artifacts/api-server/src/routes -mindepth 1 -maxdepth 1 -type d \| grep -v '__tests__' \| wc -l` |
-| CI workflows | 23 | `ls .github/workflows/ \| wc -l` |
-| Environment variables (in .env.example) | 213 | `grep -cE '^[A-Z_]+=' .env.example` |
+| DB schema files | 197 | Tracked `lib/db/src/schema/**/*.ts` files |
+| DB `pgTable` call sites | 1,067 | Static source call sites; not provisioned-table count |
+| DB migrations (SQL files) | 149 | Tracked `lib/db/drizzle/*.sql` files |
+| API route source files | 31 | Non-test route files across current runtime roots |
+| API handler declarations | 284 | Static non-test `router`/`app` method declarations |
+| CI workflows | 44 | Includes the truth-lock workflow |
+| Environment variables (in `.env.example`) | 238 | Lines matching `^[A-Z_]+=` |
 
 ---
 
@@ -59,6 +59,10 @@ This directory contains all artifacts produced by the Zero-Gap Track 1 audit. Do
 
 | Document | Fix |
 |---------|-----|
+| `SOURCE_OF_TRUTH.md` | Replaced stale April/May metrics with reproducible current-tree, locked-kernel, observed-external, and historical status classes |
+| `audit/source-of-truth.json` | Registry v2.0.0: 6 registered artifacts, 5 registered product verticals, current package/DB/API/CI/env counts, labelled Doctrine 749/14/163 definitions |
+| `docs/GLOSSARY.md` | Separated holographic state, product vertical, runtime organ, and policy gate module |
+| `.github/workflows/source-of-truth.yml` | Added a required drift-detection execution path for canonical files and counted tree roots |
 | `docs/platform-facts.md` | Active artifacts 2→14; packages 77→82; total packages 118→123; schema files 163→165; API route groups 14→12 |
 | `replit.md` | "15 active applications" → "14 registered artifacts" with complete non-duplicate list |
 | `README.md` | Repository map: added `apps/`, `services/`, `workers/` entries |
@@ -68,7 +72,11 @@ This directory contains all artifacts produced by the Zero-Gap Track 1 audit. Do
 
 ## Validation
 
-Run `node scripts/audit/validate-source-of-truth.js` from the workspace root to verify all key counts match the current filesystem state. Exit 0 = all checks pass; exit 1 = drift detected. The script re-runs every command in `source-of-truth.json` and fails if any count diverges.
+Run `node scripts/audit/validate-source-of-truth.js` from the workspace root.
+The validator is dependency-free and cross-platform. It recomputes current-tree
+metrics from Git's tracked-file index, checks the two Markdown representations,
+verifies the locked Doctrine contract, and enforces the canonical vocabulary.
+Exit 0 means all checks pass; exit 1 means drift was detected.
 
 ---
 
