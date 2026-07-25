@@ -142,7 +142,13 @@ Use [docs/README.md](README.md) for navigation by audience or task.
 | [sales/technical-demo.md](sales/technical-demo.md) | Technical/engineering audience demo script | 2026-04 |
 | [sales/go-to-market.md](sales/go-to-market.md) | GTM motion: ICP, channels, pipeline stages | 2026-04 |
 | [sales/message-house.md](sales/message-house.md) | Launch message house: primary message, three pillars, proof points | 2026-04 |
-| [sales/category-positioning.md](sales/category-positioning.md) | Category positioning: Governed Decision Infrastructure | 2026-0€nm¢Gß≤⁄Óù∆≠yﬂbuyer-personas.md) | Buyer personas: CISO, Head of Ops, CTO, CEO | 2026-04 |
+| [sales/category-positioning.md](sales/category-positioning.md) | Category positioning: Governed Decision Infrastructure | 2026-04 |
+| [sales/market-positioning.md](sales/market-positioning.md) | Market positioning: competitive differentiation and white space | 2026-04 |
+| [sales/sales-narrative.md](sales/sales-narrative.md) | Sales narrative: the accountability gap and solution story | 2026-04 |
+| [sales/sales-handoff-guide.md](sales/sales-handoff-guide.md) | Sales handoff guide: motion, qualification, deal stages | 2026-04 |
+| [sales/sales-execution-status.md](sales/sales-execution-status.md) | Current sales execution status and pipeline | 2026-04 |
+| [sales/objection-handling.md](sales/objection-handling.md) | Full objection handling responses | 2026-04 |
+| [sales/buyer-personas.md](sales/buyer-personas.md) | Buyer personas: CISO, Head of Ops, CTO, CEO | 2026-04 |
 | [sales/target-accounts.md](sales/target-accounts.md) | Target account list and qualification criteria | 2026-04 |
 | [sales/outreach-sequences.md](sales/outreach-sequences.md) | Outreach sequences for each persona | 2026-04 |
 | [sales/first-meeting-kit.md](sales/first-meeting-kit.md) | First meeting kit: agenda, discovery questions, materials | 2026-04 |
