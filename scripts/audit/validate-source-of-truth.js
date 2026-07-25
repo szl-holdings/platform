@@ -51,6 +51,37 @@ function countMatches(text, pattern) {
   return [...text.matchAll(pattern)].length;
 }
 
+const HTTP_ROUTE_METHODS = 'get|post|put|patch|delete|use';
+
+function escapeRegExp(value) {
+  return value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+}
+
+function expressReceiverNames(text) {
+  const names = new Set(['app', 'router']);
+  const declarations = [
+    /\b(?:const|let|var)\s+([A-Za-z_$][\w$]*)\s*=\s*(?:(?:express\s*\.\s*)?Router|express)\s*\(/g,
+    /\b([A-Za-z_$][\w$]*)\s*:\s*(?:Express\s*\.\s*)?I?Router\b/g,
+  ];
+
+  for (const declaration of declarations) {
+    for (const match of text.matchAll(declaration)) names.add(match[1]);
+  }
+
+  return names;
+}
+
+function countExpressHandlerDeclarations(text) {
+  let count = 0;
+  for (const receiver of expressReceiverNames(text)) {
+    count += countMatches(
+      text,
+      new RegExp(`\\b${escapeRegExp(receiver)}\\s*\\.\\s*(?:${HTTP_ROUTE_METHODS})\\s*\\(`, 'g'),
+    );
+  }
+  return count;
+}
+
 function parseCountTable(path, valueHeading) {
   const rows = new Map();
   const lines = trackedText(path).split('\n');
@@ -104,7 +135,10 @@ const runtimeSourcePaths = paths.filter(
     sourceExtensions.test(path) &&
     !testPath.test(path),
 );
-const routeSourcePaths = runtimeSourcePaths.filter((path) => /\/routes\//.test(path));
+const routeHandlerCounts = new Map(
+  runtimeSourcePaths.map((path) => [path, countExpressHandlerDeclarations(trackedText(path))]),
+);
+const routeSourcePaths = runtimeSourcePaths.filter((path) => routeHandlerCounts.get(path) > 0);
 const dbSchemaPaths = paths.filter((path) => /^lib\/db\/src\/schema\/.*\.ts$/.test(path));
 const workspacePackageManifests = paths.filter((path) => {
   if (
@@ -137,12 +171,7 @@ const actual = {
   ),
   dbMigrations: paths.filter((path) => /^lib\/db\/drizzle\/[^/]+\.sql$/.test(path)).length,
   apiRouteSourceFiles: routeSourcePaths.length,
-  apiHandlerDeclarations: runtimeSourcePaths.reduce(
-    (sum, path) =>
-      sum +
-      countMatches(trackedText(path), /\b(?:router|app)\.(?:get|post|put|patch|delete|use)\s*\(/g),
-    0,
-  ),
+  apiHandlerDeclarations: [...routeHandlerCounts.values()].reduce((sum, count) => sum + count, 0),
   workflows: paths.filter((path) => /^\.github\/workflows\/[^/]+\.ya?ml$/.test(path)).length,
   envVars: trackedText('.env.example')
     .split('\n')
@@ -284,6 +313,36 @@ const doctrineChecks = [
 
 const glossary = trackedText('docs/GLOSSARY.md');
 const canonicalTruth = trackedText('SOURCE_OF_TRUTH.md');
+const doctrineTruth = parseCountTable('SOURCE_OF_TRUTH.md', 'Locked Value');
+const expectedLockedFormulas = ['F1', 'F4', 'F7', 'F11', 'F12', 'F18', 'F19', 'F22'];
+const lockedFormulaRow = canonicalTruth
+  .split('\n')
+  .find((line) => /^\|\s*Locked-proven formulas\s*\|/.test(line));
+const documentedLockedFormulas = lockedFormulaRow
+  ? [...lockedFormulaRow.matchAll(/\bF\d+\b/g)].map((match) => match[0])
+  : [];
+const doctrineRepresentationChecks = [
+  ['Declarations', truth.doctrine_v11.declarations.count],
+  ['Unique axioms', truth.doctrine_v11.unique_axioms.count],
+  ['Tracked sorry obligations', truth.doctrine_v11.tracked_sorries.count],
+  ['Locked-proven formulas', truth.doctrine_v11.locked_formulas.count],
+].map(([name, expected]) => ({
+  name: `SOURCE_OF_TRUTH.md Doctrine: ${name}`,
+  expected,
+  actual: doctrineTruth.get(name) ?? -1,
+}));
+doctrineRepresentationChecks.push(
+  {
+    name: 'source-of-truth.json exact locked formula list',
+    expected: JSON.stringify(expectedLockedFormulas),
+    actual: JSON.stringify(truth.doctrine_v11.locked_formulas.list),
+  },
+  {
+    name: 'SOURCE_OF_TRUTH.md exact locked formula list',
+    expected: JSON.stringify(expectedLockedFormulas),
+    actual: JSON.stringify(documentedLockedFormulas),
+  },
+);
 const vocabularyChecks = [
   'Holographic state',
   'Product vertical',
@@ -326,6 +385,7 @@ printChecks(
     actual: actualValue,
   })),
 );
+printChecks('Locked Doctrine v11 representation', doctrineRepresentationChecks);
 printChecks('Canonical vocabulary', vocabularyChecks);
 
 console.log('\n-- Result --');
@@ -339,6 +399,7 @@ console.log(
     filesystemChecks.length +
     crossDocumentChecks.length +
     doctrineChecks.length +
+    doctrineRepresentationChecks.length +
     vocabularyChecks.length
   } checks passed`,
 );
