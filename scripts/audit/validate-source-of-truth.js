@@ -91,12 +91,10 @@ const truth = JSON.parse(trackedText('audit/source-of-truth.json'));
 const paths = trackedPaths();
 
 const artifactManifests = paths.filter((path) =>
-  /^artifacts\/[^/]+\/(?:\.replit-artifact\/)?artifact\.toml$/.test(path)
+  /^artifacts\/[^/]+\/(?:\.replit-artifact\/)?artifact\.toml$/.test(path),
 );
 const registeredArtifactNames = artifactManifests.map((path) => path.split('/')[1]);
-const registeredProductVerticals = registeredArtifactNames.filter(
-  (name) => name !== 'a11oy'
-);
+const registeredProductVerticals = registeredArtifactNames.filter((name) => name !== 'a11oy');
 
 const sourceExtensions = /\.(?:ts|tsx|js|mjs)$/;
 const testPath = /(?:^|\/)(?:__tests__|test|tests)(?:\/|$)|\.(?:test|spec)\./;
@@ -104,14 +102,23 @@ const runtimeSourcePaths = paths.filter(
   (path) =>
     /^(?:apps|services|artifacts\/api-server)\//.test(path) &&
     sourceExtensions.test(path) &&
-    !testPath.test(path)
+    !testPath.test(path),
 );
-const routeSourcePaths = runtimeSourcePaths.filter((path) =>
-  /\/routes\//.test(path)
-);
-const dbSchemaPaths = paths.filter((path) =>
-  /^lib\/db\/src\/schema\/.*\.ts$/.test(path)
-);
+const routeSourcePaths = runtimeSourcePaths.filter((path) => /\/routes\//.test(path));
+const dbSchemaPaths = paths.filter((path) => /^lib\/db\/src\/schema\/.*\.ts$/.test(path));
+const workspacePackageManifests = paths.filter((path) => {
+  if (
+    path === 'artifacts/imperium/package.json' ||
+    path === 'artifacts/stephen-site/package.json'
+  ) {
+    return false;
+  }
+  return (
+    /^(?:apps|artifacts|lib|packages|services|workers)\/[^/]+\/package\.json$/.test(path) ||
+    /^lib\/integrations\/[^/]+\/package\.json$/.test(path) ||
+    /^(?:scripts|platform\/temporal|platform\/agent-gateway)\/package\.json$/.test(path)
+  );
+});
 
 const actual = {
   registeredArtifacts: artifactManifests.length,
@@ -119,30 +126,24 @@ const actual = {
   productVerticals: registeredProductVerticals.length,
   packages: topLevelDirectories(paths, 'packages').size,
   sharedLibs: topLevelDirectories(paths, 'lib').size,
+  workspacePackages: workspacePackageManifests.length,
   apps: topLevelDirectories(paths, 'apps').size,
   services: topLevelDirectories(paths, 'services').size,
   workers: topLevelDirectories(paths, 'workers').size,
   dbSchemaFiles: dbSchemaPaths.length,
   dbTableCallSites: dbSchemaPaths.reduce(
     (sum, path) => sum + countMatches(trackedText(path), /\bpgTable\s*\(/g),
-    0
+    0,
   ),
-  dbMigrations: paths.filter((path) =>
-    /^lib\/db\/drizzle\/[^/]+\.sql$/.test(path)
-  ).length,
+  dbMigrations: paths.filter((path) => /^lib\/db\/drizzle\/[^/]+\.sql$/.test(path)).length,
   apiRouteSourceFiles: routeSourcePaths.length,
   apiHandlerDeclarations: runtimeSourcePaths.reduce(
     (sum, path) =>
       sum +
-      countMatches(
-        trackedText(path),
-        /\b(?:router|app)\.(?:get|post|put|patch|delete|use)\s*\(/g
-      ),
-    0
+      countMatches(trackedText(path), /\b(?:router|app)\.(?:get|post|put|patch|delete|use)\s*\(/g),
+    0,
   ),
-  workflows: paths.filter((path) =>
-    /^\.github\/workflows\/[^/]+\.ya?ml$/.test(path)
-  ).length,
+  workflows: paths.filter((path) => /^\.github\/workflows\/[^/]+\.ya?ml$/.test(path)).length,
   envVars: trackedText('.env.example')
     .split('\n')
     .filter((line) => /^[A-Z_]+=/.test(line)).length,
@@ -165,19 +166,24 @@ const filesystemChecks = [
     actual: actual.productVerticals,
   },
   {
-    name: 'Domain packages',
+    name: 'Top-level package directories',
     expected: truth.packages.domain_packages_dir.count,
     actual: actual.packages,
   },
   {
-    name: 'Shared library packages',
+    name: 'Top-level library directories',
     expected: truth.packages.shared_lib_packages.count,
     actual: actual.sharedLibs,
   },
   {
-    name: 'Total packages',
+    name: 'Top-level package and library directories',
     expected: truth.packages.total_packages.count,
     actual: actual.packages + actual.sharedLibs,
+  },
+  {
+    name: 'Workspace package manifests',
+    expected: truth.packages.workspace_package_manifests.count,
+    actual: actual.workspacePackages,
   },
   {
     name: 'Apps',
@@ -238,9 +244,10 @@ const documentationChecks = [
   ['Registered artifacts', truth.artifacts.registered.count],
   ['Artifact directories', truth.artifacts.total_on_disk.count],
   ['Registered product verticals', truth.product_verticals.registered.count],
-  ['Domain packages (packages/)', truth.packages.domain_packages_dir.count],
-  ['Shared library packages (lib/)', truth.packages.shared_lib_packages.count],
-  ['Total packages (packages/ + lib/)', truth.packages.total_packages.count],
+  ['Top-level package directories (packages/)', truth.packages.domain_packages_dir.count],
+  ['Top-level library directories (lib/)', truth.packages.shared_lib_packages.count],
+  ['Top-level package and library directories', truth.packages.total_packages.count],
+  ['Workspace package manifests', truth.packages.workspace_package_manifests.count],
   ['Apps (apps/)', truth.packages.apps.count],
   ['Services (services/)', truth.packages.services.count],
   ['Workers (workers/)', truth.packages.workers.count],
@@ -272,11 +279,7 @@ const doctrineChecks = [
   ['Doctrine unique axioms', truth.doctrine_v11.unique_axioms.count, 14],
   ['Doctrine tracked sorries', truth.doctrine_v11.tracked_sorries.count, 163],
   ['Doctrine locked formulas', truth.doctrine_v11.locked_formulas.count, 8],
-  [
-    'Doctrine kernel commit',
-    truth.doctrine_v11.kernel_commit,
-    'c7c0ba17',
-  ],
+  ['Doctrine kernel commit', truth.doctrine_v11.kernel_commit, 'c7c0ba17'],
 ];
 
 const glossary = trackedText('docs/GLOSSARY.md');
@@ -294,10 +297,7 @@ const vocabularyChecks = [
 vocabularyChecks.push({
   name: 'Canonical truth avoids governed ambiguous-surface phrases',
   expected: false,
-  actual:
-    /\b(?:holographic|customer-facing|organ|policy gate) surfaces?\b/i.test(
-      canonicalTruth
-    ),
+  actual: /\b(?:holographic|customer-facing|organ|policy gate) surfaces?\b/i.test(canonicalTruth),
 });
 
 let failures = 0;
@@ -314,9 +314,7 @@ function printChecks(title, checks) {
 }
 
 console.log(`Source-of-truth validation — ${new Date().toISOString()}`);
-console.log(
-  `SOT version: ${truth.meta.version}  generated: ${truth.meta.generated}`
-);
+console.log(`SOT version: ${truth.meta.version}  generated: ${truth.meta.generated}`);
 
 printChecks('Tracked tree vs source-of-truth.json', filesystemChecks);
 printChecks('Canonical documents vs source-of-truth.json', crossDocumentChecks);
@@ -326,7 +324,7 @@ printChecks(
     name,
     expected: expectedValue,
     actual: actualValue,
-  }))
+  })),
 );
 printChecks('Canonical vocabulary', vocabularyChecks);
 
@@ -342,5 +340,5 @@ console.log(
     crossDocumentChecks.length +
     doctrineChecks.length +
     vocabularyChecks.length
-  } checks passed`
+  } checks passed`,
 );

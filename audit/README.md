@@ -39,9 +39,10 @@ This directory contains all artifacts produced by the Zero-Gap Track 1 audit. Do
 | Registered artifacts | 6 | Tracked artifact manifests |
 | Artifact directories | 7 | Tracked top-level `artifacts/` children |
 | Registered product verticals | 5 | Registered domain artifacts; A11oy is separate |
-| Domain packages (`packages/`) | 156 | Tracked top-level package directories |
-| Shared library packages (`lib/`) | 53 | Tracked top-level library directories |
-| Total packages (`packages/` + `lib/`) | 209 | 156 + 53 |
+| Top-level package directories (`packages/`) | 156 | Tracked top-level directories; not every directory is a workspace package |
+| Top-level library directories (`lib/`) | 53 | Tracked top-level directories; not every directory is a workspace package |
+| Top-level package and library directories | 209 | Directory inventory only: 156 + 53 |
+| Workspace package manifests | 196 | Tracked manifests included by `pnpm-workspace.yaml`; excludes the root project |
 | Apps (`apps/`) | 11 | Tracked top-level `apps/` children |
 | Services (`services/`) | 11 | Tracked top-level `services/` children |
 | Workers (`workers/`) | 5 | `ls workers/ \| wc -l` |
@@ -50,7 +51,7 @@ This directory contains all artifacts produced by the Zero-Gap Track 1 audit. Do
 | DB migrations (SQL files) | 149 | Tracked `lib/db/drizzle/*.sql` files |
 | API route source files | 31 | Non-test route files across current runtime roots |
 | API handler declarations | 284 | Static non-test `router`/`app` method declarations |
-| CI workflows | 44 | Includes the truth-lock workflow |
+| CI workflows | 45 | Includes both truth-lock workflows |
 | Environment variables (in `.env.example`) | 238 | Lines matching `^[A-Z_]+=` |
 
 ---
