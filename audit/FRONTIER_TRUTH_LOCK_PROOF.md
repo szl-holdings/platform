@@ -56,6 +56,8 @@ public-repository disposition work. Inspection found material drift:
   workspace package manifests.
 - Moved active dependency overrides into `pnpm-workspace.yaml` and upgraded
   seven vulnerable transitive packages to patched releases.
+- Kept Orval on the compatible js-yaml 4.x line while raising its scoped
+  override to 4.3.0 for GHSA-52cp-r559-cp3m.
 - Closed known gap TD-011 in `docs/operations/known-gaps.md`.
 
 No repository visibility, deployment, production database, public badge, or UI
@@ -94,6 +96,8 @@ This is an environment baseline, not a product pass or failure.
   API/security documentation references outside this patch's files
 - `pnpm audit --prod --audit-level high` — **PASS for HIGH severity**; five
   moderate and two low findings remain and are not represented as resolved
+- Orval generation plus API client build/typecheck and API Zod typecheck with
+  scoped js-yaml 4.3.0 — **PASS**
 - JSON parsing for all changed registries — **PASS**
 - `git diff --check` — **PASS**
 
