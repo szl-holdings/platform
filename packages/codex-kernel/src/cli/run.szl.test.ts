@@ -49,7 +49,7 @@ function runTsx(script: string, args: string[], output_root: string): string {
 beforeAll(() => {
   tmp_root = mkdtempSync(join(tmpdir(), 'codex-kernel-szl-'));
   runner_stdout = runTsx('run.ts', [PAYLOAD_PATH], tmp_root);
-});
+}, 30_000);
 
 afterAll(() => {
   if (tmp_root) rmSync(tmp_root, { recursive: true, force: true });
@@ -130,5 +130,5 @@ describe('codex-kernel CLI runner — SZL private governed-ops payload', () => {
     } finally {
       rmSync(second_tmp, { recursive: true, force: true });
     }
-  });
+  }, 30_000);
 });

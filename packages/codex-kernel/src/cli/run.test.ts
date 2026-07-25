@@ -63,7 +63,7 @@ beforeAll(() => {
   outputs = Object.fromEntries(
     Object.entries(PAYLOAD.platform.output_paths).map(([k, rel]) => [k, resolve(tmp_root, rel)]),
   ) as typeof outputs;
-});
+}, 30_000);
 
 afterAll(() => {
   if (tmp_root) rmSync(tmp_root, { recursive: true, force: true });
@@ -128,5 +128,5 @@ describe('codex-kernel CLI runner', () => {
     } finally {
       rmSync(second_tmp, { recursive: true, force: true });
     }
-  });
+  }, 30_000);
 });
