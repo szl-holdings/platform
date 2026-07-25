@@ -97,14 +97,14 @@
   },
   "api": {
     "route_source_files": {
-      "count": 31,
-      "command": "Count non-test route source files under apps/, services/, and artifacts/api-server/",
+      "count": 43,
+      "command": "Count non-test source files under apps/, services/, and artifacts/api-server/ that contain a detected Express route declaration",
       "computed": "2026-07-25",
-      "note": "The v1 registry counted only artifacts/api-server, which no longer represents the runtime layout."
+      "note": "Derived from declarations rather than /routes/ path names so router.ts, server.ts, and other route-bearing files are included."
     },
     "handler_declarations": {
-      "count": 284,
-      "command": "Count non-test router/app get|post|put|patch|delete|use declarations under apps/, services/, and artifacts/api-server/",
+      "count": 306,
+      "command": "Count non-test get|post|put|patch|delete|use declarations on app/router and named Express Router receivers under apps/, services/, and artifacts/api-server/",
       "computed": "2026-07-25",
       "note": "A static declaration count. It does not prove deployment, reachability, authentication, or HTTP 200 behavior."
     }

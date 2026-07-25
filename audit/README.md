@@ -48,8 +48,8 @@ This directory contains all artifacts produced by the Zero-Gap Track 1 audit. Do
 | DB schema files | 197 | Tracked `lib/db/src/schema/**/*.ts` files |
 | DB `pgTable` call sites | 1,067 | Static source call sites; not provisioned-table count |
 | DB migrations (SQL files) | 149 | Tracked `lib/db/drizzle/*.sql` files |
-| API route source files | 31 | Non-test route files across current runtime roots |
-| API handler declarations | 284 | Static non-test `router`/`app` method declarations |
+| API route source files | 43 | Non-test files with detected Express route declarations across current runtime roots |
+| API handler declarations | 306 | Static non-test method declarations on `app`, `router`, and named Express Router receivers |
 | CI workflows | 44 | Includes the truth-lock workflow |
 | Environment variables (in `.env.example`) | 238 | Lines matching `^[A-Z_]+=` |
 
