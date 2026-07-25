@@ -5,7 +5,7 @@
 > `audit/source-of-truth.json`. A value without reproducible evidence is
 > **UNVERIFIED**, not estimated.
 
-**Registry version:** 2.0.0
+**Registry version:** 2.2.0
 
 **Main baseline inspected:** `platform@280176de9fd99a33f1cfc2087372014e91d7ce8f`
 
@@ -118,6 +118,25 @@ targets. Current repository truth differs:
 
 Repository visibility must not change until aliases, ownership, release tags,
 and conformance evidence are resolved.
+
+---
+
+## Overclaim Governance — Observed State
+
+**Observed:** 2026-07-25T23:50:00Z
+
+**Source:** [`docs/OVERCLAIM_LEDGER.md`](docs/OVERCLAIM_LEDGER.md) and
+[`docs/overclaim-ledger.json`](docs/overclaim-ledger.json)
+
+| Metric | Observed Value |
+|---|---:|
+| Unique overclaims caught by a completed CI policy check | **1** |
+| Mean time to correction | **10h 51m 38s** |
+
+Repeated runs for one unchanged claim count once. Workflow setup failures and
+live-probe detections are excluded from the CI metric. The named sovereign
+half-state incident is retained in the ledger as a real live-probe incident,
+but its Doctrine Overclaim Guard run passed.
 
 ---
 

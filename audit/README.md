@@ -34,7 +34,7 @@ This directory contains all artifacts produced by the Zero-Gap Track 1 audit. Do
 ## Canonical Current-Tree Numbers (Quick Reference)
 
 > Updated 2026-07-25 by FRONTIER V2 Wave 1 truth lock. Source:
-> `audit/source-of-truth.json` v2.0.0. Historical runtime/database snapshots
+> `audit/source-of-truth.json` v2.2.0. Historical runtime/database snapshots
 > remain in the JSON but are not current public claims.
 
 | Metric | Verified Count | Source |
@@ -58,12 +58,24 @@ This directory contains all artifacts produced by the Zero-Gap Track 1 audit. Do
 
 ---
 
+## Observed Governance Metrics
+
+| Metric | Verified Value | Source |
+|--------|---------------:|--------|
+| Unique overclaims caught by CI | 1 | `docs/overclaim-ledger.json` |
+| Mean time to correction | 10h 51m 38s | First completed policy finding to correcting commit |
+
+The counter excludes repeated runs for the same unchanged claim, workflow
+setup failures, and live-probe incidents not detected by the CI policy gate.
+
+---
+
 ## Corrections Applied
 
 | Document | Fix |
 |---------|-----|
 | `SOURCE_OF_TRUTH.md` | Replaced stale April/May metrics with reproducible current-tree, locked-kernel, observed-external, and historical status classes |
-| `audit/source-of-truth.json` | Registry v2.0.0: 6 registered artifacts, 5 registered product verticals, current package/DB/API/CI/env counts, labelled Doctrine 749/14/163 definitions |
+| `audit/source-of-truth.json` | Registry v2.2.0: current tree counts, observed governance metrics, and labelled Doctrine 749/14/163 definitions |
 | `docs/GLOSSARY.md` | Separated holographic state, product vertical, runtime organ, and policy gate module |
 | `.github/workflows/source-of-truth.yml` | Added a required drift-detection execution path for canonical files and counted tree roots |
 | `docs/platform-facts.md` | Active artifacts 2→14; packages 77→82; total packages 118→123; schema files 163→165; API route groups 14→12 |
