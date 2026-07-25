@@ -6,7 +6,7 @@
 
 **Base:** `platform@280176de9fd99a33f1cfc2087372014e91d7ce8f`
 
-**Branch:** `agent/frontier-truth-lock`
+**Branch:** `agent/frontier-truth-lock-consolidated`
 
 ## Context
 
@@ -32,6 +32,11 @@ public-repository disposition work. Inspection found material drift:
 6. Add a CI workflow covering canonical files and counted tree roots.
 7. Record unresolved external and runtime claims without presenting them as
    current facts.
+8. Add a separately generated live-evidence registry and incremental claim
+   drift gate.
+9. Reconcile package-directory inventory with the actual pnpm workspace-package
+   count.
+10. Repair the HIGH dependency findings that blocked the truth-lock PRs.
 
 ## Patch
 
@@ -42,6 +47,15 @@ public-repository disposition work. Inspection found material drift:
 - Added `docs/GLOSSARY.md` and indexed it in `docs/INDEX.md`.
 - Rewrote `scripts/audit/validate-source-of-truth.js`.
 - Added `.github/workflows/source-of-truth.yml`.
+- Added `artifacts/SOURCE_OF_TRUTH.json`, its dependency-free generator and
+  tests, and `.github/workflows/truth-drift.yml`.
+- Added incremental changed-claim enforcement and a manual full-corpus audit.
+- Added `docs/OVERCLAIM_LEDGER.md` without crediting CI for a detection that the
+  recorded workflow did not make.
+- Distinguished 209 top-level package/library directories from 196 actual
+  workspace package manifests.
+- Moved active dependency overrides into `pnpm-workspace.yaml` and upgraded
+  seven vulnerable transitive packages to patched releases.
 - Closed known gap TD-011 in `docs/operations/known-gaps.md`.
 
 No repository visibility, deployment, production database, public badge, or UI
@@ -51,22 +65,37 @@ surface was changed.
 
 ### Baseline
 
-`pnpm typecheck` — **BLOCKED (exit 1)** in the intentionally sparse checkout.
-The package manager reported that workspace package `@workspace/aef-contracts`
-was absent from the selected sparse paths. This is a checkout limitation, not a
-green or red product baseline.
+`pnpm typecheck` — **BLOCKED (exit 1)** before dependency installation because
+the fresh worktree had no `node_modules` and therefore no `turbo` executable.
+This is an environment baseline, not a product pass or failure.
 
 ### Targeted checks
 
+`pnpm typecheck` — **PASS (exit 0)** after dependency installation:
+
+- 179/179 Turbo tasks successful
+- 71 tasks served from cache
+- generated API client and Zod package builds/typechecks included
+
 `node scripts/audit/validate-source-of-truth.js` — **PASS (exit 0)**:
 
-- 16 tracked-tree metric checks
-- 32 cross-document checks
+- 17 tracked-tree metric checks
+- 34 cross-document checks
 - 5 locked Doctrine checks
 - 5 vocabulary checks
-- **58/58 total**
+- **61/61 total**
 
-`git diff --cached --check` — **PASS (exit 0)**.
+- `node tools/truth/generate-truth.ts --check` — **PASS**
+- `node --test tools/truth/generate-truth.test.ts` — **4/4 PASS**
+- `node tools/truth/check-claims.ts --base <main-baseline>` — **PASS**
+- `biome check` for the truth generator, tests, claim scanner, and validator —
+  **PASS** with seven intentional CLI-output `noConsole` warnings
+- `pnpm docs:claims-check` — **BASELINE FAILURE** with the same 11 stale
+  API/security documentation references outside this patch's files
+- `pnpm audit --prod --audit-level high` — **PASS for HIGH severity**; five
+  moderate and two low findings remain and are not represented as resolved
+- JSON parsing for all changed registries — **PASS**
+- `git diff --check` — **PASS**
 
 The first validator run correctly failed because a line-based reconnaissance
 count missed a second `pgTable(...)` occurrence on the same line. The canonical
@@ -79,7 +108,7 @@ recorded.
 
 ## Remaining Gates
 
-- GitHub Actions must run against the complete checkout.
+- GitHub Actions must run against the complete checkout and repaired lockfile.
 - Independent review and branch-protection requirements remain mandatory.
 - The nine-public-repository target remains **NOT APPLIED** until aliases,
   conformance, release tags, and reversible disposition steps are verified.
