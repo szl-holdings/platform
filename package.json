@@ -126,6 +126,7 @@
     "tokens:drift": "tsx scripts/check-design-tokens-drift.ts",
     "tokens:drift:check": "tsx scripts/check-design-tokens-drift.ts --check --threshold=50",
     "audit:source-of-truth": "node scripts/audit/validate-source-of-truth.js",
+    "conformance": "node packages/conformance/src/cli.mjs",
     "verticals:validate": "node ops/python/run-python.mjs services/verticals/vertical_moats.py --validate",
     "verticals:brief": "node ops/python/run-python.mjs services/verticals/vertical_moats.py --brief",
     "mcp:validate": "node ops/python/run-python.mjs ops/mcp/validate_mcp_registry.py",

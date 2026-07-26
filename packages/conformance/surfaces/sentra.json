@@ -1,0 +1,22 @@
+{
+  "schemaVersion": "szl.vertical-conformance.manifest.v1",
+  "surface": "sentra",
+  "repository": "szl-holdings/sentra",
+  "disposition": "SUPERSEDED",
+  "note": "The retained monorepo artifact says the standalone Sentra app is retired. No standalone szl-holdings/sentra repository was observed on 2026-07-25.",
+  "registration": {
+    "artifactId": "artifacts/sentra",
+    "artifactManifest": "artifacts/sentra/.replit-artifact/artifact.toml"
+  },
+  "documentation": {
+    "readme": "artifacts/sentra/README.md"
+  },
+  "deployment": {
+    "baseUrlEnv": "SENTRA_CONFORMANCE_BASE_URL",
+    "expectedGitShaEnv": "SENTRA_DEPLOYED_GIT_SHA"
+  },
+  "evidence": {
+    "publicKeyEnv": "SENTRA_CONFORMANCE_PUBLIC_KEY",
+    "publicKeyFingerprintEnv": "SENTRA_CONFORMANCE_PUBLIC_KEY_SHA256"
+  }
+}
