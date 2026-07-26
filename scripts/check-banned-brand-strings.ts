@@ -24,12 +24,24 @@
  *   tsx scripts/check-banned-brand-strings.ts --verbose
  */
 
-import { existsSync, readdirSync, readFileSync, statSync, writeFileSync } from 'node:fs';
-import { extname, join, relative, resolve } from 'node:path';
+import { spawnSync } from 'node:child_process';
+import { existsSync, readFileSync, writeFileSync } from 'node:fs';
+import { extname, join, resolve } from 'node:path';
+import {
+  readTrackedPortableText,
+  type TrackedPortablePath,
+  trackedPortablePath,
+} from './brand-paths.ts';
 
 const ROOT = resolve(import.meta.dirname ?? process.cwd(), '..');
 const VERBOSE = process.argv.includes('--verbose');
 const UPDATE_BASELINE = process.argv.includes('--update-baseline');
+const changedFromIndex = process.argv.indexOf('--changed-from');
+const CHANGED_FROM = changedFromIndex >= 0 ? process.argv[changedFromIndex + 1]?.trim() : undefined;
+
+if (changedFromIndex >= 0 && !CHANGED_FROM) {
+  throw new Error('--changed-from requires a Git revision');
+}
 
 interface BannedString {
   term: string;
@@ -69,18 +81,6 @@ const SCAN_ROOTS = [
   'tests',
   'scripts',
 ];
-const ALWAYS_IGNORE_DIRS = new Set([
-  'node_modules',
-  'dist',
-  'build',
-  '.next',
-  '.turbo',
-  '.git',
-  'coverage',
-  'playwright-report',
-  '.playwright',
-]);
-
 function isFileAllowlisted(rel: string): boolean {
   for (const entry of config.fileAllowlist) {
     if (entry.endsWith('/')) {
@@ -93,9 +93,7 @@ function isFileAllowlisted(rel: string): boolean {
 }
 
 function isLineAllowlisted(rel: string, lineNum: number, term: string): boolean {
-  return config.lineAllowlist.some(
-    (a) => a.file === rel && a.line === lineNum && a.term === term,
-  );
+  return config.lineAllowlist.some((a) => a.file === rel && a.line === lineNum && a.term === term);
 }
 
 function makeTermRegex(term: string, caseSensitive: boolean): RegExp {
@@ -104,10 +102,7 @@ function makeTermRegex(term: string, caseSensitive: boolean): RegExp {
   // (e.g. `animate-pulse`, `aegis-deck-sync`) and snake_case names.
   // For multi-word terms ("PRISM Counsel"), the boundary applies to the outer edges only.
   const escaped = term.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-  return new RegExp(
-    `(?<![\\w\\-/:.])${escaped}(?![\\w\\-/:.])`,
-    caseSensitive ? 'g' : 'gi',
-  );
+  return new RegExp(`(?<![\\w\\-/:.])${escaped}(?![\\w\\-/:.])`, caseSensitive ? 'g' : 'gi');
 }
 
 interface Violation {
@@ -120,15 +115,16 @@ interface Violation {
   snippet: string;
 }
 
-function scanFile(absPath: string): Violation[] {
-  const rel = relative(ROOT, absPath);
+function scanFile(file: TrackedPortablePath): Violation[] {
+  const rel = file.policyRelativePath;
   if (isFileAllowlisted(rel)) return [];
 
   let content: string;
   try {
-    content = readFileSync(absPath, 'utf8');
-  } catch {
-    return [];
+    content = readTrackedPortableText(ROOT, file);
+  } catch (error) {
+    const detail = error instanceof Error ? error.message : String(error);
+    throw new Error(`Unable to read tracked source file "${file.rawRelativePath}": ${detail}`);
   }
 
   const lines = content.split('\n');
@@ -162,45 +158,50 @@ function scanFile(absPath: string): Violation[] {
   return violations;
 }
 
-function walk(dir: string, out: string[]): void {
-  const rel = relative(ROOT, dir);
-  if (rel && isFileAllowlisted(rel + (rel.endsWith('/') ? '' : '/'))) return;
-  let entries: string[];
-  try {
-    entries = readdirSync(dir);
-  } catch {
-    return;
+function trackedSourceFiles(): TrackedPortablePath[] {
+  const gitArgs = CHANGED_FROM
+    ? [
+        'diff',
+        '--name-only',
+        '-z',
+        '--diff-filter=ACMR',
+        `${CHANGED_FROM}...HEAD`,
+        '--',
+        ...SCAN_ROOTS,
+      ]
+    : ['ls-files', '-z', '--', ...SCAN_ROOTS];
+  const result = spawnSync('git', gitArgs, {
+    cwd: ROOT,
+    encoding: 'utf8',
+    windowsHide: true,
+  });
+  if (result.error) {
+    throw new Error(`Unable to enumerate tracked source files with Git: ${result.error.message}`);
   }
-  for (const entry of entries) {
-    if (entry.startsWith('.')) continue;
-    if (ALWAYS_IGNORE_DIRS.has(entry)) continue;
-    const full = join(dir, entry);
-    let st;
-    try {
-      st = statSync(full);
-    } catch {
-      continue;
-    }
-    if (st.isDirectory()) {
-      walk(full, out);
-    } else if (SCAN_EXTENSIONS.has(extname(entry))) {
-      out.push(full);
-    }
+  if (result.status !== 0) {
+    throw new Error(
+      `Unable to enumerate tracked source files with Git (exit ${result.status}): ${result.stderr.trim()}`,
+    );
   }
+
+  return result.stdout
+    .split('\0')
+    .filter(Boolean)
+    .map((rawPath) => trackedPortablePath(ROOT, rawPath))
+    .filter((file) => SCAN_EXTENSIONS.has(extname(file.policyRelativePath)))
+    .filter((file) => !isFileAllowlisted(file.policyRelativePath));
 }
 
-const allFiles: string[] = [];
-for (const root of SCAN_ROOTS) {
-  walk(join(ROOT, root), allFiles);
-}
-
+const allFiles = trackedSourceFiles();
 const allViolations: Violation[] = [];
 for (const f of allFiles) {
   allViolations.push(...scanFile(f));
 }
 
 if (VERBOSE) {
-  console.error(`[brand-strings] scanned ${allFiles.length} files; raw matches: ${allViolations.length}`);
+  console.error(
+    `[brand-strings] scanned ${allFiles.length} ${CHANGED_FROM ? `changed files since ${CHANGED_FROM}` : 'tracked files'}; raw matches: ${allViolations.length}`,
+  );
 }
 
 // ---------------------------------------------------------------------------
@@ -255,7 +256,9 @@ if (VERBOSE) {
 }
 
 if (newViolations.length === 0) {
-  console.log(`✓  Banned brand-string check passed — scanned ${allFiles.length} files, no new violations beyond the audit baseline.`);
+  console.log(
+    `✓  Banned brand-string check passed — scanned ${allFiles.length} files, no new violations beyond the audit baseline.`,
+  );
   // Warn about stale baseline entries (file/term in baseline but no current matches).
   let stale = 0;
   for (const [file, terms] of Object.entries(baseline)) {
@@ -264,8 +267,10 @@ if (newViolations.length === 0) {
       if (cur < count) stale += count - cur;
     }
   }
-  if (stale > 0) {
-    console.log(`   (note: ${stale} stale baseline entr${stale === 1 ? 'y' : 'ies'} — consider running with --update-baseline to refresh)`);
+  if (!CHANGED_FROM && stale > 0) {
+    console.log(
+      `   (note: ${stale} stale baseline entr${stale === 1 ? 'y' : 'ies'} — consider running with --update-baseline to refresh)`,
+    );
   }
   process.exit(0);
 }
@@ -277,7 +282,9 @@ for (const v of newViolations) {
   byFile.set(v.file, arr);
 }
 
-console.error(`\n❌  Banned brand-string check FAILED — ${newViolations.length} NEW violation(s) introduced beyond the audit baseline.\n`);
+console.error(
+  `\n❌  Banned brand-string check FAILED — ${newViolations.length} NEW violation(s) introduced beyond the audit baseline.\n`,
+);
 
 for (const [file, vs] of byFile) {
   console.error(`  ${file}`);

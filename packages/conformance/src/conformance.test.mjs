@@ -117,7 +117,10 @@ async function listen(evidence) {
 
 test('base URL normalization removes trailing slashes in linear time', () => {
   assert.equal(normalizeBaseUrl('https://example.test////'), 'https://example.test');
-  assert.equal(normalizeBaseUrl(`https://example.test${'/'.repeat(100_000)}`), 'https://example.test');
+  assert.equal(
+    normalizeBaseUrl(`https://example.test${'/'.repeat(100_000)}`),
+    'https://example.test',
+  );
 });
 
 test('reference fixture passes all seven vertical conformance gates', async () => {

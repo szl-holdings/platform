@@ -21,6 +21,7 @@ export {
   type GovernedActionEnvelope,
   type GovernedActionRequest,
   type GovernedActionResult,
+  type GovernedToolExecutor,
   type McpGovernorConfig,
   type PolicyDecision,
   type PolicyEffect,
