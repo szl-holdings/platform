@@ -26,12 +26,14 @@
     "@modelcontextprotocol/sdk": "^1.29.0",
     "zod": "catalog:"
   },
-  "devDependencies": {
-    "@types/node": "catalog:",
-    "typescript": "catalog:"
-  },
   "scripts": {
     "typecheck": "tsc -p tsconfig.json --noEmit",
-    "build": "tsc --build"
+    "build": "tsc --build",
+    "test": "tsx --test src/server-policy.test.ts"
+  },
+  "devDependencies": {
+    "@types/node": "catalog:",
+    "tsx": "catalog:",
+    "typescript": "catalog:"
   }
 }

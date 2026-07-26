@@ -42,9 +42,9 @@ This directory contains all artifacts produced by the Zero-Gap Track 1 audit. Do
 | Registered artifacts | 6 | Tracked artifact manifests |
 | Artifact directories | 7 | Tracked top-level `artifacts/` children |
 | Registered product verticals | 5 | Registered domain artifacts; A11oy is separate |
-| Domain packages (`packages/`) | 157 | Tracked top-level package directories |
+| Domain packages (`packages/`) | 158 | Tracked top-level package directories |
 | Shared library packages (`lib/`) | 53 | Tracked top-level library directories |
-| Total packages (`packages/` + `lib/`) | 210 | 157 + 53 |
+| Total packages (`packages/` + `lib/`) | 211 | 158 + 53 |
 | Apps (`apps/`) | 11 | Tracked top-level `apps/` children |
 | Services (`services/`) | 11 | Tracked top-level `services/` children |
 | Workers (`workers/`) | 5 | `ls workers/ \| wc -l` |
