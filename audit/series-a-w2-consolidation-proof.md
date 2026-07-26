@@ -6,7 +6,7 @@
 | `agent` | CodexSmith |
 | `objective` | Publish a documentation-only, founder-gated, reversible estate plan from the observed W2 audit. |
 | `plan_summary` | Add one consolidation plan and this proof packet; make no estate mutation. |
-| `patch_summary` | Added the consolidation plan and proof packet; updated `docs/INDEX.md` to register both documents; review hardening removed non-public repository metadata, corrected the typed archive rollback field, and recorded baseline/post-edit typecheck evidence. |
+| `patch_summary` | Added `docs/CONSOLIDATION.md` and this proof packet; registered the consolidation plan in `docs/INDEX.md`; marked `docs/github/PUBLIC_REPO_PORTFOLIO_STRATEGY.md` as superseded; redirected `docs/github/ORG_SETTINGS_CHECKLIST.md` to the current founder-gated plan; review hardening removed non-public repository metadata, corrected the typed archive rollback field, and recorded baseline/post-edit typecheck evidence. |
 | `proof_level` | 4 — public documentation claim and security review; screenshot not applicable because no UI surface changed. |
 | `recorded_at` | 2026-07-26T01:30:42.617Z snapshot; packet assembled 2026-07-25 America/New_York. |
 | `recorded_by` | CodexSmith |
@@ -125,7 +125,7 @@ The two OTel successor claims conflict and are both REPORTED. This proof packet 
 ## Verification notes
 
 - The plan is additive and reversible.
-- No existing file is deleted or renamed. The existing `docs/INDEX.md` is updated only to register the two new documents.
+- No existing file is deleted or renamed. `docs/INDEX.md` registers the consolidation plan; the proof packet remains under `audit/`. The April 2026 single-repository strategy is explicitly marked superseded, and the organization checklist points to the current founder-gated plan.
 - No GitHub repository setting is changed.
 - The DCO trailer must match the authenticated contributor identity.
 - The draft PR must target `main` from an exact refreshed base SHA.

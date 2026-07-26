@@ -30,8 +30,8 @@ Option B targets nine public survivor slots. Five slots are presently usable wit
 | Trust | `szl-holdings/szl-trust` | public, archived; README reports migration to `docs-site` | decide unarchive or replace | **FOUNDER DECISION 1** | MODELED |
 | Organization profile | `szl-holdings/.github` | public, active | KEEP | none beyond refreshed preflight | MEASURED |
 | Cyber / SENTRA | exact `sentra` repository absent | `immune` is public-active and its description reports SENTRA/GATE admission | decide create, restore, or substitute `immune` | **FOUNDER DECISION 2** | MODELED |
-| Defense / maritime | exact `vessels` repository absent; `killinchu` public-active | decide whether to use the payload-permitted `killinchu` substitution | **FOUNDER DECISION 4** | MODELED |
-| Revenue / insurance | exact `insurance` repository absent from the public inventory | choose a public revenue-adjacent substitute or defer the slot | **FOUNDER DECISION 3** | MODELED |
+| Defense / maritime | exact `vessels` repository absent; `killinchu` observed | `vessels`: UNKNOWN; `killinchu`: public, active | decide whether to use the payload-permitted `killinchu` substitution, choose another repository, or defer | **FOUNDER DECISION 4** | MODELED |
+| Revenue / insurance | exact `insurance` repository absent from the public inventory | UNKNOWN | choose a public revenue-adjacent substitute or defer the slot | **FOUNDER DECISION 3** | MODELED |
 
 ### Founder decision record
 
