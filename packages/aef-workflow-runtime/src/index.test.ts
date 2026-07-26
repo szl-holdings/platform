@@ -106,7 +106,10 @@ describe('WorkflowStateMachine — approval gate', () => {
     const first = await machine.run(ctx, { checkpointStore, approvalStore });
     expect(first.status).toBe('waiting_approval');
 
-    approvalStore.resolve(first.approvalRequestId!, 'approved', 'operator-1', 'Approved for test');
+    const approvalRequestId = first.approvalRequestId;
+    expect(approvalRequestId).toBeDefined();
+    if (!approvalRequestId) throw new Error('workflow did not return an approval request ID');
+    approvalStore.resolve(approvalRequestId, 'approved', 'operator-1', 'Approved for test');
 
     const second = await machine.run(ctx, { checkpointStore, approvalStore });
     expect(second.status).toBe('completed');
@@ -206,7 +209,13 @@ describe('ChunkPlannerActor', () => {
   });
 
   it('ingestDocumentWorkflow runs the chunk-plan step in token mode end-to-end', async () => {
-    const { ingestDocumentWorkflow } = await import('./workflows/ingest-document.js');
+    const { ChunkPlannerActor } = await import('./actors.js');
+    const { createIngestDocumentWorkflow } = await import('./workflows/ingest-document.js');
+    const tokenizer = {
+      encode: (text: string) => text.split(/\s+/).map((_, i) => i + 1),
+      decode: (ids: number[]) => ids.map((i) => `t${i}`).join(' '),
+    };
+    const workflow = createIngestDocumentWorkflow(new ChunkPlannerActor({ tokenizer }));
     const ctx = {
       workflowId: 'wf-int',
       tenantId: 'tenant-int',
@@ -221,7 +230,9 @@ describe('ChunkPlannerActor', () => {
       },
       approvalRequired: false,
     };
-    const planStep = ingestDocumentWorkflow.steps.find((s) => s.stepId === 'plan-chunks')!;
+    const planStep = workflow.steps.find((s) => s.stepId === 'plan-chunks');
+    expect(planStep).toBeDefined();
+    if (!planStep) throw new Error('ingestion workflow is missing the plan-chunks step');
     const result = await planStep.execute(ctx, []);
     expect(result.output.unit).toBe('tokens');
     expect(Number(result.output.totalChunks)).toBeGreaterThan(0);
