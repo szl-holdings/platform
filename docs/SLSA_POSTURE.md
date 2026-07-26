@@ -79,8 +79,10 @@ authorized by this assessment.
 These controls improve supply-chain posture but do not establish a SLSA level
 for an artifact:
 
-- `pnpm-lock.yaml` is committed and CI workflows use frozen-lockfile
-  installation paths.
+- `pnpm-lock.yaml` is committed, and several CI workflows use frozen-lockfile
+  installation paths. This is not repository-wide enforcement:
+  [`.github/workflows/build.yml`](../.github/workflows/build.yml) explicitly
+  invokes `pnpm install --no-frozen-lockfile --prefer-offline`.
 - GitHub Actions references are SHA-pinned and checked by
   [`.github/workflows/pin-check.yml`](../.github/workflows/pin-check.yml).
 - Dependency review and SBOM workflows exist under `.github/workflows/`.
