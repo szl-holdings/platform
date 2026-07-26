@@ -46,6 +46,7 @@ async function allowEntries(): Promise<AllowEntry[]> {
 export function canonicalFor(
   watchword: string,
   metrics: Record<string, Record<string, unknown>>,
+  qualifier = '',
 ): CanonicalEvidence | null {
   let name: string | null = null;
   let value: unknown;
@@ -60,7 +61,9 @@ export function canonicalFor(
   if (/^tests?$/i.test(watchword)) {
     name = 'platform_tests';
     const tests = metrics.platform_tests;
-    value = tests?.passed ?? tests?.total;
+    if (/\b(?:passing|passed)\b/i.test(qualifier)) value = tests?.passed;
+    else if (/\btotal\b/i.test(qualifier)) value = tests?.total;
+    else value = tests?.passed ?? tests?.total;
   } else if (name) {
     value = metrics[name]?.value;
   }
@@ -153,7 +156,13 @@ function claimFailuresForText(
           Math.abs(left.index - (match.index ?? 0)) - Math.abs(right.index - (match.index ?? 0)),
       )[0];
     if (!nearest) continue;
-    const canonical = canonicalFor(nearest[0], metrics);
+    const literalIndex = match.index ?? 0;
+    const watchwordIndex = nearest.index;
+    const qualifier = text.slice(
+      Math.min(literalIndex, watchwordIndex),
+      Math.max(literalIndex + literal.length, watchwordIndex + nearest[0].length),
+    );
+    const canonical = canonicalFor(nearest[0], metrics, qualifier);
     if (!canonical) continue;
     if (
       canonical.value !== null &&
@@ -214,22 +223,53 @@ export function claimFailuresForLines(
     }
   }
 
-  for (let index = 0; index < lines.length - 1; index += 1) {
-    const current = lines[index] ?? '';
-    const next = lines[index + 1] ?? '';
-    if (heading.test(current) || heading.test(next) || !canJoinWrappedLines(current, next))
-      continue;
-    const boundary = current.length;
+  const scanBlock = (block: Array<{ line: string; lineNumber: number }>): void => {
+    if (block.length < 2) return;
+    const starts: number[] = [];
+    let joined = '';
+    for (const entry of block) {
+      if (joined) joined += ' ';
+      starts.push(joined.length);
+      joined += entry.line;
+    }
     for (const failure of claimFailuresForText(
       relative,
-      `${current} ${next}`,
-      (offset) => (offset <= boundary ? index + 1 : index + 2),
+      joined,
+      (offset) => {
+        let selected = 0;
+        for (let index = 1; index < starts.length; index += 1) {
+          if ((starts[index] ?? Number.POSITIVE_INFINITY) > offset) break;
+          selected = index;
+        }
+        return block[selected]?.lineNumber ?? block[0]?.lineNumber ?? 1;
+      },
       metrics,
       allowlist,
     )) {
       failures.add(failure);
     }
+  };
+
+  let block: Array<{ line: string; lineNumber: number }> = [];
+  for (const [index, line] of lines.entries()) {
+    if (heading.test(line)) {
+      scanBlock(block);
+      block = [];
+      continue;
+    }
+    if (block.length === 0) {
+      block.push({ line, lineNumber: index + 1 });
+      continue;
+    }
+    const previous = block[block.length - 1]?.line ?? '';
+    if (canJoinWrappedLines(previous, line)) {
+      block.push({ line, lineNumber: index + 1 });
+    } else {
+      scanBlock(block);
+      block = [{ line, lineNumber: index + 1 }];
+    }
   }
+  scanBlock(block);
 
   return [...failures];
 }

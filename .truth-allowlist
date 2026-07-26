@@ -42,3 +42,8 @@ docs/strategy/FRONTIER_DOCTRINE.md|35 # reason: Guardian subsystem suite count, 
 docs/strategy/FRONTIER_DOCTRINE.md|43 # reason: Tool-mesh subsystem suite count, not the current total platform test metric.
 load-tests/README.md|3 # reason: Scenario-local hot endpoint count, not the estate-wide API operation total.
 THESIS_PUBLICATIONS.md|172 # reason: Pinned historical Ouroboros v6.2 runtime suite count, not the current platform test total.
+.github-private/profile/README.md|37 # reason: Scoped direct child count under lib in the illustrated source tree, not the current monorepo package total.
+artifacts/sentra/src/pages/hunt-agents.tsx|3 # reason: Seeded threat-hunt finding count for one scenario, not the current monorepo package total.
+docs/architecture/architecture.md|37 # reason: Scoped direct child count under lib in the illustrated architecture tree, not the current monorepo package total.
+ops/portfolio/portfolio-architecture.md|33 # reason: Scoped shared-library diagram subtotal, not the current monorepo package total.
+packages/unified-kernel/DEVELOPER_ONBOARDING.md|218 # reason: Pinned vendored Ouroboros subsystem suite count, not the current platform test total.

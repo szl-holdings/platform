@@ -22,6 +22,12 @@ function metrics(
       label: 'MEASURED',
       source: 'GitHub Actions workflow inventory',
     },
+    platform_tests: {
+      passed: 100,
+      total: 105,
+      label: 'MEASURED',
+      source: 'test results',
+    },
   };
 }
 
@@ -108,6 +114,52 @@ test('rejects a stale package claim split across adjacent prose lines', () => {
   assert.deepEqual(failures, [
     'docs/wrapped.md:1: hardcoded 198; canonical value for this context is 199',
   ]);
+});
+
+test('rejects a stale package claim wrapped across three prose lines', () => {
+  const failures = claimFailuresForLines(
+    'docs/wrapped.md',
+    ['The current monorepo contains', '197 workspace', 'packages.'],
+    metrics(12),
+    [],
+  );
+
+  assert.deepEqual(failures, [
+    'docs/wrapped.md:2: hardcoded 197; canonical value for this context is 199',
+  ]);
+});
+
+test('uses the total test count for total-count wording', () => {
+  assert.deepEqual(
+    claimFailuresForLines(
+      'docs/testing.md',
+      ['The current platform has 105 total tests.'],
+      metrics(12),
+      [],
+    ),
+    [],
+  );
+  assert.deepEqual(
+    claimFailuresForLines(
+      'docs/testing.md',
+      ['The current platform has 104 total tests.'],
+      metrics(12),
+      [],
+    ),
+    ['docs/testing.md:1: hardcoded 104; canonical value for this context is 105'],
+  );
+});
+
+test('uses the passed test count for passing wording', () => {
+  assert.deepEqual(
+    claimFailuresForLines(
+      'docs/testing.md',
+      ['The current platform has 100 passing tests.'],
+      metrics(12),
+      [],
+    ),
+    [],
+  );
 });
 
 test('retains the numeric source line when a wrapped claim puts the value second', () => {
