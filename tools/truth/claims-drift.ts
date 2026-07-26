@@ -132,6 +132,64 @@ function isAllowed(relative: string, literal: string, allowlist: AllowEntry[]): 
   });
 }
 
+function claimClause(text: string, literal: RegExpMatchArray): string {
+  const start = literal.index ?? 0;
+  const end = start + literal[0].length;
+  const before = text.slice(0, start);
+  const after = text.slice(end);
+  const leftCharacters = Math.max(
+    before.lastIndexOf('.'),
+    before.lastIndexOf('!'),
+    before.lastIndexOf('?'),
+    before.lastIndexOf(';'),
+    before.lastIndexOf('|'),
+    before.lastIndexOf(','),
+    before.lastIndexOf('('),
+    before.lastIndexOf('['),
+    before.lastIndexOf('{'),
+    before.lastIndexOf('/'),
+  );
+  let leftWords = -1;
+  for (const match of before.matchAll(/\b(?:and|but|of|whereas|while)\b/gi)) {
+    leftWords = Math.max(leftWords, (match.index ?? -match[0].length) + match[0].length - 1);
+  }
+
+  const rightCharacters = [...after.matchAll(/[.!?;|,()[\]{}/]/g)]
+    .map((match) => match.index ?? after.length)
+    .sort((left, right) => left - right)[0];
+  const rightWord = after.match(/\b(?:and|but|of|whereas|while)\b/i);
+  const rightWords = rightWord?.index ?? after.length;
+  const right = Math.min(rightCharacters ?? after.length, rightWords);
+
+  return text.slice(Math.max(leftCharacters, leftWords) + 1, end + right);
+}
+
+function isRelatedPostpositiveTestCount(
+  text: string,
+  literal: RegExpMatchArray,
+  watchword: WatchwordMatch,
+): boolean {
+  if (!/^tests?$/i.test(watchword[0])) return false;
+  const literalIndex = literal.index ?? 0;
+  const literalEnd = literalIndex + literal[0].length;
+  const watchwordEnd = watchword.index + watchword[0].length;
+  if (watchwordEnd > literalIndex) return false;
+
+  const modifierBefore = text.slice(Math.max(0, literalIndex - 24), literalIndex);
+  const modifierAfter = text.slice(literalEnd, Math.min(text.length, literalEnd + 24));
+  if (
+    !(
+      /\b(?:passing|passed|total)\s*:?\s*$/i.test(modifierBefore) ||
+      /^\s*(?:passing|passed|total)\b/i.test(modifierAfter)
+    )
+  ) {
+    return false;
+  }
+
+  const separator = text.slice(watchwordEnd, literalIndex);
+  return /^[\s():]*(?:in\s+total)?[\s():]*$/i.test(separator);
+}
+
 function claimFailuresForText(
   relative: string,
   text: string,
@@ -145,22 +203,19 @@ function claimFailuresForText(
   if (watchwords.length === 0) return failures;
   for (const match of text.matchAll(NUMBER_LITERAL)) {
     const literal = match[0];
+    const qualifier = claimClause(text, match);
     const nearest = watchwords
       .filter(
         (watchword): watchword is WatchwordMatch =>
           typeof watchword.index === 'number' &&
-          isMetricPair(text, match, watchword as WatchwordMatch),
+          (isMetricPair(text, match, watchword as WatchwordMatch) ||
+            isRelatedPostpositiveTestCount(text, match, watchword as WatchwordMatch)),
       )
       .sort(
         (left, right) =>
           Math.abs(left.index - (match.index ?? 0)) - Math.abs(right.index - (match.index ?? 0)),
       )[0];
     if (!nearest) continue;
-    const literalIndex = match.index ?? 0;
-    const watchwordIndex = nearest.index;
-    const pairEnd = Math.max(literalIndex + literal.length, watchwordIndex + nearest[0].length);
-    const suffix = text.slice(pairEnd, Math.min(text.length, pairEnd + 40)).split(/[.!?;|]/, 1)[0];
-    const qualifier = `${text.slice(Math.min(literalIndex, watchwordIndex), pairEnd)}${suffix}`;
     const canonical = canonicalFor(nearest[0], metrics, qualifier);
     if (!canonical) continue;
     if (
@@ -202,7 +257,11 @@ function canJoinWrappedLines(current: string, next: string, relative: string): b
     (/[,;[\]{}()]\s*$/.test(currentTrimmed) ||
       /^(?:const|let|var)\b.*(?:=|[([{])\s*$/.test(currentTrimmed) ||
       /^['"`].*['"`],?\s*$/.test(currentTrimmed) ||
-      /^['"`].*['"`],?\s*$/.test(nextTrimmed))
+      /^['"`].*['"`],?\s*$/.test(nextTrimmed) ||
+      /^[\w$:.~-]+\s*=\s*(?:"[^"]*"|'[^']*'|{.*})[,/>]?\s*$/.test(currentTrimmed) ||
+      /^[\w$:.~-]+\s*=\s*(?:"[^"]*"|'[^']*'|{.*})[,/>]?\s*$/.test(nextTrimmed) ||
+      /^<\/?[A-Za-z][^>]*>\s*$/.test(currentTrimmed) ||
+      /^<\/?[A-Za-z][^>]*>\s*$/.test(nextTrimmed))
   ) {
     return false;
   }

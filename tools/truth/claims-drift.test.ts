@@ -171,6 +171,30 @@ test('uses the total test count for postpositive total wording', () => {
   );
 });
 
+test('classifies total and passing counts from their own clauses', () => {
+  assert.deepEqual(
+    claimFailuresForLines(
+      'docs/testing.md',
+      ['The current platform has 105 tests in total (100 passing).'],
+      metrics(12),
+      [],
+    ),
+    [],
+  );
+  assert.deepEqual(
+    claimFailuresForLines(
+      'docs/testing.md',
+      ['The current platform has 100 tests in total (99 passing).'],
+      metrics(12),
+      [],
+    ),
+    [
+      'docs/testing.md:1: hardcoded 100; canonical value for this context is 105',
+      'docs/testing.md:1: hardcoded 99; canonical value for this context is 100',
+    ],
+  );
+});
+
 test('uses the passed test count for passing wording', () => {
   assert.deepEqual(
     claimFailuresForLines(
@@ -199,6 +223,33 @@ test('does not join separate TSX string expressions into one claim context', () 
     ),
     [],
   );
+});
+
+test('does not join separate JSX attribute expressions into one claim context', () => {
+  assert.deepEqual(
+    claimFailuresForLines(
+      'artifacts/example/src/claims.tsx',
+      ['<Card', '  title="Current release notes"', '  description="Guardian ships 35 tests"', '/>'],
+      metrics(12),
+      [],
+    ),
+    [],
+  );
+});
+
+test('does not reinterpret scoped or timing numbers as platform test totals', () => {
+  const scopedClaims = [
+    'The 10-minute path ends with tests passing.',
+    'pytest tests/ -q # 4 passed',
+    '13 / 13 adapter tests passing on the pinned subsystem commit.',
+  ];
+
+  for (const scopedClaim of scopedClaims) {
+    assert.deepEqual(
+      claimFailuresForLines('docs/scoped-testing.md', [scopedClaim], metrics(12), []),
+      [],
+    );
+  }
 });
 
 test('retains the numeric source line when a wrapped claim puts the value second', () => {
