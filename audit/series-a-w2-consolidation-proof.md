@@ -136,6 +136,3 @@ The two OTel successor claims conflict and are both REPORTED. This proof packet 
 3. Founder disclosure/substitution decision for `insurance / david-leads`.
 4. Maintainer/owner resolution of the `szl-otel-mesh` successor conflict.
 5. Green required checks before any later merge; this PR remains draft.
-
-
-
