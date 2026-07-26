@@ -20,13 +20,13 @@
  */
 
 import { spawnSync } from 'node:child_process';
-import { readFileSync } from 'node:fs';
 import { extname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { registry } from '../packages/brand-registry/src/index.ts';
 import {
   isFrontendPortablePath,
   isIgnoredPortablePath,
+  readTrackedPortableText,
   type TrackedPortablePath,
   trackedPortablePath,
 } from './brand-paths.ts';
@@ -222,7 +222,7 @@ function scanFile(file: TrackedPortablePath): Violation[] {
   const frontend = isFrontendPortablePath(rel);
   let content: string;
   try {
-    content = readFileSync(file.absolutePath, 'utf8');
+    content = readTrackedPortableText(ROOT, file);
   } catch (error) {
     const detail = error instanceof Error ? error.message : String(error);
     throw new Error(`Unable to read tracked brand source "${file.rawRelativePath}": ${detail}`);

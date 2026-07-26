@@ -8,6 +8,7 @@ import {
   isFrontendPortablePath,
   isIgnoredPortablePath,
   normalizePortablePath,
+  readTrackedPortableText,
   trackedPortablePath,
 } from './brand-paths.ts';
 
@@ -61,4 +62,45 @@ test('preserves the raw Git path for filesystem reads while normalizing policy c
   assert.equal(tracked.policyRelativePath, 'café.ts');
   assert.notEqual(tracked.rawRelativePath, tracked.policyRelativePath);
   assert.equal(readFileSync(tracked.absolutePath, 'utf8'), 'receipt-payload\n');
+});
+
+test('reads a sparse tracked file from the Git index using its raw path', () => {
+  const rawRelativePath = `cafe\u0301.ts`;
+  const tracked = trackedPortablePath('/repo', rawRelativePath);
+  const missing = Object.assign(new Error('not in sparse worktree'), { code: 'ENOENT' });
+  let observedArgs;
+
+  const content = readTrackedPortableText('/repo', tracked, {
+    readText: () => {
+      throw missing;
+    },
+    runGit: (args) => {
+      observedArgs = args;
+      return { status: 0, stdout: 'indexed receipt\n', stderr: '' };
+    },
+  });
+
+  assert.deepEqual(observedArgs, ['show', `:${rawRelativePath}`]);
+  assert.equal(content, 'indexed receipt\n');
+});
+
+test('does not hide non-missing filesystem failures behind the Git fallback', () => {
+  const tracked = trackedPortablePath('/repo', 'packages/example/src/index.ts');
+  const denied = Object.assign(new Error('permission denied'), { code: 'EACCES' });
+  let gitCalled = false;
+
+  assert.throws(
+    () =>
+      readTrackedPortableText('/repo', tracked, {
+        readText: () => {
+          throw denied;
+        },
+        runGit: () => {
+          gitCalled = true;
+          return { status: 0, stdout: '', stderr: '' };
+        },
+      }),
+    /permission denied/,
+  );
+  assert.equal(gitCalled, false);
 });

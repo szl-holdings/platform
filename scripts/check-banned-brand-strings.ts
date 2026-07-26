@@ -27,7 +27,11 @@
 import { spawnSync } from 'node:child_process';
 import { existsSync, readFileSync, writeFileSync } from 'node:fs';
 import { extname, join, resolve } from 'node:path';
-import { type TrackedPortablePath, trackedPortablePath } from './brand-paths.ts';
+import {
+  readTrackedPortableText,
+  type TrackedPortablePath,
+  trackedPortablePath,
+} from './brand-paths.ts';
 
 const ROOT = resolve(import.meta.dirname ?? process.cwd(), '..');
 const VERBOSE = process.argv.includes('--verbose');
@@ -117,7 +121,7 @@ function scanFile(file: TrackedPortablePath): Violation[] {
 
   let content: string;
   try {
-    content = readFileSync(file.absolutePath, 'utf8');
+    content = readTrackedPortableText(ROOT, file);
   } catch (error) {
     const detail = error instanceof Error ? error.message : String(error);
     throw new Error(`Unable to read tracked source file "${file.rawRelativePath}": ${detail}`);
