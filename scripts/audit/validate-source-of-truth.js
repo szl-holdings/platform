@@ -76,10 +76,7 @@ function countExpressHandlerDeclarations(text) {
   for (const receiver of expressReceiverNames(text)) {
     count += countMatches(
       text,
-      new RegExp(
-        `\\b${escapeRegExp(receiver)}\\s*\\.\\s*(?:${HTTP_ROUTE_METHODS})\\s*\\(`,
-        'g'
-      )
+      new RegExp(`\\b${escapeRegExp(receiver)}\\s*\\.\\s*(?:${HTTP_ROUTE_METHODS})\\s*\\(`, 'g'),
     );
   }
   return count;
@@ -125,12 +122,10 @@ const truth = JSON.parse(trackedText('audit/source-of-truth.json'));
 const paths = trackedPaths();
 
 const artifactManifests = paths.filter((path) =>
-  /^artifacts\/[^/]+\/(?:\.replit-artifact\/)?artifact\.toml$/.test(path)
+  /^artifacts\/[^/]+\/(?:\.replit-artifact\/)?artifact\.toml$/.test(path),
 );
 const registeredArtifactNames = artifactManifests.map((path) => path.split('/')[1]);
-const registeredProductVerticals = registeredArtifactNames.filter(
-  (name) => name !== 'a11oy'
-);
+const registeredProductVerticals = registeredArtifactNames.filter((name) => name !== 'a11oy');
 
 const sourceExtensions = /\.(?:ts|tsx|js|mjs)$/;
 const testPath = /(?:^|\/)(?:__tests__|test|tests)(?:\/|$)|\.(?:test|spec)\./;
@@ -138,20 +133,13 @@ const runtimeSourcePaths = paths.filter(
   (path) =>
     /^(?:apps|services|artifacts\/api-server)\//.test(path) &&
     sourceExtensions.test(path) &&
-    !testPath.test(path)
+    !testPath.test(path),
 );
 const routeHandlerCounts = new Map(
-  runtimeSourcePaths.map((path) => [
-    path,
-    countExpressHandlerDeclarations(trackedText(path)),
-  ])
+  runtimeSourcePaths.map((path) => [path, countExpressHandlerDeclarations(trackedText(path))]),
 );
-const routeSourcePaths = runtimeSourcePaths.filter(
-  (path) => routeHandlerCounts.get(path) > 0
-);
-const dbSchemaPaths = paths.filter((path) =>
-  /^lib\/db\/src\/schema\/.*\.ts$/.test(path)
-);
+const routeSourcePaths = runtimeSourcePaths.filter((path) => routeHandlerCounts.get(path) > 0);
+const dbSchemaPaths = paths.filter((path) => /^lib\/db\/src\/schema\/.*\.ts$/.test(path));
 
 const actual = {
   registeredArtifacts: artifactManifests.length,
@@ -165,19 +153,12 @@ const actual = {
   dbSchemaFiles: dbSchemaPaths.length,
   dbTableCallSites: dbSchemaPaths.reduce(
     (sum, path) => sum + countMatches(trackedText(path), /\bpgTable\s*\(/g),
-    0
+    0,
   ),
-  dbMigrations: paths.filter((path) =>
-    /^lib\/db\/drizzle\/[^/]+\.sql$/.test(path)
-  ).length,
+  dbMigrations: paths.filter((path) => /^lib\/db\/drizzle\/[^/]+\.sql$/.test(path)).length,
   apiRouteSourceFiles: routeSourcePaths.length,
-  apiHandlerDeclarations: [...routeHandlerCounts.values()].reduce(
-    (sum, count) => sum + count,
-    0
-  ),
-  workflows: paths.filter((path) =>
-    /^\.github\/workflows\/[^/]+\.ya?ml$/.test(path)
-  ).length,
+  apiHandlerDeclarations: [...routeHandlerCounts.values()].reduce((sum, count) => sum + count, 0),
+  workflows: paths.filter((path) => /^\.github\/workflows\/[^/]+\.ya?ml$/.test(path)).length,
   envVars: trackedText('.env.example')
     .split('\n')
     .filter((line) => /^[A-Z_]+=/.test(line)).length,
@@ -267,7 +248,6 @@ const filesystemChecks = [
 ];
 
 const auditReadme = parseCountTable('audit/README.md', 'Verified Count');
-const humanTruth = parseCountTable('SOURCE_OF_TRUTH.md', 'Canonical Value');
 
 const documentationChecks = [
   ['Registered artifacts', truth.artifacts.registered.count],
@@ -295,11 +275,6 @@ for (const [name, expected] of documentationChecks) {
     expected,
     actual: auditReadme.get(name) ?? -1,
   });
-  crossDocumentChecks.push({
-    name: `SOURCE_OF_TRUTH.md: ${name}`,
-    expected,
-    actual: humanTruth.get(name) ?? -1,
-  });
 }
 
 const doctrineChecks = [
@@ -307,45 +282,36 @@ const doctrineChecks = [
   ['Doctrine unique axioms', truth.doctrine_v11.unique_axioms.count, 14],
   ['Doctrine tracked sorries', truth.doctrine_v11.tracked_sorries.count, 163],
   ['Doctrine locked formulas', truth.doctrine_v11.locked_formulas.count, 8],
-  [
-    'Doctrine kernel commit',
-    truth.doctrine_v11.kernel_commit,
-    'c7c0ba17',
-  ],
+  ['Doctrine kernel commit', truth.doctrine_v11.kernel_commit, 'c7c0ba17'],
 ];
 
 const glossary = trackedText('docs/GLOSSARY.md');
 const canonicalTruth = trackedText('SOURCE_OF_TRUTH.md');
-const doctrineTruth = parseCountTable('SOURCE_OF_TRUTH.md', 'Locked Value');
 const expectedLockedFormulas = ['F1', 'F4', 'F7', 'F11', 'F12', 'F18', 'F19', 'F22'];
-const lockedFormulaRow = canonicalTruth
-  .split('\n')
-  .find((line) => /^\|\s*Locked-proven formulas\s*\|/.test(line));
-const documentedLockedFormulas = lockedFormulaRow
-  ? [...lockedFormulaRow.matchAll(/\bF\d+\b/g)].map((match) => match[0])
-  : [];
 const doctrineRepresentationChecks = [
-  ['Declarations', truth.doctrine_v11.declarations.count],
-  ['Unique axioms', truth.doctrine_v11.unique_axioms.count],
-  ['Tracked sorry obligations', truth.doctrine_v11.tracked_sorries.count],
-  ['Locked-proven formulas', truth.doctrine_v11.locked_formulas.count],
-].map(([name, expected]) => ({
-  name: `SOURCE_OF_TRUTH.md Doctrine: ${name}`,
-  expected,
-  actual: doctrineTruth.get(name) ?? -1,
-}));
-doctrineRepresentationChecks.push(
   {
     name: 'source-of-truth.json exact locked formula list',
     expected: JSON.stringify(expectedLockedFormulas),
     actual: JSON.stringify(truth.doctrine_v11.locked_formulas.list),
   },
+];
+const sourceOfTruthIndexChecks = [
   {
-    name: 'SOURCE_OF_TRUTH.md exact locked formula list',
-    expected: JSON.stringify(expectedLockedFormulas),
-    actual: JSON.stringify(documentedLockedFormulas),
-  }
-);
+    name: 'Index links the current-tree registry',
+    expected: true,
+    actual: canonicalTruth.includes('audit/source-of-truth.json'),
+  },
+  {
+    name: 'Index links the live evidence record',
+    expected: true,
+    actual: canonicalTruth.includes('artifacts/SOURCE_OF_TRUTH.json'),
+  },
+  {
+    name: 'Index does not duplicate a canonical metric table',
+    expected: false,
+    actual: canonicalTruth.includes('| Metric | Canonical Value |'),
+  },
+];
 const vocabularyChecks = [
   'Holographic state',
   'Product vertical',
@@ -359,10 +325,7 @@ const vocabularyChecks = [
 vocabularyChecks.push({
   name: 'Canonical truth avoids governed ambiguous-surface phrases',
   expected: false,
-  actual:
-    /\b(?:holographic|customer-facing|organ|policy gate) surfaces?\b/i.test(
-      canonicalTruth
-    ),
+  actual: /\b(?:holographic|customer-facing|organ|policy gate) surfaces?\b/i.test(canonicalTruth),
 });
 
 let failures = 0;
@@ -379,9 +342,7 @@ function printChecks(title, checks) {
 }
 
 console.log(`Source-of-truth validation — ${new Date().toISOString()}`);
-console.log(
-  `SOT version: ${truth.meta.version}  generated: ${truth.meta.generated}`
-);
+console.log(`SOT version: ${truth.meta.version}  generated: ${truth.meta.generated}`);
 
 printChecks('Tracked tree vs source-of-truth.json', filesystemChecks);
 printChecks('Canonical documents vs source-of-truth.json', crossDocumentChecks);
@@ -391,9 +352,10 @@ printChecks(
     name,
     expected: expectedValue,
     actual: actualValue,
-  }))
+  })),
 );
 printChecks('Locked Doctrine v11 representation', doctrineRepresentationChecks);
+printChecks('Source-of-truth index contract', sourceOfTruthIndexChecks);
 printChecks('Canonical vocabulary', vocabularyChecks);
 
 console.log('\n-- Result --');
@@ -408,6 +370,7 @@ console.log(
     crossDocumentChecks.length +
     doctrineChecks.length +
     doctrineRepresentationChecks.length +
+    sourceOfTruthIndexChecks.length +
     vocabularyChecks.length
-  } checks passed`
+  } checks passed`,
 );

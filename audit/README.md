@@ -53,7 +53,7 @@ This directory contains all artifacts produced by the Zero-Gap Track 1 audit. Do
 | DB migrations (SQL files) | 149 | Tracked `lib/db/drizzle/*.sql` files |
 | API route source files | 43 | Non-test files with detected Express route declarations across current runtime roots |
 | API handler declarations | 306 | Static non-test method declarations on `app`, `router`, and named Express Router receivers |
-| CI workflows | 44 | Includes the truth-lock workflow |
+| CI workflows | 45 | Includes the truth-lock and truth-drift workflows |
 | Environment variables (in `.env.example`) | 238 | Lines matching `^[A-Z_]+=` |
 
 ---
@@ -62,7 +62,7 @@ This directory contains all artifacts produced by the Zero-Gap Track 1 audit. Do
 
 | Document | Fix |
 |---------|-----|
-| `SOURCE_OF_TRUTH.md` | Replaced stale April/May metrics with reproducible current-tree, locked-kernel, observed-external, and historical status classes |
+| `SOURCE_OF_TRUTH.md` | Replaced duplicated hand-maintained metrics with an index that assigns distinct scopes to the current-tree and live-evidence registries |
 | `audit/source-of-truth.json` | Registry v2.0.0: 6 registered artifacts, 5 registered product verticals, current package/DB/API/CI/env counts, labelled Doctrine 749/14/163 definitions |
 | `docs/GLOSSARY.md` | Separated holographic state, product vertical, runtime organ, and policy gate module |
 | `.github/workflows/source-of-truth.yml` | Added a required drift-detection execution path for canonical files and counted tree roots |

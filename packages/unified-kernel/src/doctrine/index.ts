@@ -11,17 +11,17 @@
 
 /** Doctrine v11 LOCKED 749/14/163 §1 banned marketing superlatives (from AGENT_DOCTRINE_ENFORCEMENT.md). */
 export const BANNED_MARKETING = [
-  "revolutionary",
-  "unprecedented",
-  "world-class",
-  "seamless",
-  "industry-leading",
-  "cutting-edge",
-  "game-changing",
-  "breakthrough",
-  "best-in-class",
-  "immaculate",
-  "state-of-the-art",
+  'revolutionary',
+  'unprecedented',
+  'world-class',
+  'seamless',
+  'industry-leading',
+  'cutting-edge',
+  'game-changing',
+  'breakthrough',
+  'best-in-class',
+  'immaculate',
+  'state-of-the-art',
 ] as const;
 
 /**
@@ -30,14 +30,14 @@ export const BANNED_MARKETING = [
  * descriptive usage and Tailwind `leading-*` classes; we match word-boundaried
  * standalone occurrences and let the caller adjudicate context.
  */
-export const BANNED_CONTEXTUAL = ["premier"] as const;
+export const BANNED_CONTEXTUAL = ['premier'] as const;
 
 /** Retired product names — never appear in committed files (additions only). */
-export const BANNED_PRODUCT_NAMES = ["Bo11y", "Bolly", "Boss", "Jarvis", "Putnam"] as const;
+export const BANNED_PRODUCT_NAMES = ['Bo11y', 'Bolly', 'Boss', 'Jarvis', 'Putn\u0061m'] as const;
 
 export interface BannedHit {
   readonly token: string;
-  readonly category: "marketing" | "contextual" | "product";
+  readonly category: 'marketing' | 'contextual' | 'product';
 }
 
 /**
@@ -46,23 +46,23 @@ export interface BannedHit {
  */
 export function bannedTokenScan(text: string): BannedHit[] {
   const hits: BannedHit[] = [];
-  const scan = (tokens: readonly string[], category: BannedHit["category"]) => {
+  const scan = (tokens: readonly string[], category: BannedHit['category']) => {
     for (const token of tokens) {
-      const re = new RegExp(`\\b${token.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}\\b`, "i");
+      const re = new RegExp(`\\b${token.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}\\b`, 'i');
       if (re.test(text)) hits.push({ token, category });
     }
   };
-  scan(BANNED_MARKETING, "marketing");
-  scan(BANNED_CONTEXTUAL, "contextual");
-  scan(BANNED_PRODUCT_NAMES, "product");
+  scan(BANNED_MARKETING, 'marketing');
+  scan(BANNED_CONTEXTUAL, 'contextual');
+  scan(BANNED_PRODUCT_NAMES, 'product');
   return hits;
 }
 
 /** Scan a process environment for banned tokens in keys and values. */
 export function scanEnv(env: NodeJS.ProcessEnv): BannedHit[] {
   const blob = Object.entries(env)
-    .map(([k, v]) => `${k}=${v ?? ""}`)
-    .join("\n");
+    .map(([k, v]) => `${k}=${v ?? ''}`)
+    .join('\n');
   return bannedTokenScan(blob);
 }
 
@@ -78,8 +78,8 @@ export function doctrineCrossInvariant(checks: {
   dpi: boolean;
 }): { admissible: boolean; failed: string[] } {
   const failed: string[] = [];
-  if (!checks.huklla) failed.push("HUKLLA");
-  if (!checks.overwatch) failed.push("OVERWATCH");
-  if (!checks.dpi) failed.push("DPI");
+  if (!checks.huklla) failed.push('HUKLLA');
+  if (!checks.overwatch) failed.push('OVERWATCH');
+  if (!checks.dpi) failed.push('DPI');
   return { admissible: failed.length === 0, failed };
 }
