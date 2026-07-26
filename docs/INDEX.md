@@ -8,6 +8,14 @@ Use [docs/README.md](README.md) for navigation by audience or task.
 
 ---
 
+## Governance and estate
+
+| Document | Description | Last Reviewed |
+|----------|-------------|---------------|
+| [CONSOLIDATION.md](CONSOLIDATION.md) | Founder-gated, reversible GitHub estate consolidation plan; Option B remains not applied | 2026-07 |
+
+---
+
 ## Architecture
 
 | Document | Description | Last Reviewed |
