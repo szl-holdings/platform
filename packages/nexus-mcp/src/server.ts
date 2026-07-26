@@ -12,11 +12,10 @@
  * interface — while injecting governance at every interaction boundary.
  */
 
+import { randomUUID } from 'node:crypto';
 import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import type { CallToolResult } from '@modelcontextprotocol/sdk/types.js';
-import { EventEmitter } from 'node:events';
-import { randomUUID } from 'node:crypto';
-import { z, type ZodRawShape } from 'zod';
+import { type ZodRawShape, z } from 'zod';
 
 // ─── Governance Context ────────────────────────────────────────────────────────
 
@@ -37,7 +36,14 @@ export interface GuardianPolicyResult {
 }
 
 export interface ProofChainEntry {
-  entryType: 'tool_call' | 'resource_read' | 'prompt_get' | 'sampling_request' | 'elicitation' | 'task_update' | 'app_render';
+  entryType:
+    | 'tool_call'
+    | 'resource_read'
+    | 'prompt_get'
+    | 'sampling_request'
+    | 'elicitation'
+    | 'task_update'
+    | 'app_render';
   toolName?: string;
   tenantId?: string;
   userId?: number;
@@ -64,6 +70,23 @@ export type AuditLogger = (entry: {
   metadata: Record<string, unknown>;
   userId?: number | null;
 }) => Promise<void>;
+
+export async function evaluateGuardianPolicyFailClosed(
+  evaluator: PolicyEvaluator,
+  toolName: string,
+  args: Record<string, unknown>,
+  ctx: TenantContext,
+): Promise<GuardianPolicyResult> {
+  try {
+    const result = await evaluator(toolName, args, ctx);
+    if (!result || typeof result.allowed !== 'boolean') {
+      return { allowed: false, reason: 'Guardian policy returned an invalid decision' };
+    }
+    return result;
+  } catch {
+    return { allowed: false, reason: 'Guardian policy evaluation failed' };
+  }
+}
 
 // ─── Tool Content Helpers ─────────────────────────────────────────────────────
 
@@ -169,7 +192,6 @@ export class PRAXISMcpServer {
   private readonly _config: PRAXISMcpServerConfig;
   private readonly _tasks = new Map<string, PRAXISTask>();
   private readonly _apps = new Map<string, PRAXISApp>();
-  private readonly _discoveryBus = new EventEmitter();
   private readonly _externalNotifyListeners = new Set<(type: DiscoveryEventType) => void>();
 
   constructor(config: PRAXISMcpServerConfig) {
@@ -186,13 +208,13 @@ export class PRAXISMcpServer {
     };
 
     if (config.enableSampling) {
-      capabilities['sampling'] = {};
+      capabilities.sampling = {};
     }
     if (config.enableElicitation) {
-      capabilities['elicitation'] = {};
+      capabilities.elicitation = {};
     }
     if (config.enableRoots && config.roots && config.roots.length > 0) {
-      capabilities['roots'] = { listChanged: false };
+      capabilities.roots = { listChanged: false };
     }
 
     this._sdk = new McpServer(
@@ -238,9 +260,11 @@ export class PRAXISMcpServer {
     name: string,
     description: string,
     schema: T,
-    handler: (args: z.infer<z.ZodObject<T>>, ctx: TenantContext) => Promise<{ content: ToolContent; isError?: boolean }>,
+    handler: (
+      args: z.infer<z.ZodObject<T>>,
+      ctx: TenantContext,
+    ) => Promise<{ content: ToolContent; isError?: boolean }>,
   ): void {
-    const self = this;
     // Cast to bypass generic inference — PRAXISMcpServer provides its own type-safe wrapper generics
     const sdkRegister = this._sdk.registerTool.bind(this._sdk) as (
       name: string,
@@ -250,20 +274,20 @@ export class PRAXISMcpServer {
     sdkRegister(name, { description, inputSchema: schema }, async (rawArgs, _extra) => {
       const args = rawArgs as z.infer<z.ZodObject<T>>;
       const start = Date.now();
-      const ctx: TenantContext = self._config.tenantContext ?? { tenantId: 'system' };
+      const ctx: TenantContext = this._config.tenantContext ?? { tenantId: 'system' };
       const typedArgs = rawArgs;
 
       // --- Guardian policy evaluation ---
-      if (self._config.policyEvaluator) {
-        let policyResult: GuardianPolicyResult;
-        try {
-          policyResult = await self._config.policyEvaluator(name, typedArgs, ctx);
-        } catch {
-          policyResult = { allowed: true };
-        }
+      if (this._config.policyEvaluator) {
+        const policyResult = await evaluateGuardianPolicyFailClosed(
+          this._config.policyEvaluator,
+          name,
+          typedArgs,
+          ctx,
+        );
         if (!policyResult.allowed) {
           const latencyMs = Date.now() - start;
-          void self._writeProofChain({
+          void this._writeProofChain({
             entryType: 'tool_call',
             toolName: name,
             tenantId: ctx.tenantId,
@@ -275,7 +299,9 @@ export class PRAXISMcpServer {
             timestamp: new Date().toISOString(),
           });
           return {
-            content: errorContent(`Tool blocked by policy: ${policyResult.reason ?? 'Guardian denied'}`),
+            content: errorContent(
+              `Tool blocked by policy: ${policyResult.reason ?? 'Guardian denied'}`,
+            ),
             isError: true,
           };
         }
@@ -294,13 +320,13 @@ export class PRAXISMcpServer {
       } catch (e) {
         outcome = 'error';
         errorMsg = e instanceof Error ? e.message : String(e);
-        result = { content: errorContent(errorMsg!), isError: true };
+        result = { content: errorContent(errorMsg), isError: true };
       }
 
       const latencyMs = Date.now() - start;
 
       // --- Proof chain + audit ---
-      void self._writeProofChain({
+      void this._writeProofChain({
         entryType: 'tool_call',
         toolName: name,
         tenantId: ctx.tenantId,
@@ -312,7 +338,7 @@ export class PRAXISMcpServer {
         timestamp: new Date().toISOString(),
       });
 
-      void self._writeAuditLog({
+      void this._writeAuditLog({
         action: 'mcp_tool_invoke',
         resource: 'mcp_tool',
         resourceId: name,
@@ -340,22 +366,19 @@ export class PRAXISMcpServer {
     },
     handler: (args: Record<string, unknown>, ctx: TenantContext) => Promise<unknown>,
   ): void {
-    const self = this;
     // Build a Zod schema from the raw JSON Schema properties for SDK compatibility
     const zodShape: ZodRawShape = {};
     for (const [key, prop] of Object.entries(inputSchema.properties)) {
       const p = prop as Record<string, unknown>;
       const isRequired = (inputSchema.required ?? []).includes(key);
       let fieldSchema: z.ZodTypeAny;
-      if (p['type'] === 'string') {
-        fieldSchema = p['enum']
-          ? z.enum(p['enum'] as [string, ...string[]])
-          : z.string();
-      } else if (p['type'] === 'number') {
+      if (p.type === 'string') {
+        fieldSchema = p.enum ? z.enum(p.enum as [string, ...string[]]) : z.string();
+      } else if (p.type === 'number') {
         fieldSchema = z.number();
-      } else if (p['type'] === 'boolean') {
+      } else if (p.type === 'boolean') {
         fieldSchema = z.boolean();
-      } else if (p['type'] === 'array') {
+      } else if (p.type === 'array') {
         fieldSchema = z.array(z.unknown());
       } else {
         fieldSchema = z.unknown();
@@ -370,19 +393,19 @@ export class PRAXISMcpServer {
     ) => void;
     sdkRegisterRaw(name, { description, inputSchema: zodShape }, async (typedArgs, _extra) => {
       const start = Date.now();
-      const ctx: TenantContext = self._config.tenantContext ?? { tenantId: 'system' };
+      const ctx: TenantContext = this._config.tenantContext ?? { tenantId: 'system' };
 
       // Guardian policy
-      if (self._config.policyEvaluator) {
-        let policyResult: GuardianPolicyResult;
-        try {
-          policyResult = await self._config.policyEvaluator(name, typedArgs, ctx);
-        } catch {
-          policyResult = { allowed: true };
-        }
+      if (this._config.policyEvaluator) {
+        const policyResult = await evaluateGuardianPolicyFailClosed(
+          this._config.policyEvaluator,
+          name,
+          typedArgs,
+          ctx,
+        );
         if (!policyResult.allowed) {
           const latencyMs = Date.now() - start;
-          void self._writeProofChain({
+          void this._writeProofChain({
             entryType: 'tool_call',
             toolName: name,
             tenantId: ctx.tenantId,
@@ -394,7 +417,9 @@ export class PRAXISMcpServer {
             timestamp: new Date().toISOString(),
           });
           return {
-            content: errorContent(`Tool blocked by policy: ${policyResult.reason ?? 'Guardian denied'}`),
+            content: errorContent(
+              `Tool blocked by policy: ${policyResult.reason ?? 'Guardian denied'}`,
+            ),
             isError: true,
           };
         }
@@ -416,12 +441,20 @@ export class PRAXISMcpServer {
           raw !== null &&
           typeof raw === 'object' &&
           'content' in raw &&
-          Array.isArray((raw as Record<string, unknown>)['content'])
+          Array.isArray((raw as Record<string, unknown>).content)
         ) {
-          const r = raw as { content: ToolContent; isError?: boolean; _meta?: Record<string, unknown> };
+          const r = raw as {
+            content: ToolContent;
+            isError?: boolean;
+            _meta?: Record<string, unknown>;
+          };
           content = r.content;
-          if (r.isError) { outcome = 'error'; }
-          if (r._meta) { extraMeta = r._meta; }
+          if (r.isError) {
+            outcome = 'error';
+          }
+          if (r._meta) {
+            extraMeta = r._meta;
+          }
         } else {
           content = textContent(raw);
         }
@@ -433,7 +466,7 @@ export class PRAXISMcpServer {
 
       const latencyMs = Date.now() - start;
 
-      void self._writeProofChain({
+      void this._writeProofChain({
         entryType: 'tool_call',
         toolName: name,
         tenantId: ctx.tenantId,
@@ -445,7 +478,7 @@ export class PRAXISMcpServer {
         timestamp: new Date().toISOString(),
       });
 
-      void self._writeAuditLog({
+      void this._writeAuditLog({
         action: 'mcp_tool_invoke',
         resource: 'mcp_tool',
         resourceId: name,
@@ -468,16 +501,18 @@ export class PRAXISMcpServer {
     name: string,
     uri: string,
     metadata: { description?: string; mimeType?: string },
-    handler: (uri: string, ctx: TenantContext) => Promise<{ contents: Array<{ uri: string; text: string; mimeType?: string }> }>,
+    handler: (
+      uri: string,
+      ctx: TenantContext,
+    ) => Promise<{ contents: Array<{ uri: string; text: string; mimeType?: string }> }>,
   ): void {
-    const self = this;
     this._sdk.resource(name, uri, metadata, async (_uri, _extra) => {
-      const ctx: TenantContext = self._config.tenantContext ?? { tenantId: 'system' };
+      const ctx: TenantContext = this._config.tenantContext ?? { tenantId: 'system' };
       const start = Date.now();
       try {
         const result = await handler(String(_uri), ctx);
         const latencyMs = Date.now() - start;
-        void self._writeProofChain({
+        void this._writeProofChain({
           entryType: 'resource_read',
           toolName: uri,
           tenantId: ctx.tenantId,
@@ -489,7 +524,7 @@ export class PRAXISMcpServer {
         return result;
       } catch (e) {
         const errorMsg = e instanceof Error ? e.message : String(e);
-        void self._writeProofChain({
+        void this._writeProofChain({
           entryType: 'resource_read',
           toolName: uri,
           tenantId: ctx.tenantId,
@@ -510,12 +545,14 @@ export class PRAXISMcpServer {
     name: string,
     description: string,
     argsShape: ZodRawShape,
-    handler: (args: Record<string, string>, ctx: TenantContext) => Promise<{
+    handler: (
+      args: Record<string, string>,
+      ctx: TenantContext,
+    ) => Promise<{
       description?: string;
       messages: Array<{ role: 'user' | 'assistant'; content: { type: 'text'; text: string } }>;
     }>,
   ): void {
-    const self = this;
     // Cast _sdk.prompt to a non-recursive signature to break TS2589
     // (excessively deep Zod type instantiation in @modelcontextprotocol/sdk@^1.0).
     // The runtime contract is identical; only the type-checker boundary is widened here.
@@ -526,8 +563,8 @@ export class PRAXISMcpServer {
       cb: (args: Record<string, unknown>, extra: unknown) => Promise<unknown>,
     ) => void;
     sdkPrompt(name, description, argsShape, async (args, _extra) => {
-      const ctx: TenantContext = self._config.tenantContext ?? { tenantId: 'system' };
-      void self._writeProofChain({
+      const ctx: TenantContext = this._config.tenantContext ?? { tenantId: 'system' };
+      void this._writeProofChain({
         entryType: 'prompt_get',
         toolName: name,
         tenantId: ctx.tenantId,
@@ -564,7 +601,11 @@ export class PRAXISMcpServer {
 
     // Also fire to in-process subscribers (e.g., SSE fan-out)
     for (const listener of this._externalNotifyListeners) {
-      try { listener(type); } catch { /* non-fatal */ }
+      try {
+        listener(type);
+      } catch {
+        /* non-fatal */
+      }
     }
   }
 
@@ -583,7 +624,9 @@ export class PRAXISMcpServer {
   /** Subscribe to discovery notifications (for SSE fan-out transport) */
   onDiscoveryNotification(listener: (type: DiscoveryEventType) => void): () => void {
     this._externalNotifyListeners.add(listener);
-    return () => { this._externalNotifyListeners.delete(listener); };
+    return () => {
+      this._externalNotifyListeners.delete(listener);
+    };
   }
 
   // ─── Sampling ────────────────────────────────────────────────────────────────
@@ -616,19 +659,17 @@ export class PRAXISMcpServer {
     const start = Date.now();
 
     // Guardian policy check on sampling prompt
-    if (this._config.policyEvaluator && params.systemPrompt) {
-      let policyResult: GuardianPolicyResult;
-      try {
-        policyResult = await this._config.policyEvaluator(
-          'sampling/createMessage',
-          { systemPrompt: params.systemPrompt, maxTokens: params.maxTokens },
-          ctx,
-        );
-      } catch {
-        policyResult = { allowed: true };
-      }
+    if (this._config.policyEvaluator) {
+      const policyResult = await evaluateGuardianPolicyFailClosed(
+        this._config.policyEvaluator,
+        'sampling/createMessage',
+        { systemPrompt: params.systemPrompt, maxTokens: params.maxTokens },
+        ctx,
+      );
       if (!policyResult.allowed) {
-        throw new Error(`Sampling blocked by Guardian policy: ${policyResult.reason ?? 'policy denied'}`);
+        throw new Error(
+          `Sampling blocked by Guardian policy: ${policyResult.reason ?? 'policy denied'}`,
+        );
       }
     }
 
@@ -783,12 +824,18 @@ export class PRAXISMcpServer {
             total: total ?? 100,
           },
         });
-      } catch { /* client may not be connected */ }
+      } catch {
+        /* client may not be connected */
+      }
     }
   }
 
   /** Mark a task as complete or failed */
-  async finalizeTask(taskId: string, status: 'complete' | 'failed' | 'cancelled', error?: string): Promise<void> {
+  async finalizeTask(
+    taskId: string,
+    status: 'complete' | 'failed' | 'cancelled',
+    error?: string,
+  ): Promise<void> {
     const task = this._tasks.get(taskId);
     if (!task) return;
     task.status = status;
@@ -885,7 +932,8 @@ export class PRAXISMcpServer {
       'nexus://instructions',
       'nexus://instructions',
       {
-        description: 'Dynamic system-level guidance for connected LLMs based on tenant context, active role, and domain',
+        description:
+          'Dynamic system-level guidance for connected LLMs based on tenant context, active role, and domain',
         mimeType: 'text/plain',
       },
       async () => ({
@@ -905,7 +953,8 @@ export class PRAXISMcpServer {
       'nexus://roots',
       'nexus://roots',
       {
-        description: 'Tenant-scoped filesystem boundary constraints — defines allowed root paths for connected clients',
+        description:
+          'Tenant-scoped filesystem boundary constraints — defines allowed root paths for connected clients',
         mimeType: 'application/json',
       },
       async () => ({
@@ -921,26 +970,24 @@ export class PRAXISMcpServer {
   }
 
   private _registerTaskManagementTools(): void {
-    const self = this;
     this._sdk.tool(
       'nexus_list_tasks',
       'List active MCP tasks created by long-running tool calls. Returns task IDs, status, progress, and linked Substrate run IDs.',
       {},
       async () => {
-        const tasks = self.listTasks();
+        const tasks = this.listTasks();
         return { content: [{ type: 'text', text: JSON.stringify({ tasks }, null, 2) }] };
       },
     );
   }
 
   private _registerAppsListTool(): void {
-    const self = this;
     this._sdk.tool(
       'nexus_list_apps',
       'List available domain micro-dashboard Apps. Returns app IDs, domains, and descriptions. Use nexus_render_app to get the HTML.',
       {},
       async () => {
-        const apps = self.listApps().map((a) => ({
+        const apps = this.listApps().map((a) => ({
           appId: a.appId,
           domain: a.domain,
           title: a.title,
@@ -957,22 +1004,42 @@ export class PRAXISMcpServer {
     const _renderAppRegister = this._sdk.registerTool.bind(this._sdk) as (
       name: string,
       config: { description: string; inputSchema: ZodRawShape },
-      cb: (args: Record<string, unknown>) => Promise<{ content: Array<{ type: string; text: string }>; isError?: boolean }>,
+      cb: (
+        args: Record<string, unknown>,
+      ) => Promise<{ content: Array<{ type: string; text: string }>; isError?: boolean }>,
     ) => void;
     _renderAppRegister(
       'nexus_render_app',
-      { description: 'Render a domain micro-dashboard App as inline HTML. The HTML is scoped to the authenticated tenant and generated from live platform data.', inputSchema: { appId: z.string().describe('App ID from nexus_list_apps') } },
+      {
+        description:
+          'Render a domain micro-dashboard App as inline HTML. The HTML is scoped to the authenticated tenant and generated from live platform data.',
+        inputSchema: { appId: z.string().describe('App ID from nexus_list_apps') },
+      },
       async (rawArgs: Record<string, unknown>) => {
         const args = rawArgs as { appId: string };
-        const result = await self.renderApp(args.appId);
+        const result = await this.renderApp(args.appId);
         if (!result) {
-          return { content: [{ type: 'text', text: JSON.stringify({ error: `App '${args.appId}' not found` }) }], isError: true };
+          return {
+            content: [
+              { type: 'text', text: JSON.stringify({ error: `App '${args.appId}' not found` }) },
+            ],
+            isError: true,
+          };
         }
         return {
           content: [
             {
               type: 'text',
-              text: JSON.stringify({ appId: args.appId, title: result.title, domain: result.domain, html: result.html }, null, 2),
+              text: JSON.stringify(
+                {
+                  appId: args.appId,
+                  title: result.title,
+                  domain: result.domain,
+                  html: result.html,
+                },
+                null,
+                2,
+              ),
             },
           ],
         };
@@ -986,7 +1053,9 @@ export class PRAXISMcpServer {
     if (this._config.proofChainWriter) {
       try {
         await this._config.proofChainWriter(entry);
-      } catch { /* proof chain writes must not throw */ }
+      } catch {
+        /* proof chain writes must not throw */
+      }
     }
   }
 
@@ -994,7 +1063,9 @@ export class PRAXISMcpServer {
     if (this._config.auditLogger) {
       try {
         await this._config.auditLogger(entry);
-      } catch { /* audit writes must not throw */ }
+      } catch {
+        /* audit writes must not throw */
+      }
     }
   }
 }
