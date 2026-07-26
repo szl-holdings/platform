@@ -26,7 +26,7 @@
 | F3 | Arthur AI's reviewed official announcements establish at least $57M in announced rounds. | **REPORTED:** [$15M Series A](https://www.arthur.ai/blog/announcing-series-a) plus [$42M Series B](https://www.arthur.ai/blog/making-ai-work-for-even-more-people) | Do not use the payload's $63M figure unless a later authoritative source establishes it. |
 | F4 | Several named vendors report runtime controls, decision records, audit trails, tracing, or governance gates. | **REPORTED:** See the source-by-source [competitor matrix](COMPETITOR_MATRIX.md). | Do not claim competitors are merely documentation, dashboards, or process layers. |
 | F5 | The current platform repository describes an offline Ed25519 DSSE verifier with external-key fingerprint pinning and a tamper-negative test. | **REPORTED:** [Verifier source at the exact inspected base](https://github.com/szl-holdings/platform/blob/36e924f2c8ec34d7e725fa1da6606dfa609e9eda/packages/conformance/src/verify.mjs) and [conformance documentation](https://github.com/szl-holdings/platform/blob/36e924f2c8ec34d7e725fa1da6606dfa609e9eda/docs/conformance/VERTICAL_CONFORMANCE.md) | This is repository evidence, not an independent product benchmark or customer outcome. |
-| F6 | The repository reports that zero of three requested public targets currently pass the complete conformance suite. | **REPORTED:** [Vertical conformance documentation](https://github.com/szl-holdings/platform/blob/36e924f2c8ec34d7e725fa1da6606dfa609e9eda/docs/conformance/VERTICAL_CONFORMANCE.md) | Preserve the fail-closed result. Do not turn a local reference fixture into a public deployment claim. |
+| F6 | The repository reports that none of the assessed public target surfaces currently pass every required conformance gate. | **REPORTED:** [Vertical conformance documentation](https://github.com/szl-holdings/platform/blob/36e924f2c8ec34d7e725fa1da6606dfa609e9eda/docs/conformance/VERTICAL_CONFORMANCE.md) | Preserve the fail-closed result. Do not turn a local reference fixture into a public deployment claim. |
 | F7 | No customer, revenue, LOI, design-partner outcome, or independent receipt-verification evidence was supplied to this workcell. | **UNAVAILABLE:** Outside the scope and evidence set of the W4 audit. | Do not add traction claims to investor copy from this document. |
 
 ## 2. Positioning thesis
@@ -65,7 +65,7 @@ The following language is proposed copy, not a published fact set.
 
 ### Honest proof line
 
-> **REPORTED:** The repository contains a local offline-verification reference and intentionally reports that the current public vertical conformance result is 0/3. **MODELED:** The next proof milestone is an external party reproducing a valid receipt verification and a tampered receipt failure on a clean machine.
+> **REPORTED:** The repository contains a local offline-verification reference and intentionally reports that current public vertical conformance remains unearned. **MODELED:** The next proof milestone is an external party reproducing a valid receipt verification and a tampered receipt failure on a clean machine.
 
 ## 4. Copy that remains blocked
 
@@ -100,7 +100,7 @@ No later gate may be inferred from an earlier one.
 1. **REPORTED — The problem:** Present the scoped 87%/22% survey result and cite the surveyed population.
 2. **REPORTED — The market:** Acknowledge that funded competitors already report meaningful governance, runtime, observability, and evidence capabilities.
 3. **MODELED — The design target:** Explain signed, identity-constrained, offline-verifiable decision receipts without claiming exclusivity.
-4. **REPORTED — The current proof:** Show the repository verifier and the honest 0/3 public conformance result.
+4. **REPORTED — The current proof:** Show the repository verifier and the honest fail-closed public conformance result.
 5. **UNKNOWN — The open questions:** State external reproducibility, competitor equivalence, and willingness to pay as unresolved.
 6. **MODELED — The milestone:** Ask an evaluator or design partner to run the same receipt-verification protocol against one consequential workflow.
 

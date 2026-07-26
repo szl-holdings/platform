@@ -15,13 +15,13 @@ source branch:
 | #477 overclaim ledger | `3543e80494c7116d67f29d151116901d25328c5c` | Included with immutable incident evidence bindings |
 | #479 clean-clone portability | `f2afb49b3dfb3e8dd5dfbe1459626b814bbccce4` | Included with current proof receipt |
 | #481 vertical conformance | `67b66a65e09bb11b83c9a4680ded9f3000892354` | Included with full-SHA, freshness, SSRF, timeout, and 10,000-slash regressions |
-| #482 / #489 / #492 evidence lock replacement | `a2e582f71746b278a0bb31b54cd01cccd2a46384` | Reconciled with stricter #471 truth files; added bounded allowlist parsing and exact evidence-shape validation |
-| #483 consolidation plan | `603df13e881746e9b077e58795ed042c5c62da56` | Reviewed; integration retains stricter public-only redaction, omits access-controlled fingerprints/private-slot signals, and preserves the typed rollback correction |
+| #482 / #489 / #492 evidence lock replacement | `a2e582f73bdd16c4a02deac2f9e0194bc95cd5c6` | Reconciled with stricter #471 truth files; added bounded allowlist parsing and exact evidence-shape validation |
+| #483 consolidation plan | `603df13eacb2f42808061e7582865b410af1c982` | Reviewed; integration retains stricter public-only redaction, omits access-controlled fingerprints/private-slot signals, and preserves the typed rollback correction |
 | #484 dependency override | `a67de112a8204bb7cf90b3b39b5d02014d79a819` | Included; lock resolves `tar@7.5.21` |
-| #485 evidence-led positioning | `2d19e0ea6fb6215052c7c07931775423ebde243c` | Included with changed-file claim-gate correction |
-| #486 adapter validation | `c27a531dca6ca07d65f3200caed424277a950e9a` | Included with fail-closed MISP, TAXII, New Relic, and NVD boundaries plus null-NRQL aggregate handling |
-| #487 Hugging Face catalog | `9f8a1eda2f61fcc8713db97ee70e509054c5d81a` | Included without replacing newer clean-clone and conformance trees |
-| #491 MCP governor | `635619b8684864ebc78e47e89b53ef5bb703bec3` | Included with fail-closed capability/receipt enforcement, prototype-key canonicalization, void-result receipts, and replay-expiry guards |
+| #485 evidence-led positioning | `e6b866d9f5947040323492642f3072107241eb62` | Included with changed-file claim-gate correction and qualitative conformance language |
+| #486 adapter validation | `c27a531d545f5cc0642f423c47220ce7c35b2dac` | Included with fail-closed MISP, TAXII, New Relic, and NVD boundaries plus null-NRQL aggregate handling |
+| #487 Hugging Face catalog | `9675f3085bdadc0d11921eabced2c6bf22324e09` | Included with canonical timestamp validation without replacing newer clean-clone and conformance trees |
+| #491 MCP governor | `635619b858c488cbbd9562eabdf386754cb15c08` | Included with fail-closed capability/receipt enforcement, prototype-key canonicalization, void-result receipts, and replay-expiry guards |
 
 The exact publication head is recorded by the integration pull request. Source
 heads are evidence inputs, not merge authorization.
@@ -54,7 +54,7 @@ heads are evidence inputs, not merge authorization.
 | Documentation claim gate | **PASS** — 26/26 |
 | Overclaim negative suite | **PASS** — 14/14 |
 | Conformance and offline-verifier suite | **PASS** — 16/16 |
-| Hugging Face catalog suite and snapshot check | **PASS** — 7/7 |
+| Hugging Face catalog suite and snapshot check | **PASS** — 8/8 |
 | Upstream adapter validation | **PASS** — 17/17 plus package typecheck |
 | AEF workflow runtime | **PASS** — 12/12 plus SDK and engine typechecks |
 | MCP governor / Nexus policy | **PASS** — 14/14 and 3/3 plus both package typechecks |

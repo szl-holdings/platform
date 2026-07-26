@@ -98,6 +98,24 @@ test('fetchAssetIds rejects a cursor that leaves huggingface.co', async () => {
   );
 });
 
+test('validateSnapshot requires a canonical ISO observedAt timestamp', () => {
+  assert.deepEqual(validateSnapshot(snapshot()), []);
+  for (const observedAt of [
+    '0',
+    'July 25, 2026 00:00:00 UTC',
+    '2026-02-30T00:00:00.000Z',
+    '2026-07-25T00:00:00Z',
+    '2026-07-25T00:00:00.000+00:00',
+  ]) {
+    const invalid = snapshot();
+    invalid.observedAt = observedAt;
+    assert.ok(
+      validateSnapshot(invalid).some((error) => error.includes('canonical ISO')),
+      observedAt,
+    );
+  }
+});
+
 test('validateSnapshot rejects count, order, and ownership drift', () => {
   const invalid = snapshot(['OTHER/a', 'SZLHOLDINGS/z', 'SZLHOLDINGS/a']);
   invalid.assets.models.count = 2;
