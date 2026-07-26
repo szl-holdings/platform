@@ -27,6 +27,18 @@ type CanonicalEvidence = { name: string; value: string | null };
 type TestCountRole = 'ignored' | 'passed' | 'total';
 type SourceAnchor = { lineNumber: number; column: number; scope: string };
 type BlockEntry = SourceAnchor & { line: string };
+type SourceMapSpan = {
+  decodedStart: number;
+  decodedEnd: number;
+  sourceStart: number;
+  sourceEnd: number;
+  identity: boolean;
+};
+type DecodedText = {
+  text: string;
+  sourceLength: number;
+  spans: SourceMapSpan[];
+};
 type ClaimScanState = {
   seenOccurrences: Set<string>;
   identityCounts: Map<string, number>;
@@ -293,6 +305,17 @@ function compoundTestRoles(text: string): Map<number, TestCountRole> {
     }
   }
 
+  const roleForWord = (word: string | undefined): TestCountRole | undefined => {
+    if (!word) return undefined;
+    if (/^(?:pass|passed|passing|success|successes|successful|succeeded)$/i.test(word)) {
+      return 'passed';
+    }
+    if (/^(?:fail|failed|failing|failure|failures|error|errors)$/i.test(word)) {
+      return 'ignored';
+    }
+    if (/^total$/i.test(word)) return 'total';
+    return undefined;
+  };
   const roleCandidates: Array<{ offset: number; role: TestCountRole }> = [];
   for (const match of text.matchAll(new RegExp(number, 'g'))) {
     if (typeof match.index !== 'number' || roles.has(match.index)) continue;
@@ -300,16 +323,10 @@ function compoundTestRoles(text: string): Map<number, TestCountRole> {
     const end = start + match[0].length;
     const before = text.slice(Math.max(0, start - 24), start);
     const after = text.slice(end, Math.min(text.length, end + 24));
-    if (/\b(?:failed|failing)\s*:?\s*$/i.test(before) || /^\s*(?:failed|failing)\b/i.test(after)) {
-      roleCandidates.push({ offset: start, role: 'ignored' });
-    } else if (
-      /\b(?:passed|passing)\s*:?\s*$/i.test(before) ||
-      /^\s*(?:passed|passing)\b/i.test(after)
-    ) {
-      roleCandidates.push({ offset: start, role: 'passed' });
-    } else if (/\btotal\s*:?\s*$/i.test(before) || /^\s*(?:in\s+)?total\b/i.test(after)) {
-      roleCandidates.push({ offset: start, role: 'total' });
-    }
+    const beforeWord = before.match(/\b([A-Za-z]+)\s*:?\s*$/)?.[1];
+    const afterWord = after.match(/^\s*(?:in\s+)?([A-Za-z]+)\b/)?.[1];
+    const role = roleForWord(afterWord) ?? roleForWord(beforeWord);
+    if (role) roleCandidates.push({ offset: start, role });
   }
   if (roleCandidates.length >= 2 && /\btests?\b/i.test(text)) {
     for (const candidate of roleCandidates) roles.set(candidate.offset, candidate.role);
@@ -478,6 +495,62 @@ function claimFailuresForText(
   return failures;
 }
 
+const INLINE_FORMATTING_TAGS = new Set([
+  'a',
+  'b',
+  'code',
+  'em',
+  'i',
+  'kbd',
+  'mark',
+  'small',
+  'span',
+  'strong',
+  'sub',
+  'sup',
+]);
+
+function visibleSiblingText(text: string): string {
+  return normalizeInlineMarkup(decodeNumericEntities(text).text).toLowerCase();
+}
+
+function isInlineClaimContinuation(
+  text: string,
+  closingStart: number,
+  boundaryEnd: number,
+  closingTag: string | undefined,
+  openingTag: string | undefined,
+  interstitial: string,
+): boolean {
+  if (
+    !closingTag ||
+    !openingTag ||
+    !INLINE_FORMATTING_TAGS.has(closingTag.toLowerCase()) ||
+    !INLINE_FORMATTING_TAGS.has(openingTag.toLowerCase()) ||
+    interstitial.trim()
+  ) {
+    return false;
+  }
+
+  const leftOpeningEnd = text.lastIndexOf('>', Math.max(0, closingStart - 1));
+  const rightOpeningEnd = text.indexOf('>', boundaryEnd);
+  if (leftOpeningEnd < 0 || rightOpeningEnd < 0) return false;
+  const rightClosingStart = text.indexOf('<', rightOpeningEnd + 1);
+  const left = visibleSiblingText(text.slice(leftOpeningEnd + 1, closingStart));
+  const right = visibleSiblingText(
+    text.slice(rightOpeningEnd + 1, rightClosingStart < 0 ? text.length : rightClosingStart),
+  );
+  const leftEndsCarrier =
+    /\b(?:are|contains?|counts?|exposes?|has|have|includes?|is|reports?|ships?|totals?)\s*[:=-]?\s*$/i.test(
+      left,
+    );
+  const rightStartsNumber = /^\s*\d/.test(right);
+  const leftEndsNumber = /\d\s*$/.test(left);
+  const metricOffset = right.search(new RegExp(WATCHWORD_SOURCE, 'i'));
+  const rightStartsMetric = metricOffset >= 0 && metricOffset <= 32;
+  return (leftEndsCarrier && rightStartsNumber) || (leftEndsNumber && rightStartsMetric);
+}
+
 function markupSiblingSegments(
   text: string,
   relative: string,
@@ -485,11 +558,14 @@ function markupSiblingSegments(
   if (!['.html', '.tsx'].includes(path.extname(relative))) return [{ text, start: 0 }];
   const segments: Array<{ text: string; start: number }> = [];
   const boundary =
-    /(?:<\/[A-Za-z][\w:.-]*>|<\/>|\/>)(?:(?:<!--[\s\S]*?-->|\{\s*\/\*[\s\S]*?\*\/\s*\}|[^<>{}])*(?=<[A-Za-z]|<>)|\s*(?=\{))/g;
+    /(?:<\/([A-Za-z][\w:.-]*)>|<\/>|\/>)((?:<!--[\s\S]*?-->|\{\s*\/\*[\s\S]*?\*\/\s*\}|[^<>{}])*)(?=<([A-Za-z][\w:.-]*)\b|<>|\{)/g;
   let start = 0;
   for (const match of text.matchAll(boundary)) {
     if (typeof match.index !== 'number') continue;
     const end = match.index + match[0].length;
+    if (isInlineClaimContinuation(text, match.index, end, match[1], match[3], match[2] ?? '')) {
+      continue;
+    }
     if (end > start) segments.push({ text: text.slice(start, end), start });
     start = end;
   }
@@ -510,56 +586,106 @@ function boundedTextSegments(text: string): Array<{ text: string; start: number 
   return segments;
 }
 
-function decodeNumericEntities(text: string): {
-  text: string;
-  originalStarts: number[];
-  originalEnds: number[];
-} {
-  const originalStarts: number[] = [];
-  const originalEnds: number[] = [];
-  let decoded = '';
+function decodeNumericEntities(text: string): DecodedText {
+  const pieces: string[] = [];
+  const spans: SourceMapSpan[] = [];
+  let decodedLength = 0;
   let cursor = 0;
-  const append = (value: string, start: number, end: number): void => {
-    decoded += value;
-    for (let index = 0; index < value.length; index += 1) {
-      originalStarts.push(start);
-      originalEnds.push(end);
+  const append = (
+    value: string,
+    sourceStart: number,
+    sourceEnd: number,
+    identity: boolean,
+  ): void => {
+    if (!value) return;
+    pieces.push(value);
+    const previous = spans.at(-1);
+    if (
+      identity &&
+      previous?.identity &&
+      previous.decodedEnd === decodedLength &&
+      previous.sourceEnd === sourceStart
+    ) {
+      previous.decodedEnd += value.length;
+      previous.sourceEnd = sourceEnd;
+    } else {
+      spans.push({
+        decodedStart: decodedLength,
+        decodedEnd: decodedLength + value.length,
+        sourceStart,
+        sourceEnd,
+        identity,
+      });
     }
+    decodedLength += value.length;
   };
-  const appendPlainCharacter = (index: number): void => {
-    const character = text[index] ?? '';
-    const code = character.charCodeAt(0);
-    append(code >= 0xff10 && code <= 0xff19 ? String(code - 0xff10) : character, index, index + 1);
-  };
-  const expression = /&#(?:x([\da-f]+)|(\d+));?/gi;
+
+  const expression = /&#(?:x([\da-f]+)|(\d+));?|[\uff10-\uff19]/gi;
   for (const match of text.matchAll(expression)) {
     if (typeof match.index !== 'number') continue;
-    for (let index = cursor; index < match.index; index += 1) {
-      appendPlainCharacter(index);
+    if (match.index > cursor) {
+      append(text.slice(cursor, match.index), cursor, match.index, true);
     }
-    const value = Number.parseInt(match[1] ?? match[2] ?? '', match[1] ? 16 : 10);
-    let replacement = match[0];
-    if (Number.isInteger(value) && value >= 0 && value <= 0x10ffff) {
-      try {
-        replacement = String.fromCodePoint(value);
-      } catch {
-        replacement = match[0];
+
+    const sourceStart = match.index;
+    const sourceEnd = sourceStart + match[0].length;
+    if (/^[\uff10-\uff19]$/.test(match[0])) {
+      append(String(match[0].charCodeAt(0) - 0xff10), sourceStart, sourceEnd, true);
+    } else {
+      const value = Number.parseInt(match[1] ?? match[2] ?? '', match[1] ? 16 : 10);
+      let replacement = match[0];
+      if (Number.isInteger(value) && value >= 0 && value <= 0x10ffff) {
+        try {
+          const decoded = String.fromCodePoint(value);
+          if (!/[<>{}]/.test(decoded)) replacement = decoded;
+        } catch {
+          replacement = match[0];
+        }
       }
+      append(replacement, sourceStart, sourceEnd, replacement.length === match[0].length);
     }
-    for (const character of replacement) {
-      const code = character.charCodeAt(0);
-      append(
-        code >= 0xff10 && code <= 0xff19 ? String(code - 0xff10) : character,
-        match.index,
-        match.index + match[0].length,
-      );
-    }
-    cursor = match.index + match[0].length;
+    cursor = sourceEnd;
   }
-  for (let index = cursor; index < text.length; index += 1) {
-    appendPlainCharacter(index);
+  if (cursor < text.length) append(text.slice(cursor), cursor, text.length, true);
+  return { text: pieces.join(''), sourceLength: text.length, spans };
+}
+
+function sourceSpanForDecodedOffset(
+  decoded: DecodedText,
+  offset: number,
+): SourceMapSpan | undefined {
+  let low = 0;
+  let high = decoded.spans.length;
+  while (low < high) {
+    const middle = Math.floor((low + high) / 2);
+    const span = decoded.spans[middle];
+    if (!span || span.decodedEnd <= offset) low = middle + 1;
+    else high = middle;
   }
-  return { text: decoded, originalStarts, originalEnds };
+  return decoded.spans[low];
+}
+
+function sourceStartForDecodedOffset(decoded: DecodedText, offset: number): number {
+  if (offset >= decoded.text.length) return decoded.sourceLength;
+  const span = sourceSpanForDecodedOffset(decoded, Math.max(0, offset));
+  if (!span) return decoded.sourceLength;
+  return span.identity
+    ? span.sourceStart + Math.max(0, offset - span.decodedStart)
+    : span.sourceStart;
+}
+
+function sourceEndForDecodedOffset(decoded: DecodedText, offset: number): number {
+  if (offset < 0) return 0;
+  const span = sourceSpanForDecodedOffset(
+    decoded,
+    Math.min(offset, Math.max(0, decoded.text.length - 1)),
+  );
+  if (!span) return decoded.sourceLength;
+  return span.identity ? span.sourceStart + (offset - span.decodedStart) + 1 : span.sourceEnd;
+}
+
+export function semanticSourceSpanCount(text: string): number {
+  return decodeNumericEntities(text).spans.length;
 }
 
 function claimFailuresForSegmentedText(
@@ -572,28 +698,24 @@ function claimFailuresForSegmentedText(
   scanState: ClaimScanState,
   identitySink?: Map<string, number>,
 ): string[] {
-  const decoded = decodeNumericEntities(text);
-  return markupSiblingSegments(decoded.text, relative).flatMap((markupSegment) =>
-    boundedTextSegments(markupSegment.text).flatMap((boundedSegment) => {
-      const decodedStart = markupSegment.start + boundedSegment.start;
+  return markupSiblingSegments(text, relative).flatMap((markupSegment) => {
+    const decoded = decodeNumericEntities(markupSegment.text);
+    return boundedTextSegments(decoded.text).flatMap((boundedSegment) => {
+      const decodedStart = boundedSegment.start;
       return claimFailuresForText(
         relative,
         boundedSegment.text,
         (offset) => {
-          const originalOffset =
-            decoded.originalStarts[decodedStart + offset] ??
-            decoded.originalStarts.at(-1) ??
-            text.length;
-          return sourceAnchorForOffset(originalOffset);
+          const originalOffset = sourceStartForDecodedOffset(decoded, decodedStart + offset);
+          return sourceAnchorForOffset(markupSegment.start + originalOffset);
         },
         (start, end) => {
-          const originalStart =
-            decoded.originalStarts[decodedStart + start] ??
-            decoded.originalStarts.at(-1) ??
-            text.length;
-          const originalEnd =
-            decoded.originalEnds[decodedStart + Math.max(start, end - 1)] ?? originalStart;
-          return text.slice(originalStart, originalEnd);
+          const originalStart = sourceStartForDecodedOffset(decoded, decodedStart + start);
+          const originalEnd = sourceEndForDecodedOffset(
+            decoded,
+            decodedStart + Math.max(start, end - 1),
+          );
+          return markupSegment.text.slice(originalStart, originalEnd);
         },
         metrics,
         allowlist,
@@ -601,8 +723,8 @@ function claimFailuresForSegmentedText(
         scanState,
         identitySink,
       );
-    }),
-  );
+    });
+  });
 }
 
 function startsStructuralBlock(line: string): boolean {
@@ -664,16 +786,39 @@ function canJoinWrappedLines(current: string, next: string, relative: string): b
 
 function structuralScopesForLines(lines: string[]): string[] {
   const headings: string[] = [];
-  return lines.map((line) => {
-    const markdown = line.match(/^\s*(#{1,6})\s+(.+?)\s*#*\s*$/);
-    const html = line.match(/^\s*<h([1-6])\b[^>]*>([\s\S]*?)<\/h\1>\s*$/i);
-    const level = markdown?.[1]?.length ?? (html?.[1] ? Number.parseInt(html[1], 10) : 0);
-    const headingText = normalizeInlineMarkup(markdown?.[2] ?? html?.[2] ?? '')
+  const normalized = lines.map((line) => {
+    const quote = line.match(/^\s*((?:>\s*)+)([\s\S]*)$/);
+    return {
+      quoteDepth: quote ? [...quote[1]].filter((character) => character === '>').length : 0,
+      text: quote?.[2] ?? line,
+    };
+  });
+  return normalized.map((entry, index) => {
+    const markdown = entry.text.match(/^\s*(#{1,6})\s+(.+?)\s*#*\s*$/);
+    const html = entry.text.match(/^\s*<h([1-6])\b[^>]*>([\s\S]*?)<\/h\1>\s*$/i);
+    const next = normalized[index + 1];
+    const setext =
+      !markdown && !html && entry.text.trim() && next?.quoteDepth === entry.quoteDepth
+        ? next.text.match(/^\s*(=+|-+)\s*$/)
+        : null;
+    const level =
+      markdown?.[1]?.length ??
+      (html?.[1]
+        ? Number.parseInt(html[1], 10)
+        : setext?.[1]?.startsWith('=')
+          ? 1
+          : setext
+            ? 2
+            : 0);
+    const headingText = normalizeInlineMarkup(
+      markdown?.[2] ?? html?.[2] ?? (setext ? entry.text : ''),
+    )
       .toLowerCase()
       .trim();
     if (level > 0 && headingText) {
       headings.length = level - 1;
-      headings[level - 1] = headingText;
+      headings[level - 1] =
+        entry.quoteDepth > 0 ? `quote-${entry.quoteDepth}:${headingText}` : headingText;
     }
     const path = headings
       .map((heading, index) => (heading ? `${index + 1}:${heading}` : ''))
@@ -767,12 +912,14 @@ export function claimFailuresForLines(
       const separatorSize = overlap.length > 0 ? 1 : 0;
       const remaining = characterBudget - size - separatorSize;
       if (remaining <= 0) break;
-      if (entry.line.length <= remaining) {
+      const decodedEntry = decodeNumericEntities(entry.line);
+      if (decodedEntry.text.length <= remaining) {
         overlap.unshift(entry);
-        size += entry.line.length + separatorSize;
+        size += decodedEntry.text.length + separatorSize;
         continue;
       }
-      const start = entry.line.length - remaining;
+      const decodedStart = decodedEntry.text.length - remaining;
+      const start = sourceStartForDecodedOffset(decodedEntry, decodedStart);
       overlap.unshift({
         ...entry,
         line: entry.line.slice(start),
