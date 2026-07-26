@@ -80,6 +80,7 @@ export interface GovernanceReceipt {
   readonly mutatesState: boolean;
   readonly decision: PolicyEffect;
   readonly reason: string;
+  readonly policyVersion?: string;
   readonly occurredAt: string;
   readonly argsDigest: string;
   readonly resultDigest?: string;

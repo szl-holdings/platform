@@ -126,6 +126,9 @@ export async function verifyCapabilityToken(
   }
 
   const claims = parseClaims(decodeJson(payloadPart));
+  if (options.expectedIssuer && claims.issuer !== options.expectedIssuer) {
+    throw new CapabilityTokenError('issuer_mismatch', 'capability issuer does not match');
+  }
   const publicKey = await resolvePublicKey(fields.keyId, claims.issuer);
   const signingInput = `${headerPart}.${payloadPart}`;
   const valid = verify(
@@ -143,9 +146,6 @@ export async function verifyCapabilityToken(
   }
   if (nowSeconds >= claims.expiresAt) {
     throw new CapabilityTokenError('expired', 'capability has expired');
-  }
-  if (options.expectedIssuer && claims.issuer !== options.expectedIssuer) {
-    throw new CapabilityTokenError('issuer_mismatch', 'capability issuer does not match');
   }
   if (claims.subject !== options.actorId) {
     throw new CapabilityTokenError('subject_mismatch', 'capability subject does not match actor');

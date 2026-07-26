@@ -35,6 +35,7 @@ export function createSignedReceipt(
     mutatesState: input.envelope.mutatesState,
     decision: input.decision.effect,
     reason: input.decision.reason,
+    policyVersion: input.decision.policyVersion,
     occurredAt: input.occurredAt,
     argsDigest: input.envelope.argsDigest,
     resultDigest: input.resultDigest,

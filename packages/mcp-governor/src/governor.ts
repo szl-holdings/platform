@@ -50,12 +50,46 @@ function block(reason: string): PolicyDecision {
   return { effect: 'block', reason };
 }
 
+function deepFreeze(value: unknown): unknown {
+  if (!value || typeof value !== 'object' || Object.isFrozen(value)) return value;
+  for (const key of Object.keys(value)) {
+    deepFreeze((value as Record<string, unknown>)[key]);
+  }
+  return Object.freeze(value);
+}
+
+function immutableCanonicalSnapshot(value: unknown): unknown {
+  const snapshot = JSON.parse(canonicalJson(value)) as unknown;
+  return deepFreeze(snapshot);
+}
+
+function stableFailure(error: unknown): { code: string; message: string } {
+  if (error instanceof Error) {
+    const candidateCode = (error as Error & { code?: unknown }).code;
+    const code =
+      typeof candidateCode === 'string' || typeof candidateCode === 'number'
+        ? String(candidateCode)
+        : error.name;
+    return { code, message: error.message };
+  }
+
+  let message: string;
+  try {
+    message = String(error);
+  } catch {
+    message = 'unprintable thrown value';
+  }
+  return { code: `non_error_${error === null ? 'null' : typeof error}`, message };
+}
+
 function validateDecision(value: PolicyDecision): PolicyDecision {
   if (
     !value ||
     !['allow', 'block', 'approval_required'].includes(value.effect) ||
     typeof value.reason !== 'string' ||
-    value.reason.length === 0
+    value.reason.length === 0 ||
+    (value.policyVersion !== undefined &&
+      (typeof value.policyVersion !== 'string' || value.policyVersion.length === 0))
   ) {
     return block('policy_evaluator_invalid_result');
   }
@@ -94,10 +128,11 @@ export class McpGovernor {
 
   async run<T>(
     request: GovernedActionRequest,
-    execute: () => Promise<T>,
+    execute: (args: unknown) => Promise<T>,
   ): Promise<GovernedActionResult<T>> {
     const clock = this.config.clock ?? (() => new Date());
-    const envelope = createGovernedActionEnvelope(request, clock());
+    const argsSnapshot = immutableCanonicalSnapshot(request.args);
+    const envelope = createGovernedActionEnvelope({ ...request, args: argsSnapshot }, clock());
     const receipts: GovernanceReceipt[] = [];
     let capability: VerifiedCapability | undefined;
 
@@ -158,7 +193,7 @@ export class McpGovernor {
 
     let decision: PolicyDecision;
     try {
-      decision = validateDecision(await this.config.policyEvaluator(envelope, request.args));
+      decision = validateDecision(await this.config.policyEvaluator(envelope, argsSnapshot));
     } catch {
       decision = block('policy_evaluator_error');
     }
@@ -181,14 +216,14 @@ export class McpGovernor {
 
     let result: T;
     try {
-      result = await execute();
+      result = await execute(argsSnapshot);
     } catch (error) {
       try {
         await persist(
           'after',
           'error',
           decision,
-          sha256(canonicalJson({ error: error instanceof Error ? error.name : typeof error })),
+          sha256(canonicalJson(stableFailure(error))),
           before?.receiptDigest,
         );
       } catch (receiptError) {
