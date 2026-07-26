@@ -101,6 +101,16 @@ Use [docs/README.md](README.md) for navigation by audience or task.
 
 ---
 
+## Standards and Assurance
+
+| Document | Description | Last Reviewed |
+|----------|-------------|---------------|
+| [SLSA_POSTURE.md](SLSA_POSTURE.md) | Claim-safe SLSA v1.2 Build Track posture by current artifact, including explicit evidence blockers | 2026-07 |
+| [OWASP-ASI-MAPPING.md](OWASP-ASI-MAPPING.md) | OWASP Top 10 for Agentic Applications 2026 mapping with exact risk names and evidence labels | 2026-07 |
+| [NIST-AI-RMF-CROSSWALK.md](NIST-AI-RMF-CROSSWALK.md) | NIST AI RMF Core and AI 600-1 crosswalk with measured, modeled, planned, and unknown evidence | 2026-07 |
+
+---
+
 ## Operations
 
 | Document | Description | Last Reviewed |
