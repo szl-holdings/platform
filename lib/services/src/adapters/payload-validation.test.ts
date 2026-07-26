@@ -2,6 +2,7 @@ import assert from 'node:assert/strict';
 import { describe, it } from 'vitest';
 import { parseStixBundle, parseTaxiiCollections, parseTaxiiDiscovery } from './misp-taxii.js';
 import {
+  NewRelicAdapter,
   parseNewRelicAlertConditions,
   parseNewRelicApmResults,
   parseNewRelicErrors,
@@ -15,6 +16,35 @@ import {
   optionalNumber,
   UpstreamPayloadError,
 } from './payload-validation.js';
+
+async function withLiveNewRelic<T>(
+  payloads: unknown[],
+  run: (adapter: NewRelicAdapter) => Promise<T>,
+): Promise<T> {
+  const previousApiKey = process.env.NEW_RELIC_API_KEY;
+  const previousAccountId = process.env.NEW_RELIC_ACCOUNT_ID;
+  process.env.NEW_RELIC_API_KEY = 'test-key';
+  process.env.NEW_RELIC_ACCOUNT_ID = '123';
+  try {
+    const adapter = new NewRelicAdapter();
+    let responseIndex = 0;
+    (
+      adapter as unknown as {
+        resilientFetch: () => Promise<Response>;
+      }
+    ).resilientFetch = async () =>
+      new Response(JSON.stringify(payloads[responseIndex++]), {
+        status: 200,
+        headers: { 'Content-Type': 'application/json' },
+      });
+    return await run(adapter);
+  } finally {
+    if (previousApiKey === undefined) delete process.env.NEW_RELIC_API_KEY;
+    else process.env.NEW_RELIC_API_KEY = previousApiKey;
+    if (previousAccountId === undefined) delete process.env.NEW_RELIC_ACCOUNT_ID;
+    else process.env.NEW_RELIC_ACCOUNT_ID = previousAccountId;
+  }
+}
 
 describe('upstream payload boundary validation', () => {
   it('rejects non-object payload roots', () => {
@@ -239,6 +269,27 @@ describe('New Relic payloads', () => {
         }),
       UpstreamPayloadError,
     );
+  });
+
+  it('preserves adapter fallbacks for HTTP 200 GraphQL errors', async () => {
+    const graphQlError = {
+      data: { actor: { account: null } },
+      errors: [{ message: 'Account is unavailable' }],
+    };
+
+    const apm = await withLiveNewRelic([graphQlError], (adapter) => adapter.getApmMetrics());
+    assert.equal(apm.applicationName, 'SZL-Platform-API');
+    assert.equal(apm.responseTimeMs, 142);
+
+    const hosts = await withLiveNewRelic([graphQlError], (adapter) => adapter.getInfraHosts());
+    assert.equal(hosts.length, 4);
+    assert.equal(hosts[0]?.hostname, 'api-prod-01');
+
+    const alerts = await withLiveNewRelic([graphQlError], (adapter) =>
+      adapter.getAlertConditions(),
+    );
+    assert.equal(alerts.length, 4);
+    assert.equal(alerts[0]?.name, 'High Error Rate');
   });
 });
 

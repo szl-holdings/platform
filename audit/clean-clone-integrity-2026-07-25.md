@@ -8,8 +8,11 @@ also required a POSIX shell for `preinstall`, `prepare`, and API-client presence
 checking. Those assumptions prevented a clean Windows clone from completing the
 repository's normal install and typecheck entrypoints.
 
-This workcell is limited to portable clean-clone integrity. It does not claim to close
-the broader estate release gate.
+This workcell is limited to portable clean-clone integrity. Its current exact head
+also incorporates the independently merged upstream-adapter validation change from
+`main`, because the branch was refreshed before release. The verification below
+therefore covers both the portability patch and the adapter files present in the
+reviewed branch. It does not claim to close the broader estate release gate.
 
 ## Operator authorization
 
@@ -52,6 +55,10 @@ history is removed.
   explicit warning instead of failing for optional local hooks.
 - Preserve each raw NUL-delimited Git path for filesystem access and use a separate
   NFC/slash-normalized representation only for policy comparisons and reporting.
+- Validate MISP/TAXII, New Relic, and NVD payloads before admitting external values
+  into typed adapter state. At the New Relic adapter boundary, HTTP 200 GraphQL error
+  payloads and invalid response shapes preserve the established demo fallback rather
+  than escaping as an unhandled parsing error.
 
 ## Verification
 
@@ -61,7 +68,7 @@ Verified locally on Windows with Node.js 24.14.0 and pnpm 10.26.1:
   portability patch.
 - Dependency-free clone-guard suite: PASS, 13/13 tests, including a real linked
   worktree with spaces in both checkout paths.
-- Root `verify:clean-clone`: PASS, 15/15 root guard tests and 9,387 portable
+- Root `verify:clean-clone`: PASS, 17/17 root guard tests and 9,408 portable
   tracked paths.
 - Focused follow-up regressions: PASS, 10/10 tests covering claims-input
   deletion detection, external and unavailable hook directories, and raw
@@ -72,6 +79,10 @@ Verified locally on Windows with Node.js 24.14.0 and pnpm 10.26.1:
 - `@szl-holdings/api-spec` typecheck: PASS.
 - `@szl-holdings/api-spec` tests: PASS, 2/2.
 - `@szl-holdings/api-spec` committed-client presence gate: PASS.
+- `@szl-holdings/services` payload-boundary tests: PASS, 18/18, including live-mode
+  adapter regressions for HTTP 200 NerdGraph error payloads across APM,
+  infrastructure, and alert operations.
+- `@szl-holdings/services` typecheck: PASS.
 - Repository-wide `pnpm run test`: PASS in the protected GitHub Actions
   `Unit tests (vitest)` job for PR #479 at head
   `af6344025992591a25be2fe9a7a4d3bd4ddfbf0b` (113/113 tasks successful,
@@ -79,20 +90,14 @@ Verified locally on Windows with Node.js 24.14.0 and pnpm 10.26.1:
   `https://github.com/szl-holdings/platform/actions/runs/30183117037/job/89743031505`.
 - Changed-file Biome check: PASS with no warnings or fixes required.
 - Canonical source-of-truth validator: PASS, 64/64 checks.
+- `docs:claims-check`: PASS, 19/19 current claims verified.
 - Clean-clone case-collision guard: PASS after staging the final tracked path set.
 - `git diff --check`: PASS.
 
-The full repository typecheck completed 165 of 178 scheduled tasks before failing in
-the existing `@szl-holdings/workflow-engine` dependency graph. The ten diagnostics are
-all in untouched adapter files under `lib/services/src/adapters/` (`misp-taxii.ts`,
-`new-relic.ts`, and `nvd.ts`) where `unknown` values are assigned to typed response
-objects. This workcell does not alter those files and does **not** record the
-repository-wide typecheck as a pass; protected CI remains an independent gate.
-
-The existing `docs:claims-check` remains red with 11 stale documentation references
-under `artifacts/api-server` and a missing `Key Route Paths` section. Eight checks pass.
-This workcell does not alter those documents or count that unrelated baseline failure
-as closed.
+The earlier typecheck limitation in `misp-taxii.ts`, `new-relic.ts`, and `nvd.ts` no
+longer applies to this exact head: those adapter boundaries are part of the reviewed
+branch and the focused services typecheck passes. Protected full-repository CI
+remains an independent release gate.
 
 The normalized `brand:check` scans only tracked source files and passes locally. The
 pre-push changed-file banned-brand check also passes for this branch. Its explicit

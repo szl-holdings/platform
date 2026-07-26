@@ -5,8 +5,8 @@ import {
   nestedRecord,
   optionalArray,
   optionalBoolean,
-  optionalNumber,
   optionalNullableNumber,
+  optionalNumber,
   optionalRecord,
   optionalString,
   UpstreamPayloadError,
@@ -189,6 +189,22 @@ function parseNrqlRows(payload: unknown, context: string): JsonRecord[] | undefi
   return results?.map((value, index) => expectRecord(value, `${context}.results[${index}]`));
 }
 
+async function parseNerdGraphResponse<T>(
+  response: Response,
+  parser: (payload: unknown) => T,
+): Promise<T | undefined> {
+  try {
+    const payload: unknown = await response.json();
+    if (parseNewRelicErrors(payload).length > 0) return undefined;
+    return parser(payload);
+  } catch (error) {
+    if (error instanceof UpstreamPayloadError || error instanceof SyntaxError) {
+      return undefined;
+    }
+    throw error;
+  }
+}
+
 export function parseNewRelicApmResults(payload: unknown): NewRelicApmResult[] | undefined {
   return parseNrqlRows(payload, 'NerdGraph APM response')?.map((row, index) => ({
     responseTimeMs: optionalNullableNumber(
@@ -196,9 +212,21 @@ export function parseNewRelicApmResults(payload: unknown): NewRelicApmResult[] |
       'responseTimeMs',
       `NerdGraph APM response.results[${index}]`,
     ),
-    throughputRpm: optionalNullableNumber(row, 'throughputRpm', `NerdGraph APM response.results[${index}]`),
-    errorRatePct: optionalNullableNumber(row, 'errorRatePct', `NerdGraph APM response.results[${index}]`),
-    apdexScore: optionalNullableNumber(row, 'apdexScore', `NerdGraph APM response.results[${index}]`),
+    throughputRpm: optionalNullableNumber(
+      row,
+      'throughputRpm',
+      `NerdGraph APM response.results[${index}]`,
+    ),
+    errorRatePct: optionalNullableNumber(
+      row,
+      'errorRatePct',
+      `NerdGraph APM response.results[${index}]`,
+    ),
+    apdexScore: optionalNullableNumber(
+      row,
+      'apdexScore',
+      `NerdGraph APM response.results[${index}]`,
+    ),
   }));
 }
 
@@ -206,7 +234,11 @@ export function parseNewRelicHostCountResults(
   payload: unknown,
 ): NewRelicHostCountResult[] | undefined {
   return parseNrqlRows(payload, 'NerdGraph host-count response')?.map((row, index) => ({
-    hostCount: optionalNullableNumber(row, 'hostCount', `NerdGraph host-count response.results[${index}]`),
+    hostCount: optionalNullableNumber(
+      row,
+      'hostCount',
+      `NerdGraph host-count response.results[${index}]`,
+    ),
     instanceCount: optionalNullableNumber(
       row,
       'instanceCount',
@@ -224,7 +256,11 @@ export function parseNewRelicInfraResults(payload: unknown): NewRelicInfraResult
       memoryUsedPct: optionalNullableNumber(row, 'memoryUsedPct', context),
       diskUsedPct: optionalNullableNumber(row, 'diskUsedPct', context),
       networkReceiveBytesPerSec: optionalNullableNumber(row, 'networkReceiveBytesPerSec', context),
-      networkTransmitBytesPerSec: optionalNullableNumber(row, 'networkTransmitBytesPerSec', context),
+      networkTransmitBytesPerSec: optionalNullableNumber(
+        row,
+        'networkTransmitBytesPerSec',
+        context,
+      ),
       fullestDiskPct: optionalNullableNumber(row, 'fullestDiskPct', context),
     };
   });
@@ -335,7 +371,7 @@ export class NewRelicAdapter extends ServiceAdapter {
     });
 
     if (!res.ok) return { ...DEMO_APM };
-    const results = parseNewRelicApmResults(await res.json())?.[0];
+    const results = (await parseNerdGraphResponse(res, parseNewRelicApmResults))?.[0];
     if (!results) return { ...DEMO_APM };
 
     const hostRes = await this.resilientFetch('https://api.newrelic.com/graphql', {
@@ -349,7 +385,7 @@ export class NewRelicAdapter extends ServiceAdapter {
     let hostCount = DEMO_APM.hostCount;
     let instanceCount = DEMO_APM.instanceCount;
     if (hostRes?.ok) {
-      const hr = parseNewRelicHostCountResults(await hostRes.json())?.[0];
+      const hr = (await parseNerdGraphResponse(hostRes, parseNewRelicHostCountResults))?.[0];
       if (hr) {
         hostCount = hr.hostCount ?? hostCount;
         instanceCount = hr.instanceCount ?? instanceCount;
@@ -382,7 +418,7 @@ export class NewRelicAdapter extends ServiceAdapter {
     });
 
     if (!res.ok) return [...DEMO_HOSTS];
-    const results = parseNewRelicInfraResults(await res.json());
+    const results = await parseNerdGraphResponse(res, parseNewRelicInfraResults);
     if (!Array.isArray(results) || results.length === 0) return [...DEMO_HOSTS];
 
     return results.map((r) => ({
@@ -408,7 +444,7 @@ export class NewRelicAdapter extends ServiceAdapter {
     });
 
     if (!res.ok) return [...DEMO_ALERTS];
-    const conditions = parseNewRelicAlertConditions(await res.json());
+    const conditions = await parseNerdGraphResponse(res, parseNewRelicAlertConditions);
     if (!Array.isArray(conditions) || conditions.length === 0) return [...DEMO_ALERTS];
 
     return conditions.slice(0, 10).map((c) => {
