@@ -3,12 +3,10 @@ import { generateKeyPairSync } from 'node:crypto';
 import test from 'node:test';
 
 import {
-  bindGovernedExecutor,
   type CapabilityClaims,
   CapabilityTokenError,
   canonicalJson,
   GovernanceDeniedError,
-  type GovernedActionExecutor,
   type GovernanceReceipt,
   type GovernedActionEnvelope,
   type GovernedActionRequest,
@@ -76,10 +74,15 @@ function createGovernor(
     execute: (args: unknown) => Promise<T>,
   ): Promise<GovernedActionResult<T>>;
 } {
+  let activeExecutor: ((args: unknown) => Promise<unknown>) | undefined;
   const governor = new McpGovernor({
     policyEvaluator:
       options.policy ?? (async () => ({ effect: 'allow', reason: 'policy permits action' })),
     capabilityPublicKeyResolver: () => capabilityPublicKey,
+    toolExecutor: async (_toolName, args) => {
+      if (!activeExecutor) throw new Error('test executor is not bound');
+      return activeExecutor(args);
+    },
     receiptSigner: { keyId: 'receipt-key-1', privateKey: receiptPrivateKey },
     receiptWriter:
       options.writer ??
@@ -91,8 +94,15 @@ function createGovernor(
     clock: () => NOW,
   });
   return {
-    run: (governedRequest, execute) =>
-      governor.run(governedRequest, bindGovernedExecutor(execute)),
+    run: async (governedRequest, execute) => {
+      if (activeExecutor) throw new Error('concurrent test execution is not supported');
+      activeExecutor = execute;
+      try {
+        return await governor.run(governedRequest);
+      } finally {
+        activeExecutor = undefined;
+      }
+    },
   };
 }
 
@@ -490,11 +500,27 @@ test('binds error receipts to stable failure codes and messages', async () => {
   );
 });
 
-test('rejects legacy closure executors that are not bound to governed arguments', async () => {
+test('requires a structurally controlled tool executor', async () => {
+  assert.throws(
+    () =>
+      new McpGovernor({
+        policyEvaluator: async () => ({ effect: 'allow', reason: 'policy permits action' }),
+        capabilityPublicKeyResolver: () => capabilityPublicKey,
+        toolExecutor: async () => 'legacy closure',
+        receiptSigner: { keyId: 'receipt-key-1', privateKey: receiptPrivateKey },
+        receiptWriter: async () => undefined,
+        expectedCapabilityIssuer: 'szl-control-plane',
+        clock: () => NOW,
+      }),
+    /toolExecutor must accept toolName and governed args/,
+  );
+
   const receipts: GovernanceReceipt[] = [];
+  let legacyCalled = false;
   const governor = new McpGovernor({
     policyEvaluator: async () => ({ effect: 'allow', reason: 'policy permits action' }),
     capabilityPublicKeyResolver: () => capabilityPublicKey,
+    toolExecutor: async (_toolName, args) => (args as { amount: number }).amount,
     receiptSigner: { keyId: 'receipt-key-1', privateKey: receiptPrivateKey },
     receiptWriter: async (receipt) => {
       receipts.push(receipt);
@@ -503,16 +529,21 @@ test('rejects legacy closure executors that are not bound to governed arguments'
     clock: () => NOW,
   });
   const mutableArgs = { amount: 10 };
-  const legacyExecutor = async () => mutableArgs.amount;
-
-  await assert.rejects(
-    governor.run(
-      request({ actionId: 'action-legacy-executor', args: mutableArgs }),
-      legacyExecutor as unknown as GovernedActionExecutor<number>,
-    ),
-    /bindGovernedExecutor/,
+  const legacyExecutor = async () => {
+    legacyCalled = true;
+    return mutableArgs.amount;
+  };
+  const runWithLegacyArgument = governor.run.bind(governor) as unknown as (
+    governedRequest: GovernedActionRequest,
+    ignoredLegacyExecutor: () => Promise<number>,
+  ) => Promise<GovernedActionResult<number>>;
+  const outcome = await runWithLegacyArgument(
+    request({ actionId: 'action-legacy-executor', args: mutableArgs }),
+    legacyExecutor,
   );
-  assert.equal(receipts.length, 0);
+  assert.equal(outcome.result, 10);
+  assert.equal(legacyCalled, false);
+  assert.equal(receipts.length, 2);
 });
 
 test('snapshots and freezes a mutable policy decision before later awaits', async () => {
@@ -562,4 +593,29 @@ test('snapshots and freezes a mutable policy decision before later awaits', asyn
       ['original authorization', 'covenant-original'],
     ],
   );
+});
+
+test('records an error receipt when error metadata accessors throw', async () => {
+  const receipts: GovernanceReceipt[] = [];
+  const governor = createGovernor(receipts);
+  const hostileError = new Error('opaque failure') as Error & { code?: string };
+  Object.defineProperty(hostileError, 'code', {
+    get() {
+      throw new Error('code accessor denied');
+    },
+  });
+
+  await assert.rejects(
+    governor.run(request({ actionId: 'action-hostile-error' }), async () => {
+      throw hostileError;
+    }),
+    (error: unknown) => error === hostileError,
+  );
+  const errorReceipt = receipts.find((item) => item.outcome === 'error');
+  assert.ok(errorReceipt);
+  assert.equal(
+    errorReceipt.resultDigest,
+    sha256(canonicalJson({ code: 'Error', message: 'opaque failure' })),
+  );
+  assert.equal(verifyGovernanceReceipt(errorReceipt, receiptPublicKey), true);
 });

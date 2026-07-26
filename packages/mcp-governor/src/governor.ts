@@ -13,19 +13,6 @@ import type {
   VerifiedCapability,
 } from './types.js';
 
-const GOVERNED_EXECUTOR = Symbol('szl.governed-executor/v1');
-
-export interface GovernedActionExecutor<T> {
-  readonly [GOVERNED_EXECUTOR]: true;
-  readonly execute: (args: unknown) => Promise<T>;
-}
-
-export function bindGovernedExecutor<T>(
-  execute: (args: unknown) => Promise<T>,
-): GovernedActionExecutor<T> {
-  return Object.freeze({ [GOVERNED_EXECUTOR]: true as const, execute });
-}
-
 export class InMemoryReplayStore implements ReplayStore {
   private readonly consumed = new Map<string, number>();
 
@@ -77,13 +64,32 @@ function immutableCanonicalSnapshot(value: unknown): unknown {
 }
 
 function stableFailure(error: unknown): { code: string; message: string } {
-  if (error instanceof Error) {
-    const candidateCode = (error as Error & { code?: unknown }).code;
-    const code =
-      typeof candidateCode === 'string' || typeof candidateCode === 'number'
-        ? String(candidateCode)
-        : error.name;
-    return { code, message: error.message };
+  try {
+    if (error instanceof Error) {
+      let code = 'Error';
+      let message = 'error message unavailable';
+      try {
+        if (typeof error.name === 'string' && error.name.length > 0) code = error.name;
+      } catch {
+        // Keep the stable Error fallback when metadata access is hostile.
+      }
+      try {
+        if (typeof error.message === 'string') message = error.message;
+      } catch {
+        // Keep the stable unavailable marker when metadata access is hostile.
+      }
+      try {
+        const candidateCode = (error as Error & { code?: unknown }).code;
+        if (typeof candidateCode === 'string' || typeof candidateCode === 'number') {
+          code = String(candidateCode);
+        }
+      } catch {
+        // The name-derived code remains stable when a code accessor throws.
+      }
+      return { code, message };
+    }
+  } catch {
+    // A hostile proxy can throw during instanceof; use the non-Error fallback.
   }
 
   let message: string;
@@ -140,21 +146,13 @@ export class McpGovernor {
   private readonly replayStore: ReplayStore;
 
   constructor(private readonly config: McpGovernorConfig) {
+    if (typeof config.toolExecutor !== 'function' || config.toolExecutor.length < 2) {
+      throw new TypeError('toolExecutor must accept toolName and governed args');
+    }
     this.replayStore = config.replayStore ?? new InMemoryReplayStore();
   }
 
-  async run<T>(
-    request: GovernedActionRequest,
-    executor: GovernedActionExecutor<T>,
-  ): Promise<GovernedActionResult<T>> {
-    if (
-      !executor ||
-      typeof executor !== 'object' ||
-      executor[GOVERNED_EXECUTOR] !== true ||
-      typeof executor.execute !== 'function'
-    ) {
-      throw new TypeError('execute must be created with bindGovernedExecutor');
-    }
+  async run<T>(request: GovernedActionRequest): Promise<GovernedActionResult<T>> {
     const clock = this.config.clock ?? (() => new Date());
     const argsSnapshot = immutableCanonicalSnapshot(request.args);
     const envelope = createGovernedActionEnvelope({ ...request, args: argsSnapshot }, clock());
@@ -241,7 +239,7 @@ export class McpGovernor {
 
     let result: T;
     try {
-      result = await executor.execute(argsSnapshot);
+      result = (await this.config.toolExecutor(request.toolName, argsSnapshot)) as T;
     } catch (error) {
       try {
         await persist(

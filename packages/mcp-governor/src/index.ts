@@ -5,11 +5,9 @@ export {
   verifyCapabilityToken,
 } from './capability.js';
 export {
-  bindGovernedExecutor,
   createGovernedActionEnvelope,
   GovernanceDeniedError,
   GovernancePostReceiptError,
-  type GovernedActionExecutor,
   InMemoryReplayStore,
   McpGovernor,
 } from './governor.js';
@@ -23,6 +21,7 @@ export {
   type GovernedActionEnvelope,
   type GovernedActionRequest,
   type GovernedActionResult,
+  type GovernedToolExecutor,
   type McpGovernorConfig,
   type PolicyDecision,
   type PolicyEffect,

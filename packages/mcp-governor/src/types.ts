@@ -100,6 +100,8 @@ export interface ReceiptSigner {
 
 export type ReceiptWriter = (receipt: GovernanceReceipt) => Promise<void>;
 
+export type GovernedToolExecutor = (toolName: string, args: unknown) => Promise<unknown>;
+
 export type CapabilityPublicKeyResolver = (
   keyId: string,
   issuer: string,
@@ -112,6 +114,7 @@ export interface ReplayStore {
 export interface McpGovernorConfig {
   policyEvaluator: PolicyEvaluator;
   capabilityPublicKeyResolver: CapabilityPublicKeyResolver;
+  toolExecutor: GovernedToolExecutor;
   receiptSigner: ReceiptSigner;
   receiptWriter: ReceiptWriter;
   replayStore?: ReplayStore;
