@@ -6,8 +6,8 @@
 
 - **Observed at:** `2026-07-26T01:30:42.617Z`
 - **Organization:** `szl-holdings`
-- **MEASURED:** 57 repositories: 54 public, 3 private, 12 archived, and 45 active.
-- **MEASURED:** every observed default branch was `main` and every repository had an exact 40-character default-head SHA.
+- **MEASURED:** 54 public repositories: 12 archived and 42 active. Non-public inventory is intentionally excluded from this public document and retained only in access-controlled evidence.
+- **MEASURED:** every public repository's observed default branch was `main` and every public repository had an exact 40-character default-head SHA.
 - **Drift warning:** GitHub state may change after the observed timestamp. Any later execution workcell must refresh the complete inventory, exact heads, open pull requests, rulesets, and repository notices before proposing an action.
 
 ### Claim labels
@@ -31,7 +31,7 @@ Option B targets nine public survivor slots. Six slots are presently usable with
 | Organization profile | `szl-holdings/.github` | public, active | KEEP | none beyond refreshed preflight | MEASURED |
 | Cyber / SENTRA | exact `sentra` repository absent | `immune` is public-active and its description reports SENTRA/GATE admission | decide create, restore, or substitute `immune` | **FOUNDER DECISION 2** | MODELED |
 | Defense / maritime | exact `vessels` repository absent; `killinchu` public-active | use payload-permitted `killinchu` substitution | refreshed preflight only | MEASURED |
-| Revenue / insurance | exact `insurance` repository absent; `david-leads` private-active | decide disclosure or another public revenue-adjacent substitute | **FOUNDER DECISION 3** | MODELED |
+| Revenue / insurance | exact `insurance` repository absent from the public inventory | choose a public revenue-adjacent substitute or defer the slot | **FOUNDER DECISION 3** | MODELED |
 
 ### Founder decision record
 
@@ -39,7 +39,7 @@ Option B targets nine public survivor slots. Six slots are presently usable with
 |---|---|---|---|
 | 1 — trust slot | unarchive `szl-trust`; choose a different public-active trust surface; defer slot | **NOT DECIDED** | **REQUIRED** |
 | 2 — SENTRA slot | create/restore `sentra`; substitute `immune`; choose another cyber surface; defer slot | **NOT DECIDED** | **REQUIRED** |
-| 3 — revenue slot | authorize disclosure of `david-leads`; choose another public revenue surface; defer slot | **NOT DECIDED** | **REQUIRED** |
+| 3 — revenue slot | choose a public revenue surface; defer slot | **NOT DECIDED** | **REQUIRED** |
 
 No decision may be inferred from this document or from an earlier broad authorization. Each selected choice must be recorded before an execution PR or organization-setting change begins.
 
@@ -64,7 +64,7 @@ No decision may be inferred from this document or from an earlier broad authoriz
 
 This is a plan, not an execution record.
 
-1. **Refresh and freeze evidence.** Re-query the 57-repository inventory, default heads, open PRs, branch rules, releases, issues, package consumers, and README notices. Stop on drift that changes a disposition.
+1. **Refresh and freeze evidence.** Re-query the public inventory and keep any non-public inventory in a separate access-controlled proof packet. Refresh default heads, open PRs, branch rules, releases, issues, package consumers, and README notices. Stop on drift that changes a disposition.
 2. **Resolve founder gates.** Record the three choices above and the OTel canonical-successor decision. A missing decision is a hard stop.
 3. **Prepare per-repository proof.** For any future archive, visibility, or rename proposal, capture the previous setting, exact head, release/tag list, open PRs/issues, dependency consumers, replacement pointer, and a tested restoration command.
 4. **Apply one reversible mutation per authorized workcell.** Do not batch unrelated settings. Never delete repositories or rewrite history.
@@ -76,7 +76,7 @@ This is a plan, not an execution record.
 
 ```bash
 # Restore an archived repository to its prior unarchived state.
-gh api --method PATCH "repos/szl-holdings/<repo>" -f archived=false
+gh api --method PATCH "repos/szl-holdings/<repo>" -F archived=false
 
 # Restore the exact prior visibility recorded in the mutation proof packet.
 gh api --method PATCH "repos/szl-holdings/<repo>" -f visibility='<public|private|internal>'
@@ -91,7 +91,7 @@ Restoration does not guarantee that external links, package consumers, or integr
 
 - no deletion, transfer, history rewrite, or force-push;
 - no visibility, archive, rename, license, tag, release, ruleset, or branch-protection change from this PR;
-- no publication of `david-leads` or another private repository without a specific founder disclosure decision;
+- no publication of any private repository identifier, setting, branch, ref, or head in a public plan or proof packet;
 - no substitution inferred from name similarity alone;
 - no successor selection while the OTel README conflict is unresolved;
 - no execution against stale inventory or stale heads.

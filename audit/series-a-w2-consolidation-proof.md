@@ -6,7 +6,7 @@
 | `agent` | CodexSmith |
 | `objective` | Publish a documentation-only, founder-gated, reversible estate plan from the observed W2 audit. |
 | `plan_summary` | Add one consolidation plan and this proof packet; make no estate mutation. |
-| `patch_summary` | Added `docs/CONSOLIDATION.md` and `audit/series-a-w2-consolidation-proof.md`. |
+| `patch_summary` | Added the consolidation plan and proof packet; review hardening removed non-public repository metadata, corrected the typed archive rollback field, and recorded baseline/post-edit typecheck evidence. |
 | `proof_level` | 4 — public documentation claim and security review; screenshot not applicable because no UI surface changed. |
 | `recorded_at` | 2026-07-26T01:30:42.617Z snapshot; packet assembled 2026-07-25 America/New_York. |
 | `recorded_by` | CodexSmith |
@@ -15,12 +15,16 @@
 
 - Live GitHub observation: `2026-07-26T01:30:42.617Z`.
 - Pre-change `platform/main` head used during planning: `36e924f2c8ec34d7e725fa1da6606dfa609e9eda`. The branch base is refreshed immediately before publication.
-- Local authoritative audit packet SHA-256: `76DB6009B7020256F26D959A4D91806167DDCF53D4EC16C68B95FE40E77EEC2F`.
-- Snapshot math: 54 public + 3 private = 57; 12 archived + 45 active = 57.
+- The access-controlled inventory is not reproduced or fingerprinted in this public proof packet.
+- Public snapshot math: 12 archived + 42 active = 54 public repositories.
 - Claim labels: MEASURED, REPORTED, MODELED, UNKNOWN.
 - GitHub state may drift after the observed timestamp; this packet is evidence of that observation, not a perpetual current-state claim.
 
-## Exact default-head ledger
+## Public default-head ledger
+
+This public ledger intentionally contains only repositories already visible to
+unauthenticated readers. Non-public identifiers, settings, branches, refs, and
+heads are excluded and must remain in access-controlled evidence.
 
 | Repository | Visibility | Lifecycle | Default branch | Observed head |
 |---|---|---|---|---|
@@ -28,7 +32,6 @@
 | `szl-holdings/a11oy` | public | active | `main` | `2b3a3dd0254eb37c1a9b17a7c26c015696a18646` |
 | `szl-holdings/a11oy-net` | public | active | `main` | `ff5f4da7585801e88e44c20dfd39bd7924273b11` |
 | `szl-holdings/anatomy` | public | active | `main` | `c4bc67a4a0da76ca78eee2598618ab001eed1189` |
-| `szl-holdings/david-leads` | private | active | `main` | `0fa3430671a54f14c3fdb5597127340f47993473` |
 | `szl-holdings/developers` | public | archived | `main` | `95b888c09bce8871353959250a5c5de6826a0af8` |
 | `szl-holdings/docs-site` | public | active | `main` | `edaab68833ddb2f7b6d3c002df6ff5bc813b4bc0` |
 | `szl-holdings/energy-attest-holo` | public | active | `main` | `c1e56a3109d81ec4a1b4b69657d03da9d8394a67` |
@@ -46,7 +49,6 @@
 | `szl-holdings/lean-kernel` | public | active | `main` | `62cf1dd2b948f8e5fc9c7348cb618ac25f009875` |
 | `szl-holdings/lutar-lean` | public | active | `main` | `3f3ad80df02ffd7a6d9e4757e6592b1f0dbddfd7` |
 | `szl-holdings/ouroboros` | public | active | `main` | `6c60f1efbc9198491681792b81da7fce41280042` |
-| `szl-holdings/pitch-collateral` | private | active | `main` | `8a6235927664bfd04bb3905d8af234cd22d1ce7b` |
 | `szl-holdings/platform` | public | active | `main` | `36e924f2c8ec34d7e725fa1da6606dfa609e9eda` |
 | `szl-holdings/receipt-chain-live` | public | active | `main` | `46610bf543f2f38c8a4b8c8d204e65334699d0c0` |
 | `szl-holdings/szl-brand` | public | active | `main` | `8f2c5c229f04f398bbe1a6c68e25c3acc238bd97` |
@@ -65,7 +67,6 @@
 | `szl-holdings/szl-lake` | public | active | `main` | `9c3819e3eb65af862aa0234db7e595c4e423932a` |
 | `szl-holdings/szl-lambda-gate` | public | active | `main` | `8b95ca47571fda65a52b0b6189677ec089a6e503` |
 | `szl-holdings/szl-mesh` | public | active | `main` | `b8fb7150bb1dfb2eddd71667e803387a00b2db78` |
-| `szl-holdings/szl-org-health` | private | active | `main` | `61a6f5a19d66d6363270ad6c425bcbdb9cb6394b` |
 | `szl-holdings/szl-otel-mesh` | public | archived | `main` | `172f52ecfc2cc7babac78bffde79517b38fcdb42` |
 | `szl-holdings/szl-papers` | public | active | `main` | `9525240f583e3de8a3cdfb3a1297e086e5cd07fe` |
 | `szl-holdings/szl-provctl-live` | public | active | `main` | `2af7860dac2a6fc6d27ebfaac99055c267dc65ba` |
@@ -87,7 +88,7 @@
 - Six usable public-active slots at observation: `platform`, `a11oy`, `ouroboros`, `lutar-lean`, `.github`, and payload-permitted `killinchu`.
 - Founder decision 1: `szl-trust` was public-archived and reported migration to `docs-site`.
 - Founder decision 2: exact `sentra` was absent; `immune` is only a MODELED substitute.
-- Founder decision 3: exact `insurance` was absent; `david-leads` was private-active.
+- Founder decision 3: exact `insurance` was absent from the public inventory; no public substitute is selected.
 - Option B is explicitly **NOT APPLIED**.
 
 ## Relationship proof
@@ -109,15 +110,15 @@ The two OTel successor claims conflict and are both REPORTED. This proof packet 
 
 | Check | Result | Evidence |
 |---|---|---|
-| Inventory completeness | PASS | 57 unique repository names and 57 valid 40-character default-head SHAs. |
-| Snapshot arithmetic | PASS | 54 + 3 = 57; 12 + 45 = 57. |
+| Public ledger completeness | PASS | 54 unique public repository names and 54 valid 40-character default-head SHAs; non-public inventory is intentionally excluded. |
+| Public snapshot arithmetic | PASS | 12 archived + 42 active = 54 public repositories. |
 | Option B guard | PASS | Plan says NOT APPLIED and records three unresolved founder decisions. |
 | Mutation guard | PASS | No forward mutation command or repository-setting change is part of this workcell. |
-| Restore documentation | PASS | Only rollback command templates are documented and marked DO NOT RUN FROM THIS PR. |
+| Restore documentation | PASS | Only rollback command templates are documented and marked DO NOT RUN FROM THIS PR; `archived=false` uses typed `gh api --field` conversion via `-F`. |
 | Public claim check | PASS | Counts are MEASURED at `2026-07-26T01:30:42.617Z` and carry an explicit drift boundary. Substitutions are MODELED. |
-| Security check | PASS | No token, credential, private key, `.env` value, or private repository content is included. |
+| Security check | PASS | No token, credential, private key, `.env` value, or non-public repository identifier, setting, branch, ref, head, or evidence fingerprint is included. |
 | UI screenshot | NOT APPLICABLE | Markdown-only change; no UI surface changed. |
-| Typecheck | NOT RUN LOCALLY | Markdown-only change; this Windows task has no local platform checkout or Node executable. Draft PR CI is the authoritative follow-up. |
+| Typecheck | NO WORSE THAN BASELINE (exit 1) | `pnpm typecheck` was run from this checkout before and after the review edits. Baseline: exit 1, 154/170 tasks completed before `@szl-holdings/ai-engine` stopped on TS2307 (missing `zod`) and TS7006 (implicit `any`). Post-edit: exit 1, 157/170 tasks completed, with the same package and same two diagnostics; neither diagnostic references either changed Markdown file. |
 | Known gaps update | NOT REQUIRED | The plan records unresolved decisions in itself and does not change runtime or readiness status. |
 
 ## Verification notes
@@ -133,6 +134,6 @@ The two OTel successor claims conflict and are both REPORTED. This proof packet 
 
 1. Founder decision for `szl-trust`.
 2. Founder decision for the absent `sentra` slot.
-3. Founder disclosure/substitution decision for `insurance / david-leads`.
+3. Founder selection of a public revenue-slot substitute, or deferral of that slot.
 4. Maintainer/owner resolution of the `szl-otel-mesh` successor conflict.
 5. Green required checks before any later merge; this PR remains draft.
