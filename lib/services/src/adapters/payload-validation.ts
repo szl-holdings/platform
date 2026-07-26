@@ -89,6 +89,19 @@ export function optionalNumber(
   return value;
 }
 
+export function optionalNullableNumber(
+  record: JsonRecord,
+  key: string,
+  context: string,
+): number | undefined {
+  const value = record[key];
+  if (value === undefined || value === null) return undefined;
+  if (typeof value !== 'number' || !Number.isFinite(value)) {
+    throw new UpstreamPayloadError(`${context}.${key}`, 'expected a finite number or null');
+  }
+  return value;
+}
+
 export function optionalStringArray(
   record: JsonRecord,
   key: string,
