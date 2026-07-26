@@ -12,31 +12,37 @@
  *   await server.connect(transport);
  */
 
-export { PRAXISMcpServer } from './server.js';
-export type {
-  TenantContext,
-  GuardianPolicyResult,
-  ProofChainEntry,
-  PolicyEvaluator,
-  ProofChainWriter,
-  AuditLogger,
-  PRAXISMcpServerConfig,
-  PRAXISTask,
-  PRAXISApp,
-  DiscoveryEventType,
-  ToolContent,
-} from './server.js';
-export { textContent, errorContent } from './server.js';
-
-// Transport re-exports
-export { SSEServerTransport, StdioServerTransport, StreamableHTTPServerTransport } from './transport.js';
-export { SSEClientTransport, StreamableHTTPClientTransport } from './transport.js';
-
+export { Client as McpClient } from '@modelcontextprotocol/sdk/client/index.js';
+// Re-export core SDK types consumers may need
+export { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 // Capability helpers
 export { createDomainApps } from './capabilities/domain-apps.js';
 export { buildTenantInstructions } from './capabilities/instructions.js';
 export { buildTenantRoots } from './capabilities/roots.js';
-
-// Re-export core SDK types consumers may need
-export { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
-export { Client as McpClient } from '@modelcontextprotocol/sdk/client/index.js';
+export type {
+  AuditLogger,
+  DiscoveryEventType,
+  GuardianPolicyResult,
+  PolicyEvaluator,
+  PRAXISApp,
+  PRAXISMcpServerConfig,
+  PRAXISTask,
+  ProofChainEntry,
+  ProofChainWriter,
+  TenantContext,
+  ToolContent,
+} from './server.js';
+export {
+  errorContent,
+  evaluateGuardianPolicyFailClosed,
+  PRAXISMcpServer,
+  textContent,
+} from './server.js';
+// Transport re-exports
+export {
+  SSEClientTransport,
+  SSEServerTransport,
+  StdioServerTransport,
+  StreamableHTTPClientTransport,
+  StreamableHTTPServerTransport,
+} from './transport.js';
