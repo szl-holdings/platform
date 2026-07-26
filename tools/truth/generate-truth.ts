@@ -23,6 +23,12 @@ type TestMetric = {
 
 const ROOT = path.resolve(import.meta.dirname, '..', '..');
 const OUTPUT = path.join(ROOT, 'artifacts', 'SOURCE_OF_TRUTH.json');
+const OUTPUT_RELATIVE = 'artifacts/SOURCE_OF_TRUTH.json';
+export const TRUTH_SCHEMA = 'szl.truth/v1';
+export const TRUTH_DOI = {
+  concept: '10.5281/zenodo.19944926',
+  latest: '10.5281/zenodo.20195368',
+} as const;
 const VERIFY_LOCAL_MODE =
   process.argv.includes('--verify-local') || process.argv.includes('--check');
 const VERIFY_REMOTE_MODE = process.argv.includes('--verify-remote');
@@ -60,6 +66,20 @@ export function metricDrift(
   );
 }
 
+export function metadataDrift(
+  existing: Record<string, unknown>,
+  expectedGeneratedBy: string,
+): string[] {
+  const expected: Record<string, unknown> = {
+    schema: TRUTH_SCHEMA,
+    generated_by: expectedGeneratedBy,
+    doi: TRUTH_DOI,
+  };
+  return Object.keys(expected).filter(
+    (name) => JSON.stringify(existing[name]) !== JSON.stringify(expected[name]),
+  );
+}
+
 async function walkFiles(start: string, predicate: (file: string) => boolean): Promise<string[]> {
   if (!existsSync(start)) return [];
   const output: string[] = [];
@@ -84,6 +104,21 @@ function gitSha(): string {
       encoding: 'utf8',
       stdio: ['ignore', 'pipe', 'ignore'],
     }).trim();
+  } catch {
+    return 'UNAVAILABLE';
+  }
+}
+
+function truthArtifactParent(): string {
+  try {
+    const parents = execFileSync('git', ['log', '-1', '--format=%P', '--', OUTPUT_RELATIVE], {
+      cwd: ROOT,
+      encoding: 'utf8',
+      stdio: ['ignore', 'pipe', 'ignore'],
+    })
+      .trim()
+      .split(/\s+/);
+    return parents[0] || 'UNAVAILABLE';
   } catch {
     return 'UNAVAILABLE';
   }
@@ -357,6 +392,10 @@ async function main(): Promise<void> {
 
   if (VERIFY_LOCAL_MODE) {
     if (!existing) throw new Error('artifacts/SOURCE_OF_TRUTH.json is missing or invalid');
+    const metadata = metadataDrift(existing, truthArtifactParent());
+    if (metadata.length > 0) {
+      throw new Error(`truth metadata drift: ${metadata.join(', ')}`);
+    }
     const existingMetrics = existing.metrics as Record<string, unknown> | undefined;
     if (!existingMetrics) throw new Error('artifacts/SOURCE_OF_TRUTH.json lacks metrics');
     const drift = metricDrift(existingMetrics, localMetrics, LOCAL_METRIC_NAMES);
@@ -374,17 +413,14 @@ async function main(): Promise<void> {
   }
 
   const truth = {
-    schema: 'szl.truth/v1',
+    schema: TRUTH_SCHEMA,
     generated_at: new Date().toISOString(),
     generated_by: gitSha(),
     metrics: {
       ...localMetrics,
       ...remoteMetrics,
     },
-    doi: {
-      concept: '10.5281/zenodo.19944926',
-      latest: '10.5281/zenodo.20195368',
-    },
+    doi: TRUTH_DOI,
   };
 
   await writeFile(OUTPUT, `${JSON.stringify(truth, null, 2)}\n`, 'utf8');

@@ -17,6 +17,8 @@ The scoped plan was:
 3. Reject unavailable canonical claims unless the exact path and literal are
    explicitly allowlisted.
 4. Make the standard local truth gate execute live remote verification too.
+5. Bind the schema, Zenodo DOI pointers, and generation provenance to canonical
+   values during verification.
 
 ## Patch
 
@@ -26,6 +28,10 @@ The scoped plan was:
 - Improved claim diagnostics to name the unavailable canonical metric.
 - Recognized `current` and `currently` modifiers in the exact bypass form.
 - Extended `pnpm truth:check` to include remote recomputation.
+- Rejected DOI or `generated_by` edits unless provenance remains bound to the
+  parent that generated the last committed truth artifact.
+- Checked out full history in the truth workflow so the signed generating
+  parent remains independently resolvable in CI.
 
 ## Verification
 
@@ -38,7 +44,7 @@ applicable.
 | `pnpm truth:check` | PASS |
 | Local and independently sourced remote truth recomputation | PASS |
 | Truth schema and suppression-allowlist validation | PASS |
-| Focused truth tests | PASS — 21/21 |
+| Focused truth tests | PASS — 24/24 |
 | Full numeric-claim drift scan | PASS |
 | Strict documentation claims | PASS — 26/26 |
 | Biome check for changed TypeScript and `package.json` | PASS |

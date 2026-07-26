@@ -75,8 +75,11 @@ Per-test counts remain `UNAVAILABLE` because no machine-readable
 
 ## Screenshot
 
-Not applicable. W1 changes generated evidence, validation, documentation, and
-CI; no user interface was modified.
+BLOCKED. This PR also changes the visible demonstration banners and SDK
+sections on `/a11oy/a11oy-code` and `/a11oy/sdk`. Live captures are required
+before this proof packet can be treated as complete. The current verification
+environment exposed no browser backend, so no screenshot or visual claim
+verification is asserted here.
 
 ## Verify
 
