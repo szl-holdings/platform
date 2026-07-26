@@ -317,6 +317,7 @@ Use [docs/README.md](README.md) for navigation by audience or task.
 | [WHAT_THIS_PROVES.md](WHAT_THIS_PROVES.md) | What this platform proves — validation narrative | 2026-04 |
 | [readme-standards.md](readme-standards.md) | README asset and badge standards | 2026-04 |
 | [GLOSSARY.md](GLOSSARY.md) | Canonical governance vocabulary: holographic state, product vertical, runtime organ, policy gate module | 2026-07 |
+| [OVERCLAIM_LEDGER.md](OVERCLAIM_LEDGER.md) | Corrected or blocked public claims and their evidence boundary | 2026-07 |
 | [THIRD_PARTY_REGISTER.md](THIRD_PARTY_REGISTER.md) | Third-party service register | 2026-04 |
 | [DATA_CLASSIFICATION.md](DATA_CLASSIFICATION.md) | Data classification taxonomy | 2026-04 |
 
