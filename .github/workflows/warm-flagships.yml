@@ -1,114 +1,193 @@
 # SPDX-License-Identifier: Apache-2.0
-# Warm the flagship Spaces so HF never sleeps them (Option A: external cron heartbeat).
-# Every 10 min: probe each LIVE flagship on its CORRECT health URL for its Space type.
-# Honesty rule: only a real non-200 on the correct URL is UNHEALTHY (opens a de-duped
-# issue). Unreachable/timeout (curl connect failure, HTTP code 000) is UNKNOWN /
-# network-flap and MUST NOT open an issue -- a warm cron must never fabricate an outage.
-# A final job POSTs a wake-receipt to a11oy so the wake itself is signed into the Khipu.
-#
-# Roster honesty (Doctrine v11, 749/14/163):
-#   LIVE docker organs (sdk:docker -> probe the plain .hf.space host at /healthz, 200):
-#     a11oy, killinchu, yarqa, anatomy, hatun-mcp.
-#     NOTE: anatomy is a DOCKER Space (not static). The old probe hit
-#     szlholdings-anatomy.static.hf.space/index.html and 404'd (no static host exists
-#     for a docker Space), opening false "flagship anatomy unhealthy" issues -- fixed to
-#     probe the docker /healthz like the other organs.
-#   LIVE static organs (sdk:static -> HF serves them from the .static.hf.space host;
-#     the plain .hf.space host 404s, so probe the .static host's real served asset):
-#     (none in the current flagship roster; the `static` type is kept wired so a genuinely
-#     static Space can be added with its real served path, not a hardcoded .static default.)
-#   RETIRED — consolidated into a11oy, intentionally NOT probed (no Space exists):
-#     amaru -> a11oy Memory, sentra -> a11oy Sentinel, rosie -> a11oy Operator.
-# Sign: Yachay <yachay@szlholdings.dev>.
+# Keep the live Hugging Face flagship Spaces warm and maintain one honest,
+# de-duplicated incident per organ. The controller requires repeated HTTP
+# evidence, treats network-only failures as UNKNOWN, and closes an existing
+# incident only after repeated HTTP 200 recovery evidence.
 name: warm-flagships
+
 on:
   schedule:
-    - cron: "*/10 * * * *"     # every 10 minutes (UTC)
+    - cron: "*/10 * * * *"
   workflow_dispatch: {}
+  push:
+    branches: [main]
+    paths:
+      - .github/scripts/warm_flagships.py
+      - .github/scripts/test_warm_flagships.py
+      - .github/workflows/warm-flagships.yml
+  pull_request:
+    branches: [main]
+    paths:
+      - .github/scripts/warm_flagships.py
+      - .github/scripts/test_warm_flagships.py
+      - .github/workflows/warm-flagships.yml
+
 permissions:
   contents: read
+
+concurrency:
+  group: warm-flagships-${{ github.event_name == 'pull_request' && github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+env:
+  REPORT_ROOT: reports/flagship-health
+
 jobs:
-  warm:
+  controller-contract:
+    name: Flagship health state-machine contract
     runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: read
+    steps:
+      - name: Check out controller
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+        with:
+          persist-credentials: false
+          fetch-depth: 1
+
+      - name: Set up Python
+        uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+        with:
+          python-version: "3.12"
+
+      - name: Compile and test the complete incident lifecycle
+        run: |
+          set -euo pipefail
+          python -m py_compile \
+            .github/scripts/warm_flagships.py \
+            .github/scripts/test_warm_flagships.py
+          python .github/scripts/test_warm_flagships.py
+          git diff --check
+
+  probe-pull-request:
+    name: Read-only live probe — ${{ matrix.organ }}
+    if: github.event_name == 'pull_request'
+    needs: controller-contract
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: read
     strategy:
       fail-fast: false
       matrix:
         include:
           - organ: a11oy
-            type: docker
-            probe: "https://szlholdings-a11oy.hf.space/healthz"
+            probe: https://szlholdings-a11oy.hf.space/healthz
           - organ: killinchu
-            type: docker
-            probe: "https://szlholdings-killinchu.hf.space/healthz"
+            probe: https://szlholdings-killinchu.hf.space/healthz
           - organ: yarqa
-            type: docker
-            probe: "https://szlholdings-yarqa.hf.space/healthz"
+            probe: https://szlholdings-yarqa.hf.space/healthz
           - organ: hatun-mcp
-            type: docker
-            probe: "https://szlholdings-hatun-mcp.hf.space/healthz"
+            probe: https://szlholdings-hatun-mcp.hf.space/healthz
           - organ: anatomy
-            type: docker
-            probe: "https://szlholdings-anatomy.hf.space/healthz"
+            probe: https://szlholdings-anatomy.hf.space/healthz
     steps:
-      - name: Ping flagship
-        id: ping
-        run: |
-          set +e
-          CODE=$(curl -sL -o /tmp/body -w "%{http_code}" --max-time 25 "${{ matrix.probe }}")
-          RC=$?
-          echo "GET ${{ matrix.probe }} (type=${{ matrix.type }}) -> http=$CODE curl_rc=$RC"
-          # Healthy: a real 200 on the correct URL.
-          if [ "$CODE" = "200" ]; then
-            echo "state=ok" >> "$GITHUB_OUTPUT"
-            head -c 400 /tmp/body
-            exit 0
-          fi
-          # UNKNOWN: curl could not complete (connect/timeout/DNS) or no HTTP status was
-          # returned (code 000). This is a network flap, NOT a proven outage -- do not alert.
-          if [ "$RC" != "0" ] || [ -z "$CODE" ] || [ "$CODE" = "000" ]; then
-            echo "state=unknown" >> "$GITHUB_OUTPUT"
-            echo "last_code=$CODE (curl_rc=$RC)" >> "$GITHUB_OUTPUT"
-            echo "UNKNOWN: probe unreachable (network flap) -- not opening an issue."
-            exit 0
-          fi
-          # UNHEALTHY: a real HTTP response with a non-200 status on the correct URL.
-          echo "state=unhealthy" >> "$GITHUB_OUTPUT"
-          echo "last_code=$CODE" >> "$GITHUB_OUTPUT"
-      - name: Open de-duped issue on real non-200
-        if: steps.ping.outputs.state == 'unhealthy'
-        uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9
+      - name: Check out proposed controller
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
         with:
-          script: |
-            const organ = '${{ matrix.organ }}';
-            const probe = '${{ matrix.probe }}';
-            const title = `flagship ${organ} unhealthy (warm-flagships)`;
-            const q = `repo:${context.repo.owner}/${context.repo.repo} is:issue is:open in:title "${title}"`;
-            const found = await github.rest.search.issuesAndPullRequests({ q });
-            const body = `Automated warm-flagships probe got a real non-200 on **${organ}** ` +
-                         `(\`${probe}\`, last code ${{ steps.ping.outputs.last_code }}). ` +
-                         `The Space returned an HTTP error (not merely unreachable), so it ` +
-                         `may be down, still building, or crash-looping. ` +
-                         `Check the HF Space build logs. Doctrine v11. — Yachay`;
-            if (found.data.total_count === 0) {
-              await github.rest.issues.create({ owner: context.repo.owner, repo: context.repo.repo, title, body, labels: ['flagship','availability'] });
-            }
-    permissions:
-      issues: write
-      contents: read
-  wake-receipt:
-    needs: warm
-    if: always()
+          persist-credentials: false
+          fetch-depth: 1
+
+      - name: Set up Python
+        uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+        with:
+          python-version: "3.12"
+
+      - name: Collect live evidence without issue or Space mutation
+        run: |
+          python .github/scripts/warm_flagships.py \
+            --organ "${{ matrix.organ }}" \
+            --probe-url "${{ matrix.probe }}" \
+            --attempts 3 \
+            --confirmations 2 \
+            --timeout 25 \
+            --interval 2 \
+            --report "$REPORT_ROOT/${{ matrix.organ }}.json"
+
+      - name: Upload immutable pull-request probe evidence
+        if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: flagship-health-pr-${{ matrix.organ }}-${{ github.run_id }}
+          path: ${{ env.REPORT_ROOT }}/${{ matrix.organ }}.json
+          if-no-files-found: error
+          retention-days: 30
+
+  warm:
+    name: Warm and reconcile incident — ${{ matrix.organ }}
+    if: github.event_name != 'pull_request'
+    needs: controller-contract
     runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: read
+      issues: write
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - organ: a11oy
+            probe: https://szlholdings-a11oy.hf.space/healthz
+          - organ: killinchu
+            probe: https://szlholdings-killinchu.hf.space/healthz
+          - organ: yarqa
+            probe: https://szlholdings-yarqa.hf.space/healthz
+          - organ: hatun-mcp
+            probe: https://szlholdings-hatun-mcp.hf.space/healthz
+          - organ: anatomy
+            probe: https://szlholdings-anatomy.hf.space/healthz
     steps:
-      - name: POST signed wake-receipt to a11oy
+      - name: Check out protected controller
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+        with:
+          persist-credentials: false
+          fetch-depth: 1
+
+      - name: Set up Python
+        uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+        with:
+          python-version: "3.12"
+
+      - name: Probe and reconcile the exact incident lifecycle
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        run: |
+          python .github/scripts/warm_flagships.py \
+            --organ "${{ matrix.organ }}" \
+            --probe-url "${{ matrix.probe }}" \
+            --attempts 3 \
+            --confirmations 2 \
+            --timeout 25 \
+            --interval 2 \
+            --report "$REPORT_ROOT/${{ matrix.organ }}.json" \
+            --mutate-issues
+
+      - name: Upload immutable protected-run health evidence
+        if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: flagship-health-${{ matrix.organ }}-${{ github.run_id }}
+          path: ${{ env.REPORT_ROOT }}/${{ matrix.organ }}.json
+          if-no-files-found: error
+          retention-days: 90
+
+  wake-receipt:
+    name: Record the wake attempt in A11oy
+    if: always() && github.event_name != 'pull_request'
+    needs: warm
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions:
+      contents: read
+    steps:
+      - name: POST bounded wake receipt
         run: |
           set +e
-          curl -s -X POST --max-time 25 \
+          curl -sS -X POST --max-time 25 \
             "https://szlholdings-a11oy.hf.space/api/a11oy/v3/kernels/wake-receipt" \
             -H "content-type: application/json" \
             -d "{\"source\":\"github-actions/warm-flagships\",\"run\":\"${GITHUB_RUN_ID}\",\"ts\":\"$(date -u +%FT%TZ)\"}" \
-            -o /tmp/wake -w "wake-receipt -> %{http_code}\n"
+            -o /tmp/wake \
+            -w "wake-receipt -> %{http_code}\n"
           head -c 500 /tmp/wake || true
-    permissions:
-      issues: write
-      contents: read
