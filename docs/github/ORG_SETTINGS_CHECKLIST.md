@@ -66,7 +66,9 @@ Recommended pinned repositories (maximum 6):
 1. `szl-holdings-platform` — main platform repository
 2. Any public documentation or showcase repos (if created)
 
-See `docs/github/PUBLIC_REPO_PORTFOLIO_STRATEGY.md` for the full portfolio strategy.
+See `docs/CONSOLIDATION.md` for the current founder-gated portfolio proposal.
+`docs/github/PUBLIC_REPO_PORTFOLIO_STRATEGY.md` is retained only as a
+superseded April 2026 historical strategy.
 
 ---
 
