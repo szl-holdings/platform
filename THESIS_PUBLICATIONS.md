@@ -160,28 +160,30 @@ The `run_manifest.json` in that directory lists per-deliverable `sha` hashes com
 
 ---
 
-## 6. Verified metrics (re-verified 2026-05-05)
+## 6. Evidence-labelled metrics (refreshed 2026-07-25)
 
-Every metric below is re-verified by command. The commands are documented in the platform repo's `OPERATIONAL-AUDIT.md`. Where a metric is asserted but the source command lives in a private repo, that is flagged.
+Current estate measurements come only from
+`artifacts/SOURCE_OF_TRUTH.json`. Paper-specific figures remain historical
+`REPORTED` results; they are not represented as current runtime measurements.
 
-| Metric | Value | Verification source |
-|---|---|---|
-| Concept DOI | `10.5281/zenodo.19944926` | [Zenodo](https://doi.org/10.5281/zenodo.19944926) (public) |
-| Per-version DOIs (v1–v11) | 11 distinct DOIs, listed in §3 | Each paper's `CITATION.cff` / `README.md` (public) |
-| Paper count | 11 (v1–v11) | [`papers/`](https://github.com/szl-holdings/ouroboros-thesis/tree/main/papers) (public) |
-| Customer-facing product surfaces | 8 + A11oy orchestration | APEX v2 dossier (PR #133) |
-| Database tables | 848 | `OPERATIONAL-AUDIT.md` (platform, private) |
-| API endpoint declarations | 5,524 | `OPERATIONAL-AUDIT.md` (private) |
-| Ouroboros packages | 28 | `OPERATIONAL-AUDIT.md` (private) |
-| Ouroboros guardrails tests | 62 passing | `OPERATIONAL-AUDIT.md` (private) |
-| Formal axes in Lutar invariant family | 9 (L₁..L₈ + L_Ω) | v9 (public, DOI `20053148`) |
-| Codex v11 nodes / typed edges | 76 / 95 across 11 domains | `OPERATIONAL-AUDIT.md` (private) |
-| Λ overhead (median) | 0.49 – 0.59 ms per route | v11 §3 (public, DOI `20119582`) |
-| Λ overhead (p99) | ≤ 1.27 ms per route | v11 §3 (public) |
-| ρ = 1.000 governed pairs | 8,000 / 8,000 | v11 §3 (public) |
-| Λ axiom tests passing | 48 / 48 | v11 §3 (public) |
-| Λ adapter tests passing | 13 / 13 | v11 §3 (public) |
-| `szl-holdings/ouroboros` test suite | 172 / 172 | [v3 paper README](https://github.com/szl-holdings/ouroboros-thesis/tree/main/papers/v3) (public) |
+| Metric | Value | Label | Verification source |
+|---|---|---|---|
+| Concept DOI | `10.5281/zenodo.19944926` | REPORTED | Generated truth artifact and [Zenodo](https://doi.org/10.5281/zenodo.19944926) |
+| Per-version DOIs (v1–v11) | 11 distinct DOIs, listed in §3 | REPORTED | Each paper's `CITATION.cff` / `README.md` |
+| Paper count | 11 (v1–v11) | REPORTED | [`papers/`](https://github.com/szl-holdings/ouroboros-thesis/tree/main/papers) |
+| Customer-facing product surfaces meeting manifest/health/receipt definition | 0 | MEASURED | `artifacts/SOURCE_OF_TRUTH.json` |
+| Monorepo packages | 198 | MEASURED | `pnpm -r list --depth -1 --json` via generated truth |
+| Database tables | UNAVAILABLE | UNKNOWN | No authorized live introspection receipt was available |
+| TypeScript route declarations | UNAVAILABLE | UNAVAILABLE | runtime router inventory is unavailable in the generated truth artifact |
+| Platform per-test result | UNAVAILABLE | UNKNOWN | `artifacts/test-results.json` was not produced |
+| Ouroboros per-test result | UNAVAILABLE | UNKNOWN | `artifacts/ouroboros-test-results.json` was not produced |
+| Formal axes in Lutar invariant family | 9 (L₁..L₈ + L_Ω) | REPORTED | v9, DOI `20053148` |
+| Codex v11 nodes / typed edges | 76 / 95 across 11 domains | REPORTED | Historical v11 audit snapshot |
+| Λ overhead (median) | 0.49–0.59 ms per route | REPORTED | v11 §3, DOI `20119582`; not a current benchmark |
+| Λ overhead (p99) | ≤1.27 ms per route | REPORTED | v11 §3; not a current benchmark |
+| ρ = 1.000 governed pairs | 8,000 / 8,000 | REPORTED | v11 §3 historical evaluation |
+| Λ axiom tests | 48 / 48 | REPORTED | v11 §3 historical evaluation |
+| Λ adapter tests | 13 / 13 | REPORTED | v11 §3 historical evaluation |
 
 ---
 

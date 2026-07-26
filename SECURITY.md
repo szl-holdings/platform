@@ -1,5 +1,8 @@
 # Security Policy
 
+The rationale for every active secret-scanner suppression is generated at
+[security/ALLOWLIST-JUSTIFICATIONS.md](security/ALLOWLIST-JUSTIFICATIONS.md).
+
 ## Supported Versions
 
 | Version | Supported          |
