@@ -116,3 +116,13 @@ Before any sentence here moves to the deck, organization card, website, or socia
 6. remove the internal label only after the supporting evidence is packaged for diligence.
 
 Until those gates pass, this file is a positioning workbench—not an external claim authorization.
+
+## 8. Verification record
+
+- **MEASURED:** the protected `Typecheck` job ran `pnpm run typecheck` against
+  exact head `6ce49bf7e7374b5859a763033797820b65b924de` and completed successfully on
+  2026-07-26. [Inspect the retained GitHub Actions
+  evidence](https://github.com/szl-holdings/platform/actions/runs/30186368505/job/89751760999).
+- **MEASURED:** the change at that head was documentation-only; the successful
+  baseline does not promote any MODELED, CONJECTURE, UNKNOWN, or UNAVAILABLE
+  claim in this workbench.
