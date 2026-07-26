@@ -197,6 +197,16 @@ class EvidenceDoctrineTests(unittest.TestCase):
                 }
             )
 
+    def test_subject_boundary_whitespace_uses_explicit_portable_set(self):
+        for invalid_subject in ("\u0085subject", "\ufeffsubject"):
+            with self.subTest(subject=ascii(invalid_subject)):
+                with self.assertRaisesRegex(TypeError, "boundary whitespace"):
+                    compute_decision_bundle_sha256(
+                        invalid_subject,
+                        BUNDLE_IDENTITY["evaluated_at"],
+                        verified_through("D1"),
+                    )
+
     def test_lambda_guard(self):
         honest = {
             "claim": "CONJECTURE_1",

@@ -34,6 +34,30 @@ TIMESTAMP_PATTERN = re.compile(
     r"(\d{2}):(\d{2}):(\d{2})(?:\.\d+)?"
     r"(Z|[+-]\d{2}:\d{2})$"
 )
+BOUNDARY_WHITESPACE = frozenset(
+    {
+        0x0009,
+        0x000A,
+        0x000B,
+        0x000C,
+        0x000D,
+        0x001C,
+        0x001D,
+        0x001E,
+        0x001F,
+        0x0020,
+        0x0085,
+        0x00A0,
+        0x1680,
+        *range(0x2000, 0x200B),
+        0x2028,
+        0x2029,
+        0x202F,
+        0x205F,
+        0x3000,
+        0xFEFF,
+    }
+)
 
 
 @dataclass(frozen=True)
@@ -63,12 +87,16 @@ def _validate_state(requirement: str, state: object) -> str:
 
 
 def _validate_subject(subject: object) -> str:
-    if (
-        not isinstance(subject, str)
-        or not subject
-        or subject.strip() != subject
-    ):
+    if not isinstance(subject, str) or not subject:
         raise TypeError("identity.subject must be a non-empty canonical string")
+    if (
+        ord(subject[0]) in BOUNDARY_WHITESPACE
+        or ord(subject[-1]) in BOUNDARY_WHITESPACE
+    ):
+        raise TypeError(
+            "identity.subject must not have leading or trailing "
+            "boundary whitespace"
+        )
     if any(0xD800 <= ord(character) <= 0xDFFF for character in subject):
         raise TypeError(
             "identity.subject must not contain unpaired UTF-16 surrogates"

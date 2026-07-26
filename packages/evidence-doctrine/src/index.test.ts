@@ -195,6 +195,20 @@ test('unpaired UTF-16 surrogates are rejected before hashing or grading', () => 
   );
 });
 
+test('subject boundary whitespace uses the same explicit portable set', () => {
+  for (const invalidSubject of ['\u0085subject', '\ufeffsubject']) {
+    assert.throws(
+      () =>
+        computeDecisionBundleSha256(
+          invalidSubject,
+          BUNDLE_IDENTITY.evaluated_at,
+          verifiedThrough('D1'),
+        ),
+      /boundary whitespace/,
+    );
+  }
+});
+
 test('Lambda uniqueness stays open, gray, and not machine-checked', () => {
   assert.deepEqual(
     assertLambdaCaseStudy({
