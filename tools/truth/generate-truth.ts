@@ -1,7 +1,9 @@
 import { execFileSync } from 'node:child_process';
 import { existsSync } from 'node:fs';
-import { readFile, readdir, writeFile } from 'node:fs/promises';
+import { readdir, readFile, writeFile } from 'node:fs/promises';
 import path from 'node:path';
+
+import { LOCAL_METRIC_NAMES } from './truth-schema.js';
 
 type EvidenceLabel = 'MEASURED' | 'REPORTED' | 'MODELED' | 'CONJECTURE' | 'UNKNOWN' | 'UNAVAILABLE';
 type Metric = {
@@ -20,18 +22,6 @@ const ROOT = path.resolve(import.meta.dirname, '..', '..');
 const OUTPUT = path.join(ROOT, 'artifacts', 'SOURCE_OF_TRUTH.json');
 const VERIFY_LOCAL_MODE =
   process.argv.includes('--verify-local') || process.argv.includes('--check');
-const LOCAL_METRIC_NAMES = [
-  'surfaces_customer_facing',
-  'ouroboros_tests',
-  'platform_tests',
-  'mcp_e2e_tests',
-  'monorepo_packages',
-  'api_endpoints',
-  'ci_workflows',
-  'lean_theorems_locked',
-  'lean_sorry_count',
-  'lambda_overhead_ms_median',
-] as const;
 const WALK_EXCLUSIONS = new Set([
   '.git',
   '.cache',

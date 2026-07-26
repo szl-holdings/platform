@@ -1,7 +1,8 @@
 import { readFile, writeFile } from 'node:fs/promises';
 import path from 'node:path';
+import { fileURLToPath } from 'node:url';
 
-type Entry = {
+export type Entry = {
   file: string;
   pattern: string;
   reason: string;
@@ -94,7 +95,7 @@ function closesTomlArray(line: string): boolean {
   return false;
 }
 
-function parseToml(text: string): Entry[] {
+export function parseToml(text: string): Entry[] {
   const entries: Entry[] = [];
   const lines = text.split(/\r?\n/);
   let comments: string[] = [];
@@ -157,7 +158,7 @@ function parseToml(text: string): Entry[] {
   return entries;
 }
 
-function parseSet(text: string, setName: string): Entry[] {
+export function parseSet(text: string, setName: string): Entry[] {
   const match = text.match(new RegExp(`const ${setName} = new Set\\(\\[([\\s\\S]*?)\\]\\);`));
   if (!match) return [];
   const entries: Entry[] = [];
@@ -184,6 +185,44 @@ function parseSet(text: string, setName: string): Entry[] {
   return entries;
 }
 
+function entryKey(entry: Pick<Entry, 'file' | 'pattern'>): string {
+  return `${entry.file}\u0000${entry.pattern}`;
+}
+
+export function validateAllowlistCoverage(entries: Entry[], document: string): string[] {
+  const failures: string[] = [];
+  const activeCounts = new Map<string, number>();
+  for (const entry of entries) {
+    const key = entryKey(entry);
+    activeCounts.set(key, (activeCounts.get(key) ?? 0) + 1);
+  }
+
+  const documentedCounts = new Map<string, number>();
+  for (const line of document.split(/\r?\n/)) {
+    const match = line.match(
+      /^\|\s*(\.gitleaks\.toml|scripts\/qa\/scan-secrets\.js)\s*\|\s*`((?:\\.|[^`])*)`\s*\|/,
+    );
+    if (!match) continue;
+    const key = entryKey({ file: match[1], pattern: match[2].replaceAll('\\`', '`') });
+    documentedCounts.set(key, (documentedCounts.get(key) ?? 0) + 1);
+  }
+
+  for (const [key, count] of activeCounts) {
+    const [source, pattern] = key.split('\u0000');
+    const documented = documentedCounts.get(key) ?? 0;
+    if (count > 1) failures.push(`duplicate active suppression: ${source}: ${pattern}`);
+    if (documented === 0) failures.push(`missing justification: ${source}: ${pattern}`);
+    if (documented > 1) failures.push(`duplicate justification: ${source}: ${pattern}`);
+  }
+  for (const key of documentedCounts.keys()) {
+    if (!activeCounts.has(key)) {
+      const [source, pattern] = key.split('\u0000');
+      failures.push(`stale justification: ${source}: ${pattern}`);
+    }
+  }
+  return failures;
+}
+
 async function main(): Promise<void> {
   const gitleaksText = await readFile(GITLEAKS, 'utf8');
   const scannerText = await readFile(SCANNER, 'utf8');
@@ -192,6 +231,16 @@ async function main(): Promise<void> {
     ...parseSet(scannerText, 'SKIP_DIRS'),
     ...parseSet(scannerText, 'SKIP_FILES'),
   ];
+  if (process.argv.includes('--check')) {
+    const document = await readFile(OUTPUT, 'utf8');
+    const failures = validateAllowlistCoverage(entries, document);
+    if (failures.length > 0) {
+      for (const failure of failures) process.stderr.write(`allowlist coverage: ${failure}\n`);
+      process.exit(1);
+    }
+    process.stdout.write(`allowlist coverage: PASS (${entries.length} active suppressions)\n`);
+    return;
+  }
   const date = new Date().toISOString().slice(0, 10);
   const rows = entries.map(
     (entry) =>
@@ -216,7 +265,10 @@ ${rows.join('\n')}
   );
 }
 
-void main().catch((error: unknown) => {
-  process.stderr.write(`allowlist justification generation failed: ${String(error)}\n`);
-  process.exit(1);
-});
+const invokedPath = process.argv[1] ? path.resolve(process.argv[1]).toLowerCase() : '';
+if (invokedPath === fileURLToPath(import.meta.url).toLowerCase()) {
+  void main().catch((error: unknown) => {
+    process.stderr.write(`allowlist justification generation failed: ${String(error)}\n`);
+    process.exit(1);
+  });
+}

@@ -27,10 +27,16 @@ secret, or external publication was changed by this patch.
 ## Patch
 
 - Added deterministic truth generation and validation under `tools/truth/`.
+- Centralized the complete 16-metric schema so deleting a metric fails
+  validation instead of silently disabling its claims.
+- Rejected evidence timestamps more than five minutes ahead of the validator
+  clock.
 - Added a SHA-pinned `truth-drift` GitHub Actions workflow.
 - Added `.truth-allowlist`; every entry requires an inline `# reason:`.
 - Generated `security/ALLOWLIST-JUSTIFICATIONS.md` from the tracked secret-scan
   configurations and linked it from `SECURITY.md`.
+- Bound exact active-suppression coverage and seven negative/contract tests to
+  the existing `claims:validate` CI command.
 - Marked the hand-maintained `SOURCE_OF_TRUTH.md` as superseded.
 - Corrected current public READMEs to use the neutral
   `legacy challenge-set` description.
@@ -49,6 +55,7 @@ secret, or external publication was changed by this patch.
 | `pnpm install --frozen-lockfile` | PASS — all 197 workspace projects installed |
 | `pnpm truth:generate` | PASS |
 | `pnpm truth:validate` | PASS |
+| truth schema and allowlist contract tests | PASS - 7/7 tests |
 | `pnpm claims:drift` | PASS |
 | deterministic regeneration plus artifact diff | PASS |
 | `pnpm typecheck` | PASS — 179/179 tasks |
@@ -57,7 +64,7 @@ secret, or external publication was changed by this patch.
 | Python compile for modified governance/runtime files | PASS |
 | strict documentation claims | PASS — 26/26 claims |
 | repository secret scan | PASS — 0 findings |
-| generated scanner-allowlist coverage | PASS — 98/98 rows |
+| generated scanner-allowlist coverage | PASS — 145/145 active suppressions |
 | current non-historical public README retired-name scan | PASS — 0 hits |
 | current non-historical public Markdown/HTML/TSX retired-name scan | PASS — 0 hits |
 | `git diff --check` | PASS |
