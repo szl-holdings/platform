@@ -10,7 +10,12 @@ import {
   type GovernanceReceipt,
   type GovernedActionEnvelope,
   type GovernedActionRequest,
+  type GovernedActionResult,
+  type GovernedToolExecutor,
   InMemoryReplayStore,
+  type McpGovernorConfig,
+  type PolicyDecision,
+  type ReplayStore,
   McpGovernor,
   sha256,
   signCapabilityToken,
@@ -61,23 +66,46 @@ function createGovernor(
     policy?: (
       envelope: GovernedActionEnvelope,
       args: unknown,
-    ) => Promise<{ effect: 'allow' | 'block'; reason: string }>;
+    ) => Promise<PolicyDecision>;
     writer?: (receipt: GovernanceReceipt) => Promise<void>;
+    replayStore?: ReplayStore;
   } = {},
-): McpGovernor {
-  return new McpGovernor({
+): {
+  run<T>(
+    request: GovernedActionRequest,
+    execute: (args: unknown, toolName: string) => Promise<T>,
+  ): Promise<GovernedActionResult<T>>;
+} {
+  let activeExecutor: ((args: unknown, toolName: string) => Promise<unknown>) | undefined;
+  const governor = new McpGovernor({
     policyEvaluator:
       options.policy ?? (async () => ({ effect: 'allow', reason: 'policy permits action' })),
     capabilityPublicKeyResolver: () => capabilityPublicKey,
+    toolExecutor: async (toolName, args) => {
+      if (!activeExecutor) throw new Error('test executor is not bound');
+      return activeExecutor(args, toolName);
+    },
     receiptSigner: { keyId: 'receipt-key-1', privateKey: receiptPrivateKey },
     receiptWriter:
       options.writer ??
       (async (receipt) => {
         receipts.push(receipt);
       }),
+    replayStore: options.replayStore,
     expectedCapabilityIssuer: 'szl-control-plane',
     clock: () => NOW,
   });
+  return {
+    run: async (governedRequest, execute) => {
+      if (activeExecutor) throw new Error('concurrent test execution is not supported');
+      activeExecutor = execute;
+      try {
+        return await governor.run(governedRequest);
+      } finally {
+        activeExecutor = undefined;
+      }
+    },
+  };
 }
 
 test('signs and verifies model-independent capability claims', async () => {
@@ -317,4 +345,350 @@ test('expires replay entries and rejects already-expired inserts', async () => {
   assert.equal(await store.consume('already-expired', 99, 100), false);
   assert.equal(await store.consume('cap-2', 101, 100), true);
   assert.equal(await store.consume('cap-1', 102, 100), true);
+});
+
+test('rejects unexpected issuers before resolving a public key', async () => {
+  const token = signCapabilityToken(
+    claims({ issuer: 'untrusted-control-plane' }),
+    capabilityPrivateKey,
+    'capability-key-1',
+  );
+  let resolverCalls = 0;
+
+  await assert.rejects(
+    verifyCapabilityToken(
+      token,
+      () => {
+        resolverCalls += 1;
+        return capabilityPublicKey;
+      },
+      {
+        now: NOW,
+        expectedIssuer: 'szl-control-plane',
+        actorId: 'actor-1',
+        tenantId: 'tenant-1',
+        toolName: 'ledger.write',
+        risk: 'high',
+      },
+    ),
+    (error: unknown) =>
+      error instanceof CapabilityTokenError && error.code === 'issuer_mismatch',
+  );
+  assert.equal(resolverCalls, 0);
+});
+
+test('binds policy and execution to an immutable canonical argument snapshot', async () => {
+  const receipts: GovernanceReceipt[] = [];
+  let enterPolicy!: () => void;
+  let releasePolicy!: () => void;
+  const policyEntered = new Promise<void>((resolve) => {
+    enterPolicy = resolve;
+  });
+  const policyGate = new Promise<void>((resolve) => {
+    releasePolicy = resolve;
+  });
+  const approvedArgs = JSON.parse(
+    '{"amount":10,"nested":{"value":"approved"},"__proto__":{"role":"user"}}',
+  ) as {
+    amount: number;
+    nested: { value: string };
+    __proto__: { role: string };
+  };
+  const originalArgs = JSON.parse(canonicalJson(approvedArgs)) as typeof approvedArgs;
+  const governor = createGovernor(receipts, {
+    policy: async (envelope, args) => {
+      const snapshot = args as typeof approvedArgs;
+      assert.equal(Object.isFrozen(envelope), true);
+      assert.equal(Object.isFrozen(snapshot), true);
+      assert.equal(Object.isFrozen(snapshot.nested), true);
+      assert.throws(() => {
+        envelope.toolName = 'ledger.delete';
+      }, TypeError);
+      enterPolicy();
+      await policyGate;
+      return {
+        effect: 'allow',
+        reason: 'snapshot approved',
+        policyVersion: 'covenant-2026-07',
+      };
+    },
+  });
+
+  const mutableRequest = request({ actionId: 'action-snapshot', args: originalArgs });
+  const running = governor.run(
+    mutableRequest,
+    async (args, toolName) => {
+      const snapshot = args as typeof approvedArgs;
+      assert.equal(toolName, 'ledger.write');
+      assert.equal(snapshot.amount, 10);
+      assert.equal(snapshot.nested.value, 'approved');
+      assert.equal(snapshot.__proto__.role, 'user');
+      assert.throws(() => {
+        snapshot.amount = 999;
+      }, TypeError);
+      return { amount: snapshot.amount, value: snapshot.nested.value };
+    },
+  );
+
+  await policyEntered;
+  originalArgs.amount = 999;
+  originalArgs.nested.value = 'mutated';
+  originalArgs.__proto__.role = 'admin';
+  mutableRequest.toolName = 'ledger.delete';
+  mutableRequest.actorId = 'attacker';
+  mutableRequest.tenantId = 'attacker-tenant';
+  mutableRequest.risk = 'critical';
+  mutableRequest.mutatesState = false;
+  releasePolicy();
+
+  const outcome = await running;
+  assert.deepEqual(outcome.result, { amount: 10, value: 'approved' });
+  assert.equal(outcome.envelope.toolName, 'ledger.write');
+  assert.equal(outcome.envelope.actorId, 'actor-1');
+  assert.equal(outcome.envelope.tenantId, 'tenant-1');
+  assert.equal(outcome.envelope.risk, 'high');
+  assert.equal(outcome.envelope.mutatesState, true);
+  assert.equal(outcome.envelope.argsDigest, sha256(canonicalJson(approvedArgs)));
+});
+
+test('persists the evaluated policy version in signed receipts', async () => {
+  const receipts: GovernanceReceipt[] = [];
+  const governor = createGovernor(receipts, {
+    policy: async () => ({
+      effect: 'allow',
+      reason: 'versioned policy permits action',
+      policyVersion: 'covenant-2026-07',
+    }),
+  });
+
+  const outcome = await governor.run(
+    request({ actionId: 'action-policy-version' }),
+    async () => ({ ok: true }),
+  );
+  assert.equal(outcome.decision.policyVersion, 'covenant-2026-07');
+  assert.deepEqual(
+    receipts.map((item) => item.policyVersion),
+    ['covenant-2026-07', 'covenant-2026-07'],
+  );
+  assert.ok(receipts.every((item) => verifyGovernanceReceipt(item, receiptPublicKey)));
+
+  const afterReceipt = receipts[1];
+  assert.ok(afterReceipt);
+  const tampered = {
+    ...afterReceipt,
+    policyVersion: 'covenant-tampered',
+  } as GovernanceReceipt;
+  assert.equal(verifyGovernanceReceipt(tampered, receiptPublicKey), false);
+});
+
+test('binds error receipts to stable failure codes and messages', async () => {
+  const timeoutReceipts: GovernanceReceipt[] = [];
+  const timeoutGovernor = createGovernor(timeoutReceipts);
+  const timeout = Object.assign(new Error('upstream timed out'), { code: 'ETIMEDOUT' });
+
+  await assert.rejects(
+    timeoutGovernor.run(request({ actionId: 'action-timeout' }), async () => {
+      throw timeout;
+    }),
+    (error: unknown) => error === timeout,
+  );
+  const timeoutReceipt = timeoutReceipts.find((item) => item.outcome === 'error');
+  assert.ok(timeoutReceipt);
+  assert.equal(
+    timeoutReceipt.resultDigest,
+    sha256(canonicalJson({ code: 'ETIMEDOUT', message: 'upstream timed out' })),
+  );
+  assert.equal(JSON.stringify(timeoutReceipt).includes('upstream timed out'), false);
+
+  const deniedReceipts: GovernanceReceipt[] = [];
+  const deniedGovernor = createGovernor(deniedReceipts);
+  const denied = Object.assign(new Error('permission denied'), { code: 'EACCES' });
+  await assert.rejects(
+    deniedGovernor.run(request({ actionId: 'action-denied' }), async () => {
+      throw denied;
+    }),
+    (error: unknown) => error === denied,
+  );
+  const deniedReceipt = deniedReceipts.find((item) => item.outcome === 'error');
+  assert.ok(deniedReceipt);
+  assert.notEqual(deniedReceipt.resultDigest, timeoutReceipt.resultDigest);
+  assert.equal(
+    deniedReceipt.resultDigest,
+    sha256(canonicalJson({ code: 'EACCES', message: 'permission denied' })),
+  );
+});
+
+test('requires a callable governor-owned tool executor', async () => {
+  assert.throws(
+    () =>
+      new McpGovernor({
+        policyEvaluator: async () => ({ effect: 'allow', reason: 'policy permits action' }),
+        capabilityPublicKeyResolver: () => capabilityPublicKey,
+        toolExecutor: undefined as never,
+        receiptSigner: { keyId: 'receipt-key-1', privateKey: receiptPrivateKey },
+        receiptWriter: async () => undefined,
+        expectedCapabilityIssuer: 'szl-control-plane',
+        clock: () => NOW,
+      }),
+    /toolExecutor must be callable/,
+  );
+
+  const receipts: GovernanceReceipt[] = [];
+  let legacyCalled = false;
+  const executorWithDefault: GovernedToolExecutor = async (_toolName, args = {}) =>
+    (args as { amount: number }).amount;
+  const governor = new McpGovernor({
+    policyEvaluator: async () => ({ effect: 'allow', reason: 'policy permits action' }),
+    capabilityPublicKeyResolver: () => capabilityPublicKey,
+    toolExecutor: executorWithDefault,
+    receiptSigner: { keyId: 'receipt-key-1', privateKey: receiptPrivateKey },
+    receiptWriter: async (receipt) => {
+      receipts.push(receipt);
+    },
+    expectedCapabilityIssuer: 'szl-control-plane',
+    clock: () => NOW,
+  });
+  const mutableArgs = { amount: 10 };
+  const legacyExecutor = async () => {
+    legacyCalled = true;
+    return mutableArgs.amount;
+  };
+  const runWithLegacyArgument = governor.run.bind(governor) as unknown as (
+    governedRequest: GovernedActionRequest,
+    ignoredLegacyExecutor: () => Promise<number>,
+  ) => Promise<GovernedActionResult<number>>;
+  const outcome = await runWithLegacyArgument(
+    request({ actionId: 'action-legacy-executor', args: mutableArgs }),
+    legacyExecutor,
+  );
+  assert.equal(outcome.result, 10);
+  assert.equal(legacyCalled, false);
+  assert.equal(receipts.length, 2);
+});
+
+test('snapshots and freezes a mutable policy decision before later awaits', async () => {
+  const receipts: GovernanceReceipt[] = [];
+  let enterReplay!: () => void;
+  let releaseReplay!: () => void;
+  const replayEntered = new Promise<void>((resolve) => {
+    enterReplay = resolve;
+  });
+  const replayGate = new Promise<void>((resolve) => {
+    releaseReplay = resolve;
+  });
+  const replayStore: ReplayStore = {
+    consume: async () => {
+      enterReplay();
+      await replayGate;
+      return true;
+    },
+  };
+  const mutableDecision: PolicyDecision = {
+    effect: 'allow',
+    reason: 'original authorization',
+    policyVersion: 'covenant-original',
+  };
+  const governor = createGovernor(receipts, {
+    policy: async () => mutableDecision,
+    replayStore,
+  });
+
+  const running = governor.run(
+    request({ actionId: 'action-decision-snapshot' }),
+    async () => ({ ok: true }),
+  );
+  await replayEntered;
+  mutableDecision.reason = 'mutated authorization';
+  mutableDecision.policyVersion = 'covenant-mutated';
+  releaseReplay();
+
+  const outcome = await running;
+  assert.equal(Object.isFrozen(outcome.decision), true);
+  assert.equal(outcome.decision.reason, 'original authorization');
+  assert.equal(outcome.decision.policyVersion, 'covenant-original');
+  assert.deepEqual(
+    receipts.map((item) => [item.reason, item.policyVersion]),
+    [
+      ['original authorization', 'covenant-original'],
+      ['original authorization', 'covenant-original'],
+    ],
+  );
+});
+
+test('records an error receipt when error metadata accessors throw', async () => {
+  const receipts: GovernanceReceipt[] = [];
+  const governor = createGovernor(receipts);
+  const hostileError = new Error('opaque failure') as Error & { code?: string };
+  Object.defineProperty(hostileError, 'code', {
+    get() {
+      throw new Error('code accessor denied');
+    },
+  });
+
+  await assert.rejects(
+    governor.run(request({ actionId: 'action-hostile-error' }), async () => {
+      throw hostileError;
+    }),
+    (error: unknown) => error === hostileError,
+  );
+  const errorReceipt = receipts.find((item) => item.outcome === 'error');
+  assert.ok(errorReceipt);
+  assert.equal(
+    errorReceipt.resultDigest,
+    sha256(canonicalJson({ code: 'Error', message: 'opaque failure' })),
+  );
+  assert.equal(verifyGovernanceReceipt(errorReceipt, receiptPublicKey), true);
+});
+
+test('captures the configured executor before an in-flight request', async () => {
+  const receipts: GovernanceReceipt[] = [];
+  let enterPolicy!: () => void;
+  let releasePolicy!: () => void;
+  const policyEntered = new Promise<void>((resolve) => {
+    enterPolicy = resolve;
+  });
+  const policyGate = new Promise<void>((resolve) => {
+    releasePolicy = resolve;
+  });
+  const config: McpGovernorConfig = {
+    policyEvaluator: async () => {
+      enterPolicy();
+      await policyGate;
+      return { effect: 'allow', reason: 'policy permits action' };
+    },
+    capabilityPublicKeyResolver: () => capabilityPublicKey,
+    toolExecutor: async (toolName, args) => ({
+      amount: (args as { amount: number }).amount,
+      executor: 'original',
+      toolName,
+    }),
+    receiptSigner: { keyId: 'receipt-key-1', privateKey: receiptPrivateKey },
+    receiptWriter: async (receipt) => {
+      receipts.push(receipt);
+    },
+    expectedCapabilityIssuer: 'szl-control-plane',
+    clock: () => NOW,
+  };
+  const governor = new McpGovernor(config);
+  const running = governor.run<{
+    amount: number;
+    executor: string;
+    toolName: string;
+  }>(request({ actionId: 'action-config-snapshot' }));
+
+  await policyEntered;
+  config.toolExecutor = async () => ({
+    amount: 999,
+    executor: 'substituted',
+    toolName: 'ledger.delete',
+  });
+  releasePolicy();
+
+  const outcome = await running;
+  assert.deepEqual(outcome.result, {
+    amount: 10,
+    executor: 'original',
+    toolName: 'ledger.write',
+  });
+  assert.equal(Object.isFrozen(outcome.envelope), true);
 });

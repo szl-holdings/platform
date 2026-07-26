@@ -47,7 +47,58 @@ export class GovernancePostReceiptError extends Error {
 }
 
 function block(reason: string): PolicyDecision {
-  return { effect: 'block', reason };
+  return Object.freeze({ effect: 'block', reason });
+}
+
+function deepFreeze(value: unknown): unknown {
+  if (!value || typeof value !== 'object' || Object.isFrozen(value)) return value;
+  for (const key of Object.keys(value)) {
+    deepFreeze((value as Record<string, unknown>)[key]);
+  }
+  return Object.freeze(value);
+}
+
+function immutableCanonicalSnapshot(value: unknown): unknown {
+  const snapshot = JSON.parse(canonicalJson(value)) as unknown;
+  return deepFreeze(snapshot);
+}
+
+function stableFailure(error: unknown): { code: string; message: string } {
+  try {
+    if (error instanceof Error) {
+      let code = 'Error';
+      let message = 'error message unavailable';
+      try {
+        if (typeof error.name === 'string' && error.name.length > 0) code = error.name;
+      } catch {
+        // Keep the stable Error fallback when metadata access is hostile.
+      }
+      try {
+        if (typeof error.message === 'string') message = error.message;
+      } catch {
+        // Keep the stable unavailable marker when metadata access is hostile.
+      }
+      try {
+        const candidateCode = (error as Error & { code?: unknown }).code;
+        if (typeof candidateCode === 'string' || typeof candidateCode === 'number') {
+          code = String(candidateCode);
+        }
+      } catch {
+        // The name-derived code remains stable when a code accessor throws.
+      }
+      return { code, message };
+    }
+  } catch {
+    // A hostile proxy can throw during instanceof; use the non-Error fallback.
+  }
+
+  let message: string;
+  try {
+    message = String(error);
+  } catch {
+    message = 'unprintable thrown value';
+  }
+  return { code: `non_error_${error === null ? 'null' : typeof error}`, message };
 }
 
 function validateDecision(value: PolicyDecision): PolicyDecision {
@@ -55,11 +106,17 @@ function validateDecision(value: PolicyDecision): PolicyDecision {
     !value ||
     !['allow', 'block', 'approval_required'].includes(value.effect) ||
     typeof value.reason !== 'string' ||
-    value.reason.length === 0
+    value.reason.length === 0 ||
+    (value.policyVersion !== undefined &&
+      (typeof value.policyVersion !== 'string' || value.policyVersion.length === 0))
   ) {
     return block('policy_evaluator_invalid_result');
   }
-  return value;
+  return Object.freeze({
+    effect: value.effect,
+    reason: value.reason,
+    ...(value.policyVersion === undefined ? {} : { policyVersion: value.policyVersion }),
+  });
 }
 
 export function createGovernedActionEnvelope(
@@ -72,7 +129,7 @@ export function createGovernedActionEnvelope(
   if (request.risk === 'read_only' && request.mutatesState) {
     throw new TypeError('read_only actions cannot declare a state mutation');
   }
-  return {
+  return Object.freeze({
     schema: 'szl.governed-action/v1',
     actionId: request.actionId ?? randomUUID(),
     toolName: request.toolName,
@@ -82,22 +139,40 @@ export function createGovernedActionEnvelope(
     mutatesState: request.mutatesState,
     requestedAt: now.toISOString(),
     argsDigest: sha256(canonicalJson(request.args)),
-  };
+  });
 }
 
 export class McpGovernor {
   private readonly replayStore: ReplayStore;
+  private readonly config: Readonly<McpGovernorConfig>;
+  private readonly toolExecutor: McpGovernorConfig['toolExecutor'];
 
-  constructor(private readonly config: McpGovernorConfig) {
-    this.replayStore = config.replayStore ?? new InMemoryReplayStore();
+  constructor(config: McpGovernorConfig) {
+    if (typeof config.toolExecutor !== 'function') {
+      throw new TypeError('toolExecutor must be callable');
+    }
+    this.config = Object.freeze({
+      ...config,
+      receiptSigner: Object.freeze({ ...config.receiptSigner }),
+    });
+    this.toolExecutor = config.toolExecutor;
+    this.replayStore = this.config.replayStore ?? new InMemoryReplayStore();
   }
 
-  async run<T>(
-    request: GovernedActionRequest,
-    execute: () => Promise<T>,
-  ): Promise<GovernedActionResult<T>> {
+  async run<T>(request: GovernedActionRequest): Promise<GovernedActionResult<T>> {
     const clock = this.config.clock ?? (() => new Date());
-    const envelope = createGovernedActionEnvelope(request, clock());
+    const argsSnapshot = immutableCanonicalSnapshot(request.args);
+    const requestSnapshot = Object.freeze({
+      actionId: request.actionId,
+      toolName: request.toolName,
+      actorId: request.actorId,
+      tenantId: request.tenantId,
+      risk: request.risk,
+      mutatesState: request.mutatesState,
+      args: argsSnapshot,
+      capabilityToken: request.capabilityToken,
+    });
+    const envelope = createGovernedActionEnvelope(requestSnapshot, clock());
     const receipts: GovernanceReceipt[] = [];
     let capability: VerifiedCapability | undefined;
 
@@ -131,20 +206,20 @@ export class McpGovernor {
     };
 
     const capabilityRequired =
-      request.mutatesState || (this.config.requireCapabilityForReadOnly ?? false);
+      requestSnapshot.mutatesState || (this.config.requireCapabilityForReadOnly ?? false);
     if (capabilityRequired) {
-      if (!request.capabilityToken) return deny(block('capability_token_required'));
+      if (!requestSnapshot.capabilityToken) return deny(block('capability_token_required'));
       try {
         capability = await verifyCapabilityToken(
-          request.capabilityToken,
+          requestSnapshot.capabilityToken,
           this.config.capabilityPublicKeyResolver,
           {
             now: clock(),
             expectedIssuer: this.config.expectedCapabilityIssuer,
-            actorId: request.actorId,
-            tenantId: request.tenantId,
-            toolName: request.toolName,
-            risk: request.risk,
+            actorId: requestSnapshot.actorId,
+            tenantId: requestSnapshot.tenantId,
+            toolName: requestSnapshot.toolName,
+            risk: requestSnapshot.risk,
           },
         );
       } catch (error) {
@@ -158,7 +233,7 @@ export class McpGovernor {
 
     let decision: PolicyDecision;
     try {
-      decision = validateDecision(await this.config.policyEvaluator(envelope, request.args));
+      decision = validateDecision(await this.config.policyEvaluator(envelope, argsSnapshot));
     } catch {
       decision = block('policy_evaluator_error');
     }
@@ -175,20 +250,20 @@ export class McpGovernor {
     }
 
     let before: GovernanceReceipt | undefined;
-    if (request.mutatesState) {
+    if (requestSnapshot.mutatesState) {
       before = await persist('before', 'pending', decision);
     }
 
     let result: T;
     try {
-      result = await execute();
+      result = (await this.toolExecutor(requestSnapshot.toolName, argsSnapshot)) as T;
     } catch (error) {
       try {
         await persist(
           'after',
           'error',
           decision,
-          sha256(canonicalJson({ error: error instanceof Error ? error.name : typeof error })),
+          sha256(canonicalJson(stableFailure(error))),
           before?.receiptDigest,
         );
       } catch (receiptError) {

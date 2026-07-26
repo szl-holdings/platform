@@ -80,6 +80,7 @@ export interface GovernanceReceipt {
   readonly mutatesState: boolean;
   readonly decision: PolicyEffect;
   readonly reason: string;
+  readonly policyVersion?: string;
   readonly occurredAt: string;
   readonly argsDigest: string;
   readonly resultDigest?: string;
@@ -99,6 +100,8 @@ export interface ReceiptSigner {
 
 export type ReceiptWriter = (receipt: GovernanceReceipt) => Promise<void>;
 
+export type GovernedToolExecutor = (toolName: string, args: unknown) => Promise<unknown>;
+
 export type CapabilityPublicKeyResolver = (
   keyId: string,
   issuer: string,
@@ -111,6 +114,7 @@ export interface ReplayStore {
 export interface McpGovernorConfig {
   policyEvaluator: PolicyEvaluator;
   capabilityPublicKeyResolver: CapabilityPublicKeyResolver;
+  toolExecutor: GovernedToolExecutor;
   receiptSigner: ReceiptSigner;
   receiptWriter: ReceiptWriter;
   replayStore?: ReplayStore;
