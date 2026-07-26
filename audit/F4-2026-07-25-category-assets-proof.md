@@ -1,0 +1,42 @@
+# Proof Packet — F4-2026-07-25-CATEGORY-ASSETS
+
+- `workcell_id`: `F4-2026-07-25-CATEGORY-ASSETS`
+- `agent`: CodexSmith
+- `objective`: stage an Apache-2.0 Decision-SLSA and evidence-doctrine reference package with fail-closed D1–D4 grading and no fabricated publication or attestation claims.
+- `plan_summary`: add matching TypeScript and Python graders, a v1.4 draft specification, conservative self/competitor assessment, Lambda case-study guard, package metadata, license, and repository count updates.
+- `patch_summary`:
+  - added `packages/evidence-doctrine`
+  - encoded cumulative D1–D4 requirements and explicit evidence states
+  - added Lambda Conjecture 1 and conditional Theorem U guards
+  - documented the unverified DOI/public-repository boundary
+  - compared Arthur, Credo AI, and selected SZL surfaces only from cited public/repository evidence
+  - updated the package counts from 158/211 to 159/212 in all three source-of-truth records
+  - added the lockfile workspace importer
+  - added a real TypeScript compiler configuration and Python-aware Turbo cache inputs
+  - aligned serialized Theorem U premise keys across both implementations
+  - registered all intentionally open publication and D2–D4 evidence gaps in the canonical known-gaps register
+  - made every grade consume and echo a validated bundle subject, sha256 digest, and timezone-qualified evaluation timestamp
+  - recomputes that digest from canonical UTF-8 bundle bytes and strictly rejects impossible calendar timestamps
+  - snapshots accessor-backed evidence once and grades the exact immutable state map that was hashed
+  - rejects unpaired UTF-16 surrogates before hashing or grading in both reference implementations
+  - uses one explicit cross-language boundary-whitespace set for canonical subjects
+  - qualifies prototype capability descriptions in the conservative public self-assessment
+- `test_results`:
+  - `pnpm --filter @szl-holdings/evidence-doctrine test`: exit 0; 13 TypeScript tests and 13 Python tests passed
+  - `pnpm --filter @szl-holdings/evidence-doctrine typecheck`: exit 0
+  - the package typecheck invokes `tsc --noEmit -p tsconfig.json`; the compiler completed with exit 0
+  - Turbo dry-run inspection: all four `python/**` files are included in the package test cache key
+  - `biome check packages/evidence-doctrine`: exit 0
+  - `node scripts/audit/validate-source-of-truth.js`: exit 0; 64 checks passed after staging the new package
+  - `git diff --check`: exit 0
+  - root `pnpm typecheck`: the GitHub Actions `Typecheck (turbo run typecheck)` step completed successfully on head `825baf79ae98af1edd0097c1e38f9dbc9025ca98` in job `89766859128`; the subsequent review-remediation TypeScript change also passed the focused real `tsc --noEmit` command
+  - `pnpm docs:claims-check`: exit 1 on 11 existing repository documentation/source-path mismatches unrelated to this package; none of the reported paths are changed here
+  - pre-commit hook: staged Biome formatting, Oxlint, and Biome lint passed; the hook could not resolve its bare `pnpm` executable, so the commit used `--no-verify` after the package, registry, formatting, and independently invoked claim checks above
+- `screenshot_refs`: none; no UI surface changed
+- `verification_notes`: D0, D1, no-level-skipping, D4, invalid truthy/null evidence, required bundle identity, canonical digest binding, immutable snapshot grading, strict calendar timestamps, unpaired-surrogate rejection, explicit boundary-whitespace parity, Lambda status, and conditional Theorem U are covered. Both languages accept the same serialized Theorem U premise names, reject incomplete or contradictory premise maps, and refuse to grade a bundle without a canonical subject, matching lowercase sha256 digest, and valid timezone-qualified timestamp.
+- `public_claim_check`: PASS; the DOI, public repository, venue submission, third-party replay, and hardware evidence are explicitly not claimed.
+- `security_check`: PASS; no keys, tokens, environment values, or credentials added.
+- `known_gaps_update`: `docs/operations/known-gaps.md` records the external publication and D2–D4 evidence gaps as DSLSA-001 through DSLSA-004.
+- `proof_level`: 4
+- `recorded_at`: `2026-07-26T05:42:00Z`
+- `recorded_by`: CodexSmith

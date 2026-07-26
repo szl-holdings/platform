@@ -50,7 +50,7 @@ All counts are derived from the platform metrics registry. **Do not edit this fi
 |--------|-------|
 | Domain packages (`packages/`) | 98 |
 | Shared library packages (`lib/`) | 52 |
-| Total packages | 150 |
+| Total packages | 199 (MEASURED; `artifacts/SOURCE_OF_TRUTH.json`) |
 
 ---
 

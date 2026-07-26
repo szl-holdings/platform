@@ -1,0 +1,98 @@
+{
+  "schema": "szl.hf-catalog-snapshot/v1",
+  "organization": "SZLHOLDINGS",
+  "observedAt": "2026-07-26T00:23:43.853Z",
+  "evidenceLabel": "MEASURED",
+  "source": {
+    "apiBase": "https://huggingface.co/api",
+    "pagination": "RFC_LINK_CURSOR",
+    "pageSize": 100,
+    "completenessRule": "Follow rel=next cursor links to exhaustion; reject a full terminal page without a next link."
+  },
+  "assets": {
+    "models": {
+      "count": 15,
+      "ids": [
+        "SZLHOLDINGS/SZL-Forge-1.5B-ReceiptAgent",
+        "SZLHOLDINGS/SZL-Khipu-1.5B",
+        "SZLHOLDINGS/SZL-Khipu-1.5B-GGUF",
+        "SZLHOLDINGS/a11oy-v19-substrate",
+        "SZLHOLDINGS/governed-inference-meter",
+        "SZLHOLDINGS/szl-blocked",
+        "SZLHOLDINGS/szl-formulas",
+        "SZLHOLDINGS/szl-governed-norm",
+        "SZLHOLDINGS/szl-govsign",
+        "SZLHOLDINGS/szl-invariants",
+        "SZLHOLDINGS/szl-kernels",
+        "SZLHOLDINGS/szl-lambda-gate",
+        "SZLHOLDINGS/szl-nemo",
+        "SZLHOLDINGS/szl-ouroboros",
+        "SZLHOLDINGS/szl-provctl"
+      ],
+      "pages": 1
+    },
+    "datasets": {
+      "count": 26,
+      "ids": [
+        "SZLHOLDINGS/SZLHOLDINGS",
+        "SZLHOLDINGS/a11oy-verifiable-corpus",
+        "SZLHOLDINGS/alloy-sovereign-eval-runs",
+        "SZLHOLDINGS/canonical-formulas-v1",
+        "SZLHOLDINGS/doctrine-v10-v11",
+        "SZLHOLDINGS/energy-attested-runs",
+        "SZLHOLDINGS/governed-receipts-bench",
+        "SZLHOLDINGS/k-verify-benchmark-v1",
+        "SZLHOLDINGS/killinchu-osint-corpus",
+        "SZLHOLDINGS/lean-proofs-v1",
+        "SZLHOLDINGS/lean-theorem-tree",
+        "SZLHOLDINGS/ouroboros-arxiv-preprint",
+        "SZLHOLDINGS/rag-corpus-v1",
+        "SZLHOLDINGS/readiness-runs",
+        "SZLHOLDINGS/szl-1-doctrine-sft",
+        "SZLHOLDINGS/szl-artifacts",
+        "SZLHOLDINGS/szl-lake",
+        "SZLHOLDINGS/szl-quant-sft-v1",
+        "SZLHOLDINGS/szl-second-brain-inrepo",
+        "SZLHOLDINGS/test-results",
+        "SZLHOLDINGS/thesis-corpus-v18",
+        "SZLHOLDINGS/thesis-v18-formal-verification",
+        "SZLHOLDINGS/uds-bundles-v1",
+        "SZLHOLDINGS/uds-governance-receipts",
+        "SZLHOLDINGS/uds-spans-receipts",
+        "SZLHOLDINGS/why-we-lead"
+      ],
+      "pages": 1
+    },
+    "spaces": {
+      "count": 25,
+      "ids": [
+        "SZLHOLDINGS/a11oy",
+        "SZLHOLDINGS/anatomy",
+        "SZLHOLDINGS/cosmos",
+        "SZLHOLDINGS/david-leads",
+        "SZLHOLDINGS/energy-attest-holo",
+        "SZLHOLDINGS/energy-attested-runs",
+        "SZLHOLDINGS/governed-norm-holo",
+        "SZLHOLDINGS/governed-receipt-verifier",
+        "SZLHOLDINGS/guardrail-receipt",
+        "SZLHOLDINGS/hatun-mcp",
+        "SZLHOLDINGS/holographic",
+        "SZLHOLDINGS/immune",
+        "SZLHOLDINGS/killinchu",
+        "SZLHOLDINGS/lambda-gate-holo",
+        "SZLHOLDINGS/llm-router-live",
+        "SZLHOLDINGS/receipt-chain-live",
+        "SZLHOLDINGS/sda",
+        "SZLHOLDINGS/szl-blocked-live",
+        "SZLHOLDINGS/szl-estate-live",
+        "SZLHOLDINGS/szl-forge-lab",
+        "SZLHOLDINGS/szl-govsign-live",
+        "SZLHOLDINGS/szl-kernels-live",
+        "SZLHOLDINGS/szl-model-inference-lab",
+        "SZLHOLDINGS/szl-provctl-live",
+        "SZLHOLDINGS/yarqa"
+      ],
+      "pages": 1
+    }
+  }
+}

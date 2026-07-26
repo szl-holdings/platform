@@ -1,0 +1,14 @@
+{
+  "schema_version": "1.0.0",
+  "maturity": "REPORTED",
+  "repository": "szl-holdings/platform",
+  "kind": "operations_commit_report",
+  "commit": "297b855a682c543c1f920459d649f0de694fd075",
+  "committed_at": "2026-06-13T03:25:02Z",
+  "signature_verified": false,
+  "verification_reason": "unsigned",
+  "changed_files": [
+    "replit-sync/NEXT_ORDER.md"
+  ],
+  "source_url": "https://github.com/szl-holdings/platform/commit/297b855a682c543c1f920459d649f0de694fd075"
+}

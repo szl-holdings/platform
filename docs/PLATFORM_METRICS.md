@@ -28,7 +28,7 @@
 | Artifact directories on disk | 19 |
 | Library packages (lib/) | 51 |
 | Standalone packages (packages/) | 101 |
-| Total packages | 152 |
+| Total packages | 199 (MEASURED; `artifacts/SOURCE_OF_TRUTH.json`) |
 
 ### Artifact Registry
 
@@ -72,7 +72,7 @@
 | Metric | Count |
 |--------|-------|
 | Test files (.test.ts/tsx, .spec.ts/tsx) | 387 |
-| GitHub CI workflows | 25 |
+| GitHub CI workflows | 45 (MEASURED; `artifacts/SOURCE_OF_TRUTH.json`) |
 
 ---
 

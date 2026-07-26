@@ -11,7 +11,7 @@
 import { execFileSync } from 'node:child_process';
 import { existsSync, readFileSync } from 'node:fs';
 import { extname, relative, resolve } from 'node:path';
-import { fileURLToPath } from 'node:url';
+import { fileURLToPath, pathToFileURL } from 'node:url';
 
 type Metric = {
   value: number | string | boolean | null;
@@ -25,6 +25,11 @@ type Rule = {
   words: RegExp;
   context?: RegExp;
   metric: string | ((path: string, line: string) => string);
+};
+
+type Candidate = {
+  path: string;
+  lines: Set<number> | null;
 };
 
 const ROOT = resolve(fileURLToPath(new URL('../..', import.meta.url)));
@@ -113,18 +118,39 @@ function runGit(args: string[]): string {
   });
 }
 
-function candidateFiles(): string[] {
+export function addedLineNumbers(patch: string): Set<number> {
+  const lines = new Set<number>();
+  const pattern = /^@@ -\d+(?:,\d+)? \+(\d+)(?:,(\d+))? @@/gm;
+  for (const match of patch.matchAll(pattern)) {
+    const start = Number(match[1]);
+    const count = match[2] === undefined ? 1 : Number(match[2]);
+    for (let offset = 0; offset < count; offset += 1) {
+      lines.add(start + offset);
+    }
+  }
+  return lines;
+}
+
+function candidateFiles(): Candidate[] {
   const all = process.argv.includes('--all');
   const baseIndex = process.argv.indexOf('--base');
   const base = baseIndex >= 0 ? process.argv[baseIndex + 1] : undefined;
-  const output =
-    all || !base
-      ? runGit(['ls-files'])
-      : runGit(['diff', '--name-only', '--diff-filter=ACMR', `${base}...HEAD`, '--']);
-  return output
-    .split(/\r?\n/)
-    .map((path) => path.trim())
-    .filter((path) => path.length > 0 && SCANNED_EXTENSIONS.has(extname(path)));
+  if (all || !base) {
+    return runGit(['ls-files', '-z'])
+      .split('\0')
+      .filter((path) => path.length > 0 && SCANNED_EXTENSIONS.has(extname(path)))
+      .map((path) => ({ path, lines: null }));
+  }
+  return runGit(['diff', '--name-only', '--diff-filter=ACMR', '-z', `${base}...HEAD`, '--'])
+    .split('\0')
+    .filter((path) => path.length > 0 && SCANNED_EXTENSIONS.has(extname(path)))
+    .map((path) => ({
+      path,
+      lines: addedLineNumbers(
+        runGit(['diff', '--unified=0', '--no-color', `${base}...HEAD`, '--', path]),
+      ),
+    }))
+    .filter((candidate) => candidate.lines.size > 0);
 }
 
 function parseAllowlist(): Set<string> {
@@ -180,12 +206,14 @@ function main(): void {
   const findings: string[] = [];
   let unavailable = 0;
 
-  for (const path of candidateFiles()) {
+  for (const candidate of candidateFiles()) {
+    const { path, lines: changedLines } = candidate;
     const absolute = resolve(ROOT, path);
     if (!existsSync(absolute)) continue;
     const normalized = relative(ROOT, absolute).replaceAll('\\', '/');
     const lines = readFileSync(absolute, 'utf8').split(/\r?\n/);
     lines.forEach((line, index) => {
+      if (changedLines && !changedLines.has(index + 1)) return;
       const key = `${normalized}:${index + 1}`;
       if (allowlist.has(key) || allowlist.has(normalized)) return;
 
@@ -228,4 +256,6 @@ function main(): void {
   writeOut('No claim drift detected in the scanned files.');
 }
 
-main();
+const isMain = process.argv[1] && import.meta.url === pathToFileURL(resolve(process.argv[1])).href;
+
+if (isMain) main();

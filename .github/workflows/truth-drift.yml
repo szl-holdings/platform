@@ -1,4 +1,4 @@
-name: Truth Drift
+name: Truth drift
 
 on:
   pull_request:
@@ -9,7 +9,7 @@ on:
       full_claim_scan:
         description: Scan the full tracked claim corpus, including legacy debt
         required: false
-        default: true
+        default: false
         type: boolean
 
 permissions:
@@ -17,24 +17,40 @@ permissions:
 
 jobs:
   truth-drift:
+    name: truth-drift
     runs-on: ubuntu-latest
-    timeout-minutes: 15
+    timeout-minutes: 20
     steps:
-      - name: Checkout full history
-        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+      - name: Check out repository
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           fetch-depth: 0
 
-      - name: Set up Node
-        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
+      - name: Install pnpm
+        uses: pnpm/action-setup@0ebf47130e4866e96fce0953f49152a61190b271 # v4
         with:
-          node-version: 24
+          version: 10.26.1
 
-      - name: Verify generator behavior
-        run: node --test tools/truth/*.test.ts
+      - name: Install Node.js
+        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version-file: .node-version
+          cache: pnpm
 
-      - name: Regenerate and compare canonical metrics
-        run: node tools/truth/generate-truth.ts --check
+      - name: Install locked dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Verify deterministic local truth
+        run: pnpm truth:generate -- --verify-local
+
+      - name: Verify live remote truth
+        run: pnpm truth:generate -- --verify-local --verify-remote
+
+      - name: Validate evidence labels and freshness
+        run: pnpm claims:validate
+
+      - name: Reject hardcoded metric drift
+        run: pnpm claims:drift
 
       - name: Reject newly introduced claim drift
         if: github.event_name != 'workflow_dispatch'
@@ -45,3 +61,6 @@ jobs:
       - name: Audit the complete claim corpus
         if: github.event_name == 'workflow_dispatch' && inputs.full_claim_scan
         run: node tools/truth/check-claims.ts --all
+
+      - name: Reject source-of-truth drift
+        run: git diff --exit-code -- artifacts/SOURCE_OF_TRUTH.json

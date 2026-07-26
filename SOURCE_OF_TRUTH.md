@@ -1,9 +1,12 @@
 # SZL Holdings — Source of Truth
 
-> **Canonical public metrics registry.** Every README, website, deck, and
-> compliance document must take quantitative claims from this file and
-> `audit/source-of-truth.json`. A value without reproducible evidence is
-> **UNVERIFIED**, not estimated.
+> **Canonical contextual metrics registry.** Every README, website, deck, and
+> compliance document must take quantitative claims from this file,
+> `audit/source-of-truth.json`, and the machine-generated
+> `artifacts/SOURCE_OF_TRUTH.json`. The generated artifact is authoritative for
+> overlapping current metrics; this registry may retain separately defined
+> source-tree and locked-kernel measurements. A value without reproducible
+> evidence is **UNVERIFIED**, not estimated.
 
 **Registry version:** 2.0.0
 
@@ -25,10 +28,9 @@ validator recomputes them from whichever commit is checked out.
 | Registered artifacts | **6** | Tracked `artifacts/*/(.replit-artifact/)?artifact.toml` files |
 | Artifact directories | **7** | Unique tracked top-level children of `artifacts/` |
 | Registered product verticals | **5** | Registered customer-facing domain artifacts; A11oy is counted separately as the orchestration product |
-| Top-level package directories (`packages/`) | **157** | Tracked top-level directories; excludes root file `packages/proxy-routes.ts`; not every directory is a workspace package |
-| Top-level library directories (`lib/`) | **53** | Tracked top-level directories; not every directory is a workspace package |
-| Top-level package and library directories | **210** | Directory inventory only: 157 + 53 |
-| Workspace package manifests | **197** | Tracked `package.json` files included by `pnpm-workspace.yaml`; pnpm reports 198 projects when the root is included |
+| Domain packages (`packages/`) | **159** | Tracked top-level package directories; excludes root file `packages/proxy-routes.ts` |
+| Shared library packages (`lib/`) | **53** | Tracked top-level library directories |
+| Total packages (`packages/` + `lib/`) | **212** | 159 + 53 |
 | Apps (`apps/`) | **11** | Unique tracked top-level children of `apps/` |
 | Services (`services/`) | **11** | Unique tracked top-level children of `services/` |
 | Workers (`workers/`) | **5** | Unique tracked top-level children of `workers/` |
@@ -37,7 +39,7 @@ validator recomputes them from whichever commit is checked out.
 | DB migrations (SQL files) | **149** | Tracked `lib/db/drizzle/*.sql` files; duplicate sequence numbers may exist |
 | API route source files | **43** | Non-test files under `apps/`, `services/`, and `artifacts/api-server/` containing a detected Express route declaration |
 | API handler declarations | **306** | Static non-test HTTP method declarations on `app`, `router`, and named Express Router receivers in the current runtime roots |
-| CI workflows | **45** | Tracked `.github/workflows/*.yml` and `*.yaml`, including both truth-lock workflows |
+| CI workflows | **45** | Tracked `.github/workflows/*.yml` and `*.yaml`, including both truth workflows |
 | Environment variables (in `.env.example`) | **238** | Lines matching `^[A-Z_]+=` |
 
 These are source-tree measurements. They do not by themselves prove that a

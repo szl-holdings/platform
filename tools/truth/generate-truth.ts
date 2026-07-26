@@ -1,44 +1,41 @@
-#!/usr/bin/env node
-/**
- * Generate the Series A truth-lock artifact.
- *
- * Design constraints:
- * - every metric has an evidence label and a reproducible source;
- * - missing or unreachable sources become UNAVAILABLE, never stale carry-forward;
- * - --check ignores only generation metadata and fails on metric drift;
- * - no private credentials or response bodies are written to the artifact.
- */
-
 import { execFileSync } from 'node:child_process';
-import { existsSync, readdirSync, readFileSync, writeFileSync } from 'node:fs';
-import { dirname, join, relative, resolve } from 'node:path';
+import { existsSync } from 'node:fs';
+import { readdir, readFile, writeFile } from 'node:fs/promises';
+import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
-export type EvidenceLabel =
-  | 'MEASURED'
-  | 'REPORTED'
-  | 'MODELED'
-  | 'CONJECTURE'
-  | 'UNKNOWN'
-  | 'UNAVAILABLE';
+import { parse } from 'yaml';
 
-export type TruthMetric<T = number | string | boolean> = {
-  value: T | null;
+import { LOCAL_METRIC_NAMES, REMOTE_METRIC_NAMES, TRUTH_GENERATOR_ID } from './truth-schema.js';
+
+type EvidenceLabel = 'MEASURED' | 'REPORTED' | 'MODELED' | 'CONJECTURE' | 'UNKNOWN' | 'UNAVAILABLE';
+type Metric = {
+  value: number | null;
   label: EvidenceLabel;
   source: string;
-  definition: string;
-  reason?: string;
+};
+type TestMetric = {
+  passed: number | null;
+  total: number | null;
+  label: EvidenceLabel;
+  source: string;
 };
 
-type TestSummary = { passed: number; total: number };
-
-const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '../..');
-const OUTPUT = join(ROOT, 'artifacts', 'SOURCE_OF_TRUTH.json');
-const SKIP_DIRS = new Set([
+const ROOT = path.resolve(import.meta.dirname, '..', '..');
+const OUTPUT = path.join(ROOT, 'artifacts', 'SOURCE_OF_TRUTH.json');
+export const TRUTH_SCHEMA = 'szl.truth/v1';
+export const TRUTH_DOI = {
+  concept: '10.5281/zenodo.19944926',
+  latest: '10.5281/zenodo.20195368',
+} as const;
+const VERIFY_LOCAL_MODE =
+  process.argv.includes('--verify-local') || process.argv.includes('--check');
+const VERIFY_REMOTE_MODE = process.argv.includes('--verify-remote');
+const REFRESH_REMOTE_METRICS = !VERIFY_LOCAL_MODE || VERIFY_REMOTE_MODE;
+const WALK_EXCLUSIONS = new Set([
   '.git',
-  '.lake',
-  'archive',
-  'attached_assets',
+  '.cache',
+  '.turbo',
   'coverage',
   'dist',
   'node_modules',
@@ -46,465 +43,363 @@ const SKIP_DIRS = new Set([
   'test-results',
 ]);
 
-function writeOut(message: string): void {
-  process.stdout.write(`${message}\n`);
+function metric(value: number | null, label: EvidenceLabel, source: string): Metric {
+  return { value, label, source };
 }
 
-function writeError(message: string): void {
-  process.stderr.write(`${message}\n`);
+function unavailable(source: string): Metric {
+  return metric(null, 'UNAVAILABLE', source);
 }
 
-function metric<T extends number | string | boolean>(
-  value: T,
-  label: EvidenceLabel,
-  source: string,
-  definition: string,
-): TruthMetric<T> {
-  return { value, label, source, definition };
+function unavailableTests(source: string): TestMetric {
+  return { passed: null, total: null, label: 'UNAVAILABLE', source };
 }
 
-function unavailable(source: string, definition: string, reason: string): TruthMetric {
-  return {
-    value: null,
-    label: 'UNAVAILABLE',
-    source,
-    definition,
-    reason,
+export function metricDrift(
+  existing: Record<string, unknown>,
+  recomputed: Record<string, unknown>,
+  names: readonly string[],
+): string[] {
+  return names.filter(
+    (name) => JSON.stringify(existing[name]) !== JSON.stringify(recomputed[name]),
+  );
+}
+
+export function metadataDrift(existing: Record<string, unknown>): string[] {
+  const expected: Record<string, unknown> = {
+    schema: TRUTH_SCHEMA,
+    generated_by: TRUTH_GENERATOR_ID,
+    doi: TRUTH_DOI,
   };
+  return Object.keys(expected).filter(
+    (name) => JSON.stringify(existing[name]) !== JSON.stringify(expected[name]),
+  );
 }
 
-function readJson(path: string): unknown {
-  return JSON.parse(readFileSync(path, 'utf8'));
-}
-
-function listFiles(root: string): string[] {
-  if (!existsSync(root)) return [];
-  const files: string[] = [];
-  const stack = [root];
+async function walkFiles(start: string, predicate: (file: string) => boolean): Promise<string[]> {
+  if (!existsSync(start)) return [];
+  const output: string[] = [];
+  const stack = [start];
   while (stack.length > 0) {
     const current = stack.pop();
     if (!current) continue;
-    for (const entry of readdirSync(current, { withFileTypes: true })) {
-      if (entry.isDirectory()) {
-        if (!SKIP_DIRS.has(entry.name)) stack.push(join(current, entry.name));
-      } else if (entry.isFile()) {
-        files.push(join(current, entry.name));
-      }
+    for (const entry of await readdir(current, { withFileTypes: true })) {
+      if (entry.isDirectory() && WALK_EXCLUSIONS.has(entry.name)) continue;
+      const absolute = path.join(current, entry.name);
+      if (entry.isDirectory()) stack.push(absolute);
+      else if (entry.isFile() && predicate(absolute)) output.push(absolute);
     }
   }
-  return files;
+  return output.sort();
 }
 
-function countImmediatePackageManifests(parent: string, found: Set<string>): void {
-  if (!existsSync(parent)) return;
-  for (const entry of readdirSync(parent, { withFileTypes: true })) {
-    if (!entry.isDirectory() || entry.name.startsWith('.')) continue;
-    const packageJson = join(parent, entry.name, 'package.json');
-    if (existsSync(packageJson)) found.add(packageJson);
+async function readExisting(): Promise<Record<string, unknown> | null> {
+  if (!existsSync(OUTPUT)) return null;
+  try {
+    return JSON.parse(await readFile(OUTPUT, 'utf8')) as Record<string, unknown>;
+  } catch {
+    return null;
   }
 }
 
-export function countWorkspacePackages(root = ROOT): number {
-  const manifests = new Set<string>();
-  for (const parent of [
-    'apps',
-    'artifacts',
-    'lib',
-    'lib/integrations',
-    'packages',
-    'services',
-    'workers',
-  ]) {
-    countImmediatePackageManifests(join(root, parent), manifests);
-  }
-  for (const exact of [
-    'scripts/package.json',
-    'platform/temporal/package.json',
-    'platform/agent-gateway/package.json',
-  ]) {
-    const path = join(root, exact);
-    if (existsSync(path)) manifests.add(path);
-  }
-  manifests.delete(join(root, 'artifacts', 'imperium', 'package.json'));
-  manifests.delete(join(root, 'artifacts', 'stephen-site', 'package.json'));
-  return manifests.size;
-}
-
-function countRouteRegistrations(root = ROOT): number {
-  const roots = [
-    join(root, 'apps'),
-    join(root, 'artifacts', 'api-server', 'src', 'routes'),
-    join(root, 'services'),
-  ];
-  const routeCall =
-    /\b(?:app|router|server)\s*\.\s*(?:get|post|put|patch|delete|options|head|all)\s*\(/g;
-  let count = 0;
-  for (const scanRoot of roots) {
-    for (const path of listFiles(scanRoot)) {
-      if (!/\.(?:ts|tsx|js|jsx)$/.test(path)) continue;
-      if (/\.(?:test|spec)\.[cm]?[jt]sx?$/.test(path)) continue;
-      const normalized = path.replaceAll('\\', '/');
-      if (
-        !normalized.includes('/routes/') &&
-        !/(?:route|router|server)\.[cm]?[jt]sx?$/.test(normalized)
-      ) {
-        continue;
-      }
-      count += readFileSync(path, 'utf8').match(routeCall)?.length ?? 0;
+async function countSurfaces(): Promise<Metric> {
+  const manifests = await walkFiles(path.join(ROOT, 'apps'), (file) =>
+    file.endsWith(`${path.sep}product.manifest.json`),
+  );
+  let qualified = 0;
+  for (const file of manifests) {
+    try {
+      const data = JSON.parse(await readFile(file, 'utf8')) as Record<string, unknown>;
+      const health =
+        data.health_endpoint ??
+        data.healthEndpoint ??
+        (typeof data.health === 'object' && data.health
+          ? (data.health as Record<string, unknown>).url
+          : null);
+      const receipt =
+        data.receipt_endpoint ?? data.receiptEndpoint ?? data.receipt_id ?? data.receiptId;
+      if (typeof health === 'string' && health.length > 0 && receipt) qualified += 1;
+    } catch {
+      // Invalid manifests do not qualify as customer-facing surfaces.
     }
   }
-  return count;
+  return metric(
+    qualified,
+    'MEASURED',
+    'apps/*/product.manifest.json requiring a health endpoint and receipt reference',
+  );
 }
 
-function countDrizzleDefinitions(root = ROOT): number {
-  const schemaRoot = join(root, 'lib', 'db', 'src', 'schema');
-  const tableCall = /\b(?:pgTable|mysqlTable|sqliteTable)\s*\(/g;
-  let count = 0;
-  for (const path of listFiles(schemaRoot)) {
-    if (!/\.[cm]?[jt]s$/.test(path)) continue;
-    count += readFileSync(path, 'utf8').match(tableCall)?.length ?? 0;
-  }
-  return count;
-}
-
-function countCiWorkflows(root = ROOT): number {
-  const workflows = join(root, '.github', 'workflows');
-  if (!existsSync(workflows)) return 0;
-  return readdirSync(workflows).filter((name) => /\.ya?ml$/.test(name)).length;
-}
-
-function countSurfaceManifests(root = ROOT): number {
-  const apps = join(root, 'apps');
-  if (!existsSync(apps)) return 0;
-  return readdirSync(apps, { withFileTypes: true }).filter(
-    (entry) => entry.isDirectory() && existsSync(join(apps, entry.name, 'product.manifest.json')),
-  ).length;
-}
-
-export function parseTestSummary(input: unknown): TestSummary | null {
-  if (!input || typeof input !== 'object') return null;
-  const value = input as Record<string, unknown>;
-  if (typeof value.numPassedTests === 'number' && typeof value.numTotalTests === 'number') {
-    return { passed: value.numPassedTests, total: value.numTotalTests };
-  }
-  if (!Array.isArray(value.testResults)) return null;
-  let passed = 0;
-  let total = 0;
-  for (const suite of value.testResults) {
-    if (!suite || typeof suite !== 'object') continue;
-    const assertions = (suite as Record<string, unknown>).assertionResults;
-    if (!Array.isArray(assertions)) continue;
-    for (const assertion of assertions) {
-      if (!assertion || typeof assertion !== 'object') continue;
-      total += 1;
-      if ((assertion as Record<string, unknown>).status === 'passed') passed += 1;
+async function readVitestResult(file: string): Promise<TestMetric> {
+  if (!existsSync(file)) return unavailableTests(path.relative(ROOT, file).replaceAll('\\', '/'));
+  try {
+    const data = JSON.parse(await readFile(file, 'utf8')) as Record<string, unknown>;
+    const passed = Number(data.numPassedTests);
+    const total = Number(data.numTotalTests);
+    if (Number.isFinite(passed) && Number.isFinite(total)) {
+      return {
+        passed,
+        total,
+        label: 'MEASURED',
+        source: path.relative(ROOT, file).replaceAll('\\', '/'),
+      };
     }
-  }
-  return total > 0 ? { passed, total } : null;
-}
-
-function testMetric(path: string, source: string): TruthMetric<string> {
-  if (!existsSync(path)) {
-    return unavailable(
-      source,
-      'Passed and total tests from a fresh machine-readable test run.',
-      'SOURCE_MISSING',
-    ) as TruthMetric<string>;
-  }
-  try {
-    const summary = parseTestSummary(readJson(path));
-    if (!summary) throw new Error('unsupported test result schema');
-    return metric(
-      `${summary.passed}/${summary.total}`,
-      'MEASURED',
-      source,
-      'Passed and total tests from a fresh machine-readable test run.',
-    );
   } catch {
-    return unavailable(
-      source,
-      'Passed and total tests from a fresh machine-readable test run.',
-      'SOURCE_INVALID',
-    ) as TruthMetric<string>;
+    // Fall through to an explicit unavailable result.
   }
+  return unavailableTests(path.relative(ROOT, file).replaceAll('\\', '/'));
 }
 
-async function fetchJson(url: string, headers: Record<string, string> = {}): Promise<unknown> {
-  const response = await fetch(url, {
-    headers: { Accept: 'application/json', ...headers },
-    signal: AbortSignal.timeout(15_000),
-  });
-  if (!response.ok) throw new Error(`HTTP_${response.status}`);
-  return response.json();
-}
-
-async function remoteCount(
-  url: string,
-  source: string,
-  definition: string,
-): Promise<TruthMetric<number>> {
+function packageCount(): Metric {
   try {
-    const payload = await fetchJson(url);
-    if (!Array.isArray(payload)) throw new Error('SOURCE_INVALID');
-    return metric(payload.length, 'MEASURED', source, definition);
-  } catch {
-    return unavailable(source, definition, 'FETCH_FAILED') as TruthMetric<number>;
-  }
-}
-
-async function countPublicGithubRepos(): Promise<TruthMetric<number>> {
-  const source = 'GitHub REST /orgs/szl-holdings/repos?type=public';
-  const definition =
-    'Current public repositories returned by GitHub; archived repositories remain included.';
-  try {
-    let page = 1;
-    let total = 0;
-    while (true) {
-      const payload = await fetchJson(
-        `https://api.github.com/orgs/szl-holdings/repos?type=public&per_page=100&page=${page}`,
-      );
-      if (!Array.isArray(payload)) throw new Error('SOURCE_INVALID');
-      total += payload.length;
-      if (payload.length < 100) break;
-      page += 1;
-    }
-    return metric(total, 'MEASURED', source, definition);
-  } catch {
-    return unavailable(source, definition, 'FETCH_FAILED') as TruthMetric<number>;
-  }
-}
-
-async function probeGhcrA11oy(): Promise<TruthMetric<boolean>> {
-  const source = 'GHCR v2 tags probe for ghcr.io/szl-holdings/a11oy';
-  const definition =
-    'True only when the public registry grants pull scope and returns at least one tag; this is not a total package count.';
-  try {
-    const auth = (await fetchJson(
-      'https://ghcr.io/token?service=ghcr.io&scope=repository:szl-holdings/a11oy:pull',
-    )) as Record<string, unknown>;
-    if (typeof auth.token !== 'string') throw new Error('AUTH_FAILED');
-    const tags = (await fetchJson('https://ghcr.io/v2/szl-holdings/a11oy/tags/list', {
-      Authorization: `Bearer ${auth.token}`,
-    })) as Record<string, unknown>;
-    return metric(Array.isArray(tags.tags) && tags.tags.length > 0, 'MEASURED', source, definition);
-  } catch {
-    return unavailable(source, definition, 'FETCH_FAILED') as TruthMetric<boolean>;
-  }
-}
-
-async function latestZenodoDoi(): Promise<TruthMetric<string>> {
-  const source = 'Zenodo REST /api/records/19944926';
-  const definition = 'Latest version DOI resolved from the stable SZL Holdings concept record.';
-  try {
-    const payload = (await fetchJson('https://zenodo.org/api/records/19944926')) as Record<
-      string,
-      unknown
-    >;
-    if (typeof payload.doi !== 'string') throw new Error('SOURCE_INVALID');
-    return metric(payload.doi, 'MEASURED', source, definition);
-  } catch {
-    return unavailable(source, definition, 'FETCH_FAILED') as TruthMetric<string>;
-  }
-}
-
-async function receiptChainDepth(): Promise<TruthMetric<number>> {
-  const url = process.env.RECEIPT_HEAD_URL ?? 'https://a11oy.net/api/a11oy/v1/receipts/head';
-  const source = 'GET /api/a11oy/v1/receipts/head';
-  const definition = 'Depth reported by the canonical live receipt-chain head endpoint.';
-  try {
-    const payload = (await fetchJson(url)) as Record<string, unknown>;
-    const candidate = payload.depth ?? payload.chain_depth ?? payload.height;
-    if (typeof candidate !== 'number') throw new Error('SOURCE_INVALID');
-    return metric(candidate, 'MEASURED', source, definition);
-  } catch {
-    return unavailable(source, definition, 'ENDPOINT_UNAVAILABLE') as TruthMetric<number>;
-  }
-}
-
-function lambdaMedian(): TruthMetric<number> {
-  const source = 'artifacts/lambda-benchmark.json';
-  const definition = 'Median measured Lambda overhead in milliseconds.';
-  const path = join(ROOT, source);
-  if (!existsSync(path)) {
-    return unavailable(source, definition, 'SOURCE_MISSING') as TruthMetric<number>;
-  }
-  try {
-    const payload = readJson(path) as Record<string, unknown>;
-    const value = payload.median_ms ?? payload.lambda_overhead_ms_median;
-    if (typeof value !== 'number') throw new Error('SOURCE_INVALID');
-    return metric(value, 'MEASURED', source, definition);
-  } catch {
-    return unavailable(source, definition, 'SOURCE_INVALID') as TruthMetric<number>;
-  }
-}
-
-function gitHead(): string {
-  try {
-    return execFileSync('git', ['rev-parse', 'HEAD'], {
+    const pnpmCli = process.env.npm_execpath;
+    if (!pnpmCli) return unavailable('pnpm -r list --depth -1 --json');
+    const raw = execFileSync(process.execPath, [pnpmCli, '-r', 'list', '--depth', '-1', '--json'], {
       cwd: ROOT,
       encoding: 'utf8',
-      timeout: 10_000,
-    }).trim();
+      stdio: ['ignore', 'pipe', 'ignore'],
+    });
+    const packages = JSON.parse(raw) as unknown[];
+    return metric(packages.length, 'MEASURED', 'pnpm -r list --depth -1 --json');
   } catch {
-    return 'UNAVAILABLE';
+    return unavailable('pnpm -r list --depth -1 --json');
   }
 }
 
-export async function buildTruth(now = new Date()): Promise<Record<string, unknown>> {
-  const surfaceManifests = countSurfaceManifests();
-  const hfBase = 'https://huggingface.co/api';
-  const [hfModels, hfDatasets, hfSpaces, githubRepos, ghcrA11oy, zenodoLatest, chainDepth] =
-    await Promise.all([
-      remoteCount(
-        `${hfBase}/models?author=SZLHOLDINGS&limit=1000`,
-        'Hugging Face API /api/models?author=SZLHOLDINGS',
-        'Current public models attributed to the SZLHOLDINGS account.',
-      ),
-      remoteCount(
-        `${hfBase}/datasets?author=SZLHOLDINGS&limit=1000`,
-        'Hugging Face API /api/datasets?author=SZLHOLDINGS',
-        'Current public datasets attributed to the SZLHOLDINGS account.',
-      ),
-      remoteCount(
-        `${hfBase}/spaces?author=SZLHOLDINGS&limit=1000`,
-        'Hugging Face API /api/spaces?author=SZLHOLDINGS',
-        'Current public Spaces attributed to the SZLHOLDINGS account.',
-      ),
-      countPublicGithubRepos(),
-      probeGhcrA11oy(),
-      latestZenodoDoi(),
-      receiptChainDepth(),
-    ]);
+async function countApiEndpoints(): Promise<Metric> {
+  const file = path.join(ROOT, 'lib', 'api-spec', 'openapi.yaml');
+  const source = 'OpenAPI 3.1 operations in lib/api-spec/openapi.yaml';
+  if (!existsSync(file)) return unavailable(source);
 
-  return {
-    schema: 'szl.truth/v1',
-    generated_at: now.toISOString(),
-    generated_by: gitHead(),
-    metrics: {
-      surfaces_customer_facing: metric(
-        surfaceManifests,
-        'MEASURED',
-        'apps/*/product.manifest.json',
-        'Customer-facing verticals satisfying the mandatory manifest condition. A non-zero count also requires live health and receipt conformance before publication.',
-      ),
-      platform_tests: testMetric(
-        join(ROOT, 'artifacts', 'test-results.json'),
-        'artifacts/test-results.json',
-      ),
-      ouroboros_tests: testMetric(
-        process.env.OUROBOROS_TEST_RESULTS ??
-          resolve(ROOT, '../ouroboros/artifacts/test-results.json'),
-        'fresh Ouroboros Vitest JSON',
-      ),
-      mcp_e2e_tests: testMetric(
-        process.env.MCP_E2E_TEST_RESULTS ?? join(ROOT, 'artifacts', 'mcp-e2e-test-results.json'),
-        'artifacts/mcp-e2e-test-results.json',
-      ),
-      monorepo_packages: metric(
-        countWorkspacePackages(),
-        'MEASURED',
-        'pnpm-workspace.yaml package manifests',
-        'Workspace package manifests included by the canonical pnpm workspace, excluding explicit workspace exclusions.',
-      ),
-      api_endpoints: metric(
-        countRouteRegistrations(),
-        'MEASURED',
-        'static router verb-registration scan',
-        'Express-style app/router/server HTTP verb call sites in route-bearing source files; this is a source count, not reachability.',
-      ),
-      db_tables: unavailable(
-        'Drizzle live introspection',
-        'Tables present in the live canonical database after Drizzle introspection.',
-        'DATABASE_NOT_CONNECTED',
-      ),
-      db_table_definitions_static: metric(
-        countDrizzleDefinitions(),
-        'MEASURED',
-        'lib/db/src/schema static Drizzle scan',
-        'Static pgTable/mysqlTable/sqliteTable call sites; this is not a live provisioned-table count.',
-      ),
-      ci_workflows: metric(
-        countCiWorkflows(),
-        'MEASURED',
-        '.github/workflows/*.{yml,yaml}',
-        'Workflow definition files in the platform repository.',
-      ),
-      github_public_repositories: githubRepos,
-      hf_models: hfModels,
-      hf_datasets: hfDatasets,
-      hf_spaces: hfSpaces,
-      ghcr_a11oy_package_live: ghcrA11oy,
-      lean_theorems_locked: metric(
-        8,
-        'REPORTED',
-        'szl-holdings/lutar-lean locked theorem roster',
-        'Theorems reported as locked and axiom-free; requires a fresh external Lean build for MEASURED status.',
-      ),
-      lean_sorry_count: unavailable(
-        'fresh lutar-lean lake build log',
-        'Sorry declarations observed in a fresh Lean build.',
-        'SOURCE_MISSING',
-      ),
-      doctrine_v11_declarations: metric(
-        749,
-        'REPORTED',
-        'Doctrine v11 lock metadata (docs/architecture/chakras.md)',
-        'Lean declarations in the locked Doctrine v11 corpus.',
-      ),
-      doctrine_v11_unique_axioms: metric(
-        14,
-        'REPORTED',
-        'Doctrine v11 lock metadata (docs/architecture/chakras.md)',
-        'Unique axioms tracked across the locked Doctrine v11 corpus; not an axiom-free theorem count.',
-      ),
-      doctrine_v11_tracked_sorries: metric(
-        163,
-        'REPORTED',
-        'Doctrine v11 lock metadata (docs/architecture/chakras.md)',
-        'Tracked sorry obligations across the locked Doctrine v11 corpus.',
-      ),
-      lambda_overhead_ms_median: lambdaMedian(),
-      receipt_chain_depth: chainDepth,
-    },
-    doi: {
-      concept: '10.5281/zenodo.19944926',
-      latest: zenodoLatest,
-    },
-  };
+  try {
+    const document = parse(await readFile(file, 'utf8')) as {
+      paths?: Record<string, Record<string, unknown>>;
+    };
+    const methods = new Set(['delete', 'get', 'head', 'options', 'patch', 'post', 'put', 'trace']);
+    const count = Object.values(document.paths ?? {}).reduce(
+      (total, item) =>
+        total + Object.keys(item ?? {}).filter((key) => methods.has(key.toLowerCase())).length,
+      0,
+    );
+    return metric(count, 'MEASURED', source);
+  } catch {
+    return unavailable(source);
+  }
 }
 
-export function comparableTruth(truth: Record<string, unknown>): Record<string, unknown> {
-  const { generated_at: _generatedAt, generated_by: _generatedBy, ...rest } = truth;
-  return rest;
+function dbTableCount(): Metric {
+  if (!process.env.DATABASE_URL) return unavailable('drizzle introspect against DATABASE_URL');
+  try {
+    const raw = execFileSync(
+      'psql',
+      [
+        process.env.DATABASE_URL,
+        '-Atc',
+        "SELECT count(*) FROM information_schema.tables WHERE table_schema='public';",
+      ],
+      { cwd: ROOT, encoding: 'utf8', stdio: ['ignore', 'pipe', 'ignore'] },
+    ).trim();
+    const value = Number(raw);
+    return Number.isFinite(value)
+      ? metric(value, 'MEASURED', 'drizzle introspect against DATABASE_URL')
+      : unavailable('drizzle introspect against DATABASE_URL');
+  } catch {
+    return unavailable('drizzle introspect against DATABASE_URL');
+  }
+}
+
+async function workflowCount(): Promise<Metric> {
+  const directory = path.join(ROOT, '.github', 'workflows');
+  if (!existsSync(directory)) return metric(0, 'MEASURED', 'ls .github/workflows');
+  const files = await readdir(directory, { withFileTypes: true });
+  return metric(
+    files.filter((entry) => entry.isFile() && /\.ya?ml$/.test(entry.name)).length,
+    'MEASURED',
+    'ls .github/workflows',
+  );
+}
+
+async function leanSorryCount(): Promise<Metric> {
+  const file = path.join(ROOT, 'artifacts', 'lean-build.log');
+  if (!existsSync(file)) return unavailable('artifacts/lean-build.log');
+  const text = await readFile(file, 'utf8');
+  const matches = text.match(/\b(?:declaration uses ['"]sorry['"]|sorryAx)\b/gi) ?? [];
+  return metric(matches.length, 'MEASURED', 'artifacts/lean-build.log');
+}
+
+async function lambdaMedian(): Promise<Metric> {
+  const file = path.join(ROOT, 'benchmarks', 'lambda', 'summary.json');
+  if (!existsSync(file)) return unavailable('benchmarks/lambda/summary.json');
+  try {
+    const data = JSON.parse(await readFile(file, 'utf8')) as Record<string, unknown>;
+    const value = Number(data.median_ms ?? data.medianMs ?? data.lambda_overhead_ms_median);
+    return Number.isFinite(value)
+      ? metric(value, 'MEASURED', 'benchmarks/lambda/summary.json')
+      : unavailable('benchmarks/lambda/summary.json');
+  } catch {
+    return unavailable('benchmarks/lambda/summary.json');
+  }
+}
+
+async function fetchJson(url: string): Promise<unknown> {
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), 12_000);
+  try {
+    const headers: Record<string, string> = { accept: 'application/json' };
+    if (process.env.HF_TOKEN) headers.authorization = `Bearer ${process.env.HF_TOKEN}`;
+    const response = await fetch(url, { headers, signal: controller.signal });
+    if (!response.ok) throw new Error(`HTTP ${response.status}`);
+    return await response.json();
+  } finally {
+    clearTimeout(timeout);
+  }
+}
+
+async function hubCount(kind: 'models' | 'datasets' | 'spaces' | 'collections'): Promise<Metric> {
+  const org = process.env.HF_ORG ?? 'SZLHOLDINGS';
+  const url =
+    kind === 'collections'
+      ? `https://huggingface.co/api/collections?owner=${encodeURIComponent(org)}&limit=1000`
+      : `https://huggingface.co/api/${kind}?author=${encodeURIComponent(org)}&limit=1000&full=true`;
+  try {
+    const data = await fetchJson(url);
+    const list = Array.isArray(data)
+      ? data
+      : typeof data === 'object' && data
+        ? ((data as Record<string, unknown>)[kind] ??
+          (data as Record<string, unknown>).items ??
+          (data as Record<string, unknown>).collections)
+        : null;
+    return Array.isArray(list)
+      ? metric(list.length, 'MEASURED', `Hugging Face Hub API: ${url}`)
+      : unavailable(`Hugging Face Hub API: ${url}`);
+  } catch {
+    return unavailable(`Hugging Face Hub API: ${url}`);
+  }
+}
+
+async function receiptDepth(): Promise<Metric> {
+  const url = process.env.RECEIPT_HEAD_URL ?? 'https://a-11-oy.com/api/a11oy/v1/receipts/head';
+  try {
+    const data = (await fetchJson(url)) as Record<string, unknown>;
+    const value = Number(data.depth ?? data.chain_depth ?? data.chainDepth);
+    return Number.isFinite(value)
+      ? metric(value, 'MEASURED', `GET ${url}`)
+      : unavailable(`GET ${url}`);
+  } catch {
+    return unavailable(`GET ${url}`);
+  }
 }
 
 async function main(): Promise<void> {
-  const check = process.argv.includes('--check');
-  const truth = await buildTruth();
+  const existing = await readExisting();
 
-  if (check) {
-    if (!existsSync(OUTPUT)) {
-      writeError('SOURCE_OF_TRUTH missing; run pnpm truth:generate.');
-      process.exit(1);
+  const [
+    surfaces,
+    platformTests,
+    ouroborosTests,
+    mcpTests,
+    endpoints,
+    workflows,
+    leanSorry,
+    lambda,
+    hfModels,
+    hfDatasets,
+    hfSpaces,
+    hfCollections,
+    chainDepth,
+  ] = await Promise.all([
+    countSurfaces(),
+    readVitestResult(path.join(ROOT, 'artifacts', 'test-results.json')),
+    readVitestResult(path.join(ROOT, 'artifacts', 'ouroboros-test-results.json')),
+    readVitestResult(path.join(ROOT, 'artifacts', 'mcp-e2e-test-results.json')),
+    countApiEndpoints(),
+    workflowCount(),
+    leanSorryCount(),
+    lambdaMedian(),
+    REFRESH_REMOTE_METRICS
+      ? hubCount('models')
+      : Promise.resolve(unavailable('live refresh not run in local verification')),
+    REFRESH_REMOTE_METRICS
+      ? hubCount('datasets')
+      : Promise.resolve(unavailable('live refresh not run in local verification')),
+    REFRESH_REMOTE_METRICS
+      ? hubCount('spaces')
+      : Promise.resolve(unavailable('live refresh not run in local verification')),
+    REFRESH_REMOTE_METRICS
+      ? hubCount('collections')
+      : Promise.resolve(unavailable('live refresh not run in local verification')),
+    REFRESH_REMOTE_METRICS
+      ? receiptDepth()
+      : Promise.resolve(unavailable('live refresh not run in local verification')),
+  ]);
+
+  const localMetrics = {
+    surfaces_customer_facing: surfaces,
+    ouroboros_tests: ouroborosTests,
+    platform_tests: platformTests,
+    mcp_e2e_tests: mcpTests,
+    monorepo_packages: packageCount(),
+    api_endpoints: endpoints,
+    ci_workflows: workflows,
+    lean_theorems_locked: {
+      value: 8,
+      label: 'REPORTED' as const,
+      source: 'lutar-lean/Locked8.lean',
+    },
+    lean_sorry_count: leanSorry,
+    lambda_overhead_ms_median: lambda,
+  };
+  const remoteMetrics = {
+    db_tables: dbTableCount(),
+    hf_models: hfModels,
+    hf_datasets: hfDatasets,
+    hf_spaces: hfSpaces,
+    hf_collections: hfCollections,
+    receipt_chain_depth: chainDepth,
+  };
+
+  if (VERIFY_LOCAL_MODE) {
+    if (!existing) throw new Error('artifacts/SOURCE_OF_TRUTH.json is missing or invalid');
+    const metadata = metadataDrift(existing);
+    if (metadata.length > 0) {
+      throw new Error(`truth metadata drift: ${metadata.join(', ')}`);
     }
-    const committed = readJson(OUTPUT) as Record<string, unknown>;
-    const actual = JSON.stringify(comparableTruth(truth));
-    const expected = JSON.stringify(comparableTruth(committed));
-    if (actual !== expected) {
-      writeError(
-        'SOURCE_OF_TRUTH drift detected; run pnpm truth:generate and review every changed label/value.',
-      );
-      process.exit(1);
+    const existingMetrics = existing.metrics as Record<string, unknown> | undefined;
+    if (!existingMetrics) throw new Error('artifacts/SOURCE_OF_TRUTH.json lacks metrics');
+    const drift = metricDrift(existingMetrics, localMetrics, LOCAL_METRIC_NAMES);
+    if (drift.length > 0) {
+      throw new Error(`local truth drift: ${drift.join(', ')}`);
     }
-    writeOut('SOURCE_OF_TRUTH metrics match current sources.');
+    if (VERIFY_REMOTE_MODE) {
+      const remoteDrift = metricDrift(existingMetrics, remoteMetrics, REMOTE_METRIC_NAMES);
+      if (remoteDrift.length > 0) {
+        throw new Error(`remote truth drift: ${remoteDrift.join(', ')}`);
+      }
+    }
+    process.stdout.write('local truth verification: PASS\n');
     return;
   }
 
-  writeFileSync(OUTPUT, `${JSON.stringify(truth, null, 2)}\n`, 'utf8');
-  writeOut(`Wrote ${relative(ROOT, OUTPUT)}.`);
+  const truth = {
+    schema: TRUTH_SCHEMA,
+    generated_at: new Date().toISOString(),
+    generated_by: TRUTH_GENERATOR_ID,
+    metrics: {
+      ...localMetrics,
+      ...remoteMetrics,
+    },
+    doi: TRUTH_DOI,
+  };
+
+  await writeFile(OUTPUT, `${JSON.stringify(truth, null, 2)}\n`, 'utf8');
+  process.stdout.write(`${path.relative(ROOT, OUTPUT).replaceAll('\\', '/')} generated\n`);
 }
 
-const entry = process.argv[1] ? resolve(process.argv[1]) : '';
-if (entry === fileURLToPath(import.meta.url)) {
-  await main();
+const invokedPath = process.argv[1] ? path.resolve(process.argv[1]).toLowerCase() : '';
+if (invokedPath === fileURLToPath(import.meta.url).toLowerCase()) {
+  void main().catch((error: unknown) => {
+    process.stderr.write(`truth generation failed: ${String(error)}\n`);
+    process.exit(1);
+  });
 }

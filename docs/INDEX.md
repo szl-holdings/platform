@@ -8,6 +8,14 @@ Use [docs/README.md](README.md) for navigation by audience or task.
 
 ---
 
+## Governance and estate
+
+| Document | Description | Last Reviewed |
+|----------|-------------|---------------|
+| [CONSOLIDATION.md](CONSOLIDATION.md) | Founder-gated, reversible GitHub estate consolidation plan; Option B remains not applied | 2026-07 |
+
+---
+
 ## Architecture
 
 | Document | Description | Last Reviewed |
@@ -73,6 +81,7 @@ Use [docs/README.md](README.md) for navigation by audience or task.
 |----------|-------------|---------------|
 | [compliance/EU_AI_ACT_ART_12.md](compliance/EU_AI_ACT_ART_12.md) | Honest Articles 9-15 evidence map, corrected application timeline, and Article 12 export contract | 2026-07 |
 | [compliance/ISO_42001_GAP.md](compliance/ISO_42001_GAP.md) | Clause 4-10 ISO/IEC 42001 gap analysis; certification not claimed | 2026-07 |
+| [OVERCLAIM_LEDGER.md](OVERCLAIM_LEDGER.md) | MEASURED, non-exhaustive overclaim snapshot with pinned evidence digests and one observed correction interval | 2026-07 |
 
 ---
 
@@ -84,11 +93,30 @@ Use [docs/README.md](README.md) for navigation by audience or task.
 
 ---
 
+## Market evidence
+
+| Document | Description | Last Reviewed |
+|----------|-------------|---------------|
+| [market/SERIES_A_POSITIONING.md](market/SERIES_A_POSITIONING.md) | Evidence-labelled Series A positioning workbench; external publication remains founder-gated | 2026-07 |
+| [market/COMPETITOR_MATRIX.md](market/COMPETITOR_MATRIX.md) | Source-by-source competitor claims and comparison boundaries | 2026-07 |
+
+---
+
 ## Conformance
 
 | Document | Description | Last Reviewed |
 |----------|-------------|---------------|
 | [conformance/VERTICAL_CONFORMANCE.md](conformance/VERTICAL_CONFORMANCE.md) | Seven-gate vertical verifier, deployment inputs, current 0/3 result, and offline DSSE CLI | 2026-07 |
+
+---
+
+## Standards and Assurance
+
+| Document | Description | Last Reviewed |
+|----------|-------------|---------------|
+| [SLSA_POSTURE.md](SLSA_POSTURE.md) | Claim-safe SLSA v1.2 Build Track posture by current artifact, including explicit evidence blockers | 2026-07 |
+| [OWASP-ASI-MAPPING.md](OWASP-ASI-MAPPING.md) | OWASP Top 10 for Agentic Applications 2026 mapping with exact risk names and evidence labels | 2026-07 |
+| [NIST-AI-RMF-CROSSWALK.md](NIST-AI-RMF-CROSSWALK.md) | NIST AI RMF Core and AI 600-1 crosswalk with measured, modeled, planned, and unknown evidence | 2026-07 |
 
 ---
 

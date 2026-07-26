@@ -175,8 +175,8 @@ SZL Holdings Platform
 | **Backend** | Express 5, Node.js 22 |
 | **Database** | PostgreSQL 16, Drizzle ORM |
 | **AI** | Multi-provider (Anthropic, OpenAI, Gemini, Groq) — policy-governed routing |
-| **Monorepo** | pnpm — 16 artifacts, 92 packages, 51 shared libraries |
-| **CI/CD** | 20 GitHub Actions workflows |
+| **Monorepo** | 199 pnpm workspace packages (measured in `artifacts/SOURCE_OF_TRUTH.json`) |
+| **CI/CD** | 45 GitHub Actions workflows (measured) |
 
 ---
 
