@@ -34,4 +34,11 @@ export {
 } from '@szl-holdings/observability';
 export { withCorrelationSpan } from './correlation-span';
 export { createDrizzleInstrumentation } from './drizzle-instrumentation';
+export {
+  applyMcpAttributes,
+  genAIAgentSpan,
+  genAIInferenceClientSpan,
+  genAIToolSpan,
+  mcpSpan,
+} from './genai-spans';
 export { dbSpan, httpOutboundSpan, jobSpan, startSpan, toolCallSpan } from './spans';
