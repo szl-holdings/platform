@@ -19,7 +19,7 @@ LEVEL_REQUIREMENTS = {
         "machine_checked_denial_verified",
     ),
 }
-THEOREM_U_PREMISES = ("u1", "u2", "u3")
+THEOREM_U_PREMISES = ("premise_u1", "premise_u2", "premise_u3")
 
 
 @dataclass(frozen=True)

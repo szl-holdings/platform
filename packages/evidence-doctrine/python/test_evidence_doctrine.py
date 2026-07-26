@@ -68,26 +68,34 @@ class EvidenceDoctrineTests(unittest.TestCase):
     def test_theorem_u_is_conditional(self):
         self.assertEqual(
             evaluate_theorem_u(
-                {"u1": "VERIFIED", "u2": "VERIFIED", "u3": "VERIFIED"}
+                {
+                    "premise_u1": "VERIFIED",
+                    "premise_u2": "VERIFIED",
+                    "premise_u3": "VERIFIED",
+                }
             ),
             "CONDITIONALLY_SATISFIED",
         )
         self.assertEqual(
             evaluate_theorem_u(
-                {"u1": "VERIFIED", "u2": "UNVERIFIED", "u3": "VERIFIED"}
+                {
+                    "premise_u1": "VERIFIED",
+                    "premise_u2": "UNVERIFIED",
+                    "premise_u3": "VERIFIED",
+                }
             ),
             "CONDITIONAL_OPEN",
         )
         self.assertEqual(
-            evaluate_theorem_u({"u1": "VERIFIED"}),
+            evaluate_theorem_u({"premise_u1": "VERIFIED"}),
             "CONDITIONAL_OPEN",
         )
         self.assertEqual(
             evaluate_theorem_u(
                 {
-                    "u1": "VERIFIED",
-                    "u2": "VERIFIED",
-                    "u3": "VERIFIED",
+                    "premise_u1": "VERIFIED",
+                    "premise_u2": "VERIFIED",
+                    "premise_u3": "VERIFIED",
                     "conclusion": "PROVED",
                 }
             ),

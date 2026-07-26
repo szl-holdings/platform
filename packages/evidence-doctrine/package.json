@@ -8,6 +8,10 @@
   "exports": "./src/index.ts",
   "scripts": {
     "test": "node --test src/index.test.ts && python python/test_evidence_doctrine.py",
-    "typecheck": "node --experimental-strip-types --check src/index.ts && node --experimental-strip-types --check src/index.test.ts"
+    "typecheck": "tsc --noEmit -p tsconfig.json"
+  },
+  "devDependencies": {
+    "@types/node": "catalog:",
+    "typescript": "catalog:"
   }
 }
