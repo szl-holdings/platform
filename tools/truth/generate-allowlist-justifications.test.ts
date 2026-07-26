@@ -47,3 +47,15 @@ test('rejects a stale justification', () => {
     ),
   );
 });
+
+test('parses escaped backticks and long backslash runs without regex backtracking', () => {
+  const pattern = `global.regexes: prefix${'\\_'.repeat(200)}\\\`suffix`;
+  const entry: Entry = {
+    file: '.gitleaks.toml',
+    pattern: pattern.replace('\\`', '`'),
+    reason: 'stress fixture',
+  };
+  const document = `| .gitleaks.toml | \`${pattern}\` | test | review | 2026-07-26 |`;
+
+  assert.deepEqual(validateAllowlistCoverage([entry], document), []);
+});

@@ -189,6 +189,40 @@ function entryKey(entry: Pick<Entry, 'file' | 'pattern'>): string {
   return `${entry.file}\u0000${entry.pattern}`;
 }
 
+function parseDocumentRow(line: string): Pick<Entry, 'file' | 'pattern'> | null {
+  const trimmed = line.trim();
+  if (!trimmed.startsWith('|')) return null;
+
+  const fileDelimiter = trimmed.indexOf('|', 1);
+  if (fileDelimiter < 0) return null;
+  const file = trimmed.slice(1, fileDelimiter).trim();
+  if (file !== '.gitleaks.toml' && file !== 'scripts/qa/scan-secrets.js') return null;
+
+  let cursor = fileDelimiter + 1;
+  while (cursor < trimmed.length && /\s/.test(trimmed[cursor])) cursor += 1;
+  if (trimmed[cursor] !== '`') return null;
+  cursor += 1;
+
+  let pattern = '';
+  while (cursor < trimmed.length) {
+    const character = trimmed[cursor];
+    if (character === '`') {
+      cursor += 1;
+      while (cursor < trimmed.length && /\s/.test(trimmed[cursor])) cursor += 1;
+      return trimmed[cursor] === '|' ? { file, pattern } : null;
+    }
+    if (character === '\\' && trimmed[cursor + 1] === '`') {
+      pattern += '`';
+      cursor += 2;
+      continue;
+    }
+    pattern += character;
+    cursor += 1;
+  }
+
+  return null;
+}
+
 export function validateAllowlistCoverage(entries: Entry[], document: string): string[] {
   const failures: string[] = [];
   const activeCounts = new Map<string, number>();
@@ -199,11 +233,9 @@ export function validateAllowlistCoverage(entries: Entry[], document: string): s
 
   const documentedCounts = new Map<string, number>();
   for (const line of document.split(/\r?\n/)) {
-    const match = line.match(
-      /^\|\s*(\.gitleaks\.toml|scripts\/qa\/scan-secrets\.js)\s*\|\s*`((?:\\.|[^`])*)`\s*\|/,
-    );
-    if (!match) continue;
-    const key = entryKey({ file: match[1], pattern: match[2].replaceAll('\\`', '`') });
+    const row = parseDocumentRow(line);
+    if (!row) continue;
+    const key = entryKey(row);
     documentedCounts.set(key, (documentedCounts.get(key) ?? 0) + 1);
   }
 
