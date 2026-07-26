@@ -1,6 +1,12 @@
 # Public Repository Portfolio Strategy
 
 > SZL Holdings GitHub Organization · April 2026
+>
+> **SUPERSEDED:** This April 2026 single-repository strategy is retained only
+> as historical context. The current founder-gated Series A estate proposal is
+> [`docs/CONSOLIDATION.md`](../CONSOLIDATION.md). That newer plan takes
+> precedence and remains **NOT APPLIED** until its recorded founder decisions
+> are explicitly approved.
 
 ---
 
