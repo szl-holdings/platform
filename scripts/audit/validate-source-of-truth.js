@@ -396,6 +396,35 @@ printChecks(
 printChecks('Locked Doctrine v11 representation', doctrineRepresentationChecks);
 printChecks('Canonical vocabulary', vocabularyChecks);
 
+function nodeCommandStatus(args) {
+  try {
+    execFileSync(process.execPath, args, {
+      cwd: ROOT,
+      encoding: 'utf8',
+      maxBuffer: 64 * 1024 * 1024,
+    });
+    return 0;
+  } catch (error) {
+    if (error.stdout) process.stdout.write(error.stdout);
+    if (error.stderr) process.stderr.write(error.stderr);
+    return Number.isInteger(error.status) ? error.status : 1;
+  }
+}
+
+const overclaimEvidenceChecks = [
+  {
+    name: 'Overclaim ledger evidence bindings',
+    expected: 0,
+    actual: nodeCommandStatus(['scripts/audit/validate-overclaim-ledger.js']),
+  },
+  {
+    name: 'Overclaim ledger negative tests',
+    expected: 0,
+    actual: nodeCommandStatus(['--test', 'scripts/audit/validate-overclaim-ledger.test.js']),
+  },
+];
+printChecks('Overclaim evidence enforcement', overclaimEvidenceChecks);
+
 console.log('\n-- Result --');
 if (failures > 0) {
   console.log(`  FAILED — ${failures} check(s) failed`);
@@ -408,6 +437,7 @@ console.log(
     crossDocumentChecks.length +
     doctrineChecks.length +
     doctrineRepresentationChecks.length +
-    vocabularyChecks.length
+    vocabularyChecks.length +
+    overclaimEvidenceChecks.length
   } checks passed`
 );

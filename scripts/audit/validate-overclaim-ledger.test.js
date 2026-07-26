@@ -61,6 +61,14 @@ test('rejects a correction duration that does not match timestamps', () => {
   assert.ok(failures.some((failure) => failure.includes('expected 39098')));
 });
 
+test('rejects a correction URL that is not bound to its evidence snapshot', () => {
+  const failures = validateMutation((ledger) => {
+    ledger.incidents[0].correction_url =
+      'https://github.com/szl-holdings/platform/commit/0000000000000000000000000000000000000000';
+  });
+  assert.ok(failures.some((failure) => failure.includes('correction source URL mismatch')));
+});
+
 test('rejects duplicate evidence references', () => {
   const failures = validateMutation((ledger) => {
     ledger.incidents[0].evidence_refs[1] = ledger.incidents[0].evidence_refs[0];
