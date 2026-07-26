@@ -487,6 +487,19 @@ test('preserves semantic claim continuity across custom components and inert JSX
   }
 });
 
+test('assembles styled claims across phrasing text nodes and nested value wrappers', () => {
+  for (const source of [
+    '<p>The current platform <Text>supports</Text><MetricValue>198</MetricValue><Text>API endpoints.</Text></p>',
+    '<p><Text>The current platform</Text><Text>supports</Text><MetricValue>198</MetricValue><Text>API endpoints.</Text></p>',
+    '<p><Text>The current platform supports</Text><MetricValue><strong>198</strong></MetricValue><Text>API endpoints.</Text></p>',
+    '<p><Text>The current platform supports</Text><MetricValue>{/* display */}198</MetricValue><Text>API endpoints.</Text></p>',
+  ]) {
+    assert.deepEqual(claimFailuresForLines('src/Claim.tsx', [source], metrics(12), []), [
+      'src/Claim.tsx:1: hardcoded 198; canonical value for this context is 12',
+    ]);
+  }
+});
+
 test('decodes decimal and hexadecimal numeric HTML entities without losing attribution', () => {
   for (const claimText of [
     '<p>The current monorepo has &#49;&#57;&#56; packages.</p>',
@@ -1054,4 +1067,21 @@ test('uses a strided source map for multi-megabyte entity-dense input', { timeou
   const entity = '&#49;';
   const source = entity.repeat(Math.ceil((4 * 1024 * 1024) / entity.length));
   assert.equal(semanticSourceSpanCount(source), 1);
+});
+
+test('bounds mixed-width entity maps and still scans a stale tail claim', {
+  timeout: 5_000,
+}, () => {
+  const pattern = '&#32;&#x20;&#32&#x20';
+  const source = pattern.repeat(Math.ceil((4 * 1024 * 1024) / pattern.length));
+  assert.ok(semanticSourceSpanCount(source) <= 1_024);
+  assert.deepEqual(
+    claimFailuresForLines(
+      'docs/mixed-entities.html',
+      [`<p>${source}The current monorepo has 198 packages.</p>`],
+      metrics(12),
+      [],
+    ),
+    ['docs/mixed-entities.html:1: hardcoded 198; canonical value for this context is 199'],
+  );
 });
