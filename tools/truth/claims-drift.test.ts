@@ -6,6 +6,7 @@ import {
   claimFailuresForLines,
   claimIdentitiesForLines,
   selectNonHeadBaselineCandidate,
+  semanticDecodeWindowMaxSourceLength,
   semanticSourceSpanCount,
   validateImmutableBaselineCandidate,
 } from './claims-drift.js';
@@ -493,10 +494,60 @@ test('assembles styled claims across phrasing text nodes and nested value wrappe
     '<p><Text>The current platform</Text><Text>supports</Text><MetricValue>198</MetricValue><Text>API endpoints.</Text></p>',
     '<p><Text>The current platform supports</Text><MetricValue><strong>198</strong></MetricValue><Text>API endpoints.</Text></p>',
     '<p><Text>The current platform supports</Text><MetricValue>{/* display */}198</MetricValue><Text>API endpoints.</Text></p>',
+    '<p><Text>The current platform supports</Text><MetricValue>{198}</MetricValue><Text>API endpoints.</Text></p>',
+    "<p><Text>The current platform supports</Text><MetricValue>{'198'}</MetricValue><Text>API endpoints.</Text></p>",
   ]) {
     assert.deepEqual(claimFailuresForLines('src/Claim.tsx', [source], metrics(12), []), [
       'src/Claim.tsx:1: hardcoded 198; canonical value for this context is 12',
     ]);
+  }
+});
+
+test('keeps styled claim assembly within one parent and across no explicit separator', () => {
+  for (const source of [
+    '<Stack><Text>Current release notes</Text><Panel><Metric>35</Metric><Text>tests from the Guardian archive</Text></Panel></Stack>',
+    '<div><span>Current release notes</span><span><strong>35</strong><em>tests from the Guardian archive</em></span></div>',
+    '<p><span>Current release notes</span>{/* separate */}<strong>35</strong><span>tests from the Guardian archive</span></p>',
+    '<p><span>Current release notes</span><br/><strong>35</strong><span>tests from the Guardian archive</span></p>',
+  ]) {
+    assert.deepEqual(claimFailuresForLines('src/Claim.tsx', [source], metrics(12), []), []);
+  }
+});
+
+test('covers a representative parent-aware styled-claim matrix', () => {
+  const contexts = [
+    'The current platform supports',
+    '<Text>The current platform supports</Text>',
+    '<Text>The current platform</Text><Text>supports</Text>',
+  ];
+  const values = [
+    '<MetricValue>198</MetricValue>',
+    '<MetricValue><strong>198</strong></MetricValue>',
+    '<MetricValue>{/* display */}198</MetricValue>',
+    '<MetricValue>{198}</MetricValue>',
+    "<MetricValue>{'198'}</MetricValue>",
+    '<MetricValue>198</MetricValue>{/*c*/}',
+  ];
+  const metricsMarkup = ['<Text>API endpoints.</Text>', '<Text><em>API endpoints.</em></Text>'];
+
+  for (const context of contexts) {
+    for (const value of values) {
+      for (const metric of metricsMarkup) {
+        const source = `<p>${context}${value}${metric}</p>`;
+        assert.deepEqual(
+          claimFailuresForLines('src/Claim.tsx', [source], metrics(12), []),
+          ['src/Claim.tsx:1: hardcoded 198; canonical value for this context is 12'],
+          source,
+        );
+      }
+    }
+  }
+});
+
+test('does not treat a current-platform guide label as an assertion antecedent', () => {
+  for (const parent of ['div', 'p', 'Stack']) {
+    const source = `<${parent}><Text>Current platform guide</Text><Metric>35</Metric><Text>tests from the Guardian archive</Text></${parent}>`;
+    assert.deepEqual(claimFailuresForLines('src/Claim.tsx', [source], metrics(12), []), []);
   }
 });
 
@@ -1074,6 +1125,7 @@ test('bounds mixed-width entity maps and still scans a stale tail claim', {
 }, () => {
   const pattern = '&#32;&#x20;&#32&#x20';
   const source = pattern.repeat(Math.ceil((4 * 1024 * 1024) / pattern.length));
+  const started = performance.now();
   assert.ok(semanticSourceSpanCount(source) <= 1_024);
   assert.deepEqual(
     claimFailuresForLines(
@@ -1084,4 +1136,6 @@ test('bounds mixed-width entity maps and still scans a stale tail claim', {
     ),
     ['docs/mixed-entities.html:1: hardcoded 198; canonical value for this context is 199'],
   );
+  assert.ok(semanticDecodeWindowMaxSourceLength(source) <= 131_072);
+  assert.ok(performance.now() - started < 4_000);
 });

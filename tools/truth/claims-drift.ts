@@ -20,6 +20,10 @@ const MAX_BLOCK_CHARACTERS = 16_384;
 const MAX_CLAUSE_CHARACTERS = 256;
 const MAX_PAIR_DISTANCE = 256;
 const MAX_VARIABLE_MAP_DECODED = 1_024;
+const MAX_DECODE_SOURCE_CHARACTERS = 131_072;
+const DECODE_SOURCE_OVERLAP = 32_768;
+const MAX_SEMANTIC_SUMMARY = 1_024;
+const MAX_SEMANTIC_SOURCE_SAMPLE = 8_192;
 const execFileAsync = promisify(execFile);
 const UNICODE_DECIMAL = /^\p{Nd}$/u;
 const UNICODE_DECIMAL_VALUE_CACHE = new Map<number, number>();
@@ -121,9 +125,27 @@ export function canonicalFor(
   };
 }
 
+function stripInlineComments(value: string): string {
+  let output = '';
+  let cursor = 0;
+  while (cursor < value.length) {
+    const htmlStart = value.indexOf('<!--', cursor);
+    const jsxStart = value.indexOf('{/*', cursor);
+    const starts = [htmlStart, jsxStart].filter((start) => start >= 0);
+    if (starts.length === 0) return output + value.slice(cursor);
+    const start = Math.min(...starts);
+    const html = start === htmlStart;
+    const closing = html ? '-->' : '*/}';
+    const end = value.indexOf(closing, start + (html ? 4 : 3));
+    output += `${value.slice(cursor, start)} `;
+    if (end < 0) return output;
+    cursor = end + closing.length;
+  }
+  return output;
+}
+
 function normalizeInlineMarkup(value: string): string {
-  return value
-    .replace(/<!--[\s\S]*?-->/g, ' ')
+  return stripInlineComments(value)
     .replace(/<\/?[A-Za-z][^>]*>/g, ' ')
     .replace(/\]\([^)\r\n]*\)/g, ' ')
     .replace(/[*_~`{}[\]'"]/g, ' ')
@@ -596,32 +618,50 @@ function nextMarkupToken(text: string, start: number): MarkupToken | null {
   return null;
 }
 
-function staticWhitespaceExpressionEnd(text: string, start: number): number | null {
+type StaticJsxLiteral = { end: number; value: string };
+
+function staticJsxLiteral(text: string, start: number): StaticJsxLiteral | null {
   if (text[start] !== '{') return null;
   let cursor = start + 1;
   while (/\s/.test(text[cursor] ?? '')) cursor += 1;
   const quote = text[cursor];
-  if (quote !== "'" && quote !== '"') return null;
-  cursor += 1;
-  let content = '';
-  while (cursor < text.length) {
-    const character = text[cursor] ?? '';
-    if (character === '\\') {
-      const escaped = text[cursor + 1];
-      if (!escaped) return null;
-      if (![' ', 't', 'n', 'r'].includes(escaped)) return null;
-      content += escaped === ' ' ? ' ' : '\t';
-      cursor += 2;
-      continue;
-    }
-    if (character === quote) break;
-    content += character;
+  if (quote === "'" || quote === '"') {
     cursor += 1;
+    let value = '';
+    while (cursor < text.length) {
+      const character = text[cursor] ?? '';
+      if (character === quote) break;
+      if (character === '\\') {
+        const escaped = text[cursor + 1];
+        if (!escaped) return null;
+        const replacements: Record<string, string> = {
+          n: '\n',
+          r: '\r',
+          t: '\t',
+          '\\': '\\',
+          "'": "'",
+          '"': '"',
+        };
+        const replacement = replacements[escaped];
+        if (replacement === undefined) return null;
+        value += replacement;
+        cursor += 2;
+        continue;
+      }
+      value += character;
+      cursor += 1;
+    }
+    if (text[cursor] !== quote) return null;
+    cursor += 1;
+    while (/\s/.test(text[cursor] ?? '')) cursor += 1;
+    return text[cursor] === '}' ? { end: cursor + 1, value } : null;
   }
-  if (text[cursor] !== quote || !/^\s*$/.test(content)) return null;
-  cursor += 1;
+
+  const number = text.slice(cursor).match(/^(?:\d{1,3}(?:,\d{3})+|\d+)/)?.[0];
+  if (!number) return null;
+  cursor += number.length;
   while (/\s/.test(text[cursor] ?? '')) cursor += 1;
-  return text[cursor] === '}' ? cursor + 1 : null;
+  return text[cursor] === '}' ? { end: cursor + 1, value: number } : null;
 }
 
 function nextSiblingStart(
@@ -644,9 +684,9 @@ function nextSiblingStart(
       continue;
     }
     if (jsx && text[cursor] === '{') {
-      const staticWhitespaceEnd = staticWhitespaceExpressionEnd(text, cursor);
-      if (staticWhitespaceEnd !== null) {
-        cursor = staticWhitespaceEnd;
+      const literal = staticJsxLiteral(text, cursor);
+      if (literal) {
+        cursor = literal.end;
         continue;
       }
     }
@@ -658,11 +698,29 @@ function nextSiblingStart(
 }
 
 type SemanticTextNode = {
+  kind: 'text';
   start: number;
   end: number;
-  text: string;
-  barrierBefore: boolean;
+  source: string;
+  literal?: string;
 };
+
+type SemanticBarrierNode = {
+  kind: 'barrier';
+  start: number;
+  end: number;
+};
+
+type SemanticElementNode = {
+  kind: 'element';
+  start: number;
+  end: number;
+  tag: string;
+  children: SemanticNode[];
+};
+
+type SemanticNode = SemanticTextNode | SemanticBarrierNode | SemanticElementNode;
+type SemanticParent = { children: SemanticNode[] };
 
 const BLOCK_TAGS = new Set([
   'address',
@@ -736,42 +794,77 @@ function jsxExpressionEnd(text: string, start: number): number {
   return text.length;
 }
 
-function semanticTextNodes(text: string, jsx: boolean): SemanticTextNode[] {
-  const nodes: SemanticTextNode[] = [];
+function explicitSeparationComment(value: string): boolean {
+  return /\b(?:separate|separator|split|boundary|section-break|hard-break)\b/i.test(value);
+}
+
+function semanticTree(text: string, jsx: boolean): SemanticElementNode {
+  const root: SemanticElementNode = {
+    kind: 'element',
+    start: 0,
+    end: text.length,
+    tag: '#root',
+    children: [],
+  };
+  const stack: SemanticElementNode[] = [root];
   let cursor = 0;
   let textStart = 0;
-  let barrierBefore = false;
+  const current = (): SemanticElementNode => stack.at(-1) ?? root;
   const flushText = (end: number): void => {
     if (end <= textStart) return;
-    const visible = normalizeInlineMarkup(decodeNumericEntities(text.slice(textStart, end)).text);
-    if (!visible) return;
-    nodes.push({ start: textStart, end, text: visible.toLowerCase(), barrierBefore });
-    barrierBefore = false;
+    current().children.push({
+      kind: 'text',
+      start: textStart,
+      end,
+      source: text.slice(textStart, end),
+    });
   };
 
   while (cursor < text.length) {
     if (text.startsWith('<!--', cursor)) {
       flushText(cursor);
       const commentEnd = text.indexOf('-->', cursor + 4);
-      cursor = commentEnd < 0 ? text.length : commentEnd + 3;
+      const end = commentEnd < 0 ? text.length : commentEnd + 3;
+      if (
+        explicitSeparationComment(text.slice(cursor + 4, commentEnd < 0 ? text.length : commentEnd))
+      ) {
+        current().children.push({ kind: 'barrier', start: cursor, end });
+      }
+      cursor = end;
       textStart = cursor;
       continue;
     }
     if (jsx && text.startsWith('{/*', cursor)) {
       flushText(cursor);
       const commentEnd = text.indexOf('*/}', cursor + 3);
-      cursor = commentEnd < 0 ? text.length : commentEnd + 3;
+      const end = commentEnd < 0 ? text.length : commentEnd + 3;
+      if (
+        explicitSeparationComment(text.slice(cursor + 3, commentEnd < 0 ? text.length : commentEnd))
+      ) {
+        current().children.push({ kind: 'barrier', start: cursor, end });
+      }
+      cursor = end;
       textStart = cursor;
       continue;
     }
     if (jsx && text[cursor] === '{') {
-      const whitespaceEnd = staticWhitespaceExpressionEnd(text, cursor);
       flushText(cursor);
-      if (whitespaceEnd !== null) {
-        cursor = whitespaceEnd;
+      const literal = staticJsxLiteral(text, cursor);
+      if (literal) {
+        if (literal.value) {
+          current().children.push({
+            kind: 'text',
+            start: cursor,
+            end: literal.end,
+            source: text.slice(cursor, literal.end),
+            literal: literal.value,
+          });
+        }
+        cursor = literal.end;
       } else {
-        cursor = jsxExpressionEnd(text, cursor);
-        barrierBefore = true;
+        const end = jsxExpressionEnd(text, cursor);
+        current().children.push({ kind: 'barrier', start: cursor, end });
+        cursor = end;
       }
       textStart = cursor;
       continue;
@@ -780,8 +873,37 @@ function semanticTextNodes(text: string, jsx: boolean): SemanticTextNode[] {
       const token = markupTokenAt(text, cursor);
       if (token) {
         flushText(cursor);
-        if (token.tag && BLOCK_TAGS.has(token.tag.toLowerCase()) && nodes.length > 0) {
-          barrierBefore = true;
+        if (token.kind === 'open' || token.kind === 'fragment-open') {
+          const element: SemanticElementNode = {
+            kind: 'element',
+            start: token.start,
+            end: token.end,
+            tag: token.tag?.toLowerCase() ?? '#fragment',
+            children: [],
+          };
+          current().children.push(element);
+          stack.push(element);
+        } else if (token.kind === 'self-close') {
+          current().children.push({
+            kind: 'element',
+            start: token.start,
+            end: token.end,
+            tag: token.tag?.toLowerCase() ?? '#self-close',
+            children: [],
+          });
+        } else {
+          const expected = token.tag?.toLowerCase() ?? '#fragment';
+          let match = stack.length - 1;
+          while (match > 0 && stack[match]?.tag !== expected) match -= 1;
+          if (match > 0) {
+            for (let index = stack.length - 1; index >= match; index -= 1) {
+              const element = stack[index];
+              if (element) element.end = token.end;
+            }
+            stack.length = match;
+          } else {
+            current().children.push({ kind: 'barrier', start: token.start, end: token.end });
+          }
         }
         cursor = token.end;
         textStart = cursor;
@@ -791,37 +913,156 @@ function semanticTextNodes(text: string, jsx: boolean): SemanticTextNode[] {
     cursor += 1;
   }
   flushText(text.length);
-  return nodes;
+  for (const element of stack) element.end = text.length;
+  return root;
+}
+
+type SemanticSummary = {
+  prefix: string;
+  suffix: string;
+  full?: string;
+  barrier: boolean;
+};
+
+function normalizeSemanticSample(value: string): string {
+  return normalizeInlineMarkup(decodeNumericEntities(value).text).toLowerCase();
+}
+
+function semanticTextSummary(node: SemanticTextNode): SemanticSummary {
+  if (node.literal !== undefined) {
+    const text = normalizeInlineMarkup(node.literal).toLowerCase();
+    return { prefix: text, suffix: text, full: text, barrier: false };
+  }
+  if (node.source.length <= MAX_SEMANTIC_SOURCE_SAMPLE) {
+    const text = normalizeSemanticSample(node.source);
+    const bounded = text.slice(0, MAX_SEMANTIC_SUMMARY);
+    return {
+      prefix: bounded,
+      suffix: text.slice(-MAX_SEMANTIC_SUMMARY),
+      full: text.length <= MAX_SEMANTIC_SUMMARY ? text : undefined,
+      barrier: false,
+    };
+  }
+  const prefix = normalizeSemanticSample(node.source.slice(0, MAX_SEMANTIC_SOURCE_SAMPLE)).slice(
+    0,
+    MAX_SEMANTIC_SUMMARY,
+  );
+  const suffix = normalizeSemanticSample(node.source.slice(-MAX_SEMANTIC_SOURCE_SAMPLE)).slice(
+    -MAX_SEMANTIC_SUMMARY,
+  );
+  return { prefix, suffix, barrier: false };
+}
+
+function joinSemanticText(values: string[]): string {
+  return values.filter(Boolean).join(' ').replace(/\s+/g, ' ').trim();
+}
+
+function semanticSummary(node: SemanticNode): SemanticSummary {
+  if (node.kind === 'barrier') return { prefix: '', suffix: '', barrier: true };
+  if (node.kind === 'text') return semanticTextSummary(node);
+  if (node.tag === 'br' || BLOCK_TAGS.has(node.tag)) {
+    return { prefix: '', suffix: '', barrier: true };
+  }
+
+  const summaries = node.children.map(semanticSummary);
+  if (summaries.some((summary) => summary.barrier)) {
+    return { prefix: '', suffix: '', barrier: true };
+  }
+  const prefix = joinSemanticText(summaries.map((summary) => summary.prefix)).slice(
+    0,
+    MAX_SEMANTIC_SUMMARY,
+  );
+  const suffix = joinSemanticText(summaries.map((summary) => summary.suffix)).slice(
+    -MAX_SEMANTIC_SUMMARY,
+  );
+  const fullParts = summaries.map((summary) => summary.full);
+  const fullText = fullParts.every((part): part is string => part !== undefined)
+    ? joinSemanticText(fullParts)
+    : undefined;
+  return {
+    prefix,
+    suffix,
+    full: fullText !== undefined && fullText.length <= MAX_SEMANTIC_SUMMARY ? fullText : undefined,
+    barrier: false,
+  };
+}
+
+function styledContext(text: string): boolean {
+  return (
+    /\b(?:canonical|currently|total|public|passing|passed|locked|measured|monorepo|ci|github actions|hugging face|hf|customer-facing|estate|organization|org)\b/i.test(
+      text,
+    ) ||
+    (/\bcurrent\s+(?:platform|system|repository|repo)\b/i.test(text) &&
+      /\b(?:has|have|contains?|exposes?|supports?|reports?|ships?|runs?|includes?|provides?|totals?|counts?|comprises?|serves?|offers?)\b/i.test(
+        text,
+      ))
+  );
+}
+
+function nodeActsAsSiblingBarrier(node: SemanticNode): boolean {
+  if (node.kind === 'barrier') return true;
+  if (node.kind !== 'element') return false;
+  return node.tag === 'br' || BLOCK_TAGS.has(node.tag) || semanticSummary(node).barrier;
 }
 
 function styledClaimRanges(text: string, jsx: boolean): Array<{ start: number; end: number }> {
-  const nodes = semanticTextNodes(text, jsx);
   const ranges: Array<{ start: number; end: number }> = [];
-  for (const [index, node] of nodes.entries()) {
-    if (!/^(?:\d{1,3}(?:,\d{3})+|\d+)$/.test(node.text) || node.barrierBefore) continue;
+  const root = semanticTree(text, jsx);
 
-    const left: SemanticTextNode[] = [];
-    for (let cursor = index - 1; cursor >= 0 && left.length < 8; cursor -= 1) {
-      const candidate = nodes[cursor];
-      if (!candidate) break;
-      left.unshift(candidate);
-      if (candidate.barrierBefore) break;
-    }
-    if (!CLAIM_CONTEXT.test(left.map((candidate) => candidate.text).join(' '))) continue;
+  const visit = (parent: SemanticParent): void => {
+    const nodes = parent.children.filter((node) => {
+      if (node.kind !== 'text') return true;
+      const summary = semanticSummary(node);
+      return Boolean(summary.prefix || summary.suffix);
+    });
+    const summaries = nodes.map(semanticSummary);
 
-    let metricNode: SemanticTextNode | undefined;
-    for (let cursor = index + 1; cursor < nodes.length && cursor <= index + 8; cursor += 1) {
-      const candidate = nodes[cursor];
-      if (!candidate || candidate.barrierBefore) break;
-      const metricOffset = candidate.text.search(new RegExp(WATCHWORD_SOURCE, 'i'));
-      if (metricOffset >= 0 && metricOffset <= 32) {
-        metricNode = candidate;
-        break;
+    for (const [index, node] of nodes.entries()) {
+      const summary = summaries[index];
+      const numeric = summary?.full?.trim();
+      if (
+        !summary ||
+        summary.barrier ||
+        nodeActsAsSiblingBarrier(node) ||
+        !numeric ||
+        !/^(?:\d{1,3}(?:,\d{3})+|\d+)$/.test(numeric)
+      ) {
+        continue;
       }
+
+      const left: SemanticNode[] = [];
+      for (let cursor = index - 1; cursor >= 0 && left.length < 8; cursor -= 1) {
+        const candidate = nodes[cursor];
+        if (!candidate || nodeActsAsSiblingBarrier(candidate)) break;
+        left.unshift(candidate);
+      }
+      const leftText = joinSemanticText(
+        left.map((candidate) => semanticSummary(candidate).suffix),
+      ).slice(-MAX_PAIR_DISTANCE);
+      if (!styledContext(leftText)) continue;
+
+      let metricNode: SemanticNode | undefined;
+      for (let cursor = index + 1; cursor < nodes.length && cursor <= index + 8; cursor += 1) {
+        const candidate = nodes[cursor];
+        if (!candidate || nodeActsAsSiblingBarrier(candidate)) break;
+        const metricOffset = semanticSummary(candidate).prefix.search(
+          new RegExp(WATCHWORD_SOURCE, 'i'),
+        );
+        if (metricOffset >= 0 && metricOffset <= 32) {
+          metricNode = candidate;
+          break;
+        }
+      }
+      const first = left[0];
+      if (first && metricNode) ranges.push({ start: first.start, end: metricNode.end });
     }
-    const first = left[0];
-    if (first && metricNode) ranges.push({ start: first.start, end: metricNode.end });
-  }
+
+    for (const node of parent.children) {
+      if (node.kind === 'element') visit(node);
+    }
+  };
+
+  visit(root);
   return ranges;
 }
 
@@ -834,16 +1075,19 @@ function markupSiblingSegments(
   let start = 0;
   let token = nextMarkupToken(text, 0);
   const jsx = path.extname(relative) === '.tsx';
-  const continuationRanges = styledClaimRanges(text, jsx);
+  let continuationRanges: Array<{ start: number; end: number }> | undefined;
   while (token) {
     if (['close', 'fragment-close', 'self-close'].includes(token.kind)) {
       const next = nextSiblingStart(text, token.end, jsx);
       const opensSibling = next?.kind === 'open' || next?.kind === 'fragment-open';
       const startsExpression = next?.kind === 'expression';
       if (next && (opensSibling || startsExpression)) {
+        if (opensSibling && continuationRanges === undefined) {
+          continuationRanges = styledClaimRanges(text, jsx);
+        }
         const continuesStyledClaim =
           opensSibling &&
-          continuationRanges.some((range) => range.start < token.end && range.end > next.start);
+          continuationRanges?.some((range) => range.start < token.end && range.end > next.start);
         if (startsExpression || !continuesStyledClaim) {
           if (next.start > start) segments.push({ text: text.slice(start, next.start), start });
           start = next.start;
@@ -867,6 +1111,20 @@ function boundedTextSegments(text: string): Array<{ text: string; start: number 
     });
   }
   return segments;
+}
+
+function* boundedSourceSegments(text: string): Generator<{ text: string; start: number }> {
+  if (text.length <= MAX_DECODE_SOURCE_CHARACTERS) {
+    yield { text, start: 0 };
+    return;
+  }
+  const stride = MAX_DECODE_SOURCE_CHARACTERS - DECODE_SOURCE_OVERLAP;
+  for (let start = 0; start < text.length; start += stride) {
+    yield {
+      text: text.slice(start, Math.min(text.length, start + MAX_DECODE_SOURCE_CHARACTERS)),
+      start,
+    };
+  }
 }
 
 function decodeNumericEntities(text: string): DecodedText {
@@ -1107,6 +1365,14 @@ export function semanticSourceSpanCount(text: string): number {
   return decodeNumericEntities(text).spans.length;
 }
 
+export function semanticDecodeWindowMaxSourceLength(text: string): number {
+  let maximum = 0;
+  for (const segment of boundedSourceSegments(text)) {
+    maximum = Math.max(maximum, segment.text.length);
+  }
+  return maximum;
+}
+
 function claimFailuresForSegmentedText(
   relative: string,
   text: string,
@@ -1117,33 +1383,41 @@ function claimFailuresForSegmentedText(
   scanState: ClaimScanState,
   identitySink?: Map<string, number>,
 ): string[] {
-  return markupSiblingSegments(text, relative).flatMap((markupSegment) => {
-    const decoded = decodeNumericEntities(markupSegment.text);
-    return boundedTextSegments(decoded.text).flatMap((boundedSegment) => {
-      const decodedStart = boundedSegment.start;
-      return claimFailuresForText(
-        relative,
-        boundedSegment.text,
-        (offset) => {
-          const originalOffset = sourceStartForDecodedOffset(decoded, decodedStart + offset);
-          return sourceAnchorForOffset(markupSegment.start + originalOffset);
-        },
-        (start, end) => {
-          const originalStart = sourceStartForDecodedOffset(decoded, decodedStart + start);
-          const originalEnd = sourceEndForDecodedOffset(
-            decoded,
-            decodedStart + Math.max(start, end - 1),
-          );
-          return markupSegment.text.slice(originalStart, originalEnd);
-        },
-        metrics,
-        allowlist,
-        baselineClaimIdentities,
-        scanState,
-        identitySink,
-      );
-    });
-  });
+  const failures: string[] = [];
+  for (const markupSegment of markupSiblingSegments(text, relative)) {
+    for (const sourceSegment of boundedSourceSegments(markupSegment.text)) {
+      const decoded = decodeNumericEntities(sourceSegment.text);
+      for (const boundedSegment of boundedTextSegments(decoded.text)) {
+        const decodedStart = boundedSegment.start;
+        failures.push(
+          ...claimFailuresForText(
+            relative,
+            boundedSegment.text,
+            (offset) => {
+              const originalOffset = sourceStartForDecodedOffset(decoded, decodedStart + offset);
+              return sourceAnchorForOffset(
+                markupSegment.start + sourceSegment.start + originalOffset,
+              );
+            },
+            (start, end) => {
+              const originalStart = sourceStartForDecodedOffset(decoded, decodedStart + start);
+              const originalEnd = sourceEndForDecodedOffset(
+                decoded,
+                decodedStart + Math.max(start, end - 1),
+              );
+              return sourceSegment.text.slice(originalStart, originalEnd);
+            },
+            metrics,
+            allowlist,
+            baselineClaimIdentities,
+            scanState,
+            identitySink,
+          ),
+        );
+      }
+    }
+  }
+  return failures;
 }
 
 function startsStructuralBlock(line: string): boolean {
