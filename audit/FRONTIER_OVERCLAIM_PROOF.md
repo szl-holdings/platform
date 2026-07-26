@@ -22,7 +22,7 @@
 | Check | Result |
 | --- | --- |
 | Ledger and evidence validation | **passed** |
-| Validator tests | **14/14 passed** |
+| Validator tests | **26/26 passed** |
 | Canonical source-of-truth validator | **66/66 passed** |
 | Git whitespace validation | **passed** |
 

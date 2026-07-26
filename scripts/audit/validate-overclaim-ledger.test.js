@@ -151,7 +151,11 @@ test('permits a detected incident to remain open without fabricated correction d
       ledger.metrics.aggregation = 'no_observations';
     },
     () => {},
-    (markdown) => markdown.replaceAll('10h 51m 38s', '0h 0m 0s').replaceAll('n=1', 'n=0'),
+    (markdown) =>
+      markdown
+        .replace('| Correction state | **RESOLVED** |', '| Correction state | **OPEN** |')
+        .replaceAll('10h 51m 38s', '0h 0m 0s')
+        .replaceAll('n=1', 'n=0'),
   );
   assert.deepEqual(failures, []);
 });
@@ -168,6 +172,32 @@ test('rejects a detection URL that is not bound to its structured run id', () =>
     evidence.run_id = 1;
   });
   assert.ok(failures.some((failure) => failure.includes('does not bind the run id')));
+});
+
+test('rejects malformed measured evidence artifact contracts', () => {
+  const cases = [
+    ['schema_version', 'bogus', 'evidence schema_version'],
+    ['maturity', 'REPORTED', 'evidence maturity'],
+    ['repository', 'szl-holdings/other', 'evidence repository'],
+    ['head_sha', 'bad-sha', 'head_sha'],
+    ['job_id', 'not-a-number', 'job_id'],
+  ];
+  for (const [field, value, expected] of cases) {
+    const failures = validateEvidenceMutation('OC-2026-001-detection', (evidence) => {
+      evidence[field] = value;
+    });
+    assert.ok(
+      failures.some((failure) => failure.includes(expected)),
+      `${field} mutation was not rejected by the evidence contract`,
+    );
+  }
+});
+
+test('rejects malformed commit evidence identifiers', () => {
+  const failures = validateEvidenceMutation('OC-2026-001-correction', (evidence) => {
+    evidence.commit = 'bad-sha';
+  });
+  assert.ok(failures.some((failure) => failure.includes('commit must be a 40-character')));
 });
 
 test('rejects a rendered incident count that diverges from the ledger', () => {
@@ -187,6 +217,37 @@ test('rejects a rendered duration that diverges from the ledger', () => {
     (markdown) => markdown.replace('**10h 51m 38s**', '**0h 0m 0s**'),
   );
   assert.ok(failures.some((failure) => failure.includes('rendered Markdown correction-time')));
+});
+
+test('rejects a rendered CI incident URL that diverges from the ledger', () => {
+  const failures = validateMutation(
+    () => {},
+    () => {},
+    (markdown) =>
+      markdown.replace(
+        productionLedger.incidents[0].correction_url,
+        'https://github.com/szl-holdings/platform/commit/0000000000000000000000000000000000000000',
+      ),
+  );
+  assert.ok(failures.some((failure) => failure.includes('rendered Markdown correction URL')));
+});
+
+test('rejects a rendered CI incident maturity that diverges from the ledger', () => {
+  const failures = validateMutation(
+    () => {},
+    () => {},
+    (markdown) => markdown.replace('| Maturity | **MEASURED** |', '| Maturity | **REPORTED** |'),
+  );
+  assert.ok(failures.some((failure) => failure.includes('rendered Markdown maturity')));
+});
+
+test('rejects a rendered CI incident timestamp that diverges from the ledger', () => {
+  const failures = validateMutation(
+    () => {},
+    () => {},
+    (markdown) => markdown.replace('2026-06-30 15:31:27 UTC', '2026-06-30 15:31:28 UTC'),
+  );
+  assert.ok(failures.some((failure) => failure.includes('rendered Markdown timestamp')));
 });
 
 test('rejects missing related-incident evidence', () => {
@@ -236,4 +297,28 @@ test('rejects a related-incident reconciliation URL that diverges from evidence'
       'https://github.com/szl-holdings/platform/commit/0000000000000000000000000000000000000000';
   });
   assert.ok(failures.some((failure) => failure.includes('reconciliation source URL mismatch')));
+});
+
+test('rejects a rendered related-incident state that diverges from the ledger', () => {
+  const failures = validateMutation(
+    () => {},
+    () => {},
+    (markdown) => markdown.replace('**OPEN_UNVERIFIED**', '**RESOLVED**'),
+  );
+  assert.ok(failures.some((failure) => failure.includes('rendered Markdown correction state')));
+});
+
+test('rejects a rendered related-incident evidence URL that diverges from the ledger', () => {
+  const failures = validateMutation(
+    () => {},
+    () => {},
+    (markdown) =>
+      markdown.replace(
+        productionLedger.related_non_ci_incidents[0].evidence_commit_url,
+        'https://github.com/szl-holdings/platform/commit/0000000000000000000000000000000000000000',
+      ),
+  );
+  assert.ok(
+    failures.some((failure) => failure.includes('rendered Markdown operations-report URL')),
+  );
 });

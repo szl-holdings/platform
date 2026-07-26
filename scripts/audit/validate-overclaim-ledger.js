@@ -43,6 +43,116 @@ function markdownRows(markdown, label) {
     .filter((line) => line.split('|')[1]?.trim() === label);
 }
 
+function markdownSection(markdown, id) {
+  const lines = markdown.split(/\r?\n/);
+  const start = lines.findIndex((line) => line.startsWith(`### ${id}`));
+  if (start < 0) return null;
+  const next = lines.findIndex((line, index) => index > start && line.startsWith('### '));
+  return lines.slice(start, next < 0 ? lines.length : next).join('\n');
+}
+
+function markdownTimestamp(value) {
+  return typeof value === 'string' ? value.replace('T', ' ').replace(/Z$/, ' UTC') : String(value);
+}
+
+function validateEvidenceContract(artifact, evidence, fail) {
+  const label = artifact.id;
+  if (evidence.schema_version !== '1.0.0') {
+    fail(`${label}: evidence schema_version must be 1.0.0`);
+  }
+  if (evidence.repository !== 'szl-holdings/platform') {
+    fail(`${label}: evidence repository must be szl-holdings/platform`);
+  }
+
+  const measuredKinds = new Set([
+    'github_actions_policy_finding',
+    'github_commit_correction',
+    'github_actions_policy_pass',
+  ]);
+  const reportedKinds = new Set([
+    'operations_commit_report',
+    'candidate_reconciliation_commit',
+  ]);
+  if (!measuredKinds.has(evidence.kind) && !reportedKinds.has(evidence.kind)) {
+    fail(`${label}: unsupported evidence kind`);
+    return;
+  }
+  const expectedMaturity = measuredKinds.has(evidence.kind) ? 'MEASURED' : 'REPORTED';
+  if (evidence.maturity !== expectedMaturity) {
+    fail(`${label}: evidence maturity must be ${expectedMaturity}`);
+  }
+
+  const runKinds = new Set(['github_actions_policy_finding', 'github_actions_policy_pass']);
+  if (runKinds.has(evidence.kind)) {
+    const expectedSuffix =
+      evidence.kind === 'github_actions_policy_finding' ? '-detection' : '-guard';
+    if (!label.endsWith(expectedSuffix)) {
+      fail(`${label}: evidence id does not match kind ${evidence.kind}`);
+    }
+    if (!Number.isSafeInteger(evidence.run_id) || evidence.run_id <= 0) {
+      fail(`${label}: run_id must be a positive safe integer`);
+    }
+    if (!Number.isSafeInteger(evidence.job_id) || evidence.job_id <= 0) {
+      fail(`${label}: job_id must be a positive safe integer`);
+    }
+    if (!/^[0-9a-f]{40}$/.test(evidence.head_sha ?? '')) {
+      fail(`${label}: head_sha must be a 40-character lowercase Git SHA`);
+    }
+    if (!['pull_request', 'push', 'workflow_dispatch', 'merge_group'].includes(evidence.event)) {
+      fail(`${label}: unsupported GitHub Actions event`);
+    }
+    if (!['success', 'failure', 'cancelled'].includes(evidence.run_conclusion)) {
+      fail(`${label}: unsupported run conclusion`);
+    }
+    if (typeof evidence.job_name !== 'string' || evidence.job_name.length === 0) {
+      fail(`${label}: job_name must be non-empty`);
+    }
+    const expectedSource = `https://github.com/${evidence.repository}/actions/runs/${evidence.run_id}`;
+    if (evidence.source_url !== expectedSource) {
+      fail(`${label}: source_url does not bind repository and run_id`);
+    }
+    return;
+  }
+
+  const expectedSuffix = {
+    github_commit_correction: '-correction',
+    operations_commit_report: '-report',
+    candidate_reconciliation_commit: '-reconciliation',
+  }[evidence.kind];
+  if (!label.endsWith(expectedSuffix)) {
+    fail(`${label}: evidence id does not match kind ${evidence.kind}`);
+  }
+  if (!/^[0-9a-f]{40}$/.test(evidence.commit ?? '')) {
+    fail(`${label}: commit must be a 40-character lowercase Git SHA`);
+  }
+  if (!Number.isFinite(Date.parse(evidence.committed_at))) {
+    fail(`${label}: committed_at must be an ISO timestamp`);
+  }
+  if (typeof evidence.signature_verified !== 'boolean') {
+    fail(`${label}: signature_verified must be boolean`);
+  }
+  if (typeof evidence.verification_reason !== 'string' || evidence.verification_reason.length === 0) {
+    fail(`${label}: verification_reason must be non-empty`);
+  }
+  if (
+    !Array.isArray(evidence.changed_files) ||
+    evidence.changed_files.length === 0 ||
+    evidence.changed_files.some(
+      (file) =>
+        typeof file !== 'string' ||
+        file.length === 0 ||
+        path.isAbsolute(file) ||
+        file.split(/[\\/]/).includes('..'),
+    )
+  ) {
+    fail(`${label}: changed_files must contain safe repository-relative paths`);
+  }
+  const expectedSource = `https://github.com/${evidence.repository}/commit/${evidence.commit}`;
+  if (evidence.source_url !== expectedSource) {
+    fail(`${label}: source_url does not bind repository and commit`);
+  }
+}
+
 export function validateOverclaimLedger({ ledger, ledgerBytes, manifest, markdown, root = ROOT }) {
   const failures = [];
   const fail = (message) => failures.push(message);
@@ -74,6 +184,10 @@ export function validateOverclaimLedger({ ledger, ledgerBytes, manifest, markdow
 
   const evidenceById = new Map();
   for (const artifact of manifest.artifacts ?? []) {
+    if (typeof artifact.id !== 'string' || !/^OC-\d{4}-(?:\d{3}|R0)-[a-z-]+$/.test(artifact.id)) {
+      fail('manifest evidence id is missing or malformed');
+      continue;
+    }
     if (evidenceById.has(artifact.id)) {
       fail(`duplicate manifest evidence id: ${artifact.id}`);
       continue;
@@ -101,10 +215,17 @@ export function validateOverclaimLedger({ ledger, ledgerBytes, manifest, markdow
       continue;
     }
 
-    const evidence = JSON.parse(bytes.toString('utf8'));
+    let evidence;
+    try {
+      evidence = JSON.parse(bytes.toString('utf8'));
+    } catch {
+      fail(`${artifact.id}: evidence is not valid JSON`);
+      continue;
+    }
     if (evidence.source_url !== artifact.source) {
       fail(`${artifact.id}: manifest source does not match evidence source_url`);
     }
+    validateEvidenceContract(artifact, evidence, fail);
     evidenceById.set(artifact.id, evidence);
   }
 
@@ -285,7 +406,66 @@ export function validateOverclaimLedger({ ledger, ledgerBytes, manifest, markdow
     fail('rendered Markdown correction-time values do not match the ledger metrics');
   }
 
+  for (const incident of incidents) {
+    const section = markdownSection(renderedMarkdown, incident.id);
+    if (!section) {
+      fail(`${incident.id}: rendered Markdown incident section is missing`);
+      continue;
+    }
+    const requiredTokens = [
+      [`| Maturity | **${incident.maturity}** |`, 'maturity'],
+      [`| Correction state | **${incident.correction_status}** |`, 'correction state'],
+      [`| Claim caught | ${incident.claim} |`, 'claim'],
+      [`| Truth | ${incident.truth} |`, 'truth'],
+      [`| First detection | ${markdownTimestamp(incident.first_detected_at)} |`, 'timestamp'],
+      ['| Failed policy run |', 'failed-run row'],
+      [`(${incident.first_run_url})`, 'failed-run URL'],
+    ];
+    if (incident.correction_status === 'RESOLVED') {
+      requiredTokens.push(
+        ['| Correction |', 'correction row'],
+        [`(${incident.correction_url})`, 'correction URL'],
+        [`| Corrected | ${markdownTimestamp(incident.corrected_at)} |`, 'correction timestamp'],
+        [
+          `| Observed correction time | **${formatDuration(incident.observed_correction_time_seconds)}** (\`n=1\`) |`,
+          'correction duration',
+        ],
+      );
+    }
+    for (const [token, field] of requiredTokens) {
+      if (!section.includes(token)) {
+        fail(`${incident.id}: rendered Markdown ${field} does not match the ledger`);
+      }
+    }
+  }
+
   for (const related of ledger.related_non_ci_incidents ?? []) {
+    const section = markdownSection(renderedMarkdown, related.id);
+    if (!section) {
+      fail(`${related.id}: rendered Markdown incident section is missing`);
+    } else {
+      const requiredTokens = [
+        [`| Maturity | **${related.maturity}** |`, 'maturity'],
+        [`| Correction state | **${related.correction_status}** |`, 'correction state'],
+        [`| Claim reported | ${related.claim} |`, 'claim'],
+        [`| Truth | ${related.truth} |`, 'truth'],
+        [`| Observed | ${markdownTimestamp(related.detected_at)} |`, 'timestamp'],
+        ['| Operations report |', 'operations-report row'],
+        [`(${related.evidence_commit_url})`, 'operations-report URL'],
+        ['| Overclaim guard |', 'overclaim-guard row'],
+        [`(${related.overclaim_guard_run_url})`, 'overclaim-guard URL'],
+        [`**${related.overclaim_guard_conclusion}**`, 'overclaim-guard conclusion'],
+        ['| Candidate reconciliation |', 'reconciliation row'],
+        [`(${related.candidate_reconciliation_commit_url})`, 'reconciliation URL'],
+        ['| Counted in CI metric | **No** |', 'CI-count exclusion'],
+        [`**Exclusion reason:** ${related.exclusion_reason}`, 'exclusion reason'],
+      ];
+      for (const [token, field] of requiredTokens) {
+        if (!section.includes(token)) {
+          fail(`${related.id}: rendered Markdown ${field} does not match the ledger`);
+        }
+      }
+    }
     if (related.counted_in_ci_metric !== false) {
       fail(`${related.id}: related non-CI incident must be excluded from the CI metric`);
     }
