@@ -1,0 +1,22 @@
+{
+  "schemaVersion": "szl.vertical-conformance.manifest.v1",
+  "surface": "insurance",
+  "repository": "szl-holdings/insurance-or-david-leads",
+  "disposition": "ABSENT",
+  "note": "No insurance product artifact or public insurance repository was observed on 2026-07-25. david-leads was private and cannot be treated as a conformant public surface.",
+  "registration": {
+    "artifactId": "artifacts/insurance",
+    "artifactManifest": "artifacts/insurance/.replit-artifact/artifact.toml"
+  },
+  "documentation": {
+    "readme": "artifacts/insurance/README.md"
+  },
+  "deployment": {
+    "baseUrlEnv": "INSURANCE_CONFORMANCE_BASE_URL",
+    "expectedGitShaEnv": "INSURANCE_DEPLOYED_GIT_SHA"
+  },
+  "evidence": {
+    "publicKeyEnv": "INSURANCE_CONFORMANCE_PUBLIC_KEY",
+    "publicKeyFingerprintEnv": "INSURANCE_CONFORMANCE_PUBLIC_KEY_SHA256"
+  }
+}
