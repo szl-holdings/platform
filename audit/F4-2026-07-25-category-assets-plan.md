@@ -1,0 +1,55 @@
+# Workcell F4-2026-07-25-CATEGORY-ASSETS
+
+- Status: LOCALLY VERIFIED / EXTERNAL PUBLICATION PENDING
+- Agent: CodexSmith
+- Objective: stage an Apache-2.0 Decision-SLSA and evidence-doctrine reference package without claiming an external publication, DOI deposit, third-party log, replay, or hardware attestation that has not been verified.
+- Original package files planned:
+  - `packages/evidence-doctrine/package.json`
+  - `packages/evidence-doctrine/LICENSE`
+  - `packages/evidence-doctrine/README.md`
+  - `packages/evidence-doctrine/specs/DSLSA-v14.md`
+  - `packages/evidence-doctrine/docs/SZL_SELF_ASSESSMENT.md`
+  - `packages/evidence-doctrine/src/index.ts`
+  - `packages/evidence-doctrine/src/index.test.ts`
+  - `packages/evidence-doctrine/python/evidence_doctrine.py`
+  - `packages/evidence-doctrine/python/test_evidence_doctrine.py`
+- Scope reconciliation recorded before review remediation:
+  - the original plan omitted registry, workcell, lockfile, and package-config
+    files that the implementation required; the exact full branch scope is:
+  - `SOURCE_OF_TRUTH.md`
+  - `audit/F4-2026-07-25-category-assets-plan.md`
+  - `audit/F4-2026-07-25-category-assets-proof.md`
+  - `audit/README.md`
+  - `audit/source-of-truth.json`
+  - `docs/operations/known-gaps.md`
+  - `packages/evidence-doctrine/LICENSE`
+  - `packages/evidence-doctrine/README.md`
+  - `packages/evidence-doctrine/docs/SZL_SELF_ASSESSMENT.md`
+  - `packages/evidence-doctrine/package.json`
+  - `packages/evidence-doctrine/python/.gitignore`
+  - `packages/evidence-doctrine/python/evidence_doctrine.py`
+  - `packages/evidence-doctrine/python/test_evidence_doctrine.py`
+  - `packages/evidence-doctrine/specs/DSLSA-v14.md`
+  - `packages/evidence-doctrine/src/index.test.ts`
+  - `packages/evidence-doctrine/src/index.ts`
+  - `packages/evidence-doctrine/tsconfig.json`
+  - `packages/evidence-doctrine/turbo.json`
+  - `pnpm-lock.yaml`
+- Success criteria:
+  - D1 through D4 are monotonic and fail closed.
+  - D1 records inputs, policy, and output.
+  - D2 additionally requires signed, tamper-evident evidence.
+  - D3 additionally requires a third-party transparency log, byte-identical replay, and offline verification.
+  - D4 additionally requires hardware-attested execution, a formally specified policy, and a machine-checked denial.
+  - Lambda Conjecture 1 remains open and cannot be presented as proved or green.
+  - TypeScript and Python implementations agree on representative cases.
+  - Any competitor comparison is limited to public documentation and is explicitly not a product audit.
+- Verification planned:
+  - package tests
+  - Python syntax compilation
+  - repository formatting and claim checks for changed files
+  - full GitHub CI after push
+- External boundaries:
+  - the intended Zenodo concept DOI is a target only; deposit is NOT VERIFIED
+  - the standalone public repository is NOT CREATED
+  - third-party log, replay, and hardware evidence are NOT inferred from documentation

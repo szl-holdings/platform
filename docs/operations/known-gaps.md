@@ -1,6 +1,6 @@
 # SZL Holdings — Known Gaps Register (Security & Operations)
 
-**Last updated:** 2026-04-25 (rev 10 — Operationalization Sweep Task #3489)  
+**Last updated:** 2026-07-26 (rev 13 — Decision-SLSA draft registration)
 **Owner:** Engineering / DevOps  
 **Audience:** Enterprise architects, Series A technical advisors, incoming VP Engineering
 
@@ -99,6 +99,15 @@ Operational gaps, process health, test coverage, observability, team ownership.
 ---
 
 ## Full Gap Registry
+
+### Decision-SLSA Draft Package (Open Evidence and Publication Boundaries)
+
+| ID | Gap | Area | Resolution / Status |
+|----|-----|------|---------------------|
+| DSLSA-001 | The intended standalone public repository has not been created. | Publication | Open — the reference package remains staged only inside this monorepo. |
+| DSLSA-002 | The intended Zenodo concept DOI `10.5281/zenodo.19944926` has not been deposited or independently verified. | Publication | Open — the DOI is a target only and must not be cited as a published artifact. |
+| DSLSA-003 | No verified third-party transparency log, byte-identical replay, or offline-verification packet establishes D3 for an estate decision. | Decision evidence | Open — the evaluator records absent/unverified evidence and cannot infer D3. |
+| DSLSA-004 | No verified hardware-attested execution, formally specified policy, or machine-checked denial establishes D4 for an estate decision. | Decision evidence | Open — the evaluator records absent/unverified evidence and cannot infer D4. |
 
 ### P0 — Critical / High (Resolved or Immediate Action)
 
