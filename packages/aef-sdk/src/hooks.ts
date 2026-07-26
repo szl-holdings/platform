@@ -51,7 +51,11 @@ function resolveClientConfig(opts: UseAefSearchOptions): Partial<AefClientConfig
 }
 
 function getViteEnv(key: string): string | undefined {
-  const viteEnv = import.meta.env;
+  const viteEnv = (
+    import.meta as ImportMeta & {
+      readonly env?: Readonly<Record<string, string | undefined>>;
+    }
+  ).env;
   if (viteEnv) {
     return viteEnv[key] ?? viteEnv[`VITE_${key}`] ?? undefined;
   }

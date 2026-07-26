@@ -1,6 +1,14 @@
 #!/usr/bin/env node
 import { runConformance } from './conformance.mjs';
 
+function writeStdout(value) {
+  process.stdout.write(`${value}\n`);
+}
+
+function writeStderr(value) {
+  process.stderr.write(`${value}\n`);
+}
+
 function parseArgs(argv) {
   const args = { json: false };
   for (let index = 0; index < argv.length; index += 1) {
@@ -18,19 +26,17 @@ try {
   const args = parseArgs(process.argv.slice(2));
   const report = await runConformance({ surface: args.surface });
   if (args.json) {
-    console.log(JSON.stringify(report, null, 2));
+    writeStdout(JSON.stringify(report, null, 2));
   } else {
-    console.log(
+    writeStdout(
       `Conformance: ${report.surface} ${report.passed}/${report.total} ${report.conformant ? 'PASS' : 'FAIL'}`,
     );
     for (const check of report.checks) {
-      console.log(`${check.status.padEnd(4)} ${check.id}: ${check.detail}`);
+      writeStdout(`${check.status.padEnd(4)} ${check.id}: ${check.detail}`);
     }
   }
   process.exitCode = report.conformant ? 0 : 1;
 } catch (error) {
-  console.error(
-    `Conformance usage error: ${error instanceof Error ? error.message : String(error)}`,
-  );
+  writeStderr(`Conformance usage error: ${error instanceof Error ? error.message : String(error)}`);
   process.exitCode = 2;
 }

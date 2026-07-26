@@ -1,0 +1,152 @@
+{
+  "schema": "szl.truth/v1",
+  "generated_at": "2026-07-26T03:13:04.831Z",
+  "generated_by": "UNAVAILABLE",
+  "metrics": {
+    "surfaces_customer_facing": {
+      "value": 0,
+      "label": "MEASURED",
+      "source": "apps/*/product.manifest.json",
+      "definition": "Customer-facing verticals satisfying the mandatory manifest condition. A non-zero count also requires live health and receipt conformance before publication."
+    },
+    "platform_tests": {
+      "passed": null,
+      "total": null,
+      "label": "UNAVAILABLE",
+      "source": "artifacts/test-results.json",
+      "definition": "Passed and total tests from a fresh machine-readable test run.",
+      "reason": "SOURCE_MISSING"
+    },
+    "ouroboros_tests": {
+      "passed": null,
+      "total": null,
+      "label": "UNAVAILABLE",
+      "source": "fresh Ouroboros Vitest JSON",
+      "definition": "Passed and total tests from a fresh machine-readable test run.",
+      "reason": "SOURCE_MISSING"
+    },
+    "mcp_e2e_tests": {
+      "passed": null,
+      "total": null,
+      "label": "UNAVAILABLE",
+      "source": "artifacts/mcp-e2e-test-results.json",
+      "definition": "Passed and total tests from a fresh machine-readable test run.",
+      "reason": "SOURCE_MISSING"
+    },
+    "monorepo_packages": {
+      "value": 198,
+      "label": "MEASURED",
+      "source": "pnpm-workspace.yaml package manifests",
+      "definition": "Workspace package manifests included by the canonical pnpm workspace, excluding explicit workspace exclusions."
+    },
+    "api_endpoints": {
+      "value": 181,
+      "label": "MEASURED",
+      "source": "static router verb-registration scan",
+      "definition": "Express-style app/router/server HTTP verb call sites in route-bearing source files; this is a source count, not reachability."
+    },
+    "db_tables": {
+      "value": null,
+      "label": "UNAVAILABLE",
+      "source": "Drizzle live introspection",
+      "definition": "Tables present in the live canonical database after Drizzle introspection.",
+      "reason": "DATABASE_NOT_CONNECTED"
+    },
+    "db_table_definitions_static": {
+      "value": 1067,
+      "label": "MEASURED",
+      "source": "lib/db/src/schema static Drizzle scan",
+      "definition": "Static pgTable/mysqlTable/sqliteTable call sites; this is not a live provisioned-table count."
+    },
+    "ci_workflows": {
+      "value": 45,
+      "label": "MEASURED",
+      "source": ".github/workflows/*.{yml,yaml}",
+      "definition": "Workflow definition files in the platform repository."
+    },
+    "github_public_repositories": {
+      "value": 54,
+      "label": "MEASURED",
+      "source": "GitHub REST /orgs/szl-holdings/repos?type=public",
+      "definition": "Current public repositories returned by GitHub; archived repositories remain included."
+    },
+    "hf_models": {
+      "value": 15,
+      "label": "MEASURED",
+      "source": "Hugging Face API /api/models?author=SZLHOLDINGS",
+      "definition": "Current public models attributed to the SZLHOLDINGS account."
+    },
+    "hf_datasets": {
+      "value": 26,
+      "label": "MEASURED",
+      "source": "Hugging Face API /api/datasets?author=SZLHOLDINGS",
+      "definition": "Current public datasets attributed to the SZLHOLDINGS account."
+    },
+    "hf_spaces": {
+      "value": 25,
+      "label": "MEASURED",
+      "source": "Hugging Face API /api/spaces?author=SZLHOLDINGS",
+      "definition": "Current public Spaces attributed to the SZLHOLDINGS account."
+    },
+    "ghcr_a11oy_package_live": {
+      "value": true,
+      "label": "MEASURED",
+      "source": "GHCR v2 tags probe for ghcr.io/szl-holdings/a11oy",
+      "definition": "True only when the public registry grants pull scope and returns at least one tag; this is not a total package count."
+    },
+    "lean_theorems_locked": {
+      "value": 8,
+      "label": "REPORTED",
+      "source": "szl-holdings/lutar-lean locked theorem roster",
+      "definition": "Theorems reported as locked and axiom-free; requires a fresh external Lean build for MEASURED status."
+    },
+    "lean_sorry_count": {
+      "value": null,
+      "label": "UNAVAILABLE",
+      "source": "fresh lutar-lean lake build log",
+      "definition": "Sorry declarations observed in a fresh Lean build.",
+      "reason": "SOURCE_MISSING"
+    },
+    "doctrine_v11_declarations": {
+      "value": 749,
+      "label": "REPORTED",
+      "source": "Doctrine v11 lock metadata (docs/architecture/chakras.md)",
+      "definition": "Lean declarations in the locked Doctrine v11 corpus."
+    },
+    "doctrine_v11_unique_axioms": {
+      "value": 14,
+      "label": "REPORTED",
+      "source": "Doctrine v11 lock metadata (docs/architecture/chakras.md)",
+      "definition": "Unique axioms tracked across the locked Doctrine v11 corpus; not an axiom-free theorem count."
+    },
+    "doctrine_v11_tracked_sorries": {
+      "value": 163,
+      "label": "REPORTED",
+      "source": "Doctrine v11 lock metadata (docs/architecture/chakras.md)",
+      "definition": "Tracked sorry obligations across the locked Doctrine v11 corpus."
+    },
+    "lambda_overhead_ms_median": {
+      "value": null,
+      "label": "UNAVAILABLE",
+      "source": "artifacts/lambda-benchmark.json",
+      "definition": "Median measured Lambda overhead in milliseconds.",
+      "reason": "SOURCE_MISSING"
+    },
+    "receipt_chain_depth": {
+      "value": null,
+      "label": "UNAVAILABLE",
+      "source": "GET /api/a11oy/v1/receipts/head",
+      "definition": "Depth reported by the canonical live receipt-chain head endpoint.",
+      "reason": "ENDPOINT_UNAVAILABLE"
+    }
+  },
+  "doi": {
+    "concept": "10.5281/zenodo.19944926",
+    "latest": {
+      "value": "10.5281/zenodo.20490218",
+      "label": "MEASURED",
+      "source": "Zenodo REST /api/records/19944926",
+      "definition": "Latest version DOI resolved from the stable SZL Holdings concept record."
+    }
+  }
+}

@@ -3,9 +3,42 @@
 Canonical reference for API surface metrics cited in investor due diligence.
 See `DATA-MODEL.md` for schema and table counts; `ARCHITECTURE.md` for system topology.
 
+> **TRUTH LOCK — 2026-07-25.** The generated artifact
+> `artifacts/SOURCE_OF_TRUTH.json` is authoritative for current estate counts.
+> The April inventory retained below is a historical `REPORTED` snapshot, not a
+> current measurement.
+
+## Current Evidence
+
+| Claim | Value | Label | Source |
+|---|---:|---|---|
+| Static Express-style route registrations across scanned workspace roots | 181 | MEASURED | `artifacts/SOURCE_OF_TRUTH.json`; source count, not runtime reachability |
+| Tracked route modules under `artifacts/api-server/src/routes` | 1 | MEASURED | repository tree at truth-lock commit |
+| OpenAPI operation and path coverage | UNAVAILABLE | UNKNOWN | no current generated OpenAPI receipt |
+| GraphQL type count | UNAVAILABLE | UNKNOWN | no current generated schema receipt |
+
+The tracked artifact server currently exposes the Ouroboros route module and a
+global authentication enforcer. The CSRF package implements safe-method
+classification, timing-safe pair comparison, and cookie options. Whether every
+state-changing host route mounts that helper is `UNKNOWN` until a runtime
+middleware receipt is produced.
+
+## Current Key Route Paths
+
+These route-relative paths are verified directly against the one tracked
+artifact-server route module. The host mount is not inferred here.
+
+| Group | Path | Route File |
+|---|---|---|
+| A11oy | `/a11oy/guard` | `artifacts/api-server/src/routes/ouroboros.ts` |
+| A11oy | `/a11oy/pulse` | `artifacts/api-server/src/routes/ouroboros.ts` |
+| Amaru | `/amaru/observe-metric` | `artifacts/api-server/src/routes/ouroboros.ts` |
+| Sentra | `/sentra/anchor-event` | `artifacts/api-server/src/routes/ouroboros.ts` |
+| Sentra | `/sentra/anchor-state` | `artifacts/api-server/src/routes/ouroboros.ts` |
+
 ---
 
-## Quick Reference
+## Historical Quick Reference (REPORTED April 2026 Snapshot)
 
 | Metric | Stated value | Source |
 |--------|-------------|--------|

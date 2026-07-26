@@ -1,0 +1,14 @@
+{
+  "schema_version": "1.0.0",
+  "maturity": "MEASURED",
+  "repository": "szl-holdings/platform",
+  "kind": "github_commit_correction",
+  "commit": "e4ca9006d905748670496908a2223f12f61cbe7e",
+  "committed_at": "2026-07-01T02:23:05Z",
+  "signature_verified": true,
+  "verification_reason": "valid",
+  "changed_files": [
+    "README.md"
+  ],
+  "source_url": "https://github.com/szl-holdings/platform/commit/e4ca9006d905748670496908a2223f12f61cbe7e"
+}

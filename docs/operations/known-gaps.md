@@ -8,6 +8,45 @@ This document is the canonical reference for known security, quality, and compli
 
 ---
 
+## 2026-07-25 Series A Truth Lock
+
+The generated truth artifact now fails closed when a metric cannot be established
+from a local manifest, a machine-readable test aggregate, or an authorized live
+receipt. The remaining gaps are:
+
+- **Product surfaces:** `0` MEASURED because no qualifying surface manifest or
+  live deployment receipt is available in this repository.
+- **Per-test counts:** the verified workspace graph completed `109/109` test
+  tasks, but no machine-readable `artifacts/test-results.json` aggregate exists,
+  so unit/integration/e2e counts remain `UNAVAILABLE`.
+- **Historical claim corpus:** the full audit reports `187` findings and skips
+  `694` comparisons whose canonical metric is `UNAVAILABLE`. The required PR
+  gate prevents newly introduced drift; the inherited corpus remains an
+  explicit remediation backlog.
+- **Database tables, Lean sorry count, Lambda count, and receipt-chain depth:**
+  `UNAVAILABLE` pending an authoritative local source
+  or authorized live receipt.
+- **Repository-wide TypeScript build:** the normal Turbo graph reaches unbuilt
+  composite declarations, while the root project-reference preflight exposes
+  existing missing Node typings and TypeScript 6 `rootDir` migrations in
+  unrelated libraries. Focused changed packages typecheck; the full graph is
+  not release-green and needs a dedicated baseline migration.
+- **Repository consolidation:** the live organization has `54` public
+  repositories, not the historical target of `9`. Visibility, archival,
+  deletion, and history changes require explicit founder approval and a tested
+  restoration plan.
+- **Hugging Face models:** `15` were MEASURED from the public API.
+- **Hugging Face datasets:** `26` were MEASURED from the public API.
+- **Hugging Face Spaces:** `25` were MEASURED from the public API. No private
+  asset was accessed, exported, or deployed.
+- **Independent review:** the organization currently has no eligible independent
+  collaborator. Do not manufacture or self-approve reviews. Keep required
+  checks, signed commits, linear history, conversation resolution, and exact-head
+  verification; transition to independent review after the first qualified hire
+  without creating a self-deadlock before then.
+
+---
+
 ## Viewer Guide by Persona
 
 ### For Enterprise Architects
@@ -43,7 +82,7 @@ Risk exposure, compliance posture, diligence readiness.
 | GAP-002 | No CI/CD automated secret scanning | Med | ✅ Resolved Apr-2026 |
 | GAP-003 | Android keystore not managed by EAS | Med | ✅ Resolved Apr-2026 |
 | VD1 | No responsible disclosure policy / `security.txt` | P2 | ✅ Resolved Apr-2026 (`/.well-known/security.txt` published, RFC 9116 compliant) |
-| KG025 | WCAG accessibility not systematically audited | P2 | ✅ Resolved Apr-2026 (`audit/A11OY_ACCESSIBILITY_AUDIT.md` — all 11 surfaces, F001–F007 findings). F007 skip nav implemented in `artifacts/szl-holdings/src/App.tsx` (WCAG 2.4.1 Level A). Lighthouse a11y gate enforced as CI hard-fail. Remaining F001–F006 remediations are sprint backlog items. |
+| KG025 | WCAG accessibility not systematically audited | P2 | ✅ Resolved Apr-2026 (`audit/A11OY_ACCESSIBILITY_AUDIT.md` — all 11 audited UI routes, F001–F007 findings). F007 skip nav implemented in `artifacts/szl-holdings/src/App.tsx` (WCAG 2.4.1 Level A). Lighthouse a11y gate enforced as CI hard-fail. Remaining F001–F006 remediations are sprint backlog items. |
 
 **Diligence verdict:** All P0 security gaps identified in the pre-sprint audit are resolved. KG011 (CodeQL SAST), KG012 (dependency review), GAP-002 (secret scanning), and KG010 (E2E regression suite) are now resolved — CI security and quality gates are live. Remaining open items (P1–P2, High) are scoped, have remediation owners, and do not represent critical blockers for Series A close.
 
@@ -168,7 +207,7 @@ Operational gaps, process health, test coverage, observability, team ownership.
 | TG-005 | Object storage tenant isolation not tested | Quality / Security | P2 | ⚠️ Open — Sprint 4 |
 | TG-006 | GraphQL resolver tenant scoping partial | Quality / Security | P2 | ⚠️ Open — Sprint 4 |
 | TG-007 | No automated E2E tests for mobile (Expo / CORTEX) | Quality | P2 | ⚠️ Open — Sprint 4 |
-| TG-008 | Systematic WCAG accessibility testing absent (KG025) | Quality / Compliance | P2 | ✅ Resolved Apr-2026 — `audit/A11OY_ACCESSIBILITY_AUDIT.md` covers all 11 surfaces; F001–F007 findings documented with WCAG criteria and remediation plan |
+| TG-008 | Systematic WCAG accessibility testing absent (KG025) | Quality / Compliance | P2 | ✅ Resolved Apr-2026 — `audit/A11OY_ACCESSIBILITY_AUDIT.md` covers all 11 audited UI routes; F001–F007 findings documented with WCAG criteria and remediation plan |
 
 #### Test Fixes (resolved in Phase 4–5 audit)
 
@@ -333,7 +372,7 @@ Operational gaps, process health, test coverage, observability, team ownership.
 
 - **2026-04-17 (Phase 10–11 Category Leadership & Final Diligence):** Seven stakeholder lens diligence review completed. Category named canonically as "Governed Decision Infrastructure" — CATEGORY_POSITIONING.md updated to v2.1 with three new sections (why legacy observability is insufficient, why generic AI copilots are insufficient, why automation without proof/policy is insufficient). INVESTOR_NARRATIVE.md updated to v3.0 (Forge governed agent lifecycle, Decision Fabric, category OS framing). MOAT_MAP.md updated to v2.0. MARKET_POSITIONING.md updated to v2.0. COMPANY_FACT_SHEET.md updated. TECHNICAL_DILIGENCE_PACKET.md footer updated to reflect full 13-phase audit completion. 4 new P2 doc accuracy gaps catalogued (TD-007 through TD-010), all 4 resolved. Six investor docs corrected from "five primitives" to "six primitives" with Event Fabric explicitly listed. KNOWN-GAPS.md rev 8 (final category elevation pass).
 
-- **2026-04-25 (A11OY Operationalization Sweep — Task #3489):** Full operationalization sweep completed. Gaps fully closed: VD1 (security.txt published RFC 9116 compliant at web + API origins, SECURITY.md updated), KG019 (Lighthouse CI confirmed; accessibility upgraded from warn to hard error gate), KG020c (virusScan.ts enhanced: tier-1 YARA-style signatures + tier-2 ClamAV-REST/Cloudmersive feature flag), KG023 (sli-slo.md confirmed), KG024 (manualChunks bundle splitting confirmed in szl-holdings vite.config), KG025 (A11OY_ACCESSIBILITY_AUDIT.md — all 11 surfaces), KG030 (posthog-init.ts confirmed: posthog-js installed with PII scrubbing), KG031 (public-status.ts registered). Gaps partially closed: KG020d (lib/encryption.ts helper — DB columns not yet wired; deferred to #3757). GAP-001 runbook ready (docs/operations/GAP-001-credential-rotation.md — actual rotation requires authorized operator). Four Pathfinder audit reports: Context Pack, Release Readiness Score (77.2/100), Screenshot Freshness (65/100), Public Claim Safety (82/100). Proof Packet: audit/A11OY_OPERATIONALIZATION_PROOF.md. Workflow status: 12/15 running; 3 platform-level port conflicts. KNOWN-GAPS.md updated to rev 12.
+- **2026-04-25 (A11OY Operationalization Sweep — Task #3489):** Full operationalization sweep completed. Gaps fully closed: VD1 (security.txt published RFC 9116 compliant at web + API origins, SECURITY.md updated), KG019 (Lighthouse CI confirmed; accessibility upgraded from warn to hard error gate), KG020c (virusScan.ts enhanced: tier-1 YARA-style signatures + tier-2 ClamAV-REST/Cloudmersive feature flag), KG023 (sli-slo.md confirmed), KG024 (manualChunks bundle splitting confirmed in szl-holdings vite.config), KG025 (A11OY_ACCESSIBILITY_AUDIT.md — all 11 audited UI routes), KG030 (posthog-init.ts confirmed: posthog-js installed with PII scrubbing), KG031 (public-status.ts registered). Gaps partially closed: KG020d (lib/encryption.ts helper — DB columns not yet wired; deferred to #3757). GAP-001 runbook ready (docs/operations/GAP-001-credential-rotation.md — actual rotation requires authorized operator). Four Pathfinder audit reports: Context Pack, Release Readiness Score (77.2/100), Screenshot Freshness (65/100), Public Claim Safety (82/100). Proof Packet: audit/A11OY_OPERATIONALIZATION_PROOF.md. Workflow status: 12/15 running; 3 platform-level port conflicts. KNOWN-GAPS.md updated to rev 12.
 
 - **2026-04-17 (Diligence Security Gap Remediation Sprint):** Five pre-commercial security gaps from the diligence review resolved or formally accepted. (1) **MFA (KG026)** — Formally accepted. IdP-level MFA via Azure AD SSO is the enforced control; platform-native MFA scoped for enterprise tier. (2) **IP address storage (KG034)** — Resolved. `hashIp()` in `lib/audit/src/ip-hash.ts` applies SHA-256 with configurable salt before all audit and session IP storage. Raw IPs never reach the DB. (3) **Input validation (KG003–KG008)** — Confirmed resolved. All high-traffic write routes verified to have Zod `validateBody()` applied (already resolved in Apr-2026 hardening sprint). (4) **Session revocation on role change (AF-010)** — Resolved. `revokeUserSessionsOnRoleChange()` added to `session-policy.ts`; wired into SCIM group member operations and new `PUT /admin/users/:userId/roles` endpoint. (5) **Dependency pinning (KG035)** — Formally accepted. `pnpm-lock.yaml` provides exact pinning; `pnpm install --frozen-lockfile` used in all CI/deploy pipelines; dependency vulnerability scanning via KG012. KNOWN-GAPS.md rev 9.
 

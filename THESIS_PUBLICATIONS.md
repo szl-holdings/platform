@@ -115,7 +115,7 @@ The authoritative source is `API-SPEC.md` in the platform repo (PR #141).
 
 ### 4.4 Performance and engineering
 
-**18. The Lutar Invariant Λ as a weighted-geometric scalar trust aggregator.** Λ(x; w) = Π xᵢ^wᵢ with weights wᵢ drawn from an explicit Egyptian unit-fraction decomposition that is *inspectable* by construction. Four axioms (A1 monotonicity, A2 zero-pinning, A3 Egyptian inspectability, A4 page-curve concavity), each proven by explicit numerical witness. **22 falsifiable assertions** in the public test surface (`packages/ouroboros/src/lutar-invariant-proof.test.ts` in [`szl-holdings/ouroboros`](https://github.com/szl-holdings/ouroboros)). To the author's knowledge, the specific composition (weighted-geometric + Egyptian-fraction weights + four-axiom set + public falsifiable test) is novel; related work cited in v3 §6 uses arithmetic aggregation, learned weights, or unaxiomatized scalar metrics. Formal: papers v3 + v9.
+**18. The Lutar Invariant Λ as a weighted-geometric scalar trust aggregator.** Λ(x; w) = Π xᵢ^wᵢ with weights wᵢ drawn from an explicit Egyptian unit-fraction decomposition that is *inspectable* by construction. Four axioms (A1 monotonicity, A2 zero-pinning, A3 Egyptian inspectability, A4 page-curve concavity), each proven by explicit numerical witness. **22 falsifiable assertions** in the public test suite (`packages/ouroboros/src/lutar-invariant-proof.test.ts` in [`szl-holdings/ouroboros`](https://github.com/szl-holdings/ouroboros)). To the author's knowledge, the specific composition (weighted-geometric + Egyptian-fraction weights + four-axiom set + public falsifiable test) is novel; related work cited in v3 §6 uses arithmetic aggregation, learned weights, or unaxiomatized scalar metrics. Formal: papers v3 + v9.
 
 **19. Measured Λ₁₀ overhead at production scale.** Paper v11 reports **24,800 HTTP calls** across **8** production routes (A11oy, Amaru, Sentra) × 1,000 iterations × 2 arms (baseline / governed). Median overhead **0.49 – 0.59 ms** per route; p99 **≤ 1.27 ms**; **ρ = 1.000** on 8,000 / 8,000 governed pairs; 0 missing artefacts. Commit pin: `6c5c28366`. **48 / 48 Λ axiom tests** + **13 / 13 Λ adapter tests** passing on the same commit. Source: [`papers/v11/README.md`](https://github.com/szl-holdings/ouroboros-thesis/tree/main/papers/v11).
 
@@ -129,7 +129,7 @@ The authoritative source is `API-SPEC.md` in the platform repo (PR #141).
 
 **23. Amaru — convergent multi-source data sync.** Append-only delta logs, hash-verified ingest, ten innovations beyond the open-source reverse-ETL field documented in a side-by-side audit. Binding: [`szl-holdings/amaru`](https://github.com/szl-holdings/amaru).
 
-**24. Decision Fabric — cross-primitive query layer.** A governed read substrate that joins signal, recommendation, policy, simulation, execution, proof, and outcome under a single correlation ID. Workflow 360 (cross-primitive joins), Entity Investigation (per-entity timelines across all primitives), Recommendation Trace (AI output → outcome with prediction error). Schema: [`lib/db/src/schema/decision_fabric.ts`](https://github.com/szl-holdings/platform/blob/main/lib/db/src/schema/decision_fabric.ts). Namespace: `/api/decision-fabric`. The integration point through which the CPS standard renders inside the existing seven customer-facing surfaces.
+**24. Decision Fabric — cross-primitive query layer.** A governed read substrate that joins signal, recommendation, policy, simulation, execution, proof, and outcome under a single correlation ID. Workflow 360 (cross-primitive joins), Entity Investigation (per-entity timelines across all primitives), Recommendation Trace (AI output → outcome with prediction error). Schema: [`lib/db/src/schema/decision_fabric.ts`](https://github.com/szl-holdings/platform/blob/main/lib/db/src/schema/decision_fabric.ts). Namespace: `/api/decision-fabric`. It is the integration point through which the CPS standard can render inside product integrations; this architectural role does not assert that any integration currently satisfies the full product-surface conformance definition.
 
 ---
 
@@ -160,28 +160,30 @@ The `run_manifest.json` in that directory lists per-deliverable `sha` hashes com
 
 ---
 
-## 6. Verified metrics (re-verified 2026-05-05)
+## 6. Evidence-labelled metrics (refreshed 2026-07-25)
 
-Every metric below is re-verified by command. The commands are documented in the platform repo's `OPERATIONAL-AUDIT.md`. Where a metric is asserted but the source command lives in a private repo, that is flagged.
+Current estate measurements come only from
+`artifacts/SOURCE_OF_TRUTH.json`. Paper-specific figures remain historical
+`REPORTED` results; they are not represented as current runtime measurements.
 
-| Metric | Value | Verification source |
-|---|---|---|
-| Concept DOI | `10.5281/zenodo.19944926` | [Zenodo](https://doi.org/10.5281/zenodo.19944926) (public) |
-| Per-version DOIs (v1–v11) | 11 distinct DOIs, listed in §3 | Each paper's `CITATION.cff` / `README.md` (public) |
-| Paper count | 11 (v1–v11) | [`papers/`](https://github.com/szl-holdings/ouroboros-thesis/tree/main/papers) (public) |
-| Customer-facing product surfaces | 8 + A11oy orchestration | APEX v2 dossier (PR #133) |
-| Database tables | 848 | `OPERATIONAL-AUDIT.md` (platform, private) |
-| API endpoint declarations | 5,524 | `OPERATIONAL-AUDIT.md` (private) |
-| Ouroboros packages | 28 | `OPERATIONAL-AUDIT.md` (private) |
-| Ouroboros guardrails tests | 62 passing | `OPERATIONAL-AUDIT.md` (private) |
-| Formal axes in Lutar invariant family | 9 (L₁..L₈ + L_Ω) | v9 (public, DOI `20053148`) |
-| Codex v11 nodes / typed edges | 76 / 95 across 11 domains | `OPERATIONAL-AUDIT.md` (private) |
-| Λ overhead (median) | 0.49 – 0.59 ms per route | v11 §3 (public, DOI `20119582`) |
-| Λ overhead (p99) | ≤ 1.27 ms per route | v11 §3 (public) |
-| ρ = 1.000 governed pairs | 8,000 / 8,000 | v11 §3 (public) |
-| Λ axiom tests passing | 48 / 48 | v11 §3 (public) |
-| Λ adapter tests passing | 13 / 13 | v11 §3 (public) |
-| `szl-holdings/ouroboros` test suite | 172 / 172 | [v3 paper README](https://github.com/szl-holdings/ouroboros-thesis/tree/main/papers/v3) (public) |
+| Metric | Value | Label | Verification source |
+|---|---|---|---|
+| Concept DOI | `10.5281/zenodo.19944926` | REPORTED | Generated truth artifact and [Zenodo](https://doi.org/10.5281/zenodo.19944926) |
+| Per-version DOIs (v1–v11) | 11 distinct DOIs, listed in §3 | REPORTED | Each paper's `CITATION.cff` / `README.md` |
+| Paper count | 11 (v1–v11) | REPORTED | [`papers/`](https://github.com/szl-holdings/ouroboros-thesis/tree/main/papers) |
+| Customer-facing product surfaces meeting manifest/health/receipt definition | 0 | MEASURED | `artifacts/SOURCE_OF_TRUTH.json` |
+| Monorepo packages | 198 | MEASURED | `pnpm -r list --depth -1 --json` via generated truth |
+| Database tables | UNAVAILABLE | UNKNOWN | No authorized live introspection receipt was available |
+| TypeScript route declarations | UNAVAILABLE | UNAVAILABLE | runtime router inventory is unavailable in the generated truth artifact |
+| Platform per-test result | UNAVAILABLE | UNKNOWN | `artifacts/test-results.json` was not produced |
+| Ouroboros per-test result | UNAVAILABLE | UNKNOWN | `artifacts/ouroboros-test-results.json` was not produced |
+| Formal axes in Lutar invariant family | 9 (L₁..L₈ + L_Ω) | REPORTED | v9, DOI `20053148` |
+| Codex v11 nodes / typed edges | 76 / 95 across 11 domains | REPORTED | Historical v11 audit snapshot |
+| Λ overhead (median) | 0.49–0.59 ms per route | REPORTED | v11 §3, DOI `20119582`; not a current benchmark |
+| Λ overhead (p99) | ≤1.27 ms per route | REPORTED | v11 §3; not a current benchmark |
+| ρ = 1.000 governed pairs | 8,000 / 8,000 | REPORTED | v11 §3 historical evaluation |
+| Λ axiom tests | 48 / 48 | REPORTED | v11 §3 historical evaluation |
+| Λ adapter tests | 13 / 13 | REPORTED | v11 §3 historical evaluation |
 
 ---
 

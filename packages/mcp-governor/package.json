@@ -1,0 +1,49 @@
+{
+  "name": "@szl/mcp-governor",
+  "version": "0.1.0",
+  "private": false,
+  "type": "module",
+  "description": "Fail-closed MCP capability-token, policy, and signed receipt contracts for governed tool execution.",
+  "files": [
+    "dist",
+    "README.md"
+  ],
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    },
+    "./capability": {
+      "types": "./dist/capability.d.ts",
+      "import": "./dist/capability.js"
+    },
+    "./governor": {
+      "types": "./dist/governor.d.ts",
+      "import": "./dist/governor.js"
+    },
+    "./receipt": {
+      "types": "./dist/receipt.d.ts",
+      "import": "./dist/receipt.js"
+    },
+    "./types": {
+      "types": "./dist/types.d.ts",
+      "import": "./dist/types.js"
+    }
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "scripts": {
+    "build": "tsc --build",
+    "prepack": "pnpm build",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "test": "tsx --test src/*.test.ts",
+    "lint": "biome lint ./src",
+    "lint:ci": "biome lint ./src"
+  },
+  "devDependencies": {
+    "@types/node": "catalog:",
+    "tsx": "catalog:",
+    "typescript": "catalog:"
+  }
+}
