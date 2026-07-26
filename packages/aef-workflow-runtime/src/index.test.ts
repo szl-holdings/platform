@@ -206,7 +206,13 @@ describe('ChunkPlannerActor', () => {
   });
 
   it('ingestDocumentWorkflow runs the chunk-plan step in token mode end-to-end', async () => {
-    const { ingestDocumentWorkflow } = await import('./workflows/ingest-document.js');
+    const { ChunkPlannerActor } = await import('./actors.js');
+    const { createIngestDocumentWorkflow } = await import('./workflows/ingest-document.js');
+    const tokenizer = {
+      encode: (text: string) => text.split(/\s+/).map((_, i) => i + 1),
+      decode: (ids: number[]) => ids.map((i) => `t${i}`).join(' '),
+    };
+    const workflow = createIngestDocumentWorkflow(new ChunkPlannerActor({ tokenizer }));
     const ctx = {
       workflowId: 'wf-int',
       tenantId: 'tenant-int',
@@ -221,7 +227,7 @@ describe('ChunkPlannerActor', () => {
       },
       approvalRequired: false,
     };
-    const planStep = ingestDocumentWorkflow.steps.find((s) => s.stepId === 'plan-chunks')!;
+    const planStep = workflow.steps.find((s) => s.stepId === 'plan-chunks')!;
     const result = await planStep.execute(ctx, []);
     expect(result.output.unit).toBe('tokens');
     expect(Number(result.output.totalChunks)).toBeGreaterThan(0);
