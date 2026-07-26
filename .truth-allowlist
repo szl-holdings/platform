@@ -37,6 +37,7 @@ API-CATALOGUE.md|* # reason: Generated per-route-family endpoint counts are scop
 artifacts/a11oy/src/pages/A11oyCode.tsx|14 # reason: The terminal is explicitly labeled as a scripted demonstration and is not live test evidence.
 artifacts/a11oy/src/pages/DevPlatform.tsx|* # reason: The product exploration surface explicitly labels its registry and evaluation values as seeded demonstrations, not live evidence.
 docs/CHANGELOG_PRECISION_EVOLUTION.md|14 # reason: Feature-scoped historical evolution route count, not the estate-wide API operation total.
+docs/metrics-reference.md|37 # reason: April 2026 change history preserves the old shared-library package subtotal, not the current monorepo package total.
 docs/strategy/FRONTIER_DOCTRINE.md|35 # reason: Guardian subsystem suite count, not the current total platform test metric.
 docs/strategy/FRONTIER_DOCTRINE.md|43 # reason: Tool-mesh subsystem suite count, not the current total platform test metric.
 load-tests/README.md|3 # reason: Scenario-local hot endpoint count, not the estate-wide API operation total.

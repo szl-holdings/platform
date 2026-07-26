@@ -17,6 +17,11 @@ function metrics(
       label: 'MEASURED',
       source: 'pnpm recursive workspace list',
     },
+    ci_workflows: {
+      value: 45,
+      label: 'MEASURED',
+      source: 'GitHub Actions workflow inventory',
+    },
   };
 }
 
@@ -61,6 +66,30 @@ test('accepts a numeric claim that matches available canonical evidence', () => 
     claimFailuresForLines(
       'docs/investor.md',
       ['The platform currently exposes 12 API endpoints.'],
+      metrics(12),
+      [],
+    ),
+    [],
+  );
+});
+
+test('rejects a stale measured workspace package claim', () => {
+  assert.deepEqual(
+    claimFailuresForLines(
+      'docs/investor/platform-thesis.md',
+      ['| pnpm workspace packages | 197 measured in `artifacts/SOURCE_OF_TRUTH.json` |'],
+      metrics(12),
+      [],
+    ),
+    ['docs/investor/platform-thesis.md:1: hardcoded 197; canonical value for this context is 199'],
+  );
+});
+
+test('does not treat an @workspace package identifier as estate-wide context', () => {
+  assert.deepEqual(
+    claimFailuresForLines(
+      'docs/aef/implementation-plan.md',
+      ['| `@workspace/aef-workflow-runtime` | Ships 5 workflows and 8 actor roles. |'],
       metrics(12),
       [],
     ),

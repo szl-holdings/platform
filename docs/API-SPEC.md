@@ -14,7 +14,8 @@ See `DATA-MODEL.md` for schema and table counts; `ARCHITECTURE.md` for system to
 |---|---:|---|---|
 | TypeScript route declarations across scanned workspace roots | UNAVAILABLE | UNAVAILABLE | runtime router inventory is unavailable in `artifacts/SOURCE_OF_TRUTH.json` |
 | Tracked route modules under `artifacts/api-server/src/routes` | 1 | MEASURED | repository tree at truth-lock commit |
-| OpenAPI operation and path coverage | UNAVAILABLE | UNKNOWN | no current generated OpenAPI receipt |
+| OpenAPI operations | 5,065 | MEASURED | OpenAPI 3.1 operations in `lib/api-spec/openapi.yaml`, locked by `artifacts/SOURCE_OF_TRUTH.json` |
+| OpenAPI path coverage | UNAVAILABLE | UNKNOWN | no current generated path-coverage receipt |
 | GraphQL type count | UNAVAILABLE | UNKNOWN | no current generated schema receipt |
 
 The tracked artifact server currently exposes the Ouroboros route module and a

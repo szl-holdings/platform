@@ -9,7 +9,7 @@ const ALLOWLIST_FILE = path.join(ROOT, '.truth-allowlist');
 const NUMBER_LITERAL = /(?<![\w.])(?:\d{1,3}(?:,\d{3})+|\d+)(?![\w.])/g;
 const WATCHWORD_SOURCE = String.raw`\b(?:tests|surfaces|packages|endpoints|workflows|spaces|models|datasets|theorems)\b`;
 const CLAIM_CONTEXT =
-  /\b(?:canonical|current|currently|total|public|passing|passed|locked|monorepo|ci|github actions|hugging face|hf|customer-facing|estate|organization|org)\b/i;
+  /\b(?:canonical|current|currently|total|public|passing|passed|locked|measured|monorepo|ci|github actions|hugging face|hf|customer-facing|estate|organization|org)\b/i;
 const EXTENSIONS = new Set(['.md', '.html', '.tsx']);
 const EXCLUDED = new Set(['.git', 'node_modules', 'dist', 'coverage', 'archive']);
 

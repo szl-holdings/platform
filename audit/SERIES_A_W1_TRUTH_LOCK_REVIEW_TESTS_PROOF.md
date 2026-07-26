@@ -36,6 +36,9 @@ The scoped plan was:
 - Added adjacent-line claim scanning with exact numeric source-line mapping.
 - Kept separate table rows, list items, code/object records, and completed
   sentences from leaking context into one another.
+- Recognized `measured` as current-claim context, locked the investor-facing
+  measured workspace-package form, and retained scoped `@workspace/*`
+  identifiers as non-estate context.
 
 ## Verification
 
@@ -48,7 +51,7 @@ applicable.
 | `pnpm truth:check` | PASS |
 | Local and independently sourced remote truth recomputation | PASS |
 | Truth schema and suppression-allowlist validation | PASS |
-| Focused truth tests | PASS — 32/32 |
+| Focused truth tests | PASS — 34/34 |
 | Full numeric-claim drift scan | PASS |
 | Strict documentation claims | PASS — 26/26 |
 | Biome check for changed TypeScript and `package.json` | PASS |
