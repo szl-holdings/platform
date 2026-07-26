@@ -6,7 +6,7 @@ import { fileURLToPath } from 'node:url';
 
 import { parse } from 'yaml';
 
-import { LOCAL_METRIC_NAMES, REMOTE_METRIC_NAMES } from './truth-schema.js';
+import { LOCAL_METRIC_NAMES, REMOTE_METRIC_NAMES, TRUTH_GENERATOR_ID } from './truth-schema.js';
 
 type EvidenceLabel = 'MEASURED' | 'REPORTED' | 'MODELED' | 'CONJECTURE' | 'UNKNOWN' | 'UNAVAILABLE';
 type Metric = {
@@ -24,7 +24,6 @@ type TestMetric = {
 const ROOT = path.resolve(import.meta.dirname, '..', '..');
 const OUTPUT = path.join(ROOT, 'artifacts', 'SOURCE_OF_TRUTH.json');
 export const TRUTH_SCHEMA = 'szl.truth/v1';
-export const TRUTH_GENERATOR = 'tools/truth/generate-truth.ts@szl.truth/v1';
 export const TRUTH_DOI = {
   concept: '10.5281/zenodo.19944926',
   latest: '10.5281/zenodo.20195368',
@@ -69,7 +68,7 @@ export function metricDrift(
 export function metadataDrift(existing: Record<string, unknown>): string[] {
   const expected: Record<string, unknown> = {
     schema: TRUTH_SCHEMA,
-    generated_by: TRUTH_GENERATOR,
+    generated_by: TRUTH_GENERATOR_ID,
     doi: TRUTH_DOI,
   };
   return Object.keys(expected).filter(
@@ -385,7 +384,7 @@ async function main(): Promise<void> {
   const truth = {
     schema: TRUTH_SCHEMA,
     generated_at: new Date().toISOString(),
-    generated_by: TRUTH_GENERATOR,
+    generated_by: TRUTH_GENERATOR_ID,
     metrics: {
       ...localMetrics,
       ...remoteMetrics,

@@ -1,3 +1,5 @@
+export const TRUTH_GENERATOR_ID = 'tools/truth/generate-truth.ts@szl.truth/v1';
+
 export const LOCAL_METRIC_NAMES = [
   'surfaces_customer_facing',
   'ouroboros_tests',

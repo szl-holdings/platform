@@ -48,7 +48,7 @@ applicable.
 | `pnpm truth:check` | PASS |
 | Local and independently sourced remote truth recomputation | PASS |
 | Truth schema and suppression-allowlist validation | PASS |
-| Focused truth tests | PASS — 30/30 |
+| Focused truth tests | PASS — 32/32 |
 | Full numeric-claim drift scan | PASS |
 | Strict documentation claims | PASS — 26/26 |
 | Biome check for changed TypeScript and `package.json` | PASS |

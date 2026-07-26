@@ -2,7 +2,7 @@ import { readFile } from 'node:fs/promises';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
-import { CANONICAL_METRIC_NAMES } from './truth-schema.js';
+import { CANONICAL_METRIC_NAMES, TRUTH_GENERATOR_ID } from './truth-schema.js';
 
 const ROOT = path.resolve(import.meta.dirname, '..', '..');
 const file = path.join(ROOT, 'artifacts', 'SOURCE_OF_TRUTH.json');
@@ -24,8 +24,9 @@ export function validateTruth(truth: Record<string, unknown>, nowMs = Date.now()
   if (truth.schema !== 'szl.truth/v1') failures.push('schema must equal szl.truth/v1');
   if (typeof truth.generated_at !== 'string')
     failures.push('generated_at must be an ISO-8601 string');
-  if (typeof truth.generated_by !== 'string')
-    failures.push('generated_by must be a git SHA or UNAVAILABLE');
+  if (truth.generated_by !== TRUTH_GENERATOR_ID) {
+    failures.push(`generated_by must equal ${TRUTH_GENERATOR_ID}`);
+  }
 
   const generated = Date.parse(String(truth.generated_at));
   if (!Number.isFinite(generated)) failures.push('generated_at is not parseable');

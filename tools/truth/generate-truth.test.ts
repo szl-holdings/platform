@@ -1,14 +1,8 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
 
-import {
-  metadataDrift,
-  metricDrift,
-  TRUTH_DOI,
-  TRUTH_GENERATOR,
-  TRUTH_SCHEMA,
-} from './generate-truth.js';
-import { REMOTE_METRIC_NAMES } from './truth-schema.js';
+import { metadataDrift, metricDrift, TRUTH_DOI, TRUTH_SCHEMA } from './generate-truth.js';
+import { REMOTE_METRIC_NAMES, TRUTH_GENERATOR_ID } from './truth-schema.js';
 
 const unavailable = {
   value: null,
@@ -61,7 +55,7 @@ test('accepts remote metrics only when all evidence objects match recomputation'
 function truthMetadata(): Record<string, unknown> {
   return {
     schema: TRUTH_SCHEMA,
-    generated_by: TRUTH_GENERATOR,
+    generated_by: TRUTH_GENERATOR_ID,
     doi: TRUTH_DOI,
   };
 }

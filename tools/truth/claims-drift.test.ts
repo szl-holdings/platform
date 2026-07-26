@@ -149,3 +149,25 @@ test('still scans a wrapped continuation inside one list item', () => {
     ['docs/list.md:1: hardcoded 198; canonical value for this context is 199'],
   );
 });
+
+test('does not recontextualize a complete claim using the next prose line', () => {
+  assert.deepEqual(
+    claimFailuresForLines(
+      'docs/runbook.md',
+      [
+        'Rate limits allow 5 requests per minute.',
+        'Canonical active surfaces are documented below.',
+      ],
+      {
+        ...metrics(12),
+        surfaces_customer_facing: {
+          value: 99,
+          label: 'MEASURED',
+          source: 'surface inventory',
+        },
+      },
+      [],
+    ),
+    [],
+  );
+});
