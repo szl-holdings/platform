@@ -57,7 +57,7 @@ The comparison should be run against both A11oy and any named competitor before 
 ## Safe conclusion
 
 - **CONJECTURE:** A11oy may differentiate through signed, identity-constrained, tamper-evident decision receipts that can be verified offline.
-- **REPORTED:** The current platform repository contains a local reference verifier and fail-closed conformance harness; it also reports that zero of three requested public target surfaces currently pass all seven conformance gates.
+- **REPORTED:** The current platform repository contains a local reference verifier and fail-closed conformance harness; it also reports that none of the assessed public target surfaces currently pass every required conformance gate.
 - **UNKNOWN:** Whether any named competitor provides an equivalent end-to-end mechanism.
 - **UNKNOWN:** Whether A11oy's mechanism is unique, commercially valuable, or independently reproducible outside the repository.
 
