@@ -10,6 +10,7 @@ docs/evolve-metrics-audit.md|* # reason: Dated subsystem audit contains local en
 docs/EXECUTIVE_AUDIT_SUMMARY.md|* # reason: Dated 2026-04-25 audit result is an immutable historical snapshot.
 docs/FIX_LOG.md|* # reason: Fix log records the stale numbers it corrected and must retain that historical evidence.
 docs/investor/readiness-gaps.md|* # reason: Dated coverage estimate is a scoped historical risk entry, not the current test result metric.
+docs/investor/audit-investor-readiness.md|* # reason: Dated investor-readiness audit preserves its point-in-time endpoint inventory as historical evidence.
 docs/launch/green-light-review.md|* # reason: Dated architecture review uses a workspace description rather than the generated monorepo metric.
 docs/OPEN_RISKS.md|* # reason: Dated risk register records the affected-package count for a specific failure, not total packages.
 docs/operations/codex-handoff.md|* # reason: Handoff step numbers sit near the word tests but are not metric claims.
