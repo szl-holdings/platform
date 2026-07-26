@@ -10,6 +10,8 @@ export const ASSET_TYPES = Object.freeze(['models', 'datasets', 'spaces']);
 export const DEFAULT_PAGE_SIZE = 100;
 export const DEFAULT_TIMEOUT_MS = 15_000;
 export const DEFAULT_MAX_PAGES = 100;
+export const COMPLETENESS_RULE =
+  'Follow rel=next cursor links to exhaustion; reject a full terminal page without a next link.';
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '../..');
 export const DEFAULT_SNAPSHOT_PATH = resolve(
@@ -173,8 +175,7 @@ export async function fetchLiveSnapshot({
       apiBase: 'https://huggingface.co/api',
       pagination: 'RFC_LINK_CURSOR',
       pageSize,
-      completenessRule:
-        'Follow rel=next cursor links to exhaustion; reject a full terminal page without a next link.',
+      completenessRule: COMPLETENESS_RULE,
     },
     assets: Object.fromEntries(entries),
   };
@@ -200,6 +201,16 @@ export function validateSnapshot(snapshot) {
     snapshot.source?.pagination !== 'RFC_LINK_CURSOR'
   ) {
     errors.push('source must identify the Hugging Face API and cursor-link pagination');
+  }
+  if (
+    !Number.isInteger(snapshot.source?.pageSize) ||
+    snapshot.source.pageSize < 1 ||
+    snapshot.source.pageSize > 100
+  ) {
+    errors.push('source.pageSize must be an integer from 1 through 100');
+  }
+  if (snapshot.source?.completenessRule !== COMPLETENESS_RULE) {
+    errors.push('source.completenessRule must identify the enforced cursor exhaustion rule');
   }
 
   const assetKeys =

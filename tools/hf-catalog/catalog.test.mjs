@@ -2,6 +2,7 @@ import assert from 'node:assert/strict';
 import test from 'node:test';
 import {
   compareSnapshots,
+  COMPLETENESS_RULE,
   fetchAssetIds,
   parseNextLink,
   SCHEMA,
@@ -34,7 +35,7 @@ function snapshot(models = ['SZLHOLDINGS/a']) {
       apiBase: 'https://huggingface.co/api',
       pagination: 'RFC_LINK_CURSOR',
       pageSize: 100,
-      completenessRule: 'test',
+      completenessRule: COMPLETENESS_RULE,
     },
     assets: {
       models: { count: models.length, ids: models, pages: 1 },
@@ -123,6 +124,30 @@ test('validateSnapshot rejects count, order, and ownership drift', () => {
   assert.ok(errors.some((error) => error.includes('count')));
   assert.ok(errors.some((error) => error.includes('SZLHOLDINGS')));
   assert.ok(errors.some((error) => error.includes('sorted')));
+});
+
+test('validateSnapshot requires exact pagination provenance', () => {
+  for (const mutate of [
+    (value) => {
+      delete value.source.pageSize;
+    },
+    (value) => {
+      value.source.pageSize = 0;
+    },
+    (value) => {
+      value.source.pageSize = '100';
+    },
+    (value) => {
+      delete value.source.completenessRule;
+    },
+    (value) => {
+      value.source.completenessRule = 'follow some pages';
+    },
+  ]) {
+    const invalid = snapshot();
+    mutate(invalid);
+    assert.notDeepEqual(validateSnapshot(invalid), []);
+  }
 });
 
 test('compareSnapshots reports added and removed asset IDs', () => {
