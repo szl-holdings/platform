@@ -1,0 +1,22 @@
+{
+  "schemaVersion": "szl.vertical-conformance.manifest.v1",
+  "surface": "vessels",
+  "repository": "szl-holdings/killinchu",
+  "disposition": "SUPERSEDED",
+  "note": "The retained monorepo artifact says standalone Vessels is retired; functionality moved to killinchu and command to a11oy.",
+  "registration": {
+    "artifactId": "artifacts/vessels",
+    "artifactManifest": "artifacts/vessels/.replit-artifact/artifact.toml"
+  },
+  "documentation": {
+    "readme": "artifacts/vessels/README.md"
+  },
+  "deployment": {
+    "baseUrlEnv": "VESSELS_CONFORMANCE_BASE_URL",
+    "expectedGitShaEnv": "VESSELS_DEPLOYED_GIT_SHA"
+  },
+  "evidence": {
+    "publicKeyEnv": "VESSELS_CONFORMANCE_PUBLIC_KEY",
+    "publicKeyFingerprintEnv": "VESSELS_CONFORMANCE_PUBLIC_KEY_SHA256"
+  }
+}
