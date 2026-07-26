@@ -76,6 +76,14 @@ Use [docs/README.md](README.md) for navigation by audience or task.
 
 ---
 
+## Observability
+
+| Document | Description | Last Reviewed |
+|----------|-------------|---------------|
+| [observability/OTEL_GENAI_CONVENTIONS.md](observability/OTEL_GENAI_CONVENTIONS.md) | Development-status OpenTelemetry GenAI compatibility boundary, migration table, privacy defaults, and claim limits | 2026-07 |
+
+---
+
 ## Operations
 
 | Document | Description | Last Reviewed |
