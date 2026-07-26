@@ -29,6 +29,13 @@ function validGitHubUrl(value, kind) {
   return typeof value === 'string' && pattern.test(value);
 }
 
+function formatDuration(seconds) {
+  const hours = Math.floor(seconds / 3600);
+  const minutes = Math.floor((seconds % 3600) / 60);
+  const remainingSeconds = seconds % 60;
+  return `${hours}h ${minutes}m ${remainingSeconds}s`;
+}
+
 export function validateOverclaimLedger({ ledger, ledgerBytes, manifest, root = ROOT }) {
   const failures = [];
   const fail = (message) => failures.push(message);
@@ -96,6 +103,9 @@ export function validateOverclaimLedger({ ledger, ledgerBytes, manifest, root = 
 
   const incidents = ledger.incidents ?? [];
   const ids = new Set();
+  const countedEvidenceRefs = new Set();
+  const countedDetectionSources = new Set();
+  const countedCorrectionSources = new Set();
   let totalSeconds = 0;
   for (const incident of incidents) {
     if (ids.has(incident.id)) fail(`duplicate incident id: ${incident.id}`);
@@ -129,11 +139,23 @@ export function validateOverclaimLedger({ ledger, ledgerBytes, manifest, root = 
     const refs = incident.evidence_refs ?? [];
     if (new Set(refs).size !== refs.length) fail(`${incident.id}: duplicate evidence reference`);
     if (refs.length !== 2) fail(`${incident.id}: expected detection and correction evidence`);
+    for (const ref of refs) {
+      if (countedEvidenceRefs.has(ref)) {
+        fail(
+          `${incident.id}: counted evidence reference is already used by another incident: ${ref}`,
+        );
+      }
+      countedEvidenceRefs.add(ref);
+    }
     const detection = evidenceById.get(refs[0]);
     const correction = evidenceById.get(refs[1]);
     if (detection?.kind !== 'github_actions_policy_finding') {
       fail(`${incident.id}: missing policy-finding snapshot`);
     } else {
+      if (countedDetectionSources.has(detection.source_url)) {
+        fail(`${incident.id}: detection source is already counted by another incident`);
+      }
+      countedDetectionSources.add(detection.source_url);
       if (detection.source_url !== incident.first_run_url) {
         fail(`${incident.id}: detection source URL mismatch`);
       }
@@ -147,6 +169,10 @@ export function validateOverclaimLedger({ ledger, ledgerBytes, manifest, root = 
     if (correction?.kind !== 'github_commit_correction') {
       fail(`${incident.id}: missing correction snapshot`);
     } else {
+      if (countedCorrectionSources.has(correction.source_url)) {
+        fail(`${incident.id}: correction source is already counted by another incident`);
+      }
+      countedCorrectionSources.add(correction.source_url);
       const expectedCorrectionUrl = `https://github.com/${correction.repository}/commit/${correction.commit}`;
       if (correction.source_url !== incident.correction_url) {
         fail(`${incident.id}: correction source URL mismatch`);
@@ -188,6 +214,12 @@ export function validateOverclaimLedger({ ledger, ledgerBytes, manifest, root = 
       `observed_correction_time_seconds=${metrics.observed_correction_time_seconds}, expected ${totalSeconds}`,
     );
   }
+  const expectedDisplay = formatDuration(totalSeconds);
+  if (metrics.observed_correction_time_display !== expectedDisplay) {
+    fail(
+      `observed_correction_time_display=${metrics.observed_correction_time_display}, expected ${expectedDisplay}`,
+    );
+  }
 
   for (const related of ledger.related_non_ci_incidents ?? []) {
     if (related.counted_in_ci_metric !== false) {
@@ -201,8 +233,59 @@ export function validateOverclaimLedger({ ledger, ledgerBytes, manifest, root = 
     }
     const refs = related.evidence_refs ?? [];
     if (new Set(refs).size !== refs.length) fail(`${related.id}: duplicate evidence reference`);
+    if (refs.length !== 3) {
+      fail(`${related.id}: expected report, guard, and reconciliation evidence`);
+    }
     for (const ref of refs) {
       if (!evidenceById.has(ref)) fail(`${related.id}: missing evidence ${ref}`);
+    }
+    const evidence = refs.map((ref) => evidenceById.get(ref)).filter(Boolean);
+    const report = evidence.find((artifact) => artifact.kind === 'operations_commit_report');
+    const guard = evidence.find((artifact) => artifact.kind === 'github_actions_policy_pass');
+    const reconciliation = evidence.find(
+      (artifact) => artifact.kind === 'candidate_reconciliation_commit',
+    );
+    if (!report) {
+      fail(`${related.id}: missing operations report snapshot`);
+    } else {
+      const expectedReportUrl = `https://github.com/${report.repository}/commit/${report.commit}`;
+      if (report.source_url !== related.evidence_commit_url) {
+        fail(`${related.id}: report source URL mismatch`);
+      }
+      if (report.source_url !== expectedReportUrl) {
+        fail(`${related.id}: report source URL does not bind the reported commit`);
+      }
+      if (report.committed_at !== related.detected_at) {
+        fail(`${related.id}: report timestamp mismatch`);
+      }
+    }
+    if (!guard) {
+      fail(`${related.id}: missing overclaim guard snapshot`);
+    } else {
+      const expectedGuardUrl = `https://github.com/${guard.repository}/actions/runs/${guard.run_id}`;
+      if (guard.source_url !== related.overclaim_guard_run_url) {
+        fail(`${related.id}: guard source URL mismatch`);
+      }
+      if (guard.source_url !== expectedGuardUrl) {
+        fail(`${related.id}: guard source URL does not bind the run id`);
+      }
+      if (guard.run_conclusion !== related.overclaim_guard_conclusion) {
+        fail(`${related.id}: guard conclusion mismatch`);
+      }
+    }
+    if (!reconciliation) {
+      fail(`${related.id}: missing reconciliation snapshot`);
+    } else {
+      const expectedReconciliationUrl = `https://github.com/${reconciliation.repository}/commit/${reconciliation.commit}`;
+      if (reconciliation.source_url !== related.candidate_reconciliation_commit_url) {
+        fail(`${related.id}: reconciliation source URL mismatch`);
+      }
+      if (reconciliation.source_url !== expectedReconciliationUrl) {
+        fail(`${related.id}: reconciliation source URL does not bind the candidate commit`);
+      }
+      if (reconciliation.independent_live_verification !== false) {
+        fail(`${related.id}: reconciliation snapshot must remain independently unverified`);
+      }
     }
   }
 

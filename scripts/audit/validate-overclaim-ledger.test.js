@@ -75,3 +75,73 @@ test('rejects duplicate evidence references', () => {
   });
   assert.ok(failures.some((failure) => failure.includes('duplicate evidence reference')));
 });
+
+test('rejects duplicate counted incidents that reuse detection and correction evidence', () => {
+  const failures = validateMutation((ledger) => {
+    const duplicate = clone(ledger.incidents[0]);
+    duplicate.id = 'OC-2026-002';
+    ledger.incidents.push(duplicate);
+    ledger.metrics.ci_detected_incidents = 2;
+    ledger.metrics.correction_time_sample_size = 2;
+    ledger.metrics.observed_correction_time_seconds *= 2;
+    ledger.metrics.observed_correction_time_display = '21h 43m 16s';
+  });
+  assert.ok(failures.some((failure) => failure.includes('already used by another incident')));
+  assert.ok(failures.some((failure) => failure.includes('already counted by another incident')));
+});
+
+test('rejects an incorrect correction-time display value', () => {
+  const failures = validateMutation((ledger) => {
+    ledger.metrics.observed_correction_time_display = '0 seconds';
+  });
+  assert.ok(failures.some((failure) => failure.includes('expected 10h 51m 38s')));
+});
+
+test('rejects missing related-incident evidence', () => {
+  const failures = validateMutation((ledger) => {
+    ledger.related_non_ci_incidents[0].evidence_refs = [];
+  });
+  assert.ok(
+    failures.some((failure) =>
+      failure.includes('expected report, guard, and reconciliation evidence'),
+    ),
+  );
+});
+
+test('rejects a related-incident report URL that diverges from evidence', () => {
+  const failures = validateMutation((ledger) => {
+    ledger.related_non_ci_incidents[0].evidence_commit_url =
+      'https://github.com/szl-holdings/platform/commit/0000000000000000000000000000000000000000';
+  });
+  assert.ok(failures.some((failure) => failure.includes('report source URL mismatch')));
+});
+
+test('rejects a related-incident detection timestamp that diverges from evidence', () => {
+  const failures = validateMutation((ledger) => {
+    ledger.related_non_ci_incidents[0].detected_at = '2026-06-13T03:25:03Z';
+  });
+  assert.ok(failures.some((failure) => failure.includes('report timestamp mismatch')));
+});
+
+test('rejects a related-incident guard conclusion that diverges from evidence', () => {
+  const failures = validateMutation((ledger) => {
+    ledger.related_non_ci_incidents[0].overclaim_guard_conclusion = 'failure';
+  });
+  assert.ok(failures.some((failure) => failure.includes('guard conclusion mismatch')));
+});
+
+test('rejects a related-incident guard URL that diverges from evidence', () => {
+  const failures = validateMutation((ledger) => {
+    ledger.related_non_ci_incidents[0].overclaim_guard_run_url =
+      'https://github.com/szl-holdings/platform/actions/runs/1';
+  });
+  assert.ok(failures.some((failure) => failure.includes('guard source URL mismatch')));
+});
+
+test('rejects a related-incident reconciliation URL that diverges from evidence', () => {
+  const failures = validateMutation((ledger) => {
+    ledger.related_non_ci_incidents[0].candidate_reconciliation_commit_url =
+      'https://github.com/szl-holdings/platform/commit/0000000000000000000000000000000000000000';
+  });
+  assert.ok(failures.some((failure) => failure.includes('reconciliation source URL mismatch')));
+});
