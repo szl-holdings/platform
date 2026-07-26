@@ -51,6 +51,11 @@ Verified locally on Windows with Node.js 24.14.0 and pnpm 10.26.1:
 - `@szl-holdings/api-spec` typecheck: PASS.
 - `@szl-holdings/api-spec` tests: PASS, 2/2.
 - `@szl-holdings/api-spec` committed-client presence gate: PASS.
+- Repository-wide `pnpm run test`: PASS in the protected GitHub Actions
+  `Unit tests (vitest)` job for PR #479 at head
+  `af6344025992591a25be2fe9a7a4d3bd4ddfbf0b` (113/113 tasks successful,
+  exit code 0). Receipt:
+  `https://github.com/szl-holdings/platform/actions/runs/30183117037/job/89743031505`.
 - Changed-file Biome check: PASS with no warnings or fixes required.
 - Canonical source-of-truth validator: PASS, 64/64 checks.
 - Clean-clone case-collision guard: PASS after staging the final tracked path set.
