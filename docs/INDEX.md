@@ -84,6 +84,14 @@ Use [docs/README.md](README.md) for navigation by audience or task.
 
 ---
 
+## Conformance
+
+| Document | Description | Last Reviewed |
+|----------|-------------|---------------|
+| [conformance/VERTICAL_CONFORMANCE.md](conformance/VERTICAL_CONFORMANCE.md) | Seven-gate vertical verifier, deployment inputs, current 0/3 result, and offline DSSE CLI | 2026-07 |
+
+---
+
 ## Operations
 
 | Document | Description | Last Reviewed |

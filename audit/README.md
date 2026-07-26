@@ -27,6 +27,7 @@ This directory contains all artifacts produced by the Zero-Gap Track 1 audit. Do
 | [`root-cleanup-report.md`](./root-cleanup-report.md) | What was deleted, archived, or relocated from the root directory, and why | Root hygiene record |
 | [`FRONTIER_F1_PROOF.md`](./FRONTIER_F1_PROOF.md) | Frontier F1 regulatory evidence proof packet | EU AI Act mapping, receipt v2, Article 12 export, and ISO gap verification |
 | [`FRONTIER_F2_1_PROOF.md`](./FRONTIER_F2_1_PROOF.md) | Frontier F2.1 interoperability proof packet | OpenTelemetry GenAI and MCP boundary verification with explicit claim limits |
+| [`FRONTIER_CONFORMANCE_PROOF.md`](./FRONTIER_CONFORMANCE_PROOF.md) | Frontier vertical conformance proof packet | Seven-gate reference fixture and honest 0/3 live-target result |
 
 ---
 
@@ -41,9 +42,9 @@ This directory contains all artifacts produced by the Zero-Gap Track 1 audit. Do
 | Registered artifacts | 6 | Tracked artifact manifests |
 | Artifact directories | 7 | Tracked top-level `artifacts/` children |
 | Registered product verticals | 5 | Registered domain artifacts; A11oy is separate |
-| Domain packages (`packages/`) | 156 | Tracked top-level package directories |
+| Domain packages (`packages/`) | 157 | Tracked top-level package directories |
 | Shared library packages (`lib/`) | 53 | Tracked top-level library directories |
-| Total packages (`packages/` + `lib/`) | 209 | 156 + 53 |
+| Total packages (`packages/` + `lib/`) | 210 | 157 + 53 |
 | Apps (`apps/`) | 11 | Tracked top-level `apps/` children |
 | Services (`services/`) | 11 | Tracked top-level `services/` children |
 | Workers (`workers/`) | 5 | `ls workers/ \| wc -l` |
