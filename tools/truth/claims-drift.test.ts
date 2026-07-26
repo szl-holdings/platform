@@ -5,7 +5,7 @@ import {
   type AllowEntry,
   claimFailuresForLines,
   claimIdentitiesForLines,
-  selectImmutableBaseline,
+  validateImmutableBaselineCandidate,
 } from './claims-drift.js';
 
 function metrics(
@@ -118,14 +118,55 @@ test('does not let one allowlisted occurrence cover a byte-identical duplicate',
   );
 });
 
-test('fails closed when no immutable allowlist baseline is available', () => {
-  assert.throws(
-    () => selectImmutableBaseline(undefined, undefined, undefined),
-    /immutable allowlist baseline unavailable/,
+test('does not let an allowlisted historical claim relocate under a current heading', () => {
+  const baselineLines = [
+    '## Historical record',
+    'The platform currently exposes 5,524 current API endpoints.',
+  ];
+  const currentLines = [
+    '## Current platform',
+    'The platform currently exposes 5,524 current API endpoints.',
+  ];
+  const allowlist: AllowEntry[] = [{ path: 'docs/investor.md', literal: '*' }];
+  const baselineIdentities = claimIdentitiesForLines(
+    'docs/investor.md',
+    baselineLines,
+    metrics(null),
   );
-  assert.equal(selectImmutableBaseline('abc123', undefined, undefined), 'abc123');
-  assert.equal(selectImmutableBaseline(undefined, 'def456', undefined), 'def456');
-  assert.equal(selectImmutableBaseline(undefined, undefined, '789abc'), '789abc');
+
+  assert.deepEqual(
+    claimFailuresForLines(
+      'docs/investor.md',
+      currentLines,
+      metrics(null),
+      allowlist,
+      baselineIdentities,
+    ),
+    ['docs/investor.md:2: hardcoded 5,524; canonical evidence for api_endpoints is UNAVAILABLE'],
+  );
+});
+
+test('accepts only a full immutable ancestor distinct from current HEAD', () => {
+  const baseline = 'a'.repeat(40);
+  const head = 'b'.repeat(40);
+
+  assert.equal(validateImmutableBaselineCandidate(baseline, baseline, head, true), baseline);
+  assert.throws(
+    () => validateImmutableBaselineCandidate('main', baseline, head, true),
+    /full nonzero commit SHA/,
+  );
+  assert.throws(
+    () => validateImmutableBaselineCandidate('abc123', baseline, head, true),
+    /full nonzero commit SHA/,
+  );
+  assert.throws(
+    () => validateImmutableBaselineCandidate(head, head, head, true),
+    /must not resolve to current HEAD/,
+  );
+  assert.throws(
+    () => validateImmutableBaselineCandidate(baseline, baseline, head, false),
+    /must be an ancestor/,
+  );
 });
 
 test('continues to reject stale numeric claims when canonical evidence is available', () => {
@@ -366,11 +407,36 @@ test('decodes decimal and hexadecimal numeric HTML entities without losing attri
   for (const claimText of [
     '<p>The current monorepo has &#49;&#57;&#56; packages.</p>',
     '<p>The current monorepo has &#x31;&#x39;&#x38; packages.</p>',
+    '<p>The current monorepo has &#49&#57&#56 packages.</p>',
+    '<p>The current monorepo has &#x31&#x39&#x38 packages.</p>',
+    '<p>The current monorepo has １９８ packages.</p>',
   ]) {
     assert.deepEqual(claimFailuresForLines('docs/entities.html', [claimText], metrics(12), []), [
       'docs/entities.html:1: hardcoded 198; canonical value for this context is 199',
     ]);
   }
+});
+
+test('does not let a plain allowlisted claim authorize an encoded equivalent', () => {
+  const baselineLines = ['The current monorepo has 198 packages.'];
+  const currentLines = ['The current monorepo has &#49;&#57;&#56; packages.'];
+  const allowlist: AllowEntry[] = [{ path: 'docs/entities.html', literal: '198' }];
+  const baselineIdentities = claimIdentitiesForLines(
+    'docs/entities.html',
+    baselineLines,
+    metrics(12),
+  );
+
+  assert.deepEqual(
+    claimFailuresForLines(
+      'docs/entities.html',
+      currentLines,
+      metrics(12),
+      allowlist,
+      baselineIdentities,
+    ),
+    ['docs/entities.html:1: hardcoded 198; canonical value for this context is 199'],
+  );
 });
 
 test('does not reinterpret scoped or timing numbers as platform test totals', () => {
@@ -455,6 +521,42 @@ test('classifies common compound test punctuation and shared-noun forms', () => 
     ],
     [
       'The current platform has 100 tests passed out of 104 total.',
+      'docs/testing.md:1: hardcoded 104; canonical value for this context is 105',
+    ],
+  ]);
+  for (const [claimText, expected] of staleClaims) {
+    assert.deepEqual(
+      claimFailuresForLines('docs/testing.md', [claimText], metrics(12), []),
+      [expected],
+      claimText,
+    );
+  }
+});
+
+test('classifies slash, em-dash, and pass-fail-total test roles independently', () => {
+  for (const claimText of [
+    'The current platform has 100 / 105 platform tests passed.',
+    'The current platform reports 105 total tests — 100 passed — 5 failed.',
+    'The current platform reports 100 passed — 5 failed — 105 total tests.',
+  ]) {
+    assert.deepEqual(
+      claimFailuresForLines('docs/testing.md', [claimText], metrics(12), []),
+      [],
+      claimText,
+    );
+  }
+
+  const staleClaims = new Map([
+    [
+      'The current platform has 100 / 104 platform tests passed.',
+      'docs/testing.md:1: hardcoded 104; canonical value for this context is 105',
+    ],
+    [
+      'The current platform reports 105 total tests — 99 passed — 6 failed.',
+      'docs/testing.md:1: hardcoded 99; canonical value for this context is 100',
+    ],
+    [
+      'The current platform reports 100 passed — 5 failed — 104 total tests.',
       'docs/testing.md:1: hardcoded 104; canonical value for this context is 105',
     ],
   ]);
@@ -613,6 +715,26 @@ test('does not join same-line HTML or JSX siblings into one claim context', () =
   }
 });
 
+test('does not join same-line siblings across HTML or JSX comments and fragments', () => {
+  const cases: Array<[string, string]> = [
+    [
+      'docs/siblings.html',
+      '<div><span>Current release notes</span><!-- separate --><span>Guardian ships 35 tests</span></div>',
+    ],
+    [
+      'src/Siblings.tsx',
+      '<><span>Current release notes</span>{/* separate */}<span>Guardian ships 35 tests</span></>',
+    ],
+    [
+      'src/Siblings.tsx',
+      '<div><>Current release notes</>{/* separate */}<>Guardian ships 35 tests</></div>',
+    ],
+  ];
+  for (const [relative, source] of cases) {
+    assert.deepEqual(claimFailuresForLines(relative, [source], metrics(12), []), []);
+  }
+});
+
 test('preserves claim overlap across bounded block splits', () => {
   const lines = [
     ...Array.from({ length: 31 }, () => 'Filler continuation'),
@@ -622,6 +744,27 @@ test('preserves claim overlap across bounded block splits', () => {
 
   assert.deepEqual(claimFailuresForLines('docs/wrapped.md', lines, metrics(12), []), [
     'docs/wrapped.md:33: hardcoded 198; canonical value for this context is 199',
+  ]);
+});
+
+test('preserves a character-bounded suffix across more than four wrapped lines', () => {
+  const lines = [
+    ...Array.from({ length: 26 }, () => 'Filler continuation'),
+    'The current monorepo contains',
+    ...Array.from({ length: 5 }, () => 'brief continuation'),
+    '198 packages.',
+  ];
+
+  assert.deepEqual(claimFailuresForLines('docs/wrapped.md', lines, metrics(12), []), [
+    'docs/wrapped.md:33: hardcoded 198; canonical value for this context is 199',
+  ]);
+});
+
+test('preserves the tail of a long line across a bounded block split', () => {
+  const lines = [`${'x'.repeat(20_000)} The current monorepo contains`, '198 packages.'];
+
+  assert.deepEqual(claimFailuresForLines('docs/wrapped.md', lines, metrics(12), []), [
+    'docs/wrapped.md:2: hardcoded 198; canonical value for this context is 199',
   ]);
 });
 
@@ -672,4 +815,14 @@ test('keeps a huge minified HTML line bounded while scanning its tail', { timeou
     'docs/minified.html:1: hardcoded 198; canonical value for this context is 199',
   ]);
   assert.ok(performance.now() - started < 1_500);
+});
+
+test('decodes an encoded claim across a bounded chunk overlap', { timeout: 2_000 }, () => {
+  const line = `<div>${'x'.repeat(
+    16_360,
+  )} The current monorepo has &#49;&#57;&#56; packages.</div>`;
+
+  assert.deepEqual(claimFailuresForLines('docs/minified.html', [line], metrics(12), []), [
+    'docs/minified.html:1: hardcoded 198; canonical value for this context is 199',
+  ]);
 });

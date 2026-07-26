@@ -19,14 +19,14 @@ const MAX_BLOCK_LINES = 32;
 const MAX_BLOCK_CHARACTERS = 16_384;
 const MAX_CLAUSE_CHARACTERS = 256;
 const MAX_PAIR_DISTANCE = 256;
-const MAX_BLOCK_OVERLAP_LINES = 4;
 const execFileAsync = promisify(execFile);
 
 export type AllowEntry = { path: string; literal: string };
 type WatchwordMatch = RegExpMatchArray & { index: number };
 type CanonicalEvidence = { name: string; value: string | null };
-type TestCountRole = 'passed' | 'total';
-type SourceAnchor = { lineNumber: number; column: number };
+type TestCountRole = 'ignored' | 'passed' | 'total';
+type SourceAnchor = { lineNumber: number; column: number; scope: string };
+type BlockEntry = SourceAnchor & { line: string };
 type ClaimScanState = {
   seenOccurrences: Set<string>;
   identityCounts: Map<string, number>;
@@ -241,31 +241,32 @@ function claimClause(text: string, literal: RegExpMatchArray): string {
 function compoundTestRoles(text: string): Map<number, TestCountRole> {
   const roles = new Map<number, TestCountRole>();
   const number = String.raw`(?:\d{1,3}(?:,\d{3})+|\d+)`;
+  const separator = String.raw`(?:[,;:]|[—–]|\(|\band\b)`;
   const patterns: Array<{ expression: RegExp; roles: [TestCountRole, TestCountRole] }> = [
     {
       expression: new RegExp(
-        String.raw`(${number})\s*(?:passing|passed)?\s*(?:\/|(?:out\s+)?of)\s*(${number})\s*(?:total\s+)?tests?\b(?:\s*(?:passing|passed))?`,
+        String.raw`(${number})\s*(?:passing|passed)?\s*(?:\/|(?:out\s+)?of)\s*(${number})\s*(?:total\s+)?(?:platform\s+)?tests?\b(?:\s*(?:passing|passed))?`,
         'gi',
       ),
       roles: ['passed', 'total'],
     },
     {
       expression: new RegExp(
-        String.raw`(${number})\s*(?:total\s+)?tests?\s*(?:(?:in\s+)?total)?\s*(?:[,;:]|\(|\band\b)\s*(?:and\s+|of\s+which\s+)?(${number})\s*(?:passing|passed)\b`,
+        String.raw`(${number})\s*(?:total\s+)?(?:platform\s+)?tests?\s*(?:(?:in\s+)?total)?\s*${separator}\s*(?:and\s+|of\s+which\s+)?(${number})\s*(?:passing|passed)\b`,
         'gi',
       ),
       roles: ['total', 'passed'],
     },
     {
       expression: new RegExp(
-        String.raw`(${number})\s*(?:passing|passed)\s+tests?\s*(?:[,;]|\band\b)\s*(?:and\s+)?(${number})\s*(?:in\s+)?total\b`,
+        String.raw`(${number})\s*(?:passing|passed)\s+(?:platform\s+)?tests?\s*${separator}\s*(?:and\s+)?(${number})\s*(?:in\s+)?total\b`,
         'gi',
       ),
       roles: ['passed', 'total'],
     },
     {
       expression: new RegExp(
-        String.raw`(${number})\s*(?:passing|passed)\s*(?:[,;]|\band\b)\s*(?:and\s+)?(${number})\s*(?:in\s+)?total\s+tests?\b`,
+        String.raw`(${number})\s*(?:passing|passed)\s*${separator}\s*(?:and\s+)?(${number})\s*(?:in\s+)?total\s+(?:platform\s+)?tests?\b`,
         'gi',
       ),
       roles: ['passed', 'total'],
@@ -291,20 +292,52 @@ function compoundTestRoles(text: string): Map<number, TestCountRole> {
       roles.set(secondOffset, pairRoles[1]);
     }
   }
+
+  const roleCandidates: Array<{ offset: number; role: TestCountRole }> = [];
+  for (const match of text.matchAll(new RegExp(number, 'g'))) {
+    if (typeof match.index !== 'number' || roles.has(match.index)) continue;
+    const start = match.index;
+    const end = start + match[0].length;
+    const before = text.slice(Math.max(0, start - 24), start);
+    const after = text.slice(end, Math.min(text.length, end + 24));
+    if (/\b(?:failed|failing)\s*:?\s*$/i.test(before) || /^\s*(?:failed|failing)\b/i.test(after)) {
+      roleCandidates.push({ offset: start, role: 'ignored' });
+    } else if (
+      /\b(?:passed|passing)\s*:?\s*$/i.test(before) ||
+      /^\s*(?:passed|passing)\b/i.test(after)
+    ) {
+      roleCandidates.push({ offset: start, role: 'passed' });
+    } else if (/\btotal\s*:?\s*$/i.test(before) || /^\s*(?:in\s+)?total\b/i.test(after)) {
+      roleCandidates.push({ offset: start, role: 'total' });
+    }
+  }
+  if (roleCandidates.length >= 2 && /\btests?\b/i.test(text)) {
+    for (const candidate of roleCandidates) roles.set(candidate.offset, candidate.role);
+  }
   return roles;
 }
 
 function claimIdentity(
   relative: string,
   literal: string,
+  sourceLiteral: string,
   watchword: string,
   qualifier: string,
   role: TestCountRole | undefined,
+  structuralScope: string,
 ): string {
   const normalizedQualifier = normalizeInlineMarkup(qualifier).toLowerCase();
   return createHash('sha256')
     .update(
-      [relative, literal, watchword.toLowerCase(), normalizedQualifier, role ?? ''].join('\0'),
+      [
+        relative,
+        structuralScope,
+        sourceLiteral,
+        literal,
+        watchword.toLowerCase(),
+        normalizedQualifier,
+        role ?? '',
+      ].join('\0'),
     )
     .digest('hex');
 }
@@ -364,6 +397,7 @@ function claimFailuresForText(
   relative: string,
   text: string,
   sourceAnchorForOffset: (offset: number) => SourceAnchor,
+  sourceLiteralForRange: (start: number, end: number) => string,
   metrics: Record<string, Record<string, unknown>>,
   allowlist: AllowEntry[],
   baselineClaimIdentities: ReadonlyMap<string, number>,
@@ -381,6 +415,7 @@ function claimFailuresForText(
     const qualifier = claimClause(text, match);
     const literalIndex = match.index ?? 0;
     const compoundRole = compoundRoles.get(literalIndex);
+    if (compoundRole === 'ignored') continue;
     const insertion = lowerBoundByIndex(watchwords as WatchwordMatch[], literalIndex);
     const nearby = (watchwords as WatchwordMatch[]).slice(
       Math.max(0, insertion - 8),
@@ -406,7 +441,16 @@ function claimFailuresForText(
     );
     if (!canonical) continue;
     const anchor = sourceAnchorForOffset(literalIndex);
-    const identity = claimIdentity(relative, literal, nearest[0], qualifier, compoundRole);
+    const sourceLiteral = sourceLiteralForRange(literalIndex, literalIndex + literal.length);
+    const identity = claimIdentity(
+      relative,
+      literal,
+      sourceLiteral,
+      nearest[0],
+      qualifier,
+      compoundRole,
+      anchor.scope,
+    );
     const occurrenceKey = [identity, String(anchor.lineNumber), String(anchor.column)].join('\0');
     if (scanState.seenOccurrences.has(occurrenceKey)) continue;
     scanState.seenOccurrences.add(occurrenceKey);
@@ -440,7 +484,8 @@ function markupSiblingSegments(
 ): Array<{ text: string; start: number }> {
   if (!['.html', '.tsx'].includes(path.extname(relative))) return [{ text, start: 0 }];
   const segments: Array<{ text: string; start: number }> = [];
-  const boundary = /(?:<\/[A-Za-z][\w:.-]*>|\/>)\s*(?=<[A-Za-z])/g;
+  const boundary =
+    /(?:<\/[A-Za-z][\w:.-]*>|<\/>|\/>)(?:\s|<!--[\s\S]*?-->|\{\s*\/\*[\s\S]*?\*\/\s*\})*(?=<[A-Za-z]|<>)/g;
   let start = 0;
   for (const match of text.matchAll(boundary)) {
     if (typeof match.index !== 'number') continue;
@@ -465,16 +510,32 @@ function boundedTextSegments(text: string): Array<{ text: string; start: number 
   return segments;
 }
 
-function decodeNumericEntities(text: string): { text: string; originalOffsets: number[] } {
-  const originalOffsets: number[] = [];
+function decodeNumericEntities(text: string): {
+  text: string;
+  originalStarts: number[];
+  originalEnds: number[];
+} {
+  const originalStarts: number[] = [];
+  const originalEnds: number[] = [];
   let decoded = '';
   let cursor = 0;
-  const expression = /&#(?:x([\da-f]+)|(\d+));/gi;
+  const append = (value: string, start: number, end: number): void => {
+    decoded += value;
+    for (let index = 0; index < value.length; index += 1) {
+      originalStarts.push(start);
+      originalEnds.push(end);
+    }
+  };
+  const appendPlainCharacter = (index: number): void => {
+    const character = text[index] ?? '';
+    const code = character.charCodeAt(0);
+    append(code >= 0xff10 && code <= 0xff19 ? String(code - 0xff10) : character, index, index + 1);
+  };
+  const expression = /&#(?:x([\da-f]+)|(\d+));?/gi;
   for (const match of text.matchAll(expression)) {
     if (typeof match.index !== 'number') continue;
     for (let index = cursor; index < match.index; index += 1) {
-      decoded += text[index] ?? '';
-      originalOffsets.push(index);
+      appendPlainCharacter(index);
     }
     const value = Number.parseInt(match[1] ?? match[2] ?? '', match[1] ? 16 : 10);
     let replacement = match[0];
@@ -485,17 +546,20 @@ function decodeNumericEntities(text: string): { text: string; originalOffsets: n
         replacement = match[0];
       }
     }
-    decoded += replacement;
-    for (let index = 0; index < replacement.length; index += 1) {
-      originalOffsets.push(match.index);
+    for (const character of replacement) {
+      const code = character.charCodeAt(0);
+      append(
+        code >= 0xff10 && code <= 0xff19 ? String(code - 0xff10) : character,
+        match.index,
+        match.index + match[0].length,
+      );
     }
     cursor = match.index + match[0].length;
   }
   for (let index = cursor; index < text.length; index += 1) {
-    decoded += text[index] ?? '';
-    originalOffsets.push(index);
+    appendPlainCharacter(index);
   }
-  return { text: decoded, originalOffsets };
+  return { text: decoded, originalStarts, originalEnds };
 }
 
 function claimFailuresForSegmentedText(
@@ -508,15 +572,28 @@ function claimFailuresForSegmentedText(
   scanState: ClaimScanState,
   identitySink?: Map<string, number>,
 ): string[] {
-  return markupSiblingSegments(text, relative).flatMap((markupSegment) =>
+  const decoded = decodeNumericEntities(text);
+  return markupSiblingSegments(decoded.text, relative).flatMap((markupSegment) =>
     boundedTextSegments(markupSegment.text).flatMap((boundedSegment) => {
-      const decoded = decodeNumericEntities(boundedSegment.text);
+      const decodedStart = markupSegment.start + boundedSegment.start;
       return claimFailuresForText(
         relative,
-        decoded.text,
+        boundedSegment.text,
         (offset) => {
-          const originalOffset = decoded.originalOffsets[offset] ?? boundedSegment.text.length;
-          return sourceAnchorForOffset(markupSegment.start + boundedSegment.start + originalOffset);
+          const originalOffset =
+            decoded.originalStarts[decodedStart + offset] ??
+            decoded.originalStarts.at(-1) ??
+            text.length;
+          return sourceAnchorForOffset(originalOffset);
+        },
+        (start, end) => {
+          const originalStart =
+            decoded.originalStarts[decodedStart + start] ??
+            decoded.originalStarts.at(-1) ??
+            text.length;
+          const originalEnd =
+            decoded.originalEnds[decodedStart + Math.max(start, end - 1)] ?? originalStart;
+          return text.slice(originalStart, originalEnd);
         },
         metrics,
         allowlist,
@@ -585,6 +662,27 @@ function canJoinWrappedLines(current: string, next: string, relative: string): b
   return true;
 }
 
+function structuralScopesForLines(lines: string[]): string[] {
+  const headings: string[] = [];
+  return lines.map((line) => {
+    const markdown = line.match(/^\s*(#{1,6})\s+(.+?)\s*#*\s*$/);
+    const html = line.match(/^\s*<h([1-6])\b[^>]*>([\s\S]*?)<\/h\1>\s*$/i);
+    const level = markdown?.[1]?.length ?? (html?.[1] ? Number.parseInt(html[1], 10) : 0);
+    const headingText = normalizeInlineMarkup(markdown?.[2] ?? html?.[2] ?? '')
+      .toLowerCase()
+      .trim();
+    if (level > 0 && headingText) {
+      headings.length = level - 1;
+      headings[level - 1] = headingText;
+    }
+    const path = headings
+      .map((heading, index) => (heading ? `${index + 1}:${heading}` : ''))
+      .filter(Boolean)
+      .join('/');
+    return path || 'document-root';
+  });
+}
+
 export function claimFailuresForLines(
   relative: string,
   lines: string[],
@@ -599,6 +697,7 @@ export function claimFailuresForLines(
     seenOccurrences: new Set(),
     identityCounts: new Map(),
   };
+  const structuralScopes = structuralScopesForLines(lines);
 
   for (const [index, line] of lines.entries()) {
     const scannedLine = line.replace(ordinalHeading, (heading) =>
@@ -607,7 +706,11 @@ export function claimFailuresForLines(
     for (const failure of claimFailuresForSegmentedText(
       relative,
       scannedLine,
-      (offset) => ({ lineNumber: index + 1, column: offset }),
+      (offset) => ({
+        lineNumber: index + 1,
+        column: offset,
+        scope: structuralScopes[index] ?? 'document-root',
+      }),
       metrics,
       allowlist,
       baselineClaimIdentities,
@@ -618,7 +721,7 @@ export function claimFailuresForLines(
     }
   }
 
-  const scanBlock = (block: Array<{ line: string; lineNumber: number }>): void => {
+  const scanBlock = (block: BlockEntry[]): void => {
     if (block.length < 2) return;
     const starts: number[] = [];
     let joined = '';
@@ -636,9 +739,11 @@ export function claimFailuresForLines(
           if ((starts[index] ?? Number.POSITIVE_INFINITY) > offset) break;
           selected = index;
         }
+        const entry = block[selected] ?? block[0];
         return {
-          lineNumber: block[selected]?.lineNumber ?? block[0]?.lineNumber ?? 1,
-          column: offset - (starts[selected] ?? 0),
+          lineNumber: entry?.lineNumber ?? 1,
+          column: (entry?.column ?? 0) + offset - (starts[selected] ?? 0),
+          scope: entry?.scope ?? 'document-root',
         };
       },
       metrics,
@@ -651,28 +756,33 @@ export function claimFailuresForLines(
     }
   };
 
-  let block: Array<{ line: string; lineNumber: number }> = [];
-  const overlapFor = (
-    previousBlock: Array<{ line: string; lineNumber: number }>,
-    nextLine: string,
-  ): Array<{ line: string; lineNumber: number }> => {
+  let block: BlockEntry[] = [];
+  const overlapFor = (previousBlock: BlockEntry[], nextLine: string): BlockEntry[] => {
     const characterBudget = Math.min(
       MAX_PAIR_DISTANCE,
       Math.max(0, MAX_BLOCK_CHARACTERS - nextLine.length - 1),
     );
-    const overlap: Array<{ line: string; lineNumber: number }> = [];
+    const overlap: BlockEntry[] = [];
     let size = 0;
-    for (
-      let index = previousBlock.length - 1;
-      index >= 0 && overlap.length < MAX_BLOCK_OVERLAP_LINES;
-      index -= 1
-    ) {
+    for (let index = previousBlock.length - 1; index >= 0 && size < characterBudget; index -= 1) {
       const entry = previousBlock[index];
       if (!entry) continue;
-      const entrySize = entry.line.length + (overlap.length > 0 ? 1 : 0);
-      if (size + entrySize > characterBudget) break;
-      overlap.unshift(entry);
-      size += entrySize;
+      const separatorSize = overlap.length > 0 ? 1 : 0;
+      const remaining = characterBudget - size - separatorSize;
+      if (remaining <= 0) break;
+      if (entry.line.length <= remaining) {
+        overlap.unshift(entry);
+        size += entry.line.length + separatorSize;
+        continue;
+      }
+      const start = entry.line.length - remaining;
+      overlap.unshift({
+        ...entry,
+        line: entry.line.slice(start),
+        column: entry.column + start,
+      });
+      size += remaining + separatorSize;
+      break;
     }
     return overlap;
   };
@@ -683,19 +793,44 @@ export function claimFailuresForLines(
       continue;
     }
     if (block.length === 0) {
-      block.push({ line, lineNumber: index + 1 });
+      block.push({
+        line,
+        lineNumber: index + 1,
+        column: 0,
+        scope: structuralScopes[index] ?? 'document-root',
+      });
       continue;
     }
     const previous = block[block.length - 1]?.line ?? '';
     const nextSize = block.reduce((total, entry) => total + entry.line.length + 1, 0) + line.length;
     const joinable = canJoinWrappedLines(previous, line, relative);
     if (joinable && block.length < MAX_BLOCK_LINES && nextSize <= MAX_BLOCK_CHARACTERS) {
-      block.push({ line, lineNumber: index + 1 });
+      block.push({
+        line,
+        lineNumber: index + 1,
+        column: 0,
+        scope: structuralScopes[index] ?? 'document-root',
+      });
     } else {
       scanBlock(block);
       block = joinable
-        ? [...overlapFor(block, line), { line, lineNumber: index + 1 }]
-        : [{ line, lineNumber: index + 1 }];
+        ? [
+            ...overlapFor(block, line),
+            {
+              line,
+              lineNumber: index + 1,
+              column: 0,
+              scope: structuralScopes[index] ?? 'document-root',
+            },
+          ]
+        : [
+            {
+              line,
+              lineNumber: index + 1,
+              column: 0,
+              scope: structuralScopes[index] ?? 'document-root',
+            },
+          ];
     }
   }
   scanBlock(block);
@@ -723,20 +858,51 @@ async function gitOutput(arguments_: string[]): Promise<string> {
   return stdout.trim();
 }
 
-export function selectImmutableBaseline(
-  explicit: string | undefined,
-  eventBase: string | undefined,
-  mergeBase: string | undefined,
+const FULL_COMMIT_ID = /^(?:[0-9a-f]{40}|[0-9a-f]{64})$/i;
+
+export function validateImmutableBaselineCandidate(
+  candidate: string,
+  resolved: string,
+  head: string,
+  isAncestor: boolean,
 ): string {
-  for (const candidate of [explicit, eventBase, mergeBase]) {
-    if (candidate && !/^0+$/.test(candidate)) return candidate;
+  if (!FULL_COMMIT_ID.test(candidate) || /^0+$/.test(candidate)) {
+    throw new Error('immutable allowlist baseline must be a full nonzero commit SHA');
   }
-  throw new Error(
-    'immutable allowlist baseline unavailable; set TRUTH_ALLOWLIST_BASE_SHA or provide origin/main',
-  );
+  if (!FULL_COMMIT_ID.test(resolved) || /^0+$/.test(resolved)) {
+    throw new Error('immutable allowlist baseline did not resolve to a full commit SHA');
+  }
+  if (!FULL_COMMIT_ID.test(head) || /^0+$/.test(head)) {
+    throw new Error('current HEAD did not resolve to a full commit SHA');
+  }
+  if (resolved.toLowerCase() === head.toLowerCase()) {
+    throw new Error('immutable allowlist baseline must not resolve to current HEAD');
+  }
+  if (!isAncestor) {
+    throw new Error('immutable allowlist baseline must be an ancestor of current HEAD');
+  }
+  return resolved;
+}
+
+async function resolveImmutableBaseline(candidate: string, head: string): Promise<string> {
+  const resolved = await gitOutput(['rev-parse', '--verify', `${candidate}^{commit}`]);
+  let isAncestor = false;
+  try {
+    await gitOutput(['merge-base', '--is-ancestor', resolved, head]);
+    isAncestor = true;
+  } catch {
+    isAncestor = false;
+  }
+  return validateImmutableBaselineCandidate(candidate, resolved, head, isAncestor);
 }
 
 async function baselineSha(): Promise<string> {
+  const head = await gitOutput(['rev-parse', '--verify', 'HEAD^{commit}']);
+  const explicit = process.env.TRUTH_ALLOWLIST_BASE_SHA;
+  if (explicit) {
+    return resolveImmutableBaseline(explicit, head);
+  }
+
   let eventBase: string | undefined;
   if (process.env.GITHUB_EVENT_PATH && existsSync(process.env.GITHUB_EVENT_PATH)) {
     const event = JSON.parse(await readFile(process.env.GITHUB_EVENT_PATH, 'utf8')) as {
@@ -745,13 +911,22 @@ async function baselineSha(): Promise<string> {
     };
     eventBase = event.pull_request?.base?.sha || event.before;
   }
-  let mergeBase: string | undefined;
-  try {
-    mergeBase = await gitOutput(['merge-base', 'HEAD', 'origin/main']);
-  } catch {
-    mergeBase = undefined;
+  if (eventBase && !/^0+$/.test(eventBase)) {
+    try {
+      return await resolveImmutableBaseline(eventBase, head);
+    } catch {
+      // Event payloads may carry a non-ancestor or the current head. Fall back to the merge base.
+    }
   }
-  return selectImmutableBaseline(process.env.TRUTH_ALLOWLIST_BASE_SHA, eventBase, mergeBase);
+
+  try {
+    const mergeBase = await gitOutput(['merge-base', head, 'origin/main']);
+    return await resolveImmutableBaseline(mergeBase, head);
+  } catch {
+    throw new Error(
+      'immutable allowlist baseline unavailable; set TRUTH_ALLOWLIST_BASE_SHA to a full ancestor commit SHA or provide origin/main',
+    );
+  }
 }
 
 async function main(): Promise<void> {
