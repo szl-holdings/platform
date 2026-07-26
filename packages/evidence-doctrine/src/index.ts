@@ -24,7 +24,21 @@ export const LEVEL_REQUIREMENTS = {
 export type Requirement = (typeof LEVEL_REQUIREMENTS)[keyof typeof LEVEL_REQUIREMENTS][number];
 export type DecisionEvidence = Partial<Record<Requirement, EvidenceState>>;
 
+export interface DecisionBundleIdentity {
+  subject: string;
+  bundle_sha256: string;
+  evaluated_at: string;
+}
+
+export interface DecisionEvidenceBundle {
+  identity: DecisionBundleIdentity;
+  evidence: DecisionEvidence;
+}
+
 export interface GradeResult {
+  bundle_subject: string;
+  bundle_sha256: string;
+  evaluated_at: string;
   achieved_level: DSeLevel;
   evaluation_state: 'EVALUATED_FROM_SUPPLIED_EVIDENCE';
   satisfied_requirements: Requirement[];
@@ -43,13 +57,48 @@ function validateEvidenceState(requirement: Requirement, state: unknown): Eviden
   return state as EvidenceState;
 }
 
+function validateBundle(bundle: DecisionEvidenceBundle): DecisionEvidenceBundle {
+  if (typeof bundle !== 'object' || bundle === null || Array.isArray(bundle)) {
+    throw new TypeError('decision bundle must be an object');
+  }
+  const { identity, evidence } = bundle;
+  if (typeof identity !== 'object' || identity === null || Array.isArray(identity)) {
+    throw new TypeError('decision bundle identity must be an object');
+  }
+  if (
+    typeof identity.subject !== 'string' ||
+    identity.subject.length === 0 ||
+    identity.subject.trim() !== identity.subject
+  ) {
+    throw new TypeError('identity.subject must be a non-empty canonical string');
+  }
+  if (
+    typeof identity.bundle_sha256 !== 'string' ||
+    !/^[0-9a-f]{64}$/.test(identity.bundle_sha256)
+  ) {
+    throw new TypeError('identity.bundle_sha256 must be a lowercase sha256 digest');
+  }
+  if (
+    typeof identity.evaluated_at !== 'string' ||
+    !/(?:Z|[+-]\d{2}:\d{2})$/.test(identity.evaluated_at) ||
+    Number.isNaN(Date.parse(identity.evaluated_at))
+  ) {
+    throw new TypeError('identity.evaluated_at must be a timezone-qualified timestamp');
+  }
+  if (typeof evidence !== 'object' || evidence === null || Array.isArray(evidence)) {
+    throw new TypeError('decision bundle evidence must be an object');
+  }
+  return bundle;
+}
+
 /**
  * Return the highest consecutively satisfied D-SLSA level.
  *
  * Every requirement at a level must be VERIFIED. UNVERIFIED and ABSENT both
  * block advancement; later-level evidence cannot skip an earlier level.
  */
-export function gradeDecision(evidence: DecisionEvidence): GradeResult {
+export function gradeDecision(bundle: DecisionEvidenceBundle): GradeResult {
+  const { identity, evidence } = validateBundle(bundle);
   const states = new Map<Requirement, EvidenceState>();
   for (const requirements of Object.values(LEVEL_REQUIREMENTS)) {
     for (const requirement of requirements) {
@@ -81,6 +130,9 @@ export function gradeDecision(evidence: DecisionEvidence): GradeResult {
   }
 
   return {
+    bundle_subject: identity.subject,
+    bundle_sha256: identity.bundle_sha256,
+    evaluated_at: identity.evaluated_at,
     achieved_level: achievedLevel,
     evaluation_state: 'EVALUATED_FROM_SUPPLIED_EVIDENCE',
     satisfied_requirements: satisfiedRequirements,

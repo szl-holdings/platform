@@ -5,10 +5,24 @@ import test from 'node:test';
 import {
   assertLambdaCaseStudy,
   type DecisionEvidence,
+  type DecisionEvidenceBundle,
   evaluateTheoremU,
   gradeDecision,
   LEVEL_REQUIREMENTS,
 } from './index.ts';
+
+const BUNDLE_IDENTITY = {
+  subject: 'decision:fixture:001',
+  bundle_sha256: 'a'.repeat(64),
+  evaluated_at: '2026-07-26T07:00:00Z',
+};
+
+function bundle(
+  evidence: DecisionEvidence,
+  identity: DecisionEvidenceBundle['identity'] = BUNDLE_IDENTITY,
+): DecisionEvidenceBundle {
+  return { identity, evidence };
+}
 
 function verifiedThrough(level: 'D1' | 'D2' | 'D3' | 'D4'): DecisionEvidence {
   const evidence: DecisionEvidence = {};
@@ -22,27 +36,32 @@ function verifiedThrough(level: 'D1' | 'D2' | 'D3' | 'D4'): DecisionEvidence {
 }
 
 test('D0 when a D1 record is incomplete', () => {
-  const result = gradeDecision({
-    inputs_recorded: 'VERIFIED',
-    policy_recorded: 'UNVERIFIED',
-    output_recorded: 'VERIFIED',
-  });
+  const result = gradeDecision(
+    bundle({
+      inputs_recorded: 'VERIFIED',
+      policy_recorded: 'UNVERIFIED',
+      output_recorded: 'VERIFIED',
+    }),
+  );
   assert.equal(result.achieved_level, 'D0');
   assert.deepEqual(result.blocking_requirements, ['policy_recorded']);
+  assert.equal(result.bundle_subject, BUNDLE_IDENTITY.subject);
+  assert.equal(result.bundle_sha256, BUNDLE_IDENTITY.bundle_sha256);
+  assert.equal(result.evaluated_at, BUNDLE_IDENTITY.evaluated_at);
 });
 
 test('D1 records inputs, policy, and output', () => {
-  assert.equal(gradeDecision(verifiedThrough('D1')).achieved_level, 'D1');
+  assert.equal(gradeDecision(bundle(verifiedThrough('D1'))).achieved_level, 'D1');
 });
 
 test('later evidence cannot skip an unverified D2 requirement', () => {
   const evidence = verifiedThrough('D4');
   evidence.signature_verified = 'UNVERIFIED';
-  assert.equal(gradeDecision(evidence).achieved_level, 'D1');
+  assert.equal(gradeDecision(bundle(evidence)).achieved_level, 'D1');
 });
 
 test('D4 requires every cumulative requirement', () => {
-  const result = gradeDecision(verifiedThrough('D4'));
+  const result = gradeDecision(bundle(verifiedThrough('D4')));
   assert.equal(result.achieved_level, 'D4');
   assert.equal(result.unverified_requirements.length, 0);
   assert.equal(result.absent_requirements.length, 0);
@@ -50,12 +69,39 @@ test('D4 requires every cumulative requirement', () => {
 
 test('truthy values are rejected instead of being treated as evidence', () => {
   assert.throws(
-    () => gradeDecision({ inputs_recorded: true as never }),
+    () => gradeDecision(bundle({ inputs_recorded: true as never })),
     /must be VERIFIED, UNVERIFIED, or ABSENT/,
   );
   assert.throws(
-    () => gradeDecision({ inputs_recorded: null as never }),
+    () => gradeDecision(bundle({ inputs_recorded: null as never })),
     /must be VERIFIED, UNVERIFIED, or ABSENT/,
+  );
+});
+
+test('bundle identity is required and validated before grading', () => {
+  assert.throws(
+    () => gradeDecision({ evidence: verifiedThrough('D1') } as never),
+    /identity must be an object/,
+  );
+  assert.throws(
+    () =>
+      gradeDecision(
+        bundle(verifiedThrough('D1'), {
+          ...BUNDLE_IDENTITY,
+          bundle_sha256: 'NOT-A-DIGEST',
+        }),
+      ),
+    /lowercase sha256 digest/,
+  );
+  assert.throws(
+    () =>
+      gradeDecision(
+        bundle(verifiedThrough('D1'), {
+          ...BUNDLE_IDENTITY,
+          evaluated_at: '2026-07-26T07:00:00',
+        }),
+      ),
+    /timezone-qualified timestamp/,
   );
 });
 

@@ -9,6 +9,19 @@ from evidence_doctrine import (
     grade_decision,
 )
 
+BUNDLE_IDENTITY = {
+    "subject": "decision:fixture:001",
+    "bundle_sha256": "a" * 64,
+    "evaluated_at": "2026-07-26T07:00:00Z",
+}
+
+
+def bundle(evidence: dict, identity: dict | None = None) -> dict:
+    return {
+        "identity": dict(identity or BUNDLE_IDENTITY),
+        "evidence": evidence,
+    }
+
 
 def verified_through(level: str) -> dict:
     evidence = {}
@@ -22,33 +35,59 @@ def verified_through(level: str) -> dict:
 class EvidenceDoctrineTests(unittest.TestCase):
     def test_d0_when_d1_is_incomplete(self):
         result = grade_decision(
-            {
+            bundle({
                 "inputs_recorded": "VERIFIED",
                 "policy_recorded": "UNVERIFIED",
                 "output_recorded": "VERIFIED",
-            }
+            })
         )
         self.assertEqual(result.achieved_level, "D0")
         self.assertEqual(result.blocking_requirements, ("policy_recorded",))
+        self.assertEqual(result.bundle_subject, BUNDLE_IDENTITY["subject"])
+        self.assertEqual(
+            result.bundle_sha256, BUNDLE_IDENTITY["bundle_sha256"]
+        )
+        self.assertEqual(result.evaluated_at, BUNDLE_IDENTITY["evaluated_at"])
 
     def test_d1(self):
         self.assertEqual(
-            grade_decision(verified_through("D1")).achieved_level, "D1"
+            grade_decision(bundle(verified_through("D1"))).achieved_level, "D1"
         )
 
     def test_no_level_skipping(self):
         evidence = verified_through("D4")
         evidence["tamper_evidence_verified"] = "UNVERIFIED"
-        self.assertEqual(grade_decision(evidence).achieved_level, "D1")
+        self.assertEqual(grade_decision(bundle(evidence)).achieved_level, "D1")
 
     def test_d4(self):
         self.assertEqual(
-            grade_decision(verified_through("D4")).achieved_level, "D4"
+            grade_decision(bundle(verified_through("D4"))).achieved_level, "D4"
         )
 
     def test_truthy_value_is_rejected(self):
         with self.assertRaises(TypeError):
-            grade_decision({"inputs_recorded": True})
+            grade_decision(bundle({"inputs_recorded": True}))
+
+    def test_bundle_identity_is_required_and_validated(self):
+        with self.assertRaisesRegex(TypeError, "identity must be a mapping"):
+            grade_decision({"evidence": verified_through("D1")})
+        with self.assertRaisesRegex(TypeError, "lowercase sha256 digest"):
+            grade_decision(
+                bundle(
+                    verified_through("D1"),
+                    dict(BUNDLE_IDENTITY, bundle_sha256="NOT-A-DIGEST"),
+                )
+            )
+        with self.assertRaisesRegex(TypeError, "timezone-qualified timestamp"):
+            grade_decision(
+                bundle(
+                    verified_through("D1"),
+                    dict(
+                        BUNDLE_IDENTITY,
+                        evaluated_at="2026-07-26T07:00:00",
+                    ),
+                )
+            )
 
     def test_lambda_guard(self):
         honest = {

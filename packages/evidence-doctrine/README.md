@@ -35,6 +35,10 @@ pnpm --filter @szl-holdings/evidence-doctrine typecheck
 The TypeScript and Python references implement the same requirement names and
 monotonic grading rule. They accept explicit `VERIFIED`, `UNVERIFIED`, and
 `ABSENT` states; truthy values and marketing labels are not accepted as proof.
+Every grading input is a bundle with a non-empty subject, a lowercase sha256
+bundle digest, and a timezone-qualified evaluation timestamp. The grader copies
+that identity into its result so a D1-or-higher label cannot become detached
+from the exact evidence bundle that was evaluated.
 
 ## Lambda case-study boundary
 

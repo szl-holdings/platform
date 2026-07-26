@@ -1,8 +1,10 @@
 # SPDX-License-Identifier: Apache-2.0
 """Fail-closed Decision-SLSA reference evaluator."""
 
+import re
+from collections.abc import Mapping
 from dataclasses import asdict, dataclass
-from typing import Mapping
+from datetime import datetime
 
 EVIDENCE_STATES = ("VERIFIED", "UNVERIFIED", "ABSENT")
 LEVEL_REQUIREMENTS = {
@@ -24,6 +26,9 @@ THEOREM_U_PREMISES = ("premise_u1", "premise_u2", "premise_u3")
 
 @dataclass(frozen=True)
 class GradeResult:
+    bundle_subject: str
+    bundle_sha256: str
+    evaluated_at: str
     achieved_level: str
     evaluation_state: str
     satisfied_requirements: tuple[str, ...]
@@ -45,8 +50,56 @@ def _validate_state(requirement: str, state: object) -> str:
     return str(state)
 
 
-def grade_decision(evidence: Mapping[str, object]) -> GradeResult:
+def _validate_bundle(
+    bundle: Mapping[str, object],
+) -> tuple[Mapping[str, object], Mapping[str, object]]:
+    if not isinstance(bundle, Mapping):
+        raise TypeError("decision bundle must be a mapping")
+    identity = bundle.get("identity")
+    evidence = bundle.get("evidence")
+    if not isinstance(identity, Mapping):
+        raise TypeError("decision bundle identity must be a mapping")
+    subject = identity.get("subject")
+    if (
+        not isinstance(subject, str)
+        or not subject
+        or subject.strip() != subject
+    ):
+        raise TypeError("identity.subject must be a non-empty canonical string")
+    bundle_sha256 = identity.get("bundle_sha256")
+    if (
+        not isinstance(bundle_sha256, str)
+        or re.fullmatch(r"[0-9a-f]{64}", bundle_sha256) is None
+    ):
+        raise TypeError(
+            "identity.bundle_sha256 must be a lowercase sha256 digest"
+        )
+    evaluated_at = identity.get("evaluated_at")
+    if (
+        not isinstance(evaluated_at, str)
+        or re.search(r"(?:Z|[+-]\d{2}:\d{2})$", evaluated_at) is None
+    ):
+        raise TypeError(
+            "identity.evaluated_at must be a timezone-qualified timestamp"
+        )
+    try:
+        timestamp = datetime.fromisoformat(evaluated_at.replace("Z", "+00:00"))
+    except ValueError as exc:
+        raise TypeError(
+            "identity.evaluated_at must be a timezone-qualified timestamp"
+        ) from exc
+    if timestamp.tzinfo is None:
+        raise TypeError(
+            "identity.evaluated_at must be a timezone-qualified timestamp"
+        )
+    if not isinstance(evidence, Mapping):
+        raise TypeError("decision bundle evidence must be a mapping")
+    return identity, evidence
+
+
+def grade_decision(bundle: Mapping[str, object]) -> GradeResult:
     """Return the highest consecutively satisfied Decision-SLSA level."""
+    identity, evidence = _validate_bundle(bundle)
     states = {}
     for requirements in LEVEL_REQUIREMENTS.values():
         for requirement in requirements:
@@ -68,6 +121,9 @@ def grade_decision(evidence: Mapping[str, object]) -> GradeResult:
         achieved_level = level
 
     return GradeResult(
+        bundle_subject=str(identity["subject"]),
+        bundle_sha256=str(identity["bundle_sha256"]),
+        evaluated_at=str(identity["evaluated_at"]),
         achieved_level=achieved_level,
         evaluation_state="EVALUATED_FROM_SUPPLIED_EVIDENCE",
         satisfied_requirements=tuple(
