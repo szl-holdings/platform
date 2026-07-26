@@ -57,3 +57,42 @@ test('rejects a generated_at timestamp beyond the allowed future skew', () => {
     ),
   );
 });
+
+test('accepts finite numeric scalar and test evidence', () => {
+  const truth = validTruth();
+  const metrics = truth.metrics as Record<string, unknown>;
+  metrics.hf_models = { value: 15, label: 'MEASURED', source: 'fixture' };
+  metrics.platform_tests = { passed: 44, total: 44, label: 'MEASURED', source: 'fixture' };
+  assert.deepEqual(validateTruth(truth, NOW), []);
+});
+
+for (const malformed of ['15', null, undefined]) {
+  test(`rejects malformed available scalar evidence: ${String(malformed)}`, () => {
+    const truth = validTruth();
+    (truth.metrics as Record<string, unknown>).hf_models = {
+      ...(malformed === undefined ? {} : { value: malformed }),
+      label: 'MEASURED',
+      source: 'fixture',
+    };
+    assert.ok(
+      validateTruth(truth, NOW).some((failure) =>
+        failure.includes('hf_models must use one finite numeric scalar or test evidence shape'),
+      ),
+    );
+  });
+}
+
+test('rejects malformed available test evidence', () => {
+  const truth = validTruth();
+  (truth.metrics as Record<string, unknown>).platform_tests = {
+    passed: 44,
+    total: '44',
+    label: 'MEASURED',
+    source: 'fixture',
+  };
+  assert.ok(
+    validateTruth(truth, NOW).some((failure) =>
+      failure.includes('platform_tests must use one finite numeric scalar or test evidence shape'),
+    ),
+  );
+});

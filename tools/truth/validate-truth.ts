@@ -59,12 +59,25 @@ export function validateTruth(truth: Record<string, unknown>, nowMs = Date.now()
       if (typeof value.source !== 'string' || value.source.length === 0) {
         failures.push(`${name} must name its source`);
       }
+      const scalarShape = 'value' in value && !('passed' in value) && !('total' in value);
+      const testShape = !('value' in value) && 'passed' in value && 'total' in value;
       if (value.label === 'UNAVAILABLE') {
-        const scalarUnavailable = 'value' in value && value.value === null;
-        const testUnavailable =
-          'passed' in value && value.passed === null && 'total' in value && value.total === null;
+        const scalarUnavailable = scalarShape && value.value === null;
+        const testUnavailable = testShape && value.passed === null && value.total === null;
         if (!scalarUnavailable && !testUnavailable) {
-          failures.push(`${name} must use null when UNAVAILABLE`);
+          failures.push(`${name} must use one null scalar or test evidence shape when UNAVAILABLE`);
+        }
+      } else {
+        const scalarAvailable =
+          scalarShape && typeof value.value === 'number' && Number.isFinite(value.value);
+        const testAvailable =
+          testShape &&
+          typeof value.passed === 'number' &&
+          Number.isFinite(value.passed) &&
+          typeof value.total === 'number' &&
+          Number.isFinite(value.total);
+        if (!scalarAvailable && !testAvailable) {
+          failures.push(`${name} must use one finite numeric scalar or test evidence shape`);
         }
       }
     }
