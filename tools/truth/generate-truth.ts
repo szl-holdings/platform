@@ -2,6 +2,7 @@ import { execFileSync } from 'node:child_process';
 import { existsSync } from 'node:fs';
 import { readdir, readFile, writeFile } from 'node:fs/promises';
 import path from 'node:path';
+import { fileURLToPath } from 'node:url';
 
 import { parse } from 'yaml';
 
@@ -47,6 +48,16 @@ function unavailable(source: string): Metric {
 
 function unavailableTests(source: string): TestMetric {
   return { passed: null, total: null, label: 'UNAVAILABLE', source };
+}
+
+export function metricDrift(
+  existing: Record<string, unknown>,
+  recomputed: Record<string, unknown>,
+  names: readonly string[],
+): string[] {
+  return names.filter(
+    (name) => JSON.stringify(existing[name]) !== JSON.stringify(recomputed[name]),
+  );
 }
 
 async function walkFiles(start: string, predicate: (file: string) => boolean): Promise<string[]> {
@@ -348,16 +359,12 @@ async function main(): Promise<void> {
     if (!existing) throw new Error('artifacts/SOURCE_OF_TRUTH.json is missing or invalid');
     const existingMetrics = existing.metrics as Record<string, unknown> | undefined;
     if (!existingMetrics) throw new Error('artifacts/SOURCE_OF_TRUTH.json lacks metrics');
-    const drift = LOCAL_METRIC_NAMES.filter(
-      (name) => JSON.stringify(existingMetrics[name]) !== JSON.stringify(localMetrics[name]),
-    );
+    const drift = metricDrift(existingMetrics, localMetrics, LOCAL_METRIC_NAMES);
     if (drift.length > 0) {
       throw new Error(`local truth drift: ${drift.join(', ')}`);
     }
     if (VERIFY_REMOTE_MODE) {
-      const remoteDrift = REMOTE_METRIC_NAMES.filter(
-        (name) => JSON.stringify(existingMetrics[name]) !== JSON.stringify(remoteMetrics[name]),
-      );
+      const remoteDrift = metricDrift(existingMetrics, remoteMetrics, REMOTE_METRIC_NAMES);
       if (remoteDrift.length > 0) {
         throw new Error(`remote truth drift: ${remoteDrift.join(', ')}`);
       }
@@ -384,7 +391,10 @@ async function main(): Promise<void> {
   process.stdout.write(`${path.relative(ROOT, OUTPUT).replaceAll('\\', '/')} generated\n`);
 }
 
-void main().catch((error: unknown) => {
-  process.stderr.write(`truth generation failed: ${String(error)}\n`);
-  process.exit(1);
-});
+const invokedPath = process.argv[1] ? path.resolve(process.argv[1]).toLowerCase() : '';
+if (invokedPath === fileURLToPath(import.meta.url).toLowerCase()) {
+  void main().catch((error: unknown) => {
+    process.stderr.write(`truth generation failed: ${String(error)}\n`);
+    process.exit(1);
+  });
+}

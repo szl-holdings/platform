@@ -1,6 +1,7 @@
 import { existsSync } from 'node:fs';
-import { readFile, readdir } from 'node:fs/promises';
+import { readdir, readFile } from 'node:fs/promises';
 import path from 'node:path';
+import { fileURLToPath } from 'node:url';
 
 const ROOT = path.resolve(import.meta.dirname, '..', '..');
 const TRUTH_FILE = path.join(ROOT, 'artifacts', 'SOURCE_OF_TRUTH.json');
@@ -8,12 +9,13 @@ const ALLOWLIST_FILE = path.join(ROOT, '.truth-allowlist');
 const NUMBER_LITERAL = /(?<![\w.])(?:\d{1,3}(?:,\d{3})+|\d+)(?![\w.])/g;
 const WATCHWORD_SOURCE = String.raw`\b(?:tests|surfaces|packages|endpoints|workflows|spaces|models|datasets|theorems)\b`;
 const CLAIM_CONTEXT =
-  /\b(?:canonical|current|total|public|passing|passed|locked|monorepo|ci|github actions|hugging face|hf|customer-facing|estate|organization|org)\b/i;
+  /\b(?:canonical|current|currently|total|public|passing|passed|locked|monorepo|ci|github actions|hugging face|hf|customer-facing|estate|organization|org)\b/i;
 const EXTENSIONS = new Set(['.md', '.html', '.tsx']);
 const EXCLUDED = new Set(['.git', 'node_modules', 'dist', 'coverage', 'archive']);
 
-type AllowEntry = { path: string; literal: string };
+export type AllowEntry = { path: string; literal: string };
 type WatchwordMatch = RegExpMatchArray & { index: number };
+type CanonicalEvidence = { name: string; value: string | null };
 
 async function walk(directory: string): Promise<string[]> {
   const output: string[] = [];
@@ -41,24 +43,32 @@ async function allowEntries(): Promise<AllowEntry[]> {
   return entries;
 }
 
-function canonicalFor(
+export function canonicalFor(
   watchword: string,
   metrics: Record<string, Record<string, unknown>>,
-): string | null {
+): CanonicalEvidence | null {
+  let name: string | null = null;
   let value: unknown;
-  if (/^surfaces?$/i.test(watchword)) value = metrics.surfaces_customer_facing?.value;
-  else if (/^packages?$/i.test(watchword)) value = metrics.monorepo_packages?.value;
-  else if (/^endpoints?$/i.test(watchword)) value = metrics.api_endpoints?.value;
-  else if (/^workflows?$/i.test(watchword)) value = metrics.ci_workflows?.value;
-  else if (/^spaces?$/i.test(watchword)) value = metrics.hf_spaces?.value;
-  else if (/^models?$/i.test(watchword)) value = metrics.hf_models?.value;
-  else if (/^datasets?$/i.test(watchword)) value = metrics.hf_datasets?.value;
-  else if (/^theorems?$/i.test(watchword)) value = metrics.lean_theorems_locked?.value;
+  if (/^surfaces?$/i.test(watchword)) name = 'surfaces_customer_facing';
+  else if (/^packages?$/i.test(watchword)) name = 'monorepo_packages';
+  else if (/^endpoints?$/i.test(watchword)) name = 'api_endpoints';
+  else if (/^workflows?$/i.test(watchword)) name = 'ci_workflows';
+  else if (/^spaces?$/i.test(watchword)) name = 'hf_spaces';
+  else if (/^models?$/i.test(watchword)) name = 'hf_models';
+  else if (/^datasets?$/i.test(watchword)) name = 'hf_datasets';
+  else if (/^theorems?$/i.test(watchword)) name = 'lean_theorems_locked';
   if (/^tests?$/i.test(watchword)) {
+    name = 'platform_tests';
     const tests = metrics.platform_tests;
     value = tests?.passed ?? tests?.total;
+  } else if (name) {
+    value = metrics[name]?.value;
   }
-  return typeof value === 'number' && Number.isFinite(value) ? String(value) : null;
+  if (!name) return null;
+  return {
+    name,
+    value: typeof value === 'number' && Number.isFinite(value) ? String(value) : null,
+  };
 }
 
 function isMetricPair(line: string, literal: RegExpMatchArray, watchword: WatchwordMatch): boolean {
@@ -69,7 +79,13 @@ function isMetricPair(line: string, literal: RegExpMatchArray, watchword: Watchw
   const word = watchword[0].toLowerCase();
 
   if (literalEnd <= watchwordIndex) {
-    const modifier = line.slice(literalEnd, watchwordIndex).trim().toLowerCase();
+    const modifier = line
+      .slice(literalEnd, watchwordIndex)
+      .trim()
+      .toLowerCase()
+      .replace(/\b(?:current|currently|total)\b/g, '')
+      .replace(/\s+/g, ' ')
+      .trim();
     const allowedModifiers: Record<string, Set<string>> = {
       tests: new Set(['', 'passing', 'passed', 'platform', 'platform passing']),
       surfaces: new Set(['', 'customer-facing', 'public']),
@@ -99,6 +115,69 @@ function isMetricPair(line: string, literal: RegExpMatchArray, watchword: Watchw
   return false;
 }
 
+function isAllowed(relative: string, literal: string, allowlist: AllowEntry[]): boolean {
+  return allowlist.some((entry) => {
+    const wildcardPrefix = entry.path.endsWith('/**')
+      ? entry.path.slice(0, -3).replace(/\/$/, '')
+      : null;
+    const pathMatches =
+      wildcardPrefix !== null
+        ? relative === wildcardPrefix || relative.startsWith(`${wildcardPrefix}/`)
+        : entry.path === relative;
+    const literalMatches = entry.literal === '*' || entry.literal === literal;
+    return pathMatches && literalMatches;
+  });
+}
+
+export function claimFailuresForLines(
+  relative: string,
+  lines: string[],
+  metrics: Record<string, Record<string, unknown>>,
+  allowlist: AllowEntry[],
+): string[] {
+  const failures: string[] = [];
+  for (const [index, line] of lines.entries()) {
+    if (!CLAIM_CONTEXT.test(line)) continue;
+    if (/^\s*#{1,6}\s+\d+[.)]?\s+/.test(line)) continue;
+    const watchwords = [...line.matchAll(new RegExp(WATCHWORD_SOURCE, 'gi'))];
+    if (watchwords.length === 0) continue;
+    for (const match of line.matchAll(NUMBER_LITERAL)) {
+      const literal = match[0];
+      const nearest = watchwords
+        .filter(
+          (watchword): watchword is WatchwordMatch =>
+            typeof watchword.index === 'number' &&
+            isMetricPair(line, match, watchword as WatchwordMatch),
+        )
+        .sort(
+          (left, right) =>
+            Math.abs(left.index - (match.index ?? 0)) - Math.abs(right.index - (match.index ?? 0)),
+        )[0];
+      if (!nearest) continue;
+      const canonical = canonicalFor(nearest[0], metrics);
+      if (!canonical) continue;
+      if (
+        canonical.value !== null &&
+        canonical.value.replaceAll(',', '') === literal.replaceAll(',', '')
+      ) {
+        continue;
+      }
+      if (!isAllowed(relative, literal, allowlist)) {
+        if (canonical.value === null) {
+          failures.push(
+            `${relative}:${index + 1}: hardcoded ${literal}; canonical evidence for ${canonical.name} is UNAVAILABLE`,
+          );
+        } else {
+          failures.push(
+            `${relative}:${index + 1}: hardcoded ${literal}; canonical value for this context is ${canonical.value}`,
+          );
+        }
+      }
+    }
+  }
+  return failures;
+}
+
 async function main(): Promise<void> {
   const truth = JSON.parse(await readFile(TRUTH_FILE, 'utf8')) as {
     metrics: Record<string, Record<string, unknown>>;
@@ -110,55 +189,7 @@ async function main(): Promise<void> {
     const relative = path.relative(ROOT, file).replaceAll('\\', '/');
     if (relative === 'artifacts/SOURCE_OF_TRUTH.json') continue;
     const lines = (await readFile(file, 'utf8')).split(/\r?\n/);
-    for (const [index, line] of lines.entries()) {
-      if (!CLAIM_CONTEXT.test(line)) continue;
-      if (/^\s*#{1,6}\s+\d+[.)]?\s+/.test(line)) continue;
-      const watchwords = [...line.matchAll(new RegExp(WATCHWORD_SOURCE, 'gi'))];
-      if (watchwords.length === 0) continue;
-      for (const match of line.matchAll(NUMBER_LITERAL)) {
-        const literal = match[0];
-        const nearest = watchwords
-          .filter(
-            (watchword): watchword is WatchwordMatch =>
-              typeof watchword.index === 'number' &&
-              isMetricPair(line, match, watchword as WatchwordMatch),
-          )
-          .sort(
-            (left, right) =>
-              Math.abs(left.index - (match.index ?? 0)) -
-              Math.abs(right.index - (match.index ?? 0)),
-          )[0];
-        if (!nearest) continue;
-        const canonical = canonicalFor(nearest[0], truth.metrics);
-        const allowed = allowlist.some((entry) => {
-          const wildcardPrefix = entry.path.endsWith('/**')
-            ? entry.path.slice(0, -3).replace(/\/$/, '')
-            : null;
-          const pathMatches =
-            wildcardPrefix !== null
-              ? relative === wildcardPrefix || relative.startsWith(`${wildcardPrefix}/`)
-              : entry.path === relative;
-          const literalMatches = entry.literal === '*' || entry.literal === literal;
-          return pathMatches && literalMatches;
-        });
-        if (canonical === null) {
-          if (!allowed) {
-            failures.push(
-              `${relative}:${index + 1}: hardcoded ${literal}; canonical evidence for this context is unavailable`,
-            );
-          }
-          continue;
-        }
-        if (canonical.replaceAll(',', '') === literal.replaceAll(',', '')) {
-          continue;
-        }
-        if (!allowed) {
-          failures.push(
-            `${relative}:${index + 1}: hardcoded ${literal}; canonical value for this context is ${canonical}`,
-          );
-        }
-      }
-    }
+    failures.push(...claimFailuresForLines(relative, lines, truth.metrics, allowlist));
   }
 
   if (failures.length > 0) {
@@ -169,7 +200,10 @@ async function main(): Promise<void> {
   process.stdout.write('claims drift: PASS\n');
 }
 
-void main().catch((error: unknown) => {
-  process.stderr.write(`claims drift failed: ${String(error)}\n`);
-  process.exit(1);
-});
+const invokedPath = process.argv[1] ? path.resolve(process.argv[1]).toLowerCase() : '';
+if (invokedPath === fileURLToPath(import.meta.url).toLowerCase()) {
+  void main().catch((error: unknown) => {
+    process.stderr.write(`claims drift failed: ${String(error)}\n`);
+    process.exit(1);
+  });
+}
