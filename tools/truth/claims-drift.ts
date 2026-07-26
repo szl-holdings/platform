@@ -130,10 +130,6 @@ async function main(): Promise<void> {
           )[0];
         if (!nearest) continue;
         const canonical = canonicalFor(nearest[0], truth.metrics);
-        if (canonical === null) continue;
-        if (canonical.replaceAll(',', '') === literal.replaceAll(',', '')) {
-          continue;
-        }
         const allowed = allowlist.some((entry) => {
           const wildcardPrefix = entry.path.endsWith('/**')
             ? entry.path.slice(0, -3).replace(/\/$/, '')
@@ -145,6 +141,17 @@ async function main(): Promise<void> {
           const literalMatches = entry.literal === '*' || entry.literal === literal;
           return pathMatches && literalMatches;
         });
+        if (canonical === null) {
+          if (!allowed) {
+            failures.push(
+              `${relative}:${index + 1}: hardcoded ${literal}; canonical evidence for this context is unavailable`,
+            );
+          }
+          continue;
+        }
+        if (canonical.replaceAll(',', '') === literal.replaceAll(',', '')) {
+          continue;
+        }
         if (!allowed) {
           failures.push(
             `${relative}:${index + 1}: hardcoded ${literal}; canonical value for this context is ${canonical}`,

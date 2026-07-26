@@ -3,7 +3,9 @@ import { existsSync } from 'node:fs';
 import { readdir, readFile, writeFile } from 'node:fs/promises';
 import path from 'node:path';
 
-import { LOCAL_METRIC_NAMES } from './truth-schema.js';
+import { parse } from 'yaml';
+
+import { LOCAL_METRIC_NAMES, REMOTE_METRIC_NAMES } from './truth-schema.js';
 
 type EvidenceLabel = 'MEASURED' | 'REPORTED' | 'MODELED' | 'CONJECTURE' | 'UNKNOWN' | 'UNAVAILABLE';
 type Metric = {
@@ -22,6 +24,8 @@ const ROOT = path.resolve(import.meta.dirname, '..', '..');
 const OUTPUT = path.join(ROOT, 'artifacts', 'SOURCE_OF_TRUTH.json');
 const VERIFY_LOCAL_MODE =
   process.argv.includes('--verify-local') || process.argv.includes('--check');
+const VERIFY_REMOTE_MODE = process.argv.includes('--verify-remote');
+const REFRESH_REMOTE_METRICS = !VERIFY_LOCAL_MODE || VERIFY_REMOTE_MODE;
 const WALK_EXCLUSIONS = new Set([
   '.git',
   '.cache',
@@ -147,10 +151,25 @@ function packageCount(): Metric {
   }
 }
 
-function countApiEndpoints(): Metric {
-  return unavailable(
-    'runtime router inventory artifact (source-call counting cannot prove mounted endpoints)',
-  );
+async function countApiEndpoints(): Promise<Metric> {
+  const file = path.join(ROOT, 'lib', 'api-spec', 'openapi.yaml');
+  const source = 'OpenAPI 3.1 operations in lib/api-spec/openapi.yaml';
+  if (!existsSync(file)) return unavailable(source);
+
+  try {
+    const document = parse(await readFile(file, 'utf8')) as {
+      paths?: Record<string, Record<string, unknown>>;
+    };
+    const methods = new Set(['delete', 'get', 'head', 'options', 'patch', 'post', 'put', 'trace']);
+    const count = Object.values(document.paths ?? {}).reduce(
+      (total, item) =>
+        total + Object.keys(item ?? {}).filter((key) => methods.has(key.toLowerCase())).length,
+      0,
+    );
+    return metric(count, 'MEASURED', source);
+  } catch {
+    return unavailable(source);
+  }
 }
 
 function dbTableCount(): Metric {
@@ -283,21 +302,21 @@ async function main(): Promise<void> {
     workflowCount(),
     leanSorryCount(),
     lambdaMedian(),
-    VERIFY_LOCAL_MODE
-      ? Promise.resolve(unavailable('live refresh not run in local verification'))
-      : hubCount('models'),
-    VERIFY_LOCAL_MODE
-      ? Promise.resolve(unavailable('live refresh not run in local verification'))
-      : hubCount('datasets'),
-    VERIFY_LOCAL_MODE
-      ? Promise.resolve(unavailable('live refresh not run in local verification'))
-      : hubCount('spaces'),
-    VERIFY_LOCAL_MODE
-      ? Promise.resolve(unavailable('live refresh not run in local verification'))
-      : hubCount('collections'),
-    VERIFY_LOCAL_MODE
-      ? Promise.resolve(unavailable('live refresh not run in local verification'))
-      : receiptDepth(),
+    REFRESH_REMOTE_METRICS
+      ? hubCount('models')
+      : Promise.resolve(unavailable('live refresh not run in local verification')),
+    REFRESH_REMOTE_METRICS
+      ? hubCount('datasets')
+      : Promise.resolve(unavailable('live refresh not run in local verification')),
+    REFRESH_REMOTE_METRICS
+      ? hubCount('spaces')
+      : Promise.resolve(unavailable('live refresh not run in local verification')),
+    REFRESH_REMOTE_METRICS
+      ? hubCount('collections')
+      : Promise.resolve(unavailable('live refresh not run in local verification')),
+    REFRESH_REMOTE_METRICS
+      ? receiptDepth()
+      : Promise.resolve(unavailable('live refresh not run in local verification')),
   ]);
 
   const localMetrics = {
@@ -316,6 +335,14 @@ async function main(): Promise<void> {
     lean_sorry_count: leanSorry,
     lambda_overhead_ms_median: lambda,
   };
+  const remoteMetrics = {
+    db_tables: dbTableCount(),
+    hf_models: hfModels,
+    hf_datasets: hfDatasets,
+    hf_spaces: hfSpaces,
+    hf_collections: hfCollections,
+    receipt_chain_depth: chainDepth,
+  };
 
   if (VERIFY_LOCAL_MODE) {
     if (!existing) throw new Error('artifacts/SOURCE_OF_TRUTH.json is missing or invalid');
@@ -327,6 +354,14 @@ async function main(): Promise<void> {
     if (drift.length > 0) {
       throw new Error(`local truth drift: ${drift.join(', ')}`);
     }
+    if (VERIFY_REMOTE_MODE) {
+      const remoteDrift = REMOTE_METRIC_NAMES.filter(
+        (name) => JSON.stringify(existingMetrics[name]) !== JSON.stringify(remoteMetrics[name]),
+      );
+      if (remoteDrift.length > 0) {
+        throw new Error(`remote truth drift: ${remoteDrift.join(', ')}`);
+      }
+    }
     process.stdout.write('local truth verification: PASS\n');
     return;
   }
@@ -337,12 +372,7 @@ async function main(): Promise<void> {
     generated_by: gitSha(),
     metrics: {
       ...localMetrics,
-      db_tables: dbTableCount(),
-      hf_models: hfModels,
-      hf_datasets: hfDatasets,
-      hf_spaces: hfSpaces,
-      hf_collections: hfCollections,
-      receipt_chain_depth: chainDepth,
+      ...remoteMetrics,
     },
     doi: {
       concept: '10.5281/zenodo.19944926',

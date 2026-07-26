@@ -35,6 +35,9 @@ jobs:
       - name: Verify deterministic local truth
         run: pnpm truth:generate -- --verify-local
 
+      - name: Verify live remote truth
+        run: pnpm truth:generate -- --verify-local --verify-remote
+
       - name: Validate evidence labels and freshness
         run: pnpm claims:validate
 

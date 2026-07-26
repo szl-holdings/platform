@@ -73,8 +73,8 @@ SZL Holdings is not a portfolio of domain-specific point solutions. It is a gove
 ## Proof Points (by Theme)
 
 ### Architecture credibility
-- 2,331 API endpoints across 172 route files with deny-by-default global auth
-- 700+ database tables with org-scoped tenant isolation on every query
+- Contract-generated API surface with deny-by-default global auth
+- Organization-scoped tenant controls, with database-table inventory reported only from live introspection
 - 11-role RBAC with OIDC/PKCE, SCIM 2.0, and Azure AD SSO
 - All P0 security gaps resolved in April 2026 hardening sprint
 - Full-stack TypeScript: React 19, Node.js, PostgreSQL 16, Drizzle ORM, Expo
@@ -102,7 +102,7 @@ SZL Holdings is not a portfolio of domain-specific point solutions. It is a gove
 |---|---|
 | "We already have a SIEM/dashboard/copilot" | Those tools solve the visibility problem. This platform solves the accountability problem — who decided what, based on what, and what happened. |
 | "We're not ready for AI governance" | Covenant Policy is designed so you can start with soft gates (human-advisory) and tighten to hard gates (mandatory approval) as you build trust. |
-| "It's in alpha — we need production-ready" | Functional alpha means all workflows are operational with seeded data. The architecture is production-grade — 2,331 endpoints, 700+ tables, full CI/CD. The design partner program is designed for exactly this phase. |
+| "It's in alpha — we need production-ready" | The active prototype has contract-generated APIs, governed workflows, and CI evidence. Production readiness remains receipt-gated; the design partner program is designed for this validation phase. |
 | "It's too expensive" | The ROI model shows break-even at preventing 1–2 compliance incidents per year. See [ROI_MODEL.md](roi-model.md). |
 | "We need SOC 2" | SOC 2 Type II is targeted for Q3–Q4 2026. The architecture is built to SOC 2 controls. We can provide the security questionnaire pack for early-stage review. |
 | "We want to see real customers" | We are in the design partner phase — co-building alongside early customers. The design partner program offers preferred pricing and direct product influence. |

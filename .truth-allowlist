@@ -33,3 +33,11 @@ docs/operations/audit-findings-register.md|* # reason: Audit finding identifiers
 docs/security/secrets-remediation.md|* # reason: Remediation log preserves the workflow count observed when the security change was made.
 ops/frontier/repo-truth-audit.md|* # reason: Dated repository audit preserves scoped package-category counts rather than the current estate total.
 SOURCE_OF_TRUTH.md|* # reason: This registry contains separately defined source-tree and locked-kernel metrics; overlapping current values are governed by artifacts/SOURCE_OF_TRUTH.json.
+API-CATALOGUE.md|* # reason: Generated per-route-family endpoint counts are scoped catalogue values, not the estate-wide OpenAPI operation total.
+artifacts/a11oy/src/pages/A11oyCode.tsx|14 # reason: The terminal is explicitly labeled as a scripted demonstration and is not live test evidence.
+artifacts/a11oy/src/pages/DevPlatform.tsx|* # reason: The product exploration surface explicitly labels its registry and evaluation values as seeded demonstrations, not live evidence.
+docs/CHANGELOG_PRECISION_EVOLUTION.md|14 # reason: Feature-scoped historical evolution route count, not the estate-wide API operation total.
+docs/strategy/FRONTIER_DOCTRINE.md|35 # reason: Guardian subsystem suite count, not the current total platform test metric.
+docs/strategy/FRONTIER_DOCTRINE.md|43 # reason: Tool-mesh subsystem suite count, not the current total platform test metric.
+load-tests/README.md|3 # reason: Scenario-local hot endpoint count, not the estate-wide API operation total.
+THESIS_PUBLICATIONS.md|172 # reason: Pinned historical Ouroboros v6.2 runtime suite count, not the current platform test total.

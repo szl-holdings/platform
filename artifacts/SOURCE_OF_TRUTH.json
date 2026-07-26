@@ -1,7 +1,7 @@
 {
   "schema": "szl.truth/v1",
-  "generated_at": "2026-07-26T01:38:10.913Z",
-  "generated_by": "36e924f2c8ec34d7e725fa1da6606dfa609e9eda",
+  "generated_at": "2026-07-26T03:36:41.199Z",
+  "generated_by": "a2e582f73bdd16c4a02deac2f9e0194bc95cd5c6",
   "metrics": {
     "surfaces_customer_facing": {
       "value": 0,
@@ -32,9 +32,9 @@
       "source": "pnpm -r list --depth -1 --json"
     },
     "api_endpoints": {
-      "value": null,
-      "label": "UNAVAILABLE",
-      "source": "runtime router inventory artifact (source-call counting cannot prove mounted endpoints)"
+      "value": 5065,
+      "label": "MEASURED",
+      "source": "OpenAPI 3.1 operations in lib/api-spec/openapi.yaml"
     },
     "ci_workflows": {
       "value": 45,
