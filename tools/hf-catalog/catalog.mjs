@@ -31,6 +31,12 @@ function sortedUnique(values) {
   return [...new Set(values)].sort();
 }
 
+function isCanonicalIsoTimestamp(value) {
+  if (typeof value !== 'string') return false;
+  const timestamp = new Date(value);
+  return Number.isFinite(timestamp.getTime()) && timestamp.toISOString() === value;
+}
+
 function errorCode(error) {
   const message = error instanceof Error ? error.message : String(error);
   return message.replace(/[^A-Z0-9_:-]/gi, '_').slice(0, 160);
@@ -186,8 +192,8 @@ export function validateSnapshot(snapshot) {
   if (snapshot.evidenceLabel !== 'MEASURED') {
     errors.push('evidenceLabel must be MEASURED');
   }
-  if (!Number.isFinite(Date.parse(snapshot.observedAt))) {
-    errors.push('observedAt must be an ISO timestamp');
+  if (!isCanonicalIsoTimestamp(snapshot.observedAt)) {
+    errors.push('observedAt must be a canonical ISO timestamp');
   }
   if (
     snapshot.source?.apiBase !== 'https://huggingface.co/api' ||
