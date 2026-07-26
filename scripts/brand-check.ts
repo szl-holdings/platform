@@ -19,10 +19,17 @@
  *   pnpm brand:check:verbose
  */
 
-import { readdirSync, readFileSync, statSync } from 'node:fs';
-import { extname, join, relative } from 'node:path';
+import { spawnSync } from 'node:child_process';
+import { readFileSync } from 'node:fs';
+import { extname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { registry } from '../packages/brand-registry/src/index.ts';
+import {
+  isFrontendPortablePath,
+  isIgnoredPortablePath,
+  normalizePortablePath,
+  portableRelativePath,
+} from './brand-paths.ts';
 
 const __dirname = fileURLToPath(new URL('.', import.meta.url));
 const ROOT = join(__dirname, '..');
@@ -59,7 +66,8 @@ const DEPRECATED_PATTERNS: Array<{ pattern: RegExp; reason: string }> = [
     // "Beacon" as a product name, but not navigator.sendBeacon or similar Web APIs,
     // and not cybersecurity domain terms like "C2 Beacon", "DNS Beacon",
     // "Cobalt Strike Beacon", or "Beacon interval" (malware C2 beaconing concepts).
-    pattern: /(?<!send)(?<!\.)(?<!\w)(?<!C2 )(?<!DNS )(?<!Strike )(?<!APT29 )\bBeacon\b(?! interval)(?!\s*\()/g,
+    pattern:
+      /(?<!send)(?<!\.)(?<!\w)(?<!C2 )(?<!DNS )(?<!Strike )(?<!APT29 )\bBeacon\b(?! interval)(?!\s*\()/g,
     reason: 'Deprecated product name: "Beacon" (canonical name is "Lyte")',
   },
 ];
@@ -170,48 +178,42 @@ const IGNORE_DIR_NAMES = new Set([
 ]);
 
 function isIgnored(fullPath: string): boolean {
-  const rel = relative(ROOT, fullPath);
-  if (IGNORE_PATHS_EXACT.has(rel)) return true;
-  const parts = rel.split('/');
-  for (const part of parts) {
-    if (IGNORE_DIR_NAMES.has(part)) return true;
-  }
-  for (const ignored of IGNORE_PATHS_EXACT) {
-    if (rel.startsWith(`${ignored}/`)) return true;
-  }
-  return false;
+  return isIgnoredPortablePath(
+    portableRelativePath(ROOT, fullPath),
+    IGNORE_PATHS_EXACT,
+    IGNORE_DIR_NAMES,
+  );
 }
 
 function isFrontendSource(fullPath: string): boolean {
-  const rel = relative(ROOT, fullPath);
-  return rel.startsWith('artifacts/') && !rel.startsWith('artifacts/api-server/');
+  return isFrontendPortablePath(portableRelativePath(ROOT, fullPath));
 }
 
-function walk(dir: string, files: string[] = []): string[] {
-  if (isIgnored(dir)) return files;
-  let entries: string[];
-  try {
-    entries = readdirSync(dir);
-  } catch {
-    return files;
+function trackedSourceFiles(): string[] {
+  const gitExecutable = process.env.GIT_EXECUTABLE ?? 'git';
+  const result = spawnSync(
+    gitExecutable,
+    ['ls-files', '-z', '--', 'artifacts', 'lib', 'packages'],
+    {
+      cwd: ROOT,
+      encoding: 'utf8',
+      windowsHide: true,
+    },
+  );
+  if (result.error) {
+    throw new Error(`Unable to enumerate tracked brand sources: ${result.error.message}`);
   }
-  for (const entry of entries) {
-    if (entry.startsWith('.')) continue;
-    const full = join(dir, entry);
-    if (isIgnored(full)) continue;
-    let stat;
-    try {
-      stat = statSync(full);
-    } catch {
-      continue;
-    }
-    if (stat.isDirectory()) {
-      walk(full, files);
-    } else if (SOURCE_EXTENSIONS.has(extname(entry))) {
-      files.push(full);
-    }
+  if (result.status !== 0) {
+    throw new Error(`git ls-files failed: ${result.stderr.trim() || `exit ${result.status}`}`);
   }
-  return files;
+
+  return result.stdout
+    .split('\0')
+    .filter(Boolean)
+    .map(normalizePortablePath)
+    .filter((relativePath) => SOURCE_EXTENSIONS.has(extname(relativePath)))
+    .map((relativePath) => join(ROOT, relativePath))
+    .filter((fullPath) => !isIgnored(fullPath));
 }
 
 // ---------------------------------------------------------------------------
@@ -226,7 +228,7 @@ interface Violation {
 
 function scanFile(filePath: string): Violation[] {
   const violations: Violation[] = [];
-  const rel = relative(ROOT, filePath);
+  const rel = portableRelativePath(ROOT, filePath);
   const frontend = isFrontendSource(filePath);
   let content: string;
   try {
@@ -292,12 +294,7 @@ function scanFile(filePath: string): Violation[] {
 // They are intentionally not excluded from the walk (they contribute zero
 // files), so adding src/ to any of them will automatically be picked up.
 
-const dirsToScan = [join(ROOT, 'artifacts'), join(ROOT, 'lib'), join(ROOT, 'packages')];
-
-const allFiles: string[] = [];
-for (const dir of dirsToScan) {
-  walk(dir, allFiles);
-}
+const allFiles = trackedSourceFiles();
 
 let totalViolations = 0;
 const fileViolations: Array<{ violations: Violation[] }> = [];
@@ -318,6 +315,7 @@ if (totalViolations === 0) {
 } else {
   for (const { violations } of fileViolations) {
     for (const v of violations) {
+      // biome-ignore lint/suspicious/noConsole: CI must report the exact file and claim violation.
       console.error(`[brand:check] ${v.file}:${v.line}:${v.col} — ${v.message}`);
     }
   }
