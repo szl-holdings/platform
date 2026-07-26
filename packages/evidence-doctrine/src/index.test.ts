@@ -53,6 +53,10 @@ test('truthy values are rejected instead of being treated as evidence', () => {
     () => gradeDecision({ inputs_recorded: true as never }),
     /must be VERIFIED, UNVERIFIED, or ABSENT/,
   );
+  assert.throws(
+    () => gradeDecision({ inputs_recorded: null as never }),
+    /must be VERIFIED, UNVERIFIED, or ABSENT/,
+  );
 });
 
 test('Lambda uniqueness stays open, gray, and not machine-checked', () => {

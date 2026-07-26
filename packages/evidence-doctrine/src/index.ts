@@ -53,7 +53,7 @@ export function gradeDecision(evidence: DecisionEvidence): GradeResult {
   const states = new Map<Requirement, EvidenceState>();
   for (const requirements of Object.values(LEVEL_REQUIREMENTS)) {
     for (const requirement of requirements) {
-      const supplied = evidence[requirement] ?? 'ABSENT';
+      const supplied = Object.hasOwn(evidence, requirement) ? evidence[requirement] : 'ABSENT';
       states.set(requirement, validateEvidenceState(requirement, supplied));
     }
   }
