@@ -1,134 +1,169 @@
 # SZL Holdings — Source of Truth
 
-> **SUPERSEDED 2026-07-25.** This hand-maintained snapshot is retained only as
-> historical audit evidence. Current public measurements live in
-> [`artifacts/SOURCE_OF_TRUTH.json`](artifacts/SOURCE_OF_TRUTH.json), are generated
-> from fresh evidence, and must never be copied from the legacy tables below.
->
-> **Current status:** the generated artifact is authoritative. Any unavailable
-> measurement is intentionally reported as `null` with label `UNAVAILABLE`.
->
-> **Obsolete historical instruction (do not follow):** this file once supplied
-> downstream metrics. Regenerate the JSON artifact before making a current claim;
-> do not copy a number from the legacy tables below.
+> **Canonical contextual metrics registry.** Every README, website, deck, and
+> compliance document must take quantitative claims from this file,
+> `audit/source-of-truth.json`, and the machine-generated
+> `artifacts/SOURCE_OF_TRUTH.json`. The generated artifact is authoritative for
+> overlapping current metrics; this registry may retain separately defined
+> source-tree and locked-kernel measurements. A value without reproducible
+> evidence is **UNVERIFIED**, not estimated.
+
+**Registry version:** 2.0.0
+
+**Main baseline inspected:** `platform@280176de9fd99a33f1cfc2087372014e91d7ce8f`
+
+**Measured:** 2026-07-25
+
+**Validator:** `node scripts/audit/validate-source-of-truth.js`
+
+The counts include the truth-lock workflow introduced on this branch. The
+validator recomputes them from whichever commit is checked out.
 
 ---
 
-## Canonical Public Metrics
+## Canonical Current-Tree Metrics
 
-| Metric | Canonical Value | Verification Command |
+| Metric | Canonical Value | Definition / verification |
+|---|---:|---|
+| Registered artifacts | **6** | Tracked `artifacts/*/(.replit-artifact/)?artifact.toml` files |
+| Artifact directories | **7** | Unique tracked top-level children of `artifacts/` |
+| Registered product verticals | **5** | Registered customer-facing domain artifacts; A11oy is counted separately as the orchestration product |
+| Domain packages (`packages/`) | **156** | Tracked top-level package directories; excludes root file `packages/proxy-routes.ts` |
+| Shared library packages (`lib/`) | **53** | Tracked top-level library directories |
+| Total packages (`packages/` + `lib/`) | **209** | 156 + 53 |
+| Apps (`apps/`) | **11** | Unique tracked top-level children of `apps/` |
+| Services (`services/`) | **11** | Unique tracked top-level children of `services/` |
+| Workers (`workers/`) | **5** | Unique tracked top-level children of `workers/` |
+| DB schema files | **197** | Tracked `lib/db/src/schema/**/*.ts` files |
+| DB `pgTable` call sites | **1,067** | Source call sites; not a claim about currently provisioned tables |
+| DB migrations (SQL files) | **149** | Tracked `lib/db/drizzle/*.sql` files; duplicate sequence numbers may exist |
+| API route source files | **43** | Non-test files under `apps/`, `services/`, and `artifacts/api-server/` containing a detected Express route declaration |
+| API handler declarations | **306** | Static non-test HTTP method declarations on `app`, `router`, and named Express Router receivers in the current runtime roots |
+| CI workflows | **45** | Tracked `.github/workflows/*.yml` and `*.yaml`, including both truth workflows |
+| Environment variables (in `.env.example`) | **238** | Lines matching `^[A-Z_]+=` |
+
+These are source-tree measurements. They do not by themselves prove that a
+service is deployed, reachable, authenticated correctly, or returning HTTP 200.
+
+---
+
+## Product Registry
+
+### Orchestration product
+
+| Product | Registered artifact | Status proven by this registry |
 |---|---|---|
-| Registered artifacts (artifact.toml) | **9** | `find artifacts -name artifact.toml \| wc -l` |
-| Database tables (live, provisioned) | **848** | `psql "$DATABASE_URL" -t -c "SELECT count(*) FROM information_schema.tables WHERE table_schema='public';"` |
-| API endpoints (router declarations) | **5,524** | `grep -rhE 'router\.(get\|post\|put\|patch\|delete\|use)' artifacts/api-server/src/routes --include='*.ts' \| wc -l` |
-| Verticals (post KORA consolidation) | **7** | See Verticals section below |
-| Monorepo packages (packages/ + lib/) | **126** | `echo $(( $(ls packages/ \| wc -l) + $(ls lib/ \| wc -l) ))` |
-| DB schema files | **170** | `find lib/db/src/schema -name '*.ts' \| wc -l` |
-| CI workflows | **23** | `ls .github/workflows/ \| wc -l` |
-| Declared env vars | **213** | `grep -cE '^[A-Z_]+=' .env.example` |
-| Platform primitives | **6** | See Primitives section below |
-| RBAC roles | **11** | Cross-document consistency (README + docs) |
-| Ouroboros vitest test calls | **133** | `grep -rhE "^\s*(it\|test)\(" packages/ouroboros/src --include='*.test.ts' \| wc -l` |
-| Codex-kernel vitest test calls | **29** | `grep -rhE "^\s*(it\|test)\(" packages/codex-kernel/src --include='*.test.ts' \| wc -l` |
-| Sovereign engine innovations | **44** | Count of entries in INNOVATION_MANIFEST in `packages/ouroboros-integrations/src/sovereign-engine.ts` |
-| Thesis papers (papers/) | **10** | `ls papers/*.tex \| wc -l` |
-| Security tests passing | **126** | `pnpm --filter @workspace/api-server test` (security suite) |
+| A11oy | `artifacts/a11oy` | **REGISTERED** |
 
-**Last verified:** 2026-05-04
-**Audit trail:** `audit/source-of-truth.json`
-**Note:** Re-verification on 2026-05-03 produced material deltas from the 2026-04-28 baseline. DB tables grew 798 → 848 (+50). API endpoints grew 2,816 → 5,524 (+2,708) following recent route-system expansion. Registered artifacts dropped 14 → 9 (vestigial artifact.toml files were removed in the 2026-04-25 cleanup; the canonical count is now `find artifacts -name artifact.toml`). Ouroboros tests revised to a literal call count of 133 (the earlier "150" figure was a declared-suite count and is no longer authoritative). Verticals dropped 8 → 7: KORA (Decision Intelligence) consolidated into A11oy as a unified Orchestration + Decision Intelligence surface; the `/lyte/` archive directory is retained but is no longer a standalone product line.
+### Registered product verticals
+
+| Product vertical | Registered artifact | Status proven by this registry |
+|---|---|---|
+| Carlota Jo | `artifacts/carlota-jo` | **REGISTERED** |
+| Counsel | `artifacts/counsel` | **REGISTERED** |
+| Sentra | `artifacts/sentra` | **REGISTERED** |
+| Terra | `artifacts/terra` | **REGISTERED** |
+| Vessels | `artifacts/vessels` | **REGISTERED** |
+
+`artifacts/api-server` is tracked backend infrastructure without an artifact
+manifest. It is not counted as a product vertical.
+
+Registration is a discoverability fact, not a readiness claim. LIVE, MODELED,
+PLANNED, and conformance status require separate evidence.
 
 ---
 
-## Canonical Platform Names
+## Doctrine v11 — Locked Metrics
 
-| Display Name | Slug / Path | Former Name | Notes |
-|---|---|---|---|
-| SZL Holdings Platform | `/` | — | Root dashboard |
-| FORGE | — | — | Governed operational intelligence platform |
-| Continuum | — | Alloy, AEEP | Business Observability Fabric |
-| TENAX | `/sentra/` | Sentra | Cyber Resilience Command; slug retained |
-| SEXTANT | `/vessels/` | — | Maritime Intelligence |
-| DOMAINE | `/terra/` | — | Real Estate Intelligence |
-| Counsel | `/counsel/` | PRISM Counsel | Legal Matter Command |
-| LUMINA | `/pulse/` | Pulse | AI Executive Briefing; slug retained |
-| PARAGON | `/aegis/` | Aegis | Security & Compliance |
-| KORA | `/lyte/` | Lyte | Decision Intelligence — consolidated into A11oy 2026-05-03; archive directory `archive/artifacts/lyte-command-center` retained for history |
-| A11oy | `/a11oy/` | Alloy, AEEP | Orchestration + Decision Intelligence — unified surface that powers and orchestrates all verticals |
-| Carlota Jo | `/carlota-jo/` | — | Consulting vertical |
-| Amaru | `/conduit/` | Conduit | Convergent Reverse-ETL; slug retained |
-| Unified Command | `/command/` | — | Cross-vertical intelligence layer |
-| APEX | `/szl-holdings-mobile/` | — | Mobile Command app |
-| PRAXIS | `/nexus/` | NEXUS | Agentic AI layer |
+Doctrine v11 is a frozen kernel contract tied to commit `c7c0ba17`. These
+numbers are not recalculated from experimental `main`.
 
-**Rule:** Display names in UI and docs use the canonical name above. Slugs and API paths are stable and do not change on rebrand.
+| Metric | Locked Value | Definition |
+|---|---:|---|
+| Declarations | **749** | Declarations in the frozen Doctrine v11 Lean kernel |
+| Unique axioms | **14** | Unique declared axioms; 15 raw occurrences with one duplicate |
+| Tracked `sorry` obligations | **163** | Tracked obligations in the frozen kernel snapshot |
+| Locked-proven formulas | **8** | `{F1, F4, F7, F11, F12, F18, F19, F22}` |
+
+The exact locked-proven count is separately enforced by the no-axiom Lean
+theorem `locked_count_eight`. The 163 tracked obligations are not part of the
+locked-proven set. Λ unconditional uniqueness remains **Conjecture 1 — OPEN**.
 
 ---
 
-## Seven Verticals (post KORA consolidation)
+## GitHub Public Estate — Observed State
 
-1. **TENAX** — Cyber Resilience Command (`/sentra/`)
-2. **SEXTANT** — Maritime Intelligence (`/vessels/`)
-3. **DOMAINE** — Real Estate Intelligence (`/terra/`)
-4. **Counsel** — Legal Matter Command (`/counsel/`)
-5. **LUMINA** — AI Executive Briefing (`/pulse/`)
-6. **PARAGON** — Security & Compliance (`/aegis/`)
-7. **Carlota Jo** — Consulting (`/carlota-jo/`)
+**Observed:** 2026-07-25T22:03:01Z
 
-**Orchestration layer (powers and unifies all seven):** **A11oy** — `/a11oy/` — Brand Orchestration + Decision Intelligence (formerly KORA `/lyte/`, consolidated 2026-05-03).
+**Method:** authenticated GitHub repository inventory, filtered by current
+visibility and archive state.
 
-**Public-proof open source (not a vertical, foundational runtime):** **Ouroboros** runtime (`@szl-holdings/ouroboros`, current release v6.2.0, full suite 172/172 tests passing) and **Ouroboros Thesis** — 11 Zenodo-archived papers (v1–v11). Canonical latest is v11 "Applied Λ: Measured Per-Request Overhead of the Audit-Closure Operator" (per-version DOI 10.5281/zenodo.20119582, published 2026-05-11). v3 in the same series is paper-v3-2.0.0 "The Lutar Invariant (audit-supported rewrite)" (per-version DOI 10.5281/zenodo.19983066, published 2026-05-02). Concept DOI is 10.5281/zenodo.19944926 and resolves to the latest version (currently v11). Both repositories are public on `github.com/szl-holdings`. The earlier reserved DOI 10.5281/zenodo.19951520 was withdrawn during a re-release sequence on 2026-05-02 and is not the canonical v3 record.
+| Metric | Observed Value |
+|---|---:|
+| Public repositories | **53** |
+| Archived public repositories | **12** |
+| Active public repositories | **41** |
+| FRONTIER decision target | **9** |
 
----
+The nine-public-repository target is **NOT APPLIED**. It is conditional on
+vertical conformance and a reversible disposition process. This registry does
+not claim that the current estate already matches the target.
 
-## Six Platform Primitives
+The V2 names `sentra`, `vessels`, and `insurance` as conceptual repository
+targets. Current repository truth differs:
 
-1. Outcome Graph
-2. Proof Chain
-3. Covenant Policy
-4. Decision Simulation
-5. Workflow Engine
-6. Event Fabric (PRISM Bus)
+- Sentra is a registered product vertical inside `platform`, not a current
+  repository named `sentra`.
+- Vessels is a registered product vertical inside `platform`; `killinchu` is a
+  separate public repository.
+- There is no current public repository named `insurance`; the candidate
+  scoring workload has not been approved for public release.
 
----
-
-## Model Profile Reference
-
-**Governed model:** Qwen 3.6 — 27B Reasoning Model
-**Profile file:** `model-profiles/qwen3_6_27b_szl_profile.json`
-**Provider:** Hugging Face Inference Endpoints
-**Serving transport:** OpenAI-compatible REST
-**Key env vars:** `QWEN36_BASE_URL`, `QWEN36_API_KEY`, `QWEN36_MODEL`, `HF_TOKEN`, `HF_ENDPOINT_NAMESPACE`
-**Gateway adapter:** `lib/ai-engine/src/alloy-model-gateway.ts`
-
-No model weights are hosted locally. All inference routes through the configured remote endpoint.
+Repository visibility must not change until aliases, ownership, release tags,
+and conformance evidence are resolved.
 
 ---
 
-## Endpoint Plane Reference
+## Runtime and Database Values Not Current
 
-**Profile file:** `endpoint-profiles/alloy_endpoint_plane.json`
-**Provider:** Hugging Face Inference Endpoints
-**Autoscaling:** 0–4 replicas; scales to zero after 15 min idle
-**Daily budget cap:** $50 USD (hard cutoff — new requests rejected when limit is reached)
-**Monthly budget cap:** $1,000 USD
-**Cold-start retries:** 3 attempts with 2s / 5s / 10s backoff
-**Deployment:** requires human approval; profile documents policy only
+The prior registry included live-database and deployed-route numbers measured
+in April and May 2026. No live database was queried during the 2026-07-25 truth
+lock, so those values are historical snapshots in
+`audit/source-of-truth.json`, not current public claims.
+
+Use these labels:
+
+- **CURRENT-TREE** — recomputed by the validator at the current commit.
+- **LOCKED** — frozen at a named kernel commit.
+- **OBSERVED** — refreshed from a named external system and timestamped.
+- **HISTORICAL** — retained for audit history; not current.
+- **UNVERIFIED** — no current evidence; do not publish as fact.
 
 ---
 
-## Plugin Registry Reference
+## Vocabulary
 
-**Registry file:** `ecosystem-plugin-registry.json`
-**Shared plugins:** GitHub, HuggingFace, Vercel, Neon, Cloudflare
-**Coverage:** all 8 verticals with domain-specific plugins and approval gates
+Use the canonical governance terms in [`docs/GLOSSARY.md`](docs/GLOSSARY.md):
+
+- **holographic state**
+- **product vertical**
+- **runtime organ**
+- **policy gate module**
+
+Do not use one of these terms as a synonym for another.
 
 ---
 
 ## Update Rule
 
-When any metric changes, update **both**:
-1. This file (`SOURCE_OF_TRUTH.md`) — human-readable table
-2. `audit/source-of-truth.json` — machine-readable audit record (with `computed` date and verification command)
+When a current-tree metric changes:
 
-Do not update one without the other. Run the verification command and paste the output — never estimate.
+1. Recompute it from tracked source.
+2. Update `audit/source-of-truth.json`.
+3. Update this file.
+4. Update the quick-reference table in `audit/README.md`.
+5. Run `node scripts/audit/validate-source-of-truth.js`.
+6. Attach the command output to the pull request Proof Packet.
+
+Never update only one representation, and never replace a failed measurement
+with an estimate.

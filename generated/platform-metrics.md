@@ -61,7 +61,7 @@
 | Metric | Count |
 |--------|-------|
 | Test files (.test.ts/tsx, .spec.ts/tsx) | 387 |
-| GitHub CI workflows | 44 (MEASURED; `artifacts/SOURCE_OF_TRUTH.json`) |
+| GitHub CI workflows | 45 (MEASURED; `artifacts/SOURCE_OF_TRUTH.json`) |
 
 ## Platform Primitives
 

@@ -80,7 +80,7 @@ The committed artifact reports:
 | Customer-facing surfaces meeting the full manifest/health/receipt definition | 0 | MEASURED |
 | Monorepo packages | 197 | MEASURED |
 | TypeScript route declarations | 1,676 | MEASURED |
-| CI workflows | 44 | MEASURED |
+| CI workflows | 45 | MEASURED |
 | Locked Lean theorems | 8 | REPORTED |
 | Hugging Face models | 15 | MEASURED |
 | Hugging Face datasets | 26 | MEASURED |

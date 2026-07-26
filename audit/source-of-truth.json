@@ -68,7 +68,13 @@
       "count": 5,
       "command": "Count unique tracked top-level children of workers/",
       "computed": "2026-07-25",
-      "list": ["alloy-embed-worker", "alloy-rank-worker", "alloy-rerank-worker", "alloy-vector-worker", "substrate-python"]
+      "list": [
+        "alloy-embed-worker",
+        "alloy-rank-worker",
+        "alloy-rerank-worker",
+        "alloy-vector-worker",
+        "substrate-python"
+      ]
     }
   },
   "database": {
@@ -120,10 +126,10 @@
   },
   "ci": {
     "workflows": {
-      "count": 44,
+      "count": 45,
       "command": "Count tracked .github/workflows/*.yml and *.yaml files",
       "computed": "2026-07-25",
-      "note": "Includes the source-of-truth workflow introduced by this truth-lock change."
+      "note": "Includes both the source-of-truth validator and generated-artifact truth-drift workflows."
     }
   },
   "env": {
@@ -157,7 +163,14 @@
   "platform_primitives": {
     "count": 6,
     "status": "HISTORICAL_NOT_REVERIFIED_2026-07-25",
-    "list": ["Outcome Graph", "Proof Chain", "Covenant Policy", "Decision Simulation", "Workflow Engine", "Event Fabric"]
+    "list": [
+      "Outcome Graph",
+      "Proof Chain",
+      "Covenant Policy",
+      "Decision Simulation",
+      "Workflow Engine",
+      "Event Fabric"
+    ]
   },
   "doctrine_v11": {
     "kernel_commit": "c7c0ba17",
@@ -270,7 +283,11 @@
       },
       "orphaned_files_resolved": {
         "count": 3,
-        "files": ["0010_szl_saas_layer_tables.sql", "0028_crdt_change_events.sql", "0028_multi_channel_notifications.sql"],
+        "files": [
+          "0010_szl_saas_layer_tables.sql",
+          "0028_crdt_change_events.sql",
+          "0028_multi_channel_notifications.sql"
+        ],
         "resolution": "Registered as journal idx 91, 92, 93 with IF NOT EXISTS guards"
       },
       "rollback_scripts": {
@@ -288,9 +305,22 @@
         "count": 20,
         "command": "ls scripts/seed-*.ts scripts/seed-*.sh | wc -l"
       },
-      "domains_with_full_coverage": ["KORA/Lyte", "SEXTANT/Vessels", "TENAX/Sentra", "LUMINA/Pulse", "Carlota Jo", "Agent/AI infra"],
-      "domains_with_partial_coverage": ["DOMAINE/Terra (1031 Exchange + Lease Abstraction thin)", "Counsel (M365 surfaces thin)"],
-      "surfaces_depending_only_on_static_json": ["KORA/Lyte command-cards/incidents/playbooks (by design)", "SEXTANT/Vessels fleets/AI-briefings (by design)"]
+      "domains_with_full_coverage": [
+        "KORA/Lyte",
+        "SEXTANT/Vessels",
+        "TENAX/Sentra",
+        "LUMINA/Pulse",
+        "Carlota Jo",
+        "Agent/AI infra"
+      ],
+      "domains_with_partial_coverage": [
+        "DOMAINE/Terra (1031 Exchange + Lease Abstraction thin)",
+        "Counsel (M365 surfaces thin)"
+      ],
+      "surfaces_depending_only_on_static_json": [
+        "KORA/Lyte command-cards/incidents/playbooks (by design)",
+        "SEXTANT/Vessels fleets/AI-briefings (by design)"
+      ]
     },
     "public_claims_status": "COUNTS UPDATED 2026-04-25 — see Moonshot Phase 1 audit. All stale counts reconciled.",
     "open_drift_items": 0,

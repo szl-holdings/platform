@@ -1,7 +1,7 @@
 {
   "schema": "szl.truth/v1",
-  "generated_at": "2026-07-25T23:57:31.351Z",
-  "generated_by": "ee3cc1452cfff4abfdad3d64573ca3b31593cf25",
+  "generated_at": "2026-07-26T00:22:25.791Z",
+  "generated_by": "d2dee7b320a5efbdd17fa4cdcd037fd3cbbaefcb",
   "metrics": {
     "surfaces_customer_facing": {
       "value": 0,
@@ -27,8 +27,8 @@
       "source": "artifacts/mcp-e2e-test-results.json"
     },
     "monorepo_packages": {
-      "value": 197,
-      "label": "MEASURED",
+      "value": null,
+      "label": "UNAVAILABLE",
       "source": "pnpm -r list --depth -1 --json"
     },
     "api_endpoints": {
@@ -37,7 +37,7 @@
       "source": "runtime router inventory artifact (source-call counting cannot prove mounted endpoints)"
     },
     "ci_workflows": {
-      "value": 44,
+      "value": 45,
       "label": "MEASURED",
       "source": "ls .github/workflows"
     },
