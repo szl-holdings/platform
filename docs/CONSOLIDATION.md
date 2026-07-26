@@ -99,6 +99,3 @@ Restoration does not guarantee that external links, package consumers, or integr
 ## Proof
 
 The documentation proof packet is recorded at [audit/series-a-w2-consolidation-proof.md](../audit/series-a-w2-consolidation-proof.md).
-
-
-
