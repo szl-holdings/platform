@@ -32,10 +32,8 @@ jobs:
       - name: Install locked dependencies
         run: pnpm install --frozen-lockfile
 
-      - name: Regenerate measured truth
-        env:
-          HF_ORG: SZLHOLDINGS
-        run: pnpm truth:generate -- --check
+      - name: Verify deterministic local truth
+        run: pnpm truth:generate -- --verify-local
 
       - name: Validate evidence labels and freshness
         run: pnpm claims:validate
