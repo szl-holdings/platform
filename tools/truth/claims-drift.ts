@@ -158,10 +158,9 @@ function claimFailuresForText(
     if (!nearest) continue;
     const literalIndex = match.index ?? 0;
     const watchwordIndex = nearest.index;
-    const qualifier = text.slice(
-      Math.min(literalIndex, watchwordIndex),
-      Math.max(literalIndex + literal.length, watchwordIndex + nearest[0].length),
-    );
+    const pairEnd = Math.max(literalIndex + literal.length, watchwordIndex + nearest[0].length);
+    const suffix = text.slice(pairEnd, Math.min(text.length, pairEnd + 40)).split(/[.!?;|]/, 1)[0];
+    const qualifier = `${text.slice(Math.min(literalIndex, watchwordIndex), pairEnd)}${suffix}`;
     const canonical = canonicalFor(nearest[0], metrics, qualifier);
     if (!canonical) continue;
     if (
@@ -190,7 +189,7 @@ function startsStructuralBlock(line: string): boolean {
   return /^(?:#{1,6}\s|[-+*]\s|\d+[.)]\s|\||```|~~~|[{}[\]])/.test(line.trim());
 }
 
-function canJoinWrappedLines(current: string, next: string): boolean {
+function canJoinWrappedLines(current: string, next: string, relative: string): boolean {
   const currentTrimmed = current.trim();
   const nextTrimmed = next.trim();
   if (!currentTrimmed || !nextTrimmed) return false;
@@ -198,6 +197,15 @@ function canJoinWrappedLines(current: string, next: string): boolean {
   if (currentTrimmed.startsWith('|') || nextTrimmed.startsWith('|')) return false;
   if (startsStructuralBlock(nextTrimmed)) return false;
   if (startsStructuralBlock(currentTrimmed) && /^[{}[\]]/.test(currentTrimmed)) return false;
+  if (
+    path.extname(relative) === '.tsx' &&
+    (/[,;[\]{}()]\s*$/.test(currentTrimmed) ||
+      /^(?:const|let|var)\b.*(?:=|[([{])\s*$/.test(currentTrimmed) ||
+      /^['"`].*['"`],?\s*$/.test(currentTrimmed) ||
+      /^['"`].*['"`],?\s*$/.test(nextTrimmed))
+  ) {
+    return false;
+  }
   return true;
 }
 
@@ -262,7 +270,7 @@ export function claimFailuresForLines(
       continue;
     }
     const previous = block[block.length - 1]?.line ?? '';
-    if (canJoinWrappedLines(previous, line)) {
+    if (canJoinWrappedLines(previous, line, relative)) {
       block.push({ line, lineNumber: index + 1 });
     } else {
       scanBlock(block);

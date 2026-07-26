@@ -150,11 +150,50 @@ test('uses the total test count for total-count wording', () => {
   );
 });
 
+test('uses the total test count for postpositive total wording', () => {
+  assert.deepEqual(
+    claimFailuresForLines(
+      'docs/testing.md',
+      ['The current platform has 105 tests in total.'],
+      metrics(12),
+      [],
+    ),
+    [],
+  );
+  assert.deepEqual(
+    claimFailuresForLines(
+      'docs/testing.md',
+      ['The current platform has 100 tests in total.'],
+      metrics(12),
+      [],
+    ),
+    ['docs/testing.md:1: hardcoded 100; canonical value for this context is 105'],
+  );
+});
+
 test('uses the passed test count for passing wording', () => {
   assert.deepEqual(
     claimFailuresForLines(
       'docs/testing.md',
       ['The current platform has 100 passing tests.'],
+      metrics(12),
+      [],
+    ),
+    [],
+  );
+});
+
+test('does not join separate TSX string expressions into one claim context', () => {
+  assert.deepEqual(
+    claimFailuresForLines(
+      'artifacts/example/src/claims.tsx',
+      [
+        'const labels = [',
+        "  'Current release notes',",
+        "  'Guardian engine',",
+        "  'ships 35 tests',",
+        '];',
+      ],
       metrics(12),
       [],
     ),
