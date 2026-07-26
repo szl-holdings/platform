@@ -10,6 +10,7 @@ on:
       - 'SOURCE_OF_TRUTH.md'
       - 'audit/README.md'
       - 'audit/source-of-truth.json'
+      - 'audit/evidence/huggingface-public-catalog.snapshot.json'
       - 'docs/GLOSSARY.md'
       - 'docs/operations/hugging-face-catalog-drift.md'
       - 'scripts/audit/validate-source-of-truth.js'
@@ -29,6 +30,7 @@ on:
       - 'SOURCE_OF_TRUTH.md'
       - 'audit/README.md'
       - 'audit/source-of-truth.json'
+      - 'audit/evidence/huggingface-public-catalog.snapshot.json'
       - 'docs/GLOSSARY.md'
       - 'docs/operations/hugging-face-catalog-drift.md'
       - 'scripts/audit/validate-source-of-truth.js'
@@ -80,11 +82,19 @@ jobs:
       - name: Test cursor pagination and snapshot invariants
         run: node --test tools/hf-catalog/catalog.test.mjs
       - name: Compare live asset IDs with the tracked snapshot
-        continue-on-error: true
+        shell: bash
         run: |
+          set +e
           set -o pipefail
           node tools/hf-catalog/catalog.mjs --probe-live --format markdown \
             | tee -a "$GITHUB_STEP_SUMMARY"
+          status=${PIPESTATUS[0]}
+          set -e
+          if [[ "$status" -eq 2 ]]; then
+            echo "Classified upstream unavailability is advisory." >> "$GITHUB_STEP_SUMMARY"
+            exit 0
+          fi
+          exit "$status"
       - name: Record advisory boundary
         run: |
           echo "Catalog drift or upstream unavailability is advisory and does not fail product CI." \

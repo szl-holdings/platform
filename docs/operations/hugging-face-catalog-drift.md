@@ -6,7 +6,7 @@ deployment or model-quality claim.
 ## Evidence boundary
 
 - The repository blocks changes only on deterministic tests and structural
-  validation of `artifacts/huggingface-public-catalog.snapshot.json`.
+  validation of `audit/evidence/huggingface-public-catalog.snapshot.json`.
 - A scheduled advisory job queries the public Hugging Face API and compares
   exact asset IDs with that snapshot.
 - The live probe follows every `rel="next"` cursor link. A full response page

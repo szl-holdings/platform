@@ -16,7 +16,8 @@ export const COMPLETENESS_RULE =
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '../..');
 export const DEFAULT_SNAPSHOT_PATH = resolve(
   ROOT,
-  'artifacts',
+  'audit',
+  'evidence',
   'huggingface-public-catalog.snapshot.json',
 );
 export const LEGACY_MANIFEST_PATH = resolve(ROOT, 'replit-sync', 'HF_ASSET_MANIFEST.json');
@@ -42,6 +43,13 @@ function isCanonicalIsoTimestamp(value) {
 function errorCode(error) {
   const message = error instanceof Error ? error.message : String(error);
   return message.replace(/[^A-Z0-9_:-]/gi, '_').slice(0, 160);
+}
+
+export function isUpstreamUnavailable(error) {
+  const message = error instanceof Error ? error.message : String(error);
+  if (/^HF_HTTP_(?:408|425|429|5\d\d)$/.test(message)) return true;
+  if (message === 'FETCH_UNAVAILABLE' || message.toLowerCase() === 'fetch failed') return true;
+  return error instanceof Error && ['AbortError', 'TimeoutError'].includes(error.name);
 }
 
 export function parseNextLink(linkHeader) {
@@ -265,7 +273,7 @@ export function validateLegacyManifestBoundary(manifest) {
     errors.push('legacy manifest counts_scope must distinguish declarations from live Hub state');
   }
   if (
-    manifest._meta?.live_catalog_snapshot !== 'artifacts/huggingface-public-catalog.snapshot.json'
+    manifest._meta?.live_catalog_snapshot !== 'audit/evidence/huggingface-public-catalog.snapshot.json'
   ) {
     errors.push('legacy manifest must point to the current live catalog snapshot');
   }
@@ -376,6 +384,7 @@ async function main() {
         ...compareSnapshots(tracked, live),
       };
     } catch (error) {
+      if (!isUpstreamUnavailable(error)) throw error;
       report = {
         schema: 'szl.hf-catalog-drift/v1',
         checkedAt: new Date().toISOString(),

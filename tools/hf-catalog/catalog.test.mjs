@@ -3,7 +3,9 @@ import test from 'node:test';
 import {
   compareSnapshots,
   COMPLETENESS_RULE,
+  DEFAULT_SNAPSHOT_PATH,
   fetchAssetIds,
+  isUpstreamUnavailable,
   parseNextLink,
   SCHEMA,
   validateLegacyManifestBoundary,
@@ -169,11 +171,31 @@ test('legacy manifest counts are explicitly historical declarations', () => {
         hf_org: 'SZLHOLDINGS',
         evidence_label: 'HISTORICAL',
         counts_scope: 'TRACKED_DECLARATIONS_NOT_LIVE_HUB',
-        live_catalog_snapshot: 'artifacts/huggingface-public-catalog.snapshot.json',
+        live_catalog_snapshot: 'audit/evidence/huggingface-public-catalog.snapshot.json',
         counts_note: 'Historical declarations are not a live Hub inventory.',
       },
     }),
     [],
   );
   assert.ok(validateLegacyManifestBoundary({ _meta: { hf_org: 'SZLHOLDINGS' } }).length > 0);
+});
+
+test('stores the catalog receipt outside the counted artifacts root', () => {
+  const normalized = DEFAULT_SNAPSHOT_PATH.replaceAll('\\', '/');
+  assert.match(normalized, /\/audit\/evidence\/huggingface-public-catalog\.snapshot\.json$/);
+  assert.doesNotMatch(normalized, /\/artifacts\//);
+});
+
+test('classifies only transient upstream outages as advisory', () => {
+  const timeout = new Error('request timed out');
+  timeout.name = 'TimeoutError';
+  assert.equal(isUpstreamUnavailable(timeout), true);
+  assert.equal(isUpstreamUnavailable(new Error('fetch failed')), true);
+  assert.equal(isUpstreamUnavailable(new Error('HF_HTTP_429')), true);
+  assert.equal(isUpstreamUnavailable(new Error('HF_HTTP_503')), true);
+
+  assert.equal(isUpstreamUnavailable(new Error('HF_HTTP_404')), false);
+  assert.equal(isUpstreamUnavailable(new Error('HF_RESPONSE_NOT_ARRAY')), false);
+  assert.equal(isUpstreamUnavailable(new Error('PAGINATION_AUTHOR_CHANGED')), false);
+  assert.equal(isUpstreamUnavailable(new Error('SNAPSHOT_MISSING')), false);
 });

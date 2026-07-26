@@ -6,7 +6,7 @@
     "hf_org": "SZLHOLDINGS",
     "evidence_label": "HISTORICAL",
     "counts_scope": "TRACKED_DECLARATIONS_NOT_LIVE_HUB",
-    "live_catalog_snapshot": "artifacts/huggingface-public-catalog.snapshot.json",
+    "live_catalog_snapshot": "audit/evidence/huggingface-public-catalog.snapshot.json",
     "counts_note": "These counts describe entries in this historical design manifest. They are not current public Hugging Face inventory counts.",
     "resolve_pattern_dataset": "https://huggingface.co/datasets/SZLHOLDINGS/<repo>/resolve/main/<path>",
     "resolve_pattern_model": "https://huggingface.co/SZLHOLDINGS/<repo>/resolve/main/<path>",
