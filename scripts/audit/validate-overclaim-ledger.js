@@ -36,7 +36,14 @@ function formatDuration(seconds) {
   return `${hours}h ${minutes}m ${remainingSeconds}s`;
 }
 
-export function validateOverclaimLedger({ ledger, ledgerBytes, manifest, root = ROOT }) {
+function markdownRows(markdown, label) {
+  return markdown
+    .split(/\r?\n/)
+    .filter((line) => line.startsWith('|'))
+    .filter((line) => line.split('|')[1]?.trim() === label);
+}
+
+export function validateOverclaimLedger({ ledger, ledgerBytes, manifest, markdown, root = ROOT }) {
   const failures = [];
   const fail = (message) => failures.push(message);
 
@@ -106,6 +113,7 @@ export function validateOverclaimLedger({ ledger, ledgerBytes, manifest, root = 
   const countedEvidenceRefs = new Set();
   const countedDetectionSources = new Set();
   const countedCorrectionSources = new Set();
+  let resolvedIncidentCount = 0;
   let totalSeconds = 0;
   for (const incident of incidents) {
     if (ids.has(incident.id)) fail(`duplicate incident id: ${incident.id}`);
@@ -116,29 +124,54 @@ export function validateOverclaimLedger({ ledger, ledgerBytes, manifest, root = 
     }
 
     const detected = Date.parse(incident.first_detected_at);
-    const corrected = Date.parse(incident.corrected_at);
-    if (!Number.isFinite(detected) || !Number.isFinite(corrected) || corrected < detected) {
-      fail(`${incident.id}: invalid detection or correction timestamp`);
-      continue;
-    }
-    const duration = Math.floor((corrected - detected) / 1000);
-    if (incident.observed_correction_time_seconds !== duration) {
-      fail(
-        `${incident.id}: observed_correction_time_seconds=${incident.observed_correction_time_seconds}, expected ${duration}`,
-      );
-    }
-    totalSeconds += duration;
-
+    if (!Number.isFinite(detected)) fail(`${incident.id}: invalid detection timestamp`);
     if (!validGitHubUrl(incident.first_run_url, 'run')) {
       fail(`${incident.id}: invalid first_run_url`);
     }
-    if (!validGitHubUrl(incident.correction_url, 'commit')) {
-      fail(`${incident.id}: invalid correction_url`);
+
+    const isResolved = incident.correction_status === 'RESOLVED';
+    const isOpen = incident.correction_status === 'OPEN';
+    if (!isResolved && !isOpen) {
+      fail(`${incident.id}: correction_status must be RESOLVED or OPEN`);
+    }
+    if (isResolved) {
+      resolvedIncidentCount += 1;
+      const corrected = Date.parse(incident.corrected_at);
+      if (!Number.isFinite(detected) || !Number.isFinite(corrected) || corrected < detected) {
+        fail(`${incident.id}: invalid correction timestamp`);
+      } else {
+        const duration = Math.floor((corrected - detected) / 1000);
+        if (incident.observed_correction_time_seconds !== duration) {
+          fail(
+            `${incident.id}: observed_correction_time_seconds=${incident.observed_correction_time_seconds}, expected ${duration}`,
+          );
+        }
+        totalSeconds += duration;
+      }
+      if (!validGitHubUrl(incident.correction_url, 'commit')) {
+        fail(`${incident.id}: invalid correction_url`);
+      }
+    }
+    if (isOpen) {
+      const correctionFields = [
+        'corrected_at',
+        'correction_commit',
+        'correction_url',
+        'observed_correction_time_seconds',
+      ];
+      for (const field of correctionFields) {
+        if (Object.hasOwn(incident, field)) {
+          fail(`${incident.id}: open incident must omit ${field}`);
+        }
+      }
     }
 
     const refs = incident.evidence_refs ?? [];
     if (new Set(refs).size !== refs.length) fail(`${incident.id}: duplicate evidence reference`);
-    if (refs.length !== 2) fail(`${incident.id}: expected detection and correction evidence`);
+    const expectedRefCount = isResolved ? 2 : 1;
+    if (refs.length !== expectedRefCount) {
+      fail(`${incident.id}: expected detection${isResolved ? ' and correction' : ''} evidence`);
+    }
     for (const ref of refs) {
       if (countedEvidenceRefs.has(ref)) {
         fail(
@@ -159,6 +192,10 @@ export function validateOverclaimLedger({ ledger, ledgerBytes, manifest, root = 
       if (detection.source_url !== incident.first_run_url) {
         fail(`${incident.id}: detection source URL mismatch`);
       }
+      const expectedDetectionUrl = `https://github.com/${detection.repository}/actions/runs/${detection.run_id}`;
+      if (detection.source_url !== expectedDetectionUrl) {
+        fail(`${incident.id}: detection source URL does not bind the run id`);
+      }
       if (detection.run_conclusion !== 'failure') {
         fail(`${incident.id}: detection run must have failed`);
       }
@@ -166,28 +203,30 @@ export function validateOverclaimLedger({ ledger, ledgerBytes, manifest, root = 
         fail(`${incident.id}: detection timestamp mismatch`);
       }
     }
-    if (correction?.kind !== 'github_commit_correction') {
-      fail(`${incident.id}: missing correction snapshot`);
-    } else {
-      if (countedCorrectionSources.has(correction.source_url)) {
-        fail(`${incident.id}: correction source is already counted by another incident`);
-      }
-      countedCorrectionSources.add(correction.source_url);
-      const expectedCorrectionUrl = `https://github.com/${correction.repository}/commit/${correction.commit}`;
-      if (correction.source_url !== incident.correction_url) {
-        fail(`${incident.id}: correction source URL mismatch`);
-      }
-      if (correction.source_url !== expectedCorrectionUrl) {
-        fail(`${incident.id}: correction source URL does not bind the correction commit`);
-      }
-      if (correction.commit !== incident.correction_commit) {
-        fail(`${incident.id}: correction commit mismatch`);
-      }
-      if (correction.committed_at !== incident.corrected_at) {
-        fail(`${incident.id}: correction timestamp mismatch`);
-      }
-      if (correction.signature_verified !== true) {
-        fail(`${incident.id}: correction commit is not signature-verified`);
+    if (isResolved) {
+      if (correction?.kind !== 'github_commit_correction') {
+        fail(`${incident.id}: missing correction snapshot`);
+      } else {
+        if (countedCorrectionSources.has(correction.source_url)) {
+          fail(`${incident.id}: correction source is already counted by another incident`);
+        }
+        countedCorrectionSources.add(correction.source_url);
+        const expectedCorrectionUrl = `https://github.com/${correction.repository}/commit/${correction.commit}`;
+        if (correction.source_url !== incident.correction_url) {
+          fail(`${incident.id}: correction source URL mismatch`);
+        }
+        if (correction.source_url !== expectedCorrectionUrl) {
+          fail(`${incident.id}: correction source URL does not bind the correction commit`);
+        }
+        if (correction.commit !== incident.correction_commit) {
+          fail(`${incident.id}: correction commit mismatch`);
+        }
+        if (correction.committed_at !== incident.corrected_at) {
+          fail(`${incident.id}: correction timestamp mismatch`);
+        }
+        if (correction.signature_verified !== true) {
+          fail(`${incident.id}: correction commit is not signature-verified`);
+        }
       }
     }
   }
@@ -201,13 +240,19 @@ export function validateOverclaimLedger({ ledger, ledgerBytes, manifest, root = 
   if (metrics.ci_detected_incidents !== incidents.length) {
     fail(`ci_detected_incidents=${metrics.ci_detected_incidents}, expected ${incidents.length}`);
   }
-  if (metrics.correction_time_sample_size !== incidents.length) {
+  if (metrics.correction_time_sample_size !== resolvedIncidentCount) {
     fail(
-      `correction_time_sample_size=${metrics.correction_time_sample_size}, expected ${incidents.length}`,
+      `correction_time_sample_size=${metrics.correction_time_sample_size}, expected ${resolvedIncidentCount}`,
     );
   }
-  if (metrics.correction_time_sample_size === 1 && metrics.aggregation !== 'single_observation') {
-    fail('a one-sample correction metric must use single_observation aggregation');
+  const expectedAggregation =
+    resolvedIncidentCount === 0
+      ? 'no_observations'
+      : resolvedIncidentCount === 1
+        ? 'single_observation'
+        : 'cumulative_observations';
+  if (metrics.aggregation !== expectedAggregation) {
+    fail(`correction aggregation=${metrics.aggregation}, expected ${expectedAggregation}`);
   }
   if (metrics.observed_correction_time_seconds !== totalSeconds) {
     fail(
@@ -219,6 +264,25 @@ export function validateOverclaimLedger({ ledger, ledgerBytes, manifest, root = 
     fail(
       `observed_correction_time_display=${metrics.observed_correction_time_display}, expected ${expectedDisplay}`,
     );
+  }
+
+  const renderedMarkdown =
+    markdown ?? fs.readFileSync(safePath(root, 'docs/OVERCLAIM_LEDGER.md'), 'utf8');
+  const countRows = markdownRows(renderedMarkdown, 'Overclaims caught by CI');
+  const expectedCountToken = `**${metrics.ci_detected_incidents}**`;
+  if (countRows.length !== 1 || !countRows[0].split('|')[2]?.includes(expectedCountToken)) {
+    fail('rendered Markdown CI incident count does not match the ledger metric');
+  }
+  const durationRows = markdownRows(renderedMarkdown, 'Observed correction time');
+  const expectedDurationToken = `**${metrics.observed_correction_time_display}**`;
+  const expectedSampleToken = `n=${metrics.correction_time_sample_size}`;
+  if (
+    durationRows.length === 0 ||
+    durationRows.some(
+      (row) => !row.includes(expectedDurationToken) || !row.includes(expectedSampleToken),
+    )
+  ) {
+    fail('rendered Markdown correction-time values do not match the ledger metrics');
   }
 
   for (const related of ledger.related_non_ci_incidents ?? []) {
@@ -298,7 +362,8 @@ function run() {
   const ledgerBytes = fs.readFileSync(ledgerPath);
   const ledger = JSON.parse(ledgerBytes.toString('utf8'));
   const manifest = JSON.parse(fs.readFileSync(manifestPath, 'utf8'));
-  const failures = validateOverclaimLedger({ ledger, ledgerBytes, manifest });
+  const markdown = fs.readFileSync(safePath(ROOT, 'docs/OVERCLAIM_LEDGER.md'), 'utf8');
+  const failures = validateOverclaimLedger({ ledger, ledgerBytes, manifest, markdown });
 
   const output = (message) => process.stdout.write(`${message}\n`);
   const errorOutput = (message) => process.stderr.write(`${message}\n`);

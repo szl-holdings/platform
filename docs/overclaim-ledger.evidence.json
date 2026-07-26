@@ -8,7 +8,7 @@
   },
   "ledger": {
     "path": "docs/overclaim-ledger.json",
-    "sha256": "f14c0f33fda644d74b7f5c50d4c863a72992fdbea5777bbd9be6b675aa29e84a"
+    "sha256": "dd399f52af158f466d5b2e9559bbed4d41f94d845a7b9455a399c96f400f0119"
   },
   "artifacts": [
     {

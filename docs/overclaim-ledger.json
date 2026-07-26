@@ -20,6 +20,7 @@
     {
       "id": "OC-2026-001",
       "maturity": "MEASURED",
+      "correction_status": "RESOLVED",
       "detector": "Doctrine Overclaim Guard",
       "detector_type": "ci-policy-gate",
       "claim": "Lambda trust aggregator - unconditional uniqueness: Conjecture 1 (conditional proven axiom-free).",

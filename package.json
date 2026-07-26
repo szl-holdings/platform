@@ -19,7 +19,7 @@
     "codegen": "pnpm --filter @szl-holdings/api-spec run codegen",
     "typecheck:libs": "tsc --build",
     "typecheck": "turbo run typecheck",
-    "test": "turbo run test",
+    "test": "node scripts/audit/validate-overclaim-ledger.js && node --test scripts/audit/validate-overclaim-ledger.test.js && turbo run test",
     "test:legacy": "pnpm run test:api && pnpm run test:components && pnpm run test:proof-chain && pnpm run test:placeholder-empty-states",
     "test:proof-chain": "node scripts/check-proof-chain.js && vitest run --config vitest.config.ts scripts/check-proof-chain.test.js",
     "test:api": "vitest run --config vitest.config.ts",
