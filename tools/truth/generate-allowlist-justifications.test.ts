@@ -47,3 +47,27 @@ test('rejects a stale justification', () => {
     ),
   );
 });
+
+test('parses escaped backticks without a backtracking expression', () => {
+  const escapedEntries: Entry[] = [
+    {
+      file: '.gitleaks.toml',
+      pattern: 'global.paths: `fixture`',
+      reason: 'test fixture',
+    },
+  ];
+  const document =
+    '| .gitleaks.toml | `global.paths: \\`fixture\\`` | test | review | 2026-07-26 |\n';
+
+  assert.deepEqual(validateAllowlistCoverage(escapedEntries, document), []);
+});
+
+test('rejects an unterminated inline-code pattern in bounded time', () => {
+  const document = `| .gitleaks.toml | \`${'\\\\'.repeat(20_000)} | test |\n`;
+
+  assert.ok(
+    validateAllowlistCoverage(entries, document).some((failure) =>
+      failure.includes('missing justification: .gitleaks.toml: global.paths: fixture'),
+    ),
+  );
+});

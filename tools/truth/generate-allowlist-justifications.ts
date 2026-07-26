@@ -189,6 +189,28 @@ function entryKey(entry: Pick<Entry, 'file' | 'pattern'>): string {
   return `${entry.file}\u0000${entry.pattern}`;
 }
 
+function parseDocumentedEntry(line: string): Pick<Entry, 'file' | 'pattern'> | null {
+  const prefix = line.match(/^\|\s*(\.gitleaks\.toml|scripts\/qa\/scan-secrets\.js)\s*\|\s*/);
+  if (!prefix) return null;
+
+  const remainder = line.slice(prefix[0].length);
+  if (!remainder.startsWith('`')) return null;
+
+  let escaped = false;
+  for (let index = 1; index < remainder.length; index += 1) {
+    const character = remainder[index];
+    if (character === '`' && !escaped) {
+      if (!/^\s*\|/.test(remainder.slice(index + 1))) return null;
+      return {
+        file: prefix[1],
+        pattern: remainder.slice(1, index).replaceAll('\\`', '`'),
+      };
+    }
+    escaped = character === '\\' ? !escaped : false;
+  }
+  return null;
+}
+
 export function validateAllowlistCoverage(entries: Entry[], document: string): string[] {
   const failures: string[] = [];
   const activeCounts = new Map<string, number>();
@@ -199,11 +221,9 @@ export function validateAllowlistCoverage(entries: Entry[], document: string): s
 
   const documentedCounts = new Map<string, number>();
   for (const line of document.split(/\r?\n/)) {
-    const match = line.match(
-      /^\|\s*(\.gitleaks\.toml|scripts\/qa\/scan-secrets\.js)\s*\|\s*`((?:\\.|[^`])*)`\s*\|/,
-    );
-    if (!match) continue;
-    const key = entryKey({ file: match[1], pattern: match[2].replaceAll('\\`', '`') });
+    const entry = parseDocumentedEntry(line);
+    if (!entry) continue;
+    const key = entryKey(entry);
     documentedCounts.set(key, (documentedCounts.get(key) ?? 0) + 1);
   }
 
