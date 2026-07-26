@@ -198,6 +198,36 @@ export interface MeshReceipt {
   readonly traceId: string | null;
 }
 
+export type LogRetentionClass = "lifetime" | "6mo" | "session";
+export type NistAiRmfFunction = "GOVERN" | "MAP" | "MEASURE" | "MANAGE";
+
+export interface RegulatoryMapping {
+  readonly eu_ai_act: {
+    readonly article: string;
+    readonly obligation: string;
+    readonly annex_iii_category: string | null;
+    readonly high_risk: boolean;
+    readonly log_retention_class: LogRetentionClass;
+  };
+  readonly nist_ai_rmf: {
+    readonly function: NistAiRmfFunction;
+    readonly subcategory: string;
+  };
+  readonly owasp_asi: readonly string[];
+  readonly iso_42001: {
+    readonly control: string;
+  };
+}
+
+/**
+ * Receipt schema v2 is additive. A v1 receipt remains valid because both new
+ * fields are optional; new emitters identify v2 and attach runtime mappings.
+ */
+export interface MeshReceiptV2 extends MeshReceipt {
+  readonly schemaVersion?: "2.0";
+  readonly regulatory?: RegulatoryMapping;
+}
+
 // ---------------------------------------------------------------------------
 // Minimal JSON-Schema-subset validator (zero-dependency)
 // ---------------------------------------------------------------------------
@@ -213,11 +243,11 @@ export interface ValidationResult {
 }
 
 type JsonSchema = {
-  type?: string;
-  required?: string[];
-  properties?: Record<string, JsonSchema>;
+  type?: string | readonly string[];
+  required?: readonly string[];
+  properties?: Readonly<Record<string, JsonSchema>>;
   items?: JsonSchema;
-  enum?: unknown[];
+  enum?: readonly unknown[];
   minimum?: number;
   maximum?: number;
   pattern?: string;
@@ -257,12 +287,13 @@ function walk(
   }
   if (schema.type) {
     const actual = typeOf(value);
-    const expected = schema.type === "integer" ? "number" : schema.type;
-    if (actual !== expected) {
-      errors.push({ path, message: `expected ${schema.type}, got ${actual}` });
+    const declared = Array.isArray(schema.type) ? schema.type : [schema.type];
+    const expected = declared.map((t) => (t === "integer" ? "number" : t));
+    if (!expected.includes(actual)) {
+      errors.push({ path, message: `expected ${declared.join("|")}, got ${actual}` });
       return; // type mismatch makes deeper checks meaningless
     }
-    if (schema.type === "integer" && !Number.isInteger(value)) {
+    if (declared.includes("integer") && actual === "number" && !Number.isInteger(value)) {
       errors.push({ path, message: "expected integer" });
     }
   }
@@ -313,4 +344,6 @@ export {
   reasonResponseSchema,
   spanHeadersSchema,
   meshReceiptSchema,
+  meshReceiptV2Schema,
+  regulatoryMappingSchema,
 } from "./schemas.ts";

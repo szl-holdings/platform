@@ -12,7 +12,7 @@
     "access": "public"
   },
   "scripts": {
-    "codegen": "test -f ../api-client-react/src/generated/api.ts && test -f ../api-zod/src/generated/api.ts && echo 'codegen artifacts present, skipping orval' || orval --config ./orval.config.ts",
+    "codegen": "node -e \"const fs=require('node:fs');const ok=fs.existsSync('../api-client-react/src/generated/api.ts')&&fs.existsSync('../api-zod/src/generated/api.ts');if(ok)console.log('codegen artifacts present, skipping orval');process.exit(ok?0:1)\" || orval --config ./orval.config.ts",
     "typecheck": "tsc -p tsconfig.json --noEmit"
   },
   "devDependencies": {

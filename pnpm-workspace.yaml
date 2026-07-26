@@ -81,6 +81,46 @@ onlyBuiltDependencies:
   - unrs-resolver
 
 overrides:
+  '@types/react': 19.2.15
+  '@types/react-dom': ^19.2.3
+  react: 19.1.0
+  react-dom: 19.1.0
+  path-to-regexp: 8.4.2
+  'serve-handler>path-to-regexp': 3.3.0
+  brace-expansion: 5.0.8
+  vite: 8.0.16
+  'form-data@2': 2.5.6
+  'form-data@4': 4.0.6
+  lodash: 4.18.1
+  'micromatch>picomatch': 2.3.2
+  'tinyglobby>picomatch': 4.0.4
+  '@tootallnate/once': 3.0.1
+  '@esbuild-kit/core-utils>esbuild': 0.28.1
+  protobufjs: ^7.5.8
+  protocol-buffers-schema: ^3.6.1
+  '@xmldom/xmldom': ^0.9.10
+  fast-xml-parser: ^5.7.2
+  postcss: 8.5.18
+  uuid: ^14.0.0
+  qs: ^6.15.2
+  ws: ^8.20.1
+  hono: ^4.12.21
+  shell-quote: 1.9.0
+  'tsx>esbuild': 0.28.1
+  'vite>esbuild': 0.28.1
+  'drizzle-kit>esbuild': 0.28.1
+  'esbuild-register>esbuild': 0.28.1
+  undici: '>=6.27.0'
+  adm-zip: '>=0.6.0'
+  'js-yaml@>=4.0.0 <4.3.0': 4.3.0
+  'js-yaml@>=5.0.0 <5.2.2': 5.2.2
+  fast-uri: 3.1.4
+  linkify-it: 5.0.2
+  sharp: 0.35.3
+  '@opentelemetry/propagator-jaeger': 2.9.0
+  dompurify: '>=3.4.11'
+  '@opentelemetry/core': '>=2.8.0'
+  tar: 7.5.19
   '@esbuild-kit/esm-loader': npm:tsx@^4.21.0
   '@expo/ngrok-bin>@expo/ngrok-bin-darwin-arm64': '-'
   '@expo/ngrok-bin>@expo/ngrok-bin-darwin-x64': '-'
@@ -91,7 +131,6 @@ overrides:
   '@expo/ngrok-bin>@expo/ngrok-bin-linux-ia32': '-'
   '@expo/ngrok-bin>@expo/ngrok-bin-sunos-x64': '-'
   '@expo/ngrok-bin>@expo/ngrok-bin-win32-ia32': '-'
-  '@expo/ngrok-bin>@expo/ngrok-bin-win32-x64': '-'
   '@tailwindcss/oxide>@tailwindcss/oxide-android-arm64': '-'
   '@tailwindcss/oxide>@tailwindcss/oxide-darwin-arm64': '-'
   '@tailwindcss/oxide>@tailwindcss/oxide-darwin-x64': '-'
@@ -101,7 +140,6 @@ overrides:
   '@tailwindcss/oxide>@tailwindcss/oxide-linux-arm64-musl': '-'
   '@tailwindcss/oxide>@tailwindcss/oxide-linux-x64-musl': '-'
   '@tailwindcss/oxide>@tailwindcss/oxide-win32-arm64-msvc': '-'
-  '@tailwindcss/oxide>@tailwindcss/oxide-win32-x64-msvc': '-'
   esbuild: 0.28.1
   esbuild>@esbuild/aix-ppc64: '-'
   esbuild>@esbuild/android-arm: '-'
@@ -127,7 +165,6 @@ overrides:
   esbuild>@esbuild/sunos-x64: '-'
   esbuild>@esbuild/win32-arm64: '-'
   esbuild>@esbuild/win32-ia32: '-'
-  esbuild>@esbuild/win32-x64: '-'
   lightningcss>lightningcss-android-arm64: '-'
   lightningcss>lightningcss-darwin-arm64: '-'
   lightningcss>lightningcss-darwin-x64: '-'
@@ -137,7 +174,6 @@ overrides:
   lightningcss>lightningcss-linux-arm64-musl: '-'
   lightningcss>lightningcss-linux-x64-musl: '-'
   lightningcss>lightningcss-win32-arm64-msvc: '-'
-  lightningcss>lightningcss-win32-x64-msvc: '-'
   rollup>@rollup/rollup-android-arm-eabi: '-'
   rollup>@rollup/rollup-android-arm64: '-'
   rollup>@rollup/rollup-darwin-arm64: '-'
@@ -161,4 +197,3 @@ overrides:
   rollup>@rollup/rollup-win32-arm64-msvc: '-'
   rollup>@rollup/rollup-win32-ia32-msvc: '-'
   rollup>@rollup/rollup-win32-x64-gnu: '-'
-  rollup>@rollup/rollup-win32-x64-msvc: '-'

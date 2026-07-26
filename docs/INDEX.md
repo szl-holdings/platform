@@ -67,6 +67,15 @@ Use [docs/README.md](README.md) for navigation by audience or task.
 
 ---
 
+## Compliance
+
+| Document | Description | Last Reviewed |
+|----------|-------------|---------------|
+| [compliance/EU_AI_ACT_ART_12.md](compliance/EU_AI_ACT_ART_12.md) | Honest Articles 9-15 evidence map, corrected application timeline, and Article 12 export contract | 2026-07 |
+| [compliance/ISO_42001_GAP.md](compliance/ISO_42001_GAP.md) | Clause 4-10 ISO/IEC 42001 gap analysis; certification not claimed | 2026-07 |
+
+---
+
 ## Operations
 
 | Document | Description | Last Reviewed |
@@ -291,6 +300,7 @@ Use [docs/README.md](README.md) for navigation by audience or task.
 | [SECURITY_BASELINE.md](SECURITY_BASELINE.md) | Security baseline controls | 2026-04 |
 | [WHAT_THIS_PROVES.md](WHAT_THIS_PROVES.md) | What this platform proves — validation narrative | 2026-04 |
 | [readme-standards.md](readme-standards.md) | README asset and badge standards | 2026-04 |
+| [GLOSSARY.md](GLOSSARY.md) | Canonical governance vocabulary: holographic state, product vertical, runtime organ, policy gate module | 2026-07 |
 | [THIRD_PARTY_REGISTER.md](THIRD_PARTY_REGISTER.md) | Third-party service register | 2026-04 |
 | [DATA_CLASSIFICATION.md](DATA_CLASSIFICATION.md) | Data classification taxonomy | 2026-04 |
 
