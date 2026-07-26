@@ -21,14 +21,14 @@ const OUTPUT = path.join(ROOT, 'artifacts', 'SOURCE_OF_TRUTH.json');
 const VERIFY_LOCAL_MODE =
   process.argv.includes('--verify-local') || process.argv.includes('--check');
 const LOCAL_METRIC_NAMES = [
-  'surfaces_customer_facing',
+  'governed_app_manifests',
   'ouroboros_tests',
   'platform_tests',
   'mcp_e2e_tests',
-  'monorepo_packages',
+  'pnpm_workspace_projects',
   'api_endpoints',
   'ci_workflows',
-  'lean_theorems_locked',
+  'locked_proven_formulas',
   'lean_sorry_count',
   'lambda_overhead_ms_median',
 ] as const;
@@ -235,7 +235,7 @@ async function hubCount(kind: 'models' | 'datasets' | 'spaces' | 'collections'):
   const org = process.env.HF_ORG ?? 'SZLHOLDINGS';
   const url =
     kind === 'collections'
-      ? `https://huggingface.co/api/collections?owner=${encodeURIComponent(org)}&limit=1000`
+      ? `https://huggingface.co/api/collections?owner=${encodeURIComponent(org)}&limit=100`
       : `https://huggingface.co/api/${kind}?author=${encodeURIComponent(org)}&limit=1000&full=true`;
   try {
     const data = await fetchJson(url);
@@ -311,14 +311,14 @@ async function main(): Promise<void> {
   ]);
 
   const localMetrics = {
-    surfaces_customer_facing: surfaces,
+    governed_app_manifests: surfaces,
     ouroboros_tests: ouroborosTests,
     platform_tests: platformTests,
     mcp_e2e_tests: mcpTests,
-    monorepo_packages: packageCount(),
+    pnpm_workspace_projects: packageCount(),
     api_endpoints: endpoints,
     ci_workflows: workflows,
-    lean_theorems_locked: {
+    locked_proven_formulas: {
       value: 8,
       label: 'REPORTED' as const,
       source: 'lutar-lean/Locked8.lean',

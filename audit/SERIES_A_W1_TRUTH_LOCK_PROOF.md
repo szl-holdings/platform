@@ -6,9 +6,13 @@ Generated: 2026-07-25
 
 The Series A payload contained stale estate counts and required every public
 number to resolve to evidence or to fail closed as `UNAVAILABLE`. This change
-adds a generated truth artifact, validates its evidence labels, rejects nearby
-hard-coded metric drift, documents secret-scan suppressions, and removes the
-retired challenge name from current public READMEs.
+adds a generated public-evidence artifact, validates its evidence labels,
+rejects nearby hard-coded metric drift, documents secret-scan suppressions, and
+removes the retired challenge name from current public READMEs.
+
+The platform also retains `audit/source-of-truth.json` for reproducible tracked
+tree counts. `SOURCE_OF_TRUTH.md` is the authority index between those two
+machine-readable records; it does not duplicate either record's values.
 
 No deployment, DNS, repository visibility, branch protection, license, history,
 secret, or external publication was changed by this patch.
@@ -31,7 +35,9 @@ secret, or external publication was changed by this patch.
 - Added `.truth-allowlist`; every entry requires an inline `# reason:`.
 - Generated `security/ALLOWLIST-JUSTIFICATIONS.md` from the tracked secret-scan
   configurations and linked it from `SECURITY.md`.
-- Marked the hand-maintained `SOURCE_OF_TRUTH.md` as superseded.
+- Replaced the hand-maintained root metric table with a source-of-truth index
+  that defines the non-overlapping authority and failure rules for the
+  repository-structure and public-evidence records.
 - Corrected current public READMEs to use the neutral
   `legacy challenge-set` description.
 - Repaired Windows command resolution and sandbox-process cleanup exposed by
@@ -46,10 +52,12 @@ secret, or external publication was changed by this patch.
 
 | Check | Result |
 |---|---|
-| `pnpm install --frozen-lockfile` | PASS — all 197 workspace projects installed |
+| `pnpm install --frozen-lockfile --ignore-scripts` | PASS — all 197 workspace projects installed |
 | `pnpm truth:generate` | PASS |
+| `pnpm truth:generate -- --verify-local` | PASS |
 | `pnpm truth:validate` | PASS |
 | `pnpm claims:drift` | PASS |
+| `node scripts/audit/validate-source-of-truth.js` | PASS — 46/46 checks |
 | deterministic regeneration plus artifact diff | PASS |
 | `pnpm typecheck` | PASS — 179/179 tasks |
 | `pnpm test` | PASS — 109/109 tasks |
@@ -77,18 +85,20 @@ The committed artifact reports:
 
 | Metric | Value | Label |
 |---|---:|---|
-| Customer-facing surfaces meeting the full manifest/health/receipt definition | 0 | MEASURED |
-| Monorepo packages | 197 | MEASURED |
-| TypeScript route declarations | 1,676 | MEASURED |
-| CI workflows | 44 | MEASURED |
-| Locked Lean theorems | 8 | REPORTED |
+| Governed app manifests meeting the health/receipt definition | 0 | MEASURED |
+| pnpm workspace projects | 197 | MEASURED |
+| Runtime API endpoints | unavailable | UNAVAILABLE |
+| CI workflows | 45 | MEASURED |
+| Locked proven formulas | 8 | REPORTED |
 | Hugging Face models | 15 | MEASURED |
 | Hugging Face datasets | 26 | MEASURED |
 | Hugging Face Spaces | 25 | MEASURED |
+| Hugging Face collections | 12 | MEASURED |
 
-Database tables, per-test counts, Lean sorry count, Lambda median, Hugging Face
-collections, and receipt-chain depth are explicitly `UNAVAILABLE`; no stale
-number is carried forward.
+Database tables, per-test counts, runtime API endpoints, Lean sorry count,
+Lambda median, and receipt-chain depth are explicitly `UNAVAILABLE`; no stale
+number is carried forward. Source route declarations are retained separately in
+the repository-structure registry and are not represented as live endpoints.
 
 ## Proof and Remaining Gaps
 

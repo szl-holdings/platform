@@ -1,9 +1,9 @@
 {
   "schema": "szl.truth/v1",
-  "generated_at": "2026-07-25T23:57:31.351Z",
-  "generated_by": "ee3cc1452cfff4abfdad3d64573ca3b31593cf25",
+  "generated_at": "2026-07-26T00:41:38.678Z",
+  "generated_by": "d2dee7b320a5efbdd17fa4cdcd037fd3cbbaefcb",
   "metrics": {
-    "surfaces_customer_facing": {
+    "governed_app_manifests": {
       "value": 0,
       "label": "MEASURED",
       "source": "apps/*/product.manifest.json requiring a health endpoint and receipt reference"
@@ -26,7 +26,7 @@
       "label": "UNAVAILABLE",
       "source": "artifacts/mcp-e2e-test-results.json"
     },
-    "monorepo_packages": {
+    "pnpm_workspace_projects": {
       "value": 197,
       "label": "MEASURED",
       "source": "pnpm -r list --depth -1 --json"
@@ -37,11 +37,11 @@
       "source": "runtime router inventory artifact (source-call counting cannot prove mounted endpoints)"
     },
     "ci_workflows": {
-      "value": 44,
+      "value": 45,
       "label": "MEASURED",
       "source": "ls .github/workflows"
     },
-    "lean_theorems_locked": {
+    "locked_proven_formulas": {
       "value": 8,
       "label": "REPORTED",
       "source": "lutar-lean/Locked8.lean"
@@ -77,9 +77,9 @@
       "source": "Hugging Face Hub API: https://huggingface.co/api/spaces?author=SZLHOLDINGS&limit=1000&full=true"
     },
     "hf_collections": {
-      "value": null,
-      "label": "UNAVAILABLE",
-      "source": "Hugging Face Hub API: https://huggingface.co/api/collections?owner=SZLHOLDINGS&limit=1000"
+      "value": 12,
+      "label": "MEASURED",
+      "source": "Hugging Face Hub API: https://huggingface.co/api/collections?owner=SZLHOLDINGS&limit=100"
     },
     "receipt_chain_depth": {
       "value": null,
