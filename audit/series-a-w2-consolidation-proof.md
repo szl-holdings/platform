@@ -85,10 +85,11 @@ heads are excluded and must remain in access-controlled evidence.
 
 ## Option B proof
 
-- Six usable public-active slots at observation: `platform`, `a11oy`, `ouroboros`, `lutar-lean`, `.github`, and payload-permitted `killinchu`.
+- Five usable public-active slots at observation: `platform`, `a11oy`, `ouroboros`, `lutar-lean`, and `.github`.
 - Founder decision 1: `szl-trust` was public-archived and reported migration to `docs-site`.
 - Founder decision 2: exact `sentra` was absent; `immune` is only a MODELED substitute.
 - Founder decision 3: exact `insurance` was absent from the public inventory; no public substitute is selected.
+- Founder decision 4: exact `vessels` was absent; using the payload-permitted public-active `killinchu` substitution remains MODELED and is not approved by this packet.
 - Option B is explicitly **NOT APPLIED**.
 
 ## Relationship proof
@@ -112,7 +113,7 @@ The two OTel successor claims conflict and are both REPORTED. This proof packet 
 |---|---|---|
 | Public ledger completeness | PASS | 54 unique public repository names and 54 valid 40-character default-head SHAs; non-public inventory is intentionally excluded. |
 | Public snapshot arithmetic | PASS | 12 archived + 42 active = 54 public repositories. |
-| Option B guard | PASS | Plan says NOT APPLIED and records three unresolved founder decisions. |
+| Option B guard | PASS | Plan says NOT APPLIED and records four unresolved founder decisions. |
 | Mutation guard | PASS | No forward mutation command or repository-setting change is part of this workcell. |
 | Restore documentation | PASS | Only rollback command templates are documented and marked DO NOT RUN FROM THIS PR; `archived=false` uses typed `gh api --field` conversion via `-F`. |
 | Public claim check | PASS | Counts are MEASURED at `2026-07-26T01:30:42.617Z` and carry an explicit drift boundary. Substitutions are MODELED. |
@@ -135,5 +136,6 @@ The two OTel successor claims conflict and are both REPORTED. This proof packet 
 1. Founder decision for `szl-trust`.
 2. Founder decision for the absent `sentra` slot.
 3. Founder selection of a public revenue-slot substitute, or deferral of that slot.
-4. Maintainer/owner resolution of the `szl-otel-mesh` successor conflict.
-5. Green required checks before any later merge; this PR remains draft.
+4. Founder decision to substitute `killinchu`, select another public-active defense/maritime surface, or defer that slot.
+5. Maintainer/owner resolution of the `szl-otel-mesh` successor conflict.
+6. Green required checks before any later merge; this PR remains draft.
