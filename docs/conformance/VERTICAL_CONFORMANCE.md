@@ -27,8 +27,8 @@ repository visibility.
    timestamps; deprecated `gen_ai.system` does not qualify. This proves the
    evidence payload has the expected reported structure. It does **not** prove
    collector export, backend ingestion, or end-to-end trace availability.
-5. Every receipt verifies offline against a fingerprint-pinned Ed25519 key, and
-   a tampered receipt fails.
+5. Every receipt verifies offline against a fingerprint-pinned Ed25519 or
+   ECDSA P-256 key, and a tampered receipt fails.
 6. The README declares LIVE, MODELED, or PLANNED above the fold and cites
    `SOURCE_OF_TRUTH.md`.
 7. The artifact manifest is present, counted by the canonical registry, and the
@@ -40,7 +40,7 @@ Each surface manifest names four environment variables:
 
 - deployed base URL;
 - expected Git SHA;
-- Ed25519 public key PEM; and
+- Ed25519 or ECDSA P-256 public key PEM; and
 - SHA-256 fingerprint of that public key.
 
 The public key is not secret. The separate fingerprint is a trust anchor that
@@ -74,7 +74,30 @@ pnpm --filter @szl/verify exec szl-verify \
   --offline
 ```
 
-Exit 0 means the DSSE signature verifies against the supplied key. Exit 1 means
-verification failed. Exit 2 means the invocation was invalid. With no supplied
-key, an embedded key can prove self-consistency but is reported as
-`embedded-key-unpinned`, not trusted identity.
+Exit 0 means the DSSE signature verifies under an external trust root. Exit 1
+means the receipt is invalid. Exit 2 means the result is indeterminate or the
+invocation is invalid. Exit 0 is possible only with an externally supplied
+public key or an externally supplied expected fingerprint that matches the
+embedded key. An embedded key without either external trust root can prove
+cryptographic self-consistency, but is reported as `embedded-key-unpinned` and
+exits 2. The CLI always requires the exact
+`application/vnd.szl.khipu.receipt+json` payload type.
+
+## Verifier semantic boundary
+
+The standalone verifier currently establishes only:
+
+- strict DSSE envelope and canonical-base64 parsing;
+- the exact KHIPU receipt payload type;
+- UTF-8 JSON payload decoding;
+- Ed25519 or ECDSA P-256 signature validity; and
+- signer identity pinned by an external public key or expected SPKI
+  fingerprint.
+
+It does **not** claim that a valid signature proves receipt freshness, a parent
+chain, an artifact digest, a policy digest, or policy execution. The
+surface-specific conformance runner separately enforces the implemented
+`szl.khipu.receipt.v1` freshness and parent-link fields. No canonical KHIPU
+schema in this repository defines portable artifact-digest or policy-digest
+semantics for the standalone verifier, so those checks remain open rather than
+being inferred from similarly named receipt types elsewhere in the monorepo.

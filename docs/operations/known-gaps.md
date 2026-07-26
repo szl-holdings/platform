@@ -1,6 +1,6 @@
 # SZL Holdings — Known Gaps Register (Security & Operations)
 
-**Last updated:** 2026-07-26 (rev 13 — Decision-SLSA draft registration)
+**Last updated:** 2026-07-26 (rev 14 — offline verifier trust hardening)
 **Owner:** Engineering / DevOps  
 **Audience:** Enterprise architects, Series A technical advisors, incoming VP Engineering
 
@@ -34,6 +34,13 @@ receipt. The remaining gaps are:
   checks, signed commits, linear history, conversation resolution, and exact-head
   verification; transition to independent review after the first qualified hire
   without creating a self-deadlock before then.
+- **Standalone KHIPU receipt semantics:** `@szl/verify` can establish the exact
+  DSSE payload type, JSON decoding, Ed25519 or ECDSA P-256 signature validity,
+  and an externally pinned signer identity. It does not yet validate portable
+  artifact or policy digests because no canonical KHIPU schema in this
+  repository defines those fields. The surface conformance runner has a
+  separate implemented `szl.khipu.receipt.v1` freshness and parent-link
+  contract; those semantics are not generalized by field-name inference.
 
 ---
 
