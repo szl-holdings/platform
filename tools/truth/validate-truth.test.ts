@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
 
-import { CANONICAL_METRIC_NAMES } from './truth-schema.js';
+import { CANONICAL_METRIC_NAMES, TRUTH_GENERATOR_ID } from './truth-schema.js';
 import { validateTruth } from './validate-truth.js';
 
 const NOW = Date.parse('2026-07-26T02:30:00Z');
@@ -10,7 +10,7 @@ function validTruth(): Record<string, unknown> {
   return {
     schema: 'szl.truth/v1',
     generated_at: new Date(NOW).toISOString(),
-    generated_by: '36e924f2c8ec34d7e725fa1da6606dfa609e9eda',
+    generated_by: TRUTH_GENERATOR_ID,
     metrics: Object.fromEntries(
       CANONICAL_METRIC_NAMES.map((name) => [
         name,
@@ -54,6 +54,16 @@ test('rejects a generated_at timestamp beyond the allowed future skew', () => {
   assert.ok(
     validateTruth(truth, NOW).some((failure) =>
       failure.includes('more than five minutes in the future'),
+    ),
+  );
+});
+
+test('rejects noncanonical generator provenance', () => {
+  const truth = validTruth();
+  truth.generated_by = '36e924f2c8ec34d7e725fa1da6606dfa609e9eda';
+  assert.ok(
+    validateTruth(truth, NOW).some((failure) =>
+      failure.includes(`generated_by must equal ${TRUTH_GENERATOR_ID}`),
     ),
   );
 });

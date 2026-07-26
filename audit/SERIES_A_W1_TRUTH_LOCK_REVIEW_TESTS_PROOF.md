@@ -29,9 +29,9 @@ The scoped plan was:
 - Recognized `current` and `currently` modifiers in the exact bypass form.
 - Extended `pnpm truth:check` to include remote recomputation.
 - Rejected DOI or `generated_by` edits unless provenance remains bound to the
-  parent that generated the last committed truth artifact.
-- Checked out full history in the truth workflow so the signed generating
-  parent remains independently resolvable in CI.
+  canonical generator identity, independent of branch or squash history.
+- Scanned adjacent wrapped prose as one claim window while preserving the
+  physical line number for actionable drift diagnostics.
 
 ## Verification
 

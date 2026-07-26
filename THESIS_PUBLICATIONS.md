@@ -172,7 +172,7 @@ Current estate measurements come only from
 | Per-version DOIs (v1–v11) | 11 distinct DOIs, listed in §3 | REPORTED | Each paper's `CITATION.cff` / `README.md` |
 | Paper count | 11 (v1–v11) | REPORTED | [`papers/`](https://github.com/szl-holdings/ouroboros-thesis/tree/main/papers) |
 | Customer-facing product surfaces meeting manifest/health/receipt definition | 0 | MEASURED | `artifacts/SOURCE_OF_TRUTH.json` |
-| Monorepo packages | 199 | MEASURED | `pnpm -r list --depth -1 --json` via generated truth |
+| Monorepo packages | 198 | MEASURED | `pnpm -r list --depth -1 --json` via generated truth |
 | Database tables | UNAVAILABLE | UNKNOWN | No authorized live introspection receipt was available |
 | TypeScript route declarations | UNAVAILABLE | UNAVAILABLE | runtime router inventory is unavailable in the generated truth artifact |
 | Platform per-test result | UNAVAILABLE | UNKNOWN | `artifacts/test-results.json` was not produced |

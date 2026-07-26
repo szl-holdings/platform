@@ -94,7 +94,7 @@ The committed artifact reports:
 | Metric | Value | Label |
 |---|---:|---|
 | Customer-facing surfaces meeting the full manifest/health/receipt definition | 0 | MEASURED |
-| Monorepo packages | 199 | MEASURED |
+| Monorepo packages | 198 | MEASURED |
 | TypeScript route declarations | UNAVAILABLE | UNAVAILABLE |
 | CI workflows | 45 | MEASURED |
 | Locked Lean theorems | 8 | REPORTED |
@@ -109,7 +109,7 @@ number is carried forward.
 
 The package count was remeasured on the protected PR merge tree after the
 workspace gained one package on `main`. The generated artifact was relocked to
-that 199-package integration state; the truth-drift gate remains fail-closed.
+that 198-package integration state; the truth-drift gate remains fail-closed.
 
 ## Proof and Remaining Gaps
 

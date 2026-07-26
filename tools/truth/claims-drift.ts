@@ -136,17 +136,26 @@ export function claimFailuresForLines(
   allowlist: AllowEntry[],
 ): string[] {
   const failures: string[] = [];
-  for (const [index, line] of lines.entries()) {
-    if (!CLAIM_CONTEXT.test(line)) continue;
-    if (/^\s*#{1,6}\s+\d+[.)]?\s+/.test(line)) continue;
+  const seen = new Set<string>();
+  const scan = (
+    line: string,
+    index: number,
+    secondLineOffset: number | null,
+    crossLineOnly = false,
+  ): void => {
+    if (!CLAIM_CONTEXT.test(line)) return;
+    if (/^\s*#{1,6}\s+\d+[.)]?\s+/.test(line)) return;
     const watchwords = [...line.matchAll(new RegExp(WATCHWORD_SOURCE, 'gi'))];
-    if (watchwords.length === 0) continue;
+    if (watchwords.length === 0) return;
     for (const match of line.matchAll(NUMBER_LITERAL)) {
       const literal = match[0];
       const nearest = watchwords
         .filter(
           (watchword): watchword is WatchwordMatch =>
             typeof watchword.index === 'number' &&
+            (!crossLineOnly ||
+              (match.index ?? 0) > (secondLineOffset ?? Number.MAX_SAFE_INTEGER) !==
+                watchword.index > (secondLineOffset ?? Number.MAX_SAFE_INTEGER)) &&
             isMetricPair(line, match, watchword as WatchwordMatch),
         )
         .sort(
@@ -163,16 +172,36 @@ export function claimFailuresForLines(
         continue;
       }
       if (!isAllowed(relative, literal, allowlist)) {
+        const physicalLine =
+          secondLineOffset !== null && (match.index ?? 0) > secondLineOffset
+            ? index + 2
+            : index + 1;
+        const key = `${physicalLine}:${literal}:${canonical.name}`;
+        if (seen.has(key)) continue;
+        seen.add(key);
         if (canonical.value === null) {
           failures.push(
-            `${relative}:${index + 1}: hardcoded ${literal}; canonical evidence for ${canonical.name} is UNAVAILABLE`,
+            `${relative}:${physicalLine}: hardcoded ${literal}; canonical evidence for ${canonical.name} is UNAVAILABLE`,
           );
         } else {
           failures.push(
-            `${relative}:${index + 1}: hardcoded ${literal}; canonical value for this context is ${canonical.value}`,
+            `${relative}:${physicalLine}: hardcoded ${literal}; canonical value for this context is ${canonical.value}`,
           );
         }
       }
+    }
+  };
+
+  for (const [index, line] of lines.entries()) {
+    scan(line, index, null);
+    const next = lines[index + 1];
+    if (
+      line.trim() &&
+      next?.trim() &&
+      !line.trimStart().startsWith('|') &&
+      !next.trimStart().startsWith('|')
+    ) {
+      scan(`${line}\n${next}`, index, line.length, true);
     }
   }
   return failures;

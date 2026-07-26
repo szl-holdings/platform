@@ -59,3 +59,48 @@ test('accepts a numeric claim that matches available canonical evidence', () => 
     [],
   );
 });
+
+test('rejects a stale claim split across adjacent prose lines', () => {
+  const splitMetrics = {
+    ...metrics(12),
+    monorepo_packages: {
+      value: 199,
+      label: 'MEASURED',
+      source: 'workspace package inventory',
+    },
+  };
+  const failures = claimFailuresForLines(
+    'docs/investor.md',
+    ['The estate currently has 198', 'monorepo packages under governance.'],
+    splitMetrics,
+    [],
+  );
+
+  assert.deepEqual(failures, [
+    'docs/investor.md:1: hardcoded 198; canonical value for this context is 199',
+  ]);
+});
+
+test('does not recontextualize a complete claim using the next prose line', () => {
+  const splitMetrics = {
+    ...metrics(12),
+    surfaces_customer_facing: {
+      value: 99,
+      label: 'MEASURED',
+      source: 'surface inventory',
+    },
+  };
+
+  assert.deepEqual(
+    claimFailuresForLines(
+      'docs/runbook.md',
+      [
+        'Rate limits allow 5 requests per minute.',
+        'Canonical active surfaces are documented below.',
+      ],
+      splitMetrics,
+      [],
+    ),
+    [],
+  );
+});
