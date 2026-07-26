@@ -129,7 +129,7 @@ export function createGovernedActionEnvelope(
   if (request.risk === 'read_only' && request.mutatesState) {
     throw new TypeError('read_only actions cannot declare a state mutation');
   }
-  return {
+  return Object.freeze({
     schema: 'szl.governed-action/v1',
     actionId: request.actionId ?? randomUUID(),
     toolName: request.toolName,
@@ -139,17 +139,24 @@ export function createGovernedActionEnvelope(
     mutatesState: request.mutatesState,
     requestedAt: now.toISOString(),
     argsDigest: sha256(canonicalJson(request.args)),
-  };
+  });
 }
 
 export class McpGovernor {
   private readonly replayStore: ReplayStore;
+  private readonly config: Readonly<McpGovernorConfig>;
+  private readonly toolExecutor: McpGovernorConfig['toolExecutor'];
 
-  constructor(private readonly config: McpGovernorConfig) {
+  constructor(config: McpGovernorConfig) {
     if (typeof config.toolExecutor !== 'function') {
       throw new TypeError('toolExecutor must be callable');
     }
-    this.replayStore = config.replayStore ?? new InMemoryReplayStore();
+    this.config = Object.freeze({
+      ...config,
+      receiptSigner: Object.freeze({ ...config.receiptSigner }),
+    });
+    this.toolExecutor = config.toolExecutor;
+    this.replayStore = this.config.replayStore ?? new InMemoryReplayStore();
   }
 
   async run<T>(request: GovernedActionRequest): Promise<GovernedActionResult<T>> {
@@ -249,7 +256,7 @@ export class McpGovernor {
 
     let result: T;
     try {
-      result = (await this.config.toolExecutor(envelope.toolName, argsSnapshot)) as T;
+      result = (await this.toolExecutor(requestSnapshot.toolName, argsSnapshot)) as T;
     } catch (error) {
       try {
         await persist(

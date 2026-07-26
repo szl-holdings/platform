@@ -13,6 +13,7 @@ import {
   type GovernedActionResult,
   type GovernedToolExecutor,
   InMemoryReplayStore,
+  type McpGovernorConfig,
   type PolicyDecision,
   type ReplayStore,
   McpGovernor,
@@ -395,10 +396,14 @@ test('binds policy and execution to an immutable canonical argument snapshot', a
   };
   const originalArgs = JSON.parse(canonicalJson(approvedArgs)) as typeof approvedArgs;
   const governor = createGovernor(receipts, {
-    policy: async (_envelope, args) => {
+    policy: async (envelope, args) => {
       const snapshot = args as typeof approvedArgs;
+      assert.equal(Object.isFrozen(envelope), true);
       assert.equal(Object.isFrozen(snapshot), true);
       assert.equal(Object.isFrozen(snapshot.nested), true);
+      assert.throws(() => {
+        envelope.toolName = 'ledger.delete';
+      }, TypeError);
       enterPolicy();
       await policyGate;
       return {
@@ -633,4 +638,57 @@ test('records an error receipt when error metadata accessors throw', async () =>
     sha256(canonicalJson({ code: 'Error', message: 'opaque failure' })),
   );
   assert.equal(verifyGovernanceReceipt(errorReceipt, receiptPublicKey), true);
+});
+
+test('captures the configured executor before an in-flight request', async () => {
+  const receipts: GovernanceReceipt[] = [];
+  let enterPolicy!: () => void;
+  let releasePolicy!: () => void;
+  const policyEntered = new Promise<void>((resolve) => {
+    enterPolicy = resolve;
+  });
+  const policyGate = new Promise<void>((resolve) => {
+    releasePolicy = resolve;
+  });
+  const config: McpGovernorConfig = {
+    policyEvaluator: async () => {
+      enterPolicy();
+      await policyGate;
+      return { effect: 'allow', reason: 'policy permits action' };
+    },
+    capabilityPublicKeyResolver: () => capabilityPublicKey,
+    toolExecutor: async (toolName, args) => ({
+      amount: (args as { amount: number }).amount,
+      executor: 'original',
+      toolName,
+    }),
+    receiptSigner: { keyId: 'receipt-key-1', privateKey: receiptPrivateKey },
+    receiptWriter: async (receipt) => {
+      receipts.push(receipt);
+    },
+    expectedCapabilityIssuer: 'szl-control-plane',
+    clock: () => NOW,
+  };
+  const governor = new McpGovernor(config);
+  const running = governor.run<{
+    amount: number;
+    executor: string;
+    toolName: string;
+  }>(request({ actionId: 'action-config-snapshot' }));
+
+  await policyEntered;
+  config.toolExecutor = async () => ({
+    amount: 999,
+    executor: 'substituted',
+    toolName: 'ledger.delete',
+  });
+  releasePolicy();
+
+  const outcome = await running;
+  assert.deepEqual(outcome.result, {
+    amount: 10,
+    executor: 'original',
+    toolName: 'ledger.write',
+  });
+  assert.equal(Object.isFrozen(outcome.envelope), true);
 });
