@@ -8,7 +8,7 @@
 
 ## Executive Summary
 
-SZL Holdings operates a TypeScript monorepo whose generated truth artifact currently measures 197 workspace packages. Other inventory totals in this historical diligence snapshot require fresh measurement before reuse. The platform concept — governed agentic decision infrastructure — is architecturally differentiated and implemented in code. Release-readiness and production-readiness claims remain gated by current verification evidence.
+SZL Holdings operates a TypeScript monorepo whose generated truth artifact currently measures 198 workspace packages. Other inventory totals in this historical diligence snapshot require fresh measurement before reuse. The platform concept — governed agentic decision infrastructure — is architecturally differentiated and implemented in code. Release-readiness and production-readiness claims remain gated by current verification evidence.
 
 **Bottom line:** The platform has genuine technical depth and a real implementation. It is not a mockup. It is also not production-ready. Honest framing for investor conversations: early-alpha infrastructure with a functioning demo tier.
 

@@ -174,7 +174,7 @@ Current estate measurements come only from
 | Customer-facing product surfaces meeting manifest/health/receipt definition | 0 | MEASURED | `artifacts/SOURCE_OF_TRUTH.json` |
 | Monorepo packages | 198 | MEASURED | `pnpm -r list --depth -1 --json` via generated truth |
 | Database tables | UNAVAILABLE | UNKNOWN | No authorized live introspection receipt was available |
-| TypeScript route declarations | 1,676 | MEASURED | AST route scan via generated truth |
+| TypeScript route declarations | UNAVAILABLE | UNAVAILABLE | runtime router inventory is unavailable in the generated truth artifact |
 | Platform per-test result | UNAVAILABLE | UNKNOWN | `artifacts/test-results.json` was not produced |
 | Ouroboros per-test result | UNAVAILABLE | UNKNOWN | `artifacts/ouroboros-test-results.json` was not produced |
 | Formal axes in Lutar invariant family | 9 (L₁..L₈ + L_Ω) | REPORTED | v9, DOI `20053148` |

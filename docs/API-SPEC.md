@@ -12,7 +12,7 @@ See `DATA-MODEL.md` for schema and table counts; `ARCHITECTURE.md` for system to
 
 | Claim | Value | Label | Source |
 |---|---:|---|---|
-| TypeScript route declarations across scanned workspace roots | 1,676 | MEASURED | `artifacts/SOURCE_OF_TRUTH.json` |
+| TypeScript route declarations across scanned workspace roots | UNAVAILABLE | UNAVAILABLE | runtime router inventory is unavailable in `artifacts/SOURCE_OF_TRUTH.json` |
 | Tracked route modules under `artifacts/api-server/src/routes` | 1 | MEASURED | repository tree at truth-lock commit |
 | OpenAPI operation and path coverage | UNAVAILABLE | UNKNOWN | no current generated OpenAPI receipt |
 | GraphQL type count | UNAVAILABLE | UNKNOWN | no current generated schema receipt |

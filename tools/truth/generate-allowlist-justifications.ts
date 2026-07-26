@@ -66,6 +66,34 @@ function doubleQuotedValues(line: string): string[] {
   return values;
 }
 
+function closesTomlArray(line: string): boolean {
+  let quote: '"' | "'" | null = null;
+  let escaped = false;
+  for (const character of line) {
+    if (quote === '"') {
+      if (escaped) {
+        escaped = false;
+      } else if (character === '\\') {
+        escaped = true;
+      } else if (character === '"') {
+        quote = null;
+      }
+      continue;
+    }
+    if (quote === "'") {
+      if (character === "'") quote = null;
+      continue;
+    }
+    if (character === '#') break;
+    if (character === '"' || character === "'") {
+      quote = character;
+      continue;
+    }
+    if (character === ']') return true;
+  }
+  return false;
+}
+
 function parseToml(text: string): Entry[] {
   const entries: Entry[] = [];
   const lines = text.split(/\r?\n/);
@@ -97,7 +125,7 @@ function parseToml(text: string): Entry[] {
     }
     const kind = start[1];
     const block: string[] = [line];
-    while (!block.at(-1)?.includes(']') && index + 1 < lines.length) {
+    while (!closesTomlArray(block.at(-1) ?? '') && index + 1 < lines.length) {
       index += 1;
       block.push(lines[index]);
     }

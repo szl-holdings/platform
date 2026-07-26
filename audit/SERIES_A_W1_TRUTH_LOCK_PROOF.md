@@ -78,16 +78,17 @@ The committed artifact reports:
 | Metric | Value | Label |
 |---|---:|---|
 | Customer-facing surfaces meeting the full manifest/health/receipt definition | 0 | MEASURED |
-| Monorepo packages | 197 | MEASURED |
-| TypeScript route declarations | 1,676 | MEASURED |
+| Monorepo packages | 198 | MEASURED |
+| TypeScript route declarations | UNAVAILABLE | UNAVAILABLE |
 | CI workflows | 45 | MEASURED |
 | Locked Lean theorems | 8 | REPORTED |
 | Hugging Face models | 15 | MEASURED |
 | Hugging Face datasets | 26 | MEASURED |
 | Hugging Face Spaces | 25 | MEASURED |
 
-Database tables, per-test counts, Lean sorry count, Lambda median, Hugging Face
-collections, and receipt-chain depth are explicitly `UNAVAILABLE`; no stale
+Route declarations, database tables, per-test counts, Lean sorry count, Lambda
+median, Hugging Face collections, and receipt-chain depth are explicitly
+`UNAVAILABLE`; no stale
 number is carried forward.
 
 ## Proof and Remaining Gaps
