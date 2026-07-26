@@ -10,6 +10,14 @@ import {
 const PASS = 'PASS';
 const FAIL = 'FAIL';
 
+export function normalizeBaseUrl(baseUrl) {
+  let end = baseUrl.length;
+  while (end > 0 && baseUrl.charCodeAt(end - 1) === 47) {
+    end -= 1;
+  }
+  return baseUrl.slice(0, end);
+}
+
 function result(id, status, detail) {
   return { id, status, detail };
 }
@@ -238,7 +246,7 @@ export async function runConformance({
     );
   } else {
     try {
-      const normalized = resolvedBaseUrl.replace(/\/+$/, '');
+      const normalized = normalizeBaseUrl(resolvedBaseUrl);
       const [health, version, evidenceResponse] = await Promise.all([
         fetchJson(fetchImpl, `${normalized}/healthz`),
         fetchJson(fetchImpl, `${normalized}/version`),

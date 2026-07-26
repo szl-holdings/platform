@@ -31,7 +31,7 @@ Therefore:
 
 | Check | Result |
 | --- | --- |
-| Conformance and verifier tests | **4/4 passed** |
+| Conformance and verifier tests | **5/5 passed** |
 | Frozen lockfile validation | **198 workspace projects passed** |
 | Source-of-truth validator | **58/58 passed** |
 | Sentra live-surface conformance | **1/7 failed closed** |

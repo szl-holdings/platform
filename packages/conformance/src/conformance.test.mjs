@@ -5,7 +5,7 @@ import { createServer } from 'node:http';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import test from 'node:test';
-import { runConformance } from './conformance.mjs';
+import { normalizeBaseUrl, runConformance } from './conformance.mjs';
 import { payloadHash, publicKeyFingerprint, signDssePayload } from './verify.mjs';
 
 function keyPair() {
@@ -114,6 +114,11 @@ async function listen(evidence) {
     close: () => new Promise((resolvePromise) => server.close(resolvePromise)),
   };
 }
+
+test('base URL normalization removes trailing slashes in linear time', () => {
+  assert.equal(normalizeBaseUrl('https://example.test////'), 'https://example.test');
+  assert.equal(normalizeBaseUrl(`https://example.test${'/'.repeat(100_000)}`), 'https://example.test');
+});
 
 test('reference fixture passes all seven vertical conformance gates', async () => {
   const root = await fixtureRoot();
