@@ -106,7 +106,7 @@ function normalizeInlineMarkup(value: string): string {
     .replace(/<!--[\s\S]*?-->/g, ' ')
     .replace(/<\/?[A-Za-z][^>]*>/g, ' ')
     .replace(/\]\([^)\r\n]*\)/g, ' ')
-    .replace(/[*_~`{}[\]]/g, ' ')
+    .replace(/[*_~`{}[\]'"]/g, ' ')
     .replace(/&(?:[A-Za-z][\w-]*|#\d+|#x[\da-f]+);/gi, ' ')
     .replace(/\s+/g, ' ')
     .trim();
@@ -551,23 +551,147 @@ function isInlineClaimContinuation(
   return (leftEndsCarrier && rightStartsNumber) || (leftEndsNumber && rightStartsMetric);
 }
 
+type MarkupToken = {
+  start: number;
+  end: number;
+  kind: 'close' | 'fragment-close' | 'fragment-open' | 'open' | 'self-close';
+  tag?: string;
+};
+
+function isAsciiLetter(character: string | undefined): boolean {
+  if (!character) return false;
+  const code = character.charCodeAt(0);
+  return (code >= 65 && code <= 90) || (code >= 97 && code <= 122);
+}
+
+function isTagNameCharacter(character: string | undefined): boolean {
+  if (!character) return false;
+  const code = character.charCodeAt(0);
+  return (
+    isAsciiLetter(character) ||
+    (code >= 48 && code <= 57) ||
+    character === '_' ||
+    character === '-' ||
+    character === ':' ||
+    character === '.'
+  );
+}
+
+function tagEnd(text: string, start: number): number {
+  let quote = '';
+  for (let index = start; index < text.length; index += 1) {
+    const character = text[index] ?? '';
+    if (quote) {
+      if (character === quote && text[index - 1] !== '\\') quote = '';
+    } else if (character === '"' || character === "'") {
+      quote = character;
+    } else if (character === '>') {
+      return index + 1;
+    }
+  }
+  return -1;
+}
+
+function markupTokenAt(text: string, start: number): MarkupToken | null {
+  if (text[start] !== '<' || text.startsWith('<!--', start)) return null;
+  if (text.startsWith('</>', start)) {
+    return { start, end: start + 3, kind: 'fragment-close' };
+  }
+  if (text.startsWith('<>', start)) {
+    return { start, end: start + 2, kind: 'fragment-open' };
+  }
+
+  const closing = text[start + 1] === '/';
+  const nameStart = start + (closing ? 2 : 1);
+  if (!isAsciiLetter(text[nameStart])) return null;
+  let nameEnd = nameStart + 1;
+  while (isTagNameCharacter(text[nameEnd])) nameEnd += 1;
+  const end = tagEnd(text, nameEnd);
+  if (end < 0) return null;
+  const tag = text.slice(nameStart, nameEnd);
+  if (closing) return { start, end, kind: 'close', tag };
+  let marker = end - 2;
+  while (marker > nameEnd && /\s/.test(text[marker] ?? '')) marker -= 1;
+  return { start, end, kind: text[marker] === '/' ? 'self-close' : 'open', tag };
+}
+
+function nextMarkupToken(text: string, start: number): MarkupToken | null {
+  let cursor = start;
+  while (cursor < text.length) {
+    const opening = text.indexOf('<', cursor);
+    if (opening < 0) return null;
+    if (text.startsWith('<!--', opening)) {
+      const commentEnd = text.indexOf('-->', opening + 4);
+      cursor = commentEnd < 0 ? text.length : commentEnd + 3;
+      continue;
+    }
+    const token = markupTokenAt(text, opening);
+    if (token) return token;
+    cursor = opening + 1;
+  }
+  return null;
+}
+
+function nextSiblingStart(
+  text: string,
+  start: number,
+  jsx: boolean,
+): MarkupToken | { start: number; kind: 'expression' } | null {
+  let cursor = start;
+  while (cursor < text.length) {
+    if (text.startsWith('<!--', cursor)) {
+      const commentEnd = text.indexOf('-->', cursor + 4);
+      if (commentEnd < 0) return null;
+      cursor = commentEnd + 3;
+      continue;
+    }
+    if (jsx && text.startsWith('{/*', cursor)) {
+      const commentEnd = text.indexOf('*/}', cursor + 3);
+      if (commentEnd < 0) return { start: cursor, kind: 'expression' };
+      cursor = commentEnd + 3;
+      continue;
+    }
+    if (jsx && text[cursor] === '{') return { start: cursor, kind: 'expression' };
+    if (text[cursor] === '<') return markupTokenAt(text, cursor);
+    cursor += 1;
+  }
+  return null;
+}
+
 function markupSiblingSegments(
   text: string,
   relative: string,
 ): Array<{ text: string; start: number }> {
   if (!['.html', '.tsx'].includes(path.extname(relative))) return [{ text, start: 0 }];
   const segments: Array<{ text: string; start: number }> = [];
-  const boundary =
-    /(?:<\/([A-Za-z][\w:.-]*)>|<\/>|\/>)((?:<!--[\s\S]*?-->|\{\s*\/\*[\s\S]*?\*\/\s*\}|[^<>{}])*)(?=<([A-Za-z][\w:.-]*)\b|<>|\{)/g;
   let start = 0;
-  for (const match of text.matchAll(boundary)) {
-    if (typeof match.index !== 'number') continue;
-    const end = match.index + match[0].length;
-    if (isInlineClaimContinuation(text, match.index, end, match[1], match[3], match[2] ?? '')) {
-      continue;
+  let token = nextMarkupToken(text, 0);
+  const jsx = path.extname(relative) === '.tsx';
+  while (token) {
+    if (['close', 'fragment-close', 'self-close'].includes(token.kind)) {
+      const next = nextSiblingStart(text, token.end, jsx);
+      const opensSibling = next?.kind === 'open' || next?.kind === 'fragment-open';
+      const startsExpression = next?.kind === 'expression';
+      if (next && (opensSibling || startsExpression)) {
+        const openingTag = opensSibling && 'tag' in next ? next.tag : undefined;
+        const interstitial = text.slice(token.end, next.start);
+        if (
+          startsExpression ||
+          !isInlineClaimContinuation(
+            text,
+            token.start,
+            next.start,
+            token.kind === 'close' ? token.tag : undefined,
+            openingTag,
+            interstitial,
+          )
+        ) {
+          if (next.start > start) segments.push({ text: text.slice(start, next.start), start });
+          start = next.start;
+        }
+      }
     }
-    if (end > start) segments.push({ text: text.slice(start, end), start });
-    start = end;
+    token = nextMarkupToken(text, token.end);
   }
   if (start < text.length) segments.push({ text: text.slice(start), start });
   return segments.length > 0 ? segments : [{ text, start: 0 }];
@@ -1028,6 +1152,16 @@ export function validateImmutableBaselineCandidate(
   return resolved;
 }
 
+export function selectNonHeadBaselineCandidate(
+  mergeBase: string,
+  head: string,
+  firstParent: string | undefined,
+): string {
+  if (mergeBase.toLowerCase() !== head.toLowerCase()) return mergeBase;
+  if (firstParent) return firstParent;
+  throw new Error('current HEAD has no immutable ancestor baseline');
+}
+
 async function resolveImmutableBaseline(candidate: string, head: string): Promise<string> {
   const resolved = await gitOutput(['rev-parse', '--verify', `${candidate}^{commit}`]);
   let isAncestor = false;
@@ -1065,7 +1199,18 @@ async function baselineSha(): Promise<string> {
 
   try {
     const mergeBase = await gitOutput(['merge-base', head, 'origin/main']);
-    return await resolveImmutableBaseline(mergeBase, head);
+    let firstParent: string | undefined;
+    if (mergeBase.toLowerCase() === head.toLowerCase()) {
+      try {
+        firstParent = await gitOutput(['rev-parse', '--verify', `${head}^1`]);
+      } catch {
+        firstParent = undefined;
+      }
+    }
+    return await resolveImmutableBaseline(
+      selectNonHeadBaselineCandidate(mergeBase, head, firstParent),
+      head,
+    );
   } catch {
     throw new Error(
       'immutable allowlist baseline unavailable; set TRUTH_ALLOWLIST_BASE_SHA to a full ancestor commit SHA or provide origin/main',

@@ -5,6 +5,7 @@ import {
   type AllowEntry,
   claimFailuresForLines,
   claimIdentitiesForLines,
+  selectNonHeadBaselineCandidate,
   semanticSourceSpanCount,
   validateImmutableBaselineCandidate,
 } from './claims-drift.js';
@@ -205,6 +206,18 @@ test('accepts only a full immutable ancestor distinct from current HEAD', () => 
   assert.throws(
     () => validateImmutableBaselineCandidate(baseline, baseline, head, false),
     /must be an ancestor/,
+  );
+});
+
+test('uses the first parent when the main merge base is current HEAD', () => {
+  const head = 'b'.repeat(40);
+  const parent = 'a'.repeat(40);
+
+  assert.equal(selectNonHeadBaselineCandidate(parent, head, undefined), parent);
+  assert.equal(selectNonHeadBaselineCandidate(head, head, parent), parent);
+  assert.throws(
+    () => selectNonHeadBaselineCandidate(head, head, undefined),
+    /no immutable ancestor baseline/,
   );
 });
 
@@ -444,6 +457,17 @@ test('scans stale metrics through inline Markdown, HTML, and JSX markup', () => 
   for (const [relative, lines] of cases) {
     assert.deepEqual(claimFailuresForLines(relative, lines, metrics(12), []), [
       `${relative}:${lines.length === 5 ? 3 : 1}: hardcoded 198; canonical value for this context is 199`,
+    ]);
+  }
+});
+
+test('normalizes static JSX string expressions around claim values and nouns', () => {
+  for (const source of [
+    "<p>The current monorepo has {'198'} packages.</p>",
+    "<p>The current monorepo has 198 {'packages'}.</p>",
+  ]) {
+    assert.deepEqual(claimFailuresForLines('src/Claim.tsx', [source], metrics(12), []), [
+      'src/Claim.tsx:1: hardcoded 198; canonical value for this context is 199',
     ]);
   }
 });
@@ -811,6 +835,18 @@ test('does not join same-line siblings across HTML or JSX comments and fragments
     ],
   ];
   for (const [relative, source] of cases) {
+    assert.deepEqual(claimFailuresForLines(relative, [source], metrics(12), []), []);
+  }
+});
+
+test('tokenizes adversarial HTML and JSX comment runs without backtracking', {
+  timeout: 2_000,
+}, () => {
+  for (const [relative, comments] of [
+    ['docs/comments.html', '<!-- split -->'.repeat(20_000)],
+    ['src/Comments.tsx', '{/* split */}'.repeat(20_000)],
+  ]) {
+    const source = `<div><span>Current release notes</span>${comments}<span>Guardian ships 35 tests</span></div>`;
     assert.deepEqual(claimFailuresForLines(relative, [source], metrics(12), []), []);
   }
 });
