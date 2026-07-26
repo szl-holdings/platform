@@ -1,5 +1,12 @@
 # API Specification — SZL Platform
 
+> **Evidence status: HISTORICAL.** This document preserves the route inventory
+> from the retired monolithic API layout. The listed
+> `artifacts/api-server/src/routes/*` files are not present in the current
+> tracked tree, so this document must not be used as a current deployment or
+> reachability claim. A replacement specification requires generated contracts
+> and live route receipts from the active runtime services.
+
 Canonical reference for API surface metrics cited in investor due diligence.
 See `DATA-MODEL.md` for schema and table counts; `ARCHITECTURE.md` for system topology.
 
