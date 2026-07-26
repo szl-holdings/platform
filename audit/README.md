@@ -11,6 +11,12 @@
 
 This directory contains all artifacts produced by the Zero-Gap Track 1 audit. Downstream tracks (Design System v2, Backend Hardening, Database, Infra/CI) should consume these documents as their baseline.
 
+The current governance counter is documented separately in
+[`docs/OVERCLAIM_LEDGER.md`](../docs/OVERCLAIM_LEDGER.md). Its machine-readable
+ledger and evidence manifest are explicitly labeled **MEASURED / SNAPSHOT /
+non-exhaustive**. The single observed correction interval is not labeled as a
+mean.
+
 ---
 
 ## Documents Produced by This Track
@@ -42,9 +48,9 @@ This directory contains all artifacts produced by the Zero-Gap Track 1 audit. Do
 | Registered artifacts | 6 | Tracked artifact manifests |
 | Artifact directories | 7 | Tracked top-level `artifacts/` children |
 | Registered product verticals | 5 | Registered domain artifacts; A11oy is separate |
-| Domain packages (`packages/`) | 157 | Tracked top-level package directories |
+| Domain packages (`packages/`) | 159 | Tracked top-level package directories |
 | Shared library packages (`lib/`) | 53 | Tracked top-level library directories |
-| Total packages (`packages/` + `lib/`) | 210 | 157 + 53 |
+| Total packages (`packages/` + `lib/`) | 212 | 159 + 53 |
 | Apps (`apps/`) | 11 | Tracked top-level `apps/` children |
 | Services (`services/`) | 11 | Tracked top-level `services/` children |
 | Workers (`workers/`) | 5 | `ls workers/ \| wc -l` |
@@ -53,7 +59,7 @@ This directory contains all artifacts produced by the Zero-Gap Track 1 audit. Do
 | DB migrations (SQL files) | 149 | Tracked `lib/db/drizzle/*.sql` files |
 | API route source files | 43 | Non-test files with detected Express route declarations across current runtime roots |
 | API handler declarations | 306 | Static non-test method declarations on `app`, `router`, and named Express Router receivers |
-| CI workflows | 44 | Includes the truth-lock workflow |
+| CI workflows | 45 | Includes both truth workflows |
 | Environment variables (in `.env.example`) | 238 | Lines matching `^[A-Z_]+=` |
 
 ---

@@ -20,6 +20,14 @@ const SPAN_ID_PATTERN = /^[0-9a-f]{16}$/;
 const DEFAULT_MAX_EVIDENCE_AGE_MS = 15 * 60 * 1000;
 const MAX_CLOCK_SKEW_MS = 60 * 1000;
 
+export function normalizeBaseUrl(baseUrl) {
+  let end = baseUrl.length;
+  while (end > 0 && baseUrl.charCodeAt(end - 1) === 47) {
+    end -= 1;
+  }
+  return baseUrl.slice(0, end);
+}
+
 function result(id, status, detail) {
   return { id, status, detail };
 }
@@ -126,7 +134,7 @@ function validateBaseUrl(value) {
   if (!loopback && (isPrivateAddress(hostname) || privateName)) {
     throw new TypeError('baseUrl must not target a private or link-local host');
   }
-  return { normalized: url.href.replace(/\/+$/, ''), hostname, loopback };
+  return { normalized: normalizeBaseUrl(url.href), hostname, loopback };
 }
 
 async function assertPublicEndpoint(validatedUrl, lookupImpl) {

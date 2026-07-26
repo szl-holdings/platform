@@ -223,7 +223,7 @@ Every consequential operation in the SZL ecosystem follows this path, regardless
 ┌──────────────────────────────────────────────────────────────────────┐
 │  API SERVER  (artifacts/api-server)                                    │
 │                                                                       │
-│  Express 5  ·  172 route files  ·  2,331 endpoints                   │
+│  Express 5  ·  172 route files  ·  5,065 OpenAPI operations          │
 │  Global auth enforcer (deny-by-default on /api/*)                    │
 │  REST + GraphQL (Apollo) + WebSocket + MCP                           │
 │                                                                       │

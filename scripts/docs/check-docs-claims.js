@@ -14,9 +14,9 @@
  * Checks performed:
  *   1. Platform role enum   — ACCESS-CONTROL-MATRIX.md vs lib/db/src/schema/auth.ts
  *   2. Roles-table enum     — ACCESS-CONTROL-MATRIX.md vs lib/db/src/schema/auth.ts
- *   3. CSRF exempt paths    — API-SPEC.md documented exemptions vs middlewares/csrf.ts
- *   4. CSRF prefix rules    — API-SPEC.md prefix exemptions (/api/ai/*, /api/webhooks/)
- *   5. Key route mounts     — API-SPEC.md route groups vs artifacts/api-server/src/routes/index.ts
+ *   3. CSRF primitives      — docs/API-SPEC.md claims vs packages/auth-shared
+ *   4. Public route policy  — Ouroboros prefix vs global auth enforcer
+ *   5. Route module         — documented tracked route module exists
  *   6. Referenced files     — SECURITY-CHECKLIST.md file references exist on disk
  *   7. Referenced DB tables — SECURITY-CHECKLIST.md / ACCESS-CONTROL-MATRIX.md table
  *                             names exist in lib/db/src/schema/ as pgTable declarations
@@ -126,11 +126,11 @@ function section(title) {
 
 const authSchema = readFile('lib/db/src/schema/auth.ts');
 const csrfMiddleware = readFile('packages/auth-shared/src/server/csrf.ts');
-const routesIndex = readFile('artifacts/api-server/src/routes/index.ts');
+const globalAuthEnforcer = readFile('artifacts/api-server/src/middlewares/global-auth-enforcer.ts');
+const ouroborosRoutes = readFile('artifacts/api-server/src/routes/ouroboros.ts');
 const accessMatrix = readFile('ACCESS-CONTROL-MATRIX.md');
 const apiSpec = readFile('docs/API-SPEC.md');
 const _securityChecklist = readFile('SECURITY-CHECKLIST.md');
-const apiSpecIsHistorical = apiSpec?.includes('**Evidence status: HISTORICAL.**') ?? false;
 
 addSummary('## Strict Documentation Claims Check');
 addSummary('');
@@ -252,128 +252,51 @@ if (!authSchema) {
   }
 }
 
-// ─── CHECK 3: CSRF exempt paths ───────────────────────────────────────────────
-// API-SPEC.md documents specific paths as CSRF-exempt. Verify each one still
-// appears in the EXEMPT_PATHS set (or isExempt() logic) in csrf.ts.
+// ─── CHECK 3: CSRF primitives ─────────────────────────────────────────────────
+// The current API spec claims only helpers proven by the tracked package.
 
-section('CSRF exempt paths — API-SPEC.md documented exemptions vs middlewares/csrf.ts');
-
-// These are the specific paths API-SPEC.md §"CSRF Protection" calls out.
-const DOCUMENTED_CSRF_EXEMPT_PATHS = [
-  '/api/csrf-token',
-  '/api/auth/login',
-  '/api/auth/login-password',
-  '/api/auth/logout',
-  '/api/auth/callback',
-  '/api/auth/ws-ticket',
-  '/api/billing/webhooks',
+section('CSRF primitives — docs/API-SPEC.md vs packages/auth-shared');
+const DOCUMENTED_CSRF_PRIMITIVES = [
+  { desc: 'safe-method classification', pattern: /function isSafeMethod\(/ },
+  { desc: 'timing-safe pair comparison', pattern: /function csrfTimingSafeEqual\(/ },
+  { desc: 'double-submit pair validation', pattern: /function validateCsrfPair\(/ },
+  { desc: 'cookie options factory', pattern: /function csrfCookieOptions\(/ },
 ];
 
-if (apiSpecIsHistorical) {
-  pass(
-    'Historical API specification does not assert current CSRF exemptions',
-    'docs/API-SPEC.md carries an explicit HISTORICAL evidence label',
-  );
-} else if (!csrfMiddleware) {
+if (!csrfMiddleware) {
   fail('Cannot read packages/auth-shared/src/server/csrf.ts', 'file not found or unreadable');
 } else if (!apiSpec) {
-  fail('Cannot read API-SPEC.md', 'file not found or unreadable');
+  fail('Cannot read docs/API-SPEC.md', 'file not found or unreadable');
 } else {
-  for (const exemptPath of DOCUMENTED_CSRF_EXEMPT_PATHS) {
-    // The path should appear as a quoted string literal in csrf.ts (single or double quotes)
-    const escaped = exemptPath.replace(/\//g, '\\/');
-    const pattern = new RegExp(`["']${escaped}["']`);
-    if (pattern.test(csrfMiddleware)) {
-      pass(`CSRF exempt: ${exemptPath}`);
-    } else {
-      fail(
-        'Documented CSRF-exempt path not found in csrf.ts EXEMPT_PATHS',
-        `${exemptPath} — API-SPEC.md claims this path is CSRF-exempt but it is not in the source`,
-      );
-    }
+  for (const { desc, pattern } of DOCUMENTED_CSRF_PRIMITIVES) {
+    if (pattern.test(csrfMiddleware)) pass(`CSRF primitive present: ${desc}`);
+    else fail('Documented CSRF primitive not found', desc);
   }
 }
 
-// ─── CHECK 4: CSRF prefix exemptions ─────────────────────────────────────────
-// API-SPEC.md §"CSRF Protection" states /api/ai/* routes are "fully exempt" and
-// /api/webhooks/* uses provider-signature verification instead of CSRF tokens.
+// ─── CHECK 4: Public route policy ─────────────────────────────────────────────
 
-section('CSRF prefix rules — API-SPEC.md prefix exemptions vs middlewares/csrf.ts');
+section('Public route policy — Ouroboros prefix vs global auth enforcer');
 
-if (apiSpecIsHistorical) {
-  pass(
-    'Historical API specification does not assert current CSRF prefix rules',
-    'docs/API-SPEC.md carries an explicit HISTORICAL evidence label',
+if (!globalAuthEnforcer) {
+  fail(
+    'Cannot read artifacts/api-server/src/middlewares/global-auth-enforcer.ts',
+    'file not found or unreadable',
   );
-} else if (!csrfMiddleware) {
-  skip('CSRF prefix rules check', 'csrf.ts not readable (see check 3)');
+} else if (/"\/api\/ouroboros\/"/.test(globalAuthEnforcer)) {
+  pass('Documented Ouroboros public prefix is present');
 } else {
-  const prefixChecks = [
-    {
-      desc: '/api/ai/* routes are CSRF-exempt (startsWith check)',
-      pattern: /path\.startsWith\(['"]\/api\/ai\//,
-    },
-    {
-      desc: '/api/webhooks/* routes are CSRF-exempt (startsWith check)',
-      pattern: /path\.startsWith\(['"]\/api\/webhooks\//,
-    },
-    {
-      desc: '/api/mcp/* routes are CSRF-exempt (mcp check)',
-      pattern: /path\.startsWith\(['"]\/api\/mcp\//,
-    },
-  ];
-
-  for (const { desc, pattern } of prefixChecks) {
-    if (pattern.test(csrfMiddleware)) {
-      pass(`CSRF prefix rule present: ${desc}`);
-    } else {
-      fail(
-        'Documented CSRF prefix exemption not found in csrf.ts isExempt()',
-        `${desc} — pattern not found in source`,
-      );
-    }
-  }
+  fail('Documented Ouroboros public prefix is absent from global auth enforcer');
 }
 
-// ─── CHECK 5: Key route mounts ────────────────────────────────────────────────
-// API-SPEC.md documents specific route groups. Verify each is mounted in
-// artifacts/api-server/src/routes/index.ts.
+// ─── CHECK 5: Tracked route module ────────────────────────────────────────────
 
-section('Key route mounts — API-SPEC.md route groups vs routes/index.ts');
+section('Tracked route module — docs/API-SPEC.md vs repository tree');
 
-// Documented route groups and the corresponding mount evidence in routes/index.ts.
-const DOCUMENTED_ROUTE_MOUNTS = [
-  { desc: '/pulse route group', pattern: /router\.use\(\s*['"]\/pulse['"]/ },
-  { desc: '/nexus route group', pattern: /router\.use\(['"]\/nexus['"]/ },
-  { desc: 'core routes registered', pattern: /core\.register\(router\)/ },
-  { desc: 'billing routes registered', pattern: /billing\.register\(router\)/ },
-  { desc: 'ai routes registered', pattern: /ai\.register\(router\)/ },
-  { desc: 'security routes registered', pattern: /security\.register\(router\)/ },
-  { desc: 'terra routes registered', pattern: /terra\.register\(router\)/ },
-  { desc: 'vessels routes registered', pattern: /vessels\.register\(router\)/ },
-  { desc: 'alloy-forge routes registered', pattern: /lazyMatch\("\/alloy-forge"/ },
-  { desc: 'guardian policy check applied', pattern: /guardianPolicyCheck\(\)/ },
-];
-
-if (apiSpecIsHistorical) {
-  pass(
-    'Historical API specification does not assert current route mounts',
-    'docs/API-SPEC.md carries an explicit HISTORICAL evidence label',
-  );
-} else if (!routesIndex) {
-  fail('Cannot read artifacts/api-server/src/routes/index.ts', 'file not found or unreadable');
+if (!ouroborosRoutes) {
+  fail('Cannot read artifacts/api-server/src/routes/ouroboros.ts', 'file not found or unreadable');
 } else {
-  for (const { desc, pattern } of DOCUMENTED_ROUTE_MOUNTS) {
-    if (pattern.test(routesIndex)) {
-      pass(`Route mount confirmed: ${desc}`);
-    } else {
-      fail(
-        'Documented route group not found in routes/index.ts',
-        desc +
-          ' — expected pattern not present; update API-SPEC.md if the route was intentionally removed',
-      );
-    }
-  }
+  pass('Tracked Ouroboros route module exists');
 }
 
 // ─── CHECK 6: Referenced files exist ─────────────────────────────────────────
@@ -465,20 +388,20 @@ for (const [tableName, citation] of Object.entries(DOCUMENTED_TABLES)) {
 }
 
 // ─── CHECK 8: Key route paths ─────────────────────────────────────────────────
-// API-SPEC.md §"Key Route Paths" lists representative path strings per route
+// docs/API-SPEC.md §"Current Key Route Paths" lists representative path strings per route
 // group. Verify each path appears as a quoted string literal in the named
 // route handler file, catching renames/removals before they silently
 // invalidate the spec document.
 
-section('Key route paths — API-SPEC.md §"Key Route Paths" vs route handler files');
+section('Key route paths — docs/API-SPEC.md current table vs route handler files');
 
 /**
- * Parse the "## Key Route Paths" table from API-SPEC.md.
+ * Parse the "## Current Key Route Paths" table from docs/API-SPEC.md.
  * Returns an array of { group, path, routeFile } objects, or null if the
  * section is not found.
  */
 function parseKeyRoutePathsTable(mdText) {
-  const sectionMarker = '## Key Route Paths';
+  const sectionMarker = '## Current Key Route Paths';
   const idx = mdText.indexOf(sectionMarker);
   if (idx === -1) return null;
   const afterHeading = mdText.slice(idx + sectionMarker.length);
@@ -507,23 +430,18 @@ function parseKeyRoutePathsTable(mdText) {
   return rows;
 }
 
-if (apiSpecIsHistorical) {
-  pass(
-    'Historical API specification does not assert current route-file mappings',
-    'docs/API-SPEC.md carries an explicit HISTORICAL evidence label',
-  );
-} else if (!apiSpec) {
-  skip('Key route paths check', 'API-SPEC.md not readable (see earlier checks)');
+if (!apiSpec) {
+  skip('Key route paths check', 'docs/API-SPEC.md not readable (see earlier checks)');
 } else {
   const routePathRows = parseKeyRoutePathsTable(apiSpec);
   if (routePathRows === null) {
     fail(
-      'Could not find "## Key Route Paths" section in API-SPEC.md',
+      'Could not find "## Current Key Route Paths" section in docs/API-SPEC.md',
       'Add the section with a table of representative paths and their route files',
     );
   } else if (routePathRows.length === 0) {
     fail(
-      'No rows parsed from "## Key Route Paths" table in API-SPEC.md',
+      'No rows parsed from "## Current Key Route Paths" table in docs/API-SPEC.md',
       'Table must contain at least one data row with path and route-file columns',
     );
   } else {

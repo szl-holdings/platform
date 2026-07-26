@@ -78,7 +78,7 @@ We are not building a copilot. We are not building a chatbot wrapper. We are not
 
 We are building the governed execution fabric for enterprise AI — the layer that sits between frontier models and real-world consequence, and ensures that every decision carries attribution, every action carries proof, and every outcome feeds back into the system to make the next decision better.
 
-The platform currently ships 59 SDK primitives, 133 API endpoints, and 16 operational surfaces across 7 enterprise verticals. Every number is real. Every surface is live.
+The active prototype includes SDK primitives, a documented API surface, and operational demonstrations across multiple enterprise verticals. Current estate counts are published only when canonical evidence is available.
 
 This is not a pitch. This is the work.
 

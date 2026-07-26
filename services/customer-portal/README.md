@@ -71,7 +71,7 @@ Full specs live in the org's customer-surface package: `CUSTOMER_PORTAL_SPEC.md`
 - The **Khipu receipt signature is a cosign / DSSE PLACEHOLDER**. `chain_verified` verifies the **hash chain only**, not the signature, until Sigstore/Rekor lands.
 - **SLSA = L1 (honest).** "SLSA L3" is banned.
 - **Wire D** (cross-mesh `traceparent`) is **in-process only**.
-- **LOCKED numbers** (re-derive them yourself): **749 declarations / 14 unique axioms (15 raw, 1 dup) / 163 sorries (112 baseline + 51 Putnam)** at `lutar-v18.0.0` / `c7c0ba17`; 13-axis `yuyay_v3` conjunctive AND; replay hash `bacf54434f1a3bf2d758b27a62d5fd580ca4c8d3b180693573eeebcaea631fc5`.
+- **Historical locked snapshot** (do not reuse as a current claim): **749 declarations / 14 unique axioms (15 raw, 1 duplicate) / 163 sorries (112 baseline + 51 legacy challenge-set)** at `lutar-v18.0.0` / `c7c0ba17`; 13-axis `yuyay_v3` conjunctive AND; replay hash `bacf54434f1a3bf2d758b27a62d5fd580ca4c8d3b180693573eeebcaea631fc5`.
 
 ---
 

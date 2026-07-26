@@ -5,7 +5,7 @@ import { createServer } from 'node:http';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import test from 'node:test';
-import { runConformance } from './conformance.mjs';
+import { normalizeBaseUrl, runConformance } from './conformance.mjs';
 import { payloadHash, publicKeyFingerprint, signDssePayload } from './verify.mjs';
 
 const FIXTURE_SHA = 'a'.repeat(40);
@@ -151,6 +151,14 @@ async function listen(evidence, { gitSha = FIXTURE_SHA, evidenceStatus = 200 } =
     close: () => new Promise((resolvePromise) => server.close(resolvePromise)),
   };
 }
+
+test('base URL normalization removes trailing slashes in linear time', () => {
+  assert.equal(normalizeBaseUrl('https://example.test////'), 'https://example.test');
+  assert.equal(
+    normalizeBaseUrl(`https://example.test${'/'.repeat(100_000)}`),
+    'https://example.test',
+  );
+});
 
 async function runReference({ evidence, keys, root, serverOptions, ...overrides } = {}) {
   const resolvedKeys = keys || keyPair();

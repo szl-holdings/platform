@@ -1,10 +1,39 @@
 # SZL Holdings — Known Gaps Register (Security & Operations)
 
-**Last updated:** 2026-04-25 (rev 10 — Operationalization Sweep Task #3489)  
+**Last updated:** 2026-07-26 (rev 13 — Decision-SLSA draft registration)
 **Owner:** Engineering / DevOps  
 **Audience:** Enterprise architects, Series A technical advisors, incoming VP Engineering
 
 This document is the canonical reference for known security, quality, and compliance gaps in the SZL Holdings platform. It consolidates findings from the internal risk register, the April 2026 hardening sprint, and the secrets remediation audit.
+
+---
+
+## 2026-07-25 Series A Truth Lock
+
+The generated truth artifact now fails closed when a metric cannot be established
+from a local manifest, a machine-readable test aggregate, or an authorized live
+receipt. The remaining gaps are:
+
+- **Product surfaces:** `0` MEASURED because no qualifying surface manifest or
+  live deployment receipt is available in this repository.
+- **Per-test counts:** the verified workspace graph completed `109/109` test
+  tasks, but no machine-readable `artifacts/test-results.json` aggregate exists,
+  so unit/integration/e2e counts remain `UNAVAILABLE`.
+- **Database tables, Lean sorry count, Lambda count, Hugging Face collections,
+  and receipt-chain depth:** `UNAVAILABLE` pending an authoritative local source
+  or authorized live receipt.
+- **Repository consolidation:** the live organization has `53` public
+  repositories, not the historical target of `9`. Visibility, archival,
+  deletion, and history changes require explicit founder approval and a tested
+  restoration plan.
+- **Hugging Face estate:** `15` models, `26` datasets, and `25` spaces were
+  MEASURED from the public API. No private asset was accessed, exported, or
+  deployed.
+- **Independent review:** the organization currently has no eligible independent
+  collaborator. Do not manufacture or self-approve reviews. Keep required
+  checks, signed commits, linear history, conversation resolution, and exact-head
+  verification; transition to independent review after the first qualified hire
+  without creating a self-deadlock before then.
 
 ---
 
@@ -70,6 +99,15 @@ Operational gaps, process health, test coverage, observability, team ownership.
 ---
 
 ## Full Gap Registry
+
+### Decision-SLSA Draft Package (Open Evidence and Publication Boundaries)
+
+| ID | Gap | Area | Resolution / Status |
+|----|-----|------|---------------------|
+| DSLSA-001 | The intended standalone public repository has not been created. | Publication | Open — the reference package remains staged only inside this monorepo. |
+| DSLSA-002 | The intended Zenodo concept DOI `10.5281/zenodo.19944926` has not been deposited or independently verified. | Publication | Open — the DOI is a target only and must not be cited as a published artifact. |
+| DSLSA-003 | No verified third-party transparency log, byte-identical replay, or offline-verification packet establishes D3 for an estate decision. | Decision evidence | Open — the evaluator records absent/unverified evidence and cannot infer D3. |
+| DSLSA-004 | No verified hardware-attested execution, formally specified policy, or machine-checked denial establishes D4 for an estate decision. | Decision evidence | Open — the evaluator records absent/unverified evidence and cannot infer D4. |
 
 ### P0 — Critical / High (Resolved or Immediate Action)
 

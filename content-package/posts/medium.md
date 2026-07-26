@@ -152,7 +152,7 @@ The enterprise AI industry is approximately 18 months away from a reckoning. As 
 
 The organizations that build the governance layer now will define the standard for the industry. The organizations that wait will spend years catching up.
 
-a11oy currently ships 59 SDK primitives (10 of which are alignment-specific), 133 API endpoints, a 16-tab developer platform, and operational surfaces across 7 enterprise verticals. Every primitive carries proof. Every action passes through covenant policy gates. Every execution is auditable.
+a11oy is built around SDK primitives, a documented API surface, and prototype operational surfaces spanning multiple enterprise verticals. Current estate counts are published only when canonical evidence is available. Governed executions are designed to carry proof and pass through covenant policy gates.
 
 The alignment research is clear. The engineering patterns exist. The only question is whether the enterprise AI industry takes this seriously before the first high-profile failure forces it to.
 
