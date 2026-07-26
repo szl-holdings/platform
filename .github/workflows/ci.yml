@@ -23,8 +23,28 @@ env:
   NODE_OPTIONS: --max-old-space-size=6144
 
 jobs:
+  clean-clone:
+    name: Clean clone (${{ matrix.os }})
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 10
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with: { node-version: '24' }
+      - name: Verify clean-clone invariants
+        run: node scripts/check-clean-clone.mjs
+      - name: Test dependency-free clone guards
+        run: node --test scripts/check-package-manager.test.mjs scripts/check-clean-clone.test.mjs scripts/setup-hooks.test.mjs lib/api-spec/scripts/codegen.test.mjs
+
   lint:
     name: Lint
+    needs: clean-clone
     runs-on: ubuntu-latest
     timeout-minutes: 20
     permissions:
@@ -40,6 +60,7 @@ jobs:
 
   typecheck:
     name: Typecheck
+    needs: clean-clone
     runs-on: ubuntu-latest
     timeout-minutes: 25
     permissions:
