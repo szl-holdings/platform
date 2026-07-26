@@ -1,3 +1,4 @@
 # Format: path[:line] # reason: specific, reviewable justification
 # Keep this file empty unless a numeric literal is historical, quoted, or otherwise
 # intentionally distinct from the current metric. Broad globs are not supported.
+docs/market/SERIES_A_POSITIONING.md:29 # reason: the immutable source URL contains numeric SHA substrings, not product-surface counts
