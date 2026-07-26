@@ -170,6 +170,31 @@ test('grading uses the same evidence snapshot that was hashed', () => {
   assert.equal(policyReads, 1);
 });
 
+test('unpaired UTF-16 surrogates are rejected before hashing or grading', () => {
+  const invalidSubject = '\ud800';
+  assert.throws(
+    () =>
+      computeDecisionBundleSha256(
+        invalidSubject,
+        BUNDLE_IDENTITY.evaluated_at,
+        verifiedThrough('D1'),
+      ),
+    /unpaired UTF-16 surrogates/,
+  );
+  assert.throws(
+    () =>
+      gradeDecision({
+        identity: {
+          ...BUNDLE_IDENTITY,
+          subject: invalidSubject,
+          bundle_sha256: '0'.repeat(64),
+        },
+        evidence: verifiedThrough('D1'),
+      }),
+    /unpaired UTF-16 surrogates/,
+  );
+});
+
 test('Lambda uniqueness stays open, gray, and not machine-checked', () => {
   assert.deepEqual(
     assertLambdaCaseStudy({

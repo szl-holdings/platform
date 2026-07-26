@@ -175,6 +175,28 @@ class EvidenceDoctrineTests(unittest.TestCase):
         )
         self.assertEqual(evidence.policy_reads, 1)
 
+    def test_unpaired_utf16_surrogates_are_rejected_before_hashing_or_grading(
+        self,
+    ):
+        invalid_subject = "\ud800"
+        with self.assertRaisesRegex(TypeError, "unpaired UTF-16 surrogates"):
+            compute_decision_bundle_sha256(
+                invalid_subject,
+                BUNDLE_IDENTITY["evaluated_at"],
+                verified_through("D1"),
+            )
+        with self.assertRaisesRegex(TypeError, "unpaired UTF-16 surrogates"):
+            grade_decision(
+                {
+                    "identity": {
+                        **BUNDLE_IDENTITY,
+                        "subject": invalid_subject,
+                        "bundle_sha256": "0" * 64,
+                    },
+                    "evidence": verified_through("D1"),
+                }
+            )
+
     def test_lambda_guard(self):
         honest = {
             "claim": "CONJECTURE_1",

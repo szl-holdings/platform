@@ -62,11 +62,26 @@ def _validate_state(requirement: str, state: object) -> str:
     return str(state)
 
 
+def _validate_subject(subject: object) -> str:
+    if (
+        not isinstance(subject, str)
+        or not subject
+        or subject.strip() != subject
+    ):
+        raise TypeError("identity.subject must be a non-empty canonical string")
+    if any(0xD800 <= ord(character) <= 0xDFFF for character in subject):
+        raise TypeError(
+            "identity.subject must not contain unpaired UTF-16 surrogates"
+        )
+    return subject
+
+
 def compute_decision_bundle_sha256(
     subject: str,
     evaluated_at: str,
     evidence: Mapping[str, object],
 ) -> str:
+    subject = _validate_subject(subject)
     canonical_bundle = json.dumps(
         {
             "evaluated_at": evaluated_at,
@@ -116,13 +131,7 @@ def _validate_bundle(
     if not isinstance(identity, Mapping):
         raise TypeError("decision bundle identity must be a mapping")
     identity_snapshot = dict(identity)
-    subject = identity_snapshot.get("subject")
-    if (
-        not isinstance(subject, str)
-        or not subject
-        or subject.strip() != subject
-    ):
-        raise TypeError("identity.subject must be a non-empty canonical string")
+    subject = _validate_subject(identity_snapshot.get("subject"))
     bundle_sha256 = identity_snapshot.get("bundle_sha256")
     if (
         not isinstance(bundle_sha256, str)

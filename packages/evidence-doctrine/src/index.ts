@@ -63,6 +63,24 @@ function validateEvidenceState(requirement: Requirement, state: unknown): Eviden
   return state as EvidenceState;
 }
 
+function assertCanonicalSubject(subject: unknown): asserts subject is string {
+  if (typeof subject !== 'string' || subject.length === 0 || subject.trim() !== subject) {
+    throw new TypeError('identity.subject must be a non-empty canonical string');
+  }
+  for (let index = 0; index < subject.length; index += 1) {
+    const codeUnit = subject.charCodeAt(index);
+    if (codeUnit >= 0xd800 && codeUnit <= 0xdbff) {
+      const nextCodeUnit = subject.charCodeAt(index + 1);
+      if (index + 1 >= subject.length || nextCodeUnit < 0xdc00 || nextCodeUnit > 0xdfff) {
+        throw new TypeError('identity.subject must not contain unpaired UTF-16 surrogates');
+      }
+      index += 1;
+    } else if (codeUnit >= 0xdc00 && codeUnit <= 0xdfff) {
+      throw new TypeError('identity.subject must not contain unpaired UTF-16 surrogates');
+    }
+  }
+}
+
 function isStrictTimestamp(value: string): boolean {
   const match = TIMESTAMP_PATTERN.exec(value);
   if (!match) return false;
@@ -92,6 +110,7 @@ export function computeDecisionBundleSha256(
   evaluatedAt: string,
   evidence: DecisionEvidence,
 ): string {
+  assertCanonicalSubject(subject);
   const orderedEvidence = Object.fromEntries(
     Object.entries(evidence).sort(([left], [right]) => left.localeCompare(right)),
   );
@@ -116,13 +135,7 @@ function validateBundle(bundle: DecisionEvidenceBundle): DecisionEvidenceBundle 
     bundle_sha256: identity.bundle_sha256,
     evaluated_at: identity.evaluated_at,
   };
-  if (
-    typeof identitySnapshot.subject !== 'string' ||
-    identitySnapshot.subject.length === 0 ||
-    identitySnapshot.subject.trim() !== identitySnapshot.subject
-  ) {
-    throw new TypeError('identity.subject must be a non-empty canonical string');
-  }
+  assertCanonicalSubject(identitySnapshot.subject);
   if (
     typeof identitySnapshot.bundle_sha256 !== 'string' ||
     !/^[0-9a-f]{64}$/.test(identitySnapshot.bundle_sha256)
