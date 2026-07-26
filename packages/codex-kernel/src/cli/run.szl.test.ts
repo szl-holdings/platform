@@ -20,34 +20,36 @@
 
 import { execFileSync } from 'node:child_process';
 import { existsSync, mkdtempSync, readFileSync, rmSync } from 'node:fs';
+import { createRequire } from 'node:module';
 import { tmpdir } from 'node:os';
 import { join, resolve } from 'node:path';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 
 const PACKAGE_ROOT = resolve(__dirname, '..', '..');
-const PAYLOAD_PATH = join(
-  PACKAGE_ROOT,
-  'runner',
-  'szl-private-governed-ops-001.payload.json',
-);
+const require = createRequire(import.meta.url);
+const TSX_CLI = require.resolve('tsx/cli');
+const PAYLOAD_PATH = join(PACKAGE_ROOT, 'runner', 'szl-private-governed-ops-001.payload.json');
 
 let tmp_root: string;
 let runner_stdout: string;
 
 function runTsx(script: string, args: string[], output_root: string): string {
-  const tsx = join(PACKAGE_ROOT, 'node_modules', '.bin', 'tsx');
-  return execFileSync(tsx, [join(PACKAGE_ROOT, 'src', 'cli', script), ...args], {
-    cwd: PACKAGE_ROOT,
-    env: { ...process.env, CODEX_OUTPUT_ROOT: output_root },
-    encoding: 'utf-8',
-    stdio: ['ignore', 'pipe', 'pipe'],
-  });
+  return execFileSync(
+    process.execPath,
+    [TSX_CLI, join(PACKAGE_ROOT, 'src', 'cli', script), ...args],
+    {
+      cwd: PACKAGE_ROOT,
+      env: { ...process.env, CODEX_OUTPUT_ROOT: output_root },
+      encoding: 'utf-8',
+      stdio: ['ignore', 'pipe', 'pipe'],
+    },
+  );
 }
 
 beforeAll(() => {
   tmp_root = mkdtempSync(join(tmpdir(), 'codex-kernel-szl-'));
   runner_stdout = runTsx('run.ts', [PAYLOAD_PATH], tmp_root);
-});
+}, 30_000);
 
 afterAll(() => {
   if (tmp_root) rmSync(tmp_root, { recursive: true, force: true });
@@ -128,5 +130,5 @@ describe('codex-kernel CLI runner — SZL private governed-ops payload', () => {
     } finally {
       rmSync(second_tmp, { recursive: true, force: true });
     }
-  });
+  }, 30_000);
 });

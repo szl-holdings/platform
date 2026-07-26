@@ -58,7 +58,7 @@ The lead time for a competitor to close the gap:
 | Governance library set usable by any product | 9-12 months (architectural retrofit is harder than greenfield) |
 | Six domain packs on shared substrate | 18-24 months minimum (each domain is a serious engineering investment) |
 | Unified mobile command surface | 6-9 months (Expo / RN, but data model integration is the long pole) |
-| Operator-first command surfaces | 6-12 months (cultural shift inside the competitor org) |
+| Operator-first command experience | 6-12 months (cultural shift inside the competitor org) |
 | Founder-led narrative without commodity drift | Indefinite — depends on founder voice, not engineering |
 
 **Architectural lead time:** 12-18 months for a competitor with intent and capital.

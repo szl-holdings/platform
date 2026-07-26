@@ -1,0 +1,94 @@
+{
+  "schema": "szl.truth/v1",
+  "generated_at": "2026-07-26T01:38:10.913Z",
+  "generated_by": "36e924f2c8ec34d7e725fa1da6606dfa609e9eda",
+  "metrics": {
+    "surfaces_customer_facing": {
+      "value": 0,
+      "label": "MEASURED",
+      "source": "apps/*/product.manifest.json requiring a health endpoint and receipt reference"
+    },
+    "ouroboros_tests": {
+      "passed": null,
+      "total": null,
+      "label": "UNAVAILABLE",
+      "source": "artifacts/ouroboros-test-results.json"
+    },
+    "platform_tests": {
+      "passed": null,
+      "total": null,
+      "label": "UNAVAILABLE",
+      "source": "artifacts/test-results.json"
+    },
+    "mcp_e2e_tests": {
+      "passed": null,
+      "total": null,
+      "label": "UNAVAILABLE",
+      "source": "artifacts/mcp-e2e-test-results.json"
+    },
+    "monorepo_packages": {
+      "value": 198,
+      "label": "MEASURED",
+      "source": "pnpm -r list --depth -1 --json"
+    },
+    "api_endpoints": {
+      "value": null,
+      "label": "UNAVAILABLE",
+      "source": "runtime router inventory artifact (source-call counting cannot prove mounted endpoints)"
+    },
+    "ci_workflows": {
+      "value": 45,
+      "label": "MEASURED",
+      "source": "ls .github/workflows"
+    },
+    "lean_theorems_locked": {
+      "value": 8,
+      "label": "REPORTED",
+      "source": "lutar-lean/Locked8.lean"
+    },
+    "lean_sorry_count": {
+      "value": null,
+      "label": "UNAVAILABLE",
+      "source": "artifacts/lean-build.log"
+    },
+    "lambda_overhead_ms_median": {
+      "value": null,
+      "label": "UNAVAILABLE",
+      "source": "benchmarks/lambda/summary.json"
+    },
+    "db_tables": {
+      "value": null,
+      "label": "UNAVAILABLE",
+      "source": "drizzle introspect against DATABASE_URL"
+    },
+    "hf_models": {
+      "value": 15,
+      "label": "MEASURED",
+      "source": "Hugging Face Hub API: https://huggingface.co/api/models?author=SZLHOLDINGS&limit=1000&full=true"
+    },
+    "hf_datasets": {
+      "value": 26,
+      "label": "MEASURED",
+      "source": "Hugging Face Hub API: https://huggingface.co/api/datasets?author=SZLHOLDINGS&limit=1000&full=true"
+    },
+    "hf_spaces": {
+      "value": 25,
+      "label": "MEASURED",
+      "source": "Hugging Face Hub API: https://huggingface.co/api/spaces?author=SZLHOLDINGS&limit=1000&full=true"
+    },
+    "hf_collections": {
+      "value": null,
+      "label": "UNAVAILABLE",
+      "source": "Hugging Face Hub API: https://huggingface.co/api/collections?owner=SZLHOLDINGS&limit=1000"
+    },
+    "receipt_chain_depth": {
+      "value": null,
+      "label": "UNAVAILABLE",
+      "source": "GET https://a-11-oy.com/api/a11oy/v1/receipts/head"
+    }
+  },
+  "doi": {
+    "concept": "10.5281/zenodo.19944926",
+    "latest": "10.5281/zenodo.20195368"
+  }
+}

@@ -276,7 +276,15 @@ export class ShellCapability implements SandboxCapability {
         // signal fails (e.g. process already gone).
         try {
           if (typeof child.pid === 'number') {
-            process.kill(-child.pid, 'SIGKILL');
+            if (process.platform === 'win32') {
+              const killer = spawn('taskkill', ['/pid', String(child.pid), '/t', '/f'], {
+                stdio: 'ignore',
+                windowsHide: true,
+              });
+              killer.unref();
+            } else {
+              process.kill(-child.pid, 'SIGKILL');
+            }
           } else {
             child.kill('SIGKILL');
           }

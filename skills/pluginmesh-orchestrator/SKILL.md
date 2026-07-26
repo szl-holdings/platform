@@ -82,7 +82,7 @@ PluginMesh is a **safe plugin broker** for Codex. It:
 
 ```
 1. pluginmesh_hf_model_router({ task: "text generation", preferOpen: true })
-   → Returns: top 3 HF models with model IDs, licenses, download counts
+   → Returns: a ranked shortlist of HF models with model IDs, licenses, and download counts
 ```
 
 ## Data Sources

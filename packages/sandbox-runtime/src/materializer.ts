@@ -87,10 +87,7 @@ export async function validateWorkspacePathSafe(
     const canonicalRoot = await realpath(workspaceRoot);
     const ancestorRel = relative(canonicalRoot, canonicalAncestor);
     if (ancestorRel.startsWith('..') || isAbsolute(ancestorRel)) {
-      throw new PathTraversalError(
-        path,
-        workspaceRoot,
-      );
+      throw new PathTraversalError(path, workspaceRoot);
     }
   } catch (err) {
     if (err instanceof PathTraversalError) throw err;
@@ -105,10 +102,7 @@ async function ensureDir(dir: string): Promise<void> {
   await mkdir(dir, { recursive: true });
 }
 
-async function materializeFile(
-  entry: ManifestFileEntry,
-  workspaceRoot: string,
-): Promise<void> {
+async function materializeFile(entry: ManifestFileEntry, workspaceRoot: string): Promise<void> {
   const fullPath = validateWorkspacePath(entry.path, workspaceRoot);
   await ensureDir(dirname(fullPath));
 
@@ -120,10 +114,7 @@ async function materializeFile(
   }
 }
 
-async function materializeDir(
-  entry: ManifestDirEntry,
-  workspaceRoot: string,
-): Promise<void> {
+async function materializeDir(entry: ManifestDirEntry, workspaceRoot: string): Promise<void> {
   const fullPath = validateWorkspacePath(entry.path, workspaceRoot);
   await ensureDir(fullPath);
 
@@ -189,7 +180,7 @@ async function materializeLocalDir(
  * Validate a git URL: must use http/https/ssh/git schemes only.
  * Rejects file:// and other unsafe schemes that could read the local filesystem.
  */
-function validateGitUrl(url: string): void {
+export function validateGitUrl(url: string): void {
   let parsed: URL;
   try {
     parsed = new URL(url);
@@ -208,7 +199,7 @@ function validateGitUrl(url: string): void {
  * Validate a git ref (branch/tag/SHA): must be a safe identifier.
  * No shell special characters, path separators, or control characters.
  */
-function validateGitRef(ref: string): void {
+export function validateGitRef(ref: string): void {
   if (!/^[a-zA-Z0-9._\-/]+$/.test(ref)) {
     throw new Error(`Invalid git ref: '${ref}'. Refs must match [a-zA-Z0-9._\\-/]+.`);
   }
