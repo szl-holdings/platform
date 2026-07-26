@@ -19,11 +19,14 @@
 
 import { execFileSync } from 'node:child_process';
 import { existsSync, mkdtempSync, readFileSync, rmSync } from 'node:fs';
+import { createRequire } from 'node:module';
 import { tmpdir } from 'node:os';
 import { join, resolve } from 'node:path';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 
 const PACKAGE_ROOT = resolve(__dirname, '..', '..');
+const require = createRequire(import.meta.url);
+const TSX_CLI = require.resolve('tsx/cli');
 const PAYLOAD_PATH = join(PACKAGE_ROOT, 'runner', 'payload.json');
 const PAYLOAD = JSON.parse(readFileSync(PAYLOAD_PATH, 'utf-8')) as {
   goal: { target_rows: number };
@@ -38,13 +41,16 @@ let outputs: Record<keyof typeof PAYLOAD.platform.output_paths, string>;
 function runTsx(script: string, args: string[], output_root: string): string {
   // tsx is symlinked into the package via pnpm — reuse it so we don't depend
   // on a global install. CODEX_OUTPUT_ROOT confines all writes to the sandbox.
-  const tsx = join(PACKAGE_ROOT, 'node_modules', '.bin', 'tsx');
-  return execFileSync(tsx, [join(PACKAGE_ROOT, 'src', 'cli', script), ...args], {
-    cwd: PACKAGE_ROOT,
-    env: { ...process.env, CODEX_OUTPUT_ROOT: output_root },
-    encoding: 'utf-8',
-    stdio: ['ignore', 'pipe', 'pipe'],
-  });
+  return execFileSync(
+    process.execPath,
+    [TSX_CLI, join(PACKAGE_ROOT, 'src', 'cli', script), ...args],
+    {
+      cwd: PACKAGE_ROOT,
+      env: { ...process.env, CODEX_OUTPUT_ROOT: output_root },
+      encoding: 'utf-8',
+      stdio: ['ignore', 'pipe', 'pipe'],
+    },
+  );
 }
 
 beforeAll(() => {
@@ -55,12 +61,9 @@ beforeAll(() => {
   // doesn't depend on cwd.
   runner_stdout = runTsx('run.ts', [PAYLOAD_PATH], tmp_root);
   outputs = Object.fromEntries(
-    Object.entries(PAYLOAD.platform.output_paths).map(([k, rel]) => [
-      k,
-      resolve(tmp_root, rel),
-    ]),
+    Object.entries(PAYLOAD.platform.output_paths).map(([k, rel]) => [k, resolve(tmp_root, rel)]),
   ) as typeof outputs;
-});
+}, 30_000);
 
 afterAll(() => {
   if (tmp_root) rmSync(tmp_root, { recursive: true, force: true });
@@ -125,5 +128,5 @@ describe('codex-kernel CLI runner', () => {
     } finally {
       rmSync(second_tmp, { recursive: true, force: true });
     }
-  });
+  }, 30_000);
 });

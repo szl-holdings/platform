@@ -79,7 +79,7 @@ Shared by all surfaces — the structural difference from dashboards, copilots, 
 ## Platform Scale
 
 - **14 deployable artifacts** (13 web/mobile + 1 internal dev sandbox)
-- **100 packages** in pnpm monorepo
+- **198 packages** in the pnpm monorepo (MEASURED; `artifacts/SOURCE_OF_TRUTH.json`)
 - **51 shared libraries**
 - **8 operator products**
 - **11-role RBAC** with org-scoped tenant isolation
@@ -98,7 +98,7 @@ Shared by all surfaces — the structural difference from dashboards, copilots, 
 | **Auth** | OIDC/PKCE, 11-role RBAC, deny-by-default enforcement |
 | **Mobile** | Expo / React Native |
 | **Infrastructure** | Azure (App Service, PostgreSQL Flexible, Key Vault, Redis, CDN) |
-| **Monorepo** | pnpm workspace — 100 packages |
+| **Monorepo** | pnpm workspace — 198 packages (MEASURED; `artifacts/SOURCE_OF_TRUTH.json`) |
 
 ---
 

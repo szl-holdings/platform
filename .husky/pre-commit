@@ -2,20 +2,23 @@
 # Pre-commit: run Biome format + Oxlint on staged files, then verify docs claims.
 set -e
 
-STAGED=$(git diff --cached --name-only --diff-filter=ACMR | grep -E '\.(ts|tsx|js|jsx|json|css)$' || true)
+FORMAT_STAGED=$(git diff --cached --name-only --diff-filter=ACMR | grep -E '\.(ts|tsx|js|jsx|json|css)$' || true)
+LINT_STAGED=$(git diff --cached --name-only --diff-filter=ACMR | grep -E '\.(ts|tsx|js|jsx)$' || true)
 
-if [ -n "$STAGED" ]; then
+if [ -n "$FORMAT_STAGED" ]; then
   echo "Running biome format on staged files..."
-  echo "$STAGED" | xargs node_modules/.bin/biome format --write
+  echo "$FORMAT_STAGED" | xargs node_modules/.bin/biome format --write
 
+  # Re-add any files that biome formatted.
+  echo "$FORMAT_STAGED" | xargs git add --
+fi
+
+if [ -n "$LINT_STAGED" ]; then
   echo "Running oxlint on staged files..."
-  echo "$STAGED" | xargs node_modules/.bin/oxlint --quiet
+  echo "$LINT_STAGED" | xargs node_modules/.bin/oxlint --quiet
 
   echo "Running biome lint on staged files..."
-  echo "$STAGED" | xargs node_modules/.bin/biome lint
-
-  # Re-add any files that biome formatted
-  echo "$STAGED" | xargs git add --
+  echo "$LINT_STAGED" | xargs node_modules/.bin/biome lint
 fi
 
 echo "Running docs:claims-check..."

@@ -1,9 +1,12 @@
 # SZL Holdings — Source of Truth
 
-> **Canonical public metrics registry.** Every README, website, deck, and
-> compliance document must take quantitative claims from this file and
-> `audit/source-of-truth.json`. A value without reproducible evidence is
-> **UNVERIFIED**, not estimated.
+> **Canonical contextual metrics registry.** Every README, website, deck, and
+> compliance document must take quantitative claims from this file,
+> `audit/source-of-truth.json`, and the machine-generated
+> `artifacts/SOURCE_OF_TRUTH.json`. The generated artifact is authoritative for
+> overlapping current metrics; this registry may retain separately defined
+> source-tree and locked-kernel measurements. A value without reproducible
+> evidence is **UNVERIFIED**, not estimated.
 
 **Registry version:** 2.0.0
 
@@ -36,7 +39,7 @@ validator recomputes them from whichever commit is checked out.
 | DB migrations (SQL files) | **149** | Tracked `lib/db/drizzle/*.sql` files; duplicate sequence numbers may exist |
 | API route source files | **43** | Non-test files under `apps/`, `services/`, and `artifacts/api-server/` containing a detected Express route declaration |
 | API handler declarations | **306** | Static non-test HTTP method declarations on `app`, `router`, and named Express Router receivers in the current runtime roots |
-| CI workflows | **44** | Tracked `.github/workflows/*.yml` and `*.yaml`, including the truth-lock workflow |
+| CI workflows | **45** | Tracked `.github/workflows/*.yml` and `*.yaml`, including both truth workflows |
 | Environment variables (in `.env.example`) | **238** | Lines matching `^[A-Z_]+=` |
 
 These are source-tree measurements. They do not by themselves prove that a

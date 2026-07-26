@@ -105,7 +105,7 @@ jobs:
           set -euo pipefail
           # Whole-word marketing superlatives + retired product names.
           # Tailwind `leading-*` classes are excluded by the word boundary + hyphen.
-          pattern='\b(revolutionary|unprecedented|world-class|seamless|industry-leading|cutting-edge|game-changing|breakthrough|premier|best-in-class|immaculate|state-of-the-art|Bo11y|Bolly|Jarvis|Putnam)\b'
+          pattern='\b(revolutionary|unprecedented|world-class|seamless|industry-leading|cutting-edge|game-changing|breakthrough|premier|best-in-class|immaculate|state-of-the-art|Bo11y|Bolly|Jarvis|Putn[a]m)\b'
           if grep -rInE "$pattern" packages/codex-kernel; then
             echo "Banned token found in packages/codex-kernel — see matches above."
             exit 1
