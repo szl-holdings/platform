@@ -4,6 +4,10 @@
     "author": "Opus 4.8 (Dev3 \u2014 Rosie ingest + HF assets instill)",
     "generated": "2026-06-08",
     "hf_org": "SZLHOLDINGS",
+    "evidence_label": "HISTORICAL",
+    "counts_scope": "TRACKED_DECLARATIONS_NOT_LIVE_HUB",
+    "live_catalog_snapshot": "artifacts/huggingface-public-catalog.snapshot.json",
+    "counts_note": "These counts describe entries in this historical design manifest. They are not current public Hugging Face inventory counts.",
     "resolve_pattern_dataset": "https://huggingface.co/datasets/SZLHOLDINGS/<repo>/resolve/main/<path>",
     "resolve_pattern_model": "https://huggingface.co/SZLHOLDINGS/<repo>/resolve/main/<path>",
     "counts": {
@@ -12,21 +16,10 @@
       "collections": 14
     },
     "doctrine": {
-      "locked_formulas": [
-        "F1",
-        "F11",
-        "F12",
-        "F18",
-        "F19"
-      ],
+      "locked_formulas": ["F1", "F11", "F12", "F18", "F19"],
       "lambda": "Conjecture 1",
       "slsa": "L1 honest; L2 build-attestation present; L2-verified/L3=roadmap",
-      "banned_codenames_user_visible": [
-        "amaru",
-        "sentra",
-        "rosie",
-        "jarvis"
-      ],
+      "banned_codenames_user_visible": ["amaru", "sentra", "rosie", "jarvis"],
       "runtime_cdn": 0
     },
     "placement_guides": [
@@ -207,9 +200,7 @@
       "what": "Why-we-lead narrative deck / competitive positioning corpus.",
       "a11oy": "What We Claim (honest)",
       "killinchu": "About",
-      "resolve": [
-        "https://huggingface.co/datasets/SZLHOLDINGS/why-we-lead/resolve/main/README.md"
-      ],
+      "resolve": ["https://huggingface.co/datasets/SZLHOLDINGS/why-we-lead/resolve/main/README.md"],
       "wired": "NEW (instill helper, honest narrative source)"
     },
     "ouroboros-arxiv-preprint": {
@@ -225,9 +216,7 @@
       "what": "Chart/figure assets for decks & dashboards.",
       "a11oy": "Business Observability (business)",
       "killinchu": "MELT charts",
-      "resolve": [
-        "https://huggingface.co/datasets/SZLHOLDINGS/szl-charts/resolve/main/README.md"
-      ],
+      "resolve": ["https://huggingface.co/datasets/SZLHOLDINGS/szl-charts/resolve/main/README.md"],
       "wired": "asset-reference"
     },
     "szl-artifacts": {
@@ -313,9 +302,7 @@
       "what": "Org-level meta dataset (org card, 2 files).",
       "a11oy": "\u2014",
       "killinchu": "\u2014",
-      "resolve": [
-        "https://huggingface.co/datasets/SZLHOLDINGS/SZLHOLDINGS/resolve/main/README.md"
-      ],
+      "resolve": ["https://huggingface.co/datasets/SZLHOLDINGS/SZLHOLDINGS/resolve/main/README.md"],
       "wired": "org-meta"
     }
   },
@@ -324,27 +311,21 @@
       "what": "a11oy v19 substrate model artifacts (36 files) \u2014 the governed-substrate model package.",
       "a11oy": "Model Router (llm/modelatlas) / Command Center",
       "killinchu": "Model Atlas",
-      "resolve": [
-        "https://huggingface.co/SZLHOLDINGS/a11oy-v19-substrate/resolve/main/README.md"
-      ],
+      "resolve": ["https://huggingface.co/SZLHOLDINGS/a11oy-v19-substrate/resolve/main/README.md"],
       "wired": "NEW (instill helper, Model Atlas card)"
     },
     "szl-papers": {
       "what": "szl-papers model repo (academic corpus / preprint lineage, 2 files).",
       "a11oy": "Knowledge Ontology (ontology) / What We Claim (honest)",
       "killinchu": "About",
-      "resolve": [
-        "https://huggingface.co/SZLHOLDINGS/szl-papers/resolve/main/README.md"
-      ],
+      "resolve": ["https://huggingface.co/SZLHOLDINGS/szl-papers/resolve/main/README.md"],
       "wired": "citation-reference"
     },
     "SZLHOLDINGS": {
       "what": "Org-level meta model (org card).",
       "a11oy": "\u2014",
       "killinchu": "\u2014",
-      "resolve": [
-        "https://huggingface.co/SZLHOLDINGS/SZLHOLDINGS/resolve/main/README.md"
-      ],
+      "resolve": ["https://huggingface.co/SZLHOLDINGS/SZLHOLDINGS/resolve/main/README.md"],
       "wired": "org-meta"
     }
   },

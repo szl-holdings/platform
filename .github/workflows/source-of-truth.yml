@@ -2,6 +2,8 @@ name: Source of Truth
 
 on:
   workflow_dispatch:
+  schedule:
+    - cron: '17 6 * * *'
   pull_request:
     branches: [main]
     paths:
@@ -9,7 +11,10 @@ on:
       - 'audit/README.md'
       - 'audit/source-of-truth.json'
       - 'docs/GLOSSARY.md'
+      - 'docs/operations/hugging-face-catalog-drift.md'
       - 'scripts/audit/validate-source-of-truth.js'
+      - 'tools/hf-catalog/**'
+      - 'replit-sync/HF_ASSET_MANIFEST.json'
       - '.github/workflows/**'
       - '.env.example'
       - 'apps/**'
@@ -25,7 +30,10 @@ on:
       - 'audit/README.md'
       - 'audit/source-of-truth.json'
       - 'docs/GLOSSARY.md'
+      - 'docs/operations/hugging-face-catalog-drift.md'
       - 'scripts/audit/validate-source-of-truth.js'
+      - 'tools/hf-catalog/**'
+      - 'replit-sync/HF_ASSET_MANIFEST.json'
       - '.github/workflows/**'
       - '.env.example'
       - 'apps/**'
@@ -45,6 +53,7 @@ concurrency:
 jobs:
   validate:
     name: Validate canonical metrics and vocabulary
+    if: github.event_name != 'schedule'
     runs-on: ubuntu-latest
     timeout-minutes: 5
     steps:
@@ -53,3 +62,30 @@ jobs:
         with:
           node-version: '24'
       - run: node scripts/audit/validate-source-of-truth.js
+      - name: Test Hugging Face cursor pagination and snapshot invariants
+        run: node --test tools/hf-catalog/catalog.test.mjs
+      - name: Validate the tracked Hugging Face snapshot without network access
+        run: node tools/hf-catalog/catalog.mjs --check
+
+  hf-catalog-advisory:
+    name: Compare the live Hugging Face catalog
+    if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version: '24'
+      - name: Test cursor pagination and snapshot invariants
+        run: node --test tools/hf-catalog/catalog.test.mjs
+      - name: Compare live asset IDs with the tracked snapshot
+        continue-on-error: true
+        run: |
+          set -o pipefail
+          node tools/hf-catalog/catalog.mjs --probe-live --format markdown \
+            | tee -a "$GITHUB_STEP_SUMMARY"
+      - name: Record advisory boundary
+        run: |
+          echo "Catalog drift or upstream unavailability is advisory and does not fail product CI." \
+            >> "$GITHUB_STEP_SUMMARY"
