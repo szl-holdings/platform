@@ -61,7 +61,10 @@ export function decodeDssePayload(envelope) {
   }
 }
 
-export function verifyDsseEnvelope(envelope, { publicKeyPem, expectedFingerprint } = {}) {
+export function verifyDsseEnvelope(
+  envelope,
+  { publicKeyPem, expectedFingerprint, expectedPayloadType } = {},
+) {
   const checks = [];
   try {
     if (!envelope || typeof envelope !== 'object' || Array.isArray(envelope)) {
@@ -69,6 +72,11 @@ export function verifyDsseEnvelope(envelope, { publicKeyPem, expectedFingerprint
     }
     if (typeof envelope.payloadType !== 'string' || !envelope.payloadType) {
       throw new TypeError('payloadType must be a non-empty string');
+    }
+    if (expectedPayloadType && envelope.payloadType !== expectedPayloadType) {
+      throw new TypeError(
+        `payloadType must be ${expectedPayloadType}; received ${envelope.payloadType}`,
+      );
     }
     const payload = decodeBase64Strict(envelope.payload, 'payload');
     const signatures = envelope.signatures;

@@ -3,8 +3,8 @@
   "version": "0.1.0",
   "description": "Offline DSSE receipt verification and fail-closed SZL vertical conformance.",
   "type": "module",
-  "private": false,
-  "license": "Apache-2.0",
+  "private": true,
+  "license": "LicenseRef-SZL-Proprietary",
   "bin": {
     "szl-verify": "./src/verify-cli.mjs",
     "szl-conformance": "./src/cli.mjs"

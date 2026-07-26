@@ -16,13 +16,17 @@ repository visibility.
 
 ## Seven gates
 
-1. A sequence of DSSE envelopes forms a valid Khipu parent-hash chain with an
+1. A sequence of fresh, unique, commit-bound DSSE envelopes forms a valid Khipu
+   parent-hash chain rooted at `a11oy`, terminating at the target, with an
    adjacent `a11oy -> target` boundary.
 2. `/healthz`, `/version`, and `/evidence` return HTTP 200, and `/version.gitSha`
    equals the expected deployed commit.
 3. The evidence set references a receipt whose decision is exactly `DENY`.
-4. At least one current OpenTelemetry GenAI or MCP semantic-convention span is
-   present; deprecated `gen_ai.system` does not qualify.
+4. At least one fresh reported OpenTelemetry GenAI or MCP
+   semantic-convention span structure includes valid trace and span IDs plus
+   timestamps; deprecated `gen_ai.system` does not qualify. This proves the
+   evidence payload has the expected reported structure. It does **not** prove
+   collector export, backend ingestion, or end-to-end trace availability.
 5. Every receipt verifies offline against a fingerprint-pinned Ed25519 key, and
    a tampered receipt fails.
 6. The README declares LIVE, MODELED, or PLANNED above the fold and cites
@@ -41,6 +45,11 @@ Each surface manifest names four environment variables:
 
 The public key is not secret. The separate fingerprint is a trust anchor that
 prevents a self-signed replacement key from passing conformance.
+
+The runner accepts HTTPS deployment origins only. Plain HTTP is limited to
+loopback testing. Credentials, paths, query strings, fragments, private
+addresses, link-local addresses, and hostnames that resolve to private or
+link-local addresses fail closed. Each request has a bounded timeout.
 
 ## Current target disposition
 

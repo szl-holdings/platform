@@ -2,6 +2,14 @@
 import { readFile } from 'node:fs/promises';
 import { verifyDsseFile } from './verify.mjs';
 
+function writeStdout(value) {
+  process.stdout.write(`${value}\n`);
+}
+
+function writeStderr(value) {
+  process.stderr.write(`${value}\n`);
+}
+
 function parseArgs(argv) {
   const args = { offline: false, json: false };
   for (let index = 0; index < argv.length; index += 1) {
@@ -9,6 +17,7 @@ function parseArgs(argv) {
     if (value === '--file') args.file = argv[++index];
     else if (value === '--public-key') args.publicKey = argv[++index];
     else if (value === '--expected-fingerprint') args.expectedFingerprint = argv[++index];
+    else if (value === '--expected-payload-type') args.expectedPayloadType = argv[++index];
     else if (value === '--offline') args.offline = true;
     else if (value === '--json') args.json = true;
     else throw new Error(`unknown argument: ${value}`);
@@ -24,11 +33,12 @@ try {
   const result = await verifyDsseFile(args.file, {
     publicKeyPem,
     expectedFingerprint: args.expectedFingerprint,
+    expectedPayloadType: args.expectedPayloadType,
   });
   if (args.json) {
-    console.log(JSON.stringify(result, null, 2));
+    writeStdout(JSON.stringify(result, null, 2));
   } else {
-    console.log(
+    writeStdout(
       result.valid
         ? `VERIFIED ${result.payloadHash} trust=${result.trust}`
         : `FAILED ${result.error}`,
@@ -36,6 +46,6 @@ try {
   }
   process.exitCode = result.valid ? 0 : 1;
 } catch (error) {
-  console.error(`Usage error: ${error instanceof Error ? error.message : String(error)}`);
+  writeStderr(`Usage error: ${error instanceof Error ? error.message : String(error)}`);
   process.exitCode = 2;
 }
