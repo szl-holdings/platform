@@ -47,6 +47,7 @@ export function installHooks({
   cwd = process.cwd(),
   gitExecutable = process.env.GIT_EXECUTABLE ?? 'git',
   logger = console,
+  fileSystem = { chmodSync, copyFileSync, mkdirSync, writeFileSync },
 } = {}) {
   const hooksPath = gitOutput(gitExecutable, cwd, ['rev-parse', '--git-path', 'hooks']);
   const repoRoot = gitOutput(gitExecutable, cwd, ['rev-parse', '--show-toplevel']);
@@ -56,14 +57,26 @@ export function installHooks({
   }
 
   const hooksDirectory = isAbsolute(hooksPath) ? hooksPath : resolve(cwd, hooksPath);
-  mkdirSync(hooksDirectory, { recursive: true });
+  try {
+    fileSystem.mkdirSync(hooksDirectory, { recursive: true });
 
-  const preCommit = resolve(hooksDirectory, 'pre-commit');
-  const prePush = resolve(hooksDirectory, 'pre-push');
-  copyFileSync(resolve(repoRoot, '.husky', 'pre-commit'), preCommit);
-  writeFileSync(prePush, PRE_PUSH_HOOK, 'utf8');
-  chmodSync(preCommit, 0o755);
-  chmodSync(prePush, 0o755);
+    const preCommit = resolve(hooksDirectory, 'pre-commit');
+    const prePush = resolve(hooksDirectory, 'pre-push');
+    fileSystem.copyFileSync(resolve(repoRoot, '.husky', 'pre-commit'), preCommit);
+    fileSystem.writeFileSync(prePush, PRE_PUSH_HOOK, 'utf8');
+    fileSystem.chmodSync(preCommit, 0o755);
+    fileSystem.chmodSync(prePush, 0o755);
+  } catch (error) {
+    const detail = error instanceof Error ? error.message : String(error);
+    logger.warn?.(
+      `setup-hooks: hook installation unavailable at ${hooksDirectory}; continuing without local hooks (${detail})`,
+    );
+    return {
+      installed: false,
+      hooksDirectory,
+      reason: 'hook-directory-unavailable',
+    };
+  }
 
   logger.log(`setup-hooks: hooks installed at ${hooksDirectory}`);
   return { installed: true, hooksDirectory };
@@ -72,11 +85,5 @@ export function installHooks({
 const isMain = process.argv[1] && import.meta.url === pathToFileURL(resolve(process.argv[1])).href;
 
 if (isMain) {
-  try {
-    installHooks();
-  } catch (error) {
-    // biome-ignore lint/suspicious/noConsole: prepare failures must identify an unusable hook installation.
-    console.error(`setup-hooks: ${error.message}`);
-    process.exitCode = 1;
-  }
+  installHooks();
 }

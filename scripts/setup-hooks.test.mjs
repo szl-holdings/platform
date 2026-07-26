@@ -1,6 +1,15 @@
 import assert from 'node:assert/strict';
 import { spawnSync } from 'node:child_process';
-import { existsSync, mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
+import {
+  chmodSync,
+  copyFileSync,
+  existsSync,
+  mkdirSync,
+  mkdtempSync,
+  readFileSync,
+  rmSync,
+  writeFileSync,
+} from 'node:fs';
 import { tmpdir } from 'node:os';
 import { isAbsolute, join, resolve } from 'node:path';
 import test from 'node:test';
@@ -100,4 +109,66 @@ test('skips safely outside a Git checkout', (t) => {
   });
 
   assert.deepEqual(result, { installed: false });
+});
+
+test('installs hooks in an external Git-configured hook directory', (t) => {
+  const root = fixture(t);
+  const checkout = join(root, 'checkout');
+  const externalHooks = join(root, 'external hooks');
+  const gitExecutable = process.env.GIT_EXECUTABLE ?? 'git';
+  mkdirSync(checkout, { recursive: true });
+  runGit(gitExecutable, checkout, ['init']);
+  runGit(gitExecutable, checkout, ['config', 'core.hooksPath', externalHooks]);
+
+  mkdirSync(join(checkout, '.husky'), { recursive: true });
+  writeFileSync(join(checkout, '.husky', 'pre-commit'), '#!/usr/bin/env sh\necho external\n');
+
+  const result = installHooks({
+    cwd: checkout,
+    gitExecutable,
+    logger: { log() {}, warn() {} },
+  });
+
+  assert.equal(result.installed, true);
+  assert.equal(resolve(result.hooksDirectory), resolve(externalHooks));
+  assert.equal(
+    readFileSync(join(externalHooks, 'pre-commit'), 'utf8'),
+    '#!/usr/bin/env sh\necho external\n',
+  );
+  assert.equal(readFileSync(join(externalHooks, 'pre-push'), 'utf8'), PRE_PUSH_HOOK);
+});
+
+test('treats an unwritable hook directory as a visible best-effort skip', (t) => {
+  const root = fixture(t);
+  const gitExecutable = process.env.GIT_EXECUTABLE ?? 'git';
+  runGit(gitExecutable, root, ['init']);
+
+  mkdirSync(join(root, '.husky'), { recursive: true });
+  writeFileSync(join(root, '.husky', 'pre-commit'), '#!/usr/bin/env sh\necho verified\n');
+
+  const warnings = [];
+  const unavailable = Object.assign(new Error('read-only hook directory'), { code: 'EROFS' });
+  const result = installHooks({
+    cwd: root,
+    gitExecutable,
+    logger: {
+      log() {},
+      warn(message) {
+        warnings.push(message);
+      },
+    },
+    fileSystem: {
+      mkdirSync() {
+        throw unavailable;
+      },
+      copyFileSync,
+      writeFileSync,
+      chmodSync,
+    },
+  });
+
+  assert.equal(result.installed, false);
+  assert.equal(result.reason, 'hook-directory-unavailable');
+  assert.match(warnings[0], /continuing without local hooks/);
+  assert.match(warnings[0], /read-only hook directory/);
 });

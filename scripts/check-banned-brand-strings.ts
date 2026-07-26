@@ -27,7 +27,7 @@
 import { spawnSync } from 'node:child_process';
 import { existsSync, readFileSync, writeFileSync } from 'node:fs';
 import { extname, join, resolve } from 'node:path';
-import { normalizePortablePath, portableRelativePath } from './brand-paths.ts';
+import { type TrackedPortablePath, trackedPortablePath } from './brand-paths.ts';
 
 const ROOT = resolve(import.meta.dirname ?? process.cwd(), '..');
 const VERBOSE = process.argv.includes('--verbose');
@@ -111,15 +111,16 @@ interface Violation {
   snippet: string;
 }
 
-function scanFile(absPath: string): Violation[] {
-  const rel = portableRelativePath(ROOT, absPath);
+function scanFile(file: TrackedPortablePath): Violation[] {
+  const rel = file.policyRelativePath;
   if (isFileAllowlisted(rel)) return [];
 
   let content: string;
   try {
-    content = readFileSync(absPath, 'utf8');
-  } catch {
-    return [];
+    content = readFileSync(file.absolutePath, 'utf8');
+  } catch (error) {
+    const detail = error instanceof Error ? error.message : String(error);
+    throw new Error(`Unable to read tracked source file "${file.rawRelativePath}": ${detail}`);
   }
 
   const lines = content.split('\n');
@@ -153,7 +154,7 @@ function scanFile(absPath: string): Violation[] {
   return violations;
 }
 
-function trackedSourceFiles(): string[] {
+function trackedSourceFiles(): TrackedPortablePath[] {
   const gitArgs = CHANGED_FROM
     ? [
         'diff',
@@ -182,10 +183,9 @@ function trackedSourceFiles(): string[] {
   return result.stdout
     .split('\0')
     .filter(Boolean)
-    .map(normalizePortablePath)
-    .filter((rel) => SCAN_EXTENSIONS.has(extname(rel)))
-    .filter((rel) => !isFileAllowlisted(rel))
-    .map((rel) => join(ROOT, rel));
+    .map((rawPath) => trackedPortablePath(ROOT, rawPath))
+    .filter((file) => SCAN_EXTENSIONS.has(extname(file.policyRelativePath)))
+    .filter((file) => !isFileAllowlisted(file.policyRelativePath));
 }
 
 const allFiles = trackedSourceFiles();

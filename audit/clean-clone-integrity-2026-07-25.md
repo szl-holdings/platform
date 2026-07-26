@@ -11,6 +11,14 @@ repository's normal install and typecheck entrypoints.
 This workcell is limited to portable clean-clone integrity. It does not claim to close
 the broader estate release gate.
 
+## Operator authorization
+
+The active task explicitly authorizes consolidating and removing stale duplicates
+across the estate. This workcell applies that authorization narrowly: it removes only
+the case-colliding lowercase `.github/pull_request_template.md` duplicate and retains
+the doctrine-rich canonical `.github/PULL_REQUEST_TEMPLATE.md`. No other template or
+history is removed.
+
 ## Patch
 
 - Keep the doctrine-rich uppercase pull-request template and remove its case-only
@@ -37,17 +45,30 @@ the broader estate release gate.
 - Keep the pre-commit hook from invoking Oxlint when a change contains only file
   types that Oxlint does not support.
 - Run clean-clone guards on Ubuntu and Windows before CI lint and typecheck jobs.
+- Include staged deletions in the documentation-claims pre-commit trigger so removing
+  a schema, route, or claim-bearing document cannot bypass the claims check.
+- Treat hook installation as visible best-effort setup when Git resolves a read-only
+  or externally managed hooks directory; package installation continues after an
+  explicit warning instead of failing for optional local hooks.
+- Preserve each raw NUL-delimited Git path for filesystem access and use a separate
+  NFC/slash-normalized representation only for policy comparisons and reporting.
 
 ## Verification
 
 Verified locally on Windows with Node.js 24.14.0 and pnpm 10.26.1:
 
-- `pnpm install --frozen-lockfile`: PASS across 197 workspace projects after the
+- `pnpm install --frozen-lockfile`: PASS across 198 workspace projects after the
   portability patch.
 - Dependency-free clone-guard suite: PASS, 13/13 tests, including a real linked
   worktree with spaces in both checkout paths.
-- Root `verify:clean-clone`: PASS, 11/11 root guard tests and 9,373 portable
+- Root `verify:clean-clone`: PASS, 15/15 root guard tests and 9,387 portable
   tracked paths.
+- Focused follow-up regressions: PASS, 10/10 tests covering claims-input
+  deletion detection, external and unavailable hook directories, and raw
+  Unicode Git paths.
+- Normalized tracked-source `brand:check`: PASS.
+- Changed-file banned-brand check from the `origin/main` merge base: PASS with
+  no new violations beyond the audit baseline.
 - `@szl-holdings/api-spec` typecheck: PASS.
 - `@szl-holdings/api-spec` tests: PASS, 2/2.
 - `@szl-holdings/api-spec` committed-client presence gate: PASS.
@@ -61,7 +82,7 @@ Verified locally on Windows with Node.js 24.14.0 and pnpm 10.26.1:
 - Clean-clone case-collision guard: PASS after staging the final tracked path set.
 - `git diff --check`: PASS.
 
-The full repository typecheck completed 144 of 159 scheduled tasks before failing in
+The full repository typecheck completed 165 of 178 scheduled tasks before failing in
 the existing `@szl-holdings/workflow-engine` dependency graph. The ten diagnostics are
 all in untouched adapter files under `lib/services/src/adapters/` (`misp-taxii.ts`,
 `new-relic.ts`, and `nvd.ts`) where `unknown` values are assigned to typed response

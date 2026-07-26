@@ -27,8 +27,8 @@ import { registry } from '../packages/brand-registry/src/index.ts';
 import {
   isFrontendPortablePath,
   isIgnoredPortablePath,
-  normalizePortablePath,
-  portableRelativePath,
+  type TrackedPortablePath,
+  trackedPortablePath,
 } from './brand-paths.ts';
 
 const __dirname = fileURLToPath(new URL('.', import.meta.url));
@@ -177,19 +177,7 @@ const IGNORE_DIR_NAMES = new Set([
   'playwright-report',
 ]);
 
-function isIgnored(fullPath: string): boolean {
-  return isIgnoredPortablePath(
-    portableRelativePath(ROOT, fullPath),
-    IGNORE_PATHS_EXACT,
-    IGNORE_DIR_NAMES,
-  );
-}
-
-function isFrontendSource(fullPath: string): boolean {
-  return isFrontendPortablePath(portableRelativePath(ROOT, fullPath));
-}
-
-function trackedSourceFiles(): string[] {
+function trackedSourceFiles(): TrackedPortablePath[] {
   const gitExecutable = process.env.GIT_EXECUTABLE ?? 'git';
   const result = spawnSync(
     gitExecutable,
@@ -210,10 +198,12 @@ function trackedSourceFiles(): string[] {
   return result.stdout
     .split('\0')
     .filter(Boolean)
-    .map(normalizePortablePath)
-    .filter((relativePath) => SOURCE_EXTENSIONS.has(extname(relativePath)))
-    .map((relativePath) => join(ROOT, relativePath))
-    .filter((fullPath) => !isIgnored(fullPath));
+    .map((rawPath) => trackedPortablePath(ROOT, rawPath))
+    .filter((file) => SOURCE_EXTENSIONS.has(extname(file.policyRelativePath)))
+    .filter(
+      (file) =>
+        !isIgnoredPortablePath(file.policyRelativePath, IGNORE_PATHS_EXACT, IGNORE_DIR_NAMES),
+    );
 }
 
 // ---------------------------------------------------------------------------
@@ -226,15 +216,16 @@ interface Violation {
   message: string;
 }
 
-function scanFile(filePath: string): Violation[] {
+function scanFile(file: TrackedPortablePath): Violation[] {
   const violations: Violation[] = [];
-  const rel = portableRelativePath(ROOT, filePath);
-  const frontend = isFrontendSource(filePath);
+  const rel = file.policyRelativePath;
+  const frontend = isFrontendPortablePath(rel);
   let content: string;
   try {
-    content = readFileSync(filePath, 'utf8');
-  } catch {
-    return violations;
+    content = readFileSync(file.absolutePath, 'utf8');
+  } catch (error) {
+    const detail = error instanceof Error ? error.message : String(error);
+    throw new Error(`Unable to read tracked brand source "${file.rawRelativePath}": ${detail}`);
   }
 
   const lines = content.split('\n');

@@ -9,7 +9,7 @@
     "lint": "biome lint .",
     "lint:ci": "oxlint . && biome lint --reporter=github . && pnpm run check:env-coverage",
     "check:env-coverage": "tsx scripts/check-env-coverage.ts",
-    "verify:clean-clone": "node scripts/check-clean-clone.mjs && node --test scripts/check-package-manager.test.mjs scripts/check-clean-clone.test.mjs scripts/setup-hooks.test.mjs scripts/brand-paths.test.ts",
+    "verify:clean-clone": "node scripts/check-clean-clone.mjs && node --test scripts/check-package-manager.test.mjs scripts/check-clean-clone.test.mjs scripts/setup-hooks.test.mjs scripts/pre-commit-claims.test.mjs scripts/brand-paths.test.ts",
     "check:env-coverage:strict": "tsx scripts/check-env-coverage.ts --strict",
     "check:nexus-scope": "tsx scripts/check-nexus-scope.ts",
     "lint:copy": "bash scripts/lint-copy.sh",

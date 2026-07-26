@@ -1,4 +1,13 @@
-import { relative } from 'node:path';
+import { join, relative } from 'node:path';
+
+export interface TrackedPortablePath {
+  /** Exact path bytes decoded from Git output. Use only for filesystem access. */
+  rawRelativePath: string;
+  /** NFC/slash-normalized path. Use only for policy comparisons and reporting. */
+  policyRelativePath: string;
+  /** Filesystem path derived from the exact Git output, never from the normalized policy path. */
+  absolutePath: string;
+}
 
 export function normalizePortablePath(value: string): string {
   return value.replaceAll('\\', '/').normalize('NFC');
@@ -6,6 +15,14 @@ export function normalizePortablePath(value: string): string {
 
 export function portableRelativePath(root: string, fullPath: string): string {
   return normalizePortablePath(relative(root, fullPath));
+}
+
+export function trackedPortablePath(root: string, rawRelativePath: string): TrackedPortablePath {
+  return {
+    rawRelativePath,
+    policyRelativePath: normalizePortablePath(rawRelativePath),
+    absolutePath: join(root, rawRelativePath),
+  };
 }
 
 export function isIgnoredPortablePath(
