@@ -49,10 +49,33 @@ export function installHooks({
   logger = console,
   fileSystem = { chmodSync, copyFileSync, mkdirSync, writeFileSync },
 } = {}) {
-  const hooksPath = gitOutput(gitExecutable, cwd, ['rev-parse', '--git-path', 'hooks']);
   const repoRoot = gitOutput(gitExecutable, cwd, ['rev-parse', '--show-toplevel']);
-  if (!hooksPath || !repoRoot) {
+  if (!repoRoot) {
     logger.log('setup-hooks: not a git repository, skipping hook installation');
+    return { installed: false };
+  }
+
+  const configuredHooksPath = gitOutput(gitExecutable, cwd, [
+    'config',
+    '--path',
+    '--get',
+    'core.hooksPath',
+  ]);
+  if (configuredHooksPath) {
+    const configuredDirectory = isAbsolute(configuredHooksPath)
+      ? configuredHooksPath
+      : resolve(cwd, configuredHooksPath);
+    logger.log(`setup-hooks: preserving configured core.hooksPath at ${configuredDirectory}`);
+    return {
+      installed: false,
+      hooksDirectory: configuredDirectory,
+      reason: 'configured-hooks-path-preserved',
+    };
+  }
+
+  const hooksPath = gitOutput(gitExecutable, cwd, ['rev-parse', '--git-path', 'hooks']);
+  if (!hooksPath) {
+    logger.log('setup-hooks: Git hooks directory is unavailable, skipping hook installation');
     return { installed: false };
   }
 

@@ -111,7 +111,7 @@ test('skips safely outside a Git checkout', (t) => {
   assert.deepEqual(result, { installed: false });
 });
 
-test('installs hooks in an external Git-configured hook directory', (t) => {
+test('preserves hooks in an externally configured core.hooksPath', (t) => {
   const root = fixture(t);
   const checkout = join(root, 'checkout');
   const externalHooks = join(root, 'external hooks');
@@ -122,6 +122,9 @@ test('installs hooks in an external Git-configured hook directory', (t) => {
 
   mkdirSync(join(checkout, '.husky'), { recursive: true });
   writeFileSync(join(checkout, '.husky', 'pre-commit'), '#!/usr/bin/env sh\necho external\n');
+  mkdirSync(externalHooks, { recursive: true });
+  writeFileSync(join(externalHooks, 'pre-commit'), '#!/usr/bin/env sh\necho user-pre-commit\n');
+  writeFileSync(join(externalHooks, 'pre-push'), '#!/usr/bin/env sh\necho user-pre-push\n');
 
   const result = installHooks({
     cwd: checkout,
@@ -129,13 +132,17 @@ test('installs hooks in an external Git-configured hook directory', (t) => {
     logger: { log() {}, warn() {} },
   });
 
-  assert.equal(result.installed, true);
+  assert.equal(result.installed, false);
+  assert.equal(result.reason, 'configured-hooks-path-preserved');
   assert.equal(resolve(result.hooksDirectory), resolve(externalHooks));
   assert.equal(
     readFileSync(join(externalHooks, 'pre-commit'), 'utf8'),
-    '#!/usr/bin/env sh\necho external\n',
+    '#!/usr/bin/env sh\necho user-pre-commit\n',
   );
-  assert.equal(readFileSync(join(externalHooks, 'pre-push'), 'utf8'), PRE_PUSH_HOOK);
+  assert.equal(
+    readFileSync(join(externalHooks, 'pre-push'), 'utf8'),
+    '#!/usr/bin/env sh\necho user-pre-push\n',
+  );
 });
 
 test('treats an unwritable hook directory as a visible best-effort skip', (t) => {
