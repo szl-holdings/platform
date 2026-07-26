@@ -1,0 +1,23 @@
+{
+  "name": "@szl/verify",
+  "version": "0.1.0",
+  "description": "Offline DSSE receipt verification and fail-closed SZL vertical conformance.",
+  "type": "module",
+  "private": false,
+  "license": "Apache-2.0",
+  "bin": {
+    "szl-verify": "./src/verify-cli.mjs",
+    "szl-conformance": "./src/cli.mjs"
+  },
+  "exports": {
+    ".": "./src/verify.mjs",
+    "./conformance": "./src/conformance.mjs"
+  },
+  "scripts": {
+    "conformance": "node src/cli.mjs",
+    "test": "node --test src/*.test.mjs"
+  },
+  "engines": {
+    "node": ">=24"
+  }
+}

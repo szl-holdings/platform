@@ -1,7 +1,7 @@
 {
   "schema": "szl.truth/v1",
-  "generated_at": "2026-07-26T00:41:38.678Z",
-  "generated_by": "d2dee7b320a5efbdd17fa4cdcd037fd3cbbaefcb",
+  "generated_at": "2026-07-26T01:05:10.220Z",
+  "generated_by": "db6532a1c219e9ac589bf77b6039c52c47e5b5cc",
   "metrics": {
     "governed_app_manifests": {
       "value": 0,
@@ -27,7 +27,7 @@
       "source": "artifacts/mcp-e2e-test-results.json"
     },
     "pnpm_workspace_projects": {
-      "value": 197,
+      "value": 198,
       "label": "MEASURED",
       "source": "pnpm -r list --depth -1 --json"
     },

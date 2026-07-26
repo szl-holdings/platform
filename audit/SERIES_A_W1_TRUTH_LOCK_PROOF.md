@@ -52,7 +52,7 @@ secret, or external publication was changed by this patch.
 
 | Check | Result |
 |---|---|
-| `pnpm install --frozen-lockfile --ignore-scripts` | PASS — all 197 workspace projects installed |
+| `pnpm install --frozen-lockfile --ignore-scripts` | PASS — all 198 workspace projects installed |
 | `pnpm truth:generate` | PASS |
 | `pnpm truth:generate -- --verify-local` | PASS |
 | `pnpm truth:validate` | PASS |
@@ -86,7 +86,7 @@ The committed artifact reports:
 | Metric | Value | Label |
 |---|---:|---|
 | Governed app manifests meeting the health/receipt definition | 0 | MEASURED |
-| pnpm workspace projects | 197 | MEASURED |
+| pnpm workspace projects | 198 | MEASURED |
 | Runtime API endpoints | unavailable | UNAVAILABLE |
 | CI workflows | 45 | MEASURED |
 | Locked proven formulas | 8 | REPORTED |
