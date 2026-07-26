@@ -23,8 +23,8 @@ type TestMetric = {
 
 const ROOT = path.resolve(import.meta.dirname, '..', '..');
 const OUTPUT = path.join(ROOT, 'artifacts', 'SOURCE_OF_TRUTH.json');
-const OUTPUT_RELATIVE = 'artifacts/SOURCE_OF_TRUTH.json';
 export const TRUTH_SCHEMA = 'szl.truth/v1';
+export const TRUTH_GENERATOR = 'tools/truth/generate-truth.ts@szl.truth/v1';
 export const TRUTH_DOI = {
   concept: '10.5281/zenodo.19944926',
   latest: '10.5281/zenodo.20195368',
@@ -66,13 +66,10 @@ export function metricDrift(
   );
 }
 
-export function metadataDrift(
-  existing: Record<string, unknown>,
-  expectedGeneratedBy: string,
-): string[] {
+export function metadataDrift(existing: Record<string, unknown>): string[] {
   const expected: Record<string, unknown> = {
     schema: TRUTH_SCHEMA,
-    generated_by: expectedGeneratedBy,
+    generated_by: TRUTH_GENERATOR,
     doi: TRUTH_DOI,
   };
   return Object.keys(expected).filter(
@@ -95,33 +92,6 @@ async function walkFiles(start: string, predicate: (file: string) => boolean): P
     }
   }
   return output.sort();
-}
-
-function gitSha(): string {
-  try {
-    return execFileSync('git', ['rev-parse', 'HEAD'], {
-      cwd: ROOT,
-      encoding: 'utf8',
-      stdio: ['ignore', 'pipe', 'ignore'],
-    }).trim();
-  } catch {
-    return 'UNAVAILABLE';
-  }
-}
-
-function truthArtifactParent(): string {
-  try {
-    const parents = execFileSync('git', ['log', '-1', '--format=%P', '--', OUTPUT_RELATIVE], {
-      cwd: ROOT,
-      encoding: 'utf8',
-      stdio: ['ignore', 'pipe', 'ignore'],
-    })
-      .trim()
-      .split(/\s+/);
-    return parents[0] || 'UNAVAILABLE';
-  } catch {
-    return 'UNAVAILABLE';
-  }
 }
 
 async function readExisting(): Promise<Record<string, unknown> | null> {
@@ -392,7 +362,7 @@ async function main(): Promise<void> {
 
   if (VERIFY_LOCAL_MODE) {
     if (!existing) throw new Error('artifacts/SOURCE_OF_TRUTH.json is missing or invalid');
-    const metadata = metadataDrift(existing, truthArtifactParent());
+    const metadata = metadataDrift(existing);
     if (metadata.length > 0) {
       throw new Error(`truth metadata drift: ${metadata.join(', ')}`);
     }
@@ -415,7 +385,7 @@ async function main(): Promise<void> {
   const truth = {
     schema: TRUTH_SCHEMA,
     generated_at: new Date().toISOString(),
-    generated_by: gitSha(),
+    generated_by: TRUTH_GENERATOR,
     metrics: {
       ...localMetrics,
       ...remoteMetrics,

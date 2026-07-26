@@ -1,7 +1,13 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
 
-import { metadataDrift, metricDrift, TRUTH_DOI, TRUTH_SCHEMA } from './generate-truth.js';
+import {
+  metadataDrift,
+  metricDrift,
+  TRUTH_DOI,
+  TRUTH_GENERATOR,
+  TRUTH_SCHEMA,
+} from './generate-truth.js';
 import { REMOTE_METRIC_NAMES } from './truth-schema.js';
 
 const unavailable = {
@@ -52,12 +58,10 @@ test('accepts remote metrics only when all evidence objects match recomputation'
   assert.deepEqual(metricDrift(committed, recomputed, REMOTE_METRIC_NAMES), []);
 });
 
-const generatedBy = 'a'.repeat(40);
-
 function truthMetadata(): Record<string, unknown> {
   return {
     schema: TRUTH_SCHEMA,
-    generated_by: generatedBy,
+    generated_by: TRUTH_GENERATOR,
     doi: TRUTH_DOI,
   };
 }
@@ -69,16 +73,16 @@ test('rejects a committed edit to canonical DOI metadata', () => {
     latest: TRUTH_DOI.latest,
   };
 
-  assert.deepEqual(metadataDrift(committed, generatedBy), ['doi']);
+  assert.deepEqual(metadataDrift(committed), ['doi']);
 });
 
 test('rejects a committed edit to generation provenance', () => {
   const committed = truthMetadata();
-  committed.generated_by = 'b'.repeat(40);
+  committed.generated_by = 'a'.repeat(40);
 
-  assert.deepEqual(metadataDrift(committed, generatedBy), ['generated_by']);
+  assert.deepEqual(metadataDrift(committed), ['generated_by']);
 });
 
-test('accepts canonical truth metadata bound to the generating parent', () => {
-  assert.deepEqual(metadataDrift(truthMetadata(), generatedBy), []);
+test('accepts canonical generator identity independent of Git history shape', () => {
+  assert.deepEqual(metadataDrift(truthMetadata()), []);
 });

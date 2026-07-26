@@ -1,6 +1,6 @@
 # Series A W1 Truth Lock Review Tests — Proof Packet
 
-Generated: 2026-07-25
+Generated: 2026-07-26
 
 ## Context and Plan
 
@@ -19,6 +19,8 @@ The scoped plan was:
 4. Make the standard local truth gate execute live remote verification too.
 5. Bind the schema, Zenodo DOI pointers, and generation provenance to canonical
    values during verification.
+6. Scan metric claims across adjacent wrapped prose while retaining the source
+   line and respecting Markdown and code structure boundaries.
 
 ## Patch
 
@@ -28,10 +30,12 @@ The scoped plan was:
 - Improved claim diagnostics to name the unavailable canonical metric.
 - Recognized `current` and `currently` modifiers in the exact bypass form.
 - Extended `pnpm truth:check` to include remote recomputation.
-- Rejected DOI or `generated_by` edits unless provenance remains bound to the
-  parent that generated the last committed truth artifact.
-- Checked out full history in the truth workflow so the signed generating
-  parent remains independently resolvable in CI.
+- Rejected DOI or `generated_by` edits unless provenance uses the canonical,
+  versioned generator identity, independent of merge, squash, or branch history
+  shape.
+- Added adjacent-line claim scanning with exact numeric source-line mapping.
+- Kept separate table rows, list items, code/object records, and completed
+  sentences from leaking context into one another.
 
 ## Verification
 
@@ -44,7 +48,7 @@ applicable.
 | `pnpm truth:check` | PASS |
 | Local and independently sourced remote truth recomputation | PASS |
 | Truth schema and suppression-allowlist validation | PASS |
-| Focused truth tests | PASS — 24/24 |
+| Focused truth tests | PASS — 30/30 |
 | Full numeric-claim drift scan | PASS |
 | Strict documentation claims | PASS — 26/26 |
 | Biome check for changed TypeScript and `package.json` | PASS |

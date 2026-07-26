@@ -129,53 +129,109 @@ function isAllowed(relative: string, literal: string, allowlist: AllowEntry[]): 
   });
 }
 
+function claimFailuresForText(
+  relative: string,
+  text: string,
+  lineNumberForOffset: (offset: number) => number,
+  metrics: Record<string, Record<string, unknown>>,
+  allowlist: AllowEntry[],
+): string[] {
+  const failures: string[] = [];
+  if (!CLAIM_CONTEXT.test(text)) return failures;
+  const watchwords = [...text.matchAll(new RegExp(WATCHWORD_SOURCE, 'gi'))];
+  if (watchwords.length === 0) return failures;
+  for (const match of text.matchAll(NUMBER_LITERAL)) {
+    const literal = match[0];
+    const nearest = watchwords
+      .filter(
+        (watchword): watchword is WatchwordMatch =>
+          typeof watchword.index === 'number' &&
+          isMetricPair(text, match, watchword as WatchwordMatch),
+      )
+      .sort(
+        (left, right) =>
+          Math.abs(left.index - (match.index ?? 0)) - Math.abs(right.index - (match.index ?? 0)),
+      )[0];
+    if (!nearest) continue;
+    const canonical = canonicalFor(nearest[0], metrics);
+    if (!canonical) continue;
+    if (
+      canonical.value !== null &&
+      canonical.value.replaceAll(',', '') === literal.replaceAll(',', '')
+    ) {
+      continue;
+    }
+    if (!isAllowed(relative, literal, allowlist)) {
+      const lineNumber = lineNumberForOffset(match.index ?? 0);
+      if (canonical.value === null) {
+        failures.push(
+          `${relative}:${lineNumber}: hardcoded ${literal}; canonical evidence for ${canonical.name} is UNAVAILABLE`,
+        );
+      } else {
+        failures.push(
+          `${relative}:${lineNumber}: hardcoded ${literal}; canonical value for this context is ${canonical.value}`,
+        );
+      }
+    }
+  }
+  return failures;
+}
+
+function startsStructuralBlock(line: string): boolean {
+  return /^(?:#{1,6}\s|[-+*]\s|\d+[.)]\s|\||```|~~~|[{}[\]])/.test(line.trim());
+}
+
+function canJoinWrappedLines(current: string, next: string): boolean {
+  const currentTrimmed = current.trim();
+  const nextTrimmed = next.trim();
+  if (!currentTrimmed || !nextTrimmed) return false;
+  if (/[.!?]\s*$/.test(currentTrimmed)) return false;
+  if (currentTrimmed.startsWith('|') || nextTrimmed.startsWith('|')) return false;
+  if (startsStructuralBlock(nextTrimmed)) return false;
+  if (startsStructuralBlock(currentTrimmed) && /^[{}[\]]/.test(currentTrimmed)) return false;
+  return true;
+}
+
 export function claimFailuresForLines(
   relative: string,
   lines: string[],
   metrics: Record<string, Record<string, unknown>>,
   allowlist: AllowEntry[],
 ): string[] {
-  const failures: string[] = [];
+  const failures = new Set<string>();
+  const heading = /^\s*#{1,6}\s+\d+[.)]?\s+/;
+
   for (const [index, line] of lines.entries()) {
-    if (!CLAIM_CONTEXT.test(line)) continue;
-    if (/^\s*#{1,6}\s+\d+[.)]?\s+/.test(line)) continue;
-    const watchwords = [...line.matchAll(new RegExp(WATCHWORD_SOURCE, 'gi'))];
-    if (watchwords.length === 0) continue;
-    for (const match of line.matchAll(NUMBER_LITERAL)) {
-      const literal = match[0];
-      const nearest = watchwords
-        .filter(
-          (watchword): watchword is WatchwordMatch =>
-            typeof watchword.index === 'number' &&
-            isMetricPair(line, match, watchword as WatchwordMatch),
-        )
-        .sort(
-          (left, right) =>
-            Math.abs(left.index - (match.index ?? 0)) - Math.abs(right.index - (match.index ?? 0)),
-        )[0];
-      if (!nearest) continue;
-      const canonical = canonicalFor(nearest[0], metrics);
-      if (!canonical) continue;
-      if (
-        canonical.value !== null &&
-        canonical.value.replaceAll(',', '') === literal.replaceAll(',', '')
-      ) {
-        continue;
-      }
-      if (!isAllowed(relative, literal, allowlist)) {
-        if (canonical.value === null) {
-          failures.push(
-            `${relative}:${index + 1}: hardcoded ${literal}; canonical evidence for ${canonical.name} is UNAVAILABLE`,
-          );
-        } else {
-          failures.push(
-            `${relative}:${index + 1}: hardcoded ${literal}; canonical value for this context is ${canonical.value}`,
-          );
-        }
-      }
+    if (heading.test(line)) continue;
+    for (const failure of claimFailuresForText(
+      relative,
+      line,
+      () => index + 1,
+      metrics,
+      allowlist,
+    )) {
+      failures.add(failure);
     }
   }
-  return failures;
+
+  for (let index = 0; index < lines.length - 1; index += 1) {
+    const current = lines[index] ?? '';
+    const next = lines[index + 1] ?? '';
+    if (heading.test(current) || heading.test(next) || !canJoinWrappedLines(current, next))
+      continue;
+    const boundary = current.length;
+    for (const failure of claimFailuresForText(
+      relative,
+      `${current} ${next}`,
+      (offset) => (offset <= boundary ? index + 1 : index + 2),
+      metrics,
+      allowlist,
+    )) {
+      failures.add(failure);
+    }
+  }
+
+  return [...failures];
 }
 
 async function main(): Promise<void> {

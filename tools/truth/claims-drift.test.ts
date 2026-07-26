@@ -3,12 +3,20 @@ import test from 'node:test';
 
 import { type AllowEntry, claimFailuresForLines } from './claims-drift.js';
 
-function metrics(apiEndpointValue: number | null): Record<string, Record<string, unknown>> {
+function metrics(
+  apiEndpointValue: number | null,
+  packageValue = 199,
+): Record<string, Record<string, unknown>> {
   return {
     api_endpoints:
       apiEndpointValue === null
         ? { value: null, label: 'UNAVAILABLE', source: 'runtime router inventory' }
         : { value: apiEndpointValue, label: 'MEASURED', source: 'runtime router inventory' },
+    monorepo_packages: {
+      value: packageValue,
+      label: 'MEASURED',
+      source: 'pnpm recursive workspace list',
+    },
   };
 }
 
@@ -57,5 +65,87 @@ test('accepts a numeric claim that matches available canonical evidence', () => 
       [],
     ),
     [],
+  );
+});
+
+test('rejects a stale package claim split across adjacent prose lines', () => {
+  const failures = claimFailuresForLines(
+    'docs/wrapped.md',
+    ['The platform currently has 198', 'monorepo packages.'],
+    metrics(12),
+    [],
+  );
+
+  assert.deepEqual(failures, [
+    'docs/wrapped.md:1: hardcoded 198; canonical value for this context is 199',
+  ]);
+});
+
+test('retains the numeric source line when a wrapped claim puts the value second', () => {
+  const failures = claimFailuresForLines(
+    'docs/wrapped.md',
+    ['Monorepo packages total:', '198'],
+    metrics(12),
+    [],
+  );
+
+  assert.deepEqual(failures, [
+    'docs/wrapped.md:2: hardcoded 198; canonical value for this context is 199',
+  ]);
+});
+
+test('accepts a matching package claim split across adjacent prose lines', () => {
+  assert.deepEqual(
+    claimFailuresForLines(
+      'docs/wrapped.md',
+      ['The platform currently has 199', 'monorepo packages.'],
+      metrics(12),
+      [],
+    ),
+    [],
+  );
+});
+
+test('does not combine separate Markdown table rows into one claim', () => {
+  assert.deepEqual(
+    claimFailuresForLines(
+      'docs/table.md',
+      [
+        '| Monorepo packages | 199 |',
+        '| Historical package subtotal | 51 |',
+        '| API endpoints | 12 |',
+      ],
+      metrics(12),
+      [],
+    ),
+    [],
+  );
+});
+
+test('does not carry claim context across separate list items', () => {
+  assert.deepEqual(
+    claimFailuresForLines(
+      'docs/list.md',
+      [
+        '- The current monorepo uses pnpm.',
+        '- A historical subsystem contains 51 packages.',
+        '- The canonical estate has 199 packages.',
+      ],
+      metrics(12),
+      [],
+    ),
+    [],
+  );
+});
+
+test('still scans a wrapped continuation inside one list item', () => {
+  assert.deepEqual(
+    claimFailuresForLines(
+      'docs/list.md',
+      ['- The platform currently has 198', '  monorepo packages.'],
+      metrics(12),
+      [],
+    ),
+    ['docs/list.md:1: hardcoded 198; canonical value for this context is 199'],
   );
 });
