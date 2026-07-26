@@ -5,9 +5,16 @@ import {
   parseNewRelicAlertConditions,
   parseNewRelicApmResults,
   parseNewRelicErrors,
+  parseNewRelicHostCountResults,
+  parseNewRelicInfraResults,
 } from './new-relic.js';
 import { parseNvdHealth, parseNvdResponse } from './nvd.js';
-import { expectRecord, optionalNumber, UpstreamPayloadError } from './payload-validation.js';
+import {
+  expectRecord,
+  optionalNullableNumber,
+  optionalNumber,
+  UpstreamPayloadError,
+} from './payload-validation.js';
 
 describe('upstream payload boundary validation', () => {
   it('rejects non-object payload roots', () => {
@@ -89,6 +96,107 @@ describe('New Relic payloads', () => {
           apdexScore: 0.97,
         },
       ],
+    );
+  });
+
+  it('treats null NRQL aggregates as absent and preserves numeric fallbacks', () => {
+    assert.equal(optionalNullableNumber({ value: null }, 'value', 'payload'), undefined);
+    assert.throws(
+      () => optionalNullableNumber({ value: '1' }, 'value', 'payload'),
+      UpstreamPayloadError,
+    );
+    assert.throws(
+      () => optionalNullableNumber({ value: Number.NaN }, 'value', 'payload'),
+      UpstreamPayloadError,
+    );
+
+    const apmPayload = {
+      data: {
+        actor: {
+          account: {
+            nrql: {
+              results: [
+                {
+                  responseTimeMs: null,
+                  throughputRpm: null,
+                  errorRatePct: null,
+                  apdexScore: null,
+                },
+              ],
+            },
+          },
+        },
+      },
+    };
+    assert.deepEqual(parseNewRelicApmResults(apmPayload), [
+      {
+        responseTimeMs: undefined,
+        throughputRpm: undefined,
+        errorRatePct: undefined,
+        apdexScore: undefined,
+      },
+    ]);
+
+    const hostPayload = {
+      data: {
+        actor: {
+          account: {
+            nrql: { results: [{ hostCount: null, instanceCount: null }] },
+          },
+        },
+      },
+    };
+    assert.deepEqual(parseNewRelicHostCountResults(hostPayload), [
+      { hostCount: undefined, instanceCount: undefined },
+    ]);
+
+    const infraPayload = {
+      data: {
+        actor: {
+          account: {
+            nrql: {
+              results: [
+                {
+                  facet: 'host-1',
+                  cpuPct: null,
+                  memoryUsedPct: null,
+                  diskUsedPct: null,
+                  networkReceiveBytesPerSec: null,
+                  networkTransmitBytesPerSec: null,
+                  fullestDiskPct: null,
+                },
+              ],
+            },
+          },
+        },
+      },
+    };
+    assert.deepEqual(parseNewRelicInfraResults(infraPayload), [
+      {
+        facet: 'host-1',
+        cpuPct: undefined,
+        memoryUsedPct: undefined,
+        diskUsedPct: undefined,
+        networkReceiveBytesPerSec: undefined,
+        networkTransmitBytesPerSec: undefined,
+        fullestDiskPct: undefined,
+      },
+    ]);
+  });
+
+  it('rejects malformed nullable NRQL aggregate values', () => {
+    assert.throws(
+      () =>
+        parseNewRelicApmResults({
+          data: {
+            actor: {
+              account: {
+                nrql: { results: [{ responseTimeMs: '12' }] },
+              },
+            },
+          },
+        }),
+      UpstreamPayloadError,
     );
   });
 

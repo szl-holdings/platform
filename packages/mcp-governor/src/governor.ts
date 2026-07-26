@@ -14,11 +14,14 @@ import type {
 } from './types.js';
 
 export class InMemoryReplayStore implements ReplayStore {
-  private readonly consumed = new Set<string>();
+  private readonly consumed = new Map<string, number>();
 
-  async consume(tokenId: string): Promise<boolean> {
-    if (this.consumed.has(tokenId)) return false;
-    this.consumed.add(tokenId);
+  async consume(tokenId: string, expiresAt: number, nowSeconds: number): Promise<boolean> {
+    for (const [consumedTokenId, consumedUntil] of this.consumed) {
+      if (consumedUntil <= nowSeconds) this.consumed.delete(consumedTokenId);
+    }
+    if (expiresAt <= nowSeconds || this.consumed.has(tokenId)) return false;
+    this.consumed.set(tokenId, expiresAt);
     return true;
   }
 }
@@ -162,7 +165,12 @@ export class McpGovernor {
     if (decision.effect !== 'allow') return deny(decision);
 
     if (capability) {
-      const fresh = await this.replayStore.consume(capability.claims.tokenId);
+      const replayCheckAt = Math.floor(clock().getTime() / 1000);
+      const fresh = await this.replayStore.consume(
+        capability.claims.tokenId,
+        capability.claims.expiresAt,
+        replayCheckAt,
+      );
       if (!fresh) return deny(block('capability_replay'));
     }
 
@@ -194,7 +202,7 @@ export class McpGovernor {
         'after',
         'success',
         decision,
-        sha256(canonicalJson(result)),
+        sha256(canonicalJson(result === undefined ? null : result)),
         before?.receiptDigest,
       );
     } catch (error) {

@@ -6,6 +6,7 @@ import {
   optionalArray,
   optionalBoolean,
   optionalNumber,
+  optionalNullableNumber,
   optionalRecord,
   optionalString,
   UpstreamPayloadError,
@@ -190,14 +191,14 @@ function parseNrqlRows(payload: unknown, context: string): JsonRecord[] | undefi
 
 export function parseNewRelicApmResults(payload: unknown): NewRelicApmResult[] | undefined {
   return parseNrqlRows(payload, 'NerdGraph APM response')?.map((row, index) => ({
-    responseTimeMs: optionalNumber(
+    responseTimeMs: optionalNullableNumber(
       row,
       'responseTimeMs',
       `NerdGraph APM response.results[${index}]`,
     ),
-    throughputRpm: optionalNumber(row, 'throughputRpm', `NerdGraph APM response.results[${index}]`),
-    errorRatePct: optionalNumber(row, 'errorRatePct', `NerdGraph APM response.results[${index}]`),
-    apdexScore: optionalNumber(row, 'apdexScore', `NerdGraph APM response.results[${index}]`),
+    throughputRpm: optionalNullableNumber(row, 'throughputRpm', `NerdGraph APM response.results[${index}]`),
+    errorRatePct: optionalNullableNumber(row, 'errorRatePct', `NerdGraph APM response.results[${index}]`),
+    apdexScore: optionalNullableNumber(row, 'apdexScore', `NerdGraph APM response.results[${index}]`),
   }));
 }
 
@@ -205,8 +206,8 @@ export function parseNewRelicHostCountResults(
   payload: unknown,
 ): NewRelicHostCountResult[] | undefined {
   return parseNrqlRows(payload, 'NerdGraph host-count response')?.map((row, index) => ({
-    hostCount: optionalNumber(row, 'hostCount', `NerdGraph host-count response.results[${index}]`),
-    instanceCount: optionalNumber(
+    hostCount: optionalNullableNumber(row, 'hostCount', `NerdGraph host-count response.results[${index}]`),
+    instanceCount: optionalNullableNumber(
       row,
       'instanceCount',
       `NerdGraph host-count response.results[${index}]`,
@@ -219,12 +220,12 @@ export function parseNewRelicInfraResults(payload: unknown): NewRelicInfraResult
     const context = `NerdGraph infrastructure response.results[${index}]`;
     return {
       facet: optionalString(row, 'facet', context),
-      cpuPct: optionalNumber(row, 'cpuPct', context),
-      memoryUsedPct: optionalNumber(row, 'memoryUsedPct', context),
-      diskUsedPct: optionalNumber(row, 'diskUsedPct', context),
-      networkReceiveBytesPerSec: optionalNumber(row, 'networkReceiveBytesPerSec', context),
-      networkTransmitBytesPerSec: optionalNumber(row, 'networkTransmitBytesPerSec', context),
-      fullestDiskPct: optionalNumber(row, 'fullestDiskPct', context),
+      cpuPct: optionalNullableNumber(row, 'cpuPct', context),
+      memoryUsedPct: optionalNullableNumber(row, 'memoryUsedPct', context),
+      diskUsedPct: optionalNullableNumber(row, 'diskUsedPct', context),
+      networkReceiveBytesPerSec: optionalNullableNumber(row, 'networkReceiveBytesPerSec', context),
+      networkTransmitBytesPerSec: optionalNullableNumber(row, 'networkTransmitBytesPerSec', context),
+      fullestDiskPct: optionalNullableNumber(row, 'fullestDiskPct', context),
     };
   });
 }

@@ -3,7 +3,7 @@ import { createHash } from 'node:crypto';
 function normalize(value: unknown): unknown {
   if (Array.isArray(value)) return value.map((item) => normalize(item));
   if (value && typeof value === 'object') {
-    const output: Record<string, unknown> = {};
+    const output = Object.create(null) as Record<string, unknown>;
     for (const key of Object.keys(value).sort()) {
       const item = (value as Record<string, unknown>)[key];
       if (item !== undefined) output[key] = normalize(item);

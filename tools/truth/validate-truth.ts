@@ -94,10 +94,25 @@ export function validateTruth(truth: unknown, now = Date.now()): string[] {
       failures.push(`${name} must define what it measures`);
     }
 
+    const scalarShape =
+      Object.hasOwn(value, 'value') &&
+      !Object.hasOwn(value, 'passed') &&
+      !Object.hasOwn(value, 'total');
+    const testShape =
+      !Object.hasOwn(value, 'value') &&
+      Object.hasOwn(value, 'passed') &&
+      Object.hasOwn(value, 'total');
+    const expectedShape = testMetrics.has(name) ? testShape : scalarShape;
+    if (!expectedShape) {
+      failures.push(
+        `${name} must use exactly one ${testMetrics.has(name) ? 'test' : 'scalar'} evidence shape`,
+      );
+    }
+
     if (value.label === 'UNAVAILABLE') {
       const unavailable = testMetrics.has(name)
-        ? value.passed === null && value.total === null
-        : value.value === null;
+        ? testShape && value.passed === null && value.total === null
+        : scalarShape && value.value === null;
       if (!unavailable) failures.push(`${name} must use null when UNAVAILABLE`);
       if (typeof value.reason !== 'string' || value.reason.trim().length === 0) {
         failures.push(`${name} must explain why it is UNAVAILABLE`);
@@ -105,15 +120,15 @@ export function validateTruth(truth: unknown, now = Date.now()): string[] {
       continue;
     }
 
-    if (testMetrics.has(name)) {
+    if (testMetrics.has(name) && testShape) {
       if (!isCount(value.passed) || !isCount(value.total)) {
         failures.push(`${name} passed and total must be non-negative integer counts`);
       } else if (value.passed > value.total) {
         failures.push(`${name} passed cannot exceed total`);
       }
-    } else if (booleanMetrics.has(name)) {
+    } else if (booleanMetrics.has(name) && scalarShape) {
       if (typeof value.value !== 'boolean') failures.push(`${name} value must be boolean`);
-    } else if (!isCount(value.value)) {
+    } else if (!testMetrics.has(name) && scalarShape && !isCount(value.value)) {
       failures.push(`${name} value must be a non-negative integer count`);
     }
   }

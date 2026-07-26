@@ -5,11 +5,14 @@ import test from 'node:test';
 import {
   type CapabilityClaims,
   CapabilityTokenError,
+  canonicalJson,
   GovernanceDeniedError,
   type GovernanceReceipt,
   type GovernedActionEnvelope,
   type GovernedActionRequest,
+  InMemoryReplayStore,
   McpGovernor,
+  sha256,
   signCapabilityToken,
   verifyCapabilityToken,
   verifyGovernanceReceipt,
@@ -250,4 +253,30 @@ test('prevents a side effect when the before-receipt cannot be persisted', async
     /receipt store unavailable/,
   );
   assert.equal(executed, false);
+});
+
+test('binds own __proto__ keys into canonical argument digests', () => {
+  const complete = JSON.parse('{"a":1,"__proto__":{"admin":true}}') as unknown;
+  assert.notEqual(canonicalJson(complete), canonicalJson({ a: 1 }));
+  assert.equal(canonicalJson(complete), '{"__proto__":{"admin":true},"a":1}');
+});
+
+test('canonicalizes a void action result before persisting the after receipt', async () => {
+  const receipts: GovernanceReceipt[] = [];
+  const governor = createGovernor(receipts);
+  const outcome = await governor.run(request(), async () => undefined);
+  assert.equal(outcome.result, undefined);
+  assert.equal(receipts.length, 2);
+  assert.equal(receipts[1]?.phase, 'after');
+  assert.equal(receipts[1]?.outcome, 'success');
+  assert.equal(receipts[1]?.resultDigest, sha256(canonicalJson(null)));
+});
+
+test('expires replay entries and rejects already-expired inserts', async () => {
+  const store = new InMemoryReplayStore();
+  assert.equal(await store.consume('cap-1', 100, 99), true);
+  assert.equal(await store.consume('cap-1', 100, 99), false);
+  assert.equal(await store.consume('already-expired', 99, 100), false);
+  assert.equal(await store.consume('cap-2', 101, 100), true);
+  assert.equal(await store.consume('cap-1', 102, 100), true);
 });

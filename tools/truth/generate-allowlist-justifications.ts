@@ -1,7 +1,8 @@
 import { readFile, writeFile } from 'node:fs/promises';
 import path from 'node:path';
+import { fileURLToPath } from 'node:url';
 
-type Entry = {
+export type Entry = {
   file: string;
   pattern: string;
   reason: string;
@@ -184,6 +185,85 @@ function parseSet(text: string, setName: string): Entry[] {
   return entries;
 }
 
+function entryKey(entry: Pick<Entry, 'file' | 'pattern'>): string {
+  return `${entry.file}\u0000${entry.pattern}`;
+}
+
+function isInlineWhitespace(character: string | undefined): boolean {
+  return character === ' ' || character === '\t' || character === '\r';
+}
+
+function parseJustificationRow(line: string): Pick<Entry, 'file' | 'pattern'> | undefined {
+  let cursor = 0;
+  while (cursor < line.length && isInlineWhitespace(line[cursor])) cursor += 1;
+  if (line[cursor] !== '|') return undefined;
+
+  const fileEnd = line.indexOf('|', cursor + 1);
+  if (fileEnd === -1) return undefined;
+  const file = line.slice(cursor + 1, fileEnd).trim();
+  if (file !== '.gitleaks.toml' && file !== 'scripts/qa/scan-secrets.js') return undefined;
+
+  cursor = fileEnd + 1;
+  while (cursor < line.length && isInlineWhitespace(line[cursor])) cursor += 1;
+  if (line[cursor] !== '`') return undefined;
+  cursor += 1;
+
+  let pattern = '';
+  while (cursor < line.length) {
+    const character = line[cursor];
+    if (character === '\\' && cursor + 1 < line.length) {
+      pattern += character + line[cursor + 1];
+      cursor += 2;
+      continue;
+    }
+    if (character !== '`') {
+      pattern += character;
+      cursor += 1;
+      continue;
+    }
+
+    cursor += 1;
+    while (cursor < line.length && isInlineWhitespace(line[cursor])) cursor += 1;
+    if (line[cursor] !== '|') return undefined;
+    return { file, pattern: pattern.replaceAll('\\`', '`') };
+  }
+  return undefined;
+}
+
+export function validateAllowlistCoverage(entries: Entry[], document: string): string[] {
+  const failures: string[] = [];
+  const activeCounts = new Map<string, number>();
+  for (const entry of entries) {
+    const key = entryKey(entry);
+    activeCounts.set(key, (activeCounts.get(key) ?? 0) + 1);
+  }
+
+  const documentedCounts = new Map<string, number>();
+  for (const line of document.split(/\r?\n/)) {
+    const entry = parseJustificationRow(line);
+    if (!entry) continue;
+    const key = entryKey(entry);
+    documentedCounts.set(key, (documentedCounts.get(key) ?? 0) + 1);
+  }
+
+  for (const [key, count] of activeCounts) {
+    const [source, pattern] = key.split('\u0000');
+    const documented = documentedCounts.get(key) ?? 0;
+    if (documented < count) {
+      failures.push(`missing justification: ${source}: ${pattern}`);
+    } else if (documented > count) {
+      failures.push(`duplicate justification: ${source}: ${pattern}`);
+    }
+  }
+  for (const [key] of documentedCounts) {
+    if (!activeCounts.has(key)) {
+      const [source, pattern] = key.split('\u0000');
+      failures.push(`stale justification: ${source}: ${pattern}`);
+    }
+  }
+  return failures;
+}
+
 export async function buildAllowlistDocument(now = new Date()): Promise<string> {
   const gitleaksText = await readFile(GITLEAKS, 'utf8');
   const scannerText = await readFile(SCANNER, 'utf8');
@@ -212,18 +292,27 @@ ${rows.join('\n')}
 }
 
 async function main(): Promise<void> {
-  const document = await buildAllowlistDocument();
   const check = process.argv.includes('--check');
   if (check) {
-    const committed = await readFile(OUTPUT, 'utf8');
-    if (committed !== document) {
-      throw new Error(
-        'allowlist justification drift detected; run pnpm truth:allowlists and review the diff',
-      );
+    const [gitleaksText, scannerText, committed] = await Promise.all([
+      readFile(GITLEAKS, 'utf8'),
+      readFile(SCANNER, 'utf8'),
+      readFile(OUTPUT, 'utf8'),
+    ]);
+    const entries = [
+      ...parseToml(gitleaksText),
+      ...parseSet(scannerText, 'SKIP_DIRS'),
+      ...parseSet(scannerText, 'SKIP_FILES'),
+    ];
+    const failures = validateAllowlistCoverage(entries, committed);
+    if (failures.length > 0) {
+      for (const failure of failures) process.stderr.write(`allowlist coverage: ${failure}\n`);
+      process.exit(1);
     }
-    process.stdout.write('security/ALLOWLIST-JUSTIFICATIONS.md: PASS\n');
+    process.stdout.write(`allowlist coverage: PASS (${entries.length} active suppressions)\n`);
     return;
   }
+  const document = await buildAllowlistDocument();
   await writeFile(OUTPUT, document, 'utf8');
   const entries = document.split('\n').filter((line) => line.startsWith('| .')).length;
   process.stdout.write(
@@ -231,7 +320,10 @@ async function main(): Promise<void> {
   );
 }
 
-void main().catch((error: unknown) => {
-  process.stderr.write(`allowlist justification generation failed: ${String(error)}\n`);
-  process.exit(1);
-});
+const invokedPath = process.argv[1] ? path.resolve(process.argv[1]).toLowerCase() : '';
+if (invokedPath === fileURLToPath(import.meta.url).toLowerCase()) {
+  void main().catch((error: unknown) => {
+    process.stderr.write(`allowlist justification generation failed: ${String(error)}\n`);
+    process.exit(1);
+  });
+}

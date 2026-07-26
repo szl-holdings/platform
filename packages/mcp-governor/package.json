@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "private": false,
   "type": "module",
-  "description": "Fail-closed MCP capability-token, policy, and signed receipt contracts for governed tool execution.",
+  "description": "Prototype MCP capability-token, policy, and receipt contracts designed for fail-closed tool execution.",
   "files": [
     "dist",
     "README.md"

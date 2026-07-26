@@ -105,7 +105,7 @@ export type CapabilityPublicKeyResolver = (
 ) => Promise<KeyLike> | KeyLike;
 
 export interface ReplayStore {
-  consume(tokenId: string): Promise<boolean>;
+  consume(tokenId: string, expiresAt: number, nowSeconds: number): Promise<boolean>;
 }
 
 export interface McpGovernorConfig {

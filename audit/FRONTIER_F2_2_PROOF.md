@@ -23,7 +23,7 @@ converted Guardian evaluator exceptions into allow decisions.
 - Added the publication-ready workspace package `@szl/mcp-governor`.
 - Added Ed25519 capability signing and verification without a model-provider
   dependency.
-- Added a replaceable replay-store contract with a safe in-memory default.
+- Added a replaceable replay-store contract with an expiry-bounded in-memory prototype default.
 - Added signed `before`, `after`, and `blocked` receipts containing digests
   rather than raw tool arguments or results.
 - Added fail-closed policy evaluation and explicit post-receipt failure
@@ -35,10 +35,11 @@ converted Guardian evaluator exceptions into allow decisions.
 ## Test
 
 The focused suites cover token verification and expiry, policy exceptions,
-missing authority, receipt ordering and signatures, replay, risk scope,
-read-only invariants, and receipt-store failure before an effect.
+missing authority, receipt ordering and signatures, replay expiry, risk scope,
+special-key argument binding, void-result receipts, read-only invariants, and
+receipt-store failure before an effect.
 
-- `@szl/mcp-governor`: 11/11 focused tests passed.
+- `@szl/mcp-governor`: 14/14 focused tests passed.
 - `@workspace/nexus-mcp`: 3/3 fail-closed policy tests passed.
 - Both packages passed strict TypeScript checks.
 - The repository source-of-truth validator passed all 64 checks after the
