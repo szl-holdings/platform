@@ -11,6 +11,7 @@ import {
   type GovernedActionEnvelope,
   type GovernedActionRequest,
   type GovernedActionResult,
+  type GovernedToolExecutor,
   InMemoryReplayStore,
   type PolicyDecision,
   type ReplayStore,
@@ -71,17 +72,17 @@ function createGovernor(
 ): {
   run<T>(
     request: GovernedActionRequest,
-    execute: (args: unknown) => Promise<T>,
+    execute: (args: unknown, toolName: string) => Promise<T>,
   ): Promise<GovernedActionResult<T>>;
 } {
-  let activeExecutor: ((args: unknown) => Promise<unknown>) | undefined;
+  let activeExecutor: ((args: unknown, toolName: string) => Promise<unknown>) | undefined;
   const governor = new McpGovernor({
     policyEvaluator:
       options.policy ?? (async () => ({ effect: 'allow', reason: 'policy permits action' })),
     capabilityPublicKeyResolver: () => capabilityPublicKey,
-    toolExecutor: async (_toolName, args) => {
+    toolExecutor: async (toolName, args) => {
       if (!activeExecutor) throw new Error('test executor is not bound');
-      return activeExecutor(args);
+      return activeExecutor(args, toolName);
     },
     receiptSigner: { keyId: 'receipt-key-1', privateKey: receiptPrivateKey },
     receiptWriter:
@@ -408,10 +409,12 @@ test('binds policy and execution to an immutable canonical argument snapshot', a
     },
   });
 
+  const mutableRequest = request({ actionId: 'action-snapshot', args: originalArgs });
   const running = governor.run(
-    request({ actionId: 'action-snapshot', args: originalArgs }),
-    async (args) => {
+    mutableRequest,
+    async (args, toolName) => {
       const snapshot = args as typeof approvedArgs;
+      assert.equal(toolName, 'ledger.write');
       assert.equal(snapshot.amount, 10);
       assert.equal(snapshot.nested.value, 'approved');
       assert.equal(snapshot.__proto__.role, 'user');
@@ -426,10 +429,20 @@ test('binds policy and execution to an immutable canonical argument snapshot', a
   originalArgs.amount = 999;
   originalArgs.nested.value = 'mutated';
   originalArgs.__proto__.role = 'admin';
+  mutableRequest.toolName = 'ledger.delete';
+  mutableRequest.actorId = 'attacker';
+  mutableRequest.tenantId = 'attacker-tenant';
+  mutableRequest.risk = 'critical';
+  mutableRequest.mutatesState = false;
   releasePolicy();
 
   const outcome = await running;
   assert.deepEqual(outcome.result, { amount: 10, value: 'approved' });
+  assert.equal(outcome.envelope.toolName, 'ledger.write');
+  assert.equal(outcome.envelope.actorId, 'actor-1');
+  assert.equal(outcome.envelope.tenantId, 'tenant-1');
+  assert.equal(outcome.envelope.risk, 'high');
+  assert.equal(outcome.envelope.mutatesState, true);
   assert.equal(outcome.envelope.argsDigest, sha256(canonicalJson(approvedArgs)));
 });
 
@@ -500,27 +513,29 @@ test('binds error receipts to stable failure codes and messages', async () => {
   );
 });
 
-test('requires a structurally controlled tool executor', async () => {
+test('requires a callable governor-owned tool executor', async () => {
   assert.throws(
     () =>
       new McpGovernor({
         policyEvaluator: async () => ({ effect: 'allow', reason: 'policy permits action' }),
         capabilityPublicKeyResolver: () => capabilityPublicKey,
-        toolExecutor: async () => 'legacy closure',
+        toolExecutor: undefined as never,
         receiptSigner: { keyId: 'receipt-key-1', privateKey: receiptPrivateKey },
         receiptWriter: async () => undefined,
         expectedCapabilityIssuer: 'szl-control-plane',
         clock: () => NOW,
       }),
-    /toolExecutor must accept toolName and governed args/,
+    /toolExecutor must be callable/,
   );
 
   const receipts: GovernanceReceipt[] = [];
   let legacyCalled = false;
+  const executorWithDefault: GovernedToolExecutor = async (_toolName, args = {}) =>
+    (args as { amount: number }).amount;
   const governor = new McpGovernor({
     policyEvaluator: async () => ({ effect: 'allow', reason: 'policy permits action' }),
     capabilityPublicKeyResolver: () => capabilityPublicKey,
-    toolExecutor: async (_toolName, args) => (args as { amount: number }).amount,
+    toolExecutor: executorWithDefault,
     receiptSigner: { keyId: 'receipt-key-1', privateKey: receiptPrivateKey },
     receiptWriter: async (receipt) => {
       receipts.push(receipt);

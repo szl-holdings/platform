@@ -13,7 +13,8 @@ The package is designed to supply:
 - signed `before` and `after` receipts around state-changing effects;
 - signed `blocked` receipts for denied actions;
 - a governor-owned tool executor that receives only the tool name and immutable
-  canonical argument snapshot, rejecting legacy zero-argument closures;
+  canonical argument snapshot; `run` does not accept per-request execution
+  closures;
 - a read-only invariant that forbids a `read_only` action from claiming a state
   mutation; and
 - a replaceable replay store for multi-instance deployments and an expiring in-memory prototype default.

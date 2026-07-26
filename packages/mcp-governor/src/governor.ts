@@ -146,8 +146,8 @@ export class McpGovernor {
   private readonly replayStore: ReplayStore;
 
   constructor(private readonly config: McpGovernorConfig) {
-    if (typeof config.toolExecutor !== 'function' || config.toolExecutor.length < 2) {
-      throw new TypeError('toolExecutor must accept toolName and governed args');
+    if (typeof config.toolExecutor !== 'function') {
+      throw new TypeError('toolExecutor must be callable');
     }
     this.replayStore = config.replayStore ?? new InMemoryReplayStore();
   }
@@ -155,7 +155,17 @@ export class McpGovernor {
   async run<T>(request: GovernedActionRequest): Promise<GovernedActionResult<T>> {
     const clock = this.config.clock ?? (() => new Date());
     const argsSnapshot = immutableCanonicalSnapshot(request.args);
-    const envelope = createGovernedActionEnvelope({ ...request, args: argsSnapshot }, clock());
+    const requestSnapshot = Object.freeze({
+      actionId: request.actionId,
+      toolName: request.toolName,
+      actorId: request.actorId,
+      tenantId: request.tenantId,
+      risk: request.risk,
+      mutatesState: request.mutatesState,
+      args: argsSnapshot,
+      capabilityToken: request.capabilityToken,
+    });
+    const envelope = createGovernedActionEnvelope(requestSnapshot, clock());
     const receipts: GovernanceReceipt[] = [];
     let capability: VerifiedCapability | undefined;
 
@@ -189,20 +199,20 @@ export class McpGovernor {
     };
 
     const capabilityRequired =
-      request.mutatesState || (this.config.requireCapabilityForReadOnly ?? false);
+      requestSnapshot.mutatesState || (this.config.requireCapabilityForReadOnly ?? false);
     if (capabilityRequired) {
-      if (!request.capabilityToken) return deny(block('capability_token_required'));
+      if (!requestSnapshot.capabilityToken) return deny(block('capability_token_required'));
       try {
         capability = await verifyCapabilityToken(
-          request.capabilityToken,
+          requestSnapshot.capabilityToken,
           this.config.capabilityPublicKeyResolver,
           {
             now: clock(),
             expectedIssuer: this.config.expectedCapabilityIssuer,
-            actorId: request.actorId,
-            tenantId: request.tenantId,
-            toolName: request.toolName,
-            risk: request.risk,
+            actorId: requestSnapshot.actorId,
+            tenantId: requestSnapshot.tenantId,
+            toolName: requestSnapshot.toolName,
+            risk: requestSnapshot.risk,
           },
         );
       } catch (error) {
@@ -233,13 +243,13 @@ export class McpGovernor {
     }
 
     let before: GovernanceReceipt | undefined;
-    if (request.mutatesState) {
+    if (requestSnapshot.mutatesState) {
       before = await persist('before', 'pending', decision);
     }
 
     let result: T;
     try {
-      result = (await this.config.toolExecutor(request.toolName, argsSnapshot)) as T;
+      result = (await this.config.toolExecutor(envelope.toolName, argsSnapshot)) as T;
     } catch (error) {
       try {
         await persist(
