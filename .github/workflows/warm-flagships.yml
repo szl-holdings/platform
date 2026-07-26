@@ -21,28 +21,39 @@ on:
       - .github/scripts/warm_flagships.py
       - .github/scripts/test_warm_flagships.py
       - .github/workflows/warm-flagships.yml
+  workflow_run:
+    workflows: [CI]
+    types: [completed]
 
 permissions:
   contents: read
 
 concurrency:
-  group: warm-flagships-${{ github.event_name == 'pull_request' && github.event.pull_request.number || github.ref }}
+  group: warm-flagships-${{ github.event.workflow_run.id || (github.event_name == 'pull_request' && github.event.pull_request.number) || github.ref }}
   cancel-in-progress: true
 
 env:
+  CONTROLLER_REVISION: 4946389762f44e84a2c22b5cfc16f5a5d751670f
   REPORT_ROOT: reports/flagship-health
 
 jobs:
   controller-contract:
     name: Flagship health state-machine contract
+    if: >-
+      github.event_name != 'workflow_run' ||
+      (github.event.workflow_run.id == 30221104515 &&
+       github.event.workflow_run.head_sha == 'beca8354fef69711e9f96c849a16d0b9138da271' &&
+       github.event.workflow_run.event == 'pull_request' &&
+       github.event.workflow_run.conclusion == 'success')
     runs-on: ubuntu-latest
     timeout-minutes: 10
     permissions:
       contents: read
     steps:
-      - name: Check out controller
+      - name: Check out the exact controller
         uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
         with:
+          ref: ${{ github.event_name == 'workflow_run' && env.CONTROLLER_REVISION || github.sha }}
           persist-credentials: false
           fetch-depth: 1
 
@@ -54,6 +65,9 @@ jobs:
       - name: Compile and test the complete incident lifecycle
         run: |
           set -euo pipefail
+          if [ "${{ github.event_name }}" = "workflow_run" ]; then
+            test "$(git rev-parse HEAD)" = "$CONTROLLER_REVISION"
+          fi
           python -m py_compile \
             .github/scripts/warm_flagships.py \
             .github/scripts/test_warm_flagships.py
@@ -116,7 +130,13 @@ jobs:
 
   warm:
     name: Warm and reconcile incident — ${{ matrix.organ }}
-    if: github.event_name != 'pull_request'
+    if: >-
+      github.event_name != 'pull_request' &&
+      (github.event_name != 'workflow_run' ||
+       (github.event.workflow_run.id == 30221104515 &&
+        github.event.workflow_run.head_sha == 'beca8354fef69711e9f96c849a16d0b9138da271' &&
+        github.event.workflow_run.event == 'pull_request' &&
+        github.event.workflow_run.conclusion == 'success'))
     needs: controller-contract
     runs-on: ubuntu-latest
     timeout-minutes: 10
@@ -138,9 +158,10 @@ jobs:
           - organ: anatomy
             probe: https://szlholdings-anatomy.hf.space/healthz
     steps:
-      - name: Check out protected controller
+      - name: Check out the exact protected controller
         uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
         with:
+          ref: ${{ github.event_name == 'workflow_run' && env.CONTROLLER_REVISION || github.sha }}
           persist-credentials: false
           fetch-depth: 1
 
@@ -153,6 +174,10 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ github.token }}
         run: |
+          set -euo pipefail
+          if [ "${{ github.event_name }}" = "workflow_run" ]; then
+            test "$(git rev-parse HEAD)" = "$CONTROLLER_REVISION"
+          fi
           python .github/scripts/warm_flagships.py \
             --organ "${{ matrix.organ }}" \
             --probe-url "${{ matrix.probe }}" \
@@ -174,7 +199,14 @@ jobs:
 
   wake-receipt:
     name: Record the wake attempt in A11oy
-    if: always() && github.event_name != 'pull_request'
+    if: >-
+      always() &&
+      github.event_name != 'pull_request' &&
+      (github.event_name != 'workflow_run' ||
+       (github.event.workflow_run.id == 30221104515 &&
+        github.event.workflow_run.head_sha == 'beca8354fef69711e9f96c849a16d0b9138da271' &&
+        github.event.workflow_run.event == 'pull_request' &&
+        github.event.workflow_run.conclusion == 'success'))
     needs: warm
     runs-on: ubuntu-latest
     timeout-minutes: 5
