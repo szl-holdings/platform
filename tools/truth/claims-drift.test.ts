@@ -472,6 +472,21 @@ test('normalizes static JSX string expressions around claim values and nouns', (
   }
 });
 
+test('preserves semantic claim continuity across custom components and inert JSX gaps', () => {
+  for (const source of [
+    '<Text>The current platform has</Text><MetricValue>198</MetricValue><Text>monorepo packages.</Text>',
+    "<span>The current platform exposes</span>{' '}<strong>198</strong><span>API endpoints.</span>",
+    '<span>The current platform exposes</span>{/* visual gap */}<strong>198</strong><span>API endpoints.</span>',
+    '<span>The current platform supports</span><strong>198</strong><span>API endpoints.</span>',
+  ]) {
+    assert.deepEqual(claimFailuresForLines('src/Claim.tsx', [source], metrics(12), []), [
+      `src/Claim.tsx:1: hardcoded 198; canonical value for this context is ${
+        source.includes('packages') ? 199 : 12
+      }`,
+    ]);
+  }
+});
+
 test('decodes decimal and hexadecimal numeric HTML entities without losing attribution', () => {
   for (const claimText of [
     '<p>The current monorepo has &#49;&#57;&#56; packages.</p>',
@@ -479,6 +494,19 @@ test('decodes decimal and hexadecimal numeric HTML entities without losing attri
     '<p>The current monorepo has &#49&#57&#56 packages.</p>',
     '<p>The current monorepo has &#x31&#x39&#x38 packages.</p>',
     '<p>The current monorepo has １９８ packages.</p>',
+  ]) {
+    assert.deepEqual(claimFailuresForLines('docs/entities.html', [claimText], metrics(12), []), [
+      'docs/entities.html:1: hardcoded 198; canonical value for this context is 199',
+    ]);
+  }
+});
+
+test('normalizes Unicode decimal digits from raw text and numeric entities', () => {
+  for (const claimText of [
+    '<p>The current monorepo has \u0661\u0669\u0668 packages.</p>',
+    '<p>The current monorepo has \u06f1\u06f9\u06f8 packages.</p>',
+    '<p>The current monorepo has &#1633;&#1641;&#1640; packages.</p>',
+    '<p>The current monorepo has &#x661;&#x669;&#x668; packages.</p>',
   ]) {
     assert.deepEqual(claimFailuresForLines('docs/entities.html', [claimText], metrics(12), []), [
       'docs/entities.html:1: hardcoded 198; canonical value for this context is 199',
@@ -663,6 +691,27 @@ test('classifies pass/fail and success/error role nouns and adjectives', () => {
       'docs/testing.md:1: hardcoded 99; canonical value for this context is 100',
     ]);
   }
+});
+
+test('classifies plural passes and fails test roles', () => {
+  assert.deepEqual(
+    claimFailuresForLines(
+      'docs/testing.md',
+      ['The current platform reports 99 passes, 6 fails, 105 total tests.'],
+      metrics(12),
+      [],
+    ),
+    ['docs/testing.md:1: hardcoded 99; canonical value for this context is 100'],
+  );
+  assert.deepEqual(
+    claimFailuresForLines(
+      'docs/testing.md',
+      ['The current platform reports 100 passes, 5 fails, 105 total tests.'],
+      metrics(12),
+      [],
+    ),
+    [],
+  );
 });
 
 test('retains the numeric source line when a wrapped claim puts the value second', () => {
@@ -966,4 +1015,10 @@ test('decodes an encoded claim across a bounded chunk overlap', { timeout: 2_000
 
 test('uses a compact source map for multi-megabyte plain input', { timeout: 2_000 }, () => {
   assert.equal(semanticSourceSpanCount('x'.repeat(4 * 1024 * 1024)), 1);
+});
+
+test('uses a strided source map for multi-megabyte entity-dense input', { timeout: 5_000 }, () => {
+  const entity = '&#49;';
+  const source = entity.repeat(Math.ceil((4 * 1024 * 1024) / entity.length));
+  assert.equal(semanticSourceSpanCount(source), 1);
 });

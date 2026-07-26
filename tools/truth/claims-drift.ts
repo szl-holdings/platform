@@ -20,6 +20,24 @@ const MAX_BLOCK_CHARACTERS = 16_384;
 const MAX_CLAUSE_CHARACTERS = 256;
 const MAX_PAIR_DISTANCE = 256;
 const execFileAsync = promisify(execFile);
+const UNICODE_DECIMAL_ZEROES = [
+  0x30, 0x660, 0x6f0, 0x7c0, 0x966, 0x9e6, 0xa66, 0xae6, 0xb66, 0xbe6, 0xc66, 0xce6, 0xd66, 0xde6,
+  0xe50, 0xed0, 0xf20, 0x1040, 0x1090, 0x17e0, 0x1810, 0x1946, 0x19d0, 0x1a80, 0x1a90, 0x1b50,
+  0x1bb0, 0x1c40, 0x1c50, 0xa620, 0xa8d0, 0xa900, 0xa9d0, 0xa9f0, 0xaa50, 0xabf0, 0xff10, 0x104a0,
+  0x10d30, 0x11066, 0x110f0, 0x11136, 0x111d0, 0x112f0, 0x11450, 0x114d0, 0x11650, 0x116c0, 0x11730,
+  0x118e0, 0x11950, 0x11c50, 0x11d50, 0x11da0, 0x11f50, 0x16a60, 0x16ac0, 0x16b50, 0x1d7ce, 0x1d7d8,
+  0x1d7e2, 0x1d7ec, 0x1d7f6, 0x1e140, 0x1e2f0, 0x1e4f0, 0x1e950, 0x1fbf0,
+] as const;
+
+function unicodeDecimalDigitValue(character: string): number | null {
+  const codePoint = character.codePointAt(0);
+  if (codePoint === undefined) return null;
+  for (const zero of UNICODE_DECIMAL_ZEROES) {
+    const value = codePoint - zero;
+    if (value >= 0 && value <= 9) return value;
+  }
+  return null;
+}
 
 export type AllowEntry = { path: string; literal: string };
 type WatchwordMatch = RegExpMatchArray & { index: number };
@@ -33,6 +51,8 @@ type SourceMapSpan = {
   sourceStart: number;
   sourceEnd: number;
   identity: boolean;
+  decodedStride?: number;
+  sourceStride?: number;
 };
 type DecodedText = {
   text: string;
@@ -307,10 +327,10 @@ function compoundTestRoles(text: string): Map<number, TestCountRole> {
 
   const roleForWord = (word: string | undefined): TestCountRole | undefined => {
     if (!word) return undefined;
-    if (/^(?:pass|passed|passing|success|successes|successful|succeeded)$/i.test(word)) {
+    if (/^(?:pass|passes|passed|passing|success|successes|successful|succeeded)$/i.test(word)) {
       return 'passed';
     }
-    if (/^(?:fail|failed|failing|failure|failures|error|errors)$/i.test(word)) {
+    if (/^(?:fail|fails|failed|failing|failure|failures|error|errors)$/i.test(word)) {
       return 'ignored';
     }
     if (/^total$/i.test(word)) return 'total';
@@ -495,42 +515,47 @@ function claimFailuresForText(
   return failures;
 }
 
-const INLINE_FORMATTING_TAGS = new Set([
-  'a',
-  'b',
-  'code',
-  'em',
-  'i',
-  'kbd',
-  'mark',
-  'small',
-  'span',
-  'strong',
-  'sub',
-  'sup',
-]);
-
 function visibleSiblingText(text: string): string {
   return normalizeInlineMarkup(decodeNumericEntities(text).text).toLowerCase();
+}
+
+function inertMarkupGap(value: string): boolean {
+  let cursor = 0;
+  while (cursor < value.length) {
+    const whitespace = value.slice(cursor).match(/^\s+/)?.[0];
+    if (whitespace) {
+      cursor += whitespace.length;
+      continue;
+    }
+    if (value.startsWith('<!--', cursor)) {
+      const end = value.indexOf('-->', cursor + 4);
+      if (end < 0) return false;
+      cursor = end + 3;
+      continue;
+    }
+    if (value.startsWith('{/*', cursor)) {
+      const end = value.indexOf('*/}', cursor + 3);
+      if (end < 0) return false;
+      cursor = end + 3;
+      continue;
+    }
+    const expressionEnd = staticWhitespaceExpressionEnd(value, cursor);
+    if (expressionEnd !== null) {
+      cursor = expressionEnd;
+      continue;
+    }
+    return false;
+  }
+  return true;
 }
 
 function isInlineClaimContinuation(
   text: string,
   closingStart: number,
   boundaryEnd: number,
-  closingTag: string | undefined,
-  openingTag: string | undefined,
   interstitial: string,
 ): boolean {
-  if (
-    !closingTag ||
-    !openingTag ||
-    !INLINE_FORMATTING_TAGS.has(closingTag.toLowerCase()) ||
-    !INLINE_FORMATTING_TAGS.has(openingTag.toLowerCase()) ||
-    interstitial.trim()
-  ) {
-    return false;
-  }
+  if (!inertMarkupGap(interstitial)) return false;
 
   const leftOpeningEnd = text.lastIndexOf('>', Math.max(0, closingStart - 1));
   const rightOpeningEnd = text.indexOf('>', boundaryEnd);
@@ -540,15 +565,12 @@ function isInlineClaimContinuation(
   const right = visibleSiblingText(
     text.slice(rightOpeningEnd + 1, rightClosingStart < 0 ? text.length : rightClosingStart),
   );
-  const leftEndsCarrier =
-    /\b(?:are|contains?|counts?|exposes?|has|have|includes?|is|reports?|ships?|totals?)\s*[:=-]?\s*$/i.test(
-      left,
-    );
+  const leftCanContinue = /[\p{L}\p{N})\]]\s*[:=-]?\s*$/u.test(left);
   const rightStartsNumber = /^\s*\d/.test(right);
   const leftEndsNumber = /\d\s*$/.test(left);
   const metricOffset = right.search(new RegExp(WATCHWORD_SOURCE, 'i'));
   const rightStartsMetric = metricOffset >= 0 && metricOffset <= 32;
-  return (leftEndsCarrier && rightStartsNumber) || (leftEndsNumber && rightStartsMetric);
+  return (leftCanContinue && rightStartsNumber) || (leftEndsNumber && rightStartsMetric);
 }
 
 type MarkupToken = {
@@ -632,6 +654,34 @@ function nextMarkupToken(text: string, start: number): MarkupToken | null {
   return null;
 }
 
+function staticWhitespaceExpressionEnd(text: string, start: number): number | null {
+  if (text[start] !== '{') return null;
+  let cursor = start + 1;
+  while (/\s/.test(text[cursor] ?? '')) cursor += 1;
+  const quote = text[cursor];
+  if (quote !== "'" && quote !== '"') return null;
+  cursor += 1;
+  let content = '';
+  while (cursor < text.length) {
+    const character = text[cursor] ?? '';
+    if (character === '\\') {
+      const escaped = text[cursor + 1];
+      if (!escaped) return null;
+      if (![' ', 't', 'n', 'r'].includes(escaped)) return null;
+      content += escaped === ' ' ? ' ' : '\t';
+      cursor += 2;
+      continue;
+    }
+    if (character === quote) break;
+    content += character;
+    cursor += 1;
+  }
+  if (text[cursor] !== quote || !/^\s*$/.test(content)) return null;
+  cursor += 1;
+  while (/\s/.test(text[cursor] ?? '')) cursor += 1;
+  return text[cursor] === '}' ? cursor + 1 : null;
+}
+
 function nextSiblingStart(
   text: string,
   start: number,
@@ -650,6 +700,13 @@ function nextSiblingStart(
       if (commentEnd < 0) return { start: cursor, kind: 'expression' };
       cursor = commentEnd + 3;
       continue;
+    }
+    if (jsx && text[cursor] === '{') {
+      const staticWhitespaceEnd = staticWhitespaceExpressionEnd(text, cursor);
+      if (staticWhitespaceEnd !== null) {
+        cursor = staticWhitespaceEnd;
+        continue;
+      }
     }
     if (jsx && text[cursor] === '{') return { start: cursor, kind: 'expression' };
     if (text[cursor] === '<') return markupTokenAt(text, cursor);
@@ -673,18 +730,10 @@ function markupSiblingSegments(
       const opensSibling = next?.kind === 'open' || next?.kind === 'fragment-open';
       const startsExpression = next?.kind === 'expression';
       if (next && (opensSibling || startsExpression)) {
-        const openingTag = opensSibling && 'tag' in next ? next.tag : undefined;
         const interstitial = text.slice(token.end, next.start);
         if (
           startsExpression ||
-          !isInlineClaimContinuation(
-            text,
-            token.start,
-            next.start,
-            token.kind === 'close' ? token.tag : undefined,
-            openingTag,
-            interstitial,
-          )
+          !isInlineClaimContinuation(text, token.start, next.start, interstitial)
         ) {
           if (next.start > start) segments.push({ text: text.slice(start, next.start), start });
           start = next.start;
@@ -712,9 +761,15 @@ function boundedTextSegments(text: string): Array<{ text: string; start: number 
 
 function decodeNumericEntities(text: string): DecodedText {
   const pieces: string[] = [];
+  let pieceBuffer = '';
   const spans: SourceMapSpan[] = [];
   let decodedLength = 0;
   let cursor = 0;
+  const flushPieces = (): void => {
+    if (!pieceBuffer) return;
+    pieces.push(pieceBuffer);
+    pieceBuffer = '';
+  };
   const append = (
     value: string,
     sourceStart: number,
@@ -722,7 +777,8 @@ function decodeNumericEntities(text: string): DecodedText {
     identity: boolean,
   ): void => {
     if (!value) return;
-    pieces.push(value);
+    pieceBuffer += value;
+    if (pieceBuffer.length >= 8_192) flushPieces();
     const previous = spans.at(-1);
     if (
       identity &&
@@ -732,6 +788,28 @@ function decodeNumericEntities(text: string): DecodedText {
     ) {
       previous.decodedEnd += value.length;
       previous.sourceEnd = sourceEnd;
+    } else if (!identity && previous && !previous.identity) {
+      const decodedStride = previous.decodedStride ?? previous.decodedEnd - previous.decodedStart;
+      const sourceStride = previous.sourceStride ?? previous.sourceEnd - previous.sourceStart;
+      if (
+        previous.decodedEnd === decodedLength &&
+        previous.sourceEnd === sourceStart &&
+        decodedStride === value.length &&
+        sourceStride === sourceEnd - sourceStart
+      ) {
+        previous.decodedStride = decodedStride;
+        previous.sourceStride = sourceStride;
+        previous.decodedEnd += value.length;
+        previous.sourceEnd = sourceEnd;
+      } else {
+        spans.push({
+          decodedStart: decodedLength,
+          decodedEnd: decodedLength + value.length,
+          sourceStart,
+          sourceEnd,
+          identity,
+        });
+      }
     } else {
       spans.push({
         decodedStart: decodedLength,
@@ -744,7 +822,7 @@ function decodeNumericEntities(text: string): DecodedText {
     decodedLength += value.length;
   };
 
-  const expression = /&#(?:x([\da-f]+)|(\d+));?|[\uff10-\uff19]/gi;
+  const expression = /&#(?:x([\da-f]+)|(\d+));?|(?![0-9])\p{Nd}/giu;
   for (const match of text.matchAll(expression)) {
     if (typeof match.index !== 'number') continue;
     if (match.index > cursor) {
@@ -753,14 +831,24 @@ function decodeNumericEntities(text: string): DecodedText {
 
     const sourceStart = match.index;
     const sourceEnd = sourceStart + match[0].length;
-    if (/^[\uff10-\uff19]$/.test(match[0])) {
-      append(String(match[0].charCodeAt(0) - 0xff10), sourceStart, sourceEnd, true);
+    if (/^\p{Nd}$/u.test(match[0])) {
+      const digit = unicodeDecimalDigitValue(match[0]);
+      append(
+        digit === null ? match[0] : String(digit),
+        sourceStart,
+        sourceEnd,
+        match[0].length === 1,
+      );
     } else {
       const value = Number.parseInt(match[1] ?? match[2] ?? '', match[1] ? 16 : 10);
       let replacement = match[0];
       if (Number.isInteger(value) && value >= 0 && value <= 0x10ffff) {
         try {
-          const decoded = String.fromCodePoint(value);
+          const decodedCodePoint = String.fromCodePoint(value);
+          const digit = /^\p{Nd}$/u.test(decodedCodePoint)
+            ? unicodeDecimalDigitValue(decodedCodePoint)
+            : null;
+          const decoded = digit === null ? decodedCodePoint : String(digit);
           if (!/[<>{}]/.test(decoded)) replacement = decoded;
         } catch {
           replacement = match[0];
@@ -771,6 +859,7 @@ function decodeNumericEntities(text: string): DecodedText {
     cursor = sourceEnd;
   }
   if (cursor < text.length) append(text.slice(cursor), cursor, text.length, true);
+  flushPieces();
   return { text: pieces.join(''), sourceLength: text.length, spans };
 }
 
@@ -793,9 +882,12 @@ function sourceStartForDecodedOffset(decoded: DecodedText, offset: number): numb
   if (offset >= decoded.text.length) return decoded.sourceLength;
   const span = sourceSpanForDecodedOffset(decoded, Math.max(0, offset));
   if (!span) return decoded.sourceLength;
-  return span.identity
-    ? span.sourceStart + Math.max(0, offset - span.decodedStart)
-    : span.sourceStart;
+  if (span.identity) return span.sourceStart + Math.max(0, offset - span.decodedStart);
+  if (span.decodedStride && span.sourceStride) {
+    const unit = Math.floor((offset - span.decodedStart) / span.decodedStride);
+    return span.sourceStart + unit * span.sourceStride;
+  }
+  return span.sourceStart;
 }
 
 function sourceEndForDecodedOffset(decoded: DecodedText, offset: number): number {
@@ -805,7 +897,12 @@ function sourceEndForDecodedOffset(decoded: DecodedText, offset: number): number
     Math.min(offset, Math.max(0, decoded.text.length - 1)),
   );
   if (!span) return decoded.sourceLength;
-  return span.identity ? span.sourceStart + (offset - span.decodedStart) + 1 : span.sourceEnd;
+  if (span.identity) return span.sourceStart + (offset - span.decodedStart) + 1;
+  if (span.decodedStride && span.sourceStride) {
+    const unit = Math.floor((offset - span.decodedStart) / span.decodedStride);
+    return Math.min(span.sourceEnd, span.sourceStart + (unit + 1) * span.sourceStride);
+  }
+  return span.sourceEnd;
 }
 
 export function semanticSourceSpanCount(text: string): number {
