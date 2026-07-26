@@ -106,7 +106,10 @@ describe('WorkflowStateMachine — approval gate', () => {
     const first = await machine.run(ctx, { checkpointStore, approvalStore });
     expect(first.status).toBe('waiting_approval');
 
-    approvalStore.resolve(first.approvalRequestId!, 'approved', 'operator-1', 'Approved for test');
+    const approvalRequestId = first.approvalRequestId;
+    expect(approvalRequestId).toBeDefined();
+    if (!approvalRequestId) throw new Error('workflow did not return an approval request ID');
+    approvalStore.resolve(approvalRequestId, 'approved', 'operator-1', 'Approved for test');
 
     const second = await machine.run(ctx, { checkpointStore, approvalStore });
     expect(second.status).toBe('completed');
@@ -227,7 +230,9 @@ describe('ChunkPlannerActor', () => {
       },
       approvalRequired: false,
     };
-    const planStep = workflow.steps.find((s) => s.stepId === 'plan-chunks')!;
+    const planStep = workflow.steps.find((s) => s.stepId === 'plan-chunks');
+    expect(planStep).toBeDefined();
+    if (!planStep) throw new Error('ingestion workflow is missing the plan-chunks step');
     const result = await planStep.execute(ctx, []);
     expect(result.output.unit).toBe('tokens');
     expect(Number(result.output.totalChunks)).toBeGreaterThan(0);
