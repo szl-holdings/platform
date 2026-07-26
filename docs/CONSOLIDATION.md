@@ -19,7 +19,7 @@
 
 ## Option B proposal — NOT APPLIED
 
-Option B targets nine public survivor slots. Six slots are presently usable without a visibility or archive decision; three remain founder-gated.
+Option B targets nine public survivor slots. Five slots are presently usable without a visibility or archive decision; four remain founder-gated.
 
 | Slot | Observed repository | Observed state | Proposed disposition | Gate | Claim |
 |---|---|---|---|---|---|
@@ -30,7 +30,7 @@ Option B targets nine public survivor slots. Six slots are presently usable with
 | Trust | `szl-holdings/szl-trust` | public, archived; README reports migration to `docs-site` | decide unarchive or replace | **FOUNDER DECISION 1** | MODELED |
 | Organization profile | `szl-holdings/.github` | public, active | KEEP | none beyond refreshed preflight | MEASURED |
 | Cyber / SENTRA | exact `sentra` repository absent | `immune` is public-active and its description reports SENTRA/GATE admission | decide create, restore, or substitute `immune` | **FOUNDER DECISION 2** | MODELED |
-| Defense / maritime | exact `vessels` repository absent; `killinchu` public-active | use payload-permitted `killinchu` substitution | refreshed preflight only | MODELED |
+| Defense / maritime | exact `vessels` repository absent; `killinchu` public-active | decide whether to use the payload-permitted `killinchu` substitution | **FOUNDER DECISION 4** | MODELED |
 | Revenue / insurance | exact `insurance` repository absent from the public inventory | choose a public revenue-adjacent substitute or defer the slot | **FOUNDER DECISION 3** | MODELED |
 
 ### Founder decision record
@@ -40,6 +40,7 @@ Option B targets nine public survivor slots. Six slots are presently usable with
 | 1 — trust slot | unarchive `szl-trust`; choose a different public-active trust surface; defer slot | **NOT DECIDED** | **REQUIRED** |
 | 2 — SENTRA slot | create/restore `sentra`; substitute `immune`; choose another cyber surface; defer slot | **NOT DECIDED** | **REQUIRED** |
 | 3 — revenue slot | choose a public revenue surface; defer slot | **NOT DECIDED** | **REQUIRED** |
+| 4 — defense / maritime slot | substitute `killinchu`; choose another public-active defense or maritime surface; defer slot | **NOT DECIDED** | **REQUIRED** |
 
 No decision may be inferred from this document or from an earlier broad authorization. Each selected choice must be recorded before an execution PR or organization-setting change begins.
 
@@ -65,7 +66,7 @@ No decision may be inferred from this document or from an earlier broad authoriz
 This is a plan, not an execution record.
 
 1. **Refresh and freeze evidence.** Re-query the public inventory and keep any non-public inventory in a separate access-controlled proof packet. Refresh default heads, open PRs, branch rules, releases, issues, package consumers, and README notices. Stop on drift that changes a disposition.
-2. **Resolve founder gates.** Record the three choices above and the OTel canonical-successor decision. A missing decision is a hard stop.
+2. **Resolve founder gates.** Record the four choices above and the OTel canonical-successor decision. A missing decision is a hard stop.
 3. **Prepare per-repository proof.** For any future archive, visibility, or rename proposal, capture the previous setting, exact head, release/tag list, open PRs/issues, dependency consumers, replacement pointer, and a tested restoration command.
 4. **Apply one reversible mutation per authorized workcell.** Do not batch unrelated settings. Never delete repositories or rewrite history.
 5. **Verify and observe.** Re-run links, package consumers, CI, and organization inventory after every authorized change. Record actual outcomes separately from this proposal.
