@@ -39,7 +39,7 @@
   },
   "packages": {
     "domain_packages_dir": {
-      "count": 158,
+      "count": 159,
       "command": "Count tracked top-level directories under packages/",
       "computed": "2026-07-25"
     },
@@ -49,10 +49,10 @@
       "computed": "2026-07-25"
     },
     "total_packages": {
-      "count": 211,
+      "count": 212,
       "command": "packages/ top-level count plus lib/ top-level count",
       "computed": "2026-07-25",
-      "note": "packages/ (158 directories) + lib/ (53 directories) = 211. packages/proxy-routes.ts is a file and is not counted as a package."
+      "note": "packages/ (159 directories) + lib/ (53 directories) = 212. packages/proxy-routes.ts is a file and is not counted as a package."
     },
     "apps": {
       "count": 11,
@@ -68,7 +68,13 @@
       "count": 5,
       "command": "Count unique tracked top-level children of workers/",
       "computed": "2026-07-25",
-      "list": ["alloy-embed-worker", "alloy-rank-worker", "alloy-rerank-worker", "alloy-vector-worker", "substrate-python"]
+      "list": [
+        "alloy-embed-worker",
+        "alloy-rank-worker",
+        "alloy-rerank-worker",
+        "alloy-vector-worker",
+        "substrate-python"
+      ]
     }
   },
   "database": {
@@ -157,7 +163,14 @@
   "platform_primitives": {
     "count": 6,
     "status": "HISTORICAL_NOT_REVERIFIED_2026-07-25",
-    "list": ["Outcome Graph", "Proof Chain", "Covenant Policy", "Decision Simulation", "Workflow Engine", "Event Fabric"]
+    "list": [
+      "Outcome Graph",
+      "Proof Chain",
+      "Covenant Policy",
+      "Decision Simulation",
+      "Workflow Engine",
+      "Event Fabric"
+    ]
   },
   "doctrine_v11": {
     "kernel_commit": "c7c0ba17",
@@ -270,7 +283,11 @@
       },
       "orphaned_files_resolved": {
         "count": 3,
-        "files": ["0010_szl_saas_layer_tables.sql", "0028_crdt_change_events.sql", "0028_multi_channel_notifications.sql"],
+        "files": [
+          "0010_szl_saas_layer_tables.sql",
+          "0028_crdt_change_events.sql",
+          "0028_multi_channel_notifications.sql"
+        ],
         "resolution": "Registered as journal idx 91, 92, 93 with IF NOT EXISTS guards"
       },
       "rollback_scripts": {
@@ -288,9 +305,22 @@
         "count": 20,
         "command": "ls scripts/seed-*.ts scripts/seed-*.sh | wc -l"
       },
-      "domains_with_full_coverage": ["KORA/Lyte", "SEXTANT/Vessels", "TENAX/Sentra", "LUMINA/Pulse", "Carlota Jo", "Agent/AI infra"],
-      "domains_with_partial_coverage": ["DOMAINE/Terra (1031 Exchange + Lease Abstraction thin)", "Counsel (M365 surfaces thin)"],
-      "surfaces_depending_only_on_static_json": ["KORA/Lyte command-cards/incidents/playbooks (by design)", "SEXTANT/Vessels fleets/AI-briefings (by design)"]
+      "domains_with_full_coverage": [
+        "KORA/Lyte",
+        "SEXTANT/Vessels",
+        "TENAX/Sentra",
+        "LUMINA/Pulse",
+        "Carlota Jo",
+        "Agent/AI infra"
+      ],
+      "domains_with_partial_coverage": [
+        "DOMAINE/Terra (1031 Exchange + Lease Abstraction thin)",
+        "Counsel (M365 surfaces thin)"
+      ],
+      "surfaces_depending_only_on_static_json": [
+        "KORA/Lyte command-cards/incidents/playbooks (by design)",
+        "SEXTANT/Vessels fleets/AI-briefings (by design)"
+      ]
     },
     "public_claims_status": "COUNTS UPDATED 2026-04-25 — see Moonshot Phase 1 audit. All stale counts reconciled.",
     "open_drift_items": 0,
