@@ -485,7 +485,7 @@ function markupSiblingSegments(
   if (!['.html', '.tsx'].includes(path.extname(relative))) return [{ text, start: 0 }];
   const segments: Array<{ text: string; start: number }> = [];
   const boundary =
-    /(?:<\/[A-Za-z][\w:.-]*>|<\/>|\/>)(?:\s|<!--[\s\S]*?-->|\{\s*\/\*[\s\S]*?\*\/\s*\})*(?=<[A-Za-z]|<>)/g;
+    /(?:<\/[A-Za-z][\w:.-]*>|<\/>|\/>)(?:(?:<!--[\s\S]*?-->|\{\s*\/\*[\s\S]*?\*\/\s*\}|[^<>{}])*(?=<[A-Za-z]|<>)|\s*(?=\{))/g;
   let start = 0;
   for (const match of text.matchAll(boundary)) {
     if (typeof match.index !== 'number') continue;
@@ -757,11 +757,8 @@ export function claimFailuresForLines(
   };
 
   let block: BlockEntry[] = [];
-  const overlapFor = (previousBlock: BlockEntry[], nextLine: string): BlockEntry[] => {
-    const characterBudget = Math.min(
-      MAX_PAIR_DISTANCE,
-      Math.max(0, MAX_BLOCK_CHARACTERS - nextLine.length - 1),
-    );
+  const overlapFor = (previousBlock: BlockEntry[]): BlockEntry[] => {
+    const characterBudget = MAX_PAIR_DISTANCE;
     const overlap: BlockEntry[] = [];
     let size = 0;
     for (let index = previousBlock.length - 1; index >= 0 && size < characterBudget; index -= 1) {
@@ -815,7 +812,7 @@ export function claimFailuresForLines(
       scanBlock(block);
       block = joinable
         ? [
-            ...overlapFor(block, line),
+            ...overlapFor(block),
             {
               line,
               lineNumber: index + 1,

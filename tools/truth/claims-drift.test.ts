@@ -729,6 +729,14 @@ test('does not join same-line siblings across HTML or JSX comments and fragments
       'src/Siblings.tsx',
       '<div><>Current release notes</>{/* separate */}<>Guardian ships 35 tests</></div>',
     ],
+    [
+      'src/Siblings.tsx',
+      '<div><span>Current release notes</span>{show && <span>Guardian ships 35 tests</span>}</div>',
+    ],
+    [
+      'docs/siblings.html',
+      '<div><span>Current release notes</span> separate sibling <span>Guardian ships 35 tests</span></div>',
+    ],
   ];
   for (const [relative, source] of cases) {
     assert.deepEqual(claimFailuresForLines(relative, [source], metrics(12), []), []);
@@ -765,6 +773,14 @@ test('preserves the tail of a long line across a bounded block split', () => {
 
   assert.deepEqual(claimFailuresForLines('docs/wrapped.md', lines, metrics(12), []), [
     'docs/wrapped.md:2: hardcoded 198; canonical value for this context is 199',
+  ]);
+});
+
+test('preserves prior context when the next wrapped line exceeds the block limit', () => {
+  const lines = ['The current monorepo has 198', `packages ${'x'.repeat(20_000)}`];
+
+  assert.deepEqual(claimFailuresForLines('docs/wrapped.md', lines, metrics(12), []), [
+    'docs/wrapped.md:1: hardcoded 198; canonical value for this context is 199',
   ]);
 });
 
