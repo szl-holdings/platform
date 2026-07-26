@@ -19,12 +19,18 @@ const MAX_BLOCK_LINES = 32;
 const MAX_BLOCK_CHARACTERS = 16_384;
 const MAX_CLAUSE_CHARACTERS = 256;
 const MAX_PAIR_DISTANCE = 256;
+const MAX_BLOCK_OVERLAP_LINES = 4;
 const execFileAsync = promisify(execFile);
 
 export type AllowEntry = { path: string; literal: string };
 type WatchwordMatch = RegExpMatchArray & { index: number };
 type CanonicalEvidence = { name: string; value: string | null };
 type TestCountRole = 'passed' | 'total';
+type SourceAnchor = { lineNumber: number; column: number };
+type ClaimScanState = {
+  seenOccurrences: Set<string>;
+  identityCounts: Map<string, number>;
+};
 
 async function walk(directory: string): Promise<string[]> {
   const output: string[] = [];
@@ -109,6 +115,7 @@ function isMetricPair(line: string, literal: RegExpMatchArray, watchword: Watchw
       .trim();
     const allowedModifiers: Record<string, Set<string>> = {
       tests: new Set(['', 'passing', 'passed', 'platform', 'platform passing']),
+      test: new Set(['', 'passing', 'passed', 'platform', 'platform passing']),
       surfaces: new Set(['', 'customer-facing', 'public']),
       surface: new Set(['', 'customer-facing', 'public']),
       packages: new Set(['', 'monorepo', 'workspace', 'pnpm workspace']),
@@ -126,6 +133,12 @@ function isMetricPair(line: string, literal: RegExpMatchArray, watchword: Watchw
       theorems: new Set(['', 'locked']),
       theorem: new Set(['', 'locked']),
     };
+    if (
+      word === 'test' &&
+      !/^\s*(?:$|[.,;:!?)]|\b(?:passing|passed|total)\b)/i.test(line.slice(watchwordEnd))
+    ) {
+      return false;
+    }
     return allowedModifiers[word]?.has(modifier) ?? false;
   }
 
@@ -179,11 +192,12 @@ function isAllowed(
   relative: string,
   literal: string,
   identity: string,
+  occurrence: number,
   allowlist: AllowEntry[],
-  baselineClaimIdentities: ReadonlySet<string>,
+  baselineClaimIdentities: ReadonlyMap<string, number>,
 ): boolean {
   return (
-    baselineClaimIdentities.has(identity) &&
+    (baselineClaimIdentities.get(identity) ?? 0) >= occurrence &&
     allowlist.some((entry) => {
       const literalMatches = entry.literal === '*' || entry.literal === literal;
       return pathMatchesAllowEntry(relative, entry) && literalMatches;
@@ -237,7 +251,7 @@ function compoundTestRoles(text: string): Map<number, TestCountRole> {
     },
     {
       expression: new RegExp(
-        String.raw`(${number})\s*(?:total\s+)?tests?\s*(?:(?:in\s+)?total)?\s*(?:[,;]|\band\b)\s*(?:and\s+)?(${number})\s*(?:passing|passed)\b`,
+        String.raw`(${number})\s*(?:total\s+)?tests?\s*(?:(?:in\s+)?total)?\s*(?:[,;:]|\(|\band\b)\s*(?:and\s+|of\s+which\s+)?(${number})\s*(?:passing|passed)\b`,
         'gi',
       ),
       roles: ['total', 'passed'],
@@ -245,6 +259,20 @@ function compoundTestRoles(text: string): Map<number, TestCountRole> {
     {
       expression: new RegExp(
         String.raw`(${number})\s*(?:passing|passed)\s+tests?\s*(?:[,;]|\band\b)\s*(?:and\s+)?(${number})\s*(?:in\s+)?total\b`,
+        'gi',
+      ),
+      roles: ['passed', 'total'],
+    },
+    {
+      expression: new RegExp(
+        String.raw`(${number})\s*(?:passing|passed)\s*(?:[,;]|\band\b)\s*(?:and\s+)?(${number})\s*(?:in\s+)?total\s+tests?\b`,
+        'gi',
+      ),
+      roles: ['passed', 'total'],
+    },
+    {
+      expression: new RegExp(
+        String.raw`(${number})\s+tests?\s+(?:passing|passed)\s+(?:out\s+of|\/)\s+(${number})\s*(?:in\s+)?total(?:\s+tests?)?\b`,
         'gi',
       ),
       roles: ['passed', 'total'],
@@ -335,11 +363,12 @@ function isRelatedPostpositiveTestCount(
 function claimFailuresForText(
   relative: string,
   text: string,
-  lineNumberForOffset: (offset: number) => number,
+  sourceAnchorForOffset: (offset: number) => SourceAnchor,
   metrics: Record<string, Record<string, unknown>>,
   allowlist: AllowEntry[],
-  baselineClaimIdentities: ReadonlySet<string>,
-  identitySink?: Set<string>,
+  baselineClaimIdentities: ReadonlyMap<string, number>,
+  scanState: ClaimScanState,
+  identitySink?: Map<string, number>,
 ): string[] {
   const failures: string[] = [];
   if (!CLAIM_CONTEXT.test(text)) return failures;
@@ -376,28 +405,127 @@ function claimFailuresForText(
       compoundRole === 'passed' ? 'passing' : compoundRole === 'total' ? 'total' : qualifier,
     );
     if (!canonical) continue;
-    const lineNumber = lineNumberForOffset(literalIndex);
+    const anchor = sourceAnchorForOffset(literalIndex);
     const identity = claimIdentity(relative, literal, nearest[0], qualifier, compoundRole);
-    identitySink?.add(identity);
+    const occurrenceKey = [identity, String(anchor.lineNumber), String(anchor.column)].join('\0');
+    if (scanState.seenOccurrences.has(occurrenceKey)) continue;
+    scanState.seenOccurrences.add(occurrenceKey);
+    const occurrence = (scanState.identityCounts.get(identity) ?? 0) + 1;
+    scanState.identityCounts.set(identity, occurrence);
+    identitySink?.set(identity, occurrence);
     if (
       canonical.value !== null &&
       canonical.value.replaceAll(',', '') === literal.replaceAll(',', '')
     ) {
       continue;
     }
-    if (!isAllowed(relative, literal, identity, allowlist, baselineClaimIdentities)) {
+    if (!isAllowed(relative, literal, identity, occurrence, allowlist, baselineClaimIdentities)) {
       if (canonical.value === null) {
         failures.push(
-          `${relative}:${lineNumber}: hardcoded ${literal}; canonical evidence for ${canonical.name} is UNAVAILABLE`,
+          `${relative}:${anchor.lineNumber}: hardcoded ${literal}; canonical evidence for ${canonical.name} is UNAVAILABLE`,
         );
       } else {
         failures.push(
-          `${relative}:${lineNumber}: hardcoded ${literal}; canonical value for this context is ${canonical.value}`,
+          `${relative}:${anchor.lineNumber}: hardcoded ${literal}; canonical value for this context is ${canonical.value}`,
         );
       }
     }
   }
   return failures;
+}
+
+function markupSiblingSegments(
+  text: string,
+  relative: string,
+): Array<{ text: string; start: number }> {
+  if (!['.html', '.tsx'].includes(path.extname(relative))) return [{ text, start: 0 }];
+  const segments: Array<{ text: string; start: number }> = [];
+  const boundary = /(?:<\/[A-Za-z][\w:.-]*>|\/>)\s*(?=<[A-Za-z])/g;
+  let start = 0;
+  for (const match of text.matchAll(boundary)) {
+    if (typeof match.index !== 'number') continue;
+    const end = match.index + match[0].length;
+    if (end > start) segments.push({ text: text.slice(start, end), start });
+    start = end;
+  }
+  if (start < text.length) segments.push({ text: text.slice(start), start });
+  return segments.length > 0 ? segments : [{ text, start: 0 }];
+}
+
+function boundedTextSegments(text: string): Array<{ text: string; start: number }> {
+  if (text.length <= MAX_BLOCK_CHARACTERS) return [{ text, start: 0 }];
+  const stride = MAX_BLOCK_CHARACTERS - MAX_PAIR_DISTANCE;
+  const segments: Array<{ text: string; start: number }> = [];
+  for (let start = 0; start < text.length; start += stride) {
+    segments.push({
+      text: text.slice(start, Math.min(text.length, start + MAX_BLOCK_CHARACTERS)),
+      start,
+    });
+  }
+  return segments;
+}
+
+function decodeNumericEntities(text: string): { text: string; originalOffsets: number[] } {
+  const originalOffsets: number[] = [];
+  let decoded = '';
+  let cursor = 0;
+  const expression = /&#(?:x([\da-f]+)|(\d+));/gi;
+  for (const match of text.matchAll(expression)) {
+    if (typeof match.index !== 'number') continue;
+    for (let index = cursor; index < match.index; index += 1) {
+      decoded += text[index] ?? '';
+      originalOffsets.push(index);
+    }
+    const value = Number.parseInt(match[1] ?? match[2] ?? '', match[1] ? 16 : 10);
+    let replacement = match[0];
+    if (Number.isInteger(value) && value >= 0 && value <= 0x10ffff) {
+      try {
+        replacement = String.fromCodePoint(value);
+      } catch {
+        replacement = match[0];
+      }
+    }
+    decoded += replacement;
+    for (let index = 0; index < replacement.length; index += 1) {
+      originalOffsets.push(match.index);
+    }
+    cursor = match.index + match[0].length;
+  }
+  for (let index = cursor; index < text.length; index += 1) {
+    decoded += text[index] ?? '';
+    originalOffsets.push(index);
+  }
+  return { text: decoded, originalOffsets };
+}
+
+function claimFailuresForSegmentedText(
+  relative: string,
+  text: string,
+  sourceAnchorForOffset: (offset: number) => SourceAnchor,
+  metrics: Record<string, Record<string, unknown>>,
+  allowlist: AllowEntry[],
+  baselineClaimIdentities: ReadonlyMap<string, number>,
+  scanState: ClaimScanState,
+  identitySink?: Map<string, number>,
+): string[] {
+  return markupSiblingSegments(text, relative).flatMap((markupSegment) =>
+    boundedTextSegments(markupSegment.text).flatMap((boundedSegment) => {
+      const decoded = decodeNumericEntities(boundedSegment.text);
+      return claimFailuresForText(
+        relative,
+        decoded.text,
+        (offset) => {
+          const originalOffset = decoded.originalOffsets[offset] ?? boundedSegment.text.length;
+          return sourceAnchorForOffset(markupSegment.start + boundedSegment.start + originalOffset);
+        },
+        metrics,
+        allowlist,
+        baselineClaimIdentities,
+        scanState,
+        identitySink,
+      );
+    }),
+  );
 }
 
 function startsStructuralBlock(line: string): boolean {
@@ -462,23 +590,28 @@ export function claimFailuresForLines(
   lines: string[],
   metrics: Record<string, Record<string, unknown>>,
   allowlist: AllowEntry[],
-  baselineClaimIdentities: ReadonlySet<string> = new Set(),
-  identitySink?: Set<string>,
+  baselineClaimIdentities: ReadonlyMap<string, number> = new Map(),
+  identitySink?: Map<string, number>,
 ): string[] {
   const failures = new Set<string>();
   const ordinalHeading = /^\s*#{1,6}\s+\d+[.)]\s+/;
+  const scanState: ClaimScanState = {
+    seenOccurrences: new Set(),
+    identityCounts: new Map(),
+  };
 
   for (const [index, line] of lines.entries()) {
     const scannedLine = line.replace(ordinalHeading, (heading) =>
-      heading.replace(/\d+[.)]\s+$/, ''),
+      heading.replace(/\d+[.)]\s+$/, (ordinal) => ' '.repeat(ordinal.length)),
     );
-    for (const failure of claimFailuresForText(
+    for (const failure of claimFailuresForSegmentedText(
       relative,
       scannedLine,
-      () => index + 1,
+      (offset) => ({ lineNumber: index + 1, column: offset }),
       metrics,
       allowlist,
       baselineClaimIdentities,
+      scanState,
       identitySink,
     )) {
       failures.add(failure);
@@ -494,7 +627,7 @@ export function claimFailuresForLines(
       starts.push(joined.length);
       joined += entry.line;
     }
-    for (const failure of claimFailuresForText(
+    for (const failure of claimFailuresForSegmentedText(
       relative,
       joined,
       (offset) => {
@@ -503,11 +636,15 @@ export function claimFailuresForLines(
           if ((starts[index] ?? Number.POSITIVE_INFINITY) > offset) break;
           selected = index;
         }
-        return block[selected]?.lineNumber ?? block[0]?.lineNumber ?? 1;
+        return {
+          lineNumber: block[selected]?.lineNumber ?? block[0]?.lineNumber ?? 1,
+          column: offset - (starts[selected] ?? 0),
+        };
       },
       metrics,
       allowlist,
       baselineClaimIdentities,
+      scanState,
       identitySink,
     )) {
       failures.add(failure);
@@ -515,6 +652,30 @@ export function claimFailuresForLines(
   };
 
   let block: Array<{ line: string; lineNumber: number }> = [];
+  const overlapFor = (
+    previousBlock: Array<{ line: string; lineNumber: number }>,
+    nextLine: string,
+  ): Array<{ line: string; lineNumber: number }> => {
+    const characterBudget = Math.min(
+      MAX_PAIR_DISTANCE,
+      Math.max(0, MAX_BLOCK_CHARACTERS - nextLine.length - 1),
+    );
+    const overlap: Array<{ line: string; lineNumber: number }> = [];
+    let size = 0;
+    for (
+      let index = previousBlock.length - 1;
+      index >= 0 && overlap.length < MAX_BLOCK_OVERLAP_LINES;
+      index -= 1
+    ) {
+      const entry = previousBlock[index];
+      if (!entry) continue;
+      const entrySize = entry.line.length + (overlap.length > 0 ? 1 : 0);
+      if (size + entrySize > characterBudget) break;
+      overlap.unshift(entry);
+      size += entrySize;
+    }
+    return overlap;
+  };
   for (const [index, line] of lines.entries()) {
     if (ordinalHeading.test(line)) {
       scanBlock(block);
@@ -527,15 +688,14 @@ export function claimFailuresForLines(
     }
     const previous = block[block.length - 1]?.line ?? '';
     const nextSize = block.reduce((total, entry) => total + entry.line.length + 1, 0) + line.length;
-    if (
-      canJoinWrappedLines(previous, line, relative) &&
-      block.length < MAX_BLOCK_LINES &&
-      nextSize <= MAX_BLOCK_CHARACTERS
-    ) {
+    const joinable = canJoinWrappedLines(previous, line, relative);
+    if (joinable && block.length < MAX_BLOCK_LINES && nextSize <= MAX_BLOCK_CHARACTERS) {
       block.push({ line, lineNumber: index + 1 });
     } else {
       scanBlock(block);
-      block = [{ line, lineNumber: index + 1 }];
+      block = joinable
+        ? [...overlapFor(block, line), { line, lineNumber: index + 1 }]
+        : [{ line, lineNumber: index + 1 }];
     }
   }
   scanBlock(block);
@@ -547,9 +707,9 @@ export function claimIdentitiesForLines(
   relative: string,
   lines: string[],
   metrics: Record<string, Record<string, unknown>>,
-): Set<string> {
-  const identities = new Set<string>();
-  claimFailuresForLines(relative, lines, metrics, [], new Set(), identities);
+): Map<string, number> {
+  const identities = new Map<string, number>();
+  claimFailuresForLines(relative, lines, metrics, [], new Map(), identities);
   return identities;
 }
 
@@ -563,21 +723,35 @@ async function gitOutput(arguments_: string[]): Promise<string> {
   return stdout.trim();
 }
 
+export function selectImmutableBaseline(
+  explicit: string | undefined,
+  eventBase: string | undefined,
+  mergeBase: string | undefined,
+): string {
+  for (const candidate of [explicit, eventBase, mergeBase]) {
+    if (candidate && !/^0+$/.test(candidate)) return candidate;
+  }
+  throw new Error(
+    'immutable allowlist baseline unavailable; set TRUTH_ALLOWLIST_BASE_SHA or provide origin/main',
+  );
+}
+
 async function baselineSha(): Promise<string> {
-  if (process.env.TRUTH_ALLOWLIST_BASE_SHA) return process.env.TRUTH_ALLOWLIST_BASE_SHA;
+  let eventBase: string | undefined;
   if (process.env.GITHUB_EVENT_PATH && existsSync(process.env.GITHUB_EVENT_PATH)) {
     const event = JSON.parse(await readFile(process.env.GITHUB_EVENT_PATH, 'utf8')) as {
       before?: string;
       pull_request?: { base?: { sha?: string } };
     };
-    const eventBase = event.pull_request?.base?.sha || event.before;
-    if (eventBase && !/^0+$/.test(eventBase)) return eventBase;
+    eventBase = event.pull_request?.base?.sha || event.before;
   }
+  let mergeBase: string | undefined;
   try {
-    return await gitOutput(['merge-base', 'HEAD', 'origin/main']);
+    mergeBase = await gitOutput(['merge-base', 'HEAD', 'origin/main']);
   } catch {
-    return await gitOutput(['rev-parse', 'HEAD']);
+    mergeBase = undefined;
   }
+  return selectImmutableBaseline(process.env.TRUTH_ALLOWLIST_BASE_SHA, eventBase, mergeBase);
 }
 
 async function main(): Promise<void> {
@@ -598,7 +772,7 @@ async function main(): Promise<void> {
     const relative = path.relative(ROOT, file).replaceAll('\\', '/');
     if (relative === 'artifacts/SOURCE_OF_TRUTH.json') continue;
     const lines = (await readFile(file, 'utf8')).split(/\r?\n/);
-    let baselineClaimIdentities = new Set<string>();
+    let baselineClaimIdentities = new Map<string, number>();
     if (allowlist.some((entry) => pathMatchesAllowEntry(relative, entry))) {
       if (!changedPaths.has(relative)) {
         baselineClaimIdentities = claimIdentitiesForLines(relative, lines, truth.metrics);
@@ -611,7 +785,7 @@ async function main(): Promise<void> {
             truth.metrics,
           );
         } catch {
-          baselineClaimIdentities = new Set();
+          baselineClaimIdentities = new Map();
         }
       }
     }

@@ -1,7 +1,12 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
 
-import { type AllowEntry, claimFailuresForLines, claimIdentitiesForLines } from './claims-drift.js';
+import {
+  type AllowEntry,
+  claimFailuresForLines,
+  claimIdentitiesForLines,
+  selectImmutableBaseline,
+} from './claims-drift.js';
 
 function metrics(
   apiEndpointValue: number | null,
@@ -89,6 +94,38 @@ test('does not let an allowlist entry cover a new same-literal claim in the same
     ),
     ['docs/investor.md:2: hardcoded 5,524; canonical evidence for api_endpoints is UNAVAILABLE'],
   );
+});
+
+test('does not let one allowlisted occurrence cover a byte-identical duplicate', () => {
+  const baselineLines = ['The platform currently exposes 5,524 current API endpoints.'];
+  const currentLines = [...baselineLines, ...baselineLines];
+  const allowlist: AllowEntry[] = [{ path: 'docs/investor.md', literal: '5,524' }];
+  const baselineIdentities = claimIdentitiesForLines(
+    'docs/investor.md',
+    baselineLines,
+    metrics(null),
+  );
+
+  assert.deepEqual(
+    claimFailuresForLines(
+      'docs/investor.md',
+      currentLines,
+      metrics(null),
+      allowlist,
+      baselineIdentities,
+    ),
+    ['docs/investor.md:2: hardcoded 5,524; canonical evidence for api_endpoints is UNAVAILABLE'],
+  );
+});
+
+test('fails closed when no immutable allowlist baseline is available', () => {
+  assert.throws(
+    () => selectImmutableBaseline(undefined, undefined, undefined),
+    /immutable allowlist baseline unavailable/,
+  );
+  assert.equal(selectImmutableBaseline('abc123', undefined, undefined), 'abc123');
+  assert.equal(selectImmutableBaseline(undefined, 'def456', undefined), 'def456');
+  assert.equal(selectImmutableBaseline(undefined, undefined, '789abc'), '789abc');
 });
 
 test('continues to reject stale numeric claims when canonical evidence is available', () => {
@@ -325,6 +362,17 @@ test('scans stale metrics through inline Markdown, HTML, and JSX markup', () => 
   }
 });
 
+test('decodes decimal and hexadecimal numeric HTML entities without losing attribution', () => {
+  for (const claimText of [
+    '<p>The current monorepo has &#49;&#57;&#56; packages.</p>',
+    '<p>The current monorepo has &#x31;&#x39;&#x38; packages.</p>',
+  ]) {
+    assert.deepEqual(claimFailuresForLines('docs/entities.html', [claimText], metrics(12), []), [
+      'docs/entities.html:1: hardcoded 198; canonical value for this context is 199',
+    ]);
+  }
+});
+
 test('does not reinterpret scoped or timing numbers as platform test totals', () => {
   const scopedClaims = [
     'The 10-minute path ends with tests passing.',
@@ -358,6 +406,64 @@ test('classifies ratio and out-of test counts as passed over total', () => {
     'The current platform has 100 passed out of 105 tests.',
   ]) {
     assert.deepEqual(claimFailuresForLines('docs/testing.md', [claimText], metrics(12), []), []);
+  }
+});
+
+test('classifies reverse shared-noun compound test counts', () => {
+  assert.deepEqual(
+    claimFailuresForLines(
+      'docs/testing.md',
+      ['The current platform reports 99 passing and 105 total tests.'],
+      metrics(12),
+      [],
+    ),
+    ['docs/testing.md:1: hardcoded 99; canonical value for this context is 100'],
+  );
+});
+
+test('classifies common compound test punctuation and shared-noun forms', () => {
+  for (const claimText of [
+    'The current platform has 105 tests: 100 passed.',
+    'The current platform has 105 tests (100 passed).',
+    'The current platform has 105 total tests, of which 100 passed.',
+    'The current platform reports 100 passing, 105 total tests.',
+    'The current platform has 100 tests passed out of 105 total.',
+  ]) {
+    assert.deepEqual(
+      claimFailuresForLines('docs/testing.md', [claimText], metrics(12), []),
+      [],
+      claimText,
+    );
+  }
+
+  const staleClaims = new Map([
+    [
+      'The current platform has 105 tests: 99 passed.',
+      'docs/testing.md:1: hardcoded 99; canonical value for this context is 100',
+    ],
+    [
+      'The current platform has 104 tests (100 passed).',
+      'docs/testing.md:1: hardcoded 104; canonical value for this context is 105',
+    ],
+    [
+      'The current platform has 105 total tests, of which 99 passed.',
+      'docs/testing.md:1: hardcoded 99; canonical value for this context is 100',
+    ],
+    [
+      'The current platform reports 99 passing, 105 total tests.',
+      'docs/testing.md:1: hardcoded 99; canonical value for this context is 100',
+    ],
+    [
+      'The current platform has 100 tests passed out of 104 total.',
+      'docs/testing.md:1: hardcoded 104; canonical value for this context is 105',
+    ],
+  ]);
+  for (const [claimText, expected] of staleClaims) {
+    assert.deepEqual(
+      claimFailuresForLines('docs/testing.md', [claimText], metrics(12), []),
+      [expected],
+      claimText,
+    );
   }
 });
 
@@ -486,6 +592,39 @@ test('scans singular metric nouns', () => {
   );
 });
 
+test('scans the singular test watchword', () => {
+  assert.deepEqual(
+    claimFailuresForLines('docs/testing.md', ['The current platform has 1 test.'], metrics(12), []),
+    ['docs/testing.md:1: hardcoded 1; canonical value for this context is 100'],
+  );
+});
+
+test('does not join same-line HTML or JSX siblings into one claim context', () => {
+  for (const relative of ['docs/siblings.html', 'src/Siblings.tsx']) {
+    assert.deepEqual(
+      claimFailuresForLines(
+        relative,
+        ['<div><span>Current release notes</span><span>Guardian ships 35 tests</span></div>'],
+        metrics(12),
+        [],
+      ),
+      [],
+    );
+  }
+});
+
+test('preserves claim overlap across bounded block splits', () => {
+  const lines = [
+    ...Array.from({ length: 31 }, () => 'Filler continuation'),
+    'The current monorepo contains',
+    '198 packages.',
+  ];
+
+  assert.deepEqual(claimFailuresForLines('docs/wrapped.md', lines, metrics(12), []), [
+    'docs/wrapped.md:33: hardcoded 198; canonical value for this context is 199',
+  ]);
+});
+
 test('scans numeric claim headings while ignoring genuine ordinal heading labels', () => {
   assert.deepEqual(
     claimFailuresForLines(
@@ -522,5 +661,15 @@ test('keeps adversarial wrapped-block scanning time bounded', { timeout: 2_000 }
   const started = performance.now();
 
   assert.deepEqual(claimFailuresForLines('docs/generated.md', lines, metrics(12), []), []);
+  assert.ok(performance.now() - started < 1_500);
+});
+
+test('keeps a huge minified HTML line bounded while scanning its tail', { timeout: 2_000 }, () => {
+  const line = `<div>${'x'.repeat(500_000)} The current monorepo has 198 packages.</div>`;
+  const started = performance.now();
+
+  assert.deepEqual(claimFailuresForLines('docs/minified.html', [line], metrics(12), []), [
+    'docs/minified.html:1: hardcoded 198; canonical value for this context is 199',
+  ]);
   assert.ok(performance.now() - started < 1_500);
 });
