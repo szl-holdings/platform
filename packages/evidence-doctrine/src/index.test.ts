@@ -80,6 +80,17 @@ test('Lambda uniqueness stays open, gray, and not machine-checked', () => {
       } as never),
     /not machine-checked/,
   );
+  assert.throws(
+    () =>
+      assertLambdaCaseStudy({
+        claim: 'CONJECTURE_1',
+        state: 'OPEN',
+        display: 'GRAY',
+        machine_checked: false,
+        conclusion: 'PROVED',
+      }),
+    /must remain CONJECTURE_1/,
+  );
 });
 
 test('Theorem U reports only a conditional result', () => {
@@ -97,6 +108,21 @@ test('Theorem U reports only a conditional result', () => {
       premise_u2: 'UNVERIFIED',
       premise_u3: 'VERIFIED',
     }),
+    'CONDITIONAL_OPEN',
+  );
+  assert.equal(
+    evaluateTheoremU({
+      premise_u1: 'VERIFIED',
+    } as never),
+    'CONDITIONAL_OPEN',
+  );
+  assert.equal(
+    evaluateTheoremU({
+      premise_u1: 'VERIFIED',
+      premise_u2: 'VERIFIED',
+      premise_u3: 'VERIFIED',
+      conclusion: 'PROVED',
+    } as never),
     'CONDITIONAL_OPEN',
   );
 });

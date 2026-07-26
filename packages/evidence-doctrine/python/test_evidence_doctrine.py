@@ -61,6 +61,9 @@ class EvidenceDoctrineTests(unittest.TestCase):
         dishonest = dict(honest, display="GREEN")
         with self.assertRaises(ValueError):
             assert_lambda_case_study(dishonest)
+        contradictory = dict(honest, conclusion="PROVED")
+        with self.assertRaises(ValueError):
+            assert_lambda_case_study(contradictory)
 
     def test_theorem_u_is_conditional(self):
         self.assertEqual(
@@ -72,6 +75,21 @@ class EvidenceDoctrineTests(unittest.TestCase):
         self.assertEqual(
             evaluate_theorem_u(
                 {"u1": "VERIFIED", "u2": "UNVERIFIED", "u3": "VERIFIED"}
+            ),
+            "CONDITIONAL_OPEN",
+        )
+        self.assertEqual(
+            evaluate_theorem_u({"u1": "VERIFIED"}),
+            "CONDITIONAL_OPEN",
+        )
+        self.assertEqual(
+            evaluate_theorem_u(
+                {
+                    "u1": "VERIFIED",
+                    "u2": "VERIFIED",
+                    "u3": "VERIFIED",
+                    "conclusion": "PROVED",
+                }
             ),
             "CONDITIONAL_OPEN",
         )

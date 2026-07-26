@@ -19,6 +19,7 @@ LEVEL_REQUIREMENTS = {
         "machine_checked_denial_verified",
     ),
 }
+THEOREM_U_PREMISES = ("u1", "u2", "u3")
 
 
 @dataclass(frozen=True)
@@ -104,9 +105,11 @@ def assert_lambda_case_study(value: Mapping[str, object]) -> dict:
 
 def evaluate_theorem_u(premises: Mapping[str, object]) -> str:
     """Return a conditional status without closing Lambda Conjecture 1."""
+    if set(premises) != set(THEOREM_U_PREMISES):
+        return "CONDITIONAL_OPEN"
     states = tuple(
-        _validate_state(name, state) for name, state in premises.items()
+        _validate_state(name, premises[name]) for name in THEOREM_U_PREMISES
     )
-    if states and all(state == "VERIFIED" for state in states):
+    if all(state == "VERIFIED" for state in states):
         return "CONDITIONALLY_SATISFIED"
     return "CONDITIONAL_OPEN"

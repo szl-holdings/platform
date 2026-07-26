@@ -98,22 +98,31 @@ export interface LambdaCaseStudy {
   machine_checked: false;
 }
 
+const LAMBDA_CASE_STUDY: LambdaCaseStudy = {
+  claim: 'CONJECTURE_1',
+  state: 'OPEN',
+  display: 'GRAY',
+  machine_checked: false,
+};
+
 /**
  * Guard the doctrine-bearing Lambda case study against an accidental green or
  * closed representation.
  */
-export function assertLambdaCaseStudy(value: LambdaCaseStudy): LambdaCaseStudy {
+export function assertLambdaCaseStudy(value: unknown): LambdaCaseStudy {
   if (
-    value.claim !== 'CONJECTURE_1' ||
-    value.state !== 'OPEN' ||
-    value.display !== 'GRAY' ||
-    value.machine_checked !== false
+    typeof value !== 'object' ||
+    value === null ||
+    Object.keys(value).sort().join(',') !== Object.keys(LAMBDA_CASE_STUDY).sort().join(',') ||
+    !Object.entries(LAMBDA_CASE_STUDY).every(
+      ([key, expected]) => (value as Record<string, unknown>)[key] === expected,
+    )
   ) {
     throw new Error(
       'Lambda uniqueness must remain CONJECTURE_1, OPEN, GRAY, and not machine-checked',
     );
   }
-  return value;
+  return { ...LAMBDA_CASE_STUDY };
 }
 
 export interface TheoremUPremises {
@@ -122,11 +131,21 @@ export interface TheoremUPremises {
   premise_u3: EvidenceState;
 }
 
+const THEOREM_U_PREMISES = ['premise_u1', 'premise_u2', 'premise_u3'] as const;
+
 export function evaluateTheoremU(
-  premises: TheoremUPremises,
+  premises: unknown,
 ): 'CONDITIONALLY_SATISFIED' | 'CONDITIONAL_OPEN' {
-  const states = Object.entries(premises).map(([name, state]) =>
-    validateEvidenceState(name as Requirement, state),
+  if (
+    typeof premises !== 'object' ||
+    premises === null ||
+    Object.keys(premises).sort().join(',') !== [...THEOREM_U_PREMISES].sort().join(',')
+  ) {
+    return 'CONDITIONAL_OPEN';
+  }
+  const supplied = premises as Record<string, unknown>;
+  const states = THEOREM_U_PREMISES.map((name) =>
+    validateEvidenceState(name as Requirement, supplied[name]),
   );
   return states.every((state) => state === 'VERIFIED')
     ? 'CONDITIONALLY_SATISFIED'
