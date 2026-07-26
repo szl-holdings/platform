@@ -11,7 +11,8 @@
 - separate `REPORTED / OPEN_UNVERIFIED` treatment for the R0 sovereign report;
   and
 - deterministic validation with negative cases for digest tampering, duplicate
-  evidence, URL-binding drift, duration drift, and misleading metric labels;
+  evidence and incident counting, counted and related-incident binding drift,
+  duration/display drift, and misleading metric labels;
   and
 - protected source-of-truth enforcement for the validator and its negative
   tests whenever canonical-truth CI runs.
@@ -21,7 +22,7 @@
 | Check | Result |
 | --- | --- |
 | Ledger and evidence validation | **passed** |
-| Validator negative tests | **6/6 passed** |
+| Validator tests | **14/14 passed** |
 | Canonical source-of-truth validator | **66/66 passed** |
 | Git whitespace validation | **passed** |
 
