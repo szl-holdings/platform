@@ -81,6 +81,7 @@ Use [docs/README.md](README.md) for navigation by audience or task.
 |----------|-------------|---------------|
 | [compliance/EU_AI_ACT_ART_12.md](compliance/EU_AI_ACT_ART_12.md) | Honest Articles 9-15 evidence map, corrected application timeline, and Article 12 export contract | 2026-07 |
 | [compliance/ISO_42001_GAP.md](compliance/ISO_42001_GAP.md) | Clause 4-10 ISO/IEC 42001 gap analysis; certification not claimed | 2026-07 |
+| [OVERCLAIM_LEDGER.md](OVERCLAIM_LEDGER.md) | MEASURED, non-exhaustive overclaim snapshot with pinned evidence digests and one observed correction interval | 2026-07 |
 
 ---
 

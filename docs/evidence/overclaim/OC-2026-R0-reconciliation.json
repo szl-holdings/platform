@@ -1,0 +1,15 @@
+{
+  "schema_version": "1.0.0",
+  "maturity": "REPORTED",
+  "repository": "szl-holdings/platform",
+  "kind": "candidate_reconciliation_commit",
+  "commit": "5a5f5352fc1111b591bc860a4c16b7db3a020f23",
+  "committed_at": "2026-06-13T05:27:59Z",
+  "signature_verified": false,
+  "verification_reason": "unsigned",
+  "changed_files": [
+    "replit-sync/FORGE_STATUS_RECONCILE_20260613.md"
+  ],
+  "independent_live_verification": false,
+  "source_url": "https://github.com/szl-holdings/platform/commit/5a5f5352fc1111b591bc860a4c16b7db3a020f23"
+}

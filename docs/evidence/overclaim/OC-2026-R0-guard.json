@@ -1,0 +1,15 @@
+{
+  "schema_version": "1.0.0",
+  "maturity": "MEASURED",
+  "repository": "szl-holdings/platform",
+  "kind": "github_actions_policy_pass",
+  "run_id": 27455147544,
+  "job_id": 81158185816,
+  "head_sha": "297b855a682c543c1f920459d649f0de694fd075",
+  "event": "push",
+  "run_conclusion": "success",
+  "job_name": "overclaim / Governed surfaces are honest (Theorem U citation rule)",
+  "policy_step": "Lambda-uniqueness overclaim grep",
+  "policy_step_conclusion": "success",
+  "source_url": "https://github.com/szl-holdings/platform/actions/runs/27455147544"
+}
