@@ -1,5 +1,10 @@
 export const GENAI_ATTRS = {
+  /**
+   * @deprecated OpenTelemetry renamed this attribute to `gen_ai.provider.name`.
+   * Retained so existing callers do not change their emitted telemetry silently.
+   */
   SYSTEM: 'gen_ai.system',
+  PROVIDER_NAME: 'gen_ai.provider.name',
   OPERATION_NAME: 'gen_ai.operation.name',
   REQUEST_MODEL: 'gen_ai.request.model',
   RESPONSE_MODEL: 'gen_ai.response.model',
@@ -59,9 +64,15 @@ export type GenAIAttrKey = (typeof GENAI_ATTRS)[keyof typeof GENAI_ATTRS];
 
 export const GENAI_OPERATION = {
   CHAT: 'chat',
+  GENERATE_CONTENT: 'generate_content',
   TEXT_COMPLETION: 'text_completion',
   EMBEDDINGS: 'embeddings',
   IMAGE_GENERATION: 'image_generation',
+  CREATE_AGENT: 'create_agent',
+  INVOKE_AGENT: 'invoke_agent',
+  EXECUTE_TOOL: 'execute_tool',
+  INVOKE_WORKFLOW: 'invoke_workflow',
+  PLAN: 'plan',
   AGENT_STEP: 'agent_step',
   TOOL_CALL: 'tool_call',
   RETRIEVAL: 'retrieval',
@@ -78,6 +89,8 @@ export const GENAI_SYSTEM = {
   AWS_BEDROCK: 'aws.bedrock',
   OLLAMA: 'ollama',
 } as const;
+
+export * from './semconv.js';
 
 export const GENAI_FINISH_REASON = {
   STOP: 'stop',
