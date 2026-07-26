@@ -6,7 +6,14 @@ function normalize(value: unknown): unknown {
     const output = Object.create(null) as Record<string, unknown>;
     for (const key of Object.keys(value).sort()) {
       const item = (value as Record<string, unknown>)[key];
-      if (item !== undefined) output[key] = normalize(item);
+      if (item !== undefined) {
+        Object.defineProperty(output, key, {
+          configurable: false,
+          enumerable: true,
+          value: normalize(item),
+          writable: false,
+        });
+      }
     }
     return output;
   }

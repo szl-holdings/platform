@@ -257,8 +257,46 @@ test('prevents a side effect when the before-receipt cannot be persisted', async
 
 test('binds own __proto__ keys into canonical argument digests', () => {
   const complete = JSON.parse('{"a":1,"__proto__":{"admin":true}}') as unknown;
-  assert.notEqual(canonicalJson(complete), canonicalJson({ a: 1 }));
+  const stripped = { a: 1 };
+  assert.notEqual(canonicalJson(complete), canonicalJson(stripped));
+  assert.notEqual(sha256(canonicalJson(complete)), sha256(canonicalJson(stripped)));
   assert.equal(canonicalJson(complete), '{"__proto__":{"admin":true},"a":1}');
+  assert.equal(({} as { admin?: boolean }).admin, undefined);
+});
+
+test('preserves nested prototype-like keys without digest collisions or pollution', () => {
+  const complete = JSON.parse(
+    '{"outer":{"prototype":{"level":"own"},"constructor":{"prototype":{"polluted":true}},"__proto__":{"admin":true}}}',
+  ) as unknown;
+  const stripped = JSON.parse(
+    '{"outer":{"prototype":{"level":"own"},"constructor":{"prototype":{"polluted":true}}}}',
+  ) as unknown;
+
+  assert.equal(
+    canonicalJson(complete),
+    '{"outer":{"__proto__":{"admin":true},"constructor":{"prototype":{"polluted":true}},"prototype":{"level":"own"}}}',
+  );
+  assert.notEqual(sha256(canonicalJson(complete)), sha256(canonicalJson(stripped)));
+  assert.equal(({} as { admin?: boolean; polluted?: boolean }).admin, undefined);
+  assert.equal(({} as { admin?: boolean; polluted?: boolean }).polluted, undefined);
+});
+
+test('binds defined prototype keys on null-prototype inputs', () => {
+  const complete = Object.create(null) as Record<string, unknown>;
+  Object.defineProperty(complete, '__proto__', {
+    enumerable: true,
+    value: { scope: 'governed' },
+  });
+  complete.action = 'write';
+
+  assert.equal(
+    canonicalJson(complete),
+    '{"__proto__":{"scope":"governed"},"action":"write"}',
+  );
+  assert.notEqual(
+    sha256(canonicalJson(complete)),
+    sha256(canonicalJson({ action: 'write' })),
+  );
 });
 
 test('canonicalizes a void action result before persisting the after receipt', async () => {
