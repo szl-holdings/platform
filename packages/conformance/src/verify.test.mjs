@@ -6,62 +6,119 @@ import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import test from 'node:test';
 import { fileURLToPath } from 'node:url';
-import { publicKeyFingerprint, signDssePayload, verifyDsseEnvelope } from './verify.mjs';
+import {
+  KHIPU_PAYLOAD_TYPE,
+  publicKeyFingerprint,
+  signDssePayload,
+  VERIFICATION_STATUS,
+  verifyDsseEnvelope,
+} from './verify.mjs';
 
-function keys() {
-  const { privateKey, publicKey } = generateKeyPairSync('ed25519');
+function keys(type = 'ed25519') {
+  const { privateKey, publicKey } =
+    type === 'ec'
+      ? generateKeyPairSync('ec', { namedCurve: 'prime256v1' })
+      : generateKeyPairSync('ed25519');
   return {
     privateKeyPem: privateKey.export({ format: 'pem', type: 'pkcs8' }),
     publicKeyPem: publicKey.export({ format: 'pem', type: 'spki' }),
   };
 }
 
-test('offline verifier accepts genuine and rejects tampered DSSE receipts', () => {
-  const keyPair = keys();
-  const envelope = signDssePayload(
+function fixtureSet(type = 'ed25519') {
+  const signer = keys(type);
+  const wrongSigner = keys(type);
+  const knownGood = signDssePayload(
     { receiptId: 'receipt-1', surface: 'a11oy', parentHash: null },
-    keyPair,
+    { ...signer, keyid: `fixture-${type}` },
   );
-  const expectedFingerprint = publicKeyFingerprint(keyPair.publicKeyPem);
-  assert.equal(
-    verifyDsseEnvelope(envelope, {
-      publicKeyPem: keyPair.publicKeyPem,
-      expectedFingerprint,
-    }).valid,
-    true,
-  );
-
   const tampered = {
-    ...envelope,
+    ...knownGood,
     payload: Buffer.from(
       JSON.stringify({ receiptId: 'receipt-1', surface: 'sentra', parentHash: null }),
     ).toString('base64'),
   };
-  assert.equal(
-    verifyDsseEnvelope(tampered, {
-      publicKeyPem: keyPair.publicKeyPem,
-      expectedFingerprint,
-    }).valid,
-    false,
-  );
+  const wrongType = { ...knownGood, payloadType: 'application/vnd.szl.khipu+json' };
+  return {
+    signer,
+    wrongSigner,
+    expectedFingerprint: publicKeyFingerprint(signer.publicKeyPem),
+    knownGood,
+    tampered,
+    wrongType,
+    unpinned: knownGood,
+  };
+}
+
+test('known-good Ed25519 receipt verifies only against a pinned trust root', () => {
+  const fixture = fixtureSet();
+  const result = verifyDsseEnvelope(fixture.knownGood, {
+    publicKeyPem: fixture.signer.publicKeyPem,
+    expectedFingerprint: fixture.expectedFingerprint,
+  });
+  assert.equal(result.status, VERIFICATION_STATUS.VERIFIED);
+  assert.equal(result.valid, true);
+  assert.equal(result.algorithm, 'Ed25519');
 });
 
-test('CLI exits 0 genuine and 1 tampered in offline mode', async () => {
-  const keyPair = keys();
+test('fingerprint-only pin verifies the matching embedded key', () => {
+  const fixture = fixtureSet();
+  const result = verifyDsseEnvelope(fixture.knownGood, {
+    expectedFingerprint: fixture.expectedFingerprint,
+  });
+  assert.equal(result.status, VERIFICATION_STATUS.VERIFIED);
+  assert.equal(result.trust, 'pinned-embedded-key-fingerprint');
+});
+
+test('ECDSA P-256 receipt verifies with SHA-256', () => {
+  const fixture = fixtureSet('ec');
+  const result = verifyDsseEnvelope(fixture.knownGood, {
+    publicKeyPem: fixture.signer.publicKeyPem,
+  });
+  assert.equal(result.status, VERIFICATION_STATUS.VERIFIED);
+  assert.equal(result.algorithm, 'ECDSA-P256-SHA256');
+});
+
+test('tampered, wrong-key, and wrong-type fixtures are invalid', () => {
+  const fixture = fixtureSet();
+  const options = {
+    publicKeyPem: fixture.signer.publicKeyPem,
+    expectedFingerprint: fixture.expectedFingerprint,
+  };
+  assert.equal(verifyDsseEnvelope(fixture.tampered, options).status, VERIFICATION_STATUS.INVALID);
+  assert.equal(
+    verifyDsseEnvelope(fixture.knownGood, {
+      publicKeyPem: fixture.wrongSigner.publicKeyPem,
+    }).status,
+    VERIFICATION_STATUS.INVALID,
+  );
+  assert.equal(verifyDsseEnvelope(fixture.wrongType, options).status, VERIFICATION_STATUS.INVALID);
+});
+
+test('valid self-signed receipt without an external pin is indeterminate', () => {
+  const fixture = fixtureSet();
+  const result = verifyDsseEnvelope(fixture.unpinned);
+  assert.equal(result.valid, false);
+  assert.equal(result.status, VERIFICATION_STATUS.INDETERMINATE);
+  assert.equal(result.signatureValid, true);
+  assert.equal(result.trust, 'embedded-key-unpinned');
+});
+
+test('CLI keeps verified=0, invalid=1, and indeterminate or usage=2', async () => {
+  const fixture = fixtureSet();
   const directory = await mkdtemp(join(tmpdir(), 'szl-verify-'));
   const keyPath = join(directory, 'public.pem');
+  const invalidKeyPath = join(directory, 'invalid-public.pem');
   const genuinePath = join(directory, 'genuine.json');
+  const invalidJsonPath = join(directory, 'invalid.json');
   const tamperedPath = join(directory, 'tampered.json');
-  const envelope = signDssePayload(
-    { receiptId: 'receipt-cli', surface: 'a11oy', parentHash: null },
-    keyPair,
-  );
-  await writeFile(keyPath, keyPair.publicKeyPem);
-  await writeFile(genuinePath, JSON.stringify(envelope));
-  await writeFile(
-    tamperedPath,
-    JSON.stringify({ ...envelope, payload: `${envelope.payload.slice(0, -4)}AAAA` }),
-  );
+  const wrongTypePath = join(directory, 'wrong-type.json');
+  await writeFile(keyPath, fixture.signer.publicKeyPem);
+  await writeFile(invalidKeyPath, 'not a public key');
+  await writeFile(genuinePath, JSON.stringify(fixture.knownGood));
+  await writeFile(invalidJsonPath, '{');
+  await writeFile(tamperedPath, JSON.stringify(fixture.tampered));
+  await writeFile(wrongTypePath, JSON.stringify(fixture.wrongType));
 
   const cli = fileURLToPath(new URL('./verify-cli.mjs', import.meta.url));
   const genuine = spawnSync(
@@ -74,6 +131,59 @@ test('CLI exits 0 genuine and 1 tampered in offline mode', async () => {
     [cli, '--file', tamperedPath, '--public-key', keyPath, '--offline'],
     { encoding: 'utf8' },
   );
+  const wrongType = spawnSync(
+    process.execPath,
+    [cli, '--file', wrongTypePath, '--public-key', keyPath, '--offline'],
+    { encoding: 'utf8' },
+  );
+  const unpinned = spawnSync(process.execPath, [cli, '--file', genuinePath, '--offline'], {
+    encoding: 'utf8',
+  });
+  const usage = spawnSync(process.execPath, [cli, '--file', genuinePath], {
+    encoding: 'utf8',
+  });
+  const invalidTrustInput = spawnSync(
+    process.execPath,
+    [cli, '--file', genuinePath, '--public-key', invalidKeyPath, '--offline'],
+    { encoding: 'utf8' },
+  );
+  const invalidJson = spawnSync(
+    process.execPath,
+    [cli, '--file', invalidJsonPath, '--public-key', keyPath, '--offline'],
+    { encoding: 'utf8' },
+  );
   assert.equal(genuine.status, 0, genuine.stderr);
   assert.equal(tampered.status, 1, tampered.stderr);
+  assert.equal(wrongType.status, 1, wrongType.stderr);
+  assert.equal(unpinned.status, 2, unpinned.stderr);
+  assert.match(unpinned.stdout, /^INDETERMINATE /);
+  assert.equal(usage.status, 2);
+  assert.equal(invalidTrustInput.status, 2);
+  assert.match(invalidTrustInput.stdout, /^INDETERMINATE /);
+  assert.equal(invalidJson.status, 1);
+});
+
+test('CLI accepts a fingerprint-only trust root and always enforces the KHIPU type', async () => {
+  const fixture = fixtureSet('ec');
+  const directory = await mkdtemp(join(tmpdir(), 'szl-verify-fingerprint-'));
+  const genuinePath = join(directory, 'genuine.json');
+  await writeFile(genuinePath, JSON.stringify(fixture.knownGood));
+
+  const cli = fileURLToPath(new URL('./verify-cli.mjs', import.meta.url));
+  const result = spawnSync(
+    process.execPath,
+    [
+      cli,
+      '--file',
+      genuinePath,
+      '--expected-fingerprint',
+      fixture.expectedFingerprint,
+      '--offline',
+    ],
+    { encoding: 'utf8' },
+  );
+  assert.equal(result.status, 0, result.stderr);
+  assert.match(result.stdout, /^VERIFIED sha256:[0-9a-f]{64}/);
+  assert.match(result.stdout, /algorithm=ECDSA-P256-SHA256/);
+  assert.equal(KHIPU_PAYLOAD_TYPE, 'application/vnd.szl.khipu.receipt+json');
 });
