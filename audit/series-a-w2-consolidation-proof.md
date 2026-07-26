@@ -118,7 +118,7 @@ The two OTel successor claims conflict and are both REPORTED. This proof packet 
 | Public claim check | PASS | Counts are MEASURED at `2026-07-26T01:30:42.617Z` and carry an explicit drift boundary. Substitutions are MODELED. |
 | Security check | PASS | No token, credential, private key, `.env` value, or non-public repository identifier, setting, branch, ref, head, or evidence fingerprint is included. |
 | UI screenshot | NOT APPLICABLE | Markdown-only change; no UI surface changed. |
-| Typecheck | NOT APPLICABLE TO THIS MARKDOWN-ONLY DIFF | No source or build configuration changes; protected hosted checks remain authoritative. |
+| Typecheck | HOSTED PASS; LOCAL ENVIRONMENT FAILURE RECORDED | Hosted `turbo run typecheck` completed with exit code 0 at exact pre-review head `92142370635d99018cc0b6bc554427db99e58603`: 179/179 tasks succeeded in 13m31.682s with no cache ([job 89753034692](https://github.com/szl-holdings/platform/actions/runs/30186863177/job/89753034692)). After this Markdown-only review edit, local `CI=true pnpm typecheck` exited 1 because the Windows workspace installer removed the local TypeScript executable (`node_modules/.pnpm/typescript@6.0.3/.../tsc`); no TypeScript source, package, lockfile, or build configuration changed. The hosted full-pass baseline is unchanged, and exact amended-head hosted CI remains a required merge gate. |
 | Known gaps update | NOT REQUIRED | The plan records unresolved decisions in itself and does not change runtime or readiness status. |
 
 ## Verification notes

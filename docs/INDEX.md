@@ -96,6 +96,7 @@ Use [docs/README.md](README.md) for navigation by audience or task.
 
 | Document | Description | Last Reviewed |
 |----------|-------------|---------------|
+| [CONSOLIDATION.md](CONSOLIDATION.md) | Founder-gated, public-only GitHub estate consolidation proposal with measured snapshot, hard stops, and reversible execution design; no mutations applied | 2026-07 |
 | [operations/operations-runbook.md](operations/operations-runbook.md) | Primary operations runbook: monitoring, health checks, maintenance | 2026-04 |
 | [operations/deployment-guide.md](operations/deployment-guide.md) | Staging and production deployment procedures | 2026-04 |
 | [operations/environment-variables.md](operations/environment-variables.md) | Complete environment variable reference: all 80+ vars | 2026-04 |
