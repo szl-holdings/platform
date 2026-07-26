@@ -147,6 +147,13 @@ export function validateOverclaimLedger({ ledger, ledgerBytes, manifest, root = 
     if (correction?.kind !== 'github_commit_correction') {
       fail(`${incident.id}: missing correction snapshot`);
     } else {
+      const expectedCorrectionUrl = `https://github.com/${correction.repository}/commit/${correction.commit}`;
+      if (correction.source_url !== incident.correction_url) {
+        fail(`${incident.id}: correction source URL mismatch`);
+      }
+      if (correction.source_url !== expectedCorrectionUrl) {
+        fail(`${incident.id}: correction source URL does not bind the correction commit`);
+      }
       if (correction.commit !== incident.correction_commit) {
         fail(`${incident.id}: correction commit mismatch`);
       }
