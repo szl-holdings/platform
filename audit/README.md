@@ -30,6 +30,7 @@ mean.
 | [`deployment-surface.md`](./deployment-surface.md) | Environments, CI/CD pipelines, IaC, deployment readiness per artifact | Deployment state |
 | [`public-claims-reconciliation.md`](./public-claims-reconciliation.md) | Diff of every numeric claim across all public docs vs. verified reality | What was wrong, what was corrected |
 | [`source-of-truth.json`](./source-of-truth.json) | Machine-readable canonical counts with the exact command used to compute each | Single source of truth — use this for downstream automation |
+| [`FRONTIER_TRUTH_DRIFT_PROOF.md`](./FRONTIER_TRUTH_DRIFT_PROOF.md) | Frontier truth-drift proof packet | Incremental claim scanning layered onto the canonical truth gate |
 | [`root-cleanup-report.md`](./root-cleanup-report.md) | What was deleted, archived, or relocated from the root directory, and why | Root hygiene record |
 | [`FRONTIER_F1_PROOF.md`](./FRONTIER_F1_PROOF.md) | Frontier F1 regulatory evidence proof packet | EU AI Act mapping, receipt v2, Article 12 export, and ISO gap verification |
 | [`FRONTIER_F2_1_PROOF.md`](./FRONTIER_F2_1_PROOF.md) | Frontier F2.1 interoperability proof packet | OpenTelemetry GenAI and MCP boundary verification with explicit claim limits |

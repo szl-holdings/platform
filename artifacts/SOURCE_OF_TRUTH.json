@@ -27,7 +27,7 @@
       "source": "artifacts/mcp-e2e-test-results.json"
     },
     "monorepo_packages": {
-      "value": 199,
+      "value": 200,
       "label": "MEASURED",
       "source": "pnpm -r list --depth -1 --json"
     },

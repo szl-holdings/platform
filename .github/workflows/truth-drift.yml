@@ -5,6 +5,12 @@ on:
   push:
     branches: [main]
   workflow_dispatch:
+    inputs:
+      full_claim_scan:
+        description: Scan the full tracked claim corpus, including legacy debt
+        required: false
+        default: false
+        type: boolean
 
 permissions:
   contents: read
@@ -45,6 +51,16 @@ jobs:
 
       - name: Reject hardcoded metric drift
         run: pnpm claims:drift
+
+      - name: Reject newly introduced claim drift
+        if: github.event_name != 'workflow_dispatch'
+        env:
+          BASE_SHA: ${{ github.event.pull_request.base.sha || github.event.before }}
+        run: node tools/truth/check-claims.ts --base "$BASE_SHA"
+
+      - name: Audit the complete claim corpus
+        if: github.event_name == 'workflow_dispatch' && inputs.full_claim_scan
+        run: node tools/truth/check-claims.ts --all
 
       - name: Reject source-of-truth drift
         run: git diff --exit-code -- artifacts/SOURCE_OF_TRUTH.json
