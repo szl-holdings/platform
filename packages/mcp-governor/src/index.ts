@@ -5,9 +5,11 @@ export {
   verifyCapabilityToken,
 } from './capability.js';
 export {
+  bindGovernedExecutor,
   createGovernedActionEnvelope,
   GovernanceDeniedError,
   GovernancePostReceiptError,
+  type GovernedActionExecutor,
   InMemoryReplayStore,
   McpGovernor,
 } from './governor.js';

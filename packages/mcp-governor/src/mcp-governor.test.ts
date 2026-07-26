@@ -3,15 +3,19 @@ import { generateKeyPairSync } from 'node:crypto';
 import test from 'node:test';
 
 import {
+  bindGovernedExecutor,
   type CapabilityClaims,
   CapabilityTokenError,
   canonicalJson,
   GovernanceDeniedError,
+  type GovernedActionExecutor,
   type GovernanceReceipt,
   type GovernedActionEnvelope,
   type GovernedActionRequest,
+  type GovernedActionResult,
   InMemoryReplayStore,
   type PolicyDecision,
+  type ReplayStore,
   McpGovernor,
   sha256,
   signCapabilityToken,
@@ -64,9 +68,15 @@ function createGovernor(
       args: unknown,
     ) => Promise<PolicyDecision>;
     writer?: (receipt: GovernanceReceipt) => Promise<void>;
+    replayStore?: ReplayStore;
   } = {},
-): McpGovernor {
-  return new McpGovernor({
+): {
+  run<T>(
+    request: GovernedActionRequest,
+    execute: (args: unknown) => Promise<T>,
+  ): Promise<GovernedActionResult<T>>;
+} {
+  const governor = new McpGovernor({
     policyEvaluator:
       options.policy ?? (async () => ({ effect: 'allow', reason: 'policy permits action' })),
     capabilityPublicKeyResolver: () => capabilityPublicKey,
@@ -76,9 +86,14 @@ function createGovernor(
       (async (receipt) => {
         receipts.push(receipt);
       }),
+    replayStore: options.replayStore,
     expectedCapabilityIssuer: 'szl-control-plane',
     clock: () => NOW,
   });
+  return {
+    run: (governedRequest, execute) =>
+      governor.run(governedRequest, bindGovernedExecutor(execute)),
+  };
 }
 
 test('signs and verifies model-independent capability claims', async () => {
@@ -472,5 +487,79 @@ test('binds error receipts to stable failure codes and messages', async () => {
   assert.equal(
     deniedReceipt.resultDigest,
     sha256(canonicalJson({ code: 'EACCES', message: 'permission denied' })),
+  );
+});
+
+test('rejects legacy closure executors that are not bound to governed arguments', async () => {
+  const receipts: GovernanceReceipt[] = [];
+  const governor = new McpGovernor({
+    policyEvaluator: async () => ({ effect: 'allow', reason: 'policy permits action' }),
+    capabilityPublicKeyResolver: () => capabilityPublicKey,
+    receiptSigner: { keyId: 'receipt-key-1', privateKey: receiptPrivateKey },
+    receiptWriter: async (receipt) => {
+      receipts.push(receipt);
+    },
+    expectedCapabilityIssuer: 'szl-control-plane',
+    clock: () => NOW,
+  });
+  const mutableArgs = { amount: 10 };
+  const legacyExecutor = async () => mutableArgs.amount;
+
+  await assert.rejects(
+    governor.run(
+      request({ actionId: 'action-legacy-executor', args: mutableArgs }),
+      legacyExecutor as unknown as GovernedActionExecutor<number>,
+    ),
+    /bindGovernedExecutor/,
+  );
+  assert.equal(receipts.length, 0);
+});
+
+test('snapshots and freezes a mutable policy decision before later awaits', async () => {
+  const receipts: GovernanceReceipt[] = [];
+  let enterReplay!: () => void;
+  let releaseReplay!: () => void;
+  const replayEntered = new Promise<void>((resolve) => {
+    enterReplay = resolve;
+  });
+  const replayGate = new Promise<void>((resolve) => {
+    releaseReplay = resolve;
+  });
+  const replayStore: ReplayStore = {
+    consume: async () => {
+      enterReplay();
+      await replayGate;
+      return true;
+    },
+  };
+  const mutableDecision: PolicyDecision = {
+    effect: 'allow',
+    reason: 'original authorization',
+    policyVersion: 'covenant-original',
+  };
+  const governor = createGovernor(receipts, {
+    policy: async () => mutableDecision,
+    replayStore,
+  });
+
+  const running = governor.run(
+    request({ actionId: 'action-decision-snapshot' }),
+    async () => ({ ok: true }),
+  );
+  await replayEntered;
+  mutableDecision.reason = 'mutated authorization';
+  mutableDecision.policyVersion = 'covenant-mutated';
+  releaseReplay();
+
+  const outcome = await running;
+  assert.equal(Object.isFrozen(outcome.decision), true);
+  assert.equal(outcome.decision.reason, 'original authorization');
+  assert.equal(outcome.decision.policyVersion, 'covenant-original');
+  assert.deepEqual(
+    receipts.map((item) => [item.reason, item.policyVersion]),
+    [
+      ['original authorization', 'covenant-original'],
+      ['original authorization', 'covenant-original'],
+    ],
   );
 });

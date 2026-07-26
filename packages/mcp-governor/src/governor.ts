@@ -13,6 +13,19 @@ import type {
   VerifiedCapability,
 } from './types.js';
 
+const GOVERNED_EXECUTOR = Symbol('szl.governed-executor/v1');
+
+export interface GovernedActionExecutor<T> {
+  readonly [GOVERNED_EXECUTOR]: true;
+  readonly execute: (args: unknown) => Promise<T>;
+}
+
+export function bindGovernedExecutor<T>(
+  execute: (args: unknown) => Promise<T>,
+): GovernedActionExecutor<T> {
+  return Object.freeze({ [GOVERNED_EXECUTOR]: true as const, execute });
+}
+
 export class InMemoryReplayStore implements ReplayStore {
   private readonly consumed = new Map<string, number>();
 
@@ -47,7 +60,7 @@ export class GovernancePostReceiptError extends Error {
 }
 
 function block(reason: string): PolicyDecision {
-  return { effect: 'block', reason };
+  return Object.freeze({ effect: 'block', reason });
 }
 
 function deepFreeze(value: unknown): unknown {
@@ -93,7 +106,11 @@ function validateDecision(value: PolicyDecision): PolicyDecision {
   ) {
     return block('policy_evaluator_invalid_result');
   }
-  return value;
+  return Object.freeze({
+    effect: value.effect,
+    reason: value.reason,
+    ...(value.policyVersion === undefined ? {} : { policyVersion: value.policyVersion }),
+  });
 }
 
 export function createGovernedActionEnvelope(
@@ -128,8 +145,16 @@ export class McpGovernor {
 
   async run<T>(
     request: GovernedActionRequest,
-    execute: (args: unknown) => Promise<T>,
+    executor: GovernedActionExecutor<T>,
   ): Promise<GovernedActionResult<T>> {
+    if (
+      !executor ||
+      typeof executor !== 'object' ||
+      executor[GOVERNED_EXECUTOR] !== true ||
+      typeof executor.execute !== 'function'
+    ) {
+      throw new TypeError('execute must be created with bindGovernedExecutor');
+    }
     const clock = this.config.clock ?? (() => new Date());
     const argsSnapshot = immutableCanonicalSnapshot(request.args);
     const envelope = createGovernedActionEnvelope({ ...request, args: argsSnapshot }, clock());
@@ -216,7 +241,7 @@ export class McpGovernor {
 
     let result: T;
     try {
-      result = await execute(argsSnapshot);
+      result = await executor.execute(argsSnapshot);
     } catch (error) {
       try {
         await persist(
