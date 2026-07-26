@@ -1,7 +1,7 @@
 {
   "schema": "szl.truth/v1",
-  "generated_at": "2026-07-26T00:40:52.377Z",
-  "generated_by": "8776b1b9e557edc8927321923a36e7bce3a88ca8",
+  "generated_at": "2026-07-26T01:17:03.689Z",
+  "generated_by": "eb86cf228f8bcb7a20c4c48ce3081345172cc8ec",
   "metrics": {
     "surfaces_customer_facing": {
       "value": 0,
@@ -27,7 +27,7 @@
       "source": "artifacts/mcp-e2e-test-results.json"
     },
     "monorepo_packages": {
-      "value": 197,
+      "value": 198,
       "label": "MEASURED",
       "source": "pnpm -r list --depth -1 --json"
     },
