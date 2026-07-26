@@ -17,6 +17,13 @@ An evaluation applies to one immutable decision evidence bundle. The bundle must
 identify its subject and evaluation time. Claims about an organization, product,
 or historic run cannot be inferred from one bundle.
 
+The reference evaluators bind that identity to the evaluated states with
+`bundle_sha256`. Its input is UTF-8 JSON with keys sorted lexicographically and
+no insignificant whitespace:
+`{"evaluated_at":<timestamp>,"evidence":<state-map>,"subject":<subject>}`.
+The digest field itself is excluded from those canonical bytes. A mismatched
+digest or an impossible calendar timestamp fails before a level is awarded.
+
 Each requirement has one of three states:
 
 - `VERIFIED`: the evaluator checked the referenced evidence.

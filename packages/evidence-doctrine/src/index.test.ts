@@ -4,6 +4,7 @@ import assert from 'node:assert/strict';
 import test from 'node:test';
 import {
   assertLambdaCaseStudy,
+  computeDecisionBundleSha256,
   type DecisionEvidence,
   type DecisionEvidenceBundle,
   evaluateTheoremU,
@@ -13,15 +14,23 @@ import {
 
 const BUNDLE_IDENTITY = {
   subject: 'decision:fixture:001',
-  bundle_sha256: 'a'.repeat(64),
   evaluated_at: '2026-07-26T07:00:00Z',
 };
 
 function bundle(
   evidence: DecisionEvidence,
-  identity: DecisionEvidenceBundle['identity'] = BUNDLE_IDENTITY,
+  identity: Partial<DecisionEvidenceBundle['identity']> = {},
 ): DecisionEvidenceBundle {
-  return { identity, evidence };
+  const baseIdentity = { ...BUNDLE_IDENTITY, ...identity };
+  return {
+    identity: {
+      ...baseIdentity,
+      bundle_sha256:
+        identity.bundle_sha256 ??
+        computeDecisionBundleSha256(baseIdentity.subject, baseIdentity.evaluated_at, evidence),
+    },
+    evidence,
+  };
 }
 
 function verifiedThrough(level: 'D1' | 'D2' | 'D3' | 'D4'): DecisionEvidence {
@@ -46,7 +55,10 @@ test('D0 when a D1 record is incomplete', () => {
   assert.equal(result.achieved_level, 'D0');
   assert.deepEqual(result.blocking_requirements, ['policy_recorded']);
   assert.equal(result.bundle_subject, BUNDLE_IDENTITY.subject);
-  assert.equal(result.bundle_sha256, BUNDLE_IDENTITY.bundle_sha256);
+  assert.equal(
+    result.bundle_sha256,
+    'b495d3bb901fc6bdc4ea3b7ad9c32932fcc220ee02de8dd2e192c4ab15a765ee',
+  );
   assert.equal(result.evaluated_at, BUNDLE_IDENTITY.evaluated_at);
 });
 
@@ -87,7 +99,6 @@ test('bundle identity is required and validated before grading', () => {
     () =>
       gradeDecision(
         bundle(verifiedThrough('D1'), {
-          ...BUNDLE_IDENTITY,
           bundle_sha256: 'NOT-A-DIGEST',
         }),
       ),
@@ -97,8 +108,30 @@ test('bundle identity is required and validated before grading', () => {
     () =>
       gradeDecision(
         bundle(verifiedThrough('D1'), {
-          ...BUNDLE_IDENTITY,
           evaluated_at: '2026-07-26T07:00:00',
+        }),
+      ),
+    /timezone-qualified timestamp/,
+  );
+});
+
+test('bundle digest is recomputed from canonical evidence bytes', () => {
+  const d1Bundle = bundle(verifiedThrough('D1'));
+  const reusedDigest = d1Bundle.identity.bundle_sha256;
+  d1Bundle.evidence.policy_recorded = 'UNVERIFIED';
+  assert.throws(() => gradeDecision(d1Bundle), /does not match the canonical/);
+  assert.throws(
+    () => gradeDecision(bundle(verifiedThrough('D4'), { bundle_sha256: reusedDigest })),
+    /does not match the canonical/,
+  );
+});
+
+test('impossible calendar timestamps are rejected instead of normalized', () => {
+  assert.throws(
+    () =>
+      gradeDecision(
+        bundle(verifiedThrough('D1'), {
+          evaluated_at: '2026-02-30T07:00:00Z',
         }),
       ),
     /timezone-qualified timestamp/,

@@ -1,5 +1,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
+import { createHash } from 'node:crypto';
+
 export const EVIDENCE_STATES = ['VERIFIED', 'UNVERIFIED', 'ABSENT'] as const;
 export type EvidenceState = (typeof EVIDENCE_STATES)[number];
 
@@ -23,6 +25,7 @@ export const LEVEL_REQUIREMENTS = {
 
 export type Requirement = (typeof LEVEL_REQUIREMENTS)[keyof typeof LEVEL_REQUIREMENTS][number];
 export type DecisionEvidence = Partial<Record<Requirement, EvidenceState>>;
+const REQUIREMENT_NAMES = new Set<string>(Object.values(LEVEL_REQUIREMENTS).flat());
 
 export interface DecisionBundleIdentity {
   subject: string;
@@ -48,6 +51,9 @@ export interface GradeResult {
   note: string;
 }
 
+const TIMESTAMP_PATTERN =
+  /^(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2}):(\d{2})(?:\.\d+)?(Z|[+-]\d{2}:\d{2})$/;
+
 function validateEvidenceState(requirement: Requirement, state: unknown): EvidenceState {
   if (!EVIDENCE_STATES.includes(state as EvidenceState)) {
     throw new TypeError(
@@ -55,6 +61,46 @@ function validateEvidenceState(requirement: Requirement, state: unknown): Eviden
     );
   }
   return state as EvidenceState;
+}
+
+function isStrictTimestamp(value: string): boolean {
+  const match = TIMESTAMP_PATTERN.exec(value);
+  if (!match) return false;
+  const [, yearText, monthText, dayText, hourText, minuteText, secondText, zone] = match;
+  const year = Number(yearText);
+  const month = Number(monthText);
+  const day = Number(dayText);
+  const hour = Number(hourText);
+  const minute = Number(minuteText);
+  const second = Number(secondText);
+  if (year < 1 || month < 1 || month > 12 || hour > 23 || minute > 59 || second > 59) {
+    return false;
+  }
+  const leapYear = year % 4 === 0 && (year % 100 !== 0 || year % 400 === 0);
+  const daysInMonth = [31, leapYear ? 29 : 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31];
+  if (day < 1 || day > daysInMonth[month - 1]) return false;
+  if (zone !== 'Z') {
+    const zoneHours = Number(zone.slice(1, 3));
+    const zoneMinutes = Number(zone.slice(4, 6));
+    if (zoneHours > 23 || zoneMinutes > 59) return false;
+  }
+  return true;
+}
+
+export function computeDecisionBundleSha256(
+  subject: string,
+  evaluatedAt: string,
+  evidence: DecisionEvidence,
+): string {
+  const orderedEvidence = Object.fromEntries(
+    Object.entries(evidence).sort(([left], [right]) => left.localeCompare(right)),
+  );
+  const canonicalBundle = JSON.stringify({
+    evaluated_at: evaluatedAt,
+    evidence: orderedEvidence,
+    subject,
+  });
+  return createHash('sha256').update(canonicalBundle, 'utf8').digest('hex');
 }
 
 function validateBundle(bundle: DecisionEvidenceBundle): DecisionEvidenceBundle {
@@ -78,15 +124,25 @@ function validateBundle(bundle: DecisionEvidenceBundle): DecisionEvidenceBundle 
   ) {
     throw new TypeError('identity.bundle_sha256 must be a lowercase sha256 digest');
   }
-  if (
-    typeof identity.evaluated_at !== 'string' ||
-    !/(?:Z|[+-]\d{2}:\d{2})$/.test(identity.evaluated_at) ||
-    Number.isNaN(Date.parse(identity.evaluated_at))
-  ) {
+  if (typeof identity.evaluated_at !== 'string' || !isStrictTimestamp(identity.evaluated_at)) {
     throw new TypeError('identity.evaluated_at must be a timezone-qualified timestamp');
   }
   if (typeof evidence !== 'object' || evidence === null || Array.isArray(evidence)) {
     throw new TypeError('decision bundle evidence must be an object');
+  }
+  const unknownRequirement = Object.keys(evidence).find((name) => !REQUIREMENT_NAMES.has(name));
+  if (unknownRequirement) {
+    throw new TypeError(`unknown evidence requirement: ${unknownRequirement}`);
+  }
+  const expectedDigest = computeDecisionBundleSha256(
+    identity.subject,
+    identity.evaluated_at,
+    evidence,
+  );
+  if (identity.bundle_sha256 !== expectedDigest) {
+    throw new TypeError(
+      'identity.bundle_sha256 does not match the canonical subject, evaluated_at, and evidence bytes',
+    );
   }
   return bundle;
 }

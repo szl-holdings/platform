@@ -5,20 +5,30 @@ import unittest
 from evidence_doctrine import (
     LEVEL_REQUIREMENTS,
     assert_lambda_case_study,
+    compute_decision_bundle_sha256,
     evaluate_theorem_u,
     grade_decision,
 )
 
 BUNDLE_IDENTITY = {
     "subject": "decision:fixture:001",
-    "bundle_sha256": "a" * 64,
     "evaluated_at": "2026-07-26T07:00:00Z",
 }
 
 
 def bundle(evidence: dict, identity: dict | None = None) -> dict:
+    supplied_identity = dict(BUNDLE_IDENTITY)
+    supplied_identity.update(identity or {})
+    supplied_identity.setdefault(
+        "bundle_sha256",
+        compute_decision_bundle_sha256(
+            supplied_identity["subject"],
+            supplied_identity["evaluated_at"],
+            evidence,
+        ),
+    )
     return {
-        "identity": dict(identity or BUNDLE_IDENTITY),
+        "identity": supplied_identity,
         "evidence": evidence,
     }
 
@@ -45,7 +55,9 @@ class EvidenceDoctrineTests(unittest.TestCase):
         self.assertEqual(result.blocking_requirements, ("policy_recorded",))
         self.assertEqual(result.bundle_subject, BUNDLE_IDENTITY["subject"])
         self.assertEqual(
-            result.bundle_sha256, BUNDLE_IDENTITY["bundle_sha256"]
+            result.bundle_sha256,
+            "b495d3bb901fc6bdc4ea3b7ad9c32932"
+            "fcc220ee02de8dd2e192c4ab15a765ee",
         )
         self.assertEqual(result.evaluated_at, BUNDLE_IDENTITY["evaluated_at"])
 
@@ -75,17 +87,39 @@ class EvidenceDoctrineTests(unittest.TestCase):
             grade_decision(
                 bundle(
                     verified_through("D1"),
-                    dict(BUNDLE_IDENTITY, bundle_sha256="NOT-A-DIGEST"),
+                    {"bundle_sha256": "NOT-A-DIGEST"},
                 )
             )
         with self.assertRaisesRegex(TypeError, "timezone-qualified timestamp"):
             grade_decision(
                 bundle(
                     verified_through("D1"),
-                    dict(
-                        BUNDLE_IDENTITY,
-                        evaluated_at="2026-07-26T07:00:00",
-                    ),
+                    {"evaluated_at": "2026-07-26T07:00:00"},
+                )
+            )
+
+    def test_bundle_digest_is_recomputed_from_canonical_evidence_bytes(self):
+        d1_bundle = bundle(verified_through("D1"))
+        reused_digest = d1_bundle["identity"]["bundle_sha256"]
+        d1_bundle["evidence"]["policy_recorded"] = "UNVERIFIED"
+        with self.assertRaisesRegex(TypeError, "does not match the canonical"):
+            grade_decision(d1_bundle)
+        with self.assertRaisesRegex(TypeError, "does not match the canonical"):
+            grade_decision(
+                bundle(
+                    verified_through("D4"),
+                    {"bundle_sha256": reused_digest},
+                )
+            )
+
+    def test_impossible_calendar_timestamp_is_rejected(self):
+        with self.assertRaisesRegex(
+            TypeError, "timezone-qualified timestamp"
+        ):
+            grade_decision(
+                bundle(
+                    verified_through("D1"),
+                    {"evaluated_at": "2026-02-30T07:00:00Z"},
                 )
             )
 

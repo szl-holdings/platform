@@ -1,6 +1,8 @@
 # SPDX-License-Identifier: Apache-2.0
 """Fail-closed Decision-SLSA reference evaluator."""
 
+import hashlib
+import json
 import re
 from collections.abc import Mapping
 from dataclasses import asdict, dataclass
@@ -22,6 +24,16 @@ LEVEL_REQUIREMENTS = {
     ),
 }
 THEOREM_U_PREMISES = ("premise_u1", "premise_u2", "premise_u3")
+REQUIREMENT_NAMES = frozenset(
+    requirement
+    for requirements in LEVEL_REQUIREMENTS.values()
+    for requirement in requirements
+)
+TIMESTAMP_PATTERN = re.compile(
+    r"^(\d{4})-(\d{2})-(\d{2})T"
+    r"(\d{2}):(\d{2}):(\d{2})(?:\.\d+)?"
+    r"(Z|[+-]\d{2}:\d{2})$"
+)
 
 
 @dataclass(frozen=True)
@@ -48,6 +60,50 @@ def _validate_state(requirement: str, state: object) -> str:
             f"received {state!r}"
         )
     return str(state)
+
+
+def compute_decision_bundle_sha256(
+    subject: str,
+    evaluated_at: str,
+    evidence: Mapping[str, object],
+) -> str:
+    canonical_bundle = json.dumps(
+        {
+            "evaluated_at": evaluated_at,
+            "evidence": dict(evidence),
+            "subject": subject,
+        },
+        ensure_ascii=False,
+        separators=(",", ":"),
+        sort_keys=True,
+    ).encode("utf-8")
+    return hashlib.sha256(canonical_bundle).hexdigest()
+
+
+def _is_strict_timestamp(value: str) -> bool:
+    match = TIMESTAMP_PATTERN.fullmatch(value)
+    if match is None:
+        return False
+    year, month, day, hour, minute, second = (
+        int(part) for part in match.groups()[:6]
+    )
+    zone = match.group(7)
+    if (
+        year < 1
+        or not 1 <= month <= 12
+        or hour > 23
+        or minute > 59
+        or second > 59
+    ):
+        return False
+    if zone != "Z":
+        if int(zone[1:3]) > 23 or int(zone[4:6]) > 59:
+            return False
+    try:
+        datetime.fromisoformat(value.replace("Z", "+00:00"))
+    except ValueError:
+        return False
+    return True
 
 
 def _validate_bundle(
@@ -77,23 +133,27 @@ def _validate_bundle(
     evaluated_at = identity.get("evaluated_at")
     if (
         not isinstance(evaluated_at, str)
-        or re.search(r"(?:Z|[+-]\d{2}:\d{2})$", evaluated_at) is None
+        or not _is_strict_timestamp(evaluated_at)
     ):
-        raise TypeError(
-            "identity.evaluated_at must be a timezone-qualified timestamp"
-        )
-    try:
-        timestamp = datetime.fromisoformat(evaluated_at.replace("Z", "+00:00"))
-    except ValueError as exc:
-        raise TypeError(
-            "identity.evaluated_at must be a timezone-qualified timestamp"
-        ) from exc
-    if timestamp.tzinfo is None:
         raise TypeError(
             "identity.evaluated_at must be a timezone-qualified timestamp"
         )
     if not isinstance(evidence, Mapping):
         raise TypeError("decision bundle evidence must be a mapping")
+    unknown_requirements = set(evidence) - REQUIREMENT_NAMES
+    if unknown_requirements:
+        raise TypeError(
+            "unknown evidence requirement: "
+            + sorted(str(name) for name in unknown_requirements)[0]
+        )
+    expected_digest = compute_decision_bundle_sha256(
+        subject, evaluated_at, evidence
+    )
+    if bundle_sha256 != expected_digest:
+        raise TypeError(
+            "identity.bundle_sha256 does not match the canonical subject, "
+            "evaluated_at, and evidence bytes"
+        )
     return identity, evidence
 
 
