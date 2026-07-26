@@ -189,6 +189,50 @@ function entryKey(entry: Pick<Entry, 'file' | 'pattern'>): string {
   return `${entry.file}\u0000${entry.pattern}`;
 }
 
+function isInlineWhitespace(character: string | undefined): boolean {
+  return character === ' ' || character === '\t' || character === '\r';
+}
+
+function parseJustificationRow(line: string): Pick<Entry, 'file' | 'pattern'> | undefined {
+  let cursor = 0;
+  while (cursor < line.length && isInlineWhitespace(line[cursor])) cursor += 1;
+  if (line[cursor] !== '|') return undefined;
+
+  const fileEnd = line.indexOf('|', cursor + 1);
+  if (fileEnd === -1) return undefined;
+  const file = line.slice(cursor + 1, fileEnd).trim();
+  if (file !== '.gitleaks.toml' && file !== 'scripts/qa/scan-secrets.js') return undefined;
+
+  cursor = fileEnd + 1;
+  while (cursor < line.length && isInlineWhitespace(line[cursor])) cursor += 1;
+  if (line[cursor] !== '`') return undefined;
+  cursor += 1;
+
+  let pattern = '';
+  while (cursor < line.length) {
+    const character = line[cursor];
+    if (character === '\\' && cursor + 1 < line.length) {
+      pattern += character + line[cursor + 1];
+      cursor += 2;
+      continue;
+    }
+    if (character !== '`') {
+      pattern += character;
+      cursor += 1;
+      continue;
+    }
+
+    cursor += 1;
+    while (cursor < line.length && isInlineWhitespace(line[cursor])) cursor += 1;
+    if (line[cursor] !== '|') return undefined;
+    return {
+      file,
+      pattern: pattern.replaceAll('\\`', '`'),
+    };
+  }
+  return undefined;
+}
+
 export function validateAllowlistCoverage(entries: Entry[], document: string): string[] {
   const failures: string[] = [];
   const activeCounts = new Map<string, number>();
@@ -199,11 +243,9 @@ export function validateAllowlistCoverage(entries: Entry[], document: string): s
 
   const documentedCounts = new Map<string, number>();
   for (const line of document.split(/\r?\n/)) {
-    const match = line.match(
-      /^\|\s*(\.gitleaks\.toml|scripts\/qa\/scan-secrets\.js)\s*\|\s*`((?:\\.|[^`])*)`\s*\|/,
-    );
-    if (!match) continue;
-    const key = entryKey({ file: match[1], pattern: match[2].replaceAll('\\`', '`') });
+    const entry = parseJustificationRow(line);
+    if (!entry) continue;
+    const key = entryKey(entry);
     documentedCounts.set(key, (documentedCounts.get(key) ?? 0) + 1);
   }
 

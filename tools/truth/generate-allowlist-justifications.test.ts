@@ -47,3 +47,24 @@ test('rejects a stale justification', () => {
     ),
   );
 });
+
+test('parses escaped backticks and long backslash sequences without backtracking', () => {
+  const longPattern = `global.paths: ${'\\_'.repeat(200)}`;
+  const specialEntries: Entry[] = [
+    {
+      file: '.gitleaks.toml',
+      pattern: 'global.paths: escaped`tick',
+      reason: 'escaped code span',
+    },
+    {
+      file: '.gitleaks.toml',
+      pattern: longPattern,
+      reason: 'stress case',
+    },
+  ];
+  const document = [
+    '| .gitleaks.toml | `global.paths: escaped\\`tick` | test | review | 2026-07-26 |',
+    `| .gitleaks.toml | \`${longPattern}\` | test | review | 2026-07-26 |`,
+  ].join('\n');
+  assert.deepEqual(validateAllowlistCoverage(specialEntries, document), []);
+});
