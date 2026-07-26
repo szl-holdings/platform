@@ -11,6 +11,7 @@
     "check:env-coverage": "tsx scripts/check-env-coverage.ts",
     "check:env-coverage:strict": "tsx scripts/check-env-coverage.ts --strict",
     "check:nexus-scope": "tsx scripts/check-nexus-scope.ts",
+    "audit:overclaims": "node scripts/audit/validate-overclaim-ledger.js && node --test scripts/audit/validate-overclaim-ledger.test.js",
     "lint:copy": "bash scripts/lint-copy.sh",
     "format": "biome format --write .",
     "format:check": "biome format .",

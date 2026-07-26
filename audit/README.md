@@ -11,6 +11,12 @@
 
 This directory contains all artifacts produced by the Zero-Gap Track 1 audit. Downstream tracks (Design System v2, Backend Hardening, Database, Infra/CI) should consume these documents as their baseline.
 
+The current governance counter is documented separately in
+[`docs/OVERCLAIM_LEDGER.md`](../docs/OVERCLAIM_LEDGER.md). Its machine-readable
+ledger and evidence manifest are explicitly labeled **MEASURED / SNAPSHOT /
+non-exhaustive**. The single observed correction interval is not labeled as a
+mean.
+
 ---
 
 ## Documents Produced by This Track
