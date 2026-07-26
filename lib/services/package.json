@@ -29,6 +29,7 @@
     "lint": "biome lint ./src",
     "lint:ci": "biome lint ./src",
     "format": "biome format --write ./src",
+    "test": "node --import tsx --test src/adapters/payload-validation.test.ts",
     "typecheck": "tsc -p tsconfig.json --noEmit"
   }
 }
