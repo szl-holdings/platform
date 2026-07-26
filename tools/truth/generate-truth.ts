@@ -2,7 +2,6 @@ import { execFileSync } from 'node:child_process';
 import { existsSync } from 'node:fs';
 import { readFile, readdir, writeFile } from 'node:fs/promises';
 import path from 'node:path';
-import ts from 'typescript';
 
 type EvidenceLabel = 'MEASURED' | 'REPORTED' | 'MODELED' | 'CONJECTURE' | 'UNKNOWN' | 'UNAVAILABLE';
 type Metric = {
@@ -19,8 +18,20 @@ type TestMetric = {
 
 const ROOT = path.resolve(import.meta.dirname, '..', '..');
 const OUTPUT = path.join(ROOT, 'artifacts', 'SOURCE_OF_TRUTH.json');
-const CHECK_MODE = process.argv.includes('--check');
-const ROUTE_METHODS = new Set(['get', 'post', 'put', 'patch', 'delete', 'options', 'head', 'use']);
+const VERIFY_LOCAL_MODE =
+  process.argv.includes('--verify-local') || process.argv.includes('--check');
+const LOCAL_METRIC_NAMES = [
+  'surfaces_customer_facing',
+  'ouroboros_tests',
+  'platform_tests',
+  'mcp_e2e_tests',
+  'monorepo_packages',
+  'api_endpoints',
+  'ci_workflows',
+  'lean_theorems_locked',
+  'lean_sorry_count',
+  'lambda_overhead_ms_median',
+] as const;
 const WALK_EXCLUSIONS = new Set([
   '.git',
   '.cache',
@@ -146,29 +157,10 @@ function packageCount(): Metric {
   }
 }
 
-async function countApiEndpoints(): Promise<Metric> {
-  const roots = ['apps', 'artifacts/api-server/src', 'lib', 'packages', 'services']
-    .map((item) => path.join(ROOT, item))
-    .filter(existsSync);
-  let count = 0;
-  for (const root of roots) {
-    const files = await walkFiles(root, (file) => {
-      if (!/\.(?:ts|tsx|js|jsx)$/.test(file)) return false;
-      return !/\.(?:test|spec)\.[^.]+$/.test(file);
-    });
-    for (const file of files) {
-      const source = await readFile(file, 'utf8');
-      const ast = ts.createSourceFile(file, source, ts.ScriptTarget.Latest, false);
-      const visit = (node: ts.Node): void => {
-        if (ts.isCallExpression(node) && ts.isPropertyAccessExpression(node.expression)) {
-          if (ROUTE_METHODS.has(node.expression.name.text)) count += 1;
-        }
-        ts.forEachChild(node, visit);
-      };
-      visit(ast);
-    }
-  }
-  return metric(count, 'MEASURED', 'TypeScript AST route declaration scan');
+function countApiEndpoints(): Metric {
+  return unavailable(
+    'runtime router inventory artifact (source-call counting cannot prove mounted endpoints)',
+  );
 }
 
 function dbTableCount(): Metric {
@@ -277,13 +269,6 @@ async function receiptDepth(): Promise<Metric> {
 
 async function main(): Promise<void> {
   const existing = await readExisting();
-  const existingGeneratedAt =
-    typeof existing?.generated_at === 'string' ? existing.generated_at : null;
-  const existingGeneratedBy =
-    typeof existing?.generated_by === 'string' ? existing.generated_by : null;
-  const generatedAt =
-    CHECK_MODE && existingGeneratedAt ? existingGeneratedAt : new Date().toISOString();
-  const generatedBy = CHECK_MODE && existingGeneratedBy ? existingGeneratedBy : gitSha();
 
   const [
     surfaces,
@@ -308,33 +293,61 @@ async function main(): Promise<void> {
     workflowCount(),
     leanSorryCount(),
     lambdaMedian(),
-    hubCount('models'),
-    hubCount('datasets'),
-    hubCount('spaces'),
-    hubCount('collections'),
-    receiptDepth(),
+    VERIFY_LOCAL_MODE
+      ? Promise.resolve(unavailable('live refresh not run in local verification'))
+      : hubCount('models'),
+    VERIFY_LOCAL_MODE
+      ? Promise.resolve(unavailable('live refresh not run in local verification'))
+      : hubCount('datasets'),
+    VERIFY_LOCAL_MODE
+      ? Promise.resolve(unavailable('live refresh not run in local verification'))
+      : hubCount('spaces'),
+    VERIFY_LOCAL_MODE
+      ? Promise.resolve(unavailable('live refresh not run in local verification'))
+      : hubCount('collections'),
+    VERIFY_LOCAL_MODE
+      ? Promise.resolve(unavailable('live refresh not run in local verification'))
+      : receiptDepth(),
   ]);
+
+  const localMetrics = {
+    surfaces_customer_facing: surfaces,
+    ouroboros_tests: ouroborosTests,
+    platform_tests: platformTests,
+    mcp_e2e_tests: mcpTests,
+    monorepo_packages: packageCount(),
+    api_endpoints: endpoints,
+    ci_workflows: workflows,
+    lean_theorems_locked: {
+      value: 8,
+      label: 'REPORTED' as const,
+      source: 'lutar-lean/Locked8.lean',
+    },
+    lean_sorry_count: leanSorry,
+    lambda_overhead_ms_median: lambda,
+  };
+
+  if (VERIFY_LOCAL_MODE) {
+    if (!existing) throw new Error('artifacts/SOURCE_OF_TRUTH.json is missing or invalid');
+    const existingMetrics = existing.metrics as Record<string, unknown> | undefined;
+    if (!existingMetrics) throw new Error('artifacts/SOURCE_OF_TRUTH.json lacks metrics');
+    const drift = LOCAL_METRIC_NAMES.filter(
+      (name) => JSON.stringify(existingMetrics[name]) !== JSON.stringify(localMetrics[name]),
+    );
+    if (drift.length > 0) {
+      throw new Error(`local truth drift: ${drift.join(', ')}`);
+    }
+    process.stdout.write('local truth verification: PASS\n');
+    return;
+  }
 
   const truth = {
     schema: 'szl.truth/v1',
-    generated_at: generatedAt,
-    generated_by: generatedBy,
+    generated_at: new Date().toISOString(),
+    generated_by: gitSha(),
     metrics: {
-      surfaces_customer_facing: surfaces,
-      ouroboros_tests: ouroborosTests,
-      platform_tests: platformTests,
-      mcp_e2e_tests: mcpTests,
-      monorepo_packages: packageCount(),
-      api_endpoints: endpoints,
+      ...localMetrics,
       db_tables: dbTableCount(),
-      ci_workflows: workflows,
-      lean_theorems_locked: {
-        value: 8,
-        label: 'REPORTED' as const,
-        source: 'lutar-lean/Locked8.lean',
-      },
-      lean_sorry_count: leanSorry,
-      lambda_overhead_ms_median: lambda,
       hf_models: hfModels,
       hf_datasets: hfDatasets,
       hf_spaces: hfSpaces,

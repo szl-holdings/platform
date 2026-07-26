@@ -1,7 +1,7 @@
 {
   "schema": "szl.truth/v1",
-  "generated_at": "2026-07-25T22:36:30.728Z",
-  "generated_by": "280176de9fd99a33f1cfc2087372014e91d7ce8f",
+  "generated_at": "2026-07-25T23:57:31.351Z",
+  "generated_by": "ee3cc1452cfff4abfdad3d64573ca3b31593cf25",
   "metrics": {
     "surfaces_customer_facing": {
       "value": 0,
@@ -32,14 +32,9 @@
       "source": "pnpm -r list --depth -1 --json"
     },
     "api_endpoints": {
-      "value": 1676,
-      "label": "MEASURED",
-      "source": "TypeScript AST route declaration scan"
-    },
-    "db_tables": {
       "value": null,
       "label": "UNAVAILABLE",
-      "source": "drizzle introspect against DATABASE_URL"
+      "source": "runtime router inventory artifact (source-call counting cannot prove mounted endpoints)"
     },
     "ci_workflows": {
       "value": 44,
@@ -60,6 +55,11 @@
       "value": null,
       "label": "UNAVAILABLE",
       "source": "benchmarks/lambda/summary.json"
+    },
+    "db_tables": {
+      "value": null,
+      "label": "UNAVAILABLE",
+      "source": "drizzle introspect against DATABASE_URL"
     },
     "hf_models": {
       "value": 15,

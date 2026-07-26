@@ -21,7 +21,7 @@
 | Contributing guide | ✅ `CONTRIBUTING.md` |
 | License | ✅ `LICENSE.md` |
 | Code of Conduct | ✅ `CODE_OF_CONDUCT.md` |
-| CI workflows | ✅ 13 workflows configured (ci, codeql, security, deploy, e2e, lighthouse, etc.) |
+| CI workflows | 44 workflows measured in `artifacts/SOURCE_OF_TRUTH.json`; current run status must be checked separately |
 | Branch protection | ✅ Applied to both `master` (default) and `main` (1 review, code owners, required checks, strict, no force push, enforce admins) |
 | Repo description + topics | ✅ Applied (description, homepage, 8 topics from task spec) |
 | Merge settings | ✅ Squash-only, auto-delete head branches, auto-merge enabled |

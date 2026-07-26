@@ -5,16 +5,15 @@ import path from 'node:path';
 const ROOT = path.resolve(import.meta.dirname, '..', '..');
 const TRUTH_FILE = path.join(ROOT, 'artifacts', 'SOURCE_OF_TRUTH.json');
 const ALLOWLIST_FILE = path.join(ROOT, '.truth-allowlist');
-const WATCHED_LITERALS =
-  /\b(?:218|1220|1,220|848|5524|5,524|126|76|144|23|27|19|26|15|24|22|9|8|7)\b/g;
+const NUMBER_LITERAL = /(?<![\w.])(?:\d{1,3}(?:,\d{3})+|\d+)(?![\w.])/g;
 const WATCHWORD_SOURCE = String.raw`\b(?:tests|surfaces|packages|endpoints|workflows|spaces|models|datasets|theorems)\b`;
 const CLAIM_CONTEXT =
   /\b(?:canonical|current|total|public|passing|passed|locked|monorepo|ci|github actions|hugging face|hf|customer-facing|estate|organization|org)\b/i;
-const MAX_CLAIM_DISTANCE = 36;
 const EXTENSIONS = new Set(['.md', '.html', '.tsx']);
 const EXCLUDED = new Set(['.git', 'node_modules', 'dist', 'coverage', 'archive']);
 
 type AllowEntry = { path: string; literal: string };
+type WatchwordMatch = RegExpMatchArray & { index: number };
 
 async function walk(directory: string): Promise<string[]> {
   const output: string[] = [];
@@ -42,20 +41,62 @@ async function allowEntries(): Promise<AllowEntry[]> {
   return entries;
 }
 
-function canonicalFor(watchword: string, metrics: Record<string, Record<string, unknown>>): string {
-  if (/^surfaces?$/i.test(watchword)) return String(metrics.surfaces_customer_facing?.value);
-  if (/^packages?$/i.test(watchword)) return String(metrics.monorepo_packages?.value);
-  if (/^endpoints?$/i.test(watchword)) return String(metrics.api_endpoints?.value);
-  if (/^workflows?$/i.test(watchword)) return String(metrics.ci_workflows?.value);
-  if (/^spaces?$/i.test(watchword)) return String(metrics.hf_spaces?.value);
-  if (/^models?$/i.test(watchword)) return String(metrics.hf_models?.value);
-  if (/^datasets?$/i.test(watchword)) return String(metrics.hf_datasets?.value);
-  if (/^theorems?$/i.test(watchword)) return String(metrics.lean_theorems_locked?.value);
+function canonicalFor(
+  watchword: string,
+  metrics: Record<string, Record<string, unknown>>,
+): string | null {
+  let value: unknown;
+  if (/^surfaces?$/i.test(watchword)) value = metrics.surfaces_customer_facing?.value;
+  else if (/^packages?$/i.test(watchword)) value = metrics.monorepo_packages?.value;
+  else if (/^endpoints?$/i.test(watchword)) value = metrics.api_endpoints?.value;
+  else if (/^workflows?$/i.test(watchword)) value = metrics.ci_workflows?.value;
+  else if (/^spaces?$/i.test(watchword)) value = metrics.hf_spaces?.value;
+  else if (/^models?$/i.test(watchword)) value = metrics.hf_models?.value;
+  else if (/^datasets?$/i.test(watchword)) value = metrics.hf_datasets?.value;
+  else if (/^theorems?$/i.test(watchword)) value = metrics.lean_theorems_locked?.value;
   if (/^tests?$/i.test(watchword)) {
-    const value = metrics.platform_tests;
-    return String(value?.passed ?? value?.total ?? null);
+    const tests = metrics.platform_tests;
+    value = tests?.passed ?? tests?.total;
   }
-  return 'UNKNOWN';
+  return typeof value === 'number' && Number.isFinite(value) ? String(value) : null;
+}
+
+function isMetricPair(line: string, literal: RegExpMatchArray, watchword: WatchwordMatch): boolean {
+  const literalIndex = literal.index ?? 0;
+  const literalEnd = literalIndex + literal[0].length;
+  const watchwordIndex = watchword.index;
+  const watchwordEnd = watchwordIndex + watchword[0].length;
+  const word = watchword[0].toLowerCase();
+
+  if (literalEnd <= watchwordIndex) {
+    const modifier = line.slice(literalEnd, watchwordIndex).trim().toLowerCase();
+    const allowedModifiers: Record<string, Set<string>> = {
+      tests: new Set(['', 'passing', 'passed', 'platform', 'platform passing']),
+      surfaces: new Set(['', 'customer-facing', 'public']),
+      surface: new Set(['', 'customer-facing', 'public']),
+      packages: new Set(['', 'monorepo']),
+      package: new Set(['', 'monorepo']),
+      endpoints: new Set(['', 'api', 'public api']),
+      endpoint: new Set(['', 'api', 'public api']),
+      workflows: new Set(['', 'ci', 'ci/cd', 'github', 'github actions']),
+      workflow: new Set(['', 'ci', 'ci/cd', 'github', 'github actions']),
+      spaces: new Set(['', 'public', 'hf', 'hugging face']),
+      space: new Set(['', 'public', 'hf', 'hugging face']),
+      models: new Set(['', 'public', 'hf', 'hugging face']),
+      model: new Set(['', 'public', 'hf', 'hugging face']),
+      datasets: new Set(['', 'public', 'hf', 'hugging face']),
+      dataset: new Set(['', 'public', 'hf', 'hugging face']),
+      theorems: new Set(['', 'locked']),
+      theorem: new Set(['', 'locked']),
+    };
+    return allowedModifiers[word]?.has(modifier) ?? false;
+  }
+
+  if (watchwordEnd <= literalIndex) {
+    const separator = line.slice(watchwordEnd, literalIndex).trim().toLowerCase();
+    return /^(?:\||:|=|is|are|count|total|count:|total:)$/.test(separator);
+  }
+  return false;
 }
 
 async function main(): Promise<void> {
@@ -74,18 +115,23 @@ async function main(): Promise<void> {
       if (/^\s*#{1,6}\s+\d+[.)]?\s+/.test(line)) continue;
       const watchwords = [...line.matchAll(new RegExp(WATCHWORD_SOURCE, 'gi'))];
       if (watchwords.length === 0) continue;
-      for (const match of line.matchAll(WATCHED_LITERALS)) {
+      for (const match of line.matchAll(NUMBER_LITERAL)) {
         const literal = match[0];
-        const literalIndex = match.index ?? 0;
         const nearest = watchwords
-          .map((watchword) => ({
-            watchword: watchword[0],
-            distance: Math.abs((watchword.index ?? 0) - literalIndex),
-          }))
-          .sort((left, right) => left.distance - right.distance)[0];
-        if (!nearest || nearest.distance > MAX_CLAIM_DISTANCE) continue;
-        const canonical = canonicalFor(nearest.watchword, truth.metrics);
-        if (canonical !== 'null' && canonical.replaceAll(',', '') === literal.replaceAll(',', '')) {
+          .filter(
+            (watchword): watchword is WatchwordMatch =>
+              typeof watchword.index === 'number' &&
+              isMetricPair(line, match, watchword as WatchwordMatch),
+          )
+          .sort(
+            (left, right) =>
+              Math.abs(left.index - (match.index ?? 0)) -
+              Math.abs(right.index - (match.index ?? 0)),
+          )[0];
+        if (!nearest) continue;
+        const canonical = canonicalFor(nearest[0], truth.metrics);
+        if (canonical === null) continue;
+        if (canonical.replaceAll(',', '') === literal.replaceAll(',', '')) {
           continue;
         }
         const allowed = allowlist.some((entry) => {

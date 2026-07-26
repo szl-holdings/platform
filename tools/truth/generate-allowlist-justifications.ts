@@ -37,6 +37,35 @@ function fallbackReason(kind: string): string {
   return 'Scanner exclusion was reviewed as generated, dependency, fixture, or audit evidence rather than credential-bearing source.';
 }
 
+function doubleQuotedValues(line: string): string[] {
+  const values: string[] = [];
+  let value = '';
+  let inString = false;
+  let escaped = false;
+
+  for (const character of line) {
+    if (!inString) {
+      if (character === '"') {
+        inString = true;
+        value = '';
+      }
+      continue;
+    }
+    if (escaped) {
+      value += `\\${character}`;
+      escaped = false;
+    } else if (character === '\\') {
+      escaped = true;
+    } else if (character === '"') {
+      values.push(value);
+      inString = false;
+    } else {
+      value += character;
+    }
+  }
+  return values;
+}
+
 function parseToml(text: string): Entry[] {
   const entries: Entry[] = [];
   const lines = text.split(/\r?\n/);
@@ -80,18 +109,17 @@ function parseToml(text: string): Entry[] {
         pendingComments.push(blockLine);
         continue;
       }
-      for (const match of blockLine.matchAll(/"((?:\\.|[^"])*)"/g)) {
+      for (const value of doubleQuotedValues(blockLine)) {
         if (pendingComments.length > 0) {
           reason = cleanComment(pendingComments, defaultReason);
           pendingComments = [];
         }
         entries.push({
           file: '.gitleaks.toml',
-          pattern:
-            `${section === 'rule' ? `rule:${rule}` : 'global'}.${kind}: ${match[1]}`.replaceAll(
-              '|',
-              '\\|',
-            ),
+          pattern: `${section === 'rule' ? `rule:${rule}` : 'global'}.${kind}: ${value}`.replaceAll(
+            '|',
+            '\\|',
+          ),
           reason,
         });
       }

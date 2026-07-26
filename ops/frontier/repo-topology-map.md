@@ -71,7 +71,7 @@ szl-holdings-platform/
 │   ├── replit-agent/             # Inventory & target architecture
 │   └── [other ops subdirs]
 │
-├── .github/workflows/            # 13 CI/CD workflows
+├── .github/workflows/            # 44 CI/CD workflows (MEASURED)
 │   ├── ci.yml                    # Lint + typecheck + test
 │   ├── e2e.yml                   # Playwright E2E (PARTIAL STALE)
 │   ├── security.yml              # Dependency audit + SBOM

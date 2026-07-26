@@ -25,4 +25,11 @@ docs/COMPANY_ASCENSION_PLAN.md|* # reason: Dated 2026-04-28 company plan is reta
 docs/INVESTOR_PLATFORM_BRIEF.md|* # reason: Dated 2026-04-28 confidential brief is retained as historical evidence.
 docs/RELEASE_READINESS_SCORECARD.md|* # reason: Dated 2026-05-11 scorecard is retained as historical evidence and not treated as current verification.
 docs/SECURITY_AND_GOVERNANCE_FAQ.md|* # reason: Dated 2026-04-22 FAQ records the workflow count at publication time.
+docs/architecture/full-system-inventory.md|* # reason: Dated April 2026 inventory preserves the workflow count verified at that time.
+docs/architecture-summary.md|* # reason: Dated April 2026 architecture snapshot preserves its historical workspace breakdown.
+docs/DEPENDENCY_AND_SCRIPT_DRIFT.md|* # reason: Dated dependency audit preserves scoped before-and-after package counts as evidence.
+docs/GITHUB_ASCENSION_REPORT.md|* # reason: Dated GitHub audit preserves the workflow count observed at publication time.
+docs/operations/audit-findings-register.md|* # reason: Audit finding identifiers and dated workflow observations are retained as historical evidence.
+docs/security/secrets-remediation.md|* # reason: Remediation log preserves the workflow count observed when the security change was made.
+ops/frontier/repo-truth-audit.md|* # reason: Dated repository audit preserves scoped package-category counts rather than the current estate total.
 SOURCE_OF_TRUTH.md|* # reason: Legacy hand-maintained snapshot is preserved for audit history and explicitly superseded by artifacts/SOURCE_OF_TRUTH.json.

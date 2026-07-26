@@ -38,5 +38,5 @@ A bird's-eye view of the platform's command surfaces, decision workflows, and tr
 ## Key Takeaways
 - Real operational depth (442 tables, 1,618 endpoints)
 - AI governance with human-in-the-loop approval
-- Professional engineering discipline (14 CI/CD workflows)
+- Professional engineering discipline (44 CI/CD workflows, measured in `artifacts/SOURCE_OF_TRUTH.json`)
 - Investor-grade documentation and trust posture
