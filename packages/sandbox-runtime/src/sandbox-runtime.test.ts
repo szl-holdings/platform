@@ -18,18 +18,24 @@ import { FilesystemCapability } from './capabilities/filesystem.js';
 import { ShellCapability } from './capabilities/shell.js';
 import { SandboxAgent } from './agent.js';
 import { ensureSandboxToolsRegistered } from './init.js';
-import { materializeManifest, PathTraversalError, validateWorkspacePath } from './materializer.js';
+import {
+  materializeManifest,
+  PathTraversalError,
+  validateGitRef,
+  validateGitUrl,
+  validateWorkspacePath,
+} from './materializer.js';
 import { SandboxSession } from './session.js';
 import type { Manifest } from './types.js';
 
 // ─── Path Validation ──────────────────────────────────────────────────────────
 
 describe('validateWorkspacePath', () => {
-  const root = '/tmp/test-workspace';
+  const root = join(tmpdir(), 'test-workspace');
 
   it('resolves safe relative paths', () => {
     const result = validateWorkspacePath('src/index.ts', root);
-    expect(result).toBe('/tmp/test-workspace/src/index.ts');
+    expect(result).toBe(join(root, 'src', 'index.ts'));
   });
 
   it('throws on absolute paths', () => {
@@ -41,12 +47,14 @@ describe('validateWorkspacePath', () => {
   });
 
   it('throws on nested ../ traversal', () => {
-    expect(() => validateWorkspacePath('a/b/../../../../../../etc', root)).toThrow(PathTraversalError);
+    expect(() => validateWorkspacePath('a/b/../../../../../../etc', root)).toThrow(
+      PathTraversalError,
+    );
   });
 
   it('allows paths with dots in filenames', () => {
     const result = validateWorkspacePath('my.file.ts', root);
-    expect(result).toBe('/tmp/test-workspace/my.file.ts');
+    expect(result).toBe(join(root, 'my.file.ts'));
   });
 });
 
@@ -65,9 +73,7 @@ describe('materializeManifest', () => {
 
   it('creates inline files', async () => {
     const manifest: Manifest = {
-      entries: [
-        { type: 'file', path: 'hello.txt', content: 'Hello, world!' },
-      ],
+      entries: [{ type: 'file', path: 'hello.txt', content: 'Hello, world!' }],
     };
     await materializeManifest(manifest, workspaceRoot);
     const content = await readFile(join(workspaceRoot, 'hello.txt'), 'utf8');
@@ -102,9 +108,7 @@ describe('materializeManifest', () => {
 
   it('rejects manifests with path traversal entries', async () => {
     const manifest: Manifest = {
-      entries: [
-        { type: 'file', path: '../escape/evil.txt', content: 'evil' },
-      ],
+      entries: [{ type: 'file', path: '../escape/evil.txt', content: 'evil' }],
     };
     await expect(materializeManifest(manifest, workspaceRoot)).rejects.toThrow(PathTraversalError);
   });
@@ -163,7 +167,10 @@ describe('ShellCapability', () => {
   });
 
   it('enforces timeout', async () => {
-    const result = await shell.exec('sleep 10', { timeoutMs: 100 });
+    const result = await shell.exec(
+      `${JSON.stringify(process.execPath)} -e "setTimeout(() => {}, 10_000)"`,
+      { timeoutMs: 100 },
+    );
     expect(result.timedOut).toBe(true);
   });
 
@@ -337,9 +344,7 @@ describe('git_repo manifest entry — URL / ref validation', () => {
         },
       ],
     };
-    await expect(materializeManifest(manifest, workspaceRoot)).rejects.toThrow(
-      /not permitted/i,
-    );
+    await expect(materializeManifest(manifest, workspaceRoot)).rejects.toThrow(/not permitted/i);
   });
 
   it('rejects ftp:// URLs (unsupported scheme)', async () => {
@@ -352,9 +357,7 @@ describe('git_repo manifest entry — URL / ref validation', () => {
         },
       ],
     };
-    await expect(materializeManifest(manifest, workspaceRoot)).rejects.toThrow(
-      /not permitted/i,
-    );
+    await expect(materializeManifest(manifest, workspaceRoot)).rejects.toThrow(/not permitted/i);
   });
 
   it('rejects git refs containing shell special characters', async () => {
@@ -368,9 +371,7 @@ describe('git_repo manifest entry — URL / ref validation', () => {
         },
       ],
     };
-    await expect(materializeManifest(manifest, workspaceRoot)).rejects.toThrow(
-      /Invalid git ref/i,
-    );
+    await expect(materializeManifest(manifest, workspaceRoot)).rejects.toThrow(/Invalid git ref/i);
   });
 
   it('rejects git refs containing backtick injection', async () => {
@@ -384,9 +385,7 @@ describe('git_repo manifest entry — URL / ref validation', () => {
         },
       ],
     };
-    await expect(materializeManifest(manifest, workspaceRoot)).rejects.toThrow(
-      /Invalid git ref/i,
-    );
+    await expect(materializeManifest(manifest, workspaceRoot)).rejects.toThrow(/Invalid git ref/i);
   });
 
   it('rejects malformed URLs that are not parseable', async () => {
@@ -399,31 +398,14 @@ describe('git_repo manifest entry — URL / ref validation', () => {
         },
       ],
     };
-    await expect(materializeManifest(manifest, workspaceRoot)).rejects.toThrow(
-      /Invalid git URL/i,
-    );
+    await expect(materializeManifest(manifest, workspaceRoot)).rejects.toThrow(/Invalid git URL/i);
   });
 
-  it('accepts valid https:// URLs and safe refs (validation-only — no network)', async () => {
-    // We cannot clone over the network in test, but we can verify the validation
-    // logic accepts a well-formed URL+ref pair before the subprocess is reached.
-    // The test stubs nothing — it EXPECTS the clone to fail (no network / no
-    // such host) after passing validation; the error must NOT be a validation error.
-    const manifest: Manifest = {
-      entries: [
-        {
-          type: 'git_repo',
-          url: 'https://git.invalid.local/test-repo.git',
-          ref: 'main',
-          path: 'cloned',
-        },
-      ],
-    };
-    const err = await materializeManifest(manifest, workspaceRoot).catch((e: unknown) => e);
-    expect(err).toBeInstanceOf(Error);
-    // Must NOT be a URL/ref validation error — it should be a network/exec error.
-    expect((err as Error).message).not.toMatch(/not permitted/i);
-    expect((err as Error).message).not.toMatch(/Invalid git (URL|ref)/i);
+  it('accepts valid https:// URLs and safe refs without a network call', () => {
+    // Exercise the exported validation boundary directly so this test is
+    // deterministic and never makes a network call.
+    expect(() => validateGitUrl('https://example.com/test-repo.git')).not.toThrow();
+    expect(() => validateGitRef('main')).not.toThrow();
   });
 });
 

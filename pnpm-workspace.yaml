@@ -57,6 +57,13 @@ minimumReleaseAgeExclude:
   - picomatch
   - lodash
   - '@tootallnate/once'
+  - '@opentelemetry/propagator-jaeger'
+  - brace-expansion
+  - fast-uri
+  - js-yaml
+  - linkify-it
+  - postcss
+  - sharp
   - expo-glass-effect
   - expo-image-picker
   - expo-document-picker

@@ -1,0 +1,50 @@
+# Format: relative/path|literal # reason: why the historical or non-metric number is required.
+audit/**|* # reason: Dated audit evidence is retained verbatim and is not a current public metric claim.
+docs/audit/**|* # reason: Dated audit evidence is retained verbatim and is not a current public metric claim.
+docs/reports/**|* # reason: Dated generated reports are retained verbatim and are not a current public metric claim.
+replit-sync/**|* # reason: Historical handoff records are retained verbatim and are not current public metric claims.
+docs/architecture/foundation-audit.md|* # reason: Dated 2026-06-02 subsystem audit uses scoped inventory counts, not current estate metrics.
+docs/CLAIM_RECONCILIATION_MATRIX.md|* # reason: Dated 2026-04-27 claim-audit evidence is retained verbatim for comparison.
+docs/DEMO_PATHS.md|* # reason: Historical demo script remains evidence of the earlier demo configuration and is not current measurement.
+docs/evolve-metrics-audit.md|* # reason: Dated subsystem audit contains local endpoint counts rather than the estate-wide endpoint metric.
+docs/EXECUTIVE_AUDIT_SUMMARY.md|* # reason: Dated 2026-04-25 audit result is an immutable historical snapshot.
+docs/FIX_LOG.md|* # reason: Fix log records the stale numbers it corrected and must retain that historical evidence.
+docs/investor/readiness-gaps.md|* # reason: Dated coverage estimate is a scoped historical risk entry, not the current test result metric.
+docs/investor/audit-investor-readiness.md|* # reason: Dated investor-readiness audit preserves its point-in-time endpoint inventory as historical evidence.
+docs/launch/green-light-review.md|* # reason: Dated architecture review uses a workspace description rather than the generated monorepo metric.
+docs/OPEN_RISKS.md|* # reason: Dated risk register records the affected-package count for a specific failure, not total packages.
+docs/operations/codex-handoff.md|* # reason: Handoff step numbers sit near the word tests but are not metric claims.
+docs/operations/known-gaps.md|* # reason: Historical gap entries preserve scoped counts as dated evidence.
+docs/TECHNICAL_DUE_DILIGENCE_PACKET.md|* # reason: April 2026 diligence snapshot is retained verbatim and is superseded by the generated truth artifact.
+docs/trust/security-posture.md|* # reason: April 2026 security snapshot contains scoped protection counts, not current estate totals.
+ops/leadership/founder-next-60-days.md|* # reason: Day numbers sit near surface milestones but are schedule identifiers, not metric claims.
+packages/unified-kernel/README.md|* # reason: Kernel-local package and test counts document that subsystem and are not estate-wide metrics.
+dossier/**|* # reason: Dated APEX collateral is a historical snapshot and must not be reused as current measurement.
+proof-pack/**|* # reason: Dated April 2026 proof collateral is retained as historical evidence and is superseded by the generated truth artifact.
+docs/BUYER_READINESS.md|* # reason: Dated 2026-04-28 buyer-readiness snapshot is retained as historical evidence.
+docs/COMPANY_ASCENSION_PLAN.md|* # reason: Dated 2026-04-28 company plan is retained as historical evidence.
+docs/INVESTOR_PLATFORM_BRIEF.md|* # reason: Dated 2026-04-28 confidential brief is retained as historical evidence.
+docs/RELEASE_READINESS_SCORECARD.md|* # reason: Dated 2026-05-11 scorecard is retained as historical evidence and not treated as current verification.
+docs/SECURITY_AND_GOVERNANCE_FAQ.md|* # reason: Dated 2026-04-22 FAQ records the workflow count at publication time.
+docs/architecture/full-system-inventory.md|* # reason: Dated April 2026 inventory preserves the workflow count verified at that time.
+docs/architecture-summary.md|* # reason: Dated April 2026 architecture snapshot preserves its historical workspace breakdown.
+docs/DEPENDENCY_AND_SCRIPT_DRIFT.md|* # reason: Dated dependency audit preserves scoped before-and-after package counts as evidence.
+docs/GITHUB_ASCENSION_REPORT.md|* # reason: Dated GitHub audit preserves the workflow count observed at publication time.
+docs/operations/audit-findings-register.md|* # reason: Audit finding identifiers and dated workflow observations are retained as historical evidence.
+docs/security/secrets-remediation.md|* # reason: Remediation log preserves the workflow count observed when the security change was made.
+ops/frontier/repo-truth-audit.md|* # reason: Dated repository audit preserves scoped package-category counts rather than the current estate total.
+SOURCE_OF_TRUTH.md|* # reason: This registry contains separately defined source-tree and locked-kernel metrics; overlapping current values are governed by artifacts/SOURCE_OF_TRUTH.json.
+API-CATALOGUE.md|* # reason: Generated per-route-family endpoint counts are scoped catalogue values, not the estate-wide OpenAPI operation total.
+artifacts/a11oy/src/pages/A11oyCode.tsx|14 # reason: The terminal is explicitly labeled as a scripted demonstration and is not live test evidence.
+artifacts/a11oy/src/pages/DevPlatform.tsx|* # reason: The product exploration surface explicitly labels its registry and evaluation values as seeded demonstrations, not live evidence.
+docs/CHANGELOG_PRECISION_EVOLUTION.md|14 # reason: Feature-scoped historical evolution route count, not the estate-wide API operation total.
+docs/metrics-reference.md|37 # reason: April 2026 change history preserves the old shared-library package subtotal, not the current monorepo package total.
+docs/strategy/FRONTIER_DOCTRINE.md|35 # reason: Guardian subsystem suite count, not the current total platform test metric.
+docs/strategy/FRONTIER_DOCTRINE.md|43 # reason: Tool-mesh subsystem suite count, not the current total platform test metric.
+load-tests/README.md|3 # reason: Scenario-local hot endpoint count, not the estate-wide API operation total.
+THESIS_PUBLICATIONS.md|172 # reason: Pinned historical Ouroboros v6.2 runtime suite count, not the current platform test total.
+.github-private/profile/README.md|37 # reason: Scoped direct child count under lib in the illustrated source tree, not the current monorepo package total.
+artifacts/sentra/src/pages/hunt-agents.tsx|3 # reason: Seeded threat-hunt finding count for one scenario, not the current monorepo package total.
+docs/architecture/architecture.md|37 # reason: Scoped direct child count under lib in the illustrated architecture tree, not the current monorepo package total.
+ops/portfolio/portfolio-architecture.md|33 # reason: Scoped shared-library diagram subtotal, not the current monorepo package total.
+packages/unified-kernel/DEVELOPER_ONBOARDING.md|218 # reason: Pinned vendored Ouroboros subsystem suite count, not the current platform test total.

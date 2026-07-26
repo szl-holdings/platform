@@ -22,7 +22,7 @@
 ## Infrastructure
 - **Hosting**: Replit managed infrastructure with automatic scaling
 - **Database**: Managed PostgreSQL with automated backups
-- **CI/CD**: GitHub Actions with 14 workflow files
+- **CI/CD**: GitHub Actions with 45 measured workflow files
 - **Branch protection**: Documented branch protection rules (require PR, require approval, require status checks)
 
 ## AI Governance

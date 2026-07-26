@@ -126,10 +126,10 @@
   },
   "ci": {
     "workflows": {
-      "count": 44,
+      "count": 45,
       "command": "Count tracked .github/workflows/*.yml and *.yaml files",
       "computed": "2026-07-25",
-      "note": "Includes the source-of-truth workflow introduced by this truth-lock change."
+      "note": "Includes both the source-of-truth validator and generated-artifact truth-drift workflows."
     }
   },
   "env": {
