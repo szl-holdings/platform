@@ -115,14 +115,15 @@ def _validate_bundle(
     evidence = bundle.get("evidence")
     if not isinstance(identity, Mapping):
         raise TypeError("decision bundle identity must be a mapping")
-    subject = identity.get("subject")
+    identity_snapshot = dict(identity)
+    subject = identity_snapshot.get("subject")
     if (
         not isinstance(subject, str)
         or not subject
         or subject.strip() != subject
     ):
         raise TypeError("identity.subject must be a non-empty canonical string")
-    bundle_sha256 = identity.get("bundle_sha256")
+    bundle_sha256 = identity_snapshot.get("bundle_sha256")
     if (
         not isinstance(bundle_sha256, str)
         or re.fullmatch(r"[0-9a-f]{64}", bundle_sha256) is None
@@ -130,7 +131,7 @@ def _validate_bundle(
         raise TypeError(
             "identity.bundle_sha256 must be a lowercase sha256 digest"
         )
-    evaluated_at = identity.get("evaluated_at")
+    evaluated_at = identity_snapshot.get("evaluated_at")
     if (
         not isinstance(evaluated_at, str)
         or not _is_strict_timestamp(evaluated_at)
@@ -140,21 +141,22 @@ def _validate_bundle(
         )
     if not isinstance(evidence, Mapping):
         raise TypeError("decision bundle evidence must be a mapping")
-    unknown_requirements = set(evidence) - REQUIREMENT_NAMES
+    evidence_snapshot = dict(evidence)
+    unknown_requirements = set(evidence_snapshot) - REQUIREMENT_NAMES
     if unknown_requirements:
         raise TypeError(
             "unknown evidence requirement: "
             + sorted(str(name) for name in unknown_requirements)[0]
         )
     expected_digest = compute_decision_bundle_sha256(
-        subject, evaluated_at, evidence
+        subject, evaluated_at, evidence_snapshot
     )
     if bundle_sha256 != expected_digest:
         raise TypeError(
             "identity.bundle_sha256 does not match the canonical subject, "
             "evaluated_at, and evidence bytes"
         )
-    return identity, evidence
+    return identity_snapshot, evidence_snapshot
 
 
 def grade_decision(bundle: Mapping[str, object]) -> GradeResult:

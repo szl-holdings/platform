@@ -111,40 +111,54 @@ function validateBundle(bundle: DecisionEvidenceBundle): DecisionEvidenceBundle 
   if (typeof identity !== 'object' || identity === null || Array.isArray(identity)) {
     throw new TypeError('decision bundle identity must be an object');
   }
+  const identitySnapshot: DecisionBundleIdentity = {
+    subject: identity.subject,
+    bundle_sha256: identity.bundle_sha256,
+    evaluated_at: identity.evaluated_at,
+  };
   if (
-    typeof identity.subject !== 'string' ||
-    identity.subject.length === 0 ||
-    identity.subject.trim() !== identity.subject
+    typeof identitySnapshot.subject !== 'string' ||
+    identitySnapshot.subject.length === 0 ||
+    identitySnapshot.subject.trim() !== identitySnapshot.subject
   ) {
     throw new TypeError('identity.subject must be a non-empty canonical string');
   }
   if (
-    typeof identity.bundle_sha256 !== 'string' ||
-    !/^[0-9a-f]{64}$/.test(identity.bundle_sha256)
+    typeof identitySnapshot.bundle_sha256 !== 'string' ||
+    !/^[0-9a-f]{64}$/.test(identitySnapshot.bundle_sha256)
   ) {
     throw new TypeError('identity.bundle_sha256 must be a lowercase sha256 digest');
   }
-  if (typeof identity.evaluated_at !== 'string' || !isStrictTimestamp(identity.evaluated_at)) {
+  if (
+    typeof identitySnapshot.evaluated_at !== 'string' ||
+    !isStrictTimestamp(identitySnapshot.evaluated_at)
+  ) {
     throw new TypeError('identity.evaluated_at must be a timezone-qualified timestamp');
   }
   if (typeof evidence !== 'object' || evidence === null || Array.isArray(evidence)) {
     throw new TypeError('decision bundle evidence must be an object');
   }
-  const unknownRequirement = Object.keys(evidence).find((name) => !REQUIREMENT_NAMES.has(name));
+  const evidenceSnapshot = Object.fromEntries(Object.entries(evidence)) as DecisionEvidence;
+  const unknownRequirement = Object.keys(evidenceSnapshot).find(
+    (name) => !REQUIREMENT_NAMES.has(name),
+  );
   if (unknownRequirement) {
     throw new TypeError(`unknown evidence requirement: ${unknownRequirement}`);
   }
   const expectedDigest = computeDecisionBundleSha256(
-    identity.subject,
-    identity.evaluated_at,
-    evidence,
+    identitySnapshot.subject,
+    identitySnapshot.evaluated_at,
+    evidenceSnapshot,
   );
-  if (identity.bundle_sha256 !== expectedDigest) {
+  if (identitySnapshot.bundle_sha256 !== expectedDigest) {
     throw new TypeError(
       'identity.bundle_sha256 does not match the canonical subject, evaluated_at, and evidence bytes',
     );
   }
-  return bundle;
+  return {
+    identity: Object.freeze(identitySnapshot),
+    evidence: Object.freeze(evidenceSnapshot),
+  };
 }
 
 /**

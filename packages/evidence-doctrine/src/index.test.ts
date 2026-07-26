@@ -138,6 +138,38 @@ test('impossible calendar timestamps are rejected instead of normalized', () => 
   );
 });
 
+test('grading uses the same evidence snapshot that was hashed', () => {
+  let policyReads = 0;
+  const evidence: DecisionEvidence = {
+    inputs_recorded: 'VERIFIED',
+    get policy_recorded() {
+      policyReads += 1;
+      return policyReads === 1 ? 'UNVERIFIED' : 'VERIFIED';
+    },
+    output_recorded: 'VERIFIED',
+  };
+  const hashedEvidence: DecisionEvidence = {
+    inputs_recorded: 'VERIFIED',
+    policy_recorded: 'UNVERIFIED',
+    output_recorded: 'VERIFIED',
+  };
+  const result = gradeDecision({
+    identity: {
+      ...BUNDLE_IDENTITY,
+      bundle_sha256: computeDecisionBundleSha256(
+        BUNDLE_IDENTITY.subject,
+        BUNDLE_IDENTITY.evaluated_at,
+        hashedEvidence,
+      ),
+    },
+    evidence,
+  });
+
+  assert.equal(result.achieved_level, 'D0');
+  assert.deepEqual(result.blocking_requirements, ['policy_recorded']);
+  assert.equal(policyReads, 1);
+});
+
 test('Lambda uniqueness stays open, gray, and not machine-checked', () => {
   assert.deepEqual(
     assertLambdaCaseStudy({

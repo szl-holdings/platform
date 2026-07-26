@@ -1,6 +1,7 @@
 # SPDX-License-Identifier: Apache-2.0
 
 import unittest
+from collections.abc import Mapping
 
 from evidence_doctrine import (
     LEVEL_REQUIREMENTS,
@@ -40,6 +41,29 @@ def verified_through(level: str) -> dict:
         if current == level:
             break
     return evidence
+
+
+class StatefulEvidence(Mapping):
+    def __init__(self):
+        self.policy_reads = 0
+
+    def __getitem__(self, key):
+        if key == "policy_recorded":
+            self.policy_reads += 1
+            return (
+                "UNVERIFIED" if self.policy_reads == 1 else "VERIFIED"
+            )
+        if key in {"inputs_recorded", "output_recorded"}:
+            return "VERIFIED"
+        raise KeyError(key)
+
+    def __iter__(self):
+        return iter(
+            ("inputs_recorded", "policy_recorded", "output_recorded")
+        )
+
+    def __len__(self):
+        return 3
 
 
 class EvidenceDoctrineTests(unittest.TestCase):
@@ -122,6 +146,34 @@ class EvidenceDoctrineTests(unittest.TestCase):
                     {"evaluated_at": "2026-02-30T07:00:00Z"},
                 )
             )
+
+    def test_grading_uses_the_same_evidence_snapshot_that_was_hashed(self):
+        evidence = StatefulEvidence()
+        hashed_evidence = {
+            "inputs_recorded": "VERIFIED",
+            "policy_recorded": "UNVERIFIED",
+            "output_recorded": "VERIFIED",
+        }
+        result = grade_decision(
+            {
+                "identity": {
+                    **BUNDLE_IDENTITY,
+                    "bundle_sha256": compute_decision_bundle_sha256(
+                        BUNDLE_IDENTITY["subject"],
+                        BUNDLE_IDENTITY["evaluated_at"],
+                        hashed_evidence,
+                    ),
+                },
+                "evidence": evidence,
+            }
+        )
+
+        self.assertEqual(result.achieved_level, "D0")
+        self.assertEqual(
+            result.blocking_requirements,
+            ("policy_recorded",),
+        )
+        self.assertEqual(evidence.policy_reads, 1)
 
     def test_lambda_guard(self):
         honest = {
