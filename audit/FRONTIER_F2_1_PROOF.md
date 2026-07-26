@@ -25,12 +25,12 @@ The source definitions are pinned to upstream commit
 
 | Check | Result |
 |---|---|
-| Full workspace frozen install, pnpm 10.26.1 | PASS — 197 workspace projects |
+| Full workspace frozen install, pnpm 10.26.1 | PASS — 198 workspace projects |
 | `pnpm --filter @szl-holdings/telemetry-standards test` | PASS — 80/80 tests |
 | `pnpm --filter @szl-holdings/otel test` | PASS — 3/3 native-span tests |
 | Strict isolated TypeScript check of changed source | PASS — no diagnostics |
 | Biome check of changed TypeScript | PASS |
-| Canonical source-of-truth validator | PASS — 64/64 |
+| Canonical source-of-truth validator | PASS — 67/67 |
 | Production dependency audit at HIGH threshold | PASS — 0 HIGH; 5 moderate and 2 low remain |
 | Blank required identifier | PASS — builder throws |
 | Negative token count | PASS — builder throws |
