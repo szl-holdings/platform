@@ -84,6 +84,15 @@ Use [docs/README.md](README.md) for navigation by audience or task.
 
 ---
 
+## Market evidence
+
+| Document | Description | Last Reviewed |
+|----------|-------------|---------------|
+| [market/SERIES_A_POSITIONING.md](market/SERIES_A_POSITIONING.md) | Evidence-labelled Series A positioning workbench; external publication remains founder-gated | 2026-07 |
+| [market/COMPETITOR_MATRIX.md](market/COMPETITOR_MATRIX.md) | Source-by-source competitor claims and comparison boundaries | 2026-07 |
+
+---
+
 ## Conformance
 
 | Document | Description | Last Reviewed |
