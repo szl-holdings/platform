@@ -75,11 +75,17 @@ Per-test counts remain `UNAVAILABLE` because no machine-readable
 
 ## Screenshot
 
-BLOCKED. This PR also changes the visible demonstration banners and SDK
-sections on `/a11oy/a11oy-code` and `/a11oy/sdk`. Live captures are required
-before this proof packet can be treated as complete. The current verification
-environment exposed no browser backend, so no screenshot or visual claim
-verification is asserted here.
+PASS. The two modified A11oy surfaces were captured live from the running
+application on 2026-07-26 and cataloged in `audit/screenshot-catalog.md`.
+
+| Surface | Route | Screenshot | Visible evidence |
+|---|---|---|---|
+| A11oy developer platform | `/a11oy/sdk` | `docs/assets/screenshots/current/a11oy-sdk-2026-07-26.jpg` | `WARN`, `Product exploration surface`, and `SEEDED DEMONSTRATION · NOT LIVE EVIDENCE` are visible above the seeded KPI and SDK registries. |
+| A11oy Code terminal | `/a11oy/a11oy-code` | `docs/assets/screenshots/current/a11oy-code-2026-07-26.jpg` | The governed-session terminal visibly begins `SCRIPTED DEMONSTRATION — NOT LIVE EVIDENCE`; the marketing hero was not used as proof. |
+
+These captures prove claim presentation at the demonstration/reported level.
+They do not promote any displayed registry value or scripted terminal value to
+`MEASURED`.
 
 ## Verify
 

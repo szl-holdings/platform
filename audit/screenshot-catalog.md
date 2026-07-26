@@ -616,3 +616,12 @@ Artifact `public/` and `dist/public/` directories contain static assets embedded
 | Filename | Route | Surface | Capture date | Captured by | Workcell | Proof level | Status | Notes |
 |----------|-------|---------|--------------|-------------|----------|-------------|--------|-------|
 | `docs/assets/screenshots/current/sda-canonical-verifier-2026-07-22.png` | `http://127.0.0.1:8765/proof-harness.html` | SDA ask-the-fabric receipt verifier | 2026-07-22 | CodexSmith | `SDA-CANONICAL-VERIFIER-20260722` | 4 | current | Live browser capture of the patched widget calling the canonical a11oy endpoint. The sample is explicitly unsigned and the returned `INCONCLUSIVE`, `UNSIGNED-LOCAL`, and `UNAVAILABLE` states are visibly non-green. Temporary proof harness removed after capture. |
+
+---
+
+## Series A W1 truth-lock UI evidence — 2026-07-26
+
+| Filename | Route | Surface | Capture date | Captured by | Workcell | Proof level | Status | Notes |
+|----------|-------|---------|--------------|-------------|----------|-------------|--------|-------|
+| `docs/assets/screenshots/current/a11oy-sdk-2026-07-26.jpg` | `http://127.0.0.1:4110/a11oy/sdk` | A11oy developer platform | 2026-07-26 | Codex | `SERIES-A-W1-TRUTH-LOCK-20260726` | DEMONSTRATION/REPORTED | current | Live local-app capture at the patched route. The `WARN` status, product-exploration subtitle, and `SEEDED DEMONSTRATION · NOT LIVE EVIDENCE` banner are visible above the seeded KPI and SDK registries. Route is recorded here because browser chrome is not included. |
+| `docs/assets/screenshots/current/a11oy-code-2026-07-26.jpg` | `http://127.0.0.1:4110/a11oy/a11oy-code` | A11oy Code governed-session terminal | 2026-07-26 | Codex | `SERIES-A-W1-TRUTH-LOCK-20260726` | DEMONSTRATION/REPORTED | current | Live local-app capture scrolled to the modified terminal. `SCRIPTED DEMONSTRATION — NOT LIVE EVIDENCE` is visible; the marketing hero was rejected as proof. Route is recorded here because browser chrome is not included. |
