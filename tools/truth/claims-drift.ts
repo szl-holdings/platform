@@ -20,23 +20,20 @@ const MAX_BLOCK_CHARACTERS = 16_384;
 const MAX_CLAUSE_CHARACTERS = 256;
 const MAX_PAIR_DISTANCE = 256;
 const execFileAsync = promisify(execFile);
-const UNICODE_DECIMAL_ZEROES = [
-  0x30, 0x660, 0x6f0, 0x7c0, 0x966, 0x9e6, 0xa66, 0xae6, 0xb66, 0xbe6, 0xc66, 0xce6, 0xd66, 0xde6,
-  0xe50, 0xed0, 0xf20, 0x1040, 0x1090, 0x17e0, 0x1810, 0x1946, 0x19d0, 0x1a80, 0x1a90, 0x1b50,
-  0x1bb0, 0x1c40, 0x1c50, 0xa620, 0xa8d0, 0xa900, 0xa9d0, 0xa9f0, 0xaa50, 0xabf0, 0xff10, 0x104a0,
-  0x10d30, 0x11066, 0x110f0, 0x11136, 0x111d0, 0x112f0, 0x11450, 0x114d0, 0x11650, 0x116c0, 0x11730,
-  0x118e0, 0x11950, 0x11c50, 0x11d50, 0x11da0, 0x11f50, 0x16a60, 0x16ac0, 0x16b50, 0x1d7ce, 0x1d7d8,
-  0x1d7e2, 0x1d7ec, 0x1d7f6, 0x1e140, 0x1e2f0, 0x1e4f0, 0x1e950, 0x1fbf0,
-] as const;
+const UNICODE_DECIMAL = /^\p{Nd}$/u;
+const UNICODE_DECIMAL_VALUE_CACHE = new Map<number, number>();
 
 function unicodeDecimalDigitValue(character: string): number | null {
   const codePoint = character.codePointAt(0);
-  if (codePoint === undefined) return null;
-  for (const zero of UNICODE_DECIMAL_ZEROES) {
-    const value = codePoint - zero;
-    if (value >= 0 && value <= 9) return value;
-  }
-  return null;
+  if (codePoint === undefined || !UNICODE_DECIMAL.test(character)) return null;
+  const cached = UNICODE_DECIMAL_VALUE_CACHE.get(codePoint);
+  if (cached !== undefined) return cached;
+
+  let runStart = codePoint;
+  while (runStart > 0 && UNICODE_DECIMAL.test(String.fromCodePoint(runStart - 1))) runStart -= 1;
+  const value = (codePoint - runStart) % 10;
+  UNICODE_DECIMAL_VALUE_CACHE.set(codePoint, value);
+  return value;
 }
 
 export type AllowEntry = { path: string; literal: string };
@@ -565,12 +562,12 @@ function isInlineClaimContinuation(
   const right = visibleSiblingText(
     text.slice(rightOpeningEnd + 1, rightClosingStart < 0 ? text.length : rightClosingStart),
   );
-  const leftCanContinue = /[\p{L}\p{N})\]]\s*[:=-]?\s*$/u.test(left);
-  const rightStartsNumber = /^\s*\d/.test(right);
+  const leftHasClaimContext = CLAIM_CONTEXT.test(left);
+  const rightIsStyledValue = /^(?:\d{1,3}(?:,\d{3})+|\d+)$/.test(right);
   const leftEndsNumber = /\d\s*$/.test(left);
   const metricOffset = right.search(new RegExp(WATCHWORD_SOURCE, 'i'));
   const rightStartsMetric = metricOffset >= 0 && metricOffset <= 32;
-  return (leftCanContinue && rightStartsNumber) || (leftEndsNumber && rightStartsMetric);
+  return (leftHasClaimContext && rightIsStyledValue) || (leftEndsNumber && rightStartsMetric);
 }
 
 type MarkupToken = {
@@ -831,7 +828,7 @@ function decodeNumericEntities(text: string): DecodedText {
 
     const sourceStart = match.index;
     const sourceEnd = sourceStart + match[0].length;
-    if (/^\p{Nd}$/u.test(match[0])) {
+    if (UNICODE_DECIMAL.test(match[0])) {
       const digit = unicodeDecimalDigitValue(match[0]);
       append(
         digit === null ? match[0] : String(digit),
@@ -845,7 +842,7 @@ function decodeNumericEntities(text: string): DecodedText {
       if (Number.isInteger(value) && value >= 0 && value <= 0x10ffff) {
         try {
           const decodedCodePoint = String.fromCodePoint(value);
-          const digit = /^\p{Nd}$/u.test(decodedCodePoint)
+          const digit = UNICODE_DECIMAL.test(decodedCodePoint)
             ? unicodeDecimalDigitValue(decodedCodePoint)
             : null;
           const decoded = digit === null ? decodedCodePoint : String(digit);

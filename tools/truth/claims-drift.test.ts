@@ -514,6 +514,28 @@ test('normalizes Unicode decimal digits from raw text and numeric entities', () 
   }
 });
 
+test('normalizes every new Unicode decimal block exposed by the Node 24 runtime', () => {
+  for (const zero of [
+    0x10d40, 0x116d0, 0x116da, 0x11bf0, 0x11de0, 0x16130, 0x16d70, 0x1ccf0, 0x1e5f1,
+  ]) {
+    const rawDigits = String.fromCodePoint(zero + 1, zero + 9, zero + 8);
+    const entityDigits = [zero + 1, zero + 9, zero + 8]
+      .map((codePoint) => `&#x${codePoint.toString(16)};`)
+      .join('');
+    for (const digits of [rawDigits, entityDigits]) {
+      assert.deepEqual(
+        claimFailuresForLines(
+          'docs/entities.html',
+          [`<p>The current monorepo has ${digits} packages.</p>`],
+          metrics(12),
+          [],
+        ),
+        ['docs/entities.html:1: hardcoded 198; canonical value for this context is 199'],
+      );
+    }
+  }
+});
+
 test('does not let a plain allowlisted claim authorize an encoded equivalent', () => {
   const baselineLines = ['The current monorepo has 198 packages.'];
   const currentLines = ['The current monorepo has &#49;&#57;&#56; packages.'];
@@ -857,6 +879,17 @@ test('does not join same-line HTML or JSX siblings into one claim context', () =
       ),
       [],
     );
+  }
+});
+
+test('keeps unrelated numeric HTML, block, and custom-component siblings separate', () => {
+  for (const source of [
+    '<div><span>Current release notes</span><span>35 tests from the Guardian archive</span></div>',
+    '<div><span>Current release notes</span>{/* separate */}<span>35 tests from the Guardian archive</span></div>',
+    '<main><section>Current release notes</section><section>35 tests from the Guardian archive</section></main>',
+    '<Stack><Text>Current release notes</Text><Panel>35 tests from the Guardian archive</Panel></Stack>',
+  ]) {
+    assert.deepEqual(claimFailuresForLines('src/Siblings.tsx', [source], metrics(12), []), []);
   }
 });
 
