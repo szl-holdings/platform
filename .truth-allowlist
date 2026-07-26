@@ -32,4 +32,4 @@ docs/GITHUB_ASCENSION_REPORT.md|* # reason: Dated GitHub audit preserves the wor
 docs/operations/audit-findings-register.md|* # reason: Audit finding identifiers and dated workflow observations are retained as historical evidence.
 docs/security/secrets-remediation.md|* # reason: Remediation log preserves the workflow count observed when the security change was made.
 ops/frontier/repo-truth-audit.md|* # reason: Dated repository audit preserves scoped package-category counts rather than the current estate total.
-SOURCE_OF_TRUTH.md|* # reason: Legacy hand-maintained snapshot is preserved for audit history and explicitly superseded by artifacts/SOURCE_OF_TRUTH.json.
+SOURCE_OF_TRUTH.md|* # reason: This registry contains separately defined source-tree and locked-kernel metrics; overlapping current values are governed by artifacts/SOURCE_OF_TRUTH.json.
