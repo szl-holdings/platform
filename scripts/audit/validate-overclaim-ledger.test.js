@@ -151,7 +151,25 @@ test('permits a detected incident to remain open without fabricated correction d
       ledger.metrics.aggregation = 'no_observations';
     },
     () => {},
-    (markdown) => markdown.replaceAll('10h 51m 38s', '0h 0m 0s').replaceAll('n=1', 'n=0'),
+    (markdown) => {
+      let inIncident = false;
+      return markdown
+        .replaceAll('10h 51m 38s', '0h 0m 0s')
+        .replaceAll('n=1', 'n=0')
+        .replace('| Correction state | **RESOLVED** |', '| Correction state | **OPEN** |')
+        .split(/\r?\n/)
+        .filter((line) => {
+          if (line.startsWith('### OC-2026-001 ')) inIncident = true;
+          else if (line.startsWith('### ')) inIncident = false;
+          return !(
+            inIncident &&
+            (line.startsWith('| Correction |') ||
+              line.startsWith('| Corrected |') ||
+              line.startsWith('| Observed correction time |'))
+          );
+        })
+        .join('\n');
+    },
   );
   assert.deepEqual(failures, []);
 });
@@ -168,6 +186,41 @@ test('rejects a detection URL that is not bound to its structured run id', () =>
     evidence.run_id = 1;
   });
   assert.ok(failures.some((failure) => failure.includes('does not bind the run id')));
+});
+
+test('rejects an unsupported evidence schema version', () => {
+  const failures = validateEvidenceMutation('OC-2026-001-detection', (evidence) => {
+    evidence.schema_version = 'bogus';
+  });
+  assert.ok(failures.some((failure) => failure.includes('schema_version must be 1.0.0')));
+});
+
+test('rejects evidence with the wrong maturity or repository', () => {
+  const maturityFailures = validateEvidenceMutation('OC-2026-001-detection', (evidence) => {
+    evidence.maturity = 'REPORTED';
+  });
+  assert.ok(maturityFailures.some((failure) => failure.includes('maturity must be MEASURED')));
+
+  const repositoryFailures = validateEvidenceMutation('OC-2026-001-detection', (evidence) => {
+    evidence.repository = 'example/other';
+  });
+  assert.ok(
+    repositoryFailures.some((failure) =>
+      failure.includes('repository must be szl-holdings/platform'),
+    ),
+  );
+});
+
+test('rejects malformed GitHub Actions identifier fields', () => {
+  const shaFailures = validateEvidenceMutation('OC-2026-001-detection', (evidence) => {
+    evidence.head_sha = 'not-a-sha';
+  });
+  assert.ok(shaFailures.some((failure) => failure.includes('invalid head_sha')));
+
+  const jobFailures = validateEvidenceMutation('OC-2026-001-detection', (evidence) => {
+    evidence.job_id = '84331579574';
+  });
+  assert.ok(jobFailures.some((failure) => failure.includes('invalid job_id')));
 });
 
 test('rejects a rendered incident count that diverges from the ledger', () => {
@@ -187,6 +240,46 @@ test('rejects a rendered duration that diverges from the ledger', () => {
     (markdown) => markdown.replace('**10h 51m 38s**', '**0h 0m 0s**'),
   );
   assert.ok(failures.some((failure) => failure.includes('rendered Markdown correction-time')));
+});
+
+test('rejects rendered incident details that diverge from the ledger', () => {
+  const failures = validateMutation(
+    () => {},
+    () => {},
+    (markdown) =>
+      markdown
+        .replace('| Maturity | **MEASURED** |', '| Maturity | **REPORTED** |')
+        .replace(
+          'https://github.com/szl-holdings/platform/actions/runs/28456207537',
+          'https://github.com/szl-holdings/platform/actions/runs/1',
+        )
+        .replace('2026-06-30T15:31:27Z', '2026-06-30T15:31:28Z'),
+  );
+  assert.ok(failures.some((failure) => failure.includes('Markdown Maturity')));
+  assert.ok(failures.some((failure) => failure.includes('Markdown First detection')));
+  assert.ok(failures.some((failure) => failure.includes('Markdown Failed policy run')));
+});
+
+test('rejects a rendered correction URL that diverges from the ledger', () => {
+  const failures = validateMutation(
+    () => {},
+    () => {},
+    (markdown) =>
+      markdown.replace(
+        'https://github.com/szl-holdings/platform/commit/e4ca9006d905748670496908a2223f12f61cbe7e',
+        'https://github.com/szl-holdings/platform/commit/0000000000000000000000000000000000000000',
+      ),
+  );
+  assert.ok(failures.some((failure) => failure.includes('Markdown Correction')));
+});
+
+test('rejects a rendered related-incident state that diverges from the ledger', () => {
+  const failures = validateMutation(
+    () => {},
+    () => {},
+    (markdown) => markdown.replaceAll('**OPEN_UNVERIFIED**', '**RESOLVED**'),
+  );
+  assert.ok(failures.some((failure) => failure.includes('Markdown Correction state')));
 });
 
 test('rejects missing related-incident evidence', () => {

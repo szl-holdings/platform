@@ -12,7 +12,8 @@
   and
 - deterministic validation with negative cases for digest tampering, duplicate
   evidence and incident counting, counted and related-incident binding drift,
-  duration/display drift, and misleading metric labels;
+  duration/display drift, misleading metric labels, malformed evidence
+  contracts, and rendered incident-detail drift;
   and
 - protected source-of-truth enforcement for the validator and its negative
   tests whenever canonical-truth CI runs.
@@ -22,7 +23,7 @@
 | Check | Result |
 | --- | --- |
 | Ledger and evidence validation | **passed** |
-| Validator tests | **14/14 passed** |
+| Validator tests | **25/25 passed** |
 | Canonical source-of-truth validator | **66/66 passed** |
 | Git whitespace validation | **passed** |
 

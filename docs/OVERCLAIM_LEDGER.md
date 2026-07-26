@@ -32,12 +32,13 @@ failures and live-probe reports do not inflate the CI metric.
 | Field | Evidence |
 | --- | --- |
 | Maturity | **MEASURED** |
-| Claim caught | `Lambda trust aggregator - unconditional uniqueness` described as `Conjecture 1 (conditional proven axiom-free)` |
-| Truth | Unconditional Lambda uniqueness is **Conjecture 1 - OPEN**. **Theorem U** is the proved conditional result: uniqueness modulo approximately-Lambda under IA, and strict uniqueness only under Anchored or Normalized assumptions. |
-| First detection | 2026-06-30 15:31:27 UTC |
+| Correction state | **RESOLVED** |
+| Claim caught | Lambda trust aggregator - unconditional uniqueness: Conjecture 1 (conditional proven axiom-free). |
+| Truth | Unconditional Lambda uniqueness is Conjecture 1 and remains OPEN; Theorem U is the proved conditional result, modulo approximately-Lambda under IA, with strict uniqueness only under Anchored or Normalized assumptions. |
+| First detection | 2026-06-30T15:31:27Z |
 | Failed policy run | [Doctrine Overclaim Guard run 28456207537](https://github.com/szl-holdings/platform/actions/runs/28456207537) |
 | Correction | [Commit e4ca900](https://github.com/szl-holdings/platform/commit/e4ca9006d905748670496908a2223f12f61cbe7e) |
-| Corrected | 2026-07-01 02:23:05 UTC |
+| Corrected | 2026-07-01T02:23:05Z |
 | Observed correction time | **10h 51m 38s** (`n=1`) |
 
 The local evidence manifest pins selected GitHub metadata snapshots and their
@@ -48,7 +49,16 @@ ledger against the detection and correction snapshots.
 
 ### OC-2026-R0-SOVEREIGN - reported stale sovereign label
 
-**Maturity:** REPORTED
+| Field | Evidence |
+| --- | --- |
+| Maturity | **REPORTED** |
+| Correction state | **OPEN_UNVERIFIED** |
+| Detected | 2026-06-13T03:25:02Z |
+| Evidence commit | [Operations commit 297b855](https://github.com/szl-holdings/platform/commit/297b855a682c543c1f920459d649f0de694fd075) |
+| Overclaim guard | [Doctrine Overclaim Guard run 27455147544](https://github.com/szl-holdings/platform/actions/runs/27455147544) |
+| Guard conclusion | **success** |
+| Candidate reconciliation | [Commit 5a5f535](https://github.com/szl-holdings/platform/commit/5a5f5352fc1111b591bc860a4c16b7db3a020f23) |
+| Counted in CI metric | **false** |
 
 An operations commit reported `sovereign:true` and `self-hosted-gpu` while key
 resolution and two governed turns used the Hugging Face router. This is
@@ -77,5 +87,6 @@ node scripts/audit/validate-overclaim-ledger.js
 node --test scripts/audit/validate-overclaim-ledger.test.js
 ```
 
-The negative tests reject a digest mismatch, a mislabeled one-sample mean, a
-duration mismatch, and duplicate evidence references.
+The negative tests reject digest and schema corruption, malformed identifiers,
+misleading metric labels, duplicate evidence, and drift between the
+machine-readable ledger, pinned evidence, and rendered incident sections.
