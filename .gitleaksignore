@@ -5,6 +5,9 @@
 # the five security/ALLOWLIST-JUSTIFICATIONS.md findings quote reviewed detector
 # examples in the allowlist evidence ledger. Any moved or newly introduced match
 # receives a different fingerprint and remains blocking.
+#
+# This file authorizes only the exact current-tree fingerprints below. It does not
+# accept a path, rule family, historical commit range, or future detector match.
 
 replit-sync/uds/UDS_DEPLOY_GAP_FIX_REPORT.md:private-key-bare:103
 replit-sync/uds/parity_uds_payload.md:generic-api-key:445
