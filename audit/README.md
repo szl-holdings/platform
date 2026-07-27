@@ -40,8 +40,8 @@ mean.
 
 ## Canonical Current-Tree Numbers (Quick Reference)
 
-> Updated 2026-07-25 by FRONTIER V2 Wave 1 truth lock. Source:
-> `audit/source-of-truth.json` v2.0.0. Historical runtime/database snapshots
+> Updated 2026-07-27 after permanent workflow retirement. Source:
+> `audit/source-of-truth.json` v2.1.1. Historical runtime/database snapshots
 > remain in the JSON but are not current public claims.
 
 | Metric | Verified Count | Source |
@@ -60,7 +60,7 @@ mean.
 | DB migrations (SQL files) | 149 | Tracked `lib/db/drizzle/*.sql` files |
 | API route source files | 43 | Non-test files with detected Express route declarations across current runtime roots |
 | API handler declarations | 306 | Static non-test method declarations on `app`, `router`, and named Express Router receivers |
-| CI workflows | 45 | Includes both truth workflows |
+| CI workflows | 43 | Permanent workflows after retiring two obsolete mutation one-shots |
 | Environment variables (in `.env.example`) | 238 | Lines matching `^[A-Z_]+=` |
 
 ---

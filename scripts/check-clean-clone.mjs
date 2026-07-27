@@ -4,6 +4,13 @@ import { spawnSync } from 'node:child_process';
 import { resolve } from 'node:path';
 import { pathToFileURL } from 'node:url';
 
+export const RETIRED_ONE_SHOTS = Object.freeze([
+  '.github/workflows/update-lockfile-vite.yml',
+  '.github/workflows/forge-hf-activate.yml',
+  'replit-sync/forge_hf_activate.py',
+  'replit-sync/README_FORGE_HF_ACTIVATE.md',
+]);
+
 function portablePathKey(path) {
   return path.replaceAll('\\', '/').normalize('NFC').toLowerCase();
 }
@@ -46,7 +53,14 @@ export function verifyTrackedPaths({
     throw new Error(`Tracked paths collide on case-insensitive filesystems:\n${detail}`);
   }
 
-  return { trackedPaths: paths.length };
+  const tracked = new Set(paths);
+  const resurrected = RETIRED_ONE_SHOTS.filter((path) => tracked.has(path));
+  if (resurrected.length) {
+    const detail = resurrected.map((path) => `  - ${path}`).join('\n');
+    throw new Error(`Retired direct-mutation one-shots were restored:\n${detail}`);
+  }
+
+  return { trackedPaths: paths.length, retiredOneShots: RETIRED_ONE_SHOTS.length };
 }
 
 const isMain = process.argv[1] && import.meta.url === pathToFileURL(resolve(process.argv[1])).href;
@@ -55,7 +69,9 @@ if (isMain) {
   try {
     const result = verifyTrackedPaths();
     // biome-ignore lint/suspicious/noConsole: CLI success evidence is consumed by local users and CI.
-    console.log(`[clean-clone] verified ${result.trackedPaths} tracked paths`);
+    console.log(
+      `[clean-clone] verified ${result.trackedPaths} tracked paths and ${result.retiredOneShots} retired one-shots`,
+    );
   } catch (error) {
     // biome-ignore lint/suspicious/noConsole: CLI failures must be visible to local users and CI.
     console.error(`[clean-clone] ${error.message}`);

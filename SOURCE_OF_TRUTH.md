@@ -8,16 +8,16 @@
 > source-tree and locked-kernel measurements. A value without reproducible
 > evidence is **UNVERIFIED**, not estimated.
 
-**Registry version:** 2.0.0
+**Registry version:** 2.1.1
 
 **Main baseline inspected:** `platform@280176de9fd99a33f1cfc2087372014e91d7ce8f`
 
-**Measured:** 2026-07-25
+**Measured:** 2026-07-27
 
 **Validator:** `node scripts/audit/validate-source-of-truth.js`
 
-The counts include the truth-lock workflow introduced on this branch. The
-validator recomputes them from whichever commit is checked out.
+The counts describe the permanent protected-source tree after retiring two obsolete
+mutation one-shots. The validator recomputes them from whichever commit is checked out.
 
 ---
 
@@ -39,7 +39,7 @@ validator recomputes them from whichever commit is checked out.
 | DB migrations (SQL files) | **149** | Tracked `lib/db/drizzle/*.sql` files; duplicate sequence numbers may exist |
 | API route source files | **43** | Non-test files under `apps/`, `services/`, and `artifacts/api-server/` containing a detected Express route declaration |
 | API handler declarations | **306** | Static non-test HTTP method declarations on `app`, `router`, and named Express Router receivers in the current runtime roots |
-| CI workflows | **45** | Tracked `.github/workflows/*.yml` and `*.yaml`, including both truth workflows |
+| CI workflows | **43** | Permanent tracked `.github/workflows/*.yml` and `*.yaml` after two obsolete one-shots were retired |
 | Environment variables (in `.env.example`) | **238** | Lines matching `^[A-Z_]+=` |
 
 These are source-tree measurements. They do not by themselves prove that a
