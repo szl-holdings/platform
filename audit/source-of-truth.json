@@ -1,10 +1,10 @@
 {
   "meta": {
-    "generated": "2026-07-25",
+    "generated": "2026-07-27",
     "track": "FRONTIER V2 — Wave 1 Truth Lock",
-    "version": "2.1.0",
+    "version": "2.1.1",
     "measurement_base_commit": "280176de9fd99a33f1cfc2087372014e91d7ce8f",
-    "note": "Canonical reproducible counts for the truth-lock branch, including the source-of-truth workflow introduced by this change. The listed commit is the inspected main baseline, not the eventual merge commit. scripts/audit/validate-source-of-truth.js recomputes metrics from whichever commit is checked out and fails on drift. Runtime and database values not refreshed on 2026-07-25 remain historical snapshots, not current public claims."
+    "note": "Canonical reproducible counts for the current protected-source tree. The listed measurement_base_commit remains the inspected historical baseline; scripts/audit/validate-source-of-truth.js recomputes current-tree metrics from the checked-out commit. Runtime and database values not refreshed on 2026-07-27 remain historical snapshots, not current public claims."
   },
   "artifacts": {
     "registered": {
@@ -28,7 +28,9 @@
       "count": 1,
       "command": "Tracked top-level artifact directories minus registered artifact manifests",
       "computed": "2026-07-25",
-      "list": ["artifacts/api-server"],
+      "list": [
+        "artifacts/api-server"
+      ],
       "note": "api-server is backend infrastructure and is not counted as a customer-facing product vertical."
     },
     "total_on_disk": {
@@ -126,10 +128,10 @@
   },
   "ci": {
     "workflows": {
-      "count": 45,
+      "count": 43,
       "command": "Count tracked .github/workflows/*.yml and *.yaml files",
-      "computed": "2026-07-25",
-      "note": "Includes both the source-of-truth validator and generated-artifact truth-drift workflows."
+      "computed": "2026-07-27",
+      "note": "Counts the 43 permanent protected-source workflows after retiring the obsolete Vite direct-push and Replit-era Hugging Face one-shots."
     }
   },
   "env": {
@@ -153,11 +155,19 @@
       "count": 5,
       "computed": "2026-07-25",
       "definition": "A registered customer-facing domain artifact. A11oy is counted separately as the orchestration product.",
-      "list": ["Carlota Jo", "Counsel", "Sentra", "Terra", "Vessels"]
+      "list": [
+        "Carlota Jo",
+        "Counsel",
+        "Sentra",
+        "Terra",
+        "Vessels"
+      ]
     },
     "orchestration_product": {
       "count": 1,
-      "list": ["A11oy"]
+      "list": [
+        "A11oy"
+      ]
     }
   },
   "platform_primitives": {
@@ -188,7 +198,16 @@
     },
     "locked_formulas": {
       "count": 8,
-      "list": ["F1", "F4", "F7", "F11", "F12", "F18", "F19", "F22"],
+      "list": [
+        "F1",
+        "F4",
+        "F7",
+        "F11",
+        "F12",
+        "F18",
+        "F19",
+        "F22"
+      ],
       "definition": "The exact locked-proven set, separately enforced by the no-axiom Lean theorem locked_count_eight."
     },
     "lambda_uniqueness": "CONJECTURE_1_OPEN_UNCONDITIONAL"
