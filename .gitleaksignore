@@ -1,0 +1,15 @@
+# Exact reviewed false-positive fingerprints only.
+#
+# Each entry was re-inspected on 2026-07-27. The two replit-sync findings are
+# documentation examples that explicitly state no private material is committed;
+# the five security/ALLOWLIST-JUSTIFICATIONS.md findings quote reviewed detector
+# examples in the allowlist evidence ledger. Any moved or newly introduced match
+# receives a different fingerprint and remains blocking.
+
+replit-sync/uds/UDS_DEPLOY_GAP_FIX_REPORT.md:private-key-bare:103
+replit-sync/uds/parity_uds_payload.md:generic-api-key:445
+security/ALLOWLIST-JUSTIFICATIONS.md:generic-api-key:62
+security/ALLOWLIST-JUSTIFICATIONS.md:generic-api-key:65
+security/ALLOWLIST-JUSTIFICATIONS.md:generic-api-key:66
+security/ALLOWLIST-JUSTIFICATIONS.md:generic-api-key:67
+security/ALLOWLIST-JUSTIFICATIONS.md:generic-api-key:68
