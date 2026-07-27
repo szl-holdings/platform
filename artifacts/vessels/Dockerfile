@@ -10,18 +10,21 @@
 # from the repo root. The root .dockerignore strips node_modules/dist/.git so the
 # context remains source- and lockfile-bound.
 #
-# Node 26 no longer bundles Corepack. The prior `corepack enable` assumption made
-# every clean image build fail before dependency resolution. The package manager
-# is now installed explicitly at the exact version declared by root package.json.
+# Node 26 no longer bundles Corepack. The package manager is installed explicitly
+# at the exact version declared by root package.json.
+#
+# The workspace intentionally excludes unused cross-platform Lightning CSS native
+# packages, including linux-x64-musl, while retaining linux-x64-gnu. Therefore the
+# build stages use the pinned Debian/glibc Node image. An Alpine/musl builder can
+# never load the reviewed lockfile's retained Lightning CSS native module.
 #
 # Build pattern: lockfile-only `pnpm fetch` -> frozen workspace install ->
 # filtered `@workspace/vessels` Vite build.
 
 # ─── Shared pinned package-manager base ───────────────────────────────────────
-FROM node:26-alpine@sha256:e88a35be04478413b7c71c455cd9865de9b9360e1f43456be5951032d7ac1a66 AS pnpm-base
+FROM node:26-bookworm-slim@sha256:2d49d876e96237d76de412761cf05dbfe5aee325cc4406a4d41d5824c5bb8beb AS pnpm-base
 ARG PNPM_VERSION=10.26.1
-RUN apk add --no-cache libc6-compat \
-    && npm install --global "pnpm@${PNPM_VERSION}" \
+RUN npm install --global "pnpm@${PNPM_VERSION}" \
     && test "$(pnpm --version)" = "${PNPM_VERSION}"
 WORKDIR /app
 
