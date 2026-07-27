@@ -100,6 +100,7 @@ jobs:
       - name: Validate permanent source before publication
         run: |
           set -euo pipefail
+          git rm --cached "$SELF_PATH"
           node scripts/audit/validate-source-of-truth.js
           node scripts/check-clean-clone.mjs
           git diff --check
