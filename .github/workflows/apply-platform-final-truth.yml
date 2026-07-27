@@ -26,6 +26,7 @@ jobs:
       GH_TOKEN: ${{ github.token }}
       HEAD_BRANCH: ${{ github.event.pull_request.head.ref }}
       EXPECTED_HEAD: ${{ github.event.pull_request.head.sha }}
+      BASE_SHA: ${{ github.event.pull_request.base.sha }}
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
@@ -88,18 +89,53 @@ jobs:
               if not retired.exists():
                   raise SystemExit(f'expected temporary workflow is missing: {retired}')
               retired.unlink()
-      - name: Generate and verify the final diagnostic-free truth tree
+      - name: Run every final-tree validation stage and preserve evidence
+        id: validate
+        shell: bash
         run: |
-          set -euo pipefail
-          pnpm truth:generate
-          pnpm truth:generate -- --verify-local --verify-remote
-          pnpm truth:validate
-          pnpm claims:drift
-          node tools/truth/check-claims.ts --base "${{ github.event.pull_request.base.sha }}"
-          node scripts/check-clean-clone.mjs
-          git diff --check
+          set +e
+          mkdir -p reports/platform-final-truth
+          first_failure=0
+          run_stage() {
+            name="$1"
+            shift
+            echo "===== $name =====" | tee "reports/platform-final-truth/$name.log"
+            printf 'COMMAND:' >> "reports/platform-final-truth/$name.log"
+            printf ' %q' "$@" >> "reports/platform-final-truth/$name.log"
+            echo >> "reports/platform-final-truth/$name.log"
+            "$@" >> "reports/platform-final-truth/$name.log" 2>&1
+            code=$?
+            echo "EXIT_CODE=$code" >> "reports/platform-final-truth/$name.log"
+            cat "reports/platform-final-truth/$name.log"
+            if [ "$code" -ne 0 ] && [ "$first_failure" -eq 0 ]; then
+              first_failure="$code"
+            fi
+          }
+
+          run_stage truth-generate pnpm truth:generate
+          run_stage truth-verify pnpm truth:generate -- --verify-local --verify-remote
+          run_stage truth-validate pnpm truth:validate
+          run_stage claims-drift pnpm claims:drift
+          run_stage changed-claims node tools/truth/check-claims.ts --base "$BASE_SHA"
+          run_stage clean-clone node scripts/check-clean-clone.mjs
+          run_stage diff-check git diff --check
+
+          cp artifacts/SOURCE_OF_TRUTH.json reports/platform-final-truth/SOURCE_OF_TRUTH.json
+          git diff -- artifacts/SOURCE_OF_TRUTH.json \
+            > reports/platform-final-truth/source-of-truth.diff || true
+          echo "exit_code=$first_failure" >> "$GITHUB_OUTPUT"
+          exit 0
+      - name: Upload immutable final-tree validation evidence
+        if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: platform-final-truth-${{ github.run_id }}
+          path: reports/platform-final-truth
+          if-no-files-found: error
+          retention-days: 30
       - name: Create one GitHub-signed exact source commit
         id: commit
+        if: steps.validate.outputs.exit_code == '0'
         shell: python
         run: |
           import base64
@@ -162,7 +198,7 @@ jobs:
                   'Accept': 'application/vnd.github+json',
                   'Content-Type': 'application/json',
                   'X-GitHub-Api-Version': '2022-11-28',
-                  'User-Agent': 'platform-final-truth/1',
+                  'User-Agent': 'platform-final-truth/2',
               },
           )
           try:
@@ -180,6 +216,7 @@ jobs:
           with open(os.environ['GITHUB_OUTPUT'], 'a', encoding='utf-8') as output:
               output.write(f"sha={commit['oid']}\n")
       - name: Verify the exact signed branch head
+        if: steps.validate.outputs.exit_code == '0'
         env:
           COMMIT_SHA: ${{ steps.commit.outputs.sha }}
         run: |
@@ -188,3 +225,15 @@ jobs:
           test "$observed" = "$COMMIT_SHA"
           test "$(gh api "repos/$GITHUB_REPOSITORY/commits/$COMMIT_SHA" --jq .commit.verification.verified)" = 'true'
           test "$(gh api "repos/$GITHUB_REPOSITORY/commits/$COMMIT_SHA" --jq .commit.verification.reason)" = 'valid'
+      - name: Enforce the final validation result
+        if: always()
+        env:
+          EXIT_CODE: ${{ steps.validate.outputs.exit_code }}
+        run: |
+          set -euo pipefail
+          code="${EXIT_CODE:-2}"
+          if [ "$code" -ne 0 ]; then
+            echo "::error::final Platform truth validation failed; inspect the immutable stage artifacts."
+            exit "$code"
+          fi
+          echo 'Final Platform truth tree was validated and published.'
