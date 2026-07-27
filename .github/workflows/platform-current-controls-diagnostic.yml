@@ -43,10 +43,39 @@ jobs:
         run: |
           set -euo pipefail
           mkdir -p reports/platform-final-controls
+
+          set +e
           pnpm audit --audit-level high --json \
-            > reports/platform-final-controls/pnpm-audit.json
+            > reports/platform-final-controls/pnpm-audit.json 2>&1
+          audit_exit=$?
+          set -e
+
+          python3 - <<'PY'
+          import json
+          from pathlib import Path
+
+          source = Path('reports/platform-final-controls/pnpm-audit.json')
+          payload = json.loads(source.read_text(encoding='utf-8'))
+          vulnerabilities = payload.get('metadata', {}).get('vulnerabilities', {})
+          summary = {
+              severity: int(vulnerabilities.get(severity, 0) or 0)
+              for severity in ('critical', 'high', 'moderate', 'low')
+          }
+          Path('reports/platform-final-controls/pnpm-audit-summary.json').write_text(
+              json.dumps(summary, indent=2, sort_keys=True) + '\n',
+              encoding='utf-8',
+          )
+          print(json.dumps(summary, indent=2, sort_keys=True))
+          if summary['critical'] or summary['high']:
+              raise SystemExit('Critical or High dependency vulnerability remains')
+          PY
+          echo "pnpm audit transport exit: $audit_exit; parsed Critical/High gate passed"
+
           pnpm run security:vuln \
             > reports/platform-final-controls/vulnerability-report.log 2>&1
+          cp security/vuln-report.md \
+            reports/platform-final-controls/vuln-report.md
+
           go run github.com/gitleaks/gitleaks/v8@v8.30.1 detect \
             --no-git \
             --source . \
