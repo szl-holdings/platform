@@ -1,0 +1,190 @@
+name: Apply Platform Final Truth — Controlled
+
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - .github/workflows/apply-platform-final-truth.yml
+
+permissions:
+  contents: write
+
+concurrency:
+  group: apply-platform-final-truth-${{ github.event.pull_request.number }}
+  cancel-in-progress: false
+
+jobs:
+  apply:
+    name: Reconcile final workflow inventory and publish exact truth
+    if: >-
+      github.repository == 'szl-holdings/platform' &&
+      github.event.pull_request.head.repo.full_name == github.repository &&
+      github.event.pull_request.head.ref == 'fix/platform-current-controls-v1'
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    env:
+      GH_TOKEN: ${{ github.token }}
+      HEAD_BRANCH: ${{ github.event.pull_request.head.ref }}
+      EXPECTED_HEAD: ${{ github.event.pull_request.head.sha }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+          persist-credentials: false
+          fetch-depth: 1
+      - uses: pnpm/action-setup@0ebf47130e4866e96fce0953f49152a61190b271 # v4
+        with:
+          version: 10.26.1
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version-file: .node-version
+          cache: pnpm
+      - name: Install exact dependency graph
+        run: pnpm install --frozen-lockfile
+      - name: Apply exact measured-claim replacements
+        shell: python
+        run: |
+          from pathlib import Path
+
+          replacements = {
+              'content-package/posts/medium-a11oy-definition.html': (
+                  '<tr><td><strong>CI/CD</strong></td><td>45 GitHub Actions workflows (measured)</td></tr>',
+                  '<tr><td><strong>CI/CD</strong></td><td>43 GitHub Actions workflows (measured)</td></tr>',
+              ),
+              'content-package/posts/medium-a11oy-definition.md': (
+                  '| **CI/CD** | 45 GitHub Actions workflows (measured) |',
+                  '| **CI/CD** | 43 GitHub Actions workflows (measured) |',
+              ),
+              'docs/a11oy/A11OY.md': (
+                  '| **CI/CD** | 45 GitHub Actions workflows (measured) |',
+                  '| **CI/CD** | 43 GitHub Actions workflows (measured) |',
+              ),
+              'docs/operations/github-setup.md': (
+                  '| CI workflows | 45 workflows measured in `artifacts/SOURCE_OF_TRUTH.json`; current run status must be checked separately |',
+                  '| CI workflows | 43 workflows measured in `artifacts/SOURCE_OF_TRUTH.json`; current run status must be checked separately |',
+              ),
+              'ops/frontier/current-vs-target-architecture.md': (
+                  '- **CI/CD:** 45 GitHub workflows are measured in `artifacts/SOURCE_OF_TRUTH.json`; archival workflow state is tracked separately',
+                  '- **CI/CD:** 43 GitHub workflows are measured in `artifacts/SOURCE_OF_TRUTH.json`; archival workflow state is tracked separately',
+              ),
+              'ops/frontier/repo-topology-map.md': (
+                  '├── .github/workflows/            # 45 CI/CD workflows (MEASURED)',
+                  '├── .github/workflows/            # 43 CI/CD workflows (MEASURED)',
+              ),
+          }
+
+          for relative, (old, new) in replacements.items():
+              path = Path(relative)
+              text = path.read_text(encoding='utf-8')
+              count = text.count(old)
+              if count != 1:
+                  raise SystemExit(f'{relative}: expected one exact stale claim, found {count}')
+              path.write_text(text.replace(old, new, 1), encoding='utf-8')
+
+          for retired in (
+              Path('.github/workflows/platform-current-controls-diagnostic.yml'),
+              Path('.github/workflows/apply-platform-final-truth.yml'),
+          ):
+              if not retired.exists():
+                  raise SystemExit(f'expected temporary workflow is missing: {retired}')
+              retired.unlink()
+      - name: Generate and verify the final diagnostic-free truth tree
+        run: |
+          set -euo pipefail
+          pnpm truth:generate
+          pnpm truth:generate -- --verify-local --verify-remote
+          pnpm truth:validate
+          pnpm claims:drift
+          node tools/truth/check-claims.ts --base "${{ github.event.pull_request.base.sha }}"
+          node scripts/check-clean-clone.mjs
+          git diff --check
+      - name: Create one GitHub-signed exact source commit
+        id: commit
+        shell: python
+        run: |
+          import base64
+          import json
+          import os
+          import urllib.error
+          import urllib.request
+          from pathlib import Path
+
+          additions = [
+              'artifacts/SOURCE_OF_TRUTH.json',
+              'content-package/posts/medium-a11oy-definition.html',
+              'content-package/posts/medium-a11oy-definition.md',
+              'docs/a11oy/A11OY.md',
+              'docs/operations/github-setup.md',
+              'ops/frontier/current-vs-target-architecture.md',
+              'ops/frontier/repo-topology-map.md',
+          ]
+          deletions = [
+              '.github/workflows/platform-current-controls-diagnostic.yml',
+              '.github/workflows/apply-platform-final-truth.yml',
+          ]
+          query = '''
+          mutation($input: CreateCommitOnBranchInput!) {
+            createCommitOnBranch(input: $input) {
+              commit { oid url }
+            }
+          }
+          '''
+          variables = {
+              'input': {
+                  'branch': {
+                      'repositoryNameWithOwner': os.environ['GITHUB_REPOSITORY'],
+                      'branchName': os.environ['HEAD_BRANCH'],
+                  },
+                  'message': {
+                      'headline': 'docs(truth): reconcile final workflow inventory',
+                      'body': 'Signed-off-by: Stephen Lutar <stephenlutar2@gmail.com>',
+                  },
+                  'expectedHeadOid': os.environ['EXPECTED_HEAD'],
+                  'fileChanges': {
+                      'additions': [
+                          {
+                              'path': path,
+                              'contents': base64.b64encode(Path(path).read_bytes()).decode('ascii'),
+                          }
+                          for path in additions
+                      ],
+                      'deletions': [{'path': path} for path in deletions],
+                  },
+              }
+          }
+          body = json.dumps({'query': query, 'variables': variables}).encode('utf-8')
+          request = urllib.request.Request(
+              'https://api.github.com/graphql',
+              data=body,
+              method='POST',
+              headers={
+                  'Authorization': f"Bearer {os.environ['GH_TOKEN']}",
+                  'Accept': 'application/vnd.github+json',
+                  'Content-Type': 'application/json',
+                  'X-GitHub-Api-Version': '2022-11-28',
+                  'User-Agent': 'platform-final-truth/1',
+              },
+          )
+          try:
+              with urllib.request.urlopen(request, timeout=60) as response:
+                  payload = json.loads(response.read())
+          except urllib.error.HTTPError as exc:
+              print(f'GraphQL HTTP {exc.code}')
+              raise SystemExit(1) from exc
+          errors = payload.get('errors') or []
+          if errors:
+              print(json.dumps(errors, indent=2))
+              raise SystemExit(1)
+          commit = payload['data']['createCommitOnBranch']['commit']
+          print(json.dumps(commit, indent=2, sort_keys=True))
+          with open(os.environ['GITHUB_OUTPUT'], 'a', encoding='utf-8') as output:
+              output.write(f"sha={commit['oid']}\n")
+      - name: Verify the exact signed branch head
+        env:
+          COMMIT_SHA: ${{ steps.commit.outputs.sha }}
+        run: |
+          set -euo pipefail
+          observed="$(gh api "repos/$GITHUB_REPOSITORY/branches/$HEAD_BRANCH" --jq .commit.sha)"
+          test "$observed" = "$COMMIT_SHA"
+          test "$(gh api "repos/$GITHUB_REPOSITORY/commits/$COMMIT_SHA" --jq .commit.verification.verified)" = 'true'
+          test "$(gh api "repos/$GITHUB_REPOSITORY/commits/$COMMIT_SHA" --jq .commit.verification.reason)" = 'valid'
