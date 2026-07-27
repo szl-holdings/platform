@@ -1,0 +1,182 @@
+name: Finalize Platform Canonical Truth
+
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - .github/workflows/finalize-platform-truth.yml
+
+permissions:
+  contents: write
+
+concurrency:
+  group: finalize-platform-truth
+  cancel-in-progress: false
+
+jobs:
+  finalize:
+    name: Publish signed synchronized truth registries
+    if: >-
+      github.repository == 'szl-holdings/platform' &&
+      github.event.pull_request.head.repo.full_name == github.repository &&
+      github.event.pull_request.head.ref == 'fix/platform-current-controls-v1'
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      GH_TOKEN: ${{ github.token }}
+      EXPECTED_HEAD: ${{ github.event.pull_request.head.sha }}
+      BRANCH: fix/platform-current-controls-v1
+      REPOSITORY: ${{ github.repository }}
+      SELF_PATH: .github/workflows/finalize-platform-truth.yml
+    steps:
+      - name: Checkout exact branch source
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+          persist-credentials: false
+          fetch-depth: 1
+
+      - name: Synchronize all canonical truth representations
+        shell: python
+        run: |
+          import json
+          from pathlib import Path
+
+          machine_path = Path('audit/source-of-truth.json')
+          machine = json.loads(machine_path.read_text(encoding='utf-8'))
+          machine['meta']['generated'] = '2026-07-27'
+          machine['meta']['version'] = '2.1.1'
+          machine['meta']['note'] = (
+              'Canonical reproducible counts for the current protected-source tree. '
+              'The listed measurement_base_commit remains the inspected historical baseline; '
+              'scripts/audit/validate-source-of-truth.js recomputes current-tree metrics from '
+              'the checked-out commit. Runtime and database values not refreshed on '
+              '2026-07-27 remain historical snapshots, not current public claims.'
+          )
+          machine['ci']['workflows']['count'] = 43
+          machine['ci']['workflows']['computed'] = '2026-07-27'
+          machine['ci']['workflows']['note'] = (
+              'Counts the 43 permanent protected-source workflows after retiring the obsolete '
+              'Vite direct-push and Replit-era Hugging Face one-shots.'
+          )
+          machine_path.write_text(
+              json.dumps(machine, indent=2, ensure_ascii=False) + '\n',
+              encoding='utf-8',
+          )
+
+          source_path = Path('SOURCE_OF_TRUTH.md')
+          source = source_path.read_text(encoding='utf-8')
+          source = source.replace('**Registry version:** 2.0.0', '**Registry version:** 2.1.1')
+          source = source.replace('**Measured:** 2026-07-25', '**Measured:** 2026-07-27')
+          source = source.replace(
+              'The counts include the truth-lock workflow introduced on this branch. The\nvalidator recomputes them from whichever commit is checked out.',
+              'The counts describe the permanent protected-source tree after retiring two obsolete\nmutation one-shots. The validator recomputes them from whichever commit is checked out.'
+          )
+          source = source.replace(
+              '| CI workflows | **45** | Tracked `.github/workflows/*.yml` and `*.yaml`, including both truth workflows |',
+              '| CI workflows | **43** | Permanent tracked `.github/workflows/*.yml` and `*.yaml` after two obsolete one-shots were retired |'
+          )
+          source_path.write_text(source, encoding='utf-8')
+
+          audit_path = Path('audit/README.md')
+          audit = audit_path.read_text(encoding='utf-8')
+          audit = audit.replace(
+              '> Updated 2026-07-25 by FRONTIER V2 Wave 1 truth lock. Source:\n> `audit/source-of-truth.json` v2.0.0.',
+              '> Updated 2026-07-27 after permanent workflow retirement. Source:\n> `audit/source-of-truth.json` v2.1.1.'
+          )
+          audit = audit.replace(
+              '| CI workflows | 45 | Includes both truth workflows |',
+              '| CI workflows | 43 | Permanent workflows after retiring two obsolete mutation one-shots |'
+          )
+          audit_path.write_text(audit, encoding='utf-8')
+
+      - name: Stage self-removal and validate the resulting permanent tree
+        run: |
+          set -euo pipefail
+          git rm --cached "$SELF_PATH"
+          node scripts/audit/validate-source-of-truth.js
+          git diff --check
+
+      - name: Publish one GitHub-signed finalization commit
+        id: commit
+        shell: python
+        run: |
+          import base64
+          import json
+          import os
+          import urllib.error
+          import urllib.request
+          from pathlib import Path
+
+          additions = [
+              'audit/source-of-truth.json',
+              'SOURCE_OF_TRUTH.md',
+              'audit/README.md',
+          ]
+          query = '''
+          mutation($input: CreateCommitOnBranchInput!) {
+            createCommitOnBranch(input: $input) {
+              commit { oid url }
+            }
+          }
+          '''
+          variables = {
+              'input': {
+                  'branch': {
+                      'repositoryNameWithOwner': os.environ['REPOSITORY'],
+                      'branchName': os.environ['BRANCH'],
+                  },
+                  'message': {
+                      'headline': 'fix(truth): synchronize permanent workflow count',
+                      'body': 'Signed-off-by: Stephen Lutar <stephenlutar2@gmail.com>',
+                  },
+                  'expectedHeadOid': os.environ['EXPECTED_HEAD'],
+                  'fileChanges': {
+                      'additions': [
+                          {
+                              'path': path,
+                              'contents': base64.b64encode(Path(path).read_bytes()).decode('ascii'),
+                          }
+                          for path in additions
+                      ],
+                      'deletions': [{'path': os.environ['SELF_PATH']}],
+                  },
+              }
+          }
+          request = urllib.request.Request(
+              'https://api.github.com/graphql',
+              data=json.dumps({'query': query, 'variables': variables}).encode('utf-8'),
+              method='POST',
+              headers={
+                  'Authorization': f"Bearer {os.environ['GH_TOKEN']}",
+                  'Accept': 'application/vnd.github+json',
+                  'Content-Type': 'application/json',
+                  'X-GitHub-Api-Version': '2022-11-28',
+                  'User-Agent': 'szl-platform-truth-finalizer/1',
+              },
+          )
+          try:
+              with urllib.request.urlopen(request, timeout=60) as response:
+                  payload = json.loads(response.read())
+          except urllib.error.HTTPError as exc:
+              raise SystemExit(f'GraphQL HTTP {exc.code}') from exc
+          if payload.get('errors'):
+              print(json.dumps(payload['errors'], indent=2))
+              raise SystemExit(1)
+          commit = payload['data']['createCommitOnBranch']['commit']
+          print(json.dumps(commit, indent=2, sort_keys=True))
+          with open(os.environ['GITHUB_OUTPUT'], 'a', encoding='utf-8') as output:
+              output.write(f"sha={commit['oid']}\n")
+
+      - name: Verify signed finalization and controller removal
+        env:
+          COMMIT_SHA: ${{ steps.commit.outputs.sha }}
+        run: |
+          set -euo pipefail
+          test "$(gh api "repos/$REPOSITORY/branches/$BRANCH" --jq .commit.sha)" = "$COMMIT_SHA"
+          test "$(gh api "repos/$REPOSITORY/commits/$COMMIT_SHA" --jq .commit.verification.verified)" = 'true'
+          test "$(gh api "repos/$REPOSITORY/commits/$COMMIT_SHA" --jq .commit.verification.reason)" = 'valid'
+          if gh api "repos/$REPOSITORY/contents/$SELF_PATH?ref=$BRANCH" >/dev/null 2>&1; then
+            echo '::error::temporary truth finalizer still exists'
+            exit 1
+          fi
