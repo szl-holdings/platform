@@ -8,6 +8,8 @@
 #
 # This file authorizes only the exact current-tree fingerprints below. It does not
 # accept a path, rule family, historical commit range, or future detector match.
+# Canonical source-of-truth workflow counts are maintained independently and this
+# evidence policy cannot alter or suppress those measurements.
 
 replit-sync/uds/UDS_DEPLOY_GAP_FIX_REPORT.md:private-key-bare:103
 replit-sync/uds/parity_uds_payload.md:generic-api-key:445
