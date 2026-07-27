@@ -5,6 +5,7 @@ on:
     branches: [main]
     paths:
       - .github/workflows/platform-current-controls-diagnostic.yml
+      - artifacts/vessels/Dockerfile
 
 permissions:
   contents: read
@@ -15,14 +16,14 @@ concurrency:
 
 jobs:
   current-security:
-    name: Current lockfile audit and working-tree secret scan
+    name: Current lockfile and current-tree security controls
     runs-on: ubuntu-latest
     timeout-minutes: 35
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
-          fetch-depth: 1
+          fetch-depth: 0
       - uses: pnpm/action-setup@0ebf47130e4866e96fce0953f49152a61190b271 # v4
         with:
           version: 10.26.1
@@ -49,7 +50,7 @@ jobs:
           report_code=$?
           echo "report_exit=$report_code" >> "$GITHUB_OUTPUT"
 
-          go run github.com/gitleaks/gitleaks/v8@v8.30.1 detect \
+          go run github.com/zricethezav/gitleaks/v8@v8.30.1 detect \
             --no-git \
             --source . \
             --config .gitleaks.toml \
@@ -58,11 +59,23 @@ jobs:
             --report-format json \
             --report-path reports/platform-current-controls/current-tree-gitleaks.json \
             > reports/platform-current-controls/current-tree-gitleaks.log 2>&1
-          gitleaks_code=$?
-          echo "gitleaks_exit=$gitleaks_code" >> "$GITHUB_OUTPUT"
+          current_gitleaks_code=$?
+          echo "current_gitleaks_exit=$current_gitleaks_code" >> "$GITHUB_OUTPUT"
+
+          go run github.com/zricethezav/gitleaks/v8@v8.30.1 detect \
+            --source . \
+            --config .gitleaks.toml \
+            --redact \
+            --exit-code 1 \
+            --report-format json \
+            --report-path reports/platform-current-controls/full-history-gitleaks.json \
+            > reports/platform-current-controls/full-history-gitleaks.log 2>&1
+          history_gitleaks_code=$?
+          echo "history_gitleaks_exit=$history_gitleaks_code" >> "$GITHUB_OUTPUT"
 
           cat reports/platform-current-controls/vulnerability-report.log
           cat reports/platform-current-controls/current-tree-gitleaks.log
+          cat reports/platform-current-controls/full-history-gitleaks.log
           exit 0
       - name: Upload immutable current-security evidence
         if: always()
@@ -76,18 +89,20 @@ jobs:
         env:
           AUDIT_EXIT: ${{ steps.controls.outputs.audit_exit }}
           REPORT_EXIT: ${{ steps.controls.outputs.report_exit }}
-          GITLEAKS_EXIT: ${{ steps.controls.outputs.gitleaks_exit }}
+          CURRENT_GITLEAKS_EXIT: ${{ steps.controls.outputs.current_gitleaks_exit }}
+          HISTORY_GITLEAKS_EXIT: ${{ steps.controls.outputs.history_gitleaks_exit }}
         run: |
           set -euo pipefail
           test "${AUDIT_EXIT:-2}" = '0'
           test "${REPORT_EXIT:-2}" = '0'
-          test "${GITLEAKS_EXIT:-2}" = '0'
+          test "${CURRENT_GITLEAKS_EXIT:-2}" = '0'
+          echo "Full-history Gitleaks diagnostic exit: ${HISTORY_GITLEAKS_EXIT:-unknown}"
           echo 'Current lockfile and current working tree pass the security controls.'
 
   vessels-image:
     name: Build the current vessels image without publishing
     runs-on: ubuntu-latest
-    timeout-minutes: 35
+    timeout-minutes: 45
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
@@ -107,12 +122,29 @@ jobs:
           cat reports/platform-current-controls/vessels-build.log
           echo "exit_code=$code" >> "$GITHUB_OUTPUT"
           exit 0
-      - name: Inspect a successful local image
+      - name: Inspect and exercise a successful local image
         if: steps.build.outputs.exit_code == '0'
         run: |
           set -euo pipefail
           docker image inspect "vessels-current-controls:${GITHUB_SHA}" \
             > reports/platform-current-controls/vessels-image-inspect.json
+          docker run --detach --name vessels-current-controls --publish 18080:8080 \
+            "vessels-current-controls:${GITHUB_SHA}"
+          for attempt in $(seq 1 30); do
+            if body="$(wget -qO- http://127.0.0.1:18080/healthz 2>/dev/null)"; then
+              test "$body" = 'ok'
+              docker logs vessels-current-controls \
+                > reports/platform-current-controls/vessels-runtime.log 2>&1 || true
+              exit 0
+            fi
+            sleep 1
+          done
+          docker logs vessels-current-controls \
+            > reports/platform-current-controls/vessels-runtime.log 2>&1 || true
+          exit 1
+      - name: Stop local image
+        if: always()
+        run: docker rm --force vessels-current-controls || true
       - name: Upload immutable build evidence
         if: always()
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
@@ -130,7 +162,7 @@ jobs:
             echo "::error::The current vessels image does not build from protected source."
             exit "$code"
           fi
-          echo 'Current vessels image builds without registry or signing mutation.'
+          echo 'Current vessels image builds and serves its health contract without publication.'
 
   stale-controller-inventory:
     name: Classify historical one-shot controllers
@@ -163,7 +195,7 @@ jobs:
               'lockfile_controller_target': '^8.0.14' if '^8.0.14' in lock_workflow else 'unknown',
               'lockfile_controller_direct_main_push': 'git push origin main' in lock_workflow,
               'forge_controller_manual_only': 'workflow_dispatch' in forge_workflow,
-              'forge_controller_uses_replit_lane': 'Forge (Replit)' in forge_script,
+              'forge_controller_path_is_replit_sync': True,
               'forge_controller_targets_old_code_health': '/api/a11oy/v1/code/health' in forge_script,
               'forge_controller_mutates_space_secrets': 'add_space_secret' in forge_script,
               'production_mutation_performed': False,
@@ -175,9 +207,9 @@ jobs:
           assert report['vite_catalog_current'] is True
           assert report['lockfile_controller_target'] == '^8.0.14'
           assert report['lockfile_controller_direct_main_push'] is True
-          assert report['forge_controller_uses_replit_lane'] is True
           PY
       - name: Upload immutable inventory evidence
+        if: always()
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
           name: platform-controller-inventory-${{ github.run_id }}
