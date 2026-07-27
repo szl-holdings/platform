@@ -1,4 +1,4 @@
-name: Platform Current Controls — Bounded Diagnostics
+name: Platform Final Controls — Bounded Verification
 
 on:
   pull_request:
@@ -6,19 +6,25 @@ on:
     paths:
       - .github/workflows/platform-current-controls-diagnostic.yml
       - artifacts/vessels/Dockerfile
+      - .gitleaksignore
+      - scripts/check-clean-clone.mjs
+      - .github/workflows/update-lockfile-vite.yml
+      - .github/workflows/forge-hf-activate.yml
+      - replit-sync/forge_hf_activate.py
+      - replit-sync/README_FORGE_HF_ACTIVATE.md
 
 permissions:
   contents: read
 
 concurrency:
-  group: platform-current-controls-${{ github.event.pull_request.number }}
+  group: platform-final-controls-${{ github.event.pull_request.number }}
   cancel-in-progress: true
 
 jobs:
-  current-security:
-    name: Current lockfile and current-tree security controls
+  source-controls:
+    name: Security, truth, and retirement controls
     runs-on: ubuntu-latest
-    timeout-minutes: 35
+    timeout-minutes: 40
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
@@ -29,190 +35,97 @@ jobs:
           version: 10.26.1
       - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
         with:
-          node-version: '24'
+          node-version-file: .node-version
           cache: pnpm
       - name: Install exact lockfile
         run: pnpm install --frozen-lockfile
       - name: Execute current dependency and secret controls
-        id: controls
-        shell: bash
         run: |
-          set +e
-          mkdir -p reports/platform-current-controls
-
+          set -euo pipefail
+          mkdir -p reports/platform-final-controls
           pnpm audit --audit-level high --json \
-            > reports/platform-current-controls/pnpm-audit.json 2>&1
-          audit_code=$?
-          echo "audit_exit=$audit_code" >> "$GITHUB_OUTPUT"
-
+            > reports/platform-final-controls/pnpm-audit.json
           pnpm run security:vuln \
-            > reports/platform-current-controls/vulnerability-report.log 2>&1
-          report_code=$?
-          echo "report_exit=$report_code" >> "$GITHUB_OUTPUT"
-
-          go run github.com/zricethezav/gitleaks/v8@v8.30.1 detect \
+            > reports/platform-final-controls/vulnerability-report.log 2>&1
+          go run github.com/gitleaks/gitleaks/v8@v8.30.1 detect \
             --no-git \
             --source . \
             --config .gitleaks.toml \
             --redact \
             --exit-code 1 \
             --report-format json \
-            --report-path reports/platform-current-controls/current-tree-gitleaks.json \
-            > reports/platform-current-controls/current-tree-gitleaks.log 2>&1
-          current_gitleaks_code=$?
-          echo "current_gitleaks_exit=$current_gitleaks_code" >> "$GITHUB_OUTPUT"
-
-          go run github.com/zricethezav/gitleaks/v8@v8.30.1 detect \
-            --source . \
-            --config .gitleaks.toml \
-            --redact \
-            --exit-code 1 \
-            --report-format json \
-            --report-path reports/platform-current-controls/full-history-gitleaks.json \
-            > reports/platform-current-controls/full-history-gitleaks.log 2>&1
-          history_gitleaks_code=$?
-          echo "history_gitleaks_exit=$history_gitleaks_code" >> "$GITHUB_OUTPUT"
-
-          cat reports/platform-current-controls/vulnerability-report.log
-          cat reports/platform-current-controls/current-tree-gitleaks.log
-          cat reports/platform-current-controls/full-history-gitleaks.log
-          exit 0
-      - name: Upload immutable current-security evidence
+            --report-path reports/platform-final-controls/current-tree-gitleaks.json \
+            > reports/platform-final-controls/current-tree-gitleaks.log 2>&1
+      - name: Prove retired one-shots remain absent
+        run: node scripts/check-clean-clone.mjs
+      - name: Regenerate deterministic local and remote truth
+        run: |
+          set -euo pipefail
+          pnpm truth:generate -- --verify-local
+          pnpm truth:generate -- --verify-local --verify-remote
+          pnpm claims:validate
+          pnpm claims:drift
+          node tools/truth/check-claims.ts --base "${{ github.event.pull_request.base.sha }}"
+          cp artifacts/SOURCE_OF_TRUTH.json \
+            reports/platform-final-controls/SOURCE_OF_TRUTH.json
+          git diff -- artifacts/SOURCE_OF_TRUTH.json \
+            > reports/platform-final-controls/source-of-truth.diff || true
+      - name: Upload immutable source-control evidence
         if: always()
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
-          name: platform-current-security-${{ github.run_id }}
-          path: reports/platform-current-controls
+          name: platform-final-source-controls-${{ github.run_id }}
+          path: reports/platform-final-controls
           if-no-files-found: error
           retention-days: 30
-      - name: Enforce current source state
-        env:
-          AUDIT_EXIT: ${{ steps.controls.outputs.audit_exit }}
-          REPORT_EXIT: ${{ steps.controls.outputs.report_exit }}
-          CURRENT_GITLEAKS_EXIT: ${{ steps.controls.outputs.current_gitleaks_exit }}
-          HISTORY_GITLEAKS_EXIT: ${{ steps.controls.outputs.history_gitleaks_exit }}
-        run: |
-          set -euo pipefail
-          test "${AUDIT_EXIT:-2}" = '0'
-          test "${REPORT_EXIT:-2}" = '0'
-          test "${CURRENT_GITLEAKS_EXIT:-2}" = '0'
-          echo "Full-history Gitleaks diagnostic exit: ${HISTORY_GITLEAKS_EXIT:-unknown}"
-          echo 'Current lockfile and current working tree pass the security controls.'
 
   vessels-image:
-    name: Build the current vessels image without publishing
+    name: Build and exercise the Vessels image without publishing
     runs-on: ubuntu-latest
-    timeout-minutes: 45
+    timeout-minutes: 40
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
           fetch-depth: 1
       - name: Build exact current image
-        id: build
-        shell: bash
-        run: |
-          set +e
-          mkdir -p reports/platform-current-controls
-          docker build \
-            --file artifacts/vessels/Dockerfile \
-            --tag vessels-current-controls:${GITHUB_SHA} \
-            . > reports/platform-current-controls/vessels-build.log 2>&1
-          code=$?
-          cat reports/platform-current-controls/vessels-build.log
-          echo "exit_code=$code" >> "$GITHUB_OUTPUT"
-          exit 0
-      - name: Inspect and exercise a successful local image
-        if: steps.build.outputs.exit_code == '0'
         run: |
           set -euo pipefail
-          docker image inspect "vessels-current-controls:${GITHUB_SHA}" \
-            > reports/platform-current-controls/vessels-image-inspect.json
-          docker run --detach --name vessels-current-controls --publish 18080:8080 \
-            "vessels-current-controls:${GITHUB_SHA}"
+          mkdir -p reports/platform-final-controls
+          docker build \
+            --file artifacts/vessels/Dockerfile \
+            --tag vessels-final-controls:${GITHUB_SHA} \
+            . 2>&1 | tee reports/platform-final-controls/vessels-build.log
+      - name: Inspect and exercise the local image
+        run: |
+          set -euo pipefail
+          image="vessels-final-controls:${GITHUB_SHA}"
+          docker image inspect "$image" \
+            > reports/platform-final-controls/vessels-image-inspect.json
+          container_id="$(docker run --detach --publish 127.0.0.1:18080:8080 "$image")"
+          echo "$container_id" > reports/platform-final-controls/container-id.txt
+          cleanup() { docker rm --force "$container_id" >/dev/null 2>&1 || true; }
+          trap cleanup EXIT
           for attempt in $(seq 1 30); do
-            if body="$(wget -qO- http://127.0.0.1:18080/healthz 2>/dev/null)"; then
-              test "$body" = 'ok'
-              docker logs vessels-current-controls \
-                > reports/platform-current-controls/vessels-runtime.log 2>&1 || true
-              exit 0
+            if curl --fail --silent --show-error \
+              http://127.0.0.1:18080/healthz \
+              > reports/platform-final-controls/healthz.txt; then
+              break
             fi
             sleep 1
           done
-          docker logs vessels-current-controls \
-            > reports/platform-current-controls/vessels-runtime.log 2>&1 || true
-          exit 1
-      - name: Stop local image
-        if: always()
-        run: docker rm --force vessels-current-controls || true
-      - name: Upload immutable build evidence
-        if: always()
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
-        with:
-          name: platform-vessels-build-${{ github.run_id }}
-          path: reports/platform-current-controls
-          if-no-files-found: error
-          retention-days: 30
-      - name: Enforce the current image contract
-        env:
-          EXIT_CODE: ${{ steps.build.outputs.exit_code }}
-        run: |
-          code="${EXIT_CODE:-2}"
-          if [ "$code" -ne 0 ]; then
-            echo "::error::The current vessels image does not build from protected source."
-            exit "$code"
-          fi
-          echo 'Current vessels image builds and serves its health contract without publication.'
-
-  stale-controller-inventory:
-    name: Classify historical one-shot controllers
-    runs-on: ubuntu-latest
-    timeout-minutes: 5
-    steps:
-      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-        with:
-          persist-credentials: false
-          fetch-depth: 1
-      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
-        with:
-          python-version: '3.12'
-      - name: Produce bounded controller inventory
-        run: |
-          set -euo pipefail
-          mkdir -p reports/platform-current-controls
-          python - <<'PY'
-          import json
-          from pathlib import Path
-
-          root = Path('.')
-          workspace = (root / 'pnpm-workspace.yaml').read_text(encoding='utf-8')
-          lock_workflow = (root / '.github/workflows/update-lockfile-vite.yml').read_text(encoding='utf-8')
-          forge_workflow = (root / '.github/workflows/forge-hf-activate.yml').read_text(encoding='utf-8')
-          forge_script = (root / 'replit-sync/forge_hf_activate.py').read_text(encoding='utf-8')
-          report = {
-              'schema': 'szl.platform-current-controller-inventory/v1',
-              'vite_catalog_current': "vite: '^8.0.16'" in workspace,
-              'lockfile_controller_target': '^8.0.14' if '^8.0.14' in lock_workflow else 'unknown',
-              'lockfile_controller_direct_main_push': 'git push origin main' in lock_workflow,
-              'forge_controller_manual_only': 'workflow_dispatch' in forge_workflow,
-              'forge_controller_path_is_replit_sync': True,
-              'forge_controller_targets_old_code_health': '/api/a11oy/v1/code/health' in forge_script,
-              'forge_controller_mutates_space_secrets': 'add_space_secret' in forge_script,
-              'production_mutation_performed': False,
-          }
-          Path('reports/platform-current-controls/controller-inventory.json').write_text(
-              json.dumps(report, indent=2, sort_keys=True) + '\n', encoding='utf-8'
-          )
-          print(json.dumps(report, indent=2, sort_keys=True))
-          assert report['vite_catalog_current'] is True
-          assert report['lockfile_controller_target'] == '^8.0.14'
-          assert report['lockfile_controller_direct_main_push'] is True
-          PY
-      - name: Upload immutable inventory evidence
+          test "$(cat reports/platform-final-controls/healthz.txt)" = 'ok'
+          curl --fail --silent --show-error \
+            http://127.0.0.1:18080/ \
+            > reports/platform-final-controls/index.html
+          grep -qi '<!doctype html' reports/platform-final-controls/index.html
+          docker logs "$container_id" \
+            > reports/platform-final-controls/vessels-container.log 2>&1 || true
+      - name: Upload immutable image evidence
         if: always()
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
-          name: platform-controller-inventory-${{ github.run_id }}
-          path: reports/platform-current-controls/controller-inventory.json
+          name: platform-final-vessels-${{ github.run_id }}
+          path: reports/platform-final-controls
           if-no-files-found: error
           retention-days: 30
