@@ -87,14 +87,21 @@ jobs:
             > reports/platform-final-controls/current-tree-gitleaks.log 2>&1
       - name: Prove retired one-shots remain absent
         run: node scripts/check-clean-clone.mjs
-      - name: Regenerate deterministic local and remote truth
+      - name: Regenerate truth for the final diagnostic-free tree
         run: |
           set -euo pipefail
-          pnpm truth:generate -- --verify-local
-          pnpm truth:generate -- --verify-local --verify-remote
-          pnpm claims:validate
-          pnpm claims:drift
-          node tools/truth/check-claims.ts --base "${{ github.event.pull_request.base.sha }}"
+          rm .github/workflows/platform-current-controls-diagnostic.yml
+          pnpm truth:generate \
+            2>&1 | tee reports/platform-final-controls/truth-generate.log
+          pnpm truth:generate -- --verify-local --verify-remote \
+            2>&1 | tee reports/platform-final-controls/truth-verify.log
+          pnpm truth:validate \
+            2>&1 | tee reports/platform-final-controls/truth-validate.log
+          pnpm claims:drift \
+            2>&1 | tee reports/platform-final-controls/claims-drift.log
+          node tools/truth/check-claims.ts \
+            --base "${{ github.event.pull_request.base.sha }}" \
+            2>&1 | tee reports/platform-final-controls/changed-claims.log
           cp artifacts/SOURCE_OF_TRUTH.json \
             reports/platform-final-controls/SOURCE_OF_TRUTH.json
           git diff -- artifacts/SOURCE_OF_TRUTH.json \
