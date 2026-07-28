@@ -3,6 +3,7 @@ import { generateKeyPairSync } from 'node:crypto';
 import test from 'node:test';
 
 import {
+  type ActionRisk,
   type AttestationResultAlgorithm,
   type AttestationResultClaims,
   AttestationTokenError,
@@ -287,6 +288,35 @@ test('signs and verifies relying-party attestation results across supported algo
   }
 });
 
+test('verifies attestation signatures before appraising pinned references', async () => {
+  const governedRequest = request();
+  const cases: Array<Partial<AttestationResultClaims>> = [
+    { measurement: `sha384:${'d'.repeat(96)}` },
+    { referencePolicyDigest: `sha256:${'e'.repeat(64)}` },
+  ];
+
+  for (const overrides of cases) {
+    const claims = attestationClaimsFor(governedRequest, overrides);
+    const token = signAttestationResultToken(
+      claims,
+      capabilityPrivateKey,
+      'untrusted-attestation-key',
+    );
+    await assert.rejects(
+      verifyAttestationResultToken(token, () => attestationPublicKey, {
+        now: NOW,
+        expectedActionId: claims.actionId,
+        expectedActorId: claims.actorId,
+        expectedTenantId: claims.tenantId,
+        expectedEatNonce: claims.eatNonce,
+        references: attestationConfig().references,
+      }),
+      (error: unknown) =>
+        error instanceof AttestationTokenError && error.code === 'invalid_signature',
+    );
+  }
+});
+
 test('requires a verified hardware attestation result for configured risks', async () => {
   const receipts: GovernanceReceipt[] = [];
   const governor = createGovernor(receipts, { attestation: attestationConfig() });
@@ -463,6 +493,25 @@ test('rejects incomplete attestation admission configuration at construction', (
       }),
     /attestation\.references must not be empty/,
   );
+});
+
+test('rejects inherited object property names as attestation risk classes', () => {
+  for (const inheritedRisk of ['constructor', 'toString', '__proto__']) {
+    assert.throws(
+      () =>
+        new McpGovernor({
+          policyEvaluator: async () => ({ effect: 'allow', reason: 'policy permits action' }),
+          capabilityPublicKeyResolver: () => capabilityPublicKey,
+          toolExecutor: async () => undefined,
+          receiptSigner: { keyId: 'receipt-key-1', privateKey: receiptPrivateKey },
+          receiptWriter: async () => undefined,
+          attestation: attestationConfig({
+            requiredRisks: [inheritedRisk as ActionRisk],
+          }),
+        }),
+      /attestation\.requiredRisks contains an unsupported risk/,
+    );
+  }
 });
 
 test('fails closed when policy evaluation throws', async () => {
