@@ -477,15 +477,17 @@ function requireIsoTimestamp(value: string, field: string): string {
   const millisecond = Number((fraction ?? '').padEnd(3, '0'));
   const offsetHour = Number(match[9] ?? 0);
   const offsetMinute = Number(match[10] ?? 0);
+  const endOfDay = hour === 24;
 
   if (
     month < 1 ||
     month > 12 ||
     day < 1 ||
     day > 31 ||
-    hour > 23 ||
+    hour > 24 ||
     minute > 59 ||
     second > 59 ||
+    (endOfDay && (minute !== 0 || second !== 0 || millisecond !== 0)) ||
     (offsetSign !== undefined &&
       (offsetHour > 14 || offsetMinute > 59 || (offsetHour === 14 && offsetMinute !== 0)))
   ) {
@@ -493,13 +495,14 @@ function requireIsoTimestamp(value: string, field: string): string {
   }
 
   const calendarProbe = new Date(0);
-  calendarProbe.setUTCHours(hour, minute, second, millisecond);
+  const calendarHour = endOfDay ? 0 : hour;
+  calendarProbe.setUTCHours(calendarHour, minute, second, millisecond);
   calendarProbe.setUTCFullYear(year, month - 1, day);
   if (
     calendarProbe.getUTCFullYear() !== year ||
     calendarProbe.getUTCMonth() !== month - 1 ||
     calendarProbe.getUTCDate() !== day ||
-    calendarProbe.getUTCHours() !== hour ||
+    calendarProbe.getUTCHours() !== calendarHour ||
     calendarProbe.getUTCMinutes() !== minute ||
     calendarProbe.getUTCSeconds() !== second ||
     calendarProbe.getUTCMilliseconds() !== millisecond
