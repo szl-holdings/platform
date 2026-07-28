@@ -13,7 +13,6 @@ Regenerate with `pnpm truth:allowlists`. Review every changed row before merge.
 | .gitleaks.toml | `global.paths: yarn.lock` | Lock files contain package hashes, not secrets. | Repository config review | 2026-07-26 |
 | .gitleaks.toml | `global.paths: scripts/qa/scan-secrets.js` | The internal scanner script contains regex patterns for detection; those patterns are not credentials. | Repository config review | 2026-07-26 |
 | .gitleaks.toml | `global.paths: .gitleaks.toml` | This config file itself contains allowlist regex fragments. | Repository config review | 2026-07-26 |
-| .gitleaks.toml | `global.paths: security/ALLOWLIST-JUSTIFICATIONS\\.md` | The generated justification register quotes active scanner patterns and source-shaped false positives for audit review; it contains no secrets. | Repository config review | 2026-07-28 |
 | .gitleaks.toml | `global.paths: playwright-report` | Generated test/build output — never contain real source credentials. | Repository config review | 2026-07-26 |
 | .gitleaks.toml | `global.paths: test-results` | Generated test/build output — never contain real source credentials. | Repository config review | 2026-07-26 |
 | .gitleaks.toml | `global.paths: coverage` | Generated test/build output — never contain real source credentials. | Repository config review | 2026-07-26 |
@@ -72,10 +71,6 @@ Regenerate with `pnpm truth:allowlists`. Review every changed row before merge.
 | .gitleaks.toml | `global.regexes: changeme` | Generic placeholder strings used in .env.example and docs | Repository config review | 2026-07-26 |
 | .gitleaks.toml | `global.regexes: replace[-_]?me` | Generic placeholder strings used in .env.example and docs | Repository config review | 2026-07-26 |
 | .gitleaks.toml | `global.regexes: example[-_]?only` | Generic placeholder strings used in .env.example and docs | Repository config review | 2026-07-26 |
-| .gitleaks.toml | `global.regexes: szl-receipts-ed25519` | Public key identifier for the receipt signing slot; it is not key material. | Repository config review | 2026-07-28 |
-| .gitleaks.toml | `global.regexes: szlholdings-ec-p256` | Public key identifier for the ECDSA signing slot; it is not key material. | Repository config review | 2026-07-28 |
-| .gitleaks.toml | `global.regexes: Ed25519PrivateKey` | Python cryptography type name used in an annotation; it is not key material. | Repository config review | 2026-07-28 |
-| .gitleaks.toml | `global.regexes: ENCRYPTED SIGSTORE PRIVATE KEY` | Literal encrypted-key header quoted in an audit statement that the private key was never committed; it contains no key payload. | Repository config review | 2026-07-28 |
 | .gitleaks.toml | `global.regexes: sk_test_[a-zA-Z0-9]+` | Stripe test-mode keys (not live). sk_test_ and pk_test_ keys are non-billable; they cannot charge real cards. | Repository config review | 2026-07-26 |
 | .gitleaks.toml | `global.regexes: pk_test_[a-zA-Z0-9]+` | Stripe test-mode keys (not live). sk_test_ and pk_test_ keys are non-billable; they cannot charge real cards. | Repository config review | 2026-07-26 |
 | .gitleaks.toml | `global.regexes: rk_test_[a-zA-Z0-9]+` | Stripe test-mode keys (not live). sk_test_ and pk_test_ keys are non-billable; they cannot charge real cards. | Repository config review | 2026-07-26 |
