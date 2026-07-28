@@ -187,3 +187,19 @@ test('CLI accepts a fingerprint-only trust root and always enforces the KHIPU ty
   assert.match(result.stdout, /algorithm=ECDSA-P256-SHA256/);
   assert.equal(KHIPU_PAYLOAD_TYPE, 'application/vnd.szl.khipu.receipt+json');
 });
+
+test('verifier CLI rejects every missing option value before verification', () => {
+  const cli = fileURLToPath(new URL('./verify-cli.mjs', import.meta.url));
+  for (const argv of [
+    ['--file'],
+    ['--file', '--offline'],
+    ['--file', 'receipt.json', '--public-key'],
+    ['--file', 'receipt.json', '--public-key', '--offline'],
+    ['--file', 'receipt.json', '--expected-fingerprint'],
+    ['--file', 'receipt.json', '--expected-fingerprint', '--offline'],
+  ]) {
+    const result = spawnSync(process.execPath, [cli, ...argv], { encoding: 'utf8' });
+    assert.equal(result.status, 2, argv.join(' '));
+    assert.match(result.stderr, /requires a value/, argv.join(' '));
+  }
+});
