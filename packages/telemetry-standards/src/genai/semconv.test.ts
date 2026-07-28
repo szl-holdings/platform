@@ -4,6 +4,7 @@ import {
   createGenAIInferenceClientSpan,
   createGenAIToolSpan,
   createMcpSpan,
+  OTEL_GENAI_ATTESTATION_ATTRS,
   OTEL_GENAI_ATTRS,
   OTEL_GENAI_EVENTS,
   OTEL_GENAI_METRICS,
@@ -203,6 +204,116 @@ describe('agent and tool spans', () => {
       toolResult: '{"decision":"deny"}',
     });
     expect(failed.attributes).not.toHaveProperty(OTEL_GENAI_ATTRS.TOOL_CALL_RESULT);
+  });
+});
+
+describe('SZL experimental attestation attributes', () => {
+  it('binds verified hardware evidence and a receipt pointer to a GenAI span', () => {
+    const span = createGenAIToolSpan({
+      toolName: 'high_consequence_action',
+      attestation: {
+        verified: true,
+        evidenceTier: 'MEASURED',
+        type: 'nvidia-cc',
+        quoteDigest: `sha384:${'a'.repeat(96)}`,
+        measurement: `sha384:${'b'.repeat(96)}`,
+        verifiedAt: '2026-07-27T16:30:00-04:00',
+        verifier: 'nras',
+        receiptId: 'receipt-tee-001',
+        receiptUrl: 'https://evidence.example.test/receipts/receipt-tee-001',
+      },
+    });
+
+    expect(span.attributes[OTEL_GENAI_ATTESTATION_ATTRS.VERIFIED]).toBe(true);
+    expect(span.attributes[OTEL_GENAI_ATTESTATION_ATTRS.EVIDENCE_TIER]).toBe('MEASURED');
+    expect(span.attributes[OTEL_GENAI_ATTESTATION_ATTRS.TYPE]).toBe('nvidia-cc');
+    expect(span.attributes[OTEL_GENAI_ATTESTATION_ATTRS.VERIFIED_AT]).toBe(
+      '2026-07-27T20:30:00.000Z',
+    );
+    expect(span.attributes[OTEL_GENAI_ATTESTATION_ATTRS.RECEIPT_ID]).toBe('receipt-tee-001');
+  });
+
+  it('emits an honest unverified state without hardware claims', () => {
+    const span = createGenAIAgentSpan({
+      agentName: 'policy-reviewer',
+      attestation: {
+        verified: false,
+        evidenceTier: 'UNVERIFIED',
+        receiptId: 'receipt-blocked-001',
+        reasonCode: 'attestation_required',
+      },
+    });
+
+    expect(span.attributes[OTEL_GENAI_ATTESTATION_ATTRS.VERIFIED]).toBe(false);
+    expect(span.attributes[OTEL_GENAI_ATTESTATION_ATTRS.REASON_CODE]).toBe('attestation_required');
+    expect(span.attributes).not.toHaveProperty(OTEL_GENAI_ATTESTATION_ATTRS.TYPE);
+    expect(span.attributes).not.toHaveProperty(OTEL_GENAI_ATTESTATION_ATTRS.MEASUREMENT);
+  });
+
+  it('rejects malformed proof digests and unsafe receipt URLs', () => {
+    expect(() =>
+      createGenAIInferenceClientSpan({
+        providerName: 'openai',
+        operationName: 'chat',
+        requestModel: 'model',
+        attestation: {
+          verified: true,
+          evidenceTier: 'MEASURED',
+          type: 'nvidia-cc',
+          quoteDigest: 'sha384:not-a-digest',
+          measurement: `sha256:${'b'.repeat(64)}`,
+          verifiedAt: '2026-07-27T20:30:00.000Z',
+          verifier: 'nras',
+          receiptId: 'receipt-tee-001',
+        },
+      }),
+    ).toThrow('quoteDigest');
+
+    expect(() =>
+      createMcpSpan({
+        role: 'client',
+        methodName: 'tools/call',
+        jsonrpcRequestId: 'request-4',
+        toolName: 'verify_receipt',
+        attestation: {
+          verified: false,
+          evidenceTier: 'UNVERIFIED',
+          receiptId: 'receipt-blocked-002',
+          receiptUrl: 'https://user:secret@example.test/receipt',
+          reasonCode: 'verifier_unavailable',
+        },
+      }),
+    ).toThrow('receiptUrl');
+  });
+
+  it('rejects evidence-tier upgrades and unsupported runtime values', () => {
+    expect(() =>
+      createGenAIToolSpan({
+        toolName: 'policy_check',
+        attestation: {
+          verified: false,
+          evidenceTier: 'MEASURED',
+          receiptId: 'receipt-blocked-003',
+          reasonCode: 'verifier_unavailable',
+        } as never,
+      }),
+    ).toThrow('UNVERIFIED');
+
+    expect(() =>
+      createGenAIToolSpan({
+        toolName: 'policy_check',
+        attestation: {
+          verified: true,
+          evidenceTier: 'MEASURED',
+          type: 'unsupported',
+          quoteDigest: `sha384:${'a'.repeat(96)}`,
+          measurement: `sha256:${'b'.repeat(64)}`,
+          verifiedAt: '2026-07-27T20:30:00.000Z',
+          verifier: 'local',
+          receiptId: 'receipt-tee-002',
+        } as never,
+      }),
+    ).toThrow('attestation.type');
   });
 });
 

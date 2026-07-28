@@ -1,6 +1,6 @@
 # Frontier F2.1 proof — OpenTelemetry GenAI boundary
 
-**Verified:** 2026-07-25
+**Verified:** 2026-07-27
 **Claim level:** code and package-test evidence only
 
 ## Scope
@@ -26,9 +26,9 @@ conventions `v1.43.0`.
 
 | Check | Result |
 |---|---|
-| Full workspace frozen install, pnpm 10.26.1 | PARTIAL on Windows — all 1,758 packages linked; root preinstall requires `sh` and exited before lifecycle completion |
-| `pnpm --filter @szl-holdings/telemetry-standards test` | PASS — 83/83 tests |
-| `pnpm --filter @szl-holdings/otel test` | PASS — 5/5 native-span tests |
+| Fresh full-workspace offline install | PARTIAL on Windows — dependency linking exceeded the bounded local run; verification reused the already-linked workspace dependency store |
+| `@szl-holdings/telemetry-standards` Vitest suite | PASS — 87/87 tests |
+| `@szl-holdings/otel` Vitest suite | PASS — 6/6 native-span tests |
 | Strict isolated TypeScript check of changed source | PASS — no diagnostics |
 | Biome check of changed TypeScript | PASS |
 | Blank required identifier | PASS — builder throws |
@@ -41,6 +41,24 @@ conventions `v1.43.0`.
 | Successful span status | PASS — remains `UNSET` |
 | Semantic/thrown failure | PASS — `ERROR` plus low-cardinality `error.type`; raw message omitted |
 | Existing GenAI tool + MCP | PASS — attributes applied without a duplicate span |
+
+## Experimental attestation extension
+
+The telemetry boundary now carries a fail-closed, experimental
+`gen_ai.attestation.*` correlation contract:
+
+- verified evidence requires a hardware type, algorithm-prefixed quote and
+  measurement digests, a verification timestamp, a verifier, `MEASURED`, and a
+  receipt pointer;
+- unverified evidence emits `UNVERIFIED` plus a low-cardinality reason and
+  omits hardware measurement claims;
+- receipt URLs reject credentials, query parameters, fragments, and non-HTTPS
+  origins; and
+- the native OpenTelemetry wrapper attaches the correlation fields at span
+  creation so they are available to head samplers.
+
+This is an implemented local extension. It is not an upstream OpenTelemetry
+standard and does not prove production collector or dashboard ingestion.
 
 ## Claim boundary
 
