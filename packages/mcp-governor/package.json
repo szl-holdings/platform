@@ -17,6 +17,10 @@
       "types": "./dist/capability.d.ts",
       "import": "./dist/capability.js"
     },
+    "./attestation": {
+      "types": "./dist/attestation.d.ts",
+      "import": "./dist/attestation.js"
+    },
     "./governor": {
       "types": "./dist/governor.d.ts",
       "import": "./dist/governor.js"
