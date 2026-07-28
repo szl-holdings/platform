@@ -19,6 +19,7 @@
   },
   "files": [
     "dist",
+    "publication-contract.json",
     "README.md",
     "LICENSE"
   ],
@@ -53,7 +54,7 @@
   },
   "scripts": {
     "build": "tsc --build",
-    "prepack": "tsx --test src/*.test.ts && tsc --build",
+    "prepack": "node ../../scripts/release/public-npm-contract.mjs --check && tsx --test src/*.test.ts && tsc --build --force",
     "typecheck": "tsc -p tsconfig.json --noEmit",
     "test": "tsx --test src/*.test.ts",
     "lint": "biome lint ./src",

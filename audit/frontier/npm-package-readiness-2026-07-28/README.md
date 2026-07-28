@@ -7,8 +7,8 @@ not evidence of npm registry publication.
 ## SHA-256
 
 ```text
-dd87f0bd083c000eb2ed15c731ddec67669e4497f2e746dd93e2bc0431d644c1  szl-mcp-governor-0.1.0.tgz
-bc39042fc4c791dbfbe34d3999e538d492632a8f9ff27c10374d6f9eefa24d15  szl-verify-0.1.0.tgz
+e277c70b3d5c61724bba4a00f22242f260f9dc3c715f3abc97d829b56616a9ac  szl-mcp-governor-0.1.0.tgz
+db50118722fbbc719a776d524ee377ebbedd8fc4e0d00800dc4eaac8302e5ac2  szl-verify-0.1.0.tgz
 ```
 
 ## Verification
@@ -24,5 +24,8 @@ The complete file inventories are stored in `inventory.json`.
 pnpm executes `prepack` from the source manifest before creating each archive.
 It then writes publish-transformed package metadata into the archive: workspace
 catalog versions are resolved and preparation-only lifecycle hooks are omitted.
-`inventory.json` binds both source and packed manifest SHA-256 digests so this
-intentional transform cannot be mistaken for source drift.
+Each archive embeds a canonical `publication-contract.json` that binds the
+exact source manifest hash, exact source `prepack` command, development
+dependency names, and normalized publish manifest. `inventory.json` binds the
+source manifest, packed manifest, embedded contract, tarball, and complete file
+inventory so an updated source hash cannot make a stale archive appear current.

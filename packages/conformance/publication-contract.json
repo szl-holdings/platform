@@ -1,0 +1,52 @@
+{
+  "developmentDependencyNames": [],
+  "packageName": "@szl/verify",
+  "publishManifest": {
+    "bin": {
+      "szl-conformance": "./src/cli.mjs",
+      "szl-verify": "./src/verify-cli.mjs"
+    },
+    "bugs": {
+      "url": "https://github.com/szl-holdings/platform/issues"
+    },
+    "description": "Offline DSSE receipt verification and fail-closed SZL vertical conformance.",
+    "engines": {
+      "node": ">=24"
+    },
+    "exports": {
+      ".": "./src/verify.mjs",
+      "./conformance": "./src/conformance.mjs"
+    },
+    "files": [
+      "src/cli.mjs",
+      "src/conformance.mjs",
+      "src/verify-cli.mjs",
+      "src/verify.mjs",
+      "surfaces",
+      "publication-contract.json",
+      "README.md",
+      "LICENSE"
+    ],
+    "homepage": "https://github.com/szl-holdings/platform/tree/main/packages/conformance#readme",
+    "license": "LicenseRef-SZL-Proprietary",
+    "name": "@szl/verify",
+    "private": false,
+    "publishConfig": {
+      "access": "public"
+    },
+    "repository": {
+      "directory": "packages/conformance",
+      "type": "git",
+      "url": "git+https://github.com/szl-holdings/platform.git"
+    },
+    "scripts": {
+      "conformance": "node src/cli.mjs",
+      "test": "node --test src/*.test.mjs"
+    },
+    "type": "module",
+    "version": "0.1.0"
+  },
+  "schemaVersion": "szl.npm-publication-contract.v1",
+  "sourceManifestSha256": "4c9810426d524f5ac1bea9a78ab85584a1527956a59813be6b94ca7281c1d156",
+  "sourcePrepack": "node ../../scripts/release/public-npm-contract.mjs --check && node --test src/*.test.mjs"
+}
