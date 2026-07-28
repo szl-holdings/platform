@@ -62,3 +62,12 @@ b9db2d019e2654cbf2b5d2da1ef021024d88aba6:security/ALLOWLIST-JUSTIFICATIONS.md:ge
 7cd2c5dede2b7dd28703c562c7d432fa04bc656d:packages/hatun-mcp/hatun_mcp/governance.py:generic-api-key:127
 68569225cca994f9cc6f1d6dc572d9d8c1441559:packages/hatun-mcp/hatun_mcp/governance.py:generic-api-key:127
 e30089fe845fc8004acd8a0affd4670c7afe6a5e:packages/hatun-mcp/hatun_mcp/governance.py:generic-api-key:127
+
+# These exact findings are synthetic encrypted-RSA detector fixtures from the
+# superseded and current scanner-review lineages. Both commits are signed, the
+# payload is repeated "A" test data, and the fixture is now constructed from
+# fragments so later revisions remain blocking without new exact qualification.
+b23db644765f599cb1906affbe9df71eac580592:scripts/qa/scan-secrets.test.js:private-key-bare:63
+b23db644765f599cb1906affbe9df71eac580592:scripts/qa/scan-secrets.test.js:private-key:63
+d7b3f1e15dbf79aa655f1af2ce416ddf0df2b719:scripts/qa/scan-secrets.test.js:private-key-bare:63
+d7b3f1e15dbf79aa655f1af2ce416ddf0df2b719:scripts/qa/scan-secrets.test.js:private-key:63
