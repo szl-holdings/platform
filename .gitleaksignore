@@ -6,10 +6,11 @@
 # examples in the allowlist evidence ledger. Any moved or newly introduced match
 # receives a different fingerprint and remains blocking.
 #
-# This file authorizes only the exact current-tree fingerprints below. It does not
+# Entries without a commit prefix bind one exact current-tree fingerprint.
+# Commit-prefixed entries bind one exact historical finding. This file does not
 # accept a path, rule family, historical commit range, or future detector match.
-# Canonical source-of-truth workflow counts are maintained independently and this
-# evidence policy cannot alter or suppress those measurements.
+# Canonical source-of-truth workflow counts are maintained independently and
+# this evidence policy cannot alter or suppress those measurements.
 
 replit-sync/uds/UDS_DEPLOY_GAP_FIX_REPORT.md:private-key-bare:103
 replit-sync/uds/parity_uds_payload.md:generic-api-key:445
@@ -18,3 +19,13 @@ security/ALLOWLIST-JUSTIFICATIONS.md:generic-api-key:65
 security/ALLOWLIST-JUSTIFICATIONS.md:generic-api-key:66
 security/ALLOWLIST-JUSTIFICATIONS.md:generic-api-key:67
 security/ALLOWLIST-JUSTIFICATIONS.md:generic-api-key:68
+
+# Re-inspected 2026-07-28 after exact-main Security Audit run 30383771723.
+# These are public receipt-key identifiers or a Python type name in historical
+# documentation/source, not credential material. The full fingerprints preserve
+# detection for any future occurrence, moved line, changed rule, or new commit.
+1a83efaafe7eb9a31b89862570838ece940c4a58:platform/deploy/SOVEREIGN_DELIVERY.md:generic-api-key:321
+66291ab81aa3514c5ffb86fdbe56de48aa292c5a:replit-sync/NEXT_ORDER.md:generic-api-key:116
+7cd2c5dede2b7dd28703c562c7d432fa04bc656d:packages/hatun-mcp/hatun_mcp/governance.py:generic-api-key:127
+68569225cca994f9cc6f1d6dc572d9d8c1441559:packages/hatun-mcp/hatun_mcp/governance.py:generic-api-key:127
+e30089fe845fc8004acd8a0affd4670c7afe6a5e:packages/hatun-mcp/hatun_mcp/governance.py:generic-api-key:127
