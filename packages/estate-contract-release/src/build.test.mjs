@@ -35,9 +35,7 @@ test('release id closes the complete component inventories', () => {
 
 test('React client closure includes its public runtime boundary', () => {
   const manifest = buildManifest();
-  const reactClient = manifest.components.find(
-    (component) => component.id === 'api-client-react',
-  );
+  const reactClient = manifest.components.find((component) => component.id === 'api-client-react');
   assert.ok(reactClient);
   const paths = new Set(reactClient.files.map((file) => file.path));
   for (const path of [

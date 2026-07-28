@@ -9,10 +9,7 @@
     },
     "codegen": {
       "inputs": ["openapi.yaml", "orval.config.ts"],
-      "outputs": [
-        "../api-client-react/src/generated/**",
-        "../api-zod/src/generated/**"
-      ]
+      "outputs": ["../api-client-react/src/generated/**", "../api-zod/src/generated/**"]
     },
     "typecheck": {
       "dependsOn": ["^build", "^codegen"],
