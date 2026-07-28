@@ -214,7 +214,7 @@ function normalizeAttestationConfig(
     throw new TypeError('attestation.requiredRisks must not be empty');
   }
   const requiredRisks = value.requiredRisks as readonly ActionRisk[];
-  if (!requiredRisks.every((risk) => risk in ACTION_RISK_RANK)) {
+  if (!requiredRisks.every((risk) => Object.hasOwn(ACTION_RISK_RANK, risk))) {
     throw new TypeError('attestation.requiredRisks contains an unsupported risk');
   }
   if (new Set(requiredRisks).size !== requiredRisks.length) {
