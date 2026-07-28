@@ -138,7 +138,7 @@ revision `4e62ce4a926df9193d5b622915d298f9b634c933`.
 | Command | Exit | Observed output summary |
 |---|---:|---|
 | `C:\Users\steph\.cache\codex-runtimes\codex-primary-runtime\dependencies\node\bin\node.exe packages/estate-contract-release/src/build.mjs --check` | 0 | `PASS sha256:9af586...f493`, six components |
-| `C:\Users\steph\.cache\codex-runtimes\codex-primary-runtime\dependencies\node\bin\node.exe --test packages/estate-contract-release/src/build.test.mjs` | 0 | 13 tests passed, including ignored/untracked-file exclusion |
+| `C:\Users\steph\.cache\codex-runtimes\codex-primary-runtime\dependencies\node\bin\node.exe --test packages/estate-contract-release/src/build.test.mjs` | 0 | all focused package tests passed locally, including ignored/untracked-file exclusion |
 | `git diff --check 4fd8824f32d7eedc0cd341fd4f4d57722b9d45e9...4e62ce4a926df9193d5b622915d298f9b634c933` | 0 | no whitespace errors |
 
 ## Verification notes
