@@ -1,5 +1,5 @@
 {
-  "schemaVersion": "szl.npm-package-readiness.v1",
+  "schemaVersion": "szl.npm-package-readiness.v2",
   "generatedAt": "2026-07-28T19:45:03Z",
   "status": "TARBALL_VERIFIED_REGISTRY_UNAVAILABLE",
   "packages": [
@@ -10,6 +10,8 @@
       "sha256": "dd87f0bd083c000eb2ed15c731ddec67669e4497f2e746dd93e2bc0431d644c1",
       "sourceManifestSha256": "41b7ee2a4f2b1bdb187c612cc3ade3427f915be0130d0b0a67955040ce3ca663",
       "packedManifestSha256": "7c9bafbd526e23223eba82c6965c55f6eaf089c98ce73445cbd2391f78a16d2b",
+      "sourcePrepackSha256": "e2f51ae6d96ea9f4bd5fd17dc994e6bcfe8a81d8775a6868d94a709601e9ece8",
+      "publishManifestContractSha256": "f562609347889ea6f706b729677a92d465f4c5e8ff551a80b3adfe16648bfab7",
       "files": [
         "LICENSE",
         "dist/attestation.d.ts",
@@ -44,6 +46,8 @@
       "sha256": "bc39042fc4c791dbfbe34d3999e538d492632a8f9ff27c10374d6f9eefa24d15",
       "sourceManifestSha256": "ee43941477dea2af14bc85a0c476238abf025cffef6e40bdda2039d7a7b99573",
       "packedManifestSha256": "cdf66eb7262121f096069abb04fd59f95639307d6a9dc26e2459d89f79a9a564",
+      "sourcePrepackSha256": "c4868369b9707ff4aa8e86df05768f5cd4b3188e99a4145a5e5fbaec1481876f",
+      "publishManifestContractSha256": "cafb2f99f21c95690b5b2bafb0f891681a4d780575e1b1127652ae419d4f16fc",
       "files": [
         "LICENSE",
         "package.json",

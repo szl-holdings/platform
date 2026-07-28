@@ -24,5 +24,13 @@ The complete file inventories are stored in `inventory.json`.
 pnpm executes `prepack` from the source manifest before creating each archive.
 It then writes publish-transformed package metadata into the archive: workspace
 catalog versions are resolved and preparation-only lifecycle hooks are omitted.
-`inventory.json` binds both source and packed manifest SHA-256 digests so this
-intentional transform cannot be mistaken for source drift.
+`inventory.json` binds the source and packed manifest SHA-256 digests, the exact
+source `prepack` command, and a normalized publish-manifest contract. The
+normalized contract excludes only development dependencies and the intentionally
+stripped `prepack` hook; all other package metadata must match the archive. This
+includes publish-relevant fields such as `bin`, `files`, `exports`, `type`,
+`license`, `engines`, scripts, and runtime dependencies.
+
+The verifier's regression suite changes publish metadata and `prepack` while
+refreshing only the source-manifest digest. Both stale-archive cases must fail.
+Registry publication remains `UNEXECUTED`.

@@ -16,13 +16,44 @@ function sha256(value) {
   return createHash('sha256').update(value).digest('hex');
 }
 
+export function canonicalJson(value) {
+  if (Array.isArray(value)) {
+    return `[${value.map((entry) => canonicalJson(entry)).join(',')}]`;
+  }
+  if (value !== null && typeof value === 'object') {
+    return `{${Object.keys(value)
+      .sort()
+      .map((key) => `${JSON.stringify(key)}:${canonicalJson(value[key])}`)
+      .join(',')}}`;
+  }
+  return JSON.stringify(value);
+}
+
+export function normalizePublishManifest(manifest, { source = false } = {}) {
+  const normalized = structuredClone(manifest);
+
+  // pnpm resolves workspace catalog entries while packing. Development-only
+  // dependencies are not part of the runtime publication contract.
+  delete normalized.devDependencies;
+
+  // pnpm intentionally strips prepack from the packed manifest. Its exact
+  // source value is bound separately so a changed preparation gate still
+  // invalidates the evidence.
+  if (source && normalized.scripts) {
+    delete normalized.scripts.prepack;
+    if (Object.keys(normalized.scripts).length === 0) delete normalized.scripts;
+  }
+
+  return normalized;
+}
+
 function headerText(header, start, end) {
   const terminator = header.indexOf(0, start);
   const boundary = terminator >= start && terminator < end ? terminator : end;
   return header.subarray(start, boundary).toString('utf8').trim();
 }
 
-function tarEntries(tarball) {
+export function tarEntries(tarball) {
   const archive = gunzipSync(tarball);
   const entries = new Map();
   let offset = 0;
@@ -59,7 +90,7 @@ export async function verifyPublicNpmArtifacts(repositoryRoot = REPOSITORY_ROOT)
     'npm-package-readiness-2026-07-28',
   );
   const inventory = JSON.parse(await readFile(join(evidenceDirectory, 'inventory.json'), 'utf8'));
-  assert.equal(inventory.schemaVersion, 'szl.npm-package-readiness.v1');
+  assert.equal(inventory.schemaVersion, 'szl.npm-package-readiness.v2');
   assert.equal(inventory.status, 'TARBALL_VERIFIED_REGISTRY_UNAVAILABLE');
 
   const results = [];
@@ -75,6 +106,17 @@ export async function verifyPublicNpmArtifacts(repositoryRoot = REPOSITORY_ROOT)
       sha256(sourceManifest),
       packageEvidence.sourceManifestSha256,
       `${packageEvidence.name} source manifest drift`,
+    );
+    const sourceMetadata = JSON.parse(sourceManifest.toString('utf8'));
+    const sourcePrepack = sourceMetadata.scripts?.prepack;
+    assert(
+      typeof sourcePrepack === 'string' && sourcePrepack.length > 0,
+      `${packageEvidence.name} source prepack gate missing`,
+    );
+    assert.equal(
+      sha256(sourcePrepack),
+      packageEvidence.sourcePrepackSha256,
+      `${packageEvidence.name} source prepack drift`,
     );
 
     const entries = tarEntries(tarball);
@@ -97,6 +139,24 @@ export async function verifyPublicNpmArtifacts(repositoryRoot = REPOSITORY_ROOT)
     );
 
     const packedMetadata = JSON.parse(packedManifest.toString('utf8'));
+    assert.equal(
+      packedMetadata.scripts?.prepack,
+      undefined,
+      `${packageEvidence.name} packed manifest unexpectedly exposes prepack`,
+    );
+    const sourcePublishManifest = normalizePublishManifest(sourceMetadata, { source: true });
+    const packedPublishManifest = normalizePublishManifest(packedMetadata);
+    assert.deepEqual(
+      sourcePublishManifest,
+      packedPublishManifest,
+      `${packageEvidence.name} normalized publish manifest drift`,
+    );
+    assert.equal(
+      sha256(canonicalJson(sourcePublishManifest)),
+      packageEvidence.publishManifestContractSha256,
+      `${packageEvidence.name} publish manifest contract drift`,
+    );
+
     assert.equal(packedMetadata.name, packageEvidence.name);
     assert.equal(packedMetadata.version, packageEvidence.version);
     assert.equal(packedMetadata.private, false);
