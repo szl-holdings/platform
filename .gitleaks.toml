@@ -277,12 +277,11 @@ useDefault = true
     "replace[-_]?me",
     "example[-_]?only",
 
-    # Public key identifiers, a Python type name, and an encrypted-key header.
+    # Public key identifiers and a Python type name.
     # These describe algorithms or key slots; none contains private key material.
     "szl-receipts-ed25519",
     "szlholdings-ec-p256",
     "Ed25519PrivateKey",
-    "ENCRYPTED SIGSTORE PRIVATE KEY",
 
     # Stripe test-mode keys (not live).
     # sk_test_ and pk_test_ keys are non-billable; they cannot charge real cards.
@@ -435,6 +434,9 @@ useDefault = true
       "\\.env\\.example",
       # documentation may quote key format without real key content
       "SECRETS_SETUP\\.md",
+      # Audited report states that this exact encrypted Sigstore key header was
+      # never committed; keep the exception scoped to that historical report.
+      "replit-sync/uds/UDS_DEPLOY_GAP_FIX_REPORT\\.md",
       # Mobile scaffold files: private_key field contains PLACEHOLDER_PRIVATE_KEY
       "artifacts/szl-holdings-mobile/google-play-service-account\\.json\\.template",
       "artifacts/szl-holdings-mobile/google-play-service-account\\.example\\.json",
