@@ -351,6 +351,13 @@ export async function verifyAttestationResultToken(
   const keyId = requireIdentifier(headerFields.kid, 'keyId');
   const claims = parseClaims(decodeJson(payloadPart, 'attestation payload'));
 
+  const issuerScopeIsTrusted = options.references.some(
+    (item) => item.verifier === claims.verifier && item.issuers.includes(claims.issuer),
+  );
+  if (!issuerScopeIsTrusted) {
+    throw new AttestationTokenError('invalid_signature', 'attestation result signature is invalid');
+  }
+
   let validSignature = false;
   try {
     const publicKey = await resolvePublicKey(keyId, claims.issuer, claims.verifier);
