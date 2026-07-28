@@ -2,8 +2,13 @@
 
 > Doctrine v11 LOCKED · 749/14/163 · locked_at `c7c0ba17`
 
-JSON dashboards for the flagship mesh. Metrics are scraped from the OTel collector
-(`https://szlholdings-otel-collector.hf.space`) via Prometheus remote-write / OTLP.
+JSON dashboards for the flagship mesh. They are designed for metrics from an
+OTel collector via Prometheus remote-write / OTLP.
+
+**Deployment status:** NOT LIVE-VERIFIED. The previously advertised collector
+at `https://szlholdings-otel-collector.hf.space` returned HTTP 404 during the
+2026-07-28 verification snapshot. Importable dashboard JSON is not proof that a
+collector is running or that a receipt has appeared in Grafana.
 
 ## Dashboards
 
