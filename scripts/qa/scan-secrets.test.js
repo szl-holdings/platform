@@ -48,6 +48,15 @@ test('rejects PEM private-key material', () => {
   assert.match(result.stderr, /signing\.pem: Private key \(PEM\)/);
 });
 
+test('rejects encrypted PKCS#8 private-key material', () => {
+  const result = scan({
+    'encrypted-signing.pem': privateKey('ENCRYPTED '),
+  });
+
+  assert.equal(result.status, 1, result.stdout);
+  assert.match(result.stderr, /encrypted-signing\.pem: Private key \(PEM\)/);
+});
+
 test('allows public keys and non-key placeholders in key extensions', () => {
   const publicMarker = ['-----BEGIN ', 'PUBLIC KEY-----'].join('');
   const publicFooter = ['-----END ', 'PUBLIC KEY-----'].join('');
