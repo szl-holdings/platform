@@ -3,9 +3,14 @@ import { generateKeyPairSync } from 'node:crypto';
 import test from 'node:test';
 
 import {
+  type AttestationResultAlgorithm,
+  type AttestationResultClaims,
+  AttestationTokenError,
   type CapabilityClaims,
   CapabilityTokenError,
   canonicalJson,
+  createAttestationChallenge,
+  createGovernedActionEnvelope,
   GovernanceDeniedError,
   type GovernanceReceipt,
   type GovernedActionEnvelope,
@@ -18,7 +23,9 @@ import {
   type ReplayStore,
   McpGovernor,
   sha256,
+  signAttestationResultToken,
   signCapabilityToken,
+  verifyAttestationResultToken,
   verifyCapabilityToken,
   verifyGovernanceReceipt,
 } from './index.js';
@@ -28,6 +35,14 @@ const { privateKey: capabilityPrivateKey, publicKey: capabilityPublicKey } =
   generateKeyPairSync('ed25519');
 const { privateKey: receiptPrivateKey, publicKey: receiptPublicKey } =
   generateKeyPairSync('ed25519');
+const { privateKey: attestationPrivateKey, publicKey: attestationPublicKey } =
+  generateKeyPairSync('ed25519');
+
+const ATTESTATION_ISSUER = 'https://verifier.szl.test';
+const ATTESTATION_WORKLOAD = 'frontier-inference-1';
+const ATTESTATION_MEASUREMENT = `sha384:${'a'.repeat(96)}`;
+const ATTESTATION_QUOTE_DIGEST = `sha384:${'b'.repeat(96)}`;
+const ATTESTATION_POLICY_DIGEST = `sha256:${'c'.repeat(64)}`;
 
 function claims(overrides: Partial<CapabilityClaims> = {}): CapabilityClaims {
   const nowSeconds = Math.floor(NOW.getTime() / 1000);
@@ -60,15 +75,83 @@ function request(overrides: Partial<GovernedActionRequest> = {}): GovernedAction
   };
 }
 
+function attestationConfig(
+  overrides: Partial<NonNullable<McpGovernorConfig['attestation']>> = {},
+): NonNullable<McpGovernorConfig['attestation']> {
+  return {
+    requiredRisks: ['high', 'critical'],
+    references: [
+      {
+        attestationType: 'nvidia-cc',
+        verifier: 'nvidia-nras',
+        workloadId: ATTESTATION_WORKLOAD,
+        issuers: [ATTESTATION_ISSUER],
+        measurements: [ATTESTATION_MEASUREMENT],
+        referencePolicyDigests: [ATTESTATION_POLICY_DIGEST],
+      },
+    ],
+    publicKeyResolver: () => attestationPublicKey,
+    maxResultAgeSeconds: 120,
+    maxTokenLifetimeSeconds: 300,
+    allowedClockSkewSeconds: 5,
+    ...overrides,
+  };
+}
+
+function attestationClaimsFor(
+  governedRequest: GovernedActionRequest,
+  overrides: Partial<AttestationResultClaims> = {},
+): AttestationResultClaims {
+  const envelope = createGovernedActionEnvelope(governedRequest, NOW);
+  const capability = governedRequest.capabilityToken
+    ? {
+        claims: claims(),
+        keyId: 'capability-key-1',
+      }
+    : undefined;
+  const nowSeconds = Math.floor(NOW.getTime() / 1000);
+  return {
+    version: 'szl.attestation-result/v1',
+    resultId: 'attestation-result-001',
+    issuer: ATTESTATION_ISSUER,
+    actionId: envelope.actionId,
+    actorId: envelope.actorId,
+    tenantId: envelope.tenantId,
+    workloadId: ATTESTATION_WORKLOAD,
+    attestationType: 'nvidia-cc',
+    verifier: 'nvidia-nras',
+    hardwareVerified: true,
+    eatNonce: createAttestationChallenge(envelope, capability),
+    quoteDigest: ATTESTATION_QUOTE_DIGEST,
+    measurement: ATTESTATION_MEASUREMENT,
+    referencePolicyDigest: ATTESTATION_POLICY_DIGEST,
+    verifiedAt: nowSeconds - 5,
+    expiresAt: nowSeconds + 120,
+    ...overrides,
+  };
+}
+
+function withAttestation(
+  governedRequest: GovernedActionRequest,
+  overrides: Partial<AttestationResultClaims> = {},
+): GovernedActionRequest {
+  return {
+    ...governedRequest,
+    attestationResultToken: signAttestationResultToken(
+      attestationClaimsFor(governedRequest, overrides),
+      attestationPrivateKey,
+      'attestation-key-1',
+    ),
+  };
+}
+
 function createGovernor(
   receipts: GovernanceReceipt[],
   options: {
-    policy?: (
-      envelope: GovernedActionEnvelope,
-      args: unknown,
-    ) => Promise<PolicyDecision>;
+    policy?: (envelope: GovernedActionEnvelope, args: unknown) => Promise<PolicyDecision>;
     writer?: (receipt: GovernanceReceipt) => Promise<void>;
     replayStore?: ReplayStore;
+    attestation?: McpGovernorConfig['attestation'];
   } = {},
 ): {
   run<T>(
@@ -92,6 +175,7 @@ function createGovernor(
         receipts.push(receipt);
       }),
     replayStore: options.replayStore,
+    attestation: options.attestation,
     expectedCapabilityIssuer: 'szl-control-plane',
     clock: () => NOW,
   });
@@ -138,6 +222,246 @@ test('rejects expired capability tokens', async () => {
       risk: 'high',
     }),
     (error: unknown) => error instanceof CapabilityTokenError && error.code === 'expired',
+  );
+});
+
+test('signs and verifies relying-party attestation results across supported algorithms', async () => {
+  const governedRequest = request();
+  const { privateKey: es256PrivateKey, publicKey: es256PublicKey } = generateKeyPairSync('ec', {
+    namedCurve: 'prime256v1',
+  });
+  const { privateKey: ps384PrivateKey, publicKey: ps384PublicKey } = generateKeyPairSync('rsa', {
+    modulusLength: 2048,
+  });
+  const cases: Array<{
+    algorithm: AttestationResultAlgorithm;
+    keyId: string;
+    privateKey: typeof attestationPrivateKey;
+    publicKey: typeof attestationPublicKey;
+  }> = [
+    {
+      algorithm: 'EdDSA',
+      keyId: 'attestation-ed25519',
+      privateKey: attestationPrivateKey,
+      publicKey: attestationPublicKey,
+    },
+    {
+      algorithm: 'ES256',
+      keyId: 'attestation-es256',
+      privateKey: es256PrivateKey,
+      publicKey: es256PublicKey,
+    },
+    {
+      algorithm: 'PS384',
+      keyId: 'attestation-ps384',
+      privateKey: ps384PrivateKey,
+      publicKey: ps384PublicKey,
+    },
+  ];
+
+  for (const item of cases) {
+    const resultClaims = attestationClaimsFor(governedRequest, {
+      resultId: `attestation-${item.algorithm.toLowerCase()}`,
+    });
+    const token = signAttestationResultToken(
+      resultClaims,
+      item.privateKey,
+      item.keyId,
+      item.algorithm,
+    );
+    const verified = await verifyAttestationResultToken(token, () => item.publicKey, {
+      now: NOW,
+      expectedActionId: resultClaims.actionId,
+      expectedActorId: resultClaims.actorId,
+      expectedTenantId: resultClaims.tenantId,
+      expectedEatNonce: resultClaims.eatNonce,
+      references: attestationConfig().references,
+      maxResultAgeSeconds: 120,
+      maxTokenLifetimeSeconds: 300,
+      allowedClockSkewSeconds: 5,
+    });
+    assert.equal(verified.algorithm, item.algorithm);
+    assert.equal(verified.keyId, item.keyId);
+    assert.equal(verified.claims.hardwareVerified, true);
+    assert.equal(Object.isFrozen(verified.claims), true);
+  }
+});
+
+test('requires a verified hardware attestation result for configured risks', async () => {
+  const receipts: GovernanceReceipt[] = [];
+  const governor = createGovernor(receipts, { attestation: attestationConfig() });
+  let executed = false;
+
+  await assert.rejects(
+    governor.run(request(), async () => {
+      executed = true;
+      return 'unreachable';
+    }),
+    (error: unknown) =>
+      error instanceof GovernanceDeniedError &&
+      error.decision.reason === 'attestation_token_required',
+  );
+  assert.equal(executed, false);
+  assert.equal(receipts[0]?.phase, 'blocked');
+});
+
+test('requires a caller-stable action ID when an attestation result is supplied', async () => {
+  const receipts: GovernanceReceipt[] = [];
+  const governor = createGovernor(receipts, { attestation: attestationConfig() });
+  const governedRequest = withAttestation(request({ actionId: undefined }));
+
+  await assert.rejects(
+    governor.run(governedRequest, async () => 'unreachable'),
+    (error: unknown) =>
+      error instanceof GovernanceDeniedError &&
+      error.decision.reason === 'attestation_action_id_required',
+  );
+});
+
+test('binds admitted attestation to action, capability nonce, reference values, and receipts', async () => {
+  const receipts: GovernanceReceipt[] = [];
+  const governor = createGovernor(receipts, { attestation: attestationConfig() });
+  const governedRequest = withAttestation(request());
+
+  const outcome = await governor.run(governedRequest, async () => ({ committed: true }));
+  assert.equal(outcome.attestation?.claims.resultId, 'attestation-result-001');
+  assert.equal(outcome.attestation?.claims.measurement, ATTESTATION_MEASUREMENT);
+  assert.equal(receipts.length, 2);
+  assert.equal(receipts[0]?.attestation?.claims.hardwareVerified, true);
+  assert.equal(receipts[1]?.attestation?.claims.referencePolicyDigest, ATTESTATION_POLICY_DIGEST);
+  assert.ok(receipts.every((receipt) => verifyGovernanceReceipt(receipt, receiptPublicKey)));
+
+  const afterReceipt = receipts[1];
+  assert.ok(afterReceipt?.attestation);
+  const tampered = {
+    ...afterReceipt,
+    attestation: {
+      ...afterReceipt.attestation,
+      claims: {
+        ...afterReceipt.attestation.claims,
+        measurement: `sha384:${'f'.repeat(96)}`,
+      },
+    },
+  } as GovernanceReceipt;
+  assert.equal(verifyGovernanceReceipt(tampered, receiptPublicKey), false);
+});
+
+test('applies configured clock skew consistently to verification and replay admission', async () => {
+  const receipts: GovernanceReceipt[] = [];
+  const governor = createGovernor(receipts, { attestation: attestationConfig() });
+  const nowSeconds = Math.floor(NOW.getTime() / 1000);
+  const governedRequest = withAttestation(request({ actionId: 'action-clock-skew' }), {
+    resultId: 'attestation-clock-skew',
+    verifiedAt: nowSeconds - 10,
+    expiresAt: nowSeconds - 1,
+  });
+
+  const outcome = await governor.run(governedRequest, async () => ({ admitted: true }));
+  assert.deepEqual(outcome.result, { admitted: true });
+});
+
+test('rejects a signed attestation result with a non-reference measurement', async () => {
+  const receipts: GovernanceReceipt[] = [];
+  const governor = createGovernor(receipts, { attestation: attestationConfig() });
+  const governedRequest = withAttestation(request(), {
+    measurement: `sha384:${'d'.repeat(96)}`,
+  });
+  let executed = false;
+
+  await assert.rejects(
+    governor.run(governedRequest, async () => {
+      executed = true;
+      return 'unreachable';
+    }),
+    (error: unknown) =>
+      error instanceof GovernanceDeniedError &&
+      error.decision.reason === 'attestation_measurement_not_allowed',
+  );
+  assert.equal(executed, false);
+});
+
+test('rejects stale, expired, and challenge-mismatched attestation results', async () => {
+  const baseRequest = request();
+  const nowSeconds = Math.floor(NOW.getTime() / 1000);
+  const cases: Array<{
+    overrides: Partial<AttestationResultClaims>;
+    code: AttestationTokenError['code'];
+  }> = [
+    {
+      overrides: { verifiedAt: nowSeconds - 200, expiresAt: nowSeconds + 10 },
+      code: 'stale',
+    },
+    {
+      overrides: { verifiedAt: nowSeconds - 100, expiresAt: nowSeconds - 10 },
+      code: 'expired',
+    },
+    {
+      overrides: { eatNonce: Buffer.alloc(32, 9).toString('base64url') },
+      code: 'nonce_mismatch',
+    },
+  ];
+
+  for (const item of cases) {
+    const resultClaims = attestationClaimsFor(baseRequest, item.overrides);
+    const token = signAttestationResultToken(
+      resultClaims,
+      attestationPrivateKey,
+      'attestation-key-1',
+    );
+    await assert.rejects(
+      verifyAttestationResultToken(token, () => attestationPublicKey, {
+        now: NOW,
+        expectedActionId: resultClaims.actionId,
+        expectedActorId: resultClaims.actorId,
+        expectedTenantId: resultClaims.tenantId,
+        expectedEatNonce: attestationClaimsFor(baseRequest).eatNonce,
+        references: attestationConfig().references,
+        maxResultAgeSeconds: 120,
+        maxTokenLifetimeSeconds: 300,
+        allowedClockSkewSeconds: 5,
+      }),
+      (error: unknown) => error instanceof AttestationTokenError && error.code === item.code,
+    );
+  }
+});
+
+test('rejects replay of a one-use attestation result', async () => {
+  const receipts: GovernanceReceipt[] = [];
+  const config = attestationConfig({ requiredRisks: ['read_only'] });
+  const governor = createGovernor(receipts, { attestation: config });
+  const governedRequest = withAttestation(
+    request({
+      actionId: 'action-attested-read',
+      toolName: 'ledger.read',
+      risk: 'read_only',
+      mutatesState: false,
+      capabilityToken: undefined,
+    }),
+  );
+
+  await governor.run(governedRequest, async () => ({ rows: 1 }));
+  await assert.rejects(
+    governor.run(governedRequest, async () => ({ rows: 2 })),
+    (error: unknown) =>
+      error instanceof GovernanceDeniedError && error.decision.reason === 'attestation_replay',
+  );
+});
+
+test('rejects incomplete attestation admission configuration at construction', () => {
+  assert.throws(
+    () =>
+      new McpGovernor({
+        policyEvaluator: async () => ({ effect: 'allow', reason: 'policy permits action' }),
+        capabilityPublicKeyResolver: () => capabilityPublicKey,
+        toolExecutor: async () => undefined,
+        receiptSigner: { keyId: 'receipt-key-1', privateKey: receiptPrivateKey },
+        receiptWriter: async () => undefined,
+        attestation: {
+          ...attestationConfig(),
+          references: [],
+        },
+      }),
+    /attestation\.references must not be empty/,
   );
 });
 
@@ -317,14 +641,8 @@ test('binds defined prototype keys on null-prototype inputs', () => {
   });
   complete.action = 'write';
 
-  assert.equal(
-    canonicalJson(complete),
-    '{"__proto__":{"scope":"governed"},"action":"write"}',
-  );
-  assert.notEqual(
-    sha256(canonicalJson(complete)),
-    sha256(canonicalJson({ action: 'write' })),
-  );
+  assert.equal(canonicalJson(complete), '{"__proto__":{"scope":"governed"},"action":"write"}');
+  assert.notEqual(sha256(canonicalJson(complete)), sha256(canonicalJson({ action: 'write' })));
 });
 
 test('canonicalizes a void action result before persisting the after receipt', async () => {
@@ -371,8 +689,7 @@ test('rejects unexpected issuers before resolving a public key', async () => {
         risk: 'high',
       },
     ),
-    (error: unknown) =>
-      error instanceof CapabilityTokenError && error.code === 'issuer_mismatch',
+    (error: unknown) => error instanceof CapabilityTokenError && error.code === 'issuer_mismatch',
   );
   assert.equal(resolverCalls, 0);
 });
@@ -415,20 +732,17 @@ test('binds policy and execution to an immutable canonical argument snapshot', a
   });
 
   const mutableRequest = request({ actionId: 'action-snapshot', args: originalArgs });
-  const running = governor.run(
-    mutableRequest,
-    async (args, toolName) => {
-      const snapshot = args as typeof approvedArgs;
-      assert.equal(toolName, 'ledger.write');
-      assert.equal(snapshot.amount, 10);
-      assert.equal(snapshot.nested.value, 'approved');
-      assert.equal(snapshot.__proto__.role, 'user');
-      assert.throws(() => {
-        snapshot.amount = 999;
-      }, TypeError);
-      return { amount: snapshot.amount, value: snapshot.nested.value };
-    },
-  );
+  const running = governor.run(mutableRequest, async (args, toolName) => {
+    const snapshot = args as typeof approvedArgs;
+    assert.equal(toolName, 'ledger.write');
+    assert.equal(snapshot.amount, 10);
+    assert.equal(snapshot.nested.value, 'approved');
+    assert.equal(snapshot.__proto__.role, 'user');
+    assert.throws(() => {
+      snapshot.amount = 999;
+    }, TypeError);
+    return { amount: snapshot.amount, value: snapshot.nested.value };
+  });
 
   await policyEntered;
   originalArgs.amount = 999;
@@ -461,10 +775,9 @@ test('persists the evaluated policy version in signed receipts', async () => {
     }),
   });
 
-  const outcome = await governor.run(
-    request({ actionId: 'action-policy-version' }),
-    async () => ({ ok: true }),
-  );
+  const outcome = await governor.run(request({ actionId: 'action-policy-version' }), async () => ({
+    ok: true,
+  }));
   assert.equal(outcome.decision.policyVersion, 'covenant-2026-07');
   assert.deepEqual(
     receipts.map((item) => item.policyVersion),
@@ -593,10 +906,9 @@ test('snapshots and freezes a mutable policy decision before later awaits', asyn
     replayStore,
   });
 
-  const running = governor.run(
-    request({ actionId: 'action-decision-snapshot' }),
-    async () => ({ ok: true }),
-  );
+  const running = governor.run(request({ actionId: 'action-decision-snapshot' }), async () => ({
+    ok: true,
+  }));
   await replayEntered;
   mutableDecision.reason = 'mutated authorization';
   mutableDecision.policyVersion = 'covenant-mutated';
