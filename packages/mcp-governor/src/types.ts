@@ -28,6 +28,67 @@ export interface VerifiedCapability {
   keyId: string;
 }
 
+export type AttestationType = 'nvidia-cc' | 'amd-sev-snp' | 'intel-tdx' | 'tpm2';
+
+export type AttestationVerifier =
+  | 'nvidia-nras'
+  | 'amd-vcek'
+  | 'intel-trust-authority'
+  | 'intel-dcap'
+  | 'tpm2-quote';
+
+export type AttestationResultAlgorithm = 'EdDSA' | 'ES256' | 'PS384';
+
+export interface AttestationResultClaims {
+  version: 'szl.attestation-result/v1';
+  resultId: string;
+  issuer: string;
+  actionId: string;
+  actorId: string;
+  tenantId: string;
+  workloadId: string;
+  attestationType: AttestationType;
+  verifier: AttestationVerifier;
+  hardwareVerified: true;
+  eatNonce: string;
+  quoteDigest: string;
+  measurement: string;
+  referencePolicyDigest: string;
+  verifiedAt: number;
+  expiresAt: number;
+}
+
+export interface VerifiedAttestationResult {
+  readonly claims: Readonly<AttestationResultClaims>;
+  readonly keyId: string;
+  readonly algorithm: AttestationResultAlgorithm;
+}
+
+export type AttestationPublicKeyResolver = (
+  keyId: string,
+  issuer: string,
+  verifier: AttestationVerifier,
+) => Promise<KeyLike> | KeyLike;
+
+export interface AttestationReferenceValue {
+  readonly attestationType: AttestationType;
+  readonly verifier: AttestationVerifier;
+  readonly workloadId: string;
+  readonly issuers: readonly string[];
+  readonly measurements: readonly string[];
+  readonly referencePolicyDigests: readonly string[];
+}
+
+export interface AttestationAdmissionConfig {
+  readonly requiredRisks: readonly ActionRisk[];
+  readonly references: readonly AttestationReferenceValue[];
+  readonly publicKeyResolver: AttestationPublicKeyResolver;
+  readonly replayStore?: ReplayStore;
+  readonly maxResultAgeSeconds?: number;
+  readonly maxTokenLifetimeSeconds?: number;
+  readonly allowedClockSkewSeconds?: number;
+}
+
 export interface GovernedActionEnvelope {
   schema: 'szl.governed-action/v1';
   actionId: string;
@@ -49,6 +110,7 @@ export interface GovernedActionRequest {
   mutatesState: boolean;
   args: unknown;
   capabilityToken?: string;
+  attestationResultToken?: string;
 }
 
 export type PolicyEffect = 'allow' | 'block' | 'approval_required';
@@ -85,6 +147,7 @@ export interface GovernanceReceipt {
   readonly argsDigest: string;
   readonly resultDigest?: string;
   readonly priorReceiptDigest?: string;
+  readonly attestation?: VerifiedAttestationResult;
   readonly receiptDigest: string;
   readonly signature: {
     readonly algorithm: 'Ed25519';
@@ -120,6 +183,7 @@ export interface McpGovernorConfig {
   replayStore?: ReplayStore;
   requireCapabilityForReadOnly?: boolean;
   expectedCapabilityIssuer?: string;
+  attestation?: AttestationAdmissionConfig;
   clock?: () => Date;
 }
 
@@ -128,5 +192,6 @@ export interface GovernedActionResult<T> {
   envelope: GovernedActionEnvelope;
   decision: PolicyDecision;
   capability?: VerifiedCapability;
+  attestation?: VerifiedAttestationResult;
   receipts: GovernanceReceipt[];
 }

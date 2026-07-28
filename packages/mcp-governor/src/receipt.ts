@@ -8,6 +8,7 @@ import type {
   ReceiptOutcome,
   ReceiptPhase,
   ReceiptSigner,
+  VerifiedAttestationResult,
 } from './types.js';
 
 export function createSignedReceipt(
@@ -19,6 +20,7 @@ export function createSignedReceipt(
     occurredAt: string;
     resultDigest?: string;
     priorReceiptDigest?: string;
+    attestation?: VerifiedAttestationResult;
   },
   signer: ReceiptSigner,
 ): GovernanceReceipt {
@@ -40,6 +42,7 @@ export function createSignedReceipt(
     argsDigest: input.envelope.argsDigest,
     resultDigest: input.resultDigest,
     priorReceiptDigest: input.priorReceiptDigest,
+    attestation: input.attestation,
   };
   const receiptDigest = sha256(canonicalJson(unsigned));
   const signature = sign(null, Buffer.from(receiptDigest, 'hex'), signer.privateKey).toString(
