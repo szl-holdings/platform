@@ -1,6 +1,6 @@
 {
   "schema": "szl.truth/v1",
-  "generated_at": "2026-07-27T08:29:07.855Z",
+  "generated_at": "2026-07-28T17:25:51.793Z",
   "generated_by": "tools/truth/generate-truth.ts@szl.truth/v1",
   "metrics": {
     "surfaces_customer_facing": {
@@ -67,12 +67,12 @@
       "source": "Hugging Face Hub API: https://huggingface.co/api/models?author=SZLHOLDINGS&limit=1000&full=true"
     },
     "hf_datasets": {
-      "value": 26,
+      "value": 27,
       "label": "MEASURED",
       "source": "Hugging Face Hub API: https://huggingface.co/api/datasets?author=SZLHOLDINGS&limit=1000&full=true"
     },
     "hf_spaces": {
-      "value": 25,
+      "value": 26,
       "label": "MEASURED",
       "source": "Hugging Face Hub API: https://huggingface.co/api/spaces?author=SZLHOLDINGS&limit=1000&full=true"
     },
