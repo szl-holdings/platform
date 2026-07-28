@@ -1,29 +1,62 @@
 # Exact reviewed false-positive fingerprints only.
 #
-# Each entry was re-inspected on 2026-07-27. The two replit-sync findings are
-# documentation examples that explicitly state no private material is committed;
-# the five security/ALLOWLIST-JUSTIFICATIONS.md findings quote reviewed detector
-# examples in the allowlist evidence ledger. Any moved or newly introduced match
-# receives a different fingerprint and remains blocking.
+# Every entry is a full commit:path:rule:line fingerprint observed in exact-main
+# Security Audit runs 30242431089 or 30383771723 and re-inspected on 2026-07-28.
+# No path-only, rule-family, commit-range, or future detector match is accepted.
+# A moved line, changed rule, or new commit therefore remains blocking.
 #
-# Entries without a commit prefix bind one exact current-tree fingerprint.
-# Commit-prefixed entries bind one exact historical finding. This file does not
-# accept a path, rule family, historical commit range, or future detector match.
+# Two historical deployment documents state that no private material was
+# committed. Forty findings quote non-secret detector examples in the generated
+# allowlist evidence ledger. The final five are public receipt-key identifiers or
+# a Python cryptography type name in historical documentation/source.
+#
 # Canonical source-of-truth workflow counts are maintained independently and
 # this evidence policy cannot alter or suppress those measurements.
 
-replit-sync/uds/UDS_DEPLOY_GAP_FIX_REPORT.md:private-key-bare:103
-replit-sync/uds/parity_uds_payload.md:generic-api-key:445
-security/ALLOWLIST-JUSTIFICATIONS.md:generic-api-key:62
-security/ALLOWLIST-JUSTIFICATIONS.md:generic-api-key:65
-security/ALLOWLIST-JUSTIFICATIONS.md:generic-api-key:66
-security/ALLOWLIST-JUSTIFICATIONS.md:generic-api-key:67
-security/ALLOWLIST-JUSTIFICATIONS.md:generic-api-key:68
+f4cd98afd352a861419e4afb2d77ff1206e3da96:replit-sync/uds/UDS_DEPLOY_GAP_FIX_REPORT.md:private-key-bare:103
+e808c6afac87a340e4f2e4853cd4c236e5a46f53:replit-sync/uds/parity_uds_payload.md:generic-api-key:445
 
-# Re-inspected 2026-07-28 after exact-main Security Audit run 30383771723.
-# These are public receipt-key identifiers or a Python type name in historical
-# documentation/source, not credential material. The full fingerprints preserve
-# detection for any future occurrence, moved line, changed rule, or new commit.
+137b76e55229f928d03f693f0c85b03fc2362f99:security/ALLOWLIST-JUSTIFICATIONS.md:generic-api-key:62
+137b76e55229f928d03f693f0c85b03fc2362f99:security/ALLOWLIST-JUSTIFICATIONS.md:generic-api-key:65
+137b76e55229f928d03f693f0c85b03fc2362f99:security/ALLOWLIST-JUSTIFICATIONS.md:generic-api-key:66
+137b76e55229f928d03f693f0c85b03fc2362f99:security/ALLOWLIST-JUSTIFICATIONS.md:generic-api-key:67
+137b76e55229f928d03f693f0c85b03fc2362f99:security/ALLOWLIST-JUSTIFICATIONS.md:generic-api-key:68
+2d9e37d0bae7443871ee404a4066d8786783a4c5:security/ALLOWLIST-JUSTIFICATIONS.md:generic-api-key:62
+2d9e37d0bae7443871ee404a4066d8786783a4c5:security/ALLOWLIST-JUSTIFICATIONS.md:generic-api-key:65
+2d9e37d0bae7443871ee404a4066d8786783a4c5:security/ALLOWLIST-JUSTIFICATIONS.md:generic-api-key:66
+2d9e37d0bae7443871ee404a4066d8786783a4c5:security/ALLOWLIST-JUSTIFICATIONS.md:generic-api-key:67
+2d9e37d0bae7443871ee404a4066d8786783a4c5:security/ALLOWLIST-JUSTIFICATIONS.md:generic-api-key:68
+6720c29c2d16beb35d430d0087508877e316213d:security/ALLOWLIST-JUSTIFICATIONS.md:generic-api-key:62
+6720c29c2d16beb35d430d0087508877e316213d:security/ALLOWLIST-JUSTIFICATIONS.md:generic-api-key:65
+6720c29c2d16beb35d430d0087508877e316213d:security/ALLOWLIST-JUSTIFICATIONS.md:generic-api-key:66
+6720c29c2d16beb35d430d0087508877e316213d:security/ALLOWLIST-JUSTIFICATIONS.md:generic-api-key:67
+6720c29c2d16beb35d430d0087508877e316213d:security/ALLOWLIST-JUSTIFICATIONS.md:generic-api-key:68
+8a4239fef8b9bb6ddee923ea2aa62960dbf036eb:security/ALLOWLIST-JUSTIFICATIONS.md:generic-api-key:62
+8a4239fef8b9bb6ddee923ea2aa62960dbf036eb:security/ALLOWLIST-JUSTIFICATIONS.md:generic-api-key:65
+8a4239fef8b9bb6ddee923ea2aa62960dbf036eb:security/ALLOWLIST-JUSTIFICATIONS.md:generic-api-key:66
+8a4239fef8b9bb6ddee923ea2aa62960dbf036eb:security/ALLOWLIST-JUSTIFICATIONS.md:generic-api-key:67
+8a4239fef8b9bb6ddee923ea2aa62960dbf036eb:security/ALLOWLIST-JUSTIFICATIONS.md:generic-api-key:68
+90f2129309efefae3128dfbcff2323b0f359af9d:security/ALLOWLIST-JUSTIFICATIONS.md:generic-api-key:62
+90f2129309efefae3128dfbcff2323b0f359af9d:security/ALLOWLIST-JUSTIFICATIONS.md:generic-api-key:65
+90f2129309efefae3128dfbcff2323b0f359af9d:security/ALLOWLIST-JUSTIFICATIONS.md:generic-api-key:66
+90f2129309efefae3128dfbcff2323b0f359af9d:security/ALLOWLIST-JUSTIFICATIONS.md:generic-api-key:67
+90f2129309efefae3128dfbcff2323b0f359af9d:security/ALLOWLIST-JUSTIFICATIONS.md:generic-api-key:68
+98430f500c85d5a1ad73160249c19f9dbaa902e7:security/ALLOWLIST-JUSTIFICATIONS.md:generic-api-key:62
+98430f500c85d5a1ad73160249c19f9dbaa902e7:security/ALLOWLIST-JUSTIFICATIONS.md:generic-api-key:65
+98430f500c85d5a1ad73160249c19f9dbaa902e7:security/ALLOWLIST-JUSTIFICATIONS.md:generic-api-key:66
+98430f500c85d5a1ad73160249c19f9dbaa902e7:security/ALLOWLIST-JUSTIFICATIONS.md:generic-api-key:67
+98430f500c85d5a1ad73160249c19f9dbaa902e7:security/ALLOWLIST-JUSTIFICATIONS.md:generic-api-key:68
+9e7cba144eb1e48dd23665bcd23f9e3110f51f3e:security/ALLOWLIST-JUSTIFICATIONS.md:generic-api-key:62
+9e7cba144eb1e48dd23665bcd23f9e3110f51f3e:security/ALLOWLIST-JUSTIFICATIONS.md:generic-api-key:65
+9e7cba144eb1e48dd23665bcd23f9e3110f51f3e:security/ALLOWLIST-JUSTIFICATIONS.md:generic-api-key:66
+9e7cba144eb1e48dd23665bcd23f9e3110f51f3e:security/ALLOWLIST-JUSTIFICATIONS.md:generic-api-key:67
+9e7cba144eb1e48dd23665bcd23f9e3110f51f3e:security/ALLOWLIST-JUSTIFICATIONS.md:generic-api-key:68
+b9db2d019e2654cbf2b5d2da1ef021024d88aba6:security/ALLOWLIST-JUSTIFICATIONS.md:generic-api-key:62
+b9db2d019e2654cbf2b5d2da1ef021024d88aba6:security/ALLOWLIST-JUSTIFICATIONS.md:generic-api-key:65
+b9db2d019e2654cbf2b5d2da1ef021024d88aba6:security/ALLOWLIST-JUSTIFICATIONS.md:generic-api-key:66
+b9db2d019e2654cbf2b5d2da1ef021024d88aba6:security/ALLOWLIST-JUSTIFICATIONS.md:generic-api-key:67
+b9db2d019e2654cbf2b5d2da1ef021024d88aba6:security/ALLOWLIST-JUSTIFICATIONS.md:generic-api-key:68
+
 1a83efaafe7eb9a31b89862570838ece940c4a58:platform/deploy/SOVEREIGN_DELIVERY.md:generic-api-key:321
 66291ab81aa3514c5ffb86fdbe56de48aa292c5a:replit-sync/NEXT_ORDER.md:generic-api-key:116
 7cd2c5dede2b7dd28703c562c7d432fa04bc656d:packages/hatun-mcp/hatun_mcp/governance.py:generic-api-key:127
