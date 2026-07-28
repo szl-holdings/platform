@@ -380,37 +380,86 @@ test('rejects a signed attestation result with a non-reference measurement', asy
   assert.equal(executed, false);
 });
 
-test('verifies attestation signatures before disclosing pinned reference membership', async () => {
+test('normalizes forged attestation appraisal probes in signed blocked receipts', async () => {
   const governedRequest = request();
   const { privateKey: untrustedPrivateKey } = generateKeyPairSync('ed25519');
   const cases: Array<Partial<AttestationResultClaims>> = [
+    { attestationType: 'amd-sev-snp' },
+    { verifier: 'amd-vcek' },
+    { workloadId: 'untrusted-workload' },
+    { issuer: 'https://untrusted-verifier.example' },
     { actionId: 'action-probe' },
     { measurement: `sha384:${'d'.repeat(96)}` },
     { referencePolicyDigest: `sha256:${'e'.repeat(64)}` },
   ];
 
   for (const overrides of cases) {
+    const receipts: GovernanceReceipt[] = [];
+    const governor = createGovernor(receipts, { attestation: attestationConfig() });
     const resultClaims = attestationClaimsFor(governedRequest, overrides);
     const token = signAttestationResultToken(
       resultClaims,
       untrustedPrivateKey,
       'attestation-key-1',
     );
+    let executed = false;
     await assert.rejects(
-      verifyAttestationResultToken(token, () => attestationPublicKey, {
-        now: NOW,
-        expectedActionId: createGovernedActionEnvelope(governedRequest, NOW).actionId,
-        expectedActorId: resultClaims.actorId,
-        expectedTenantId: resultClaims.tenantId,
-        expectedEatNonce: resultClaims.eatNonce,
-        references: attestationConfig().references,
-        maxResultAgeSeconds: 120,
-        maxTokenLifetimeSeconds: 300,
-        allowedClockSkewSeconds: 5,
+      governor.run({ ...governedRequest, attestationResultToken: token }, async () => {
+        executed = true;
+        return 'unreachable';
       }),
       (error: unknown) =>
-        error instanceof AttestationTokenError && error.code === 'invalid_signature',
+        error instanceof GovernanceDeniedError &&
+        error.decision.reason === 'attestation_invalid_signature',
     );
+    assert.equal(executed, false);
+    assert.equal(receipts.length, 1);
+    assert.equal(receipts[0]?.phase, 'blocked');
+    assert.equal(receipts[0]?.reason, 'attestation_invalid_signature');
+    assert.equal(verifyGovernanceReceipt(receipts[0] as GovernanceReceipt, receiptPublicKey), true);
+  }
+});
+
+test('rejects untrusted issuer scopes before shared key resolution', async () => {
+  const governedRequest = request();
+  const { privateKey: sharedPrivateKey, publicKey: sharedPublicKey } =
+    generateKeyPairSync('ed25519');
+  const cases: Array<Partial<AttestationResultClaims>> = [
+    { issuer: 'https://unconfigured-verifier.example' },
+    { verifier: 'amd-vcek' },
+  ];
+
+  for (const overrides of cases) {
+    const receipts: GovernanceReceipt[] = [];
+    let resolverCalls = 0;
+    const governor = createGovernor(receipts, {
+      attestation: attestationConfig({
+        publicKeyResolver: () => {
+          resolverCalls += 1;
+          return sharedPublicKey;
+        },
+      }),
+    });
+    const token = signAttestationResultToken(
+      attestationClaimsFor(governedRequest, overrides),
+      sharedPrivateKey,
+      'shared-untrusted-key',
+    );
+
+    await assert.rejects(
+      governor.run(
+        { ...governedRequest, attestationResultToken: token },
+        async () => 'unreachable',
+      ),
+      (error: unknown) =>
+        error instanceof GovernanceDeniedError &&
+        error.decision.reason === 'attestation_invalid_signature',
+    );
+    assert.equal(resolverCalls, 0);
+    assert.equal(receipts.length, 1);
+    assert.equal(receipts[0]?.phase, 'blocked');
+    assert.equal(receipts[0]?.reason, 'attestation_invalid_signature');
+    assert.equal(verifyGovernanceReceipt(receipts[0] as GovernanceReceipt, receiptPublicKey), true);
   }
 });
 

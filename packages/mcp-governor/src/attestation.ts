@@ -351,6 +351,29 @@ export async function verifyAttestationResultToken(
   const keyId = requireIdentifier(headerFields.kid, 'keyId');
   const claims = parseClaims(decodeJson(payloadPart, 'attestation payload'));
 
+  const issuerScopeIsTrusted = options.references.some(
+    (item) => item.verifier === claims.verifier && item.issuers.includes(claims.issuer),
+  );
+  if (!issuerScopeIsTrusted) {
+    throw new AttestationTokenError('invalid_signature', 'attestation result signature is invalid');
+  }
+
+  let validSignature = false;
+  try {
+    const publicKey = await resolvePublicKey(keyId, claims.issuer, claims.verifier);
+    validSignature = verifyInput(
+      algorithm,
+      Buffer.from(`${headerPart}.${payloadPart}`, 'utf8'),
+      Buffer.from(signaturePart, 'base64url'),
+      publicKey,
+    );
+  } catch {
+    validSignature = false;
+  }
+  if (!validSignature) {
+    throw new AttestationTokenError('invalid_signature', 'attestation result signature is invalid');
+  }
+
   if (!options.references.some((item) => item.attestationType === claims.attestationType)) {
     throw new AttestationTokenError('type_mismatch', 'attestation type is not allowed');
   }
@@ -382,21 +405,7 @@ export async function verifyAttestationResultToken(
   if (!reference) {
     throw new AttestationTokenError('issuer_mismatch', 'attestation issuer is not trusted');
   }
-  const publicKey = await resolvePublicKey(keyId, claims.issuer, claims.verifier);
-  let validSignature = false;
-  try {
-    validSignature = verifyInput(
-      algorithm,
-      Buffer.from(`${headerPart}.${payloadPart}`, 'utf8'),
-      Buffer.from(signaturePart, 'base64url'),
-      publicKey,
-    );
-  } catch {
-    validSignature = false;
-  }
-  if (!validSignature) {
-    throw new AttestationTokenError('invalid_signature', 'attestation result signature is invalid');
-  }
+
   if (claims.actionId !== options.expectedActionId) {
     throw new AttestationTokenError('action_mismatch', 'attestation action does not match');
   }
