@@ -1,0 +1,4029 @@
+{
+  "schema_version": "szl.estate-contract-release.v1",
+  "status": "HASH_CLOSED_SOURCE_RELEASE",
+  "source_repository": "https://github.com/szl-holdings/platform",
+  "evidence_labels": {
+    "source_bytes": "VERIFIED_LOCAL",
+    "generated_output_lineage": "STRUCTURE_ONLY",
+    "registry_publication": "UNAVAILABLE",
+    "cross_repository_adoption": "UNAVAILABLE",
+    "production_deployment": "UNAVAILABLE"
+  },
+  "components": [
+    {
+      "id": "design-system",
+      "role": "CANONICAL_SOURCE",
+      "package_name": "@szl-holdings/design-system",
+      "inputs": [
+        "packages/design-system/package.json",
+        "packages/design-system/src"
+      ],
+      "file_count": 100,
+      "bytes": 354178,
+      "tree_sha256": "b8b84fb54875d976d6ac87db8976156ed49542073f06b32762b17a0f61efc0df",
+      "files": [
+        {
+          "path": "packages/design-system/package.json",
+          "bytes": 3558,
+          "sha256": "0cb23521e244cb66defdfd7c475ec9a7229a11c498a7831016f40e5c0547fc8d"
+        },
+        {
+          "path": "packages/design-system/src/a11y/LiveRegion.tsx",
+          "bytes": 806,
+          "sha256": "f95ad192da47b9fb2274b8e6c34df787b738edd814fe159138ccae7322ae8b6c"
+        },
+        {
+          "path": "packages/design-system/src/a11y/SkipLink.tsx",
+          "bytes": 689,
+          "sha256": "213c97da403c420933cbb3cfe0ee32f1e8a67761ab2d258a4229a75dc0acef6c"
+        },
+        {
+          "path": "packages/design-system/src/a11y/VisuallyHidden.tsx",
+          "bytes": 737,
+          "sha256": "9c2c2fb780604c0d5e4aa81fdb04c06ce30bd5d2ce11c53efac644f9dce7f7af"
+        },
+        {
+          "path": "packages/design-system/src/a11y/index.ts",
+          "bytes": 436,
+          "sha256": "94b55bf705dd46ec75906648bd4b0c1dc3ee6876738ae872be94d0f115f109f5"
+        },
+        {
+          "path": "packages/design-system/src/a11y/useFocusTrap.ts",
+          "bytes": 2233,
+          "sha256": "207975b320a002c73a697a700470af850ba6393905ffe3acd757d5f9e82c5837"
+        },
+        {
+          "path": "packages/design-system/src/a11y/usePrefersReducedMotion.ts",
+          "bytes": 817,
+          "sha256": "07233b668c7047f8eb3a0c60a94c6287fe58e6071fcbd43ea7f17b47a8dd0679"
+        },
+        {
+          "path": "packages/design-system/src/alloy-bridge.ts",
+          "bytes": 6474,
+          "sha256": "4eec497ea26192b29b2364fbabd2f37bfdfb5ef224b49326145843625452744f"
+        },
+        {
+          "path": "packages/design-system/src/cockpit/ApprovalDialog.tsx",
+          "bytes": 9998,
+          "sha256": "018d3e55bd03c71f646830bdb689ea3833482e9c40cb03c022fbaf6c1d6ace21"
+        },
+        {
+          "path": "packages/design-system/src/cockpit/AuditRail.tsx",
+          "bytes": 6736,
+          "sha256": "3178330c4f884ff82e97ba194c949ddc94fa4c46ff44175cd0aba9d0a2d66241"
+        },
+        {
+          "path": "packages/design-system/src/cockpit/DenseTable.tsx",
+          "bytes": 5062,
+          "sha256": "749e4f6900a6ab24b1930e458ba85a2f16d32545e11eaf4500f88580490e9537"
+        },
+        {
+          "path": "packages/design-system/src/cockpit/EvidenceDrawer.tsx",
+          "bytes": 7531,
+          "sha256": "164699f1a9345bc382a8afce557794d63652d8f843f1cb5a2be7c93c9f23be98"
+        },
+        {
+          "path": "packages/design-system/src/cockpit/GraphCanvas.tsx",
+          "bytes": 8335,
+          "sha256": "59da033d48f6d480d5a3358bdd67570ae17c68f97310302f32964405ec03e997"
+        },
+        {
+          "path": "packages/design-system/src/cockpit/MapSurface.tsx",
+          "bytes": 3465,
+          "sha256": "44a65bbe55d81c0460baadc204f5047de3c76fd535bcf76dea79d2ff0d724e96"
+        },
+        {
+          "path": "packages/design-system/src/cockpit/NarrativePanel.tsx",
+          "bytes": 3324,
+          "sha256": "6740ad6766b3953bebdcabdb1b5996134b9476e543ac745b58c74b03d7bf5a2d"
+        },
+        {
+          "path": "packages/design-system/src/cockpit/RecommendationCard.tsx",
+          "bytes": 5643,
+          "sha256": "8c37afe6e7059d8687d98e1ecf963b528210dbe4932c39dc31983df886a04749"
+        },
+        {
+          "path": "packages/design-system/src/cockpit/RunTimeline.tsx",
+          "bytes": 6456,
+          "sha256": "5c2dd1b6888d0969c17b18596bcf78d62b448396ae98792df28589718ce3f6a3"
+        },
+        {
+          "path": "packages/design-system/src/cockpit/StepFlow.tsx",
+          "bytes": 8511,
+          "sha256": "97a5222ef96447fc86ade6b7feefd47d1971f59eb8986388c1afbe1b5ac3ba5c"
+        },
+        {
+          "path": "packages/design-system/src/cockpit/TimelineLane.tsx",
+          "bytes": 4990,
+          "sha256": "f5af6918205b1d7280ff91f1db31d73e224613b954266ef8d19cc88d4cba30e5"
+        },
+        {
+          "path": "packages/design-system/src/cockpit/index.ts",
+          "bytes": 1436,
+          "sha256": "6296c6bfd0bb53f1b7b67a0456516e55f59370bd0e0325b8a3260394a4407a17"
+        },
+        {
+          "path": "packages/design-system/src/data/ComparisonTable.tsx",
+          "bytes": 12557,
+          "sha256": "ca256b38b4c96686fe1c570b618de9f35f75ebf7e50252fcd5cf873c1a0b6803"
+        },
+        {
+          "path": "packages/design-system/src/data/DataCard.tsx",
+          "bytes": 13572,
+          "sha256": "31c62350cc90bc9ccf1675966b36de04cf4321b1aa75f89b6ab2dd3ea2aeb3c3"
+        },
+        {
+          "path": "packages/design-system/src/data/DataGrid.tsx",
+          "bytes": 4345,
+          "sha256": "d527785468e78638c93d7828141136f57f74e4355f9f7a7ee2cddb0be9f704c7"
+        },
+        {
+          "path": "packages/design-system/src/data/FilterBar.tsx",
+          "bytes": 2330,
+          "sha256": "8f3afa527ea2ba79c83ee4a343e079b9f32a4e871326181199a6eff75c1ebd88"
+        },
+        {
+          "path": "packages/design-system/src/data/MetricStat.tsx",
+          "bytes": 2157,
+          "sha256": "147b5ea22d150bbfcb4ffbf12cdc94fe6db54df451cb4798401ca17aecb1dee1"
+        },
+        {
+          "path": "packages/design-system/src/data/StatusBadge.tsx",
+          "bytes": 2263,
+          "sha256": "cef4645c0bae3243469eac31c545d1b9ea336fa4d85fc09aad0ff036da59702e"
+        },
+        {
+          "path": "packages/design-system/src/data/TableToolbar.tsx",
+          "bytes": 1924,
+          "sha256": "3f683e956cff71a510c90adc4fa7f9898626cee4c3f79d5aac3c64aed626235d"
+        },
+        {
+          "path": "packages/design-system/src/data/index.ts",
+          "bytes": 234,
+          "sha256": "33d4760a8cc5838c960e966f80fb0730d67d632c250ff6ded4a14bb015ef109d"
+        },
+        {
+          "path": "packages/design-system/src/detail/DetailDrawer.tsx",
+          "bytes": 2285,
+          "sha256": "415a56cec22abab56d3e83b52919b82781cccf0fb70ed30be4ae1b781ced619f"
+        },
+        {
+          "path": "packages/design-system/src/detail/index.ts",
+          "bytes": 35,
+          "sha256": "9ef3321965c885ad11b10c7d4d35f5323d81bb8cd20da77afa75aca2fb0e8981"
+        },
+        {
+          "path": "packages/design-system/src/eval/BenchmarkCard.tsx",
+          "bytes": 7143,
+          "sha256": "cd51242b004208d423871d0e9c2e59f96ffcd6a35c13450d9f9221b42bd88c1e"
+        },
+        {
+          "path": "packages/design-system/src/eval/EvalBadge.tsx",
+          "bytes": 2995,
+          "sha256": "7c86311d9339becbaf97c8a8a57b4f88bca2dd979ef782df2e8363bd825ded87"
+        },
+        {
+          "path": "packages/design-system/src/eval/LeaderboardTable.tsx",
+          "bytes": 7447,
+          "sha256": "b1bdb3cd136cd4c727da3c316392aaa62080224d25c77b9afa6da807f747d72d"
+        },
+        {
+          "path": "packages/design-system/src/eval/ResultDetailDrawer.tsx",
+          "bytes": 6878,
+          "sha256": "733f85ffc5ff90beed9e45c7235b624fcfef59f0bbfce6b8c8f886d593c2282c"
+        },
+        {
+          "path": "packages/design-system/src/eval/ScoreChip.tsx",
+          "bytes": 3332,
+          "sha256": "600ca819a9e941b6c7efeacd7c63420ed96c4c5721ba7149ea7ecd588ed4c60f"
+        },
+        {
+          "path": "packages/design-system/src/eval/SubmitScoreForm.tsx",
+          "bytes": 12795,
+          "sha256": "b805a28207612256a0bc836ac48a552a9c1eb96ad73698d48ce04c1af659e6a9"
+        },
+        {
+          "path": "packages/design-system/src/eval/index.ts",
+          "bytes": 779,
+          "sha256": "225f3fbe91772ee797d85d70bf8c7e789445c73b4449ef2021a4425a1fbd03c8"
+        },
+        {
+          "path": "packages/design-system/src/evidence/EvidencePanel.tsx",
+          "bytes": 6194,
+          "sha256": "4d44f5c131d64ee13158f1f5163aa8d3f526058f17653b482bf4c5c22083f8aa"
+        },
+        {
+          "path": "packages/design-system/src/evidence/index.ts",
+          "bytes": 179,
+          "sha256": "32a7e2d45f392ffccedf67df7bde43cc321f0e1a84491d6b26d4bed9a5e0c13f"
+        },
+        {
+          "path": "packages/design-system/src/feedback/EmptyState.tsx",
+          "bytes": 980,
+          "sha256": "e74fd72e57ca65cf3c0c7f282ac57453aa06858567abc24dd1559620d81d990a"
+        },
+        {
+          "path": "packages/design-system/src/feedback/ErrorState.tsx",
+          "bytes": 1941,
+          "sha256": "76c4d1d9da67368d2745468f65f0ff9e8d33982568bbdf3dc9c565c497555d64"
+        },
+        {
+          "path": "packages/design-system/src/feedback/InsightBanner.tsx",
+          "bytes": 10049,
+          "sha256": "910a2df7be36608effbdf78d48bb9b9e4b78672f0e6eb4583573c7893bd49788"
+        },
+        {
+          "path": "packages/design-system/src/feedback/LoadingState.tsx",
+          "bytes": 1605,
+          "sha256": "9076460373b84367e0bc19f3ef9dde9c5d6b6b143ba3a75accde2f28d556a71c"
+        },
+        {
+          "path": "packages/design-system/src/feedback/SkeletonLoader.tsx",
+          "bytes": 3986,
+          "sha256": "2916d4425681d03619bf9b2f8e5d82ce1b353ded1df2420bf769370df3b1893d"
+        },
+        {
+          "path": "packages/design-system/src/feedback/Toast.tsx",
+          "bytes": 4747,
+          "sha256": "bd7bbfdcf87560450c981fdf4446598e72cc4bca6c7a702804146cefc0dafe0a"
+        },
+        {
+          "path": "packages/design-system/src/feedback/index.ts",
+          "bytes": 202,
+          "sha256": "8ac2a5ff257785c54c72b4b6326a4c1f17e64b199897fee23f5c4fdedb008947"
+        },
+        {
+          "path": "packages/design-system/src/form/Button.tsx",
+          "bytes": 3282,
+          "sha256": "ab8365d1e6e24ef3a3c89ca5dc4a34363df7329fbeb9a1130a84cb9975d03334"
+        },
+        {
+          "path": "packages/design-system/src/form/FormField.tsx",
+          "bytes": 1041,
+          "sha256": "2a8e2da88127bef3ba600a5d520221d920f0e9bffafdb4bb079448bc01f71b7e"
+        },
+        {
+          "path": "packages/design-system/src/form/SearchInput.tsx",
+          "bytes": 1458,
+          "sha256": "a8275a6a3ae50eb6ff311a97f3cc8248eabf238b500bdb2f3a42c465885438c3"
+        },
+        {
+          "path": "packages/design-system/src/form/SegmentedControl.tsx",
+          "bytes": 1598,
+          "sha256": "a151e08906fb9ba4345adfa2db8b86a38f08dd29e3d453f0c33db1f77d43f2ca"
+        },
+        {
+          "path": "packages/design-system/src/form/Select.tsx",
+          "bytes": 1521,
+          "sha256": "62e6e812682927e4453952c7b53311c2a17ad391d5aaa6e1e47731fe926d4ee1"
+        },
+        {
+          "path": "packages/design-system/src/form/Stepper.tsx",
+          "bytes": 3283,
+          "sha256": "88181a08e608796f81b323d98cfc6b8116dd45481987763d75bb977e37b7b88c"
+        },
+        {
+          "path": "packages/design-system/src/form/index.ts",
+          "bytes": 193,
+          "sha256": "ad28a6b3bdf0f704d2a673d83edd2b7c69743c7f832e024d17bef7083700509f"
+        },
+        {
+          "path": "packages/design-system/src/hooks/index.ts",
+          "bytes": 69,
+          "sha256": "7b16d497cbcf1868a3f25380a216591ab11ecf55c2a5a100295a225dd148c1a3"
+        },
+        {
+          "path": "packages/design-system/src/hooks/useDensity.ts",
+          "bytes": 719,
+          "sha256": "d1c347067bedee5cd91975721ca6a19fd2a37024c8dc594562b95311edf2bf69"
+        },
+        {
+          "path": "packages/design-system/src/hooks/useScreenMode.ts",
+          "bytes": 741,
+          "sha256": "bfa33ef76699cc72b61cef9fe2399ebb2559cf8559db1448baafbf27f11bb67b"
+        },
+        {
+          "path": "packages/design-system/src/index.ts",
+          "bytes": 984,
+          "sha256": "6d284be46342990a8d259a44e1d222206e45c38ffa4e9795e53b6914a1808767"
+        },
+        {
+          "path": "packages/design-system/src/layout/InspectorTabs.tsx",
+          "bytes": 1759,
+          "sha256": "07a2f3a4e34bce2e197938d72522c98febb253e1286e5465cf015d1905eb3224"
+        },
+        {
+          "path": "packages/design-system/src/layout/SideInspector.tsx",
+          "bytes": 1502,
+          "sha256": "1ee4517ae0883f482c2920e6179fe15fcc8d4e2e05afdc26945c9aee0ce3cd40"
+        },
+        {
+          "path": "packages/design-system/src/layout/SplitPane.tsx",
+          "bytes": 745,
+          "sha256": "e4ed054b161f86c5bf2b05a7ae84505d7588f73c4497a0980508fbe255185771"
+        },
+        {
+          "path": "packages/design-system/src/layout/SplitView.tsx",
+          "bytes": 8767,
+          "sha256": "3b19fe3832badabc4a36f693d3848052de06e587e5bc7d0fa4a0cfce0f189a44"
+        },
+        {
+          "path": "packages/design-system/src/layout/index.ts",
+          "bytes": 136,
+          "sha256": "2bc97ba61ac936da3245b03d5d29659f4b99f5b56291ef54ab0af0577955b5ab"
+        },
+        {
+          "path": "packages/design-system/src/proof/AutonomyModeToggle.tsx",
+          "bytes": 3270,
+          "sha256": "c9adb5b45102703efb31ed9e77857cf9ca365849283d46f9929d64376a4f73c0"
+        },
+        {
+          "path": "packages/design-system/src/proof/ConfidenceMeter.tsx",
+          "bytes": 2776,
+          "sha256": "ab26c6c4e9a5bffbff10ce7458ec055a29451fc581b04420e92dc73496dac04e"
+        },
+        {
+          "path": "packages/design-system/src/proof/EvidenceBadge.tsx",
+          "bytes": 5325,
+          "sha256": "2982ea6aac45eee60c128a6338c3ec2887fe3fe5a26a34aaffd16de1183f8d48"
+        },
+        {
+          "path": "packages/design-system/src/proof/FreshnessChip.tsx",
+          "bytes": 2293,
+          "sha256": "d8f93e90e764a8cb0c5cee945c6a567deece5db10c78347e9eb8966aef390d00"
+        },
+        {
+          "path": "packages/design-system/src/proof/PolicyModeBadge.tsx",
+          "bytes": 3717,
+          "sha256": "fb9a5ac8f1f5abd84529d72b13080789d39add7dc73af869c67123c39bbc30c8"
+        },
+        {
+          "path": "packages/design-system/src/proof/PolicyStateChip.tsx",
+          "bytes": 1452,
+          "sha256": "3c29ea56b7c6b4a0436fd47dd770d278af1ac4386aef25534cc0a62fb80aebbc"
+        },
+        {
+          "path": "packages/design-system/src/proof/ProofChainViewer.tsx",
+          "bytes": 12731,
+          "sha256": "564b46a1c79bf01c1eba41cb2d9b02dd8e1185c2cae69a994d8191f27951a1d6"
+        },
+        {
+          "path": "packages/design-system/src/proof/ProofEnvelope.tsx",
+          "bytes": 6069,
+          "sha256": "1f197c61de382c5cfa1f09b2da750ab88f06bf5ea8d45ac76afc2c574d9e933f"
+        },
+        {
+          "path": "packages/design-system/src/proof/index.ts",
+          "bytes": 1193,
+          "sha256": "21d451a37ed78f93b44d481308ab1f6d608996aabba981d15bec66ce0cbcfc63"
+        },
+        {
+          "path": "packages/design-system/src/providers/DesignSystemProvider.tsx",
+          "bytes": 1578,
+          "sha256": "8d5d73b53d3e2653a59386ac5010c9d414b64adf1f7ed22149dffc3b917bec25"
+        },
+        {
+          "path": "packages/design-system/src/providers/index.ts",
+          "bytes": 43,
+          "sha256": "ecbc266cef9f26e9d083002ebab351e91fb95015781451387bdaaa429401561a"
+        },
+        {
+          "path": "packages/design-system/src/shell/AppShell.tsx",
+          "bytes": 7336,
+          "sha256": "506d64691ddf68e76985ed9ca0ff0d6d1aecbb3e9976e7b158fbe3e6b11ec58e"
+        },
+        {
+          "path": "packages/design-system/src/shell/Breadcrumb.tsx",
+          "bytes": 2133,
+          "sha256": "b225e8a4248c9de617a8fa8fe9053e44bb9c0b7e8d3c1d8825cb065b7ef3284f"
+        },
+        {
+          "path": "packages/design-system/src/shell/CommandBar.tsx",
+          "bytes": 2541,
+          "sha256": "c3896bf6ac2474c5dbe76fc93d8e850a0e469c1e643261d543b430f1a78853d4"
+        },
+        {
+          "path": "packages/design-system/src/shell/CommandMenu.tsx",
+          "bytes": 13056,
+          "sha256": "f01d3ba976adbf9fab9e120efe484e11415f88fe967b63758b1bb0d850165c87"
+        },
+        {
+          "path": "packages/design-system/src/shell/GlobalCommandPalette.tsx",
+          "bytes": 5201,
+          "sha256": "769f0749acc8333fe36cc3bee486fabe2e3863ba6d8db415298f6e04543831b1"
+        },
+        {
+          "path": "packages/design-system/src/shell/PageHeader.tsx",
+          "bytes": 1580,
+          "sha256": "91d63ed901c10c45b33da3cc149f0b3d458c919bbcf68a84ea6133d3e205b0fb"
+        },
+        {
+          "path": "packages/design-system/src/shell/SectionPanel.tsx",
+          "bytes": 1347,
+          "sha256": "227de2a7903ea0fdfaf1d114c1c0b260cfe0698fdf1d5ba3ca8ffaa0f95d782a"
+        },
+        {
+          "path": "packages/design-system/src/shell/SideNav.tsx",
+          "bytes": 2363,
+          "sha256": "abea6b9d2d846aadd5781f6c8d66645492b05898344df436c9b31885c55db8e0"
+        },
+        {
+          "path": "packages/design-system/src/shell/TenantIndicator.tsx",
+          "bytes": 1660,
+          "sha256": "0319022a8fcbcbee6019984e249672309786bc39307462e0ac4ac7ff08b79777"
+        },
+        {
+          "path": "packages/design-system/src/shell/TopBar.tsx",
+          "bytes": 2712,
+          "sha256": "e180b82a97772c6c20f495ed144144107d3065d3e30e74ad1b9cf0e42b1a5188"
+        },
+        {
+          "path": "packages/design-system/src/shell/index.ts",
+          "bytes": 339,
+          "sha256": "a1e6e320a86cf18bd1de1e532cccc9e77c5852f42881aa4674427fb52d7eb287"
+        },
+        {
+          "path": "packages/design-system/src/timeline/ActivityFeed.tsx",
+          "bytes": 2270,
+          "sha256": "5451a0ec96231f15e392283d55f5a257169e770fb514a1078aa3f966955e4720"
+        },
+        {
+          "path": "packages/design-system/src/timeline/AuditTrailList.tsx",
+          "bytes": 2900,
+          "sha256": "ba7a812138de734b9157783618036e08e59ecb80f2e0b1080180977d4ee82b9a"
+        },
+        {
+          "path": "packages/design-system/src/timeline/Timeline.tsx",
+          "bytes": 4212,
+          "sha256": "affdfbd41304fd6f8abc9083b7803de995098bc25d37f658cf5c8d9ca632263c"
+        },
+        {
+          "path": "packages/design-system/src/timeline/index.ts",
+          "bytes": 103,
+          "sha256": "336159830824851109aa53a8b366600e71638cf00b09f8e048be0d0c94cac5fb"
+        },
+        {
+          "path": "packages/design-system/src/tokens/chart.ts",
+          "bytes": 875,
+          "sha256": "310c40a965de2097c877d4ac59f069defa443c470656e084cf156c93b91949e7"
+        },
+        {
+          "path": "packages/design-system/src/tokens/domain-accents.ts",
+          "bytes": 782,
+          "sha256": "0e863b5bcceaacd45b4db640fe19b9244d7b81813742a75053e624e17add4eec"
+        },
+        {
+          "path": "packages/design-system/src/tokens/elevation.ts",
+          "bytes": 623,
+          "sha256": "505f38f773a907ac18ea0dd93f6cc99818a65d2cd1327734332d4e673f5db170"
+        },
+        {
+          "path": "packages/design-system/src/tokens/gi-tokens.css",
+          "bytes": 14128,
+          "sha256": "eb5c6c88797b8e070a63a734b7be068dbfab7ad6fbed8480c7200ad3c0fb40ef"
+        },
+        {
+          "path": "packages/design-system/src/tokens/index.ts",
+          "bytes": 7265,
+          "sha256": "98f45b349d8a08d4c594f53e2c3da66eec795a3b83bb9d2300565de38ed80612"
+        },
+        {
+          "path": "packages/design-system/src/tokens/motion.ts",
+          "bytes": 1112,
+          "sha256": "0dd37667b51e267985ad8a236cda2903d0c90c203fb391f516ea4d18872a90c1"
+        },
+        {
+          "path": "packages/design-system/src/tokens/radius.ts",
+          "bytes": 382,
+          "sha256": "784628c645ebf2500598850dc7372d4975817ab6c16b72fe5a9c81146b37e3bf"
+        },
+        {
+          "path": "packages/design-system/src/tokens/semantic.ts",
+          "bytes": 1249,
+          "sha256": "bd820ba2f0bff5c0c7aeea99a185a13d914e448201f18c5d15f4f1dc886050e4"
+        },
+        {
+          "path": "packages/design-system/src/tokens/spacing.ts",
+          "bytes": 1403,
+          "sha256": "9373d2f16bc3467b5954bbc6cde31f331ea8acf4a46e473ca7269aa10015cd01"
+        },
+        {
+          "path": "packages/design-system/src/tokens/typography.ts",
+          "bytes": 2722,
+          "sha256": "baf563225a08e773d555e28d9bba1f757b951544956d8c7a4ea73e23b88bc137"
+        },
+        {
+          "path": "packages/design-system/src/tokens/vars.ts",
+          "bytes": 5271,
+          "sha256": "628ca6c26ff49dcfc7e4c266a2af78fcd72ce9c1fbdef5b9060f97eb5adb0d93"
+        },
+        {
+          "path": "packages/design-system/src/utils.ts",
+          "bytes": 177,
+          "sha256": "d86ed37269779e6a8c3b25f89b6edbf51d752254f870a667bf9a9128bb3c594b"
+        }
+      ]
+    },
+    {
+      "id": "design-system-forge-type-contract",
+      "role": "EXPORTED_SOURCE_DEPENDENCY",
+      "package_name": "@workspace/forge/types",
+      "inputs": [
+        "packages/forge/package.json",
+        "packages/forge/src/types.ts"
+      ],
+      "file_count": 2,
+      "bytes": 4737,
+      "tree_sha256": "39b24e39751abdc8fb69e6f3212f8cec9164db25bf6d59e5a13917dea1cd9566",
+      "files": [
+        {
+          "path": "packages/forge/package.json",
+          "bytes": 1821,
+          "sha256": "d9f6702c416013b4ba5307764b3f7b229873e9c7c20dcd3b9ae8bb5fa0256170"
+        },
+        {
+          "path": "packages/forge/src/types.ts",
+          "bytes": 2916,
+          "sha256": "9bd3493ce114617d1e08be403f99ac72008defc7a52e1077d44b656c84515151"
+        }
+      ]
+    },
+    {
+      "id": "api-spec",
+      "role": "CANONICAL_SOURCE",
+      "package_name": "@szl-holdings/api-spec",
+      "inputs": [
+        "lib/api-spec/package.json",
+        "lib/api-spec/openapi.yaml",
+        "lib/api-spec/orval.config.ts",
+        "lib/api-spec/scripts/codegen.mjs"
+      ],
+      "file_count": 4,
+      "bytes": 2189187,
+      "tree_sha256": "d31aa14ddb9db747df80915b3b4ab4f69b7753441a5105faeb4e90d0cd7322e2",
+      "files": [
+        {
+          "path": "lib/api-spec/openapi.yaml",
+          "bytes": 2184799,
+          "sha256": "cc155bbd9ad034168897b5975e602acffe283787d88b4a9eebcf100d35b26b94"
+        },
+        {
+          "path": "lib/api-spec/orval.config.ts",
+          "bytes": 2094,
+          "sha256": "4376b6a063b7b013b38d1628fd87bc271ff0aab4804fc53a75944ebd9947257e"
+        },
+        {
+          "path": "lib/api-spec/package.json",
+          "bytes": 553,
+          "sha256": "20e7818ef118230b691294f104011d5c4cf8071d352813f6be28a814ea7382a6"
+        },
+        {
+          "path": "lib/api-spec/scripts/codegen.mjs",
+          "bytes": 1741,
+          "sha256": "248d735a61ad04356335ac60eb94f5445efa300b82724ea2bd379701e5412e69"
+        }
+      ]
+    },
+    {
+      "id": "api-client-react",
+      "role": "RUNTIME_AND_GENERATED_OUTPUT_PRESENT",
+      "package_name": "@szl-holdings/api-client-react",
+      "inputs": [
+        "lib/api-client-react/package.json",
+        "lib/api-client-react/src/index.ts",
+        "lib/api-client-react/src/custom-fetch.ts",
+        "lib/api-client-react/src/standard-hooks.ts",
+        "lib/api-client-react/src/generated"
+      ],
+      "file_count": 6,
+      "bytes": 13687043,
+      "tree_sha256": "0e7b8296410f3ba963721c30d29f6ff2a689176e8fd329f3674a3951f7e46add",
+      "files": [
+        {
+          "path": "lib/api-client-react/package.json",
+          "bytes": 840,
+          "sha256": "ce646a0a81a1ded984dd1aae0b0c1ca72850a46e22033c79e6fd6601dd6287d6"
+        },
+        {
+          "path": "lib/api-client-react/src/custom-fetch.ts",
+          "bytes": 12268,
+          "sha256": "f8eb3ed3433722f9805730e8dabbaa8e6bbed3d8835eebef82994056472706c6"
+        },
+        {
+          "path": "lib/api-client-react/src/generated/api.schemas.ts",
+          "bytes": 117194,
+          "sha256": "90943eb162d373d9a74ad27b7ba5fbda595dd758f543aecc79cb8d164af8078f"
+        },
+        {
+          "path": "lib/api-client-react/src/generated/api.ts",
+          "bytes": 13546261,
+          "sha256": "91d560de8f4552d4b27f1deafbeeefd34bba4f60e8cf96a4e3e0dd80e310c511"
+        },
+        {
+          "path": "lib/api-client-react/src/index.ts",
+          "bytes": 272,
+          "sha256": "a4a23f037dca1e99007457de751ad015522177044bcd85528012ddca81e860e0"
+        },
+        {
+          "path": "lib/api-client-react/src/standard-hooks.ts",
+          "bytes": 10208,
+          "sha256": "4f9cd374cb236c9390446164ef88d8c49a7d12c4af64abf146b9b95855e0d992"
+        }
+      ]
+    },
+    {
+      "id": "api-zod",
+      "role": "RUNTIME_AND_GENERATED_OUTPUT_PRESENT",
+      "package_name": "@szl-holdings/api-zod",
+      "inputs": [
+        "lib/api-zod/package.json",
+        "lib/api-zod/src"
+      ],
+      "file_count": 661,
+      "bytes": 1014791,
+      "tree_sha256": "c3b24c7048d461ff83819e60fc6f0c62a0773e1564a9174affff896b03e0c87b",
+      "files": [
+        {
+          "path": "lib/api-zod/package.json",
+          "bytes": 672,
+          "sha256": "758a08958ebf639278eb4715913c456c0d6fb61b5ccc353edbf3aabc1fbd25ec"
+        },
+        {
+          "path": "lib/api-zod/src/generated/api.ts",
+          "bytes": 580767,
+          "sha256": "d43dc0ee883230664d5c2d339b4121c167a03d8e74ad163ab2538a8105ca69b6"
+        },
+        {
+          "path": "lib/api-zod/src/generated/types/a2AAgentCard.ts",
+          "bytes": 978,
+          "sha256": "bb132ba4d53b1269c338812c23411a44620489eaa6455472f73b30968f8123cb"
+        },
+        {
+          "path": "lib/api-zod/src/generated/types/a2AAgentCardAvailability.ts",
+          "bytes": 611,
+          "sha256": "b985eafbf3a127bee51500cf2c41d11c24758346650a473a9799965504e800df"
+        },
+        {
+          "path": "lib/api-zod/src/generated/types/a2AAgentCardEndpoints.ts",
+          "bytes": 441,
+          "sha256": "376419a50bdd4abcb3e7fdbca1e93b4143f2e3d751eaacb480fe865168f6a6f3"
+        },
+        {
+          "path": "lib/api-zod/src/generated/types/a2AAgentCardMetadata.ts",
+          "bytes": 440,
+          "sha256": "163cb8423d5a2f10ef144210452fef1cbe049831cd933b3c8f98081b99cbd73a"
+        },
+        {
+          "path": "lib/api-zod/src/generated/types/a2AAgentCardTrustLevel.ts",
+          "bytes": 623,
+          "sha256": "b630d465248d11bef0588836bfd8832d5533c7b768021b71b7d9ec51a4f3cc25"
+        },
+        {
+          "path": "lib/api-zod/src/generated/types/a2ATask.ts",
+          "bytes": 863,
+          "sha256": "c8d74db3e552793996f57cfea5fbaf842639373d0771640dd11d242a037c1642"
+        },
+        {
+          "path": "lib/api-zod/src/generated/types/a2ATaskInput.ts",
+          "bytes": 432,
+          "sha256": "a9eb28b3c8d0701a6b77e6f67dfbd5be1073dbfe24516d93b4e608aae4db735a"
+        },
+        {
+          "path": "lib/api-zod/src/generated/types/a2ATaskStatus.ts",
+          "bytes": 591,
+          "sha256": "bdb976e3e66e308e7773f7f576202782542d86ba502250e18114143df1186985"
+        },
+        {
+          "path": "lib/api-zod/src/generated/types/a2aJsonRpc200.ts",
+          "bytes": 637,
+          "sha256": "daff29311330e4264a53e85040f4f95100c5ddfa117c79a85e3220b482df489d"
+        },
+        {
+          "path": "lib/api-zod/src/generated/types/a2aJsonRpc200Error.ts",
+          "bytes": 438,
+          "sha256": "fabc7c7a5a427c994f92b2052c5a2fa62947b5cb9e67ee4a889e293575ed1e3a"
+        },
+        {
+          "path": "lib/api-zod/src/generated/types/a2aJsonRpc200Result.ts",
+          "bytes": 439,
+          "sha256": "e90ff061576a25b37e9f6e64cae4c978fd4dba09da2fa62811d620a69079236a"
+        },
+        {
+          "path": "lib/api-zod/src/generated/types/a2aJsonRpcBody.ts",
+          "bytes": 648,
+          "sha256": "b4d21721e7b2e29148b239f8ea3662239bc4be7f238cf7e2723fb9e6b4b6e4d5"
+        },
+        {
+          "path": "lib/api-zod/src/generated/types/a2aJsonRpcBodyJsonrpc.ts",
+          "bytes": 550,
+          "sha256": "9bc5f460c0f6e58fec23b0bb2840ea56861f1fcf662ea785bbd4b5d964f98665"
+        },
+        {
+          "path": "lib/api-zod/src/generated/types/a2aJsonRpcBodyParams.ts",
+          "bytes": 440,
+          "sha256": "9b05ddd3009a7390fd0a881ba8873294a4e3db6b4c2a763d313235d0ac0cefe9"
+        },
+        {
+          "path": "lib/api-zod/src/generated/types/acceptInvestorNDA200.ts",
+          "bytes": 460,
+          "sha256": "01c7ad9df5a008ec2aa9a84ffcd7c4bde96855b070ee925dc1689bdca269948b"
+        },
+        {
+          "path": "lib/api-zod/src/generated/types/activityLog.ts",
+          "bytes": 626,
+          "sha256": "467706b0f3a520c65073dde09393328c3a9d12afabee0be03d84e2cd49f5b672"
+        },
+        {
+          "path": "lib/api-zod/src/generated/types/agentSkill.ts",
+          "bytes": 1009,
+          "sha256": "af0515caa3542f24888bb4edd0422b4bef4630e22f727f71f72872ebb1e8d586"
+        },
+        {
+          "path": "lib/api-zod/src/generated/types/agentSkillInputSchema.ts",
+          "bytes": 469,
+          "sha256": "9a7b4eacab99686c0c94acb0af494e4bafaac3399c38c74d0ed7b0c87b444d60"
+        },
+        {
+          "path": "lib/api-zod/src/generated/types/agentSkillOutputSchema.ts",
+          "bytes": 470,
+          "sha256": "f8f00e7c51b0bd82da41a8dd6d515e1716c1b128e1c508825b79dce109d345cd"
+        },
+        {
+          "path": "lib/api-zod/src/generated/types/agentSkillStatus.ts",
+          "bytes": 581,
+          "sha256": "da8a21deabfdfe650b22ee8d24de586c90fb5f9fadfd3acb146c85fd41ee4c11"
+        },
+        {
+          "path": "lib/api-zod/src/generated/types/agentSkillStepsItem.ts",
+          "bytes": 439,
+          "sha256": "9d6d10f65f3e647fa47337e3606069fa6df970e399ef47dbe06d73838e619da1"
+        },
+        {
+          "path": "lib/api-zod/src/generated/types/aiProviderHealthCheck200.ts",
+          "bytes": 906,
+          "sha256": "311cadcff1c67a128a84d37553ff025c0623e41445f84fecce28a8f45ebb4c16"
+        },
+        {
+          "path": "lib/api-zod/src/generated/types/aiProviderHealthCheck200Providers.ts",
+          "bytes": 499,
+          "sha256": "fe3c720b52327ae6eb301933b2c3c6e50d3b571918d7c44ae3064ebf33f189a3"
+        },
+        {
+          "path": "lib/api-zod/src/generated/types/aiProviderHealthCheck200Retrieval.ts",
+          "bytes": 453,
+          "sha256": "fddc77af74f26e9b4b33f9a6d90d1840ac2f17184994445029b67dec89d4f1a5"
+        },
+        {
+          "path": "lib/api-zod/src/generated/types/aiProviderHealthCheck200Status.ts",
+          "bytes": 643,
+          "sha256": "6e7bcd6c7bfe74733c7c867f5af528e510fefc79dd6c4fb68454904f3dda8be6"
+        },
+        {
+          "path": "lib/api-zod/src/generated/types/alertRecord.ts",
+          "bytes": 770,
+          "sha256": "b5fdc4685e3dcdaa5a9febb6ec259303997c68480ab8f9a848af6cc754720588"
+        },
+        {
+          "path": "lib/api-zod/src/generated/types/alertRecordMetadata.ts",
+          "bytes": 467,
+          "sha256": "58eafc6598c1c223c566d9df70c3b8835c397acf55bd49aebe14d2953fda5bd0"
+        },
+        {
+          "path": "lib/api-zod/src/generated/types/alertRecordSeverity.ts",
+          "bytes": 573,
+          "sha256": "97cc39e4230d118c79b32c5ea3fb5ff0e5f33143526cfb52be7474f91bb73c4d"
+        },
+        {
+          "path": "lib/api-zod/src/generated/types/alloyApproval.ts",
+          "bytes": 872,
+          "sha256": "6c79b733f61e0eacf82c9a0e6fccb31a2dfabb37893d87b466af9aba0400f877"
+        },
+        {
+          "path": "lib/api-zod/src/generated/types/alloyApprovalStatus.ts",
+          "bytes": 619,
+          "sha256": "03da4218384d7321d3f7ac654d0df188d43d26225526ffcfd0e70254573825aa"
+        },
+        {
+          "path": "lib/api-zod/src/generated/types/alloyArtifact.ts",
+          "bytes": 941,
+          "sha256": "9d27dcf8eb8ba45610890208af1fee46e7203439650c0e601b90a4dbfd6fed58"
+        },
+        {
+          "path": "lib/api-zod/src/generated/types/alloyArtifactContent.ts",
+          "bytes": 440,
+          "sha256": "fb9d9cc70f79f24a66314d181c1d454784f7fb2e01545e2a2da7b396360774b1"
+        },
+        {
+          "path": "lib/api-zod/src/generated/types/alloyArtifactStatus.ts",
+          "bytes": 597,
+          "sha256": "9831647d862f8849840612ed9e02c28bb466f2f570c5a0b3953708c76225a47a"
+        },
+        {
+          "path": "lib/api-zod/src/generated/types/alloyDecision.ts",
+          "bytes": 1875,
+          "sha256": "6312bd9a6e48508dd1e48292f41fd114a1b3b7c46929e351339b236cd206868c"
+        },
+        {
+          "path": "lib/api-zod/src/generated/types/alloyDecisionEvidenceRefsItem.ts",
+          "bytes": 628,
+          "sha256": "10fc5ef9278616e93daedf33db4f31c8f30d7c624066dba46b735699469fa981"
+        },
+        {
+          "path": "lib/api-zod/src/generated/types/alloyDecisionExecutionOutcome.ts",
+          "bytes": 711,
+          "sha256": "fb722a9c3fdb5462dbfc582bbe9f1d2c70717fdff5e9569318e1b6cafa9dcab0"
+        },
+        {
+          "path": "lib/api-zod/src/generated/types/alloyDecisionRiskLevel.ts",
+          "bytes": 599,
+          "sha256": "53b7e71f19645e229ecc525798ed7a53897dd7e91c24e3628d7198f2e2b1b4db"
+        },
+        {
+          "path": "lib/api-zod/src/generated/types/alloyDecisionSchemaVersion.ts",
+          "bytes": 573,
+          "sha256": "7a070c0c5dd41b194b61b8340ac84a2132526657b7cdf9c3cb3ea0c70274db70"
+        },
+        {
+          "path": "lib/api-zod/src/generated/types/alloyDecisionStatus.ts",
+          "bytes": 685,
+          "sha256": "6f5663bce34105f831cdb222ab7ef97d50bdcc03be49c7abbadf5ceec9e9d5f9"
+        },
+        {
+          "path": "lib/api-zod/src/generated/types/alloyRun.ts",
+          "bytes": 931,
+          "sha256": "40cf60dc78eb1b2450abe3b5cc1b5e64f163c88543ef887366587acc3ec3a4a7"
+        },
+        {
+          "path": "lib/api-zod/src/generated/types/alloyRunInput.ts",
+          "bytes": 461,
+          "sha256": "581347e800f7a70fe5de9406fdf2769cb87d41391486614131f68d45d89e85e9"
+        },
+        {
+          "path": "lib/api-zod/src/generated/types/alloyRunOutput.ts",
+          "bytes": 462,
+          "sha256": "c0326a3f8e2ad407d27868e277f6e51274c49d6dd66b67f292cce9b6ad385da0"
+        },
+        {
+          "path": "lib/api-zod/src/generated/types/alloyRunStatus.ts",
+          "bytes": 621,
+          "sha256": "0a9cc78f776550424a1576580ce0ecdf6aa57e8a83a993303bf48c8ba9c99ea8"
+        },
+        {
+          "path": "lib/api-zod/src/generated/types/alloyRunStep.ts",
+          "bytes": 902,
+          "sha256": "63e802faa973c514f9fe995190e34b91485abd0f8060509d4087573128592e95"
+        },
+        {
+          "path": "lib/api-zod/src/generated/types/alloyRunStepInput.ts",
+          "bytes": 465,
+          "sha256": "1570fe0cb267ded351adf3c81d0eeb1c3352921c621eaa7673d26836d1bddb1d"
+        },
+        {
+          "path": "lib/api-zod/src/generated/types/alloyRunStepOutput.ts",
+          "bytes": 466,
+          "sha256": "11a312afe9ce0cc99baf0a3d2ab198d8d0cba593a697463c1ff85f4407015cf0"
+        },
+        {
+          "path": "lib/api-zod/src/generated/types/alloyRunStepStatus.ts",
+          "bytes": 635,
+          "sha256": "56a280d960af20c4c0400f3f501ac9a916c8ea18b3dda6329573daf54c883647"
+        },
+        {
+          "path": "lib/api-zod/src/generated/types/alloySignal.ts",
+          "bytes": 884,
+          "sha256": "c7c38fe89616173a58d44ba864e49478467cb1d0676537c72b481b1f6b8baa2e"
+        },
+        {
+          "path": "lib/api-zod/src/generated/types/alloySignalInput.ts",
+          "bytes": 937,
+          "sha256": "7210daa13b8ea1b39146c024c399d7fa24635160b7e9107c74b3d052a9b351bb"
+        },
+        {
+          "path": "lib/api-zod/src/generated/types/alloySignalInputMetadata.ts",
+          "bytes": 444,
+          "sha256": "da47e353be2387b026b7698d7aada966194a2bde79a91f29e1c738c262be43c0"
+        },
+        {
+          "path": "lib/api-zod/src/generated/types/alloySignalInputPayload.ts",
+          "bytes": 443,
+          "sha256": "f949036ff49b5be4246090cba45fc5a88ae5dbc9b57d3ba20a85106863392d02"
+        },
+        {
+          "path": "lib/api-zod/src/generated/types/alloySignalInputPriority.ts",
+          "bytes": 621,
+          "sha256": "fd79d440b5baf2f368c44258d18575a5eb481811b9c1aea21d20686ad0b328bf"
+        },
+        {
+          "path": "lib/api-zod/src/generated/types/alloySignalPayload.ts",
+          "bytes": 438,
+          "sha256": "a25c363055925a7b8f7f01d46afd47855490e903a1666dd35c7edaf494e8b06b"
+        },
+        {
+          "path": "lib/api-zod/src/generated/types/alloySignalStatus.ts",
+          "bytes": 635,
+          "sha256": "4357982f07e303b194378e22802b931f4f383511bf4cd5dcc3526c63e40c95a8"
+        },
+        {
+          "path": "lib/api-zod/src/generated/types/alloyWorkflow.ts",
+          "bytes": 901,
+          "sha256": "49f27c77f69ab939a2ead055067a467db3f580de6945fdbd0892aae2e0d98fe1"
+        },
+        {
+          "path": "lib/api-zod/src/generated/types/alloyWorkflowStatus.ts",
+          "bytes": 595,
+          "sha256": "d77b15f0bc5bcb411ab4d400df7eb302c833ed7284b0fc3f0f4a8bc51ab75cce"
+        },
+        {
+          "path": "lib/api-zod/src/generated/types/alloyWorkflowStepsItem.ts",
+          "bytes": 442,
+          "sha256": "c3ad778fc3383a8b77879261b9e1b0718089a54dd0d1b13430a168740beccfa0"
+        },
+        {
+          "path": "lib/api-zod/src/generated/types/alloyWorkflowTriggersItem.ts",
+          "bytes": 445,
+          "sha256": "4b84c35c26be958ac5b94dd2c1834b7d911a56ea71964a30ba8564b90ceb64b0"
+        },
+        {
+          "path": "lib/api-zod/src/generated/types/applyConduitTemplateBody.ts",
+          "bytes": 463,
+          "sha256": "ea7a6982d8c1b6c65ee0ede17d36f41e2ea3084ad6c1558264b10b870cca8b79"
+        },
+        {
+          "path": "lib/api-zod/src/generated/types/approvalPolicy.ts",
+          "bytes": 512,
+          "sha256": "e9432fcb0cb492866a99ee1a4aaaa3cdf235a2af5acd5e06ae8149d82eef320e"
+        },
+        {
+          "path": "lib/api-zod/src/generated/types/approveAlloyArtifactBody.ts",
+          "bytes": 446,
+          "sha256": "f390a8ecdc79fcb1ff38435c960951ee669eb93aefdac8fdce2f1dd3aa891bd9"
+        },
+        {
+          "path": "lib/api-zod/src/generated/types/approveDecision200.ts",
+          "bytes": 517,
+          "sha256": "6e587217f8334c2c0fbee7bd6169833d535272e80ff06ac0f88807b315ff463c"
+        },
+        {
+          "path": "lib/api-zod/src/generated/types/approveDecisionBody.ts",
+          "bytes": 441,
+          "sha256": "de7afb209f4ba037c922f70ed34131b1ac3361715e9dd561127f00fad65226da"
+        },
+        {
+          "path": "lib/api-zod/src/generated/types/approvePlatformDecisionBody.ts",
+          "bytes": 449,
+          "sha256": "3606459c76264219796cd81cd7a9afbe026385e074177cf968becba8c4b3edd9"
+        },
+        {
+          "path": "lib/api-zod/src/generated/types/asset.ts",
+          "bytes": 541,
+          "sha256": "43d9742a5517675ab86d5c21a9ad9f8709e457adb9b50702efbca850cfadb0f9"
+        },
+        {
+          "path": "lib/api-zod/src/generated/types/assignAdminUserRolesBody.ts",
+          "bytes": 440,
+          "sha256": "63de571895576da8d6a8983669686823a4399ef27e1eb64eca5377d937ed980f"
+        },
+        {
+          "path": "lib/api-zod/src/generated/types/atlasBranchPackageInput.ts",
+          "bytes": 1454,
+          "sha256": "e5e236b304ef7fe06ebdd9583c2ddbdfc91b77049d1fc142de9a5c5433356b8b"
+        },
+        {
+          "path": "lib/api-zod/src/generated/types/atlasBranchPackageInputDeltaState.ts",
+          "bytes": 515,
+          "sha256": "544440ff13f40ce12bc749bf7179ef01d8472445df527a9ee6e1a685c9a6e0b7"
+        },
+        {
+          "path": "lib/api-zod/src/generated/types/atlasBranchPackageInputMetadata.ts",
+          "bytes": 451,
+          "sha256": "1c27efdf3a75763db3eed12b7909b6b0cadad45a1ace6d7acb6bba58f57bc98f"
+        },
+        {
+          "path": "lib/api-zod/src/generated/types/atlasBranchPackageInputOutcomeProjectionsItem.ts",
+          "bytes": 741,
+          "sha256": "6db50aa640f85c438aace65e0dcfc90a79a832694e700a865f80cf4fe7d5feb6"
+        },
+        {
+          "path": "lib/api-zod/src/generated/types/atlasBranchPackageInputOutcomeProjectionsItemMetrics.ts",
+          "bytes": 474,
+          "sha256": "530f2205ba02ed0a488e56521e1be57e09e3d1070b2ff1ce4b37fb5bf14c2779"
+        },
+        {
+          "path": "lib/api-zod/src/generated/types/atlasProofBundleInput.ts",
+          "bytes": 1224,
+          "sha256": "5a7866a812a11c31bf8dd7bbc31d8efd57e9a9c280f9555e994031c908601c4e"
+        },
+        {
+          "path": "lib/api-zod/src/generated/types/atlasProofBundleInputApprovalChainItem.ts",
+          "bytes": 681,
+          "sha256": "a22dd2dfe13bea78772616aa004a64a95f2becdd4bb2ffe77d774aa1798166c9"
+        },
+        {
+          "path": "lib/api-zod/src/generated/types/atlasProofBundleInputApprovalChainItemDecision.ts",
+          "bytes": 709,
+          "sha256": "e46e7f7e04ed8a03dd5fe49ddff50cfa53e703e1a1cd95539f4cdb99b44afff0"
+        },
+        {
+          "path": "lib/api-zod/src/generated/types/atlasProofBundleInputCitationsItem.ts",
+          "bytes": 485,
+          "sha256": "157bfb092a3e9fdc9b23daa73e8f4600d79e3b2d67efde62357697a937b691d3"
+        },
+        {
+          "path": "lib/api-zod/src/generated/types/atlasProofBundleInputMetadata.ts",
+          "bytes": 449,
+          "sha256": "c496f42211591d0603754ce42541dd705e3953cb75bb34bda1de2338ea59406e"
+        },
+        {
+          "path": "lib/api-zod/src/generated/types/auditEvent.ts",
+          "bytes": 575,
+          "sha256": "62136d7b8c74b94d4b0ad2cd3d6ee1d37a9929920bc96f61991a95756d8983dd"
+        },
+        {
+          "path": "lib/api-zod/src/generated/types/authUser.ts",
+          "bytes": 555,
+          "sha256": "a60968be7a9a2f05daed55453805e2fe1095f665f076e1347d9249195114372f"
+        },
+        {
+          "path": "lib/api-zod/src/generated/types/authUserEnvelope.ts",
+          "bytes": 503,
+          "sha256": "e8e29e056fb9b20f7890ffe218486ca2518d8bbaa60e4c7790959e12f5412270"
+        },
+        {
+          "path": "lib/api-zod/src/generated/types/badRequestResponse.ts",
+          "bytes": 493,
+          "sha256": "bb20ab1e680699a546470665e7ff3d8cf89082f799596278e262e79c2356c274"
+        },
+        {
+          "path": "lib/api-zod/src/generated/types/beginBrowserLoginParams.ts",
+          "bytes": 441,
+          "sha256": "9d1a06fefa872a4cb2c93112ae3c726dd869b37623aa78ee686f5efcdcbe21c5"
+        },
+        {
+          "path": "lib/api-zod/src/generated/types/billingHealthCheck200.ts",
+          "bytes": 620,
+          "sha256": "66dbefe8be6350530bd64be50ce6ab674c4dac3cc27796e026dceea65457672b"
+        },
+        {
+          "path": "lib/api-zod/src/generated/types/billingHealthCheck200Status.ts",
+          "bytes": 655,
+          "sha256": "e63e9dababc4f3ff55c178d550af940aebccc85412fa8c8e4ef84deae5c13e58"
+        },
+        {
+          "path": "lib/api-zod/src/generated/types/billingPlan.ts",
+          "bytes": 700,
+          "sha256": "6853581b5ac40b365c2ef51bf35bfde461360e9739e76b0bfe0246db518229d1"
+        },
+        {
+          "path": "lib/api-zod/src/generated/types/billingPlanFeatures.ts",
+          "bytes": 439,
+          "sha256": "8ce6512be1ee4e9496c6cf06da7eabddf35dcdf9cf11bb9ff7cbc0effa659b50"
+        },
+        {
+          "path": "lib/api-zod/src/generated/types/businessEventCounts.ts",
+          "bytes": 793,
+          "sha256": "86de67710523d77a3b61d4b3909918957956ec112aede69975e29d4773815690"
+        },
+        {
+          "path": "lib/api-zod/src/generated/types/businessEventCountsEventCounts.ts",
+          "bytes": 449,
+          "sha256": "20098f1e57fe31cf7ff930fcaa8e76f78b5b777be7293e6b64be5040ee0621b9"
+        },
+        {
+          "path": "lib/api-zod/src/generated/types/businessEventCountsEventsByDomain.ts",
+          "bytes": 452,
+          "sha256": "15a0b89045ecbbc72bf81defd9a67e94d5f184d23b39990da3f17d5d96adaf4b"
+        },
+        {
+          "path": "lib/api-zod/src/generated/types/cancelSubscription200.ts",
+          "bytes": 564,
+          "sha256": "e10fd445bd6523fc3c137723346dfad6ecfe9dddf4cd9b4f71ba650f9bd5026f"
+        },
+        {
+          "path": "lib/api-zod/src/generated/types/cancelSubscription200Subscription.ts",
+          "bytes": 453,
+          "sha256": "1b3eb5ab6efb010ba60551deb8ee1de4a0022551671ee8c489449d2a5034a4d4"
+        },
+        {
+          "path": "lib/api-zod/src/generated/types/cancelSubscriptionBody.ts",
+          "bytes": 476,
+          "sha256": "5eb066b49c98239a13fd3b12f67abdfda7bfec91190dc8dc2ce3bf78b9759000"
+        },
+        {
+          "path": "lib/api-zod/src/generated/types/checkoutRequest.ts",
+          "bytes": 598,
+          "sha256": "ccf66104090923240b367ba0b5152214a6b153d8bf3b4dd0aee4c8770470dcf9"
+        },
+        {
+          "path": "lib/api-zod/src/generated/types/checkoutRequestMode.ts",
+          "bytes": 581,
+          "sha256": "79b85c9a37c031bc4ff7bcf447d9f5fd4ccf4feb7c1b7c31266dee6d78aa8ea7"
+        },
+        {
+          "path": "lib/api-zod/src/generated/types/checkoutResponse.ts",
+          "bytes": 451,
+          "sha256": "3d95fa32bd225d11dcf1e747654db587585dc554a3099456c297b6b293900ce7"
+        },
+        {
+          "path": "lib/api-zod/src/generated/types/commercialProperty.ts",
+          "bytes": 856,
+          "sha256": "70e704cfa06338c8756597c30b5a14bf5899fde4b80ebbcb905d2642361778c1"
+        },
+        {
+          "path": "lib/api-zod/src/generated/types/conduitConnection.ts",
+          "bytes": 810,
+          "sha256": "ac3d304e46a237e1a302655bbdfc5bdb1581f1b9b2e9f5419670a5b6e759490a"
+        },
+        {
+          "path": "lib/api-zod/src/generated/types/conduitConnectionCredentialMeta.ts",
+          "bytes": 451,
+          "sha256": "fc5a60fa5cc47a6ff96d7a4a7c7e3a5748018d833f980793f74bef00c7308a8a"
+        },
+        {
+          "path": "lib/api-zod/src/generated/types/conduitConnectionStatus.ts",
+          "bytes": 605,
+          "sha256": "abf334a5a4c67aed515a20dfe57b58e732b2d440efec8b8d168424fe837d6382"
+        },
+        {
+          "path": "lib/api-zod/src/generated/types/conduitConnectionTestResult.ts",
+          "bytes": 488,
+          "sha256": "3fd9593e9d518f1eb6090b4d059991d99c6dec20c33742ba58bb594043d7f771"
+        },
+        {
+          "path": "lib/api-zod/src/generated/types/conduitDestinationField.ts",
+          "bytes": 541,
+          "sha256": "da37ff0d6e3442e020b8eb9110a203ce7befb8f1b0b20423745e19c878773cc8"
+        },
+        {
+          "path": "lib/api-zod/src/generated/types/conduitDestinationObject.ts",
+          "bytes": 480,
+          "sha256": "e7661c8989387040f0f2eb5e16239592f847ef7581edf8a72677bea3c6d2b634"
+        },
+        {
+          "path": "lib/api-zod/src/generated/types/conduitError.ts",
+          "bytes": 429,
+          "sha256": "bf98f3bdcf93fa368b662f91a369ed82f6f2621946399be7dfba004a54784de9"
+        },
+        {
+          "path": "lib/api-zod/src/generated/types/conduitSourcePreviewRequest.ts",
+          "bytes": 718,
+          "sha256": "fd5985f5831b3d4f3356bffe903fc361b9fedf8cdd678e1a5d7423cefe4c3398"
+        },
+        {
+          "path": "lib/api-zod/src/generated/types/conduitSourcePreviewRequestSourceMeta.ts",
+          "bytes": 457,
+          "sha256": "b09bbb02507dcb666ec973f99bc8a06d4da8bb0f835125171f684b0b065a2361"
+        },
+        {
+          "path": "lib/api-zod/src/generated/types/conduitSourcePreviewResult.ts",
+          "bytes": 611,
+          "sha256": "3e3f192ed62bd9baf3968e3d71453c283bcf4cd64dff87f33a7df1f6f73c7222"
+        },
+        {
+          "path": "lib/api-zod/src/generated/types/conduitSourcePreviewResultRowsItem.ts",
+          "bytes": 454,
+          "sha256": "39a5a96c4d7f1e3ba0cda0b0a424c1a6499840a17f08b5f11b7ebcc69e6492c7"
+        },
+        {
+          "path": "lib/api-zod/src/generated/types/conduitStats.ts",
+          "bytes": 672,
+          "sha256": "d4fd0d1d5cf90098f633e94f121fa98f9f76e738db4da47c8c10c089863e2c57"
+        },
+        {
+          "path": "lib/api-zod/src/generated/types/conduitSync.ts",
+          "bytes": 1401,
+          "sha256": "3ac743cf8a91c5b21a9eb90194e1487fa5e58001e9808c1d2c79033198ce6661"
+        },
+        {
+          "path": "lib/api-zod/src/generated/types/conduitSyncMapping.ts",
+          "bytes": 815,
+          "sha256": "f317be31b50b4cb41350bc9c82a67412ea60946b9db5ca082e4c53437a72959d"
+        },
+        {
+          "path": "lib/api-zod/src/generated/types/conduitSyncMappingInput.ts",
+          "bytes": 681,
+          "sha256": "d95980daaeab6af744d0c48f49dc857fec8e90748ec7040a67ee2a9beab49f59"
+        },
+        {
+          "path": "lib/api-zod/src/generated/types/conduitSyncMappingInputTransformConfig.ts",
+          "bytes": 458,
+          "sha256": "2935e1121bff7445bd511985b1f63dd90a28318caffd0a9e843b193b40750515"
+        },
+        {
+          "path": "lib/api-zod/src/generated/types/conduitSyncMappingTransform.ts",
+          "bytes": 817,
+          "sha256": "e5b1fa84274625800825e0c80e972eb1ae371ec0584077cf7633dd2573e77ff6"
+        },
+        {
+          "path": "lib/api-zod/src/generated/types/conduitSyncMappingTransformConfig.ts",
+          "bytes": 453,
+          "sha256": "63f4bd6a88b9f7512564e8576a35d9c2342578dcb7a72d48bfaa3e3bea12c035"
+        },
+        {
+          "path": "lib/api-zod/src/generated/types/conduitSyncRun.ts",
+          "bytes": 925,
+          "sha256": "26dc263061e1dd6203b65e4dd0f33fcade69a8b0e0091ed5d1fdb63f84b555e4"
+        },
+        {
+          "path": "lib/api-zod/src/generated/types/conduitSyncRunDetail.ts",
+          "bytes": 662,
+          "sha256": "99424d83b68521ca754f4a93d536157863ac9712cd2b6234c39a36d1cd715b6f"
+        },
+        {
+          "path": "lib/api-zod/src/generated/types/conduitSyncRunMode.ts",
+          "bytes": 595,
+          "sha256": "87efb94550442577fe7b72b380978c9ca6b16785186cfacbb962abb9e698e684"
+        },
+        {
+          "path": "lib/api-zod/src/generated/types/conduitSyncRunRow.ts",
+          "bytes": 713,
+          "sha256": "64b785399ccaa214c949e31bef0766c4673eb711c26bf687139fe97e06b646a6"
+        },
+        {
+          "path": "lib/api-zod/src/generated/types/conduitSyncRunRowSourceData.ts",
+          "bytes": 447,
+          "sha256": "fb6a1d792c9357a4ddae65de6d874f5392ee6710a13ab5f508de1d75028bf7dc"
+        },
+        {
+          "path": "lib/api-zod/src/generated/types/conduitSyncRunStatus.ts",
+          "bytes": 617,
+          "sha256": "bc8c1b4fddb8efb9be0464c42358df284c2a901d8e36158ce97dd76947f7ad08"
+        },
+        {
+          "path": "lib/api-zod/src/generated/types/conduitSyncRunTriggeredBy.ts",
+          "bytes": 623,
+          "sha256": "c80921e5b301e7661749431c24d5457b9c90b43c5b0a4c6967d9e4ee92d14120"
+        },
+        {
+          "path": "lib/api-zod/src/generated/types/conduitSyncSemantics.ts",
+          "bytes": 591,
+          "sha256": "acce22b5efa1a77a9a2c4a77c01aa0b74017ff986b0ff4a04e6dcd17418c0764"
+        },
+        {
+          "path": "lib/api-zod/src/generated/types/conduitSyncSourceMeta.ts",
+          "bytes": 441,
+          "sha256": "0a371a8af58dcca6795b47cde37d029aee5fa780a1a4e7a57e40d32bdf335487"
+        },
+        {
+          "path": "lib/api-zod/src/generated/types/conduitSyncSourceType.ts",
+          "bytes": 655,
+          "sha256": "acd64dd2fcebc45e1add73a1a9d04742387f99a5234055d6074231a2b9023199"
+        },
+        {
+          "path": "lib/api-zod/src/generated/types/conduitSyncStatus.ts",
+          "bytes": 595,
+          "sha256": "6d1e29291f411a227c632e0fe2c24b6b306dd6008bf9a7c3c2ccb0e7e0d1c796"
+        },
+        {
+          "path": "lib/api-zod/src/generated/types/conduitTemplate.ts",
+          "bytes": 689,
+          "sha256": "915ebcdcc0636cc652f5f2b49a5826d4258a3eb4fcdb0ec299cb43071deaf88d"
+        },
+        {
+          "path": "lib/api-zod/src/generated/types/conflictResponse.ts",
+          "bytes": 491,
+          "sha256": "5c70485e066db7d85f2818c8591e132b61ffd5ce2a6137e021fc0ba59883f97c"
+        },
+        {
+          "path": "lib/api-zod/src/generated/types/connector.ts",
+          "bytes": 707,
+          "sha256": "36fd3d0a2cfcea1999d801dce9f00dc045c2291e8daf051b5cf2e84a3b801a05"
+        },
+        {
+          "path": "lib/api-zod/src/generated/types/connectorStatus.ts",
+          "bytes": 595,
+          "sha256": "789adf03b4857612b7bf63b4c00832c532a94356e4d508651797f3f571a412df"
+        },
+        {
+          "path": "lib/api-zod/src/generated/types/connectorType.ts",
+          "bytes": 661,
+          "sha256": "affca85e5da81f4bd4687d6ee8d55a18ef6ef53d0f15dfb1fe50f4f3f68d2821"
+        },
+        {
+          "path": "lib/api-zod/src/generated/types/copilotChat200One.ts",
+          "bytes": 434,
+          "sha256": "c09695f2e1a925d7a3e20619d3dbafe1983c353568c403c5b881ba36fcda4a1e"
+        },
+        {
+          "path": "lib/api-zod/src/generated/types/copilotChatRequest.ts",
+          "bytes": 978,
+          "sha256": "a405db360f8a653f7bc686abf81f6f66c072d1a58f2c20eaf531ca992a2366cf"
+        },
+        {
+          "path": "lib/api-zod/src/generated/types/copilotChatRequestContext.ts",
+          "bytes": 503,
+          "sha256": "9efce6320f0e57aee265c49597560088cfa9e87753477c3befea288180b9278a"
+        },
+        {
+          "path": "lib/api-zod/src/generated/types/copilotChatRequestMessagesItem.ts",
+          "bytes": 638,
+          "sha256": "2bb1bf511c0977dace762ba79d7cedecacf68f4eb748b0e7eb977c199e08fcb1"
+        },
+        {
+          "path": "lib/api-zod/src/generated/types/copilotChatRequestMessagesItemRole.ts",
+          "bytes": 649,
+          "sha256": "9ad9227e1be65d234a51594298cd5600723f647214383fb48890b4cb4d775009"
+        },
+        {
+          "path": "lib/api-zod/src/generated/types/counselAppendAuditEntryBody.ts",
+          "bytes": 648,
+          "sha256": "f72cd90d3a46e4f82ea68ff88282bb94865193bf1bd802455633a14109967d3a"
+        },
+        {
+          "path": "lib/api-zod/src/generated/types/counselAppendAuditEntryBodyAction.ts",
+          "bytes": 819,
+          "sha256": "3911cfceaa9d9e0562f99951eb0706869b82ea083bd5eda53e987394cbb389b9"
+        },
+        {
+          "path": "lib/api-zod/src/generated/types/counselAppendProofChainEntryBody.ts",
+          "bytes": 940,
+          "sha256": "e27dba63f57027d53f775faad0d589e426cdf09834928c0b26064bb58a1a2038"
+        },
+        {
+          "path": "lib/api-zod/src/generated/types/counselAppendProofChainEntryBodyEventType.ts",
+          "bytes": 823,
+          "sha256": "dfcf41d2123c6534f108980d50d389cbb94148590f739141771b154d88508637"
+        },
+        {
+          "path": "lib/api-zod/src/generated/types/counselAppendProofChainEntryBodyPrivilegeLevel.ts",
+          "bytes": 743,
+          "sha256": "3da393b5492cc8e8e80d77f74e9b70e31e72d49ebe464f74d47cdbd3cccb4b89"
+        },
+        {
+          "path": "lib/api-zod/src/generated/types/counselAuditEntry.ts",
+          "bytes": 650,
+          "sha256": "6047aff9dab8fcd2bb0ed67f2d7489113117131d5e1e54fc97f93ce14336efa6"
+        },
+        {
+          "path": "lib/api-zod/src/generated/types/counselAuditEntryAction.ts",
+          "bytes": 779,
+          "sha256": "f2274f5ab9e742dd4544597a35903ae62f1a6757285a09664415b6297c51dcd9"
+        },
+        {
+          "path": "lib/api-zod/src/generated/types/counselDeleteMatter200.ts",
+          "bytes": 455,
+          "sha256": "dd2bb7cddaf9e441af2afb2b112cb7dba8f9b88d6b1fc54706c029b57a15464e"
+        },
+        {
+          "path": "lib/api-zod/src/generated/types/counselListAuditTrail200.ts",
+          "bytes": 516,
+          "sha256": "bce32d95adbd6cfd0c5d70a7f6d15aafbb9bf4d5686f17b7ca931556b744d8d5"
+        },
+        {
+          "path": "lib/api-zod/src/generated/types/counselListAuditTrailParams.ts",
+          "bytes": 445,
+          "sha256": "08da718d0d1e33b8987066778b8ab55f6ddccdefd5ebd676156a1e72fbc2ba95"
+        },
+        {
+          "path": "lib/api-zod/src/generated/types/counselListMatters200.ts",
+          "bytes": 501,
+          "sha256": "b3b7ad06d93c285d9554a2fa71b5e8b6e27e3db0ceea4e2b3bee4d73a076efac"
+        },
+        {
+          "path": "lib/api-zod/src/generated/types/counselListProofChain200.ts",
+          "bytes": 552,
+          "sha256": "b5ae8204d74e720f177877353e2b2f46f4aa5bd7448f41620b5b6bfbffe5394d"
+        },
+        {
+          "path": "lib/api-zod/src/generated/types/counselListProofChainParams.ts",
+          "bytes": 444,
+          "sha256": "3064461099d928b09c808e083171b0a762c7eb0c9305495524a7e046e9324d27"
+        },
+        {
+          "path": "lib/api-zod/src/generated/types/counselMatter.ts",
+          "bytes": 1568,
+          "sha256": "9bfba92c7678bae368825490f7b1004c6d808dca577a0d044091cd92504d291e"
+        },
+        {
+          "path": "lib/api-zod/src/generated/types/counselMatterCreate.ts",
+          "bytes": 1322,
+          "sha256": "c257445c2d5ff5d977db3ea69f21640cc50aa2c80b3e550051633ff6d6607410"
+        },
+        {
+          "path": "lib/api-zod/src/generated/types/counselMatterCreatePrivilegeLevel.ts",
+          "bytes": 691,
+          "sha256": "9e4ef79f21e246862649b59910ec26f7551c6d3a8ab83ec6445939d7e3f0baef"
+        },
+        {
+          "path": "lib/api-zod/src/generated/types/counselMatterCreateStatus.ts",
+          "bytes": 663,
+          "sha256": "9294bad63b8093aa262bce12beac26786cd5f01a581d900644a1bbe24ec92299"
+        },
+        {
+          "path": "lib/api-zod/src/generated/types/counselMatterCreateType.ts",
+          "bytes": 725,
+          "sha256": "fa9ad4261851f97d21ef14619aa3b5756d8fd33c34777af6f5444502bc9d561e"
+        },
+        {
+          "path": "lib/api-zod/src/generated/types/counselMatterPrivilegeLevel.ts",
+          "bytes": 667,
+          "sha256": "42f2ad86a518596720621b6edc265da813475518bdc8075d929b0c89ee5da0ad"
+        },
+        {
+          "path": "lib/api-zod/src/generated/types/counselMatterStatus.ts",
+          "bytes": 639,
+          "sha256": "f0d41d3d4d712afeeae44710ca75902cee767dc6c15cfe4959b21ef32bc2debe"
+        },
+        {
+          "path": "lib/api-zod/src/generated/types/counselMatterType.ts",
+          "bytes": 701,
+          "sha256": "76ba3cd82c9d4f4964d7dbdcad7d829e86564449625b8800f93184a8ade6ad28"
+        },
+        {
+          "path": "lib/api-zod/src/generated/types/counselMatterUpdate.ts",
+          "bytes": 1324,
+          "sha256": "942876017471fe64aa0826a0a932f38e08dce2ceae7ad6b7eb8efacf3c458b11"
+        },
+        {
+          "path": "lib/api-zod/src/generated/types/counselMatterUpdatePrivilegeLevel.ts",
+          "bytes": 691,
+          "sha256": "a9857177d3050505285140f2fd94ed1eda97a01da0f870af2a32d01f57f5f48b"
+        },
+        {
+          "path": "lib/api-zod/src/generated/types/counselMatterUpdateStatus.ts",
+          "bytes": 663,
+          "sha256": "c19187afbb966aac66324547027cbf52438b0a8117e76f916e9286c198f4b311"
+        },
+        {
+          "path": "lib/api-zod/src/generated/types/counselMatterUpdateType.ts",
+          "bytes": 725,
+          "sha256": "9275f764138e33dacaf6af485edb8fe873b3c8325cbc5e2b4af839b1b001b3ea"
+        },
+        {
+          "path": "lib/api-zod/src/generated/types/counselObligation.ts",
+          "bytes": 912,
+          "sha256": "c9c0ed4c3f926c763cfd19321bf85e8e44a884147a8f24dcde839d42ee9570e5"
+        },
+        {
+          "path": "lib/api-zod/src/generated/types/counselObligationPrivilegeLevel.ts",
+          "bytes": 683,
+          "sha256": "a75825147e4c7b9ce6458ec91acb1e846b537d1a33fbb196953a16619c38208a"
+        },
+        {
+          "path": "lib/api-zod/src/generated/types/counselObligationStatus.ts",
+          "bytes": 667,
+          "sha256": "34c704ac2d3c8f616b57b6ab0fad381dbfc4d49532929729206166050746b61a"
+        },
+        {
+          "path": "lib/api-zod/src/generated/types/counselParty.ts",
+          "bytes": 575,
+          "sha256": "7881cb73333e97fd54b7c25ca8746e2d2b14bfb922fcca44c5a12c5b610b90d1"
+        },
+        {
+          "path": "lib/api-zod/src/generated/types/counselPartyRole.ts",
+          "bytes": 685,
+          "sha256": "90136d95727f5be6826504a9b9279101b860b591c9c8f66b2b38f548a99f3e7e"
+        },
+        {
+          "path": "lib/api-zod/src/generated/types/counselProofChainEntry.ts",
+          "bytes": 913,
+          "sha256": "f13858799679ee1784d51ff26d36df1bfcb660cb7681960993f9463a7765817b"
+        },
+        {
+          "path": "lib/api-zod/src/generated/types/counselProofChainEntryEventType.ts",
+          "bytes": 783,
+          "sha256": "4b1831300a6ac1117e0d6fe47b58d491e78f83b48530f0e14abad9213e2e0fd9"
+        },
+        {
+          "path": "lib/api-zod/src/generated/types/counselProofChainEntryPrivilegeLevel.ts",
+          "bytes": 703,
+          "sha256": "8ffa84bd4b0cbb09bd3fa36df8add8ca29a384ebd999ad1f746bde97148a7956"
+        },
+        {
+          "path": "lib/api-zod/src/generated/types/counselUpdateObligationBody.ts",
+          "bytes": 651,
+          "sha256": "9f635f59cabacc9e321ac76eb913e216147d79a27974c200f075916f9d053e2b"
+        },
+        {
+          "path": "lib/api-zod/src/generated/types/counselUpdateObligationBodyStatus.ts",
+          "bytes": 707,
+          "sha256": "47cd6e6f94080c7eac9ab8efc6e0b6ebd051186035ca775482600bc5b623e591"
+        },
+        {
+          "path": "lib/api-zod/src/generated/types/counselWall.ts",
+          "bytes": 549,
+          "sha256": "b65c1ffe1c733cfff214e7d53228e0e60ee0c663532ccab2468c5bf2f0069593"
+        },
+        {
+          "path": "lib/api-zod/src/generated/types/createA2ATaskBody.ts",
+          "bytes": 572,
+          "sha256": "a3c7b422c7d1f8501c9e53206a5973e2ea9e8146f167477e150606f7d0e18c35"
+        },
+        {
+          "path": "lib/api-zod/src/generated/types/createA2ATaskBodyInput.ts",
+          "bytes": 597,
+          "sha256": "e0503ff91cda334661b1b8c99eedce5a7f579031a9f745bd40ae01cd0adec513"
+        },
+        {
+          "path": "lib/api-zod/src/generated/types/createA2ATaskBodyInputContext.ts",
+          "bytes": 449,
+          "sha256": "ae577e7bd8a391bb961ca09f7b9e51884d5a1feddac1de314ab016ce7e4e17c3"
+        },
+        {
+          "path": "lib/api-zod/src/generated/types/createAdminUserBody.ts",
+          "bytes": 473,
+          "sha256": "a52ce66d28a5facfb2f56731c363db351e46bb0e210636838904f26c86c15eba"
+        },
+        {
+          "path": "lib/api-zod/src/generated/types/createAegisInvoiceBody.ts",
+          "bytes": 629,
+          "sha256": "321d1dca51cde594bf689258cb0d845ac1b19f2382bde00e597e86cb47f3a4f6"
+        },
+        {
+          "path": "lib/api-zod/src/generated/types/createAegisInvoiceBodyLineItemsItem.ts",
+          "bytes": 494,
+          "sha256": "947bfefbff21a83d54e508eea3dc992193298cd2836e3fd11695490c6c6a9b14"
+        },
+        {
+          "path": "lib/api-zod/src/generated/types/createAlloyWorkflow.ts",
+          "bytes": 741,
+          "sha256": "fd4ba6b75a96412fff371f689f01628b57c0bf9e53f827b6d5f5ee8eff09bec7"
+        },
+        {
+          "path": "lib/api-zod/src/generated/types/createAlloyWorkflowStepsItem.ts",
+          "bytes": 448,
+          "sha256": "7b0d1fabe90df6f4e44b5032b37fd99597b2f53b4ac0787300e2de2d65d1a143"
+        },
+        {
+          "path": "lib/api-zod/src/generated/types/createAlloyWorkflowTriggersItem.ts",
+          "bytes": 451,
+          "sha256": "a9876c98b637a3d8b2f1c0006534a609ab84e13bcee3810d78bed674436e97ee"
+        },
+        {
+          "path": "lib/api-zod/src/generated/types/createConduitConnectionBody.ts",
+          "bytes": 625,
+          "sha256": "cf226cad482e80a4eded0df16fb806f44bdec2f7f0fde71333f5b81702391bba"
+        },
+        {
+          "path": "lib/api-zod/src/generated/types/createConduitConnectionBodyCredentials.ts",
+          "bytes": 458,
+          "sha256": "7fc19ef51deaefc2015cf6846d1dfb4f669e28f1f689ee53a668b641906fbf58"
+        },
+        {
+          "path": "lib/api-zod/src/generated/types/createConduitSyncBody.ts",
+          "bytes": 729,
+          "sha256": "b83bec6084f289aad2d08d7c84789d9eb17d5b60e380dc35256e93bfe287c3b2"
+        },
+        {
+          "path": "lib/api-zod/src/generated/types/createConduitSyncBodySourceMeta.ts",
+          "bytes": 451,
+          "sha256": "f484a52f795cbf8dfe3e4a6d5f01b4f919cf9b28587c892abcf082386a975c36"
+        },
+        {
+          "path": "lib/api-zod/src/generated/types/createConnector.ts",
+          "bytes": 647,
+          "sha256": "2411ebca6a9ddc847f285f1b326ba36c06deaae55084ba9e2f93f3b4f3661e7f"
+        },
+        {
+          "path": "lib/api-zod/src/generated/types/createConnectorConfig.ts",
+          "bytes": 441,
+          "sha256": "5b5357c8d5b89e9de155476eb31b4a9ba5e860aec7d7a43c22871810098fc0ef"
+        },
+        {
+          "path": "lib/api-zod/src/generated/types/createConnectorType.ts",
+          "bytes": 687,
+          "sha256": "40e39752d7353d86594ebfe3e609615357ce0672ccfbd3de3e5a9ad293f4ba5f"
+        },
+        {
+          "path": "lib/api-zod/src/generated/types/createCustomerPortal200.ts",
+          "bytes": 436,
+          "sha256": "aa95e3778383e9d30e151017fd2a47c5e4271724c7b55004b5b3cacbcc9b9b31"
+        },
+        {
+          "path": "lib/api-zod/src/generated/types/createCustomerPortalBody.ts",
+          "bytes": 464,
+          "sha256": "2674c698d8991dde6f46b2133a678325d6737bf63a0ef3b09d8bb314e8529b94"
+        },
+        {
+          "path": "lib/api-zod/src/generated/types/createDecision201.ts",
+          "bytes": 607,
+          "sha256": "fd9b4d166b0be6f40d0b83e20aa6f439c51b4b6a2a1027745de537423d54e810"
+        },
+        {
+          "path": "lib/api-zod/src/generated/types/createDecisionBody.ts",
+          "bytes": 953,
+          "sha256": "dbe1c6d02d9292172ba57584ce3c9c6614f833ccf8dd37f755cad1ee1b3fd392"
+        },
+        {
+          "path": "lib/api-zod/src/generated/types/createDecisionBodyRiskLevel.ts",
+          "bytes": 619,
+          "sha256": "fa7764d0d85a7842c0eed994e52b2054cbabafb6657fbaf0879844f1181d498c"
+        },
+        {
+          "path": "lib/api-zod/src/generated/types/createFeatureFlag.ts",
+          "bytes": 524,
+          "sha256": "58a1debd8197a546f35cfaf69ad53cd6ebdb814211154d5f61c4e55973287b77"
+        },
+        {
+          "path": "lib/api-zod/src/generated/types/createHoldingsInquiryBody.ts",
+          "bytes": 619,
+          "sha256": "bad876e750c50d36fad3d2389fff05da0d27c4fd047ad0cdbdbcbeeb6c77d554"
+        },
+        {
+          "path": "lib/api-zod/src/generated/types/createHoldingsInquiryBodyType.ts",
+          "bytes": 665,
+          "sha256": "a7eed7988cd382805c3a39e12c445ec11b6b001c46beddbe68835ad4002deea9"
+        },
+        {
+          "path": "lib/api-zod/src/generated/types/createNotification.ts",
+          "bytes": 714,
+          "sha256": "c157fb8623fc231b274e4f98b8a530e771b2f79a39519def56e3bb45fe1c8c7b"
+        },
+        {
+          "path": "lib/api-zod/src/generated/types/createNotificationChannel.ts",
+          "bytes": 621,
+          "sha256": "3f8d726db104522e28f260871905d932a75f2f34e913ae76f90baacf002e2007"
+        },
+        {
+          "path": "lib/api-zod/src/generated/types/createNotificationType.ts",
+          "bytes": 655,
+          "sha256": "328c50949c0cf56d3dded98c7fe72215176956f7971bb831ac9a940bfbfd6c55"
+        },
+        {
+          "path": "lib/api-zod/src/generated/types/createPlatformDecisionBody.ts",
+          "bytes": 670,
+          "sha256": "d695558e0408179764b57aa1c200f582277debc4efd4945afbc03a105af1554d"
+        },
+        {
+          "path": "lib/api-zod/src/generated/types/createPlatformDecisionBodyRiskLevel.ts",
+          "bytes": 651,
+          "sha256": "6d956a29cd4d457b0e1247d9e10cd3066ade38088dd6f3c8574ee8f9d347237a"
+        },
+        {
+          "path": "lib/api-zod/src/generated/types/createProject.ts",
+          "bytes": 576,
+          "sha256": "badcfb277a99225b408885a13d19cea66565d4295d03cc00539718a23939cd5e"
+        },
+        {
+          "path": "lib/api-zod/src/generated/types/createProjectStatus.ts",
+          "bytes": 621,
+          "sha256": "98fe80d8c7a4db219e7ed1646b3bdc6b1d6d947037876cc20990e277eb2555d4"
+        },
+        {
+          "path": "lib/api-zod/src/generated/types/createReportTemplateBody.ts",
+          "bytes": 632,
+          "sha256": "997d8c9b040fdaf78f9892d350d766b7a9df8690627fa4314624afd21ac00402"
+        },
+        {
+          "path": "lib/api-zod/src/generated/types/createReportTemplateBodySectionsItem.ts",
+          "bytes": 456,
+          "sha256": "246c995ab8557bed50ed8df3217c9d5a20d0e3d78c07f9821bb4ac262c36786f"
+        },
+        {
+          "path": "lib/api-zod/src/generated/types/createSkillBody.ts",
+          "bytes": 835,
+          "sha256": "04e8878e80b8b002ab768c5232757a1198514854c540dacbd5dd3b60da12e8c7"
+        },
+        {
+          "path": "lib/api-zod/src/generated/types/createSkillBodyInputSchema.ts",
+          "bytes": 446,
+          "sha256": "1cd42de69647489a948200e9e792e0a6f1a212271e6572b30c54795589b3236d"
+        },
+        {
+          "path": "lib/api-zod/src/generated/types/createSkillBodyOutputSchema.ts",
+          "bytes": 447,
+          "sha256": "3efd26176aacb1ce424955934894d63e911d184d7617ea4f48463bcd5b2809f3"
+        },
+        {
+          "path": "lib/api-zod/src/generated/types/createSkillBodyStepsItem.ts",
+          "bytes": 444,
+          "sha256": "2456f7333113b98ce8a06bac74d385a87313387af39448ce3e5d912f0ac803b6"
+        },
+        {
+          "path": "lib/api-zod/src/generated/types/createStephenBookingRequest.ts",
+          "bytes": 672,
+          "sha256": "ff4223a07d7848f2dfd1a9d8f1cea6536fb7c5a0f2b66d8448a23f9f314f3170"
+        },
+        {
+          "path": "lib/api-zod/src/generated/types/createStephenBookingRequestType.ts",
+          "bytes": 759,
+          "sha256": "af7f804fde92540c41ff44321d5c56034923d21b386a0b492bbd707cb9837282"
+        },
+        {
+          "path": "lib/api-zod/src/generated/types/createStephenContact.ts",
+          "bytes": 491,
+          "sha256": "a7a6a8df4b17bc5bee31b617482250c19b9ee0579d1b95d9fa061ca5429cf282"
+        },
+        {
+          "path": "lib/api-zod/src/generated/types/createStephenContentBlock.ts",
+          "bytes": 805,
+          "sha256": "5ba27a9a6495232667b56e4db4049d2a4c14a32d5fadcd6d96f8f61fd231aa83"
+        },
+        {
+          "path": "lib/api-zod/src/generated/types/createStephenContentBlockMetadata.ts",
+          "bytes": 453,
+          "sha256": "efae2fb388ccb4cb54c4b2f0fb954a7927552a9dedda4a0a551b8e1f9d0f886d"
+        },
+        {
+          "path": "lib/api-zod/src/generated/types/createStephenContentBlockType.ts",
+          "bytes": 671,
+          "sha256": "4f3895d36c3c7601bd64fd557da04d03cd76094afb3ed711b86e337f9cc8d04b"
+        },
+        {
+          "path": "lib/api-zod/src/generated/types/createStephenPortfolioCaseStudy.ts",
+          "bytes": 628,
+          "sha256": "9aaca0d4bf9c8367f04997e770f6d1e42abdd0aac4aba732995cd9f6e8cc3838"
+        },
+        {
+          "path": "lib/api-zod/src/generated/types/createVenture.ts",
+          "bytes": 670,
+          "sha256": "5d01567ef88c26c702de0c7dd8affe0d1a95d8bfc1cfa34bea280c4ba1a7c4eb"
+        },
+        {
+          "path": "lib/api-zod/src/generated/types/createVentureLeaderBody.ts",
+          "bytes": 536,
+          "sha256": "b2943b495f242c045f2405943574daffcbc202cc8a9f093c279274306448c261"
+        },
+        {
+          "path": "lib/api-zod/src/generated/types/createVentureMetricBody.ts",
+          "bytes": 518,
+          "sha256": "2fcf471f7337279a88d6329bc1f23727beb39150f084208b01382302799792af"
+        },
+        {
+          "path": "lib/api-zod/src/generated/types/createVentureMilestoneBody.ts",
+          "bytes": 642,
+          "sha256": "3f211d8076d97a2dcbaee33d438a1dd0ec48a66ee9e1bfbfd47ae071ab858c03"
+        },
+        {
+          "path": "lib/api-zod/src/generated/types/createVentureMilestoneBodyStatus.ts",
+          "bytes": 677,
+          "sha256": "5bdfcaa0a9e5948e1ce260a2ca1be3ad0f3b78ca1e35b99d82abc568e7afe5ab"
+        },
+        {
+          "path": "lib/api-zod/src/generated/types/createVentureStatus.ts",
+          "bytes": 639,
+          "sha256": "446f428234c625f2fd742490fcf76715aa581b85c21c58be1fc19d76ef077249"
+        },
+        {
+          "path": "lib/api-zod/src/generated/types/createVessel.ts",
+          "bytes": 660,
+          "sha256": "11938d31026bdb9fa5e7005ffcc5b38b568fd9dc8e70340469db2253a4f6e432"
+        },
+        {
+          "path": "lib/api-zod/src/generated/types/createVesselAlertBody.ts",
+          "bytes": 603,
+          "sha256": "c3c8f79873bdb87c148c505bb91217a83a412fcfb073addb8c2aa928de782360"
+        },
+        {
+          "path": "lib/api-zod/src/generated/types/createVesselAlertBodySeverity.ts",
+          "bytes": 629,
+          "sha256": "bbddc5f06d613765fe941391510d31a17c5150d47c936a1abc6ec273742f2ac6"
+        },
+        {
+          "path": "lib/api-zod/src/generated/types/createVesselAlertRule.ts",
+          "bytes": 763,
+          "sha256": "39639e56886dbda8b7b863717bf1c408e653c2bb50c474a0ce0201111d769733"
+        },
+        {
+          "path": "lib/api-zod/src/generated/types/createVesselAlertRuleAppliesTo.ts",
+          "bytes": 623,
+          "sha256": "6ea10240efdd56d57dc0cb52e0011f20d867864db49334003751bd7f6f66586e"
+        },
+        {
+          "path": "lib/api-zod/src/generated/types/createVesselAlertRuleSeverity.ts",
+          "bytes": 629,
+          "sha256": "98d1b6d022fa1dca181503d2fde1c04bfbb3586be1565626486780a24e706d55"
+        },
+        {
+          "path": "lib/api-zod/src/generated/types/createVesselCommandWorkflowBody.ts",
+          "bytes": 632,
+          "sha256": "99ba9226af0c94d4607d5d53ead27191c886ee303ee47578c7148fe1d4aed4c4"
+        },
+        {
+          "path": "lib/api-zod/src/generated/types/createVesselCommandWorkflowBodyParameters.ts",
+          "bytes": 464,
+          "sha256": "a5c46c6110ffbc292a14f051faa3d7eb52f3dc9bfb98a48baac02eb5d09dc214"
+        },
+        {
+          "path": "lib/api-zod/src/generated/types/createVesselEventBody.ts",
+          "bytes": 608,
+          "sha256": "596eaa5334e9d8d845aeab8c2eca2f33c9bf89fe9a75e5153aff28dc66140ae8"
+        },
+        {
+          "path": "lib/api-zod/src/generated/types/createVesselEventBodyMetadata.ts",
+          "bytes": 449,
+          "sha256": "0a9aa9c35c4908418143620aa6f0b1fe8b9672c7a67bdbcbc976b22799b511e6"
+        },
+        {
+          "path": "lib/api-zod/src/generated/types/createVesselFleet.ts",
+          "bytes": 566,
+          "sha256": "88e3f1f0545889f99e9bcd89c6b0444905ad09373a8364972fd9996daa9b43f9"
+        },
+        {
+          "path": "lib/api-zod/src/generated/types/createVesselFleetStatus.ts",
+          "bytes": 587,
+          "sha256": "19ba93d0f64f3664f228a0e49cff3fdf5d517819f23b181573917eae13af4330"
+        },
+        {
+          "path": "lib/api-zod/src/generated/types/createVesselRoute.ts",
+          "bytes": 671,
+          "sha256": "29ad21449375aaaf3ce3ee4590dc117d07a1619499a52e275c25b927b58cdd6d"
+        },
+        {
+          "path": "lib/api-zod/src/generated/types/createVesselRouteWaypointsItem.ts",
+          "bytes": 450,
+          "sha256": "79b577a0d5c0a3f7946b1718205b0710d6106100e8652311cf430866e8c0b1cb"
+        },
+        {
+          "path": "lib/api-zod/src/generated/types/createVesselSimulationBody.ts",
+          "bytes": 529,
+          "sha256": "df367d973d451f300586825d302358f8ddada580b43f30a069c4b4c1f0672bb4"
+        },
+        {
+          "path": "lib/api-zod/src/generated/types/createWsTicket200.ts",
+          "bytes": 453,
+          "sha256": "ac939b026a237478c2229e04ba05b034fd1464ee63b825e2d542504fda7abdcf"
+        },
+        {
+          "path": "lib/api-zod/src/generated/types/deactivateAdminUserBody.ts",
+          "bytes": 439,
+          "sha256": "5e429841feb0f31c12a4cb258aa900ee108c257635225125ccc47fff8ef7fee8"
+        },
+        {
+          "path": "lib/api-zod/src/generated/types/decideAlloyApprovalBody.ts",
+          "bytes": 574,
+          "sha256": "6a5bbe7fbfa5d08591a4a09b0f47b4d7f218a9b2e0fb0b3534ce3186678650f9"
+        },
+        {
+          "path": "lib/api-zod/src/generated/types/decideAlloyApprovalBodyDecision.ts",
+          "bytes": 617,
+          "sha256": "85b76cd862f77e5d6dc7fa6e751212fc1dc07c65905b0d7f1e69a0cc03395eec"
+        },
+        {
+          "path": "lib/api-zod/src/generated/types/decisionApprovedEvent.ts",
+          "bytes": 751,
+          "sha256": "93e1a68e6c7cc0b121e83826282fc3ec7bda77b1c0afd63c433cd531c4a20e32"
+        },
+        {
+          "path": "lib/api-zod/src/generated/types/decisionApprovedEventPolicyEffect.ts",
+          "bytes": 659,
+          "sha256": "4058acc456c7614cc7f5bc2a8737b3bb8de36d0e44ffeb4cbdc40e1801958564"
+        },
+        {
+          "path": "lib/api-zod/src/generated/types/decisionCreatedEvent.ts",
+          "bytes": 650,
+          "sha256": "552c6747d204995b1c0c083db08b80d3f608c9b1733954f1ebbaed1fe6648d6e"
+        },
+        {
+          "path": "lib/api-zod/src/generated/types/decisionExecutedEvent.ts",
+          "bytes": 743,
+          "sha256": "85b1e6efe41aaea851642cf58be1b1874ee558f7ee946cdad26610930b51083e"
+        },
+        {
+          "path": "lib/api-zod/src/generated/types/decisionOutcomeRecordedEvent.ts",
+          "bytes": 940,
+          "sha256": "156274113a9a52d4a24405f329d7a20f7f74758066ffe71f1862db4d711ab9d9"
+        },
+        {
+          "path": "lib/api-zod/src/generated/types/decisionOutcomeRecordedEventImpact.ts",
+          "bytes": 503,
+          "sha256": "9e7eee01c1fce49281cb6f5fb65d45b3223ad0f443d5eb33345ed526178d83b2"
+        },
+        {
+          "path": "lib/api-zod/src/generated/types/decisionOutcomeRecordedEventOutcome.ts",
+          "bytes": 681,
+          "sha256": "85c3949da956b52cc12f04ec252c8c907db34f370bf8bbeabbdddd3937dec623"
+        },
+        {
+          "path": "lib/api-zod/src/generated/types/decisionOutcomeRequest.ts",
+          "bytes": 827,
+          "sha256": "57bbc934ccddde15b2e7a5ee6efb7eb4c0d83e61cf22601098b41acb802aa016"
+        },
+        {
+          "path": "lib/api-zod/src/generated/types/decisionOutcomeRequestImpact.ts",
+          "bytes": 497,
+          "sha256": "50094e880666d51323b86ad02ee7ce820fc4a77694464a4d9e21f1b61f24f0a8"
+        },
+        {
+          "path": "lib/api-zod/src/generated/types/decisionOutcomeRequestMetadata.ts",
+          "bytes": 450,
+          "sha256": "4876638a71320a93667a6e117bc466ce92725d2cea05d54ff755e6b1d4dfb111"
+        },
+        {
+          "path": "lib/api-zod/src/generated/types/decisionOutcomeRequestOutcome.ts",
+          "bytes": 657,
+          "sha256": "1bf0d07e0df5fa4481dffaa51ea3788c14b40627a6262f408e3a585479100360"
+        },
+        {
+          "path": "lib/api-zod/src/generated/types/decisionProofRequest.ts",
+          "bytes": 865,
+          "sha256": "9664a9e776e4fe8cf82b6ac9e13247161f3a5acebbe423a7eb9d5904a2def50f"
+        },
+        {
+          "path": "lib/api-zod/src/generated/types/decisionProofRequestEvidenceItem.ts",
+          "bytes": 482,
+          "sha256": "adc57e7ecc4490a7c37a6139a78edc66e021c0ba4f0985b0c4a30d4e8ffa5943"
+        },
+        {
+          "path": "lib/api-zod/src/generated/types/decisionProofRequestProofType.ts",
+          "bytes": 711,
+          "sha256": "a62b7485afc24e21c4bf52f9a3b6f0f9d65b8bcc9de23e6c185d32b5c3fe033e"
+        },
+        {
+          "path": "lib/api-zod/src/generated/types/decisionProvedEvent.ts",
+          "bytes": 911,
+          "sha256": "be95457a1a7cc2ff4a81e856914749c03eb82c3080467b2638baeacb155f6676"
+        },
+        {
+          "path": "lib/api-zod/src/generated/types/decisionProvedEventEvidenceItem.ts",
+          "bytes": 483,
+          "sha256": "e5d2a052fddaa716b4fe3fad3baa709bdf4ad8562b6e4836a30e661f46ae44a7"
+        },
+        {
+          "path": "lib/api-zod/src/generated/types/decisionProvedEventProofType.ts",
+          "bytes": 707,
+          "sha256": "660e550ff45b04b96e7785fdaa2354392d0677d2758dc74f393fd5282c4ada0a"
+        },
+        {
+          "path": "lib/api-zod/src/generated/types/delegateA2ATask200.ts",
+          "bytes": 438,
+          "sha256": "b38094fa9cfe37b57561901ebea9504b46e1efbf81ca8e4fbd063e8b3ddeccb0"
+        },
+        {
+          "path": "lib/api-zod/src/generated/types/delegateA2ATaskBody.ts",
+          "bytes": 639,
+          "sha256": "b51b264aeca073d972f4c18b2a2124dc4b1cbb8bdb14314578f0dff99516530b"
+        },
+        {
+          "path": "lib/api-zod/src/generated/types/delegateA2ATaskBodyPriority.ts",
+          "bytes": 633,
+          "sha256": "fca2f6f2d824719ae3e23d52b8208a9ee1ec09bb87ac459ff2ba7efb0782e4d1"
+        },
+        {
+          "path": "lib/api-zod/src/generated/types/detailedHealthStatus.ts",
+          "bytes": 855,
+          "sha256": "97282295c90c503d46984afd617d514d791d6e291da42f11d9cc47a80a534cdc"
+        },
+        {
+          "path": "lib/api-zod/src/generated/types/detailedHealthStatusChecks.ts",
+          "bytes": 570,
+          "sha256": "c8fd768004bc33bab25c9b44900ef7bda9b1a1a0f8065d511695d5f585818d3f"
+        },
+        {
+          "path": "lib/api-zod/src/generated/types/detailedHealthStatusMemory.ts",
+          "bytes": 488,
+          "sha256": "73f178205123be21001dfe0a38834b5616fc6f254ea8657371bc7a6c90be1cdb"
+        },
+        {
+          "path": "lib/api-zod/src/generated/types/detailedHealthStatusStatus.ts",
+          "bytes": 623,
+          "sha256": "d46a70570463225e689826f059da0f10175ce7a188ecdcad3032f1e20a46825a"
+        },
+        {
+          "path": "lib/api-zod/src/generated/types/discoverA2AAgents200.ts",
+          "bytes": 540,
+          "sha256": "eb7b23519409b34c97709d94fac1d36f7902492079bab56c51ed54f51730352c"
+        },
+        {
+          "path": "lib/api-zod/src/generated/types/discoverA2AAgentsParams.ts",
+          "bytes": 480,
+          "sha256": "80d9aac895c667fed364a11dbb7c66f2a6b2e1e18b8f4d37dd49d4b6d061972b"
+        },
+        {
+          "path": "lib/api-zod/src/generated/types/distributeReportBody.ts",
+          "bytes": 602,
+          "sha256": "de775ec682bdad5f5db47a61d6a1ab4aaab6db047387ddfe51a7864266f68875"
+        },
+        {
+          "path": "lib/api-zod/src/generated/types/distributeReportBodyChannelsItem.ts",
+          "bytes": 637,
+          "sha256": "f2bd874ae21a26a15a95549f5f32022f859aa6e8082252ccc74834d3f3f2d7e8"
+        },
+        {
+          "path": "lib/api-zod/src/generated/types/downloadExport200ThreeItem.ts",
+          "bytes": 446,
+          "sha256": "9c0c6d280fcf61808173991c5d28e7cb4fa638631fafa0288adc4007a5836883"
+        },
+        {
+          "path": "lib/api-zod/src/generated/types/dreamscapeProject.ts",
+          "bytes": 572,
+          "sha256": "179bb34068e65a61f561cd2306b992a2079fa0046cab6db335e6c616287d2ddd"
+        },
+        {
+          "path": "lib/api-zod/src/generated/types/endImpersonationBody.ts",
+          "bytes": 436,
+          "sha256": "b482e9362354c583f4a8f26bafb2dca669f440acc7294189ceb57b09d913d814"
+        },
+        {
+          "path": "lib/api-zod/src/generated/types/errorEnvelope.ts",
+          "bytes": 429,
+          "sha256": "0bb8249d4bf1d1ef6d0858d41cca21dedd0ff1cc1fc80a75b547b8c3cc449c51"
+        },
+        {
+          "path": "lib/api-zod/src/generated/types/evaluateDecisionSignals200.ts",
+          "bytes": 694,
+          "sha256": "04344d53f643181b6b1297768bef710284ee3dd43959fede5baff03284763b8e"
+        },
+        {
+          "path": "lib/api-zod/src/generated/types/evaluateDecisionSignals200RecommendationsItem.ts",
+          "bytes": 468,
+          "sha256": "a8ae8885b9f026ab33558892052b49f0285aabe6c2d4445118ea3bb6e8f1be65"
+        },
+        {
+          "path": "lib/api-zod/src/generated/types/evaluateDecisionSignalsBody.ts",
+          "bytes": 783,
+          "sha256": "19c5c33a215f95c812899e7e3fd007437e5e74a4c370bcab1225523fc20f67bd"
+        },
+        {
+          "path": "lib/api-zod/src/generated/types/evaluateDecisionSignalsBodyGroupsItem.ts",
+          "bytes": 521,
+          "sha256": "55c09388941f32ff52c24bf3da4a7ee1916a2bf54afb2b9731b05f1aae7cd33c"
+        },
+        {
+          "path": "lib/api-zod/src/generated/types/evaluateDecisionSignalsBodyWeights.ts",
+          "bytes": 497,
+          "sha256": "514bb2e6ed602c5b1bd710a8b06a391a18d1ce0cdd34ff8abe0ec1675cdc9d42"
+        },
+        {
+          "path": "lib/api-zod/src/generated/types/executeDecisionWorkflow201.ts",
+          "bytes": 784,
+          "sha256": "72698c98b1f9f86e0f482e6a9d3937ebca67ee5c0ab3b185952000ca14c82f49"
+        },
+        {
+          "path": "lib/api-zod/src/generated/types/executeDecisionWorkflow201PolicyEvaluation.ts",
+          "bytes": 465,
+          "sha256": "c23fbd42237cb6cff4dc57463f58a7bb719e54608cf3c507b64f83db14e379f8"
+        },
+        {
+          "path": "lib/api-zod/src/generated/types/executeDecisionWorkflow201Run.ts",
+          "bytes": 480,
+          "sha256": "086f470fc202f2f8bf8994dc0a0043154e70d4c8b5b91f61c80393a4bf3528ad"
+        },
+        {
+          "path": "lib/api-zod/src/generated/types/executeDecisionWorkflowBody.ts",
+          "bytes": 694,
+          "sha256": "758aecaf3c51739a0dcdfed53c856804c0d201f7d2dda9e040a5965a12581edf"
+        },
+        {
+          "path": "lib/api-zod/src/generated/types/executeDecisionWorkflowBodyMetadata.ts",
+          "bytes": 455,
+          "sha256": "bb08d28debf2b89e9fc2ccfede264df6ae27d72852427f77d771b1cae0cf472e"
+        },
+        {
+          "path": "lib/api-zod/src/generated/types/exportAdapterResult.ts",
+          "bytes": 1097,
+          "sha256": "76636bd5ff9caa9977b96824666a87d6607a73fbaab92d93e994b275dec619d9"
+        },
+        {
+          "path": "lib/api-zod/src/generated/types/exportAtlasBranchPackage503.ts",
+          "bytes": 651,
+          "sha256": "73dcef037b6c0850b5340ceca5631521946a8f8d6c37c54214ddef43eb22a6c3"
+        },
+        {
+          "path": "lib/api-zod/src/generated/types/exportAtlasBranchPackage503Details.ts",
+          "bytes": 451,
+          "sha256": "5f45ad1de38e545e4199cb388b794d833c6c554d8807010536161c9b771cf413"
+        },
+        {
+          "path": "lib/api-zod/src/generated/types/exportAtlasOpenUSDManifest503.ts",
+          "bytes": 659,
+          "sha256": "bbeec86da79a8bdccc95bb30a6a683dd547cc1b6859618cf465af59e040e3bba"
+        },
+        {
+          "path": "lib/api-zod/src/generated/types/exportAtlasOpenUSDManifest503Details.ts",
+          "bytes": 453,
+          "sha256": "92e19f9e3bfe53d6e5385690587b797b332a92f860301a743da072e4778738dd"
+        },
+        {
+          "path": "lib/api-zod/src/generated/types/exportAtlasOpenUSDManifestParams.ts",
+          "bytes": 717,
+          "sha256": "b4a1a41e8c0ffc5d82634ee4cf17316de4df3d5a792d6850935be7cc7106937a"
+        },
+        {
+          "path": "lib/api-zod/src/generated/types/exportAtlasProofBundle503.ts",
+          "bytes": 643,
+          "sha256": "0b10688b7c060ed0d54f7ea99d8a901b67df7e5981275ac17447b92d83c04b42"
+        },
+        {
+          "path": "lib/api-zod/src/generated/types/exportAtlasProofBundle503Details.ts",
+          "bytes": 449,
+          "sha256": "708b1f77c6246c10ef4512b1ed28d96d144be73198c03ca06c03b209038575c6"
+        },
+        {
+          "path": "lib/api-zod/src/generated/types/exportAtlasSnapshot503.ts",
+          "bytes": 631,
+          "sha256": "150ffc03612a4821c3b9e680cef528e31876bff4f782f9764cbd30bc8032ea37"
+        },
+        {
+          "path": "lib/api-zod/src/generated/types/exportAtlasSnapshot503Details.ts",
+          "bytes": 446,
+          "sha256": "df0432b088cf2d2ef5d2a5f46506f33d42bea10fb902818816ab0602077ca193"
+        },
+        {
+          "path": "lib/api-zod/src/generated/types/exportAtlasSnapshotParams.ts",
+          "bytes": 682,
+          "sha256": "4dc6ebccc0dd730c09274fa62c325b701abbdda1c7c63accb720a5e8389f90a1"
+        },
+        {
+          "path": "lib/api-zod/src/generated/types/exportJob.ts",
+          "bytes": 947,
+          "sha256": "f522461042ea9aa9e2bf5cbac3d7107b3de1fe3586a6c977414d68a7b70a1a84"
+        },
+        {
+          "path": "lib/api-zod/src/generated/types/exportJobFormat.ts",
+          "bytes": 557,
+          "sha256": "bd427de13d024dcb01d67b9d30483269f7c712ca465fafacb83e7ec753c9db03"
+        },
+        {
+          "path": "lib/api-zod/src/generated/types/exportJobStatus.ts",
+          "bytes": 621,
+          "sha256": "5d62b208a3c9f7973e3fa0bd739a7f84ccd3fc2551b336ea14e5858406a0ccd0"
+        },
+        {
+          "path": "lib/api-zod/src/generated/types/exportRequest.ts",
+          "bytes": 662,
+          "sha256": "6785d453fbd80dbfc016ae546d8ee35d9ff02e423b84ffc41ebec206a7e2f592"
+        },
+        {
+          "path": "lib/api-zod/src/generated/types/exportRequestFilters.ts",
+          "bytes": 440,
+          "sha256": "b7f7701470d09287523415fd7401181adf177486bd53ac184d1bcad068e75353"
+        },
+        {
+          "path": "lib/api-zod/src/generated/types/exportRequestFormat.ts",
+          "bytes": 573,
+          "sha256": "9c049b9f769534dc97d993db865f2349935c653174860d0d673c8f4e723b6371"
+        },
+        {
+          "path": "lib/api-zod/src/generated/types/featureFlag.ts",
+          "bytes": 576,
+          "sha256": "ab81b4460cd84ae84e65a54fb7a5922adcacf8aa3ffac875f085e0d322c8f967"
+        },
+        {
+          "path": "lib/api-zod/src/generated/types/fileRecord.ts",
+          "bytes": 544,
+          "sha256": "dcdb4cb455513348f2c9ca7e037091f19ce52927479e5a6eaa24e6952f5ec905"
+        },
+        {
+          "path": "lib/api-zod/src/generated/types/firestormAnalytics.ts",
+          "bytes": 534,
+          "sha256": "b0b3dda7cc8981cf98b68ecfccb13ef474f4c98ebec7d8556fcb0373931bf67b"
+        },
+        {
+          "path": "lib/api-zod/src/generated/types/firestormCampaign.ts",
+          "bytes": 569,
+          "sha256": "6235bd082bb3fc4470800dd6aab07b29346e92ddac8d2fbfbed73f0a939998ee"
+        },
+        {
+          "path": "lib/api-zod/src/generated/types/firestormLead.ts",
+          "bytes": 620,
+          "sha256": "89ba37db60530bde4838ecfb2864af765c824dc59b9d716ad38280245206a587"
+        },
+        {
+          "path": "lib/api-zod/src/generated/types/forbiddenResponse.ts",
+          "bytes": 492,
+          "sha256": "7abe9d8774c16565cbc596d7788cb90d60d84bcddf0f82ddefb7bd165de7e21d"
+        },
+        {
+          "path": "lib/api-zod/src/generated/types/generateReportBody.ts",
+          "bytes": 584,
+          "sha256": "ddd80d275d280eaa44b00eecb89023e478f90e3527151f07a86c43aaefcbfdf6"
+        },
+        {
+          "path": "lib/api-zod/src/generated/types/generateReportBodyParameters.ts",
+          "bytes": 448,
+          "sha256": "f94b2403415d9590b623aeebebb91e4cf1a5649594d587ad75714f49f21613c6"
+        },
+        {
+          "path": "lib/api-zod/src/generated/types/generateReportNarrative200.ts",
+          "bytes": 445,
+          "sha256": "a61d8cd169276b17ebb31c58069721ba5856cfbc65c29842cc951b9a391e6198"
+        },
+        {
+          "path": "lib/api-zod/src/generated/types/generateReportNarrativeBody.ts",
+          "bytes": 575,
+          "sha256": "ee63627d2c8f16952504f61b9ab789f63f201896ff4216daf6e6b9d081096f21"
+        },
+        {
+          "path": "lib/api-zod/src/generated/types/generateReportNarrativeBodyTone.ts",
+          "bytes": 649,
+          "sha256": "da2dfa4b803afc00f35334b5c9690f28d8d97c61d380ac41f4fff248d29ff95c"
+        },
+        {
+          "path": "lib/api-zod/src/generated/types/getA2AAgentHealth200.ts",
+          "bytes": 617,
+          "sha256": "5a3fe07789a931f22db41974c01717e19c1351417b845a448a79dc680ad3a86c"
+        },
+        {
+          "path": "lib/api-zod/src/generated/types/getA2AAgentHealth200Status.ts",
+          "bytes": 623,
+          "sha256": "74d272e6e571babe9ae9b7ce3c94d37a6ef436ebdc68f51826e7165ac76774d2"
+        },
+        {
+          "path": "lib/api-zod/src/generated/types/getA2AAgentStatus200.ts",
+          "bytes": 562,
+          "sha256": "07bef8a80cd39379f87574ffc25f3995ebabef02f560a7721cd008d424623eb3"
+        },
+        {
+          "path": "lib/api-zod/src/generated/types/getA2ADelegationStats200.ts",
+          "bytes": 444,
+          "sha256": "038a89fffde796a4b2571c3dd34a2a5ef07badac181b0e659b763e1573d5df38"
+        },
+        {
+          "path": "lib/api-zod/src/generated/types/getActiveAlerts200.ts",
+          "bytes": 529,
+          "sha256": "b762a61b84b73d4624b788a2f3a65f0b29b222c3ced136ac3a47b4e69756e9ce"
+        },
+        {
+          "path": "lib/api-zod/src/generated/types/getAdminAuditLog200.ts",
+          "bytes": 508,
+          "sha256": "0739de93c6649ae0bd52a7827a070c4ad8537d603066160b72bd0317be476c19"
+        },
+        {
+          "path": "lib/api-zod/src/generated/types/getAdminAuditLogParams.ts",
+          "bytes": 522,
+          "sha256": "890e4961517717b9eb6a74e7fd50e14268f6cef2d2fe627b7eaecbb2286e961e"
+        },
+        {
+          "path": "lib/api-zod/src/generated/types/getAdminExportHistoryParams.ts",
+          "bytes": 442,
+          "sha256": "7cccf8f08b2474e55c1498348a23437eac0937b32d1f78ff469b0d0d9eaceb2f"
+        },
+        {
+          "path": "lib/api-zod/src/generated/types/getAgentOsStatus200.ts",
+          "bytes": 816,
+          "sha256": "94b542388243490553cc319889b5e279ecb169ef1d03a835bedb42370b3db6a8"
+        },
+        {
+          "path": "lib/api-zod/src/generated/types/getAgentOsStatus200EventBus.ts",
+          "bytes": 447,
+          "sha256": "5870763638abf7290070ca54e7f82c6a014fb16377623d6d7751f9e8c3541470"
+        },
+        {
+          "path": "lib/api-zod/src/generated/types/getAgentOsStatus200Knowledge.ts",
+          "bytes": 448,
+          "sha256": "6769bd7dc9aff3773ef0564fb9eac094d5306ff755d6e6375b8dfe47cf83be54"
+        },
+        {
+          "path": "lib/api-zod/src/generated/types/getAgentOsStatus200Scheduler.ts",
+          "bytes": 448,
+          "sha256": "f438fddee5f681fe5cd8e41421a846f7bb28b42220d675ff029e8f63e7feee0a"
+        },
+        {
+          "path": "lib/api-zod/src/generated/types/getAgentStats200.ts",
+          "bytes": 837,
+          "sha256": "e3364a1984a231ed29d2b6f48b2e6313436623c8643da4ff938615e4542a705e"
+        },
+        {
+          "path": "lib/api-zod/src/generated/types/getAgentStats200AgentsItem.ts",
+          "bytes": 446,
+          "sha256": "b9c5ad5f30845ed8255680608688d95dda4a16aba63f8515fec99c1882b9e6f9"
+        },
+        {
+          "path": "lib/api-zod/src/generated/types/getAgentStats200EventBus.ts",
+          "bytes": 444,
+          "sha256": "e4abb9e9bb78e008c4ec64b9a5fbd0de5183efe3cf033dcf85d6adc0f20c6253"
+        },
+        {
+          "path": "lib/api-zod/src/generated/types/getAgentStats200Knowledge.ts",
+          "bytes": 445,
+          "sha256": "a3d963c6ab02a3acd7436085540d2361ebfb82a4b7e4fed3f8fff37de2a9de63"
+        },
+        {
+          "path": "lib/api-zod/src/generated/types/getAlloyDashboard200.ts",
+          "bytes": 587,
+          "sha256": "69b179359a3d2c7d180653203869e664f0540739e04b37231b092280c00d362d"
+        },
+        {
+          "path": "lib/api-zod/src/generated/types/getAlloyFactoryFloor200.ts",
+          "bytes": 643,
+          "sha256": "ae49adb67845b06ad5c57842f378d400638e42e7b385f43f921c883708eec53d"
+        },
+        {
+          "path": "lib/api-zod/src/generated/types/getAlloyFactoryFloor200WorkersItem.ts",
+          "bytes": 515,
+          "sha256": "c3776b4998f10e5183d6d9adc23cd5790ca3c5faa36cebcc2141ce9344b193ee"
+        },
+        {
+          "path": "lib/api-zod/src/generated/types/getAppObservability200.ts",
+          "bytes": 442,
+          "sha256": "e470797bfa5bbdf889be3b27713c6b341f6410ff4dfd2143db9306350b0db4d6"
+        },
+        {
+          "path": "lib/api-zod/src/generated/types/getApprovalMatrix200.ts",
+          "bytes": 586,
+          "sha256": "dd45cbd12d82fcc6efc75052963e41c92ce06e28d70d485b2ffc805c39a735b9"
+        },
+        {
+          "path": "lib/api-zod/src/generated/types/getApprovalMatrix200Matrix.ts",
+          "bytes": 509,
+          "sha256": "3999b94769c3666b04eee590639bae40c0f80eaec988bd45aec8adeceec68167"
+        },
+        {
+          "path": "lib/api-zod/src/generated/types/getAuthProviders200.ts",
+          "bytes": 440,
+          "sha256": "fb18cb32bf726622b77b203299d047688420aeefa1bb3927391fa31e0fd4368d"
+        },
+        {
+          "path": "lib/api-zod/src/generated/types/getBillingRevenueAnalytics200.ts",
+          "bytes": 544,
+          "sha256": "797da7927b4aba57a1883f53fb9c154fcd1e1f8b6e274d276077470beb16595b"
+        },
+        {
+          "path": "lib/api-zod/src/generated/types/getDecision200.ts",
+          "bytes": 584,
+          "sha256": "253ccc0c8ef5cc95e947991ac62c8b032386f9083bf7141719fdc95945f1ee16"
+        },
+        {
+          "path": "lib/api-zod/src/generated/types/getDomainAgentFeed200.ts",
+          "bytes": 691,
+          "sha256": "1778740e6b93ddcb24b823edd22579e6b18b174014c18d419b171b66f8563e97"
+        },
+        {
+          "path": "lib/api-zod/src/generated/types/getDomainAgentFeed200Feed.ts",
+          "bytes": 445,
+          "sha256": "90fd16f7170c5a83127bef2f5dad2f151ed9064223f5f18b7af46c5982b49668"
+        },
+        {
+          "path": "lib/api-zod/src/generated/types/getDomainAgentFeed200Stats.ts",
+          "bytes": 446,
+          "sha256": "90ebfb970628f19917794d87fd4ae3f9df81d3e5cc3d2fbdc4c47d12b9940fef"
+        },
+        {
+          "path": "lib/api-zod/src/generated/types/getDomainAgentFeedParams.ts",
+          "bytes": 439,
+          "sha256": "ee3171cb28e216b7738ed39f89a3454f2eb9759ce598933d732a4a7315ab6d2b"
+        },
+        {
+          "path": "lib/api-zod/src/generated/types/getGlobalAgentFeed200.ts",
+          "bytes": 696,
+          "sha256": "ba2018af6cc77cd855f06e988b06235715e8d12abfc52e3ad766f192cb964ac8"
+        },
+        {
+          "path": "lib/api-zod/src/generated/types/getGlobalAgentFeed200GlobalFeed.ts",
+          "bytes": 1006,
+          "sha256": "73ff9c42d60ce39b411de45e65763752fd6f1bf33c6a7cc42240a04a2c1c3b4c"
+        },
+        {
+          "path": "lib/api-zod/src/generated/types/getGlobalAgentFeed200GlobalFeedCorrelationsItem.ts",
+          "bytes": 470,
+          "sha256": "179e8c72a195d9e0789b923e59bb3b658dffc620e0606a62c57958a3d83edd85"
+        },
+        {
+          "path": "lib/api-zod/src/generated/types/getGlobalAgentFeed200GlobalFeedRecentEventsItem.ts",
+          "bytes": 470,
+          "sha256": "39bbbc5ed216ddc257d8da9db023aed2e9a9332847d675f6011083d3a5e92b40"
+        },
+        {
+          "path": "lib/api-zod/src/generated/types/getGlobalAgentFeed200GlobalFeedRecentFindingsItem.ts",
+          "bytes": 472,
+          "sha256": "7aa392cbd8ca2f9daeea060e7c8a61bf7c6c06aabcaebf27f84ac4054173c8a1"
+        },
+        {
+          "path": "lib/api-zod/src/generated/types/getGlobalAgentFeed200Stats.ts",
+          "bytes": 446,
+          "sha256": "5930423619e2d40a9f0abb9183b65382d7aaabb1d41b8a7f2741f274085aad8d"
+        },
+        {
+          "path": "lib/api-zod/src/generated/types/getGlobalAgentFeedParams.ts",
+          "bytes": 439,
+          "sha256": "050d90ea519176d6cb170abea272fe94b28939e1c1b2e549cfb426a0039134ae"
+        },
+        {
+          "path": "lib/api-zod/src/generated/types/getHoldingsEcosystemHealth200.ts",
+          "bytes": 768,
+          "sha256": "0357dbf263a74701bc28485ca86c86884d18d5ba73070b33f5514ee2b5e01402"
+        },
+        {
+          "path": "lib/api-zod/src/generated/types/getHoldingsEcosystemHealth200OverallHealth.ts",
+          "bytes": 687,
+          "sha256": "42b72b6f8c40fdf6cc3474b7ae4934c967fb95b3e8caab881d0396ac39353594"
+        },
+        {
+          "path": "lib/api-zod/src/generated/types/getHoldingsEcosystemHealth200VenturesItem.ts",
+          "bytes": 508,
+          "sha256": "f9e55ff77627c3dc0a8336e81c6d4af6f38affe322abe1455513c3fe75b72cb2"
+        },
+        {
+          "path": "lib/api-zod/src/generated/types/getHoldingsEcosystemSummary200.ts",
+          "bytes": 450,
+          "sha256": "514443a8709549983e2e3aa1c8dbfff2eac4733c9dee220f8acf0d43d0651af7"
+        },
+        {
+          "path": "lib/api-zod/src/generated/types/getHoldingsKPIs200.ts",
+          "bytes": 538,
+          "sha256": "8ca175ccba5dbb57f4bc276f269f20947493fc64380a8f4e2455fff32afc1675"
+        },
+        {
+          "path": "lib/api-zod/src/generated/types/getInvestorNDAStatus200.ts",
+          "bytes": 489,
+          "sha256": "5bcbd56c2eb0152c81aca9985e97eb8931de7cf959c0f7e5490cc87029388094"
+        },
+        {
+          "path": "lib/api-zod/src/generated/types/getMyRoles200.ts",
+          "bytes": 430,
+          "sha256": "bc574934a67fedfab958d59f4b3c0601fcf8cf94367d79bef3bfba90407e0539"
+        },
+        {
+          "path": "lib/api-zod/src/generated/types/getReportApproval200.ts",
+          "bytes": 532,
+          "sha256": "474f3565de6bcd39ed1d6caae2a7374f7d979b33aadc48203013762e4a24e7c9"
+        },
+        {
+          "path": "lib/api-zod/src/generated/types/getReportStats200.ts",
+          "bytes": 578,
+          "sha256": "cf934ddc6d4baf870fedd8e725742dad852f540ddc6f2977e49db38d5cb273dc"
+        },
+        {
+          "path": "lib/api-zod/src/generated/types/getReportStats200ByStatus.ts",
+          "bytes": 445,
+          "sha256": "5e181c3f7ed44975c3341cbe11c5f03d8fa7239893022f2b75dceed106d89650"
+        },
+        {
+          "path": "lib/api-zod/src/generated/types/getSkillRunsParams.ts",
+          "bytes": 433,
+          "sha256": "963b2f520daecad0bf0dc9834d683e388d246d0ebf4cab9a7e79596d671f5998"
+        },
+        {
+          "path": "lib/api-zod/src/generated/types/getStripeConfig200.ts",
+          "bytes": 547,
+          "sha256": "f29c88018939af53e3cce02f60004f97971a7c0e65ed50d2261d2e9a393cece7"
+        },
+        {
+          "path": "lib/api-zod/src/generated/types/getStripeConfig200Mode.ts",
+          "bytes": 571,
+          "sha256": "8cc0ed2a353be6d009ba040685cbca2a66ff2ae7f64116363a086d7ccbbea6c7"
+        },
+        {
+          "path": "lib/api-zod/src/generated/types/getSubscriptionStatusParams.ts",
+          "bytes": 465,
+          "sha256": "93d15855dd4087497abde06c82ed4ef3209f62880dd6c0f6d37ef0d1747b9699"
+        },
+        {
+          "path": "lib/api-zod/src/generated/types/getTerraCommercialComps200.ts",
+          "bytes": 570,
+          "sha256": "4fce93335e57b2a9b1f00b19745e44d2866cc062e97a717642d42cb23bc7fb83"
+        },
+        {
+          "path": "lib/api-zod/src/generated/types/getTerraCommercialComps200CompsItem.ts",
+          "bytes": 516,
+          "sha256": "d39ee08e1d563b2769affe3137b757a6dd16d75fcf8f62a53fcdef8c10c06981"
+        },
+        {
+          "path": "lib/api-zod/src/generated/types/getTerraCommercialCompsParams.ts",
+          "bytes": 516,
+          "sha256": "b430782d980132cc535601c775e4d036acd5395ea8adb1c592ef2c30f83e4a8e"
+        },
+        {
+          "path": "lib/api-zod/src/generated/types/getTerraCommercialProperties200.ts",
+          "bytes": 547,
+          "sha256": "c0b8dad19246141a17e8c3d10f9281ccaa8d226729ae82d9b23b6570ecdd0d22"
+        },
+        {
+          "path": "lib/api-zod/src/generated/types/getTerraCommercialPropertiesAssetClass.ts",
+          "bytes": 759,
+          "sha256": "a5f956a37827294fa84563debd60ccb260607e3098382bcbcb55deb70ae3f739"
+        },
+        {
+          "path": "lib/api-zod/src/generated/types/getTerraCommercialPropertiesParams.ts",
+          "bytes": 713,
+          "sha256": "e60a0cac00e8dbc5853faf4d99041994ba6aeacb5df75b1285a9cd157bb959c8"
+        },
+        {
+          "path": "lib/api-zod/src/generated/types/getTerraDemographics200.ts",
+          "bytes": 443,
+          "sha256": "20fede4d94e1e6ad36b45ce88b8a9f69715ff507c4bab411c006bf508dff0d7d"
+        },
+        {
+          "path": "lib/api-zod/src/generated/types/getTerraEmploymentOutlook200.ts",
+          "bytes": 507,
+          "sha256": "908bcc00d7d3d0789dbe9b8d9f8a12179b535d219085aca821ec22fe38bfcb73"
+        },
+        {
+          "path": "lib/api-zod/src/generated/types/getTerraEmploymentOutlookParams.ts",
+          "bytes": 492,
+          "sha256": "6214076f0ed631ed7f20bc5c03f18a0efbe40822031825c27aa3bfe4f854e3dc"
+        },
+        {
+          "path": "lib/api-zod/src/generated/types/getTerraEnterpriseFlags200.ts",
+          "bytes": 446,
+          "sha256": "65a884c8d62ba9e719c4265af54f74c492b6b2ab7593ce7e2a62bdbcd020a4e7"
+        },
+        {
+          "path": "lib/api-zod/src/generated/types/getTerraMLSListings200.ts",
+          "bytes": 512,
+          "sha256": "d249c2d2ae05fc2b165a694ec38a1b9c817ecc25be9c8888c6665fe4240c74d3"
+        },
+        {
+          "path": "lib/api-zod/src/generated/types/getTerraMLSListingsParams.ts",
+          "bytes": 627,
+          "sha256": "0f9ebd4391040f940d7a5eebd45f7f41a3f99f82ede5624dff9eef5ea08a2753"
+        },
+        {
+          "path": "lib/api-zod/src/generated/types/getTerraMarketIntelligence200.ts",
+          "bytes": 550,
+          "sha256": "febe4baf53d0711b9b5a3c3745df5094d6f024dc0b0c0c13cf506a01f9d84da8"
+        },
+        {
+          "path": "lib/api-zod/src/generated/types/getTerraPropertyRisk200.ts",
+          "bytes": 443,
+          "sha256": "24028d3612c58c9e78eeb4879fd0d7e48bb5e3ad367c662f0e5fd31f293275c1"
+        },
+        {
+          "path": "lib/api-zod/src/generated/types/getTerraReitFilings200Item.ts",
+          "bytes": 499,
+          "sha256": "a122bb99d9a21c1dfd8b1fa9356f0b95220579b6d16aee40999ab77de9896ca4"
+        },
+        {
+          "path": "lib/api-zod/src/generated/types/getTerraSectorPerformance200.ts",
+          "bytes": 523,
+          "sha256": "aad5f79478ae2cf332b3c26591cfa1142031276866f7fe32012d6e128222098c"
+        },
+        {
+          "path": "lib/api-zod/src/generated/types/getVesselLiveChokepoints200Item.ts",
+          "bytes": 643,
+          "sha256": "c808ae0d5f29b6b114b69a1312fd8f37d6ebc7b7c72dd2026773d0853e5e2455"
+        },
+        {
+          "path": "lib/api-zod/src/generated/types/getVesselLiveChokepoints200ItemStatus.ts",
+          "bytes": 689,
+          "sha256": "68a4cf2bb3aeb9a3e339c6acc0cec3160b65a8a3b344703386e85e99ebf14a12"
+        },
+        {
+          "path": "lib/api-zod/src/generated/types/getVesselLiveGeopoliticalEvents200Item.ts",
+          "bytes": 717,
+          "sha256": "af7e40bcc8473e7c5be361a182cd1702375c5facba858ae8a771365f4a3c462e"
+        },
+        {
+          "path": "lib/api-zod/src/generated/types/getVesselLiveGeopoliticalEvents200ItemSeverity.ts",
+          "bytes": 709,
+          "sha256": "a3c0a93f88b2a85db1a1b9418c118f711c513a618567c5ae6696315cd34f6137"
+        },
+        {
+          "path": "lib/api-zod/src/generated/types/getVesselLiveMarineWeather200.ts",
+          "bytes": 695,
+          "sha256": "86452c6b53b85e4c87938383ef45f123a949989acf29a442c4e13427dafd944b"
+        },
+        {
+          "path": "lib/api-zod/src/generated/types/getVesselLiveMarineWeather200ForecastItem.ts",
+          "bytes": 464,
+          "sha256": "76f420eb0681249afb284688e36a7e23e1c7a8e3e2888bae0db3a72cd3f4383e"
+        },
+        {
+          "path": "lib/api-zod/src/generated/types/getVesselLiveMarineWeatherParams.ts",
+          "bytes": 480,
+          "sha256": "55572d0bb0899521ffc195f6733f2b76106cb74f6120aebbd50ea5f89d89f375"
+        },
+        {
+          "path": "lib/api-zod/src/generated/types/getVesselLivePortCongestion200Item.ts",
+          "bytes": 723,
+          "sha256": "7ea557fb48c09210f1f98ebb08e681628bcb38b812f26e3900b6d807c178b94e"
+        },
+        {
+          "path": "lib/api-zod/src/generated/types/getVesselLivePortCongestion200ItemCongestionLevel.ts",
+          "bytes": 721,
+          "sha256": "4b5e5148886552fce7928f1246dae748f55d9682634dbdcdbcbce8d407d9c9ff"
+        },
+        {
+          "path": "lib/api-zod/src/generated/types/getVesselPositionsParams.ts",
+          "bytes": 439,
+          "sha256": "20ec398461a54051313a0923cc6a186c97d70ffb25d66a0b577dd9a3fc691d3e"
+        },
+        {
+          "path": "lib/api-zod/src/generated/types/getVesselWeatherSnapshots200Item.ts",
+          "bytes": 578,
+          "sha256": "62ea5ea1251ed09cbfd9cf22c63a8d98533783f28cd7854f1c691eb077a4c95f"
+        },
+        {
+          "path": "lib/api-zod/src/generated/types/getVesselWeatherSnapshotsParams.ts",
+          "bytes": 449,
+          "sha256": "6d65c582d6c5b86a0ab152628613fcbf71efaf7864cec605b44555fb2148038e"
+        },
+        {
+          "path": "lib/api-zod/src/generated/types/handleBrowserLoginCallbackParams.ts",
+          "bytes": 480,
+          "sha256": "34fdb0e060dfe4982c238eff78f88a954955fa6b04521e343b284fa01b5b91e3"
+        },
+        {
+          "path": "lib/api-zod/src/generated/types/handleStripeWebhookBody.ts",
+          "bytes": 479,
+          "sha256": "17b7f1f382f0ff7af81db54684c0b288797002c8b053cc4453d2d02e2b4a9fb9"
+        },
+        {
+          "path": "lib/api-zod/src/generated/types/healthStatus.ts",
+          "bytes": 429,
+          "sha256": "4e21c131c5d7bf02225ba64b3b04451bbba59864f3013a739ef9d404514865e3"
+        },
+        {
+          "path": "lib/api-zod/src/generated/types/holdingsInquiry.ts",
+          "bytes": 743,
+          "sha256": "e8bf5c56d3a7bb841eaab2a779c7f1e543758f674ad4594797455a641a0f924f"
+        },
+        {
+          "path": "lib/api-zod/src/generated/types/holdingsInquiryStatus.ts",
+          "bytes": 625,
+          "sha256": "eafaae5b2133af2ab4652ebe8e71f202f5464794308b5353daa72ebbc6d425a5"
+        },
+        {
+          "path": "lib/api-zod/src/generated/types/holdingsInquiryType.ts",
+          "bytes": 625,
+          "sha256": "a45ef0717269e40b335fe07ed9b264f155d366dd9f68bb360dfa258d10e4fd14"
+        },
+        {
+          "path": "lib/api-zod/src/generated/types/impersonateUser200.ts",
+          "bytes": 453,
+          "sha256": "e6593749fda401fa86afd9e21c9a0c54070d72877d63f835f2c4796326a06f75"
+        },
+        {
+          "path": "lib/api-zod/src/generated/types/impersonateUserBody.ts",
+          "bytes": 434,
+          "sha256": "52cd6c67957d27ba8af94b8fe129de9aa317f62af5018c816e912de5b64989f9"
+        },
+        {
+          "path": "lib/api-zod/src/generated/types/index.ts",
+          "bytes": 28463,
+          "sha256": "d159d503bf8fc81561a344f98a86e7e1666f1e6bb1871e5f26036a43e40d5851"
+        },
+        {
+          "path": "lib/api-zod/src/generated/types/ingestAlloySignal201.ts",
+          "bytes": 457,
+          "sha256": "a05b851e2e9d00c30c31cb24ad8654a2ce41d482189900d8b83be0ef5cb74bcb"
+        },
+        {
+          "path": "lib/api-zod/src/generated/types/ingestAlloySignalBatch201.ts",
+          "bytes": 482,
+          "sha256": "99d0731b4087433293eb72fa72fb4488defac2f871c283c574ddd7602f085986"
+        },
+        {
+          "path": "lib/api-zod/src/generated/types/ingestAlloySignalBatchBody.ts",
+          "bytes": 537,
+          "sha256": "8e65160d40f07e1580eca097125aafa1c81769fc594ca83f0fcdcd6f643ea6d8"
+        },
+        {
+          "path": "lib/api-zod/src/generated/types/investorDoc.ts",
+          "bytes": 664,
+          "sha256": "6d1c90c65c2d5405e9e3d859da33cc579cf01961218f01d7e6cc7b3326d2fb70"
+        },
+        {
+          "path": "lib/api-zod/src/generated/types/invoice.ts",
+          "bytes": 575,
+          "sha256": "6067813ce968239fa840416fcb5f277e17c1619e3015607522386c75ee14b42e"
+        },
+        {
+          "path": "lib/api-zod/src/generated/types/invoiceStatus.ts",
+          "bytes": 601,
+          "sha256": "6f7b7f885f7df8d656a0cb18307e75d407fcdeb4b84be7f6c940e74e801d241b"
+        },
+        {
+          "path": "lib/api-zod/src/generated/types/listA2ADelegations200.ts",
+          "bytes": 812,
+          "sha256": "67374ee29b6205186401f2f8836c6740f0838cab34260d1a5fc8c23a5e4d734f"
+        },
+        {
+          "path": "lib/api-zod/src/generated/types/listA2ADelegations200ActiveItem.ts",
+          "bytes": 451,
+          "sha256": "eb23768535145857dfb9cc54ea02e23d072676a4842abfa33a7ead8b4a365225"
+        },
+        {
+          "path": "lib/api-zod/src/generated/types/listA2ADelegations200HistoryItem.ts",
+          "bytes": 452,
+          "sha256": "547d0334de66ed71c73215254e73fae26753fa94898d3b6c89cfcc440657fffd"
+        },
+        {
+          "path": "lib/api-zod/src/generated/types/listA2ADelegations200Stats.ts",
+          "bytes": 446,
+          "sha256": "afcfb6979b66045c9b2d603ba28d3f3dbd6fcf6568a4c1cfd921857956df3690"
+        },
+        {
+          "path": "lib/api-zod/src/generated/types/listA2ATasks200.ts",
+          "bytes": 495,
+          "sha256": "a82aa0c699e18e13861a9dcba45235444838e43da1e2f02b422a1df668f53f41"
+        },
+        {
+          "path": "lib/api-zod/src/generated/types/listA2ATasksParams.ts",
+          "bytes": 463,
+          "sha256": "03bb92bf86957028bab1cf326c6919cb1cb5e209e36b3af1c9dc9766632708f4"
+        },
+        {
+          "path": "lib/api-zod/src/generated/types/listAdminUsers200.ts",
+          "bytes": 507,
+          "sha256": "99e1cf4238d148f30e0667ad5b6a5344e09abf96f9d1bd84327f8a0790f64207"
+        },
+        {
+          "path": "lib/api-zod/src/generated/types/listAdminUsersParams.ts",
+          "bytes": 512,
+          "sha256": "87f4a65a2d3b64b6b4b025d592b298f4192c7b92a9f88381e9c9e6a9a7bfb347"
+        },
+        {
+          "path": "lib/api-zod/src/generated/types/listAgentEvents200.ts",
+          "bytes": 651,
+          "sha256": "cb7a2e82dbdb4eaa8dfd84c3c0c75b62748dd720283ea0093c45c87e2396452b"
+        },
+        {
+          "path": "lib/api-zod/src/generated/types/listAgentEvents200EventsItem.ts",
+          "bytes": 448,
+          "sha256": "f568f9fc4e358982ddc33af41a8502ba4bc1894609b9edf0225187db5be11733"
+        },
+        {
+          "path": "lib/api-zod/src/generated/types/listAgentEvents200Stats.ts",
+          "bytes": 443,
+          "sha256": "2dddde121fb89a817e0096fb7e99c5aa807120fcfe282c498b8b748b56c17337"
+        },
+        {
+          "path": "lib/api-zod/src/generated/types/listAgentEventsParams.ts",
+          "bytes": 496,
+          "sha256": "924b61b72be9d0f3402078f0bb6f85771c60f7f453139283f03b38c59dcf1f9e"
+        },
+        {
+          "path": "lib/api-zod/src/generated/types/listAgentRuns200.ts",
+          "bytes": 544,
+          "sha256": "6e596816fbbeee0ee0ef8b9d18993ccd1ff283d8375f6317e3a6cffe0fab6fa4"
+        },
+        {
+          "path": "lib/api-zod/src/generated/types/listAgentRuns200RunsItem.ts",
+          "bytes": 444,
+          "sha256": "77730ef0148786d95848e57f145cbb2390dc27dda48fd0e196572a99ffc66941"
+        },
+        {
+          "path": "lib/api-zod/src/generated/types/listAgentRunsParams.ts",
+          "bytes": 473,
+          "sha256": "6e674f68e19db5fc6c4264d91da671b42406190860f454b401cdb79aa0344fa2"
+        },
+        {
+          "path": "lib/api-zod/src/generated/types/listAgentSchedules200.ts",
+          "bytes": 612,
+          "sha256": "02c18baf1029c7f03e106427e43c1324bfda4183c1b0b680d7cd210d2e92aa87"
+        },
+        {
+          "path": "lib/api-zod/src/generated/types/listAgentSchedules200SchedulesItem.ts",
+          "bytes": 454,
+          "sha256": "6d4ea47cf845b8e45232ea1ecad2afb0383d3c33c1909e451fbe3895892640cf"
+        },
+        {
+          "path": "lib/api-zod/src/generated/types/listAlloyApprovals200.ts",
+          "bytes": 521,
+          "sha256": "f707a8104f361471a51362e68e39f391450b88cc8561dedb86d43f9bea49fba8"
+        },
+        {
+          "path": "lib/api-zod/src/generated/types/listAlloyApprovalsParams.ts",
+          "bytes": 552,
+          "sha256": "5f4e4490d5d9a48e2e7f2fe0b460cdd0a9908b95bab99e65c638c1b404b779e9"
+        },
+        {
+          "path": "lib/api-zod/src/generated/types/listAlloyApprovalsStatus.ts",
+          "bytes": 639,
+          "sha256": "82f4268968efafe04e318a02dd01bc178358319e260d262d080845503901de0f"
+        },
+        {
+          "path": "lib/api-zod/src/generated/types/listAlloyArtifactsParams.ts",
+          "bytes": 552,
+          "sha256": "2671069f36e78b82da976958bb5cbf01febcce5d13eaeb9f97c8f680393bdd82"
+        },
+        {
+          "path": "lib/api-zod/src/generated/types/listAlloyArtifactsStatus.ts",
+          "bytes": 617,
+          "sha256": "75a61d54ff2f83e1e05559f0fcddd9d05d4cf5c51a428a8227ebd217eb4ac207"
+        },
+        {
+          "path": "lib/api-zod/src/generated/types/listAlloyAuditLog200.ts",
+          "bytes": 509,
+          "sha256": "7f82e1bbda8d77bda1464780ba449f3c9326ba9039ec06f40bc0af6afbf64c35"
+        },
+        {
+          "path": "lib/api-zod/src/generated/types/listAlloyAuditLogParams.ts",
+          "bytes": 476,
+          "sha256": "458f9a4d85e6b89cb3f95b0bd7a517cf1fd68a4cfd2f746b6291631caa39a7c4"
+        },
+        {
+          "path": "lib/api-zod/src/generated/types/listAlloyRuns200.ts",
+          "bytes": 496,
+          "sha256": "1eab8f058c69810a417ac835a9e7d13d7f9615b148d0dda09d21625ad2e2da90"
+        },
+        {
+          "path": "lib/api-zod/src/generated/types/listAlloyRunsParams.ts",
+          "bytes": 574,
+          "sha256": "afbc2498ebe59914f5bef939d7eea07f08cc74c92d6cc6cd8395ca8fb04acd84"
+        },
+        {
+          "path": "lib/api-zod/src/generated/types/listAlloyRunsStatus.ts",
+          "bytes": 621,
+          "sha256": "0f8285e02fc8e6b1da03f3c04d5b8480a4680d607ce53b7c11628dc7ea222437"
+        },
+        {
+          "path": "lib/api-zod/src/generated/types/listAlloySignals200.ts",
+          "bytes": 511,
+          "sha256": "c7ddf2b0849d85476464e83859b077ba2c89e280445b42e12bd6054ad0ef4307"
+        },
+        {
+          "path": "lib/api-zod/src/generated/types/listAlloySignalsParams.ts",
+          "bytes": 524,
+          "sha256": "6b7c38b31fd1edbd6e698dd6583668bacc4641abe0847e562a4275f4b93e2bcb"
+        },
+        {
+          "path": "lib/api-zod/src/generated/types/listAlloyWorkflowsParams.ts",
+          "bytes": 552,
+          "sha256": "6da760cc51be3beb0660a4bb068c7f41bedfc461eaab1ba3712d2f786f3e30bd"
+        },
+        {
+          "path": "lib/api-zod/src/generated/types/listAlloyWorkflowsStatus.ts",
+          "bytes": 615,
+          "sha256": "80a0a59c3510c1e37ba3c89bcc6529bad2ce11ba09a209d46b7f8f141f622aa5"
+        },
+        {
+          "path": "lib/api-zod/src/generated/types/listConduitDestinationFieldsParams.ts",
+          "bytes": 456,
+          "sha256": "930715a86bbc763a6b5e3824155f031d0efd5d12d48df5c6bc6fd9cdd3ffa9b0"
+        },
+        {
+          "path": "lib/api-zod/src/generated/types/listConduitDestinationObjectsParams.ts",
+          "bytes": 457,
+          "sha256": "04ae2e8138649e149c123460e7d2fa7ec64f85a4b6c91c2baeefb654db52788b"
+        },
+        {
+          "path": "lib/api-zod/src/generated/types/listConduitSyncRunRowsParams.ts",
+          "bytes": 462,
+          "sha256": "d714e6be69c8f12de4c7eed0ce74b4578075d617ac2e66316111e0bd951ef303"
+        },
+        {
+          "path": "lib/api-zod/src/generated/types/listConduitSyncRuns200.ts",
+          "bytes": 520,
+          "sha256": "a7adf5c9e14e8523758638435f777d21613d18f94bdb76a6fcd934f2fee5a122"
+        },
+        {
+          "path": "lib/api-zod/src/generated/types/listConduitSyncRunsParams.ts",
+          "bytes": 497,
+          "sha256": "33a5a9dc08e90ce35d77b6336bdeb0a4c6e673f24518b712dffa1b8367677254"
+        },
+        {
+          "path": "lib/api-zod/src/generated/types/listConduitSyncsParams.ts",
+          "bytes": 464,
+          "sha256": "aeac4fff1797728030f1cd8442843814e09272f1ee0a3c20a64375f359d9e3f4"
+        },
+        {
+          "path": "lib/api-zod/src/generated/types/listDecisions200.ts",
+          "bytes": 553,
+          "sha256": "113c6d6c7412c516bc63623c5961a9843ffeb755735174e93c2a14d00cd42250"
+        },
+        {
+          "path": "lib/api-zod/src/generated/types/listDecisionsParams.ts",
+          "bytes": 691,
+          "sha256": "5ff86f99c4beab90bf364ff60ae67c3e068aa89341f0d21ebc79dddc18d6adbf"
+        },
+        {
+          "path": "lib/api-zod/src/generated/types/listDecisionsRiskLevel.ts",
+          "bytes": 599,
+          "sha256": "ab39f20fb2b93b0164c64ba2ecd3085d522cb9943cf57234f4b71660e2a6d5d7"
+        },
+        {
+          "path": "lib/api-zod/src/generated/types/listDecisionsStatus.ts",
+          "bytes": 685,
+          "sha256": "3011f2048bce00c8a8cb41a59ff74e613d6813ba4f6c0dc3c27e2549610ef48b"
+        },
+        {
+          "path": "lib/api-zod/src/generated/types/listExportHistory200.ts",
+          "bytes": 503,
+          "sha256": "19208d4f79b40e800ebd01066fe40cf8c92b7001603a9222dcabcdad750ebb50"
+        },
+        {
+          "path": "lib/api-zod/src/generated/types/listExportHistoryParams.ts",
+          "bytes": 457,
+          "sha256": "4124b489dcbc50684a1268cbc003634cb35014aefa7f1dbe75c21b515c770de7"
+        },
+        {
+          "path": "lib/api-zod/src/generated/types/listFirestormAnalyticsParams.ts",
+          "bytes": 448,
+          "sha256": "56ba86a04cf079eeb39cac0686c70ffbe258be3e95e7960bb939ce1ef7c968d5"
+        },
+        {
+          "path": "lib/api-zod/src/generated/types/listHoldingsInquiriesParams.ts",
+          "bytes": 563,
+          "sha256": "2468c1eb01093b44fda2bf33304dceadd933735970d2fc31da154233b2f16061"
+        },
+        {
+          "path": "lib/api-zod/src/generated/types/listHoldingsInquiriesStatus.ts",
+          "bytes": 649,
+          "sha256": "ed4260172c3746d496c603d940b5dcee21b36b1c95532be878b030fd25a6fc21"
+        },
+        {
+          "path": "lib/api-zod/src/generated/types/listNotificationsParams.ts",
+          "bytes": 439,
+          "sha256": "741db74b3c1e335eacbb96b166ef80db4d3603cb7c3bb415e4a659fefa45fd29"
+        },
+        {
+          "path": "lib/api-zod/src/generated/types/listObservabilityApps200Item.ts",
+          "bytes": 608,
+          "sha256": "377a8a312cbe271fa4a16e8a359cb2723f0970beb25eea46d266367153da93e7"
+        },
+        {
+          "path": "lib/api-zod/src/generated/types/listObservabilityApps200ItemStatus.ts",
+          "bytes": 677,
+          "sha256": "4d9c683bd44e268264c9927240c6ac4890be257e12b4e348a8a6dbf3bba8d5eb"
+        },
+        {
+          "path": "lib/api-zod/src/generated/types/listPlatformDecisions200.ts",
+          "bytes": 524,
+          "sha256": "683d09a673ff0ca06a52ef078ea168bb3a1379af5f0b8df9a27f8c59f599874e"
+        },
+        {
+          "path": "lib/api-zod/src/generated/types/listPlatformDecisionsParams.ts",
+          "bytes": 583,
+          "sha256": "c36bc316eec7b06abb92335b9acad8d42624f7ab512de4ac049120bf5161cde7"
+        },
+        {
+          "path": "lib/api-zod/src/generated/types/listPlatformDecisionsStatus.ts",
+          "bytes": 717,
+          "sha256": "02583489b8166ab77810f23ba5e0c0d09a31f49a6872e4dacf2ccff24d1299fb"
+        },
+        {
+          "path": "lib/api-zod/src/generated/types/listReportDistributions200Item.ts",
+          "bytes": 520,
+          "sha256": "fba85c6bfa038ba4fd7ea79cd02563772d871fed3e9389840bc9bfe9101fb9c7"
+        },
+        {
+          "path": "lib/api-zod/src/generated/types/listReportSchedules200Item.ts",
+          "bytes": 533,
+          "sha256": "5c91e56f017d716520a8326a397427d1ac87a3615b9df410787ffc33bd431365"
+        },
+        {
+          "path": "lib/api-zod/src/generated/types/listReportVersions200Item.ts",
+          "bytes": 484,
+          "sha256": "035ab6d25f77eec320058ce00bed320c0ce00b54f8fc9b37ed9ea9d7b83d4dad"
+        },
+        {
+          "path": "lib/api-zod/src/generated/types/listReports200.ts",
+          "bytes": 491,
+          "sha256": "12d3115ef75a8dc2e865b4268d62be5488cfb5662a1d6c2c7aae50ec54b1959f"
+        },
+        {
+          "path": "lib/api-zod/src/generated/types/listReportsParams.ts",
+          "bytes": 470,
+          "sha256": "0ac72bc7aec6294b3b26b88f58c43eb946de81ec90dd297ddaa4b34a400f0d86"
+        },
+        {
+          "path": "lib/api-zod/src/generated/types/listSkills200.ts",
+          "bytes": 501,
+          "sha256": "ff46b332d25cba90a7e1500811f5bccd27029ddbd743065d02faf9443b7d9c49"
+        },
+        {
+          "path": "lib/api-zod/src/generated/types/listSkillsParams.ts",
+          "bytes": 539,
+          "sha256": "82b9896d900e7b19aabffa65d7490925df3c1f8039b3838b12fcfaba9d12db12"
+        },
+        {
+          "path": "lib/api-zod/src/generated/types/listSkillsStatus.ts",
+          "bytes": 581,
+          "sha256": "43de836bdc70c3267d41e40249708e43562f447310b49757e14b945eddebee07"
+        },
+        {
+          "path": "lib/api-zod/src/generated/types/listStephenContentBlocksParams.ts",
+          "bytes": 550,
+          "sha256": "5d4af3a558e518e2d532dd460b1a164ad8c61b06a98b37d324f7ee0c5928ee0c"
+        },
+        {
+          "path": "lib/api-zod/src/generated/types/listStephenContentBlocksType.ts",
+          "bytes": 667,
+          "sha256": "63d1dba5b88d79639dd864bb7da60466c04fdfe69f6bb0e9a783871adb5bb776"
+        },
+        {
+          "path": "lib/api-zod/src/generated/types/listStripeInvoicesParams.ts",
+          "bytes": 444,
+          "sha256": "e77d2ec04b9162ab673bb3692367f9fec101004df6369fa10926dea1ce93ceff"
+        },
+        {
+          "path": "lib/api-zod/src/generated/types/listVentureLeadershipParams.ts",
+          "bytes": 446,
+          "sha256": "766662233075eb4012578ff0890b40cb7817cadbfd373233c3e6f2cf6e0574f9"
+        },
+        {
+          "path": "lib/api-zod/src/generated/types/listVentureMetricsParams.ts",
+          "bytes": 466,
+          "sha256": "f0db105faa6e35fdab7592abc1e130973513fc4336f58d1c158b0790f9924298"
+        },
+        {
+          "path": "lib/api-zod/src/generated/types/listVentureMilestonesParams.ts",
+          "bytes": 568,
+          "sha256": "526ac795e292f777918ad426d39c4e28e26554df1ebfa7eba287341c5e7d148a"
+        },
+        {
+          "path": "lib/api-zod/src/generated/types/listVentureMilestonesStatus.ts",
+          "bytes": 657,
+          "sha256": "326d785727cdbbcbee6938443464aba838b57280db2f47b4aa543bbc8d471d2c"
+        },
+        {
+          "path": "lib/api-zod/src/generated/types/listVenturesParams.ts",
+          "bytes": 453,
+          "sha256": "00a9ddd6b5819f2ebdbeb19a85d412db401afb3f71ec71db2d1bbe2dff09f1b7"
+        },
+        {
+          "path": "lib/api-zod/src/generated/types/listVesselCommandWorkflowsParams.ts",
+          "bytes": 566,
+          "sha256": "e174f15b8967c530c9a9e5c9f348482de1125e3b25654257de67df5fb25d995f"
+        },
+        {
+          "path": "lib/api-zod/src/generated/types/listVesselCommandWorkflowsStatus.ts",
+          "bytes": 667,
+          "sha256": "93918e9c464754274329cbe0da15f98e178500947fc610b9acbef5dd6b30770d"
+        },
+        {
+          "path": "lib/api-zod/src/generated/types/listVesselEventsParams.ts",
+          "bytes": 473,
+          "sha256": "3f9cba194f07680d04b9a9c5c7eb527e3b2596a714c6284302bb03fd2f08c964"
+        },
+        {
+          "path": "lib/api-zod/src/generated/types/listWebhookDeliveries200.ts",
+          "bytes": 528,
+          "sha256": "7c7981c83d1fd2eabb488ed4c6fcf5a9cdf00ae23a4ff483e367857d7737a20f"
+        },
+        {
+          "path": "lib/api-zod/src/generated/types/listWebhookDeliveriesParams.ts",
+          "bytes": 639,
+          "sha256": "6692942f3040f557426ab7a4599dcb26d027067158c5bba9474de8891675935e"
+        },
+        {
+          "path": "lib/api-zod/src/generated/types/listWebhookEndpoints200.ts",
+          "bytes": 527,
+          "sha256": "5edbd155172e2a7358c887938ca95add238fbb2e1e203c5919391feacb40299c"
+        },
+        {
+          "path": "lib/api-zod/src/generated/types/listWebhookEventTypes200.ts",
+          "bytes": 565,
+          "sha256": "d15628186028d2b0bd670d475e6d4ba64a7076b563fdf473bd8c4d326543e608"
+        },
+        {
+          "path": "lib/api-zod/src/generated/types/listWebhookEventTypes200Data.ts",
+          "bytes": 450,
+          "sha256": "d8336c245e8f32f51f267b534e010c3c7bb3529b8250215c2b8c14ecc6faa29b"
+        },
+        {
+          "path": "lib/api-zod/src/generated/types/listWebhooks200.ts",
+          "bytes": 519,
+          "sha256": "ed1bf72cc4bec37c85c5ac6dabd89fc76fee9e7ed9ac8b1b0b64cbcc6df9f9f0"
+        },
+        {
+          "path": "lib/api-zod/src/generated/types/livenessCheck200.ts",
+          "bytes": 432,
+          "sha256": "2dc03c7466f88052ad54ec1bd9aaaad93815e50706a116f1c7b3c4374953715a"
+        },
+        {
+          "path": "lib/api-zod/src/generated/types/login201.ts",
+          "bytes": 506,
+          "sha256": "ecb5083a724c85250a30b03cc242aec012e7c15e547d0439e7facc63121b2ed5"
+        },
+        {
+          "path": "lib/api-zod/src/generated/types/loginBody.ts",
+          "bytes": 428,
+          "sha256": "0a23062f0b25397afdf1d1245e28cc4a5f32778935051d58366d5e2794c4a901"
+        },
+        {
+          "path": "lib/api-zod/src/generated/types/loginWithPassword200.ts",
+          "bytes": 518,
+          "sha256": "0e010a5a34a3773f2af84a0b8e86f90a16125b85e456ec0b52bd43cbd67fa586"
+        },
+        {
+          "path": "lib/api-zod/src/generated/types/loginWithPasswordBody.ts",
+          "bytes": 455,
+          "sha256": "a818a68caa02a27b49849480098559a8e80fd8a51fd5a46be87a5e8f961f9141"
+        },
+        {
+          "path": "lib/api-zod/src/generated/types/logoutSuccess.ts",
+          "bytes": 432,
+          "sha256": "44b1651811463a091647e955252eb727672474f4abce88b5f4917dd4a6244fae"
+        },
+        {
+          "path": "lib/api-zod/src/generated/types/lyteOrder.ts",
+          "bytes": 576,
+          "sha256": "ad053411df162008625331f92230311d673e5198b5a1258a2b42a6043a6ce17a"
+        },
+        {
+          "path": "lib/api-zod/src/generated/types/lyteProduct.ts",
+          "bytes": 547,
+          "sha256": "f79340b1101be613985b85b21db24f806abc95b81fc683491253bb46f9ed1153"
+        },
+        {
+          "path": "lib/api-zod/src/generated/types/mLSListing.ts",
+          "bytes": 883,
+          "sha256": "4ccdb0f0640add7becd8f6fc44ed19c7b0cf56a0df4d29030d57a24a359f87e7"
+        },
+        {
+          "path": "lib/api-zod/src/generated/types/mLSListingStatus.ts",
+          "bytes": 601,
+          "sha256": "f4e8022370074b79b4409e72fa8b66b613ec3f458e3f9d786768706219b2bb31"
+        },
+        {
+          "path": "lib/api-zod/src/generated/types/mobileTokenExchangeRequest.ts",
+          "bytes": 635,
+          "sha256": "baf81b6febbb8ec34feafd305011e7fdc5948b51610f42700e895d9d367dc285"
+        },
+        {
+          "path": "lib/api-zod/src/generated/types/mobileTokenExchangeSuccess.ts",
+          "bytes": 442,
+          "sha256": "8254a7d20a4bbdffe47a5392455b97e6384d820e346cb7682d03cca5878fae39"
+        },
+        {
+          "path": "lib/api-zod/src/generated/types/multiDelegateA2ATask200.ts",
+          "bytes": 443,
+          "sha256": "6e7b6a8ea53a7d0330b2260e789fe72f335f5f39808f7cfa459512acf7da4730"
+        },
+        {
+          "path": "lib/api-zod/src/generated/types/multiDelegateA2ATaskBody.ts",
+          "bytes": 523,
+          "sha256": "7988f90186c3a9d4abccb719d74d037e29c666f73dd1b7e07a031a2a2b890aaf"
+        },
+        {
+          "path": "lib/api-zod/src/generated/types/notFoundResponse.ts",
+          "bytes": 471,
+          "sha256": "4cc7e027e8dc9c498ff645823d2e07f591b8af233a748cdf4bee2302e6f00e66"
+        },
+        {
+          "path": "lib/api-zod/src/generated/types/notification.ts",
+          "bytes": 750,
+          "sha256": "4d3e955104844d56b848f971592427f1951361cd9f9e9f7f7a929d1afdf55432"
+        },
+        {
+          "path": "lib/api-zod/src/generated/types/notificationChannel.ts",
+          "bytes": 597,
+          "sha256": "e802480f700c87fb88f8b7dc99c1112a9b9b2e53697fed842b9bb3a0b91feb2e"
+        },
+        {
+          "path": "lib/api-zod/src/generated/types/notificationType.ts",
+          "bytes": 631,
+          "sha256": "27be76a0393b2baa56c0f148ab8dd0e379581825f326f368a1497b43ef69dfa6"
+        },
+        {
+          "path": "lib/api-zod/src/generated/types/patchAlloyAdminFlagBody.ts",
+          "bytes": 473,
+          "sha256": "1c3894b066e59647e7dbfd973d4d257a2571a0a83369cdf87445aa14bddecd6c"
+        },
+        {
+          "path": "lib/api-zod/src/generated/types/pingWebhookEndpoint200.ts",
+          "bytes": 557,
+          "sha256": "f102906c5b37faf3d3b21d4d07f792415c037d9b232751a87d7b80e990ad02e1"
+        },
+        {
+          "path": "lib/api-zod/src/generated/types/pingWebhookEndpoint200Data.ts",
+          "bytes": 487,
+          "sha256": "b02fd476208c4148b784d8c5846e29e0795addc5ac98329440ad0371454d4198"
+        },
+        {
+          "path": "lib/api-zod/src/generated/types/previewExport200.ts",
+          "bytes": 570,
+          "sha256": "052f93bedeaa7df8c3e96c1e847f8a78fe8b5ddc542d1d51c62486b9d147816b"
+        },
+        {
+          "path": "lib/api-zod/src/generated/types/previewExport200RowsItem.ts",
+          "bytes": 444,
+          "sha256": "7275a3aaebee2be95abbc0e4f1a42dad18bdb5b3b7947e52daf39fd4c1d32347"
+        },
+        {
+          "path": "lib/api-zod/src/generated/types/previewExportParams.ts",
+          "bytes": 462,
+          "sha256": "df151d6a4004b43417210db3a8f127f4f7a2085c27498bdd201f3cd6c7fe439c"
+        },
+        {
+          "path": "lib/api-zod/src/generated/types/project.ts",
+          "bytes": 650,
+          "sha256": "841436917c45f01cf7e23e175a303a1b0c9c1229555d56b19f8e96eac97ae767"
+        },
+        {
+          "path": "lib/api-zod/src/generated/types/projectStatus.ts",
+          "bytes": 595,
+          "sha256": "10628631b411ddef367f880f0978f1f5388f3137021bea28e8ee69246aba0ad7"
+        },
+        {
+          "path": "lib/api-zod/src/generated/types/proveDecisionRun200.ts",
+          "bytes": 498,
+          "sha256": "6502f7f9f40d750cc23ef258b9096a876291f048e4dcc3b12d9b8eb409983b34"
+        },
+        {
+          "path": "lib/api-zod/src/generated/types/queryAgentKnowledge200.ts",
+          "bytes": 701,
+          "sha256": "710d47661785aee8977157bf0beb46ae85d7cac2adb58721f05778eb6b12fde1"
+        },
+        {
+          "path": "lib/api-zod/src/generated/types/queryAgentKnowledge200EntriesItem.ts",
+          "bytes": 453,
+          "sha256": "efed70ab99cd3740a8b4ad6bae237536a442b13a876ff4815b6ab3bc2e29b358"
+        },
+        {
+          "path": "lib/api-zod/src/generated/types/queryAgentKnowledge200Stats.ts",
+          "bytes": 447,
+          "sha256": "fbed2bb0059fcb56ec366259956005ced1ddc47e1929ae570cbb5dc561f78c37"
+        },
+        {
+          "path": "lib/api-zod/src/generated/types/queryAgentKnowledgeParams.ts",
+          "bytes": 579,
+          "sha256": "ca8349caaa0a36287fead272b6a7355d3ebd8c8784e94c6cd4e8c1af66034c3b"
+        },
+        {
+          "path": "lib/api-zod/src/generated/types/rateLimitedResponse.ts",
+          "bytes": 494,
+          "sha256": "d929598eee29e8c2fcca69cfa5f5d706a47eae0d11d2147d986dcbefed803af5"
+        },
+        {
+          "path": "lib/api-zod/src/generated/types/readinessAssessment.ts",
+          "bytes": 588,
+          "sha256": "ab7ffc6a0af9a33f644d400b2505f8e349447faa86354b77b3a146b02e9c4545"
+        },
+        {
+          "path": "lib/api-zod/src/generated/types/recordA2AHeartbeat200.ts",
+          "bytes": 460,
+          "sha256": "5ae29fd851a1ec7d93c822b1d1783490ffcfb2ceafdcc4bacb635b078b869213"
+        },
+        {
+          "path": "lib/api-zod/src/generated/types/recordDecisionOutcome200.ts",
+          "bytes": 620,
+          "sha256": "e7eaf6850558f9bb8b9bd62458c56b7d77e6a3bba52ac5f1ee7f196fb6dccbf1"
+        },
+        {
+          "path": "lib/api-zod/src/generated/types/recordDecisionOutcome200Outcome.ts",
+          "bytes": 665,
+          "sha256": "c51e4f8c0fd7e1c49d5dc3b953078fe745c8de95f69bc26bd398f4a8f471f602"
+        },
+        {
+          "path": "lib/api-zod/src/generated/types/recordTerraMeteredUsageBody.ts",
+          "bytes": 634,
+          "sha256": "ba0fcaddd9dc9bda056726e77615dd9c2f956bf7da773515b0ba085906f9a1be"
+        },
+        {
+          "path": "lib/api-zod/src/generated/types/recordTerraMeteredUsageBodyAction.ts",
+          "bytes": 623,
+          "sha256": "66c1cb672874756753502db9db195feba3a5aea8182c5e593cce8911d7811f62"
+        },
+        {
+          "path": "lib/api-zod/src/generated/types/recordWebVitalsBody.ts",
+          "bytes": 647,
+          "sha256": "244863ea456f0031d21e8301580ac35914ed0bd44561588f6abe4d39e7c37fb9"
+        },
+        {
+          "path": "lib/api-zod/src/generated/types/recordWebVitalsBodyRating.ts",
+          "bytes": 627,
+          "sha256": "f55d6eac0d00c798b70c1aaa937018d724eb863aef1388294b5b9758a599ef49"
+        },
+        {
+          "path": "lib/api-zod/src/generated/types/register201.ts",
+          "bytes": 491,
+          "sha256": "cd911829857ac3f999fd7abd68690629c6016b866ddcbd256dd30b722c5832ef"
+        },
+        {
+          "path": "lib/api-zod/src/generated/types/registerBody.ts",
+          "bytes": 491,
+          "sha256": "564ee265daf00cc1d38d83655d9fad51c5ebf10ccc4f34e0aedf077bfda17ec4"
+        },
+        {
+          "path": "lib/api-zod/src/generated/types/registerWebhook201.ts",
+          "bytes": 550,
+          "sha256": "77fca0a96adc9e1c16d1db6578db040a90803f1215f973e3921f651bb76faec8"
+        },
+        {
+          "path": "lib/api-zod/src/generated/types/registerWebhookEndpoint201.ts",
+          "bytes": 558,
+          "sha256": "ed8309e91fecb2b382c81c1610df12f42385bc997094bdde3fb427cf417b4298"
+        },
+        {
+          "path": "lib/api-zod/src/generated/types/rejectAlloyArtifactBody.ts",
+          "bytes": 438,
+          "sha256": "fd78b247f96e1e275c13d0f413ee8dd2b01ff4827ab9bace9f10d93e9bd0e4d9"
+        },
+        {
+          "path": "lib/api-zod/src/generated/types/rejectDecision200.ts",
+          "bytes": 516,
+          "sha256": "7fed2bc66334f6c61865e59b284e20809c0ac05b901a0bba92dfa75c7660aa66"
+        },
+        {
+          "path": "lib/api-zod/src/generated/types/rejectDecisionBody.ts",
+          "bytes": 459,
+          "sha256": "230fa07bee1c6d0bb911a0f72e1158f523ac26c22a16066853601e30b0b2ca9b"
+        },
+        {
+          "path": "lib/api-zod/src/generated/types/rejectPlatformDecisionBody.ts",
+          "bytes": 441,
+          "sha256": "44bf45dc96770f8e8106816acb7aa4a4f2f5ff8426dbebe857db4544de63d8a9"
+        },
+        {
+          "path": "lib/api-zod/src/generated/types/report.ts",
+          "bytes": 826,
+          "sha256": "45f738b1c689ca76ba7a8df7fa3f08397ab3e901192f6caaa471ae670d88818a"
+        },
+        {
+          "path": "lib/api-zod/src/generated/types/reportParameters.ts",
+          "bytes": 464,
+          "sha256": "c05d480d32fe631eb92254307c8df391bbfbcab89a134bf6a5eaad456d51a4cc"
+        },
+        {
+          "path": "lib/api-zod/src/generated/types/reportStatus.ts",
+          "bytes": 621,
+          "sha256": "de8797d87407d862503d3ca7fa7f44fc02596ba45b09da82c03231e66f326fbd"
+        },
+        {
+          "path": "lib/api-zod/src/generated/types/reportTemplate.ts",
+          "bytes": 789,
+          "sha256": "ae0cdc0453db115d99c0c6359cc9d61dfad037e539f4b5a1b4fbbe2ad914e71c"
+        },
+        {
+          "path": "lib/api-zod/src/generated/types/reportTemplateSectionsItem.ts",
+          "bytes": 446,
+          "sha256": "a8c7e22a4a3d9e013b7034c2dd85f746b7b7429d68a0ee88de4468f46f82c604"
+        },
+        {
+          "path": "lib/api-zod/src/generated/types/requestAegisEnterpriseQuoteBody.ts",
+          "bytes": 506,
+          "sha256": "4c12f30841c6dd683917db9ef13125d5548ed99e736a1ebeb88710ed31ae2c83"
+        },
+        {
+          "path": "lib/api-zod/src/generated/types/revokeUserSessionsBody.ts",
+          "bytes": 438,
+          "sha256": "2f74ca06bcc946742202db669bed49dff70963bf6dce3ed2cc2ef0deafcc74f4"
+        },
+        {
+          "path": "lib/api-zod/src/generated/types/role.ts",
+          "bytes": 503,
+          "sha256": "d96e5f0150c35f0efc2349ce6e12a07bd83ae9fc5c9a5cb80efa2775dc33f781"
+        },
+        {
+          "path": "lib/api-zod/src/generated/types/runAlloyWorkflow202.ts",
+          "bytes": 453,
+          "sha256": "0e67f664840289e571a15e5e9562919307dc9f227c40b15a6503ecc387e8e595"
+        },
+        {
+          "path": "lib/api-zod/src/generated/types/runAlloyWorkflowBody.ts",
+          "bytes": 552,
+          "sha256": "0de8e035696b12d80ccb6430d64f5c6b7c714ee213e1a88798ba0968ef5db468"
+        },
+        {
+          "path": "lib/api-zod/src/generated/types/runAlloyWorkflowBodyInput.ts",
+          "bytes": 445,
+          "sha256": "78a128408424e8d7d2242de40eeec6b981938864611fa8923b1d69ca720dfc0e"
+        },
+        {
+          "path": "lib/api-zod/src/generated/types/searchHoldings200.ts",
+          "bytes": 542,
+          "sha256": "9a358888cb3b972f7774da0a2fa33489d1229ada4ca243ea17acac4f11f21221"
+        },
+        {
+          "path": "lib/api-zod/src/generated/types/searchHoldings200ResultsItem.ts",
+          "bytes": 495,
+          "sha256": "af6611d586914b2b0d030e383f7bd5d86f42aea5cf33947385202a95cf35f716"
+        },
+        {
+          "path": "lib/api-zod/src/generated/types/searchHoldingsDomain.ts",
+          "bytes": 627,
+          "sha256": "07a365f87a6a56721fbfa4037f598c66550dd3e2514cd741b95db4a81bcf84f4"
+        },
+        {
+          "path": "lib/api-zod/src/generated/types/searchHoldingsParams.ts",
+          "bytes": 549,
+          "sha256": "f5acc1303b04d90b1a097be19751a890906aa310536b3875e910d0c0b63709f2"
+        },
+        {
+          "path": "lib/api-zod/src/generated/types/sessionToken.ts",
+          "bytes": 447,
+          "sha256": "8637e6c8fb94d51a2791a283508f84ff563b34243591a30c1938e9ad05289fd0"
+        },
+        {
+          "path": "lib/api-zod/src/generated/types/setAdminFeatureFlagBody.ts",
+          "bytes": 442,
+          "sha256": "389e5a502765b02553b46dd64d39a01328a0812ea0a6d6f5b93084fb449ad420"
+        },
+        {
+          "path": "lib/api-zod/src/generated/types/setAdminUserRoleBody.ts",
+          "bytes": 433,
+          "sha256": "76e316c5bdd836d98a4e171c91b97f54c0bad4bae99b6773749f5e6ad72d2533"
+        },
+        {
+          "path": "lib/api-zod/src/generated/types/stephenBookingRequest.ts",
+          "bytes": 880,
+          "sha256": "aa3c73a3f88c33dffad80331e33c53ee914c7fda0e2740a8a870ff67fc937605"
+        },
+        {
+          "path": "lib/api-zod/src/generated/types/stephenBookingRequestStatus.ts",
+          "bytes": 657,
+          "sha256": "b005b88acaefb8666138b7b6a23128f2f66d781fa1584eb9d0582d0d746de04a"
+        },
+        {
+          "path": "lib/api-zod/src/generated/types/stephenBookingRequestType.ts",
+          "bytes": 735,
+          "sha256": "a6097fa0ee1f323232dbcfa17b0a2e12841a1f787350ec75ea0a7c81aca0509b"
+        },
+        {
+          "path": "lib/api-zod/src/generated/types/stephenCaseStudy.ts",
+          "bytes": 598,
+          "sha256": "4e39186cc8b69a69aae06cd9f2f1171c35a8853c51a2dbf0e1552df54497d87d"
+        },
+        {
+          "path": "lib/api-zod/src/generated/types/stephenContact.ts",
+          "bytes": 564,
+          "sha256": "bee5f071adb3d74b34fcfc36beed4c64c75af54b765323162c6afae5dff4cefa"
+        },
+        {
+          "path": "lib/api-zod/src/generated/types/stephenContentBlock.ts",
+          "bytes": 865,
+          "sha256": "0013d9c606bcdcf4cf7eafd3ff091943069d420ea834dc85bc07dd8f872d7e47"
+        },
+        {
+          "path": "lib/api-zod/src/generated/types/stephenContentBlockMetadata.ts",
+          "bytes": 475,
+          "sha256": "2993f950c6a0ad3fd22e3291d3602df9835e846f08cfb893a80e1e12eddcf4a5"
+        },
+        {
+          "path": "lib/api-zod/src/generated/types/stephenContentBlockType.ts",
+          "bytes": 647,
+          "sha256": "d6a445419861305c1302d65839ec5958dbefe03b3e68e30e855016a7dc4bde41"
+        },
+        {
+          "path": "lib/api-zod/src/generated/types/stephenEcosystemStatus.ts",
+          "bytes": 729,
+          "sha256": "474f190054a20af0601be94ab100f7df1836f6603359baab9ff3ed762f22deba"
+        },
+        {
+          "path": "lib/api-zod/src/generated/types/stephenEcosystemStatusAppsItem.ts",
+          "bytes": 504,
+          "sha256": "4a61731c09ae2df2b01de7f8ccba8bdcf9570c6d3eafe1468d3d5aa4a6d41463"
+        },
+        {
+          "path": "lib/api-zod/src/generated/types/stephenEcosystemStatusConnectorsItem.ts",
+          "bytes": 469,
+          "sha256": "8da89ac93588c7a04ed4e4748bf357c9f7caa9279d88090ddcb0086f8c6027d0"
+        },
+        {
+          "path": "lib/api-zod/src/generated/types/stephenPortfolioCaseStudy.ts",
+          "bytes": 758,
+          "sha256": "ee19c657391b7cf4b042181751ccc4ace54596d8a268a3457a11ecb7e32dba94"
+        },
+        {
+          "path": "lib/api-zod/src/generated/types/stephenProfile.ts",
+          "bytes": 636,
+          "sha256": "585eac35d2ecb2d8174da97937ef0ab5bc25cff2d7cf09b8dcb6ff22c2941f48"
+        },
+        {
+          "path": "lib/api-zod/src/generated/types/stephenTestimonial.ts",
+          "bytes": 617,
+          "sha256": "32fe12d46c2172dcc9ea79b39c32cd617761f3c2a188a451a82d52da03953de1"
+        },
+        {
+          "path": "lib/api-zod/src/generated/types/streamA2AAgentParams.ts",
+          "bytes": 434,
+          "sha256": "eae0166252937c5d8672110e3ee20bcb86bdc44f17aa6a0cdf8a242f67af22d0"
+        },
+        {
+          "path": "lib/api-zod/src/generated/types/stripeCheckoutSession.ts",
+          "bytes": 650,
+          "sha256": "0942bcc9320c15a92238220f18c6014b1dd2824976446c6befb3f6cfacd8a471"
+        },
+        {
+          "path": "lib/api-zod/src/generated/types/stripeInvoice.ts",
+          "bytes": 725,
+          "sha256": "f8be9e536d8262312f3c379580132e874666ae308f74170e4d17b68f61b7b059"
+        },
+        {
+          "path": "lib/api-zod/src/generated/types/stripeProduct.ts",
+          "bytes": 596,
+          "sha256": "47e37a7a56f4c9e00e1272d5e86f84909d005e7286b561c83e7e2a06732dfdc3"
+        },
+        {
+          "path": "lib/api-zod/src/generated/types/stripeProductPricesItem.ts",
+          "bytes": 519,
+          "sha256": "72ee3538e75ce397208d80fcbaf5ae45836123899f76e762bb8f2dee33c42be2"
+        },
+        {
+          "path": "lib/api-zod/src/generated/types/submitReportReviewBody.ts",
+          "bytes": 569,
+          "sha256": "693d00e6432a84a6fa525c5f2010fb4d207166b977b2d3f29a6bb4d9e25a9a23"
+        },
+        {
+          "path": "lib/api-zod/src/generated/types/submitReportReviewBodyDecision.ts",
+          "bytes": 613,
+          "sha256": "1d22cbc8c0f72b5506c639c7da307256d405e15b015fb8956c1737f3329baf44"
+        },
+        {
+          "path": "lib/api-zod/src/generated/types/subscribeCommandPlanBody.ts",
+          "bytes": 501,
+          "sha256": "0041e7b2275372ad568c9852c48dd5cab6c2c34b323dbd34f743a04b30b2a270"
+        },
+        {
+          "path": "lib/api-zod/src/generated/types/subscribeTerraplanBody.ts",
+          "bytes": 500,
+          "sha256": "5b31343f6e7ba824017a26b0e163ed44692bccbec248f46d47966912de27fbfc"
+        },
+        {
+          "path": "lib/api-zod/src/generated/types/subscription.ts",
+          "bytes": 574,
+          "sha256": "aa4cda8dd8f90f5e9393310716bda46c1489ba1322a90eb51c37cc7716d5a194"
+        },
+        {
+          "path": "lib/api-zod/src/generated/types/subscriptionStatus.ts",
+          "bytes": 635,
+          "sha256": "c37c796b4530efbe141269f8ebd9a7001a337db9e11012da2152fddbcaaac708"
+        },
+        {
+          "path": "lib/api-zod/src/generated/types/subscriptionStatusResponse.ts",
+          "bytes": 819,
+          "sha256": "a9716e5e8e3438f300ffaa730ed88831745a0130fe2b5b51bb0833bb96d4205e"
+        },
+        {
+          "path": "lib/api-zod/src/generated/types/subscriptionStatusResponseAllSubscriptionsItem.ts",
+          "bytes": 469,
+          "sha256": "e5f1a7d498a4619d60db398750be0ad67c8cd61b7b9d5c30a628c26fa660d629"
+        },
+        {
+          "path": "lib/api-zod/src/generated/types/subscriptionStatusResponseSubscription.ts",
+          "bytes": 631,
+          "sha256": "92a42aa141008b61b4c4524183b92362d3c4c614cb07db4a06ff4f1e62bfa3d9"
+        },
+        {
+          "path": "lib/api-zod/src/generated/types/syncBillingPlans200.ts",
+          "bytes": 435,
+          "sha256": "fb19b640d01f9fab47ada9d6d13356b53c5bb74089f69196f919f504bb7bb206"
+        },
+        {
+          "path": "lib/api-zod/src/generated/types/syncTerraCommercial202.ts",
+          "bytes": 457,
+          "sha256": "41040fd49ff4786ed186131f40d5ed76be2209d718efe1b7256f0233d0460e5e"
+        },
+        {
+          "path": "lib/api-zod/src/generated/types/syncTerraMLS202.ts",
+          "bytes": 450,
+          "sha256": "6a99ce76a1d1a2df1b7acdc7a63792cc1b44b94e564dab4101ae4ef715154cb9"
+        },
+        {
+          "path": "lib/api-zod/src/generated/types/terraGeocode200.ts",
+          "bytes": 493,
+          "sha256": "a9a52010b02c761c612ebf4efb08241c304a511ccdb5e09056012869b1f605bc"
+        },
+        {
+          "path": "lib/api-zod/src/generated/types/terraGeocodeParams.ts",
+          "bytes": 434,
+          "sha256": "7846e5e18abc006602f14a45e2ddeecd5aa4d2d96082f730a6e23812e604c9f6"
+        },
+        {
+          "path": "lib/api-zod/src/generated/types/terraGeocodingStatus200.ts",
+          "bytes": 522,
+          "sha256": "63f988af80d7a544005012a8a1e3ce288799b99cdb2ccb752e06003a7400b5e0"
+        },
+        {
+          "path": "lib/api-zod/src/generated/types/terraReverseGeocode200.ts",
+          "bytes": 589,
+          "sha256": "b9805c5362817c03625768acda219bdc2c7945c476c96ae000b4e6af3cd1d2aa"
+        },
+        {
+          "path": "lib/api-zod/src/generated/types/terraReverseGeocode200Components.ts",
+          "bytes": 452,
+          "sha256": "4d8ca943f1ff36743b05f5f09e68fb8021e8a57628052e6af0506fc51d1c932d"
+        },
+        {
+          "path": "lib/api-zod/src/generated/types/terraReverseGeocodeParams.ts",
+          "bytes": 452,
+          "sha256": "95ffaeecbbf24c5ef302e051ade55b2070390af2a0bc9460af4d1ab96bddfed1"
+        },
+        {
+          "path": "lib/api-zod/src/generated/types/triggerAgentRun200.ts",
+          "bytes": 528,
+          "sha256": "9e4f41a75e70151a11a8b59e19898605a9b9e348b29b5f7a578ff27e108ed948"
+        },
+        {
+          "path": "lib/api-zod/src/generated/types/triggerAgentRun200Record.ts",
+          "bytes": 444,
+          "sha256": "af9069b194fd71e82ef42de44bc49049099b73aa05f4c58c51b9dd557c067a85"
+        },
+        {
+          "path": "lib/api-zod/src/generated/types/unauthorizedResponse.ts",
+          "bytes": 475,
+          "sha256": "767dbb8480f261f9918aa04c6372730bbe4a379c3bb19f0b1c935fd6c59cf6ab"
+        },
+        {
+          "path": "lib/api-zod/src/generated/types/updateAlloyWorkflowBody.ts",
+          "bytes": 727,
+          "sha256": "6032666b004953ccb8e260d9e24b33fd7b0fd36c7a81cc92f4f47361bc12d608"
+        },
+        {
+          "path": "lib/api-zod/src/generated/types/updateAlloyWorkflowBodyStatus.ts",
+          "bytes": 635,
+          "sha256": "58cb72627838270e1b2bfc6152acd0fd0beb8f595dacdd1ff0f29eb38147ec96"
+        },
+        {
+          "path": "lib/api-zod/src/generated/types/updateAlloyWorkflowBodyStepsItem.ts",
+          "bytes": 452,
+          "sha256": "46e0bc3c38d00714b02be531aef7e210a8b764b8659a911d609690b2b4512248"
+        },
+        {
+          "path": "lib/api-zod/src/generated/types/updateConduitConnectionBody.ts",
+          "bytes": 603,
+          "sha256": "cd28f185d4bd3ab245a04ddfa425c7caf158cebace8d84879a2e92abd14f1809"
+        },
+        {
+          "path": "lib/api-zod/src/generated/types/updateConduitConnectionBodyCredentials.ts",
+          "bytes": 458,
+          "sha256": "a7a91a6ed1e226d60e60c049537a6c31798f18f2cea7eb231800ea4651bcb1cb"
+        },
+        {
+          "path": "lib/api-zod/src/generated/types/updateConduitSyncBody.ts",
+          "bytes": 754,
+          "sha256": "c3e047e774f881fba0aa82069d252bf4555c871f556526a0d39223aeee8c73a1"
+        },
+        {
+          "path": "lib/api-zod/src/generated/types/updateConduitSyncBodySourceMeta.ts",
+          "bytes": 451,
+          "sha256": "b74154212e4847711e362787b4c5bcce51392728e2bacc44b0c1d36ffa6a3647"
+        },
+        {
+          "path": "lib/api-zod/src/generated/types/updateConduitSyncMappingsBody.ts",
+          "bytes": 539,
+          "sha256": "14741212ce16c56863789249559dd56efe0b80b2114d0804b59eed662d19d54c"
+        },
+        {
+          "path": "lib/api-zod/src/generated/types/updateConnector.ts",
+          "bytes": 662,
+          "sha256": "edaecdb66301afe62fc1af268c17881089ecf936fda3260d6114d300b4d45f79"
+        },
+        {
+          "path": "lib/api-zod/src/generated/types/updateConnectorConfig.ts",
+          "bytes": 441,
+          "sha256": "4f47fa640b24e763defa4496f3438dff3a2482ef41c9560359ff7dddb143bcd1"
+        },
+        {
+          "path": "lib/api-zod/src/generated/types/updateConnectorStatus.ts",
+          "bytes": 619,
+          "sha256": "6fc7e5362ab2c941d90176acab6d3290dd540c67f6a27207d19d57381f6f496e"
+        },
+        {
+          "path": "lib/api-zod/src/generated/types/updateFeatureFlag.ts",
+          "bytes": 510,
+          "sha256": "d222c4837752e6d3abddcc57684d31c69c17b656c78be8d06bc3a56e262b9a68"
+        },
+        {
+          "path": "lib/api-zod/src/generated/types/updateProject.ts",
+          "bytes": 577,
+          "sha256": "18c7433d29592d7fd027fee8e55e36452d6be1a573257a40811c5de14f54c435"
+        },
+        {
+          "path": "lib/api-zod/src/generated/types/updateProjectStatus.ts",
+          "bytes": 621,
+          "sha256": "e69100af3998624e39853fbcbac3cb977d557c991ed55eade824f635099fbff8"
+        },
+        {
+          "path": "lib/api-zod/src/generated/types/updateReportStatusBody.ts",
+          "bytes": 543,
+          "sha256": "dd953ef4f71c991610965c2216bc25939f43667e123aabb0570c89355435c083"
+        },
+        {
+          "path": "lib/api-zod/src/generated/types/updateReportStatusBodyStatus.ts",
+          "bytes": 687,
+          "sha256": "49a5d06463f27f3f7ecc874f2e696c643d0e1ac4bdba1dc4ac1cff86f40a1aab"
+        },
+        {
+          "path": "lib/api-zod/src/generated/types/updateReportTemplateBody.ts",
+          "bytes": 615,
+          "sha256": "b51104c8d7002a42ebd20863682e1edd692b5dc7baef1d6e702dde079ae408df"
+        },
+        {
+          "path": "lib/api-zod/src/generated/types/updateReportTemplateBodySectionsItem.ts",
+          "bytes": 456,
+          "sha256": "738d7f21c1fd15ddea9d8f2cbf51846e81e11d97c78cc202f24341e27b290d80"
+        },
+        {
+          "path": "lib/api-zod/src/generated/types/updateSkillBody.ts",
+          "bytes": 671,
+          "sha256": "df36f636e6f398236cb60533728f8e085d8fbce15dd657b08cc7cd52ff99df32"
+        },
+        {
+          "path": "lib/api-zod/src/generated/types/updateSkillBodyStatus.ts",
+          "bytes": 601,
+          "sha256": "6a244e05ab8ec1b8d3e92452ad8966b458e9f5ecb8f9e8f9f3d6d7d0adb500de"
+        },
+        {
+          "path": "lib/api-zod/src/generated/types/updateSkillBodyStepsItem.ts",
+          "bytes": 444,
+          "sha256": "d39153644390a460c65e47cafbc1f5b478c05d7efc87ca85da53584a8b7578fe"
+        },
+        {
+          "path": "lib/api-zod/src/generated/types/updateStephenContentBlock.ts",
+          "bytes": 682,
+          "sha256": "e3dc4629007a0ce24307747d6711f83cd619594a280561e89948d88f5ad30dbb"
+        },
+        {
+          "path": "lib/api-zod/src/generated/types/updateStephenContentBlockMetadata.ts",
+          "bytes": 453,
+          "sha256": "2651de734594ac279744d4ad017d31dd473bcc11ac352f2cd54d2d8eadd890e4"
+        },
+        {
+          "path": "lib/api-zod/src/generated/types/updateStephenPortfolioCaseStudy.ts",
+          "bytes": 615,
+          "sha256": "bbe42cb65dfbfee8c8729f98b8cc3efaa67ce518b1d514710bedd5f204a085ac"
+        },
+        {
+          "path": "lib/api-zod/src/generated/types/updateSubscriptionBody.ts",
+          "bytes": 486,
+          "sha256": "c30236d739924c7490e0e4a059f9a8c1d7dde69a0ce06502e106a0d262bfc9e8"
+        },
+        {
+          "path": "lib/api-zod/src/generated/types/updateVentureBody.ts",
+          "bytes": 493,
+          "sha256": "81588b40009bc1cd78c9b4dae7e6056f999943a1c849a932a9d0f0c2dc78e457"
+        },
+        {
+          "path": "lib/api-zod/src/generated/types/updateVesselCommandWorkflowBody.ts",
+          "bytes": 580,
+          "sha256": "b19aeea5af78963c185c2e320385ff06a5f4f03b78597630fc66710886c2fb33"
+        },
+        {
+          "path": "lib/api-zod/src/generated/types/updateVesselCommandWorkflowBodyStatus.ts",
+          "bytes": 691,
+          "sha256": "cdcaee397f074614ea80aac11d4a9f938fc26eedc73e567497e8120730e7170d"
+        },
+        {
+          "path": "lib/api-zod/src/generated/types/updateVesselEventBody.ts",
+          "bytes": 591,
+          "sha256": "40aad65236e8fddb56ac7d5707475aa64a3be9bc2def9a7f6563c7cf009ed0f5"
+        },
+        {
+          "path": "lib/api-zod/src/generated/types/updateVesselEventBodyMetadata.ts",
+          "bytes": 449,
+          "sha256": "280b63f3d632ced607c50edf9f766b1a00b79aefe1e08daa69ca785d1454cccf"
+        },
+        {
+          "path": "lib/api-zod/src/generated/types/updateWebhookEndpointBody.ts",
+          "bytes": 513,
+          "sha256": "74ab0f3666ce66ed7bd4ed70cf7f4d403416607ff0b04c2af4907ac1a00aa4f3"
+        },
+        {
+          "path": "lib/api-zod/src/generated/types/uploadUrlRequest.ts",
+          "bytes": 940,
+          "sha256": "a3f18d4410227705dbcc4406f94dfe5f757cb8a594e9ce4d21b69c31d8db9b66"
+        },
+        {
+          "path": "lib/api-zod/src/generated/types/uploadUrlResponse.ts",
+          "bytes": 684,
+          "sha256": "6f02b6910c8eaa4b3ac8829b45740a60377ecb4fc184f4658a51bb60000f3e48"
+        },
+        {
+          "path": "lib/api-zod/src/generated/types/upsertAlloyAdminFlagBody.ts",
+          "bytes": 505,
+          "sha256": "586c0eaf7f350dfb6cc464a0130612e89fd52e0d18dfa65d9727714ce517b14f"
+        },
+        {
+          "path": "lib/api-zod/src/generated/types/userSummary.ts",
+          "bytes": 580,
+          "sha256": "73e87c102cc68131c5b9fc54dd20bde1a079215b500f93d2bacdbeaf0e035135"
+        },
+        {
+          "path": "lib/api-zod/src/generated/types/venture.ts",
+          "bytes": 834,
+          "sha256": "c3dc2fc2dbca1f9c3e20f374215c6d1d5f4cd78798963e8980eea6a312fb4028"
+        },
+        {
+          "path": "lib/api-zod/src/generated/types/ventureLeader.ts",
+          "bytes": 620,
+          "sha256": "5d84c0d3a8adf3b455f629df80ca2d9aabdfc6d2dc8ed5d92849df7bca31b3c9"
+        },
+        {
+          "path": "lib/api-zod/src/generated/types/ventureMetric.ts",
+          "bytes": 549,
+          "sha256": "c7e810681448e037208b1d1acfc0b34f88596615762b7e0c8efc2bd079538125"
+        },
+        {
+          "path": "lib/api-zod/src/generated/types/ventureMilestone.ts",
+          "bytes": 691,
+          "sha256": "66ec89fba4217551ca726c5aba8a6c699e065771311943819fba6f247c55acd7"
+        },
+        {
+          "path": "lib/api-zod/src/generated/types/ventureMilestoneStatus.ts",
+          "bytes": 637,
+          "sha256": "9fc47c04e0c769fbb8396b7bf91da6a6edf82a833b2202cd050eeedbc940b0ee"
+        },
+        {
+          "path": "lib/api-zod/src/generated/types/ventureStatus.ts",
+          "bytes": 613,
+          "sha256": "02ef30777f114c6c31c08c0421b9651c2c2d47ca77a143abdffdbe0a852a4f72"
+        },
+        {
+          "path": "lib/api-zod/src/generated/types/verifyEmailParams.ts",
+          "bytes": 431,
+          "sha256": "3ef24b6991f8641122fa1ae9c9e4dcb381a439656080c4e410b4ab547640f0c0"
+        },
+        {
+          "path": "lib/api-zod/src/generated/types/vessel.ts",
+          "bytes": 560,
+          "sha256": "b347b1888dfd236825dbcb0e5ab77dd8c5ad47a6b61f2f5420688bbc84cf055f"
+        },
+        {
+          "path": "lib/api-zod/src/generated/types/vesselAlert.ts",
+          "bytes": 714,
+          "sha256": "4440838de2c7ca0e5ccfa6e3bf1ad6db233c1715000996968dd2e78c705a25cb"
+        },
+        {
+          "path": "lib/api-zod/src/generated/types/vesselAlertRule.ts",
+          "bytes": 808,
+          "sha256": "5abcd97679ff19812dd823a6c172ec229d6ce1a69543f811fc177f11e4121559"
+        },
+        {
+          "path": "lib/api-zod/src/generated/types/vesselAlertRuleAppliesTo.ts",
+          "bytes": 599,
+          "sha256": "11cc8807448749b6fabe16556b24cfa3e4cda009923e9355a1e85f796197d871"
+        },
+        {
+          "path": "lib/api-zod/src/generated/types/vesselAlertRuleSeverity.ts",
+          "bytes": 605,
+          "sha256": "3308812f98fda15f690535c16b05d6c192aae8837152d8f7cd344588bc6d8cd8"
+        },
+        {
+          "path": "lib/api-zod/src/generated/types/vesselAlertSeverity.ts",
+          "bytes": 589,
+          "sha256": "480090310d4990fa928904d69b79b64537dbf5ee0543421c613cdf3e8bebad78"
+        },
+        {
+          "path": "lib/api-zod/src/generated/types/vesselCargo.ts",
+          "bytes": 708,
+          "sha256": "d210191fb055dce6c30cc3b5009b05ad41d91a7ddfc06d207ce9bd558b2e454b"
+        },
+        {
+          "path": "lib/api-zod/src/generated/types/vesselCommandWorkflow.ts",
+          "bytes": 815,
+          "sha256": "1942fd0bee34c95b3b662e1030780dfe720b2a7b007e6e4774ee995118100229"
+        },
+        {
+          "path": "lib/api-zod/src/generated/types/vesselCommandWorkflowParameters.ts",
+          "bytes": 479,
+          "sha256": "f4c42f4a4742c2b5f82af996462233e670da9becfffe1511c2cdc28d23df369a"
+        },
+        {
+          "path": "lib/api-zod/src/generated/types/vesselCommandWorkflowStatus.ts",
+          "bytes": 673,
+          "sha256": "470c25826f4bb15f6100abfcfa144fe718928a1636e54edb86ff2d689447967b"
+        },
+        {
+          "path": "lib/api-zod/src/generated/types/vesselEvent.ts",
+          "bytes": 667,
+          "sha256": "9987f7b5028272549fecd68deb2552a990dcbbbab453503622c15ca1cbb3c72b"
+        },
+        {
+          "path": "lib/api-zod/src/generated/types/vesselEventMetadata.ts",
+          "bytes": 467,
+          "sha256": "09cc86ac5a51602fe96392fa0f1f9afaff685ec8634180c98d908e0969db5d42"
+        },
+        {
+          "path": "lib/api-zod/src/generated/types/vesselFleet.ts",
+          "bytes": 625,
+          "sha256": "7aa4789f3720972fa7dabfc795d570f667b5da0922633350049f8de3b65afe69"
+        },
+        {
+          "path": "lib/api-zod/src/generated/types/vesselFleetStatus.ts",
+          "bytes": 563,
+          "sha256": "72fe7050a6ff8c189d130d16cbce4abf7a5c55b4cf74d3853e0fb68ed2b03f0e"
+        },
+        {
+          "path": "lib/api-zod/src/generated/types/vesselPosition.ts",
+          "bytes": 614,
+          "sha256": "c63c20cedbfa615f38cc34aa56079ed1f270afa3ce9269b4b5167e9001ba5dda"
+        },
+        {
+          "path": "lib/api-zod/src/generated/types/vesselRoute.ts",
+          "bytes": 847,
+          "sha256": "2e04f3378a5429869023bac8bab96910568f3fcb0d3a78f019cb83c0e38abe06"
+        },
+        {
+          "path": "lib/api-zod/src/generated/types/vesselRouteStatus.ts",
+          "bytes": 613,
+          "sha256": "9ee8a2ac4253254905cd9f674ca9a91d71f36ca3d8d17e7c9b55c0ac7898ff1b"
+        },
+        {
+          "path": "lib/api-zod/src/generated/types/vesselRouteWaypointsItem.ts",
+          "bytes": 444,
+          "sha256": "18f39a7955f052efb5424292e7cfc2a43d0b080fc2ea72c83d5734ea7d5ed7e1"
+        },
+        {
+          "path": "lib/api-zod/src/generated/types/vesselSimulation.ts",
+          "bytes": 946,
+          "sha256": "efe05a34708c7139091f66ee4b6c5b907aa2d9d8ad906453705ac2112a798c91"
+        },
+        {
+          "path": "lib/api-zod/src/generated/types/vesselSimulationResult.ts",
+          "bytes": 470,
+          "sha256": "42453b66462d6c65bdf0702fef9c51fd200ade0c38b1522bfd5d1e1d6428e18a"
+        },
+        {
+          "path": "lib/api-zod/src/generated/types/vesselSimulationStatus.ts",
+          "bytes": 629,
+          "sha256": "1245c05c56ff39ec0d54e1621af2a4ccfb527d6a53f280c58410ec92f40723da"
+        },
+        {
+          "path": "lib/api-zod/src/generated/types/webhookDelivery.ts",
+          "bytes": 968,
+          "sha256": "46c7be4d8eabddca52ad6881a4dd132235010630c008160e45ec300db4187350"
+        },
+        {
+          "path": "lib/api-zod/src/generated/types/webhookDeliveryStatus.ts",
+          "bytes": 603,
+          "sha256": "7d6a6963ecf85bf974546b718025bba460091303a120f6f89ba9cd576c453901"
+        },
+        {
+          "path": "lib/api-zod/src/generated/types/webhookEndpoint.ts",
+          "bytes": 727,
+          "sha256": "e733631afa49b3fcb5d1872da60812ae8e4237962a114fe8eec168b462f00c53"
+        },
+        {
+          "path": "lib/api-zod/src/generated/types/webhookEndpointWithSecret.ts",
+          "bytes": 599,
+          "sha256": "67bafaf095e08e02907c4848639a2a8486005b3fbd9805c1da84e0b55b57f482"
+        },
+        {
+          "path": "lib/api-zod/src/generated/types/webhookEvent.ts",
+          "bytes": 1061,
+          "sha256": "20e1aea6e1cce1dc4db47f6e1bc7d86d259d3756e18c6a728125549a84f84b59"
+        },
+        {
+          "path": "lib/api-zod/src/generated/types/webhookEventData.ts",
+          "bytes": 500,
+          "sha256": "e48d4ba7eae6b5194f67e928de1322cfe1f0e7e7d86bae2b4a7ceb67ec24b8c0"
+        },
+        {
+          "path": "lib/api-zod/src/generated/types/webhookRegistrationRequest.ts",
+          "bytes": 1513,
+          "sha256": "6eac0c337155983c869b9ff1e3ff883dddd062f83f81975e7c18a13a94d74dae"
+        },
+        {
+          "path": "lib/api-zod/src/generated/types/websocketHealthCheck200.ts",
+          "bytes": 523,
+          "sha256": "1c78a4c9b7f84dd3e61d7a93ca7dc4e394442de13c1bc9bd0d1cc65703e0695c"
+        },
+        {
+          "path": "lib/api-zod/src/index.ts",
+          "bytes": 1234,
+          "sha256": "44ba2b944239a0b9fd1c9b93f9fe789fdbe42239733f3bdfc5369c41b3e84ad0"
+        },
+        {
+          "path": "lib/api-zod/src/nexus-v1.ts",
+          "bytes": 8435,
+          "sha256": "414ea43973eff7a285ccb289e783c036a94a1d227d554f2363196a78a693b5f5"
+        },
+        {
+          "path": "lib/api-zod/src/per.ts",
+          "bytes": 7464,
+          "sha256": "ac3c7bf4afa827b39ff0f857da2a4ad8e87e91b1ae23d39df427b64d89d0c683"
+        }
+      ]
+    },
+    {
+      "id": "shared-contracts",
+      "role": "CANONICAL_SOURCE",
+      "package_name": "@szl-holdings/shared-contracts",
+      "inputs": [
+        "packages/shared-contracts/package.json",
+        "packages/shared-contracts/src"
+      ],
+      "file_count": 9,
+      "bytes": 47529,
+      "tree_sha256": "ac5dde34c6df9e17350427f272cbb04ebd0aea5401811c6c007cec10f3d0a8c5",
+      "files": [
+        {
+          "path": "packages/shared-contracts/package.json",
+          "bytes": 471,
+          "sha256": "55e4e90b11c10ac837a242ffb90c25d48fdc0e423fb93f885024bd4b2cb20d42"
+        },
+        {
+          "path": "packages/shared-contracts/src/agent-roles.ts",
+          "bytes": 6073,
+          "sha256": "6fe2747c577d0f1e1c0f08b49c5d490bd8731849e14fa029c5aa40a491948c1b"
+        },
+        {
+          "path": "packages/shared-contracts/src/eval-types.ts",
+          "bytes": 10614,
+          "sha256": "b0d2a6fbe508a9abc92ed22efaa170049bd58ca1b12f4d95b72f1dae67070f36"
+        },
+        {
+          "path": "packages/shared-contracts/src/evidence-types.ts",
+          "bytes": 2231,
+          "sha256": "77c4a39bccff8d0e946abf9a900d46681e9c45dc2620ebd29b04a4c1480a4add"
+        },
+        {
+          "path": "packages/shared-contracts/src/index.ts",
+          "bytes": 627,
+          "sha256": "b06580e87e8ce192ab099879a822358e616249ab254422d67e55a8a321c82f3f"
+        },
+        {
+          "path": "packages/shared-contracts/src/memory-types.ts",
+          "bytes": 4294,
+          "sha256": "80472db29e19367cee431fafaa4881e24f7a85a4fbb124eacd2cd791214b98b9"
+        },
+        {
+          "path": "packages/shared-contracts/src/policy-types.ts",
+          "bytes": 1881,
+          "sha256": "5bb5cd5c9710753b26e4a0e6efcf026854615c8b265d8c13cbacf1d7c362befc"
+        },
+        {
+          "path": "packages/shared-contracts/src/retrieval-types.ts",
+          "bytes": 4175,
+          "sha256": "a18e26609476bca6b4bfce060b222f5aa229ee6e563cfa82c19dccd0f470bc54"
+        },
+        {
+          "path": "packages/shared-contracts/src/workflow-types.ts",
+          "bytes": 17163,
+          "sha256": "db5e2b346ae1fd4d031a1428facb14c82708b1e1eb408cbd3ec93cd736821d34"
+        }
+      ]
+    }
+  ],
+  "consumer_contract": {
+    "pin": "an immutable protected Platform Git revision",
+    "verify": [
+      "enumerate every Git-tracked file beneath each component input root",
+      "recompute every file SHA-256 and byte count",
+      "recompute every component tree SHA-256",
+      "recompute the release_id over canonical JSON"
+    ],
+    "reject": [
+      "mutable main or latest references",
+      "missing or additional tracked files inside an allowlisted component",
+      "a release_id or component digest mismatch",
+      "claims that hash closure proves registry publication or deployment"
+    ]
+  },
+  "release_id": "sha256:9af5861b8849ccc11813717187a15e52f644d64e97970b9cf0143eea47abf493"
+}

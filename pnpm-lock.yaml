@@ -3149,6 +3149,8 @@ importers:
         specifier: 'catalog:'
         version: 6.0.3
 
+  packages/estate-contract-release: {}
+
   packages/eval-forge:
     dependencies:
       '@szl-holdings/shared-contracts':
