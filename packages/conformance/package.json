@@ -20,6 +20,7 @@
     "src/verify-cli.mjs",
     "src/verify.mjs",
     "surfaces",
+    "publication-contract.json",
     "README.md",
     "LICENSE"
   ],
@@ -33,7 +34,7 @@
   },
   "scripts": {
     "conformance": "node src/cli.mjs",
-    "prepack": "node --test src/*.test.mjs",
+    "prepack": "node ../../scripts/release/public-npm-contract.mjs --check && node --test src/*.test.mjs",
     "test": "node --test src/*.test.mjs"
   },
   "engines": {
