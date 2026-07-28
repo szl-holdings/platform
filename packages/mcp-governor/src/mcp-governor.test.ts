@@ -18,10 +18,10 @@ import {
   type GovernedActionResult,
   type GovernedToolExecutor,
   InMemoryReplayStore,
+  McpGovernor,
   type McpGovernorConfig,
   type PolicyDecision,
   type ReplayStore,
-  McpGovernor,
   sha256,
   signAttestationResultToken,
   signCapabilityToken,
@@ -380,6 +380,40 @@ test('rejects a signed attestation result with a non-reference measurement', asy
   assert.equal(executed, false);
 });
 
+test('verifies attestation signatures before disclosing pinned reference membership', async () => {
+  const governedRequest = request();
+  const { privateKey: untrustedPrivateKey } = generateKeyPairSync('ed25519');
+  const cases: Array<Partial<AttestationResultClaims>> = [
+    { actionId: 'action-probe' },
+    { measurement: `sha384:${'d'.repeat(96)}` },
+    { referencePolicyDigest: `sha256:${'e'.repeat(64)}` },
+  ];
+
+  for (const overrides of cases) {
+    const resultClaims = attestationClaimsFor(governedRequest, overrides);
+    const token = signAttestationResultToken(
+      resultClaims,
+      untrustedPrivateKey,
+      'attestation-key-1',
+    );
+    await assert.rejects(
+      verifyAttestationResultToken(token, () => attestationPublicKey, {
+        now: NOW,
+        expectedActionId: createGovernedActionEnvelope(governedRequest, NOW).actionId,
+        expectedActorId: resultClaims.actorId,
+        expectedTenantId: resultClaims.tenantId,
+        expectedEatNonce: resultClaims.eatNonce,
+        references: attestationConfig().references,
+        maxResultAgeSeconds: 120,
+        maxTokenLifetimeSeconds: 300,
+        allowedClockSkewSeconds: 5,
+      }),
+      (error: unknown) =>
+        error instanceof AttestationTokenError && error.code === 'invalid_signature',
+    );
+  }
+});
+
 test('rejects stale, expired, and challenge-mismatched attestation results', async () => {
   const baseRequest = request();
   const nowSeconds = Math.floor(NOW.getTime() / 1000);
@@ -463,6 +497,28 @@ test('rejects incomplete attestation admission configuration at construction', (
       }),
     /attestation\.references must not be empty/,
   );
+});
+
+test('rejects prototype-chain names as attestation risk classes', () => {
+  for (const inheritedRisk of ['constructor', 'toString', '__proto__']) {
+    assert.throws(
+      () =>
+        new McpGovernor({
+          policyEvaluator: async () => ({ effect: 'allow', reason: 'policy permits action' }),
+          capabilityPublicKeyResolver: () => capabilityPublicKey,
+          toolExecutor: async () => undefined,
+          receiptSigner: { keyId: 'receipt-key-1', privateKey: receiptPrivateKey },
+          receiptWriter: async () => undefined,
+          attestation: {
+            ...attestationConfig(),
+            requiredRisks: [inheritedRisk] as unknown as NonNullable<
+              McpGovernorConfig['attestation']
+            >['requiredRisks'],
+          },
+        }),
+      /attestation\.requiredRisks contains an unsupported risk/,
+    );
+  }
 });
 
 test('fails closed when policy evaluation throws', async () => {

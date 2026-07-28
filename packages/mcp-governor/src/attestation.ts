@@ -2,10 +2,10 @@ import { constants, type KeyLike, type KeyObject, sign, verify } from 'node:cryp
 
 import { canonicalJson, sha256 } from './canonical.js';
 import type {
-  AttestationResultAlgorithm,
-  AttestationResultClaims,
   AttestationPublicKeyResolver,
   AttestationReferenceValue,
+  AttestationResultAlgorithm,
+  AttestationResultClaims,
   AttestationType,
   AttestationVerifier,
   GovernedActionEnvelope,
@@ -382,6 +382,21 @@ export async function verifyAttestationResultToken(
   if (!reference) {
     throw new AttestationTokenError('issuer_mismatch', 'attestation issuer is not trusted');
   }
+  const publicKey = await resolvePublicKey(keyId, claims.issuer, claims.verifier);
+  let validSignature = false;
+  try {
+    validSignature = verifyInput(
+      algorithm,
+      Buffer.from(`${headerPart}.${payloadPart}`, 'utf8'),
+      Buffer.from(signaturePart, 'base64url'),
+      publicKey,
+    );
+  } catch {
+    validSignature = false;
+  }
+  if (!validSignature) {
+    throw new AttestationTokenError('invalid_signature', 'attestation result signature is invalid');
+  }
   if (claims.actionId !== options.expectedActionId) {
     throw new AttestationTokenError('action_mismatch', 'attestation action does not match');
   }
@@ -405,22 +420,6 @@ export async function verifyAttestationResultToken(
       'policy_not_allowed',
       'attestation reference policy is not allowed',
     );
-  }
-
-  const publicKey = await resolvePublicKey(keyId, claims.issuer, claims.verifier);
-  let validSignature = false;
-  try {
-    validSignature = verifyInput(
-      algorithm,
-      Buffer.from(`${headerPart}.${payloadPart}`, 'utf8'),
-      Buffer.from(signaturePart, 'base64url'),
-      publicKey,
-    );
-  } catch {
-    validSignature = false;
-  }
-  if (!validSignature) {
-    throw new AttestationTokenError('invalid_signature', 'attestation result signature is invalid');
   }
 
   const maxResultAgeSeconds = boundedNonNegativeInteger(
