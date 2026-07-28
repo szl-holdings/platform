@@ -33,7 +33,8 @@ const SECRET_PATTERNS = [
   { pattern: /re_(?=[a-zA-Z0-9]*[A-Z])[a-zA-Z0-9]{24,}/, label: 'Resend API key' },
   { pattern: /eyJ[a-zA-Z0-9_-]{20,}\.eyJ[a-zA-Z0-9_-]{20,}/, label: 'JWT token (live)' },
   {
-    pattern: /-----BEGIN (?:RSA |EC |OPENSSH )?PRIVATE KEY-----\r?\n[A-Za-z0-9+/\r\n]{64,}/,
+    pattern:
+      /-----BEGIN (?:RSA |EC |OPENSSH |ENCRYPTED SIGSTORE )?PRIVATE KEY-----\r?\n[A-Za-z0-9+/\r\n]{64,}/,
     label: 'Private key (PEM)',
   },
 ];
