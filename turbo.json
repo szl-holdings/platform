@@ -24,6 +24,12 @@
       "inputs": ["src/**", "tests/**", "vitest.config.*"],
       "outputs": ["coverage/**"]
     },
+    "@szl-holdings/estate-contract-release#test": {
+      "cache": false,
+      "dependsOn": ["^build"],
+      "inputs": ["$TURBO_DEFAULT$"],
+      "outputs": []
+    },
     "test:watch": {
       "cache": false,
       "persistent": true

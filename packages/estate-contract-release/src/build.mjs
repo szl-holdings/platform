@@ -33,7 +33,13 @@ export const COMPONENT_DEFINITIONS = Object.freeze([
     id: 'api-client-react',
     role: 'GENERATED_OUTPUT_PRESENT',
     package_name: '@szl-holdings/api-client-react',
-    inputs: ['lib/api-client-react/package.json', 'lib/api-client-react/src/generated'],
+    inputs: [
+      'lib/api-client-react/package.json',
+      'lib/api-client-react/src/index.ts',
+      'lib/api-client-react/src/custom-fetch.ts',
+      'lib/api-client-react/src/standard-hooks.ts',
+      'lib/api-client-react/src/generated',
+    ],
   },
   {
     id: 'api-zod',

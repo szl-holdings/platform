@@ -5,7 +5,8 @@ owned by `szl-holdings/platform`:
 
 - the canonical `@szl-holdings/design-system` source and tokens;
 - the canonical OpenAPI specification and generator configuration;
-- the present React and Zod generated-client outputs; and
+- the present React and Zod generated-client outputs, including the React
+  client's exported entrypoint and runtime request/mutator sources; and
 - the canonical `@szl-holdings/shared-contracts` types.
 
 `manifest.json` inventories every byte in those allowlisted roots. Its

@@ -9,7 +9,8 @@
 This proof packet covers the deterministic cross-estate release identity in
 `packages/estate-contract-release`. The release closes the exact source bytes
 for the Platform design system, OpenAPI contract, present generated React/Zod
-clients, and shared TypeScript contracts.
+clients, the React client's public entrypoint/runtime mutator boundary, and
+shared TypeScript contracts.
 
 It does not claim npm/GitHub Packages publication, adoption by every estate
 repository, or production deployment.
@@ -31,8 +32,9 @@ repository, or production deployment.
 After restoring the checkout from the committed frozen lockfile:
 
 - the release build reproduced
-  `sha256:326ab224f0f815b11c20b4dadbfbad19a5a81ec2891baf56bd4d810656d3de49`;
-- all four release integrity and negative-control tests passed;
+  `sha256:e21a467c92e2a112035df6fb6a86c910e655eb428fbb9856f78c83078ba0f7b3`
+  over 777 files and 17,275,595 bytes;
+- all six release integrity, closure, and negative-control tests passed;
 - both API-spec code-generation tests passed;
 - design-system and shared-contract TypeScript checks passed; and
 - Biome and `git diff --check` passed on the added release package.

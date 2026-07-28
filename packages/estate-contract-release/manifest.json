@@ -554,14 +554,19 @@
       "id": "api-client-react",
       "role": "GENERATED_OUTPUT_PRESENT",
       "package_name": "@szl-holdings/api-client-react",
-      "file_count": 3,
-      "bytes": 13664295,
-      "tree_sha256": "9c9c447c4ddc30abffb67b3d2f68e36f9845bfaf0242ff32df0f3331cef29882",
+      "file_count": 6,
+      "bytes": 13687043,
+      "tree_sha256": "0e7b8296410f3ba963721c30d29f6ff2a689176e8fd329f3674a3951f7e46add",
       "files": [
         {
           "path": "lib/api-client-react/package.json",
           "bytes": 840,
           "sha256": "ce646a0a81a1ded984dd1aae0b0c1ca72850a46e22033c79e6fd6601dd6287d6"
+        },
+        {
+          "path": "lib/api-client-react/src/custom-fetch.ts",
+          "bytes": 12268,
+          "sha256": "f8eb3ed3433722f9805730e8dabbaa8e6bbed3d8835eebef82994056472706c6"
         },
         {
           "path": "lib/api-client-react/src/generated/api.schemas.ts",
@@ -572,6 +577,16 @@
           "path": "lib/api-client-react/src/generated/api.ts",
           "bytes": 13546261,
           "sha256": "91d560de8f4552d4b27f1deafbeeefd34bba4f60e8cf96a4e3e0dd80e310c511"
+        },
+        {
+          "path": "lib/api-client-react/src/index.ts",
+          "bytes": 272,
+          "sha256": "a4a23f037dca1e99007457de751ad015522177044bcd85528012ddca81e860e0"
+        },
+        {
+          "path": "lib/api-client-react/src/standard-hooks.ts",
+          "bytes": 10208,
+          "sha256": "4f9cd374cb236c9390446164ef88d8c49a7d12c4af64abf146b9b95855e0d992"
         }
       ]
     },
@@ -3945,5 +3960,5 @@
       "claims that hash closure proves registry publication or deployment"
     ]
   },
-  "release_id": "sha256:326ab224f0f815b11c20b4dadbfbad19a5a81ec2891baf56bd4d810656d3de49"
+  "release_id": "sha256:e21a467c92e2a112035df6fb6a86c910e655eb428fbb9856f78c83078ba0f7b3"
 }

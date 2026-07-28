@@ -33,6 +33,22 @@ test('release id closes the complete component inventories', () => {
   assert.ok(manifest.components.every((component) => component.file_count > 0));
 });
 
+test('React client closure includes its public runtime boundary', () => {
+  const manifest = buildManifest();
+  const reactClient = manifest.components.find(
+    (component) => component.id === 'api-client-react',
+  );
+  assert.ok(reactClient);
+  const paths = new Set(reactClient.files.map((file) => file.path));
+  for (const path of [
+    'lib/api-client-react/src/index.ts',
+    'lib/api-client-react/src/custom-fetch.ts',
+    'lib/api-client-react/src/standard-hooks.ts',
+  ]) {
+    assert.equal(paths.has(path), true, `${path} must be hash-closed`);
+  }
+});
+
 test('one changed file digest changes the release identity', () => {
   const manifest = buildManifest();
   const tampered = structuredClone(manifest);
