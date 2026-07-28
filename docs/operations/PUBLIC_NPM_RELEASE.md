@@ -24,15 +24,20 @@ Run from an isolated clean clone at the exact reviewed commit:
 ```bash
 npm whoami
 pnpm install --frozen-lockfile
-npm pack --dry-run --json ./packages/mcp-governor
-npm pack --dry-run --json ./packages/conformance
-npm publish --access public ./packages/mcp-governor
-npm publish --access public ./packages/conformance
+pnpm verify:npm-artifacts
+npm publish --access public \
+  ./audit/frontier/npm-package-readiness-2026-07-28/szl-mcp-governor-0.1.0.tgz
+npm publish --access public \
+  ./audit/frontier/npm-package-readiness-2026-07-28/szl-verify-0.1.0.tgz
 ```
 
 Do not put an npm token in a commit, PR, issue, log, or chat. Use an
 authenticated local npm session or a granular automation token supplied through
 an approved secret store.
+
+The reviewed tarballs are the release inputs. Do not pass package directories to
+`npm publish`; that would repack the source and publish bytes different from the
+retained evidence.
 
 Automatic npm provenance generation is not available from an arbitrary local
 shell. The first local publication is therefore recorded with provenance
@@ -62,6 +67,25 @@ If any receipt field is missing, the release remains `UNVERIFIED`.
 The exact tarballs, SHA-256 digests, and file inventories are primary release
 evidence. Preserve them in the durable release evidence store before deleting
 any build directory. A console transcript alone is insufficient.
+
+After publication, download the registry artifacts and compare their exact bytes
+to the reviewed tarballs:
+
+```bash
+mkdir registry-readback
+npm pack @szl/mcp-governor@0.1.0 --pack-destination registry-readback
+npm pack @szl/verify@0.1.0 --pack-destination registry-readback
+cmp --silent \
+  audit/frontier/npm-package-readiness-2026-07-28/szl-mcp-governor-0.1.0.tgz \
+  registry-readback/szl-mcp-governor-0.1.0.tgz
+cmp --silent \
+  audit/frontier/npm-package-readiness-2026-07-28/szl-verify-0.1.0.tgz \
+  registry-readback/szl-verify-0.1.0.tgz
+npm view @szl/mcp-governor@0.1.0 dist --json
+npm view @szl/verify@0.1.0 dist --json
+```
+
+Any byte mismatch leaves publication `UNVERIFIED`.
 
 ## Current external gate
 

@@ -10,16 +10,31 @@ function writeStderr(value) {
   process.stderr.write(`${value}\n`);
 }
 
+function optionValue(argv, index, option) {
+  const value = argv[index + 1];
+  if (!value || value.startsWith('--')) {
+    throw new Error(`${option} requires a value`);
+  }
+  return value;
+}
+
 function parseArgs(argv) {
   const args = { offline: false, json: false };
   for (let index = 0; index < argv.length; index += 1) {
     const value = argv[index];
-    if (value === '--file') args.file = argv[++index];
-    else if (value === '--public-key') args.publicKey = argv[++index];
-    else if (value === '--expected-fingerprint') args.expectedFingerprint = argv[++index];
-    else if (value === '--offline') args.offline = true;
-    else if (value === '--json') args.json = true;
-    else throw new Error(`unknown argument: ${value}`);
+    if (value === '--file' || value === '--public-key' || value === '--expected-fingerprint') {
+      const parsedValue = optionValue(argv, index, value);
+      if (value === '--file') args.file = parsedValue;
+      else if (value === '--public-key') args.publicKey = parsedValue;
+      else args.expectedFingerprint = parsedValue;
+      index += 1;
+    } else if (value === '--offline') {
+      args.offline = true;
+    } else if (value === '--json') {
+      args.json = true;
+    } else {
+      throw new Error(`unknown argument: ${value}`);
+    }
   }
   if (!args.file) throw new Error('--file is required');
   if (!args.offline) throw new Error('--offline is required; this verifier never uses a network');

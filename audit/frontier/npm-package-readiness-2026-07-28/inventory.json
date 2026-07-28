@@ -1,6 +1,6 @@
 {
   "schemaVersion": "szl.npm-package-readiness.v1",
-  "generatedAt": "2026-07-28T19:10:55Z",
+  "generatedAt": "2026-07-28T19:45:03Z",
   "status": "TARBALL_VERIFIED_REGISTRY_UNAVAILABLE",
   "packages": [
     {
@@ -8,6 +8,8 @@
       "version": "0.1.0",
       "filename": "szl-mcp-governor-0.1.0.tgz",
       "sha256": "dd87f0bd083c000eb2ed15c731ddec67669e4497f2e746dd93e2bc0431d644c1",
+      "sourceManifestSha256": "41b7ee2a4f2b1bdb187c612cc3ade3427f915be0130d0b0a67955040ce3ca663",
+      "packedManifestSha256": "7c9bafbd526e23223eba82c6965c55f6eaf089c98ce73445cbd2391f78a16d2b",
       "files": [
         "LICENSE",
         "dist/attestation.d.ts",
@@ -39,7 +41,9 @@
       "name": "@szl/verify",
       "version": "0.1.0",
       "filename": "szl-verify-0.1.0.tgz",
-      "sha256": "bc13cfcacecbb71105e0c806d3ad750ed962fd1ff902c1bc71971bc29243028a",
+      "sha256": "bc39042fc4c791dbfbe34d3999e538d492632a8f9ff27c10374d6f9eefa24d15",
+      "sourceManifestSha256": "ee43941477dea2af14bc85a0c476238abf025cffef6e40bdda2039d7a7b99573",
+      "packedManifestSha256": "cdf66eb7262121f096069abb04fd59f95639307d6a9dc26e2459d89f79a9a564",
       "files": [
         "LICENSE",
         "package.json",
