@@ -56,7 +56,7 @@ export async function verifyPublicNpmArtifacts(repositoryRoot = REPOSITORY_ROOT)
     'npm-package-readiness-2026-07-28',
   );
   const inventory = JSON.parse(await readFile(join(evidenceDirectory, 'inventory.json'), 'utf8'));
-  assert.equal(inventory.schemaVersion, 'szl.npm-package-readiness.v1');
+  assert.equal(inventory.schemaVersion, 'szl.npm-package-readiness.v2');
   assert.equal(inventory.status, 'TARBALL_VERIFIED_REGISTRY_UNAVAILABLE');
   assert.deepEqual(
     inventory.packages.map(({ name }) => name).sort(),
@@ -114,6 +114,11 @@ export async function verifyPublicNpmArtifacts(repositoryRoot = REPOSITORY_ROOT)
     );
 
     const packedMetadata = JSON.parse(packedManifest.toString('utf8'));
+    assert.equal(
+      packedMetadata.scripts?.prepack,
+      undefined,
+      `${packageEvidence.name} packed manifest unexpectedly exposes prepack`,
+    );
     const normalizedPacked = normalizePublishManifest(packedMetadata);
     assert.deepEqual(
       normalizedPacked.publishManifest,

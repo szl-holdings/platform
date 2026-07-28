@@ -45,6 +45,8 @@
   digests, both file inventories, and the public package metadata before
   publication. Its regression test proves that refreshing only the source hash
   cannot authorize a stale tarball after a publish-relevant source change.
+- artifact verification requires a non-empty source `prepack` gate and rejects
+  a packed manifest that unexpectedly retains the preparation-only hook.
 
 Preserved SHA-256:
 

@@ -50,6 +50,10 @@ export function normalizePublishManifest(manifest) {
 export function buildPublicationContract(sourceManifest) {
   const manifest = JSON.parse(sourceManifest.toString('utf8'));
   const normalized = normalizePublishManifest(manifest);
+  assert(
+    typeof normalized.sourcePrepack === 'string' && normalized.sourcePrepack.trim().length > 0,
+    `${manifest.name} source prepack gate missing`,
+  );
   return canonicalize({
     schemaVersion: PUBLICATION_CONTRACT_SCHEMA,
     packageName: manifest.name,

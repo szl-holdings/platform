@@ -29,3 +29,5 @@ exact source manifest hash, exact source `prepack` command, development
 dependency names, and normalized publish manifest. `inventory.json` binds the
 source manifest, packed manifest, embedded contract, tarball, and complete file
 inventory so an updated source hash cannot make a stale archive appear current.
+Verification also requires a non-empty source `prepack` gate and rejects any
+packed manifest that unexpectedly retains that preparation-only hook.

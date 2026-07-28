@@ -35,6 +35,23 @@ afterEach(async () => {
   await rm(fixtureRoot, { recursive: true, force: true });
 });
 
+async function mutateSourceManifest(packageName, mutation) {
+  const manifestPath = SOURCE_MANIFESTS.get(packageName);
+  assert(manifestPath);
+
+  const manifest = JSON.parse(await readFile(join(fixtureRoot, manifestPath), 'utf8'));
+  mutation(manifest);
+  const changedManifest = `${JSON.stringify(manifest, null, 2)}\n`;
+  await writeFile(join(fixtureRoot, manifestPath), changedManifest, 'utf8');
+
+  const inventoryPath = join(fixtureRoot, EVIDENCE_PATH, 'inventory.json');
+  const inventory = JSON.parse(await readFile(inventoryPath, 'utf8'));
+  const packageEvidence = inventory.packages.find(({ name }) => name === packageName);
+  assert(packageEvidence);
+  packageEvidence.sourceManifestSha256 = sha256(changedManifest);
+  await writeFile(inventoryPath, `${JSON.stringify(inventory, null, 2)}\n`, 'utf8');
+}
+
 test('accepts the exact retained source manifests and tarballs', async () => {
   const results = await verifyPublicNpmArtifacts(fixtureRoot);
   assert.deepEqual(
@@ -43,21 +60,10 @@ test('accepts the exact retained source manifests and tarballs', async () => {
   );
 });
 
-test('rejects a stale tarball even when its source-manifest inventory hash is refreshed', async () => {
-  const manifestPath = SOURCE_MANIFESTS.get('@szl/mcp-governor');
-  assert(manifestPath);
-
-  const manifest = JSON.parse(await readFile(join(fixtureRoot, manifestPath), 'utf8'));
-  manifest.scripts.prepack = 'node ./different-prepack.mjs';
-  const changedManifest = `${JSON.stringify(manifest, null, 2)}\n`;
-  await writeFile(join(fixtureRoot, manifestPath), changedManifest, 'utf8');
-
-  const inventoryPath = join(fixtureRoot, EVIDENCE_PATH, 'inventory.json');
-  const inventory = JSON.parse(await readFile(inventoryPath, 'utf8'));
-  const packageEvidence = inventory.packages.find(({ name }) => name === '@szl/mcp-governor');
-  assert(packageEvidence);
-  packageEvidence.sourceManifestSha256 = sha256(changedManifest);
-  await writeFile(inventoryPath, `${JSON.stringify(inventory, null, 2)}\n`, 'utf8');
+test('rejects prepack drift even when its source-manifest inventory hash is refreshed', async () => {
+  await mutateSourceManifest('@szl/mcp-governor', (manifest) => {
+    manifest.scripts.prepack = 'node ./different-prepack.mjs';
+  });
 
   await assert.rejects(
     verifyPublicNpmArtifacts(fixtureRoot),
@@ -65,10 +71,32 @@ test('rejects a stale tarball even when its source-manifest inventory hash is re
   );
 });
 
+test('rejects publish metadata drift when its source-manifest inventory hash is refreshed', async () => {
+  await mutateSourceManifest('@szl/mcp-governor', (manifest) => {
+    manifest.engines.node = '>=25';
+  });
+
+  await assert.rejects(
+    verifyPublicNpmArtifacts(fixtureRoot),
+    /@szl\/mcp-governor embedded publication contract drift/,
+  );
+});
+
+test('rejects a missing source prepack gate', async () => {
+  await mutateSourceManifest('@szl/mcp-governor', (manifest) => {
+    delete manifest.scripts.prepack;
+  });
+
+  await assert.rejects(
+    verifyPublicNpmArtifacts(fixtureRoot),
+    /@szl\/mcp-governor source prepack gate missing/,
+  );
+});
+
 test('rejects an inventory that omits an expected package', async () => {
   const inventoryPath = join(fixtureRoot, EVIDENCE_PATH, 'inventory.json');
   const inventory = JSON.parse(
-    await readFile(join(REPOSITORY_ROOT, EVIDENCE_PATH, 'inventory.json')),
+    await readFile(join(REPOSITORY_ROOT, EVIDENCE_PATH, 'inventory.json'), 'utf8'),
   );
   inventory.packages = inventory.packages.filter(({ name }) => name !== '@szl/verify');
   await writeFile(inventoryPath, `${JSON.stringify(inventory, null, 2)}\n`, 'utf8');
