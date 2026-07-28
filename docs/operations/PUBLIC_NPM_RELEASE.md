@@ -22,16 +22,24 @@ publish the proprietary package.
 Run from an isolated clean clone at the exact reviewed commit:
 
 ```bash
+corepack enable
+pnpm install --frozen-lockfile
 npm whoami
 npm pack --dry-run --json ./packages/mcp-governor
 npm pack --dry-run --json ./packages/conformance
-npm publish --access public --provenance ./packages/mcp-governor
-npm publish --access public --provenance ./packages/conformance
+npm publish --access public ./packages/mcp-governor
+npm publish --access public ./packages/conformance
 ```
 
 Do not put an npm token in a commit, PR, issue, log, or chat. Use an
 authenticated local npm session or a granular automation token supplied through
 an approved secret store.
+
+The authenticated local first publication cannot emit npm provenance. Record
+its provenance state as `UNAVAILABLE_INITIAL_LOCAL_PUBLISH`; do not infer an
+attestation from package metadata or a successful registry upload. Provenance
+becomes required only after the package exists and trusted publishing can run
+inside the supported GitHub Actions OIDC boundary described below.
 
 ## Trusted publishing after package creation
 
@@ -45,11 +53,15 @@ The release receipt must preserve:
 - reviewed Git commit and immutable package version;
 - tarball filename, integrity digest, and unpacked file inventory;
 - npm registry URL and returned package metadata;
-- provenance attestation identity;
+- provenance state, including `UNAVAILABLE_INITIAL_LOCAL_PUBLISH` for the
+  authenticated first publication or the attestation identity for a supported
+  trusted-publishing run;
 - workflow run URL and terminal conclusion; and
 - an unauthenticated `npm view <name>@<version>` verification.
 
-If any receipt field is missing, the release remains `UNVERIFIED`.
+For the local first publication, the workflow fields must be recorded as
+`NOT_APPLICABLE_INITIAL_LOCAL_PUBLISH`, not omitted. If any applicable receipt
+field is missing, the release remains `UNVERIFIED`.
 
 ## Current external gate
 
