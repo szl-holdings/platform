@@ -69,14 +69,16 @@ test('rejects encrypted PKCS#8 private-key material', () => {
 });
 
 test('rejects traditional encrypted PEM metadata before the payload', () => {
+  const marker = ['-----BEGIN RSA ', 'PRIVATE KEY-----'].join('');
+  const footer = ['-----END RSA ', 'PRIVATE KEY-----'].join('');
   const result = scan({
     'legacy-signing.pem': [
-      '-----BEGIN RSA PRIVATE KEY-----',
+      marker,
       'Proc-Type: 4,ENCRYPTED',
       `DEK-Info: AES-256-CBC,${'A'.repeat(32)}`,
       '',
       'A'.repeat(96),
-      '-----END RSA PRIVATE KEY-----',
+      footer,
       '',
     ].join('\n'),
   });
