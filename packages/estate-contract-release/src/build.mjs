@@ -19,6 +19,12 @@ export const COMPONENT_DEFINITIONS = Object.freeze([
     inputs: ['packages/design-system/package.json', 'packages/design-system/src'],
   },
   {
+    id: 'design-system-forge-type-contract',
+    role: 'EXPORTED_SOURCE_DEPENDENCY',
+    package_name: '@workspace/forge/types',
+    inputs: ['packages/forge/package.json', 'packages/forge/src/types.ts'],
+  },
+  {
     id: 'api-spec',
     role: 'CANONICAL_SOURCE',
     package_name: '@szl-holdings/api-spec',
@@ -31,7 +37,7 @@ export const COMPONENT_DEFINITIONS = Object.freeze([
   },
   {
     id: 'api-client-react',
-    role: 'GENERATED_OUTPUT_PRESENT',
+    role: 'RUNTIME_AND_GENERATED_OUTPUT_PRESENT',
     package_name: '@szl-holdings/api-client-react',
     inputs: [
       'lib/api-client-react/package.json',
@@ -43,9 +49,9 @@ export const COMPONENT_DEFINITIONS = Object.freeze([
   },
   {
     id: 'api-zod',
-    role: 'GENERATED_OUTPUT_PRESENT',
+    role: 'RUNTIME_AND_GENERATED_OUTPUT_PRESENT',
     package_name: '@szl-holdings/api-zod',
-    inputs: ['lib/api-zod/package.json', 'lib/api-zod/src/generated'],
+    inputs: ['lib/api-zod/package.json', 'lib/api-zod/src'],
   },
   {
     id: 'shared-contracts',

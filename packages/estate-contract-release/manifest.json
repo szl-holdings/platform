@@ -521,6 +521,26 @@
       ]
     },
     {
+      "id": "design-system-forge-type-contract",
+      "role": "EXPORTED_SOURCE_DEPENDENCY",
+      "package_name": "@workspace/forge/types",
+      "file_count": 2,
+      "bytes": 4737,
+      "tree_sha256": "39b24e39751abdc8fb69e6f3212f8cec9164db25bf6d59e5a13917dea1cd9566",
+      "files": [
+        {
+          "path": "packages/forge/package.json",
+          "bytes": 1821,
+          "sha256": "d9f6702c416013b4ba5307764b3f7b229873e9c7c20dcd3b9ae8bb5fa0256170"
+        },
+        {
+          "path": "packages/forge/src/types.ts",
+          "bytes": 2916,
+          "sha256": "9bd3493ce114617d1e08be403f99ac72008defc7a52e1077d44b656c84515151"
+        }
+      ]
+    },
+    {
       "id": "api-spec",
       "role": "CANONICAL_SOURCE",
       "package_name": "@szl-holdings/api-spec",
@@ -552,7 +572,7 @@
     },
     {
       "id": "api-client-react",
-      "role": "GENERATED_OUTPUT_PRESENT",
+      "role": "RUNTIME_AND_GENERATED_OUTPUT_PRESENT",
       "package_name": "@szl-holdings/api-client-react",
       "file_count": 6,
       "bytes": 13687043,
@@ -592,11 +612,11 @@
     },
     {
       "id": "api-zod",
-      "role": "GENERATED_OUTPUT_PRESENT",
+      "role": "RUNTIME_AND_GENERATED_OUTPUT_PRESENT",
       "package_name": "@szl-holdings/api-zod",
-      "file_count": 658,
-      "bytes": 997658,
-      "tree_sha256": "3259b93c10460c0b2c29d7d8138601ee81c1aacdf88ba38ba6da31e85f828f56",
+      "file_count": 661,
+      "bytes": 1014791,
+      "tree_sha256": "c3b24c7048d461ff83819e60fc6f0c62a0773e1564a9174affff896b03e0c87b",
       "files": [
         {
           "path": "lib/api-zod/package.json",
@@ -3887,6 +3907,21 @@
           "path": "lib/api-zod/src/generated/types/websocketHealthCheck200.ts",
           "bytes": 523,
           "sha256": "1c78a4c9b7f84dd3e61d7a93ca7dc4e394442de13c1bc9bd0d1cc65703e0695c"
+        },
+        {
+          "path": "lib/api-zod/src/index.ts",
+          "bytes": 1234,
+          "sha256": "44ba2b944239a0b9fd1c9b93f9fe789fdbe42239733f3bdfc5369c41b3e84ad0"
+        },
+        {
+          "path": "lib/api-zod/src/nexus-v1.ts",
+          "bytes": 8435,
+          "sha256": "414ea43973eff7a285ccb289e783c036a94a1d227d554f2363196a78a693b5f5"
+        },
+        {
+          "path": "lib/api-zod/src/per.ts",
+          "bytes": 7464,
+          "sha256": "ac3c7bf4afa827b39ff0f857da2a4ad8e87e91b1ae23d39df427b64d89d0c683"
         }
       ]
     },
@@ -3960,5 +3995,5 @@
       "claims that hash closure proves registry publication or deployment"
     ]
   },
-  "release_id": "sha256:e21a467c92e2a112035df6fb6a86c910e655eb428fbb9856f78c83078ba0f7b3"
+  "release_id": "sha256:fc76da58f821f77c9d225d21545015b022d4ab429ed7d4971579ba4f3995f661"
 }
