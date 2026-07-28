@@ -26,6 +26,8 @@
   fail-closed boundary.
 - both actual tarballs were created in an isolated temporary directory and
   extracted successfully;
+- the repository-pinned `pnpm@10.26.1` independently rebuilt both corrected
+  archives byte-for-byte with the retained SHA-256 digests;
 - the packed `@szl/mcp-governor` entrypoint imported successfully;
 - the packed `@szl/verify` entrypoint imported successfully;
 - the packed conformance CLI loaded its bundled Sentra manifest and returned

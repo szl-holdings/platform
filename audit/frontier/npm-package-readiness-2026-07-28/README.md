@@ -31,3 +31,7 @@ source manifest, packed manifest, embedded contract, tarball, and complete file
 inventory so an updated source hash cannot make a stale archive appear current.
 Verification also requires a non-empty source `prepack` gate and rejects any
 packed manifest that unexpectedly retains that preparation-only hook.
+
+The repository-pinned `pnpm@10.26.1` independently rebuilt both archives with
+the exact SHA-256 digests above. The retained bytes are therefore reproducible
+with the declared package-manager toolchain.
