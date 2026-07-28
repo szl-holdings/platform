@@ -116,7 +116,7 @@ function walk(dir, count = { n: 0 }) {
 
 function checkFile(fullPath, name) {
   const rel = path.relative(TARGET, fullPath);
-  const ext = path.extname(name);
+  const ext = path.extname(name).toLowerCase();
 
   if (SKIP_FILES.has(name)) return;
 

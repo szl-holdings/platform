@@ -48,6 +48,17 @@ test('rejects PEM private-key material', () => {
   assert.match(result.stderr, /signing\.pem: Private key \(PEM\)/);
 });
 
+test('rejects private-key material in uppercase key-file extensions', () => {
+  const result = scan({
+    'COSIGN.KEY': privateKey('ENCRYPTED SIGSTORE '),
+    'signing.PEM': privateKey(''),
+  });
+
+  assert.equal(result.status, 1, result.stdout);
+  assert.match(result.stderr, /COSIGN\.KEY: Private key \(PEM\)/);
+  assert.match(result.stderr, /signing\.PEM: Private key \(PEM\)/);
+});
+
 test('rejects encrypted PKCS#8 private-key material', () => {
   const result = scan({
     'encrypted-signing.pem': privateKey('ENCRYPTED '),
