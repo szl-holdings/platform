@@ -37,15 +37,17 @@ The corrective objective is to ensure that:
   `4fd8824f32d7eedc0cd341fd4f4d57722b9d45e9`;
 - cache-correction parent revision:
   `eceecb560d8dc92c72dfe47aa1d4f8bbb8af47d1`;
-- exact implementation revision tested below:
+- baseline audit revision:
   `ace0f748819ad44190d5946c2f5909daef0b29f3`;
+- tracked-input correction revision tested in the review addendum:
+  `4e62ce4a926df9193d5b622915d298f9b634c933`;
 - this packet is a proof-only follow-up to the tested implementation revision;
   the immutable final PR head must be taken from GitHub review metadata.
 
-The tested implementation produced release ID
-`sha256:88734588547aa875399f9bacec4a487218fbde38088c1644ef50e3141945c944`
+The corrected implementation produced release ID
+`sha256:9af5861b8849ccc11813717187a15e52f644d64e97970b9cf0143eea47abf493`
 over six components, 782 files, and 17,297,465 input bytes. The manifest
-document is 167,940 bytes.
+document is 167,960 bytes.
 
 ## Scope
 
@@ -58,8 +60,10 @@ The release closes the exact source bytes for:
   entrypoint, runtime, and re-export boundaries; and
 - shared TypeScript contracts.
 
-Each component now serializes its allowlisted `inputs`. Consumers must enumerate
-those roots and reject missing or additional files before recomputing file,
+Each component now serializes its allowlisted `inputs`. The builder enumerates
+only Git-tracked regular files below those roots, so ignored editor artifacts
+and other untracked local files cannot enter a release identity. Consumers must
+reject missing or additional tracked files before recomputing file,
 component-tree, and release digests.
 
 The exported-dependency closure is limited to repository-owned source.
@@ -77,17 +81,21 @@ source and generator configuration.
 4. Disable Turbo cache for both manifest build and freshness test tasks.
 5. Regenerate the manifest intentionally, then verify it without mutation.
 6. Record exact commands, numeric exits, output summaries, and truth limits.
+7. Restrict release enumeration to Git-tracked regular files and prove ignored
+   local artifacts cannot affect the identity.
 
 ## Patch summary
 
 - `packages/estate-contract-release/src/build.mjs`
   - publishes each component's allowlisted `inputs`;
-  - requires consumers to enumerate every file beneath those roots.
+  - derives each inventory from `git ls-files`;
+  - rejects missing, empty, symbolic-link, and non-regular tracked inputs.
 - `packages/estate-contract-release/package.json`
   - adds `verify`, which invokes `build.mjs --check` and does not write.
 - `packages/estate-contract-release/src/build.test.mjs`
   - proves verification preserves the manifest bytes;
   - proves all component input roots are serialized;
+  - proves ignored and untracked files do not enter the manifest;
   - proves both relevant Turbo tasks have `cache: false`.
 - `packages/estate-contract-release/README.md`
   - documents verify-before-build ordering and consumer enumeration.
@@ -99,7 +107,7 @@ source and generator configuration.
 No UI, route, database, deployment, registry, or external consumer was changed.
 Screenshot evidence is therefore not applicable.
 
-## Exact observed commands
+## Baseline observed commands
 
 All commands below were run from the repository root against exact
 implementation revision
@@ -118,10 +126,20 @@ implementation revision
 | `git diff --check 4fd8824f32d7eedc0cd341fd4f4d57722b9d45e9...ace0f748819ad44190d5946c2f5909daef0b29f3` | 0 | no whitespace errors |
 | `git status --porcelain=v1` | 0 | empty output at the tested implementation revision |
 
-The manifest was intentionally regenerated before the exact-revision check with
-`node packages/estate-contract-release/src/build.mjs`; it exited 0 and wrote the
-release ID above. All subsequent manifest verification used the non-mutating
-`--check` path.
+The baseline manifest was intentionally regenerated before that exact-revision
+check. All subsequent baseline verification used the non-mutating `--check`
+path.
+
+## Review-correction observed commands
+
+These commands were run from the repository root against exact correction
+revision `4e62ce4a926df9193d5b622915d298f9b634c933`.
+
+| Command | Exit | Observed output summary |
+|---|---:|---|
+| `C:\Users\steph\.cache\codex-runtimes\codex-primary-runtime\dependencies\node\bin\node.exe packages/estate-contract-release/src/build.mjs --check` | 0 | `PASS sha256:9af586...f493`, six components |
+| `C:\Users\steph\.cache\codex-runtimes\codex-primary-runtime\dependencies\node\bin\node.exe --test packages/estate-contract-release/src/build.test.mjs` | 0 | 13 tests passed, including ignored/untracked-file exclusion |
+| `git diff --check 4fd8824f32d7eedc0cd341fd4f4d57722b9d45e9...4e62ce4a926df9193d5b622915d298f9b634c933` | 0 | no whitespace errors |
 
 ## Verification notes
 
@@ -129,6 +147,8 @@ release ID above. All subsequent manifest verification used the non-mutating
   `build.mjs --check` and requires byte-for-byte equality.
 - The published input-root regression compares every manifest component with
   its canonical component definition.
+- The tracked-input regression adds an ignored `.DS_Store` below an allowlisted
+  root and requires byte-for-byte manifest equality.
 - The external-tree mutation regression changes actual copied Forge and Zod
   source bytes and requires new component and release digests.
 - Turbo 2.9.18 dry-run evidence reports both local and remote cache disabled for
