@@ -21,6 +21,8 @@ Status: **PUBLIC SOURCE VERIFIED / DOI UNAVAILABLE**
 - Portable-typecheck PR: <https://github.com/szl-holdings/evidence-doctrine/pull/1>
 - Exact reviewed PR head: `3ea40357f878a7326bc5c1a732b20ba3dd32f1ca`
 - Protected squash result: `b2fcdb5078127c3ac0bd063ed629a80d26827dca`
+- Claim-boundary PR: <https://github.com/szl-holdings/evidence-doctrine/pull/2>
+- Current exact main commit: `71ab3b8a4538a106fe0a24146785456fcc8bbe1f`
 
 The initial push established the empty repository's first `main` commit.
 Thereafter the inherited organization rule rejected a direct update to `main`,
