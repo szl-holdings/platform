@@ -3,8 +3,26 @@
   "version": "0.1.0",
   "description": "Offline DSSE receipt verification and fail-closed SZL vertical conformance.",
   "type": "module",
-  "private": true,
+  "private": false,
   "license": "LicenseRef-SZL-Proprietary",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/szl-holdings/platform.git",
+    "directory": "packages/conformance"
+  },
+  "homepage": "https://github.com/szl-holdings/platform/tree/main/packages/conformance#readme",
+  "bugs": {
+    "url": "https://github.com/szl-holdings/platform/issues"
+  },
+  "files": [
+    "src/cli.mjs",
+    "src/conformance.mjs",
+    "src/verify-cli.mjs",
+    "src/verify.mjs",
+    "surfaces",
+    "README.md",
+    "LICENSE"
+  ],
   "bin": {
     "szl-verify": "./src/verify-cli.mjs",
     "szl-conformance": "./src/cli.mjs"
@@ -15,9 +33,13 @@
   },
   "scripts": {
     "conformance": "node src/cli.mjs",
+    "prepack": "node --test src/*.test.mjs",
     "test": "node --test src/*.test.mjs"
   },
   "engines": {
     "node": ">=24"
+  },
+  "publishConfig": {
+    "access": "public"
   }
 }

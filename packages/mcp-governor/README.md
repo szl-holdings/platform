@@ -26,8 +26,9 @@ Arguments are canonicalized once into an immutable in-process snapshot shared
 by the policy evaluator and governor-owned tool executor. Receipts persist only
 the snapshot's SHA-256 digest, never the argument payload.
 
-`private: false` makes the workspace package publication-ready. This repository
-does not claim that an external npm publication occurred.
+`private: false` makes the workspace package publication-ready. Verify the
+exact package version at the public registry before claiming that an external
+npm publication occurred.
 
 ## Hardware-attestation admission
 
