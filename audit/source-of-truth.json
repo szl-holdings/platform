@@ -1,8 +1,8 @@
 {
   "meta": {
-    "generated": "2026-07-27",
+    "generated": "2026-07-28",
     "track": "FRONTIER V2 — Wave 1 Truth Lock",
-    "version": "2.1.1",
+    "version": "2.1.2",
     "measurement_base_commit": "280176de9fd99a33f1cfc2087372014e91d7ce8f",
     "note": "Canonical reproducible counts for the current protected-source tree. The listed measurement_base_commit remains the inspected historical baseline; scripts/audit/validate-source-of-truth.js recomputes current-tree metrics from the checked-out commit. Runtime and database values not refreshed on 2026-07-27 remain historical snapshots, not current public claims."
   },
@@ -41,9 +41,9 @@
   },
   "packages": {
     "domain_packages_dir": {
-      "count": 159,
+      "count": 160,
       "command": "Count tracked top-level directories under packages/",
-      "computed": "2026-07-25"
+      "computed": "2026-07-28"
     },
     "shared_lib_packages": {
       "count": 53,
@@ -51,10 +51,10 @@
       "computed": "2026-07-25"
     },
     "total_packages": {
-      "count": 212,
+      "count": 213,
       "command": "packages/ top-level count plus lib/ top-level count",
-      "computed": "2026-07-25",
-      "note": "packages/ (159 directories) + lib/ (53 directories) = 212. packages/proxy-routes.ts is a file and is not counted as a package."
+      "computed": "2026-07-28",
+      "note": "packages/ (160 directories) + lib/ (53 directories) = 213. packages/proxy-routes.ts is a file and is not counted as a package."
     },
     "apps": {
       "count": 11,

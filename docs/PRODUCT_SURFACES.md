@@ -155,7 +155,7 @@ These surfaces had registered artifacts that have since been removed from disk. 
 | Artifacts on disk | 19 |
 | Library packages | 51 |
 | Standalone packages | 101 |
-| Total packages | 200 (MEASURED; `artifacts/SOURCE_OF_TRUTH.json`) |
+| Total packages | 201 (MEASURED; `artifacts/SOURCE_OF_TRUTH.json`) |
 | API route files | 180 |
 | API route handlers | 6,063 |
 | DB table definitions | 1,047 |

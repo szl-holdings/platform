@@ -7,12 +7,15 @@
       "inputs": ["src/**", "tsconfig.json", "tsconfig*.json", "vite.config.*", "build.mjs"],
       "outputs": ["dist/**", "build/**", ".next/**"]
     },
+    "@szl-holdings/estate-contract-release#build": {
+      "cache": false,
+      "dependsOn": ["^build", "^codegen"],
+      "inputs": ["$TURBO_DEFAULT$"],
+      "outputs": []
+    },
     "codegen": {
       "inputs": ["openapi.yaml", "orval.config.ts"],
-      "outputs": [
-        "../api-client-react/src/generated/**",
-        "../api-zod/src/generated/**"
-      ]
+      "outputs": ["../api-client-react/src/generated/**", "../api-zod/src/generated/**"]
     },
     "typecheck": {
       "dependsOn": ["^build", "^codegen"],
@@ -23,6 +26,12 @@
       "dependsOn": ["^build"],
       "inputs": ["src/**", "tests/**", "vitest.config.*"],
       "outputs": ["coverage/**"]
+    },
+    "@szl-holdings/estate-contract-release#test": {
+      "cache": false,
+      "dependsOn": ["^build"],
+      "inputs": ["$TURBO_DEFAULT$"],
+      "outputs": []
     },
     "test:watch": {
       "cache": false,

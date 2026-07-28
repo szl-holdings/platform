@@ -8,11 +8,11 @@
 > source-tree and locked-kernel measurements. A value without reproducible
 > evidence is **UNVERIFIED**, not estimated.
 
-**Registry version:** 2.1.1
+**Registry version:** 2.1.2
 
 **Main baseline inspected:** `platform@280176de9fd99a33f1cfc2087372014e91d7ce8f`
 
-**Measured:** 2026-07-27
+**Measured:** 2026-07-28
 
 **Validator:** `node scripts/audit/validate-source-of-truth.js`
 
@@ -28,9 +28,9 @@ mutation one-shots. The validator recomputes them from whichever commit is check
 | Registered artifacts | **6** | Tracked `artifacts/*/(.replit-artifact/)?artifact.toml` files |
 | Artifact directories | **7** | Unique tracked top-level children of `artifacts/` |
 | Registered product verticals | **5** | Registered customer-facing domain artifacts; A11oy is counted separately as the orchestration product |
-| Domain packages (`packages/`) | **159** | Tracked top-level package directories; excludes root file `packages/proxy-routes.ts` |
+| Domain packages (`packages/`) | **160** | Tracked top-level package directories; excludes root file `packages/proxy-routes.ts` |
 | Shared library packages (`lib/`) | **53** | Tracked top-level library directories |
-| Total packages (`packages/` + `lib/`) | **212** | 159 + 53 |
+| Total packages (`packages/` + `lib/`) | **213** | 160 + 53 |
 | Apps (`apps/`) | **11** | Unique tracked top-level children of `apps/` |
 | Services (`services/`) | **11** | Unique tracked top-level children of `services/` |
 | Workers (`workers/`) | **5** | Unique tracked top-level children of `workers/` |
