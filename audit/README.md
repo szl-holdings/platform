@@ -40,8 +40,8 @@ mean.
 
 ## Canonical Current-Tree Numbers (Quick Reference)
 
-> Updated 2026-07-27 after permanent workflow retirement. Source:
-> `audit/source-of-truth.json` v2.1.1. Historical runtime/database snapshots
+> Updated 2026-07-28 after adding the deterministic estate contract release. Source:
+> `audit/source-of-truth.json` v2.1.2. Historical runtime/database snapshots
 > remain in the JSON but are not current public claims.
 
 | Metric | Verified Count | Source |
@@ -49,9 +49,9 @@ mean.
 | Registered artifacts | 6 | Tracked artifact manifests |
 | Artifact directories | 7 | Tracked top-level `artifacts/` children |
 | Registered product verticals | 5 | Registered domain artifacts; A11oy is separate |
-| Domain packages (`packages/`) | 159 | Tracked top-level package directories |
+| Domain packages (`packages/`) | 160 | Tracked top-level package directories |
 | Shared library packages (`lib/`) | 53 | Tracked top-level library directories |
-| Total packages (`packages/` + `lib/`) | 212 | 159 + 53 |
+| Total packages (`packages/` + `lib/`) | 213 | 160 + 53 |
 | Apps (`apps/`) | 11 | Tracked top-level `apps/` children |
 | Services (`services/`) | 11 | Tracked top-level `services/` children |
 | Workers (`workers/`) | 5 | `ls workers/ \| wc -l` |

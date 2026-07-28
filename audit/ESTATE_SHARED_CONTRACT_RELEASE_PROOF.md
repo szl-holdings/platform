@@ -22,6 +22,8 @@ repository, or production deployment.
 - `pnpm --filter @szl-holdings/api-spec test`
 - `pnpm --filter @szl-holdings/design-system typecheck`
 - `pnpm --filter @szl-holdings/shared-contracts typecheck`
+- `node scripts/audit/validate-source-of-truth.js`
+- `pnpm truth:generate -- --verify-local`
 - `git diff --check`
 
 ## Observed local evidence
@@ -36,6 +38,9 @@ After restoring the checkout from the committed frozen lockfile:
 - Biome and `git diff --check` passed on the added release package.
 - the restored repository-wide typecheck passed all 182 tasks in
   23 minutes 56.944 seconds.
+- both source-of-truth validators passed after relocking the added package at
+  160 domain directories, 213 total domain/library directories, and 201 pnpm
+  recursive workspace entries.
 
 The first repository-wide typecheck attempt was made before dependency
 restoration and failed because that checkout's `node_modules` was incomplete.
