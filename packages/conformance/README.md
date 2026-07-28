@@ -5,7 +5,7 @@ Offline DSSE receipt verification and fail-closed SZL vertical conformance.
 ## Offline receipt verification
 
 ```bash
-npx --package @szl/verify szl-verify \
+npx --package @szl/verify@0.1.0 szl-verify \
   --file receipt.json \
   --public-key conformance.pub \
   --expected-fingerprint sha256:<hex> \
@@ -27,7 +27,7 @@ an exact clean clone containing the registered artifact and documentation
 evidence:
 
 ```bash
-npx --package @szl/verify szl-conformance \
+npx --package @szl/verify@0.1.0 szl-conformance \
   --surface sentra \
   --root /path/to/platform
 ```
@@ -35,7 +35,7 @@ npx --package @szl/verify szl-conformance \
 For a separately registered surface, supply its manifest explicitly:
 
 ```bash
-npx --package @szl/verify szl-conformance \
+npx --package @szl/verify@0.1.0 szl-conformance \
   --surface example \
   --manifest /path/to/example.json \
   --root /path/to/evidence-root

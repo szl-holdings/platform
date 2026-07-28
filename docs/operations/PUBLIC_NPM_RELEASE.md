@@ -23,15 +23,22 @@ Run from an isolated clean clone at the exact reviewed commit:
 
 ```bash
 npm whoami
+pnpm install --frozen-lockfile
 npm pack --dry-run --json ./packages/mcp-governor
 npm pack --dry-run --json ./packages/conformance
-npm publish --access public --provenance ./packages/mcp-governor
-npm publish --access public --provenance ./packages/conformance
+npm publish --access public ./packages/mcp-governor
+npm publish --access public ./packages/conformance
 ```
 
 Do not put an npm token in a commit, PR, issue, log, or chat. Use an
 authenticated local npm session or a granular automation token supplied through
 an approved secret store.
+
+Automatic npm provenance generation is not available from an arbitrary local
+shell. The first local publication is therefore recorded with provenance
+`UNAVAILABLE_INITIAL_PUBLICATION`. If provenance is mandatory for version
+`0.1.0`, perform the token-authenticated first publication in a supported
+GitHub Actions workflow with `id-token: write` instead.
 
 ## Trusted publishing after package creation
 
@@ -45,11 +52,16 @@ The release receipt must preserve:
 - reviewed Git commit and immutable package version;
 - tarball filename, integrity digest, and unpacked file inventory;
 - npm registry URL and returned package metadata;
-- provenance attestation identity;
+- provenance attestation identity, or the explicit
+  `UNAVAILABLE_INITIAL_PUBLICATION` state for a local first publication;
 - workflow run URL and terminal conclusion; and
 - an unauthenticated `npm view <name>@<version>` verification.
 
 If any receipt field is missing, the release remains `UNVERIFIED`.
+
+The exact tarballs, SHA-256 digests, and file inventories are primary release
+evidence. Preserve them in the durable release evidence store before deleting
+any build directory. A console transcript alone is insufficient.
 
 ## Current external gate
 

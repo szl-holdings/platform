@@ -53,7 +53,7 @@
   },
   "scripts": {
     "build": "tsc --build",
-    "prepack": "tsc --build",
+    "prepack": "tsx --test src/*.test.ts && tsc --build",
     "typecheck": "tsc -p tsconfig.json --noEmit",
     "test": "tsx --test src/*.test.ts",
     "lint": "biome lint ./src",

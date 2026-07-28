@@ -1,0 +1,62 @@
+{
+  "schemaVersion": "szl.npm-package-readiness.v1",
+  "generatedAt": "2026-07-28T19:10:55Z",
+  "status": "TARBALL_VERIFIED_REGISTRY_UNAVAILABLE",
+  "packages": [
+    {
+      "name": "@szl/mcp-governor",
+      "version": "0.1.0",
+      "filename": "szl-mcp-governor-0.1.0.tgz",
+      "sha256": "dd87f0bd083c000eb2ed15c731ddec67669e4497f2e746dd93e2bc0431d644c1",
+      "files": [
+        "LICENSE",
+        "dist/attestation.d.ts",
+        "dist/attestation.d.ts.map",
+        "dist/attestation.js",
+        "dist/canonical.d.ts",
+        "dist/canonical.d.ts.map",
+        "dist/canonical.js",
+        "dist/capability.d.ts",
+        "dist/capability.d.ts.map",
+        "dist/capability.js",
+        "dist/governor.d.ts",
+        "dist/governor.d.ts.map",
+        "dist/governor.js",
+        "dist/index.d.ts",
+        "dist/index.d.ts.map",
+        "dist/index.js",
+        "dist/receipt.d.ts",
+        "dist/receipt.d.ts.map",
+        "dist/receipt.js",
+        "dist/types.d.ts",
+        "dist/types.d.ts.map",
+        "dist/types.js",
+        "package.json",
+        "README.md"
+      ]
+    },
+    {
+      "name": "@szl/verify",
+      "version": "0.1.0",
+      "filename": "szl-verify-0.1.0.tgz",
+      "sha256": "bc13cfcacecbb71105e0c806d3ad750ed962fd1ff902c1bc71971bc29243028a",
+      "files": [
+        "LICENSE",
+        "package.json",
+        "README.md",
+        "src/cli.mjs",
+        "src/conformance.mjs",
+        "src/verify-cli.mjs",
+        "src/verify.mjs",
+        "surfaces/insurance.json",
+        "surfaces/sentra.json",
+        "surfaces/vessels.json"
+      ]
+    }
+  ],
+  "registry": {
+    "mcpGovernorHttpStatus": 404,
+    "verifyHttpStatus": 404,
+    "publication": "UNEXECUTED"
+  }
+}

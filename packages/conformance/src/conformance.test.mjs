@@ -1,10 +1,12 @@
 import assert from 'node:assert/strict';
+import { spawnSync } from 'node:child_process';
 import { generateKeyPairSync } from 'node:crypto';
 import { mkdir, mkdtemp, writeFile } from 'node:fs/promises';
 import { createServer } from 'node:http';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import test from 'node:test';
+import { fileURLToPath } from 'node:url';
 import { normalizeBaseUrl, runConformance } from './conformance.mjs';
 import { payloadHash, publicKeyFingerprint, signDssePayload } from './verify.mjs';
 
@@ -390,4 +392,18 @@ test('bundled manifests load independently of the evidence root and stay fail cl
     report.checks.find((check) => check.id === 'product-manifest')?.detail || '',
     /disposition=SUPERSEDED/,
   );
+});
+
+test('CLI rejects every missing option value instead of silently defaulting', () => {
+  const cli = fileURLToPath(new URL('./cli.mjs', import.meta.url));
+  for (const argv of [
+    ['--surface'],
+    ['--surface', 'sentra', '--root'],
+    ['--surface', 'sentra', '--manifest'],
+    ['--surface', '--json'],
+  ]) {
+    const result = spawnSync(process.execPath, [cli, ...argv], { encoding: 'utf8' });
+    assert.equal(result.status, 2, argv.join(' '));
+    assert.match(result.stderr, /requires a value/, argv.join(' '));
+  }
 });

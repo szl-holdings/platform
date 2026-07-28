@@ -10,20 +10,32 @@ function writeStderr(value) {
   process.stderr.write(`${value}\n`);
 }
 
+function optionValue(argv, index, option) {
+  const value = argv[index + 1];
+  if (!value || value.startsWith('--')) {
+    throw new Error(`${option} requires a value`);
+  }
+  return value;
+}
+
 function parseArgs(argv) {
   const args = { json: false };
   for (let index = 0; index < argv.length; index += 1) {
     const value = argv[index];
-    if (value === '--surface') args.surface = argv[++index];
-    else if (value === '--root') args.root = argv[++index];
-    else if (value === '--manifest') args.manifest = argv[++index];
-    else if (value === '--json') args.json = true;
-    else throw new Error(`unknown argument: ${value}`);
+    if (value === '--surface' || value === '--root' || value === '--manifest') {
+      const parsedValue = optionValue(argv, index, value);
+      if (value === '--surface') args.surface = parsedValue;
+      else if (value === '--root') args.root = parsedValue;
+      else args.manifest = parsedValue;
+      index += 1;
+    } else if (value === '--json') {
+      args.json = true;
+    } else {
+      throw new Error(`unknown argument: ${value}`);
+    }
   }
   if (!args.surface) throw new Error('--surface is required');
   if (!/^[a-z0-9-]+$/.test(args.surface)) throw new Error('surface has invalid characters');
-  if (args.root === '') throw new Error('--root must be a non-empty path');
-  if (args.manifest === '') throw new Error('--manifest must be a non-empty path');
   return args;
 }
 

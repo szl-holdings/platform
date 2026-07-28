@@ -22,7 +22,7 @@
 
 - `@szl/mcp-governor`: typecheck passed, build passed, and 36/36 focused tests
   passed.
-- `@szl/verify`: 22/22 focused tests passed, including the packaged-manifest
+- `@szl/verify`: 23/23 focused tests passed, including the packaged-manifest
   fail-closed boundary.
 - both actual tarballs were created in an isolated temporary directory and
   extracted successfully;
@@ -34,8 +34,15 @@
   metadata, README, and license;
 - the verifier tarball contained only four runtime modules, three surface
   manifests, metadata, README, and license; and
-- the temporary tarballs and extraction directory were removed after the smoke
-  test.
+- the reviewed tarballs, their SHA-256 digests, and their file inventories are
+  preserved under `audit/frontier/npm-package-readiness-2026-07-28/`.
+
+Preserved SHA-256:
+
+- `szl-mcp-governor-0.1.0.tgz`:
+  `dd87f0bd083c000eb2ed15c731ddec67669e4497f2e746dd93e2bc0431d644c1`
+- `szl-verify-0.1.0.tgz`:
+  `bc13cfcacecbb71105e0c806d3ad750ed962fd1ff902c1bc71971bc29243028a`
 
 Fresh unauthenticated registry lookups returned HTTP `404` for both exact
 package names.
