@@ -376,3 +376,18 @@ test('a superseded surface fails the product-manifest gate', async () => {
   assert.equal(report.conformant, false);
   assert.equal(report.checks.find((check) => check.id === 'product-manifest')?.status, 'FAIL');
 });
+
+test('bundled manifests load independently of the evidence root and stay fail closed', async () => {
+  const root = await fixtureRoot();
+  const report = await runConformance({
+    surface: 'sentra',
+    root,
+    nowMs: FIXTURE_NOW,
+  });
+  assert.equal(report.conformant, false);
+  assert.equal(report.checks.find((check) => check.id === 'product-manifest')?.status, 'FAIL');
+  assert.match(
+    report.checks.find((check) => check.id === 'product-manifest')?.detail || '',
+    /disposition=SUPERSEDED/,
+  );
+});

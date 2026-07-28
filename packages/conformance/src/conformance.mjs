@@ -1,7 +1,8 @@
 import { lookup } from 'node:dns/promises';
 import { readFile } from 'node:fs/promises';
 import { isIP } from 'node:net';
-import { isAbsolute, relative, resolve } from 'node:path';
+import { dirname, isAbsolute, relative, resolve } from 'node:path';
+import { fileURLToPath } from 'node:url';
 import {
   decodeDssePayload,
   KHIPU_PAYLOAD_TYPE,
@@ -19,6 +20,7 @@ const TRACE_ID_PATTERN = /^[0-9a-f]{32}$/;
 const SPAN_ID_PATTERN = /^[0-9a-f]{16}$/;
 const DEFAULT_MAX_EVIDENCE_AGE_MS = 15 * 60 * 1000;
 const MAX_CLOCK_SKEW_MS = 60 * 1000;
+const PACKAGE_ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 
 export function normalizeBaseUrl(baseUrl) {
   let end = baseUrl.length;
@@ -457,7 +459,7 @@ export async function runConformance({
   const surfaceManifest =
     manifest ||
     (await readJson(
-      resolveWithinRoot(root, `packages/conformance/surfaces/${surface}.json`, 'surface manifest'),
+      resolveWithinRoot(PACKAGE_ROOT, `surfaces/${surface}.json`, 'surface manifest'),
     ));
   if (surfaceManifest.surface !== surface) {
     throw new TypeError(`manifest surface must match ${surface}`);
