@@ -1,6 +1,6 @@
 # Decision-SLSA v1.4
 
-Status: **DRAFT / NOT A CERTIFICATION / NOT EXTERNALLY PUBLISHED**
+Status: **PUBLIC DRAFT / NOT A CERTIFICATION**
 
 Decision-SLSA (D-SLSA) is a cumulative maturity model for the evidence attached
 to a governed decision. It borrows SLSA's evidence-oriented, levelled structure
@@ -125,6 +125,12 @@ the corresponding state to `VERIFIED`.
 
 ## 6. Publication boundary
 
-The intended Zenodo concept DOI is `10.5281/zenodo.19944926`. As of this draft,
-deposit and DOI resolution have not been verified. The standalone public
-repository and third-party venue submission are also pending.
+The reference source is public at
+<https://github.com/szl-holdings/evidence-doctrine>. No D-SLSA DOI has been
+minted. The previously proposed concept DOI `10.5281/zenodo.19944926` resolves
+to the Ouroboros Thesis v21 record `10.5281/zenodo.20490218`, not this
+specification. D-SLSA requires a new Zenodo deposition and concept DOI; the
+unrelated Ouroboros DOI must not be repurposed.
+
+Publication of source does not establish adoption, independent validation, or
+any D-SLSA level for an evaluated decision bundle.
