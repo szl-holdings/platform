@@ -60,6 +60,9 @@ const SCAN_EXTENSIONS = new Set([
   '.toml',
   '.ini',
   '.env',
+  // Standard private-key outputs. Content must still match a secret pattern.
+  '.key',
+  '.pem',
 ]);
 const MAX_FILES = 20_000;
 
