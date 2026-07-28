@@ -33,6 +33,15 @@ function contractFixture(t) {
       cpSync(source, target, { recursive: true });
     }
   }
+  for (const args of [
+    ['init', '--quiet'],
+    ['config', 'user.email', 'estate-contract-test@invalid.example'],
+    ['config', 'user.name', 'Estate Contract Test'],
+    ['add', '--', ...COMPONENT_DEFINITIONS.flatMap((component) => component.inputs)],
+  ]) {
+    const result = spawnSync('git', ['-C', root, ...args], { encoding: 'utf8' });
+    assert.equal(result.status, 0, result.stderr);
+  }
   t.after(() => rmSync(root, { force: true, recursive: true }));
   return root;
 }
@@ -132,6 +141,23 @@ test('exported dependency mutations change the release identity', (t) => {
   assert.notEqual(
     afterZod.components.find((component) => component.id === 'api-zod')?.tree_sha256,
     after.components.find((component) => component.id === 'api-zod')?.tree_sha256,
+  );
+});
+
+test('ignored and untracked files cannot enter the release identity', (t) => {
+  const root = contractFixture(t);
+  const before = buildManifest(root);
+  appendFileSync(resolve(root, '.git/info/exclude'), '\n.DS_Store\n', 'utf8');
+  appendFileSync(resolve(root, 'packages/design-system/src/.DS_Store'), 'local-only', 'utf8');
+
+  const after = buildManifest(root);
+
+  assert.deepEqual(after, before);
+  assert.equal(
+    after.components
+      .flatMap((component) => component.files)
+      .some((file) => file.path.endsWith('/.DS_Store')),
+    false,
   );
 });
 

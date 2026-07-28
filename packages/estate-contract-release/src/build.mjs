@@ -1,7 +1,8 @@
 #!/usr/bin/env node
 
+import { spawnSync } from 'node:child_process';
 import { createHash } from 'node:crypto';
-import { lstatSync, mkdirSync, readdirSync, readFileSync, writeFileSync } from 'node:fs';
+import { lstatSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { dirname, relative, resolve, sep } from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 
@@ -73,20 +74,50 @@ export function compareUtf8Bytes(left, right) {
   return Buffer.compare(Buffer.from(left, 'utf8'), Buffer.from(right, 'utf8'));
 }
 
-function listFiles(path) {
-  const stat = lstatSync(path);
+function requireRegularTrackedFile(root, path) {
+  const absolutePath = resolve(root, path);
+  const stat = lstatSync(absolutePath);
   if (stat.isSymbolicLink()) {
     throw new Error(`contract input must not be a symbolic link: ${path}`);
   }
-  if (stat.isFile()) {
-    return [path];
+  if (!stat.isFile()) {
+    throw new Error(`tracked contract input must be a regular file: ${path}`);
   }
-  if (!stat.isDirectory()) {
-    throw new Error(`contract input must be a file or directory: ${path}`);
+  return absolutePath;
+}
+
+function listTrackedFiles(root, inputs) {
+  for (const input of inputs) {
+    const stat = lstatSync(resolve(root, input));
+    if (stat.isSymbolicLink() || (!stat.isFile() && !stat.isDirectory())) {
+      throw new Error(`contract input must be a regular file or directory: ${input}`);
+    }
   }
-  return readdirSync(path, { withFileTypes: true })
-    .sort((left, right) => compareUtf8Bytes(left.name, right.name))
-    .flatMap((entry) => listFiles(resolve(path, entry.name)));
+
+  const result = spawnSync('git', ['-C', root, 'ls-files', '-z', '--', ...inputs], {
+    encoding: 'utf8',
+    maxBuffer: 16 * 1024 * 1024,
+  });
+  if (result.error) {
+    throw new Error(`unable to enumerate tracked contract inputs: ${result.error.message}`);
+  }
+  if (result.status !== 0) {
+    throw new Error(
+      `unable to enumerate tracked contract inputs: ${String(result.stderr).trim()}`,
+    );
+  }
+
+  const paths = result.stdout
+    .split('\0')
+    .filter(Boolean)
+    .sort(compareUtf8Bytes);
+  for (const input of inputs) {
+    const prefix = `${input}/`;
+    if (!paths.some((path) => path === input || path.startsWith(prefix))) {
+      throw new Error(`contract input contains no tracked files: ${input}`);
+    }
+  }
+  return paths.map((path) => requireRegularTrackedFile(root, path));
 }
 
 export function canonicalJson(value) {
@@ -104,8 +135,7 @@ export function canonicalJson(value) {
 
 export function buildManifest(root = REPOSITORY_ROOT) {
   const components = COMPONENT_DEFINITIONS.map((definition) => {
-    const files = definition.inputs
-      .flatMap((input) => listFiles(resolve(root, input)))
+    const files = listTrackedFiles(root, definition.inputs)
       .map((path) => {
         const body = readFileSync(path);
         return {
@@ -143,14 +173,14 @@ export function buildManifest(root = REPOSITORY_ROOT) {
     consumer_contract: {
       pin: 'an immutable protected Platform Git revision',
       verify: [
-        'enumerate every file beneath each component input root',
+        'enumerate every Git-tracked file beneath each component input root',
         'recompute every file SHA-256 and byte count',
         'recompute every component tree SHA-256',
         'recompute the release_id over canonical JSON',
       ],
       reject: [
         'mutable main or latest references',
-        'missing or additional files inside an allowlisted component',
+        'missing or additional tracked files inside an allowlisted component',
         'a release_id or component digest mismatch',
         'claims that hash closure proves registry publication or deployment',
       ],

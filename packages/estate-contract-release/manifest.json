@@ -4013,17 +4013,17 @@
   "consumer_contract": {
     "pin": "an immutable protected Platform Git revision",
     "verify": [
-      "enumerate every file beneath each component input root",
+      "enumerate every Git-tracked file beneath each component input root",
       "recompute every file SHA-256 and byte count",
       "recompute every component tree SHA-256",
       "recompute the release_id over canonical JSON"
     ],
     "reject": [
       "mutable main or latest references",
-      "missing or additional files inside an allowlisted component",
+      "missing or additional tracked files inside an allowlisted component",
       "a release_id or component digest mismatch",
       "claims that hash closure proves registry publication or deployment"
     ]
   },
-  "release_id": "sha256:88734588547aa875399f9bacec4a487218fbde38088c1644ef50e3141945c944"
+  "release_id": "sha256:9af5861b8849ccc11813717187a15e52f644d64e97970b9cf0143eea47abf493"
 }
