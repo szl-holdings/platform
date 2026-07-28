@@ -1,20 +1,17 @@
 import assert from 'node:assert/strict';
-import { createHash } from 'node:crypto';
 import { readFile } from 'node:fs/promises';
 import { dirname, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { gunzipSync } from 'node:zlib';
+import {
+  buildPublicationContract,
+  normalizePublishManifest,
+  SOURCE_MANIFESTS,
+  sha256,
+} from './public-npm-contract.mjs';
 
 const SCRIPT_PATH = fileURLToPath(import.meta.url);
 const REPOSITORY_ROOT = resolve(dirname(SCRIPT_PATH), '..', '..');
-const SOURCE_MANIFESTS = new Map([
-  ['@szl/mcp-governor', 'packages/mcp-governor/package.json'],
-  ['@szl/verify', 'packages/conformance/package.json'],
-]);
-
-function sha256(value) {
-  return createHash('sha256').update(value).digest('hex');
-}
 
 function headerText(header, start, end) {
   const terminator = header.indexOf(0, start);
@@ -61,6 +58,11 @@ export async function verifyPublicNpmArtifacts(repositoryRoot = REPOSITORY_ROOT)
   const inventory = JSON.parse(await readFile(join(evidenceDirectory, 'inventory.json'), 'utf8'));
   assert.equal(inventory.schemaVersion, 'szl.npm-package-readiness.v1');
   assert.equal(inventory.status, 'TARBALL_VERIFIED_REGISTRY_UNAVAILABLE');
+  assert.deepEqual(
+    inventory.packages.map(({ name }) => name).sort(),
+    [...SOURCE_MANIFESTS.keys()].sort(),
+    'npm artifact inventory must contain every expected package exactly once',
+  );
 
   const results = [];
   for (const packageEvidence of inventory.packages) {
@@ -86,6 +88,21 @@ export async function verifyPublicNpmArtifacts(repositoryRoot = REPOSITORY_ROOT)
       `${packageEvidence.name} packed manifest drift`,
     );
 
+    const publicationContract = entries.get('package/publication-contract.json');
+    assert(publicationContract, `${packageEvidence.name} publication contract missing`);
+    assert.equal(
+      sha256(publicationContract),
+      packageEvidence.publicationContractSha256,
+      `${packageEvidence.name} publication contract digest drift`,
+    );
+    const expectedContract = buildPublicationContract(sourceManifest);
+    const packedContract = JSON.parse(publicationContract.toString('utf8'));
+    assert.deepEqual(
+      packedContract,
+      expectedContract,
+      `${packageEvidence.name} embedded publication contract drift`,
+    );
+
     const files = [...entries.keys()]
       .filter((path) => path.startsWith('package/'))
       .map((path) => path.slice('package/'.length))
@@ -97,6 +114,17 @@ export async function verifyPublicNpmArtifacts(repositoryRoot = REPOSITORY_ROOT)
     );
 
     const packedMetadata = JSON.parse(packedManifest.toString('utf8'));
+    const normalizedPacked = normalizePublishManifest(packedMetadata);
+    assert.deepEqual(
+      normalizedPacked.publishManifest,
+      expectedContract.publishManifest,
+      `${packageEvidence.name} source-to-packed publish manifest drift`,
+    );
+    assert.deepEqual(
+      normalizedPacked.developmentDependencyNames,
+      expectedContract.developmentDependencyNames,
+      `${packageEvidence.name} development dependency-name drift`,
+    );
     assert.equal(packedMetadata.name, packageEvidence.name);
     assert.equal(packedMetadata.version, packageEvidence.version);
     assert.equal(packedMetadata.private, false);

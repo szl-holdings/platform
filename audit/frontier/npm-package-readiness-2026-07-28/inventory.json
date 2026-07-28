@@ -1,15 +1,16 @@
 {
   "schemaVersion": "szl.npm-package-readiness.v1",
-  "generatedAt": "2026-07-28T19:45:03Z",
+  "generatedAt": "2026-07-28T20:10:02Z",
   "status": "TARBALL_VERIFIED_REGISTRY_UNAVAILABLE",
   "packages": [
     {
       "name": "@szl/mcp-governor",
       "version": "0.1.0",
       "filename": "szl-mcp-governor-0.1.0.tgz",
-      "sha256": "dd87f0bd083c000eb2ed15c731ddec67669e4497f2e746dd93e2bc0431d644c1",
-      "sourceManifestSha256": "41b7ee2a4f2b1bdb187c612cc3ade3427f915be0130d0b0a67955040ce3ca663",
-      "packedManifestSha256": "7c9bafbd526e23223eba82c6965c55f6eaf089c98ce73445cbd2391f78a16d2b",
+      "sha256": "e277c70b3d5c61724bba4a00f22242f260f9dc3c715f3abc97d829b56616a9ac",
+      "sourceManifestSha256": "fef24ba4f34a8f573c7ba618b4456f394eaab54d78266d6578325098aeef9d0f",
+      "packedManifestSha256": "c4ec7a422ff5010959304eeb022756b8ed1c93d2c62c4ecd8e8668ca78ff72cb",
+      "publicationContractSha256": "8cdccae7d7c46fcee5e144f33d9513838740c2ed1034bf1b7f1f7dffcfc40534",
       "files": [
         "LICENSE",
         "dist/attestation.d.ts",
@@ -34,6 +35,7 @@
         "dist/types.d.ts.map",
         "dist/types.js",
         "package.json",
+        "publication-contract.json",
         "README.md"
       ]
     },
@@ -41,12 +43,14 @@
       "name": "@szl/verify",
       "version": "0.1.0",
       "filename": "szl-verify-0.1.0.tgz",
-      "sha256": "bc39042fc4c791dbfbe34d3999e538d492632a8f9ff27c10374d6f9eefa24d15",
-      "sourceManifestSha256": "ee43941477dea2af14bc85a0c476238abf025cffef6e40bdda2039d7a7b99573",
-      "packedManifestSha256": "cdf66eb7262121f096069abb04fd59f95639307d6a9dc26e2459d89f79a9a564",
+      "sha256": "db50118722fbbc719a776d524ee377ebbedd8fc4e0d00800dc4eaac8302e5ac2",
+      "sourceManifestSha256": "4c9810426d524f5ac1bea9a78ab85584a1527956a59813be6b94ca7281c1d156",
+      "packedManifestSha256": "12e9a36b802defaf1e3f1fb3dc5aa03cf1ee4ebaff60ea3219b753bd15e0b667",
+      "publicationContractSha256": "7f52b6cbf573e6d30f45dc970ceeabbcfcc7cebf7f0870382dc6b8fdb80c705f",
       "files": [
         "LICENSE",
         "package.json",
+        "publication-contract.json",
         "README.md",
         "src/cli.mjs",
         "src/conformance.mjs",

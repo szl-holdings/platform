@@ -34,19 +34,24 @@
 - the MCP Governor tarball contained only compiled output, declarations,
   metadata, README, and license;
 - the verifier tarball contained only four runtime modules, three surface
-  manifests, metadata, README, and license; and
+  manifests, metadata, the publication contract, README, and license;
+- each tarball embeds a canonical publication contract binding the exact source
+  manifest hash, exact source `prepack` command, development dependency names,
+  and normalized publish manifest;
 - the reviewed tarballs, their SHA-256 digests, and their file inventories are
   preserved under `audit/frontier/npm-package-readiness-2026-07-28/`.
 - `pnpm verify:npm-artifacts` recomputes both tarball digests, both source and
-  publish-transformed manifest digests, both file inventories, and the public
-  package metadata before publication.
+  publish-transformed manifest digests, both embedded publication-contract
+  digests, both file inventories, and the public package metadata before
+  publication. Its regression test proves that refreshing only the source hash
+  cannot authorize a stale tarball after a publish-relevant source change.
 
 Preserved SHA-256:
 
 - `szl-mcp-governor-0.1.0.tgz`:
-  `dd87f0bd083c000eb2ed15c731ddec67669e4497f2e746dd93e2bc0431d644c1`
+  `e277c70b3d5c61724bba4a00f22242f260f9dc3c715f3abc97d829b56616a9ac`
 - `szl-verify-0.1.0.tgz`:
-  `bc39042fc4c791dbfbe34d3999e538d492632a8f9ff27c10374d6f9eefa24d15`
+  `db50118722fbbc719a776d524ee377ebbedd8fc4e0d00800dc4eaac8302e5ac2`
 
 Fresh unauthenticated registry lookups returned HTTP `404` for both exact
 package names.

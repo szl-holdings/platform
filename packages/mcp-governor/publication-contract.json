@@ -1,0 +1,73 @@
+{
+  "developmentDependencyNames": [
+    "@types/node",
+    "tsx",
+    "typescript"
+  ],
+  "packageName": "@szl/mcp-governor",
+  "publishManifest": {
+    "bugs": {
+      "url": "https://github.com/szl-holdings/platform/issues"
+    },
+    "description": "Prototype MCP capability-token, policy, and receipt contracts designed for fail-closed tool execution.",
+    "engines": {
+      "node": ">=24"
+    },
+    "exports": {
+      ".": {
+        "import": "./dist/index.js",
+        "types": "./dist/index.d.ts"
+      },
+      "./attestation": {
+        "import": "./dist/attestation.js",
+        "types": "./dist/attestation.d.ts"
+      },
+      "./capability": {
+        "import": "./dist/capability.js",
+        "types": "./dist/capability.d.ts"
+      },
+      "./governor": {
+        "import": "./dist/governor.js",
+        "types": "./dist/governor.d.ts"
+      },
+      "./receipt": {
+        "import": "./dist/receipt.js",
+        "types": "./dist/receipt.d.ts"
+      },
+      "./types": {
+        "import": "./dist/types.js",
+        "types": "./dist/types.d.ts"
+      }
+    },
+    "files": [
+      "dist",
+      "publication-contract.json",
+      "README.md",
+      "LICENSE"
+    ],
+    "homepage": "https://github.com/szl-holdings/platform/tree/main/packages/mcp-governor#readme",
+    "license": "LicenseRef-SZL-Proprietary",
+    "name": "@szl/mcp-governor",
+    "private": false,
+    "publishConfig": {
+      "access": "public"
+    },
+    "repository": {
+      "directory": "packages/mcp-governor",
+      "type": "git",
+      "url": "git+https://github.com/szl-holdings/platform.git"
+    },
+    "scripts": {
+      "build": "tsc --build",
+      "lint": "biome lint ./src",
+      "lint:ci": "biome lint ./src",
+      "test": "tsx --test src/*.test.ts",
+      "typecheck": "tsc -p tsconfig.json --noEmit"
+    },
+    "type": "module",
+    "version": "0.1.0"
+  },
+  "schemaVersion": "szl.npm-publication-contract.v1",
+  "sourceManifestSha256": "fef24ba4f34a8f573c7ba618b4456f394eaab54d78266d6578325098aeef9d0f",
+  "sourcePrepack": "node ../../scripts/release/public-npm-contract.mjs --check && tsx --test src/*.test.ts && tsc --build --force"
+}
