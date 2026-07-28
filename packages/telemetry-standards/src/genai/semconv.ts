@@ -453,6 +453,67 @@ function requireReceiptId(value: string): string {
   return normalized;
 }
 
+function requireIsoTimestamp(value: string, field: string): string {
+  if (typeof value !== 'string') {
+    throw new TypeError(`${field} must be an ISO 8601 timestamp with timezone`);
+  }
+
+  const match =
+    /^(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2}):(\d{2})(?:\.(\d{1,3}))?(?:Z|([+-])(\d{2}):(\d{2}))$/.exec(
+      value,
+    );
+  if (!match) {
+    throw new TypeError(`${field} must be an ISO 8601 timestamp with timezone`);
+  }
+
+  const [, yearText, monthText, dayText, hourText, minuteText, secondText, fraction, offsetSign] =
+    match;
+  const year = Number(yearText);
+  const month = Number(monthText);
+  const day = Number(dayText);
+  const hour = Number(hourText);
+  const minute = Number(minuteText);
+  const second = Number(secondText);
+  const millisecond = Number((fraction ?? '').padEnd(3, '0'));
+  const offsetHour = Number(match[9] ?? 0);
+  const offsetMinute = Number(match[10] ?? 0);
+
+  if (
+    month < 1 ||
+    month > 12 ||
+    day < 1 ||
+    day > 31 ||
+    hour > 23 ||
+    minute > 59 ||
+    second > 59 ||
+    (offsetSign !== undefined &&
+      (offsetHour > 14 || offsetMinute > 59 || (offsetHour === 14 && offsetMinute !== 0)))
+  ) {
+    throw new TypeError(`${field} must be a valid ISO 8601 timestamp`);
+  }
+
+  const calendarProbe = new Date(0);
+  calendarProbe.setUTCHours(hour, minute, second, millisecond);
+  calendarProbe.setUTCFullYear(year, month - 1, day);
+  if (
+    calendarProbe.getUTCFullYear() !== year ||
+    calendarProbe.getUTCMonth() !== month - 1 ||
+    calendarProbe.getUTCDate() !== day ||
+    calendarProbe.getUTCHours() !== hour ||
+    calendarProbe.getUTCMinutes() !== minute ||
+    calendarProbe.getUTCSeconds() !== second ||
+    calendarProbe.getUTCMilliseconds() !== millisecond
+  ) {
+    throw new TypeError(`${field} must be a valid ISO 8601 timestamp`);
+  }
+
+  const timestampMs = Date.parse(value);
+  if (!Number.isFinite(timestampMs)) {
+    throw new TypeError(`${field} must be a valid ISO 8601 timestamp`);
+  }
+  return new Date(timestampMs).toISOString();
+}
+
 function attestationAttributeEntries(
   input: GenAIAttestationInput | undefined,
 ): ReadonlyArray<readonly [string, OtelAttributeValue | undefined]> {
@@ -467,7 +528,10 @@ function attestationAttributeEntries(
     if (input.evidenceTier !== 'UNVERIFIED') {
       throw new TypeError('unverified attestation evidenceTier must be UNVERIFIED');
     }
-    if (!/^[a-z0-9][a-z0-9._-]{0,63}$/.test(input.reasonCode)) {
+    if (
+      typeof input.reasonCode !== 'string' ||
+      !/^[a-z0-9][a-z0-9._-]{0,63}$/.test(input.reasonCode)
+    ) {
       throw new TypeError('attestation.reasonCode must be a low-cardinality reason code');
     }
     return [
@@ -488,17 +552,7 @@ function attestationAttributeEntries(
   if (input.verifier !== 'nras' && input.verifier !== 'local') {
     throw new TypeError('attestation.verifier is unsupported');
   }
-  if (
-    !/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d{1,3})?(?:Z|[+-]\d{2}:\d{2})$/.test(
-      input.verifiedAt,
-    )
-  ) {
-    throw new TypeError('attestation.verifiedAt must be an ISO 8601 timestamp with timezone');
-  }
-  const verifiedAtMs = Date.parse(input.verifiedAt);
-  if (!Number.isFinite(verifiedAtMs)) {
-    throw new TypeError('attestation.verifiedAt must be a valid ISO 8601 timestamp');
-  }
+  const verifiedAt = requireIsoTimestamp(input.verifiedAt, 'attestation.verifiedAt');
   return [
     [OTEL_GENAI_ATTESTATION_ATTRS.VERIFIED, true],
     [OTEL_GENAI_ATTESTATION_ATTRS.EVIDENCE_TIER, input.evidenceTier],
@@ -511,7 +565,7 @@ function attestationAttributeEntries(
       OTEL_GENAI_ATTESTATION_ATTRS.MEASUREMENT,
       requireDigest(input.measurement, 'attestation.measurement', ['sha256', 'sha384']),
     ],
-    [OTEL_GENAI_ATTESTATION_ATTRS.VERIFIED_AT, new Date(verifiedAtMs).toISOString()],
+    [OTEL_GENAI_ATTESTATION_ATTRS.VERIFIED_AT, verifiedAt],
     [OTEL_GENAI_ATTESTATION_ATTRS.VERIFIER, input.verifier],
     [OTEL_GENAI_ATTESTATION_ATTRS.RECEIPT_ID, receiptId],
     [OTEL_GENAI_ATTESTATION_ATTRS.RECEIPT_URL, receiptUrl],
