@@ -1,10 +1,26 @@
 # SZL Holdings — Known Gaps Register (Security & Operations)
 
-**Last updated:** 2026-07-28 (rev 15 — attestation admission boundary)
+**Last updated:** 2026-07-28 (rev 16 — attestation admission and CI policy receipt)
 **Owner:** Engineering / DevOps  
 **Audience:** Enterprise architects, Series A technical advisors, incoming VP Engineering
 
 This document is the canonical reference for known security, quality, and compliance gaps in the SZL Holdings platform. It consolidates findings from the internal risk register, the April 2026 hardening sprint, and the secrets remediation audit.
+
+---
+
+## 2026-07-28 Post-Merge CI Policy Receipt
+
+Platform PR #524 merged exact reviewed head
+`9d74488d40e44a6ff88dab94aa2146f7f7388216` as protected main commit
+`3daa582026778294a90f07474294de72d2063012`. The source-level
+`@szl/mcp-governor` verification passed 36/36 focused tests, lint, package
+typecheck, and build. The hosted Commitlint job subsequently failed because one
+commit-body line exceeded the 100-character policy.
+
+The failure is recorded rather than rewritten: no commit was amended, no
+force-push occurred, and the code result is not represented as an all-green PR.
+This forward-only receipt does not retroactively turn the failed check green.
+Future commits must wrap body lines to 100 characters or fewer.
 
 ---
 
@@ -355,6 +371,15 @@ Operational gaps, process health, test coverage, observability, team ownership.
 ---
 
 ## Incident Log
+
+- **2026-07-28 (PR #524 post-merge Commitlint policy failure):** Protected main
+  contains the exact reviewed attestation hardening tree at
+  `3daa582026778294a90f07474294de72d2063012`. Commitlint failed after merge on
+  source commit `9d74488d40e44a6ff88dab94aa2146f7f7388216` because a body line exceeded
+  100 characters. The code checks named in the receipt above passed, but #524
+  is not an all-green PR. History was preserved; the policy failure is
+  remediated forward through this signed audit record and compliant future
+  commits.
 
 - **2026-07-25 (FRONTIER V2 Wave 1 Truth Lock):** TD-011 resolved. Live
   tracked-tree inspection found material drift between `SOURCE_OF_TRUTH.md`,
