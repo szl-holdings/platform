@@ -46,6 +46,10 @@ useDefault = true
     # This config file itself contains allowlist regex fragments.
     ".gitleaks.toml",
 
+    # The generated justification register quotes active scanner patterns and
+    # source-shaped false positives for audit review; it contains no secrets.
+    "security/ALLOWLIST-JUSTIFICATIONS\\.md",
+
     # Generated test/build output — never contain real source credentials.
     "playwright-report",
     "test-results",
@@ -272,6 +276,13 @@ useDefault = true
     "changeme",
     "replace[-_]?me",
     "example[-_]?only",
+
+    # Public key identifiers, a Python type name, and an encrypted-key header.
+    # These describe algorithms or key slots; none contains private key material.
+    "szl-receipts-ed25519",
+    "szlholdings-ec-p256",
+    "Ed25519PrivateKey",
+    "ENCRYPTED SIGSTORE PRIVATE KEY",
 
     # Stripe test-mode keys (not live).
     # sk_test_ and pk_test_ keys are non-billable; they cannot charge real cards.
