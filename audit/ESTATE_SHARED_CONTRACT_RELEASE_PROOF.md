@@ -110,8 +110,8 @@ implementation revision
 | `C:\Users\steph\.cache\codex-runtimes\codex-primary-runtime\dependencies\node\bin\node.exe packages/estate-contract-release/src/build.mjs --check` | 0 | `PASS sha256:887345...c944`, six components |
 | `C:\Users\steph\.cache\codex-runtimes\codex-primary-runtime\dependencies\node\bin\node.exe --check packages/estate-contract-release/src/build.mjs` | 0 | no syntax errors |
 | `C:\Users\steph\.cache\codex-runtimes\codex-primary-runtime\dependencies\node\bin\node.exe --check packages/estate-contract-release/src/build.test.mjs` | 0 | no syntax errors |
-| `C:\Users\steph\.cache\codex-runtimes\codex-primary-runtime\dependencies\node\bin\node.exe --test packages/estate-contract-release/src/build.test.mjs` | 0 | 12 tests, 12 passed, 0 failed |
-| `C:\Users\steph\.cache\codex-runtimes\codex-primary-runtime\dependencies\node\bin\node.exe --test lib/api-spec/scripts/codegen.test.mjs` | 0 | 2 tests, 2 passed, 0 failed |
+| `C:\Users\steph\.cache\codex-runtimes\codex-primary-runtime\dependencies\node\bin\node.exe --test packages/estate-contract-release/src/build.test.mjs` | 0 | focused package tests passed locally; canonical `platform_tests` remains `UNAVAILABLE` |
+| `C:\Users\steph\.cache\codex-runtimes\codex-primary-runtime\dependencies\node\bin\node.exe --test lib/api-spec/scripts/codegen.test.mjs` | 0 | focused API codegen tests passed locally; canonical `platform_tests` remains `UNAVAILABLE` |
 | `.\node_modules\.bin\turbo.cmd run build --filter=@szl-holdings/estate-contract-release --dry-run=json` | 0 | package build resolved `cache=false`, local cache false, remote cache false |
 | `.\node_modules\.bin\biome.cmd check turbo.json packages/estate-contract-release/package.json packages/estate-contract-release/src/build.mjs packages/estate-contract-release/src/build.test.mjs` | 0 | four files checked, no fixes |
 | `C:\Users\steph\.cache\codex-runtimes\codex-primary-runtime\dependencies\node\bin\node.exe scripts/qa/scan-secrets.js` | 0 | `CLEAN — no secrets found.` |
