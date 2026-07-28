@@ -99,7 +99,9 @@ jobs:
           fi
 
       - name: Secondary scan — project-specific patterns (belt-and-suspenders)
-        run: node scripts/qa/scan-secrets.js .
+        run: |
+          node --test scripts/qa/scan-secrets.test.js
+          node scripts/qa/scan-secrets.js .
         env:
           NODE_ENV: ci
 
