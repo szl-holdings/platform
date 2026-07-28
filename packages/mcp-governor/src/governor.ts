@@ -1,8 +1,16 @@
 import { randomUUID } from 'node:crypto';
+import {
+  AttestationTokenError,
+  createAttestationChallenge,
+  verifyAttestationResultToken,
+} from './attestation.js';
 import { canonicalJson, sha256 } from './canonical.js';
 import { CapabilityTokenError, verifyCapabilityToken } from './capability.js';
 import { createSignedReceipt } from './receipt.js';
 import type {
+  ActionRisk,
+  AttestationAdmissionConfig,
+  AttestationReferenceValue,
   GovernanceReceipt,
   GovernedActionEnvelope,
   GovernedActionRequest,
@@ -10,8 +18,10 @@ import type {
   McpGovernorConfig,
   PolicyDecision,
   ReplayStore,
+  VerifiedAttestationResult,
   VerifiedCapability,
 } from './types.js';
+import { ACTION_RISK_RANK } from './types.js';
 
 export class InMemoryReplayStore implements ReplayStore {
   private readonly consumed = new Map<string, number>();
@@ -119,6 +129,146 @@ function validateDecision(value: PolicyDecision): PolicyDecision {
   });
 }
 
+function nonEmptyUniqueStrings(
+  values: readonly string[],
+  field: string,
+  validator: (value: string) => boolean,
+): readonly string[] {
+  if (
+    !Array.isArray(values) ||
+    values.length === 0 ||
+    !values.every((value) => typeof value === 'string' && validator(value))
+  ) {
+    throw new TypeError(`${field} must contain valid values`);
+  }
+  if (new Set(values).size !== values.length) {
+    throw new TypeError(`${field} must not contain duplicates`);
+  }
+  return Object.freeze([...values]);
+}
+
+function hasControlCharacters(value: string): boolean {
+  for (const character of value) {
+    const codePoint = character.codePointAt(0) ?? 0;
+    if (codePoint <= 31 || codePoint === 127) return true;
+  }
+  return false;
+}
+
+function isBoundedText(value: string): boolean {
+  return value.length > 0 && value.length <= 512 && !hasControlCharacters(value);
+}
+
+function isDigest(value: string): boolean {
+  return /^(?:sha256:[0-9a-f]{64}|sha384:[0-9a-f]{96})$/.test(value);
+}
+
+function optionalAdmissionInteger(value: number | undefined, field: string): number | undefined {
+  if (value !== undefined && (!Number.isSafeInteger(value) || value < 0 || value > 86_400)) {
+    throw new TypeError(`${field} must be an integer between 0 and 86400`);
+  }
+  return value;
+}
+
+function normalizeAttestationReference(
+  value: AttestationReferenceValue,
+  index: number,
+): AttestationReferenceValue {
+  const prefix = `attestation.references[${index}]`;
+  if (!['nvidia-cc', 'amd-sev-snp', 'intel-tdx', 'tpm2'].includes(value.attestationType)) {
+    throw new TypeError(`${prefix}.attestationType is unsupported`);
+  }
+  if (
+    !['nvidia-nras', 'amd-vcek', 'intel-trust-authority', 'intel-dcap', 'tpm2-quote'].includes(
+      value.verifier,
+    )
+  ) {
+    throw new TypeError(`${prefix}.verifier is unsupported`);
+  }
+  if (
+    typeof value.workloadId !== 'string' ||
+    value.workloadId.length > 256 ||
+    !isBoundedText(value.workloadId)
+  ) {
+    throw new TypeError(`${prefix}.workloadId has an invalid format`);
+  }
+  return Object.freeze({
+    attestationType: value.attestationType,
+    verifier: value.verifier,
+    workloadId: value.workloadId,
+    issuers: nonEmptyUniqueStrings(value.issuers, `${prefix}.issuers`, isBoundedText),
+    measurements: nonEmptyUniqueStrings(value.measurements, `${prefix}.measurements`, isDigest),
+    referencePolicyDigests: nonEmptyUniqueStrings(
+      value.referencePolicyDigests,
+      `${prefix}.referencePolicyDigests`,
+      isDigest,
+    ),
+  });
+}
+
+function normalizeAttestationConfig(
+  value: AttestationAdmissionConfig | undefined,
+): AttestationAdmissionConfig | undefined {
+  if (value === undefined) return undefined;
+  if (!Array.isArray(value.requiredRisks) || value.requiredRisks.length === 0) {
+    throw new TypeError('attestation.requiredRisks must not be empty');
+  }
+  const requiredRisks = value.requiredRisks as readonly ActionRisk[];
+  if (!requiredRisks.every((risk) => risk in ACTION_RISK_RANK)) {
+    throw new TypeError('attestation.requiredRisks contains an unsupported risk');
+  }
+  if (new Set(requiredRisks).size !== requiredRisks.length) {
+    throw new TypeError('attestation.requiredRisks must not contain duplicates');
+  }
+  if (!Array.isArray(value.references) || value.references.length === 0) {
+    throw new TypeError('attestation.references must not be empty');
+  }
+  if (typeof value.publicKeyResolver !== 'function') {
+    throw new TypeError('attestation.publicKeyResolver must be callable');
+  }
+  if (value.replayStore && typeof value.replayStore.consume !== 'function') {
+    throw new TypeError('attestation.replayStore.consume must be callable');
+  }
+
+  const references = value.references.map(normalizeAttestationReference);
+  const scopes = new Set<string>();
+  for (const reference of references) {
+    for (const issuer of reference.issuers) {
+      const scope = [
+        reference.attestationType,
+        reference.verifier,
+        reference.workloadId,
+        issuer,
+      ].join('\u0000');
+      if (scopes.has(scope)) {
+        throw new TypeError(
+          'attestation.references must not overlap for the same type, verifier, workload, and issuer',
+        );
+      }
+      scopes.add(scope);
+    }
+  }
+
+  return Object.freeze({
+    requiredRisks: Object.freeze([...requiredRisks]),
+    references: Object.freeze(references),
+    publicKeyResolver: value.publicKeyResolver,
+    replayStore: value.replayStore,
+    maxResultAgeSeconds: optionalAdmissionInteger(
+      value.maxResultAgeSeconds,
+      'attestation.maxResultAgeSeconds',
+    ),
+    maxTokenLifetimeSeconds: optionalAdmissionInteger(
+      value.maxTokenLifetimeSeconds,
+      'attestation.maxTokenLifetimeSeconds',
+    ),
+    allowedClockSkewSeconds: optionalAdmissionInteger(
+      value.allowedClockSkewSeconds,
+      'attestation.allowedClockSkewSeconds',
+    ),
+  });
+}
+
 export function createGovernedActionEnvelope(
   request: GovernedActionRequest,
   now = new Date(),
@@ -144,6 +294,7 @@ export function createGovernedActionEnvelope(
 
 export class McpGovernor {
   private readonly replayStore: ReplayStore;
+  private readonly attestationReplayStore?: ReplayStore;
   private readonly config: Readonly<McpGovernorConfig>;
   private readonly toolExecutor: McpGovernorConfig['toolExecutor'];
 
@@ -151,12 +302,17 @@ export class McpGovernor {
     if (typeof config.toolExecutor !== 'function') {
       throw new TypeError('toolExecutor must be callable');
     }
+    const attestation = normalizeAttestationConfig(config.attestation);
     this.config = Object.freeze({
       ...config,
       receiptSigner: Object.freeze({ ...config.receiptSigner }),
+      attestation,
     });
     this.toolExecutor = config.toolExecutor;
     this.replayStore = this.config.replayStore ?? new InMemoryReplayStore();
+    this.attestationReplayStore = attestation
+      ? (attestation.replayStore ?? new InMemoryReplayStore())
+      : undefined;
   }
 
   async run<T>(request: GovernedActionRequest): Promise<GovernedActionResult<T>> {
@@ -171,10 +327,12 @@ export class McpGovernor {
       mutatesState: request.mutatesState,
       args: argsSnapshot,
       capabilityToken: request.capabilityToken,
+      attestationResultToken: request.attestationResultToken,
     });
     const envelope = createGovernedActionEnvelope(requestSnapshot, clock());
     const receipts: GovernanceReceipt[] = [];
     let capability: VerifiedCapability | undefined;
+    let attestation: VerifiedAttestationResult | undefined;
 
     const persist = async (
       phase: 'before' | 'after' | 'blocked',
@@ -192,6 +350,7 @@ export class McpGovernor {
           occurredAt: clock().toISOString(),
           resultDigest,
           priorReceiptDigest,
+          attestation,
         },
         this.config.receiptSigner,
       );
@@ -231,6 +390,44 @@ export class McpGovernor {
       }
     }
 
+    const attestationConfig = this.config.attestation;
+    const attestationRequired =
+      attestationConfig?.requiredRisks.includes(requestSnapshot.risk) ?? false;
+    if (attestationRequired && !requestSnapshot.attestationResultToken) {
+      return deny(block('attestation_token_required'));
+    }
+    if (requestSnapshot.attestationResultToken) {
+      if (!requestSnapshot.actionId) {
+        return deny(block('attestation_action_id_required'));
+      }
+      if (!attestationConfig) {
+        return deny(block('attestation_verifier_unavailable'));
+      }
+      try {
+        attestation = await verifyAttestationResultToken(
+          requestSnapshot.attestationResultToken,
+          attestationConfig.publicKeyResolver,
+          {
+            now: clock(),
+            expectedActionId: envelope.actionId,
+            expectedActorId: envelope.actorId,
+            expectedTenantId: envelope.tenantId,
+            expectedEatNonce: createAttestationChallenge(envelope, capability),
+            references: attestationConfig.references,
+            maxResultAgeSeconds: attestationConfig.maxResultAgeSeconds,
+            maxTokenLifetimeSeconds: attestationConfig.maxTokenLifetimeSeconds,
+            allowedClockSkewSeconds: attestationConfig.allowedClockSkewSeconds,
+          },
+        );
+      } catch (error) {
+        const reason =
+          error instanceof AttestationTokenError
+            ? `attestation_${error.code}`
+            : 'attestation_verification_error';
+        return deny(block(reason));
+      }
+    }
+
     let decision: PolicyDecision;
     try {
       decision = validateDecision(await this.config.policyEvaluator(envelope, argsSnapshot));
@@ -247,6 +444,19 @@ export class McpGovernor {
         replayCheckAt,
       );
       if (!fresh) return deny(block('capability_replay'));
+    }
+    if (attestation) {
+      try {
+        const replayCheckAt = Math.floor(clock().getTime() / 1000);
+        const fresh = await this.attestationReplayStore?.consume(
+          attestation.claims.resultId,
+          attestation.claims.expiresAt + (attestationConfig?.allowedClockSkewSeconds ?? 30),
+          replayCheckAt,
+        );
+        if (fresh !== true) return deny(block('attestation_replay'));
+      } catch {
+        return deny(block('attestation_replay_store_error'));
+      }
     }
 
     let before: GovernanceReceipt | undefined;
@@ -283,6 +493,6 @@ export class McpGovernor {
     } catch (error) {
       throw new GovernancePostReceiptError(error);
     }
-    return { result, envelope, decision, capability, receipts };
+    return { result, envelope, decision, capability, attestation, receipts };
   }
 }
