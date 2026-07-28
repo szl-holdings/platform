@@ -1,10 +1,27 @@
 # SZL Holdings — Known Gaps Register (Security & Operations)
 
-**Last updated:** 2026-07-28 (rev 16 — attestation admission and CI policy receipt)
+**Last updated:** 2026-07-28 (rev 17 — D-SLSA standalone publication)
 **Owner:** Engineering / DevOps  
 **Audience:** Enterprise architects, Series A technical advisors, incoming VP Engineering
 
 This document is the canonical reference for known security, quality, and compliance gaps in the SZL Holdings platform. It consolidates findings from the internal risk register, the April 2026 hardening sprint, and the secrets remediation audit.
+
+---
+
+## 2026-07-28 D-SLSA Standalone Publication
+
+The Apache-2.0 Decision-SLSA v1.4 reference implementation is now public at
+<https://github.com/szl-holdings/evidence-doctrine>. Repository PR #1 merged
+exact head `3ea40357f878a7326bc5c1a732b20ba3dd32f1ca` as
+`b2fcdb5078127c3ac0bd063ed629a80d26827dca`. An unauthenticated request returned
+the public README, and a clean standalone checkout passed 13 TypeScript tests,
+13 Python tests, and TypeScript typecheck.
+
+This publication closes only the standalone-source gap. It does not establish a
+D-SLSA DOI, adoption, independent validation, D3 evidence, or D4 evidence. The
+previously proposed concept DOI `10.5281/zenodo.19944926` resolves to Ouroboros
+Thesis v21 record `10.5281/zenodo.20490218`; it is not a D-SLSA deposit. A new
+Zenodo deposition and newly minted concept DOI remain required.
 
 ---
 
@@ -127,8 +144,8 @@ Operational gaps, process health, test coverage, observability, team ownership.
 
 | ID | Gap | Area | Resolution / Status |
 |----|-----|------|---------------------|
-| DSLSA-001 | The intended standalone public repository has not been created. | Publication | Open — the reference package remains staged only inside this monorepo. |
-| DSLSA-002 | The intended Zenodo concept DOI `10.5281/zenodo.19944926` has not been deposited or independently verified. | Publication | Open — the DOI is a target only and must not be cited as a published artifact. |
+| DSLSA-001 | The intended standalone public repository has not been created. | Publication | Resolved — `szl-holdings/evidence-doctrine` is public at exact main commit `b2fcdb5078127c3ac0bd063ed629a80d26827dca`; unauthenticated README retrieval and clean-clone tests were verified. |
+| DSLSA-002 | No D-SLSA Zenodo deposition or concept DOI exists. | Publication | Open — proposed concept DOI `10.5281/zenodo.19944926` resolves to unrelated Ouroboros Thesis v21 record `10.5281/zenodo.20490218`. D-SLSA requires a new authenticated deposition and newly minted concept DOI. |
 | DSLSA-003 | No verified third-party transparency log, byte-identical replay, or offline-verification packet establishes D3 for an estate decision. | Decision evidence | Open — the evaluator records absent/unverified evidence and cannot infer D3. |
 | DSLSA-004 | No verified hardware-attested execution establishes D4 for an estate decision. | Decision evidence | Partial — `@szl/mcp-governor` now implements a fail-closed, signed RATS Attestation Result admission boundary with action/capability nonce binding, freshness, replay defense, and pinned workload/measurement/policy reference values. Unit tests use synthetic keys and do not establish hardware evidence. D4 remains unavailable until an authorized run produces and preserves a real NRAS, SEV-SNP, TDX, or TPM-backed result. |
 
