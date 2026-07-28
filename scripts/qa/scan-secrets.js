@@ -34,7 +34,7 @@ const SECRET_PATTERNS = [
   { pattern: /eyJ[a-zA-Z0-9_-]{20,}\.eyJ[a-zA-Z0-9_-]{20,}/, label: 'JWT token (live)' },
   {
     pattern:
-      /-----BEGIN (?:RSA |EC |OPENSSH |ENCRYPTED(?: SIGSTORE)? )?PRIVATE KEY-----\r?\n[A-Za-z0-9+/\r\n]{64,}/,
+      /-----BEGIN (?:RSA |EC |OPENSSH |ENCRYPTED(?: SIGSTORE)? )?PRIVATE KEY-----\r?\n(?:(?:Proc-Type|DEK-Info):[^\r\n]*\r?\n)*(?:\r?\n)?[A-Za-z0-9+/=\r\n]{64,}/,
     label: 'Private key (PEM)',
   },
 ];

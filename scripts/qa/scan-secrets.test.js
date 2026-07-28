@@ -57,6 +57,23 @@ test('rejects encrypted PKCS#8 private-key material', () => {
   assert.match(result.stderr, /encrypted-signing\.pem: Private key \(PEM\)/);
 });
 
+test('rejects traditional encrypted PEM metadata before the payload', () => {
+  const result = scan({
+    'legacy-signing.pem': [
+      '-----BEGIN RSA PRIVATE KEY-----',
+      'Proc-Type: 4,ENCRYPTED',
+      `DEK-Info: AES-256-CBC,${'A'.repeat(32)}`,
+      '',
+      'A'.repeat(96),
+      '-----END RSA PRIVATE KEY-----',
+      '',
+    ].join('\n'),
+  });
+
+  assert.equal(result.status, 1, result.stdout);
+  assert.match(result.stderr, /legacy-signing\.pem: Private key \(PEM\)/);
+});
+
 test('allows public keys and non-key placeholders in key extensions', () => {
   const publicMarker = ['-----BEGIN ', 'PUBLIC KEY-----'].join('');
   const publicFooter = ['-----END ', 'PUBLIC KEY-----'].join('');
