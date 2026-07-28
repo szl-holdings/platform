@@ -60,6 +60,8 @@ const SCAN_EXTENSIONS = new Set([
   '.toml',
   '.ini',
   '.env',
+  '.key',
+  '.pem',
 ]);
 const MAX_FILES = 20_000;
 
