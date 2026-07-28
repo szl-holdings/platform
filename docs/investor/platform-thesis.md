@@ -126,7 +126,7 @@ A representative cross-section of the live product surfaces:
 |--------|--------------|
 | Active artifacts | 14 |
 | Database tables | 798 across 131 schema files (per-domain namespaced, all org-scoped) |
-| pnpm workspace packages | 200 measured in `artifacts/SOURCE_OF_TRUTH.json` |
+| pnpm workspace packages | 201 measured in `artifacts/SOURCE_OF_TRUTH.json` |
 | Platform primitives | 6 (Outcome Graph, Proof Chain, Covenant Policy, Monte Carlo, Workflow Engine, Event Fabric) |
 | AI decision types (schema-validated) | 9 |
 | RBAC roles | 11 |
