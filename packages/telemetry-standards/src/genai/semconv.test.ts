@@ -315,6 +315,51 @@ describe('SZL experimental attestation attributes', () => {
       }),
     ).toThrow('attestation.type');
   });
+
+  it('rejects missing reason codes and calendar-invalid verification timestamps', () => {
+    expect(() =>
+      createGenAIToolSpan({
+        toolName: 'policy_check',
+        attestation: {
+          verified: false,
+          evidenceTier: 'UNVERIFIED',
+          receiptId: 'receipt-blocked-004',
+        } as never,
+      }),
+    ).toThrow('attestation.reasonCode');
+
+    expect(() =>
+      createGenAIToolSpan({
+        toolName: 'policy_check',
+        attestation: {
+          verified: true,
+          evidenceTier: 'MEASURED',
+          type: 'nvidia-cc',
+          quoteDigest: `sha384:${'a'.repeat(96)}`,
+          measurement: `sha256:${'b'.repeat(64)}`,
+          verifiedAt: '2026-02-31T20:30:00.000Z',
+          verifier: 'local',
+          receiptId: 'receipt-tee-003',
+        },
+      }),
+    ).toThrow('attestation.verifiedAt');
+
+    expect(() =>
+      createGenAIToolSpan({
+        toolName: 'policy_check',
+        attestation: {
+          verified: true,
+          evidenceTier: 'MEASURED',
+          type: 'nvidia-cc',
+          quoteDigest: `sha384:${'a'.repeat(96)}`,
+          measurement: `sha256:${'b'.repeat(64)}`,
+          verifiedAt: '2026-07-27T20:30:00.000+14:01',
+          verifier: 'local',
+          receiptId: 'receipt-tee-004',
+        },
+      }),
+    ).toThrow('attestation.verifiedAt');
+  });
 });
 
 describe('MCP spans', () => {
