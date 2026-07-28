@@ -1,16 +1,22 @@
 # Evidence Doctrine
 
-Status: **DRAFT / NOT EXTERNALLY PUBLISHED**
+Status: **PUBLIC REFERENCE IMPLEMENTATION / NOT A CERTIFICATION**
 
 This Apache-2.0 reference package defines Decision-SLSA (D-SLSA), a fail-closed
 maturity model for evidence attached to governed decisions. It is designed to
 make the difference between a recorded decision, a signed record, a replayable
 record, and hardware-attested execution mechanically visible.
 
-This directory is staged inside the SZL Holdings platform monorepo. The intended
-standalone public repository and Zenodo concept DOI `10.5281/zenodo.19944926`
-have **not** been created or deposited by this change. Do not cite that DOI as a
-published artifact until the deposit is independently verified.
+The standalone source is published at
+<https://github.com/szl-holdings/evidence-doctrine>. The package remains mirrored
+inside the SZL Holdings platform monorepo so both copies can be compared at an
+exact source commit.
+
+No D-SLSA DOI is currently authorized. The previously proposed concept DOI
+`10.5281/zenodo.19944926` resolves to the Ouroboros Thesis v21 record
+`10.5281/zenodo.20490218`; it is not a D-SLSA deposit and must not be cited as
+one. A future D-SLSA release requires a new Zenodo deposition and a newly minted
+concept DOI.
 
 ## Levels
 
