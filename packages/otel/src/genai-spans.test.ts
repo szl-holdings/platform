@@ -7,6 +7,7 @@ import {
   SimpleSpanProcessor,
 } from '@opentelemetry/sdk-trace-base';
 import {
+  OTEL_GENAI_ATTESTATION_ATTRS,
   OTEL_GENAI_ATTRS,
   OTEL_GENAI_OPERATION,
   OTEL_GENAI_PROVIDER,
@@ -162,5 +163,33 @@ describe('native OpenTelemetry GenAI wrappers', () => {
     expect(spans).toHaveLength(1);
     expect(spans[0]?.attributes[OTEL_MCP_ATTRS.METHOD_NAME]).toBe('tools/call');
     expect(spans[0]?.attributes[OTEL_GENAI_ATTRS.TOOL_NAME]).toBe('verify_receipt');
+  });
+
+  it('exports verified attestation correlation attributes to a real OTel span', async () => {
+    await genAIToolSpan(
+      {
+        toolName: 'policy_check',
+        attestation: {
+          verified: true,
+          evidenceTier: 'MEASURED',
+          type: 'amd-sev-snp',
+          quoteDigest: `sha384:${'c'.repeat(96)}`,
+          measurement: `sha256:${'d'.repeat(64)}`,
+          verifiedAt: '2026-07-27T20:30:00.000Z',
+          verifier: 'local',
+          receiptId: 'receipt-sev-001',
+          receiptUrl: 'https://evidence.example.test/receipts/receipt-sev-001',
+        },
+      },
+      async () => undefined,
+    );
+
+    const [span] = exporter.getFinishedSpans();
+    expect(span?.attributes[OTEL_GENAI_ATTESTATION_ATTRS.VERIFIED]).toBe(true);
+    expect(span?.attributes[OTEL_GENAI_ATTESTATION_ATTRS.TYPE]).toBe('amd-sev-snp');
+    expect(span?.attributes[OTEL_GENAI_ATTESTATION_ATTRS.RECEIPT_ID]).toBe('receipt-sev-001');
+    expect(samplerAttributes[OTEL_GENAI_ATTESTATION_ATTRS.MEASUREMENT]).toBe(
+      `sha256:${'d'.repeat(64)}`,
+    );
   });
 });

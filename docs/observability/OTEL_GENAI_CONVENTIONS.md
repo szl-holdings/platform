@@ -1,6 +1,6 @@
 # OpenTelemetry GenAI compatibility
 
-**Status: IMPLEMENTED IN CODE / DEVELOPMENT UPSTREAM / PRODUCTION EXPORT UNVERIFIED**
+**Status: IMPLEMENTED IN CODE / DEVELOPMENT UPSTREAM / LOCAL ATTESTATION EXTENSION EXPERIMENTAL / PRODUCTION EXPORT UNVERIFIED**
 
 SZL exposes a compatibility layer for the OpenTelemetry GenAI semantic
 conventions in `packages/telemetry-standards/src/genai/semconv.ts`. It is based
@@ -30,6 +30,25 @@ The builders produce an SDK-neutral span description.
 OpenTelemetry API spans for inference, agent, tool, and MCP operations. A
 deployment still has to configure an exporter and prove collector receipt in
 its own environment.
+
+## Experimental attestation correlation
+
+SZL additionally emits an experimental `gen_ai.attestation.*` attribute set.
+It is a local extension, not an upstream OpenTelemetry convention and not a
+claim that a collector, dashboard, or hardware verifier is configured in
+production.
+
+The verified form carries the attestation type, quote digest, measured workload
+identity, verification timestamp, verifier, evidence tier, and a receipt
+pointer. It accepts `MEASURED` only when verification is true. The unverified
+form emits `verified=false`, `UNVERIFIED`, a low-cardinality reason code, and a
+receipt pointer; it deliberately omits hardware type and measurement claims.
+
+Receipt links must use HTTPS without credentials, query parameters, or
+fragments. Quote and measurement digests are algorithm-prefixed and validated
+before a span is created. The attributes are attached at span creation so head
+samplers can route attested and blocked operations without inspecting prompt or
+tool content.
 
 ## Privacy and cardinality defaults
 

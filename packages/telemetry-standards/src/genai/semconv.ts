@@ -46,6 +46,26 @@ export const OTEL_GENAI_ATTRS = {
   SERVER_PORT: 'server.port',
 } as const;
 
+/**
+ * SZL experimental extension proposed for hardware-attestation correlation.
+ *
+ * These attributes are not part of the upstream OpenTelemetry GenAI semantic
+ * conventions. Keep the separate constant set so callers cannot mistake a
+ * local extension for an upstream-stable contract.
+ */
+export const OTEL_GENAI_ATTESTATION_ATTRS = {
+  VERIFIED: 'gen_ai.attestation.verified',
+  EVIDENCE_TIER: 'gen_ai.attestation.evidence_tier',
+  TYPE: 'gen_ai.attestation.type',
+  QUOTE_DIGEST: 'gen_ai.attestation.quote.digest',
+  MEASUREMENT: 'gen_ai.attestation.measurement',
+  VERIFIED_AT: 'gen_ai.attestation.verified_at',
+  VERIFIER: 'gen_ai.attestation.verifier',
+  RECEIPT_ID: 'gen_ai.attestation.receipt.id',
+  RECEIPT_URL: 'gen_ai.attestation.receipt.url',
+  REASON_CODE: 'gen_ai.attestation.reason_code',
+} as const;
+
 export const OTEL_MCP_ATTRS = {
   METHOD_NAME: 'mcp.method.name',
   SESSION_ID: 'mcp.session.id',
@@ -159,7 +179,35 @@ export interface OtelSemconvSpan {
   attributes: Record<string, OtelAttributeValue>;
 }
 
-export interface GenAIInferenceSpanInput {
+export type GenAIAttestationType = 'nvidia-cc' | 'amd-sev-snp' | 'intel-tdx' | 'tpm2';
+
+export interface VerifiedGenAIAttestationInput {
+  verified: true;
+  evidenceTier: 'MEASURED';
+  type: GenAIAttestationType;
+  quoteDigest: string;
+  measurement: string;
+  verifiedAt: string;
+  verifier: 'nras' | 'local';
+  receiptId: string;
+  receiptUrl?: string;
+}
+
+export interface UnverifiedGenAIAttestationInput {
+  verified: false;
+  evidenceTier: 'UNVERIFIED';
+  receiptId: string;
+  receiptUrl?: string;
+  reasonCode: string;
+}
+
+export type GenAIAttestationInput = VerifiedGenAIAttestationInput | UnverifiedGenAIAttestationInput;
+
+export interface GenAIAttestableSpanInput {
+  attestation?: GenAIAttestationInput;
+}
+
+export interface GenAIInferenceSpanInput extends GenAIAttestableSpanInput {
   providerName: string;
   operationName: string;
   requestModel: string;
@@ -180,7 +228,7 @@ export interface GenAIInferenceSpanInput {
   errorType?: string;
 }
 
-export interface GenAIAgentInternalSpanInput {
+export interface GenAIAgentInternalSpanInput extends GenAIAttestableSpanInput {
   kind?: 'INTERNAL';
   agentName?: string;
   requestModel?: string;
@@ -188,7 +236,7 @@ export interface GenAIAgentInternalSpanInput {
   errorType?: string;
 }
 
-export interface GenAIAgentClientSpanInput {
+export interface GenAIAgentClientSpanInput extends GenAIAttestableSpanInput {
   kind: 'CLIENT';
   providerName: string;
   agentName?: string;
@@ -209,7 +257,7 @@ export interface GenAIContentCapturePolicy {
   redactKeys?: readonly string[];
 }
 
-export interface GenAIToolSpanInput {
+export interface GenAIToolSpanInput extends GenAIAttestableSpanInput {
   toolName: string;
   toolType?: string;
   toolCallId?: string;
@@ -220,7 +268,7 @@ export interface GenAIToolSpanInput {
   contentCapturePolicy?: GenAIContentCapturePolicy;
 }
 
-export interface McpSpanInput {
+export interface McpSpanInput extends GenAIAttestableSpanInput {
   role: 'client' | 'server';
   methodName: string;
   protocolVersion?: string;
@@ -365,6 +413,111 @@ function definedAttributes(
   >;
 }
 
+function requireDigest(
+  value: string,
+  field: string,
+  algorithms: readonly ('sha256' | 'sha384')[],
+): string {
+  const normalized = requireText(value, field);
+  const [algorithm, digest, ...remainder] = normalized.split(':');
+  const lengths: Record<string, number> = { sha256: 64, sha384: 96 };
+  if (
+    remainder.length > 0 ||
+    !algorithms.includes(algorithm as 'sha256' | 'sha384') ||
+    digest?.length !== lengths[algorithm] ||
+    !/^[0-9a-f]+$/.test(digest)
+  ) {
+    throw new TypeError(
+      `${field} must be a lowercase ${algorithms.join(' or ')} digest with its algorithm prefix`,
+    );
+  }
+  return normalized;
+}
+
+function optionalReceiptUrl(value: string | undefined): string | undefined {
+  if (value === undefined) return undefined;
+  const url = new URL(requireText(value, 'attestation.receiptUrl'));
+  if (url.protocol !== 'https:' || url.username || url.password || url.search || url.hash) {
+    throw new TypeError(
+      'attestation.receiptUrl must be HTTPS without credentials, query parameters, or fragments',
+    );
+  }
+  return url.href;
+}
+
+function requireReceiptId(value: string): string {
+  const normalized = requireText(value, 'attestation.receiptId');
+  if (!/^[A-Za-z0-9._:-]{1,128}$/.test(normalized)) {
+    throw new TypeError('attestation.receiptId has an invalid format');
+  }
+  return normalized;
+}
+
+function attestationAttributeEntries(
+  input: GenAIAttestationInput | undefined,
+): ReadonlyArray<readonly [string, OtelAttributeValue | undefined]> {
+  if (input === undefined) return [];
+  if (input.verified !== true && input.verified !== false) {
+    throw new TypeError('attestation.verified must be a boolean');
+  }
+
+  const receiptId = requireReceiptId(input.receiptId);
+  const receiptUrl = optionalReceiptUrl(input.receiptUrl);
+  if (!input.verified) {
+    if (input.evidenceTier !== 'UNVERIFIED') {
+      throw new TypeError('unverified attestation evidenceTier must be UNVERIFIED');
+    }
+    if (!/^[a-z0-9][a-z0-9._-]{0,63}$/.test(input.reasonCode)) {
+      throw new TypeError('attestation.reasonCode must be a low-cardinality reason code');
+    }
+    return [
+      [OTEL_GENAI_ATTESTATION_ATTRS.VERIFIED, false],
+      [OTEL_GENAI_ATTESTATION_ATTRS.EVIDENCE_TIER, input.evidenceTier],
+      [OTEL_GENAI_ATTESTATION_ATTRS.RECEIPT_ID, receiptId],
+      [OTEL_GENAI_ATTESTATION_ATTRS.RECEIPT_URL, receiptUrl],
+      [OTEL_GENAI_ATTESTATION_ATTRS.REASON_CODE, input.reasonCode],
+    ];
+  }
+
+  if (input.evidenceTier !== 'MEASURED') {
+    throw new TypeError('verified attestation evidenceTier must be MEASURED');
+  }
+  if (!['nvidia-cc', 'amd-sev-snp', 'intel-tdx', 'tpm2'].includes(input.type)) {
+    throw new TypeError('attestation.type is unsupported');
+  }
+  if (input.verifier !== 'nras' && input.verifier !== 'local') {
+    throw new TypeError('attestation.verifier is unsupported');
+  }
+  if (
+    !/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d{1,3})?(?:Z|[+-]\d{2}:\d{2})$/.test(
+      input.verifiedAt,
+    )
+  ) {
+    throw new TypeError('attestation.verifiedAt must be an ISO 8601 timestamp with timezone');
+  }
+  const verifiedAtMs = Date.parse(input.verifiedAt);
+  if (!Number.isFinite(verifiedAtMs)) {
+    throw new TypeError('attestation.verifiedAt must be a valid ISO 8601 timestamp');
+  }
+  return [
+    [OTEL_GENAI_ATTESTATION_ATTRS.VERIFIED, true],
+    [OTEL_GENAI_ATTESTATION_ATTRS.EVIDENCE_TIER, input.evidenceTier],
+    [OTEL_GENAI_ATTESTATION_ATTRS.TYPE, input.type],
+    [
+      OTEL_GENAI_ATTESTATION_ATTRS.QUOTE_DIGEST,
+      requireDigest(input.quoteDigest, 'attestation.quoteDigest', ['sha384']),
+    ],
+    [
+      OTEL_GENAI_ATTESTATION_ATTRS.MEASUREMENT,
+      requireDigest(input.measurement, 'attestation.measurement', ['sha256', 'sha384']),
+    ],
+    [OTEL_GENAI_ATTESTATION_ATTRS.VERIFIED_AT, new Date(verifiedAtMs).toISOString()],
+    [OTEL_GENAI_ATTESTATION_ATTRS.VERIFIER, input.verifier],
+    [OTEL_GENAI_ATTESTATION_ATTRS.RECEIPT_ID, receiptId],
+    [OTEL_GENAI_ATTESTATION_ATTRS.RECEIPT_URL, receiptUrl],
+  ];
+}
+
 export function createGenAIInferenceClientSpan(input: GenAIInferenceSpanInput): OtelSemconvSpan {
   const providerName = requireText(input.providerName, 'providerName');
   const operationName = requireText(input.operationName, 'operationName');
@@ -415,6 +568,7 @@ export function createGenAIInferenceClientSpan(input: GenAIInferenceSpanInput): 
       [OTEL_GENAI_ATTRS.SERVER_ADDRESS, serverAddress],
       [OTEL_GENAI_ATTRS.SERVER_PORT, serverPort],
       [OTEL_GENAI_ATTRS.ERROR_TYPE, optionalText(input.errorType, 'errorType')],
+      ...attestationAttributeEntries(input.attestation),
     ]),
   };
 }
@@ -452,6 +606,7 @@ export function createGenAIAgentSpan(input: GenAIAgentSpanInput): OtelSemconvSpa
       [OTEL_GENAI_ATTRS.SERVER_ADDRESS, serverAddress],
       [OTEL_GENAI_ATTRS.SERVER_PORT, serverPort],
       [OTEL_GENAI_ATTRS.ERROR_TYPE, optionalText(input.errorType, 'errorType')],
+      ...attestationAttributeEntries(input.attestation),
     ]),
   };
 }
@@ -482,6 +637,7 @@ export function createGenAIToolSpan(input: GenAIToolSpanInput): OtelSemconvSpan 
           ? undefined
           : capturedJsonObject(input.toolResult, 'toolResult', input.contentCapturePolicy),
       ],
+      ...attestationAttributeEntries(input.attestation),
     ]),
   };
 }
@@ -567,6 +723,7 @@ export function createMcpSpan(input: McpSpanInput): OtelSemconvSpan {
           ? undefined
           : capturedJsonObject(input.toolResult, 'toolResult', input.contentCapturePolicy),
       ],
+      ...attestationAttributeEntries(input.attestation),
     ]),
   };
 }
