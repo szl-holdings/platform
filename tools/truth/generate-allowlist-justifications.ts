@@ -270,8 +270,9 @@ async function main(): Promise<void> {
   const scannerText = await readFile(SCANNER, 'utf8');
   const entries = [
     ...parseToml(gitleaksText),
-    ...parseSet(scannerText, 'SKIP_DIRS'),
-    ...parseSet(scannerText, 'SKIP_FILES'),
+    ...parseSet(scannerText, 'SKIP_DIRECTORY_PATHS'),
+    ...parseSet(scannerText, 'SKIP_PATHS'),
+    ...parseSet(scannerText, 'ALLOW_VALUES'),
   ];
   if (process.argv.includes('--check')) {
     const document = await readFile(OUTPUT, 'utf8');
