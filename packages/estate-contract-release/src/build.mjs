@@ -120,6 +120,7 @@ export function buildManifest(root = REPOSITORY_ROOT) {
       id: definition.id,
       role: definition.role,
       package_name: definition.package_name,
+      inputs: [...definition.inputs],
       file_count: files.length,
       bytes: files.reduce((total, file) => total + file.bytes, 0),
       tree_sha256: sha256(tree),
@@ -142,6 +143,7 @@ export function buildManifest(root = REPOSITORY_ROOT) {
     consumer_contract: {
       pin: 'an immutable protected Platform Git revision',
       verify: [
+        'enumerate every file beneath each component input root',
         'recompute every file SHA-256 and byte count',
         'recompute every component tree SHA-256',
         'recompute the release_id over canonical JSON',

@@ -24,10 +24,17 @@ it does not prove that those bytes were freshly derived from the included
 OpenAPI source and generator configuration.
 
 Consumers must pin a protected Platform Git revision, download the manifest
-from that immutable revision, recompute the file and component digests, and
-record the manifest `release_id` in their own source-bound release evidence.
+from that immutable revision, enumerate every file beneath each component's
+published `inputs`, reject missing or additional files, recompute the file and
+component digests, and record the manifest `release_id` in their own
+source-bound release evidence.
 
 ```bash
-pnpm --filter @szl-holdings/estate-contract-release build
+pnpm --filter @szl-holdings/estate-contract-release verify
+pnpm --filter @szl-holdings/estate-contract-release typecheck
 pnpm --filter @szl-holdings/estate-contract-release test
 ```
+
+`verify` is non-mutating and must run before any intentional regeneration.
+Maintainers update the checked-in manifest with `build` only after changing an
+allowlisted input or the manifest contract.

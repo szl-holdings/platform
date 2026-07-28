@@ -1,9 +1,11 @@
 import assert from 'node:assert/strict';
+import { spawnSync } from 'node:child_process';
 import { createHash } from 'node:crypto';
 import { appendFileSync, cpSync, mkdirSync, mkdtempSync, readFileSync, rmSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { dirname, resolve } from 'node:path';
 import test from 'node:test';
+import { fileURLToPath } from 'node:url';
 
 import {
   buildManifest,
@@ -14,6 +16,8 @@ import {
   OUTPUT_PATH,
   REPOSITORY_ROOT,
 } from './build.mjs';
+
+const BUILDER = fileURLToPath(new URL('./build.mjs', import.meta.url));
 
 function digest(value) {
   return `sha256:${createHash('sha256').update(canonicalJson(value)).digest('hex')}`;
@@ -38,6 +42,18 @@ test('checked-in manifest matches every current allowlisted byte', () => {
   assert.equal(manifestMatchesCurrent(checkedIn), true);
 });
 
+test('manifest verification is non-mutating', () => {
+  const before = readFileSync(OUTPUT_PATH);
+  const result = spawnSync(process.execPath, [BUILDER, '--check'], {
+    encoding: 'utf8',
+  });
+  const after = readFileSync(OUTPUT_PATH);
+
+  assert.equal(result.status, 0, result.stderr);
+  assert.match(result.stdout, /estate-contract-release: PASS sha256:/);
+  assert.deepEqual(after, before);
+});
+
 test('canonical ordering is locale-independent UTF-8 byte order', () => {
   const values = ['ı', 'i', 'README', 'I'];
   assert.deepEqual(values.sort(compareUtf8Bytes), ['I', 'README', 'i', 'ı']);
@@ -49,6 +65,20 @@ test('release id closes the complete component inventories', () => {
   assert.equal(releaseId, digest(release));
   assert.equal(manifest.components.length, 6);
   assert.ok(manifest.components.every((component) => component.file_count > 0));
+});
+
+test('each component publishes the allowlisted roots consumers must enumerate', () => {
+  const manifest = buildManifest();
+  assert.deepEqual(
+    manifest.components.map((component) => ({
+      id: component.id,
+      inputs: component.inputs,
+    })),
+    COMPONENT_DEFINITIONS.map((component) => ({
+      id: component.id,
+      inputs: component.inputs,
+    })),
+  );
 });
 
 test('design-system closure binds every repository-owned exported dependency', () => {
@@ -136,8 +166,9 @@ test('Zod client closure includes its complete public re-export boundary', () =>
   }
 });
 
-test('Turbo never caches the external-tree freshness test', () => {
+test('Turbo never caches external-tree manifest build or freshness tasks', () => {
   const turbo = JSON.parse(readFileSync(resolve(REPOSITORY_ROOT, 'turbo.json'), 'utf8'));
+  assert.equal(turbo.tasks['@szl-holdings/estate-contract-release#build']?.cache, false);
   assert.equal(turbo.tasks['@szl-holdings/estate-contract-release#test']?.cache, false);
 });
 
