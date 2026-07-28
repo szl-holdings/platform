@@ -1,6 +1,6 @@
 # SZL Holdings — Known Gaps Register (Security & Operations)
 
-**Last updated:** 2026-07-26 (rev 14 — offline verifier trust hardening)
+**Last updated:** 2026-07-28 (rev 15 — attestation admission boundary)
 **Owner:** Engineering / DevOps  
 **Audience:** Enterprise architects, Series A technical advisors, incoming VP Engineering
 
@@ -114,7 +114,7 @@ Operational gaps, process health, test coverage, observability, team ownership.
 | DSLSA-001 | The intended standalone public repository has not been created. | Publication | Open — the reference package remains staged only inside this monorepo. |
 | DSLSA-002 | The intended Zenodo concept DOI `10.5281/zenodo.19944926` has not been deposited or independently verified. | Publication | Open — the DOI is a target only and must not be cited as a published artifact. |
 | DSLSA-003 | No verified third-party transparency log, byte-identical replay, or offline-verification packet establishes D3 for an estate decision. | Decision evidence | Open — the evaluator records absent/unverified evidence and cannot infer D3. |
-| DSLSA-004 | No verified hardware-attested execution, formally specified policy, or machine-checked denial establishes D4 for an estate decision. | Decision evidence | Open — the evaluator records absent/unverified evidence and cannot infer D4. |
+| DSLSA-004 | No verified hardware-attested execution establishes D4 for an estate decision. | Decision evidence | Partial — `@szl/mcp-governor` now implements a fail-closed, signed RATS Attestation Result admission boundary with action/capability nonce binding, freshness, replay defense, and pinned workload/measurement/policy reference values. Unit tests use synthetic keys and do not establish hardware evidence. D4 remains unavailable until an authorized run produces and preserves a real NRAS, SEV-SNP, TDX, or TPM-backed result. |
 
 ### P0 — Critical / High (Resolved or Immediate Action)
 
