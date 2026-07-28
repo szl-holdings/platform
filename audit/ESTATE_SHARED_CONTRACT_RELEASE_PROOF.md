@@ -31,7 +31,7 @@ repository, or production deployment.
 After restoring the checkout from the committed frozen lockfile:
 
 - the release build reproduced
-  `sha256:e39ebc9dc25fa88d2bb5ee6c7a368c980b38272ceaca0588d40d42317ba0f4f0`;
+  `sha256:326ab224f0f815b11c20b4dadbfbad19a5a81ec2891baf56bd4d810656d3de49`;
 - all four release integrity and negative-control tests passed;
 - both API-spec code-generation tests passed;
 - design-system and shared-contract TypeScript checks passed; and

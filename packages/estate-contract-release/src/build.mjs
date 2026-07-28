@@ -57,6 +57,10 @@ function toPosix(path) {
   return path.split(sep).join('/');
 }
 
+export function compareUtf8Bytes(left, right) {
+  return Buffer.compare(Buffer.from(left, 'utf8'), Buffer.from(right, 'utf8'));
+}
+
 function listFiles(path) {
   const stat = lstatSync(path);
   if (stat.isSymbolicLink()) {
@@ -69,7 +73,7 @@ function listFiles(path) {
     throw new Error(`contract input must be a file or directory: ${path}`);
   }
   return readdirSync(path, { withFileTypes: true })
-    .sort((left, right) => left.name.localeCompare(right.name))
+    .sort((left, right) => compareUtf8Bytes(left.name, right.name))
     .flatMap((entry) => listFiles(resolve(path, entry.name)));
 }
 
@@ -79,7 +83,7 @@ export function canonicalJson(value) {
   }
   if (value !== null && typeof value === 'object') {
     return `{${Object.keys(value)
-      .sort()
+      .sort(compareUtf8Bytes)
       .map((key) => `${JSON.stringify(key)}:${canonicalJson(value[key])}`)
       .join(',')}}`;
   }
@@ -98,7 +102,7 @@ export function buildManifest(root = REPOSITORY_ROOT) {
           sha256: sha256(body),
         };
       })
-      .sort((left, right) => left.path.localeCompare(right.path));
+      .sort((left, right) => compareUtf8Bytes(left.path, right.path));
     const tree = files.map((file) => `${file.path}\0${file.bytes}\0${file.sha256}\n`).join('');
     return {
       id: definition.id,

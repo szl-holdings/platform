@@ -3,7 +3,13 @@ import { createHash } from 'node:crypto';
 import { readFileSync } from 'node:fs';
 import test from 'node:test';
 
-import { buildManifest, canonicalJson, manifestMatchesCurrent, OUTPUT_PATH } from './build.mjs';
+import {
+  buildManifest,
+  canonicalJson,
+  compareUtf8Bytes,
+  manifestMatchesCurrent,
+  OUTPUT_PATH,
+} from './build.mjs';
 
 function digest(value) {
   return `sha256:${createHash('sha256').update(canonicalJson(value)).digest('hex')}`;
@@ -12,6 +18,11 @@ function digest(value) {
 test('checked-in manifest matches every current allowlisted byte', () => {
   const checkedIn = JSON.parse(readFileSync(OUTPUT_PATH, 'utf8'));
   assert.equal(manifestMatchesCurrent(checkedIn), true);
+});
+
+test('canonical ordering is locale-independent UTF-8 byte order', () => {
+  const values = ['ı', 'i', 'README', 'I'];
+  assert.deepEqual(values.sort(compareUtf8Bytes), ['I', 'README', 'i', 'ı']);
 });
 
 test('release id closes the complete component inventories', () => {
