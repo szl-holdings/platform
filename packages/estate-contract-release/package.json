@@ -1,0 +1,12 @@
+{
+  "name": "@szl-holdings/estate-contract-release",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Deterministic release identity for the canonical SZL design, API, generated-client, and shared-type contracts.",
+  "scripts": {
+    "build": "node src/build.mjs",
+    "test": "node --test src/build.test.mjs",
+    "typecheck": "node --check src/build.mjs && node --check src/build.test.mjs"
+  }
+}

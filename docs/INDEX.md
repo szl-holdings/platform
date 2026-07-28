@@ -13,6 +13,8 @@ Use [docs/README.md](README.md) for navigation by audience or task.
 | Document | Description | Last Reviewed |
 |----------|-------------|---------------|
 | [CONSOLIDATION.md](CONSOLIDATION.md) | Founder-gated, reversible GitHub estate consolidation plan; Option B remains not applied | 2026-07 |
+| [Estate contract release](../packages/estate-contract-release/README.md) | Deterministic release identity for canonical design, API, generated-output, and shared-type contract bytes | 2026-07 |
+| [Estate contract release proof](../audit/ESTATE_SHARED_CONTRACT_RELEASE_PROOF.md) | Evidence labels, required checks, baseline disclosure, and immutable consumer rule | 2026-07 |
 
 ---
 
