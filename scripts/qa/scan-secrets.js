@@ -11,7 +11,7 @@
  *
  * Exit codes:
  *   0 = CLEAN — no secrets found
- *   1 = FAILED — one or more secrets detected
+ *   1 = FAILED — one or more secrets detected or the scan was incomplete
  */
 
 import fs from 'node:fs';
@@ -20,7 +20,12 @@ import { fileURLToPath } from 'node:url';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const WORKSPACE_ROOT = path.resolve(__dirname, '../..');
-const TARGET = process.argv[2] ? path.resolve(process.argv[2]) : WORKSPACE_ROOT;
+
+const ALLOW_VALUES = new Set([
+  // Exact public example values from AWS documentation. Future values remain blocking.
+  'AKIAIOSFODNN7EXAMPLE',
+  'AKIA0000000000EXAMPLE',
+]);
 
 const SECRET_PATTERNS = [
   { pattern: /sk-[a-zA-Z0-9]{20,}/, label: 'OpenAI API key' },
@@ -65,101 +70,152 @@ const SCAN_EXTENSIONS = new Set([
 ]);
 const MAX_FILES = 20_000;
 
-const SKIP_DIRS = new Set([
-  'node_modules',
+const SKIP_DIRECTORY_PATHS = new Set([
+  // Repository metadata and installed dependencies are external to tracked source.
   '.git',
-  'dist',
-  'build',
-  '.cache',
-  'coverage',
-  '.semgrep',
-  'attached_assets',
-  'playwright-report',
-  'test-results',
-  'backups',
-  // Audit and security report directories contain documentation examples of
-  // credential-shaped values (e.g. AKIAIOSFODNN7EXAMPLE) confirmed as false
-  // positives in prior audits. Real secrets are never committed here.
-  'audit',
-  'security',
+  'node_modules',
 ]);
 // .env.example is intentionally IN scope so accidental real secrets are caught.
 // Placeholder patterns in templates (re_xxxx, sk_test_*) are excluded via pattern design.
-const SKIP_FILES = new Set([
+const SKIP_PATHS = new Set([
+  // Only the repository-root generated lockfile is excluded.
   'pnpm-lock.yaml',
-  'scan-secrets.js',
-  '.gitleaks.toml',
-  // Known-gaps document: references AKIAIOSFODNN7EXAMPLE as a documented
-  // false positive finding. The file documents security audit results, not
-  // committed credentials.
-  'KNOWN-GAPS.md',
 ]);
 
-let _errors = 0;
-const hits = [];
-
-function walk(dir, count = { n: 0 }) {
-  if (!fs.existsSync(dir)) return;
-  const entries = fs.readdirSync(dir, { withFileTypes: true });
-  for (const entry of entries) {
-    if (count.n >= MAX_FILES) return;
-    const fullPath = path.join(dir, entry.name);
-    if (entry.isDirectory()) {
-      if (SKIP_DIRS.has(entry.name)) continue;
-      walk(fullPath, count);
-    } else if (entry.isFile()) {
-      count.n++;
-      checkFile(fullPath, entry.name);
-    }
-  }
+function relativePath(target, candidate) {
+  return path.relative(target, candidate).split(path.sep).join('/');
 }
 
-function checkFile(fullPath, name) {
-  const rel = path.relative(TARGET, fullPath);
-  const ext = path.extname(name).toLowerCase();
+function containsNonAllowlistedMatch(pattern, content) {
+  let candidate = content;
+  for (const value of ALLOW_VALUES) candidate = candidate.replaceAll(value, '');
+  return pattern.test(candidate);
+}
 
-  if (SKIP_FILES.has(name)) return;
+export function scanTarget(
+  target,
+  { maxFiles = MAX_FILES, readFileSync = fs.readFileSync, readdirSync = fs.readdirSync } = {},
+) {
+  const hits = [];
+  const coverageIssues = [];
+  const count = { n: 0 };
 
-  if (ENV_FILE_BLOCK.test(name)) {
-    hits.push({ rel, label: 'Committed .env file (may contain secrets)' });
-    _errors++;
-    return;
+  function addCoverageIssue(rel, label) {
+    if (!coverageIssues.some((issue) => issue.rel === rel && issue.label === label)) {
+      coverageIssues.push({ rel, label });
+    }
   }
 
-  if (/\.(sql\.gz|dump|pgdump)$/.test(name)) {
-    hits.push({ rel, label: 'Database dump file' });
-    _errors++;
-    return;
+  function checkFile(fullPath, name) {
+    const rel = relativePath(target, fullPath);
+    const lowerName = name.toLowerCase();
+    const ext = path.extname(lowerName);
+
+    if (SKIP_PATHS.has(rel)) return;
+
+    if (ENV_FILE_BLOCK.test(lowerName)) {
+      hits.push({ rel, label: 'Committed .env file (may contain secrets)' });
+      return;
+    }
+
+    if (/\.(sql\.gz|dump|pgdump)$/.test(lowerName)) {
+      hits.push({ rel, label: 'Database dump file' });
+      return;
+    }
+
+    if (!SCAN_EXTENSIONS.has(ext)) return;
+
+    let content;
+    try {
+      content = readFileSync(fullPath, 'utf-8');
+    } catch {
+      addCoverageIssue(rel, 'File could not be read');
+      return;
+    }
+
+    for (const { pattern, label } of SECRET_PATTERNS) {
+      if (containsNonAllowlistedMatch(pattern, content)) {
+        hits.push({ rel, label });
+        break;
+      }
+    }
   }
 
-  if (!SCAN_EXTENSIONS.has(ext)) return;
+  function walk(dir) {
+    let entries;
+    try {
+      entries = readdirSync(dir, { withFileTypes: true });
+    } catch {
+      addCoverageIssue(relativePath(target, dir) || '.', 'Directory could not be read');
+      return false;
+    }
 
-  let content;
+    for (const entry of entries) {
+      const fullPath = path.join(dir, entry.name);
+      const rel = relativePath(target, fullPath);
+      if (SKIP_DIRECTORY_PATHS.has(rel)) continue;
+      if (count.n >= maxFiles) {
+        addCoverageIssue(rel, `File scan limit of ${maxFiles} was exceeded`);
+        return false;
+      }
+      if (entry.isDirectory()) {
+        if (!walk(fullPath)) return false;
+      } else if (entry.isFile()) {
+        count.n++;
+        checkFile(fullPath, entry.name);
+      } else {
+        count.n++;
+        addCoverageIssue(rel, 'Unsupported filesystem entry could not be scanned');
+      }
+    }
+    return true;
+  }
+
+  let targetStats;
   try {
-    content = fs.readFileSync(fullPath, 'utf-8');
+    targetStats = fs.statSync(target);
   } catch {
-    return;
+    addCoverageIssue('.', 'Scan target does not exist or cannot be inspected');
+    return { hits, coverageIssues, scannedFiles: count.n };
+  }
+  if (!targetStats.isDirectory()) {
+    addCoverageIssue('.', 'Scan target is not a directory');
+    return { hits, coverageIssues, scannedFiles: count.n };
   }
 
-  for (const { pattern, label } of SECRET_PATTERNS) {
-    if (pattern.test(content)) {
-      hits.push({ rel, label });
-      _errors++;
-      break;
-    }
-  }
+  walk(target);
+  return { hits, coverageIssues, scannedFiles: count.n };
 }
 
-walk(TARGET);
+function main() {
+  const target = process.argv[2] ? path.resolve(process.argv[2]) : WORKSPACE_ROOT;
+  const { hits, coverageIssues } = scanTarget(target);
 
-if (hits.length > 0) {
-  console.error(`\nFAILED — ${hits.length} secret(s) detected:\n`);
-  for (const hit of hits) {
-    console.error(`  ❌  ${hit.rel}: ${hit.label}`);
+  if (hits.length > 0) {
+    console.error(`\nFAILED — ${hits.length} secret(s) detected:\n`);
+    for (const hit of hits) {
+      console.error(`  ❌  ${hit.rel}: ${hit.label}`);
+    }
+    console.error('');
   }
-  console.error('');
-  process.exit(1);
-} else {
+
+  if (coverageIssues.length > 0) {
+    console.error(`\nFAILED — secret scan incomplete (${coverageIssues.length} issue(s)):\n`);
+    for (const issue of coverageIssues) {
+      console.error(`  ❌  ${issue.rel}: ${issue.label}`);
+    }
+    console.error('');
+  }
+
+  if (hits.length > 0 || coverageIssues.length > 0) {
+    process.exit(1);
+  }
+
   console.log('CLEAN — no secrets found.');
   process.exit(0);
+}
+
+const entrypoint = process.argv[1] ? path.resolve(process.argv[1]) : '';
+if (entrypoint.toLowerCase() === fileURLToPath(import.meta.url).toLowerCase()) {
+  main();
 }
