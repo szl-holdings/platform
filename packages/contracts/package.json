@@ -12,6 +12,7 @@
     "./webhooks": "./src/webhooks.ts",
     "./admin": "./src/admin.ts",
     "./common": "./src/common.ts",
+    "./decision-genome": "./src/decision-genome.ts",
     "./governance": "./src/governance.ts"
   },
   "scripts": {
