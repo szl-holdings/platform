@@ -14,5 +14,6 @@ export * from './ai';
 export * from './alloy';
 export * from './auth';
 export * from './common';
+export * from './decision-genome';
 export * from './governance';
 export * from './webhooks';
