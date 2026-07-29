@@ -1,0 +1,180 @@
+name: Publish reviewed public npm packages
+
+on:
+  workflow_dispatch:
+    inputs:
+      authentication:
+        description: Use OIDC after trusted publishing is configured; use bootstrap-token only for the first publication.
+        required: true
+        type: choice
+        default: trusted-publishing
+        options:
+          - trusted-publishing
+          - bootstrap-token
+      confirmation:
+        description: Type PUBLISH @szl PUBLIC to authorize this irreversible public release.
+        required: true
+        type: string
+
+permissions:
+  contents: read
+  id-token: write
+
+concurrency:
+  group: npm-public-publish
+  cancel-in-progress: false
+
+env:
+  NODE_OPTIONS: --max-old-space-size=6144
+
+jobs:
+  publish:
+    name: Publish exact reviewed tarballs
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    permissions:
+      contents: read
+      id-token: write
+
+    steps:
+      - name: Require explicit public-release confirmation
+        env:
+          RELEASE_CONFIRMATION: ${{ inputs.confirmation }}
+        run: |
+          set -euo pipefail
+          if [[ "$RELEASE_CONFIRMATION" != "PUBLISH @szl PUBLIC" ]]; then
+            echo "::error::confirmation must exactly equal PUBLISH @szl PUBLIC"
+            exit 1
+          fi
+
+      - name: Checkout exact workflow commit
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - name: Require protected current main
+        run: |
+          set -euo pipefail
+          if [[ "$GITHUB_REF" != 'refs/heads/main' ]]; then
+            echo "::error::public npm publication may run only from refs/heads/main"
+            exit 1
+          fi
+          git fetch --no-tags origin main
+          if [[ "$GITHUB_SHA" != "$(git rev-parse origin/main)" ]]; then
+            echo "::error::workflow commit is not the current protected main commit"
+            exit 1
+          fi
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@0ebf47130e4866e96fce0953f49152a61190b271 # v4
+
+      - name: Setup Node.js for npm trusted publishing
+        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version: '24.15.0'
+          registry-url: https://registry.npmjs.org
+          package-manager-cache: false
+
+      - name: Pin npm with OIDC trusted-publishing support
+        run: npm install --global npm@12.0.1
+
+      - name: Record release toolchain
+        run: |
+          node --version
+          npm --version
+          pnpm --version
+
+      - name: Install exact dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Verify retained publication artifacts
+        run: pnpm verify:npm-artifacts
+
+      - name: Publish with npm trusted publishing
+        if: inputs.authentication == 'trusted-publishing'
+        run: |
+          set -euo pipefail
+          publish_exact() {
+            local package_name="$1"
+            local package_version="$2"
+            local artifact="$3"
+            local readback_dir="$RUNNER_TEMP/npm-readback-${package_name##*/}"
+
+            if npm view "${package_name}@${package_version}" version --json >/dev/null 2>&1; then
+              echo "${package_name}@${package_version} already exists; verifying retained-byte parity"
+            else
+              npm publish "$artifact" --access public --provenance
+            fi
+
+            rm -rf "$readback_dir"
+            mkdir -p "$readback_dir"
+            npm pack "${package_name}@${package_version}" --pack-destination "$readback_dir" --silent >/dev/null
+            local downloaded
+            downloaded="$(find "$readback_dir" -maxdepth 1 -type f -name '*.tgz' -print -quit)"
+            test -n "$downloaded"
+            cmp --silent "$artifact" "$downloaded"
+            npm view "${package_name}@${package_version}" dist --json
+          }
+
+          publish_exact \
+            '@szl/mcp-governor' \
+            '0.1.0' \
+            'audit/frontier/npm-package-readiness-2026-07-28/szl-mcp-governor-0.1.0.tgz'
+          publish_exact \
+            '@szl/verify' \
+            '0.1.0' \
+            'audit/frontier/npm-package-readiness-2026-07-28/szl-verify-0.1.0.tgz'
+
+      - name: Bootstrap first publication with a granular npm token
+        if: inputs.authentication == 'bootstrap-token'
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+        run: |
+          set -euo pipefail
+          if [[ -z "${NODE_AUTH_TOKEN:-}" ]]; then
+            echo "::error::NPM_TOKEN is required only for bootstrap-token mode"
+            exit 1
+          fi
+
+          publish_exact() {
+            local package_name="$1"
+            local package_version="$2"
+            local artifact="$3"
+            local readback_dir="$RUNNER_TEMP/npm-readback-${package_name##*/}"
+
+            if npm view "${package_name}@${package_version}" version --json >/dev/null 2>&1; then
+              echo "${package_name}@${package_version} already exists; verifying retained-byte parity"
+            else
+              npm publish "$artifact" --access public --provenance
+            fi
+
+            rm -rf "$readback_dir"
+            mkdir -p "$readback_dir"
+            npm pack "${package_name}@${package_version}" --pack-destination "$readback_dir" --silent >/dev/null
+            local downloaded
+            downloaded="$(find "$readback_dir" -maxdepth 1 -type f -name '*.tgz' -print -quit)"
+            test -n "$downloaded"
+            cmp --silent "$artifact" "$downloaded"
+            npm view "${package_name}@${package_version}" dist --json
+          }
+
+          publish_exact \
+            '@szl/mcp-governor' \
+            '0.1.0' \
+            'audit/frontier/npm-package-readiness-2026-07-28/szl-mcp-governor-0.1.0.tgz'
+          publish_exact \
+            '@szl/verify' \
+            '0.1.0' \
+            'audit/frontier/npm-package-readiness-2026-07-28/szl-verify-0.1.0.tgz'
+
+      - name: Record terminal public-registry proof
+        if: always()
+        run: |
+          {
+            echo "## Public npm release"
+            echo
+            echo "- Source commit: \`$GITHUB_SHA\`"
+            echo "- Authentication: \`${{ inputs.authentication }}\`"
+            echo "- Workflow: \`npm-public-publish.yml\`"
+            echo "- Registry: \`https://registry.npmjs.org\`"
+            echo "- Package: \`@szl/mcp-governor@0.1.0\`"
+            echo "- Package: \`@szl/verify@0.1.0\`"
+          } >> "$GITHUB_STEP_SUMMARY"

@@ -39,18 +39,37 @@ The reviewed tarballs are the release inputs. Do not pass package directories to
 `npm publish`; that would repack the source and publish bytes different from the
 retained evidence.
 
+For a provenance-bearing first release, store a narrowly scoped granular npm
+token as the `NPM_TOKEN` Actions secret, then run
+`npm-public-publish.yml` in `bootstrap-token` mode with the exact confirmation
+`PUBLISH @szl PUBLIC`. The workflow publishes only the retained `0.1.0`
+tarballs, requests Sigstore provenance, downloads both packages from the public
+registry, and fails unless the downloaded bytes match the reviewed artifacts.
+Dispatch the current `main` branch; the workflow rejects any other ref or stale
+main commit. Remove the bootstrap token after both packages are verified.
+
 Automatic npm provenance generation is not available from an arbitrary local
-shell. The first local publication is therefore recorded with provenance
-`UNAVAILABLE_INITIAL_PUBLICATION`. If provenance is mandatory for version
-`0.1.0`, perform the token-authenticated first publication in a supported
-GitHub Actions workflow with `id-token: write` instead.
+shell. A local first publication is therefore recorded with provenance
+`UNAVAILABLE_INITIAL_PUBLICATION`.
 
 ## Trusted publishing after package creation
 
-For each package, configure npm trusted publishing with the exact GitHub
-repository, workflow filename, and optional environment. The release workflow
-must use GitHub OIDC (`id-token: write`), must publish the exact reviewed
-version, and must not use a long-lived npm token.
+After the first publication, configure npm trusted publishing separately for
+both packages with these exact values:
+
+| Setting | Value |
+| --- | --- |
+| Provider | GitHub Actions |
+| Organization | `szl-holdings` |
+| Repository | `platform` |
+| Workflow filename | `npm-public-publish.yml` |
+| Allowed action | `npm publish` |
+
+Then run the workflow in `trusted-publishing` mode. The job uses GitHub OIDC
+(`id-token: write`) and does not receive `NPM_TOKEN`. Each package can have only
+one trusted publisher, and npm treats the workflow filename as case-sensitive.
+The workflow is intentionally manual and requires an exact confirmation phrase;
+it never publishes on an ordinary branch push or pull request.
 
 The release receipt must preserve:
 
@@ -90,6 +109,6 @@ Any byte mismatch leaves publication `UNVERIFIED`.
 ## Current external gate
 
 No npm token, authenticated npm configuration, or signed-in npm browser session
-was available during the 2026-07-28 verification. Both registry endpoints
-returned `404`. Initial publication was therefore not attempted and no
-publication claim is authorized.
+was available during the 2026-07-29 verification. Both registry endpoints
+returned `404`. The OIDC-ready release workflow is source-complete, but initial
+publication remains account-bound and was not attempted.
