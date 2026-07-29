@@ -1,6 +1,6 @@
 # SZL Holdings — Known Gaps Register (Security & Operations)
 
-**Last updated:** 2026-07-28 (rev 17 — D-SLSA standalone publication)
+**Last updated:** 2026-07-29 (rev 18 — D-SLSA proof-packet correction)
 **Owner:** Engineering / DevOps  
 **Audience:** Enterprise architects, Series A technical advisors, incoming VP Engineering
 
@@ -24,6 +24,14 @@ D-SLSA DOI, adoption, independent validation, D3 evidence, or D4 evidence. The
 previously proposed concept DOI `10.5281/zenodo.19944926` resolves to Ouroboros
 Thesis v21 record `10.5281/zenodo.20490218`; it is not a D-SLSA deposit. A new
 Zenodo deposition and newly minted concept DOI remain required.
+
+The original standalone-publication proof packet omitted mandatory
+reproducibility and attribution fields. The append-only
+[`D-SLSA proof correction`](../../audit/frontier/DSLSA_STANDALONE_PUBLICATION_PROOF_CORRECTION_2026-07-29.md)
+records the commands and numeric exit codes, original and corrective patch
+summaries, task and actor attribution, screenshot `N/A` disposition,
+public-claim and security checks, proof level, timestamp, and residual
+boundaries. The original packet remains unchanged.
 
 ---
 
@@ -150,6 +158,7 @@ Operational gaps, process health, test coverage, observability, team ownership.
 | DSLSA-002 | No D-SLSA Zenodo deposition or concept DOI exists. | Publication | Open — proposed concept DOI `10.5281/zenodo.19944926` resolves to unrelated Ouroboros Thesis v21 record `10.5281/zenodo.20490218`. D-SLSA requires a new authenticated deposition and newly minted concept DOI. |
 | DSLSA-003 | No verified third-party transparency log, byte-identical replay, or offline-verification packet establishes D3 for an estate decision. | Decision evidence | Open — the evaluator records absent/unverified evidence and cannot infer D3. |
 | DSLSA-004 | No verified hardware-attested execution establishes D4 for an estate decision. | Decision evidence | Partial — `@szl/mcp-governor` now implements a fail-closed, signed RATS Attestation Result admission boundary with action/capability nonce binding, freshness, replay defense, and pinned workload/measurement/policy reference values. Unit tests use synthetic keys and do not establish hardware evidence. D4 remains unavailable until an authorized run produces and preserves a real NRAS, SEV-SNP, TDX, or TPM-backed result. |
+| DSLSA-005 | The merged standalone-publication proof packet omitted the required commands and exit codes, patch summary, task and actor attribution, screenshot disposition, claim and security checks, proof level, and timestamp. | Proof process | Resolved — the append-only 2026-07-29 correction records the missing fields and preserves the original immutable entry. |
 
 ### P0 — Critical / High (Resolved or Immediate Action)
 
