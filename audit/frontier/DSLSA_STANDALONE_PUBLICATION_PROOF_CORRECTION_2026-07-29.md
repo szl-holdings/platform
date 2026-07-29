@@ -5,7 +5,8 @@ This is an append-only correction to
 The original record is preserved because the Proof Ledger is immutable. This
 packet supplies the fields omitted by Platform PR
 [#538](https://github.com/szl-holdings/platform/pull/538) and binds the
-correction to the exact current Platform source inspected below.
+correction to the exact protected Platform base and successor verification
+recorded below.
 
 - `workcell_id`: `PLATFORM-DSLSA-PROOF-CORRECTION-2026-07-29`
 - `agent`: `CodexSmith`
@@ -34,9 +35,11 @@ correction to the exact current Platform source inspected below.
     deployment state, repository visibility, protection rules, and public
     package publication are unchanged.
 - `test_results`:
-  - `git rev-parse HEAD`: exit `0`;
-    `a85afe8f924969fbd2e9fdff316b691dc494b61b`, the Platform main head inspected
-    before this corrective patch.
+  - `git rev-parse origin/main`: exit `0`;
+    `bdbbca709c57e2aa0cbeaaf77035e86c2595cda0`, the protected Platform main
+    head used for the clean successor after PR #545 advanced the base. The
+    original corrective worktree inspected
+    `a85afe8f924969fbd2e9fdff316b691dc494b61b`.
   - `pnpm install --frozen-lockfile --offline`: exit `124` after the bounded
     300-second setup window. The repository dependency verifier attempted npm
     package and attestation metadata requests that the offline environment
@@ -52,11 +55,12 @@ correction to the exact current Platform source inspected below.
   - `tsc --noEmit -p packages/evidence-doctrine/tsconfig.json` through the
     checkout's root `.bin`: exit `2`; dependency setup had removed the
     `@types/node` link.
-  - Direct TypeScript 6.0.3 compiler invocation with the already-installed
-    exact `@types/node` store path and the same package `tsconfig.json`: exit
-    `0`. This establishes the package typecheck independently of the broken
-    workspace link; it does not turn the failed root setup or root typecheck
-    green.
+  - Direct TypeScript 6.0.3 compiler invocation in the original corrective
+    worktree with the already-installed exact `@types/node` store path and the
+    same package `tsconfig.json`: exit `0`. PR #545 and this append-only
+    correction do not change the evaluator TypeScript or its `tsconfig.json`;
+    the focused current-base TypeScript suite was re-run below. This does not
+    turn the failed root setup or root typecheck green.
   - `curl.exe -sS https://api.github.com/repos/szl-holdings/evidence-doctrine`:
     exit `0`, HTTP `200`; response reported `private=false`, `visibility=public`,
     `default_branch=main`, and Apache-2.0.
@@ -107,6 +111,13 @@ correction to the exact current Platform source inspected below.
 
 ## Post-change verification
 
+- Clean successor base: `bdbbca709c57e2aa0cbeaaf77035e86c2595cda0`;
+  refreshed at `2026-07-29T12:58:04-04:00`. The one overlapping known-gaps
+  header was reconciled without dropping PR #545's live-frontier record.
+- `node --test packages/evidence-doctrine/src/index.test.ts`: exit `0`;
+  current-base exact source passed `13/13`.
+- `python packages/evidence-doctrine/python/test_evidence_doctrine.py`: exit
+  `0`; current-base exact source passed `13/13`.
 - `pnpm typecheck`: exit `124` at the bounded 60-second post-change window. The
   dependency verifier again attempted denied npm package and attestation
   metadata requests; Turbo typechecking did not begin. Root typecheck remains
