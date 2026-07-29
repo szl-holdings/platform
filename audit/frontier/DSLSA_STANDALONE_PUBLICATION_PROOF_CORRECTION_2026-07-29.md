@@ -56,21 +56,26 @@ correction to the exact current Platform source inspected below.
     exact `@types/node` store path and the same package `tsconfig.json`: exit
     `0`. This establishes the package typecheck independently of the broken
     workspace link; it does not turn the failed root setup or root typecheck
-    green.
-  - `curl.exe -sS https://api.github.com/repos/szl-holdings/evidence-doctrine`:
-    exit `0`, HTTP `200`; response reported `private=false`, `visibility=public`,
+    green. The exact working directory, executable paths, type-root path, and
+    arguments are recorded in
+    [Exact TypeScript invocation](#exact-typescript-invocation).
+  - The exact status-producing repository API command and parser in
+    [Exact public-endpoint commands](#exact-public-endpoint-commands): exit
+    `0`, HTTP `200`; response reported `private=false`, `visibility=public`,
     `default_branch=main`, and Apache-2.0.
-  - `curl.exe -sS https://api.github.com/repos/szl-holdings/evidence-doctrine/commits/main`:
-    exit `0`, HTTP `200`; current main was
+  - The exact status-producing commit API command and parser in
+    [Exact public-endpoint commands](#exact-public-endpoint-commands): exit
+    `0`, HTTP `200`; current main was
     `71ab3b8a4538a106fe0a24146785456fcc8bbe1f` with
     `verification.verified=true`.
-  - `curl.exe -sS https://raw.githubusercontent.com/szl-holdings/evidence-doctrine/main/README.md`:
-    exit `0`, HTTP `200`; the response identified the project as a public reference
+  - The exact status-producing raw README command and two-assertion parser in
+    [Exact public-endpoint commands](#exact-public-endpoint-commands): exit
+    `0`, HTTP `200`; the response identified the project as a public reference
     implementation, not a certification, and stated that no D-SLSA DOI is
     authorized.
-  - `curl.exe -sS https://zenodo.org/api/records/20490218`: exit `0`, HTTP
-    `200`; the
-    response identified Ouroboros Thesis v21, DOI
+  - The exact status-producing Zenodo command and parser in
+    [Exact public-endpoint commands](#exact-public-endpoint-commands): exit
+    `0`, HTTP `200`; the response identified Ouroboros Thesis v21, DOI
     `10.5281/zenodo.20490218`, and concept DOI
     `10.5281/zenodo.19944926`.
   - Post-change documentation, field-presence, secret-scan, and diff checks are
@@ -105,19 +110,151 @@ correction to the exact current Platform source inspected below.
 - `recorded_at`: `2026-07-29T11:13:20-04:00`
 - `recorded_by`: `CodexSmith`
 
+## Exact public-endpoint commands
+
+These commands were executed from Windows PowerShell without an authenticated
+GitHub or Zenodo session. Each `curl.exe` invocation writes the response body
+separately, fails on HTTP errors, and emits the observed HTTP status.
+
+```powershell
+$proofTmp = Join-Path $env:TEMP 'platform544-live'
+New-Item -ItemType Directory -Force -Path $proofTmp | Out-Null
+
+curl.exe -sS --fail-with-body `
+  -o (Join-Path $proofTmp 'evidence-doctrine-repo.json') `
+  -w 'HTTP_STATUS=%{http_code}\n' `
+  https://api.github.com/repos/szl-holdings/evidence-doctrine
+if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+$repo = Get-Content -LiteralPath (Join-Path $proofTmp 'evidence-doctrine-repo.json') -Raw |
+  ConvertFrom-Json -ErrorAction Stop
+[pscustomobject]@{
+  private = $repo.private
+  visibility = $repo.visibility
+  default_branch = $repo.default_branch
+  license = $repo.license.spdx_id
+} | ConvertTo-Json -Compress
+
+curl.exe -sS --fail-with-body `
+  -o (Join-Path $proofTmp 'evidence-doctrine-main.json') `
+  -w 'HTTP_STATUS=%{http_code}\n' `
+  https://api.github.com/repos/szl-holdings/evidence-doctrine/commits/main
+if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+$commit = Get-Content -LiteralPath (Join-Path $proofTmp 'evidence-doctrine-main.json') -Raw |
+  ConvertFrom-Json -ErrorAction Stop
+[pscustomobject]@{
+  sha = $commit.sha
+  verified = $commit.commit.verification.verified
+  reason = $commit.commit.verification.reason
+} | ConvertTo-Json -Compress
+
+curl.exe -sS --fail-with-body `
+  -o (Join-Path $proofTmp 'evidence-doctrine-readme.md') `
+  -w 'HTTP_STATUS=%{http_code}\n' `
+  https://raw.githubusercontent.com/szl-holdings/evidence-doctrine/main/README.md
+if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+$statusLine = @(Select-String -LiteralPath (Join-Path $proofTmp 'evidence-doctrine-readme.md') `
+  -SimpleMatch 'PUBLIC REFERENCE IMPLEMENTATION / NOT A CERTIFICATION')
+$doiLine = @(Select-String -LiteralPath (Join-Path $proofTmp 'evidence-doctrine-readme.md') `
+  -SimpleMatch 'No D-SLSA DOI is currently authorized.')
+$statusLine, $doiLine | ForEach-Object { $_.Line.Trim() }
+if (($statusLine.Count -ne 1) -or ($doiLine.Count -ne 1)) { exit 1 }
+'README_ASSERTIONS=2/2'
+
+curl.exe -sS --fail-with-body `
+  -o (Join-Path $proofTmp 'zenodo-20490218.json') `
+  -w 'HTTP_STATUS=%{http_code}\n' `
+  https://zenodo.org/api/records/20490218
+if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+$zenodo = Get-Content -LiteralPath (Join-Path $proofTmp 'zenodo-20490218.json') -Raw |
+  ConvertFrom-Json -ErrorAction Stop
+[pscustomobject]@{
+  id = $zenodo.id
+  title = $zenodo.metadata.title
+  version = $zenodo.metadata.version
+  doi = $zenodo.doi
+  conceptdoi = $zenodo.conceptdoi
+} | ConvertTo-Json -Compress
+```
+
+All four `curl.exe` commands exited `0` and emitted `HTTP_STATUS=200`. The
+parsers exited `0` with these relevant outputs:
+
+```text
+{"private":false,"visibility":"public","default_branch":"main","license":"Apache-2.0"}
+{"sha":"71ab3b8a4538a106fe0a24146785456fcc8bbe1f","verified":true,"reason":"valid"}
+README_ASSERTIONS=2/2
+{"id":20490218,"title":"SZL Holdings Ouroboros Thesis v21 — The PURIQ-OS Substrate: an Honest, Audit-Ready Cybernetic Runtime for Verifiable Agentic AI","version":"21.0.0","doi":"10.5281/zenodo.20490218","conceptdoi":"10.5281/zenodo.19944926"}
+```
+
+## Exact TypeScript invocation
+
+Working directory:
+`C:\Users\steph\Documents\Codex\2026-07-28\cod\work\platform544-audit`.
+
+```powershell
+$node = 'C:\Users\steph\.cache\codex-runtimes\codex-primary-runtime\dependencies\node\bin\node.exe'
+$tsc = 'C:\Users\steph\Documents\Codex\2026-07-28\cod\work\platform_pr541_fix\node_modules\.pnpm\typescript@6.0.3\node_modules\typescript\bin\tsc'
+$typeRoots = 'C:\Users\steph\Documents\Codex\2026-07-28\cod\work\platform_pr541_fix\node_modules\.pnpm\@types+node@25.3.5\node_modules\@types'
+& $node $tsc --version
+& $node $tsc --noEmit --typeRoots $typeRoots `
+  -p packages/evidence-doctrine/tsconfig.json
+```
+
+Both commands exited `0`; the version command emitted `Version 6.0.3`.
+
 ## Post-change verification
 
 - `pnpm typecheck`: exit `124` at the bounded 60-second post-change window. The
   dependency verifier again attempted denied npm package and attestation
   metadata requests; Turbo typechecking did not begin. Root typecheck remains
   `UNVERIFIED`, not green.
+- Hosted Typecheck for initial exact corrective head
+  `273ccbccc327398b7f20e74850fd7999a264e1ed`: GitHub Actions job
+  [`90631398161`](https://github.com/szl-holdings/platform/actions/runs/30468165674/job/90631398161)
+  exited successfully. This hosted result is recorded separately and does not
+  relabel the unavailable local root typecheck as green.
 - `node --experimental-vm-modules scripts/docs/check-docs-claims.js`: exit `0`;
   all `26/26` claim assertions passed after materializing every referenced
   source path.
 - `node scripts/qa/scan-secrets.js .`: exit `0`; `CLEAN` for the materialized
   exact-source working tree, including every changed Markdown file.
-- Proof-field assertion over this packet: exit `0`; all `14/14` required field
-  names are present.
-- Correction-link assertion: exit `0`; both the original and append-only
-  correction packet paths resolve.
+- The exact proof-field and correction-link commands below exited `0` with
+  `PROOF_FIELDS=14/14` and `CORRECTION_LINKS=2/2`.
 - `git diff --check`: exit `0`.
+
+```powershell
+$packet = 'audit/frontier/DSLSA_STANDALONE_PUBLICATION_PROOF_CORRECTION_2026-07-29.md'
+$required = @(
+  'workcell_id', 'agent', 'objective', 'plan_summary', 'patch_summary',
+  'test_results', 'screenshot_refs', 'verification_notes',
+  'public_claim_check', 'security_check', 'known_gaps_update', 'proof_level',
+  'recorded_at', 'recorded_by'
+)
+$packetText = Get-Content -LiteralPath $packet -Raw
+$missing = @($required | Where-Object {
+  $packetText -notmatch ('`' + [regex]::Escape($_) + '`')
+})
+if ($missing.Count -ne 0) { $missing; exit 1 }
+"PROOF_FIELDS=$($required.Count)/$($required.Count)"
+
+$links = @(
+  'audit/frontier/DSLSA_STANDALONE_PUBLICATION_PROOF_2026-07-28.md',
+  'audit/frontier/DSLSA_STANDALONE_PUBLICATION_PROOF_CORRECTION_2026-07-29.md'
+)
+$missingLinks = @($links | Where-Object {
+  -not (Test-Path -LiteralPath $_ -PathType Leaf)
+})
+if ($missingLinks.Count -ne 0) { $missingLinks; exit 1 }
+"CORRECTION_LINKS=$($links.Count)/$($links.Count)"
+```
+
+The correction's initial post-change commit is bound by the exact command:
+
+```powershell
+git rev-parse HEAD
+```
+
+It exited `0` and emitted
+`273ccbccc327398b7f20e74850fd7999a264e1ed`. That signed+DCO commit is the
+initial corrective packet inspected before this append-only reproducibility
+repair; the repair commit is separately bound by Git and the pull request.
