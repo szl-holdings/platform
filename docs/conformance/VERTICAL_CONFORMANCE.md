@@ -57,10 +57,21 @@ link-local addresses fail closed. Each request has a bounded timeout.
 |---|---|---|
 | Sentra | Retained monorepo artifact explicitly says standalone Sentra is superseded; requested public repository not observed | FAIL CLOSED |
 | Vessels | Retained artifact explicitly says standalone Vessels is superseded; functionality points to killinchu | FAIL CLOSED |
-| Insurance / david-leads | No registered insurance artifact; `david-leads` was observed private | FAIL CLOSED |
+| Insurance / david-leads | `david-leads` is public and its runtime is healthy, but `/version` and `/evidence` return 404 and no registered insurance artifact exists | FAIL CLOSED |
 
 No `3/3` badge is authorized. A badge may be added only after three cited
 deployment runs pass all seven gates at exact commits.
+
+## Live frontier preflight
+
+`pnpm frontier:preflight` performs a bounded, read-only measurement of the
+current npm, DOI, vertical deployment, local TPM-readiness, and hosted
+observability frontiers. It emits `szl.frontier-preflight.v1` JSON and does not
+publish, deploy, mint evidence, or change a conformance result.
+
+`pnpm frontier:gate` runs the same probes and exits non-zero until every
+frontier is operational. In particular, a healthy runtime, HTTP 200, local TPM
+readiness, or `receipt_minted=false` never upgrades a surface to verified.
 
 ## Offline verifier
 

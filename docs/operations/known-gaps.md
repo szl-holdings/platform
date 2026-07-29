@@ -1,10 +1,33 @@
 # SZL Holdings — Known Gaps Register (Security & Operations)
 
-**Last updated:** 2026-07-29 (rev 18 — D-SLSA proof-packet correction)
+**Last updated:** 2026-07-29 (rev 19 — live frontier preflight and D-SLSA proof correction)
 **Owner:** Engineering / DevOps  
 **Audience:** Enterprise architects, Series A technical advisors, incoming VP Engineering
 
 This document is the canonical reference for known security, quality, and compliance gaps in the SZL Holdings platform. It consolidates findings from the internal risk register, the April 2026 hardening sprint, and the secrets remediation audit.
+
+---
+
+## 2026-07-29 Live Frontier Preflight
+
+The dependency-free `pnpm frontier:preflight` command now measures five
+external frontiers without exposing credential values: exact npm versions,
+the configured Zenodo record, the three vertical deployment targets, local
+Windows TPM readiness, and hosted Datadog/Langfuse/Arize proof inputs. The
+strict `pnpm frontier:gate` variant exits non-zero while any frontier remains
+blocked.
+
+The first live run remained truthfully blocked. Both npm packages returned
+404; the configured DOI still resolved to Ouroboros Thesis v21; Sentra had no
+canonical public target; David Leads lacked `/version` and `/evidence`;
+Killinchu returned HTML fallbacks for those conformance paths; both live
+build-info endpoints reported `receipt_minted=false`; local TPM 2.0 readiness
+and PCR-log parity were measured without a signed quote or authorized verifier
+result; and no hosted Datadog, Langfuse, or Arize production proof was
+retrieved. The command operationalizes repeatable measurement but does not
+close or relabel any external evidence gap. The command, test, and live result
+are recorded in
+[`audit/frontier/FRONTIER_PREFLIGHT_PROOF_2026-07-29.md`](../../audit/frontier/FRONTIER_PREFLIGHT_PROOF_2026-07-29.md).
 
 ---
 
