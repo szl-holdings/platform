@@ -38,7 +38,7 @@ Generated: 2026-04-16 (updated)
 - **Host:** Replit (Autoscale deployment)
 - **DB:** Replit-managed PostgreSQL 16 (561+ tables in `lib/db`)
 - **Secrets:** Mix of Replit Secrets panel + hardcoded values in `.replit [userenv.shared]` — **NON-COMPLIANT**
-- **CI/CD:** 44 GitHub workflows are measured in `artifacts/SOURCE_OF_TRUTH.json`; archival workflow state is tracked separately
+- **CI/CD:** 45 GitHub workflows are measured in `artifacts/SOURCE_OF_TRUTH.json`; archival workflow state is tracked separately
 - **Credential files:** Both mobile Firebase configs are placeholder-only (compliant)
 
 ---
