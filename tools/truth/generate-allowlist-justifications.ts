@@ -270,7 +270,7 @@ async function main(): Promise<void> {
   const scannerText = await readFile(SCANNER, 'utf8');
   const entries = [
     ...parseToml(gitleaksText),
-    ...parseSet(scannerText, 'SKIP_DIRECTORY_PATHS'),
+    ...parseSet(scannerText, 'SKIP_DIRECTORY_NAMES'),
     ...parseSet(scannerText, 'SKIP_PATHS'),
     ...parseSet(scannerText, 'ALLOW_VALUES'),
   ];
