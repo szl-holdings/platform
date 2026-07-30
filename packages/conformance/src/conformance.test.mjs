@@ -11,6 +11,7 @@ import { normalizeBaseUrl, runConformance } from './conformance.mjs';
 import { payloadHash, publicKeyFingerprint, signDssePayload } from './verify.mjs';
 
 const FIXTURE_SHA = 'a'.repeat(40);
+const ROOT_FIXTURE_SHA = 'b'.repeat(40);
 const FIXTURE_NOW = Date.parse('2026-07-25T20:00:00.000Z');
 
 function keyPair() {
@@ -41,7 +42,7 @@ async function fixtureRoot(
 
 function fixtureManifest(disposition = 'CANDIDATE') {
   return {
-    schemaVersion: 'szl.vertical-conformance.manifest.v1',
+    schemaVersion: 'szl.vertical-conformance.manifest.v2',
     surface: 'sentra',
     disposition,
     registration: {
@@ -54,10 +55,27 @@ function fixtureManifest(disposition = 'CANDIDATE') {
       expectedGitShaEnv: 'SENTRA_DEPLOYED_GIT_SHA',
     },
     evidence: {
-      publicKeyEnv: 'SENTRA_CONFORMANCE_PUBLIC_KEY',
-      publicKeyFingerprintEnv: 'SENTRA_CONFORMANCE_PUBLIC_KEY_SHA256',
+      root: {
+        expectedGitShaEnv: 'A11OY_CONFORMANCE_GIT_SHA',
+        publicKeyEnv: 'A11OY_CONFORMANCE_PUBLIC_KEY',
+        publicKeyFingerprintEnv: 'A11OY_CONFORMANCE_PUBLIC_KEY_SHA256',
+      },
+      target: {
+        publicKeyEnv: 'SENTRA_CONFORMANCE_PUBLIC_KEY',
+        publicKeyFingerprintEnv: 'SENTRA_CONFORMANCE_PUBLIC_KEY_SHA256',
+      },
     },
   };
+}
+
+function fixtureManifestV1(disposition = 'CANDIDATE') {
+  const manifest = fixtureManifest(disposition);
+  manifest.schemaVersion = 'szl.vertical-conformance.manifest.v1';
+  manifest.evidence = {
+    publicKeyEnv: 'SENTRA_CONFORMANCE_PUBLIC_KEY',
+    publicKeyFingerprintEnv: 'SENTRA_CONFORMANCE_PUBLIC_KEY_SHA256',
+  };
+  return manifest;
 }
 
 function receiptPayload({
@@ -87,6 +105,8 @@ function referenceEvidence(
   keys,
   { a11oyOverrides = {}, sentraOverrides = {}, denialReceiptId = 'sentra-deny', otel = {} } = {},
 ) {
+  const rootKeys = keys.root || keys;
+  const targetKeys = keys.target || keys;
   const a11oyPayload = {
     ...receiptPayload({
       receiptId: 'a11oy-allow',
@@ -94,10 +114,11 @@ function referenceEvidence(
       surface: 'a11oy',
       parentHash: null,
       decision: 'ALLOW',
+      gitSha: ROOT_FIXTURE_SHA,
     }),
     ...a11oyOverrides,
   };
-  const a11oy = signDssePayload(a11oyPayload, keys);
+  const a11oy = signDssePayload(a11oyPayload, rootKeys);
   const sentraPayload = {
     ...receiptPayload({
       receiptId: 'sentra-deny',
@@ -108,7 +129,7 @@ function referenceEvidence(
     }),
     ...sentraOverrides,
   };
-  const sentra = signDssePayload(sentraPayload, keys);
+  const sentra = signDssePayload(sentraPayload, targetKeys);
   return {
     receipts: [a11oy, sentra],
     denialReceiptId,
@@ -163,7 +184,11 @@ test('base URL normalization removes trailing slashes in linear time', () => {
 });
 
 async function runReference({ evidence, keys, root, serverOptions, ...overrides } = {}) {
-  const resolvedKeys = keys || keyPair();
+  const resolvedKeys = keys
+    ? keys.root && keys.target
+      ? keys
+      : { root: keys, target: keys }
+    : { root: keyPair(), target: keyPair() };
   const resolvedRoot = root || (await fixtureRoot());
   const server = await listen(evidence || referenceEvidence(resolvedKeys), serverOptions);
   try {
@@ -173,8 +198,11 @@ async function runReference({ evidence, keys, root, serverOptions, ...overrides 
       manifest: fixtureManifest(),
       baseUrl: server.baseUrl,
       expectedGitSha: FIXTURE_SHA,
-      publicKeyPem: resolvedKeys.publicKeyPem,
-      expectedFingerprint: publicKeyFingerprint(resolvedKeys.publicKeyPem),
+      expectedRootGitSha: ROOT_FIXTURE_SHA,
+      publicKeyPem: resolvedKeys.target.publicKeyPem,
+      expectedFingerprint: publicKeyFingerprint(resolvedKeys.target.publicKeyPem),
+      rootPublicKeyPem: resolvedKeys.root.publicKeyPem,
+      rootExpectedFingerprint: publicKeyFingerprint(resolvedKeys.root.publicKeyPem),
       nowMs: FIXTURE_NOW,
       ...overrides,
     });
@@ -198,6 +226,53 @@ test('reference fixture passes all seven vertical conformance gates', async () =
       'readme-status',
       'product-manifest',
     ],
+  );
+});
+
+test('v2 verifies distinct root and target commits under distinct pinned signers', async () => {
+  const keys = { root: keyPair(), target: keyPair() };
+  assert.notEqual(
+    publicKeyFingerprint(keys.root.publicKeyPem),
+    publicKeyFingerprint(keys.target.publicKeyPem),
+  );
+  const evidence = referenceEvidence(keys);
+  const [rootReceipt, targetReceipt] = evidence.receipts.map((receipt) =>
+    JSON.parse(Buffer.from(receipt.payload, 'base64').toString('utf8')),
+  );
+  assert.equal(rootReceipt.gitSha, ROOT_FIXTURE_SHA);
+  assert.equal(targetReceipt.gitSha, FIXTURE_SHA);
+
+  const report = await runReference({ evidence, keys });
+  assert.equal(report.conformant, true);
+  assert.match(
+    report.checks.find((check) => check.id === 'offline-verify')?.detail || '',
+    /separately pinned trust roots/,
+  );
+});
+
+test('legacy v1 retains its shared-commit shared-signer contract', async () => {
+  const keys = keyPair();
+  const evidence = referenceEvidence(keys, {
+    a11oyOverrides: { gitSha: FIXTURE_SHA },
+  });
+  const report = await runReference({
+    evidence,
+    keys,
+    manifest: fixtureManifestV1(),
+    expectedRootGitSha: undefined,
+  });
+  assert.equal(report.conformant, true);
+});
+
+test('v2 rejects an a11oy root bound to the target commit', async () => {
+  const keys = { root: keyPair(), target: keyPair() };
+  const evidence = referenceEvidence(keys, {
+    a11oyOverrides: { gitSha: FIXTURE_SHA },
+  });
+  const report = await runReference({ evidence, keys });
+  assert.match(
+    report.checks.find((check) => check.id === 'khipu-chain')?.detail || '',
+    /root commit/,
   );
 });
 
@@ -265,6 +340,14 @@ test('a different pinned key fails offline receipt verification', async () => {
     evidence,
     keys: trustKeys,
   });
+  assert.equal(report.checks.find((check) => check.id === 'offline-verify')?.status, 'FAIL');
+});
+
+test('a target signature cannot substitute for the separately pinned a11oy root signer', async () => {
+  const signingKeys = { root: keyPair(), target: keyPair() };
+  const trustKeys = { root: keyPair(), target: signingKeys.target };
+  const evidence = referenceEvidence(signingKeys);
+  const report = await runReference({ evidence, keys: trustKeys });
   assert.equal(report.checks.find((check) => check.id === 'offline-verify')?.status, 'FAIL');
 });
 

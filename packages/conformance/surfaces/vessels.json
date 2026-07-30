@@ -1,5 +1,5 @@
 {
-  "schemaVersion": "szl.vertical-conformance.manifest.v1",
+  "schemaVersion": "szl.vertical-conformance.manifest.v2",
   "surface": "vessels",
   "repository": "szl-holdings/killinchu",
   "disposition": "SUPERSEDED",
@@ -16,7 +16,14 @@
     "expectedGitShaEnv": "VESSELS_DEPLOYED_GIT_SHA"
   },
   "evidence": {
-    "publicKeyEnv": "VESSELS_CONFORMANCE_PUBLIC_KEY",
-    "publicKeyFingerprintEnv": "VESSELS_CONFORMANCE_PUBLIC_KEY_SHA256"
+    "root": {
+      "expectedGitShaEnv": "A11OY_CONFORMANCE_GIT_SHA",
+      "publicKeyEnv": "A11OY_CONFORMANCE_PUBLIC_KEY",
+      "publicKeyFingerprintEnv": "A11OY_CONFORMANCE_PUBLIC_KEY_SHA256"
+    },
+    "target": {
+      "publicKeyEnv": "VESSELS_CONFORMANCE_PUBLIC_KEY",
+      "publicKeyFingerprintEnv": "VESSELS_CONFORMANCE_PUBLIC_KEY_SHA256"
+    }
   }
 }

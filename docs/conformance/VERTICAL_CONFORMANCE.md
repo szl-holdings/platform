@@ -18,7 +18,8 @@ repository visibility.
 
 1. A sequence of fresh, unique, commit-bound DSSE envelopes forms a valid Khipu
    parent-hash chain rooted at `a11oy`, terminating at the target, with an
-   adjacent `a11oy -> target` boundary.
+   adjacent `a11oy -> target` boundary. Manifest v2 binds the root to the exact
+   A11oy commit and the remaining receipts to the exact target commit.
 2. `/healthz`, `/version`, and `/evidence` return HTTP 200, and `/version.gitSha`
    equals the expected deployed commit.
 3. The evidence set references a receipt whose decision is exactly `DENY`.
@@ -27,8 +28,9 @@ repository visibility.
    timestamps; deprecated `gen_ai.system` does not qualify. This proves the
    evidence payload has the expected reported structure. It does **not** prove
    collector export, backend ingestion, or end-to-end trace availability.
-5. Every receipt verifies offline against a fingerprint-pinned Ed25519 or
-   ECDSA P-256 key, and a tampered receipt fails.
+5. The A11oy root verifies offline against its fingerprint-pinned Ed25519 or
+   ECDSA P-256 trust root; target receipts verify against the separately pinned
+   target trust root; and a tampered target receipt fails.
 6. The README declares LIVE, MODELED, or PLANNED above the fold and cites
    `SOURCE_OF_TRUTH.md`.
 7. The artifact manifest is present, counted by the canonical registry, and the
@@ -36,15 +38,20 @@ repository visibility.
 
 ## Required deployment inputs
 
-Each surface manifest names four environment variables:
+Each bundled v2 surface manifest names seven environment variables:
 
 - deployed base URL;
-- expected Git SHA;
-- Ed25519 or ECDSA P-256 public key PEM; and
-- SHA-256 fingerprint of that public key.
+- expected target Git SHA;
+- expected A11oy root Git SHA;
+- A11oy root Ed25519 or ECDSA P-256 public key PEM;
+- SHA-256 fingerprint of the A11oy root public key;
+- target Ed25519 or ECDSA P-256 public key PEM; and
+- SHA-256 fingerprint of the target public key.
 
-The public key is not secret. The separate fingerprint is a trust anchor that
-prevents a self-signed replacement key from passing conformance.
+The public keys are not secrets. The separate fingerprints are trust anchors
+that prevent a target from substituting a self-signed A11oy-shaped root or a
+replacement target key. Manifest v1 remains accepted for legacy
+shared-commit, shared-signer evidence, but all bundled targets use v2.
 
 The runner accepts HTTPS deployment origins only. Plain HTTP is limited to
 loopback testing. Credentials, paths, query strings, fragments, private

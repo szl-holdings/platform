@@ -15,10 +15,28 @@ let fixtureRoot;
 beforeEach(async () => {
   fixtureRoot = await mkdtemp(join(tmpdir(), 'szl-npm-artifact-verifier-'));
 
+  const inventory = JSON.parse(
+    await readFile(join(REPOSITORY_ROOT, EVIDENCE_PATH, 'inventory.json'), 'utf8'),
+  );
   for (const manifestPath of SOURCE_MANIFESTS.values()) {
     const destination = join(fixtureRoot, manifestPath);
     await mkdir(dirname(destination), { recursive: true });
     await copyFile(join(REPOSITORY_ROOT, manifestPath), destination);
+  }
+  for (const packageEvidence of inventory.packages) {
+    const manifestPath = SOURCE_MANIFESTS.get(packageEvidence.name);
+    assert(manifestPath);
+    const sourcePackageDirectory = dirname(join(REPOSITORY_ROOT, manifestPath));
+    const fixturePackageDirectory = dirname(join(fixtureRoot, manifestPath));
+    for (const path of packageEvidence.files) {
+      if (path === 'package.json' || path === 'publication-contract.json') {
+        continue;
+      }
+
+      const destination = join(fixturePackageDirectory, path);
+      await mkdir(dirname(destination), { recursive: true });
+      await copyFile(join(sourcePackageDirectory, path), destination);
+    }
   }
 
   const evidenceDirectory = join(fixtureRoot, EVIDENCE_PATH);
@@ -104,5 +122,25 @@ test('rejects an inventory that omits an expected package', async () => {
   await assert.rejects(
     verifyPublicNpmArtifacts(fixtureRoot),
     /npm artifact inventory must contain every expected package exactly once/,
+  );
+});
+
+test('rejects packed executable source drift', async () => {
+  const sourcePath = join(fixtureRoot, 'packages', 'conformance', 'src', 'conformance.mjs');
+  await writeFile(sourcePath, `${await readFile(sourcePath, 'utf8')}\n// tampered\n`, 'utf8');
+
+  await assert.rejects(
+    verifyPublicNpmArtifacts(fixtureRoot),
+    /@szl\/verify packed source drift: src\/conformance\.mjs/,
+  );
+});
+
+test('rejects packed generated output drift', async () => {
+  const generatedPath = join(fixtureRoot, 'packages', 'mcp-governor', 'dist', 'index.js');
+  await writeFile(generatedPath, `${await readFile(generatedPath, 'utf8')}\n// tampered\n`, 'utf8');
+
+  await assert.rejects(
+    verifyPublicNpmArtifacts(fixtureRoot),
+    /@szl\/mcp-governor packed source drift: dist\/index\.js/,
   );
 });
