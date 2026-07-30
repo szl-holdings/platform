@@ -21,6 +21,8 @@ const SPAN_ID_PATTERN = /^[0-9a-f]{16}$/;
 const DEFAULT_MAX_EVIDENCE_AGE_MS = 15 * 60 * 1000;
 const MAX_CLOCK_SKEW_MS = 60 * 1000;
 const PACKAGE_ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '..');
+const MANIFEST_V1 = 'szl.vertical-conformance.manifest.v1';
+const MANIFEST_V2 = 'szl.vertical-conformance.manifest.v2';
 
 export function normalizeBaseUrl(baseUrl) {
   let end = baseUrl.length;
@@ -164,7 +166,7 @@ async function fetchJson(fetchImpl, url, timeoutMs) {
   return { status: response.status, body };
 }
 
-function validateEvidenceWindow(payload, expectedGitSha, nowMs, maxEvidenceAgeMs) {
+function validateEvidenceWindow(payload, nowMs, maxEvidenceAgeMs) {
   if (!payload || typeof payload !== 'object' || Array.isArray(payload)) {
     throw new TypeError('receipt payload must be an object');
   }
@@ -189,8 +191,8 @@ function validateEvidenceWindow(payload, expectedGitSha, nowMs, maxEvidenceAgeMs
   if (payload.decision !== 'ALLOW' && payload.decision !== 'DENY') {
     throw new TypeError('receipt decision must be ALLOW or DENY');
   }
-  if (payload.gitSha !== expectedGitSha) {
-    throw new TypeError(`receipt gitSha must match ${expectedGitSha}`);
+  if (!FULL_GIT_SHA_PATTERN.test(payload.gitSha)) {
+    throw new TypeError('receipt gitSha must be a full 40-character lowercase commit');
   }
 
   const issuedAtMs = Date.parse(payload.issuedAt);
@@ -218,7 +220,11 @@ function tamperEnvelope(envelope) {
   return { ...envelope, payload: payload.toString('base64') };
 }
 
-function evaluateChain(surface, evidence, { expectedGitSha, nowMs, maxEvidenceAgeMs }) {
+function evaluateChain(
+  surface,
+  evidence,
+  { expectedRootGitSha, expectedGitSha, nowMs, maxEvidenceAgeMs },
+) {
   const receipts = evidence?.receipts;
   if (!Array.isArray(receipts) || receipts.length < 2) {
     return result('khipu-chain', FAIL, 'evidence.receipts must contain at least two receipts');
@@ -236,7 +242,18 @@ function evaluateChain(surface, evidence, { expectedGitSha, nowMs, maxEvidenceAg
       if (entry.envelope.payloadType !== KHIPU_PAYLOAD_TYPE) {
         throw new TypeError(`receipt ${index} payloadType must be ${KHIPU_PAYLOAD_TYPE}`);
       }
-      validateEvidenceWindow(entry.payload, expectedGitSha, nowMs, maxEvidenceAgeMs);
+      validateEvidenceWindow(entry.payload, nowMs, maxEvidenceAgeMs);
+      const expectedCommit = index === 0 ? expectedRootGitSha : expectedGitSha;
+      if (!FULL_GIT_SHA_PATTERN.test(expectedCommit || '')) {
+        throw new TypeError(
+          `${index === 0 ? 'root' : 'target'} expected Git SHA must be a full 40-character lowercase commit`,
+        );
+      }
+      if (entry.payload.gitSha !== expectedCommit) {
+        throw new TypeError(
+          `receipt ${index} gitSha must match ${index === 0 ? 'root' : 'target'} commit ${expectedCommit}`,
+        );
+      }
       if (receiptIds.has(entry.payload.receiptId)) {
         throw new TypeError(`receipt ${index} replays receiptId ${entry.payload.receiptId}`);
       }
@@ -277,7 +294,7 @@ function evaluateChain(surface, evidence, { expectedGitSha, nowMs, maxEvidenceAg
       ? result(
           'khipu-chain',
           PASS,
-          `${receipts.length} fresh commit-bound DSSE envelopes; cross-surface link verified`,
+          `${receipts.length} fresh DSSE envelopes bound to root ${expectedRootGitSha} and target ${expectedGitSha}; cross-surface link verified`,
         )
       : result('khipu-chain', FAIL, 'one or more receipts lack the required DSSE envelope');
   } catch (error) {
@@ -341,42 +358,88 @@ function evaluateOtel(evidence, nowMs, maxEvidenceAgeMs) {
       );
 }
 
-function evaluateOffline(evidence, publicKeyPem, expectedFingerprint) {
+function validateTrustRoot(label, publicKeyPem, expectedFingerprint) {
+  if (!publicKeyPem || !expectedFingerprint) {
+    throw new TypeError(`pinned ${label} public key and fingerprint are required`);
+  }
+  const actualFingerprint = publicKeyFingerprint(publicKeyPem);
+  if (actualFingerprint !== expectedFingerprint) {
+    throw new TypeError(
+      `${label} public key fingerprint mismatch: expected ${expectedFingerprint}, received ${actualFingerprint}`,
+    );
+  }
+}
+
+function verifyPinnedEnvelope(envelope, publicKeyPem, expectedFingerprint) {
+  return verifyDsseEnvelope(envelope, {
+    publicKeyPem,
+    expectedFingerprint,
+    expectedPayloadType: KHIPU_PAYLOAD_TYPE,
+  }).valid;
+}
+
+function evaluateOffline(
+  evidence,
+  { rootPublicKeyPem, rootExpectedFingerprint, targetPublicKeyPem, targetExpectedFingerprint },
+) {
   const receipts = evidence?.receipts;
   if (!Array.isArray(receipts) || receipts.length === 0) {
     return result('offline-verify', FAIL, 'no receipts are available to verify');
   }
-  if (!publicKeyPem || !expectedFingerprint) {
-    return result('offline-verify', FAIL, 'pinned public key and fingerprint are required');
-  }
   try {
-    const actualFingerprint = publicKeyFingerprint(publicKeyPem);
-    if (actualFingerprint !== expectedFingerprint) {
-      return result(
-        'offline-verify',
-        FAIL,
-        `public key fingerprint mismatch: ${actualFingerprint}`,
+    validateTrustRoot('a11oy root', rootPublicKeyPem, rootExpectedFingerprint);
+    validateTrustRoot('target', targetPublicKeyPem, targetExpectedFingerprint);
+    const rootValid = verifyPinnedEnvelope(receipts[0], rootPublicKeyPem, rootExpectedFingerprint);
+    const targetValid = receipts
+      .slice(1)
+      .every((envelope) =>
+        verifyPinnedEnvelope(envelope, targetPublicKeyPem, targetExpectedFingerprint),
       );
-    }
-    const genuine = receipts.every(
-      (envelope) =>
-        verifyDsseEnvelope(envelope, {
-          publicKeyPem,
-          expectedFingerprint,
-          expectedPayloadType: KHIPU_PAYLOAD_TYPE,
-        }).valid,
+    const tamperedTargetValid = verifyPinnedEnvelope(
+      tamperEnvelope(receipts.at(-1)),
+      targetPublicKeyPem,
+      targetExpectedFingerprint,
     );
-    const tampered = verifyDsseEnvelope(tamperEnvelope(receipts.at(-1)), {
-      publicKeyPem,
-      expectedFingerprint,
-      expectedPayloadType: KHIPU_PAYLOAD_TYPE,
-    });
-    return genuine && !tampered.valid
-      ? result('offline-verify', PASS, 'genuine receipts verify; tampered receipt fails')
+    return rootValid && targetValid && !tamperedTargetValid
+      ? result(
+          'offline-verify',
+          PASS,
+          'a11oy root and target receipts verify under separately pinned trust roots; tampered target fails',
+        )
       : result('offline-verify', FAIL, 'genuine/tampered exit contract was not satisfied');
   } catch (error) {
     return result('offline-verify', FAIL, error instanceof Error ? error.message : String(error));
   }
+}
+
+function evidenceContract(manifest) {
+  if (manifest.schemaVersion === MANIFEST_V1) {
+    return {
+      rootGitShaEnv: manifest.deployment.expectedGitShaEnv,
+      rootPublicKeyEnv: manifest.evidence.publicKeyEnv,
+      rootPublicKeyFingerprintEnv: manifest.evidence.publicKeyFingerprintEnv,
+      targetPublicKeyEnv: manifest.evidence.publicKeyEnv,
+      targetPublicKeyFingerprintEnv: manifest.evidence.publicKeyFingerprintEnv,
+    };
+  }
+  if (manifest.schemaVersion !== MANIFEST_V2) {
+    throw new TypeError('unsupported conformance manifest schemaVersion');
+  }
+  const root = manifest.evidence?.root;
+  const target = manifest.evidence?.target;
+  const fields = {
+    rootGitShaEnv: root?.expectedGitShaEnv,
+    rootPublicKeyEnv: root?.publicKeyEnv,
+    rootPublicKeyFingerprintEnv: root?.publicKeyFingerprintEnv,
+    targetPublicKeyEnv: target?.publicKeyEnv,
+    targetPublicKeyFingerprintEnv: target?.publicKeyFingerprintEnv,
+  };
+  for (const [field, value] of Object.entries(fields)) {
+    if (typeof value !== 'string' || !/^[A-Z][A-Z0-9_]+$/.test(value)) {
+      throw new TypeError(`manifest ${field} must name an environment variable`);
+    }
+  }
+  return fields;
 }
 
 async function evaluateReadme(root, manifest) {
@@ -405,7 +468,7 @@ async function evaluateReadme(root, manifest) {
 
 async function evaluateManifest(root, manifest, surface) {
   try {
-    if (manifest.schemaVersion !== 'szl.vertical-conformance.manifest.v1') {
+    if (![MANIFEST_V1, MANIFEST_V2].includes(manifest.schemaVersion)) {
       throw new TypeError('unsupported conformance manifest schemaVersion');
     }
     if (manifest.surface !== surface) {
@@ -439,8 +502,11 @@ export async function runConformance({
   manifest,
   baseUrl,
   expectedGitSha,
+  expectedRootGitSha,
   publicKeyPem,
   expectedFingerprint,
+  rootPublicKeyPem,
+  rootExpectedFingerprint,
   fetchImpl = globalThis.fetch,
   lookupImpl = lookup,
   nowMs = Date.now(),
@@ -464,6 +530,7 @@ export async function runConformance({
   if (surfaceManifest.surface !== surface) {
     throw new TypeError(`manifest surface must match ${surface}`);
   }
+  const trust = evidenceContract(surfaceManifest);
   const checks = [];
 
   const resolvedBaseUrl = baseUrl || process.env[surfaceManifest.deployment.baseUrlEnv];
@@ -471,9 +538,21 @@ export async function runConformance({
     expectedGitSha ||
     process.env[surfaceManifest.deployment.expectedGitShaEnv] ||
     process.env.GITHUB_SHA;
-  const resolvedPublicKey = publicKeyPem || process.env[surfaceManifest.evidence.publicKeyEnv];
-  const resolvedFingerprint =
-    expectedFingerprint || process.env[surfaceManifest.evidence.publicKeyFingerprintEnv];
+  const resolvedExpectedRootSha =
+    expectedRootGitSha ||
+    process.env[trust.rootGitShaEnv] ||
+    (surfaceManifest.schemaVersion === MANIFEST_V1 ? resolvedExpectedSha : undefined);
+  const resolvedTargetPublicKey = publicKeyPem || process.env[trust.targetPublicKeyEnv];
+  const resolvedTargetFingerprint =
+    expectedFingerprint || process.env[trust.targetPublicKeyFingerprintEnv];
+  const resolvedRootPublicKey =
+    rootPublicKeyPem ||
+    process.env[trust.rootPublicKeyEnv] ||
+    (surfaceManifest.schemaVersion === MANIFEST_V1 ? resolvedTargetPublicKey : undefined);
+  const resolvedRootFingerprint =
+    rootExpectedFingerprint ||
+    process.env[trust.rootPublicKeyFingerprintEnv] ||
+    (surfaceManifest.schemaVersion === MANIFEST_V1 ? resolvedTargetFingerprint : undefined);
 
   let evidence = null;
   if (!resolvedBaseUrl || !resolvedExpectedSha || !FULL_GIT_SHA_PATTERN.test(resolvedExpectedSha)) {
@@ -516,6 +595,7 @@ export async function runConformance({
 
   checks.push(
     evaluateChain(surface, evidence, {
+      expectedRootGitSha: resolvedExpectedRootSha,
       expectedGitSha: resolvedExpectedSha,
       nowMs,
       maxEvidenceAgeMs,
@@ -523,7 +603,14 @@ export async function runConformance({
   );
   checks.push(evaluateDenial(evidence));
   checks.push(evaluateOtel(evidence, nowMs, maxEvidenceAgeMs));
-  checks.push(evaluateOffline(evidence, resolvedPublicKey, resolvedFingerprint));
+  checks.push(
+    evaluateOffline(evidence, {
+      rootPublicKeyPem: resolvedRootPublicKey,
+      rootExpectedFingerprint: resolvedRootFingerprint,
+      targetPublicKeyPem: resolvedTargetPublicKey,
+      targetExpectedFingerprint: resolvedTargetFingerprint,
+    }),
+  );
   checks.push(await evaluateReadme(root, surfaceManifest));
   checks.push(await evaluateManifest(root, surfaceManifest, surface));
 

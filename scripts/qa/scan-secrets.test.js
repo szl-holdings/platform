@@ -181,7 +181,7 @@ test('scans audit and security trees instead of blanket-excluding them', () => {
   ]);
 });
 
-test('scans generated-name directories outside the two root-qualified skips', () => {
+test('scans generated-name directories outside dependency and metadata skips', () => {
   const result = inspect({
     'src/build/leaked.md': privateKey(''),
     'src/dist/leaked.md': privateKey(''),
@@ -191,6 +191,20 @@ test('scans generated-name directories outside the two root-qualified skips', ()
     'src/build/leaked.md',
     'src/dist/leaked.md',
   ]);
+});
+
+test('skips installed dependencies at every workspace depth', () => {
+  const result = inspect({
+    'node_modules/root-leak.md': privateKey(''),
+    'packages/example/node_modules/dependency-leak.md': privateKey(''),
+    'packages/example/src/tracked-leak.md': privateKey(''),
+  });
+
+  assert.deepEqual(
+    result.hits.map(({ rel }) => rel),
+    ['packages/example/src/tracked-leak.md'],
+  );
+  assert.deepEqual(result.coverageIssues, []);
 });
 
 test('keeps the lockfile exception path-qualified', () => {

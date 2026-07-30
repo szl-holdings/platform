@@ -77,7 +77,7 @@
     "release:check": "pnpm run verify:env && pnpm run verify:claims:strict && pnpm run test:unit && pnpm run test:smoke && pnpm run audit:mocks && pnpm run audit:routes && pnpm run audit:deps && pnpm run brand:check",
     "generate:npm-contracts": "node scripts/release/public-npm-contract.mjs",
     "verify:npm-contracts": "node scripts/release/public-npm-contract.mjs --check",
-    "verify:npm-artifacts": "node --test scripts/release/verify-public-npm-artifacts.test.mjs && node scripts/release/verify-public-npm-artifacts.mjs",
+    "verify:npm-artifacts": "pnpm --dir packages/mcp-governor run prepack && node --test scripts/release/verify-public-npm-artifacts.test.mjs && node scripts/release/verify-public-npm-artifacts.mjs",
     "frontier:preflight": "node scripts/frontier/frontier-preflight.mjs",
     "frontier:gate": "node scripts/frontier/frontier-preflight.mjs --require-operational",
     "frontier:hosted-observability": "node scripts/frontier/frontier-preflight.mjs --require-hosted-observability",

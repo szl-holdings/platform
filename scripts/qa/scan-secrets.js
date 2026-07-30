@@ -70,7 +70,7 @@ const SCAN_EXTENSIONS = new Set([
 ]);
 const MAX_FILES = 20_000;
 
-const SKIP_DIRECTORY_PATHS = new Set([
+const SKIP_DIRECTORY_NAMES = new Set([
   // Repository metadata and installed dependencies are external to tracked source.
   '.git',
   'node_modules',
@@ -153,7 +153,7 @@ export function scanTarget(
     for (const entry of entries) {
       const fullPath = path.join(dir, entry.name);
       const rel = relativePath(target, fullPath);
-      if (SKIP_DIRECTORY_PATHS.has(rel)) continue;
+      if (entry.isDirectory() && SKIP_DIRECTORY_NAMES.has(entry.name)) continue;
       if (count.n >= maxFiles) {
         addCoverageIssue(rel, `File scan limit of ${maxFiles} was exceeded`);
         return false;

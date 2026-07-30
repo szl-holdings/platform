@@ -1,6 +1,6 @@
 # SZL Holdings — Known Gaps Register (Security & Operations)
 
-**Last updated:** 2026-07-30 (rev 20 — exact hosted observability readback)
+**Last updated:** 2026-07-30 (rev 21 — cross-repository conformance trust)
 **Owner:** Engineering / DevOps  
 **Audience:** Enterprise architects, Series A technical advisors, incoming VP Engineering
 
@@ -47,6 +47,26 @@ external evidence gap. No hosted credential or successful production readback
 was present while this change was implemented, so current hosted proof remains
 `UNAVAILABLE`. The configuration and evidence runbook is
 [`hosted-proof-readback.md`](../observability/hosted-proof-readback.md).
+
+### 2026-07-30 cross-repository conformance correction
+
+The vertical conformance evaluator previously required the A11oy root and
+target receipts to claim one Git SHA and verify under one public key. That
+could validate a local fixture, but it could not truthfully establish a
+cross-repository boundary between independently deployed A11oy and vertical
+commits.
+
+Manifest schema `szl.vertical-conformance.manifest.v2` now requires an exact
+A11oy root commit, exact target commit, separately pinned A11oy and target
+public keys, and separate SHA-256 fingerprints. Root-SHA substitution,
+target-signer substitution, wrong-key evidence, replay, stale evidence,
+tampering, and broken parent links fail closed. Manifest v1 remains supported
+for existing shared-commit fixtures.
+
+This closes the verifier-model defect; it does not make a live surface
+conformant. The live A11oy deployment still lacks the required root evidence,
+and the three targets remain `0/3 VERIFIED` until exact deployments provide all
+seven gates.
 
 ---
 

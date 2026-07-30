@@ -113,6 +113,22 @@ export async function verifyPublicNpmArtifacts(repositoryRoot = REPOSITORY_ROOT)
       `${packageEvidence.name} file drift`,
     );
 
+    const sourcePackageDirectory = dirname(join(repositoryRoot, sourceManifestPath));
+    for (const path of files) {
+      if (path === 'package.json' || path === 'publication-contract.json') {
+        continue;
+      }
+
+      const packedSource = entries.get(`package/${path}`);
+      assert(packedSource, `${packageEvidence.name} packed source missing: ${path}`);
+      const repositorySource = await readFile(join(sourcePackageDirectory, path));
+      assert.equal(
+        sha256(packedSource),
+        sha256(repositorySource),
+        `${packageEvidence.name} packed source drift: ${path}`,
+      );
+    }
+
     const packedMetadata = JSON.parse(packedManifest.toString('utf8'));
     assert.equal(
       packedMetadata.scripts?.prepack,

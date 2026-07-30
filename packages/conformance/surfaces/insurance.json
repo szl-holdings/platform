@@ -1,5 +1,5 @@
 {
-  "schemaVersion": "szl.vertical-conformance.manifest.v1",
+  "schemaVersion": "szl.vertical-conformance.manifest.v2",
   "surface": "insurance",
   "repository": "szl-holdings/insurance-or-david-leads",
   "disposition": "ABSENT",
@@ -16,7 +16,14 @@
     "expectedGitShaEnv": "INSURANCE_DEPLOYED_GIT_SHA"
   },
   "evidence": {
-    "publicKeyEnv": "INSURANCE_CONFORMANCE_PUBLIC_KEY",
-    "publicKeyFingerprintEnv": "INSURANCE_CONFORMANCE_PUBLIC_KEY_SHA256"
+    "root": {
+      "expectedGitShaEnv": "A11OY_CONFORMANCE_GIT_SHA",
+      "publicKeyEnv": "A11OY_CONFORMANCE_PUBLIC_KEY",
+      "publicKeyFingerprintEnv": "A11OY_CONFORMANCE_PUBLIC_KEY_SHA256"
+    },
+    "target": {
+      "publicKeyEnv": "INSURANCE_CONFORMANCE_PUBLIC_KEY",
+      "publicKeyFingerprintEnv": "INSURANCE_CONFORMANCE_PUBLIC_KEY_SHA256"
+    }
   }
 }
