@@ -1,6 +1,6 @@
 {
   "schema": "szl.truth/v1",
-  "generated_at": "2026-07-29T18:37:46.855Z",
+  "generated_at": "2026-07-30T16:05:15.496Z",
   "generated_by": "tools/truth/generate-truth.ts@szl.truth/v1",
   "metrics": {
     "surfaces_customer_facing": {
@@ -37,7 +37,7 @@
       "source": "OpenAPI 3.1 operations in lib/api-spec/openapi.yaml"
     },
     "ci_workflows": {
-      "value": 44,
+      "value": 45,
       "label": "MEASURED",
       "source": "ls .github/workflows"
     },
