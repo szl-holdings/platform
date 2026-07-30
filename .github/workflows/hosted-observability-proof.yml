@@ -1,0 +1,130 @@
+name: HOSTED-OBSERVABILITY-PROOF
+
+on:
+  workflow_dispatch:
+    inputs:
+      receipt_id:
+        description: Exact gen_ai.attestation.receipt.id to retrieve
+        required: true
+        type: string
+      git_sha:
+        description: Exact 40-character vcs.ref.head.revision to retrieve
+        required: true
+        type: string
+      environment:
+        description: Deployment environment attribute
+        required: true
+        default: production
+        type: choice
+        options:
+          - production
+          - staging
+      lookback_hours:
+        description: Bounded readback window, from 1 to 168 hours
+        required: true
+        default: "24"
+        type: string
+      langfuse_trace_id:
+        description: Exact Langfuse trace ID containing the proof span
+        required: true
+        type: string
+      arize_project_id:
+        description: Arize AX project ID or name
+        required: true
+        type: string
+      datadog_site:
+        description: Datadog site
+        required: true
+        default: datadoghq.com
+        type: choice
+        options:
+          - datadoghq.com
+          - us3.datadoghq.com
+          - us5.datadoghq.com
+          - datadoghq.eu
+          - ap1.datadoghq.com
+          - ap2.datadoghq.com
+          - ddog-gov.com
+      langfuse_base_url:
+        description: Langfuse HTTPS base URL
+        required: true
+        default: https://cloud.langfuse.com
+        type: choice
+        options:
+          - https://cloud.langfuse.com
+          - https://us.cloud.langfuse.com
+          - https://jp.cloud.langfuse.com
+          - https://hipaa.cloud.langfuse.com
+
+permissions:
+  contents: read
+
+concurrency:
+  group: hosted-observability-proof
+  cancel-in-progress: false
+
+jobs:
+  verify:
+    name: Exact hosted readback
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Harden runner
+        uses: step-security/harden-runner@bf7454d06d71f1098171f2acdf0cd4708d7b5920 # v2.20.0
+        with:
+          egress-policy: audit
+
+      - name: Require protected default branch source
+        env:
+          DEFAULT_BRANCH: ${{ github.event.repository.default_branch }}
+          REF_NAME: ${{ github.ref_name }}
+        run: |
+          test "$REF_NAME" = "$DEFAULT_BRANCH"
+
+      - name: Checkout exact workflow source
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Set up Node
+        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version: 24.15.0
+
+      - name: Read back exact hosted proof
+        id: readback
+        continue-on-error: true
+        env:
+          SZL_OBSERVABILITY_RECEIPT_ID: ${{ inputs.receipt_id }}
+          SZL_OBSERVABILITY_GIT_SHA: ${{ inputs.git_sha }}
+          SZL_OBSERVABILITY_ENVIRONMENT: ${{ inputs.environment }}
+          SZL_OBSERVABILITY_LOOKBACK_HOURS: ${{ inputs.lookback_hours }}
+          DATADOG_SITE: ${{ inputs.datadog_site }}
+          DATADOG_API_KEY: ${{ secrets.DATADOG_API_KEY }}
+          DATADOG_APP_KEY: ${{ secrets.DATADOG_APP_KEY }}
+          LANGFUSE_BASE_URL: ${{ inputs.langfuse_base_url }}
+          LANGFUSE_PUBLIC_KEY: ${{ secrets.LANGFUSE_PUBLIC_KEY }}
+          LANGFUSE_SECRET_KEY: ${{ secrets.LANGFUSE_SECRET_KEY }}
+          LANGFUSE_TRACE_ID: ${{ inputs.langfuse_trace_id }}
+          ARIZE_BASE_URL: https://api.arize.com/v2
+          ARIZE_API_KEY: ${{ secrets.ARIZE_API_KEY }}
+          ARIZE_PROJECT_ID: ${{ inputs.arize_project_id }}
+        run: |
+          node scripts/frontier/frontier-preflight.mjs \
+            --require-hosted-observability > hosted-observability-proof.json
+
+      - name: Upload bounded proof report
+        if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: hosted-observability-proof-${{ github.run_id }}
+          path: hosted-observability-proof.json
+          if-no-files-found: error
+          retention-days: 30
+
+      - name: Enforce exact hosted proof
+        if: always()
+        env:
+          READBACK_OUTCOME: ${{ steps.readback.outcome }}
+        run: |
+          test "$READBACK_OUTCOME" = "success"
