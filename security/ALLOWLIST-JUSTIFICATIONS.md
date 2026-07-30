@@ -136,8 +136,8 @@ Regenerate with `pnpm truth:allowlists`. Review every changed row before merge.
 | .gitleaks.toml | `rule:curl-auth-header.regexes: szl_live_a1b2c3d4e5f6` | Truncated example shown with ellipsis — not a real token | Repository config review | 2026-07-26 |
 | .gitleaks.toml | `rule:curl-auth-user.paths: packages/lean-formulas/\\.lake/packages/mathlib/\\.github/` | Mathlib vendored Lean4 dependency — upstream CI workflow that references secrets.SPEED }} via GitHub Actions Secrets (never a committed value). | Repository config review | 2026-07-26 |
 | .gitleaks.toml | `rule:curl-auth-user.regexes: \\$\\{\\{\\s*secrets\\.` | GitHub Actions secret reference: the value is resolved at runtime from GitHub Secrets; the string committed to source is the reference itself. | Repository config review | 2026-07-26 |
-| scripts/qa/scan-secrets.js | `SKIP_DIRECTORY_PATHS: .git` | Repository metadata and installed dependencies are external to tracked source. | Repository config review | 2026-07-28 |
-| scripts/qa/scan-secrets.js | `SKIP_DIRECTORY_PATHS: node_modules` | Repository metadata and installed dependencies are external to tracked source. | Repository config review | 2026-07-28 |
+| scripts/qa/scan-secrets.js | `SKIP_DIRECTORY_NAMES: .git` | Repository metadata and installed dependencies are external to tracked source. | Repository config review | 2026-07-28 |
+| scripts/qa/scan-secrets.js | `SKIP_DIRECTORY_NAMES: node_modules` | Repository metadata and installed dependencies are external to tracked source. | Repository config review | 2026-07-28 |
 | scripts/qa/scan-secrets.js | `SKIP_PATHS: pnpm-lock.yaml` | Only the repository-root generated lockfile is excluded. | Repository config review | 2026-07-28 |
 | scripts/qa/scan-secrets.js | `ALLOW_VALUES: AKIAIOSFODNN7EXAMPLE` | Exact public example values from AWS documentation. Future values remain blocking. | Repository config review | 2026-07-28 |
 | scripts/qa/scan-secrets.js | `ALLOW_VALUES: AKIA0000000000EXAMPLE` | Exact public example values from AWS documentation. Future values remain blocking. | Repository config review | 2026-07-28 |
