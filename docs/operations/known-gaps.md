@@ -1,6 +1,6 @@
 # SZL Holdings — Known Gaps Register (Security & Operations)
 
-**Last updated:** 2026-07-29 (rev 19 — live frontier preflight and D-SLSA proof-packet correction)
+**Last updated:** 2026-07-30 (rev 20 — exact hosted observability readback)
 **Owner:** Engineering / DevOps  
 **Audience:** Enterprise architects, Series A technical advisors, incoming VP Engineering
 
@@ -28,6 +28,25 @@ retrieved. The command operationalizes repeatable measurement but does not
 close or relabel any external evidence gap. The command, test, and live result
 are recorded in
 [`audit/frontier/FRONTIER_PREFLIGHT_PROOF_2026-07-29.md`](../../audit/frontier/FRONTIER_PREFLIGHT_PROOF_2026-07-29.md).
+
+### 2026-07-30 hosted readback upgrade
+
+The preflight no longer stops at credential-presence detection for hosted
+observability. Schema `szl.frontier-preflight.v2` performs bounded, read-only
+retrieval from Datadog span search, Langfuse Observations v2, and Arize AX
+span search. Every provider must return one record containing the exact
+`gen_ai.attestation.receipt.id`, `vcs.ref.head.revision`, and
+`deployment.environment.name`. Responses are bounded to 64 KiB; redirects,
+timeouts, malformed JSON, oversized responses, missing fields, split records,
+and partial provider success fail closed.
+
+The default-branch-only `HOSTED-OBSERVABILITY-PROOF` manual workflow retains
+the JSON result as a 30-day artifact and fails unless all three readbacks pass.
+The executable verifier closes the prior tooling gap; it does not close the
+external evidence gap. No hosted credential or successful production readback
+was present while this change was implemented, so current hosted proof remains
+`UNAVAILABLE`. The configuration and evidence runbook is
+[`hosted-proof-readback.md`](../observability/hosted-proof-readback.md).
 
 ---
 

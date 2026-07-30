@@ -66,12 +66,19 @@ deployment runs pass all seven gates at exact commits.
 
 `pnpm frontier:preflight` performs a bounded, read-only measurement of the
 current npm, DOI, vertical deployment, local TPM-readiness, and hosted
-observability frontiers. It emits `szl.frontier-preflight.v1` JSON and does not
-publish, deploy, mint evidence, or change a conformance result.
+observability frontiers. It emits `szl.frontier-preflight.v2` JSON and does not
+publish, deploy, mint evidence, or change a conformance result. Hosted
+observability now performs exact Datadog, Langfuse, and Arize readback
+when its credential and proof-identity inputs are present.
 
 `pnpm frontier:gate` runs the same probes and exits non-zero until every
 frontier is operational. In particular, a healthy runtime, HTTP 200, local TPM
 readiness, or `receipt_minted=false` never upgrades a surface to verified.
+
+`pnpm frontier:hosted-observability` gates only the hosted readback frontier.
+It requires one provider record containing the exact receipt ID, Git SHA, and
+deployment environment in each provider. See
+[`hosted-proof-readback.md`](../observability/hosted-proof-readback.md).
 
 ## Offline verifier
 

@@ -3,6 +3,13 @@ import test from 'node:test';
 import { runFrontierPreflight } from './frontier-preflight.mjs';
 
 const NOW = Date.parse('2026-07-29T16:00:00.000Z');
+const RECEIPT_ID = 'receipt-prod-001';
+const GIT_SHA = 'a'.repeat(40);
+const PROOF_ATTRIBUTES = {
+  'gen_ai.attestation.receipt.id': RECEIPT_ID,
+  'vcs.ref.head.revision': GIT_SHA,
+  'deployment.environment.name': 'production',
+};
 
 function json(body, status = 200) {
   return new Response(JSON.stringify(body), {
@@ -75,7 +82,7 @@ test('measures every unresolved frontier without upgrading readiness claims', as
     nowMs: NOW,
   });
 
-  assert.equal(report.schemaVersion, 'szl.frontier-preflight.v1');
+  assert.equal(report.schemaVersion, 'szl.frontier-preflight.v2');
   assert.equal(report.checkedAt, '2026-07-29T16:00:00.000Z');
   assert.equal(report.status, 'BLOCKED');
   assert.equal(report.evidenceState, 'MEASURED');
@@ -156,10 +163,27 @@ test('never returns credential values in the observability report', async () => 
     DATADOG_APP_KEY: 'datadog-app-secret',
     LANGFUSE_PUBLIC_KEY: 'langfuse-public',
     LANGFUSE_SECRET_KEY: 'langfuse-secret',
+    LANGFUSE_TRACE_ID: 'trace-prod-001',
     ARIZE_API_KEY: 'arize-secret',
+    ARIZE_PROJECT_ID: 'szl-production',
+    SZL_OBSERVABILITY_RECEIPT_ID: RECEIPT_ID,
+    SZL_OBSERVABILITY_GIT_SHA: GIT_SHA,
+  };
+  const fetchImpl = async (url, init) => {
+    const target = String(url);
+    if (
+      target.includes('api.datadoghq.com') ||
+      target.includes('cloud.langfuse.com') ||
+      target.includes('api.arize.com')
+    ) {
+      const serializedInit = JSON.stringify(init);
+      const leaked = Object.values(secrets).find((secret) => serializedInit.includes(secret));
+      throw new Error(`provider failure ${leaked}`);
+    }
+    return mockFetch(target);
   };
   const report = await runFrontierPreflight({
-    fetchImpl: mockFetch,
+    fetchImpl,
     env: secrets,
     platform: 'linux',
     nowMs: NOW,
@@ -173,6 +197,195 @@ test('never returns credential values in the observability report', async () => 
     ),
     true,
   );
+  assert.equal(
+    report.frontiers.hostedObservability.providers.every(
+      ({ status }) => status === 'REQUEST_FAILED',
+    ),
+    true,
+  );
+});
+
+test('verifies exact hosted receipt and commit readback across all providers', async () => {
+  const seen = [];
+  const fetchImpl = async (url, init = {}) => {
+    const target = String(url);
+    if (target.includes('api.datadoghq.com')) {
+      seen.push('datadog');
+      assert.equal(init.method, 'POST');
+      assert.match(init.body, /gen_ai\.attestation\.receipt\.id/);
+      return json({ data: [{ id: 'dd-span', attributes: PROOF_ATTRIBUTES }] });
+    }
+    if (target.includes('cloud.langfuse.com')) {
+      seen.push('langfuse');
+      assert.match(target, /api\/public\/v2\/observations/);
+      assert.match(target, /traceId=trace-prod-001/);
+      return json({ data: [{ id: 'lf-observation', metadata: PROOF_ATTRIBUTES }] });
+    }
+    if (target.includes('api.arize.com')) {
+      seen.push('arize');
+      assert.equal(init.method, 'POST');
+      assert.match(target, /v2\/spans/);
+      assert.match(init.body, /attributes\.gen_ai\.attestation\.receipt\.id/);
+      return json({ spans: [{ id: 'arize-span', attributes: PROOF_ATTRIBUTES }] });
+    }
+    return mockFetch(target);
+  };
+
+  const report = await runFrontierPreflight({
+    fetchImpl,
+    env: {
+      DATADOG_API_KEY: 'dd-api',
+      DATADOG_APP_KEY: 'dd-app',
+      LANGFUSE_PUBLIC_KEY: 'lf-public',
+      LANGFUSE_SECRET_KEY: 'lf-secret',
+      LANGFUSE_TRACE_ID: 'trace-prod-001',
+      ARIZE_API_KEY: 'arize-key',
+      ARIZE_PROJECT_ID: 'szl-production',
+      SZL_OBSERVABILITY_RECEIPT_ID: RECEIPT_ID,
+      SZL_OBSERVABILITY_GIT_SHA: GIT_SHA,
+    },
+    platform: 'linux',
+    nowMs: NOW,
+  });
+
+  assert.deepEqual(seen.sort(), ['arize', 'datadog', 'langfuse']);
+  assert.equal(report.frontiers.hostedObservability.evidenceState, 'VERIFIED');
+  assert.equal(report.frontiers.hostedObservability.status, 'OPERATIONAL');
+  assert.equal(report.frontiers.hostedObservability.operational, true);
+  assert.equal(
+    report.frontiers.hostedObservability.providers.every(
+      ({ hostedProductionProofObserved, recordsExamined }) =>
+        hostedProductionProofObserved && recordsExamined === 1,
+    ),
+    true,
+  );
+  assert.equal(report.operational, false);
+});
+
+test('fails closed when required attributes are split across provider records', async () => {
+  const fetchImpl = async (url) => {
+    const target = String(url);
+    if (target.includes('api.datadoghq.com')) {
+      return json({
+        data: [
+          {
+            attributes: {
+              'gen_ai.attestation.receipt.id': RECEIPT_ID,
+              'deployment.environment.name': 'production',
+            },
+          },
+          {
+            attributes: {
+              'vcs.ref.head.revision': GIT_SHA,
+              'deployment.environment.name': 'production',
+            },
+          },
+        ],
+      });
+    }
+    if (target.includes('cloud.langfuse.com')) {
+      return json({ data: [{ attributes: PROOF_ATTRIBUTES }] });
+    }
+    if (target.includes('api.arize.com')) {
+      return json({ spans: [{ attributes: PROOF_ATTRIBUTES }] });
+    }
+    return mockFetch(target);
+  };
+
+  const report = await runFrontierPreflight({
+    fetchImpl,
+    env: {
+      DATADOG_API_KEY: 'dd-api',
+      DATADOG_APP_KEY: 'dd-app',
+      LANGFUSE_PUBLIC_KEY: 'lf-public',
+      LANGFUSE_SECRET_KEY: 'lf-secret',
+      LANGFUSE_TRACE_ID: 'trace-prod-001',
+      ARIZE_API_KEY: 'arize-key',
+      ARIZE_PROJECT_ID: 'szl-production',
+      SZL_OBSERVABILITY_RECEIPT_ID: RECEIPT_ID,
+      SZL_OBSERVABILITY_GIT_SHA: GIT_SHA,
+    },
+    platform: 'linux',
+    nowMs: NOW,
+  });
+
+  const datadog = report.frontiers.hostedObservability.providers.find(
+    ({ provider }) => provider === 'Datadog',
+  );
+  assert.equal(datadog.status, 'PROOF_MISMATCH');
+  assert.equal(datadog.matchingRecordObserved, false);
+  assert.equal(report.frontiers.hostedObservability.operational, false);
+});
+
+test('rejects non-provider hosted base URLs before credentials leave the process', async () => {
+  const requested = [];
+  const report = await runFrontierPreflight({
+    fetchImpl: async (url) => {
+      const target = String(url);
+      requested.push(target);
+      return mockFetch(target);
+    },
+    env: {
+      LANGFUSE_PUBLIC_KEY: 'lf-public',
+      LANGFUSE_SECRET_KEY: 'lf-secret',
+      LANGFUSE_TRACE_ID: 'trace-prod-001',
+      LANGFUSE_BASE_URL: 'https://attacker.example.test',
+      SZL_OBSERVABILITY_RECEIPT_ID: RECEIPT_ID,
+      SZL_OBSERVABILITY_GIT_SHA: GIT_SHA,
+    },
+    platform: 'linux',
+    nowMs: NOW,
+  });
+
+  assert.equal(
+    requested.some((url) => url.includes('attacker.example.test')),
+    false,
+  );
+  const langfuse = report.frontiers.hostedObservability.providers.find(
+    ({ provider }) => provider === 'Langfuse',
+  );
+  assert.equal(langfuse.status, 'CONFIGURATION_INCOMPLETE');
+  assert.equal(langfuse.queryAttempted, false);
+});
+
+test('rejects an oversized hosted response even when it starts with matching attributes', async () => {
+  const fetchImpl = async (url) => {
+    const target = String(url);
+    if (target.includes('api.datadoghq.com')) {
+      return json({
+        data: [{ attributes: PROOF_ATTRIBUTES, padding: 'x'.repeat(70 * 1024) }],
+      });
+    }
+    if (target.includes('cloud.langfuse.com')) {
+      return json({ data: [{ attributes: PROOF_ATTRIBUTES }] });
+    }
+    if (target.includes('api.arize.com')) {
+      return json({ spans: [{ attributes: PROOF_ATTRIBUTES }] });
+    }
+    return mockFetch(target);
+  };
+  const report = await runFrontierPreflight({
+    fetchImpl,
+    env: {
+      DATADOG_API_KEY: 'dd-api',
+      DATADOG_APP_KEY: 'dd-app',
+      LANGFUSE_PUBLIC_KEY: 'lf-public',
+      LANGFUSE_SECRET_KEY: 'lf-secret',
+      LANGFUSE_TRACE_ID: 'trace-prod-001',
+      ARIZE_API_KEY: 'arize-key',
+      ARIZE_PROJECT_ID: 'szl-production',
+      SZL_OBSERVABILITY_RECEIPT_ID: RECEIPT_ID,
+      SZL_OBSERVABILITY_GIT_SHA: GIT_SHA,
+    },
+    platform: 'linux',
+    nowMs: NOW,
+  });
+
+  const datadog = report.frontiers.hostedObservability.providers.find(
+    ({ provider }) => provider === 'Datadog',
+  );
+  assert.equal(datadog.status, 'RESPONSE_TOO_LARGE');
+  assert.equal(datadog.hostedProductionProofObserved, false);
 });
 
 test('rejects unbounded timeout configuration', async () => {
