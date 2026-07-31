@@ -81,7 +81,27 @@
     wrapper was not accepted as terminal evidence and every check was rerun
     separately;
   - Platform `node scripts/qa/scan-secrets.js .`: exit `0`, `CLEAN — no
-    secrets found`.
+    secrets found`;
+  - the shared pre-push hook could not launch its Node-based `brand:check` or
+    `brand:strings` commands because `node` was absent from that hook's
+    `PATH`; the hook reported `qa:og` skipped because its shell did not expose
+    `python3` plus Pillow, and the branch push still completed;
+  - explicit pinned-runtime `pnpm brand:check`: exit `0`;
+  - explicit pinned-runtime `pnpm brand:strings`: exit `1` on `42` inherited
+    `TENAX` occurrences in A11oy and Terra files that are unchanged from exact
+    `origin/main`; none is in this documentation diff, and the A11oy
+    coordination lock was preserved;
+  - exact pre-push incremental
+    `check-banned-brand-strings.ts --changed-from <merge-base>`: exit `0`; the
+    documentation-only patch has no newly scannable banned-string violations;
+  - explicit `pnpm qa:og`: exit `1` before validation because Windows resolved
+    `sh` to an unavailable WSL path; no product result was inferred;
+  - direct `python scripts/generate_og_cards.py --check`: exit `1` before
+    validation under the default CP-1252 console encoding; rerunning with
+    `PYTHONUTF8=1` reached the actual check and exited `1` because all `13`
+    expected OG cards are absent on exact current `main`. Those inherited
+    assets are outside this runtime-contract documentation patch and remain a
+    separately actionable gap.
 - `screenshot_refs`: `N/A`; this change is runtime JSON, CI, and deployment
   evidence rather than a visual surface.
 - `verification_notes`: an empty `receipts` array is deliberate negative
