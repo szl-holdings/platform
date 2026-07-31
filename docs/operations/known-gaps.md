@@ -74,11 +74,20 @@ Killinchu PR #301 merged normally as signed main commit
 `3af652dbc326e653e4c02c0a879d25188e8bdf6a`. Its governed Hugging Face
 deployment completed source binding, byte and smoke-route attestation, GitHub
 OIDC release attestation `38075818`, receipt publication, and restarted-runtime
-verification. The live `/healthz`, `/version`, and `/evidence` routes now
-return JSON 200, `/version.gitSha` equals the exact main commit, and
+verification. At that deployment, `/healthz`, `/version`, and `/evidence`
+returned JSON 200, `/version.gitSha` equaled the exact main commit, and
 `/api/build-info.receipt_minted` is `true`. A live conformance run with the
 exact deployment URL and SHA passed `runtime-endpoints` and `readme-status`
 only, advancing Vessels from `1/7` to `2/7`.
+
+Signed dependency-hardening PR #302 subsequently advanced Killinchu main to
+`305d6aaf67b3d6edd3c4c065a5c8ac90006a1dba`. All `17/17` exact-main
+workflows succeeded, governed deployment run
+<https://github.com/szl-holdings/killinchu/actions/runs/30595522086>
+completed, and the live build now reports that SHA with GitHub OIDC attestation
+`38078930`. An exact-SHA conformance rerun still passes the same two gates and
+remains `2/7`; the successor changed dependency evidence, not the runtime
+contract result.
 
 The Killinchu evidence endpoint intentionally publishes `receipts: []` and
 `evidenceState: PARTIAL`. No cross-repository A11oy-to-Killinchu DSSE pair,
@@ -97,6 +106,8 @@ conformance remains `0/3 VERIFIED`.
 
 The immutable runtime-contract evidence is recorded in
 [`VERTICAL_RUNTIME_CONTRACT_PROOF_2026-07-31.md`](../../audit/frontier/VERTICAL_RUNTIME_CONTRACT_PROOF_2026-07-31.md).
+The append-only live-SHA correction is recorded in
+[`VERTICAL_RUNTIME_CONTRACT_DRIFT_CORRECTION_2026-07-31.md`](../../audit/frontier/VERTICAL_RUNTIME_CONTRACT_DRIFT_CORRECTION_2026-07-31.md).
 
 ---
 
