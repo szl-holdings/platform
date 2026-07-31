@@ -37,6 +37,8 @@
     `0/3 VERIFIED`;
   - signed Platform main `f073afd8bd1c23997c2d205aca02950509a3fc07`
     exact-main workflows: `21/21` terminal success or accepted neutral/skip;
+  - post-edit pinned `pnpm 10.26.1 typecheck`: exit `0`, `182/182` Turbo
+    tasks successful against this correction tree;
   - `pnpm claims:validate`: exit `0`, canonical truth and allowlist coverage
     passed, `89/89` truth tests passed;
   - `pnpm docs:claims-check`: exit `0`, `26/26` documentation claims verified;
