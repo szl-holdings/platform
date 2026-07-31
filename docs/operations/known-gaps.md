@@ -1,6 +1,6 @@
 # SZL Holdings — Known Gaps Register (Security & Operations)
 
-**Last updated:** 2026-07-30 (rev 21 — cross-repository conformance trust)
+**Last updated:** 2026-07-31 (rev 22 — vertical runtime contracts)
 **Owner:** Engineering / DevOps  
 **Audience:** Enterprise architects, Series A technical advisors, incoming VP Engineering
 
@@ -67,6 +67,36 @@ This closes the verifier-model defect; it does not make a live surface
 conformant. The live A11oy deployment still lacks the required root evidence,
 and the three targets remain `0/3 VERIFIED` until exact deployments provide all
 seven gates.
+
+### 2026-07-31 vertical runtime-contract advance
+
+Killinchu PR #301 merged normally as signed main commit
+`3af652dbc326e653e4c02c0a879d25188e8bdf6a`. Its governed Hugging Face
+deployment completed source binding, byte and smoke-route attestation, GitHub
+OIDC release attestation `38075818`, receipt publication, and restarted-runtime
+verification. The live `/healthz`, `/version`, and `/evidence` routes now
+return JSON 200, `/version.gitSha` equals the exact main commit, and
+`/api/build-info.receipt_minted` is `true`. A live conformance run with the
+exact deployment URL and SHA passed `runtime-endpoints` and `readme-status`
+only, advancing Vessels from `1/7` to `2/7`.
+
+The Killinchu evidence endpoint intentionally publishes `receipts: []` and
+`evidenceState: PARTIAL`. No cross-repository A11oy-to-Killinchu DSSE pair,
+conformance denial receipt, OTel GenAI span set, separately pinned offline
+trust roots, or candidate product manifest was observed. Vessels is therefore
+a runtime **CANDIDATE**, not a conformant surface.
+
+David Leads PR #74 also merged normally as signed main commit
+`e34044cbb2b565ea77421c4ec6dbef19a5d133dc`, with its full 126-test
+operational-safety gate green. The exact-main Neon migration is waiting on the
+protected `david-space-credential-rotation` environment, so the downstream
+deployment has not run and the live `/version` and `/evidence` paths remain
+404. No approval was bypassed or self-issued. Sentra still has no standalone
+public repository or configured canonical deployment. Overall vertical
+conformance remains `0/3 VERIFIED`.
+
+The immutable runtime-contract evidence is recorded in
+[`VERTICAL_RUNTIME_CONTRACT_PROOF_2026-07-31.md`](../../audit/frontier/VERTICAL_RUNTIME_CONTRACT_PROOF_2026-07-31.md).
 
 ---
 

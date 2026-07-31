@@ -63,8 +63,8 @@ link-local addresses fail closed. Each request has a bounded timeout.
 | Target | Current evidence | Result |
 |---|---|---|
 | Sentra | Retained monorepo artifact explicitly says standalone Sentra is superseded; requested public repository not observed | FAIL CLOSED |
-| Vessels | Retained artifact explicitly says standalone Vessels is superseded; functionality points to killinchu | FAIL CLOSED |
-| Insurance / david-leads | `david-leads` is public and its runtime is healthy, but `/version` and `/evidence` return 404 and no registered insurance artifact exists | FAIL CLOSED |
+| Vessels / killinchu | Exact deployed commit `3af652dbc326e653e4c02c0a879d25188e8bdf6a` exposes JSON `/healthz`, `/version`, and `/evidence`; the GitHub OIDC release receipt is minted. A live run with the exact base URL and SHA passed `runtime-endpoints` and `readme-status` only (`2/7`). The portable DSSE chain, denial receipt, OTel span set, offline trust pins, and candidate product manifest remain absent. | CANDIDATE / FAIL CLOSED |
+| Insurance / david-leads | Runtime-contract source merged through `david-leads` PR #74 as signed main `e34044cbb2b565ea77421c4ec6dbef19a5d133dc`, but its required Neon migration and downstream deployment are waiting on the protected `david-space-credential-rotation` environment. The live deployment still returns 404 for `/version` and `/evidence`, and no registered insurance artifact exists. | SOURCE MERGED / LIVE FAIL CLOSED |
 
 No `3/3` badge is authorized. A badge may be added only after three cited
 deployment runs pass all seven gates at exact commits.
