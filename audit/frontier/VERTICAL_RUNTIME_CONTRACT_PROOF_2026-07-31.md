@@ -21,6 +21,8 @@
     fail-closed root contracts, distinguishes public application-receipt count
     from portable conformance receipts, and applies no-store caching to runtime
     truth routes;
+  - the Platform proof records a full screenshot-catalog disposition,
+    MirrorEval assessment, and scoped Release Readiness Score;
   - neither target claims Khipu-chain, denial-receipt, OTel GenAI,
     offline-verifier, or product-registration success.
 - `test_results`:
@@ -106,8 +108,10 @@
     expected OG cards are absent on exact current `main`. Those inherited
     assets are outside this runtime-contract documentation patch and remain a
     separately actionable gap.
-- `screenshot_refs`: `N/A`; this change is runtime JSON, CI, and deployment
-  evidence rather than a visual surface.
+- `screenshot_refs`: no screenshot counts as proof because no UI surface
+  changed. The full N/A disposition is recorded in
+  [`audit/screenshot-catalog.md`](../screenshot-catalog.md#2026-07-31-runtime-contract-release-proof-disposition);
+  exact-SHA JSON readback is the applicable evidence.
 - `verification_notes`: an empty `receipts` array is deliberate negative
   evidence. It makes the endpoint machine-readable while preserving failure of
   Khipu-chain, denial, OTel, and offline-verification gates.
@@ -121,7 +125,48 @@
 - `known_gaps_update`: revision 22 records one live runtime-gate advance and
   preserves every absent cryptographic, telemetry, registration, and
   account-controlled gate.
-- `proof_level`: `4` (`Full Proof`), with screenshot evidence not applicable
-  and the David deployment explicitly incomplete.
+- `mirroreval_assessment`:
+
+  | Dimension | Score | Threshold | Evidence |
+  |---|---:|---:|---|
+  | Groundedness | 0.95 | 0.75 | Exact commits, PRs, runs, routes, and attestation are cited. |
+  | Evidence Coverage | 0.86 | 0.70 | Positive and absent conformance gates are both recorded. |
+  | Action Safety | 0.96 | 0.85 | Fail-closed contracts and empty portable receipts prevent overclaim. |
+  | Hallucination Risk | 0.95 | 0.80 | Live claims are bound to exact observed responses and SHA. |
+  | Policy Compliance | 0.92 | 0.90 | Protected paths, coordination locks, and approvals were preserved. |
+  | Tool Risk | 0.90 | 0.80 | Normal git, GitHub, tests, and read-only probes were used. |
+  | Stale Context | 0.95 | 0.70 | Source, deployment, and preflight state were refreshed in-session. |
+  | Verification Readiness | 0.95 | 0.65 | Routes, commit identity, CI, and attestation are re-readable. |
+  | Counterfactual Strength | 0.80 | 0.60 | No-action remains explicit: HTML/404 fail-closed gaps persist. |
+  | Causal Validity | 0.92 | 0.70 | Runtime contract caused the measured Vessels `1/7` to `2/7` advance. |
+  | Approval Alignment | 0.95 | 0.90 | Protected merges were normal; the David environment was not self-approved. |
+  | Scope Adherence | 0.96 | 0.85 | Locked governance, A11oy, qillqaq, and draft PRs were untouched. |
+  | Output Fidelity | 0.91 | 0.75 | The packet distinguishes live, candidate, partial, and absent states. |
+  | Proof Completeness | 0.90 | 0.80 | Tests, catalog disposition, gaps, MirrorEval, and readiness are present. |
+
+  Equal-weight composite: `0.92`. Disposition: `pass`; no dimension is below
+  its threshold. This evaluates the proof packet, not product conformance.
+- `release_readiness_score`:
+
+  | Category | Weight | Score | Weighted points | Evidence |
+  |---|---:|---:|---:|---|
+  | Code Quality | 15% | 95 | 14.25 | Target tests, Platform typecheck, and PR CI passed. |
+  | Security | 20% | 96 | 19.20 | Secret scans and security checks passed; no credentials changed. |
+  | Public Claims Safety | 15% | 100 | 15.00 | Candidate, partial, and unavailable claims remain qualified. |
+  | Screenshot Freshness | 10% | 100 | 10.00 | No UI changed; full catalog N/A disposition recorded. |
+  | Documentation Currency | 10% | 98 | 9.80 | Conformance table and known-gaps register use exact live state. |
+  | Proof Completeness | 10% | 95 | 9.50 | Level 5 fields and exact validation history are recorded. |
+  | Naming and Language | 5% | 100 | 5.00 | Incremental banned-string guard passed. |
+  | Architecture Integrity | 10% | 40 | 4.00 | Vessels passes only `2/7`; five architecture gates are absent. |
+  | Governance | 5% | 65 | 3.25 | Protected flow passed, but candidate registration is absent. |
+
+  Weighted composite: `90.00/100`. Verdict: `RELEASE BLOCKED` because
+  Architecture Integrity is below `50`; the composite does not override the
+  doctrine's single-category blocker. Governance also remains below `70`.
+  This packet authorizes no `3/3` or conformant-product claim.
+- `proof_level`: `5` (`Release Proof`), with a full screenshot-catalog
+  disposition, MirrorEval assessment, and Release Readiness Score. Release
+  readiness remains blocked as scored above, and the David deployment is
+  explicitly incomplete.
 - `recorded_at`: `2026-07-30T20:46:21-04:00`
 - `recorded_by`: `Codex`

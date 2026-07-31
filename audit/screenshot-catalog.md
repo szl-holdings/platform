@@ -1,5 +1,6 @@
 # Screenshot Catalog — SZL Holdings Platform
 **Track 6 — 2026-04-21**
+**Updated — 2026-07-31 (Workcell VERTICAL-RUNTIME-CONTRACTS-2026-07-31)**
 **Updated — 2026-04-22 (Task #3103, README screenshot block refresh)**
 **Status:** Complete disposition ledger. Per-file keep/archive executed.
 
@@ -15,6 +16,18 @@
 | `demo-assets/screenshots/` | 9 | **KEPT in place** — actively linked from LinkedIn carousel |
 | `docs/screenshots/` | 19 | **KEPT in place** — actively linked from docs/ |
 | `artifacts/*/public/` | N/A | **KEPT in place** — static OpenGraph and product assets embedded in artifacts |
+
+---
+
+## 2026-07-31 runtime-contract release-proof disposition
+
+| Workcell | Surface | Evidence | Screenshot disposition | Reason | Proof packet |
+|----------|---------|----------|------------------------|--------|--------------|
+| `VERTICAL-RUNTIME-CONTRACTS-2026-07-31` | Killinchu `/healthz`, `/version`, `/evidence`, and `/api/build-info` | Exact-SHA JSON readback, governed deployment run, and GitHub OIDC attestation | **N/A — no screenshot counts as proof** | The released change is a machine-readable runtime contract; no UI surface changed. A screenshot would weaken rather than improve exact JSON/SHA evidence. | [`VERTICAL_RUNTIME_CONTRACT_PROOF_2026-07-31.md`](frontier/VERTICAL_RUNTIME_CONTRACT_PROOF_2026-07-31.md) |
+
+This is a full catalog disposition, not a screenshot waiver for a modified UI.
+Any later UI surface associated with this release requires a fresh live capture
+under the normal screenshot doctrine.
 
 ---
 
