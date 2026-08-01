@@ -15,22 +15,22 @@ const NOW = Date.parse('2026-08-01T15:20:00Z');
 
 function surface(overrides: Partial<PublicSurface> = {}): PublicSurface {
   return {
-    id: 'example-surface',
-    name: 'Example public surface',
+    id: 'a11oy-front-door',
+    name: 'SZL Holdings and A11oy front door',
     kind: 'WEB',
     audience: ['INVESTOR', 'DEVELOPER'],
     mode: 'MIXED',
     availability: 'REACHABLE',
-    canonical_url: 'https://example.com/surface',
+    canonical_url: 'https://a-11-oy.com/',
     source_owner: {
-      repository: 'szl-holdings/example',
-      path: 'web/index.html',
+      repository: 'szl-holdings/a11oy',
+      path: 'a11oy_landing.html',
       role: 'RUNTIME_OWNER',
     },
     observation: {
       method: 'GET',
       status: 200,
-      final_url: 'https://example.com/surface',
+      final_url: 'https://a-11-oy.com/',
     },
     note: 'Reachability is measured independently from deeper capability state.',
     ...overrides,
@@ -50,17 +50,21 @@ test('counts only routed customer-facing web surfaces', () => {
     registry([
       surface(),
       surface({
-        id: 'machine-api',
+        id: 'a11oy-build-info-api',
         kind: 'API',
         audience: ['DEVELOPER'],
-        canonical_url: 'https://example.com/api',
-        observation: { method: 'GET', status: 200, final_url: 'https://example.com/api' },
+        canonical_url: 'https://szlholdings-a11oy.hf.space/api/build-info',
+        observation: {
+          method: 'GET',
+          status: 200,
+          final_url: 'https://szlholdings-a11oy.hf.space/api/build-info',
+        },
       }),
       surface({
-        id: 'missing-page',
+        id: 'legacy-lyte-route',
         mode: 'UNAVAILABLE',
         availability: 'UNAVAILABLE',
-        canonical_url: 'https://example.com/missing',
+        canonical_url: 'https://a-11-oy.com/lyte/',
         source_owner: {
           repository: 'szl-holdings/example',
           path: 'README.md',
@@ -69,7 +73,7 @@ test('counts only routed customer-facing web surfaces', () => {
         observation: {
           method: 'GET',
           status: 404,
-          final_url: 'https://example.com/missing',
+          final_url: 'https://a-11-oy.com/lyte/',
         },
       }),
     ]),
@@ -98,7 +102,7 @@ test('rejects stale observations instead of carrying them forward as current', (
 test('rejects a reachable claim backed by an HTTP failure', () => {
   const invalid = registry([
     surface({
-      observation: { method: 'GET', status: 404, final_url: 'https://example.com/surface' },
+      observation: { method: 'GET', status: 404, final_url: 'https://a-11-oy.com/' },
     }),
   ]);
   assert.ok(
@@ -126,7 +130,7 @@ test('rejects a routed surface without a runtime source owner', () => {
 });
 
 test('rejects duplicate canonical URLs', () => {
-  const invalid = registry([surface(), surface({ id: 'duplicate-surface' })]);
+  const invalid = registry([surface(), surface({ id: 'a11oy-console' })]);
   assert.ok(
     validatePublicSurfaceRegistry(invalid, NOW).some((failure) =>
       failure.includes('canonical_url duplicates'),
@@ -137,11 +141,121 @@ test('rejects duplicate canonical URLs', () => {
 test('live verification fails closed on status or redirect drift', async () => {
   const failures = await verifyLivePublicSurfaces(registry(), async () => ({
     status: 503,
-    url: 'https://example.com/maintenance',
+    url: 'https://a-11-oy.com/maintenance',
     body: null,
   }));
   assert.deepEqual(failures, [
-    'example-surface: expected HTTP 200, observed 503',
-    'example-surface: expected final URL https://example.com/surface, observed https://example.com/maintenance',
+    'a11oy-front-door: expected HTTP 200, observed 503',
+    'a11oy-front-door: expected final URL https://a-11-oy.com/, observed https://a-11-oy.com/maintenance',
+  ]);
+});
+
+test('rejects unknown, credentialed, IP, port, and final-target escape values', () => {
+  const cases: Array<Partial<PublicSurface>> = [
+    { id: 'unknown-surface' },
+    {
+      canonical_url: 'https://user:password@a-11-oy.com/',
+      observation: {
+        method: 'GET',
+        status: 200,
+        final_url: 'https://user:password@a-11-oy.com/',
+      },
+    },
+    {
+      canonical_url: 'https://127.0.0.1/internal',
+      observation: { method: 'GET', status: 200, final_url: 'https://127.0.0.1/internal' },
+    },
+    {
+      canonical_url: 'https://a-11-oy.com:444/',
+      observation: { method: 'GET', status: 200, final_url: 'https://a-11-oy.com:444/' },
+    },
+    {
+      observation: { method: 'GET', status: 200, final_url: 'https://a11oy.net/' },
+    },
+  ];
+
+  for (const overrides of cases) {
+    assert.notDeepEqual(validatePublicSurfaceRegistry(registry([surface(overrides)]), NOW), []);
+  }
+});
+
+test('does not issue a request when file-controlled target validation fails', async () => {
+  let requestCount = 0;
+  const malicious = surface({
+    canonical_url: 'https://127.0.0.1/internal',
+    observation: { method: 'GET', status: 200, final_url: 'https://127.0.0.1/internal' },
+  });
+
+  const failures = await verifyLivePublicSurfaces(registry([malicious]), async () => {
+    requestCount += 1;
+    return { status: 200, url: malicious.canonical_url, body: null };
+  });
+
+  assert.equal(requestCount, 0);
+  assert.ok(failures.every((failure) => failure.startsWith('registry: ')));
+});
+
+test('follows one exact approved redirect with manual redirect handling', async () => {
+  const redirected = surface({
+    id: 'killinchu-public-console',
+    name: 'Killinchu public console',
+    canonical_url: 'https://a-11-oy.com/killinchu',
+    availability: 'REDIRECTED',
+    observation: {
+      method: 'GET',
+      status: 200,
+      final_url: 'https://szlholdings-killinchu.hf.space/',
+    },
+  });
+  const requests: string[] = [];
+
+  const failures = await verifyLivePublicSurfaces(registry([redirected]), async (url, init) => {
+    requests.push(url);
+    assert.equal(init.redirect, 'manual');
+    if (requests.length === 1) {
+      return {
+        status: 307,
+        url,
+        body: null,
+        headers: { get: () => 'https://szlholdings-killinchu.hf.space/' },
+      };
+    }
+    return { status: 200, url, body: null, headers: { get: () => null } };
+  });
+
+  assert.deepEqual(failures, []);
+  assert.deepEqual(requests, [
+    'https://a-11-oy.com/killinchu',
+    'https://szlholdings-killinchu.hf.space/',
+  ]);
+});
+
+test('rejects a redirect escape before requesting the destination', async () => {
+  const redirected = surface({
+    id: 'killinchu-public-console',
+    name: 'Killinchu public console',
+    canonical_url: 'https://a-11-oy.com/killinchu',
+    availability: 'REDIRECTED',
+    observation: {
+      method: 'GET',
+      status: 200,
+      final_url: 'https://szlholdings-killinchu.hf.space/',
+    },
+  });
+  const requests: string[] = [];
+
+  const failures = await verifyLivePublicSurfaces(registry([redirected]), async (url) => {
+    requests.push(url);
+    return {
+      status: 307,
+      url,
+      body: null,
+      headers: { get: () => 'https://127.0.0.1/internal' },
+    };
+  });
+
+  assert.deepEqual(requests, ['https://a-11-oy.com/killinchu']);
+  assert.deepEqual(failures, [
+    'killinchu-public-console: expected redirect to https://szlholdings-killinchu.hf.space/, observed https://127.0.0.1/internal',
   ]);
 });

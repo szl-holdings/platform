@@ -18,10 +18,12 @@ directories or marketing copy.
 
 This closes the zero-manifest tooling gap, not every web gap. The historical `/lyte`, `/aegis`,
 `/vessels`, `/terra`, `/counsel`, `/carlota-jo`, `/command`, and `/pulse` preview paths returned
-HTTP 404 and remain explicit `UNAVAILABLE` records. `a11oy.net/chat`, `a11oy.net/code`,
-`robots.txt`, `sitemap.xml`, and `manifest.webmanifest` also remain `UNAVAILABLE`. They are not
-counted or silently replaced. A routed page is not an uptime, customer, feature-completeness, or
-correctness claim; `LIVE`, `MIXED`, and `DOCUMENTATION` modes retain that boundary.
+HTTP 404 and remain explicit `UNAVAILABLE` records. `a11oy.net/chat`, `a11oy.net/code`, and
+`manifest.webmanifest` also remain `UNAVAILABLE`. The independently measured `robots.txt` and
+`sitemap.xml` files now return their expected machine-readable content and are recorded as
+`REACHABLE` metadata; they are not customer-facing surfaces and do not change the routed-product
+count. A routed page is not an uptime, customer, feature-completeness, or correctness claim;
+`LIVE`, `MIXED`, and `DOCUMENTATION` modes retain that boundary.
 
 The existing `truth-drift` job validates schema, seven-day freshness, deterministic generated
 bytes, source ownership, expected status and redirect behavior, and current live HTTP results. It

@@ -43,7 +43,11 @@ this workcell.
 Verification completed from the clean worktree:
 
 - `tools/truth/generate-public-surfaces.ts --check --verify-live`: **PASS** for all 29 declared
-  records, including 12 routed customer-facing web surfaces and 13 explicit unavailable records.
+  records, including 12 routed customer-facing web surfaces, 11 explicit unavailable records,
+  and 2 reachable machine-metadata records that remain excluded from the customer-facing count.
+- Live probes use exact compile-time ID-to-URL targets and manual redirect handling. Unknown IDs,
+  URL credentials, IP literals, nonstandard ports, mutated final destinations, and redirect escapes
+  fail before any unapproved destination is requested.
 - Focused and canonical truth suites: **PASS** with zero failures.
 - `tools/truth/generate-truth.ts --verify-local`: **PASS** using the repository's locked pnpm
   10.26.1 runtime; measured package parity remained 201.

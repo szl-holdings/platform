@@ -1,6 +1,6 @@
 {
   "schema": "szl.public-surfaces.registry/v1",
-  "observed_at": "2026-08-01T15:19:55.433Z",
+  "observed_at": "2026-08-01T16:36:48.680Z",
   "surfaces": [
     {
       "id": "a11oy-front-door",
@@ -527,40 +527,40 @@
       "name": "A11oy.net robots metadata",
       "kind": "METADATA",
       "audience": ["MACHINE"],
-      "mode": "UNAVAILABLE",
-      "availability": "UNAVAILABLE",
+      "mode": "DOCUMENTATION",
+      "availability": "REACHABLE",
       "canonical_url": "https://a11oy.net/robots.txt",
       "source_owner": {
         "repository": "szl-holdings/a11oy-net",
-        "path": "index.html",
-        "role": "REMEDIATION_OWNER"
+        "path": "robots.txt",
+        "role": "RUNTIME_OWNER"
       },
       "observation": {
         "method": "GET",
-        "status": 404,
+        "status": 200,
         "final_url": "https://a11oy.net/robots.txt"
       },
-      "note": "Crawler policy metadata is missing and remains a tracked, non-customer-facing remediation gap."
+      "note": "Machine-readable crawler policy is reachable and points to the canonical sitemap; it is not a customer-facing product surface."
     },
     {
       "id": "a11oy-net-sitemap-gap",
       "name": "A11oy.net sitemap metadata",
       "kind": "METADATA",
       "audience": ["MACHINE"],
-      "mode": "UNAVAILABLE",
-      "availability": "UNAVAILABLE",
+      "mode": "DOCUMENTATION",
+      "availability": "REACHABLE",
       "canonical_url": "https://a11oy.net/sitemap.xml",
       "source_owner": {
         "repository": "szl-holdings/a11oy-net",
-        "path": "index.html",
-        "role": "REMEDIATION_OWNER"
+        "path": "sitemap.xml",
+        "role": "RUNTIME_OWNER"
       },
       "observation": {
         "method": "GET",
-        "status": 404,
+        "status": 200,
         "final_url": "https://a11oy.net/sitemap.xml"
       },
-      "note": "Sitemap metadata is missing and remains a tracked, non-customer-facing remediation gap."
+      "note": "Machine-readable sitemap metadata is reachable and lists the public thesis; it is not a customer-facing product surface."
     },
     {
       "id": "a11oy-net-webmanifest-gap",
