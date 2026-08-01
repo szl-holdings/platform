@@ -6,6 +6,7 @@ import { fileURLToPath } from 'node:url';
 
 import { parse } from 'yaml';
 
+import { type PublicSurfaceManifest, validatePublicSurfaceManifest } from './public-surfaces.js';
 import { LOCAL_METRIC_NAMES, REMOTE_METRIC_NAMES, TRUTH_GENERATOR_ID } from './truth-schema.js';
 
 type EvidenceLabel = 'MEASURED' | 'REPORTED' | 'MODELED' | 'CONJECTURE' | 'UNKNOWN' | 'UNAVAILABLE';
@@ -32,17 +33,6 @@ const VERIFY_LOCAL_MODE =
   process.argv.includes('--verify-local') || process.argv.includes('--check');
 const VERIFY_REMOTE_MODE = process.argv.includes('--verify-remote');
 const REFRESH_REMOTE_METRICS = !VERIFY_LOCAL_MODE || VERIFY_REMOTE_MODE;
-const WALK_EXCLUSIONS = new Set([
-  '.git',
-  '.cache',
-  '.turbo',
-  'coverage',
-  'dist',
-  'node_modules',
-  'playwright-report',
-  'test-results',
-]);
-
 function metric(value: number | null, label: EvidenceLabel, source: string): Metric {
   return { value, label, source };
 }
@@ -76,23 +66,6 @@ export function metadataDrift(existing: Record<string, unknown>): string[] {
   );
 }
 
-async function walkFiles(start: string, predicate: (file: string) => boolean): Promise<string[]> {
-  if (!existsSync(start)) return [];
-  const output: string[] = [];
-  const stack = [start];
-  while (stack.length > 0) {
-    const current = stack.pop();
-    if (!current) continue;
-    for (const entry of await readdir(current, { withFileTypes: true })) {
-      if (entry.isDirectory() && WALK_EXCLUSIONS.has(entry.name)) continue;
-      const absolute = path.join(current, entry.name);
-      if (entry.isDirectory()) stack.push(absolute);
-      else if (entry.isFile() && predicate(absolute)) output.push(absolute);
-    }
-  }
-  return output.sort();
-}
-
 async function readExisting(): Promise<Record<string, unknown> | null> {
   if (!existsSync(OUTPUT)) return null;
   try {
@@ -103,31 +76,19 @@ async function readExisting(): Promise<Record<string, unknown> | null> {
 }
 
 async function countSurfaces(): Promise<Metric> {
-  const manifests = await walkFiles(path.join(ROOT, 'apps'), (file) =>
-    file.endsWith(`${path.sep}product.manifest.json`),
-  );
-  let qualified = 0;
-  for (const file of manifests) {
-    try {
-      const data = JSON.parse(await readFile(file, 'utf8')) as Record<string, unknown>;
-      const health =
-        data.health_endpoint ??
-        data.healthEndpoint ??
-        (typeof data.health === 'object' && data.health
-          ? (data.health as Record<string, unknown>).url
-          : null);
-      const receipt =
-        data.receipt_endpoint ?? data.receiptEndpoint ?? data.receipt_id ?? data.receiptId;
-      if (typeof health === 'string' && health.length > 0 && receipt) qualified += 1;
-    } catch {
-      // Invalid manifests do not qualify as customer-facing surfaces.
-    }
+  const source = 'artifacts/PUBLIC_SURFACES.json#summary.customer_facing_products';
+  const file = path.join(ROOT, 'artifacts', 'PUBLIC_SURFACES.json');
+  if (!existsSync(file)) return unavailable(source);
+  try {
+    const manifest = JSON.parse(await readFile(file, 'utf8')) as PublicSurfaceManifest;
+    if (validatePublicSurfaceManifest(manifest).length > 0) return unavailable(source);
+    const value = Number(manifest.summary.customer_facing_products);
+    return Number.isInteger(value) && value >= 0
+      ? metric(value, 'MEASURED', source)
+      : unavailable(source);
+  } catch {
+    return unavailable(source);
   }
-  return metric(
-    qualified,
-    'MEASURED',
-    'apps/*/product.manifest.json requiring a health endpoint and receipt reference',
-  );
 }
 
 async function readVitestResult(file: string): Promise<TestMetric> {

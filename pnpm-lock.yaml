@@ -289,6 +289,9 @@ importers:
       express:
         specifier: ^5.2.1
         version: 5.2.1
+      fast-xml-parser:
+        specifier: ^5.7.2
+        version: 5.8.0
       happy-dom:
         specifier: ^20.8.9
         version: 20.10.2
