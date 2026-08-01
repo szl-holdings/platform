@@ -4,9 +4,9 @@
   "generated_by": "tools/truth/generate-truth.ts@szl.truth/v1",
   "metrics": {
     "surfaces_customer_facing": {
-      "value": 0,
+      "value": 12,
       "label": "MEASURED",
-      "source": "apps/*/product.manifest.json requiring a health endpoint and receipt reference"
+      "source": "artifacts/PUBLIC_SURFACES.json#summary.customer_facing_routed"
     },
     "ouroboros_tests": {
       "passed": null,
