@@ -1,12 +1,12 @@
 {
   "schema": "szl.truth/v1",
-  "generated_at": "2026-07-30T16:16:37.275Z",
+  "generated_at": "2026-08-01T17:55:45.264Z",
   "generated_by": "tools/truth/generate-truth.ts@szl.truth/v1",
   "metrics": {
     "surfaces_customer_facing": {
-      "value": 0,
+      "value": 2,
       "label": "MEASURED",
-      "source": "apps/*/product.manifest.json requiring a health endpoint and receipt reference"
+      "source": "artifacts/PUBLIC_SURFACES.json#summary.customer_facing_products"
     },
     "ouroboros_tests": {
       "passed": null,
