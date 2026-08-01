@@ -1,5 +1,22 @@
 # Public Surface Truth Proof Packet — 2026-08-01
 
+| Proof field | Recorded value |
+|---|---|
+| `workcell_id` | `platform-pr-560-public-surface-truth` |
+| `agent` | CodexSmith |
+| `objective` | Establish fail-closed, generated public-surface truth without changing public routes or protections. |
+| `plan_summary` | See **Workcell plan**. |
+| `patch_summary` | See **Patch, tests, and final verification** and the exact-head follow-up sections. |
+| `test_results` | See **Baseline verification**, **Post-edit typecheck comparison**, and both verification sections. |
+| `screenshot_refs` | Not applicable: no rendered UI surface or route was modified. |
+| `verification_notes` | See **Route observation method** and both verification sections. |
+| `public_claim_check` | No unqualified quantitative public claim is introduced; canonical counts remain governed by generated platform facts. |
+| `security_check` | No secret, token, credential, environment value, or protection setting is introduced or changed. |
+| `known_gaps_update` | No new gap is introduced; existing route gaps remain explicit in the generated registry. |
+| `proof_level` | `4 — Full Proof`; the public-truth verifier and claims boundary are covered, with no modified UI surface requiring a screenshot. |
+| `recorded_at` | `2026-08-01T21:14:13Z` |
+| `recorded_by` | CodexSmith |
+
 ## Workcell plan
 
 - **Context:** the canonical generated truth reports zero customer-facing product surfaces because
@@ -119,4 +136,4 @@ secret, or protection mutation was performed.
   change was introduced.
 - **Screenshot:** not applicable; this follow-up changes a verifier, tests, and evidence prose, not a
   rendered UI surface.
-- **Recorded at:** `2026-08-01T18:57:36Z` by CodexSmith for Platform PR #560.
+- **Recorded at:** `2026-08-01T21:14:13Z` by CodexSmith for Platform PR #560.

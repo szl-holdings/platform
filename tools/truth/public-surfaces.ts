@@ -581,6 +581,20 @@ function parseSitemapXml(xml: string): Record<string, unknown> | null {
   }
 }
 
+function isValidSitemapLocation(value: unknown): value is string {
+  if (typeof value !== 'string') return false;
+  try {
+    const parsed = new URL(value);
+    return (
+      (parsed.protocol === 'https:' || parsed.protocol === 'http:') &&
+      parsed.username === '' &&
+      parsed.password === ''
+    );
+  } catch {
+    return false;
+  }
+}
+
 async function validateMetadataResponse(
   surfaceId: string,
   response: SurfaceFetchResponse,
@@ -620,16 +634,21 @@ async function validateMetadataResponse(
     }
     const urlset = parsed.urlset;
     const urls = isXmlRecord(urlset) ? (Array.isArray(urlset.url) ? urlset.url : [urlset.url]) : [];
+    const allEntriesValid =
+      urls.length > 0 &&
+      urls.every((entry) => isXmlRecord(entry) && isValidSitemapLocation(entry.loc));
     const hasCanonicalEntry = urls.some(
       (entry) => isXmlRecord(entry) && entry.loc === 'https://a11oy.net/',
     );
     if (
       !isXmlRecord(urlset) ||
-      urlset['@_xmlns'] !== 'http://www.sitemaps.org/schemas/sitemap/0.9' ||
-      !hasCanonicalEntry
+      urlset['@_xmlns'] !== 'http://www.sitemaps.org/schemas/sitemap/0.9'
     ) {
       return [`${surfaceId}: sitemap metadata lacks the canonical urlset entry`];
     }
+    if (!allEntriesValid) return [`${surfaceId}: sitemap metadata contains an invalid url entry`];
+    if (!hasCanonicalEntry)
+      return [`${surfaceId}: sitemap metadata lacks the canonical urlset entry`];
     return [];
   }
 

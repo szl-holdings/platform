@@ -8,9 +8,10 @@ The public-surface registry separates three facts that older product inventories
 
 The reviewed source is [`config/public-surfaces.json`](../../config/public-surfaces.json). The
 deterministic output is
-[`artifacts/PUBLIC_SURFACES.json`](../../artifacts/PUBLIC_SURFACES.json), and the overlapping
-customer-facing product count remains canonical in
-[`artifacts/SOURCE_OF_TRUTH.json`](../../artifacts/SOURCE_OF_TRUTH.json).
+[`artifacts/PUBLIC_SURFACES.json`](../../artifacts/PUBLIC_SURFACES.json). Its overlapping measured
+product value also feeds the internal claims-drift artifact; this page intentionally publishes no
+canonical quantitative claim. Public platform counts remain governed by the metrics registry and
+generated [`docs/platform-facts.md`](../platform-facts.md).
 
 ## Vocabulary
 
@@ -37,8 +38,9 @@ The generated summary keeps product and route granularity separate:
   `source_owner.repository` values;
 - `customer_facing_routes` counts the qualifying routed web pages owned by those products.
 
-Only the distinct-owner value feeds the canonical `surfaces_customer_facing` product metric, so a
-new documentation page or route cannot be misreported as a new product.
+Only the distinct-owner value feeds the internal `surfaces_customer_facing` drift signal, so a new
+documentation page or route cannot be misreported as a new product. It is not a public platform
+statistic until it is incorporated into the governed metrics registry and generated platform facts.
 
 ## Developer workflow
 
