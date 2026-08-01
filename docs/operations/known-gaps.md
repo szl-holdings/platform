@@ -11,10 +11,10 @@ This document is the canonical reference for known security, quality, and compli
 ## Current Public Surface Truth
 
 The generated public-surface manifest now distinguishes source-tree product inventory from public
-route evidence. Twelve customer-facing web routes were measured as `REACHABLE` or `REDIRECTED` and
-bound to a named runtime repository and path. The count is derived from
-[`artifacts/PUBLIC_SURFACES.json`](../../artifacts/PUBLIC_SURFACES.json), not from historical app
-directories or marketing copy.
+route evidence. Customer-facing web route records are measured as `REACHABLE` or `REDIRECTED` and
+bound to a named runtime repository and path. Public quantitative claims remain governed by the
+canonical metrics registry and generated [`docs/platform-facts.md`](../platform-facts.md), not by
+historical app directories or marketing copy.
 
 This closes the zero-manifest tooling gap, not every web gap. The historical `/lyte`, `/aegis`,
 `/vessels`, `/terra`, `/counsel`, `/carlota-jo`, `/command`, and `/pulse` preview paths returned
@@ -27,8 +27,9 @@ correctness claim;
 `LIVE`, `MIXED`, and `DOCUMENTATION` modes retain that boundary.
 
 The existing `truth-drift` job validates schema, seven-day freshness, deterministic generated
-bytes, source ownership, expected status and redirect behavior, and current live HTTP results. It
-uses the existing status context and does not weaken or replace any protected check.
+bytes, source ownership, expected status and redirect behavior, bounded `robots.txt` and sitemap
+content, and current live HTTP results. It uses the existing status context and does not weaken or
+replace any protected check.
 
 ---
 

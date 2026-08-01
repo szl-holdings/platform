@@ -45,6 +45,32 @@ function registry(surfaces: PublicSurface[] = [surface()]): PublicSurfaceRegistr
   };
 }
 
+function metadataResponse(text: string, contentType: string, chunks: number[] = [text.length]) {
+  const bytes = new TextEncoder().encode(text);
+  let offset = 0;
+  return {
+    status: 200,
+    url: 'https://a11oy.net/robots.txt',
+    headers: {
+      get: (name: string) => (name.toLowerCase() === 'content-type' ? contentType : null),
+    },
+    body: {
+      cancel: async () => undefined,
+      getReader: () => ({
+        read: async () => {
+          if (offset >= bytes.byteLength) return { done: true };
+          const chunkLength = chunks.shift() ?? bytes.byteLength - offset;
+          const value = bytes.slice(offset, offset + chunkLength);
+          offset += value.byteLength;
+          return { done: false, value };
+        },
+        cancel: async () => undefined,
+        releaseLock: () => undefined,
+      }),
+    },
+  };
+}
+
 test('counts only routed customer-facing web surfaces', () => {
   const manifest = buildPublicSurfaceManifest(
     registry([
@@ -321,4 +347,87 @@ test('rejects a redirect escape before requesting the destination', async () => 
   assert.deepEqual(failures, [
     'killinchu-public-console: expected redirect to https://szlholdings-killinchu.hf.space/, observed https://127.0.0.1/internal',
   ]);
+});
+
+test('validates bounded robots metadata content rather than status alone', async () => {
+  const robots = surface({
+    id: 'a11oy-net-robots-gap',
+    name: 'A11oy.net robots metadata',
+    kind: 'METADATA',
+    audience: ['MACHINE'],
+    mode: 'DOCUMENTATION',
+    canonical_url: 'https://a11oy.net/robots.txt',
+    observation: { method: 'GET', status: 200, final_url: 'https://a11oy.net/robots.txt' },
+  });
+
+  const valid = await verifyLivePublicSurfaces(registry([robots]), async () =>
+    metadataResponse(
+      'User-agent: *\nAllow: /\n\nSitemap: https://a11oy.net/sitemap.xml\n',
+      'text/plain; charset=utf-8',
+      [5, 7, 11],
+    ),
+  );
+  assert.deepEqual(valid, []);
+
+  const soft404 = await verifyLivePublicSurfaces(registry([robots]), async () =>
+    metadataResponse('<!doctype html><html><body>Not found</body></html>', 'text/html'),
+  );
+  assert.deepEqual(soft404, ['a11oy-net-robots-gap: metadata body is an HTML response']);
+});
+
+test('rejects truncated sitemap XML and accepts the canonical entry', async () => {
+  const sitemap = surface({
+    id: 'a11oy-net-sitemap-gap',
+    name: 'A11oy.net sitemap metadata',
+    kind: 'METADATA',
+    audience: ['MACHINE'],
+    mode: 'DOCUMENTATION',
+    canonical_url: 'https://a11oy.net/sitemap.xml',
+    observation: { method: 'GET', status: 200, final_url: 'https://a11oy.net/sitemap.xml' },
+  });
+  const validXml =
+    '<?xml version="1.0" encoding="UTF-8"?>\n' +
+    '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">' +
+    '<url><loc>https://a11oy.net/</loc></url></urlset>';
+
+  const valid = await verifyLivePublicSurfaces(registry([sitemap]), async () => ({
+    ...metadataResponse(validXml, 'application/xml'),
+    url: 'https://a11oy.net/sitemap.xml',
+  }));
+  assert.deepEqual(valid, []);
+
+  const truncated = await verifyLivePublicSurfaces(registry([sitemap]), async () => ({
+    ...metadataResponse(validXml.replace('</urlset>', ''), 'application/xml'),
+    url: 'https://a11oy.net/sitemap.xml',
+  }));
+  assert.deepEqual(truncated, ['a11oy-net-sitemap-gap: sitemap metadata is not well-formed XML']);
+
+  const missingNamespace = await verifyLivePublicSurfaces(registry([sitemap]), async () => ({
+    ...metadataResponse(
+      validXml.replace(' xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"', ''),
+      'application/xml',
+    ),
+    url: 'https://a11oy.net/sitemap.xml',
+  }));
+  assert.deepEqual(missingNamespace, [
+    'a11oy-net-sitemap-gap: sitemap metadata lacks the canonical urlset entry',
+  ]);
+});
+
+test('rejects metadata bodies that exceed the bounded read limit', async () => {
+  const robots = surface({
+    id: 'a11oy-net-robots-gap',
+    name: 'A11oy.net robots metadata',
+    kind: 'METADATA',
+    audience: ['MACHINE'],
+    mode: 'DOCUMENTATION',
+    canonical_url: 'https://a11oy.net/robots.txt',
+    observation: { method: 'GET', status: 200, final_url: 'https://a11oy.net/robots.txt' },
+  });
+  const tooLarge = 'User-agent: *\n'.padEnd(128 * 1024 + 1, 'x');
+
+  const failures = await verifyLivePublicSurfaces(registry([robots]), async () =>
+    metadataResponse(tooLarge, 'text/plain', [64 * 1024, 64 * 1024, 1]),
+  );
+  assert.deepEqual(failures, ['a11oy-net-robots-gap: metadata body exceeds 131072 bytes']);
 });

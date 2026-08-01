@@ -74,3 +74,39 @@ Verification completed from the clean worktree:
 No screenshot is required because this workcell changes no UI surface; it records existing public
 routes and their evidence boundaries. No deployment, DNS, Hugging Face, A11oy, Killinchu, Bridge,
 secret, or protection mutation was performed.
+
+## Exact-head review follow-up plan
+
+- Remove the remaining public route-count prose so all quantitative public claims continue to flow
+  through the canonical metrics registry and generated platform facts.
+- Replace status-only metadata probing with a bounded UTF-8 body read and exact fail-closed
+  validators for the approved `robots.txt` and sitemap records.
+- Add regressions for a valid chunked robots body, an HTML soft 404, truncated sitemap XML, the
+  canonical sitemap entry, and a body over the byte limit.
+
+## Exact-head review follow-up proof
+
+- **Baseline typecheck:** `turbo run typecheck` completed 153 of 165 tasks and exited `1` before the
+  follow-up edit because reused package dependency links caused pnpm's non-interactive
+  `ERR_PNPM_ABORTED_REMOVE_MODULES_DIR_NO_TTY` guard. No public-surface TypeScript diagnostic was
+  emitted.
+- **Post-edit typecheck:** the same command completed 153 of 169 tasks and exited `1` at the same
+  dependency-link/pnpm guard. No changed-file TypeScript diagnostic was emitted, so the local result
+  is no worse than the follow-up baseline. The previous exact-head hosted Typecheck was green; the
+  new exact-head hosted Typecheck remains merge authority.
+- **Live verification:** `generate-public-surfaces.ts --check --verify-live` passed, including the
+  bounded body and exact content checks against the approved live `robots.txt` and sitemap targets.
+- **Tests:** the focused public-surface suite passed 16 of 16; the complete truth suite passed 105 of
+  105. Coverage includes chunked reads, HTML soft 404, truncated XML, the canonical sitemap entry,
+  and the 131,072-byte ceiling.
+- **Truth and claims:** local truth verification, truth validation, 133 allowlist entries,
+  claims-drift, 26 documentation claims, and 66 source-of-truth checks passed. Generated truth
+  artifacts remained byte-for-byte unchanged.
+- **Formatting and diff:** Biome checks on both changed TypeScript files and `git diff --check`
+  passed.
+- **Claim and security review:** the residual public route count was removed rather than creating a
+  competing quantitative truth path. No secret, credential, route, deployment, UI, or protection
+  change was introduced.
+- **Screenshot:** not applicable; this follow-up changes a verifier, tests, and evidence prose, not a
+  rendered UI surface.
+- **Recorded at:** `2026-08-01T18:57:36Z` by CodexSmith for Platform PR #560.
