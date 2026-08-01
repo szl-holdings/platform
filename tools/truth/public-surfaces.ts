@@ -211,6 +211,41 @@ function isObject(value: unknown): value is Record<string, unknown> {
   return Boolean(value) && typeof value === 'object' && !Array.isArray(value);
 }
 
+function validateObservationTimestamp(
+  value: Record<string, unknown>,
+  nowMs: number,
+  requireFreshObservation: boolean,
+): string[] {
+  const failures: string[] = [];
+  const observedAt = Date.parse(String(value.observed_at));
+  if (!Number.isFinite(observedAt)) {
+    return ['observed_at must be a parseable ISO-8601 time'];
+  }
+
+  const ageMs = nowMs - observedAt;
+  if (requireFreshObservation && ageMs > MAX_OBSERVATION_AGE_MS) {
+    failures.push('observed_at is older than seven days');
+  }
+  if (ageMs < -MAX_FUTURE_SKEW_MS) {
+    failures.push('observed_at is more than five minutes in the future');
+  }
+  return failures;
+}
+
+/**
+ * Deliberate freshness audit for consumers that require a recent committed
+ * snapshot. Ordinary schema validation accepts historical snapshots because
+ * their timestamp remains honest; current route state is checked separately
+ * by verifyLivePublicSurfaces.
+ */
+export function validatePublicSurfaceObservationFreshness(
+  value: unknown,
+  nowMs = Date.now(),
+): string[] {
+  if (!isObject(value)) return ['registry must be an object'];
+  return validateObservationTimestamp(value, nowMs, true);
+}
+
 function normalizedUrl(value: string): string | null {
   try {
     const url = new URL(value);
@@ -282,15 +317,7 @@ export function validatePublicSurfaceRegistry(value: unknown, nowMs = Date.now()
     failures.push(`schema must equal ${PUBLIC_SURFACE_REGISTRY_SCHEMA}`);
   }
 
-  const observedAt = Date.parse(String(value.observed_at));
-  if (!Number.isFinite(observedAt)) failures.push('observed_at must be a parseable ISO-8601 time');
-  else {
-    const ageMs = nowMs - observedAt;
-    if (ageMs > MAX_OBSERVATION_AGE_MS) failures.push('observed_at is older than seven days');
-    if (ageMs < -MAX_FUTURE_SKEW_MS) {
-      failures.push('observed_at is more than five minutes in the future');
-    }
-  }
+  failures.push(...validateObservationTimestamp(value, nowMs, false));
 
   if (!Array.isArray(value.surfaces) || value.surfaces.length === 0) {
     failures.push('surfaces must be a non-empty array');

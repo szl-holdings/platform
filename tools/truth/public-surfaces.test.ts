@@ -7,6 +7,7 @@ import {
   type PublicSurface,
   type PublicSurfaceRegistry,
   validatePublicSurfaceManifest,
+  validatePublicSurfaceObservationFreshness,
   validatePublicSurfaceRegistry,
   verifyLivePublicSurfaces,
 } from './public-surfaces.js';
@@ -180,11 +181,29 @@ test('serializes deterministic repository-formatted audience arrays', () => {
   assert.equal(JSON.parse(serialized).summary.customer_facing_routes, 1);
 });
 
-test('rejects stale observations instead of carrying them forward as current', () => {
+test('accepts an honest historical snapshot during ordinary schema validation', () => {
+  const stale = registry();
+  stale.observed_at = new Date(NOW - 7 * 24 * 60 * 60 * 1000 - 1).toISOString();
+  assert.deepEqual(validatePublicSurfaceRegistry(stale, NOW), []);
+});
+
+test('continues to reject observations beyond the allowed future clock skew', () => {
+  const future = registry();
+  future.observed_at = new Date(NOW + 5 * 60 * 1000 + 1).toISOString();
+  assert.ok(
+    validatePublicSurfaceRegistry(future, NOW).includes(
+      'observed_at is more than five minutes in the future',
+    ),
+  );
+});
+
+test('retains an explicit freshness audit for consumers that require recent evidence', () => {
   const stale = registry();
   stale.observed_at = new Date(NOW - 7 * 24 * 60 * 60 * 1000 - 1).toISOString();
   assert.ok(
-    validatePublicSurfaceRegistry(stale, NOW).includes('observed_at is older than seven days'),
+    validatePublicSurfaceObservationFreshness(stale, NOW).includes(
+      'observed_at is older than seven days',
+    ),
   );
 });
 

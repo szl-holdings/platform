@@ -126,6 +126,7 @@
     "metrics:check": "tsx scripts/validate-platform-facts.ts --strict",
     "surfaces:generate": "tsx tools/truth/generate-public-surfaces.ts",
     "surfaces:check": "tsx tools/truth/generate-public-surfaces.ts --check --verify-live",
+    "surfaces:freshness": "tsx tools/truth/generate-public-surfaces.ts --check --verify-live --require-fresh-observation",
     "surfaces:test": "tsx --test tools/truth/public-surfaces.test.ts",
     "truth:generate": "tsx tools/truth/generate-truth.ts",
     "truth:validate": "tsx tools/truth/validate-truth.ts && pnpm truth:allowlists:check && pnpm truth:test",

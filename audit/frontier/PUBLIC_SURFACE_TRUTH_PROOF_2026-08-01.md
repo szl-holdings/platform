@@ -27,8 +27,9 @@
   `truth-drift` job without changing rulesets or required context names.
 - **Excluded:** no A11oy, Killinchu, Bridge, DNS, Hugging Face, deployment, secret, or organization
   protection mutation; no UI source or route change.
-- **Success criteria:** deterministic generation, schema and freshness validation, fail-closed live
-  HTTP drift, focused negative tests, local truth parity, signed DCO commit, and draft PR only.
+- **Success criteria:** deterministic generation, schema validation, separately invokable snapshot
+  freshness auditing, fail-closed live HTTP drift, focused negative tests, local truth parity, signed
+  DCO commit, and draft PR only.
 
 ## Exact source baseline
 
@@ -64,10 +65,10 @@ approved redirect encoded for that surface. The registry stores the observed sta
 
 ## Patch, tests, and final verification
 
-The patch adds a source registry, deterministic generated manifest, schema/freshness/source-owner
-validation, live status and redirect verification, and a measured truth summary. It extends the
-existing `truth-drift` job and status context; no ruleset or required-context mutation is part of
-this workcell.
+The patch adds a source registry, deterministic generated manifest, structural/source-owner
+validation, live status and redirect verification, a separately invokable snapshot-freshness audit,
+and a measured truth summary. It extends the existing `truth-drift` job and status context; no
+ruleset or required-context mutation is part of this workcell.
 
 Verification completed from the clean worktree:
 
@@ -137,3 +138,17 @@ secret, or protection mutation was performed.
 - **Screenshot:** not applicable; this follow-up changes a verifier, tests, and evidence prose, not a
   rendered UI surface.
 - **Recorded at:** `2026-08-01T21:14:13Z` by CodexSmith for Platform PR #560.
+
+## Exact-head timestamp-expiry follow-up
+
+The committed registry and manifest are immutable observation snapshots. Their `observed_at` value
+continues to record when those bytes were measured and is never rewritten or relabeled by ordinary
+CI. Structural validation still rejects malformed timestamps and observations more than five
+minutes in the future, while `surfaces:check` performs fresh fail-closed probes against every exact
+approved route on each PR and protected-main run.
+
+Snapshot age no longer makes unrelated PRs fail after seven days. Consumers that explicitly require
+a recent committed snapshot retain the deliberate `pnpm surfaces:freshness` audit, which combines
+the seven-day age requirement with the same live route verification. Focused regressions prove both
+that historical snapshots remain honest valid inputs and that the explicit freshness audit rejects
+an expired snapshot.

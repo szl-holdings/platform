@@ -6,6 +6,7 @@ import { fileURLToPath } from 'node:url';
 import {
   buildPublicSurfaceManifest,
   type PublicSurfaceRegistry,
+  validatePublicSurfaceObservationFreshness,
   validatePublicSurfaceRegistry,
   verifyLivePublicSurfaces,
 } from './public-surfaces.js';
@@ -42,8 +43,14 @@ export function serializeManifest(registry: PublicSurfaceRegistry): string {
 async function main(): Promise<void> {
   const check = process.argv.includes('--check');
   const verifyLive = process.argv.includes('--verify-live');
+  const requireFreshObservation = process.argv.includes('--require-fresh-observation');
   const registry = JSON.parse(await readFile(REGISTRY, 'utf8')) as PublicSurfaceRegistry;
-  const failures = validatePublicSurfaceRegistry(registry);
+  const failures = [
+    ...new Set([
+      ...validatePublicSurfaceRegistry(registry),
+      ...(requireFreshObservation ? validatePublicSurfaceObservationFreshness(registry) : []),
+    ]),
+  ];
   if (failures.length > 0) {
     throw new Error(`public surface registry invalid:\n- ${failures.join('\n- ')}`);
   }
