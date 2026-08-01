@@ -96,9 +96,18 @@ secret, or protection mutation was performed.
   new exact-head hosted Typecheck remains merge authority.
 - **Live verification:** `generate-public-surfaces.ts --check --verify-live` passed, including the
   bounded body and exact content checks against the approved live `robots.txt` and sitemap targets.
-- **Tests:** every executed focused public-surface and complete truth test passed with no failure.
-  Coverage includes chunked reads, HTML soft 404, truncated XML, the canonical sitemap entry, and
-  the configured bounded-body ceiling.
+- **Focused tests:** `node node_modules/tsx/dist/cli.mjs --test
+  tools/truth/public-surfaces.test.ts` exited `0`; every executed public-surface test passed.
+  Coverage includes chunked reads, HTML soft 404, malformed and truncated XML, DTD/entity
+  rejection, the canonical sitemap entry, and the configured bounded-body ceiling.
+- **Complete truth suite:** `node node_modules/tsx/dist/cli.mjs --test
+  tools/truth/validate-truth.test.ts tools/truth/generate-truth.test.ts
+  tools/truth/claims-drift.test.ts tools/truth/generate-allowlist-justifications.test.ts
+  tools/truth/public-surfaces.test.ts` exited `0`; every executed truth test passed.
+- **Package-script disclosure:** `pnpm surfaces:test` exited `1` before test execution because the
+  reused dependency junction triggered pnpm's non-interactive modules-directory purge guard. The
+  direct repository `tsx` entrypoint above is the executed local test authority; hosted package
+  scripts remain merge authority.
 - **Truth and claims:** local truth verification, truth validation, 133 allowlist entries,
   claims-drift, 26 documentation claims, and 66 source-of-truth checks passed. Generated truth
   artifacts remained byte-for-byte unchanged.

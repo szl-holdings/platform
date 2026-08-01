@@ -1,3 +1,5 @@
+import { XMLParser, XMLValidator } from 'fast-xml-parser';
+
 export const PUBLIC_SURFACE_REGISTRY_SCHEMA = 'szl.public-surfaces.registry/v1';
 export const PUBLIC_SURFACE_MANIFEST_SCHEMA = 'szl.public-surfaces/v1';
 export const PUBLIC_SURFACE_GENERATOR_ID =
@@ -549,24 +551,32 @@ async function readBoundedResponseBody(
   }
 }
 
-function hasBalancedXmlElements(xml: string): boolean {
-  const stack: string[] = [];
-  const tags = xml.match(/<[^>]+>/g) ?? [];
-  for (const tag of tags) {
-    if (/^<\?/.test(tag) || /^<!--/.test(tag)) continue;
-    if (/^<!/i.test(tag)) return false;
+function isXmlRecord(value: unknown): value is Record<string, unknown> {
+  return typeof value === 'object' && value !== null && !Array.isArray(value);
+}
 
-    const closing = tag.match(/^<\/([A-Za-z_][\w:.-]*)\s*>$/);
-    if (closing) {
-      if (stack.pop() !== closing[1]) return false;
-      continue;
-    }
+const sitemapXmlParser = new XMLParser({
+  allowBooleanAttributes: false,
+  ignoreAttributes: false,
+  ignoreDeclaration: true,
+  parseAttributeValue: false,
+  parseTagValue: false,
+  processEntities: false,
+  trimValues: true,
+});
 
-    const opening = tag.match(/^<([A-Za-z_][\w:.-]*)(?:\s[^<>]*)?\s*\/?>$/);
-    if (!opening) return false;
-    if (!/\/>$/.test(tag)) stack.push(opening[1]);
+function parseSitemapXml(xml: string): Record<string, unknown> | null {
+  // The sitemap contract never needs a DTD or entity declaration. Reject both
+  // before parsing so external entities cannot become an input channel.
+  if (/<!\s*(?:doctype|entity)\b/i.test(xml)) return null;
+  if (XMLValidator.validate(xml, { allowBooleanAttributes: false }) !== true) return null;
+
+  try {
+    const parsed = sitemapXmlParser.parse(xml) as unknown;
+    return isXmlRecord(parsed) ? parsed : null;
+  } catch {
+    return null;
   }
-  return stack.length === 0;
 }
 
 async function validateMetadataResponse(
@@ -602,18 +612,19 @@ async function validateMetadataResponse(
     if (!/^(?:application|text)\/(?:[a-z0-9.+-]+\+)?xml(?:;|$)/i.test(contentType)) {
       return [`${surfaceId}: expected an XML response, observed ${contentType || 'missing'}`];
     }
-    if (/<!doctype/i.test(body) || !hasBalancedXmlElements(body)) {
+    const parsed = parseSitemapXml(body);
+    if (!parsed) {
       return [`${surfaceId}: sitemap metadata is not well-formed XML`];
     }
-    const withoutDeclaration = body.replace(/^<\?xml[^?]*\?>\s*/i, '');
+    const urlset = parsed.urlset;
+    const urls = isXmlRecord(urlset) ? (Array.isArray(urlset.url) ? urlset.url : [urlset.url]) : [];
+    const hasCanonicalEntry = urls.some(
+      (entry) => isXmlRecord(entry) && entry.loc === 'https://a11oy.net/',
+    );
     if (
-      !/^<urlset\b[^>]*\bxmlns=["']http:\/\/www\.sitemaps\.org\/schemas\/sitemap\/0\.9["'][^>]*>/.test(
-        withoutDeclaration,
-      ) ||
-      !/<url(?:\s|>)[\s\S]*?<loc>\s*https:\/\/a11oy\.net\/\s*<\/loc>[\s\S]*?<\/url>/.test(
-        withoutDeclaration,
-      ) ||
-      !/<\/urlset>\s*$/.test(withoutDeclaration)
+      !isXmlRecord(urlset) ||
+      urlset['@_xmlns'] !== 'http://www.sitemaps.org/schemas/sitemap/0.9' ||
+      !hasCanonicalEntry
     ) {
       return [`${surfaceId}: sitemap metadata lacks the canonical urlset entry`];
     }

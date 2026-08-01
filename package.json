@@ -185,6 +185,7 @@
     "cookie-parser": "^1.4.7",
     "drizzle-orm": "catalog:",
     "express": "^5.2.1",
+    "fast-xml-parser": "^5.7.2",
     "happy-dom": "^20.8.9",
     "lru-cache": "^11.3.5",
     "oxlint": "^1.60.0",

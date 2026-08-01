@@ -412,6 +412,32 @@ test('rejects truncated sitemap XML and accepts the canonical entry', async () =
   assert.deepEqual(missingNamespace, [
     'a11oy-net-sitemap-gap: sitemap metadata lacks the canonical urlset entry',
   ]);
+
+  const unescapedAmpersand = await verifyLivePublicSurfaces(registry([sitemap]), async () => ({
+    ...metadataResponse(
+      validXml.replace(
+        '</url></urlset>',
+        '</url><url><loc>https://a11oy.net/?first=1&second=2</loc></url></urlset>',
+      ),
+      'application/xml',
+    ),
+    url: 'https://a11oy.net/sitemap.xml',
+  }));
+  assert.deepEqual(unescapedAmpersand, [
+    'a11oy-net-sitemap-gap: sitemap metadata is not well-formed XML',
+  ]);
+
+  const externalEntity = await verifyLivePublicSurfaces(registry([sitemap]), async () => ({
+    ...metadataResponse(
+      '<!DOCTYPE urlset [<!ENTITY external SYSTEM "file:///etc/passwd">]>' +
+        validXml.replace('https://a11oy.net/', '&external;'),
+      'application/xml',
+    ),
+    url: 'https://a11oy.net/sitemap.xml',
+  }));
+  assert.deepEqual(externalEntity, [
+    'a11oy-net-sitemap-gap: sitemap metadata is not well-formed XML',
+  ]);
 });
 
 test('rejects metadata bodies that exceed the bounded read limit', async () => {
