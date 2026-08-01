@@ -427,6 +427,14 @@ test('rejects truncated sitemap XML and accepts the canonical entry', async () =
     'a11oy-net-sitemap-gap: sitemap metadata is not well-formed XML',
   ]);
 
+  const multipleRoots = await verifyLivePublicSurfaces(registry([sitemap]), async () => ({
+    ...metadataResponse(`<evil/>${validXml}`, 'application/xml'),
+    url: 'https://a11oy.net/sitemap.xml',
+  }));
+  assert.deepEqual(multipleRoots, [
+    'a11oy-net-sitemap-gap: sitemap metadata is not well-formed XML',
+  ]);
+
   const externalEntity = await verifyLivePublicSurfaces(registry([sitemap]), async () => ({
     ...metadataResponse(
       '<!DOCTYPE urlset [<!ENTITY external SYSTEM "file:///etc/passwd">]>' +

@@ -573,7 +573,9 @@ function parseSitemapXml(xml: string): Record<string, unknown> | null {
 
   try {
     const parsed = sitemapXmlParser.parse(xml) as unknown;
-    return isXmlRecord(parsed) ? parsed : null;
+    if (!isXmlRecord(parsed)) return null;
+    const roots = Object.keys(parsed);
+    return roots.length === 1 && roots[0] === 'urlset' ? parsed : null;
   } catch {
     return null;
   }

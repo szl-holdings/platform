@@ -94,8 +94,9 @@ secret, or protection mutation was performed.
   dependency-link/pnpm guard. No changed-file TypeScript diagnostic was emitted, so the local result
   is no worse than the follow-up baseline. The previous exact-head hosted Typecheck was green; the
   new exact-head hosted Typecheck remains merge authority.
-- **Live verification:** `generate-public-surfaces.ts --check --verify-live` passed, including the
-  bounded body and exact content checks against the approved live `robots.txt` and sitemap targets.
+- **Live verification:** `node node_modules/tsx/dist/cli.mjs
+  tools/truth/generate-public-surfaces.ts --check --verify-live` exited `0`, including the bounded
+  body and exact content checks against the approved live `robots.txt` and sitemap targets.
 - **Focused tests:** `node node_modules/tsx/dist/cli.mjs --test
   tools/truth/public-surfaces.test.ts` exited `0`; every executed public-surface test passed.
   Coverage includes chunked reads, HTML soft 404, malformed and truncated XML, DTD/entity
