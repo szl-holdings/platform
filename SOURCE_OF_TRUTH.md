@@ -75,9 +75,10 @@ PLANNED, and conformance status require separate evidence.
 
 ## Public Surface Reachability Snapshot
 
-The generated [`artifacts/PUBLIC_SURFACES.json`](artifacts/PUBLIC_SURFACES.json) currently records
-**12 customer-facing routed web surfaces**. This count includes only reviewed `WEB` entries for an
-investor or developer audience whose measured availability is `REACHABLE` or `REDIRECTED`.
+The generated [`artifacts/PUBLIC_SURFACES.json`](artifacts/PUBLIC_SURFACES.json) records reviewed
+customer-facing routes and their item-level evidence. This narrative deliberately does not
+duplicate a quantitative route claim: public platform counts remain governed by the canonical
+[`docs/platform-facts.md`](docs/platform-facts.md) registry path.
 
 The manifest also preserves unrouted historical paths and missing `a11oy.net` routes as explicit
 `UNAVAILABLE` records. Route reachability does not prove uptime, customer use, feature

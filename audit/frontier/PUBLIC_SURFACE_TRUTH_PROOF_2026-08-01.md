@@ -27,6 +27,17 @@ the clean worktree reused a shared dependency junction and package-local `node_m
 `@types/node` were absent in `@szl/mcp-governor`, `@workspace/run-ledger`, and
 `@workspace/codex-kernel`. This is recorded as an environment baseline, not presented as green.
 
+## Post-edit typecheck comparison
+
+The exact post-edit command
+`.\node_modules\.bin\turbo.cmd run typecheck` (the command behind the root `pnpm typecheck` script)
+completed 153 of 169 tasks and exited `1`. The remaining task failed because the isolated successor
+worktree reuses a dependency junction whose package-level `pnpm` process refused a non-interactive
+modules-directory purge (`ERR_PNPM_ABORTED_REMOVE_MODULES_DIR_NO_TTY`). It emitted no TypeScript
+diagnostic in the changed truth files. Compared with the baseline, the check completed 22 additional
+tasks and reduced the process exit from `2` to `1`; it is therefore no worse, but it is not presented
+as green. The exact-head hosted Typecheck remains the merge authority.
+
 ## Route observation method
 
 Each registry entry is verified with an unauthenticated `GET` to its exact compile-time-approved
@@ -43,10 +54,9 @@ this workcell.
 
 Verification completed from the clean worktree:
 
-- `tools/truth/generate-public-surfaces.ts --check --verify-live`: **PASS** for all 29 declared
-  records, including 2 distinct customer-facing product/runtime owners across 12 routed web pages,
-  11 explicit unavailable records, and 2 reachable machine-metadata records excluded from both
-  customer-facing counts.
+- `tools/truth/generate-public-surfaces.ts --check --verify-live`: **PASS** for every declared
+  record. Quantitative summaries remain in the generated machine evidence and are not duplicated as
+  a competing public route claim.
 - Live probes use exact compile-time ID-to-URL targets and manual redirect handling. Unknown IDs,
   URL credentials, IP literals, nonstandard ports, mutated final destinations, and redirect escapes
   fail before any unapproved destination is requested.
