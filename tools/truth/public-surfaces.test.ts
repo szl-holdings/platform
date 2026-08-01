@@ -80,7 +80,48 @@ test('counts only routed customer-facing web surfaces', () => {
   );
 
   assert.equal(manifest.summary.declared, 3);
-  assert.equal(manifest.summary.customer_facing_routed, 1);
+  assert.equal(manifest.summary.customer_facing_products, 1);
+  assert.equal(manifest.summary.customer_facing_routes, 1);
+  assert.deepEqual(validatePublicSurfaceManifest(manifest, NOW), []);
+});
+
+test('counts customer-facing products independently from their routed pages', () => {
+  const manifest = buildPublicSurfaceManifest(
+    registry([
+      surface(),
+      surface({
+        id: 'a11oy-docs',
+        name: 'A11oy public documentation',
+        mode: 'DOCUMENTATION',
+        canonical_url: 'https://a-11-oy.com/docs',
+        source_owner: {
+          repository: 'szl-holdings/a11oy',
+          path: 'console/docs.html',
+          role: 'RUNTIME_OWNER',
+        },
+        observation: { method: 'GET', status: 200, final_url: 'https://a-11-oy.com/docs' },
+      }),
+      surface({
+        id: 'killinchu-public-console',
+        name: 'Killinchu public console',
+        canonical_url: 'https://a-11-oy.com/killinchu',
+        availability: 'REDIRECTED',
+        source_owner: {
+          repository: 'szl-holdings/killinchu',
+          path: 'web/index.html',
+          role: 'RUNTIME_OWNER',
+        },
+        observation: {
+          method: 'GET',
+          status: 200,
+          final_url: 'https://szlholdings-killinchu.hf.space/',
+        },
+      }),
+    ]),
+  );
+
+  assert.equal(manifest.summary.customer_facing_routes, 3);
+  assert.equal(manifest.summary.customer_facing_products, 2);
   assert.deepEqual(validatePublicSurfaceManifest(manifest, NOW), []);
 });
 
@@ -88,7 +129,8 @@ test('serializes deterministic repository-formatted audience arrays', () => {
   const serialized = serializeManifest(registry());
   assert.match(serialized, /"audience": \["INVESTOR", "DEVELOPER"\]/);
   assert.doesNotMatch(serialized, /"audience": \[\n/);
-  assert.equal(JSON.parse(serialized).summary.customer_facing_routed, 1);
+  assert.equal(JSON.parse(serialized).summary.customer_facing_products, 1);
+  assert.equal(JSON.parse(serialized).summary.customer_facing_routes, 1);
 });
 
 test('rejects stale observations instead of carrying them forward as current', () => {

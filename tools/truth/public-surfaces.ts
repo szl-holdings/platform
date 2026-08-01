@@ -38,7 +38,8 @@ export type PublicSurfaceRegistry = {
 
 export type PublicSurfaceSummary = {
   declared: number;
-  customer_facing_routed: number;
+  customer_facing_products: number;
+  customer_facing_routes: number;
   by_availability: Record<SurfaceAvailability, number>;
   by_mode: Record<SurfaceMode, number>;
 };
@@ -255,9 +256,15 @@ export function summarizePublicSurfaces(surfaces: PublicSurface[]): PublicSurfac
     byMode[surface.mode] += 1;
   }
 
+  const customerFacingRoutes = surfaces.filter(isCustomerFacingRouted);
+  const customerFacingProducts = new Set(
+    customerFacingRoutes.map((surface) => surface.source_owner.repository),
+  );
+
   return {
     declared: surfaces.length,
-    customer_facing_routed: surfaces.filter(isCustomerFacingRouted).length,
+    customer_facing_products: customerFacingProducts.size,
+    customer_facing_routes: customerFacingRoutes.length,
     by_availability: byAvailability,
     by_mode: byMode,
   };

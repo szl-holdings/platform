@@ -76,13 +76,13 @@ async function readExisting(): Promise<Record<string, unknown> | null> {
 }
 
 async function countSurfaces(): Promise<Metric> {
-  const source = 'artifacts/PUBLIC_SURFACES.json#summary.customer_facing_routed';
+  const source = 'artifacts/PUBLIC_SURFACES.json#summary.customer_facing_products';
   const file = path.join(ROOT, 'artifacts', 'PUBLIC_SURFACES.json');
   if (!existsSync(file)) return unavailable(source);
   try {
     const manifest = JSON.parse(await readFile(file, 'utf8')) as PublicSurfaceManifest;
     if (validatePublicSurfaceManifest(manifest).length > 0) return unavailable(source);
-    const value = Number(manifest.summary.customer_facing_routed);
+    const value = Number(manifest.summary.customer_facing_products);
     return Number.isInteger(value) && value >= 0
       ? metric(value, 'MEASURED', source)
       : unavailable(source);

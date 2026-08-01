@@ -9,7 +9,7 @@ The public-surface registry separates three facts that older product inventories
 The reviewed source is [`config/public-surfaces.json`](../../config/public-surfaces.json). The
 deterministic output is
 [`artifacts/PUBLIC_SURFACES.json`](../../artifacts/PUBLIC_SURFACES.json), and the overlapping
-customer-facing count remains canonical in
+customer-facing product count remains canonical in
 [`artifacts/SOURCE_OF_TRUTH.json`](../../artifacts/SOURCE_OF_TRUTH.json).
 
 ## Vocabulary
@@ -30,6 +30,14 @@ customer-facing count remains canonical in
 
 Route reachability is not uptime, customer adoption, feature completeness, or correctness proof.
 Item-level receipts and evidence labels remain authoritative.
+
+The generated summary keeps product and route granularity separate:
+
+- `customer_facing_products` counts distinct qualifying `source_owner.repository` values;
+- `customer_facing_routes` counts the qualifying routed web pages owned by those products.
+
+Only the distinct-owner value feeds the canonical `surfaces_customer_facing` product metric, so a
+new documentation page or route cannot be misreported as a new product.
 
 ## Developer workflow
 
