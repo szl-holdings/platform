@@ -2,7 +2,7 @@
 
 | Proof field | Recorded value |
 |---|---|
-| `workcell_id` | `platform-pr-560-public-surface-truth` |
+| `workcell_id` | `platform-pr-564-public-surface-truth-successor` |
 | `agent` | CodexSmith |
 | `objective` | Establish fail-closed, generated public-surface truth without changing public routes or protections. |
 | `plan_summary` | See **Workcell plan**. |
@@ -14,7 +14,7 @@
 | `security_check` | No secret, token, credential, environment value, or protection setting is introduced or changed. |
 | `known_gaps_update` | No new gap is introduced; existing route gaps remain explicit in the generated registry. |
 | `proof_level` | `4 — Full Proof`; the public-truth verifier and claims boundary are covered, with no modified UI surface requiring a screenshot. |
-| `recorded_at` | `2026-08-01T21:14:13Z` |
+| `recorded_at` | `2026-08-01T22:28:54Z` |
 | `recorded_by` | CodexSmith |
 
 ## Workcell plan
@@ -37,6 +37,22 @@
 - Base: `a20e45ee87dfd783cb5ead9beebf69531bc3ed80`
 - Base signature: GitHub verified
 - Open pull requests at start: `0`
+
+## Protected successor lineage
+
+- Original reviewed PR #560 ended at head
+  `41f2199c28796bf342eb0f69ec11964259864237`, tree
+  `a720f6f6d502a1c10f77d216503065d7b3f76ab1`.
+- PR #562 added the timestamp-expiry correction at signed head
+  `b9d787fdd3aa854103e1fdb29b770ad5e56e42ec`, tree
+  `2c77046928898d79b2dabb39af5978b74cc156f0`. Its preserved history failed Commitlint; it was not
+  rewritten.
+- PR #564 republished that corrected tree from the exact base as one signed, DCO-attested commit,
+  head `1853c7341580b05d4b1d0c2fae90b549208bb983`. Independent review of that head found only the
+  documentation consistency corrections recorded in this follow-up.
+- The signed commit containing this follow-up cannot embed its own content-derived SHA. PR #564's
+  exact-head review comment and immutable merge readback are the authoritative final commit and tree
+  binding. No source branch is represented as merged before that readback exists.
 
 ## Baseline verification
 
@@ -137,7 +153,8 @@ secret, or protection mutation was performed.
   change was introduced.
 - **Screenshot:** not applicable; this follow-up changes a verifier, tests, and evidence prose, not a
   rendered UI surface.
-- **Recorded at:** `2026-08-01T21:14:13Z` by CodexSmith for Platform PR #560.
+- **Historical record:** `2026-08-01T21:14:13Z` by CodexSmith for the original Platform PR #560
+  review head. The protected-successor lineage above and timestamp below bind the later correction.
 
 ## Exact-head timestamp-expiry follow-up
 
@@ -152,3 +169,16 @@ a recent committed snapshot retain the deliberate `pnpm surfaces:freshness` audi
 the seven-day age requirement with the same live route verification. Focused regressions prove both
 that historical snapshots remain honest valid inputs and that the explicit freshness audit rejects
 an expired snapshot.
+
+## Clean-successor documentation follow-up
+
+Independent review of PR #564 identified three prose inconsistencies after the timestamp-expiry
+fix. The known-gaps register and developer guide now state that ordinary `surfaces:check` verifies
+schema, deterministic bytes, and current live routes without expiring an honest historical
+snapshot. They name `surfaces:freshness` as the explicit seven-day audit. The route summary now
+states that documentation-only owners can add qualifying routes without increasing the distinct
+non-documentation product count.
+
+This follow-up was recorded at `2026-08-01T22:28:54Z`. It changes documentation and proof binding
+only; the generated registry, manifest, route probes, freshness implementation, and public runtime
+remain unchanged.
