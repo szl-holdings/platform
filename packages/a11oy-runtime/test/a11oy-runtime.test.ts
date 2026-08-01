@@ -4,11 +4,16 @@ import {
   deriveAxes,
   fluxionsReceiptHolds,
   discriminantForOperators,
-  DEMO_WORKCELLS,
-  WORKCELL_MAP,
   TOOL_MAP,
   OPERATOR_MAP,
+  OPERATIONAL_WORKCELLS,
+  WORKCELL_SOURCE,
+  getOperationalWorkcells,
 } from "../src/index.js";
+import {
+  TEST_DEMO_WORKCELLS as DEMO_WORKCELLS,
+  TEST_WORKCELL_MAP as WORKCELL_MAP,
+} from "./fixtures/demo-workcells.js";
 import type {
   Workcell,
   ActionBrief,
@@ -44,7 +49,22 @@ function pickAccepted(): Workcell {
   throw new Error("no admissible demo workcell found");
 }
 
-// ---- registry sanity ------------------------------------------------------
+// ---- production source boundary ------------------------------------------
+
+describe("a11oy operational workcell source — fail closed", () => {
+  it("publishes an immutable UNAVAILABLE result without sample records", () => {
+    expect(WORKCELL_SOURCE.state).toBe("UNAVAILABLE");
+    expect(WORKCELL_SOURCE.source).toBeNull();
+    expect(WORKCELL_SOURCE.observedAt).toBeNull();
+    expect(WORKCELL_SOURCE.records).toBe(OPERATIONAL_WORKCELLS);
+    expect(OPERATIONAL_WORKCELLS).toHaveLength(0);
+    expect(Object.isFrozen(OPERATIONAL_WORKCELLS)).toBe(true);
+    expect(Object.isFrozen(WORKCELL_SOURCE)).toBe(true);
+    expect(getOperationalWorkcells()).toBe(WORKCELL_SOURCE);
+  });
+});
+
+// ---- test-only sample registry sanity ------------------------------------
 
 describe("a11oy registry — sanity", () => {
   it("DEMO_WORKCELLS contains at least one workcell with an actionBrief", () => {
