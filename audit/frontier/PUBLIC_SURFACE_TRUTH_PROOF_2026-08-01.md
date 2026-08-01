@@ -2,8 +2,8 @@
 
 ## Workcell plan
 
-- **Context:** the canonical generated truth reports zero customer-facing surfaces because it only
-  scans absent `apps/*/product.manifest.json` records, while historical product documents list
+- **Context:** the canonical generated truth reports zero customer-facing product surfaces because
+  it only scans absent `apps/*/product.manifest.json` records, while historical product documents list
   unrouted preview paths.
 - **Scope:** establish one generated public-surface registry in `platform`, bind each route to an
   evidence mode, HTTP availability observation, and source owner, and extend the existing
