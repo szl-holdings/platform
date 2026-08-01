@@ -85,7 +85,7 @@ test('counts only routed customer-facing web surfaces', () => {
   assert.deepEqual(validatePublicSurfaceManifest(manifest, NOW), []);
 });
 
-test('counts customer-facing products independently from their routed pages', () => {
+test('counts customer-facing products independently from routed pages and repository casing', () => {
   const manifest = buildPublicSurfaceManifest(
     registry([
       surface(),
@@ -95,7 +95,7 @@ test('counts customer-facing products independently from their routed pages', ()
         mode: 'DOCUMENTATION',
         canonical_url: 'https://a-11-oy.com/docs',
         source_owner: {
-          repository: 'szl-holdings/a11oy',
+          repository: 'SZL-Holdings/A11oy',
           path: 'console/docs.html',
           role: 'RUNTIME_OWNER',
         },
@@ -117,12 +117,33 @@ test('counts customer-facing products independently from their routed pages', ()
           final_url: 'https://szlholdings-killinchu.hf.space/',
         },
       }),
+      surface({
+        id: 'a11oy-net-thesis',
+        name: 'A11oy technical thesis',
+        mode: 'DOCUMENTATION',
+        canonical_url: 'https://a11oy.net/',
+        source_owner: {
+          repository: 'szl-holdings/a11oy-net',
+          path: 'index.html',
+          role: 'RUNTIME_OWNER',
+        },
+        observation: { method: 'GET', status: 200, final_url: 'https://a11oy.net/' },
+      }),
     ]),
   );
 
-  assert.equal(manifest.summary.customer_facing_routes, 3);
+  assert.equal(manifest.summary.customer_facing_routes, 4);
   assert.equal(manifest.summary.customer_facing_products, 2);
   assert.deepEqual(validatePublicSurfaceManifest(manifest, NOW), []);
+});
+
+test('returns validation failures for malformed manifest surfaces without throwing', () => {
+  const manifest = buildPublicSurfaceManifest(registry());
+  const malformed = { ...manifest, surfaces: [null] };
+
+  assert.deepEqual(validatePublicSurfaceManifest(malformed, NOW), [
+    'surfaces[0] must be an object',
+  ]);
 });
 
 test('serializes deterministic repository-formatted audience arrays', () => {

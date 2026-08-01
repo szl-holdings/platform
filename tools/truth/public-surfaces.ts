@@ -258,7 +258,9 @@ export function summarizePublicSurfaces(surfaces: PublicSurface[]): PublicSurfac
 
   const customerFacingRoutes = surfaces.filter(isCustomerFacingRouted);
   const customerFacingProducts = new Set(
-    customerFacingRoutes.map((surface) => surface.source_owner.repository),
+    customerFacingRoutes
+      .filter((surface) => surface.mode !== 'DOCUMENTATION')
+      .map((surface) => surface.source_owner.repository.toLowerCase()),
   );
 
   return {
@@ -452,8 +454,9 @@ export function validatePublicSurfaceManifest(value: unknown, nowMs = Date.now()
     observed_at: value.observed_at,
     surfaces: value.surfaces,
   };
-  failures.push(...validatePublicSurfaceRegistry(registry, nowMs));
-  if (Array.isArray(value.surfaces)) {
+  const registryFailures = validatePublicSurfaceRegistry(registry, nowMs);
+  failures.push(...registryFailures);
+  if (Array.isArray(value.surfaces) && registryFailures.length === 0) {
     const expected = summarizePublicSurfaces(value.surfaces as PublicSurface[]);
     if (JSON.stringify(value.summary) !== JSON.stringify(expected)) {
       failures.push('summary does not match the surface records');

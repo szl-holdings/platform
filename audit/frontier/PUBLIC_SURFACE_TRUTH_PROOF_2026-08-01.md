@@ -44,7 +44,7 @@ this workcell.
 Verification completed from the clean worktree:
 
 - `tools/truth/generate-public-surfaces.ts --check --verify-live`: **PASS** for all 29 declared
-  records, including 3 distinct customer-facing product/runtime owners across 12 routed web pages,
+  records, including 2 distinct customer-facing product/runtime owners across 12 routed web pages,
   11 explicit unavailable records, and 2 reachable machine-metadata records excluded from both
   customer-facing counts.
 - Live probes use exact compile-time ID-to-URL targets and manual redirect handling. Unknown IDs,

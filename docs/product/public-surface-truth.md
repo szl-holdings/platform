@@ -33,7 +33,8 @@ Item-level receipts and evidence labels remain authoritative.
 
 The generated summary keeps product and route granularity separate:
 
-- `customer_facing_products` counts distinct qualifying `source_owner.repository` values;
+- `customer_facing_products` counts distinct qualifying non-documentation
+  `source_owner.repository` values;
 - `customer_facing_routes` counts the qualifying routed web pages owned by those products.
 
 Only the distinct-owner value feeds the canonical `surfaces_customer_facing` product metric, so a
