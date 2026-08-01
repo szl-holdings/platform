@@ -29,9 +29,10 @@ the clean worktree reused a shared dependency junction and package-local `node_m
 
 ## Route observation method
 
-Each registry entry was measured with an unauthenticated `GET`, redirects enabled, and a 25-second
-timeout. The registry stores the observed status and final URL. `LIVE` and `MIXED` remain evidence
-modes; neither is inferred merely from HTTP 200.
+Each registry entry is verified with an unauthenticated `GET` to its exact compile-time-approved
+target, manual redirect handling, and a 15-second timeout. The verifier follows only the one exact
+approved redirect encoded for that surface. The registry stores the observed status and final URL.
+`LIVE` and `MIXED` remain evidence modes; neither is inferred merely from HTTP 200.
 
 ## Patch, tests, and final verification
 
