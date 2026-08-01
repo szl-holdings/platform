@@ -6,6 +6,7 @@ import { fileURLToPath } from 'node:url';
 import {
   buildPublicSurfaceManifest,
   type PublicSurfaceRegistry,
+  validatePublicSurfaceFreshness,
   validatePublicSurfaceRegistry,
   verifyLivePublicSurfaces,
 } from './public-surfaces.js';
@@ -42,8 +43,14 @@ export function serializeManifest(registry: PublicSurfaceRegistry): string {
 async function main(): Promise<void> {
   const check = process.argv.includes('--check');
   const verifyLive = process.argv.includes('--verify-live');
+  const requireFresh = process.argv.includes('--require-fresh');
   const registry = JSON.parse(await readFile(REGISTRY, 'utf8')) as PublicSurfaceRegistry;
-  const failures = validatePublicSurfaceRegistry(registry);
+  const failures = [
+    ...new Set([
+      ...validatePublicSurfaceRegistry(registry),
+      ...(requireFresh ? validatePublicSurfaceFreshness(registry) : []),
+    ]),
+  ];
   if (failures.length > 0) {
     throw new Error(`public surface registry invalid:\n- ${failures.join('\n- ')}`);
   }
@@ -68,7 +75,7 @@ async function main(): Promise<void> {
   process.stdout.write(
     `${check ? 'public surface manifest: PASS' : 'artifacts/PUBLIC_SURFACES.json generated'}${
       verifyLive ? ' (live routes verified)' : ''
-    }\n`,
+    }${requireFresh ? ' (freshness required)' : ''}\n`,
   );
 }
 

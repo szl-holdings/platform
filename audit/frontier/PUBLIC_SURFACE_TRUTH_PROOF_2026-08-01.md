@@ -14,7 +14,7 @@
 | `security_check` | No secret, token, credential, environment value, or protection setting is introduced or changed. |
 | `known_gaps_update` | No new gap is introduced; existing route gaps remain explicit in the generated registry. |
 | `proof_level` | `4 — Full Proof`; the public-truth verifier and claims boundary are covered, with no modified UI surface requiring a screenshot. |
-| `recorded_at` | `2026-08-01T21:14:13Z` |
+| `recorded_at` | `2026-08-01T22:02:07Z` |
 | `recorded_by` | CodexSmith |
 
 ## Workcell plan
@@ -137,3 +137,24 @@ secret, or protection mutation was performed.
 - **Screenshot:** not applicable; this follow-up changes a verifier, tests, and evidence prose, not a
   rendered UI surface.
 - **Recorded at:** `2026-08-01T21:14:13Z` by CodexSmith for Platform PR #560.
+
+## Freshness lifecycle successor proof
+
+- **Required PR/main gate:** structural schema, future skew beyond five minutes, deterministic bytes,
+  and live route/content drift remain fail-closed. Maximum observation age alone cannot block an
+  unrelated source change when the committed evidence still matches the live approved targets.
+- **Freshness gate:** `surfaces:freshness` preserves the seven-day maximum age and the five-minute
+  future bound. It runs daily at `06:17 UTC` and through the explicit
+  `require_surface_freshness` manual input; unrelated manual claim scans do not invoke it.
+- **Scheduled-event safety:** incremental claim drift is restricted to `pull_request` and `push`,
+  the only configured events that provide its governed comparison SHA.
+- **Boundary regressions:** focused tests pass, including old-but-live ordinary validation,
+  seven-day pass and expiry, five-minute future pass, and future-skew rejection in both modes.
+- **Complete verification:** the canonical truth, documentation-claim, and source-of-truth checks
+  pass, together with both live commands, claims drift, proof-chain, Biome, YAML parsing/event
+  assertions, and `git diff --check`.
+- **Remediation:** the operator workflow is documented in
+  `docs/product/public-surface-truth.md`; it requires re-observing every approved target, updating
+  registry evidence, deterministically regenerating artifacts, reviewing the diff, and rerunning
+  the freshness gate.
+- **Recorded at:** `2026-08-01T22:02:07Z` by CodexSmith for canonical successor Platform PR #562.

@@ -286,7 +286,6 @@ export function validatePublicSurfaceRegistry(value: unknown, nowMs = Date.now()
   if (!Number.isFinite(observedAt)) failures.push('observed_at must be a parseable ISO-8601 time');
   else {
     const ageMs = nowMs - observedAt;
-    if (ageMs > MAX_OBSERVATION_AGE_MS) failures.push('observed_at is older than seven days');
     if (ageMs < -MAX_FUTURE_SKEW_MS) {
       failures.push('observed_at is more than five minutes in the future');
     }
@@ -428,6 +427,20 @@ export function validatePublicSurfaceRegistry(value: unknown, nowMs = Date.now()
     }
   }
 
+  return failures;
+}
+
+export function validatePublicSurfaceFreshness(value: unknown, nowMs = Date.now()): string[] {
+  if (!isObject(value)) return ['registry must be an object'];
+  const observedAt = Date.parse(String(value.observed_at));
+  if (!Number.isFinite(observedAt)) return ['observed_at must be a parseable ISO-8601 time'];
+
+  const ageMs = nowMs - observedAt;
+  const failures: string[] = [];
+  if (ageMs > MAX_OBSERVATION_AGE_MS) failures.push('observed_at is older than seven days');
+  if (ageMs < -MAX_FUTURE_SKEW_MS) {
+    failures.push('observed_at is more than five minutes in the future');
+  }
   return failures;
 }
 

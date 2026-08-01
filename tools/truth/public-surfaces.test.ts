@@ -6,6 +6,7 @@ import {
   buildPublicSurfaceManifest,
   type PublicSurface,
   type PublicSurfaceRegistry,
+  validatePublicSurfaceFreshness,
   validatePublicSurfaceManifest,
   validatePublicSurfaceRegistry,
   verifyLivePublicSurfaces,
@@ -180,12 +181,43 @@ test('serializes deterministic repository-formatted audience arrays', () => {
   assert.equal(JSON.parse(serialized).summary.customer_facing_routes, 1);
 });
 
-test('rejects stale observations instead of carrying them forward as current', () => {
+test('keeps old live-compatible evidence out of the structural PR gate', async () => {
   const stale = registry();
   stale.observed_at = new Date(NOW - 7 * 24 * 60 * 60 * 1000 - 1).toISOString();
-  assert.ok(
-    validatePublicSurfaceRegistry(stale, NOW).includes('observed_at is older than seven days'),
+  assert.deepEqual(validatePublicSurfaceRegistry(stale, NOW), []);
+  assert.deepEqual(
+    await verifyLivePublicSurfaces(stale, async () => ({
+      status: 200,
+      url: 'https://a-11-oy.com/',
+    })),
+    [],
   );
+  assert.deepEqual(validatePublicSurfaceFreshness(stale, NOW), [
+    'observed_at is older than seven days',
+  ]);
+});
+
+test('enforces exact observation age and future-skew boundaries', () => {
+  const sevenDaysOld = registry();
+  sevenDaysOld.observed_at = new Date(NOW - 7 * 24 * 60 * 60 * 1000).toISOString();
+  assert.deepEqual(validatePublicSurfaceFreshness(sevenDaysOld, NOW), []);
+
+  const stale = registry();
+  stale.observed_at = new Date(NOW - 7 * 24 * 60 * 60 * 1000 - 1).toISOString();
+  assert.deepEqual(validatePublicSurfaceFreshness(stale, NOW), [
+    'observed_at is older than seven days',
+  ]);
+
+  const fiveMinutesAhead = registry();
+  fiveMinutesAhead.observed_at = new Date(NOW + 5 * 60 * 1000).toISOString();
+  assert.deepEqual(validatePublicSurfaceRegistry(fiveMinutesAhead, NOW), []);
+  assert.deepEqual(validatePublicSurfaceFreshness(fiveMinutesAhead, NOW), []);
+
+  const future = registry();
+  future.observed_at = new Date(NOW + 5 * 60 * 1000 + 1).toISOString();
+  const futureFailure = ['observed_at is more than five minutes in the future'];
+  assert.deepEqual(validatePublicSurfaceRegistry(future, NOW), futureFailure);
+  assert.deepEqual(validatePublicSurfaceFreshness(future, NOW), futureFailure);
 });
 
 test('rejects a reachable claim backed by an HTTP failure', () => {
