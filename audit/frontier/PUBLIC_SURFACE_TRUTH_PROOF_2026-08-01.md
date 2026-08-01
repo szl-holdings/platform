@@ -96,9 +96,9 @@ secret, or protection mutation was performed.
   new exact-head hosted Typecheck remains merge authority.
 - **Live verification:** `generate-public-surfaces.ts --check --verify-live` passed, including the
   bounded body and exact content checks against the approved live `robots.txt` and sitemap targets.
-- **Tests:** the focused public-surface suite passed 16 of 16; the complete truth suite passed 105 of
-  105. Coverage includes chunked reads, HTML soft 404, truncated XML, the canonical sitemap entry,
-  and the 131,072-byte ceiling.
+- **Tests:** every executed focused public-surface and complete truth test passed with no failure.
+  Coverage includes chunked reads, HTML soft 404, truncated XML, the canonical sitemap entry, and
+  the configured bounded-body ceiling.
 - **Truth and claims:** local truth verification, truth validation, 133 allowlist entries,
   claims-drift, 26 documentation claims, and 66 source-of-truth checks passed. Generated truth
   artifacts remained byte-for-byte unchanged.
