@@ -4,8 +4,7 @@ import {
   deriveAxes,
   fluxionsReceiptHolds,
   discriminantForOperators,
-  OPERATIONAL_WORKCELLS,
-  WORKCELL_SOURCE,
+  DEMO_WORKCELLS,
   WORKCELL_MAP,
   TOOL_MAP,
   OPERATOR_MAP,
@@ -16,7 +15,6 @@ import type {
   MirrorEvalScore,
   ProposedAction,
 } from "../src/types/index.js";
-import { SAMPLE_WORKCELLS } from "./fixtures/sample-workcells.js";
 
 // ---- helpers --------------------------------------------------------------
 
@@ -35,37 +33,27 @@ function withMirror(w: Workcell, override: Partial<MirrorEvalScore>): Workcell {
 }
 
 function pickAccepted(): Workcell {
-  // Find a SAMPLE workcell whose default mirror-eval passes Lambda-gate and has a brief.
-  for (const w of SAMPLE_WORKCELLS) {
+  // Find a demo workcell whose default mirror-eval passes Λ-gate AND has a brief
+  for (const w of DEMO_WORKCELLS) {
     if (!w.actionBrief) continue;
     const out = verify({ workcell: w, witnessThreshold: 0 }); // disable witness for picking
     if (out.receipt.verdict === "ACCEPTED" || out.receipt.verdict === "REFUSED_WITNESS_DIVERSITY") {
       return w;
     }
   }
-  throw new Error("no admissible SAMPLE workcell found");
+  throw new Error("no admissible demo workcell found");
 }
 
 // ---- registry sanity ------------------------------------------------------
 
-describe("a11oy operational registry - fail closed", () => {
-  it("exposes no records when an operational source is unavailable", () => {
-    expect(WORKCELL_SOURCE.state).toBe("UNAVAILABLE");
-    expect(WORKCELL_SOURCE.source).toBeNull();
-    expect(WORKCELL_SOURCE.observedAt).toBeNull();
-    expect(OPERATIONAL_WORKCELLS).toHaveLength(0);
-    expect(WORKCELL_MAP).toEqual({});
-  });
-});
-
-describe("a11oy SAMPLE registry - sanity", () => {
-  it("SAMPLE_WORKCELLS contains at least one workcell with an actionBrief", () => {
-    const withBrief = SAMPLE_WORKCELLS.filter((w) => w.actionBrief !== null);
+describe("a11oy registry — sanity", () => {
+  it("DEMO_WORKCELLS contains at least one workcell with an actionBrief", () => {
+    const withBrief = DEMO_WORKCELLS.filter((w) => w.actionBrief !== null);
     expect(withBrief.length).toBeGreaterThan(0);
   });
 
   it("every operator referenced by every workcell is in OPERATOR_MAP", () => {
-    for (const w of SAMPLE_WORKCELLS) {
+    for (const w of DEMO_WORKCELLS) {
       for (const opId of w.operatorSequence) {
         expect(OPERATOR_MAP[opId], `op ${opId} from workcell ${w.id}`).toBeDefined();
       }
@@ -73,7 +61,7 @@ describe("a11oy SAMPLE registry - sanity", () => {
   });
 
   it("every tool referenced by every proposedAction is in TOOL_MAP", () => {
-    for (const w of SAMPLE_WORKCELLS) {
+    for (const w of DEMO_WORKCELLS) {
       if (!w.actionBrief) continue;
       for (const a of w.actionBrief.proposedActions) {
         expect(TOOL_MAP[a.tool], `tool ${a.tool} from workcell ${w.id}`).toBeDefined();
@@ -85,7 +73,7 @@ describe("a11oy SAMPLE registry - sanity", () => {
 // ---- core verify ----------------------------------------------------------
 
 describe("a11oy.verify — spine integration", () => {
-  it("ACCEPTS a clean SAMPLE workcell with strong mirror-eval", () => {
+  it("ACCEPTS a clean demo workcell with strong mirror-eval", () => {
     const w = withMirror(pickAccepted(), {
       groundedness: 0.95,
       evidenceCoverage: 0.95,
@@ -202,12 +190,12 @@ describe("a11oy.verify — spine integration", () => {
   });
 
   it("works on workcells without an actionBrief (early-stage planning)", () => {
-    const intake = SAMPLE_WORKCELLS.find(
+    const intake = DEMO_WORKCELLS.find(
       (w) => w.actionBrief === null && w.operatorSequence.length > 0,
     );
     if (!intake) {
       // construct one
-      const base = cloneWorkcell(SAMPLE_WORKCELLS[0] as Workcell);
+      const base = cloneWorkcell(DEMO_WORKCELLS[0] as Workcell);
       base.actionBrief = null;
       base.status = "intake";
       const out = verify({ workcell: base, witnessThreshold: 0 });
@@ -224,7 +212,7 @@ describe("a11oy.verify — spine integration", () => {
 
 describe("a11oy.deriveAxes — Λ₉ derivation", () => {
   it("all 9 axes are in [0,1]", () => {
-    for (const w of SAMPLE_WORKCELLS) {
+    for (const w of DEMO_WORKCELLS) {
       const axes = deriveAxes(w);
       for (const [k, v] of Object.entries(axes)) {
         expect(v, `axis ${k} on workcell ${w.id}`).toBeGreaterThanOrEqual(0);
@@ -245,18 +233,18 @@ describe("a11oy.deriveAxes — Λ₉ derivation", () => {
 
 describe("a11oy.fluxionsReceiptHolds — tool-risk consistency", () => {
   it("vacuously true when no actionBrief is present", () => {
-    const w = cloneWorkcell(SAMPLE_WORKCELLS[0] as Workcell);
+    const w = cloneWorkcell(DEMO_WORKCELLS[0] as Workcell);
     w.actionBrief = null;
     expect(fluxionsReceiptHolds(w)).toBe(true);
   });
 
-  it("true for the unmodified SAMPLE workcells (fixture is self-consistent)", () => {
-    for (const w of SAMPLE_WORKCELLS) {
-      // SAMPLE data should be coherent - every proposed action's tool exists.
+  it("true for the unmodified demo workcells (registry is self-consistent)", () => {
+    for (const w of DEMO_WORKCELLS) {
+      // Demo data should be coherent — every proposed action's tool exists.
       const holds = fluxionsReceiptHolds(w);
       if (!holds) {
         // surface which workcell is broken for diagnosis
-        throw new Error(`SAMPLE workcell ${w.id} fails fluxionsReceipt`);
+        throw new Error(`demo workcell ${w.id} fails fluxionsReceipt`);
       }
       expect(holds).toBe(true);
     }
@@ -285,7 +273,7 @@ describe("a11oy.fluxionsReceiptHolds — tool-risk consistency", () => {
 
 describe("a11oy.discriminantForOperators — Gauss discriminant builder", () => {
   it("returns d < 0 and d ≡ 0 or 1 (mod 4)", () => {
-    for (const w of SAMPLE_WORKCELLS) {
+    for (const w of DEMO_WORKCELLS) {
       const d = discriminantForOperators(w.operatorSequence);
       expect(d).toBeLessThan(0);
       const mod4 = ((d % 4) + 4) % 4;
@@ -309,9 +297,9 @@ describe("a11oy.discriminantForOperators — Gauss discriminant builder", () => 
 
 // ---- end-to-end ------------------------------------------------------------
 
-describe("a11oy verify - end-to-end on the SAMPLE registry", () => {
-  it("can run on every SAMPLE workcell without throwing", () => {
-    for (const w of SAMPLE_WORKCELLS) {
+describe("a11oy verify — end-to-end on the demo registry", () => {
+  it("can run on every demo workcell without throwing", () => {
+    for (const w of DEMO_WORKCELLS) {
       const out = verify({ workcell: w, witnessThreshold: 0 });
       expect(out.receipt.receiptDigest).toMatch(/^[a-f0-9]{64}$/);
       expect(typeof out.classNumberValue).toBe("number");
@@ -319,4 +307,9 @@ describe("a11oy verify - end-to-end on the SAMPLE registry", () => {
     }
   });
 
+  it("WORKCELL_MAP and DEMO_WORKCELLS are aligned", () => {
+    for (const w of DEMO_WORKCELLS) {
+      expect(WORKCELL_MAP[w.id]).toBe(w);
+    }
+  });
 });
