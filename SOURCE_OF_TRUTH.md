@@ -73,6 +73,20 @@ PLANNED, and conformance status require separate evidence.
 
 ---
 
+## Public Surface Reachability Snapshot
+
+The generated [`artifacts/PUBLIC_SURFACES.json`](artifacts/PUBLIC_SURFACES.json) currently records
+**12 customer-facing routed web surfaces**. This count includes only reviewed `WEB` entries for an
+investor or developer audience whose measured availability is `REACHABLE` or `REDIRECTED`.
+
+The manifest also preserves unrouted historical paths and missing `a11oy.net` routes as explicit
+`UNAVAILABLE` records. Route reachability does not prove uptime, customer use, feature
+completeness, correctness, or that mixed-mode content is live. See
+[`docs/product/public-surface-truth.md`](docs/product/public-surface-truth.md) for the evidence
+vocabulary and refresh procedure.
+
+---
+
 ## Doctrine v11 — Locked Metrics
 
 Doctrine v11 is a frozen kernel contract tied to commit `c7c0ba17`. These

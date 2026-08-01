@@ -40,6 +40,9 @@ jobs:
       - name: Install locked dependencies
         run: pnpm install --frozen-lockfile
 
+      - name: Verify public surface manifest and live route evidence
+        run: pnpm surfaces:check
+
       - name: Verify deterministic local truth
         run: pnpm truth:generate -- --verify-local
 
@@ -63,4 +66,4 @@ jobs:
         run: node tools/truth/check-claims.ts --all
 
       - name: Reject source-of-truth drift
-        run: git diff --exit-code -- artifacts/SOURCE_OF_TRUTH.json
+        run: git diff --exit-code -- artifacts/SOURCE_OF_TRUTH.json artifacts/PUBLIC_SURFACES.json
