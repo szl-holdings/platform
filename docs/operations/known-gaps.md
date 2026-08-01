@@ -21,8 +21,9 @@ This closes the zero-manifest tooling gap, not every web gap. The historical `/l
 HTTP 404 and remain explicit `UNAVAILABLE` records. `a11oy.net/chat`, `a11oy.net/code`, and
 `manifest.webmanifest` also remain `UNAVAILABLE`. The independently measured `robots.txt` and
 `sitemap.xml` files now return their expected machine-readable content and are recorded as
-`REACHABLE` metadata; they are not customer-facing surfaces and do not change the routed-product
-count. A routed page is not an uptime, customer, feature-completeness, or correctness claim;
+`REACHABLE` metadata; they are not customer-facing product surfaces and do not change the
+routed-product count. A routed page is not an uptime, customer, feature-completeness, or
+correctness claim;
 `LIVE`, `MIXED`, and `DOCUMENTATION` modes retain that boundary.
 
 The existing `truth-drift` job validates schema, seven-day freshness, deterministic generated
