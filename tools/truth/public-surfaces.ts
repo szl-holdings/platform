@@ -72,6 +72,7 @@ const ALLOWED_OWNER_ROLES = new Set<SourceOwnerRole>([
 ]);
 const MAX_OBSERVATION_AGE_MS = 7 * 24 * 60 * 60 * 1000;
 const MAX_FUTURE_SKEW_MS = 5 * 60 * 1000;
+const MAX_METADATA_BODY_BYTES = 128 * 1024;
 
 type ApprovedSurfaceTarget = Readonly<{
   canonicalUrl: string;
@@ -472,13 +473,155 @@ export function validatePublicSurfaceManifest(value: unknown, nowMs = Date.now()
 type SurfaceFetchResponse = {
   status: number;
   url: string;
-  body?: { cancel: () => Promise<void> } | null;
+  body?: {
+    cancel: () => Promise<void>;
+    getReader?: () => {
+      read: () => Promise<{ done: boolean; value?: Uint8Array }>;
+      cancel: () => Promise<void>;
+      releaseLock?: () => void;
+    };
+  } | null;
   headers?: { get: (name: string) => string | null };
 };
 export type SurfaceFetch = (
   url: string,
   init: { method: 'GET'; redirect: 'manual'; signal: AbortSignal },
 ) => Promise<SurfaceFetchResponse>;
+
+async function cancelResponseBody(response: SurfaceFetchResponse): Promise<void> {
+  await response.body?.cancel();
+}
+
+async function readBoundedResponseBody(
+  surfaceId: string,
+  response: SurfaceFetchResponse,
+): Promise<{ text: string | null; failure: string | null }> {
+  const contentLength = response.headers?.get('content-length');
+  if (contentLength && /^\d+$/.test(contentLength)) {
+    const declaredBytes = Number(contentLength);
+    if (declaredBytes > MAX_METADATA_BODY_BYTES) {
+      await cancelResponseBody(response);
+      return {
+        text: null,
+        failure: `${surfaceId}: metadata body exceeds ${MAX_METADATA_BODY_BYTES} bytes`,
+      };
+    }
+  }
+
+  const reader = response.body?.getReader?.();
+  if (!reader) {
+    await cancelResponseBody(response);
+    return { text: null, failure: `${surfaceId}: metadata response body is unavailable` };
+  }
+
+  const chunks: Uint8Array[] = [];
+  let totalBytes = 0;
+  try {
+    while (true) {
+      const { done, value } = await reader.read();
+      if (done) break;
+      if (!value) continue;
+      totalBytes += value.byteLength;
+      if (totalBytes > MAX_METADATA_BODY_BYTES) {
+        await reader.cancel();
+        return {
+          text: null,
+          failure: `${surfaceId}: metadata body exceeds ${MAX_METADATA_BODY_BYTES} bytes`,
+        };
+      }
+      chunks.push(value);
+    }
+  } finally {
+    reader.releaseLock?.();
+  }
+
+  const bodyBytes = new Uint8Array(totalBytes);
+  let offset = 0;
+  for (const chunk of chunks) {
+    bodyBytes.set(chunk, offset);
+    offset += chunk.byteLength;
+  }
+
+  try {
+    return { text: new TextDecoder('utf-8', { fatal: true }).decode(bodyBytes), failure: null };
+  } catch {
+    return { text: null, failure: `${surfaceId}: metadata body is not valid UTF-8` };
+  }
+}
+
+function hasBalancedXmlElements(xml: string): boolean {
+  const stack: string[] = [];
+  const tags = xml.match(/<[^>]+>/g) ?? [];
+  for (const tag of tags) {
+    if (/^<\?/.test(tag) || /^<!--/.test(tag)) continue;
+    if (/^<!/i.test(tag)) return false;
+
+    const closing = tag.match(/^<\/([A-Za-z_][\w:.-]*)\s*>$/);
+    if (closing) {
+      if (stack.pop() !== closing[1]) return false;
+      continue;
+    }
+
+    const opening = tag.match(/^<([A-Za-z_][\w:.-]*)(?:\s[^<>]*)?\s*\/?>$/);
+    if (!opening) return false;
+    if (!/\/>$/.test(tag)) stack.push(opening[1]);
+  }
+  return stack.length === 0;
+}
+
+async function validateMetadataResponse(
+  surfaceId: string,
+  response: SurfaceFetchResponse,
+): Promise<string[]> {
+  const contentType = response.headers?.get('content-type')?.toLowerCase() ?? '';
+  const { text, failure } = await readBoundedResponseBody(surfaceId, response);
+  if (failure || text === null) return [failure ?? `${surfaceId}: metadata body is unavailable`];
+
+  const body = text.replace(/^\uFEFF/, '').trim();
+  if (body.length === 0) return [`${surfaceId}: metadata body is empty`];
+  if (/<!doctype\s+html|<html(?:\s|>)/i.test(body)) {
+    return [`${surfaceId}: metadata body is an HTML response`];
+  }
+
+  if (surfaceId === 'a11oy-net-robots-gap') {
+    if (!contentType.startsWith('text/plain')) {
+      return [`${surfaceId}: expected a text/plain response, observed ${contentType || 'missing'}`];
+    }
+    const lines = body.split(/\r?\n/).map((line) => line.trim());
+    const hasCrawlerPolicy = lines.some((line) => /^user-agent:\s*\*$/i.test(line));
+    const hasCanonicalSitemap = lines.some((line) =>
+      /^sitemap:\s*https:\/\/a11oy\.net\/sitemap\.xml$/i.test(line),
+    );
+    if (!hasCrawlerPolicy || !hasCanonicalSitemap) {
+      return [`${surfaceId}: robots metadata must declare User-agent: * and the canonical sitemap`];
+    }
+    return [];
+  }
+
+  if (surfaceId === 'a11oy-net-sitemap-gap') {
+    if (!/^(?:application|text)\/(?:[a-z0-9.+-]+\+)?xml(?:;|$)/i.test(contentType)) {
+      return [`${surfaceId}: expected an XML response, observed ${contentType || 'missing'}`];
+    }
+    if (/<!doctype/i.test(body) || !hasBalancedXmlElements(body)) {
+      return [`${surfaceId}: sitemap metadata is not well-formed XML`];
+    }
+    const withoutDeclaration = body.replace(/^<\?xml[^?]*\?>\s*/i, '');
+    if (
+      !/^<urlset\b[^>]*\bxmlns=["']http:\/\/www\.sitemaps\.org\/schemas\/sitemap\/0\.9["'][^>]*>/.test(
+        withoutDeclaration,
+      ) ||
+      !/<url(?:\s|>)[\s\S]*?<loc>\s*https:\/\/a11oy\.net\/\s*<\/loc>[\s\S]*?<\/url>/.test(
+        withoutDeclaration,
+      ) ||
+      !/<\/urlset>\s*$/.test(withoutDeclaration)
+    ) {
+      return [`${surfaceId}: sitemap metadata lacks the canonical urlset entry`];
+    }
+    return [];
+  }
+
+  return [`${surfaceId}: routed metadata has no body validator`];
+}
 
 export async function verifyLivePublicSurfaces(
   registry: PublicSurfaceRegistry,
@@ -495,20 +638,18 @@ export async function verifyLivePublicSurfaces(
         const approvedTarget = approvedTargetFor(surface.id);
         if (!approvedTarget) return [`${surface.id}: no approved live probe target`];
 
-        const request = async (url: string): Promise<SurfaceFetchResponse> => {
-          const response = await fetchSurface(url, {
+        const request = async (url: string): Promise<SurfaceFetchResponse> =>
+          fetchSurface(url, {
             method: 'GET',
             redirect: 'manual',
             signal: AbortSignal.timeout(15_000),
           });
-          await response.body?.cancel();
-          return response;
-        };
 
         const firstResponse = await request(approvedTarget.canonicalUrl);
         let response = firstResponse;
         if (approvedTarget.canonicalUrl !== approvedTarget.finalUrl) {
           if (firstResponse.status < 300 || firstResponse.status >= 400) {
+            await cancelResponseBody(firstResponse);
             return [
               `${surface.id}: expected an approved redirect from ${approvedTarget.canonicalUrl}`,
             ];
@@ -518,12 +659,15 @@ export async function verifyLivePublicSurfaces(
             ? normalizedUrl(new URL(location, approvedTarget.canonicalUrl).toString())
             : null;
           if (redirectTarget !== approvedTarget.finalUrl) {
+            await cancelResponseBody(firstResponse);
             return [
               `${surface.id}: expected redirect to ${approvedTarget.finalUrl}, observed ${String(location)}`,
             ];
           }
+          await cancelResponseBody(firstResponse);
           response = await request(approvedTarget.finalUrl);
         } else if (firstResponse.status >= 300 && firstResponse.status < 400) {
+          await cancelResponseBody(firstResponse);
           return [`${surface.id}: unexpected redirect from approved final destination`];
         }
 
@@ -538,6 +682,16 @@ export async function verifyLivePublicSurfaces(
           failures.push(
             `${surface.id}: expected final URL ${approvedTarget.finalUrl}, observed ${response.url}`,
           );
+        }
+        if (
+          surface.kind === 'METADATA' &&
+          surface.availability !== 'UNAVAILABLE' &&
+          response.status >= 200 &&
+          response.status < 300
+        ) {
+          failures.push(...(await validateMetadataResponse(surface.id, response)));
+        } else {
+          await cancelResponseBody(response);
         }
         return failures;
       } catch (error) {
