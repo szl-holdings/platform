@@ -1,5 +1,8 @@
 import assert from 'node:assert/strict';
+import { readFileSync } from 'node:fs';
 import test from 'node:test';
+
+import YAML from 'yaml';
 
 import { serializeManifest } from './generate-public-surfaces.js';
 import {
@@ -181,29 +184,80 @@ test('serializes deterministic repository-formatted audience arrays', () => {
   assert.equal(JSON.parse(serialized).summary.customer_facing_routes, 1);
 });
 
-test('accepts an honest historical snapshot during ordinary schema validation', () => {
+test('keeps old live-compatible evidence out of the structural PR gate', async () => {
   const stale = registry();
   stale.observed_at = new Date(NOW - 7 * 24 * 60 * 60 * 1000 - 1).toISOString();
   assert.deepEqual(validatePublicSurfaceRegistry(stale, NOW), []);
-});
-
-test('continues to reject observations beyond the allowed future clock skew', () => {
-  const future = registry();
-  future.observed_at = new Date(NOW + 5 * 60 * 1000 + 1).toISOString();
-  assert.ok(
-    validatePublicSurfaceRegistry(future, NOW).includes(
-      'observed_at is more than five minutes in the future',
-    ),
+  assert.deepEqual(
+    await verifyLivePublicSurfaces(stale, async () => ({
+      status: 200,
+      url: 'https://a-11-oy.com/',
+    })),
+    [],
   );
+  assert.deepEqual(validatePublicSurfaceObservationFreshness(stale, NOW), [
+    'observed_at is older than seven days',
+  ]);
 });
 
-test('retains an explicit freshness audit for consumers that require recent evidence', () => {
+test('enforces exact observation age and future-skew boundaries', () => {
+  const sevenDaysOld = registry();
+  sevenDaysOld.observed_at = new Date(NOW - 7 * 24 * 60 * 60 * 1000).toISOString();
+  assert.deepEqual(validatePublicSurfaceObservationFreshness(sevenDaysOld, NOW), []);
+
   const stale = registry();
   stale.observed_at = new Date(NOW - 7 * 24 * 60 * 60 * 1000 - 1).toISOString();
-  assert.ok(
-    validatePublicSurfaceObservationFreshness(stale, NOW).includes(
-      'observed_at is older than seven days',
-    ),
+  assert.deepEqual(validatePublicSurfaceObservationFreshness(stale, NOW), [
+    'observed_at is older than seven days',
+  ]);
+
+  const fiveMinutesAhead = registry();
+  fiveMinutesAhead.observed_at = new Date(NOW + 5 * 60 * 1000).toISOString();
+  assert.deepEqual(validatePublicSurfaceRegistry(fiveMinutesAhead, NOW), []);
+  assert.deepEqual(validatePublicSurfaceObservationFreshness(fiveMinutesAhead, NOW), []);
+
+  const future = registry();
+  future.observed_at = new Date(NOW + 5 * 60 * 1000 + 1).toISOString();
+  const futureFailure = ['observed_at is more than five minutes in the future'];
+  assert.deepEqual(validatePublicSurfaceRegistry(future, NOW), futureFailure);
+  assert.deepEqual(validatePublicSurfaceObservationFreshness(future, NOW), futureFailure);
+});
+
+test('wires freshness only to scheduled and explicit manual events', () => {
+  const workflow = YAML.parse(readFileSync('.github/workflows/truth-drift.yml', 'utf8')) as {
+    on: {
+      schedule: Array<{ cron: string }>;
+      workflow_dispatch: {
+        inputs: { require_surface_freshness: { default: boolean; type: string } };
+      };
+    };
+    jobs: { 'truth-drift': { steps: Array<{ name?: string; if?: string; run?: string }> } };
+  };
+
+  assert.deepEqual(workflow.on.schedule, [{ cron: '17 6 * * *' }]);
+  assert.deepEqual(workflow.on.workflow_dispatch.inputs.require_surface_freshness, {
+    description: 'Require the public surface observation to be no older than seven days',
+    required: false,
+    default: false,
+    type: 'boolean',
+  });
+
+  const freshness = workflow.jobs['truth-drift'].steps.find(
+    (step) => step.name === 'Require a current public surface observation',
+  );
+  assert.equal(freshness?.run, 'pnpm surfaces:freshness');
+  assert.equal(
+    freshness?.if,
+    "github.event_name == 'schedule' || " +
+      "(github.event_name == 'workflow_dispatch' && inputs.require_surface_freshness)",
+  );
+
+  const incremental = workflow.jobs['truth-drift'].steps.find(
+    (step) => step.name === 'Reject newly introduced claim drift',
+  );
+  assert.equal(
+    incremental?.if,
+    "github.event_name == 'pull_request' || github.event_name == 'push'",
   );
 });
 

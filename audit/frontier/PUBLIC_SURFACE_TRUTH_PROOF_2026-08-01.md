@@ -182,3 +182,19 @@ non-documentation product count.
 This follow-up was recorded at `2026-08-01T22:28:54Z`. It changes documentation and proof binding
 only; the generated registry, manifest, route probes, freshness implementation, and public runtime
 remain unchanged.
+
+## Automated freshness lifecycle successor
+
+Protected Platform main `ba2f958d3b003e08c7618820bc7fde4c76f32fcf` preserves the corrected
+public-surface registry, live route verification, immutable observation timestamps, and separate
+`surfaces:freshness` implementation from PR #564. This successor wires that existing audit into a
+daily `06:17 UTC` schedule and an explicit `require_surface_freshness` manual input. PR and main
+checks continue to reject malformed timestamps, excessive future skew, generated-byte drift, and
+live route/content drift without expiring an honest historical snapshot solely because of age.
+
+Incremental claim drift now runs only for `pull_request` and `push`, the configured events that
+provide its governed comparison SHA. Focused regressions bind the exact seven-day and five-minute
+boundaries, prove old-but-live evidence remains valid in the ordinary gate, and parse the workflow
+to require the scheduled/manual freshness command and the PR/push-only incremental condition.
+Operator documentation records the deterministic evidence-refresh and review procedure. No route,
+runtime, deployment, DNS, secret, ruleset, or protection setting changes in this successor.

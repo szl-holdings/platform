@@ -4,10 +4,17 @@ on:
   pull_request:
   push:
     branches: [main]
+  schedule:
+    - cron: '17 6 * * *'
   workflow_dispatch:
     inputs:
       full_claim_scan:
         description: Scan the full tracked claim corpus, including legacy debt
+        required: false
+        default: false
+        type: boolean
+      require_surface_freshness:
+        description: Require the public surface observation to be no older than seven days
         required: false
         default: false
         type: boolean
@@ -43,6 +50,12 @@ jobs:
       - name: Verify public surface manifest and live route evidence
         run: pnpm surfaces:check
 
+      - name: Require a current public surface observation
+        if: >-
+          github.event_name == 'schedule' ||
+          (github.event_name == 'workflow_dispatch' && inputs.require_surface_freshness)
+        run: pnpm surfaces:freshness
+
       - name: Verify deterministic local truth
         run: pnpm truth:generate -- --verify-local
 
@@ -56,7 +69,8 @@ jobs:
         run: pnpm claims:drift
 
       - name: Reject newly introduced claim drift
-        if: github.event_name != 'workflow_dispatch'
+        # Only these events provide the governed comparison SHA used below.
+        if: github.event_name == 'pull_request' || github.event_name == 'push'
         env:
           BASE_SHA: ${{ github.event.pull_request.base.sha || github.event.before }}
         run: node tools/truth/check-claims.ts --base "$BASE_SHA"
