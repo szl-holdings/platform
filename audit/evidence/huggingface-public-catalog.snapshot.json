@@ -1,7 +1,7 @@
 {
   "schema": "szl.hf-catalog-snapshot/v1",
   "organization": "SZLHOLDINGS",
-  "observedAt": "2026-07-26T00:23:43.853Z",
+  "observedAt": "2026-08-02T03:04:26.148Z",
   "evidenceLabel": "MEASURED",
   "source": {
     "apiBase": "https://huggingface.co/api",
@@ -11,7 +11,7 @@
   },
   "assets": {
     "models": {
-      "count": 15,
+      "count": 16,
       "ids": [
         "SZLHOLDINGS/SZL-Forge-1.5B-ReceiptAgent",
         "SZLHOLDINGS/SZL-Khipu-1.5B",
@@ -27,12 +27,13 @@
         "SZLHOLDINGS/szl-lambda-gate",
         "SZLHOLDINGS/szl-nemo",
         "SZLHOLDINGS/szl-ouroboros",
-        "SZLHOLDINGS/szl-provctl"
+        "SZLHOLDINGS/szl-provctl",
+        "SZLHOLDINGS/szl-receiptagent-qwen35-0.8b-v2"
       ],
       "pages": 1
     },
     "datasets": {
-      "count": 26,
+      "count": 27,
       "ids": [
         "SZLHOLDINGS/SZLHOLDINGS",
         "SZLHOLDINGS/a11oy-verifiable-corpus",
@@ -40,6 +41,7 @@
         "SZLHOLDINGS/canonical-formulas-v1",
         "SZLHOLDINGS/doctrine-v10-v11",
         "SZLHOLDINGS/energy-attested-runs",
+        "SZLHOLDINGS/governed-agent-bench",
         "SZLHOLDINGS/governed-receipts-bench",
         "SZLHOLDINGS/k-verify-benchmark-v1",
         "SZLHOLDINGS/killinchu-osint-corpus",
@@ -64,7 +66,7 @@
       "pages": 1
     },
     "spaces": {
-      "count": 25,
+      "count": 26,
       "ids": [
         "SZLHOLDINGS/a11oy",
         "SZLHOLDINGS/anatomy",
@@ -72,6 +74,7 @@
         "SZLHOLDINGS/david-leads",
         "SZLHOLDINGS/energy-attest-holo",
         "SZLHOLDINGS/energy-attested-runs",
+        "SZLHOLDINGS/governed-agent-bench",
         "SZLHOLDINGS/governed-norm-holo",
         "SZLHOLDINGS/governed-receipt-verifier",
         "SZLHOLDINGS/guardrail-receipt",
