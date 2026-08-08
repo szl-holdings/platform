@@ -6,13 +6,13 @@
 > (vulnerability identification, remediation, and documented risk acceptance) and to
 > provide an auditable trail of transitive / unfixable vulnerabilities.
 >
-> Maintained by: Yachay (CTO), SZL Holdings. Last triage: 2026-06-01.
+> Maintained by: Yachay (CTO), SZL Holdings. Last triage: 2026-08-08.
 > Source of truth for live alerts: GitHub Security tab (Code Scanning / Dependabot /
 > Secret Scanning) on `szl-holdings/platform`.
 
 ---
 
-## 1. Triage summary (2026-06-01)
+## 1. Triage summary (2026-08-08)
 
 | Source | Open | Notes |
 |---|---|---|
@@ -53,6 +53,8 @@ here as **accepted/deferred risk** with the listed mitigations.
 | GHSA-r73j-pqj5-w3x7 | Transitive; deferred pending upstream fix. |
 | GHSA-whj4-6x5x-4v2j | Transitive; deferred pending upstream fix. |
 | PYSEC-2026-165 / GHSA-wjx4-4jcj-g98j | Transitive; recent advisory, fix tracked for next dependency sweep. |
+| GHSA-w3rx-r6r6-pgpr | Image-size parser DOS (ICNS). No fixed upstream transitive replacement today; build-time-only mobile image parsing path. |
+| GHSA-5p2g-fcmc-qvqq | Image-size parser DOS (JXL/HEIF). No fixed upstream transitive replacement today; build-time-only mobile image parsing path. |
 
 **Compensating controls (apply broadly to the above):**
 - Inference/eval workloads run in network-isolated containers (no inbound, egress allow-listed).
