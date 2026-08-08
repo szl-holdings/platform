@@ -1,25 +1,21 @@
-import { describe, it, expect } from "vitest";
+import { describe, expect, it } from 'vitest';
 import {
-  verify,
   deriveAxes,
-  fluxionsReceiptHolds,
   discriminantForOperators,
-  TOOL_MAP,
-  OPERATOR_MAP,
-  OPERATIONAL_WORKCELLS,
-  WORKCELL_SOURCE,
+  fluxionsReceiptHolds,
   getOperationalWorkcells,
-} from "../src/index.js";
+  WORKCELL_MAP as OPERATIONAL_WORKCELL_MAP,
+  OPERATIONAL_WORKCELLS,
+  OPERATOR_MAP,
+  TOOL_MAP,
+  verify,
+  WORKCELL_SOURCE,
+} from '../src/index.js';
+import type { ActionBrief, MirrorEvalScore, ProposedAction, Workcell } from '../src/types/index.js';
 import {
+  TEST_WORKCELL_MAP as DEMO_WORKCELL_MAP,
   TEST_DEMO_WORKCELLS as DEMO_WORKCELLS,
-  TEST_WORKCELL_MAP as WORKCELL_MAP,
-} from "./fixtures/demo-workcells.js";
-import type {
-  Workcell,
-  ActionBrief,
-  MirrorEvalScore,
-  ProposedAction,
-} from "../src/types/index.js";
+} from './fixtures/demo-workcells.js';
 
 // ---- helpers --------------------------------------------------------------
 
@@ -42,18 +38,18 @@ function pickAccepted(): Workcell {
   for (const w of DEMO_WORKCELLS) {
     if (!w.actionBrief) continue;
     const out = verify({ workcell: w, witnessThreshold: 0 }); // disable witness for picking
-    if (out.receipt.verdict === "ACCEPTED" || out.receipt.verdict === "REFUSED_WITNESS_DIVERSITY") {
+    if (out.receipt.verdict === 'ACCEPTED' || out.receipt.verdict === 'REFUSED_WITNESS_DIVERSITY') {
       return w;
     }
   }
-  throw new Error("no admissible demo workcell found");
+  throw new Error('no admissible demo workcell found');
 }
 
 // ---- production source boundary ------------------------------------------
 
-describe("a11oy operational workcell source — fail closed", () => {
-  it("publishes an immutable UNAVAILABLE result without sample records", () => {
-    expect(WORKCELL_SOURCE.state).toBe("UNAVAILABLE");
+describe('a11oy operational workcell source — fail closed', () => {
+  it('publishes an immutable UNAVAILABLE result without sample records', () => {
+    expect(WORKCELL_SOURCE.state).toBe('UNAVAILABLE');
     expect(WORKCELL_SOURCE.source).toBeNull();
     expect(WORKCELL_SOURCE.observedAt).toBeNull();
     expect(WORKCELL_SOURCE.records).toBe(OPERATIONAL_WORKCELLS);
@@ -62,17 +58,25 @@ describe("a11oy operational workcell source — fail closed", () => {
     expect(Object.isFrozen(WORKCELL_SOURCE)).toBe(true);
     expect(getOperationalWorkcells()).toBe(WORKCELL_SOURCE);
   });
+
+  it('returns undefined for unknown operational-workcell IDs', () => {
+    expect(OPERATIONAL_WORKCELL_MAP['non-existent-key']).toBeUndefined();
+  });
+
+  it('fails closed for unknown fixture lookup keys', () => {
+    expect(DEMO_WORKCELL_MAP['non-existent-key']).toBeUndefined();
+  });
 });
 
 // ---- test-only sample registry sanity ------------------------------------
 
-describe("a11oy registry — sanity", () => {
-  it("DEMO_WORKCELLS contains at least one workcell with an actionBrief", () => {
+describe('a11oy registry — sanity', () => {
+  it('DEMO_WORKCELLS contains at least one workcell with an actionBrief', () => {
     const withBrief = DEMO_WORKCELLS.filter((w) => w.actionBrief !== null);
     expect(withBrief.length).toBeGreaterThan(0);
   });
 
-  it("every operator referenced by every workcell is in OPERATOR_MAP", () => {
+  it('every operator referenced by every workcell is in OPERATOR_MAP', () => {
     for (const w of DEMO_WORKCELLS) {
       for (const opId of w.operatorSequence) {
         expect(OPERATOR_MAP[opId], `op ${opId} from workcell ${w.id}`).toBeDefined();
@@ -80,7 +84,7 @@ describe("a11oy registry — sanity", () => {
     }
   });
 
-  it("every tool referenced by every proposedAction is in TOOL_MAP", () => {
+  it('every tool referenced by every proposedAction is in TOOL_MAP', () => {
     for (const w of DEMO_WORKCELLS) {
       if (!w.actionBrief) continue;
       for (const a of w.actionBrief.proposedActions) {
@@ -92,8 +96,8 @@ describe("a11oy registry — sanity", () => {
 
 // ---- core verify ----------------------------------------------------------
 
-describe("a11oy.verify — spine integration", () => {
-  it("ACCEPTS a clean demo workcell with strong mirror-eval", () => {
+describe('a11oy.verify — spine integration', () => {
+  it('ACCEPTS a clean demo workcell with strong mirror-eval', () => {
     const w = withMirror(pickAccepted(), {
       groundedness: 0.95,
       evidenceCoverage: 0.95,
@@ -106,13 +110,13 @@ describe("a11oy.verify — spine integration", () => {
       hallucinationRisk: 0.04,
     });
     const out = verify({ workcell: w, witnessThreshold: 0 });
-    expect(out.receipt.verdict).toBe("ACCEPTED");
-    expect(out.signal.kind).toBe("admit");
+    expect(out.receipt.verdict).toBe('ACCEPTED');
+    expect(out.signal.kind).toBe('admit');
     expect(out.receipt.receiptDigest).toMatch(/^[a-f0-9]{64}$/);
     expect(out.lutar.invariant).toBeGreaterThan(0.5);
   });
 
-  it("REFUSES at Λ-gate when mirror-eval is poor", () => {
+  it('REFUSES at Λ-gate when mirror-eval is poor', () => {
     const w = withMirror(pickAccepted(), {
       groundedness: 0.05,
       evidenceCoverage: 0.05,
@@ -125,49 +129,49 @@ describe("a11oy.verify — spine integration", () => {
       hallucinationRisk: 0.95,
     });
     const out = verify({ workcell: w, witnessThreshold: 0 });
-    expect(out.receipt.verdict).toBe("REFUSED_LAMBDA_GATE");
-    expect(out.signal.kind).toBe("refuse");
+    expect(out.receipt.verdict).toBe('REFUSED_LAMBDA_GATE');
+    expect(out.signal.kind).toBe('refuse');
   });
 
-  it("REFUSES on fluxions bare-claim: unknown tool in proposedActions", () => {
+  it('REFUSES on fluxions bare-claim: unknown tool in proposedActions', () => {
     const w = cloneWorkcell(pickAccepted());
     const brief = w.actionBrief as ActionBrief;
     const bogus: ProposedAction = {
-      id: "bogus-1",
-      tool: "tool_that_does_not_exist",
-      description: "ghost tool",
-      riskLevel: "low",
+      id: 'bogus-1',
+      tool: 'tool_that_does_not_exist',
+      description: 'ghost tool',
+      riskLevel: 'low',
       requiresApproval: false,
-      expectedOutcome: "n/a",
+      expectedOutcome: 'n/a',
     };
     brief.proposedActions = [...brief.proposedActions, bogus];
     const out = verify({ workcell: w, witnessThreshold: 0 });
-    expect(out.receipt.verdict).toBe("REFUSED_FLUXIONS_BARE_CLAIM");
+    expect(out.receipt.verdict).toBe('REFUSED_FLUXIONS_BARE_CLAIM');
   });
 
-  it("REFUSES on fluxions bare-claim: high-risk tool without requiresApproval", () => {
+  it('REFUSES on fluxions bare-claim: high-risk tool without requiresApproval', () => {
     const w = cloneWorkcell(pickAccepted());
     const brief = w.actionBrief as ActionBrief;
     // Find a high/critical-risk tool from registry
     const critical = Object.values(TOOL_MAP).find(
-      (t) => t.risk === "high" || t.risk === "critical",
+      (t) => t.risk === 'high' || t.risk === 'critical',
     );
-    if (!critical) throw new Error("registry lacks high-risk tool — fixture broken");
+    if (!critical) throw new Error('registry lacks high-risk tool — fixture broken');
     brief.proposedActions = [
       {
-        id: "claim-down-1",
+        id: 'claim-down-1',
         tool: critical.id,
-        description: "bare claim on critical tool",
-        riskLevel: "low", // claim-down
+        description: 'bare claim on critical tool',
+        riskLevel: 'low', // claim-down
         requiresApproval: false, // no approval
-        expectedOutcome: "should be refused",
+        expectedOutcome: 'should be refused',
       },
     ];
     const out = verify({ workcell: w, witnessThreshold: 0 });
-    expect(out.receipt.verdict).toBe("REFUSED_FLUXIONS_BARE_CLAIM");
+    expect(out.receipt.verdict).toBe('REFUSED_FLUXIONS_BARE_CLAIM');
   });
 
-  it("REFUSES at witness-diversity gate when threshold is set very high", () => {
+  it('REFUSES at witness-diversity gate when threshold is set very high', () => {
     const w = withMirror(pickAccepted(), {
       groundedness: 0.95,
       evidenceCoverage: 0.95,
@@ -180,18 +184,18 @@ describe("a11oy.verify — spine integration", () => {
       hallucinationRisk: 0.04,
     });
     const out = verify({ workcell: w, witnessThreshold: 1.5 }); // unreachable
-    expect(out.receipt.verdict).toBe("REFUSED_WITNESS_DIVERSITY");
+    expect(out.receipt.verdict).toBe('REFUSED_WITNESS_DIVERSITY');
     expect(out.receipt.witnessDiversity?.admitted).toBe(false);
   });
 
-  it("identical inputs yield identical receipt digests (deterministic)", () => {
+  it('identical inputs yield identical receipt digests (deterministic)', () => {
     const w = pickAccepted();
     const a = verify({ workcell: w, witnessThreshold: 0 });
     const b = verify({ workcell: w, witnessThreshold: 0 });
     expect(a.receipt.receiptDigest).toBe(b.receipt.receiptDigest);
   });
 
-  it("Λ₉ bound holds for every accepted receipt", () => {
+  it('Λ₉ bound holds for every accepted receipt', () => {
     const w = withMirror(pickAccepted(), {
       groundedness: 0.95,
       evidenceCoverage: 0.95,
@@ -204,12 +208,12 @@ describe("a11oy.verify — spine integration", () => {
       hallucinationRisk: 0.05,
     });
     const out = verify({ workcell: w, witnessThreshold: 0 });
-    expect(out.receipt.verdict).toBe("ACCEPTED");
+    expect(out.receipt.verdict).toBe('ACCEPTED');
     expect(out.lutar.invariant).toBeGreaterThanOrEqual(out.lutar.bound.lower);
     expect(out.lutar.invariant).toBeLessThanOrEqual(out.lutar.bound.upper);
   });
 
-  it("works on workcells without an actionBrief (early-stage planning)", () => {
+  it('works on workcells without an actionBrief (early-stage planning)', () => {
     const intake = DEMO_WORKCELLS.find(
       (w) => w.actionBrief === null && w.operatorSequence.length > 0,
     );
@@ -217,21 +221,21 @@ describe("a11oy.verify — spine integration", () => {
       // construct one
       const base = cloneWorkcell(DEMO_WORKCELLS[0] as Workcell);
       base.actionBrief = null;
-      base.status = "intake";
+      base.status = 'intake';
       const out = verify({ workcell: base, witnessThreshold: 0 });
       // fallback axes from operator trust ⇒ should ACCEPT (operators all ≥ 0.85 overall)
-      expect(["ACCEPTED", "REFUSED_LAMBDA_GATE"]).toContain(out.receipt.verdict);
+      expect(['ACCEPTED', 'REFUSED_LAMBDA_GATE']).toContain(out.receipt.verdict);
       return;
     }
     const out = verify({ workcell: intake, witnessThreshold: 0 });
-    expect(["ACCEPTED", "REFUSED_LAMBDA_GATE"]).toContain(out.receipt.verdict);
+    expect(['ACCEPTED', 'REFUSED_LAMBDA_GATE']).toContain(out.receipt.verdict);
   });
 });
 
 // ---- deriveAxes -----------------------------------------------------------
 
-describe("a11oy.deriveAxes — Λ₉ derivation", () => {
-  it("all 9 axes are in [0,1]", () => {
+describe('a11oy.deriveAxes — Λ₉ derivation', () => {
+  it('all 9 axes are in [0,1]', () => {
     for (const w of DEMO_WORKCELLS) {
       const axes = deriveAxes(w);
       for (const [k, v] of Object.entries(axes)) {
@@ -241,7 +245,7 @@ describe("a11oy.deriveAxes — Λ₉ derivation", () => {
     }
   });
 
-  it("staleContextRisk=0, hallucinationRisk=0 ⇒ cleanliness=1, measurabilityHonesty=1", () => {
+  it('staleContextRisk=0, hallucinationRisk=0 ⇒ cleanliness=1, measurabilityHonesty=1', () => {
     const w = withMirror(pickAccepted(), { staleContextRisk: 0, hallucinationRisk: 0 });
     const axes = deriveAxes(w);
     expect(axes.cleanliness).toBe(1);
@@ -251,14 +255,14 @@ describe("a11oy.deriveAxes — Λ₉ derivation", () => {
 
 // ---- fluxionsReceiptHolds -------------------------------------------------
 
-describe("a11oy.fluxionsReceiptHolds — tool-risk consistency", () => {
-  it("vacuously true when no actionBrief is present", () => {
+describe('a11oy.fluxionsReceiptHolds — tool-risk consistency', () => {
+  it('vacuously true when no actionBrief is present', () => {
     const w = cloneWorkcell(DEMO_WORKCELLS[0] as Workcell);
     w.actionBrief = null;
     expect(fluxionsReceiptHolds(w)).toBe(true);
   });
 
-  it("true for the unmodified demo workcells (registry is self-consistent)", () => {
+  it('true for the unmodified demo workcells (registry is self-consistent)', () => {
     for (const w of DEMO_WORKCELLS) {
       // Demo data should be coherent — every proposed action's tool exists.
       const holds = fluxionsReceiptHolds(w);
@@ -270,19 +274,19 @@ describe("a11oy.fluxionsReceiptHolds — tool-risk consistency", () => {
     }
   });
 
-  it("false when an action claims lower risk than the registered tool", () => {
+  it('false when an action claims lower risk than the registered tool', () => {
     const w = cloneWorkcell(pickAccepted());
     const brief = w.actionBrief as ActionBrief;
-    const high = Object.values(TOOL_MAP).find((t) => t.risk === "critical" || t.risk === "high");
-    if (!high) throw new Error("no high-risk tool in registry");
+    const high = Object.values(TOOL_MAP).find((t) => t.risk === 'critical' || t.risk === 'high');
+    if (!high) throw new Error('no high-risk tool in registry');
     brief.proposedActions = [
       {
-        id: "x",
+        id: 'x',
         tool: high.id,
-        description: "claim-down",
-        riskLevel: "read_only",
+        description: 'claim-down',
+        riskLevel: 'read_only',
         requiresApproval: true,
-        expectedOutcome: "n/a",
+        expectedOutcome: 'n/a',
       },
     ];
     expect(fluxionsReceiptHolds(w)).toBe(false);
@@ -291,8 +295,8 @@ describe("a11oy.fluxionsReceiptHolds — tool-risk consistency", () => {
 
 // ---- discriminantForOperators --------------------------------------------
 
-describe("a11oy.discriminantForOperators — Gauss discriminant builder", () => {
-  it("returns d < 0 and d ≡ 0 or 1 (mod 4)", () => {
+describe('a11oy.discriminantForOperators — Gauss discriminant builder', () => {
+  it('returns d < 0 and d ≡ 0 or 1 (mod 4)', () => {
     for (const w of DEMO_WORKCELLS) {
       const d = discriminantForOperators(w.operatorSequence);
       expect(d).toBeLessThan(0);
@@ -301,35 +305,46 @@ describe("a11oy.discriminantForOperators — Gauss discriminant builder", () => 
     }
   });
 
-  it("is deterministic for the same operator set", () => {
-    const seq = ["planner", "analyst", "risk", "proof"] as const;
+  it('is deterministic for the same operator set', () => {
+    const seq = ['planner', 'analyst', 'risk', 'proof'] as const;
     const a = discriminantForOperators([...seq]);
     const b = discriminantForOperators([...seq]);
     expect(a).toBe(b);
   });
 
-  it("is permutation-invariant (depends on the SET of operators)", () => {
-    const a = discriminantForOperators(["planner", "analyst", "risk"]);
-    const b = discriminantForOperators(["risk", "planner", "analyst"]);
+  it('is permutation-invariant (depends on the SET of operators)', () => {
+    const a = discriminantForOperators(['planner', 'analyst', 'risk']);
+    const b = discriminantForOperators(['risk', 'planner', 'analyst']);
     expect(a).toBe(b);
   });
 });
 
 // ---- end-to-end ------------------------------------------------------------
 
-describe("a11oy verify — end-to-end on the demo registry", () => {
-  it("can run on every demo workcell without throwing", () => {
+describe('a11oy verify — end-to-end on the demo registry', () => {
+  it('can run on every demo workcell without throwing', () => {
     for (const w of DEMO_WORKCELLS) {
       const out = verify({ workcell: w, witnessThreshold: 0 });
       expect(out.receipt.receiptDigest).toMatch(/^[a-f0-9]{64}$/);
-      expect(typeof out.classNumberValue).toBe("number");
+      expect(typeof out.classNumberValue).toBe('number');
       expect(out.classNumberValue).toBeGreaterThanOrEqual(1);
     }
   });
 
-  it("WORKCELL_MAP and DEMO_WORKCELLS are aligned", () => {
+  it('WORKCELL_MAP and DEMO_WORKCELLS are aligned', () => {
     for (const w of DEMO_WORKCELLS) {
-      expect(WORKCELL_MAP[w.id]).toBe(w);
+      expect(DEMO_WORKCELL_MAP[w.id]).toBe(w);
     }
+  });
+
+  it('OPERATIONAL_WORKCELL_MAP is frozen and immutable', () => {
+    expect(OPERATIONAL_WORKCELL_MAP).toEqual({});
+    expect(Object.isFrozen(OPERATIONAL_WORKCELL_MAP)).toBe(true);
+    expect(() => {
+      const writable = OPERATIONAL_WORKCELL_MAP as Record<string, Workcell>;
+      writable['temp-id'] = DEMO_WORKCELL_MAP['wc-voyage-risk'];
+    }).toThrow();
+
+    expect(OPERATIONAL_WORKCELL_MAP['temp-id']).toBeUndefined();
   });
 });
