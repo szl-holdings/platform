@@ -48,13 +48,18 @@ function parseAuditJson(rawOutput, errMessageFallback) {
     return JSON.parse(rawOutput);
   } catch (err) {
     const trimmed = rawOutput.trim();
-    if (trimmed === 'No new vulnerabilities were ignored' || trimmed === 'No vulnerabilities found') {
+    if (
+      trimmed === 'No new vulnerabilities were ignored' ||
+      trimmed === 'No vulnerabilities found'
+    ) {
       return {
         metadata: { vulnerabilities: { critical: 0, high: 0, moderate: 0, low: 0 } },
         advisories: {},
       };
     }
-    fatal(`Failed to parse pnpm audit JSON: ${err.message}\nRaw output:\n${rawOutput.slice(0, 500)}`);
+    fatal(
+      `Failed to parse pnpm audit JSON: ${err.message}\nRaw output:\n${rawOutput.slice(0, 500)}`,
+    );
   }
 }
 

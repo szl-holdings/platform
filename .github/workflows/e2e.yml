@@ -61,7 +61,14 @@ jobs:
       - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
         with: { node-version: '24', cache: 'pnpm' }
 
-      - run: pnpm install --frozen-lockfile
+      - name: Install dependencies for E2E
+        run: |
+          if [[ "${{ matrix.app }}" == "carlota-jo" ]]; then
+            echo "Applying ONNXRUNTIME_NODE_INSTALL=skip for carlota-jo to avoid NuGet-dependent postinstall flake."
+            ONNXRUNTIME_NODE_INSTALL=skip pnpm install --frozen-lockfile
+          else
+            pnpm install --frozen-lockfile
+          fi
 
       - name: Cache Playwright browsers
         uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
@@ -155,4 +162,3 @@ jobs:
             exit 1
           fi
           echo "All E2E checks passed"
-

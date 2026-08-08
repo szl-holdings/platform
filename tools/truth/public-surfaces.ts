@@ -160,7 +160,7 @@ const APPROVED_PUBLIC_SURFACE_TARGETS = {
   },
   'killinchu-public-console': {
     canonicalUrl: 'https://a-11-oy.com/killinchu',
-    finalUrl: 'https://szlholdings-killinchu.hf.space/',
+    finalUrl: 'https://a-11-oy.com/killinchu',
   },
   'killinchu-readiness-api': {
     canonicalUrl: 'https://szlholdings-killinchu.hf.space/readyz',
@@ -649,6 +649,18 @@ async function validateMetadataResponse(
       return [`${surfaceId}: robots metadata must declare User-agent: * and the canonical sitemap`];
     }
     return [];
+  }
+
+  if (surfaceId === 'a11oy-net-webmanifest-gap') {
+    if (!/^(?:application|text)\/(?:[a-z0-9.+-]+\+)?json(?:;|$)/i.test(contentType)) {
+      return [`${surfaceId}: expected a JSON response, observed ${contentType || 'missing'}`];
+    }
+    try {
+      JSON.parse(body);
+      return [];
+    } catch {
+      return [`${surfaceId}: manifest metadata is not valid JSON`];
+    }
   }
 
   if (surfaceId === 'a11oy-net-sitemap-gap') {
