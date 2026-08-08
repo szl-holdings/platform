@@ -1,6 +1,6 @@
 {
   "schema": "szl.public-surfaces.registry/v1",
-  "observed_at": "2026-08-01T16:36:48.680Z",
+  "observed_at": "2026-08-08T21:48:37.072Z",
   "surfaces": [
     {
       "id": "a11oy-front-door",
@@ -207,8 +207,8 @@
       "name": "Killinchu public console",
       "kind": "WEB",
       "audience": ["INVESTOR", "DEVELOPER", "OPERATOR"],
-      "mode": "MIXED",
-      "availability": "REDIRECTED",
+      "mode": "UNAVAILABLE",
+      "availability": "UNAVAILABLE",
       "canonical_url": "https://a-11-oy.com/killinchu",
       "source_owner": {
         "repository": "szl-holdings/killinchu",
@@ -217,10 +217,10 @@
       },
       "observation": {
         "method": "GET",
-        "status": 200,
+        "status": 503,
         "final_url": "https://szlholdings-killinchu.hf.space/"
       },
-      "note": "Canonical vanity route redirects to the isolated Space; training, modeled, and live feeds remain explicitly separated inside the console."
+      "note": "Killinchu vanity console route is currently unavailable (503) and preserved as a controlled outage evidence boundary."
     },
     {
       "id": "a11oy-net-thesis",
@@ -287,8 +287,8 @@
       "name": "Killinchu source-binding API",
       "kind": "API",
       "audience": ["DEVELOPER", "OPERATOR"],
-      "mode": "LIVE",
-      "availability": "REACHABLE",
+      "mode": "UNAVAILABLE",
+      "availability": "UNAVAILABLE",
       "canonical_url": "https://szlholdings-killinchu.hf.space/api/build-info",
       "source_owner": {
         "repository": "szl-holdings/killinchu",
@@ -297,18 +297,18 @@
       },
       "observation": {
         "method": "GET",
-        "status": 200,
+        "status": 503,
         "final_url": "https://szlholdings-killinchu.hf.space/api/build-info"
       },
-      "note": "Machine-readable build identity endpoint; exact source and attestation fields remain independently verifiable."
+      "note": "Killinchu build-info API is currently unavailable (503) and treated as a controlled production outage boundary."
     },
     {
       "id": "killinchu-readiness-api",
       "name": "Killinchu readiness API",
       "kind": "API",
       "audience": ["DEVELOPER", "OPERATOR"],
-      "mode": "LIVE",
-      "availability": "REACHABLE",
+      "mode": "UNAVAILABLE",
+      "availability": "UNAVAILABLE",
       "canonical_url": "https://szlholdings-killinchu.hf.space/readyz",
       "source_owner": {
         "repository": "szl-holdings/killinchu",
@@ -317,10 +317,10 @@
       },
       "observation": {
         "method": "GET",
-        "status": 200,
+        "status": 503,
         "final_url": "https://szlholdings-killinchu.hf.space/readyz"
       },
-      "note": "Machine-readable readiness route; route success does not convert modeled console content into observed operations."
+      "note": "Killinchu readiness API is currently unavailable (503); readiness state remains out-of-service and excluded from operational claims."
     },
     {
       "id": "legacy-lyte-route",
@@ -567,20 +567,20 @@
       "name": "A11oy.net web app manifest",
       "kind": "METADATA",
       "audience": ["MACHINE"],
-      "mode": "UNAVAILABLE",
-      "availability": "UNAVAILABLE",
+      "mode": "DOCUMENTATION",
+      "availability": "REACHABLE",
       "canonical_url": "https://a11oy.net/manifest.webmanifest",
       "source_owner": {
         "repository": "szl-holdings/a11oy-net",
         "path": "index.html",
-        "role": "REMEDIATION_OWNER"
+        "role": "RUNTIME_OWNER"
       },
       "observation": {
         "method": "GET",
-        "status": 404,
+        "status": 200,
         "final_url": "https://a11oy.net/manifest.webmanifest"
       },
-      "note": "Install metadata is missing and remains a tracked, non-customer-facing remediation gap."
+      "note": "A11oy.net manifest is presently reachable; install-metadata state is now observed and tracked as a live metadata surface."
     }
   ]
 }

@@ -76,3 +76,9 @@ ignore:
   
   - vulnerability: GHSA-wjx4-4jcj-g98j
     reason: "Transitive alias for PYSEC-2026-165. Documented SECURITY_KNOWN_ISSUES.md §2."
+
+  - vulnerability: GHSA-w3rx-r6r6-pgpr
+    reason: "Image-size transitive in mobile toolchain. No safe patched replacement available today; build-time image parsing is limited to trusted repository assets and controlled CI surfaces."
+
+  - vulnerability: GHSA-5p2g-fcmc-qvqq
+    reason: "Image-size transitive in mobile toolchain. No safe patched replacement available today; build-time image parsing is limited to trusted repository assets and controlled CI surfaces."
