@@ -1,30 +1,5 @@
-# .trivyignore — Trivy filesystem scan suppressions for szl-holdings/platform
+# .trivyignore - strict Trivy scanner configuration for szl-holdings/platform.
 #
-# All entries documented in SECURITY_KNOWN_ISSUES.md §2.
-# Transitive Python dependencies with no available upstream fix.
-# HONESTY: No fixable CVE is listed here. If a fix is released, 
-# this entry must be removed and the dependency updated.
-# Doctrine v11. Λ = Conjecture 1 (NOT a theorem). SLSA L1 (honest). No CMMC claim.
-
-# Python transitive CVEs — all mitigated and documented in SECURITY_KNOWN_ISSUES.md
-PYSEC-2021-100
-GHSA-8h2j-cgx8-6xv7
-PYSEC-2024-38
-PYSEC-2022-183
-GHSA-h8pj-cxx2-jfg2
-PYSEC-2021-47
-GHSA-5jqp-qgf6-3pvh
-GHSA-mr82-8j83-vxmv
-PYSEC-2020-150
-GHSA-33c7-2mpw-hg34
-PYSEC-2020-151
-GHSA-f97h-2pfx-f59f
-GHSA-6w46-j5rx-g56g
-GHSA-f83h-ghpp-7wcc
-GHSA-wf5f-4jwr-ppcp
-GHSA-cfh3-3jmp-rvhc
-GHSA-pwv6-vv43-88gr
-GHSA-r73j-pqj5-w3x7
-GHSA-whj4-6x5x-4v2j
-PYSEC-2026-165
-GHSA-wjx4-4jcj-g98j
+# Keep this file intentionally empty of advisory identifiers. Findings remain
+# visible in SARIF, while the unsuppressed Grype HIGH/CRITICAL job is the release
+# gate. Dependencies must be upgraded, replaced, or removed instead of ignored.

@@ -28,9 +28,7 @@
       "count": 1,
       "command": "Tracked top-level artifact directories minus registered artifact manifests",
       "computed": "2026-07-25",
-      "list": [
-        "artifacts/api-server"
-      ],
+      "list": ["artifacts/api-server"],
       "note": "api-server is backend infrastructure and is not counted as a customer-facing product vertical."
     },
     "total_on_disk": {
@@ -41,9 +39,9 @@
   },
   "packages": {
     "domain_packages_dir": {
-      "count": 160,
+      "count": 161,
       "command": "Count tracked top-level directories under packages/",
-      "computed": "2026-07-28"
+      "computed": "2026-08-08"
     },
     "shared_lib_packages": {
       "count": 53,
@@ -51,10 +49,10 @@
       "computed": "2026-07-25"
     },
     "total_packages": {
-      "count": 213,
+      "count": 214,
       "command": "packages/ top-level count plus lib/ top-level count",
-      "computed": "2026-07-28",
-      "note": "packages/ (160 directories) + lib/ (53 directories) = 213. packages/proxy-routes.ts is a file and is not counted as a package."
+      "computed": "2026-08-08",
+      "note": "packages/ (161 directories) + lib/ (53 directories) = 214. packages/proxy-routes.ts is a file and is not counted as a package."
     },
     "apps": {
       "count": 11,
@@ -155,19 +153,11 @@
       "count": 5,
       "computed": "2026-07-25",
       "definition": "A registered customer-facing domain artifact. A11oy is counted separately as the orchestration product.",
-      "list": [
-        "Carlota Jo",
-        "Counsel",
-        "Sentra",
-        "Terra",
-        "Vessels"
-      ]
+      "list": ["Carlota Jo", "Counsel", "Sentra", "Terra", "Vessels"]
     },
     "orchestration_product": {
       "count": 1,
-      "list": [
-        "A11oy"
-      ]
+      "list": ["A11oy"]
     }
   },
   "platform_primitives": {
@@ -198,16 +188,7 @@
     },
     "locked_formulas": {
       "count": 8,
-      "list": [
-        "F1",
-        "F4",
-        "F7",
-        "F11",
-        "F12",
-        "F18",
-        "F19",
-        "F22"
-      ],
+      "list": ["F1", "F4", "F7", "F11", "F12", "F18", "F19", "F22"],
       "definition": "The exact locked-proven set, separately enforced by the no-axiom Lean theorem locked_count_eight."
     },
     "lambda_uniqueness": "CONJECTURE_1_OPEN_UNCONDITIONAL"

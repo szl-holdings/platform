@@ -160,7 +160,7 @@ const APPROVED_PUBLIC_SURFACE_TARGETS = {
   },
   'killinchu-public-console': {
     canonicalUrl: 'https://a-11-oy.com/killinchu',
-    finalUrl: 'https://szlholdings-killinchu.hf.space/',
+    finalUrl: 'https://a-11-oy.com/killinchu',
   },
   'killinchu-readiness-api': {
     canonicalUrl: 'https://szlholdings-killinchu.hf.space/readyz',
@@ -647,6 +647,33 @@ async function validateMetadataResponse(
     );
     if (!hasCrawlerPolicy || !hasCanonicalSitemap) {
       return [`${surfaceId}: robots metadata must declare User-agent: * and the canonical sitemap`];
+    }
+    return [];
+  }
+
+  if (surfaceId === 'a11oy-net-webmanifest-gap') {
+    if (!/^application\/manifest\+json(?:;|$)/i.test(contentType)) {
+      return [
+        `${surfaceId}: expected an application/manifest+json response, observed ${contentType || 'missing'}`,
+      ];
+    }
+    let manifest: unknown;
+    try {
+      manifest = JSON.parse(body);
+    } catch {
+      return [`${surfaceId}: manifest metadata is not valid JSON`];
+    }
+    if (!isObject(manifest)) {
+      return [`${surfaceId}: manifest metadata must be a JSON object`];
+    }
+    if (manifest.name !== 'A11oy Proof Registry' || manifest.short_name !== 'A11oy.net') {
+      return [`${surfaceId}: manifest metadata has an unexpected product identity`];
+    }
+    if (manifest.start_url !== '/' || manifest.scope !== '/') {
+      return [`${surfaceId}: manifest start_url and scope must both equal /`];
+    }
+    if (manifest.display !== 'minimal-ui') {
+      return [`${surfaceId}: manifest display must equal minimal-ui`];
     }
     return [];
   }
