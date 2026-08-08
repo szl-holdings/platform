@@ -1,78 +1,8 @@
-# .grype.yaml — Grype scanner configuration for szl-holdings/platform
+# .grype.yaml — strict Grype scanner configuration for szl-holdings/platform.
 #
-# This file documents accepted/deferred vulnerabilities. All suppressions here
-# correspond to entries in SECURITY_KNOWN_ISSUES.md — transitive dependencies
-# with no available fix or compensating controls documented there.
-#
-# HONESTY: No fixable CVE is suppressed here. If a fix becomes available,
-# remove the suppress entry and apply the upstream patch.
-# Doctrine v11 LOCKED. Λ = Conjecture 1 (NOT a theorem). SLSA L1 (honest).
-# No CMMC, FedRAMP, or certification claim.
+# High and Critical findings are release blockers. This repository does not
+# suppress advisories in Grype; dependencies must be upgraded, replaced, or
+# removed. Doctrine v11 remains LOCKED, Lambda remains Conjecture 1, and no
+# certification claim is implied.
 
-ignore:
-  # Python transitive vulnerabilities — all documented in SECURITY_KNOWN_ISSUES.md §2
-  # Mitigations: inference workloads run in network-isolated containers; 
-  # input validated at gateway boundary; sovereign-only posture.
-  
-  - vulnerability: PYSEC-2021-100
-    reason: "Transitive; affected code path not invoked by substrate runtime. Documented SECURITY_KNOWN_ISSUES.md §2."
-  
-  - vulnerability: GHSA-8h2j-cgx8-6xv7
-    reason: "Transitive alias for PYSEC-2021-100. Documented SECURITY_KNOWN_ISSUES.md §2."
-  
-  - vulnerability: PYSEC-2024-38
-    reason: "Transitive; deferred pending upstream patched release. Documented SECURITY_KNOWN_ISSUES.md §2."
-  
-  - vulnerability: PYSEC-2022-183
-    reason: "Transitive; input is internally generated, not attacker-controlled. Documented SECURITY_KNOWN_ISSUES.md §2."
-  
-  - vulnerability: GHSA-h8pj-cxx2-jfg2
-    reason: "Transitive alias for PYSEC-2022-183. Documented SECURITY_KNOWN_ISSUES.md §2."
-  
-  - vulnerability: PYSEC-2021-47
-    reason: "Transitive; mitigated by input validation at gateway boundary. Documented SECURITY_KNOWN_ISSUES.md §2."
-  
-  - vulnerability: GHSA-5jqp-qgf6-3pvh
-    reason: "Transitive alias for PYSEC-2021-47. Documented SECURITY_KNOWN_ISSUES.md §2."
-  
-  - vulnerability: GHSA-mr82-8j83-vxmv
-    reason: "Transitive; no fixed version; compensating control = read-only mount. Documented SECURITY_KNOWN_ISSUES.md §2."
-  
-  - vulnerability: PYSEC-2020-150
-    reason: "Transitive; legacy advisory, affected feature disabled in config. Documented SECURITY_KNOWN_ISSUES.md §2."
-  
-  - vulnerability: GHSA-33c7-2mpw-hg34
-    reason: "Transitive alias for PYSEC-2020-150. Documented SECURITY_KNOWN_ISSUES.md §2."
-  
-  - vulnerability: PYSEC-2020-151
-    reason: "Transitive; affected feature disabled in config. Documented SECURITY_KNOWN_ISSUES.md §2."
-  
-  - vulnerability: GHSA-f97h-2pfx-f59f
-    reason: "Transitive alias for PYSEC-2020-151. Documented SECURITY_KNOWN_ISSUES.md §2."
-  
-  - vulnerability: GHSA-6w46-j5rx-g56g
-    reason: "Transitive; deferred pending dependency bump. Documented SECURITY_KNOWN_ISSUES.md §2."
-  
-  - vulnerability: GHSA-f83h-ghpp-7wcc
-    reason: "Transitive; deferred pending dependency bump. Documented SECURITY_KNOWN_ISSUES.md §2."
-  
-  - vulnerability: GHSA-wf5f-4jwr-ppcp
-    reason: "Transitive; not in reachable call graph. Documented SECURITY_KNOWN_ISSUES.md §2."
-  
-  - vulnerability: GHSA-cfh3-3jmp-rvhc
-    reason: "Transitive; not in reachable call graph. Documented SECURITY_KNOWN_ISSUES.md §2."
-  
-  - vulnerability: GHSA-pwv6-vv43-88gr
-    reason: "Transitive; mitigated by container network isolation. Documented SECURITY_KNOWN_ISSUES.md §2."
-  
-  - vulnerability: GHSA-r73j-pqj5-w3x7
-    reason: "Transitive; deferred pending upstream fix. Documented SECURITY_KNOWN_ISSUES.md §2."
-  
-  - vulnerability: GHSA-whj4-6x5x-4v2j
-    reason: "Transitive; deferred pending upstream fix. Documented SECURITY_KNOWN_ISSUES.md §2."
-  
-  - vulnerability: PYSEC-2026-165
-    reason: "Recent transitive advisory; fix tracked for next dependency sweep. Documented SECURITY_KNOWN_ISSUES.md §2."
-  
-  - vulnerability: GHSA-wjx4-4jcj-g98j
-    reason: "Transitive alias for PYSEC-2026-165. Documented SECURITY_KNOWN_ISSUES.md §2."
+ignore: []
