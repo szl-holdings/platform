@@ -162,7 +162,7 @@ const svgAbsoluteUnitToPixels = Object.freeze({
 function numericSvgAttribute(tag, name) {
   const match = tag.match(
     new RegExp(
-      `(?:^|\\s)${name}\\s*=\\s*["']\\s*([0-9]+(?:\\.[0-9]+)?)\\s*([a-z]*)\\s*["']`,
+      `(?:^|\\s)${name}\\s*=\\s*["']\\s*((?:[0-9]+(?:\\.[0-9]*)?|\\.[0-9]+)(?:[eE][+-]?[0-9]+)?)\\s*([a-z]*)\\s*["']`,
       'i',
     ),
   );
