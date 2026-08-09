@@ -162,7 +162,7 @@ const svgAbsoluteUnitToPixels = Object.freeze({
 function numericSvgAttribute(tag, name) {
   const match = tag.match(
     new RegExp(
-      `\\b${name}\\s*=\\s*["']\\s*([0-9]+(?:\\.[0-9]+)?)\\s*([a-z]*)\\s*["']`,
+      `(?:^|\\s)${name}\\s*=\\s*["']\\s*([0-9]+(?:\\.[0-9]+)?)\\s*([a-z]*)\\s*["']`,
       'i',
     ),
   );
@@ -172,9 +172,28 @@ function numericSvgAttribute(tag, name) {
   return factor === undefined ? undefined : Number(match[1]) * factor;
 }
 
+function svgRootTag(text) {
+  const root = /<svg\b/i.exec(text);
+  if (!root) return undefined;
+  let quote;
+  for (let offset = root.index; offset < text.length; offset += 1) {
+    const character = text[offset];
+    if (quote) {
+      if (character === quote) quote = undefined;
+      continue;
+    }
+    if (character === '"' || character === "'") {
+      quote = character;
+      continue;
+    }
+    if (character === '>') return text.slice(root.index, offset + 1);
+  }
+  return undefined;
+}
+
 function parseSvg(buffer) {
   const text = buffer.toString('utf8');
-  const tag = text.match(/<svg\b[^>]*>/i)?.[0];
+  const tag = svgRootTag(text);
   if (!tag) fail('invalid SVG root');
   let width = numericSvgAttribute(tag, 'width');
   let height = numericSvgAttribute(tag, 'height');

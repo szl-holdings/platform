@@ -122,6 +122,16 @@ test('parses bounded SVG, TIFF, and KTX metadata', () => {
     type: 'svg',
   });
   assert.deepEqual(
+    imageSize(Buffer.from('<svg data-width="100" height="50" viewBox="0 0 200 50"></svg>')),
+    { width: 200, height: 50, type: 'svg' },
+  );
+  assert.deepEqual(
+    imageSize(
+      Buffer.from('<svg aria-label="value > threshold" width="100" height="50"></svg>'),
+    ),
+    { width: 100, height: 50, type: 'svg' },
+  );
+  assert.deepEqual(
     imageSize(Buffer.from(`${'<?xml'.repeat(512)}<svg width="8" height="9"></svg>`)),
     { width: 8, height: 9, type: 'svg' },
   );
