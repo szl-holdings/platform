@@ -203,8 +203,8 @@ function parseSvg(buffer) {
     /(?:^|\s)viewBox\s*=\s*["']\s*([-+0-9.eE]+)[\s,]+([-+0-9.eE]+)[\s,]+([-+0-9.eE]+)[\s,]+([-+0-9.eE]+)\s*["']/i,
   );
   if (viewBox) {
-    const viewBoxWidth = Number(viewBox[3]);
-    const viewBoxHeight = Number(viewBox[4]);
+    const viewBoxWidth = Math.round(Number(viewBox[3]));
+    const viewBoxHeight = Math.round(Number(viewBox[4]));
     if (width === undefined && height !== undefined) {
       height = Math.round(height);
       width = height * (viewBoxWidth / viewBoxHeight);
@@ -284,10 +284,7 @@ function parseKtx(buffer) {
 }
 
 function looksLikeSvg(buffer) {
-  const prefix = buffer
-    .subarray(0, Math.min(buffer.length, 4096))
-    .toString('utf8')
-    .toLowerCase();
+  const prefix = buffer.subarray(0, Math.min(buffer.length, 4096)).toString('utf8').toLowerCase();
   let offset = 0;
   while (offset < prefix.length) {
     const svgStart = prefix.indexOf('<svg', offset);
