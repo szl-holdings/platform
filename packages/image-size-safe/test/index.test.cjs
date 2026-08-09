@@ -85,6 +85,8 @@ test('parses the bounded raster formats Metro declares', () => {
   psd.writeUInt32BE(720, 14);
   psd.writeUInt32BE(1280, 18);
   assert.deepEqual(imageSize(psd), { width: 1280, height: 720, type: 'psd' });
+  psd.writeUInt16BE(2, 4);
+  assert.deepEqual(imageSize(psd), { width: 1280, height: 720, type: 'psd' });
 
   const webp = Buffer.alloc(30);
   webp.write('RIFF', 0, 'ascii');

@@ -79,7 +79,8 @@ function parseBmp(buffer) {
 
 function parsePsd(buffer) {
   requireBytes(buffer, 0, 22, 'PSD header');
-  if (buffer.readUInt16BE(4) !== 1) fail('unsupported PSD version');
+  const version = buffer.readUInt16BE(4);
+  if (version !== 1 && version !== 2) fail('unsupported PSD version');
   return checkedDimensions(buffer.readUInt32BE(18), buffer.readUInt32BE(14), 'psd');
 }
 
