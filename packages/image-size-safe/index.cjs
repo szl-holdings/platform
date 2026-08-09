@@ -197,22 +197,30 @@ function parseSvg(buffer) {
   if (!tag) fail('invalid SVG root');
   let width = numericSvgAttribute(tag, 'width');
   let height = numericSvgAttribute(tag, 'height');
+  let inferredWidth = false;
+  let inferredHeight = false;
   const viewBox = tag.match(
-    /\bviewBox\s*=\s*["']\s*([-+0-9.eE]+)[ ,]+([-+0-9.eE]+)[ ,]+([-+0-9.eE]+)[ ,]+([-+0-9.eE]+)\s*["']/i,
+    /(?:^|\s)viewBox\s*=\s*["']\s*([-+0-9.eE]+)[ ,]+([-+0-9.eE]+)[ ,]+([-+0-9.eE]+)[ ,]+([-+0-9.eE]+)\s*["']/i,
   );
   if (viewBox) {
     const viewBoxWidth = Number(viewBox[3]);
     const viewBoxHeight = Number(viewBox[4]);
     if (width === undefined && height !== undefined) {
       width = height * (viewBoxWidth / viewBoxHeight);
+      inferredWidth = true;
     } else if (height === undefined && width !== undefined) {
       height = width * (viewBoxHeight / viewBoxWidth);
+      inferredHeight = true;
     } else {
       width ??= viewBoxWidth;
       height ??= viewBoxHeight;
     }
   }
-  return checkedDimensions(Math.round(width), Math.round(height), 'svg');
+  return checkedDimensions(
+    inferredWidth ? Math.floor(width) : Math.round(width),
+    inferredHeight ? Math.floor(height) : Math.round(height),
+    'svg',
+  );
 }
 
 function parseTiff(buffer) {
