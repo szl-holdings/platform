@@ -1,21 +1,21 @@
 {
   "schema": "szl.public-surfaces/v1",
   "generated_by": "tools/truth/generate-public-surfaces.ts@szl.public-surfaces/v1",
-  "observed_at": "2026-08-01T16:36:48.680Z",
+  "observed_at": "2026-08-09T05:19:33.381Z",
   "summary": {
     "declared": 29,
-    "customer_facing_products": 2,
-    "customer_facing_routes": 12,
+    "customer_facing_products": 1,
+    "customer_facing_routes": 11,
     "by_availability": {
-      "REACHABLE": 17,
-      "REDIRECTED": 1,
-      "UNAVAILABLE": 11
+      "REACHABLE": 16,
+      "REDIRECTED": 0,
+      "UNAVAILABLE": 13
     },
     "by_mode": {
-      "LIVE": 5,
-      "MIXED": 9,
-      "DOCUMENTATION": 4,
-      "UNAVAILABLE": 11
+      "LIVE": 3,
+      "MIXED": 8,
+      "DOCUMENTATION": 5,
+      "UNAVAILABLE": 13
     }
   },
   "surfaces": [
@@ -37,7 +37,7 @@
         "status": 200,
         "final_url": "https://szlholdings-a11oy.hf.space/api/build-info"
       },
-      "note": "Machine-readable build identity endpoint; returned content must be evaluated separately for exact source and receipt state."
+      "note": "Measured HTTP 200 at the canonical route; reachability does not assert payload correctness, deployment provenance, or exact source parity."
     },
     {
       "id": "a11oy-console",
@@ -57,7 +57,7 @@
         "status": 200,
         "final_url": "https://a-11-oy.com/console"
       },
-      "note": "Console shell is routed; individual tabs retain their own LIVE, MODELED, SNAPSHOT, SAMPLE, or UNAVAILABLE state."
+      "note": "Measured HTTP 200 at the canonical route; reachability does not assert payload correctness, deployment provenance, or exact source parity."
     },
     {
       "id": "a11oy-docs",
@@ -77,7 +77,7 @@
         "status": 200,
         "final_url": "https://a-11-oy.com/docs"
       },
-      "note": "Documentation route is reachable; documentation presence is not proof that every described capability is live."
+      "note": "Measured HTTP 200 at the canonical route; reachability does not assert payload correctness, deployment provenance, or exact source parity."
     },
     {
       "id": "a11oy-ecosystem-atlas",
@@ -97,7 +97,7 @@
         "status": 200,
         "final_url": "https://a-11-oy.com/ecosystem"
       },
-      "note": "Atlas route is reachable and combines generated inventory with live provider state; item-level evidence labels govern."
+      "note": "Measured HTTP 200 at the canonical route; reachability does not assert payload correctness, deployment provenance, or exact source parity."
     },
     {
       "id": "a11oy-front-door",
@@ -117,7 +117,7 @@
         "status": 200,
         "final_url": "https://a-11-oy.com/"
       },
-      "note": "Public front door is routed; capability cards mix live evidence, snapshots, and qualified claims."
+      "note": "Measured HTTP 200 at the canonical route; reachability does not assert payload correctness, deployment provenance, or exact source parity."
     },
     {
       "id": "a11oy-net-chat-gap",
@@ -224,20 +224,20 @@
       "name": "A11oy.net web app manifest",
       "kind": "METADATA",
       "audience": ["MACHINE"],
-      "mode": "UNAVAILABLE",
-      "availability": "UNAVAILABLE",
+      "mode": "DOCUMENTATION",
+      "availability": "REACHABLE",
       "canonical_url": "https://a11oy.net/manifest.webmanifest",
       "source_owner": {
         "repository": "szl-holdings/a11oy-net",
-        "path": "index.html",
-        "role": "REMEDIATION_OWNER"
+        "path": "manifest.webmanifest",
+        "role": "RUNTIME_OWNER"
       },
       "observation": {
         "method": "GET",
-        "status": 404,
+        "status": 200,
         "final_url": "https://a11oy.net/manifest.webmanifest"
       },
-      "note": "Install metadata is missing and remains a tracked, non-customer-facing remediation gap."
+      "note": "A11oy.net manifest is currently reachable as JSON metadata and tracked with explicit metadata validation."
     },
     {
       "id": "a11oy-observability",
@@ -257,7 +257,7 @@
         "status": 200,
         "final_url": "https://a-11-oy.com/observability"
       },
-      "note": "Observability UI is routed; hosted provider proof and individual telemetry panels retain separate evidence states."
+      "note": "Measured HTTP 200 at the canonical route; reachability does not assert payload correctness, deployment provenance, or exact source parity."
     },
     {
       "id": "a11oy-product-introduction",
@@ -277,7 +277,7 @@
         "status": 200,
         "final_url": "https://a-11-oy.com/a11oy/"
       },
-      "note": "Product introduction is routed and links to the isolated runtime; it is not an uptime claim."
+      "note": "Measured HTTP 200 at the canonical route; reachability does not assert payload correctness, deployment provenance, or exact source parity."
     },
     {
       "id": "a11oy-readiness-api",
@@ -297,7 +297,7 @@
         "status": 200,
         "final_url": "https://szlholdings-a11oy.hf.space/readyz"
       },
-      "note": "Machine-readable readiness route; HTTP reachability alone is not a release or capability claim."
+      "note": "Measured HTTP 200 at the canonical route; reachability does not assert payload correctness, deployment provenance, or exact source parity."
     },
     {
       "id": "a11oy-receipt-verifier",
@@ -317,7 +317,7 @@
         "status": 200,
         "final_url": "https://a-11-oy.com/verify"
       },
-      "note": "Verifier UI is routed; each submitted receipt still resolves independently to VERIFIED, MISMATCH, UNSIGNED_LOCAL, or UNAVAILABLE."
+      "note": "Measured HTTP 200 at the canonical route; reachability does not assert payload correctness, deployment provenance, or exact source parity."
     },
     {
       "id": "a11oy-spaces-registry",
@@ -337,7 +337,7 @@
         "status": 200,
         "final_url": "https://a-11-oy.com/spaces"
       },
-      "note": "Registry route is reachable; each linked Space retains its own stage and availability rather than inheriting this route state."
+      "note": "Measured HTTP 200 at the canonical route; reachability does not assert payload correctness, deployment provenance, or exact source parity."
     },
     {
       "id": "a11oy-trust-center",
@@ -357,7 +357,7 @@
         "status": 200,
         "final_url": "https://a-11-oy.com/trust"
       },
-      "note": "Trust center is routed and evidence-labelled; linked evidence remains authoritative over summary copy."
+      "note": "Measured HTTP 200 at the canonical route; reachability does not assert payload correctness, deployment provenance, or exact source parity."
     },
     {
       "id": "a11oy-wires",
@@ -377,15 +377,15 @@
         "status": 200,
         "final_url": "https://a-11-oy.com/wires"
       },
-      "note": "Cross-organ mesh page is routed; each wire must still report its own runtime availability without substitution."
+      "note": "Measured HTTP 200 at the canonical route; reachability does not assert payload correctness, deployment provenance, or exact source parity."
     },
     {
       "id": "killinchu-build-info-api",
       "name": "Killinchu source-binding API",
       "kind": "API",
       "audience": ["DEVELOPER", "OPERATOR"],
-      "mode": "LIVE",
-      "availability": "REACHABLE",
+      "mode": "UNAVAILABLE",
+      "availability": "UNAVAILABLE",
       "canonical_url": "https://szlholdings-killinchu.hf.space/api/build-info",
       "source_owner": {
         "repository": "szl-holdings/killinchu",
@@ -394,18 +394,18 @@
       },
       "observation": {
         "method": "GET",
-        "status": 200,
+        "status": 503,
         "final_url": "https://szlholdings-killinchu.hf.space/api/build-info"
       },
-      "note": "Machine-readable build identity endpoint; exact source and attestation fields remain independently verifiable."
+      "note": "Measured HTTP 503 while the Killinchu Space is PAUSED by cpu-basic quota (requested=1, current=5, limit=3); source binding is unavailable."
     },
     {
       "id": "killinchu-public-console",
       "name": "Killinchu public console",
       "kind": "WEB",
       "audience": ["INVESTOR", "DEVELOPER", "OPERATOR"],
-      "mode": "MIXED",
-      "availability": "REDIRECTED",
+      "mode": "UNAVAILABLE",
+      "availability": "UNAVAILABLE",
       "canonical_url": "https://a-11-oy.com/killinchu",
       "source_owner": {
         "repository": "szl-holdings/killinchu",
@@ -414,18 +414,18 @@
       },
       "observation": {
         "method": "GET",
-        "status": 200,
+        "status": 503,
         "final_url": "https://szlholdings-killinchu.hf.space/"
       },
-      "note": "Canonical vanity route redirects to the isolated Space; training, modeled, and live feeds remain explicitly separated inside the console."
+      "note": "Protected A11oy source redirects this canonical path to the approved Killinchu Space; the measured final response is HTTP 503, so availability remains failed closed."
     },
     {
       "id": "killinchu-readiness-api",
       "name": "Killinchu readiness API",
       "kind": "API",
       "audience": ["DEVELOPER", "OPERATOR"],
-      "mode": "LIVE",
-      "availability": "REACHABLE",
+      "mode": "UNAVAILABLE",
+      "availability": "UNAVAILABLE",
       "canonical_url": "https://szlholdings-killinchu.hf.space/readyz",
       "source_owner": {
         "repository": "szl-holdings/killinchu",
@@ -434,10 +434,10 @@
       },
       "observation": {
         "method": "GET",
-        "status": 200,
+        "status": 503,
         "final_url": "https://szlholdings-killinchu.hf.space/readyz"
       },
-      "note": "Machine-readable readiness route; route success does not convert modeled console content into observed operations."
+      "note": "Measured HTTP 503 while the Killinchu Space is PAUSED by cpu-basic quota (requested=1, current=5, limit=3); readiness remains failed closed."
     },
     {
       "id": "legacy-aegis-route",
@@ -457,7 +457,7 @@
         "status": 404,
         "final_url": "https://a-11-oy.com/aegis/"
       },
-      "note": "Historical source-tree preview path is not routed on the current public deployment and is excluded from the measured count."
+      "note": "Measured HTTP 404 at this historical route; it remains unavailable and no product-surface claim is made."
     },
     {
       "id": "legacy-carlota-jo-route",
@@ -477,7 +477,7 @@
         "status": 404,
         "final_url": "https://a-11-oy.com/carlota-jo/"
       },
-      "note": "Historical source-tree preview path is not routed on the current public deployment and is excluded from the measured count."
+      "note": "Measured HTTP 404 at this historical route; it remains unavailable and no product-surface claim is made."
     },
     {
       "id": "legacy-command-route",
@@ -497,7 +497,7 @@
         "status": 404,
         "final_url": "https://a-11-oy.com/command/"
       },
-      "note": "Historical source-tree preview path is not routed on the current public deployment and is excluded from the measured count."
+      "note": "Measured HTTP 404 at this historical route; it remains unavailable and no product-surface claim is made."
     },
     {
       "id": "legacy-counsel-route",
@@ -517,7 +517,7 @@
         "status": 404,
         "final_url": "https://a-11-oy.com/counsel/"
       },
-      "note": "Historical source-tree preview path is not routed on the current public deployment and is excluded from the measured count."
+      "note": "Measured HTTP 404 at this historical route; it remains unavailable and no product-surface claim is made."
     },
     {
       "id": "legacy-lyte-route",
@@ -537,7 +537,7 @@
         "status": 404,
         "final_url": "https://a-11-oy.com/lyte/"
       },
-      "note": "Historical source-tree preview path is not routed on the current public deployment and is excluded from the measured count."
+      "note": "Measured HTTP 404 at this historical route; it remains unavailable and no product-surface claim is made."
     },
     {
       "id": "legacy-pulse-route",
@@ -557,7 +557,7 @@
         "status": 404,
         "final_url": "https://a-11-oy.com/pulse/"
       },
-      "note": "Historical source-tree preview path is not routed on the current public deployment and is excluded from the measured count."
+      "note": "Measured HTTP 404 at this historical route; it remains unavailable and no product-surface claim is made."
     },
     {
       "id": "legacy-terra-route",
@@ -577,7 +577,7 @@
         "status": 404,
         "final_url": "https://a-11-oy.com/terra/"
       },
-      "note": "Historical source-tree preview path is not routed on the current public deployment and is excluded from the measured count."
+      "note": "Measured HTTP 404 at this historical route; it remains unavailable and no product-surface claim is made."
     },
     {
       "id": "legacy-vessels-route",
@@ -597,7 +597,7 @@
         "status": 404,
         "final_url": "https://a-11-oy.com/vessels/"
       },
-      "note": "Historical source-tree preview path is not routed on the current public deployment and is excluded from the measured count."
+      "note": "Measured HTTP 404 at this historical route; it remains unavailable and no product-surface claim is made."
     }
   ]
 }

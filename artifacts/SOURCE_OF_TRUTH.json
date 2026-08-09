@@ -1,10 +1,10 @@
 {
   "schema": "szl.truth/v1",
-  "generated_at": "2026-08-01T17:55:45.264Z",
+  "generated_at": "2026-08-09T05:45:08.826Z",
   "generated_by": "tools/truth/generate-truth.ts@szl.truth/v1",
   "metrics": {
     "surfaces_customer_facing": {
-      "value": 2,
+      "value": 1,
       "label": "MEASURED",
       "source": "artifacts/PUBLIC_SURFACES.json#summary.customer_facing_products"
     },
@@ -27,7 +27,7 @@
       "source": "artifacts/mcp-e2e-test-results.json"
     },
     "monorepo_packages": {
-      "value": 201,
+      "value": 202,
       "label": "MEASURED",
       "source": "pnpm -r list --depth -1 --json"
     },

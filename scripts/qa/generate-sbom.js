@@ -14,7 +14,7 @@
  */
 
 import { mkdirSync, readFileSync, writeFileSync } from 'node:fs';
-import { dirname, join } from 'node:path';
+import { dirname, isAbsolute, join, relative, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
@@ -27,6 +27,48 @@ const SEVERITY_ORDER = ['critical', 'high', 'moderate', 'low'];
 
 function fatal(_message) {
   process.exit(1);
+}
+
+function addLinkedWorkspacePackages(packages) {
+  const workspacePath = join(ROOT, 'pnpm-workspace.yaml');
+  let workspaceText;
+  try {
+    workspaceText = readFileSync(workspacePath, 'utf8');
+  } catch (err) {
+    fatal(`Cannot read pnpm-workspace.yaml: ${err.message}`);
+  }
+
+  const linkPattern = /\blink:\s*["']?([^"'#\s]+)["']?/g;
+  let match;
+  while ((match = linkPattern.exec(workspaceText)) !== null) {
+    const packageRoot = resolve(ROOT, match[1]);
+    const packageRelative = relative(ROOT, packageRoot);
+    if (
+      packageRelative === '..' ||
+      packageRelative.startsWith('../') ||
+      packageRelative.startsWith('..\\') ||
+      isAbsolute(packageRelative)
+    ) {
+      fatal(`Linked workspace package escapes repository root: ${match[1]}`);
+    }
+    const manifestPath = join(packageRoot, 'package.json');
+    let manifest;
+    try {
+      manifest = JSON.parse(readFileSync(manifestPath, 'utf8'));
+    } catch (err) {
+      fatal(`Cannot read linked workspace package ${manifestPath}: ${err.message}`);
+    }
+    if (
+      typeof manifest.name !== 'string' ||
+      !manifest.name ||
+      typeof manifest.version !== 'string' ||
+      !manifest.version
+    ) {
+      fatal(`Linked workspace package lacks name/version: ${manifestPath}`);
+    }
+    if (!packages[manifest.name]) packages[manifest.name] = new Set();
+    packages[manifest.name].add(manifest.version);
+  }
 }
 
 function parseLockfile() {
@@ -60,6 +102,7 @@ function parseLockfile() {
     }
     packages[name].add(version);
   }
+  addLinkedWorkspacePackages(packages);
 
   const result = {};
   for (const [name, versionSet] of Object.entries(packages)) {
@@ -165,7 +208,7 @@ function buildSbom(packages, advisories) {
     metadata: {
       timestamp: new Date().toISOString(),
       scanStatus: 'success',
-      tools: [{ vendor: 'SZL Holdings', name: 'generate-sbom.js', version: '2.1.0' }],
+      tools: [{ vendor: 'SZL Holdings', name: 'generate-sbom.js', version: '2.2.0' }],
       component: { type: 'application', name: 'szl-platform', version: '1.0.0' },
       statistics: {
         totalPackages: components.length,

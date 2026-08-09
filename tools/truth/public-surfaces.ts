@@ -651,6 +651,33 @@ async function validateMetadataResponse(
     return [];
   }
 
+  if (surfaceId === 'a11oy-net-webmanifest-gap') {
+    if (!/^application\/manifest\+json(?:;|$)/i.test(contentType)) {
+      return [
+        `${surfaceId}: expected an application/manifest+json response, observed ${contentType || 'missing'}`,
+      ];
+    }
+    let manifest: unknown;
+    try {
+      manifest = JSON.parse(body);
+    } catch {
+      return [`${surfaceId}: manifest metadata is not valid JSON`];
+    }
+    if (!isObject(manifest)) {
+      return [`${surfaceId}: manifest metadata must be a JSON object`];
+    }
+    if (manifest.name !== 'A11oy Proof Registry' || manifest.short_name !== 'A11oy.net') {
+      return [`${surfaceId}: manifest metadata has an unexpected product identity`];
+    }
+    if (manifest.start_url !== '/' || manifest.scope !== '/') {
+      return [`${surfaceId}: manifest start_url and scope must both equal /`];
+    }
+    if (manifest.display !== 'minimal-ui') {
+      return [`${surfaceId}: manifest display must equal minimal-ui`];
+    }
+    return [];
+  }
+
   if (surfaceId === 'a11oy-net-sitemap-gap') {
     if (!/^(?:application|text)\/(?:[a-z0-9.+-]+\+)?xml(?:;|$)/i.test(contentType)) {
       return [`${surfaceId}: expected an XML response, observed ${contentType || 'missing'}`];

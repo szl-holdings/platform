@@ -1,83 +1,86 @@
-# Security — Known Issues & Accepted Risk Register
+# Security — Known Findings and Remediation Status
 
-> **Scope:** This document records security findings that are **known, triaged, and
-> currently accepted or deferred** under the SZL Holdings vulnerability-management
-> process. It follows good vulnerability-management hygiene (identification, remediation, documented risk acceptance) — SZL makes NO CMMC, FedRAMP, or certification claim
-> (vulnerability identification, remediation, and documented risk acceptance) and to
-> provide an auditable trail of transitive / unfixable vulnerabilities.
+> **Scope:** This document records measured security findings and their remediation
+> status. It is not an advisory allowlist or a risk-acceptance mechanism. Critical and
+> High dependency findings block the release in both `pnpm audit` and Grype, and the
+> Grype configuration contains no suppressions.
 >
-> Maintained by: Yachay (CTO), SZL Holdings. Last triage: 2026-06-01.
-> Source of truth for live alerts: GitHub Security tab (Code Scanning / Dependabot /
-> Secret Scanning) on `szl-holdings/platform`.
+> Maintained by: Yachay (CTO), SZL Holdings. Last triage: 2026-08-08.
+> Source of truth for live alerts: the GitHub Security tab (Code Scanning,
+> Dependabot, and Secret Scanning) on `szl-holdings/platform`.
+>
+> This process makes no CMMC, FedRAMP, or other certification claim.
 
 ---
 
-## 1. Triage summary (2026-06-01)
+## 1. Triage summary (2026-08-08)
 
 | Source | Open | Notes |
 |---|---|---|
-| CodeQL / Code Scanning | 639 (after FP dismissal) | Dominated by code-quality rules; 17 high + 57 medium security-scored remain for review |
-| Dependabot | 0 open | All 65 historical alerts are in `fixed` state |
-| Secret Scanning | 0 open | All 3 historical alerts `resolved`; push-protection enabled |
+| CodeQL / Code Scanning | 639 after false-positive dismissal | Dominated by code-quality rules; production security findings remain explicitly open below |
+| Dependabot | 16 open on protected `main` (3 High, 11 Moderate, 2 Low) | Exact pre-merge API readback; the successor lock resolves `pnpm audit` to zero, but GitHub alert closure still requires protected merge and default-branch re-evaluation |
+| Secret Scanning | 0 open | All 3 historical alerts are resolved; push protection is enabled |
 
-The bulk of open Code Scanning alerts are **non-security code-quality rules**
-(`js/syntax-error` ×247, `js/unused-local-variable` ×198, `py/unused-import` ×25,
-etc.). These do not represent exploitable conditions and are tracked as code-health
-debt, not security risk.
+The 16 Dependabot alerts are the measured protected-`main` state, not a projected
+successor state. Their packages are `brace-expansion`, `fast-uri`, `ip-address`,
+`undici`, `hono`, `@hono/node-server`, `body-parser`, `dompurify`, and `protobufjs`.
+The exact successor lock and overrides produce zero findings under `pnpm audit
+--json`; that local result does not mark the GitHub alerts fixed. After a normal
+protected merge, Dependabot must re-evaluate the new default-branch lock before the
+open-alert count can be updated.
+
+The bulk of open Code Scanning alerts are non-security code-quality rules
+(`js/syntax-error` ×247, `js/unused-local-variable` ×198,
+`py/unused-import` ×25, and similar findings). They remain code-health work; they are
+not represented as vulnerability exceptions.
 
 ---
 
-## 2. Known transitive vulnerabilities (OSSF Scorecard `Vulnerabilities` check)
+## 2. Dependency vulnerability gate
 
-The OSSF Scorecard `Vulnerabilities` probe (Code Scanning alert **#3066**, scored 0)
-reports the following advisories reachable through **transitive dependencies** of the
-Python inference/eval surfaces. These are upstream advisories in indirect dependencies
-that have **no fixed version available in our current dependency tree**, or whose fix
-requires a major upstream version bump gated by founder review. They are documented
-here as **accepted/deferred risk** with the listed mitigations.
+The release policy is fail-closed:
 
-| Advisory | Mitigation / rationale |
+- `.grype.yaml` has `ignore: []`, and `.trivyignore` contains no advisory IDs, so
+  neither scanner suppresses a dependency finding.
+- `scripts/qa/generate-vuln-report.js` treats every Critical or High advisory as a
+  blocking finding. It has no exception or allowlist set.
+- A malformed, empty, or non-JSON `pnpm audit` response is a gate failure.
+- Moderate and Low findings stay visible in the generated report and remain eligible
+  for remediation; they do not silently change the Critical/High release threshold.
+
+The mobile dependency tree previously resolved `image-size@1.2.1` through Metro and
+exposed the following two High advisories:
+
+| Advisory | Remediation |
 |---|---|
-| PYSEC-2021-100 / GHSA-8h2j-cgx8-6xv7 | Transitive; affected code path not invoked by substrate runtime. Network egress sandboxed. |
-| PYSEC-2024-38 | Transitive; deferred pending upstream patched release. |
-| PYSEC-2022-183 / GHSA-h8pj-cxx2-jfg2 | Transitive; input is internally generated, not attacker-controlled. |
-| PYSEC-2021-47 / GHSA-5jqp-qgf6-3pvh | Transitive; mitigated by input validation at gateway boundary. |
-| GHSA-mr82-8j83-vxmv | Transitive; no fixed version; compensating control = read-only mount. |
-| PYSEC-2020-150 / GHSA-33c7-2mpw-hg34 | Transitive; legacy advisory, affected feature disabled in config. |
-| PYSEC-2020-151 / GHSA-f97h-2pfx-f59f | Transitive; affected feature disabled in config. |
-| GHSA-6w46-j5rx-g56g | Transitive; deferred pending dependency bump. |
-| GHSA-f83h-ghpp-7wcc | Transitive; deferred pending dependency bump. |
-| GHSA-wf5f-4jwr-ppcp | Transitive; not in reachable call graph. |
-| GHSA-cfh3-3jmp-rvhc | Transitive; not in reachable call graph. |
-| GHSA-pwv6-vv43-88gr | Transitive; mitigated by container network isolation. |
-| GHSA-r73j-pqj5-w3x7 | Transitive; deferred pending upstream fix. |
-| GHSA-whj4-6x5x-4v2j | Transitive; deferred pending upstream fix. |
-| PYSEC-2026-165 / GHSA-wjx4-4jcj-g98j | Transitive; recent advisory, fix tracked for next dependency sweep. |
+| `GHSA-w3rx-r6r6-pgpr` | Replaced the vulnerable ICNS-capable parser with the repository-owned `packages/image-size-safe` package. ICNS is not supported. Reads and directory walks are bounded. |
+| `GHSA-5p2g-fcmc-qvqq` | The same replacement intentionally excludes JXL and HEIF and rejects those payload classes fail-closed. |
 
-**Compensating controls (apply broadly to the above):**
-- Inference/eval workloads run in network-isolated containers (no inbound, egress allow-listed).
-- Untrusted input is validated and bounded at the gateway boundary before reaching Python surfaces.
-- Sovereign-only posture: no cloud LLM keys; no external model-provider egress.
-- Dependabot security updates are **enabled**; fixed versions will be adopted automatically as they publish.
+The replacement preserves the CommonJS API and the exact PNG, JPEG, BMP, GIF, WebP,
+PSD, SVG, TIFF, and KTX formats Metro consumes. Tests exercise every declared format,
+both file APIs, bounded direct-buffer behavior, format disabling, concurrency, crafted
+advisory inputs, and truncated headers. Workspace overrides also move
+`@hono/node-server` and `body-parser` to patched releases; compatibility is validated
+by the normal exact-head test and typecheck gates.
 
-> **Review cadence:** This register is re-evaluated each dependency sweep and at every
-> vulnerability-management triage cycle (no CMMC claim). Any advisory that gains a fixed version is removed here
-> and remediated via a Dependabot/founder-reviewed PR.
+Historical Python advisory identifiers that appeared in the old Grype ignore file are
+not carried forward as exceptions. If any becomes reachable in a future SBOM, the
+unsuppressed Grype gate reports it and blocks on High or Critical severity.
 
 ---
 
-## 3. Supply-chain / posture findings (OSSF Scorecard, informational)
+## 3. Supply-chain and posture findings (informational)
 
-These are **posture** findings, not code vulnerabilities. Documented for transparency;
-remediation is owned by the founder and tracked outside this register.
+These are posture findings, not dependency exceptions. They remain visible for
+follow-up and do not weaken a required check.
 
 | Alert | Finding | Status |
 |---|---|---|
-| #3065 `SAST` | SAST run on 21/30 recent commits | Deferred — CI gate hardening planned |
-| #3063 `Maintained` | Repo < 90 days old | Time-based; resolves automatically |
-| #3062 `CodeReview` | Approved-changeset ratio low | Process maturing as team scales |
-| #3026 `BranchProtection` | `main` protection not maximal | Founder-owned policy decision |
-| #3041–#3137, #3052–#3061 `Pinned-Dependencies` ×49 | Docker base images / workflow steps not pinned by hash | Deferred — hash-pinning sweep planned; tracked as supply-chain hardening |
+| #3065 `SAST` | SAST ran on 21 of 30 recent commits | Open hardening work |
+| #3063 `Maintained` | Repository is less than 90 days old | Time-based observation |
+| #3062 `CodeReview` | Approved-changeset ratio is low | Process evidence is still accumulating |
+| #3026 `BranchProtection` | Scorecard reports branch-protection posture | Governed separately; this document does not authorize a protection change |
+| #3041–#3137, #3052–#3061 `Pinned-Dependencies` ×49 | Docker base images or workflow steps reported without immutable pins | Open supply-chain hardening work |
 
 ---
 
@@ -85,14 +88,13 @@ remediation is owned by the founder and tracked outside this register.
 
 | Alert | Rule | Location | Reason |
 |---|---|---|---|
-| #3024 | `js/file-system-race` | `packages/gateway/test/gateway-e2e.test.ts:208` | TOCTOU pattern in **e2e test harness** on a test-owned audit-log file; no untrusted-actor attack surface in test code. Dismissed as `false positive`. |
+| #3024 | `js/file-system-race` | `packages/gateway/test/gateway-e2e.test.ts:208` | The TOCTOU pattern is in an end-to-end harness operating on a test-owned audit-log file; no untrusted actor can access that test path. Dismissed as `false positive`. |
 
 ---
 
-## 5. Items requiring founder review (NOT accepted — open for remediation)
+## 5. Open production security findings
 
-The following **production** security findings remain open and are explicitly **not**
-accepted by this register. They are flagged for founder-reviewed fixes:
+These findings are not accepted, suppressed, or marked remediated by this document:
 
 - `py/path-injection` — `apps/substrate-inference/engine/ollm/ollm/auto_inference.py:34,136` (#3139, #3140)
 - `py/clear-text-logging-sensitive-data` — `ops/meridian/check.py:34` (#3138)
@@ -107,4 +109,5 @@ accepted by this register. They are flagged for founder-reviewed fixes:
 
 ---
 
-_This file is additive documentation only. It does not modify application code._
+This file describes evidence and policy only. It does not close an alert or alter a
+repository protection.
