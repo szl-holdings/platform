@@ -2,7 +2,8 @@
 /**
  * License Compliance Report Generator
  *
- * Scans every package.json in the pnpm virtual store (node_modules/.pnpm) and
+ * Scans every package.json in the pnpm virtual store (node_modules/.pnpm),
+ * overlays linked workspace production packages from pnpm-workspace.yaml, and
  * produces `security/license-report.md` with:
  *   - A full per-dependency license inventory (package, version, license, flag)
  *   - A summary of copyleft and unknown-license packages
@@ -19,7 +20,7 @@
  */
 
 import { existsSync, mkdirSync, readdirSync, readFileSync, writeFileSync } from 'node:fs';
-import { dirname, join } from 'node:path';
+import { dirname, isAbsolute, join, relative, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
@@ -252,6 +253,34 @@ function scanStore() {
         }
       }
     }
+  }
+
+  const workspacePath = join(ROOT, 'pnpm-workspace.yaml');
+  let workspaceText;
+  try {
+    workspaceText = readFileSync(workspacePath, 'utf8');
+  } catch (e) {
+    fatal(`Cannot read pnpm-workspace.yaml: ${e.message}`);
+  }
+  const linkPattern = /\blink:\s*["']?([^"'#\s]+)["']?/g;
+  let linkMatch;
+  while ((linkMatch = linkPattern.exec(workspaceText)) !== null) {
+    const packageRoot = resolve(ROOT, linkMatch[1]);
+    const packageRelative = relative(ROOT, packageRoot);
+    if (
+      packageRelative === '..' ||
+      packageRelative.startsWith('../') ||
+      packageRelative.startsWith('..\\') ||
+      isAbsolute(packageRelative)
+    ) {
+      fatal(`Linked workspace package escapes repository root: ${linkMatch[1]}`);
+    }
+    const manifestPath = join(packageRoot, 'package.json');
+    const info = readPackage(manifestPath, linkMatch[1]);
+    if (!info) {
+      fatal(`Cannot read linked workspace package: ${manifestPath}`);
+    }
+    packages[info.name] = { version: info.version, license: info.license };
   }
 
   if (Object.keys(packages).length === 0) {
