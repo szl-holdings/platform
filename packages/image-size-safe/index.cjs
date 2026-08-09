@@ -200,6 +200,8 @@ function parseSvg(buffer) {
   if (!tag) fail('invalid SVG root');
   let width = numericSvgAttribute(tag, 'width');
   let height = numericSvgAttribute(tag, 'height');
+  if (width === 0) width = undefined;
+  if (height === 0) height = undefined;
   let inferredWidth = false;
   let inferredHeight = false;
   const viewBox = tag.match(
