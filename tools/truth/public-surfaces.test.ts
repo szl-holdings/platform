@@ -145,7 +145,7 @@ test('counts routed products independently from pages and excludes unavailable p
         observation: {
           method: 'GET',
           status: 503,
-          final_url: 'https://a-11-oy.com/killinchu',
+          final_url: 'https://szlholdings-killinchu.hf.space/',
         },
       }),
       surface({
