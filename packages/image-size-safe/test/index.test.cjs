@@ -131,6 +131,16 @@ test('parses bounded SVG, TIFF, and KTX metadata', () => {
     height: 66,
     type: 'svg',
   });
+  assert.deepEqual(imageSize(Buffer.from('<svg width="100.1" viewBox="0 0 7 10"></svg>')), {
+    width: 100,
+    height: 142,
+    type: 'svg',
+  });
+  assert.deepEqual(imageSize(Buffer.from('<svg width="100" viewBox="0\t0\t200\t50"></svg>')), {
+    width: 100,
+    height: 25,
+    type: 'svg',
+  });
   assert.throws(
     () => imageSize(Buffer.from('<svg data-viewBox="0 0 200 50" width="100"></svg>')),
     /invalid svg dimensions/i,

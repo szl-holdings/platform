@@ -200,15 +200,17 @@ function parseSvg(buffer) {
   let inferredWidth = false;
   let inferredHeight = false;
   const viewBox = tag.match(
-    /(?:^|\s)viewBox\s*=\s*["']\s*([-+0-9.eE]+)[ ,]+([-+0-9.eE]+)[ ,]+([-+0-9.eE]+)[ ,]+([-+0-9.eE]+)\s*["']/i,
+    /(?:^|\s)viewBox\s*=\s*["']\s*([-+0-9.eE]+)[\s,]+([-+0-9.eE]+)[\s,]+([-+0-9.eE]+)[\s,]+([-+0-9.eE]+)\s*["']/i,
   );
   if (viewBox) {
     const viewBoxWidth = Number(viewBox[3]);
     const viewBoxHeight = Number(viewBox[4]);
     if (width === undefined && height !== undefined) {
+      height = Math.round(height);
       width = height * (viewBoxWidth / viewBoxHeight);
       inferredWidth = true;
     } else if (height === undefined && width !== undefined) {
+      width = Math.round(width);
       height = width * (viewBoxHeight / viewBoxWidth);
       inferredHeight = true;
     } else {
