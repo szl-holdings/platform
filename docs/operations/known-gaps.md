@@ -1,6 +1,6 @@
 # SZL Holdings — Known Gaps Register (Security & Operations)
 
-**Last updated:** 2026-08-01 (rev 23 — public surface truth)
+**Last updated:** 2026-08-08 (rev 24 — public surface truth)
 **Owner:** Engineering / DevOps  
 **Audience:** Enterprise architects, Series A technical advisors, incoming VP Engineering
 
@@ -17,10 +17,10 @@ canonical metrics registry and generated [`docs/platform-facts.md`](../platform-
 historical app directories or marketing copy.
 
 This closes the zero-manifest tooling gap, not every web gap. The historical `/lyte`, `/aegis`,
-`/vessels`, `/terra`, `/counsel`, `/carlota-jo`, `/command`, and `/pulse` preview paths returned
-HTTP 404 and remain explicit `UNAVAILABLE` records. `a11oy.net/chat`, `a11oy.net/code`, and
-`manifest.webmanifest` also remain `UNAVAILABLE`. The independently measured `robots.txt` and
-`sitemap.xml` files now return their expected machine-readable content and are recorded as
+`/vessels`, `/terra`, `/counsel`, `/carlota-jo`, `/command`, and `/pulse` preview paths currently
+return HTTP 503 and remain explicit `UNAVAILABLE` records. `a11oy.net/chat` and `a11oy.net/code`
+remain unavailable at HTTP 404. The independently measured `manifest.webmanifest`, `robots.txt`,
+and `sitemap.xml` files now return their expected machine-readable content and are recorded as
 `REACHABLE` metadata; they are not customer-facing product surfaces and do not change the
 routed-product count. A routed page is not an uptime, customer, feature-completeness, or
 correctness claim;

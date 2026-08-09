@@ -90,6 +90,20 @@ test('parses bounded SVG, TIFF, and KTX metadata', () => {
     height: 768,
     type: 'svg',
   });
+  assert.deepEqual(imageSize(Buffer.from('<svg width="2cm" height="3cm"></svg>')), {
+    width: 76,
+    height: 113,
+    type: 'svg',
+  });
+  assert.deepEqual(imageSize(Buffer.from('<svg width="1in" height="72pt"></svg>')), {
+    width: 96,
+    height: 96,
+    type: 'svg',
+  });
+  assert.deepEqual(
+    imageSize(Buffer.from(`${'<?xml'.repeat(512)}<svg width="8" height="9"></svg>`)),
+    { width: 8, height: 9, type: 'svg' },
+  );
 
   const tiff = Buffer.alloc(38);
   tiff.write('II', 0, 'ascii');
@@ -151,7 +165,7 @@ test('fails closed on the advisory ICNS zero-length entry class', () => {
   input.writeUInt32BE(16, 4);
   input.write('ic07', 8, 'ascii');
   input.writeUInt32BE(0, 12);
-  assert.throws(() => imageSize(input), /unsupported file type/);
+  assert.throws(() => imageSize(input), /unsupported file type: unknown/);
 });
 
 test('fails closed on the advisory JXL zero-size box class', () => {

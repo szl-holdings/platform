@@ -134,11 +134,28 @@ function parseWebp(buffer) {
   fail('unsupported WebP chunk');
 }
 
+const svgAbsoluteUnitToPixels = Object.freeze({
+  '': 1,
+  px: 1,
+  in: 96,
+  cm: 96 / 2.54,
+  mm: 96 / 25.4,
+  q: 96 / 101.6,
+  pt: 96 / 72,
+  pc: 16,
+});
+
 function numericSvgAttribute(tag, name) {
   const match = tag.match(
-    new RegExp(`\\b${name}\\s*=\\s*["']\\s*([0-9]+(?:\\.[0-9]+)?)(?:px)?\\s*["']`, 'i'),
+    new RegExp(
+      `\\b${name}\\s*=\\s*["']\\s*([0-9]+(?:\\.[0-9]+)?)\\s*([a-z]*)\\s*["']`,
+      'i',
+    ),
   );
-  return match ? Number(match[1]) : undefined;
+  if (!match) return undefined;
+  const unit = match[2].toLowerCase();
+  const factor = svgAbsoluteUnitToPixels[unit];
+  return factor === undefined ? undefined : Number(match[1]) * factor;
 }
 
 function parseSvg(buffer) {
@@ -215,6 +232,31 @@ function parseKtx(buffer) {
   fail('invalid KTX signature');
 }
 
+function looksLikeSvg(buffer) {
+  const prefix = buffer
+    .subarray(0, Math.min(buffer.length, 4096))
+    .toString('utf8')
+    .toLowerCase();
+  let offset = 0;
+  while (offset < prefix.length) {
+    const svgStart = prefix.indexOf('<svg', offset);
+    if (svgStart === -1) return false;
+    const boundary = prefix[svgStart + 4];
+    if (
+      boundary === undefined ||
+      boundary === '>' ||
+      boundary === ' ' ||
+      boundary === '\t' ||
+      boundary === '\r' ||
+      boundary === '\n'
+    ) {
+      return true;
+    }
+    offset = svgStart + 4;
+  }
+  return false;
+}
+
 function detect(buffer) {
   if (
     buffer.length >= 24 &&
@@ -236,14 +278,7 @@ function detect(buffer) {
   if (buffer.length >= 8 && ['II', 'MM'].includes(buffer.toString('ascii', 0, 2))) return 'tiff';
   if (buffer.length >= 12 && buffer[0] === 0xab && buffer.toString('ascii', 1, 4) === 'KTX')
     return 'ktx';
-  if (
-    buffer
-      .subarray(0, Math.min(buffer.length, 4096))
-      .toString('utf8')
-      .match(/(?:<\?xml[^>]*>\s*)?<svg\b/i)
-  ) {
-    return 'svg';
-  }
+  if (looksLikeSvg(buffer)) return 'svg';
   return undefined;
 }
 
@@ -262,7 +297,7 @@ const parsers = {
 function lookup(input, filepath) {
   const buffer = asBuffer(input);
   const type = detect(buffer);
-  if (!type) fail(`unsupported file type: ${type} (file: ${filepath ?? ''})`);
+  if (!type) fail(`unsupported file type: unknown (file: ${filepath ?? ''})`);
   if (disabledTypes.has(type)) fail(`disabled file type: ${type}`);
   return parsers[type](buffer);
 }
