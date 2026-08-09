@@ -40,8 +40,22 @@ function checkedDimensions(width, height, type) {
 
 function parsePng(buffer) {
   requireBytes(buffer, 0, 24, 'PNG header');
-  if (buffer.toString('ascii', 12, 16) !== 'IHDR') fail('invalid PNG header');
-  return checkedDimensions(buffer.readUInt32BE(16), buffer.readUInt32BE(20), 'png');
+  let ihdrOffset = 12;
+  if (buffer.toString('ascii', 12, 16) === 'CgBI') {
+    const cgbiLength = buffer.readUInt32BE(8);
+    requireBytes(buffer, 16, cgbiLength + 4, 'PNG CgBI chunk');
+    const nextChunkOffset = 20 + cgbiLength;
+    requireBytes(buffer, nextChunkOffset, 16, 'PNG IHDR chunk');
+    ihdrOffset = nextChunkOffset + 4;
+  }
+  if (buffer.toString('ascii', ihdrOffset, ihdrOffset + 4) !== 'IHDR') {
+    fail('invalid PNG header');
+  }
+  return checkedDimensions(
+    buffer.readUInt32BE(ihdrOffset + 4),
+    buffer.readUInt32BE(ihdrOffset + 8),
+    'png',
+  );
 }
 
 function parseGif(buffer) {
@@ -168,8 +182,16 @@ function parseSvg(buffer) {
     /\bviewBox\s*=\s*["']\s*([-+0-9.eE]+)[ ,]+([-+0-9.eE]+)[ ,]+([-+0-9.eE]+)[ ,]+([-+0-9.eE]+)\s*["']/i,
   );
   if (viewBox) {
-    width ??= Number(viewBox[3]);
-    height ??= Number(viewBox[4]);
+    const viewBoxWidth = Number(viewBox[3]);
+    const viewBoxHeight = Number(viewBox[4]);
+    if (width === undefined && height !== undefined) {
+      width = height * (viewBoxWidth / viewBoxHeight);
+    } else if (height === undefined && width !== undefined) {
+      height = width * (viewBoxHeight / viewBoxWidth);
+    } else {
+      width ??= viewBoxWidth;
+      height ??= viewBoxHeight;
+    }
   }
   return checkedDimensions(Math.round(width), Math.round(height), 'svg');
 }

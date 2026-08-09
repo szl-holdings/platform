@@ -17,6 +17,16 @@ function png(width, height) {
   return buffer;
 }
 
+function cgbiPng(width, height) {
+  const buffer = Buffer.alloc(36);
+  Buffer.from([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a]).copy(buffer);
+  buffer.write('CgBI', 12, 'ascii');
+  buffer.write('IHDR', 24, 'ascii');
+  buffer.writeUInt32BE(width, 28);
+  buffer.writeUInt32BE(height, 32);
+  return buffer;
+}
+
 function jpeg(width, height) {
   const buffer = Buffer.alloc(21);
   buffer.set([0xff, 0xd8, 0xff, 0xc0, 0x00, 0x11, 0x08]);
@@ -60,6 +70,7 @@ test('parses the bounded raster formats Metro declares', () => {
   gif.writeUInt16LE(200, 8);
   assert.deepEqual(imageSize(gif), { width: 320, height: 200, type: 'gif' });
   assert.deepEqual(imageSize(jpeg(48, 32)), { width: 48, height: 32, type: 'jpg' });
+  assert.deepEqual(imageSize(cgbiPng(60, 40)), { width: 60, height: 40, type: 'png' });
 
   const bmp = Buffer.alloc(54);
   bmp.write('BM', 0, 'ascii');
@@ -98,6 +109,16 @@ test('parses bounded SVG, TIFF, and KTX metadata', () => {
   assert.deepEqual(imageSize(Buffer.from('<svg width="1in" height="72pt"></svg>')), {
     width: 96,
     height: 96,
+    type: 'svg',
+  });
+  assert.deepEqual(imageSize(Buffer.from('<svg width="100" viewBox="0 0 200 50"></svg>')), {
+    width: 100,
+    height: 25,
+    type: 'svg',
+  });
+  assert.deepEqual(imageSize(Buffer.from('<svg height="75" viewBox="0 0 200 50"></svg>')), {
+    width: 300,
+    height: 75,
     type: 'svg',
   });
   assert.deepEqual(
