@@ -286,10 +286,7 @@ function parseKtx(buffer) {
 }
 
 function looksLikeSvg(buffer) {
-  const prefix = buffer
-    .subarray(0, Math.min(buffer.length, 4096))
-    .toString('utf8')
-    .toLowerCase();
+  const prefix = buffer.subarray(0, Math.min(buffer.length, 4096)).toString('utf8').toLowerCase();
   let offset = 0;
   while (offset < prefix.length) {
     const svgStart = prefix.indexOf('<svg', offset);
