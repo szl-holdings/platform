@@ -7,12 +7,13 @@ import {
   TOOL_MAP,
   OPERATOR_MAP,
   OPERATIONAL_WORKCELLS,
+  WORKCELL_MAP as OPERATIONAL_WORKCELL_MAP,
   WORKCELL_SOURCE,
   getOperationalWorkcells,
 } from "../src/index.js";
 import {
   TEST_DEMO_WORKCELLS as DEMO_WORKCELLS,
-  TEST_WORKCELL_MAP as WORKCELL_MAP,
+  TEST_WORKCELL_MAP as DEMO_WORKCELL_MAP,
 } from "./fixtures/demo-workcells.js";
 import type {
   Workcell,
@@ -62,11 +63,19 @@ describe("a11oy operational workcell source — fail closed", () => {
     expect(Object.isFrozen(WORKCELL_SOURCE)).toBe(true);
     expect(getOperationalWorkcells()).toBe(WORKCELL_SOURCE);
   });
+
+  it("returns undefined for unknown operational-workcell IDs", () => {
+    expect(OPERATIONAL_WORKCELL_MAP["non-existent-key"]).toBeUndefined();
+  });
 });
 
 // ---- test-only sample registry sanity ------------------------------------
 
 describe("a11oy registry — sanity", () => {
+  it("returns undefined for unknown fixture workcell IDs", () => {
+    expect(DEMO_WORKCELL_MAP["non-existent-key"]).toBeUndefined();
+  });
+
   it("DEMO_WORKCELLS contains at least one workcell with an actionBrief", () => {
     const withBrief = DEMO_WORKCELLS.filter((w) => w.actionBrief !== null);
     expect(withBrief.length).toBeGreaterThan(0);
@@ -327,9 +336,9 @@ describe("a11oy verify — end-to-end on the demo registry", () => {
     }
   });
 
-  it("WORKCELL_MAP and DEMO_WORKCELLS are aligned", () => {
+  it("DEMO_WORKCELL_MAP and DEMO_WORKCELLS are aligned", () => {
     for (const w of DEMO_WORKCELLS) {
-      expect(WORKCELL_MAP[w.id]).toBe(w);
+      expect(DEMO_WORKCELL_MAP[w.id]).toBe(w);
     }
   });
 });
