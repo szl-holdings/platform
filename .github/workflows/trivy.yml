@@ -38,7 +38,7 @@ jobs:
           trivyignores: '.trivyignore'
 
       - name: Upload Trivy SARIF to GitHub Security tab
-        uses: github/codeql-action/upload-sarif@e4fba868fa4b1b91e1fdab776edc8cfbe6e9fb81 # v4
+        uses: github/codeql-action/upload-sarif@f205ea1c3313d32999d8d6a48b4f6530d4437b38 # v4
         with:
           sarif_file: trivy-results.sarif
 
@@ -53,9 +53,8 @@ jobs:
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
       - name: Scan with Grype (fail build on HIGH/CRITICAL)
-        # .grype.yaml in repo root suppresses documented transitive CVEs (SECURITY_KNOWN_ISSUES.md §2)
-        # Only unfixable transitive deps with compensating controls are suppressed.
-        # If grype finds NEW fixable CVEs, this job will still fail.
+        # .grype.yaml deliberately contains an empty ignore list. Every HIGH or
+        # CRITICAL finding is a release blocker; there is no advisory exception path.
         uses: anchore/scan-action@e1165082ffb1fe366ebaf02d8526e7c4989ea9d2 # v7.4.0
         with:
           path: "."
@@ -74,7 +73,7 @@ jobs:
           output-format: sarif
 
       - name: Upload Grype SARIF
-        uses: github/codeql-action/upload-sarif@e4fba868fa4b1b91e1fdab776edc8cfbe6e9fb81 # v4
+        uses: github/codeql-action/upload-sarif@f205ea1c3313d32999d8d6a48b4f6530d4437b38 # v4
         if: always() && steps.grype-sarif.outputs.sarif != ''
         with:
           sarif_file: ${{ steps.grype-sarif.outputs.sarif }}

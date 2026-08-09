@@ -115,7 +115,7 @@ test('counts only routed customer-facing web surfaces', () => {
   assert.deepEqual(validatePublicSurfaceManifest(manifest, NOW), []);
 });
 
-test('counts customer-facing products independently from routed pages and repository casing', () => {
+test('counts routed products independently from pages and excludes unavailable products', () => {
   const manifest = buildPublicSurfaceManifest(
     registry([
       surface(),
@@ -135,16 +135,17 @@ test('counts customer-facing products independently from routed pages and reposi
         id: 'killinchu-public-console',
         name: 'Killinchu public console',
         canonical_url: 'https://a-11-oy.com/killinchu',
-        availability: 'REDIRECTED',
+        mode: 'UNAVAILABLE',
+        availability: 'UNAVAILABLE',
         source_owner: {
           repository: 'szl-holdings/killinchu',
           path: 'web/index.html',
-          role: 'RUNTIME_OWNER',
+          role: 'REMEDIATION_OWNER',
         },
         observation: {
           method: 'GET',
-          status: 200,
-          final_url: 'https://szlholdings-killinchu.hf.space/',
+          status: 503,
+          final_url: 'https://a-11-oy.com/killinchu',
         },
       }),
       surface({
@@ -162,8 +163,8 @@ test('counts customer-facing products independently from routed pages and reposi
     ]),
   );
 
-  assert.equal(manifest.summary.customer_facing_routes, 4);
-  assert.equal(manifest.summary.customer_facing_products, 2);
+  assert.equal(manifest.summary.customer_facing_routes, 3);
+  assert.equal(manifest.summary.customer_facing_products, 1);
   assert.deepEqual(validatePublicSurfaceManifest(manifest, NOW), []);
 });
 
@@ -357,42 +358,37 @@ test('does not issue a request when file-controlled target validation fails', as
   assert.ok(failures.every((failure) => failure.startsWith('registry: ')));
 });
 
-test('follows one exact approved redirect with manual redirect handling', async () => {
-  const redirected = surface({
+test('accepts the measured Killinchu 503 only when declared unavailable', async () => {
+  const unavailable = surface({
     id: 'killinchu-public-console',
     name: 'Killinchu public console',
     canonical_url: 'https://a-11-oy.com/killinchu',
-    availability: 'REDIRECTED',
+    mode: 'UNAVAILABLE',
+    availability: 'UNAVAILABLE',
+    source_owner: {
+      repository: 'szl-holdings/killinchu',
+      path: 'web/index.html',
+      role: 'REMEDIATION_OWNER',
+    },
     observation: {
       method: 'GET',
-      status: 200,
-      final_url: 'https://szlholdings-killinchu.hf.space/',
+      status: 503,
+      final_url: 'https://a-11-oy.com/killinchu',
     },
   });
   const requests: string[] = [];
 
-  const failures = await verifyLivePublicSurfaces(registry([redirected]), async (url, init) => {
+  const failures = await verifyLivePublicSurfaces(registry([unavailable]), async (url, init) => {
     requests.push(url);
     assert.equal(init.redirect, 'manual');
-    if (requests.length === 1) {
-      return {
-        status: 307,
-        url,
-        body: null,
-        headers: { get: () => 'https://szlholdings-killinchu.hf.space/' },
-      };
-    }
-    return { status: 200, url, body: null, headers: { get: () => null } };
+    return { status: 503, url, body: null, headers: { get: () => null } };
   });
 
   assert.deepEqual(failures, []);
-  assert.deepEqual(requests, [
-    'https://a-11-oy.com/killinchu',
-    'https://szlholdings-killinchu.hf.space/',
-  ]);
+  assert.deepEqual(requests, ['https://a-11-oy.com/killinchu']);
 });
 
-test('rejects a redirect escape before requesting the destination', async () => {
+test('rejects obsolete Killinchu redirect truth before issuing a request', async () => {
   const redirected = surface({
     id: 'killinchu-public-console',
     name: 'Killinchu public console',
@@ -408,17 +404,12 @@ test('rejects a redirect escape before requesting the destination', async () => 
 
   const failures = await verifyLivePublicSurfaces(registry([redirected]), async (url) => {
     requests.push(url);
-    return {
-      status: 307,
-      url,
-      body: null,
-      headers: { get: () => 'https://127.0.0.1/internal' },
-    };
+    return { status: 307, url, body: null, headers: { get: () => null } };
   });
 
-  assert.deepEqual(requests, ['https://a-11-oy.com/killinchu']);
+  assert.deepEqual(requests, []);
   assert.deepEqual(failures, [
-    'killinchu-public-console: expected redirect to https://szlholdings-killinchu.hf.space/, observed https://127.0.0.1/internal',
+    'registry: surfaces[0].observation.final_url does not match the approved target for killinchu-public-console',
   ]);
 });
 
@@ -529,6 +520,65 @@ test('rejects truncated sitemap XML and accepts the canonical entry', async () =
   }));
   assert.deepEqual(externalEntity, [
     'a11oy-net-sitemap-gap: sitemap metadata is not well-formed XML',
+  ]);
+});
+
+test('validates the exact A11oy.net webmanifest contract', async () => {
+  const webmanifest = surface({
+    id: 'a11oy-net-webmanifest-gap',
+    name: 'A11oy.net web app manifest',
+    kind: 'METADATA',
+    audience: ['MACHINE'],
+    mode: 'DOCUMENTATION',
+    canonical_url: 'https://a11oy.net/manifest.webmanifest',
+    observation: {
+      method: 'GET',
+      status: 200,
+      final_url: 'https://a11oy.net/manifest.webmanifest',
+    },
+  });
+  const canonicalManifest = {
+    name: 'A11oy Proof Registry',
+    short_name: 'A11oy.net',
+    start_url: '/',
+    scope: '/',
+    display: 'minimal-ui',
+  };
+  const verify = (body: string, contentType = 'application/manifest+json; charset=utf-8') =>
+    verifyLivePublicSurfaces(registry([webmanifest]), async () => ({
+      ...metadataResponse(body, contentType),
+      url: 'https://a11oy.net/manifest.webmanifest',
+    }));
+
+  assert.deepEqual(await verify(JSON.stringify(canonicalManifest)), []);
+  assert.deepEqual(await verify('{'), [
+    'a11oy-net-webmanifest-gap: manifest metadata is not valid JSON',
+  ]);
+  assert.deepEqual(await verify('<html>not a manifest</html>', 'text/html'), [
+    'a11oy-net-webmanifest-gap: metadata body is an HTML response',
+  ]);
+  assert.deepEqual(await verify(JSON.stringify(canonicalManifest), 'application/json'), [
+    'a11oy-net-webmanifest-gap: expected an application/manifest+json response, observed application/json',
+  ]);
+  assert.deepEqual(await verify('{}'), [
+    'a11oy-net-webmanifest-gap: manifest metadata has an unexpected product identity',
+  ]);
+  assert.deepEqual(
+    await verify(JSON.stringify({ ...canonicalManifest, name: 'Different product' })),
+    ['a11oy-net-webmanifest-gap: manifest metadata has an unexpected product identity'],
+  );
+  assert.deepEqual(
+    await verify(JSON.stringify({ ...canonicalManifest, start_url: 'https://evil.example/' })),
+    ['a11oy-net-webmanifest-gap: manifest start_url and scope must both equal /'],
+  );
+  assert.deepEqual(await verify(JSON.stringify({ ...canonicalManifest, scope: '/private/' })), [
+    'a11oy-net-webmanifest-gap: manifest start_url and scope must both equal /',
+  ]);
+  assert.deepEqual(await verify(JSON.stringify({ ...canonicalManifest, display: 'standalone' })), [
+    'a11oy-net-webmanifest-gap: manifest display must equal minimal-ui',
+  ]);
+  assert.deepEqual(await verify('[]'), [
+    'a11oy-net-webmanifest-gap: manifest metadata must be a JSON object',
   ]);
 });
 
