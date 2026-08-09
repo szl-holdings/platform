@@ -157,6 +157,8 @@ const svgAbsoluteUnitToPixels = Object.freeze({
   q: 96 / 101.6,
   pt: 96 / 72,
   pc: 16,
+  em: 16,
+  ex: 8,
 });
 
 function numericSvgAttribute(tag, name) {
@@ -203,8 +205,8 @@ function parseSvg(buffer) {
     /(?:^|\s)viewBox\s*=\s*["']\s*([-+0-9.eE]+)[\s,]+([-+0-9.eE]+)[\s,]+([-+0-9.eE]+)[\s,]+([-+0-9.eE]+)\s*["']/i,
   );
   if (viewBox) {
-    const viewBoxWidth = Number(viewBox[3]);
-    const viewBoxHeight = Number(viewBox[4]);
+    const viewBoxWidth = Math.round(Number(viewBox[3]));
+    const viewBoxHeight = Math.round(Number(viewBox[4]));
     if (width === undefined && height !== undefined) {
       height = Math.round(height);
       width = height * (viewBoxWidth / viewBoxHeight);
