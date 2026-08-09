@@ -1,14 +1,14 @@
 {
   "schema": "szl.public-surfaces.registry/v1",
-  "observed_at": "2026-08-08T22:39:30.948Z",
+  "observed_at": "2026-08-09T05:19:33.381Z",
   "surfaces": [
     {
       "id": "a11oy-front-door",
       "name": "SZL Holdings and A11oy front door",
       "kind": "WEB",
       "audience": ["INVESTOR", "DEVELOPER"],
-      "mode": "UNAVAILABLE",
-      "availability": "UNAVAILABLE",
+      "mode": "LIVE",
+      "availability": "REACHABLE",
       "canonical_url": "https://a-11-oy.com/",
       "source_owner": {
         "repository": "szl-holdings/a11oy",
@@ -17,18 +17,18 @@
       },
       "observation": {
         "method": "GET",
-        "status": 503,
+        "status": 200,
         "final_url": "https://a-11-oy.com/"
       },
-      "note": "Operationally unavailable boundary: this surface is currently down and reflected as maintenance outage evidence."
+      "note": "Measured HTTP 200 at the canonical route; reachability does not assert payload correctness, deployment provenance, or exact source parity."
     },
     {
       "id": "a11oy-product-introduction",
       "name": "A11oy product introduction",
       "kind": "WEB",
       "audience": ["INVESTOR", "DEVELOPER"],
-      "mode": "UNAVAILABLE",
-      "availability": "UNAVAILABLE",
+      "mode": "LIVE",
+      "availability": "REACHABLE",
       "canonical_url": "https://a-11-oy.com/a11oy/",
       "source_owner": {
         "repository": "szl-holdings/a11oy",
@@ -37,18 +37,18 @@
       },
       "observation": {
         "method": "GET",
-        "status": 503,
+        "status": 200,
         "final_url": "https://a-11-oy.com/a11oy/"
       },
-      "note": "Operationally unavailable boundary: this surface is currently down and reflected as maintenance outage evidence."
+      "note": "Measured HTTP 200 at the canonical route; reachability does not assert payload correctness, deployment provenance, or exact source parity."
     },
     {
       "id": "a11oy-console",
       "name": "A11oy operator console",
       "kind": "WEB",
       "audience": ["INVESTOR", "DEVELOPER", "OPERATOR"],
-      "mode": "UNAVAILABLE",
-      "availability": "UNAVAILABLE",
+      "mode": "LIVE",
+      "availability": "REACHABLE",
       "canonical_url": "https://a-11-oy.com/console",
       "source_owner": {
         "repository": "szl-holdings/a11oy",
@@ -57,18 +57,18 @@
       },
       "observation": {
         "method": "GET",
-        "status": 503,
+        "status": 200,
         "final_url": "https://a-11-oy.com/console"
       },
-      "note": "Operationally unavailable boundary: this surface is currently down and reflected as maintenance outage evidence."
+      "note": "Measured HTTP 200 at the canonical route; reachability does not assert payload correctness, deployment provenance, or exact source parity."
     },
     {
       "id": "a11oy-docs",
       "name": "A11oy public documentation",
       "kind": "WEB",
       "audience": ["DEVELOPER", "INVESTOR"],
-      "mode": "UNAVAILABLE",
-      "availability": "UNAVAILABLE",
+      "mode": "LIVE",
+      "availability": "REACHABLE",
       "canonical_url": "https://a-11-oy.com/docs",
       "source_owner": {
         "repository": "szl-holdings/a11oy",
@@ -77,18 +77,18 @@
       },
       "observation": {
         "method": "GET",
-        "status": 503,
+        "status": 200,
         "final_url": "https://a-11-oy.com/docs"
       },
-      "note": "Operationally unavailable boundary: this surface is currently down and reflected as maintenance outage evidence."
+      "note": "Measured HTTP 200 at the canonical route; reachability does not assert payload correctness, deployment provenance, or exact source parity."
     },
     {
       "id": "a11oy-trust-center",
       "name": "A11oy trust center",
       "kind": "WEB",
       "audience": ["INVESTOR", "DEVELOPER"],
-      "mode": "UNAVAILABLE",
-      "availability": "UNAVAILABLE",
+      "mode": "LIVE",
+      "availability": "REACHABLE",
       "canonical_url": "https://a-11-oy.com/trust",
       "source_owner": {
         "repository": "szl-holdings/a11oy",
@@ -97,18 +97,18 @@
       },
       "observation": {
         "method": "GET",
-        "status": 503,
+        "status": 200,
         "final_url": "https://a-11-oy.com/trust"
       },
-      "note": "Operationally unavailable boundary: this surface is currently down and reflected as maintenance outage evidence."
+      "note": "Measured HTTP 200 at the canonical route; reachability does not assert payload correctness, deployment provenance, or exact source parity."
     },
     {
       "id": "a11oy-receipt-verifier",
       "name": "A11oy public receipt verifier",
       "kind": "WEB",
       "audience": ["INVESTOR", "DEVELOPER", "OPERATOR"],
-      "mode": "UNAVAILABLE",
-      "availability": "UNAVAILABLE",
+      "mode": "LIVE",
+      "availability": "REACHABLE",
       "canonical_url": "https://a-11-oy.com/verify",
       "source_owner": {
         "repository": "szl-holdings/a11oy",
@@ -117,18 +117,18 @@
       },
       "observation": {
         "method": "GET",
-        "status": 503,
+        "status": 200,
         "final_url": "https://a-11-oy.com/verify"
       },
-      "note": "Operationally unavailable boundary: this surface is currently down and reflected as maintenance outage evidence."
+      "note": "Measured HTTP 200 at the canonical route; reachability does not assert payload correctness, deployment provenance, or exact source parity."
     },
     {
       "id": "a11oy-ecosystem-atlas",
       "name": "SZL ecosystem atlas",
       "kind": "WEB",
       "audience": ["INVESTOR", "DEVELOPER"],
-      "mode": "UNAVAILABLE",
-      "availability": "UNAVAILABLE",
+      "mode": "LIVE",
+      "availability": "REACHABLE",
       "canonical_url": "https://a-11-oy.com/ecosystem",
       "source_owner": {
         "repository": "szl-holdings/a11oy",
@@ -137,18 +137,18 @@
       },
       "observation": {
         "method": "GET",
-        "status": 503,
+        "status": 200,
         "final_url": "https://a-11-oy.com/ecosystem"
       },
-      "note": "Operationally unavailable boundary: this surface is currently down and reflected as maintenance outage evidence."
+      "note": "Measured HTTP 200 at the canonical route; reachability does not assert payload correctness, deployment provenance, or exact source parity."
     },
     {
       "id": "a11oy-observability",
       "name": "A11oy observability surface",
       "kind": "WEB",
       "audience": ["DEVELOPER", "OPERATOR", "INVESTOR"],
-      "mode": "UNAVAILABLE",
-      "availability": "UNAVAILABLE",
+      "mode": "LIVE",
+      "availability": "REACHABLE",
       "canonical_url": "https://a-11-oy.com/observability",
       "source_owner": {
         "repository": "szl-holdings/a11oy",
@@ -157,18 +157,18 @@
       },
       "observation": {
         "method": "GET",
-        "status": 503,
+        "status": 200,
         "final_url": "https://a-11-oy.com/observability"
       },
-      "note": "Operationally unavailable boundary: this surface is currently down and reflected as maintenance outage evidence."
+      "note": "Measured HTTP 200 at the canonical route; reachability does not assert payload correctness, deployment provenance, or exact source parity."
     },
     {
       "id": "a11oy-wires",
       "name": "A11oy cross-organ wires",
       "kind": "WEB",
       "audience": ["DEVELOPER", "OPERATOR", "INVESTOR"],
-      "mode": "UNAVAILABLE",
-      "availability": "UNAVAILABLE",
+      "mode": "LIVE",
+      "availability": "REACHABLE",
       "canonical_url": "https://a-11-oy.com/wires",
       "source_owner": {
         "repository": "szl-holdings/a11oy",
@@ -177,18 +177,18 @@
       },
       "observation": {
         "method": "GET",
-        "status": 503,
+        "status": 200,
         "final_url": "https://a-11-oy.com/wires"
       },
-      "note": "Operationally unavailable boundary: this surface is currently down and reflected as maintenance outage evidence."
+      "note": "Measured HTTP 200 at the canonical route; reachability does not assert payload correctness, deployment provenance, or exact source parity."
     },
     {
       "id": "a11oy-spaces-registry",
       "name": "Hugging Face Spaces registry",
       "kind": "WEB",
       "audience": ["INVESTOR", "DEVELOPER"],
-      "mode": "UNAVAILABLE",
-      "availability": "UNAVAILABLE",
+      "mode": "LIVE",
+      "availability": "REACHABLE",
       "canonical_url": "https://a-11-oy.com/spaces",
       "source_owner": {
         "repository": "szl-holdings/a11oy",
@@ -197,10 +197,10 @@
       },
       "observation": {
         "method": "GET",
-        "status": 503,
+        "status": 200,
         "final_url": "https://a-11-oy.com/spaces"
       },
-      "note": "Operationally unavailable boundary: this surface is currently down and reflected as maintenance outage evidence."
+      "note": "Measured HTTP 200 at the canonical route; reachability does not assert payload correctness, deployment provenance, or exact source parity."
     },
     {
       "id": "killinchu-public-console",
@@ -218,9 +218,9 @@
       "observation": {
         "method": "GET",
         "status": 503,
-        "final_url": "https://a-11-oy.com/killinchu"
+        "final_url": "https://szlholdings-killinchu.hf.space/"
       },
-      "note": "Measured HTTP 503. The Killinchu Space is PAUSED because cpu-basic quota is exceeded (requested=1, current=5, limit=3); no redirect or readiness claim is made."
+      "note": "Protected A11oy source redirects this canonical path to the approved Killinchu Space; the measured final response is HTTP 503, so availability remains failed closed."
     },
     {
       "id": "a11oy-net-thesis",
@@ -247,8 +247,8 @@
       "name": "A11oy source-binding API",
       "kind": "API",
       "audience": ["DEVELOPER", "OPERATOR"],
-      "mode": "UNAVAILABLE",
-      "availability": "UNAVAILABLE",
+      "mode": "LIVE",
+      "availability": "REACHABLE",
       "canonical_url": "https://szlholdings-a11oy.hf.space/api/build-info",
       "source_owner": {
         "repository": "szl-holdings/a11oy",
@@ -257,18 +257,18 @@
       },
       "observation": {
         "method": "GET",
-        "status": 503,
+        "status": 200,
         "final_url": "https://szlholdings-a11oy.hf.space/api/build-info"
       },
-      "note": "Operationally unavailable boundary: this surface is currently down and reflected as maintenance outage evidence."
+      "note": "Measured HTTP 200 at the canonical route; reachability does not assert payload correctness, deployment provenance, or exact source parity."
     },
     {
       "id": "a11oy-readiness-api",
       "name": "A11oy readiness API",
       "kind": "API",
       "audience": ["DEVELOPER", "OPERATOR"],
-      "mode": "UNAVAILABLE",
-      "availability": "UNAVAILABLE",
+      "mode": "LIVE",
+      "availability": "REACHABLE",
       "canonical_url": "https://szlholdings-a11oy.hf.space/readyz",
       "source_owner": {
         "repository": "szl-holdings/a11oy",
@@ -277,10 +277,10 @@
       },
       "observation": {
         "method": "GET",
-        "status": 503,
+        "status": 200,
         "final_url": "https://szlholdings-a11oy.hf.space/readyz"
       },
-      "note": "Operationally unavailable boundary: this surface is currently down and reflected as maintenance outage evidence."
+      "note": "Measured HTTP 200 at the canonical route; reachability does not assert payload correctness, deployment provenance, or exact source parity."
     },
     {
       "id": "killinchu-build-info-api",
@@ -337,10 +337,10 @@
       },
       "observation": {
         "method": "GET",
-        "status": 503,
+        "status": 404,
         "final_url": "https://a-11-oy.com/lyte/"
       },
-      "note": "Operationally unavailable boundary: this surface is currently down and reflected as maintenance outage evidence."
+      "note": "Measured HTTP 404 at this historical route; it remains unavailable and no product-surface claim is made."
     },
     {
       "id": "legacy-aegis-route",
@@ -357,10 +357,10 @@
       },
       "observation": {
         "method": "GET",
-        "status": 503,
+        "status": 404,
         "final_url": "https://a-11-oy.com/aegis/"
       },
-      "note": "Operationally unavailable boundary: this surface is currently down and reflected as maintenance outage evidence."
+      "note": "Measured HTTP 404 at this historical route; it remains unavailable and no product-surface claim is made."
     },
     {
       "id": "legacy-vessels-route",
@@ -377,10 +377,10 @@
       },
       "observation": {
         "method": "GET",
-        "status": 503,
+        "status": 404,
         "final_url": "https://a-11-oy.com/vessels/"
       },
-      "note": "Operationally unavailable boundary: this surface is currently down and reflected as maintenance outage evidence."
+      "note": "Measured HTTP 404 at this historical route; it remains unavailable and no product-surface claim is made."
     },
     {
       "id": "legacy-terra-route",
@@ -397,10 +397,10 @@
       },
       "observation": {
         "method": "GET",
-        "status": 503,
+        "status": 404,
         "final_url": "https://a-11-oy.com/terra/"
       },
-      "note": "Operationally unavailable boundary: this surface is currently down and reflected as maintenance outage evidence."
+      "note": "Measured HTTP 404 at this historical route; it remains unavailable and no product-surface claim is made."
     },
     {
       "id": "legacy-counsel-route",
@@ -417,10 +417,10 @@
       },
       "observation": {
         "method": "GET",
-        "status": 503,
+        "status": 404,
         "final_url": "https://a-11-oy.com/counsel/"
       },
-      "note": "Operationally unavailable boundary: this surface is currently down and reflected as maintenance outage evidence."
+      "note": "Measured HTTP 404 at this historical route; it remains unavailable and no product-surface claim is made."
     },
     {
       "id": "legacy-carlota-jo-route",
@@ -437,10 +437,10 @@
       },
       "observation": {
         "method": "GET",
-        "status": 503,
+        "status": 404,
         "final_url": "https://a-11-oy.com/carlota-jo/"
       },
-      "note": "Operationally unavailable boundary: this surface is currently down and reflected as maintenance outage evidence."
+      "note": "Measured HTTP 404 at this historical route; it remains unavailable and no product-surface claim is made."
     },
     {
       "id": "legacy-command-route",
@@ -457,10 +457,10 @@
       },
       "observation": {
         "method": "GET",
-        "status": 503,
+        "status": 404,
         "final_url": "https://a-11-oy.com/command/"
       },
-      "note": "Operationally unavailable boundary: this surface is currently down and reflected as maintenance outage evidence."
+      "note": "Measured HTTP 404 at this historical route; it remains unavailable and no product-surface claim is made."
     },
     {
       "id": "legacy-pulse-route",
@@ -477,10 +477,10 @@
       },
       "observation": {
         "method": "GET",
-        "status": 503,
+        "status": 404,
         "final_url": "https://a-11-oy.com/pulse/"
       },
-      "note": "Operationally unavailable boundary: this surface is currently down and reflected as maintenance outage evidence."
+      "note": "Measured HTTP 404 at this historical route; it remains unavailable and no product-surface claim is made."
     },
     {
       "id": "a11oy-net-chat-gap",

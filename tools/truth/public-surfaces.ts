@@ -160,7 +160,7 @@ const APPROVED_PUBLIC_SURFACE_TARGETS = {
   },
   'killinchu-public-console': {
     canonicalUrl: 'https://a-11-oy.com/killinchu',
-    finalUrl: 'https://a-11-oy.com/killinchu',
+    finalUrl: 'https://szlholdings-killinchu.hf.space/',
   },
   'killinchu-readiness-api': {
     canonicalUrl: 'https://szlholdings-killinchu.hf.space/readyz',

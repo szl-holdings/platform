@@ -358,7 +358,7 @@ test('does not issue a request when file-controlled target validation fails', as
   assert.ok(failures.every((failure) => failure.startsWith('registry: ')));
 });
 
-test('accepts the measured Killinchu 503 only when declared unavailable', async () => {
+test('accepts the approved Killinchu redirect only when its 503 final is unavailable', async () => {
   const unavailable = surface({
     id: 'killinchu-public-console',
     name: 'Killinchu public console',
@@ -373,7 +373,7 @@ test('accepts the measured Killinchu 503 only when declared unavailable', async 
     observation: {
       method: 'GET',
       status: 503,
-      final_url: 'https://a-11-oy.com/killinchu',
+      final_url: 'https://szlholdings-killinchu.hf.space/',
     },
   });
   const requests: string[] = [];
@@ -381,35 +381,55 @@ test('accepts the measured Killinchu 503 only when declared unavailable', async 
   const failures = await verifyLivePublicSurfaces(registry([unavailable]), async (url, init) => {
     requests.push(url);
     assert.equal(init.redirect, 'manual');
+    if (url === 'https://a-11-oy.com/killinchu') {
+      return {
+        status: 307,
+        url,
+        body: null,
+        headers: {
+          get: (name: string) =>
+            name === 'location' ? 'https://szlholdings-killinchu.hf.space/' : null,
+        },
+      };
+    }
     return { status: 503, url, body: null, headers: { get: () => null } };
   });
 
   assert.deepEqual(failures, []);
-  assert.deepEqual(requests, ['https://a-11-oy.com/killinchu']);
+  assert.deepEqual(requests, [
+    'https://a-11-oy.com/killinchu',
+    'https://szlholdings-killinchu.hf.space/',
+  ]);
 });
 
-test('rejects obsolete Killinchu redirect truth before issuing a request', async () => {
-  const redirected = surface({
+test('rejects an unapproved Killinchu redirect target', async () => {
+  const unavailable = surface({
     id: 'killinchu-public-console',
     name: 'Killinchu public console',
     canonical_url: 'https://a-11-oy.com/killinchu',
-    availability: 'REDIRECTED',
+    mode: 'UNAVAILABLE',
+    availability: 'UNAVAILABLE',
     observation: {
       method: 'GET',
-      status: 200,
+      status: 503,
       final_url: 'https://szlholdings-killinchu.hf.space/',
     },
   });
   const requests: string[] = [];
 
-  const failures = await verifyLivePublicSurfaces(registry([redirected]), async (url) => {
+  const failures = await verifyLivePublicSurfaces(registry([unavailable]), async (url) => {
     requests.push(url);
-    return { status: 307, url, body: null, headers: { get: () => null } };
+    return {
+      status: 307,
+      url,
+      body: null,
+      headers: { get: () => 'https://example.com/unapproved' },
+    };
   });
 
-  assert.deepEqual(requests, []);
+  assert.deepEqual(requests, ['https://a-11-oy.com/killinchu']);
   assert.deepEqual(failures, [
-    'registry: surfaces[0].observation.final_url does not match the approved target for killinchu-public-console',
+    'killinchu-public-console: expected redirect to https://szlholdings-killinchu.hf.space/, observed https://example.com/unapproved',
   ]);
 });
 
