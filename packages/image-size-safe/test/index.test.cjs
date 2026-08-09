@@ -221,6 +221,55 @@ test('supports synchronous and callback file-path parsing', async () => {
   }
 });
 
+test('reads a bounded late TIFF directory for file-path APIs', async () => {
+  const directory = fs.mkdtempSync(path.join(os.tmpdir(), 'szl-image-size-tiff-'));
+  const file = path.join(directory, 'late-ifd.tiff');
+  const ifdOffset = 600_000;
+  const header = Buffer.alloc(8);
+  header.write('II', 0, 'ascii');
+  header.writeUInt16LE(42, 2);
+  header.writeUInt32LE(ifdOffset, 4);
+  const imageDirectory = Buffer.alloc(26);
+  imageDirectory.writeUInt16LE(2, 0);
+  imageDirectory.writeUInt16LE(256, 2);
+  imageDirectory.writeUInt16LE(4, 4);
+  imageDirectory.writeUInt32LE(1, 6);
+  imageDirectory.writeUInt32LE(640, 10);
+  imageDirectory.writeUInt16LE(257, 14);
+  imageDirectory.writeUInt16LE(4, 16);
+  imageDirectory.writeUInt32LE(1, 18);
+  imageDirectory.writeUInt32LE(480, 22);
+  const descriptor = fs.openSync(file, 'w');
+  try {
+    fs.writeSync(descriptor, header, 0, header.length, 0);
+    fs.writeSync(
+      descriptor,
+      imageDirectory,
+      0,
+      imageDirectory.length,
+      ifdOffset,
+    );
+  } finally {
+    fs.closeSync(descriptor);
+  }
+
+  try {
+    const expected = { width: 640, height: 480, type: 'tiff' };
+    assert.deepEqual(imageSize(file), expected);
+    await new Promise((resolve, reject) => {
+      imageSize(file, (error, dimensions) => {
+        if (error) reject(error);
+        else {
+          assert.deepEqual(dimensions, expected);
+          resolve();
+        }
+      });
+    });
+  } finally {
+    fs.rmSync(directory, { recursive: true, force: true });
+  }
+});
+
 test('honors disabled formats and filesystem access', () => {
   imageSize.disableTypes(['png']);
   assert.throws(() => imageSize(png(1, 1)), /disabled file type: png/);

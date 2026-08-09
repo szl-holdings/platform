@@ -227,28 +227,41 @@ function parseSvg(buffer) {
   );
 }
 
-function parseTiff(buffer) {
+function tiffHeader(buffer) {
   requireBytes(buffer, 0, 8, 'TIFF header');
   const byteOrder = buffer.toString('ascii', 0, 2);
   if (byteOrder !== 'II' && byteOrder !== 'MM') fail('invalid TIFF byte order');
   const littleEndian = byteOrder === 'II';
+  const readHeader16 = (offset) =>
+    littleEndian ? buffer.readUInt16LE(offset) : buffer.readUInt16BE(offset);
+  const readHeader32 = (offset) =>
+    littleEndian ? buffer.readUInt32LE(offset) : buffer.readUInt32BE(offset);
+  if (readHeader16(2) !== 42) fail('invalid TIFF magic');
+  return { littleEndian, ifdOffset: readHeader32(4) };
+}
+
+function parseTiff(buffer, directoryBuffer = buffer, directoryBase = 0) {
+  const { littleEndian, ifdOffset } = tiffHeader(buffer);
+  const directoryOffset = ifdOffset - directoryBase;
   const read16 = (offset) => {
-    requireBytes(buffer, offset, 2, 'TIFF uint16');
-    return littleEndian ? buffer.readUInt16LE(offset) : buffer.readUInt16BE(offset);
+    requireBytes(directoryBuffer, offset, 2, 'TIFF uint16');
+    return littleEndian
+      ? directoryBuffer.readUInt16LE(offset)
+      : directoryBuffer.readUInt16BE(offset);
   };
   const read32 = (offset) => {
-    requireBytes(buffer, offset, 4, 'TIFF uint32');
-    return littleEndian ? buffer.readUInt32LE(offset) : buffer.readUInt32BE(offset);
+    requireBytes(directoryBuffer, offset, 4, 'TIFF uint32');
+    return littleEndian
+      ? directoryBuffer.readUInt32LE(offset)
+      : directoryBuffer.readUInt32BE(offset);
   };
-  if (read16(2) !== 42) fail('invalid TIFF magic');
-  const ifdOffset = read32(4);
-  const count = read16(ifdOffset);
+  const count = read16(directoryOffset);
   if (count > MAX_TIFF_ENTRIES) fail('unbounded TIFF directory');
   let width;
   let height;
   for (let index = 0; index < count; index += 1) {
-    const entry = ifdOffset + 2 + index * 12;
-    requireBytes(buffer, entry, 12, 'TIFF directory entry');
+    const entry = directoryOffset + 2 + index * 12;
+    requireBytes(directoryBuffer, entry, 12, 'TIFF directory entry');
     const tag = read16(entry);
     if (tag !== 256 && tag !== 257) continue;
     const fieldType = read16(entry + 2);
@@ -344,11 +357,14 @@ const parsers = {
   ktx: parseKtx,
 };
 
-function lookup(input, filepath) {
+function lookup(input, filepath, tiffDirectory, tiffDirectoryBase = 0) {
   const buffer = asBuffer(input);
   const type = detect(buffer);
   if (!type) fail(`unsupported file type: unknown (file: ${filepath ?? ''})`);
   if (disabledTypes.has(type)) fail(`disabled file type: ${type}`);
+  if (type === 'tiff' && tiffDirectory) {
+    return parseTiff(buffer, tiffDirectory, tiffDirectoryBase);
+  }
   return parsers[type](buffer);
 }
 
@@ -357,9 +373,39 @@ function readFileSyncBounded(filepath) {
   try {
     const size = fs.fstatSync(descriptor).size;
     if (size <= 0) fail('empty image file');
+    const readExact = (position, length, label) => {
+      if (position < 0 || position + length > size) fail(`truncated ${label}`);
+      const output = Buffer.alloc(length);
+      let offset = 0;
+      while (offset < length) {
+        const bytesRead = fs.readSync(
+          descriptor,
+          output,
+          offset,
+          length - offset,
+          position + offset,
+        );
+        if (bytesRead === 0) fail(`truncated ${label}`);
+        offset += bytesRead;
+      }
+      return output;
+    };
     const input = Buffer.alloc(Math.min(size, MAX_INPUT_SIZE));
-    fs.readSync(descriptor, input, 0, input.length, 0);
-    return input;
+    const prefix = readExact(0, input.length, 'image file');
+    prefix.copy(input);
+    if (detect(input) !== 'tiff') return { input };
+    const { littleEndian, ifdOffset } = tiffHeader(input);
+    const countBuffer = readExact(ifdOffset, 2, 'TIFF directory count');
+    const count = littleEndian
+      ? countBuffer.readUInt16LE(0)
+      : countBuffer.readUInt16BE(0);
+    if (count > MAX_TIFF_ENTRIES) fail('unbounded TIFF directory');
+    const tiffDirectory = readExact(
+      ifdOffset,
+      2 + count * 12,
+      'TIFF directory',
+    );
+    return { input, tiffDirectory, tiffDirectoryBase: ifdOffset };
   } finally {
     fs.closeSync(descriptor);
   }
@@ -370,9 +416,38 @@ async function readFileBounded(filepath) {
   try {
     const size = (await handle.stat()).size;
     if (size <= 0) fail('empty image file');
+    const readExact = async (position, length, label) => {
+      if (position < 0 || position + length > size) fail(`truncated ${label}`);
+      const output = Buffer.alloc(length);
+      let offset = 0;
+      while (offset < length) {
+        const { bytesRead } = await handle.read(
+          output,
+          offset,
+          length - offset,
+          position + offset,
+        );
+        if (bytesRead === 0) fail(`truncated ${label}`);
+        offset += bytesRead;
+      }
+      return output;
+    };
     const input = Buffer.alloc(Math.min(size, MAX_INPUT_SIZE));
-    await handle.read(input, 0, input.length, 0);
-    return input;
+    const prefix = await readExact(0, input.length, 'image file');
+    prefix.copy(input);
+    if (detect(input) !== 'tiff') return { input };
+    const { littleEndian, ifdOffset } = tiffHeader(input);
+    const countBuffer = await readExact(ifdOffset, 2, 'TIFF directory count');
+    const count = littleEndian
+      ? countBuffer.readUInt16LE(0)
+      : countBuffer.readUInt16BE(0);
+    if (count > MAX_TIFF_ENTRIES) fail('unbounded TIFF directory');
+    const tiffDirectory = await readExact(
+      ifdOffset,
+      2 + count * 12,
+      'TIFF directory',
+    );
+    return { input, tiffDirectory, tiffDirectoryBase: ifdOffset };
   } finally {
     await handle.close();
   }
@@ -404,7 +479,13 @@ function imageSize(input, callback) {
   if (typeof callback === 'function') {
     enqueue(async () => {
       try {
-        const dimensions = lookup(await readFileBounded(filepath), filepath);
+        const file = await readFileBounded(filepath);
+        const dimensions = lookup(
+          file.input,
+          filepath,
+          file.tiffDirectory,
+          file.tiffDirectoryBase,
+        );
         process.nextTick(callback, null, dimensions);
       } catch (error) {
         process.nextTick(callback, error);
@@ -412,7 +493,13 @@ function imageSize(input, callback) {
     });
     return;
   }
-  return lookup(readFileSyncBounded(filepath), filepath);
+  const file = readFileSyncBounded(filepath);
+  return lookup(
+    file.input,
+    filepath,
+    file.tiffDirectory,
+    file.tiffDirectoryBase,
+  );
 }
 
 function disableFS(disabled) {

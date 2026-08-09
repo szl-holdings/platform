@@ -18,7 +18,7 @@ historical app directories or marketing copy.
 
 This closes the zero-manifest tooling gap, not every web gap. The historical `/lyte`, `/aegis`,
 `/vessels`, `/terra`, `/counsel`, `/carlota-jo`, `/command`, and `/pulse` preview paths currently
-return HTTP 503 and remain explicit `UNAVAILABLE` records. `a11oy.net/chat` and `a11oy.net/code`
+return HTTP 404 and remain explicit `UNAVAILABLE` records. `a11oy.net/chat` and `a11oy.net/code`
 remain unavailable at HTTP 404. The independently measured `manifest.webmanifest`, `robots.txt`,
 and `sitemap.xml` files now return their expected machine-readable content and are recorded as
 `REACHABLE` metadata; they are not customer-facing product surfaces and do not change the
