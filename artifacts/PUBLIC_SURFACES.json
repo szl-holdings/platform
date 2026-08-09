@@ -12,9 +12,9 @@
       "UNAVAILABLE": 13
     },
     "by_mode": {
-      "LIVE": 12,
-      "MIXED": 0,
-      "DOCUMENTATION": 4,
+      "LIVE": 3,
+      "MIXED": 8,
+      "DOCUMENTATION": 5,
       "UNAVAILABLE": 13
     }
   },
@@ -44,7 +44,7 @@
       "name": "A11oy operator console",
       "kind": "WEB",
       "audience": ["INVESTOR", "DEVELOPER", "OPERATOR"],
-      "mode": "LIVE",
+      "mode": "MIXED",
       "availability": "REACHABLE",
       "canonical_url": "https://a-11-oy.com/console",
       "source_owner": {
@@ -64,7 +64,7 @@
       "name": "A11oy public documentation",
       "kind": "WEB",
       "audience": ["DEVELOPER", "INVESTOR"],
-      "mode": "LIVE",
+      "mode": "DOCUMENTATION",
       "availability": "REACHABLE",
       "canonical_url": "https://a-11-oy.com/docs",
       "source_owner": {
@@ -84,7 +84,7 @@
       "name": "SZL ecosystem atlas",
       "kind": "WEB",
       "audience": ["INVESTOR", "DEVELOPER"],
-      "mode": "LIVE",
+      "mode": "MIXED",
       "availability": "REACHABLE",
       "canonical_url": "https://a-11-oy.com/ecosystem",
       "source_owner": {
@@ -104,7 +104,7 @@
       "name": "SZL Holdings and A11oy front door",
       "kind": "WEB",
       "audience": ["INVESTOR", "DEVELOPER"],
-      "mode": "LIVE",
+      "mode": "MIXED",
       "availability": "REACHABLE",
       "canonical_url": "https://a-11-oy.com/",
       "source_owner": {
@@ -244,7 +244,7 @@
       "name": "A11oy observability surface",
       "kind": "WEB",
       "audience": ["DEVELOPER", "OPERATOR", "INVESTOR"],
-      "mode": "LIVE",
+      "mode": "MIXED",
       "availability": "REACHABLE",
       "canonical_url": "https://a-11-oy.com/observability",
       "source_owner": {
@@ -264,7 +264,7 @@
       "name": "A11oy product introduction",
       "kind": "WEB",
       "audience": ["INVESTOR", "DEVELOPER"],
-      "mode": "LIVE",
+      "mode": "MIXED",
       "availability": "REACHABLE",
       "canonical_url": "https://a-11-oy.com/a11oy/",
       "source_owner": {
@@ -324,7 +324,7 @@
       "name": "Hugging Face Spaces registry",
       "kind": "WEB",
       "audience": ["INVESTOR", "DEVELOPER"],
-      "mode": "LIVE",
+      "mode": "MIXED",
       "availability": "REACHABLE",
       "canonical_url": "https://a-11-oy.com/spaces",
       "source_owner": {
@@ -344,7 +344,7 @@
       "name": "A11oy trust center",
       "kind": "WEB",
       "audience": ["INVESTOR", "DEVELOPER"],
-      "mode": "LIVE",
+      "mode": "MIXED",
       "availability": "REACHABLE",
       "canonical_url": "https://a-11-oy.com/trust",
       "source_owner": {
@@ -364,7 +364,7 @@
       "name": "A11oy cross-organ wires",
       "kind": "WEB",
       "audience": ["DEVELOPER", "OPERATOR", "INVESTOR"],
-      "mode": "LIVE",
+      "mode": "MIXED",
       "availability": "REACHABLE",
       "canonical_url": "https://a-11-oy.com/wires",
       "source_owner": {

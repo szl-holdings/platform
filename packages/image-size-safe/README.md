@@ -16,8 +16,8 @@ before reading.
 The workspace override in `pnpm-workspace.yaml` resolves every transitive
 `image-size` request to this package. The regression suite covers each supported
 format, the Metro-compatible API, bounded file access, malformed input, and the
-three advisory failure classes. SVG dimensions preserve CSS absolute-unit
-conversion for `px`, `in`, `cm`, `mm`, `q`, `pt`, and `pc` without an
+three advisory failure classes. SVG dimensions preserve the pinned
+`image-size@1.2.1` conversions for `px`, `in`, `cm`, `mm`, `q`, `pt`, and `pc` without an
 unbounded detector expression.
 
 This is an independently implemented compatibility layer, not a republished

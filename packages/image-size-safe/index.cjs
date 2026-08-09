@@ -156,7 +156,7 @@ const svgAbsoluteUnitToPixels = Object.freeze({
   mm: 96 / 25.4,
   q: 96 / 101.6,
   pt: 96 / 72,
-  pc: 16,
+  pc: 96 / 72 / 12,
   em: 16,
   ex: 8,
 });
