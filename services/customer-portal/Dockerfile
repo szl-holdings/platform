@@ -2,7 +2,7 @@
 # HF Space (sdk: docker). Sovereign: no external API keys required to boot.
 # OIDC issuer + cosign keymint are optional env (see README). Author: Yachay.
 # Doctrine v11 LOCKED 749/14/163 locked_at c7c0ba17.
-FROM python:3.14-slim@sha256:cea0e6040540fb2b965b6e7fb5ffa00871e632eef63719f0ea54bca189ce14a6
+FROM python:3.14-slim@sha256:a7fb1e634c4a578f9e0bd6327f11a3cde11b7a9395f48e24360c0988bcc5c2bc
 
 WORKDIR /app
 ENV PYTHONUNBUFFERED=1 \
