@@ -1,10 +1,10 @@
 {
   "schema": "szl.truth/v1",
-  "generated_at": "2026-08-09T05:45:08.826Z",
+  "generated_at": "2026-08-11T09:23:59.419Z",
   "generated_by": "tools/truth/generate-truth.ts@szl.truth/v1",
   "metrics": {
     "surfaces_customer_facing": {
-      "value": 1,
+      "value": 2,
       "label": "MEASURED",
       "source": "artifacts/PUBLIC_SURFACES.json#summary.customer_facing_products"
     },

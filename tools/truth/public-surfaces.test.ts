@@ -9,6 +9,7 @@ import {
   buildPublicSurfaceManifest,
   type PublicSurface,
   type PublicSurfaceRegistry,
+  parseDuplicateFreeJson,
   validatePublicSurfaceManifest,
   validatePublicSurfaceObservationFreshness,
   validatePublicSurfaceRegistry,
@@ -16,6 +17,33 @@ import {
 } from './public-surfaces.js';
 
 const NOW = Date.parse('2026-08-01T15:20:00Z');
+const CONFIGURED_REGISTRY = JSON.parse(
+  readFileSync('config/public-surfaces.json', 'utf8'),
+) as PublicSurfaceRegistry;
+
+type Deferred<T> = Readonly<{
+  promise: Promise<T>;
+  resolve: (value: T | PromiseLike<T>) => void;
+}>;
+
+function deferred<T>(): Deferred<T> {
+  let resolve!: (value: T | PromiseLike<T>) => void;
+  const promise = new Promise<T>((settle) => {
+    resolve = settle;
+  });
+  return { promise, resolve };
+}
+
+function configuredDirectWebSurfaces(count: number): PublicSurface[] {
+  const surfaces = CONFIGURED_REGISTRY.surfaces
+    .filter(
+      (candidate) =>
+        candidate.kind === 'WEB' && candidate.canonical_url === candidate.observation.final_url,
+    )
+    .slice(0, count);
+  assert.equal(surfaces.length, count, `expected ${count} configured direct WEB surfaces`);
+  return surfaces;
+}
 
 function surface(overrides: Partial<PublicSurface> = {}): PublicSurface {
   return {
@@ -75,6 +103,82 @@ function metadataResponse(text: string, contentType: string, chunks: number[] = 
   };
 }
 
+function apiResponse(
+  url: string,
+  payload: unknown,
+  contentType = 'application/json; charset=utf-8',
+  chunks?: number[],
+) {
+  const text = typeof payload === 'string' ? payload : JSON.stringify(payload);
+  const bytes = new TextEncoder().encode(text);
+  const chunkSizes = chunks ? [...chunks] : [bytes.byteLength];
+  let offset = 0;
+  return {
+    status: 200,
+    url,
+    headers: {
+      get: (name: string) => {
+        const normalized = name.toLowerCase();
+        if (normalized === 'content-type') return contentType;
+        if (normalized === 'content-length') return String(bytes.byteLength);
+        return null;
+      },
+    },
+    body: {
+      cancel: async () => undefined,
+      getReader: () => ({
+        read: async () => {
+          if (offset >= bytes.byteLength) return { done: true };
+          const chunkLength = chunkSizes.shift() ?? bytes.byteLength - offset;
+          const value = bytes.slice(offset, offset + chunkLength);
+          offset += value.byteLength;
+          return { done: false, value };
+        },
+        cancel: async () => undefined,
+        releaseLock: () => undefined,
+      }),
+    },
+  };
+}
+
+const KILLINCHU_BUILD_INFO_BODY = {
+  status: 'OBSERVED',
+  service: 'killinchu',
+  build: {
+    state: 'OBSERVED',
+    revision: '859e26cf27164b38c4e289e40a751ce80d403368',
+    revision_source: 'env:SZL_GIT_SHA',
+  },
+  receipt_minted: true,
+  release_receipt: {
+    state: 'GITHUB_OIDC_ATTESTED',
+    source_revision: '859e26cf27164b38c4e289e40a751ce80d403368',
+    subject: 'hf-deploy-manifest.json',
+    subject_sha256: '7730a0334485ed3ca4754b38bd288ac004258918f0ede46719e72ae2a2ede960',
+    attestation_id: '39971795',
+    attestation_url: 'https://github.com/szl-holdings/killinchu/attestations/39971795',
+    verification:
+      'Download hf-deploy-manifest.json from the matching deployment run and run gh attestation verify hf-deploy-manifest.json -R szl-holdings/killinchu',
+  },
+};
+
+const KILLINCHU_READINESS_BODY = {
+  status: 'ready',
+  organ: 'killinchu',
+  khipu_backend: 'sqlite',
+  khipu_durable: true,
+  khipu_depth: 0,
+  khipu_chain_ok: true,
+  khipu_first_break_seq: -1,
+  doctrine: 'v11',
+};
+
+function configuredSurface(id: string): PublicSurface {
+  const candidate = CONFIGURED_REGISTRY.surfaces.find((surface) => surface.id === id);
+  assert.ok(candidate, `missing configured surface ${id}`);
+  return candidate;
+}
+
 test('counts only routed customer-facing web surfaces', () => {
   const manifest = buildPublicSurfaceManifest(
     registry([
@@ -113,6 +217,26 @@ test('counts only routed customer-facing web surfaces', () => {
   assert.equal(manifest.summary.customer_facing_products, 1);
   assert.equal(manifest.summary.customer_facing_routes, 1);
   assert.deepEqual(validatePublicSurfaceManifest(manifest, NOW), []);
+});
+
+test('binds the configured public-surface summary to the reviewed registry', () => {
+  const manifest = buildPublicSurfaceManifest(CONFIGURED_REGISTRY);
+  assert.deepEqual(manifest.summary, {
+    declared: 29,
+    customer_facing_products: 2,
+    customer_facing_routes: 12,
+    by_availability: {
+      REACHABLE: 18,
+      REDIRECTED: 1,
+      UNAVAILABLE: 10,
+    },
+    by_mode: {
+      LIVE: 5,
+      MIXED: 9,
+      DOCUMENTATION: 5,
+      UNAVAILABLE: 10,
+    },
+  });
 });
 
 test('counts routed products independently from pages and excludes unavailable products', () => {
@@ -313,6 +437,629 @@ test('live verification fails closed on status or redirect drift', async () => {
   ]);
 });
 
+test('caps live verification at four complete surface transactions', async () => {
+  const surfaces = configuredDirectWebSurfaces(8);
+  const expectedByUrl = new Map(surfaces.map((candidate) => [candidate.canonical_url, candidate]));
+  const release = deferred<void>();
+  const atLimit = deferred<void>();
+  const started: string[] = [];
+  let active = 0;
+  let maxActive = 0;
+
+  const verification = verifyLivePublicSurfaces(registry(surfaces), async (url) => {
+    const expected = expectedByUrl.get(url);
+    assert.ok(expected, `unexpected URL ${url}`);
+    started.push(url);
+    active += 1;
+    maxActive = Math.max(maxActive, active);
+    if (active === 4) atLimit.resolve();
+    await release.promise;
+    active -= 1;
+    return {
+      status: expected.observation.status,
+      url: expected.observation.final_url,
+      body: null,
+    };
+  });
+
+  await atLimit.promise;
+  assert.equal(started.length, 4);
+  assert.equal(maxActive, 4);
+  release.resolve();
+
+  assert.deepEqual(await verification, []);
+  assert.equal(started.length, surfaces.length);
+  assert.equal(new Set(started).size, surfaces.length);
+  assert.equal(maxActive, 4);
+});
+
+test('holds one worker slot across an approved redirect transaction', async () => {
+  const unavailable = surface({
+    id: 'killinchu-public-console',
+    name: 'Killinchu public console',
+    canonical_url: 'https://a-11-oy.com/killinchu',
+    mode: 'UNAVAILABLE',
+    availability: 'UNAVAILABLE',
+    source_owner: {
+      repository: 'szl-holdings/killinchu',
+      path: 'web/index.html',
+      role: 'REMEDIATION_OWNER',
+    },
+    observation: {
+      method: 'GET',
+      status: 503,
+      final_url: 'https://szlholdings-killinchu.hf.space/',
+    },
+  });
+  const direct = configuredDirectWebSurfaces(4);
+  const [firstDirect, , , fourthDirect] = direct;
+  assert.ok(firstDirect);
+  assert.ok(fourthDirect);
+  const surfaces = [unavailable, ...direct];
+  const expectedByUrl = new Map(
+    surfaces.flatMap((candidate) => [
+      [candidate.canonical_url, candidate] as const,
+      [candidate.observation.final_url, candidate] as const,
+    ]),
+  );
+  const gates = new Map(
+    [unavailable.observation.final_url, ...direct.map((candidate) => candidate.canonical_url)].map(
+      (url) => [url, deferred<void>()] as const,
+    ),
+  );
+  const atLimit = deferred<void>();
+  const fifthStarted = deferred<void>();
+  const requests: string[] = [];
+  let active = 0;
+  let maxActive = 0;
+
+  const verification = verifyLivePublicSurfaces(registry(surfaces), async (url, init) => {
+    requests.push(url);
+    assert.equal(init.redirect, 'manual');
+    if (url === unavailable.canonical_url) {
+      return {
+        status: 307,
+        url,
+        body: null,
+        headers: {
+          get: (name: string) => (name === 'location' ? unavailable.observation.final_url : null),
+        },
+      };
+    }
+
+    const expected = expectedByUrl.get(url);
+    const gate = gates.get(url);
+    assert.ok(expected, `unexpected URL ${url}`);
+    assert.ok(gate, `missing gate for ${url}`);
+    active += 1;
+    maxActive = Math.max(maxActive, active);
+    if (active === 4) atLimit.resolve();
+    if (url === fourthDirect.canonical_url) fifthStarted.resolve();
+    await gate.promise;
+    active -= 1;
+    return {
+      status: expected.observation.status,
+      url: expected.observation.final_url,
+      body: null,
+      headers: { get: () => null },
+    };
+  });
+
+  await atLimit.promise;
+  assert.equal(requests.filter((url) => url === unavailable.canonical_url).length, 1);
+  assert.equal(requests.filter((url) => url === unavailable.observation.final_url).length, 1);
+  for (const candidate of direct.slice(0, 3)) {
+    assert.equal(requests.filter((url) => url === candidate.canonical_url).length, 1);
+  }
+  assert.equal(requests.includes(fourthDirect.canonical_url), false);
+
+  const firstDirectGate = gates.get(firstDirect.canonical_url);
+  assert.ok(firstDirectGate);
+  firstDirectGate.resolve();
+  await fifthStarted.promise;
+  assert.equal(active, 4);
+  for (const gate of gates.values()) gate.resolve();
+
+  assert.deepEqual(await verification, []);
+  assert.equal(requests.filter((url) => url === unavailable.canonical_url).length, 1);
+  assert.equal(requests.filter((url) => url === unavailable.observation.final_url).length, 1);
+  assert.equal(maxActive, 4);
+});
+
+test('aggregates every live failure in stable order under reverse completion', async () => {
+  const surfaces = configuredDirectWebSurfaces(6);
+  const [firstSurface, secondSurface] = surfaces;
+  assert.ok(firstSurface);
+  assert.ok(secondSurface);
+  const expectedByUrl = new Map(surfaces.map((candidate) => [candidate.canonical_url, candidate]));
+  const gates = new Map(surfaces.map((candidate) => [candidate.canonical_url, deferred<void>()]));
+  const started: string[] = [];
+  const startWaiters: Array<() => void> = [];
+  let active = 0;
+  let maxActive = 0;
+
+  const waitForStarted = async (count: number): Promise<void> => {
+    while (started.length < count) {
+      await new Promise<void>((resolve) => startWaiters.push(resolve));
+    }
+  };
+
+  const verification = verifyLivePublicSurfaces(registry(surfaces), async (url) => {
+    const expected = expectedByUrl.get(url);
+    const gate = gates.get(url);
+    assert.ok(expected, `unexpected URL ${url}`);
+    assert.ok(gate, `missing gate for ${url}`);
+    const index = surfaces.indexOf(expected);
+    started.push(url);
+    active += 1;
+    maxActive = Math.max(maxActive, active);
+    while (startWaiters.length > 0) {
+      const waiter = startWaiters.shift();
+      assert.ok(waiter);
+      waiter();
+    }
+    await gate.promise;
+    active -= 1;
+    if (index === 0) throw new Error('certificate rejected');
+    if (index === 1) throw new RangeError('invalid response');
+    return {
+      status: expected.observation.status + 1,
+      url: new URL(`/unexpected-${index}`, expected.canonical_url).toString(),
+      body: null,
+    };
+  });
+
+  await waitForStarted(4);
+  const fourthStarted = started[3];
+  assert.ok(fourthStarted);
+  const fourthGate = gates.get(fourthStarted);
+  assert.ok(fourthGate);
+  fourthGate.resolve();
+  await waitForStarted(5);
+  const thirdStarted = started[2];
+  assert.ok(thirdStarted);
+  const thirdGate = gates.get(thirdStarted);
+  assert.ok(thirdGate);
+  thirdGate.resolve();
+  await waitForStarted(6);
+  for (const url of [...started].reverse()) {
+    const gate = gates.get(url);
+    assert.ok(gate);
+    gate.resolve();
+  }
+
+  const expectedFailures = [
+    `${firstSurface.id}: live probe failed: Error: certificate rejected`,
+    `${secondSurface.id}: live probe failed: RangeError: invalid response`,
+    ...surfaces.slice(2).flatMap((candidate, offset) => {
+      const index = offset + 2;
+      return [
+        `${candidate.id}: expected HTTP ${candidate.observation.status}, observed ${candidate.observation.status + 1}`,
+        `${candidate.id}: expected final URL ${candidate.observation.final_url}, observed ${new URL(`/unexpected-${index}`, candidate.canonical_url).toString()}`,
+      ];
+    }),
+  ].sort();
+
+  assert.deepEqual(await verification, expectedFailures);
+  assert.equal(started.length, surfaces.length);
+  assert.equal(maxActive, 4);
+});
+
+test('retries only transient requests within the bound and then fails closed', async () => {
+  const [candidate] = configuredDirectWebSurfaces(1);
+  assert.ok(candidate);
+
+  let successfulCalls = 0;
+  const successful = await verifyLivePublicSurfaces(registry([candidate]), async (url) => {
+    successfulCalls += 1;
+    return {
+      status: candidate.observation.status,
+      url,
+      body: null,
+    };
+  });
+  assert.deepEqual(successful, []);
+  assert.equal(successfulCalls, 1);
+
+  let recoveredCalls = 0;
+  const recovered = await verifyLivePublicSurfaces(registry([candidate]), async (url) => {
+    recoveredCalls += 1;
+    if (recoveredCalls < 3) throw new TypeError('fetch failed');
+    return {
+      status: candidate.observation.status,
+      url,
+      body: null,
+    };
+  });
+  assert.deepEqual(recovered, []);
+  assert.equal(recoveredCalls, 3);
+
+  let exhaustedCalls = 0;
+  const exhausted = await verifyLivePublicSurfaces(registry([candidate]), async () => {
+    exhaustedCalls += 1;
+    throw new DOMException('timed out', 'TimeoutError');
+  });
+  assert.equal(exhaustedCalls, 3);
+  assert.deepEqual(exhausted, [`${candidate.id}: live probe failed: TimeoutError: timed out`]);
+
+  let permanentCalls = 0;
+  const permanent = await verifyLivePublicSurfaces(registry([candidate]), async () => {
+    permanentCalls += 1;
+    throw new Error('certificate rejected');
+  });
+  assert.equal(permanentCalls, 1);
+  assert.deepEqual(permanent, [`${candidate.id}: live probe failed: Error: certificate rejected`]);
+});
+
+test('retries direct and nested transient codes but not unknown transport codes', async () => {
+  const [candidate] = configuredDirectWebSurfaces(1);
+  assert.ok(candidate);
+  const transientErrors = [
+    Object.assign(new Error('connection reset'), { code: 'econnreset' }),
+    Object.assign(new Error('wrapped transport failure'), {
+      cause: Object.assign(new Error('dns retry'), { code: 'EAI_AGAIN' }),
+    }),
+    Object.assign(new TypeError('fetch failed'), {
+      cause: Object.assign(new Error('undici connect timeout'), {
+        code: 'UND_ERR_CONNECT_TIMEOUT',
+      }),
+    }),
+    Object.assign(new TypeError('fetch failed'), {
+      cause: Object.assign(new Error('undici socket reset'), {
+        code: 'UND_ERR_SOCKET',
+      }),
+    }),
+  ];
+
+  for (const transientError of transientErrors) {
+    let calls = 0;
+    const failures = await verifyLivePublicSurfaces(registry([candidate]), async (url) => {
+      calls += 1;
+      if (calls === 1) throw transientError;
+      return { status: candidate.observation.status, url, body: null };
+    });
+    assert.deepEqual(failures, []);
+    assert.equal(calls, 2);
+  }
+
+  let unknownCalls = 0;
+  const unknownError = Object.assign(new Error('permanent transport failure'), {
+    code: 'EHOSTDOWN',
+  });
+  const unknown = await verifyLivePublicSurfaces(registry([candidate]), async () => {
+    unknownCalls += 1;
+    throw unknownError;
+  });
+  assert.equal(unknownCalls, 1);
+  assert.deepEqual(unknown, [
+    `${candidate.id}: live probe failed: Error: permanent transport failure`,
+  ]);
+
+  let permanentWrappedCalls = 0;
+  const permanentWrappedError = Object.assign(new TypeError('fetch failed'), {
+    cause: Object.assign(new Error('certificate expired'), { code: 'CERT_HAS_EXPIRED' }),
+  });
+  const permanentWrapped = await verifyLivePublicSurfaces(registry([candidate]), async () => {
+    permanentWrappedCalls += 1;
+    throw permanentWrappedError;
+  });
+  assert.equal(permanentWrappedCalls, 1);
+  assert.deepEqual(permanentWrapped, [
+    `${candidate.id}: live probe failed: TypeError: fetch failed`,
+  ]);
+});
+
+test('retries transient metadata body failures with a fresh request signal', async () => {
+  const metadata = surface({
+    id: 'a11oy-net-robots-gap',
+    name: 'A11oy.net robots metadata',
+    kind: 'METADATA',
+    audience: ['MACHINE'],
+    mode: 'DOCUMENTATION',
+    canonical_url: 'https://a11oy.net/robots.txt',
+    observation: {
+      method: 'GET',
+      status: 200,
+      final_url: 'https://a11oy.net/robots.txt',
+    },
+  });
+  const signals: AbortSignal[] = [];
+  let attempts = 0;
+  let cancelled = 0;
+
+  const failures = await verifyLivePublicSurfaces(registry([metadata]), async (_url, init) => {
+    attempts += 1;
+    signals.push(init.signal);
+    if (attempts === 1) {
+      return {
+        status: 200,
+        url: metadata.canonical_url,
+        headers: { get: () => 'text/plain; charset=utf-8' },
+        body: {
+          cancel: async () => {
+            cancelled += 1;
+          },
+          getReader: () => ({
+            read: async () => {
+              throw Object.assign(new TypeError('fetch failed'), {
+                cause: Object.assign(new Error('peer reset during body read'), {
+                  code: 'UND_ERR_SOCKET',
+                }),
+              });
+            },
+            cancel: async () => undefined,
+            releaseLock: () => undefined,
+          }),
+        },
+      };
+    }
+    return metadataResponse(
+      'User-agent: *\nAllow: /\n\nSitemap: https://a11oy.net/sitemap.xml\n',
+      'text/plain; charset=utf-8',
+    );
+  });
+
+  assert.deepEqual(failures, []);
+  assert.equal(attempts, 2);
+  assert.equal(cancelled, 1);
+  assert.equal(new Set(signals).size, 2);
+});
+
+test('validates the exact Killinchu build-info source-binding body', async () => {
+  const candidate = configuredSurface('killinchu-build-info-api');
+  const verify = (payload: unknown, contentType?: string) =>
+    verifyLivePublicSurfaces(registry([candidate]), async (url) =>
+      apiResponse(url, payload, contentType),
+    );
+
+  assert.deepEqual(await verify(KILLINCHU_BUILD_INFO_BODY), []);
+
+  const missingAttestation = structuredClone(KILLINCHU_BUILD_INFO_BODY) as Record<string, unknown>;
+  delete (missingAttestation.release_receipt as Record<string, unknown>).attestation_id;
+  const mismatchedSource = structuredClone(KILLINCHU_BUILD_INFO_BODY);
+  mismatchedSource.build.revision = '0'.repeat(40);
+  const unexpectedField = { ...KILLINCHU_BUILD_INFO_BODY, aggregate_health: 'green' };
+  const unrelatedBody = { status: 'OBSERVED' };
+  const contractFailure = [
+    'killinchu-build-info-api: API body does not match the exact source-binding contract',
+  ];
+
+  for (const invalid of [missingAttestation, mismatchedSource, unexpectedField, unrelatedBody]) {
+    assert.deepEqual(await verify(invalid), contractFailure);
+  }
+  assert.deepEqual(await verify('{"status":', 'application/json'), [
+    'killinchu-build-info-api: API body is not valid duplicate-free JSON',
+  ]);
+  assert.deepEqual(await verify(KILLINCHU_BUILD_INFO_BODY, 'text/html'), [
+    'killinchu-build-info-api: expected a JSON API response, observed text/html',
+  ]);
+});
+
+test('validates the exact Killinchu readiness body without freezing dynamic depth', async () => {
+  const candidate = configuredSurface('killinchu-readiness-api');
+  const verify = (payload: unknown) =>
+    verifyLivePublicSurfaces(registry([candidate]), async (url) => apiResponse(url, payload));
+
+  assert.deepEqual(await verify(KILLINCHU_READINESS_BODY), []);
+  assert.deepEqual(await verify({ ...KILLINCHU_READINESS_BODY, khipu_depth: 7 }), []);
+
+  const missingDoctrine = { ...KILLINCHU_READINESS_BODY } as Record<string, unknown>;
+  delete missingDoctrine.doctrine;
+  const contractFailure = [
+    'killinchu-readiness-api: API body does not match the exact readiness contract',
+  ];
+  for (const invalid of [
+    missingDoctrine,
+    { ...KILLINCHU_READINESS_BODY, unexpected: true },
+    { ...KILLINCHU_READINESS_BODY, khipu_durable: false },
+    { ...KILLINCHU_READINESS_BODY, khipu_chain_ok: false },
+    { ...KILLINCHU_READINESS_BODY, khipu_depth: -1 },
+    { ...KILLINCHU_READINESS_BODY, khipu_first_break_seq: 0 },
+    { ...KILLINCHU_READINESS_BODY, doctrine: ['v', String(10)].join('') },
+  ]) {
+    assert.deepEqual(await verify(invalid), contractFailure);
+  }
+});
+
+test('retries transient Killinchu API body failures inside the request boundary', async () => {
+  const candidate = configuredSurface('killinchu-build-info-api');
+  const signals: AbortSignal[] = [];
+  let attempts = 0;
+  let cancelled = 0;
+
+  const failures = await verifyLivePublicSurfaces(registry([candidate]), async (url, init) => {
+    attempts += 1;
+    signals.push(init.signal);
+    if (attempts === 1) {
+      return {
+        status: 200,
+        url,
+        headers: { get: () => 'application/json' },
+        body: {
+          cancel: async () => {
+            cancelled += 1;
+          },
+          getReader: () => ({
+            read: async () => {
+              throw Object.assign(new TypeError('fetch failed'), {
+                cause: Object.assign(new Error('peer reset during API body read'), {
+                  code: 'UND_ERR_SOCKET',
+                }),
+              });
+            },
+            cancel: async () => undefined,
+            releaseLock: () => undefined,
+          }),
+        },
+      };
+    }
+    return apiResponse(url, KILLINCHU_BUILD_INFO_BODY);
+  });
+
+  assert.deepEqual(failures, []);
+  assert.equal(attempts, 2);
+  assert.equal(cancelled, 1);
+  assert.equal(new Set(signals).size, 2);
+});
+
+test('rejects duplicate, trailing, and over-depth JSON before API contract validation', async () => {
+  assert.equal(parseDuplicateFreeJson('{"source_revision":"a","source_revision":"b"}').ok, false);
+  assert.equal(
+    parseDuplicateFreeJson('{"source_revision":"a","source\\u005frevision":"b"}').ok,
+    false,
+  );
+  assert.equal(
+    parseDuplicateFreeJson('{"release":{"attestation_id":"1","attestation_id":"2"}}').ok,
+    false,
+  );
+  assert.equal(parseDuplicateFreeJson('{"status":"ready"} trailing').ok, false);
+  assert.equal(parseDuplicateFreeJson(`${'['.repeat(66)}null${']'.repeat(66)}`).ok, false);
+
+  const candidate = configuredSurface('killinchu-build-info-api');
+  const duplicateBody = JSON.stringify(KILLINCHU_BUILD_INFO_BODY).replace(
+    '"source_revision":"859e26cf27164b38c4e289e40a751ce80d403368"',
+    '"source_revision":"859e26cf27164b38c4e289e40a751ce80d403368","source\\u005frevision":"859e26cf27164b38c4e289e40a751ce80d403368"',
+  );
+  const failures = await verifyLivePublicSurfaces(registry([candidate]), async (url) =>
+    apiResponse(url, duplicateBody),
+  );
+  assert.deepEqual(failures, [
+    'killinchu-build-info-api: API body is not valid duplicate-free JSON',
+  ]);
+});
+
+test('rejects Killinchu API bodies above the bounded read limit', async () => {
+  const candidate = configuredSurface('killinchu-build-info-api');
+  const failures = await verifyLivePublicSurfaces(registry([candidate]), async (url) =>
+    apiResponse(url, 'x'.repeat(128 * 1024 + 1)),
+  );
+  assert.deepEqual(failures, ['killinchu-build-info-api: API body exceeds 131072 bytes']);
+});
+
+test('creates a fresh timeout signal for every transient attempt', async () => {
+  const [candidate] = configuredDirectWebSurfaces(1);
+  assert.ok(candidate);
+  const signals: AbortSignal[] = [];
+  const timeoutDurations: number[] = [];
+  const originalTimeoutDescriptor = Object.getOwnPropertyDescriptor(AbortSignal, 'timeout');
+  assert.ok(originalTimeoutDescriptor);
+  const originalTimeout = AbortSignal.timeout.bind(AbortSignal);
+  let calls = 0;
+
+  Object.defineProperty(AbortSignal, 'timeout', {
+    configurable: true,
+    writable: true,
+    value: (milliseconds: number): AbortSignal => {
+      timeoutDurations.push(milliseconds);
+      return originalTimeout(milliseconds);
+    },
+  });
+
+  let failures: string[];
+  try {
+    failures = await verifyLivePublicSurfaces(registry([candidate]), async (url, init) => {
+      calls += 1;
+      signals.push(init.signal);
+      if (calls < 3) throw new TypeError('fetch failed');
+      return { status: candidate.observation.status, url, body: null };
+    });
+  } finally {
+    Object.defineProperty(AbortSignal, 'timeout', originalTimeoutDescriptor);
+  }
+
+  assert.deepEqual(failures, []);
+  assert.equal(calls, 3);
+  assert.equal(signals.length, 3);
+  assert.equal(new Set(signals).size, 3);
+  assert.deepEqual(timeoutDurations, [15_000, 15_000, 15_000]);
+  assert.ok(signals.every((signal) => signal instanceof AbortSignal));
+});
+
+test('retries a transient approved redirect final hop while retaining one worker slot', {
+  timeout: 5_000,
+}, async () => {
+  const unavailable = surface({
+    id: 'killinchu-public-console',
+    name: 'Killinchu public console',
+    canonical_url: 'https://a-11-oy.com/killinchu',
+    mode: 'UNAVAILABLE',
+    availability: 'UNAVAILABLE',
+    source_owner: {
+      repository: 'szl-holdings/killinchu',
+      path: 'web/index.html',
+      role: 'REMEDIATION_OWNER',
+    },
+    observation: {
+      method: 'GET',
+      status: 503,
+      final_url: 'https://szlholdings-killinchu.hf.space/',
+    },
+  });
+  const direct = configuredDirectWebSurfaces(4);
+  const [firstDirect, , , fourthDirect] = direct;
+  assert.ok(firstDirect);
+  assert.ok(fourthDirect);
+  const surfaces = [unavailable, ...direct];
+  const directByUrl = new Map(direct.map((candidate) => [candidate.canonical_url, candidate]));
+  const directGates = new Map(
+    direct.map((candidate) => [candidate.canonical_url, deferred<void>()] as const),
+  );
+  const redirectFinalGate = deferred<void>();
+  const redirectRetryStarted = deferred<void>();
+  const fourthStarted = deferred<void>();
+  const requests: string[] = [];
+  let redirectFinalAttempts = 0;
+
+  const verification = verifyLivePublicSurfaces(registry(surfaces), async (url) => {
+    requests.push(url);
+    if (url === unavailable.canonical_url) {
+      return {
+        status: 307,
+        url,
+        body: null,
+        headers: {
+          get: (name: string) => (name === 'location' ? unavailable.observation.final_url : null),
+        },
+      };
+    }
+    if (url === unavailable.observation.final_url) {
+      redirectFinalAttempts += 1;
+      if (redirectFinalAttempts === 1) {
+        throw Object.assign(new Error('connection reset'), { code: 'ECONNRESET' });
+      }
+      redirectRetryStarted.resolve();
+      await redirectFinalGate.promise;
+      return { status: 503, url, body: null };
+    }
+
+    const expected = directByUrl.get(url);
+    const gate = directGates.get(url);
+    assert.ok(expected, `unexpected URL ${url}`);
+    assert.ok(gate, `missing gate for ${url}`);
+    if (url === fourthDirect.canonical_url) fourthStarted.resolve();
+    await gate.promise;
+    return { status: expected.observation.status, url, body: null };
+  });
+
+  await redirectRetryStarted.promise;
+  assert.equal(redirectFinalAttempts, 2);
+  assert.equal(requests.includes(fourthDirect.canonical_url), false);
+  assert.equal(
+    direct.slice(0, 3).every((candidate) => requests.includes(candidate.canonical_url)),
+    true,
+  );
+
+  const firstDirectGate = directGates.get(firstDirect.canonical_url);
+  assert.ok(firstDirectGate);
+  firstDirectGate.resolve();
+  await fourthStarted.promise;
+  redirectFinalGate.resolve();
+  for (const gate of directGates.values()) gate.resolve();
+
+  assert.deepEqual(await verification, []);
+  assert.equal(requests.filter((url) => url === unavailable.observation.final_url).length, 2);
+});
+
 test('rejects unknown, credentialed, IP, port, and final-target escape values', () => {
   const cases: Array<Partial<PublicSurface>> = [
     { id: 'unknown-surface' },
@@ -358,7 +1105,47 @@ test('does not issue a request when file-controlled target validation fails', as
   assert.ok(failures.every((failure) => failure.startsWith('registry: ')));
 });
 
-test('accepts the approved Killinchu redirect only when its 503 final is unavailable', async () => {
+test('accepts the approved Killinchu redirect and successful final route', async () => {
+  const redirected = surface({
+    id: 'killinchu-public-console',
+    name: 'Killinchu public console',
+    canonical_url: 'https://a-11-oy.com/killinchu',
+    mode: 'MIXED',
+    availability: 'REDIRECTED',
+    source_owner: {
+      repository: 'szl-holdings/killinchu',
+      path: 'web/console.html',
+      role: 'RUNTIME_OWNER',
+    },
+    observation: {
+      method: 'GET',
+      status: 200,
+      final_url: 'https://szlholdings-killinchu.hf.space/',
+    },
+  });
+  const requests: string[] = [];
+
+  const failures = await verifyLivePublicSurfaces(registry([redirected]), async (url, init) => {
+    requests.push(url);
+    assert.equal(init.redirect, 'manual');
+    if (url === redirected.canonical_url) {
+      return {
+        status: 307,
+        url,
+        body: null,
+        headers: {
+          get: (name: string) => (name === 'location' ? redirected.observation.final_url : null),
+        },
+      };
+    }
+    return { status: 200, url, body: null, headers: { get: () => null } };
+  });
+
+  assert.deepEqual(failures, []);
+  assert.deepEqual(requests, [redirected.canonical_url, redirected.observation.final_url]);
+});
+
+test('accepts an explicit unavailable Killinchu redirect with a 503 final', async () => {
   const unavailable = surface({
     id: 'killinchu-public-console',
     name: 'Killinchu public console',
@@ -431,6 +1218,47 @@ test('rejects an unapproved Killinchu redirect target', async () => {
   assert.deepEqual(failures, [
     'killinchu-public-console: expected redirect to https://szlholdings-killinchu.hf.space/, observed https://example.com/unapproved',
   ]);
+});
+
+test('cancels the redirect response body when Location is malformed', async () => {
+  const unavailable = surface({
+    id: 'killinchu-public-console',
+    name: 'Killinchu public console',
+    canonical_url: 'https://a-11-oy.com/killinchu',
+    mode: 'UNAVAILABLE',
+    availability: 'UNAVAILABLE',
+    source_owner: {
+      repository: 'szl-holdings/killinchu',
+      path: 'web/index.html',
+      role: 'REMEDIATION_OWNER',
+    },
+    observation: {
+      method: 'GET',
+      status: 503,
+      final_url: 'https://szlholdings-killinchu.hf.space/',
+    },
+  });
+  let calls = 0;
+  let cancellations = 0;
+
+  const failures = await verifyLivePublicSurfaces(registry([unavailable]), async (url) => {
+    calls += 1;
+    return {
+      status: 307,
+      url,
+      body: {
+        cancel: async () => {
+          cancellations += 1;
+        },
+      },
+      headers: { get: () => 'http://[malformed' },
+    };
+  });
+
+  assert.equal(calls, 1);
+  assert.equal(cancellations, 1);
+  assert.equal(failures.length, 1);
+  assert.match(failures[0] ?? '', /^killinchu-public-console: live probe failed: TypeError:/);
 });
 
 test('validates bounded robots metadata content rather than status alone', async () => {
