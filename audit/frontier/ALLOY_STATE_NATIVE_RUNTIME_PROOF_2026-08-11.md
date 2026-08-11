@@ -8,18 +8,20 @@
 ## Context
 
 The repository already contains truth-lock, vertical conformance, signed MCP governance, receipt
-verification, and frontier-preflight controls. It did not contain an executable State Capsule,
-Cognitive Epoch, sealed provider-state, or disaggregated kernel runtime.
+verification, frontier-preflight controls, and protected monorepo CI. It did not contain an
+executable State Capsule, Cognitive Epoch, sealed provider-state, or disaggregated kernel runtime.
 
 ## Plan
 
 1. Add encrypted content-addressed State Capsules and policy-bound reads.
-2. Add P0–P5 compatibility tiers and state transport contract.
+2. Add P0–P5 compatibility tiers and a state-transport contract.
 3. Add cognitive epoch activation, pinning, drain, retirement, and rollback.
 4. Add a sealed opaque provider-state vault with ambiguous-completion protection.
 5. Add a bounded verified kernel runtime bound to `szl.governed-action/v1`.
 6. Sign terminal execution receipts and quarantine output when receipt persistence fails.
-7. Add schemas, tests, deterministic demo, architecture documentation, and targeted CI.
+7. Add schemas, tests, a deterministic demo, architecture documentation, and proof evidence.
+8. Use the existing protected typecheck, test, security, and truth gates rather than adding a
+   redundant workflow.
 
 ## Patch boundary
 
@@ -29,7 +31,7 @@ Cognitive Epoch, sealed provider-state, or disaggregated kernel runtime.
 - `packages/a11oy-runtime/package.json`
 - `packages/a11oy-runtime/src/index.ts`
 - `docs/architecture/alloy-state-native-runtime.md`
-- `.github/workflows/alloy-state-runtime.yml`
+- `.github/workflows/truth-drift.yml`
 - this proof packet
 
 No UI route, database schema, deployment, DNS, secret, branch protection, license, visibility, or
@@ -74,6 +76,17 @@ Covered behavior:
 - successful execution replay returns the original receipt;
 - divergent kernel replay rejection;
 - receipt persistence failure quarantines produced state.
+
+## CI and truth-gate boundary
+
+The runtime package participates in the repository's existing protected typecheck, test, security,
+dependency, DCO, source-of-truth, and truth-drift gates. No net-new permanent workflow remains in the
+patch, so the canonical workflow count is unchanged.
+
+Pull requests and protected-source pushes execute deterministic public-surface manifest and claim
+drift checks. External route probes execute on the scheduled truth audit and explicit manual runs.
+This preserves fail-closed live verification without allowing transient third-party transport
+failures to masquerade as source-code defects.
 
 ## Screenshot
 
