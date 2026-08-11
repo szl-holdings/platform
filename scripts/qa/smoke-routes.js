@@ -173,6 +173,7 @@ const WEB_DOMAIN_CONFIGS = [
       '/a11oy/command',
       '/a11oy/signals',
       '/a11oy/actions',
+      '/a11oy/start',
       '/a11oy/proof',
       '/a11oy/governance',
       '/a11oy/agents',

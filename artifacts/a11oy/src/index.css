@@ -63,6 +63,56 @@ h1, h2, h3, h4, h5, h6 {
 ::-webkit-scrollbar-thumb { background: var(--color-a11oy-border); border-radius: 2px; }
 ::-webkit-scrollbar-thumb:hover { background: var(--color-a11oy-muted); }
 
+.a11oy-sidebar {
+  position: sticky;
+  top: 60px;
+  width: 200px;
+  height: calc(100vh - 60px);
+}
+
+.a11oy-main {
+  padding: 1.5rem;
+}
+
+.a11oy-sidebar-backdrop {
+  display: none;
+}
+
+@media (max-width: 767px) {
+  .a11oy-top-bar {
+    padding: 0 0.5rem !important;
+  }
+
+  .a11oy-top-status {
+    display: none !important;
+  }
+
+  .a11oy-sidebar {
+    position: fixed;
+    z-index: 35;
+    top: 60px;
+    bottom: 0;
+    left: 0;
+    width: min(18rem, 85vw);
+    height: auto;
+    box-shadow: 18px 0 42px rgba(0, 0, 0, 0.45);
+  }
+
+  .a11oy-sidebar-backdrop {
+    position: fixed;
+    z-index: 30;
+    inset: 60px 0 0;
+    display: block;
+    border: 0;
+    background: rgba(0, 0, 0, 0.62);
+  }
+
+  .a11oy-main {
+    width: 100%;
+    padding: 1rem;
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after {
     animation-duration: 0.01ms !important;

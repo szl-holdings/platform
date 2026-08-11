@@ -9,12 +9,25 @@ import type {
   SignalSeverity,
   SignalStatus,
   OutcomeStatus,
+  OperationalEvidenceState,
   Vertical,
   WorkcellStatus,
 } from './types.js';
 
-export type { Vertical, SignalSeverity, SignalStatus, OutcomeStatus, ActionStatus,
-  PolicyEnforcement, WorkcellStatus, ProofPacketKind, FabricLayer, MirrorEvalVerdict, ExecutionMode };
+export type {
+  Vertical,
+  SignalSeverity,
+  SignalStatus,
+  OutcomeStatus,
+  ActionStatus,
+  PolicyEnforcement,
+  WorkcellStatus,
+  OperationalEvidenceState,
+  ProofPacketKind,
+  FabricLayer,
+  MirrorEvalVerdict,
+  ExecutionMode,
+};
 
 export interface BusinessSignal {
   id: string;
@@ -110,6 +123,8 @@ export interface Workcell {
   name: string;
   vertical: Vertical;
   status: WorkcellStatus;
+  evidenceState: OperationalEvidenceState;
+  evidenceReason: string;
   objective: string;
   signals: string[];
   contextPack: Record<string, unknown>;
@@ -215,6 +230,8 @@ export interface Workcell {
   name: string;
   vertical: Vertical;
   status: WorkcellStatus;
+  evidenceState: OperationalEvidenceState;
+  evidenceReason: string;
   objective: string;
   signals: string[];
   contextPack: Record<string, unknown>;
