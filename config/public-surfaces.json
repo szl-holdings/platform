@@ -300,7 +300,7 @@
         "status": 200,
         "final_url": "https://szlholdings-killinchu.hf.space/api/build-info"
       },
-      "note": "A bounded HTTP 200 read reported OBSERVED source 859e26cf27164b38c4e289e40a751ce80d403368, matching protected Killinchu main, and OIDC attestation 39971795 for manifest sha256:7730a0334485ed3ca4754b38bd288ac004258918f0ede46719e72ae2a2ede960; the distinct HF runtime content revision is 83142da9526e2c0ddfe1e78eb99a20940cde0cf3."
+      "note": "A bounded JSON body read reported OBSERVED source 859e26cf27164b38c4e289e40a751ce80d403368, matching protected Killinchu main, and OIDC attestation 39971795 for manifest sha256:7730a0334485ed3ca4754b38bd288ac004258918f0ede46719e72ae2a2ede960; this source-binding endpoint does not assert or infer the separate HF runtime content revision."
     },
     {
       "id": "killinchu-readiness-api",
@@ -320,7 +320,7 @@
         "status": 200,
         "final_url": "https://szlholdings-killinchu.hf.space/readyz"
       },
-      "note": "A bounded HTTP 200 read reported ready, durable Khipu storage, an intact Khipu chain, and Doctrine v11; this scoped witness does not establish aggregate Killinchu API or alert-channel health."
+      "note": "A bounded JSON body read reported ready, durable Khipu storage, an intact Khipu chain, and Doctrine v11; this scoped witness does not establish aggregate Killinchu API or alert-channel health."
     },
     {
       "id": "legacy-lyte-route",
