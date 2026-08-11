@@ -27,6 +27,9 @@ executable State Capsule, Cognitive Epoch, sealed provider-state, or disaggregat
 
 - `packages/a11oy-runtime/src/state-native/**`
 - `packages/a11oy-runtime/test/state-native-runtime.test.mjs`
+- `packages/a11oy-runtime/test/state-native-runtime-timeout.test.mjs`
+- `packages/a11oy-runtime/test/state-native-runtime-security.test.mjs`
+- `packages/a11oy-runtime/test/state-native-state-bus-security.test.mjs`
 - `packages/a11oy-runtime/schemas/**`
 - `packages/a11oy-runtime/package.json`
 - `packages/a11oy-runtime/src/index.ts`
@@ -37,41 +40,50 @@ executable State Capsule, Cognitive Epoch, sealed provider-state, or disaggregat
 No UI route, database schema, deployment, DNS, secret, branch protection, license, visibility, or
 external account is changed.
 
-## Local validation
+## Implementation validation
 
-Executed against the exact proposed state-native source in an isolated TypeScript build directory:
+Focused isolated validation was executed during implementation and adversarial security review:
 
 ```text
 tsc --pretty false
-exit: 0
+result: passed
 
-node --test test/state-native-runtime.test.mjs
-8 tests passed
-0 failed
-exit: 0
+node --test test/state-native-runtime.test.mjs \
+  test/state-native-runtime-timeout.test.mjs \
+  test/state-native-runtime-security.test.mjs \
+  test/state-native-state-bus-security.test.mjs
+result: passed
 
 node dist/state-native/demo.js
 status: OPERATIONAL_REFERENCE
-networkCalls: 0
+networkCalls: none
 receiptVerified: true
 reasoningVaultState: SHREDDED
-exit: 0
+result: passed
 ```
+
+Exact-head GitHub checks under the repository-pinned Node and pnpm toolchain remain the promotion
+authority. This proof does not substitute isolated validation for protected monorepo CI.
 
 Covered behavior:
 
 - deterministic canonical JSON;
 - portability compatibility pass/fail;
 - encrypted State Bus write/read;
-- tenant isolation;
+- tenant and session isolation;
 - policy mismatch and sensitivity-authorization rejection;
 - idempotent state replay and divergent replay rejection;
-- transport export/import with digest verification;
+- transport export/import with full content-addressed metadata authentication;
+- forged session, governance, compatibility, and reuse-policy rejection;
 - crypto-shred terminal behavior;
 - epoch lease drain semantics;
+- pinned-epoch input isolation;
+- retry safety after failed epoch pinning;
 - exact provider-state binding and indeterminate replay refusal;
-- verified kernel execution;
+- bounded kernel execution and mandatory verification under one shared deadline;
+- abort propagation and fail-closed verifier timeout behavior;
 - signed policy-block and kernel-error receipts;
+- serialized per-tenant receipt-chain persistence;
 - Ed25519 receipt verification;
 - successful execution replay returns the original receipt;
 - divergent kernel replay rejection;
@@ -97,6 +109,7 @@ failures to masquerade as source-code defects.
 - No token, API key, credential, private key, `.env`, or authorization header is added.
 - Demo signing and encryption keys are generated in memory and destroyed at teardown.
 - Payload bytes are encrypted at rest inside the reference State Bus and Reasoning Vault.
+- Imported payloads and immutable capsule metadata are authenticated before local persistence.
 - Receipt verification uses an externally supplied public key.
 - The included transport adapter is explicitly local/test-only.
 
