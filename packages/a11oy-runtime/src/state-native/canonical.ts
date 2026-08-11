@@ -40,6 +40,12 @@ function normalize(value: unknown, stack: Set<object>): CanonicalJsonValue {
 
   if (typeof value === 'object') {
     const object = value as Record<string, unknown>;
+    const prototype = Object.getPrototypeOf(object);
+    if (prototype !== Object.prototype && prototype !== null) {
+      throw new TypeError(
+        'Canonical JSON supports only plain objects, arrays, dates, and byte arrays.',
+      );
+    }
     if (stack.has(object)) {
       throw new TypeError('Canonical JSON does not support circular objects.');
     }
