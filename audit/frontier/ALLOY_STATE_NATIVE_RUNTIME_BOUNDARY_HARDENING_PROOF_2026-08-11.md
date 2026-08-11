@@ -3,8 +3,9 @@
 **Workcell:** `A11OY-STATE-001-B`  
 **Date:** 2026-08-11  
 **Repository:** `szl-holdings/platform`  
-**Branch:** `feat/alloy-state-native-runtime-clean-2026-08-11`  
-**Parent head reviewed:** `d66395250d210f7b02ce03d4c952ecf44c8eff22`  
+**Publication branch:** `feat/alloy-state-native-runtime-final-2026-08-11`  
+**Publication parent:** `065108a21fdf975c33930ce96a9c43cc737d074a`  
+**Reviewed source head:** `d66395250d210f7b02ce03d4c952ecf44c8eff22`  
 **Risk:** B — additive runtime hardening and adversarial tests  
 **Claim level:** source implementation pending exact-head protected CI
 
