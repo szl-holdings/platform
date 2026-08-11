@@ -238,6 +238,7 @@ export class AlloyKernelRuntime {
     let inputCapsules: StateCapsule[] = [];
     const outputCapsules: StateCapsule[] = [];
     const startedAt = performance.now();
+    const deadlineAt = startedAt + request.budget.maxRuntimeMs;
     const lease = this.#epochManager.pin(request.tenantId, definition.route, request.epochId);
     try {
       if (lease.epoch.route !== definition.route) {
@@ -309,22 +310,28 @@ export class AlloyKernelRuntime {
       }
 
       const controller = new AbortController();
-      executionStarted = true;
-      const output = await this.#executeWithTimeout(
-        definition,
-        {
-          capsules: Object.freeze(input),
-          parameters: request.parameters,
-        },
-        {
-          actionId: request.authorization.envelope.actionId,
-          tenantId: request.tenantId,
-          sessionId: request.sessionId,
-          epoch: lease.epoch,
-          budget: request.budget,
-          signal: controller.signal,
+      const context = {
+        actionId: request.authorization.envelope.actionId,
+        tenantId: request.tenantId,
+        sessionId: request.sessionId,
+        epoch: lease.epoch,
+        budget: request.budget,
+        signal: controller.signal,
+      };
+      const output = await this.#runWithDeadline(
+        () => {
+          executionStarted = true;
+          return definition.execute(
+            {
+              capsules: Object.freeze(input),
+              parameters: request.parameters,
+            },
+            context,
+          );
         },
         controller,
+        deadlineAt,
+        'Kernel execution',
       );
 
       if (output.length > request.budget.maxStateWrites) {
@@ -341,16 +348,18 @@ export class AlloyKernelRuntime {
         });
       }
 
-      const context = {
-        actionId: request.authorization.envelope.actionId,
-        tenantId: request.tenantId,
-        sessionId: request.sessionId,
-        epoch: lease.epoch,
-        budget: request.budget,
-        signal: controller.signal,
-      };
       const verifier = definition.verify
-        ? await definition.verify(output, { capsules: Object.freeze(input), parameters: request.parameters }, context)
+        ? await this.#runWithDeadline(
+            () =>
+              definition.verify!(
+                output,
+                { capsules: Object.freeze(input), parameters: request.parameters },
+                context,
+              ),
+            controller,
+            deadlineAt,
+            'Kernel verification',
+          )
         : undefined;
       if (definition.requiresVerification && (!verifier || !verifier.passed)) {
         const reason = verifier?.reason ?? 'Required kernel verifier was unavailable.';
@@ -379,10 +388,7 @@ export class AlloyKernelRuntime {
           portability: produced.portability,
           payload: produced.payload,
           compatibility,
-          governance: defaultGovernance(
-            inputCapsules,
-            produced,
-          ),
+          governance: defaultGovernance(inputCapsules, produced),
           provenance: {
             sourceActionId: request.authorization.envelope.actionId,
             parentCapsuleIds: Object.freeze([...request.inputCapsuleIds]),
@@ -516,23 +522,36 @@ export class AlloyKernelRuntime {
     }
   }
 
-  async #executeWithTimeout(
-    definition: KernelDefinition,
-    input: Parameters<KernelDefinition['execute']>[0],
-    context: Parameters<KernelDefinition['execute']>[1],
+  async #runWithDeadline<T>(
+    operation: () => Promise<T>,
     controller: AbortController,
-  ): Promise<readonly KernelProducedState[]> {
-    let timeout: NodeJS.Timeout | undefined;
+    deadlineAt: number,
+    phase: string,
+  ): Promise<T> {
+    const remainingMs = Math.ceil(deadlineAt - performance.now());
+    if (remainingMs <= 0) {
+      const error = new StateNativeError(
+        'BUDGET_EXCEEDED',
+        `${phase} exceeded the shared kernel runtime budget.`,
+      );
+      controller.abort(error);
+      throw error;
+    }
+
+    let timeout: ReturnType<typeof setTimeout> | undefined;
     const deadline = new Promise<never>((_resolve, reject) => {
       timeout = setTimeout(() => {
-        controller.abort(new StateNativeError('BUDGET_EXCEEDED', 'Kernel runtime budget expired.'));
-        reject(new StateNativeError('BUDGET_EXCEEDED', 'Kernel runtime budget expired.'));
-      }, context.budget.maxRuntimeMs);
-      timeout.unref?.();
+        const error = new StateNativeError(
+          'BUDGET_EXCEEDED',
+          `${phase} exceeded the shared kernel runtime budget.`,
+        );
+        reject(error);
+        controller.abort(error);
+      }, remainingMs);
     });
 
     try {
-      return await Promise.race([definition.execute(input, context), deadline]);
+      return await Promise.race([operation(), deadline]);
     } finally {
       if (timeout) {
         clearTimeout(timeout);
