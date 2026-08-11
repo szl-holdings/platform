@@ -47,7 +47,11 @@ jobs:
       - name: Install locked dependencies
         run: pnpm install --frozen-lockfile
 
-      - name: Verify public surface manifest and live route evidence
+      - name: Verify deterministic public surface manifest
+        run: pnpm exec tsx tools/truth/generate-public-surfaces.ts --check
+
+      - name: Verify live public surface evidence
+        if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
         run: pnpm surfaces:check
 
       - name: Require a current public surface observation
@@ -60,6 +64,7 @@ jobs:
         run: pnpm truth:generate -- --verify-local
 
       - name: Verify live remote truth
+        if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
         run: pnpm truth:generate -- --verify-local --verify-remote
 
       - name: Validate evidence labels and freshness
