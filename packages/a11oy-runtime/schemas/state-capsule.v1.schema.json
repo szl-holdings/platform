@@ -1,0 +1,188 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://a-11-oy.com/schemas/state-capsule.v1.schema.json",
+  "title": "SZL State Capsule v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema",
+    "capsuleId",
+    "tenantId",
+    "sessionId",
+    "stateType",
+    "portability",
+    "contentDigest",
+    "byteLength",
+    "createdAt",
+    "compatibility",
+    "governance",
+    "provenance",
+    "revocationStatus"
+  ],
+  "properties": {
+    "schema": { "const": "szl.state-capsule/v1" },
+    "capsuleId": { "type": "string", "pattern": "^state_[a-f0-9]{64}$" },
+    "tenantId": { "type": "string", "minLength": 1 },
+    "sessionId": { "type": "string", "minLength": 1 },
+    "stateType": {
+      "enum": [
+        "prompt",
+        "kv_cache",
+        "hidden_state",
+        "embedding",
+        "verifier_trace",
+        "adapter",
+        "tool_output",
+        "reasoning_state",
+        "structured_memory",
+        "custom"
+      ]
+    },
+    "portability": { "enum": ["P0", "P1", "P2", "P3", "P4", "P5"] },
+    "contentDigest": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "byteLength": { "type": "integer", "minimum": 1 },
+    "createdAt": { "type": "string", "format": "date-time" },
+    "expiresAt": { "type": "string", "format": "date-time" },
+    "compatibility": { "$ref": "#/$defs/compatibility" },
+    "governance": { "$ref": "#/$defs/governance" },
+    "provenance": { "$ref": "#/$defs/provenance" },
+    "revocationStatus": { "enum": ["ACTIVE", "REVOKED", "QUARANTINED", "SHREDDED"] },
+    "transitionDigest": { "type": "string", "pattern": "^[a-f0-9]{64}$" }
+  },
+  "allOf": [
+    {
+      "if": { "properties": { "portability": { "const": "P0" } } },
+      "then": {
+        "properties": {
+          "compatibility": {
+            "required": [
+              "modelId",
+              "modelRevision",
+              "engineId",
+              "engineVersion",
+              "tokenizerDigest",
+              "layoutDigest",
+              "adapterSetDigest",
+              "policyDigest",
+              "cognitiveEpoch",
+              "providerSessionId"
+            ]
+          }
+        }
+      }
+    },
+    {
+      "if": { "properties": { "portability": { "const": "P1" } } },
+      "then": {
+        "properties": {
+          "compatibility": {
+            "required": [
+              "modelId",
+              "modelRevision",
+              "engineId",
+              "engineVersion",
+              "tokenizerDigest",
+              "layoutDigest",
+              "adapterSetDigest",
+              "policyDigest",
+              "cognitiveEpoch"
+            ]
+          }
+        }
+      }
+    },
+    {
+      "if": { "properties": { "portability": { "const": "P2" } } },
+      "then": {
+        "properties": {
+          "compatibility": {
+            "required": [
+              "modelId",
+              "modelRevision",
+              "tokenizerDigest",
+              "adapterSetDigest",
+              "policyDigest",
+              "cognitiveEpoch"
+            ]
+          }
+        }
+      }
+    },
+    {
+      "if": { "properties": { "portability": { "const": "P3" } } },
+      "then": {
+        "properties": {
+          "compatibility": {
+            "required": ["semanticSpaceDigest", "schemaDigest", "policyDigest", "cognitiveEpoch"]
+          }
+        }
+      }
+    },
+    {
+      "if": { "properties": { "portability": { "const": "P4" } } },
+      "then": {
+        "properties": {
+          "compatibility": {
+            "required": ["schemaDigest", "policyDigest", "cognitiveEpoch"]
+          }
+        }
+      }
+    }
+  ],
+  "$defs": {
+    "digest": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "compatibility": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["policyDigest", "cognitiveEpoch"],
+      "properties": {
+        "modelId": { "type": "string", "minLength": 1 },
+        "modelRevision": { "type": "string", "minLength": 1 },
+        "engineId": { "type": "string", "minLength": 1 },
+        "engineVersion": { "type": "string", "minLength": 1 },
+        "tokenizerDigest": { "$ref": "#/$defs/digest" },
+        "layoutDigest": { "$ref": "#/$defs/digest" },
+        "adapterSetDigest": { "$ref": "#/$defs/digest" },
+        "semanticSpaceDigest": { "$ref": "#/$defs/digest" },
+        "schemaDigest": { "$ref": "#/$defs/digest" },
+        "policyDigest": { "$ref": "#/$defs/digest" },
+        "cognitiveEpoch": { "type": "string", "minLength": 1 },
+        "providerSessionId": { "type": "string", "minLength": 1 }
+      }
+    },
+    "governance": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["sensitivity", "retentionClass", "reusePolicy", "evidenceTier"],
+      "properties": {
+        "sensitivity": { "enum": ["public", "internal", "confidential", "restricted"] },
+        "retentionClass": { "enum": ["ephemeral", "session", "short", "regulated", "custom"] },
+        "reusePolicy": { "enum": ["never", "same_action", "same_session", "same_tenant", "explicit"] },
+        "evidenceTier": { "enum": ["MEASURED", "REPORTED", "MODELED", "CONJECTURE", "UNKNOWN"] },
+        "explicitGrantId": { "type": "string", "minLength": 1 }
+      },
+      "allOf": [
+        {
+          "if": { "properties": { "reusePolicy": { "const": "explicit" } } },
+          "then": { "required": ["explicitGrantId"] }
+        }
+      ]
+    },
+    "provenance": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["sourceActionId", "parentCapsuleIds"],
+      "properties": {
+        "sourceActionId": { "type": "string", "minLength": 1 },
+        "parentCapsuleIds": {
+          "type": "array",
+          "items": { "type": "string", "pattern": "^state_[a-f0-9]{64}$" },
+          "uniqueItems": true
+        },
+        "producerKernelId": { "type": "string", "minLength": 1 },
+        "producerKernelVersion": { "type": "string", "minLength": 1 },
+        "sourceReceiptId": { "type": "string", "minLength": 1 }
+      }
+    }
+  }
+}
