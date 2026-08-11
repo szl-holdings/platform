@@ -12,6 +12,7 @@ import { StateNativeError } from './errors.js';
 const AES_KEY_BYTES = 32;
 const AES_IV_BYTES = 12;
 const AES_TAG_BYTES = 16;
+const HEX_PATTERN = /^[0-9a-f]+$/i;
 
 export interface EncryptedEnvelope {
   readonly algorithm: 'AES-256-GCM';
@@ -71,19 +72,22 @@ export function encryptEnvelope(
   assertMasterKey(masterKey);
   const aad = Buffer.from(aadText, 'utf8');
   const dataKey = randomBytes(AES_KEY_BYTES);
-  const payload = encryptAesGcm(dataKey, plaintext, aad);
-  const wrapped = encryptAesGcm(masterKey, dataKey, aad);
-  dataKey.fill(0);
 
-  return {
-    algorithm: 'AES-256-GCM',
-    ciphertext: payload.ciphertext.toString('base64'),
-    iv: payload.iv.toString('base64'),
-    authTag: payload.authTag.toString('base64'),
-    wrappedKey: wrapped.ciphertext.toString('base64'),
-    wrapIv: wrapped.iv.toString('base64'),
-    wrapAuthTag: wrapped.authTag.toString('base64'),
-  };
+  try {
+    const payload = encryptAesGcm(dataKey, plaintext, aad);
+    const wrapped = encryptAesGcm(masterKey, dataKey, aad);
+    return {
+      algorithm: 'AES-256-GCM',
+      ciphertext: payload.ciphertext.toString('base64'),
+      iv: payload.iv.toString('base64'),
+      authTag: payload.authTag.toString('base64'),
+      wrappedKey: wrapped.ciphertext.toString('base64'),
+      wrapIv: wrapped.iv.toString('base64'),
+      wrapAuthTag: wrapped.authTag.toString('base64'),
+    };
+  } finally {
+    dataKey.fill(0);
+  }
 }
 
 export function decryptEnvelope(
@@ -128,7 +132,13 @@ export function verifyDigest(publicKey: KeyLike, digestHex: string, signature: s
 }
 
 export function constantTimeEqualHex(left: string, right: string): boolean {
-  if (left.length !== right.length || left.length % 2 !== 0) {
+  if (
+    left.length !== right.length ||
+    left.length === 0 ||
+    left.length % 2 !== 0 ||
+    !HEX_PATTERN.test(left) ||
+    !HEX_PATTERN.test(right)
+  ) {
     return false;
   }
   const leftBytes = Buffer.from(left, 'hex');
