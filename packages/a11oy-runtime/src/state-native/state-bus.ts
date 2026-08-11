@@ -42,6 +42,24 @@ const SENSITIVITY_RANK: Readonly<Record<StateSensitivity, number>> = {
   restricted: 3,
 };
 
+const STATE_TYPES = new Set([
+  'prompt',
+  'kv_cache',
+  'hidden_state',
+  'embedding',
+  'verifier_trace',
+  'adapter',
+  'tool_output',
+  'reasoning_state',
+  'structured_memory',
+  'custom',
+]);
+const PORTABILITY_TIERS = new Set(['P0', 'P1', 'P2', 'P3', 'P4', 'P5']);
+const SENSITIVITIES = new Set(['public', 'internal', 'confidential', 'restricted']);
+const RETENTION_CLASSES = new Set(['ephemeral', 'session', 'short', 'regulated', 'custom']);
+const REUSE_POLICIES = new Set(['never', 'same_action', 'same_session', 'same_tenant', 'explicit']);
+const EVIDENCE_TIERS = new Set(['MEASURED', 'REPORTED', 'MODELED', 'CONJECTURE', 'UNKNOWN']);
+
 function capsuleIdentity(request: PutStateRequest, contentDigest: string): string {
   return digestObject({
     schema: 'szl.state-capsule-identity/v1',
@@ -77,12 +95,57 @@ function capsuleAad(capsule: StateCapsule): string {
     schema: capsule.schema,
     capsuleId: capsule.capsuleId,
     tenantId: capsule.tenantId,
+    sessionId: capsule.sessionId,
+    stateType: capsule.stateType,
+    portability: capsule.portability,
     contentDigest: capsule.contentDigest,
+    byteLength: capsule.byteLength,
+    createdAt: capsule.createdAt,
+    expiresAt: capsule.expiresAt,
+    compatibility: capsule.compatibility,
+    governance: capsule.governance,
+    provenance: capsule.provenance,
   });
 }
 
 function assertNonEmpty(value: string, field: string): void {
   assertStateNative(value.trim().length > 0, 'INVALID_INPUT', `${field} must not be empty.`);
+}
+
+function importRequest(object: PortableStateObject): PutStateRequest {
+  return {
+    tenantId: object.capsule.tenantId,
+    sessionId: object.capsule.sessionId,
+    stateType: object.capsule.stateType,
+    portability: object.capsule.portability,
+    payload: object.payload,
+    compatibility: object.capsule.compatibility,
+    governance: object.capsule.governance,
+    provenance: object.capsule.provenance,
+    expiresAt: object.capsule.expiresAt,
+  };
+}
+
+function freezeImportedCapsule(capsule: StateCapsule, payloadLength: number): StateCapsule {
+  return Object.freeze({
+    schema: 'szl.state-capsule/v1' as const,
+    capsuleId: capsule.capsuleId,
+    tenantId: capsule.tenantId,
+    sessionId: capsule.sessionId,
+    stateType: capsule.stateType,
+    portability: capsule.portability,
+    contentDigest: capsule.contentDigest,
+    byteLength: payloadLength,
+    createdAt: capsule.createdAt,
+    expiresAt: capsule.expiresAt,
+    compatibility: Object.freeze({ ...capsule.compatibility }),
+    governance: Object.freeze({ ...capsule.governance }),
+    provenance: Object.freeze({
+      ...capsule.provenance,
+      parentCapsuleIds: Object.freeze([...capsule.provenance.parentCapsuleIds]),
+    }),
+    revocationStatus: 'ACTIVE' as const,
+  });
 }
 
 export class AlloyStateBus {
@@ -268,6 +331,12 @@ export class AlloyStateBus {
         capsuleId,
       });
     }
+    if (object.capsule.schema !== 'szl.state-capsule/v1') {
+      throw new StateNativeError('INVALID_INPUT', 'Transported state uses an unsupported capsule schema.', {
+        capsuleId,
+        schema: object.capsule.schema,
+      });
+    }
     if (object.capsule.revocationStatus !== 'ACTIVE') {
       throw new StateNativeError(
         'REUSE_DENIED',
@@ -275,25 +344,59 @@ export class AlloyStateBus {
         { capsuleId, revocationStatus: object.capsule.revocationStatus },
       );
     }
+    if (!Number.isFinite(Date.parse(object.capsule.createdAt))) {
+      throw new StateNativeError('INVALID_INPUT', 'Transported state has an invalid createdAt timestamp.', {
+        capsuleId,
+      });
+    }
+    if (object.capsule.byteLength !== object.payload.byteLength) {
+      throw new StateNativeError('SIGNATURE_INVALID', 'Transported state byte length does not match its payload.', {
+        capsuleId,
+        declaredByteLength: object.capsule.byteLength,
+        observedByteLength: object.payload.byteLength,
+      });
+    }
 
+    const request = importRequest(object);
+    this.#validatePutRequest(request);
     const digest = sha256Hex(object.payload);
     if (!constantTimeEqualHex(digest, object.capsule.contentDigest)) {
       throw new StateNativeError('SIGNATURE_INVALID', 'Transported state content digest verification failed.', {
         capsuleId,
       });
     }
+    const expectedCapsuleId = `state_${capsuleIdentity(request, digest)}`;
+    if (expectedCapsuleId !== capsuleId) {
+      throw new StateNativeError(
+        'SIGNATURE_INVALID',
+        'Transported state metadata does not match its content-addressed capsule identity.',
+        { capsuleId, expectedCapsuleId },
+      );
+    }
 
+    const imported = freezeImportedCapsule(object.capsule, object.payload.byteLength);
     const existing = this.#objects.get(capsuleId);
     if (!existing) {
-      const envelope = encryptEnvelope(this.#masterKey, object.payload, capsuleAad(object.capsule));
-      this.#objects.set(capsuleId, { capsule: object.capsule, envelope });
-      const transition = this.#appendTransition(object.capsule, 'CREATED', `Imported through ${adapter.name}.`);
-      const capsule = Object.freeze({ ...object.capsule, transitionDigest: transition.transitionDigest });
+      const envelope = encryptEnvelope(this.#masterKey, object.payload, capsuleAad(imported));
+      this.#objects.set(capsuleId, { capsule: imported, envelope });
+      const transition = this.#appendTransition(imported, 'CREATED', `Imported through ${adapter.name}.`);
+      const capsule = Object.freeze({ ...imported, transitionDigest: transition.transitionDigest });
       this.#objects.set(capsuleId, { capsule, envelope });
-    } else if (!constantTimeEqualHex(existing.capsule.contentDigest, digest)) {
-      throw new StateNativeError('DIVERGENT_REPLAY', 'Existing local state disagrees with imported content.', {
-        capsuleId,
-      });
+    } else {
+      if (!constantTimeEqualHex(existing.capsule.contentDigest, digest)) {
+        throw new StateNativeError('DIVERGENT_REPLAY', 'Existing local state disagrees with imported content.', {
+          capsuleId,
+        });
+      }
+      const existingAadDigest = sha256Hex(Buffer.from(capsuleAad(existing.capsule), 'utf8'));
+      const importedAadDigest = sha256Hex(Buffer.from(capsuleAad(imported), 'utf8'));
+      if (!constantTimeEqualHex(existingAadDigest, importedAadDigest)) {
+        throw new StateNativeError(
+          'DIVERGENT_REPLAY',
+          'Existing local state disagrees with the imported immutable capsule contract.',
+          { capsuleId },
+        );
+      }
     }
 
     const capsule = this.requireMetadata(capsuleId, tenantId);
@@ -310,9 +413,64 @@ export class AlloyStateBus {
   #validatePutRequest(request: PutStateRequest): void {
     assertNonEmpty(request.tenantId, 'tenantId');
     assertNonEmpty(request.sessionId, 'sessionId');
+    assertStateNative(STATE_TYPES.has(request.stateType), 'INVALID_INPUT', 'stateType is unsupported.');
+    assertStateNative(
+      PORTABILITY_TIERS.has(request.portability),
+      'INVALID_INPUT',
+      'portability tier is unsupported.',
+    );
+    assertStateNative(
+      SENSITIVITIES.has(request.governance.sensitivity),
+      'INVALID_INPUT',
+      'governance.sensitivity is unsupported.',
+    );
+    assertStateNative(
+      RETENTION_CLASSES.has(request.governance.retentionClass),
+      'INVALID_INPUT',
+      'governance.retentionClass is unsupported.',
+    );
+    assertStateNative(
+      REUSE_POLICIES.has(request.governance.reusePolicy),
+      'INVALID_INPUT',
+      'governance.reusePolicy is unsupported.',
+    );
+    assertStateNative(
+      EVIDENCE_TIERS.has(request.governance.evidenceTier),
+      'INVALID_INPUT',
+      'governance.evidenceTier is unsupported.',
+    );
     assertNonEmpty(request.compatibility.policyDigest, 'compatibility.policyDigest');
     assertNonEmpty(request.compatibility.cognitiveEpoch, 'compatibility.cognitiveEpoch');
+    for (const [field, value] of Object.entries(request.compatibility)) {
+      if (value !== undefined) {
+        assertNonEmpty(value, `compatibility.${field}`);
+      }
+    }
     assertNonEmpty(request.provenance.sourceActionId, 'provenance.sourceActionId');
+    assertStateNative(
+      Array.isArray(request.provenance.parentCapsuleIds),
+      'INVALID_INPUT',
+      'provenance.parentCapsuleIds must be an array.',
+    );
+    const parentIds = new Set<string>();
+    for (const parentCapsuleId of request.provenance.parentCapsuleIds) {
+      assertNonEmpty(parentCapsuleId, 'provenance.parentCapsuleIds[]');
+      assertStateNative(
+        !parentIds.has(parentCapsuleId),
+        'INVALID_INPUT',
+        'provenance.parentCapsuleIds must not contain duplicates.',
+      );
+      parentIds.add(parentCapsuleId);
+    }
+    if (request.provenance.producerKernelId !== undefined) {
+      assertNonEmpty(request.provenance.producerKernelId, 'provenance.producerKernelId');
+    }
+    if (request.provenance.producerKernelVersion !== undefined) {
+      assertNonEmpty(request.provenance.producerKernelVersion, 'provenance.producerKernelVersion');
+    }
+    if (request.provenance.sourceReceiptId !== undefined) {
+      assertNonEmpty(request.provenance.sourceReceiptId, 'provenance.sourceReceiptId');
+    }
     assertStateNative(request.payload.byteLength > 0, 'INVALID_INPUT', 'State payload must not be empty.');
 
     if (request.expiresAt) {
@@ -327,6 +485,12 @@ export class AlloyStateBus {
           request.governance.explicitGrantId.trim().length > 0,
         'INVALID_INPUT',
         'explicitGrantId is required when reusePolicy is explicit.',
+      );
+    } else {
+      assertStateNative(
+        request.governance.explicitGrantId === undefined,
+        'INVALID_INPUT',
+        'explicitGrantId is only allowed when reusePolicy is explicit.',
       );
     }
   }
