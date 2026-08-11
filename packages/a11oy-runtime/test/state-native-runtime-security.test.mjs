@@ -275,6 +275,7 @@ test('kernel registration snapshots verification policy and implementation', asy
   const active = prepareEpoch(manager, 'epoch_definition_snapshot', 'rev-definition');
   const { privateKey } = generateKeyPairSync('ed25519');
   const ledger = [];
+  const stats = { executeCalls: 0, verifyCalls: 0 };
   try {
     const runtime = new AlloyKernelRuntime({
       stateBus: bus,
@@ -291,17 +292,15 @@ test('kernel registration snapshots verification policy and implementation', asy
         this.kind = 'custom';
         this.route = 'state.test';
         this.requiresVerification = true;
-        this.executeCalls = 0;
-        this.verifyCalls = 0;
       }
 
       async execute() {
-        this.executeCalls += 1;
+        stats.executeCalls += 1;
         return [];
       }
 
       async verify() {
-        this.verifyCalls += 1;
+        stats.verifyCalls += 1;
         return {
           passed: false,
           reason: 'The admitted verifier rejects this execution.',
@@ -324,8 +323,8 @@ test('kernel registration snapshots verification policy and implementation', asy
     assert.equal(ledger.length, 1);
     assert.equal(ledger[0].outcome, 'blocked');
     assert.equal(ledger[0].verifier.passed, false);
-    assert.equal(definition.executeCalls, 1);
-    assert.equal(definition.verifyCalls, 1);
+    assert.equal(stats.executeCalls, 1);
+    assert.equal(stats.verifyCalls, 1);
   } finally {
     bus.dispose();
     stateKey.fill(0);
@@ -428,7 +427,7 @@ test('malformed verifier evidence digests fail closed', async () => {
       compatibility: active.compatibility,
       epochId: 'epoch_verifier_digest',
     });
-    await assert.rejects(runtime.execute(request), expectCode('VERIFICATION_FAILED'));
+    await assert.rejects(runtime.execute(request), expectCode('INVALID_INPUT'));
   } finally {
     bus.dispose();
     stateKey.fill(0);
