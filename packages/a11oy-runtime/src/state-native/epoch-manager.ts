@@ -32,6 +32,26 @@ function freezeRecord(record: CognitiveEpochRecord): CognitiveEpochRecord {
   });
 }
 
+function snapshotSpec(spec: CognitiveEpochSpec): CognitiveEpochSpec {
+  return Object.freeze({
+    epochId: spec.epochId,
+    tenantId: spec.tenantId,
+    route: spec.route,
+    modelId: spec.modelId,
+    modelRevision: spec.modelRevision,
+    engineId: spec.engineId,
+    engineVersion: spec.engineVersion,
+    tokenizerDigest: spec.tokenizerDigest,
+    layoutDigest: spec.layoutDigest,
+    adapterSetDigest: spec.adapterSetDigest,
+    verifierSetDigest: spec.verifierSetDigest,
+    promptBundleDigest: spec.promptBundleDigest,
+    policyDigest: spec.policyDigest,
+    toolManifestDigest: spec.toolManifestDigest,
+    createdAt: spec.createdAt,
+  });
+}
+
 export class CognitiveEpochManager {
   readonly #clock: () => Date;
   readonly #records = new Map<string, CognitiveEpochRecord>();
@@ -43,28 +63,29 @@ export class CognitiveEpochManager {
   }
 
   public prepare(spec: CognitiveEpochSpec): CognitiveEpochRecord {
-    this.#validateSpec(spec);
-    const digest = specDigest(spec);
-    const existing = this.#records.get(spec.epochId);
+    const snapshot = snapshotSpec(spec);
+    this.#validateSpec(snapshot);
+    const digest = specDigest(snapshot);
+    const existing = this.#records.get(snapshot.epochId);
     if (existing) {
-      if (this.#specDigests.get(spec.epochId) !== digest) {
+      if (this.#specDigests.get(snapshot.epochId) !== digest) {
         throw new StateNativeError(
           'DIVERGENT_REPLAY',
           'The cognitive epoch identifier was already used for a different specification.',
-          { epochId: spec.epochId },
+          { epochId: snapshot.epochId },
         );
       }
       return existing;
     }
 
     const record = freezeRecord({
-      ...spec,
+      ...snapshot,
       state: 'PREPARED',
       validationChecks: Object.freeze([]),
       leaseCount: 0,
     });
-    this.#records.set(spec.epochId, record);
-    this.#specDigests.set(spec.epochId, digest);
+    this.#records.set(snapshot.epochId, record);
+    this.#specDigests.set(snapshot.epochId, digest);
     return record;
   }
 

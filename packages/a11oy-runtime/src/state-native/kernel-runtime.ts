@@ -245,7 +245,10 @@ function validateApproval(approval: ApprovalEvidence | undefined, requestDigest:
 function verifierResultSnapshot(result: KernelVerifierResult): KernelVerifierResult {
   const passed = result?.passed;
   const reason = result?.reason;
-  const evidenceDigests = result?.evidenceDigests;
+  const rawEvidenceDigests = result?.evidenceDigests;
+  const evidenceDigests = Array.isArray(rawEvidenceDigests)
+    ? [...rawEvidenceDigests]
+    : undefined;
   assertStateNative(
     typeof passed === 'boolean' && typeof reason === 'string' && reason.trim().length > 0,
     'VERIFICATION_FAILED',
@@ -262,7 +265,7 @@ function verifierResultSnapshot(result: KernelVerifierResult): KernelVerifierRes
   return Object.freeze({
     passed,
     reason,
-    evidenceDigests: Object.freeze([...evidenceDigests]),
+    evidenceDigests: Object.freeze(evidenceDigests),
   });
 }
 
@@ -284,10 +287,31 @@ export class AlloyKernelRuntime {
   }
 
   public register(definition: KernelDefinition): void {
-    const normalized = Object.freeze({ ...definition });
-    assertStateNative(normalized.kernelId.trim().length > 0, 'INVALID_INPUT', 'kernelId must not be empty.');
-    assertStateNative(normalized.version.trim().length > 0, 'INVALID_INPUT', 'kernel version must not be empty.');
-    assertStateNative(normalized.route.trim().length > 0, 'INVALID_INPUT', 'kernel route must not be empty.');
+    const kernelId = definition.kernelId;
+    const version = definition.version;
+    const kind = definition.kind;
+    const route = definition.route;
+    const requiresVerification = definition.requiresVerification;
+    const execute = definition.execute;
+    const verify = definition.verify;
+    assertStateNative(typeof kernelId === 'string' && kernelId.trim().length > 0, 'INVALID_INPUT', 'kernelId must not be empty.');
+    assertStateNative(typeof version === 'string' && version.trim().length > 0, 'INVALID_INPUT', 'kernel version must not be empty.');
+    assertStateNative(typeof route === 'string' && route.trim().length > 0, 'INVALID_INPUT', 'kernel route must not be empty.');
+    assertStateNative(typeof execute === 'function', 'INVALID_INPUT', 'kernel execute must be a function.');
+    assertStateNative(
+      verify === undefined || typeof verify === 'function',
+      'INVALID_INPUT',
+      'kernel verifier must be a function when provided.',
+    );
+    const normalized: KernelDefinition = Object.freeze({
+      kernelId,
+      version,
+      kind,
+      route,
+      requiresVerification,
+      execute: execute.bind(definition),
+      verify: verify?.bind(definition),
+    });
     if (normalized.requiresVerification && !normalized.verify) {
       throw new StateNativeError(
         'INVALID_INPUT',

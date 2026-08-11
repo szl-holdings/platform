@@ -279,19 +279,32 @@ test('kernel registration snapshots verification policy and implementation', asy
         receiptWriter: async (receipt) => ledger.push(receipt),
       },
     });
-    const definition = {
-      kernelId: 'state.definition-snapshot',
-      version: '1.0.0',
-      kind: 'custom',
-      route: 'state.test',
-      requiresVerification: true,
-      execute: async () => [],
-      verify: async () => ({
-        passed: false,
-        reason: 'The admitted verifier rejects this execution.',
-        evidenceDigests: [digestObject({ verifier: 'admitted' })],
-      }),
-    };
+    class DefinitionFixture {
+      constructor() {
+        this.kernelId = 'state.definition-snapshot';
+        this.version = '1.0.0';
+        this.kind = 'custom';
+        this.route = 'state.test';
+        this.requiresVerification = true;
+        this.executeCalls = 0;
+        this.verifyCalls = 0;
+      }
+
+      async execute() {
+        this.executeCalls += 1;
+        return [];
+      }
+
+      async verify() {
+        this.verifyCalls += 1;
+        return {
+          passed: false,
+          reason: 'The admitted verifier rejects this execution.',
+          evidenceDigests: [digestObject({ verifier: 'admitted' })],
+        };
+      }
+    }
+    const definition = new DefinitionFixture();
     runtime.register(definition);
     definition.requiresVerification = false;
     definition.verify = undefined;
@@ -306,6 +319,8 @@ test('kernel registration snapshots verification policy and implementation', asy
     assert.equal(ledger.length, 1);
     assert.equal(ledger[0].outcome, 'blocked');
     assert.equal(ledger[0].verifier.passed, false);
+    assert.equal(definition.executeCalls, 1);
+    assert.equal(definition.verifyCalls, 1);
   } finally {
     bus.dispose();
     stateKey.fill(0);
@@ -319,6 +334,7 @@ test('verifier decisions are read once and evidence digests are snapshotted', as
   const active = prepareEpoch(manager, 'epoch_verifier_result', 'rev-verifier-result');
   const { privateKey } = generateKeyPairSync('ed25519');
   let passedReads = 0;
+  let evidenceReads = 0;
   try {
     const runtime = new AlloyKernelRuntime({
       stateBus: bus,
@@ -328,7 +344,16 @@ test('verifier decisions are read once and evidence digests are snapshotted', as
         receiptWriter: async () => {},
       },
     });
-    const evidenceDigests = [digestObject({ verifier: 'stable' })];
+    const stableEvidenceDigest = digestObject({ verifier: 'stable' });
+    const evidenceDigests = [];
+    Object.defineProperty(evidenceDigests, 0, {
+      enumerable: true,
+      get() {
+        evidenceReads += 1;
+        return evidenceReads === 1 ? stableEvidenceDigest : 'not-a-sha256-digest';
+      },
+    });
+    evidenceDigests.length = 1;
     runtime.register({
       kernelId: 'state.verifier-result',
       version: '1.0.0',
@@ -353,10 +378,10 @@ test('verifier decisions are read once and evidence digests are snapshotted', as
       epochId: 'epoch_verifier_result',
     });
     const result = await runtime.execute(request);
-    evidenceDigests[0] = '0'.repeat(64);
     assert.equal(passedReads, 1);
+    assert.equal(evidenceReads, 1);
     assert.equal(result.receipt.outcome, 'success');
-    assert.notEqual(result.receipt.verifier.evidenceDigests[0], evidenceDigests[0]);
+    assert.equal(result.receipt.verifier.evidenceDigests[0], stableEvidenceDigest);
   } finally {
     bus.dispose();
     stateKey.fill(0);
@@ -429,6 +454,41 @@ test('malformed cognitive epoch digests are rejected before storage', () => {
     expectCode('INVALID_INPUT'),
   );
   assert.equal(manager.get('epoch_invalid_digest'), undefined);
+});
+
+test('cognitive epoch fields are read once before validation and storage', () => {
+  const manager = new CognitiveEpochManager();
+  const stableTokenizerDigest = digestObject({ tokenizer: 'stable' });
+  let tokenizerReads = 0;
+  const spec = {
+    epochId: 'epoch_accessor_digest',
+    tenantId: 'tenant_a',
+    route: 'state.test',
+    modelId: 'model-accessor',
+    modelRevision: 'rev-accessor',
+    engineId: 'engine-a',
+    engineVersion: '1.0.0',
+    tokenizerDigest: stableTokenizerDigest,
+    layoutDigest: digestObject({ layout: 'accessor' }),
+    adapterSetDigest: digestObject({ adapters: [] }),
+    verifierSetDigest: digestObject({ verifiers: [] }),
+    promptBundleDigest: digestObject({ prompt: 'accessor' }),
+    policyDigest: digestObject({ policy: 'accessor' }),
+    toolManifestDigest: digestObject({ tools: [] }),
+    createdAt: new Date().toISOString(),
+  };
+  Object.defineProperty(spec, 'tokenizerDigest', {
+    enumerable: true,
+    get() {
+      tokenizerReads += 1;
+      return tokenizerReads === 1 ? stableTokenizerDigest : 'not-a-sha256-digest';
+    },
+  });
+
+  const prepared = manager.prepare(spec);
+  assert.equal(tokenizerReads, 1);
+  assert.equal(prepared.tokenizerDigest, stableTokenizerDigest);
+  assert.equal(manager.require(spec.epochId).tokenizerDigest, stableTokenizerDigest);
 });
 
 test('kernel outputs cannot downgrade the highest input sensitivity', async () => {
