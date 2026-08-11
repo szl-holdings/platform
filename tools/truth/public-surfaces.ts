@@ -75,6 +75,17 @@ const ALLOWED_OWNER_ROLES = new Set<SourceOwnerRole>([
 const MAX_OBSERVATION_AGE_MS = 7 * 24 * 60 * 60 * 1000;
 const MAX_FUTURE_SKEW_MS = 5 * 60 * 1000;
 const MAX_METADATA_BODY_BYTES = 128 * 1024;
+const LIVE_SURFACE_PROBE_CONCURRENCY = 4;
+const LIVE_SURFACE_RETRY_DELAYS_MS = [750, 1_500] as const;
+const TRANSIENT_TRANSPORT_CODES = new Set([
+  'EAI_AGAIN',
+  'ECONNRESET',
+  'ETIMEDOUT',
+  'UND_ERR_CONNECT_TIMEOUT',
+  'UND_ERR_SOCKET',
+]);
+// A worker owns the whole surface transaction. The approved two-hop redirect path is therefore
+// bounded to 2 * (3 * 15 seconds + 750 ms + 1,500 ms) = 94.5 seconds of slot occupancy.
 
 type ApprovedSurfaceTarget = Readonly<{
   canonicalUrl: string;
@@ -709,6 +720,138 @@ async function validateMetadataResponse(
   return [`${surfaceId}: routed metadata has no body validator`];
 }
 
+function isTransientTransportError(error: unknown): boolean {
+  if (error instanceof DOMException && error.name === 'TimeoutError') return true;
+
+  let candidate = error;
+  for (let depth = 0; depth < 2; depth += 1) {
+    if (typeof candidate !== 'object' || candidate === null) break;
+    const record = candidate as Record<string, unknown>;
+    if (typeof record.code === 'string' && record.code.trim() !== '') {
+      return TRANSIENT_TRANSPORT_CODES.has(record.code.toUpperCase());
+    }
+    candidate = record.cause;
+  }
+  return error instanceof TypeError && error.message === 'fetch failed';
+}
+
+async function requestSurface(
+  url: string,
+  fetchSurface: SurfaceFetch,
+  validateResponse?: (response: SurfaceFetchResponse) => Promise<string[]>,
+): Promise<{ response: SurfaceFetchResponse; responseFailures: string[] | null }> {
+  const attempts = LIVE_SURFACE_RETRY_DELAYS_MS.length + 1;
+  for (let attempt = 1; attempt <= attempts; attempt += 1) {
+    let response: SurfaceFetchResponse | null = null;
+    try {
+      response = await fetchSurface(url, {
+        method: 'GET',
+        redirect: 'manual',
+        signal: AbortSignal.timeout(15_000),
+      });
+      const responseFailures = validateResponse ? await validateResponse(response) : null;
+      return { response, responseFailures };
+    } catch (error) {
+      if (response) {
+        try {
+          await cancelResponseBody(response);
+        } catch {
+          // Preserve the transport/body error that controls retry classification.
+        }
+      }
+      if (!isTransientTransportError(error) || attempt === attempts) {
+        throw error;
+      }
+      const retryDelayMs = LIVE_SURFACE_RETRY_DELAYS_MS[attempt - 1];
+      if (retryDelayMs === undefined) {
+        throw new Error('surface retry schedule exhausted before the final attempt');
+      }
+      await new Promise((resolve) => setTimeout(resolve, retryDelayMs));
+    }
+  }
+  throw new Error('surface request exhausted without a result');
+}
+
+async function verifyLivePublicSurface(
+  surface: PublicSurface,
+  fetchSurface: SurfaceFetch,
+): Promise<string[]> {
+  try {
+    const approvedTarget = approvedTargetFor(surface.id);
+    if (!approvedTarget) return [`${surface.id}: no approved live probe target`];
+
+    const validateRoutedMetadata =
+      surface.kind === 'METADATA' && surface.availability !== 'UNAVAILABLE'
+        ? async (candidate: SurfaceFetchResponse): Promise<string[]> => {
+            if (candidate.status >= 200 && candidate.status < 300) {
+              return await validateMetadataResponse(surface.id, candidate);
+            }
+            await cancelResponseBody(candidate);
+            return [];
+          }
+        : undefined;
+    const firstResult = await requestSurface(
+      approvedTarget.canonicalUrl,
+      fetchSurface,
+      approvedTarget.canonicalUrl === approvedTarget.finalUrl ? validateRoutedMetadata : undefined,
+    );
+    const firstResponse = firstResult.response;
+    let response = firstResponse;
+    let responseFailures = firstResult.responseFailures;
+    if (approvedTarget.canonicalUrl !== approvedTarget.finalUrl) {
+      if (firstResponse.status < 300 || firstResponse.status >= 400) {
+        await cancelResponseBody(firstResponse);
+        return [`${surface.id}: expected an approved redirect from ${approvedTarget.canonicalUrl}`];
+      }
+      const location = firstResponse.headers?.get('location');
+      let redirectTarget: string | null;
+      try {
+        redirectTarget = location
+          ? normalizedUrl(new URL(location, approvedTarget.canonicalUrl).toString())
+          : null;
+      } finally {
+        await cancelResponseBody(firstResponse);
+      }
+      if (redirectTarget !== approvedTarget.finalUrl) {
+        return [
+          `${surface.id}: expected redirect to ${approvedTarget.finalUrl}, observed ${String(location)}`,
+        ];
+      }
+      const finalResult = await requestSurface(
+        approvedTarget.finalUrl,
+        fetchSurface,
+        validateRoutedMetadata,
+      );
+      response = finalResult.response;
+      responseFailures = finalResult.responseFailures;
+    } else if (firstResponse.status >= 300 && firstResponse.status < 400) {
+      await cancelResponseBody(firstResponse);
+      return [`${surface.id}: unexpected redirect from approved final destination`];
+    }
+
+    const failures: string[] = [];
+    if (response.status !== surface.observation.status) {
+      failures.push(
+        `${surface.id}: expected HTTP ${surface.observation.status}, observed ${response.status}`,
+      );
+    }
+    const finalUrl = normalizedUrl(response.url);
+    if (finalUrl !== approvedTarget.finalUrl) {
+      failures.push(
+        `${surface.id}: expected final URL ${approvedTarget.finalUrl}, observed ${response.url}`,
+      );
+    }
+    if (responseFailures) {
+      failures.push(...responseFailures);
+    } else {
+      await cancelResponseBody(response);
+    }
+    return failures;
+  } catch (error) {
+    return [`${surface.id}: live probe failed: ${String(error)}`];
+  }
+}
+
 export async function verifyLivePublicSurfaces(
   registry: PublicSurfaceRegistry,
   fetchSurface: SurfaceFetch = fetch as unknown as SurfaceFetch,
@@ -718,72 +861,22 @@ export async function verifyLivePublicSurfaces(
     return registryFailures.map((failure) => `registry: ${failure}`).sort();
   }
 
-  const results = await Promise.all(
-    registry.surfaces.map(async (surface): Promise<string[]> => {
-      try {
-        const approvedTarget = approvedTargetFor(surface.id);
-        if (!approvedTarget) return [`${surface.id}: no approved live probe target`];
+  const results = Array.from({ length: registry.surfaces.length }, (): string[] => []);
+  let nextIndex = 0;
 
-        const request = async (url: string): Promise<SurfaceFetchResponse> =>
-          fetchSurface(url, {
-            method: 'GET',
-            redirect: 'manual',
-            signal: AbortSignal.timeout(15_000),
-          });
-
-        const firstResponse = await request(approvedTarget.canonicalUrl);
-        let response = firstResponse;
-        if (approvedTarget.canonicalUrl !== approvedTarget.finalUrl) {
-          if (firstResponse.status < 300 || firstResponse.status >= 400) {
-            await cancelResponseBody(firstResponse);
-            return [
-              `${surface.id}: expected an approved redirect from ${approvedTarget.canonicalUrl}`,
-            ];
-          }
-          const location = firstResponse.headers?.get('location');
-          const redirectTarget = location
-            ? normalizedUrl(new URL(location, approvedTarget.canonicalUrl).toString())
-            : null;
-          if (redirectTarget !== approvedTarget.finalUrl) {
-            await cancelResponseBody(firstResponse);
-            return [
-              `${surface.id}: expected redirect to ${approvedTarget.finalUrl}, observed ${String(location)}`,
-            ];
-          }
-          await cancelResponseBody(firstResponse);
-          response = await request(approvedTarget.finalUrl);
-        } else if (firstResponse.status >= 300 && firstResponse.status < 400) {
-          await cancelResponseBody(firstResponse);
-          return [`${surface.id}: unexpected redirect from approved final destination`];
-        }
-
-        const failures: string[] = [];
-        if (response.status !== surface.observation.status) {
-          failures.push(
-            `${surface.id}: expected HTTP ${surface.observation.status}, observed ${response.status}`,
-          );
-        }
-        const finalUrl = normalizedUrl(response.url);
-        if (finalUrl !== approvedTarget.finalUrl) {
-          failures.push(
-            `${surface.id}: expected final URL ${approvedTarget.finalUrl}, observed ${response.url}`,
-          );
-        }
-        if (
-          surface.kind === 'METADATA' &&
-          surface.availability !== 'UNAVAILABLE' &&
-          response.status >= 200 &&
-          response.status < 300
-        ) {
-          failures.push(...(await validateMetadataResponse(surface.id, response)));
-        } else {
-          await cancelResponseBody(response);
-        }
-        return failures;
-      } catch (error) {
-        return [`${surface.id}: live probe failed: ${String(error)}`];
+  const worker = async (): Promise<void> => {
+    while (nextIndex < registry.surfaces.length) {
+      const index = nextIndex;
+      nextIndex += 1;
+      const surface = registry.surfaces[index];
+      if (surface === undefined) {
+        throw new Error(`surface worker selected invalid registry index ${index}`);
       }
-    }),
-  );
+      results[index] = await verifyLivePublicSurface(surface, fetchSurface);
+    }
+  };
+
+  const workerCount = Math.min(LIVE_SURFACE_PROBE_CONCURRENCY, registry.surfaces.length);
+  await Promise.all(Array.from({ length: workerCount }, () => worker()));
   return results.flat().sort();
 }

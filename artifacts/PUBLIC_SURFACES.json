@@ -1,21 +1,21 @@
 {
   "schema": "szl.public-surfaces/v1",
   "generated_by": "tools/truth/generate-public-surfaces.ts@szl.public-surfaces/v1",
-  "observed_at": "2026-08-09T05:19:33.381Z",
+  "observed_at": "2026-08-11T08:36:44.786Z",
   "summary": {
     "declared": 29,
-    "customer_facing_products": 1,
-    "customer_facing_routes": 11,
+    "customer_facing_products": 2,
+    "customer_facing_routes": 12,
     "by_availability": {
-      "REACHABLE": 16,
-      "REDIRECTED": 0,
-      "UNAVAILABLE": 13
+      "REACHABLE": 18,
+      "REDIRECTED": 1,
+      "UNAVAILABLE": 10
     },
     "by_mode": {
-      "LIVE": 3,
-      "MIXED": 8,
+      "LIVE": 5,
+      "MIXED": 9,
       "DOCUMENTATION": 5,
-      "UNAVAILABLE": 13
+      "UNAVAILABLE": 10
     }
   },
   "surfaces": [
@@ -384,8 +384,8 @@
       "name": "Killinchu source-binding API",
       "kind": "API",
       "audience": ["DEVELOPER", "OPERATOR"],
-      "mode": "UNAVAILABLE",
-      "availability": "UNAVAILABLE",
+      "mode": "LIVE",
+      "availability": "REACHABLE",
       "canonical_url": "https://szlholdings-killinchu.hf.space/api/build-info",
       "source_owner": {
         "repository": "szl-holdings/killinchu",
@@ -394,18 +394,18 @@
       },
       "observation": {
         "method": "GET",
-        "status": 503,
+        "status": 200,
         "final_url": "https://szlholdings-killinchu.hf.space/api/build-info"
       },
-      "note": "Measured HTTP 503 while the Killinchu Space is PAUSED by cpu-basic quota (requested=1, current=5, limit=3); source binding is unavailable."
+      "note": "A bounded HTTP 200 read reported OBSERVED source 859e26cf27164b38c4e289e40a751ce80d403368, matching protected Killinchu main, and OIDC attestation 39971795 for manifest sha256:7730a0334485ed3ca4754b38bd288ac004258918f0ede46719e72ae2a2ede960; the distinct HF runtime content revision is 83142da9526e2c0ddfe1e78eb99a20940cde0cf3."
     },
     {
       "id": "killinchu-public-console",
       "name": "Killinchu public console",
       "kind": "WEB",
       "audience": ["INVESTOR", "DEVELOPER", "OPERATOR"],
-      "mode": "UNAVAILABLE",
-      "availability": "UNAVAILABLE",
+      "mode": "MIXED",
+      "availability": "REDIRECTED",
       "canonical_url": "https://a-11-oy.com/killinchu",
       "source_owner": {
         "repository": "szl-holdings/killinchu",
@@ -414,18 +414,18 @@
       },
       "observation": {
         "method": "GET",
-        "status": 503,
+        "status": 200,
         "final_url": "https://szlholdings-killinchu.hf.space/"
       },
-      "note": "Protected A11oy source redirects this canonical path to the approved Killinchu Space; the measured final response is HTTP 503, so availability remains failed closed."
+      "note": "The full public-surface sweep observed the approved redirect and final HTTP 200 at the Killinchu Space; this records route reachability only, not aggregate Killinchu health or source parity."
     },
     {
       "id": "killinchu-readiness-api",
       "name": "Killinchu readiness API",
       "kind": "API",
       "audience": ["DEVELOPER", "OPERATOR"],
-      "mode": "UNAVAILABLE",
-      "availability": "UNAVAILABLE",
+      "mode": "LIVE",
+      "availability": "REACHABLE",
       "canonical_url": "https://szlholdings-killinchu.hf.space/readyz",
       "source_owner": {
         "repository": "szl-holdings/killinchu",
@@ -434,10 +434,10 @@
       },
       "observation": {
         "method": "GET",
-        "status": 503,
+        "status": 200,
         "final_url": "https://szlholdings-killinchu.hf.space/readyz"
       },
-      "note": "Measured HTTP 503 while the Killinchu Space is PAUSED by cpu-basic quota (requested=1, current=5, limit=3); readiness remains failed closed."
+      "note": "A bounded HTTP 200 read reported ready, durable Khipu storage, an intact Khipu chain, and Doctrine v11; this scoped witness does not establish aggregate Killinchu API or alert-channel health."
     },
     {
       "id": "legacy-aegis-route",
