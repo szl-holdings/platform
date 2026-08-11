@@ -108,6 +108,13 @@ test('canonical digests reject structured non-JSON object types', () => {
 
   assert.doesNotThrow(() => digestObject({ parameters: { value: '2026-08-11T00:00:00.000Z' } }));
   assert.doesNotThrow(() => digestObject({ parameters: { value: { $bytes: 'AQ==' } } }));
+
+  const sparse = [];
+  sparse.length = 1;
+  assert.throws(
+    () => digestObject({ parameters: { value: sparse } }),
+    /Canonical JSON does not support sparse arrays/,
+  );
 });
 
 test('runtime rejects blank action identifiers before kernel execution', async () => {
@@ -228,4 +235,32 @@ test('epoch validation rejects truthy non-boolean results before state transitio
     expectCode('INVALID_INPUT'),
   );
   assert.equal(manager.require('epoch_malformed_check').state, 'PREPARED');
+
+  const sparseChecks = [];
+  sparseChecks.length = 1;
+  assert.throws(
+    () => manager.validate('epoch_malformed_check', sparseChecks),
+    expectCode('INVALID_INPUT'),
+  );
+  assert.equal(manager.require('epoch_malformed_check').state, 'PREPARED');
+
+  let passedReads = 0;
+  const oneReadCheck = Object.defineProperties(
+    {},
+    {
+      name: { enumerable: true, get: () => 'self-test' },
+      passed: {
+        enumerable: true,
+        get: () => {
+          passedReads += 1;
+          return passedReads === 1 ? true : 'false';
+        },
+      },
+      detail: { enumerable: true, get: () => 'Evidence is captured exactly once.' },
+    },
+  );
+  const validated = manager.validate('epoch_malformed_check', [oneReadCheck]);
+  assert.equal(validated.state, 'VALIDATED');
+  assert.equal(passedReads, 1);
+  assert.equal(validated.validationChecks[0].passed, true);
 });

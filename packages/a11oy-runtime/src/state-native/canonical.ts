@@ -29,9 +29,18 @@ function normalize(value: unknown, stack: Set<object>): CanonicalJsonValue {
       throw new TypeError('Canonical JSON does not support circular arrays.');
     }
     stack.add(value);
-    const result = value.map((item) => normalize(item, stack));
-    stack.delete(value);
-    return result;
+    try {
+      const result: CanonicalJsonValue[] = [];
+      for (let index = 0; index < value.length; index += 1) {
+        if (!Object.hasOwn(value, index)) {
+          throw new TypeError('Canonical JSON does not support sparse arrays.');
+        }
+        result.push(normalize(value[index], stack));
+      }
+      return result;
+    } finally {
+      stack.delete(value);
+    }
   }
 
   if (typeof value === 'object') {

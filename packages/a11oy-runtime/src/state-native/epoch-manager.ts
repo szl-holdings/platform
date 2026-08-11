@@ -93,7 +93,7 @@ export class CognitiveEpochManager {
 
   public validate(epochId: string, checks: readonly EpochValidationCheck[]): CognitiveEpochRecord {
     assertStateNative(
-      checks.length > 0,
+      Array.isArray(checks) && checks.length > 0,
       'INVALID_INPUT',
       'At least one epoch validation check is required.',
     );
@@ -105,32 +105,45 @@ export class CognitiveEpochManager {
       );
     }
 
-    const normalizedChecks = Object.freeze(
-      checks.map((check) => {
-        const normalized = Object.freeze({
-          name: check.name,
-          passed: check.passed,
-          detail: check.detail,
-        });
-        assertStateNative(
-          typeof normalized.name === 'string' && normalized.name.trim().length > 0,
-          'INVALID_INPUT',
-          'Epoch validation check name must not be empty.',
-        );
-        assertStateNative(
-          typeof normalized.passed === 'boolean',
-          'INVALID_INPUT',
-          'Epoch validation check passed must be boolean.',
-        );
-        assertStateNative(
-          typeof normalized.detail === 'string' && normalized.detail.trim().length > 0,
-          'INVALID_INPUT',
-          'Epoch validation check detail must not be empty.',
-        );
-        return normalized;
-      }),
-    );
-    const state = normalizedChecks.every((check) => check.passed) ? 'VALIDATED' : 'REJECTED';
+    const snapshots: EpochValidationCheck[] = [];
+    for (let index = 0; index < checks.length; index += 1) {
+      assertStateNative(
+        Object.hasOwn(checks, index),
+        'INVALID_INPUT',
+        'Epoch validation checks must not contain sparse entries.',
+      );
+      const check = checks[index] as EpochValidationCheck | undefined;
+      assertStateNative(
+        check !== null && typeof check === 'object',
+        'INVALID_INPUT',
+        'Each epoch validation check must be an object.',
+      );
+      const normalized = Object.freeze({
+        name: check.name,
+        passed: check.passed,
+        detail: check.detail,
+      });
+      assertStateNative(
+        typeof normalized.name === 'string' && normalized.name.trim().length > 0,
+        'INVALID_INPUT',
+        'Epoch validation check name must not be empty.',
+      );
+      assertStateNative(
+        typeof normalized.passed === 'boolean',
+        'INVALID_INPUT',
+        'Epoch validation check passed must be boolean.',
+      );
+      assertStateNative(
+        typeof normalized.detail === 'string' && normalized.detail.trim().length > 0,
+        'INVALID_INPUT',
+        'Epoch validation check detail must not be empty.',
+      );
+      snapshots.push(normalized);
+    }
+    const normalizedChecks = Object.freeze(snapshots);
+    const state = normalizedChecks.every((check) => check.passed === true)
+      ? 'VALIDATED'
+      : 'REJECTED';
     const next = freezeRecord({ ...current, state, validationChecks: normalizedChecks });
     this.#records.set(epochId, next);
     return next;
