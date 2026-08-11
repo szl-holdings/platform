@@ -31,6 +31,7 @@ from typing import Any, Mapping, Sequence
 REPORT_SCHEMA = "szl.flagship-health/v2"
 USER_AGENT = "szl-flagship-health/2"
 ISSUE_MARKER_PREFIX = "szl-flagship-health"
+PAUSED_HINT = "space is paused"
 HEALTHY = "HEALTHY"
 UNHEALTHY = "UNHEALTHY"
 UNKNOWN = "UNKNOWN"
@@ -66,6 +67,14 @@ def issue_title(organ: str) -> str:
 
 def issue_marker(organ: str) -> str:
     return f"<!-- {ISSUE_MARKER_PREFIX}:{organ} -->"
+
+
+def has_pause_signature(attempts: Sequence[Attempt]) -> bool:
+    return any(
+        attempt.http_status == 503
+        and PAUSED_HINT in attempt.body_preview.lower()
+        for attempt in attempts
+    )
 
 
 def _safe_text(value: object, *, limit: int = 400) -> str:
@@ -214,12 +223,14 @@ def issue_body(report: Mapping[str, Any]) -> str:
         for attempt in report.get("attempts", [])
         if isinstance(attempt, dict)
     ]
+    pause_signal = "true" if report.get("pause_signature") else "false"
     return "\n".join(
         [
             issue_marker(organ),
             f"# Flagship health incident: {organ}",
             "",
             f"- State: **{report['state']}**",
+            f"- Pause indicator detected: {pause_signal}",
             f"- Probe: `{report['probe_url']}`",
             f"- Observed: `{report['generated_at']}`",
             f"- HTTP sequence: `{', '.join(statuses)}`",
@@ -343,6 +354,7 @@ def run_probe(
         ),
         "organ": organ,
         "probe_url": url,
+        "pause_signature": has_pause_signature(attempts),
         "state": classify_attempts(attempts, confirmations=confirmations),
         "policy": {
             "attempts": attempts_count,
