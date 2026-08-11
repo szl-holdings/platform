@@ -365,14 +365,14 @@ test('verifier decisions are read once and evidence digests are snapshotted', as
       route: 'state.test',
       requiresVerification: true,
       execute: async () => [],
-      verify: async () => ({
-        get passed() {
-          passedReads += 1;
-          return passedReads === 1;
-        },
+      verify: async () => {
+        passedReads += 1;
+        return {
+          passed: true,
         reason: 'Verifier result is stable at the trust boundary.',
-        evidenceDigests,
-      }),
+          evidenceDigests,
+        };
+      },
     });
 
     const request = requestFor({
