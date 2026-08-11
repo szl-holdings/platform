@@ -263,6 +263,174 @@ test('a verifier cannot mutate the bytes that are persisted after verification',
   }
 });
 
+test('kernel registration snapshots verification policy and implementation', async () => {
+  const stateKey = randomBytes(32);
+  const bus = new AlloyStateBus({ masterKey: stateKey });
+  const manager = new CognitiveEpochManager();
+  const active = prepareEpoch(manager, 'epoch_definition_snapshot', 'rev-definition');
+  const { privateKey } = generateKeyPairSync('ed25519');
+  const ledger = [];
+  try {
+    const runtime = new AlloyKernelRuntime({
+      stateBus: bus,
+      epochManager: manager,
+      config: {
+        receiptSigner: { keyId: 'test-key', privateKey },
+        receiptWriter: async (receipt) => ledger.push(receipt),
+      },
+    });
+    const definition = {
+      kernelId: 'state.definition-snapshot',
+      version: '1.0.0',
+      kind: 'custom',
+      route: 'state.test',
+      requiresVerification: true,
+      execute: async () => [],
+      verify: async () => ({
+        passed: false,
+        reason: 'The admitted verifier rejects this execution.',
+        evidenceDigests: [digestObject({ verifier: 'admitted' })],
+      }),
+    };
+    runtime.register(definition);
+    definition.requiresVerification = false;
+    definition.verify = undefined;
+
+    const request = requestFor({
+      actionId: 'runtime-action-definition-snapshot',
+      kernelId: 'state.definition-snapshot',
+      compatibility: active.compatibility,
+      epochId: 'epoch_definition_snapshot',
+    });
+    await assert.rejects(runtime.execute(request), expectCode('VERIFICATION_FAILED'));
+    assert.equal(ledger.length, 1);
+    assert.equal(ledger[0].outcome, 'blocked');
+    assert.equal(ledger[0].verifier.passed, false);
+  } finally {
+    bus.dispose();
+    stateKey.fill(0);
+  }
+});
+
+test('verifier decisions are read once and evidence digests are snapshotted', async () => {
+  const stateKey = randomBytes(32);
+  const bus = new AlloyStateBus({ masterKey: stateKey });
+  const manager = new CognitiveEpochManager();
+  const active = prepareEpoch(manager, 'epoch_verifier_result', 'rev-verifier-result');
+  const { privateKey } = generateKeyPairSync('ed25519');
+  let passedReads = 0;
+  try {
+    const runtime = new AlloyKernelRuntime({
+      stateBus: bus,
+      epochManager: manager,
+      config: {
+        receiptSigner: { keyId: 'test-key', privateKey },
+        receiptWriter: async () => {},
+      },
+    });
+    const evidenceDigests = [digestObject({ verifier: 'stable' })];
+    runtime.register({
+      kernelId: 'state.verifier-result',
+      version: '1.0.0',
+      kind: 'custom',
+      route: 'state.test',
+      requiresVerification: true,
+      execute: async () => [],
+      verify: async () => ({
+        get passed() {
+          passedReads += 1;
+          return passedReads === 1;
+        },
+        reason: 'Verifier result is stable at the trust boundary.',
+        evidenceDigests,
+      }),
+    });
+
+    const request = requestFor({
+      actionId: 'runtime-action-verifier-result',
+      kernelId: 'state.verifier-result',
+      compatibility: active.compatibility,
+      epochId: 'epoch_verifier_result',
+    });
+    const result = await runtime.execute(request);
+    evidenceDigests[0] = '0'.repeat(64);
+    assert.equal(passedReads, 1);
+    assert.equal(result.receipt.outcome, 'success');
+    assert.notEqual(result.receipt.verifier.evidenceDigests[0], evidenceDigests[0]);
+  } finally {
+    bus.dispose();
+    stateKey.fill(0);
+  }
+});
+
+test('malformed verifier evidence digests fail closed', async () => {
+  const stateKey = randomBytes(32);
+  const bus = new AlloyStateBus({ masterKey: stateKey });
+  const manager = new CognitiveEpochManager();
+  const active = prepareEpoch(manager, 'epoch_verifier_digest', 'rev-verifier-digest');
+  const { privateKey } = generateKeyPairSync('ed25519');
+  try {
+    const runtime = new AlloyKernelRuntime({
+      stateBus: bus,
+      epochManager: manager,
+      config: {
+        receiptSigner: { keyId: 'test-key', privateKey },
+        receiptWriter: async () => {},
+      },
+    });
+    runtime.register({
+      kernelId: 'state.verifier-digest',
+      version: '1.0.0',
+      kind: 'custom',
+      route: 'state.test',
+      requiresVerification: true,
+      execute: async () => [],
+      verify: async () => ({
+        passed: true,
+        reason: 'Malformed evidence must not reach a receipt.',
+        evidenceDigests: ['not-a-sha256-digest'],
+      }),
+    });
+
+    const request = requestFor({
+      actionId: 'runtime-action-verifier-digest',
+      kernelId: 'state.verifier-digest',
+      compatibility: active.compatibility,
+      epochId: 'epoch_verifier_digest',
+    });
+    await assert.rejects(runtime.execute(request), expectCode('VERIFICATION_FAILED'));
+  } finally {
+    bus.dispose();
+    stateKey.fill(0);
+  }
+});
+
+test('malformed cognitive epoch digests are rejected before storage', () => {
+  const manager = new CognitiveEpochManager();
+  assert.throws(
+    () =>
+      manager.prepare({
+        epochId: 'epoch_invalid_digest',
+        tenantId: 'tenant_a',
+        route: 'state.test',
+        modelId: 'model-invalid',
+        modelRevision: 'rev-invalid',
+        engineId: 'engine-a',
+        engineVersion: '1.0.0',
+        tokenizerDigest: 'not-a-sha256-digest',
+        layoutDigest: digestObject({ layout: 'invalid' }),
+        adapterSetDigest: digestObject({ adapters: [] }),
+        verifierSetDigest: digestObject({ verifiers: [] }),
+        promptBundleDigest: digestObject({ prompt: 'invalid' }),
+        policyDigest: digestObject({ policy: 'invalid' }),
+        toolManifestDigest: digestObject({ tools: [] }),
+        createdAt: new Date().toISOString(),
+      }),
+    expectCode('INVALID_INPUT'),
+  );
+  assert.equal(manager.get('epoch_invalid_digest'), undefined);
+});
+
 test('kernel outputs cannot downgrade the highest input sensitivity', async () => {
   const stateKey = randomBytes(32);
   const bus = new AlloyStateBus({ masterKey: stateKey });

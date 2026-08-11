@@ -11,6 +11,16 @@ export interface CognitiveEpochManagerConfig {
   readonly clock?: () => Date;
 }
 
+const EPOCH_DIGEST_FIELDS = [
+  'tokenizerDigest',
+  'layoutDigest',
+  'adapterSetDigest',
+  'verifierSetDigest',
+  'promptBundleDigest',
+  'policyDigest',
+  'toolManifestDigest',
+] as const;
+
 function specDigest(spec: CognitiveEpochSpec): string {
   return digestObject({ schema: 'szl.cognitive-epoch-spec/v1', ...spec });
 }
@@ -266,6 +276,13 @@ export class CognitiveEpochManager {
         typeof value === 'string' && value.trim().length > 0,
         'INVALID_INPUT',
         `Cognitive epoch field ${field} must not be empty.`,
+      );
+    }
+    for (const field of EPOCH_DIGEST_FIELDS) {
+      assertStateNative(
+        /^[0-9a-f]{64}$/u.test(spec[field]),
+        'INVALID_INPUT',
+        `Cognitive epoch field ${field} must be a lowercase SHA-256 digest.`,
       );
     }
     assertStateNative(

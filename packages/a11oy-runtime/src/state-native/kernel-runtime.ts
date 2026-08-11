@@ -16,6 +16,7 @@ import type {
   KernelProducedState,
   KernelReceiptUnsigned,
   KernelRuntimeConfig,
+  KernelVerifierResult,
   StateCapsule,
   StateGovernance,
   StateSensitivity,
@@ -241,6 +242,30 @@ function validateApproval(approval: ApprovalEvidence | undefined, requestDigest:
   }
 }
 
+function verifierResultSnapshot(result: KernelVerifierResult): KernelVerifierResult {
+  const passed = result?.passed;
+  const reason = result?.reason;
+  const evidenceDigests = result?.evidenceDigests;
+  assertStateNative(
+    typeof passed === 'boolean' && typeof reason === 'string' && reason.trim().length > 0,
+    'VERIFICATION_FAILED',
+    'Kernel verifier returned malformed decision evidence.',
+  );
+  assertStateNative(
+    Array.isArray(evidenceDigests) &&
+      evidenceDigests.every(
+        (digest) => typeof digest === 'string' && /^[0-9a-f]{64}$/u.test(digest),
+      ),
+    'VERIFICATION_FAILED',
+    'Kernel verifier evidence digests must be lowercase SHA-256 values.',
+  );
+  return Object.freeze({
+    passed,
+    reason,
+    evidenceDigests: Object.freeze([...evidenceDigests]),
+  });
+}
+
 export class AlloyKernelRuntime {
   readonly #stateBus: AlloyStateBus;
   readonly #epochManager: CognitiveEpochManager;
@@ -259,22 +284,23 @@ export class AlloyKernelRuntime {
   }
 
   public register(definition: KernelDefinition): void {
-    assertStateNative(definition.kernelId.trim().length > 0, 'INVALID_INPUT', 'kernelId must not be empty.');
-    assertStateNative(definition.version.trim().length > 0, 'INVALID_INPUT', 'kernel version must not be empty.');
-    assertStateNative(definition.route.trim().length > 0, 'INVALID_INPUT', 'kernel route must not be empty.');
-    if (definition.requiresVerification && !definition.verify) {
+    const normalized = Object.freeze({ ...definition });
+    assertStateNative(normalized.kernelId.trim().length > 0, 'INVALID_INPUT', 'kernelId must not be empty.');
+    assertStateNative(normalized.version.trim().length > 0, 'INVALID_INPUT', 'kernel version must not be empty.');
+    assertStateNative(normalized.route.trim().length > 0, 'INVALID_INPUT', 'kernel route must not be empty.');
+    if (normalized.requiresVerification && !normalized.verify) {
       throw new StateNativeError(
         'INVALID_INPUT',
         'A verification-required kernel must provide an independent verifier.',
-        { kernelId: definition.kernelId },
+        { kernelId: normalized.kernelId },
       );
     }
-    if (this.#kernels.has(definition.kernelId)) {
+    if (this.#kernels.has(normalized.kernelId)) {
       throw new StateNativeError('DIVERGENT_REPLAY', 'Kernel identifier is already registered.', {
-        kernelId: definition.kernelId,
+        kernelId: normalized.kernelId,
       });
     }
-    this.#kernels.set(definition.kernelId, definition);
+    this.#kernels.set(normalized.kernelId, normalized);
   }
 
   public listKernels(): readonly Pick<KernelDefinition, 'kernelId' | 'version' | 'kind' | 'route'>[] {
@@ -449,16 +475,18 @@ export class AlloyKernelRuntime {
       }
 
       const verifier = definition.verify
-        ? await this.#runWithDeadline(
-            () =>
-              definition.verify!(
-                producedStateSnapshot(output),
-                { capsules: Object.freeze(input), parameters: request.parameters },
-                context,
-              ),
-            controller,
-            deadlineAt,
-            'Kernel verification',
+        ? verifierResultSnapshot(
+            await this.#runWithDeadline(
+              () =>
+                definition.verify!(
+                  producedStateSnapshot(output),
+                  { capsules: Object.freeze(input), parameters: request.parameters },
+                  context,
+                ),
+              controller,
+              deadlineAt,
+              'Kernel verification',
+            ),
           )
         : undefined;
       if (definition.requiresVerification && (!verifier || !verifier.passed)) {
