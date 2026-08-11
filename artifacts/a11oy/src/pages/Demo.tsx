@@ -100,6 +100,8 @@ export function Demo() {
 
   const resetDemo = () => setStepIdx(-1);
 
+  const isPipelineComplete = stepIdx >= steps.length - 1 && stepIdx >= 0;
+
   return (
     <Layout>
       <PageHeader
@@ -238,13 +240,15 @@ export function Demo() {
                         <TraceStep
                           step={step.step}
                           status={
-                            stepIdx === -1
-                              ? 'pending'
-                              : i < stepIdx
-                                ? 'completed'
-                                : i === stepIdx
-                                  ? 'running'
-                                  : 'pending'
+                            isPipelineComplete
+                              ? 'completed'
+                              : stepIdx === -1
+                                ? 'pending'
+                                : i < stepIdx
+                                  ? 'completed'
+                                  : i === stepIdx
+                                    ? 'running'
+                                    : 'pending'
                           }
                           note={visible ? step.note : undefined}
                         />
@@ -294,7 +298,7 @@ export function Demo() {
                 </div>
               </Card>
 
-              {stepIdx >= steps.length - 1 && (
+              {isPipelineComplete && (
                 <div
                   className="mb-4 p-4 rounded-lg"
                   style={{
@@ -306,7 +310,8 @@ export function Demo() {
                     Scenario Complete
                   </div>
                   <div className="text-xs" style={{ color: 'var(--color-a11oy-text-sub)' }}>
-                    All pipeline stages complete. Every step governed, traced, and proof-recorded.
+                    Scenario steps reached the configured completion point. Traces and fields are seeded
+                    fixtures for this route.
                   </div>
                 </div>
               )}

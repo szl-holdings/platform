@@ -88,6 +88,9 @@ export function WorkcellDetail() {
       idle: '#5e5e5e',
     }[wc.status] ?? '#5e5e5e';
   const execResult = wc.mockExecutionResult as WorkcellExecutionResult;
+  const execStatus = execResult.status ?? 'unknown';
+  const execDuration = execResult.durationMs;
+  const execOutputSummary = execResult.outputSummary;
 
   return (
     <Layout>
@@ -555,16 +558,16 @@ export function WorkcellDetail() {
                   className="font-mono px-1.5 py-0.5 rounded"
                   style={{
                     backgroundColor:
-                      execResult.status === 'success'
+                      execStatus === 'success'
                         ? 'rgba(201,183,135,0.12)'
                         : 'rgba(245,245,245,0.12)',
-                    color: execResult.status === 'success' ? '#c9b787' : '#f5f5f5',
+                    color: execStatus === 'success' ? '#c9b787' : '#f5f5f5',
                   }}
                 >
-                  {execResult.status ?? 'unknown'}
+                  {execStatus}
                 </span>
                 <span style={{ color: 'var(--color-a11oy-text-ghost)' }}>
-                  {execResult.durationMs}ms
+                  {execDuration != null ? `${execDuration}ms` : 'duration unavailable'}
                 </span>
               </div>
               <div
@@ -575,7 +578,7 @@ export function WorkcellDetail() {
                   color: 'var(--color-a11oy-text-ghost)',
                 }}
               >
-                {execResult.outputSummary}
+                {execOutputSummary ?? 'No execution output snapshot is available for this fixture.'}
               </div>
               {execResult.errorMessage && (
                 <div

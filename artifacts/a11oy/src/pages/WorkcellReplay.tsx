@@ -12,8 +12,8 @@ interface ReplaySummary {
   workcellName: string;
   tenant: string;
   domain: string;
-  outcome: string;
-  completedAt: string;
+  outcome: 'success' | 'failed' | 'blocked' | 'running';
+  completedAt: string | null;
   durationMs: number;
   evalDisposition: string | null;
   evalComposite: number | null;
@@ -26,7 +26,9 @@ const OUTCOME_COLORS: Record<string, string> = {
   success: '#c9b787',
   blocked: '#f5f5f5',
   failed: '#c9b787',
+  running: '#8a8a8a',
 };
+
 const DISP_COLORS: Record<string, string> = {
   pass: '#c9b787',
   pass_with_warning: '#c9b787',
@@ -53,6 +55,7 @@ const FAILURE_CLASSES = [
   'policy_violation',
   null,
 ];
+
 const REPLAY_FIXTURE_EPOCH_MS = Date.parse('2026-04-16T12:00:00.000Z');
 
 const REPLAYS: ReplaySummary[] = SEED_WORKCELLS.map((wc, i) => {
@@ -60,15 +63,18 @@ const REPLAYS: ReplaySummary[] = SEED_WORKCELLS.map((wc, i) => {
     tenant: 'Enterprise',
     domain: 'Operations',
   };
+
   const outcome =
     wc.status === 'error'
       ? 'failed'
-      : wc.status === 'idle' && !wc.requiresApproval
-        ? 'success'
+      : wc.status === 'blocked' || (wc.status === 'idle' && wc.requiresApproval)
+        ? 'blocked'
         : wc.status === 'running'
-          ? 'success'
+          ? 'running'
           : 'success';
+
   const failureClass = outcome === 'failed' ? FAILURE_CLASSES[i % FAILURE_CLASSES.length] : null;
+
   return {
     id: `replay-${wc.id}`,
     workcellId: wc.id,
@@ -76,7 +82,10 @@ const REPLAYS: ReplaySummary[] = SEED_WORKCELLS.map((wc, i) => {
     tenant: meta.tenant,
     domain: meta.domain,
     outcome,
-    completedAt: new Date(REPLAY_FIXTURE_EPOCH_MS - (i * 3600000 + (i % 4) * 300000)).toISOString(),
+    completedAt:
+      outcome === 'success'
+        ? new Date(REPLAY_FIXTURE_EPOCH_MS - (i * 3600000 + (i % 4) * 300000)).toISOString()
+        : null,
     durationMs: 8000 + ((i * 7919) % 90000),
     evalDisposition:
       wc.mirrorEvalResult.verdict === 'pass'
@@ -97,12 +106,32 @@ const REPLAYS_DATA = {
   replays: REPLAYS,
   total: REPLAYS.length,
   successful: REPLAYS.filter((r) => r.outcome === 'success').length,
-  failed: REPLAYS.filter((r) => r.outcome !== 'success').length,
+  failed: REPLAYS.filter((r) => r.outcome === 'failed').length,
+  blocked: REPLAYS.filter((r) => r.outcome === 'blocked').length,
+  running: REPLAYS.filter((r) => r.outcome === 'running').length,
 };
 
 function fmt(ms: number) {
   const s = Math.floor(ms / 1000);
   return s > 60 ? `${Math.floor(s / 60)}m ${s % 60}s` : `${s}s`;
+}
+
+function formatOutcome(outcome: ReplaySummary['outcome']) {
+  if (outcome === 'success') return '[OK]';
+  if (outcome === 'running') return '[RUN]';
+  if (outcome === 'blocked') return '[BLOCKED]';
+  return '[FAIL]';
+}
+
+function formatCompletedAt(completedAt: string | null) {
+  return completedAt
+    ? new Date(completedAt).toLocaleString('en-US', {
+        month: 'short',
+        day: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit',
+      })
+    : 'running fixture';
 }
 
 export function WorkcellReplay() {
@@ -136,23 +165,20 @@ export function WorkcellReplay() {
       </div>
 
       <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-6">
-        <KpiCard
-          label="DEMO REPLAYS"
-          value={String(data.total)}
-          sub="seed fixtures"
-          accent="#c9b787"
-        />
-        <KpiCard
-          label="DEMO SUCCESS"
-          value={String(data.successful)}
-          sub="derived outcome"
-          accent="#c9b787"
-        />
+        <KpiCard label="DEMO REPLAYS" value={String(data.total)} sub="seed fixtures" accent="#c9b787" />
+        <KpiCard label="DEMO SUCCESS" value={String(data.successful)} sub="derived outcome" accent="#c9b787" />
         <KpiCard
           label="DEMO FAILED"
           value={String(data.failed)}
           sub="derived outcome"
           accent="#f5f5f5"
+        />
+        <KpiCard label="DEMO BLOCKED" value={String(data.blocked)} sub="derived outcome" accent="#f5f5f5" />
+        <KpiCard
+          label="DEMO RUNNING"
+          value={String(data.running)}
+          sub="in-progress fixture state"
+          accent="#8a8a8a"
         />
         <KpiCard
           label="FAILURE CLASSES"
@@ -166,7 +192,7 @@ export function WorkcellReplay() {
         <span className="text-xs" style={{ color: 'var(--color-a11oy-text-ghost)' }}>
           Outcome:
         </span>
-        {['all', 'success', 'failed', 'blocked'].map((o) => (
+        {['all', 'success', 'running', 'failed', 'blocked'].map((o) => (
           <button
             type="button"
             key={o}
@@ -174,8 +200,7 @@ export function WorkcellReplay() {
             aria-pressed={filterOutcome === o}
             className="min-h-11 text-xs px-3 py-2 rounded"
             style={{
-              backgroundColor:
-                filterOutcome === o ? 'rgba(201,183,135,0.2)' : 'var(--color-a11oy-muted)',
+              backgroundColor: filterOutcome === o ? 'rgba(201,183,135,0.2)' : 'var(--color-a11oy-muted)',
               color: filterOutcome === o ? '#c9b787' : 'var(--color-a11oy-text-ghost)',
               border: `1px solid ${filterOutcome === o ? 'rgba(201,183,135,0.4)' : 'var(--color-a11oy-border)'}`,
             }}
@@ -217,8 +242,7 @@ export function WorkcellReplay() {
                       className="text-xs font-medium"
                       style={{ color: OUTCOME_COLORS[r.outcome] ?? '#5e5e5e' }}
                     >
-                      {r.outcome === 'success' ? '✓' : r.outcome === 'blocked' ? '⊗' : '⚠'}{' '}
-                      {r.outcome.toUpperCase()}
+                      {formatOutcome(r.outcome)} {r.outcome.toUpperCase()}
                     </span>
                     <span className="text-xs" style={{ color: 'var(--color-a11oy-text-ghost)' }}>
                       {r.domain} · {r.tenant}
@@ -232,25 +256,16 @@ export function WorkcellReplay() {
                   </div>
                   <div className="flex items-center gap-4 text-xs">
                     <span style={{ color: 'var(--color-a11oy-text-ghost)' }}>
-                      {new Date(r.completedAt).toLocaleString('en-US', {
-                        month: 'short',
-                        day: 'numeric',
-                        hour: '2-digit',
-                        minute: '2-digit',
-                      })}
+                      {formatCompletedAt(r.completedAt)}
                     </span>
                     <span style={{ color: 'var(--color-a11oy-text-ghost)' }}>
-                      ⏱ {fmt(r.durationMs)}
+                      dur {fmt(r.durationMs)}
                     </span>
-                    {r.approvalTier && (
-                      <span style={{ color: 'var(--color-a11oy-text-ghost)' }}>
-                        ⚖ {r.approvalTier}
-                      </span>
-                    )}
+                    <span style={{ color: 'var(--color-a11oy-text-ghost)' }}>
+                      tier {r.approvalTier}
+                    </span>
                     {r.proofRef && (
-                      <span style={{ color: '#b08d52' }}>
-                        ◇ {r.proofRef.split('-').slice(0, 2).join('-')}
-                      </span>
+                      <span style={{ color: '#b08d52' }}>ref {r.proofRef.split('-').slice(0, 2).join('-')}</span>
                     )}
                   </div>
                 </div>
@@ -309,8 +324,9 @@ export function WorkcellReplay() {
           color: 'var(--color-a11oy-text-ghost)',
         }}
       >
-        <span className="w-1.5 h-1.5 rounded-full bg-[var(--color-a11oy-blue)]" /> Demo environment
-        — replay rows are deterministic fixtures that illustrate an intended audit-trail model.
+        <span className="w-1.5 h-1.5 rounded-full bg-[var(--color-a11oy-blue)]" /> Demo
+        environment — replay rows are deterministic fixtures that illustrate an intended audit-trail
+        model.
       </div>
     </Layout>
   );

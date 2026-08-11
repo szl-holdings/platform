@@ -144,7 +144,7 @@ export function Recommendations() {
               const isExpanded = expanded === rec.id;
               const st = STATUS_STYLES[rec.status] ?? STATUS_STYLES.pending;
               return (
-                <Card key={rec.id} onClick={() => setExpanded(isExpanded ? null : rec.id)}>
+                <Card key={rec.id}>
                   <div className="flex items-start justify-between gap-3 mb-1">
                     <div className="flex items-center gap-2 flex-1 min-w-0">
                       <SeverityDot severity={rec.severity} />
@@ -154,8 +154,20 @@ export function Recommendations() {
                       <span className="font-mono text-xs px-1.5 py-0.5 rounded" style={{ backgroundColor: st.bg, color: st.color }}>
                         {rec.status}
                       </span>
-                      <span className="font-mono text-xs" style={{ color: '#5e5e5e' }}>{rec.created}</span>
+                    <span className="font-mono text-xs" style={{ color: '#5e5e5e' }}>{rec.created}</span>
                     </div>
+                  </div>
+                  <div className="flex justify-end">
+                    <button
+                      type="button"
+                      onClick={() => setExpanded(isExpanded ? null : rec.id)}
+                      className="text-xs px-2 py-1 rounded"
+                      style={{ border: '1px solid rgba(255,255,255,0.15)', color: '#8a8a8a', background: 'transparent' }}
+                      aria-expanded={isExpanded}
+                      aria-controls={`recommendation-${rec.id}`}
+                    >
+                      {isExpanded ? 'Collapse details' : 'Expand details'}
+                    </button>
                   </div>
                   <div className="flex items-center gap-3 text-xs mb-2" style={{ color: '#8a8a8a' }}>
                     <span>{rec.vertical}</span>
@@ -168,7 +180,11 @@ export function Recommendations() {
                   </div>
 
                   {isExpanded && (
-                    <div className="mt-3 pt-3" style={{ borderTop: '1px solid rgba(255,255,255,0.06)' }}>
+                    <div
+                      id={`recommendation-${rec.id}`}
+                      className="mt-3 pt-3"
+                      style={{ borderTop: '1px solid rgba(255,255,255,0.06)' }}
+                    >
                       <div className="text-xs mb-3" style={{ color: '#8a8a8a' }}>{rec.reasoning}</div>
 
                       <div className="mb-3">

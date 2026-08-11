@@ -169,7 +169,10 @@ export function TrustCenter() {
   const [expanded, setExpanded] = useState<string | null>('humanGatedAutonomy');
 
   const securityItems = [
-    { label: 'No secrets hardcoded in source', pass: data.securityPosture.secretsInCode === false },
+    {
+      label: 'No secrets hardcoded in source fixtures',
+      pass: data.securityPosture.secretsInCode === false,
+    },
     { label: 'No lorem ipsum in seed data', pass: data.securityPosture.loremIpsum === false },
     { label: 'No fake partner claims', pass: data.securityPosture.fakeClaims === false },
     { label: 'No sensitive data exposed', pass: data.securityPosture.noSensitiveDataExposed },
@@ -196,7 +199,7 @@ export function TrustCenter() {
         customer operation, or external attestation.
       </div>
 
-      <SectionTitle>Static Fixture Flags</SectionTitle>
+      <SectionTitle>Modeled Fixture Flags (Static Only)</SectionTitle>
 
       <div className="grid grid-cols-2 md:grid-cols-5 gap-3 mb-8">
         {securityItems.map((item) => (
@@ -208,12 +211,12 @@ export function TrustCenter() {
               borderColor: item.pass ? 'rgba(201,183,135,0.2)' : 'rgba(245,245,245,0.2)',
             }}
           >
-            <div
-              className="text-xs font-mono mb-1"
-              style={{ color: item.pass ? '#c9b787' : '#f5f5f5' }}
-            >
-              {item.pass ? 'DEMO' : 'UNSET'}
-            </div>
+              <div
+                className="text-xs font-mono mb-1"
+                style={{ color: item.pass ? '#c9b787' : '#f5f5f5' }}
+              >
+                {item.pass ? 'MODELED' : 'UNVERIFIED'}
+              </div>
             <div className="text-xs" style={{ color: 'var(--color-a11oy-text-ghost)' }}>
               {item.label}
             </div>

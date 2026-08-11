@@ -1,4 +1,3 @@
-import { Link } from 'wouter';
 import { Layout } from '../components/layout';
 import { StatusPill, type StatusPillStatus } from '../components/ui';
 
@@ -32,19 +31,25 @@ const journeys: readonly Journey[] = [
         state: 'DEMO',
       },
       {
-        title: '2. Interactive scenario',
+        title: '2. Flagship value',
+        description: 'Review what this prototype models as its headline value and boundary.',
+        href: '#flagship-value',
+        state: 'DEMO',
+      },
+      {
+        title: '3. Interactive scenario',
         description: 'Step through repository-seeded signals, Workcells, and approval gates.',
         href: `${BASE}/demo`,
         state: 'DEMO',
       },
       {
-        title: '3. Proof model',
+        title: '4. Proof model',
         description: 'Inspect how demonstration reasoning nodes and receipts are presented.',
         href: `${BASE}/proof`,
         state: 'DEMO',
       },
       {
-        title: '4. Diligence boundary',
+        title: '5. Diligence boundary',
         description: 'Review modeled controls, limitations, and roadmap posture.',
         href: `${BASE}/trust`,
         state: 'DEMO',
@@ -173,8 +178,8 @@ export function ProductJourney() {
             <ol className="mt-6 grid gap-3 sm:grid-cols-2">
               {journey.steps.map((step) => (
                 <li key={step.title} className="min-w-0">
-                  <Link
-                    href={step.href}
+                  <a
+                    href={step.href.startsWith('#') ? `${BASE}${step.href}` : step.href}
                     className="flex min-h-11 h-full min-w-0 flex-col justify-between gap-3 rounded-xl border border-white/15 p-4 no-underline transition-colors hover:bg-white/[0.06]"
                   >
                     <span>
@@ -189,12 +194,29 @@ export function ProductJourney() {
                         Open →
                       </span>
                     </span>
-                  </Link>
+                  </a>
                 </li>
               ))}
             </ol>
           </article>
         ))}
+      </section>
+
+      <section id="flagship-value" className="mx-auto mt-10 w-full max-w-7xl">
+        <h2 className="text-2xl font-semibold text-white">Flagship value</h2>
+        <p className="mt-3 max-w-3xl text-sm leading-6 text-neutral-300">
+          The Series-A prototype highlights one primary product value: deterministic evidence-ready
+          workflow traces that stay within repository fixtures while making policy and boundary states
+          explicit for investor and developer review.
+        </p>
+        <div className="mt-4 rounded-xl border border-white/10 p-5 bg-white/[0.02] text-sm leading-6 text-neutral-300">
+          <div className="font-medium text-white mb-2">What this surface demonstrates</div>
+          <ul className="list-disc list-inside">
+            <li>Seeded Workcells execute with reproducible, local-only fixture traces.</li>
+            <li>Governance, policy, and receipt fields are surfaced and grouped by evidence state.</li>
+            <li>Readiness claims remain explicit: modeled, boundary-defined, and non-operational.</li>
+          </ul>
+        </div>
       </section>
 
       <section className="mx-auto mt-10 w-full max-w-7xl" aria-labelledby="family-title">
