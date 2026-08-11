@@ -145,7 +145,7 @@ test('a request pinned to a new epoch cannot consume state using an older epoch 
       compatibility: epochA.compatibility,
       epochId: 'epoch_b',
       inputCapsuleIds: [input.capsuleId],
-      idempotencyKey: 'epoch-boundary-1',
+      idempotencyKey: 'idem-a',
     });
 
     await assert.rejects(runtime.execute(request), expectCode('COMPATIBILITY_MISMATCH'));
@@ -189,7 +189,7 @@ test('failed epoch pinning never poisons an idempotency key as in-flight', async
       kernelId: 'state.pin-boundary',
       compatibility: active.compatibility,
       epochId: 'epoch_missing',
-      idempotencyKey: 'pin-boundary-1',
+      idempotencyKey: 'idem-b',
     });
 
     await assert.rejects(runtime.execute(request), expectCode('EPOCH_NOT_ACTIVE'));
