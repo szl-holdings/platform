@@ -308,16 +308,19 @@ function kernelContextSnapshot(input: {
 function verifierResultSnapshot(result: KernelVerifierResult): KernelVerifierResult {
   assertStateNative(typeof result.passed === 'boolean', 'INVALID_INPUT', 'Verifier passed must be boolean.');
   assertStateNative(typeof result.reason === 'string', 'INVALID_INPUT', 'Verifier reason must be a string.');
-  assertStateNative(
-    Array.isArray(result.evidenceDigests) &&
-      result.evidenceDigests.every((digest) => typeof digest === 'string'),
-    'INVALID_INPUT',
-    'Verifier evidenceDigests must be an array of strings.',
-  );
+  assertStateNative(Array.isArray(result.evidenceDigests), 'INVALID_INPUT', 'Verifier evidenceDigests must be an array.');
+  const evidenceDigests = Object.freeze([...result.evidenceDigests]);
+  for (const digest of evidenceDigests) {
+    assertStateNative(
+      typeof digest === 'string' && /^[0-9a-f]{64}$/u.test(digest),
+      'INVALID_INPUT',
+      'Verifier evidenceDigests must be lowercase SHA-256 digests.',
+    );
+  }
   return Object.freeze({
     passed: result.passed,
     reason: result.reason,
-    evidenceDigests: Object.freeze([...result.evidenceDigests]),
+    evidenceDigests,
   });
 }
 

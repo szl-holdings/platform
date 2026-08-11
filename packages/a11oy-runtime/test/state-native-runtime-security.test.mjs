@@ -430,6 +430,37 @@ test('malformed verifier evidence digests fail closed', async () => {
   }
 });
 
+test('cognitive epoch validation checks enforce boolean passed', () => {
+  const manager = new CognitiveEpochManager();
+  prepareEpoch(manager, 'epoch_validation_passed', 'rev-validation-passed');
+  assert.throws(
+    () =>
+      manager.validate('epoch_validation_passed', [
+        { name: 'self-test', passed: 1, detail: 'Validation must use boolean pass/fail values.' },
+      ]),
+    expectCode('INVALID_INPUT'),
+  );
+});
+
+test('cognitive epoch validation checks require non-empty name and detail strings', () => {
+  const manager = new CognitiveEpochManager();
+  prepareEpoch(manager, 'epoch_validation_shape', 'rev-validation-shape');
+  assert.throws(
+    () =>
+      manager.validate('epoch_validation_shape', [
+        { name: '', passed: true, detail: 'Passed.' },
+      ]),
+    expectCode('INVALID_INPUT'),
+  );
+  assert.throws(
+    () =>
+      manager.validate('epoch_validation_shape', [
+        { name: 'self-test', passed: true, detail: '' },
+      ]),
+    expectCode('INVALID_INPUT'),
+  );
+});
+
 test('malformed cognitive epoch digests are rejected before storage', () => {
   const manager = new CognitiveEpochManager();
   assert.throws(

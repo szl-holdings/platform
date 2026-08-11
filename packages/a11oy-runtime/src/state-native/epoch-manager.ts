@@ -99,7 +99,31 @@ export class CognitiveEpochManager {
       );
     }
 
-    const normalizedChecks = Object.freeze(checks.map((check) => Object.freeze({ ...check })));
+    const normalizedChecks = Object.freeze(
+      checks.map((check) => {
+        assertStateNative(
+          !!check && typeof check === 'object',
+          'INVALID_INPUT',
+          'Cognitive epoch validation checks must be objects.',
+        );
+        assertStateNative(
+          typeof check.name === 'string' && check.name.trim().length > 0,
+          'INVALID_INPUT',
+          'Cognitive epoch validation check name must be a non-empty string.',
+        );
+        assertStateNative(
+          typeof check.passed === 'boolean',
+          'INVALID_INPUT',
+          'Cognitive epoch validation check passed must be a boolean.',
+        );
+        assertStateNative(
+          typeof check.detail === 'string' && check.detail.trim().length > 0,
+          'INVALID_INPUT',
+          'Cognitive epoch validation check detail must be a non-empty string.',
+        );
+        return Object.freeze({ name: check.name, passed: check.passed, detail: check.detail });
+      }),
+    );
     const state = normalizedChecks.every((check) => check.passed) ? 'VALIDATED' : 'REJECTED';
     const next = freezeRecord({ ...current, state, validationChecks: normalizedChecks });
     this.#records.set(epochId, next);
