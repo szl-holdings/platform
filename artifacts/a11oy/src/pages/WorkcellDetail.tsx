@@ -87,7 +87,7 @@ export function WorkcellDetail() {
       paused: '#5e5e5e',
       idle: '#5e5e5e',
     }[wc.status] ?? '#5e5e5e';
-  const execResult = wc.mockExecutionResult as WorkcellExecutionResult;
+  const execResult: WorkcellExecutionResult = wc.mockExecutionResult ?? {};
   const execStatus = execResult.status ?? 'unknown';
   const execDuration = execResult.durationMs;
   const execOutputSummary = execResult.outputSummary;

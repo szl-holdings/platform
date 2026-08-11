@@ -179,7 +179,11 @@ export function ProductJourney() {
               {journey.steps.map((step) => (
                 <li key={step.title} className="min-w-0">
                   <a
-                    href={step.href.startsWith('#') ? `${BASE}${step.href}` : step.href}
+                    href={
+                      step.href.startsWith('#')
+                        ? `${BASE}/start${step.href}`
+                        : step.href
+                    }
                     className="flex min-h-11 h-full min-w-0 flex-col justify-between gap-3 rounded-xl border border-white/15 p-4 no-underline transition-colors hover:bg-white/[0.06]"
                   >
                     <span>

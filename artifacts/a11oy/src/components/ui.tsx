@@ -1,4 +1,44 @@
-import { useState, type ReactNode } from 'react';
+import {
+  useState,
+  type ReactNode,
+  type ReactElement,
+  isValidElement,
+} from 'react';
+
+function hasInteractiveDescendant(node: ReactNode): boolean {
+  const interactiveTags = new Set([
+    'a',
+    'button',
+    'input',
+    'select',
+    'textarea',
+    'option',
+    'label',
+  ]);
+
+  const walk = (value: ReactNode): boolean => {
+    if (value == null || typeof value === 'boolean' || value === '') return false;
+    if (typeof value === 'string' || typeof value === 'number') return false;
+    if (Array.isArray(value)) return value.some((child) => walk(child));
+
+    if (!isValidElement(value)) return false;
+
+    const element = value as ReactElement;
+    const type = element.type;
+    if (typeof type === 'string' && interactiveTags.has(type)) return true;
+
+    const childProps = element.props as {
+      onClick?: (() => void) | undefined;
+      role?: string | undefined;
+    };
+
+    if (typeof childProps.onClick === 'function' || childProps.role === 'button') return true;
+
+    return walk(childProps.children);
+  };
+
+  return walk(node);
+}
 
 export type StatusPillStatus =
   | 'LIVE'
@@ -172,6 +212,8 @@ export function Card({
   onClick?: () => void;
   style?: React.CSSProperties;
 }) {
+  const hasInteractiveContent = hasInteractiveDescendant(children);
+
   return (
     <div
       className={`rounded-lg border p-4 ${className} ${onClick ? 'cursor-pointer transition-colors hover:border-[#c9b787]/30' : ''}`}
@@ -181,10 +223,10 @@ export function Card({
         ...style,
       }}
       onClick={onClick}
-      role={onClick ? 'button' : undefined}
-      tabIndex={onClick ? 0 : undefined}
+      role={onClick && !hasInteractiveContent ? 'button' : undefined}
+      tabIndex={onClick && !hasInteractiveContent ? 0 : undefined}
       onKeyDown={
-        onClick
+        onClick && !hasInteractiveContent
           ? (event) => {
               if (event.key === 'Enter' || event.key === ' ') {
                 event.preventDefault();

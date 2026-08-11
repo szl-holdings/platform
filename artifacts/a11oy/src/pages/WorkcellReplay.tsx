@@ -233,7 +233,7 @@ export function WorkcellReplay() {
       <SectionTitle>Replay Index ({filtered.length})</SectionTitle>
       <div className="flex flex-col gap-3">
         {filtered.map((r) => (
-          <Link key={r.id} href={`${BASE}/replay/${r.id}`}>
+          <Link key={r.id} href={`${BASE}/workcells/${r.workcellId}/replay`}>
             <Card className="cursor-pointer hover:opacity-80 transition-opacity">
               <div className="flex items-start justify-between gap-3">
                 <div className="flex-1 min-w-0">
