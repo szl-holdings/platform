@@ -444,17 +444,18 @@ test('cognitive epoch validation checks enforce boolean passed', () => {
 
 test('cognitive epoch validation checks require non-empty name and detail strings', () => {
   const manager = new CognitiveEpochManager();
-  prepareEpoch(manager, 'epoch_validation_shape', 'rev-validation-shape');
+  prepareEpoch(manager, 'epoch_validation_shape_name', 'rev-validation-shape-name');
   assert.throws(
     () =>
-      manager.validate('epoch_validation_shape', [
+      manager.validate('epoch_validation_shape_name', [
         { name: '', passed: true, detail: 'Passed.' },
       ]),
     expectCode('INVALID_INPUT'),
   );
+  prepareEpoch(manager, 'epoch_validation_shape_detail', 'rev-validation-shape-detail');
   assert.throws(
     () =>
-      manager.validate('epoch_validation_shape', [
+      manager.validate('epoch_validation_shape_detail', [
         { name: 'self-test', passed: true, detail: '' },
       ]),
     expectCode('INVALID_INPUT'),
