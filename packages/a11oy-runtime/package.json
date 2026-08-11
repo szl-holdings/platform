@@ -9,11 +9,14 @@
     ".": "./src/index.ts",
     "./types": "./src/types/index.ts",
     "./data": "./src/data/index.ts",
-    "./verify": "./src/verify.ts"
+    "./verify": "./src/verify.ts",
+    "./state-native": "./src/state-native/index.ts"
   },
   "scripts": {
-    "test": "vitest run --passWithNoTests",
-    "typecheck": "tsc --noEmit"
+    "build": "tsc",
+    "test": "vitest run --passWithNoTests && tsc && node --test test/state-native-runtime.test.mjs test/state-native-runtime-timeout.test.mjs test/state-native-runtime-security.test.mjs test/state-native-state-bus-security.test.mjs",
+    "typecheck": "tsc --noEmit",
+    "demo:state-native": "tsc && node dist/state-native/demo.js"
   },
   "dependencies": {
     "@workspace/ouroboros-loop": "workspace:*",

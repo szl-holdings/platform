@@ -1,0 +1,110 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://a-11-oy.com/schemas/kernel-execution-receipt.v1.schema.json",
+  "title": "SZL Kernel Execution Receipt v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema",
+    "receiptId",
+    "actionId",
+    "tenantId",
+    "sessionId",
+    "kernelId",
+    "kernelVersion",
+    "kernelKind",
+    "epochId",
+    "policyEffect",
+    "policyReason",
+    "outcome",
+    "reason",
+    "inputCapsuleIds",
+    "inputDigests",
+    "outputCapsuleIds",
+    "outputDigests",
+    "budget",
+    "runtimeMs",
+    "occurredAt",
+    "receiptDigest",
+    "signature"
+  ],
+  "properties": {
+    "schema": { "const": "szl.kernel-execution-receipt/v1" },
+    "receiptId": { "type": "string", "pattern": "^kernel_receipt_[0-9a-f-]{36}$" },
+    "actionId": { "type": "string", "minLength": 1 },
+    "tenantId": { "type": "string", "minLength": 1 },
+    "sessionId": { "type": "string", "minLength": 1 },
+    "kernelId": { "type": "string", "minLength": 1 },
+    "kernelVersion": { "type": "string", "minLength": 1 },
+    "kernelKind": {
+      "enum": [
+        "context_build",
+        "prefill",
+        "decode",
+        "planning",
+        "tool",
+        "multimodal_encode",
+        "policy",
+        "verification",
+        "custom"
+      ]
+    },
+    "epochId": { "type": "string", "minLength": 1 },
+    "policyEffect": { "enum": ["allow", "block", "approval_required"] },
+    "policyReason": { "type": "string", "minLength": 1 },
+    "policyVersion": { "type": "string", "minLength": 1 },
+    "approvalId": { "type": "string", "minLength": 1 },
+    "outcome": { "enum": ["success", "blocked", "error"] },
+    "reason": { "type": "string", "minLength": 1 },
+    "inputCapsuleIds": { "$ref": "#/$defs/capsuleIds" },
+    "inputDigests": { "$ref": "#/$defs/digests" },
+    "outputCapsuleIds": { "$ref": "#/$defs/capsuleIds" },
+    "outputDigests": { "$ref": "#/$defs/digests" },
+    "verifier": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["passed", "reason", "evidenceDigests"],
+      "properties": {
+        "passed": { "type": "boolean" },
+        "reason": { "type": "string", "minLength": 1 },
+        "evidenceDigests": { "$ref": "#/$defs/digests" }
+      }
+    },
+    "budget": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["maxRuntimeMs", "maxInputBytes", "maxOutputBytes", "maxStateWrites"],
+      "properties": {
+        "maxRuntimeMs": { "type": "integer", "minimum": 1 },
+        "maxInputBytes": { "type": "integer", "minimum": 0 },
+        "maxOutputBytes": { "type": "integer", "minimum": 0 },
+        "maxStateWrites": { "type": "integer", "minimum": 0 }
+      }
+    },
+    "runtimeMs": { "type": "number", "minimum": 0 },
+    "occurredAt": { "type": "string", "format": "date-time" },
+    "priorReceiptDigest": { "$ref": "#/$defs/digest" },
+    "receiptDigest": { "$ref": "#/$defs/digest" },
+    "signature": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["algorithm", "keyId", "value"],
+      "properties": {
+        "algorithm": { "const": "Ed25519" },
+        "keyId": { "type": "string", "minLength": 1 },
+        "value": { "type": "string", "minLength": 1, "contentEncoding": "base64" }
+      }
+    }
+  },
+  "$defs": {
+    "digest": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "digests": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/digest" }
+    },
+    "capsuleIds": {
+      "type": "array",
+      "items": { "type": "string", "pattern": "^state_[a-f0-9]{64}$" }
+    }
+  }
+}

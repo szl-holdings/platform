@@ -1,0 +1,67 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://a-11-oy.com/schemas/cognitive-epoch.v1.schema.json",
+  "title": "SZL Cognitive Epoch v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "epochId",
+    "tenantId",
+    "route",
+    "modelId",
+    "modelRevision",
+    "engineId",
+    "engineVersion",
+    "tokenizerDigest",
+    "layoutDigest",
+    "adapterSetDigest",
+    "verifierSetDigest",
+    "promptBundleDigest",
+    "policyDigest",
+    "toolManifestDigest",
+    "createdAt",
+    "state",
+    "validationChecks",
+    "leaseCount"
+  ],
+  "properties": {
+    "epochId": { "type": "string", "minLength": 1 },
+    "tenantId": { "type": "string", "minLength": 1 },
+    "route": { "type": "string", "minLength": 1 },
+    "modelId": { "type": "string", "minLength": 1 },
+    "modelRevision": { "type": "string", "minLength": 1 },
+    "engineId": { "type": "string", "minLength": 1 },
+    "engineVersion": { "type": "string", "minLength": 1 },
+    "tokenizerDigest": { "$ref": "#/$defs/digest" },
+    "layoutDigest": { "$ref": "#/$defs/digest" },
+    "adapterSetDigest": { "$ref": "#/$defs/digest" },
+    "verifierSetDigest": { "$ref": "#/$defs/digest" },
+    "promptBundleDigest": { "$ref": "#/$defs/digest" },
+    "policyDigest": { "$ref": "#/$defs/digest" },
+    "toolManifestDigest": { "$ref": "#/$defs/digest" },
+    "createdAt": { "type": "string", "format": "date-time" },
+    "state": {
+      "enum": ["PREPARED", "VALIDATED", "ACTIVE", "DRAINING", "RETIRED", "REJECTED", "ROLLED_BACK"]
+    },
+    "validationChecks": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["name", "passed", "detail"],
+        "properties": {
+          "name": { "type": "string", "minLength": 1 },
+          "passed": { "type": "boolean" },
+          "detail": { "type": "string", "minLength": 1 }
+        }
+      }
+    },
+    "activatedAt": { "type": "string", "format": "date-time" },
+    "retiredAt": { "type": "string", "format": "date-time" },
+    "rollbackReason": { "type": "string", "minLength": 1 },
+    "leaseCount": { "type": "integer", "minimum": 0 }
+  },
+  "$defs": {
+    "digest": { "type": "string", "pattern": "^[a-f0-9]{64}$" }
+  }
+}
