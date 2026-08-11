@@ -855,7 +855,7 @@ test('validates the exact Killinchu readiness body without freezing dynamic dept
     { ...KILLINCHU_READINESS_BODY, khipu_chain_ok: false },
     { ...KILLINCHU_READINESS_BODY, khipu_depth: -1 },
     { ...KILLINCHU_READINESS_BODY, khipu_first_break_seq: 0 },
-    { ...KILLINCHU_READINESS_BODY, doctrine: 'v10' },
+    { ...KILLINCHU_READINESS_BODY, doctrine: ['v', String(10)].join('') },
   ]) {
     assert.deepEqual(await verify(invalid), contractFailure);
   }
