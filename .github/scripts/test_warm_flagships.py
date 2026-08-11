@@ -66,6 +66,54 @@ class ClassificationTests(unittest.TestCase):
             warm.UNKNOWN,
         )
 
+    def test_pause_signals_are_observed(self) -> None:
+        with patch.object(
+            warm,
+            "probe_once",
+            side_effect=[
+                warm.Attempt(
+                    number=1,
+                    observed_at="2026-07-26T00:00:00+00:00",
+                    http_status=503,
+                    final_url="https://example.test/healthz",
+                    elapsed_ms=12,
+                    body_preview="The space is paused, ask a maintainer to restart it",
+                    error_class=None,
+                    error_detail=None,
+                ),
+                warm.Attempt(
+                    number=2,
+                    observed_at="2026-07-26T00:00:01+00:00",
+                    http_status=503,
+                    final_url="https://example.test/healthz",
+                    elapsed_ms=13,
+                    body_preview="The space is paused, ask a maintainer to restart it",
+                    error_class=None,
+                    error_detail=None,
+                ),
+                warm.Attempt(
+                    number=3,
+                    observed_at="2026-07-26T00:00:02+00:00",
+                    http_status=503,
+                    final_url="https://example.test/healthz",
+                    elapsed_ms=14,
+                    body_preview="The space is paused, ask a maintainer to restart it",
+                    error_class=None,
+                    error_detail=None,
+                ),
+            ],
+        ), patch.object(warm.time, "sleep"):
+            report = warm.run_probe(
+                "yarqa",
+                url=warm.ROSTER["yarqa"],
+                attempts_count=3,
+                confirmations=2,
+                timeout=1,
+                interval=0,
+            )
+        self.assertEqual(report["state"], warm.UNHEALTHY)
+        self.assertTrue(report["pause_signature"])
+
     def test_non_200_then_recovery_without_confirmation_is_unknown(self) -> None:
         self.assertEqual(
             warm.classify_attempts(
@@ -164,6 +212,7 @@ class ReportBoundaryTests(unittest.TestCase):
             "schema": warm.REPORT_SCHEMA,
             "organ": "a11oy",
             "state": warm.UNHEALTHY,
+            "pause_signature": True,
             "probe_url": warm.ROSTER["a11oy"],
             "generated_at": "2026-07-26T00:00:00+00:00",
             "generation": "a" * 40,
@@ -176,6 +225,7 @@ class ReportBoundaryTests(unittest.TestCase):
         }
         body = warm.issue_body(report)
         self.assertIn(warm.issue_marker("a11oy"), body)
+        self.assertIn("- Pause indicator detected: true", body)
         self.assertIn("503, 503, NO_HTTP_RESPONSE", body)
         start = body.index("```json") + len("```json")
         end = body.index("```", start)
