@@ -8,13 +8,31 @@ import type {
   ReceiptSigner,
 } from './types.js';
 
+function snapshotUnsignedReceipt(unsigned: KernelReceiptUnsigned): KernelReceiptUnsigned {
+  return Object.freeze({
+    ...unsigned,
+    inputCapsuleIds: Object.freeze([...unsigned.inputCapsuleIds]),
+    inputDigests: Object.freeze([...unsigned.inputDigests]),
+    outputCapsuleIds: Object.freeze([...unsigned.outputCapsuleIds]),
+    outputDigests: Object.freeze([...unsigned.outputDigests]),
+    verifier: unsigned.verifier
+      ? Object.freeze({
+          ...unsigned.verifier,
+          evidenceDigests: Object.freeze([...unsigned.verifier.evidenceDigests]),
+        })
+      : undefined,
+    budget: Object.freeze({ ...unsigned.budget }),
+  });
+}
+
 export function createKernelExecutionReceipt(
   unsigned: KernelReceiptUnsigned,
   signer: ReceiptSigner,
 ): KernelExecutionReceipt {
-  const receiptDigest = digestObject(unsigned);
+  const snapshot = snapshotUnsignedReceipt(unsigned);
+  const receiptDigest = digestObject(snapshot);
   return Object.freeze({
-    ...unsigned,
+    ...snapshot,
     receiptDigest,
     signature: Object.freeze({
       algorithm: 'Ed25519',
