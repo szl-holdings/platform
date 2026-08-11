@@ -60,7 +60,7 @@ export function WorkcellReplayDetail() {
           note: `Verdict: ${wc.mirrorEvalResult.verdict} · Score: ${Math.round(wc.mirrorEvalResult.score * 100)}%`,
         },
         {
-          step: 'Proof Ledger: PCE contract recorded',
+          step: 'Demo Proof Ledger: seed PCE contract referenced',
           status: wc.verificationResult.status === 'passed' ? 'completed' : 'failed',
           note: `Contract: ${wc.pceContractId}`,
         },
@@ -133,9 +133,18 @@ export function WorkcellReplayDetail() {
       <PageHeader
         label="WORKCELL REPLAY"
         title={`↩ ${wc.name}`}
-        subtitle="Step-by-step replay of the workcell execution trace with latency, agent roles, and evidence chain."
-        status="LIVE"
+        subtitle="Browser-local replay of a seeded Workcell trace with agent roles and demonstration evidence."
+        status={wc.evidenceState}
       />
+
+      <div
+        className="mb-6 rounded-xl border border-white/15 bg-white/[0.03] p-4 text-sm leading-6"
+        style={{ color: 'var(--color-a11oy-text-sub)' }}
+        role="note"
+      >
+        <strong style={{ color: 'var(--color-a11oy-text)' }}>Demo replay:</strong>{' '}
+        {wc.evidenceReason} Playback changes only local UI state.
+      </div>
 
       <div className="grid lg:grid-cols-3 gap-6">
         <div className="lg:col-span-2">
@@ -163,7 +172,8 @@ export function WorkcellReplayDetail() {
                     type="button"
                     key={s}
                     onClick={() => setSpeed(s)}
-                    className="px-2 py-0.5 rounded font-mono"
+                    aria-pressed={speed === s}
+                    className="min-h-11 px-3 py-2 rounded font-mono"
                     style={{
                       backgroundColor: speed === s ? 'rgba(201,183,135,0.15)' : 'transparent',
                       color: speed === s ? '#c9b787' : 'var(--color-a11oy-text-ghost)',
@@ -218,7 +228,7 @@ export function WorkcellReplayDetail() {
                   const isCurrent = i === stepIdx && replayState === 'playing';
                   return (
                     <div
-                      key={i}
+                      key={step.step}
                       className="transition-all"
                       style={{
                         opacity: replayState === 'idle' ? 1 : visible ? 1 : 0.2,
@@ -336,7 +346,7 @@ export function WorkcellReplayDetail() {
             <div className="flex flex-col gap-1.5">
               {wc.agentSequence.map((a, i) => (
                 <div
-                  key={i}
+                  key={a.agentId}
                   className="text-xs px-2 py-1.5 rounded border"
                   style={{
                     backgroundColor: 'var(--color-a11oy-card)',

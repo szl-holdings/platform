@@ -1,8 +1,12 @@
-import type { Workcell, ActionBrief, MirrorEvalResult } from '../schema.js';
+import type { Workcell } from '../schema.js';
 
-const now = () => new Date().toISOString();
+export const SEED_WORKCELL_TIMESTAMP = '2026-04-16T00:00:00.000Z';
+export const SEED_WORKCELL_EVIDENCE_REASON =
+  'Repository-seeded demonstration fixture; not an authenticated production execution record.';
 
-export const SEED_WORKCELLS: Workcell[] = [
+const now = () => SEED_WORKCELL_TIMESTAMP;
+
+const SEED_WORKCELL_FIXTURES: Array<Omit<Workcell, 'evidenceState' | 'evidenceReason'>> = [
   {
     id: 'wc-001',
     name: 'Revenue Friction Remediation',
@@ -13,7 +17,7 @@ export const SEED_WORKCELLS: Workcell[] = [
     contextPack: { threshold: 0.28, current: 0.21, gap: 0.07 },
     agentSequence: [
       { agentId: 'analyst-1', role: 'Data Analyst', action: 'Identify churn drivers' },
-      { agentId: 'strategist-1', role: 'Revenue Strategist', action: 'Propose recovery plan' }
+      { agentId: 'strategist-1', role: 'Revenue Strategist', action: 'Propose recovery plan' },
     ],
     actionBrief: {
       id: 'act-001',
@@ -29,7 +33,7 @@ export const SEED_WORKCELLS: Workcell[] = [
       linkedSignalIds: ['sig-lyte-002'],
       linkedOutcomeIds: ['out-001'],
       createdAt: now(),
-      updatedAt: now()
+      updatedAt: now(),
     },
     mirrorEvalResult: {
       id: 'me-001',
@@ -37,10 +41,12 @@ export const SEED_WORKCELLS: Workcell[] = [
       targetType: 'action',
       verdict: 'pass',
       score: 0.95,
-      dimensions: [{ name: 'strategic-alignment', score: 0.98, rationale: 'Matches churn reduction goals.' }],
+      dimensions: [
+        { name: 'strategic-alignment', score: 0.98, rationale: 'Matches churn reduction goals.' },
+      ],
       flags: [],
       evaluatorModel: 'gpt-4-eval',
-      evaluatedAt: now()
+      evaluatedAt: now(),
     },
     pceContractId: 'pce-001',
     requiresApproval: true,
@@ -49,7 +55,7 @@ export const SEED_WORKCELLS: Workcell[] = [
     proofPacketId: 'proof-001',
     executionTraceId: 'trace-001',
     createdAt: now(),
-    updatedAt: now()
+    updatedAt: now(),
   },
   {
     id: 'wc-002',
@@ -59,9 +65,7 @@ export const SEED_WORKCELLS: Workcell[] = [
     objective: 'Monitor and accelerate unsigned SOWs in the pipeline.',
     signals: ['sig-carlota-002'],
     contextPack: { limitDays: 30, pendingCount: 12 },
-    agentSequence: [
-      { agentId: 'ops-1', role: 'Ops Lead', action: 'Scan signature queue' }
-    ],
+    agentSequence: [{ agentId: 'ops-1', role: 'Ops Lead', action: 'Scan signature queue' }],
     actionBrief: {
       id: 'act-002',
       title: 'Automated SOW Reminders',
@@ -76,7 +80,7 @@ export const SEED_WORKCELLS: Workcell[] = [
       linkedSignalIds: ['sig-carlota-002'],
       linkedOutcomeIds: [],
       createdAt: now(),
-      updatedAt: now()
+      updatedAt: now(),
     },
     mirrorEvalResult: {
       id: 'me-002',
@@ -87,7 +91,7 @@ export const SEED_WORKCELLS: Workcell[] = [
       dimensions: [{ name: 'compliance', score: 0.9, rationale: 'Standard follow-up procedure.' }],
       flags: [],
       evaluatorModel: 'gpt-4-eval',
-      evaluatedAt: now()
+      evaluatedAt: now(),
     },
     pceContractId: 'pce-006',
     requiresApproval: false,
@@ -96,7 +100,7 @@ export const SEED_WORKCELLS: Workcell[] = [
     proofPacketId: 'proof-006',
     executionTraceId: 'trace-006',
     createdAt: now(),
-    updatedAt: now()
+    updatedAt: now(),
   },
   {
     id: 'wc-003',
@@ -107,7 +111,7 @@ export const SEED_WORKCELLS: Workcell[] = [
     signals: ['sig-alloy-002'],
     contextPack: { duplicationThreshold: 0.85 },
     agentSequence: [
-      { agentId: 'architect-1', role: 'Fabric Architect', action: 'Analyze scope overlap' }
+      { agentId: 'architect-1', role: 'Fabric Architect', action: 'Analyze scope overlap' },
     ],
     actionBrief: {
       id: 'act-003',
@@ -123,7 +127,7 @@ export const SEED_WORKCELLS: Workcell[] = [
       linkedSignalIds: ['sig-alloy-002'],
       linkedOutcomeIds: [],
       createdAt: now(),
-      updatedAt: now()
+      updatedAt: now(),
     },
     mirrorEvalResult: {
       id: 'me-003',
@@ -131,10 +135,12 @@ export const SEED_WORKCELLS: Workcell[] = [
       targetType: 'action',
       verdict: 'warn',
       score: 0.75,
-      dimensions: [{ name: 'risk', score: 0.6, rationale: 'Potential for service interruption during merge.' }],
+      dimensions: [
+        { name: 'risk', score: 0.6, rationale: 'Potential for service interruption during merge.' },
+      ],
       flags: ['high-risk-mutation'],
       evaluatorModel: 'gpt-4-eval',
-      evaluatedAt: now()
+      evaluatedAt: now(),
     },
     pceContractId: 'pce-005',
     requiresApproval: true,
@@ -143,7 +149,7 @@ export const SEED_WORKCELLS: Workcell[] = [
     proofPacketId: 'proof-005',
     executionTraceId: 'trace-005',
     createdAt: now(),
-    updatedAt: now()
+    updatedAt: now(),
   },
   {
     id: 'wc-004',
@@ -153,9 +159,7 @@ export const SEED_WORKCELLS: Workcell[] = [
     objective: 'Reconcile data discrepancies between Salesforce and RevOps database.',
     signals: ['sig-lyte-003'],
     contextPack: { mismatchCount: 42 },
-    agentSequence: [
-      { agentId: 'data-bot', role: 'Data Integrity Bot', action: 'Diff datasets' }
-    ],
+    agentSequence: [{ agentId: 'data-bot', role: 'Data Integrity Bot', action: 'Diff datasets' }],
     actionBrief: {
       id: 'act-004',
       title: 'Data Re-sync',
@@ -170,7 +174,7 @@ export const SEED_WORKCELLS: Workcell[] = [
       linkedSignalIds: ['sig-lyte-003'],
       linkedOutcomeIds: [],
       createdAt: now(),
-      updatedAt: now()
+      updatedAt: now(),
     },
     mirrorEvalResult: {
       id: 'me-004',
@@ -181,7 +185,7 @@ export const SEED_WORKCELLS: Workcell[] = [
       dimensions: [{ name: 'correctness', score: 0.95, rationale: 'Standard sync protocol.' }],
       flags: [],
       evaluatorModel: 'gpt-4-eval',
-      evaluatedAt: now()
+      evaluatedAt: now(),
     },
     pceContractId: 'pce-008',
     requiresApproval: true,
@@ -190,7 +194,7 @@ export const SEED_WORKCELLS: Workcell[] = [
     proofPacketId: 'proof-008',
     executionTraceId: 'trace-008',
     createdAt: now(),
-    updatedAt: now()
+    updatedAt: now(),
   },
   {
     id: 'wc-005',
@@ -201,7 +205,7 @@ export const SEED_WORKCELLS: Workcell[] = [
     signals: ['sig-lyte-001'],
     contextPack: { marginThreshold: 0.15 },
     agentSequence: [
-      { agentId: 'finance-agent', role: 'Finance Analyst', action: 'Review deal pricing' }
+      { agentId: 'finance-agent', role: 'Finance Analyst', action: 'Review deal pricing' },
     ],
     actionBrief: {
       id: 'act-005',
@@ -217,7 +221,7 @@ export const SEED_WORKCELLS: Workcell[] = [
       linkedSignalIds: ['sig-lyte-001'],
       linkedOutcomeIds: [],
       createdAt: now(),
-      updatedAt: now()
+      updatedAt: now(),
     },
     mirrorEvalResult: {
       id: 'me-005',
@@ -225,10 +229,12 @@ export const SEED_WORKCELLS: Workcell[] = [
       targetType: 'action',
       verdict: 'pass',
       score: 0.99,
-      dimensions: [{ name: 'margin-protection', score: 1.0, rationale: 'Directly addresses the leak.' }],
+      dimensions: [
+        { name: 'margin-protection', score: 1.0, rationale: 'Directly addresses the leak.' },
+      ],
       flags: [],
       evaluatorModel: 'gpt-4-eval',
-      evaluatedAt: now()
+      evaluatedAt: now(),
     },
     pceContractId: 'pce-013',
     requiresApproval: true,
@@ -237,7 +243,7 @@ export const SEED_WORKCELLS: Workcell[] = [
     proofPacketId: 'proof-013',
     executionTraceId: 'trace-013',
     createdAt: now(),
-    updatedAt: now()
+    updatedAt: now(),
   },
   {
     id: 'wc-006',
@@ -247,9 +253,7 @@ export const SEED_WORKCELLS: Workcell[] = [
     objective: 'Assess and mitigate risks for active maritime voyages.',
     signals: ['sig-vessels-001', 'sig-vessels-003'],
     contextPack: { weatherStatus: 'adverse', fuelPrice: 720 },
-    agentSequence: [
-      { agentId: 'ops-agent', role: 'Ops Controller', action: 'Calculate ETA slip' }
-    ],
+    agentSequence: [{ agentId: 'ops-agent', role: 'Ops Controller', action: 'Calculate ETA slip' }],
     actionBrief: {
       id: 'act-006',
       title: 'Route Optimization',
@@ -264,7 +268,7 @@ export const SEED_WORKCELLS: Workcell[] = [
       linkedSignalIds: ['sig-vessels-001'],
       linkedOutcomeIds: [],
       createdAt: now(),
-      updatedAt: now()
+      updatedAt: now(),
     },
     mirrorEvalResult: {
       id: 'me-006',
@@ -275,7 +279,7 @@ export const SEED_WORKCELLS: Workcell[] = [
       dimensions: [{ name: 'efficiency', score: 0.96, rationale: 'Optimal path found.' }],
       flags: [],
       evaluatorModel: 'gpt-4-eval',
-      evaluatedAt: now()
+      evaluatedAt: now(),
     },
     pceContractId: 'pce-011',
     requiresApproval: true,
@@ -284,7 +288,7 @@ export const SEED_WORKCELLS: Workcell[] = [
     proofPacketId: 'proof-011',
     executionTraceId: 'trace-011',
     createdAt: now(),
-    updatedAt: now()
+    updatedAt: now(),
   },
   {
     id: 'wc-007',
@@ -295,7 +299,11 @@ export const SEED_WORKCELLS: Workcell[] = [
     signals: ['sig-vessels-004'],
     contextPack: { gapDuration: '4h', location: 'Red Sea' },
     agentSequence: [
-      { agentId: 'security-agent', role: 'Security Analyst', action: 'Cross-reference satellite data' }
+      {
+        agentId: 'security-agent',
+        role: 'Security Analyst',
+        action: 'Cross-reference satellite data',
+      },
     ],
     actionBrief: {
       id: 'act-007',
@@ -311,7 +319,7 @@ export const SEED_WORKCELLS: Workcell[] = [
       linkedSignalIds: ['sig-vessels-004'],
       linkedOutcomeIds: [],
       createdAt: now(),
-      updatedAt: now()
+      updatedAt: now(),
     },
     mirrorEvalResult: {
       id: 'me-007',
@@ -322,7 +330,7 @@ export const SEED_WORKCELLS: Workcell[] = [
       dimensions: [{ name: 'urgency', score: 1.0, rationale: 'Safety first.' }],
       flags: [],
       evaluatorModel: 'gpt-4-eval',
-      evaluatedAt: now()
+      evaluatedAt: now(),
     },
     pceContractId: 'pce-016',
     requiresApproval: false,
@@ -331,7 +339,7 @@ export const SEED_WORKCELLS: Workcell[] = [
     proofPacketId: 'proof-016',
     executionTraceId: 'trace-016',
     createdAt: now(),
-    updatedAt: now()
+    updatedAt: now(),
   },
   {
     id: 'wc-008',
@@ -342,7 +350,7 @@ export const SEED_WORKCELLS: Workcell[] = [
     signals: ['sig-aegis-002'],
     contextPack: { sdnUpdateVersion: '2026-04-25' },
     agentSequence: [
-      { agentId: 'compliance-bot', role: 'Compliance Officer', action: 'Fuzzy match entities' }
+      { agentId: 'compliance-bot', role: 'Compliance Officer', action: 'Fuzzy match entities' },
     ],
     actionBrief: {
       id: 'act-008',
@@ -358,7 +366,7 @@ export const SEED_WORKCELLS: Workcell[] = [
       linkedSignalIds: ['sig-aegis-002'],
       linkedOutcomeIds: [],
       createdAt: now(),
-      updatedAt: now()
+      updatedAt: now(),
     },
     mirrorEvalResult: {
       id: 'me-008',
@@ -369,7 +377,7 @@ export const SEED_WORKCELLS: Workcell[] = [
       dimensions: [{ name: 'legal-compliance', score: 1.0, rationale: 'Required by law.' }],
       flags: [],
       evaluatorModel: 'gpt-4-eval',
-      evaluatedAt: now()
+      evaluatedAt: now(),
     },
     pceContractId: 'pce-010',
     requiresApproval: true,
@@ -378,7 +386,7 @@ export const SEED_WORKCELLS: Workcell[] = [
     proofPacketId: 'proof-010',
     executionTraceId: 'trace-010',
     createdAt: now(),
-    updatedAt: now()
+    updatedAt: now(),
   },
   {
     id: 'wc-009',
@@ -388,9 +396,7 @@ export const SEED_WORKCELLS: Workcell[] = [
     objective: 'Identify source of 22% capex overrun in residential portfolio.',
     signals: ['sig-terra-003'],
     contextPack: { budget: 5000000, actual: 6100000 },
-    agentSequence: [
-      { agentId: 'audit-bot', role: 'Audit Lead', action: 'Categorize invoices' }
-    ],
+    agentSequence: [{ agentId: 'audit-bot', role: 'Audit Lead', action: 'Categorize invoices' }],
     actionBrief: {
       id: 'act-009',
       title: 'Halt Non-Essential Renovations',
@@ -405,7 +411,7 @@ export const SEED_WORKCELLS: Workcell[] = [
       linkedSignalIds: ['sig-terra-003'],
       linkedOutcomeIds: [],
       createdAt: now(),
-      updatedAt: now()
+      updatedAt: now(),
     },
     mirrorEvalResult: {
       id: 'me-009',
@@ -413,10 +419,12 @@ export const SEED_WORKCELLS: Workcell[] = [
       targetType: 'action',
       verdict: 'pass',
       score: 0.85,
-      dimensions: [{ name: 'fiscal-responsibility', score: 0.9, rationale: 'Necessary for covenant health.' }],
+      dimensions: [
+        { name: 'fiscal-responsibility', score: 0.9, rationale: 'Necessary for covenant health.' },
+      ],
       flags: [],
       evaluatorModel: 'gpt-4-eval',
-      evaluatedAt: now()
+      evaluatedAt: now(),
     },
     pceContractId: 'pce-009',
     requiresApproval: true,
@@ -425,7 +433,7 @@ export const SEED_WORKCELLS: Workcell[] = [
     proofPacketId: 'proof-009',
     executionTraceId: 'trace-009',
     createdAt: now(),
-    updatedAt: now()
+    updatedAt: now(),
   },
   {
     id: 'wc-010',
@@ -436,7 +444,7 @@ export const SEED_WORKCELLS: Workcell[] = [
     signals: ['sig-alloy-001'],
     contextPack: { slaTarget: 0.999, actual: 0.995 },
     agentSequence: [
-      { agentId: 'procurement-agent', role: 'Vendor Manager', action: 'Calculate service credits' }
+      { agentId: 'procurement-agent', role: 'Vendor Manager', action: 'Calculate service credits' },
     ],
     actionBrief: {
       id: 'act-010',
@@ -452,7 +460,7 @@ export const SEED_WORKCELLS: Workcell[] = [
       linkedSignalIds: ['sig-alloy-001'],
       linkedOutcomeIds: [],
       createdAt: now(),
-      updatedAt: now()
+      updatedAt: now(),
     },
     mirrorEvalResult: {
       id: 'me-010',
@@ -463,7 +471,7 @@ export const SEED_WORKCELLS: Workcell[] = [
       dimensions: [{ name: 'accuracy', score: 0.95, rationale: 'Calculations verified.' }],
       flags: [],
       evaluatorModel: 'gpt-4-eval',
-      evaluatedAt: now()
+      evaluatedAt: now(),
     },
     pceContractId: 'pce-019',
     requiresApproval: false,
@@ -472,7 +480,7 @@ export const SEED_WORKCELLS: Workcell[] = [
     proofPacketId: 'proof-019',
     executionTraceId: 'trace-019',
     createdAt: now(),
-    updatedAt: now()
+    updatedAt: now(),
   },
   {
     id: 'wc-011',
@@ -483,7 +491,7 @@ export const SEED_WORKCELLS: Workcell[] = [
     signals: ['sig-aegis-001'],
     contextPack: { threatLevel: 'critical', attribution: 'state-actor' },
     agentSequence: [
-      { agentId: 'ir-agent', role: 'Incident Responder', action: 'Isolate affected subnets' }
+      { agentId: 'ir-agent', role: 'Incident Responder', action: 'Isolate affected subnets' },
     ],
     actionBrief: {
       id: 'act-011',
@@ -499,7 +507,7 @@ export const SEED_WORKCELLS: Workcell[] = [
       linkedSignalIds: ['sig-aegis-001'],
       linkedOutcomeIds: [],
       createdAt: now(),
-      updatedAt: now()
+      updatedAt: now(),
     },
     mirrorEvalResult: {
       id: 'me-011',
@@ -510,7 +518,7 @@ export const SEED_WORKCELLS: Workcell[] = [
       dimensions: [{ name: 'safety', score: 1.0, rationale: 'Standard IR protocol.' }],
       flags: [],
       evaluatorModel: 'gpt-4-eval',
-      evaluatedAt: now()
+      evaluatedAt: now(),
     },
     pceContractId: 'pce-010',
     requiresApproval: true,
@@ -519,7 +527,7 @@ export const SEED_WORKCELLS: Workcell[] = [
     proofPacketId: 'proof-010',
     executionTraceId: 'trace-010',
     createdAt: now(),
-    updatedAt: now()
+    updatedAt: now(),
   },
   {
     id: 'wc-012',
@@ -530,7 +538,7 @@ export const SEED_WORKCELLS: Workcell[] = [
     signals: ['sig-aegis-004'],
     contextPack: { cve: 'CVE-2026-11842', environments: 2 },
     agentSequence: [
-      { agentId: 'patch-agent', role: 'Patch Manager', action: 'Verify patch availability' }
+      { agentId: 'patch-agent', role: 'Patch Manager', action: 'Verify patch availability' },
     ],
     actionBrief: {
       id: 'act-012',
@@ -546,7 +554,7 @@ export const SEED_WORKCELLS: Workcell[] = [
       linkedSignalIds: ['sig-aegis-004'],
       linkedOutcomeIds: [],
       createdAt: now(),
-      updatedAt: now()
+      updatedAt: now(),
     },
     mirrorEvalResult: {
       id: 'me-012',
@@ -557,7 +565,7 @@ export const SEED_WORKCELLS: Workcell[] = [
       dimensions: [{ name: 'timeliness', score: 1.0, rationale: 'Action taken within SLA.' }],
       flags: [],
       evaluatorModel: 'gpt-4-eval',
-      evaluatedAt: now()
+      evaluatedAt: now(),
     },
     pceContractId: 'pce-015',
     requiresApproval: true,
@@ -566,7 +574,7 @@ export const SEED_WORKCELLS: Workcell[] = [
     proofPacketId: 'proof-015',
     executionTraceId: 'trace-015',
     createdAt: now(),
-    updatedAt: now()
+    updatedAt: now(),
   },
   {
     id: 'wc-013',
@@ -577,7 +585,7 @@ export const SEED_WORKCELLS: Workcell[] = [
     signals: ['sig-counsel-002', 'sig-counsel-003'],
     contextPack: { systemsCount: 8, deadline: '2027-08-02' },
     agentSequence: [
-      { agentId: 'legal-bot', role: 'Legal Assistant', action: 'Draft compliance roadmap' }
+      { agentId: 'legal-bot', role: 'Legal Assistant', action: 'Draft compliance roadmap' },
     ],
     actionBrief: {
       id: 'act-013',
@@ -593,7 +601,7 @@ export const SEED_WORKCELLS: Workcell[] = [
       linkedSignalIds: ['sig-counsel-003'],
       linkedOutcomeIds: [],
       createdAt: now(),
-      updatedAt: now()
+      updatedAt: now(),
     },
     mirrorEvalResult: {
       id: 'me-013',
@@ -604,7 +612,7 @@ export const SEED_WORKCELLS: Workcell[] = [
       dimensions: [{ name: 'risk-reduction', score: 0.95, rationale: 'Proactive compliance.' }],
       flags: [],
       evaluatorModel: 'gpt-4-eval',
-      evaluatedAt: now()
+      evaluatedAt: now(),
     },
     pceContractId: 'pce-017',
     requiresApproval: true,
@@ -613,7 +621,7 @@ export const SEED_WORKCELLS: Workcell[] = [
     proofPacketId: 'proof-017',
     executionTraceId: 'trace-017',
     createdAt: now(),
-    updatedAt: now()
+    updatedAt: now(),
   },
   {
     id: 'wc-014',
@@ -624,7 +632,7 @@ export const SEED_WORKCELLS: Workcell[] = [
     signals: ['sig-counsel-004'],
     contextPack: { exposure: 4100000 },
     agentSequence: [
-      { agentId: 'auditor-1', role: 'Governance Auditor', action: 'Verify causal links' }
+      { agentId: 'auditor-1', role: 'Governance Auditor', action: 'Verify causal links' },
     ],
     actionBrief: {
       id: 'act-014',
@@ -640,7 +648,7 @@ export const SEED_WORKCELLS: Workcell[] = [
       linkedSignalIds: ['sig-counsel-004'],
       linkedOutcomeIds: [],
       createdAt: now(),
-      updatedAt: now()
+      updatedAt: now(),
     },
     mirrorEvalResult: {
       id: 'me-014',
@@ -651,7 +659,7 @@ export const SEED_WORKCELLS: Workcell[] = [
       dimensions: [{ name: 'integrity', score: 1.0, rationale: 'Full chain present.' }],
       flags: [],
       evaluatorModel: 'gpt-4-eval',
-      evaluatedAt: now()
+      evaluatedAt: now(),
     },
     pceContractId: 'pce-012',
     requiresApproval: true,
@@ -660,7 +668,7 @@ export const SEED_WORKCELLS: Workcell[] = [
     proofPacketId: 'proof-012',
     executionTraceId: 'trace-012',
     createdAt: now(),
-    updatedAt: now()
+    updatedAt: now(),
   },
   {
     id: 'wc-015',
@@ -671,7 +679,7 @@ export const SEED_WORKCELLS: Workcell[] = [
     signals: ['sig-carlota-003'],
     contextPack: { csatScore: 6.3 },
     agentSequence: [
-      { agentId: 'concierge-1', role: 'Lead Concierge', action: 'Personalize recovery gift' }
+      { agentId: 'concierge-1', role: 'Lead Concierge', action: 'Personalize recovery gift' },
     ],
     actionBrief: {
       id: 'act-015',
@@ -687,7 +695,7 @@ export const SEED_WORKCELLS: Workcell[] = [
       linkedSignalIds: ['sig-carlota-003'],
       linkedOutcomeIds: [],
       createdAt: now(),
-      updatedAt: now()
+      updatedAt: now(),
     },
     mirrorEvalResult: {
       id: 'me-015',
@@ -698,7 +706,7 @@ export const SEED_WORKCELLS: Workcell[] = [
       dimensions: [{ name: 'empathy', score: 0.9, rationale: 'Appropriate tone.' }],
       flags: [],
       evaluatorModel: 'gpt-4-eval',
-      evaluatedAt: now()
+      evaluatedAt: now(),
     },
     pceContractId: 'pce-018',
     requiresApproval: true,
@@ -707,7 +715,7 @@ export const SEED_WORKCELLS: Workcell[] = [
     proofPacketId: 'proof-018',
     executionTraceId: 'trace-018',
     createdAt: now(),
-    updatedAt: now()
+    updatedAt: now(),
   },
   {
     id: 'wc-016',
@@ -717,9 +725,7 @@ export const SEED_WORKCELLS: Workcell[] = [
     objective: 'Manage sensitive data transfers for family office clients.',
     signals: ['sig-counsel-003'],
     contextPack: { dataClass: 'highly-sensitive' },
-    agentSequence: [
-      { agentId: 'privacy-bot', role: 'Privacy Officer', action: 'Encrypt payload' }
-    ],
+    agentSequence: [{ agentId: 'privacy-bot', role: 'Privacy Officer', action: 'Encrypt payload' }],
     actionBrief: {
       id: 'act-016',
       title: 'Secure Data Transfer',
@@ -734,7 +740,7 @@ export const SEED_WORKCELLS: Workcell[] = [
       linkedSignalIds: ['sig-counsel-003'],
       linkedOutcomeIds: [],
       createdAt: now(),
-      updatedAt: now()
+      updatedAt: now(),
     },
     mirrorEvalResult: {
       id: 'me-016',
@@ -745,7 +751,7 @@ export const SEED_WORKCELLS: Workcell[] = [
       dimensions: [{ name: 'privacy', score: 1.0, rationale: 'Encryption standards met.' }],
       flags: [],
       evaluatorModel: 'gpt-4-eval',
-      evaluatedAt: now()
+      evaluatedAt: now(),
     },
     pceContractId: 'pce-017',
     requiresApproval: true,
@@ -754,7 +760,7 @@ export const SEED_WORKCELLS: Workcell[] = [
     proofPacketId: 'proof-017',
     executionTraceId: 'trace-017',
     createdAt: now(),
-    updatedAt: now()
+    updatedAt: now(),
   },
   {
     id: 'wc-017',
@@ -765,7 +771,7 @@ export const SEED_WORKCELLS: Workcell[] = [
     signals: ['sig-alloy-002', 'sig-lyte-002', 'sig-terra-001'],
     contextPack: { period: 'Q2 2026' },
     agentSequence: [
-      { agentId: 'report-bot', role: 'Reporting Agent', action: 'Synthesize cross-vertical risks' }
+      { agentId: 'report-bot', role: 'Reporting Agent', action: 'Synthesize cross-vertical risks' },
     ],
     actionBrief: {
       id: 'act-017',
@@ -781,7 +787,7 @@ export const SEED_WORKCELLS: Workcell[] = [
       linkedSignalIds: ['sig-alloy-002', 'sig-lyte-002', 'sig-terra-001'],
       linkedOutcomeIds: [],
       createdAt: now(),
-      updatedAt: now()
+      updatedAt: now(),
     },
     mirrorEvalResult: {
       id: 'me-017',
@@ -792,7 +798,7 @@ export const SEED_WORKCELLS: Workcell[] = [
       dimensions: [{ name: 'completeness', score: 0.98, rationale: 'All key risks included.' }],
       flags: [],
       evaluatorModel: 'gpt-4-eval',
-      evaluatedAt: now()
+      evaluatedAt: now(),
     },
     pceContractId: 'pce-019',
     requiresApproval: true,
@@ -801,7 +807,7 @@ export const SEED_WORKCELLS: Workcell[] = [
     proofPacketId: 'proof-019',
     executionTraceId: 'trace-019',
     createdAt: now(),
-    updatedAt: now()
+    updatedAt: now(),
   },
   {
     id: 'wc-018',
@@ -812,7 +818,7 @@ export const SEED_WORKCELLS: Workcell[] = [
     signals: ['sig-alloy-001'],
     contextPack: { latencyThreshold: 200, current: 340 },
     agentSequence: [
-      { agentId: 'watchdog-1', role: 'SRE Agent', action: 'Analyze snapshot contention' }
+      { agentId: 'watchdog-1', role: 'SRE Agent', action: 'Analyze snapshot contention' },
     ],
     actionBrief: {
       id: 'act-018',
@@ -828,7 +834,7 @@ export const SEED_WORKCELLS: Workcell[] = [
       linkedSignalIds: ['sig-alloy-001'],
       linkedOutcomeIds: ['out-005'],
       createdAt: now(),
-      updatedAt: now()
+      updatedAt: now(),
     },
     mirrorEvalResult: {
       id: 'me-018',
@@ -839,7 +845,7 @@ export const SEED_WORKCELLS: Workcell[] = [
       dimensions: [{ name: 'technical-soundness', score: 0.9, rationale: 'Addresses root cause.' }],
       flags: [],
       evaluatorModel: 'gpt-4-eval',
-      evaluatedAt: now()
+      evaluatedAt: now(),
     },
     pceContractId: 'pce-005',
     requiresApproval: false,
@@ -848,7 +854,7 @@ export const SEED_WORKCELLS: Workcell[] = [
     proofPacketId: 'proof-005',
     executionTraceId: 'trace-005',
     createdAt: now(),
-    updatedAt: now()
+    updatedAt: now(),
   },
   {
     id: 'wc-019',
@@ -859,7 +865,11 @@ export const SEED_WORKCELLS: Workcell[] = [
     signals: ['sig-lyte-002', 'sig-terra-001', 'sig-vessels-002'],
     contextPack: { correlationFactor: 0.72 },
     agentSequence: [
-      { agentId: 'fusion-bot', role: 'Risk Architect', action: 'Perform multi-variate correlation' }
+      {
+        agentId: 'fusion-bot',
+        role: 'Risk Architect',
+        action: 'Perform multi-variate correlation',
+      },
     ],
     actionBrief: {
       id: 'act-019',
@@ -875,7 +885,7 @@ export const SEED_WORKCELLS: Workcell[] = [
       linkedSignalIds: ['sig-lyte-002', 'sig-terra-001', 'sig-vessels-002'],
       linkedOutcomeIds: [],
       createdAt: now(),
-      updatedAt: now()
+      updatedAt: now(),
     },
     mirrorEvalResult: {
       id: 'me-019',
@@ -886,7 +896,7 @@ export const SEED_WORKCELLS: Workcell[] = [
       dimensions: [{ name: 'insight', score: 1.0, rationale: 'Non-obvious link detected.' }],
       flags: ['systemic-risk'],
       evaluatorModel: 'gpt-4-eval',
-      evaluatedAt: now()
+      evaluatedAt: now(),
     },
     pceContractId: 'pce-019',
     requiresApproval: true,
@@ -895,7 +905,7 @@ export const SEED_WORKCELLS: Workcell[] = [
     proofPacketId: 'proof-019',
     executionTraceId: 'trace-019',
     createdAt: now(),
-    updatedAt: now()
+    updatedAt: now(),
   },
   {
     id: 'wc-020',
@@ -906,7 +916,7 @@ export const SEED_WORKCELLS: Workcell[] = [
     signals: ['sig-alloy-002'],
     contextPack: { codeRepo: 'a11oy-fabric-core', pr: 1142 },
     agentSequence: [
-      { agentId: 'audit-agent', role: 'Security Auditor', action: 'Scan for credential leaks' }
+      { agentId: 'audit-agent', role: 'Security Auditor', action: 'Scan for credential leaks' },
     ],
     actionBrief: {
       id: 'act-020',
@@ -922,7 +932,7 @@ export const SEED_WORKCELLS: Workcell[] = [
       linkedSignalIds: ['sig-alloy-002'],
       linkedOutcomeIds: [],
       createdAt: now(),
-      updatedAt: now()
+      updatedAt: now(),
     },
     mirrorEvalResult: {
       id: 'me-020',
@@ -933,7 +943,7 @@ export const SEED_WORKCELLS: Workcell[] = [
       dimensions: [{ name: 'thoroughness', score: 0.95, rationale: 'Full scan complete.' }],
       flags: [],
       evaluatorModel: 'gpt-4-eval',
-      evaluatedAt: now()
+      evaluatedAt: now(),
     },
     pceContractId: 'pce-019',
     requiresApproval: true,
@@ -942,6 +952,12 @@ export const SEED_WORKCELLS: Workcell[] = [
     proofPacketId: 'proof-019',
     executionTraceId: 'trace-019',
     createdAt: now(),
-    updatedAt: now()
-  }
+    updatedAt: now(),
+  },
 ];
+
+export const SEED_WORKCELLS: Workcell[] = SEED_WORKCELL_FIXTURES.map((workcell) => ({
+  ...workcell,
+  evidenceState: 'DEMO',
+  evidenceReason: SEED_WORKCELL_EVIDENCE_REASON,
+}));

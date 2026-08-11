@@ -7,9 +7,7 @@ function stripTrailingSlash(path: string) {
   return path.endsWith('/') && path.length > 1 ? path.slice(0, -1) : path;
 }
 
-const base = stripTrailingSlash(
-  (import.meta.env.BASE_URL ?? '/a11oy/').replace(/\/$/, ''),
-);
+const base = stripTrailingSlash((import.meta.env.BASE_URL ?? '/a11oy/').replace(/\/$/, ''));
 
 function Loader() {
   return (
@@ -48,6 +46,9 @@ const Governance = lazy(() =>
 );
 const Agents = lazy(() => import('./pages/Agents').then((m) => ({ default: m.Agents })));
 const Workcells = lazy(() => import('./pages/Workcells').then((m) => ({ default: m.Workcells })));
+const ProductJourney = lazy(() =>
+  import('./pages/ProductJourney').then((m) => ({ default: m.ProductJourney })),
+);
 const WorkcellDetail = lazy(() =>
   import('./pages/WorkcellDetail').then((m) => ({ default: m.WorkcellDetail })),
 );
@@ -299,9 +300,7 @@ const SystemCard = lazy(() =>
 const CapabilityTrajectory = lazy(() =>
   import('./pages/CapabilityTrajectory').then((m) => ({ default: m.CapabilityTrajectory })),
 );
-const HatunSpec = lazy(() =>
-  import('./pages/HatunSpec').then((m) => ({ default: m.HatunSpec })),
-);
+const HatunSpec = lazy(() => import('./pages/HatunSpec').then((m) => ({ default: m.HatunSpec })));
 const GlasswingPartners = lazy(() =>
   import('./pages/GlasswingPartners').then((m) => ({ default: m.GlasswingPartners })),
 );
@@ -404,6 +403,7 @@ export default function App() {
         <Switch>
           <Route path={`${base}/`} component={HomePage} />
           <Route path={`${base}`} component={HomePage} />
+          <Route path={`${base}/start`} component={ProductJourney} />
           <Route path={`${base}/now`} component={NowBoard} />
           <Route path={`${base}/recommendations`} component={Recommendations} />
           <Route path={`${base}/brief`} component={ExecutiveBrief} />

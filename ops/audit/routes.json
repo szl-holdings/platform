@@ -110,7 +110,11 @@
       "previewPath": "/a11oy",
       "routes": [
         { "path": "/a11oy/", "label": "Home" },
-        { "path": "/a11oy/brand", "label": "Brand Assets" }
+        { "path": "/a11oy/start", "label": "Investor and developer start" },
+        { "path": "/a11oy/demo", "label": "Seeded interactive demo" },
+        { "path": "/a11oy/workcells", "label": "Demo Workcells" },
+        { "path": "/a11oy/proof", "label": "Demonstration proof model" },
+        { "path": "/a11oy/trust", "label": "Prototype trust posture" }
       ]
     },
     {
