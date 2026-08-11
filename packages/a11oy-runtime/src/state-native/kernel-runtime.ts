@@ -62,6 +62,14 @@ function idempotencyRequestDigest(request: KernelExecutionRequest): string {
   });
 }
 
+function idempotencyScopeKey(tenantId: string, idempotencyKey: string): string {
+  return digestObject({
+    schema: 'szl.kernel-idempotency-scope/v1',
+    tenantId,
+    idempotencyKey,
+  });
+}
+
 function epochCompatibility(
   epoch: CognitiveEpochRecord,
   request: KernelExecutionRequest,
@@ -172,7 +180,7 @@ function defaultGovernance(
   return governance;
 }
 
-function verifierOutputSnapshot(
+function producedStateSnapshot(
   output: readonly KernelProducedState[],
 ): readonly KernelProducedState[] {
   return Object.freeze(
@@ -295,7 +303,7 @@ export class AlloyKernelRuntime {
     }
 
     const idempotencyKey = request.idempotencyKey
-      ? `${request.tenantId}:${request.idempotencyKey}`
+      ? idempotencyScopeKey(request.tenantId, request.idempotencyKey)
       : undefined;
     const replayDigest = idempotencyRequestDigest(request);
     if (idempotencyKey) {
@@ -401,15 +409,15 @@ export class AlloyKernelRuntime {
       }
 
       const controller = new AbortController();
-      const context = {
+      const context = Object.freeze({
         actionId: request.authorization.envelope.actionId,
         tenantId: request.tenantId,
         sessionId: request.sessionId,
         epoch: lease.epoch,
         budget: request.budget,
         signal: controller.signal,
-      };
-      const output = await this.#runWithDeadline(
+      });
+      const rawOutput = await this.#runWithDeadline(
         () => {
           executionStarted = true;
           return definition.execute(
@@ -424,6 +432,7 @@ export class AlloyKernelRuntime {
         deadlineAt,
         'Kernel execution',
       );
+      const output = producedStateSnapshot(rawOutput);
 
       if (output.length > request.budget.maxStateWrites) {
         throw new StateNativeError('BUDGET_EXCEEDED', 'Kernel exceeded the state-write budget.', {
@@ -439,12 +448,11 @@ export class AlloyKernelRuntime {
         });
       }
 
-      const verifierOutput = verifierOutputSnapshot(output);
       const verifier = definition.verify
         ? await this.#runWithDeadline(
             () =>
               definition.verify!(
-                verifierOutput,
+                producedStateSnapshot(output),
                 { capsules: Object.freeze(input), parameters: request.parameters },
                 context,
               ),
