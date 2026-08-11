@@ -9,6 +9,7 @@ import {
   buildPublicSurfaceManifest,
   type PublicSurface,
   type PublicSurfaceRegistry,
+  parseDuplicateFreeJson,
   validatePublicSurfaceManifest,
   validatePublicSurfaceObservationFreshness,
   validatePublicSurfaceRegistry,
@@ -100,6 +101,82 @@ function metadataResponse(text: string, contentType: string, chunks: number[] = 
       }),
     },
   };
+}
+
+function apiResponse(
+  url: string,
+  payload: unknown,
+  contentType = 'application/json; charset=utf-8',
+  chunks?: number[],
+) {
+  const text = typeof payload === 'string' ? payload : JSON.stringify(payload);
+  const bytes = new TextEncoder().encode(text);
+  const chunkSizes = chunks ? [...chunks] : [bytes.byteLength];
+  let offset = 0;
+  return {
+    status: 200,
+    url,
+    headers: {
+      get: (name: string) => {
+        const normalized = name.toLowerCase();
+        if (normalized === 'content-type') return contentType;
+        if (normalized === 'content-length') return String(bytes.byteLength);
+        return null;
+      },
+    },
+    body: {
+      cancel: async () => undefined,
+      getReader: () => ({
+        read: async () => {
+          if (offset >= bytes.byteLength) return { done: true };
+          const chunkLength = chunkSizes.shift() ?? bytes.byteLength - offset;
+          const value = bytes.slice(offset, offset + chunkLength);
+          offset += value.byteLength;
+          return { done: false, value };
+        },
+        cancel: async () => undefined,
+        releaseLock: () => undefined,
+      }),
+    },
+  };
+}
+
+const KILLINCHU_BUILD_INFO_BODY = {
+  status: 'OBSERVED',
+  service: 'killinchu',
+  build: {
+    state: 'OBSERVED',
+    revision: '859e26cf27164b38c4e289e40a751ce80d403368',
+    revision_source: 'env:SZL_GIT_SHA',
+  },
+  receipt_minted: true,
+  release_receipt: {
+    state: 'GITHUB_OIDC_ATTESTED',
+    source_revision: '859e26cf27164b38c4e289e40a751ce80d403368',
+    subject: 'hf-deploy-manifest.json',
+    subject_sha256: '7730a0334485ed3ca4754b38bd288ac004258918f0ede46719e72ae2a2ede960',
+    attestation_id: '39971795',
+    attestation_url: 'https://github.com/szl-holdings/killinchu/attestations/39971795',
+    verification:
+      'Download hf-deploy-manifest.json from the matching deployment run and run gh attestation verify hf-deploy-manifest.json -R szl-holdings/killinchu',
+  },
+};
+
+const KILLINCHU_READINESS_BODY = {
+  status: 'ready',
+  organ: 'killinchu',
+  khipu_backend: 'sqlite',
+  khipu_durable: true,
+  khipu_depth: 0,
+  khipu_chain_ok: true,
+  khipu_first_break_seq: -1,
+  doctrine: 'v11',
+};
+
+function configuredSurface(id: string): PublicSurface {
+  const candidate = CONFIGURED_REGISTRY.surfaces.find((surface) => surface.id === id);
+  assert.ok(candidate, `missing configured surface ${id}`);
+  return candidate;
 }
 
 test('counts only routed customer-facing web surfaces', () => {
@@ -726,6 +803,137 @@ test('retries transient metadata body failures with a fresh request signal', asy
   assert.equal(attempts, 2);
   assert.equal(cancelled, 1);
   assert.equal(new Set(signals).size, 2);
+});
+
+test('validates the exact Killinchu build-info source-binding body', async () => {
+  const candidate = configuredSurface('killinchu-build-info-api');
+  const verify = (payload: unknown, contentType?: string) =>
+    verifyLivePublicSurfaces(registry([candidate]), async (url) =>
+      apiResponse(url, payload, contentType),
+    );
+
+  assert.deepEqual(await verify(KILLINCHU_BUILD_INFO_BODY), []);
+
+  const missingAttestation = structuredClone(KILLINCHU_BUILD_INFO_BODY) as Record<string, unknown>;
+  delete (missingAttestation.release_receipt as Record<string, unknown>).attestation_id;
+  const mismatchedSource = structuredClone(KILLINCHU_BUILD_INFO_BODY);
+  mismatchedSource.build.revision = '0'.repeat(40);
+  const unexpectedField = { ...KILLINCHU_BUILD_INFO_BODY, aggregate_health: 'green' };
+  const unrelatedBody = { status: 'OBSERVED' };
+  const contractFailure = [
+    'killinchu-build-info-api: API body does not match the exact source-binding contract',
+  ];
+
+  for (const invalid of [missingAttestation, mismatchedSource, unexpectedField, unrelatedBody]) {
+    assert.deepEqual(await verify(invalid), contractFailure);
+  }
+  assert.deepEqual(await verify('{"status":', 'application/json'), [
+    'killinchu-build-info-api: API body is not valid duplicate-free JSON',
+  ]);
+  assert.deepEqual(await verify(KILLINCHU_BUILD_INFO_BODY, 'text/html'), [
+    'killinchu-build-info-api: expected a JSON API response, observed text/html',
+  ]);
+});
+
+test('validates the exact Killinchu readiness body without freezing dynamic depth', async () => {
+  const candidate = configuredSurface('killinchu-readiness-api');
+  const verify = (payload: unknown) =>
+    verifyLivePublicSurfaces(registry([candidate]), async (url) => apiResponse(url, payload));
+
+  assert.deepEqual(await verify(KILLINCHU_READINESS_BODY), []);
+  assert.deepEqual(await verify({ ...KILLINCHU_READINESS_BODY, khipu_depth: 7 }), []);
+
+  const missingDoctrine = { ...KILLINCHU_READINESS_BODY } as Record<string, unknown>;
+  delete missingDoctrine.doctrine;
+  const contractFailure = [
+    'killinchu-readiness-api: API body does not match the exact readiness contract',
+  ];
+  for (const invalid of [
+    missingDoctrine,
+    { ...KILLINCHU_READINESS_BODY, unexpected: true },
+    { ...KILLINCHU_READINESS_BODY, khipu_durable: false },
+    { ...KILLINCHU_READINESS_BODY, khipu_chain_ok: false },
+    { ...KILLINCHU_READINESS_BODY, khipu_depth: -1 },
+    { ...KILLINCHU_READINESS_BODY, khipu_first_break_seq: 0 },
+    { ...KILLINCHU_READINESS_BODY, doctrine: 'v10' },
+  ]) {
+    assert.deepEqual(await verify(invalid), contractFailure);
+  }
+});
+
+test('retries transient Killinchu API body failures inside the request boundary', async () => {
+  const candidate = configuredSurface('killinchu-build-info-api');
+  const signals: AbortSignal[] = [];
+  let attempts = 0;
+  let cancelled = 0;
+
+  const failures = await verifyLivePublicSurfaces(registry([candidate]), async (url, init) => {
+    attempts += 1;
+    signals.push(init.signal);
+    if (attempts === 1) {
+      return {
+        status: 200,
+        url,
+        headers: { get: () => 'application/json' },
+        body: {
+          cancel: async () => {
+            cancelled += 1;
+          },
+          getReader: () => ({
+            read: async () => {
+              throw Object.assign(new TypeError('fetch failed'), {
+                cause: Object.assign(new Error('peer reset during API body read'), {
+                  code: 'UND_ERR_SOCKET',
+                }),
+              });
+            },
+            cancel: async () => undefined,
+            releaseLock: () => undefined,
+          }),
+        },
+      };
+    }
+    return apiResponse(url, KILLINCHU_BUILD_INFO_BODY);
+  });
+
+  assert.deepEqual(failures, []);
+  assert.equal(attempts, 2);
+  assert.equal(cancelled, 1);
+  assert.equal(new Set(signals).size, 2);
+});
+
+test('rejects duplicate, trailing, and over-depth JSON before API contract validation', async () => {
+  assert.equal(parseDuplicateFreeJson('{"source_revision":"a","source_revision":"b"}').ok, false);
+  assert.equal(
+    parseDuplicateFreeJson('{"source_revision":"a","source\\u005frevision":"b"}').ok,
+    false,
+  );
+  assert.equal(
+    parseDuplicateFreeJson('{"release":{"attestation_id":"1","attestation_id":"2"}}').ok,
+    false,
+  );
+  assert.equal(parseDuplicateFreeJson('{"status":"ready"} trailing').ok, false);
+  assert.equal(parseDuplicateFreeJson(`${'['.repeat(66)}null${']'.repeat(66)}`).ok, false);
+
+  const candidate = configuredSurface('killinchu-build-info-api');
+  const duplicateBody = JSON.stringify(KILLINCHU_BUILD_INFO_BODY).replace(
+    '"source_revision":"859e26cf27164b38c4e289e40a751ce80d403368"',
+    '"source_revision":"859e26cf27164b38c4e289e40a751ce80d403368","source\\u005frevision":"859e26cf27164b38c4e289e40a751ce80d403368"',
+  );
+  const failures = await verifyLivePublicSurfaces(registry([candidate]), async (url) =>
+    apiResponse(url, duplicateBody),
+  );
+  assert.deepEqual(failures, [
+    'killinchu-build-info-api: API body is not valid duplicate-free JSON',
+  ]);
+});
+
+test('rejects Killinchu API bodies above the bounded read limit', async () => {
+  const candidate = configuredSurface('killinchu-build-info-api');
+  const failures = await verifyLivePublicSurfaces(registry([candidate]), async (url) =>
+    apiResponse(url, 'x'.repeat(128 * 1024 + 1)),
+  );
+  assert.deepEqual(failures, ['killinchu-build-info-api: API body exceeds 131072 bytes']);
 });
 
 test('creates a fresh timeout signal for every transient attempt', async () => {

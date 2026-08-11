@@ -75,6 +75,11 @@ const ALLOWED_OWNER_ROLES = new Set<SourceOwnerRole>([
 const MAX_OBSERVATION_AGE_MS = 7 * 24 * 60 * 60 * 1000;
 const MAX_FUTURE_SKEW_MS = 5 * 60 * 1000;
 const MAX_METADATA_BODY_BYTES = 128 * 1024;
+const JSON_WHITESPACE = new Set([' ', '\t', '\n', '\r']);
+const KILLINCHU_SOURCE_REVISION = '859e26cf27164b38c4e289e40a751ce80d403368';
+const KILLINCHU_MANIFEST_SHA256 =
+  '7730a0334485ed3ca4754b38bd288ac004258918f0ede46719e72ae2a2ede960';
+const KILLINCHU_ATTESTATION_ID = '39971795';
 const LIVE_SURFACE_PROBE_CONCURRENCY = 4;
 const LIVE_SURFACE_RETRY_DELAYS_MS = [750, 1_500] as const;
 const TRANSIENT_TRANSPORT_CODES = new Set([
@@ -535,6 +540,7 @@ async function cancelResponseBody(response: SurfaceFetchResponse): Promise<void>
 async function readBoundedResponseBody(
   surfaceId: string,
   response: SurfaceFetchResponse,
+  bodyKind: 'metadata' | 'API' = 'metadata',
 ): Promise<{ text: string | null; failure: string | null }> {
   const contentLength = response.headers?.get('content-length');
   if (contentLength && /^\d+$/.test(contentLength)) {
@@ -543,7 +549,7 @@ async function readBoundedResponseBody(
       await cancelResponseBody(response);
       return {
         text: null,
-        failure: `${surfaceId}: metadata body exceeds ${MAX_METADATA_BODY_BYTES} bytes`,
+        failure: `${surfaceId}: ${bodyKind} body exceeds ${MAX_METADATA_BODY_BYTES} bytes`,
       };
     }
   }
@@ -551,7 +557,7 @@ async function readBoundedResponseBody(
   const reader = response.body?.getReader?.();
   if (!reader) {
     await cancelResponseBody(response);
-    return { text: null, failure: `${surfaceId}: metadata response body is unavailable` };
+    return { text: null, failure: `${surfaceId}: ${bodyKind} response body is unavailable` };
   }
 
   const chunks: Uint8Array[] = [];
@@ -566,7 +572,7 @@ async function readBoundedResponseBody(
         await reader.cancel();
         return {
           text: null,
-          failure: `${surfaceId}: metadata body exceeds ${MAX_METADATA_BODY_BYTES} bytes`,
+          failure: `${surfaceId}: ${bodyKind} body exceeds ${MAX_METADATA_BODY_BYTES} bytes`,
         };
       }
       chunks.push(value);
@@ -585,8 +591,239 @@ async function readBoundedResponseBody(
   try {
     return { text: new TextDecoder('utf-8', { fatal: true }).decode(bodyBytes), failure: null };
   } catch {
-    return { text: null, failure: `${surfaceId}: metadata body is not valid UTF-8` };
+    return { text: null, failure: `${surfaceId}: ${bodyKind} body is not valid UTF-8` };
   }
+}
+
+export type StrictJsonParseResult =
+  | Readonly<{ ok: true; value: unknown }>
+  | Readonly<{ ok: false }>;
+
+export function parseDuplicateFreeJson(input: string): StrictJsonParseResult {
+  const failed = Symbol('invalid-json');
+  type ParsedValue = unknown | typeof failed;
+  let index = 0;
+
+  const skipWhitespace = (): void => {
+    while (JSON_WHITESPACE.has(input[index] ?? '')) index += 1;
+  };
+
+  const readString = (): string | typeof failed => {
+    skipWhitespace();
+    if (input[index] !== '"') return failed;
+    const start = index;
+    index += 1;
+    let escaped = false;
+    while (index < input.length) {
+      const character = input[index];
+      index += 1;
+      if (escaped) {
+        escaped = false;
+        continue;
+      }
+      if (character === '\\') {
+        escaped = true;
+        continue;
+      }
+      if (character === '"') {
+        try {
+          const value = JSON.parse(input.slice(start, index)) as unknown;
+          return typeof value === 'string' ? value : failed;
+        } catch {
+          return failed;
+        }
+      }
+      if (character.charCodeAt(0) < 0x20) return failed;
+    }
+    return failed;
+  };
+
+  const parseValue = (depth: number): ParsedValue => {
+    if (depth > 64) return failed;
+    skipWhitespace();
+    const character = input[index];
+
+    if (character === '"') return readString();
+    if (character === '{') {
+      index += 1;
+      const object = Object.create(null) as Record<string, unknown>;
+      const seen = new Set<string>();
+      skipWhitespace();
+      if (input[index] === '}') {
+        index += 1;
+        return object;
+      }
+      while (index < input.length) {
+        const key = readString();
+        if (key === failed || seen.has(key)) return failed;
+        seen.add(key);
+        skipWhitespace();
+        if (input[index] !== ':') return failed;
+        index += 1;
+        const value = parseValue(depth + 1);
+        if (value === failed) return failed;
+        object[key] = value;
+        skipWhitespace();
+        if (input[index] === '}') {
+          index += 1;
+          return object;
+        }
+        if (input[index] !== ',') return failed;
+        index += 1;
+      }
+      return failed;
+    }
+    if (character === '[') {
+      index += 1;
+      const array: unknown[] = [];
+      skipWhitespace();
+      if (input[index] === ']') {
+        index += 1;
+        return array;
+      }
+      while (index < input.length) {
+        const value = parseValue(depth + 1);
+        if (value === failed) return failed;
+        array.push(value);
+        skipWhitespace();
+        if (input[index] === ']') {
+          index += 1;
+          return array;
+        }
+        if (input[index] !== ',') return failed;
+        index += 1;
+      }
+      return failed;
+    }
+    if (input.startsWith('true', index)) {
+      index += 4;
+      return true;
+    }
+    if (input.startsWith('false', index)) {
+      index += 5;
+      return false;
+    }
+    if (input.startsWith('null', index)) {
+      index += 4;
+      return null;
+    }
+
+    const number = input.slice(index).match(/^-?(?:0|[1-9]\d*)(?:\.\d+)?(?:[eE][+-]?\d+)?/);
+    if (!number) return failed;
+    index += number[0].length;
+    const value = Number(number[0]);
+    return Number.isFinite(value) ? value : failed;
+  };
+
+  const value = parseValue(0);
+  if (value === failed) return { ok: false };
+  skipWhitespace();
+  return index === input.length ? { ok: true, value } : { ok: false };
+}
+
+function hasExactKeys(value: Record<string, unknown>, expected: readonly string[]): boolean {
+  const actual = Object.keys(value).sort((left, right) => left.localeCompare(right));
+  const canonical = [...expected].sort((left, right) => left.localeCompare(right));
+  return (
+    actual.length === canonical.length && actual.every((key, index) => key === canonical[index])
+  );
+}
+
+function isExactKillinchuBuildInfo(value: unknown): boolean {
+  if (!isObject(value)) return false;
+  if (
+    !hasExactKeys(value, ['status', 'service', 'build', 'receipt_minted', 'release_receipt']) ||
+    value.status !== 'OBSERVED' ||
+    value.service !== 'killinchu' ||
+    value.receipt_minted !== true ||
+    !isObject(value.build) ||
+    !isObject(value.release_receipt)
+  ) {
+    return false;
+  }
+
+  const build = value.build;
+  const receipt = value.release_receipt;
+  return (
+    hasExactKeys(build, ['state', 'revision', 'revision_source']) &&
+    build.state === 'OBSERVED' &&
+    build.revision === KILLINCHU_SOURCE_REVISION &&
+    build.revision_source === 'env:SZL_GIT_SHA' &&
+    hasExactKeys(receipt, [
+      'state',
+      'source_revision',
+      'subject',
+      'subject_sha256',
+      'attestation_id',
+      'attestation_url',
+      'verification',
+    ]) &&
+    receipt.state === 'GITHUB_OIDC_ATTESTED' &&
+    receipt.source_revision === KILLINCHU_SOURCE_REVISION &&
+    receipt.subject === 'hf-deploy-manifest.json' &&
+    receipt.subject_sha256 === KILLINCHU_MANIFEST_SHA256 &&
+    receipt.attestation_id === KILLINCHU_ATTESTATION_ID &&
+    receipt.attestation_url ===
+      `https://github.com/szl-holdings/killinchu/attestations/${KILLINCHU_ATTESTATION_ID}` &&
+    receipt.verification ===
+      'Download hf-deploy-manifest.json from the matching deployment run and run gh attestation verify hf-deploy-manifest.json -R szl-holdings/killinchu'
+  );
+}
+
+function isExactKillinchuReadiness(value: unknown): boolean {
+  if (!isObject(value)) return false;
+  return (
+    hasExactKeys(value, [
+      'status',
+      'organ',
+      'khipu_backend',
+      'khipu_durable',
+      'khipu_depth',
+      'khipu_chain_ok',
+      'khipu_first_break_seq',
+      'doctrine',
+    ]) &&
+    value.status === 'ready' &&
+    value.organ === 'killinchu' &&
+    value.khipu_backend === 'sqlite' &&
+    value.khipu_durable === true &&
+    Number.isSafeInteger(value.khipu_depth) &&
+    (value.khipu_depth as number) >= 0 &&
+    value.khipu_chain_ok === true &&
+    value.khipu_first_break_seq === -1 &&
+    value.doctrine === 'v11'
+  );
+}
+
+async function validatePublicApiResponse(
+  surfaceId: string,
+  response: SurfaceFetchResponse,
+): Promise<string[]> {
+  const contentType = response.headers?.get('content-type')?.toLowerCase() ?? '';
+  if (!/^application\/(?:[a-z0-9.+-]+\+)?json(?:;|$)/i.test(contentType)) {
+    await cancelResponseBody(response);
+    return [`${surfaceId}: expected a JSON API response, observed ${contentType || 'missing'}`];
+  }
+
+  const { text, failure } = await readBoundedResponseBody(surfaceId, response, 'API');
+  if (failure || text === null) return [failure ?? `${surfaceId}: API body is unavailable`];
+  if (text.trim().length === 0) return [`${surfaceId}: API body is empty`];
+
+  const parsed = parseDuplicateFreeJson(text);
+  if (!parsed.ok) return [`${surfaceId}: API body is not valid duplicate-free JSON`];
+  const payload = parsed.value;
+
+  if (surfaceId === 'killinchu-build-info-api') {
+    return isExactKillinchuBuildInfo(payload)
+      ? []
+      : [`${surfaceId}: API body does not match the exact source-binding contract`];
+  }
+  if (surfaceId === 'killinchu-readiness-api') {
+    return isExactKillinchuReadiness(payload)
+      ? []
+      : [`${surfaceId}: API body does not match the exact readiness contract`];
+  }
+  return [`${surfaceId}: routed API has no body validator`];
 }
 
 function isXmlRecord(value: unknown): value is Record<string, unknown> {
@@ -780,11 +1017,16 @@ async function verifyLivePublicSurface(
     const approvedTarget = approvedTargetFor(surface.id);
     if (!approvedTarget) return [`${surface.id}: no approved live probe target`];
 
-    const validateRoutedMetadata =
-      surface.kind === 'METADATA' && surface.availability !== 'UNAVAILABLE'
+    const validateRoutedBody =
+      surface.availability !== 'UNAVAILABLE' &&
+      (surface.kind === 'METADATA' ||
+        surface.id === 'killinchu-build-info-api' ||
+        surface.id === 'killinchu-readiness-api')
         ? async (candidate: SurfaceFetchResponse): Promise<string[]> => {
             if (candidate.status >= 200 && candidate.status < 300) {
-              return await validateMetadataResponse(surface.id, candidate);
+              return surface.kind === 'METADATA'
+                ? await validateMetadataResponse(surface.id, candidate)
+                : await validatePublicApiResponse(surface.id, candidate);
             }
             await cancelResponseBody(candidate);
             return [];
@@ -793,7 +1035,7 @@ async function verifyLivePublicSurface(
     const firstResult = await requestSurface(
       approvedTarget.canonicalUrl,
       fetchSurface,
-      approvedTarget.canonicalUrl === approvedTarget.finalUrl ? validateRoutedMetadata : undefined,
+      approvedTarget.canonicalUrl === approvedTarget.finalUrl ? validateRoutedBody : undefined,
     );
     const firstResponse = firstResult.response;
     let response = firstResponse;
@@ -820,7 +1062,7 @@ async function verifyLivePublicSurface(
       const finalResult = await requestSurface(
         approvedTarget.finalUrl,
         fetchSurface,
-        validateRoutedMetadata,
+        validateRoutedBody,
       );
       response = finalResult.response;
       responseFailures = finalResult.responseFailures;
