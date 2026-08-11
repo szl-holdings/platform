@@ -18,7 +18,15 @@ import type {
   KernelRuntimeConfig,
   StateCapsule,
   StateGovernance,
+  StateSensitivity,
 } from './types.js';
+
+const SENSITIVITY_RANK: Readonly<Record<StateSensitivity, number>> = {
+  public: 0,
+  internal: 1,
+  confidential: 2,
+  restricted: 3,
+};
 
 interface IdempotencyRecord {
   readonly requestDigest: string;
@@ -143,13 +151,43 @@ function defaultGovernance(
   inputCapsules: readonly StateCapsule[],
   output: KernelProducedState,
 ): StateGovernance {
-  return (
+  const minimumSensitivity =
+    inputCapsules.length > 0 ? highestSensitivity(inputCapsules) : 'public';
+  const governance =
     output.governance ?? {
-      sensitivity: inputCapsules.length > 0 ? highestSensitivity(inputCapsules) : 'internal',
+      sensitivity: inputCapsules.length > 0 ? minimumSensitivity : 'internal',
       retentionClass: 'session',
       reusePolicy: 'same_session',
       evidenceTier: 'MEASURED',
-    }
+    };
+  assertStateNative(
+    SENSITIVITY_RANK[governance.sensitivity] >= SENSITIVITY_RANK[minimumSensitivity],
+    'REUSE_DENIED',
+    'Kernel output cannot reduce the highest input sensitivity without governed declassification.',
+    {
+      minimumSensitivity,
+      outputSensitivity: governance.sensitivity,
+    },
+  );
+  return governance;
+}
+
+function verifierOutputSnapshot(
+  output: readonly KernelProducedState[],
+): readonly KernelProducedState[] {
+  return Object.freeze(
+    output.map((produced) =>
+      Object.freeze({
+        ...produced,
+        payload: Uint8Array.from(produced.payload),
+        compatibility: produced.compatibility
+          ? Object.freeze({ ...produced.compatibility })
+          : undefined,
+        governance: produced.governance
+          ? Object.freeze({ ...produced.governance })
+          : undefined,
+      }),
+    ),
   );
 }
 
@@ -401,11 +439,12 @@ export class AlloyKernelRuntime {
         });
       }
 
+      const verifierOutput = verifierOutputSnapshot(output);
       const verifier = definition.verify
         ? await this.#runWithDeadline(
             () =>
               definition.verify!(
-                output,
+                verifierOutput,
                 { capsules: Object.freeze(input), parameters: request.parameters },
                 context,
               ),
@@ -534,7 +573,6 @@ export class AlloyKernelRuntime {
                   }),
             outputCapsules,
           });
-          receiptWritten = true;
         } catch (receiptError) {
           terminalError = receiptError;
         }

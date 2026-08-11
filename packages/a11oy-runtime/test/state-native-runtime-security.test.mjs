@@ -201,6 +201,136 @@ test('failed epoch pinning never poisons an idempotency key as in-flight', async
   }
 });
 
+test('a verifier cannot mutate the bytes that are persisted after verification', async () => {
+  const stateKey = randomBytes(32);
+  const bus = new AlloyStateBus({ masterKey: stateKey });
+  const manager = new CognitiveEpochManager();
+  const active = prepareEpoch(manager, 'epoch_verifier_snapshot', 'rev-snapshot');
+  const { privateKey } = generateKeyPairSync('ed25519');
+  const expected = Buffer.from('verified-output');
+  try {
+    const runtime = new AlloyKernelRuntime({
+      stateBus: bus,
+      epochManager: manager,
+      config: {
+        receiptSigner: { keyId: 'test-key', privateKey },
+        receiptWriter: async () => {},
+      },
+    });
+    runtime.register({
+      kernelId: 'state.verifier-snapshot',
+      version: '1.0.0',
+      kind: 'custom',
+      route: 'state.test',
+      requiresVerification: true,
+      execute: async () => [
+        {
+          stateType: 'prompt',
+          portability: 'P4',
+          payload: Uint8Array.from(expected),
+          governance: {
+            sensitivity: 'public',
+            retentionClass: 'session',
+            reusePolicy: 'same_session',
+            evidenceTier: 'MEASURED',
+          },
+        },
+      ],
+      verify: async (outputs) => {
+        outputs[0].payload.fill(0);
+        return { passed: true, reason: 'Verifier accepted its isolated copy.', evidenceDigests: [] };
+      },
+    });
+
+    const request = requestFor({
+      actionId: 'runtime-action-verifier-snapshot',
+      kernelId: 'state.verifier-snapshot',
+      compatibility: active.compatibility,
+      epochId: 'epoch_verifier_snapshot',
+    });
+    const result = await runtime.execute(request);
+    const stored = await bus.get(result.outputs[0].capsuleId, {
+      tenantId: 'tenant_a',
+      sessionId: 'session_a',
+      actionId: request.authorization.envelope.actionId,
+      compatibility: result.outputs[0].compatibility,
+      allowedSensitivities: ['public'],
+    });
+    assert.deepEqual(Buffer.from(stored.payload), expected);
+  } finally {
+    bus.dispose();
+    stateKey.fill(0);
+  }
+});
+
+test('kernel outputs cannot downgrade the highest input sensitivity', async () => {
+  const stateKey = randomBytes(32);
+  const bus = new AlloyStateBus({ masterKey: stateKey });
+  const manager = new CognitiveEpochManager();
+  const active = prepareEpoch(manager, 'epoch_sensitivity_floor', 'rev-sensitivity');
+  const input = await bus.put({
+    tenantId: 'tenant_a',
+    sessionId: 'session_a',
+    stateType: 'prompt',
+    portability: 'P4',
+    payload: Buffer.from('confidential'),
+    compatibility: active.compatibility,
+    governance: {
+      sensitivity: 'confidential',
+      retentionClass: 'session',
+      reusePolicy: 'same_session',
+      evidenceTier: 'MEASURED',
+    },
+    provenance: { sourceActionId: 'seed_action', parentCapsuleIds: [] },
+  });
+  const { privateKey } = generateKeyPairSync('ed25519');
+  const ledger = [];
+  try {
+    const runtime = new AlloyKernelRuntime({
+      stateBus: bus,
+      epochManager: manager,
+      config: {
+        receiptSigner: { keyId: 'test-key', privateKey },
+        receiptWriter: async (receipt) => ledger.push(receipt),
+      },
+    });
+    runtime.register({
+      kernelId: 'state.sensitivity-floor',
+      version: '1.0.0',
+      kind: 'custom',
+      route: 'state.test',
+      requiresVerification: false,
+      execute: async ({ capsules }) => [
+        {
+          stateType: 'prompt',
+          portability: 'P4',
+          payload: Uint8Array.from(capsules[0].payload),
+          governance: {
+            sensitivity: 'public',
+            retentionClass: 'session',
+            reusePolicy: 'same_session',
+            evidenceTier: 'MEASURED',
+          },
+        },
+      ],
+    });
+
+    const request = requestFor({
+      actionId: 'runtime-action-sensitivity-floor',
+      kernelId: 'state.sensitivity-floor',
+      compatibility: active.compatibility,
+      epochId: 'epoch_sensitivity_floor',
+      inputCapsuleIds: [input.capsuleId],
+    });
+    await assert.rejects(runtime.execute(request), expectCode('REUSE_DENIED'));
+    assert.equal(ledger.length, 1);
+    assert.equal(ledger[0].outcome, 'error');
+  } finally {
+    bus.dispose();
+    stateKey.fill(0);
+  }
+});
+
 test('same-tenant terminal receipts are serialized into one predecessor chain', async () => {
   const stateKey = randomBytes(32);
   const bus = new AlloyStateBus({ masterKey: stateKey });
