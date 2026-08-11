@@ -253,7 +253,11 @@ export class CognitiveEpochManager {
   }
 
   #routeKey(tenantId: string, route: string): string {
-    return `${tenantId}:${route}`;
+    return digestObject({
+      schema: 'szl.epoch-route-scope/v1',
+      tenantId,
+      route,
+    });
   }
 
   #validateSpec(spec: CognitiveEpochSpec): void {
