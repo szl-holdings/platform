@@ -15,7 +15,7 @@ function expectCode(code) {
   return (error) => error instanceof StateNativeError && error.code === code;
 }
 
-function prepareEpoch(manager, epochId, revision) {
+function prepareEpochDraft(manager, epochId, revision) {
   const policyDigest = digestObject({ policy: `policy-${revision}`, version: 1 });
   manager.prepare({
     epochId,
@@ -34,8 +34,6 @@ function prepareEpoch(manager, epochId, revision) {
     toolManifestDigest: digestObject({ tools: [] }),
     createdAt: new Date().toISOString(),
   });
-  manager.validate(epochId, [{ name: 'self-test', passed: true, detail: 'Passed.' }]);
-  manager.activate(epochId);
   return {
     policyDigest,
     compatibility: {
@@ -44,6 +42,13 @@ function prepareEpoch(manager, epochId, revision) {
       cognitiveEpoch: epochId,
     },
   };
+}
+
+function prepareEpoch(manager, epochId, revision) {
+  const prepared = prepareEpochDraft(manager, epochId, revision);
+  manager.validate(epochId, [{ name: 'self-test', passed: true, detail: 'Passed.' }]);
+  manager.activate(epochId);
+  return prepared;
 }
 
 function bindRequest(provisional) {
@@ -432,7 +437,7 @@ test('malformed verifier evidence digests fail closed', async () => {
 
 test('cognitive epoch validation checks enforce boolean passed', () => {
   const manager = new CognitiveEpochManager();
-  prepareEpoch(manager, 'epoch_validation_passed', 'rev-validation-passed');
+  prepareEpochDraft(manager, 'epoch_validation_passed', 'rev-validation-passed');
   assert.throws(
     () =>
       manager.validate('epoch_validation_passed', [
@@ -444,7 +449,7 @@ test('cognitive epoch validation checks enforce boolean passed', () => {
 
 test('cognitive epoch validation checks require non-empty name and detail strings', () => {
   const manager = new CognitiveEpochManager();
-  prepareEpoch(manager, 'epoch_validation_shape_name', 'rev-validation-shape-name');
+  prepareEpochDraft(manager, 'epoch_validation_shape_name', 'rev-validation-shape-name');
   assert.throws(
     () =>
       manager.validate('epoch_validation_shape_name', [
@@ -452,7 +457,7 @@ test('cognitive epoch validation checks require non-empty name and detail string
       ]),
     expectCode('INVALID_INPUT'),
   );
-  prepareEpoch(manager, 'epoch_validation_shape_detail', 'rev-validation-shape-detail');
+  prepareEpochDraft(manager, 'epoch_validation_shape_detail', 'rev-validation-shape-detail');
   assert.throws(
     () =>
       manager.validate('epoch_validation_shape_detail', [
