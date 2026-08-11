@@ -40,8 +40,8 @@ jobs:
           node-version: '24'
           cache: 'pnpm'
 
-      - name: Install dependencies
-        run: pnpm install --frozen-lockfile
+      - name: Install dependencies (skip ONNXRuntime download to avoid postinstall network flake)
+        run: ONNXRUNTIME_NODE_INSTALL=skip pnpm install --frozen-lockfile
 
       # ── Boot the real servers the qa-site smoke fetches against ───────────────
       # audit:full's `qa-site` step (scripts/qa/smoke-routes.js) is a LIVE HTTP
