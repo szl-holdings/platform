@@ -1,5 +1,5 @@
 import { canonicalJson, digestObject, newId, sha256Hex } from './canonical.js';
-import { assertCompatibility } from './compatibility.js';
+import { assertCompatibility, assertCompatibilityFingerprint } from './compatibility.js';
 import {
   constantTimeEqualHex,
   decryptEnvelope,
@@ -90,6 +90,14 @@ function stateRequestDigest(request: PutStateRequest, contentDigest: string): st
   });
 }
 
+function idempotencyScopeKey(tenantId: string, idempotencyKey: string): string {
+  return digestObject({
+    schema: 'szl.state-idempotency-scope/v1',
+    tenantId,
+    idempotencyKey,
+  });
+}
+
 function capsuleAad(capsule: StateCapsule): string {
   return canonicalJson({
     schema: capsule.schema,
@@ -167,7 +175,7 @@ export class AlloyStateBus {
     const requestDigest = stateRequestDigest(request, contentDigest);
 
     if (request.idempotencyKey) {
-      const key = `${request.tenantId}:${request.idempotencyKey}`;
+      const key = idempotencyScopeKey(request.tenantId, request.idempotencyKey);
       const prior = this.#idempotency.get(key);
       if (prior) {
         if (!constantTimeEqualHex(prior.requestDigest, requestDigest)) {
@@ -419,6 +427,7 @@ export class AlloyStateBus {
       'INVALID_INPUT',
       'portability tier is unsupported.',
     );
+    assertCompatibilityFingerprint(request.portability, request.compatibility);
     assertStateNative(
       SENSITIVITIES.has(request.governance.sensitivity),
       'INVALID_INPUT',
@@ -499,7 +508,10 @@ export class AlloyStateBus {
     if (!request.idempotencyKey) {
       return;
     }
-    this.#idempotency.set(`${request.tenantId}:${request.idempotencyKey}`, { requestDigest, capsuleId });
+    this.#idempotency.set(idempotencyScopeKey(request.tenantId, request.idempotencyKey), {
+      requestDigest,
+      capsuleId,
+    });
   }
 
   #assertReadable(capsule: StateCapsule, context: StateReadContext): void {
@@ -509,7 +521,7 @@ export class AlloyStateBus {
       });
     }
 
-    const now = context.now ?? this.#clock();
+    const now = this.#clock();
     if (capsule.expiresAt && Date.parse(capsule.expiresAt) <= now.getTime()) {
       throw new StateNativeError('EXPIRED', 'State capsule has expired.', { capsuleId: capsule.capsuleId });
     }
