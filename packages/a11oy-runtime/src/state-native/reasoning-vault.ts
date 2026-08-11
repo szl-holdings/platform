@@ -41,12 +41,23 @@ function entryAad(entry: ReasoningVaultEntry): string {
     modelRevision: entry.modelRevision,
     cognitiveEpoch: entry.cognitiveEpoch,
     providerRequestId: entry.providerRequestId,
+    createdAt: entry.createdAt,
+    expiresAt: entry.expiresAt,
+    byteLength: entry.byteLength,
     contentDigest: entry.contentDigest,
   });
 }
 
 function freezeEntry(entry: ReasoningVaultEntry): ReasoningVaultEntry {
   return Object.freeze({ ...entry });
+}
+
+function idempotencyScopeKey(tenantId: string, idempotencyKey: string): string {
+  return digestObject({
+    schema: 'szl.reasoning-idempotency-scope/v1',
+    tenantId,
+    idempotencyKey,
+  });
 }
 
 export class ReasoningVault {
@@ -59,9 +70,26 @@ export class ReasoningVault {
 
   public constructor(config: ReasoningVaultConfig) {
     assertStateNative(config.masterKey.byteLength === 32, 'INVALID_INPUT', 'masterKey must contain 32 bytes.');
+    const maxEntryBytes = config.maxEntryBytes ?? 8 * 1024 * 1024;
+    const maxTenantBytes = config.maxTenantBytes ?? 64 * 1024 * 1024;
+    assertStateNative(
+      Number.isSafeInteger(maxEntryBytes) && maxEntryBytes > 0,
+      'INVALID_INPUT',
+      'maxEntryBytes must be a positive safe integer.',
+    );
+    assertStateNative(
+      Number.isSafeInteger(maxTenantBytes) && maxTenantBytes > 0,
+      'INVALID_INPUT',
+      'maxTenantBytes must be a positive safe integer.',
+    );
+    assertStateNative(
+      maxTenantBytes >= maxEntryBytes,
+      'INVALID_INPUT',
+      'maxTenantBytes must be greater than or equal to maxEntryBytes.',
+    );
     this.#masterKey = Buffer.from(config.masterKey);
-    this.#maxEntryBytes = config.maxEntryBytes ?? 8 * 1024 * 1024;
-    this.#maxTenantBytes = config.maxTenantBytes ?? 64 * 1024 * 1024;
+    this.#maxEntryBytes = maxEntryBytes;
+    this.#maxTenantBytes = maxTenantBytes;
     this.#clock = config.clock ?? (() => new Date());
   }
 
@@ -81,7 +109,7 @@ export class ReasoningVault {
     });
 
     if (request.idempotencyKey) {
-      const key = `${request.tenantId}:${request.idempotencyKey}`;
+      const key = idempotencyScopeKey(request.tenantId, request.idempotencyKey);
       const prior = this.#idempotency.get(key);
       if (prior) {
         if (!constantTimeEqualHex(prior.requestDigest, requestDigest)) {
@@ -105,6 +133,12 @@ export class ReasoningVault {
     );
 
     const createdAt = this.#clock();
+    const expiresAt = createdAt.getTime() + request.ttlMs;
+    assertStateNative(
+      Number.isFinite(expiresAt) && expiresAt <= 8_640_000_000_000_000,
+      'INVALID_INPUT',
+      'Reasoning-vault TTL exceeds the supported timestamp range.',
+    );
     const entry = freezeEntry({
       schema: 'szl.reasoning-vault-entry/v1',
       entryId: newId('reasoning'),
@@ -115,7 +149,7 @@ export class ReasoningVault {
       cognitiveEpoch: request.cognitiveEpoch,
       providerRequestId: request.providerRequestId,
       createdAt: createdAt.toISOString(),
-      expiresAt: new Date(createdAt.getTime() + request.ttlMs).toISOString(),
+      expiresAt: new Date(expiresAt).toISOString(),
       byteLength: request.payload.byteLength,
       contentDigest,
       state: 'PREPARED',
@@ -123,7 +157,7 @@ export class ReasoningVault {
     const envelope = encryptEnvelope(this.#masterKey, request.payload, entryAad(entry));
     this.#entries.set(entry.entryId, { entry, envelope });
     if (request.idempotencyKey) {
-      this.#idempotency.set(`${request.tenantId}:${request.idempotencyKey}`, {
+      this.#idempotency.set(idempotencyScopeKey(request.tenantId, request.idempotencyKey), {
         requestDigest,
         entryId: entry.entryId,
       });
@@ -139,7 +173,7 @@ export class ReasoningVault {
       });
     }
     this.#assertBinding(stored.entry, request);
-    const now = request.now ?? this.#clock();
+    const now = this.#clock();
     if (Date.parse(stored.entry.expiresAt) <= now.getTime()) {
       throw new StateNativeError('EXPIRED', 'Reasoning-vault entry has expired.', {
         entryId: request.entryId,
@@ -232,7 +266,8 @@ export class ReasoningVault {
     );
   }
 
-  public purgeExpired(now = this.#clock()): readonly ReasoningVaultEntry[] {
+  public purgeExpired(): readonly ReasoningVaultEntry[] {
+    const now = this.#clock();
     const shredded: ReasoningVaultEntry[] = [];
     for (const stored of this.#entries.values()) {
       if (stored.entry.state !== 'SHREDDED' && Date.parse(stored.entry.expiresAt) <= now.getTime()) {
@@ -309,7 +344,11 @@ export class ReasoningVault {
       'INVALID_INPUT',
       'Reasoning-vault binding fields must not be empty.',
     );
-    assertStateNative(request.ttlMs > 0, 'INVALID_INPUT', 'Reasoning-vault TTL must be positive.');
+    assertStateNative(
+      Number.isSafeInteger(request.ttlMs) && request.ttlMs > 0,
+      'INVALID_INPUT',
+      'Reasoning-vault TTL must be a positive safe integer.',
+    );
     assertStateNative(request.payload.byteLength > 0, 'INVALID_INPUT', 'Reasoning state must not be empty.');
     assertStateNative(
       request.payload.byteLength <= this.#maxEntryBytes,
