@@ -87,7 +87,10 @@ export function WorkcellDetail() {
       paused: '#5e5e5e',
       idle: '#5e5e5e',
     }[wc.status] ?? '#5e5e5e';
-  const execResult = wc.mockExecutionResult as WorkcellExecutionResult;
+  const execResult: WorkcellExecutionResult = wc.mockExecutionResult ?? {};
+  const execStatus = execResult.status ?? 'unknown';
+  const execDuration = execResult.durationMs;
+  const execOutputSummary = execResult.outputSummary;
 
   return (
     <Layout>
@@ -100,7 +103,12 @@ export function WorkcellDetail() {
           ← All Workcells
         </Link>
       </div>
-      <PageHeader label="WORKCELL DETAIL" title={wc.name} subtitle={wc.objective} status="LIVE">
+      <PageHeader
+        label="WORKCELL DETAIL"
+        title={wc.name}
+        subtitle={wc.objective}
+        status={wc.evidenceState}
+      >
         <div className="flex items-center gap-2">
           <span
             className="text-xs font-mono px-2 py-1 rounded"
@@ -116,6 +124,15 @@ export function WorkcellDetail() {
           </span>
         </div>
       </PageHeader>
+
+      <div
+        className="mb-6 rounded-xl border border-white/15 bg-white/[0.03] p-4 text-sm leading-6"
+        style={{ color: 'var(--color-a11oy-text-sub)' }}
+        role="note"
+      >
+        <strong style={{ color: 'var(--color-a11oy-text)' }}>Demo record:</strong>{' '}
+        {wc.evidenceReason} Decisions on this page update browser-local presentation state only.
+      </div>
 
       <div className="grid lg:grid-cols-3 gap-6">
         {/* Main content */}
@@ -139,7 +156,7 @@ export function WorkcellDetail() {
                   {
                     step: 'Context Engine: context pack built',
                     status: 'completed',
-                    note: JSON.stringify(wc.contextPack).slice(0, 60) + '…',
+                    note: `${JSON.stringify(wc.contextPack).slice(0, 60)}…`,
                   },
                   ...wc.agentSequence.map((a) => ({
                     step: `${a.role}: ${a.action}`,
@@ -164,12 +181,12 @@ export function WorkcellDetail() {
                     note: `Verdict: ${wc.mirrorEvalResult.verdict} · Score: ${Math.round(wc.mirrorEvalResult.score * 100)}%`,
                   },
                   {
-                    step: 'Proof Ledger: PCE contract recorded',
+                    step: 'Demo Proof Ledger: seed PCE contract referenced',
                     status: wc.verificationResult.status === 'passed' ? 'completed' : 'failed',
                     note: `Contract: ${wc.pceContractId}`,
                   },
-                ].map((s, i) => (
-                  <TraceStep key={i} step={s.step} status={s.status} note={s.note} />
+                ].map((s) => (
+                  <TraceStep key={s.step} step={s.step} status={s.status} note={s.note} />
                 ))}
               </div>
             </Card>
@@ -180,7 +197,7 @@ export function WorkcellDetail() {
             <SectionTitle>Agent Sequence ({wc.agentSequence.length})</SectionTitle>
             <div className="flex flex-col gap-2">
               {wc.agentSequence.map((a, i) => (
-                <Card key={i} className="text-xs">
+                <Card key={a.agentId} className="text-xs">
                   <div className="flex items-start justify-between gap-2">
                     <div>
                       <div className="flex items-center gap-2 mb-0.5">
@@ -291,7 +308,7 @@ export function WorkcellDetail() {
             const chain = DELEGATION_CHAINS.find((c) => {
               if (c.rootAgentId === wc.agentSequence[0]?.agentId || c.workcellId === wc.id)
                 return true;
-              const cLower = (c.workcellId + ' ' + c.workcellName).toLowerCase();
+              const cLower = `${c.workcellId} ${c.workcellName}`.toLowerCase();
               return vertParts.some((seg) => seg.length > 2 && cLower.includes(seg));
             });
             if (!chain || chain.hops.length === 0) return null;
@@ -387,8 +404,8 @@ export function WorkcellDetail() {
                     <div className="flex items-center gap-2">
                       <span style={{ color: '#22c55e' }}>✓</span>
                       <span style={{ color: 'var(--color-a11oy-text-ghost)' }}>
-                        All hops scope-narrowed · Privilege boundaries enforced · Chain replay
-                        available
+                        Fixture hops show scope narrowing · Privilege boundaries are modeled ·
+                        Browser-local chain replay is available
                       </span>
                     </div>
                   </div>
@@ -492,14 +509,15 @@ export function WorkcellDetail() {
                         }}
                       >
                         {decision === 'approved'
-                          ? '✓ Approved — execution authorized'
+                          ? '✓ Demo approval recorded — no external execution'
                           : decision === 'deferred'
                             ? '⏸ Deferred'
                             : '✕ Rejected'}
                       </span>
                       <button
+                        type="button"
                         onClick={() => setDecision(null)}
-                        className="text-xs ml-2"
+                        className="min-h-11 px-3 text-xs ml-2"
                         style={{
                           color: 'var(--color-a11oy-text-ghost)',
                           background: 'none',
@@ -512,7 +530,7 @@ export function WorkcellDetail() {
                     </div>
                   ) : (
                     <>
-                      <ApprovalGate label={`Requires ${wc.actionBrief.approvalTier} approval`} />
+                      <ApprovalGate label={`Simulated ${wc.actionBrief.approvalTier} approval`} />
                       <div className="flex gap-2 mt-2">
                         <ActionButton variant="primary" onClick={() => setDecision('approved')}>
                           Approve
@@ -540,16 +558,16 @@ export function WorkcellDetail() {
                   className="font-mono px-1.5 py-0.5 rounded"
                   style={{
                     backgroundColor:
-                      execResult.status === 'success'
+                      execStatus === 'success'
                         ? 'rgba(201,183,135,0.12)'
                         : 'rgba(245,245,245,0.12)',
-                    color: execResult.status === 'success' ? '#c9b787' : '#f5f5f5',
+                    color: execStatus === 'success' ? '#c9b787' : '#f5f5f5',
                   }}
                 >
-                  {execResult.status ?? 'unknown'}
+                  {execStatus}
                 </span>
                 <span style={{ color: 'var(--color-a11oy-text-ghost)' }}>
-                  {execResult.durationMs}ms
+                  {execDuration != null ? `${execDuration}ms` : 'duration unavailable'}
                 </span>
               </div>
               <div
@@ -560,7 +578,7 @@ export function WorkcellDetail() {
                   color: 'var(--color-a11oy-text-ghost)',
                 }}
               >
-                {execResult.outputSummary}
+                {execOutputSummary ?? 'No execution output snapshot is available for this fixture.'}
               </div>
               {execResult.errorMessage && (
                 <div
@@ -615,9 +633,9 @@ export function WorkcellDetail() {
                     >
                       CAUSAL CHAIN
                     </div>
-                    {pceContract.causalChainIds.map((id, i) => (
+                    {pceContract.causalChainIds.map((id) => (
                       <div
-                        key={i}
+                        key={id}
                         className="font-mono"
                         style={{ color: 'var(--color-a11oy-text-ghost)' }}
                       >

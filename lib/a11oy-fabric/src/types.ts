@@ -30,6 +30,19 @@ export type PolicyEnforcement = 'block' | 'warn' | 'log' | 'require_approval';
 
 export type WorkcellStatus = 'idle' | 'running' | 'paused' | 'error' | 'completed';
 
+/**
+ * Evidence availability is independent from a Workcell's workflow status.
+ * These tokens intentionally match the operational-source vocabulary used by
+ * @workspace/a11oy-runtime without coupling the two packages.
+ */
+export type OperationalEvidenceState =
+  | 'REAL'
+  | 'DEMO'
+  | 'UNAVAILABLE'
+  | 'DEGRADED'
+  | 'BLOCKED'
+  | 'ROADMAP';
+
 export type ProofPacketKind =
   | 'signal_ingestion'
   | 'state_transition'

@@ -1,47 +1,62 @@
-# A11oy — Brand Orchestration Layer
+# A11oy — Governed Execution Fabric Prototype
 
-> Cross-domain AI agent fabric and brand intelligence system — the orchestration backbone connecting all SZL Holdings domain packs.
+> Active prototype and investor-demo surface for inspecting governed execution concepts, seeded Workcells, approval gates, and receipt models.
 
 [![CI](https://github.com/szl-holdings/platform/actions/workflows/ci.yml/badge.svg)](https://github.com/szl-holdings/platform/actions/workflows/ci.yml)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.9-3178C6?style=flat-square&logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
 [![License](https://img.shields.io/badge/license-Proprietary-red?style=flat-square)](../../LICENSE.md)
 
-[Live Demo](https://szlholdings.com) · [Platform Demo Video](https://szlholdings.com/szl-demo-video/) · [Investor Dashboard](https://szlholdings.com/stephen/investor) · [Architecture](../../docs/architecture/architecture.md)
-
-![A11oy — Brand Orchestration Layer](../../.github/assets/screenshots/a11oy-hero.jpg)
+[Start route](http://localhost:4110/a11oy/start) · [Architecture](../../docs/architecture/architecture.md) · [Claims doctrine](../../docs/A11OY_PUBLIC_CLAIMS_DOCTRINE.md)
 
 ---
 
 ## What it does
 
-A11oy is the Alloy Fabric agent orchestration surface for the SZL Holdings platform. It provides a unified view of all AI agents running across every domain pack — their status, decisions, Covenant Policy gates, and Proof Chain attributions — along with the brand intelligence systems that ensure consistent voice and signal quality across the platform.
+A11oy is the governed-execution-fabric product in the SZL Holdings family. This artifact provides an audience-oriented start route and prototype surfaces for architecture, seed Workcells, modeled governance, seeded Proof-Carrying Execution contracts, and demonstration receipts.
 
-Every agentic action taken anywhere in the platform routes through the Alloy Fabric. A11oy is where operators monitor, tune, and govern that activity.
+The checked-in UI uses repository fixtures unless a surface explicitly identifies a current authenticated source and observation time. A rendered route or fixture status is not evidence of production operation, public deployment, customer use, or source/runtime parity. The operational Workcell registry in `@workspace/a11oy-runtime` currently fails closed as `UNAVAILABLE` with no records.
 
 ## Run locally
 
 ```bash
 # From the monorepo root
 pnpm install
-pnpm --filter @workspace/api-server dev   # Start the API server first
 pnpm --filter @workspace/a11oy dev
 ```
 
-**Primary route:** `/a11oy/`
+The seeded frontend renders without an API server. Connected features may require separately governed services, but the UI must not reinterpret an unavailable service as live.
+
+**Start route:** `/a11oy/start`
 
 ## Key modules
 
 | Module | Route | Purpose |
 |--------|-------|---------|
-| Agent Registry | `/a11oy/` | Active agent status across all domains |
-| Covenant Policies | `/a11oy/policies` | Policy configuration and override management |
-| Brand Intelligence | `/a11oy/brand` | Cross-domain brand signal monitoring |
-| Alloy Actions | `/a11oy/actions` | Pending and completed agentic actions |
-| Proof Chain | `/a11oy/proof-chain` | Immutable audit trail viewer |
+| Start here | `/a11oy/start` | Qualified investor and developer journeys |
+| Interactive demo | `/a11oy/demo` | Repository-seeded scenario walkthrough |
+| Workcells | `/a11oy/workcells` | Seed workflow state separated from `DEMO` evidence state |
+| Architecture | `/a11oy/architecture` | Designed component model |
+| SDK | `/a11oy/sdk` | Prototype developer exploration surface |
+| Governance | `/a11oy/governance` | Modeled policies and browser-local approvals |
+| PCE | `/a11oy/pce` | Seed Proof-Carrying Execution contract fields |
+| Proof | `/a11oy/proof` | Demonstration reasoning and receipt model |
+| Trust | `/a11oy/trust` | Prototype controls, unavailable operations, and roadmap |
+
+## Verify locally
+
+```bash
+pnpm --filter @workspace/a11oy-fabric test
+pnpm --filter @workspace/a11oy-fabric typecheck
+pnpm --filter @workspace/a11oy typecheck
+pnpm --filter @workspace/a11oy lint:ci
+pnpm --filter @workspace/a11oy build
+```
+
+These commands validate local source behavior only. They do not establish a deployment or authenticated operational source.
 
 ## Tech stack
 
-React 19 + Vite 7 + TypeScript (strict) · Express 5 (shared API server) · PostgreSQL 16 / Drizzle ORM · Multi-provider AI (Anthropic, OpenAI, Gemini) · OIDC/PKCE auth · Proof Chain audit trail
+React 19, Vite, TypeScript, Wouter, and the repository-local `@workspace/a11oy-fabric` seed package.
 
 ## Architecture reference
 

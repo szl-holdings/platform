@@ -5,6 +5,7 @@ import { fileURLToPath } from 'node:url';
 
 import {
   buildPublicSurfaceManifest,
+  type PublicSurface,
   type PublicSurfaceRegistry,
   validatePublicSurfaceObservationFreshness,
   validatePublicSurfaceRegistry,
@@ -14,30 +15,73 @@ import {
 const ROOT = path.resolve(import.meta.dirname, '..', '..');
 const REGISTRY = path.join(ROOT, 'config', 'public-surfaces.json');
 const OUTPUT = path.join(ROOT, 'artifacts', 'PUBLIC_SURFACES.json');
+const LIVE_VERIFY_ATTEMPTS = 3;
+const LIVE_VERIFY_BACKOFF_MS = [750, 1_500] as const;
+
+function serializeSurface(surface: PublicSurface): string {
+  return JSON.stringify(surface).replace(/"audience":\[([^\]]*)\]/, (match, members: string) => {
+    if (members.length === 0) return match;
+    return `"audience": [${members.split(',').join(', ')}]`;
+  });
+}
 
 export function serializeManifest(registry: PublicSurfaceRegistry): string {
-  const lines = JSON.stringify(buildPublicSurfaceManifest(registry), null, 2).split('\n');
-  const formatted: string[] = [];
+  const manifest = buildPublicSurfaceManifest(registry);
+  const summaryLines = JSON.stringify(manifest.summary, null, 2).split('\n');
+  const formattedSummary = summaryLines.map((line, index) => {
+    if (index === 0) return `  "summary": ${line}`;
+    return `  ${line}`;
+  });
+  formattedSummary[formattedSummary.length - 1] += ',';
 
-  for (let index = 0; index < lines.length; index += 1) {
-    const line = lines[index];
-    if (line.trim() !== '"audience": [') {
-      formatted.push(line);
-      continue;
-    }
+  const surfaceLines = manifest.surfaces.map(
+    (surface, index) =>
+      `    ${serializeSurface(surface)}${index === manifest.surfaces.length - 1 ? '' : ','}`,
+  );
 
-    const indent = line.slice(0, line.indexOf('"'));
-    const audience: string[] = [];
-    index += 1;
-    while (index < lines.length && lines[index].trim() !== '],') {
-      const encoded = lines[index].trim().replace(/,$/, '');
-      audience.push(JSON.parse(encoded) as string);
-      index += 1;
-    }
-    formatted.push(`${indent}"audience": [${audience.map(JSON.stringify).join(', ')}],`);
+  return [
+    '{',
+    `  "schema": ${JSON.stringify(manifest.schema)},`,
+    `  "generated_by": ${JSON.stringify(manifest.generated_by)},`,
+    `  "observed_at": ${JSON.stringify(manifest.observed_at)},`,
+    ...formattedSummary,
+    '  "surfaces": [',
+    ...surfaceLines,
+    '  ]',
+    '}',
+    '',
+  ].join('\n');
+}
+
+function isTransientTransportFailure(failure: string): boolean {
+  if (!failure.includes(': live probe failed:')) return false;
+  return (
+    failure.includes('TimeoutError') ||
+    failure.includes('TypeError: fetch failed') ||
+    failure.includes('ECONNRESET') ||
+    failure.includes('ETIMEDOUT') ||
+    failure.includes('EAI_AGAIN')
+  );
+}
+
+async function verifyLiveWithBoundedTransportRetry(
+  registry: PublicSurfaceRegistry,
+): Promise<string[]> {
+  for (let attempt = 1; attempt <= LIVE_VERIFY_ATTEMPTS; attempt += 1) {
+    const failures = await verifyLivePublicSurfaces(registry);
+    if (failures.length === 0) return [];
+
+    const transportOnly = failures.every(isTransientTransportFailure);
+    if (!transportOnly || attempt === LIVE_VERIFY_ATTEMPTS) return failures;
+
+    const backoffMs = LIVE_VERIFY_BACKOFF_MS[attempt - 1] ?? LIVE_VERIFY_BACKOFF_MS.at(-1)!;
+    process.stderr.write(
+      `public surface live verification: transient transport failure on attempt ${attempt}/${LIVE_VERIFY_ATTEMPTS}; retrying after ${backoffMs}ms\n`,
+    );
+    await new Promise((resolve) => setTimeout(resolve, backoffMs));
   }
 
-  return `${formatted.join('\n')}\n`;
+  return ['live verification exhausted without a result'];
 }
 
 async function main(): Promise<void> {
@@ -66,7 +110,7 @@ async function main(): Promise<void> {
   }
 
   if (verifyLive) {
-    const liveFailures = await verifyLivePublicSurfaces(registry);
+    const liveFailures = await verifyLiveWithBoundedTransportRetry(registry);
     if (liveFailures.length > 0) {
       throw new Error(`public surface live drift:\n- ${liveFailures.join('\n- ')}`);
     }
