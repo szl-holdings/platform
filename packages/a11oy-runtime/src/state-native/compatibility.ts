@@ -50,6 +50,32 @@ const REQUIRED_FIELDS: Readonly<Record<PortabilityTier, readonly (keyof Compatib
   P5: ['policyDigest', 'cognitiveEpoch'],
 };
 
+export function missingCompatibilityFields(
+  tier: PortabilityTier,
+  fingerprint: CompatibilityFingerprint,
+): readonly (keyof CompatibilityFingerprint)[] {
+  return Object.freeze(
+    REQUIRED_FIELDS[tier].filter((field) => {
+      const value = fingerprint[field];
+      return value === undefined || value.trim().length === 0;
+    }),
+  );
+}
+
+export function assertCompatibilityFingerprint(
+  tier: PortabilityTier,
+  fingerprint: CompatibilityFingerprint,
+): void {
+  const missing = missingCompatibilityFields(tier, fingerprint);
+  if (missing.length > 0) {
+    throw new StateNativeError(
+      'COMPATIBILITY_MISMATCH',
+      `Compatibility fingerprint is incomplete for portability tier ${tier}.`,
+      { missing },
+    );
+  }
+}
+
 export function evaluateCompatibility(
   tier: PortabilityTier,
   stored: CompatibilityFingerprint,
