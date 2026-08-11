@@ -50,6 +50,16 @@ const REQUIRED_FIELDS: Readonly<Record<PortabilityTier, readonly (keyof Compatib
   P5: ['policyDigest', 'cognitiveEpoch'],
 };
 
+const DIGEST_FIELDS: readonly (keyof CompatibilityFingerprint)[] = [
+  'tokenizerDigest',
+  'layoutDigest',
+  'adapterSetDigest',
+  'semanticSpaceDigest',
+  'schemaDigest',
+  'policyDigest',
+];
+const DIGEST_PATTERN = /^[a-f0-9]{64}$/;
+
 export function missingCompatibilityFields(
   tier: PortabilityTier,
   fingerprint: CompatibilityFingerprint,
@@ -58,6 +68,17 @@ export function missingCompatibilityFields(
     REQUIRED_FIELDS[tier].filter((field) => {
       const value = fingerprint[field];
       return value === undefined || value.trim().length === 0;
+    }),
+  );
+}
+
+export function invalidCompatibilityDigestFields(
+  fingerprint: CompatibilityFingerprint,
+): readonly (keyof CompatibilityFingerprint)[] {
+  return Object.freeze(
+    DIGEST_FIELDS.filter((field) => {
+      const value = fingerprint[field];
+      return value !== undefined && !DIGEST_PATTERN.test(value);
     }),
   );
 }
@@ -72,6 +93,15 @@ export function assertCompatibilityFingerprint(
       'COMPATIBILITY_MISMATCH',
       `Compatibility fingerprint is incomplete for portability tier ${tier}.`,
       { missing },
+    );
+  }
+
+  const invalidDigests = invalidCompatibilityDigestFields(fingerprint);
+  if (invalidDigests.length > 0) {
+    throw new StateNativeError(
+      'COMPATIBILITY_MISMATCH',
+      'Compatibility digest fields must contain 64 lowercase hexadecimal characters.',
+      { invalidDigests },
     );
   }
 }
