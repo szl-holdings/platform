@@ -24,7 +24,7 @@
     },
     "test": {
       "dependsOn": ["^build"],
-      "inputs": ["src/**", "tests/**", "vitest.config.*"],
+      "inputs": ["src/**", "test/**", "tests/**", "vitest.config.*"],
       "outputs": ["coverage/**"]
     },
     "@szl-holdings/estate-contract-release#test": {
