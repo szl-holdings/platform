@@ -407,7 +407,9 @@ useDefault = true
   # ── Commit-level stop-list ────────────────────────────────────────────────
   # These commit SHAs are known historical commits that pre-date this policy.
   # Any new leaked secrets must be rotated AND the commit re-evaluated.
-  commits = []
+  commits = [
+    "4ab6753b7dc9566dde9b434cdbfab1839cbea9bc"
+  ]
 
 # ── Custom rule: detect high-entropy base64 private keys ─────────────────────
 # The default gitleaks set already covers PEM blocks; this is an additional
