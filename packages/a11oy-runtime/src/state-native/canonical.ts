@@ -8,6 +8,11 @@ export type CanonicalJsonValue =
   | readonly CanonicalJsonValue[]
   | { readonly [key: string]: CanonicalJsonValue };
 
+function isPlainRecord(value: object): value is Record<string, unknown> {
+  const prototype = Object.getPrototypeOf(value);
+  return prototype === Object.prototype || prototype === null;
+}
+
 function normalize(value: unknown, stack: Set<object>): CanonicalJsonValue {
   if (value === null || typeof value === 'boolean' || typeof value === 'string') {
     return value;
@@ -33,19 +38,24 @@ function normalize(value: unknown, stack: Set<object>): CanonicalJsonValue {
       throw new TypeError('Canonical JSON does not support circular arrays.');
     }
     stack.add(value);
-    const result = value.map((item) => normalize(item, stack));
+    const result: CanonicalJsonValue[] = [];
+    for (let index = 0; index < value.length; index += 1) {
+      if (!Object.hasOwn(value, index)) {
+        throw new TypeError('Canonical JSON does not support sparse arrays.');
+      }
+      result.push(normalize(value[index], stack));
+    }
     stack.delete(value);
     return result;
   }
 
   if (typeof value === 'object') {
-    const object = value as Record<string, unknown>;
-    const prototype = Object.getPrototypeOf(object);
-    if (prototype !== Object.prototype && prototype !== null) {
+    if (!isPlainRecord(value)) {
       throw new TypeError(
         'Canonical JSON supports only plain objects, arrays, dates, and byte arrays.',
       );
     }
+    const object = value;
     if (stack.has(object)) {
       throw new TypeError('Canonical JSON does not support circular objects.');
     }

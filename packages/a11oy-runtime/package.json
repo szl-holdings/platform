@@ -14,7 +14,7 @@
   },
   "scripts": {
     "build": "tsc",
-    "test": "vitest run --passWithNoTests && tsc && node --test test/state-native-runtime.test.mjs test/state-native-runtime-timeout.test.mjs test/state-native-runtime-security.test.mjs test/state-native-state-bus-security.test.mjs test/state-native-boundary-security.test.mjs test/state-native-receipt-integrity.test.mjs test/state-native-runtime-boundary-regressions.test.mjs test/state-native-runtime-admission-regressions.test.mjs",
+    "test": "vitest run --passWithNoTests && tsc && node --test test/state-native-runtime.test.mjs test/state-native-runtime-timeout.test.mjs test/state-native-runtime-security.test.mjs test/state-native-state-bus-security.test.mjs test/state-native-boundary-security.test.mjs test/state-native-receipt-integrity.test.mjs test/state-native-runtime-boundary-regressions.test.mjs test/state-native-runtime-admission-regressions.test.mjs test/state-native-review-hardening.test.mjs",
     "typecheck": "tsc --noEmit",
     "demo:state-native": "tsc && node dist/state-native/demo.js"
   },
