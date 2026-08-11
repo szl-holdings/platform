@@ -90,6 +90,55 @@ function epochCompatibility(
   return compatibility;
 }
 
+function validateInputCompatibilityAgainstEpoch(
+  epoch: CognitiveEpochRecord,
+  compatibility: CompatibilityFingerprint,
+): void {
+  const expected: Readonly<
+    Pick<
+      CompatibilityFingerprint,
+      | 'modelId'
+      | 'modelRevision'
+      | 'engineId'
+      | 'engineVersion'
+      | 'tokenizerDigest'
+      | 'layoutDigest'
+      | 'adapterSetDigest'
+      | 'policyDigest'
+      | 'cognitiveEpoch'
+    >
+  > = {
+    modelId: epoch.modelId,
+    modelRevision: epoch.modelRevision,
+    engineId: epoch.engineId,
+    engineVersion: epoch.engineVersion,
+    tokenizerDigest: epoch.tokenizerDigest,
+    layoutDigest: epoch.layoutDigest,
+    adapterSetDigest: epoch.adapterSetDigest,
+    policyDigest: epoch.policyDigest,
+    cognitiveEpoch: epoch.epochId,
+  };
+  const mandatory = new Set<keyof CompatibilityFingerprint>(['policyDigest', 'cognitiveEpoch']);
+  const mismatches: Array<{ readonly field: string; readonly expected: string; readonly actual?: string }> = [];
+
+  for (const [field, expectedValue] of Object.entries(expected) as Array<
+    [keyof typeof expected, string]
+  >) {
+    const actual = compatibility[field];
+    if ((mandatory.has(field) || actual !== undefined) && actual !== expectedValue) {
+      mismatches.push({ field, expected: expectedValue, actual });
+    }
+  }
+
+  if (mismatches.length > 0) {
+    throw new StateNativeError(
+      'COMPATIBILITY_MISMATCH',
+      'Input compatibility is not bound to the pinned cognitive epoch.',
+      { epochId: epoch.epochId, mismatches },
+    );
+  }
+}
+
 function defaultGovernance(
   inputCapsules: readonly StateCapsule[],
   output: KernelProducedState,
@@ -153,6 +202,7 @@ export class AlloyKernelRuntime {
   readonly #clock: () => Date;
   readonly #kernels = new Map<string, KernelDefinition>();
   readonly #lastReceiptByTenant = new Map<string, string>();
+  readonly #receiptTailByTenant = new Map<string, Promise<void>>();
   readonly #idempotency = new Map<string, IdempotencyRecord>();
 
   public constructor(dependencies: AlloyKernelRuntimeDependencies) {
@@ -230,7 +280,6 @@ export class AlloyKernelRuntime {
           'Prior execution reached an ambiguous terminal boundary and will not be retried automatically.',
         );
       }
-      this.#idempotency.set(idempotencyKey, { requestDigest: replayDigest, status: 'IN_FLIGHT' });
     }
 
     let executionStarted = false;
@@ -241,9 +290,13 @@ export class AlloyKernelRuntime {
     const deadlineAt = startedAt + request.budget.maxRuntimeMs;
     const lease = this.#epochManager.pin(request.tenantId, definition.route, request.epochId);
     try {
+      if (idempotencyKey) {
+        this.#idempotency.set(idempotencyKey, { requestDigest: replayDigest, status: 'IN_FLIGHT' });
+      }
       if (lease.epoch.route !== definition.route) {
         throw new StateNativeError('EPOCH_NOT_ACTIVE', 'Kernel route does not match the pinned epoch.');
       }
+      validateInputCompatibilityAgainstEpoch(lease.epoch, request.inputCompatibility);
 
       const decision = request.authorization.decision;
       if (decision.effect === 'block') {
@@ -572,44 +625,66 @@ export class AlloyKernelRuntime {
     readonly receiptId?: string;
   }): Promise<KernelExecutionReceipt> {
     const { request, definition, epoch } = input;
-    const unsigned: KernelReceiptUnsigned = {
-      schema: 'szl.kernel-execution-receipt/v1',
-      receiptId: input.receiptId ?? newId('kernel_receipt'),
-      actionId: request.authorization.envelope.actionId,
-      tenantId: request.tenantId,
-      sessionId: request.sessionId,
-      kernelId: definition.kernelId,
-      kernelVersion: definition.version,
-      kernelKind: definition.kind,
-      epochId: epoch.epochId,
-      policyEffect: request.authorization.decision.effect,
-      policyReason: request.authorization.decision.reason,
-      policyVersion: request.authorization.decision.policyVersion,
-      approvalId: request.authorization.approval?.approvalId,
-      outcome: input.outcome,
-      reason: input.reason,
-      inputCapsuleIds: Object.freeze(input.inputCapsules.map((capsule) => capsule.capsuleId)),
-      inputDigests: Object.freeze(input.inputCapsules.map((capsule) => capsule.contentDigest)),
-      outputCapsuleIds: Object.freeze(input.outputCapsules.map((capsule) => capsule.capsuleId)),
-      outputDigests: Object.freeze(input.outputCapsules.map((capsule) => capsule.contentDigest)),
-      verifier: input.verifier,
-      budget: request.budget,
-      runtimeMs: Math.max(0, Math.round(input.runtimeMs * 1000) / 1000),
-      occurredAt: this.#clock().toISOString(),
-      priorReceiptDigest: this.#lastReceiptByTenant.get(request.tenantId),
-    };
-    const receipt = createKernelExecutionReceipt(unsigned, this.#config.receiptSigner);
+    return this.#withTenantReceiptLock(request.tenantId, async () => {
+      const unsigned: KernelReceiptUnsigned = {
+        schema: 'szl.kernel-execution-receipt/v1',
+        receiptId: input.receiptId ?? newId('kernel_receipt'),
+        actionId: request.authorization.envelope.actionId,
+        tenantId: request.tenantId,
+        sessionId: request.sessionId,
+        kernelId: definition.kernelId,
+        kernelVersion: definition.version,
+        kernelKind: definition.kind,
+        epochId: epoch.epochId,
+        policyEffect: request.authorization.decision.effect,
+        policyReason: request.authorization.decision.reason,
+        policyVersion: request.authorization.decision.policyVersion,
+        approvalId: request.authorization.approval?.approvalId,
+        outcome: input.outcome,
+        reason: input.reason,
+        inputCapsuleIds: Object.freeze(input.inputCapsules.map((capsule) => capsule.capsuleId)),
+        inputDigests: Object.freeze(input.inputCapsules.map((capsule) => capsule.contentDigest)),
+        outputCapsuleIds: Object.freeze(input.outputCapsules.map((capsule) => capsule.capsuleId)),
+        outputDigests: Object.freeze(input.outputCapsules.map((capsule) => capsule.contentDigest)),
+        verifier: input.verifier,
+        budget: request.budget,
+        runtimeMs: Math.max(0, Math.round(input.runtimeMs * 1000) / 1000),
+        occurredAt: this.#clock().toISOString(),
+        priorReceiptDigest: this.#lastReceiptByTenant.get(request.tenantId),
+      };
+      const receipt = createKernelExecutionReceipt(unsigned, this.#config.receiptSigner);
+      try {
+        await this.#config.receiptWriter(receipt);
+      } catch (error) {
+        throw new StateNativeError(
+          'RECEIPT_WRITE_FAILED',
+          'Kernel receipt persistence failed; produced state is not releasable.',
+          { receiptId: receipt.receiptId },
+          { cause: error },
+        );
+      }
+      this.#lastReceiptByTenant.set(request.tenantId, receipt.receiptDigest);
+      return receipt;
+    });
+  }
+
+  async #withTenantReceiptLock<T>(tenantId: string, operation: () => Promise<T>): Promise<T> {
+    const prior = this.#receiptTailByTenant.get(tenantId) ?? Promise.resolve();
+    let release!: () => void;
+    const current = new Promise<void>((resolve) => {
+      release = resolve;
+    });
+    const tail = prior.catch(() => undefined).then(() => current);
+    this.#receiptTailByTenant.set(tenantId, tail);
+
+    await prior.catch(() => undefined);
     try {
-      await this.#config.receiptWriter(receipt);
-    } catch (error) {
-      throw new StateNativeError(
-        'RECEIPT_WRITE_FAILED',
-        'Kernel receipt persistence failed; produced state is not releasable.',
-        { receiptId: receipt.receiptId },
-        { cause: error },
-      );
+      return await operation();
+    } finally {
+      release();
+      if (this.#receiptTailByTenant.get(tenantId) === tail) {
+        this.#receiptTailByTenant.delete(tenantId);
+      }
     }
-    this.#lastReceiptByTenant.set(request.tenantId, receipt.receiptDigest);
-    return receipt;
   }
 }
