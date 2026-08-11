@@ -885,6 +885,9 @@ export class AlloyKernelRuntime {
 
   #validateAuthorizationBoundary(request: KernelExecutionRequest): void {
     const envelope = request.authorization.envelope;
+    if (typeof envelope.actionId !== 'string' || envelope.actionId.trim().length === 0) {
+      throw new StateNativeError('INVALID_INPUT', 'Action envelope actionId must be non-empty.');
+    }
     if (envelope.tenantId !== request.tenantId) {
       throw new StateNativeError('TENANT_MISMATCH', 'Action envelope belongs to another tenant.');
     }

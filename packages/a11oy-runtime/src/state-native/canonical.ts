@@ -20,12 +20,8 @@ function normalize(value: unknown, stack: Set<object>): CanonicalJsonValue {
     return Object.is(value, -0) ? 0 : value;
   }
 
-  if (value instanceof Uint8Array) {
-    return { $bytes: Buffer.from(value).toString('base64') };
-  }
-
-  if (value instanceof Date) {
-    return value.toISOString();
+  if (value instanceof Uint8Array || value instanceof Date) {
+    throw new TypeError('Canonical JSON supports only plain objects and arrays.');
   }
 
   if (Array.isArray(value)) {
@@ -42,9 +38,7 @@ function normalize(value: unknown, stack: Set<object>): CanonicalJsonValue {
     const object = value as Record<string, unknown>;
     const prototype = Object.getPrototypeOf(object);
     if (prototype !== Object.prototype && prototype !== null) {
-      throw new TypeError(
-        'Canonical JSON supports only plain objects, arrays, dates, and byte arrays.',
-      );
+      throw new TypeError('Canonical JSON supports only plain objects and arrays.');
     }
     if (stack.has(object)) {
       throw new TypeError('Canonical JSON does not support circular objects.');

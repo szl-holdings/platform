@@ -93,11 +93,70 @@ function requestFor({ actionId, kernelId, compatibility, epochId }) {
 }
 
 test('canonical digests reject structured non-JSON object types', () => {
-  for (const value of [new Map([['material', 1]]), new Set(['material']), /material/u]) {
+  for (const value of [
+    new Map([['material', 1]]),
+    new Set(['material']),
+    /material/u,
+    new Date('2026-08-11T00:00:00.000Z'),
+    Uint8Array.from([1]),
+  ]) {
     assert.throws(
       () => digestObject({ parameters: { value } }),
-      /Canonical JSON supports only plain objects/,
+      /Canonical JSON supports only plain objects and arrays/,
     );
+  }
+
+  assert.doesNotThrow(() => digestObject({ parameters: { value: '2026-08-11T00:00:00.000Z' } }));
+  assert.doesNotThrow(() => digestObject({ parameters: { value: { $bytes: 'AQ==' } } }));
+});
+
+test('runtime rejects blank action identifiers before kernel execution', async () => {
+  const stateKey = randomBytes(32);
+  const bus = new AlloyStateBus({ masterKey: stateKey });
+  const manager = new CognitiveEpochManager();
+  const active = prepareEpoch(manager, 'epoch_blank_action_id');
+  activateEpoch(manager, 'epoch_blank_action_id');
+  const receiptKeys = generateKeyPairSync('ed25519');
+  const receiptLedger = [];
+  let executions = 0;
+
+  try {
+    const runtime = new AlloyKernelRuntime({
+      stateBus: bus,
+      epochManager: manager,
+      config: {
+        receiptSigner: { keyId: 'receipt-key', privateKey: receiptKeys.privateKey },
+        receiptWriter: async (receipt) => receiptLedger.push(receipt),
+      },
+    });
+    runtime.register({
+      kernelId: 'state.blank-action-id',
+      version: '1.0.0',
+      kind: 'custom',
+      route: 'state.test',
+      requiresVerification: false,
+      execute: async () => {
+        executions += 1;
+        return [];
+      },
+    });
+
+    await assert.rejects(
+      runtime.execute(
+        requestFor({
+          actionId: '   ',
+          kernelId: 'state.blank-action-id',
+          compatibility: active.compatibility,
+          epochId: 'epoch_blank_action_id',
+        }),
+      ),
+      expectCode('INVALID_INPUT'),
+    );
+    assert.equal(executions, 0);
+    assert.equal(receiptLedger.length, 0);
+  } finally {
+    bus.dispose();
+    stateKey.fill(0);
   }
 });
 
