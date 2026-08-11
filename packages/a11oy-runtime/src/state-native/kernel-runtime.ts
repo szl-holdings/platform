@@ -9,7 +9,10 @@ import type {
   ApprovalEvidence,
   CognitiveEpochRecord,
   CompatibilityFingerprint,
+  KernelBudget,
   KernelDefinition,
+  KernelExecutionContext,
+  KernelExecutionInput,
   KernelExecutionReceipt,
   KernelExecutionRequest,
   KernelExecutionResult,
@@ -19,6 +22,7 @@ import type {
   KernelVerifierResult,
   StateCapsule,
   StateGovernance,
+  StateReadResult,
   StateSensitivity,
 } from './types.js';
 
@@ -28,6 +32,19 @@ const SENSITIVITY_RANK: Readonly<Record<StateSensitivity, number>> = {
   confidential: 2,
   restricted: 3,
 };
+
+const POLICY_EFFECTS = new Set(['allow', 'block', 'approval_required']);
+const KERNEL_KINDS = new Set([
+  'context_build',
+  'prefill',
+  'decode',
+  'planning',
+  'tool',
+  'multimodal_encode',
+  'policy',
+  'verification',
+  'custom',
+]);
 
 interface IdempotencyRecord {
   readonly requestDigest: string;
@@ -200,6 +217,119 @@ function producedStateSnapshot(
   );
 }
 
+function deepFreeze<T>(value: T, seen = new WeakSet<object>()): T {
+  if (value === null || typeof value !== 'object') {
+    return value;
+  }
+
+  const objectValue = value as object;
+  if (seen.has(objectValue)) {
+    return value;
+  }
+  seen.add(objectValue);
+
+  if (!ArrayBuffer.isView(objectValue)) {
+    for (const nested of Object.values(objectValue as Record<string, unknown>)) {
+      deepFreeze(nested, seen);
+    }
+    Object.freeze(objectValue);
+  }
+  return value;
+}
+
+function boundarySnapshot<T>(value: T, label: string): T {
+  try {
+    return deepFreeze(structuredClone(value));
+  } catch (error) {
+    throw new StateNativeError(
+      'INVALID_INPUT',
+      `${label} must be structured-clone compatible.`,
+      undefined,
+      { cause: error },
+    );
+  }
+}
+
+function requestSnapshot(request: KernelExecutionRequest): KernelExecutionRequest {
+  return boundarySnapshot(request, 'Kernel execution request');
+}
+
+function definitionSnapshot(definition: KernelDefinition): KernelDefinition {
+  return Object.freeze({
+    kernelId: definition.kernelId,
+    version: definition.version,
+    kind: definition.kind,
+    route: definition.route,
+    requiresVerification: definition.requiresVerification,
+    execute: definition.execute,
+    verify: definition.verify,
+  });
+}
+
+function stateReadSnapshot(input: readonly StateReadResult[]): readonly StateReadResult[] {
+  return Object.freeze(
+    input.map((item) =>
+      Object.freeze({
+        capsule: item.capsule,
+        payload: Uint8Array.from(item.payload),
+      }),
+    ),
+  );
+}
+
+function kernelInputSnapshot(
+  input: readonly StateReadResult[],
+  parameters: Readonly<Record<string, unknown>>,
+): KernelExecutionInput {
+  return Object.freeze({
+    capsules: stateReadSnapshot(input),
+    parameters: boundarySnapshot(parameters, 'Kernel parameters'),
+  });
+}
+
+function kernelContextSnapshot(input: {
+  readonly actionId: string;
+  readonly tenantId: string;
+  readonly sessionId: string;
+  readonly epoch: CognitiveEpochRecord;
+  readonly budget: KernelBudget;
+  readonly signal: AbortSignal;
+}): KernelExecutionContext {
+  return Object.freeze({
+    actionId: input.actionId,
+    tenantId: input.tenantId,
+    sessionId: input.sessionId,
+    epoch: boundarySnapshot(input.epoch, 'Cognitive epoch'),
+    budget: Object.freeze({ ...input.budget }),
+    signal: input.signal,
+  });
+}
+
+function verifierResultSnapshot(result: KernelVerifierResult): KernelVerifierResult {
+  assertStateNative(typeof result.passed === 'boolean', 'INVALID_INPUT', 'Verifier passed must be boolean.');
+  assertStateNative(typeof result.reason === 'string', 'INVALID_INPUT', 'Verifier reason must be a string.');
+  assertStateNative(
+    Array.isArray(result.evidenceDigests) &&
+      result.evidenceDigests.every((digest) => typeof digest === 'string'),
+    'INVALID_INPUT',
+    'Verifier evidenceDigests must be an array of strings.',
+  );
+  return Object.freeze({
+    passed: result.passed,
+    reason: result.reason,
+    evidenceDigests: Object.freeze([...result.evidenceDigests]),
+  });
+}
+
+function validatePolicyEffect(effect: unknown): void {
+  assertStateNative(
+    typeof effect === 'string' && POLICY_EFFECTS.has(effect),
+    'INVALID_INPUT',
+    'Policy effect is unsupported; execution fails closed.',
+    { effect },
+  );
+}
+
 function validateBudget(request: KernelExecutionRequest): void {
   const { budget } = request;
   assertStateNative(
@@ -242,33 +372,6 @@ function validateApproval(approval: ApprovalEvidence | undefined, requestDigest:
   }
 }
 
-function verifierResultSnapshot(result: KernelVerifierResult): KernelVerifierResult {
-  const passed = result?.passed;
-  const reason = result?.reason;
-  const rawEvidenceDigests = result?.evidenceDigests;
-  const evidenceDigests = Array.isArray(rawEvidenceDigests)
-    ? [...rawEvidenceDigests]
-    : undefined;
-  assertStateNative(
-    typeof passed === 'boolean' && typeof reason === 'string' && reason.trim().length > 0,
-    'VERIFICATION_FAILED',
-    'Kernel verifier returned malformed decision evidence.',
-  );
-  assertStateNative(
-    Array.isArray(evidenceDigests) &&
-      evidenceDigests.every(
-        (digest) => typeof digest === 'string' && /^[0-9a-f]{64}$/u.test(digest),
-      ),
-    'VERIFICATION_FAILED',
-    'Kernel verifier evidence digests must be lowercase SHA-256 values.',
-  );
-  return Object.freeze({
-    passed,
-    reason,
-    evidenceDigests: Object.freeze(evidenceDigests),
-  });
-}
-
 export class AlloyKernelRuntime {
   readonly #stateBus: AlloyStateBus;
   readonly #epochManager: CognitiveEpochManager;
@@ -287,44 +390,48 @@ export class AlloyKernelRuntime {
   }
 
   public register(definition: KernelDefinition): void {
-    const kernelId = definition.kernelId;
-    const version = definition.version;
-    const kind = definition.kind;
-    const route = definition.route;
-    const requiresVerification = definition.requiresVerification;
-    const execute = definition.execute;
-    const verify = definition.verify;
-    assertStateNative(typeof kernelId === 'string' && kernelId.trim().length > 0, 'INVALID_INPUT', 'kernelId must not be empty.');
-    assertStateNative(typeof version === 'string' && version.trim().length > 0, 'INVALID_INPUT', 'kernel version must not be empty.');
-    assertStateNative(typeof route === 'string' && route.trim().length > 0, 'INVALID_INPUT', 'kernel route must not be empty.');
-    assertStateNative(typeof execute === 'function', 'INVALID_INPUT', 'kernel execute must be a function.');
     assertStateNative(
-      verify === undefined || typeof verify === 'function',
+      typeof definition.kernelId === 'string' && definition.kernelId.trim().length > 0,
       'INVALID_INPUT',
-      'kernel verifier must be a function when provided.',
+      'kernelId must not be empty.',
     );
-    const normalized: KernelDefinition = Object.freeze({
-      kernelId,
-      version,
-      kind,
-      route,
-      requiresVerification,
-      execute: execute.bind(definition),
-      verify: verify?.bind(definition),
-    });
-    if (normalized.requiresVerification && !normalized.verify) {
+    assertStateNative(
+      typeof definition.version === 'string' && definition.version.trim().length > 0,
+      'INVALID_INPUT',
+      'kernel version must not be empty.',
+    );
+    assertStateNative(
+      typeof definition.route === 'string' && definition.route.trim().length > 0,
+      'INVALID_INPUT',
+      'kernel route must not be empty.',
+    );
+    assertStateNative(KERNEL_KINDS.has(definition.kind), 'INVALID_INPUT', 'kernel kind is unsupported.');
+    assertStateNative(
+      typeof definition.requiresVerification === 'boolean',
+      'INVALID_INPUT',
+      'requiresVerification must be boolean.',
+    );
+    assertStateNative(typeof definition.execute === 'function', 'INVALID_INPUT', 'kernel execute must be callable.');
+    assertStateNative(
+      definition.verify === undefined || typeof definition.verify === 'function',
+      'INVALID_INPUT',
+      'kernel verify must be callable when present.',
+    );
+    if (definition.requiresVerification && !definition.verify) {
       throw new StateNativeError(
         'INVALID_INPUT',
         'A verification-required kernel must provide an independent verifier.',
-        { kernelId: normalized.kernelId },
+        { kernelId: definition.kernelId },
       );
     }
-    if (this.#kernels.has(normalized.kernelId)) {
+
+    const snapshot = definitionSnapshot(definition);
+    if (this.#kernels.has(snapshot.kernelId)) {
       throw new StateNativeError('DIVERGENT_REPLAY', 'Kernel identifier is already registered.', {
-        kernelId: normalized.kernelId,
+        kernelId: snapshot.kernelId,
       });
     }
-    this.#kernels.set(normalized.kernelId, normalized);
+    this.#kernels.set(snapshot.kernelId, snapshot);
   }
 
   public listKernels(): readonly Pick<KernelDefinition, 'kernelId' | 'version' | 'kind' | 'route'>[] {
@@ -335,13 +442,15 @@ export class AlloyKernelRuntime {
     );
   }
 
-  public async execute(request: KernelExecutionRequest): Promise<KernelExecutionResult> {
+  public async execute(inputRequest: KernelExecutionRequest): Promise<KernelExecutionResult> {
+    const request = requestSnapshot(inputRequest);
     const definition = this.#kernels.get(request.kernelId);
     if (!definition) {
       throw new StateNativeError('NOT_FOUND', 'Kernel is not registered.', { kernelId: request.kernelId });
     }
 
     validateBudget(request);
+    validatePolicyEffect(request.authorization.decision.effect);
     this.#validateAuthorizationBoundary(request);
     const actionDigest = kernelRequestDigest(request);
     if (request.authorization.envelope.argsDigest !== actionDigest) {
@@ -437,16 +546,18 @@ export class AlloyKernelRuntime {
         }
       }
 
-      const input = await Promise.all(
-        request.inputCapsuleIds.map((capsuleId) =>
-          this.#stateBus.get(capsuleId, {
-            tenantId: request.tenantId,
-            sessionId: request.sessionId,
-            actionId: request.authorization.envelope.actionId,
-            compatibility: request.inputCompatibility,
-            explicitGrantId: request.stateGrantId,
-            allowedSensitivities: request.authorization.allowedSensitivities,
-          }),
+      const input = stateReadSnapshot(
+        await Promise.all(
+          request.inputCapsuleIds.map((capsuleId) =>
+            this.#stateBus.get(capsuleId, {
+              tenantId: request.tenantId,
+              sessionId: request.sessionId,
+              actionId: request.authorization.envelope.actionId,
+              compatibility: request.inputCompatibility,
+              explicitGrantId: request.stateGrantId,
+              allowedSensitivities: request.authorization.allowedSensitivities,
+            }),
+          ),
         ),
       );
       inputCapsules = input.map((item) => item.capsule);
@@ -459,23 +570,21 @@ export class AlloyKernelRuntime {
       }
 
       const controller = new AbortController();
-      const context = Object.freeze({
-        actionId: request.authorization.envelope.actionId,
-        tenantId: request.tenantId,
-        sessionId: request.sessionId,
-        epoch: lease.epoch,
-        budget: request.budget,
-        signal: controller.signal,
-      });
+      const makeContext = (): KernelExecutionContext =>
+        kernelContextSnapshot({
+          actionId: request.authorization.envelope.actionId,
+          tenantId: request.tenantId,
+          sessionId: request.sessionId,
+          epoch: lease.epoch,
+          budget: request.budget,
+          signal: controller.signal,
+        });
       const rawOutput = await this.#runWithDeadline(
         () => {
           executionStarted = true;
           return definition.execute(
-            {
-              capsules: Object.freeze(input),
-              parameters: request.parameters,
-            },
-            context,
+            kernelInputSnapshot(input, request.parameters),
+            makeContext(),
           );
         },
         controller,
@@ -504,8 +613,8 @@ export class AlloyKernelRuntime {
               () =>
                 definition.verify!(
                   producedStateSnapshot(output),
-                  { capsules: Object.freeze(input), parameters: request.parameters },
-                  context,
+                  kernelInputSnapshot(input, request.parameters),
+                  makeContext(),
                 ),
               controller,
               deadlineAt,
@@ -550,7 +659,11 @@ export class AlloyKernelRuntime {
           },
           expiresAt: produced.expiresAt,
           idempotencyKey: request.idempotencyKey
-            ? `${request.idempotencyKey}:output:${index}`
+            ? digestObject({
+                schema: 'szl.kernel-output-idempotency/v1',
+                parentIdempotencyKey: request.idempotencyKey,
+                index,
+              })
             : undefined,
         });
         outputCapsules.push(capsule);
