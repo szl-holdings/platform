@@ -15,6 +15,8 @@ import {
 const ROOT = path.resolve(import.meta.dirname, '..', '..');
 const REGISTRY = path.join(ROOT, 'config', 'public-surfaces.json');
 const OUTPUT = path.join(ROOT, 'artifacts', 'PUBLIC_SURFACES.json');
+const LIVE_VERIFY_ATTEMPTS = 3;
+const LIVE_VERIFY_BACKOFF_MS = [750, 1_500] as const;
 
 function serializeSurface(surface: PublicSurface): string {
   return JSON.stringify(surface).replace(/"audience":\[([^\]]*)\]/, (match, members: string) => {
@@ -51,6 +53,37 @@ export function serializeManifest(registry: PublicSurfaceRegistry): string {
   ].join('\n');
 }
 
+function isTransientTransportFailure(failure: string): boolean {
+  if (!failure.includes(': live probe failed:')) return false;
+  return (
+    failure.includes('TimeoutError') ||
+    failure.includes('TypeError: fetch failed') ||
+    failure.includes('ECONNRESET') ||
+    failure.includes('ETIMEDOUT') ||
+    failure.includes('EAI_AGAIN')
+  );
+}
+
+async function verifyLiveWithBoundedTransportRetry(
+  registry: PublicSurfaceRegistry,
+): Promise<string[]> {
+  for (let attempt = 1; attempt <= LIVE_VERIFY_ATTEMPTS; attempt += 1) {
+    const failures = await verifyLivePublicSurfaces(registry);
+    if (failures.length === 0) return [];
+
+    const transportOnly = failures.every(isTransientTransportFailure);
+    if (!transportOnly || attempt === LIVE_VERIFY_ATTEMPTS) return failures;
+
+    const backoffMs = LIVE_VERIFY_BACKOFF_MS[attempt - 1] ?? LIVE_VERIFY_BACKOFF_MS.at(-1)!;
+    process.stderr.write(
+      `public surface live verification: transient transport failure on attempt ${attempt}/${LIVE_VERIFY_ATTEMPTS}; retrying after ${backoffMs}ms\n`,
+    );
+    await new Promise((resolve) => setTimeout(resolve, backoffMs));
+  }
+
+  return ['live verification exhausted without a result'];
+}
+
 async function main(): Promise<void> {
   const check = process.argv.includes('--check');
   const verifyLive = process.argv.includes('--verify-live');
@@ -77,7 +110,7 @@ async function main(): Promise<void> {
   }
 
   if (verifyLive) {
-    const liveFailures = await verifyLivePublicSurfaces(registry);
+    const liveFailures = await verifyLiveWithBoundedTransportRetry(registry);
     if (liveFailures.length > 0) {
       throw new Error(`public surface live drift:\n- ${liveFailures.join('\n- ')}`);
     }
