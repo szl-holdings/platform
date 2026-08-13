@@ -12,12 +12,13 @@ import {
   TraceStep,
 } from '../components/ui';
 import {
-  SEED_WORKCELLS,
+  WORKCELL_DEMO_SOURCE,
   SEED_SIGNALS,
   SEED_PCE_CONTRACTS,
   SEED_PROOF_PACKETS,
 } from '@workspace/a11oy-fabric';
 import { DELEGATION_CHAINS } from '../data/complianceFabric';
+import { projectTraceStatus, projectWorkcellState } from '../data/workcellProjection';
 
 type ApprovalDecision = 'approved' | 'deferred' | 'rejected';
 
@@ -41,16 +42,9 @@ const VERTICAL_LABELS: Record<string, string> = {
   'alloy-core': 'Alloy Core',
 };
 
-type WorkcellExecutionResult = {
-  status?: string;
-  durationMs?: number;
-  outputSummary?: string;
-  errorMessage?: string;
-};
-
 export function WorkcellDetail() {
   const params = useParams<{ id: string }>();
-  const wc = SEED_WORKCELLS.find((w) => w.id === params.id);
+  const wc = WORKCELL_DEMO_SOURCE.records.find((w) => w.id === params.id);
   const [decision, setDecision] = useState<ApprovalDecision | null>(null);
 
   if (!wc) {
@@ -87,7 +81,8 @@ export function WorkcellDetail() {
       paused: '#5e5e5e',
       idle: '#5e5e5e',
     }[wc.status] ?? '#5e5e5e';
-  const execResult = wc.mockExecutionResult as WorkcellExecutionResult;
+  const projection = projectWorkcellState(wc);
+  const executionRecorded = projection.showFixtureResult;
 
   return (
     <Layout>
@@ -100,22 +95,40 @@ export function WorkcellDetail() {
           ← All Workcells
         </Link>
       </div>
-      <PageHeader label="WORKCELL DETAIL" title={wc.name} subtitle={wc.objective} status="LIVE">
-        <div className="flex items-center gap-2">
-          <span
-            className="text-xs font-mono px-2 py-1 rounded"
-            style={{ backgroundColor: `${statusColor}18`, color: statusColor }}
-          >
-            {wc.status}
-          </span>
-          <span
-            className="text-xs font-mono px-2 py-1 rounded"
-            style={{ backgroundColor: `${color}18`, color }}
-          >
-            {VERTICAL_LABELS[wc.vertical]}
-          </span>
-        </div>
-      </PageHeader>
+      <div data-proof-surface="a11oy-workcell-detail" data-proof-ready="true">
+        <PageHeader label="WORKCELL DETAIL" title={wc.name} subtitle={wc.objective} status="DEMO">
+          <div className="flex items-center gap-2">
+            <span
+              className="text-xs font-mono px-2 py-1 rounded"
+              style={{ backgroundColor: `${statusColor}18`, color: statusColor }}
+            >
+              {wc.status}
+            </span>
+            <span
+              className="text-xs font-mono px-2 py-1 rounded"
+              style={{ backgroundColor: `${color}18`, color }}
+            >
+              {VERTICAL_LABELS[wc.vertical]}
+            </span>
+          </div>
+        </PageHeader>
+      </div>
+
+      <div
+        className="p-3 rounded-lg mb-6 text-xs"
+        role="status"
+        style={{
+          backgroundColor: 'rgba(201,183,135,0.06)',
+          border: '1px solid rgba(201,183,135,0.2)',
+          color: 'var(--color-a11oy-text-sub)',
+        }}
+      >
+        <span className="font-mono" style={{ color: '#c9b787' }}>
+          {wc.evidenceState}
+        </span>
+        {' — '}
+        {wc.evidenceReason} Current workflow state: <strong>{wc.status}</strong>.
+      </div>
 
       <div className="grid lg:grid-cols-3 gap-6">
         {/* Main content */}
@@ -128,45 +141,43 @@ export function WorkcellDetail() {
                 {[
                   {
                     step: 'Signal Mesh: signal ingested and routed',
-                    status: 'completed',
+                    status: projectTraceStatus(wc, 'input'),
                     note: wc.signals.slice(0, 2).join(', '),
                   },
                   {
                     step: 'Causal Core: evidence graph assembled',
-                    status: 'completed',
+                    status: projectTraceStatus(wc, 'input'),
                     note: `${wc.signals.length} causal links traced`,
                   },
                   {
                     step: 'Context Engine: context pack built',
-                    status: 'completed',
+                    status: projectTraceStatus(wc, 'input'),
                     note: JSON.stringify(wc.contextPack).slice(0, 60) + '…',
                   },
                   ...wc.agentSequence.map((a) => ({
                     step: `${a.role}: ${a.action}`,
-                    status:
-                      wc.status === 'completed'
-                        ? 'completed'
-                        : wc.status === 'running'
-                          ? 'running'
-                          : 'pending',
+                    status: projectTraceStatus(wc, 'agent'),
                     note: `Agent: ${a.agentId}`,
                   })),
                   {
                     step: 'Covenant Layer: policy gate evaluated',
-                    status: wc.requiresApproval ? 'running' : 'completed',
-                    note: wc.requiresApproval
-                      ? `Pending ${wc.actionBrief.approvalTier} approval`
-                      : 'All policy clauses satisfied',
+                    status: projectTraceStatus(wc, 'gate'),
+                    note:
+                      wc.actionBrief.status === 'pending_approval'
+                        ? `Fixture action is pending ${wc.actionBrief.approvalTier} approval`
+                        : `Fixture action status: ${wc.actionBrief.status}`,
                   },
                   {
                     step: 'MirrorEval: recommendation scored',
-                    status: 'completed',
+                    status: projectTraceStatus(wc, 'evaluation'),
                     note: `Verdict: ${wc.mirrorEvalResult.verdict} · Score: ${Math.round(wc.mirrorEvalResult.score * 100)}%`,
                   },
                   {
                     step: 'Proof Ledger: PCE contract recorded',
-                    status: wc.verificationResult.status === 'passed' ? 'completed' : 'failed',
-                    note: `Contract: ${wc.pceContractId}`,
+                    status: projectTraceStatus(wc, 'receipt'),
+                    note: projection.showProofShape
+                      ? `Fixture contract: ${wc.pceContractId}`
+                      : 'No completed fixture receipt is represented.',
                   },
                 ].map((s, i) => (
                   <TraceStep key={i} step={s.step} status={s.status} note={s.note} />
@@ -229,10 +240,13 @@ export function WorkcellDetail() {
             </div>
           </div>
 
-          {/* MirrorEval */}
+          {/* MirrorEval fixture shape */}
           <div>
-            <SectionTitle>MirrorEval Result</SectionTitle>
+            <SectionTitle>MirrorEval Fixture Fields</SectionTitle>
             <Card>
+              <p className="mb-3 text-xs" style={{ color: 'var(--color-a11oy-text-ghost)' }}>
+                Source-declared fixture values only; no runtime evaluator call is represented.
+              </p>
               <div className="flex items-center gap-3 mb-3">
                 <VerdictBadge verdict={wc.mirrorEvalResult.verdict} />
                 <span
@@ -387,8 +401,8 @@ export function WorkcellDetail() {
                     <div className="flex items-center gap-2">
                       <span style={{ color: '#22c55e' }}>✓</span>
                       <span style={{ color: 'var(--color-a11oy-text-ghost)' }}>
-                        All hops scope-narrowed · Privilege boundaries enforced · Chain replay
-                        available
+                        Fixture hops and scope fields declared · no runtime enforcement or replay
+                        availability inferred
                       </span>
                     </div>
                   </div>
@@ -469,7 +483,7 @@ export function WorkcellDetail() {
                   <div style={{ color: '#c9b787' }}>{wc.actionBrief.estimatedImpact}</div>
                 </div>
               </div>
-              {wc.requiresApproval && (
+              {projection.canRecordDemoDecision ? (
                 <>
                   {decision ? (
                     <div className="flex items-center justify-between">
@@ -492,7 +506,7 @@ export function WorkcellDetail() {
                         }}
                       >
                         {decision === 'approved'
-                          ? '✓ Approved — execution authorized'
+                          ? '✓ Demo approval recorded — no execution authorized'
                           : decision === 'deferred'
                             ? '⏸ Deferred'
                             : '✕ Rejected'}
@@ -512,10 +526,12 @@ export function WorkcellDetail() {
                     </div>
                   ) : (
                     <>
-                      <ApprovalGate label={`Requires ${wc.actionBrief.approvalTier} approval`} />
+                      <ApprovalGate
+                        label={`Demo gate requires ${wc.actionBrief.approvalTier} approval`}
+                      />
                       <div className="flex gap-2 mt-2">
                         <ActionButton variant="primary" onClick={() => setDecision('approved')}>
-                          Approve
+                          Record demo approval
                         </ActionButton>
                         <ActionButton variant="ghost" onClick={() => setDecision('deferred')}>
                           Defer
@@ -527,60 +543,63 @@ export function WorkcellDetail() {
                     </>
                   )}
                 </>
-              )}
-            </Card>
-          </div>
-
-          {/* Execution Result */}
-          <div>
-            <SectionTitle>Execution Result</SectionTitle>
-            <Card className="text-xs">
-              <div className="flex items-center gap-2 mb-2">
-                <span
-                  className="font-mono px-1.5 py-0.5 rounded"
-                  style={{
-                    backgroundColor:
-                      execResult.status === 'success'
-                        ? 'rgba(201,183,135,0.12)'
-                        : 'rgba(245,245,245,0.12)',
-                    color: execResult.status === 'success' ? '#c9b787' : '#f5f5f5',
-                  }}
-                >
-                  {execResult.status ?? 'unknown'}
-                </span>
-                <span style={{ color: 'var(--color-a11oy-text-ghost)' }}>
-                  {execResult.durationMs}ms
-                </span>
-              </div>
-              <div
-                className="font-mono text-xs p-2 rounded mb-2"
-                style={{
-                  backgroundColor: 'var(--color-a11oy-deep)',
-                  border: '1px solid var(--color-a11oy-border)',
-                  color: 'var(--color-a11oy-text-ghost)',
-                }}
-              >
-                {execResult.outputSummary}
-              </div>
-              {execResult.errorMessage && (
+              ) : (
                 <div
-                  className="text-xs p-2 rounded"
+                  className="mt-2 p-2 rounded"
                   style={{
-                    backgroundColor: 'rgba(245,245,245,0.08)',
-                    color: '#f5f5f5',
-                    border: '1px solid rgba(245,245,245,0.2)',
+                    color: 'var(--color-a11oy-text-ghost)',
+                    border: '1px solid var(--color-a11oy-border)',
                   }}
                 >
-                  Error: {execResult.errorMessage}
+                  No local approval decision is available. Fixture action status:{' '}
+                  <strong>{wc.actionBrief.status}</strong>.
                 </div>
               )}
             </Card>
           </div>
 
+          {/* Fixture result payload */}
+          <div>
+            <SectionTitle>Fixture Result Payload</SectionTitle>
+            <Card className="text-xs">
+              <div className="flex items-center gap-2 mb-2">
+                <span
+                  className="font-mono px-1.5 py-0.5 rounded"
+                  style={{
+                    backgroundColor: executionRecorded
+                      ? 'rgba(201,183,135,0.12)'
+                      : 'rgba(94,94,94,0.18)',
+                    color: executionRecorded ? '#c9b787' : '#a0a0a0',
+                  }}
+                >
+                  {executionRecorded ? `${wc.status} fixture` : 'no completed fixture result'}
+                </span>
+              </div>
+              {executionRecorded ? (
+                <pre
+                  className="font-mono text-xs p-2 rounded overflow-x-auto"
+                  style={{
+                    backgroundColor: 'var(--color-a11oy-deep)',
+                    border: '1px solid var(--color-a11oy-border)',
+                    color: 'var(--color-a11oy-text-ghost)',
+                  }}
+                >
+                  {JSON.stringify(wc.mockExecutionResult, null, 2)}
+                </pre>
+              ) : (
+                <p style={{ color: 'var(--color-a11oy-text-ghost)' }}>
+                  This fixture is {wc.status}; its seeded payload is withheld from the result panel
+                  until the fixture workflow state is completed or error. No runtime result is
+                  inferred.
+                </p>
+              )}
+            </Card>
+          </div>
+
           {/* PCE Contract */}
-          {pceContract && (
+          {pceContract && projection.showProofShape && (
             <div>
-              <SectionTitle>PCE Contract</SectionTitle>
+              <SectionTitle>Fixture PCE Contract</SectionTitle>
               <Card className="text-xs">
                 <HashId id={pceContract.id} />
                 <div className="mt-2 grid grid-cols-2 gap-2 text-xs">
@@ -646,7 +665,7 @@ export function WorkcellDetail() {
           )}
 
           {/* Proof Packet */}
-          {proofPacket && (
+          {proofPacket && projection.showProofShape && (
             <div>
               <SectionTitle>Proof Packet</SectionTitle>
               <Card className="text-xs">

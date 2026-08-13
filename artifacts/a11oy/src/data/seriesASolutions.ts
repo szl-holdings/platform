@@ -20,7 +20,6 @@ export type SeriesASolution = {
   readonly buyer: string;
   readonly thesis: string;
   readonly value: string;
-  readonly demoHref: string;
   readonly demoLabel: string;
   readonly sourceState: 'AVAILABLE';
   readonly scenarioState: 'DEMO';
@@ -69,8 +68,7 @@ export const SERIES_A_SOLUTIONS: readonly SeriesASolution[] = [
       'Turn a threat signal into a governed containment recommendation with an explicit approval boundary.',
     value:
       'Shortens the path from detection to an accountable decision without granting an agent silent control.',
-    demoHref: '/cyber-resilience',
-    demoLabel: 'Open cyber resilience demo',
+    demoLabel: 'Walk through the cyber fixture',
     sourceState: 'AVAILABLE',
     scenarioState: 'DEMO',
     liveState: 'UNAVAILABLE',
@@ -89,8 +87,7 @@ export const SERIES_A_SOLUTIONS: readonly SeriesASolution[] = [
     thesis: 'Compare financial scenarios before a material action crosses an approval threshold.',
     value:
       'Makes assumptions, counterfactuals, and authority visible in one reviewable decision path.',
-    demoHref: '/counterfactuals',
-    demoLabel: 'Open finance scenario demo',
+    demoLabel: 'Walk through the finance fixture',
     sourceState: 'AVAILABLE',
     scenarioState: 'DEMO',
     liveState: 'UNAVAILABLE',
@@ -110,8 +107,7 @@ export const SERIES_A_SOLUTIONS: readonly SeriesASolution[] = [
       'Make data access, model use, and policy evaluation legible before downstream execution.',
     value:
       'Gives diligence teams a concrete boundary between declared controls and observed evidence.',
-    demoHref: '/governance',
-    demoLabel: 'Open governance demo',
+    demoLabel: 'Walk through the data fixture',
     sourceState: 'AVAILABLE',
     scenarioState: 'DEMO',
     liveState: 'UNAVAILABLE',
@@ -131,8 +127,7 @@ export const SERIES_A_SOLUTIONS: readonly SeriesASolution[] = [
       'Coordinate a consequential operating decision across signals, teams, and policy gates.',
     value:
       'Replaces opaque handoffs with one inspectable recommendation, approval, and proof sequence.',
-    demoHref: '/approval-queue',
-    demoLabel: 'Open approval queue demo',
+    demoLabel: 'Walk through the operations fixture',
     sourceState: 'AVAILABLE',
     scenarioState: 'DEMO',
     liveState: 'UNAVAILABLE',
@@ -152,8 +147,7 @@ export const SERIES_A_SOLUTIONS: readonly SeriesASolution[] = [
       'Evaluate an asset decision against risk, portfolio context, and approval policy before commitment.',
     value:
       'Connects asset-level evidence to an investment decision without presenting seeded data as a live portfolio.',
-    demoHref: '/fabric/verticals',
-    demoLabel: 'Open vertical fabric demo',
+    demoLabel: 'Walk through the real-estate fixture',
     sourceState: 'AVAILABLE',
     scenarioState: 'DEMO',
     liveState: 'UNAVAILABLE',
@@ -173,8 +167,7 @@ export const SERIES_A_SOLUTIONS: readonly SeriesASolution[] = [
       'Turn an obligation or matter signal into an explainable, reviewable legal operations decision.',
     value:
       'Keeps privilege, authority, and the difference between analysis and legal action explicit.',
-    demoHref: '/right-to-audit',
-    demoLabel: 'Open legal audit demo',
+    demoLabel: 'Walk through the legal fixture',
     sourceState: 'AVAILABLE',
     scenarioState: 'DEMO',
     liveState: 'UNAVAILABLE',

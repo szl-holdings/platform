@@ -9,60 +9,61 @@ import {
   VerdictBadge,
   TraceStep,
 } from '../components/ui';
-import { SEED_WORKCELLS } from '@workspace/a11oy-fabric';
+import { WORKCELL_DEMO_SOURCE } from '@workspace/a11oy-fabric';
+import { projectTraceStatus, projectWorkcellState } from '../data/workcellProjection';
 
 const BASE = (import.meta.env.BASE_URL ?? '/a11oy/').replace(/\/$/, '');
 
 export function WorkcellReplayDetail() {
   const params = useParams<{ id: string }>();
-  const wc = SEED_WORKCELLS.find((w) => w.id === params.id);
+  const wc = WORKCELL_DEMO_SOURCE.records.find((w) => w.id === params.id);
   const [replayState, setReplayState] = useState<'idle' | 'playing' | 'done'>('idle');
   const [stepIdx, setStepIdx] = useState(-1);
   const [speed, setSpeed] = useState(800);
+  const projection = wc ? projectWorkcellState(wc) : null;
 
   const steps = wc
     ? [
         {
           step: 'Signal Mesh: signals ingested and routed',
-          status: 'completed',
+          status: projectTraceStatus(wc, 'input'),
           note: wc.signals.slice(0, 2).join(', '),
         },
         {
           step: 'Causal Core: evidence graph assembled',
-          status: 'completed',
+          status: projectTraceStatus(wc, 'input'),
           note: `${wc.signals.length} causal links traced`,
         },
         {
           step: 'Context Engine: context pack built',
-          status: 'completed',
+          status: projectTraceStatus(wc, 'input'),
           note: `${JSON.stringify(wc.contextPack).slice(0, 60)}…`,
         },
         ...wc.agentSequence.map((a) => ({
           step: `${a.role}: ${a.action}`,
-          status:
-            wc.status === 'completed'
-              ? 'completed'
-              : wc.status === 'running'
-                ? 'running'
-                : 'pending',
+          status: projectTraceStatus(wc, 'agent'),
           note: `Agent: ${a.agentId}`,
         })),
         {
           step: 'Covenant Layer: policy gate evaluated',
-          status: wc.requiresApproval ? 'running' : 'completed',
-          note: wc.requiresApproval
-            ? `Pending ${wc.actionBrief.approvalTier} approval`
-            : 'All policy clauses satisfied',
+          status: projectTraceStatus(wc, 'gate'),
+          note:
+            wc.actionBrief.status === 'pending_approval'
+              ? `Fixture action is pending ${wc.actionBrief.approvalTier} approval`
+              : `Fixture action status: ${wc.actionBrief.status}`,
         },
         {
           step: 'MirrorEval: recommendation scored',
-          status: 'completed',
+          status: projectTraceStatus(wc, 'evaluation'),
           note: `Verdict: ${wc.mirrorEvalResult.verdict} · Score: ${Math.round(wc.mirrorEvalResult.score * 100)}%`,
         },
         {
           step: 'Proof Ledger: PCE contract recorded',
-          status: wc.verificationResult.status === 'passed' ? 'completed' : 'failed',
-          note: `Contract: ${wc.pceContractId}`,
+          status: projectTraceStatus(wc, 'receipt'),
+          note:
+            wc.status === 'completed'
+              ? `Fixture contract: ${wc.pceContractId}`
+              : 'No completed fixture receipt is represented.',
         },
       ]
     : [];
@@ -130,12 +131,30 @@ export function WorkcellReplayDetail() {
         </span>
       </div>
 
-      <PageHeader
-        label="WORKCELL REPLAY"
-        title={`↩ ${wc.name}`}
-        subtitle="Step-by-step replay of the workcell execution trace with latency, agent roles, and evidence chain."
-        status="LIVE"
-      />
+      <div data-proof-surface="a11oy-workcell-replay-detail" data-proof-ready="true">
+        <PageHeader
+          label="WORKCELL REPLAY"
+          title={`↩ ${wc.name}`}
+          subtitle="Step through the source-declared fixture sequence without converting an unfinished workflow into a successful execution."
+          status="DEMO"
+        />
+      </div>
+
+      <div
+        className="p-3 rounded-lg mb-6 text-xs"
+        role="status"
+        style={{
+          backgroundColor: 'rgba(201,183,135,0.06)',
+          border: '1px solid rgba(201,183,135,0.2)',
+          color: 'var(--color-a11oy-text-sub)',
+        }}
+      >
+        <span className="font-mono" style={{ color: '#c9b787' }}>
+          {wc.evidenceState}
+        </span>
+        {' — '}
+        {wc.evidenceReason} The Play control reveals fixture rows only.
+      </div>
 
       <div className="grid lg:grid-cols-3 gap-6">
         <div className="lg:col-span-2">
@@ -163,7 +182,8 @@ export function WorkcellReplayDetail() {
                     type="button"
                     key={s}
                     onClick={() => setSpeed(s)}
-                    className="px-2 py-0.5 rounded font-mono"
+                    aria-pressed={speed === s}
+                    className="px-2 py-0.5 rounded font-mono min-h-11"
                     style={{
                       backgroundColor: speed === s ? 'rgba(201,183,135,0.15)' : 'transparent',
                       color: speed === s ? '#c9b787' : 'var(--color-a11oy-text-ghost)',
@@ -247,10 +267,12 @@ export function WorkcellReplayDetail() {
               }}
             >
               <div className="text-sm font-semibold mb-1" style={{ color: '#c9b787' }}>
-                Replay Complete
+                Fixture Walkthrough Complete
               </div>
               <div className="text-xs" style={{ color: 'var(--color-a11oy-text-sub)' }}>
-                All {steps.length} steps replayed. MirrorEval verdict: {wc.mirrorEvalResult.verdict}
+                All {steps.length} source rows were revealed. Workflow status remains {wc.status}
+                and the projected outcome remains {projection?.outcome}; no execution or receipt was
+                created.
               </div>
             </div>
           )}
@@ -282,6 +304,15 @@ export function WorkcellReplayDetail() {
                   >
                     {wc.status}
                   </div>
+                </div>
+                <div>
+                  <div
+                    className="font-mono mb-0.5"
+                    style={{ color: 'var(--color-a11oy-text-ghost)' }}
+                  >
+                    EVIDENCE STATE
+                  </div>
+                  <div style={{ color: '#c9b787' }}>{wc.evidenceState}</div>
                 </div>
                 <div>
                   <div

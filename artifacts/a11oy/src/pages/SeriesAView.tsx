@@ -69,6 +69,14 @@ function TruthCard({
 }
 
 function SolutionPanel({ solution }: { solution: SeriesASolution }) {
+  const [walkthroughStep, setWalkthroughStep] = useState(-1);
+  const lastStep = solution.loop.length - 1;
+  const walkthroughComplete = walkthroughStep === lastStep;
+
+  function advanceWalkthrough() {
+    setWalkthroughStep((current) => Math.min(current + 1, lastStep));
+  }
+
   return (
     <div
       id={`solution-panel-${solution.id}`}
@@ -102,8 +110,39 @@ function SolutionPanel({ solution }: { solution: SeriesASolution }) {
             <h3>{step.phase}</h3>
             <p>{step.summary}</p>
             <small>{step.evidence}</small>
+            <span className="sa-walkthrough-state">
+              {walkthroughStep >= index ? 'REVEALED' : 'PENDING'}
+            </span>
           </article>
         ))}
+      </section>
+
+      <section className="sa-walkthrough" aria-labelledby={`walkthrough-${solution.id}`}>
+        <div>
+          <p className="sa-eyebrow">Deterministic fixture walkthrough</p>
+          <h3 id={`walkthrough-${solution.id}`}>Reveal the decision path one stage at a time.</h3>
+          <p aria-live="polite">
+            {walkthroughStep < 0
+              ? 'No fixture stage has been revealed.'
+              : walkthroughComplete
+                ? 'Fixture walkthrough complete. No external mutation ran and no deployed receipt was produced.'
+                : `${solution.loop[walkthroughStep].phase} revealed. Continue to inspect the next declared stage.`}
+          </p>
+        </div>
+        <div
+          className="sa-progress"
+          role="progressbar"
+          aria-label="Walkthrough progress"
+          aria-valuemin={0}
+          aria-valuemax={solution.loop.length}
+          aria-valuenow={Math.max(0, walkthroughStep + 1)}
+        >
+          <span
+            style={{
+              width: `${Math.max(0, ((walkthroughStep + 1) / solution.loop.length) * 100)}%`,
+            }}
+          />
+        </div>
       </section>
 
       <div className="sa-outcome-grid">
@@ -122,15 +161,24 @@ function SolutionPanel({ solution }: { solution: SeriesASolution }) {
       </div>
 
       <div className="sa-actions">
-        <Link className="sa-button sa-button-primary" href={route(solution.demoHref)}>
-          {solution.demoLabel}
-        </Link>
-        <Link className="sa-button" href={route('/proof')}>
-          Inspect Proof Ledger
-        </Link>
-        <Link className="sa-button" href={route('/governance')}>
-          Inspect policy gates
-        </Link>
+        <button
+          className="sa-button sa-button-primary"
+          type="button"
+          onClick={walkthroughComplete ? () => setWalkthroughStep(-1) : advanceWalkthrough}
+        >
+          {walkthroughComplete ? 'Reset fixture walkthrough' : solution.demoLabel}
+        </button>
+        {walkthroughStep >= 0 && !walkthroughComplete && (
+          <button className="sa-button" type="button" onClick={advanceWalkthrough}>
+            Reveal next stage
+          </button>
+        )}
+        <a className="sa-button" href="#proof-boundary">
+          Inspect proof boundary
+        </a>
+        <a className="sa-button" href="#governance-boundary">
+          Inspect policy boundary
+        </a>
       </div>
     </div>
   );
@@ -158,7 +206,12 @@ export function SeriesAView() {
 
   return (
     <Layout fullscreen>
-      <div className="sa-shell">
+      <div
+        className="sa-shell"
+        data-proof-surface="a11oy-series-a-start"
+        data-proof-ready="true"
+        data-proof-state="DEMO"
+      >
         <style>{`
           .sa-shell {
             --sa-bg: #080908;
@@ -219,6 +272,7 @@ export function SeriesAView() {
           }
           .sa-header nav a:hover, .sa-header nav a:focus-visible { color: var(--sa-text); background: var(--sa-surface); }
           .sa-main { width: min(100%, 1280px); margin: 0 auto; padding: clamp(2.5rem, 7vw, 6.5rem) clamp(1rem, 4vw, 3rem) 6rem; }
+          .sa-main section[id] { scroll-margin-top: 7rem; }
           .sa-hero { display: grid; grid-template-columns: minmax(0, 1.35fr) minmax(250px, .65fr); gap: clamp(2rem, 6vw, 5rem); align-items: end; }
           .sa-kicker, .sa-eyebrow {
             margin: 0;
@@ -257,12 +311,18 @@ export function SeriesAView() {
           .sa-step h3 { margin: 1.8rem 0 .7rem; font-size: 1.22rem; }
           .sa-step p { margin: 0; color: var(--sa-dim); font-size: .83rem; line-height: 1.6; }
           .sa-step small { display: block; margin-top: 1.2rem; padding-top: .8rem; border-top: 1px solid var(--sa-border); color: var(--sa-muted); font-size: .69rem; line-height: 1.5; }
+          .sa-walkthrough-state { display: block; margin-top: .8rem; color: var(--sa-accent); font: 700 .58rem/1 ui-monospace, SFMono-Regular, Menlo, monospace; letter-spacing: .1em; }
+          .sa-walkthrough { display: grid; grid-template-columns: minmax(0, 1fr) minmax(180px, .45fr); gap: 1rem; align-items: end; margin: 0 0 1rem; padding: 1rem; border: 1px solid var(--sa-border-strong); border-radius: 14px; background: rgba(201,183,135,.045); }
+          .sa-walkthrough h3 { margin: .55rem 0 .45rem; font-size: 1rem; }
+          .sa-walkthrough p:last-child { margin: 0; color: var(--sa-dim); font-size: .78rem; line-height: 1.55; }
+          .sa-progress { height: 8px; overflow: hidden; border-radius: 999px; background: rgba(255,255,255,.08); }
+          .sa-progress span { display: block; height: 100%; border-radius: inherit; background: var(--sa-accent); transition: width .2s ease; }
           .sa-outcome-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: .75rem; }
           .sa-outcome { padding: 1.05rem; border: 1px solid var(--sa-border); border-radius: 14px; background: var(--sa-surface); }
           .sa-outcome > p:last-child { margin: .65rem 0 0; color: var(--sa-dim); line-height: 1.6; }
           .sa-boundary { border-color: rgba(219,139,75,.25); }
           .sa-actions { display: flex; flex-wrap: wrap; gap: .65rem; margin-top: 1.2rem; }
-          .sa-button { min-height: 46px; display: inline-flex; align-items: center; justify-content: center; padding: .7rem 1rem; border: 1px solid var(--sa-border); border-radius: 10px; color: var(--sa-text); background: var(--sa-surface); text-decoration: none; font-size: .78rem; font-weight: 650; }
+          .sa-button { min-height: 46px; display: inline-flex; align-items: center; justify-content: center; padding: .7rem 1rem; border: 1px solid var(--sa-border); border-radius: 10px; color: var(--sa-text); background: var(--sa-surface); text-decoration: none; font: 650 .78rem/1.2 inherit; cursor: pointer; }
           .sa-button:hover, .sa-button:focus-visible { border-color: var(--sa-border-strong); background: var(--sa-surface-strong); }
           .sa-button-primary { background: var(--sa-accent); color: #11120f; border-color: var(--sa-accent); }
           .sa-diligence { margin-top: clamp(3.5rem, 8vw, 7rem); }
@@ -272,6 +332,17 @@ export function SeriesAView() {
           .sa-diligence-card span:first-child { color: var(--sa-accent); font: 650 .65rem/1 ui-monospace, SFMono-Regular, Menlo, monospace; letter-spacing: .12em; }
           .sa-diligence-card strong { display: block; margin-top: .65rem; font-size: 1.25rem; }
           .sa-diligence-card p { margin: 0; color: var(--sa-muted); font-size: .78rem; line-height: 1.55; }
+          .sa-flagship { margin: clamp(3.5rem, 8vw, 7rem) 0; padding: clamp(1.2rem, 4vw, 2.5rem); border: 1px solid var(--sa-border-strong); border-radius: 20px; background: linear-gradient(140deg, rgba(201,183,135,.09), rgba(255,255,255,.018)); }
+          .sa-flagship h2 { max-width: 920px; margin: .75rem 0 1rem; font-size: clamp(1.9rem, 5vw, 4rem); line-height: 1.05; letter-spacing: -.05em; }
+          .sa-flagship > p:last-child { max-width: 780px; margin: 0; color: var(--sa-dim); line-height: 1.7; }
+          .sa-boundary-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: .75rem; margin-top: 1.25rem; }
+          .sa-dev-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: .75rem; margin: 1.25rem 0 0; padding: 0; list-style: none; }
+          .sa-dev-card { min-width: 0; padding: 1.1rem; border: 1px solid var(--sa-border); border-radius: 14px; background: var(--sa-surface); }
+          .sa-dev-card-wide { grid-column: 1 / -1; }
+          .sa-dev-head { display: flex; align-items: center; justify-content: space-between; gap: .75rem; }
+          .sa-dev-card h3 { margin: .8rem 0 .5rem; font-size: 1.05rem; }
+          .sa-dev-card p { margin: 0; color: var(--sa-muted); font-size: .78rem; line-height: 1.6; overflow-wrap: anywhere; }
+          .sa-code { margin: .9rem 0 0; padding: .85rem; overflow-x: auto; border: 1px solid var(--sa-border); border-radius: 10px; background: rgba(0,0,0,.32); color: #d7d2c4; font: .7rem/1.75 ui-monospace, SFMono-Regular, Menlo, monospace; white-space: pre-wrap; overflow-wrap: anywhere; }
           .sa-footer { display: flex; justify-content: space-between; gap: 1rem; margin-top: 4rem; padding-top: 1.25rem; border-top: 1px solid var(--sa-border); color: var(--sa-muted); font-size: .7rem; line-height: 1.5; }
           @media (max-width: 960px) {
             .sa-hero { grid-template-columns: 1fr; align-items: start; }
@@ -280,13 +351,15 @@ export function SeriesAView() {
             .sa-tabs { grid-template-columns: repeat(3, minmax(0, 1fr)); }
             .sa-panel-head { grid-template-columns: 1fr; }
             .sa-panel-proof { width: min(100%, 360px); }
+            .sa-walkthrough { grid-template-columns: 1fr; }
           }
           @media (max-width: 700px) {
             .sa-header { align-items: flex-start; flex-direction: column; }
             .sa-header nav { width: 100%; overflow-x: auto; padding-bottom: .1rem; }
             .sa-header nav a { flex: 0 0 auto; }
             .sa-section-head { align-items: flex-start; flex-direction: column; }
-            .sa-outcome-grid, .sa-diligence-grid { grid-template-columns: 1fr; }
+            .sa-outcome-grid, .sa-diligence-grid, .sa-boundary-grid, .sa-dev-grid { grid-template-columns: 1fr; }
+            .sa-dev-card-wide { grid-column: auto; }
             .sa-footer { flex-direction: column; }
           }
           @media (max-width: 520px) {
@@ -305,17 +378,21 @@ export function SeriesAView() {
         `}</style>
 
         <header className="sa-header">
-          <Link className="sa-brand" href={route('/')} aria-label="A11oy home">
+          <a
+            className="sa-brand"
+            href="#series-a-title"
+            aria-label="Return to the Series A product view heading"
+          >
             <span className="sa-mark" aria-hidden="true">
               a
             </span>
             <span>A11oy</span>
-          </Link>
+          </a>
           <nav aria-label="Series A view navigation">
-            <a href="#solutions">Solutions</a>
-            <a href="#evidence">Evidence</a>
+            <a href="#flagship-value">Value</a>
+            <a href="#solutions">Demo</a>
             <a href="#diligence">Diligence</a>
-            <Link href={route('/architecture')}>Developer view</Link>
+            <a href="#developer">Developer view</a>
           </nav>
         </header>
 
@@ -332,12 +409,12 @@ export function SeriesAView() {
                 demonstrates from what still requires a live, independently observed runtime.
               </p>
               <div className="sa-actions">
-                <Link className="sa-button sa-button-primary" href={route('/demo')}>
-                  Open deterministic demo
-                </Link>
-                <Link className="sa-button" href={route('/proof')}>
-                  Inspect proof shape
-                </Link>
+                <a className="sa-button sa-button-primary" href="#flagship-value">
+                  See flagship value
+                </a>
+                <a className="sa-button" href="#solutions">
+                  Run deterministic walkthrough
+                </a>
               </div>
             </div>
             <aside className="sa-hero-aside" aria-label="Investor view status">
@@ -350,6 +427,18 @@ export function SeriesAView() {
             </aside>
           </section>
 
+          <section className="sa-flagship" id="flagship-value" aria-labelledby="flagship-title">
+            <p className="sa-kicker">Flagship value</p>
+            <h2 id="flagship-title">
+              Authority and evidence travel with the decision, not after it.
+            </h2>
+            <p>
+              The source-backed prototype makes the recommendation, policy gate, human boundary, and
+              proposed receipt shape inspectable in one journey. It does not promote fixture data,
+              staged actions, or source-defined receipts into production evidence.
+            </p>
+          </section>
+
           <section className="sa-truth-grid" id="evidence" aria-label="Current evidence boundary">
             <TruthCard
               label="React surface"
@@ -359,7 +448,7 @@ export function SeriesAView() {
             <TruthCard
               label="Decision scenarios"
               state="DEMO"
-              detail="Each view uses deterministic, non-customer scenario language and links to an existing source route."
+              detail="Each view runs a deterministic, non-customer walkthrough entirely inside this qualified source surface."
             />
             <TruthCard
               label="External execution"
@@ -369,7 +458,7 @@ export function SeriesAView() {
             <TruthCard
               label="GraphQL runtime"
               state="UNAVAILABLE"
-              detail="No server resolver route for the declared GraphQL client contract was found at this revision."
+              detail="Schema and resolvers exist in packages/szl-graphql, but no mounted authenticated /api/graphql or /api/graphql/ws route matching this client was found."
             />
           </section>
 
@@ -380,8 +469,9 @@ export function SeriesAView() {
                 <h2 id="solutions-title">Choose the buyer problem.</h2>
               </div>
               <p>
-                Every tab exposes the same governed loop and links into an existing A11oy demo
-                surface. The operational state stays visible throughout the journey.
+                Every tab exposes the same governed loop and a local click-through fixture. The
+                evidence state stays visible without sending the visitor into unqualified LIVE
+                surfaces.
               </p>
             </div>
 
@@ -406,7 +496,51 @@ export function SeriesAView() {
                 </button>
               ))}
             </div>
-            <SolutionPanel solution={selected} />
+            <SolutionPanel key={selected.id} solution={selected} />
+          </section>
+
+          <section className="sa-diligence" id="proof-boundary" aria-labelledby="proof-title">
+            <div className="sa-section-head">
+              <div>
+                <p className="sa-kicker">Proof boundary</p>
+                <h2 id="proof-title">Inspect what a receipt would need to bind.</h2>
+              </div>
+              <p>
+                These are source-declared fixture fields. They are not a deployed receipt, a
+                cryptographic witness, or proof of an external action.
+              </p>
+            </div>
+            <div className="sa-boundary-grid">
+              <TruthCard
+                label="Fixture proof shape"
+                state="DEMO"
+                detail="The walkthrough binds scenario input, policy disposition, reviewer state, proposed action, and evidence references as a deterministic shape."
+              />
+              <TruthCard
+                label="Deployed receipt parity"
+                state="UNAVAILABLE"
+                detail="No authenticated runtime receipt was fetched and no source-to-deployment parity witness is represented by this page."
+              />
+            </div>
+          </section>
+
+          <section
+            className="sa-diligence"
+            id="governance-boundary"
+            aria-labelledby="governance-boundary-title"
+          >
+            <div className="sa-section-head">
+              <div>
+                <p className="sa-kicker">Governance boundary</p>
+                <h2 id="governance-boundary-title">
+                  The demo stages decisions; it grants no authority.
+                </h2>
+              </div>
+              <p>
+                Local controls change only fixture presentation state. They do not approve, execute,
+                file, notify, transact, or mutate an external system.
+              </p>
+            </div>
           </section>
 
           <section className="sa-diligence" id="diligence" aria-labelledby="diligence-title">
@@ -415,37 +549,134 @@ export function SeriesAView() {
                 <p className="sa-kicker">Diligence path</p>
                 <h2 id="diligence-title">Move from narrative to source evidence.</h2>
               </div>
-              <p>
-                No dead-end pitch deck: every diligence card resolves to a registered A11oy route.
-              </p>
+              <p>Each card resolves to a truth-qualified section in this source surface.</p>
             </div>
             <div className="sa-diligence-grid">
-              <Link className="sa-diligence-card" href={route('/architecture')}>
+              <a className="sa-diligence-card" href="#developer">
                 <span>01 · ARCHITECTURE</span>
                 <div>
                   <strong>Inspect the fabric</strong>
                   <p>Review the source-declared layers, boundaries, and product structure.</p>
                 </div>
-              </Link>
-              <Link className="sa-diligence-card" href={route('/governance')}>
+              </a>
+              <a className="sa-diligence-card" href="#governance-boundary">
                 <span>02 · GOVERNANCE</span>
                 <div>
                   <strong>Inspect the gate</strong>
                   <p>Follow the Covenant policy and human-authorization path.</p>
                 </div>
-              </Link>
-              <Link className="sa-diligence-card" href={route('/proof')}>
+              </a>
+              <a className="sa-diligence-card" href="#proof-boundary">
                 <span>03 · PROOF</span>
                 <div>
                   <strong>Inspect the evidence</strong>
                   <p>Review the demo Proof Packet shape without inferring deployed receipts.</p>
                 </div>
-              </Link>
+              </a>
             </div>
           </section>
 
+          <section className="sa-diligence" id="developer" aria-labelledby="developer-title">
+            <div className="sa-section-head">
+              <div>
+                <p className="sa-kicker">Developer path</p>
+                <h2 id="developer-title">Follow the source contract end to end.</h2>
+              </div>
+              <p>
+                Architecture, API availability, DEMO Workcells, governance, receipt shape, local
+                run, and verification are kept in one explicit sequence.
+              </p>
+            </div>
+            <ol className="sa-dev-grid">
+              <li className="sa-dev-card">
+                <div className="sa-dev-head">
+                  <span>01 · ARCHITECTURE</span>
+                  <StateBadge state="AVAILABLE" />
+                </div>
+                <h3>Route and fabric boundaries</h3>
+                <p>
+                  <code>artifacts/a11oy/src/App.tsx</code> mounts the source view;{' '}
+                  <code>lib/a11oy-fabric</code> supplies typed deterministic fixtures.
+                </p>
+              </li>
+              <li className="sa-dev-card">
+                <div className="sa-dev-head">
+                  <span>02 · APIs</span>
+                  <StateBadge state="UNAVAILABLE" />
+                </div>
+                <h3>Fail-closed GraphQL client</h3>
+                <p>
+                  Implemented schema and resolvers exist in <code>packages/szl-graphql</code>, but
+                  no mounted authenticated route matching <code>/api/graphql</code> or{' '}
+                  <code>/api/graphql/ws</code> was found.
+                </p>
+              </li>
+              <li className="sa-dev-card">
+                <div className="sa-dev-head">
+                  <span>03 · WORKCELLS</span>
+                  <StateBadge state="DEMO" />
+                </div>
+                <h3>Typed fixture registry</h3>
+                <p>
+                  <code>WORKCELL_DEMO_SOURCE</code> carries records, a deterministic observation
+                  time, and an evidence reason separately from workflow status.
+                </p>
+                <div className="sa-actions">
+                  <Link className="sa-button" href={route('/workcells')}>
+                    Inspect DEMO Workcells
+                  </Link>
+                </div>
+              </li>
+              <li className="sa-dev-card">
+                <div className="sa-dev-head">
+                  <span>04 · GOVERNANCE</span>
+                  <StateBadge state="DEMO" />
+                </div>
+                <h3>Local policy disposition</h3>
+                <p>
+                  The walkthrough exposes a fixture gate and human boundary; a click changes local
+                  presentation state and confers no operational authority.
+                </p>
+              </li>
+              <li className="sa-dev-card">
+                <div className="sa-dev-head">
+                  <span>05 · RECEIPTS</span>
+                  <StateBadge state="DEMO" />
+                </div>
+                <h3>Proof shape, not deployed proof</h3>
+                <p>
+                  The source declares fields and references for a receipt-shaped record. Deployed
+                  receipt parity remains unavailable without an authenticated witness.
+                </p>
+              </li>
+              <li className="sa-dev-card">
+                <div className="sa-dev-head">
+                  <span>06 · LOCAL RUN</span>
+                  <StateBadge state="AVAILABLE" />
+                </div>
+                <h3>Start the source preview</h3>
+                <pre className="sa-code">pnpm --filter @workspace/a11oy dev</pre>
+              </li>
+              <li className="sa-dev-card sa-dev-card-wide">
+                <div className="sa-dev-head">
+                  <span>07 · VERIFICATION</span>
+                  <StateBadge state="AVAILABLE" />
+                </div>
+                <h3>Run the focused source contracts</h3>
+                <pre className="sa-code">
+                  pnpm --filter @workspace/a11oy test{`\n`}pnpm --filter @workspace/a11oy typecheck
+                  {`\n`}pnpm --filter @workspace/a11oy lint:ci
+                </pre>
+                <p>
+                  Command availability is source evidence only; the durable Proof Packet records
+                  observed exit codes separately.
+                </p>
+              </li>
+            </ol>
+          </section>
+
           <footer className="sa-footer">
-            <span>A11oy · Governed decision infrastructure prototype</span>
+            <span>A11oy · Governed decision infrastructure prototype · /a11oy/start</span>
             <span>
               Source-qualified view · no customer, revenue, certification, or production claim
             </span>

@@ -243,7 +243,9 @@ interface LayoutProps {
 }
 
 export function Layout({ children, fullscreen = false }: LayoutProps) {
-  const [sidebarOpen, setSidebarOpen] = useState(true);
+  const [sidebarOpen, setSidebarOpen] = useState(
+    () => typeof window === 'undefined' || window.innerWidth >= 768,
+  );
   const [location] = useLocation();
 
   if (fullscreen) {
@@ -294,8 +296,8 @@ export function Layout({ children, fullscreen = false }: LayoutProps) {
             type="button"
             onClick={() => setSidebarOpen((o) => !o)}
             style={{
-              width: 26,
-              height: 26,
+              width: 44,
+              height: 44,
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
@@ -311,7 +313,13 @@ export function Layout({ children, fullscreen = false }: LayoutProps) {
           </button>
           <Link
             href={b('/')}
-            style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', textDecoration: 'none' }}
+            style={{
+              minHeight: 44,
+              display: 'flex',
+              alignItems: 'center',
+              gap: '0.5rem',
+              textDecoration: 'none',
+            }}
           >
             <span
               style={{
@@ -367,6 +375,9 @@ export function Layout({ children, fullscreen = false }: LayoutProps) {
           <Link
             href={b('/start')}
             style={{
+              minHeight: 44,
+              display: 'inline-flex',
+              alignItems: 'center',
               padding: '0.4rem 0.875rem',
               fontSize: '0.75rem',
               fontWeight: 500,
@@ -423,7 +434,9 @@ export function Layout({ children, fullscreen = false }: LayoutProps) {
                       key={item.href}
                       href={fullHref}
                       style={{
-                        display: 'block',
+                        minHeight: 44,
+                        display: 'flex',
+                        alignItems: 'center',
                         padding: '0.4rem 1.25rem',
                         fontSize: '0.8125rem',
                         textDecoration: 'none',

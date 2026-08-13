@@ -92,7 +92,7 @@ export function OmniaShellProvider({
 }: OmniaShellProviderProps) {
   const [commandPaletteOpen, setCommandPaletteOpen] = useState(false);
   const [notifications, setNotifications] = useState<OmniaNotification[]>(
-    initialNotifications ?? SEED_NOTIFICATIONS,
+    initialNotifications ?? (config.networkState === 'UNAVAILABLE' ? [] : SEED_NOTIFICATIONS),
   );
   const [activeProvenanceChain, setActiveProvenanceChain] = useState<ProvenanceChain | null>(null);
   const adoptionBeaconFired = useRef(false);
@@ -161,8 +161,7 @@ export function OmniaShellProvider({
             return [...fresh, ...prev].slice(0, 50);
           });
         }
-      } catch {
-      }
+      } catch {}
     };
     const timer = setInterval(poll, 30_000);
     return () => clearInterval(timer);

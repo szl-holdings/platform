@@ -30,6 +30,30 @@ export type PolicyEnforcement = 'block' | 'warn' | 'log' | 'require_approval';
 
 export type WorkcellStatus = 'idle' | 'running' | 'paused' | 'error' | 'completed';
 
+export type OperationalEvidenceState =
+  | 'REAL'
+  | 'DEMO'
+  | 'UNAVAILABLE'
+  | 'DEGRADED'
+  | 'BLOCKED'
+  | 'ROADMAP';
+
+export type OperationalRecordSource<T> =
+  | {
+      readonly state: 'REAL' | 'DEMO' | 'DEGRADED';
+      readonly records: readonly T[];
+      readonly reason: string;
+      readonly source: string;
+      readonly observedAt: string;
+    }
+  | {
+      readonly state: 'UNAVAILABLE' | 'BLOCKED' | 'ROADMAP';
+      readonly records: readonly [];
+      readonly reason: string;
+      readonly source: null;
+      readonly observedAt: null;
+    };
+
 export type ProofPacketKind =
   | 'signal_ingestion'
   | 'state_transition'
