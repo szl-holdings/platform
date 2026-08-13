@@ -28,7 +28,9 @@ function specDigest(spec: CognitiveEpochSpec): string {
 function freezeRecord(record: CognitiveEpochRecord): CognitiveEpochRecord {
   return Object.freeze({
     ...record,
-    validationChecks: Object.freeze(record.validationChecks.map((check) => Object.freeze({ ...check }))),
+    validationChecks: Object.freeze(
+      record.validationChecks.map((check) => Object.freeze({ ...check })),
+    ),
   });
 }
 
@@ -90,7 +92,11 @@ export class CognitiveEpochManager {
   }
 
   public validate(epochId: string, checks: readonly EpochValidationCheck[]): CognitiveEpochRecord {
-    assertStateNative(checks.length > 0, 'INVALID_INPUT', 'At least one epoch validation check is required.');
+    assertStateNative(
+      checks.length > 0,
+      'INVALID_INPUT',
+      'At least one epoch validation check is required.',
+    );
     const current = this.require(epochId);
     if (current.state !== 'PREPARED') {
       throw new StateNativeError(
@@ -106,22 +112,25 @@ export class CognitiveEpochManager {
           'INVALID_INPUT',
           'Cognitive epoch validation checks must be objects.',
         );
+        const name = check.name;
+        const passed = check.passed;
+        const detail = check.detail;
         assertStateNative(
-          typeof check.name === 'string' && check.name.trim().length > 0,
+          typeof name === 'string' && name.trim().length > 0,
           'INVALID_INPUT',
           'Cognitive epoch validation check name must be a non-empty string.',
         );
         assertStateNative(
-          typeof check.passed === 'boolean',
+          typeof passed === 'boolean',
           'INVALID_INPUT',
           'Cognitive epoch validation check passed must be a boolean.',
         );
         assertStateNative(
-          typeof check.detail === 'string' && check.detail.trim().length > 0,
+          typeof detail === 'string' && detail.trim().length > 0,
           'INVALID_INPUT',
           'Cognitive epoch validation check detail must be a non-empty string.',
         );
-        return Object.freeze({ name: check.name, passed: check.passed, detail: check.detail });
+        return Object.freeze({ name, passed, detail });
       }),
     );
     const state = normalizedChecks.every((check) => check.passed) ? 'VALIDATED' : 'REJECTED';
@@ -181,12 +190,23 @@ export class CognitiveEpochManager {
     return next;
   }
 
-  public rollback(activeEpochId: string, targetEpochId: string, reason: string): CognitiveEpochRecord {
-    assertStateNative(reason.trim().length > 0, 'INVALID_INPUT', 'Rollback reason must not be empty.');
+  public rollback(
+    activeEpochId: string,
+    targetEpochId: string,
+    reason: string,
+  ): CognitiveEpochRecord {
+    assertStateNative(
+      reason.trim().length > 0,
+      'INVALID_INPUT',
+      'Rollback reason must not be empty.',
+    );
     const active = this.require(activeEpochId);
     const target = this.require(targetEpochId);
     if (active.state !== 'ACTIVE') {
-      throw new StateNativeError('INVALID_TRANSITION', 'Only an active cognitive epoch can be rolled back.');
+      throw new StateNativeError(
+        'INVALID_TRANSITION',
+        'Only an active cognitive epoch can be rolled back.',
+      );
     }
     if (active.tenantId !== target.tenantId || active.route !== target.route) {
       throw new StateNativeError(
@@ -232,23 +252,33 @@ export class CognitiveEpochManager {
     const routeKey = this.#routeKey(tenantId, route);
     const epochId = this.#activeByTenantRoute.get(routeKey);
     if (!epochId) {
-      throw new StateNativeError('EPOCH_NOT_ACTIVE', 'No active cognitive epoch exists for this route.', {
-        tenantId,
-        route,
-      });
+      throw new StateNativeError(
+        'EPOCH_NOT_ACTIVE',
+        'No active cognitive epoch exists for this route.',
+        {
+          tenantId,
+          route,
+        },
+      );
     }
     if (expectedEpochId && expectedEpochId !== epochId) {
-      throw new StateNativeError('EPOCH_NOT_ACTIVE', 'The requested cognitive epoch is not active.', {
-        tenantId,
-        route,
-        expectedEpochId,
-        activeEpochId: epochId,
-      });
+      throw new StateNativeError(
+        'EPOCH_NOT_ACTIVE',
+        'The requested cognitive epoch is not active.',
+        {
+          tenantId,
+          route,
+          expectedEpochId,
+          activeEpochId: epochId,
+        },
+      );
     }
 
     const current = this.require(epochId);
     if (current.state !== 'ACTIVE') {
-      throw new StateNativeError('EPOCH_NOT_ACTIVE', 'Cognitive epoch is no longer active.', { epochId });
+      throw new StateNativeError('EPOCH_NOT_ACTIVE', 'Cognitive epoch is no longer active.', {
+        epochId,
+      });
     }
     const pinned = freezeRecord({ ...current, leaseCount: current.leaseCount + 1 });
     this.#records.set(epochId, pinned);
