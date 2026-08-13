@@ -1,572 +1,262 @@
 #!/usr/bin/env node
 /**
- * smoke-product-mode.js — Product-Mode Readiness Runner
+ * Product-mode smoke for the current Alloy Runtime API contract.
  *
- * Validates that the platform is ready to operate in production/demo mode:
- *   1. Critical environment variables exist
- *   2. API server boots and responds to health check
- *   3. Auth endpoints are reachable
- *   4. Core trust routes load without error
- *   5. Health endpoint reports real dependency status (not optimistic stub)
- *   6. Demo data sentinel — confirms demo data is not treated as production data
- *   7. No production-blocking errors in health response
- *
- * Usage:
- *   node scripts/qa/smoke-product-mode.js
- *   BASE_URL=https://szlholdings.com node scripts/qa/smoke-product-mode.js
- *   BASE_URL=http://localhost:5000 node scripts/qa/smoke-product-mode.js
- *
- * Exit codes:
- *   0 — All checks passed
- *   1 — One or more Sev 0 or Sev 1 checks failed
+ * The target server is already running. This probe verifies build identity,
+ * dependency readiness, fail-closed API-key enforcement, and an authenticated,
+ * tenant-scoped read without calling any mutation endpoint.
  */
 
-const BASE_URL = process.env.BASE_URL ?? process.env.API_BASE_URL ?? 'http://localhost:5000';
-const TIMEOUT_MS = parseInt(process.env.SMOKE_TIMEOUT_MS ?? '10000', 10);
-const NODE_ENV = process.env.NODE_ENV ?? 'development';
-const IS_PRODUCTION = NODE_ENV === 'production';
+import { appendFileSync } from 'node:fs';
+import { artifactUrl } from '../lib/artifact-ports.js';
 
-const _COLORS = {
-  green: '\x1b[32m',
-  red: '\x1b[31m',
-  yellow: '\x1b[33m',
-  cyan: '\x1b[36m',
-  bold: '\x1b[1m',
-  reset: '\x1b[0m',
-};
+const API_BASE_URL = (
+  process.env.API_BASE_URL ??
+  process.env.BASE_URL ??
+  artifactUrl('api-server')
+).replace(/\/+$/, '');
+const SMOKE_API_KEY = process.env.SMOKE_API_KEY;
+const INVALID_SMOKE_API_KEY = `${SMOKE_API_KEY ?? 'unset'}-deliberately-invalid`;
+const EXPECTED_GIT_SHA = process.env.GITHUB_SHA?.trim() || null;
+const SMOKE_TENANT_ID = `runtime-audit-${process.env.GITHUB_RUN_ID ?? process.pid}`;
+const parsedTimeout = Number.parseInt(process.env.SMOKE_TIMEOUT_MS ?? '10000', 10);
+const TIMEOUT_MS = Number.isFinite(parsedTimeout) && parsedTimeout > 0 ? parsedTimeout : 10_000;
+const EXPECTED_DEPENDENCIES = ['memory-store', 'run-registry', 'workflow-runtime'];
 
-const pass = (_msg) => {};
-const fail = (_msg) => {};
-const warn = (_msg) => {};
-const info = (_msg) => {};
-const header = (_msg) => {};
+const checks = [];
+let livenessGitSha = null;
 
-const results = { sev0: [], sev1: [], sev2: [], skipped: [] };
-
-function recordSev0(name, message) {
-  results.sev0.push({ name, message });
-}
-function recordSev1(name, message) {
-  results.sev1.push({ name, message });
-}
-function recordSev2(name, message) {
-  results.sev2.push({ name, message });
-}
-function recordSkip(name, reason) {
-  results.skipped.push({ name, reason });
+function writeStdout(message) {
+  process.stdout.write(`${message}\n`);
 }
 
-async function fetchWithTimeout(url, options = {}) {
+function writeStderr(message) {
+  process.stderr.write(`${message}\n`);
+}
+
+function invariant(condition, message) {
+  if (!condition) throw new Error(message);
+}
+
+function isValidDate(value) {
+  return typeof value === 'string' && Number.isFinite(Date.parse(value));
+}
+
+async function fetchJson(pathname, options = {}) {
   const controller = new AbortController();
   const timer = setTimeout(() => controller.abort(), TIMEOUT_MS);
+
   try {
-    const res = await fetch(url, { ...options, signal: controller.signal });
-    return res;
-  } catch (err) {
-    if (err.name === 'AbortError') {
-      throw new Error(`Request timed out after ${TIMEOUT_MS}ms: ${url}`);
+    const response = await fetch(`${API_BASE_URL}${pathname}`, {
+      ...options,
+      signal: controller.signal,
+    });
+    const rawBody = await response.text();
+    let body = null;
+
+    if (rawBody.trim().length > 0) {
+      try {
+        body = JSON.parse(rawBody);
+      } catch {
+        throw new Error(`${pathname} returned invalid JSON`);
+      }
     }
-    throw err;
+
+    return { response, body };
+  } catch (error) {
+    if (error instanceof Error && error.name === 'AbortError') {
+      throw new Error(`${pathname} timed out after ${TIMEOUT_MS}ms`);
+    }
+    throw error;
   } finally {
     clearTimeout(timer);
   }
 }
 
-// ─── Check 1: Critical Environment Variables ──────────────────────────────────
+async function runCheck(id, probe) {
+  const startedAt = Date.now();
 
-header('Check 1: Critical Environment Variables');
-
-const REQUIRED_ENV_VARS = [
-  { name: 'DATABASE_URL', sev: 0, description: 'PostgreSQL connection string' },
-  { name: 'SESSION_SECRET', sev: 0, description: 'Session signing secret' },
-];
-
-const RECOMMENDED_ENV_VARS = [
-  { name: 'NODE_ENV', sev: 2, description: 'Runtime environment' },
-  { name: 'PORT', sev: 2, description: 'Server port' },
-];
-
-const PRODUCTION_REQUIRED = [
-  { name: 'OBJECT_STORAGE_BUCKET_ID', sev: 1, description: 'Cloud object storage' },
-];
-
-for (const { name, sev, description } of REQUIRED_ENV_VARS) {
-  if (process.env[name]) {
-    pass(`${name} — present (${description})`);
-  } else {
-    fail(`${name} — MISSING (${description})`);
-    if (sev === 0) recordSev0(`env:${name}`, `Required env var ${name} is missing`);
-    else recordSev1(`env:${name}`, `Required env var ${name} is missing`);
-  }
-}
-
-for (const { name, description } of RECOMMENDED_ENV_VARS) {
-  if (process.env[name]) {
-    pass(`${name} — present (${description})`);
-  } else {
-    warn(`${name} — not set (${description})`);
-    recordSev2(`env:${name}`, `Recommended env var ${name} is not set`);
-  }
-}
-
-if (IS_PRODUCTION) {
-  for (const { name, description } of PRODUCTION_REQUIRED) {
-    if (process.env[name]) {
-      pass(`${name} — present (${description}) [production-required]`);
-    } else {
-      fail(`${name} — MISSING in production (${description})`);
-      recordSev1(`env:${name}`, `Production-required env var ${name} is missing`);
-    }
-  }
-} else {
-  info(`Skipping production-only env checks (NODE_ENV=${NODE_ENV})`);
-}
-
-// ─── Check 2: API Server Boot Health ─────────────────────────────────────────
-
-header('Check 2: API Server Health Endpoint');
-
-let healthData = null;
-let healthReachable = false;
-
-try {
-  const healthUrl = `${BASE_URL}/api/health`;
-  info(`GET ${healthUrl}`);
-  const res = await fetchWithTimeout(healthUrl);
-
-  if (res.status === 200) {
-    pass(`/api/health — HTTP 200`);
-    healthReachable = true;
-    try {
-      healthData = await res.json();
-      const status = healthData?.status;
-      if (status === 'ok') {
-        pass(`Health status: ${status}`);
-      } else if (status === 'degraded') {
-        warn(`Health status: ${status} — check service dependencies`);
-        recordSev1(
-          'health:status',
-          `Health endpoint reports degraded status: ${JSON.stringify(healthData?.services ?? {})}`,
-        );
-      } else {
-        warn(`Health status: ${status ?? 'unknown'}`);
-      }
-    } catch {
-      warn(`/api/health returned 200 but body is not valid JSON`);
-      recordSev2('health:json', 'Health endpoint returned non-JSON body');
-    }
-  } else {
-    fail(`/api/health — HTTP ${res.status}`);
-    recordSev0('health:status-code', `/api/health returned HTTP ${res.status}`);
-  }
-} catch (err) {
-  fail(`/api/health — ${err.message}`);
-  recordSev0('health:reachable', `API server unreachable: ${err.message}`);
-}
-
-// ─── Check 3: Readiness Probe (DB-aware) ─────────────────────────────────────
-
-header('Check 3: Readiness Probe (DB-aware health)');
-
-try {
-  const readyUrl = `${BASE_URL}/api/health/ready`;
-  info(`GET ${readyUrl}`);
-  const res = await fetchWithTimeout(readyUrl);
-
-  if (res.status === 200) {
-    pass(`/api/health/ready — HTTP 200`);
-    try {
-      const readyData = await res.json();
-      // /api/health/ready uses { checks: { database, server, uptime } } shape
-      // /api/health uses { services: { database: { status, latencyMs } } } shape
-      const dbCheck = readyData?.checks?.database;
-      const dbServiceStatus = readyData?.services?.database?.status;
-      if (dbCheck === 'connected' || dbCheck === 'ok' || dbServiceStatus === 'ok') {
-        pass(`Database status in readiness probe: connected`);
-      } else if (dbCheck && dbCheck !== 'connected' && dbCheck !== 'ok') {
-        fail(`Database status in readiness probe: ${dbCheck}`);
-        recordSev1('health:db-degraded', `Readiness probe reports database: ${dbCheck}`);
-      } else if (!readyData?.checks && !readyData?.services) {
-        warn(`Readiness probe response has no checks or services key — health may be optimistic`);
-        recordSev2('health:optimistic', 'Readiness probe lacks per-service status breakdown');
-      }
-    } catch {
-      warn(`/api/health/ready body is not valid JSON`);
-    }
-  } else if (res.status === 503) {
-    fail(`/api/health/ready — HTTP 503 (not ready)`);
-    recordSev0('health:not-ready', 'Readiness probe returned 503 — system not ready');
-  } else if (res.status === 404) {
-    // /api/health/ready is not implemented in this API — fall back to /api/health
-    info(
-      `/api/health/ready — HTTP 404 (no dedicated readiness probe; using /api/health DB status)`,
-    );
-    if (healthReachable && healthData?.services?.database) {
-      const dbStatus = healthData.services.database.status;
-      if (dbStatus === 'ok') {
-        pass(`Database status from /api/health: ok`);
-      } else {
-        fail(`Database status from /api/health: ${dbStatus}`);
-        recordSev1('health:db-degraded', `DB status from /api/health is ${dbStatus}`);
-      }
-    } else {
-      recordSkip(
-        'health:ready',
-        '/api/health/ready not implemented; DB status unavailable from /api/health',
-      );
-    }
-  } else {
-    warn(`/api/health/ready — HTTP ${res.status} (unexpected; checking /api/health fallback)`);
-    if (healthReachable && healthData?.services?.database) {
-      info(`Falling back to DB status from /api/health: ${healthData.services.database.status}`);
-    }
-  }
-} catch {
-  warn(`/api/health/ready — connection error; falling back to /api/health DB status`);
-  if (healthReachable && healthData?.services?.database) {
-    const dbStatus = healthData.services.database.status;
-    if (dbStatus === 'ok') {
-      pass(`Database status from /api/health: ok (fallback check)`);
-    } else {
-      fail(`Database status from /api/health: ${dbStatus}`);
-      recordSev1('health:db-degraded-fallback', `DB status from /api/health is ${dbStatus}`);
-    }
-  } else {
-    recordSkip('health:ready', '/api/health/ready not reachable; DB check skipped');
-  }
-}
-
-// ─── Check 4: Auth Contract Validation ───────────────────────────────────────
-//
-// Validates the auth contract at three levels:
-//   4a. /api/auth/user — returns 200 with { user: null } when unauthenticated,
-//       confirming the auth endpoint is up and not erroring
-//   4b. Auth guard enforcement — known protected routes must return 401 without
-//       credentials; a 200 here means auth is bypassed (Sev 0)
-//   4c. Login entry point — GET /api/login must be reachable (302 or 503 ok)
-//
-// Routes are derived from actual oidc-auth.ts and auth.ts registrations:
-//   - GET  /api/auth/user    → user info (200 with {user:null} when anon)
-//   - GET  /api/login        → OIDC login redirect (302 or 503 when unconfigured)
-//   - POST /api/auth/login   → credential login (not probed — needs POST body)
-//   - GET  /api/apm/snapshot → protected by authMiddleware() → must 401 anon
-//   - GET  /api/connectors   → protected by authMiddleware() → must 401 anon
-
-header('Check 4: Auth Contract Validation');
-
-// 4a: Auth user endpoint — must be reachable and return non-5xx
-// Returns { user: null } when unauthenticated (200 is correct behavior here)
-try {
-  const userUrl = `${BASE_URL}/api/auth/user`;
-  info(`GET ${userUrl}`);
-  const res = await fetchWithTimeout(userUrl, { method: 'GET' });
-
-  if (res.status >= 500) {
-    fail(`/api/auth/user — HTTP ${res.status} (server error on auth endpoint)`);
-    recordSev0('auth:user-5xx', `/api/auth/user returned ${res.status} — auth system error`);
-  } else if (res.status === 404) {
-    fail(`/api/auth/user — HTTP 404 (auth/user endpoint not registered)`);
-    recordSev1(
-      'auth:user-missing',
-      '/api/auth/user returned 404 — auth endpoint must be registered',
-    );
-  } else if (res.status === 200) {
-    let body = null;
-    try {
-      body = await res.json();
-    } catch {
-      /* ignore */
-    }
-    if (body !== null && typeof body === 'object' && 'user' in body) {
-      pass(`/api/auth/user — HTTP 200 with {user} shape (unauthenticated returns user:null)`);
-    } else {
-      pass(`/api/auth/user — HTTP 200 (auth endpoint up)`);
-    }
-  } else {
-    pass(`/api/auth/user — HTTP ${res.status} (auth endpoint reachable)`);
-  }
-} catch (err) {
-  fail(`/api/auth/user — ${err.message}`);
-  recordSev0('auth:user-unreachable', `/api/auth/user unreachable: ${err.message}`);
-}
-
-// 4b: Auth guard enforcement — probe known protected routes without credentials.
-// These routes use authMiddleware() with no { required: false } override, so they
-// MUST return 401 for unauthenticated requests. A 200 means auth is bypassed (Sev 0).
-const PROTECTED_ROUTES_TO_PROBE = [
-  { path: '/api/apm/snapshot', description: 'APM snapshot — authMiddleware() enforced' },
-  { path: '/api/connectors', description: 'Connectors list — authMiddleware() enforced' },
-  { path: '/api/audit/events', description: 'Audit events — authMiddleware() enforced' },
-];
-
-let authGuardVerified = false;
-for (const { path, description } of PROTECTED_ROUTES_TO_PROBE) {
   try {
-    const url = `${BASE_URL}${path}`;
-    info(`GET ${url} (without credentials — expecting 401)`);
-    const res = await fetchWithTimeout(url, { method: 'GET' });
-
-    if (res.status === 401 || res.status === 403) {
-      pass(
-        `${path} — HTTP ${res.status} (auth guard confirmed — unauthenticated request rejected)`,
-      );
-      authGuardVerified = true;
-      break;
-    } else if (res.status === 200) {
-      fail(`${path} — HTTP 200 without credentials (auth guard BYPASSED!)`);
-      recordSev0(
-        'auth:guard-bypassed',
-        `Protected route ${path} (${description}) returned 200 without credentials — auth middleware is broken`,
-      );
-      break;
-    } else if (res.status >= 500) {
-      warn(`${path} — HTTP ${res.status} (server error; trying next route)`);
-    } else {
-      info(`${path} — HTTP ${res.status} (unexpected; trying next route)`);
-    }
-  } catch {
-    info(`${path} — not reachable; trying next protected route`);
+    const detail = await probe();
+    const result = { id, passed: true, detail, durationMs: Date.now() - startedAt };
+    checks.push(result);
+    writeStdout(`PASS ${id}: ${detail}`);
+  } catch (error) {
+    const detail = error instanceof Error ? error.message : String(error);
+    const result = { id, passed: false, detail, durationMs: Date.now() - startedAt };
+    checks.push(result);
+    writeStderr(`FAIL ${id}: ${detail}`);
   }
 }
 
-if (
-  !authGuardVerified &&
-  results.sev0.filter((r) => r.name === 'auth:guard-bypassed').length === 0
-) {
-  warn(
-    'Auth guard unverifiable — known protected routes all returned non-200/non-401 (API server may not be running)',
+writeStdout(`Product-mode smoke target: ${API_BASE_URL}`);
+writeStdout(`Expected build SHA: ${EXPECTED_GIT_SHA ?? '(not supplied)'}`);
+
+await runCheck('liveness-build-identity', async () => {
+  const { response, body } = await fetchJson('/healthz');
+
+  invariant(response.status === 200, `/healthz returned HTTP ${response.status}, expected 200`);
+  invariant(body && typeof body === 'object', '/healthz returned no JSON object');
+  invariant(
+    body.status === 'ok',
+    `/healthz status is ${JSON.stringify(body.status)}, expected "ok"`,
   );
-  recordSev2(
-    'auth:guard-unverifiable',
-    'Could not confirm auth guard enforcement — API server may be offline',
+  invariant(
+    body.service === 'alloy-runtime-api',
+    `/healthz service is ${JSON.stringify(body.service)}, expected "alloy-runtime-api"`,
   );
-}
+  invariant(
+    typeof body.version === 'string' && body.version.length > 0,
+    '/healthz version is empty',
+  );
+  invariant(typeof body.gitSha === 'string' && body.gitSha.length > 0, '/healthz gitSha is empty');
+  invariant(isValidDate(body.bootTime), '/healthz bootTime is not a valid timestamp');
+  invariant(
+    Number.isFinite(body.uptimeSeconds) && body.uptimeSeconds >= 0,
+    '/healthz uptimeSeconds is not a finite nonnegative number',
+  );
 
-// 4c: Login entry point — GET /api/login must exist (302 to OIDC or 503 when unconfigured)
-try {
-  const loginUrl = `${BASE_URL}/api/login`;
-  info(`GET ${loginUrl}`);
-  const res = await fetchWithTimeout(loginUrl, { method: 'GET', redirect: 'manual' });
-
-  if (res.status >= 500) {
-    fail(`/api/login — HTTP ${res.status} (server error on login route)`);
-    recordSev1('auth:login-5xx', `/api/login returned ${res.status} — login entry point is broken`);
-  } else if (res.status === 404) {
-    fail(`/api/login — HTTP 404 (login route not registered)`);
-    recordSev1(
-      'auth:login-missing',
-      '/api/login returned 404 — OIDC login entry point must be registered',
-    );
-  } else if (res.status === 302 || res.status === 301) {
-    pass(`/api/login — HTTP ${res.status} (login redirects to OIDC provider)`);
-  } else if (res.status === 503) {
-    warn(`/api/login — HTTP 503 (OIDC not configured — acceptable in dev/staging without OIDC)`);
-  } else {
-    pass(`/api/login — HTTP ${res.status} (login route reachable)`);
-  }
-} catch (err) {
-  warn(`/api/login — ${err.message}`);
-  recordSev2('auth:login-unreachable', `/api/login not reachable: ${err.message}`);
-}
-
-// ─── Check 5: Core Trust Routes ──────────────────────────────────────────────
-
-header('Check 5: Core Trust Routes');
-
-// Trust routes are PUBLIC endpoints (no authMiddleware) that must respond 200.
-// /api/status is excluded — it is protected and will always 401 unauthenticated.
-// Use /api/auth/providers and /api/health/integrations as canonical public probes.
-const TRUST_ROUTES = [
-  { path: '/api/auth/providers', description: 'Auth providers list (public, from oidc-auth.ts)' },
-  {
-    path: '/api/health/integrations',
-    description: 'Integration health snapshot (public, from health-integrations.ts)',
-  },
-  { path: '/api/health', description: 'Health endpoint (repeated, expect cached)' },
-];
-
-for (const { path, description } of TRUST_ROUTES) {
-  try {
-    const url = `${BASE_URL}${path}`;
-    const res = await fetchWithTimeout(url);
-    if (res.status < 400) {
-      pass(`${path} — HTTP ${res.status} (${description})`);
-    } else {
-      warn(`${path} — HTTP ${res.status} (${description})`);
-      recordSev2(`trust:${path}`, `Trust route ${path} returned ${res.status}`);
-    }
-  } catch (err) {
-    warn(`${path} — not reachable (${err.message})`);
-    recordSev2(`trust:${path}`, `Trust route ${path} unreachable`);
-  }
-}
-
-// ─── Check 6: Demo Data Sentinel ─────────────────────────────────────────────
-
-header('Check 6: Demo Data Sentinel');
-
-if (IS_PRODUCTION) {
-  info('Running in production — checking for demo data leakage indicators');
-  try {
-    if (healthData) {
-      const version = healthData?.version;
-      const isDemoVersion = typeof version === 'string' && version.includes('demo');
-      if (isDemoVersion) {
-        fail(`Version string contains 'demo' in production: ${version}`);
-        recordSev1('demo:version', 'Production health endpoint exposes demo version marker');
-      } else {
-        pass(`Version string does not indicate demo mode: ${version ?? '(not set)'}`);
-      }
-    } else {
-      info('Health data unavailable — skipping version check');
-      recordSkip('demo:version', 'Health data not available for demo sentinel check');
-    }
-  } catch {
-    recordSkip('demo:sentinel', 'Demo data sentinel skipped — health not available');
-  }
-} else {
-  info(`NODE_ENV=${NODE_ENV} — demo data checks are relaxed in non-production`);
-  pass('Demo data sentinel skipped for non-production environment');
-}
-
-// ─── Check 7: Health Endpoint Authenticity ───────────────────────────────────
-
-header('Check 7: Health Endpoint Authenticity (Anti-Optimism Check)');
-
-if (healthData?.services) {
-  const db = healthData.services.database;
-  if (!db) {
-    warn('Health endpoint does not report database status — may be optimistic');
-    recordSev2('health:authenticity', 'Health endpoint lacks database status field');
-  } else if (db.status === 'ok' && typeof db.latencyMs !== 'number') {
-    warn("Health endpoint reports DB 'ok' without a latency measurement — may not be checking DB");
-    recordSev2(
-      'health:db-check-depth',
-      'DB health check lacks latency measurement — verify it performs a real query',
-    );
-  } else {
-    pass(
-      `Health endpoint reports database status: ${db.status} (latency: ${db.latencyMs ?? 'N/A'}ms)`,
+  if (EXPECTED_GIT_SHA) {
+    invariant(
+      body.gitSha === EXPECTED_GIT_SHA,
+      `/healthz gitSha ${body.gitSha} does not match expected ${EXPECTED_GIT_SHA}`,
     );
   }
 
-  const auth = healthData.services.auth;
-  if (auth?.status === 'ok' && auth?.mode === 'missing_secret') {
-    fail("Health reports auth 'ok' but mode is 'missing_secret' — contradictory status");
-    recordSev1('health:auth-contradiction', 'Auth status is ok but session secret is missing');
-  } else if (auth) {
-    pass(`Auth status: ${auth.status} (mode: ${auth.mode ?? 'N/A'})`);
+  livenessGitSha = body.gitSha;
+  return `HTTP 200; service=${body.service}; gitSha=${body.gitSha}`;
+});
+
+await runCheck('dependency-readiness', async () => {
+  const { response, body } = await fetchJson('/readyz');
+
+  invariant(response.status === 200, `/readyz returned HTTP ${response.status}, expected 200`);
+  invariant(body && typeof body === 'object', '/readyz returned no JSON object');
+  invariant(body.ready === true, `/readyz ready is ${JSON.stringify(body.ready)}, expected true`);
+  invariant(
+    body.service === 'alloy-runtime-api',
+    `/readyz service is ${JSON.stringify(body.service)}, expected "alloy-runtime-api"`,
+  );
+  invariant(isValidDate(body.checkedAt), '/readyz checkedAt is not a valid timestamp');
+  invariant(Array.isArray(body.dependencies), '/readyz dependencies is not an array');
+  invariant(typeof livenessGitSha === 'string', 'liveness build identity was not established');
+  invariant(
+    body.gitSha === livenessGitSha,
+    `/readyz gitSha ${JSON.stringify(body.gitSha)} does not match /healthz ${livenessGitSha}`,
+  );
+
+  const dependencyNames = body.dependencies.map((dependency) => dependency?.name);
+  invariant(
+    body.dependencies.length === EXPECTED_DEPENDENCIES.length &&
+      new Set(dependencyNames).size === EXPECTED_DEPENDENCIES.length &&
+      EXPECTED_DEPENDENCIES.every((name) => dependencyNames.includes(name)),
+    `/readyz dependencies are ${JSON.stringify(dependencyNames)}, expected ${JSON.stringify(EXPECTED_DEPENDENCIES)}`,
+  );
+
+  for (const dependency of body.dependencies) {
+    invariant(dependency.ready === true, `${dependency.name} readiness is not true`);
+    invariant(
+      Number.isFinite(dependency.latencyMs) && dependency.latencyMs >= 0,
+      `${dependency.name} latencyMs is not a finite nonnegative number`,
+    );
+    invariant(dependency.detail === 'ok', `${dependency.name} detail is not "ok"`);
   }
-} else if (healthReachable) {
-  warn('Health endpoint reachable but lacks services breakdown — treating as optimistic');
-  recordSev2('health:no-services', 'Health endpoint does not include per-service status');
-} else {
-  recordSkip('health:authenticity', 'Health endpoint not reachable — cannot check authenticity');
-}
 
-const totalFailed = results.sev0.length + results.sev1.length;
-const totalWarnings = results.sev2.length;
+  return `HTTP 200; ready=true; dependencies=${dependencyNames.join(',')}`;
+});
 
-if (results.sev0.length > 0) {
-  for (const { name, message } of results.sev0) {
-  }
-}
+await runCheck('anonymous-api-key-guard', async () => {
+  const { response, body } = await fetchJson('/v1/workflows', {
+    headers: { 'X-Tenant-Id': SMOKE_TENANT_ID },
+  });
 
-if (results.sev1.length > 0) {
-  for (const { name, message } of results.sev1) {
-  }
-}
+  invariant(
+    response.status === 401,
+    `/v1/workflows returned HTTP ${response.status}, expected 401`,
+  );
+  invariant(
+    body?.code === 'INVALID_API_KEY',
+    `/v1/workflows error code is ${JSON.stringify(body?.code)}, expected "INVALID_API_KEY"`,
+  );
 
-if (results.sev2.length > 0) {
-  for (const { name, message } of results.sev2) {
-  }
-}
+  return 'HTTP 401; code=INVALID_API_KEY';
+});
 
-if (results.skipped.length > 0) {
-  for (const { name, reason } of results.skipped) {
-  }
-}
+await runCheck('invalid-api-key-guard', async () => {
+  const { response, body } = await fetchJson('/v1/workflows', {
+    headers: {
+      'X-Api-Key': INVALID_SMOKE_API_KEY,
+      'X-Tenant-Id': SMOKE_TENANT_ID,
+    },
+  });
 
-if (totalFailed === 0 && totalWarnings === 0) {
-} else if (totalFailed === 0) {
-} else {
-  if (results.sev0.length > 0) {
-  }
-}
+  invariant(
+    response.status === 401,
+    `/v1/workflows returned HTTP ${response.status} for an invalid key, expected 401`,
+  );
+  invariant(
+    body?.code === 'INVALID_API_KEY',
+    `/v1/workflows error code for an invalid key is ${JSON.stringify(body?.code)}, expected "INVALID_API_KEY"`,
+  );
 
-// ─── GitHub Actions Step Summary ─────────────────────────────────────────────
-// When running in GitHub Actions, $GITHUB_STEP_SUMMARY points to a markdown file
-// that gets rendered in the PR check view. Writing a summary here makes failures
-// easy to read without scrolling through raw logs (where ANSI colors are stripped).
+  return 'HTTP 401; code=INVALID_API_KEY';
+});
+
+await runCheck('authenticated-tenant-read', async () => {
+  invariant(
+    typeof SMOKE_API_KEY === 'string' && SMOKE_API_KEY.length > 0,
+    'SMOKE_API_KEY is required for the authenticated product-mode probe',
+  );
+
+  const { response, body } = await fetchJson('/v1/workflows', {
+    headers: {
+      'X-Api-Key': SMOKE_API_KEY,
+      'X-Tenant-Id': SMOKE_TENANT_ID,
+    },
+  });
+
+  invariant(
+    response.status === 200,
+    `/v1/workflows returned HTTP ${response.status}, expected 200`,
+  );
+  invariant(Array.isArray(body?.runs), '/v1/workflows runs is not an array');
+  invariant(
+    body.tenantId === SMOKE_TENANT_ID,
+    `/v1/workflows tenantId is ${JSON.stringify(body?.tenantId)}, expected ${SMOKE_TENANT_ID}`,
+  );
+
+  return `HTTP 200; tenantId=${body.tenantId}; runs=${body.runs.length}`;
+});
+
+const passed = checks.every((check) => check.passed);
+const result = {
+  schemaVersion: 1,
+  baseUrl: API_BASE_URL,
+  expectedGitSha: EXPECTED_GIT_SHA,
+  tenantId: SMOKE_TENANT_ID,
+  passed,
+  checks,
+};
+
+writeStdout(`PRODUCT_SMOKE_RESULT ${JSON.stringify(result)}`);
 
 if (process.env.GITHUB_STEP_SUMMARY) {
-  try {
-    const fs = await import('node:fs');
-
-    const overall =
-      totalFailed === 0 && totalWarnings === 0
-        ? '✅ All product-mode checks passed'
-        : totalFailed === 0
-          ? `⚠️ No blocking failures — ${totalWarnings} warning(s) to address`
-          : `❌ ${totalFailed} blocking failure(s) — platform not ready for release`;
-
-    const lines = [];
-    lines.push(`## Product-Mode Smoke Test`);
-    lines.push('');
-    lines.push(`**Base URL:** \`${BASE_URL}\`  `);
-    lines.push(`**NODE_ENV:** \`${NODE_ENV}\`  `);
-    lines.push(`**Result:** ${overall}`);
-    lines.push('');
-    lines.push(`| Severity | Count |`);
-    lines.push(`| --- | --- |`);
-    lines.push(`| Sev 0 (deployment blocked) | ${results.sev0.length} |`);
-    lines.push(`| Sev 1 (release blocked) | ${results.sev1.length} |`);
-    lines.push(`| Sev 2 (warnings) | ${results.sev2.length} |`);
-    lines.push(`| Skipped | ${results.skipped.length} |`);
-    lines.push('');
-
-    const renderRows = (items) =>
-      items.length === 0
-        ? '_None_'
-        : [
-            `| Check | Detail |`,
-            `| --- | --- |`,
-            ...items.map(
-              ({ name, message, reason }) =>
-                `| \`${name}\` | ${String(message ?? reason ?? '').replace(/\|/g, '\\|')} |`,
-            ),
-          ].join('\n');
-
-    if (results.sev0.length > 0) {
-      lines.push(`### ❌ Sev 0 — Deployment Blocked (${results.sev0.length})`);
-      lines.push(renderRows(results.sev0));
-      lines.push('');
-    }
-    if (results.sev1.length > 0) {
-      lines.push(`### ❌ Sev 1 — Release Blocked (${results.sev1.length})`);
-      lines.push(renderRows(results.sev1));
-      lines.push('');
-    }
-    if (results.sev2.length > 0) {
-      lines.push(`### ⚠️ Sev 2 — Warnings (${results.sev2.length})`);
-      lines.push(renderRows(results.sev2));
-      lines.push('');
-    }
-    if (results.skipped.length > 0) {
-      lines.push(`<details><summary>Skipped checks (${results.skipped.length})</summary>`);
-      lines.push('');
-      lines.push(renderRows(results.skipped));
-      lines.push('');
-      lines.push(`</details>`);
-      lines.push('');
-    }
-
-    lines.push(`<sub>See \`docs/FAILURE_SEVERITY_POLICY.md\` for severity definitions.</sub>`);
-    lines.push('');
-
-    fs.appendFileSync(process.env.GITHUB_STEP_SUMMARY, lines.join('\n'));
-  } catch (_err) {
-  }
+  const lines = [
+    '## Alloy Runtime product-mode smoke',
+    '',
+    `- Target: \`${API_BASE_URL}\``,
+    `- Expected SHA: \`${EXPECTED_GIT_SHA ?? 'not supplied'}\``,
+    `- Result: **${passed ? 'PASS' : 'FAIL'}**`,
+    '',
+    '| Check | Result | Detail |',
+    '| --- | --- | --- |',
+    ...checks.map(
+      (check) =>
+        `| \`${check.id}\` | ${check.passed ? 'PASS' : 'FAIL'} | ${check.detail.replace(/\|/g, '\\|')} |`,
+    ),
+    '',
+  ];
+  appendFileSync(process.env.GITHUB_STEP_SUMMARY, lines.join('\n'));
 }
 
-process.exit(totalFailed > 0 ? 1 : 0);
+process.exitCode = passed ? 0 : 1;
