@@ -43,7 +43,10 @@ function isValidDate(value) {
 }
 
 function escapeMarkdownTableCell(value) {
-  return String(value).replace(/\\/g, '\\\\').replace(/\|/g, '\\|').replace(/\r?\n/g, ' ');
+  return String(value)
+    .replace(/\\/g, '\\\\')
+    .replace(/\|/g, '\\|')
+    .replace(/\r\n?|\n/g, ' ');
 }
 
 async function fetchJson(pathname, options = {}) {
