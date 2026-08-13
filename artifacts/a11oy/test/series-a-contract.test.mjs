@@ -37,6 +37,8 @@ const workcellProjection = readFileSync(
   new URL('../src/data/workcellProjection.ts', import.meta.url),
   'utf8',
 );
+const demo = readFileSync(new URL('../src/pages/Demo.tsx', import.meta.url), 'utf8');
+const ui = readFileSync(new URL('../src/components/ui.tsx', import.meta.url), 'utf8');
 
 const solutionIds = [
   'cyber-security',
@@ -82,7 +84,7 @@ test('registers the canonical and backward-compatible investor routes', () => {
 });
 
 test('provides keyboard-operable tabs and narrow-screen layouts', () => {
-  assert.match(page, /role=\"tablist\"/);
+  assert.match(page, /role="tablist"/);
   assert.match(page, /aria-selected=/);
   assert.match(page, /ArrowLeft/);
   assert.match(page, /ArrowRight/);
@@ -165,6 +167,11 @@ test('does not fabricate completed replay outcomes or wall-clock evidence', () =
   assert.match(workcellProjection, /actionStatus === 'executing'/);
   assert.match(workcellProjection, /workcell\.status === 'completed'/);
   assert.match(workcellProjection, /showProofShape: outcome === 'success'/);
+});
+
+test('preserves blocked Workcell state in the deterministic demo trace', () => {
+  assert.match(demo, /outcome === 'blocked'[\s\S]*?\? 'blocked'/);
+  assert.match(ui, /status === 'blocked'/);
 });
 
 test('mounts one GraphQL provider while retaining fail-closed client state', () => {

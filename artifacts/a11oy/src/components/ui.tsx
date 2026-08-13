@@ -469,11 +469,13 @@ export function TraceStep({
       ? '#c9b787'
       : status === 'running'
         ? '#c9b787'
-        : status === 'failed' || status === 'error'
-          ? '#f5f5f5'
-          : status === 'skipped'
-            ? '#5e5e5e'
-            : '#5e5e5e';
+        : status === 'blocked'
+          ? '#d98b4b'
+          : status === 'failed' || status === 'error'
+            ? '#f5f5f5'
+            : status === 'skipped'
+              ? '#5e5e5e'
+              : '#5e5e5e';
   const statusIcon =
     status === 'completed' || status === 'ok'
       ? '✓'

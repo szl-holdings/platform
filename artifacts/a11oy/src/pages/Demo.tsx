@@ -68,9 +68,11 @@ export function Demo() {
               ? 'completed'
               : projectWorkcellState(wc).outcome === 'failed'
                 ? 'failed'
-                : projectWorkcellState(wc).outcome === 'running'
-                  ? 'running'
-                  : 'pending',
+                : projectWorkcellState(wc).outcome === 'blocked'
+                  ? 'blocked'
+                  : projectWorkcellState(wc).outcome === 'running'
+                    ? 'running'
+                    : 'pending',
           note: wc.objective,
         })),
         {
@@ -167,6 +169,7 @@ export function Demo() {
               const primaryVertical = wcs[0]?.vertical ?? 'alloy-core';
               return (
                 <button
+                  type="button"
                   key={s.id}
                   onClick={() => startDemo(s.id)}
                   className="text-left rounded-lg border p-4 transition-all"
@@ -243,7 +246,7 @@ export function Demo() {
                     const visible = stepIdx === -1 || i <= stepIdx;
                     return (
                       <div
-                        key={i}
+                        key={step.step}
                         className="transition-all"
                         style={{ opacity: stepIdx === -1 ? 0.5 : visible ? 1 : 0.3 }}
                       >
