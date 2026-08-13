@@ -26,13 +26,21 @@ jobs:
           fetch-depth: 0
       - name: Install gitleaks
         run: |
-          VER="8.21.2"
-          curl -sSL "https://github.com/gitleaks/gitleaks/releases/download/v${VER}/gitleaks_${VER}_linux_x64.tar.gz" -o /tmp/gitleaks.tgz
-          tar -xzf /tmp/gitleaks.tgz -C /tmp gitleaks
-          sudo install /tmp/gitleaks /usr/local/bin/gitleaks
-          gitleaks version
+          set -euo pipefail
+          GITLEAKS_VERSION="8.21.2"
+          GITLEAKS_ARCHIVE="gitleaks_${GITLEAKS_VERSION}_linux_x64.tar.gz"
+          GITLEAKS_SHA256="5bc41815076e6ed6ef8fbecc9d9b75bcae31f39029ceb55da08086315316e3ba"
+          GITLEAKS_PATH="${RUNNER_TEMP}/${GITLEAKS_ARCHIVE}"
+
+          curl --fail --location --silent --show-error --retry 3 \
+            "https://github.com/gitleaks/gitleaks/releases/download/v${GITLEAKS_VERSION}/${GITLEAKS_ARCHIVE}" \
+            --output "${GITLEAKS_PATH}"
+          printf '%s  %s\n' "${GITLEAKS_SHA256}" "${GITLEAKS_PATH}" | sha256sum --check --strict
+          tar -xzf "${GITLEAKS_PATH}" -C "${RUNNER_TEMP}" gitleaks
+          sudo install -m 0755 "${RUNNER_TEMP}/gitleaks" /usr/local/bin/gitleaks
+          test "$(gitleaks version)" = "${GITLEAKS_VERSION}"
       - name: Gitleaks scan
         run: |
-          CFG=""
-          [ -f .gitleaks.toml ] && CFG="-c .gitleaks.toml"
-          gitleaks detect --no-banner --redact ${CFG} --exit-code 1
+          GITLEAKS_CONFIG=()
+          [ -f .gitleaks.toml ] && GITLEAKS_CONFIG=(-c .gitleaks.toml)
+          gitleaks detect --no-banner --redact "${GITLEAKS_CONFIG[@]}" --exit-code 1
