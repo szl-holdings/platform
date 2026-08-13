@@ -42,6 +42,10 @@ function isValidDate(value) {
   return typeof value === 'string' && Number.isFinite(Date.parse(value));
 }
 
+function escapeMarkdownTableCell(value) {
+  return String(value).replace(/\\/g, '\\\\').replace(/\|/g, '\\|').replace(/\r?\n/g, ' ');
+}
+
 async function fetchJson(pathname, options = {}) {
   const controller = new AbortController();
   const timer = setTimeout(() => controller.abort(), TIMEOUT_MS);
@@ -252,7 +256,7 @@ if (process.env.GITHUB_STEP_SUMMARY) {
     '| --- | --- | --- |',
     ...checks.map(
       (check) =>
-        `| \`${check.id}\` | ${check.passed ? 'PASS' : 'FAIL'} | ${check.detail.replace(/\|/g, '\\|')} |`,
+        `| \`${escapeMarkdownTableCell(check.id)}\` | ${check.passed ? 'PASS' : 'FAIL'} | ${escapeMarkdownTableCell(check.detail)} |`,
     ),
     '',
   ];
