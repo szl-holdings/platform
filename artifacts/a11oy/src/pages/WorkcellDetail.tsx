@@ -95,7 +95,11 @@ export function WorkcellDetail() {
           ← All Workcells
         </Link>
       </div>
-      <div data-proof-surface="a11oy-workcell-detail" data-proof-ready="true">
+      <div
+        data-proof-surface="a11oy-workcell-detail"
+        data-proof-ready="true"
+        data-proof-state="DEMO"
+      >
         <PageHeader label="WORKCELL DETAIL" title={wc.name} subtitle={wc.objective} status="DEMO">
           <div className="flex items-center gap-2">
             <span

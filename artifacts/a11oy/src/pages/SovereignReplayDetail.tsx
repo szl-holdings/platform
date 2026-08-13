@@ -29,6 +29,7 @@ interface ReplayReport {
   durationMs: number;
   evalDisposition: string | null;
   evalComposite: number | null;
+  evalDimensionCount: number;
   proofRef: string | null;
   approvalTier: string;
   approvedBy: string | null;
@@ -139,6 +140,7 @@ function buildReplayFromId(id: string): ReplayReport | null {
     durationMs,
     evalDisposition,
     evalComposite: wc.mirrorEvalResult.score,
+    evalDimensionCount: wc.mirrorEvalResult.dimensions.length,
     proofRef: projection.showProofShape ? wc.proofPacketId : null,
     approvalTier: wc.requiresApproval
       ? (wc.actionBrief?.approvalTier?.toUpperCase() ?? 'TIER_3')
@@ -249,7 +251,11 @@ export function SovereignReplayDetail() {
         </span>
       </div>
 
-      <div data-proof-surface="a11oy-sovereign-replay-detail" data-proof-ready="true">
+      <div
+        data-proof-surface="a11oy-sovereign-replay-detail"
+        data-proof-ready="true"
+        data-proof-state="DEMO"
+      >
         <PageHeader
           label="SOVEREIGN REPLAY"
           title={`↩ ${data.workcellName}`}
@@ -542,7 +548,8 @@ export function SovereignReplayDetail() {
                 </div>
                 {data.evalComposite !== null && (
                   <div style={{ color: 'var(--color-a11oy-text-ghost)' }}>
-                    Composite: {Math.round(data.evalComposite * 100)}% · 14 dimensions scored
+                    Composite: {Math.round(data.evalComposite * 100)}% · {data.evalDimensionCount}{' '}
+                    {data.evalDimensionCount === 1 ? 'dimension' : 'dimensions'} scored
                   </div>
                 )}
               </Card>

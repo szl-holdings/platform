@@ -129,6 +129,7 @@ export function WorkcellReplay() {
         className="p-3 rounded-lg mb-6 text-xs"
         data-proof-surface="a11oy-workcell-replay"
         data-proof-ready="true"
+        data-proof-state="DEMO"
         role="status"
         style={{
           backgroundColor: 'rgba(201,183,135,0.06)',

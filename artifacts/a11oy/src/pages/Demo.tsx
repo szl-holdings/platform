@@ -110,7 +110,7 @@ export function Demo() {
 
   return (
     <Layout>
-      <div data-proof-surface="a11oy-demo" data-proof-ready="true">
+      <div data-proof-surface="a11oy-demo" data-proof-ready="true" data-proof-state="DEMO">
         <PageHeader
           label="DEMO CENTER"
           title="Interactive Demo Scenarios"

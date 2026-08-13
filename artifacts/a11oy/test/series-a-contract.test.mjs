@@ -39,6 +39,10 @@ const workcellProjection = readFileSync(
 );
 const demo = readFileSync(new URL('../src/pages/Demo.tsx', import.meta.url), 'utf8');
 const ui = readFileSync(new URL('../src/components/ui.tsx', import.meta.url), 'utf8');
+const sovereignReplay = readFileSync(
+  new URL('../src/pages/SovereignReplayDetail.tsx', import.meta.url),
+  'utf8',
+);
 
 const solutionIds = [
   'cyber-security',
@@ -172,6 +176,14 @@ test('does not fabricate completed replay outcomes or wall-clock evidence', () =
 test('preserves blocked Workcell state in the deterministic demo trace', () => {
   assert.match(demo, /outcome === 'blocked'[\s\S]*?\? 'blocked'/);
   assert.match(ui, /status === 'blocked'/);
+});
+
+test('derives replay dimension counts and requires DEMO proof markers', () => {
+  assert.match(sovereignReplay, /wc\.mirrorEvalResult\.dimensions\.length/);
+  assert.doesNotMatch(sovereignReplay, /14 dimensions scored/);
+  for (const source of [demo, workcellsPage, replayIndex, replayDetail, sovereignReplay]) {
+    assert.match(source, /data-proof-state="DEMO"/);
+  }
 });
 
 test('mounts one GraphQL provider while retaining fail-closed client state', () => {

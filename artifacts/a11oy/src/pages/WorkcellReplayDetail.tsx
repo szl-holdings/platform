@@ -131,7 +131,11 @@ export function WorkcellReplayDetail() {
         </span>
       </div>
 
-      <div data-proof-surface="a11oy-workcell-replay-detail" data-proof-ready="true">
+      <div
+        data-proof-surface="a11oy-workcell-replay-detail"
+        data-proof-ready="true"
+        data-proof-state="DEMO"
+      >
         <PageHeader
           label="WORKCELL REPLAY"
           title={`↩ ${wc.name}`}

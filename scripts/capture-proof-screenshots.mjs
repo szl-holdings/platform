@@ -101,6 +101,12 @@ const FILTER =
   '';
 const DRY_RUN = args.includes('--dry-run');
 
+if (!FILTER && !DRY_RUN) {
+  throw new Error(
+    'Proof capture requires an explicit --filter or --filter=<safe-group>; unqualified legacy targets are not captured by default.',
+  );
+}
+
 // ── Chromium resolution ───────────────────────────────────────────────────────
 
 function resolveChromium() {
@@ -311,10 +317,22 @@ for (const target of targets) {
       const page = await context.newPage();
       const consoleErrors = [];
       const pageErrors = [];
+      const resourceErrors = [];
       page.on('console', (message) => {
-        if (message.type() === 'error') consoleErrors.push(message.text());
+        if (message.type() === 'error') {
+          const location = message.location();
+          consoleErrors.push(
+            `${message.text()}${location.url ? ` @ ${location.url}:${location.lineNumber ?? 0}` : ''}`,
+          );
+        }
       });
       page.on('pageerror', (error) => pageErrors.push(String(error)));
+      page.on('response', (response) => {
+        if (response.status() >= 400) resourceErrors.push(`${response.status()} ${response.url()}`);
+      });
+      page.on('requestfailed', (request) => {
+        resourceErrors.push(`${request.failure()?.errorText ?? 'request failed'} ${request.url()}`);
+      });
 
       const response = await page.goto(requestedUrl.href, {
         waitUntil: 'networkidle',
@@ -387,6 +405,8 @@ for (const target of targets) {
       });
 
       if (pageErrors.length > 0) throw new Error(`Page error: ${pageErrors.join(' | ')}`);
+      if (resourceErrors.length > 0)
+        throw new Error(`Resource error: ${resourceErrors.join(' | ')}`);
       if (consoleErrors.length > 0) throw new Error(`Console error: ${consoleErrors.join(' | ')}`);
       if (inspection.overlay) throw new Error('Runtime error overlay is present');
       if (inspection.visibleLoading)
