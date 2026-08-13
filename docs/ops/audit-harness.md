@@ -26,7 +26,7 @@ pnpm audit:full:ci
 |----------|------|-------------|
 | P0 | install | `pnpm install --frozen-lockfile` |
 | P0 | typecheck | TypeScript compilation across all packages |
-| P0 | lint | ESLint across the full workspace |
+| P0 | lint | Biome lint across the full workspace |
 | P0 | test | Unit + proof-chain tests |
 | P0 | build | Full recursive build of all artifacts |
 | P0 | audit:routes | Route registry completeness and classification |
@@ -42,10 +42,11 @@ pnpm audit:full:ci
 | P1 | docs:claims-check | Documented claims vs. codebase reality |
 | P1 | e2e | Playwright end-to-end tests (skipped with `--skip-e2e`) |
 
-**P0 failures are merge-blocking.** A failure in any P0 step aborts the
-pipeline immediately and exits with code 1. P1 failures are always recorded
-as advisory warnings and never affect the exit code — they appear in the
-summary report so they can be tracked and resolved over time.
+**P0 failures are harness-blocking.** A failure in any P0 step aborts the
+pipeline immediately, exits with code 1, and fails the hosted Runtime Audit
+job. P1 failures are always recorded as advisory warnings and never affect the
+exit code — they appear in the summary report so they can be tracked and
+resolved over time.
 
 ## Evidence
 
@@ -72,14 +73,16 @@ it in under 60 seconds.
 ## CI integration
 
 The harness runs as the `Runtime Audit Harness` job in
-`.github/workflows/audit-full.yml` on every pull request and push to
-`master`/`main`. The job:
+`.github/workflows/audit-full.yml` on pull requests and pushes to
+`master`/`main` (pushes changing only `replit-sync/**` are ignored), and by
+manual dispatch. The job:
 
 1. Installs dependencies.
-2. Runs `pnpm audit:full:ci` (all steps except E2E; exits 1 on P0 failure only).
-3. Uploads the entire `artifacts/audit/evidence/` tree as a GitHub Actions
+2. Builds the workspace artifacts and boots the local product/runtime targets.
+3. Runs `pnpm audit:full:ci` (all steps except E2E; exits 1 on P0 failure only).
+4. Uploads the entire `artifacts/audit/evidence/` tree as a GitHub Actions
    artifact named `audit-evidence-<run-id>`, retained for 30 days.
-4. Prints the `latest/summary.md` to the job log regardless of pass/fail.
+5. Prints the `latest/summary.md` to the job log regardless of pass/fail.
 
 P0 failures cause the job to exit non-zero. P1 failures remain advisory and
 appear in the summary report. Under the current live branch-protection rules,
