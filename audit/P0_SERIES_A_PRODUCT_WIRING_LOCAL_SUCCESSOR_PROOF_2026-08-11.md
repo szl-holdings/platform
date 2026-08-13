@@ -1,30 +1,36 @@
-# P0 Series A Product Wiring - Local Successor Proof Packet
+# P0 Series A Product Wiring - Protected Successor Proof Packet
 
 Generated: 2026-08-11
 
 ## Verdict
 
-`LOCAL_SOURCE_AND_RESPONSIVE_UI_VERIFIED / NOT PROMOTED`
+`SOURCE_COMMITTED / PROTECTED PR #608 / FRESH EXACT-HEAD GATES REQUIRED`
 
-The current platform PR #584 source was advanced locally with one truth-safe A11oy investor path.
-The candidate passes focused contracts, TypeScript compilation, and production bundling. It has
-not been committed, pushed, reviewed, merged, deployed, or independently observed in production.
+Platform PR #608 carries the committed Series A product wiring on branch
+`codex/p0-platform-work-20260813-r2`. The product delta passed the focused local contracts,
+TypeScript compilation, production bundling, responsive browser matrix, and the bounded hosted
+checks recorded below. Pre-remediation PR head `4ed2dfa486a7776c4a329be6fb20a2af9de3ad19`
+completed with no failed or pending check contexts; this documentation repair must receive its own
+fresh exact-head checks and review-thread resolution before protected merge. Nothing in this packet
+claims a merge, deployment, production runtime, or independent production witness.
 
 ## Exact provenance
 
 | Field | Evidence |
 |---|---|
 | Repository | `szl-holdings/platform` |
-| Worktree | `C:\Users\steph\Documents\Codex\2026-08-11\i\work\platform-series-a` |
-| Branch | `codex/p0-platform-work-20260811` |
-| PR | #584, `closed` and still marked draft at final read-only inspection |
-| PR base | `e7c87eddcc1761de3887db4bc39e6e6a945b13cc` |
-| Local base and HEAD | `bc40b1c6aec8a44a8a6928c25a21de9aa91e76b7` |
-| Candidate state | Dirty, uncommitted working tree |
-| Remote mutations | None |
+| Worktree | `C:\Users\steph\Documents\Codex\2026-08-11\i\work\platform-series-a-clean` |
+| Branch | `codex/p0-platform-work-20260813-r2` |
+| PR | #608, open and ready for review at packet repair time |
+| Incorporated protected-main base | `8745cf05e98b30547e005ade7f5741885480e6e1` |
+| Product delta commit | `72c5a3607e859a83ea4291ec5b3665dc0ff382ca` |
+| Review-repair parent | `4ed2dfa486a7776c4a329be6fb20a2af9de3ad19` |
+| Exact repair revision | The immutable GitHub PR #608 head containing this packet is authoritative |
+| Candidate state | Committed and pushed; fresh exact-head CI and review-thread resolution required |
+| Remote mutations | Successor branch pushes and PR #608 publication/update; no protected merge or deploy |
 
-The originally supplied `d5cf05ce18b2f776e5ea5124bb9eebc5b0a842d9` revision was not used as the
-final base because read-only inspection recovered the newer exact PR head.
+The earlier PR #584 local candidate is provenance only. It is superseded by the committed PR #608
+successor above and is not the promotion target.
 
 ## Product contract
 
@@ -75,7 +81,7 @@ runtime as `UNAVAILABLE`; it remains a residual backend gap.
 - `.codex/tasks/P0_SERIES_A_PRODUCT_WIRING_20260811.md`
 - `docs/operations/known-gaps.md`
 - `audit/screenshot-catalog.md`
-- `audit/screenshots/series-a-local-2026-08-11/*.png`
+- `docs/assets/screenshots/current/a11oy-series-a-*-2026-08-11.png`
 - `audit/P0_SERIES_A_PRODUCT_WIRING_LOCAL_SUCCESSOR_PROOF_2026-08-11.md`
 
 ## Verification
@@ -99,6 +105,8 @@ runtime as `UNAVAILABLE`; it remains a residual backend gap.
 | `/a11oy/investor-demo` compatibility | `PASS`: HTTP 200 and canonical Series A heading |
 | Direct image review | `PASS`: 320, 390, and 1366 inspected; no capture stitching artifact in final images |
 | `git diff --check` | `PASS` |
+| Protected PR #608 checks at parent `4ed2dfa486a7776c4a329be6fb20a2af9de3ad19` | `PASS`: 51 successful, 1 neutral, and 2 skipped check contexts; no failed or pending context; DCO and lockfile gates passed |
+| Review repair | Three actionable threads identified; this successor corrects provenance, screenshot storage, and public-surface rollback, with fresh exact-head CI and thread resolution still required |
 
 The fresh target did not receive a secret or network package install. Its partial `node_modules`
 directory was preserved as `node_modules.partial-install-20260811`; local junctions reuse the
@@ -137,8 +145,9 @@ external font delivery. The five PNGs are cataloged in `audit/screenshot-catalog
    authentication boundary, tests, and runtime evidence exist.
 2. Run the full root workspace graph in a clean dependency environment; focused A11oy checks do
    not represent all 202 workspace projects.
-3. Preserve normal signed commit, DCO, hosted CI, independent review, protected merge, deployed
-   readback, and exact-revision receipt gates.
+3. Require a signed and DCO-compliant repair commit, fresh exact-head hosted CI, review-thread
+   resolution, and normal protected merge before promotion; require deployed readback and an
+   exact-revision receipt before any runtime claim.
 4. The legacy `InvestorDemo.tsx` file remains in source but is no longer registered as the route
    target; it should be removed or rewritten in a separately reviewed cleanup only if no other
    consumer is found.
@@ -147,7 +156,7 @@ external font delivery. The five PNGs are cataloged in `audit/screenshot-catalog
 
 ## Non-claims
 
-This packet does not claim a pushed branch update, PR review, protected merge, deployment,
-production operation, live data, live GraphQL, connector execution, customer use, revenue,
-compliance, ROI, model superiority, or independent runtime witness. It proves only the local source
-and local checks recorded above.
+This packet does not claim protected merge, deployment, production operation, live data, live
+GraphQL, connector execution, customer use, revenue, compliance, ROI, model superiority, or an
+independent runtime witness. It proves committed PR source plus only the bounded local and hosted
+checks explicitly recorded above.

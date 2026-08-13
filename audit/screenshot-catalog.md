@@ -632,15 +632,15 @@ Artifact `public/` and `dist/public/` directories contain static assets embedded
 
 ---
 
-## P0 Series A local successor UI evidence - 2026-08-11
+## P0 Series A protected successor UI evidence - 2026-08-11
 
 | Filename | Route | Width | Capture date | Captured by | Workcell | Proof level | Status | Notes |
 |----------|-------|------:|--------------|-------------|----------|-------------|--------|-------|
-| `audit/screenshots/series-a-local-2026-08-11/a11oy-series-a-320.png` | `http://127.0.0.1:4128/a11oy/start` | 320 | 2026-08-11 | Codex | `P0-SERIES-A-PRODUCT-WIRING-20260811` | DEMONSTRATION/LOCAL_SOURCE | local candidate | Six views, truth states, 2x2 mobile nav, and system-font fallback visible; SHA-256 `3FEEF96D2ABC2CCADB8AE117A37DEC9FB785EC794BD08EF7442A3111009AB84E`. |
-| `audit/screenshots/series-a-local-2026-08-11/a11oy-series-a-390.png` | `http://127.0.0.1:4128/a11oy/start` | 390 | 2026-08-11 | Codex | `P0-SERIES-A-PRODUCT-WIRING-20260811` | DEMONSTRATION/LOCAL_SOURCE | local candidate | Narrow mobile composition; SHA-256 `4822BAE2B2B3C118CF8527078CA0742C363C92D3D3BF7A17D7F50210FD5F64BD`. |
-| `audit/screenshots/series-a-local-2026-08-11/a11oy-series-a-768.png` | `http://127.0.0.1:4128/a11oy/start` | 768 | 2026-08-11 | Codex | `P0-SERIES-A-PRODUCT-WIRING-20260811` | DEMONSTRATION/LOCAL_SOURCE | local candidate | Tablet composition; SHA-256 `EF5D1298D865F01BB4E8F64A932A323C97D66F4D978D4821A94D77D5E5826511`. |
-| `audit/screenshots/series-a-local-2026-08-11/a11oy-series-a-1366.png` | `http://127.0.0.1:4128/a11oy/start` | 1366 | 2026-08-11 | Codex | `P0-SERIES-A-PRODUCT-WIRING-20260811` | DEMONSTRATION/LOCAL_SOURCE | local candidate | Laptop/desktop composition; SHA-256 `E2EBA6DCC1293ACFF47957AC68647DA1D18A66B15F07B49373F2D6D82DE14547`. |
-| `audit/screenshots/series-a-local-2026-08-11/a11oy-series-a-1728.png` | `http://127.0.0.1:4128/a11oy/start` | 1728 | 2026-08-11 | Codex | `P0-SERIES-A-PRODUCT-WIRING-20260811` | DEMONSTRATION/LOCAL_SOURCE | local candidate | Wide-desktop composition; SHA-256 `C4B9C902FCBAFA30B4F0F887098056751EBA9D23622DB15799962518D628CD3B`. |
+| `docs/assets/screenshots/current/a11oy-series-a-320-2026-08-11.png` | `http://127.0.0.1:4128/a11oy/start` | 320 | 2026-08-11 | Codex | `P0-SERIES-A-PRODUCT-WIRING-20260811` | DEMONSTRATION/LOCAL_SOURCE | protected PR candidate | Six views, truth states, 2x2 mobile nav, and system-font fallback visible; SHA-256 `3FEEF96D2ABC2CCADB8AE117A37DEC9FB785EC794BD08EF7442A3111009AB84E`. |
+| `docs/assets/screenshots/current/a11oy-series-a-390-2026-08-11.png` | `http://127.0.0.1:4128/a11oy/start` | 390 | 2026-08-11 | Codex | `P0-SERIES-A-PRODUCT-WIRING-20260811` | DEMONSTRATION/LOCAL_SOURCE | protected PR candidate | Narrow mobile composition; SHA-256 `4822BAE2B2B3C118CF8527078CA0742C363C92D3D3BF7A17D7F50210FD5F64BD`. |
+| `docs/assets/screenshots/current/a11oy-series-a-768-2026-08-11.png` | `http://127.0.0.1:4128/a11oy/start` | 768 | 2026-08-11 | Codex | `P0-SERIES-A-PRODUCT-WIRING-20260811` | DEMONSTRATION/LOCAL_SOURCE | protected PR candidate | Tablet composition; SHA-256 `EF5D1298D865F01BB4E8F64A932A323C97D66F4D978D4821A94D77D5E5826511`. |
+| `docs/assets/screenshots/current/a11oy-series-a-1366-2026-08-11.png` | `http://127.0.0.1:4128/a11oy/start` | 1366 | 2026-08-11 | Codex | `P0-SERIES-A-PRODUCT-WIRING-20260811` | DEMONSTRATION/LOCAL_SOURCE | protected PR candidate | Laptop/desktop composition; SHA-256 `E2EBA6DCC1293ACFF47957AC68647DA1D18A66B15F07B49373F2D6D82DE14547`. |
+| `docs/assets/screenshots/current/a11oy-series-a-1728-2026-08-11.png` | `http://127.0.0.1:4128/a11oy/start` | 1728 | 2026-08-11 | Codex | `P0-SERIES-A-PRODUCT-WIRING-20260811` | DEMONSTRATION/LOCAL_SOURCE | protected PR candidate | Wide-desktop composition; SHA-256 `C4B9C902FCBAFA30B4F0F887098056751EBA9D23622DB15799962518D628CD3B`. |
 
 The browser sandbox denied the optional Google Fonts request. These captures fulfilled that
 stylesheet with empty CSS and prove the declared system-font fallback, not external font delivery.
