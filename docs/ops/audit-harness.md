@@ -2,10 +2,10 @@
 
 ## Overview
 
-The runtime audit harness provides a single command that boots every product,
-runs a comprehensive set of quality checks, captures evidence, and produces a
-human-readable summary report. It is the required gate for every change in this
-workspace.
+The runtime audit harness provides a single command that runs the workspace's
+P0 and P1 quality checks, captures evidence, and produces a human-readable
+summary report. Its hosted workflow is fail-closed for P0 failures, but it is
+not currently a required branch-protection status check.
 
 ## Quick start
 
@@ -16,7 +16,7 @@ pnpm audit:full
 # Fast local iteration (skip install + E2E)
 pnpm audit:full:fast
 
-# CI mode — same as fast but exits 2 on P1 failures
+# CI mode — skips install + E2E; exits 1 on P0 and records P1 as advisory
 pnpm audit:full:ci
 ```
 
@@ -31,6 +31,7 @@ pnpm audit:full:ci
 | P0 | build | Full recursive build of all artifacts |
 | P0 | audit:routes | Route registry completeness and classification |
 | P0 | qa:site | Public routes + links + trust pages + meta + empty-states |
+| P0 | smoke:product-mode | Runtime identity, readiness, API-key rejection, and tenant-scoped read |
 | P1 | audit:mocks | Detect real API calls leaking through mock boundaries |
 | P1 | audit:copy | UI copy consistency (no placeholder text) |
 | P1 | audit:deps | Dependency health (missing/circular/unused) |
@@ -38,7 +39,6 @@ pnpm audit:full:ci
 | P1 | audit:broken-links | Internal hyperlink integrity |
 | P1 | qa:a11y | Accessibility audit (axe-core) |
 | P1 | brand:check | Brand token and copy compliance |
-| P1 | smoke:product-mode | Product-mode isolation smoke tests |
 | P1 | docs:claims-check | Documented claims vs. codebase reality |
 | P1 | e2e | Playwright end-to-end tests (skipped with `--skip-e2e`) |
 
@@ -81,10 +81,11 @@ The harness runs as the `Runtime Audit Harness` job in
    artifact named `audit-evidence-<run-id>`, retained for 30 days.
 4. Prints the `latest/summary.md` to the job log regardless of pass/fail.
 
-P0 failures cause the job to exit non-zero, blocking the merge. P1 failures
-are advisory and never block the merge — they appear in the summary report
-so they can be tracked and resolved. The existing `ci-gate` job in `ci.yml`
-remains unchanged; this workflow is an additive, standalone gate.
+P0 failures cause the job to exit non-zero. P1 failures remain advisory and
+appear in the summary report. Under the current live branch-protection rules,
+Runtime Audit is hosted evidence but is not a required status context, so its
+failure does not mechanically prevent a merge. The existing jobs in `ci.yml`
+remain unchanged; this workflow is an additive, standalone check.
 
 ## Interpreting the summary
 
