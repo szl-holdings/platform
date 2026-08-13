@@ -205,7 +205,7 @@ export function WorkcellReplay() {
             style={{
               backgroundColor:
                 filterDomain === d ? 'rgba(138,138,138,0.2)' : 'var(--color-a11oy-muted)',
-              color: filterDomain === d ? '#8a8a8a' : 'var(--color-a11oy-text-ghost)',
+              color: filterDomain === d ? '#b7bac2' : 'var(--color-a11oy-text-ghost)',
               border: `1px solid ${filterDomain === d ? 'rgba(138,138,138,0.4)' : 'var(--color-a11oy-border)'}`,
             }}
           >

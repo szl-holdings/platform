@@ -236,7 +236,7 @@ export function Workcells() {
                   className="text-xs px-3 py-1.5 rounded font-medium min-h-11 inline-flex items-center"
                   style={{
                     backgroundColor: 'var(--color-a11oy-blue)',
-                    color: 'white',
+                    color: '#0a0a0a',
                     textDecoration: 'none',
                   }}
                 >
