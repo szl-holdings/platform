@@ -618,7 +618,7 @@ export function WorkcellDetail() {
                   </div>
                   <div>
                     <div className="font-mono" style={{ color: 'var(--color-a11oy-text-ghost)' }}>
-                      Verified
+                      Fixture isVerified field
                     </div>
                     <div style={{ color: pceContract.isVerified ? '#c9b787' : '#f5f5f5' }}>
                       {pceContract.isVerified ? '✓ YES' : '✗ NO'}
@@ -662,17 +662,17 @@ export function WorkcellDetail() {
                   }}
                 >
                   {wc.verificationResult.status === 'passed'
-                    ? '✓ Contract verified'
-                    : '✗ Verification failed'}
+                    ? 'Fixture verification status: passed'
+                    : 'Fixture verification status: failed'}
                 </div>
               </Card>
             </div>
           )}
 
-          {/* Proof Packet */}
+          {/* Fixture Proof Packet shape */}
           {proofPacket && projection.showProofShape && (
             <div>
-              <SectionTitle>Proof Packet</SectionTitle>
+              <SectionTitle>Fixture Proof Packet shape</SectionTitle>
               <Card className="text-xs">
                 <HashId id={proofPacket.id} />
                 <div

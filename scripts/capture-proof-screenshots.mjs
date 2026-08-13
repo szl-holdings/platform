@@ -8,8 +8,7 @@
  * audit/screenshots/raw/ mirrors.
  *
  * Usage:
- *   node scripts/capture-proof-screenshots.mjs
- *   node scripts/capture-proof-screenshots.mjs --filter a11oy
+ *   node scripts/capture-proof-screenshots.mjs --filter=p0-series-a
  *   node scripts/capture-proof-screenshots.mjs --dry-run
  *
  * The script waits for:
@@ -100,10 +99,17 @@ const FILTER =
   args.find((arg) => !arg.startsWith('--')) ??
   '';
 const DRY_RUN = args.includes('--dry-run');
+const SAFE_CAPTURE_GROUPS = new Set(['p0-series-a']);
 
 if (!FILTER && !DRY_RUN) {
   throw new Error(
-    'Proof capture requires an explicit --filter or --filter=<safe-group>; unqualified legacy targets are not captured by default.',
+    'Proof capture requires an explicit --filter=<safe-group>; unqualified legacy targets are not captured by default.',
+  );
+}
+
+if (!DRY_RUN && !SAFE_CAPTURE_GROUPS.has(FILTER)) {
+  throw new Error(
+    `Proof capture filter must name a reviewed safe group (${[...SAFE_CAPTURE_GROUPS].join(', ')}); received ${FILTER || '<empty>'}.`,
   );
 }
 
@@ -208,11 +214,12 @@ function gitValue(args) {
 }
 
 const targets = FILTER
-  ? TARGETS.filter(
-      (t) =>
-        t.id.includes(FILTER) ||
-        t.route.includes(FILTER) ||
-        (Array.isArray(t.groups) && t.groups.includes(FILTER)),
+  ? TARGETS.filter((t) =>
+      DRY_RUN
+        ? t.id.includes(FILTER) ||
+          t.route.includes(FILTER) ||
+          (Array.isArray(t.groups) && t.groups.includes(FILTER))
+        : Array.isArray(t.groups) && t.groups.includes(FILTER),
     )
   : TARGETS;
 

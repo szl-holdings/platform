@@ -51,6 +51,10 @@ const sovereignReplay = readFileSync(
   new URL('../src/pages/SovereignReplayDetail.tsx', import.meta.url),
   'utf8',
 );
+const captureScript = readFileSync(
+  new URL('../../../scripts/capture-proof-screenshots.mjs', import.meta.url),
+  'utf8',
+);
 
 const solutionIds = [
   'cyber-security',
@@ -179,6 +183,30 @@ test('does not fabricate completed replay outcomes or wall-clock evidence', () =
   assert.match(workcellProjection, /actionStatus === 'executing'/);
   assert.match(workcellProjection, /workcell\.status === 'completed'/);
   assert.match(workcellProjection, /showProofShape: outcome === 'success'/);
+});
+
+test('qualifies completed Workcell proof labels as fixture-source fields', () => {
+  const fixtureProofSection = workcellDetail.match(
+    /{\/\* PCE Contract \*\/}[\s\S]*?{\/\* Replay link \*\/}/,
+  )?.[0];
+
+  assert.ok(fixtureProofSection);
+  assert.match(fixtureProofSection, />\s*Fixture isVerified field\s*</);
+  assert.match(
+    fixtureProofSection,
+    /\? 'Fixture verification status: passed'\s*: 'Fixture verification status: failed'/,
+  );
+  assert.match(fixtureProofSection, /<SectionTitle>Fixture Proof Packet shape<\/SectionTitle>/);
+  assert.doesNotMatch(fixtureProofSection, />\s*Verified\s*</);
+  assert.doesNotMatch(fixtureProofSection, /Contract verified/);
+  assert.doesNotMatch(fixtureProofSection, /<SectionTitle>Proof Packet<\/SectionTitle>/);
+});
+
+test('limits non-dry-run proof capture to reviewed safe groups', () => {
+  assert.match(captureScript, /SAFE_CAPTURE_GROUPS = new Set\(\['p0-series-a'\]\)/);
+  assert.match(captureScript, /!DRY_RUN && !SAFE_CAPTURE_GROUPS\.has\(FILTER\)/);
+  assert.match(captureScript, /: Array\.isArray\(t\.groups\) && t\.groups\.includes\(FILTER\)/);
+  assert.doesNotMatch(captureScript, /--filter a11oy/);
 });
 
 test('preserves blocked Workcell state in the deterministic demo trace', () => {
