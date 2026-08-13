@@ -155,6 +155,7 @@ export interface OmniaShellConfig {
   accentColor: string;
   apiBase?: string;
   shellVersion?: string;
+  networkState?: 'AVAILABLE' | 'UNAVAILABLE';
 }
 
 export interface OmniaShellContextValue {

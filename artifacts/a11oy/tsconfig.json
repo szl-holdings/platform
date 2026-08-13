@@ -19,6 +19,9 @@
     "paths": {
       "@/*": [
         "src/*"
+      ],
+      "@szl-holdings/omnia-shell/provider": [
+        "../../packages/omnia-shell/src/OmniaShellProvider.tsx"
       ]
     }
   },

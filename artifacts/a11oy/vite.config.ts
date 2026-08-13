@@ -31,6 +31,14 @@ export default defineConfig({
   resolve: {
     alias: [
       { find: '@', replacement: path.resolve(import.meta.dirname, 'src') },
+      {
+        find: /^@szl-holdings\/flexcache\/react$/,
+        replacement: path.resolve(import.meta.dirname, '../../lib/flexcache/src/react.tsx'),
+      },
+      {
+        find: /^@szl-holdings\/flexcache$/,
+        replacement: path.resolve(import.meta.dirname, '../../lib/flexcache/src/index.ts'),
+      },
       { find: /^@szl-holdings\/omnia-shell\/provider$/, replacement: path.resolve(import.meta.dirname, '../../packages/omnia-shell/src/OmniaShellProvider.tsx') },
       { find: /^@szl-holdings\/omnia-shell\/top-bar$/, replacement: path.resolve(import.meta.dirname, '../../packages/omnia-shell/src/OmniaTopBar.tsx') },
       { find: /^@szl-holdings\/omnia-shell\/command-palette$/, replacement: path.resolve(import.meta.dirname, '../../packages/omnia-shell/src/OmniaCommandPalette.tsx') },
