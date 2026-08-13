@@ -207,7 +207,7 @@
     "docx": "^9.6.1",
     "nodemailer": "^9.0.1",
     "posthog-js": "^1.369.1",
-    "puppeteer-core": "^24.41.0",
+    "puppeteer-core": "^25.6.0",
     "react": "catalog:",
     "react-dom": "catalog:",
     "slate": "^0.124.0",
