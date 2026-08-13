@@ -1,20 +1,75 @@
-import { useState, type ReactNode } from 'react';
+import {
+  useState,
+  type ReactNode,
+  type ReactElement,
+  isValidElement,
+} from 'react';
 
-export function StatusPill({
-  status,
-}: {
-  status: 'LIVE' | 'GATED' | 'APPROVED' | 'ROADMAP' | 'WARN' | 'ERROR' | 'CONNECTING';
-}) {
-  const styles: Record<string, { bg: string; color: string }> = {
+function hasInteractiveDescendant(node: ReactNode): boolean {
+  const interactiveTags = new Set([
+    'a',
+    'button',
+    'input',
+    'select',
+    'textarea',
+    'option',
+    'label',
+  ]);
+
+  const walk = (value: ReactNode): boolean => {
+    if (value == null || typeof value === 'boolean' || value === '') return false;
+    if (typeof value === 'string' || typeof value === 'number') return false;
+    if (Array.isArray(value)) return value.some((child) => walk(child));
+
+    if (!isValidElement(value)) return false;
+
+    const element = value as ReactElement;
+    const type = element.type;
+    if (typeof type === 'string' && interactiveTags.has(type)) return true;
+
+    const childProps = element.props as {
+      onClick?: (() => void) | undefined;
+      role?: string | undefined;
+    };
+
+    if (typeof childProps.onClick === 'function' || childProps.role === 'button') return true;
+
+    return walk(childProps.children);
+  };
+
+  return walk(node);
+}
+
+export type StatusPillStatus =
+  | 'LIVE'
+  | 'REAL'
+  | 'DEMO'
+  | 'UNAVAILABLE'
+  | 'DEGRADED'
+  | 'BLOCKED'
+  | 'GATED'
+  | 'APPROVED'
+  | 'ROADMAP'
+  | 'WARN'
+  | 'ERROR'
+  | 'CONNECTING';
+
+export function StatusPill({ status }: { status: StatusPillStatus }) {
+  const styles: Record<StatusPillStatus, { bg: string; color: string }> = {
     LIVE: { bg: 'rgba(201,183,135,0.15)', color: '#c9b787' },
-    GATED: { bg: 'rgba(94,94,94,0.15)', color: '#5e5e5e' },
+    REAL: { bg: 'rgba(201,183,135,0.15)', color: '#c9b787' },
+    DEMO: { bg: 'rgba(138,138,138,0.18)', color: '#d4d4d4' },
+    UNAVAILABLE: { bg: 'rgba(245,245,245,0.12)', color: '#f5f5f5' },
+    DEGRADED: { bg: 'rgba(201,183,135,0.15)', color: '#c9b787' },
+    BLOCKED: { bg: 'rgba(245,245,245,0.12)', color: '#f5f5f5' },
+    GATED: { bg: 'rgba(94,94,94,0.15)', color: '#a3a3a3' },
     APPROVED: { bg: 'rgba(201,183,135,0.15)', color: '#c9b787' },
-    ROADMAP: { bg: 'rgba(94,94,94,0.15)', color: '#5e5e5e' },
+    ROADMAP: { bg: 'rgba(94,94,94,0.15)', color: '#a3a3a3' },
     WARN: { bg: 'rgba(201,183,135,0.15)', color: '#c9b787' },
     ERROR: { bg: 'rgba(245,245,245,0.12)', color: '#f5f5f5' },
-    CONNECTING: { bg: 'rgba(94,94,94,0.15)', color: '#5e5e5e' },
+    CONNECTING: { bg: 'rgba(94,94,94,0.15)', color: '#a3a3a3' },
   };
-  const s = styles[status] ?? styles.LIVE;
+  const s = styles[status];
   return (
     <span
       className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-xs font-mono font-medium"
@@ -49,7 +104,7 @@ export function ApprovalGate({
       }}
     >
       <div className="flex items-center gap-2 font-medium" style={{ color: '#c9b787' }}>
-        <svg width="12" height="12" fill="none" viewBox="0 0 16 16">
+        <svg aria-hidden="true" width="12" height="12" fill="none" viewBox="0 0 16 16">
           <path
             d="M8 1a7 7 0 100 14A7 7 0 008 1zm0 6.5a1 1 0 011 1v2a1 1 0 01-2 0v-2a1 1 0 011-1zm0-2.5a1 1 0 100-2 1 1 0 000 2z"
             fill="currentColor"
@@ -61,8 +116,9 @@ export function ApprovalGate({
         <div className="flex items-center gap-2 mt-2">
           {onApprove && (
             <button
+              type="button"
               onClick={onApprove}
-              className="px-3 py-1 rounded text-xs font-medium"
+              className="min-h-11 px-3 py-2 rounded text-xs font-medium"
               style={{
                 backgroundColor: 'rgba(201,183,135,0.15)',
                 color: '#c9b787',
@@ -75,8 +131,9 @@ export function ApprovalGate({
           )}
           {onReject && (
             <button
+              type="button"
               onClick={onReject}
-              className="px-3 py-1 rounded text-xs font-medium"
+              className="min-h-11 px-3 py-2 rounded text-xs font-medium"
               style={{
                 backgroundColor: 'rgba(245,245,245,0.08)',
                 color: '#f5f5f5',
@@ -103,7 +160,7 @@ export function PageHeader({
   label: string;
   title: string;
   subtitle?: string;
-  status?: 'LIVE' | 'GATED' | 'APPROVED' | 'ROADMAP' | 'WARN' | 'ERROR' | 'CONNECTING';
+  status?: StatusPillStatus;
   children?: ReactNode;
 }) {
   return (
@@ -117,7 +174,7 @@ export function PageHeader({
           className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-xs font-mono"
           style={{
             backgroundColor: 'rgba(201,183,135,0.06)',
-            color: 'rgba(201,183,135,0.5)',
+            color: 'var(--color-a11oy-gold)',
             border: '1px solid rgba(201,183,135,0.12)',
           }}
         >
@@ -155,6 +212,8 @@ export function Card({
   onClick?: () => void;
   style?: React.CSSProperties;
 }) {
+  const hasInteractiveContent = hasInteractiveDescendant(children);
+
   return (
     <div
       className={`rounded-lg border p-4 ${className} ${onClick ? 'cursor-pointer transition-colors hover:border-[#c9b787]/30' : ''}`}
@@ -164,6 +223,18 @@ export function Card({
         ...style,
       }}
       onClick={onClick}
+      role={onClick && !hasInteractiveContent ? 'button' : undefined}
+      tabIndex={onClick && !hasInteractiveContent ? 0 : undefined}
+      onKeyDown={
+        onClick && !hasInteractiveContent
+          ? (event) => {
+              if (event.key === 'Enter' || event.key === ' ') {
+                event.preventDefault();
+                onClick();
+              }
+            }
+          : undefined
+      }
     >
       {children}
     </div>
@@ -333,12 +404,13 @@ export function ActionButton({
     warn: { bg: 'rgba(201,183,135,0.1)', color: '#c9b787', border: 'rgba(201,183,135,0.25)' },
   };
   const s = styles[variant];
-  const pad = size === 'sm' ? 'px-2 py-1' : 'px-3 py-1.5';
+  const pad = size === 'sm' ? 'px-2 py-2' : 'px-3 py-2';
   return (
     <button
+      type="button"
       onClick={onClick}
       disabled={disabled}
-      className={`${pad} rounded font-medium border transition-opacity`}
+      className={`${pad} min-h-11 rounded font-medium border transition-opacity`}
       style={{
         fontSize: size === 'sm' ? '11px' : '12px',
         backgroundColor: s.bg,
@@ -417,6 +489,7 @@ export function CodeBlock({
           {language}
         </span>
         <button
+          type="button"
           onClick={copy}
           className="text-xs font-mono transition-colors"
           style={{

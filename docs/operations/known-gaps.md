@@ -1,6 +1,6 @@
 # SZL Holdings — Known Gaps Register (Security & Operations)
 
-**Last updated:** 2026-08-08 (rev 24 — public surface truth)
+**Last updated:** 2026-08-11 (rev 25 — Series-A branch-local product wiring evidence)
 **Owner:** Engineering / DevOps  
 **Audience:** Enterprise architects, Series A technical advisors, incoming VP Engineering
 
@@ -35,6 +35,43 @@ gate adds the deliberate seven-day age audit to the same live checks without wea
 the protected PR/main check. An expired observation is remediated by re-observing every approved
 target, updating the registry evidence, regenerating the deterministic artifacts, reviewing the
 diff, and rerunning the freshness gate.
+
+---
+
+## 2026-08-11 Series-A Branch-Local Product Wiring
+
+The local working tree derived from existing PR #584 starting head
+`bc40b1c6aec8a44a8a6928c25a21de9aa91e76b7` now contains a source-backed
+`/a11oy/start` journey for investor and developer paths. The same working tree
+separates Workcell workflow status from the six typed evidence states `REAL`,
+`DEMO`, `UNAVAILABLE`, `DEGRADED`, `BLOCKED`, and `ROADMAP`; repository-seeded
+Workcells and their dependent demo, replay, PCE, governance, proof, and trust
+surfaces are explicitly `DEMO` or prototype evidence rather than authenticated
+operations.
+
+This is branch-local, uncommitted-at-capture source truth. A production-build
+preview at `http://127.0.0.1:4111` rendered the changed journey and its
+destinations, including the five required responsive widths for `/a11oy/start`
+and `/a11oy/workcells`. The 18 captures are catalogued in
+[`audit/screenshot-catalog.md`](../../audit/screenshot-catalog.md), and the
+source/browser boundary is recorded in
+[`audit/P0_SERIES_A_PRODUCT_WIRING_PROOF_2026-08-11.md`](../../audit/P0_SERIES_A_PRODUCT_WIRING_PROOF_2026-08-11.md).
+The Vite development server on port 4110 returned HTTP 200, but the in-app
+browser could not establish that server's HMR WebSocket; those HTTP results
+were therefore not used as JavaScript-render proof.
+
+Hosted Truth-drift remains fail-closed. In hosted run `31463647916`, job
+`93691994304`, all 21 approved external live probes timed out from the same
+runner. That observation does not establish that every public target was down,
+and it does not justify bypassing the live-probe gate. A new terminal hosted
+run against the exact pushed head is required to distinguish runner/network
+transport failure from target behavior and to establish hosted source/evidence
+parity.
+
+No deployment, certification, production operation, authenticated execution,
+hosted success, merge, or protected-source promotion is claimed. This work did
+not change [`docs/APP_STATUS.md`](../APP_STATUS.md), because no application
+readiness state was promoted.
 
 ---
 

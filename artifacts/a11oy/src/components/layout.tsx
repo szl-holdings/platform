@@ -12,6 +12,7 @@ const NAV_GROUPS = [
     label: 'SYSTEM',
     items: [
       { href: '/', label: 'Home' },
+      { href: '/start', label: 'Start here' },
       { href: '/architecture', label: 'Architecture' },
       { href: '/applications', label: 'Applications' },
       { href: '/resources', label: 'Resources' },
@@ -61,7 +62,7 @@ const NAV_GROUPS = [
   {
     label: 'PIPELINE',
     items: [
-      { href: '/pipeline', label: 'Live Pipeline' },
+      { href: '/pipeline', label: 'Pipeline Demo' },
       { href: '/intent-router', label: 'Intent Router' },
       { href: '/planner', label: 'Planner Canvas' },
       { href: '/ontology', label: 'Ontology Graph' },
@@ -243,7 +244,9 @@ interface LayoutProps {
 }
 
 export function Layout({ children, fullscreen = false }: LayoutProps) {
-  const [sidebarOpen, setSidebarOpen] = useState(true);
+  const [sidebarOpen, setSidebarOpen] = useState(() =>
+    typeof window === 'undefined' ? false : window.matchMedia('(min-width: 768px)').matches,
+  );
   const [location] = useLocation();
 
   if (fullscreen) {
@@ -274,13 +277,14 @@ export function Layout({ children, fullscreen = false }: LayoutProps) {
       }}
     >
       {/* TOP BAR — minimal, monochrome */}
-      <div
+      <header
+        className="a11oy-top-bar"
         style={{
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'space-between',
           padding: '0 1.25rem',
-          height: 52,
+          minHeight: 60,
           borderBottom: `1px solid ${TOKENS.border}`,
           position: 'sticky',
           top: 0,
@@ -294,8 +298,8 @@ export function Layout({ children, fullscreen = false }: LayoutProps) {
             type="button"
             onClick={() => setSidebarOpen((o) => !o)}
             style={{
-              width: 26,
-              height: 26,
+              width: 44,
+              height: 44,
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
@@ -306,6 +310,8 @@ export function Layout({ children, fullscreen = false }: LayoutProps) {
               fontSize: 13,
             }}
             aria-label="Toggle sidebar"
+            aria-expanded={sidebarOpen}
+            aria-controls="a11oy-sidebar"
           >
             ☰
           </button>
@@ -343,6 +349,7 @@ export function Layout({ children, fullscreen = false }: LayoutProps) {
         </div>
         <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
           <div
+            className="a11oy-top-status"
             style={{
               display: 'flex',
               alignItems: 'center',
@@ -353,21 +360,13 @@ export function Layout({ children, fullscreen = false }: LayoutProps) {
               letterSpacing: '0.04em',
             }}
           >
-            <span
-              style={{
-                width: 5,
-                height: 5,
-                borderRadius: '50%',
-                background: TOKENS.accent,
-                boxShadow: `0 0 6px ${TOKENS.accent}`,
-              }}
-            />
-            Fabric operational
+            Prototype · seed data
           </div>
           <Link
-            href={b('/investor-demo')}
+            href={b('/start')}
             style={{
-              padding: '0.4rem 0.875rem',
+              minHeight: 44,
+              padding: '0.5rem 0.875rem',
               fontSize: '0.75rem',
               fontWeight: 500,
               color: '#0a0a0a',
@@ -375,81 +374,97 @@ export function Layout({ children, fullscreen = false }: LayoutProps) {
               borderRadius: 999,
               textDecoration: 'none',
               letterSpacing: '-0.005em',
+              display: 'inline-flex',
+              alignItems: 'center',
             }}
           >
-            Investor demo
+            Start here
           </Link>
         </div>
-      </div>
+      </header>
 
       <div style={{ display: 'flex', flex: 1, minHeight: 0 }}>
         {sidebarOpen && (
+          <button
+            type="button"
+            className="a11oy-sidebar-backdrop"
+            aria-label="Close navigation"
+            onClick={() => setSidebarOpen(false)}
+          />
+        )}
+        {sidebarOpen && (
           <aside
+            id="a11oy-sidebar"
+            className="a11oy-sidebar"
+            aria-label="A11oy navigation"
             style={{
-              width: 200,
               borderRight: `1px solid ${TOKENS.border}`,
               flexShrink: 0,
               overflowY: 'auto',
               padding: '1.5rem 0',
               background: TOKENS.bg,
-              position: 'sticky',
-              top: 52,
-              height: 'calc(100vh - 52px)',
             }}
           >
-            {NAV_GROUPS.map((group) => (
-              <div key={group.label} style={{ marginBottom: '1.5rem' }}>
-                <div
-                  style={{
-                    padding: '0 1.25rem',
-                    marginBottom: '0.5rem',
-                    fontSize: '0.625rem',
-                    fontFamily: TOKENS.mono,
-                    fontWeight: 500,
-                    letterSpacing: '0.16em',
-                    color: TOKENS.textMuted,
-                  }}
-                >
-                  {group.label}
+            <nav aria-label="Primary">
+              {NAV_GROUPS.map((group) => (
+                <div key={group.label} style={{ marginBottom: '1.5rem' }}>
+                  <div
+                    style={{
+                      padding: '0 1.25rem',
+                      marginBottom: '0.5rem',
+                      fontSize: '0.625rem',
+                      fontFamily: TOKENS.mono,
+                      fontWeight: 500,
+                      letterSpacing: '0.16em',
+                      color: TOKENS.textDim,
+                    }}
+                  >
+                    {group.label}
+                  </div>
+                  {group.items.map((item) => {
+                    const fullHref = b(item.href);
+                    const isActive =
+                      item.href === '/'
+                        ? location === fullHref || location === BASE || location === `${BASE}/`
+                        : location.startsWith(fullHref);
+                    return (
+                      <Link
+                        key={item.href}
+                        href={fullHref}
+                        onClick={() => {
+                          if (typeof window !== 'undefined' && window.innerWidth < 768) {
+                            setSidebarOpen(false);
+                          }
+                        }}
+                        style={{
+                          display: 'block',
+                          padding: '0.4rem 1.25rem',
+                          fontSize: '0.8125rem',
+                          textDecoration: 'none',
+                          color: isActive ? TOKENS.text : TOKENS.textDim,
+                          background: isActive ? 'rgba(255,255,255,0.03)' : 'transparent',
+                          borderLeft: isActive
+                            ? `2px solid ${TOKENS.accent}`
+                            : '2px solid transparent',
+                          fontWeight: isActive ? 500 : 400,
+                          letterSpacing: '-0.005em',
+                          transition: 'color 0.15s, background 0.15s',
+                        }}
+                      >
+                        {item.label}
+                      </Link>
+                    );
+                  })}
                 </div>
-                {group.items.map((item) => {
-                  const fullHref = b(item.href);
-                  const isActive =
-                    item.href === '/'
-                      ? location === fullHref || location === BASE || location === `${BASE}/`
-                      : location.startsWith(fullHref);
-                  return (
-                    <Link
-                      key={item.href}
-                      href={fullHref}
-                      style={{
-                        display: 'block',
-                        padding: '0.4rem 1.25rem',
-                        fontSize: '0.8125rem',
-                        textDecoration: 'none',
-                        color: isActive ? TOKENS.text : TOKENS.textDim,
-                        background: isActive ? 'rgba(255,255,255,0.03)' : 'transparent',
-                        borderLeft: isActive
-                          ? `2px solid ${TOKENS.accent}`
-                          : '2px solid transparent',
-                        fontWeight: isActive ? 500 : 400,
-                        letterSpacing: '-0.005em',
-                        transition: 'color 0.15s, background 0.15s',
-                      }}
-                    >
-                      {item.label}
-                    </Link>
-                  );
-                })}
-              </div>
-            ))}
+              ))}
+            </nav>
           </aside>
         )}
         <main
+          className="a11oy-main"
           style={{
             flex: 1,
             overflowY: 'auto',
-            padding: '1.5rem',
             minWidth: 0,
             background: TOKENS.bg,
           }}

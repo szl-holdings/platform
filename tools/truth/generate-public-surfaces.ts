@@ -21,7 +21,7 @@ const LIVE_VERIFY_BACKOFF_MS = [750, 1_500] as const;
 function serializeSurface(surface: PublicSurface): string {
   return JSON.stringify(surface).replace(/"audience":\[([^\]]*)\]/, (match, members: string) => {
     if (members.length === 0) return match;
-    return `"audience":[${members.split(',').join(', ')}]`;
+    return `"audience": [${members.split(',').join(', ')}]`;
   });
 }
 
