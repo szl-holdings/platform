@@ -6,7 +6,7 @@
 
 const fs = require('node:fs');
 const path = require('node:path');
-const puppeteer = require('puppeteer-core');
+const { chromium } = require('@playwright/test');
 const archiver = require('archiver');
 
 const { POSTS } = require('./posts.cjs');
@@ -1160,7 +1160,7 @@ function resolveChromium() {
 
 async function launchBrowser() {
   const exe = resolveChromium();
-  return await puppeteer.launch({
+  return await chromium.launch({
     executablePath: exe,
     headless: true,
     args: [
