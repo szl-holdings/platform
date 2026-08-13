@@ -224,7 +224,7 @@ export function WorkcellReplay() {
                   <div className="flex items-center gap-2 mb-1">
                     <span
                       className="text-xs font-medium"
-                      style={{ color: OUTCOME_COLORS[r.outcome] ?? '#5e5e5e' }}
+                      style={{ color: OUTCOME_COLORS[r.outcome] ?? '#8a8a8a' }}
                     >
                       {r.outcome === 'success'
                         ? '✓'
@@ -280,8 +280,8 @@ export function WorkcellReplay() {
                     <span
                       className="text-xs px-1.5 py-0.5 rounded font-mono"
                       style={{
-                        color: DISP_COLORS[r.evalDisposition] ?? '#5e5e5e',
-                        backgroundColor: `${DISP_COLORS[r.evalDisposition] ?? '#5e5e5e'}18`,
+                        color: DISP_COLORS[r.evalDisposition] ?? '#8a8a8a',
+                        backgroundColor: `${DISP_COLORS[r.evalDisposition] ?? '#8a8a8a'}18`,
                       }}
                     >
                       {r.evalDisposition.replace(/_/g, ' ')}

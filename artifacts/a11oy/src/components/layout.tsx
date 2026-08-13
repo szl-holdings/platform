@@ -232,7 +232,7 @@ const TOKENS = {
   borderStrong: 'rgba(255,255,255,0.12)',
   text: '#f5f5f5',
   textDim: '#8a8a8a',
-  textMuted: '#5e5e5e',
+  textMuted: '#8a8a8a',
   accent: '#c9b787',
   mono: 'var(--font-mono, ui-monospace, SFMono-Regular, Menlo, monospace)',
 };

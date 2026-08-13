@@ -35,9 +35,9 @@ const VERTICAL_LABELS: Record<string, string> = {
 const STATUS_COLORS: Record<string, string> = {
   running: '#c9b787',
   completed: '#c9b787',
-  paused: '#5e5e5e',
+  paused: '#8a8a8a',
   error: '#f5f5f5',
-  idle: '#5e5e5e',
+  idle: '#8a8a8a',
 };
 
 export function Workcells() {
@@ -158,8 +158,8 @@ export function Workcells() {
 
       <div className="grid md:grid-cols-2 xl:grid-cols-3 gap-4">
         {filtered.map((wc) => {
-          const color = VERTICAL_COLORS[wc.vertical] ?? '#5e5e5e';
-          const statusColor = STATUS_COLORS[wc.status] ?? '#5e5e5e';
+          const color = VERTICAL_COLORS[wc.vertical] ?? '#8a8a8a';
+          const statusColor = STATUS_COLORS[wc.status] ?? '#8a8a8a';
           const projection = projectWorkcellState(wc);
           return (
             <Card key={wc.id} className="flex flex-col gap-3">

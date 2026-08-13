@@ -173,7 +173,7 @@ const OUTCOME_COLORS: Record<string, string> = {
   failed: '#f5f5f5',
   running: '#c9b787',
   pending: '#8a8a8a',
-  skipped: '#5e5e5e',
+  skipped: '#8a8a8a',
 };
 
 function fmt(ms: number) {
@@ -357,7 +357,7 @@ export function SovereignReplayDetail() {
                 {steps.map((step, i) => {
                   const visible = i <= stepIdx || replayState === 'idle';
                   const isCurrent = i === stepIdx && replayState === 'playing';
-                  const outColor = OUTCOME_COLORS[step.outcome] ?? '#5e5e5e';
+                  const outColor = OUTCOME_COLORS[step.outcome] ?? '#8a8a8a';
                   const statusDot =
                     step.outcome === 'success'
                       ? '✓'
@@ -451,7 +451,7 @@ export function SovereignReplayDetail() {
                   >
                     OUTCOME
                   </div>
-                  <div style={{ color: OUTCOME_COLORS[data.outcome] ?? '#5e5e5e' }}>
+                  <div style={{ color: OUTCOME_COLORS[data.outcome] ?? '#8a8a8a' }}>
                     {data.outcome.toUpperCase()}
                   </div>
                 </div>

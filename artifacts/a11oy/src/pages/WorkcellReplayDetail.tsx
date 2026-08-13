@@ -301,8 +301,8 @@ export function WorkcellReplayDetail() {
                         running: '#c9b787',
                         completed: '#c9b787',
                         error: '#f5f5f5',
-                        paused: '#5e5e5e',
-                        idle: '#5e5e5e',
+                        paused: '#8a8a8a',
+                        idle: '#8a8a8a',
                       }[wc.status],
                     }}
                   >

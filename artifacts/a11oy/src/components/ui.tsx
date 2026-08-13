@@ -22,12 +22,12 @@ export function StatusPill({ status }: { status: SurfaceStatus }) {
     UNAVAILABLE: { bg: 'rgba(94,94,94,0.18)', color: '#a0a0a0' },
     DEGRADED: { bg: 'rgba(201,183,135,0.15)', color: '#c9b787' },
     BLOCKED: { bg: 'rgba(245,245,245,0.12)', color: '#f5f5f5' },
-    GATED: { bg: 'rgba(94,94,94,0.15)', color: '#5e5e5e' },
+    GATED: { bg: 'rgba(94,94,94,0.15)', color: '#8a8a8a' },
     APPROVED: { bg: 'rgba(201,183,135,0.15)', color: '#c9b787' },
-    ROADMAP: { bg: 'rgba(94,94,94,0.15)', color: '#5e5e5e' },
+    ROADMAP: { bg: 'rgba(94,94,94,0.15)', color: '#8a8a8a' },
     WARN: { bg: 'rgba(201,183,135,0.15)', color: '#c9b787' },
     ERROR: { bg: 'rgba(245,245,245,0.12)', color: '#f5f5f5' },
-    CONNECTING: { bg: 'rgba(94,94,94,0.15)', color: '#5e5e5e' },
+    CONNECTING: { bg: 'rgba(94,94,94,0.15)', color: '#8a8a8a' },
   };
   const s = styles[status] ?? styles.UNAVAILABLE;
   return (
@@ -134,7 +134,7 @@ export function PageHeader({
           className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-xs font-mono"
           style={{
             backgroundColor: 'rgba(201,183,135,0.06)',
-            color: 'rgba(201,183,135,0.5)',
+            color: '#a89868',
             border: '1px solid rgba(201,183,135,0.12)',
           }}
         >
@@ -241,7 +241,7 @@ export function KpiCard({
         {trend && (
           <span
             className="text-xs mb-0.5 font-mono"
-            style={{ color: trend === 'up' ? '#c9b787' : trend === 'down' ? '#f5f5f5' : '#5e5e5e' }}
+            style={{ color: trend === 'up' ? '#c9b787' : trend === 'down' ? '#f5f5f5' : '#8a8a8a' }}
           >
             {trend === 'up' ? '↑' : trend === 'down' ? '↓' : '→'}
           </span>
@@ -265,13 +265,13 @@ export function SeverityDot({
     critical: '#f5f5f5',
     high: '#c9b787',
     medium: '#8a8a8a',
-    low: '#5e5e5e',
-    info: '#5e5e5e',
+    low: '#8a8a8a',
+    info: '#8a8a8a',
   };
   return (
     <span
       className="inline-block w-2 h-2 rounded-full flex-shrink-0"
-      style={{ backgroundColor: colors[severity] ?? '#5e5e5e' }}
+      style={{ backgroundColor: colors[severity] ?? '#8a8a8a' }}
     />
   );
 }
@@ -281,13 +281,13 @@ export function SeverityBadge({ severity }: { severity: string }) {
     critical: { bg: 'rgba(245,245,245,0.10)', color: '#f5f5f5' },
     high: { bg: 'rgba(201,183,135,0.12)', color: '#c9b787' },
     medium: { bg: 'rgba(138,138,138,0.10)', color: '#8a8a8a' },
-    low: { bg: 'rgba(94,94,94,0.10)', color: '#5e5e5e' },
-    info: { bg: 'rgba(94,94,94,0.10)', color: '#5e5e5e' },
+    low: { bg: 'rgba(94,94,94,0.10)', color: '#8a8a8a' },
+    info: { bg: 'rgba(94,94,94,0.10)', color: '#8a8a8a' },
     active: { bg: 'rgba(201,183,135,0.12)', color: '#c9b787' },
     escalated: { bg: 'rgba(245,245,245,0.10)', color: '#f5f5f5' },
     acknowledged: { bg: 'rgba(138,138,138,0.10)', color: '#8a8a8a' },
-    resolved: { bg: 'rgba(94,94,94,0.10)', color: '#5e5e5e' },
-    suppressed: { bg: 'rgba(94,94,94,0.08)', color: '#5e5e5e' },
+    resolved: { bg: 'rgba(94,94,94,0.10)', color: '#8a8a8a' },
+    suppressed: { bg: 'rgba(94,94,94,0.08)', color: '#8a8a8a' },
   };
   const s = styles[severity] ?? styles.info;
   return (
@@ -305,7 +305,7 @@ export function VerdictBadge({ verdict }: { verdict: 'pass' | 'fail' | 'warn' | 
     pass: { bg: 'rgba(201,183,135,0.12)', color: '#c9b787', icon: '✓' },
     fail: { bg: 'rgba(245,245,245,0.10)', color: '#f5f5f5', icon: '✗' },
     warn: { bg: 'rgba(138,138,138,0.12)', color: '#8a8a8a', icon: '⚠' },
-    abstain: { bg: 'rgba(94,94,94,0.12)', color: '#5e5e5e', icon: '—' },
+    abstain: { bg: 'rgba(94,94,94,0.12)', color: '#8a8a8a', icon: '—' },
   };
   const s = styles[verdict] ?? styles.abstain;
   return (
@@ -393,7 +393,7 @@ export function StatusBadge({
     ok: '#c9b787',
     warn: '#8a8a8a',
     error: '#f5f5f5',
-    info: '#5e5e5e',
+    info: '#8a8a8a',
   };
   const color = colors[status];
   return (
@@ -474,8 +474,8 @@ export function TraceStep({
           : status === 'failed' || status === 'error'
             ? '#f5f5f5'
             : status === 'skipped'
-              ? '#5e5e5e'
-              : '#5e5e5e';
+              ? '#8a8a8a'
+              : '#8a8a8a';
   const statusIcon =
     status === 'completed' || status === 'ok'
       ? '✓'

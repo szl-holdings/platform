@@ -350,7 +350,7 @@ export function Demo() {
                             ? '#c9b787'
                             : wc.status === 'running'
                               ? '#c9b787'
-                              : '#5e5e5e',
+                              : '#8a8a8a',
                       }}
                     >
                       {wc.status}

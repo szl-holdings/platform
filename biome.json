@@ -115,7 +115,8 @@
   "css": {
     "parser": {
       "cssModules": true,
-      "allowWrongLineComments": false
+      "allowWrongLineComments": false,
+      "tailwindDirectives": true
     },
     "linter": {
       "enabled": false

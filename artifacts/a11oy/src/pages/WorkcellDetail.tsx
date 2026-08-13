@@ -72,15 +72,15 @@ export function WorkcellDetail() {
   const signals = SEED_SIGNALS.filter((s) => wc.signals.includes(s.id));
   const pceContract = SEED_PCE_CONTRACTS.find((p) => p.id === wc.pceContractId);
   const proofPacket = SEED_PROOF_PACKETS.find((p) => p.id === wc.proofPacketId);
-  const color = VERTICAL_COLORS[wc.vertical] ?? '#5e5e5e';
+  const color = VERTICAL_COLORS[wc.vertical] ?? '#8a8a8a';
   const statusColor =
     {
       running: '#c9b787',
       completed: '#c9b787',
       error: '#f5f5f5',
-      paused: '#5e5e5e',
-      idle: '#5e5e5e',
-    }[wc.status] ?? '#5e5e5e';
+      paused: '#8a8a8a',
+      idle: '#8a8a8a',
+    }[wc.status] ?? '#8a8a8a';
   const projection = projectWorkcellState(wc);
   const executionRecorded = projection.showFixtureResult;
 
@@ -233,7 +233,7 @@ export function WorkcellDetail() {
                             ? '#c9b787'
                             : wc.status === 'running'
                               ? '#c9b787'
-                              : '#5e5e5e',
+                              : '#8a8a8a',
                       }}
                     >
                       {wc.status}
