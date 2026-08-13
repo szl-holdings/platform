@@ -59,7 +59,7 @@ export function WorkcellDetail() {
           </div>
           <Link
             href={`${BASE}/workcells`}
-            className="text-xs"
+            className="text-xs min-h-11 min-w-11 inline-flex items-center justify-center"
             style={{ color: 'var(--color-a11oy-blue)' }}
           >
             ← Back to Workcells
@@ -89,7 +89,7 @@ export function WorkcellDetail() {
       <div className="mb-4">
         <Link
           href={`${BASE}/workcells`}
-          className="text-xs font-mono"
+          className="text-xs font-mono min-h-11 min-w-11 inline-flex items-center"
           style={{ color: 'var(--color-a11oy-blue)', textDecoration: 'none' }}
         >
           ← All Workcells
@@ -516,8 +516,9 @@ export function WorkcellDetail() {
                             : '✕ Rejected'}
                       </span>
                       <button
+                        type="button"
                         onClick={() => setDecision(null)}
-                        className="text-xs ml-2"
+                        className="text-xs ml-2 min-h-11 min-w-11 inline-flex items-center justify-center"
                         style={{
                           color: 'var(--color-a11oy-text-ghost)',
                           background: 'none',
@@ -712,7 +713,7 @@ export function WorkcellDetail() {
           <div>
             <Link
               href={`${BASE}/workcells/${wc.id}/replay`}
-              className="w-full block text-center text-xs px-3 py-2 rounded border font-medium"
+              className="w-full min-h-11 min-w-11 inline-flex items-center justify-center text-center text-xs px-3 py-2 rounded border font-medium"
               style={{
                 color: 'var(--color-a11oy-text-sub)',
                 borderColor: 'var(--color-a11oy-border)',

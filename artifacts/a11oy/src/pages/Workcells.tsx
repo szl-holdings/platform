@@ -119,7 +119,7 @@ export function Workcells() {
               key={s}
               onClick={() => setFilterStatus(s)}
               aria-pressed={filterStatus === s}
-              className="text-xs px-2.5 py-1 rounded font-mono transition-colors min-h-11"
+              className="text-xs px-2.5 py-1 rounded font-mono transition-colors min-h-11 min-w-11"
               style={{
                 backgroundColor:
                   filterStatus === s ? 'rgba(201,183,135,0.15)' : 'var(--color-a11oy-muted)',

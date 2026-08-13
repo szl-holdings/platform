@@ -29,6 +29,14 @@ const replayIndex = readFileSync(
   new URL('../src/pages/WorkcellReplay.tsx', import.meta.url),
   'utf8',
 );
+const workcellDetail = readFileSync(
+  new URL('../src/pages/WorkcellDetail.tsx', import.meta.url),
+  'utf8',
+);
+const workcellReplayDetail = readFileSync(
+  new URL('../src/pages/WorkcellReplayDetail.tsx', import.meta.url),
+  'utf8',
+);
 const replayDetail = readFileSync(
   new URL('../src/pages/SovereignReplayDetail.tsx', import.meta.url),
   'utf8',
@@ -190,4 +198,33 @@ test('mounts one GraphQL provider while retaining fail-closed client state', () 
   assert.doesNotMatch(main, /<GraphQLProvider>/);
   assert.equal((app.match(/<GraphQLProvider>/g) ?? []).length, 1);
   assert.match(main, /networkState: 'UNAVAILABLE'/);
+});
+
+test('keeps compact proof controls and navigation targets at least 44px', () => {
+  for (const [source, targetCount] of [
+    [workcellsPage, 1],
+    [replayIndex, 2],
+    [workcellDetail, 4],
+    [workcellReplayDetail, 5],
+    [sovereignReplay, 7],
+  ]) {
+    assert.equal((source.match(/min-h-11 min-w-11/g) ?? []).length, targetCount);
+  }
+
+  for (const source of [workcellReplayDetail, sovereignReplay]) {
+    assert.match(source, /\[2000, 1000, 600, 300\][\s\S]*?min-h-11 min-w-11/);
+  }
+
+  assert.equal(
+    (workcellDetail.match(/min-h-11 min-w-11 inline-flex items-center/g) ?? []).length,
+    4,
+  );
+  assert.equal(
+    (workcellReplayDetail.match(/min-h-11 min-w-11 inline-flex items-center/g) ?? []).length,
+    4,
+  );
+  assert.equal(
+    (sovereignReplay.match(/min-h-11 min-w-11 inline-flex items-center/g) ?? []).length,
+    6,
+  );
 });

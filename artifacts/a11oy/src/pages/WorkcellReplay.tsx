@@ -181,7 +181,7 @@ export function WorkcellReplay() {
             key={o}
             onClick={() => setFilterOutcome(o)}
             aria-pressed={filterOutcome === o}
-            className="text-xs px-2 py-0.5 rounded min-h-11"
+            className="text-xs px-2 py-0.5 rounded min-h-11 min-w-11"
             style={{
               backgroundColor:
                 filterOutcome === o ? 'rgba(201,183,135,0.2)' : 'var(--color-a11oy-muted)',
@@ -201,7 +201,7 @@ export function WorkcellReplay() {
             key={d}
             onClick={() => setFilterDomain(d)}
             aria-pressed={filterDomain === d}
-            className="text-xs px-2 py-0.5 rounded min-h-11"
+            className="text-xs px-2 py-0.5 rounded min-h-11 min-w-11"
             style={{
               backgroundColor:
                 filterDomain === d ? 'rgba(138,138,138,0.2)' : 'var(--color-a11oy-muted)',

@@ -222,7 +222,7 @@ export function SovereignReplayDetail() {
           </div>
           <Link
             href={`${BASE}/replay`}
-            className="text-xs"
+            className="text-xs min-h-11 min-w-11 inline-flex items-center justify-center"
             style={{ color: 'var(--color-a11oy-blue)' }}
           >
             ← Back to Replay Index
@@ -237,7 +237,7 @@ export function SovereignReplayDetail() {
       <div className="mb-4 flex items-center gap-3">
         <Link
           href={`${BASE}/replay`}
-          className="text-xs font-mono"
+          className="text-xs font-mono min-h-11 min-w-11 inline-flex items-center"
           style={{ color: 'var(--color-a11oy-blue)', textDecoration: 'none' }}
         >
           ← All Replays
@@ -306,7 +306,7 @@ export function SovereignReplayDetail() {
                     key={s}
                     onClick={() => setSpeed(s)}
                     aria-pressed={speed === s}
-                    className="px-2 py-0.5 rounded font-mono min-h-11"
+                    className="px-2 py-0.5 rounded font-mono min-h-11 min-w-11"
                     style={{
                       backgroundColor: speed === s ? 'rgba(201,183,135,0.15)' : 'transparent',
                       color: speed === s ? '#c9b787' : 'var(--color-a11oy-text-ghost)',
@@ -646,8 +646,9 @@ export function SovereignReplayDetail() {
                     </span>
                   </div>
                   <button
+                    type="button"
                     onClick={() => setCertDecision(null)}
-                    className="text-xs font-mono ml-2"
+                    className="text-xs font-mono ml-2 min-h-11 min-w-11 inline-flex items-center justify-center"
                     style={{
                       color: 'var(--color-a11oy-text-ghost)',
                       background: 'none',
@@ -665,8 +666,9 @@ export function SovereignReplayDetail() {
                     <span style={{ color: '#c9b787' }}>Flagged for investigation.</span>
                   </div>
                   <button
+                    type="button"
                     onClick={() => setCertDecision(null)}
-                    className="text-xs font-mono ml-2"
+                    className="text-xs font-mono ml-2 min-h-11 min-w-11 inline-flex items-center justify-center"
                     style={{
                       color: 'var(--color-a11oy-text-ghost)',
                       background: 'none',
@@ -684,8 +686,9 @@ export function SovereignReplayDetail() {
                     <span style={{ color: '#ef4444' }}>Outcome rejected — record disputed.</span>
                   </div>
                   <button
+                    type="button"
                     onClick={() => setCertDecision(null)}
-                    className="text-xs font-mono ml-2"
+                    className="text-xs font-mono ml-2 min-h-11 min-w-11 inline-flex items-center justify-center"
                     style={{
                       color: 'var(--color-a11oy-text-ghost)',
                       background: 'none',
@@ -702,7 +705,7 @@ export function SovereignReplayDetail() {
 
           <Link
             href={`${BASE}/replay`}
-            className="block text-center text-xs px-3 py-2 rounded border"
+            className="w-full min-h-11 min-w-11 inline-flex items-center justify-center text-center text-xs px-3 py-2 rounded border"
             style={{
               color: 'var(--color-a11oy-text-sub)',
               borderColor: 'var(--color-a11oy-border)',
