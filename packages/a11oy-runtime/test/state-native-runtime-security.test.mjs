@@ -64,7 +64,14 @@ function bindRequest(provisional) {
   };
 }
 
-function requestFor({ actionId, kernelId, compatibility, epochId, inputCapsuleIds = [], idempotencyKey }) {
+function requestFor({
+  actionId,
+  kernelId,
+  compatibility,
+  epochId,
+  inputCapsuleIds = [],
+  idempotencyKey,
+}) {
   return bindRequest({
     authorization: {
       envelope: {
@@ -78,7 +85,10 @@ function requestFor({ actionId, kernelId, compatibility, epochId, inputCapsuleId
         requestedAt: new Date().toISOString(),
         argsDigest: '',
       },
-      decision: { effect: 'allow', reason: 'Bounded security conformance policy allows execution.' },
+      decision: {
+        effect: 'allow',
+        reason: 'Bounded security conformance policy allows execution.',
+      },
       allowedSensitivities: ['confidential'],
     },
     kernelId,
@@ -157,7 +167,10 @@ test('a request pinned to a new epoch cannot consume state using an older epoch 
     await assert.rejects(runtime.execute(request), expectCode('COMPATIBILITY_MISMATCH'));
     assert.equal(executed, false);
     assert.equal(ledger.length, 2);
-    assert.equal(ledger.every((receipt) => receipt.outcome === 'error'), true);
+    assert.equal(
+      ledger.every((receipt) => receipt.outcome === 'error'),
+      true,
+    );
   } finally {
     bus.dispose();
     stateKey.fill(0);
@@ -243,7 +256,11 @@ test('a verifier cannot mutate the bytes that are persisted after verification',
       ],
       verify: async (outputs) => {
         outputs[0].payload.fill(0);
-        return { passed: true, reason: 'Verifier accepted its isolated copy.', evidenceDigests: [] };
+        return {
+          passed: true,
+          reason: 'Verifier accepted its isolated copy.',
+          evidenceDigests: [],
+        };
       },
     });
 
@@ -286,7 +303,12 @@ test('kernel registration snapshots verification policy and implementation', asy
       },
     });
     class DefinitionFixture {
-      constructor() {
+      #stats;
+      #reason;
+
+      constructor(receiverStats) {
+        this.#stats = receiverStats;
+        this.#reason = 'The admitted verifier rejects this execution.';
         this.kernelId = 'state.definition-snapshot';
         this.version = '1.0.0';
         this.kind = 'custom';
@@ -295,20 +317,20 @@ test('kernel registration snapshots verification policy and implementation', asy
       }
 
       async execute() {
-        stats.executeCalls += 1;
+        this.#stats.executeCalls += 1;
         return [];
       }
 
       async verify() {
-        stats.verifyCalls += 1;
+        this.#stats.verifyCalls += 1;
         return {
           passed: false,
-          reason: 'The admitted verifier rejects this execution.',
+          reason: this.#reason,
           evidenceDigests: [digestObject({ verifier: 'admitted' })],
         };
       }
     }
-    const definition = new DefinitionFixture();
+    const definition = new DefinitionFixture(stats);
     runtime.register(definition);
     definition.requiresVerification = false;
     definition.verify = undefined;
@@ -337,7 +359,8 @@ test('verifier decisions are read once and evidence digests are snapshotted', as
   const manager = new CognitiveEpochManager();
   const active = prepareEpoch(manager, 'epoch_verifier_result', 'rev-verifier-result');
   const { privateKey } = generateKeyPairSync('ed25519');
-  let passedReads = 0;
+  const ledger = [];
+  const reads = { passed: 0, reason: 0, evidence: 0 };
   let evidenceReads = 0;
   try {
     const runtime = new AlloyKernelRuntime({
@@ -345,7 +368,7 @@ test('verifier decisions are read once and evidence digests are snapshotted', as
       epochManager: manager,
       config: {
         receiptSigner: { keyId: 'test-key', privateKey },
-        receiptWriter: async () => {},
+        receiptWriter: async (receipt) => ledger.push(receipt),
       },
     });
     const stableEvidenceDigest = digestObject({ verifier: 'stable' });
@@ -358,6 +381,32 @@ test('verifier decisions are read once and evidence digests are snapshotted', as
       },
     });
     evidenceDigests.length = 1;
+    const verifierResult = {};
+    Object.defineProperties(verifierResult, {
+      passed: {
+        enumerable: true,
+        get() {
+          reads.passed += 1;
+          return reads.passed === 1 ? false : true;
+        },
+      },
+      reason: {
+        enumerable: true,
+        get() {
+          reads.reason += 1;
+          return reads.reason === 1
+            ? 'Verifier rejected the snapshotted result.'
+            : 'Accessor changed the rejection reason.';
+        },
+      },
+      evidenceDigests: {
+        enumerable: true,
+        get() {
+          reads.evidence += 1;
+          return reads.evidence === 1 ? evidenceDigests : ['not-a-sha256-digest'];
+        },
+      },
+    });
     runtime.register({
       kernelId: 'state.verifier-result',
       version: '1.0.0',
@@ -365,14 +414,7 @@ test('verifier decisions are read once and evidence digests are snapshotted', as
       route: 'state.test',
       requiresVerification: true,
       execute: async () => [],
-      verify: async () => {
-        passedReads += 1;
-        return {
-          passed: true,
-        reason: 'Verifier result is stable at the trust boundary.',
-          evidenceDigests,
-        };
-      },
+      verify: async () => verifierResult,
     });
 
     const request = requestFor({
@@ -381,11 +423,14 @@ test('verifier decisions are read once and evidence digests are snapshotted', as
       compatibility: active.compatibility,
       epochId: 'epoch_verifier_result',
     });
-    const result = await runtime.execute(request);
-    assert.equal(passedReads, 1);
+    await assert.rejects(runtime.execute(request), expectCode('VERIFICATION_FAILED'));
+    assert.deepEqual(reads, { passed: 1, reason: 1, evidence: 1 });
     assert.equal(evidenceReads, 1);
-    assert.equal(result.receipt.outcome, 'success');
-    assert.equal(result.receipt.verifier.evidenceDigests[0], stableEvidenceDigest);
+    assert.equal(ledger.length, 1);
+    assert.equal(ledger[0].outcome, 'blocked');
+    assert.equal(ledger[0].verifier.passed, false);
+    assert.equal(ledger[0].verifier.reason, 'Verifier rejected the snapshotted result.');
+    assert.equal(ledger[0].verifier.evidenceDigests[0], stableEvidenceDigest);
   } finally {
     bus.dispose();
     stateKey.fill(0);
@@ -466,6 +511,47 @@ test('cognitive epoch validation checks require non-empty name and detail string
   );
 });
 
+test('cognitive epoch validation check fields are read and stored exactly once', () => {
+  const manager = new CognitiveEpochManager();
+  prepareEpochDraft(manager, 'epoch_validation_accessor', 'rev-validation-accessor');
+  const reads = { name: 0, passed: 0, detail: 0 };
+  const check = {};
+  Object.defineProperties(check, {
+    name: {
+      enumerable: true,
+      get() {
+        reads.name += 1;
+        return reads.name === 1 ? 'self-test' : '';
+      },
+    },
+    passed: {
+      enumerable: true,
+      get() {
+        reads.passed += 1;
+        return reads.passed === 1 ? false : true;
+      },
+    },
+    detail: {
+      enumerable: true,
+      get() {
+        reads.detail += 1;
+        return reads.detail === 1 ? 'Rejected by the immutable check.' : '';
+      },
+    },
+  });
+
+  const record = manager.validate('epoch_validation_accessor', [check]);
+  assert.deepEqual(reads, { name: 1, passed: 1, detail: 1 });
+  assert.equal(record.state, 'REJECTED');
+  assert.deepEqual(record.validationChecks, [
+    {
+      name: 'self-test',
+      passed: false,
+      detail: 'Rejected by the immutable check.',
+    },
+  ]);
+});
+
 test('malformed cognitive epoch digests are rejected before storage', () => {
   const manager = new CognitiveEpochManager();
   assert.throws(
@@ -492,19 +578,25 @@ test('malformed cognitive epoch digests are rejected before storage', () => {
   assert.equal(manager.get('epoch_invalid_digest'), undefined);
 });
 
-test('cognitive epoch fields are read once before validation and storage', () => {
-  const manager = new CognitiveEpochManager();
-  const stableTokenizerDigest = digestObject({ tokenizer: 'stable' });
-  let tokenizerReads = 0;
-  const spec = {
-    epochId: 'epoch_accessor_digest',
+test('every cognitive epoch field is read once before validation, hashing, lookup, and storage', () => {
+  const digestFields = new Set([
+    'tokenizerDigest',
+    'layoutDigest',
+    'adapterSetDigest',
+    'verifierSetDigest',
+    'promptBundleDigest',
+    'policyDigest',
+    'toolManifestDigest',
+  ]);
+  const baseSpec = {
+    epochId: 'epoch_accessor_all_fields',
     tenantId: 'tenant_a',
     route: 'state.test',
     modelId: 'model-accessor',
     modelRevision: 'rev-accessor',
     engineId: 'engine-a',
     engineVersion: '1.0.0',
-    tokenizerDigest: stableTokenizerDigest,
+    tokenizerDigest: digestObject({ tokenizer: 'accessor' }),
     layoutDigest: digestObject({ layout: 'accessor' }),
     adapterSetDigest: digestObject({ adapters: [] }),
     verifierSetDigest: digestObject({ verifiers: [] }),
@@ -513,18 +605,31 @@ test('cognitive epoch fields are read once before validation and storage', () =>
     toolManifestDigest: digestObject({ tools: [] }),
     createdAt: new Date().toISOString(),
   };
-  Object.defineProperty(spec, 'tokenizerDigest', {
-    enumerable: true,
-    get() {
-      tokenizerReads += 1;
-      return tokenizerReads === 1 ? stableTokenizerDigest : 'not-a-sha256-digest';
-    },
-  });
 
-  const prepared = manager.prepare(spec);
-  assert.equal(tokenizerReads, 1);
-  assert.equal(prepared.tokenizerDigest, stableTokenizerDigest);
-  assert.equal(manager.require(spec.epochId).tokenizerDigest, stableTokenizerDigest);
+  for (const field of Object.keys(baseSpec)) {
+    const manager = new CognitiveEpochManager();
+    const stableSpec = { ...baseSpec, epochId: `${baseSpec.epochId}_${field}` };
+    const stableValue = stableSpec[field];
+    const changedValue = digestFields.has(field)
+      ? digestObject({ field, changed: true })
+      : field === 'createdAt'
+        ? new Date(Date.now() + 60_000).toISOString()
+        : `${stableValue}-changed`;
+    let reads = 0;
+    const accessorSpec = { ...stableSpec };
+    Object.defineProperty(accessorSpec, field, {
+      enumerable: true,
+      get() {
+        reads += 1;
+        return reads === 1 ? stableValue : changedValue;
+      },
+    });
+
+    const prepared = manager.prepare(accessorSpec);
+    assert.equal(reads, 1, field);
+    assert.equal(prepared[field], stableValue, field);
+    assert.equal(manager.require(stableSpec.epochId)[field], stableValue, field);
+  }
 });
 
 test('kernel outputs cannot downgrade the highest input sensitivity', async () => {

@@ -143,7 +143,11 @@ test('registered kernel invariants cannot be downgraded through caller mutation'
       },
       verify: async () => {
         verifierCalls += 1;
-        return { passed: false, reason: 'Independent verifier rejected output.', evidenceDigests: [] };
+        return {
+          passed: false,
+          reason: 'Independent verifier rejected output.',
+          evidenceDigests: [],
+        };
       },
     };
     runtime.register(definition);
@@ -252,6 +256,8 @@ test('kernel input mutation cannot alter the verifier input snapshot', async () 
   const active = prepareEpoch(manager, 'epoch_input_snapshot', 'rev-input');
   const ledger = [];
   const trusted = Buffer.from('trusted-input');
+  let executionCapsule;
+  let verifierCapsule;
   try {
     const input = await bus.put({
       tenantId: 'tenant_a',
@@ -276,14 +282,27 @@ test('kernel input mutation cannot alter the verifier input snapshot', async () 
       route: 'state.test',
       requiresVerification: true,
       execute: async ({ capsules }) => {
+        executionCapsule = capsules[0].capsule;
         capsules[0].payload.fill(0);
+        try {
+          capsules[0].capsule.governance.sensitivity = 'public';
+        } catch {}
+        try {
+          capsules[0].capsule.provenance.parentCapsuleIds.push('forged-parent');
+        } catch {}
         return [outputState('accepted')];
       },
-      verify: async (_outputs, { capsules }) => ({
-        passed: Buffer.from(capsules[0].payload).equals(trusted),
-        reason: 'Verifier received an isolated input snapshot.',
-        evidenceDigests: [],
-      }),
+      verify: async (_outputs, { capsules }) => {
+        verifierCapsule = capsules[0].capsule;
+        return {
+          passed:
+            Buffer.from(capsules[0].payload).equals(trusted) &&
+            capsules[0].capsule.governance.sensitivity === 'confidential' &&
+            !capsules[0].capsule.provenance.parentCapsuleIds.includes('forged-parent'),
+          reason: 'Verifier received isolated capsule metadata and payload bytes.',
+          evidenceDigests: [],
+        };
+      },
     });
     const request = requestFor({
       actionId: 'runtime-action-input-snapshot',
@@ -295,18 +314,24 @@ test('kernel input mutation cannot alter the verifier input snapshot', async () 
     const result = await runtime.execute(request);
     assert.equal(result.receipt.outcome, 'success');
     assert.equal(result.receipt.verifier.passed, true);
+    assert.notEqual(executionCapsule, verifierCapsule);
+    assert.notEqual(executionCapsule, input);
+    assert.notEqual(verifierCapsule, input);
+    assert.notEqual(executionCapsule.governance, verifierCapsule.governance);
+    assert.notEqual(executionCapsule.provenance, verifierCapsule.provenance);
   } finally {
     bus.dispose();
     stateKey.fill(0);
   }
 });
 
-test('caller mutation after execute starts cannot expand the private request budget', async () => {
+test('caller mutation after execute starts cannot alter admission, execution, or receipt fields', async () => {
   const stateKey = randomBytes(32);
   const bus = new AlloyStateBus({ masterKey: stateKey });
   const manager = new CognitiveEpochManager();
   const active = prepareEpoch(manager, 'epoch_request_snapshot', 'rev-request');
   const ledger = [];
+  let observed;
   try {
     const runtime = createRuntime(bus, manager, ledger);
     runtime.register({
@@ -315,9 +340,16 @@ test('caller mutation after execute starts cannot expand the private request bud
       kind: 'custom',
       route: 'state.test',
       requiresVerification: false,
-      execute: async () => {
+      execute: async (input, context) => {
         await new Promise((resolve) => setImmediate(resolve));
-        return [outputState('one'), outputState('two')];
+        observed = {
+          actionId: context.actionId,
+          tenantId: context.tenantId,
+          sessionId: context.sessionId,
+          parameterValue: input.parameters.nested.value,
+          inputCount: input.capsules.length,
+        };
+        return [outputState('one')];
       },
     });
     const request = requestFor({
@@ -327,9 +359,35 @@ test('caller mutation after execute starts cannot expand the private request bud
       epochId: active.epochId,
     });
     const execution = runtime.execute(request);
+    request.authorization.decision.effect = 'block';
+    request.authorization.decision.reason = 'Caller changed the policy decision.';
+    request.authorization.envelope.actionId = 'mutated-action';
+    request.authorization.envelope.tenantId = 'mutated-tenant';
+    request.authorization.envelope.argsDigest = '0'.repeat(64);
+    request.authorization.allowedSensitivities.length = 0;
+    request.tenantId = 'mutated-tenant';
+    request.sessionId = 'mutated-session';
+    request.epochId = 'mutated-epoch';
+    request.parameters.nested.value = 99;
+    request.inputCapsuleIds.push('forged-capsule');
     request.budget.maxStateWrites = 2;
     request.budget.maxOutputBytes = 8192;
-    await assert.rejects(execution, expectCode('BUDGET_EXCEEDED'));
+    const result = await execution;
+    assert.deepEqual(observed, {
+      actionId: 'runtime-action-request-snapshot',
+      tenantId: 'tenant_a',
+      sessionId: 'session_a',
+      parameterValue: 1,
+      inputCount: 0,
+    });
+    assert.equal(result.receipt.outcome, 'success');
+    assert.equal(result.receipt.actionId, 'runtime-action-request-snapshot');
+    assert.equal(result.receipt.tenantId, 'tenant_a');
+    assert.equal(result.receipt.sessionId, 'session_a');
+    assert.equal(result.receipt.epochId, active.epochId);
+    assert.equal(result.receipt.policyEffect, 'allow');
+    assert.equal(result.receipt.policyReason, 'Boundary regression policy decision.');
+    assert.deepEqual(result.receipt.inputCapsuleIds, []);
     assert.equal(ledger.length, 1);
     assert.equal(ledger[0].budget.maxStateWrites, 1);
   } finally {
@@ -360,7 +418,11 @@ test('verifier closure mutation cannot change the output snapshot selected for p
       },
       verify: async () => {
         rawOutput[0].payload.fill(0);
-        return { passed: true, reason: 'Verifier accepted the immutable output snapshot.', evidenceDigests: [] };
+        return {
+          passed: true,
+          reason: 'Verifier accepted the immutable output snapshot.',
+          evidenceDigests: [],
+        };
       },
     });
     const request = requestFor({
