@@ -104,10 +104,18 @@ function epochCompatibility(
     adapterSetDigest: epoch.adapterSetDigest,
     semanticSpaceDigest:
       request.inputCompatibility.semanticSpaceDigest ??
-      digestObject({ kernelId: definition.kernelId, version: definition.version, semantic: output.stateType }),
+      digestObject({
+        kernelId: definition.kernelId,
+        version: definition.version,
+        semantic: output.stateType,
+      }),
     schemaDigest:
       request.inputCompatibility.schemaDigest ??
-      digestObject({ kernelId: definition.kernelId, version: definition.version, stateType: output.stateType }),
+      digestObject({
+        kernelId: definition.kernelId,
+        version: definition.version,
+        stateType: output.stateType,
+      }),
     policyDigest: epoch.policyDigest,
     cognitiveEpoch: epoch.epochId,
     providerSessionId: request.inputCompatibility.providerSessionId,
@@ -153,7 +161,11 @@ function validateInputCompatibilityAgainstEpoch(
     cognitiveEpoch: epoch.epochId,
   };
   const mandatory = new Set<keyof CompatibilityFingerprint>(['policyDigest', 'cognitiveEpoch']);
-  const mismatches: Array<{ readonly field: string; readonly expected: string; readonly actual?: string }> = [];
+  const mismatches: Array<{
+    readonly field: string;
+    readonly expected: string;
+    readonly actual?: string;
+  }> = [];
 
   for (const [field, expectedValue] of Object.entries(expected) as Array<
     [keyof typeof expected, string]
@@ -179,13 +191,12 @@ function defaultGovernance(
 ): StateGovernance {
   const minimumSensitivity =
     inputCapsules.length > 0 ? highestSensitivity(inputCapsules) : 'public';
-  const governance =
-    output.governance ?? {
-      sensitivity: inputCapsules.length > 0 ? minimumSensitivity : 'internal',
-      retentionClass: 'session',
-      reusePolicy: 'same_session',
-      evidenceTier: 'MEASURED',
-    };
+  const governance = output.governance ?? {
+    sensitivity: inputCapsules.length > 0 ? minimumSensitivity : 'internal',
+    retentionClass: 'session',
+    reusePolicy: 'same_session',
+    evidenceTier: 'MEASURED',
+  };
   assertStateNative(
     SENSITIVITY_RANK[governance.sensitivity] >= SENSITIVITY_RANK[minimumSensitivity],
     'REUSE_DENIED',
@@ -209,9 +220,7 @@ function producedStateSnapshot(
         compatibility: produced.compatibility
           ? Object.freeze({ ...produced.compatibility })
           : undefined,
-        governance: produced.governance
-          ? Object.freeze({ ...produced.governance })
-          : undefined,
+        governance: produced.governance ? Object.freeze({ ...produced.governance }) : undefined,
       }),
     ),
   );
@@ -255,14 +264,61 @@ function requestSnapshot(request: KernelExecutionRequest): KernelExecutionReques
 }
 
 function definitionSnapshot(definition: KernelDefinition): KernelDefinition {
+  const kernelId = definition.kernelId;
+  const version = definition.version;
+  const kind = definition.kind;
+  const route = definition.route;
+  const requiresVerification = definition.requiresVerification;
+  const execute = definition.execute;
+  const verify = definition.verify;
+
+  assertStateNative(
+    typeof kernelId === 'string' && kernelId.trim().length > 0,
+    'INVALID_INPUT',
+    'kernelId must not be empty.',
+  );
+  assertStateNative(
+    typeof version === 'string' && version.trim().length > 0,
+    'INVALID_INPUT',
+    'kernel version must not be empty.',
+  );
+  assertStateNative(
+    typeof route === 'string' && route.trim().length > 0,
+    'INVALID_INPUT',
+    'kernel route must not be empty.',
+  );
+  assertStateNative(KERNEL_KINDS.has(kind), 'INVALID_INPUT', 'kernel kind is unsupported.');
+  assertStateNative(
+    typeof requiresVerification === 'boolean',
+    'INVALID_INPUT',
+    'requiresVerification must be boolean.',
+  );
+  assertStateNative(
+    typeof execute === 'function',
+    'INVALID_INPUT',
+    'kernel execute must be callable.',
+  );
+  assertStateNative(
+    verify === undefined || typeof verify === 'function',
+    'INVALID_INPUT',
+    'kernel verify must be callable when present.',
+  );
+  if (requiresVerification && !verify) {
+    throw new StateNativeError(
+      'INVALID_INPUT',
+      'A verification-required kernel must provide an independent verifier.',
+      { kernelId },
+    );
+  }
+
   return Object.freeze({
-    kernelId: definition.kernelId,
-    version: definition.version,
-    kind: definition.kind,
-    route: definition.route,
-    requiresVerification: definition.requiresVerification,
-    execute: definition.execute,
-    verify: definition.verify,
+    kernelId,
+    version,
+    kind,
+    route,
+    requiresVerification,
+    execute: execute.bind(definition),
+    verify: verify?.bind(definition),
   });
 }
 
@@ -270,7 +326,7 @@ function stateReadSnapshot(input: readonly StateReadResult[]): readonly StateRea
   return Object.freeze(
     input.map((item) =>
       Object.freeze({
-        capsule: item.capsule,
+        capsule: boundarySnapshot(item.capsule, 'State capsule'),
         payload: Uint8Array.from(item.payload),
       }),
     ),
@@ -306,10 +362,25 @@ function kernelContextSnapshot(input: {
 }
 
 function verifierResultSnapshot(result: KernelVerifierResult): KernelVerifierResult {
-  assertStateNative(typeof result.passed === 'boolean', 'INVALID_INPUT', 'Verifier passed must be boolean.');
-  assertStateNative(typeof result.reason === 'string', 'INVALID_INPUT', 'Verifier reason must be a string.');
-  assertStateNative(Array.isArray(result.evidenceDigests), 'INVALID_INPUT', 'Verifier evidenceDigests must be an array.');
-  const evidenceDigests = Object.freeze([...result.evidenceDigests]);
+  const passed = result.passed;
+  const reason = result.reason;
+  const rawEvidenceDigests = result.evidenceDigests;
+  assertStateNative(
+    typeof passed === 'boolean',
+    'INVALID_INPUT',
+    'Verifier passed must be boolean.',
+  );
+  assertStateNative(
+    typeof reason === 'string',
+    'INVALID_INPUT',
+    'Verifier reason must be a string.',
+  );
+  assertStateNative(
+    Array.isArray(rawEvidenceDigests),
+    'INVALID_INPUT',
+    'Verifier evidenceDigests must be an array.',
+  );
+  const evidenceDigests = Object.freeze(Array.from(rawEvidenceDigests));
   for (const digest of evidenceDigests) {
     assertStateNative(
       typeof digest === 'string' && /^[0-9a-f]{64}$/u.test(digest),
@@ -318,8 +389,8 @@ function verifierResultSnapshot(result: KernelVerifierResult): KernelVerifierRes
     );
   }
   return Object.freeze({
-    passed: result.passed,
-    reason: result.reason,
+    passed,
+    reason,
     evidenceDigests,
   });
 }
@@ -357,7 +428,11 @@ function validateBudget(request: KernelExecutionRequest): void {
   );
 }
 
-function validateApproval(approval: ApprovalEvidence | undefined, requestDigest: string, actionId: string): void {
+function validateApproval(
+  approval: ApprovalEvidence | undefined,
+  requestDigest: string,
+  actionId: string,
+): void {
   if (!approval) {
     throw new StateNativeError('APPROVAL_REQUIRED', 'Policy requires exact approval evidence.');
   }
@@ -368,7 +443,10 @@ function validateApproval(approval: ApprovalEvidence | undefined, requestDigest:
       { approvalId: approval.approvalId },
     );
   }
-  if (!Number.isFinite(Date.parse(approval.approvedAt)) || approval.approvedBy.trim().length === 0) {
+  if (
+    !Number.isFinite(Date.parse(approval.approvedAt)) ||
+    approval.approvedBy.trim().length === 0
+  ) {
     throw new StateNativeError('APPROVAL_REQUIRED', 'Approval evidence is malformed.', {
       approvalId: approval.approvalId,
     });
@@ -393,41 +471,6 @@ export class AlloyKernelRuntime {
   }
 
   public register(definition: KernelDefinition): void {
-    assertStateNative(
-      typeof definition.kernelId === 'string' && definition.kernelId.trim().length > 0,
-      'INVALID_INPUT',
-      'kernelId must not be empty.',
-    );
-    assertStateNative(
-      typeof definition.version === 'string' && definition.version.trim().length > 0,
-      'INVALID_INPUT',
-      'kernel version must not be empty.',
-    );
-    assertStateNative(
-      typeof definition.route === 'string' && definition.route.trim().length > 0,
-      'INVALID_INPUT',
-      'kernel route must not be empty.',
-    );
-    assertStateNative(KERNEL_KINDS.has(definition.kind), 'INVALID_INPUT', 'kernel kind is unsupported.');
-    assertStateNative(
-      typeof definition.requiresVerification === 'boolean',
-      'INVALID_INPUT',
-      'requiresVerification must be boolean.',
-    );
-    assertStateNative(typeof definition.execute === 'function', 'INVALID_INPUT', 'kernel execute must be callable.');
-    assertStateNative(
-      definition.verify === undefined || typeof definition.verify === 'function',
-      'INVALID_INPUT',
-      'kernel verify must be callable when present.',
-    );
-    if (definition.requiresVerification && !definition.verify) {
-      throw new StateNativeError(
-        'INVALID_INPUT',
-        'A verification-required kernel must provide an independent verifier.',
-        { kernelId: definition.kernelId },
-      );
-    }
-
     const snapshot = definitionSnapshot(definition);
     if (this.#kernels.has(snapshot.kernelId)) {
       throw new StateNativeError('DIVERGENT_REPLAY', 'Kernel identifier is already registered.', {
@@ -437,10 +480,15 @@ export class AlloyKernelRuntime {
     this.#kernels.set(snapshot.kernelId, snapshot);
   }
 
-  public listKernels(): readonly Pick<KernelDefinition, 'kernelId' | 'version' | 'kind' | 'route'>[] {
+  public listKernels(): readonly Pick<
+    KernelDefinition,
+    'kernelId' | 'version' | 'kind' | 'route'
+  >[] {
     return Object.freeze(
       [...this.#kernels.values()]
-        .map(({ kernelId, version, kind, route }) => Object.freeze({ kernelId, version, kind, route }))
+        .map(({ kernelId, version, kind, route }) =>
+          Object.freeze({ kernelId, version, kind, route }),
+        )
         .sort((left, right) => left.kernelId.localeCompare(right.kernelId)),
     );
   }
@@ -449,7 +497,9 @@ export class AlloyKernelRuntime {
     const request = requestSnapshot(inputRequest);
     const definition = this.#kernels.get(request.kernelId);
     if (!definition) {
-      throw new StateNativeError('NOT_FOUND', 'Kernel is not registered.', { kernelId: request.kernelId });
+      throw new StateNativeError('NOT_FOUND', 'Kernel is not registered.', {
+        kernelId: request.kernelId,
+      });
     }
 
     validateBudget(request);
@@ -502,7 +552,10 @@ export class AlloyKernelRuntime {
         this.#idempotency.set(idempotencyKey, { requestDigest: replayDigest, status: 'IN_FLIGHT' });
       }
       if (lease.epoch.route !== definition.route) {
-        throw new StateNativeError('EPOCH_NOT_ACTIVE', 'Kernel route does not match the pinned epoch.');
+        throw new StateNativeError(
+          'EPOCH_NOT_ACTIVE',
+          'Kernel route does not match the pinned epoch.',
+        );
       }
       validateInputCompatibilityAgainstEpoch(lease.epoch, request.inputCompatibility);
 
@@ -515,7 +568,9 @@ export class AlloyKernelRuntime {
           outcome: 'blocked',
           reason: decision.reason,
           runtimeMs: performance.now() - startedAt,
-          inputCapsules: request.inputCapsuleIds.map((id) => this.#stateBus.requireMetadata(id, request.tenantId)),
+          inputCapsules: request.inputCapsuleIds.map((id) =>
+            this.#stateBus.requireMetadata(id, request.tenantId),
+          ),
           outputCapsules: [],
         });
         receiptWritten = true;
@@ -531,7 +586,8 @@ export class AlloyKernelRuntime {
             request.authorization.envelope.actionId,
           );
         } catch (error) {
-          const reason = error instanceof Error ? error.message : 'Approval evidence failed validation.';
+          const reason =
+            error instanceof Error ? error.message : 'Approval evidence failed validation.';
           const receipt = await this.#writeTerminalReceipt({
             request,
             definition,
@@ -566,10 +622,14 @@ export class AlloyKernelRuntime {
       inputCapsules = input.map((item) => item.capsule);
       const inputBytes = input.reduce((total, item) => total + item.payload.byteLength, 0);
       if (inputBytes > request.budget.maxInputBytes) {
-        throw new StateNativeError('BUDGET_EXCEEDED', 'Kernel input exceeds the declared byte budget.', {
-          inputBytes,
-          maxInputBytes: request.budget.maxInputBytes,
-        });
+        throw new StateNativeError(
+          'BUDGET_EXCEEDED',
+          'Kernel input exceeds the declared byte budget.',
+          {
+            inputBytes,
+            maxInputBytes: request.budget.maxInputBytes,
+          },
+        );
       }
 
       const controller = new AbortController();
@@ -585,10 +645,7 @@ export class AlloyKernelRuntime {
       const rawOutput = await this.#runWithDeadline(
         () => {
           executionStarted = true;
-          return definition.execute(
-            kernelInputSnapshot(input, request.parameters),
-            makeContext(),
-          );
+          return definition.execute(kernelInputSnapshot(input, request.parameters), makeContext());
         },
         controller,
         deadlineAt,
@@ -604,10 +661,14 @@ export class AlloyKernelRuntime {
       }
       const outputBytes = output.reduce((total, item) => total + item.payload.byteLength, 0);
       if (outputBytes > request.budget.maxOutputBytes) {
-        throw new StateNativeError('BUDGET_EXCEEDED', 'Kernel output exceeds the declared byte budget.', {
-          outputBytes,
-          maxOutputBytes: request.budget.maxOutputBytes,
-        });
+        throw new StateNativeError(
+          'BUDGET_EXCEEDED',
+          'Kernel output exceeds the declared byte budget.',
+          {
+            outputBytes,
+            maxOutputBytes: request.budget.maxOutputBytes,
+          },
+        );
       }
 
       const verifier = definition.verify
