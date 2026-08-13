@@ -357,6 +357,7 @@ export function SeriesAView() {
             .sa-header { align-items: flex-start; flex-direction: column; }
             .sa-header nav { width: 100%; overflow-x: auto; padding-bottom: .1rem; }
             .sa-header nav a { flex: 0 0 auto; }
+            .sa-main section[id] { scroll-margin-top: 13rem; }
             .sa-section-head { align-items: flex-start; flex-direction: column; }
             .sa-outcome-grid, .sa-diligence-grid, .sa-boundary-grid, .sa-dev-grid { grid-template-columns: 1fr; }
             .sa-dev-card-wide { grid-column: auto; }
