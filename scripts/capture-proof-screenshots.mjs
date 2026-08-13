@@ -29,10 +29,10 @@
  */
 
 import { chromium } from '@playwright/test';
-import { mkdirSync, existsSync, writeFileSync, readFileSync } from 'node:fs';
+import { mkdirSync, existsSync, writeFileSync, readFileSync, readdirSync } from 'node:fs';
 import { join, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { execSync } from 'node:child_process';
+import { execFileSync, execSync } from 'node:child_process';
 import { createHash } from 'node:crypto';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
@@ -105,6 +105,22 @@ const DRY_RUN = args.includes('--dry-run');
 
 function resolveChromium() {
   if (process.env.PLAYWRIGHT_CHROMIUM_PATH) return process.env.PLAYWRIGHT_CHROMIUM_PATH;
+
+  if (process.platform === 'win32' && process.env.LOCALAPPDATA) {
+    const cacheRoot = join(process.env.LOCALAPPDATA, 'ms-playwright');
+    if (existsSync(cacheRoot)) {
+      const installs = readdirSync(cacheRoot)
+        .filter((name) => /^chromium(?:_headless_shell)?-\d+$/.test(name))
+        .sort((left, right) => Number(right.match(/\d+$/)?.[0]) - Number(left.match(/\d+$/)?.[0]));
+      for (const install of installs) {
+        const executable = install.startsWith('chromium_headless_shell-')
+          ? join(cacheRoot, install, 'chrome-headless-shell-win64', 'chrome-headless-shell.exe')
+          : join(cacheRoot, install, 'chrome-win64', 'chrome.exe');
+        if (existsSync(executable)) return executable;
+      }
+    }
+  }
+
   const commands =
     process.platform === 'win32'
       ? ['where.exe chrome', 'where.exe msedge', 'where.exe chromium']
@@ -177,9 +193,9 @@ function filenameFor(target, viewport) {
   return `${target.fileBase}-${viewport.label}-${CAPTURE_DATE}.${extension}`;
 }
 
-function gitValue(command) {
+function gitValue(args) {
   try {
-    return execSync(command, { cwd: REPO_ROOT, encoding: 'utf8' }).trim();
+    return execFileSync('git', args, { cwd: REPO_ROOT, encoding: 'utf8' }).trim();
   } catch {
     return null;
   }
@@ -211,8 +227,8 @@ const manifest = {
   capturedAt: new Date().toISOString(),
   captureDate: CAPTURE_DATE,
   baseUrl: BASE_URL,
-  gitHead: gitValue('git rev-parse HEAD'),
-  gitTree: gitValue('git rev-parse HEAD^{tree}'),
+  gitHead: gitValue(['rev-parse', 'HEAD']),
+  gitTree: gitValue(['rev-parse', 'HEAD^{tree}']),
   dryRun: DRY_RUN,
   totalTargets: targets.length,
   results: [],
