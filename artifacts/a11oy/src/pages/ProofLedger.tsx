@@ -35,6 +35,15 @@ interface ProofChain {
   nodes: ProofNode[];
 }
 
+type ConstraintStatus = 'modeled' | 'missing';
+
+interface GovernanceConstraint {
+  constraint: string;
+  observed: string;
+  required: string;
+  status: ConstraintStatus;
+}
+
 const CHAINS: ProofChain[] = [
   {
     id: 'chain-001',
@@ -983,14 +992,15 @@ export function ProofLedger() {
           const referencedPremises = premises.filter((step) => step.evidenceRefs.length > 0);
           const referencedConclusions = conclusions.filter((step) => step.evidenceRefs.length > 0);
           const uniqueTraceIds = new Set(trace.map((step) => step.id)).size;
-          const policyRequiresApproval = policyNode?.detail.includes('block_until_approved') ?? false;
+          const policyRequiresApproval =
+            policyNode?.detail.includes('block_until_approved') ?? false;
           const approvalFixturePresent = chain.nodes.some(
             (node) => node.kind === 'APPROVAL' && node.label.toLowerCase().includes('granted'),
           );
           const verificationFixturePresent = chain.nodes.some(
             (node) => node.kind === 'VERIFICATION' && node.evidenceRefs.length > 0,
           );
-          const governanceConstraints = [
+          const governanceConstraints: GovernanceConstraint[] = [
             {
               constraint: 'Fixture confidence fields meet the 90% example threshold',
               observed: `${highConfidenceSteps.length} of ${trace.length} trace steps`,
@@ -1049,7 +1059,10 @@ export function ProofLedger() {
               status: verificationFixturePresent ? 'modeled' : 'missing',
             },
           ];
-          const constraintColors = { modeled: GOLD, missing: '#ef4444' };
+          const constraintColors: Record<ConstraintStatus, string> = {
+            modeled: GOLD,
+            missing: '#ef4444',
+          };
 
           return (
             <>

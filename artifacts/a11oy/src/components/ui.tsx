@@ -1,9 +1,4 @@
-import {
-  useState,
-  type ReactNode,
-  type ReactElement,
-  isValidElement,
-} from 'react';
+import { useState, type ReactNode, type ReactElement, isValidElement } from 'react';
 
 function hasInteractiveDescendant(node: ReactNode): boolean {
   const interactiveTags = new Set([
@@ -30,6 +25,7 @@ function hasInteractiveDescendant(node: ReactNode): boolean {
     const childProps = element.props as {
       onClick?: (() => void) | undefined;
       role?: string | undefined;
+      children?: ReactNode;
     };
 
     if (typeof childProps.onClick === 'function' || childProps.role === 'button') return true;

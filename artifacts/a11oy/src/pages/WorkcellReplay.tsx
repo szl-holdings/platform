@@ -65,13 +65,13 @@ const REPLAYS: ReplaySummary[] = SEED_WORKCELLS.map((wc, i) => {
   };
 
   const outcome =
-    wc.status === 'error'
-      ? 'failed'
-      : wc.status === 'blocked' || (wc.status === 'idle' && wc.requiresApproval)
+    wc.status === 'running'
+      ? 'running'
+      : wc.status === 'idle' && wc.requiresApproval
         ? 'blocked'
-        : wc.status === 'running'
-          ? 'running'
-          : 'success';
+        : wc.status === 'completed' || wc.status === 'paused' || wc.status === 'idle'
+          ? 'success'
+          : 'failed';
 
   const failureClass = outcome === 'failed' ? FAILURE_CLASSES[i % FAILURE_CLASSES.length] : null;
 
@@ -165,15 +165,30 @@ export function WorkcellReplay() {
       </div>
 
       <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-6">
-        <KpiCard label="DEMO REPLAYS" value={String(data.total)} sub="seed fixtures" accent="#c9b787" />
-        <KpiCard label="DEMO SUCCESS" value={String(data.successful)} sub="derived outcome" accent="#c9b787" />
+        <KpiCard
+          label="DEMO REPLAYS"
+          value={String(data.total)}
+          sub="seed fixtures"
+          accent="#c9b787"
+        />
+        <KpiCard
+          label="DEMO SUCCESS"
+          value={String(data.successful)}
+          sub="derived outcome"
+          accent="#c9b787"
+        />
         <KpiCard
           label="DEMO FAILED"
           value={String(data.failed)}
           sub="derived outcome"
           accent="#f5f5f5"
         />
-        <KpiCard label="DEMO BLOCKED" value={String(data.blocked)} sub="derived outcome" accent="#f5f5f5" />
+        <KpiCard
+          label="DEMO BLOCKED"
+          value={String(data.blocked)}
+          sub="derived outcome"
+          accent="#f5f5f5"
+        />
         <KpiCard
           label="DEMO RUNNING"
           value={String(data.running)}
@@ -200,7 +215,8 @@ export function WorkcellReplay() {
             aria-pressed={filterOutcome === o}
             className="min-h-11 text-xs px-3 py-2 rounded"
             style={{
-              backgroundColor: filterOutcome === o ? 'rgba(201,183,135,0.2)' : 'var(--color-a11oy-muted)',
+              backgroundColor:
+                filterOutcome === o ? 'rgba(201,183,135,0.2)' : 'var(--color-a11oy-muted)',
               color: filterOutcome === o ? '#c9b787' : 'var(--color-a11oy-text-ghost)',
               border: `1px solid ${filterOutcome === o ? 'rgba(201,183,135,0.4)' : 'var(--color-a11oy-border)'}`,
             }}
@@ -265,7 +281,9 @@ export function WorkcellReplay() {
                       tier {r.approvalTier}
                     </span>
                     {r.proofRef && (
-                      <span style={{ color: '#b08d52' }}>ref {r.proofRef.split('-').slice(0, 2).join('-')}</span>
+                      <span style={{ color: '#b08d52' }}>
+                        ref {r.proofRef.split('-').slice(0, 2).join('-')}
+                      </span>
                     )}
                   </div>
                 </div>
@@ -324,9 +342,8 @@ export function WorkcellReplay() {
           color: 'var(--color-a11oy-text-ghost)',
         }}
       >
-        <span className="w-1.5 h-1.5 rounded-full bg-[var(--color-a11oy-blue)]" /> Demo
-        environment — replay rows are deterministic fixtures that illustrate an intended audit-trail
-        model.
+        <span className="w-1.5 h-1.5 rounded-full bg-[var(--color-a11oy-blue)]" /> Demo environment
+        — replay rows are deterministic fixtures that illustrate an intended audit-trail model.
       </div>
     </Layout>
   );

@@ -163,17 +163,17 @@ not the source used for this run.
 | `pnpm --filter @workspace/a11oy-fabric test` | PASS - 1 file, 2 tests. |
 | `pnpm --filter @workspace/a11oy-fabric typecheck` | PASS. |
 | `pnpm --filter @workspace/a11oy typecheck` | PASS. |
-| `pnpm --filter @workspace/a11oy lint:ci` | PASS, exit 0; warning-only output and no lint error. |
+| `pnpm --filter @workspace/a11oy lint:ci` | FAIL (1 lint error, 569 warnings, 75 infos in unchanged pre-existing `artifacts/a11oy` files; no source-level failure on changed surfaces). |
 | `pnpm --filter @workspace/a11oy build` | PASS - 3,343 modules transformed and a `ProductJourney` chunk emitted. |
 | `curl` to `http://127.0.0.1:4110/a11oy/start` | PASS - HTTP 200. Reachability only; not JavaScript-render proof. |
 | In-app browser against Vite dev port 4110 | BLOCKED FOR RENDERING - its HMR WebSocket did not establish. No screenshot from this path was used. |
 | In-app browser against built preview `http://127.0.0.1:4111` | PASS for the observed local run - all 18 target/viewport combinations rendered, with no page error or horizontal document overflow observed. Investor and developer journey destinations rendered. |
 | Initial axe run | FINDINGS OBSERVED - repairs were applied. A final rerun is not yet claimed. |
-| Final axe rerun after all source fixes | **PENDING - final operator must replace this line only with the observed command and result.** |
-| Final focused package rerun on the completed exact tree | **PENDING - final operator must record exact commands and outcomes.** |
-| Final doctrine, claim, brand, and route checks | **PENDING - final operator must record exact commands and outcomes.** |
-| Final secret/environment scan and `git diff --check` | **PENDING - final operator must record exact commands and outcomes.** |
-| Commit signature, DCO/raw-commit verification, normal push, remote SHA/tree readback, and hosted checks | **PENDING - no remote persistence or hosted success is claimed.** |
+| Final axe rerun after all source fixes | `pnpm qa:a11y` (attempted) - **BLOCKED**: command exits 1 while probing `http://localhost:3000/*` because expected test targets were not running. |
+| Final focused package rerun on the completed exact tree | PASS: `pnpm --filter @workspace/a11oy-runtime test`, `pnpm --filter @workspace/a11oy-fabric test`, `pnpm --filter @workspace/a11oy-fabric typecheck`, `pnpm --filter @workspace/a11oy typecheck`, and `pnpm --filter @workspace/a11oy test` all completed successfully. |
+| Final doctrine, claim, brand, and route checks | `pnpm docs:claims-check` PASS (26 claims); `pnpm verify:claims:strict` FAIL (exit 1, no diagnostics emitted); `pnpm qa:routes` FAIL (82 routes failed due `fetch failed` because app/API processes were not running); `pnpm brand:check` FAIL (script aborts at `scripts/brand-check.ts:195` with `git ls-files` returning non-zero in this environment). |
+| Final secret/environment scan and `git diff --check` | PASS: `git diff --check` clean, secret pattern scan pass, no `.env*` files changed, and no `git diff --name-only` `.env` entries. |
+| Commit signature, DCO/raw-commit verification, normal push, remote SHA/tree readback, and hosted checks | **BLOCKED** - final signature/DCO and remote push/hosted checks still pending execution on this run after this blocker pass. |
 
 ### Fresh local-browser evidence
 
@@ -203,12 +203,11 @@ certification, or production operation.
 ### Remaining blocker, completion state, and non-claims
 
 - Final axe, focused exact-tree package, doctrine/claim/brand/route, secret,
-  environment-file, and Git-diff checks remain `PENDING`; this task must not be
-  marked complete until the final operator replaces those placeholders with
-  observed results.
-- An intentional policy-compliant commit, signature/DCO verification, normal
-  push to the existing branch, exact remote SHA/tree readback, terminal hosted
-  checks, and protected authority remain `PENDING`.
+  environment-file, and Git-diff checks were completed and recorded with results;
+  several are blocked by missing local targets or existing environment/script limits.
+- Commit, signature/DCO verification, normal push to the existing branch, exact
+  remote SHA/tree readback, terminal hosted checks, and protected authority remain
+  `BLOCKED` pending remote-gate execution.
 - The external Truth-drift probe transport failure remains fail-closed and must
   be resolved by a new exact-head hosted run, not by weakening or skipping the
   gate.
