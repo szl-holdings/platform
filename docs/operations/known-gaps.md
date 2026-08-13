@@ -1,6 +1,6 @@
 # SZL Holdings — Known Gaps Register (Security & Operations)
 
-**Last updated:** 2026-08-08 (rev 24 — public surface truth)
+**Last updated:** 2026-08-13 (rev 25 — Series A successor proof correction)
 **Owner:** Engineering / DevOps  
 **Audience:** Enterprise architects, Series A technical advisors, incoming VP Engineering
 
@@ -36,21 +36,22 @@ the protected PR/main check. An expired observation is remediated by re-observin
 target, updating the registry evidence, regenerating the deterministic artifacts, reviewing the
 diff, and rerunning the freshness gate.
 
-### 2026-08-11 local Series A React candidate
+### 2026-08-11 published Series A React successor
 
-An uncommitted local candidate based on platform PR #584 head
-`bc40b1c6aec8a44a8a6928c25a21de9aa91e76b7` adds one investor-oriented A11oy entry point at
-`/a11oy/start`. It organizes cyber security, finance, data governance, enterprise operations,
-real estate, and legal around the same `Observe -> Gate -> Act -> Prove` evidence sequence. The
-legacy `/a11oy/investor-demo` route resolves to the same truth-safe view so it cannot expose the
-older hard-coded investor claims.
+Signed platform PR #608 on branch `codex/p0-platform-work-20260813-r2`, with published
+implementation revision `4ed2dfa486a7776c4a329be6fb20a2af9de3ad19`, adds one investor-oriented
+A11oy entry point at `/a11oy/start`. It organizes cyber security, finance, data governance,
+enterprise operations, real estate, and legal around the same `Observe -> Gate -> Act -> Prove`
+evidence sequence. The legacy `/a11oy/investor-demo` route resolves to the same truth-safe view so
+it cannot expose the older hard-coded investor claims. Closed PR #584 is historical provenance,
+not the current publication boundary.
 
-This is source and local-build evidence only. The React surface is labelled `AVAILABLE`, seeded
-decision paths are `DEMO`, external execution is `BLOCKED`, and the declared GraphQL runtime is
-`UNAVAILABLE`. No server resolver for the client-declared `/api/graphql` or `/api/graphql/ws`
-contract was found in this revision, so the candidate does not fabricate a connection or infer a
-backend from a client declaration. It also makes no merged, deployed, production, customer,
-revenue, compliance, or live-data claim.
+This is committed source, local-build, and hosted PR-CI evidence only. The React surface is labelled
+`AVAILABLE`, seeded decision paths are `DEMO`, external execution is `BLOCKED`, and the declared
+GraphQL runtime is `UNAVAILABLE`. No server resolver for the client-declared `/api/graphql` or
+`/api/graphql/ws` contract was found in this revision, so the candidate does not fabricate a
+connection or infer a backend from a client declaration. It also makes no merged, deployed,
+production, customer, revenue, compliance, or live-data claim.
 
 Focused contract tests, A11oy TypeScript compilation, and the A11oy production bundle pass
 locally. The running preview returned HTTP 200 with the configured security headers. A local
@@ -59,8 +60,9 @@ All five widths rendered the six tabs and panels without document overflow, clip
 undersized interaction targets, application console errors, page errors, error overlays, or
 undeclared API calls. The browser sandbox could not retrieve the optional Google Fonts stylesheet,
 so capture fulfilled that stylesheet with an empty response and exercised the declared system-font
-fallback; the images do not prove external font availability or a deployed runtime. Exact local
-evidence and remaining limits are recorded in
+fallback; the images do not prove external font availability or a deployed runtime. The immutable
+captures are cataloged under `docs/assets/screenshots/current/` with ISO-date filenames. Exact
+source evidence and remaining limits are recorded in
 [`audit/P0_SERIES_A_PRODUCT_WIRING_LOCAL_SUCCESSOR_PROOF_2026-08-11.md`](../../audit/P0_SERIES_A_PRODUCT_WIRING_LOCAL_SUCCESSOR_PROOF_2026-08-11.md).
 
 ---

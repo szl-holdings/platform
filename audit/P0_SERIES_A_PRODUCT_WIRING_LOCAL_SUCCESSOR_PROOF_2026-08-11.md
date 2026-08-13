@@ -1,30 +1,35 @@
-# P0 Series A Product Wiring - Local Successor Proof Packet
+# P0 Series A Product Wiring - Published Successor Proof Packet
 
 Generated: 2026-08-11
 
 ## Verdict
 
-`LOCAL_SOURCE_AND_RESPONSIVE_UI_VERIFIED / NOT PROMOTED`
+`SOURCE_COMMITTED / FINAL_EXACT_HEAD_CI_AND_REVIEW_REQUIRED / NOT MERGED_OR_DEPLOYED`
 
-The current platform PR #584 source was advanced locally with one truth-safe A11oy investor path.
-The candidate passes focused contracts, TypeScript compilation, and production bundling. It has
-not been committed, pushed, reviewed, merged, deployed, or independently observed in production.
+Platform PR #608 publishes one truth-safe A11oy investor path on a signed branch. The implementation
+revision passed the hosted PR matrix before this additive proof correction. Normal exact-head CI and
+review must run again for the final proof-bearing head. No source merge, deployment, Hugging Face
+publication, domain change, or independent production-runtime observation is claimed here.
 
 ## Exact provenance
 
 | Field | Evidence |
 |---|---|
 | Repository | `szl-holdings/platform` |
-| Worktree | `C:\Users\steph\Documents\Codex\2026-08-11\i\work\platform-series-a` |
-| Branch | `codex/p0-platform-work-20260811` |
-| PR | #584, `closed` and still marked draft at final read-only inspection |
-| PR base | `e7c87eddcc1761de3887db4bc39e6e6a945b13cc` |
-| Local base and HEAD | `bc40b1c6aec8a44a8a6928c25a21de9aa91e76b7` |
-| Candidate state | Dirty, uncommitted working tree |
-| Remote mutations | None |
+| Worktree used for proof correction | `C:\Users\steph\Documents\Codex\2026-08-13\u\work\platform-608-fix` |
+| Branch | `codex/p0-platform-work-20260813-r2` |
+| PR | #608, open and ready for review at the proof-correction cut |
+| Current protected base | `8745cf05e98b30547e005ade7f5741885480e6e1` |
+| Published implementation revision | `4ed2dfa486a7776c4a329be6fb20a2af9de3ad19` |
+| Implementation revision verification | GitHub `verified=true`; DCO and the full hosted PR matrix passed |
+| Proof-correction state | Additive signed descendant; exact final head is bound in the PR record |
+| Remote mutations in this lane | Branch push and PR update only; no merge, deployment, or provider mutation |
 
-The originally supplied `d5cf05ce18b2f776e5ea5124bb9eebc5b0a842d9` revision was not used as the
-final base because read-only inspection recovered the newer exact PR head.
+The originally supplied `d5cf05ce18b2f776e5ea5124bb9eebc5b0a842d9` revision and closed PR #584
+are historical provenance. The implementation was carried forward through signed successors and is
+published in PR #608 at the exact revision above. This packet deliberately names the implementation
+revision instead of pretending that a Markdown file can contain the SHA of the commit that contains
+itself.
 
 ## Product contract
 
@@ -75,7 +80,7 @@ runtime as `UNAVAILABLE`; it remains a residual backend gap.
 - `.codex/tasks/P0_SERIES_A_PRODUCT_WIRING_20260811.md`
 - `docs/operations/known-gaps.md`
 - `audit/screenshot-catalog.md`
-- `audit/screenshots/series-a-local-2026-08-11/*.png`
+- `docs/assets/screenshots/current/a11oy-series-a-start-*-2026-08-11.png`
 - `audit/P0_SERIES_A_PRODUCT_WIRING_LOCAL_SUCCESSOR_PROOF_2026-08-11.md`
 
 ## Verification
@@ -121,7 +126,10 @@ label and an unsupported live-operation footer claim.
 
 The sandbox denied the optional Google Fonts stylesheet. The capture fulfilled that stylesheet
 with an empty CSS response and therefore verifies the source-declared system-font fallback, not
-external font delivery. The five PNGs are cataloged in `audit/screenshot-catalog.md`.
+external font delivery. The five PNGs are cataloged in `audit/screenshot-catalog.md` and are stored
+in the doctrine-required `docs/assets/screenshots/current/` directory with ISO-date filenames. They
+are byte-identical copies of the original live local captures; copying them does not upgrade local
+UI evidence into deployment or runtime evidence.
 
 | Width | Pixels | SHA-256 |
 |---:|---:|---|
@@ -137,8 +145,9 @@ external font delivery. The five PNGs are cataloged in `audit/screenshot-catalog
    authentication boundary, tests, and runtime evidence exist.
 2. Run the full root workspace graph in a clean dependency environment; focused A11oy checks do
    not represent all 202 workspace projects.
-3. Preserve normal signed commit, DCO, hosted CI, independent review, protected merge, deployed
-   readback, and exact-revision receipt gates.
+3. Preserve normal signed commit, DCO, hosted exact-head CI, exact-head automated review, protected
+   merge, deployed readback, and exact-revision receipt gates. This solo build does not fabricate an
+   unavailable independent human approval.
 4. The legacy `InvestorDemo.tsx` file remains in source but is no longer registered as the route
    target; it should be removed or rewritten in a separately reviewed cleanup only if no other
    consumer is found.
@@ -147,7 +156,8 @@ external font delivery. The five PNGs are cataloged in `audit/screenshot-catalog
 
 ## Non-claims
 
-This packet does not claim a pushed branch update, PR review, protected merge, deployment,
-production operation, live data, live GraphQL, connector execution, customer use, revenue,
-compliance, ROI, model superiority, or independent runtime witness. It proves only the local source
-and local checks recorded above.
+This packet proves a signed published branch candidate, the recorded local verification, and hosted
+CI on the named implementation revision. It does not claim a protected merge, deployment, domain
+state, production operation, live data, live GraphQL, connector execution, customer use, revenue,
+compliance, ROI, model superiority, or independent runtime witness. Hosted checks for any additive
+proof-correction head remain a separate exact-head gate and must be read from the PR provider record.
