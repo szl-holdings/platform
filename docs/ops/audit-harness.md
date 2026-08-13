@@ -72,14 +72,15 @@ it in under 60 seconds.
 
 ## CI integration
 
-The harness runs as the `Runtime Audit Harness` job in
-`.github/workflows/audit-full.yml` on pull requests and pushes to
-`master`/`main` (pushes changing only `replit-sync/**` are ignored), and by
-manual dispatch. The job:
+The harness runs in the `Runtime Audit (audit:full)` job of the
+`Runtime Audit Harness` workflow (`.github/workflows/audit-full.yml`) on pull
+requests and pushes to `master`/`main` (pushes changing only
+`replit-sync/**` are ignored), and by manual dispatch. The job:
 
 1. Installs dependencies.
 2. Builds the workspace artifacts and boots the local product/runtime targets.
-3. Runs `pnpm audit:full:ci` (all steps except E2E; exits 1 on P0 failure only).
+3. Runs `pnpm audit:full:ci` (the harness marks install and E2E skipped; exits 1
+   on P0 failure only).
 4. Uploads the entire `artifacts/audit/evidence/` tree as a GitHub Actions
    artifact named `audit-evidence-<run-id>`, retained for 30 days.
 5. Prints the `latest/summary.md` to the job log regardless of pass/fail.
