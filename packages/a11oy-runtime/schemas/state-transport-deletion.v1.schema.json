@@ -10,7 +10,8 @@
     "adapter",
     "deletedAt",
     "priorRecordDigest",
-    "deletionDigest"
+    "deletionDigest",
+    "authenticationTag"
   ],
   "properties": {
     "schema": { "const": "szl.state-transport-deletion/v1" },
@@ -18,6 +19,7 @@
     "adapter": { "type": "string", "minLength": 1 },
     "deletedAt": { "type": "string", "format": "date-time" },
     "priorRecordDigest": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
-    "deletionDigest": { "type": "string", "pattern": "^[a-f0-9]{64}$" }
+    "deletionDigest": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "authenticationTag": { "type": "string", "pattern": "^[a-f0-9]{64}$" }
   }
 }
