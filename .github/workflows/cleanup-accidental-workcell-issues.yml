@@ -1,0 +1,42 @@
+name: Cleanup accidental workcell issues
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - .github/workflows/cleanup-accidental-workcell-issues.yml
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  issues: write
+
+jobs:
+  cleanup:
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Close exact accidental issue titles
+        env:
+          GH_TOKEN: ${{ github.token }}
+          REPOSITORY: ${{ github.repository }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          titles=(
+            'TEMP'
+            '[Codex] Replace retired Replit screenshot requirement with exact-head CI capture'
+            '[Workcell] Exact-head screenshot evidence without Replit'
+            '[Execution] Migrate screenshot proof from retired Replit to GitHub Actions'
+            '[Codex review request] Exact-head screenshot evidence controller'
+            '[Cleanup marker] Do not use'
+            'STOP'
+            'DO NOT MERGE - cleanup'
+          )
+          for title in "${titles[@]}"; do
+            gh issue list --repo "$REPOSITORY" --state open --limit 100 --json number,title \
+              --jq ".[] | select(.title == \"${title//\"/\\\"}\") | .number" |
+            while read -r number; do
+              [[ -z "$number" ]] && continue
+              gh issue close "$number" --repo "$REPOSITORY" --reason 'not planned' --comment 'Closed automatically: this issue was created accidentally while establishing the vendor-neutral exact-head screenshot evidence workflow. The implementation is tracked by the protected pull request and its successor capture workflow.'
+            done
+          done

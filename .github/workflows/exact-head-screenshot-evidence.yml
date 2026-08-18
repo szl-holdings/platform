@@ -1,0 +1,235 @@
+name: Exact-head screenshot evidence
+
+on:
+  pull_request:
+    paths:
+      - .github/workflows/exact-head-screenshot-evidence.yml
+      - docs/standards/exact-head-screenshot-evidence.md
+      - scripts/ci/capture-series-a-exact-head.mjs
+  workflow_dispatch:
+    inputs:
+      candidate_sha:
+        description: Exact 40-character candidate head SHA
+        required: true
+        type: string
+      target_branch:
+        description: Existing same-repository branch that must still point to candidate_sha
+        required: true
+        type: string
+      source_pr:
+        description: Source pull request number being superseded
+        required: true
+        default: "608"
+        type: string
+      route:
+        description: Absolute application route to capture
+        required: true
+        default: /a11oy/start
+        type: string
+
+permissions:
+  contents: read
+
+concurrency:
+  group: exact-head-screenshot-evidence-${{ github.event_name }}-${{ inputs.candidate_sha || github.event.pull_request.head.sha }}
+  cancel-in-progress: false
+
+jobs:
+  contract:
+    name: Capture contract
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Checkout controller source
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          persist-credentials: false
+      - name: Validate controller syntax and policy
+        shell: bash
+        run: |
+          set -euo pipefail
+          node --check scripts/ci/capture-series-a-exact-head.mjs
+          grep -Fq 'GitHub-hosted ephemeral runner is the canonical default' docs/standards/exact-head-screenshot-evidence.md
+          grep -Fq 'Copied screenshots' docs/standards/exact-head-screenshot-evidence.md
+          grep -Fq 'source_sha' scripts/ci/capture-series-a-exact-head.mjs
+          grep -Fq 'workflow_run_id' scripts/ci/capture-series-a-exact-head.mjs
+          grep -Fq 'horizontal overflow' scripts/ci/capture-series-a-exact-head.mjs
+
+  capture:
+    name: Capture and open clean successor
+    if: github.event_name == 'workflow_dispatch'
+    needs: contract
+    runs-on: ubuntu-24.04
+    timeout-minutes: 45
+    permissions:
+      contents: write
+      pull-requests: write
+    env:
+      CANDIDATE_SHA: ${{ inputs.candidate_sha }}
+      TARGET_BRANCH: ${{ inputs.target_branch }}
+      SOURCE_PR: ${{ inputs.source_pr }}
+      CAPTURE_ROUTE: ${{ inputs.route }}
+      GH_TOKEN: ${{ github.token }}
+    steps:
+      - name: Validate immutable inputs
+        shell: bash
+        run: |
+          set -euo pipefail
+          [[ "$CANDIDATE_SHA" =~ ^[0-9a-f]{40}$ ]]
+          [[ "$TARGET_BRANCH" =~ ^[A-Za-z0-9._/-]+$ ]]
+          [[ "$TARGET_BRANCH" != -* ]]
+          [[ "$TARGET_BRANCH" != *..* ]]
+          [[ "$SOURCE_PR" =~ ^[0-9]+$ ]]
+          [[ "$CAPTURE_ROUTE" == /* ]]
+          [[ "$CAPTURE_ROUTE" != *..* ]]
+
+      - name: Checkout controller from protected main
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          ref: main
+          path: controller
+          persist-credentials: false
+
+      - name: Verify target branch still equals authorized candidate
+        shell: bash
+        run: |
+          set -euo pipefail
+          remote_head="$(git ls-remote "https://github.com/${GITHUB_REPOSITORY}.git" "refs/heads/${TARGET_BRANCH}" | awk '{print $1}')"
+          test -n "$remote_head"
+          test "$remote_head" = "$CANDIDATE_SHA"
+
+      - name: Checkout exact candidate
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          ref: ${{ inputs.candidate_sha }}
+          path: candidate
+          fetch-depth: 0
+          persist-credentials: true
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@0977fd99725f1db4007ccb2928dbb4e90d06cc86
+
+      - name: Setup Node.js
+        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020
+        with:
+          node-version: "24"
+          cache: pnpm
+          cache-dependency-path: candidate/pnpm-lock.yaml
+
+      - name: Install exact dependencies and Chromium
+        working-directory: candidate
+        shell: bash
+        run: |
+          set -euo pipefail
+          pnpm install --frozen-lockfile
+          pnpm exec playwright install --with-deps chromium
+
+      - name: Capture exact-head evidence
+        working-directory: candidate
+        shell: bash
+        env:
+          SZL_CANDIDATE_SHA: ${{ inputs.candidate_sha }}
+          SZL_SOURCE_PR: ${{ inputs.source_pr }}
+          SZL_ROUTE: ${{ inputs.route }}
+          SZL_START_COMMAND: pnpm run dev
+        run: node ../controller/scripts/ci/capture-series-a-exact-head.mjs
+
+      - name: Verify fresh capture packet
+        working-directory: candidate
+        shell: bash
+        run: |
+          set -euo pipefail
+          node - <<'NODE'
+          const fs = require('fs');
+          const crypto = require('crypto');
+          const packet = JSON.parse(fs.readFileSync('audit/series-a-exact-head-capture.json', 'utf8'));
+          if (packet.state !== 'VERIFIED') throw new Error('capture packet is not VERIFIED');
+          if (packet.source_sha !== process.env.CANDIDATE_SHA) throw new Error('source SHA mismatch');
+          if (!Array.isArray(packet.results) || packet.results.length !== 5) throw new Error('viewport matrix incomplete');
+          for (const row of packet.results) {
+            const bytes = fs.readFileSync(row.screenshot);
+            const digest = crypto.createHash('sha256').update(bytes).digest('hex');
+            if (digest !== row.sha256) throw new Error(`digest mismatch: ${row.screenshot}`);
+            if (row.horizontal_overflow) throw new Error(`horizontal overflow: ${row.name}`);
+            if (row.console_errors.length || row.page_errors.length) throw new Error(`browser errors: ${row.name}`);
+          }
+          NODE
+
+      - name: Re-read branch before successor publication
+        shell: bash
+        run: |
+          set -euo pipefail
+          remote_head="$(git ls-remote "https://github.com/${GITHUB_REPOSITORY}.git" "refs/heads/${TARGET_BRANCH}" | awk '{print $1}')"
+          test "$remote_head" = "$CANDIDATE_SHA"
+
+      - name: Commit evidence on a new branch
+        id: commit
+        working-directory: candidate
+        shell: bash
+        run: |
+          set -euo pipefail
+          successor="evidence/series-a-capture-pr-${SOURCE_PR}-${GITHUB_RUN_ID}"
+          git switch -c "$successor"
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add audit/screenshot-catalog.md audit/series-a-exact-head-capture.json docs/assets/screenshots/current/
+          git diff --cached --check
+          git commit -m "docs(evidence): recapture exact-head Series A screenshots" -m "Source-PR: #${SOURCE_PR}" -m "Source-SHA: ${CANDIDATE_SHA}" -m "Workflow-Run: ${GITHUB_RUN_ID}/${GITHUB_RUN_ATTEMPT}" -m "Signed-off-by: github-actions[bot] <41898282+github-actions[bot]@users.noreply.github.com>"
+          git push origin "HEAD:refs/heads/${successor}"
+          echo "successor=${successor}" >> "$GITHUB_OUTPUT"
+          echo "commit=$(git rev-parse HEAD)" >> "$GITHUB_OUTPUT"
+
+      - name: Open draft successor pull request
+        working-directory: candidate
+        shell: bash
+        env:
+          SUCCESSOR_BRANCH: ${{ steps.commit.outputs.successor }}
+          EVIDENCE_COMMIT: ${{ steps.commit.outputs.commit }}
+        run: |
+          set -euo pipefail
+          body_file="$RUNNER_TEMP/pr-body.md"
+          cat > "$body_file" <<EOF
+          ## Exact-head screenshot evidence without Replit
+
+          Replit is retired from the SZL toolchain. This successor preserves the screenshot-proof burden using a clean GitHub-hosted ephemeral runner.
+
+          - source PR: #${SOURCE_PR}
+          - source head: \`${CANDIDATE_SHA}\`
+          - evidence commit: \`${EVIDENCE_COMMIT}\`
+          - capture workflow: \`${GITHUB_RUN_ID}/${GITHUB_RUN_ATTEMPT}\`
+          - route: \`${CAPTURE_ROUTE}\`
+          - viewports: 390, 768, 1440, 1920, 2560 pixels
+          - machine packet: \`audit/series-a-exact-head-capture.json\`
+          - images: \`docs/assets/screenshots/current/\`
+
+          The images were freshly generated in the named workflow run. The packet binds source SHA, runner, browser, Node, route, viewport, timestamps, browser errors, overflow results, byte lengths, and SHA-256 digests.
+
+          This is source-presentation evidence only. It does not claim deployment, production traffic, uptime, customer outcomes, or authorization.
+
+          Supersedes #${SOURCE_PR} only after this successor independently passes current-head checks and review.
+
+          Signed-off-by: Stephen Lutar <stephenlutar2@gmail.com>
+          EOF
+          existing="$(gh pr list --repo "$GITHUB_REPOSITORY" --head "$SUCCESSOR_BRANCH" --state open --json number --jq '.[0].number // empty')"
+          if [[ -n "$existing" ]]; then
+            echo "successor PR already exists: #$existing"
+            exit 0
+          fi
+          gh pr create \
+            --repo "$GITHUB_REPOSITORY" \
+            --base main \
+            --head "$SUCCESSOR_BRANCH" \
+            --draft \
+            --title "chore(series-a): recapture exact-head product evidence" \
+            --body-file "$body_file"
+
+      - name: Upload immutable capture evidence
+        if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
+        with:
+          name: exact-head-screenshot-evidence-${{ github.run_id }}-${{ github.run_attempt }}
+          path: |
+            candidate/audit/series-a-exact-head-capture.json
+            candidate/audit/screenshot-catalog.md
+            candidate/docs/assets/screenshots/current/*.png
+          if-no-files-found: error
+          retention-days: 90
