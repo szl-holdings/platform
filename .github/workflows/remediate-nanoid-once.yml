@@ -1,0 +1,103 @@
+name: One-use nanoid remediation
+
+on:
+  push:
+    branches:
+      - fix/nanoid-3.3.18-20260817
+
+permissions:
+  contents: write
+
+jobs:
+  remediate:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0
+      - uses: pnpm/action-setup@0977fd99725f1db4007ccb2928dbb4e90d06cc86 # v6.0.10
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version: '24'
+          cache: pnpm
+
+      - name: Patch the security override
+        shell: bash
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+
+          path = Path('pnpm-workspace.yaml')
+          text = path.read_text()
+          old = '  nanoid@<4: 3.3.17'
+          new = '  nanoid@<4: 3.3.18'
+          if text.count(old) != 1:
+              raise SystemExit('expected exactly one nanoid@<4 override at 3.3.17')
+          text = text.replace(old, new)
+
+          exclusion = '  - nanoid  # GHSA-2v37-7h3g-55p8 security patch\n'
+          if exclusion not in text:
+              marker = '  - postcss\n'
+              if text.count(marker) != 1:
+                  raise SystemExit('expected exactly one postcss release-age exclusion')
+              text = text.replace(marker, marker + exclusion)
+
+          path.write_text(text)
+          PY
+
+      - name: Regenerate the lockfile with the pinned toolchain
+        run: pnpm install --lockfile-only --ignore-scripts
+
+      - name: Enforce a nanoid-only dependency diff
+        shell: bash
+        run: |
+          python - <<'PY'
+          import subprocess
+
+          diff = subprocess.check_output(
+              ['git', 'diff', '--', 'pnpm-workspace.yaml', 'pnpm-lock.yaml'],
+              text=True,
+          )
+          old_integrity = 'sha512-xQLf0A3HOMlgHq0n247/LRuAOYmB7dXJ/DvAxGvsSBij45XtBSmQycu+F8ODbHwns/XyFZagyL1+J0Offw1E0g=='
+          new_integrity = 'sha512-DTg4MJbGMWkfi6VZFdNt2/caMbQy4Ou+Op/hJQvGEWcnVfoA1QA+xzRKAzw9jD6+GVOOeYr/mIcuDSdug6F6+w=='
+          unexpected = []
+          for line in diff.splitlines():
+              if not line.startswith(('+', '-')) or line.startswith(('+++', '---')):
+                  continue
+              body = line[1:].strip()
+              if not body:
+                  continue
+              if 'nanoid' in body or body in {old_integrity, new_integrity}:
+                  continue
+              unexpected.append(line)
+          if unexpected:
+              raise SystemExit('unexpected lockfile changes:\n' + '\n'.join(unexpected))
+          required = ['3.3.18', new_integrity]
+          for value in required:
+              if value not in diff:
+                  raise SystemExit(f'missing expected regenerated value: {value}')
+          if '3.3.17' not in diff:
+              raise SystemExit('expected the vulnerable version to be removed in the diff')
+          print(diff)
+          PY
+
+      - name: Validate frozen lockfile and advisory status
+        shell: bash
+        run: |
+          pnpm install --lockfile-only --frozen-lockfile --ignore-scripts
+          pnpm audit --audit-level high
+
+      - name: Remove the one-use workflow and publish the repair
+        shell: bash
+        env:
+          BRANCH_NAME: ${{ github.ref_name }}
+        run: |
+          git rm .github/workflows/remediate-nanoid-once.yml
+          git diff --check
+          git config user.name 'Lutar, Stephen P.'
+          git config user.email 'stephenlutar2@gmail.com'
+          git add pnpm-workspace.yaml pnpm-lock.yaml
+          git commit -s -m 'fix(security): upgrade nanoid to 3.3.18'
+          git push origin "HEAD:${BRANCH_NAME}"
