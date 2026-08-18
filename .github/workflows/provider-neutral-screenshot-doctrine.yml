@@ -1,0 +1,56 @@
+name: Apply provider-neutral screenshot doctrine
+
+on:
+  push:
+    branches:
+      - fix/provider-neutral-screenshot-proof-20260818
+
+permissions:
+  contents: write
+
+concurrency:
+  group: provider-neutral-screenshot-doctrine
+  cancel-in-progress: false
+
+jobs:
+  apply:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0
+          persist-credentials: true
+
+      - uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065 # v6.0.0
+        with:
+          python-version: '3.13'
+
+      - name: Apply exact-anchor migration
+        run: python scripts/qa/apply-provider-neutral-screenshot-doctrine.py
+
+      - name: Validate migration
+        shell: bash
+        run: |
+          set -euo pipefail
+          grep -Fq 'No vendor-specific workspace is required.' AGENTS.md
+          grep -Fq 'A11oy work is provider-neutral and source-bound.' docs/A11OY_EXECUTION_ENVIRONMENT_DOCTRINE.md
+          grep -Fq 'source_revision' docs/A11OY_SCREENSHOT_DOCTRINE.md
+          grep -Fq 'name: Screenshot Proof' .github/workflows/screenshot-proof.yml
+          node --check scripts/qa/capture-screenshot-proof.mjs
+          git diff --check
+
+      - name: Commit generated source
+        shell: bash
+        run: |
+          set -euo pipefail
+          if git diff --quiet --exit-code; then
+            echo 'No generated changes.'
+            exit 0
+          fi
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add -A
+          git commit -m $'docs(doctrine): retire provider-specific screenshot proof\n\nSigned-off-by: github-actions[bot] <41898282+github-actions[bot]@users.noreply.github.com>'
+          git push origin HEAD:fix/provider-neutral-screenshot-proof-20260818
