@@ -1,8 +1,8 @@
 import assert from 'node:assert/strict';
 import { randomBytes } from 'node:crypto';
-import { mkdtemp, readFile, readdir, rm, writeFile } from 'node:fs/promises';
+import { mkdir, mkdtemp, readFile, readdir, rm, symlink, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
-import { join } from 'node:path';
+import { dirname, join } from 'node:path';
 import test from 'node:test';
 import {
   FileSystemStateTransportAdapter,
@@ -70,6 +70,11 @@ function portableObject(payloadText = 'durable secret payload') {
     },
     payload,
   };
+}
+
+function storagePath(root, capsuleId, kind = 'objects') {
+  const digest = capsuleId.slice('state_'.length);
+  return join(root, kind, digest.slice(0, 2), digest.slice(2, 4), `${capsuleId}.json`);
 }
 
 async function listFiles(path) {
@@ -151,6 +156,7 @@ test('deletion receipt is terminal and prevents resurrection', async () => {
     assert.equal(inspection.deletionReceipt?.deletedAt, '2026-08-17T12:00:00.000Z');
     assert.equal(inspection.deletionReceipt?.priorRecordDigest.length, 64);
     assert.equal(inspection.deletionReceipt?.deletionDigest.length, 64);
+    assert.equal(inspection.deletionReceipt?.authenticationTag.length, 64);
 
     const reopened = new FileSystemStateTransportAdapter({ rootDirectory: root, masterKey });
     await assert.rejects(reopened.put(object), expectCode('SHREDDED'));
@@ -173,3 +179,79 @@ test('invalid IDs and payload budgets fail before filesystem traversal', async (
     await rm(root, { recursive: true, force: true });
   }
 });
+
+test('deletion receipts are authenticated against storage forgery', async () => {
+  const root = await mkdtemp(join(tmpdir(), 'szl-state-'));
+  const masterKey = randomBytes(32);
+  const object = portableObject('authenticated tombstone');
+  try {
+    const adapter = new FileSystemStateTransportAdapter({ rootDirectory: root, masterKey });
+    await adapter.put(object);
+    await adapter.delete(object.capsule.capsuleId);
+
+    const tombstonePath = storagePath(root, object.capsule.capsuleId, 'tombstones');
+    const tombstone = JSON.parse(await readFile(tombstonePath, 'utf8'));
+    tombstone.deletedAt = '2026-08-18T00:00:00.000Z';
+    const base = {
+      schema: tombstone.schema,
+      capsuleId: tombstone.capsuleId,
+      adapter: tombstone.adapter,
+      deletedAt: tombstone.deletedAt,
+      priorRecordDigest: tombstone.priorRecordDigest,
+    };
+    tombstone.deletionDigest = digestObject(base);
+    await writeFile(tombstonePath, `${JSON.stringify(tombstone)}\n`, 'utf8');
+
+    await assert.rejects(
+      adapter.getDeletionReceipt(object.capsule.capsuleId),
+      expectCode('SIGNATURE_INVALID'),
+    );
+    const wrongKey = new FileSystemStateTransportAdapter({
+      rootDirectory: root,
+      masterKey: randomBytes(32),
+    });
+    await assert.rejects(
+      wrongKey.getDeletionReceipt(object.capsule.capsuleId),
+      expectCode('SIGNATURE_INVALID'),
+    );
+  } finally {
+    await rm(root, { recursive: true, force: true });
+  }
+});
+
+test(
+  'filesystem links cannot redirect state records or shard directories',
+  { skip: process.platform === 'win32' },
+  async () => {
+    const root = await mkdtemp(join(tmpdir(), 'szl-state-'));
+    const object = portableObject('linked state');
+    try {
+      const adapter = new FileSystemStateTransportAdapter({
+        rootDirectory: root,
+        masterKey: randomBytes(32),
+      });
+      await adapter.inspect(object.capsule.capsuleId);
+
+      const recordPath = storagePath(root, object.capsule.capsuleId);
+      await mkdir(dirname(recordPath), { recursive: true });
+      const outsideRecord = join(root, 'outside-record.json');
+      await writeFile(outsideRecord, '{}\n', 'utf8');
+      await symlink(outsideRecord, recordPath);
+      await assert.rejects(adapter.get(object.capsule.capsuleId), expectCode('SIGNATURE_INVALID'));
+      await rm(recordPath, { force: true });
+
+      const firstShard = join(
+        root,
+        'objects',
+        object.capsule.capsuleId.slice('state_'.length, 'state_'.length + 2),
+      );
+      await rm(firstShard, { recursive: true, force: true });
+      const outsideDirectory = join(root, 'outside-directory');
+      await mkdir(outsideDirectory);
+      await symlink(outsideDirectory, firstShard, 'dir');
+      await assert.rejects(adapter.put(object), expectCode('INVALID_INPUT'));
+    } finally {
+      await rm(root, { recursive: true, force: true });
+    }
+  },
+);
