@@ -1,0 +1,332 @@
+name: Platform nanoid exact repair builder
+
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - '.github/workflows/platform-nanoid-repair-builder.yml'
+
+permissions:
+  contents: write
+  issues: write
+
+concurrency:
+  group: platform-nanoid-exact-repair-${{ github.event.pull_request.number }}
+  cancel-in-progress: false
+
+jobs:
+  build-repair:
+    name: build signed Platform nanoid successor
+    if: >-
+      github.event.pull_request.user.login == 'stephenlutar2-hash' &&
+      github.event.pull_request.head.ref == 'chore/platform-nanoid-repair-builder-20260818'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    env:
+      GH_TOKEN: ${{ github.token }}
+      REPOSITORY: ${{ github.repository }}
+      TARGET_BRANCH: fix/platform-nanoid-audit-successor-20260818
+      TRACKING_PR: '612'
+    steps:
+      - name: Verify exact protected-base context
+        id: context
+        shell: bash
+        run: |
+          set -euo pipefail
+          base_sha='${{ github.event.pull_request.base.sha }}'
+          current_main="$(gh api "repos/${REPOSITORY}/git/ref/heads/main" --jq '.object.sha')"
+          test "$current_main" = "$base_sha"
+          echo "base_sha=$base_sha" >> "$GITHUB_OUTPUT"
+
+      - name: Checkout exact protected base
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: ${{ steps.context.outputs.base_sha }}
+          path: source
+          persist-credentials: false
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@0977fd99725f1db4007ccb2928dbb4e90d06cc86 # v6.0.10
+        with:
+          version: 10.26.1
+
+      - name: Install Node.js
+        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version: '24'
+          cache: pnpm
+          cache-dependency-path: source/pnpm-lock.yaml
+
+      - name: Apply narrow workspace override repair
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          from pathlib import Path
+
+          path = Path('source/pnpm-workspace.yaml')
+          text = path.read_text(encoding='utf-8')
+          old = "  nanoid@<4: 3.3.17\n"
+          new = "  nanoid@<4: 3.3.18\n"
+          if text.count(old) != 1:
+              raise SystemExit('expected exactly one nanoid 3.x override at 3.3.17')
+          path.write_text(text.replace(old, new, 1), encoding='utf-8')
+          PY
+
+      - name: Regenerate deterministic pnpm lockfile
+        working-directory: source
+        shell: bash
+        run: pnpm install --lockfile-only --no-frozen-lockfile --ignore-scripts
+
+      - name: Enforce exact two-file repair scope
+        shell: bash
+        run: |
+          set -euo pipefail
+          cd source
+          mapfile -t changed < <(git diff --name-only | sort)
+          expected=(pnpm-lock.yaml pnpm-workspace.yaml)
+          test "${changed[*]}" = "${expected[*]}"
+          test "$(grep -Fc 'nanoid@3.3.17:' pnpm-lock.yaml || true)" = '0'
+          test "$(grep -Fc 'nanoid@3.3.18:' pnpm-lock.yaml)" = '2'
+          grep -Fq 'sha512-DTg4MJbGMWkfi6VZFdNt2/caMbQy4Ou+Op/hJQvGEWcnVfoA1QA+xzRKAzw9jD6+GVOOeYr/mIcuDSdug6F6+w==' pnpm-lock.yaml
+          git diff --check
+
+      - name: Reproduce frozen install
+        working-directory: source
+        shell: bash
+        run: pnpm install --frozen-lockfile
+
+      - name: Require clean audit and generate evidence
+        working-directory: source
+        shell: bash
+        run: |
+          set -euo pipefail
+          evidence="$RUNNER_TEMP/platform-nanoid-repair-evidence"
+          mkdir -p "$evidence"
+
+          set +e
+          pnpm audit --json > "$evidence/pnpm-audit.json"
+          audit_status=$?
+          set -e
+          test "$audit_status" = '0'
+
+          pnpm list nanoid --depth Infinity --json > "$evidence/pnpm-list-nanoid.json"
+          node scripts/qa/generate-sbom.js
+          node scripts/qa/generate-vuln-report.js
+          cp security/sbom-latest.json "$evidence/sbom-latest.json"
+          cp security/vuln-report.md "$evidence/vuln-report.md"
+
+          export EVIDENCE_DIR="$evidence"
+          export REPAIR_BASE_SHA='${{ steps.context.outputs.base_sha }}'
+          python - <<'PY'
+          import hashlib
+          import json
+          import os
+          from pathlib import Path
+
+          evidence = Path(os.environ['EVIDENCE_DIR'])
+          tree = json.loads((evidence / 'pnpm-list-nanoid.json').read_text(encoding='utf-8'))
+          versions = set()
+
+          def walk(node):
+              if isinstance(node, dict):
+                  if node.get('name') == 'nanoid' and node.get('version'):
+                      versions.add(str(node['version']))
+                  for key, value in node.items():
+                      if key == 'nanoid' and isinstance(value, dict) and value.get('version'):
+                          versions.add(str(value['version']))
+                      walk(value)
+              elif isinstance(node, list):
+                  for value in node:
+                      walk(value)
+
+          walk(tree)
+          if '3.3.17' in versions:
+              raise SystemExit('vulnerable nanoid 3.3.17 remains in the installed graph')
+          if '3.3.18' not in versions:
+              raise SystemExit(f'patched nanoid 3.3.18 missing; observed {sorted(versions)}')
+
+          lock = Path('pnpm-lock.yaml').read_text(encoding='utf-8')
+          if 'nanoid@3.3.17:' in lock:
+              raise SystemExit('vulnerable nanoid lock node remains')
+          if lock.count('nanoid@3.3.18:') != 2:
+              raise SystemExit('unexpected nanoid 3.3.18 lock-node cardinality')
+
+          files = {}
+          for rel in ('pnpm-workspace.yaml', 'pnpm-lock.yaml'):
+              data = Path(rel).read_bytes()
+              files[rel] = hashlib.sha256(data).hexdigest()
+
+          summary = {
+              'schema': 'szl.platform-nanoid-repair.v1',
+              'base_sha': os.environ['REPAIR_BASE_SHA'],
+              'advisory': 'GHSA-2v37-7h3g-55p8',
+              'cve': 'CVE-2026-67213',
+              'resolved_versions': sorted(versions),
+              'changed_files': ['pnpm-lock.yaml', 'pnpm-workspace.yaml'],
+              'sha256': files,
+              'audit_exit': 0,
+          }
+          (evidence / 'summary.json').write_text(
+              json.dumps(summary, indent=2, sort_keys=True) + '\n',
+              encoding='utf-8',
+          )
+          print(json.dumps(summary, indent=2, sort_keys=True))
+          PY
+
+      - name: Upload immutable repair evidence
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: platform-nanoid-audit-repair-evidence
+          path: ${{ runner.temp }}/platform-nanoid-repair-evidence
+          if-no-files-found: error
+          retention-days: 90
+
+      - name: Create exact GitHub-signed repair commit
+        id: publish
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          umask 077
+          base_sha='${{ steps.context.outputs.base_sha }}'
+
+          if existing="$(gh api "repos/${REPOSITORY}/git/ref/heads/${TARGET_BRANCH}" --jq '.object.sha' 2>/dev/null)"; then
+            test "$existing" = "$base_sha"
+          else
+            gh api --method POST "repos/${REPOSITORY}/git/refs" \
+              -f ref="refs/heads/${TARGET_BRANCH}" \
+              -f sha="$base_sha" >/dev/null
+          fi
+
+          export REPAIR_BASE_SHA="$base_sha"
+          export REPAIR_TOKEN="$GH_TOKEN"
+          export REPAIR_REPOSITORY="$REPOSITORY"
+          export REPAIR_BRANCH="$TARGET_BRANCH"
+          export REPAIR_ROOT="$GITHUB_WORKSPACE/source"
+
+          result="$RUNNER_TEMP/platform-nanoid-repair-commit.json"
+          python - "$result" <<'PY'
+          import base64
+          import json
+          import os
+          import pathlib
+          import sys
+          import urllib.error
+          import urllib.request
+
+          output = pathlib.Path(sys.argv[1])
+          root = pathlib.Path(os.environ['REPAIR_ROOT'])
+          repository = os.environ['REPAIR_REPOSITORY']
+          branch = os.environ['REPAIR_BRANCH']
+          base_sha = os.environ['REPAIR_BASE_SHA']
+          token = os.environ['REPAIR_TOKEN']
+          paths = ['pnpm-workspace.yaml', 'pnpm-lock.yaml']
+
+          additions = [
+              {
+                  'path': rel,
+                  'contents': base64.b64encode((root / rel).read_bytes()).decode('ascii'),
+              }
+              for rel in paths
+          ]
+          mutation = '''
+          mutation BuildPlatformNanoidRepair($input: CreateCommitOnBranchInput!) {
+            createCommitOnBranch(input: $input) {
+              commit { oid url }
+            }
+          }
+          '''
+          variables = {
+              'input': {
+                  'branch': {
+                      'repositoryNameWithOwner': repository,
+                      'branchName': branch,
+                  },
+                  'expectedHeadOid': base_sha,
+                  'message': {
+                      'headline': 'fix(security): patch transitive nanoid advisory',
+                      'body': (
+                          'Raise the governed nanoid 3.x override to 3.3.18 and regenerate '
+                          'the pnpm lockfile from exact protected main.\n\n'
+                          'Security evidence: CVE-2026-67213 / GHSA-2v37-7h3g-55p8 '
+                          'is absent after a frozen install, pnpm audit, SBOM generation, '
+                          'and vulnerability-report generation.\n\n'
+                          'Signed-off-by: Lutar, Stephen P. <stephenlutar2@gmail.com>'
+                      ),
+                  },
+                  'fileChanges': {'additions': additions},
+              }
+          }
+          request = urllib.request.Request(
+              'https://api.github.com/graphql',
+              data=json.dumps({'query': mutation, 'variables': variables}).encode('utf-8'),
+              method='POST',
+              headers={
+                  'Authorization': f'Bearer {token}',
+                  'Accept': 'application/vnd.github+json',
+                  'Content-Type': 'application/json',
+                  'User-Agent': 'szl-platform-nanoid-repair-builder',
+                  'X-GitHub-Api-Version': '2022-11-28',
+              },
+          )
+          try:
+              with urllib.request.urlopen(request, timeout=90) as response:
+                  payload = json.load(response)
+          except urllib.error.HTTPError as exc:
+              raise SystemExit(f'GitHub GraphQL HTTP {exc.code}') from exc
+          if payload.get('errors'):
+              raise SystemExit('; '.join(str(row.get('message')) for row in payload['errors'])[:1000])
+          commit = (((payload.get('data') or {}).get('createCommitOnBranch') or {}).get('commit') or {})
+          oid = str(commit.get('oid') or '')
+          if len(oid) != 40 or any(ch not in '0123456789abcdef' for ch in oid):
+              raise SystemExit('GitHub did not return a valid commit OID')
+          output.write_text(json.dumps({'commit_oid': oid, 'url': commit.get('url')}) + '\n')
+          PY
+
+          commit_sha="$(jq -er '.commit_oid' "$result")"
+          commit_json="$(gh api "repos/${REPOSITORY}/commits/${commit_sha}")"
+          jq -e '.commit.verification.verified == true' <<<"$commit_json" >/dev/null
+          test "$(jq -er '.parents | length' <<<"$commit_json")" = '1'
+          test "$(jq -er '.parents[0].sha' <<<"$commit_json")" = "$base_sha"
+          grep -Eq '^Signed-off-by: .+ <[^>]+>$' <<<"$(jq -r '.commit.message' <<<"$commit_json")"
+          mapfile -t changed < <(jq -r '.files[].filename' <<<"$commit_json" | sort)
+          expected=(pnpm-lock.yaml pnpm-workspace.yaml)
+          test "${changed[*]}" = "${expected[*]}"
+          test "$(gh api "repos/${REPOSITORY}/git/ref/heads/${TARGET_BRANCH}" --jq '.object.sha')" = "$commit_sha"
+
+          comment="$(cat <<EOF
+          Exact current-main-native security repair branch created.
+
+          - Branch: \`${TARGET_BRANCH}\`
+          - Base: \`${base_sha}\`
+          - Head: \`${commit_sha}\`
+          - GitHub signature: verified
+          - DCO: present
+          - Finding: \`CVE-2026-67213\` / \`GHSA-2v37-7h3g-55p8\`
+          - Repair: governed \`nanoid@<4\` override raised to exact \`3.3.18\`
+          - Changed files: \`pnpm-workspace.yaml\`, \`pnpm-lock.yaml\`
+          - Frozen install: passed
+          - \`pnpm audit --json\`: passed
+          - SBOM and vulnerability-report generation: passed
+
+          This diagnostic PR must close without merge. The successor branch is ready for a separate protected pull request.
+          EOF
+          )"
+          gh api "repos/${REPOSITORY}/issues/${TRACKING_PR}/comments" -f body="$comment" >/dev/null
+
+          echo "base_sha=$base_sha" >> "$GITHUB_OUTPUT"
+          echo "commit_sha=$commit_sha" >> "$GITHUB_OUTPUT"
+          echo "branch=$TARGET_BRANCH" >> "$GITHUB_OUTPUT"
+
+      - name: Report exact successor
+        shell: bash
+        run: |
+          {
+            echo '### Platform nanoid exact repair successor'
+            echo "- branch: \`${{ steps.publish.outputs.branch }}\`"
+            echo "- base: \`${{ steps.publish.outputs.base_sha }}\`"
+            echo "- head: \`${{ steps.publish.outputs.commit_sha }}\`"
+            echo '- GitHub signature: verified'
+            echo '- frozen install and security audit: passed'
+            echo '- exact changed files: pnpm-workspace.yaml, pnpm-lock.yaml'
+          } >> "$GITHUB_STEP_SUMMARY"
