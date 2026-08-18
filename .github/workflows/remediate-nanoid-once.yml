@@ -1,5 +1,6 @@
 name: One-use nanoid remediation
 
+# This branch-only workflow deletes itself after producing the reviewed dependency repair.
 on:
   push:
     branches:
