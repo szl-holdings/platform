@@ -1,0 +1,38 @@
+name: Merge current main into provider-neutral proof
+
+on:
+  push:
+    branches:
+      - fix/provider-neutral-screenshot-proof-20260818
+
+permissions:
+  contents: write
+
+concurrency:
+  group: merge-current-main-provider-neutral
+  cancel-in-progress: false
+
+jobs:
+  merge:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0
+          persist-credentials: true
+
+      - name: Integrate exact protected main and remove one-shot
+        shell: bash
+        run: |
+          set -euo pipefail
+          git fetch --no-tags origin main
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git merge --no-ff --no-commit origin/main
+          rm -f .github/workflows/merge-current-main-provider-neutral.yml
+          git add -A
+          git diff --cached --check
+          git commit -m $'chore(doctrine): integrate current protected main\n\nSigned-off-by: github-actions[bot] <41898282+github-actions[bot]@users.noreply.github.com>\nSigned-off-by: Stephen Lutar <stephenlutar@gmail.com>'
+          git push origin HEAD:fix/provider-neutral-screenshot-proof-20260818
