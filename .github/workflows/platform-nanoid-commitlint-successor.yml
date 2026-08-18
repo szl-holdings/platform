@@ -1,0 +1,170 @@
+name: Platform nanoid commitlint-clean successor
+
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - '.github/workflows/platform-nanoid-commitlint-successor.yml'
+
+permissions:
+  contents: write
+
+concurrency:
+  group: platform-nanoid-commitlint-successor-${{ github.event.pull_request.number }}
+  cancel-in-progress: false
+
+jobs:
+  publish-successor:
+    name: publish signed commitlint-clean successor
+    if: >-
+      github.event.pull_request.user.login == 'stephenlutar2-hash' &&
+      github.event.pull_request.head.ref == 'chore/platform-nanoid-repair-builder-20260818'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    env:
+      GH_TOKEN: ${{ github.token }}
+      REPOSITORY: ${{ github.repository }}
+      BASE_SHA: 15444cbd67c4b82481041788ace89c96940a56ad
+      SOURCE_SHA: f2882b327a743104e70591230f959915fcd48987
+      TARGET_BRANCH: fix/platform-nanoid-audit-successor-v2-20260818
+    steps:
+      - name: Verify protected main has not advanced
+        shell: bash
+        run: |
+          set -euo pipefail
+          current_main="$(gh api "repos/${REPOSITORY}/git/ref/heads/main" --jq '.object.sha')"
+          test "$current_main" = "$BASE_SHA"
+          test '${{ github.event.pull_request.base.sha }}' = "$BASE_SHA"
+
+      - name: Checkout already-qualified repair tree
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: ${{ env.SOURCE_SHA }}
+          fetch-depth: 2
+          path: source
+          persist-credentials: false
+
+      - name: Verify exact source tree and parent
+        shell: bash
+        run: |
+          set -euo pipefail
+          cd source
+          test "$(git rev-parse HEAD)" = "$SOURCE_SHA"
+          test "$(git rev-parse HEAD^)" = "$BASE_SHA"
+          mapfile -t changed < <(git diff-tree --no-commit-id --name-only -r HEAD | sort)
+          expected=(pnpm-lock.yaml pnpm-workspace.yaml)
+          test "${changed[*]}" = "${expected[*]}"
+          test "$(sha256sum pnpm-lock.yaml | cut -d' ' -f1)" = \
+            '8ca498a12f4af40d42d31a74da3a193a83ab60758e13a59b0aa6f8e7de0b0418'
+          test "$(sha256sum pnpm-workspace.yaml | cut -d' ' -f1)" = \
+            'a4558bd9d5a98d16fda72f71dad2e88768610aa1f10f308d9b5ca2e085c22ff3'
+          test "$(grep -Fc 'nanoid@3.3.17:' pnpm-lock.yaml || true)" = '0'
+          test "$(grep -Fc 'nanoid@3.3.18:' pnpm-lock.yaml)" = '2'
+
+      - name: Create exact-base target branch
+        shell: bash
+        run: |
+          set -euo pipefail
+          if existing="$(gh api "repos/${REPOSITORY}/git/ref/heads/${TARGET_BRANCH}" --jq '.object.sha' 2>/dev/null)"; then
+            test "$existing" = "$BASE_SHA"
+          else
+            gh api --method POST "repos/${REPOSITORY}/git/refs" \
+              -f ref="refs/heads/${TARGET_BRANCH}" \
+              -f sha="$BASE_SHA" >/dev/null
+          fi
+
+      - name: Create GitHub-signed commit with compliant message
+        id: commit
+        shell: bash
+        run: |
+          set -euo pipefail
+          export REPAIR_ROOT="$GITHUB_WORKSPACE/source"
+          result="$RUNNER_TEMP/platform-nanoid-successor-v2.json"
+          python - "$result" <<'PY'
+          import base64
+          import json
+          import os
+          import pathlib
+          import sys
+          import urllib.request
+
+          output = pathlib.Path(sys.argv[1])
+          root = pathlib.Path(os.environ['REPAIR_ROOT'])
+          paths = ['pnpm-workspace.yaml', 'pnpm-lock.yaml']
+          additions = [
+              {
+                  'path': rel,
+                  'contents': base64.b64encode((root / rel).read_bytes()).decode('ascii'),
+              }
+              for rel in paths
+          ]
+          query = '''
+          mutation BuildPlatformNanoidSuccessor($input: CreateCommitOnBranchInput!) {
+            createCommitOnBranch(input: $input) {
+              commit { oid url }
+            }
+          }
+          '''
+          body = (
+              'Raise the governed nanoid 3.x override to 3.3.18.\n'
+              'Regenerate the pnpm lockfile from exact protected main.\n\n'
+              'CVE-2026-67213 and GHSA-2v37-7h3g-55p8 are absent.\n'
+              'Frozen install, audit, SBOM, and vulnerability reporting passed.\n\n'
+              'Signed-off-by: Lutar, Stephen P. <stephenlutar2@gmail.com>'
+          )
+          variables = {
+              'input': {
+                  'branch': {
+                      'repositoryNameWithOwner': os.environ['REPOSITORY'],
+                      'branchName': os.environ['TARGET_BRANCH'],
+                  },
+                  'expectedHeadOid': os.environ['BASE_SHA'],
+                  'message': {
+                      'headline': 'fix(security): patch transitive nanoid advisory',
+                      'body': body,
+                  },
+                  'fileChanges': {'additions': additions},
+              }
+          }
+          request = urllib.request.Request(
+              'https://api.github.com/graphql',
+              data=json.dumps({'query': query, 'variables': variables}).encode(),
+              method='POST',
+              headers={
+                  'Authorization': f"Bearer {os.environ['GH_TOKEN']}",
+                  'Accept': 'application/vnd.github+json',
+                  'Content-Type': 'application/json',
+                  'User-Agent': 'szl-platform-nanoid-successor-v2',
+                  'X-GitHub-Api-Version': '2022-11-28',
+              },
+          )
+          with urllib.request.urlopen(request, timeout=90) as response:
+              payload = json.load(response)
+          if payload.get('errors'):
+              raise SystemExit('; '.join(str(row.get('message')) for row in payload['errors']))
+          commit = payload['data']['createCommitOnBranch']['commit']
+          output.write_text(json.dumps(commit) + '\n', encoding='utf-8')
+          PY
+          commit_sha="$(jq -er '.oid' "$result")"
+          echo "commit_sha=$commit_sha" >> "$GITHUB_OUTPUT"
+          echo "branch=$TARGET_BRANCH" >> "$GITHUB_OUTPUT"
+
+      - name: Upload successor identity
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: platform-nanoid-successor-v2-identity
+          path: ${{ runner.temp }}/platform-nanoid-successor-v2.json
+          if-no-files-found: error
+          retention-days: 90
+
+      - name: Report successor
+        shell: bash
+        run: |
+          {
+            echo '### Commitlint-clean Platform nanoid successor'
+            echo "- branch: \`${{ steps.commit.outputs.branch }}\`"
+            echo "- head: \`${{ steps.commit.outputs.commit_sha }}\`"
+            echo "- base: \`${BASE_SHA}\`"
+            echo '- source tree: byte-identical to the qualified repair'
+            echo '- commit body: every line under 100 characters'
+          } >> "$GITHUB_STEP_SUMMARY"
