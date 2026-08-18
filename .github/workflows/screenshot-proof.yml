@@ -15,10 +15,15 @@ on:
   pull_request:
     branches: [main]
     paths:
+      - '.github/workflows/screenshot-proof.yml'
       - 'audit/screenshot-capture-plan.json'
+      - 'audit/screenshot-proof-selftest-plan.json'
       - 'artifacts/a11oy/**'
+      - 'docs/A11OY_EXECUTION_ENVIRONMENT_DOCTRINE.md'
+      - 'docs/A11OY_SCREENSHOT_DOCTRINE.md'
       - 'packages/a11oy-runtime/**'
       - 'scripts/qa/capture-screenshot-proof.mjs'
+      - 'scripts/qa/fixtures/screenshot-proof/**'
 
 permissions:
   contents: read
@@ -65,12 +70,14 @@ jobs:
       - name: Install Chromium
         run: pnpm exec playwright install --with-deps chromium
 
-      - name: Build A11oy
+      - name: Build A11oy for an explicit application proof
+        if: github.event_name == 'workflow_dispatch'
         run: pnpm --filter @workspace/a11oy run build
         env:
           BASE_PATH: /
 
-      - name: Serve exact build
+      - name: Serve exact A11oy build
+        if: github.event_name == 'workflow_dispatch'
         shell: bash
         run: |
           set -euo pipefail
@@ -84,9 +91,24 @@ jobs:
           cat "$RUNNER_TEMP/a11oy-serve.log"
           exit 1
 
+      - name: Serve deterministic capture-rail fixture
+        if: github.event_name == 'pull_request'
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 -m http.server 4110 --bind 127.0.0.1 --directory scripts/qa/fixtures/screenshot-proof > "$RUNNER_TEMP/screenshot-fixture.log" 2>&1 &
+          for attempt in {1..30}; do
+            if curl --fail --silent --show-error http://127.0.0.1:4110/ >/dev/null; then
+              exit 0
+            fi
+            sleep 1
+          done
+          cat "$RUNNER_TEMP/screenshot-fixture.log"
+          exit 1
+
       - name: Capture source-bound proof
         env:
-          SCREENSHOT_PLAN: ${{ github.event_name == 'workflow_dispatch' && inputs.plan_path || 'audit/screenshot-capture-plan.json' }}
+          SCREENSHOT_PLAN: ${{ github.event_name == 'workflow_dispatch' && inputs.plan_path || 'audit/screenshot-proof-selftest-plan.json' }}
           SCREENSHOT_BASE_URL: http://127.0.0.1:4110
           SCREENSHOT_OUTPUT_DIR: screenshot-proof
           SOURCE_REVISION: ${{ steps.source.outputs.sha }}
