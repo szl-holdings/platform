@@ -3,7 +3,7 @@
 **Workcell:** `A11OY-STATE-002`  
 **Date:** 2026-08-17  
 **Scope:** Additive encrypted filesystem persistence for portable State Capsules  
-**Claim level:** Locally verified durable single-host transport; protected CI remains authoritative
+**Claim level:** Package-workflow verified durable single-host transport; full protected CI remains authoritative
 
 ## Context
 
@@ -25,11 +25,12 @@ Kimi K3 inference, distributed locking, production KMS custody, or a deployed se
 4. Publish records atomically with an fsynced temporary inode and a no-replace hard link.
 5. Shard paths by the canonical `state_<sha256>` identity and reject noncanonical IDs before path
    construction.
-6. Bound payload and record reads and reject links or special files.
+6. Bound payload and record reads, bind reads to opened descriptors, and reject links or special
+   files.
 7. Make deletion terminal through an HMAC-authenticated, digest-bound tombstone written before
    object removal.
 8. Add exact readback, concurrent idempotency, tamper, wrong-key, traversal, budget, reopen,
-   tombstone-forgery, symlink-redirection, and resurrection tests.
+   tombstone-forgery, symlink-redirection, unlink-target-preservation, and resurrection tests.
 
 ## Patch boundary
 
@@ -61,7 +62,7 @@ license, or external account is changed.
 - deletion-state rechecks across existing-object and publication races;
 - divergent protected-input rejection;
 - bounded record reads and configurable payload ceiling;
-- descriptor-bound, bounded no-follow reads with post-read path identity checks;
+- descriptor-bound, bounded no-follow reads with post-read descriptor and path identity checks;
 - link and special-file rejection for records and every created shard component;
 - direct unlink cleanup that removes a replaced link entry without following its target;
 - HMAC-SHA-256-authenticated deletion receipts bound to the prior record digest;
@@ -69,7 +70,9 @@ license, or external account is changed.
 - no resurrection after a valid deletion receipt;
 - wrong-key, record tamper, tombstone forgery, and link redirection failure as a closed result.
 
-## Local validation
+## Validation
+
+### Initial dependency-isolated validation
 
 A dependency-isolated TypeScript harness used the repository's exact canonical hashing, encryption,
 error, and transport contracts.
@@ -85,24 +88,46 @@ node --check dist/state-native/filesystem-transport.js
 result: PASS
 ```
 
-Exact locally validated source blob:
+Initial adapter blob:
 
 ```text
 0cb2198e3df05a74acbb694348a5751390cc03bc
 ```
 
-Covered behavior:
+That blob established the encrypted persistence, tamper, wrong-key, terminal deletion, traversal,
+quota, tombstone-authentication, and stable symlink-rejection boundary before Advanced Security
+identified a path check/use race.
 
-- encrypted persistence, concurrent idempotency, exact reopen, and plaintext absence;
-- wrong-key rejection and on-disk record tamper rejection;
-- terminal deletion receipt, idempotent delete, and resurrection rejection;
-- path-traversal ID rejection and configured payload-budget enforcement;
-- HMAC rejection after an attacker recomputes the public tombstone digest but cannot reproduce the
-  authentication tag, plus wrong-key tombstone rejection;
-- record-file and shard-directory symlink redirection rejection on platforms supporting the test.
+### Descriptor-bound successor validation
 
-Protected repository checks on the exact pull-request head remain the merge authority. Isolated
-validation is not represented as the complete monorepo result.
+A one-use same-repository workcell generated the successor from the protected feature branch, ran the
+exact frozen workspace install and package test command, deleted both temporary workflows and the
+patch script, and then published only the reviewed source changes.
+
+```text
+pnpm install --frozen-lockfile --ignore-scripts
+result: PASS
+
+pnpm --filter @workspace/a11oy-runtime test
+result: PASS
+```
+
+Tested source-only tree:
+
+```text
+5bf6256f9564990b0b344e6bb0421f9f71aa8b92
+```
+
+Current adapter blob:
+
+```text
+3b979b7b0b971d65cd1de0eae06ca0932cc775e4
+```
+
+Additional successor coverage verifies that terminal cleanup unlinks only the canonical directory
+entry and does not follow a replacement symlink to an external target. Current-head CodeQL and the
+complete protected repository matrix remain the merge authority; the package workcell is not
+represented as the full monorepo result.
 
 ## Screenshot
 
@@ -124,7 +149,8 @@ validation is not represented as the complete monorepo result.
 - object-store or database durability;
 - KMS/HSM key custody and rotation;
 - backup, restore, disaster recovery, and retention-policy operators;
-- fully race-free operation against an adversary with concurrent same-user filesystem mutation;
+- complete protection from an adversary with concurrent same-user mutation of the private storage
+  tree beyond the explicit descriptor, identity, no-follow, directory-mode, and unlink controls;
 - Mooncake, LMCache, NIXL, GPU, or Kimi K3 deployment;
 - externally observed performance, uptime, customer traffic, or production use.
 
