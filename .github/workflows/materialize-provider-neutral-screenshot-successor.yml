@@ -4,6 +4,9 @@ on:
   push:
     branches:
       - fix/provider-neutral-screenshot-proof-successor-20260818
+  pull_request:
+    branches:
+      - main
 
 permissions:
   contents: write
@@ -20,6 +23,7 @@ jobs:
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
+          ref: fix/provider-neutral-screenshot-proof-successor-20260818
           fetch-depth: 0
           persist-credentials: true
 
@@ -139,8 +143,7 @@ jobs:
                   text = text.replace(old, new, 1)
               path.write_text(text, encoding='utf-8')
 
-          bcp = Path('content/trust/bcp-dr.md')
-          bcp.write_text('''# Business Continuity & Disaster Recovery — SZL Holdings
+          Path('content/trust/bcp-dr.md').write_text('''# Business Continuity & Disaster Recovery — SZL Holdings
 
 ## Evidence status
 
