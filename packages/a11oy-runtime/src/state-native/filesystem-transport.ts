@@ -285,6 +285,13 @@ export class FileSystemStateTransportAdapter implements StateTransportAdapter {
     }
     const existing = await this.#readObject(capsuleId);
     if (existing) {
+      if (await this.#readDeletionReceipt(capsuleId)) {
+        throw new StateNativeError(
+          'SHREDDED',
+          'A concurrent deletion prevented State Capsule persistence.',
+          { capsuleId },
+        );
+      }
       this.#assertSameObject(existing, object);
       return;
     }
@@ -306,6 +313,14 @@ export class FileSystemStateTransportAdapter implements StateTransportAdapter {
         'Concurrent durable state write could not be read back.',
         { capsuleId },
       );
+      if (await this.#readDeletionReceipt(capsuleId)) {
+        await this.#removeObjectFile(capsuleId);
+        throw new StateNativeError(
+          'SHREDDED',
+          'A concurrent deletion prevented State Capsule persistence.',
+          { capsuleId },
+        );
+      }
       this.#assertSameObject(raced, object);
       return;
     }
