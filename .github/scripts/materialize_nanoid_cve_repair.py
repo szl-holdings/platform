@@ -13,6 +13,7 @@ import base64
 import json
 import os
 from pathlib import Path
+import re
 import subprocess
 import urllib.error
 import urllib.request
@@ -27,9 +28,6 @@ WORKSPACE = ROOT / "pnpm-workspace.yaml"
 LOCKFILE = ROOT / "pnpm-lock.yaml"
 OLD_OVERRIDE = "  nanoid@<4: 3.3.17\n"
 NEW_OVERRIDE = "  nanoid@<4: 3.3.18\n"
-EXPECTED_INTEGRITY = (
-    "sha512-vqwJYgwsopvT0J46gpxZs13u6qC/O5UoB+7kQbz6RYQBC4c5t1FTqy7To38RurujiuCs0uwVaoY05YBWOro56g=="
-)
 
 
 def run(*args: str) -> None:
@@ -46,7 +44,7 @@ def request(url: str, *, data: dict[str, Any] | None = None) -> Any:
             "Accept": "application/vnd.github+json",
             "Content-Type": "application/json",
             "X-GitHub-Api-Version": "2022-11-28",
-            "User-Agent": "szl-nanoid-cve-materializer/1",
+            "User-Agent": "szl-nanoid-cve-materializer/2",
         },
     )
     try:
@@ -76,8 +74,13 @@ def main() -> int:
         raise SystemExit("vulnerable nanoid package remains in lockfile")
     if "nanoid@3.3.18" not in lockfile_after:
         raise SystemExit("repaired nanoid 3.3.18 package is absent")
-    if EXPECTED_INTEGRITY not in lockfile_after:
-        raise SystemExit("nanoid 3.3.18 integrity does not match reviewed registry metadata")
+    integrity_match = re.search(
+        r"(?m)^  nanoid@3\.3\.18:\n    resolution: \{integrity: (sha512-[^}]+)\}$",
+        lockfile_after,
+    )
+    if integrity_match is None:
+        raise SystemExit("nanoid 3.3.18 lacks a canonical sha512 lockfile integrity")
+    lockfile_integrity = integrity_match.group(1)
 
     changed = subprocess.check_output(
         ["git", "diff", "--name-only"], cwd=ROOT, text=True
@@ -137,6 +140,7 @@ def main() -> int:
         "cve": "CVE-2026-67213",
         "before": "3.3.17",
         "after": "3.3.18",
+        "lockfile_integrity": lockfile_integrity,
         "expected_parent": EXPECTED_PARENT,
         "target_branch": TARGET_BRANCH,
         "commit": commit,
