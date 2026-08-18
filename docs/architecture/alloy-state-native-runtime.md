@@ -121,6 +121,7 @@ contract. It provides:
 - complete immutable State Capsule metadata as authenticated additional data;
 - canonical `state_<sha256>` path admission and two-level content-addressed sharding;
 - bounded payload and record sizes;
+- descriptor-bound no-follow reads with post-read path identity verification;
 - fsynced temporary writes and atomic no-replace hard-link publication;
 - exact post-write readback and idempotent concurrent same-object writes;
 - wrong-key, digest, metadata, and payload tamper rejection;

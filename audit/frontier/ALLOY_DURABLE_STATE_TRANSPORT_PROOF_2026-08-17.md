@@ -61,7 +61,9 @@ license, or external account is changed.
 - deletion-state rechecks across existing-object and publication races;
 - divergent protected-input rejection;
 - bounded record reads and configurable payload ceiling;
+- descriptor-bound, bounded no-follow reads with post-read path identity checks;
 - link and special-file rejection for records and every created shard component;
+- direct unlink cleanup that removes a replaced link entry without following its target;
 - HMAC-SHA-256-authenticated deletion receipts bound to the prior record digest;
 - terminal deletion receipts written before object removal;
 - no resurrection after a valid deletion receipt;
