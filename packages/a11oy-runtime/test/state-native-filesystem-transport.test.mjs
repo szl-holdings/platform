@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import { randomBytes } from 'node:crypto';
-import { mkdir, mkdtemp, readFile, readdir, rm, symlink, writeFile } from 'node:fs/promises';
+import { lstat, mkdir, mkdtemp, readFile, readdir, rm, symlink, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { dirname, join } from 'node:path';
 import test from 'node:test';
@@ -218,6 +218,39 @@ test('deletion receipts are authenticated against storage forgery', async () => 
     await rm(root, { recursive: true, force: true });
   }
 });
+
+
+test(
+  'terminal deletion unlinks only the canonical directory entry',
+  { skip: process.platform === 'win32' },
+  async () => {
+    const root = await mkdtemp(join(tmpdir(), 'szl-state-'));
+    const object = portableObject('unlink safety');
+    try {
+      const adapter = new FileSystemStateTransportAdapter({
+        rootDirectory: root,
+        masterKey: randomBytes(32),
+      });
+      await adapter.put(object);
+      await adapter.delete(object.capsule.capsuleId);
+
+      const recordPath = storagePath(root, object.capsule.capsuleId);
+      const outsideRecord = join(root, 'outside-must-survive.json');
+      await mkdir(dirname(recordPath), { recursive: true });
+      await writeFile(outsideRecord, 'outside survives\n', 'utf8');
+      await symlink(outsideRecord, recordPath);
+
+      await adapter.delete(object.capsule.capsuleId);
+      assert.equal(await readFile(outsideRecord, 'utf8'), 'outside survives\n');
+      await assert.rejects(
+        lstat(recordPath),
+        (error) => error && typeof error === 'object' && error.code === 'ENOENT',
+      );
+    } finally {
+      await rm(root, { recursive: true, force: true });
+    }
+  },
+);
 
 test(
   'filesystem links cannot redirect state records or shard directories',

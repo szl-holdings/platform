@@ -1,5 +1,15 @@
 import { createHmac, randomUUID } from 'node:crypto';
-import { link, lstat, mkdir, open, readFile, realpath, rm } from 'node:fs/promises';
+import { constants as fsConstants } from 'node:fs';
+import {
+  link,
+  lstat,
+  mkdir,
+  open,
+  realpath,
+  rm,
+  unlink,
+  type FileHandle,
+} from 'node:fs/promises';
 import { dirname, isAbsolute, join, parse, relative, resolve, sep } from 'node:path';
 import { canonicalJson, digestObject, sha256Hex } from './canonical.js';
 import {
@@ -17,6 +27,7 @@ const DELETION_SCHEMA = 'szl.state-transport-deletion/v1' as const;
 const ID_PATTERN = /^state_([0-9a-f]{64})$/;
 const DEFAULT_MAX_PAYLOAD_BYTES = 512 * 1024 * 1024;
 const RECORD_OVERHEAD_BYTES = 1024 * 1024;
+const READ_CHUNK_BYTES = 64 * 1024;
 const UNSUPPORTED_DIRECTORY_SYNC = new Set(['EBADF', 'EISDIR', 'EINVAL', 'ENOSYS', 'ENOTSUP', 'EPERM']);
 
 interface EncryptedPortableStateRecord {
@@ -496,26 +507,87 @@ export class FileSystemStateTransportAdapter implements StateTransportAdapter {
   }
 
   async #readBounded(path: string): Promise<string | undefined> {
-    let metadata;
-    try {
-      metadata = await lstat(path);
-    } catch (error) {
+    const flags = fsConstants.O_RDONLY | (fsConstants.O_NOFOLLOW ?? 0);
+    const handle: FileHandle | undefined = await open(path, flags).catch((error: unknown) => {
       if (errorCode(error) === 'ENOENT') return undefined;
+      if (errorCode(error) === 'ELOOP') {
+        throw new StateNativeError(
+          'SIGNATURE_INVALID',
+          'Durable state paths must not be symbolic links.',
+          { path },
+          { cause: error },
+        );
+      }
       throw error;
+    });
+    if (!handle) return undefined;
+
+    try {
+      const opened = await handle.stat();
+      assertStateNative(
+        opened.isFile(),
+        'SIGNATURE_INVALID',
+        'Durable state paths must contain regular files, not links or special files.',
+        { path },
+      );
+      assertStateNative(
+        opened.size <= this.#maxRecordBytes,
+        'BUDGET_EXCEEDED',
+        'Durable state record exceeds the configured read limit.',
+        { path, size: opened.size, maxRecordBytes: this.#maxRecordBytes },
+      );
+
+      const chunks: Buffer[] = [];
+      let byteLength = 0;
+      while (true) {
+        const capacity = Math.min(
+          READ_CHUNK_BYTES,
+          this.#maxRecordBytes - byteLength + 1,
+        );
+        const chunk = Buffer.allocUnsafe(capacity);
+        const { bytesRead } = await handle.read(chunk, 0, chunk.byteLength, null);
+        if (bytesRead === 0) break;
+        byteLength += bytesRead;
+        assertStateNative(
+          byteLength <= this.#maxRecordBytes,
+          'BUDGET_EXCEEDED',
+          'Durable state record grew beyond the configured read limit.',
+          { path, size: byteLength, maxRecordBytes: this.#maxRecordBytes },
+        );
+        chunks.push(chunk.subarray(0, bytesRead));
+      }
+
+      const afterRead = await handle.stat();
+      assertStateNative(
+        opened.dev === afterRead.dev &&
+          opened.ino === afterRead.ino &&
+          opened.size === afterRead.size &&
+          opened.mtimeMs === afterRead.mtimeMs,
+        'SIGNATURE_INVALID',
+        'Durable state record changed while it was read.',
+        { path },
+      );
+      const current = await lstat(path).catch((error: unknown) => {
+        throw new StateNativeError(
+          'SIGNATURE_INVALID',
+          'Durable state path changed while it was read.',
+          { path },
+          { cause: error },
+        );
+      });
+      assertStateNative(
+        current.isFile() &&
+          !current.isSymbolicLink() &&
+          current.dev === afterRead.dev &&
+          current.ino === afterRead.ino,
+        'SIGNATURE_INVALID',
+        'Durable state path no longer identifies the opened record.',
+        { path },
+      );
+      return Buffer.concat(chunks, byteLength).toString('utf8');
+    } finally {
+      await handle.close();
     }
-    assertStateNative(
-      metadata.isFile() && !metadata.isSymbolicLink(),
-      'SIGNATURE_INVALID',
-      'Durable state paths must contain regular files, not links or special files.',
-      { path },
-    );
-    assertStateNative(
-      metadata.size <= this.#maxRecordBytes,
-      'BUDGET_EXCEEDED',
-      'Durable state record exceeds the configured read limit.',
-      { path, size: metadata.size, maxRecordBytes: this.#maxRecordBytes },
-    );
-    return readFile(path, 'utf8');
   }
 
   async #readRecord(capsuleId: string): Promise<EncryptedPortableStateRecord | undefined> {
@@ -597,20 +669,17 @@ export class FileSystemStateTransportAdapter implements StateTransportAdapter {
 
   async #removeObjectFile(capsuleId: string): Promise<void> {
     const path = this.#objectPath(capsuleId);
-    let metadata;
     try {
-      metadata = await lstat(path);
+      await unlink(path);
     } catch (error) {
       if (errorCode(error) === 'ENOENT') return;
-      throw error;
+      throw new StateNativeError(
+        'RECEIPT_WRITE_FAILED',
+        'Durable state object entry could not be unlinked.',
+        { path },
+        { cause: error },
+      );
     }
-    assertStateNative(
-      metadata.isFile() && !metadata.isSymbolicLink(),
-      'SIGNATURE_INVALID',
-      'Durable state object removal refused a link or special file.',
-      { path },
-    );
-    await rm(path, { force: true });
     await this.#syncDirectory(dirname(path));
   }
 
