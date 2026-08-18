@@ -1,23 +1,29 @@
 name: One-use nanoid remediation
 
-# This branch-only workflow deletes itself after producing the reviewed dependency repair.
+# This same-repository PR workflow deletes itself after producing the reviewed dependency repair.
 on:
-  push:
+  pull_request:
     branches:
-      - fix/nanoid-3.3.18-20260817
+      - main
+    types:
+      - opened
+      - reopened
+      - synchronize
 
 permissions:
   contents: write
+  pull-requests: read
 
 jobs:
   remediate:
-    if: github.actor != 'github-actions[bot]'
+    if: github.head_ref == 'fix/nanoid-3.3.18-20260817' && github.actor != 'github-actions[bot]'
     runs-on: ubuntu-latest
     timeout-minutes: 20
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           fetch-depth: 0
+          ref: ${{ github.head_ref }}
       - uses: pnpm/action-setup@0977fd99725f1db4007ccb2928dbb4e90d06cc86 # v6.0.10
       - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
         with:
@@ -93,7 +99,7 @@ jobs:
       - name: Remove the one-use workflow and publish the repair
         shell: bash
         env:
-          BRANCH_NAME: ${{ github.ref_name }}
+          BRANCH_NAME: ${{ github.head_ref }}
         run: |
           git rm .github/workflows/remediate-nanoid-once.yml
           git diff --check
