@@ -1,6 +1,6 @@
-import { randomUUID } from 'node:crypto';
-import { link, lstat, mkdir, open, readFile, realpath, rm, stat } from 'node:fs/promises';
-import { dirname, join, parse, resolve } from 'node:path';
+import { createHmac, randomUUID } from 'node:crypto';
+import { link, lstat, mkdir, open, readFile, realpath, rm } from 'node:fs/promises';
+import { dirname, isAbsolute, join, parse, relative, resolve, sep } from 'node:path';
 import { canonicalJson, digestObject, sha256Hex } from './canonical.js';
 import {
   assertMasterKey,
@@ -17,7 +17,7 @@ const DELETION_SCHEMA = 'szl.state-transport-deletion/v1' as const;
 const ID_PATTERN = /^state_([0-9a-f]{64})$/;
 const DEFAULT_MAX_PAYLOAD_BYTES = 512 * 1024 * 1024;
 const RECORD_OVERHEAD_BYTES = 1024 * 1024;
-const UNSUPPORTED_DIRECTORY_SYNC = new Set(['EINVAL', 'ENOTSUP', 'EPERM']);
+const UNSUPPORTED_DIRECTORY_SYNC = new Set(['EBADF', 'EISDIR', 'EINVAL', 'ENOSYS', 'ENOTSUP', 'EPERM']);
 
 interface EncryptedPortableStateRecord {
   readonly schema: typeof RECORD_SCHEMA;
@@ -33,6 +33,7 @@ export interface StateTransportDeletionReceipt {
   readonly deletedAt: string;
   readonly priorRecordDigest: string;
   readonly deletionDigest: string;
+  readonly authenticationTag: string;
 }
 
 export interface FileSystemStateTransportInspection {
@@ -185,10 +186,26 @@ function parseRecord(raw: string, capsuleId: string): EncryptedPortableStateReco
   return record;
 }
 
+function deletionAuthenticationTag(
+  masterKey: Uint8Array,
+  receipt: Omit<StateTransportDeletionReceipt, 'authenticationTag'>,
+): string {
+  return createHmac('sha256', masterKey)
+    .update(
+      canonicalJson({
+        domain: 'szl.state-transport-deletion-auth/v1',
+        receipt,
+      }),
+      'utf8',
+    )
+    .digest('hex');
+}
+
 function parseDeletionReceipt(
   raw: string,
   capsuleId: string,
   adapter: string,
+  masterKey: Uint8Array,
 ): StateTransportDeletionReceipt {
   const value = parseJson(raw, 'Durable state deletion receipt', capsuleId);
   assertStateNative(
@@ -197,7 +214,8 @@ function parseDeletionReceipt(
       value.adapter === adapter &&
       typeof value.deletedAt === 'string' &&
       typeof value.priorRecordDigest === 'string' &&
-      typeof value.deletionDigest === 'string',
+      typeof value.deletionDigest === 'string' &&
+      typeof value.authenticationTag === 'string',
     'SIGNATURE_INVALID',
     'Durable state deletion receipt is malformed.',
     { capsuleId },
@@ -209,6 +227,7 @@ function parseDeletionReceipt(
     deletedAt: value.deletedAt,
     priorRecordDigest: value.priorRecordDigest,
     deletionDigest: value.deletionDigest,
+    authenticationTag: value.authenticationTag,
   } satisfies StateTransportDeletionReceipt;
   const expected = digestObject({
     schema: DELETION_SCHEMA,
@@ -221,6 +240,23 @@ function parseDeletionReceipt(
     constantTimeEqualHex(receipt.deletionDigest, expected),
     'SIGNATURE_INVALID',
     'Durable state deletion receipt digest is invalid.',
+    { capsuleId },
+  );
+  const authenticated = {
+    schema: receipt.schema,
+    capsuleId: receipt.capsuleId,
+    adapter: receipt.adapter,
+    deletedAt: receipt.deletedAt,
+    priorRecordDigest: receipt.priorRecordDigest,
+    deletionDigest: receipt.deletionDigest,
+  } satisfies Omit<StateTransportDeletionReceipt, 'authenticationTag'>;
+  assertStateNative(
+    constantTimeEqualHex(
+      receipt.authenticationTag,
+      deletionAuthenticationTag(masterKey, authenticated),
+    ),
+    'SIGNATURE_INVALID',
+    'Durable state deletion receipt authentication failed.',
     { capsuleId },
   );
   return receipt;
@@ -366,8 +402,15 @@ export class FileSystemStateTransportAdapter implements StateTransportAdapter {
       adapter: this.name,
       deletedAt: this.#clock().toISOString(),
       priorRecordDigest: record.recordDigest,
-    } satisfies Omit<StateTransportDeletionReceipt, 'deletionDigest'>;
-    const receipt = { ...base, deletionDigest: digestObject(base) };
+    } satisfies Omit<StateTransportDeletionReceipt, 'deletionDigest' | 'authenticationTag'>;
+    const authenticated = {
+      ...base,
+      deletionDigest: digestObject(base),
+    } satisfies Omit<StateTransportDeletionReceipt, 'authenticationTag'>;
+    const receipt = {
+      ...authenticated,
+      authenticationTag: deletionAuthenticationTag(this.#masterKey, authenticated),
+    } satisfies StateTransportDeletionReceipt;
     const created = await this.#atomicCreate(
       this.#tombstonePath(capsuleId),
       `${canonicalJson(receipt)}\n`,
@@ -403,13 +446,33 @@ export class FileSystemStateTransportAdapter implements StateTransportAdapter {
   }
 
   async #ensureDirectory(path: string): Promise<void> {
-    await mkdir(path, { recursive: true, mode: this.#directoryMode });
-    const metadata = await lstat(path);
+    const target = resolve(path);
+    const relativePath = relative(this.#rootDirectory, target);
     assertStateNative(
-      metadata.isDirectory() && !metadata.isSymbolicLink(),
+      relativePath === '' ||
+        (!isAbsolute(relativePath) && relativePath !== '..' && !relativePath.startsWith(`..${sep}`)),
       'INVALID_INPUT',
-      'Filesystem transport paths must be real directories, not symbolic links.',
-      { path },
+      'Filesystem transport directory escaped the configured root.',
+      { path: target },
+    );
+    await mkdir(target, { recursive: true, mode: this.#directoryMode });
+
+    let current = this.#rootDirectory;
+    for (const component of relativePath.split(sep).filter(Boolean)) {
+      current = join(current, component);
+      const metadata = await lstat(current);
+      assertStateNative(
+        metadata.isDirectory() && !metadata.isSymbolicLink(),
+        'INVALID_INPUT',
+        'Filesystem transport path components must be real directories, not symbolic links.',
+        { path: current },
+      );
+    }
+    assertStateNative(
+      (await realpath(target)) === target,
+      'INVALID_INPUT',
+      'Filesystem transport directory resolved through an unexpected link.',
+      { path: target },
     );
   }
 
@@ -435,13 +498,19 @@ export class FileSystemStateTransportAdapter implements StateTransportAdapter {
   async #readBounded(path: string): Promise<string | undefined> {
     let metadata;
     try {
-      metadata = await stat(path);
+      metadata = await lstat(path);
     } catch (error) {
       if (errorCode(error) === 'ENOENT') return undefined;
       throw error;
     }
     assertStateNative(
-      metadata.isFile() && metadata.size <= this.#maxRecordBytes,
+      metadata.isFile() && !metadata.isSymbolicLink(),
+      'SIGNATURE_INVALID',
+      'Durable state paths must contain regular files, not links or special files.',
+      { path },
+    );
+    assertStateNative(
+      metadata.size <= this.#maxRecordBytes,
       'BUDGET_EXCEEDED',
       'Durable state record exceeds the configured read limit.',
       { path, size: metadata.size, maxRecordBytes: this.#maxRecordBytes },
@@ -472,7 +541,9 @@ export class FileSystemStateTransportAdapter implements StateTransportAdapter {
     capsuleId: string,
   ): Promise<StateTransportDeletionReceipt | undefined> {
     const raw = await this.#readBounded(this.#tombstonePath(capsuleId));
-    return raw === undefined ? undefined : parseDeletionReceipt(raw, capsuleId, this.name);
+    return raw === undefined
+      ? undefined
+      : parseDeletionReceipt(raw, capsuleId, this.name, this.#masterKey);
   }
 
   #assertSameObject(existing: PortableStateObject, candidate: PortableStateObject): void {
@@ -490,10 +561,12 @@ export class FileSystemStateTransportAdapter implements StateTransportAdapter {
     await this.#ensureDirectory(directory);
     const temporaryPath = `${path}.${process.pid}.${randomUUID()}.tmp`;
     let handle;
+    let prepared = false;
     try {
       handle = await open(temporaryPath, 'wx', this.#fileMode);
       await handle.writeFile(content, 'utf8');
       await handle.sync();
+      prepared = true;
     } catch (error) {
       throw new StateNativeError(
         'RECEIPT_WRITE_FAILED',
@@ -503,6 +576,7 @@ export class FileSystemStateTransportAdapter implements StateTransportAdapter {
       );
     } finally {
       await handle?.close();
+      if (!prepared) await rm(temporaryPath, { force: true });
     }
     try {
       await link(temporaryPath, path);
@@ -523,12 +597,19 @@ export class FileSystemStateTransportAdapter implements StateTransportAdapter {
 
   async #removeObjectFile(capsuleId: string): Promise<void> {
     const path = this.#objectPath(capsuleId);
+    let metadata;
     try {
-      await stat(path);
+      metadata = await lstat(path);
     } catch (error) {
       if (errorCode(error) === 'ENOENT') return;
       throw error;
     }
+    assertStateNative(
+      metadata.isFile() && !metadata.isSymbolicLink(),
+      'SIGNATURE_INVALID',
+      'Durable state object removal refused a link or special file.',
+      { path },
+    );
     await rm(path, { force: true });
     await this.#syncDirectory(dirname(path));
   }
