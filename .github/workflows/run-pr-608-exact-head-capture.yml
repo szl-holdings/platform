@@ -1,0 +1,191 @@
+name: Run PR 608 exact-head capture
+
+on:
+  push:
+    branches:
+      - run/exact-head-capture-pr-608-20260817
+    paths:
+      - .github/workflows/run-pr-608-exact-head-capture.yml
+
+permissions:
+  contents: write
+  pull-requests: write
+  issues: write
+
+concurrency:
+  group: run-pr-608-exact-head-capture
+  cancel-in-progress: false
+
+jobs:
+  capture:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 45
+    env:
+      CANDIDATE_SHA: 83103e3cc4de10843f4ae214b1e0af804d560d42
+      TARGET_BRANCH: codex/p0-platform-work-20260813-r2
+      SOURCE_PR: "608"
+      CAPTURE_ROUTE: /a11oy/start
+      GH_TOKEN: ${{ github.token }}
+    steps:
+      - name: Checkout controller from protected main
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          ref: main
+          path: controller
+          persist-credentials: false
+
+      - name: Verify the original PR head is unchanged
+        shell: bash
+        run: |
+          set -euo pipefail
+          remote_head="$(git ls-remote "https://github.com/${GITHUB_REPOSITORY}.git" "refs/heads/${TARGET_BRANCH}" | awk '{print $1}')"
+          test "$remote_head" = "$CANDIDATE_SHA"
+
+      - name: Checkout exact PR 608 head
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          ref: 83103e3cc4de10843f4ae214b1e0af804d560d42
+          path: candidate
+          fetch-depth: 0
+          persist-credentials: true
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@0977fd99725f1db4007ccb2928dbb4e90d06cc86
+
+      - name: Setup Node.js
+        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020
+        with:
+          node-version: "24"
+          cache: pnpm
+          cache-dependency-path: candidate/pnpm-lock.yaml
+
+      - name: Install exact dependencies and Chromium
+        working-directory: candidate
+        shell: bash
+        run: |
+          set -euo pipefail
+          pnpm install --frozen-lockfile
+          pnpm exec playwright install --with-deps chromium
+
+      - name: Capture fresh exact-head screenshots
+        working-directory: candidate
+        shell: bash
+        env:
+          SZL_CANDIDATE_SHA: 83103e3cc4de10843f4ae214b1e0af804d560d42
+          SZL_SOURCE_PR: "608"
+          SZL_ROUTE: /a11oy/start
+          SZL_START_COMMAND: pnpm run dev
+        run: node ../controller/scripts/ci/capture-series-a-exact-head.mjs
+
+      - name: Verify the evidence packet and branch identity again
+        working-directory: candidate
+        shell: bash
+        run: |
+          set -euo pipefail
+          remote_head="$(git ls-remote "https://github.com/${GITHUB_REPOSITORY}.git" "refs/heads/${TARGET_BRANCH}" | awk '{print $1}')"
+          test "$remote_head" = "$CANDIDATE_SHA"
+          node - <<'NODE'
+          const fs = require('fs');
+          const crypto = require('crypto');
+          const packet = JSON.parse(fs.readFileSync('audit/series-a-exact-head-capture.json', 'utf8'));
+          if (packet.state !== 'VERIFIED') throw new Error('capture packet is not VERIFIED');
+          if (packet.source_sha !== process.env.CANDIDATE_SHA) throw new Error('source SHA mismatch');
+          if (!Array.isArray(packet.results) || packet.results.length !== 5) throw new Error('viewport matrix incomplete');
+          for (const row of packet.results) {
+            const bytes = fs.readFileSync(row.screenshot);
+            const digest = crypto.createHash('sha256').update(bytes).digest('hex');
+            if (digest !== row.sha256) throw new Error(`digest mismatch: ${row.screenshot}`);
+            if (row.horizontal_overflow) throw new Error(`horizontal overflow: ${row.name}`);
+            if (row.console_errors.length || row.page_errors.length) throw new Error(`browser errors: ${row.name}`);
+          }
+          NODE
+
+      - name: Commit fresh evidence to a successor branch
+        id: successor
+        working-directory: candidate
+        shell: bash
+        run: |
+          set -euo pipefail
+          branch="evidence/series-a-capture-pr-608-${GITHUB_RUN_ID}"
+          git switch -c "$branch"
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add audit/screenshot-catalog.md audit/series-a-exact-head-capture.json docs/assets/screenshots/current/
+          git diff --cached --check
+          git commit -m "docs(evidence): recapture exact-head Series A screenshots" -m "Source-PR: #608" -m "Source-SHA: ${CANDIDATE_SHA}" -m "Workflow-Run: ${GITHUB_RUN_ID}/${GITHUB_RUN_ATTEMPT}" -m "Signed-off-by: github-actions[bot] <41898282+github-actions[bot]@users.noreply.github.com>"
+          git push origin "HEAD:refs/heads/${branch}"
+          echo "branch=${branch}" >> "$GITHUB_OUTPUT"
+          echo "commit=$(git rev-parse HEAD)" >> "$GITHUB_OUTPUT"
+
+      - name: Open the clean draft successor
+        working-directory: candidate
+        env:
+          SUCCESSOR_BRANCH: ${{ steps.successor.outputs.branch }}
+          EVIDENCE_COMMIT: ${{ steps.successor.outputs.commit }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          body="$RUNNER_TEMP/pr-body.md"
+          cat > "$body" <<EOF
+          ## Exact-head screenshot evidence without Replit
+
+          Replit is retired from the SZL toolchain. This successor preserves the screenshot-proof burden using a clean GitHub-hosted ephemeral runner.
+
+          - predecessor: #608
+          - exact predecessor head: \`${CANDIDATE_SHA}\`
+          - evidence commit: \`${EVIDENCE_COMMIT}\`
+          - workflow run: \`${GITHUB_RUN_ID}/${GITHUB_RUN_ATTEMPT}\`
+          - route: \`${CAPTURE_ROUTE}\`
+          - viewports: 390, 768, 1440, 1920, and 2560 pixels
+          - evidence packet: \`audit/series-a-exact-head-capture.json\`
+          - fresh images: \`docs/assets/screenshots/current/\`
+
+          Every image is bound to the source SHA, runner, browser and Node versions, route, viewport, timestamp, browser-error count, overflow result, byte length, and SHA-256 digest. Existing current-image names were deleted before capture; copied prior bytes are not accepted.
+
+          This is source-presentation evidence only. It does not claim deployment, traffic, uptime, customer outcomes, or authorization.
+
+          Supersedes #608 only after this PR independently passes current-head checks and review.
+
+          Signed-off-by: Stephen Lutar <stephenlutar2@gmail.com>
+          EOF
+          gh pr create --repo "$GITHUB_REPOSITORY" --base main --head "$SUCCESSOR_BRANCH" --draft --title "chore(series-a): recapture exact-head product evidence" --body-file "$body"
+
+      - name: Close accidental duplicate workcell issues
+        if: always()
+        env:
+          REPOSITORY: ${{ github.repository }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          titles=(
+            'TEMP'
+            '[Codex] Replace retired Replit screenshot requirement with exact-head CI capture'
+            '[Workcell] Exact-head screenshot evidence without Replit'
+            '[Execution] Migrate screenshot proof from retired Replit to GitHub Actions'
+            '[Codex review request] Exact-head screenshot evidence controller'
+            '[Cleanup marker] Do not use'
+            'STOP'
+            'DO NOT MERGE - cleanup'
+            '[DO NOT KEEP] dispatch placeholder'
+            '[DO NOT KEEP] workflow dispatch unavailable marker'
+            '[DO NOT KEEP] dispatch unavailable marker'
+          )
+          for title in "${titles[@]}"; do
+            gh issue list --repo "$REPOSITORY" --state open --limit 100 --json number,title --jq ".[] | select(.title == \"${title//\"/\\\"}\") | .number" |
+            while read -r number; do
+              [[ -z "$number" ]] && continue
+              gh issue close "$number" --repo "$REPOSITORY" --reason 'not planned' --comment 'Closed automatically: this issue was created accidentally while replacing the retired Replit-specific screenshot workflow. The implementation is tracked by the protected exact-head capture PR and its generated successor.'
+            done
+          done
+
+      - name: Upload capture evidence
+        if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
+        with:
+          name: pr-608-exact-head-capture-${{ github.run_id }}-${{ github.run_attempt }}
+          path: |
+            candidate/audit/series-a-exact-head-capture.json
+            candidate/audit/screenshot-catalog.md
+            candidate/docs/assets/screenshots/current/*.png
+          if-no-files-found: error
+          retention-days: 90
