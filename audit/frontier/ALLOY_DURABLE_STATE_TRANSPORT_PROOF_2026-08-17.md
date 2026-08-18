@@ -74,16 +74,13 @@ error, and transport contracts.
 
 ```text
 tsc --pretty false
-exit: 0
+result: PASS
 
 node --test test/filesystem-transport.test.mjs
-subtests: 6
-passed: 6
-failed: 0
-exit: 0
+result: PASS
 
 node --check dist/state-native/filesystem-transport.js
-exit: 0
+result: PASS
 ```
 
 Exact locally validated source blob:
@@ -94,13 +91,13 @@ Exact locally validated source blob:
 
 Covered behavior:
 
-1. encrypted persistence, concurrent idempotency, exact reopen, and plaintext absence;
-2. wrong-key rejection and on-disk record tamper rejection;
-3. terminal deletion receipt, idempotent delete, and resurrection rejection;
-4. path-traversal ID rejection and configured payload-budget enforcement;
-5. HMAC rejection after an attacker recomputes the public tombstone digest but cannot reproduce the
-   authentication tag, plus wrong-key tombstone rejection;
-6. record-file and shard-directory symlink redirection rejection on platforms supporting the test.
+- encrypted persistence, concurrent idempotency, exact reopen, and plaintext absence;
+- wrong-key rejection and on-disk record tamper rejection;
+- terminal deletion receipt, idempotent delete, and resurrection rejection;
+- path-traversal ID rejection and configured payload-budget enforcement;
+- HMAC rejection after an attacker recomputes the public tombstone digest but cannot reproduce the
+  authentication tag, plus wrong-key tombstone rejection;
+- record-file and shard-directory symlink redirection rejection on platforms supporting the test.
 
 Protected repository checks on the exact pull-request head remain the merge authority. Isolated
 validation is not represented as the complete monorepo result.
