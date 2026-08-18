@@ -1,0 +1,47 @@
+name: Apply screenshot workflow truth count
+
+on:
+  push:
+    branches:
+      - fix/provider-neutral-screenshot-proof-20260818
+
+permissions:
+  contents: write
+
+concurrency:
+  group: apply-screenshot-workflow-truth-count
+  cancel-in-progress: false
+
+jobs:
+  apply:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0
+          persist-credentials: true
+
+      - uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065 # v6.0.0
+        with:
+          python-version: '3.13'
+
+      - name: Reconcile canonical count
+        run: python scripts/qa/apply-screenshot-workflow-truth-count.py
+
+      - name: Validate and commit
+        shell: bash
+        run: |
+          set -euo pipefail
+          node scripts/audit/validate-source-of-truth.js
+          git diff --check
+          if git diff --quiet --exit-code; then
+            echo 'No generated changes.'
+            exit 0
+          fi
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add -A
+          git commit -m $'chore(truth): reconcile screenshot workflow count\n\nSigned-off-by: github-actions[bot] <41898282+github-actions[bot]@users.noreply.github.com>'
+          git push origin HEAD:fix/provider-neutral-screenshot-proof-20260818
