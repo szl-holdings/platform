@@ -1,0 +1,23 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://a-11-oy.com/schemas/state-transport-deletion.v1.schema.json",
+  "title": "SZL State Transport Deletion Receipt v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema",
+    "capsuleId",
+    "adapter",
+    "deletedAt",
+    "priorRecordDigest",
+    "deletionDigest"
+  ],
+  "properties": {
+    "schema": { "const": "szl.state-transport-deletion/v1" },
+    "capsuleId": { "type": "string", "pattern": "^state_[a-f0-9]{64}$" },
+    "adapter": { "type": "string", "minLength": 1 },
+    "deletedAt": { "type": "string", "format": "date-time" },
+    "priorRecordDigest": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "deletionDigest": { "type": "string", "pattern": "^[a-f0-9]{64}$" }
+  }
+}
