@@ -1,0 +1,103 @@
+name: Screenshot Proof
+
+on:
+  workflow_dispatch:
+    inputs:
+      source_revision:
+        description: Exact 40-character revision to capture
+        required: true
+        type: string
+      plan_path:
+        description: Capture plan path at that revision
+        required: false
+        default: audit/screenshot-capture-plan.json
+        type: string
+  pull_request:
+    branches: [main]
+    paths:
+      - 'audit/screenshot-capture-plan.json'
+      - 'artifacts/a11oy/**'
+      - 'packages/a11oy-runtime/**'
+      - 'scripts/qa/capture-screenshot-proof.mjs'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: screenshot-proof-${{ github.event.pull_request.number || inputs.source_revision || github.sha }}
+  cancel-in-progress: true
+
+env:
+  NODE_OPTIONS: --max-old-space-size=6144
+
+jobs:
+  capture:
+    runs-on: ubuntu-latest
+    timeout-minutes: 35
+    steps:
+      - name: Resolve exact source revision
+        id: source
+        shell: bash
+        run: |
+          set -euo pipefail
+          if [[ "${{ github.event_name }}" == "workflow_dispatch" ]]; then
+            sha='${{ inputs.source_revision }}'
+          else
+            sha='${{ github.event.pull_request.head.sha }}'
+          fi
+          [[ "$sha" =~ ^[0-9a-f]{40}$ ]] || { echo "::error::source revision must be an exact lowercase 40-character SHA"; exit 1; }
+          echo "sha=$sha" >> "$GITHUB_OUTPUT"
+
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: ${{ steps.source.outputs.sha }}
+          persist-credentials: false
+
+      - uses: pnpm/action-setup@0977fd99725f1db4007ccb2928dbb4e90d06cc86 # v6.0.10
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version: '24'
+          cache: pnpm
+
+      - name: Install exact dependencies
+        run: ONNXRUNTIME_NODE_INSTALL=skip pnpm install --frozen-lockfile
+
+      - name: Install Chromium
+        run: pnpm exec playwright install --with-deps chromium
+
+      - name: Build A11oy
+        run: pnpm --filter @workspace/a11oy run build
+        env:
+          BASE_PATH: /
+
+      - name: Serve exact build
+        shell: bash
+        run: |
+          set -euo pipefail
+          pnpm exec serve artifacts/a11oy/dist/public -s -l 4110 > "$RUNNER_TEMP/a11oy-serve.log" 2>&1 &
+          for attempt in {1..60}; do
+            if curl --fail --silent --show-error http://127.0.0.1:4110/ >/dev/null; then
+              exit 0
+            fi
+            sleep 1
+          done
+          cat "$RUNNER_TEMP/a11oy-serve.log"
+          exit 1
+
+      - name: Capture source-bound proof
+        env:
+          SCREENSHOT_PLAN: ${{ github.event_name == 'workflow_dispatch' && inputs.plan_path || 'audit/screenshot-capture-plan.json' }}
+          SCREENSHOT_BASE_URL: http://127.0.0.1:4110
+          SCREENSHOT_OUTPUT_DIR: screenshot-proof
+          SOURCE_REVISION: ${{ steps.source.outputs.sha }}
+          RUN_IDENTITY: https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}/attempts/${{ github.run_attempt }}
+          CAPTURE_ENVIRONMENT: github-actions
+        run: node scripts/qa/capture-screenshot-proof.mjs
+
+      - name: Upload immutable screenshot evidence
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: screenshot-proof-${{ steps.source.outputs.sha }}
+          path: screenshot-proof/
+          retention-days: 30
+          if-no-files-found: error
