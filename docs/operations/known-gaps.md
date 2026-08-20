@@ -1,10 +1,31 @@
 # SZL Holdings — Known Gaps Register (Security & Operations)
 
-**Last updated:** 2026-08-08 (rev 24 — public surface truth)
+**Last updated:** 2026-08-20 (rev 25 - A11oy Series A exact-head proof)
 **Owner:** Engineering / DevOps  
 **Audience:** Enterprise architects, Series A technical advisors, incoming VP Engineering
 
 This document is the canonical reference for known security, quality, and compliance gaps in the SZL Holdings platform. It consolidates findings from the internal risk register, the April 2026 hardening sprint, and the secrets remediation audit.
+
+---
+
+## 2026-08-20 A11oy Series A candidate boundary
+
+Platform PR #656 adds the truth-safe `/a11oy/start` source candidate. GitHub
+Actions run `32364821536` built and captured five responsive views from exact
+source commit `69285dd8450fc86db5ec5ba59986d36333d79f75`. The imported
+artifact records HTTP 200, six exercised tabs, no horizontal overflow, zero
+console/page errors, and zero undeclared API requests at every width.
+
+This closes the prior source-bound screenshot gap for that candidate revision.
+It does not close the following operational gaps:
+
+- The GraphQL HTTP and WebSocket clients have no verified server resolver or
+  authenticated route and remain `UNAVAILABLE`.
+- Omnia network mutation endpoints remain absent and fail closed.
+- The imported screenshots do not prove protected merge, deployment, domain
+  state, external-font delivery, production runtime, customer use, or receipts.
+- The evidence-only successor commit must receive fresh exact-head CI and
+  review before normal protected merge.
 
 ---
 

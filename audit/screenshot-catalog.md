@@ -2,6 +2,7 @@
 **Track 6 — 2026-04-21**
 **Updated — 2026-07-31 (Workcell VERTICAL-RUNTIME-CONTRACTS-2026-07-31)**
 **Updated — 2026-04-22 (Task #3103, README screenshot block refresh)**
+**Updated - 2026-08-20 (Workcell P0-SERIES-A-PRODUCT-WIRING-20260811)**
 **Status:** Complete disposition ledger. Per-file keep/archive executed.
 
 ---
@@ -10,12 +11,45 @@
 
 | Location | File Count | Disposition |
 |----------|-----------|-------------|
-| `docs/assets/screenshots/current/` | 7 | **REFRESHED 2026-04-22 (Task #3103)** — README screenshot block. Files renamed from product slugs to in-app codenames so captions match chrome (KORA, SEXTANT, DOMAINE, TENAX, FORGE). See Section 0 below. |
+| `docs/assets/screenshots/current/` | 13 | **REFRESHED 2026-08-20** - prior seven README images retained; five A11oy Series A PNGs and one capture-metadata record added from exact-head GitHub Actions proof. |
 | `screenshots/approved/` | 3 committed (13 catalogued) | **KEPT** — 3 post-DB authenticated-surface captures from 2026-04-22 (Task #2890) are the only files currently committed to this directory. The 10 entries dated 2026-04-21 in Section 1 below were captured live from dev servers but were never committed to the repository; they are documented for reference only. See "Repository state" note in Section 1. |
 | `screenshots/archive/` | 280 | **ARCHIVED** — legacy/pre-redesign/iteration/superseded |
 | `demo-assets/screenshots/` | 9 | **KEPT in place** — actively linked from LinkedIn carousel |
 | `docs/screenshots/` | 19 | **KEPT in place** — actively linked from docs/ |
 | `artifacts/*/public/` | N/A | **KEPT in place** — static OpenGraph and product assets embedded in artifacts |
+
+---
+
+## 2026-08-20 A11oy Series A exact-head capture
+
+GitHub Actions run
+[`32364821536`](https://github.com/szl-holdings/platform/actions/runs/32364821536)
+checked out source commit
+`69285dd8450fc86db5ec5ba59986d36333d79f75` with tree
+`1774cf19daa8689287dea98540a744d7847eea9c`, built the A11oy artifact,
+served `/a11oy/start` on loopback, and captured five full-page PNGs with
+Chromium `148.0.7778.96`.
+
+| Viewport | Full page pixels | File | SHA-256 |
+|---:|---:|---|---|
+| 320 x 900 | 320 x 5630 | `a11oy-series-a-320-2026-08-20.png` | `09322066951167342e8f4eadc5bcfcc8ab5cd8f6fc0de9582e772d9c761c6155` |
+| 390 x 900 | 390 x 5051 | `a11oy-series-a-390-2026-08-20.png` | `59444a43b6b61a654f1e291e16b3be633f9ee75d9656454d3d07b96adeb880ff` |
+| 768 x 1024 | 768 x 3275 | `a11oy-series-a-768-2026-08-20.png` | `b579e5ee9c241e383065855751a94028866d876506f426a4d0e879d9553a94ae` |
+| 1366 x 900 | 1366 x 2855 | `a11oy-series-a-1366-2026-08-20.png` | `08ba665dba2d6b6854a417bf66af47d5fe5bf3c920e13ed514f2bbbfe3faffb2` |
+| 1728 x 1000 | 1728 x 2898 | `a11oy-series-a-1728-2026-08-20.png` | `5067ee4739783f8772d6585c17b283c0b1d32108366cd0d75602e62595398b60` |
+
+The adjacent
+`a11oy-series-a-capture-metadata-2026-08-20.json.txt` raw JSON record has SHA-256
+`842336b189607c8914ecf6bcd0577bb37964974a368974b61dbbd0bca715403e`.
+The downloaded artifact ZIP matched GitHub's declared digest
+`c271f1a2a7730b5fd960d988c8c0aee32a12e59294932b4dfd850d5c2c0c6b0d`.
+
+Every capture recorded HTTP 200, the expected heading, six exercised tabs,
+no horizontal overflow, no console or page error, and no undeclared API
+request. Google Fonts CSS was replaced with an empty response, so this evidence
+uses the declared system-font fallback. These are exact-source GitHub Actions
+presentation captures, not deployment, production-runtime, customer-use, or
+external-service evidence. No separate direct visual-inspection claim is made.
 
 ---
 
