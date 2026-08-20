@@ -18,11 +18,11 @@ on:
         required: true
         type: string
       source_pr:
-        description: Open same-repository pull request whose head is candidate_sha
+        description: Pull request whose current same-repository head must equal candidate_sha
         required: true
         type: string
       route:
-        description: Absolute application route to capture
+        description: Absolute A11oy application route to capture
         required: true
         default: /a11oy/
         type: string
@@ -31,7 +31,7 @@ permissions:
   contents: read
 
 concurrency:
-  group: exact-head-screenshot-evidence-${{ github.event_name }}-${{ inputs.candidate_sha || github.event.pull_request.head.sha }}
+  group: exact-head-screenshot-evidence-${{ github.event_name }}-${{ inputs.source_pr || github.event.pull_request.number }}
   cancel-in-progress: false
 
 jobs:
@@ -61,15 +61,18 @@ jobs:
     needs: contract
     runs-on: ubuntu-24.04
     timeout-minutes: 45
+    outputs:
+      artifact_id: ${{ steps.evidence_upload.outputs['artifact-id'] }}
+      artifact_url: ${{ steps.evidence_upload.outputs['artifact-url'] }}
+      artifact_digest: ${{ steps.evidence_upload.outputs['artifact-digest'] }}
     permissions:
       contents: read
-      issues: write
+      pull-requests: read
     env:
       CANDIDATE_SHA: ${{ inputs.candidate_sha }}
       TARGET_BRANCH: ${{ inputs.target_branch }}
       SOURCE_PR: ${{ inputs.source_pr }}
       CAPTURE_ROUTE: ${{ inputs.route }}
-      GH_TOKEN: ${{ github.token }}
     steps:
       - name: Validate immutable inputs
         shell: bash
@@ -79,9 +82,11 @@ jobs:
           [[ "$TARGET_BRANCH" =~ ^[A-Za-z0-9._/-]+$ ]]
           [[ "$TARGET_BRANCH" != -* ]]
           [[ "$TARGET_BRANCH" != *..* ]]
-          [[ "$SOURCE_PR" =~ ^[0-9]+$ ]]
-          [[ "$CAPTURE_ROUTE" == /* ]]
+          [[ "$TARGET_BRANCH" != *//* ]]
+          [[ "$SOURCE_PR" =~ ^[1-9][0-9]*$ ]]
+          [[ "$CAPTURE_ROUTE" =~ ^/a11oy(/[A-Za-z0-9._~/-]*)?$ ]]
           [[ "$CAPTURE_ROUTE" != *..* ]]
+          [[ "$CAPTURE_ROUTE" != *//* ]]
 
       - name: Checkout controller from protected main
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
@@ -90,29 +95,23 @@ jobs:
           path: controller
           persist-credentials: false
 
-      - name: Verify target branch still equals authorized candidate
+      - name: Verify authorized pull request and branch
         shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
         run: |
           set -euo pipefail
-          remote_head="$(git ls-remote "https://github.com/${GITHUB_REPOSITORY}.git" "refs/heads/${TARGET_BRANCH}" | awk '{print $1}')"
-          test -n "$remote_head"
-          test "$remote_head" = "$CANDIDATE_SHA"
-
-          pr_head="$(
-            gh api "repos/${GITHUB_REPOSITORY}/pulls/${SOURCE_PR}" \
-              --jq '.head.sha'
-          )"
-          pr_repo="$(
-            gh api "repos/${GITHUB_REPOSITORY}/pulls/${SOURCE_PR}" \
-              --jq '.head.repo.full_name'
-          )"
-          pr_state="$(
-            gh api "repos/${GITHUB_REPOSITORY}/pulls/${SOURCE_PR}" \
-              --jq '.state'
-          )"
-          test "$pr_repo" = "$GITHUB_REPOSITORY"
-          test "$pr_state" = 'open'
+          pr_json="$(gh api "repos/${GITHUB_REPOSITORY}/pulls/${SOURCE_PR}")"
+          pr_head="$(jq -er '.head.sha | strings' <<<"$pr_json")"
+          pr_branch="$(jq -er '.head.ref | strings' <<<"$pr_json")"
+          pr_repository="$(jq -er '.head.repo.full_name | strings' <<<"$pr_json")"
+          pr_state="$(jq -er '.state | strings' <<<"$pr_json")"
+          branch_head="$(gh api "repos/${GITHUB_REPOSITORY}/git/ref/heads/${TARGET_BRANCH}" --jq '.object.sha')"
+          test "$pr_state" = open
+          test "$pr_repository" = "$GITHUB_REPOSITORY"
+          test "$pr_branch" = "$TARGET_BRANCH"
           test "$pr_head" = "$CANDIDATE_SHA"
+          test "$branch_head" = "$CANDIDATE_SHA"
 
       - name: Checkout exact candidate
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
@@ -122,8 +121,15 @@ jobs:
           fetch-depth: 0
           persist-credentials: false
 
+      - name: Verify candidate checkout identity
+        working-directory: candidate
+        shell: bash
+        run: test "$(git rev-parse HEAD)" = "$CANDIDATE_SHA"
+
       - name: Setup pnpm
         uses: pnpm/action-setup@0977fd99725f1db4007ccb2928dbb4e90d06cc86
+        with:
+          version: 10.26.1
 
       - name: Setup Node.js
         uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020
@@ -137,8 +143,18 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          pnpm install --frozen-lockfile
+          test "$(node -p "require('./package.json').packageManager")" = pnpm@10.26.1
+          pnpm install --frozen-lockfile --ignore-scripts
           pnpm exec playwright install --with-deps chromium
+
+      - name: Verify candidate immediately before capture
+        working-directory: candidate
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse HEAD)" = "$CANDIDATE_SHA"
+          tracked_status="$(git status --porcelain=v1 --untracked-files=no)"
+          test -z "$tracked_status"
 
       - name: Capture exact-head evidence
         working-directory: candidate
@@ -147,40 +163,86 @@ jobs:
           SZL_CANDIDATE_SHA: ${{ inputs.candidate_sha }}
           SZL_SOURCE_PR: ${{ inputs.source_pr }}
           SZL_ROUTE: ${{ inputs.route }}
-          SZL_START_COMMAND: pnpm --filter @workspace/a11oy dev
         run: |
           cp ../controller/scripts/ci/capture-series-a-exact-head.mjs .szl-capture-series-a-exact-head.mjs
           node .szl-capture-series-a-exact-head.mjs
 
-      - name: Verify fresh capture packet
+      - name: Verify fresh capture packet and isolated artifact
         working-directory: candidate
         shell: bash
+        env:
+          SZL_CANDIDATE_SHA: ${{ inputs.candidate_sha }}
+          SZL_SOURCE_PR: ${{ inputs.source_pr }}
+          SZL_ROUTE: ${{ inputs.route }}
+        run: node .szl-capture-series-a-exact-head.mjs --verify
+
+      - name: Re-read authorized pull request and branch before upload
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
         run: |
           set -euo pipefail
-          node - <<'NODE'
-          const fs = require('fs');
-          const crypto = require('crypto');
-          const packet = JSON.parse(fs.readFileSync('audit/series-a-exact-head-capture.json', 'utf8'));
-          if (packet.state !== 'VERIFIED') throw new Error('capture packet is not VERIFIED');
-          if (packet.source_sha !== process.env.CANDIDATE_SHA) throw new Error('source SHA mismatch');
-          if (!packet.pnpm_version) throw new Error('pnpm version is missing');
-          if (!Array.isArray(packet.results) || packet.results.length !== 5) throw new Error('viewport matrix incomplete');
-          for (const row of packet.results) {
-            const bytes = fs.readFileSync(row.screenshot);
-            const digest = crypto.createHash('sha256').update(bytes).digest('hex');
-            if (digest !== row.sha256) throw new Error(`digest mismatch: ${row.screenshot}`);
-            if (row.device_scale_factor !== 1) throw new Error(`device scale factor mismatch: ${row.name}`);
-            if (row.horizontal_overflow) throw new Error(`horizontal overflow: ${row.name}`);
-            if (row.console_errors.length || row.page_errors.length) throw new Error(`browser errors: ${row.name}`);
-          }
-          NODE
+          pr_json="$(gh api "repos/${GITHUB_REPOSITORY}/pulls/${SOURCE_PR}")"
+          pr_head="$(jq -er '.head.sha | strings' <<<"$pr_json")"
+          pr_branch="$(jq -er '.head.ref | strings' <<<"$pr_json")"
+          pr_repository="$(jq -er '.head.repo.full_name | strings' <<<"$pr_json")"
+          pr_state="$(jq -er '.state | strings' <<<"$pr_json")"
+          branch_head="$(gh api "repos/${GITHUB_REPOSITORY}/git/ref/heads/${TARGET_BRANCH}" --jq '.object.sha')"
+          test "$pr_state" = open
+          test "$pr_repository" = "$GITHUB_REPOSITORY"
+          test "$pr_branch" = "$TARGET_BRANCH"
+          test "$pr_head" = "$CANDIDATE_SHA"
+          test "$branch_head" = "$CANDIDATE_SHA"
 
-      - name: Re-read branch before evidence publication
+      - name: Upload immutable capture evidence
+        id: evidence_upload
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
+        with:
+          name: exact-head-screenshot-evidence-${{ github.run_id }}-${{ github.run_attempt }}
+          path: candidate/exact-head-evidence-artifact/
+          if-no-files-found: error
+          retention-days: 90
+
+  publish:
+    name: Publish signed-promotion work item
+    if: github.event_name == 'workflow_dispatch'
+    needs:
+      - contract
+      - capture
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: read
+      issues: write
+      pull-requests: read
+    env:
+      CANDIDATE_SHA: ${{ inputs.candidate_sha }}
+      TARGET_BRANCH: ${{ inputs.target_branch }}
+      SOURCE_PR: ${{ inputs.source_pr }}
+      CAPTURE_ROUTE: ${{ inputs.route }}
+      ARTIFACT_NAME: exact-head-screenshot-evidence-${{ github.run_id }}-${{ github.run_attempt }}
+      ARTIFACT_ID: ${{ needs.capture.outputs.artifact_id }}
+      ARTIFACT_URL: ${{ needs.capture.outputs.artifact_url }}
+      ARTIFACT_DIGEST: ${{ needs.capture.outputs.artifact_digest }}
+      GH_TOKEN: ${{ github.token }}
+    steps:
+      - name: Re-read authorized pull request and branch before publication
         shell: bash
         run: |
           set -euo pipefail
-          remote_head="$(git ls-remote "https://github.com/${GITHUB_REPOSITORY}.git" "refs/heads/${TARGET_BRANCH}" | awk '{print $1}')"
-          test "$remote_head" = "$CANDIDATE_SHA"
+          pr_json="$(gh api "repos/${GITHUB_REPOSITORY}/pulls/${SOURCE_PR}")"
+          pr_head="$(jq -er '.head.sha | strings' <<<"$pr_json")"
+          pr_branch="$(jq -er '.head.ref | strings' <<<"$pr_json")"
+          pr_repository="$(jq -er '.head.repo.full_name | strings' <<<"$pr_json")"
+          pr_state="$(jq -er '.state | strings' <<<"$pr_json")"
+          branch_head="$(gh api "repos/${GITHUB_REPOSITORY}/git/ref/heads/${TARGET_BRANCH}" --jq '.object.sha')"
+          test "$pr_state" = open
+          test "$pr_repository" = "$GITHUB_REPOSITORY"
+          test "$pr_branch" = "$TARGET_BRANCH"
+          test "$pr_head" = "$CANDIDATE_SHA"
+          test "$branch_head" = "$CANDIDATE_SHA"
+          [[ "$ARTIFACT_ID" =~ ^[1-9][0-9]*$ ]]
+          test "$ARTIFACT_URL" = "${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}/actions/runs/${GITHUB_RUN_ID}/artifacts/${ARTIFACT_ID}"
+          [[ "$ARTIFACT_DIGEST" =~ ^[0-9a-f]{64}$ ]]
 
       - name: Open or update the signed-promotion work item
         shell: bash
@@ -191,9 +253,13 @@ jobs:
           body="$(cat <<EOF
           Exact-head screenshot evidence is ready for signed promotion.
 
-          - workflow run and 90-day artifact: ${run_url}
+          - workflow run: ${run_url}
+          - workflow run attempt: \`${GITHUB_RUN_ATTEMPT}\`
+          - exact 90-day artifact: [\`${ARTIFACT_NAME}\`](${ARTIFACT_URL}) (ID \`${ARTIFACT_ID}\`)
+          - uploaded archive SHA-256: \`${ARTIFACT_DIGEST}\`
           - source PR: #${SOURCE_PR}
           - source head: \`${CANDIDATE_SHA}\`
+          - source branch: \`${TARGET_BRANCH}\`
           - route: \`${CAPTURE_ROUTE}\`
           - viewports: 390, 768, 1440, 1920, 2560 pixels
           - machine packet: \`audit/series-a-exact-head-capture.json\`
@@ -202,21 +268,13 @@ jobs:
           Download and verify the artifact, then promote it through a signed, DCO-complete protected pull request. The workflow intentionally does not create a token-authored pull request whose events cannot trigger the protected check suite.
           EOF
           )"
-          number="$(gh issue list --repo "$GITHUB_REPOSITORY" --state open --search "${title} in:title" --json number,title --jq ".[] | select(.title == \"${title}\") | .number" | head -n1)"
-          if [ -n "$number" ]; then
-            gh issue comment "$number" --repo "$GITHUB_REPOSITORY" --body "$body"
+          matches_text="$(gh api --paginate --slurp "repos/${GITHUB_REPOSITORY}/issues?state=open&per_page=100" --jq ".[][] | select((has(\"pull_request\") | not) and .title == \"${title}\") | .number")"
+          mapfile -t matches < <(printf '%s' "$matches_text")
+          if (( ${#matches[@]} > 1 )); then
+            echo "multiple open promotion work items have the exact title" >&2
+            exit 1
+          elif (( ${#matches[@]} == 1 )); then
+            gh issue edit "${matches[0]}" --repo "$GITHUB_REPOSITORY" --body "$body"
           else
             gh issue create --repo "$GITHUB_REPOSITORY" --title "$title" --body "$body"
           fi
-
-      - name: Upload immutable capture evidence
-        if: always()
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
-        with:
-          name: exact-head-screenshot-evidence-${{ github.run_id }}-${{ github.run_attempt }}
-          path: |
-            candidate/audit/series-a-exact-head-capture.json
-            candidate/audit/screenshot-catalog.md
-            candidate/docs/assets/screenshots/current/*.png
-          if-no-files-found: error
-          retention-days: 90

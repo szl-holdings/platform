@@ -36,6 +36,7 @@ mean.
 | [`FRONTIER_F2_1_PROOF.md`](./FRONTIER_F2_1_PROOF.md) | Frontier F2.1 interoperability proof packet | OpenTelemetry GenAI and MCP boundary verification with explicit claim limits |
 | [`frontier/DSLSA_STANDALONE_PUBLICATION_PROOF_CORRECTION_2026-07-29.md`](./frontier/DSLSA_STANDALONE_PUBLICATION_PROOF_CORRECTION_2026-07-29.md) | Append-only D-SLSA publication proof correction | Reproducible commands, numeric exit codes, attribution, patch scope, and unchanged DOI/D3/D4 boundaries |
 | [`FRONTIER_CONFORMANCE_PROOF.md`](./FRONTIER_CONFORMANCE_PROOF.md) | Frontier vertical conformance proof packet | Seven-gate reference fixture and honest 0/3 live-target result |
+| [`exact-head-screenshot-evidence-hardening-2026-08-20.md`](./exact-head-screenshot-evidence-hardening-2026-08-20.md) | Exact-head screenshot evidence hardening proof packet | PR/branch/checkout binding, fail-closed capture, isolated artifacts, and regression evidence |
 
 ---
 
