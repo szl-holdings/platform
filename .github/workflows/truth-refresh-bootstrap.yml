@@ -4,6 +4,11 @@ on:
   push:
     branches:
       - fix/truth-refresh-automation-20260820
+  pull_request:
+    branches: [main]
+    paths:
+      - .github/workflows/truth-refresh-bootstrap.yml
+      - .github/workflows/truth-drift.yml
 
 permissions:
   contents: write
@@ -15,7 +20,16 @@ concurrency:
 jobs:
   bootstrap:
     name: regenerate evidence and remove one-shot builder
-    if: github.repository == 'szl-holdings/platform'
+    if: >-
+      github.repository == 'szl-holdings/platform' &&
+      (
+        github.event_name == 'push' ||
+        (
+          github.event_name == 'pull_request' &&
+          github.head_ref == 'fix/truth-refresh-automation-20260820' &&
+          github.event.pull_request.head.repo.full_name == github.repository
+        )
+      )
     runs-on: ubuntu-latest
     timeout-minutes: 25
     steps:
