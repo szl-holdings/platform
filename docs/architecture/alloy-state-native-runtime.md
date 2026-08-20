@@ -111,6 +111,28 @@ failure-injection conformance before production admission.
 Transport availability never overrides policy. A successful byte transfer is not permission to
 reuse the state.
 
+### Encrypted filesystem transport
+
+`FileSystemStateTransportAdapter` is a real single-host durable implementation of the transport
+contract. It provides:
+
+- restart-surviving encrypted records under a caller-supplied 32-byte master key;
+- a random AES-256-GCM data key per payload, wrapped independently under the master key;
+- complete immutable State Capsule metadata as authenticated additional data;
+- canonical `state_<sha256>` path admission and two-level content-addressed sharding;
+- bounded payload and record sizes;
+- descriptor-bound no-follow reads with post-read path identity verification;
+- fsynced temporary writes and atomic no-replace hard-link publication;
+- exact post-write readback and idempotent concurrent same-object writes;
+- wrong-key, digest, metadata, and payload tamper rejection;
+- terminal digest-bound deletion receipts written before object removal;
+- resurrection rejection after deletion.
+
+Directory synchronization is required by default on supporting non-Windows systems. Platforms that
+do not support directory fsync may opt out explicitly, but that weakens the crash-durability claim
+and must be labelled in deployment evidence. The adapter is not a substitute for multi-host object
+storage, a database, distributed locking, KMS/HSM custody, backup, or disaster recovery.
+
 ## Kernel registration
 
 A kernel declares an immutable ID and version, kind and route, bounded `execute` function, whether
@@ -154,6 +176,10 @@ The demo performs no network calls. It creates an epoch, encrypted input state, 
 transition, encrypted output state, signed receipt, local transport receipt, sealed provider-state
 lifecycle, and crypto-shred. Its terminal status is `OPERATIONAL_REFERENCE`, not `PRODUCTION`.
 
+The package test command also exercises encrypted filesystem reopen, concurrent idempotency,
+plaintext absence, wrong-key and tamper rejection, terminal deletion, traversal rejection, and
+payload-budget enforcement.
+
 ## Current boundaries
 
 Implemented and locally verified:
@@ -165,13 +191,15 @@ Implemented and locally verified:
 - sealed provider-state lifecycle;
 - kernel budgets, policy/approval binding, mandatory verifier, idempotency, and fail-closed receipt persistence;
 - Ed25519 execution receipts and offline verification;
-- transport adapter contract and local adapter.
+- transport adapter contract and local adapter;
+- encrypted, atomically published, restart-surviving single-host filesystem transport;
+- terminal durable deletion receipts and no-resurrection enforcement.
 
 Not claimed by this change:
 
-- durable Postgres/S3/MinIO State Bus;
-- cross-process distributed locking;
-- production KMS/HSM key custody;
+- durable Postgres, S3, MinIO, or other multi-host state storage;
+- cross-process distributed locking or consensus;
+- production KMS/HSM key custody, rotation, backup, restore, or disaster recovery;
 - Mooncake, LMCache, NIXL, or GPU transfer deployment;
 - live Kimi K3 inference;
 - external production deployment, customer traffic, uptime, or performance improvement.
