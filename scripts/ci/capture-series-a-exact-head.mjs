@@ -11,6 +11,7 @@ import { pathToFileURL } from "node:url";
 
 export const DEFAULT_ROUTE = "/a11oy/";
 export const EXPECTED_PNPM_VERSION = "10.26.1";
+export const EXPECTED_PLAYWRIGHT_VERSION = "1.60.0";
 export const VIEWPORTS = Object.freeze([
   { name: "phone-390", width: 390, height: 844 },
   { name: "tablet-768", width: 768, height: 1024 },
@@ -26,8 +27,8 @@ const ARTIFACT_DIRECTORY = "exact-head-evidence-artifact";
 const APPLICATION_PORT = 4110;
 const DEVICE_SCALE_FACTOR = 1;
 const TIMEOUT_MS = 180_000;
-const START_EXECUTABLE = "pnpm";
-const START_ARGUMENTS = Object.freeze([
+const APPLICATION_EXECUTABLE = "pnpm";
+const APPLICATION_ARGUMENTS = Object.freeze([
   "--filter",
   "@workspace/a11oy",
   "exec",
@@ -40,7 +41,8 @@ const START_ARGUMENTS = Object.freeze([
   String(APPLICATION_PORT),
   "--strictPort",
 ]);
-const START_COMMAND = [START_EXECUTABLE, ...START_ARGUMENTS].join(" ");
+const START_COMMAND = [APPLICATION_EXECUTABLE, ...APPLICATION_ARGUMENTS].join(" ");
+const REQUIRED_CANDIDATE_USER = "szl-capture-candidate";
 const PNG_SIGNATURE = Buffer.from([137, 80, 78, 71, 13, 10, 26, 10]);
 const TRANSIENT_PATTERN = /\b(CHECKING|CONNECTING|LOADING|OBSERVING)\b/i;
 const CAPTURED_BY = "GitHub Actions";
@@ -132,6 +134,48 @@ export function assertCleanTrackedTree(statusOutput) {
   if (dirtyEntries) {
     throw new Error(`tracked candidate files changed before capture: ${dirtyEntries}`);
   }
+}
+
+function pathContains(parent, child) {
+  const relative = path.relative(parent, child);
+  return relative === "" || (
+    relative !== ".." &&
+    !relative.startsWith(`..${path.sep}`) &&
+    !path.isAbsolute(relative)
+  );
+}
+
+export function validateCaptureIsolation(environment = process.env) {
+  const candidateRootValue = String(environment.SZL_CANDIDATE_ROOT || "").trim();
+  const evidenceRootValue = String(environment.SZL_EVIDENCE_ROOT || "").trim();
+  const candidateHomeValue = String(environment.SZL_CANDIDATE_HOME || "").trim();
+  const candidateUser = String(environment.SZL_CANDIDATE_USER || "").trim();
+  for (const [name, value] of [
+    ["SZL_CANDIDATE_ROOT", candidateRootValue],
+    ["SZL_EVIDENCE_ROOT", evidenceRootValue],
+    ["SZL_CANDIDATE_HOME", candidateHomeValue],
+  ]) {
+    if (!value || !path.isAbsolute(value)) throw new Error(`${name} must be an absolute path`);
+  }
+  if (candidateUser !== REQUIRED_CANDIDATE_USER) {
+    throw new Error(`SZL_CANDIDATE_USER must equal ${REQUIRED_CANDIDATE_USER}`);
+  }
+
+  const candidateRoot = path.resolve(candidateRootValue);
+  const evidenceRoot = path.resolve(evidenceRootValue);
+  const candidateHome = path.resolve(candidateHomeValue);
+  if (pathContains(candidateRoot, evidenceRoot) || pathContains(evidenceRoot, candidateRoot)) {
+    throw new Error("candidate and evidence roots must be disjoint");
+  }
+  if (
+    pathContains(candidateRoot, candidateHome) ||
+    pathContains(candidateHome, candidateRoot) ||
+    pathContains(evidenceRoot, candidateHome) ||
+    pathContains(candidateHome, evidenceRoot)
+  ) {
+    throw new Error("candidate home must be disjoint from source and evidence roots");
+  }
+  return { candidateRoot, evidenceRoot, candidateHome, candidateUser };
 }
 
 export function surfaceFromRoute(route) {
@@ -339,6 +383,9 @@ export async function verifyEvidencePacketOnDisk({
     throw new Error("capture toolchain identity is incomplete");
   }
   if (!packet.node_version.startsWith("v24.")) throw new Error("Node major version mismatch");
+  if (packet.playwright_version !== EXPECTED_PLAYWRIGHT_VERSION) {
+    throw new Error("Playwright version mismatch");
+  }
 
   const startedAt = Date.parse(packet.started_at);
   const capturedAt = Date.parse(packet.captured_at);
@@ -501,8 +548,9 @@ async function terminateServer(child) {
   }
 }
 
-function verifyCurrentCheckout(candidateSha) {
+function verifyCurrentCheckout(candidateSha, candidateRoot) {
   const observedSha = execFileSync("git", ["rev-parse", "HEAD"], {
+    cwd: candidateRoot,
     encoding: "utf8",
     timeout: 8_000,
   }).trim();
@@ -510,7 +558,7 @@ function verifyCurrentCheckout(candidateSha) {
   const trackedStatus = execFileSync(
     "git",
     ["status", "--porcelain=v1", "--untracked-files=no"],
-    { encoding: "utf8", timeout: 8_000 },
+    { cwd: candidateRoot, encoding: "utf8", timeout: 8_000 },
   );
   assertCleanTrackedTree(trackedStatus);
   return observedSha;
@@ -519,7 +567,9 @@ function verifyCurrentCheckout(candidateSha) {
 async function capture() {
   const startedAt = new Date();
   const inputs = validateRuntimeInputs();
-  let observedSha = verifyCurrentCheckout(inputs.candidateSha);
+  const { candidateRoot, evidenceRoot, candidateHome, candidateUser } =
+    validateCaptureIsolation();
+  verifyCurrentCheckout(inputs.candidateSha, candidateRoot);
 
   const pnpmVersion = execFileSync("pnpm", ["--version"], { encoding: "utf8" }).trim();
   if (pnpmVersion !== EXPECTED_PNPM_VERSION) {
@@ -529,8 +579,13 @@ async function capture() {
   const playwrightPackage = (
     await import("@playwright/test/package.json", { with: { type: "json" } })
   ).default;
+  if (playwrightPackage.version !== EXPECTED_PLAYWRIGHT_VERSION) {
+    throw new Error(
+      `Playwright ${playwrightPackage.version} does not match ${EXPECTED_PLAYWRIGHT_VERSION}`,
+    );
+  }
 
-  const root = process.cwd();
+  const root = evidenceRoot;
   const evidenceDir = path.resolve(root, EVIDENCE_DIRECTORY);
   const evidencePath = path.resolve(root, EVIDENCE_PATH);
   const catalogPath = path.resolve(root, CATALOG_PATH);
@@ -546,27 +601,32 @@ async function capture() {
   await mkdir(path.dirname(evidencePath), { recursive: true });
   await rm(artifactRoot, { recursive: true, force: true });
 
-  const childEnvironment = {
-    ...process.env,
-    CI: "1",
-    BROWSER: "none",
-    BASE_PATH: "/a11oy/",
-    VITE_PORT: String(APPLICATION_PORT),
-  };
-  for (const sensitiveName of [
-    "GH_TOKEN",
-    "GITHUB_TOKEN",
-    "ACTIONS_RUNTIME_TOKEN",
-    "ACTIONS_ID_TOKEN_REQUEST_TOKEN",
-    "ACTIONS_ID_TOKEN_REQUEST_URL",
-    "ACTIONS_RESULTS_URL",
-    "ACTIONS_CACHE_URL",
-  ]) {
-    delete childEnvironment[sensitiveName];
-  }
-  const child = spawn(START_EXECUTABLE, START_ARGUMENTS, {
-    cwd: root,
-    env: childEnvironment,
+  const trustedPath = String(process.env.PATH || "/usr/local/bin:/usr/bin:/bin");
+  const pnpmPath = execFileSync("which", ["pnpm"], { encoding: "utf8" }).trim();
+  if (!path.isAbsolute(pnpmPath)) throw new Error("pnpm executable must resolve to an absolute path");
+  const candidateEnvironment = [
+    `PATH=${trustedPath}`,
+    `HOME=${candidateHome}`,
+    `TMPDIR=${path.join(candidateHome, "tmp")}`,
+    `XDG_CACHE_HOME=${path.join(candidateHome, "cache")}`,
+    "CI=1",
+    "BROWSER=none",
+    "BASE_PATH=/a11oy/",
+    `VITE_PORT=${APPLICATION_PORT}`,
+  ];
+  const child = spawn("sudo", [
+    "--non-interactive",
+    "--user",
+    candidateUser,
+    "--",
+    "/usr/bin/env",
+    "-i",
+    ...candidateEnvironment,
+    pnpmPath,
+    ...APPLICATION_ARGUMENTS,
+  ], {
+    cwd: candidateRoot,
+    env: { PATH: trustedPath, LANG: "C.UTF-8" },
     shell: false,
     stdio: ["ignore", "pipe", "pipe"],
     detached: process.platform !== "win32",
@@ -621,9 +681,9 @@ async function capture() {
     );
   }
 
-  // The install and application startup both execute candidate-controlled code. Re-read
-  // HEAD and the tracked tree at the last common point before any viewport is captured.
-  observedSha = verifyCurrentCheckout(inputs.candidateSha);
+  // Candidate application code runs as a separate OS identity against read-only source.
+  // Re-read the exact checkout at the last common point before any viewport is captured.
+  const preCaptureSha = verifyCurrentCheckout(inputs.candidateSha, candidateRoot);
 
   let browser;
   const results = [];
@@ -781,6 +841,11 @@ async function capture() {
     await terminateServer(child);
   }
 
+  // Close the provenance boundary after the untrusted process is gone. Evidence lives in
+  // a runner-only root that the candidate identity cannot traverse or mutate.
+  const postTeardownSha = verifyCurrentCheckout(inputs.candidateSha, candidateRoot);
+  assertCheckoutRevision(preCaptureSha, postTeardownSha);
+
   const capturedAt = new Date();
   let catalog = "";
   try {
@@ -806,7 +871,7 @@ async function capture() {
     repository: inputs.repository,
     source_pr: inputs.sourcePr,
     source_sha: inputs.candidateSha,
-    checkout_sha: observedSha,
+    checkout_sha: postTeardownSha,
     workflow_run_id: inputs.workflowRunId,
     workflow_run_attempt: inputs.workflowRunAttempt,
     workflow_run_url: workflowRunUrl,
@@ -860,7 +925,8 @@ async function capture() {
 const invokedPath = process.argv[1] ? pathToFileURL(path.resolve(process.argv[1])).href : "";
 if (import.meta.url === invokedPath) {
   if (process.argv[2] === "--verify") {
-    const packet = await verifyEvidencePacketOnDisk();
+    const { evidenceRoot } = validateCaptureIsolation();
+    const packet = await verifyEvidencePacketOnDisk({ root: evidenceRoot });
     console.log(
       JSON.stringify({ state: packet.state, source_sha: packet.source_sha, captures: packet.results.length }),
     );

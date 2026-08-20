@@ -57,7 +57,7 @@ jobs:
 
   capture:
     name: Capture exact-head evidence package
-    if: github.event_name == 'workflow_dispatch'
+    if: github.event_name == 'workflow_dispatch' && github.ref == 'refs/heads/main'
     needs: contract
     runs-on: ubuntu-24.04
     timeout-minutes: 45
@@ -73,6 +73,10 @@ jobs:
       TARGET_BRANCH: ${{ inputs.target_branch }}
       SOURCE_PR: ${{ inputs.source_pr }}
       CAPTURE_ROUTE: ${{ inputs.route }}
+      SZL_CANDIDATE_ROOT: ${{ github.workspace }}/candidate
+      SZL_EVIDENCE_ROOT: ${{ runner.temp }}/exact-head-evidence-${{ github.run_id }}-${{ github.run_attempt }}
+      SZL_CANDIDATE_HOME: ${{ runner.temp }}/candidate-home-${{ github.run_id }}-${{ github.run_attempt }}
+      SZL_CANDIDATE_USER: szl-capture-candidate
     steps:
       - name: Validate immutable inputs
         shell: bash
@@ -88,10 +92,10 @@ jobs:
           [[ "$CAPTURE_ROUTE" != *..* ]]
           [[ "$CAPTURE_ROUTE" != *//* ]]
 
-      - name: Checkout controller from protected main
+      - name: Checkout controller from immutable protected workflow SHA
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
         with:
-          ref: main
+          ref: ${{ github.sha }}
           path: controller
           persist-credentials: false
 
@@ -136,45 +140,108 @@ jobs:
         with:
           node-version: "24"
           cache: pnpm
-          cache-dependency-path: candidate/pnpm-lock.yaml
+          cache-dependency-path: |
+            candidate/pnpm-lock.yaml
+            controller/pnpm-lock.yaml
 
-      - name: Install exact dependencies and Chromium
-        working-directory: candidate
+      - name: Install nonexecuting candidate dependencies and trusted Chromium
         shell: bash
         run: |
           set -euo pipefail
-          test "$(node -p "require('./package.json').packageManager")" = pnpm@10.26.1
-          pnpm install --frozen-lockfile --ignore-scripts
-          pnpm exec playwright install --with-deps chromium
+          test "$(node -p "require('./candidate/package.json').packageManager")" = pnpm@10.26.1
+          test "$(node -p "require('./controller/package.json').packageManager")" = pnpm@10.26.1
+          pnpm --dir candidate install --frozen-lockfile --ignore-scripts --ignore-pnpmfile
+          pnpm --dir controller install --frozen-lockfile --ignore-scripts --ignore-pnpmfile
+          pnpm --dir controller exec playwright install --with-deps chromium
+
+      - name: Establish read-only candidate and private evidence boundary
+        shell: bash
+        run: |
+          set -euo pipefail
+          unsafe_entries="$(git -C candidate ls-files --stage | awk '$1 == "120000" || $1 == "160000" { print $4 }')"
+          test -z "$unsafe_entries"
+          if id "$SZL_CANDIDATE_USER" >/dev/null 2>&1; then
+            echo "candidate runtime identity already exists" >&2
+            exit 1
+          fi
+          sudo useradd --system --no-create-home --home-dir /nonexistent \
+            --shell /usr/sbin/nologin "$SZL_CANDIDATE_USER"
+          candidate_group="$(id -gn "$SZL_CANDIDATE_USER")"
+          sudo install -d -o "$SZL_CANDIDATE_USER" -g "$candidate_group" -m 0700 \
+            "$SZL_CANDIDATE_HOME" "$SZL_CANDIDATE_HOME/tmp" "$SZL_CANDIDATE_HOME/cache"
+          install -d -m 0700 "$SZL_EVIDENCE_ROOT"
+          chmod -R a-w "$SZL_CANDIDATE_ROOT"
+          for cache_path in \
+            "$SZL_CANDIDATE_ROOT/node_modules/.vite" \
+            "$SZL_CANDIDATE_ROOT/node_modules/.vite-temp" \
+            "$SZL_CANDIDATE_ROOT/node_modules/.cache"; do
+            test ! -L "$cache_path"
+          done
+          sudo install -d -o "$SZL_CANDIDATE_USER" -g "$candidate_group" -m 0700 \
+            "$SZL_CANDIDATE_ROOT/node_modules/.vite" \
+            "$SZL_CANDIDATE_ROOT/node_modules/.vite-temp" \
+            "$SZL_CANDIDATE_ROOT/node_modules/.cache"
+          sudo --non-interactive --user "$SZL_CANDIDATE_USER" -- \
+            test ! -w "$SZL_CANDIDATE_ROOT/package.json"
+          if sudo --non-interactive --user "$SZL_CANDIDATE_USER" -- \
+            test -r "$SZL_EVIDENCE_ROOT"; then
+            echo "candidate runtime identity can traverse the evidence root" >&2
+            exit 1
+          fi
+          if sudo --non-interactive --user "$SZL_CANDIDATE_USER" -- \
+            test -w "$(dirname "$SZL_EVIDENCE_ROOT")"; then
+            echo "candidate runtime identity can rename the evidence root" >&2
+            exit 1
+          fi
 
       - name: Verify candidate immediately before capture
-        working-directory: candidate
         shell: bash
         run: |
           set -euo pipefail
-          test "$(git rev-parse HEAD)" = "$CANDIDATE_SHA"
-          tracked_status="$(git status --porcelain=v1 --untracked-files=no)"
+          test "$(git -C "$SZL_CANDIDATE_ROOT" rev-parse HEAD)" = "$CANDIDATE_SHA"
+          tracked_status="$(git -C "$SZL_CANDIDATE_ROOT" status --porcelain=v1 --untracked-files=no)"
           test -z "$tracked_status"
 
       - name: Capture exact-head evidence
-        working-directory: candidate
+        working-directory: controller
         shell: bash
         env:
           SZL_CANDIDATE_SHA: ${{ inputs.candidate_sha }}
           SZL_SOURCE_PR: ${{ inputs.source_pr }}
           SZL_ROUTE: ${{ inputs.route }}
         run: |
-          cp ../controller/scripts/ci/capture-series-a-exact-head.mjs .szl-capture-series-a-exact-head.mjs
-          node .szl-capture-series-a-exact-head.mjs
+          set -euo pipefail
+          cleanup_candidate() {
+            sudo pkill -KILL -u "$SZL_CANDIDATE_USER" >/dev/null 2>&1 || true
+          }
+          trap cleanup_candidate EXIT
+          node scripts/ci/capture-series-a-exact-head.mjs
+          cleanup_candidate
+          trap - EXIT
+          if pgrep -u "$SZL_CANDIDATE_USER" >/dev/null; then
+            echo "candidate runtime processes remain after capture" >&2
+            exit 1
+          fi
 
-      - name: Verify fresh capture packet and isolated artifact
-        working-directory: candidate
+      - name: Close source and evidence integrity after candidate teardown
+        working-directory: controller
         shell: bash
         env:
           SZL_CANDIDATE_SHA: ${{ inputs.candidate_sha }}
           SZL_SOURCE_PR: ${{ inputs.source_pr }}
           SZL_ROUTE: ${{ inputs.route }}
-        run: node .szl-capture-series-a-exact-head.mjs --verify
+        run: |
+          set -euo pipefail
+          if pgrep -u "$SZL_CANDIDATE_USER" >/dev/null; then
+            echo "candidate runtime processes remain before verification" >&2
+            exit 1
+          fi
+          test "$(git -C "$SZL_CANDIDATE_ROOT" rev-parse HEAD)" = "$CANDIDATE_SHA"
+          tracked_status="$(git -C "$SZL_CANDIDATE_ROOT" status --porcelain=v1 --untracked-files=no)"
+          test -z "$tracked_status"
+          test "$(stat -c '%a' "$SZL_EVIDENCE_ROOT")" = 700
+          node scripts/ci/capture-series-a-exact-head.mjs --verify
+          chmod -R a-w "$SZL_EVIDENCE_ROOT"
 
       - name: Re-read authorized pull request and branch before upload
         shell: bash
@@ -199,7 +266,7 @@ jobs:
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
         with:
           name: exact-head-screenshot-evidence-${{ github.run_id }}-${{ github.run_attempt }}
-          path: candidate/exact-head-evidence-artifact/
+          path: ${{ runner.temp }}/exact-head-evidence-${{ github.run_id }}-${{ github.run_attempt }}/exact-head-evidence-artifact/
           if-no-files-found: error
           retention-days: 90
 

@@ -2,8 +2,8 @@
 
 - **workcell_id:** `platform-pr658-exact-head-audit-20260820`
 - **agent:** Codex, independent pull-request reviewer
-- **objective:** Audit PR #658 at exact head
-  `02f8b3b7ac691a8f7f30f8c28d5bb1f38734b301` and harden screenshot
+- **objective:** Audit PR #658 through exact review head
+  `4e4bd01fc1ec0ecf33e5c26ed7845120b3264bcb` and harden screenshot
   provenance, exact-ref race handling, dependency and port selection, artifact
   integrity, duplicate work-item behavior, and fail-closed errors.
 - **plan_summary:** Read repository doctrine and the complete PR diff, inspect the
@@ -15,29 +15,42 @@
   default route; bound the open same-repository PR, candidate
   branch, checkout, packet, and publication to one SHA; pinned pnpm 10.26.1 and
   A11oy port 4110; required an unchanged tracked tree immediately before
-  capture; rejected HTTP-200 not-found, unfinished, redirected,
+  capture; moved candidate execution behind a dedicated unprivileged OS
+  identity with read-only exact source, a private runtime home, and no access
+  to the runner-owned `0700` evidence root; executed the controller and browser
+  tooling from the immutable protected workflow SHA; killed all candidate-user
+  processes and rechecked source integrity before making verified evidence
+  read-only; rejected HTTP-200 not-found, unfinished, redirected,
   overflowing, placeholder, transient, and browser-error surfaces; added
   ISO-dated surface filenames and PNG dimension checks; isolated the seven
   retained files; emitted every screenshot-doctrine catalog field; scanned
   visible body text for unmarked connecting states; moved issue-write authority
   into a post-capture job; and
   bound the work item to the exact attempt-scoped artifact ID, URL, name, and
-  archive digest while making updates deterministic and duplicate-failing.
+  archive digest while making updates deterministic and duplicate-failing;
+  corrected the adjacent 46-workflow note; and separated structural truth
+  validation from the scheduled/manual snapshot-age audit so unrelated PRs do
+  not rewrite or expire honest historical evidence.
 - **test_results:**
   - Local `pnpm typecheck` could not begin because the
     package-manager shim attempted a network acquisition that the execution
     environment denied. No TypeScript result is claimed.
   - `node --test scripts/ci/exact-head-screenshot-evidence.test.mjs` — exit 0;
-    10 passed, 0 failed. Regressions cover real-route naming, checkout and clean
-    tracked-tree mismatch,
+    11 passed, 0 failed. Regressions cover real-route naming, checkout and clean
+    tracked-tree mismatch, disjoint source/runtime/evidence roots,
     HTTP-200 SPA 404, route/readiness/error rejection, valid packet admission,
     duplicate screenshot identity, incomplete catalog metadata, unbound artifact
     pollution, symlink output escape, visible connecting state, and workflow
     permission/ref/work-item contracts.
   - `node --check scripts/ci/capture-series-a-exact-head.mjs` and the test file
     — exit 0.
-  - PyYAML safe-load of the capture and staging workflows — exit 0; jobs parsed as
-    `contract,capture,publish` and `deploy-staging`.
+  - Native Node type-stripping execution of
+    `tools/truth/validate-truth.test.ts` — exit 0; 13 passed, 0 failed.
+    Structural validation accepts the honest historical snapshot, while the
+    explicit freshness audit rejects its age as expected.
+  - PyYAML safe-load and embedded-Bash syntax checks of the capture,
+    truth-drift, and staging workflows — exit 0; jobs parsed and 28 shell
+    blocks checked.
   - `node scripts/audit/validate-source-of-truth.js` — exit 0; all 66 checks
     passed, including the tracked 46-workflow inventory.
   - Protected-base comparison of `.github/workflows/deploy-staging.yml` — exit
@@ -64,8 +77,10 @@
   and explicit claim boundaries; it introduces no customer, revenue,
   compliance, deployment, traffic, uptime, or authorization claim.
 - **security_check:** Passed. No secret or environment value is committed.
-  Candidate-controlled install and application processes run without an
-  issue-write token; the separate publication job never checks out or executes
+  Candidate dependency resolution disables scripts and candidate pnpm hooks.
+  Candidate application code receives a minimal non-secret environment and
+  runs as a separate OS identity that cannot write tracked source or traverse
+  evidence outputs. The separate publication job never checks out or executes
   candidate code.
 - **known_gaps_update:** No product gap was introduced or closed, so
   `docs/operations/known-gaps.md` is unchanged. A full hosted capture was not

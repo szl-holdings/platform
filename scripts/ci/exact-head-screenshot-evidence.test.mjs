@@ -6,6 +6,7 @@ import path from "node:path";
 import test from "node:test";
 import {
   DEFAULT_ROUTE,
+  EXPECTED_PLAYWRIGHT_VERSION,
   EXPECTED_PNPM_VERSION,
   VIEWPORTS,
   assertCleanTrackedTree,
@@ -16,6 +17,7 @@ import {
   screenshotFilename,
   surfaceFromRoute,
   surfaceLabelFromRoute,
+  validateCaptureIsolation,
   validateRoute,
   verifyEvidencePacketOnDisk,
 } from "./capture-series-a-exact-head.mjs";
@@ -152,7 +154,7 @@ ${results.map(row => catalogEntryMarkdown(row)).join("\n")}\n`;
     runner_arch: "X64",
     node_version: "v24.0.0",
     pnpm_version: EXPECTED_PNPM_VERSION,
-    playwright_version: "1.60.0",
+    playwright_version: EXPECTED_PLAYWRIGHT_VERSION,
     browser_version: "test",
     start_command:
       "pnpm --filter @workspace/a11oy exec vite --config vite.config.ts --host 127.0.0.1 --port 4110 --strictPort",
@@ -199,6 +201,35 @@ test("checkout identity is fail-closed", () => {
   assert.throws(
     () => assertCleanTrackedTree(" M artifacts/a11oy/src/App.tsx"),
     /tracked candidate files changed/,
+  );
+});
+
+test("candidate source, runtime home, and evidence roots must be disjoint", () => {
+  const isolated = validateCaptureIsolation({
+    SZL_CANDIDATE_ROOT: "/runner/work/platform/candidate",
+    SZL_EVIDENCE_ROOT: "/runner/temp/evidence",
+    SZL_CANDIDATE_HOME: "/runner/temp/candidate-home",
+    SZL_CANDIDATE_USER: "szl-capture-candidate",
+  });
+  assert.equal(isolated.candidateRoot, "/runner/work/platform/candidate");
+  assert.equal(isolated.evidenceRoot, "/runner/temp/evidence");
+  assert.throws(
+    () => validateCaptureIsolation({
+      SZL_CANDIDATE_ROOT: "/runner/work/platform/candidate",
+      SZL_EVIDENCE_ROOT: "/runner/work/platform/candidate/evidence",
+      SZL_CANDIDATE_HOME: "/runner/temp/candidate-home",
+      SZL_CANDIDATE_USER: "szl-capture-candidate",
+    }),
+    /candidate and evidence roots must be disjoint/,
+  );
+  assert.throws(
+    () => validateCaptureIsolation({
+      SZL_CANDIDATE_ROOT: "/runner/work/platform/candidate",
+      SZL_EVIDENCE_ROOT: "/runner/temp/evidence",
+      SZL_CANDIDATE_HOME: "/runner/temp/candidate-home",
+      SZL_CANDIDATE_USER: "runner",
+    }),
+    /SZL_CANDIDATE_USER/,
   );
 });
 
@@ -326,17 +357,25 @@ test("workflow binds PR, branch, permissions, publication, and artifact contract
   );
   assert.match(captureSource, /--untracked-files=no/);
   assert.match(captureSource, /bodyText\s*\.split\(\/\\n\+\//);
-  assert.equal(
-    captureSource.match(/verifyCurrentCheckout\(inputs\.candidateSha\)/g)?.length,
-    2,
+  assert.equal(captureSource.match(/verifyCurrentCheckout\(inputs\.candidateSha,/g)?.length, 3);
+  const preCaptureGuard = captureSource.indexOf(
+    "const preCaptureSha = verifyCurrentCheckout(inputs.candidateSha, candidateRoot)",
   );
-  const preCaptureGuard = captureSource.lastIndexOf(
-    "verifyCurrentCheckout(inputs.candidateSha)",
+  const postTeardownGuard = captureSource.indexOf(
+    "const postTeardownSha = verifyCurrentCheckout(inputs.candidateSha, candidateRoot)",
   );
   assert.ok(preCaptureGuard > captureSource.indexOf("if (!ready)"));
   assert.ok(preCaptureGuard < captureSource.indexOf("chromium.launch"));
+  assert.ok(postTeardownGuard > captureSource.indexOf("await terminateServer(child)"));
   assert.match(workflow, /Verify candidate immediately before capture/);
-  assert.match(workflow, /tracked_status="\$\(git status --porcelain=v1 --untracked-files=no\)"/);
+  assert.match(captureJob, /github\.ref == 'refs\/heads\/main'/);
+  assert.match(workflow, /ref: \$\{\{ github\.sha \}\}/);
+  assert.match(workflow, /SZL_CANDIDATE_USER: szl-capture-candidate/);
+  assert.match(workflow, /chmod -R a-w "\$SZL_CANDIDATE_ROOT"/);
+  assert.match(workflow, /install -d -m 0700 "\$SZL_EVIDENCE_ROOT"/);
+  assert.match(workflow, /sudo --non-interactive --user/);
+  assert.match(workflow, /--ignore-scripts --ignore-pnpmfile/);
+  assert.match(workflow, /tracked_status="\$\(git -C "\$SZL_CANDIDATE_ROOT" status --porcelain=v1 --untracked-files=no\)"/);
   assert.match(workflow, /test -z "\$tracked_status"/);
   assert.match(workflow, /inputs\.source_pr \|\| github\.event\.pull_request\.number/);
   assert.doesNotMatch(captureJob, /issues: write/);
@@ -345,7 +384,8 @@ test("workflow binds PR, branch, permissions, publication, and artifact contract
   assert.match(publishJob, /matches_text="\$\(gh api --paginate --slurp/);
   assert.match(publishJob, /gh issue edit/);
   assert.doesNotMatch(workflow, /if: always\(\)/);
-  assert.match(workflow, /candidate\/exact-head-evidence-artifact\//);
+  assert.match(workflow, /runner\.temp.*exact-head-evidence/);
+  assert.doesNotMatch(workflow, /cp \.\.\/controller\/scripts\/ci\/capture-series-a-exact-head/);
   assert.match(workflow, /id: evidence_upload/);
   assert.match(workflow, /steps\.evidence_upload\.outputs\['artifact-id'\]/);
   assert.match(publishJob, /needs\.capture\.outputs\.artifact_digest/);

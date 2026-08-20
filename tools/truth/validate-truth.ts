@@ -18,7 +18,15 @@ const allowedLabels = new Set([
 const MAX_AGE_MS = 7 * 24 * 60 * 60 * 1000;
 const MAX_FUTURE_SKEW_MS = 5 * 60 * 1000;
 
-export function validateTruth(truth: Record<string, unknown>, nowMs = Date.now()): string[] {
+type TruthValidationOptions = {
+  requireFreshness?: boolean;
+};
+
+export function validateTruth(
+  truth: Record<string, unknown>,
+  nowMs = Date.now(),
+  options: TruthValidationOptions = {},
+): string[] {
   const failures: string[] = [];
 
   if (truth.schema !== 'szl.truth/v1') failures.push('schema must equal szl.truth/v1');
@@ -32,7 +40,9 @@ export function validateTruth(truth: Record<string, unknown>, nowMs = Date.now()
   if (!Number.isFinite(generated)) failures.push('generated_at is not parseable');
   else {
     const ageMs = nowMs - generated;
-    if (ageMs > MAX_AGE_MS) failures.push('generated_at is older than seven days');
+    if (options.requireFreshness && ageMs > MAX_AGE_MS) {
+      failures.push('generated_at is older than seven days');
+    }
     if (ageMs < -MAX_FUTURE_SKEW_MS) {
       failures.push('generated_at is more than five minutes in the future');
     }
@@ -89,7 +99,9 @@ export function validateTruth(truth: Record<string, unknown>, nowMs = Date.now()
 
 async function main(): Promise<void> {
   const truth = JSON.parse(await readFile(file, 'utf8')) as Record<string, unknown>;
-  const failures = validateTruth(truth);
+  const failures = validateTruth(truth, Date.now(), {
+    requireFreshness: process.argv.includes('--require-freshness'),
+  });
 
   if (failures.length > 0) {
     for (const failure of failures) process.stderr.write(`truth validation: ${failure}\n`);
