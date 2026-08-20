@@ -5,10 +5,15 @@ import App from './App';
 import { GraphQLProvider } from './graphql';
 import './index.css';
 
-ReactDOM.createRoot(document.getElementById('root')!).render(
+const root = document.getElementById('root');
+if (!root) throw new Error('A11oy root element is unavailable');
+
+ReactDOM.createRoot(root).render(
   <React.StrictMode>
     <GraphQLProvider>
-      <OmniaShellProvider config={{ artifactId: 'a11oy', accentColor: '#c9b787' }}>
+      <OmniaShellProvider
+        config={{ artifactId: 'a11oy', accentColor: '#c9b787', networkState: 'UNAVAILABLE' }}
+      >
         <App />
       </OmniaShellProvider>
     </GraphQLProvider>
