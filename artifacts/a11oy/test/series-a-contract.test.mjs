@@ -55,6 +55,16 @@ const captureScript = readFileSync(
   new URL('../../../scripts/capture-proof-screenshots.mjs', import.meta.url),
   'utf8',
 );
+const screenshotTargets = JSON.parse(
+  readFileSync(new URL('../../../scripts/screenshot-targets.json', import.meta.url), 'utf8'),
+);
+const rootPackage = JSON.parse(
+  readFileSync(new URL('../../../package.json', import.meta.url), 'utf8'),
+);
+const screenshotRefresh = readFileSync(
+  new URL('../../../scripts/screenshots/refresh.sh', import.meta.url),
+  'utf8',
+);
 
 const solutionIds = [
   'cyber-security',
@@ -207,6 +217,38 @@ test('limits non-dry-run proof capture to reviewed safe groups', () => {
   assert.match(captureScript, /!DRY_RUN && !SAFE_CAPTURE_GROUPS\.has\(FILTER\)/);
   assert.match(captureScript, /: Array\.isArray\(t\.groups\) && t\.groups\.includes\(FILTER\)/);
   assert.doesNotMatch(captureScript, /--filter a11oy/);
+});
+
+test('keeps local QA output separate from Replit proof candidates', () => {
+  assert.match(captureScript, /CAPTURE_MODES = new Set\(\['local-qa', 'replit-proof'\]\)/);
+  assert.match(captureScript, /NON_QUALIFYING_LOCAL_QA/);
+  assert.match(captureScript, /REPLIT_WORKSPACE_CAPTURE_PENDING_REVIEW/);
+  assert.match(captureScript, /proofLevel: null/);
+  assert.match(captureScript, /LOCAL_QA_OUTPUT_ROOT/);
+  assert.match(captureScript, /isStrictDescendant\(LOCAL_QA_OUTPUT_ROOT, resolvedOutput\)/);
+  assert.match(captureScript, /replit-proof requires non-empty REPL_ID and REPLIT_DEV_DOMAIN/);
+  assert.match(captureScript, /writeManifestFiles\(manifest, OUTPUT_DIR\)/);
+  assert.doesNotMatch(captureScript, /Source-local target cannot be captured/);
+
+  const dryRunStart = captureScript.indexOf('if (DRY_RUN) {');
+  const ensureOutput = captureScript.indexOf('ensureDir(OUTPUT_DIR);');
+  assert.ok(dryRunStart >= 0 && ensureOutput > dryRunStart);
+  const dryRunBlock = captureScript.slice(dryRunStart, ensureOutput);
+  assert.match(dryRunBlock, /console\.log\(JSON\.stringify\(manifest, null, 2\)\)/);
+  assert.doesNotMatch(dryRunBlock, /writeManifestFiles/);
+
+  const p0Targets = screenshotTargets.filter((target) => target.groups?.includes('p0-series-a'));
+  assert.equal(p0Targets.length, 7);
+  assert.ok(
+    p0Targets.every(
+      (target) =>
+        target.recommendedUsage?.length === 1 && target.recommendedUsage[0] === 'local source QA',
+    ),
+  );
+  assert.doesNotMatch(JSON.stringify(p0Targets), /local source proof/);
+  assert.match(rootPackage.scripts['screenshots:proof'], /--filter=p0-series-a/);
+  assert.match(screenshotRefresh, /set -euo pipefail/);
+  assert.match(screenshotRefresh, /capture-proof-screenshots\.mjs --filter=p0-series-a/);
 });
 
 test('preserves blocked Workcell state in the deterministic demo trace', () => {

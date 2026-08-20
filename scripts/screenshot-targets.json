@@ -102,7 +102,7 @@
     "viewports": ["desktop_1366"],
     "groups": ["p0-series-a"],
     "delay": 300,
-    "recommendedUsage": ["local source proof"]
+    "recommendedUsage": ["local source QA"]
   },
   {
     "id": "a11oy-workcell-replay",
@@ -119,7 +119,7 @@
     "viewports": ["desktop_1366"],
     "groups": ["p0-series-a"],
     "delay": 300,
-    "recommendedUsage": ["local source proof"]
+    "recommendedUsage": ["local source QA"]
   },
   {
     "id": "a11oy-mirror-eval",
@@ -224,7 +224,7 @@
     "viewports": ["mobile_320", "mobile_390", "tablet_768", "desktop_1366", "wide_1728"],
     "groups": ["p0-series-a"],
     "delay": 300,
-    "recommendedUsage": ["local source proof"]
+    "recommendedUsage": ["local source QA"]
   },
   {
     "id": "a11oy-demo-fixture",
@@ -241,7 +241,7 @@
     "viewports": ["desktop_1366"],
     "groups": ["p0-series-a"],
     "delay": 300,
-    "recommendedUsage": ["local source proof"]
+    "recommendedUsage": ["local source QA"]
   },
   {
     "id": "a11oy-workcell-detail-fixture",
@@ -258,7 +258,7 @@
     "viewports": ["desktop_1366"],
     "groups": ["p0-series-a"],
     "delay": 300,
-    "recommendedUsage": ["local source proof"]
+    "recommendedUsage": ["local source QA"]
   },
   {
     "id": "a11oy-workcell-replay-detail-fixture",
@@ -275,7 +275,7 @@
     "viewports": ["desktop_1366"],
     "groups": ["p0-series-a"],
     "delay": 300,
-    "recommendedUsage": ["local source proof"]
+    "recommendedUsage": ["local source QA"]
   },
   {
     "id": "a11oy-sovereign-replay-detail-fixture",
@@ -292,7 +292,7 @@
     "viewports": ["desktop_1366"],
     "groups": ["p0-series-a"],
     "delay": 300,
-    "recommendedUsage": ["local source proof"]
+    "recommendedUsage": ["local source QA"]
   },
   {
     "id": "command-hero",

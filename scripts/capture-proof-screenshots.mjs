@@ -2,13 +2,17 @@
 /**
  * SZL Holdings — Proof-Grade Screenshot Capture Script
  *
- * Captures proof screenshots across A11oy surfaces and other configured
- * artifacts. The canonical output is docs/assets/screenshots/current/.
- * Set SCREENSHOT_WRITE_MIRRORS=1 to also write public/proof/current/ and
- * audit/screenshots/raw/ mirrors.
+ * Captures reviewed screenshot targets in one explicit evidence mode:
+ *   - local-qa: loopback-only, non-qualifying output under audit/screenshots/
+ *   - replit-proof: identified Replit workspace output to the canonical path
  *
  * Usage:
- *   node scripts/capture-proof-screenshots.mjs --filter=p0-series-a
+ *   SCREENSHOT_CAPTURE_MODE=local-qa \
+ *     SCREENSHOT_OUTPUT_DIR=audit/screenshots/series-a-local-YYYY-MM-DD \
+ *     PLAYWRIGHT_BASE_URL=http://127.0.0.1:4111 \
+ *     node scripts/capture-proof-screenshots.mjs --filter=p0-series-a
+ *   SCREENSHOT_CAPTURE_MODE=replit-proof \
+ *     node scripts/capture-proof-screenshots.mjs --filter=p0-series-a
  *   node scripts/capture-proof-screenshots.mjs --dry-run
  *
  * The script waits for:
@@ -29,7 +33,7 @@
 
 import { chromium } from '@playwright/test';
 import { mkdirSync, existsSync, writeFileSync, readFileSync, readdirSync } from 'node:fs';
-import { join, dirname } from 'node:path';
+import { dirname, isAbsolute, join, relative, resolve, sep } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { execFileSync, execSync } from 'node:child_process';
 import { createHash } from 'node:crypto';
@@ -78,16 +82,6 @@ const TARGETS = JSON.parse(readFileSync(join(__dirname, 'screenshot-targets.json
 
 // ── Output directories ────────────────────────────────────────────────────────
 
-const CANONICAL_OUTPUT_DIR = join(REPO_ROOT, 'docs', 'assets', 'screenshots', 'current');
-const OUTPUT_DIRS =
-  process.env.SCREENSHOT_WRITE_MIRRORS === '1'
-    ? [
-        join(REPO_ROOT, 'public', 'proof', 'current'),
-        CANONICAL_OUTPUT_DIR,
-        join(REPO_ROOT, 'audit', 'screenshots', 'raw'),
-      ]
-    : [CANONICAL_OUTPUT_DIR];
-
 // ── Argument parsing ──────────────────────────────────────────────────────────
 
 const args = process.argv.slice(2);
@@ -100,6 +94,8 @@ const FILTER =
   '';
 const DRY_RUN = args.includes('--dry-run');
 const SAFE_CAPTURE_GROUPS = new Set(['p0-series-a']);
+const CAPTURE_MODES = new Set(['local-qa', 'replit-proof']);
+const CAPTURE_MODE = process.env.SCREENSHOT_CAPTURE_MODE ?? '';
 
 if (!FILTER && !DRY_RUN) {
   throw new Error(
@@ -111,6 +107,90 @@ if (!DRY_RUN && !SAFE_CAPTURE_GROUPS.has(FILTER)) {
   throw new Error(
     `Proof capture filter must name a reviewed safe group (${[...SAFE_CAPTURE_GROUPS].join(', ')}); received ${FILTER || '<empty>'}.`,
   );
+}
+
+const BASE_URL =
+  process.env.PLAYWRIGHT_BASE_URL ??
+  (process.env.REPLIT_DEV_DOMAIN
+    ? `https://${process.env.REPLIT_DEV_DOMAIN}`
+    : 'http://localhost:80');
+const CANONICAL_OUTPUT_DIR = join(REPO_ROOT, 'docs', 'assets', 'screenshots', 'current');
+const LOCAL_QA_OUTPUT_ROOT = resolve(REPO_ROOT, 'audit', 'screenshots');
+const LOOPBACK_HOSTS = new Set(['127.0.0.1', 'localhost', '::1']);
+
+function normalizedHost(value) {
+  return value.trim().toLowerCase().replace(/^\[/, '').replace(/\]$/, '').replace(/\.$/, '');
+}
+
+function repoRelativePath(value) {
+  return relative(REPO_ROOT, value).split(sep).join('/');
+}
+
+function isStrictDescendant(parent, child) {
+  const relation = relative(parent, child);
+  return Boolean(
+    relation && relation !== '..' && !relation.startsWith(`..${sep}`) && !isAbsolute(relation),
+  );
+}
+
+if (process.env.SCREENSHOT_WRITE_MIRRORS) {
+  throw new Error(
+    'SCREENSHOT_WRITE_MIRRORS is not supported; each capture writes to one mode-selected directory.',
+  );
+}
+
+let OUTPUT_DIR = null;
+let qualificationStatus = 'DRY_RUN_NON_EVIDENCE';
+let qualificationReason = 'Dry run only; no browser capture or evidence file was written.';
+
+if (!DRY_RUN) {
+  if (!CAPTURE_MODES.has(CAPTURE_MODE)) {
+    throw new Error(
+      `SCREENSHOT_CAPTURE_MODE must be one of ${[...CAPTURE_MODES].join(', ')}; received ${CAPTURE_MODE || '<empty>'}.`,
+    );
+  }
+
+  const base = new URL(BASE_URL);
+  const baseHost = normalizedHost(base.hostname);
+  const isLoopback = LOOPBACK_HOSTS.has(baseHost);
+
+  if (CAPTURE_MODE === 'local-qa') {
+    const requestedOutput = process.env.SCREENSHOT_OUTPUT_DIR;
+    if (!requestedOutput || isAbsolute(requestedOutput)) {
+      throw new Error(
+        'local-qa requires a repo-relative SCREENSHOT_OUTPUT_DIR under audit/screenshots/.',
+      );
+    }
+    const resolvedOutput = resolve(REPO_ROOT, requestedOutput);
+    if (!isStrictDescendant(LOCAL_QA_OUTPUT_ROOT, resolvedOutput)) {
+      throw new Error('local-qa output must be a strict descendant of audit/screenshots/.');
+    }
+    if (!isLoopback) {
+      throw new Error(`local-qa requires a loopback PLAYWRIGHT_BASE_URL; received ${base.origin}.`);
+    }
+    OUTPUT_DIR = resolvedOutput;
+    qualificationStatus = 'NON_QUALIFYING_LOCAL_QA';
+    qualificationReason =
+      'Local loopback QA only; this establishes no Replit-workspace, deployment, public-runtime, or screenshot-doctrine proof.';
+  } else {
+    const replitId = process.env.REPL_ID?.trim();
+    const replitDomain = normalizedHost(process.env.REPLIT_DEV_DOMAIN ?? '');
+    if (!replitId || !replitDomain) {
+      throw new Error('replit-proof requires non-empty REPL_ID and REPLIT_DEV_DOMAIN values.');
+    }
+    if (process.env.SCREENSHOT_OUTPUT_DIR) {
+      throw new Error('replit-proof uses the canonical output and rejects SCREENSHOT_OUTPUT_DIR.');
+    }
+    if (!isLoopback && (base.protocol !== 'https:' || baseHost !== replitDomain)) {
+      throw new Error(
+        `replit-proof requires loopback inside the identified workspace or https://${replitDomain}; received ${base.origin}.`,
+      );
+    }
+    OUTPUT_DIR = CANONICAL_OUTPUT_DIR;
+    qualificationStatus = 'REPLIT_WORKSPACE_CAPTURE_PENDING_REVIEW';
+    qualificationReason =
+      'Captured in an explicitly identified Replit workspace; exact-head, catalog, claim, and doctrine review remain required before proof use.';
+  }
 }
 
 // ── Chromium resolution ───────────────────────────────────────────────────────
@@ -194,12 +274,6 @@ async function waitForScreenshotReady(page, target, timeout = 12000) {
 
 // ── Main ──────────────────────────────────────────────────────────────────────
 
-const BASE_URL =
-  process.env.PLAYWRIGHT_BASE_URL ??
-  (process.env.REPLIT_DEV_DOMAIN
-    ? `https://${process.env.REPLIT_DEV_DOMAIN}`
-    : 'http://localhost:80');
-
 function filenameFor(target, viewport) {
   const extension = target.format === 'jpeg' ? 'jpg' : 'png';
   return `${target.fileBase}-${viewport.label}-${CAPTURE_DATE}.${extension}`;
@@ -232,9 +306,8 @@ console.log(`\n  SZL Holdings — Proof Screenshot Capture`);
 console.log(`  Base URL:  ${BASE_URL}`);
 console.log(`  Targets:   ${targets.length}`);
 console.log(`  Dry run:   ${DRY_RUN}`);
+console.log(`  Mode:      ${DRY_RUN ? 'dry-run' : CAPTURE_MODE}`);
 console.log();
-
-OUTPUT_DIRS.forEach(ensureDir);
 
 const manifest = {
   capturedAt: new Date().toISOString(),
@@ -243,6 +316,19 @@ const manifest = {
   gitHead: gitValue(['rev-parse', 'HEAD']),
   gitTree: gitValue(['rev-parse', 'HEAD^{tree}']),
   dryRun: DRY_RUN,
+  captureMode: DRY_RUN ? 'dry-run' : CAPTURE_MODE,
+  qualificationStatus,
+  proofLevel: null,
+  qualificationReason,
+  outputDirectory: OUTPUT_DIR ? repoRelativePath(OUTPUT_DIR) : null,
+  ...(CAPTURE_MODE === 'replit-proof' && !DRY_RUN
+    ? {
+        replitWorkspace: {
+          id: process.env.REPL_ID,
+          devDomain: process.env.REPLIT_DEV_DOMAIN,
+        },
+      }
+    : {}),
   totalTargets: targets.length,
   results: [],
 };
@@ -266,9 +352,11 @@ if (DRY_RUN) {
       });
     }
   }
-  writeManifestFiles(manifest);
+  console.log(JSON.stringify(manifest, null, 2));
   process.exit(0);
 }
+
+ensureDir(OUTPUT_DIR);
 
 const executablePath = resolveChromium();
 manifest.browserExecutable = executablePath ?? 'Playwright-managed Chromium';
@@ -302,19 +390,15 @@ for (const target of targets) {
       proofClaim: target.proofClaim,
       qualityStatus: 'fail',
       notes: '',
-      recommendedUsage: target.recommendedUsage,
+      recommendedUsage:
+        CAPTURE_MODE === 'local-qa'
+          ? ['local source QA']
+          : ['candidate screenshot evidence pending doctrine review'],
     };
 
     let context;
     try {
       const requestedUrl = new URL(target.route, BASE_URL);
-      if (
-        target.sourceLocalOnly &&
-        !['127.0.0.1', 'localhost', '::1'].includes(requestedUrl.hostname)
-      ) {
-        throw new Error(`Source-local target cannot be captured from ${requestedUrl.origin}`);
-      }
-
       context = await browser.newContext({
         viewport: { width: vp.width, height: vp.height },
         deviceScaleFactor: target.deviceScaleFactor ?? 2,
@@ -433,13 +517,16 @@ for (const target of targets) {
         type: target.format === 'jpeg' ? 'jpeg' : 'png',
         ...(target.format === 'jpeg' ? { quality: 90 } : {}),
       });
-      for (const dir of OUTPUT_DIRS) writeFileSync(join(dir, filename), image);
+      writeFileSync(join(OUTPUT_DIR, filename), image);
 
       entry.capturedAt = new Date().toISOString();
       entry.imageSha256 = createHash('sha256').update(image).digest('hex');
       entry.readySelector = target.readySelector ?? '#root > *';
       entry.qualityStatus = 'pass';
-      entry.notes = 'Clean fail-closed local capture';
+      entry.notes =
+        CAPTURE_MODE === 'local-qa'
+          ? 'Clean fail-closed non-qualifying local QA capture'
+          : 'Clean fail-closed Replit-workspace capture pending doctrine review';
       passed++;
       console.log(`  ✓ ${filename}`);
 
@@ -464,32 +551,18 @@ for (const target of targets) {
 await browser.close();
 
 manifest.summary = { passed, failed, total: passed + failed };
-writeManifestFiles(manifest);
+writeManifestFiles(manifest, OUTPUT_DIR);
 
 console.log(`\n  Done. ${passed} passed, ${failed} failed.`);
-console.log(`  Manifest: docs/assets/screenshots/current/screenshot-manifest.json\n`);
+console.log(`  Manifest: ${repoRelativePath(join(OUTPUT_DIR, 'screenshot-manifest.json'))}\n`);
 
 process.exit(failed > 0 ? 1 : 0);
 
 // ── Manifest writers ──────────────────────────────────────────────────────────
 
-function writeManifestFiles(manifest) {
-  const jsonPath = join(
-    REPO_ROOT,
-    'docs',
-    'assets',
-    'screenshots',
-    'current',
-    'screenshot-manifest.json',
-  );
-  const mdPath = join(
-    REPO_ROOT,
-    'docs',
-    'assets',
-    'screenshots',
-    'current',
-    'screenshot-manifest.md',
-  );
+function writeManifestFiles(manifest, outputDir) {
+  const jsonPath = join(outputDir, 'screenshot-manifest.json');
+  const mdPath = join(outputDir, 'screenshot-manifest.md');
 
   writeFileSync(jsonPath, JSON.stringify(manifest, null, 2));
   writeFileSync(mdPath, buildMarkdownManifest(manifest));
@@ -522,6 +595,11 @@ function buildMarkdownManifest(manifest) {
 
 **Generated:** ${manifest.capturedAt}
 **Base URL:** ${manifest.baseUrl}
+**Capture mode:** ${manifest.captureMode}
+**Qualification:** ${manifest.qualificationStatus}
+**Proof level:** ${manifest.proofLevel ?? 'N/A'}
+**Qualification reason:** ${manifest.qualificationReason}
+**Output directory:** ${manifest.outputDirectory ?? 'none'}
 **Summary:** ${summary}
 
 ---

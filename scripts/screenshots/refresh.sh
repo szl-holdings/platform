@@ -4,10 +4,13 @@
 # Requires the platform to be running (all artifact workflows active).
 #
 # Usage:
-#   bash scripts/screenshots/refresh.sh           # full refresh
+#   SCREENSHOT_CAPTURE_MODE=local-qa \
+#     SCREENSHOT_OUTPUT_DIR=audit/screenshots/<archive> \
+#     PLAYWRIGHT_BASE_URL=http://127.0.0.1:<port> \
+#     bash scripts/screenshots/refresh.sh
 #   bash scripts/screenshots/refresh.sh --check   # assert workflows running, then exit
 
-set -uo pipefail
+set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT="$(cd "$SCRIPT_DIR/../.." && pwd)"
@@ -33,6 +36,6 @@ if [ "$CHECK_ONLY" = "true" ]; then
 fi
 
 echo "[screenshots] Capturing proof screenshots…"
-node scripts/capture-proof-screenshots.mjs
+node scripts/capture-proof-screenshots.mjs --filter=p0-series-a
 
 echo "[screenshots] ✅ Screenshot refresh complete."
