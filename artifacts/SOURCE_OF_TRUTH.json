@@ -1,6 +1,6 @@
 {
   "schema": "szl.truth/v1",
-  "generated_at": "2026-08-11T09:23:59.419Z",
+  "generated_at": "2026-08-20T11:02:28.823Z",
   "generated_by": "tools/truth/generate-truth.ts@szl.truth/v1",
   "metrics": {
     "surfaces_customer_facing": {
@@ -62,7 +62,7 @@
       "source": "drizzle introspect against DATABASE_URL"
     },
     "hf_models": {
-      "value": 16,
+      "value": 17,
       "label": "MEASURED",
       "source": "Hugging Face Hub API: https://huggingface.co/api/models?author=SZLHOLDINGS&limit=1000&full=true"
     },
