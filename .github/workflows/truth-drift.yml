@@ -131,25 +131,63 @@ jobs:
           fetch-depth: 0
           persist-credentials: true
 
-      - name: Install pnpm
+      - name: Determine whether evidence refresh is due
         if: steps.existing.outputs.number == ''
+        id: due
+        env:
+          EVENT_NAME: ${{ github.event_name }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          import datetime as dt
+          import json
+          import os
+          from pathlib import Path
+
+          due = os.environ.get('EVENT_NAME') == 'workflow_dispatch'
+          reason = 'owner dispatch requested an immediate refresh'
+          if not due:
+              path = Path('artifacts/SOURCE_OF_TRUTH.json')
+              try:
+                  payload = json.loads(path.read_text(encoding='utf-8'))
+                  stamp = str(payload['generated_at']).replace('Z', '+00:00')
+                  generated = dt.datetime.fromisoformat(stamp).astimezone(dt.timezone.utc)
+                  age = dt.datetime.now(dt.timezone.utc) - generated
+                  due = age >= dt.timedelta(days=5)
+                  reason = f'canonical evidence age is {age.total_seconds() / 86400:.2f} days'
+              except (OSError, KeyError, TypeError, ValueError, json.JSONDecodeError) as error:
+                  due = True
+                  reason = f'canonical evidence could not be dated safely: {type(error).__name__}'
+          with open(os.environ['GITHUB_OUTPUT'], 'a', encoding='utf-8') as output:
+              output.write(f"value={'true' if due else 'false'}\n")
+              output.write(f"reason={reason}\n")
+          print(f"refresh_due={due}: {reason}")
+          PY
+
+      - name: Record bounded no-op decision
+        if: steps.existing.outputs.number == '' && steps.due.outputs.value != 'true'
+        run: echo "No refresh PR is required because ${{ steps.due.outputs.reason }}."
+
+      - name: Install pnpm
+        if: steps.existing.outputs.number == '' && steps.due.outputs.value == 'true'
         uses: pnpm/action-setup@0977fd99725f1db4007ccb2928dbb4e90d06cc86 # v6.0.10
         with:
           version: 10.26.1
 
       - name: Install Node.js
-        if: steps.existing.outputs.number == ''
+        if: steps.existing.outputs.number == '' && steps.due.outputs.value == 'true'
         uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
         with:
           node-version-file: .node-version
           cache: pnpm
 
       - name: Install locked dependencies
-        if: steps.existing.outputs.number == ''
+        if: steps.existing.outputs.number == '' && steps.due.outputs.value == 'true'
         run: pnpm install --frozen-lockfile
 
       - name: Regenerate current local and remote evidence
-        if: steps.existing.outputs.number == ''
+        if: steps.existing.outputs.number == '' && steps.due.outputs.value == 'true'
         run: |
           set -euo pipefail
           pnpm truth:generate
@@ -158,7 +196,7 @@ jobs:
           git diff --check
 
       - name: Detect evidence change
-        if: steps.existing.outputs.number == ''
+        if: steps.existing.outputs.number == '' && steps.due.outputs.value == 'true'
         id: changed
         shell: bash
         run: |
