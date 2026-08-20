@@ -121,12 +121,28 @@ try {
       }
       await tabs.first().click();
 
+      await page.evaluate(() => window.scrollTo(0, 0));
+      await page.waitForFunction(() => window.scrollX === 0 && window.scrollY === 0);
+      await page.evaluate(
+        () =>
+          new Promise((resolve) => {
+            requestAnimationFrame(() => requestAnimationFrame(resolve));
+          }),
+      );
+
       const layout = await page.evaluate(() => ({
         documentWidth: document.documentElement.scrollWidth,
         viewportWidth: window.innerWidth,
         documentHeight: document.documentElement.scrollHeight,
         readyState: document.readyState,
+        scrollX: window.scrollX,
+        scrollY: window.scrollY,
       }));
+      if (layout.scrollX !== 0 || layout.scrollY !== 0) {
+        throw new Error(
+          `capture must start at scroll origin, found (${layout.scrollX}, ${layout.scrollY})`,
+        );
+      }
       if (layout.documentWidth > layout.viewportWidth + 1) {
         throw new Error(
           `horizontal overflow: document=${layout.documentWidth}, viewport=${layout.viewportWidth}`,
@@ -160,6 +176,7 @@ try {
           heading_visible: true,
           tab_count: tabCount,
           all_tabs_exercised: true,
+          scroll_origin: true,
           horizontal_overflow: false,
           console_errors: 0,
           page_errors: 0,
