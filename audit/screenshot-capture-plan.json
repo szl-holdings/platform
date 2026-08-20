@@ -1,0 +1,13 @@
+{
+  "schema": "szl.screenshot-capture-plan/v1",
+  "targets": [
+    {
+      "surface": "a11oy-start",
+      "route": "/a11oy/start",
+      "viewports": [
+        { "width": 390, "height": 844 },
+        { "width": 1440, "height": 1100 }
+      ]
+    }
+  ]
+}
