@@ -1,0 +1,65 @@
+name: Bootstrap current source-of-truth evidence
+
+on:
+  push:
+    branches:
+      - fix/truth-refresh-automation-20260820
+
+permissions:
+  contents: write
+
+concurrency:
+  group: bootstrap-source-of-truth-evidence
+  cancel-in-progress: false
+
+jobs:
+  bootstrap:
+    name: regenerate evidence and remove one-shot builder
+    if: github.repository == 'szl-holdings/platform'
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - name: Check out exact repair branch
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: fix/truth-refresh-automation-20260820
+          fetch-depth: 0
+          persist-credentials: true
+
+      - name: Remove one-shot builder before measurement
+        run: git rm .github/workflows/truth-refresh-bootstrap.yml
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@0977fd99725f1db4007ccb2928dbb4e90d06cc86 # v6.0.10
+        with:
+          version: 10.26.1
+
+      - name: Install Node.js
+        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version-file: .node-version
+          cache: pnpm
+
+      - name: Install locked dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Regenerate and validate current evidence
+        run: |
+          set -euo pipefail
+          pnpm truth:generate
+          pnpm truth:generate -- --verify-local
+          pnpm claims:validate
+          git diff --check
+
+      - name: Publish exact branch successor
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add artifacts/SOURCE_OF_TRUTH.json .github/workflows/truth-refresh-bootstrap.yml
+          git commit \
+            -m 'chore(truth): regenerate current source evidence' \
+            -m 'Generate local and bounded remote evidence after removing the one-shot builder from the measured tree.' \
+            -m 'Signed-off-by: github-actions[bot] <41898282+github-actions[bot]@users.noreply.github.com>'
+          git push origin HEAD:fix/truth-refresh-automation-20260820
