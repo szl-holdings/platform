@@ -78,17 +78,18 @@ Update this file before finishing with exact files changed, root causes, command
 
 The branch contains complete tested source repairs or a proof-backed `ALREADY_SATISFIED` result; investor and developer journeys are coherent across all changed screen sizes; operational states and claims are honest; task/payload dispositions are recorded; and no reproducible source defect in scope is left as an unowned roadmap item.
 
-## 2026-08-11 local successor result
+## 2026-08-11 published successor result
 
 ### Exact source and boundary
 
-- Worktree: `C:\Users\steph\Documents\Codex\2026-08-11\i\work\platform-series-a`
+- Proof-correction worktree: `C:\Users\steph\Documents\Codex\2026-08-13\u\work\platform-608-fix`
 - Repository: `szl-holdings/platform`
-- Branch: `codex/p0-platform-work-20260811`
-- PR base revision: `e7c87eddcc1761de3887db4bc39e6e6a945b13cc`
-- Inspected PR #584 head and local HEAD: `bc40b1c6aec8a44a8a6928c25a21de9aa91e76b7`
-- State: uncommitted local candidate under a consolidation lock. No commit, push, PR update,
-  workflow action, deployment, Hugging Face change, or other remote mutation was issued.
+- Branch: `codex/p0-platform-work-20260813-r2`
+- Current protected base revision: `8745cf05e98b30547e005ade7f5741885480e6e1`
+- Published implementation revision: `4ed2dfa486a7776c4a329be6fb20a2af9de3ad19`
+- Pull request: #608, open and ready for exact-head review
+- State: signed published source candidate. Branch pushes and PR updates are recorded; no merge,
+  deployment, Hugging Face change, domain change, or other provider mutation is claimed.
 
 ### Root causes
 
@@ -127,8 +128,10 @@ The branch contains complete tested source repairs or a proof-backed `ALREADY_SA
 
 - Starting SHA `d5cf05ce18b2f776e5ea5124bb9eebc5b0a842d9`:
   `SUPERSEDED_BY_NEWER_SOURCE` because current PR #584 head was obtained read-only.
-- Current PR #584 head `bc40b1c6aec8a44a8a6928c25a21de9aa91e76b7`:
-  `APPLIED_AND_VERIFIED` as the exact local base for this successor patch.
+- Closed PR #584 head `bc40b1c6aec8a44a8a6928c25a21de9aa91e76b7`:
+  `SUPERSEDED_BY_NEWER_SOURCE` and retained only as historical provenance.
+- PR #608 implementation revision `4ed2dfa486a7776c4a329be6fb20a2af9de3ad19`:
+  `APPLIED_PUBLISHED_AND_HOSTED_CI_VERIFIED` before the additive proof correction.
 - Six-view investor IA, evidence-state contract, route compatibility, and local source alias:
   `APPLIED_AND_VERIFIED` by focused tests, TypeScript compilation, and production build.
 - GraphQL server execution, external connectors, hosted receipts, deployment parity, and
@@ -170,7 +173,7 @@ The branch contains complete tested source repairs or a proof-backed `ALREADY_SA
   overlay, and no `/api` request. The compatibility investor route also returned HTTP 200.
 - Visual review: `PASS`; 320, 390, and 1366 captures were directly inspected. The review repaired
   the 320 px nav clipping and removed the residual unsupported live-operation footer text.
-- Screenshot files: `audit/screenshots/series-a-local-2026-08-11/a11oy-series-a-{320,390,768,1366,1728}.png`.
+- Screenshot files: `docs/assets/screenshots/current/a11oy-series-a-start-{320,390,768,1366,1728}-2026-08-11.png`.
 - `git diff --check`: `PASS`.
 
 ### Screenshot evidence and non-claims
@@ -182,10 +185,11 @@ cataloged images. Because the sandbox denied the optional Google Fonts request, 
 fulfilled that stylesheet with an empty response and used the declared system-font fallback. This
 is local responsive UI evidence, not external-font, hosted, deployed, or production evidence.
 
-This local candidate does not prove a commit, pushed branch update, review, protected merge,
-deployment, domain state, GraphQL service, connector execution, customer use, revenue, compliance,
-production readiness, or live receipt parity. `docs/APP_STATUS.md` was not changed because a local
-uncommitted candidate does not change the canonical application status.
+This published candidate proves committed branch source, local qualification, and hosted CI on the
+named implementation revision. It does not prove a protected merge, deployment, domain state,
+GraphQL service, connector execution, customer use, revenue, compliance, production readiness, or
+live receipt parity. `docs/APP_STATUS.md` was not changed because unmerged source does not change
+the canonical deployed application status.
 
 Proof packet:
 `audit/P0_SERIES_A_PRODUCT_WIRING_LOCAL_SUCCESSOR_PROOF_2026-08-11.md`.
