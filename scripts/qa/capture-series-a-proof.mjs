@@ -14,6 +14,8 @@ const VIEWPORTS = [
   { id: '1728', width: 1728, height: 1000 },
 ];
 
+const EXPECTED_HEADING = 'See the governed decision loop. Inspect the proof boundary.';
+
 function requiredEnvironment(name) {
   const value = process.env[name]?.trim();
   if (!value) throw new Error(`${name} is required`);
@@ -101,10 +103,14 @@ try {
         throw new Error(`route returned HTTP ${response?.status() ?? 'NO_RESPONSE'}`);
       }
 
-      await page.getByRole('heading', { name: /Series A Decision System/i }).waitFor({
-        state: 'visible',
-        timeout: 15_000,
-      });
+      const heading = page.locator('#series-a-title');
+      await heading.waitFor({ state: 'visible', timeout: 15_000 });
+      const headingText = (await heading.innerText()).replace(/\s+/g, ' ').trim();
+      if (headingText !== EXPECTED_HEADING) {
+        throw new Error(
+          `unexpected Series A heading: expected ${JSON.stringify(EXPECTED_HEADING)}, found ${JSON.stringify(headingText)}`,
+        );
+      }
 
       const tabs = page.getByRole('tab');
       const tabCount = await tabs.count();
@@ -157,7 +163,8 @@ try {
         sha256: sha256(bytes),
         assertions: {
           http_status: response.status(),
-          heading_visible: true,
+          heading_id: 'series-a-title',
+          heading_text: headingText,
           tab_count: tabCount,
           all_tabs_exercised: true,
           horizontal_overflow: false,
