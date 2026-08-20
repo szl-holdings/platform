@@ -51,7 +51,8 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          test "$(git rev-parse HEAD^)" = '693f519ef0c529b60063fadfd6c5a6d67d3c1f18'
+          test "$(git rev-parse origin/main)" = '693f519ef0c529b60063fadfd6c5a6d67d3c1f18'
+          git merge-base --is-ancestor origin/main HEAD
           rm -f .github/workflows/materialize-canonical-truth-refresh.yml
           pnpm install --frozen-lockfile
           pnpm truth:generate
@@ -82,9 +83,9 @@ jobs:
           }, null, 2));
           NODE
           git add -A
-          git diff --cached --check HEAD^
+          git diff --cached --check origin/main
           test ! -e .github/workflows/materialize-canonical-truth-refresh.yml
-          changed="$(git diff --cached --name-only HEAD^)"
+          changed="$(git diff --cached --name-only origin/main)"
           test "$changed" = 'artifacts/SOURCE_OF_TRUTH.json'
 
           git config user.name 'github-actions[bot]'
