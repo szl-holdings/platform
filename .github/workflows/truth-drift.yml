@@ -106,12 +106,35 @@ jobs:
     env:
       GH_TOKEN: ${{ github.token }}
     steps:
-      - name: Check out exact protected main
+      - name: Check out exact protected source
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
-          ref: main
+          ref: ${{ github.sha }}
           fetch-depth: 0
           persist-credentials: false
+
+      - name: Bind generation to exact current protected main
+        id: source
+        env:
+          EXPECTED_SHA: ${{ github.sha }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          if [ "$GITHUB_REF" != 'refs/heads/main' ]; then
+            echo "::error::Truth refresh must run from refs/heads/main, not ${GITHUB_REF}."
+            exit 1
+          fi
+          observed_sha="$(git rev-parse HEAD)"
+          current_main="$(
+            gh api "repos/${GITHUB_REPOSITORY}/git/ref/heads/main" \
+              --jq '.object.sha'
+          )"
+          if [ "$observed_sha" != "$EXPECTED_SHA" ] || [ "$current_main" != "$EXPECTED_SHA" ]; then
+            echo "::error::Protected main moved or checkout identity diverged;" \
+              'rerun from the new main.'
+            exit 1
+          fi
+          echo "sha=${observed_sha}" >> "$GITHUB_OUTPUT"
 
       - name: Determine whether evidence refresh is due
         id: due
@@ -134,9 +157,14 @@ jobs:
                   payload = json.loads(path.read_text(encoding='utf-8'))
                   stamp = str(payload['generated_at']).replace('Z', '+00:00')
                   generated = dt.datetime.fromisoformat(stamp).astimezone(dt.timezone.utc)
-                  age = dt.datetime.now(dt.timezone.utc) - generated
-                  due = age >= dt.timedelta(days=5)
-                  reason = f'canonical evidence age is {age.total_seconds() / 86400:.2f} days'
+                  now = dt.datetime.now(dt.timezone.utc)
+                  age = now - generated
+                  if generated > now:
+                      due = True
+                      reason = 'canonical evidence timestamp is future-dated'
+                  else:
+                      due = age >= dt.timedelta(days=5)
+                      reason = f'canonical evidence age is {age.total_seconds() / 86400:.2f} days'
               except (OSError, KeyError, TypeError, ValueError, json.JSONDecodeError) as error:
                   due = True
                   reason = f'canonical evidence could not be dated safely: {type(error).__name__}'
@@ -188,6 +216,26 @@ jobs:
             echo 'value=true' >> "$GITHUB_OUTPUT"
           fi
 
+      - name: Bind package to unchanged protected main
+        if: steps.changed.outputs.value == 'true'
+        id: package
+        env:
+          SOURCE_SHA: ${{ steps.source.outputs.sha }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          observed_sha="$(git rev-parse HEAD)"
+          current_main="$(
+            gh api "repos/${GITHUB_REPOSITORY}/git/ref/heads/main" \
+              --jq '.object.sha'
+          )"
+          if [ "$observed_sha" != "$SOURCE_SHA" ] || [ "$current_main" != "$SOURCE_SHA" ]; then
+            echo "::error::Protected main advanced while the evidence package was generated; rerun."
+            exit 1
+          fi
+          package_sha256="$(sha256sum artifacts/SOURCE_OF_TRUTH.json | awk '{print $1}')"
+          echo "sha256=${package_sha256}" >> "$GITHUB_OUTPUT"
+
       - name: Retain the exact generated refresh package
         if: steps.changed.outputs.value == 'true'
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
@@ -201,7 +249,8 @@ jobs:
         if: steps.changed.outputs.value == 'true'
         shell: bash
         env:
-          SOURCE_SHA: ${{ github.sha }}
+          SOURCE_SHA: ${{ steps.source.outputs.sha }}
+          PACKAGE_SHA256: ${{ steps.package.outputs.sha256 }}
         run: |
           set -euo pipefail
           title='chore(truth): promote current source-of-truth evidence'
@@ -212,19 +261,29 @@ jobs:
           - source revision: \`${SOURCE_SHA}\`
           - workflow run and seven-day artifact: ${run_url}
           - generated path: \`artifacts/SOURCE_OF_TRUTH.json\`
+          - package SHA-256: \`${PACKAGE_SHA256}\`
 
-          Download the artifact, verify its bytes, and promote it through a signed, DCO-complete pull request. The automation intentionally does not push a branch or create a pull request with \`GITHUB_TOKEN\`, because token-authored pull-request events do not trigger the protected check suite.
+          Download the artifact, verify its bytes, and promote it through a signed,
+          DCO-complete pull request. The automation intentionally does not push a
+          branch or create a pull request with \`GITHUB_TOKEN\`, because token-authored
+          pull-request events do not trigger the protected check suite.
           EOF
           )"
-          number="$(gh issue list \
-            --repo "$GITHUB_REPOSITORY" \
-            --state open \
-            --search "${title} in:title" \
-            --json number,title \
-            --jq ".[] | select(.title == \"${title}\") | .number" \
-            | head -n1)"
-          if [ -n "$number" ]; then
-            gh issue comment "$number" --repo "$GITHUB_REPOSITORY" --body "$body"
+          number_output="$(
+            gh issue list \
+              --repo "$GITHUB_REPOSITORY" \
+              --state open \
+              --limit 1000 \
+              --search "${title} in:title" \
+              --json number,title \
+              --jq ".[] | select(.title == \"${title}\") | .number"
+          )"
+          mapfile -t numbers < <(printf '%s' "$number_output")
+          if [ "${#numbers[@]}" -gt 1 ]; then
+            echo "::error::Multiple open protected refresh work items have the exact title."
+            exit 1
+          elif [ "${#numbers[@]}" -eq 1 ]; then
+            gh issue comment "${numbers[0]}" --repo "$GITHUB_REPOSITORY" --body "$body"
           else
             gh issue create --repo "$GITHUB_REPOSITORY" --title "$title" --body "$body"
           fi
