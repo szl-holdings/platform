@@ -8,21 +8,32 @@ Screenshots are evidence. They are not illustrations, marketing assets, or decor
 
 Every screenshot submitted as proof must:
 
-1. **Be a live capture.** Taken from the running application in this Replit workspace using the PixelProof agent or equivalent live capture method. Not from a design tool, not from a static HTML file rendered outside the app, not from a prior session.
+1. **Be a live, source-bound capture.** Taken from the running application at an exact 40-character source revision in a repository-controlled environment. Accepted environments include GitHub Actions, a protected preview deployment, an authenticated cloud development environment, or a local exact-head checkout. No vendor-specific workspace is mandatory. Not from a design tool, an unrelated static export, or a prior session.
 
 2. **Show the correct surface.** The screenshot must display the exact route or UI surface that the associated patch modified. A screenshot of the wrong page does not prove the right page works.
 
 3. **Show real or realistic demo data.** Seed data, demo data, and realistic placeholder data are acceptable. Text labeled "LOREM", "TODO", "PLACEHOLDER", "EXAMPLE DATA", or "YOUR TEXT HERE" is not acceptable.
 
-4. **Include a visible browser chrome or app frame.** The screenshot must be recognizable as a running application — not a cropped design or exported asset. The URL bar (or app route indicator for mobile) should be visible or noted in the catalog entry.
+4. **Bind the route and application frame.** Show browser chrome or an app frame when the capture method supports it. Headless captures are acceptable only with a metadata sidecar and catalog entry containing the exact route, viewport, source revision, capture environment, capture time, and screenshot SHA-256.
 
 5. **Be stored with the correct naming convention.** Files go in `docs/assets/screenshots/current/`. Filename format: `{surface-name}-{YYYY-MM-DD}.jpg` (e.g., `a11oy-now-board-2026-04-25.jpg`).
 
-6. **Have a corresponding catalog entry.** Every screenshot used as proof must have an entry in `audit/screenshot-catalog.md` with filename, route, capture date, capturing agent, and associated Workcell ID or task number.
+6. **Have a corresponding catalog entry.** Every screenshot used as proof must have an entry in `audit/screenshot-catalog.md` with filename, route, capture date, capture environment, exact source revision, workflow run or command, viewport, screenshot SHA-256, capturing agent, and associated Workcell ID or task number.
 
 7. **Show the application in a stable, loaded state.** No loading spinners, skeleton screens, or transitional states unless the patch specifically relates to loading or transition behavior.
 
 ---
+
+## Accepted Capture Environments
+
+A proof capture is environment-neutral but identity-strict. One of the following is acceptable:
+
+1. **GitHub Actions** checking out the exact PR head or protected revision and uploading an immutable artifact.
+2. **Protected preview deployment** whose served build identity is read back and equals the captured source revision.
+3. **Authenticated cloud development environment** such as a Codespace or Cursor Cloud workspace pinned to the exact source revision.
+4. **Local exact-head checkout** with the command, operating environment, source revision, and artifact digest recorded.
+
+The provider is not the trust root. The trust root is the bound source revision, reproducible command or workflow, route, viewport, timestamp, and screenshot digest. A copied image without that identity is not current proof.
 
 ## Blocked Screenshots
 
@@ -52,7 +63,12 @@ Every entry in `audit/screenshot-catalog.md` must include:
 | `route` | The URL path or route name shown in the screenshot |
 | `surface` | Human-readable name of the surface (e.g., "A11oy Now Board", "TENAX SOC Command") |
 | `capture_date` | ISO 8601 date of capture |
-| `captured_by` | Named agent (e.g., PixelProof) or human contributor |
+| `captured_by` | Named agent (e.g., PixelProof), GitHub Actions, or human contributor |
+| `capture_environment` | `github-actions`, `protected-preview`, `codespace`, `cursor-cloud`, or `local-exact-head` |
+| `source_revision` | Exact 40-character Git revision used for the running application |
+| `workflow_run_or_command` | Immutable workflow run URL/ID or exact local capture command |
+| `viewport` | Width and height used for the capture |
+| `artifact_sha256` | SHA-256 of the committed screenshot bytes |
 | `workcell_id` | Associated Workcell ID or task number |
 | `proof_level` | The proof level this screenshot contributes to |
 | `status` | `current` (valid) or `superseded` (replaced by a newer capture) |

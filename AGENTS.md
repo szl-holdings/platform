@@ -1,6 +1,6 @@
 # AGENTS.md — A11oy Repo Operating Doctrine
 
-This file is the authoritative operating contract for every AI agent, Replit task, Codex session, and human contributor working in this repository. Read it before touching a file. Honor it on every commit.
+This file is the authoritative operating contract for every AI agent, repository-controlled workspace, Codex session, and human contributor working in this repository. Read it before touching a file. Honor it on every commit.
 
 ---
 
@@ -144,13 +144,13 @@ Full rules: `docs/A11OY_PUBLIC_CLAIMS_DOCTRINE.md`
 
 Every screenshot submitted as proof must:
 
-1. Be captured live from the running application in this Replit workspace.
-2. Show a browser chrome or app frame — not a design mockup or Figma export.
-3. Be stored in `docs/assets/screenshots/current/` with ISO-date filename and metadata in `audit/screenshot-catalog.md`.
-4. Include the route URL visible in the address bar or be noted in the catalog.
+1. Be captured live from the running application at an exact 40-character source revision in a repository-controlled environment. No vendor-specific workspace is required.
+2. Use GitHub Actions, a protected preview deployment, an authenticated cloud development environment, or a local exact-head checkout whose provider and command or workflow run are recorded.
+3. Show a browser chrome or app frame, or carry a source-bound metadata sidecar with the exact route, viewport, capture time, and screenshot SHA-256. Design mockups and Figma exports are not proof.
+4. Be stored in `docs/assets/screenshots/current/` with an ISO-date filename and metadata in `audit/screenshot-catalog.md`.
 5. Be free of placeholder data labeled "TODO", "LOREM", or "PLACEHOLDER".
 
-Blocked screenshots: blank screens, error pages, loading spinners, Figma exports, screenshots taken outside the running app.
+Blocked screenshots: blank screens, error pages, loading spinners, design-tool exports, AI-generated images, stale prior-session captures, or captures without exact source and route identity.
 
 Full rules: `docs/A11OY_SCREENSHOT_DOCTRINE.md`
 
@@ -201,7 +201,7 @@ Quick reference: `skills/a11oy-code/agent-roster.md`
 | `docs/A11OY_PUBLIC_CLAIMS_DOCTRINE.md` | Blocked claims, required qualifiers |
 | `docs/A11OY_SECURITY_DOCTRINE.md` | Security rules and secret hygiene |
 | `docs/A11OY_RELEASE_DOCTRINE.md` | Release readiness checklist and scoring |
-| `docs/A11OY_REPLIT_CODEX_DOCTRINE.md` | 11-step agent operating sequence |
+| `docs/A11OY_EXECUTION_ENVIRONMENT_DOCTRINE.md` | Provider-neutral, source-bound execution and proof environments |
 | `docs/A11OY_DEFINITION_OF_DONE.md` | Full done checklist |
 
 ---
