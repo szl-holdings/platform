@@ -51,8 +51,17 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          test "$(git rev-parse origin/main)" = '693f519ef0c529b60063fadfd6c5a6d67d3c1f18'
-          git merge-base --is-ancestor origin/main HEAD
+          protected_main='48b0ea169de75990e44b6ec924e59fe7d76e6020'
+          test "$(git rev-parse origin/main)" = "$protected_main"
+          git merge-base --is-ancestor '693f519ef0c529b60063fadfd6c5a6d67d3c1f18' origin/main
+
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git merge --no-ff origin/main \
+            -m 'chore(truth): integrate current protected main' \
+            -m 'Signed-off-by: github-actions[bot] <41898282+github-actions[bot]@users.noreply.github.com>' \
+            -m 'Signed-off-by: Lutar, Stephen P. <stephenlutar2@gmail.com>'
+
           rm -f .github/workflows/materialize-canonical-truth-refresh.yml
           pnpm install --frozen-lockfile
           pnpm truth:generate
@@ -88,8 +97,6 @@ jobs:
           changed="$(git diff --cached --name-only origin/main)"
           test "$changed" = 'artifacts/SOURCE_OF_TRUTH.json'
 
-          git config user.name 'github-actions[bot]'
-          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
           git commit -m 'chore(truth): refresh canonical evidence' \
             -m 'Regenerate local metrics and live public evidence.' \
             -m 'Signed-off-by: github-actions[bot] <41898282+github-actions[bot]@users.noreply.github.com>' \
