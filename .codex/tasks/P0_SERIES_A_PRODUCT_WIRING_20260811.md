@@ -72,7 +72,7 @@ The five PNGs and capture metadata are cataloged in
 At product-source commit `69285dd8450fc86db5ec5ba59986d36333d79f75`,
 Source of Truth, Commitlint, DCO, security, lockfile, README, doctrine, schema,
 dependency review, and screenshot proof were observed green. Truth drift
-correctly found ten prose surfaces still stating 45 workflows. This
+correctly found ten prose surfaces still stating the prior workflow count. This
 evidence-only commit advances those exact references to canonical 46.
 
 Fresh final-head CI, review-thread resolution, and protected merge remain
@@ -93,4 +93,3 @@ This task records pushed source and hosted presentation evidence only. It does
 not claim protected merge, deployment, production behavior, live integrations,
 external-font delivery, customer use, revenue, compliance, or an independent
 runtime witness.
-
