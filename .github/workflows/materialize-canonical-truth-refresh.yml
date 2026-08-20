@@ -82,9 +82,9 @@ jobs:
           }, null, 2));
           NODE
           git add -A
-          git diff --cached --check
+          git diff --cached --check HEAD^
           test ! -e .github/workflows/materialize-canonical-truth-refresh.yml
-          changed="$(git diff --cached --name-only)"
+          changed="$(git diff --cached --name-only HEAD^)"
           test "$changed" = 'artifacts/SOURCE_OF_TRUTH.json'
 
           git config user.name 'github-actions[bot]'
