@@ -58,7 +58,8 @@ an explicit residual, not a claim made by this source repair.
 ## Implemented contract
 
 - `/a11oy/start` is the canonical investor route.
-- `/a11oy/investor-demo` resolves to the same truth-safe view.
+- `/a11oy/investor-demo` preserves the existing 12-step guided product story;
+  the new six-view Series A surface does not replace it.
 - Cyber security, finance, data governance, enterprise operations, real
   estate, and legal use one typed six-view model.
 - External actions stay staged and blocked.
