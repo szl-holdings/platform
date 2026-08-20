@@ -1,0 +1,172 @@
+{
+  "schema": "szl.screenshot-proof/v1",
+  "captured_at": "2026-08-20T11:40:10.991Z",
+  "completed_at": "2026-08-20T11:40:19.291Z",
+  "status": "PASS",
+  "source": {
+    "repository": "szl-holdings/platform",
+    "ref": "codex/series-a-proof-successor-v2-20260820",
+    "sha": "69285dd8450fc86db5ec5ba59986d36333d79f75",
+    "tree_sha": "1774cf19daa8689287dea98540a744d7847eea9c"
+  },
+  "route": "/a11oy/start",
+  "capture_environment": {
+    "provider": "github-actions",
+    "workflow_name": "Series A Screenshot Proof",
+    "workflow_path": ".github/workflows/series-a-screenshot-proof.yml",
+    "workflow_run_id": "32364821536",
+    "workflow_run_attempt": "1",
+    "workflow_run_url": "https://github.com/szl-holdings/platform/actions/runs/32364821536",
+    "runner_os": "Linux",
+    "runner_arch": "X64",
+    "node_version": "v24.19.0",
+    "browser": {
+      "name": "chromium",
+      "version": "148.0.7778.96"
+    },
+    "command": "node scripts/qa/capture-series-a-proof.mjs",
+    "loopback_base_url": "http://127.0.0.1:4173",
+    "external_font_policy": "Google Fonts CSS replaced with an empty response; system fallback used"
+  },
+  "summary": {
+    "total": 5,
+    "passed": 5,
+    "failed": 0
+  },
+  "captures": [
+    {
+      "status": "PASS",
+      "filename": "a11oy-series-a-320-2026-08-20.png",
+      "path": "a11oy-series-a-320-2026-08-20.png",
+      "route": "/a11oy/start",
+      "captured_at": "2026-08-20T11:40:12.237Z",
+      "viewport_css_px": {
+        "width": 320,
+        "height": 900
+      },
+      "document_css_px": {
+        "width": 320,
+        "height": 5630
+      },
+      "sha256": "09322066951167342E8F4EADC5BCFCC8AB5CD8F6FC0DE9582E772D9C761C6155",
+      "assertions": {
+        "http_status": 200,
+        "heading_visible": true,
+        "tab_count": 6,
+        "all_tabs_exercised": true,
+        "horizontal_overflow": false,
+        "console_errors": 0,
+        "page_errors": 0,
+        "undeclared_api_requests": 0
+      }
+    },
+    {
+      "status": "PASS",
+      "filename": "a11oy-series-a-390-2026-08-20.png",
+      "path": "a11oy-series-a-390-2026-08-20.png",
+      "route": "/a11oy/start",
+      "captured_at": "2026-08-20T11:40:13.546Z",
+      "viewport_css_px": {
+        "width": 390,
+        "height": 900
+      },
+      "document_css_px": {
+        "width": 390,
+        "height": 5051
+      },
+      "sha256": "59444A43B6B61A654F1E291E16B3BE633F9EE75D9656454D3D07B96ADEB880FF",
+      "assertions": {
+        "http_status": 200,
+        "heading_visible": true,
+        "tab_count": 6,
+        "all_tabs_exercised": true,
+        "horizontal_overflow": false,
+        "console_errors": 0,
+        "page_errors": 0,
+        "undeclared_api_requests": 0
+      }
+    },
+    {
+      "status": "PASS",
+      "filename": "a11oy-series-a-768-2026-08-20.png",
+      "path": "a11oy-series-a-768-2026-08-20.png",
+      "route": "/a11oy/start",
+      "captured_at": "2026-08-20T11:40:14.815Z",
+      "viewport_css_px": {
+        "width": 768,
+        "height": 1024
+      },
+      "document_css_px": {
+        "width": 768,
+        "height": 3275
+      },
+      "sha256": "B579E5EE9C241E383065855751A94028866D876506F426A4D0E879D9553A94AE",
+      "assertions": {
+        "http_status": 200,
+        "heading_visible": true,
+        "tab_count": 6,
+        "all_tabs_exercised": true,
+        "horizontal_overflow": false,
+        "console_errors": 0,
+        "page_errors": 0,
+        "undeclared_api_requests": 0
+      }
+    },
+    {
+      "status": "PASS",
+      "filename": "a11oy-series-a-1366-2026-08-20.png",
+      "path": "a11oy-series-a-1366-2026-08-20.png",
+      "route": "/a11oy/start",
+      "captured_at": "2026-08-20T11:40:16.111Z",
+      "viewport_css_px": {
+        "width": 1366,
+        "height": 900
+      },
+      "document_css_px": {
+        "width": 1366,
+        "height": 2855
+      },
+      "sha256": "08BA665DBA2D6B6854A417BF66AF47D5FE5BF3C920E13ED514F2BBBFE3FAFFB2",
+      "assertions": {
+        "http_status": 200,
+        "heading_visible": true,
+        "tab_count": 6,
+        "all_tabs_exercised": true,
+        "horizontal_overflow": false,
+        "console_errors": 0,
+        "page_errors": 0,
+        "undeclared_api_requests": 0
+      }
+    },
+    {
+      "status": "PASS",
+      "filename": "a11oy-series-a-1728-2026-08-20.png",
+      "path": "a11oy-series-a-1728-2026-08-20.png",
+      "route": "/a11oy/start",
+      "captured_at": "2026-08-20T11:40:17.676Z",
+      "viewport_css_px": {
+        "width": 1728,
+        "height": 1000
+      },
+      "document_css_px": {
+        "width": 1728,
+        "height": 2898
+      },
+      "sha256": "5067EE4739783F8772D6585C17B283C0B1D32108366CD0D75602E62595398B60",
+      "assertions": {
+        "http_status": 200,
+        "heading_visible": true,
+        "tab_count": 6,
+        "all_tabs_exercised": true,
+        "horizontal_overflow": false,
+        "console_errors": 0,
+        "page_errors": 0,
+        "undeclared_api_requests": 0
+      }
+    }
+  ],
+  "non_claims": [
+    "The captures prove presentation of the named source revision in GitHub Actions only.",
+    "They do not prove deployment, production runtime, customer use, or external service parity."
+  ]
+}
