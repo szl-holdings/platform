@@ -2,8 +2,10 @@
 
 - **workcell_id:** `platform-pr658-exact-head-audit-20260820`
 - **agent:** Codex, independent pull-request reviewer
-- **objective:** Audit PR #658 through exact review head
-  `4e4bd01fc1ec0ecf33e5c26ed7845120b3264bcb` and harden screenshot
+- **objective:** Audit PR #658 through exact implementation head
+  `eda1c8c08425f3759983996e3d498315a70930cb` and tree
+  `a3df4fc108ef1a5f12c34b12e0804922de5aef6`, including the runtime-isolation
+  and app-root Vite-cache corrections, and harden screenshot
   provenance, exact-ref race handling, dependency and port selection, artifact
   integrity, duplicate work-item behavior, and fail-closed errors.
 - **plan_summary:** Read repository doctrine and the complete PR diff, inspect the
@@ -63,6 +65,14 @@
     `artifacts/SOURCE_OF_TRUTH.json#metrics.ci_workflows.value` both record 46,
     correcting the hosted `local truth drift: ci_workflows` failure.
   - `git diff --check` — exit 0.
+- **identity_notes:** The exact implementation head above is the parent of the
+  packet-only publication commit; this file is the sole publication delta.
+  Embedding the publication commit's own SHA in its contents would be
+  self-referential. The hosted workflow does not trust this static anchor for
+  capture identity: it resolves the open same-repository PR, binds the current
+  PR head to `GITHUB_SHA`, checks out that SHA, and rechecks it before capture
+  and publication. Fresh CI and review are required on the resulting final PR
+  head.
 - **screenshot_refs:** Not applicable. This correction changes CI, capture
   tooling, tests, and its operational standard; it does not change a rendered
   UI surface. A live five-viewport capture remains the responsibility of the
@@ -82,10 +92,12 @@
   runs as a separate OS identity that cannot write tracked source or traverse
   evidence outputs. The separate publication job never checks out or executes
   candidate code.
-- **known_gaps_update:** No product gap was introduced or closed, so
-  `docs/operations/known-gaps.md` is unchanged. A full hosted capture was not
+- **known_gaps_update:** No product gap was introduced or closed. The known-gaps
+  register is updated to document the truth-snapshot lifecycle: structural
+  validation remains a PR/main gate, while scheduled/manual freshness auditing
+  fails old snapshots without rewriting them. A full hosted capture was not
   reproducible in this dependency-less local worktree and is explicitly not
   claimed.
 - **proof_level:** Level 2 — Standard Proof; non-UI CI and tooling correction.
-- **recorded_at:** `2026-08-20T12:05:10Z`
+- **recorded_at:** `2026-08-20T13:37:43Z`
 - **recorded_by:** Codex
