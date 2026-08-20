@@ -18,6 +18,11 @@ on:
         required: false
         default: false
         type: boolean
+      refresh_truth:
+        description: Regenerate source-of-truth evidence and stage a protected refresh package
+        required: false
+        default: false
+        type: boolean
 
 permissions:
   contents: read
@@ -25,6 +30,8 @@ permissions:
 jobs:
   truth-drift:
     name: truth-drift
+    if: >-
+      github.event_name != 'workflow_dispatch' || inputs.refresh_truth == false
     runs-on: ubuntu-latest
     timeout-minutes: 20
     steps:
@@ -74,7 +81,6 @@ jobs:
         run: pnpm claims:drift
 
       - name: Reject newly introduced claim drift
-        # Only these events provide the governed comparison SHA used below.
         if: github.event_name == 'pull_request' || github.event_name == 'push'
         env:
           BASE_SHA: ${{ github.event.pull_request.base.sha || github.event.before }}
@@ -86,3 +92,139 @@ jobs:
 
       - name: Reject source-of-truth drift
         run: git diff --exit-code -- artifacts/SOURCE_OF_TRUTH.json artifacts/PUBLIC_SURFACES.json
+
+  refresh-truth:
+    name: generate current evidence and stage protected refresh
+    if: >-
+      github.event_name == 'schedule' ||
+      (github.event_name == 'workflow_dispatch' && inputs.refresh_truth)
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    permissions:
+      contents: read
+      issues: write
+    env:
+      GH_TOKEN: ${{ github.token }}
+    steps:
+      - name: Check out exact protected main
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: main
+          fetch-depth: 0
+          persist-credentials: false
+
+      - name: Determine whether evidence refresh is due
+        id: due
+        env:
+          EVENT_NAME: ${{ github.event_name }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          import datetime as dt
+          import json
+          import os
+          from pathlib import Path
+
+          due = os.environ.get('EVENT_NAME') == 'workflow_dispatch'
+          reason = 'owner dispatch requested an immediate refresh'
+          if not due:
+              path = Path('artifacts/SOURCE_OF_TRUTH.json')
+              try:
+                  payload = json.loads(path.read_text(encoding='utf-8'))
+                  stamp = str(payload['generated_at']).replace('Z', '+00:00')
+                  generated = dt.datetime.fromisoformat(stamp).astimezone(dt.timezone.utc)
+                  age = dt.datetime.now(dt.timezone.utc) - generated
+                  due = age >= dt.timedelta(days=5)
+                  reason = f'canonical evidence age is {age.total_seconds() / 86400:.2f} days'
+              except (OSError, KeyError, TypeError, ValueError, json.JSONDecodeError) as error:
+                  due = True
+                  reason = f'canonical evidence could not be dated safely: {type(error).__name__}'
+          with open(os.environ['GITHUB_OUTPUT'], 'a', encoding='utf-8') as output:
+              output.write(f"value={'true' if due else 'false'}\n")
+              output.write(f"reason={reason}\n")
+          print(f"refresh_due={due}: {reason}")
+          PY
+
+      - name: Record bounded no-op decision
+        if: steps.due.outputs.value != 'true'
+        run: echo "No refresh PR is required because ${{ steps.due.outputs.reason }}."
+
+      - name: Install pnpm
+        if: steps.due.outputs.value == 'true'
+        uses: pnpm/action-setup@0977fd99725f1db4007ccb2928dbb4e90d06cc86 # v6.0.10
+        with:
+          version: 10.26.1
+
+      - name: Install Node.js
+        if: steps.due.outputs.value == 'true'
+        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version-file: .node-version
+          cache: pnpm
+
+      - name: Install locked dependencies
+        if: steps.due.outputs.value == 'true'
+        run: pnpm install --frozen-lockfile
+
+      - name: Regenerate current local and remote evidence
+        if: steps.due.outputs.value == 'true'
+        run: |
+          set -euo pipefail
+          pnpm truth:generate
+          pnpm truth:generate -- --verify-local
+          pnpm claims:validate
+          git diff --check
+
+      - name: Detect evidence change
+        if: steps.due.outputs.value == 'true'
+        id: changed
+        shell: bash
+        run: |
+          if git diff --quiet -- artifacts/SOURCE_OF_TRUTH.json; then
+            echo 'value=false' >> "$GITHUB_OUTPUT"
+            echo 'The generated evidence is already current.'
+          else
+            echo 'value=true' >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Retain the exact generated refresh package
+        if: steps.changed.outputs.value == 'true'
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: source-of-truth-refresh-${{ github.run_id }}
+          path: artifacts/SOURCE_OF_TRUTH.json
+          if-no-files-found: error
+          retention-days: 7
+
+      - name: Open or update the protected refresh work item
+        if: steps.changed.outputs.value == 'true'
+        shell: bash
+        env:
+          SOURCE_SHA: ${{ github.sha }}
+        run: |
+          set -euo pipefail
+          title='chore(truth): promote current source-of-truth evidence'
+          run_url="${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}/actions/runs/${GITHUB_RUN_ID}"
+          body="$(cat <<EOF
+          A current evidence package was generated from protected main.
+
+          - source revision: \`${SOURCE_SHA}\`
+          - workflow run and seven-day artifact: ${run_url}
+          - generated path: \`artifacts/SOURCE_OF_TRUTH.json\`
+
+          Download the artifact, verify its bytes, and promote it through a signed, DCO-complete pull request. The automation intentionally does not push a branch or create a pull request with \`GITHUB_TOKEN\`, because token-authored pull-request events do not trigger the protected check suite.
+          EOF
+          )"
+          number="$(gh issue list \
+            --repo "$GITHUB_REPOSITORY" \
+            --state open \
+            --search "${title} in:title" \
+            --json number,title \
+            --jq ".[] | select(.title == \"${title}\") | .number" \
+            | head -n1)"
+          if [ -n "$number" ]; then
+            gh issue comment "$number" --repo "$GITHUB_REPOSITORY" --body "$body"
+          else
+            gh issue create --repo "$GITHUB_REPOSITORY" --title "$title" --body "$body"
+          fi
