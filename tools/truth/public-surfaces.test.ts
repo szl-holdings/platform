@@ -356,7 +356,17 @@ test('wires freshness only to scheduled and explicit manual events', () => {
         inputs: { require_surface_freshness: { default: boolean; type: string } };
       };
     };
-    jobs: { 'truth-drift': { steps: Array<{ name?: string; if?: string; run?: string }> } };
+    jobs: {
+      'truth-drift': { steps: Array<{ name?: string; if?: string; run?: string }> };
+      'refresh-truth': {
+        steps: Array<{
+          name?: string;
+          if?: string;
+          run?: string;
+          with?: Record<string, unknown>;
+        }>;
+      };
+    };
   };
 
   assert.deepEqual(workflow.on.schedule, [{ cron: '17 6 * * *' }]);
@@ -384,6 +394,39 @@ test('wires freshness only to scheduled and explicit manual events', () => {
     incremental?.if,
     "github.event_name == 'pull_request' || github.event_name == 'push'",
   );
+
+  const refreshSteps = workflow.jobs['refresh-truth'].steps;
+  const checkout = refreshSteps.find((step) => step.name === 'Check out exact protected source');
+  assert.equal(checkout?.with?.ref, '${{ github.sha }}');
+
+  const source = refreshSteps.find(
+    (step) => step.name === 'Bind generation to exact current protected main',
+  );
+  assert.match(source?.run ?? '', /GITHUB_REF.*refs\/heads\/main/);
+  assert.match(source?.run ?? '', /git rev-parse HEAD/);
+  assert.match(source?.run ?? '', /git\/ref\/heads\/main/);
+
+  const due = refreshSteps.find(
+    (step) => step.name === 'Determine whether evidence refresh is due',
+  );
+  assert.match(due?.run ?? '', /generated > now/);
+  assert.match(due?.run ?? '', /future-dated/);
+
+  const packageBinding = refreshSteps.find(
+    (step) => step.name === 'Bind package to unchanged protected main',
+  );
+  assert.match(packageBinding?.run ?? '', /current_main.*SOURCE_SHA/);
+  assert.match(packageBinding?.run ?? '', /sha256sum artifacts\/SOURCE_OF_TRUTH\.json/);
+
+  const workItem = refreshSteps.find(
+    (step) => step.name === 'Open or update the protected refresh work item',
+  );
+  assert.match(workItem?.run ?? '', /package SHA-256/);
+  assert.match(workItem?.run ?? '', /number_output="\$\(/);
+  assert.match(workItem?.run ?? '', /mapfile -t numbers/);
+  assert.match(workItem?.run ?? '', /Multiple open protected refresh work items/);
+  assert.doesNotMatch(workItem?.run ?? '', /mapfile -t numbers < <\(gh/);
+  assert.doesNotMatch(workItem?.run ?? '', /head -n1/);
 });
 
 test('rejects a reachable claim backed by an HTTP failure', () => {
