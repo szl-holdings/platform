@@ -1,0 +1,353 @@
+name: Exact-head screenshot evidence
+
+on:
+  pull_request:
+    paths:
+      - .github/workflows/exact-head-screenshot-evidence.yml
+      - docs/standards/exact-head-screenshot-evidence.md
+      - scripts/ci/capture-series-a-exact-head.mjs
+      - scripts/ci/exact-head-screenshot-evidence.test.mjs
+  workflow_dispatch:
+    inputs:
+      candidate_sha:
+        description: Exact 40-character candidate head SHA
+        required: true
+        type: string
+      target_branch:
+        description: Existing same-repository branch that must still point to candidate_sha
+        required: true
+        type: string
+      source_pr:
+        description: Pull request whose current same-repository head must equal candidate_sha
+        required: true
+        type: string
+      route:
+        description: Absolute A11oy application route to capture
+        required: true
+        default: /a11oy/
+        type: string
+
+permissions:
+  contents: read
+
+concurrency:
+  group: exact-head-screenshot-evidence-${{ github.event_name }}-${{ inputs.source_pr || github.event.pull_request.number }}
+  cancel-in-progress: false
+
+jobs:
+  contract:
+    name: Capture contract
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Checkout controller source
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          persist-credentials: false
+      - name: Validate controller syntax and policy
+        shell: bash
+        run: |
+          set -euo pipefail
+          node --check scripts/ci/capture-series-a-exact-head.mjs
+          node --test scripts/ci/exact-head-screenshot-evidence.test.mjs
+          grep -Fq 'GitHub-hosted ephemeral runner is the canonical default' docs/standards/exact-head-screenshot-evidence.md
+          grep -Fq 'Copied screenshots' docs/standards/exact-head-screenshot-evidence.md
+          grep -Fq 'source_sha' scripts/ci/capture-series-a-exact-head.mjs
+          grep -Fq 'workflow_run_id' scripts/ci/capture-series-a-exact-head.mjs
+          grep -Fq 'horizontal overflow' scripts/ci/capture-series-a-exact-head.mjs
+
+  capture:
+    name: Capture exact-head evidence package
+    if: github.event_name == 'workflow_dispatch' && github.ref == 'refs/heads/main'
+    needs: contract
+    runs-on: ubuntu-24.04
+    timeout-minutes: 45
+    outputs:
+      artifact_id: ${{ steps.evidence_upload.outputs['artifact-id'] }}
+      artifact_url: ${{ steps.evidence_upload.outputs['artifact-url'] }}
+      artifact_digest: ${{ steps.evidence_upload.outputs['artifact-digest'] }}
+    permissions:
+      contents: read
+      pull-requests: read
+    env:
+      CANDIDATE_SHA: ${{ inputs.candidate_sha }}
+      TARGET_BRANCH: ${{ inputs.target_branch }}
+      SOURCE_PR: ${{ inputs.source_pr }}
+      CAPTURE_ROUTE: ${{ inputs.route }}
+      SZL_CANDIDATE_ROOT: ${{ github.workspace }}/candidate
+      SZL_EVIDENCE_ROOT: ${{ runner.temp }}/exact-head-evidence-${{ github.run_id }}-${{ github.run_attempt }}
+      SZL_CANDIDATE_HOME: ${{ runner.temp }}/candidate-home-${{ github.run_id }}-${{ github.run_attempt }}
+      SZL_CANDIDATE_USER: szl-capture-candidate
+    steps:
+      - name: Validate immutable inputs
+        shell: bash
+        run: |
+          set -euo pipefail
+          [[ "$CANDIDATE_SHA" =~ ^[0-9a-f]{40}$ ]]
+          [[ "$TARGET_BRANCH" =~ ^[A-Za-z0-9._/-]+$ ]]
+          [[ "$TARGET_BRANCH" != -* ]]
+          [[ "$TARGET_BRANCH" != *..* ]]
+          [[ "$TARGET_BRANCH" != *//* ]]
+          [[ "$SOURCE_PR" =~ ^[1-9][0-9]*$ ]]
+          [[ "$CAPTURE_ROUTE" =~ ^/a11oy(/[A-Za-z0-9._~/-]*)?$ ]]
+          [[ "$CAPTURE_ROUTE" != *..* ]]
+          [[ "$CAPTURE_ROUTE" != *//* ]]
+
+      - name: Checkout controller from immutable protected workflow SHA
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          ref: ${{ github.sha }}
+          path: controller
+          persist-credentials: false
+
+      - name: Verify authorized pull request and branch
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          pr_json="$(gh api "repos/${GITHUB_REPOSITORY}/pulls/${SOURCE_PR}")"
+          pr_head="$(jq -er '.head.sha | strings' <<<"$pr_json")"
+          pr_branch="$(jq -er '.head.ref | strings' <<<"$pr_json")"
+          pr_repository="$(jq -er '.head.repo.full_name | strings' <<<"$pr_json")"
+          pr_state="$(jq -er '.state | strings' <<<"$pr_json")"
+          branch_head="$(gh api "repos/${GITHUB_REPOSITORY}/git/ref/heads/${TARGET_BRANCH}" --jq '.object.sha')"
+          test "$pr_state" = open
+          test "$pr_repository" = "$GITHUB_REPOSITORY"
+          test "$pr_branch" = "$TARGET_BRANCH"
+          test "$pr_head" = "$CANDIDATE_SHA"
+          test "$branch_head" = "$CANDIDATE_SHA"
+
+      - name: Checkout exact candidate
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          ref: ${{ inputs.candidate_sha }}
+          path: candidate
+          fetch-depth: 0
+          persist-credentials: false
+
+      - name: Verify candidate checkout identity
+        working-directory: candidate
+        shell: bash
+        run: test "$(git rev-parse HEAD)" = "$CANDIDATE_SHA"
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@0977fd99725f1db4007ccb2928dbb4e90d06cc86
+        with:
+          version: 10.26.1
+
+      - name: Setup Node.js
+        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020
+        with:
+          node-version: "24"
+          cache: pnpm
+          cache-dependency-path: |
+            candidate/pnpm-lock.yaml
+            controller/pnpm-lock.yaml
+
+      - name: Install nonexecuting candidate dependencies and trusted Chromium
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(node -p "require('./candidate/package.json').packageManager")" = pnpm@10.26.1
+          test "$(node -p "require('./controller/package.json').packageManager")" = pnpm@10.26.1
+          pnpm --dir candidate install --frozen-lockfile --ignore-scripts --ignore-pnpmfile
+          pnpm --dir controller install --frozen-lockfile --ignore-scripts --ignore-pnpmfile
+          pnpm --dir controller exec playwright install --with-deps chromium
+
+      - name: Establish read-only candidate and private evidence boundary
+        shell: bash
+        run: |
+          set -euo pipefail
+          unsafe_entries="$(git -C candidate ls-files --stage | awk '$1 == "120000" || $1 == "160000" { print $4 }')"
+          test -z "$unsafe_entries"
+          if id "$SZL_CANDIDATE_USER" >/dev/null 2>&1; then
+            echo "candidate runtime identity already exists" >&2
+            exit 1
+          fi
+          sudo useradd --system --no-create-home --home-dir /nonexistent \
+            --shell /usr/sbin/nologin "$SZL_CANDIDATE_USER"
+          candidate_group="$(id -gn "$SZL_CANDIDATE_USER")"
+          sudo install -d -o "$SZL_CANDIDATE_USER" -g "$candidate_group" -m 0700 \
+            "$SZL_CANDIDATE_HOME" "$SZL_CANDIDATE_HOME/tmp" "$SZL_CANDIDATE_HOME/cache"
+          install -d -m 0700 "$SZL_EVIDENCE_ROOT"
+          chmod -R a-w "$SZL_CANDIDATE_ROOT"
+          for cache_path in \
+            "$SZL_CANDIDATE_ROOT/node_modules/.vite" \
+            "$SZL_CANDIDATE_ROOT/node_modules/.vite-temp" \
+            "$SZL_CANDIDATE_ROOT/node_modules/.cache" \
+            "$SZL_CANDIDATE_ROOT/artifacts/a11oy/node_modules/.vite" \
+            "$SZL_CANDIDATE_ROOT/artifacts/a11oy/node_modules/.vite-temp" \
+            "$SZL_CANDIDATE_ROOT/artifacts/a11oy/node_modules/.cache"; do
+            test ! -L "$cache_path"
+          done
+          sudo install -d -o "$SZL_CANDIDATE_USER" -g "$candidate_group" -m 0700 \
+            "$SZL_CANDIDATE_ROOT/node_modules/.vite" \
+            "$SZL_CANDIDATE_ROOT/node_modules/.vite-temp" \
+            "$SZL_CANDIDATE_ROOT/node_modules/.cache" \
+            "$SZL_CANDIDATE_ROOT/artifacts/a11oy/node_modules/.vite" \
+            "$SZL_CANDIDATE_ROOT/artifacts/a11oy/node_modules/.vite-temp" \
+            "$SZL_CANDIDATE_ROOT/artifacts/a11oy/node_modules/.cache"
+          sudo --non-interactive --user "$SZL_CANDIDATE_USER" -- \
+            test ! -w "$SZL_CANDIDATE_ROOT/package.json"
+          if sudo --non-interactive --user "$SZL_CANDIDATE_USER" -- \
+            test -r "$SZL_EVIDENCE_ROOT"; then
+            echo "candidate runtime identity can traverse the evidence root" >&2
+            exit 1
+          fi
+          if sudo --non-interactive --user "$SZL_CANDIDATE_USER" -- \
+            test -w "$(dirname "$SZL_EVIDENCE_ROOT")"; then
+            echo "candidate runtime identity can rename the evidence root" >&2
+            exit 1
+          fi
+
+      - name: Verify candidate immediately before capture
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git -C "$SZL_CANDIDATE_ROOT" rev-parse HEAD)" = "$CANDIDATE_SHA"
+          tracked_status="$(git -C "$SZL_CANDIDATE_ROOT" status --porcelain=v1 --untracked-files=no)"
+          test -z "$tracked_status"
+
+      - name: Capture exact-head evidence
+        working-directory: controller
+        shell: bash
+        env:
+          SZL_CANDIDATE_SHA: ${{ inputs.candidate_sha }}
+          SZL_SOURCE_PR: ${{ inputs.source_pr }}
+          SZL_ROUTE: ${{ inputs.route }}
+        run: |
+          set -euo pipefail
+          cleanup_candidate() {
+            sudo pkill -KILL -u "$SZL_CANDIDATE_USER" >/dev/null 2>&1 || true
+          }
+          trap cleanup_candidate EXIT
+          node scripts/ci/capture-series-a-exact-head.mjs
+          cleanup_candidate
+          trap - EXIT
+          if pgrep -u "$SZL_CANDIDATE_USER" >/dev/null; then
+            echo "candidate runtime processes remain after capture" >&2
+            exit 1
+          fi
+
+      - name: Close source and evidence integrity after candidate teardown
+        working-directory: controller
+        shell: bash
+        env:
+          SZL_CANDIDATE_SHA: ${{ inputs.candidate_sha }}
+          SZL_SOURCE_PR: ${{ inputs.source_pr }}
+          SZL_ROUTE: ${{ inputs.route }}
+        run: |
+          set -euo pipefail
+          if pgrep -u "$SZL_CANDIDATE_USER" >/dev/null; then
+            echo "candidate runtime processes remain before verification" >&2
+            exit 1
+          fi
+          test "$(git -C "$SZL_CANDIDATE_ROOT" rev-parse HEAD)" = "$CANDIDATE_SHA"
+          tracked_status="$(git -C "$SZL_CANDIDATE_ROOT" status --porcelain=v1 --untracked-files=no)"
+          test -z "$tracked_status"
+          test "$(stat -c '%a' "$SZL_EVIDENCE_ROOT")" = 700
+          node scripts/ci/capture-series-a-exact-head.mjs --verify
+          chmod -R a-w "$SZL_EVIDENCE_ROOT"
+
+      - name: Re-read authorized pull request and branch before upload
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          pr_json="$(gh api "repos/${GITHUB_REPOSITORY}/pulls/${SOURCE_PR}")"
+          pr_head="$(jq -er '.head.sha | strings' <<<"$pr_json")"
+          pr_branch="$(jq -er '.head.ref | strings' <<<"$pr_json")"
+          pr_repository="$(jq -er '.head.repo.full_name | strings' <<<"$pr_json")"
+          pr_state="$(jq -er '.state | strings' <<<"$pr_json")"
+          branch_head="$(gh api "repos/${GITHUB_REPOSITORY}/git/ref/heads/${TARGET_BRANCH}" --jq '.object.sha')"
+          test "$pr_state" = open
+          test "$pr_repository" = "$GITHUB_REPOSITORY"
+          test "$pr_branch" = "$TARGET_BRANCH"
+          test "$pr_head" = "$CANDIDATE_SHA"
+          test "$branch_head" = "$CANDIDATE_SHA"
+
+      - name: Upload immutable capture evidence
+        id: evidence_upload
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
+        with:
+          name: exact-head-screenshot-evidence-${{ github.run_id }}-${{ github.run_attempt }}
+          path: ${{ runner.temp }}/exact-head-evidence-${{ github.run_id }}-${{ github.run_attempt }}/exact-head-evidence-artifact/
+          if-no-files-found: error
+          retention-days: 90
+
+  publish:
+    name: Publish signed-promotion work item
+    if: github.event_name == 'workflow_dispatch'
+    needs:
+      - contract
+      - capture
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: read
+      issues: write
+      pull-requests: read
+    env:
+      CANDIDATE_SHA: ${{ inputs.candidate_sha }}
+      TARGET_BRANCH: ${{ inputs.target_branch }}
+      SOURCE_PR: ${{ inputs.source_pr }}
+      CAPTURE_ROUTE: ${{ inputs.route }}
+      ARTIFACT_NAME: exact-head-screenshot-evidence-${{ github.run_id }}-${{ github.run_attempt }}
+      ARTIFACT_ID: ${{ needs.capture.outputs.artifact_id }}
+      ARTIFACT_URL: ${{ needs.capture.outputs.artifact_url }}
+      ARTIFACT_DIGEST: ${{ needs.capture.outputs.artifact_digest }}
+      GH_TOKEN: ${{ github.token }}
+    steps:
+      - name: Re-read authorized pull request and branch before publication
+        shell: bash
+        run: |
+          set -euo pipefail
+          pr_json="$(gh api "repos/${GITHUB_REPOSITORY}/pulls/${SOURCE_PR}")"
+          pr_head="$(jq -er '.head.sha | strings' <<<"$pr_json")"
+          pr_branch="$(jq -er '.head.ref | strings' <<<"$pr_json")"
+          pr_repository="$(jq -er '.head.repo.full_name | strings' <<<"$pr_json")"
+          pr_state="$(jq -er '.state | strings' <<<"$pr_json")"
+          branch_head="$(gh api "repos/${GITHUB_REPOSITORY}/git/ref/heads/${TARGET_BRANCH}" --jq '.object.sha')"
+          test "$pr_state" = open
+          test "$pr_repository" = "$GITHUB_REPOSITORY"
+          test "$pr_branch" = "$TARGET_BRANCH"
+          test "$pr_head" = "$CANDIDATE_SHA"
+          test "$branch_head" = "$CANDIDATE_SHA"
+          [[ "$ARTIFACT_ID" =~ ^[1-9][0-9]*$ ]]
+          test "$ARTIFACT_URL" = "${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}/actions/runs/${GITHUB_RUN_ID}/artifacts/${ARTIFACT_ID}"
+          [[ "$ARTIFACT_DIGEST" =~ ^[0-9a-f]{64}$ ]]
+
+      - name: Open or update the signed-promotion work item
+        shell: bash
+        run: |
+          set -euo pipefail
+          title="chore(series-a): promote exact-head capture for PR #${SOURCE_PR}"
+          run_url="${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}/actions/runs/${GITHUB_RUN_ID}"
+          body="$(cat <<EOF
+          Exact-head screenshot evidence is ready for signed promotion.
+
+          - workflow run: ${run_url}
+          - workflow run attempt: \`${GITHUB_RUN_ATTEMPT}\`
+          - exact 90-day artifact: [\`${ARTIFACT_NAME}\`](${ARTIFACT_URL}) (ID \`${ARTIFACT_ID}\`)
+          - uploaded archive SHA-256: \`${ARTIFACT_DIGEST}\`
+          - source PR: #${SOURCE_PR}
+          - source head: \`${CANDIDATE_SHA}\`
+          - source branch: \`${TARGET_BRANCH}\`
+          - route: \`${CAPTURE_ROUTE}\`
+          - viewports: 390, 768, 1440, 1920, 2560 pixels
+          - machine packet: \`audit/series-a-exact-head-capture.json\`
+          - images: \`docs/assets/screenshots/current/\`
+
+          Download and verify the artifact, then promote it through a signed, DCO-complete protected pull request. The workflow intentionally does not create a token-authored pull request whose events cannot trigger the protected check suite.
+          EOF
+          )"
+          matches_text="$(gh api --paginate --slurp "repos/${GITHUB_REPOSITORY}/issues?state=open&per_page=100" --jq ".[][] | select((has(\"pull_request\") | not) and .title == \"${title}\") | .number")"
+          mapfile -t matches < <(printf '%s' "$matches_text")
+          if (( ${#matches[@]} > 1 )); then
+            echo "multiple open promotion work items have the exact title" >&2
+            exit 1
+          elif (( ${#matches[@]} == 1 )); then
+            gh issue edit "${matches[0]}" --repo "$GITHUB_REPOSITORY" --body "$body"
+          else
+            gh issue create --repo "$GITHUB_REPOSITORY" --title "$title" --body "$body"
+          fi

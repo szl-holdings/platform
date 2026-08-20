@@ -18,6 +18,11 @@ on:
         required: false
         default: false
         type: boolean
+      require_truth_freshness:
+        description: Require the generated truth snapshot to be no older than seven days
+        required: false
+        default: false
+        type: boolean
       refresh_truth:
         description: Regenerate source-of-truth evidence and stage a protected refresh package
         required: false
@@ -74,8 +79,14 @@ jobs:
         if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
         run: pnpm truth:generate -- --verify-local --verify-remote
 
-      - name: Validate evidence labels and freshness
+      - name: Validate evidence labels and structure
         run: pnpm claims:validate
+
+      - name: Require a current generated truth snapshot
+        if: >-
+          github.event_name == 'schedule' ||
+          (github.event_name == 'workflow_dispatch' && inputs.require_truth_freshness)
+        run: pnpm truth:freshness
 
       - name: Reject hardcoded metric drift
         run: pnpm claims:drift
@@ -261,14 +272,14 @@ jobs:
           body="$(cat <<EOF
           A current evidence package was generated from protected main.
 
-          - source revision: \`${SOURCE_SHA}\`
+          - source revision: `${SOURCE_SHA}`
           - workflow run and seven-day artifact: ${run_url}
-          - generated path: \`artifacts/SOURCE_OF_TRUTH.json\`
-          - package SHA-256: \`${PACKAGE_SHA256}\`
+          - generated path: `artifacts/SOURCE_OF_TRUTH.json`
+          - package SHA-256: `${PACKAGE_SHA256}`
 
           Download the artifact, verify its bytes, and promote it through a signed,
           DCO-complete pull request. The automation intentionally does not push a
-          branch or create a pull request with \`GITHUB_TOKEN\`, because token-authored
+          branch or create a pull request with `GITHUB_TOKEN`, because token-authored
           pull-request events do not trigger the protected check suite.
           EOF
           )"
