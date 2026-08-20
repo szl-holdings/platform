@@ -39,7 +39,7 @@ mutation one-shots. The validator recomputes them from whichever commit is check
 | DB migrations (SQL files) | **149** | Tracked `lib/db/drizzle/*.sql` files; duplicate sequence numbers may exist |
 | API route source files | **43** | Non-test files under `apps/`, `services/`, and `artifacts/api-server/` containing a detected Express route declaration |
 | API handler declarations | **306** | Static non-test HTTP method declarations on `app`, `router`, and named Express Router receivers in the current runtime roots |
-| CI workflows | **45** | Permanent tracked `.github/workflows/*.yml` and `*.yaml`, including the hosted observability proof and public npm release paths, after two obsolete one-shots were retired |
+| CI workflows | **46** | Permanent tracked `.github/workflows/*.yml` and `*.yaml`, including exact-head screenshot evidence, hosted observability proof, and public npm release paths |
 | Environment variables (in `.env.example`) | **238** | Lines matching `^[A-Z_]+=` |
 
 These are source-tree measurements. They do not by themselves prove that a
