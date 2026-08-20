@@ -174,13 +174,19 @@ jobs:
           for cache_path in \
             "$SZL_CANDIDATE_ROOT/node_modules/.vite" \
             "$SZL_CANDIDATE_ROOT/node_modules/.vite-temp" \
-            "$SZL_CANDIDATE_ROOT/node_modules/.cache"; do
+            "$SZL_CANDIDATE_ROOT/node_modules/.cache" \
+            "$SZL_CANDIDATE_ROOT/artifacts/a11oy/node_modules/.vite" \
+            "$SZL_CANDIDATE_ROOT/artifacts/a11oy/node_modules/.vite-temp" \
+            "$SZL_CANDIDATE_ROOT/artifacts/a11oy/node_modules/.cache"; do
             test ! -L "$cache_path"
           done
           sudo install -d -o "$SZL_CANDIDATE_USER" -g "$candidate_group" -m 0700 \
             "$SZL_CANDIDATE_ROOT/node_modules/.vite" \
             "$SZL_CANDIDATE_ROOT/node_modules/.vite-temp" \
-            "$SZL_CANDIDATE_ROOT/node_modules/.cache"
+            "$SZL_CANDIDATE_ROOT/node_modules/.cache" \
+            "$SZL_CANDIDATE_ROOT/artifacts/a11oy/node_modules/.vite" \
+            "$SZL_CANDIDATE_ROOT/artifacts/a11oy/node_modules/.vite-temp" \
+            "$SZL_CANDIDATE_ROOT/artifacts/a11oy/node_modules/.cache"
           sudo --non-interactive --user "$SZL_CANDIDATE_USER" -- \
             test ! -w "$SZL_CANDIDATE_ROOT/package.json"
           if sudo --non-interactive --user "$SZL_CANDIDATE_USER" -- \

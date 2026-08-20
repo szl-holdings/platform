@@ -1,9 +1,9 @@
-import assert from "node:assert/strict";
-import { createHash } from "node:crypto";
-import { copyFile, mkdir, mkdtemp, readFile, rm, symlink, writeFile } from "node:fs/promises";
-import os from "node:os";
-import path from "node:path";
-import test from "node:test";
+import assert from 'node:assert/strict';
+import { createHash } from 'node:crypto';
+import { copyFile, mkdir, mkdtemp, readFile, rm, symlink, writeFile } from 'node:fs/promises';
+import os from 'node:os';
+import path from 'node:path';
+import test from 'node:test';
 import {
   DEFAULT_ROUTE,
   EXPECTED_PLAYWRIGHT_VERSION,
@@ -20,31 +20,30 @@ import {
   validateCaptureIsolation,
   validateRoute,
   verifyEvidencePacketOnDisk,
-} from "./capture-series-a-exact-head.mjs";
+} from './capture-series-a-exact-head.mjs';
 
-const repository = "szl-holdings/platform";
-const sourceSha = "a".repeat(40);
+const repository = 'szl-holdings/platform';
+const sourceSha = 'a'.repeat(40);
 const environment = {
   SZL_CANDIDATE_SHA: sourceSha,
-  SZL_SOURCE_PR: "653",
+  SZL_SOURCE_PR: '653',
   SZL_ROUTE: DEFAULT_ROUTE,
   GITHUB_REPOSITORY: repository,
-  GITHUB_RUN_ID: "123456",
-  GITHUB_RUN_ATTEMPT: "2",
-  GITHUB_SERVER_URL: "https://github.com",
+  GITHUB_RUN_ID: '123456',
+  GITHUB_RUN_ATTEMPT: '2',
+  GITHUB_SERVER_URL: 'https://github.com',
 };
-const workflowRunUrl =
-  "https://github.com/szl-holdings/platform/actions/runs/123456/attempts/2";
-const workcellId = "exact-head-screenshot-pr-653-run-123456-attempt-2";
+const workflowRunUrl = 'https://github.com/szl-holdings/platform/actions/runs/123456/attempts/2';
+const workcellId = 'exact-head-screenshot-pr-653-run-123456-attempt-2';
 
 function digest(bytes) {
-  return createHash("sha256").update(bytes).digest("hex");
+  return createHash('sha256').update(bytes).digest('hex');
 }
 
 function fakePng(width, height) {
   const bytes = Buffer.alloc(128);
   Buffer.from([137, 80, 78, 71, 13, 10, 26, 10]).copy(bytes, 0);
-  bytes.write("IHDR", 12, "ascii");
+  bytes.write('IHDR', 12, 'ascii');
   bytes.writeUInt32BE(width, 16);
   bytes.writeUInt32BE(height, 20);
   return bytes;
@@ -52,8 +51,8 @@ function fakePng(width, height) {
 
 function admittedMetrics(overrides = {}) {
   return {
-    finalUrl: "http://127.0.0.1:4110/a11oy/",
-    readyState: "complete",
+    finalUrl: 'http://127.0.0.1:4110/a11oy/',
+    readyState: 'complete',
     screenshotReady: true,
     mainContentCount: 1,
     h1Count: 1,
@@ -69,10 +68,10 @@ function admittedMetrics(overrides = {}) {
 }
 
 async function writeFixture() {
-  const root = await mkdtemp(path.join(os.tmpdir(), "szl-exact-head-test-"));
-  const artifactRoot = path.join(root, "exact-head-evidence-artifact");
-  const evidencePath = "audit/series-a-exact-head-capture.json";
-  const catalogPath = "audit/screenshot-catalog.md";
+  const root = await mkdtemp(path.join(os.tmpdir(), 'szl-exact-head-test-'));
+  const artifactRoot = path.join(root, 'exact-head-evidence-artifact');
+  const evidencePath = 'audit/series-a-exact-head-capture.json';
+  const catalogPath = 'audit/screenshot-catalog.md';
   const surface = surfaceFromRoute(DEFAULT_ROUTE);
   const startedAt = new Date(Date.now() - 1_000);
   const capturedAt = new Date();
@@ -96,10 +95,10 @@ async function writeFixture() {
       height: viewport.height,
       device_scale_factor: 1,
       route: DEFAULT_ROUTE,
-      final_url: "http://127.0.0.1:4110/a11oy/",
+      final_url: 'http://127.0.0.1:4110/a11oy/',
       http_status: 200,
-      title: "A11oy",
-      ready_state: "complete",
+      title: 'A11oy',
+      ready_state: 'complete',
       screenshot_ready: true,
       main_content_count: 1,
       h1_count: 1,
@@ -117,18 +116,18 @@ async function writeFixture() {
       captured_at: capturedAt.toISOString(),
       screenshot,
       filename: screenshot,
-      surface: "A11oy Home",
-      captured_by: "GitHub Actions",
-      capture_environment: "github-actions",
+      surface: 'A11oy Home',
+      captured_by: 'GitHub Actions',
+      capture_environment: 'github-actions',
       source_revision: sourceSha,
       workflow_run_or_command: workflowRunUrl,
       viewport: `${viewport.width} x ${viewport.height}`,
       artifact_sha256: digest(bytes),
       workcell_id: workcellId,
-      proof_level: "3 — Evidence Proof",
-      status: "current",
+      proof_level: '3 — Evidence Proof',
+      status: 'current',
       notes:
-        "Exact-head source-presentation capture after readiness checks; not deployment evidence.",
+        'Exact-head source-presentation capture after readiness checks; not deployment evidence.',
       png_width: viewport.width,
       png_height: viewport.height,
       bytes: bytes.length,
@@ -138,27 +137,27 @@ async function writeFixture() {
 
   const catalog = `# Screenshot catalog\n\n| Filename | Route | Surface | Capture date | Captured by | Capture environment | Source revision | Workflow run or command | Viewport | Artifact SHA-256 | Workcell ID | Proof level | Status | Notes |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-${results.map(row => catalogEntryMarkdown(row)).join("\n")}\n`;
+${results.map((row) => catalogEntryMarkdown(row)).join('\n')}\n`;
   const packet = {
-    schema: "szl.exact-head-screenshot-evidence/v1",
-    state: "VERIFIED",
+    schema: 'szl.exact-head-screenshot-evidence/v1',
+    state: 'VERIFIED',
     repository,
-    source_pr: "653",
+    source_pr: '653',
     source_sha: sourceSha,
     checkout_sha: sourceSha,
-    workflow_run_id: "123456",
-    workflow_run_attempt: "2",
+    workflow_run_id: '123456',
+    workflow_run_attempt: '2',
     workflow_run_url: workflowRunUrl,
     workcell_id: workcellId,
-    runner_image: "ubuntu24@test",
-    runner_arch: "X64",
-    node_version: "v24.0.0",
+    runner_image: 'ubuntu24@test',
+    runner_arch: 'X64',
+    node_version: 'v24.0.0',
     pnpm_version: EXPECTED_PNPM_VERSION,
     playwright_version: EXPECTED_PLAYWRIGHT_VERSION,
-    browser_version: "test",
+    browser_version: 'test',
     start_command:
-      "pnpm --filter @workspace/a11oy exec vite --config vite.config.ts --host 127.0.0.1 --port 4110 --strictPort",
-    base_url: "http://127.0.0.1:4110",
+      'pnpm --filter @workspace/a11oy exec vite --config vite.config.ts --host 127.0.0.1 --port 4110 --strictPort',
+    base_url: 'http://127.0.0.1:4110',
     route: DEFAULT_ROUTE,
     surface,
     capture_dates: [captureDate],
@@ -177,71 +176,70 @@ ${results.map(row => catalogEntryMarkdown(row)).join("\n")}\n`;
   return { root, artifactRoot, evidencePath, packet };
 }
 
-test("the default and generated filenames bind a real A11oy surface and ISO date", () => {
-  assert.equal(DEFAULT_ROUTE, "/a11oy/");
+test('the default and generated filenames bind a real A11oy surface and ISO date', () => {
+  assert.equal(DEFAULT_ROUTE, '/a11oy/');
   assert.equal(validateRoute(DEFAULT_ROUTE), DEFAULT_ROUTE);
-  assert.equal(surfaceFromRoute(DEFAULT_ROUTE), "a11oy-home");
-  assert.equal(surfaceLabelFromRoute(DEFAULT_ROUTE), "A11oy Home");
+  assert.equal(surfaceFromRoute(DEFAULT_ROUTE), 'a11oy-home');
+  assert.equal(surfaceLabelFromRoute(DEFAULT_ROUTE), 'A11oy Home');
   assert.equal(
-    screenshotFilename("a11oy-home", "2026-08-20", "phone-390"),
-    "a11oy-home-2026-08-20-phone-390.png",
+    screenshotFilename('a11oy-home', '2026-08-20', 'phone-390'),
+    'a11oy-home-2026-08-20-phone-390.png',
   );
-  for (const invalid of ["/a11oy/start?x=1", "/a11oy/../admin", "//a11oy/", "/other/"]) {
+  for (const invalid of ['/a11oy/start?x=1', '/a11oy/../admin', '//a11oy/', '/other/']) {
     assert.throws(() => validateRoute(invalid));
   }
 });
 
-test("checkout identity is fail-closed", () => {
+test('checkout identity is fail-closed', () => {
   assert.doesNotThrow(() => assertCheckoutRevision(sourceSha, sourceSha));
-  assert.doesNotThrow(() => assertCleanTrackedTree(""));
+  assert.doesNotThrow(() => assertCleanTrackedTree(''));
+  assert.throws(() => assertCheckoutRevision(sourceSha, 'b'.repeat(40)), /does not match/);
   assert.throws(
-    () => assertCheckoutRevision(sourceSha, "b".repeat(40)),
-    /does not match/,
-  );
-  assert.throws(
-    () => assertCleanTrackedTree(" M artifacts/a11oy/src/App.tsx"),
+    () => assertCleanTrackedTree(' M artifacts/a11oy/src/App.tsx'),
     /tracked candidate files changed/,
   );
 });
 
-test("candidate source, runtime home, and evidence roots must be disjoint", () => {
+test('candidate source, runtime home, and evidence roots must be disjoint', () => {
   const isolated = validateCaptureIsolation({
-    SZL_CANDIDATE_ROOT: "/runner/work/platform/candidate",
-    SZL_EVIDENCE_ROOT: "/runner/temp/evidence",
-    SZL_CANDIDATE_HOME: "/runner/temp/candidate-home",
-    SZL_CANDIDATE_USER: "szl-capture-candidate",
+    SZL_CANDIDATE_ROOT: '/runner/work/platform/candidate',
+    SZL_EVIDENCE_ROOT: '/runner/temp/evidence',
+    SZL_CANDIDATE_HOME: '/runner/temp/candidate-home',
+    SZL_CANDIDATE_USER: 'szl-capture-candidate',
   });
-  assert.equal(isolated.candidateRoot, "/runner/work/platform/candidate");
-  assert.equal(isolated.evidenceRoot, "/runner/temp/evidence");
+  assert.equal(isolated.candidateRoot, '/runner/work/platform/candidate');
+  assert.equal(isolated.evidenceRoot, '/runner/temp/evidence');
   assert.throws(
-    () => validateCaptureIsolation({
-      SZL_CANDIDATE_ROOT: "/runner/work/platform/candidate",
-      SZL_EVIDENCE_ROOT: "/runner/work/platform/candidate/evidence",
-      SZL_CANDIDATE_HOME: "/runner/temp/candidate-home",
-      SZL_CANDIDATE_USER: "szl-capture-candidate",
-    }),
+    () =>
+      validateCaptureIsolation({
+        SZL_CANDIDATE_ROOT: '/runner/work/platform/candidate',
+        SZL_EVIDENCE_ROOT: '/runner/work/platform/candidate/evidence',
+        SZL_CANDIDATE_HOME: '/runner/temp/candidate-home',
+        SZL_CANDIDATE_USER: 'szl-capture-candidate',
+      }),
     /candidate and evidence roots must be disjoint/,
   );
   assert.throws(
-    () => validateCaptureIsolation({
-      SZL_CANDIDATE_ROOT: "/runner/work/platform/candidate",
-      SZL_EVIDENCE_ROOT: "/runner/temp/evidence",
-      SZL_CANDIDATE_HOME: "/runner/temp/candidate-home",
-      SZL_CANDIDATE_USER: "runner",
-    }),
+    () =>
+      validateCaptureIsolation({
+        SZL_CANDIDATE_ROOT: '/runner/work/platform/candidate',
+        SZL_EVIDENCE_ROOT: '/runner/temp/evidence',
+        SZL_CANDIDATE_HOME: '/runner/temp/candidate-home',
+        SZL_CANDIDATE_USER: 'runner',
+      }),
     /SZL_CANDIDATE_USER/,
   );
 });
 
-test("an HTTP-200 SPA not-found surface is rejected", () => {
+test('an HTTP-200 SPA not-found surface is rejected', () => {
   assert.throws(
     () =>
       assertPageAdmissible({
-        viewportName: "phone-390",
-        targetUrl: "http://127.0.0.1:4110/a11oy/start",
+        viewportName: 'phone-390',
+        targetUrl: 'http://127.0.0.1:4110/a11oy/start',
         responseStatus: 200,
         metrics: admittedMetrics({
-          finalUrl: "http://127.0.0.1:4110/a11oy/start",
+          finalUrl: 'http://127.0.0.1:4110/a11oy/start',
           notFound: true,
         }),
         consoleErrors: [],
@@ -251,10 +249,10 @@ test("an HTTP-200 SPA not-found surface is rejected", () => {
   );
 });
 
-test("route changes, unfinished UI, and browser errors are rejected", () => {
+test('route changes, unfinished UI, and browser errors are rejected', () => {
   const base = {
-    viewportName: "phone-390",
-    targetUrl: "http://127.0.0.1:4110/a11oy/",
+    viewportName: 'phone-390',
+    targetUrl: 'http://127.0.0.1:4110/a11oy/',
     responseStatus: 200,
     consoleErrors: [],
     pageErrors: [],
@@ -263,33 +261,33 @@ test("route changes, unfinished UI, and browser errors are rejected", () => {
   assert.throws(() =>
     assertPageAdmissible({
       ...base,
-      metrics: admittedMetrics({ finalUrl: "http://127.0.0.1:4110/a11oy/actions" }),
+      metrics: admittedMetrics({ finalUrl: 'http://127.0.0.1:4110/a11oy/actions' }),
     }),
   );
   assert.throws(() =>
     assertPageAdmissible({ ...base, metrics: admittedMetrics({ screenshotReady: false }) }),
   );
   assert.throws(() =>
-    assertPageAdmissible({ ...base, metrics: admittedMetrics(), consoleErrors: ["boom"] }),
+    assertPageAdmissible({ ...base, metrics: admittedMetrics(), consoleErrors: ['boom'] }),
   );
   assert.throws(
     () =>
       assertPageAdmissible({
         ...base,
-        metrics: admittedMetrics({ transient: ["CONNECTING", "Connecting to fabric..."] }),
+        metrics: admittedMetrics({ transient: ['CONNECTING', 'Connecting to fabric...'] }),
       }),
     /nonterminal public state/,
   );
 });
 
-test("a complete isolated packet verifies", async t => {
+test('a complete isolated packet verifies', async (t) => {
   const fixture = await writeFixture();
   t.after(() => rm(fixture.root, { recursive: true, force: true }));
   const packet = await verifyEvidencePacketOnDisk({ root: fixture.root, environment });
   assert.equal(packet.results.length, VIEWPORTS.length);
 });
 
-test("duplicate screenshot identities fail packet verification", async t => {
+test('duplicate screenshot identities fail packet verification', async (t) => {
   const fixture = await writeFixture();
   t.after(() => rm(fixture.root, { recursive: true, force: true }));
   fixture.packet.results[1].screenshot = fixture.packet.results[0].screenshot;
@@ -302,10 +300,10 @@ test("duplicate screenshot identities fail packet verification", async t => {
   );
 });
 
-test("incomplete screenshot catalog metadata fails packet verification", async t => {
+test('incomplete screenshot catalog metadata fails packet verification', async (t) => {
   const fixture = await writeFixture();
   t.after(() => rm(fixture.root, { recursive: true, force: true }));
-  fixture.packet.results[0].workcell_id = "";
+  fixture.packet.results[0].workcell_id = '';
   const packetBytes = `${JSON.stringify(fixture.packet, null, 2)}\n`;
   await writeFile(path.join(fixture.root, fixture.evidencePath), packetBytes);
   await writeFile(path.join(fixture.artifactRoot, fixture.evidencePath), packetBytes);
@@ -315,67 +313,74 @@ test("incomplete screenshot catalog metadata fails packet verification", async t
   );
 });
 
-test("unbound files fail isolated-artifact verification", async t => {
+test('unbound files fail isolated-artifact verification', async (t) => {
   const fixture = await writeFixture();
   t.after(() => rm(fixture.root, { recursive: true, force: true }));
-  await writeFile(path.join(fixture.artifactRoot, "unbound.png"), "not evidence");
+  await writeFile(path.join(fixture.artifactRoot, 'unbound.png'), 'not evidence');
   await assert.rejects(
     verifyEvidencePacketOnDisk({ root: fixture.root, environment }),
     /artifact file set is not isolated/,
   );
 });
 
-test("evidence output paths reject symlink escapes", async t => {
-  const root = await mkdtemp(path.join(os.tmpdir(), "szl-exact-head-link-test-"));
-  const outside = await mkdtemp(path.join(os.tmpdir(), "szl-exact-head-outside-"));
-  t.after(() => Promise.all([
-    rm(root, { recursive: true, force: true }),
-    rm(outside, { recursive: true, force: true }),
-  ]));
-  await symlink(outside, path.join(root, "audit"));
+test('evidence output paths reject symlink escapes', async (t) => {
+  const root = await mkdtemp(path.join(os.tmpdir(), 'szl-exact-head-link-test-'));
+  const outside = await mkdtemp(path.join(os.tmpdir(), 'szl-exact-head-outside-'));
+  t.after(() =>
+    Promise.all([
+      rm(root, { recursive: true, force: true }),
+      rm(outside, { recursive: true, force: true }),
+    ]),
+  );
+  await symlink(outside, path.join(root, 'audit'));
   await assert.rejects(
-    assertSafeRepositoryPath(root, path.join(root, "audit", "packet.json")),
+    assertSafeRepositoryPath(root, path.join(root, 'audit', 'packet.json')),
     /symbolic link/,
   );
 });
 
-test("workflow binds PR, branch, permissions, publication, and artifact contracts", async () => {
+test('workflow binds PR, branch, permissions, publication, and artifact contracts', async () => {
   const workflow = await readFile(
-    new URL("../../.github/workflows/exact-head-screenshot-evidence.yml", import.meta.url),
-    "utf8",
+    new URL('../../.github/workflows/exact-head-screenshot-evidence.yml', import.meta.url),
+    'utf8',
   );
-  const captureJob = workflow.slice(workflow.indexOf("  capture:"), workflow.indexOf("  publish:"));
-  const publishJob = workflow.slice(workflow.indexOf("  publish:"));
+  const captureJob = workflow.slice(workflow.indexOf('  capture:'), workflow.indexOf('  publish:'));
+  const publishJob = workflow.slice(workflow.indexOf('  publish:'));
   assert.match(workflow, /default: \/a11oy\//);
   assert.doesNotMatch(workflow, /default: ["']?608/);
   assert.match(workflow, /pulls\/\$\{SOURCE_PR\}/);
   assert.match(workflow, /test "\$pr_head" = "\$CANDIDATE_SHA"/);
   assert.match(workflow, /test "\$branch_head" = "\$CANDIDATE_SHA"/);
   const captureSource = await readFile(
-    new URL("./capture-series-a-exact-head.mjs", import.meta.url),
-    "utf8",
+    new URL('./capture-series-a-exact-head.mjs', import.meta.url),
+    'utf8',
   );
   assert.match(captureSource, /--untracked-files=no/);
   assert.match(captureSource, /bodyText\s*\.split\(\/\\n\+\//);
   assert.equal(captureSource.match(/verifyCurrentCheckout\(inputs\.candidateSha,/g)?.length, 3);
   const preCaptureGuard = captureSource.indexOf(
-    "const preCaptureSha = verifyCurrentCheckout(inputs.candidateSha, candidateRoot)",
+    'const preCaptureSha = verifyCurrentCheckout(inputs.candidateSha, candidateRoot)',
   );
   const postTeardownGuard = captureSource.indexOf(
-    "const postTeardownSha = verifyCurrentCheckout(inputs.candidateSha, candidateRoot)",
+    'const postTeardownSha = verifyCurrentCheckout(inputs.candidateSha, candidateRoot)',
   );
-  assert.ok(preCaptureGuard > captureSource.indexOf("if (!ready)"));
-  assert.ok(preCaptureGuard < captureSource.indexOf("chromium.launch"));
-  assert.ok(postTeardownGuard > captureSource.indexOf("await terminateServer(child)"));
+  assert.ok(preCaptureGuard > captureSource.indexOf('if (!ready)'));
+  assert.ok(preCaptureGuard < captureSource.indexOf('chromium.launch'));
+  assert.ok(postTeardownGuard > captureSource.indexOf('await terminateServer(child)'));
   assert.match(workflow, /Verify candidate immediately before capture/);
   assert.match(captureJob, /github\.ref == 'refs\/heads\/main'/);
   assert.match(workflow, /ref: \$\{\{ github\.sha \}\}/);
   assert.match(workflow, /SZL_CANDIDATE_USER: szl-capture-candidate/);
   assert.match(workflow, /chmod -R a-w "\$SZL_CANDIDATE_ROOT"/);
+  assert.match(workflow, /\$SZL_CANDIDATE_ROOT\/artifacts\/a11oy\/node_modules\/\.vite-temp/);
+  assert.match(workflow, /\$SZL_CANDIDATE_ROOT\/artifacts\/a11oy\/node_modules\/\.cache/);
   assert.match(workflow, /install -d -m 0700 "\$SZL_EVIDENCE_ROOT"/);
   assert.match(workflow, /sudo --non-interactive --user/);
   assert.match(workflow, /--ignore-scripts --ignore-pnpmfile/);
-  assert.match(workflow, /tracked_status="\$\(git -C "\$SZL_CANDIDATE_ROOT" status --porcelain=v1 --untracked-files=no\)"/);
+  assert.match(
+    workflow,
+    /tracked_status="\$\(git -C "\$SZL_CANDIDATE_ROOT" status --porcelain=v1 --untracked-files=no\)"/,
+  );
   assert.match(workflow, /test -z "\$tracked_status"/);
   assert.match(workflow, /inputs\.source_pr \|\| github\.event\.pull_request\.number/);
   assert.doesNotMatch(captureJob, /issues: write/);
@@ -393,8 +398,8 @@ test("workflow binds PR, branch, permissions, publication, and artifact contract
   assert.match(publishJob, /exact 90-day artifact/);
   assert.match(publishJob, /uploaded archive SHA-256/);
   const staging = await readFile(
-    new URL("../../.github/workflows/deploy-staging.yml", import.meta.url),
-    "utf8",
+    new URL('../../.github/workflows/deploy-staging.yml', import.meta.url),
+    'utf8',
   );
   assert.match(staging, /branches: \[main, master\]/);
 });
