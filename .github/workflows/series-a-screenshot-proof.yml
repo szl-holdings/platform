@@ -1,0 +1,125 @@
+name: Series A Screenshot Proof
+
+on:
+  workflow_dispatch:
+  pull_request:
+    branches: [main]
+    paths:
+      - '.github/workflows/series-a-screenshot-proof.yml'
+      - 'artifacts/a11oy/**'
+      - 'packages/a11oy-runtime/**'
+      - 'packages/omnia-shell/**'
+      - 'scripts/qa/capture-series-a-proof.mjs'
+      - 'scripts/qa/smoke-routes.js'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: series-a-screenshot-${{ github.event.pull_request.head.sha || github.sha }}
+  cancel-in-progress: true
+
+env:
+  NODE_OPTIONS: --max-old-space-size=6144
+
+jobs:
+  capture:
+    name: Exact-head responsive capture
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    permissions:
+      contents: read
+    env:
+      SOURCE_REPOSITORY: ${{ github.repository }}
+      SOURCE_REF: ${{ github.event.pull_request.head.ref || github.ref_name }}
+      SOURCE_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+
+    steps:
+      - name: Harden runner
+        uses: step-security/harden-runner@05e31511f85b41b11d1cf0ef85d0992719546e2c # v2.21.0
+        with:
+          egress-policy: audit
+
+      - name: Check out exact candidate head
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          persist-credentials: false
+
+      - name: Bind checked-out source identity
+        shell: bash
+        run: |
+          set -euo pipefail
+          actual_sha="$(git rev-parse HEAD)"
+          test "$actual_sha" = "$SOURCE_SHA"
+          echo "SOURCE_TREE_SHA=$(git rev-parse 'HEAD^{tree}')" >> "$GITHUB_ENV"
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@0977fd99725f1db4007ccb2928dbb4e90d06cc86 # v6.0.10
+
+      - name: Install Node.js
+        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version-file: .node-version
+          cache: pnpm
+
+      - name: Install locked dependencies
+        env:
+          ONNXRUNTIME_NODE_INSTALL: skip
+        run: pnpm install --frozen-lockfile
+
+      - name: Cache Playwright Chromium
+        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        id: playwright-cache
+        with:
+          path: ~/.cache/ms-playwright
+          key: playwright-chromium-${{ runner.os }}-${{ hashFiles('pnpm-lock.yaml') }}
+
+      - name: Install Chromium with system dependencies
+        if: steps.playwright-cache.outputs.cache-hit != 'true'
+        run: pnpm exec playwright install --with-deps chromium
+
+      - name: Install Chromium system dependencies
+        if: steps.playwright-cache.outputs.cache-hit == 'true'
+        run: pnpm exec playwright install-deps chromium
+
+      - name: Build exact A11oy source
+        env:
+          BASE_PATH: /a11oy/
+        run: pnpm --filter @workspace/a11oy run build
+
+      - name: Serve exact build on loopback
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p .proof-site/a11oy
+          cp -R artifacts/a11oy/dist/public/. .proof-site/a11oy/
+          cp .proof-site/a11oy/index.html .proof-site/index.html
+          pnpm exec serve .proof-site -s -l 4173 > "$RUNNER_TEMP/series-a-proof-serve.log" 2>&1 &
+          for attempt in {1..30}; do
+            if curl --silent --show-error --fail \
+              http://127.0.0.1:4173/a11oy/start > /dev/null; then
+              exit 0
+            fi
+            sleep 1
+          done
+          cat "$RUNNER_TEMP/series-a-proof-serve.log"
+          exit 1
+
+      - name: Capture exact-head proof
+        env:
+          PLAYWRIGHT_BASE_URL: http://127.0.0.1:4173
+          CAPTURE_ROUTE: /a11oy/start
+          PROOF_OUTPUT_DIR: artifacts/series-a-screenshot-proof
+          WORKFLOW_RUN_ID: ${{ github.run_id }}
+          WORKFLOW_RUN_ATTEMPT: ${{ github.run_attempt }}
+        run: node scripts/qa/capture-series-a-proof.mjs
+
+      - name: Upload capture evidence
+        if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: series-a-screenshot-proof-${{ github.event.pull_request.head.sha || github.sha }}
+          path: artifacts/series-a-screenshot-proof/
+          if-no-files-found: error
+          retention-days: 14
