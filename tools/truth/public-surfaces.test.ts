@@ -359,6 +359,7 @@ test('wires freshness only to scheduled and explicit manual events', () => {
     jobs: {
       'truth-drift': { steps: Array<{ name?: string; if?: string; run?: string }> };
       'refresh-truth': {
+        concurrency: { group: string; 'cancel-in-progress': boolean };
         steps: Array<{
           name?: string;
           if?: string;
@@ -394,6 +395,11 @@ test('wires freshness only to scheduled and explicit manual events', () => {
     incremental?.if,
     "github.event_name == 'pull_request' || github.event_name == 'push'",
   );
+
+  assert.deepEqual(workflow.jobs['refresh-truth'].concurrency, {
+    group: 'truth-evidence-refresh-${{ github.repository }}',
+    'cancel-in-progress': false,
+  });
 
   const refreshSteps = workflow.jobs['refresh-truth'].steps;
   const checkout = refreshSteps.find((step) => step.name === 'Check out exact protected source');
