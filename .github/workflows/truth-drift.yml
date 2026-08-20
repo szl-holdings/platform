@@ -5,7 +5,7 @@ on:
   push:
     branches: [main]
   schedule:
-    - cron: '13 5 * * 1,4'
+    - cron: '17 6 * * *'
   workflow_dispatch:
     inputs:
       full_claim_scan:
