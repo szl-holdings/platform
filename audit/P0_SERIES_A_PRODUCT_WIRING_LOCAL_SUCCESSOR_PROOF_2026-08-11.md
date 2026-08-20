@@ -39,7 +39,9 @@ governance, enterprise operations, real estate, and legal. Each uses
 `Observe -> Gate -> Act -> Prove`, links to existing source routes, and exposes
 explicit `AVAILABLE`, `DEMO`, `BLOCKED`, or `UNAVAILABLE` evidence states.
 
-The compatibility route `/a11oy/investor-demo` resolves to the same view.
+The existing `/a11oy/investor-demo` route preserves its 12-step guided product
+story. The new six-view Series A surface is available at `/a11oy/start` and
+does not replace that guided flow.
 GraphQL and Omnia server operations remain unavailable because no verified
 authenticated backend route was established.
 

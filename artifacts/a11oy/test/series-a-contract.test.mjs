@@ -57,9 +57,10 @@ test('keeps Observe, Gate, Act, Prove and operational truth states explicit', ()
   assert.doesNotMatch(page, /production[- ]ready|SOC 2 certified|enterprise customers|proven ROI/i);
 });
 
-test('registers the canonical and backward-compatible investor routes', () => {
+test('registers the Series A route without replacing the guided investor demo', () => {
   assert.match(app, /path=\{`\$\{base\}\/start`\} component=\{SeriesAView\}/);
-  assert.match(app, /path=\{`\$\{base\}\/investor-demo`\} component=\{SeriesAView\}/);
+  assert.match(app, /path=\{`\$\{base\}\/investor-demo`\} component=\{InvestorDemo\}/);
+  assert.match(app, /import\('\.\/pages\/InvestorDemo'\)/);
   assert.match(layout, /href=\{b\('\/start'\)\}/);
   assert.match(layout, />\s*Series A view\s*</);
 });
