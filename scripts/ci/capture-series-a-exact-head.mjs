@@ -11,7 +11,7 @@ import { chromium } from "@playwright/test";
 const startedAt = new Date();
 const candidateSha = String(process.env.SZL_CANDIDATE_SHA || "").trim();
 const sourcePr = String(process.env.SZL_SOURCE_PR || "").trim();
-const route = String(process.env.SZL_ROUTE || "/a11oy/start").trim();
+const route = String(process.env.SZL_ROUTE || "/a11oy/").trim();
 const startCommand = String(process.env.SZL_START_COMMAND || "pnpm run dev").trim();
 const evidenceDir = path.resolve("docs/assets/screenshots/current");
 const evidencePath = path.resolve("audit/series-a-exact-head-capture.json");
@@ -36,10 +36,12 @@ const candidatePorts = [4110];
 const deviceScaleFactor = 1;
 const pnpmVersion = execFileSync("pnpm", ["--version"], { encoding: "utf8" }).trim();
 const transientPattern = /^(CHECKING|CONNECTING|LOADING|OBSERVING)$/i;
+const captureDate = startedAt.toISOString().slice(0, 10);
+const routeSlug = route.replace(/^\/+|\/+$/g, "").replace(/[^a-z0-9]+/gi, "-").toLowerCase() || "root";
 
 await mkdir(evidenceDir, { recursive: true });
 for (const viewport of viewports) {
-  await rm(path.join(evidenceDir, `a11oy-start-${viewport.name}.png`), { force: true });
+  await rm(path.join(evidenceDir, `${captureDate}-${routeSlug}-${viewport.name}.png`), { force: true });
 }
 
 const child = spawn(startCommand, {
@@ -152,6 +154,9 @@ try {
         scrollWidth: document.documentElement.scrollWidth,
         clientWidth: document.documentElement.clientWidth,
         transient,
+        notFound:
+          document.body.innerText.includes("404") &&
+          document.body.innerText.includes("Page not found"),
       };
     }, transientPattern.source);
 
@@ -161,11 +166,14 @@ try {
     if (metrics.transient.length) {
       throw new Error(`${viewport.name}: nonterminal public state remained visible: ${metrics.transient.join(", ")}`);
     }
+    if (metrics.notFound) {
+      throw new Error(`${viewport.name}: application rendered the not-found surface for ${route}`);
+    }
     if (consoleErrors.length || pageErrors.length) {
       throw new Error(`${viewport.name}: browser errors: ${JSON.stringify({ consoleErrors, pageErrors })}`);
     }
 
-    const fileName = `a11oy-start-${viewport.name}.png`;
+    const fileName = `${captureDate}-${routeSlug}-${viewport.name}.png`;
     const filePath = path.join(evidenceDir, fileName);
     await page.screenshot({ path: filePath, fullPage: true, animations: "disabled" });
     const bytes = await readFile(filePath);

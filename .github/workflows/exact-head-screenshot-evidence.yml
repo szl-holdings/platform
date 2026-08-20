@@ -6,6 +6,7 @@ on:
       - .github/workflows/exact-head-screenshot-evidence.yml
       - docs/standards/exact-head-screenshot-evidence.md
       - scripts/ci/capture-series-a-exact-head.mjs
+      - scripts/ci/exact-head-screenshot-evidence.test.mjs
   workflow_dispatch:
     inputs:
       candidate_sha:
@@ -17,14 +18,13 @@ on:
         required: true
         type: string
       source_pr:
-        description: Source pull request number being superseded
+        description: Open same-repository pull request whose head is candidate_sha
         required: true
-        default: "608"
         type: string
       route:
         description: Absolute application route to capture
         required: true
-        default: /a11oy/start
+        default: /a11oy/
         type: string
 
 permissions:
@@ -48,6 +48,7 @@ jobs:
         run: |
           set -euo pipefail
           node --check scripts/ci/capture-series-a-exact-head.mjs
+          node --test scripts/ci/exact-head-screenshot-evidence.test.mjs
           grep -Fq 'GitHub-hosted ephemeral runner is the canonical default' docs/standards/exact-head-screenshot-evidence.md
           grep -Fq 'Copied screenshots' docs/standards/exact-head-screenshot-evidence.md
           grep -Fq 'source_sha' scripts/ci/capture-series-a-exact-head.mjs
@@ -96,6 +97,22 @@ jobs:
           remote_head="$(git ls-remote "https://github.com/${GITHUB_REPOSITORY}.git" "refs/heads/${TARGET_BRANCH}" | awk '{print $1}')"
           test -n "$remote_head"
           test "$remote_head" = "$CANDIDATE_SHA"
+
+          pr_head="$(
+            gh api "repos/${GITHUB_REPOSITORY}/pulls/${SOURCE_PR}" \
+              --jq '.head.sha'
+          )"
+          pr_repo="$(
+            gh api "repos/${GITHUB_REPOSITORY}/pulls/${SOURCE_PR}" \
+              --jq '.head.repo.full_name'
+          )"
+          pr_state="$(
+            gh api "repos/${GITHUB_REPOSITORY}/pulls/${SOURCE_PR}" \
+              --jq '.state'
+          )"
+          test "$pr_repo" = "$GITHUB_REPOSITORY"
+          test "$pr_state" = 'open'
+          test "$pr_head" = "$CANDIDATE_SHA"
 
       - name: Checkout exact candidate
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
