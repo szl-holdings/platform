@@ -219,67 +219,72 @@ test('deletion receipts are authenticated against storage forgery', async () => 
   }
 });
 
-test('terminal deletion unlinks only the canonical directory entry', {
-  skip: process.platform === 'win32',
-}, async () => {
-  const root = await mkdtemp(join(tmpdir(), 'szl-state-'));
-  const object = portableObject('unlink safety');
-  try {
-    const adapter = new FileSystemStateTransportAdapter({
-      rootDirectory: root,
-      masterKey: randomBytes(32),
-    });
-    await adapter.put(object);
-    await adapter.delete(object.capsule.capsuleId);
 
-    const recordPath = storagePath(root, object.capsule.capsuleId);
-    const outsideRecord = join(root, 'outside-must-survive.json');
-    await mkdir(dirname(recordPath), { recursive: true });
-    await writeFile(outsideRecord, 'outside survives\n', 'utf8');
-    await symlink(outsideRecord, recordPath);
+test(
+  'terminal deletion unlinks only the canonical directory entry',
+  { skip: process.platform === 'win32' },
+  async () => {
+    const root = await mkdtemp(join(tmpdir(), 'szl-state-'));
+    const object = portableObject('unlink safety');
+    try {
+      const adapter = new FileSystemStateTransportAdapter({
+        rootDirectory: root,
+        masterKey: randomBytes(32),
+      });
+      await adapter.put(object);
+      await adapter.delete(object.capsule.capsuleId);
 
-    await adapter.delete(object.capsule.capsuleId);
-    assert.equal(await readFile(outsideRecord, 'utf8'), 'outside survives\n');
-    await assert.rejects(
-      lstat(recordPath),
-      (error) => error && typeof error === 'object' && error.code === 'ENOENT',
-    );
-  } finally {
-    await rm(root, { recursive: true, force: true });
-  }
-});
+      const recordPath = storagePath(root, object.capsule.capsuleId);
+      const outsideRecord = join(root, 'outside-must-survive.json');
+      await mkdir(dirname(recordPath), { recursive: true });
+      await writeFile(outsideRecord, 'outside survives\n', 'utf8');
+      await symlink(outsideRecord, recordPath);
 
-test('filesystem links cannot redirect state records or shard directories', {
-  skip: process.platform === 'win32',
-}, async () => {
-  const root = await mkdtemp(join(tmpdir(), 'szl-state-'));
-  const object = portableObject('linked state');
-  try {
-    const adapter = new FileSystemStateTransportAdapter({
-      rootDirectory: root,
-      masterKey: randomBytes(32),
-    });
-    await adapter.inspect(object.capsule.capsuleId);
+      await adapter.delete(object.capsule.capsuleId);
+      assert.equal(await readFile(outsideRecord, 'utf8'), 'outside survives\n');
+      await assert.rejects(
+        lstat(recordPath),
+        (error) => error && typeof error === 'object' && error.code === 'ENOENT',
+      );
+    } finally {
+      await rm(root, { recursive: true, force: true });
+    }
+  },
+);
 
-    const recordPath = storagePath(root, object.capsule.capsuleId);
-    await mkdir(dirname(recordPath), { recursive: true });
-    const outsideRecord = join(root, 'outside-record.json');
-    await writeFile(outsideRecord, '{}\n', 'utf8');
-    await symlink(outsideRecord, recordPath);
-    await assert.rejects(adapter.get(object.capsule.capsuleId), expectCode('SIGNATURE_INVALID'));
-    await rm(recordPath, { force: true });
+test(
+  'filesystem links cannot redirect state records or shard directories',
+  { skip: process.platform === 'win32' },
+  async () => {
+    const root = await mkdtemp(join(tmpdir(), 'szl-state-'));
+    const object = portableObject('linked state');
+    try {
+      const adapter = new FileSystemStateTransportAdapter({
+        rootDirectory: root,
+        masterKey: randomBytes(32),
+      });
+      await adapter.inspect(object.capsule.capsuleId);
 
-    const firstShard = join(
-      root,
-      'objects',
-      object.capsule.capsuleId.slice('state_'.length, 'state_'.length + 2),
-    );
-    await rm(firstShard, { recursive: true, force: true });
-    const outsideDirectory = join(root, 'outside-directory');
-    await mkdir(outsideDirectory);
-    await symlink(outsideDirectory, firstShard, 'dir');
-    await assert.rejects(adapter.put(object), expectCode('INVALID_INPUT'));
-  } finally {
-    await rm(root, { recursive: true, force: true });
-  }
-});
+      const recordPath = storagePath(root, object.capsule.capsuleId);
+      await mkdir(dirname(recordPath), { recursive: true });
+      const outsideRecord = join(root, 'outside-record.json');
+      await writeFile(outsideRecord, '{}\n', 'utf8');
+      await symlink(outsideRecord, recordPath);
+      await assert.rejects(adapter.get(object.capsule.capsuleId), expectCode('SIGNATURE_INVALID'));
+      await rm(recordPath, { force: true });
+
+      const firstShard = join(
+        root,
+        'objects',
+        object.capsule.capsuleId.slice('state_'.length, 'state_'.length + 2),
+      );
+      await rm(firstShard, { recursive: true, force: true });
+      const outsideDirectory = join(root, 'outside-directory');
+      await mkdir(outsideDirectory);
+      await symlink(outsideDirectory, firstShard, 'dir');
+      await assert.rejects(adapter.put(object), expectCode('INVALID_INPUT'));
+    } finally {
+      await rm(root, { recursive: true, force: true });
+    }
+  },
+);

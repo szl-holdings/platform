@@ -1,6 +1,15 @@
 import { createHmac, randomUUID } from 'node:crypto';
 import { constants as fsConstants } from 'node:fs';
-import { link, lstat, mkdir, open, realpath, rm, unlink, type FileHandle } from 'node:fs/promises';
+import {
+  link,
+  lstat,
+  mkdir,
+  open,
+  realpath,
+  rm,
+  unlink,
+  type FileHandle,
+} from 'node:fs/promises';
 import { dirname, isAbsolute, join, parse, relative, resolve, sep } from 'node:path';
 import { canonicalJson, digestObject, sha256Hex } from './canonical.js';
 import {
@@ -19,14 +28,7 @@ const ID_PATTERN = /^state_([0-9a-f]{64})$/;
 const DEFAULT_MAX_PAYLOAD_BYTES = 512 * 1024 * 1024;
 const RECORD_OVERHEAD_BYTES = 1024 * 1024;
 const READ_CHUNK_BYTES = 64 * 1024;
-const UNSUPPORTED_DIRECTORY_SYNC = new Set([
-  'EBADF',
-  'EISDIR',
-  'EINVAL',
-  'ENOSYS',
-  'ENOTSUP',
-  'EPERM',
-]);
+const UNSUPPORTED_DIRECTORY_SYNC = new Set(['EBADF', 'EISDIR', 'EINVAL', 'ENOSYS', 'ENOTSUP', 'EPERM']);
 
 interface EncryptedPortableStateRecord {
   readonly schema: typeof RECORD_SCHEMA;
@@ -459,9 +461,7 @@ export class FileSystemStateTransportAdapter implements StateTransportAdapter {
     const relativePath = relative(this.#rootDirectory, target);
     assertStateNative(
       relativePath === '' ||
-        (!isAbsolute(relativePath) &&
-          relativePath !== '..' &&
-          !relativePath.startsWith(`..${sep}`)),
+        (!isAbsolute(relativePath) && relativePath !== '..' && !relativePath.startsWith(`..${sep}`)),
       'INVALID_INPUT',
       'Filesystem transport directory escaped the configured root.',
       { path: target },
@@ -540,7 +540,10 @@ export class FileSystemStateTransportAdapter implements StateTransportAdapter {
       const chunks: Buffer[] = [];
       let byteLength = 0;
       while (true) {
-        const capacity = Math.min(READ_CHUNK_BYTES, this.#maxRecordBytes - byteLength + 1);
+        const capacity = Math.min(
+          READ_CHUNK_BYTES,
+          this.#maxRecordBytes - byteLength + 1,
+        );
         const chunk = Buffer.allocUnsafe(capacity);
         const { bytesRead } = await handle.read(chunk, 0, chunk.byteLength, null);
         if (bytesRead === 0) break;
