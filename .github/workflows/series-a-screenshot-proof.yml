@@ -94,6 +94,7 @@ jobs:
           set -euo pipefail
           mkdir -p .proof-site/a11oy
           cp -R artifacts/a11oy/dist/public/. .proof-site/a11oy/
+          cp .proof-site/a11oy/index.html .proof-site/index.html
           pnpm exec serve .proof-site -s -l 4173 > "$RUNNER_TEMP/series-a-proof-serve.log" 2>&1 &
           for attempt in {1..30}; do
             if curl --silent --show-error --fail \
