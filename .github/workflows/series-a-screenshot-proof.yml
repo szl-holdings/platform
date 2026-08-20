@@ -96,7 +96,7 @@ jobs:
           cp -R artifacts/a11oy/dist/public/. .proof-site/a11oy/
           pnpm exec serve .proof-site -s -l 4173 > "$RUNNER_TEMP/series-a-proof-serve.log" 2>&1 &
           for attempt in {1..30}; do
-            if curl --silent --show-error --fail --head \
+            if curl --silent --show-error --fail \
               http://127.0.0.1:4173/a11oy/start > /dev/null; then
               exit 0
             fi
