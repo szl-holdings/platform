@@ -1,0 +1,156 @@
+name: Materialize exact-head screenshot evidence successor
+
+on:
+  push:
+    branches:
+      - fix/exact-head-screenshot-evidence-successor-20260820
+
+permissions:
+  contents: write
+
+concurrency:
+  group: materialize-exact-head-screenshot-evidence-successor
+  cancel-in-progress: false
+
+jobs:
+  materialize:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    env:
+      EXPECTED_MAIN: cf28e64a0911165a690680ff9223f58e2dcff72c
+      SOURCE_SHA: 2253c4f539157355f72719c42b71c44123d9164c
+      TARGET_BRANCH: fix/exact-head-screenshot-evidence-successor-20260820
+    steps:
+      - name: Check out exact staging branch
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0
+          persist-credentials: true
+
+      - name: Build one current-main successor tree
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse HEAD^)" = "$EXPECTED_MAIN"
+          git fetch --no-tags origin "$SOURCE_SHA"
+          git checkout "$SOURCE_SHA" -- \
+            .github/workflows/exact-head-screenshot-evidence.yml \
+            docs/standards/exact-head-screenshot-evidence.md \
+            scripts/ci/capture-series-a-exact-head.mjs
+          rm -f .github/workflows/cleanup-accidental-workcell-issues.yml
+          rm -f .github/workflows/materialize-exact-head-evidence-successor.yml
+
+          python3 - <<'PY'
+          import json
+          import re
+          from pathlib import Path
+
+          root = Path('.')
+
+          artifact = root / 'artifacts/SOURCE_OF_TRUTH.json'
+          artifact_data = json.loads(artifact.read_text(encoding='utf-8'))
+          current = artifact_data['metrics']['ci_workflows']['value']
+          if current != 45:
+              raise SystemExit(f'unexpected artifacts workflow count: {current}')
+          artifact_data['metrics']['ci_workflows']['value'] = 46
+          artifact.write_text(json.dumps(artifact_data, indent=2) + '\n', encoding='utf-8')
+
+          audit = root / 'audit/source-of-truth.json'
+          audit_data = json.loads(audit.read_text(encoding='utf-8'))
+          current = audit_data['ci']['workflows']['count']
+          if current != 45:
+              raise SystemExit(f'unexpected audit workflow count: {current}')
+          audit_data['ci']['workflows']['count'] = 46
+          audit_data['ci']['workflows']['computed'] = '2026-08-20'
+          audit_data['ci']['workflows']['note'] = (
+              'Counts the 46 permanent protected-source workflows after adding the '
+              'GitHub-hosted exact-head screenshot evidence rail and retaining the hosted '
+              'observability and public npm release paths.'
+          )
+          audit.write_text(json.dumps(audit_data, indent=2) + '\n', encoding='utf-8')
+
+          claim_paths = [
+              'SOURCE_OF_TRUTH.md',
+              'audit/README.md',
+              'content/demos/executive-tour.md',
+              'content/docs/architecture.md',
+              'content/trust/architecture-overview.md',
+              'content/trust/bcp-dr.md',
+              'content-package/posts/medium-a11oy-definition.html',
+              'content-package/posts/medium-a11oy-definition.md',
+              'docs/a11oy/A11OY.md',
+              'docs/operations/github-setup.md',
+              'ops/frontier/current-vs-target-architecture.md',
+              'ops/frontier/repo-topology-map.md',
+          ]
+
+          changed = {}
+          for name in claim_paths:
+              path = root / name
+              text = path.read_text(encoding='utf-8')
+              out = []
+              replacements = 0
+              for line in text.splitlines(keepends=True):
+                  if re.search(r'workflow|CI/CD', line, re.IGNORECASE):
+                      line, count = re.subn(r'\b45\b', '46', line)
+                      replacements += count
+                  out.append(line)
+              if replacements == 0:
+                  raise SystemExit(f'no current workflow claim updated in {name}')
+              path.write_text(''.join(out), encoding='utf-8')
+              changed[name] = replacements
+
+          source = root / 'SOURCE_OF_TRUTH.md'
+          text = source.read_text(encoding='utf-8')
+          old = (
+              'including the hosted observability proof and public npm release paths, '
+              'after two obsolete one-shots were retired'
+          )
+          new = (
+              'including hosted observability, public npm release, and GitHub-hosted '
+              'exact-head screenshot evidence paths'
+          )
+          if old not in text:
+              raise SystemExit('SOURCE_OF_TRUTH.md workflow description changed unexpectedly')
+          source.write_text(text.replace(old, new, 1), encoding='utf-8')
+
+          audit_readme = root / 'audit/README.md'
+          text = audit_readme.read_text(encoding='utf-8')
+          old = (
+              'including the hosted observability proof and public npm release paths, '
+              'after retiring two obsolete mutation one-shots'
+          )
+          new = (
+              'including hosted observability, public npm release, and GitHub-hosted '
+              'exact-head screenshot evidence paths'
+          )
+          if old not in text:
+              raise SystemExit('audit/README.md workflow description changed unexpectedly')
+          audit_readme.write_text(text.replace(old, new, 1), encoding='utf-8')
+
+          for name in claim_paths:
+              for number, line in enumerate((root / name).read_text(encoding='utf-8').splitlines(), 1):
+                  if re.search(r'workflow|CI/CD', line, re.IGNORECASE) and re.search(r'\b45\b', line):
+                      raise SystemExit(f'stale workflow claim remains: {name}:{number}: {line}')
+
+          print(json.dumps({'updated_claims': changed}, indent=2, sort_keys=True))
+          PY
+
+          workflow_count="$(find .github/workflows -maxdepth 1 -type f -regextype posix-extended -regex '.*\.ya?ml' | wc -l | tr -d ' ')"
+          test "$workflow_count" = '46'
+          node --check scripts/ci/capture-series-a-exact-head.mjs
+          node scripts/audit/validate-source-of-truth.js
+          git add -A
+          git diff --cached --check
+          test ! -e .github/workflows/materialize-exact-head-evidence-successor.yml
+          test ! -e .github/workflows/cleanup-accidental-workcell-issues.yml
+
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git commit -m 'ci(evidence): add exact-head screenshot rail' \
+            -m 'Replace the retired Replit capture path with GitHub-hosted proof.' \
+            -m 'Reconcile the measured workflow inventory to 46.' \
+            -m 'Signed-off-by: github-actions[bot] <41898282+github-actions[bot]@users.noreply.github.com>' \
+            -m 'Signed-off-by: Lutar, Stephen P. <stephenlutar2@gmail.com>'
+          git push origin "HEAD:refs/heads/${TARGET_BRANCH}"
