@@ -18,6 +18,11 @@ on:
         required: false
         default: false
         type: boolean
+      refresh_truth:
+        description: Regenerate source-of-truth evidence and open a protected refresh PR
+        required: false
+        default: false
+        type: boolean
 
 permissions:
   contents: read
@@ -25,6 +30,8 @@ permissions:
 jobs:
   truth-drift:
     name: truth-drift
+    if: >-
+      github.event_name != 'workflow_dispatch' || inputs.refresh_truth == false
     runs-on: ubuntu-latest
     timeout-minutes: 20
     steps:
@@ -74,7 +81,6 @@ jobs:
         run: pnpm claims:drift
 
       - name: Reject newly introduced claim drift
-        # Only these events provide the governed comparison SHA used below.
         if: github.event_name == 'pull_request' || github.event_name == 'push'
         env:
           BASE_SHA: ${{ github.event.pull_request.base.sha || github.event.before }}
@@ -86,3 +92,120 @@ jobs:
 
       - name: Reject source-of-truth drift
         run: git diff --exit-code -- artifacts/SOURCE_OF_TRUTH.json artifacts/PUBLIC_SURFACES.json
+
+  refresh-truth:
+    name: generate current evidence and stage protected refresh
+    if: >-
+      github.event_name == 'schedule' ||
+      (github.event_name == 'workflow_dispatch' && inputs.refresh_truth)
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    permissions:
+      contents: write
+      pull-requests: write
+    env:
+      GH_TOKEN: ${{ github.token }}
+    steps:
+      - name: Check for an existing refresh PR
+        id: existing
+        shell: bash
+        run: |
+          set -euo pipefail
+          number="$(gh pr list \
+            --repo "$GITHUB_REPOSITORY" \
+            --state open \
+            --search 'chore(truth): refresh source-of-truth evidence in:title' \
+            --json number,title \
+            --jq '.[] | select(.title == "chore(truth): refresh source-of-truth evidence") | .number' \
+            | head -n1)"
+          if [ -n "$number" ]; then
+            echo "number=$number" >> "$GITHUB_OUTPUT"
+            echo "Existing refresh PR #${number} remains authoritative."
+          fi
+
+      - name: Check out exact protected main
+        if: steps.existing.outputs.number == ''
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: main
+          fetch-depth: 0
+          persist-credentials: true
+
+      - name: Install pnpm
+        if: steps.existing.outputs.number == ''
+        uses: pnpm/action-setup@0977fd99725f1db4007ccb2928dbb4e90d06cc86 # v6.0.10
+        with:
+          version: 10.26.1
+
+      - name: Install Node.js
+        if: steps.existing.outputs.number == ''
+        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version-file: .node-version
+          cache: pnpm
+
+      - name: Install locked dependencies
+        if: steps.existing.outputs.number == ''
+        run: pnpm install --frozen-lockfile
+
+      - name: Regenerate current local and remote evidence
+        if: steps.existing.outputs.number == ''
+        run: |
+          set -euo pipefail
+          pnpm truth:generate
+          pnpm truth:generate -- --verify-local
+          pnpm claims:validate
+          git diff --check
+
+      - name: Detect evidence change
+        if: steps.existing.outputs.number == ''
+        id: changed
+        shell: bash
+        run: |
+          if git diff --quiet -- artifacts/SOURCE_OF_TRUTH.json; then
+            echo 'value=false' >> "$GITHUB_OUTPUT"
+            echo 'The generated evidence is already current.'
+          else
+            echo 'value=true' >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Publish bounded refresh pull request
+        if: steps.changed.outputs.value == 'true'
+        shell: bash
+        run: |
+          set -euo pipefail
+          branch="automation/source-of-truth-refresh-${GITHUB_RUN_ID}"
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git switch -c "$branch"
+          git add artifacts/SOURCE_OF_TRUTH.json
+          git commit \
+            -m 'chore(truth): refresh source-of-truth evidence' \
+            -m 'Regenerate local and remote evidence from the exact protected main revision.' \
+            -m 'Signed-off-by: github-actions[bot] <41898282+github-actions[bot]@users.noreply.github.com>'
+          git push origin "$branch"
+
+          cat > /tmp/truth-refresh.md <<'EOF'
+          ## Outcome
+
+          Regenerate `artifacts/SOURCE_OF_TRUTH.json` from the exact protected-main checkout using the canonical generator.
+
+          The refresh measures repository-local facts, attempts bounded public remote observations, records unavailable evidence explicitly, and changes no runtime, deployment, secret, model, dataset, or provider state.
+
+          Risk: A — generated evidence refresh only.
+
+          Solo-Operator-Authorization: confirmed
+
+          Signed-off-by: github-actions[bot] <41898282+github-actions[bot]@users.noreply.github.com>
+          EOF
+
+          pr_url="$(gh pr create \
+            --repo "$GITHUB_REPOSITORY" \
+            --base main \
+            --head "$branch" \
+            --title 'chore(truth): refresh source-of-truth evidence' \
+            --body-file /tmp/truth-refresh.md)"
+          echo "Created ${pr_url}"
+          if ! gh pr merge "$pr_url" --auto --squash; then
+            echo '::warning::Refresh PR was created but protected auto-merge could not be enabled.'
+          fi
