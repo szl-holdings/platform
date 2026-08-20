@@ -69,13 +69,19 @@ jobs:
       contents: read
       pull-requests: read
     env:
+      CONTROLLER_SHA: ${{ github.sha }}
       CANDIDATE_SHA: ${{ inputs.candidate_sha }}
       TARGET_BRANCH: ${{ inputs.target_branch }}
       SOURCE_PR: ${{ inputs.source_pr }}
       CAPTURE_ROUTE: ${{ inputs.route }}
+      SZL_CONTROLLER_ROOT: ${{ github.workspace }}/controller
       SZL_CANDIDATE_ROOT: ${{ github.workspace }}/candidate
       SZL_EVIDENCE_ROOT: ${{ runner.temp }}/exact-head-evidence-${{ github.run_id }}-${{ github.run_attempt }}
       SZL_CANDIDATE_HOME: ${{ runner.temp }}/candidate-home-${{ github.run_id }}-${{ github.run_attempt }}
+      SZL_CANDIDATE_CACHE: ${{ runner.temp }}/candidate-home-${{ github.run_id }}-${{ github.run_attempt }}/cache
+      SZL_CANDIDATE_STORE: ${{ runner.temp }}/candidate-home-${{ github.run_id }}-${{ github.run_attempt }}/store
+      SZL_CANDIDATE_VIRTUAL_STORE: ${{ github.workspace }}/candidate/node_modules/.pnpm
+      SZL_DEPENDENCY_DIRS_MANIFEST: ${{ runner.temp }}/candidate-dependency-dirs-${{ github.run_id }}-${{ github.run_attempt }}
       SZL_CANDIDATE_USER: szl-capture-candidate
     steps:
       - name: Validate immutable inputs
@@ -125,10 +131,20 @@ jobs:
           fetch-depth: 0
           persist-credentials: false
 
-      - name: Verify candidate checkout identity
+      - name: Reject unsafe candidate Git entries before dependency resolution
         working-directory: candidate
         shell: bash
-        run: test "$(git rev-parse HEAD)" = "$CANDIDATE_SHA"
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse HEAD)" = "$CANDIDATE_SHA"
+          tracked_status="$(git status --porcelain=v1 --untracked-files=no)"
+          test -z "$tracked_status"
+          unsafe_entries="$(git ls-files --stage | awk '$1 == "120000" || $1 == "160000" { print $4 }')"
+          if [[ -n "$unsafe_entries" ]]; then
+            echo "candidate contains a tracked symbolic link or submodule:" >&2
+            printf '%s\n' "$unsafe_entries" >&2
+            exit 1
+          fi
 
       - name: Setup pnpm
         uses: pnpm/action-setup@0977fd99725f1db4007ccb2928dbb4e90d06cc86
@@ -144,22 +160,47 @@ jobs:
             candidate/pnpm-lock.yaml
             controller/pnpm-lock.yaml
 
-      - name: Install nonexecuting candidate dependencies and trusted Chromium
+      - name: Install and lock protected controller tooling
         shell: bash
         run: |
           set -euo pipefail
-          test "$(node -p "require('./candidate/package.json').packageManager")" = pnpm@10.26.1
           test "$(node -p "require('./controller/package.json').packageManager")" = pnpm@10.26.1
-          pnpm --dir candidate install --frozen-lockfile --ignore-scripts --ignore-pnpmfile
           pnpm --dir controller install --frozen-lockfile --ignore-scripts --ignore-pnpmfile
           pnpm --dir controller exec playwright install --with-deps chromium
+          test "$(git -C "$SZL_CONTROLLER_ROOT" rev-parse HEAD)" = "$CONTROLLER_SHA"
+          controller_status="$(git -C "$SZL_CONTROLLER_ROOT" status --porcelain=v1 --untracked-files=no)"
+          test -z "$controller_status"
+          chmod -R a-w "$SZL_CONTROLLER_ROOT"
 
-      - name: Establish read-only candidate and private evidence boundary
+      - name: Prepare isolated candidate dependency roots
         shell: bash
         run: |
           set -euo pipefail
-          unsafe_entries="$(git -C candidate ls-files --stage | awk '$1 == "120000" || $1 == "160000" { print $4 }')"
-          test -z "$unsafe_entries"
+          node --input-type=module <<'NODE'
+          import { readFileSync } from 'node:fs';
+          import { parse } from './controller/node_modules/yaml/dist/index.js';
+
+          const workspace = parse(readFileSync('./candidate/pnpm-workspace.yaml', 'utf8'));
+          if (!Array.isArray(workspace?.packages) || workspace.packages.length === 0) {
+            throw new Error('candidate workspace must declare package patterns');
+          }
+          for (const rawPattern of workspace.packages) {
+            if (typeof rawPattern !== 'string' || rawPattern.length === 0) {
+              throw new Error('candidate workspace package patterns must be nonempty strings');
+            }
+            const pattern = rawPattern.startsWith('!') ? rawPattern.slice(1) : rawPattern;
+            if (
+              pattern.length === 0 ||
+              pattern.startsWith('/') ||
+              pattern.startsWith('~') ||
+              pattern.includes('..') ||
+              pattern.includes('\\') ||
+              pattern.includes('\0')
+            ) {
+              throw new Error(`candidate workspace pattern escapes its checkout: ${rawPattern}`);
+            }
+          }
+          NODE
           if id "$SZL_CANDIDATE_USER" >/dev/null 2>&1; then
             echo "candidate runtime identity already exists" >&2
             exit 1
@@ -168,9 +209,162 @@ jobs:
             --shell /usr/sbin/nologin "$SZL_CANDIDATE_USER"
           candidate_group="$(id -gn "$SZL_CANDIDATE_USER")"
           sudo install -d -o "$SZL_CANDIDATE_USER" -g "$candidate_group" -m 0700 \
-            "$SZL_CANDIDATE_HOME" "$SZL_CANDIDATE_HOME/tmp" "$SZL_CANDIDATE_HOME/cache"
+            "$SZL_CANDIDATE_HOME" \
+            "$SZL_CANDIDATE_HOME/bin" \
+            "$SZL_CANDIDATE_HOME/config" \
+            "$SZL_CANDIDATE_HOME/data" \
+            "$SZL_CANDIDATE_HOME/state" \
+            "$SZL_CANDIDATE_HOME/tmp" \
+            "$SZL_CANDIDATE_CACHE" \
+            "$SZL_CANDIDATE_STORE"
           install -d -m 0700 "$SZL_EVIDENCE_ROOT"
-          chmod -R a-w "$SZL_CANDIDATE_ROOT"
+          chmod -R a-w "$SZL_CONTROLLER_ROOT" "$SZL_CANDIDATE_ROOT"
+
+          dependency_dirs=(
+            "$SZL_CANDIDATE_HOME/bin"
+            "$SZL_CANDIDATE_HOME/config"
+            "$SZL_CANDIDATE_HOME/data"
+            "$SZL_CANDIDATE_HOME/state"
+            "$SZL_CANDIDATE_HOME/tmp"
+            "$SZL_CANDIDATE_CACHE"
+            "$SZL_CANDIDATE_STORE"
+          )
+          while IFS= read -r -d '' tracked_path; do
+            case "$tracked_path" in
+              package.json)
+                package_root="$SZL_CANDIDATE_ROOT"
+                ;;
+              */package.json)
+                package_root="$SZL_CANDIDATE_ROOT/${tracked_path%/package.json}"
+                ;;
+              *)
+                continue
+                ;;
+            esac
+            modules_dir="$package_root/node_modules"
+            if [[ -e "$modules_dir" || -L "$modules_dir" ]]; then
+              echo "candidate dependency directory already exists: ${modules_dir}" >&2
+              exit 1
+            fi
+            sudo install -d -o "$SZL_CANDIDATE_USER" -g "$candidate_group" -m 0700 \
+              "$modules_dir"
+            dependency_dirs+=("$modules_dir")
+          done < <(git -C "$SZL_CANDIDATE_ROOT" ls-files -z)
+          if (( ${#dependency_dirs[@]} < 8 )); then
+            echo "candidate dependency directory inventory is incomplete" >&2
+            exit 1
+          fi
+          printf '%s\0' "${dependency_dirs[@]}" > "$SZL_DEPENDENCY_DIRS_MANIFEST"
+          chmod 0600 "$SZL_DEPENDENCY_DIRS_MANIFEST"
+
+          sudo --non-interactive --user "$SZL_CANDIDATE_USER" -- \
+            test ! -w "$SZL_CONTROLLER_ROOT/package.json"
+          sudo --non-interactive --user "$SZL_CANDIDATE_USER" -- \
+            test ! -w "$SZL_CANDIDATE_ROOT/package.json"
+          if sudo --non-interactive --user "$SZL_CANDIDATE_USER" -- \
+            test -r "$SZL_EVIDENCE_ROOT"; then
+            echo "candidate dependency identity can traverse the evidence root" >&2
+            exit 1
+          fi
+          for protected_root in \
+            "$SZL_CONTROLLER_ROOT" \
+            "$SZL_CANDIDATE_ROOT" \
+            "$SZL_EVIDENCE_ROOT"; do
+            if sudo --non-interactive --user "$SZL_CANDIDATE_USER" -- \
+              test -w "$(dirname "$protected_root")"; then
+              echo "candidate dependency identity can rename protected root: ${protected_root}" >&2
+              exit 1
+            fi
+          done
+
+      - name: Install nonexecuting candidate dependencies as isolated identity
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(node -p "require('./candidate/package.json').packageManager")" = pnpm@10.26.1
+          trusted_path="$(dirname "$(command -v node)"):$(dirname "$(command -v pnpm)"):/usr/local/bin:/usr/bin:/bin"
+          pnpm_path="$(command -v pnpm)"
+          test -x "$pnpm_path"
+          sudo --non-interactive --user "$SZL_CANDIDATE_USER" -- \
+            /usr/bin/env -i \
+              "PATH=$trusted_path" \
+              "HOME=$SZL_CANDIDATE_HOME" \
+              "TMPDIR=$SZL_CANDIDATE_HOME/tmp" \
+              "XDG_CACHE_HOME=$SZL_CANDIDATE_CACHE" \
+              "XDG_CONFIG_HOME=$SZL_CANDIDATE_HOME/config" \
+              "XDG_DATA_HOME=$SZL_CANDIDATE_HOME/data" \
+              "XDG_STATE_HOME=$SZL_CANDIDATE_HOME/state" \
+              "PNPM_HOME=$SZL_CANDIDATE_HOME/bin" \
+              CI=1 \
+              COREPACK_ENABLE_DOWNLOAD_PROMPT=0 \
+              "$pnpm_path" \
+                "--config.workspace-dir=$SZL_CANDIDATE_ROOT" \
+                "--config.lockfile-dir=$SZL_CANDIDATE_ROOT" \
+                "--config.store-dir=$SZL_CANDIDATE_STORE" \
+                "--config.cache-dir=$SZL_CANDIDATE_CACHE" \
+                --config.modules-dir=node_modules \
+                "--config.virtual-store-dir=$SZL_CANDIDATE_VIRTUAL_STORE" \
+                "--config.userconfig=$SZL_CANDIDATE_HOME/config/npmrc" \
+                "--config.globalconfig=$SZL_CANDIDATE_HOME/config/global-npmrc" \
+                "--config.state-dir=$SZL_CANDIDATE_HOME/state" \
+                "--config.global-dir=$SZL_CANDIDATE_HOME/data/global" \
+                "--config.global-bin-dir=$SZL_CANDIDATE_HOME/bin" \
+                --config.node-linker=isolated \
+                --dir "$SZL_CANDIDATE_ROOT" \
+                install \
+                --frozen-lockfile \
+                --ignore-scripts \
+                --ignore-pnpmfile \
+                --package-import-method=copy \
+                --reporter=append-only
+
+      - name: Verify install boundaries and lock candidate source
+        shell: bash
+        run: |
+          set -euo pipefail
+          candidate_group="$(id -gn "$SZL_CANDIDATE_USER")"
+          test "$(git -C "$SZL_CONTROLLER_ROOT" rev-parse HEAD)" = "$CONTROLLER_SHA"
+          controller_status="$(git -C "$SZL_CONTROLLER_ROOT" status --porcelain=v1 --untracked-files=no)"
+          test -z "$controller_status"
+          test "$(git -C "$SZL_CANDIDATE_ROOT" rev-parse HEAD)" = "$CANDIDATE_SHA"
+          tracked_status="$(git -C "$SZL_CANDIDATE_ROOT" status --porcelain=v1 --untracked-files=no)"
+          test -z "$tracked_status"
+          while IFS= read -r -d '' dependency_dir; do
+            case "$dependency_dir" in
+              "$SZL_CANDIDATE_ROOT"/node_modules|\
+              "$SZL_CANDIDATE_ROOT"/*/node_modules|\
+              "$SZL_CANDIDATE_HOME"/*)
+                ;;
+              *)
+                echo "dependency path escaped admitted roots: ${dependency_dir}" >&2
+                exit 1
+                ;;
+            esac
+            test -d "$dependency_dir"
+            test ! -L "$dependency_dir"
+            test "$(stat -c '%U' "$dependency_dir")" = "$SZL_CANDIDATE_USER"
+          done < "$SZL_DEPENDENCY_DIRS_MANIFEST"
+          while IFS= read -r -d '' dependency_link; do
+            dependency_target="$(realpath -e "$dependency_link")"
+            case "$dependency_target" in
+              "$SZL_CANDIDATE_ROOT"|"$SZL_CANDIDATE_ROOT"/*|\
+              "$SZL_CANDIDATE_HOME"|"$SZL_CANDIDATE_HOME"/*)
+                ;;
+              *)
+                echo "candidate dependency link escaped admitted roots: ${dependency_link}" >&2
+                exit 1
+                ;;
+            esac
+          done < <(find "$SZL_CANDIDATE_ROOT" "$SZL_CANDIDATE_HOME" -type l -print0)
+          sudo --non-interactive --user "$SZL_CANDIDATE_USER" -- \
+            test ! -w "$SZL_CONTROLLER_ROOT/package.json"
+          if sudo --non-interactive --user "$SZL_CANDIDATE_USER" -- \
+            test -r "$SZL_EVIDENCE_ROOT"; then
+            echo "candidate dependency identity can traverse the evidence root" >&2
+            exit 1
+          fi
+
+          sudo chmod -R a-w "$SZL_CANDIDATE_ROOT"
           for cache_path in \
             "$SZL_CANDIDATE_ROOT/node_modules/.vite" \
             "$SZL_CANDIDATE_ROOT/node_modules/.vite-temp" \
@@ -204,6 +398,9 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
+          test "$(git -C "$SZL_CONTROLLER_ROOT" rev-parse HEAD)" = "$CONTROLLER_SHA"
+          controller_status="$(git -C "$SZL_CONTROLLER_ROOT" status --porcelain=v1 --untracked-files=no)"
+          test -z "$controller_status"
           test "$(git -C "$SZL_CANDIDATE_ROOT" rev-parse HEAD)" = "$CANDIDATE_SHA"
           tracked_status="$(git -C "$SZL_CANDIDATE_ROOT" status --porcelain=v1 --untracked-files=no)"
           test -z "$tracked_status"
@@ -242,6 +439,9 @@ jobs:
             echo "candidate runtime processes remain before verification" >&2
             exit 1
           fi
+          test "$(git -C "$SZL_CONTROLLER_ROOT" rev-parse HEAD)" = "$CONTROLLER_SHA"
+          controller_status="$(git -C "$SZL_CONTROLLER_ROOT" status --porcelain=v1 --untracked-files=no)"
+          test -z "$controller_status"
           test "$(git -C "$SZL_CANDIDATE_ROOT" rev-parse HEAD)" = "$CANDIDATE_SHA"
           tracked_status="$(git -C "$SZL_CANDIDATE_ROOT" status --porcelain=v1 --untracked-files=no)"
           test -z "$tracked_status"

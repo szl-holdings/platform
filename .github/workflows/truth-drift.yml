@@ -272,14 +272,14 @@ jobs:
           body="$(cat <<EOF
           A current evidence package was generated from protected main.
 
-          - source revision: `${SOURCE_SHA}`
+          - source revision: \`${SOURCE_SHA}\`
           - workflow run and seven-day artifact: ${run_url}
-          - generated path: `artifacts/SOURCE_OF_TRUTH.json`
-          - package SHA-256: `${PACKAGE_SHA256}`
+          - generated path: \`artifacts/SOURCE_OF_TRUTH.json\`
+          - package SHA-256: \`${PACKAGE_SHA256}\`
 
           Download the artifact, verify its bytes, and promote it through a signed,
           DCO-complete pull request. The automation intentionally does not push a
-          branch or create a pull request with `GITHUB_TOKEN`, because token-authored
+          branch or create a pull request with \`GITHUB_TOKEN\`, because token-authored
           pull-request events do not trigger the protected check suite.
           EOF
           )"

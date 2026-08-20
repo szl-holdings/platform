@@ -32,7 +32,15 @@
   archive digest while making updates deterministic and duplicate-failing;
   corrected the adjacent 46-workflow note; and separated structural truth
   validation from the scheduled/manual snapshot-age audit so unrelated PRs do
-  not rewrite or expire honest historical evidence.
+  not rewrite or expire honest historical evidence. The clean-successor
+  follow-up now rejects tracked links and gitlinks before candidate tooling,
+  installs and locks the verified protected controller first, and resolves
+  candidate dependencies as a fresh unprivileged identity under `env -i` with
+  private and command-line-forced pnpm paths. It inventories every admitted
+  dependency directory, rejects dependency symlinks outside the candidate or
+  private home, reverifies both Git trees, locks the candidate, and reopens only
+  the enumerated Vite caches. It also restores literal Markdown delimiters in
+  the protected truth-refresh work item.
 - **test_results:**
   - Local `pnpm typecheck` could not begin because the
     package-manager shim attempted a network acquisition that the execution
@@ -43,15 +51,18 @@
     HTTP-200 SPA 404, route/readiness/error rejection, valid packet admission,
     duplicate screenshot identity, incomplete catalog metadata, unbound artifact
     pollution, symlink output escape, visible connecting state, and workflow
-    permission/ref/work-item contracts.
+    permission/ref/work-item contracts. Follow-up regressions execute the
+    truth-refresh heredoc and an unsafe tracked-link checkout, and pin the
+    controller-first, private-config, unprivileged-install, and lockdown order.
   - `node --check scripts/ci/capture-series-a-exact-head.mjs` and the test file
     — exit 0.
-  - Native Node type-stripping execution of
-    `tools/truth/validate-truth.test.ts` — exit 0; the focused suite passed.
-    Structural validation accepts the honest historical snapshot, while the
-    explicit freshness audit rejects its age as expected.
+  - Node with the repository-pinned `tsx` 4.22.4 loader executed the complete
+    focused truth-test command, including `tools/truth/validate-truth.test.ts`
+    and `tools/truth/public-surfaces.test.ts` — exit 0. No native Node
+    type-stripping result is claimed; the hosted Truth drift job remains the
+    authoritative clean-install result.
   - PyYAML safe-load and embedded-Bash syntax checks of the capture,
-    truth-drift, and staging workflows — exit 0; jobs parsed and 28 shell
+    truth-drift, and staging workflows — exit 0; jobs parsed and 38 shell
     blocks checked.
   - `node scripts/audit/validate-source-of-truth.js` — exit 0; all 66 checks
     passed, including the tracked 46-workflow inventory.
@@ -65,10 +76,12 @@
     `artifacts/SOURCE_OF_TRUTH.json#metrics.ci_workflows.value` both record 46,
     correcting the hosted `local truth drift: ci_workflows` failure.
   - `git diff --check` — exit 0.
-- **identity_notes:** The exact implementation head above is the parent of the
-  packet-only publication commit; this file is the sole publication delta.
-  Embedding the publication commit's own SHA in its contents would be
-  self-referential. The hosted workflow does not trust this static anchor for
+- **identity_notes:** The historical exact implementation head above was the
+  parent of PR #658's packet-only publication commit. The clean successor
+  recreates the desired net state directly on protected main and then applies
+  this bounded repair without retaining PR #658's branch-only ancestry.
+  Embedding a publication commit's own SHA in its contents would be
+  self-referential. The hosted workflow does not trust this historical anchor for
   capture identity: `github.sha` identifies the protected controller revision,
   while the workflow resolves the open same-repository PR, binds its current
   head to the `CANDIDATE_SHA` input, checks out that candidate SHA, and rechecks
@@ -88,11 +101,14 @@
   and explicit claim boundaries; it introduces no customer, revenue,
   compliance, deployment, traffic, uptime, or authorization claim.
 - **security_check:** Passed. No secret or environment value is committed.
-  Candidate dependency resolution disables scripts and candidate pnpm hooks.
-  Candidate application code receives a minimal non-secret environment and
-  runs as a separate OS identity that cannot write tracked source or traverse
-  evidence outputs. The separate publication job never checks out or executes
-  candidate code.
+  Candidate dependency resolution disables scripts and candidate pnpm hooks,
+  begins only after unsafe Git-entry rejection and protected-controller
+  lockdown, and runs under the same unprivileged identity used for the
+  candidate application. Both receive a minimal non-secret environment and
+  private command-line-forced dependency paths. The identity cannot write the
+  protected controller or tracked source, traverse evidence outputs, or retain
+  dependency links outside the admitted roots. The separate publication job
+  never checks out or executes candidate code.
 - **known_gaps_update:** No product gap was introduced or closed. The known-gaps
   register is updated to document the truth-snapshot lifecycle: structural
   validation remains a PR/main gate, while scheduled/manual freshness auditing
@@ -107,11 +123,17 @@
   are no longer presented as platform metrics, the claims-drift command passes,
   and the focused evidence, truth, source-of-truth, secret, overclaim, YAML,
   Bash, syntax, and whitespace checks pass. Hosted Commitlint run `32375418672`
-  is a separate history-shape blocker: ancestor
-  `356ecdea56ddf0ce1cd6786d752b469fcbcf1fbe` contains an overlong body line.
-  A forward child cannot remove that linted ancestor, so the gate remains
-  unchanged and a clean-history successor is required before merge.
-- **followup_recorded_at:** `2026-08-20T14:08:19Z`
+  is a separate history-shape blocker: its log reports
+  `body-max-line-length` on the commit titled
+  `fix(ci): reopen app-root Vite caches`. A forward child could not remove that
+  linted branch-only history, so a clean-history successor was required before
+  merge. The successor contains none of PR #658's branch-only ancestry,
+  including `356ecdea56ddf0ce1cd6786d752b469fcbcf1fbe`; this packet does not attribute
+  the logged overlong line to that exact object. The PR #659 follow-up also
+  closes the review findings for truth-refresh command substitution, runner-user
+  candidate dependency resolution, the overbroad writable-path statement, and
+  the non-reproducible native-Node result.
+- **followup_recorded_at:** `2026-08-20T15:01:24Z`
 - **proof_level:** Level 2 — Standard Proof; non-UI CI and tooling correction.
 - **recorded_at:** `2026-08-20T13:37:43Z`
 - **recorded_by:** Codex

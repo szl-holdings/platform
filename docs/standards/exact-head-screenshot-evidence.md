@@ -72,12 +72,16 @@ Fresh current images belong under `docs/assets/screenshots/current/`. The catalo
 Screenshot names include the normalized surface, ISO capture date, and
 viewport. The retained artifact contains only the packet, catalog, and the
 five files bound by that packet; unrelated current screenshots are excluded.
-Candidate dependencies are installed without lifecycle scripts or a candidate
-pnpmfile. Browser tooling and the controller are installed and executed from
-the immutable protected workflow SHA on `main`. The candidate server then runs
-as a dedicated unprivileged OS identity against read-only source. Its only
-writable paths are a private runtime
-home and bounded Vite caches. The screenshot, packet, catalog, and upload tree
+Candidate dependencies are resolved without lifecycle scripts or a candidate
+pnpmfile, after rejecting tracked symbolic links and submodules. Browser tooling
+and the controller are installed first from the immutable protected workflow SHA
+on `main`, verified, and made read-only. Dependency resolution and the candidate
+server then run as a dedicated unprivileged OS identity with a minimal
+environment, private home, and command-line-forced pnpm cache, store, modules,
+and virtual-store locations. Within the protected source/controller/evidence
+boundary, the candidate identity can write only those enumerated dependency
+directories before lockdown and bounded Vite caches afterward. The screenshot,
+packet, catalog, and upload tree
 live under a runner-owned `0700` evidence root outside the candidate checkout,
 so the candidate identity cannot traverse or mutate them. After browser capture,
 the workflow kills every process owned by the candidate identity, rechecks the

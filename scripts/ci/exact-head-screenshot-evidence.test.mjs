@@ -1,22 +1,23 @@
 import assert from 'node:assert/strict';
+import { spawnSync } from 'node:child_process';
 import { createHash } from 'node:crypto';
 import { copyFile, mkdir, mkdtemp, readFile, rm, symlink, writeFile } from 'node:fs/promises';
 import os from 'node:os';
 import path from 'node:path';
 import test from 'node:test';
 import {
-  DEFAULT_ROUTE,
-  EXPECTED_PLAYWRIGHT_VERSION,
-  EXPECTED_PNPM_VERSION,
-  VIEWPORTS,
-  assertCleanTrackedTree,
   assertCheckoutRevision,
+  assertCleanTrackedTree,
   assertPageAdmissible,
   assertSafeRepositoryPath,
   catalogEntryMarkdown,
+  DEFAULT_ROUTE,
+  EXPECTED_PLAYWRIGHT_VERSION,
+  EXPECTED_PNPM_VERSION,
   screenshotFilename,
   surfaceFromRoute,
   surfaceLabelFromRoute,
+  VIEWPORTS,
   validateCaptureIsolation,
   validateRoute,
   verifyEvidencePacketOnDisk,
@@ -35,6 +36,29 @@ const environment = {
 };
 const workflowRunUrl = 'https://github.com/szl-holdings/platform/actions/runs/123456/attempts/2';
 const workcellId = 'exact-head-screenshot-pr-653-run-123456-attempt-2';
+
+function workflowStepRun(workflow, name) {
+  const stepMarker = `      - name: ${name}\n`;
+  const stepStart = workflow.indexOf(stepMarker);
+  assert.notEqual(stepStart, -1, `missing workflow step ${name}`);
+  const runMarker = '        run: |\n';
+  const runStart = workflow.indexOf(runMarker, stepStart);
+  assert.notEqual(runStart, -1, `missing run block for ${name}`);
+  const bodyStart = runStart + runMarker.length;
+  const nextStep = workflow.indexOf('\n      - name:', bodyStart);
+  const bodyEnd = nextStep === -1 ? workflow.length : nextStep;
+  return workflow
+    .slice(bodyStart, bodyEnd)
+    .split('\n')
+    .map((line) => (line.startsWith('          ') ? line.slice(10) : line))
+    .join('\n');
+}
+
+function checkedSpawn(command, args, options = {}) {
+  const result = spawnSync(command, args, { encoding: 'utf8', ...options });
+  assert.equal(result.status, 0, result.stderr || result.stdout);
+  return result;
+}
 
 function digest(bytes) {
   return createHash('sha256').update(bytes).digest('hex');
@@ -339,6 +363,142 @@ test('evidence output paths reject symlink escapes', async (t) => {
   );
 });
 
+test('truth refresh heredoc renders Markdown literally without command substitution', async (t) => {
+  const root = await mkdtemp(path.join(os.tmpdir(), 'szl-truth-heredoc-test-'));
+  const capturedBody = path.join(root, 'body.txt');
+  t.after(() => rm(root, { recursive: true, force: true }));
+  const workflow = await readFile(
+    new URL('../../.github/workflows/truth-drift.yml', import.meta.url),
+    'utf8',
+  );
+  const run = workflowStepRun(workflow, 'Open or update the protected refresh work item');
+  const ghStub = `gh() {
+    if [[ "$1 $2" == "issue list" ]]; then
+      return 0
+    fi
+    local previous=''
+    for argument in "$@"; do
+      if [[ "$previous" == '--body' ]]; then
+        printf '%s' "$argument" > "$CAPTURED_BODY"
+        return 0
+      fi
+      previous="$argument"
+    done
+    printf 'unexpected gh invocation\\n' >&2
+    return 1
+  }`;
+  const sourceSha = 'a'.repeat(40);
+  const packageSha = 'b'.repeat(64);
+  const result = spawnSync('/bin/bash', ['-c', `${ghStub}\n${run}`], {
+    encoding: 'utf8',
+    env: {
+      ...process.env,
+      CAPTURED_BODY: capturedBody,
+      GITHUB_RUN_ID: '42',
+      GITHUB_REPOSITORY: repository,
+      GITHUB_SERVER_URL: 'https://github.com',
+      PACKAGE_SHA256: packageSha,
+      SOURCE_SHA: sourceSha,
+    },
+  });
+  assert.equal(result.status, 0, result.stderr || result.stdout);
+  assert.equal(result.stderr, '');
+  const body = await readFile(capturedBody, 'utf8');
+  assert.ok(body.includes(`source revision: \`${sourceSha}\``));
+  assert.match(body, /generated path: `artifacts\/SOURCE_OF_TRUTH\.json`/);
+  assert.ok(body.includes(`package SHA-256: \`${packageSha}\``));
+  assert.match(body, /with `GITHUB_TOKEN`/);
+});
+
+test('unsafe tracked Git entries fail before candidate tooling can run', async (t) => {
+  const root = await mkdtemp(path.join(os.tmpdir(), 'szl-unsafe-git-entry-test-'));
+  t.after(() => rm(root, { recursive: true, force: true }));
+  await writeFile(path.join(root, 'package.json'), '{}\n');
+  await symlink('/tmp/untrusted-target', path.join(root, 'tracked-link'));
+  checkedSpawn('git', ['init', '--quiet'], { cwd: root });
+  checkedSpawn('git', ['add', 'package.json', 'tracked-link'], { cwd: root });
+  checkedSpawn(
+    'git',
+    [
+      '-c',
+      'user.name=Evidence Test',
+      '-c',
+      'user.email=evidence@example.invalid',
+      'commit',
+      '--quiet',
+      '-m',
+      'test fixture',
+    ],
+    { cwd: root },
+  );
+  const candidateSha = checkedSpawn('git', ['rev-parse', 'HEAD'], { cwd: root }).stdout.trim();
+  const workflow = await readFile(
+    new URL('../../.github/workflows/exact-head-screenshot-evidence.yml', import.meta.url),
+    'utf8',
+  );
+  const run = workflowStepRun(
+    workflow,
+    'Reject unsafe candidate Git entries before dependency resolution',
+  );
+  const result = spawnSync('/bin/bash', ['-c', run], {
+    cwd: root,
+    encoding: 'utf8',
+    env: { ...process.env, CANDIDATE_SHA: candidateSha },
+  });
+  assert.notEqual(result.status, 0);
+  assert.match(result.stderr, /tracked symbolic link or submodule/);
+  assert.match(result.stderr, /tracked-link/);
+});
+
+test('candidate config cannot precede or redirect the protected install boundary', async () => {
+  const workflow = await readFile(
+    new URL('../../.github/workflows/exact-head-screenshot-evidence.yml', import.meta.url),
+    'utf8',
+  );
+  const controller = workflow.indexOf('- name: Install and lock protected controller tooling');
+  const prepare = workflow.indexOf('- name: Prepare isolated candidate dependency roots');
+  const install = workflow.indexOf(
+    '- name: Install nonexecuting candidate dependencies as isolated identity',
+  );
+  const lockdown = workflow.indexOf('- name: Verify install boundaries and lock candidate source');
+  assert.ok(controller < prepare && prepare < install && install < lockdown);
+
+  const controllerRun = workflowStepRun(workflow, 'Install and lock protected controller tooling');
+  assert.match(controllerRun, /CONTROLLER_SHA/);
+  assert.match(controllerRun, /controller_status/);
+  assert.match(controllerRun, /chmod -R a-w "\$SZL_CONTROLLER_ROOT"/);
+
+  const prepareRun = workflowStepRun(workflow, 'Prepare isolated candidate dependency roots');
+  assert.match(prepareRun, /test -w "\$\(dirname "\$protected_root"\)"/);
+  assert.match(prepareRun, /candidate dependency identity can rename protected root/);
+
+  const installRun = workflowStepRun(
+    workflow,
+    'Install nonexecuting candidate dependencies as isolated identity',
+  );
+  assert.match(installRun, /\/usr\/bin\/env -i/);
+  assert.match(installRun, /--config\.workspace-dir=\$SZL_CANDIDATE_ROOT/);
+  assert.match(installRun, /--config\.lockfile-dir=\$SZL_CANDIDATE_ROOT/);
+  assert.match(installRun, /--config\.store-dir=\$SZL_CANDIDATE_STORE/);
+  assert.match(installRun, /--config\.cache-dir=\$SZL_CANDIDATE_CACHE/);
+  assert.match(installRun, /--config\.modules-dir=node_modules/);
+  assert.match(installRun, /--config\.virtual-store-dir=\$SZL_CANDIDATE_VIRTUAL_STORE/);
+  assert.match(installRun, /--config\.userconfig=\$SZL_CANDIDATE_HOME\/config\/npmrc/);
+  assert.match(installRun, /--config\.globalconfig=\$SZL_CANDIDATE_HOME\/config\/global-npmrc/);
+  assert.match(installRun, /--ignore-scripts/);
+  assert.match(installRun, /--ignore-pnpmfile/);
+
+  const boundaryRun = workflowStepRun(
+    workflow,
+    'Verify install boundaries and lock candidate source',
+  );
+  assert.match(boundaryRun, /CONTROLLER_SHA/);
+  assert.match(boundaryRun, /CANDIDATE_SHA/);
+  assert.match(boundaryRun, /candidate dependency link escaped admitted roots/);
+  assert.match(boundaryRun, /sudo chmod -R a-w "\$SZL_CANDIDATE_ROOT"/);
+  assert.match(boundaryRun, /node_modules\/\.vite-temp/);
+});
+
 test('workflow binds PR, branch, permissions, publication, and artifact contracts', async () => {
   const workflow = await readFile(
     new URL('../../.github/workflows/exact-head-screenshot-evidence.yml', import.meta.url),
@@ -370,13 +530,31 @@ test('workflow binds PR, branch, permissions, publication, and artifact contract
   assert.match(workflow, /Verify candidate immediately before capture/);
   assert.match(captureJob, /github\.ref == 'refs\/heads\/main'/);
   assert.match(workflow, /ref: \$\{\{ github\.sha \}\}/);
+  assert.match(workflow, /CONTROLLER_SHA: \$\{\{ github\.sha \}\}/);
   assert.match(workflow, /SZL_CANDIDATE_USER: szl-capture-candidate/);
   assert.match(workflow, /chmod -R a-w "\$SZL_CANDIDATE_ROOT"/);
   assert.match(workflow, /\$SZL_CANDIDATE_ROOT\/artifacts\/a11oy\/node_modules\/\.vite-temp/);
   assert.match(workflow, /\$SZL_CANDIDATE_ROOT\/artifacts\/a11oy\/node_modules\/\.cache/);
   assert.match(workflow, /install -d -m 0700 "\$SZL_EVIDENCE_ROOT"/);
   assert.match(workflow, /sudo --non-interactive --user/);
+  assert.match(workflow, /\/usr\/bin\/env -i/);
   assert.match(workflow, /--ignore-scripts --ignore-pnpmfile/);
+  for (const forcedConfig of [
+    'workspace-dir',
+    'lockfile-dir',
+    'store-dir',
+    'cache-dir',
+    'modules-dir',
+    'virtual-store-dir',
+    'userconfig',
+    'globalconfig',
+    'state-dir',
+    'global-dir',
+    'global-bin-dir',
+    'node-linker',
+  ]) {
+    assert.match(workflow, new RegExp(`--config\\.${forcedConfig}=`));
+  }
   assert.match(
     workflow,
     /tracked_status="\$\(git -C "\$SZL_CANDIDATE_ROOT" status --porcelain=v1 --untracked-files=no\)"/,
@@ -397,6 +575,50 @@ test('workflow binds PR, branch, permissions, publication, and artifact contract
   assert.match(publishJob, /workflow run attempt/);
   assert.match(publishJob, /exact 90-day artifact/);
   assert.match(publishJob, /uploaded archive SHA-256/);
+  const checkoutIndex = captureJob.indexOf('- name: Checkout exact candidate');
+  const unsafeIndex = captureJob.indexOf(
+    '- name: Reject unsafe candidate Git entries before dependency resolution',
+  );
+  const setupIndex = captureJob.indexOf('- name: Setup pnpm');
+  const controllerIndex = captureJob.indexOf(
+    '- name: Install and lock protected controller tooling',
+  );
+  const prepareIndex = captureJob.indexOf('- name: Prepare isolated candidate dependency roots');
+  const installIndex = captureJob.indexOf(
+    '- name: Install nonexecuting candidate dependencies as isolated identity',
+  );
+  const lockIndex = captureJob.indexOf(
+    '- name: Verify install boundaries and lock candidate source',
+  );
+  const captureIndex = captureJob.indexOf('- name: Capture exact-head evidence');
+  assert.ok(
+    checkoutIndex < unsafeIndex &&
+      unsafeIndex < setupIndex &&
+      setupIndex < controllerIndex &&
+      controllerIndex < prepareIndex &&
+      prepareIndex < installIndex &&
+      installIndex < lockIndex &&
+      lockIndex < captureIndex,
+    'candidate admission, controller trust, isolation, install, and lockdown order changed',
+  );
+  const unsafeRun = workflowStepRun(
+    workflow,
+    'Reject unsafe candidate Git entries before dependency resolution',
+  );
+  assert.match(unsafeRun, /120000/);
+  assert.match(unsafeRun, /160000/);
+  const controllerRun = workflowStepRun(workflow, 'Install and lock protected controller tooling');
+  assert.match(controllerRun, /rev-parse HEAD.*CONTROLLER_SHA/);
+  assert.match(controllerRun, /status --porcelain=v1 --untracked-files=no/);
+  assert.match(controllerRun, /chmod -R a-w "\$SZL_CONTROLLER_ROOT"/);
+  const boundaryRun = workflowStepRun(
+    workflow,
+    'Verify install boundaries and lock candidate source',
+  );
+  assert.match(boundaryRun, /CONTROLLER_SHA/);
+  assert.match(boundaryRun, /SZL_DEPENDENCY_DIRS_MANIFEST/);
+  assert.match(boundaryRun, /candidate dependency link escaped admitted roots/);
+  assert.doesNotMatch(captureJob, /pnpm --dir candidate install/);
   const staging = await readFile(
     new URL('../../.github/workflows/deploy-staging.yml', import.meta.url),
     'utf8',
