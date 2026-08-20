@@ -1,4 +1,12 @@
-import React, { createContext, useCallback, useContext, useEffect, useRef, useState } from 'react';
+import {
+  createContext,
+  useCallback,
+  useContext,
+  useEffect,
+  useRef,
+  useState,
+  type ReactNode,
+} from 'react';
 import type {
   OmniaNotification,
   OmniaShellConfig,
@@ -73,7 +81,7 @@ const SEED_NOTIFICATIONS: OmniaNotification[] = [
 
 export interface OmniaShellProviderProps {
   config: OmniaShellConfig;
-  children: React.ReactNode;
+  children: ReactNode;
   initialNotifications?: OmniaNotification[];
 }
 
@@ -121,6 +129,7 @@ export function OmniaShellProvider({
   }, [commandPaletteOpen]);
 
   useEffect(() => {
+    if (config.networkState === 'UNAVAILABLE') return;
     if (adoptionBeaconFired.current) return;
     adoptionBeaconFired.current = true;
     const apiBase = config.apiBase ?? '/api';
@@ -134,9 +143,10 @@ export function OmniaShellProvider({
         timestamp: new Date().toISOString(),
       }),
     }).catch(() => {});
-  }, [config.artifactId, config.apiBase, config.shellVersion]);
+  }, [config.artifactId, config.apiBase, config.networkState, config.shellVersion]);
 
   useEffect(() => {
+    if (config.networkState === 'UNAVAILABLE') return;
     const apiBase = config.apiBase ?? '/api';
     const poll = async () => {
       try {
@@ -151,12 +161,11 @@ export function OmniaShellProvider({
             return [...fresh, ...prev].slice(0, 50);
           });
         }
-      } catch {
-      }
+      } catch {}
     };
     const timer = setInterval(poll, 30_000);
     return () => clearInterval(timer);
-  }, [config.artifactId, config.apiBase]);
+  }, [config.artifactId, config.apiBase, config.networkState]);
 
   const value: OmniaShellContextValue = {
     config: { ...config, shellVersion: config.shellVersion ?? OMNIA_SHELL_VERSION },
