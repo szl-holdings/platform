@@ -43,8 +43,9 @@ Fifteen paths changed on both lineages.
 - The protected-main truth-snapshot lifecycle section in
   `docs/operations/known-gaps.md` remains, and the Series A candidate boundary
   is added as a separate fail-closed section.
-- Every other predecessor path had no protected-main overlap and is carried
-  byte-for-byte from the reviewed #656 head.
+- Every other predecessor path without protected-main overlap carries the
+  reviewed #656 content. The task ledger alone updates publication metadata to
+  identify this clean successor.
 
 ## Carried product boundary
 
