@@ -1,17 +1,12 @@
 # P0 Series A Product Wiring
 
-Updated: 2026-08-20
+Updated: 2026-08-26
 
 ## Status
 
-`SOURCE_REPAIR_READY / HOSTED_RECAPTURE_REQUIRED / FINAL_HEAD_CI_REVIEW_MERGE_PENDING`
+`SOURCE_CARRIED_FORWARD / REPAIRED_HOSTED_RECAPTURE_IMPORTED_FOR_PR656_HEAD / SUCCESSOR_FINAL_HEAD_CI_REVIEW_MERGE_PENDING`
 
-The reviewed Series A product delta is consolidated in Platform PR #656 as one
-signed conventional source commit. The following evidence-only commit imported
-a successful GitHub Actions artifact, but review found that tab interaction left
-the page scrolled before capture. Those images are retained as superseded audit
-history and do not close screenshot proof. Nothing in this task claims a
-protected merge, deployment, production runtime, or customer use.
+The reviewed Series A product delta was consolidated in Platform PR #656 and has now been carried forward onto current `origin/main` as successor branch `codex/series-a-proof-successor-20260826`. The first hosted capture run `32364821536` remains superseded because its full-page images started below the scroll origin. Repaired GitHub Actions run `32376800750` captured the PR #656 final head `0ca011c41184f809bddf184ca494f08224f71791` with `scroll_origin: true` at all five viewports, and those repaired PNGs plus metadata are imported as current hosted presentation evidence for that source revision. The successor branch still requires fresh exact-head CI/review before any protected merge. Nothing in this task claims deployment, production runtime, customer use, revenue, compliance, or model performance.
 
 ## Objective
 
@@ -36,24 +31,24 @@ Before patching the current PR head, the repair plan is to:
 5. run the focused contract suite, A11oy and Omnia typechecks, Truth checks,
    formatting, lint, metadata verification, and diff review.
 
-Success requires every local check available in this environment to pass and no
-invalid screenshot to remain labeled current proof. A fresh hosted recapture is
-an explicit residual, not a claim made by this source repair.
+Success requires every local check available in this environment to pass and no invalid screenshot to remain labeled current proof. The repaired PR #656 capture is imported; the current-main successor branch must still pass its own fresh exact-head CI after push.
 
 ## Exact provenance
 
 | Field | Value |
 |---|---|
 | Repository | `szl-holdings/platform` |
-| Worktree | `C:\Users\steph\Documents\Codex\2026-08-11\i\work\platform-series-a-successor-v2-20260820` |
-| Branch | `codex/series-a-proof-successor-v2-20260820` |
-| Pull request | #656 |
+| Worktree | `C:\Users\steph\Documents\Codex\2026-08-26\prior-conversation-with-codex-conversation-role-10\work\platform-series-a-successor-20260826` |
+| Branch | `codex/series-a-proof-successor-20260826` |
+| Prior pull request | #656 (closed) |
 | Protected base | `48b0ea169de75990e44b6ec924e59fe7d76e6020` |
 | Signed product-source commit | `69285dd8450fc86db5ec5ba59986d36333d79f75` |
 | Product-source tree | `1774cf19daa8689287dea98540a744d7847eea9c` |
-| Superseded hosted capture run | `32364821536` |
-| Hosted artifact ID | `9404902758` |
-| Artifact digest | `sha256:c271f1a2a7730b5fd960d988c8c0aee32a12e59294932b4dfd850d5c2c0c6b0d` |
+| Superseded hosted capture run | 32364821536 |
+| Repaired hosted capture run | 32376800750 |
+| Repaired hosted artifact ID | 9409395738 |
+| Repaired artifact digest | sha256:cbe034bfd9b28c68fee191913c0dfe0ed6ecbbceb36d991db45c0a36c1a0b823 |
+| Repaired capture metadata SHA-256 | 55979e0cb408bac56d074fa794ed58bfa20e111fdd095dc72df0725100cdb3a4 |
 
 ## Implemented contract
 
@@ -69,26 +64,9 @@ an explicit residual, not a claim made by this source repair.
   responsive views.
 - Canonical workflow-count surfaces now measure 46 tracked workflows.
 
-## Superseded hosted evidence
+## Hosted evidence
 
-Run `32364821536` passed checkout identity binding, locked dependency
-installation, A11oy build, loopback serve, browser capture, and artifact upload.
-For 320, 390, 768, 1366, and 1728 CSS-pixel widths, its metadata records:
-
-- HTTP 200;
-- the expected accessible heading;
-- six tabs exercised;
-- no horizontal overflow;
-- zero console errors;
-- zero page errors; and
-- zero undeclared API requests.
-
-Review-time visual inspection found that tab interaction left the page scrolled,
-so the sticky header was displaced partway down each full-page image. The five
-PNGs and raw capture metadata remain cataloged in `audit/screenshot-catalog.md`
-as superseded audit history. They contribute to no current proof level. A fresh
-exact-head hosted capture using the repaired script must be inspected and
-imported before screenshot proof is complete.
+Run `32364821536` passed automated capture assertions but remains superseded because direct review found the sticky header displaced after tab interaction. Run `32376800750` used the repaired script against source commit `0ca011c41184f809bddf184ca494f08224f71791` and artifact `9409395738`; its metadata records `PASS`, `scroll_origin: true`, HTTP 200, the expected accessible heading, six exercised tabs, no horizontal overflow, zero console/page errors, and zero undeclared API requests at every width. The five repaired PNGs and metadata sidecar are imported in `docs/assets/screenshots/current/` and cataloged in `audit/screenshot-catalog.md` as hosted presentation proof for that exact PR #656 head.
 
 ## CI disposition
 
@@ -98,8 +76,7 @@ dependency review, and screenshot-capture automation were observed green. Truth
 drift correctly found ten prose surfaces still stating the prior workflow count.
 This evidence-only commit advances those exact references to canonical 46.
 
-Fresh final-head CI, review-thread resolution, and protected merge remain
-required. A prior green source run is not substituted for those gates.
+The closed PR #656 final head had green CI, including the repaired screenshot workflow. The current-main successor branch must receive fresh exact-head CI and review before any protected merge. Prior green runs are recorded as evidence, not substituted for successor-head gates.
 
 ## Residuals
 
@@ -107,9 +84,8 @@ required. A prior green source run is not substituted for those gates.
 - Omnia network mutation endpoints remain absent.
 - Full deployment and domain readback are outside this source task.
 - Hugging Face publication and mutation are outside this task.
-- The imported run `32364821536` screenshots are superseded because the capture
-  started below the scroll origin. A fresh repaired exact-head hosted capture,
-  direct visual inspection, and import remain required.
+- PR #656 is closed and was conflicting with current main; this successor branch carries the work forward without rewriting that branch.
+- Successor-head CI and protected review remain required before merge. The imported repaired screenshots prove the older PR #656 final head, not deployment or production behavior.
 - Production receipts, customers, revenue, compliance, and model-performance
   claims remain unproven.
 

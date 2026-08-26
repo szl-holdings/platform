@@ -1,22 +1,22 @@
 {
   "schema": "szl.screenshot-proof/v1",
-  "captured_at": "2026-08-20T11:40:10.991Z",
-  "completed_at": "2026-08-20T11:40:19.291Z",
+  "captured_at": "2026-08-20T13:54:15.002Z",
+  "completed_at": "2026-08-20T13:54:22.083Z",
   "status": "PASS",
   "source": {
     "repository": "szl-holdings/platform",
     "ref": "codex/series-a-proof-successor-v2-20260820",
-    "sha": "69285dd8450fc86db5ec5ba59986d36333d79f75",
-    "tree_sha": "1774cf19daa8689287dea98540a744d7847eea9c"
+    "sha": "0ca011c41184f809bddf184ca494f08224f71791",
+    "tree_sha": "c95f16f12a193da6227704c3f576dfe2d0650b11"
   },
   "route": "/a11oy/start",
   "capture_environment": {
     "provider": "github-actions",
     "workflow_name": "Series A Screenshot Proof",
     "workflow_path": ".github/workflows/series-a-screenshot-proof.yml",
-    "workflow_run_id": "32364821536",
+    "workflow_run_id": "32376800750",
     "workflow_run_attempt": "1",
-    "workflow_run_url": "https://github.com/szl-holdings/platform/actions/runs/32364821536",
+    "workflow_run_url": "https://github.com/szl-holdings/platform/actions/runs/32376800750",
     "runner_os": "Linux",
     "runner_arch": "X64",
     "node_version": "v24.19.0",
@@ -39,7 +39,7 @@
       "filename": "a11oy-series-a-320-2026-08-20.png",
       "path": "a11oy-series-a-320-2026-08-20.png",
       "route": "/a11oy/start",
-      "captured_at": "2026-08-20T11:40:12.237Z",
+      "captured_at": "2026-08-20T13:54:15.734Z",
       "viewport_css_px": {
         "width": 320,
         "height": 900
@@ -48,12 +48,13 @@
         "width": 320,
         "height": 5630
       },
-      "sha256": "09322066951167342E8F4EADC5BCFCC8AB5CD8F6FC0DE9582E772D9C761C6155",
+      "sha256": "A2148C5A08D1D87561CC105E4E516C5A4B4040B8E511314FB872E67C57E4C6FD",
       "assertions": {
         "http_status": 200,
         "heading_visible": true,
         "tab_count": 6,
         "all_tabs_exercised": true,
+        "scroll_origin": true,
         "horizontal_overflow": false,
         "console_errors": 0,
         "page_errors": 0,
@@ -65,7 +66,7 @@
       "filename": "a11oy-series-a-390-2026-08-20.png",
       "path": "a11oy-series-a-390-2026-08-20.png",
       "route": "/a11oy/start",
-      "captured_at": "2026-08-20T11:40:13.546Z",
+      "captured_at": "2026-08-20T13:54:16.922Z",
       "viewport_css_px": {
         "width": 390,
         "height": 900
@@ -74,12 +75,13 @@
         "width": 390,
         "height": 5051
       },
-      "sha256": "59444A43B6B61A654F1E291E16B3BE633F9EE75D9656454D3D07B96ADEB880FF",
+      "sha256": "633C7FD3B25363A5C1630ACD313043B51ED8DAFD68D4E2ADF4ACEEFAEE1A0085",
       "assertions": {
         "http_status": 200,
         "heading_visible": true,
         "tab_count": 6,
         "all_tabs_exercised": true,
+        "scroll_origin": true,
         "horizontal_overflow": false,
         "console_errors": 0,
         "page_errors": 0,
@@ -91,7 +93,7 @@
       "filename": "a11oy-series-a-768-2026-08-20.png",
       "path": "a11oy-series-a-768-2026-08-20.png",
       "route": "/a11oy/start",
-      "captured_at": "2026-08-20T11:40:14.815Z",
+      "captured_at": "2026-08-20T13:54:18.092Z",
       "viewport_css_px": {
         "width": 768,
         "height": 1024
@@ -100,12 +102,13 @@
         "width": 768,
         "height": 3275
       },
-      "sha256": "B579E5EE9C241E383065855751A94028866D876506F426A4D0E879D9553A94AE",
+      "sha256": "D95F6D4ABE64BCE14C0A30B2E2E13C854B05996ADB1B1C5F2C47196F6E7F6BA2",
       "assertions": {
         "http_status": 200,
         "heading_visible": true,
         "tab_count": 6,
         "all_tabs_exercised": true,
+        "scroll_origin": true,
         "horizontal_overflow": false,
         "console_errors": 0,
         "page_errors": 0,
@@ -117,7 +120,7 @@
       "filename": "a11oy-series-a-1366-2026-08-20.png",
       "path": "a11oy-series-a-1366-2026-08-20.png",
       "route": "/a11oy/start",
-      "captured_at": "2026-08-20T11:40:16.111Z",
+      "captured_at": "2026-08-20T13:54:19.283Z",
       "viewport_css_px": {
         "width": 1366,
         "height": 900
@@ -126,12 +129,13 @@
         "width": 1366,
         "height": 2855
       },
-      "sha256": "08BA665DBA2D6B6854A417BF66AF47D5FE5BF3C920E13ED514F2BBBFE3FAFFB2",
+      "sha256": "5D85F1FC1A6A4B077CFF0DF6BE37FB0135A64E8E42176B17CD098C47AD5448B2",
       "assertions": {
         "http_status": 200,
         "heading_visible": true,
         "tab_count": 6,
         "all_tabs_exercised": true,
+        "scroll_origin": true,
         "horizontal_overflow": false,
         "console_errors": 0,
         "page_errors": 0,
@@ -143,7 +147,7 @@
       "filename": "a11oy-series-a-1728-2026-08-20.png",
       "path": "a11oy-series-a-1728-2026-08-20.png",
       "route": "/a11oy/start",
-      "captured_at": "2026-08-20T11:40:17.676Z",
+      "captured_at": "2026-08-20T13:54:20.634Z",
       "viewport_css_px": {
         "width": 1728,
         "height": 1000
@@ -152,12 +156,13 @@
         "width": 1728,
         "height": 2898
       },
-      "sha256": "5067EE4739783F8772D6585C17B283C0B1D32108366CD0D75602E62595398B60",
+      "sha256": "1F8FD71E0B4427193F01774101DAD90BA755559F45F04C5B3964F0A7AEA5B574",
       "assertions": {
         "http_status": 200,
         "heading_visible": true,
         "tab_count": 6,
         "all_tabs_exercised": true,
+        "scroll_origin": true,
         "horizontal_overflow": false,
         "console_errors": 0,
         "page_errors": 0,

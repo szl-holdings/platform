@@ -1,6 +1,6 @@
 # SZL Holdings — Known Gaps Register (Security & Operations)
 
-**Last updated:** 2026-08-20 (rev 26 - A11oy Series A capture review repair)
+**Last updated:** 2026-08-26 (rev 27 - A11oy Series A successor carry-forward)
 **Owner:** Engineering / DevOps  
 **Audience:** Enterprise architects, Series A technical advisors, incoming VP Engineering
 
@@ -8,31 +8,18 @@ This document is the canonical reference for known security, quality, and compli
 
 ---
 
-## 2026-08-20 A11oy Series A candidate boundary
+## 2026-08-26 A11oy Series A successor boundary
 
-Platform PR #656 adds the truth-safe `/a11oy/start` source candidate. GitHub
-Actions run `32364821536` built and captured five responsive views from exact
-source commit `69285dd8450fc86db5ec5ba59986d36333d79f75`. The imported
-artifact records HTTP 200, six exercised tabs, no horizontal overflow, zero
-console/page errors, and zero undeclared API requests at every width.
+Platform PR #656 added the truth-safe `/a11oy/start` source candidate and is now closed. The product-source stack has been carried forward onto current `origin/main` as successor branch `codex/series-a-proof-successor-20260826` without rewriting the closed PR branch.
 
-Direct review found that tab interaction left the page scrolled before each
-full-page capture, displacing the sticky header in all five imported images. The
-captures are retained as `superseded` audit history and close no screenshot
-proof gap. The capture script now resets and verifies scroll origin and waits for
-layout stability, but a fresh exact-head hosted run, direct visual inspection,
-and artifact import remain required.
+The first hosted capture run `32364821536` remains superseded because direct review found the sticky header displaced after tab interaction. Repaired GitHub Actions run `32376800750` captured PR #656 final head `0ca011c41184f809bddf184ca494f08224f71791` with artifact `9409395738` and artifact digest `sha256:cbe034bfd9b28c68fee191913c0dfe0ed6ecbbceb36d991db45c0a36c1a0b823`. Its metadata records `PASS`, `scroll_origin: true`, HTTP 200, six exercised tabs, no horizontal overflow, zero console/page errors, and zero undeclared API requests at every width. The repaired PNGs and metadata sidecar are imported as hosted presentation evidence for that exact source revision.
 
-The following operational gaps also remain open:
+The following operational gaps remain open:
 
-- The GraphQL HTTP and WebSocket clients have no verified server resolver or
-  authenticated route and remain `UNAVAILABLE`.
+- The GraphQL HTTP and WebSocket clients have no verified server resolver or authenticated route and remain `UNAVAILABLE`.
 - Omnia network mutation endpoints remain absent and fail closed.
-- No current screenshot proves the repaired exact-head candidate. Even a valid
-  replacement would not prove protected merge, deployment, domain state,
-  external-font delivery, production runtime, customer use, or receipts.
-- The evidence-only successor commit must receive fresh exact-head CI and
-  review before normal protected merge.
+- The repaired screenshots do not prove protected merge, deployment, domain state, external-font delivery, production runtime, customer use, or receipts.
+- The successor branch must receive fresh exact-head CI and review before normal protected merge.
 
 ---
 

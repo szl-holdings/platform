@@ -115,9 +115,9 @@ test('resets and verifies scroll origin after tab exercise before full-page capt
   assert.match(captureScript, /scroll_origin: true/);
 });
 
-test('catalogs every Series A capture with complete superseded proof metadata', () => {
+test('catalogs every Series A capture with complete repaired proof metadata', () => {
   const section = screenshotCatalog.match(
-    /## 2026-08-20 A11oy Series A superseded exact-head capture([\s\S]*?)\n---/,
+    /## 2026-08-20 A11oy Series A repaired exact-head capture([\s\S]*?)\n---/,
   )?.[1];
   assert.ok(section);
 
@@ -136,11 +136,12 @@ test('catalogs every Series A capture with complete superseded proof metadata', 
     assert.equal(cells[1], '`/a11oy/start`');
     assert.equal(cells[4], 'GitHub Actions');
     assert.equal(cells[5], '`github-actions`');
-    assert.equal(cells[6], '`69285dd8450fc86db5ec5ba59986d36333d79f75`');
-    assert.match(cells[7], /32364821536.*capture-series-a-proof\.mjs/);
+    assert.equal(cells[6], '`0ca011c41184f809bddf184ca494f08224f71791`');
+    assert.match(cells[7], /32376800750.*capture-series-a-proof\.mjs/);
     assert.equal(cells[10], '`P0-SERIES-A-PRODUCT-WIRING-20260811`');
-    assert.equal(cells[11], 'None - superseded');
-    assert.equal(cells[12], '`superseded`');
-    assert.match(cells[13], /sticky header displaced/);
+    assert.equal(cells[11], 'Level 3 - hosted presentation proof for exact source revision');
+    assert.equal(cells[12], '`current`');
+    assert.match(cells[13], /scroll_origin: true/);
   }
+  assert.match(section, /earlier run `32364821536` remains superseded/i);
 });

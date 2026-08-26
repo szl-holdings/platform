@@ -2,7 +2,7 @@
 **Track 6 — 2026-04-21**
 **Updated — 2026-07-31 (Workcell VERTICAL-RUNTIME-CONTRACTS-2026-07-31)**
 **Updated — 2026-04-22 (Task #3103, README screenshot block refresh)**
-**Updated - 2026-08-20 (Workcell P0-SERIES-A-PRODUCT-WIRING-20260811)**
+**Updated - 2026-08-26 (Workcell P0-SERIES-A-PRODUCT-WIRING-20260811 successor carry-forward)**
 **Status:** Complete disposition ledger. Per-file keep/archive executed.
 
 ---
@@ -11,7 +11,7 @@
 
 | Location | File Count | Disposition |
 |----------|-----------|-------------|
-| `docs/assets/screenshots/current/` | 13 | **REVIEWED 2026-08-20** - prior seven README images retained; five A11oy Series A PNGs and one capture-metadata record remain for audit history but are superseded pending a repaired exact-head hosted recapture. |
+| `docs/assets/screenshots/current/` | 13 | **UPDATED 2026-08-26** - prior seven README images retained; five A11oy Series A PNGs and one capture-metadata record now point to the repaired hosted capture for PR #656 final head `0ca011c41184f809bddf184ca494f08224f71791`. The earlier run `32364821536` remains superseded in Git history. |
 | `screenshots/approved/` | 3 committed (13 catalogued) | **KEPT** — 3 post-DB authenticated-surface captures from 2026-04-22 (Task #2890) are the only files currently committed to this directory. The 10 entries dated 2026-04-21 in Section 1 below were captured live from dev servers but were never committed to the repository; they are documented for reference only. See "Repository state" note in Section 1. |
 | `screenshots/archive/` | 280 | **ARCHIVED** — legacy/pre-redesign/iteration/superseded |
 | `demo-assets/screenshots/` | 9 | **KEPT in place** — actively linked from LinkedIn carousel |
@@ -20,42 +20,38 @@
 
 ---
 
-## 2026-08-20 A11oy Series A superseded exact-head capture
+## 2026-08-20 A11oy Series A repaired exact-head capture
 
 GitHub Actions run
-[`32364821536`](https://github.com/szl-holdings/platform/actions/runs/32364821536)
+[`32376800750`](https://github.com/szl-holdings/platform/actions/runs/32376800750)
 checked out source commit
-`69285dd8450fc86db5ec5ba59986d36333d79f75` with tree
-`1774cf19daa8689287dea98540a744d7847eea9c`, built the A11oy artifact,
+`0ca011c41184f809bddf184ca494f08224f71791` with tree
+`c95f16f12a193da6227704c3f576dfe2d0650b11`, built the A11oy artifact,
 served `/a11oy/start` on loopback, and captured five full-page PNGs with
-Chromium `148.0.7778.96`. Each row below is a complete per-capture manifest;
-shared prose is context only and does not substitute for a required field.
+Chromium `148.0.7778.96`. The repaired artifact ID is `9409395738`; GitHub
+reported artifact digest
+`sha256:cbe034bfd9b28c68fee191913c0dfe0ed6ecbbceb36d991db45c0a36c1a0b823`.
+The earlier run `32364821536` remains superseded because its captures started
+below the scroll origin.
 
 | Filename | Route | Surface | Capture date | Captured by | Capture environment | Source revision | Workflow run or command | Viewport | Artifact SHA-256 | Workcell ID | Proof level | Status | Notes |
 |---|---|---|---|---|---|---|---|---|---|---|---|---|---|
-| `a11oy-series-a-320-2026-08-20.png` | `/a11oy/start` | A11oy Series A investor view | `2026-08-20` | GitHub Actions | `github-actions` | `69285dd8450fc86db5ec5ba59986d36333d79f75` | Run [`32364821536`](https://github.com/szl-holdings/platform/actions/runs/32364821536), `node scripts/qa/capture-series-a-proof.mjs` | 320 x 900 CSS px; 320 x 5630 full page | `09322066951167342e8f4eadc5bcfcc8ab5cd8f6fc0de9582e772d9c761c6155` | `P0-SERIES-A-PRODUCT-WIRING-20260811` | None - superseded | `superseded` | Visual review found the sticky header displaced after tab-induced scrolling; retained only as audit history pending repaired exact-head recapture. |
-| `a11oy-series-a-390-2026-08-20.png` | `/a11oy/start` | A11oy Series A investor view | `2026-08-20` | GitHub Actions | `github-actions` | `69285dd8450fc86db5ec5ba59986d36333d79f75` | Run [`32364821536`](https://github.com/szl-holdings/platform/actions/runs/32364821536), `node scripts/qa/capture-series-a-proof.mjs` | 390 x 900 CSS px; 390 x 5051 full page | `59444a43b6b61a654f1e291e16b3be633f9ee75d9656454d3d07b96adeb880ff` | `P0-SERIES-A-PRODUCT-WIRING-20260811` | None - superseded | `superseded` | Visual review found the sticky header displaced after tab-induced scrolling; retained only as audit history pending repaired exact-head recapture. |
-| `a11oy-series-a-768-2026-08-20.png` | `/a11oy/start` | A11oy Series A investor view | `2026-08-20` | GitHub Actions | `github-actions` | `69285dd8450fc86db5ec5ba59986d36333d79f75` | Run [`32364821536`](https://github.com/szl-holdings/platform/actions/runs/32364821536), `node scripts/qa/capture-series-a-proof.mjs` | 768 x 1024 CSS px; 768 x 3275 full page | `b579e5ee9c241e383065855751a94028866d876506f426a4d0e879d9553a94ae` | `P0-SERIES-A-PRODUCT-WIRING-20260811` | None - superseded | `superseded` | Visual review found the sticky header displaced after tab-induced scrolling; retained only as audit history pending repaired exact-head recapture. |
-| `a11oy-series-a-1366-2026-08-20.png` | `/a11oy/start` | A11oy Series A investor view | `2026-08-20` | GitHub Actions | `github-actions` | `69285dd8450fc86db5ec5ba59986d36333d79f75` | Run [`32364821536`](https://github.com/szl-holdings/platform/actions/runs/32364821536), `node scripts/qa/capture-series-a-proof.mjs` | 1366 x 900 CSS px; 1366 x 2855 full page | `08ba665dba2d6b6854a417bf66af47d5fe5bf3c920e13ed514f2bbbfe3faffb2` | `P0-SERIES-A-PRODUCT-WIRING-20260811` | None - superseded | `superseded` | Visual review found the sticky header displaced after tab-induced scrolling; retained only as audit history pending repaired exact-head recapture. |
-| `a11oy-series-a-1728-2026-08-20.png` | `/a11oy/start` | A11oy Series A investor view | `2026-08-20` | GitHub Actions | `github-actions` | `69285dd8450fc86db5ec5ba59986d36333d79f75` | Run [`32364821536`](https://github.com/szl-holdings/platform/actions/runs/32364821536), `node scripts/qa/capture-series-a-proof.mjs` | 1728 x 1000 CSS px; 1728 x 2898 full page | `5067ee4739783f8772d6585c17b283c0b1d32108366cd0d75602e62595398b60` | `P0-SERIES-A-PRODUCT-WIRING-20260811` | None - superseded | `superseded` | Visual review found the sticky header displaced after tab-induced scrolling; retained only as audit history pending repaired exact-head recapture. |
+| `a11oy-series-a-320-2026-08-20.png` | `/a11oy/start` | A11oy Series A investor view | `2026-08-20` | GitHub Actions | `github-actions` | `0ca011c41184f809bddf184ca494f08224f71791` | Run [`32376800750`](https://github.com/szl-holdings/platform/actions/runs/32376800750), `node scripts/qa/capture-series-a-proof.mjs` | 320 x 900 CSS px; 320 x 5630 full page | `a2148c5a08d1d87561cc105e4e516c5a4b4040b8e511314fb872e67c57e4c6fd` | `P0-SERIES-A-PRODUCT-WIRING-20260811` | Level 3 - hosted presentation proof for exact source revision | `current` | Repaired metadata records `scroll_origin: true`, HTTP 200, six tabs exercised, no overflow, zero console/page errors, and zero undeclared API requests. |
+| `a11oy-series-a-390-2026-08-20.png` | `/a11oy/start` | A11oy Series A investor view | `2026-08-20` | GitHub Actions | `github-actions` | `0ca011c41184f809bddf184ca494f08224f71791` | Run [`32376800750`](https://github.com/szl-holdings/platform/actions/runs/32376800750), `node scripts/qa/capture-series-a-proof.mjs` | 390 x 900 CSS px; 390 x 5051 full page | `633c7fd3b25363a5c1630acd313043b51ed8dafd68d4e2adf4aceefaee1a0085` | `P0-SERIES-A-PRODUCT-WIRING-20260811` | Level 3 - hosted presentation proof for exact source revision | `current` | Repaired metadata records `scroll_origin: true`, HTTP 200, six tabs exercised, no overflow, zero console/page errors, and zero undeclared API requests. |
+| `a11oy-series-a-768-2026-08-20.png` | `/a11oy/start` | A11oy Series A investor view | `2026-08-20` | GitHub Actions | `github-actions` | `0ca011c41184f809bddf184ca494f08224f71791` | Run [`32376800750`](https://github.com/szl-holdings/platform/actions/runs/32376800750), `node scripts/qa/capture-series-a-proof.mjs` | 768 x 1024 CSS px; 768 x 3275 full page | `d95f6d4abe64bce14c0a30b2e2e13c854b05996adb1b1c5f2c47196f6e7f6ba2` | `P0-SERIES-A-PRODUCT-WIRING-20260811` | Level 3 - hosted presentation proof for exact source revision | `current` | Repaired metadata records `scroll_origin: true`, HTTP 200, six tabs exercised, no overflow, zero console/page errors, and zero undeclared API requests. |
+| `a11oy-series-a-1366-2026-08-20.png` | `/a11oy/start` | A11oy Series A investor view | `2026-08-20` | GitHub Actions | `github-actions` | `0ca011c41184f809bddf184ca494f08224f71791` | Run [`32376800750`](https://github.com/szl-holdings/platform/actions/runs/32376800750), `node scripts/qa/capture-series-a-proof.mjs` | 1366 x 900 CSS px; 1366 x 2855 full page | `5d85f1fc1a6a4b077cff0df6be37fb0135a64e8e42176b17cd098c47ad5448b2` | `P0-SERIES-A-PRODUCT-WIRING-20260811` | Level 3 - hosted presentation proof for exact source revision | `current` | Repaired metadata records `scroll_origin: true`, HTTP 200, six tabs exercised, no overflow, zero console/page errors, and zero undeclared API requests. |
+| `a11oy-series-a-1728-2026-08-20.png` | `/a11oy/start` | A11oy Series A investor view | `2026-08-20` | GitHub Actions | `github-actions` | `0ca011c41184f809bddf184ca494f08224f71791` | Run [`32376800750`](https://github.com/szl-holdings/platform/actions/runs/32376800750), `node scripts/qa/capture-series-a-proof.mjs` | 1728 x 1000 CSS px; 1728 x 2898 full page | `1f8fd71e0b4427193f01774101dad90ba755559f45f04c5b3964f0a7aea5b574` | `P0-SERIES-A-PRODUCT-WIRING-20260811` | Level 3 - hosted presentation proof for exact source revision | `current` | Repaired metadata records `scroll_origin: true`, HTTP 200, six tabs exercised, no overflow, zero console/page errors, and zero undeclared API requests. |
 
 The adjacent
 `a11oy-series-a-capture-metadata-2026-08-20.json.txt` raw JSON record has SHA-256
-`842336b189607c8914ecf6bcd0577bb37964974a368974b61dbbd0bca715403e`.
-The downloaded artifact ZIP matched GitHub's declared digest
-`c271f1a2a7730b5fd960d988c8c0aee32a12e59294932b4dfd850d5c2c0c6b0d`.
-
-Every capture recorded HTTP 200, the expected heading, six exercised tabs,
-no horizontal overflow, no console or page error, and no undeclared API
-request. Google Fonts CSS was replaced with an empty response, so the captures
-use the declared system-font fallback. Direct review found that exercising the
-tabs scrolled the page before full-page capture, displacing the sticky header in
-the committed images. All five entries are therefore `superseded` and contribute
-to no current proof level. The files remain immutable audit history; a repaired
-exact-head hosted recapture, direct visual inspection, and import are required.
+`55979e0cb408bac56d074fa794ed58bfa20e111fdd095dc72df0725100cdb3a4`.
+The captures prove hosted presentation of PR #656 final head only. They do not
+prove protected merge, deployment, production runtime, domain readback, customer
+use, receipts, external service parity, revenue, compliance, or model
+performance. The current-main successor branch must still pass fresh exact-head
+CI and review before merge.
 
 ---
-
 ## 2026-07-31 runtime-contract release-proof disposition
 
 | Workcell | Surface | Evidence | Screenshot disposition | Reason | Proof packet |
