@@ -11,12 +11,12 @@
 
 ## 1. Executive Summary
 
-This document constitutes the first systematic WCAG 2.1 AA accessibility audit of the SZL Holdings platform. Prior to this audit, accessibility had not been systematically tested (gap KG025). A dedicated Lighthouse CI accessibility workflow (`a11y.yml`) is already configured and runs on every commit, providing ongoing automated coverage; this audit supplements that automation with a structural review.
+This document constitutes the first systematic WCAG 2.1 AA accessibility audit of the SZL Holdings platform. Prior to this audit, accessibility had not been systematically tested (gap KG025). A dedicated Playwright/axe accessibility workflow (`a11y.yml`) provides automated rule coverage; the separate Lighthouse workflow (`lighthouse.yml`) measures its configured category thresholds. This audit supplements that automation with a structural review.
 
 **Overall accessibility posture:** Moderate risk. No P0 show-stoppers identified. Primary findings are in focus management, color contrast in dark-UI surfaces, and missing `aria-label` on icon-only controls. All findings are actionable and remediable before any public launch.
 
 **Lighthouse CI accessibility scores** (from `.github/workflows/lighthouse.yml` + `.lighthouserc.json`):
-- Hard-fail threshold: ≥ 90 (enforced as `["error", {"minScore": 0.90}]` — CI blocks merge on regression)
+- Workflow hard-fail threshold: ≥ 90 (enforced as `["error", {"minScore": 0.90}]`). The aggregate Lighthouse check is not currently a required branch-protection context.
 - Performance / Best Practices / SEO: advisory `warn` only
 
 ---
@@ -151,16 +151,21 @@ Automated coverage gap: Lighthouse/axe-core does not catch all WCAG criteria. Th
 
 | Check | Automated | Tool | Threshold |
 |-------|-----------|------|-----------|
-| axe-core WCAG rules | ✅ Yes | Lighthouse CI via `a11y.yml` | Warn ≥ 90 |
-| Color contrast | ✅ Partial | Lighthouse accessibility audit | Warn ≥ 90 |
-| Alt text on images | ✅ Yes | Lighthouse | Warn ≥ 90 |
-| Form label associations | ✅ Yes | Lighthouse | Warn ≥ 90 |
+| axe-core WCAG rules | ✅ Yes | Lighthouse CI via `lighthouse.yml` | Enforced ≥ 90 |
+| Color contrast | ✅ Partial | Lighthouse accessibility audit | Enforced ≥ 90 |
+| Alt text on images | ✅ Yes | Lighthouse | Enforced ≥ 90 |
+| Form label associations | ✅ Yes | Lighthouse | Enforced ≥ 90 |
 | Keyboard navigation flow | ❌ No | Manual review required | — |
 | Screen reader announcements | ❌ No | Manual review required | — |
 | Focus management | ❌ No | Manual review with NVDA/VoiceOver | — |
 | Skip navigation | ❌ No | Manual review | — |
 
-**Status:** Lighthouse accessibility threshold is now enforced as a hard CI gate. `.lighthouserc.json` was updated to `["error", {"minScore": 0.90}]` and the `lighthouse-gate` CI job now exits 1 on failure, blocking PR merge. The original recommendation from this audit has been implemented.
+**Status:** Lighthouse accessibility threshold is enforced as a workflow hard error.
+`.lighthouserc.json` uses `["error", {"minScore": 0.90}]`, and the `lighthouse-gate` job fails
+for every matrix result other than `success`. The aggregate check is not currently a required
+branch-protection context, so workflow enforcement must not be represented as independently
+guaranteeing that every PR merge is blocked. The original audit recommendation is implemented at
+the workflow level.
 
 **F007 implementation (skip navigation — WCAG 2.4.1, Level A):** Skip-to-main-content link added to `artifacts/szl-holdings/src/App.tsx` as the first focusable element. Uses Tailwind `sr-only focus:not-sr-only` pattern — visually hidden until focused by keyboard navigation, then appears as a visible link. `<main id="main-content">` wrapper added around the route Switch to provide the skip target. This is the simplest Level A fix and applies the WCAG 2.4.1 requirement.
 

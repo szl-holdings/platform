@@ -1,6 +1,6 @@
 # SZL Holdings — Known Gaps Register (Security & Operations)
 
-**Last updated:** 2026-08-20 (rev 25 — truth snapshot lifecycle)
+**Last updated:** 2026-08-26 (rev 26 — Lighthouse gate integrity)
 **Owner:** Engineering / DevOps  
 **Audience:** Enterprise architects, Series A technical advisors, incoming VP Engineering
 
@@ -46,6 +46,24 @@ daily schedule and an explicit manual `require_truth_freshness` input run
 requires rerunning the canonical generator with its admitted local and remote
 sources and reviewing the resulting evidence; changing only the timestamp is
 not an accepted remediation.
+
+---
+
+## 2026-08-26 Lighthouse Gate Integrity Correction
+
+The Lighthouse matrix previously used job-level `continue-on-error`, which could neutralize a
+failed per-app accessibility assertion before the aggregate gate evaluated the matrix result. Its
+dependency install also admitted the optional `onnxruntime-node` CUDA binary download even though
+none of the audited static web artifacts requires ONNX or CUDA.
+
+The workflow now removes job-level failure masking, skips only the optional ONNX binary download,
+and treats every matrix result other than `success` as a failed aggregate gate. The failure message
+keeps assertion failures distinct from install, build, serve, browser, and collection failures.
+A dependency-free source contract test protects these invariants in the root test suite.
+
+This closes the workflow-execution defect in KG019. It does not claim that Lighthouse is a required
+branch-protection context: the repository ruleset must be inspected and changed separately before
+that stronger enforcement claim can be made.
 
 ---
 
@@ -285,7 +303,7 @@ Operational gaps, process health, test coverage, observability, team ownership.
 | KG013 | No `CODEOWNERS` file | P1 | ✅ Resolved Apr-2026 |
 | KG018 | 80+ env vars with no formal schema documentation | P2 | ⚠️ Open — Sprint 4 |
 | GAP-004 | No `.env.example` files for all artifacts | Low | ✅ Resolved Apr-2026 |
-| KG019 | No Lighthouse CI performance regression guard | P2 | ✅ Resolved Apr-2026 (`.lighthouserc.json` + `lighthouse.yml` CI — 10 artifacts). Accessibility threshold (≥ 90) enforced as hard `error` gate Apr-2026; performance/best-practices/SEO remain advisory `warn` |
+| KG019 | No Lighthouse CI performance regression guard | P2 | ✅ Resolved Apr-2026 (`.lighthouserc.json` + `lighthouse.yml` CI — six web artifacts in the current matrix). Accessibility threshold (≥ 90) is a workflow hard error; performance/best-practices/SEO remain advisory warnings. The Lighthouse aggregate check is not currently a required branch-protection context. |
 | KG023 | SLI/SLO definitions absent | P2 | ✅ Resolved Apr-2026 (`docs/operations/sli-slo.md` — all service tiers defined) |
 | KG024 | Large vendor bundle sizes on all web apps (1–1.7 MB) | P2 | ✅ Resolved Apr-2026 (`artifacts/szl-holdings/vite.config.ts` — `manualChunks`: vendor-charts, vendor-motion, vendor-radix, vendor-tanstack, vendor-icons, vendor-react) |
 

@@ -24,7 +24,6 @@ jobs:
     name: Lighthouse / ${{ matrix.app.name }}
     runs-on: ubuntu-latest
     timeout-minutes: 20
-    continue-on-error: true
     permissions:
       contents: read
     strategy:
@@ -62,7 +61,10 @@ jobs:
       - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
         with: { node-version: '24', cache: 'pnpm' }
 
-      - run: pnpm install --frozen-lockfile
+      - name: Install dependencies without optional ONNX CUDA binaries
+        run: pnpm install --frozen-lockfile
+        env:
+          ONNXRUNTIME_NODE_INSTALL: skip
 
       - name: Build ${{ matrix.app.name }}
         run: pnpm --filter ${{ matrix.app.filter }} run build
@@ -80,7 +82,7 @@ jobs:
           sleep 3
         shell: bash
 
-      - name: Run Lighthouse CI (warnings only — not a hard gate)
+      - name: Run Lighthouse CI (accessibility enforced)
         uses: treosh/lighthouse-ci-action@3e7e23fb74242897f95c0ba9cabad3d0227b9b18 # v12.6.2
         with:
           urls: |
@@ -102,12 +104,27 @@ jobs:
     steps:
       - name: Enforce Lighthouse accessibility gate
         run: |
+          result="${{ needs.lighthouse.result }}"
+
           echo "Lighthouse audits completed."
           echo "Thresholds: Performance ≥ 80 (warn), Accessibility ≥ 90 (error/hard), Best Practices ≥ 90 (warn), SEO ≥ 90 (warn)"
           echo "See audit/performance/lighthouse-baseline.md for baseline scores."
           echo "See audit/A11OY_ACCESSIBILITY_AUDIT.md for current WCAG 2.1 AA audit findings."
-          if [[ "${{ needs.lighthouse.result }}" == "failure" ]]; then
-            echo "::error::One or more Lighthouse jobs failed. Accessibility threshold (≥ 90) is enforced — fix WCAG violations before merge."
-            exit 1
-          fi
-          echo "All Lighthouse checks passed."
+
+          case "$result" in
+            success)
+              echo "All Lighthouse matrix jobs completed and the enforced accessibility assertions passed."
+              ;;
+            failure)
+              echo "::error::One or more Lighthouse matrix jobs failed. Inspect the failed per-app step: an assertion failure is an accessibility-gate failure; install, build, serve, browser, or collection failures are infrastructure failures."
+              exit 1
+              ;;
+            cancelled|skipped)
+              echo "::error::Lighthouse infrastructure did not complete: $result."
+              exit 1
+              ;;
+            *)
+              echo "::error::Unexpected Lighthouse matrix result: $result."
+              exit 1
+              ;;
+          esac
