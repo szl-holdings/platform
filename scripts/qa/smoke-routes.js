@@ -167,6 +167,8 @@ const WEB_DOMAIN_CONFIGS = [
     baseUrl: BASE_URL ? `${BASE_URL}` : A11OY_URL,
     routes: [
       '/a11oy/',
+      '/a11oy/start',
+      '/a11oy/investor-demo',
       '/a11oy/now',
       '/a11oy/recommendations',
       '/a11oy/brief',
@@ -240,7 +242,9 @@ async function main() {
 
   if (!JSON_OUTPUT) {
     console.log(`\nSZL Holdings — Route Smoke Runner`);
-    console.log(`Timeout: ${TIMEOUT_MS}ms  Concurrency: ${CONCURRENCY}  API-only: ${API_ONLY}  Web-only: ${WEB_ONLY}\n`);
+    console.log(
+      `Timeout: ${TIMEOUT_MS}ms  Concurrency: ${CONCURRENCY}  API-only: ${API_ONLY}  Web-only: ${WEB_ONLY}\n`,
+    );
   }
 
   const domainSummary = [];
@@ -258,11 +262,17 @@ async function main() {
 
       for (const result of results) {
         if (result.ok) {
-          if (!JSON_OUTPUT) console.log(`  PASS  ${result.status}  ${result.duration}ms  ${result.url.replace(baseUrl, '')}`);
+          if (!JSON_OUTPUT)
+            console.log(
+              `  PASS  ${result.status}  ${result.duration}ms  ${result.url.replace(baseUrl, '')}`,
+            );
           dp++;
           totalPassed++;
         } else {
-          if (!JSON_OUTPUT) console.error(`  FAIL  ${result.status}  ${result.duration}ms  ${result.url.replace(baseUrl, '')}${result.error ? '  err=' + result.error : ''}`);
+          if (!JSON_OUTPUT)
+            console.error(
+              `  FAIL  ${result.status}  ${result.duration}ms  ${result.url.replace(baseUrl, '')}${result.error ? '  err=' + result.error : ''}`,
+            );
           df++;
           totalFailed++;
         }
@@ -276,7 +286,8 @@ async function main() {
         error: r.error ?? null,
       }));
       domainSummary.push({ domain: name, passed: dp, failed: df, total: routes.length });
-      if (!JSON_OUTPUT) console.log(`  → ${dp}/${routes.length} passed${df > 0 ? `  (${df} FAILED)` : ''}`);
+      if (!JSON_OUTPUT)
+        console.log(`  → ${dp}/${routes.length} passed${df > 0 ? `  (${df} FAILED)` : ''}`);
     }
   }
 
@@ -301,11 +312,17 @@ async function main() {
 
       for (const result of results) {
         if (result.ok) {
-          if (!JSON_OUTPUT) console.log(`  PASS  ${result.status}  ${result.duration}ms  ${result.url.replace(apiBaseUrl, '')}`);
+          if (!JSON_OUTPUT)
+            console.log(
+              `  PASS  ${result.status}  ${result.duration}ms  ${result.url.replace(apiBaseUrl, '')}`,
+            );
           dp++;
           totalPassed++;
         } else {
-          if (!JSON_OUTPUT) console.error(`  FAIL  ${result.status}  ${result.duration}ms  ${result.url.replace(apiBaseUrl, '')}${result.error ? '  err=' + result.error : ''}`);
+          if (!JSON_OUTPUT)
+            console.error(
+              `  FAIL  ${result.status}  ${result.duration}ms  ${result.url.replace(apiBaseUrl, '')}${result.error ? '  err=' + result.error : ''}`,
+            );
           df++;
           totalFailed++;
         }
@@ -319,7 +336,8 @@ async function main() {
         error: r.error ?? null,
       }));
       domainSummary.push({ domain: label, passed: dp, failed: df, total: paths.length });
-      if (!JSON_OUTPUT) console.log(`  → ${dp}/${paths.length} passed${df > 0 ? `  (${df} FAILED)` : ''}`);
+      if (!JSON_OUTPUT)
+        console.log(`  → ${dp}/${paths.length} passed${df > 0 ? `  (${df} FAILED)` : ''}`);
     }
   }
 
@@ -329,13 +347,16 @@ async function main() {
     console.log('\n--- Summary ---');
     for (const { domain, passed, failed, total } of domainSummary) {
       const icon = failed === 0 ? '✓' : '✗';
-      console.log(`  ${icon}  ${domain}: ${passed}/${total}${failed > 0 ? `  (${failed} failed)` : ''}`);
+      console.log(
+        `  ${icon}  ${domain}: ${passed}/${total}${failed > 0 ? `  (${failed} failed)` : ''}`,
+      );
     }
     console.log(`\nTotal: ${totalPassed} passed, ${totalFailed} failed`);
   }
 
   if (totalFailed > 0) {
-    if (!JSON_OUTPUT) console.error(`\nSmoke run FAILED — ${totalFailed} route(s) did not meet expectations.`);
+    if (!JSON_OUTPUT)
+      console.error(`\nSmoke run FAILED — ${totalFailed} route(s) did not meet expectations.`);
     process.exit(1);
   } else {
     if (!JSON_OUTPUT) console.log(`\nSmoke run PASSED`);
