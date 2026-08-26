@@ -76,14 +76,41 @@ jobs:
       CAPTURE_ROUTE: ${{ inputs.route }}
       SZL_CONTROLLER_ROOT: ${{ github.workspace }}/controller
       SZL_CANDIDATE_ROOT: ${{ github.workspace }}/candidate
-      SZL_EVIDENCE_ROOT: ${{ runner.temp }}/exact-head-evidence-${{ github.run_id }}-${{ github.run_attempt }}
-      SZL_CANDIDATE_HOME: ${{ runner.temp }}/candidate-home-${{ github.run_id }}-${{ github.run_attempt }}
-      SZL_CANDIDATE_CACHE: ${{ runner.temp }}/candidate-home-${{ github.run_id }}-${{ github.run_attempt }}/cache
-      SZL_CANDIDATE_STORE: ${{ runner.temp }}/candidate-home-${{ github.run_id }}-${{ github.run_attempt }}/store
       SZL_CANDIDATE_VIRTUAL_STORE: ${{ github.workspace }}/candidate/node_modules/.pnpm
-      SZL_DEPENDENCY_DIRS_MANIFEST: ${{ runner.temp }}/candidate-dependency-dirs-${{ github.run_id }}-${{ github.run_attempt }}
       SZL_CANDIDATE_USER: szl-capture-candidate
     steps:
+      - name: Bind runner-scoped paths
+        shell: bash
+        env:
+          SZL_EVIDENCE_ROOT_VALUE: ${{ runner.temp }}/exact-head-evidence-${{ github.run_id }}-${{ github.run_attempt }}
+          SZL_CANDIDATE_HOME_VALUE: ${{ runner.temp }}/candidate-home-${{ github.run_id }}-${{ github.run_attempt }}
+          SZL_CANDIDATE_CACHE_VALUE: ${{ runner.temp }}/candidate-home-${{ github.run_id }}-${{ github.run_attempt }}/cache
+          SZL_CANDIDATE_STORE_VALUE: ${{ runner.temp }}/candidate-home-${{ github.run_id }}-${{ github.run_attempt }}/store
+          SZL_DEPENDENCY_DIRS_MANIFEST_VALUE: ${{ runner.temp }}/candidate-dependency-dirs-${{ github.run_id }}-${{ github.run_attempt }}
+        run: |
+          set -euo pipefail
+          for runner_path in \
+            "$SZL_EVIDENCE_ROOT_VALUE" \
+            "$SZL_CANDIDATE_HOME_VALUE" \
+            "$SZL_CANDIDATE_CACHE_VALUE" \
+            "$SZL_CANDIDATE_STORE_VALUE" \
+            "$SZL_DEPENDENCY_DIRS_MANIFEST_VALUE"; do
+            case "$runner_path" in
+              "$RUNNER_TEMP"/*) ;;
+              *)
+                echo "runner-scoped path escaped RUNNER_TEMP: ${runner_path}" >&2
+                exit 1
+                ;;
+            esac
+          done
+          {
+            printf 'SZL_EVIDENCE_ROOT=%s\n' "$SZL_EVIDENCE_ROOT_VALUE"
+            printf 'SZL_CANDIDATE_HOME=%s\n' "$SZL_CANDIDATE_HOME_VALUE"
+            printf 'SZL_CANDIDATE_CACHE=%s\n' "$SZL_CANDIDATE_CACHE_VALUE"
+            printf 'SZL_CANDIDATE_STORE=%s\n' "$SZL_CANDIDATE_STORE_VALUE"
+            printf 'SZL_DEPENDENCY_DIRS_MANIFEST=%s\n' "$SZL_DEPENDENCY_DIRS_MANIFEST_VALUE"
+          } >> "$GITHUB_ENV"
+
       - name: Validate immutable inputs
         shell: bash
         run: |
