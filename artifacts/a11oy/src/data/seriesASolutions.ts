@@ -1,4 +1,24 @@
-export type SeriesAEvidenceState = 'AVAILABLE' | 'DEMO' | 'BLOCKED' | 'UNAVAILABLE';
+export const SERIES_A_EVIDENCE_STATES = [
+  'REAL',
+  'DEMO',
+  'UNAVAILABLE',
+  'DEGRADED',
+  'BLOCKED',
+  'ROADMAP',
+] as const;
+
+export type SeriesAEvidenceState = (typeof SERIES_A_EVIDENCE_STATES)[number];
+
+export const SERIES_A_EVIDENCE_STATE_DETAILS: Readonly<Record<SeriesAEvidenceState, string>> = {
+  REAL: 'Authenticated or independently observed operational evidence with current provenance. No item on this source-only page currently qualifies.',
+  DEMO: 'Deterministic source-backed interface, fixture, or scenario. It is not customer or production runtime evidence.',
+  UNAVAILABLE:
+    'The required authenticated source or runtime witness is absent, so the page fails closed.',
+  DEGRADED:
+    'An authenticated source is only partially healthy and its observed limitation is explicit.',
+  BLOCKED: 'Policy, authority, or safety boundaries prevent the proposed external action.',
+  ROADMAP: 'Planned capability without an implemented and observed operational source.',
+};
 
 export type SeriesALoopStep = {
   readonly phase: 'Observe' | 'Gate' | 'Act' | 'Prove';
@@ -20,9 +40,8 @@ export type SeriesASolution = {
   readonly buyer: string;
   readonly thesis: string;
   readonly value: string;
-  readonly demoHref: string;
-  readonly demoLabel: string;
-  readonly sourceState: 'AVAILABLE';
+  readonly actionLabel: string;
+  readonly sourceState: 'DEMO';
   readonly scenarioState: 'DEMO';
   readonly liveState: 'UNAVAILABLE';
   readonly loop: readonly [SeriesALoopStep, SeriesALoopStep, SeriesALoopStep, SeriesALoopStep];
@@ -69,9 +88,8 @@ export const SERIES_A_SOLUTIONS: readonly SeriesASolution[] = [
       'Turn a threat signal into a governed containment recommendation with an explicit approval boundary.',
     value:
       'Designed to shorten the path from detection to an accountable decision without granting an agent silent control.',
-    demoHref: '/cyber-resilience',
-    demoLabel: 'Open cyber resilience demo',
-    sourceState: 'AVAILABLE',
+    actionLabel: 'Trace the cyber decision contract',
+    sourceState: 'DEMO',
     scenarioState: 'DEMO',
     liveState: 'UNAVAILABLE',
     loop: loop(
@@ -89,9 +107,8 @@ export const SERIES_A_SOLUTIONS: readonly SeriesASolution[] = [
     thesis: 'Compare financial scenarios before a material action crosses an approval threshold.',
     value:
       'Designed to make assumptions, counterfactuals, and authority visible in one reviewable decision path.',
-    demoHref: '/counterfactuals',
-    demoLabel: 'Open finance scenario demo',
-    sourceState: 'AVAILABLE',
+    actionLabel: 'Trace the finance decision contract',
+    sourceState: 'DEMO',
     scenarioState: 'DEMO',
     liveState: 'UNAVAILABLE',
     loop: loop(
@@ -110,9 +127,8 @@ export const SERIES_A_SOLUTIONS: readonly SeriesASolution[] = [
       'Make data access, model use, and policy evaluation legible before downstream execution.',
     value:
       'Designed to give diligence teams a concrete boundary between declared controls and observed evidence.',
-    demoHref: '/governance',
-    demoLabel: 'Open governance demo',
-    sourceState: 'AVAILABLE',
+    actionLabel: 'Trace the data decision contract',
+    sourceState: 'DEMO',
     scenarioState: 'DEMO',
     liveState: 'UNAVAILABLE',
     loop: loop(
@@ -131,9 +147,8 @@ export const SERIES_A_SOLUTIONS: readonly SeriesASolution[] = [
       'Coordinate a consequential operating decision across signals, teams, and policy gates.',
     value:
       'Designed to replace opaque handoffs with one inspectable recommendation, approval, and proof sequence.',
-    demoHref: '/approval-queue',
-    demoLabel: 'Open approval queue demo',
-    sourceState: 'AVAILABLE',
+    actionLabel: 'Trace the enterprise decision contract',
+    sourceState: 'DEMO',
     scenarioState: 'DEMO',
     liveState: 'UNAVAILABLE',
     loop: loop(
@@ -152,9 +167,8 @@ export const SERIES_A_SOLUTIONS: readonly SeriesASolution[] = [
       'Evaluate an asset decision against risk, portfolio context, and approval policy before commitment.',
     value:
       'Designed to connect asset-level evidence to an investment decision without presenting seeded data as a live portfolio.',
-    demoHref: '/fabric/verticals',
-    demoLabel: 'Open vertical fabric demo',
-    sourceState: 'AVAILABLE',
+    actionLabel: 'Trace the asset decision contract',
+    sourceState: 'DEMO',
     scenarioState: 'DEMO',
     liveState: 'UNAVAILABLE',
     loop: loop(
@@ -173,9 +187,8 @@ export const SERIES_A_SOLUTIONS: readonly SeriesASolution[] = [
       'Turn an obligation or matter signal into an explainable, reviewable legal operations decision.',
     value:
       'Designed to keep privilege, authority, and the difference between analysis and legal action explicit.',
-    demoHref: '/right-to-audit',
-    demoLabel: 'Open legal audit demo',
-    sourceState: 'AVAILABLE',
+    actionLabel: 'Trace the legal decision contract',
+    sourceState: 'DEMO',
     scenarioState: 'DEMO',
     liveState: 'UNAVAILABLE',
     loop: loop(
@@ -185,4 +198,86 @@ export const SERIES_A_SOLUTIONS: readonly SeriesASolution[] = [
       'Record the source context, policy path, reviewer state, and proposed next step.',
     ),
   },
+] as const;
+
+export type SeriesADeveloperStep = {
+  readonly id:
+    | 'architecture'
+    | 'interfaces'
+    | 'workcells'
+    | 'governance'
+    | 'receipts'
+    | 'local-run'
+    | 'verification';
+  readonly title: string;
+  readonly state: SeriesAEvidenceState;
+  readonly detail: string;
+};
+
+export const SERIES_A_DEVELOPER_PATH: readonly SeriesADeveloperStep[] = [
+  {
+    id: 'architecture',
+    title: 'Inspect the source boundary',
+    state: 'DEMO',
+    detail:
+      'The React route, typed solution contracts, and fail-closed provider configuration are inspectable in this revision.',
+  },
+  {
+    id: 'interfaces',
+    title: 'Inspect the declared interfaces',
+    state: 'DEMO',
+    detail:
+      'Client-side route and schema contracts are source evidence only; this page does not claim a hosted API endpoint.',
+  },
+  {
+    id: 'workcells',
+    title: 'Request authenticated Workcells',
+    state: 'UNAVAILABLE',
+    detail:
+      'No authenticated operational Workcell registry is connected here. Repository fixtures are excluded from live claims.',
+  },
+  {
+    id: 'governance',
+    title: 'Evaluate the Covenant gate',
+    state: 'DEMO',
+    detail:
+      'The deterministic gate shape is visible, but deployed policy enforcement has not been independently observed.',
+  },
+  {
+    id: 'receipts',
+    title: 'Inspect the receipt shape',
+    state: 'DEMO',
+    detail:
+      'The scenario records the evidence fields a receipt would require; it does not represent a deployed receipt.',
+  },
+  {
+    id: 'local-run',
+    title: 'Build the local prototype',
+    state: 'DEMO',
+    detail:
+      'The repository-pinned package task builds the source locally; a successful build is not deployment evidence.',
+  },
+  {
+    id: 'verification',
+    title: 'Verify the source contract',
+    state: 'DEMO',
+    detail:
+      'Focused tests, type checks, and the production build must run and be recorded before source promotion.',
+  },
+] as const;
+
+export const SERIES_A_RECEIPT_FIELDS = [
+  { field: 'scenario_id', rule: 'Stable identifier for the deterministic scenario.' },
+  { field: 'source_state', rule: 'One canonical six-state evidence value.' },
+  { field: 'policy_version', rule: 'Declared policy identifier; never inferred from UI copy.' },
+  { field: 'approval_state', rule: 'Human authorization state before any proposed action.' },
+  { field: 'proposed_action', rule: 'Recommendation only while external mutation is blocked.' },
+  { field: 'evidence_refs', rule: 'References to source-qualified inputs and gate results.' },
+  { field: 'generated_at', rule: 'Deterministic demo time or authenticated observed time.' },
+] as const;
+
+export const SERIES_A_VERIFICATION_COMMANDS = [
+  'pnpm --filter @workspace/a11oy test:series-a',
+  'pnpm --filter @workspace/a11oy typecheck',
+  'pnpm --filter @workspace/a11oy build',
 ] as const;

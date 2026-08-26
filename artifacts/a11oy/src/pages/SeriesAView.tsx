@@ -1,20 +1,21 @@
 import { type KeyboardEvent, useRef, useState } from 'react';
-import { Link } from 'wouter';
 import { Layout } from '../components/layout';
 import {
+  SERIES_A_DEVELOPER_PATH,
+  SERIES_A_EVIDENCE_STATE_DETAILS,
+  SERIES_A_EVIDENCE_STATES,
+  SERIES_A_RECEIPT_FIELDS,
   SERIES_A_SOLUTIONS,
+  SERIES_A_VERIFICATION_COMMANDS,
   type SeriesAEvidenceState,
   type SeriesASolution,
 } from '../data/seriesASolutions';
-
-const BASE = (import.meta.env.BASE_URL ?? '/a11oy/').replace(/\/$/, '');
-const route = (path: string) => `${BASE}${path}`;
 
 const STATE_STYLE: Record<
   SeriesAEvidenceState,
   { color: string; background: string; border: string }
 > = {
-  AVAILABLE: {
+  REAL: {
     color: '#b8e4d3',
     background: 'rgba(85, 185, 146, 0.10)',
     border: 'rgba(85, 185, 146, 0.28)',
@@ -33,6 +34,16 @@ const STATE_STYLE: Record<
     color: '#b7bac2',
     background: 'rgba(183, 186, 194, 0.08)',
     border: 'rgba(183, 186, 194, 0.22)',
+  },
+  DEGRADED: {
+    color: '#e8c985',
+    background: 'rgba(232, 201, 133, 0.10)',
+    border: 'rgba(232, 201, 133, 0.30)',
+  },
+  ROADMAP: {
+    color: '#bbb0d8',
+    background: 'rgba(150, 128, 196, 0.10)',
+    border: 'rgba(150, 128, 196, 0.30)',
   },
 };
 
@@ -68,13 +79,14 @@ function TruthCard({
   );
 }
 
-function SolutionPanel({ solution }: { solution: SeriesASolution }) {
+function SolutionPanel({ solution, active }: { solution: SeriesASolution; active: boolean }) {
   return (
     <div
       id={`solution-panel-${solution.id}`}
       role="tabpanel"
       aria-labelledby={`solution-tab-${solution.id}`}
       className="sa-panel"
+      hidden={!active}
     >
       <div className="sa-panel-head">
         <div>
@@ -122,15 +134,15 @@ function SolutionPanel({ solution }: { solution: SeriesASolution }) {
       </div>
 
       <div className="sa-actions">
-        <Link className="sa-button sa-button-primary" href={route(solution.demoHref)}>
-          {solution.demoLabel}
-        </Link>
-        <Link className="sa-button" href={route('/proof')}>
-          Inspect Proof Ledger
-        </Link>
-        <Link className="sa-button" href={route('/governance')}>
-          Inspect policy gates
-        </Link>
+        <a className="sa-button sa-button-primary" href="#developer">
+          {solution.actionLabel}
+        </a>
+        <a className="sa-button" href="#truth-vocabulary">
+          Inspect truth states
+        </a>
+        <a className="sa-button" href="#non-claims">
+          Read non-claims
+        </a>
       </div>
     </div>
   );
@@ -219,6 +231,7 @@ export function SeriesAView() {
           }
           .sa-header nav a:hover, .sa-header nav a:focus-visible { color: var(--sa-text); background: var(--sa-surface); }
           .sa-main { width: min(100%, 1280px); margin: 0 auto; padding: clamp(2.5rem, 7vw, 6.5rem) clamp(1rem, 4vw, 3rem) 6rem; }
+          #main-content, #evidence, #truth-vocabulary, #solutions, #developer, #non-claims { scroll-margin-top: 88px; }
           .sa-hero { display: grid; grid-template-columns: minmax(0, 1.35fr) minmax(250px, .65fr); gap: clamp(2rem, 6vw, 5rem); align-items: end; }
           .sa-kicker, .sa-eyebrow {
             margin: 0;
@@ -240,6 +253,10 @@ export function SeriesAView() {
           .sa-section-head { display: flex; align-items: end; justify-content: space-between; gap: 1rem; margin-bottom: 1rem; }
           .sa-section-head h2 { margin: .55rem 0 0; font-size: clamp(1.7rem, 4vw, 3rem); letter-spacing: -.04em; }
           .sa-section-head p:last-child { max-width: 520px; margin: 0; color: var(--sa-muted); font-size: .83rem; line-height: 1.6; }
+          .sa-vocabulary, .sa-developer { margin: clamp(3.5rem, 8vw, 7rem) 0; }
+          .sa-vocabulary-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: .75rem; }
+          .sa-vocabulary-card { min-width: 0; padding: 1rem; border: 1px solid var(--sa-border); border-radius: 14px; background: var(--sa-surface); }
+          .sa-vocabulary-card p { margin: .8rem 0 0; color: var(--sa-muted); font-size: .75rem; line-height: 1.55; }
           .sa-tabs { display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: .55rem; margin: 1.5rem 0 .8rem; }
           .sa-tab { min-width: 0; min-height: 52px; padding: .65rem .7rem; border: 1px solid var(--sa-border); border-radius: 10px; background: var(--sa-surface); color: var(--sa-dim); cursor: pointer; font: 650 .75rem/1.25 inherit; text-align: left; }
           .sa-tab:hover, .sa-tab:focus-visible { border-color: var(--sa-border-strong); color: var(--sa-text); }
@@ -265,10 +282,25 @@ export function SeriesAView() {
           .sa-button { min-height: 46px; display: inline-flex; align-items: center; justify-content: center; padding: .7rem 1rem; border: 1px solid var(--sa-border); border-radius: 10px; color: var(--sa-text); background: var(--sa-surface); text-decoration: none; font-size: .78rem; font-weight: 650; }
           .sa-button:hover, .sa-button:focus-visible { border-color: var(--sa-border-strong); background: var(--sa-surface-strong); }
           .sa-button-primary { background: var(--sa-accent); color: #11120f; border-color: var(--sa-accent); }
+          .sa-developer-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: .75rem; margin: 1.25rem 0 0; padding: 0; list-style: none; }
+          .sa-developer-card { min-width: 0; padding: 1.1rem; border: 1px solid var(--sa-border); border-radius: 14px; background: rgba(0,0,0,.20); }
+          .sa-developer-card h3 { margin: 1.2rem 0 .55rem; font-size: 1rem; }
+          .sa-developer-card p { margin: 0; color: var(--sa-muted); font-size: .78rem; line-height: 1.6; }
+          .sa-receipt { display: grid; grid-template-columns: minmax(0, .7fr) minmax(0, 1.3fr); gap: 1rem; margin-top: .75rem; padding: 1.1rem; border: 1px solid var(--sa-border); border-radius: 14px; background: var(--sa-surface); }
+          .sa-receipt h3 { margin: .7rem 0 .55rem; font-size: 1.05rem; }
+          .sa-receipt > div > p:last-child { margin: 0; color: var(--sa-muted); font-size: .75rem; line-height: 1.55; }
+          .sa-receipt-grid { display: grid; gap: .5rem; margin: 0; }
+          .sa-receipt-grid > div { display: grid; grid-template-columns: minmax(120px, .4fr) minmax(0, 1fr); gap: .75rem; padding: .6rem; border: 1px solid var(--sa-border); border-radius: 8px; background: rgba(0,0,0,.20); }
+          .sa-receipt-grid dt { color: var(--sa-accent); font: 650 .68rem/1.4 ui-monospace, SFMono-Regular, Menlo, monospace; }
+          .sa-receipt-grid dd { margin: 0; color: var(--sa-muted); font-size: .72rem; line-height: 1.5; }
+          .sa-verification { display: grid; grid-template-columns: minmax(0, .8fr) minmax(0, 1.2fr); gap: 1rem; margin-top: .75rem; padding: 1.1rem; border: 1px solid var(--sa-border-strong); border-radius: 14px; background: rgba(201,183,135,.055); }
+          .sa-verification h3 { margin: .7rem 0 .55rem; font-size: 1.05rem; }
+          .sa-verification p:last-child { margin: .65rem 0 0; color: var(--sa-muted); font-size: .75rem; line-height: 1.55; }
+          .sa-command-list { display: grid; gap: .5rem; min-width: 0; }
+          .sa-command-list code { display: block; min-width: 0; padding: .7rem; overflow-x: auto; border: 1px solid var(--sa-border); border-radius: 8px; background: rgba(0,0,0,.28); color: var(--sa-dim); font: 600 .7rem/1.45 ui-monospace, SFMono-Regular, Menlo, monospace; white-space: nowrap; }
           .sa-diligence { margin-top: clamp(3.5rem, 8vw, 7rem); }
           .sa-diligence-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: .75rem; margin-top: 1.25rem; }
-          .sa-diligence-card { min-height: 180px; display: flex; flex-direction: column; justify-content: space-between; gap: 1.5rem; padding: 1.2rem; border: 1px solid var(--sa-border); border-radius: 15px; background: var(--sa-surface); color: var(--sa-text); text-decoration: none; }
-          .sa-diligence-card:hover, .sa-diligence-card:focus-visible { border-color: var(--sa-border-strong); transform: translateY(-2px); }
+          .sa-diligence-card { min-height: 180px; display: flex; flex-direction: column; justify-content: space-between; gap: 1.5rem; padding: 1.2rem; border: 1px solid var(--sa-border); border-radius: 15px; background: var(--sa-surface); color: var(--sa-text); }
           .sa-diligence-card span:first-child { color: var(--sa-accent); font: 650 .65rem/1 ui-monospace, SFMono-Regular, Menlo, monospace; letter-spacing: .12em; }
           .sa-diligence-card strong { display: block; margin-top: .65rem; font-size: 1.25rem; }
           .sa-diligence-card p { margin: 0; color: var(--sa-muted); font-size: .78rem; line-height: 1.55; }
@@ -276,7 +308,7 @@ export function SeriesAView() {
           @media (max-width: 960px) {
             .sa-hero { grid-template-columns: 1fr; align-items: start; }
             .sa-hero-aside { max-width: 620px; }
-            .sa-truth-grid, .sa-loop { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+            .sa-truth-grid, .sa-vocabulary-grid, .sa-loop { grid-template-columns: repeat(2, minmax(0, 1fr)); }
             .sa-tabs { grid-template-columns: repeat(3, minmax(0, 1fr)); }
             .sa-panel-head { grid-template-columns: 1fr; }
             .sa-panel-proof { width: min(100%, 360px); }
@@ -286,15 +318,16 @@ export function SeriesAView() {
             .sa-header nav { width: 100%; overflow-x: auto; padding-bottom: .1rem; }
             .sa-header nav a { flex: 0 0 auto; }
             .sa-section-head { align-items: flex-start; flex-direction: column; }
-            .sa-outcome-grid, .sa-diligence-grid { grid-template-columns: 1fr; }
+            .sa-outcome-grid, .sa-developer-grid, .sa-diligence-grid, .sa-receipt, .sa-verification { grid-template-columns: 1fr; }
             .sa-footer { flex-direction: column; }
           }
           @media (max-width: 520px) {
             .sa-main { padding-inline: .8rem; }
             .sa-header nav { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); overflow: visible; }
             .sa-header nav a { justify-content: center; text-align: center; }
-            .sa-truth-grid, .sa-loop, .sa-tabs { grid-template-columns: 1fr; }
+            .sa-truth-grid, .sa-vocabulary-grid, .sa-loop, .sa-tabs { grid-template-columns: 1fr; }
             .sa-step { min-height: 0; }
+            .sa-receipt-grid > div { grid-template-columns: 1fr; }
             .sa-tab { text-align: center; }
             .sa-actions { flex-direction: column; }
             .sa-button { width: 100%; }
@@ -305,17 +338,17 @@ export function SeriesAView() {
         `}</style>
 
         <header className="sa-header">
-          <Link className="sa-brand" href={route('/')} aria-label="A11oy home">
+          <a className="sa-brand" href="#main-content" aria-label="A11oy Series A view">
             <span className="sa-mark" aria-hidden="true">
               a
             </span>
             <span>A11oy</span>
-          </Link>
+          </a>
           <nav aria-label="Series A view navigation">
             <a href="#solutions">Solutions</a>
             <a href="#evidence">Evidence</a>
-            <a href="#diligence">Diligence</a>
-            <Link href={route('/architecture')}>Developer view</Link>
+            <a href="#developer">Developer</a>
+            <a href="#non-claims">Non-claims</a>
           </nav>
         </header>
 
@@ -332,12 +365,12 @@ export function SeriesAView() {
                 demonstrates from what still requires a live, independently observed runtime.
               </p>
               <div className="sa-actions">
-                <Link className="sa-button sa-button-primary" href={route('/demo')}>
-                  Open deterministic demo
-                </Link>
-                <Link className="sa-button" href={route('/proof')}>
-                  Inspect proof shape
-                </Link>
+                <a className="sa-button sa-button-primary" href="#solutions">
+                  Explore the deterministic views
+                </a>
+                <a className="sa-button" href="#developer">
+                  Inspect the developer path
+                </a>
               </div>
             </div>
             <aside className="sa-hero-aside" aria-label="Investor view status">
@@ -353,13 +386,13 @@ export function SeriesAView() {
           <section className="sa-truth-grid" id="evidence" aria-label="Current evidence boundary">
             <TruthCard
               label="React surface"
-              state="AVAILABLE"
-              detail="This route and its six solution contracts exist in the current source tree."
+              state="DEMO"
+              detail="This source-backed route and its six typed solution contracts are an active prototype, not operational data."
             />
             <TruthCard
               label="Decision scenarios"
               state="DEMO"
-              detail="Each view uses deterministic, non-customer scenario language and links to an existing source route."
+              detail="Each view uses deterministic, non-customer scenario language and remains within this truth-qualified route."
             />
             <TruthCard
               label="External execution"
@@ -373,6 +406,31 @@ export function SeriesAView() {
             />
           </section>
 
+          <section
+            className="sa-vocabulary"
+            id="truth-vocabulary"
+            aria-labelledby="truth-vocabulary-title"
+          >
+            <div className="sa-section-head">
+              <div>
+                <p className="sa-kicker">Operational truth vocabulary</p>
+                <h2 id="truth-vocabulary-title">Six states. No silent promotion.</h2>
+              </div>
+              <p>
+                The complete runtime vocabulary stays visible even when a state has no qualifying
+                current record on this source-only page.
+              </p>
+            </div>
+            <div className="sa-vocabulary-grid">
+              {SERIES_A_EVIDENCE_STATES.map((state) => (
+                <article className="sa-vocabulary-card" key={state}>
+                  <StateBadge state={state} />
+                  <p>{SERIES_A_EVIDENCE_STATE_DETAILS[state]}</p>
+                </article>
+              ))}
+            </div>
+          </section>
+
           <section id="solutions" aria-labelledby="solutions-title">
             <div className="sa-section-head">
               <div>
@@ -380,8 +438,8 @@ export function SeriesAView() {
                 <h2 id="solutions-title">Choose the buyer problem.</h2>
               </div>
               <p>
-                Every tab exposes the same governed loop and links into an existing A11oy demo
-                surface. The operational state stays visible throughout the journey.
+                Every tab exposes the same governed loop and remains inside this source-qualified
+                surface. Seeded legacy pages are not used as operational proof.
               </p>
             </div>
 
@@ -406,41 +464,114 @@ export function SeriesAView() {
                 </button>
               ))}
             </div>
-            <SolutionPanel solution={selected} />
+            {SERIES_A_SOLUTIONS.map((solution) => (
+              <SolutionPanel
+                key={solution.id}
+                solution={solution}
+                active={selected.id === solution.id}
+              />
+            ))}
           </section>
 
-          <section className="sa-diligence" id="diligence" aria-labelledby="diligence-title">
+          <section className="sa-developer" id="developer" aria-labelledby="developer-title">
             <div className="sa-section-head">
               <div>
-                <p className="sa-kicker">Diligence path</p>
-                <h2 id="diligence-title">Move from narrative to source evidence.</h2>
+                <p className="sa-kicker">Developer path</p>
+                <h2 id="developer-title">Trace source to the runtime boundary.</h2>
               </div>
               <p>
-                No dead-end pitch deck: every diligence card resolves to a registered A11oy route.
+                These steps describe what a developer can inspect or verify without turning local
+                source, fixtures, or a successful build into a production claim.
+              </p>
+            </div>
+            <ol className="sa-developer-grid">
+              {SERIES_A_DEVELOPER_PATH.map((step, index) => (
+                <li className="sa-developer-card" key={step.id}>
+                  <div className="sa-step-top">
+                    <span className="sa-step-number">{String(index + 1).padStart(2, '0')}</span>
+                    <StateBadge state={step.state} />
+                  </div>
+                  <h3>{step.title}</h3>
+                  <p>{step.detail}</p>
+                </li>
+              ))}
+            </ol>
+            <section className="sa-receipt" aria-labelledby="receipt-shape-title">
+              <div>
+                <p className="sa-eyebrow">Evidence contract</p>
+                <h3 id="receipt-shape-title">Receipt shape, not a fabricated receipt.</h3>
+                <p>
+                  These are required field names and validation rules. No hash, signer, execution,
+                  customer, or external outcome is manufactured for this demo.
+                </p>
+              </div>
+              <dl className="sa-receipt-grid">
+                {SERIES_A_RECEIPT_FIELDS.map((item) => (
+                  <div key={item.field}>
+                    <dt>{item.field}</dt>
+                    <dd>{item.rule}</dd>
+                  </div>
+                ))}
+              </dl>
+            </section>
+            <section className="sa-verification" aria-labelledby="verification-title">
+              <div>
+                <p className="sa-eyebrow">Repository-native verification</p>
+                <h3 id="verification-title">Run the source gates.</h3>
+                <p>
+                  Run these commands from the repository root. Their presence is instruction; only
+                  captured command results establish a local verification outcome.
+                </p>
+              </div>
+              <div className="sa-command-list">
+                {SERIES_A_VERIFICATION_COMMANDS.map((command) => (
+                  <code key={command}>{command}</code>
+                ))}
+              </div>
+            </section>
+          </section>
+
+          <section className="sa-diligence" id="non-claims" aria-labelledby="non-claims-title">
+            <div className="sa-section-head">
+              <div>
+                <p className="sa-kicker">Diligence boundary</p>
+                <h2 id="non-claims-title">Know exactly what is not proven.</h2>
+              </div>
+              <p>
+                This page intentionally ends at the observed source and local-verification boundary.
               </p>
             </div>
             <div className="sa-diligence-grid">
-              <Link className="sa-diligence-card" href={route('/architecture')}>
-                <span>01 · ARCHITECTURE</span>
+              <article className="sa-diligence-card">
+                <span>01 · DEPLOYMENT</span>
                 <div>
-                  <strong>Inspect the fabric</strong>
-                  <p>Review the source-declared layers, boundaries, and product structure.</p>
+                  <strong>No production witness</strong>
+                  <p>
+                    No deployment, production health, connector parity, or external mutation is
+                    asserted.
+                  </p>
                 </div>
-              </Link>
-              <Link className="sa-diligence-card" href={route('/governance')}>
-                <span>02 · GOVERNANCE</span>
+              </article>
+              <article className="sa-diligence-card">
+                <span>02 · ADOPTION</span>
                 <div>
-                  <strong>Inspect the gate</strong>
-                  <p>Follow the Covenant policy and human-authorization path.</p>
+                  <strong>No customer claim</strong>
+                  <p>
+                    No customer, revenue, usage, retention, or independently observed outcome is
+                    inferred.
+                  </p>
                 </div>
-              </Link>
-              <Link className="sa-diligence-card" href={route('/proof')}>
-                <span>03 · PROOF</span>
+              </article>
+              <article className="sa-diligence-card">
+                <span>03 · ASSURANCE</span>
                 <div>
-                  <strong>Inspect the evidence</strong>
-                  <p>Review the demo Proof Packet shape without inferring deployed receipts.</p>
+                  <strong>No compliance or legal claim</strong>
+                  <p>
+                    No certification, audit opinion, legal conclusion, privilege determination, or
+                    filing is represented.
+                  </p>
                 </div>
-              </Link>
+              </article>
             </div>
           </section>
 

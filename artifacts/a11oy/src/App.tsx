@@ -95,9 +95,6 @@ const BoardroomMode = lazy(() =>
 const SeriesAView = lazy(() =>
   import('./pages/SeriesAView').then((m) => ({ default: m.SeriesAView })),
 );
-const InvestorDemo = lazy(() =>
-  import('./pages/InvestorDemo').then((m) => ({ default: m.InvestorDemo })),
-);
 const FlexCacheRuntime = lazy(() =>
   import('./pages/FlexCacheRuntime').then((m) => ({ default: m.FlexCacheRuntime })),
 );
@@ -432,7 +429,7 @@ export default function App() {
           <Route path={`${base}/sovereign`} component={Sovereign} />
           <Route path={`${base}/boardroom`} component={BoardroomMode} />
           <Route path={`${base}/start`} component={SeriesAView} />
-          <Route path={`${base}/investor-demo`} component={InvestorDemo} />
+          <Route path={`${base}/investor-demo`} component={SeriesAView} />
           <Route path={`${base}/flexcache`} component={FlexCacheRuntime} />
           <Route path={`${base}/terminal`} component={Terminal} />
           <Route path={`${base}/nexus`} component={Praxis} />

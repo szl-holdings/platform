@@ -26,12 +26,14 @@ const ROOT = join(__dirname, '../..');
 const STRICT = process.argv.includes('--strict');
 const JSON_MODE = process.argv.includes('--json');
 
-const SCORECARD_PATH = join(ROOT, 'launch/FINAL_ABILITY_SCORECARD.csv');
+const SCORECARD_PATH = join(ROOT, 'audit/launch/FINAL_ABILITY_SCORECARD.csv');
 
 let csvLines;
 try {
   csvLines = readFileSync(SCORECARD_PATH, 'utf-8').trim().split('\n');
-} catch (_e) {
+} catch (error) {
+  const detail = error instanceof Error ? error.message : String(error);
+  process.stderr.write(`[verify:claims] unable to read ${SCORECARD_PATH}: ${detail}\n`);
   process.exit(1);
 }
 
@@ -51,7 +53,7 @@ const partial = rows.filter((r) => r.current_status === 'partial');
 const dormant = rows.filter((r) => r.current_status === 'dormant');
 const working = rows.filter((r) => r.current_status === 'working');
 
-const _summary = {
+const summary = {
   total: rows.length,
   working: working.length,
   partial: partial.length,
@@ -63,41 +65,36 @@ const _summary = {
 };
 
 if (JSON_MODE) {
+  process.stdout.write(
+    `${JSON.stringify(
+      {
+        summary,
+        non_launchable: [...broken, ...mocked],
+        warn_only: [...partial, ...dormant],
+      },
+      null,
+      2,
+    )}\n`,
+  );
 } else {
-
-  if (broken.length > 0) {
-    for (const r of broken) {
-      if (r.blocker) {}
-      if (r.recommended_action) {}
-    }
-  }
-
-  if (mocked.length > 0) {
-    for (const r of mocked) {
-      if (r.blocker) {}
-    }
-  }
-
-  if (partial.length > 0) {
-    for (const r of partial) {
-      if (r.blocker) {}
-    }
-  }
-  for (const _r of working) {
+  process.stdout.write(
+    `[verify:claims] ${summary.working}/${summary.total} working; ` +
+      `${summary.partial} partial; ${summary.dormant} dormant; ` +
+      `${summary.mock} mock; ${summary.broken} broken\n`,
+  );
+  for (const row of [...broken, ...mocked]) {
+    process.stdout.write(
+      `[verify:claims] ${row.current_status}: ${row.product} / ${row.capability}` +
+        `${row.blocker ? ` — ${row.blocker}` : ''}\n`,
+    );
   }
 }
 
 const nonLaunchable = broken.length + mocked.length;
 const shouldFail = STRICT && nonLaunchable > 0;
-if (!JSON_MODE) {
-  if (nonLaunchable > 0) {
-    const _detail = [
-      broken.length > 0 ? `${broken.length} broken` : null,
-      mocked.length > 0 ? `${mocked.length} mock/demo` : null,
-    ]
-      .filter(Boolean)
-      .join(', ');
-  } else {
-  }
+if (!JSON_MODE && shouldFail) {
+  process.stderr.write(
+    `[verify:claims] strict gate failed: ${nonLaunchable} non-launchable claim row(s)\n`,
+  );
 }
 process.exit(shouldFail ? 1 : 0);
