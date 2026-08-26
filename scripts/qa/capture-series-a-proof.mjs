@@ -5,8 +5,6 @@ import { createHash } from 'node:crypto';
 import { mkdir, readFile, writeFile } from 'node:fs/promises';
 import path from 'node:path';
 
-import { chromium } from '@playwright/test';
-
 const VIEWPORTS = [
   { id: '320', width: 320, height: 900 },
   { id: '390', width: 390, height: 900 },
@@ -41,7 +39,7 @@ function requireRepository(name) {
   return value;
 }
 
-function requireWorkflowPath(repository) {
+function requireWorkflowIdentity(repository) {
   const workflowRef = requiredEnvironment('GITHUB_WORKFLOW_REF');
   const prefix = `${repository}/`;
   const revisionSeparator = workflowRef.lastIndexOf('@');
@@ -49,14 +47,15 @@ function requireWorkflowPath(repository) {
     throw new Error('GITHUB_WORKFLOW_REF must bind the current repository and workflow revision');
   }
   const workflowPath = workflowRef.slice(prefix.length, revisionSeparator);
-  if (!/^\.github\/workflows\/[A-Za-z0-9._-]+\.ya?ml$/.test(workflowPath)) {
+  const workflowRevision = workflowRef.slice(revisionSeparator + 1);
+  if (!/^\.github\/workflows\/[A-Za-z0-9._-]+\.ya?ml$/.test(workflowPath) || !workflowRevision) {
     throw new Error('GITHUB_WORKFLOW_REF must identify a repository workflow file');
   }
-  return workflowPath;
+  return { workflowPath, workflowRef, workflowRevision };
 }
 
 function requireServerOrigin() {
-  const serverUrl = new URL(process.env.GITHUB_SERVER_URL?.trim() || 'https://github.com');
+  const serverUrl = new URL(requiredEnvironment('GITHUB_SERVER_URL'));
   if (
     serverUrl.protocol !== 'https:' ||
     serverUrl.username ||
@@ -68,6 +67,49 @@ function requireServerOrigin() {
     throw new Error('GITHUB_SERVER_URL must be an absolute HTTPS origin');
   }
   return serverUrl.origin;
+}
+
+function captureProvenance(repository) {
+  if (process.env.GITHUB_ACTIONS?.trim() !== 'true') {
+    return Object.freeze({
+      authority: 'LOCAL_NON_AUTHORITATIVE',
+      provider: 'local',
+      workflow_name: null,
+      workflow_ref: null,
+      workflow_path: null,
+      workflow_revision: null,
+      workflow_source_sha: null,
+      workflow_run_id: null,
+      workflow_run_attempt: null,
+      workflow_run_url: null,
+    });
+  }
+
+  const githubRepository = requireRepository('GITHUB_REPOSITORY');
+  if (githubRepository !== repository) {
+    throw new Error('GITHUB_REPOSITORY must match SOURCE_REPOSITORY');
+  }
+  const workflowName = requiredEnvironment('GITHUB_WORKFLOW');
+  const { workflowPath, workflowRef, workflowRevision } = requireWorkflowIdentity(githubRepository);
+  const workflowSourceSha = requireSha('GITHUB_WORKFLOW_SHA');
+  const workflowRunId = requirePositiveInteger('GITHUB_RUN_ID');
+  const workflowRunAttempt = requirePositiveInteger('GITHUB_RUN_ATTEMPT');
+  const githubServerOrigin = requireServerOrigin();
+
+  return Object.freeze({
+    authority: 'VERIFIED_GITHUB_RUNTIME',
+    provider: 'github-actions',
+    workflow_name: workflowName,
+    workflow_ref: workflowRef,
+    workflow_path: workflowPath,
+    workflow_revision: workflowRevision,
+    workflow_source_sha: workflowSourceSha,
+    workflow_run_id: workflowRunId,
+    workflow_run_attempt: workflowRunAttempt,
+    workflow_run_url:
+      `${githubServerOrigin}/${githubRepository}/actions/runs/${workflowRunId}` +
+      `/attempts/${workflowRunAttempt}`,
+  });
 }
 
 function requireLoopbackBaseUrl() {
@@ -121,33 +163,52 @@ function normalizedRelative(root, target) {
   return path.relative(root, target).replaceAll(path.sep, '/');
 }
 
+function observeCheckoutIdentity() {
+  const sha = execFileSync('git', ['rev-parse', 'HEAD'], { encoding: 'utf8' }).trim();
+  const treeSha = execFileSync('git', ['rev-parse', 'HEAD^{tree}'], {
+    encoding: 'utf8',
+  }).trim();
+  const trackedStatus = execFileSync('git', ['status', '--porcelain=v1', '--untracked-files=no'], {
+    encoding: 'utf8',
+  }).trim();
+  let branch = null;
+  try {
+    branch = execFileSync('git', ['symbolic-ref', '--quiet', '--short', 'HEAD'], {
+      encoding: 'utf8',
+    }).trim();
+  } catch {
+    branch = null;
+  }
+  return { branch, sha, trackedStatus, treeSha };
+}
+
+function verifyCheckoutIdentity(expectedSha, expectedTreeSha, phase) {
+  const observed = observeCheckoutIdentity();
+  if (observed.sha !== expectedSha) {
+    throw new Error(`${phase} source ${observed.sha} does not match SOURCE_SHA`);
+  }
+  if (observed.treeSha !== expectedTreeSha) {
+    throw new Error(`${phase} tree ${observed.treeSha} does not match SOURCE_TREE_SHA`);
+  }
+  if (observed.trackedStatus) {
+    throw new Error(`tracked source changed ${phase}: ${observed.trackedStatus}`);
+  }
+  return observed;
+}
+
 const repository = requireRepository('SOURCE_REPOSITORY');
 const sourceSha = requireSha('SOURCE_SHA');
 const sourceTreeSha = requireSha('SOURCE_TREE_SHA');
 const sourceRef = requiredEnvironment('SOURCE_REF');
-const workflowRunId = requirePositiveInteger('WORKFLOW_RUN_ID');
-const workflowRunAttempt = requirePositiveInteger('WORKFLOW_RUN_ATTEMPT');
-const workflowName = requiredEnvironment('GITHUB_WORKFLOW');
-const workflowPath = requireWorkflowPath(repository);
-const githubServerOrigin = requireServerOrigin();
+const provenance = captureProvenance(repository);
 const baseUrl = requireLoopbackBaseUrl();
 const captureRoute = requireCaptureRoute();
 const repositoryRoot = process.cwd();
 
-const observedSourceSha = execFileSync('git', ['rev-parse', 'HEAD'], { encoding: 'utf8' }).trim();
-const observedTreeSha = execFileSync('git', ['rev-parse', 'HEAD^{tree}'], {
-  encoding: 'utf8',
-}).trim();
-const trackedStatus = execFileSync('git', ['status', '--porcelain=v1', '--untracked-files=no'], {
-  encoding: 'utf8',
-}).trim();
-if (observedSourceSha !== sourceSha) {
-  throw new Error(`checked-out source ${observedSourceSha} does not match SOURCE_SHA`);
+const initialCheckout = verifyCheckoutIdentity(sourceSha, sourceTreeSha, 'before capture');
+if (provenance.authority === 'LOCAL_NON_AUTHORITATIVE' && initialCheckout.branch !== sourceRef) {
+  throw new Error('local SOURCE_REF must match the checked-out branch');
 }
-if (observedTreeSha !== sourceTreeSha) {
-  throw new Error(`checked-out tree ${observedTreeSha} does not match SOURCE_TREE_SHA`);
-}
-if (trackedStatus) throw new Error(`tracked source changed before capture: ${trackedStatus}`);
 
 const outputDirectory = requireOutputDirectory(repositoryRoot);
 await mkdir(outputDirectory, { recursive: true });
@@ -156,6 +217,7 @@ const startedAt = new Date().toISOString();
 const captureDate = startedAt.slice(0, 10);
 const targetUrl = new URL(captureRoute, baseUrl).href;
 const results = [];
+const { chromium } = await import('@playwright/test');
 let browser;
 
 try {
@@ -306,6 +368,8 @@ try {
   await browser?.close();
 }
 
+verifyCheckoutIdentity(sourceSha, sourceTreeSha, 'after capture');
+
 const failed = results.filter((result) => result.status !== 'PASS');
 const metadata = {
   schema: 'szl.screenshot-proof/v1',
@@ -320,14 +384,9 @@ const metadata = {
   },
   route: captureRoute,
   capture_environment: {
-    provider: 'github-actions',
-    workflow_name: workflowName,
-    workflow_path: workflowPath,
-    workflow_run_id: workflowRunId,
-    workflow_run_attempt: workflowRunAttempt,
-    workflow_run_url: `${githubServerOrigin}/${repository}/actions/runs/${workflowRunId}/attempts/${workflowRunAttempt}`,
-    runner_os: process.env.RUNNER_OS ?? 'unknown',
-    runner_arch: process.env.RUNNER_ARCH ?? 'unknown',
+    ...provenance,
+    runner_os: process.env.RUNNER_OS ?? process.platform,
+    runner_arch: process.env.RUNNER_ARCH ?? process.arch,
     node_version: process.version,
     browser: { name: 'chromium', version: browser?.version() ?? 'unknown' },
     command: 'node scripts/qa/capture-series-a-proof.mjs',
@@ -341,7 +400,9 @@ const metadata = {
   },
   captures: results,
   non_claims: [
-    'The captures prove presentation of the named source revision in GitHub Actions only.',
+    provenance.authority === 'LOCAL_NON_AUTHORITATIVE'
+      ? 'This local capture is non-authoritative and cannot satisfy hosted evidence gates alone.'
+      : 'Hosted metadata is bound to the validated GitHub workflow runtime identity.',
     'They do not prove deployment, production runtime, customer use, or external service parity.',
   ],
 };

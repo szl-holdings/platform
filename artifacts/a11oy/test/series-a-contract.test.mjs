@@ -111,10 +111,18 @@ test('resets and verifies scroll origin after tab exercise before full-page capt
   assert.match(captureScript, /scroll_origin: true/);
 });
 
-test('binds capture metadata to the checked-out tree and actual workflow', () => {
+test('binds hosted provenance and labels local capture as non-authoritative', () => {
+  assert.match(captureScript, /GITHUB_ACTIONS/);
+  assert.match(captureScript, /GITHUB_REPOSITORY/);
+  assert.match(captureScript, /GITHUB_RUN_ID/);
+  assert.match(captureScript, /GITHUB_RUN_ATTEMPT/);
   assert.match(captureScript, /GITHUB_WORKFLOW_REF/);
+  assert.match(captureScript, /GITHUB_WORKFLOW_SHA/);
+  assert.match(captureScript, /LOCAL_NON_AUTHORITATIVE/);
+  assert.match(captureScript, /VERIFIED_GITHUB_RUNTIME/);
   assert.match(captureScript, /rev-parse', 'HEAD\^\{tree\}'/);
-  assert.match(captureScript, /tracked source changed before capture/);
+  assert.match(captureScript, /tracked source changed \$\{phase\}/);
   assert.match(captureScript, /PLAYWRIGHT_BASE_URL must be an uncredentialed HTTP loopback URL/);
+  assert.doesNotMatch(captureScript, /requiredEnvironment\('WORKFLOW_RUN_ID'\)/);
   assert.doesNotMatch(captureScript, /series-a-screenshot-proof\.yml/);
 });
