@@ -42,8 +42,8 @@ mean.
 
 ## Canonical Current-Tree Numbers (Quick Reference)
 
-> Updated 2026-07-28 after adding the deterministic estate contract release. Source:
-> `audit/source-of-truth.json` v2.1.2. Historical runtime/database snapshots
+> Updated 2026-08-26 after adding the A11oy Atelier package and governed API route. Source:
+> `audit/source-of-truth.json` v2.1.3. Historical runtime/database snapshots
 > remain in the JSON but are not current public claims.
 
 | Metric | Verified Count | Source |
@@ -51,17 +51,17 @@ mean.
 | Registered artifacts | 6 | Tracked artifact manifests |
 | Artifact directories | 7 | Tracked top-level `artifacts/` children |
 | Registered product verticals | 5 | Registered domain artifacts; A11oy is separate |
-| Domain packages (`packages/`) | 161 | Tracked top-level package directories |
+| Domain packages (`packages/`) | 162 | Tracked top-level package directories |
 | Shared library packages (`lib/`) | 53 | Tracked top-level library directories |
-| Total packages (`packages/` + `lib/`) | 214 | 161 + 53 |
+| Total packages (`packages/` + `lib/`) | 215 | 162 + 53 |
 | Apps (`apps/`) | 11 | Tracked top-level `apps/` children |
 | Services (`services/`) | 11 | Tracked top-level `services/` children |
 | Workers (`workers/`) | 5 | `ls workers/ \| wc -l` |
 | DB schema files | 197 | Tracked `lib/db/src/schema/**/*.ts` files |
 | DB `pgTable` call sites | 1,067 | Static source call sites; not provisioned-table count |
 | DB migrations (SQL files) | 149 | Tracked `lib/db/drizzle/*.sql` files |
-| API route source files | 43 | Non-test files with detected Express route declarations across current runtime roots |
-| API handler declarations | 306 | Static non-test method declarations on `app`, `router`, and named Express Router receivers |
+| API route source files | 44 | Non-test files with detected Express route declarations across current runtime roots |
+| API handler declarations | 311 | Static non-test method declarations on `app`, `router`, and named Express Router receivers |
 | CI workflows | 46 | Permanent workflows including exact-head screenshot evidence, hosted observability proof, and public npm release paths |
 | Environment variables (in `.env.example`) | 238 | Lines matching `^[A-Z_]+=` |
 
