@@ -130,6 +130,7 @@
     "surfaces:test": "tsx --test tools/truth/public-surfaces.test.ts",
     "truth:generate": "tsx tools/truth/generate-truth.ts",
     "truth:validate": "tsx tools/truth/validate-truth.ts && pnpm truth:allowlists:check && pnpm truth:test",
+    "truth:freshness": "tsx tools/truth/validate-truth.ts --require-freshness",
     "truth:allowlists": "tsx tools/truth/generate-allowlist-justifications.ts",
     "truth:allowlists:check": "tsx tools/truth/generate-allowlist-justifications.ts --check",
     "truth:test": "tsx --test tools/truth/validate-truth.test.ts tools/truth/generate-truth.test.ts tools/truth/claims-drift.test.ts tools/truth/generate-allowlist-justifications.test.ts tools/truth/public-surfaces.test.ts",

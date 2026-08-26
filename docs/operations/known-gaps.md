@@ -1,6 +1,6 @@
 # SZL Holdings — Known Gaps Register (Security & Operations)
 
-**Last updated:** 2026-08-08 (rev 24 — public surface truth)
+**Last updated:** 2026-08-20 (rev 25 — truth snapshot lifecycle)
 **Owner:** Engineering / DevOps  
 **Audience:** Enterprise architects, Series A technical advisors, incoming VP Engineering
 
@@ -35,6 +35,17 @@ gate adds the deliberate seven-day age audit to the same live checks without wea
 the protected PR/main check. An expired observation is remediated by re-observing every approved
 target, updating the registry evidence, regenerating the deterministic artifacts, reviewing the
 diff, and rerunning the freshness gate.
+
+The generated `artifacts/SOURCE_OF_TRUTH.json` timestamp follows the same
+honest-snapshot rule. Pull requests and protected-main pushes still validate
+its schema, labels, canonical metric set, future skew, deterministic local
+metrics, allowlists, and claim drift, but they do not rewrite or expire an
+otherwise honest historical snapshot merely because seven days elapsed. The
+daily schedule and an explicit manual `require_truth_freshness` input run
+`pnpm truth:freshness` as the separate age audit. Refreshing that timestamp
+requires rerunning the canonical generator with its admitted local and remote
+sources and reviewing the resulting evidence; changing only the timestamp is
+not an accepted remediation.
 
 ---
 

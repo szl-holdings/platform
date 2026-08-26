@@ -30,7 +30,7 @@
 
 ### Infrastructure Layer
 - Replit managed hosting
-- GitHub Actions CI/CD (45 workflows, measured in `artifacts/SOURCE_OF_TRUTH.json`)
+- GitHub Actions CI/CD (46 workflows, measured in `artifacts/SOURCE_OF_TRUTH.json`)
 - pnpm monorepo workspace
 - Environment-based configuration
 

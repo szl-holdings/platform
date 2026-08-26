@@ -428,6 +428,12 @@ test('wires freshness only to scheduled and explicit manual events', () => {
     (step) => step.name === 'Open or update the protected refresh work item',
   );
   assert.match(workItem?.run ?? '', /package SHA-256/);
+  assert.match(workItem?.run ?? '', /- source revision: \\`\$\{SOURCE_SHA\}\\`/);
+  assert.ok(
+    (workItem?.run ?? '').includes('- generated path: \\`artifacts/SOURCE_OF_TRUTH.json\\`'),
+  );
+  assert.match(workItem?.run ?? '', /- package SHA-256: \\`\$\{PACKAGE_SHA256\}\\`/);
+  assert.ok((workItem?.run ?? '').includes('with \\`GITHUB_TOKEN\\`'));
   assert.match(workItem?.run ?? '', /number_output="\$\(/);
   assert.match(workItem?.run ?? '', /mapfile -t numbers/);
   assert.match(workItem?.run ?? '', /Multiple open protected refresh work items/);
