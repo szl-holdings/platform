@@ -25,7 +25,16 @@ export interface OmniaArtifactMeta {
 export interface WorldModelEntity {
   id: string;
   label: string;
-  type: 'domain' | 'entity' | 'concept' | 'agent' | 'signal' | 'property' | 'threat' | 'matter' | 'vessel';
+  type:
+    | 'domain'
+    | 'entity'
+    | 'concept'
+    | 'agent'
+    | 'signal'
+    | 'property'
+    | 'threat'
+    | 'matter'
+    | 'vessel';
   domain: OmniaArtifact | string;
   confidence: number;
   freshness: number;
@@ -155,6 +164,7 @@ export interface OmniaShellConfig {
   accentColor: string;
   apiBase?: string;
   shellVersion?: string;
+  networkState?: 'AVAILABLE' | 'UNAVAILABLE';
 }
 
 export interface OmniaShellContextValue {

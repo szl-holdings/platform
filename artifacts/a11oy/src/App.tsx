@@ -1,15 +1,13 @@
-import { lazy, Suspense, type ReactNode } from 'react';
+import { lazy, type ReactNode, Suspense } from 'react';
 import { Route, Switch } from 'wouter';
-import { GraphQLProvider } from './graphql';
 import { AppShell } from './components/shell/AppShell';
+import { GraphQLProvider } from './graphql';
 
 function stripTrailingSlash(path: string) {
   return path.endsWith('/') && path.length > 1 ? path.slice(0, -1) : path;
 }
 
-const base = stripTrailingSlash(
-  (import.meta.env.BASE_URL ?? '/a11oy/').replace(/\/$/, ''),
-);
+const base = stripTrailingSlash((import.meta.env.BASE_URL ?? '/a11oy/').replace(/\/$/, ''));
 
 function Loader() {
   return (
@@ -91,6 +89,9 @@ const Sovereign = lazy(() => import('./pages/Sovereign').then((m) => ({ default:
 const BoardroomMode = lazy(() =>
   import('./pages/BoardroomMode').then((m) => ({ default: m.BoardroomMode })),
 );
+const SeriesAView = lazy(() =>
+  import('./pages/SeriesAView').then((m) => ({ default: m.SeriesAView })),
+);
 const InvestorDemo = lazy(() =>
   import('./pages/InvestorDemo').then((m) => ({ default: m.InvestorDemo })),
 );
@@ -98,7 +99,6 @@ const FlexCacheRuntime = lazy(() =>
   import('./pages/FlexCacheRuntime').then((m) => ({ default: m.FlexCacheRuntime })),
 );
 const Terminal = lazy(() => import('./pages/Terminal').then((m) => ({ default: m.Terminal })));
-const Fabric = lazy(() => import('./pages/Fabric').then((m) => ({ default: m.Fabric })));
 const FabricCockpit = lazy(() =>
   import('./pages/fabric/FabricCockpit').then((m) => ({ default: m.FabricCockpit })),
 );
@@ -299,9 +299,7 @@ const SystemCard = lazy(() =>
 const CapabilityTrajectory = lazy(() =>
   import('./pages/CapabilityTrajectory').then((m) => ({ default: m.CapabilityTrajectory })),
 );
-const HatunSpec = lazy(() =>
-  import('./pages/HatunSpec').then((m) => ({ default: m.HatunSpec })),
-);
+const HatunSpec = lazy(() => import('./pages/HatunSpec').then((m) => ({ default: m.HatunSpec })));
 const GlasswingPartners = lazy(() =>
   import('./pages/GlasswingPartners').then((m) => ({ default: m.GlasswingPartners })),
 );
@@ -429,6 +427,7 @@ export default function App() {
           <Route path={`${base}/right-to-audit`} component={RightToAudit} />
           <Route path={`${base}/sovereign`} component={Sovereign} />
           <Route path={`${base}/boardroom`} component={BoardroomMode} />
+          <Route path={`${base}/start`} component={SeriesAView} />
           <Route path={`${base}/investor-demo`} component={InvestorDemo} />
           <Route path={`${base}/flexcache`} component={FlexCacheRuntime} />
           <Route path={`${base}/terminal`} component={Terminal} />

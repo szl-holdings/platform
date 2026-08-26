@@ -1,4 +1,4 @@
-import { useState, type ReactNode } from 'react';
+import { type ReactNode, useState } from 'react';
 import { Link, useLocation } from 'wouter';
 
 const BASE = (import.meta.env.BASE_URL ?? '/a11oy/').replace(/\/$/, '');
@@ -362,10 +362,10 @@ export function Layout({ children, fullscreen = false }: LayoutProps) {
                 boxShadow: `0 0 6px ${TOKENS.accent}`,
               }}
             />
-            Fabric operational
+            Active prototype
           </div>
           <Link
-            href={b('/investor-demo')}
+            href={b('/start')}
             style={{
               padding: '0.4rem 0.875rem',
               fontSize: '0.75rem',
@@ -377,7 +377,7 @@ export function Layout({ children, fullscreen = false }: LayoutProps) {
               letterSpacing: '-0.005em',
             }}
           >
-            Investor demo
+            Series A view
           </Link>
         </div>
       </div>

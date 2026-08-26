@@ -1,21 +1,42 @@
 import type { Workcell } from '../types/index.js';
 
-export interface UnavailableWorkcellSource {
-  readonly state: 'UNAVAILABLE';
+export type OperationalSourceState =
+  | 'REAL'
+  | 'DEMO'
+  | 'UNAVAILABLE'
+  | 'DEGRADED'
+  | 'BLOCKED'
+  | 'ROADMAP';
+
+interface OperationalWorkcellSourceBase {
+  readonly state: OperationalSourceState;
   readonly records: readonly Workcell[];
-  readonly source: null;
-  readonly observedAt: null;
   readonly reason: string;
 }
+
+export interface ObservedWorkcellSource extends OperationalWorkcellSourceBase {
+  readonly state: 'REAL' | 'DEMO' | 'DEGRADED';
+  readonly source: string;
+  readonly observedAt: string;
+}
+
+export interface EmptyWorkcellSource extends OperationalWorkcellSourceBase {
+  readonly state: 'UNAVAILABLE' | 'BLOCKED' | 'ROADMAP';
+  readonly records: readonly [];
+  readonly source: null;
+  readonly observedAt: null;
+}
+
+export type OperationalWorkcellSource = ObservedWorkcellSource | EmptyWorkcellSource;
 
 /**
  * Production workcells must come from a current, authenticated operational
  * source. The repository does not currently provide one, so this registry
  * fails closed instead of exporting deterministic sample executions.
  */
-export const OPERATIONAL_WORKCELLS: readonly Workcell[] = Object.freeze([]);
+export const OPERATIONAL_WORKCELLS: readonly [] = Object.freeze([]) as readonly [];
 
-export const WORKCELL_SOURCE: UnavailableWorkcellSource = Object.freeze({
+export const WORKCELL_SOURCE: EmptyWorkcellSource = Object.freeze({
   state: 'UNAVAILABLE',
   records: OPERATIONAL_WORKCELLS,
   source: null,
@@ -26,6 +47,6 @@ export const WORKCELL_SOURCE: UnavailableWorkcellSource = Object.freeze({
 
 export const WORKCELL_MAP: Readonly<Record<string, Workcell | undefined>> = Object.freeze({});
 
-export function getOperationalWorkcells(): UnavailableWorkcellSource {
+export function getOperationalWorkcells(): OperationalWorkcellSource {
   return WORKCELL_SOURCE;
 }
