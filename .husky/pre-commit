@@ -2,9 +2,25 @@
 # Pre-commit: run Biome format + Oxlint on staged files, then verify docs claims.
 set -e
 
-STAGED_BIOME=$(git diff --cached --name-only --diff-filter=ACMR | grep -E '\.(ts|tsx|js|jsx|mjs|cjs|json|css)$' || true)
-STAGED_OXLINT=$(git diff --cached --name-only --diff-filter=ACMR | grep -E '\.(ts|tsx|js|jsx|mjs|cjs)$' || true)
-STAGED_DOC_CLAIMS=$(git diff --cached --name-only --diff-filter=ACDMR | grep -E '^(ACCESS-CONTROL-MATRIX\.md|API-SPEC\.md|SECURITY-CHECKLIST\.md|docs/API-SPEC\.md|scripts/docs/check-docs-claims\.js|lib/db/src/schema/|packages/auth-shared/src/server/csrf\.ts|artifacts/api-server/src/)' || true)
+DIFF_BASE=''
+if git rev-parse --verify --quiet MERGE_HEAD >/dev/null; then
+  # During a merge, lint the net candidate delta against the merged protected
+  # source. Comparing against the stale first parent also selects unrelated
+  # upstream changes and can rewrite protected-source bytes in the hook.
+  DIFF_BASE=$(git rev-parse MERGE_HEAD)
+fi
+
+staged_files() {
+  if [ -n "$DIFF_BASE" ]; then
+    git diff --cached "$DIFF_BASE" --name-only --diff-filter="$1"
+  else
+    git diff --cached --name-only --diff-filter="$1"
+  fi
+}
+
+STAGED_BIOME=$(staged_files ACMR | grep -E '\.(ts|tsx|js|jsx|mjs|cjs|json|css)$' || true)
+STAGED_OXLINT=$(staged_files ACMR | grep -E '\.(ts|tsx|js|jsx|mjs|cjs)$' || true)
+STAGED_DOC_CLAIMS=$(staged_files ACDMR | grep -E '^(ACCESS-CONTROL-MATRIX\.md|API-SPEC\.md|SECURITY-CHECKLIST\.md|docs/API-SPEC\.md|scripts/docs/check-docs-claims\.js|lib/db/src/schema/|packages/auth-shared/src/server/csrf\.ts|artifacts/api-server/src/)' || true)
 
 if [ -n "$STAGED_BIOME" ]; then
   echo "Running biome format on staged files..."

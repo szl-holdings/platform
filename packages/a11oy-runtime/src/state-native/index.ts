@@ -17,6 +17,12 @@ export {
 export { CognitiveEpochManager, type CognitiveEpochManagerConfig } from './epoch-manager.js';
 export { assertStateNative, StateNativeError, type StateNativeErrorCode } from './errors.js';
 export {
+  FileSystemStateTransportAdapter,
+  type FileSystemStateTransportAdapterConfig,
+  type FileSystemStateTransportInspection,
+  type StateTransportDeletionReceipt,
+} from './filesystem-transport.js';
+export {
   AlloyKernelRuntime,
   kernelRequestDigest,
   type AlloyKernelRuntimeDependencies,

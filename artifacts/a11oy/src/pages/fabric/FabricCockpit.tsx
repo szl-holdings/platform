@@ -13,7 +13,6 @@ import {
   rankSignalsBySeverity,
   SEVERITY_COLORS,
   GOVERNANCE_COLORS,
-  type VerticalId,
 } from '../../data/fabric';
 
 const BASE = (import.meta.env.BASE_URL ?? '/a11oy/').replace(/\/$/, '');
@@ -36,9 +35,21 @@ export function FabricCockpit() {
       <PageHeader
         label="A11OY COMMAND FABRIC"
         title="Universal Intelligence Layer"
-        subtitle="One intelligence layer across every vertical. Signals become risks, risks become decisions, decisions become outcomes, outcomes become memory."
-        status="LIVE"
+        subtitle="Deterministic prototype data shows how signals can become risks, decisions, outcomes, and memory across verticals."
+        status="DEMO"
       />
+
+      <div
+        className="mb-8 rounded-lg border p-4 text-sm"
+        style={{
+          backgroundColor: 'rgba(229,210,158,0.05)',
+          borderColor: 'rgba(229,210,158,0.22)',
+          color: SUB,
+        }}
+      >
+        This command map is a repository-seeded demonstration. Its health, signal, risk, decision,
+        and evidence values are not authenticated production telemetry.
+      </div>
 
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-8">
         <KpiCard
@@ -115,54 +126,62 @@ export function FabricCockpit() {
           return (
             <div
               key={v.id}
-              className="rounded-lg border cursor-pointer transition-all p-4"
-              onClick={() => setSelectedVertical(isSelected ? null : v.id)}
+              className="w-full rounded-lg border p-4 text-left transition-all"
               style={{
                 backgroundColor: isSelected ? `${v.colorToken}08` : 'rgba(255,255,255,0.018)',
                 borderColor: isSelected ? v.colorToken : 'rgba(255,255,255,0.08)',
                 borderTop: `3px solid ${v.colorToken}`,
               }}
             >
-              <div className="flex items-center justify-between mb-2">
-                <div className="flex items-center gap-2">
-                  <span style={{ color: v.colorToken, fontSize: '1.1rem' }}>{v.icon}</span>
-                  <span className="font-semibold text-sm" style={{ color: TEXT }}>
-                    {v.name}
+              <button
+                type="button"
+                aria-expanded={isSelected}
+                aria-controls={`vertical-detail-${v.id}`}
+                className="min-h-11 w-full cursor-pointer border-0 bg-transparent p-0 text-left"
+                onClick={() => setSelectedVertical(isSelected ? null : v.id)}
+              >
+                <div className="flex items-center justify-between mb-2">
+                  <div className="flex items-center gap-2">
+                    <span style={{ color: v.colorToken, fontSize: '1.1rem' }}>{v.icon}</span>
+                    <span className="font-semibold text-sm" style={{ color: TEXT }}>
+                      {v.name}
+                    </span>
+                  </div>
+                  <span
+                    className="text-[10px] font-mono px-1.5 py-0.5 rounded"
+                    style={{
+                      backgroundColor: `${GOVERNANCE_COLORS[twin.tenaxGovernanceState]}18`,
+                      color: GOVERNANCE_COLORS[twin.tenaxGovernanceState],
+                    }}
+                  >
+                    {twin.tenaxGovernanceState.toUpperCase()}
                   </span>
                 </div>
-                <span
-                  className="text-[10px] font-mono px-1.5 py-0.5 rounded"
-                  style={{
-                    backgroundColor: `${GOVERNANCE_COLORS[twin.tenaxGovernanceState]}18`,
-                    color: GOVERNANCE_COLORS[twin.tenaxGovernanceState],
-                  }}
-                >
-                  {twin.tenaxGovernanceState.toUpperCase()}
-                </span>
-              </div>
-              <p className="text-xs mb-3" style={{ color: GHOST }}>
-                {v.tagline}
-              </p>
-              <div className="grid grid-cols-2 gap-2 text-[10px] font-mono">
-                <div>
-                  <span style={{ color: GHOST }}>Health</span>{' '}
-                  <span style={{ color: TEXT }}>{twin.healthScore}%</span>
+                <p className="text-xs mb-3" style={{ color: GHOST }}>
+                  {v.tagline}
+                </p>
+                <div className="grid grid-cols-2 gap-2 text-[10px] font-mono">
+                  <div>
+                    <span style={{ color: GHOST }}>Health</span>{' '}
+                    <span style={{ color: TEXT }}>{twin.healthScore}%</span>
+                  </div>
+                  <div>
+                    <span style={{ color: GHOST }}>Signals</span>{' '}
+                    <span style={{ color: TEXT }}>{sigCount}</span>
+                  </div>
+                  <div>
+                    <span style={{ color: GHOST }}>Risks</span>{' '}
+                    <span style={{ color: riskCount > 10 ? '#f59e0b' : TEXT }}>{riskCount}</span>
+                  </div>
+                  <div>
+                    <span style={{ color: GHOST }}>Evidence</span>{' '}
+                    <span style={{ color: TEXT }}>{twin.evidenceCompleteness}%</span>
+                  </div>
                 </div>
-                <div>
-                  <span style={{ color: GHOST }}>Signals</span>{' '}
-                  <span style={{ color: TEXT }}>{sigCount}</span>
-                </div>
-                <div>
-                  <span style={{ color: GHOST }}>Risks</span>{' '}
-                  <span style={{ color: riskCount > 10 ? '#f59e0b' : TEXT }}>{riskCount}</span>
-                </div>
-                <div>
-                  <span style={{ color: GHOST }}>Evidence</span>{' '}
-                  <span style={{ color: TEXT }}>{twin.evidenceCompleteness}%</span>
-                </div>
-              </div>
+              </button>
               {isSelected && (
                 <div
+                  id={`vertical-detail-${v.id}`}
                   className="mt-3 pt-3 border-t"
                   style={{ borderColor: 'rgba(255,255,255,0.06)' }}
                 >
@@ -177,7 +196,7 @@ export function FabricCockpit() {
                   </p>
                   <Link
                     href={`${BASE}/fabric/verticals`}
-                    className="inline-block mt-2 text-[10px] font-mono"
+                    className="mt-2 inline-flex min-h-11 items-center text-[10px] font-mono"
                     style={{ color: GOLD }}
                   >
                     View vertical detail →
@@ -241,7 +260,7 @@ export function FabricCockpit() {
           </div>
           <Link
             href={`${BASE}/fabric/risks`}
-            className="inline-block mt-3 text-xs font-mono"
+            className="mt-3 inline-flex min-h-11 items-center text-xs font-mono"
             style={{ color: GOLD }}
           >
             View all risks →
@@ -287,7 +306,7 @@ export function FabricCockpit() {
           </div>
           <Link
             href={`${BASE}/fabric/decisions`}
-            className="inline-block mt-3 text-xs font-mono"
+            className="mt-3 inline-flex min-h-11 items-center text-xs font-mono"
             style={{ color: GOLD }}
           >
             View decision queue →
@@ -333,7 +352,7 @@ export function FabricCockpit() {
           </div>
           <Link
             href={`${BASE}/fabric/signals`}
-            className="inline-block mt-3 text-xs font-mono"
+            className="mt-3 inline-flex min-h-11 items-center text-xs font-mono"
             style={{ color: GOLD }}
           >
             View signal mesh →
@@ -373,7 +392,7 @@ export function FabricCockpit() {
           </div>
           <Link
             href={`${BASE}/fabric/twins`}
-            className="inline-block mt-3 text-xs font-mono"
+            className="mt-3 inline-flex min-h-11 items-center text-xs font-mono"
             style={{ color: GOLD }}
           >
             View all twins →

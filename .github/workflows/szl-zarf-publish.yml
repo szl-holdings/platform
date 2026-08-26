@@ -251,7 +251,7 @@ jobs:
           download-init-package: false
 
       - name: Install uds-cli
-        uses: defenseunicorns/setup-uds@ab842abcad1f7a3305c2538e3dd1950d0daacfa5 # main
+        uses: defenseunicorns/setup-uds@d6add59d4c2ca789ed7c92741e91bd340b4e950b # main
 
       - name: Install cosign (keyless OIDC)
         uses: sigstore/cosign-installer@6f9f17788090df1f26f669e9d70d6ae9567deba6 # v4.1.2

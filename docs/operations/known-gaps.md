@@ -1,6 +1,6 @@
 # SZL Holdings — Known Gaps Register (Security & Operations)
 
-**Last updated:** 2026-08-08 (rev 24 — public surface truth)
+**Last updated:** 2026-08-26 (rev 26 — Series A source and promotion boundary)
 **Owner:** Engineering / DevOps  
 **Audience:** Enterprise architects, Series A technical advisors, incoming VP Engineering
 
@@ -36,32 +36,41 @@ the protected PR/main check. An expired observation is remediated by re-observin
 target, updating the registry evidence, regenerating the deterministic artifacts, reviewing the
 diff, and rerunning the freshness gate.
 
-### 2026-08-11 local Series A React candidate
+The generated `artifacts/SOURCE_OF_TRUTH.json` timestamp follows the same
+honest-snapshot rule. Pull requests and protected-main pushes still validate
+its schema, labels, canonical metric set, future skew, deterministic local
+metrics, allowlists, and claim drift, but they do not rewrite or expire an
+otherwise honest historical snapshot merely because seven days elapsed. The
+daily schedule and an explicit manual `require_truth_freshness` input run
+`pnpm truth:freshness` as the separate age audit. Refreshing that timestamp
+requires rerunning the canonical generator with its admitted local and remote
+sources and reviewing the resulting evidence; changing only the timestamp is
+not an accepted remediation.
 
-An uncommitted local candidate based on platform PR #584 head
-`bc40b1c6aec8a44a8a6928c25a21de9aa91e76b7` adds one investor-oriented A11oy entry point at
-`/a11oy/start`. It organizes cyber security, finance, data governance, enterprise operations,
-real estate, and legal around the same `Observe -> Gate -> Act -> Prove` evidence sequence. The
-legacy `/a11oy/investor-demo` route resolves to the same truth-safe view so it cannot expose the
-older hard-coded investor claims.
+---
 
-This is source and local-build evidence only. The React surface is labelled `AVAILABLE`, seeded
-decision paths are `DEMO`, external execution is `BLOCKED`, and the declared GraphQL runtime is
-`UNAVAILABLE`. No server resolver for the client-declared `/api/graphql` or `/api/graphql/ws`
-contract was found in this revision, so the candidate does not fabricate a connection or infer a
-backend from a client declaration. It also makes no merged, deployed, production, customer,
-revenue, compliance, or live-data claim.
+## 2026-08-26 Series A Product-Wiring Boundary
 
-Focused contract tests, A11oy TypeScript compilation, and the A11oy production bundle pass
-locally. The running preview returned HTTP 200 with the configured security headers. A local
-Playwright fallback captured and inspected the page at 320, 390, 768, 1366, and 1728 CSS pixels.
-All five widths rendered the six tabs and panels without document overflow, clipped navigation,
-undersized interaction targets, application console errors, page errors, error overlays, or
-undeclared API calls. The browser sandbox could not retrieve the optional Google Fonts stylesheet,
-so capture fulfilled that stylesheet with an empty response and exercised the declared system-font
-fallback; the images do not prove external font availability or a deployed runtime. Exact local
-evidence and remaining limits are recorded in
-[`audit/P0_SERIES_A_PRODUCT_WIRING_LOCAL_SUCCESSOR_PROOF_2026-08-11.md`](../../audit/P0_SERIES_A_PRODUCT_WIRING_LOCAL_SUCCESSOR_PROOF_2026-08-11.md).
+The `codex/p0-platform-work-20260811` branch is being reconciled forward from
+its historical head to protected source without rewriting history. The source
+candidate adds a single investor/developer entry journey, truth-safe
+`/series-a` and `/investor-demo` routing, typed operational availability,
+deterministic Workcell fixtures, and a source-bound responsive capture
+contract. Demo workflow status is deliberately separate from operational
+availability and evidence.
+
+This closes source-level navigation, status-label, determinism, and evidence
+tooling gaps only when the recorded tests pass at the exact candidate tree. It
+does not establish a protected merge, deployment, production operation,
+external connector execution, customer use, compliance, or independent
+runtime witness. Those states remain unavailable until ordinary push,
+exact-head hosted CI, protected review/merge, deployment, and deployed
+revision readback each produce their own evidence. The organization has no
+eligible independent collaborator at this observation; no self-review or
+policy bypass is an accepted substitute.
+
+The previously cataloged 2026-08-11 local screenshots are retained as
+superseded history. They are not current evidence for this source candidate.
 
 ---
 

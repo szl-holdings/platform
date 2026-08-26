@@ -1,5 +1,12 @@
-import type React from 'react';
-import { createContext, useCallback, useContext, useEffect, useRef, useState } from 'react';
+import {
+  createContext,
+  type ReactNode,
+  useCallback,
+  useContext,
+  useEffect,
+  useRef,
+  useState,
+} from 'react';
 import type {
   OmniaNotification,
   OmniaShellConfig,
@@ -74,7 +81,7 @@ const SEED_NOTIFICATIONS: OmniaNotification[] = [
 
 export interface OmniaShellProviderProps {
   config: OmniaShellConfig;
-  children: React.ReactNode;
+  children: ReactNode;
   initialNotifications?: OmniaNotification[];
 }
 
@@ -154,8 +161,7 @@ export function OmniaShellProvider({
             return [...fresh, ...prev].slice(0, 50);
           });
         }
-      } catch {
-      }
+      } catch {}
     };
     const timer = setInterval(poll, 30_000);
     return () => clearInterval(timer);

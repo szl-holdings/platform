@@ -7,9 +7,10 @@
  *
  * Priority semantics
  *   P0 — Blocking: boot failure, typecheck, lint, unit tests, build, broken core
- *        public routes. Pipeline aborts on first P0 failure. Exit code 1.
+ *        public routes, runtime readiness, and API-key enforcement. Pipeline
+ *        aborts on first P0 failure. Exit code 1.
  *   P1 — Advisory: mocks, copy, deps, design-system, broken links, a11y, brand,
- *        docs claims, smoke, E2E. Recorded but do NOT block. Exit code 0.
+ *        docs claims, E2E. Recorded but do NOT block. Exit code 0.
  *
  * Evidence layout
  *   artifacts/audit/evidence/<timestamp>/<step>/
@@ -103,6 +104,12 @@ const STEPS = [
     cmd: 'pnpm run qa:site',
     priority: 'P0',
   },
+  {
+    id: 'smoke-product-mode',
+    label: 'Smoke: product mode',
+    cmd: 'pnpm run smoke:product-mode',
+    priority: 'P0',
+  },
   // Advisory checks — failures recorded and reported, but do not block merges.
   {
     id: 'audit-mocks',
@@ -144,12 +151,6 @@ const STEPS = [
     id: 'brand-check',
     label: 'Brand check',
     cmd: 'pnpm run brand:check',
-    priority: 'P1',
-  },
-  {
-    id: 'smoke-product-mode',
-    label: 'Smoke: product mode',
-    cmd: 'pnpm run smoke:product-mode',
     priority: 'P1',
   },
   {

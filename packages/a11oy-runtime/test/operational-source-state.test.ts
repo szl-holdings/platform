@@ -1,9 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import {
-  OPERATIONAL_WORKCELLS,
-  WORKCELL_SOURCE,
-  getOperationalWorkcells,
-} from '../src/index.js';
+import { OPERATIONAL_WORKCELLS, WORKCELL_SOURCE, getOperationalWorkcells } from '../src/index.js';
 import type { OperationalSourceState } from '../src/data/workcells.js';
 
 const STATES: readonly OperationalSourceState[] = [
@@ -17,14 +13,7 @@ const STATES: readonly OperationalSourceState[] = [
 
 describe('operational workcell source truth states', () => {
   it('keeps the complete six-state vocabulary explicit', () => {
-    expect(STATES).toEqual([
-      'REAL',
-      'DEMO',
-      'UNAVAILABLE',
-      'DEGRADED',
-      'BLOCKED',
-      'ROADMAP',
-    ]);
+    expect(STATES).toEqual(['REAL', 'DEMO', 'UNAVAILABLE', 'DEGRADED', 'BLOCKED', 'ROADMAP']);
   });
 
   it('fails closed when no authenticated operational source exists', () => {

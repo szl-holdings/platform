@@ -68,9 +68,9 @@ export const SERIES_A_SOLUTIONS: readonly SeriesASolution[] = [
     thesis:
       'Turn a threat signal into a governed containment recommendation with an explicit approval boundary.',
     value:
-      'Shortens the path from detection to an accountable decision without granting an agent silent control.',
-    demoHref: '/cyber-resilience',
-    demoLabel: 'Open cyber resilience demo',
+      'Designed to shorten the path from detection to an accountable decision without granting an agent silent control.',
+    demoHref: '/demo',
+    demoLabel: 'Open deterministic demo',
     sourceState: 'AVAILABLE',
     scenarioState: 'DEMO',
     liveState: 'UNAVAILABLE',
@@ -88,9 +88,9 @@ export const SERIES_A_SOLUTIONS: readonly SeriesASolution[] = [
     buyer: 'CFO, treasury, and risk teams',
     thesis: 'Compare financial scenarios before a material action crosses an approval threshold.',
     value:
-      'Makes assumptions, counterfactuals, and authority visible in one reviewable decision path.',
-    demoHref: '/counterfactuals',
-    demoLabel: 'Open finance scenario demo',
+      'Designed to make assumptions, counterfactuals, and authority visible in one reviewable decision path.',
+    demoHref: '/demo',
+    demoLabel: 'Open deterministic scenarios',
     sourceState: 'AVAILABLE',
     scenarioState: 'DEMO',
     liveState: 'UNAVAILABLE',
@@ -109,7 +109,7 @@ export const SERIES_A_SOLUTIONS: readonly SeriesASolution[] = [
     thesis:
       'Make data access, model use, and policy evaluation legible before downstream execution.',
     value:
-      'Gives diligence teams a concrete boundary between declared controls and observed evidence.',
+      'Designed to give diligence teams a concrete boundary between declared controls and observed evidence.',
     demoHref: '/governance',
     demoLabel: 'Open governance demo',
     sourceState: 'AVAILABLE',
@@ -130,9 +130,9 @@ export const SERIES_A_SOLUTIONS: readonly SeriesASolution[] = [
     thesis:
       'Coordinate a consequential operating decision across signals, teams, and policy gates.',
     value:
-      'Replaces opaque handoffs with one inspectable recommendation, approval, and proof sequence.',
-    demoHref: '/approval-queue',
-    demoLabel: 'Open approval queue demo',
+      'Designed to replace opaque handoffs with one inspectable recommendation, approval, and proof sequence.',
+    demoHref: '/governance',
+    demoLabel: 'Open demo approval gates',
     sourceState: 'AVAILABLE',
     scenarioState: 'DEMO',
     liveState: 'UNAVAILABLE',
@@ -151,9 +151,9 @@ export const SERIES_A_SOLUTIONS: readonly SeriesASolution[] = [
     thesis:
       'Evaluate an asset decision against risk, portfolio context, and approval policy before commitment.',
     value:
-      'Connects asset-level evidence to an investment decision without presenting seeded data as a live portfolio.',
-    demoHref: '/fabric/verticals',
-    demoLabel: 'Open vertical fabric demo',
+      'Designed to connect asset-level evidence to an investment decision without presenting seeded data as a live portfolio.',
+    demoHref: '/fabric',
+    demoLabel: 'Open demo fabric',
     sourceState: 'AVAILABLE',
     scenarioState: 'DEMO',
     liveState: 'UNAVAILABLE',
@@ -172,9 +172,9 @@ export const SERIES_A_SOLUTIONS: readonly SeriesASolution[] = [
     thesis:
       'Turn an obligation or matter signal into an explainable, reviewable legal operations decision.',
     value:
-      'Keeps privilege, authority, and the difference between analysis and legal action explicit.',
-    demoHref: '/right-to-audit',
-    demoLabel: 'Open legal audit demo',
+      'Designed to keep privilege, authority, and the difference between analysis and legal action explicit.',
+    demoHref: '/demo',
+    demoLabel: 'Open deterministic demo',
     sourceState: 'AVAILABLE',
     scenarioState: 'DEMO',
     liveState: 'UNAVAILABLE',

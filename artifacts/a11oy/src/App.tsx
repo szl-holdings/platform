@@ -1,15 +1,12 @@
 import { lazy, Suspense, type ReactNode } from 'react';
 import { Route, Switch } from 'wouter';
-import { GraphQLProvider } from './graphql';
 import { AppShell } from './components/shell/AppShell';
 
 function stripTrailingSlash(path: string) {
   return path.endsWith('/') && path.length > 1 ? path.slice(0, -1) : path;
 }
 
-const base = stripTrailingSlash(
-  (import.meta.env.BASE_URL ?? '/a11oy/').replace(/\/$/, ''),
-);
+const base = stripTrailingSlash((import.meta.env.BASE_URL ?? '/a11oy/').replace(/\/$/, ''));
 
 function Loader() {
   return (
@@ -93,6 +90,9 @@ const BoardroomMode = lazy(() =>
 );
 const SeriesAView = lazy(() =>
   import('./pages/SeriesAView').then((m) => ({ default: m.SeriesAView })),
+);
+const ProductJourney = lazy(() =>
+  import('./pages/ProductJourney').then((m) => ({ default: m.ProductJourney })),
 );
 const FlexCacheRuntime = lazy(() =>
   import('./pages/FlexCacheRuntime').then((m) => ({ default: m.FlexCacheRuntime })),
@@ -298,9 +298,7 @@ const SystemCard = lazy(() =>
 const CapabilityTrajectory = lazy(() =>
   import('./pages/CapabilityTrajectory').then((m) => ({ default: m.CapabilityTrajectory })),
 );
-const HatunSpec = lazy(() =>
-  import('./pages/HatunSpec').then((m) => ({ default: m.HatunSpec })),
-);
+const HatunSpec = lazy(() => import('./pages/HatunSpec').then((m) => ({ default: m.HatunSpec })));
 const GlasswingPartners = lazy(() =>
   import('./pages/GlasswingPartners').then((m) => ({ default: m.GlasswingPartners })),
 );
@@ -398,210 +396,209 @@ const CostAwareMonitoring = lazy(() =>
 
 export default function App() {
   return (
-    <GraphQLProvider>
-      <Suspense fallback={<Loader />}>
-        <Switch>
-          <Route path={`${base}/`} component={HomePage} />
-          <Route path={`${base}`} component={HomePage} />
-          <Route path={`${base}/now`} component={NowBoard} />
-          <Route path={`${base}/recommendations`} component={Recommendations} />
-          <Route path={`${base}/brief`} component={ExecutiveBrief} />
-          <Route path={`${base}/command`} component={CommandSurface} />
-          <Route path={`${base}/signals`} component={SignalMesh} />
-          <Route path={`${base}/actions`} component={ActionRail} />
-          <Route path={`${base}/proof`} component={ProofLedger} />
-          <Route path={`${base}/governance`} component={Governance} />
-          <Route path={`${base}/agents`} component={Agents} />
-          <Route path={`${base}/workcells/:id/replay`} component={WorkcellReplayDetail} />
-          <Route path={`${base}/workcells/:id`} component={WorkcellDetail} />
-          <Route path={`${base}/workcells`} component={Workcells} />
-          <Route path={`${base}/evals`} component={MirrorEval} />
-          <Route path={`${base}/connectors`} component={ConnectorFirewall} />
-          <Route path={`${base}/twins`} component={TwinFoundry} />
-          <Route path={`${base}/model-router`} component={ModelRouter} />
-          <Route path={`${base}/skills`} component={SkillsLibrary} />
-          <Route path={`${base}/replay/:id`} component={SovereignReplayDetail} />
-          <Route path={`${base}/replay`} component={WorkcellReplay} />
-          <Route path={`${base}/trust`} component={TrustCenter} />
-          <Route path={`${base}/constitution`} component={Constitution} />
-          <Route path={`${base}/security-compliance`} component={SecurityCompliance} />
-          <Route path={`${base}/right-to-audit`} component={RightToAudit} />
-          <Route path={`${base}/sovereign`} component={Sovereign} />
-          <Route path={`${base}/boardroom`} component={BoardroomMode} />
-          <Route path={`${base}/start`} component={SeriesAView} />
-          <Route path={`${base}/investor-demo`} component={SeriesAView} />
-          <Route path={`${base}/flexcache`} component={FlexCacheRuntime} />
-          <Route path={`${base}/terminal`} component={Terminal} />
-          <Route path={`${base}/nexus`} component={Praxis} />
-          <Route path={`${base}/mcp-hub`} component={McpHub} />
-          <Route path={`${base}/agentic-rag`} component={AgenticRag} />
-          <Route path={`${base}/fabric/verticals`} component={FabricVerticalsCommand} />
-          <Route path={`${base}/fabric/twins`} component={FabricDomainTwins} />
-          <Route path={`${base}/fabric/signals`} component={FabricSignalMeshPage} />
-          <Route path={`${base}/fabric/risks`} component={FabricRiskMatrix} />
-          <Route path={`${base}/fabric/decisions`} component={FabricDecisionQueue} />
-          <Route path={`${base}/fabric/outcomes`} component={FabricOutcomeMemory} />
-          <Route path={`${base}/fabric/evidence`} component={FabricEvidenceLedger} />
-          <Route path={`${base}/fabric/roadmap`} component={FabricEcosystemRoadmap} />
-          <Route path={`${base}/fabric`} component={FabricCockpit} />
-          <Route path={`${base}/verticals`} component={Verticals} />
-          <Route path={`${base}/outcomes`} component={Outcomes} />
-          <Route path={`${base}/memory`} component={Memory} />
-          <Route path={`${base}/tools`} component={Tools} />
-          <Route path={`${base}/pce`} component={Pce} />
-          <Route path={`${base}/demo`} component={Demo} />
-          <Route path={`${base}/orchestration`} component={AgentOrchestration} />
-          <Route path={`${base}/agent-viz`} component={AgentViz} />
-          <Route path={`${base}/sdk`} component={DevPlatform} />
-          <Route path={`${base}/a11oy-code`} component={A11oyCode} />
-          <Route path={`${base}/agent-mesh`} component={AgentMesh} />
-          <Route path={`${base}/plugins`} component={PluginHub} />
-          <Route path={`${base}/deep-research`} component={DeepResearch} />
-          <Route path={`${base}/action`} component={CiAction} />
-          <Route path={`${base}/convergence`} component={AgiConvergence} />
-          <Route path={`${base}/solutions`} component={Solutions} />
-          <Route path={`${base}/about`} component={About} />
-          <Route path={`${base}/omnia-adoption`} component={OmniaAdoptionPage} />
-          <Route path={`${base}/applications`} component={ApplicationsCatalog} />
-          <Route path={`${base}/constellation`} component={ConstellationGraph} />
-          <Route path={`${base}/architecture`} component={ArchitectureOverview} />
-          <Route path={`${base}/resources`} component={ResourcesHub} />
-          <Route path={`${base}/control-tower`} component={ControlTower} />
-          <Route path={`${base}/pipeline`} component={PipelineCanvas} />
-          <Route path={`${base}/intent-router`} component={IntentRouter} />
-          <Route path={`${base}/planner`} component={PlannerCanvas} />
-          <Route path={`${base}/ontology`} component={OntologyGraph} />
-          <Route path={`${base}/learning`} component={LearningLoop} />
-          <Route path={`${base}/counterfactuals`} component={Counterfactuals} />
-          <Route path={`${base}/adversarial`} component={AdversarialResilience} />
-          <Route path={`${base}/frontier`} component={FrontierIntelligence} />
-          <Route path={`${base}/approval-queue`} component={ApprovalQueue} />
-          <Route path={`${base}/verifier`} component={VerifierAgent} />
-          <Route path={`${base}/doctrine`} component={DoctrineOverview} />
-          <Route path={`${base}/risk-reports`} component={RiskReports} />
-          <Route path={`${base}/behavioral-audit`} component={BehavioralAudit} />
-          <Route path={`${base}/covenant-lift`} component={CovenantLift} />
-          <Route path={`${base}/code-behaviors`} component={CodeBehaviors} />
-          <Route path={`${base}/reward-hacking`} component={RewardHacking} />
-          <Route path={`${base}/alignment-review`} component={AlignmentReview} />
-          <Route path={`${base}/snapshot-provenance`} component={SnapshotProvenance} />
-          <Route path={`${base}/ai-user-turn`} component={AIUserTurn} />
-          <Route path={`${base}/welfare`} component={AgentWelfare} />
-          <Route path={`${base}/red-team`} component={RedTeam} />
-          <Route path={`${base}/glasswing`} component={GlasswingPage} />
-          <Route path={`${base}/argo`} component={ArgoForgePage} />
-          <Route path={`${base}/hatun-layer`} component={HatunLayerPage} />
-          <Route path={`${base}/aerial-twin`} component={AerialTwinPage} />
-          <Route path={`${base}/aerial-twin/:milestone`} component={AerialTwinMilestonePage} />
-          <Route path={`${base}/system-card/:id`} component={SystemCard} />
-          <Route path={`${base}/capability-trajectory`} component={CapabilityTrajectory} />
-          <Route path={`${base}/resilience`} component={DarpaResilienceHub} />
-          <Route path={`${base}/gard-robustness`} component={GardRobustness} />
-          <Route path={`${base}/formal-verification`} component={FormalVerification} />
-          <Route path={`${base}/supply-chain`} component={SupplyChainAttestation} />
-          <Route path={`${base}/explainability`} component={ExplainabilityEngine} />
-          <Route path={`${base}/compartments`} component={CapabilityCompartments} />
-          <Route path={`${base}/cyber-resilience`} component={CyberResilience} />
-          <Route path={`${base}/sim-governance`} component={SimGovernance} />
-          <Route path={`${base}/hatun-spec`} component={HatunSpec} />
-          <Route path={`${base}/glasswing-partners`} component={GlasswingPartners} />
-          <Route path={`${base}/cavd`} component={CAVDPage} />
-          <Route path={`${base}/transparency-report`} component={TransparencyReport} />
-          <Route path={`${base}/trust-portal`} component={PublicTrustPortal} />
-          <Route path={`${base}/robustness-wall`} component={RobustnessWall} />
-          <Route path={`${base}/constitution-dsl`} component={ConstitutionDSL} />
-          <Route path={`${base}/welfare-playbooks`} component={WelfarePlaybooks} />
-          <Route path={`${base}/defender-credits`} component={DefenderCredits} />
-          <Route path={`${base}/compass`} component={Compass} />
-          <Route path={`${base}/agent-bom`} component={AgentBom} />
-          <Route path={`${base}/delegation-chain`} component={DelegationChainPage} />
-          <Route path={`${base}/trust-exchange`} component={TrustExchange} />
-          <Route path={`${base}/care`} component={CareEngine} />
-          <Route path={`${base}/precision-ai`} component={PrecisionAI} />
-          <Route path={`${base}/weaponized-intel`} component={WeaponizedIntel} />
-          <Route path={`${base}/agent-zero-trust`} component={AgentZeroTrust} />
-          <Route path={`${base}/atlas-shield`} component={AtlasShield} />
-          <Route path={`${base}/swarm-orchestrator`} component={SwarmOrchestrator} />
-          <Route path={`${base}/playbook-engine`} component={PlaybookEngine} />
-          <Route path={`${base}/a2a-interop`} component={A2AInterop} />
-          <Route path={`${base}/agent-identity`} component={AgentIdentityRegistry} />
-          <Route path={`${base}/self-optimization`} component={SelfOptimization} />
-          <Route path={`${base}/security-agents`} component={GovernedSecurityAgents} />
-          <Route path={`${base}/karpathy-evolution`} component={KarpathyEvolution} />
-          <Route path={`${base}/substrate-compute`} component={SubstrateCompute} />
-          <Route path={`${base}/toto-forecaster`} component={TotoForecaster} />
-          <Route path={`${base}/causal-rca`} component={CausalRCA} />
-          <Route path={`${base}/synthetic-metrics`} component={SyntheticMetrics} />
-          <Route path={`${base}/self-healing`} component={SelfHealingEngine} />
-          <Route path={`${base}/observability-as-code`} component={ObservabilityAsCode} />
-          <Route path={`${base}/alert-triage`} component={AlertTriage} />
-          <Route path={`${base}/cost-monitoring`} component={CostAwareMonitoring} />
+    <Suspense fallback={<Loader />}>
+      <Switch>
+        <Route path={`${base}/`} component={HomePage} />
+        <Route path={`${base}`} component={HomePage} />
+        <Route path={`${base}/now`} component={NowBoard} />
+        <Route path={`${base}/recommendations`} component={Recommendations} />
+        <Route path={`${base}/brief`} component={ExecutiveBrief} />
+        <Route path={`${base}/command`} component={CommandSurface} />
+        <Route path={`${base}/signals`} component={SignalMesh} />
+        <Route path={`${base}/actions`} component={ActionRail} />
+        <Route path={`${base}/proof`} component={ProofLedger} />
+        <Route path={`${base}/governance`} component={Governance} />
+        <Route path={`${base}/agents`} component={Agents} />
+        <Route path={`${base}/workcells/:id/replay`} component={WorkcellReplayDetail} />
+        <Route path={`${base}/workcells/:id`} component={WorkcellDetail} />
+        <Route path={`${base}/workcells`} component={Workcells} />
+        <Route path={`${base}/evals`} component={MirrorEval} />
+        <Route path={`${base}/connectors`} component={ConnectorFirewall} />
+        <Route path={`${base}/twins`} component={TwinFoundry} />
+        <Route path={`${base}/model-router`} component={ModelRouter} />
+        <Route path={`${base}/skills`} component={SkillsLibrary} />
+        <Route path={`${base}/replay/:id`} component={SovereignReplayDetail} />
+        <Route path={`${base}/replay`} component={WorkcellReplay} />
+        <Route path={`${base}/trust`} component={TrustCenter} />
+        <Route path={`${base}/constitution`} component={Constitution} />
+        <Route path={`${base}/security-compliance`} component={SecurityCompliance} />
+        <Route path={`${base}/right-to-audit`} component={RightToAudit} />
+        <Route path={`${base}/sovereign`} component={Sovereign} />
+        <Route path={`${base}/boardroom`} component={BoardroomMode} />
+        <Route path={`${base}/start`} component={ProductJourney} />
+        <Route path={`${base}/series-a`} component={SeriesAView} />
+        <Route path={`${base}/investor-demo`} component={Demo} />
+        <Route path={`${base}/flexcache`} component={FlexCacheRuntime} />
+        <Route path={`${base}/terminal`} component={Terminal} />
+        <Route path={`${base}/nexus`} component={Praxis} />
+        <Route path={`${base}/mcp-hub`} component={McpHub} />
+        <Route path={`${base}/agentic-rag`} component={AgenticRag} />
+        <Route path={`${base}/fabric/verticals`} component={FabricVerticalsCommand} />
+        <Route path={`${base}/fabric/twins`} component={FabricDomainTwins} />
+        <Route path={`${base}/fabric/signals`} component={FabricSignalMeshPage} />
+        <Route path={`${base}/fabric/risks`} component={FabricRiskMatrix} />
+        <Route path={`${base}/fabric/decisions`} component={FabricDecisionQueue} />
+        <Route path={`${base}/fabric/outcomes`} component={FabricOutcomeMemory} />
+        <Route path={`${base}/fabric/evidence`} component={FabricEvidenceLedger} />
+        <Route path={`${base}/fabric/roadmap`} component={FabricEcosystemRoadmap} />
+        <Route path={`${base}/fabric`} component={FabricCockpit} />
+        <Route path={`${base}/verticals`} component={Verticals} />
+        <Route path={`${base}/outcomes`} component={Outcomes} />
+        <Route path={`${base}/memory`} component={Memory} />
+        <Route path={`${base}/tools`} component={Tools} />
+        <Route path={`${base}/pce`} component={Pce} />
+        <Route path={`${base}/demo`} component={Demo} />
+        <Route path={`${base}/orchestration`} component={AgentOrchestration} />
+        <Route path={`${base}/agent-viz`} component={AgentViz} />
+        <Route path={`${base}/sdk`} component={DevPlatform} />
+        <Route path={`${base}/a11oy-code`} component={A11oyCode} />
+        <Route path={`${base}/agent-mesh`} component={AgentMesh} />
+        <Route path={`${base}/plugins`} component={PluginHub} />
+        <Route path={`${base}/deep-research`} component={DeepResearch} />
+        <Route path={`${base}/action`} component={CiAction} />
+        <Route path={`${base}/convergence`} component={AgiConvergence} />
+        <Route path={`${base}/solutions`} component={Solutions} />
+        <Route path={`${base}/about`} component={About} />
+        <Route path={`${base}/omnia-adoption`} component={OmniaAdoptionPage} />
+        <Route path={`${base}/applications`} component={ApplicationsCatalog} />
+        <Route path={`${base}/constellation`} component={ConstellationGraph} />
+        <Route path={`${base}/architecture`} component={ArchitectureOverview} />
+        <Route path={`${base}/resources`} component={ResourcesHub} />
+        <Route path={`${base}/control-tower`} component={ControlTower} />
+        <Route path={`${base}/pipeline`} component={PipelineCanvas} />
+        <Route path={`${base}/intent-router`} component={IntentRouter} />
+        <Route path={`${base}/planner`} component={PlannerCanvas} />
+        <Route path={`${base}/ontology`} component={OntologyGraph} />
+        <Route path={`${base}/learning`} component={LearningLoop} />
+        <Route path={`${base}/counterfactuals`} component={Counterfactuals} />
+        <Route path={`${base}/adversarial`} component={AdversarialResilience} />
+        <Route path={`${base}/frontier`} component={FrontierIntelligence} />
+        <Route path={`${base}/approval-queue`} component={ApprovalQueue} />
+        <Route path={`${base}/verifier`} component={VerifierAgent} />
+        <Route path={`${base}/doctrine`} component={DoctrineOverview} />
+        <Route path={`${base}/risk-reports`} component={RiskReports} />
+        <Route path={`${base}/behavioral-audit`} component={BehavioralAudit} />
+        <Route path={`${base}/covenant-lift`} component={CovenantLift} />
+        <Route path={`${base}/code-behaviors`} component={CodeBehaviors} />
+        <Route path={`${base}/reward-hacking`} component={RewardHacking} />
+        <Route path={`${base}/alignment-review`} component={AlignmentReview} />
+        <Route path={`${base}/snapshot-provenance`} component={SnapshotProvenance} />
+        <Route path={`${base}/ai-user-turn`} component={AIUserTurn} />
+        <Route path={`${base}/welfare`} component={AgentWelfare} />
+        <Route path={`${base}/red-team`} component={RedTeam} />
+        <Route path={`${base}/glasswing`} component={GlasswingPage} />
+        <Route path={`${base}/argo`} component={ArgoForgePage} />
+        <Route path={`${base}/hatun-layer`} component={HatunLayerPage} />
+        <Route path={`${base}/aerial-twin`} component={AerialTwinPage} />
+        <Route path={`${base}/aerial-twin/:milestone`} component={AerialTwinMilestonePage} />
+        <Route path={`${base}/system-card/:id`} component={SystemCard} />
+        <Route path={`${base}/capability-trajectory`} component={CapabilityTrajectory} />
+        <Route path={`${base}/resilience`} component={DarpaResilienceHub} />
+        <Route path={`${base}/gard-robustness`} component={GardRobustness} />
+        <Route path={`${base}/formal-verification`} component={FormalVerification} />
+        <Route path={`${base}/supply-chain`} component={SupplyChainAttestation} />
+        <Route path={`${base}/explainability`} component={ExplainabilityEngine} />
+        <Route path={`${base}/compartments`} component={CapabilityCompartments} />
+        <Route path={`${base}/cyber-resilience`} component={CyberResilience} />
+        <Route path={`${base}/sim-governance`} component={SimGovernance} />
+        <Route path={`${base}/hatun-spec`} component={HatunSpec} />
+        <Route path={`${base}/glasswing-partners`} component={GlasswingPartners} />
+        <Route path={`${base}/cavd`} component={CAVDPage} />
+        <Route path={`${base}/transparency-report`} component={TransparencyReport} />
+        <Route path={`${base}/trust-portal`} component={PublicTrustPortal} />
+        <Route path={`${base}/robustness-wall`} component={RobustnessWall} />
+        <Route path={`${base}/constitution-dsl`} component={ConstitutionDSL} />
+        <Route path={`${base}/welfare-playbooks`} component={WelfarePlaybooks} />
+        <Route path={`${base}/defender-credits`} component={DefenderCredits} />
+        <Route path={`${base}/compass`} component={Compass} />
+        <Route path={`${base}/agent-bom`} component={AgentBom} />
+        <Route path={`${base}/delegation-chain`} component={DelegationChainPage} />
+        <Route path={`${base}/trust-exchange`} component={TrustExchange} />
+        <Route path={`${base}/care`} component={CareEngine} />
+        <Route path={`${base}/precision-ai`} component={PrecisionAI} />
+        <Route path={`${base}/weaponized-intel`} component={WeaponizedIntel} />
+        <Route path={`${base}/agent-zero-trust`} component={AgentZeroTrust} />
+        <Route path={`${base}/atlas-shield`} component={AtlasShield} />
+        <Route path={`${base}/swarm-orchestrator`} component={SwarmOrchestrator} />
+        <Route path={`${base}/playbook-engine`} component={PlaybookEngine} />
+        <Route path={`${base}/a2a-interop`} component={A2AInterop} />
+        <Route path={`${base}/agent-identity`} component={AgentIdentityRegistry} />
+        <Route path={`${base}/self-optimization`} component={SelfOptimization} />
+        <Route path={`${base}/security-agents`} component={GovernedSecurityAgents} />
+        <Route path={`${base}/karpathy-evolution`} component={KarpathyEvolution} />
+        <Route path={`${base}/substrate-compute`} component={SubstrateCompute} />
+        <Route path={`${base}/toto-forecaster`} component={TotoForecaster} />
+        <Route path={`${base}/causal-rca`} component={CausalRCA} />
+        <Route path={`${base}/synthetic-metrics`} component={SyntheticMetrics} />
+        <Route path={`${base}/self-healing`} component={SelfHealingEngine} />
+        <Route path={`${base}/observability-as-code`} component={ObservabilityAsCode} />
+        <Route path={`${base}/alert-triage`} component={AlertTriage} />
+        <Route path={`${base}/cost-monitoring`} component={CostAwareMonitoring} />
 
-          <Route path={`${base}/atlas`}>
-            <WithShell>
-              <AtlasSection />
-            </WithShell>
-          </Route>
-          <Route path={`${base}/tokens`}>
-            <WithShell>
-              <TokensSection />
-            </WithShell>
-          </Route>
-          <Route path={`${base}/voice`}>
-            <WithShell>
-              <VoiceSection />
-            </WithShell>
-          </Route>
-          <Route path={`${base}/library`}>
-            <WithShell>
-              <LibrarySection />
-            </WithShell>
-          </Route>
-          <Route path={`${base}/releases`}>
-            <WithShell>
-              <ReleasesSection />
-            </WithShell>
-          </Route>
-          <Route path={`${base}/audit`}>
-            <WithShell>
-              <AuditSection />
-            </WithShell>
-          </Route>
-          <Route path={`${base}/account/billing`}>
-            <WithShell>
-              <A11oyBillingPage />
-            </WithShell>
-          </Route>
-          <Route>
-            <div
-              className="flex items-center justify-center min-h-screen"
-              style={{
-                backgroundColor: 'var(--color-a11oy-navy)',
-                color: 'var(--color-a11oy-text)',
-              }}
-            >
-              <div className="text-center">
-                <div
-                  className="text-6xl font-display font-bold mb-4"
-                  style={{ color: 'var(--color-a11oy-border)' }}
-                >
-                  404
-                </div>
-                <div className="text-sm" style={{ color: 'var(--color-a11oy-text-ghost)' }}>
-                  Page not found
-                </div>
-                <a
-                  href={`${base}/`}
-                  className="mt-4 inline-block text-sm"
-                  style={{ color: '#c9b787' }}
-                >
-                  ← Back to A11oy
-                </a>
+        <Route path={`${base}/atlas`}>
+          <WithShell>
+            <AtlasSection />
+          </WithShell>
+        </Route>
+        <Route path={`${base}/tokens`}>
+          <WithShell>
+            <TokensSection />
+          </WithShell>
+        </Route>
+        <Route path={`${base}/voice`}>
+          <WithShell>
+            <VoiceSection />
+          </WithShell>
+        </Route>
+        <Route path={`${base}/library`}>
+          <WithShell>
+            <LibrarySection />
+          </WithShell>
+        </Route>
+        <Route path={`${base}/releases`}>
+          <WithShell>
+            <ReleasesSection />
+          </WithShell>
+        </Route>
+        <Route path={`${base}/audit`}>
+          <WithShell>
+            <AuditSection />
+          </WithShell>
+        </Route>
+        <Route path={`${base}/account/billing`}>
+          <WithShell>
+            <A11oyBillingPage />
+          </WithShell>
+        </Route>
+        <Route>
+          <div
+            className="flex items-center justify-center min-h-screen"
+            style={{
+              backgroundColor: 'var(--color-a11oy-navy)',
+              color: 'var(--color-a11oy-text)',
+            }}
+          >
+            <div className="text-center">
+              <div
+                className="text-6xl font-display font-bold mb-4"
+                style={{ color: 'var(--color-a11oy-border)' }}
+              >
+                404
               </div>
+              <div className="text-sm" style={{ color: 'var(--color-a11oy-text-ghost)' }}>
+                Page not found
+              </div>
+              <a
+                href={`${base}/`}
+                className="mt-4 inline-block text-sm"
+                style={{ color: '#c9b787' }}
+              >
+                ← Back to A11oy
+              </a>
             </div>
-          </Route>
-        </Switch>
-      </Suspense>
-    </GraphQLProvider>
+          </div>
+        </Route>
+      </Switch>
+    </Suspense>
   );
 }

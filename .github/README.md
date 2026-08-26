@@ -55,19 +55,17 @@ See also: [product surfaces](https://github.com/szl-holdings/platform/tree/main/
 
 | Workflow | Trigger | Required Check | Purpose |
 |----------|---------|----------------|---------|
-| `ci.yml` | PR + push to `main`/`master` | `CI Gate` | Aggregate gate: lint, typecheck, test, build, integration tests, secret scan, readiness smoke, proof-chain, route security |
+| `ci.yml` | PR + push to `main` | Individual checks | Clean-clone validation on Linux and Windows, lint, and TypeScript typecheck |
 | `ci.yml` | PR + push to `main`/`master` | `Readiness Gate (smoke:product-mode)` | Product-mode API smoke test surfaced separately for fast PR visibility |
 | `e2e.yml` | PR + push to `main`/`master` | `E2E Gate` | Full Playwright matrix across all artifact surfaces + axe-core a11y |
 | `dependency-review.yml` | PR only | `dependency-review` | OSS vulnerability scan on changed dependencies |
 | `codeql.yml` | PR + push + weekly schedule | `analyze` | GitHub CodeQL static analysis (JavaScript/TypeScript) |
 
-### Security (advisory / scheduled)
+### Security
 
 | Workflow | Trigger | Purpose |
 |----------|---------|---------|
-| `security.yml` | PR + push | Dependency vulnerability scan + SBOM generation |
-| `secret-scan-scheduled.yml` | Daily 06:17 UTC + `.gitleaks.toml` changes | Full-history Gitleaks scan against `main`; uploads SARIF to Security tab and opens triage issue on findings |
-| `secret-scan.yml` | PR only | PR-diff Gitleaks scan using `.gitleaks.toml` |
+| `security.yml` | PR to `main` + push to `main` + manual + Mondays 03:00 UTC | Dependency/SBOM checks, Gitleaks and project-specific secret scans, lockfile integrity, license report, and the fan-in `Security Gate (blocking)` job |
 
 ### Build & Quality (advisory)
 
@@ -131,10 +129,11 @@ All Dependabot PRs must pass the same required CI checks as any other PR.
 
 ## Secret Scanning
 
-Two complementary layers:
+Three complementary layers:
 
-1. **PR-time gate** (`ci.yml` → `secret-scan` job + `secret-scan.yml`): Gitleaks scans the PR diff using `.gitleaks.toml`. Blocks merge on any finding.
-2. **Scheduled sweep** (`secret-scan-scheduled.yml`): Full-history Gitleaks scan of `main` every day at 06:17 UTC. Uploads SARIF to the Security tab; opens a triage issue on findings.
+1. **GitHub-native scanning and push protection:** provider-known patterns are checked by GitHub, including before accepted pushes when push protection matches.
+2. **PR-time scan** (`security.yml` → `secret-scan`): Gitleaks scans the PR's base-to-head commit range, then the project-specific scanner checks the current tree. A finding fails the `Security Gate (blocking)` fan-in job.
+3. **Default-branch and scheduled scan** (`security.yml` → `secret-scan`): pushes to `main`, manual dispatches, and the Monday 03:00 UTC schedule scan reachable repository history with Gitleaks and check the current tree with the project-specific scanner.
 
 Config lives in `.gitleaks.toml`. If you need to add an allowlist entry, document the reason inline and keep patterns as narrow as possible.
 

@@ -1,4 +1,4 @@
-import { useRef, useState, type KeyboardEvent } from 'react';
+import { type KeyboardEvent, useRef, useState } from 'react';
 import { Link } from 'wouter';
 import { Layout } from '../components/layout';
 import {
@@ -376,7 +376,7 @@ export function SeriesAView() {
           <section id="solutions" aria-labelledby="solutions-title">
             <div className="sa-section-head">
               <div>
-                <p className="sa-kicker">One product · six investor-ready views</p>
+                <p className="sa-kicker">One product · six investor-demo views</p>
                 <h2 id="solutions-title">Choose the buyer problem.</h2>
               </div>
               <p>

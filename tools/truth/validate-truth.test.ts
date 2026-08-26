@@ -1,4 +1,5 @@
 import assert from 'node:assert/strict';
+import { readFileSync } from 'node:fs';
 import test from 'node:test';
 
 import { CANONICAL_METRIC_NAMES, TRUTH_GENERATOR_ID } from './truth-schema.js';
@@ -55,6 +56,33 @@ test('rejects a generated_at timestamp beyond the allowed future skew', () => {
     validateTruth(truth, NOW).some((failure) =>
       failure.includes('more than five minutes in the future'),
     ),
+  );
+});
+
+test('keeps honest historical truth out of the structural PR gate', () => {
+  const truth = validTruth();
+  truth.generated_at = new Date(NOW - 7 * 24 * 60 * 60 * 1000 - 1).toISOString();
+  assert.deepEqual(validateTruth(truth, NOW), []);
+  assert.deepEqual(validateTruth(truth, NOW, { requireFreshness: true }), [
+    'generated_at is older than seven days',
+  ]);
+});
+
+test('enforces the exact truth-snapshot freshness boundary', () => {
+  const truth = validTruth();
+  truth.generated_at = new Date(NOW - 7 * 24 * 60 * 60 * 1000).toISOString();
+  assert.deepEqual(validateTruth(truth, NOW, { requireFreshness: true }), []);
+});
+
+test('wires truth freshness only to scheduled and explicit manual events', () => {
+  const workflow = readFileSync('.github/workflows/truth-drift.yml', 'utf8');
+  assert.match(
+    workflow,
+    /require_truth_freshness:\n\s+description: Require the generated truth snapshot to be no older than seven days\n\s+required: false\n\s+default: false\n\s+type: boolean/,
+  );
+  assert.match(
+    workflow,
+    /- name: Require a current generated truth snapshot\n\s+if: >-\n\s+github\.event_name == 'schedule' \|\|\n\s+\(github\.event_name == 'workflow_dispatch' && inputs\.require_truth_freshness\)\n\s+run: pnpm truth:freshness/,
   );
 });
 
