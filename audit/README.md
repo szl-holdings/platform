@@ -62,7 +62,7 @@ mean.
 | DB migrations (SQL files) | 149 | Tracked `lib/db/drizzle/*.sql` files |
 | API route source files | 43 | Non-test files with detected Express route declarations across current runtime roots |
 | API handler declarations | 306 | Static non-test method declarations on `app`, `router`, and named Express Router receivers |
-| CI workflows | 46 | Permanent workflows including hosted observability, public npm release, and exact-head Series A screenshot proof paths, after retiring two obsolete mutation one-shots |
+| CI workflows | 47 | Permanent workflows including hosted observability, public npm release, and exact-head Series A screenshot proof paths, after retiring two obsolete mutation one-shots |
 | Environment variables (in `.env.example`) | 238 | Lines matching `^[A-Z_]+=` |
 
 ---

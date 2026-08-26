@@ -62,7 +62,7 @@ Success requires every local check available in this environment to pass and no 
   backend route exists.
 - The exact-head workflow builds, serves, captures, hashes, and uploads five
   responsive views.
-- Canonical workflow-count surfaces now measure 46 tracked workflows.
+- Canonical workflow-count surfaces now measure 47 tracked workflows.
 
 ## Hosted evidence
 
@@ -74,7 +74,7 @@ At product-source commit `69285dd8450fc86db5ec5ba59986d36333d79f75`,
 Source of Truth, Commitlint, DCO, security, lockfile, README, doctrine, schema,
 dependency review, and screenshot-capture automation were observed green. Truth
 drift correctly found ten prose surfaces still stating the prior workflow count.
-This evidence-only commit advances those exact references to canonical 46.
+This evidence-only commit advances those exact references to canonical 47.
 
 The closed PR #656 final head had green CI, including the repaired screenshot workflow. The current-main successor branch must receive fresh exact-head CI and review before any protected merge. Prior green runs are recorded as evidence, not substituted for successor-head gates.
 
