@@ -43,13 +43,10 @@ files.
 
 ## Hosted Checks
 
-Exact protected head `7383a30fffeb44c7e8a3fa2c27e176ee450607fd` had 80 check
-runs observed through the GitHub Checks API on 2026-08-26:
-
-- 74 completed successfully.
-- 6 completed as skipped.
-- 0 completed with failure, cancellation, timeout, or action required in the
-  observed check-run page.
+Exact protected head `7383a30fffeb44c7e8a3fa2c27e176ee450607fd` had terminal
+check runs observed through the GitHub Checks API on 2026-08-26. Every observed
+non-skipped check run completed successfully; no observed check run completed
+with failure, cancellation, timeout, or action required.
 
 This is hosted current-main check evidence. It is not a deployment, runtime, or
 external witness claim.
@@ -61,16 +58,16 @@ Completed in
 on branch `codex/state-native-runtime-hardening-v4-20260826`:
 
 - `pnpm --filter @workspace/a11oy-runtime... install --ignore-scripts --offline`
-  exited 0. Scope was 9 of 202 workspace projects; 786 packages were linked
-  from the local pnpm store with no downloads.
+  exited 0. The filtered dependency graph was linked from the local pnpm
+  store with no downloads.
 - `pnpm --filter @workspace/a11oy-runtime typecheck` exited 0.
-- `pnpm --filter @workspace/a11oy-runtime test` exited 0. Vitest reported
-  2 files passed and 35 tests passed. The state-native Node test suite reported
-  47 tests total, 45 passed, 0 failed, and 2 skipped. The passing cases include
-  retained-object mutation, kernel-definition accessor mutation, stateful
-  verifier receiver binding, verifier getter flips, mutable verifier evidence,
-  malformed verifier evidence, malformed cognitive-epoch digests, and one-read
-  validation-check accessors.
+- `pnpm --filter @workspace/a11oy-runtime test` exited 0. The focused Vitest
+  suite passed, and the state-native Node suite completed with no failures and
+  its expected platform-specific skips. The passing cases include retained-object
+  mutation, kernel-definition accessor mutation, stateful verifier receiver
+  binding, verifier getter flips, mutable verifier evidence, malformed verifier
+  evidence, malformed cognitive-epoch digests, and one-read validation-check
+  accessors.
 
 ## Truth Boundary
 
