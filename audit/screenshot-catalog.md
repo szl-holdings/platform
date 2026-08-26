@@ -638,3 +638,36 @@ Artifact `public/` and `dist/public/` directories contain static assets embedded
 |----------|-------|---------|--------------|-------------|----------|-------------|--------|-------|
 | `docs/assets/screenshots/current/a11oy-sdk-2026-07-26.jpg` | `http://127.0.0.1:4110/a11oy/sdk` | A11oy developer platform | 2026-07-26 | Codex | `SERIES-A-W1-TRUTH-LOCK-20260726` | DEMONSTRATION/REPORTED | current | Live local-app capture at the patched route. The `WARN` status, product-exploration subtitle, and `SEEDED DEMONSTRATION · NOT LIVE EVIDENCE` banner are visible above the seeded KPI and SDK registries. Route is recorded here because browser chrome is not included. |
 | `docs/assets/screenshots/current/a11oy-code-2026-07-26.jpg` | `http://127.0.0.1:4110/a11oy/a11oy-code` | A11oy Code governed-session terminal | 2026-07-26 | Codex | `SERIES-A-W1-TRUTH-LOCK-20260726` | DEMONSTRATION/REPORTED | current | Live local-app capture scrolled to the modified terminal. `SCRIPTED DEMONSTRATION — NOT LIVE EVIDENCE` is visible; the marketing hero was rejected as proof. Route is recorded here because browser chrome is not included. |
+
+---
+
+## PR #668 Series A product-view evidence — 2026-08-26
+
+The following five entries share this required capture identity:
+
+- `route`: `/a11oy/start`
+- `surface`: A11oy Series A product view
+- `captured_by`: Codex
+- `capture_environment`: `local-exact-head`
+- `source_revision`: `11e6d637ab6f15934a63458ab146c75e8813aaec`
+- `source_tree`: `1b35c727a64c5f19b2d52d9774afbe1c8eec3efa`
+- `workflow_run_or_command`: `env -u GITHUB_ACTIONS PLAYWRIGHT_BROWSERS_PATH=/tmp/playwright-series-a SOURCE_REPOSITORY=szl-holdings/platform SOURCE_SHA=11e6d637ab6f15934a63458ab146c75e8813aaec SOURCE_TREE_SHA=1b35c727a64c5f19b2d52d9774afbe1c8eec3efa SOURCE_REF=local/series-a-repair-11e6 PLAYWRIGHT_BASE_URL=http://127.0.0.1:4173 CAPTURE_ROUTE=/a11oy/start PROOF_OUTPUT_DIR=artifacts/series-a-screenshot-proof-local-11e6 node scripts/qa/capture-series-a-proof.mjs`
+- `workcell_id`: `P0-SERIES-A-PRODUCT-WIRING-20260811`
+- `proof_level`: 4
+- `status`: `current`
+- `metadata_sidecar`: [`a11oy-series-a-capture-metadata-2026-08-26.json.txt`](../docs/assets/screenshots/current/a11oy-series-a-capture-metadata-2026-08-26.json.txt), SHA-256 `58f976b8e45d92ba116e7013de9005ba41267731617ad464d039e5119594898c`
+
+| Filename | Capture time | Viewport | Artifact SHA-256 | Notes |
+|----------|--------------|----------|-----------------|-------|
+| `docs/assets/screenshots/current/a11oy-series-a-320-2026-08-26.png` | `2026-08-26T15:59:30.191Z` | `320x900` CSS px; full page `320x5630` | `635c5e3c130ea2609b87d0860a2a588e6597b5f1ae3ec65ee423a84229748545` | PASS; loaded app frame, explicit prototype/demo/unavailable states, no horizontal overflow, console error, page error, or undeclared API request. |
+| `docs/assets/screenshots/current/a11oy-series-a-390-2026-08-26.png` | `2026-08-26T15:59:31.618Z` | `390x900` CSS px; full page `390x5076` | `87410d9925203f69efd3d4717be0263103dc17bc351b5d6221bc2319aee71f5d` | PASS; loaded app frame, explicit prototype/demo/unavailable states, no horizontal overflow, console error, page error, or undeclared API request. |
+| `docs/assets/screenshots/current/a11oy-series-a-768-2026-08-26.png` | `2026-08-26T15:59:33.105Z` | `768x1024` CSS px; full page `768x3275` | `4298495fe2f1f736601f2652f414fd17b226307d5db4a0a4f22f6d0415d013b7` | PASS; loaded app frame, explicit prototype/demo/unavailable states, no horizontal overflow, console error, page error, or undeclared API request. |
+| `docs/assets/screenshots/current/a11oy-series-a-1366-2026-08-26.png` | `2026-08-26T15:59:34.380Z` | `1366x900` CSS px; full page `1366x2855` | `641f83226d07b416ed2bba3bc9a0ea5e0d0b774b4b8322a2abecfeb7c871b7d5` | PASS; loaded app frame, explicit prototype/demo/unavailable states, no horizontal overflow, console error, page error, or undeclared API request. |
+| `docs/assets/screenshots/current/a11oy-series-a-1728-2026-08-26.png` | `2026-08-26T15:59:36.629Z` | `1728x1000` CSS px; full page `1728x2898` | `c203575f83b701f0dbed69f72713d9df043209596e0232bed89aba5756a68413` | PASS; loaded app frame, explicit prototype/demo/unavailable states, no horizontal overflow, console error, page error, or undeclared API request. |
+
+All five PNGs were visually inspected at original resolution. No clipping,
+overlap, missing content, broken styling, loading state, placeholder token, or
+error surface was observed. A second independent capture from the same exact
+source produced byte-identical PNGs at all five viewports. This local capture
+is intentionally labeled non-authoritative for hosted gates; final PR-head
+equivalence and hosted checks remain separate requirements.

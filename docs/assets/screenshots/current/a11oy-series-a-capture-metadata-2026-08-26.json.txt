@@ -1,0 +1,181 @@
+{
+  "schema": "szl.screenshot-proof/v1",
+  "captured_at": "2026-08-26T15:59:29.629Z",
+  "completed_at": "2026-08-26T15:59:38.807Z",
+  "status": "PASS",
+  "source": {
+    "repository": "szl-holdings/platform",
+    "ref": "local/series-a-repair-11e6",
+    "sha": "11e6d637ab6f15934a63458ab146c75e8813aaec",
+    "tree_sha": "1b35c727a64c5f19b2d52d9774afbe1c8eec3efa"
+  },
+  "route": "/a11oy/start",
+  "capture_environment": {
+    "authority": "LOCAL_NON_AUTHORITATIVE",
+    "provider": "local",
+    "workflow_name": null,
+    "workflow_ref": null,
+    "workflow_path": null,
+    "workflow_revision": null,
+    "workflow_source_sha": null,
+    "workflow_run_id": null,
+    "workflow_run_attempt": null,
+    "workflow_run_url": null,
+    "runner_os": "linux",
+    "runner_arch": "x64",
+    "node_version": "v24.19.0",
+    "browser": {
+      "name": "chromium",
+      "version": "148.0.7778.96"
+    },
+    "command": "node scripts/qa/capture-series-a-proof.mjs",
+    "loopback_base_url": "http://127.0.0.1:4173",
+    "external_font_policy": "Google Fonts CSS replaced with an empty response; system fallback used"
+  },
+  "summary": {
+    "total": 5,
+    "passed": 5,
+    "failed": 0
+  },
+  "captures": [
+    {
+      "status": "PASS",
+      "filename": "a11oy-series-a-320-2026-08-26.png",
+      "path": "a11oy-series-a-320-2026-08-26.png",
+      "route": "/a11oy/start",
+      "captured_at": "2026-08-26T15:59:30.191Z",
+      "viewport_css_px": {
+        "width": 320,
+        "height": 900
+      },
+      "document_css_px": {
+        "width": 320,
+        "height": 5630
+      },
+      "sha256": "635C5E3C130EA2609B87D0860A2A588E6597B5F1AE3EC65EE423A84229748545",
+      "assertions": {
+        "http_status": 200,
+        "heading_visible": true,
+        "tab_count": 6,
+        "all_tabs_exercised": true,
+        "scroll_origin": true,
+        "horizontal_overflow": false,
+        "console_errors": 0,
+        "page_errors": 0,
+        "undeclared_api_requests": 0
+      }
+    },
+    {
+      "status": "PASS",
+      "filename": "a11oy-series-a-390-2026-08-26.png",
+      "path": "a11oy-series-a-390-2026-08-26.png",
+      "route": "/a11oy/start",
+      "captured_at": "2026-08-26T15:59:31.618Z",
+      "viewport_css_px": {
+        "width": 390,
+        "height": 900
+      },
+      "document_css_px": {
+        "width": 390,
+        "height": 5076
+      },
+      "sha256": "87410D9925203F69EFD3D4717BE0263103DC17BC351B5D6221BC2319AEE71F5D",
+      "assertions": {
+        "http_status": 200,
+        "heading_visible": true,
+        "tab_count": 6,
+        "all_tabs_exercised": true,
+        "scroll_origin": true,
+        "horizontal_overflow": false,
+        "console_errors": 0,
+        "page_errors": 0,
+        "undeclared_api_requests": 0
+      }
+    },
+    {
+      "status": "PASS",
+      "filename": "a11oy-series-a-768-2026-08-26.png",
+      "path": "a11oy-series-a-768-2026-08-26.png",
+      "route": "/a11oy/start",
+      "captured_at": "2026-08-26T15:59:33.105Z",
+      "viewport_css_px": {
+        "width": 768,
+        "height": 1024
+      },
+      "document_css_px": {
+        "width": 768,
+        "height": 3275
+      },
+      "sha256": "4298495FE2F1F736601F2652F414FD17B226307D5DB4A0A4F22F6D0415D013B7",
+      "assertions": {
+        "http_status": 200,
+        "heading_visible": true,
+        "tab_count": 6,
+        "all_tabs_exercised": true,
+        "scroll_origin": true,
+        "horizontal_overflow": false,
+        "console_errors": 0,
+        "page_errors": 0,
+        "undeclared_api_requests": 0
+      }
+    },
+    {
+      "status": "PASS",
+      "filename": "a11oy-series-a-1366-2026-08-26.png",
+      "path": "a11oy-series-a-1366-2026-08-26.png",
+      "route": "/a11oy/start",
+      "captured_at": "2026-08-26T15:59:34.380Z",
+      "viewport_css_px": {
+        "width": 1366,
+        "height": 900
+      },
+      "document_css_px": {
+        "width": 1366,
+        "height": 2855
+      },
+      "sha256": "641F83226D07B416ED2BBA3BC9A0EA5E0D0B774B4B8322A2ABECFEB7C871B7D5",
+      "assertions": {
+        "http_status": 200,
+        "heading_visible": true,
+        "tab_count": 6,
+        "all_tabs_exercised": true,
+        "scroll_origin": true,
+        "horizontal_overflow": false,
+        "console_errors": 0,
+        "page_errors": 0,
+        "undeclared_api_requests": 0
+      }
+    },
+    {
+      "status": "PASS",
+      "filename": "a11oy-series-a-1728-2026-08-26.png",
+      "path": "a11oy-series-a-1728-2026-08-26.png",
+      "route": "/a11oy/start",
+      "captured_at": "2026-08-26T15:59:36.629Z",
+      "viewport_css_px": {
+        "width": 1728,
+        "height": 1000
+      },
+      "document_css_px": {
+        "width": 1728,
+        "height": 2898
+      },
+      "sha256": "C203575F83B701F0DBED69F72713D9DF043209596E0232BED89ABA5756A68413",
+      "assertions": {
+        "http_status": 200,
+        "heading_visible": true,
+        "tab_count": 6,
+        "all_tabs_exercised": true,
+        "scroll_origin": true,
+        "horizontal_overflow": false,
+        "console_errors": 0,
+        "page_errors": 0,
+        "undeclared_api_requests": 0
+      }
+    }
+  ],
+  "non_claims": [
+    "This local capture is non-authoritative and cannot satisfy hosted evidence gates alone.",
+    "They do not prove deployment, production runtime, customer use, or external service parity."
+  ]
+}
