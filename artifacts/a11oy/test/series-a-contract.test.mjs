@@ -293,6 +293,8 @@ test('owns a clean build and loopback server before source-bound capture', () =>
   assert.match(captureScript, /LOCAL_NON_AUTHORITATIVE/);
   assert.match(captureScript, /readTrackedFile/);
   assert.match(captureScript, /rejectSymlinkComponents/);
+  assert.match(captureScript, /expectedCaptures\.size \* CANONICAL_CAPTURE_TIMEOUT_PER_CASE_MS/);
+  assert.match(captureScript, /timeout: canonicalCaptureTimeoutMs/);
   assert.doesNotMatch(captureScript, /PLAYWRIGHT_BASE_URL/);
   assert.ok(
     captureScript.indexOf("verifyCheckout('after teardown'") <

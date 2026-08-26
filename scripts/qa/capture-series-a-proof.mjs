@@ -31,6 +31,9 @@ const planPath =
   process.env.SCREENSHOT_PLAN?.trim() || 'audit/series-a-screenshot-capture-plan.json';
 const outputDirectory =
   process.env.SCREENSHOT_OUTPUT_DIR?.trim() || 'artifacts/series-a-screenshot-proof';
+const MIN_CANONICAL_CAPTURE_TIMEOUT_MS = 10 * 60 * 1_000;
+const MAX_CANONICAL_CAPTURE_TIMEOUT_MS = 60 * 60 * 1_000;
+const CANONICAL_CAPTURE_TIMEOUT_PER_CASE_MS = 20 * 1_000;
 
 function requiredText(name, maxLength) {
   const value = process.env[name]?.trim();
@@ -377,6 +380,13 @@ for (const target of capturePlan.targets) {
     expectedCaptures.set(key, heading);
   }
 }
+const canonicalCaptureTimeoutMs = Math.min(
+  MAX_CANONICAL_CAPTURE_TIMEOUT_MS,
+  Math.max(
+    MIN_CANONICAL_CAPTURE_TIMEOUT_MS,
+    expectedCaptures.size * CANONICAL_CAPTURE_TIMEOUT_PER_CASE_MS,
+  ),
+);
 
 const absoluteOutputDirectory = await prepareOutputDirectory(outputDirectory);
 const temporaryRoot = await mkdtemp(path.join(tmpdir(), 'a11oy-series-a-exact-'));
@@ -473,7 +483,7 @@ try {
       SOURCE_REVISION: sourceRevision,
     },
     stdio: 'inherit',
-    timeout: 10 * 60 * 1000,
+    timeout: canonicalCaptureTimeoutMs,
   });
 
   const postCaptureAssets = await collectAssetManifest(buildRoot);
@@ -602,6 +612,7 @@ try {
       tool: canonicalIdentity.repositoryPath,
       metadata_sha256: sha256(canonicalMetadataBytes),
       captures: captureCount,
+      timeout_ms: canonicalCaptureTimeoutMs,
     },
     non_claims: [
       'This binds presentation evidence to a clean build and an immutable served-asset manifest for the recorded source revision.',
