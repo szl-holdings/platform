@@ -12,6 +12,7 @@
     "test": "vitest run --passWithNoTests"
   },
   "dependencies": {
+    "@szl-holdings/a11oy-atelier": "workspace:*",
     "@szl-holdings/workflow-runtime": "workspace:*",
     "@szl-holdings/memory-core": "workspace:*",
     "@szl-holdings/agent-core": "workspace:*",

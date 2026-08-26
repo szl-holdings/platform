@@ -32,6 +32,11 @@ export function apiKeyGuard(req: Request, res: Response, next: NextFunction): vo
       });
       return;
     }
+    const tenantId = (req.headers['x-tenant-id'] as string | undefined) ?? 'default';
+    req.tenantCtx = {
+      tenantId,
+      apiKeyPrefix: 'development-no-key',
+    };
     next();
     return;
   }

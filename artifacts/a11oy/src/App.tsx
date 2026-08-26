@@ -1,15 +1,13 @@
-import { lazy, Suspense, type ReactNode } from 'react';
+import { lazy, type ReactNode, Suspense } from 'react';
 import { Route, Switch } from 'wouter';
-import { GraphQLProvider } from './graphql';
 import { AppShell } from './components/shell/AppShell';
+import { GraphQLProvider } from './graphql';
 
 function stripTrailingSlash(path: string) {
   return path.endsWith('/') && path.length > 1 ? path.slice(0, -1) : path;
 }
 
-const base = stripTrailingSlash(
-  (import.meta.env.BASE_URL ?? '/a11oy/').replace(/\/$/, ''),
-);
+const base = stripTrailingSlash((import.meta.env.BASE_URL ?? '/a11oy/').replace(/\/$/, ''));
 
 function Loader() {
   return (
@@ -30,6 +28,9 @@ function WithShell({ children }: { children: ReactNode }) {
 }
 
 const HomePage = lazy(() => import('./pages/HomePage').then((m) => ({ default: m.HomePage })));
+const A11oyAtelier = lazy(() =>
+  import('./pages/A11oyAtelier').then((m) => ({ default: m.A11oyAtelier })),
+);
 const NowBoard = lazy(() => import('./pages/NowBoard').then((m) => ({ default: m.NowBoard })));
 const CommandSurface = lazy(() =>
   import('./pages/CommandSurface').then((m) => ({ default: m.CommandSurface })),
@@ -299,9 +300,7 @@ const SystemCard = lazy(() =>
 const CapabilityTrajectory = lazy(() =>
   import('./pages/CapabilityTrajectory').then((m) => ({ default: m.CapabilityTrajectory })),
 );
-const HatunSpec = lazy(() =>
-  import('./pages/HatunSpec').then((m) => ({ default: m.HatunSpec })),
-);
+const HatunSpec = lazy(() => import('./pages/HatunSpec').then((m) => ({ default: m.HatunSpec })));
 const GlasswingPartners = lazy(() =>
   import('./pages/GlasswingPartners').then((m) => ({ default: m.GlasswingPartners })),
 );
@@ -404,6 +403,7 @@ export default function App() {
         <Switch>
           <Route path={`${base}/`} component={HomePage} />
           <Route path={`${base}`} component={HomePage} />
+          <Route path={`${base}/atelier`} component={A11oyAtelier} />
           <Route path={`${base}/now`} component={NowBoard} />
           <Route path={`${base}/recommendations`} component={Recommendations} />
           <Route path={`${base}/brief`} component={ExecutiveBrief} />

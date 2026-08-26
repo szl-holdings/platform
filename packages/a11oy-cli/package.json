@@ -5,7 +5,8 @@
   "description": "A11oy Terminal CLI",
   "main": "dist/cli.js",
   "bin": {
-    "a11oy": "./dist/cli.js"
+    "a11oy": "./dist/cli.js",
+    "a11oy-atelier": "./dist/atelier-cli.js"
   },
   "scripts": {
     "build": "tsc",
