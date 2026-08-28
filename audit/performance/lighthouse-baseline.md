@@ -89,7 +89,8 @@ workflow configuration, not a claim that the check is required by branch protect
 | terra | 86 | ✅ 0 violations |
 | vessels | 91 | ✅ 0 violations |
 
-All 10 artifacts pass the axe-core WCAG 2.1 AA zero-critical/serious gate (30/30 tests passing).
+The historical axe-core record reports no critical or serious violations across the measured
+artifacts. It is a point-in-time accessibility record, not canonical platform-wide evidence.
 See `audit/a11y/findings.md` for full remediation history.
 
 ---

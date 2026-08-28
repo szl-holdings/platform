@@ -59,12 +59,15 @@ repository-pinned pnpm 10.26.1.
 
 2. node --test scripts/ci/lighthouse-workflow.test.mjs
    - Exit: 0
-   - Evidence: 4 tests passed, 0 failed, 0 skipped after the adversarial-review strengthening.
+   - Evidence: the focused contract command completed without failures or skips after the
+     adversarial-review strengthening. Canonical `platform_tests` evidence remains `UNAVAILABLE`;
+     this local command is not promoted to a platform-wide metric.
 
-3. Root validation prefix: overclaim-ledger validator plus the three built-in Node test files
+3. Root validation prefix: overclaim-ledger validator plus the built-in Node validation files
    - Exit: 0
-   - Evidence: ledger validation passed; 33 tests passed, 0 failed, 0 skipped. This is the exact
-     root test command before its Turbo subgraph and includes the new Lighthouse regression.
+   - Evidence: ledger validation and the root validation prefix completed without failures or
+     skips. Canonical `platform_tests` evidence remains `UNAVAILABLE`; this is the exact root
+     command before its Turbo subgraph and includes the new Lighthouse regression.
 
 4. Initial pnpm run test with Turbo's default host concurrency
    - Exit: 1
@@ -74,8 +77,9 @@ repository-pinned pnpm 10.26.1.
 
 5. pnpm --filter @workspace/tool-mesh test
    - Exit: 0
-   - Evidence: the isolated package passed 107 of 107 tests, establishing that the prior failure
-     was contention-sensitive rather than a deterministic source regression.
+   - Evidence: the isolated package command completed successfully, supporting the conclusion
+     that the prior failure was contention-sensitive rather than a deterministic source
+     regression. Canonical `platform_tests` evidence remains `UNAVAILABLE`.
 
 6. Mistaken pnpm run test -- --concurrency=4 invocation
    - Exit: 1
@@ -85,9 +89,9 @@ repository-pinned pnpm 10.26.1.
 7. pnpm exec turbo run test --concurrency=4
    - Exit: 0
    - Evidence: 119 of 119 tasks succeeded; 101 were cached; elapsed time 19m1.105s. The graph
-     included tool-mesh 107 of 107, A11oy runtime security regressions, and the explicitly
-     documented environment-dependent skips (six real-vector ONNX cases and two Windows
-     link-capability cases). There were no test failures.
+     included tool-mesh, A11oy runtime security regressions, and the explicitly documented
+     environment-dependent skips (six real-vector ONNX cases and two Windows link-capability
+     cases). There were no failures in the bounded task graph.
 
 8. pnpm exec turbo run typecheck --concurrency=4 --output-logs=errors-only
    - Exit: 1
@@ -136,6 +140,10 @@ repository-pinned pnpm 10.26.1.
   a11oy. The ten-artifact April measurements remain labeled as a historical dev-server snapshot.
 - An independent adversarial patch review found the missing any-scope failure-masking assertion
   and stale audit claims; both findings were resolved before this packet was recorded.
+- The first hosted PR run rejected numeric local case counts because canonical `platform_tests`
+  evidence is unavailable. Before merge, this unmerged packet was normalized in a signed and
+  DCO-certified successor commit. The commands, exit codes, and evidence boundary are unchanged;
+  no canonical platform-wide count is claimed.
 - At pre-publication refresh, local HEAD, origin/main, and the merge base were all exactly
   7383a30fffeb44c7e8a3fa2c27e176ee450607fd. The overlapping PR 671 remained open and unmerged.
 - Live repository policy requires a pull request, signed commits, strict up-to-date status,
