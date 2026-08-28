@@ -37,18 +37,18 @@ Enable **"Require status checks to pass before merging"** and add the following 
 >
 > **Decision — surface `Readiness Gate (smoke:product-mode)` as its own required check:** the readiness smoke job is already aggregated inside `CI Gate` (see `.github/workflows/ci.yml` — the `ci-gate` job lists `readiness-gate` in its `needs`). However, we additionally require it as a named status check so reviewers can see at a glance on the PR whether the product-mode smoke test passed without drilling into the `CI Gate` logs. The job name in branch protection must match the workflow job's `name:` exactly: `Readiness Gate (smoke:product-mode)`.
 >
-> **Note on Lighthouse:** The `lighthouse.yml` workflow job is named `Lighthouse Gate (advisory)` and runs with `continue-on-error: true` — it cannot serve as a blocking required check. Lighthouse scores are tracked as advisory signal only. Do **not** add this check to the required status checks list; it will never block a PR.
+> **Note on Lighthouse:** The `lighthouse.yml` workflow job is named `Lighthouse Gate (accessibility enforced)`. Its matrix and aggregate gate fail closed for accessibility assertion failures and incomplete infrastructure; performance, best-practices, and SEO assertions remain advisory. This checklist does not currently list the Lighthouse gate as a required branch-protection context, so do not represent it as branch-required unless the live ruleset is updated and verified separately.
 
 ### Lighthouse Score Thresholds
 
 Configured in `.lighthouserc.json`:
 
-| Category | Minimum Score |
-|---|---|
-| Performance | 80 |
-| Accessibility | 90 |
-| Best Practices | 90 |
-| SEO | 90 |
+| Category | Minimum Score | Workflow behavior |
+|---|---|---|
+| Performance | 80 | Advisory warning |
+| Accessibility | 90 | Enforced error |
+| Best Practices | 90 | Advisory warning |
+| SEO | 90 | Advisory warning |
 
 ### Additional Branch Protections
 

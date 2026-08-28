@@ -67,11 +67,11 @@ See also: [product surfaces](https://github.com/szl-holdings/platform/tree/main/
 |----------|---------|---------|
 | `security.yml` | PR to `main` + push to `main` + manual + Mondays 03:00 UTC | Dependency/SBOM checks, Gitleaks and project-specific secret scans, lockfile integrity, license report, and the fan-in `Security Gate (blocking)` job |
 
-### Build & Quality (advisory)
+### Build & Quality
 
 | Workflow | Trigger | Purpose |
 |----------|---------|---------|
-| `lighthouse.yml` | PR + push | Lighthouse CI performance/a11y/SEO scores — **advisory only** (`continue-on-error: true`; not a blocking required check) |
+| `lighthouse.yml` | PR + push | Lighthouse CI across six web artifacts. Accessibility ≥ 90 and complete matrix execution are enforced by the workflow; performance, best-practices, and SEO scores remain advisory. The aggregate check is not currently listed as required branch protection. |
 | `readme-qa.yml` | PR + push | Validates README image paths, badge workflow names, and link integrity |
 | `verify-source-of-truth.yml` | PR + push | Checks canonical doc sources are in sync |
 | `audit-full.yml` | Manual dispatch | Full audit suite (mocks, routes, deps, copy, design) |
@@ -151,4 +151,4 @@ See `BRANCH_PROTECTION.md` for the full GitHub UI configuration checklist. Requi
 - `dependency-review`
 - `analyze`
 
-The `Lighthouse Gate (advisory)` check is **not** a required check — it runs advisory-only with `continue-on-error: true`.
+The `Lighthouse Gate (accessibility enforced)` check is not currently listed as a required branch-protection context. When the workflow runs, only a completed successful matrix passes: accessibility assertions are hard failures and incomplete infrastructure fails closed. Performance, best-practices, and SEO assertions remain advisory warnings.

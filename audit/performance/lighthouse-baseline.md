@@ -1,11 +1,17 @@
-# Lighthouse Performance Baseline
+# Lighthouse Performance Baseline (Historical Snapshot)
 
 **Established:** 2026-04-21  
 **Tool:** Lighthouse 12.4.0 (via `@lhci/cli` v0.15.1)  
 **Runner:** Replit NixOS container — Chromium 138.0.7204.100  
 **Chrome flags:** `--headless=new --no-sandbox --disable-gpu --ignore-certificate-errors --disable-dev-shm-usage`  
-**Config:** `.lighthouserc.json` (preset: `lighthouse:no-pwa`, warn-mode thresholds)  
-**Runs per artifact:** 1 single-measurement run (CI uses 3-run median)
+**Historical capture config:** `.lighthouserc.json` as of 2026-04-21 (preset: `lighthouse:no-pwa`, warn-mode thresholds)
+**Historical capture runs:** 1 single-measurement run per artifact
+
+> **Current operational boundary (2026-08-26):** The measurements below remain a historical
+> ten-artifact dev-server snapshot; they are not a current CI result. The live workflow matrix now
+> audits six built web artifacts with one run each. Accessibility ≥ 90 is enforced as an error,
+> while performance ≥ 80, best-practices ≥ 90, and SEO ≥ 90 remain advisory warnings. The
+> aggregate Lighthouse check is not currently a required branch-protection context.
 
 > **Dev-server measurement note:** All scores below were captured against live Vite **dev servers**
 > (non-minified JS, no tree-shaking, hot-reload client included). This inflates LCP and TBT
@@ -38,9 +44,9 @@
 
 ---
 
-## CI Thresholds (`.lighthouserc.json`, warn mode)
+## Historical Baseline Thresholds (2026-04-21)
 
-| Category | Warn ≥ | Passing (10/10) | Needs attention |
+| Category | Historical warn ≥ | Passing (10/10) | Needs attention |
 |----------|:------:|:---------------:|:----------------|
 | Performance | 70 | — (dev numbers) | Validate against production builds |
 | Accessibility | 85 | 10/10 ✓ (axe-core zero-violation baseline achieved) | — |
@@ -52,6 +58,19 @@
 > zero-critical/serious-violation gate. Lighthouse A11y scores for carlota-jo and
 > lyte-command-center are expected to improve on the next production-build re-run after
 > the contrast and link fixes from this baseline pass.
+
+### Current Workflow Configuration (2026-08-26)
+
+| Category | Current minimum | Workflow behavior |
+|----------|:---------------:|-------------------|
+| Performance | 80 | Advisory warning |
+| Accessibility | 90 | Enforced error |
+| Best Practices | 90 | Advisory warning |
+| SEO | 90 | Advisory warning |
+
+The current matrix in `.github/workflows/lighthouse.yml` covers `terra`, `vessels`,
+`carlota-jo`, `sentra`, `counsel`, and `a11oy`, with one run per artifact. This section describes
+workflow configuration, not a claim that the check is required by branch protection.
 
 ---
 
@@ -70,7 +89,8 @@
 | terra | 86 | ✅ 0 violations |
 | vessels | 91 | ✅ 0 violations |
 
-All 10 artifacts pass the axe-core WCAG 2.1 AA zero-critical/serious gate (30/30 tests passing).
+The historical axe-core record reports no critical or serious violations across the measured
+artifacts. It is a point-in-time accessibility record, not canonical platform-wide evidence.
 See `audit/a11y/findings.md` for full remediation history.
 
 ---
