@@ -638,3 +638,53 @@ Artifact `public/` and `dist/public/` directories contain static assets embedded
 |----------|-------|---------|--------------|-------------|----------|-------------|--------|-------|
 | `docs/assets/screenshots/current/a11oy-sdk-2026-07-26.jpg` | `http://127.0.0.1:4110/a11oy/sdk` | A11oy developer platform | 2026-07-26 | Codex | `SERIES-A-W1-TRUTH-LOCK-20260726` | DEMONSTRATION/REPORTED | current | Live local-app capture at the patched route. The `WARN` status, product-exploration subtitle, and `SEEDED DEMONSTRATION · NOT LIVE EVIDENCE` banner are visible above the seeded KPI and SDK registries. Route is recorded here because browser chrome is not included. |
 | `docs/assets/screenshots/current/a11oy-code-2026-07-26.jpg` | `http://127.0.0.1:4110/a11oy/a11oy-code` | A11oy Code governed-session terminal | 2026-07-26 | Codex | `SERIES-A-W1-TRUTH-LOCK-20260726` | DEMONSTRATION/REPORTED | current | Live local-app capture scrolled to the modified terminal. `SCRIPTED DEMONSTRATION — NOT LIVE EVIDENCE` is visible; the marketing hero was rejected as proof. Route is recorded here because browser chrome is not included. |
+
+---
+
+## PR #668 Series A product-view evidence — 2026-08-26
+
+The following five entries share this required capture identity:
+
+- **route:** /a11oy/start
+- **surface:** A11oy Series A product view
+- **captured_by:** Codex
+- **capture_environment:** LOCAL_NON_AUTHORITATIVE exact-source rail
+- **source_revision:** 4ca56d79a229a7207883475e368967c24c061df4
+- **source_tree:** cb311e5c9fb1caf8e1ccfcc9d5fea0b203ca92b6
+- **source_ref:** codex/series-a-product-current-main-v4
+- **capture_command:** node scripts/qa/capture-series-a-proof.mjs
+- **capture_inputs:** repository, SHA, tree, ref, /a11oy/start route, and a new
+  proof output directory were supplied explicitly; PLAYWRIGHT_BASE_URL was not
+  accepted
+- **workcell_id:** P0-SERIES-A-PRODUCT-WIRING-20260811
+- **proof_level:** 4
+- **status:** current local source proof; hosted exact-head authority pending
+- **metadata_sidecar:**
+  [a11oy-series-a-capture-metadata-2026-08-26.json.txt](../docs/assets/screenshots/current/a11oy-series-a-capture-metadata-2026-08-26.json.txt),
+  SHA-256
+  EB5B78ECDCD1D8D952DA75D4BDADC61B8A48B7CC7427F13FF5AB7DA300327399
+- **build_manifest_sha256:**
+  806485B29F378B1AAA38F3AF2984AB65C74A677F9CAE1282F6B7D52756B2ACD5
+- **entry_document_sha256:**
+  6510BCBEC50E14BAF4AAF73DC52DECA5F3CFEF8ADE65B6008744C50935F6E26B
+
+| Filename | Capture time | Viewport | Artifact SHA-256 | Notes |
+|---|---|---|---|---|
+| docs/assets/screenshots/current/a11oy-series-a-320-2026-08-26.png | 2026-08-26T20:39:02.479Z | 320x900 CSS px; full page 320x9155 | EEE8ED83F6E01A56EF1774EBF2C4426B9763C24A28008636511CB890FF967DCC | PASS; exact served build, six states/tabs, keyboard and ARIA checks, no overflow or undeclared network. |
+| docs/assets/screenshots/current/a11oy-series-a-390-2026-08-26.png | 2026-08-26T20:39:05.086Z | 390x900 CSS px; full page 390x8356 | C0EEEB0AE3FF7067D48D50B1038CD75EBD75709FD0289998F456C2BEB87FA6DE | PASS; exact served build, six states/tabs, keyboard and ARIA checks, no overflow or undeclared network. |
+| docs/assets/screenshots/current/a11oy-series-a-768-2026-08-26.png | 2026-08-26T20:39:08.761Z | 768x1024 CSS px; full page 768x5205 | 61A210B5C27A8CC666CD5FF1699CAE346BE8D8F5473921695C6065CA34FDB181 | PASS; exact served build, six states/tabs, keyboard and ARIA checks, no overflow or undeclared network. |
+| docs/assets/screenshots/current/a11oy-series-a-1366-2026-08-26.png | 2026-08-26T20:39:17.398Z | 1366x900 CSS px; full page 1366x4620 | 431C37C0D8518D05A3F63D58F0BE1756F2CE66633C9CAC83831E7F265FDE3444 | PASS; exact served build, six states/tabs, keyboard and ARIA checks, no overflow or undeclared network. |
+| docs/assets/screenshots/current/a11oy-series-a-1728-2026-08-26.png | 2026-08-26T20:39:20.103Z | 1728x1000 CSS px; full page 1728x4665 | D679D023CC298E4442EEB9A272B51B8C0D4C1220D9206547B752FF4278F59008 | PASS; exact served build, six states/tabs, keyboard and ARIA checks, no overflow or undeclared network. |
+
+The rail built 344 files into a fresh temporary directory, served an immutable
+in-memory snapshot from an owned ephemeral loopback listener, verified the
+entry-document digest and response identity, blocked foreign HTTP/WebSocket
+connections and service workers, and removed the owned temporary build. All
+five promoted PNG digests match the generated proof bytes.
+
+All five full-page captures were decoded and visually inspected. No responsive
+layout defect, horizontal clipping, overlap, error surface, or truth-label
+regression was observed. This local evidence proves exact source and local
+build behavior only. It does not prove hosted execution, deployment,
+production runtime, customer use, or external-service parity. Final PR-head
+byte equivalence and hosted checks remain separate promotion requirements.

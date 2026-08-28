@@ -167,6 +167,8 @@ const WEB_DOMAIN_CONFIGS = [
     baseUrl: BASE_URL ? `${BASE_URL}` : A11OY_URL,
     routes: [
       '/a11oy/',
+      '/a11oy/start',
+      '/a11oy/investor-demo',
       '/a11oy/now',
       '/a11oy/recommendations',
       '/a11oy/brief',

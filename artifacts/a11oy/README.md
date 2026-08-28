@@ -1,52 +1,72 @@
-# A11oy — Brand Orchestration Layer
+# A11oy — governed decision infrastructure prototype
 
-> Cross-domain AI agent fabric and brand intelligence system — the orchestration backbone connecting all SZL Holdings domain packs.
+A11oy is a source-backed React prototype for inspecting governed decision
+flows. The default Series-A route separates deterministic demonstration
+behavior from authenticated operational evidence and fails closed when a
+required runtime source is absent.
 
-[![CI](https://github.com/szl-holdings/platform/actions/workflows/ci.yml/badge.svg)](https://github.com/szl-holdings/platform/actions/workflows/ci.yml)
-[![TypeScript](https://img.shields.io/badge/TypeScript-5.9-3178C6?style=flat-square&logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
-[![License](https://img.shields.io/badge/license-Proprietary-red?style=flat-square)](../../LICENSE.md)
+## Current entry points
 
-[Live Demo](https://szlholdings.com) · [Platform Demo Video](https://szlholdings.com/szl-demo-video/) · [Investor Dashboard](https://szlholdings.com/stephen/investor) · [Architecture](../../docs/architecture/architecture.md)
+- `/a11oy/start` — the canonical investor and developer view.
+- `/a11oy/investor-demo` — compatibility route for the same truth-qualified
+  Series-A surface.
 
-![A11oy — Brand Orchestration Layer](../../.github/assets/screenshots/a11oy-hero.jpg)
+The Series-A journey is self-contained. It does not link to legacy seeded
+surfaces as evidence of live operations.
 
----
+## Evidence states
 
-## What it does
+The UI uses one six-state operational vocabulary:
 
-A11oy is the Alloy Fabric agent orchestration surface for the SZL Holdings platform. It provides a unified view of all AI agents running across every domain pack — their status, decisions, Covenant Policy gates, and Proof Chain attributions — along with the brand intelligence systems that ensure consistent voice and signal quality across the platform.
+- `REAL` — authenticated or independently observed operational evidence with
+  current provenance.
+- `DEMO` — deterministic source-backed interface, fixture, or scenario.
+- `UNAVAILABLE` — no qualifying authenticated source or runtime witness.
+- `DEGRADED` — a qualifying source is present but observably impaired.
+- `BLOCKED` — policy, authority, or safety prevents an external action.
+- `ROADMAP` — planned capability without an implemented and observed source.
 
-Every agentic action taken anywhere in the platform routes through the Alloy Fabric. A11oy is where operators monitor, tune, and govern that activity.
+At this revision the Series-A interface and its scenarios are `DEMO`, external
+mutation is `BLOCKED`, and authenticated Workcell, GraphQL, deployment, and
+customer-runtime evidence is `UNAVAILABLE`. Source presence alone is not
+`REAL` operational evidence.
 
 ## Run locally
 
+From the monorepo root:
+
 ```bash
-# From the monorepo root
-pnpm install
-pnpm --filter @workspace/api-server dev   # Start the API server first
+pnpm install --frozen-lockfile
 pnpm --filter @workspace/a11oy dev
 ```
 
-**Primary route:** `/a11oy/`
+The local route is normally served beneath `/a11oy/`. No API server is required
+to inspect the fail-closed Series-A surface. A successful local start or HTTP
+response is not deployment evidence.
 
-## Key modules
+## Verify the source contract
 
-| Module | Route | Purpose |
-|--------|-------|---------|
-| Agent Registry | `/a11oy/` | Active agent status across all domains |
-| Covenant Policies | `/a11oy/policies` | Policy configuration and override management |
-| Brand Intelligence | `/a11oy/brand` | Cross-domain brand signal monitoring |
-| Alloy Actions | `/a11oy/actions` | Pending and completed agentic actions |
-| Proof Chain | `/a11oy/proof-chain` | Immutable audit trail viewer |
+```bash
+pnpm --filter @workspace/a11oy test:series-a
+pnpm --filter @workspace/a11oy typecheck
+pnpm --filter @workspace/a11oy build
+```
 
-## Tech stack
+Record the actual command results before making a verification claim. Hosted
+CI, protected-main merge, deployment, production health, and customer use are
+separate evidence gates.
 
-React 19 + Vite 7 + TypeScript (strict) · Express 5 (shared API server) · PostgreSQL 16 / Drizzle ORM · Multi-provider AI (Anthropic, OpenAI, Gemini) · OIDC/PKCE auth · Proof Chain audit trail
+## Product boundary
 
-## Architecture reference
+The current source includes a six-buyer `Observe → Gate → Act → Prove` demo,
+an inline developer path, a typed receipt shape, and fail-closed Omnia network
+configuration. It does not claim:
 
-Full system architecture: [`docs/architecture/architecture.md`](../../docs/architecture/architecture.md)
+- production deployment or external connector parity;
+- customer use, revenue, retention, or independently observed outcomes;
+- cryptographically verified production executions or deployed receipts;
+- certification, audit opinion, legal conclusion, or regulatory status; or
+- authority to transact, file, notify, or change a customer environment.
 
----
-
-**SZL Holdings** · [szlholdings.com](https://szlholdings.com) · [inquiries@szlholdings.com](mailto:inquiries@szlholdings.com)
+Architecture reference:
+[`docs/architecture/architecture.md`](../../docs/architecture/architecture.md).
