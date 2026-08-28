@@ -82,6 +82,19 @@ Primary PostgreSQL connection string.
 
 ---
 
+## A11oy Atelier
+
+| Variable | Classification | Purpose |
+|----------|----------------|---------|
+| `A11OY_ATELIER_XAI_API_KEY` | **optional, server-only** | Enables the fixed-endpoint xAI Responses API adapter. Never expose through a `VITE_` variable. |
+| `A11OY_ATELIER_GROK_CLI_PATH` | **optional, local-only** | Absolute path to a locally installed, signed Grok Build executable. Do not configure in deployed containers. |
+| `A11OY_ATELIER_MODEL` | **optional** | Provider model identifier; defaults to `grok-4.6`. |
+| `A11OY_ATELIER_API_BASE_URL` | **optional, CLI-only** | Base URL used by `a11oy-atelier`; defaults to `http://127.0.0.1:8080`. |
+| `A11OY_ATELIER_TENANT_ID` | **optional, CLI-only** | Tenant header used by the local CLI; defaults to `default`. |
+| `VITE_A11OY_ATELIER_TENANT_ID` | **optional, non-secret** | Development tenant selector for the browser. Production identity remains authoritative. |
+
+Atelier does **not** emit mock model responses. If neither the direct API key nor a usable local CLI path is configured, provider selection fails closed. The local CLI adapter disables tools, web search, and subagents for the v1 workbench boundary.
+
 ## Server
 
 ### `PORT`

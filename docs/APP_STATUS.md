@@ -1,6 +1,6 @@
 # SZL Holdings — Application Status Register
 
-**Date:** April 16, 2026
+**Date:** August 26, 2026
 **Status:** Authoritative single source of truth for all artifact GA/beta/internal/archived/concept status
 **Update cadence:** Update after each release or Phase completion
 
@@ -35,6 +35,19 @@
 | **Notes** | Primary corporate and investor presence; includes Lyte business observability via `szl-holdings` workspace |
 
 ---
+
+### A11oy — Governed Intelligence Fabric
+| Attribute | Value |
+|---|---|
+| **Artifact** | `artifacts/a11oy` |
+| **Package** | `@workspace/a11oy` |
+| **Status** | **Partial** |
+| **Audience** | SZL operator; enterprise evaluators after production hardening |
+| **URL** | `/a11oy/`; Atelier workbench at `/a11oy/atelier` |
+| **Authentication** | Runtime API key guard; local development may run without a configured key |
+| **Live Data** | Atelier provider adapter may use a configured xAI Responses API or local Grok Build CLI; no mock Atelier answers |
+| **Blockers** | Atelier ledger and session memory are process-local; production identity binding, durable persistence, deployment, and independent runtime witness remain incomplete |
+| **Notes** | Original SZL-owned workbench with deterministic capability denials, provider disclosure, response hashing, EvidenceLedger append, tenant-scoped memory, CLI, health route, and UI. See `docs/A11OY_ATELIER.md`. |
 
 ### Aegis — Unified Defense & Intelligence
 | Attribute | Value |
@@ -191,12 +204,12 @@ No archived artifact should be deployed, registered, or referenced as an active 
 |---|---|---|
 | GA | 2 | Carlota Jo, API Server |
 | Beta | 4 | SZL Holdings, Aegis, Terra, SZL Holdings Mobile |
-| Partial | 2 | Vessels, Command |
+| Partial | 3 | A11oy, Vessels, Command |
 | Internal | 1 | Mockup Sandbox |
 | Archived | 5 | Firestorm, Prism Counsel, Stephen Site, Lyte Command Center, Imperium |
 | Concept / Skeleton | 1 | Cortex Mobile |
-| **Total** | **15** | |
+| **Total** | **16** | |
 
 ---
 
-*Update this document after each development phase. Last updated: April 16, 2026.*
+*Update this document after each development phase. Last updated: August 26, 2026.*

@@ -563,6 +563,9 @@ Operational gaps, process health, test coverage, observability, team ownership.
 
 ## Incident Log
 
+- **2026-08-26 (A11oy Atelier local integration):** A11oy Atelier is locally wired through the governed runtime route, deterministic capability policy, xAI API/local Grok Build adapters, EvidenceLedger receipt append, tenant-scoped working memory, CLI, health surface, and A11oy UI. A live local Grok 4.6 witness and browser witness passed. Remaining gaps are production deployment witness, production identity binding, durable external ledger/session persistence, direct xAI API witness, and CI at the eventual remote exact head. Local health or inference evidence must not be reported as deployment.
+
+
 - **2026-07-28 (PR #524 post-merge Commitlint policy failure):** Protected main
   contains the exact reviewed attestation hardening tree at
   `3daa582026778294a90f07474294de72d2063012`. Commitlint failed after merge on

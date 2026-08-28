@@ -442,6 +442,9 @@ importers:
 
   apps/alloy-runtime-api:
     dependencies:
+      '@szl-holdings/a11oy-atelier':
+        specifier: workspace:*
+        version: link:../../packages/a11oy-atelier
       '@szl-holdings/agent-core':
         specifier: workspace:*
         version: link:../../packages/agent-core
@@ -2212,6 +2215,25 @@ importers:
       '@types/node':
         specifier: 'catalog:'
         version: 25.3.5
+
+  packages/a11oy-atelier:
+    dependencies:
+      '@szl-holdings/policy-engine':
+        specifier: workspace:*
+        version: link:../policy-engine
+      zod:
+        specifier: 'catalog:'
+        version: 3.25.76
+    devDependencies:
+      '@types/node':
+        specifier: 'catalog:'
+        version: 25.3.5
+      typescript:
+        specifier: 'catalog:'
+        version: 6.0.3
+      vitest:
+        specifier: 'catalog:'
+        version: 4.1.7(@opentelemetry/api@1.9.1)(@types/node@25.3.5)(@vitest/coverage-v8@4.1.8)(@vitest/ui@4.1.8)(esbuild@0.28.1)(happy-dom@20.10.2)(jiti@2.7.0)(terser@5.48.0)(tsx@4.22.4)(yaml@2.9.0)
 
   packages/a11oy-cli:
     dependencies:

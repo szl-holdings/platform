@@ -1,8 +1,9 @@
 /**
  * Tests for the API key guard + tenant context middleware.
  */
+
+import { request, type Server } from 'node:http';
 import type { AddressInfo } from 'node:net';
-import { type Server, request } from 'node:http';
 import express from 'express';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import { apiKeyGuard } from './auth.js';
@@ -17,7 +18,9 @@ function get(headers: Record<string, string> = {}): Promise<{ status: number; js
     const r = request(`${baseUrl}/guarded`, { method: 'GET', headers }, (res) => {
       let body = '';
       res.on('data', (c) => (body += c));
-      res.on('end', () => resolve({ status: res.statusCode ?? 0, json: body ? JSON.parse(body) : null }));
+      res.on('end', () =>
+        resolve({ status: res.statusCode ?? 0, json: body ? JSON.parse(body) : null }),
+      );
     });
     r.on('error', reject);
     r.end();
@@ -50,9 +53,12 @@ describe('apiKeyGuard', () => {
     delete process.env.ALLOY_API_KEY;
     process.env.NODE_ENV = 'test';
     await boot();
-    const res = await get();
+    const res = await get({ 'x-tenant-id': 'local-tenant' });
     expect(res.status).toBe(200);
-    expect(res.json.tenant).toBeNull();
+    expect(res.json.tenant).toEqual({
+      tenantId: 'local-tenant',
+      apiKeyPrefix: 'development-no-key',
+    });
   });
 
   it('returns 503 in production when ALLOY_API_KEY is not configured', async () => {

@@ -1,4 +1,4 @@
-import { useState, type ReactNode } from 'react';
+import { type ReactNode, useState } from 'react';
 import { Link, useLocation } from 'wouter';
 
 const BASE = (import.meta.env.BASE_URL ?? '/a11oy/').replace(/\/$/, '');
@@ -28,6 +28,7 @@ const NAV_GROUPS = [
   {
     label: 'INTELLIGENCE',
     items: [
+      { href: '/atelier', label: 'A11oy Atelier' },
       { href: '/recommendations', label: 'Recommendations' },
       { href: '/brief', label: 'Executive Brief' },
       { href: '/frontier', label: 'Frontier Intel' },

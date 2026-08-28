@@ -36,19 +36,26 @@
  *   POST   /v1/evals/run               — run an evaluation suite
  */
 import { Router } from 'express';
-import { apiKeyGuard } from './middleware/auth.js';
 import { buildHealthReport, buildReadinessReport } from './health.js';
+import { apiKeyGuard } from './middleware/auth.js';
+import atelierRouter from './routes/v1/atelier.js';
 import embedRouter from './routes/v1/embed.js';
 import evalsRouter from './routes/v1/evals.js';
 import indexRouter from './routes/v1/index.js';
+import lutarRouter from './routes/v1/lutar.js';
 import memoryRouter from './routes/v1/memory.js';
+import ouroborosRouter from './routes/v1/ouroboros.js';
 import searchRouter from './routes/v1/search.js';
 import tasksRouter from './routes/v1/tasks.js';
-import ouroborosRouter from './routes/v1/ouroboros.js';
-import lutarRouter from './routes/v1/lutar.js';
 import workflowsRouter from './routes/v1/workflows.js';
 
 const V1_ENDPOINTS = {
+  shellCompatibility: ['POST /api/omnia/adoption/beacon'],
+  atelier: [
+    'POST /api/a11oy/v1/atelier/ask',
+    'GET /api/a11oy/v1/atelier/health',
+    'GET /api/a11oy/v1/atelier/sessions/:sessionId',
+  ],
   tasks: ['POST /v1/tasks/plan', 'POST /v1/tasks/execute'],
   memory: ['POST /v1/memory/write', 'POST /v1/memory/query', 'DELETE /v1/memory/evict-stale'],
   workflows: [
@@ -89,6 +96,11 @@ const ALL_V1_ENDPOINTS = Object.values(V1_ENDPOINTS).flat();
 
 export function createRouter(): Router {
   const router = Router();
+
+  router.post('/api/omnia/adoption/beacon', (_req, res) => {
+    res.setHeader('X-Evidence-State', 'UNAVAILABLE');
+    res.status(204).end();
+  });
 
   router.get('/health', (_req, res) => {
     res.status(200).json({
@@ -144,6 +156,7 @@ export function createRouter(): Router {
     });
   });
 
+  router.use('/api/a11oy/v1/atelier', apiKeyGuard, atelierRouter);
   router.use('/v1/tasks', apiKeyGuard, tasksRouter);
   router.use('/v1/memory', apiKeyGuard, memoryRouter);
   router.use('/v1/workflows', apiKeyGuard, workflowsRouter);

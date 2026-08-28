@@ -8,11 +8,11 @@
 > source-tree and locked-kernel measurements. A value without reproducible
 > evidence is **UNVERIFIED**, not estimated.
 
-**Registry version:** 2.1.2
+**Registry version:** 2.1.3
 
-**Main baseline inspected:** `platform@280176de9fd99a33f1cfc2087372014e91d7ce8f`
+**Feature baseline inspected:** `platform@433b0c34c54ed28719b9fcab964c0171c2e79034`
 
-**Measured:** 2026-07-28
+**Measured:** 2026-08-26
 
 **Validator:** `node scripts/audit/validate-source-of-truth.js`
 
@@ -28,17 +28,17 @@ mutation one-shots. The validator recomputes them from whichever commit is check
 | Registered artifacts | **6** | Tracked `artifacts/*/(.replit-artifact/)?artifact.toml` files |
 | Artifact directories | **7** | Unique tracked top-level children of `artifacts/` |
 | Registered product verticals | **5** | Registered customer-facing domain artifacts; A11oy is counted separately as the orchestration product |
-| Domain packages (`packages/`) | **161** | Tracked top-level package directories; excludes root file `packages/proxy-routes.ts` |
+| Domain packages (`packages/`) | **162** | Tracked top-level package directories; excludes root file `packages/proxy-routes.ts` |
 | Shared library packages (`lib/`) | **53** | Tracked top-level library directories |
-| Total packages (`packages/` + `lib/`) | **214** | 161 + 53 |
+| Total packages (`packages/` + `lib/`) | **215** | 162 + 53 |
 | Apps (`apps/`) | **11** | Unique tracked top-level children of `apps/` |
 | Services (`services/`) | **11** | Unique tracked top-level children of `services/` |
 | Workers (`workers/`) | **5** | Unique tracked top-level children of `workers/` |
 | DB schema files | **197** | Tracked `lib/db/src/schema/**/*.ts` files |
 | DB `pgTable` call sites | **1,067** | Source call sites; not a claim about currently provisioned tables |
 | DB migrations (SQL files) | **149** | Tracked `lib/db/drizzle/*.sql` files; duplicate sequence numbers may exist |
-| API route source files | **43** | Non-test files under `apps/`, `services/`, and `artifacts/api-server/` containing a detected Express route declaration |
-| API handler declarations | **306** | Static non-test HTTP method declarations on `app`, `router`, and named Express Router receivers in the current runtime roots |
+| API route source files | **44** | Non-test files under `apps/`, `services/`, and `artifacts/api-server/` containing a detected Express route declaration |
+| API handler declarations | **311** | Static non-test HTTP method declarations on `app`, `router`, and named Express Router receivers in the current runtime roots |
 | CI workflows | **46** | Permanent tracked `.github/workflows/*.yml` and `*.yaml`, including exact-head screenshot evidence, hosted observability proof, and public npm release paths |
 | Environment variables (in `.env.example`) | **238** | Lines matching `^[A-Z_]+=` |
 

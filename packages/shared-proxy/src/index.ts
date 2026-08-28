@@ -298,15 +298,25 @@ export function sharedProxyPlugin() {
       await new Promise<void>((resolve) => {
         let settled = false;
         const finish = () => {
-          if (!settled) { settled = true; resolve(); }
+          if (!settled) {
+            settled = true;
+            resolve();
+          }
         };
         proxyServer.once('error', (err: NodeJS.ErrnoException) => {
           if (err.code !== 'EADDRINUSE') {
-            console.error(`[shared-proxy] Failed to bind on port ${SHARED_PROXY_PORT}: ${err.message}`);
+            console.error(
+              `[shared-proxy] Failed to bind on port ${SHARED_PROXY_PORT}: ${err.message}`,
+            );
           }
           finish();
         });
-        proxyServer.listen({ port: SHARED_PROXY_PORT, host: '::', reusePort: true }, finish);
+        if (process.platform === 'win32') {
+          // Windows does not implement SO_REUSEPORT for this listener shape.
+          proxyServer.listen({ port: SHARED_PROXY_PORT, host: '0.0.0.0' }, finish);
+        } else {
+          proxyServer.listen({ port: SHARED_PROXY_PORT, host: '::', reusePort: true }, finish);
+        }
       });
 
       // ── WebSocket upgrade handler ─────────────────────────────────────────
@@ -328,8 +338,12 @@ export function sharedProxyPlugin() {
           wsActiveTunnels.delete(tunnelId);
           // Post-handshake: send 1001 Going Away so the browser auto-reconnects.
           if (handshakeComplete && !socket.destroyed) {
-            try { socket.write(WS_CLOSE_GOING_AWAY); socket.end(); }
-            catch { socket.destroy(); }
+            try {
+              socket.write(WS_CLOSE_GOING_AWAY);
+              socket.end();
+            } catch {
+              socket.destroy();
+            }
           } else if (!socket.destroyed) {
             socket.destroy();
           }
@@ -346,7 +360,7 @@ export function sharedProxyPlugin() {
             const statusText = isConnRefused ? 'Service Unavailable' : 'Bad Gateway';
             socket.write(
               `HTTP/1.1 ${status} ${statusText}\r\nContent-Type: text/plain\r\nConnection: close\r\n\r\n` +
-              `WebSocket upstream on port ${targetPort} is not available.`,
+                `WebSocket upstream on port ${targetPort} is not available.`,
             );
             socket.destroy();
           }
@@ -393,7 +407,9 @@ export function sharedProxyPlugin() {
             if (!socket.destroyed && !upstream.destroyed) upstream.pipe(socket);
           });
 
-          upstream.on('data', () => { tunnel.lastDataFromUpstreamAt = Date.now(); });
+          upstream.on('data', () => {
+            tunnel.lastDataFromUpstreamAt = Date.now();
+          });
 
           socket.pipe(upstream);
 
@@ -426,8 +442,12 @@ export function sharedProxyPlugin() {
         clearInterval(healthScanTimer);
         for (const tunnel of wsActiveTunnels.values()) {
           if (!tunnel.clientSocket.destroyed) {
-            try { tunnel.clientSocket.write(WS_CLOSE_GOING_AWAY); tunnel.clientSocket.end(); }
-            catch { tunnel.clientSocket.destroy(); }
+            try {
+              tunnel.clientSocket.write(WS_CLOSE_GOING_AWAY);
+              tunnel.clientSocket.end();
+            } catch {
+              tunnel.clientSocket.destroy();
+            }
           }
           if (!tunnel.upstreamSocket.destroyed) tunnel.upstreamSocket.destroy();
           wsActiveTunnels.delete(tunnel.id);
