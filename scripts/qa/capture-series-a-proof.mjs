@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 
-import { execFileSync } from 'node:child_process';
+import { execFileSync, spawn } from 'node:child_process';
 import { createHash } from 'node:crypto';
 import {
   lstat,
@@ -32,8 +32,75 @@ const planPath =
 const outputDirectory =
   process.env.SCREENSHOT_OUTPUT_DIR?.trim() || 'artifacts/series-a-screenshot-proof';
 const MIN_CANONICAL_CAPTURE_TIMEOUT_MS = 10 * 60 * 1_000;
-const MAX_CANONICAL_CAPTURE_TIMEOUT_MS = 60 * 60 * 1_000;
-const CANONICAL_CAPTURE_TIMEOUT_PER_CASE_MS = 20 * 1_000;
+const MAX_CANONICAL_CAPTURE_TIMEOUT_MS = 90 * 60 * 1_000;
+const CANONICAL_CAPTURE_TIMEOUT_PER_CASE_MS = 75 * 1_000;
+
+function terminateChildTree(child) {
+  if (!child.pid || child.exitCode !== null) return;
+  if (process.platform === 'win32') {
+    const killer = spawn('taskkill.exe', ['/pid', String(child.pid), '/t', '/f'], {
+      stdio: 'ignore',
+      windowsHide: true,
+    });
+    killer.once('error', () => child.kill());
+    return;
+  }
+  child.kill('SIGTERM');
+}
+
+async function runChild(command, args, options) {
+  const { timeout, ...spawnOptions } = options;
+  if (!Number.isSafeInteger(timeout) || timeout <= 0) {
+    throw new Error('child timeout must be a positive safe integer');
+  }
+
+  await new Promise((resolve, reject) => {
+    const child = spawn(command, args, {
+      ...spawnOptions,
+      stdio: 'inherit',
+      windowsHide: true,
+    });
+    let timedOut = false;
+    let settled = false;
+    let forceTimer;
+
+    const settle = (error) => {
+      if (settled) return;
+      settled = true;
+      clearTimeout(timeoutTimer);
+      if (forceTimer) clearTimeout(forceTimer);
+      if (error) reject(error);
+      else resolve();
+    };
+
+    const timeoutTimer = setTimeout(() => {
+      timedOut = true;
+      terminateChildTree(child);
+      forceTimer = setTimeout(() => {
+        if (child.exitCode === null) child.kill('SIGKILL');
+      }, 5_000);
+      forceTimer.unref?.();
+    }, timeout);
+    timeoutTimer.unref?.();
+
+    child.once('error', (error) => {
+      settle(new Error(`failed to start child process ${command}`, { cause: error }));
+    });
+    child.once('close', (code, signal) => {
+      if (timedOut) {
+        settle(new Error(`child process timed out after ${timeout}ms`));
+      } else if (code !== 0) {
+        settle(
+          new Error(
+            `child process exited with code ${code ?? 'null'}${signal ? ` and signal ${signal}` : ''}`,
+          ),
+        );
+      } else {
+        settle();
+      }
+    });
+  });
+}
 
 function requiredText(name, maxLength) {
   const value = process.env[name]?.trim();
@@ -473,7 +540,7 @@ try {
   const servedAssetManifestSha256 = sha256(assetManifestBytes);
   preview = await startExactBuildServer(buildRoot);
 
-  execFileSync(process.execPath, [canonicalCapture], {
+  await runChild(process.execPath, [canonicalCapture], {
     cwd: repositoryRoot,
     env: {
       ...process.env,

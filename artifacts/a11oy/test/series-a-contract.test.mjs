@@ -295,6 +295,9 @@ test('owns a clean build and loopback server before source-bound capture', () =>
   assert.match(captureScript, /rejectSymlinkComponents/);
   assert.match(captureScript, /expectedCaptures\.size \* CANONICAL_CAPTURE_TIMEOUT_PER_CASE_MS/);
   assert.match(captureScript, /timeout: canonicalCaptureTimeoutMs/);
+  assert.match(captureScript, /await runChild\(process\.execPath, \[canonicalCapture\]/);
+  assert.match(captureScript, /const child = spawn\(command, args,/);
+  assert.doesNotMatch(captureScript, /execFileSync\(process\.execPath, \[canonicalCapture\]/);
   assert.doesNotMatch(captureScript, /PLAYWRIGHT_BASE_URL/);
   assert.ok(
     captureScript.indexOf("verifyCheckout('after teardown'") <
