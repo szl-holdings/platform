@@ -66,6 +66,7 @@ const canonicalCapture = readFileSync(
   new URL('../../../scripts/qa/capture-screenshot-proof.mjs', import.meta.url),
   'utf8',
 );
+const indexHtml = readFileSync(new URL('../index.html', import.meta.url), 'utf8');
 const capturePlan = JSON.parse(
   readFileSync(
     new URL('../../../audit/series-a-screenshot-capture-plan.json', import.meta.url),
@@ -141,8 +142,9 @@ test('provides complete investor and developer journeys with one route-owned mai
   assert.match(journey, /do not represent authenticated\s+production operations/);
   assert.doesNotMatch(journey, /\$\{BASE\}\/sdk/);
   assert.doesNotMatch(journey, /<main\b/);
+  assert.doesNotMatch(journey, /id="main-content"/);
   assert.match(page, /<main className="sa-main"/);
-  assert.match(layout, /<main\b/);
+  assert.match(layout, /<main\s+id="main-content"\s+tabIndex=\{-1\}/);
 });
 
 test('provides keyboard-operable tabs and narrow-screen layouts', () => {
@@ -236,6 +238,8 @@ test('keeps Workcell detail and replay routes inside the deterministic DEMO boun
   assert.match(workcellReplayDetail, /No authenticated production execution/);
   assert.match(workcellReplay, /workcells\/\$\{replay\.workcellId\}\/replay/);
   assert.doesNotMatch(workcellReplay, /replay\/\$\{replay\.id\}/);
+  assert.match(workcellsPage, /min-h-11 min-w-11 text-xs/);
+  assert.equal([...workcellReplay.matchAll(/min-h-11 min-w-11 px-3 rounded text-xs/g)].length, 2);
 });
 
 test('uses explicit DEMO labels on linked prototype surfaces', () => {
@@ -253,7 +257,7 @@ test('uses explicit DEMO labels on linked prototype surfaces', () => {
 });
 
 test('keeps architecture and resource destinations source-bound and safely linked', () => {
-  assert.match(architecturePage, /id="main-content"/);
+  assert.doesNotMatch(architecturePage, /id="main-content"/);
   assert.match(architecturePage, /aria-expanded=/);
   assert.match(architecturePage, /unavailable without authenticated deployed evidence/i);
   assert.match(resourcesPage, /type Availability = 'source' \| 'internal' \| 'draft'/);
@@ -264,6 +268,7 @@ test('keeps architecture and resource destinations source-bound and safely linke
     assert.doesNotMatch(resourcesPage, new RegExp(`href: '/a11oy${unsafeRoute}'`));
   }
   assert.doesNotMatch(resourcesPage, /availability: 'public'/);
+  assert.doesNotMatch(resourcesPage, /<main\b/);
 });
 
 test('gives DEMO an explicit non-LIVE visual treatment', () => {
@@ -299,6 +304,7 @@ test('owns a clean build and loopback server before source-bound capture', () =>
   assert.match(captureScript, /const child = spawn\(command, args,/);
   assert.doesNotMatch(captureScript, /execFileSync\(process\.execPath, \[canonicalCapture\]/);
   assert.doesNotMatch(captureScript, /PLAYWRIGHT_BASE_URL/);
+  assert.match(canonicalCapture, /fullPage: true, timeout: 60_000/);
   assert.ok(
     captureScript.indexOf("verifyCheckout('after teardown'") <
       captureScript.indexOf("path.join(absoluteOutputDirectory, 'source-bound-metadata.json')"),
@@ -309,6 +315,16 @@ test('uses deterministic local font stacks with no runtime font provider', () =>
   assert.doesNotMatch(rootStylesheet, /fonts\.googleapis\.com|fonts\.gstatic\.com|@import\s+url/i);
   assert.match(rootStylesheet, /--font-sans: system-ui/);
   assert.match(rootStylesheet, /--font-mono: ui-monospace/);
+});
+
+test('keeps the shared navigation responsive and its skip target verifiable', () => {
+  assert.match(layout, /window\.matchMedia\('\(min-width: 768px\)'\)\.matches/);
+  assert.match(layout, /aria-expanded=\{sidebarOpen\}/);
+  assert.match(layout, /id="primary-navigation"/);
+  assert.match(indexHtml, /min-height: 44px/);
+  assert.match(indexHtml, /opacity: 0/);
+  assert.match(indexHtml, /\.skip-to-content:focus \{[\s\S]*opacity: 1/);
+  assert.match(trustPage, /flex min-w-0 items-center gap-3/);
 });
 
 test('binds every planned route to its expected heading', () => {

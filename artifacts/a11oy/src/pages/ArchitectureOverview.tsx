@@ -1,10 +1,10 @@
+import { motion } from 'framer-motion';
 import { useState } from 'react';
 import { Layout } from '../components/layout';
-import { motion } from 'framer-motion';
 import {
-  SEVEN_PRINCIPLES,
   BLUEPRINT_COMPONENTS,
   IMPLEMENTATION_PRIORITIES,
+  SEVEN_PRINCIPLES,
 } from '../data/blueprint';
 
 const T = {
@@ -45,7 +45,7 @@ export function ArchitectureOverview() {
 
   return (
     <Layout>
-      <div id="main-content" tabIndex={-1} style={{ paddingBottom: '4rem' }}>
+      <div style={{ paddingBottom: '4rem' }}>
         <div
           style={{
             padding: '3rem 0 2.5rem',

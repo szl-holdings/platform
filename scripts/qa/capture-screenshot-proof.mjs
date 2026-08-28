@@ -688,7 +688,7 @@ try {
         const date = capturedAt.toISOString().slice(0, 10);
         const filename = `${surface}-${date}-${width}x${height}.png`;
         const filePath = path.join(normalizedOutputDir, filename);
-        await page.screenshot({ path: filePath, fullPage: true });
+        await page.screenshot({ path: filePath, fullPage: true, timeout: 60_000 });
         const bytes = await readFile(filePath);
         const record = {
           filename,

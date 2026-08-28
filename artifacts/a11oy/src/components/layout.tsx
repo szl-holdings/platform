@@ -1,4 +1,4 @@
-import { useState, type ReactNode } from 'react';
+import { type ReactNode, useEffect, useState } from 'react';
 import { Link, useLocation } from 'wouter';
 
 const BASE = (import.meta.env.BASE_URL ?? '/a11oy/').replace(/\/$/, '');
@@ -243,8 +243,17 @@ interface LayoutProps {
 }
 
 export function Layout({ children, fullscreen = false }: LayoutProps) {
-  const [sidebarOpen, setSidebarOpen] = useState(true);
+  const [sidebarOpen, setSidebarOpen] = useState(
+    () => typeof window !== 'undefined' && window.matchMedia('(min-width: 768px)').matches,
+  );
   const [location] = useLocation();
+
+  useEffect(() => {
+    const desktop = window.matchMedia('(min-width: 768px)');
+    const syncSidebarToViewport = () => setSidebarOpen(desktop.matches);
+    desktop.addEventListener('change', syncSidebarToViewport);
+    return () => desktop.removeEventListener('change', syncSidebarToViewport);
+  }, []);
 
   if (fullscreen) {
     return (
@@ -306,6 +315,8 @@ export function Layout({ children, fullscreen = false }: LayoutProps) {
               fontSize: 13,
             }}
             aria-label="Toggle sidebar"
+            aria-expanded={sidebarOpen}
+            aria-controls="primary-navigation"
           >
             ☰
           </button>
@@ -394,6 +405,7 @@ export function Layout({ children, fullscreen = false }: LayoutProps) {
       <div style={{ display: 'flex', flex: 1, minHeight: 0 }}>
         {sidebarOpen && (
           <aside
+            id="primary-navigation"
             style={{
               width: 200,
               borderRight: `1px solid ${TOKENS.border}`,
@@ -457,6 +469,8 @@ export function Layout({ children, fullscreen = false }: LayoutProps) {
           </aside>
         )}
         <main
+          id="main-content"
+          tabIndex={-1}
           style={{
             flex: 1,
             overflowY: 'auto',

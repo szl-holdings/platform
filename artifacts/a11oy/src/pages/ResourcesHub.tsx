@@ -1,6 +1,6 @@
+import { motion } from 'framer-motion';
 import { useState } from 'react';
 import { Layout } from '../components/layout';
-import { motion } from 'framer-motion';
 
 const T = {
   bg: '#0a0a0a',
@@ -218,7 +218,7 @@ export function ResourcesHub() {
 
   return (
     <Layout>
-      <main id="main-content" tabIndex={-1} style={{ paddingBottom: '4rem', outline: 'none' }}>
+      <div style={{ paddingBottom: '4rem' }}>
         <div
           style={{
             padding: '3rem 0 2.5rem',
@@ -480,7 +480,7 @@ export function ResourcesHub() {
             availability are not claimed.
           </p>
         </div>
-      </main>
+      </div>
     </Layout>
   );
 }

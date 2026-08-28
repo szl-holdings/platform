@@ -42,11 +42,7 @@ const executionModel = [
 export function ProductJourney() {
   return (
     <Layout>
-      <div
-        id="main-content"
-        tabIndex={-1}
-        className="mx-auto w-full max-w-7xl px-4 py-10 sm:px-6 lg:px-8"
-      >
+      <div className="mx-auto w-full max-w-7xl px-4 py-10 sm:px-6 lg:px-8">
         <section className="max-w-4xl" aria-labelledby="product-journey-title">
           <p className="font-mono text-xs tracking-[0.22em] text-[#c9b787]">A11OY · START HERE</p>
           <h1

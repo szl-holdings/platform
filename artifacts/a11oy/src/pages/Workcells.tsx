@@ -1,15 +1,15 @@
+import { type OperationalAvailability, SEED_WORKCELLS } from '@workspace/a11oy-fabric';
 import { useState } from 'react';
 import { Link } from 'wouter';
 import { Layout } from '../components/layout';
 import {
-  PageHeader,
+  ApprovalGate,
   Card,
   KpiCard,
-  ApprovalGate,
+  PageHeader,
   VerdictBadge,
   VerticalBadge,
 } from '../components/ui';
-import { SEED_WORKCELLS, type OperationalAvailability } from '@workspace/a11oy-fabric';
 
 const BASE = (import.meta.env.BASE_URL ?? '/a11oy/').replace(/\/$/, '');
 const VERTICAL_COLORS: Record<string, string> = {
@@ -64,7 +64,7 @@ export function Workcells() {
 
   return (
     <Layout>
-      <div id="main-content" tabIndex={-1}>
+      <div>
         <PageHeader
           label="WORKCELLS"
           title="Execution Workcell Engine"
@@ -109,7 +109,7 @@ export function Workcells() {
                 key={s}
                 aria-pressed={filterStatus === s}
                 onClick={() => setFilterStatus(s)}
-                className="min-h-11 text-xs px-2.5 py-1 rounded font-mono transition-colors"
+                className="min-h-11 min-w-11 text-xs px-2.5 py-1 rounded font-mono transition-colors"
                 style={{
                   backgroundColor:
                     filterStatus === s ? 'rgba(201,183,135,0.15)' : 'var(--color-a11oy-muted)',

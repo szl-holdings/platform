@@ -1,8 +1,8 @@
+import { SEED_WORKCELLS } from '@workspace/a11oy-fabric';
 import { useState } from 'react';
 import { Link } from 'wouter';
 import { Layout } from '../components/layout';
-import { PageHeader, Card, SectionTitle, KpiCard } from '../components/ui';
-import { SEED_WORKCELLS } from '@workspace/a11oy-fabric';
+import { Card, KpiCard, PageHeader, SectionTitle } from '../components/ui';
 
 const BASE = (import.meta.env.BASE_URL ?? '/a11oy/').replace(/\/$/, '');
 
@@ -171,7 +171,7 @@ export function WorkcellReplay() {
             key={outcome}
             aria-pressed={filterOutcome === outcome}
             onClick={() => setFilterOutcome(outcome)}
-            className="min-h-11 px-3 rounded text-xs"
+            className="min-h-11 min-w-11 px-3 rounded text-xs"
             style={{
               backgroundColor:
                 filterOutcome === outcome ? 'rgba(201,183,135,0.2)' : 'var(--color-a11oy-muted)',
@@ -191,7 +191,7 @@ export function WorkcellReplay() {
             key={domain}
             aria-pressed={filterDomain === domain}
             onClick={() => setFilterDomain(domain)}
-            className="min-h-11 px-3 rounded text-xs"
+            className="min-h-11 min-w-11 px-3 rounded text-xs"
             style={{
               backgroundColor:
                 filterDomain === domain ? 'rgba(138,138,138,0.2)' : 'var(--color-a11oy-muted)',

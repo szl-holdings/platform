@@ -1,11 +1,11 @@
 import { useState } from 'react';
 import { Link } from 'wouter';
 import { Layout } from '../components/layout';
-import { PageHeader, Card, SectionTitle, StatusPill } from '../components/ui';
+import { Card, PageHeader, SectionTitle, StatusPill } from '../components/ui';
 import {
-  TRUST_ATTESTATIONS,
   CONTROL_MAPPINGS,
   type ControlMapping,
+  TRUST_ATTESTATIONS,
 } from '../data/complianceFabric';
 
 interface TrustSection {
@@ -272,7 +272,7 @@ export function TrustCenter() {
                 className="min-h-11 w-full text-left p-4 flex items-center justify-between gap-3"
                 style={{ backgroundColor: 'var(--color-a11oy-surface)' }}
               >
-                <div className="flex items-center gap-3">
+                <div className="flex min-w-0 items-center gap-3">
                   <span
                     className="text-xs px-1.5 py-0.5 rounded font-mono"
                     style={{ color: style.color, backgroundColor: style.bg }}
@@ -280,7 +280,7 @@ export function TrustCenter() {
                     {style.label}
                   </span>
                   <span
-                    className="text-sm font-medium"
+                    className="min-w-0 text-sm font-medium break-words"
                     style={{ color: 'var(--color-a11oy-text)' }}
                   >
                     {SECTION_LABELS[key] ?? key}
