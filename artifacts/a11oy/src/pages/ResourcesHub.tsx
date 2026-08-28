@@ -327,7 +327,7 @@ export function ResourcesHub() {
             <div
               style={{
                 display: 'grid',
-                gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))',
+                gridTemplateColumns: 'repeat(auto-fill, minmax(min(300px, 100%), 1fr))',
                 gap: '1px',
                 background: T.border,
                 borderRadius: 12,
@@ -350,6 +350,7 @@ export function ResourcesHub() {
                       display: 'flex',
                       flexDirection: 'column',
                       gap: '0.75rem',
+                      minWidth: 0,
                     }}
                   >
                     <div

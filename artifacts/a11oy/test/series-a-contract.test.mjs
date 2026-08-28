@@ -269,6 +269,7 @@ test('keeps architecture and resource destinations source-bound and safely linke
   }
   assert.doesNotMatch(resourcesPage, /availability: 'public'/);
   assert.doesNotMatch(resourcesPage, /<main\b/);
+  assert.match(resourcesPage, /minmax\(min\(300px, 100%\), 1fr\)/);
 });
 
 test('gives DEMO an explicit non-LIVE visual treatment', () => {
