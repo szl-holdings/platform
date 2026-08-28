@@ -1,6 +1,6 @@
 {
   "schema": "szl.truth/v1",
-  "generated_at": "2026-08-20T11:02:28.823Z",
+  "generated_at": "2026-08-28T16:26:42Z",
   "generated_by": "tools/truth/generate-truth.ts@szl.truth/v1",
   "metrics": {
     "surfaces_customer_facing": {
@@ -27,7 +27,7 @@
       "source": "artifacts/mcp-e2e-test-results.json"
     },
     "monorepo_packages": {
-      "value": 202,
+      "value": 203,
       "label": "MEASURED",
       "source": "pnpm -r list --depth -1 --json"
     },
