@@ -1,6 +1,6 @@
 # SZL Holdings — Known Gaps Register (Security & Operations)
 
-**Last updated:** 2026-08-26 (rev 26 — Lighthouse gate integrity)
+**Last updated:** 2026-08-26 (rev 26 — Lighthouse gate integrity; PR #668 source/proof boundary)
 **Owner:** Engineering / DevOps  
 **Audience:** Enterprise architects, Series A technical advisors, incoming VP Engineering
 
@@ -46,6 +46,24 @@ daily schedule and an explicit manual `require_truth_freshness` input run
 requires rerunning the canonical generator with its admitted local and remote
 sources and reviewing the resulting evidence; changing only the timestamp is
 not an accepted remediation.
+
+### 2026-08-26 A11oy Series A route boundary
+
+PR #668 now has a source-complete /a11oy/start candidate on
+codex/series-a-product-current-main-v4. The route keeps all six operational
+truth states visible, labels its current scenarios DEMO or UNAVAILABLE, and
+contains the developer-verification and non-claim boundaries on the same
+surface. A local exact-source rail built and hashed 344 files, exercised all
+six tabs and keyboard behavior at five viewports, and promoted digest-matched
+screenshots. That establishes source and local-build behavior only.
+
+Hosted exact-head checks, fresh review, protected merge, deployment, production
+health, customer use, and external-service parity remain separate evidence
+states. No deployment or customer witness is currently attached to this task,
+so those states remain UNAVAILABLE. The repository-wide strict claims gate also
+continues to fail closed on the Vessels/AIS mock while MARINETRAFFIC_API_KEY is
+absent; PR #668 does not relabel that external-authority gap or introduce a
+credential to bypass it.
 
 ---
 

@@ -1,87 +1,147 @@
-# PR #668 Series A product view — proof packet
+# PR #668 Series A product view — Level 4 proof packet
 
-- `workcell_id`: `P0-SERIES-A-PRODUCT-WIRING-20260811`
-- `agent`: Codex
-- `objective`: Publish the truth-qualified `/a11oy/start` product view on the
-  current protected-main base, repair screenshot provenance so hosted identity
-  fails closed, and record fresh exact-source visual evidence without carrying
-  predecessor workflow, proof, truth-count, or screenshot artifacts.
-- `plan_summary`: Reconstruct the bounded product delta from protected main;
-  validate its route, types, contracts, and build; repair capture provenance in
-  a forward-only commit; capture the real built application from that exact
-  clean source at five viewports; inspect every PNG; then promote only the fresh
-  PNGs, raw metadata, catalog record, and this packet in one evidence-only
-  commit. Recapture the resulting PR head and record byte equivalence in the PR
-  discussion without changing source again.
-- `patch_summary`:
-  - the product commit changes the intended 15 product, route, type, test, and
-    capture-script paths from protected base
-    `7383a30fffeb44c7e8a3fa2c27e176ee450607fd`;
-  - repair commit `11e6d637ab6f15934a63458ab146c75e8813aaec`,
-    tree `1b35c727a64c5f19b2d52d9774afbe1c8eec3efa`, changes only
-    `artifacts/a11oy/test/series-a-contract.test.mjs` and
-    `scripts/qa/capture-series-a-proof.mjs`;
-  - the repair requires validated GitHub runtime metadata for hosted authority,
-    labels local captures `LOCAL_NON_AUTHORITATIVE`, and verifies the checkout
-    SHA, tree, branch, and tracked cleanliness before and after capture;
-  - this evidence-only delta adds five fresh PNGs and their raw metadata, appends
-    the complete catalog identity, and adds this packet. It does not add a
-    workflow, predecessor image, task file, truth/count record, known-gap edit,
-    application source change, or public-copy change.
-- `test_results`:
-  - repository-pinned pnpm `10.26.1` frozen install: PASS; lockfile unchanged;
-  - `node --test artifacts/a11oy/test/series-a-contract.test.mjs`: PASS, 10/10;
-  - A11oy runtime Vitest suite: PASS, 37/37;
-  - A11oy runtime native Node suite: PASS, 47/47;
-  - A11oy and A11oy runtime TypeScript checks: PASS;
-  - Biome and Oxlint on the two provenance-repair paths: PASS;
-  - capture-script Node syntax and Git whitespace checks: PASS;
-  - A11oy production build: PASS, 3,343 modules transformed and a
-    `SeriesAView` chunk emitted;
-  - local exact-source capture: PASS, 5/5 viewports; HTTP 200, six tabs
-    exercised, scroll origin restored, no horizontal overflow, no console or
-    page errors, and no undeclared API requests;
-  - same-source repeat capture: PASS; all five PNGs are byte-identical to the
-    promoted files;
-  - original-resolution visual inspection: PASS at 320, 390, 768, 1366, and
-    1728 CSS-pixel widths; no visual defect observed.
-- `screenshot_refs`:
-  - [`a11oy-series-a-320-2026-08-26.png`](../docs/assets/screenshots/current/a11oy-series-a-320-2026-08-26.png) — `/a11oy/start`, `320x900`;
-  - [`a11oy-series-a-390-2026-08-26.png`](../docs/assets/screenshots/current/a11oy-series-a-390-2026-08-26.png) — `/a11oy/start`, `390x900`;
-  - [`a11oy-series-a-768-2026-08-26.png`](../docs/assets/screenshots/current/a11oy-series-a-768-2026-08-26.png) — `/a11oy/start`, `768x1024`;
-  - [`a11oy-series-a-1366-2026-08-26.png`](../docs/assets/screenshots/current/a11oy-series-a-1366-2026-08-26.png) — `/a11oy/start`, `1366x900`;
-  - [`a11oy-series-a-1728-2026-08-26.png`](../docs/assets/screenshots/current/a11oy-series-a-1728-2026-08-26.png) — `/a11oy/start`, `1728x1000`;
-  - [raw capture metadata](../docs/assets/screenshots/current/a11oy-series-a-capture-metadata-2026-08-26.json.txt) and [catalog entries](screenshot-catalog.md#pr-668-series-a-product-view-evidence--2026-08-26).
-- `verification_notes`: The captures were produced at source commit
-  `11e6d637ab6f15934a63458ab146c75e8813aaec` and tree
-  `1b35c727a64c5f19b2d52d9774afbe1c8eec3efa` from a tracked-clean checkout.
-  Metadata records Linux x64, Node `v24.19.0`, Chrome for Testing
-  `148.0.7778.96`, route `/a11oy/start`, exact viewport and document sizes,
-  timestamps, assertions, and PNG digests. The exact browser archive was
-  118,673,688 bytes with SHA-256
-  `88817c574c1838a39f88fda0bbd043b4481fd385fb10e92c323e230844d636ce`;
-  archive integrity and runtime version were verified. Vite preview could not
-  enumerate sandbox network interfaces (`uv_interface_addresses`), so the
-  already-built production bytes were served on `127.0.0.1` by a loopback-only
-  Python `ThreadingHTTPServer` adapter that mapped the configured `/a11oy/`
-  base and SPA fallback. The capture remains explicitly local and
-  non-authoritative for hosted gates.
-- `public_claim_check`: PASS. The evidence records only source-observed
-  prototype/demo/unavailable states. It does not claim a deployment, customer,
-  revenue, compliance status, production mutation, live connector, or external
-  service parity.
-- `security_check`: PASS. No token, credential, `.env` value, workflow, or
-  executable source is added by the evidence delta. The metadata contains no
-  GitHub run identity because local mode is fail-closed and non-authoritative.
-- `known_gaps_update`: None. The evidence delta introduces or closes no product
-  gap; hosted checks and fresh review are completion gates rather than a
-  product-state change.
-- `proof_level`: 4 — full proof for a public-facing route change. This is not a
-  release claim or Level 5 release packet.
-- `identity_boundary`: The evidence commit cannot embed its own commit SHA
-  without self-reference. Its parent is the exact captured source. After this
-  packet is committed, the exact GitHub evidence head must be reconstructed and
-  recaptured. All five PNGs must be byte-identical to the committed files; that
-  final-head receipt belongs in PR discussion, with no later source mutation.
-- `recorded_at`: `2026-08-26T16:05:52Z`
-- `recorded_by`: Codex
+- **workcell_id:** P0-SERIES-A-PRODUCT-WIRING-20260811
+- **agent:** Codex
+- **pull_request:** szl-holdings/platform#668
+- **source_lane:** codex/series-a-product-current-main-v4
+- **objective:** Publish one truth-qualified A11oy Series A route from the current
+  protected-main line, make local screenshot provenance fail closed, and leave
+  hosted promotion to exact-head checks and the protected pull-request path.
+- **proof_level:** 4 — public route source, build, behavior, and visual proof.
+  This is not a Level 5 release packet or a production-runtime witness.
+
+## Context and root cause
+
+The prior candidate exposed seeded buyer journeys without a single route that
+kept the product story, source boundary, operational-state vocabulary,
+developer path, receipt shape, and non-claims together. Its screenshot rail
+also trusted a caller-provided loopback server and therefore could not prove
+that captured pixels came from the validated source revision.
+
+The repaired rail now builds into a fresh OS-temporary directory, hashes every
+emitted file, serves only that immutable snapshot from an in-process node:http
+listener on an OS-assigned 127.0.0.1 port, and binds the browser response to
+the source SHA, source tree, manifest digest, and a per-run nonce. Foreign HTTP
+and WebSocket connections fail closed before connection.
+
+## Patch disposition
+
+Source commit 4ca56d79a229a7207883475e368967c24c061df4, tree
+cb311e5c9fb1caf8e1ccfcc9d5fea0b203ca92b6, provides:
+
+- a self-contained /a11oy/start page with six deterministic buyer views;
+- a truth-safe /a11oy/investor-demo compatibility alias to the same page;
+- visible REAL, DEMO, UNAVAILABLE, DEGRADED, BLOCKED, and ROADMAP definitions,
+  with no current item silently promoted to REAL;
+- seven developer-verification steps and seven receipt-contract fields;
+- internal fragment navigation only, with no outbound product claim;
+- all tab panels mounted with resolved ARIA relationships and keyboard
+  navigation for Arrow keys, Home, and End;
+- an exact-source capture rail with owned build, server, network policy,
+  deterministic manifesting, safe proof publication, and owned cleanup;
+- behavioral coverage for output containment, digest-verified publication,
+  no-overwrite behavior, tamper cleanup, and foreign HTTP/WebSocket blocking;
+- corrected strict-claims verifier lookup for the tracked
+  audit/launch/claim-evidence-ledger.json path without weakening its result.
+
+## Test and doctrine loop
+
+| Gate | Result | Observed evidence |
+|---|---|---|
+| Frozen workspace install | PASS | pnpm 10.26.1; 202 workspaces linked; lockfile unchanged |
+| Node syntax | PASS | capture rail, helper, helper tests, and claims verifier |
+| Biome | PASS | all modified source and test paths |
+| Series A package suite | PASS | 16/16 tests |
+| A11oy typecheck | PASS | repository-pinned package task |
+| A11oy production build | PASS | Vite 8.0.16; 3,342 modules transformed |
+| Brand gate | PASS | pnpm brand:check |
+| Overclaim audit | PASS | 26/26 documentation claims |
+| Documentation claims | PASS | 26/26 documentation claims |
+| Advisory claims verifier | PASS | 90/106 working; 12 partial; 3 dormant; 1 mock; 0 broken |
+| Strict claims verifier | BLOCKED | honest fail-closed Vessels/AIS mock; MARINETRAFFIC_API_KEY absent |
+| Git whitespace | PASS | git diff --check |
+| Secret-pattern review | PASS | no credential or .env value added |
+
+The strict claims result was not relabeled, bypassed, or supplied with an
+unapproved credential. It is a repository-wide external-authority blocker,
+not a failure of the A11oy route or its capture rail.
+
+## Exact-source screenshot proof
+
+The local rail ran from a tracked-clean checkout with:
+
+- SOURCE_REPOSITORY=szl-holdings/platform
+- SOURCE_SHA=4ca56d79a229a7207883475e368967c24c061df4
+- SOURCE_TREE_SHA=cb311e5c9fb1caf8e1ccfcc9d5fea0b203ca92b6
+- SOURCE_REF=codex/series-a-product-current-main-v4
+- CAPTURE_ROUTE=/a11oy/start
+
+The result was 5/5 PASS. The promoted raw metadata is
+[a11oy-series-a-capture-metadata-2026-08-26.json.txt](../docs/assets/screenshots/current/a11oy-series-a-capture-metadata-2026-08-26.json.txt),
+SHA-256
+EB5B78ECDCD1D8D952DA75D4BDADC61B8A48B7CC7427F13FF5AB7DA300327399.
+
+Build identity:
+
+- Node v24.19.0
+- pnpm 10.26.1, equal to the repository pin
+- Vite 8.0.16 on win32-x64 and Node v24.19.0
+- lockfile SHA-256
+  8CA498A12F4AF40D42D31A74DA3A193A83AB60758E13A59B0AA6F8E7DE0B0418
+- canonical 344-file manifest SHA-256
+  806485B29F378B1AAA38F3AF2984AB65C74A677F9CAE1282F6B7D52756B2ACD5
+- entry document SHA-256
+  6510BCBEC50E14BAF4AAF73DC52DECA5F3CFEF8ADE65B6008744C50935F6E26B
+- build size 16,537,771 bytes
+- proof nonce SHA-256
+  4A64BFEA9C22C724B9FC2D38036574326850A633BECA06DAA31779D9D561068A
+
+| Viewport | Captured at | Full document | PNG SHA-256 |
+|---|---|---|---|
+| 320x900 | 2026-08-26T20:39:02.479Z | 320x9155 | EEE8ED83F6E01A56EF1774EBF2C4426B9763C24A28008636511CB890FF967DCC |
+| 390x900 | 2026-08-26T20:39:05.086Z | 390x8356 | C0EEEB0AE3FF7067D48D50B1038CD75EBD75709FD0289998F456C2BEB87FA6DE |
+| 768x1024 | 2026-08-26T20:39:08.761Z | 768x5205 | 61A210B5C27A8CC666CD5FF1699CAE346BE8D8F5473921695C6065CA34FDB181 |
+| 1366x900 | 2026-08-26T20:39:17.398Z | 1366x4620 | 431C37C0D8518D05A3F63D58F0BE1756F2CE66633C9CAC83831E7F265FDE3444 |
+| 1728x1000 | 2026-08-26T20:39:20.103Z | 1728x4665 | D679D023CC298E4442EEB9A272B51B8C0D4C1220D9206547B752FF4278F59008 |
+
+Every viewport recorded HTTP 200, exact served-build identity, document-digest
+verification, six states, six exercised tabs, resolved ARIA controls, keyboard
+navigation, seven developer steps, seven receipt fields, zero outbound or
+missing-fragment targets, restored scroll origin, no horizontal overflow, no
+console/page/API errors, no foreign network or WebSocket requests, blocked
+service workers, and one intentionally stubbed Google Fonts request.
+
+All five full-page captures were decoded and visually inspected. The responsive
+layouts, copy hierarchy, truth-state badges, selected/focused tab, cards, and
+non-claims remained readable without observed overlap or horizontal clipping.
+The Codex desktop image renderer and optional in-app browser kernel both hit
+local ACL/tooling faults; those tool faults did not replace or weaken the
+repository-owned Playwright assertions.
+
+## Security and public-claim check
+
+- The rail removes inherited VITE_*, evidence-output, and REPL_ID values.
+- It accepts only its owned exact origin, blocks service workers and
+  pre-connect WebSockets, and never kills or scans for a foreign process.
+- It publishes through adjacent copy, digest verification, and atomic rename;
+  destination overwrite is not allowed.
+- No token, credential, secret value, workflow bypass, database mutation,
+  deployment, or production/customer assertion was added.
+- The route is source-qualified DEMO/UNAVAILABLE evidence. Local HTTP 200, a
+  passing build, and captured pixels are not deployment or customer proof.
+
+## Promotion boundary
+
+This packet binds the promoted screenshots to the exact source parent. An
+evidence commit cannot embed its own SHA without recursion. After this packet
+is committed and pushed, the final PR head must be recaptured; byte equivalence
+of the five committed PNGs and the final-head receipt belong in the PR
+discussion. Hosted exact-head CI, fresh review, resolution of the two review
+threads, draft removal, and a normal protected squash merge remain separate
+promotion gates. No administrator bypass or force push is authorized.
+
+- **task_disposition:** source complete; protected promotion tracked in PR #668
+- **deployment_disposition:** UNAVAILABLE — no deployment requested or witnessed
+- **customer_runtime_disposition:** UNAVAILABLE — no customer use observed
+- **recorded_at:** 2026-08-26T20:45:00Z
+- **recorded_by:** Codex

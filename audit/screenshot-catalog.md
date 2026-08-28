@@ -645,29 +645,46 @@ Artifact `public/` and `dist/public/` directories contain static assets embedded
 
 The following five entries share this required capture identity:
 
-- `route`: `/a11oy/start`
-- `surface`: A11oy Series A product view
-- `captured_by`: Codex
-- `capture_environment`: `local-exact-head`
-- `source_revision`: `11e6d637ab6f15934a63458ab146c75e8813aaec`
-- `source_tree`: `1b35c727a64c5f19b2d52d9774afbe1c8eec3efa`
-- `workflow_run_or_command`: `env -u GITHUB_ACTIONS PLAYWRIGHT_BROWSERS_PATH=/tmp/playwright-series-a SOURCE_REPOSITORY=szl-holdings/platform SOURCE_SHA=11e6d637ab6f15934a63458ab146c75e8813aaec SOURCE_TREE_SHA=1b35c727a64c5f19b2d52d9774afbe1c8eec3efa SOURCE_REF=local/series-a-repair-11e6 PLAYWRIGHT_BASE_URL=http://127.0.0.1:4173 CAPTURE_ROUTE=/a11oy/start PROOF_OUTPUT_DIR=artifacts/series-a-screenshot-proof-local-11e6 node scripts/qa/capture-series-a-proof.mjs`
-- `workcell_id`: `P0-SERIES-A-PRODUCT-WIRING-20260811`
-- `proof_level`: 4
-- `status`: `current`
-- `metadata_sidecar`: [`a11oy-series-a-capture-metadata-2026-08-26.json.txt`](../docs/assets/screenshots/current/a11oy-series-a-capture-metadata-2026-08-26.json.txt), SHA-256 `58f976b8e45d92ba116e7013de9005ba41267731617ad464d039e5119594898c`
+- **route:** /a11oy/start
+- **surface:** A11oy Series A product view
+- **captured_by:** Codex
+- **capture_environment:** LOCAL_NON_AUTHORITATIVE exact-source rail
+- **source_revision:** 4ca56d79a229a7207883475e368967c24c061df4
+- **source_tree:** cb311e5c9fb1caf8e1ccfcc9d5fea0b203ca92b6
+- **source_ref:** codex/series-a-product-current-main-v4
+- **capture_command:** node scripts/qa/capture-series-a-proof.mjs
+- **capture_inputs:** repository, SHA, tree, ref, /a11oy/start route, and a new
+  proof output directory were supplied explicitly; PLAYWRIGHT_BASE_URL was not
+  accepted
+- **workcell_id:** P0-SERIES-A-PRODUCT-WIRING-20260811
+- **proof_level:** 4
+- **status:** current local source proof; hosted exact-head authority pending
+- **metadata_sidecar:**
+  [a11oy-series-a-capture-metadata-2026-08-26.json.txt](../docs/assets/screenshots/current/a11oy-series-a-capture-metadata-2026-08-26.json.txt),
+  SHA-256
+  EB5B78ECDCD1D8D952DA75D4BDADC61B8A48B7CC7427F13FF5AB7DA300327399
+- **build_manifest_sha256:**
+  806485B29F378B1AAA38F3AF2984AB65C74A677F9CAE1282F6B7D52756B2ACD5
+- **entry_document_sha256:**
+  6510BCBEC50E14BAF4AAF73DC52DECA5F3CFEF8ADE65B6008744C50935F6E26B
 
 | Filename | Capture time | Viewport | Artifact SHA-256 | Notes |
-|----------|--------------|----------|-----------------|-------|
-| `docs/assets/screenshots/current/a11oy-series-a-320-2026-08-26.png` | `2026-08-26T15:59:30.191Z` | `320x900` CSS px; full page `320x5630` | `635c5e3c130ea2609b87d0860a2a588e6597b5f1ae3ec65ee423a84229748545` | PASS; loaded app frame, explicit prototype/demo/unavailable states, no horizontal overflow, console error, page error, or undeclared API request. |
-| `docs/assets/screenshots/current/a11oy-series-a-390-2026-08-26.png` | `2026-08-26T15:59:31.618Z` | `390x900` CSS px; full page `390x5076` | `87410d9925203f69efd3d4717be0263103dc17bc351b5d6221bc2319aee71f5d` | PASS; loaded app frame, explicit prototype/demo/unavailable states, no horizontal overflow, console error, page error, or undeclared API request. |
-| `docs/assets/screenshots/current/a11oy-series-a-768-2026-08-26.png` | `2026-08-26T15:59:33.105Z` | `768x1024` CSS px; full page `768x3275` | `4298495fe2f1f736601f2652f414fd17b226307d5db4a0a4f22f6d0415d013b7` | PASS; loaded app frame, explicit prototype/demo/unavailable states, no horizontal overflow, console error, page error, or undeclared API request. |
-| `docs/assets/screenshots/current/a11oy-series-a-1366-2026-08-26.png` | `2026-08-26T15:59:34.380Z` | `1366x900` CSS px; full page `1366x2855` | `641f83226d07b416ed2bba3bc9a0ea5e0d0b774b4b8322a2abecfeb7c871b7d5` | PASS; loaded app frame, explicit prototype/demo/unavailable states, no horizontal overflow, console error, page error, or undeclared API request. |
-| `docs/assets/screenshots/current/a11oy-series-a-1728-2026-08-26.png` | `2026-08-26T15:59:36.629Z` | `1728x1000` CSS px; full page `1728x2898` | `c203575f83b701f0dbed69f72713d9df043209596e0232bed89aba5756a68413` | PASS; loaded app frame, explicit prototype/demo/unavailable states, no horizontal overflow, console error, page error, or undeclared API request. |
+|---|---|---|---|---|
+| docs/assets/screenshots/current/a11oy-series-a-320-2026-08-26.png | 2026-08-26T20:39:02.479Z | 320x900 CSS px; full page 320x9155 | EEE8ED83F6E01A56EF1774EBF2C4426B9763C24A28008636511CB890FF967DCC | PASS; exact served build, six states/tabs, keyboard and ARIA checks, no overflow or undeclared network. |
+| docs/assets/screenshots/current/a11oy-series-a-390-2026-08-26.png | 2026-08-26T20:39:05.086Z | 390x900 CSS px; full page 390x8356 | C0EEEB0AE3FF7067D48D50B1038CD75EBD75709FD0289998F456C2BEB87FA6DE | PASS; exact served build, six states/tabs, keyboard and ARIA checks, no overflow or undeclared network. |
+| docs/assets/screenshots/current/a11oy-series-a-768-2026-08-26.png | 2026-08-26T20:39:08.761Z | 768x1024 CSS px; full page 768x5205 | 61A210B5C27A8CC666CD5FF1699CAE346BE8D8F5473921695C6065CA34FDB181 | PASS; exact served build, six states/tabs, keyboard and ARIA checks, no overflow or undeclared network. |
+| docs/assets/screenshots/current/a11oy-series-a-1366-2026-08-26.png | 2026-08-26T20:39:17.398Z | 1366x900 CSS px; full page 1366x4620 | 431C37C0D8518D05A3F63D58F0BE1756F2CE66633C9CAC83831E7F265FDE3444 | PASS; exact served build, six states/tabs, keyboard and ARIA checks, no overflow or undeclared network. |
+| docs/assets/screenshots/current/a11oy-series-a-1728-2026-08-26.png | 2026-08-26T20:39:20.103Z | 1728x1000 CSS px; full page 1728x4665 | D679D023CC298E4442EEB9A272B51B8C0D4C1220D9206547B752FF4278F59008 | PASS; exact served build, six states/tabs, keyboard and ARIA checks, no overflow or undeclared network. |
 
-All five PNGs were visually inspected at original resolution. No clipping,
-overlap, missing content, broken styling, loading state, placeholder token, or
-error surface was observed. A second independent capture from the same exact
-source produced byte-identical PNGs at all five viewports. This local capture
-is intentionally labeled non-authoritative for hosted gates; final PR-head
-equivalence and hosted checks remain separate requirements.
+The rail built 344 files into a fresh temporary directory, served an immutable
+in-memory snapshot from an owned ephemeral loopback listener, verified the
+entry-document digest and response identity, blocked foreign HTTP/WebSocket
+connections and service workers, and removed the owned temporary build. All
+five promoted PNG digests match the generated proof bytes.
+
+All five full-page captures were decoded and visually inspected. No responsive
+layout defect, horizontal clipping, overlap, error surface, or truth-label
+regression was observed. This local evidence proves exact source and local
+build behavior only. It does not prove hosted execution, deployment,
+production runtime, customer use, or external-service parity. Final PR-head
+byte equivalence and hosted checks remain separate promotion requirements.
