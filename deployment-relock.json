@@ -1,0 +1,14 @@
+{
+  "schema": "szl.deployment-relock/v1",
+  "requested_at": "2026-08-28T00:00:00Z",
+  "source_authority": "protected-main-after-squash-merge",
+  "targets": [
+    "a-11-oy.com",
+    "a11oy.net"
+  ],
+  "claims": {
+    "merge_is_deployment": false,
+    "live_revision_requires_readback": true,
+    "responsive_delivery_requires_live_probe": true
+  }
+}
