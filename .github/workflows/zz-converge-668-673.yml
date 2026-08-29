@@ -1,0 +1,141 @@
+name: Converge platform PRs 668 and 673
+
+on:
+  push:
+    branches:
+      - ops/converge-668-673-20260828
+
+permissions:
+  contents: write
+  pull-requests: write
+
+concurrency:
+  group: converge-platform-668-673
+  cancel-in-progress: false
+
+jobs:
+  converge:
+    if: github.repository == 'szl-holdings/platform' && github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - name: Check out exact controller branch
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          ref: ops/converge-668-673-20260828
+          fetch-depth: 0
+          persist-credentials: true
+
+      - name: Update behind heads and enable protected squash auto-merge
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: szl-holdings/platform
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          from __future__ import annotations
+
+          import json
+          import os
+          from pathlib import Path
+          import subprocess
+
+          repository = os.environ["GH_REPO"]
+          receipt = {
+              "schema": "szl.platform-pr-convergence/v1",
+              "repository": repository,
+              "pull_requests": [],
+          }
+
+          def gh_json(*args: str) -> object:
+              result = subprocess.run(
+                  ["gh", *args],
+                  check=True,
+                  capture_output=True,
+                  text=True,
+                  encoding="utf-8",
+              )
+              return json.loads(result.stdout) if result.stdout.strip() else {}
+
+          for number in (668, 673):
+              pr = gh_json(
+                  "api",
+                  f"repos/{repository}/pulls/{number}",
+                  "--method",
+                  "GET",
+              )
+              row = {
+                  "number": number,
+                  "state": pr.get("state") if isinstance(pr, dict) else None,
+                  "draft": pr.get("draft") if isinstance(pr, dict) else None,
+                  "action": "NONE",
+              }
+              receipt["pull_requests"].append(row)
+              if not isinstance(pr, dict) or pr.get("state") != "open":
+                  row["action"] = "ALREADY_CLOSED"
+                  continue
+              head = pr.get("head") if isinstance(pr.get("head"), dict) else {}
+              base = pr.get("base") if isinstance(pr.get("base"), dict) else {}
+              head_repo = head.get("repo") if isinstance(head.get("repo"), dict) else {}
+              if (
+                  pr.get("draft") is True
+                  or base.get("ref") != "main"
+                  or head_repo.get("full_name") != repository
+              ):
+                  row["action"] = "REFUSED_NONCANONICAL"
+                  continue
+              head_sha = head.get("sha")
+              if pr.get("mergeable_state") == "behind":
+                  update = gh_json(
+                      "api",
+                      f"repos/{repository}/pulls/{number}/update-branch",
+                      "--method",
+                      "PUT",
+                      "-f",
+                      f"expected_head_sha={head_sha}",
+                  )
+                  row["updated_branch"] = update
+              process = subprocess.run(
+                  [
+                      "gh",
+                      "pr",
+                      "merge",
+                      str(number),
+                      "--repo",
+                      repository,
+                      "--auto",
+                      "--squash",
+                  ],
+                  capture_output=True,
+                  text=True,
+                  encoding="utf-8",
+              )
+              if process.returncode != 0:
+                  row["action"] = "AUTO_MERGE_NOT_ENABLED"
+                  row["diagnostic"] = (process.stderr or process.stdout)[-2000:]
+              else:
+                  row["action"] = "AUTO_MERGE_ENABLED"
+
+          path = Path("audit/PLATFORM_PR_CONVERGENCE_668_673_20260828.json")
+          path.parent.mkdir(parents=True, exist_ok=True)
+          path.write_text(
+              json.dumps(receipt, ensure_ascii=False, sort_keys=True, indent=2) + "\n",
+              encoding="utf-8",
+          )
+          workflow = Path(".github/workflows/zz-converge-668-673.yml")
+          if not workflow.is_file():
+              raise RuntimeError("self-deleting controller workflow is missing")
+          workflow.unlink()
+          PY
+
+          git config user.name "Lutar, Stephen P."
+          git config user.email "stephenlutar2@gmail.com"
+          git add audit/PLATFORM_PR_CONVERGENCE_668_673_20260828.json \
+            .github/workflows/zz-converge-668-673.yml
+          git diff --cached --check
+          git commit \
+            -m "ops(pr): record platform convergence decisions" \
+            -m "Update only behind canonical heads for PRs 668 and 673, enable protected squash auto-merge, and remove the one-shot controller." \
+            -m "Signed-off-by: Lutar, Stephen P. <stephenlutar2@gmail.com>"
+          git push origin HEAD:ops/converge-668-673-20260828
