@@ -151,10 +151,10 @@ Automated coverage gap: Lighthouse/axe-core does not catch all WCAG criteria. Th
 
 | Check | Automated | Tool | Threshold |
 |-------|-----------|------|-----------|
-| axe-core WCAG rules | ✅ Yes | Lighthouse CI via `lighthouse.yml` | Enforced ≥ 90 |
-| Color contrast | ✅ Partial | Lighthouse accessibility audit | Enforced ≥ 90 |
-| Alt text on images | ✅ Yes | Lighthouse | Enforced ≥ 90 |
-| Form label associations | ✅ Yes | Lighthouse | Enforced ≥ 90 |
+| axe-core WCAG rules | ✅ Yes | Lighthouse CI via `lighthouse.yml` | **Aggregate accessibility category gate (0.90)** |
+| Color contrast | ✅ Partial | Lighthouse accessibility audit | **Aggregate accessibility category gate (0.90)** |
+| Alt text on images | ✅ Yes | Lighthouse | **Aggregate accessibility category gate (0.90)** |
+| Form label associations | ✅ Yes | Lighthouse | **Aggregate accessibility category gate (0.90)** |
 | Keyboard navigation flow | ❌ No | Manual review required | — |
 | Screen reader announcements | ❌ No | Manual review required | — |
 | Focus management | ❌ No | Manual review with NVDA/VoiceOver | — |
