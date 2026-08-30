@@ -25,9 +25,24 @@ function html(body = '<!doctype html><title>fallback</title>') {
   });
 }
 
+// Exact-host matching. Using `url.includes(host)` to route a mock is unsafe:
+// the host string can appear anywhere in the URL, so a URL such as
+// `https://attacker.example.test/?x=api.datadoghq.com` would match. Parsing the
+// URL and comparing `hostname` exactly (allowing genuine subdomains) makes the
+// mocks reject spoofed targets the same way the code under test must.
+function hostMatches(url, host) {
+  let hostname;
+  try {
+    ({ hostname } = new URL(String(url)));
+  } catch {
+    return false;
+  }
+  return hostname === host || hostname.endsWith(`.${host}`);
+}
+
 function mockFetch(url) {
-  if (url.includes('registry.npmjs.org')) return json({ error: 'Not found' }, 404);
-  if (url.includes('zenodo.org')) {
+  if (hostMatches(url, 'registry.npmjs.org')) return json({ error: 'Not found' }, 404);
+  if (hostMatches(url, 'zenodo.org')) {
     return json({
       links: {
         parent_doi: 'https://doi.org/10.5281/zenodo.19944926',
@@ -132,13 +147,13 @@ test('measures every unresolved frontier without upgrading readiness claims', as
 
 test('reports a published package only when the exact version is present', async () => {
   const fetchImpl = async (url) => {
-    if (url.includes('registry.npmjs.org/%40szl%2Fmcp-governor')) {
+    if (hostMatches(url, 'registry.npmjs.org') && String(url).includes('%40szl%2Fmcp-governor')) {
       return json({
         name: '@szl/mcp-governor',
         versions: { '0.1.0': { name: '@szl/mcp-governor', version: '0.1.0' } },
       });
     }
-    if (url.includes('registry.npmjs.org/%40szl%2Fverify')) {
+    if (hostMatches(url, 'registry.npmjs.org') && String(url).includes('%40szl%2Fverify')) {
       return json({
         name: '@szl/verify',
         versions: { '0.2.0': { name: '@szl/verify', version: '0.2.0' } },
@@ -172,9 +187,9 @@ test('never returns credential values in the observability report', async () => 
   const fetchImpl = async (url, init) => {
     const target = String(url);
     if (
-      target.includes('api.datadoghq.com') ||
-      target.includes('cloud.langfuse.com') ||
-      target.includes('api.arize.com')
+      hostMatches(target, 'api.datadoghq.com') ||
+      hostMatches(target, 'cloud.langfuse.com') ||
+      hostMatches(target, 'api.arize.com')
     ) {
       const serializedInit = JSON.stringify(init);
       const leaked = Object.values(secrets).find((secret) => serializedInit.includes(secret));
@@ -209,19 +224,19 @@ test('verifies exact hosted receipt and commit readback across all providers', a
   const seen = [];
   const fetchImpl = async (url, init = {}) => {
     const target = String(url);
-    if (target.includes('api.datadoghq.com')) {
+    if (hostMatches(target, 'api.datadoghq.com')) {
       seen.push('datadog');
       assert.equal(init.method, 'POST');
       assert.match(init.body, /gen_ai\.attestation\.receipt\.id/);
       return json({ data: [{ id: 'dd-span', attributes: PROOF_ATTRIBUTES }] });
     }
-    if (target.includes('cloud.langfuse.com')) {
+    if (hostMatches(target, 'cloud.langfuse.com')) {
       seen.push('langfuse');
       assert.match(target, /api\/public\/v2\/observations/);
       assert.match(target, /traceId=trace-prod-001/);
       return json({ data: [{ id: 'lf-observation', metadata: PROOF_ATTRIBUTES }] });
     }
-    if (target.includes('api.arize.com')) {
+    if (hostMatches(target, 'api.arize.com')) {
       seen.push('arize');
       assert.equal(init.method, 'POST');
       assert.match(target, /v2\/spans/);
@@ -265,7 +280,7 @@ test('verifies exact hosted receipt and commit readback across all providers', a
 test('fails closed when required attributes are split across provider records', async () => {
   const fetchImpl = async (url) => {
     const target = String(url);
-    if (target.includes('api.datadoghq.com')) {
+    if (hostMatches(target, 'api.datadoghq.com')) {
       return json({
         data: [
           {
@@ -283,10 +298,10 @@ test('fails closed when required attributes are split across provider records', 
         ],
       });
     }
-    if (target.includes('cloud.langfuse.com')) {
+    if (hostMatches(target, 'cloud.langfuse.com')) {
       return json({ data: [{ attributes: PROOF_ATTRIBUTES }] });
     }
-    if (target.includes('api.arize.com')) {
+    if (hostMatches(target, 'api.arize.com')) {
       return json({ spans: [{ attributes: PROOF_ATTRIBUTES }] });
     }
     return mockFetch(target);
@@ -351,15 +366,15 @@ test('rejects non-provider hosted base URLs before credentials leave the process
 test('rejects an oversized hosted response even when it starts with matching attributes', async () => {
   const fetchImpl = async (url) => {
     const target = String(url);
-    if (target.includes('api.datadoghq.com')) {
+    if (hostMatches(target, 'api.datadoghq.com')) {
       return json({
         data: [{ attributes: PROOF_ATTRIBUTES, padding: 'x'.repeat(70 * 1024) }],
       });
     }
-    if (target.includes('cloud.langfuse.com')) {
+    if (hostMatches(target, 'cloud.langfuse.com')) {
       return json({ data: [{ attributes: PROOF_ATTRIBUTES }] });
     }
-    if (target.includes('api.arize.com')) {
+    if (hostMatches(target, 'api.arize.com')) {
       return json({ spans: [{ attributes: PROOF_ATTRIBUTES }] });
     }
     return mockFetch(target);
