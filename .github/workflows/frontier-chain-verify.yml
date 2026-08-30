@@ -45,11 +45,6 @@ concurrency:
   group: frontier-chain-verify-${{ github.ref }}
   cancel-in-progress: true
 
-env:
-  # Outputs land outside the repo tree so a CI run can never commit its own
-  # receipts back into the source of truth.
-  A11OY_ROOT: ${{ runner.temp }}/frontier-run
-
 jobs:
   verify:
     name: Invariants, sweep, tamper negative control, egress guard
@@ -59,6 +54,13 @@ jobs:
       contents: read
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      # Outputs land outside the repo tree so a CI run can never commit its own
+      # receipts back into the source of truth. This is set in a step, not in a
+      # workflow-level `env:`, because the `runner` context is only available
+      # inside steps — referencing it at workflow level is a startup failure.
+      - name: Resolve the output root
+        run: echo "A11OY_ROOT=$RUNNER_TEMP/frontier-run" >> "$GITHUB_ENV"
 
       - name: Set up Python
         uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
