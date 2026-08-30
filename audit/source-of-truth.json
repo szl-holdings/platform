@@ -126,10 +126,10 @@
   },
   "ci": {
     "workflows": {
-      "count": 46,
+      "count": 47,
       "command": "Count tracked .github/workflows/*.yml and *.yaml files",
-      "computed": "2026-08-20",
-      "note": "Counts the 46 permanent protected-source workflows after adding exact-head screenshot evidence and the hosted observability and public npm release paths, while retiring the obsolete Vite direct-push and Replit-era Hugging Face one-shots."
+      "computed": "2026-08-30",
+      "note": "Counts the 47 permanent protected-source workflows: the prior 46 (exact-head screenshot evidence plus the hosted observability and public npm release paths, with the obsolete Vite direct-push and Replit-era Hugging Face one-shots retired) plus the frontier receipt-chain gate."
     }
   },
   "env": {
