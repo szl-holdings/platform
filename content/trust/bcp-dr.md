@@ -34,7 +34,7 @@
 ## Continuity Measures
 - All code in Git with full history
 - GitHub mirror provides secondary code storage
-- 46 CI/CD workflows are inventoried in `artifacts/SOURCE_OF_TRUTH.json`; their current results determine build integrity
+- 47 CI/CD workflows are inventoried in `artifacts/SOURCE_OF_TRUTH.json`; their current results determine build integrity
 - Health/readiness endpoints for service monitoring
 - Structured audit logs for forensic analysis
 
