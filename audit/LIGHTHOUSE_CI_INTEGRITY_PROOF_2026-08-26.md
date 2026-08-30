@@ -3,7 +3,7 @@
 ## Required Fields
 
 - workcell_id: lighthouse-ci-integrity-20260826
-- agent: Codex
+- agent: CodexSmith
 - objective: Make the six-app Lighthouse workflow fail closed for accessibility assertion
   failures and incomplete execution, avoid the irrelevant optional ONNX CUDA download without
   disabling other lifecycle scripts, add adversarial source-contract coverage, and reconcile
@@ -43,7 +43,7 @@
   obligations are vacuously N/A because no UI surface changed. Public-claim, security, and
   known-gap checks are included.
 - recorded_at: 2026-08-26T21:02:00.085Z
-- recorded_by: Codex
+- recorded_by: CodexSmith
 
 ## Test Results
 
