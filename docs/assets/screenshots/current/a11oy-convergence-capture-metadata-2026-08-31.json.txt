@@ -1,0 +1,80 @@
+{
+  "schema": "a11oy-ui-proof-metadata/v1",
+  "status": "PASS",
+  "proof_level": 4,
+  "surface": "A11oy Convergence vLLM ecosystem absorption lexicon",
+  "route": "/a11oy/convergence",
+  "captured_at": "2026-08-31T05:10:33.072Z",
+  "captured_by": "GitHub Actions + Playwright",
+  "capture_environment": "GitHub-hosted ubuntu-24.04 exact-source build",
+  "source_revision": "e1730f581c8109986f14410ff65304715afee634",
+  "source_tree": "9d2145f7f22ec3a42828e6601885f7bc4c79b373",
+  "source_ref": "chore/a11oy-gacm-dual-proof-20260831",
+  "source_pr": 696,
+  "workflow": {
+    "name": "Temporary Convergence exact-head proof",
+    "run_id": 33359471359,
+    "run_attempt": 1,
+    "run_url": "https://github.com/szl-holdings/platform/actions/runs/33359471359",
+    "definition_ref": "ops/convergence-proof-696-20260831",
+    "definition_sha": "99a81af1458d65b150ed3f5aa473e01737b6ea88"
+  },
+  "workcell_id": "PLATFORM-PR-696-CONVERGENCE-PROOF",
+  "viewport_css_px": {
+    "width": 1440,
+    "height": 900
+  },
+  "device_scale_factor": 1,
+  "browser": "chromium",
+  "browser_version": "148.0.7778.96",
+  "artifact": {
+    "path": "docs/assets/screenshots/current/a11oy-convergence-2026-08-31.jpg",
+    "media_type": "image/jpeg",
+    "sha256": "8ee00fa6d520d7120dd7845f6e0a66c3bea53f218ec41261d8c438947734f0c6"
+  },
+  "assertions": {
+    "route_http_ok": true,
+    "changed_label_visible": true,
+    "changed_label_match_count": 2,
+    "superseded_label_absent": true,
+    "loading_state_resolved": true,
+    "horizontal_overflow_px": 0,
+    "page_errors": [],
+    "console_errors": [],
+    "unexpected_foreign_requests": [],
+    "expected_font_requests_stubbed": [
+      "https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=Inter:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&family=JetBrains+Mono:wght@400;500&display=swap"
+    ]
+  },
+  "capture_inputs": {
+    "api_responses": "same-origin /api/a11oy/* returned deterministic ok:false JSON",
+    "external_fonts": "expected Google font hosts returned empty deterministic responses"
+  },
+  "validation_commands": [
+    {
+      "command": "pnpm install --frozen-lockfile --ignore-scripts --ignore-pnpmfile",
+      "exit_code": 0
+    },
+    {
+      "command": "pnpm --filter @workspace/a11oy typecheck",
+      "exit_code": 0
+    },
+    {
+      "command": "pnpm --filter @workspace/a11oy test:series-a",
+      "exit_code": 0
+    },
+    {
+      "command": "pnpm --filter @workspace/a11oy build",
+      "exit_code": 0
+    },
+    {
+      "command": "Playwright exact-route assertions for /a11oy/convergence",
+      "exit_code": 0
+    }
+  ],
+  "nonclaims": [
+    "This proves exact-source local rendering on the named GitHub-hosted runner only.",
+    "It does not prove deployment, production runtime, customer use, or provider connectivity.",
+    "The screenshot proves the changed convergence lexicon surface, not live provider data."
+  ]
+}

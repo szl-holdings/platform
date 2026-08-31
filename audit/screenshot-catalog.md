@@ -718,3 +718,33 @@ Required capture identity:
 | docs/assets/screenshots/current/a11oy-model-router-2026-08-31.jpg | 2026-08-31T04:39:40.844Z | 1440x900 CSS px | 3646d432fb1ca1a5176c2b4e6d52fbd2e2ef063247fc09e4eb0264ef510abfd0 | PASS; live exact-source build; changed label visible; superseded label absent; no horizontal overflow, browser errors, or undeclared network. |
 
 The same-origin /api/a11oy/* endpoints returned deterministic ok:false JSON, so this capture proves the changed lexicon surface and does not claim live provider data. Expected Google font hosts were replaced with empty deterministic responses. Deployment and production behavior remain outside this proof boundary.
+
+---
+
+## PR #696 A11oy Convergence lexicon evidence — 2026-08-31
+
+Required capture identity:
+
+- route: /a11oy/convergence
+- surface: A11oy Convergence vLLM ecosystem absorption lexicon
+- captured_by: GitHub Actions + Playwright
+- capture_environment: GitHub-hosted ubuntu-24.04 exact-source build
+- source_revision: e1730f581c8109986f14410ff65304715afee634
+- source_tree: 9d2145f7f22ec3a42828e6601885f7bc4c79b373
+- source_ref: chore/a11oy-gacm-dual-proof-20260831
+- source_pr: #696
+- capture_workflow: https://github.com/szl-holdings/platform/actions/runs/33359471359
+- workflow_definition_ref: ops/convergence-proof-696-20260831
+- workflow_definition_sha: 99a81af1458d65b150ed3f5aa473e01737b6ea88
+- viewport: 1440x900 CSS px at device scale factor 1
+- workcell_id: PLATFORM-PR-696-CONVERGENCE-PROOF
+- proof_level: 4
+- status: current exact-source UI evidence
+- metadata_sidecar: docs/assets/screenshots/current/a11oy-convergence-capture-metadata-2026-08-31.json.txt
+- metadata_sha256: 819d48c2c66c3abfeb2a83849a3c946002325becfa691ef34f439cf57ef16946
+
+| Filename | Capture time | Viewport | Artifact SHA-256 | Notes |
+|---|---|---|---|---|
+| docs/assets/screenshots/current/a11oy-convergence-2026-08-31.jpg | 2026-08-31T05:10:33.072Z | 1440x900 CSS px | 8ee00fa6d520d7120dd7845f6e0a66c3bea53f218ec41261d8c438947734f0c6 | PASS; live exact-source build; changed label visible; superseded label absent; no horizontal overflow, browser errors, or undeclared network. |
+
+The same-origin /api/a11oy/* endpoints returned deterministic ok:false JSON, so this capture proves the convergence lexicon surface and does not claim live provider data. Expected Google font hosts were replaced with empty deterministic responses. Deployment and production behavior remain outside this proof boundary.
