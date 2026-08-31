@@ -12,7 +12,7 @@
 # runtime uses the mandated node:22.
 
 # ─── Stage 1: dependency cache (pnpm fetch from root) ────────────────────────
-FROM node:26-alpine@sha256:aadf416b2cdce311a8811ba3f0608a61b77dbf997500e2eafe781b51f6a0b019 AS deps
+FROM node:26-alpine@sha256:2d984a15c9b54fd0aeb608b8e0d0d83529eb34d2966db27a1fb4f1edc3d298a3 AS deps
 RUN apk add --no-cache libc6-compat
 RUN corepack enable
 WORKDIR /app
@@ -21,7 +21,7 @@ RUN --mount=type=cache,id=pnpm-store,target=/root/.local/share/pnpm/store \
     pnpm fetch
 
 # ─── Stage 2: builder (install + filtered build) ─────────────────────────────
-FROM node:26-alpine@sha256:aadf416b2cdce311a8811ba3f0608a61b77dbf997500e2eafe781b51f6a0b019 AS builder
+FROM node:26-alpine@sha256:2d984a15c9b54fd0aeb608b8e0d0d83529eb34d2966db27a1fb4f1edc3d298a3 AS builder
 RUN apk add --no-cache libc6-compat
 RUN corepack enable
 WORKDIR /app
@@ -34,7 +34,7 @@ RUN pnpm --filter @workspace/alloy-ingestion-orchestrator build
 RUN pnpm --filter @workspace/alloy-ingestion-orchestrator deploy --prod --legacy /app/deploy
 
 # ─── Stage 3: runtime (minimal) ──────────────────────────────────────────────
-FROM node:26-alpine@sha256:aadf416b2cdce311a8811ba3f0608a61b77dbf997500e2eafe781b51f6a0b019 AS runtime
+FROM node:26-alpine@sha256:2d984a15c9b54fd0aeb608b8e0d0d83529eb34d2966db27a1fb4f1edc3d298a3 AS runtime
 RUN apk add --no-cache libc6-compat
 WORKDIR /app
 RUN addgroup -g 1000 -S app && adduser -u 1000 -S app -G app
