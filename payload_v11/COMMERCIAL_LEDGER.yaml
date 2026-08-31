@@ -1,0 +1,175 @@
+---
+ledger: COMMERCIAL_LEDGER
+version: 11
+generated_by: payload_v11/tools/emit_ledgers.py
+audit_date: 2026-08-30
+rule: every row is UNKNOWN and every row sets blocks_raise=true; no model, agent, or payload may invent these values; release_gate.py exits non-zero until a human supplies them with evidence
+rows:
+  - id: CL-01
+    metric: ARR (annual recurring revenue, contracted)
+    value: UNKNOWN
+    state: UNKNOWN
+    evidence_uri: UNKNOWN
+    verified_at: UNKNOWN
+    blocks_raise: true
+  - id: CL-02
+    metric: MRR (monthly recurring revenue)
+    value: UNKNOWN
+    state: UNKNOWN
+    evidence_uri: UNKNOWN
+    verified_at: UNKNOWN
+    blocks_raise: true
+  - id: CL-03
+    metric: Recognized revenue trailing 12 months
+    value: UNKNOWN
+    state: UNKNOWN
+    evidence_uri: UNKNOWN
+    verified_at: UNKNOWN
+    blocks_raise: true
+  - id: CL-04
+    metric: Paying customer count
+    value: UNKNOWN
+    state: UNKNOWN
+    evidence_uri: UNKNOWN
+    verified_at: UNKNOWN
+    blocks_raise: true
+  - id: CL-05
+    metric: Named design partners with signed agreements
+    value: UNKNOWN
+    state: UNKNOWN
+    evidence_uri: UNKNOWN
+    verified_at: UNKNOWN
+    blocks_raise: true
+  - id: CL-06
+    metric: Design partner to paid conversion rate
+    value: UNKNOWN
+    state: UNKNOWN
+    evidence_uri: UNKNOWN
+    verified_at: UNKNOWN
+    blocks_raise: true
+  - id: CL-07
+    metric: Gross margin percentage
+    value: UNKNOWN
+    state: UNKNOWN
+    evidence_uri: UNKNOWN
+    verified_at: UNKNOWN
+    blocks_raise: true
+  - id: CL-08
+    metric: Net revenue retention percentage
+    value: UNKNOWN
+    state: UNKNOWN
+    evidence_uri: UNKNOWN
+    verified_at: UNKNOWN
+    blocks_raise: true
+  - id: CL-09
+    metric: CAC payback period in months
+    value: UNKNOWN
+    state: UNKNOWN
+    evidence_uri: UNKNOWN
+    verified_at: UNKNOWN
+    blocks_raise: true
+  - id: CL-10
+    metric: Cash on hand
+    value: UNKNOWN
+    state: UNKNOWN
+    evidence_uri: UNKNOWN
+    verified_at: UNKNOWN
+    blocks_raise: true
+  - id: CL-11
+    metric: Monthly net burn
+    value: UNKNOWN
+    state: UNKNOWN
+    evidence_uri: UNKNOWN
+    verified_at: UNKNOWN
+    blocks_raise: true
+  - id: CL-12
+    metric: Runway in months
+    value: UNKNOWN
+    state: UNKNOWN
+    evidence_uri: UNKNOWN
+    verified_at: UNKNOWN
+    blocks_raise: true
+  - id: CL-13
+    metric: Burn multiple
+    value: UNKNOWN
+    state: UNKNOWN
+    evidence_uri: UNKNOWN
+    verified_at: UNKNOWN
+    blocks_raise: true
+  - id: CL-14
+    metric: Published price for the Control SKU
+    value: UNKNOWN
+    state: UNKNOWN
+    evidence_uri: UNKNOWN
+    verified_at: UNKNOWN
+    blocks_raise: true
+  - id: CL-15
+    metric: Published price for the Assurance SKU
+    value: UNKNOWN
+    state: UNKNOWN
+    evidence_uri: UNKNOWN
+    verified_at: UNKNOWN
+    blocks_raise: true
+  - id: CL-16
+    metric: ICP buyer persona with named title and budget line
+    value: UNKNOWN
+    state: UNKNOWN
+    evidence_uri: UNKNOWN
+    verified_at: UNKNOWN
+    blocks_raise: true
+  - id: CL-17
+    metric: Co-founder or named owner beyond Stephen Lutar
+    value: UNKNOWN
+    state: UNKNOWN
+    evidence_uri: UNKNOWN
+    verified_at: UNKNOWN
+    blocks_raise: true
+  - id: CL-18
+    metric: Cap table cleanliness (Delaware C-Corp, single class, no side letters)
+    value: UNKNOWN
+    state: UNKNOWN
+    evidence_uri: UNKNOWN
+    verified_at: UNKNOWN
+    blocks_raise: true
+  - id: CL-19
+    metric: Contributor IP assignment coverage
+    value: UNKNOWN
+    state: UNKNOWN
+    evidence_uri: UNKNOWN
+    verified_at: UNKNOWN
+    blocks_raise: true
+  - id: CL-20
+    metric: Model BOM and dataset license register completed and counsel-reviewed
+    value: UNKNOWN
+    state: UNKNOWN
+    evidence_uri: UNKNOWN
+    verified_at: UNKNOWN
+    blocks_raise: true
+  - id: CL-21
+    metric: SOC 2 status (none / Type I / Type II) with auditor named
+    value: UNKNOWN
+    state: UNKNOWN
+    evidence_uri: UNKNOWN
+    verified_at: UNKNOWN
+    blocks_raise: true
+  - id: CL-22
+    metric: ISO 42001 Statement of Applicability published
+    value: UNKNOWN
+    state: UNKNOWN
+    evidence_uri: UNKNOWN
+    verified_at: UNKNOWN
+    blocks_raise: true
+  - id: CL-23
+    metric: Bricklayer IP risk register (IP-001) reviewed by counsel
+    value: UNKNOWN
+    state: UNKNOWN
+    evidence_uri: UNKNOWN
+    verified_at: UNKNOWN
+    blocks_raise: true
+  - id: CL-24
+    metric: Two paying six-month design partners with public testimonial rights
+    value: UNKNOWN
+    state: UNKNOWN
+    evidence_uri: UNKNOWN
+    verified_at: UNKNOWN
+    blocks_raise: true
