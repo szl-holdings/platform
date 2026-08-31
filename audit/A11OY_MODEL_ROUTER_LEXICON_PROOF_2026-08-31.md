@@ -18,15 +18,16 @@ Proof level: 4
 - patch_summary: The final candidate changes seven paths relative to live main.
   Two TypeScript files carry six additions and six deletions. Five evidence paths add
   the screenshot, metadata, screenshot-catalog entry, docs-index entry, and this
-  packet. This packet expands from 64 to 188 lines; the final tree is
-  283 additions and 6 deletions relative to live main. Runtime behavior
+  packet. This packet expands from 64 to 228 lines; the final tree is
+  323 additions and 6 deletions relative to live main. Runtime behavior
   is unchanged; the rendered public category label is renamed.
 - test_results: Every command, exit code, and output summary is recorded below.
 - screenshot_refs: docs/assets/screenshots/current/a11oy-model-router-2026-08-31.jpg
   at /a11oy/model-router; catalog entry in audit/screenshot-catalog.md; sidecar at
   docs/assets/screenshots/current/a11oy-model-router-capture-metadata-2026-08-31.json.txt.
 - verification_notes: Exact source and tree were checked before dependency resolution,
-  build, capture, artifact upload, and publication. The changed label rendered twice;
+  build, artifact upload, and publication. The changed label rendered twice in the
+  separately source-bound capture;
   the superseded label rendered zero times; loading resolved; horizontal overflow was
   zero; browser errors and unexpected foreign requests were empty. Screenshot and
   metadata digests were rechecked in the proof-field verification run.
@@ -42,9 +43,9 @@ Proof level: 4
   docs/operations/known-gaps.md unchanged (git diff --quiet exit 0). Existing
   deployment, live-provider, customer-use, and external-service gaps remain open.
 - proof_level: 4 — live UI screenshot plus public-claim, security, and known-gap checks.
-- recorded_at: 2026-08-31T04:55:50Z
+- recorded_at: 2026-08-31T05:10:14Z
 - recorded_by: Codex task /root/graphql_signed_rewrite_688; exact command evidence
-  assembled by GitHub Actions run 33358694028.
+  assembled by GitHub Actions run 33359492908.
 
 ## Claim under test
 
@@ -57,20 +58,47 @@ and does not render the superseded public label Governed Inference Recipes.
 | Field | Value |
 |---|---|
 | Repository | szl-holdings/platform |
-| Candidate revision verified by this packet | 9508b26fe0a1d82e2357eee530a0dca389dd0201 |
-| Candidate tree verified by this packet | 9d2145f7f22ec3a42828e6601885f7bc4c79b373 |
+| Candidate revision verified by this packet | cbc2b43b6391665c0533ab3286f2d03c6c572e75 |
+| Candidate tree verified by this packet | c88482c6296589f98bce5d7976bf77e2905c94c2 |
 | Candidate base | 755f0824fe86b95c77a420423e2e29751c8e59de |
 | UI source revision | 9e66b0eebb52d4e183e2b9248fec1aa74caf8611 |
 | UI source tree | 51fa6d934538233b1ad83ec336ff59498b6b1a50 |
-| Pull request verified | #693 |
+| Pull request verified | #695 |
 | Capture workflow run | https://github.com/szl-holdings/platform/actions/runs/33357789150 |
-| Proof-field workflow run | https://github.com/szl-holdings/platform/actions/runs/33358694028 |
-| Proof-field workflow definition | ops/model-router-proof-fields-693-20260831 at c9aafa71288e02ac19045cdc7a6f120f0645e3c0 |
+| Proof-field workflow run | https://github.com/szl-holdings/platform/actions/runs/33359492908 |
+| Proof-field workflow definition | ops/model-router-proof-binding-695-20260831 at fa212c3edbd9c9514d634833f4072295cf877a42 |
+| Current verification artifact ID | 9746228799 |
+| Current verification artifact name | model-router-proof-binding-695-33359492908-1 |
+| Current verification artifact ZIP SHA-256 | c0bab3acc231fa2d98f9f2fe3a7a161e3be31bc5483253427798a06416fa9e78 |
+| Prior verification artifact ID | 9745983666 |
+| Prior verification artifact ZIP SHA-256 | 8af1bf98134729f76af54ed6486d97be2e62abf75a508c8bae8e5dcedaca9eef |
 | Route | /a11oy/model-router |
 | Viewport | 1440x900 CSS px; device scale factor 1 |
 | Capture time | 2026-08-31T04:39:40.844Z |
 | Screenshot SHA-256 | 3646d432fb1ca1a5176c2b4e6d52fbd2e2ef063247fc09e4eb0264ef510abfd0 |
 | Metadata SHA-256 | 08c659642f0461dc75b57f419d82a2df8b1fe24abcf3de3b00dd00add0b13ca5 |
+
+## Exact-head artifact and byte-equivalence binding
+
+The current verifier checked authenticated reviewed revision cbc2b43b6391665c0533ab3286f2d03c6c572e75
+at exact Git tree c88482c6296589f98bce5d7976bf77e2905c94c2. Its results are artifact
+ID 9746228799 (ZIP SHA-256 c0bab3acc231fa2d98f9f2fe3a7a161e3be31bc5483253427798a06416fa9e78).
+Every recorded command in that artifact exited 0.
+
+The earlier verification artifact 9745983666 checked revision
+9508b26fe0a1d82e2357eee530a0dca389dd0201 at tree
+9d2145f7f22ec3a42828e6601885f7bc4c79b373. A full Git-tree comparison to
+revision cbc2b43b6391665c0533ab3286f2d03c6c572e75 returned exactly one changed path:
+audit/A11OY_MODEL_ROUTER_LEXICON_PROOF_2026-08-31.md. A complementary
+git diff --quiet with that path excluded exited 0, proving all UI source, screenshot,
+metadata, catalog, and docs-index bytes are identical between those trees.
+
+Publication replaces only this packet after the artifact ID exists. The publishing
+job verifies the signed publication commit has one parent, one changed path (this
+packet), a valid GitHub signature, and exact target-ref CAS. The authenticated
+normalization preserves the publication tree byte-for-byte. The successor PR body
+records its resulting exact head and tree plus the one-path comparison; embedding a
+packet's own resulting tree or commit hash inside that packet would be self-referential.
 
 ## Dependency and execution environment identity
 
@@ -108,22 +136,28 @@ and does not render the superseded public label Governed Inference Recipes.
 5. command: pnpm audit:overclaims
    - exit_code: 0
    - output_summary: Overclaim ledger validator and its test suite passed.
-6. command: git diff --check 755f0824fe86b95c77a420423e2e29751c8e59de...9508b26fe0a1d82e2357eee530a0dca389dd0201
+6. command: git diff --check 755f0824fe86b95c77a420423e2e29751c8e59de...cbc2b43b6391665c0533ab3286f2d03c6c572e75
    - exit_code: 0
    - output_summary: No whitespace errors in the exact candidate diff.
 7. command: python3 targeted added-line secret and credential-path scan
    - exit_code: 0
    - output_summary: Seven changed paths admitted; no credential-bearing path or high-confidence added-line secret pattern found.
-8. command: git diff --quiet 755f0824fe86b95c77a420423e2e29751c8e59de 9508b26fe0a1d82e2357eee530a0dca389dd0201 -- docs/operations/known-gaps.md
+8. command: git diff --quiet 755f0824fe86b95c77a420423e2e29751c8e59de cbc2b43b6391665c0533ab3286f2d03c6c572e75 -- docs/operations/known-gaps.md
    - exit_code: 0
    - output_summary: Known-gaps register is unchanged; scope review found no introduced or closed gap.
-9. command: git diff --quiet 755f0824fe86b95c77a420423e2e29751c8e59de 9508b26fe0a1d82e2357eee530a0dca389dd0201 -- docs/APP_STATUS.md
+9. command: git diff --quiet 755f0824fe86b95c77a420423e2e29751c8e59de cbc2b43b6391665c0533ab3286f2d03c6c572e75 -- docs/APP_STATUS.md
    - exit_code: 0
    - output_summary: Artifact readiness register is unchanged; this lexicon-only change does not alter readiness.
 10. command: python3 screenshot, metadata, catalog, source, route, workcell, and digest assertions
    - exit_code: 0
    - output_summary: Screenshot and metadata SHA-256 values, exact source/tree, route, workflow, and catalog bindings matched.
-11. command: inline Playwright capture script in workflow run 33357789150
+11. command: git diff --name-only 9508b26fe0a1d82e2357eee530a0dca389dd0201 cbc2b43b6391665c0533ab3286f2d03c6c572e75
+   - exit_code: 0
+   - output_summary: Only audit/A11OY_MODEL_ROUTER_LEXICON_PROOF_2026-08-31.md differs between the prior verified tree and authenticated reviewed head.
+12. command: sha256sum prior verification artifact 9745983666 and validate results.json
+   - exit_code: 0
+   - output_summary: Artifact ZIP digest matched 8af1bf98134729f76af54ed6486d97be2e62abf75a508c8bae8e5dcedaca9eef; source, tree, run, PASS status, and all exit codes matched.
+13. command: inline Playwright capture script in workflow run 33357789150
     - exit_code: 0
     - output_summary: Chromium loaded the exact built route; the changed label was
       visible twice; the superseded label was absent; loading resolved; overflow,
@@ -162,6 +196,9 @@ both remained byte-identical to the candidate base for this scope.
   package name. It published no evidence; cleanup deleted the builder ref.
 - Workflow run 33357789150 used the repository-provided @playwright/test import and
   completed capture, signed publication, and builder cleanup with exit 0.
+- Workflow run 33358694028 passed exact-source verification and produced artifact
+  9745983666. GraphQL published the signed packet commit; the run was then marked
+  failed only because an immediate post-publication PR-head read was stale.
 - Current proof-field verification terminal_failure_state: none in this verification run.
 
 ## Evidence
@@ -171,13 +208,16 @@ both remained byte-identical to the candidate base for this scope.
   docs/assets/screenshots/current/a11oy-model-router-capture-metadata-2026-08-31.json.txt
 - Screenshot catalog: audit/screenshot-catalog.md
 - Exact-source capture run: https://github.com/szl-holdings/platform/actions/runs/33357789150
-- Proof-field verification run: https://github.com/szl-holdings/platform/actions/runs/33358694028
+- Proof-field verification run: https://github.com/szl-holdings/platform/actions/runs/33359492908
+- Proof-field verification artifact: 9746228799
+- Proof-field artifact ZIP SHA-256: c0bab3acc231fa2d98f9f2fe3a7a161e3be31bc5483253427798a06416fa9e78
 
 ## Acceptance result
 
 PASS. The changed phrase is visible in the exact-source browser render, the prior
 phrase is absent, all recorded successful commands exited 0, the environment and
-lockfile are identified, and Level 4 doctrine checks are explicitly recorded.
+lockfile are identified, the authenticated reviewed head/tree and verification
+artifact are explicitly bound, and Level 4 doctrine checks are recorded.
 
 ## Nonclaims and limitations
 
