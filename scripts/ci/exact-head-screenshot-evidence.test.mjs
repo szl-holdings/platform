@@ -1,7 +1,16 @@
 import assert from 'node:assert/strict';
 import { spawnSync } from 'node:child_process';
 import { createHash } from 'node:crypto';
-import { copyFile, mkdir, mkdtemp, readFile, rm, symlink, writeFile } from 'node:fs/promises';
+import {
+  chmod,
+  copyFile,
+  mkdir,
+  mkdtemp,
+  readFile,
+  rm,
+  symlink,
+  writeFile,
+} from 'node:fs/promises';
 import os from 'node:os';
 import path from 'node:path';
 import test from 'node:test';
@@ -19,6 +28,8 @@ import {
   surfaceLabelFromRoute,
   VIEWPORTS,
   validateCaptureIsolation,
+  validatePnpmRuntime,
+  validatePnpmRuntimePaths,
   validateRoute,
   verifyEvidencePacketOnDisk,
 } from './capture-series-a-exact-head.mjs';
@@ -225,14 +236,17 @@ test('checkout identity is fail-closed', () => {
 });
 
 test('candidate source, runtime home, and evidence roots must be disjoint', () => {
+  const candidateRoot = '/runner/work/platform/candidate';
+  const evidenceRoot = '/runner/temp/evidence';
   const isolated = validateCaptureIsolation({
-    SZL_CANDIDATE_ROOT: '/runner/work/platform/candidate',
-    SZL_EVIDENCE_ROOT: '/runner/temp/evidence',
+    SZL_CANDIDATE_ROOT: candidateRoot,
+    SZL_EVIDENCE_ROOT: evidenceRoot,
     SZL_CANDIDATE_HOME: '/runner/temp/candidate-home',
     SZL_CANDIDATE_USER: 'szl-capture-candidate',
+    SZL_PNPM_ROOT: '/runner/temp/candidate-pnpm',
   });
-  assert.equal(isolated.candidateRoot, '/runner/work/platform/candidate');
-  assert.equal(isolated.evidenceRoot, '/runner/temp/evidence');
+  assert.equal(isolated.candidateRoot, path.resolve(candidateRoot));
+  assert.equal(isolated.evidenceRoot, path.resolve(evidenceRoot));
   assert.throws(
     () =>
       validateCaptureIsolation({
@@ -240,6 +254,7 @@ test('candidate source, runtime home, and evidence roots must be disjoint', () =
         SZL_EVIDENCE_ROOT: '/runner/work/platform/candidate/evidence',
         SZL_CANDIDATE_HOME: '/runner/temp/candidate-home',
         SZL_CANDIDATE_USER: 'szl-capture-candidate',
+        SZL_PNPM_ROOT: '/runner/temp/candidate-pnpm',
       }),
     /candidate and evidence roots must be disjoint/,
   );
@@ -250,9 +265,169 @@ test('candidate source, runtime home, and evidence roots must be disjoint', () =
         SZL_EVIDENCE_ROOT: '/runner/temp/evidence',
         SZL_CANDIDATE_HOME: '/runner/temp/candidate-home',
         SZL_CANDIDATE_USER: 'runner',
+        SZL_PNPM_ROOT: '/runner/temp/candidate-pnpm',
       }),
     /SZL_CANDIDATE_USER/,
   );
+  assert.throws(
+    () =>
+      validateCaptureIsolation({
+        SZL_CANDIDATE_ROOT: '/runner/work/platform/candidate',
+        SZL_EVIDENCE_ROOT: '/runner/temp/evidence',
+        SZL_CANDIDATE_HOME: '/runner/temp/candidate-home',
+        SZL_CANDIDATE_USER: 'szl-capture-candidate',
+        SZL_PNPM_ROOT: '/runner/work/platform/candidate/tooling',
+      }),
+    /pnpm runtime root must be disjoint/,
+  );
+});
+
+test('pnpm runtime paths fail closed outside their admitted root', () => {
+  const pnpmRoot = path.resolve(os.tmpdir(), 'candidate-pnpm');
+  const pnpmExecutable = path.join(
+    pnpmRoot,
+    'bin',
+    process.platform === 'win32' ? 'pnpm.exe' : 'pnpm',
+  );
+  assert.deepEqual(
+    validatePnpmRuntimePaths({
+      SZL_PNPM_ROOT: pnpmRoot,
+      SZL_PNPM_EXECUTABLE: pnpmExecutable,
+    }),
+    { pnpmRoot, pnpmExecutable },
+  );
+  assert.throws(
+    () =>
+      validatePnpmRuntimePaths({
+        SZL_PNPM_ROOT: pnpmRoot,
+        SZL_PNPM_EXECUTABLE: path.resolve(pnpmRoot, '..', 'foreign', 'pnpm'),
+      }),
+    /must remain inside/,
+  );
+  assert.throws(
+    () =>
+      validatePnpmRuntimePaths({
+        SZL_PNPM_ROOT: 'relative/tooling',
+        SZL_PNPM_EXECUTABLE: pnpmExecutable,
+      }),
+    /SZL_PNPM_ROOT must be an absolute path/,
+  );
+});
+
+test('pnpm runtime must be candidate-readable, immutable to peers, and contained after symlink resolution', {
+  skip: process.platform === 'win32',
+}, async (t) => {
+  const root = await mkdtemp(path.join(os.tmpdir(), 'szl-pnpm-runtime-test-'));
+  const outside = await mkdtemp(path.join(os.tmpdir(), 'szl-pnpm-outside-test-'));
+  t.after(() =>
+    Promise.all([
+      rm(root, { recursive: true, force: true }),
+      rm(outside, { recursive: true, force: true }),
+    ]),
+  );
+  const bin = path.join(root, 'bin');
+  const executable = path.join(bin, 'pnpm');
+  const outsideExecutable = path.join(outside, 'pnpm');
+  await mkdir(bin);
+  await writeFile(executable, '#!/bin/sh\nexit 0\n', { mode: 0o755 });
+  await writeFile(outsideExecutable, '#!/bin/sh\nexit 0\n', { mode: 0o755 });
+  await chmod(root, 0o755);
+  const admitted = await validatePnpmRuntime({
+    SZL_PNPM_ROOT: root,
+    SZL_PNPM_EXECUTABLE: executable,
+  });
+  assert.equal(admitted.pnpmExecutable, executable);
+
+  await chmod(executable, 0o777);
+  await assert.rejects(
+    validatePnpmRuntime({
+      SZL_PNPM_ROOT: root,
+      SZL_PNPM_EXECUTABLE: executable,
+    }),
+    /must not be group- or world-writable/,
+  );
+  await rm(executable);
+  await symlink(outsideExecutable, executable);
+  await assert.rejects(
+    validatePnpmRuntime({
+      SZL_PNPM_ROOT: root,
+      SZL_PNPM_EXECUTABLE: executable,
+    }),
+    /resolves outside/,
+  );
+});
+
+test('shared lockfile and pin callers use the released reusable verifier SHA', async () => {
+  const releasedSha = '932817603e46212f4226347c95aeb0cc55ec58cb';
+  const [lockfileCaller, pinCaller] = await Promise.all([
+    readFile(new URL('../../.github/workflows/lockfile-registry.yml', import.meta.url), 'utf8'),
+    readFile(new URL('../../.github/workflows/pin-check.yml', import.meta.url), 'utf8'),
+  ]);
+  assert.ok(
+    lockfileCaller.includes(
+      `uses: szl-holdings/.github/.github/workflows/reusable-lockfile-registry-check.yml@${releasedSha}`,
+    ),
+  );
+  assert.ok(
+    pinCaller.includes(
+      `uses: szl-holdings/.github/.github/workflows/pin-check-reusable.yml@${releasedSha}`,
+    ),
+  );
+});
+
+test('pnpm admission Bash binds contained action output and rejects a symlink escape', {
+  skip: process.platform === 'win32',
+}, async (t) => {
+  const root = await mkdtemp(path.join(os.tmpdir(), 'szl-pnpm-admission-test-'));
+  const outside = await mkdtemp(path.join(os.tmpdir(), 'szl-pnpm-admission-outside-'));
+  t.after(() =>
+    Promise.all([
+      rm(root, { recursive: true, force: true }),
+      rm(outside, { recursive: true, force: true }),
+    ]),
+  );
+  const bin = path.join(root, 'bin');
+  const executable = path.join(bin, 'pnpm');
+  const outsideExecutable = path.join(outside, 'pnpm');
+  const githubEnvironment = path.join(outside, 'github-env');
+  await mkdir(bin);
+  await writeFile(executable, '#!/bin/sh\nexit 0\n', { mode: 0o755 });
+  await writeFile(outsideExecutable, '#!/bin/sh\nexit 0\n', { mode: 0o755 });
+  await writeFile(githubEnvironment, '');
+  const workflow = await readFile(
+    new URL('../../.github/workflows/exact-head-screenshot-evidence.yml', import.meta.url),
+    'utf8',
+  );
+  const run = workflowStepRun(workflow, 'Admit candidate-readable pnpm runtime');
+  const admitted = spawnSync('/bin/bash', ['-c', run], {
+    encoding: 'utf8',
+    env: {
+      ...process.env,
+      GITHUB_ENV: githubEnvironment,
+      PATH: `${bin}:${process.env.PATH}`,
+      SZL_PNPM_ACTION_BIN_DEST: bin,
+      SZL_PNPM_ACTION_DEST: root,
+      SZL_PNPM_ROOT: root,
+    },
+  });
+  assert.equal(admitted.status, 0, admitted.stderr || admitted.stdout);
+  assert.equal(await readFile(githubEnvironment, 'utf8'), `SZL_PNPM_EXECUTABLE=${executable}\n`);
+
+  await rm(executable);
+  await symlink(outsideExecutable, executable);
+  const escaped = spawnSync('/bin/bash', ['-c', run], {
+    encoding: 'utf8',
+    env: {
+      ...process.env,
+      GITHUB_ENV: githubEnvironment,
+      PATH: `${bin}:${process.env.PATH}`,
+      SZL_PNPM_ACTION_BIN_DEST: bin,
+      SZL_PNPM_ACTION_DEST: root,
+      SZL_PNPM_ROOT: root,
+    },
+  });
+  assert.notEqual(escaped.status, 0);
+  assert.match(escaped.stderr, /resolved outside its runner-scoped root/);
 });
 
 test('an HTTP-200 SPA not-found surface is rejected', () => {
@@ -356,14 +531,20 @@ test('evidence output paths reject symlink escapes', async (t) => {
       rm(outside, { recursive: true, force: true }),
     ]),
   );
-  await symlink(outside, path.join(root, 'audit'));
+  await symlink(
+    outside,
+    path.join(root, 'audit'),
+    process.platform === 'win32' ? 'junction' : undefined,
+  );
   await assert.rejects(
     assertSafeRepositoryPath(root, path.join(root, 'audit', 'packet.json')),
     /symbolic link/,
   );
 });
 
-test('truth refresh heredoc renders Markdown literally without command substitution', async (t) => {
+test('truth refresh heredoc renders Markdown literally without command substitution', {
+  skip: process.platform === 'win32',
+}, async (t) => {
   const root = await mkdtemp(path.join(os.tmpdir(), 'szl-truth-heredoc-test-'));
   const capturedBody = path.join(root, 'body.txt');
   t.after(() => rm(root, { recursive: true, force: true }));
@@ -410,7 +591,9 @@ test('truth refresh heredoc renders Markdown literally without command substitut
   assert.match(body, /with `GITHUB_TOKEN`/);
 });
 
-test('unsafe tracked Git entries fail before candidate tooling can run', async (t) => {
+test('unsafe tracked Git entries fail before candidate tooling can run', {
+  skip: process.platform === 'win32',
+}, async (t) => {
   const root = await mkdtemp(path.join(os.tmpdir(), 'szl-unsafe-git-entry-test-'));
   t.after(() => rm(root, { recursive: true, force: true }));
   await writeFile(path.join(root, 'package.json'), '{}\n');
@@ -518,6 +701,9 @@ test('workflow binds PR, branch, permissions, publication, and artifact contract
   assert.match(captureSource, /--untracked-files=no/);
   assert.match(captureSource, /bodyText\s*\.split\(\/\\n\+\//);
   assert.equal(captureSource.match(/verifyCurrentCheckout\(inputs\.candidateSha,/g)?.length, 3);
+  assert.match(captureSource, /validatePnpmRuntimePaths/);
+  assert.match(captureSource, /pnpmRuntime\.pnpmExecutable/);
+  assert.doesNotMatch(captureSource, /execFileSync\("which", \["pnpm"\]/);
   const preCaptureGuard = captureSource.indexOf(
     'const preCaptureSha = verifyCurrentCheckout(inputs.candidateSha, candidateRoot)',
   );
@@ -532,6 +718,23 @@ test('workflow binds PR, branch, permissions, publication, and artifact contract
   assert.match(workflow, /ref: \$\{\{ github\.sha \}\}/);
   assert.match(workflow, /CONTROLLER_SHA: \$\{\{ github\.sha \}\}/);
   assert.match(workflow, /SZL_CANDIDATE_USER: szl-capture-candidate/);
+  assert.match(workflow, /id: pnpm_setup/);
+  assert.match(workflow, /standalone: true/);
+  assert.match(
+    workflow,
+    /dest: \$\{\{ runner\.temp \}\}\/candidate-pnpm-\$\{\{ github\.run_id \}\}-\$\{\{ github\.run_attempt \}\}/,
+  );
+  assert.match(workflow, /steps\.pnpm_setup\.outputs\.dest/);
+  assert.match(workflow, /steps\.pnpm_setup\.outputs\.bin_dest/);
+  assert.match(workflow, /SZL_PNPM_EXECUTABLE/);
+  assert.match(workflow, /candidate_pnpm_version/);
+  assert.match(workflow, /candidate_node_version/);
+  assert.match(workflow, /find "\$resolved_root" ! -type l -perm \/022/);
+  assert.match(
+    workflow,
+    /find "\$SZL_PNPM_ROOT" ! -type l -writable -print -quit/,
+  );
+  assert.match(workflow, /candidate identity can write admitted pnpm runtime/);
   assert.match(workflow, /chmod -R a-w "\$SZL_CANDIDATE_ROOT"/);
   assert.match(workflow, /\$SZL_CANDIDATE_ROOT\/artifacts\/a11oy\/node_modules\/\.vite-temp/);
   assert.match(workflow, /\$SZL_CANDIDATE_ROOT\/artifacts\/a11oy\/node_modules\/\.cache/);
@@ -580,6 +783,7 @@ test('workflow binds PR, branch, permissions, publication, and artifact contract
     '- name: Reject unsafe candidate Git entries before dependency resolution',
   );
   const setupIndex = captureJob.indexOf('- name: Setup pnpm');
+  const admitPnpmIndex = captureJob.indexOf('- name: Admit candidate-readable pnpm runtime');
   const controllerIndex = captureJob.indexOf(
     '- name: Install and lock protected controller tooling',
   );
@@ -594,7 +798,8 @@ test('workflow binds PR, branch, permissions, publication, and artifact contract
   assert.ok(
     checkoutIndex < unsafeIndex &&
       unsafeIndex < setupIndex &&
-      setupIndex < controllerIndex &&
+      setupIndex < admitPnpmIndex &&
+      admitPnpmIndex < controllerIndex &&
       controllerIndex < prepareIndex &&
       prepareIndex < installIndex &&
       installIndex < lockIndex &&
