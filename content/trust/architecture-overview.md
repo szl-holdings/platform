@@ -36,7 +36,7 @@
 | Backend | Node.js (Express), TypeScript |
 | Database | PostgreSQL (Drizzle ORM) |
 | AI/ML | HuggingFace Inference, BGE Embeddings |
-| CI/CD | GitHub Actions (47 workflows, measured in `artifacts/SOURCE_OF_TRUTH.json`) |
+| CI/CD | GitHub Actions (46 workflows, measured in `artifacts/SOURCE_OF_TRUTH.json`) |
 | Hosting | Replit managed infrastructure |
 | Monorepo | pnpm workspaces |
 

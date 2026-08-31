@@ -176,7 +176,7 @@ SZL Holdings Platform
 | **Database** | PostgreSQL 16, Drizzle ORM |
 | **AI** | Multi-provider (Anthropic, OpenAI, Gemini, Groq) — policy-governed routing |
 | **Monorepo** | 203 pnpm workspace packages (measured in `artifacts/SOURCE_OF_TRUTH.json`) |
-| **CI/CD** | 47 GitHub Actions workflows (measured) |
+| **CI/CD** | 46 GitHub Actions workflows (measured) |
 
 ---
 

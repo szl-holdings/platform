@@ -1,10 +1,10 @@
 {
   "meta": {
-    "generated": "2026-08-26",
+    "generated": "2026-08-31",
     "track": "FRONTIER V2 — Wave 1 Truth Lock",
-    "version": "2.1.3",
-    "measurement_base_commit": "433b0c34c54ed28719b9fcab964c0171c2e79034",
-    "note": "Canonical reproducible counts for the current protected-source tree. The listed measurement_base_commit remains the inspected historical baseline; scripts/audit/validate-source-of-truth.js recomputes current-tree metrics from the checked-out commit. Runtime and database values not refreshed on 2026-07-27 remain historical snapshots, not current public claims."
+    "version": "2.1.4",
+    "measurement_base_commit": "e8c569768943dae57b17483195f5aaccc62b902f",
+    "note": "Canonical reproducible counts for the current protected-source tree. The listed measurement_base_commit is the inspected source after the legacy DCO compatibility workflow was retired; scripts/audit/validate-source-of-truth.js recomputes current-tree metrics from the checked-out commit. Runtime and database values not refreshed on 2026-08-31 remain historical snapshots, not current public claims."
   },
   "artifacts": {
     "registered": {
@@ -126,10 +126,10 @@
   },
   "ci": {
     "workflows": {
-      "count": 47,
+      "count": 46,
       "command": "Count tracked .github/workflows/*.yml and *.yaml files",
-      "computed": "2026-08-30",
-      "note": "Counts the 47 permanent protected-source workflows: the prior 46 (exact-head screenshot evidence plus the hosted observability and public npm release paths, with the obsolete Vite direct-push and Replit-era Hugging Face one-shots retired) plus the frontier receipt-chain gate."
+      "computed": "2026-08-31",
+      "note": "Counts the permanent protected-source workflows after the read-only legacy DCO compatibility workflow was retired. The frontier receipt-chain gate remains included."
     }
   },
   "env": {
@@ -180,7 +180,7 @@
     },
     "unique_axioms": {
       "count": 14,
-      "definition": "Unique declared axioms in the frozen kernel; 15 raw occurrences with one duplicate."
+      "definition": "Unique declared axioms; 15 raw occurrences with one duplicate."
     },
     "tracked_sorries": {
       "count": 163,
