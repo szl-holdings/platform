@@ -325,6 +325,7 @@ Use [docs/README.md](README.md) for navigation by audience or task.
 
 | Document | Description | Last Reviewed |
 |----------|-------------|---------------|
+| [A11oy Model Router lexicon proof](../audit/A11OY_MODEL_ROUTER_LEXICON_PROOF_2026-08-31.md) | Level 4 exact-source browser proof for the PR #691 governed lexicon change | 2026-08 |
 | [audit/2026-04/README.md](audit/2026-04/README.md) | April 2026 operational audit — executive summary and findings | 2026-04 |
 | [APP_STATUS.md](APP_STATUS.md) | Authoritative artifact readiness register (GA / Beta / Partial / Archived) | 2026-04 |
 | [platform-facts.md](platform-facts.md) | Platform statistics — auto-generated from metrics registry | 2026-04 |
