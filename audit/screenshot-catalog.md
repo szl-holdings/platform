@@ -688,3 +688,34 @@ regression was observed. This local evidence proves exact source and local
 build behavior only. It does not prove hosted execution, deployment,
 production runtime, customer use, or external-service parity. Final PR-head
 byte equivalence and hosted checks remain separate promotion requirements.
+
+---
+
+## PR #691 A11oy Model Router lexicon evidence — 2026-08-31
+
+Required capture identity:
+
+- route: /a11oy/model-router
+- surface: A11oy Model Router governed recipe lexicon
+- captured_by: GitHub Actions + Playwright
+- capture_environment: github-actions
+- notes: GitHub-hosted ubuntu-24.04 exact-source build; Playwright capture using the repository-provided @playwright/test runtime.
+- source_revision: 9e66b0eebb52d4e183e2b9248fec1aa74caf8611
+- source_tree: 51fa6d934538233b1ad83ec336ff59498b6b1a50
+- source_ref: chore/a11oy-gacm-signed-688
+- source_pr: #691
+- capture_workflow: https://github.com/szl-holdings/platform/actions/runs/33357789150
+- workflow_definition_ref: ops/model-router-proof-691-20260831
+- workflow_definition_sha: 926390e0efc0a7bfd1cb7b14ea8919e03e8dfeb4
+- viewport: 1440x900 CSS px at device scale factor 1
+- workcell_id: PLATFORM-PR-688-MODEL-ROUTER-PROOF
+- proof_level: 4
+- status: current exact-source UI evidence
+- metadata_sidecar: docs/assets/screenshots/current/a11oy-model-router-capture-metadata-2026-08-31.json.txt
+- metadata_sha256: 08c659642f0461dc75b57f419d82a2df8b1fe24abcf3de3b00dd00add0b13ca5
+
+| Filename | Capture time | Viewport | Artifact SHA-256 | Notes |
+|---|---|---|---|---|
+| docs/assets/screenshots/current/a11oy-model-router-2026-08-31.jpg | 2026-08-31T04:39:40.844Z | 1440x900 CSS px | 3646d432fb1ca1a5176c2b4e6d52fbd2e2ef063247fc09e4eb0264ef510abfd0 | PASS; live exact-source build; changed label visible; superseded label absent; no horizontal overflow, browser errors, or undeclared network. |
+
+The same-origin /api/a11oy/* endpoints returned deterministic ok:false JSON, so this capture proves the changed lexicon surface and does not claim live provider data. Expected Google font hosts were replaced with empty deterministic responses. Deployment and production behavior remain outside this proof boundary.
