@@ -1,7 +1,7 @@
 <!--
   platform README — investor-readable rewrite · 2026-06-30
   Honesty doctrine LOCKED. Sign-off: Stephen Lutar <stephenlutar2@gmail.com>
-  DCO + Conventional Commits. No codenames in UI prose.
+  Solo-builder provenance + Conventional Commits. No codenames in UI prose.
 -->
 
 <div align="center">
@@ -15,7 +15,7 @@
 [![CodeQL](https://github.com/szl-holdings/platform/actions/workflows/codeql.yml/badge.svg?branch=main)](https://github.com/szl-holdings/platform/actions/workflows/codeql.yml)
 [![SBOM](https://github.com/szl-holdings/platform/actions/workflows/sbom.yml/badge.svg?branch=main)](https://github.com/szl-holdings/platform/actions/workflows/sbom.yml)
 [![SLSA L1](https://img.shields.io/badge/SLSA-L1%20honest-22c55e?style=flat-square)](https://slsa.dev/spec/v1.0/levels)
-[![DCO](https://github.com/szl-holdings/platform/actions/workflows/dco.yml/badge.svg?branch=main)](https://github.com/szl-holdings/platform/actions/workflows/dco.yml)
+[![Provenance](https://github.com/szl-holdings/platform/actions/workflows/legacy-required-context-compat.yml/badge.svg?branch=main)](https://github.com/szl-holdings/platform/actions/workflows/legacy-required-context-compat.yml)
 [![License: Proprietary](https://img.shields.io/badge/License-Proprietary-0B1F3A.svg?style=flat-square)](./LICENSE)
 [![Doctrine v11](https://img.shields.io/badge/Doctrine-v11_LOCKED-3b82f6?style=flat-square)](https://github.com/szl-holdings/.github/tree/main/doctrine)
 [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.20434276.svg)](https://doi.org/10.5281/zenodo.20434276)
