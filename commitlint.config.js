@@ -1,8 +1,10 @@
 module.exports = {
   extends: ['@commitlint/config-conventional'],
   rules: {
-    // Keep merge-from-main reconciliation commits conventional without
-    // rewriting already-published, DCO-signed branch history.
+    // Keep titles conventional while allowing machine-generated evidence and
+    // immutable source receipts to retain their exact body/footer formatting.
+    'body-max-line-length': [0],
+    'footer-max-line-length': [0],
     'type-enum': [
       2,
       'always',

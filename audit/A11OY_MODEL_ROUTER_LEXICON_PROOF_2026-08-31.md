@@ -2,15 +2,15 @@
 
 Status: PASS
 Proof level: 4
-Workcell: PLATFORM-PR-696-CONVERGENCE-PROOF
+Workcell: PLATFORM-GACM-CONVERGENCE-PROOF-FINAL
 
 ## Pre-execution plan
 
 1. Freeze the source branch and Git tree before running candidate code.
-2. Reverify protected `main`, PR #696, its branch, and its exact head with API reads.
+2. Reverify protected `main` and the target branch at its exact source head with API reads.
 3. Install the frozen dependency graph with lifecycle and pnpmfile execution disabled.
 4. run typecheck, the Series A suite, and the production build; stop on any nonzero exit.
-5. Serve the built application on loopback and capture both modified public surfaces.
+5. Serve the built application on loopback and capture both modified routes.
 6. Reject the proof on stale source identity, the superseded label, browser errors,
    horizontal overflow, undeclared network, missing artifacts, or digest mismatch.
 7. Publish only evidence bytes and this packet with a compare-and-swap commit.
@@ -24,8 +24,11 @@ Workcell: PLATFORM-PR-696-CONVERGENCE-PROOF
   `Governed Agent Change Management`; it does not change routing or provider behavior.
 - Evidence commit `e1730f581c8109986f14410ff65304715afee634` from predecessor
   PR #691 added the first Model Router capture, its metadata, the catalog entry, and the initial packet.
-- This evidence-only append adds the missing Convergence capture and metadata, appends
-  the catalog, and replaces the packet with the complete plan → patch → test → verify trail.
+- Evidence commit `bbd62c7896cbd3a3ee8a9dfac7abed0fabb7d212` added the first
+  Convergence capture and the complete plan → patch → test → verify trail, but visual review
+  rejected its nearly blank viewport even though the DOM assertions passed.
+- This evidence-only append replaces that image and metadata with a direct-text capture
+  whose target geometry and opacity are checked inside the recorded viewport.
 
 ## Claim under test
 
@@ -38,11 +41,11 @@ The exact-source built routes `/a11oy/model-router` and `/a11oy/convergence` bot
 | Route | Source revision / tree | Workflow run | Chromium | Screenshot SHA-256 | Metadata SHA-256 |
 |---|---|---|---|---|---|
 | `/a11oy/model-router` | `9e66b0eebb52d4e183e2b9248fec1aa74caf8611` / `51fa6d934538233b1ad83ec336ff59498b6b1a50` | https://github.com/szl-holdings/platform/actions/runs/33357789150 | 148.0.7778.96 | `3646d432fb1ca1a5176c2b4e6d52fbd2e2ef063247fc09e4eb0264ef510abfd0` | `08c659642f0461dc75b57f419d82a2df8b1fe24abcf3de3b00dd00add0b13ca5` |
-| `/a11oy/convergence` | `e1730f581c8109986f14410ff65304715afee634` / `9d2145f7f22ec3a42828e6601885f7bc4c79b373` | https://github.com/szl-holdings/platform/actions/runs/33359471359 | 148.0.7778.96 | `8ee00fa6d520d7120dd7845f6e0a66c3bea53f218ec41261d8c438947734f0c6` | `819d48c2c66c3abfeb2a83849a3c946002325becfa691ef34f439cf57ef16946` |
+| `/a11oy/convergence` | `bbd62c7896cbd3a3ee8a9dfac7abed0fabb7d212` / `2fd713227df61d4b402d045a2ccd76fdf463146f` | https://github.com/szl-holdings/platform/actions/runs/33359744252 | 148.0.7778.96 | `43fbc7a2fab9f6be0aafc1bf337ed9680628aff2661e4c19bccd9b8de8823504` | `e2b1049e7a052c3b7a7f18ae89b066ce334ae3fba45145f88f858cb16075faa3` |
 
 Both captures use a 1440×900 CSS-pixel viewport at device scale factor 1 on a
 GitHub-hosted Ubuntu 24.04 runner. The Convergence capture branch was `chore/a11oy-gacm-dual-proof-20260831`; its
-temporary workflow definition was `ops/convergence-proof-696-20260831` at `99a81af1458d65b150ed3f5aa473e01737b6ea88`.
+temporary workflow definition was `ops/convergence-proof-final-20260831` at `a4fab59624be84bb80e46b699f332e8fd51428d3`.
 
 ## Test commands and results
 
@@ -58,7 +61,7 @@ temporary workflow definition was `ops/convergence-proof-696-20260831` at `99a81
 ## Procedure and verification
 
 1. The workflow checked out the immutable source revision and verified its Git tree.
-2. It re-read main, the successor branch, and PR #696 before executing the build.
+2. It re-read protected `main` and the successor branch before executing the build.
 3. It installed the frozen lockfile with lifecycle and pnpmfile execution disabled.
 4. It passed A11oy typecheck and Series A tests, then built the exact source.
 5. It served the built Vite output on loopback and loaded the exact application routes.
