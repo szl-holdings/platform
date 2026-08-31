@@ -1,0 +1,58 @@
+name: temporary-build-support-successor
+
+on:
+  push:
+    branches:
+      - fix/canonical-support-current-main-20260830-v2
+    paths:
+      - .github/workflows/temporary-build-support-successor.yml
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: fix/canonical-support-current-main-20260830-v2
+          fetch-depth: 0
+          persist-credentials: true
+      - name: Apply only the reviewed canonical SUPPORT delta
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name "Lutar, Stephen P."
+          git config user.email "stephenlutar2@gmail.com"
+          git fetch origin main fix/canonical-support-contact-20260830
+          merge_base="$(git merge-base origin/main origin/fix/canonical-support-contact-20260830)"
+          mapfile -t paths < <(git diff --name-only "${merge_base}..origin/fix/canonical-support-contact-20260830" -- . ':(exclude).github/workflows/temporary-*' ':(exclude).ci-*')
+          if [ "${#paths[@]}" -ne 1 ] || [ "${paths[0]}" != "SUPPORT.md" ]; then
+            printf 'Observed paths:\n%s\n' "${paths[*]}"
+            echo "::error::Canonical support source contains more than the reviewed SUPPORT.md delta."
+            exit 1
+          fi
+          git diff --binary "${merge_base}..origin/fix/canonical-support-contact-20260830" -- SUPPORT.md > /tmp/support.patch
+          git reset --hard origin/main
+          git apply --3way --index /tmp/support.patch
+          test ! -e .github/workflows/temporary-build-support-successor.yml
+          git diff --cached --check
+          python - <<'PY'
+          import pathlib
+          text = pathlib.Path('SUPPORT.md').read_text(encoding='utf-8')
+          required = (
+              'security@szlholdings.com',
+              'hello@szlholdings.com',
+              'https://a-11-oy.com',
+              'https://a11oy.net',
+          )
+          for value in required:
+              if value not in text:
+                  raise SystemExit(f'missing canonical support value: {value}')
+          if 'szlholdings.ai' in text:
+              raise SystemExit('non-resolving support domain remains')
+          PY
+          git commit -m "fix(support): replace non-resolving contact domain" -m "Signed-off-by: Stephen P. Lutar <stephenlutar2@gmail.com>"
+          git push --force-with-lease origin HEAD:fix/canonical-support-current-main-20260830-v2
