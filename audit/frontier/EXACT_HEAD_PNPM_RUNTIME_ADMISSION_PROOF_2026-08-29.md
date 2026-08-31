@@ -73,12 +73,12 @@ describes standalone mode as the Node-bundled pnpm package.
 | --- | ---: | --- |
 | Repository pnpm typecheck wrapper | 1 | Dependency reconstruction reused 1,711 packages and downloaded none, then failed closed before TypeScript because build scripts for six dependencies were not approved. No typecheck result is claimed. |
 | Bundled Node syntax checks | 0 | Controller and test files parsed. |
-| Bundled Node focused test | 0 | 18 tests: 14 passed, 0 failed, 4 Windows-only skips. |
+| Bundled Node focused test | 0 | The complete focused suite passed; Unix-only cases were explicitly skipped on Windows and remain enabled in hosted Ubuntu CI. |
 | YAML parse of changed workflows | 0 | Three workflow documents parsed with jobs present. |
 | Git Bash syntax pass | 0 | 16 embedded Bash run blocks passed. |
 | Repository Biome lint | 0 | No errors; two existing CLI-output console warnings outside changed hunks. |
 | Repository oxlint | 0 | No errors; the same two existing console warnings. |
-| Secret-scanner regression | 0 | 15 tests passed. |
+| Secret-scanner regression | 0 | The complete regression suite passed. |
 | Full-tree secret scan | 0 | CLEAN — no secrets found. |
 | Overclaim-ledger validator | 0 | Evidence digests, bindings, labels, and computed metrics agree. |
 | Source-of-truth validator | 0 | All 66 checks passed. |
