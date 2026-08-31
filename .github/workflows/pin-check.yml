@@ -17,4 +17,4 @@ permissions:
 
 jobs:
   pin-check:
-    uses: szl-holdings/.github/.github/workflows/pin-check-reusable.yml@1bbd857634a87d3a824be86ec7a79aaa8e4937e8
+    uses: szl-holdings/.github/.github/workflows/pin-check-reusable.yml@932817603e46212f4226347c95aeb0cc55ec58cb

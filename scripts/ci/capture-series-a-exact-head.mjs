@@ -3,7 +3,17 @@
 import { execFileSync, spawn } from "node:child_process";
 import { createHash } from "node:crypto";
 import { once } from "node:events";
-import { copyFile, lstat, mkdir, readFile, readdir, rm, stat, writeFile } from "node:fs/promises";
+import {
+  copyFile,
+  lstat,
+  mkdir,
+  readdir,
+  readFile,
+  realpath,
+  rm,
+  stat,
+  writeFile,
+} from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
 import process from "node:process";
@@ -149,11 +159,13 @@ export function validateCaptureIsolation(environment = process.env) {
   const candidateRootValue = String(environment.SZL_CANDIDATE_ROOT || "").trim();
   const evidenceRootValue = String(environment.SZL_EVIDENCE_ROOT || "").trim();
   const candidateHomeValue = String(environment.SZL_CANDIDATE_HOME || "").trim();
+  const pnpmRootValue = String(environment.SZL_PNPM_ROOT || "").trim();
   const candidateUser = String(environment.SZL_CANDIDATE_USER || "").trim();
   for (const [name, value] of [
     ["SZL_CANDIDATE_ROOT", candidateRootValue],
     ["SZL_EVIDENCE_ROOT", evidenceRootValue],
     ["SZL_CANDIDATE_HOME", candidateHomeValue],
+    ["SZL_PNPM_ROOT", pnpmRootValue],
   ]) {
     if (!value || !path.isAbsolute(value)) throw new Error(`${name} must be an absolute path`);
   }
@@ -164,6 +176,7 @@ export function validateCaptureIsolation(environment = process.env) {
   const candidateRoot = path.resolve(candidateRootValue);
   const evidenceRoot = path.resolve(evidenceRootValue);
   const candidateHome = path.resolve(candidateHomeValue);
+  const pnpmRoot = path.resolve(pnpmRootValue);
   if (pathContains(candidateRoot, evidenceRoot) || pathContains(evidenceRoot, candidateRoot)) {
     throw new Error("candidate and evidence roots must be disjoint");
   }
@@ -175,7 +188,62 @@ export function validateCaptureIsolation(environment = process.env) {
   ) {
     throw new Error("candidate home must be disjoint from source and evidence roots");
   }
-  return { candidateRoot, evidenceRoot, candidateHome, candidateUser };
+  for (const protectedRoot of [candidateRoot, evidenceRoot, candidateHome]) {
+    if (pathContains(pnpmRoot, protectedRoot) || pathContains(protectedRoot, pnpmRoot)) {
+      throw new Error("pnpm runtime root must be disjoint from source, evidence, and candidate home");
+    }
+  }
+  return { candidateRoot, evidenceRoot, candidateHome, candidateUser, pnpmRoot };
+}
+
+export function validatePnpmRuntimePaths(environment = process.env) {
+  const rootValue = String(environment.SZL_PNPM_ROOT || "").trim();
+  const executableValue = String(environment.SZL_PNPM_EXECUTABLE || "").trim();
+  if (!rootValue || !path.isAbsolute(rootValue)) {
+    throw new Error("SZL_PNPM_ROOT must be an absolute path");
+  }
+  if (!executableValue || !path.isAbsolute(executableValue)) {
+    throw new Error("SZL_PNPM_EXECUTABLE must be an absolute path");
+  }
+  const pnpmRoot = path.resolve(rootValue);
+  const pnpmExecutable = path.resolve(executableValue);
+  if (pnpmExecutable === pnpmRoot || !pathContains(pnpmRoot, pnpmExecutable)) {
+    throw new Error("pnpm executable must remain inside SZL_PNPM_ROOT");
+  }
+  return { pnpmRoot, pnpmExecutable };
+}
+
+export async function validatePnpmRuntime(environment = process.env) {
+  const configured = validatePnpmRuntimePaths(environment);
+  const rootEntry = await lstat(configured.pnpmRoot);
+  if (!rootEntry.isDirectory() || rootEntry.isSymbolicLink()) {
+    throw new Error("pnpm runtime root must be a real directory");
+  }
+  const [resolvedRoot, resolvedExecutable] = await Promise.all([
+    realpath(configured.pnpmRoot),
+    realpath(configured.pnpmExecutable),
+  ]);
+  if (!pathContains(resolvedRoot, resolvedExecutable) || resolvedRoot === resolvedExecutable) {
+    throw new Error("pnpm executable resolves outside SZL_PNPM_ROOT");
+  }
+  const [rootMetadata, executableMetadata] = await Promise.all([
+    stat(resolvedRoot),
+    stat(resolvedExecutable),
+  ]);
+  if (!executableMetadata.isFile()) {
+    throw new Error("pnpm executable must resolve to a regular file");
+  }
+  if ((rootMetadata.mode & 0o005) !== 0o005 || (executableMetadata.mode & 0o005) !== 0o005) {
+    throw new Error("pnpm runtime must be readable and executable by the candidate identity");
+  }
+  if ((rootMetadata.mode & 0o022) !== 0 || (executableMetadata.mode & 0o022) !== 0) {
+    throw new Error("pnpm runtime must not be group- or world-writable");
+  }
+  return {
+    pnpmRoot: configured.pnpmRoot,
+    pnpmExecutable: configured.pnpmExecutable,
+    resolvedExecutable,
+  };
 }
 
 export function surfaceFromRoute(route) {
@@ -567,11 +635,17 @@ function verifyCurrentCheckout(candidateSha, candidateRoot) {
 async function capture() {
   const startedAt = new Date();
   const inputs = validateRuntimeInputs();
-  const { candidateRoot, evidenceRoot, candidateHome, candidateUser } =
+  const { candidateRoot, evidenceRoot, candidateHome, candidateUser, pnpmRoot } =
     validateCaptureIsolation();
+  const pnpmRuntime = await validatePnpmRuntime();
+  if (pnpmRuntime.pnpmRoot !== pnpmRoot) {
+    throw new Error("capture isolation and pnpm runtime roots disagree");
+  }
   verifyCurrentCheckout(inputs.candidateSha, candidateRoot);
 
-  const pnpmVersion = execFileSync("pnpm", ["--version"], { encoding: "utf8" }).trim();
+  const pnpmVersion = execFileSync(pnpmRuntime.pnpmExecutable, ["--version"], {
+    encoding: "utf8",
+  }).trim();
   if (pnpmVersion !== EXPECTED_PNPM_VERSION) {
     throw new Error(`pnpm ${pnpmVersion} does not match the admitted ${EXPECTED_PNPM_VERSION}`);
   }
@@ -601,9 +675,12 @@ async function capture() {
   await mkdir(path.dirname(evidencePath), { recursive: true });
   await rm(artifactRoot, { recursive: true, force: true });
 
-  const trustedPath = String(process.env.PATH || "/usr/local/bin:/usr/bin:/bin");
-  const pnpmPath = execFileSync("which", ["pnpm"], { encoding: "utf8" }).trim();
-  if (!path.isAbsolute(pnpmPath)) throw new Error("pnpm executable must resolve to an absolute path");
+  const trustedPath = [
+    path.dirname(process.execPath),
+    "/usr/local/bin",
+    "/usr/bin",
+    "/bin",
+  ].join(path.delimiter);
   const candidateEnvironment = [
     `PATH=${trustedPath}`,
     `HOME=${candidateHome}`,
@@ -622,7 +699,7 @@ async function capture() {
     "/usr/bin/env",
     "-i",
     ...candidateEnvironment,
-    pnpmPath,
+    pnpmRuntime.pnpmExecutable,
     ...APPLICATION_ARGUMENTS,
   ], {
     cwd: candidateRoot,

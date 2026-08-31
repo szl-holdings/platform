@@ -86,6 +86,7 @@ jobs:
           SZL_CANDIDATE_HOME_VALUE: ${{ runner.temp }}/candidate-home-${{ github.run_id }}-${{ github.run_attempt }}
           SZL_CANDIDATE_CACHE_VALUE: ${{ runner.temp }}/candidate-home-${{ github.run_id }}-${{ github.run_attempt }}/cache
           SZL_CANDIDATE_STORE_VALUE: ${{ runner.temp }}/candidate-home-${{ github.run_id }}-${{ github.run_attempt }}/store
+          SZL_PNPM_ROOT_VALUE: ${{ runner.temp }}/candidate-pnpm-${{ github.run_id }}-${{ github.run_attempt }}
           SZL_DEPENDENCY_DIRS_MANIFEST_VALUE: ${{ runner.temp }}/candidate-dependency-dirs-${{ github.run_id }}-${{ github.run_attempt }}
         run: |
           set -euo pipefail
@@ -94,6 +95,7 @@ jobs:
             "$SZL_CANDIDATE_HOME_VALUE" \
             "$SZL_CANDIDATE_CACHE_VALUE" \
             "$SZL_CANDIDATE_STORE_VALUE" \
+            "$SZL_PNPM_ROOT_VALUE" \
             "$SZL_DEPENDENCY_DIRS_MANIFEST_VALUE"; do
             case "$runner_path" in
               "$RUNNER_TEMP"/*) ;;
@@ -108,6 +110,7 @@ jobs:
             printf 'SZL_CANDIDATE_HOME=%s\n' "$SZL_CANDIDATE_HOME_VALUE"
             printf 'SZL_CANDIDATE_CACHE=%s\n' "$SZL_CANDIDATE_CACHE_VALUE"
             printf 'SZL_CANDIDATE_STORE=%s\n' "$SZL_CANDIDATE_STORE_VALUE"
+            printf 'SZL_PNPM_ROOT=%s\n' "$SZL_PNPM_ROOT_VALUE"
             printf 'SZL_DEPENDENCY_DIRS_MANIFEST=%s\n' "$SZL_DEPENDENCY_DIRS_MANIFEST_VALUE"
           } >> "$GITHUB_ENV"
 
@@ -174,8 +177,11 @@ jobs:
           fi
 
       - name: Setup pnpm
+        id: pnpm_setup
         uses: pnpm/action-setup@0977fd99725f1db4007ccb2928dbb4e90d06cc86
         with:
+          dest: ${{ runner.temp }}/candidate-pnpm-${{ github.run_id }}-${{ github.run_attempt }}
+          standalone: true
           version: 10.26.1
 
       - name: Setup Node.js
@@ -187,13 +193,48 @@ jobs:
             candidate/pnpm-lock.yaml
             controller/pnpm-lock.yaml
 
+      - name: Admit candidate-readable pnpm runtime
+        shell: bash
+        env:
+          SZL_PNPM_ACTION_DEST: ${{ steps.pnpm_setup.outputs.dest }}
+          SZL_PNPM_ACTION_BIN_DEST: ${{ steps.pnpm_setup.outputs.bin_dest }}
+        run: |
+          set -euo pipefail
+          test "$SZL_PNPM_ACTION_DEST" = "$SZL_PNPM_ROOT"
+          case "$SZL_PNPM_ACTION_BIN_DEST" in
+            "$SZL_PNPM_ROOT"/*) ;;
+            *)
+              echo "pnpm action binary directory escaped its runner-scoped root" >&2
+              exit 1
+              ;;
+          esac
+          pnpm_path="$SZL_PNPM_ACTION_BIN_DEST/pnpm"
+          test "$(command -v pnpm)" = "$pnpm_path"
+          test -x "$pnpm_path"
+          resolved_root="$(realpath -e "$SZL_PNPM_ROOT")"
+          resolved_pnpm="$(realpath -e "$pnpm_path")"
+          case "$resolved_pnpm" in
+            "$resolved_root"/*) ;;
+            *)
+              echo "pnpm executable resolved outside its runner-scoped root" >&2
+              exit 1
+              ;;
+          esac
+          chmod -R a+rX,go-w "$resolved_root"
+          writable_entry="$(find "$resolved_root" ! -type l -perm /022 -print -quit)"
+          test -z "$writable_entry"
+          test -r "$resolved_pnpm"
+          test -x "$resolved_pnpm"
+          printf 'SZL_PNPM_EXECUTABLE=%s\n' "$pnpm_path" >> "$GITHUB_ENV"
+
       - name: Install and lock protected controller tooling
         shell: bash
         run: |
           set -euo pipefail
           test "$(node -p "require('./controller/package.json').packageManager")" = pnpm@10.26.1
-          pnpm --dir controller install --frozen-lockfile --ignore-scripts --ignore-pnpmfile
-          pnpm --dir controller exec playwright install --with-deps chromium
+          test "$(command -v pnpm)" = "$SZL_PNPM_EXECUTABLE"
+          "$SZL_PNPM_EXECUTABLE" --dir controller install --frozen-lockfile --ignore-scripts --ignore-pnpmfile
+          "$SZL_PNPM_EXECUTABLE" --dir controller exec playwright install --with-deps chromium
           test "$(git -C "$SZL_CONTROLLER_ROOT" rev-parse HEAD)" = "$CONTROLLER_SHA"
           controller_status="$(git -C "$SZL_CONTROLLER_ROOT" status --porcelain=v1 --untracked-files=no)"
           test -z "$controller_status"
@@ -296,22 +337,60 @@ jobs:
           for protected_root in \
             "$SZL_CONTROLLER_ROOT" \
             "$SZL_CANDIDATE_ROOT" \
-            "$SZL_EVIDENCE_ROOT"; do
+            "$SZL_EVIDENCE_ROOT" \
+            "$SZL_PNPM_ROOT"; do
             if sudo --non-interactive --user "$SZL_CANDIDATE_USER" -- \
               test -w "$(dirname "$protected_root")"; then
               echo "candidate dependency identity can rename protected root: ${protected_root}" >&2
               exit 1
             fi
           done
+          sudo --non-interactive --user "$SZL_CANDIDATE_USER" -- \
+            test -x "$SZL_PNPM_EXECUTABLE"
+          sudo --non-interactive --user "$SZL_CANDIDATE_USER" -- \
+            test ! -w "$SZL_PNPM_EXECUTABLE"
+          candidate_writable_pnpm_entry="$(
+            sudo --non-interactive --user "$SZL_CANDIDATE_USER" -- \
+              find "$SZL_PNPM_ROOT" ! -type l -writable -print -quit
+          )"
+          if [[ -n "$candidate_writable_pnpm_entry" ]]; then
+            echo "candidate identity can write admitted pnpm runtime: ${candidate_writable_pnpm_entry}" >&2
+            exit 1
+          fi
 
       - name: Install nonexecuting candidate dependencies as isolated identity
         shell: bash
         run: |
           set -euo pipefail
           test "$(node -p "require('./candidate/package.json').packageManager")" = pnpm@10.26.1
-          trusted_path="$(dirname "$(command -v node)"):$(dirname "$(command -v pnpm)"):/usr/local/bin:/usr/bin:/bin"
-          pnpm_path="$(command -v pnpm)"
+          trusted_path="$(dirname "$(command -v node)"):/usr/local/bin:/usr/bin:/bin"
+          test "$(command -v pnpm)" = "$SZL_PNPM_EXECUTABLE"
+          pnpm_path="$SZL_PNPM_EXECUTABLE"
           test -x "$pnpm_path"
+          resolved_root="$(realpath -e "$SZL_PNPM_ROOT")"
+          resolved_pnpm="$(realpath -e "$pnpm_path")"
+          case "$resolved_pnpm" in
+            "$resolved_root"/*) ;;
+            *)
+              echo "pnpm executable resolved outside its admitted root" >&2
+              exit 1
+              ;;
+          esac
+          candidate_pnpm_version="$(
+            sudo --non-interactive --user "$SZL_CANDIDATE_USER" -- \
+              /usr/bin/env -i \
+                "PATH=$trusted_path" \
+                "HOME=$SZL_CANDIDATE_HOME" \
+                "$pnpm_path" --version
+          )"
+          test "$candidate_pnpm_version" = 10.26.1
+          candidate_node_version="$(
+            sudo --non-interactive --user "$SZL_CANDIDATE_USER" -- \
+              /usr/bin/env -i \
+                "PATH=$trusted_path" \
+                node --version
+          )"
+          [[ "$candidate_node_version" =~ ^v24\. ]]
           sudo --non-interactive --user "$SZL_CANDIDATE_USER" -- \
             /usr/bin/env -i \
               "PATH=$trusted_path" \
@@ -385,6 +464,10 @@ jobs:
           done < <(find "$SZL_CANDIDATE_ROOT" "$SZL_CANDIDATE_HOME" -type l -print0)
           sudo --non-interactive --user "$SZL_CANDIDATE_USER" -- \
             test ! -w "$SZL_CONTROLLER_ROOT/package.json"
+          sudo --non-interactive --user "$SZL_CANDIDATE_USER" -- \
+            test -x "$SZL_PNPM_EXECUTABLE"
+          sudo --non-interactive --user "$SZL_CANDIDATE_USER" -- \
+            test ! -w "$SZL_PNPM_EXECUTABLE"
           if sudo --non-interactive --user "$SZL_CANDIDATE_USER" -- \
             test -r "$SZL_EVIDENCE_ROOT"; then
             echo "candidate dependency identity can traverse the evidence root" >&2
