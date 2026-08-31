@@ -8,16 +8,17 @@
 > source-tree and locked-kernel measurements. A value without reproducible
 > evidence is **UNVERIFIED**, not estimated.
 
-**Registry version:** 2.1.3
+**Registry version:** 2.1.4
 
-**Feature baseline inspected:** `platform@433b0c34c54ed28719b9fcab964c0171c2e79034`
+**Feature baseline inspected:** `platform@e8c569768943dae57b17483195f5aaccc62b902f`
 
-**Measured:** 2026-08-26
+**Measured:** 2026-08-31
 
 **Validator:** `node scripts/audit/validate-source-of-truth.js`
 
-The counts describe the permanent protected-source tree after retiring two obsolete
-mutation one-shots. The validator recomputes them from whichever commit is checked out.
+The counts describe the permanent protected-source tree after retiring the obsolete
+legacy DCO compatibility workflow. The validator recomputes them from whichever
+commit is checked out.
 
 ---
 
@@ -39,7 +40,7 @@ mutation one-shots. The validator recomputes them from whichever commit is check
 | DB migrations (SQL files) | **149** | Tracked `lib/db/drizzle/*.sql` files; duplicate sequence numbers may exist |
 | API route source files | **44** | Non-test files under `apps/`, `services/`, and `artifacts/api-server/` containing a detected Express route declaration |
 | API handler declarations | **311** | Static non-test HTTP method declarations on `app`, `router`, and named Express Router receivers in the current runtime roots |
-| CI workflows | **47** | Permanent tracked `.github/workflows/*.yml` and `*.yaml`, including exact-head screenshot evidence, hosted observability proof, public npm release paths, and the frontier receipt-chain gate |
+| CI workflows | **46** | Permanent tracked `.github/workflows/*.yml` and `*.yaml`, including exact-head screenshot evidence, hosted observability proof, public npm release paths, and the frontier receipt-chain gate; excludes the retired DCO compatibility workflow |
 | Environment variables (in `.env.example`) | **238** | Lines matching `^[A-Z_]+=` |
 
 These are source-tree measurements. They do not by themselves prove that a
