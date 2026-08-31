@@ -698,7 +698,8 @@ Required capture identity:
 - route: /a11oy/model-router
 - surface: A11oy Model Router governed recipe lexicon
 - captured_by: GitHub Actions + Playwright
-- capture_environment: GitHub-hosted ubuntu-24.04 exact-source build
+- capture_environment: github-actions
+- notes: GitHub-hosted ubuntu-24.04 exact-source build; Playwright capture using the repository-provided @playwright/test runtime.
 - source_revision: 9e66b0eebb52d4e183e2b9248fec1aa74caf8611
 - source_tree: 51fa6d934538233b1ad83ec336ff59498b6b1a50
 - source_ref: chore/a11oy-gacm-signed-688
