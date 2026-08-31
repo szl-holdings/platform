@@ -47,7 +47,7 @@
 | SZL Holdings | szl-holdings | szl-holdings-mobile | holdings, admin | Core tables |
 | Lyte | lyte-command-center | lyte-mobile | lyte-*, alloy-* | alloy_*, lyte_* |
 | Aegis | firestorm | aegis-mobile | firestorm-* | firestorm_* |
-| Terra | terra | terra-mobile | terra-mobile | terra_* |
+| Terra | terra | terra-mobile | terra-* | terra_* |
 | Vessels | vessels | vessels-mobile | vessels-* | vessels_* |
 | Carlota Jo | carlota-jo | carlota-jo-mobile | carlota-*, booking | carlota_* |
 | Founder | stephen-site | stephen-mobile | stephen | — |
