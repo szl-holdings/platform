@@ -1,0 +1,58 @@
+{
+  "schema": "a11oy-ui-proof-metadata/v1",
+  "status": "PASS",
+  "proof_level": 4,
+  "surface": "A11oy Model Router governed recipe lexicon",
+  "route": "/a11oy/model-router",
+  "captured_at": "2026-08-31T04:39:40.844Z",
+  "captured_by": "GitHub Actions + Playwright",
+  "capture_environment": "GitHub-hosted ubuntu-24.04 exact-source build",
+  "source_revision": "9e66b0eebb52d4e183e2b9248fec1aa74caf8611",
+  "source_tree": "51fa6d934538233b1ad83ec336ff59498b6b1a50",
+  "source_ref": "chore/a11oy-gacm-signed-688",
+  "source_pr": 691,
+  "workflow": {
+    "name": "Temporary Model Router exact-head proof",
+    "run_id": 33357789150,
+    "run_attempt": 1,
+    "run_url": "https://github.com/szl-holdings/platform/actions/runs/33357789150",
+    "definition_ref": "ops/model-router-proof-691-20260831",
+    "definition_sha": "926390e0efc0a7bfd1cb7b14ea8919e03e8dfeb4"
+  },
+  "workcell_id": "PLATFORM-PR-688-MODEL-ROUTER-PROOF",
+  "viewport_css_px": {
+    "width": 1440,
+    "height": 900
+  },
+  "device_scale_factor": 1,
+  "browser": "chromium",
+  "browser_version": "148.0.7778.96",
+  "artifact": {
+    "path": "docs/assets/screenshots/current/a11oy-model-router-2026-08-31.jpg",
+    "media_type": "image/jpeg",
+    "sha256": "3646d432fb1ca1a5176c2b4e6d52fbd2e2ef063247fc09e4eb0264ef510abfd0"
+  },
+  "assertions": {
+    "route_http_ok": true,
+    "changed_label_visible": true,
+    "changed_label_match_count": 2,
+    "superseded_label_absent": true,
+    "loading_state_resolved": true,
+    "horizontal_overflow_px": 0,
+    "page_errors": [],
+    "console_errors": [],
+    "unexpected_foreign_requests": [],
+    "expected_font_requests_stubbed": [
+      "https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=Inter:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&family=JetBrains+Mono:wght@400;500&display=swap"
+    ]
+  },
+  "capture_inputs": {
+    "api_responses": "same-origin /api/a11oy/* returned deterministic ok:false JSON",
+    "external_fonts": "expected Google font hosts returned empty deterministic responses"
+  },
+  "nonclaims": [
+    "This proves exact-source local rendering on the named GitHub-hosted runner only.",
+    "It does not prove deployment, production runtime, customer use, or provider connectivity.",
+    "The screenshot proves the changed lexicon surface, not live model-router data."
+  ]
+}
