@@ -517,7 +517,7 @@ export function ModelRouter() {
           {/* GOVERNED INFERENCE RECIPES */}
           <div className="mb-8">
             <div className="flex items-center justify-between mb-1">
-              <SectionTitle>Governed Inference Recipes</SectionTitle>
+              <SectionTitle>Governed Agent Change Management</SectionTitle>
               <span className="text-xs font-mono px-2 py-0.5 rounded" style={{ backgroundColor: 'rgba(167,139,250,0.1)', color: '#a78bfa' }}>
                 Inspired by vLLM Recipes — governed by A11oy
               </span>
@@ -630,7 +630,7 @@ export function ModelRouter() {
             )}
 
             <div className="mt-4 p-3 rounded-lg text-xs" style={{ backgroundColor: 'rgba(167,139,250,0.04)', border: '1px solid rgba(167,139,250,0.12)', color: 'var(--color-a11oy-text-ghost)' }}>
-              <span className="font-mono" style={{ color: '#a78bfa' }}>Governed Inference Recipes</span> — inspired by vLLM's recipe model for composable deployment configurations,
+              <span className="font-mono" style={{ color: '#a78bfa' }}>Governed Agent Change Management</span> — inspired by vLLM's recipe model for composable deployment configurations,
               extended with A11oy's Covenant Policy enforcement, Proof Chain attribution, and Shadow Council adversarial review.
               Each recipe is a governance-first configuration: the model, the task, the domain, and the full compliance layer — one composable unit.
             </div>
