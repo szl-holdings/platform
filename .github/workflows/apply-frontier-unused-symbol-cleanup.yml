@@ -1,0 +1,53 @@
+# SPDX-License-Identifier: Apache-2.0
+name: Apply frontier unused-symbol cleanup
+
+on:
+  push:
+    branches:
+      - fix/frontier-unused-symbols
+
+permissions:
+  contents: write
+
+concurrency:
+  group: apply-frontier-unused-symbol-cleanup
+  cancel-in-progress: false
+
+jobs:
+  patch:
+    name: Apply, verify, and commit behavior-neutral cleanup
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Harden runner
+        uses: step-security/harden-runner@b09bb98e06d4d774595224525879c09bc6e98c40
+        with:
+          egress-policy: audit
+
+      - name: Check out exact feature head
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          ref: fix/frontier-unused-symbols
+          fetch-depth: 0
+
+      - name: Apply exact cleanup
+        run: python .github/scripts/apply_frontier_unused_symbol_cleanup.py
+
+      - name: Verify frontier behavior
+        run: |
+          python -m py_compile tools/a11oy_frontier.py
+          python tools/test_a11oy_frontier.py
+
+      - name: Commit only the permanent reviewed change
+        env:
+          BRANCH: fix/frontier-unused-symbols
+        run: |
+          set -euo pipefail
+          git config user.name "SZL Holdings Automation"
+          git config user.email "eng@szlholdings.com"
+          git add tools/a11oy_frontier.py
+          git rm .github/scripts/apply_frontier_unused_symbol_cleanup.py
+          git rm .github/workflows/apply-frontier-unused-symbol-cleanup.yml
+          git diff --cached --check
+          git commit -s -m "chore(frontier): remove unused parser symbols"
+          git push origin "HEAD:${BRANCH}"
