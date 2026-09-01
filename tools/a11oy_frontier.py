@@ -55,7 +55,7 @@ import re
 import subprocess
 import sys
 import time
-from dataclasses import dataclass, field, asdict
+from dataclasses import dataclass, asdict
 from pathlib import Path
 from typing import Any, Callable, Iterable, Optional
 
@@ -362,7 +362,6 @@ def bench_tiktoken(case: Case, oracle: Optional[Result] = None) -> Result:
 
 # --- frontier: gigatoken (ingress acceleration layer) ----------------------
 
-_NUM = re.compile(r"([0-9][0-9_,]*\.?[0-9]*)\s*(GB/s|MB/s|tokens/s|tok/s)", re.I)
 
 
 def bench_gigatoken(case: Case, oracle: Optional[Result] = None) -> Result:
