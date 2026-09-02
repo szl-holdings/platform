@@ -107,7 +107,7 @@ overrides:
   qs: ^6.15.2
   ws: ^8.20.1
   hono: 4.12.34
-  '@hono/node-server': 2.0.19
+  '@hono/node-server': 2.1.1
   browserslist: 4.28.7
   body-parser: 2.3.0
   image-size: link:packages/image-size-safe
@@ -199,7 +199,6 @@ overrides:
   rollup>@rollup/rollup-linux-ppc64-gnu: '-'
   rollup>@rollup/rollup-linux-ppc64-musl: '-'
   rollup>@rollup/rollup-linux-riscv64-gnu: '-'
-  rollup>@rollup/rollup-linux-riscv64-musl: '-'
   rollup>@rollup/rollup-linux-s390x-gnu: '-'
   rollup>@rollup/rollup-linux-x64-musl: '-'
   rollup>@rollup/rollup-openbsd-x64: '-'
