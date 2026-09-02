@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: Apache-2.0
-# Keep the live Hugging Face flagship Spaces warm and maintain one honest,
+# Keep the canonical live Hugging Face flagship Spaces warm and maintain one honest,
 # de-duplicated incident per organ. The controller requires repeated HTTP
 # evidence, treats network-only failures as UNKNOWN, and closes an existing
 # incident only after repeated HTTP 200 recovery evidence.
@@ -76,12 +76,16 @@ jobs:
             probe: https://szlholdings-a11oy.hf.space/healthz
           - organ: killinchu
             probe: https://szlholdings-killinchu.hf.space/healthz
-          - organ: yarqa
-            probe: https://szlholdings-yarqa.hf.space/healthz
-          - organ: hatun-mcp
-            probe: https://szlholdings-hatun-mcp.hf.space/healthz
+          - organ: david-leads
+            probe: https://szlholdings-david-leads.hf.space/healthz
           - organ: anatomy
             probe: https://szlholdings-anatomy.hf.space/healthz
+          - organ: immune
+            probe: https://szlholdings-immune.hf.space/healthz
+          - organ: szl-real-estate
+            probe: https://szlholdings-szl-real-estate.hf.space/healthz
+          - organ: szl-atelier
+            probe: https://szlholdings-szl-atelier.hf.space/healthz
     steps:
       - name: Check out proposed controller
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
@@ -131,12 +135,16 @@ jobs:
             probe: https://szlholdings-a11oy.hf.space/healthz
           - organ: killinchu
             probe: https://szlholdings-killinchu.hf.space/healthz
-          - organ: yarqa
-            probe: https://szlholdings-yarqa.hf.space/healthz
-          - organ: hatun-mcp
-            probe: https://szlholdings-hatun-mcp.hf.space/healthz
+          - organ: david-leads
+            probe: https://szlholdings-david-leads.hf.space/healthz
           - organ: anatomy
             probe: https://szlholdings-anatomy.hf.space/healthz
+          - organ: immune
+            probe: https://szlholdings-immune.hf.space/healthz
+          - organ: szl-real-estate
+            probe: https://szlholdings-szl-real-estate.hf.space/healthz
+          - organ: szl-atelier
+            probe: https://szlholdings-szl-atelier.hf.space/healthz
     steps:
       - name: Check out protected controller
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1

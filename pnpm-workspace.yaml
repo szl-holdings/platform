@@ -70,6 +70,8 @@ minimumReleaseAgeExclude:
   - expo-location
   - expo-sensors
   - expo-symbols
+  - browserslist
+  - '@hono/node-server'
 
 onlyBuiltDependencies:
   - '@swc/core'
@@ -99,13 +101,14 @@ overrides:
   protobufjs: 7.6.5
   protocol-buffers-schema: ^3.6.1
   '@xmldom/xmldom': ^0.9.10
-  fast-xml-parser: ^5.7.2
+  fast-xml-parser: ^5.8.0
   postcss: 8.5.23
   uuid: ^14.0.0
   qs: ^6.15.2
   ws: ^8.20.1
   hono: 4.12.34
-  '@hono/node-server': 2.0.12
+  '@hono/node-server': 2.1.1
+  browserslist: 4.28.7
   body-parser: 2.3.0
   image-size: link:packages/image-size-safe
   shell-quote: 1.9.0
@@ -121,7 +124,7 @@ overrides:
   nanoid@<4: 3.3.18
   'nanoid@>=4 <5.1.16': 5.1.16
   ip-address: 10.3.1
-  fast-uri: 3.1.5
+  fast-uri: 3.1.6
   linkify-it: 5.0.2
   sharp: 0.35.3
   '@opentelemetry/propagator-jaeger': 2.9.0
@@ -196,7 +199,6 @@ overrides:
   rollup>@rollup/rollup-linux-ppc64-gnu: '-'
   rollup>@rollup/rollup-linux-ppc64-musl: '-'
   rollup>@rollup/rollup-linux-riscv64-gnu: '-'
-  rollup>@rollup/rollup-linux-riscv64-musl: '-'
   rollup>@rollup/rollup-linux-s390x-gnu: '-'
   rollup>@rollup/rollup-linux-x64-musl: '-'
   rollup>@rollup/rollup-openbsd-x64: '-'

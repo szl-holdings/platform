@@ -559,8 +559,8 @@
         "lib/api-spec/scripts/codegen.mjs"
       ],
       "file_count": 4,
-      "bytes": 2189187,
-      "tree_sha256": "d31aa14ddb9db747df80915b3b4ab4f69b7753441a5105faeb4e90d0cd7322e2",
+      "bytes": 2189188,
+      "tree_sha256": "54f2b5f9101f2c8e15bfdff6cd9899032adca70021ea37805a3306438a8dff73",
       "files": [
         {
           "path": "lib/api-spec/openapi.yaml",
@@ -574,8 +574,8 @@
         },
         {
           "path": "lib/api-spec/package.json",
-          "bytes": 553,
-          "sha256": "20e7818ef118230b691294f104011d5c4cf8071d352813f6be28a814ea7382a6"
+          "bytes": 554,
+          "sha256": "f182a3986f6d32082667158030fdb3208c08a51132eb31228145d96a9fc3b324"
         },
         {
           "path": "lib/api-spec/scripts/codegen.mjs",
@@ -4025,5 +4025,5 @@
       "claims that hash closure proves registry publication or deployment"
     ]
   },
-  "release_id": "sha256:9af5861b8849ccc11813717187a15e52f644d64e97970b9cf0143eea47abf493"
+  "release_id": "sha256:27ec82606a7fd8dab0a78d8d5ab2d78d784aa7caef6e6291c2df1ca5cb71eee4"
 }

@@ -122,11 +122,21 @@ class IssueLifecycleTests(unittest.TestCase):
 
 
 class ReportBoundaryTests(unittest.TestCase):
-    def test_roster_is_exact_and_uses_docker_health_routes(self) -> None:
+    def test_roster_is_exact_canonical_seven_and_uses_health_routes(self) -> None:
         self.assertEqual(
             set(warm.ROSTER),
-            {"a11oy", "killinchu", "yarqa", "hatun-mcp", "anatomy"},
+            {
+                "a11oy",
+                "killinchu",
+                "david-leads",
+                "anatomy",
+                "immune",
+                "szl-real-estate",
+                "szl-atelier",
+            },
         )
+        self.assertNotIn("yarqa", warm.ROSTER)
+        self.assertNotIn("hatun-mcp", warm.ROSTER)
         for organ, url in warm.ROSTER.items():
             self.assertEqual(url, f"https://szlholdings-{organ}.hf.space/healthz")
 
@@ -195,6 +205,8 @@ class ReportBoundaryTests(unittest.TestCase):
         self.assertIn("test_warm_flagships.py", workflow)
         self.assertIn("actions/upload-artifact@", workflow)
         self.assertNotIn("actions/github-script@", workflow)
+        self.assertNotIn("szlholdings-yarqa.hf.space", workflow)
+        self.assertNotIn("szlholdings-hatun-mcp.hf.space", workflow)
 
 
 if __name__ == "__main__":
