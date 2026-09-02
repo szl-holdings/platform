@@ -45,3 +45,4 @@ jobs:
           git add pnpm-lock.yaml
           git commit -m "fix(security): refresh dependency lockfile"
           git push origin HEAD:fix/warm-flagships-canonical-seven-20260902
+# retry: published @hono/node-server 2.1.1
