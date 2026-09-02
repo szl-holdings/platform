@@ -70,6 +70,8 @@ minimumReleaseAgeExclude:
   - expo-location
   - expo-sensors
   - expo-symbols
+  - browserslist
+  - '@hono/node-server'
 
 onlyBuiltDependencies:
   - '@swc/core'
@@ -99,13 +101,14 @@ overrides:
   protobufjs: 7.6.5
   protocol-buffers-schema: ^3.6.1
   '@xmldom/xmldom': ^0.9.10
-  fast-xml-parser: ^5.7.2
+  fast-xml-parser: ^5.8.0
   postcss: 8.5.23
   uuid: ^14.0.0
   qs: ^6.15.2
   ws: ^8.20.1
   hono: 4.12.34
-  '@hono/node-server': 2.0.12
+  '@hono/node-server': 2.0.19
+  browserslist: 4.28.7
   body-parser: 2.3.0
   image-size: link:packages/image-size-safe
   shell-quote: 1.9.0
