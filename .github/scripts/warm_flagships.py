@@ -35,12 +35,17 @@ HEALTHY = "HEALTHY"
 UNHEALTHY = "UNHEALTHY"
 UNKNOWN = "UNKNOWN"
 
+# Canonical public Hugging Face fleet established by the protected 2026-09-02
+# consolidation: 52 total Spaces -> seven public RUNNING keep targets ->
+# 45 folded private. Retired/folded Spaces must never be reintroduced here.
 ROSTER: dict[str, str] = {
     "a11oy": "https://szlholdings-a11oy.hf.space/healthz",
     "killinchu": "https://szlholdings-killinchu.hf.space/healthz",
-    "yarqa": "https://szlholdings-yarqa.hf.space/healthz",
-    "hatun-mcp": "https://szlholdings-hatun-mcp.hf.space/healthz",
+    "david-leads": "https://szlholdings-david-leads.hf.space/healthz",
     "anatomy": "https://szlholdings-anatomy.hf.space/healthz",
+    "immune": "https://szlholdings-immune.hf.space/healthz",
+    "szl-real-estate": "https://szlholdings-szl-real-estate.hf.space/healthz",
+    "szl-atelier": "https://szlholdings-szl-atelier.hf.space/healthz",
 }
 
 
