@@ -45,18 +45,14 @@ jobs:
         with:
           persist-credentials: false
           fetch-depth: 1
-
       - name: Set up Python
         uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
         with:
           python-version: "3.12"
-
       - name: Compile and test the complete incident lifecycle
         run: |
           set -euo pipefail
-          python -m py_compile \
-            .github/scripts/warm_flagships.py \
-            .github/scripts/test_warm_flagships.py
+          python -m py_compile .github/scripts/warm_flagships.py .github/scripts/test_warm_flagships.py
           python .github/scripts/test_warm_flagships.py
           git diff --check
 
@@ -76,28 +72,30 @@ jobs:
             probe: https://szlholdings-a11oy.hf.space/healthz
           - organ: killinchu
             probe: https://szlholdings-killinchu.hf.space/healthz
+          - organ: terra
+            probe: https://szlholdings-terra.hf.space/healthz
+          - organ: sentra
+            probe: https://szlholdings-sentra.hf.space/healthz
+          - organ: counsel
+            probe: https://szlholdings-counsel.hf.space/healthz
+          - organ: finance
+            probe: https://szlholdings-finance.hf.space/healthz
+          - organ: vessels
+            probe: https://szlholdings-vessels.hf.space/healthz
+          - organ: lyte
+            probe: https://szlholdings-lyte.hf.space/healthz
           - organ: david-leads
             probe: https://szlholdings-david-leads.hf.space/healthz
-          - organ: anatomy
-            probe: https://szlholdings-anatomy.hf.space/healthz
-          - organ: immune
-            probe: https://szlholdings-immune.hf.space/healthz
-          - organ: szl-real-estate
-            probe: https://szlholdings-szl-real-estate.hf.space/healthz
-          - organ: szl-atelier
-            probe: https://szlholdings-szl-atelier.hf.space/healthz
     steps:
       - name: Check out proposed controller
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
           fetch-depth: 1
-
       - name: Set up Python
         uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
         with:
           python-version: "3.12"
-
       - name: Collect live evidence without issue or Space mutation
         run: |
           python .github/scripts/warm_flagships.py \
@@ -108,7 +106,6 @@ jobs:
             --timeout 25 \
             --interval 2 \
             --report "$REPORT_ROOT/${{ matrix.organ }}.json"
-
       - name: Upload immutable pull-request probe evidence
         if: always()
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
@@ -135,28 +132,30 @@ jobs:
             probe: https://szlholdings-a11oy.hf.space/healthz
           - organ: killinchu
             probe: https://szlholdings-killinchu.hf.space/healthz
+          - organ: terra
+            probe: https://szlholdings-terra.hf.space/healthz
+          - organ: sentra
+            probe: https://szlholdings-sentra.hf.space/healthz
+          - organ: counsel
+            probe: https://szlholdings-counsel.hf.space/healthz
+          - organ: finance
+            probe: https://szlholdings-finance.hf.space/healthz
+          - organ: vessels
+            probe: https://szlholdings-vessels.hf.space/healthz
+          - organ: lyte
+            probe: https://szlholdings-lyte.hf.space/healthz
           - organ: david-leads
             probe: https://szlholdings-david-leads.hf.space/healthz
-          - organ: anatomy
-            probe: https://szlholdings-anatomy.hf.space/healthz
-          - organ: immune
-            probe: https://szlholdings-immune.hf.space/healthz
-          - organ: szl-real-estate
-            probe: https://szlholdings-szl-real-estate.hf.space/healthz
-          - organ: szl-atelier
-            probe: https://szlholdings-szl-atelier.hf.space/healthz
     steps:
       - name: Check out protected controller
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
           fetch-depth: 1
-
       - name: Set up Python
         uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
         with:
           python-version: "3.12"
-
       - name: Probe and reconcile the exact incident lifecycle
         env:
           GITHUB_TOKEN: ${{ github.token }}
@@ -170,7 +169,6 @@ jobs:
             --interval 2 \
             --report "$REPORT_ROOT/${{ matrix.organ }}.json" \
             --mutate-issues
-
       - name: Upload immutable protected-run health evidence
         if: always()
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
