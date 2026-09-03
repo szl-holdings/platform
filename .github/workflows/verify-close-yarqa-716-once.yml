@@ -1,0 +1,79 @@
+name: Verify and close YARQA runtime incident once
+
+on:
+  push:
+    branches:
+      - ops/verify-close-yarqa-716-20260902
+    paths:
+      - ".github/workflows/verify-close-yarqa-716-once.yml"
+
+permissions:
+  contents: write
+  issues: write
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    env:
+      GH_TOKEN: ${{ github.token }}
+    steps:
+      - name: Prove public health and exact served source
+        id: proof
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          import json
+          import os
+          import urllib.request
+
+          def get(url):
+              request = urllib.request.Request(
+                  url,
+                  headers={
+                      "Accept": "application/vnd.github+json",
+                      "User-Agent": "SZL-YARQA-incident-proof/1.0",
+                      "Cache-Control": "no-cache",
+                  },
+              )
+              with urllib.request.urlopen(request, timeout=45) as response:
+                  body = response.read()
+                  if response.status != 200:
+                      raise SystemExit(f"{url} returned HTTP {response.status}")
+                  return body
+
+          main = json.loads(
+              get("https://api.github.com/repos/szl-holdings/yarqa/branches/main")
+          )["commit"]["sha"]
+          root = get("https://szlholdings-yarqa.hf.space/")
+          health = get("https://szlholdings-yarqa.hf.space/healthz")
+          build = get("https://szlholdings-yarqa.hf.space/api/build-info")
+          json.loads(health)
+          json.loads(build)
+          if main.encode("ascii") not in build:
+              raise SystemExit(
+                  "YARQA /api/build-info does not expose exact protected main " + main
+              )
+          if not root.strip():
+              raise SystemExit("YARQA root returned an empty response")
+          with open(os.environ["GITHUB_OUTPUT"], "a", encoding="utf-8") as output:
+              output.write(f"main={main}\n")
+          print("YARQA live source proof: PASS", main)
+          PY
+
+      - name: Close the incident with the exact proof
+        shell: bash
+        run: |
+          set -euo pipefail
+          gh issue close 716 \
+            --repo "$GITHUB_REPOSITORY" \
+            --reason completed \
+            --comment "Resolved by the governed YARQA publication and restart rail. Public root, /healthz, and /api/build-info returned HTTP 200, both JSON routes parsed, and the served source identity equaled protected yarqa main `${{ steps.proof.outputs.main }}`. No reachability-only or source-only claim was used."
+
+      - name: Remove the transient verifier branch
+        if: always()
+        shell: bash
+        run: |
+          set -euo pipefail
+          git push "https://x-access-token:${GH_TOKEN}@github.com/${GITHUB_REPOSITORY}.git" --delete "$GITHUB_REF_NAME"
