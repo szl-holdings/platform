@@ -72,6 +72,7 @@ minimumReleaseAgeExclude:
   - expo-symbols
   - browserslist
   - '@hono/node-server'
+  - qs
 
 onlyBuiltDependencies:
   - '@swc/core'
