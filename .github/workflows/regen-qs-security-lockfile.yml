@@ -1,0 +1,91 @@
+name: Regenerate qs security lockfile
+
+on:
+  push:
+    branches:
+      - fix/security-qs-6.16.0-lockfile
+    paths:
+      - .github/workflows/regen-qs-security-lockfile.yml
+
+permissions:
+  contents: write
+
+concurrency:
+  group: regen-qs-security-lockfile-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  regenerate:
+    name: Pin qs 6.16.0 and regenerate pnpm lockfile
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: Harden runner
+        uses: step-security/harden-runner@bf7454d06d71f1098171f2acdf0cd4708d7b5920 # v2.20.0
+        with:
+          egress-policy: audit
+
+      - name: Checkout exact repair branch
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: ${{ github.ref_name }}
+          fetch-depth: 0
+
+      - name: Set up pnpm
+        uses: pnpm/action-setup@0977fd99725f1db4007ccb2928dbb4e90d06cc86 # v6.0.10
+
+      - name: Set up Node.js
+        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version: "24"
+          cache: pnpm
+
+      - name: Pin the first non-vulnerable qs release
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          from pathlib import Path
+
+          path = Path("pnpm-workspace.yaml")
+          text = path.read_text(encoding="utf-8")
+          old = "  qs: ^6.15.2\n"
+          new = "  qs: 6.16.0\n"
+          count = text.count(old)
+          if count != 1:
+              raise SystemExit(f"expected exactly one qs override to replace, found {count}")
+          path.write_text(text.replace(old, new, 1), encoding="utf-8")
+          PY
+
+      - name: Regenerate only the lockfile
+        shell: bash
+        run: |
+          set -euo pipefail
+          pnpm update qs@6.16.0 --lockfile-only --no-save -r
+
+      - name: Verify the vulnerable resolution is gone
+        shell: bash
+        run: |
+          set -euo pipefail
+          grep -Fq "  qs: 6.16.0" pnpm-workspace.yaml
+          grep -Fq "qs@6.16.0" pnpm-lock.yaml
+          if grep -Fq "qs@6.15.2" pnpm-lock.yaml; then
+            echo "::error::pnpm-lock.yaml still resolves vulnerable qs@6.15.2"
+            exit 1
+          fi
+          git diff --check
+          git diff -- pnpm-workspace.yaml pnpm-lock.yaml
+
+      - name: Commit the deterministic security repair
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name "Lutar, Stephen P."
+          git config user.email "stephenlutar2@gmail.com"
+          git add pnpm-workspace.yaml pnpm-lock.yaml
+          if git diff --cached --quiet; then
+            echo "::error::The security repair produced no tracked changes"
+            exit 1
+          fi
+          git commit -s -m "fix(security): lock qs 6.16.0"
+          git push origin "HEAD:${GITHUB_REF_NAME}"
