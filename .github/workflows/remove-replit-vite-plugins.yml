@@ -1,0 +1,181 @@
+name: Remove retired Replit Vite plugins
+
+on:
+  push:
+    branches:
+      - refactor/remove-replit-vite-plugins-20260903
+    paths:
+      - .github/workflows/remove-replit-vite-plugins.yml
+
+permissions:
+  contents: write
+
+concurrency:
+  group: remove-replit-vite-plugins-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  migrate:
+    name: Remove plugins, regenerate lockfile, build affected frontends
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - name: Harden runner
+        uses: step-security/harden-runner@bf7454d06d71f1098171f2acdf0cd4708d7b5920 # v2.20.0
+        with:
+          egress-policy: audit
+
+      - name: Checkout exact migration branch
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: ${{ github.ref_name }}
+          fetch-depth: 0
+
+      - name: Set up pnpm
+        uses: pnpm/action-setup@0977fd99725f1db4007ccb2928dbb4e90d06cc86 # v6.0.10
+
+      - name: Set up Node.js
+        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version: "24"
+          cache: pnpm
+
+      - name: Remove external Replit Vite coupling
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          from __future__ import annotations
+
+          import json
+          from pathlib import Path
+
+          plugin_keys = (
+              "@replit/vite-plugin-cartographer",
+              "@replit/vite-plugin-dev-banner",
+              "@replit/vite-plugin-runtime-error-modal",
+          )
+          apps = ("a11oy", "terra", "sentra", "counsel", "vessels", "carlota-jo")
+
+          for app in apps:
+              config = Path("artifacts") / app / "vite.config.ts"
+              text = config.read_text(encoding="utf-8")
+              original = text
+
+              import_line = "import runtimeErrorOverlay from '@replit/vite-plugin-runtime-error-modal';\n"
+              if text.count(import_line) != 1:
+                  raise SystemExit(f"{config}: expected one runtime overlay import")
+              text = text.replace(import_line, "", 1)
+
+              call_line = "    runtimeErrorOverlay(),\n"
+              if text.count(call_line) != 1:
+                  raise SystemExit(f"{config}: expected one runtime overlay plugin call")
+              text = text.replace(call_line, "", 1)
+
+              start_marker = (
+                  "    ...(process.env.NODE_ENV !== 'production' && "
+                  "process.env.REPL_ID !== undefined\n"
+              )
+              end_marker = "      : []),\n"
+              start = text.find(start_marker)
+              if start < 0:
+                  raise SystemExit(f"{config}: Replit-only plugin block start not found")
+              end = text.find(end_marker, start)
+              if end < 0:
+                  raise SystemExit(f"{config}: Replit-only plugin block end not found")
+              text = text[:start] + text[end + len(end_marker):]
+
+              if text == original:
+                  raise SystemExit(f"{config}: migration produced no change")
+              if "@replit/vite-plugin-" in text or "REPL_ID" in text:
+                  raise SystemExit(f"{config}: retired Replit Vite coupling remains")
+              config.write_text(text, encoding="utf-8")
+
+              manifest = Path("artifacts") / app / "package.json"
+              data = json.loads(manifest.read_text(encoding="utf-8"))
+              dev_dependencies = data.get("devDependencies")
+              if not isinstance(dev_dependencies, dict):
+                  raise SystemExit(f"{manifest}: devDependencies object missing")
+              missing = [key for key in plugin_keys if key not in dev_dependencies]
+              if missing:
+                  raise SystemExit(f"{manifest}: expected plugin dependencies missing: {missing}")
+              for key in plugin_keys:
+                  del dev_dependencies[key]
+              manifest.write_text(json.dumps(data, indent=2) + "\n", encoding="utf-8")
+
+          workspace = Path("pnpm-workspace.yaml")
+          lines = workspace.read_text(encoding="utf-8").splitlines()
+          removed: set[str] = set()
+          retained: list[str] = []
+          for line in lines:
+              stripped = line.strip()
+              matched = next(
+                  (key for key in plugin_keys if stripped.startswith(f"'{key}':")),
+                  None,
+              )
+              if matched is not None:
+                  removed.add(matched)
+                  continue
+              retained.append(line)
+          if removed != set(plugin_keys):
+              raise SystemExit(
+                  f"pnpm-workspace.yaml: removed {sorted(removed)}, expected {sorted(plugin_keys)}"
+              )
+          workspace.write_text("\n".join(retained) + "\n", encoding="utf-8")
+          PY
+
+      - name: Regenerate deterministic pnpm lockfile
+        shell: bash
+        run: |
+          set -euo pipefail
+          pnpm install --lockfile-only --ignore-scripts
+          pnpm install --frozen-lockfile
+
+      - name: Build all affected frontends
+        shell: bash
+        run: |
+          set -euo pipefail
+          for package in \
+            @workspace/a11oy \
+            @workspace/terra \
+            @workspace/sentra \
+            @workspace/counsel \
+            @workspace/vessels \
+            @workspace/carlota-jo
+          do
+            pnpm --filter "$package" run build
+          done
+
+      - name: Verify complete build-plugin removal
+        shell: bash
+        run: |
+          set -euo pipefail
+          if git grep -n '@replit/vite-plugin-' -- \
+            'artifacts/*/vite.config.ts' \
+            'artifacts/*/package.json' \
+            'pnpm-workspace.yaml' \
+            'pnpm-lock.yaml'
+          then
+            echo '::error::Retired Replit Vite plugin references remain in active build inputs'
+            exit 1
+          fi
+          if git grep -n 'REPL_ID' -- 'artifacts/*/vite.config.ts'; then
+            echo '::error::Replit-only Vite conditionals remain'
+            exit 1
+          fi
+          git diff --check
+          git status --short
+
+      - name: Commit deterministic migration
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name "Lutar, Stephen P."
+          git config user.email "stephenlutar2@gmail.com"
+          git add pnpm-workspace.yaml pnpm-lock.yaml artifacts/*/package.json artifacts/*/vite.config.ts
+          if git diff --cached --quiet; then
+            echo '::error::The migration produced no tracked changes'
+            exit 1
+          fi
+          git commit -s -m "refactor(build): remove retired Replit Vite plugins"
+          git push origin "HEAD:${GITHUB_REF_NAME}"
