@@ -441,10 +441,22 @@ for (const target of capturePlan.targets) {
   if (!Array.isArray(target.viewports) || target.viewports.length === 0) {
     throw new Error(`capture target ${route} must declare viewports`);
   }
+  const minimumScreenshotRevealElements =
+    target.minimum_screenshot_reveal_elements === undefined
+      ? 0
+      : Number(target.minimum_screenshot_reveal_elements);
+  if (
+    !Number.isSafeInteger(minimumScreenshotRevealElements) ||
+    minimumScreenshotRevealElements < 0
+  ) {
+    throw new Error(
+      `capture target ${route} must declare a non-negative minimum_screenshot_reveal_elements`,
+    );
+  }
   for (const viewport of target.viewports) {
     const key = `${route}:${Number(viewport.width)}x${Number(viewport.height)}`;
     if (expectedCaptures.has(key)) throw new Error(`duplicate Series A capture target: ${key}`);
-    expectedCaptures.set(key, heading);
+    expectedCaptures.set(key, { heading, minimumScreenshotRevealElements });
   }
 }
 const canonicalCaptureTimeoutMs = Math.min(
@@ -592,9 +604,28 @@ try {
   const observedCaptures = new Set();
   for (const record of canonicalMetadata.evidence) {
     const key = `${record.route}:${Number(record.viewport?.width)}x${Number(record.viewport?.height)}`;
-    const expectedHeading = expectedCaptures.get(key);
-    if (!expectedHeading || record.expected_heading !== expectedHeading) {
+    const expected = expectedCaptures.get(key);
+    if (!expected || record.expected_heading !== expected.heading) {
       throw new Error(`captured surface does not match the committed plan: ${key}`);
+    }
+    const scrollReveal = record.scroll_reveal;
+    if (
+      record.minimum_screenshot_reveal_elements !== expected.minimumScreenshotRevealElements ||
+      !scrollReveal ||
+      !Number.isSafeInteger(scrollReveal.marked_elements) ||
+      !Number.isSafeInteger(scrollReveal.unrevealed_elements) ||
+      !Number.isSafeInteger(scrollReveal.sweep_steps) ||
+      !Number.isFinite(scrollReveal.maximum_scroll_top) ||
+      !Number.isFinite(scrollReveal.reached_bottom_scroll_top) ||
+      !Number.isFinite(scrollReveal.final_scroll_top) ||
+      scrollReveal.marked_elements < expected.minimumScreenshotRevealElements ||
+      scrollReveal.unrevealed_elements !== 0 ||
+      scrollReveal.sweep_steps < 1 ||
+      scrollReveal.sweep_steps > 256 ||
+      Math.abs(scrollReveal.reached_bottom_scroll_top - scrollReveal.maximum_scroll_top) > 1 ||
+      Math.abs(scrollReveal.final_scroll_top) > 1
+    ) {
+      throw new Error(`captured surface has invalid scroll-reveal evidence: ${key}`);
     }
     if (observedCaptures.has(key)) throw new Error(`duplicate captured surface: ${key}`);
     observedCaptures.add(key);

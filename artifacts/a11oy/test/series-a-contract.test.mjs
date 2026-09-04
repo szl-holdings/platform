@@ -36,6 +36,7 @@ const resourcesPage = readFileSync(
   new URL('../src/pages/ResourcesHub.tsx', import.meta.url),
   'utf8',
 );
+const homePage = readFileSync(new URL('../src/pages/HomePage.tsx', import.meta.url), 'utf8');
 const ui = readFileSync(new URL('../src/components/ui.tsx', import.meta.url), 'utf8');
 const data = readFileSync(new URL('../src/data/seriesASolutions.ts', import.meta.url), 'utf8');
 const app = readFileSync(new URL('../src/App.tsx', import.meta.url), 'utf8');
@@ -305,6 +306,31 @@ test('owns a clean build and loopback server before source-bound capture', () =>
   assert.match(captureScript, /const child = spawn\(command, args,/);
   assert.doesNotMatch(captureScript, /execFileSync\(process\.execPath, \[canonicalCapture\]/);
   assert.doesNotMatch(captureScript, /PLAYWRIGHT_BASE_URL/);
+  assert.match(
+    canonicalCapture,
+    /async function revealScrollTriggeredContent\(page, minimumMarkedElements\)/,
+  );
+  assert.match(canonicalCapture, /const scrollReveal = await revealScrollTriggeredContent\(/);
+  assert.match(canonicalCapture, /MAX_SCROLL_REVEAL_STEPS/);
+  assert.match(canonicalCapture, /SCROLL_REVEAL_TIMEOUT_MS/);
+  assert.match(canonicalCapture, /SCROLL_REVEAL_TOTAL_TIMEOUT_MS/);
+  assert.match(canonicalCapture, /SCROLL_REVEAL_RESTORATION_RESERVE_MS/);
+  assert.match(canonicalCapture, /stableBottomPasses < 2/);
+  assert.match(canonicalCapture, /sweepToStableBottom\('post-reveal'\)/);
+  assert.match(canonicalCapture, /\[data-screenshot-reveal\]/);
+  assert.match(canonicalCapture, /isEffectivelyVisible/);
+  assert.match(canonicalCapture, /unrevealed_elements/);
+  assert.match(canonicalCapture, /scroll reveal restoration paint/);
+  assert.match(canonicalCapture, /restorationBounded/);
+  assert.ok(
+    canonicalCapture.indexOf('await page.waitForFunction(') <
+      canonicalCapture.indexOf("sweepToStableBottom('post-reveal')"),
+  );
+  assert.match(captureScript, /captured surface has invalid scroll-reveal evidence/);
+  assert.ok(
+    canonicalCapture.indexOf('const scrollReveal = await revealScrollTriggeredContent(') <
+      canonicalCapture.indexOf('const state = await page.evaluate'),
+  );
   assert.match(canonicalCapture, /fullPage: true, timeout: 60_000/);
   assert.ok(
     captureScript.indexOf("verifyCheckout('after teardown'") <
@@ -350,6 +376,10 @@ test('binds every planned route to its expected heading', () => {
   assert.equal(capturePlan.targets.length, expectedRoutes.size);
   for (const target of capturePlan.targets) {
     assert.equal(target.expected_heading, expectedRoutes.get(target.route));
+    assert.equal(
+      target.minimum_screenshot_reveal_elements ?? 0,
+      ['/a11oy/architecture', '/a11oy/resources'].includes(target.route) ? 1 : 0,
+    );
     assert.deepEqual(
       target.viewports.map(({ width }) => width),
       [320, 390, 768, 1366, 1728],
@@ -359,6 +389,19 @@ test('binds every planned route to its expected heading', () => {
     capturePlan.targets.reduce((total, target) => total + target.viewports.length, 0),
     70,
   );
+});
+
+test('marks every captured viewport-triggered motion group for fail-closed screenshots', () => {
+  for (const [filename, source, expectedCount] of [
+    ['ArchitectureOverview.tsx', architecturePage, 3],
+    ['ResourcesHub.tsx', resourcesPage, 1],
+    ['HomePage.tsx', homePage, 1],
+  ]) {
+    const whileInViewCount = source.match(/\bwhileInView=/g)?.length ?? 0;
+    const revealMarkerCount = source.match(/\bdata-screenshot-reveal=/g)?.length ?? 0;
+    assert.equal(revealMarkerCount, whileInViewCount, filename);
+    assert.equal(revealMarkerCount, expectedCount, filename);
+  }
 });
 
 test('fails screenshot evidence closed on wrong headings and browser/network errors', () => {

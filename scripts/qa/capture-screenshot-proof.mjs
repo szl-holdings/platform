@@ -165,6 +165,317 @@ function sanitizeConsoleMessage(value) {
   return text;
 }
 
+const SCROLL_REVEAL_TIMEOUT_MS = 10_000;
+const SCROLL_REVEAL_TOTAL_TIMEOUT_MS = 30_000;
+const SCROLL_REVEAL_RESTORATION_RESERVE_MS = 5_000;
+const MAX_SCROLL_REVEAL_STEPS = 256;
+
+async function withDeadline(operation, label, timeoutMs = SCROLL_REVEAL_TIMEOUT_MS) {
+  let timeout;
+  try {
+    return await Promise.race([
+      operation,
+      new Promise((_, reject) => {
+        timeout = setTimeout(
+          () => reject(new Error(`${label} exceeded ${timeoutMs}ms`)),
+          timeoutMs,
+        );
+      }),
+    ]);
+  } finally {
+    clearTimeout(timeout);
+  }
+}
+
+async function revealScrollTriggeredContent(page, minimumMarkedElements) {
+  if (!Number.isSafeInteger(minimumMarkedElements) || minimumMarkedElements < 0) {
+    throw new Error('minimum screenshot reveal elements must be a non-negative integer');
+  }
+
+  const totalDeadline = Date.now() + SCROLL_REVEAL_TOTAL_TIMEOUT_MS;
+  const sweepDeadline = totalDeadline - SCROLL_REVEAL_RESTORATION_RESERVE_MS;
+  const createBoundedOperation = (deadline, createOperation, label) => {
+    const remainingMs = deadline - Date.now();
+    if (remainingMs <= 0) {
+      throw new Error(`scroll reveal exceeded ${SCROLL_REVEAL_TOTAL_TIMEOUT_MS}ms`);
+    }
+    return withDeadline(createOperation(), label, Math.min(SCROLL_REVEAL_TIMEOUT_MS, remainingMs));
+  };
+  const bounded = (createOperation, label) =>
+    createBoundedOperation(sweepDeadline, createOperation, label);
+  const restorationBounded = (createOperation, label) =>
+    createBoundedOperation(totalDeadline, createOperation, label);
+
+  const initial = await bounded(
+    () =>
+      page.evaluate(() => {
+        const scrollingElement = document.scrollingElement;
+        if (!scrollingElement) throw new Error('document has no scrolling element');
+        const originalScrollBehavior = scrollingElement.style.scrollBehavior;
+        scrollingElement.style.scrollBehavior = 'auto';
+        window.scrollTo(0, 0);
+        return {
+          originalScrollBehavior,
+          maximumScrollTop: Math.max(0, scrollingElement.scrollHeight - window.innerHeight),
+          step: Math.max(1, Math.floor(window.innerHeight * 0.8)),
+        };
+      }),
+    'scroll reveal initialization',
+  );
+
+  let revealState;
+  let reachedBottomScrollTop = null;
+  let maximumScrollTop = initial.maximumScrollTop;
+  let sweepSteps = 0;
+  let revealFailure = null;
+  try {
+    const sweepToStableBottom = async (phase) => {
+      let targetScrollTop = 0;
+      let stableBottomPasses = 0;
+      let previouslyObservedMaximum = null;
+      let phaseMaximumScrollTop = null;
+      let phaseReachedBottomScrollTop = null;
+
+      while (stableBottomPasses < 2) {
+        if (sweepSteps >= MAX_SCROLL_REVEAL_STEPS) {
+          throw new Error(`scroll reveal exceeded ${MAX_SCROLL_REVEAL_STEPS} steps`);
+        }
+        sweepSteps += 1;
+        const positioned = await bounded(
+          () =>
+            page.evaluate((target) => {
+              const scrollingElement = document.scrollingElement;
+              if (!scrollingElement) throw new Error('document has no scrolling element');
+              window.scrollTo(0, target);
+              return {
+                scrollTop: scrollingElement.scrollTop,
+                maximumScrollTop: Math.max(0, scrollingElement.scrollHeight - window.innerHeight),
+              };
+            }, targetScrollTop),
+          `${phase} scroll reveal position ${targetScrollTop}`,
+        );
+        const expectedScrollTop = Math.min(targetScrollTop, positioned.maximumScrollTop);
+        if (
+          typeof positioned.scrollTop !== 'number' ||
+          Math.abs(positioned.scrollTop - expectedScrollTop) > 1
+        ) {
+          throw new Error(
+            `scroll reveal failed to reach ${expectedScrollTop}; observed ${String(positioned.scrollTop)}`,
+          );
+        }
+        await bounded(
+          () =>
+            page.evaluate(
+              () =>
+                new Promise((resolve) =>
+                  requestAnimationFrame(() => requestAnimationFrame(resolve)),
+                ),
+            ),
+          `${phase} scroll reveal paint at ${targetScrollTop}`,
+        );
+        const observed = await bounded(
+          () =>
+            page.evaluate(() => {
+              const scrollingElement = document.scrollingElement;
+              if (!scrollingElement) throw new Error('document has no scrolling element');
+              return {
+                scrollTop: scrollingElement.scrollTop,
+                maximumScrollTop: Math.max(0, scrollingElement.scrollHeight - window.innerHeight),
+              };
+            }),
+          `${phase} scroll reveal geometry readback`,
+        );
+        phaseMaximumScrollTop = observed.maximumScrollTop;
+        if (Math.abs(observed.scrollTop - observed.maximumScrollTop) <= 1) {
+          stableBottomPasses =
+            previouslyObservedMaximum !== null &&
+            Math.abs(previouslyObservedMaximum - observed.maximumScrollTop) <= 1
+              ? stableBottomPasses + 1
+              : 1;
+          previouslyObservedMaximum = observed.maximumScrollTop;
+          phaseReachedBottomScrollTop = observed.scrollTop;
+          targetScrollTop = observed.maximumScrollTop;
+        } else {
+          stableBottomPasses = 0;
+          previouslyObservedMaximum = null;
+          targetScrollTop = Math.min(observed.maximumScrollTop, observed.scrollTop + initial.step);
+        }
+      }
+
+      return {
+        maximumScrollTop: phaseMaximumScrollTop,
+        reachedBottomScrollTop: phaseReachedBottomScrollTop,
+      };
+    };
+
+    ({ maximumScrollTop, reachedBottomScrollTop } = await sweepToStableBottom('initial'));
+
+    const markerWaitTimeout = Math.min(SCROLL_REVEAL_TIMEOUT_MS, sweepDeadline - Date.now());
+    if (markerWaitTimeout <= 0) {
+      throw new Error(`scroll reveal exceeded ${SCROLL_REVEAL_TOTAL_TIMEOUT_MS}ms`);
+    }
+    await page.waitForFunction(
+      (minimum) => {
+        const marked = [...document.querySelectorAll('[data-screenshot-reveal]')];
+        const isEffectivelyVisible = (element) => {
+          const rect = element.getBoundingClientRect();
+          if (rect.width <= 0 || rect.height <= 0) return false;
+          let left = rect.left;
+          let right = rect.right;
+          let top = rect.top;
+          let bottom = rect.bottom;
+          for (let current = element; current; current = current.parentElement) {
+            const style = getComputedStyle(current);
+            if (
+              style.display === 'none' ||
+              style.visibility === 'hidden' ||
+              style.visibility === 'collapse' ||
+              Number.parseFloat(style.opacity || '1') <= 0
+            ) {
+              return false;
+            }
+            if (current === element) continue;
+            const ancestorRect = current.getBoundingClientRect();
+            if (['hidden', 'clip', 'auto', 'scroll'].includes(style.overflowX)) {
+              left = Math.max(left, ancestorRect.left);
+              right = Math.min(right, ancestorRect.right);
+            }
+            if (['hidden', 'clip', 'auto', 'scroll'].includes(style.overflowY)) {
+              top = Math.max(top, ancestorRect.top);
+              bottom = Math.min(bottom, ancestorRect.bottom);
+            }
+            if (right - left <= 0 || bottom - top <= 0) return false;
+          }
+          return Number.parseFloat(getComputedStyle(element).opacity) >= 0.99;
+        };
+        return marked.length >= minimum && marked.every((element) => isEffectivelyVisible(element));
+      },
+      minimumMarkedElements,
+      { polling: 50, timeout: markerWaitTimeout },
+    );
+    ({ maximumScrollTop, reachedBottomScrollTop } = await sweepToStableBottom('post-reveal'));
+    const readback = await bounded(
+      () =>
+        page.evaluate(() => {
+          const scrollingElement = document.scrollingElement;
+          if (!scrollingElement) throw new Error('document has no scrolling element');
+          const marked = [...document.querySelectorAll('[data-screenshot-reveal]')];
+          const isEffectivelyVisible = (element) => {
+            const rect = element.getBoundingClientRect();
+            if (rect.width <= 0 || rect.height <= 0) return false;
+            let left = rect.left;
+            let right = rect.right;
+            let top = rect.top;
+            let bottom = rect.bottom;
+            for (let current = element; current; current = current.parentElement) {
+              const style = getComputedStyle(current);
+              if (
+                style.display === 'none' ||
+                style.visibility === 'hidden' ||
+                style.visibility === 'collapse' ||
+                Number.parseFloat(style.opacity || '1') <= 0
+              ) {
+                return false;
+              }
+              if (current === element) continue;
+              const ancestorRect = current.getBoundingClientRect();
+              if (['hidden', 'clip', 'auto', 'scroll'].includes(style.overflowX)) {
+                left = Math.max(left, ancestorRect.left);
+                right = Math.min(right, ancestorRect.right);
+              }
+              if (['hidden', 'clip', 'auto', 'scroll'].includes(style.overflowY)) {
+                top = Math.max(top, ancestorRect.top);
+                bottom = Math.min(bottom, ancestorRect.bottom);
+              }
+              if (right - left <= 0 || bottom - top <= 0) return false;
+            }
+            return Number.parseFloat(getComputedStyle(element).opacity) >= 0.99;
+          };
+          return {
+            marked_elements: marked.length,
+            unrevealed_elements: marked.filter((element) => !isEffectivelyVisible(element)).length,
+            maximumScrollTop: Math.max(0, scrollingElement.scrollHeight - window.innerHeight),
+            scrollTop: scrollingElement.scrollTop,
+          };
+        }),
+      'scroll reveal state readback',
+    );
+    revealState = {
+      marked_elements: readback.marked_elements,
+      unrevealed_elements: readback.unrevealed_elements,
+    };
+    if (
+      revealState.marked_elements < minimumMarkedElements ||
+      revealState.unrevealed_elements !== 0 ||
+      typeof reachedBottomScrollTop !== 'number' ||
+      typeof maximumScrollTop !== 'number' ||
+      Math.abs(reachedBottomScrollTop - maximumScrollTop) > 1 ||
+      Math.abs(readback.scrollTop - readback.maximumScrollTop) > 1 ||
+      Math.abs(readback.maximumScrollTop - maximumScrollTop) > 1
+    ) {
+      throw new Error('scroll-triggered content did not reach its required visible state');
+    }
+    maximumScrollTop = readback.maximumScrollTop;
+    reachedBottomScrollTop = readback.scrollTop;
+  } catch (error) {
+    revealFailure = error;
+  }
+
+  let finalScrollTop = null;
+  let restorationFailure = null;
+  try {
+    await restorationBounded(
+      () =>
+        page.evaluate((originalScrollBehavior) => {
+          const scrollingElement = document.scrollingElement;
+          if (!scrollingElement) throw new Error('document has no scrolling element');
+          window.scrollTo(0, 0);
+          scrollingElement.style.scrollBehavior = originalScrollBehavior;
+        }, initial.originalScrollBehavior),
+      'scroll reveal restoration',
+    );
+    await restorationBounded(
+      () =>
+        page.evaluate(
+          () =>
+            new Promise((resolve) => requestAnimationFrame(() => requestAnimationFrame(resolve))),
+        ),
+      'scroll reveal restoration paint',
+    );
+    finalScrollTop = await restorationBounded(
+      () => page.evaluate(() => document.scrollingElement?.scrollTop ?? null),
+      'scroll reveal restoration readback',
+    );
+    if (typeof finalScrollTop !== 'number') {
+      restorationFailure = new Error('scroll reveal restoration produced no numeric readback');
+    }
+    if (Math.abs(finalScrollTop) > 1) {
+      restorationFailure = new Error(
+        `scroll reveal failed to return to the top; observed ${finalScrollTop}`,
+      );
+    }
+  } catch (error) {
+    restorationFailure = error;
+  }
+
+  if (revealFailure && restorationFailure) {
+    throw new AggregateError(
+      [revealFailure, restorationFailure],
+      'scroll reveal and restoration both failed',
+    );
+  }
+  if (revealFailure) throw revealFailure;
+  if (restorationFailure) throw restorationFailure;
+
+  return {
+    ...revealState,
+    maximum_scroll_top: maximumScrollTop,
+    reached_bottom_scroll_top: reachedBottomScrollTop,
+    final_scroll_top: finalScrollTop,
+    sweep_steps: sweepSteps,
+  };
+}
+
 const plan = JSON.parse(await readFile(planPath, 'utf8'));
 if (plan.schema !== 'szl.screenshot-capture-plan/v1') {
   throw new Error('capture plan must use schema szl.screenshot-capture-plan/v1');
@@ -217,6 +528,18 @@ try {
       (!expectedHeading || expectedHeading.length > 300)
     ) {
       throw new Error(`expected_heading for ${surface} must be 1-300 characters`);
+    }
+    const minimumScreenshotRevealElements =
+      target.minimum_screenshot_reveal_elements === undefined
+        ? 0
+        : Number(target.minimum_screenshot_reveal_elements);
+    if (
+      !Number.isSafeInteger(minimumScreenshotRevealElements) ||
+      minimumScreenshotRevealElements < 0
+    ) {
+      throw new Error(
+        `minimum_screenshot_reveal_elements for ${surface} must be a non-negative integer`,
+      );
     }
     const viewports =
       Array.isArray(target.viewports) && target.viewports.length
@@ -324,7 +647,10 @@ try {
           if (document.fonts) await document.fonts.ready;
           window.scrollTo(0, 0);
         });
-        await page.waitForTimeout(500);
+        const scrollReveal = await revealScrollTriggeredContent(
+          page,
+          minimumScreenshotRevealElements,
+        );
 
         const state = await page.evaluate(async () => {
           const root = document.documentElement;
@@ -705,6 +1031,8 @@ try {
           workflow_run_or_command: runIdentity,
           viewport: { width, height },
           expected_heading: expectedHeading,
+          minimum_screenshot_reveal_elements: minimumScreenshotRevealElements,
+          scroll_reveal: scrollReveal,
           artifact_sha256: createHash('sha256').update(bytes).digest('hex'),
           console_errors: consoleErrors,
           page_errors: pageErrors,

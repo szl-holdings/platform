@@ -30,6 +30,7 @@ const ease = [0.22, 1, 0.36, 1] as [number, number, number, number];
 function FadeIn({ children, delay = 0 }: { children: React.ReactNode; delay?: number }) {
   return (
     <motion.div
+      data-screenshot-reveal="true"
       initial={{ opacity: 0, y: 20 }}
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true, amount: 0.1 }}
@@ -162,6 +163,7 @@ export function ArchitectureOverview() {
               return (
                 <motion.div
                   key={c.id}
+                  data-screenshot-reveal="true"
                   initial={{ opacity: 0, y: 16 }}
                   whileInView={{ opacity: 1, y: 0 }}
                   viewport={{ once: true, amount: 0.1 }}
@@ -341,6 +343,7 @@ export function ArchitectureOverview() {
               {IMPLEMENTATION_PRIORITIES.map((p, i) => (
                 <motion.div
                   key={p.num}
+                  data-screenshot-reveal="true"
                   initial={{ opacity: 0, y: 12 }}
                   whileInView={{ opacity: 1, y: 0 }}
                   viewport={{ once: true, amount: 0.1 }}

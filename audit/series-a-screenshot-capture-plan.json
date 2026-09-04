@@ -102,6 +102,7 @@
       "surface": "a11oy-architecture",
       "route": "/a11oy/architecture",
       "expected_heading": "Eleven architecture components. One governed system.",
+      "minimum_screenshot_reveal_elements": 1,
       "viewports": [
         { "width": 320, "height": 900 },
         { "width": 390, "height": 900 },
@@ -150,6 +151,7 @@
       "surface": "a11oy-resources",
       "route": "/a11oy/resources",
       "expected_heading": "Architecture, Guides & References",
+      "minimum_screenshot_reveal_elements": 1,
       "viewports": [
         { "width": 320, "height": 900 },
         { "width": 390, "height": 900 },
