@@ -2,13 +2,14 @@
 /**
  * Fail-closed dependency vulnerability report.
  *
- * Security authority is the package manager itself:
- *   pnpm audit --json --audit-level=high
+ * Security authority is the parsed package-manager audit result. High/Critical
+ * advisories block promotion. Moderate/Low findings remain visible but do not
+ * masquerade as High/Critical failures merely because a package-manager version
+ * returns a non-zero exit status for lower severities.
  *
- * Exit status 0 means pnpm found no High/Critical advisory. Any non-zero status
- * blocks the release, including registry/network failure. JSON parsing is used
- * for reporting only and supports multiple pnpm/npm schemas; an unfamiliar
- * clean-output schema cannot weaken the command's blocking verdict.
+ * We still fail closed when pnpm cannot execute, emits no parseable JSON, or
+ * returns an unsupported audit schema. This keeps registry/network/parser
+ * failures blocking without weakening the intended High/Critical policy.
  */
 
 import { spawnSync } from 'node:child_process';
@@ -115,6 +116,28 @@ export function validateAuditJson(value) {
   normalizeAuditJson(value);
 }
 
+/**
+ * Fail closed unless a supported audit payload was parsed and it contains no
+ * High/Critical advisory. Lower severities stay reportable, not promotional.
+ */
+export function auditBlockingVerdict(normalized, spawnError = null) {
+  if (spawnError || !normalized) {
+    return { passed: false, reason: 'audit execution or JSON parsing was unavailable' };
+  }
+  const counts = normalized.vulnerabilities ?? emptyCounts();
+  const high = Number(counts.high ?? 0);
+  const critical = Number(counts.critical ?? 0);
+  const advisories = Object.values(normalized.advisories ?? {});
+  const parsedBlocking = advisories.filter((a) => ['critical', 'high'].includes(advisorySeverity(a)));
+  const passed = high === 0 && critical === 0 && parsedBlocking.length === 0;
+  return {
+    passed,
+    reason: passed
+      ? 'no parsed High/Critical advisory'
+      : `${critical} Critical and ${high} High advisories reported`,
+  };
+}
+
 function readOverrides() {
   const workspace = parseYaml(readFileSync(join(ROOT, 'pnpm-workspace.yaml'), 'utf8'));
   return workspace?.overrides ?? {};
@@ -142,7 +165,6 @@ async function main() {
 
   const stdout = audit.stdout ?? '';
   const stderr = audit.stderr ?? '';
-  const commandPassed = audit.status === 0;
   let normalized = null;
   let parseNote = null;
   try {
@@ -154,18 +176,20 @@ async function main() {
   const counts = normalized?.vulnerabilities ?? emptyCounts();
   const advisories = Object.values(normalized?.advisories ?? {});
   const blocking = advisories.filter((a) => ['critical', 'high'].includes(advisorySeverity(a)));
+  const verdict = auditBlockingVerdict(normalized, audit.error ?? null);
   const generated = new Date().toISOString();
 
   let report = '# Dependency Vulnerability Report\n\n';
   report += `**Generated:** ${generated}\n`;
-  report += '**Blocking authority:** `pnpm audit --json --audit-level=high`\n';
+  report += '**Policy:** parsed High/Critical advisories block; Moderate/Low remain reported\n';
+  report += '**Command:** `pnpm audit --json --audit-level=high`\n';
   report += `**Command exit status:** ${audit.status ?? 'UNAVAILABLE'}\n`;
   report += `**Parsed schema:** ${normalized?.sourceShape ?? 'UNAVAILABLE'}\n`;
   report += `**Total dependencies reported by audit:** ${normalized?.totalDependencies ?? 'not reported'}\n\n`;
   report += '## Blocking verdict\n\n';
-  report += commandPassed
-    ? 'PASS — pnpm reported no High or Critical vulnerability.\n\n'
-    : 'FAIL — pnpm audit returned non-zero; release remains blocked.\n\n';
+  report += verdict.passed
+    ? `PASS — ${verdict.reason}.\n\n`
+    : `FAIL — ${verdict.reason}; release remains blocked.\n\n`;
 
   report += '## Parsed counts\n\n';
   report += '| Severity | Count |\n|---|---:|\n';
@@ -184,9 +208,12 @@ async function main() {
   if (parseNote) {
     report += '## Parser note\n\n';
     report += `Audit JSON was not recognized for detailed reporting: \`${parseNote}\`. `;
-    report += commandPassed
-      ? 'The blocking verdict remains PASS because the package-manager audit command itself returned 0.\n\n'
-      : 'The blocking verdict remains FAIL because the package-manager audit command returned non-zero.\n\n';
+    report += 'The blocking verdict remains FAIL because an unsupported or unavailable audit cannot be admitted.\n\n';
+  }
+  if (audit.error) {
+    report += '## Audit execution error\n\n```text\n';
+    report += String(audit.error.message ?? audit.error).slice(0, 4000).replace(/```/g, "''' ");
+    report += '\n```\n\n';
   }
   if (stderr.trim()) {
     report += '## Audit stderr\n\n```text\n';
@@ -201,10 +228,10 @@ async function main() {
     report += '\n';
   }
 
-  report += '_CI fails closed on every non-zero `pnpm audit --audit-level=high` result, including registry/network failure._\n';
+  report += '_CI fails closed on High/Critical findings and on audit execution/parser failure. Moderate/Low findings remain visible and non-promotional._\n';
   writeFileSync(OUTPUT_FILE, report);
 
-  if (!commandPassed) process.exit(1);
+  if (!verdict.passed) process.exit(1);
 }
 
 if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) {
