@@ -27,9 +27,9 @@ HEALTHY = "HEALTHY"
 UNHEALTHY = "UNHEALTHY"
 UNKNOWN = "UNKNOWN"
 
-# Canonical public fleet established by a11oy's authenticated 2026-09-02
-# consolidation: 57 total Spaces -> nine public RUNNING flagships -> 48 folded
-# private. Platform monitoring must follow this source-of-truth roster exactly.
+# Canonical monitored product and capability identities. Vessels is no longer a
+# standalone Space: its compatibility health contract is served by Killinchu.
+# The roster records product-plane health without recreating retired origins.
 ROSTER: dict[str, str] = {
     "a11oy": "https://szlholdings-a11oy.hf.space/healthz",
     "killinchu": "https://szlholdings-killinchu.hf.space/healthz",
@@ -37,7 +37,7 @@ ROSTER: dict[str, str] = {
     "sentra": "https://szlholdings-sentra.hf.space/healthz",
     "counsel": "https://szlholdings-counsel.hf.space/healthz",
     "finance": "https://szlholdings-finance.hf.space/healthz",
-    "vessels": "https://szlholdings-vessels.hf.space/healthz",
+    "vessels": "https://szlholdings-killinchu.hf.space/api/vessels/healthz",
     "lyte": "https://szlholdings-lyte.hf.space/healthz",
     "david-leads": "https://szlholdings-david-leads.hf.space/healthz",
 }

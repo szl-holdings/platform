@@ -81,7 +81,7 @@ jobs:
           - organ: finance
             probe: https://szlholdings-finance.hf.space/healthz
           - organ: vessels
-            probe: https://szlholdings-vessels.hf.space/healthz
+            probe: https://szlholdings-killinchu.hf.space/api/vessels/healthz
           - organ: lyte
             probe: https://szlholdings-lyte.hf.space/healthz
           - organ: david-leads
@@ -141,7 +141,7 @@ jobs:
           - organ: finance
             probe: https://szlholdings-finance.hf.space/healthz
           - organ: vessels
-            probe: https://szlholdings-vessels.hf.space/healthz
+            probe: https://szlholdings-killinchu.hf.space/api/vessels/healthz
           - organ: lyte
             probe: https://szlholdings-lyte.hf.space/healthz
           - organ: david-leads
