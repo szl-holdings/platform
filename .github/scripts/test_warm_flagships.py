@@ -69,7 +69,14 @@ class ReportBoundaryTests(unittest.TestCase):
         for retired in {"anatomy", "immune", "szl-real-estate", "szl-atelier", "yarqa", "hatun-mcp"}:
             self.assertNotIn(retired, warm.ROSTER)
         for organ, url in warm.ROSTER.items():
-            self.assertEqual(url, f"https://szlholdings-{organ}.hf.space/healthz")
+            if organ == "vessels":
+                self.assertEqual(
+                    url,
+                    "https://szlholdings-killinchu.hf.space/api/vessels/healthz",
+                )
+            else:
+                self.assertEqual(url, f"https://szlholdings-{organ}.hf.space/healthz")
+        self.assertNotIn("szlholdings-vessels.hf.space", "\n".join(warm.ROSTER.values()))
 
     def test_report_never_serializes_configured_credentials(self) -> None:
         secret = "do-not-record-this-value"
@@ -109,7 +116,13 @@ class ReportBoundaryTests(unittest.TestCase):
         self.assertIn("test_warm_flagships.py", workflow)
         self.assertIn("actions/upload-artifact@", workflow)
         for organ in warm.ROSTER:
-            self.assertIn(f"szlholdings-{organ}.hf.space/healthz", workflow)
+            expected = (
+                "szlholdings-killinchu.hf.space/api/vessels/healthz"
+                if organ == "vessels"
+                else f"szlholdings-{organ}.hf.space/healthz"
+            )
+            self.assertIn(expected, workflow)
+        self.assertNotIn("szlholdings-vessels.hf.space", workflow)
         for retired in ("anatomy", "immune", "szl-real-estate", "szl-atelier", "yarqa", "hatun-mcp"):
             self.assertNotIn(f"szlholdings-{retired}.hf.space", workflow)
 
