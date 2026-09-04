@@ -1,0 +1,176 @@
+{
+  "schema": "szl.screenshot-capture-plan/v1",
+  "workcell_id": "P0-SERIES-A-PRODUCT-WIRING-20260811",
+  "targets": [
+    {
+      "surface": "a11oy-product-journey",
+      "route": "/a11oy/product-journey",
+      "expected_heading": "One fabric. Two clear ways in.",
+      "viewports": [
+        { "width": 320, "height": 900 },
+        { "width": 390, "height": 900 },
+        { "width": 768, "height": 1024 },
+        { "width": 1366, "height": 900 },
+        { "width": 1728, "height": 1000 }
+      ]
+    },
+    {
+      "surface": "a11oy-series-a",
+      "route": "/a11oy/series-a",
+      "expected_heading": "See the governed decision loop. Inspect the proof boundary.",
+      "viewports": [
+        { "width": 320, "height": 900 },
+        { "width": 390, "height": 900 },
+        { "width": 768, "height": 1024 },
+        { "width": 1366, "height": 900 },
+        { "width": 1728, "height": 1000 }
+      ]
+    },
+    {
+      "surface": "a11oy-investor-demo",
+      "route": "/a11oy/investor-demo",
+      "expected_heading": "See the governed decision loop. Inspect the proof boundary.",
+      "viewports": [
+        { "width": 320, "height": 900 },
+        { "width": 390, "height": 900 },
+        { "width": 768, "height": 1024 },
+        { "width": 1366, "height": 900 },
+        { "width": 1728, "height": 1000 }
+      ]
+    },
+    {
+      "surface": "a11oy-workcells",
+      "route": "/a11oy/workcells",
+      "expected_heading": "Execution Workcell Engine",
+      "viewports": [
+        { "width": 320, "height": 900 },
+        { "width": 390, "height": 900 },
+        { "width": 768, "height": 1024 },
+        { "width": 1366, "height": 900 },
+        { "width": 1728, "height": 1000 }
+      ]
+    },
+    {
+      "surface": "a11oy-workcell-detail",
+      "route": "/a11oy/workcells/wc-001",
+      "expected_heading": "Revenue Friction Remediation",
+      "viewports": [
+        { "width": 320, "height": 900 },
+        { "width": 390, "height": 900 },
+        { "width": 768, "height": 1024 },
+        { "width": 1366, "height": 900 },
+        { "width": 1728, "height": 1000 }
+      ]
+    },
+    {
+      "surface": "a11oy-workcell-replay-detail",
+      "route": "/a11oy/workcells/wc-001/replay",
+      "expected_heading": "↩ Revenue Friction Remediation",
+      "viewports": [
+        { "width": 320, "height": 900 },
+        { "width": 390, "height": 900 },
+        { "width": 768, "height": 1024 },
+        { "width": 1366, "height": 900 },
+        { "width": 1728, "height": 1000 }
+      ]
+    },
+    {
+      "surface": "a11oy-workcell-replay",
+      "route": "/a11oy/replay",
+      "expected_heading": "Demo Flight Recorder & Execution Audit",
+      "viewports": [
+        { "width": 320, "height": 900 },
+        { "width": 390, "height": 900 },
+        { "width": 768, "height": 1024 },
+        { "width": 1366, "height": 900 },
+        { "width": 1728, "height": 1000 }
+      ]
+    },
+    {
+      "surface": "a11oy-demo",
+      "route": "/a11oy/demo",
+      "expected_heading": "Interactive Demo Scenarios",
+      "viewports": [
+        { "width": 320, "height": 900 },
+        { "width": 390, "height": 900 },
+        { "width": 768, "height": 1024 },
+        { "width": 1366, "height": 900 },
+        { "width": 1728, "height": 1000 }
+      ]
+    },
+    {
+      "surface": "a11oy-architecture",
+      "route": "/a11oy/architecture",
+      "expected_heading": "Eleven architecture components. One governed system.",
+      "minimum_screenshot_reveal_elements": 1,
+      "viewports": [
+        { "width": 320, "height": 900 },
+        { "width": 390, "height": 900 },
+        { "width": 768, "height": 1024 },
+        { "width": 1366, "height": 900 },
+        { "width": 1728, "height": 1000 }
+      ]
+    },
+    {
+      "surface": "a11oy-fabric",
+      "route": "/a11oy/fabric",
+      "expected_heading": "Universal Intelligence Layer",
+      "viewports": [
+        { "width": 320, "height": 900 },
+        { "width": 390, "height": 900 },
+        { "width": 768, "height": 1024 },
+        { "width": 1366, "height": 900 },
+        { "width": 1728, "height": 1000 }
+      ]
+    },
+    {
+      "surface": "a11oy-governance",
+      "route": "/a11oy/governance",
+      "expected_heading": "Policy Gates & Approvals",
+      "viewports": [
+        { "width": 320, "height": 900 },
+        { "width": 390, "height": 900 },
+        { "width": 768, "height": 1024 },
+        { "width": 1366, "height": 900 },
+        { "width": 1728, "height": 1000 }
+      ]
+    },
+    {
+      "surface": "a11oy-proof",
+      "route": "/a11oy/proof",
+      "expected_heading": "Proof Chain & Reasoning Trace Demonstration",
+      "viewports": [
+        { "width": 320, "height": 900 },
+        { "width": 390, "height": 900 },
+        { "width": 768, "height": 1024 },
+        { "width": 1366, "height": 900 },
+        { "width": 1728, "height": 1000 }
+      ]
+    },
+    {
+      "surface": "a11oy-resources",
+      "route": "/a11oy/resources",
+      "expected_heading": "Architecture, Guides & References",
+      "minimum_screenshot_reveal_elements": 1,
+      "viewports": [
+        { "width": 320, "height": 900 },
+        { "width": 390, "height": 900 },
+        { "width": 768, "height": 1024 },
+        { "width": 1366, "height": 900 },
+        { "width": 1728, "height": 1000 }
+      ]
+    },
+    {
+      "surface": "a11oy-trust",
+      "route": "/a11oy/trust",
+      "expected_heading": "Human-Gated Autonomy & Security Posture",
+      "viewports": [
+        { "width": 320, "height": 900 },
+        { "width": 390, "height": 900 },
+        { "width": 768, "height": 1024 },
+        { "width": 1366, "height": 900 },
+        { "width": 1728, "height": 1000 }
+      ]
+    }
+  ]
+}

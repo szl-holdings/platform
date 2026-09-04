@@ -1,4 +1,4 @@
-import { type ReactNode, useState } from 'react';
+import { type ReactNode, useEffect, useState } from 'react';
 import { Link, useLocation } from 'wouter';
 
 const BASE = (import.meta.env.BASE_URL ?? '/a11oy/').replace(/\/$/, '');
@@ -12,6 +12,7 @@ const NAV_GROUPS = [
     label: 'SYSTEM',
     items: [
       { href: '/', label: 'Home' },
+      { href: '/product-journey', label: 'Product Journey' },
       { href: '/architecture', label: 'Architecture' },
       { href: '/applications', label: 'Applications' },
       { href: '/resources', label: 'Resources' },
@@ -244,8 +245,23 @@ interface LayoutProps {
 }
 
 export function Layout({ children, fullscreen = false }: LayoutProps) {
-  const [sidebarOpen, setSidebarOpen] = useState(true);
+  const [isDesktop, setIsDesktop] = useState(
+    () => typeof window !== 'undefined' && window.matchMedia('(min-width: 768px)').matches,
+  );
+  const [sidebarOpen, setSidebarOpen] = useState(
+    () => typeof window !== 'undefined' && window.matchMedia('(min-width: 768px)').matches,
+  );
   const [location] = useLocation();
+
+  useEffect(() => {
+    const desktop = window.matchMedia('(min-width: 768px)');
+    const syncSidebarToViewport = () => {
+      setIsDesktop(desktop.matches);
+      setSidebarOpen(desktop.matches);
+    };
+    desktop.addEventListener('change', syncSidebarToViewport);
+    return () => desktop.removeEventListener('change', syncSidebarToViewport);
+  }, []);
 
   if (fullscreen) {
     return (
@@ -295,8 +311,8 @@ export function Layout({ children, fullscreen = false }: LayoutProps) {
             type="button"
             onClick={() => setSidebarOpen((o) => !o)}
             style={{
-              width: 26,
-              height: 26,
+              width: 44,
+              height: 44,
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
@@ -307,12 +323,20 @@ export function Layout({ children, fullscreen = false }: LayoutProps) {
               fontSize: 13,
             }}
             aria-label="Toggle sidebar"
+            aria-expanded={sidebarOpen}
+            aria-controls="primary-navigation"
           >
             ☰
           </button>
           <Link
             href={b('/')}
-            style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', textDecoration: 'none' }}
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: '0.5rem',
+              minHeight: 44,
+              textDecoration: 'none',
+            }}
           >
             <span
               style={{
@@ -369,6 +393,9 @@ export function Layout({ children, fullscreen = false }: LayoutProps) {
             href={b('/start')}
             style={{
               padding: '0.4rem 0.875rem',
+              minHeight: 44,
+              display: 'inline-flex',
+              alignItems: 'center',
               fontSize: '0.75rem',
               fontWeight: 500,
               color: '#0a0a0a',
@@ -384,8 +411,24 @@ export function Layout({ children, fullscreen = false }: LayoutProps) {
       </div>
 
       <div style={{ display: 'flex', flex: 1, minHeight: 0 }}>
+        {sidebarOpen && !isDesktop && (
+          <button
+            type="button"
+            aria-label="Close navigation"
+            onClick={() => setSidebarOpen(false)}
+            style={{
+              position: 'fixed',
+              inset: '52px 0 0 0',
+              zIndex: 44,
+              border: 0,
+              background: 'rgba(0,0,0,0.62)',
+              cursor: 'pointer',
+            }}
+          />
+        )}
         {sidebarOpen && (
           <aside
+            id="primary-navigation"
             style={{
               width: 200,
               borderRight: `1px solid ${TOKENS.border}`,
@@ -393,9 +436,13 @@ export function Layout({ children, fullscreen = false }: LayoutProps) {
               overflowY: 'auto',
               padding: '1.5rem 0',
               background: TOKENS.bg,
-              position: 'sticky',
+              position: isDesktop ? 'sticky' : 'fixed',
               top: 52,
               height: 'calc(100vh - 52px)',
+              left: 0,
+              zIndex: isDesktop ? 1 : 45,
+              maxWidth: 'calc(100vw - 44px)',
+              boxShadow: isDesktop ? 'none' : '12px 0 32px rgba(0,0,0,0.35)',
             }}
           >
             {NAV_GROUPS.map((group) => (
@@ -423,8 +470,13 @@ export function Layout({ children, fullscreen = false }: LayoutProps) {
                     <Link
                       key={item.href}
                       href={fullHref}
+                      onClick={() => {
+                        if (!isDesktop) setSidebarOpen(false);
+                      }}
                       style={{
-                        display: 'block',
+                        display: 'flex',
+                        alignItems: 'center',
+                        minHeight: 44,
                         padding: '0.4rem 1.25rem',
                         fontSize: '0.8125rem',
                         textDecoration: 'none',
@@ -447,6 +499,8 @@ export function Layout({ children, fullscreen = false }: LayoutProps) {
           </aside>
         )}
         <main
+          id="main-content"
+          tabIndex={-1}
           style={{
             flex: 1,
             overflowY: 'auto',

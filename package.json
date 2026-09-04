@@ -154,6 +154,7 @@
     "meridian:python:test": "node ops/python/run-python.mjs ops/meridian/run_tests.py",
     "meridian:check": "node ops/python/run-python.mjs ops/meridian/check.py",
     "screenshots:proof": "node scripts/assert-workflows-running.mjs && node scripts/capture-proof-screenshots.mjs",
+    "screenshots:a11oy:product-proof": "node scripts/qa/capture-series-a-product-matrix-proof.mjs",
     "validate:markdown-assets": "node scripts/validate-markdown-assets.mjs",
     "audit:mcp-registry": "node ops/audit/meridian-mcp-check.mjs",
     "dev:validate": "tsx scripts/dev-validate.ts",

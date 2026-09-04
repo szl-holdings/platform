@@ -1,12 +1,21 @@
 import { useState, type ReactNode } from 'react';
 
-export function StatusPill({
-  status,
-}: {
-  status: 'LIVE' | 'GATED' | 'APPROVED' | 'ROADMAP' | 'WARN' | 'ERROR' | 'CONNECTING';
-}) {
-  const styles: Record<string, { bg: string; color: string }> = {
+export type UiStatus =
+  | 'LIVE'
+  | 'DEMO'
+  | 'UNAVAILABLE'
+  | 'GATED'
+  | 'APPROVED'
+  | 'ROADMAP'
+  | 'WARN'
+  | 'ERROR'
+  | 'CONNECTING';
+
+export function StatusPill({ status }: { status: UiStatus }) {
+  const styles: Record<UiStatus, { bg: string; color: string }> = {
     LIVE: { bg: 'rgba(201,183,135,0.15)', color: '#c9b787' },
+    DEMO: { bg: 'rgba(229,210,158,0.12)', color: '#e5d29e' },
+    UNAVAILABLE: { bg: 'rgba(94,94,94,0.16)', color: '#a8a8a8' },
     GATED: { bg: 'rgba(94,94,94,0.15)', color: '#5e5e5e' },
     APPROVED: { bg: 'rgba(201,183,135,0.15)', color: '#c9b787' },
     ROADMAP: { bg: 'rgba(94,94,94,0.15)', color: '#5e5e5e' },
@@ -49,7 +58,14 @@ export function ApprovalGate({
       }}
     >
       <div className="flex items-center gap-2 font-medium" style={{ color: '#c9b787' }}>
-        <svg width="12" height="12" fill="none" viewBox="0 0 16 16">
+        <svg
+          aria-hidden="true"
+          focusable="false"
+          width="12"
+          height="12"
+          fill="none"
+          viewBox="0 0 16 16"
+        >
           <path
             d="M8 1a7 7 0 100 14A7 7 0 008 1zm0 6.5a1 1 0 011 1v2a1 1 0 01-2 0v-2a1 1 0 011-1zm0-2.5a1 1 0 100-2 1 1 0 000 2z"
             fill="currentColor"
@@ -61,8 +77,9 @@ export function ApprovalGate({
         <div className="flex items-center gap-2 mt-2">
           {onApprove && (
             <button
+              type="button"
               onClick={onApprove}
-              className="px-3 py-1 rounded text-xs font-medium"
+              className="min-h-11 px-3 py-1 rounded text-xs font-medium"
               style={{
                 backgroundColor: 'rgba(201,183,135,0.15)',
                 color: '#c9b787',
@@ -75,8 +92,9 @@ export function ApprovalGate({
           )}
           {onReject && (
             <button
+              type="button"
               onClick={onReject}
-              className="px-3 py-1 rounded text-xs font-medium"
+              className="min-h-11 px-3 py-1 rounded text-xs font-medium"
               style={{
                 backgroundColor: 'rgba(245,245,245,0.08)',
                 color: '#f5f5f5',
@@ -103,7 +121,7 @@ export function PageHeader({
   label: string;
   title: string;
   subtitle?: string;
-  status?: 'LIVE' | 'GATED' | 'APPROVED' | 'ROADMAP' | 'WARN' | 'ERROR' | 'CONNECTING';
+  status?: UiStatus;
   children?: ReactNode;
 }) {
   return (
@@ -157,7 +175,9 @@ export function Card({
 }) {
   return (
     <div
-      className={`rounded-lg border p-4 ${className} ${onClick ? 'cursor-pointer transition-colors hover:border-[#c9b787]/30' : ''}`}
+      className={`rounded-lg border p-4 ${className} ${
+        onClick ? 'cursor-pointer transition-colors hover:border-[#c9b787]/30' : ''
+      }`}
       style={{
         backgroundColor: 'var(--color-a11oy-card)',
         borderColor: 'var(--color-a11oy-border)',
@@ -336,9 +356,10 @@ export function ActionButton({
   const pad = size === 'sm' ? 'px-2 py-1' : 'px-3 py-1.5';
   return (
     <button
+      type="button"
       onClick={onClick}
       disabled={disabled}
-      className={`${pad} rounded font-medium border transition-opacity`}
+      className={`${pad} min-h-11 min-w-11 rounded font-medium border transition-opacity`}
       style={{
         fontSize: size === 'sm' ? '11px' : '12px',
         backgroundColor: s.bg,
@@ -417,6 +438,7 @@ export function CodeBlock({
           {language}
         </span>
         <button
+          type="button"
           onClick={copy}
           className="text-xs font-mono transition-colors"
           style={{

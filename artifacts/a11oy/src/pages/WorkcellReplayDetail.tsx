@@ -23,46 +23,46 @@ export function WorkcellReplayDetail() {
   const steps = wc
     ? [
         {
-          step: 'Signal Mesh: signals ingested and routed',
+          step: 'Demo Signal Mesh: seed signals routed',
           status: 'completed',
-          note: wc.signals.slice(0, 2).join(', '),
+          note: `Repository seed: ${wc.signals.slice(0, 2).join(', ')}`,
         },
         {
-          step: 'Causal Core: evidence graph assembled',
+          step: 'Demo Causal Core: seed evidence graph assembled',
           status: 'completed',
-          note: `${wc.signals.length} causal links traced`,
+          note: `${wc.signals.length} fixture links represented`,
         },
         {
-          step: 'Context Engine: context pack built',
+          step: 'Demo Context Engine: seed context pack loaded',
           status: 'completed',
           note: `${JSON.stringify(wc.contextPack).slice(0, 60)}…`,
         },
         ...wc.agentSequence.map((a) => ({
-          step: `${a.role}: ${a.action}`,
+          step: `Demo ${a.role}: ${a.action}`,
           status:
             wc.status === 'completed'
               ? 'completed'
               : wc.status === 'running'
                 ? 'running'
                 : 'pending',
-          note: `Agent: ${a.agentId}`,
+          note: `Seed agent id: ${a.agentId}`,
         })),
         {
-          step: 'Covenant Layer: policy gate evaluated',
+          step: 'Demo Covenant Layer: policy fixture evaluated',
           status: wc.requiresApproval ? 'running' : 'completed',
           note: wc.requiresApproval
-            ? `Pending ${wc.actionBrief.approvalTier} approval`
-            : 'All policy clauses satisfied',
+            ? `Pending demo ${wc.actionBrief.approvalTier} decision`
+            : 'Seed policy fixture represents a satisfied gate',
         },
         {
-          step: 'MirrorEval: recommendation scored',
+          step: 'Demo MirrorEval: seed recommendation scored',
           status: 'completed',
-          note: `Verdict: ${wc.mirrorEvalResult.verdict} · Score: ${Math.round(wc.mirrorEvalResult.score * 100)}%`,
+          note: `Seed verdict: ${wc.mirrorEvalResult.verdict} · Score: ${Math.round(wc.mirrorEvalResult.score * 100)}%`,
         },
         {
-          step: 'Proof Ledger: PCE contract recorded',
+          step: 'Demo Proof Ledger: PCE fixture inspected',
           status: wc.verificationResult.status === 'passed' ? 'completed' : 'failed',
-          note: `Contract: ${wc.pceContractId}`,
+          note: `Fixture contract: ${wc.pceContractId}`,
         },
       ]
     : [];
@@ -96,7 +96,7 @@ export function WorkcellReplayDetail() {
           </div>
           <Link
             href={`${BASE}/workcells`}
-            className="text-xs"
+            className="inline-flex min-h-11 items-center text-xs"
             style={{ color: 'var(--color-a11oy-blue)' }}
           >
             ← Back to Workcells
@@ -111,7 +111,7 @@ export function WorkcellReplayDetail() {
       <div className="mb-4 flex items-center gap-3">
         <Link
           href={`${BASE}/workcells`}
-          className="text-xs font-mono"
+          className="inline-flex min-h-11 items-center text-xs font-mono"
           style={{ color: 'var(--color-a11oy-blue)', textDecoration: 'none' }}
         >
           ← All Workcells
@@ -119,7 +119,7 @@ export function WorkcellReplayDetail() {
         <span style={{ color: 'var(--color-a11oy-border)' }}>/</span>
         <Link
           href={`${BASE}/workcells/${wc.id}`}
-          className="text-xs font-mono"
+          className="inline-flex min-h-11 items-center text-xs font-mono"
           style={{ color: 'var(--color-a11oy-blue)', textDecoration: 'none' }}
         >
           {wc.name}
@@ -133,16 +133,37 @@ export function WorkcellReplayDetail() {
       <PageHeader
         label="WORKCELL REPLAY"
         title={`↩ ${wc.name}`}
-        subtitle="Step-by-step replay of the workcell execution trace with latency, agent roles, and evidence chain."
-        status="LIVE"
+        subtitle="Step-by-step playback of a deterministic seed trace. No authenticated production execution or external ledger readback is represented."
+        status="DEMO"
       />
+
+      <Card className="mb-6 text-xs">
+        <div className="font-mono mb-1" style={{ color: '#e5d29e' }}>
+          DEMO EVIDENCE BOUNDARY
+        </div>
+        <p style={{ color: 'var(--color-a11oy-text-sub)' }}>{wc.operationalEvidence}</p>
+        <div className="mt-2 grid sm:grid-cols-2 gap-2">
+          <div>
+            <span className="font-mono" style={{ color: 'var(--color-a11oy-text-ghost)' }}>
+              WORKFLOW STATUS
+            </span>{' '}
+            <span style={{ color: 'var(--color-a11oy-text)' }}>{wc.status}</span>
+          </div>
+          <div>
+            <span className="font-mono" style={{ color: 'var(--color-a11oy-text-ghost)' }}>
+              OPERATIONAL AVAILABILITY
+            </span>{' '}
+            <span style={{ color: '#e5d29e' }}>{wc.operationalAvailability}</span>
+          </div>
+        </div>
+      </Card>
 
       <div className="grid lg:grid-cols-3 gap-6">
         <div className="lg:col-span-2">
           {/* Replay Controls */}
           <Card className="mb-4">
             <div className="flex items-center gap-3 flex-wrap">
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-2 [&>button]:min-h-11">
                 {replayState === 'playing' ? (
                   <ActionButton variant="primary" onClick={pauseReplay}>
                     ⏸ Pause
@@ -163,7 +184,7 @@ export function WorkcellReplayDetail() {
                     type="button"
                     key={s}
                     onClick={() => setSpeed(s)}
-                    className="px-2 py-0.5 rounded font-mono"
+                    className="min-h-11 min-w-11 px-2 py-0.5 rounded font-mono"
                     style={{
                       backgroundColor: speed === s ? 'rgba(201,183,135,0.15)' : 'transparent',
                       color: speed === s ? '#c9b787' : 'var(--color-a11oy-text-ghost)',
@@ -202,7 +223,7 @@ export function WorkcellReplayDetail() {
           </Card>
 
           {/* Trace Steps */}
-          <SectionTitle>Execution Trace</SectionTitle>
+          <SectionTitle>Demo Execution Trace</SectionTitle>
           <Card>
             {steps.length === 0 ? (
               <div
@@ -218,7 +239,7 @@ export function WorkcellReplayDetail() {
                   const isCurrent = i === stepIdx && replayState === 'playing';
                   return (
                     <div
-                      key={i}
+                      key={`${step.step}:${step.note ?? ''}`}
                       className="transition-all"
                       style={{
                         opacity: replayState === 'idle' ? 1 : visible ? 1 : 0.2,
@@ -247,10 +268,11 @@ export function WorkcellReplayDetail() {
               }}
             >
               <div className="text-sm font-semibold mb-1" style={{ color: '#c9b787' }}>
-                Replay Complete
+                Demo Replay Complete
               </div>
               <div className="text-xs" style={{ color: 'var(--color-a11oy-text-sub)' }}>
-                All {steps.length} steps replayed. MirrorEval verdict: {wc.mirrorEvalResult.verdict}
+                All {steps.length} seed steps replayed. Demo MirrorEval verdict:{' '}
+                {wc.mirrorEvalResult.verdict}
               </div>
             </div>
           )}
@@ -267,7 +289,7 @@ export function WorkcellReplayDetail() {
                     className="font-mono mb-0.5"
                     style={{ color: 'var(--color-a11oy-text-ghost)' }}
                   >
-                    STATUS
+                    WORKFLOW STATUS
                   </div>
                   <div
                     style={{
@@ -281,6 +303,26 @@ export function WorkcellReplayDetail() {
                     }}
                   >
                     {wc.status}
+                  </div>
+                </div>
+                <div>
+                  <div
+                    className="font-mono mb-0.5"
+                    style={{ color: 'var(--color-a11oy-text-ghost)' }}
+                  >
+                    OPERATIONAL AVAILABILITY
+                  </div>
+                  <div style={{ color: '#e5d29e' }}>{wc.operationalAvailability}</div>
+                </div>
+                <div>
+                  <div
+                    className="font-mono mb-0.5"
+                    style={{ color: 'var(--color-a11oy-text-ghost)' }}
+                  >
+                    OPERATIONAL EVIDENCE
+                  </div>
+                  <div style={{ color: 'var(--color-a11oy-text-sub)' }}>
+                    {wc.operationalEvidence}
                   </div>
                 </div>
                 <div>
@@ -319,7 +361,7 @@ export function WorkcellReplayDetail() {
           </div>
 
           <div>
-            <SectionTitle>MirrorEval</SectionTitle>
+            <SectionTitle>Demo MirrorEval</SectionTitle>
             <Card className="text-xs">
               <VerdictBadge verdict={wc.mirrorEvalResult.verdict} />
               <div className="mt-2" style={{ color: 'var(--color-a11oy-text-ghost)' }}>
@@ -332,11 +374,11 @@ export function WorkcellReplayDetail() {
           </div>
 
           <div>
-            <SectionTitle>Agent Sequence</SectionTitle>
+            <SectionTitle>Demo Agent Sequence</SectionTitle>
             <div className="flex flex-col gap-1.5">
               {wc.agentSequence.map((a, i) => (
                 <div
-                  key={i}
+                  key={a.agentId}
                   className="text-xs px-2 py-1.5 rounded border"
                   style={{
                     backgroundColor: 'var(--color-a11oy-card)',
@@ -364,14 +406,14 @@ export function WorkcellReplayDetail() {
           <div>
             <Link
               href={`${BASE}/workcells/${wc.id}`}
-              className="block text-center text-xs px-3 py-2 rounded border"
+              className="min-h-11 flex items-center justify-center text-center text-xs px-3 py-2 rounded border"
               style={{
                 color: 'var(--color-a11oy-text-sub)',
                 borderColor: 'var(--color-a11oy-border)',
                 textDecoration: 'none',
               }}
             >
-              ↗ Full Workcell Detail
+              ↗ Full Demo Workcell Detail
             </Link>
           </div>
         </div>
