@@ -1,6 +1,6 @@
 # SZL Holdings — Known Gaps Register (Security & Operations)
 
-**Last updated:** 2026-09-04 (rev 28 — PR #668 protected merge and refreshed current-main witness)
+**Last updated:** 2026-09-04 (rev 29 — PR #668 witness and protected-head gate reconciliation)
 **Owner:** Engineering / DevOps  
 **Audience:** Enterprise architects, Series A technical advisors, incoming VP Engineering
 
@@ -56,8 +56,20 @@ PR #668 merged the source-complete `/a11oy/start` journey normally on
 `6bde2b6f2e0a360f31a87c3e8228c141b062585e` is GitHub-verified and has the
 same tree. The five branch commits had valid DCO trailers but were reported as
 unsigned; the verified squash result does not retroactively relabel them.
-Current protected main `1c18213044e7164aca9e70fe789a27ea981cba0e`
+Current protected main `bd1e62dea8b229f2e437b01488e76facb4c81b1c`
 retains the merge as an ancestor as observed on 2026-09-04.
+
+That protected head also contains the parsed High/Critical dependency-audit
+repair from commit `d878d23fc3a6ec332f366bbbd7e9f5e00d9e8df5`
+and the mirrored-asset lint repair from verified commit
+`bd1e62dea8b229f2e437b01488e76facb4c81b1c`. The preceding full-suite run
+failed Lint and Runtime Audit because each of the byte-identical Sentra and
+Vessels hologram assets contained two block-local `var` declarations. The
+protected repair makes those four existing hoists explicit and passes the
+full local Oxlint, Biome, and environment-coverage contract. Fresh clean
+hosted checks on an exact candidate head remain the promotion authority; a
+local build from a partially linked dependency tree is not substituted for
+that evidence.
 
 The protected source keeps all six operational truth states visible, labels
 the current scenarios DEMO or UNAVAILABLE, aliases `/a11oy/investor-demo` to

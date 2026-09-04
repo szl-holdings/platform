@@ -17,7 +17,7 @@
 - **protected_merge_tree:** `5dafa42faa20c11e13581d79c6de2c6f2fedde1e`
 - **merged_at:** `2026-08-28T17:32:30Z`
 - **merge_signature:** GitHub-verified and GitHub-signed
-- **current_main_witness:** `1c18213044e7164aca9e70fe789a27ea981cba0e`
+- **current_main_witness:** `bd1e62dea8b229f2e437b01488e76facb4c81b1c`
   retains the merge as an ancestor as observed on 2026-09-04
 
 The five final PR commits carried valid DCO trailers but were reported by
@@ -32,6 +32,26 @@ does not copy the stale predecessor branch state or represent predecessor
 screenshots, test counts, workflow runs, commits, or deployment claims as
 current. The live promotion state is tracked on PR #668 so this source record
 does not require a self-referential commit loop.
+
+## 2026-09-04 protected-head reconciliation
+
+The retained `codex/p0-platform-work-20260811` lineage was reconciled without
+force-pushing onto protected main `bd1e62dea8b229f2e437b01488e76facb4c81b1c`,
+tree `2ad5ce38ece5476e38b29d0ef00521884dc484df`. That base contains the
+parsed High/Critical dependency-audit correction from protected commit
+`d878d23fc3a6ec332f366bbbd7e9f5e00d9e8df5` and the verified mirrored-asset
+lint correction from protected commit `bd1e62dea8b229f2e437b01488e76facb4c81b1c`.
+
+The protected asset correction makes JavaScript's existing `var` hoisting
+explicit for two declarations in each byte-identical Sentra and Vessels public
+hologram asset, closing four hosted diagnostics without changing branch or
+assignment behavior. Direct Node syntax checks, byte-parity comparison, Biome
+2.4.16 focused and repository lint, Oxlint, environment-coverage, and
+whitespace checks pass locally. Both local Vite builds reached chunk
+rendering, then stopped on the partially linked local workspace's unresolved
+`graphql-ws` to `graphql` import. A local production-build pass is therefore
+not claimed; clean hosted exact-head CI is the promotion authority for this
+reconciliation.
 
 ## Objective
 
