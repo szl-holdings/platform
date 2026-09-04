@@ -79,10 +79,10 @@ jobs:
           git add \
             .github/scripts/warm_flagships.py \
             .github/scripts/test_warm_flagships.py \
-            .github/workflows/warm-flagships.yml \
             packages/edge-organs/edge_organs/wasi_rikuq.py
+          git add -f .github/workflows/warm-flagships.yml
           git rm scripts/apply_folded_vessels_probe.py
-          git rm .github/workflows/zz-fold-vessels-health-probe-once.yml
+          git rm -f .github/workflows/zz-fold-vessels-health-probe-once.yml
           git diff --cached --check
           git commit --signoff -m "fix(platform): probe Vessels through Killinchu"
           git push origin "HEAD:${GITHUB_REF_NAME}"
