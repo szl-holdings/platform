@@ -70,7 +70,7 @@ jobs:
           PY
           git diff --check
 
-      - name: Commit durable repair and remove one-shot controls
+      - name: Commit source repair without workflow-path mutation
         shell: bash
         run: |
           set -euo pipefail
@@ -80,9 +80,7 @@ jobs:
             .github/scripts/warm_flagships.py \
             .github/scripts/test_warm_flagships.py \
             packages/edge-organs/edge_organs/wasi_rikuq.py
-          git add -f .github/workflows/warm-flagships.yml
           git rm scripts/apply_folded_vessels_probe.py
-          git rm -f .github/workflows/zz-fold-vessels-health-probe-once.yml
           git diff --cached --check
           git commit --signoff -m "fix(platform): probe Vessels through Killinchu"
           git push origin "HEAD:${GITHUB_REF_NAME}"
