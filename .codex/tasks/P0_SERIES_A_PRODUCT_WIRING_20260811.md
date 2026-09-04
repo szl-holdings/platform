@@ -4,9 +4,26 @@
 - **repository:** szl-holdings/platform
 - **pull_request:** #668
 - **source_lane:** codex/series-a-product-current-main-v4
-- **status:** SOURCE_COMPLETE
+- **status:** MERGED_SOURCE; HOSTED_CAPTURE_UNAVAILABLE
 - **promotion_authority:** protected pull-request checks and normal squash merge
 - **owner:** solo builder, with Codex execution and auditable receipts
+
+## Protected promotion receipt
+
+- **final_pr_base:** `0bf6019093935d72f8d5d8deba02dcb9243261d6`
+- **final_pr_head:** `6a79dcfd76c13cd2fb402015bcdbfa5223d602b5`
+- **final_pr_tree:** `5dafa42faa20c11e13581d79c6de2c6f2fedde1e`
+- **protected_merge:** `6bde2b6f2e0a360f31a87c3e8228c141b062585e`
+- **protected_merge_tree:** `5dafa42faa20c11e13581d79c6de2c6f2fedde1e`
+- **merged_at:** `2026-08-28T17:32:30Z`
+- **merge_signature:** GitHub-verified and GitHub-signed
+- **current_main_witness:** `1c18213044e7164aca9e70fe789a27ea981cba0e`
+  retains the merge as an ancestor as observed on 2026-09-04
+
+The five final PR commits carried valid DCO trailers but were reported by
+GitHub as unsigned. The ordinary squash merge created one verified protected
+commit with the exact final PR tree. This establishes signed protected source;
+it does not retroactively make the branch commits cryptographically signed.
 
 ## Lineage
 
@@ -43,8 +60,10 @@ trusting a foreign preview server.
 | Source tests, typecheck, build | PASS | 16/16 tests, typecheck, Vite production build |
 | Brand and documentation claims | PASS | brand gate plus both 26/26 claim checks |
 | Repository strict claims | BLOCKED | Vessels/AIS remains mock without MARINETRAFFIC_API_KEY |
-| Hosted exact-head CI and review | PR AUTHORITY | must bind the final pushed PR head |
-| Protected-main promotion | PR AUTHORITY | no admin bypass, force push, or direct main write |
+| PR-head checks and review threads | COMPLETE | 52 successful checks, 3 expected skips, and all 4 threads resolved on the final PR head |
+| Hosted exact-head screenshot capture | UNAVAILABLE | workflow-dispatch run 33013248530 failed before capture while invoking pnpm under the isolated candidate identity |
+| Screenshot-controller repair | COMPLETE, NOT RETROACTIVE | protected PR #690 repaired the candidate-readable pinned pnpm path after #668 merged; its green controller checks do not create a #668 capture receipt |
+| Protected-main promotion | COMPLETE | normal squash merge `6bde2b6f2e0a360f31a87c3e8228c141b062585e`; no deployment inferred |
 | Deployment witness | UNAVAILABLE | no deployment requested or observed |
 | Customer runtime witness | UNAVAILABLE | no customer use or production outcome observed |
 
@@ -64,15 +83,20 @@ trusting a foreign preview server.
    visually inspected the responsive outputs.
 7. **Proof:** refreshed the Level 4 packet, screenshot catalog, known-gaps
    boundary, and this disposition.
-8. **Commit/promotion:** source commit is complete. The evidence commit,
-   final-head recapture, hosted checks, fresh review, thread resolution, and
-   normal protected squash merge remain to be executed and recorded on PR #668.
+8. **Commit/promotion:** PR #668 merged normally as verified protected commit
+   `6bde2b6f2e0a360f31a87c3e8228c141b062585e`, preserving final tree
+   `5dafa42faa20c11e13581d79c6de2c6f2fedde1e`. PR-head checks completed and
+   all four review threads were resolved. The separately dispatched hosted
+   screenshot job failed before capture, so no hosted exact-head screenshot
+   receipt is claimed. PR #690 later repaired the controller path without
+   retroactively changing that evidence state.
 
 ## Non-claims
 
-SOURCE_COMPLETE means the bounded repository implementation and local
-qualification are complete. It does not mean deployed, production healthy,
-customer adopted, externally integrated, independently reviewed, or merged.
-Those states require their own witnessed evidence and are never inferred from
-HTTP 200, a local build, a screenshot, a branch push, or a green check on a
+MERGED_SOURCE means the bounded implementation is present in protected source.
+It does not mean deployed, production healthy, customer adopted, externally
+integrated, or independently witnessed at runtime. It also does not convert a
+failed hosted screenshot run into a pass. Those states require their own
+witnessed evidence and are never inferred from HTTP 200, a local build, a
+screenshot, a branch push, a later controller repair, or a green check on a
 different commit.

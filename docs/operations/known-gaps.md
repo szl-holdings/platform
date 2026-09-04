@@ -1,6 +1,6 @@
 # SZL Holdings — Known Gaps Register (Security & Operations)
 
-**Last updated:** 2026-08-26 (rev 26 — Lighthouse gate integrity; PR #668 source/proof boundary)
+**Last updated:** 2026-09-04 (rev 28 — PR #668 protected merge and refreshed current-main witness)
 **Owner:** Engineering / DevOps  
 **Audience:** Enterprise architects, Series A technical advisors, incoming VP Engineering
 
@@ -49,21 +49,40 @@ not an accepted remediation.
 
 ### 2026-08-26 A11oy Series A route boundary
 
-PR #668 now has a source-complete /a11oy/start candidate on
-codex/series-a-product-current-main-v4. The route keeps all six operational
-truth states visible, labels its current scenarios DEMO or UNAVAILABLE, and
-contains the developer-verification and non-claim boundaries on the same
-surface. A local exact-source rail built and hashed 344 files, exercised all
-six tabs and keyboard behavior at five viewports, and promoted digest-matched
-screenshots. That establishes source and local-build behavior only.
+PR #668 merged the source-complete `/a11oy/start` journey normally on
+2026-08-28. Its final branch head was
+`6a79dcfd76c13cd2fb402015bcdbfa5223d602b5`, tree
+`5dafa42faa20c11e13581d79c6de2c6f2fedde1e`. Protected squash commit
+`6bde2b6f2e0a360f31a87c3e8228c141b062585e` is GitHub-verified and has the
+same tree. The five branch commits had valid DCO trailers but were reported as
+unsigned; the verified squash result does not retroactively relabel them.
+Current protected main `1c18213044e7164aca9e70fe789a27ea981cba0e`
+retains the merge as an ancestor as observed on 2026-09-04.
 
-Hosted exact-head checks, fresh review, protected merge, deployment, production
-health, customer use, and external-service parity remain separate evidence
-states. No deployment or customer witness is currently attached to this task,
-so those states remain UNAVAILABLE. The repository-wide strict claims gate also
-continues to fail closed on the Vessels/AIS mock while MARINETRAFFIC_API_KEY is
-absent; PR #668 does not relabel that external-authority gap or introduce a
-credential to bypass it.
+The protected source keeps all six operational truth states visible, labels
+the current scenarios DEMO or UNAVAILABLE, aliases `/a11oy/investor-demo` to
+the same qualified surface, and places developer-verification and non-claim
+boundaries on that surface. The local exact-source rail built and hashed 344
+files, exercised all six tabs and keyboard behavior at five viewports, and
+promoted digest-matched screenshots. The final PR rollup recorded 52 successful
+checks and 3 expected skips, and all four review threads were resolved. These
+facts establish protected source and local-build behavior only.
+
+The separately dispatched exact-head screenshot run
+<https://github.com/szl-holdings/platform/actions/runs/33013248530> failed before
+capture because the isolated candidate identity could not execute pnpm through
+the runner-private path. PR #690 later repaired the controller to expose and
+invoke one candidate-readable pinned pnpm executable, and its controller checks
+passed. That later controller proof does not retroactively create a hosted
+capture receipt for PR #668. Hosted exact-head screenshot evidence therefore
+remains UNAVAILABLE for that merged candidate.
+
+Deployment, production health, customer use, and external-service parity remain
+separate evidence states. No deployment or customer witness is attached to
+this task, so those states remain UNAVAILABLE. The repository-wide strict
+claims gate also continues to fail closed on the Vessels/AIS mock while
+MARINETRAFFIC_API_KEY is absent; PR #668 does not relabel that
+external-authority gap or introduce a credential to bypass it.
 
 ---
 
