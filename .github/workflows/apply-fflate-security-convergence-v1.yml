@@ -1,0 +1,123 @@
+name: Apply fflate security convergence v1
+
+on:
+  push:
+    branches:
+      - fix/fflate-transitive-security-convergence-v1
+    paths:
+      - .github/workflows/apply-fflate-security-convergence-v1.yml
+
+permissions:
+  contents: write
+
+concurrency:
+  group: apply-fflate-security-convergence-v1
+  cancel-in-progress: false
+
+jobs:
+  materialize:
+    name: Converge fflate, regenerate lock and prove security evidence
+    runs-on: ubuntu-24.04
+    timeout-minutes: 45
+    steps:
+      - name: Harden runner
+        uses: step-security/harden-runner@05e31511f85b41b11d1cf0ef85d0992719546e2c # v2.21.0
+        with:
+          egress-policy: audit
+
+      - name: Check out exact repair branch
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: fix/fflate-transitive-security-convergence-v1
+          fetch-depth: 1
+
+      - name: Set up Node
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
+        with:
+          node-version-file: .node-version
+          cache: pnpm
+
+      - name: Enable the repository-pinned pnpm
+        run: |
+          corepack enable
+          corepack prepare pnpm@10.26.1 --activate
+          pnpm --version
+
+      - name: Add one central patched override and permanent gate
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+
+          workspace = Path('pnpm-workspace.yaml')
+          text = workspace.read_text(encoding='utf-8')
+          anchor = '  brace-expansion: 5.0.9\n'
+          replacement = anchor + '  fflate: 0.8.3\n'
+          if text.count(anchor) != 1:
+              raise SystemExit(f'expected one override anchor, found {text.count(anchor)}')
+          if '  fflate: 0.8.3\n' not in text:
+              text = text.replace(anchor, replacement, 1)
+          workspace.write_text(text, encoding='utf-8')
+
+          package_path = Path('package.json')
+          package = json.loads(package_path.read_text(encoding='utf-8'))
+          scripts = package['scripts']
+          scripts['security:fflate'] = 'node scripts/qa/check-fflate-resolution.mjs'
+          current = scripts['security:audit']
+          prefix = 'pnpm run security:fflate && '
+          if not current.startswith(prefix):
+              scripts['security:audit'] = prefix + current
+          package_path.write_text(json.dumps(package, indent=2) + '\n', encoding='utf-8')
+          PY
+
+      - name: Regenerate exact lockfile from current manifests
+        run: pnpm install --lockfile-only --no-frozen-lockfile
+
+      - name: Install the regenerated graph without lifecycle execution
+        run: pnpm install --frozen-lockfile --ignore-scripts
+
+      - name: Prove no vulnerable fflate path remains
+        run: |
+          set -euo pipefail
+          pnpm run security:fflate
+          pnpm why fflate -r > reports-fflate-why.txt
+          if grep -Eq 'fflate 0\.(4\.[0-8]|5\.[0-3]|6\.(?:[0-9]|10)|7\.[0-4]|8\.[0-2])(?:$|[^0-9])' reports-fflate-why.txt; then
+            cat reports-fflate-why.txt
+            echo '::error::A vulnerable fflate resolution remains.'
+            exit 1
+          fi
+
+      - name: Regenerate dependency evidence
+        run: |
+          node scripts/qa/generate-sbom.js
+          node scripts/qa/generate-license-report.js
+          node scripts/qa/generate-vuln-report.js
+
+      - name: Validate durable diff
+        run: |
+          set -euo pipefail
+          pnpm run security:fflate
+          ! grep -R --line-number --fixed-string 'fflate@0.4.8' pnpm-lock.yaml security/sbom-latest.json security/license-report.md security/vuln-report.md
+          git diff --check
+
+      - name: Commit only durable security convergence
+        env:
+          BRANCH: fix/fflate-transitive-security-convergence-v1
+        run: |
+          set -euo pipefail
+          git rm .github/workflows/apply-fflate-security-convergence-v1.yml
+          git add \
+            package.json \
+            pnpm-workspace.yaml \
+            pnpm-lock.yaml \
+            scripts/qa/check-fflate-resolution.mjs \
+            security/sbom-latest.json \
+            security/license-report.md \
+            security/vuln-report.md
+          git config user.name 'SZL Frontier Operator'
+          git config user.email 'stephenlutar2@gmail.com'
+          git commit \
+            -m 'fix(security): converge fflate on patched 0.8.3' \
+            -m 'Override the vulnerable PostHog transitive edge, regenerate the exact pnpm graph and dependency evidence, and add a permanent fail-closed lockfile regression.' \
+            -m 'Signed-off-by: Stephen Lutar <stephenlutar2@gmail.com>'
+          git push origin "HEAD:${BRANCH}"
