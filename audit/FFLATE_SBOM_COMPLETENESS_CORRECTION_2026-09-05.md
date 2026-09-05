@@ -1,0 +1,31 @@
+# fflate SBOM completeness correction — Proof Packet
+
+- **workcell_id:** `SEC-FFLATE-SBOM-COMPLETENESS-2026-09-05`
+- **agent:** BuildWarden
+- **objective:** Correct the fflate security candidate so its committed CycloneDX inventory includes quoted and unquoted pnpm package keys, while preserving exact `fflate@0.8.3` convergence and the `@xmldom/xmldom@0.9.12` remediation.
+- **plan_summary:** Repair the lockfile tarball integrity that made install-based CI fail; isolate the pnpm `packages` section; parse quoted, unquoted, scoped, and peer-qualified package keys; add focused regression coverage to the blocking security workflow; regenerate the security artifacts; and verify the resulting inventory against an independent YAML parse.
+- **patch_summary:** `scripts/qa/generate-sbom.js` now parses both YAML key forms and stops before the `snapshots` section. `scripts/qa/generate-sbom.test.mjs` covers both key forms, peer suffix normalization, section isolation, whole-lockfile parity, and the two security-critical versions. `.github/workflows/security.yml` and `security:sbom` run that regression before generation. The 0.9.12 tarball integrity now matches the registry artifact. The SBOM, vulnerability report, and license report were regenerated.
+- **test_results:**
+  - `pnpm install --frozen-lockfile --ignore-scripts` — exit `0`; 1,735 packages installed and the corrected 0.9.12 tarball passed integrity verification.
+  - `ONNXRUNTIME_NODE_INSTALL=skip pnpm install --frozen-lockfile` — exit `0`; frozen install reported the workspace up to date.
+  - `node --test scripts/qa/generate-sbom.test.mjs` — exit `0`; 2 focused parser/inventory tests passed.
+  - `node --test scripts/qa/check-fflate-resolution.test.mjs` — exit `0`; all 4 positive, negative, and workflow-binding cases passed.
+  - `pnpm run security:fflate` — exit `0`; 3 dependency edges converge on `fflate@0.8.3`.
+  - `pnpm run security:sbom` — exit `0`; generated 1,796 unique components from 1,795 lockfile packages plus 1 linked workspace package.
+  - independent YAML/SBOM assertion — exit `0`; the generated inventory is sorted, duplicate-free, matches the lockfile count plus the linked workspace component, contains exactly `fflate@0.8.3`, and contains exactly `@xmldom/xmldom@0.9.12`.
+  - `pnpm audit --json --audit-level=moderate` — exit `0`; Info, Low, Moderate, High, and Critical counts are all zero.
+  - `node scripts/qa/generate-vuln-report.js` — exit `0`; the committed vulnerability report was regenerated from the corrected dependency graph.
+  - `node scripts/qa/generate-license-report.js` — exit `0`; the committed license report records `@xmldom/xmldom@0.9.12`.
+  - `node --import tsx tools/truth/claims-drift.ts` with `TRUTH_ALLOWLIST_BASE_SHA=90fd724cb62dc1fee89b408d8086df72cc7c7bb2` — exit `0`; claims drift passed. The package-script wrapper could not create its sandbox IPC socket, so the same TypeScript entry point was executed through Node's loader.
+  - YAML parse of `.github/workflows/security.yml` — exit `0`.
+  - `git diff --check` — exit `0`.
+  - `pnpm typecheck` — exit `1`; 148 tasks passed before the pre-existing `@szl-holdings/ai-engine` errors (`zod` resolution and an implicit-any parameter) stopped the run. This work changes no TypeScript product source or package dependency declaration and does not worsen those unrelated baseline errors.
+- **screenshot_refs:** N/A — no UI surface changed.
+- **verification_notes:** An independent YAML parse reports 1,795 keys in `pnpm-lock.yaml.packages`; the generated artifact contains those entries plus the repository's one linked workspace component. The prior 698-component artifact omitted 1,098 unquoted keys. The corrected artifact explicitly carries `pkg:npm/fflate@0.8.3`.
+- **public_claim_check:** No public product claim changed. Counts in this packet describe the exact local dependency inventory only.
+- **security_check:** No secret, token, credential, or `.env` value was added. The existing blocking security policy and vulnerability threshold were preserved.
+- **known_gaps_update:** No product or operational gap was introduced or closed; this correction repairs evidence completeness and a candidate-lock integrity defect before merge.
+- **proof_level:** 2 (Standard Proof; non-UI security tooling change)
+- **recorded_at:** `2026-09-05T16:47:21Z`
+- **recorded_by:** BuildWarden
+- **supersedes_evidence:** Completeness and installability claims for candidate `fb1453fcaa4c9e537f3f259ca313e562b28be5c4`; the earlier convergence proof remains authoritative for its original fflate guard results.

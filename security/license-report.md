@@ -1,16 +1,16 @@
 # License Compliance Report
 
-**Generated:** 2026-08-09
-**Total packages scanned:** 1502
+**Generated:** 2026-09-05
+**Total packages scanned:** 1471
 
 ## Summary
 
 | Category | Count |
 |----------|-------|
-| Permissive — OK | 1485 |
+| Permissive — OK | 1457 |
 | Copyleft — REVIEW | 8 |
-| Unknown / Non-standard — CHECK | 9 |
-| **Total** | **1502** |
+| Unknown / Non-standard — CHECK | 6 |
+| **Total** | **1471** |
 
 **Flag key:**
 - `OK` — permissive license (MIT, Apache-2.0, ISC, BSD-*, Unlicense, CC0, etc.); no commercial use restrictions
@@ -24,12 +24,12 @@ These packages have licenses that impose obligations or restrict commercial use.
 | Package | Version | License | Notes |
 |---------|---------|---------|-------|
 | `@axe-core/playwright` | 4.11.3 | MPL-2.0 | File-scoped copyleft; no obligation if unmodified |
-| `@img/sharp-win32-x64` | 0.35.3 | Apache-2.0 AND LGPL-3.0-or-later | Copyleft — review before distribution |
+| `@img/sharp-libvips-linux-x64` | 1.3.2 | LGPL-3.0-or-later | Copyleft — review before distribution |
 | `axe-core` | 4.12.1 | MPL-2.0 | File-scoped copyleft; no obligation if unmodified |
 | `dompurify` | 3.4.13 | (MPL-2.0 OR Apache-2.0) | Dual-licensed — elect permissive option |
 | `jszip` | 3.10.1 | (MIT OR GPL-3.0-or-later) | Dual-licensed — elect permissive option |
 | `lightningcss` | 1.32.0 | MPL-2.0 | File-scoped copyleft; no obligation if unmodified |
-| `lightningcss-win32-x64-msvc` | 1.32.0 | MPL-2.0 | File-scoped copyleft; no obligation if unmodified |
+| `lightningcss-linux-x64-gnu` | 1.32.0 | MPL-2.0 | File-scoped copyleft; no obligation if unmodified |
 | `node-forge` | 1.4.0 | (BSD-3-Clause OR GPL-2.0) | Dual-licensed — elect permissive option |
 
 ## Unknown / Non-Standard License Packages
@@ -39,9 +39,6 @@ These packages have missing or non-SPDX license identifiers. Verify acceptable u
 | Package | Version | License String |
 |---------|---------|---------------|
 | `@replit/connectors-sdk` | 0.3.0 | UNKNOWN |
-| `@replit/vite-plugin-cartographer` | 0.5.21 | UNKNOWN |
-| `@replit/vite-plugin-dev-banner` | 0.1.2 | UNKNOWN |
-| `@replit/vite-plugin-runtime-error-modal` | 0.0.6 | UNKNOWN |
 | `browser-assert` | 1.2.1 | UNKNOWN |
 | `mapbox-gl` | 3.27.0 | SEE LICENSE IN LICENSE.txt |
 | `png-js` | 1.1.0 | UNKNOWN |
@@ -55,17 +52,14 @@ Complete per-package license listing for all installed dependencies.
 | Package | Version | License | Flag |
 |---------|---------|---------|------|
 | `@axe-core/playwright` | 4.11.3 | MPL-2.0 | REVIEW |
-| `@img/sharp-win32-x64` | 0.35.3 | Apache-2.0 AND LGPL-3.0-or-later | REVIEW |
+| `@img/sharp-libvips-linux-x64` | 1.3.2 | LGPL-3.0-or-later | REVIEW |
 | `axe-core` | 4.12.1 | MPL-2.0 | REVIEW |
 | `dompurify` | 3.4.13 | (MPL-2.0 OR Apache-2.0) | REVIEW |
 | `jszip` | 3.10.1 | (MIT OR GPL-3.0-or-later) | REVIEW |
 | `lightningcss` | 1.32.0 | MPL-2.0 | REVIEW |
-| `lightningcss-win32-x64-msvc` | 1.32.0 | MPL-2.0 | REVIEW |
+| `lightningcss-linux-x64-gnu` | 1.32.0 | MPL-2.0 | REVIEW |
 | `node-forge` | 1.4.0 | (BSD-3-Clause OR GPL-2.0) | REVIEW |
 | `@replit/connectors-sdk` | 0.3.0 | UNKNOWN | CHECK |
-| `@replit/vite-plugin-cartographer` | 0.5.21 | UNKNOWN | CHECK |
-| `@replit/vite-plugin-dev-banner` | 0.1.2 | UNKNOWN | CHECK |
-| `@replit/vite-plugin-runtime-error-modal` | 0.0.6 | UNKNOWN | CHECK |
 | `browser-assert` | 1.2.1 | UNKNOWN | CHECK |
 | `mapbox-gl` | 3.27.0 | SEE LICENSE IN LICENSE.txt | CHECK |
 | `png-js` | 1.1.0 | UNKNOWN | CHECK |
@@ -179,9 +173,9 @@ Complete per-package license listing for all installed dependencies.
 | `@babel/types` | 7.29.7 | MIT | OK |
 | `@bcoe/v8-coverage` | 1.0.2 | MIT | OK |
 | `@biomejs/biome` | 2.4.16 | MIT OR Apache-2.0 | OK |
-| `@biomejs/cli-win32-x64` | 2.4.16 | MIT OR Apache-2.0 | OK |
+| `@biomejs/cli-linux-x64` | 2.4.16 | MIT OR Apache-2.0 | OK |
 | `@colors/colors` | 1.5.0 | MIT | OK |
-| `@commander-js/extra-typings` | 14.0.0 | MIT | OK |
+| `@commander-js/extra-typings` | 15.0.0 | MIT | OK |
 | `@commitlint/cli` | 19.8.1 | MIT | OK |
 | `@commitlint/config-conventional` | 19.8.1 | MIT | OK |
 | `@commitlint/config-validator` | 19.8.1 | MIT | OK |
@@ -201,7 +195,7 @@ Complete per-package license listing for all installed dependencies.
 | `@commitlint/types` | 19.8.1 | MIT | OK |
 | `@date-fns/tz` | 1.5.0 | MIT | OK |
 | `@drizzle-team/brocli` | 0.10.2 | Apache-2.0 | OK |
-| `@esbuild/win32-x64` | 0.28.1 | MIT | OK |
+| `@esbuild/linux-x64` | 0.28.1 | MIT | OK |
 | `@expo/cli` | 54.0.25 | MIT | OK |
 | `@expo/code-signing-certificates` | 0.0.6 | MIT | OK |
 | `@expo/config` | 12.0.13 | MIT | OK |
@@ -240,12 +234,13 @@ Complete per-package license listing for all installed dependencies.
 | `@graphql-typed-document-node/core` | 3.2.0 | MIT | OK |
 | `@grpc/grpc-js` | 1.14.4 | Apache-2.0 | OK |
 | `@grpc/proto-loader` | 0.8.1 | Apache-2.0 | OK |
-| `@hono/node-server` | 2.0.12 | MIT | OK |
+| `@hono/node-server` | 2.1.1 | MIT | OK |
 | `@huggingface/jinja` | 0.5.9 | MIT | OK |
 | `@huggingface/tokenizers` | 0.1.3 | Apache-2.0 | OK |
 | `@huggingface/transformers` | 4.2.0 | Apache-2.0 | OK |
 | `@ide/backoff` | 1.0.0 | MIT | OK |
 | `@img/colour` | 1.1.0 | MIT | OK |
+| `@img/sharp-linux-x64` | 0.35.3 | Apache-2.0 | OK |
 | `@isaacs/cliui` | 8.0.2 | ISC | OK |
 | `@isaacs/fs-minipass` | 4.0.1 | ISC | OK |
 | `@isaacs/ttlcache` | 1.4.1 | ISC | OK |
@@ -353,20 +348,20 @@ Complete per-package license listing for all installed dependencies.
 | `@opentelemetry/sdk-trace-node` | 2.7.1 | Apache-2.0 | OK |
 | `@opentelemetry/semantic-conventions` | 1.41.1 | Apache-2.0 | OK |
 | `@opentelemetry/sql-common` | 0.41.2 | Apache-2.0 | OK |
-| `@orval/angular` | 8.17.0 | MIT | OK |
-| `@orval/axios` | 8.17.0 | MIT | OK |
-| `@orval/core` | 8.17.0 | MIT | OK |
-| `@orval/effect` | 8.17.0 | MIT | OK |
-| `@orval/fetch` | 8.17.0 | MIT | OK |
-| `@orval/hono` | 8.17.0 | MIT | OK |
-| `@orval/mcp` | 8.17.0 | MIT | OK |
-| `@orval/mock` | 8.17.0 | MIT | OK |
-| `@orval/query` | 8.17.0 | MIT | OK |
-| `@orval/solid-start` | 8.17.0 | MIT | OK |
-| `@orval/swr` | 8.17.0 | MIT | OK |
-| `@orval/zod` | 8.17.0 | MIT | OK |
+| `@orval/angular` | 8.22.0 | MIT | OK |
+| `@orval/axios` | 8.22.0 | MIT | OK |
+| `@orval/core` | 8.22.0 | MIT | OK |
+| `@orval/effect` | 8.22.0 | MIT | OK |
+| `@orval/fetch` | 8.22.0 | MIT | OK |
+| `@orval/hono` | 8.22.0 | MIT | OK |
+| `@orval/mcp` | 8.22.0 | MIT | OK |
+| `@orval/mock` | 8.22.0 | MIT | OK |
+| `@orval/query` | 8.22.0 | MIT | OK |
+| `@orval/solid-start` | 8.22.0 | MIT | OK |
+| `@orval/swr` | 8.22.0 | MIT | OK |
+| `@orval/zod` | 8.22.0 | MIT | OK |
 | `@oxc-project/types` | 0.133.0 | MIT | OK |
-| `@oxlint/binding-win32-x64-msvc` | 1.69.0 | MIT | OK |
+| `@oxlint/binding-linux-x64-gnu` | 1.69.0 | MIT | OK |
 | `@paralleldrive/cuid2` | 2.3.1 | MIT | OK |
 | `@pinojs/redact` | 0.4.0 | MIT | OK |
 | `@pkgjs/parseargs` | 0.11.0 | MIT | OK |
@@ -383,7 +378,6 @@ Complete per-package license listing for all installed dependencies.
 | `@protobufjs/path` | 1.1.2 | BSD-3-Clause | OK |
 | `@protobufjs/pool` | 1.1.0 | BSD-3-Clause | OK |
 | `@protobufjs/utf8` | 1.1.1 | BSD-3-Clause | OK |
-| `@puppeteer/browsers` | 2.13.2 | Apache-2.0 | OK |
 | `@radix-ui/number` | 1.1.2 | MIT | OK |
 | `@radix-ui/primitive` | 1.1.4 | MIT | OK |
 | `@radix-ui/react-accordion` | 1.2.13 | MIT | OK |
@@ -451,14 +445,14 @@ Complete per-package license listing for all installed dependencies.
 | `@react-native/js-polyfills` | 0.81.5 | MIT | OK |
 | `@react-native/normalize-colors` | 0.81.5 | MIT | OK |
 | `@react-native/virtualized-lists` | 0.81.5 | MIT | OK |
-| `@rolldown/binding-win32-x64-msvc` | 1.0.3 | MIT | OK |
+| `@rolldown/binding-linux-x64-gnu` | 1.0.3 | MIT | OK |
 | `@rolldown/pluginutils` | 1.0.1 | MIT | OK |
 | `@rollup/pluginutils` | 5.4.0 | MIT | OK |
-| `@scalar/helpers` | 0.8.2 | MIT | OK |
-| `@scalar/json-magic` | 0.12.16 | MIT | OK |
-| `@scalar/openapi-parser` | 0.28.7 | MIT | OK |
+| `@scalar/helpers` | 0.11.1 | MIT | OK |
+| `@scalar/json-magic` | 0.12.20 | MIT | OK |
+| `@scalar/openapi-parser` | 0.28.16 | MIT | OK |
 | `@scalar/openapi-types` | 0.8.0 | MIT | OK |
-| `@scalar/openapi-upgrader` | 0.2.9 | MIT | OK |
+| `@scalar/openapi-upgrader` | 0.2.15 | MIT | OK |
 | `@sec-ant/readable-stream` | 0.4.1 | MIT | OK |
 | `@sentry-internal/browser-utils` | 10.57.0 | MIT | OK |
 | `@sentry-internal/feedback` | 10.57.0 | MIT | OK |
@@ -484,7 +478,7 @@ Complete per-package license listing for all installed dependencies.
 | `@storybook/addon-controls` | 8.6.14 | MIT | OK |
 | `@storybook/addon-docs` | 8.6.14 | MIT | OK |
 | `@storybook/addon-essentials` | 8.6.14 | MIT | OK |
-| `@storybook/addon-highlight` | 8.6.14 | MIT | OK |
+| `@storybook/addon-highlight` | 8.6.18 | MIT | OK |
 | `@storybook/addon-measure` | 8.6.14 | MIT | OK |
 | `@storybook/addon-outline` | 8.6.14 | MIT | OK |
 | `@storybook/addon-themes` | 8.6.18 | MIT | OK |
@@ -509,7 +503,7 @@ Complete per-package license listing for all installed dependencies.
 | `@tabby_ai/hijri-converter` | 1.0.5 | MIT | OK |
 | `@tailwindcss/node` | 4.3.3 | MIT | OK |
 | `@tailwindcss/oxide` | 4.3.3 | MIT | OK |
-| `@tailwindcss/oxide-win32-x64-msvc` | 4.3.3 | MIT | OK |
+| `@tailwindcss/oxide-linux-x64-gnu` | 4.3.3 | MIT | OK |
 | `@tailwindcss/typography` | 0.5.20 | MIT | OK |
 | `@tailwindcss/vite` | 4.3.3 | MIT | OK |
 | `@tanstack/query-async-storage-persister` | 5.101.0 | MIT | OK |
@@ -517,14 +511,13 @@ Complete per-package license listing for all installed dependencies.
 | `@tanstack/query-persist-client-core` | 5.101.0 | MIT | OK |
 | `@tanstack/query-sync-storage-persister` | 5.101.0 | MIT | OK |
 | `@tanstack/react-query` | 5.100.14 | MIT | OK |
-| `@testing-library/dom` | 10.4.0 | MIT | OK |
+| `@testing-library/dom` | 10.4.1 | MIT | OK |
 | `@testing-library/jest-dom` | 6.9.1 | MIT | OK |
 | `@testing-library/react` | 16.3.2 | MIT | OK |
-| `@testing-library/user-event` | 14.5.2 | MIT | OK |
+| `@testing-library/user-event` | 14.6.1 | MIT | OK |
 | `@tootallnate/once` | 3.0.1 | MIT | OK |
-| `@tootallnate/quickjs-emscripten` | 0.23.0 | MIT | OK |
 | `@transloadit/prettier-bytes` | 0.3.5 | MIT | OK |
-| `@turbo/windows-64` | 2.9.18 | MIT | OK |
+| `@turbo/linux-64` | 2.9.18 | MIT | OK |
 | `@types/aria-query` | 5.0.4 | MIT | OK |
 | `@types/aws-lambda` | 8.10.162 | MIT | OK |
 | `@types/babel__core` | 7.20.5 | MIT | OK |
@@ -555,7 +548,7 @@ Complete per-package license listing for all installed dependencies.
 | `@types/express` | 5.0.6 | MIT | OK |
 | `@types/express-serve-static-core` | 5.1.1 | MIT | OK |
 | `@types/graceful-fs` | 4.1.9 | MIT | OK |
-| `@types/hast` | 3.0.4 | MIT | OK |
+| `@types/hast` | 3.0.5 | MIT | OK |
 | `@types/http-errors` | 2.0.5 | MIT | OK |
 | `@types/istanbul-lib-coverage` | 2.0.6 | MIT | OK |
 | `@types/istanbul-lib-report` | 3.0.3 | MIT | OK |
@@ -568,7 +561,7 @@ Complete per-package license listing for all installed dependencies.
 | `@types/memcached` | 2.2.10 | MIT | OK |
 | `@types/methods` | 1.1.4 | MIT | OK |
 | `@types/mysql` | 2.15.27 | MIT | OK |
-| `@types/node` | 25.3.5 | MIT | OK |
+| `@types/node` | 25.9.3 | MIT | OK |
 | `@types/nodemailer` | 7.0.12 | MIT | OK |
 | `@types/oracledb` | 6.5.2 | MIT | OK |
 | `@types/pako` | 2.0.4 | MIT | OK |
@@ -597,7 +590,6 @@ Complete per-package license listing for all installed dependencies.
 | `@types/ws` | 8.18.1 | MIT | OK |
 | `@types/yargs` | 17.0.35 | MIT | OK |
 | `@types/yargs-parser` | 21.0.3 | MIT | OK |
-| `@types/yauzl` | 2.10.3 | MIT | OK |
 | `@types/zen-observable` | 0.8.3 | MIT | OK |
 | `@udecode/plate-common` | 42.0.0 | MIT | OK |
 | `@udecode/plate-core` | 49.0.0 | MIT | OK |
@@ -633,11 +625,11 @@ Complete per-package license listing for all installed dependencies.
 | `@wry/context` | 0.7.4 | MIT | OK |
 | `@wry/equality` | 0.5.7 | MIT | OK |
 | `@wry/trie` | 0.5.0 | MIT | OK |
-| `@xmldom/xmldom` | 0.9.10 | MIT | OK |
+| `@xmldom/xmldom` | 0.9.12 | MIT | OK |
 | `@zeit/schemas` | 2.36.0 | MIT | OK |
 | `abort-controller` | 3.0.0 | MIT | OK |
 | `accepts` | 2.0.0 | MIT | OK |
-| `acorn` | 8.17.0 | MIT | OK |
+| `acorn` | 8.18.0 | MIT | OK |
 | `acorn-import-attributes` | 1.9.5 | MIT | OK |
 | `adm-zip` | 0.6.0 | MIT | OK |
 | `agent-base` | 7.1.4 | MIT | OK |
@@ -646,7 +638,6 @@ Complete per-package license listing for all installed dependencies.
 | `ajv-formats` | 3.0.1 | MIT | OK |
 | `anser` | 1.4.10 | MIT | OK |
 | `ansi-align` | 3.0.1 | ISC | OK |
-| `ansi-colors` | 4.1.3 | MIT | OK |
 | `ansi-escapes` | 4.3.2 | MIT | OK |
 | `ansi-regex` | 6.2.2 | MIT | OK |
 | `ansi-styles` | 6.2.3 | MIT | OK |
@@ -696,8 +687,7 @@ Complete per-package license listing for all installed dependencies.
 | `bare-url` | 2.4.5 | Apache-2.0 | OK |
 | `base64-arraybuffer` | 1.0.2 | MIT | OK |
 | `base64-js` | 1.5.1 | MIT | OK |
-| `baseline-browser-mapping` | 2.10.36 | Apache-2.0 | OK |
-| `basic-ftp` | 5.3.1 | MIT | OK |
+| `baseline-browser-mapping` | 2.11.20 | Apache-2.0 | OK |
 | `better-opn` | 3.0.2 | MIT | OK |
 | `big-integer` | 1.6.52 | Unlicense | OK |
 | `bignumber.js` | 9.3.1 | MIT | OK |
@@ -711,10 +701,10 @@ Complete per-package license listing for all installed dependencies.
 | `braces` | 3.0.3 | MIT | OK |
 | `brotli` | 1.3.3 | MIT | OK |
 | `browserify-zlib` | 0.2.0 | MIT | OK |
-| `browserslist` | 4.28.2 | MIT | OK |
+| `browserslist` | 4.28.7 | MIT | OK |
 | `bser` | 2.1.1 | Apache-2.0 | OK |
 | `buffer` | 5.7.1 | MIT | OK |
-| `buffer-crc32` | 0.2.13 | MIT | OK |
+| `buffer-crc32` | 1.0.0 | MIT | OK |
 | `buffer-equal-constant-time` | 1.0.1 | BSD-3-Clause | OK |
 | `buffer-from` | 1.1.2 | MIT | OK |
 | `buffer-image-size` | 0.6.4 | MIT | OK |
@@ -724,7 +714,7 @@ Complete per-package license listing for all installed dependencies.
 | `call-bound` | 1.0.4 | MIT | OK |
 | `callsites` | 3.1.0 | MIT | OK |
 | `camelcase` | 6.3.0 | MIT | OK |
-| `caniuse-lite` | 1.0.30001799 | CC-BY-4.0 | OK |
+| `caniuse-lite` | 1.0.30001810 | CC-BY-4.0 | OK |
 | `canvg` | 3.0.11 | MIT | OK |
 | `chai` | 6.2.2 | MIT | OK |
 | `chalk` | 5.0.1 | MIT | OK |
@@ -733,7 +723,6 @@ Complete per-package license listing for all installed dependencies.
 | `chokidar` | 5.0.0 | MIT | OK |
 | `chownr` | 3.0.0 | BlueOak-1.0.0 | OK |
 | `chrome-launcher` | 0.15.2 | Apache-2.0 | OK |
-| `chromium-bidi` | 14.0.0 | Apache-2.0 | OK |
 | `chromium-edge-launcher` | 0.2.0 | Apache-2.0 | OK |
 | `ci-info` | 2.0.0 | MIT | OK |
 | `cjs-module-lexer` | 2.2.0 | MIT | OK |
@@ -810,7 +799,6 @@ Complete per-package license listing for all installed dependencies.
 | `define-data-property` | 1.1.4 | MIT | OK |
 | `define-lazy-prop` | 2.0.0 | MIT | OK |
 | `define-properties` | 1.2.1 | MIT | OK |
-| `degenerator` | 5.0.1 | MIT | OK |
 | `delayed-stream` | 1.0.0 | MIT | OK |
 | `depd` | 2.0.0 | MIT | OK |
 | `dequal` | 2.0.3 | MIT | OK |
@@ -818,7 +806,6 @@ Complete per-package license listing for all installed dependencies.
 | `detect-libc` | 2.1.2 | Apache-2.0 | OK |
 | `detect-node` | 2.1.0 | MIT | OK |
 | `detect-node-es` | 1.1.0 | MIT | OK |
-| `devtools-protocol` | 0.0.1608973 | BSD-3-Clause | OK |
 | `dezalgo` | 1.0.4 | ISC | OK |
 | `dfa` | 1.2.0 | MIT | OK |
 | `direction` | 1.0.4 | MIT | OK |
@@ -837,7 +824,7 @@ Complete per-package license listing for all installed dependencies.
 | `eastasianwidth` | 0.2.0 | MIT | OK |
 | `ecdsa-sig-formatter` | 1.0.11 | Apache-2.0 | OK |
 | `ee-first` | 1.1.1 | MIT | OK |
-| `electron-to-chromium` | 1.5.371 | ISC | OK |
+| `electron-to-chromium` | 1.5.420 | ISC | OK |
 | `embla-carousel` | 8.6.0 | MIT | OK |
 | `embla-carousel-react` | 8.6.0 | MIT | OK |
 | `embla-carousel-reactive-utils` | 8.6.0 | MIT | OK |
@@ -845,7 +832,6 @@ Complete per-package license listing for all installed dependencies.
 | `encodeurl` | 2.0.0 | MIT | OK |
 | `end-of-stream` | 1.4.5 | MIT | OK |
 | `enhanced-resolve` | 5.24.3 | MIT | OK |
-| `enquirer` | 2.4.1 | MIT | OK |
 | `entities` | 4.5.0 | BSD-2-Clause | OK |
 | `env-editor` | 0.4.2 | MIT | OK |
 | `env-paths` | 2.2.1 | MIT | OK |
@@ -862,9 +848,7 @@ Complete per-package license listing for all installed dependencies.
 | `escalade` | 3.2.0 | MIT | OK |
 | `escape-html` | 1.0.3 | MIT | OK |
 | `escape-string-regexp` | 2.0.0 | MIT | OK |
-| `escodegen` | 2.1.0 | BSD-2-Clause | OK |
 | `esprima` | 4.0.1 | BSD-2-Clause | OK |
-| `estraverse` | 5.3.0 | BSD-2-Clause | OK |
 | `estree-walker` | 3.0.3 | MIT | OK |
 | `esutils` | 2.0.3 | BSD-2-Clause | OK |
 | `etag` | 1.8.1 | MIT | OK |
@@ -897,7 +881,6 @@ Complete per-package license listing for all installed dependencies.
 | `express` | 5.2.1 | MIT | OK |
 | `express-rate-limit` | 8.5.2 | MIT | OK |
 | `extend` | 3.0.2 | MIT | OK |
-| `extract-zip` | 2.0.1 | BSD-2-Clause | OK |
 | `fast-check` | 3.23.2 | MIT | OK |
 | `fast-copy` | 4.0.3 | MIT | OK |
 | `fast-deep-equal` | 3.1.3 | MIT | OK |
@@ -907,14 +890,13 @@ Complete per-package license listing for all installed dependencies.
 | `fast-png` | 6.4.0 | MIT | OK |
 | `fast-safe-stringify` | 2.1.1 | MIT | OK |
 | `fast-sha256` | 1.3.0 | Unlicense | OK |
-| `fast-uri` | 3.1.5 | BSD-3-Clause | OK |
+| `fast-uri` | 3.1.6 | BSD-3-Clause | OK |
 | `fast-xml-builder` | 1.2.0 | MIT | OK |
 | `fast-xml-parser` | 5.8.0 | MIT | OK |
 | `fb-watchman` | 2.0.2 | Apache-2.0 | OK |
-| `fd-slicer` | 1.1.0 | MIT | OK |
 | `fdir` | 6.5.0 | MIT | OK |
 | `fetch-blob` | 3.2.0 | MIT | OK |
-| `fflate` | 0.4.8 | MIT | OK |
+| `fflate` | 0.8.3 | MIT | OK |
 | `figures` | 6.1.0 | MIT | OK |
 | `fill-range` | 7.1.1 | MIT | OK |
 | `finalhandler` | 2.1.1 | MIT | OK |
@@ -934,7 +916,7 @@ Complete per-package license listing for all installed dependencies.
 | `framer-motion` | 12.42.2 | MIT | OK |
 | `freeport-async` | 2.0.0 | MIT | OK |
 | `fresh` | 2.0.0 | MIT | OK |
-| `fs-extra` | 11.3.5 | MIT | OK |
+| `fs-extra` | 11.4.0 | MIT | OK |
 | `fs.realpath` | 1.0.0 | ISC | OK |
 | `function-bind` | 1.1.2 | MIT | OK |
 | `gaxios` | 6.7.1 | Apache-2.0 | OK |
@@ -947,8 +929,7 @@ Complete per-package license listing for all installed dependencies.
 | `get-package-type` | 0.1.0 | MIT | OK |
 | `get-proto` | 1.0.1 | MIT | OK |
 | `get-stream` | 9.0.1 | MIT | OK |
-| `get-tsconfig` | 4.14.0 | MIT | OK |
-| `get-uri` | 6.0.5 | MIT | OK |
+| `get-tsconfig` | 4.14.3 | MIT | OK |
 | `getenv` | 2.0.0 | MIT | OK |
 | `git-raw-commits` | 4.0.0 | MIT | OK |
 | `glob` | 7.2.3 | ISC | OK |
@@ -1101,7 +1082,7 @@ Complete per-package license listing for all installed dependencies.
 | `long` | 5.3.2 | Apache-2.0 | OK |
 | `loose-envify` | 1.4.0 | MIT | OK |
 | `loupe` | 3.2.1 | MIT | OK |
-| `lru-cache` | 7.18.3 | ISC | OK |
+| `lru-cache` | 11.5.1 | BlueOak-1.0.0 | OK |
 | `lucide-react` | 1.16.0 | ISC | OK |
 | `lunr` | 2.3.9 | MIT | OK |
 | `lz-string` | 1.5.0 | MIT | OK |
@@ -1110,11 +1091,11 @@ Complete per-package license listing for all installed dependencies.
 | `make-dir` | 4.0.0 | MIT | OK |
 | `makeerror` | 1.0.12 | BSD-3-Clause | OK |
 | `map-or-similar` | 1.5.0 | MIT | OK |
-| `markdown-it` | 14.2.0 | MIT | OK |
+| `markdown-it` | 14.3.1 | MIT | OK |
 | `marky` | 1.3.0 | Apache-2.0 | OK |
 | `matcher` | 3.0.0 | MIT | OK |
 | `math-intrinsics` | 1.1.0 | MIT | OK |
-| `mdurl` | 2.0.0 | MIT | OK |
+| `mdurl` | 2.1.0 | MIT | OK |
 | `media-typer` | 1.1.0 | MIT | OK |
 | `memoize-one` | 5.2.1 | MIT | OK |
 | `memoizerific` | 1.11.3 | MIT | OK |
@@ -1145,13 +1126,12 @@ Complete per-package license listing for all installed dependencies.
 | `mimic-fn` | 2.1.0 | MIT | OK |
 | `min-indent` | 1.0.1 | MIT | OK |
 | `minimalistic-assert` | 1.0.1 | ISC | OK |
-| `minimatch` | 10.2.5 | BlueOak-1.0.0 | OK |
+| `minimatch` | 10.2.6 | BlueOak-1.0.0 | OK |
 | `minimist` | 1.2.8 | MIT | OK |
 | `minipass` | 7.1.3 | BlueOak-1.0.0 | OK |
 | `minizlib` | 3.1.0 | MIT | OK |
 | `mitt` | 3.0.1 | MIT | OK |
 | `mkdirp` | 1.0.4 | MIT | OK |
-| `modern-screenshot` | 4.7.0 | MIT | OK |
 | `module-details-from-path` | 1.0.4 | MIT | OK |
 | `motion-dom` | 12.42.2 | MIT | OK |
 | `motion-utils` | 12.39.0 | MIT | OK |
@@ -1160,16 +1140,15 @@ Complete per-package license listing for all installed dependencies.
 | `mutative` | 1.1.0 | MIT | OK |
 | `mz` | 2.7.0 | MIT | OK |
 | `namespace-emitter` | 2.0.1 | MIT | OK |
-| `nanoid` | 3.3.17 | MIT | OK |
+| `nanoid` | 3.3.18 | MIT | OK |
 | `negotiator` | 1.0.0 | MIT | OK |
 | `nested-error-stacks` | 2.0.1 | MIT | OK |
-| `netmask` | 2.1.1 | MIT | OK |
 | `next-themes` | 0.4.6 | MIT | OK |
 | `node-domexception` | 1.0.0 | MIT | OK |
 | `node-fetch` | 2.7.0 | MIT | OK |
 | `node-gyp-build` | 4.8.4 | MIT | OK |
 | `node-int64` | 0.4.0 | MIT | OK |
-| `node-releases` | 2.0.47 | MIT | OK |
+| `node-releases` | 2.0.54 | MIT | OK |
 | `nodemailer` | 9.0.1 | MIT-0 | OK |
 | `normalize-path` | 3.0.0 | MIT | OK |
 | `npm-package-arg` | 11.0.3 | ISC | OK |
@@ -1195,7 +1174,7 @@ Complete per-package license listing for all installed dependencies.
 | `optics-ts` | 2.4.1 | MIT | OK |
 | `optimism` | 0.18.1 | MIT | OK |
 | `ora` | 3.4.0 | MIT | OK |
-| `orval` | 8.17.0 | MIT | OK |
+| `orval` | 8.22.0 | MIT | OK |
 | `oxlint` | 1.69.0 | MIT | OK |
 | `p-limit` | 4.0.0 | MIT | OK |
 | `p-locate` | 6.0.0 | MIT | OK |
@@ -1203,8 +1182,6 @@ Complete per-package license listing for all installed dependencies.
 | `p-retry` | 7.1.1 | MIT | OK |
 | `p-timeout` | 6.1.4 | MIT | OK |
 | `p-try` | 2.2.0 | MIT | OK |
-| `pac-proxy-agent` | 7.2.0 | MIT | OK |
-| `pac-resolver` | 7.0.1 | MIT | OK |
 | `package-json-from-dist` | 1.0.1 | BlueOak-1.0.0 | OK |
 | `pako` | 0.2.9 | MIT | OK |
 | `parent-module` | 1.0.1 | MIT | OK |
@@ -1223,7 +1200,6 @@ Complete per-package license listing for all installed dependencies.
 | `pathe` | 2.0.3 | MIT | OK |
 | `pathval` | 2.0.1 | MIT | OK |
 | `pdfkit` | 0.18.0 | MIT | OK |
-| `pend` | 1.2.0 | MIT | OK |
 | `performance-now` | 2.1.0 | MIT | OK |
 | `pg` | 8.21.0 | MIT | OK |
 | `pg-cloudflare` | 1.4.0 | MIT | OK |
@@ -1258,7 +1234,7 @@ Complete per-package license listing for all installed dependencies.
 | `prettier` | 3.8.4 | MIT | OK |
 | `pretty-bytes` | 6.1.1 | MIT | OK |
 | `pretty-format` | 29.7.0 | MIT | OK |
-| `pretty-ms` | 9.3.0 | MIT | OK |
+| `pretty-ms` | 9.3.1 | MIT | OK |
 | `proc-log` | 4.2.0 | ISC | OK |
 | `process` | 0.11.10 | MIT | OK |
 | `process-nextick-args` | 2.0.1 | MIT | OK |
@@ -1270,16 +1246,13 @@ Complete per-package license listing for all installed dependencies.
 | `prop-types` | 15.8.1 | MIT | OK |
 | `protobufjs` | 7.6.5 | BSD-3-Clause | OK |
 | `proxy-addr` | 2.0.7 | MIT | OK |
-| `proxy-agent` | 6.5.0 | MIT | OK |
 | `proxy-compare` | 2.6.0 | MIT | OK |
-| `proxy-from-env` | 1.1.0 | MIT | OK |
 | `pump` | 3.0.4 | MIT | OK |
 | `punycode` | 2.3.1 | MIT | OK |
 | `punycode.js` | 2.3.1 | MIT | OK |
-| `puppeteer-core` | 24.43.1 | Apache-2.0 | OK |
 | `pure-rand` | 6.1.0 | MIT | OK |
 | `qrcode-terminal` | 0.11.0 | Apache 2.0 | OK |
-| `qs` | 6.15.2 | BSD-3-Clause | OK |
+| `qs` | 6.16.0 | BSD-3-Clause | OK |
 | `query-selector-shadow-dom` | 1.0.1 | MIT | OK |
 | `quick-format-unescaped` | 4.0.4 | MIT | OK |
 | `raf` | 3.4.1 | MIT | OK |
@@ -1309,7 +1282,7 @@ Complete per-package license listing for all installed dependencies.
 | `react-transition-group` | 4.4.5 | BSD-3-Clause | OK |
 | `readable-stream` | 4.7.0 | MIT | OK |
 | `readdir-glob` | 1.1.3 | Apache-2.0 | OK |
-| `readdirp` | 5.0.0 | MIT | OK |
+| `readdirp` | 5.1.1 | MIT | OK |
 | `real-require` | 0.2.0 | MIT | OK |
 | `recast` | 0.23.11 | MIT | OK |
 | `recharts` | 2.15.4 | MIT | OK |
@@ -1325,7 +1298,7 @@ Complete per-package license listing for all installed dependencies.
 | `regjsgen` | 0.8.0 | MIT | OK |
 | `regjsparser` | 0.13.1 | BSD-2-Clause | OK |
 | `rehackt` | 0.1.0 | MIT | OK |
-| `remeda` | 2.39.0 | MIT | OK |
+| `remeda` | 2.45.0 | MIT | OK |
 | `require-directory` | 2.1.1 | MIT | OK |
 | `require-from-string` | 2.0.2 | MIT | OK |
 | `require-in-the-middle` | 8.0.1 | MIT | OK |
@@ -1383,9 +1356,6 @@ Complete per-package license listing for all installed dependencies.
 | `slate-hyperscript` | 0.100.0 | MIT | OK |
 | `slate-react` | 0.124.2 | MIT | OK |
 | `slugify` | 1.6.9 | MIT | OK |
-| `smart-buffer` | 4.2.0 | MIT | OK |
-| `socks` | 2.8.9 | MIT | OK |
-| `socks-proxy-agent` | 8.0.5 | MIT | OK |
 | `sonic-boom` | 4.2.1 | MIT | OK |
 | `sonner` | 2.0.7 | MIT | OK |
 | `source-map` | 0.6.1 | BSD-3-Clause | OK |
@@ -1429,7 +1399,6 @@ Complete per-package license listing for all installed dependencies.
 | `tailwindcss` | 4.3.3 | MIT | OK |
 | `tapable` | 2.3.3 | MIT | OK |
 | `tar` | 7.5.21 | BlueOak-1.0.0 | OK |
-| `tar-fs` | 3.1.2 | MIT | OK |
 | `tar-stream` | 3.2.0 | MIT | OK |
 | `tdigest` | 0.1.2 | MIT | OK |
 | `teeny-request` | 9.0.0 | Apache-2.0 | OK |
@@ -1465,16 +1434,15 @@ Complete per-package license listing for all installed dependencies.
 | `ts-invariant` | 0.10.3 | MIT | OK |
 | `tsconfig-paths` | 4.2.0 | MIT | OK |
 | `tslib` | 2.8.1 | 0BSD | OK |
-| `tsx` | 4.22.4 | MIT | OK |
+| `tsx` | 4.23.13 | MIT | OK |
 | `turbo` | 2.9.18 | MIT | OK |
 | `tw-animate-css` | 1.4.0 | MIT | OK |
 | `type-detect` | 4.0.8 | MIT | OK |
 | `type-fest` | 2.19.0 | (MIT OR CC0-1.0) | OK |
 | `type-is` | 2.1.0 | MIT | OK |
-| `typed-query-selector` | 2.12.2 | MIT | OK |
-| `typedoc` | 0.28.19 | Apache-2.0 | OK |
+| `typedoc` | 0.28.20 | Apache-2.0 | OK |
 | `typedoc-plugin-coverage` | 4.0.3 | MIT | OK |
-| `typedoc-plugin-markdown` | 4.12.0 | MIT | OK |
+| `typedoc-plugin-markdown` | 4.13.0 | MIT | OK |
 | `typescript` | 6.0.3 | Apache-2.0 | OK |
 | `ua-parser-js` | 0.7.41 | MIT | OK |
 | `uc.micro` | 2.1.0 | MIT | OK |
@@ -1516,7 +1484,6 @@ Complete per-package license listing for all installed dependencies.
 | `wcwidth` | 1.0.1 | MIT | OK |
 | `web-streams-polyfill` | 3.3.3 | MIT | OK |
 | `web-vitals` | 5.3.0 | Apache-2.0 | OK |
-| `webdriver-bidi-protocol` | 0.4.1 | Apache-2.0 | OK |
 | `webidl-conversions` | 3.0.1 | BSD-2-Clause | OK |
 | `webpack-virtual-modules` | 0.6.2 | MIT | OK |
 | `whatwg-fetch` | 3.6.20 | MIT | OK |
@@ -1546,9 +1513,8 @@ Complete per-package license listing for all installed dependencies.
 | `yaml` | 2.9.0 | ISC | OK |
 | `yargs` | 17.7.2 | MIT | OK |
 | `yargs-parser` | 21.1.1 | ISC | OK |
-| `yauzl` | 2.10.0 | MIT | OK |
 | `yocto-queue` | 1.2.2 | MIT | OK |
-| `yoctocolors` | 2.1.2 | MIT | OK |
+| `yoctocolors` | 2.2.0 | MIT | OK |
 | `zen-observable` | 0.8.15 | MIT | OK |
 | `zen-observable-ts` | 1.2.5 | MIT | OK |
 | `zip-stream` | 6.0.1 | MIT | OK |
