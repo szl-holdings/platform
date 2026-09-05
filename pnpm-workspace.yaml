@@ -12,6 +12,14 @@ packages:
   - platform/temporal
   - platform/agent-gateway
 
+allowBuilds:
+  '@google/genai': set this to true or false
+  core-js: set this to true or false
+  esbuild: set this to true or false
+  isolated-vm: set this to true or false
+  onnxruntime-node: set this to true or false
+  protobufjs: set this to true or false
+
 autoInstallPeers: false
 
 catalog:
@@ -44,9 +52,9 @@ catalog:
 minimumReleaseAge: 1440
 
 minimumReleaseAgeExclude:
-  - esbuild  # GHSA-gv7w-rqvm-qjhr security patch (0.28.1)
-  - '@esbuild/*'  # esbuild platform binaries for 0.28.1
-  - tsx      # required to allow esbuild 0.28.x
+  - esbuild # GHSA-gv7w-rqvm-qjhr security patch (0.28.1)
+  - '@esbuild/*' # esbuild platform binaries for 0.28.1
+  - tsx # required to allow esbuild 0.28.x
   - '@replit/*'
   - stripe-replit-sync
   - vite
@@ -88,6 +96,7 @@ overrides:
   path-to-regexp: 8.4.2
   'serve-handler>path-to-regexp': 3.3.0
   brace-expansion: 5.0.9
+  fflate: 0.8.3
   vite: 8.0.16
   'form-data@2': 2.5.6
   'form-data@4': 4.0.6
