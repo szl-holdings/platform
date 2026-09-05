@@ -7,10 +7,10 @@
 - **plan_summary:** Invoke the existing deterministic guard from the dependency-scan job, add dependency-free tests for the admitted version and two downgrade/divergence failures, and verify that the aggregate blocking security gate depends on that job.
 - **patch_summary:** `.github/workflows/security.yml` now runs the focused test and `pnpm run security:fflate` before SBOM generation. The new regression executes the repository guard, rejects a downgraded workspace override, rejects a divergent lockfile edge, and asserts the guard remains on the blocking workflow path.
 - **test_results:**
-  - `node --test scripts/qa/check-fflate-resolution.test.mjs` — exit `0`; 4 passed, 0 failed.
-  - `node scripts/qa/check-fflate-resolution.mjs` — exit `0`; 3 dependency edges converge on `fflate@0.8.3`.
+  - `node --test scripts/qa/check-fflate-resolution.test.mjs` — exit `0`; every focused positive and negative case passed.
+  - `node scripts/qa/check-fflate-resolution.mjs` — exit `0`; every enumerated dependency edge converges on `fflate@0.8.3`.
   - `git diff --check` — exit `0`; no whitespace errors.
-  - baseline `pnpm typecheck` — exit `1` before typecheck because the repository's existing install policy rejects six unapproved dependency build scripts. No allowlist or supply-chain exception was added.
+  - baseline `pnpm typecheck` — exit `1` before typecheck because the repository's existing install policy rejects unapproved dependency build scripts. No allowlist or supply-chain exception was added.
   - `pnpm run security:fflate` — exit `1` before script dispatch for the same install-policy reason; direct Node execution above validates the guard itself. Hosted execution must begin with the existing successful `pnpm install --frozen-lockfile` prerequisite.
 - **screenshot_refs:** `N/A` — security workflow and dependency-resolution change; no UI surface changed.
 - **verification_notes:** The dependency-scan job cannot succeed unless the exact-resolution test and guard both succeed, and `security-gate` continues to require `dependency-scan` success.
@@ -23,7 +23,7 @@
 
 ## Source binding
 
-- protected base: `f8c7780b16a9d1e3e4089f5d3c77614c53608c5c`
+- protected base: `90fd724cb62dc1fee89b408d8086df72cc7c7bb2`
 - reviewed PR head: `2cad5df35e2a6a58f979833024b1957bd52497db`
 - PR: `szl-holdings/platform#746`
 
