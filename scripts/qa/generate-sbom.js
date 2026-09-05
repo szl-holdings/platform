@@ -65,6 +65,35 @@ function addLinkedWorkspacePackages(packages) {
   }
 }
 
+export function parseLockfileText(lockfileText) {
+  const packages = {};
+  const marker = lockfileText.indexOf('\npackages:');
+  if (marker < 0) fatal('pnpm-lock.yaml is missing the packages section');
+  const packagesStart = marker + '\npackages:'.length;
+  const followingSection = lockfileText.slice(packagesStart).search(/^\S[^\n]*:/m);
+  const packagesEnd = followingSection < 0 ? lockfileText.length : packagesStart + followingSection;
+  const inPackagesSection = lockfileText.slice(packagesStart, packagesEnd);
+  const pkgRegex = /^ {2}((?:'[^'\n]+'|"[^"\n]+"|[^\s'"\n][^:\n]*)):\s*$/gm;
+  let match;
+  while ((match = pkgRegex.exec(inPackagesSection)) !== null) {
+    const packageKey = match[1].replace(/^(['"])(.*)\1$/, '$2');
+    const canonicalKey = packageKey.split('(', 1)[0];
+    const separator = canonicalKey.lastIndexOf('@');
+    if (separator <= 0) continue;
+    const name = canonicalKey.slice(0, separator).trim();
+    const version = canonicalKey.slice(separator + 1).trim();
+    if (!name || !version || version.includes(' ')) continue;
+    if (!packages[name]) packages[name] = new Set();
+    packages[name].add(version);
+  }
+
+  const result = {};
+  for (const [name, versionSet] of Object.entries(packages)) {
+    result[name] = Array.from(versionSet).sort();
+  }
+  return result;
+}
+
 export function parseLockfile() {
   const lockfilePath = join(ROOT, 'pnpm-lock.yaml');
   let lockfileText;
@@ -74,24 +103,17 @@ export function parseLockfile() {
     fatal(`Cannot read pnpm-lock.yaml: ${err.message}`);
   }
 
-  const packages = {};
-  const marker = lockfileText.indexOf('\npackages:');
-  if (marker < 0) fatal('pnpm-lock.yaml is missing the packages section');
-  const inPackagesSection = lockfileText.slice(marker);
-  const pkgRegex = /^ {2}'((?:@[^@'\n]+\/)?[^@'\n]+)@([^'()\n]+)/gm;
-  let match;
-  while ((match = pkgRegex.exec(inPackagesSection)) !== null) {
-    const name = match[1].trim();
-    const version = match[2].trim();
-    if (!name || !version || version.includes(' ')) continue;
-    if (!packages[name]) packages[name] = new Set();
-    packages[name].add(version);
-  }
+  const packages = Object.fromEntries(
+    Object.entries(parseLockfileText(lockfileText)).map(([name, versions]) => [
+      name,
+      new Set(versions),
+    ]),
+  );
   addLinkedWorkspacePackages(packages);
 
   const result = {};
-  for (const [name, versionSet] of Object.entries(packages)) {
-    result[name] = Array.from(versionSet).sort();
+  for (const [name, versions] of Object.entries(packages)) {
+    result[name] = Array.from(versions).sort();
   }
   return result;
 }
@@ -118,7 +140,7 @@ export function buildSbom(packages) {
       timestamp: new Date().toISOString(),
       scanStatus: 'inventory-only',
       vulnerabilityAuthority: 'pnpm audit --audit-level=high (separate blocking CI step)',
-      tools: [{ vendor: 'SZL Holdings', name: 'generate-sbom.js', version: '3.0.0' }],
+      tools: [{ vendor: 'SZL Holdings', name: 'generate-sbom.js', version: '3.1.0' }],
       component: { type: 'application', name: 'szl-platform', version: '1.0.0' },
       statistics: {
         totalPackages: components.length,
@@ -145,4 +167,6 @@ async function main() {
   console.log('Vulnerability authority: pnpm audit --audit-level=high in generate-vuln-report.js');
 }
 
-main().catch((err) => fatal(err.message));
+if (process.argv[1] && resolve(process.argv[1]) === fileURLToPath(import.meta.url)) {
+  main().catch((err) => fatal(err.message));
+}

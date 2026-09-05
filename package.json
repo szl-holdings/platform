@@ -98,9 +98,9 @@
     "health:check": "node --experimental-vm-modules scripts/qa/health-check.js",
     "qa:verify": "node scripts/qa/post-merge-verify.js",
     "qa:verify:skip-e2e": "node scripts/qa/post-merge-verify.js --skip-e2e",
-    "security:audit": "node scripts/qa/generate-sbom.js && node scripts/qa/generate-vuln-report.js && node scripts/qa/generate-license-report.js",
+    "security:audit": "pnpm run security:fflate && pnpm run security:sbom && node scripts/qa/generate-vuln-report.js && node scripts/qa/generate-license-report.js",
     "security:audit:fix": "pnpm update --latest",
-    "security:sbom": "node scripts/qa/generate-sbom.js",
+    "security:sbom": "node --test scripts/qa/generate-sbom.test.mjs && node scripts/qa/generate-sbom.js",
     "security:vuln": "node scripts/qa/generate-vuln-report.js",
     "security:license": "node scripts/qa/generate-license-report.js",
     "smoke:product-mode": "node scripts/qa/smoke-product-mode.js",
@@ -158,7 +158,8 @@
     "audit:mcp-registry": "node ops/audit/meridian-mcp-check.mjs",
     "dev:validate": "tsx scripts/dev-validate.ts",
     "eval-harness:run-standard": "pnpm --filter @workspace/eval-harness run eval-harness:run-standard",
-    "eval-harness:reproduce": "pnpm --filter @workspace/eval-harness run eval-harness:reproduce"
+    "eval-harness:reproduce": "pnpm --filter @workspace/eval-harness run eval-harness:reproduce",
+    "security:fflate": "node scripts/qa/check-fflate-resolution.mjs"
   },
   "private": true,
   "packageManager": "pnpm@10.26.1",
