@@ -78,7 +78,9 @@ jobs:
   severity-gate:
     name: severity-gate
     needs: analyze
-    if: github.event_name == 'pull_request'
+    # `always()` is intentional: a failed or cancelled analyzer must make the
+    # required gate run and fail closed instead of silently skipping.
+    if: always() && github.event_name == 'pull_request'
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -86,15 +88,22 @@ jobs:
     steps:
       - name: Fail on open critical/high CodeQL alerts
         env:
+          ANALYZE_RESULT: ${{ needs.analyze.result }}
           GH_TOKEN: ${{ github.token }}
           REF: ${{ github.event.pull_request.head.ref }}
         run: |
           set -euo pipefail
+          if [ "${ANALYZE_RESULT}" != "success" ]; then
+            echo "::error::CodeQL analysis ended ${ANALYZE_RESULT}; blocking merge because the analyzer did not produce a trustworthy result."
+            exit 1
+          fi
           # Open alerts for the PR head ref, filtered to the CodeQL tool.
-          alerts=$(gh api \
-            "repos/${{ github.repository }}/code-scanning/alerts?state=open&ref=refs/heads/${REF}&tool_name=CodeQL&per_page=100" \
-            --jq '[.[] | {sev: (.rule.security_severity_level // .rule.severity), num: .number, rule: .rule.id}]' \
-            2>/dev/null || echo '[]')
+          if ! alerts=$(gh api \
+              "repos/${{ github.repository }}/code-scanning/alerts?state=open&ref=refs/heads/${REF}&tool_name=CodeQL&per_page=100" \
+              --jq '[.[] | {sev: (.rule.security_severity_level // .rule.severity), num: .number, rule: .rule.id}]'); then
+            echo "::error::Unable to read CodeQL alerts; blocking merge because absence of evidence is not evidence of absence."
+            exit 1
+          fi
           blocking=$(echo "$alerts" | jq '[.[] | select(.sev=="critical" or .sev=="high")]')
           count=$(echo "$blocking" | jq 'length')
           echo "Open critical/high CodeQL alerts on ${REF}: ${count}"
