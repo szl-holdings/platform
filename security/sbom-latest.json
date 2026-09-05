@@ -2,9 +2,9 @@
   "bomFormat": "CycloneDX",
   "specVersion": "1.4",
   "version": 1,
-  "serialNumber": "urn:uuid:3003868b-ef66-4e8f-8b72-8d5f6ef9bc9c",
+  "serialNumber": "urn:uuid:f3c6b23e-c98a-43ba-af70-09253c1885ce",
   "metadata": {
-    "timestamp": "2026-09-05T02:46:20.385Z",
+    "timestamp": "2026-09-05T16:23:41.840Z",
     "scanStatus": "inventory-only",
     "vulnerabilityAuthority": "pnpm audit --audit-level=high (separate blocking CI step)",
     "tools": [
@@ -4197,8 +4197,8 @@
     {
       "type": "library",
       "name": "@xmldom/xmldom",
-      "version": "0.9.10",
-      "purl": "pkg:npm/@xmldom/xmldom@0.9.10"
+      "version": "0.9.12",
+      "purl": "pkg:npm/@xmldom/xmldom@0.9.12"
     },
     {
       "type": "library",

@@ -1,11 +1,11 @@
 # Dependency Vulnerability Report
 
-**Generated:** 2026-09-05T02:46:21.314Z
+**Generated:** 2026-09-05T16:23:51.423Z
 **Policy:** parsed High/Critical advisories block; Moderate/Low remain reported
 **Command:** `pnpm audit --json --audit-level=high`
-**Command exit status:** 1
+**Command exit status:** 0
 **Parsed schema:** legacy-advisories
-**Total dependencies reported by audit:** 2018
+**Total dependencies reported by audit:** 1795
 
 ## Blocking verdict
 
@@ -17,7 +17,7 @@ PASS — no parsed High/Critical advisory.
 |---|---:|
 | Critical | 0 |
 | High | 0 |
-| Moderate | 1 |
+| Moderate | 0 |
 | Low | 0 |
 
 ## Workspace overrides
@@ -42,7 +42,7 @@ PASS — no parsed High/Critical advisory.
 | `@esbuild-kit/core-utils>esbuild` | `0.28.1` |
 | `protobufjs` | `7.6.5` |
 | `protocol-buffers-schema` | `^3.6.1` |
-| `@xmldom/xmldom` | `^0.9.10` |
+| `@xmldom/xmldom` | `^0.9.12` |
 | `fast-xml-parser` | `^5.8.0` |
 | `postcss` | `8.5.23` |
 | `uuid` | `^14.0.0` |
