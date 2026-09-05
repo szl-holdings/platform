@@ -39,6 +39,11 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
+      - name: Verify fflate dependency convergence
+        run: |
+          node --test scripts/qa/check-fflate-resolution.test.mjs
+          pnpm run security:fflate
+
       - name: Run dependency vulnerability scan and generate SBOM
         id: sbom
         run: node scripts/qa/generate-sbom.js
