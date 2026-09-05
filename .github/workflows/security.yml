@@ -41,7 +41,9 @@ jobs:
 
       - name: Run dependency vulnerability scan and generate SBOM
         id: sbom
-        run: node scripts/qa/generate-sbom.js
+        run: |
+          pnpm run security:fflate
+          node scripts/qa/generate-sbom.js
         env:
           NODE_ENV: production
 
