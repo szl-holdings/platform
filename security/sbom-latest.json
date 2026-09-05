@@ -2,15 +2,16 @@
   "bomFormat": "CycloneDX",
   "specVersion": "1.4",
   "version": 1,
-  "serialNumber": "urn:uuid:a10e51d2-e914-4c5b-a070-a390145ca48b",
+  "serialNumber": "urn:uuid:8b1516c3-5045-46b9-b1cb-8b83ba963f2a",
   "metadata": {
-    "timestamp": "2026-08-09T06:46:19.178Z",
-    "scanStatus": "success",
+    "timestamp": "2026-09-05T16:47:01.967Z",
+    "scanStatus": "inventory-only",
+    "vulnerabilityAuthority": "pnpm audit --audit-level=high (separate blocking CI step)",
     "tools": [
       {
         "vendor": "SZL Holdings",
         "name": "generate-sbom.js",
-        "version": "2.2.0"
+        "version": "3.1.0"
       }
     ],
     "component": {
@@ -19,12 +20,7 @@
       "version": "1.0.0"
     },
     "statistics": {
-      "totalPackages": 698,
-      "vulnerabilitiesFound": 0,
-      "critical": 0,
-      "high": 0,
-      "moderate": 0,
-      "low": 0
+      "totalPackages": 1796
     }
   },
   "components": [
@@ -147,6 +143,12 @@
       "name": "@babel/generator",
       "version": "7.29.7",
       "purl": "pkg:npm/@babel/generator@7.29.7"
+    },
+    {
+      "type": "library",
+      "name": "@babel/generator",
+      "version": "7.29.8",
+      "purl": "pkg:npm/@babel/generator@7.29.8"
     },
     {
       "type": "library",
@@ -273,6 +275,12 @@
       "name": "@babel/parser",
       "version": "7.29.7",
       "purl": "pkg:npm/@babel/parser@7.29.7"
+    },
+    {
+      "type": "library",
+      "name": "@babel/parser",
+      "version": "7.29.8",
+      "purl": "pkg:npm/@babel/parser@7.29.8"
     },
     {
       "type": "library",
@@ -570,6 +578,12 @@
     },
     {
       "type": "library",
+      "name": "@babel/plugin-transform-react-jsx",
+      "version": "7.29.7",
+      "purl": "pkg:npm/@babel/plugin-transform-react-jsx@7.29.7"
+    },
+    {
+      "type": "library",
       "name": "@babel/plugin-transform-react-jsx-development",
       "version": "7.29.7",
       "purl": "pkg:npm/@babel/plugin-transform-react-jsx-development@7.29.7"
@@ -585,12 +599,6 @@
       "name": "@babel/plugin-transform-react-jsx-source",
       "version": "7.29.7",
       "purl": "pkg:npm/@babel/plugin-transform-react-jsx-source@7.29.7"
-    },
-    {
-      "type": "library",
-      "name": "@babel/plugin-transform-react-jsx",
-      "version": "7.29.7",
-      "purl": "pkg:npm/@babel/plugin-transform-react-jsx@7.29.7"
     },
     {
       "type": "library",
@@ -672,9 +680,21 @@
     },
     {
       "type": "library",
+      "name": "@babel/traverse",
+      "version": "7.29.8",
+      "purl": "pkg:npm/@babel/traverse@7.29.8"
+    },
+    {
+      "type": "library",
       "name": "@babel/types",
       "version": "7.29.7",
       "purl": "pkg:npm/@babel/types@7.29.7"
+    },
+    {
+      "type": "library",
+      "name": "@babel/types",
+      "version": "7.29.8",
+      "purl": "pkg:npm/@babel/types@7.29.8"
     },
     {
       "type": "library",
@@ -702,27 +722,27 @@
     },
     {
       "type": "library",
-      "name": "@biomejs/cli-linux-arm64-musl",
-      "version": "2.4.16",
-      "purl": "pkg:npm/@biomejs/cli-linux-arm64-musl@2.4.16"
-    },
-    {
-      "type": "library",
       "name": "@biomejs/cli-linux-arm64",
       "version": "2.4.16",
       "purl": "pkg:npm/@biomejs/cli-linux-arm64@2.4.16"
     },
     {
       "type": "library",
-      "name": "@biomejs/cli-linux-x64-musl",
+      "name": "@biomejs/cli-linux-arm64-musl",
       "version": "2.4.16",
-      "purl": "pkg:npm/@biomejs/cli-linux-x64-musl@2.4.16"
+      "purl": "pkg:npm/@biomejs/cli-linux-arm64-musl@2.4.16"
     },
     {
       "type": "library",
       "name": "@biomejs/cli-linux-x64",
       "version": "2.4.16",
       "purl": "pkg:npm/@biomejs/cli-linux-x64@2.4.16"
+    },
+    {
+      "type": "library",
+      "name": "@biomejs/cli-linux-x64-musl",
+      "version": "2.4.16",
+      "purl": "pkg:npm/@biomejs/cli-linux-x64-musl@2.4.16"
     },
     {
       "type": "library",
@@ -745,8 +765,8 @@
     {
       "type": "library",
       "name": "@commander-js/extra-typings",
-      "version": "14.0.0",
-      "purl": "pkg:npm/@commander-js/extra-typings@14.0.0"
+      "version": "15.0.0",
+      "purl": "pkg:npm/@commander-js/extra-typings@15.0.0"
     },
     {
       "type": "library",
@@ -912,6 +932,18 @@
     },
     {
       "type": "library",
+      "name": "@expo/config",
+      "version": "11.0.13",
+      "purl": "pkg:npm/@expo/config@11.0.13"
+    },
+    {
+      "type": "library",
+      "name": "@expo/config",
+      "version": "12.0.13",
+      "purl": "pkg:npm/@expo/config@12.0.13"
+    },
+    {
+      "type": "library",
       "name": "@expo/config-plugins",
       "version": "10.1.2",
       "purl": "pkg:npm/@expo/config-plugins@10.1.2"
@@ -933,18 +965,6 @@
       "name": "@expo/config-types",
       "version": "54.0.10",
       "purl": "pkg:npm/@expo/config-types@54.0.10"
-    },
-    {
-      "type": "library",
-      "name": "@expo/config",
-      "version": "11.0.13",
-      "purl": "pkg:npm/@expo/config@11.0.13"
-    },
-    {
-      "type": "library",
-      "name": "@expo/config",
-      "version": "12.0.13",
-      "purl": "pkg:npm/@expo/config@12.0.13"
     },
     {
       "type": "library",
@@ -1014,15 +1034,15 @@
     },
     {
       "type": "library",
-      "name": "@expo/metro-config",
-      "version": "54.0.16",
-      "purl": "pkg:npm/@expo/metro-config@54.0.16"
-    },
-    {
-      "type": "library",
       "name": "@expo/metro",
       "version": "54.2.0",
       "purl": "pkg:npm/@expo/metro@54.2.0"
+    },
+    {
+      "type": "library",
+      "name": "@expo/metro-config",
+      "version": "54.0.16",
+      "purl": "pkg:npm/@expo/metro-config@54.0.16"
     },
     {
       "type": "library",
@@ -1183,8 +1203,8 @@
     {
       "type": "library",
       "name": "@hono/node-server",
-      "version": "2.0.12",
-      "purl": "pkg:npm/@hono/node-server@2.0.12"
+      "version": "2.1.1",
+      "purl": "pkg:npm/@hono/node-server@2.1.1"
     },
     {
       "type": "library",
@@ -1248,15 +1268,15 @@
     },
     {
       "type": "library",
-      "name": "@img/sharp-libvips-linux-arm64",
-      "version": "1.3.2",
-      "purl": "pkg:npm/@img/sharp-libvips-linux-arm64@1.3.2"
-    },
-    {
-      "type": "library",
       "name": "@img/sharp-libvips-linux-arm",
       "version": "1.3.2",
       "purl": "pkg:npm/@img/sharp-libvips-linux-arm@1.3.2"
+    },
+    {
+      "type": "library",
+      "name": "@img/sharp-libvips-linux-arm64",
+      "version": "1.3.2",
+      "purl": "pkg:npm/@img/sharp-libvips-linux-arm64@1.3.2"
     },
     {
       "type": "library",
@@ -1296,15 +1316,15 @@
     },
     {
       "type": "library",
-      "name": "@img/sharp-linux-arm64",
-      "version": "0.35.3",
-      "purl": "pkg:npm/@img/sharp-linux-arm64@0.35.3"
-    },
-    {
-      "type": "library",
       "name": "@img/sharp-linux-arm",
       "version": "0.35.3",
       "purl": "pkg:npm/@img/sharp-linux-arm@0.35.3"
+    },
+    {
+      "type": "library",
+      "name": "@img/sharp-linux-arm64",
+      "version": "0.35.3",
+      "purl": "pkg:npm/@img/sharp-linux-arm64@0.35.3"
     },
     {
       "type": "library",
@@ -1536,6 +1556,12 @@
     },
     {
       "type": "library",
+      "name": "@openai/agents",
+      "version": "0.0.15",
+      "purl": "pkg:npm/@openai/agents@0.0.15"
+    },
+    {
+      "type": "library",
       "name": "@openai/agents-core",
       "version": "0.0.15",
       "purl": "pkg:npm/@openai/agents-core@0.0.15"
@@ -1554,9 +1580,9 @@
     },
     {
       "type": "library",
-      "name": "@openai/agents",
-      "version": "0.0.15",
-      "purl": "pkg:npm/@openai/agents@0.0.15"
+      "name": "@opentelemetry/api",
+      "version": "1.9.1",
+      "purl": "pkg:npm/@opentelemetry/api@1.9.1"
     },
     {
       "type": "library",
@@ -1569,12 +1595,6 @@
       "name": "@opentelemetry/api-logs",
       "version": "0.217.0",
       "purl": "pkg:npm/@opentelemetry/api-logs@0.217.0"
-    },
-    {
-      "type": "library",
-      "name": "@opentelemetry/api",
-      "version": "1.9.1",
-      "purl": "pkg:npm/@opentelemetry/api@1.9.1"
     },
     {
       "type": "library",
@@ -1689,6 +1709,12 @@
       "name": "@opentelemetry/exporter-zipkin",
       "version": "2.7.1",
       "purl": "pkg:npm/@opentelemetry/exporter-zipkin@2.7.1"
+    },
+    {
+      "type": "library",
+      "name": "@opentelemetry/instrumentation",
+      "version": "0.217.0",
+      "purl": "pkg:npm/@opentelemetry/instrumentation@0.217.0"
     },
     {
       "type": "library",
@@ -1836,15 +1862,15 @@
     },
     {
       "type": "library",
-      "name": "@opentelemetry/instrumentation-mysql2",
-      "version": "0.63.0",
-      "purl": "pkg:npm/@opentelemetry/instrumentation-mysql2@0.63.0"
-    },
-    {
-      "type": "library",
       "name": "@opentelemetry/instrumentation-mysql",
       "version": "0.63.0",
       "purl": "pkg:npm/@opentelemetry/instrumentation-mysql@0.63.0"
+    },
+    {
+      "type": "library",
+      "name": "@opentelemetry/instrumentation-mysql2",
+      "version": "0.63.0",
+      "purl": "pkg:npm/@opentelemetry/instrumentation-mysql2@0.63.0"
     },
     {
       "type": "library",
@@ -1929,12 +1955,6 @@
       "name": "@opentelemetry/instrumentation-winston",
       "version": "0.61.0",
       "purl": "pkg:npm/@opentelemetry/instrumentation-winston@0.61.0"
-    },
-    {
-      "type": "library",
-      "name": "@opentelemetry/instrumentation",
-      "version": "0.217.0",
-      "purl": "pkg:npm/@opentelemetry/instrumentation@0.217.0"
     },
     {
       "type": "library",
@@ -2107,74 +2127,74 @@
     {
       "type": "library",
       "name": "@orval/angular",
-      "version": "8.17.0",
-      "purl": "pkg:npm/@orval/angular@8.17.0"
+      "version": "8.22.0",
+      "purl": "pkg:npm/@orval/angular@8.22.0"
     },
     {
       "type": "library",
       "name": "@orval/axios",
-      "version": "8.17.0",
-      "purl": "pkg:npm/@orval/axios@8.17.0"
+      "version": "8.22.0",
+      "purl": "pkg:npm/@orval/axios@8.22.0"
     },
     {
       "type": "library",
       "name": "@orval/core",
-      "version": "8.17.0",
-      "purl": "pkg:npm/@orval/core@8.17.0"
+      "version": "8.22.0",
+      "purl": "pkg:npm/@orval/core@8.22.0"
     },
     {
       "type": "library",
       "name": "@orval/effect",
-      "version": "8.17.0",
-      "purl": "pkg:npm/@orval/effect@8.17.0"
+      "version": "8.22.0",
+      "purl": "pkg:npm/@orval/effect@8.22.0"
     },
     {
       "type": "library",
       "name": "@orval/fetch",
-      "version": "8.17.0",
-      "purl": "pkg:npm/@orval/fetch@8.17.0"
+      "version": "8.22.0",
+      "purl": "pkg:npm/@orval/fetch@8.22.0"
     },
     {
       "type": "library",
       "name": "@orval/hono",
-      "version": "8.17.0",
-      "purl": "pkg:npm/@orval/hono@8.17.0"
+      "version": "8.22.0",
+      "purl": "pkg:npm/@orval/hono@8.22.0"
     },
     {
       "type": "library",
       "name": "@orval/mcp",
-      "version": "8.17.0",
-      "purl": "pkg:npm/@orval/mcp@8.17.0"
+      "version": "8.22.0",
+      "purl": "pkg:npm/@orval/mcp@8.22.0"
     },
     {
       "type": "library",
       "name": "@orval/mock",
-      "version": "8.17.0",
-      "purl": "pkg:npm/@orval/mock@8.17.0"
+      "version": "8.22.0",
+      "purl": "pkg:npm/@orval/mock@8.22.0"
     },
     {
       "type": "library",
       "name": "@orval/query",
-      "version": "8.17.0",
-      "purl": "pkg:npm/@orval/query@8.17.0"
+      "version": "8.22.0",
+      "purl": "pkg:npm/@orval/query@8.22.0"
     },
     {
       "type": "library",
       "name": "@orval/solid-start",
-      "version": "8.17.0",
-      "purl": "pkg:npm/@orval/solid-start@8.17.0"
+      "version": "8.22.0",
+      "purl": "pkg:npm/@orval/solid-start@8.22.0"
     },
     {
       "type": "library",
       "name": "@orval/swr",
-      "version": "8.17.0",
-      "purl": "pkg:npm/@orval/swr@8.17.0"
+      "version": "8.22.0",
+      "purl": "pkg:npm/@orval/swr@8.22.0"
     },
     {
       "type": "library",
       "name": "@orval/zod",
-      "version": "8.17.0",
-      "purl": "pkg:npm/@orval/zod@8.17.0"
+      "version": "8.22.0",
+      "purl": "pkg:npm/@orval/zod@8.22.0"
     },
     {
       "type": "library",
@@ -2394,12 +2414,6 @@
     },
     {
       "type": "library",
-      "name": "@puppeteer/browsers",
-      "version": "2.13.2",
-      "purl": "pkg:npm/@puppeteer/browsers@2.13.2"
-    },
-    {
-      "type": "library",
       "name": "@radix-ui/number",
       "version": "1.1.2",
       "purl": "pkg:npm/@radix-ui/number@1.1.2"
@@ -2466,15 +2480,15 @@
     },
     {
       "type": "library",
-      "name": "@radix-ui/react-context-menu",
-      "version": "2.3.0",
-      "purl": "pkg:npm/@radix-ui/react-context-menu@2.3.0"
-    },
-    {
-      "type": "library",
       "name": "@radix-ui/react-context",
       "version": "1.1.4",
       "purl": "pkg:npm/@radix-ui/react-context@1.1.4"
+    },
+    {
+      "type": "library",
+      "name": "@radix-ui/react-context-menu",
+      "version": "2.3.0",
+      "purl": "pkg:npm/@radix-ui/react-context-menu@2.3.0"
     },
     {
       "type": "library",
@@ -2646,15 +2660,15 @@
     },
     {
       "type": "library",
-      "name": "@radix-ui/react-toggle-group",
-      "version": "1.1.12",
-      "purl": "pkg:npm/@radix-ui/react-toggle-group@1.1.12"
-    },
-    {
-      "type": "library",
       "name": "@radix-ui/react-toggle",
       "version": "1.1.11",
       "purl": "pkg:npm/@radix-ui/react-toggle@1.1.11"
+    },
+    {
+      "type": "library",
+      "name": "@radix-ui/react-toggle-group",
+      "version": "1.1.12",
+      "purl": "pkg:npm/@radix-ui/react-toggle-group@1.1.12"
     },
     {
       "type": "library",
@@ -2808,24 +2822,6 @@
     },
     {
       "type": "library",
-      "name": "@replit/vite-plugin-cartographer",
-      "version": "0.5.21",
-      "purl": "pkg:npm/@replit/vite-plugin-cartographer@0.5.21"
-    },
-    {
-      "type": "library",
-      "name": "@replit/vite-plugin-dev-banner",
-      "version": "0.1.2",
-      "purl": "pkg:npm/@replit/vite-plugin-dev-banner@0.1.2"
-    },
-    {
-      "type": "library",
-      "name": "@replit/vite-plugin-runtime-error-modal",
-      "version": "0.0.6",
-      "purl": "pkg:npm/@replit/vite-plugin-runtime-error-modal@0.0.6"
-    },
-    {
-      "type": "library",
       "name": "@rolldown/binding-android-arm64",
       "version": "1.0.3",
       "purl": "pkg:npm/@rolldown/binding-android-arm64@1.0.3"
@@ -2929,20 +2925,32 @@
     {
       "type": "library",
       "name": "@scalar/helpers",
-      "version": "0.8.2",
-      "purl": "pkg:npm/@scalar/helpers@0.8.2"
+      "version": "0.10.0",
+      "purl": "pkg:npm/@scalar/helpers@0.10.0"
+    },
+    {
+      "type": "library",
+      "name": "@scalar/helpers",
+      "version": "0.11.1",
+      "purl": "pkg:npm/@scalar/helpers@0.11.1"
     },
     {
       "type": "library",
       "name": "@scalar/json-magic",
-      "version": "0.12.16",
-      "purl": "pkg:npm/@scalar/json-magic@0.12.16"
+      "version": "0.12.20",
+      "purl": "pkg:npm/@scalar/json-magic@0.12.20"
+    },
+    {
+      "type": "library",
+      "name": "@scalar/json-magic",
+      "version": "0.13.2",
+      "purl": "pkg:npm/@scalar/json-magic@0.13.2"
     },
     {
       "type": "library",
       "name": "@scalar/openapi-parser",
-      "version": "0.28.7",
-      "purl": "pkg:npm/@scalar/openapi-parser@0.28.7"
+      "version": "0.28.16",
+      "purl": "pkg:npm/@scalar/openapi-parser@0.28.16"
     },
     {
       "type": "library",
@@ -2953,14 +2961,14 @@
     {
       "type": "library",
       "name": "@scalar/openapi-types",
-      "version": "0.9.1",
-      "purl": "pkg:npm/@scalar/openapi-types@0.9.1"
+      "version": "0.9.5",
+      "purl": "pkg:npm/@scalar/openapi-types@0.9.5"
     },
     {
       "type": "library",
       "name": "@scalar/openapi-upgrader",
-      "version": "0.2.9",
-      "purl": "pkg:npm/@scalar/openapi-upgrader@0.2.9"
+      "version": "0.2.15",
+      "purl": "pkg:npm/@scalar/openapi-upgrader@0.2.15"
     },
     {
       "type": "library",
@@ -2982,15 +2990,15 @@
     },
     {
       "type": "library",
-      "name": "@sentry-internal/replay-canvas",
-      "version": "10.57.0",
-      "purl": "pkg:npm/@sentry-internal/replay-canvas@10.57.0"
-    },
-    {
-      "type": "library",
       "name": "@sentry-internal/replay",
       "version": "10.57.0",
       "purl": "pkg:npm/@sentry-internal/replay@10.57.0"
+    },
+    {
+      "type": "library",
+      "name": "@sentry-internal/replay-canvas",
+      "version": "10.57.0",
+      "purl": "pkg:npm/@sentry-internal/replay-canvas@10.57.0"
     },
     {
       "type": "library",
@@ -3222,6 +3230,12 @@
     },
     {
       "type": "library",
+      "name": "@storybook/react",
+      "version": "8.6.18",
+      "purl": "pkg:npm/@storybook/react@8.6.18"
+    },
+    {
+      "type": "library",
       "name": "@storybook/react-dom-shim",
       "version": "8.6.14",
       "purl": "pkg:npm/@storybook/react-dom-shim@8.6.14"
@@ -3237,12 +3251,6 @@
       "name": "@storybook/react-vite",
       "version": "8.6.18",
       "purl": "pkg:npm/@storybook/react-vite@8.6.18"
-    },
-    {
-      "type": "library",
-      "name": "@storybook/react",
-      "version": "8.6.18",
-      "purl": "pkg:npm/@storybook/react@8.6.18"
     },
     {
       "type": "library",
@@ -3276,6 +3284,12 @@
     },
     {
       "type": "library",
+      "name": "@tailwindcss/oxide",
+      "version": "4.3.3",
+      "purl": "pkg:npm/@tailwindcss/oxide@4.3.3"
+    },
+    {
+      "type": "library",
       "name": "@tailwindcss/oxide-linux-x64-gnu",
       "version": "4.3.3",
       "purl": "pkg:npm/@tailwindcss/oxide-linux-x64-gnu@4.3.3"
@@ -3291,12 +3305,6 @@
       "name": "@tailwindcss/oxide-win32-x64-msvc",
       "version": "4.3.3",
       "purl": "pkg:npm/@tailwindcss/oxide-win32-x64-msvc@4.3.3"
-    },
-    {
-      "type": "library",
-      "name": "@tailwindcss/oxide",
-      "version": "4.3.3",
-      "purl": "pkg:npm/@tailwindcss/oxide@4.3.3"
     },
     {
       "type": "library",
@@ -3393,12 +3401,6 @@
       "name": "@tootallnate/once",
       "version": "3.0.1",
       "purl": "pkg:npm/@tootallnate/once@3.0.1"
-    },
-    {
-      "type": "library",
-      "name": "@tootallnate/quickjs-emscripten",
-      "version": "0.23.0",
-      "purl": "pkg:npm/@tootallnate/quickjs-emscripten@0.23.0"
     },
     {
       "type": "library",
@@ -3612,15 +3614,15 @@
     },
     {
       "type": "library",
-      "name": "@types/express-serve-static-core",
-      "version": "5.1.1",
-      "purl": "pkg:npm/@types/express-serve-static-core@5.1.1"
-    },
-    {
-      "type": "library",
       "name": "@types/express",
       "version": "5.0.6",
       "purl": "pkg:npm/@types/express@5.0.6"
+    },
+    {
+      "type": "library",
+      "name": "@types/express-serve-static-core",
+      "version": "5.1.1",
+      "purl": "pkg:npm/@types/express-serve-static-core@5.1.1"
     },
     {
       "type": "library",
@@ -3631,8 +3633,8 @@
     {
       "type": "library",
       "name": "@types/hast",
-      "version": "3.0.4",
-      "purl": "pkg:npm/@types/hast@3.0.4"
+      "version": "3.0.5",
+      "purl": "pkg:npm/@types/hast@3.0.5"
     },
     {
       "type": "library",
@@ -3744,12 +3746,6 @@
     },
     {
       "type": "library",
-      "name": "@types/pg-pool",
-      "version": "2.0.7",
-      "purl": "pkg:npm/@types/pg-pool@2.0.7"
-    },
-    {
-      "type": "library",
       "name": "@types/pg",
       "version": "8.15.6",
       "purl": "pkg:npm/@types/pg@8.15.6"
@@ -3759,6 +3755,12 @@
       "name": "@types/pg",
       "version": "8.20.0",
       "purl": "pkg:npm/@types/pg@8.20.0"
+    },
+    {
+      "type": "library",
+      "name": "@types/pg-pool",
+      "version": "2.0.7",
+      "purl": "pkg:npm/@types/pg-pool@2.0.7"
     },
     {
       "type": "library",
@@ -3780,15 +3782,15 @@
     },
     {
       "type": "library",
-      "name": "@types/react-dom",
-      "version": "19.2.3",
-      "purl": "pkg:npm/@types/react-dom@19.2.3"
-    },
-    {
-      "type": "library",
       "name": "@types/react",
       "version": "19.2.15",
       "purl": "pkg:npm/@types/react@19.2.15"
+    },
+    {
+      "type": "library",
+      "name": "@types/react-dom",
+      "version": "19.2.3",
+      "purl": "pkg:npm/@types/react-dom@19.2.3"
     },
     {
       "type": "library",
@@ -3888,21 +3890,15 @@
     },
     {
       "type": "library",
-      "name": "@types/yargs-parser",
-      "version": "21.0.3",
-      "purl": "pkg:npm/@types/yargs-parser@21.0.3"
-    },
-    {
-      "type": "library",
       "name": "@types/yargs",
       "version": "17.0.35",
       "purl": "pkg:npm/@types/yargs@17.0.35"
     },
     {
       "type": "library",
-      "name": "@types/yauzl",
-      "version": "2.10.3",
-      "purl": "pkg:npm/@types/yauzl@2.10.3"
+      "name": "@types/yargs-parser",
+      "version": "21.0.3",
+      "purl": "pkg:npm/@types/yargs-parser@21.0.3"
     },
     {
       "type": "library",
@@ -4201,8 +4197,8 @@
     {
       "type": "library",
       "name": "@xmldom/xmldom",
-      "version": "0.9.10",
-      "purl": "pkg:npm/@xmldom/xmldom@0.9.10"
+      "version": "0.9.12",
+      "purl": "pkg:npm/@xmldom/xmldom@0.9.12"
     },
     {
       "type": "library",
@@ -4212,10 +4208,6597 @@
     },
     {
       "type": "library",
+      "name": "abort-controller",
+      "version": "3.0.0",
+      "purl": "pkg:npm/abort-controller@3.0.0"
+    },
+    {
+      "type": "library",
+      "name": "accepts",
+      "version": "1.3.8",
+      "purl": "pkg:npm/accepts@1.3.8"
+    },
+    {
+      "type": "library",
+      "name": "accepts",
+      "version": "2.0.0",
+      "purl": "pkg:npm/accepts@2.0.0"
+    },
+    {
+      "type": "library",
+      "name": "acorn",
+      "version": "8.18.0",
+      "purl": "pkg:npm/acorn@8.18.0"
+    },
+    {
+      "type": "library",
+      "name": "acorn-import-attributes",
+      "version": "1.9.5",
+      "purl": "pkg:npm/acorn-import-attributes@1.9.5"
+    },
+    {
+      "type": "library",
+      "name": "adm-zip",
+      "version": "0.6.0",
+      "purl": "pkg:npm/adm-zip@0.6.0"
+    },
+    {
+      "type": "library",
+      "name": "agent-base",
+      "version": "6.0.2",
+      "purl": "pkg:npm/agent-base@6.0.2"
+    },
+    {
+      "type": "library",
+      "name": "agent-base",
+      "version": "7.1.4",
+      "purl": "pkg:npm/agent-base@7.1.4"
+    },
+    {
+      "type": "library",
+      "name": "ajv",
+      "version": "8.18.0",
+      "purl": "pkg:npm/ajv@8.18.0"
+    },
+    {
+      "type": "library",
+      "name": "ajv",
+      "version": "8.20.0",
+      "purl": "pkg:npm/ajv@8.20.0"
+    },
+    {
+      "type": "library",
+      "name": "ajv-draft-04",
+      "version": "1.0.0",
+      "purl": "pkg:npm/ajv-draft-04@1.0.0"
+    },
+    {
+      "type": "library",
+      "name": "ajv-formats",
+      "version": "3.0.1",
+      "purl": "pkg:npm/ajv-formats@3.0.1"
+    },
+    {
+      "type": "library",
+      "name": "anser",
+      "version": "1.4.10",
+      "purl": "pkg:npm/anser@1.4.10"
+    },
+    {
+      "type": "library",
+      "name": "ansi-align",
+      "version": "3.0.1",
+      "purl": "pkg:npm/ansi-align@3.0.1"
+    },
+    {
+      "type": "library",
+      "name": "ansi-escapes",
+      "version": "4.3.2",
+      "purl": "pkg:npm/ansi-escapes@4.3.2"
+    },
+    {
+      "type": "library",
+      "name": "ansi-regex",
+      "version": "4.1.1",
+      "purl": "pkg:npm/ansi-regex@4.1.1"
+    },
+    {
+      "type": "library",
+      "name": "ansi-regex",
+      "version": "5.0.1",
+      "purl": "pkg:npm/ansi-regex@5.0.1"
+    },
+    {
+      "type": "library",
+      "name": "ansi-regex",
+      "version": "6.2.2",
+      "purl": "pkg:npm/ansi-regex@6.2.2"
+    },
+    {
+      "type": "library",
+      "name": "ansi-styles",
+      "version": "3.2.1",
+      "purl": "pkg:npm/ansi-styles@3.2.1"
+    },
+    {
+      "type": "library",
+      "name": "ansi-styles",
+      "version": "4.3.0",
+      "purl": "pkg:npm/ansi-styles@4.3.0"
+    },
+    {
+      "type": "library",
+      "name": "ansi-styles",
+      "version": "5.2.0",
+      "purl": "pkg:npm/ansi-styles@5.2.0"
+    },
+    {
+      "type": "library",
+      "name": "ansi-styles",
+      "version": "6.2.3",
+      "purl": "pkg:npm/ansi-styles@6.2.3"
+    },
+    {
+      "type": "library",
+      "name": "any-promise",
+      "version": "1.3.0",
+      "purl": "pkg:npm/any-promise@1.3.0"
+    },
+    {
+      "type": "library",
+      "name": "anymatch",
+      "version": "3.1.3",
+      "purl": "pkg:npm/anymatch@3.1.3"
+    },
+    {
+      "type": "library",
+      "name": "anynum",
+      "version": "1.0.0",
+      "purl": "pkg:npm/anynum@1.0.0"
+    },
+    {
+      "type": "library",
+      "name": "arch",
+      "version": "2.2.0",
+      "purl": "pkg:npm/arch@2.2.0"
+    },
+    {
+      "type": "library",
+      "name": "archiver",
+      "version": "7.0.1",
+      "purl": "pkg:npm/archiver@7.0.1"
+    },
+    {
+      "type": "library",
+      "name": "archiver-utils",
+      "version": "5.0.2",
+      "purl": "pkg:npm/archiver-utils@5.0.2"
+    },
+    {
+      "type": "library",
+      "name": "arg",
+      "version": "5.0.2",
+      "purl": "pkg:npm/arg@5.0.2"
+    },
+    {
+      "type": "library",
+      "name": "argparse",
+      "version": "1.0.10",
+      "purl": "pkg:npm/argparse@1.0.10"
+    },
+    {
+      "type": "library",
+      "name": "argparse",
+      "version": "2.0.1",
+      "purl": "pkg:npm/argparse@2.0.1"
+    },
+    {
+      "type": "library",
+      "name": "aria-hidden",
+      "version": "1.2.6",
+      "purl": "pkg:npm/aria-hidden@1.2.6"
+    },
+    {
+      "type": "library",
+      "name": "aria-query",
+      "version": "5.3.0",
+      "purl": "pkg:npm/aria-query@5.3.0"
+    },
+    {
+      "type": "library",
+      "name": "aria-query",
+      "version": "5.3.2",
+      "purl": "pkg:npm/aria-query@5.3.2"
+    },
+    {
+      "type": "library",
+      "name": "array-ify",
+      "version": "1.0.0",
+      "purl": "pkg:npm/array-ify@1.0.0"
+    },
+    {
+      "type": "library",
+      "name": "arrify",
+      "version": "2.0.1",
+      "purl": "pkg:npm/arrify@2.0.1"
+    },
+    {
+      "type": "library",
+      "name": "asap",
+      "version": "2.0.6",
+      "purl": "pkg:npm/asap@2.0.6"
+    },
+    {
+      "type": "library",
+      "name": "assert",
+      "version": "2.1.0",
+      "purl": "pkg:npm/assert@2.1.0"
+    },
+    {
+      "type": "library",
+      "name": "assertion-error",
+      "version": "2.0.1",
+      "purl": "pkg:npm/assertion-error@2.0.1"
+    },
+    {
+      "type": "library",
+      "name": "ast-types",
+      "version": "0.16.1",
+      "purl": "pkg:npm/ast-types@0.16.1"
+    },
+    {
+      "type": "library",
+      "name": "ast-v8-to-istanbul",
+      "version": "1.0.4",
+      "purl": "pkg:npm/ast-v8-to-istanbul@1.0.4"
+    },
+    {
+      "type": "library",
+      "name": "async",
+      "version": "3.2.6",
+      "purl": "pkg:npm/async@3.2.6"
+    },
+    {
+      "type": "library",
+      "name": "async-retry",
+      "version": "1.3.3",
+      "purl": "pkg:npm/async-retry@1.3.3"
+    },
+    {
+      "type": "library",
+      "name": "asynckit",
+      "version": "0.4.0",
+      "purl": "pkg:npm/asynckit@0.4.0"
+    },
+    {
+      "type": "library",
+      "name": "atomic-sleep",
+      "version": "1.0.0",
+      "purl": "pkg:npm/atomic-sleep@1.0.0"
+    },
+    {
+      "type": "library",
+      "name": "available-typed-arrays",
+      "version": "1.0.7",
+      "purl": "pkg:npm/available-typed-arrays@1.0.7"
+    },
+    {
+      "type": "library",
+      "name": "axe-core",
+      "version": "4.11.4",
+      "purl": "pkg:npm/axe-core@4.11.4"
+    },
+    {
+      "type": "library",
+      "name": "axe-core",
+      "version": "4.12.1",
+      "purl": "pkg:npm/axe-core@4.12.1"
+    },
+    {
+      "type": "library",
+      "name": "b4a",
+      "version": "1.8.1",
+      "purl": "pkg:npm/b4a@1.8.1"
+    },
+    {
+      "type": "library",
+      "name": "babel-jest",
+      "version": "29.7.0",
+      "purl": "pkg:npm/babel-jest@29.7.0"
+    },
+    {
+      "type": "library",
+      "name": "babel-plugin-istanbul",
+      "version": "6.1.1",
+      "purl": "pkg:npm/babel-plugin-istanbul@6.1.1"
+    },
+    {
+      "type": "library",
+      "name": "babel-plugin-jest-hoist",
+      "version": "29.6.3",
+      "purl": "pkg:npm/babel-plugin-jest-hoist@29.6.3"
+    },
+    {
+      "type": "library",
+      "name": "babel-plugin-polyfill-corejs2",
+      "version": "0.4.17",
+      "purl": "pkg:npm/babel-plugin-polyfill-corejs2@0.4.17"
+    },
+    {
+      "type": "library",
+      "name": "babel-plugin-polyfill-corejs3",
+      "version": "0.13.0",
+      "purl": "pkg:npm/babel-plugin-polyfill-corejs3@0.13.0"
+    },
+    {
+      "type": "library",
+      "name": "babel-plugin-polyfill-regenerator",
+      "version": "0.6.8",
+      "purl": "pkg:npm/babel-plugin-polyfill-regenerator@0.6.8"
+    },
+    {
+      "type": "library",
+      "name": "babel-plugin-react-compiler",
+      "version": "1.0.0",
+      "purl": "pkg:npm/babel-plugin-react-compiler@1.0.0"
+    },
+    {
+      "type": "library",
+      "name": "babel-plugin-react-native-web",
+      "version": "0.21.2",
+      "purl": "pkg:npm/babel-plugin-react-native-web@0.21.2"
+    },
+    {
+      "type": "library",
+      "name": "babel-plugin-syntax-hermes-parser",
+      "version": "0.29.1",
+      "purl": "pkg:npm/babel-plugin-syntax-hermes-parser@0.29.1"
+    },
+    {
+      "type": "library",
+      "name": "babel-plugin-transform-flow-enums",
+      "version": "0.0.2",
+      "purl": "pkg:npm/babel-plugin-transform-flow-enums@0.0.2"
+    },
+    {
+      "type": "library",
+      "name": "babel-preset-current-node-syntax",
+      "version": "1.2.0",
+      "purl": "pkg:npm/babel-preset-current-node-syntax@1.2.0"
+    },
+    {
+      "type": "library",
+      "name": "babel-preset-expo",
+      "version": "54.0.11",
+      "purl": "pkg:npm/babel-preset-expo@54.0.11"
+    },
+    {
+      "type": "library",
+      "name": "babel-preset-jest",
+      "version": "29.6.3",
+      "purl": "pkg:npm/babel-preset-jest@29.6.3"
+    },
+    {
+      "type": "library",
+      "name": "badgin",
+      "version": "1.2.3",
+      "purl": "pkg:npm/badgin@1.2.3"
+    },
+    {
+      "type": "library",
+      "name": "balanced-match",
+      "version": "4.0.4",
+      "purl": "pkg:npm/balanced-match@4.0.4"
+    },
+    {
+      "type": "library",
+      "name": "bare-events",
+      "version": "2.9.1",
+      "purl": "pkg:npm/bare-events@2.9.1"
+    },
+    {
+      "type": "library",
+      "name": "bare-fs",
+      "version": "4.7.2",
+      "purl": "pkg:npm/bare-fs@4.7.2"
+    },
+    {
+      "type": "library",
+      "name": "bare-os",
+      "version": "3.9.1",
+      "purl": "pkg:npm/bare-os@3.9.1"
+    },
+    {
+      "type": "library",
+      "name": "bare-path",
+      "version": "3.0.1",
+      "purl": "pkg:npm/bare-path@3.0.1"
+    },
+    {
+      "type": "library",
+      "name": "bare-stream",
+      "version": "2.13.2",
+      "purl": "pkg:npm/bare-stream@2.13.2"
+    },
+    {
+      "type": "library",
+      "name": "bare-url",
+      "version": "2.4.5",
+      "purl": "pkg:npm/bare-url@2.4.5"
+    },
+    {
+      "type": "library",
+      "name": "base64-arraybuffer",
+      "version": "1.0.2",
+      "purl": "pkg:npm/base64-arraybuffer@1.0.2"
+    },
+    {
+      "type": "library",
+      "name": "base64-js",
+      "version": "0.0.8",
+      "purl": "pkg:npm/base64-js@0.0.8"
+    },
+    {
+      "type": "library",
+      "name": "base64-js",
+      "version": "1.5.1",
+      "purl": "pkg:npm/base64-js@1.5.1"
+    },
+    {
+      "type": "library",
+      "name": "baseline-browser-mapping",
+      "version": "2.11.20",
+      "purl": "pkg:npm/baseline-browser-mapping@2.11.20"
+    },
+    {
+      "type": "library",
+      "name": "better-opn",
+      "version": "3.0.2",
+      "purl": "pkg:npm/better-opn@3.0.2"
+    },
+    {
+      "type": "library",
+      "name": "big-integer",
+      "version": "1.6.52",
+      "purl": "pkg:npm/big-integer@1.6.52"
+    },
+    {
+      "type": "library",
+      "name": "bignumber.js",
+      "version": "9.3.1",
+      "purl": "pkg:npm/bignumber.js@9.3.1"
+    },
+    {
+      "type": "library",
+      "name": "bintrees",
+      "version": "1.0.2",
+      "purl": "pkg:npm/bintrees@1.0.2"
+    },
+    {
+      "type": "library",
+      "name": "body-parser",
+      "version": "2.3.0",
+      "purl": "pkg:npm/body-parser@2.3.0"
+    },
+    {
+      "type": "library",
+      "name": "boolean",
+      "version": "3.2.0",
+      "purl": "pkg:npm/boolean@3.2.0"
+    },
+    {
+      "type": "library",
+      "name": "boxen",
+      "version": "7.0.0",
+      "purl": "pkg:npm/boxen@7.0.0"
+    },
+    {
+      "type": "library",
+      "name": "bplist-creator",
+      "version": "0.1.0",
+      "purl": "pkg:npm/bplist-creator@0.1.0"
+    },
+    {
+      "type": "library",
+      "name": "bplist-parser",
+      "version": "0.3.1",
+      "purl": "pkg:npm/bplist-parser@0.3.1"
+    },
+    {
+      "type": "library",
+      "name": "bplist-parser",
+      "version": "0.3.2",
+      "purl": "pkg:npm/bplist-parser@0.3.2"
+    },
+    {
+      "type": "library",
+      "name": "brace-expansion",
+      "version": "5.0.9",
+      "purl": "pkg:npm/brace-expansion@5.0.9"
+    },
+    {
+      "type": "library",
+      "name": "braces",
+      "version": "3.0.3",
+      "purl": "pkg:npm/braces@3.0.3"
+    },
+    {
+      "type": "library",
+      "name": "brotli",
+      "version": "1.3.3",
+      "purl": "pkg:npm/brotli@1.3.3"
+    },
+    {
+      "type": "library",
+      "name": "browser-assert",
+      "version": "1.2.1",
+      "purl": "pkg:npm/browser-assert@1.2.1"
+    },
+    {
+      "type": "library",
+      "name": "browserify-zlib",
+      "version": "0.2.0",
+      "purl": "pkg:npm/browserify-zlib@0.2.0"
+    },
+    {
+      "type": "library",
+      "name": "browserslist",
+      "version": "4.28.7",
+      "purl": "pkg:npm/browserslist@4.28.7"
+    },
+    {
+      "type": "library",
+      "name": "bser",
+      "version": "2.1.1",
+      "purl": "pkg:npm/bser@2.1.1"
+    },
+    {
+      "type": "library",
+      "name": "buffer",
+      "version": "5.7.1",
+      "purl": "pkg:npm/buffer@5.7.1"
+    },
+    {
+      "type": "library",
+      "name": "buffer",
+      "version": "6.0.3",
+      "purl": "pkg:npm/buffer@6.0.3"
+    },
+    {
+      "type": "library",
+      "name": "buffer-crc32",
+      "version": "1.0.0",
+      "purl": "pkg:npm/buffer-crc32@1.0.0"
+    },
+    {
+      "type": "library",
+      "name": "buffer-equal-constant-time",
+      "version": "1.0.1",
+      "purl": "pkg:npm/buffer-equal-constant-time@1.0.1"
+    },
+    {
+      "type": "library",
+      "name": "buffer-from",
+      "version": "1.1.2",
+      "purl": "pkg:npm/buffer-from@1.1.2"
+    },
+    {
+      "type": "library",
+      "name": "buffer-image-size",
+      "version": "0.6.4",
+      "purl": "pkg:npm/buffer-image-size@0.6.4"
+    },
+    {
+      "type": "library",
+      "name": "bytes",
+      "version": "3.0.0",
+      "purl": "pkg:npm/bytes@3.0.0"
+    },
+    {
+      "type": "library",
+      "name": "bytes",
+      "version": "3.1.2",
+      "purl": "pkg:npm/bytes@3.1.2"
+    },
+    {
+      "type": "library",
+      "name": "call-bind",
+      "version": "1.0.9",
+      "purl": "pkg:npm/call-bind@1.0.9"
+    },
+    {
+      "type": "library",
+      "name": "call-bind-apply-helpers",
+      "version": "1.0.2",
+      "purl": "pkg:npm/call-bind-apply-helpers@1.0.2"
+    },
+    {
+      "type": "library",
+      "name": "call-bound",
+      "version": "1.0.4",
+      "purl": "pkg:npm/call-bound@1.0.4"
+    },
+    {
+      "type": "library",
+      "name": "callsites",
+      "version": "3.1.0",
+      "purl": "pkg:npm/callsites@3.1.0"
+    },
+    {
+      "type": "library",
+      "name": "camelcase",
+      "version": "5.3.1",
+      "purl": "pkg:npm/camelcase@5.3.1"
+    },
+    {
+      "type": "library",
+      "name": "camelcase",
+      "version": "6.3.0",
+      "purl": "pkg:npm/camelcase@6.3.0"
+    },
+    {
+      "type": "library",
+      "name": "camelcase",
+      "version": "7.0.1",
+      "purl": "pkg:npm/camelcase@7.0.1"
+    },
+    {
+      "type": "library",
+      "name": "caniuse-lite",
+      "version": "1.0.30001810",
+      "purl": "pkg:npm/caniuse-lite@1.0.30001810"
+    },
+    {
+      "type": "library",
+      "name": "canvg",
+      "version": "3.0.11",
+      "purl": "pkg:npm/canvg@3.0.11"
+    },
+    {
+      "type": "library",
+      "name": "chai",
+      "version": "5.3.3",
+      "purl": "pkg:npm/chai@5.3.3"
+    },
+    {
+      "type": "library",
+      "name": "chai",
+      "version": "6.2.2",
+      "purl": "pkg:npm/chai@6.2.2"
+    },
+    {
+      "type": "library",
+      "name": "chalk",
+      "version": "2.4.2",
+      "purl": "pkg:npm/chalk@2.4.2"
+    },
+    {
+      "type": "library",
+      "name": "chalk",
+      "version": "3.0.0",
+      "purl": "pkg:npm/chalk@3.0.0"
+    },
+    {
+      "type": "library",
+      "name": "chalk",
+      "version": "4.1.2",
+      "purl": "pkg:npm/chalk@4.1.2"
+    },
+    {
+      "type": "library",
+      "name": "chalk",
+      "version": "5.0.1",
+      "purl": "pkg:npm/chalk@5.0.1"
+    },
+    {
+      "type": "library",
+      "name": "chalk",
+      "version": "5.6.2",
+      "purl": "pkg:npm/chalk@5.6.2"
+    },
+    {
+      "type": "library",
+      "name": "chalk-template",
+      "version": "0.4.0",
+      "purl": "pkg:npm/chalk-template@0.4.0"
+    },
+    {
+      "type": "library",
+      "name": "check-error",
+      "version": "2.1.3",
+      "purl": "pkg:npm/check-error@2.1.3"
+    },
+    {
+      "type": "library",
+      "name": "chokidar",
+      "version": "5.0.0",
+      "purl": "pkg:npm/chokidar@5.0.0"
+    },
+    {
+      "type": "library",
+      "name": "chownr",
+      "version": "3.0.0",
+      "purl": "pkg:npm/chownr@3.0.0"
+    },
+    {
+      "type": "library",
+      "name": "chrome-launcher",
+      "version": "0.15.2",
+      "purl": "pkg:npm/chrome-launcher@0.15.2"
+    },
+    {
+      "type": "library",
+      "name": "chromium-edge-launcher",
+      "version": "0.2.0",
+      "purl": "pkg:npm/chromium-edge-launcher@0.2.0"
+    },
+    {
+      "type": "library",
+      "name": "ci-info",
+      "version": "2.0.0",
+      "purl": "pkg:npm/ci-info@2.0.0"
+    },
+    {
+      "type": "library",
+      "name": "ci-info",
+      "version": "3.9.0",
+      "purl": "pkg:npm/ci-info@3.9.0"
+    },
+    {
+      "type": "library",
+      "name": "cjs-module-lexer",
+      "version": "2.2.0",
+      "purl": "pkg:npm/cjs-module-lexer@2.2.0"
+    },
+    {
+      "type": "library",
+      "name": "class-variance-authority",
+      "version": "0.7.1",
+      "purl": "pkg:npm/class-variance-authority@0.7.1"
+    },
+    {
+      "type": "library",
+      "name": "classnames",
+      "version": "2.5.1",
+      "purl": "pkg:npm/classnames@2.5.1"
+    },
+    {
+      "type": "library",
+      "name": "cli-boxes",
+      "version": "3.0.0",
+      "purl": "pkg:npm/cli-boxes@3.0.0"
+    },
+    {
+      "type": "library",
+      "name": "cli-cursor",
+      "version": "2.1.0",
+      "purl": "pkg:npm/cli-cursor@2.1.0"
+    },
+    {
+      "type": "library",
+      "name": "cli-spinners",
+      "version": "2.9.2",
+      "purl": "pkg:npm/cli-spinners@2.9.2"
+    },
+    {
+      "type": "library",
+      "name": "cli-table3",
+      "version": "0.6.5",
+      "purl": "pkg:npm/cli-table3@0.6.5"
+    },
+    {
+      "type": "library",
+      "name": "clipboardy",
+      "version": "3.0.0",
+      "purl": "pkg:npm/clipboardy@3.0.0"
+    },
+    {
+      "type": "library",
+      "name": "cliui",
+      "version": "8.0.1",
+      "purl": "pkg:npm/cliui@8.0.1"
+    },
+    {
+      "type": "library",
+      "name": "clone",
+      "version": "1.0.4",
+      "purl": "pkg:npm/clone@1.0.4"
+    },
+    {
+      "type": "library",
+      "name": "clone",
+      "version": "2.1.2",
+      "purl": "pkg:npm/clone@2.1.2"
+    },
+    {
+      "type": "library",
+      "name": "clsx",
+      "version": "2.1.1",
+      "purl": "pkg:npm/clsx@2.1.1"
+    },
+    {
+      "type": "library",
+      "name": "cmdk",
+      "version": "1.1.1",
+      "purl": "pkg:npm/cmdk@1.1.1"
+    },
+    {
+      "type": "library",
+      "name": "color-convert",
+      "version": "1.9.3",
+      "purl": "pkg:npm/color-convert@1.9.3"
+    },
+    {
+      "type": "library",
+      "name": "color-convert",
+      "version": "2.0.1",
+      "purl": "pkg:npm/color-convert@2.0.1"
+    },
+    {
+      "type": "library",
+      "name": "color-name",
+      "version": "1.1.3",
+      "purl": "pkg:npm/color-name@1.1.3"
+    },
+    {
+      "type": "library",
+      "name": "color-name",
+      "version": "1.1.4",
+      "purl": "pkg:npm/color-name@1.1.4"
+    },
+    {
+      "type": "library",
+      "name": "colorette",
+      "version": "2.0.20",
+      "purl": "pkg:npm/colorette@2.0.20"
+    },
+    {
+      "type": "library",
+      "name": "combined-stream",
+      "version": "1.0.8",
+      "purl": "pkg:npm/combined-stream@1.0.8"
+    },
+    {
+      "type": "library",
+      "name": "commander",
+      "version": "12.1.0",
+      "purl": "pkg:npm/commander@12.1.0"
+    },
+    {
+      "type": "library",
+      "name": "commander",
+      "version": "15.0.0",
+      "purl": "pkg:npm/commander@15.0.0"
+    },
+    {
+      "type": "library",
+      "name": "commander",
+      "version": "2.20.3",
+      "purl": "pkg:npm/commander@2.20.3"
+    },
+    {
+      "type": "library",
+      "name": "commander",
+      "version": "4.1.1",
+      "purl": "pkg:npm/commander@4.1.1"
+    },
+    {
+      "type": "library",
+      "name": "commander",
+      "version": "7.2.0",
+      "purl": "pkg:npm/commander@7.2.0"
+    },
+    {
+      "type": "library",
+      "name": "compare-func",
+      "version": "2.0.0",
+      "purl": "pkg:npm/compare-func@2.0.0"
+    },
+    {
+      "type": "library",
+      "name": "compare-versions",
+      "version": "6.1.1",
+      "purl": "pkg:npm/compare-versions@6.1.1"
+    },
+    {
+      "type": "library",
+      "name": "component-emitter",
+      "version": "1.3.1",
+      "purl": "pkg:npm/component-emitter@1.3.1"
+    },
+    {
+      "type": "library",
+      "name": "compress-commons",
+      "version": "6.0.2",
+      "purl": "pkg:npm/compress-commons@6.0.2"
+    },
+    {
+      "type": "library",
+      "name": "compressible",
+      "version": "2.0.18",
+      "purl": "pkg:npm/compressible@2.0.18"
+    },
+    {
+      "type": "library",
+      "name": "compression",
+      "version": "1.8.1",
+      "purl": "pkg:npm/compression@1.8.1"
+    },
+    {
+      "type": "library",
+      "name": "compute-scroll-into-view",
+      "version": "3.1.1",
+      "purl": "pkg:npm/compute-scroll-into-view@3.1.1"
+    },
+    {
+      "type": "library",
+      "name": "connect",
+      "version": "3.7.0",
+      "purl": "pkg:npm/connect@3.7.0"
+    },
+    {
+      "type": "library",
+      "name": "content-disposition",
+      "version": "0.5.2",
+      "purl": "pkg:npm/content-disposition@0.5.2"
+    },
+    {
+      "type": "library",
+      "name": "content-disposition",
+      "version": "1.1.0",
+      "purl": "pkg:npm/content-disposition@1.1.0"
+    },
+    {
+      "type": "library",
+      "name": "content-type",
+      "version": "1.0.5",
+      "purl": "pkg:npm/content-type@1.0.5"
+    },
+    {
+      "type": "library",
+      "name": "content-type",
+      "version": "2.0.0",
+      "purl": "pkg:npm/content-type@2.0.0"
+    },
+    {
+      "type": "library",
+      "name": "conventional-changelog-angular",
+      "version": "7.0.0",
+      "purl": "pkg:npm/conventional-changelog-angular@7.0.0"
+    },
+    {
+      "type": "library",
+      "name": "conventional-changelog-conventionalcommits",
+      "version": "7.0.2",
+      "purl": "pkg:npm/conventional-changelog-conventionalcommits@7.0.2"
+    },
+    {
+      "type": "library",
+      "name": "conventional-commits-parser",
+      "version": "5.0.0",
+      "purl": "pkg:npm/conventional-commits-parser@5.0.0"
+    },
+    {
+      "type": "library",
+      "name": "convert-source-map",
+      "version": "2.0.0",
+      "purl": "pkg:npm/convert-source-map@2.0.0"
+    },
+    {
+      "type": "library",
+      "name": "cookie",
+      "version": "0.7.2",
+      "purl": "pkg:npm/cookie@0.7.2"
+    },
+    {
+      "type": "library",
+      "name": "cookie-parser",
+      "version": "1.4.7",
+      "purl": "pkg:npm/cookie-parser@1.4.7"
+    },
+    {
+      "type": "library",
+      "name": "cookie-signature",
+      "version": "1.0.6",
+      "purl": "pkg:npm/cookie-signature@1.0.6"
+    },
+    {
+      "type": "library",
+      "name": "cookie-signature",
+      "version": "1.2.2",
+      "purl": "pkg:npm/cookie-signature@1.2.2"
+    },
+    {
+      "type": "library",
+      "name": "cookiejar",
+      "version": "2.1.4",
+      "purl": "pkg:npm/cookiejar@2.1.4"
+    },
+    {
+      "type": "library",
+      "name": "core-js",
+      "version": "3.49.0",
+      "purl": "pkg:npm/core-js@3.49.0"
+    },
+    {
+      "type": "library",
+      "name": "core-js-compat",
+      "version": "3.49.0",
+      "purl": "pkg:npm/core-js-compat@3.49.0"
+    },
+    {
+      "type": "library",
+      "name": "core-util-is",
+      "version": "1.0.3",
+      "purl": "pkg:npm/core-util-is@1.0.3"
+    },
+    {
+      "type": "library",
+      "name": "cors",
+      "version": "2.8.6",
+      "purl": "pkg:npm/cors@2.8.6"
+    },
+    {
+      "type": "library",
+      "name": "cosmiconfig",
+      "version": "9.0.2",
+      "purl": "pkg:npm/cosmiconfig@9.0.2"
+    },
+    {
+      "type": "library",
+      "name": "cosmiconfig-typescript-loader",
+      "version": "6.3.0",
+      "purl": "pkg:npm/cosmiconfig-typescript-loader@6.3.0"
+    },
+    {
+      "type": "library",
+      "name": "crc-32",
+      "version": "1.2.2",
+      "purl": "pkg:npm/crc-32@1.2.2"
+    },
+    {
+      "type": "library",
+      "name": "crc32-stream",
+      "version": "6.0.0",
+      "purl": "pkg:npm/crc32-stream@6.0.0"
+    },
+    {
+      "type": "library",
+      "name": "cross-spawn",
+      "version": "7.0.6",
+      "purl": "pkg:npm/cross-spawn@7.0.6"
+    },
+    {
+      "type": "library",
+      "name": "crypto-random-string",
+      "version": "2.0.0",
+      "purl": "pkg:npm/crypto-random-string@2.0.0"
+    },
+    {
+      "type": "library",
+      "name": "css-line-break",
+      "version": "2.1.0",
+      "purl": "pkg:npm/css-line-break@2.1.0"
+    },
+    {
+      "type": "library",
+      "name": "css.escape",
+      "version": "1.5.1",
+      "purl": "pkg:npm/css.escape@1.5.1"
+    },
+    {
+      "type": "library",
+      "name": "cssesc",
+      "version": "3.0.0",
+      "purl": "pkg:npm/cssesc@3.0.0"
+    },
+    {
+      "type": "library",
+      "name": "csstype",
+      "version": "3.2.3",
+      "purl": "pkg:npm/csstype@3.2.3"
+    },
+    {
+      "type": "library",
+      "name": "d3-array",
+      "version": "3.2.4",
+      "purl": "pkg:npm/d3-array@3.2.4"
+    },
+    {
+      "type": "library",
+      "name": "d3-color",
+      "version": "3.1.0",
+      "purl": "pkg:npm/d3-color@3.1.0"
+    },
+    {
+      "type": "library",
+      "name": "d3-ease",
+      "version": "3.0.1",
+      "purl": "pkg:npm/d3-ease@3.0.1"
+    },
+    {
+      "type": "library",
+      "name": "d3-format",
+      "version": "3.1.2",
+      "purl": "pkg:npm/d3-format@3.1.2"
+    },
+    {
+      "type": "library",
+      "name": "d3-interpolate",
+      "version": "3.0.1",
+      "purl": "pkg:npm/d3-interpolate@3.0.1"
+    },
+    {
+      "type": "library",
+      "name": "d3-path",
+      "version": "3.1.0",
+      "purl": "pkg:npm/d3-path@3.1.0"
+    },
+    {
+      "type": "library",
+      "name": "d3-scale",
+      "version": "4.0.2",
+      "purl": "pkg:npm/d3-scale@4.0.2"
+    },
+    {
+      "type": "library",
+      "name": "d3-shape",
+      "version": "3.2.0",
+      "purl": "pkg:npm/d3-shape@3.2.0"
+    },
+    {
+      "type": "library",
+      "name": "d3-time",
+      "version": "3.1.0",
+      "purl": "pkg:npm/d3-time@3.1.0"
+    },
+    {
+      "type": "library",
+      "name": "d3-time-format",
+      "version": "4.1.0",
+      "purl": "pkg:npm/d3-time-format@4.1.0"
+    },
+    {
+      "type": "library",
+      "name": "d3-timer",
+      "version": "3.0.1",
+      "purl": "pkg:npm/d3-timer@3.0.1"
+    },
+    {
+      "type": "library",
+      "name": "dargs",
+      "version": "8.1.0",
+      "purl": "pkg:npm/dargs@8.1.0"
+    },
+    {
+      "type": "library",
+      "name": "data-uri-to-buffer",
+      "version": "4.0.1",
+      "purl": "pkg:npm/data-uri-to-buffer@4.0.1"
+    },
+    {
+      "type": "library",
+      "name": "date-fns",
+      "version": "4.4.0",
+      "purl": "pkg:npm/date-fns@4.4.0"
+    },
+    {
+      "type": "library",
+      "name": "date-fns-jalali",
+      "version": "4.1.0-0",
+      "purl": "pkg:npm/date-fns-jalali@4.1.0-0"
+    },
+    {
+      "type": "library",
+      "name": "dateformat",
+      "version": "4.6.3",
+      "purl": "pkg:npm/dateformat@4.6.3"
+    },
+    {
+      "type": "library",
+      "name": "debug",
+      "version": "2.6.9",
+      "purl": "pkg:npm/debug@2.6.9"
+    },
+    {
+      "type": "library",
+      "name": "debug",
+      "version": "3.2.7",
+      "purl": "pkg:npm/debug@3.2.7"
+    },
+    {
+      "type": "library",
+      "name": "debug",
+      "version": "4.4.3",
+      "purl": "pkg:npm/debug@4.4.3"
+    },
+    {
+      "type": "library",
+      "name": "decimal.js-light",
+      "version": "2.5.1",
+      "purl": "pkg:npm/decimal.js-light@2.5.1"
+    },
+    {
+      "type": "library",
+      "name": "deep-eql",
+      "version": "5.0.2",
+      "purl": "pkg:npm/deep-eql@5.0.2"
+    },
+    {
+      "type": "library",
+      "name": "deep-extend",
+      "version": "0.6.0",
+      "purl": "pkg:npm/deep-extend@0.6.0"
+    },
+    {
+      "type": "library",
+      "name": "deepmerge",
+      "version": "4.3.1",
+      "purl": "pkg:npm/deepmerge@4.3.1"
+    },
+    {
+      "type": "library",
+      "name": "defaults",
+      "version": "1.0.4",
+      "purl": "pkg:npm/defaults@1.0.4"
+    },
+    {
+      "type": "library",
+      "name": "define-data-property",
+      "version": "1.1.4",
+      "purl": "pkg:npm/define-data-property@1.1.4"
+    },
+    {
+      "type": "library",
+      "name": "define-lazy-prop",
+      "version": "2.0.0",
+      "purl": "pkg:npm/define-lazy-prop@2.0.0"
+    },
+    {
+      "type": "library",
+      "name": "define-properties",
+      "version": "1.2.1",
+      "purl": "pkg:npm/define-properties@1.2.1"
+    },
+    {
+      "type": "library",
+      "name": "delayed-stream",
+      "version": "1.0.0",
+      "purl": "pkg:npm/delayed-stream@1.0.0"
+    },
+    {
+      "type": "library",
+      "name": "depd",
+      "version": "2.0.0",
+      "purl": "pkg:npm/depd@2.0.0"
+    },
+    {
+      "type": "library",
+      "name": "dequal",
+      "version": "2.0.3",
+      "purl": "pkg:npm/dequal@2.0.3"
+    },
+    {
+      "type": "library",
+      "name": "destroy",
+      "version": "1.2.0",
+      "purl": "pkg:npm/destroy@1.2.0"
+    },
+    {
+      "type": "library",
+      "name": "detect-libc",
+      "version": "2.1.2",
+      "purl": "pkg:npm/detect-libc@2.1.2"
+    },
+    {
+      "type": "library",
+      "name": "detect-node",
+      "version": "2.1.0",
+      "purl": "pkg:npm/detect-node@2.1.0"
+    },
+    {
+      "type": "library",
+      "name": "detect-node-es",
+      "version": "1.1.0",
+      "purl": "pkg:npm/detect-node-es@1.1.0"
+    },
+    {
+      "type": "library",
+      "name": "dezalgo",
+      "version": "1.0.4",
+      "purl": "pkg:npm/dezalgo@1.0.4"
+    },
+    {
+      "type": "library",
+      "name": "dfa",
+      "version": "1.2.0",
+      "purl": "pkg:npm/dfa@1.2.0"
+    },
+    {
+      "type": "library",
+      "name": "direction",
+      "version": "1.0.4",
+      "purl": "pkg:npm/direction@1.0.4"
+    },
+    {
+      "type": "library",
+      "name": "doctrine",
+      "version": "3.0.0",
+      "purl": "pkg:npm/doctrine@3.0.0"
+    },
+    {
+      "type": "library",
+      "name": "docx",
+      "version": "9.7.1",
+      "purl": "pkg:npm/docx@9.7.1"
+    },
+    {
+      "type": "library",
+      "name": "dom-accessibility-api",
+      "version": "0.5.16",
+      "purl": "pkg:npm/dom-accessibility-api@0.5.16"
+    },
+    {
+      "type": "library",
+      "name": "dom-accessibility-api",
+      "version": "0.6.3",
+      "purl": "pkg:npm/dom-accessibility-api@0.6.3"
+    },
+    {
+      "type": "library",
+      "name": "dom-helpers",
+      "version": "5.2.1",
+      "purl": "pkg:npm/dom-helpers@5.2.1"
+    },
+    {
+      "type": "library",
+      "name": "dompurify",
+      "version": "3.4.13",
+      "purl": "pkg:npm/dompurify@3.4.13"
+    },
+    {
+      "type": "library",
+      "name": "dot-prop",
+      "version": "5.3.0",
+      "purl": "pkg:npm/dot-prop@5.3.0"
+    },
+    {
+      "type": "library",
+      "name": "dotenv",
+      "version": "16.4.7",
+      "purl": "pkg:npm/dotenv@16.4.7"
+    },
+    {
+      "type": "library",
+      "name": "dotenv",
+      "version": "17.4.2",
+      "purl": "pkg:npm/dotenv@17.4.2"
+    },
+    {
+      "type": "library",
+      "name": "dotenv-expand",
+      "version": "11.0.7",
+      "purl": "pkg:npm/dotenv-expand@11.0.7"
+    },
+    {
+      "type": "library",
+      "name": "drizzle-kit",
+      "version": "0.31.10",
+      "purl": "pkg:npm/drizzle-kit@0.31.10"
+    },
+    {
+      "type": "library",
+      "name": "drizzle-orm",
+      "version": "0.45.2",
+      "purl": "pkg:npm/drizzle-orm@0.45.2"
+    },
+    {
+      "type": "library",
+      "name": "drizzle-zod",
+      "version": "0.8.3",
+      "purl": "pkg:npm/drizzle-zod@0.8.3"
+    },
+    {
+      "type": "library",
+      "name": "dunder-proto",
+      "version": "1.0.1",
+      "purl": "pkg:npm/dunder-proto@1.0.1"
+    },
+    {
+      "type": "library",
+      "name": "duplexify",
+      "version": "4.1.3",
+      "purl": "pkg:npm/duplexify@4.1.3"
+    },
+    {
+      "type": "library",
+      "name": "eastasianwidth",
+      "version": "0.2.0",
+      "purl": "pkg:npm/eastasianwidth@0.2.0"
+    },
+    {
+      "type": "library",
+      "name": "ecdsa-sig-formatter",
+      "version": "1.0.11",
+      "purl": "pkg:npm/ecdsa-sig-formatter@1.0.11"
+    },
+    {
+      "type": "library",
+      "name": "ee-first",
+      "version": "1.1.1",
+      "purl": "pkg:npm/ee-first@1.1.1"
+    },
+    {
+      "type": "library",
+      "name": "electron-to-chromium",
+      "version": "1.5.420",
+      "purl": "pkg:npm/electron-to-chromium@1.5.420"
+    },
+    {
+      "type": "library",
+      "name": "embla-carousel",
+      "version": "8.6.0",
+      "purl": "pkg:npm/embla-carousel@8.6.0"
+    },
+    {
+      "type": "library",
+      "name": "embla-carousel-react",
+      "version": "8.6.0",
+      "purl": "pkg:npm/embla-carousel-react@8.6.0"
+    },
+    {
+      "type": "library",
+      "name": "embla-carousel-reactive-utils",
+      "version": "8.6.0",
+      "purl": "pkg:npm/embla-carousel-reactive-utils@8.6.0"
+    },
+    {
+      "type": "library",
+      "name": "emoji-regex",
+      "version": "8.0.0",
+      "purl": "pkg:npm/emoji-regex@8.0.0"
+    },
+    {
+      "type": "library",
+      "name": "emoji-regex",
+      "version": "9.2.2",
+      "purl": "pkg:npm/emoji-regex@9.2.2"
+    },
+    {
+      "type": "library",
+      "name": "encodeurl",
+      "version": "1.0.2",
+      "purl": "pkg:npm/encodeurl@1.0.2"
+    },
+    {
+      "type": "library",
+      "name": "encodeurl",
+      "version": "2.0.0",
+      "purl": "pkg:npm/encodeurl@2.0.0"
+    },
+    {
+      "type": "library",
+      "name": "end-of-stream",
+      "version": "1.4.5",
+      "purl": "pkg:npm/end-of-stream@1.4.5"
+    },
+    {
+      "type": "library",
+      "name": "enhanced-resolve",
+      "version": "5.24.3",
+      "purl": "pkg:npm/enhanced-resolve@5.24.3"
+    },
+    {
+      "type": "library",
+      "name": "entities",
+      "version": "4.5.0",
+      "purl": "pkg:npm/entities@4.5.0"
+    },
+    {
+      "type": "library",
+      "name": "entities",
+      "version": "7.0.1",
+      "purl": "pkg:npm/entities@7.0.1"
+    },
+    {
+      "type": "library",
+      "name": "env-editor",
+      "version": "0.4.2",
+      "purl": "pkg:npm/env-editor@0.4.2"
+    },
+    {
+      "type": "library",
+      "name": "env-paths",
+      "version": "2.2.1",
+      "purl": "pkg:npm/env-paths@2.2.1"
+    },
+    {
+      "type": "library",
+      "name": "error-ex",
+      "version": "1.3.4",
+      "purl": "pkg:npm/error-ex@1.3.4"
+    },
+    {
+      "type": "library",
+      "name": "error-stack-parser",
+      "version": "2.1.4",
+      "purl": "pkg:npm/error-stack-parser@2.1.4"
+    },
+    {
+      "type": "library",
+      "name": "es-define-property",
+      "version": "1.0.1",
+      "purl": "pkg:npm/es-define-property@1.0.1"
+    },
+    {
+      "type": "library",
+      "name": "es-errors",
+      "version": "1.3.0",
+      "purl": "pkg:npm/es-errors@1.3.0"
+    },
+    {
+      "type": "library",
+      "name": "es-module-lexer",
+      "version": "2.1.0",
+      "purl": "pkg:npm/es-module-lexer@2.1.0"
+    },
+    {
+      "type": "library",
+      "name": "es-object-atoms",
+      "version": "1.1.2",
+      "purl": "pkg:npm/es-object-atoms@1.1.2"
+    },
+    {
+      "type": "library",
+      "name": "es-set-tostringtag",
+      "version": "2.1.0",
+      "purl": "pkg:npm/es-set-tostringtag@2.1.0"
+    },
+    {
+      "type": "library",
+      "name": "es6-error",
+      "version": "4.1.1",
+      "purl": "pkg:npm/es6-error@4.1.1"
+    },
+    {
+      "type": "library",
+      "name": "esbuild",
+      "version": "0.28.1",
+      "purl": "pkg:npm/esbuild@0.28.1"
+    },
+    {
+      "type": "library",
+      "name": "esbuild-register",
+      "version": "3.6.0",
+      "purl": "pkg:npm/esbuild-register@3.6.0"
+    },
+    {
+      "type": "library",
+      "name": "escalade",
+      "version": "3.2.0",
+      "purl": "pkg:npm/escalade@3.2.0"
+    },
+    {
+      "type": "library",
+      "name": "escape-html",
+      "version": "1.0.3",
+      "purl": "pkg:npm/escape-html@1.0.3"
+    },
+    {
+      "type": "library",
+      "name": "escape-string-regexp",
+      "version": "1.0.5",
+      "purl": "pkg:npm/escape-string-regexp@1.0.5"
+    },
+    {
+      "type": "library",
+      "name": "escape-string-regexp",
+      "version": "2.0.0",
+      "purl": "pkg:npm/escape-string-regexp@2.0.0"
+    },
+    {
+      "type": "library",
+      "name": "escape-string-regexp",
+      "version": "4.0.0",
+      "purl": "pkg:npm/escape-string-regexp@4.0.0"
+    },
+    {
+      "type": "library",
+      "name": "esprima",
+      "version": "4.0.1",
+      "purl": "pkg:npm/esprima@4.0.1"
+    },
+    {
+      "type": "library",
+      "name": "estree-walker",
+      "version": "2.0.2",
+      "purl": "pkg:npm/estree-walker@2.0.2"
+    },
+    {
+      "type": "library",
+      "name": "estree-walker",
+      "version": "3.0.3",
+      "purl": "pkg:npm/estree-walker@3.0.3"
+    },
+    {
+      "type": "library",
+      "name": "esutils",
+      "version": "2.0.3",
+      "purl": "pkg:npm/esutils@2.0.3"
+    },
+    {
+      "type": "library",
+      "name": "etag",
+      "version": "1.8.1",
+      "purl": "pkg:npm/etag@1.8.1"
+    },
+    {
+      "type": "library",
+      "name": "event-target-shim",
+      "version": "5.0.1",
+      "purl": "pkg:npm/event-target-shim@5.0.1"
+    },
+    {
+      "type": "library",
+      "name": "eventemitter3",
+      "version": "4.0.7",
+      "purl": "pkg:npm/eventemitter3@4.0.7"
+    },
+    {
+      "type": "library",
+      "name": "eventemitter3",
+      "version": "5.0.4",
+      "purl": "pkg:npm/eventemitter3@5.0.4"
+    },
+    {
+      "type": "library",
+      "name": "events",
+      "version": "3.3.0",
+      "purl": "pkg:npm/events@3.3.0"
+    },
+    {
+      "type": "library",
+      "name": "events-universal",
+      "version": "1.0.1",
+      "purl": "pkg:npm/events-universal@1.0.1"
+    },
+    {
+      "type": "library",
+      "name": "eventsource",
+      "version": "3.0.7",
+      "purl": "pkg:npm/eventsource@3.0.7"
+    },
+    {
+      "type": "library",
+      "name": "eventsource-parser",
+      "version": "3.1.0",
+      "purl": "pkg:npm/eventsource-parser@3.1.0"
+    },
+    {
+      "type": "library",
+      "name": "execa",
+      "version": "5.1.1",
+      "purl": "pkg:npm/execa@5.1.1"
+    },
+    {
+      "type": "library",
+      "name": "execa",
+      "version": "9.6.1",
+      "purl": "pkg:npm/execa@9.6.1"
+    },
+    {
+      "type": "library",
+      "name": "exifr",
+      "version": "7.1.3",
+      "purl": "pkg:npm/exifr@7.1.3"
+    },
+    {
+      "type": "library",
+      "name": "expect-type",
+      "version": "1.3.0",
+      "purl": "pkg:npm/expect-type@1.3.0"
+    },
+    {
+      "type": "library",
+      "name": "expo",
+      "version": "54.0.35",
+      "purl": "pkg:npm/expo@54.0.35"
+    },
+    {
+      "type": "library",
+      "name": "expo-application",
+      "version": "6.1.5",
+      "purl": "pkg:npm/expo-application@6.1.5"
+    },
+    {
+      "type": "library",
+      "name": "expo-asset",
+      "version": "12.0.13",
+      "purl": "pkg:npm/expo-asset@12.0.13"
+    },
+    {
+      "type": "library",
+      "name": "expo-blur",
+      "version": "14.1.5",
+      "purl": "pkg:npm/expo-blur@14.1.5"
+    },
+    {
+      "type": "library",
+      "name": "expo-constants",
+      "version": "17.1.8",
+      "purl": "pkg:npm/expo-constants@17.1.8"
+    },
+    {
+      "type": "library",
+      "name": "expo-constants",
+      "version": "18.0.13",
+      "purl": "pkg:npm/expo-constants@18.0.13"
+    },
+    {
+      "type": "library",
+      "name": "expo-constants",
+      "version": "55.0.16",
+      "purl": "pkg:npm/expo-constants@55.0.16"
+    },
+    {
+      "type": "library",
+      "name": "expo-device",
+      "version": "8.0.10",
+      "purl": "pkg:npm/expo-device@8.0.10"
+    },
+    {
+      "type": "library",
+      "name": "expo-file-system",
+      "version": "19.0.23",
+      "purl": "pkg:npm/expo-file-system@19.0.23"
+    },
+    {
+      "type": "library",
+      "name": "expo-font",
+      "version": "14.0.12",
+      "purl": "pkg:npm/expo-font@14.0.12"
+    },
+    {
+      "type": "library",
+      "name": "expo-keep-awake",
+      "version": "15.0.8",
+      "purl": "pkg:npm/expo-keep-awake@15.0.8"
+    },
+    {
+      "type": "library",
+      "name": "expo-linking",
+      "version": "55.0.15",
+      "purl": "pkg:npm/expo-linking@55.0.15"
+    },
+    {
+      "type": "library",
+      "name": "expo-local-authentication",
+      "version": "17.0.8",
+      "purl": "pkg:npm/expo-local-authentication@17.0.8"
+    },
+    {
+      "type": "library",
+      "name": "expo-modules-autolinking",
+      "version": "3.0.26",
+      "purl": "pkg:npm/expo-modules-autolinking@3.0.26"
+    },
+    {
+      "type": "library",
+      "name": "expo-modules-core",
+      "version": "3.0.30",
+      "purl": "pkg:npm/expo-modules-core@3.0.30"
+    },
+    {
+      "type": "library",
+      "name": "expo-notifications",
+      "version": "0.30.7",
+      "purl": "pkg:npm/expo-notifications@0.30.7"
+    },
+    {
+      "type": "library",
+      "name": "expo-secure-store",
+      "version": "15.0.8",
+      "purl": "pkg:npm/expo-secure-store@15.0.8"
+    },
+    {
+      "type": "library",
+      "name": "expo-server",
+      "version": "1.0.7",
+      "purl": "pkg:npm/expo-server@1.0.7"
+    },
+    {
+      "type": "library",
+      "name": "exponential-backoff",
+      "version": "3.1.3",
+      "purl": "pkg:npm/exponential-backoff@3.1.3"
+    },
+    {
+      "type": "library",
+      "name": "express",
+      "version": "5.2.1",
+      "purl": "pkg:npm/express@5.2.1"
+    },
+    {
+      "type": "library",
+      "name": "express-rate-limit",
+      "version": "8.5.2",
+      "purl": "pkg:npm/express-rate-limit@8.5.2"
+    },
+    {
+      "type": "library",
+      "name": "extend",
+      "version": "3.0.2",
+      "purl": "pkg:npm/extend@3.0.2"
+    },
+    {
+      "type": "library",
+      "name": "fast-check",
+      "version": "3.23.2",
+      "purl": "pkg:npm/fast-check@3.23.2"
+    },
+    {
+      "type": "library",
+      "name": "fast-copy",
+      "version": "4.0.3",
+      "purl": "pkg:npm/fast-copy@4.0.3"
+    },
+    {
+      "type": "library",
+      "name": "fast-deep-equal",
+      "version": "3.1.3",
+      "purl": "pkg:npm/fast-deep-equal@3.1.3"
+    },
+    {
+      "type": "library",
+      "name": "fast-equals",
+      "version": "5.4.0",
+      "purl": "pkg:npm/fast-equals@5.4.0"
+    },
+    {
+      "type": "library",
+      "name": "fast-fifo",
+      "version": "1.3.2",
+      "purl": "pkg:npm/fast-fifo@1.3.2"
+    },
+    {
+      "type": "library",
+      "name": "fast-json-stable-stringify",
+      "version": "2.1.0",
+      "purl": "pkg:npm/fast-json-stable-stringify@2.1.0"
+    },
+    {
+      "type": "library",
+      "name": "fast-png",
+      "version": "6.4.0",
+      "purl": "pkg:npm/fast-png@6.4.0"
+    },
+    {
+      "type": "library",
+      "name": "fast-safe-stringify",
+      "version": "2.1.1",
+      "purl": "pkg:npm/fast-safe-stringify@2.1.1"
+    },
+    {
+      "type": "library",
+      "name": "fast-sha256",
+      "version": "1.3.0",
+      "purl": "pkg:npm/fast-sha256@1.3.0"
+    },
+    {
+      "type": "library",
+      "name": "fast-uri",
+      "version": "3.1.6",
+      "purl": "pkg:npm/fast-uri@3.1.6"
+    },
+    {
+      "type": "library",
+      "name": "fast-xml-builder",
+      "version": "1.2.0",
+      "purl": "pkg:npm/fast-xml-builder@1.2.0"
+    },
+    {
+      "type": "library",
+      "name": "fast-xml-parser",
+      "version": "5.8.0",
+      "purl": "pkg:npm/fast-xml-parser@5.8.0"
+    },
+    {
+      "type": "library",
+      "name": "fb-watchman",
+      "version": "2.0.2",
+      "purl": "pkg:npm/fb-watchman@2.0.2"
+    },
+    {
+      "type": "library",
+      "name": "fdir",
+      "version": "6.5.0",
+      "purl": "pkg:npm/fdir@6.5.0"
+    },
+    {
+      "type": "library",
+      "name": "fetch-blob",
+      "version": "3.2.0",
+      "purl": "pkg:npm/fetch-blob@3.2.0"
+    },
+    {
+      "type": "library",
+      "name": "fflate",
+      "version": "0.8.3",
+      "purl": "pkg:npm/fflate@0.8.3"
+    },
+    {
+      "type": "library",
+      "name": "figures",
+      "version": "6.1.0",
+      "purl": "pkg:npm/figures@6.1.0"
+    },
+    {
+      "type": "library",
+      "name": "fill-range",
+      "version": "7.1.1",
+      "purl": "pkg:npm/fill-range@7.1.1"
+    },
+    {
+      "type": "library",
+      "name": "finalhandler",
+      "version": "1.1.2",
+      "purl": "pkg:npm/finalhandler@1.1.2"
+    },
+    {
+      "type": "library",
+      "name": "finalhandler",
+      "version": "2.1.1",
+      "purl": "pkg:npm/finalhandler@2.1.1"
+    },
+    {
+      "type": "library",
+      "name": "find-up",
+      "version": "4.1.0",
+      "purl": "pkg:npm/find-up@4.1.0"
+    },
+    {
+      "type": "library",
+      "name": "find-up",
+      "version": "5.0.0",
+      "purl": "pkg:npm/find-up@5.0.0"
+    },
+    {
+      "type": "library",
+      "name": "find-up",
+      "version": "7.0.0",
+      "purl": "pkg:npm/find-up@7.0.0"
+    },
+    {
+      "type": "library",
+      "name": "find-up",
+      "version": "8.0.0",
+      "purl": "pkg:npm/find-up@8.0.0"
+    },
+    {
+      "type": "library",
+      "name": "flatbuffers",
+      "version": "25.9.23",
+      "purl": "pkg:npm/flatbuffers@25.9.23"
+    },
+    {
+      "type": "library",
+      "name": "flatted",
+      "version": "3.4.2",
+      "purl": "pkg:npm/flatted@3.4.2"
+    },
+    {
+      "type": "library",
+      "name": "flow-enums-runtime",
+      "version": "0.0.6",
+      "purl": "pkg:npm/flow-enums-runtime@0.0.6"
+    },
+    {
+      "type": "library",
+      "name": "fontfaceobserver",
+      "version": "2.3.0",
+      "purl": "pkg:npm/fontfaceobserver@2.3.0"
+    },
+    {
+      "type": "library",
+      "name": "fontkit",
+      "version": "2.0.4",
+      "purl": "pkg:npm/fontkit@2.0.4"
+    },
+    {
+      "type": "library",
+      "name": "for-each",
+      "version": "0.3.5",
+      "purl": "pkg:npm/for-each@0.3.5"
+    },
+    {
+      "type": "library",
+      "name": "foreground-child",
+      "version": "3.3.1",
+      "purl": "pkg:npm/foreground-child@3.3.1"
+    },
+    {
+      "type": "library",
+      "name": "form-data",
+      "version": "2.5.6",
+      "purl": "pkg:npm/form-data@2.5.6"
+    },
+    {
+      "type": "library",
+      "name": "form-data",
+      "version": "4.0.6",
+      "purl": "pkg:npm/form-data@4.0.6"
+    },
+    {
+      "type": "library",
+      "name": "formdata-polyfill",
+      "version": "4.0.10",
+      "purl": "pkg:npm/formdata-polyfill@4.0.10"
+    },
+    {
+      "type": "library",
+      "name": "formidable",
+      "version": "3.5.4",
+      "purl": "pkg:npm/formidable@3.5.4"
+    },
+    {
+      "type": "library",
+      "name": "forwarded",
+      "version": "0.2.0",
+      "purl": "pkg:npm/forwarded@0.2.0"
+    },
+    {
+      "type": "library",
+      "name": "forwarded-parse",
+      "version": "2.1.2",
+      "purl": "pkg:npm/forwarded-parse@2.1.2"
+    },
+    {
+      "type": "library",
+      "name": "framer-motion",
+      "version": "12.35.1",
+      "purl": "pkg:npm/framer-motion@12.35.1"
+    },
+    {
+      "type": "library",
+      "name": "framer-motion",
+      "version": "12.42.2",
+      "purl": "pkg:npm/framer-motion@12.42.2"
+    },
+    {
+      "type": "library",
+      "name": "freeport-async",
+      "version": "2.0.0",
+      "purl": "pkg:npm/freeport-async@2.0.0"
+    },
+    {
+      "type": "library",
+      "name": "fresh",
+      "version": "0.5.2",
+      "purl": "pkg:npm/fresh@0.5.2"
+    },
+    {
+      "type": "library",
+      "name": "fresh",
+      "version": "2.0.0",
+      "purl": "pkg:npm/fresh@2.0.0"
+    },
+    {
+      "type": "library",
+      "name": "fs-extra",
+      "version": "11.4.0",
+      "purl": "pkg:npm/fs-extra@11.4.0"
+    },
+    {
+      "type": "library",
+      "name": "fs.realpath",
+      "version": "1.0.0",
+      "purl": "pkg:npm/fs.realpath@1.0.0"
+    },
+    {
+      "type": "library",
+      "name": "fsevents",
+      "version": "2.3.2",
+      "purl": "pkg:npm/fsevents@2.3.2"
+    },
+    {
+      "type": "library",
+      "name": "fsevents",
+      "version": "2.3.3",
+      "purl": "pkg:npm/fsevents@2.3.3"
+    },
+    {
+      "type": "library",
+      "name": "function-bind",
+      "version": "1.1.2",
+      "purl": "pkg:npm/function-bind@1.1.2"
+    },
+    {
+      "type": "library",
+      "name": "gaxios",
+      "version": "6.7.1",
+      "purl": "pkg:npm/gaxios@6.7.1"
+    },
+    {
+      "type": "library",
+      "name": "gaxios",
+      "version": "7.1.3",
+      "purl": "pkg:npm/gaxios@7.1.3"
+    },
+    {
+      "type": "library",
+      "name": "gaxios",
+      "version": "7.1.5",
+      "purl": "pkg:npm/gaxios@7.1.5"
+    },
+    {
+      "type": "library",
+      "name": "gcp-metadata",
+      "version": "6.1.1",
+      "purl": "pkg:npm/gcp-metadata@6.1.1"
+    },
+    {
+      "type": "library",
+      "name": "gcp-metadata",
+      "version": "8.1.2",
+      "purl": "pkg:npm/gcp-metadata@8.1.2"
+    },
+    {
+      "type": "library",
+      "name": "gcp-metadata",
+      "version": "8.1.3",
+      "purl": "pkg:npm/gcp-metadata@8.1.3"
+    },
+    {
+      "type": "library",
+      "name": "generator-function",
+      "version": "2.0.1",
+      "purl": "pkg:npm/generator-function@2.0.1"
+    },
+    {
+      "type": "library",
+      "name": "gensync",
+      "version": "1.0.0-beta.2",
+      "purl": "pkg:npm/gensync@1.0.0-beta.2"
+    },
+    {
+      "type": "library",
+      "name": "get-caller-file",
+      "version": "2.0.5",
+      "purl": "pkg:npm/get-caller-file@2.0.5"
+    },
+    {
+      "type": "library",
+      "name": "get-intrinsic",
+      "version": "1.3.0",
+      "purl": "pkg:npm/get-intrinsic@1.3.0"
+    },
+    {
+      "type": "library",
+      "name": "get-nonce",
+      "version": "1.0.1",
+      "purl": "pkg:npm/get-nonce@1.0.1"
+    },
+    {
+      "type": "library",
+      "name": "get-package-type",
+      "version": "0.1.0",
+      "purl": "pkg:npm/get-package-type@0.1.0"
+    },
+    {
+      "type": "library",
+      "name": "get-proto",
+      "version": "1.0.1",
+      "purl": "pkg:npm/get-proto@1.0.1"
+    },
+    {
+      "type": "library",
+      "name": "get-stream",
+      "version": "6.0.1",
+      "purl": "pkg:npm/get-stream@6.0.1"
+    },
+    {
+      "type": "library",
+      "name": "get-stream",
+      "version": "9.0.1",
+      "purl": "pkg:npm/get-stream@9.0.1"
+    },
+    {
+      "type": "library",
+      "name": "get-tsconfig",
+      "version": "4.14.3",
+      "purl": "pkg:npm/get-tsconfig@4.14.3"
+    },
+    {
+      "type": "library",
+      "name": "getenv",
+      "version": "2.0.0",
+      "purl": "pkg:npm/getenv@2.0.0"
+    },
+    {
+      "type": "library",
+      "name": "git-raw-commits",
+      "version": "4.0.0",
+      "purl": "pkg:npm/git-raw-commits@4.0.0"
+    },
+    {
+      "type": "library",
+      "name": "glob",
+      "version": "10.5.0",
+      "purl": "pkg:npm/glob@10.5.0"
+    },
+    {
+      "type": "library",
+      "name": "glob",
+      "version": "13.0.6",
+      "purl": "pkg:npm/glob@13.0.6"
+    },
+    {
+      "type": "library",
+      "name": "glob",
+      "version": "7.2.3",
+      "purl": "pkg:npm/glob@7.2.3"
+    },
+    {
+      "type": "library",
+      "name": "global-agent",
+      "version": "3.0.0",
+      "purl": "pkg:npm/global-agent@3.0.0"
+    },
+    {
+      "type": "library",
+      "name": "global-directory",
+      "version": "4.0.1",
+      "purl": "pkg:npm/global-directory@4.0.1"
+    },
+    {
+      "type": "library",
+      "name": "globalthis",
+      "version": "1.0.4",
+      "purl": "pkg:npm/globalthis@1.0.4"
+    },
+    {
+      "type": "library",
+      "name": "google-auth-library",
+      "version": "10.7.0",
+      "purl": "pkg:npm/google-auth-library@10.7.0"
+    },
+    {
+      "type": "library",
+      "name": "google-auth-library",
+      "version": "9.15.1",
+      "purl": "pkg:npm/google-auth-library@9.15.1"
+    },
+    {
+      "type": "library",
+      "name": "google-logging-utils",
+      "version": "0.0.2",
+      "purl": "pkg:npm/google-logging-utils@0.0.2"
+    },
+    {
+      "type": "library",
+      "name": "google-logging-utils",
+      "version": "1.1.3",
+      "purl": "pkg:npm/google-logging-utils@1.1.3"
+    },
+    {
+      "type": "library",
+      "name": "gopd",
+      "version": "1.2.0",
+      "purl": "pkg:npm/gopd@1.2.0"
+    },
+    {
+      "type": "library",
+      "name": "graceful-fs",
+      "version": "4.2.11",
+      "purl": "pkg:npm/graceful-fs@4.2.11"
+    },
+    {
+      "type": "library",
+      "name": "graphql",
+      "version": "16.14.2",
+      "purl": "pkg:npm/graphql@16.14.2"
+    },
+    {
+      "type": "library",
+      "name": "graphql-tag",
+      "version": "2.12.6",
+      "purl": "pkg:npm/graphql-tag@2.12.6"
+    },
+    {
+      "type": "library",
+      "name": "graphql-ws",
+      "version": "6.0.8",
+      "purl": "pkg:npm/graphql-ws@6.0.8"
+    },
+    {
+      "type": "library",
+      "name": "gtoken",
+      "version": "7.1.0",
+      "purl": "pkg:npm/gtoken@7.1.0"
+    },
+    {
+      "type": "library",
+      "name": "guid-typescript",
+      "version": "1.0.9",
+      "purl": "pkg:npm/guid-typescript@1.0.9"
+    },
+    {
+      "type": "library",
+      "name": "happy-dom",
+      "version": "20.10.2",
+      "purl": "pkg:npm/happy-dom@20.10.2"
+    },
+    {
+      "type": "library",
+      "name": "has-flag",
+      "version": "3.0.0",
+      "purl": "pkg:npm/has-flag@3.0.0"
+    },
+    {
+      "type": "library",
+      "name": "has-flag",
+      "version": "4.0.0",
+      "purl": "pkg:npm/has-flag@4.0.0"
+    },
+    {
+      "type": "library",
+      "name": "has-property-descriptors",
+      "version": "1.0.2",
+      "purl": "pkg:npm/has-property-descriptors@1.0.2"
+    },
+    {
+      "type": "library",
+      "name": "has-symbols",
+      "version": "1.1.0",
+      "purl": "pkg:npm/has-symbols@1.1.0"
+    },
+    {
+      "type": "library",
+      "name": "has-tostringtag",
+      "version": "1.0.2",
+      "purl": "pkg:npm/has-tostringtag@1.0.2"
+    },
+    {
+      "type": "library",
+      "name": "hash.js",
+      "version": "1.1.7",
+      "purl": "pkg:npm/hash.js@1.1.7"
+    },
+    {
+      "type": "library",
+      "name": "hasown",
+      "version": "2.0.4",
+      "purl": "pkg:npm/hasown@2.0.4"
+    },
+    {
+      "type": "library",
+      "name": "help-me",
+      "version": "5.0.0",
+      "purl": "pkg:npm/help-me@5.0.0"
+    },
+    {
+      "type": "library",
+      "name": "hermes-estree",
+      "version": "0.29.1",
+      "purl": "pkg:npm/hermes-estree@0.29.1"
+    },
+    {
+      "type": "library",
+      "name": "hermes-estree",
+      "version": "0.32.0",
+      "purl": "pkg:npm/hermes-estree@0.32.0"
+    },
+    {
+      "type": "library",
+      "name": "hermes-estree",
+      "version": "0.35.0",
+      "purl": "pkg:npm/hermes-estree@0.35.0"
+    },
+    {
+      "type": "library",
+      "name": "hermes-parser",
+      "version": "0.29.1",
+      "purl": "pkg:npm/hermes-parser@0.29.1"
+    },
+    {
+      "type": "library",
+      "name": "hermes-parser",
+      "version": "0.32.0",
+      "purl": "pkg:npm/hermes-parser@0.32.0"
+    },
+    {
+      "type": "library",
+      "name": "hermes-parser",
+      "version": "0.35.0",
+      "purl": "pkg:npm/hermes-parser@0.35.0"
+    },
+    {
+      "type": "library",
+      "name": "hoist-non-react-statics",
+      "version": "3.3.2",
+      "purl": "pkg:npm/hoist-non-react-statics@3.3.2"
+    },
+    {
+      "type": "library",
+      "name": "hono",
+      "version": "4.12.34",
+      "purl": "pkg:npm/hono@4.12.34"
+    },
+    {
+      "type": "library",
+      "name": "hosted-git-info",
+      "version": "7.0.2",
+      "purl": "pkg:npm/hosted-git-info@7.0.2"
+    },
+    {
+      "type": "library",
+      "name": "html-entities",
+      "version": "2.6.0",
+      "purl": "pkg:npm/html-entities@2.6.0"
+    },
+    {
+      "type": "library",
+      "name": "html-escaper",
+      "version": "2.0.2",
+      "purl": "pkg:npm/html-escaper@2.0.2"
+    },
+    {
+      "type": "library",
+      "name": "html-parse-stringify",
+      "version": "3.0.1",
+      "purl": "pkg:npm/html-parse-stringify@3.0.1"
+    },
+    {
+      "type": "library",
+      "name": "html2canvas",
+      "version": "1.4.1",
+      "purl": "pkg:npm/html2canvas@1.4.1"
+    },
+    {
+      "type": "library",
+      "name": "http-errors",
+      "version": "2.0.1",
+      "purl": "pkg:npm/http-errors@2.0.1"
+    },
+    {
+      "type": "library",
+      "name": "http-proxy-agent",
+      "version": "5.0.0",
+      "purl": "pkg:npm/http-proxy-agent@5.0.0"
+    },
+    {
+      "type": "library",
+      "name": "https-proxy-agent",
+      "version": "5.0.1",
+      "purl": "pkg:npm/https-proxy-agent@5.0.1"
+    },
+    {
+      "type": "library",
+      "name": "https-proxy-agent",
+      "version": "7.0.6",
+      "purl": "pkg:npm/https-proxy-agent@7.0.6"
+    },
+    {
+      "type": "library",
+      "name": "human-signals",
+      "version": "2.1.0",
+      "purl": "pkg:npm/human-signals@2.1.0"
+    },
+    {
+      "type": "library",
+      "name": "human-signals",
+      "version": "8.0.1",
+      "purl": "pkg:npm/human-signals@8.0.1"
+    },
+    {
+      "type": "library",
+      "name": "i18next",
+      "version": "26.3.1",
+      "purl": "pkg:npm/i18next@26.3.1"
+    },
+    {
+      "type": "library",
+      "name": "i18next-browser-languagedetector",
+      "version": "8.2.1",
+      "purl": "pkg:npm/i18next-browser-languagedetector@8.2.1"
+    },
+    {
+      "type": "library",
+      "name": "iconv-lite",
+      "version": "0.7.2",
+      "purl": "pkg:npm/iconv-lite@0.7.2"
+    },
+    {
+      "type": "library",
+      "name": "idb",
+      "version": "8.0.3",
+      "purl": "pkg:npm/idb@8.0.3"
+    },
+    {
+      "type": "library",
+      "name": "ieee754",
+      "version": "1.2.1",
+      "purl": "pkg:npm/ieee754@1.2.1"
+    },
+    {
+      "type": "library",
+      "name": "ignore",
+      "version": "5.3.2",
+      "purl": "pkg:npm/ignore@5.3.2"
+    },
+    {
+      "type": "library",
       "name": "image-size",
       "version": "3.0.0-szl.1",
       "purl": "pkg:npm/image-size@3.0.0-szl.1"
+    },
+    {
+      "type": "library",
+      "name": "immediate",
+      "version": "3.0.6",
+      "purl": "pkg:npm/immediate@3.0.6"
+    },
+    {
+      "type": "library",
+      "name": "immer",
+      "version": "10.2.0",
+      "purl": "pkg:npm/immer@10.2.0"
+    },
+    {
+      "type": "library",
+      "name": "import-fresh",
+      "version": "3.3.1",
+      "purl": "pkg:npm/import-fresh@3.3.1"
+    },
+    {
+      "type": "library",
+      "name": "import-in-the-middle",
+      "version": "3.0.2",
+      "purl": "pkg:npm/import-in-the-middle@3.0.2"
+    },
+    {
+      "type": "library",
+      "name": "import-meta-resolve",
+      "version": "4.2.0",
+      "purl": "pkg:npm/import-meta-resolve@4.2.0"
+    },
+    {
+      "type": "library",
+      "name": "imurmurhash",
+      "version": "0.1.4",
+      "purl": "pkg:npm/imurmurhash@0.1.4"
+    },
+    {
+      "type": "library",
+      "name": "indent-string",
+      "version": "4.0.0",
+      "purl": "pkg:npm/indent-string@4.0.0"
+    },
+    {
+      "type": "library",
+      "name": "inflight",
+      "version": "1.0.6",
+      "purl": "pkg:npm/inflight@1.0.6"
+    },
+    {
+      "type": "library",
+      "name": "inherits",
+      "version": "2.0.4",
+      "purl": "pkg:npm/inherits@2.0.4"
+    },
+    {
+      "type": "library",
+      "name": "ini",
+      "version": "1.3.8",
+      "purl": "pkg:npm/ini@1.3.8"
+    },
+    {
+      "type": "library",
+      "name": "ini",
+      "version": "4.1.1",
+      "purl": "pkg:npm/ini@4.1.1"
+    },
+    {
+      "type": "library",
+      "name": "input-otp",
+      "version": "1.4.2",
+      "purl": "pkg:npm/input-otp@1.4.2"
+    },
+    {
+      "type": "library",
+      "name": "internmap",
+      "version": "2.0.3",
+      "purl": "pkg:npm/internmap@2.0.3"
+    },
+    {
+      "type": "library",
+      "name": "invariant",
+      "version": "2.2.4",
+      "purl": "pkg:npm/invariant@2.2.4"
+    },
+    {
+      "type": "library",
+      "name": "iobuffer",
+      "version": "5.4.0",
+      "purl": "pkg:npm/iobuffer@5.4.0"
+    },
+    {
+      "type": "library",
+      "name": "ip-address",
+      "version": "10.3.1",
+      "purl": "pkg:npm/ip-address@10.3.1"
+    },
+    {
+      "type": "library",
+      "name": "ipaddr.js",
+      "version": "1.9.1",
+      "purl": "pkg:npm/ipaddr.js@1.9.1"
+    },
+    {
+      "type": "library",
+      "name": "is-arguments",
+      "version": "1.2.0",
+      "purl": "pkg:npm/is-arguments@1.2.0"
+    },
+    {
+      "type": "library",
+      "name": "is-arrayish",
+      "version": "0.2.1",
+      "purl": "pkg:npm/is-arrayish@0.2.1"
+    },
+    {
+      "type": "library",
+      "name": "is-callable",
+      "version": "1.2.7",
+      "purl": "pkg:npm/is-callable@1.2.7"
+    },
+    {
+      "type": "library",
+      "name": "is-core-module",
+      "version": "2.16.2",
+      "purl": "pkg:npm/is-core-module@2.16.2"
+    },
+    {
+      "type": "library",
+      "name": "is-docker",
+      "version": "2.2.1",
+      "purl": "pkg:npm/is-docker@2.2.1"
+    },
+    {
+      "type": "library",
+      "name": "is-fullwidth-code-point",
+      "version": "3.0.0",
+      "purl": "pkg:npm/is-fullwidth-code-point@3.0.0"
+    },
+    {
+      "type": "library",
+      "name": "is-generator-function",
+      "version": "1.1.2",
+      "purl": "pkg:npm/is-generator-function@1.1.2"
+    },
+    {
+      "type": "library",
+      "name": "is-hotkey",
+      "version": "0.2.0",
+      "purl": "pkg:npm/is-hotkey@0.2.0"
+    },
+    {
+      "type": "library",
+      "name": "is-nan",
+      "version": "1.3.2",
+      "purl": "pkg:npm/is-nan@1.3.2"
+    },
+    {
+      "type": "library",
+      "name": "is-network-error",
+      "version": "1.3.2",
+      "purl": "pkg:npm/is-network-error@1.3.2"
+    },
+    {
+      "type": "library",
+      "name": "is-number",
+      "version": "7.0.0",
+      "purl": "pkg:npm/is-number@7.0.0"
+    },
+    {
+      "type": "library",
+      "name": "is-obj",
+      "version": "2.0.0",
+      "purl": "pkg:npm/is-obj@2.0.0"
+    },
+    {
+      "type": "library",
+      "name": "is-plain-obj",
+      "version": "2.1.0",
+      "purl": "pkg:npm/is-plain-obj@2.1.0"
+    },
+    {
+      "type": "library",
+      "name": "is-plain-obj",
+      "version": "4.1.0",
+      "purl": "pkg:npm/is-plain-obj@4.1.0"
+    },
+    {
+      "type": "library",
+      "name": "is-plain-object",
+      "version": "5.0.0",
+      "purl": "pkg:npm/is-plain-object@5.0.0"
+    },
+    {
+      "type": "library",
+      "name": "is-port-reachable",
+      "version": "4.0.0",
+      "purl": "pkg:npm/is-port-reachable@4.0.0"
+    },
+    {
+      "type": "library",
+      "name": "is-promise",
+      "version": "4.0.0",
+      "purl": "pkg:npm/is-promise@4.0.0"
+    },
+    {
+      "type": "library",
+      "name": "is-regex",
+      "version": "1.2.1",
+      "purl": "pkg:npm/is-regex@1.2.1"
+    },
+    {
+      "type": "library",
+      "name": "is-stream",
+      "version": "2.0.1",
+      "purl": "pkg:npm/is-stream@2.0.1"
+    },
+    {
+      "type": "library",
+      "name": "is-stream",
+      "version": "4.0.1",
+      "purl": "pkg:npm/is-stream@4.0.1"
+    },
+    {
+      "type": "library",
+      "name": "is-text-path",
+      "version": "2.0.0",
+      "purl": "pkg:npm/is-text-path@2.0.0"
+    },
+    {
+      "type": "library",
+      "name": "is-typed-array",
+      "version": "1.1.15",
+      "purl": "pkg:npm/is-typed-array@1.1.15"
+    },
+    {
+      "type": "library",
+      "name": "is-unicode-supported",
+      "version": "2.1.0",
+      "purl": "pkg:npm/is-unicode-supported@2.1.0"
+    },
+    {
+      "type": "library",
+      "name": "is-wsl",
+      "version": "2.2.0",
+      "purl": "pkg:npm/is-wsl@2.2.0"
+    },
+    {
+      "type": "library",
+      "name": "isarray",
+      "version": "1.0.0",
+      "purl": "pkg:npm/isarray@1.0.0"
+    },
+    {
+      "type": "library",
+      "name": "isexe",
+      "version": "2.0.0",
+      "purl": "pkg:npm/isexe@2.0.0"
+    },
+    {
+      "type": "library",
+      "name": "isolated-vm",
+      "version": "6.1.2",
+      "purl": "pkg:npm/isolated-vm@6.1.2"
+    },
+    {
+      "type": "library",
+      "name": "istanbul-lib-coverage",
+      "version": "3.2.2",
+      "purl": "pkg:npm/istanbul-lib-coverage@3.2.2"
+    },
+    {
+      "type": "library",
+      "name": "istanbul-lib-instrument",
+      "version": "5.2.1",
+      "purl": "pkg:npm/istanbul-lib-instrument@5.2.1"
+    },
+    {
+      "type": "library",
+      "name": "istanbul-lib-report",
+      "version": "3.0.1",
+      "purl": "pkg:npm/istanbul-lib-report@3.0.1"
+    },
+    {
+      "type": "library",
+      "name": "istanbul-reports",
+      "version": "3.2.0",
+      "purl": "pkg:npm/istanbul-reports@3.2.0"
+    },
+    {
+      "type": "library",
+      "name": "jackspeak",
+      "version": "3.4.3",
+      "purl": "pkg:npm/jackspeak@3.4.3"
+    },
+    {
+      "type": "library",
+      "name": "jest-environment-node",
+      "version": "29.7.0",
+      "purl": "pkg:npm/jest-environment-node@29.7.0"
+    },
+    {
+      "type": "library",
+      "name": "jest-get-type",
+      "version": "29.6.3",
+      "purl": "pkg:npm/jest-get-type@29.6.3"
+    },
+    {
+      "type": "library",
+      "name": "jest-haste-map",
+      "version": "29.7.0",
+      "purl": "pkg:npm/jest-haste-map@29.7.0"
+    },
+    {
+      "type": "library",
+      "name": "jest-message-util",
+      "version": "29.7.0",
+      "purl": "pkg:npm/jest-message-util@29.7.0"
+    },
+    {
+      "type": "library",
+      "name": "jest-mock",
+      "version": "29.7.0",
+      "purl": "pkg:npm/jest-mock@29.7.0"
+    },
+    {
+      "type": "library",
+      "name": "jest-regex-util",
+      "version": "29.6.3",
+      "purl": "pkg:npm/jest-regex-util@29.6.3"
+    },
+    {
+      "type": "library",
+      "name": "jest-util",
+      "version": "29.7.0",
+      "purl": "pkg:npm/jest-util@29.7.0"
+    },
+    {
+      "type": "library",
+      "name": "jest-validate",
+      "version": "29.7.0",
+      "purl": "pkg:npm/jest-validate@29.7.0"
+    },
+    {
+      "type": "library",
+      "name": "jest-worker",
+      "version": "29.7.0",
+      "purl": "pkg:npm/jest-worker@29.7.0"
+    },
+    {
+      "type": "library",
+      "name": "jimp-compact",
+      "version": "0.16.1",
+      "purl": "pkg:npm/jimp-compact@0.16.1"
+    },
+    {
+      "type": "library",
+      "name": "jiti",
+      "version": "2.6.1",
+      "purl": "pkg:npm/jiti@2.6.1"
+    },
+    {
+      "type": "library",
+      "name": "jiti",
+      "version": "2.7.0",
+      "purl": "pkg:npm/jiti@2.7.0"
+    },
+    {
+      "type": "library",
+      "name": "jose",
+      "version": "6.2.3",
+      "purl": "pkg:npm/jose@6.2.3"
+    },
+    {
+      "type": "library",
+      "name": "jotai",
+      "version": "2.8.4",
+      "purl": "pkg:npm/jotai@2.8.4"
+    },
+    {
+      "type": "library",
+      "name": "jotai-optics",
+      "version": "0.4.0",
+      "purl": "pkg:npm/jotai-optics@0.4.0"
+    },
+    {
+      "type": "library",
+      "name": "jotai-x",
+      "version": "2.3.2",
+      "purl": "pkg:npm/jotai-x@2.3.2"
+    },
+    {
+      "type": "library",
+      "name": "joycon",
+      "version": "3.1.1",
+      "purl": "pkg:npm/joycon@3.1.1"
+    },
+    {
+      "type": "library",
+      "name": "js-md5",
+      "version": "0.8.3",
+      "purl": "pkg:npm/js-md5@0.8.3"
+    },
+    {
+      "type": "library",
+      "name": "js-tokens",
+      "version": "10.0.0",
+      "purl": "pkg:npm/js-tokens@10.0.0"
+    },
+    {
+      "type": "library",
+      "name": "js-tokens",
+      "version": "4.0.0",
+      "purl": "pkg:npm/js-tokens@4.0.0"
+    },
+    {
+      "type": "library",
+      "name": "js-yaml",
+      "version": "3.15.1",
+      "purl": "pkg:npm/js-yaml@3.15.1"
+    },
+    {
+      "type": "library",
+      "name": "js-yaml",
+      "version": "4.3.1",
+      "purl": "pkg:npm/js-yaml@4.3.1"
+    },
+    {
+      "type": "library",
+      "name": "jsc-safe-url",
+      "version": "0.2.4",
+      "purl": "pkg:npm/jsc-safe-url@0.2.4"
+    },
+    {
+      "type": "library",
+      "name": "jsdoc-type-pratt-parser",
+      "version": "4.8.0",
+      "purl": "pkg:npm/jsdoc-type-pratt-parser@4.8.0"
+    },
+    {
+      "type": "library",
+      "name": "jsesc",
+      "version": "3.1.0",
+      "purl": "pkg:npm/jsesc@3.1.0"
+    },
+    {
+      "type": "library",
+      "name": "json-bigint",
+      "version": "1.0.0",
+      "purl": "pkg:npm/json-bigint@1.0.0"
+    },
+    {
+      "type": "library",
+      "name": "json-parse-even-better-errors",
+      "version": "2.3.1",
+      "purl": "pkg:npm/json-parse-even-better-errors@2.3.1"
+    },
+    {
+      "type": "library",
+      "name": "json-schema-to-ts",
+      "version": "3.1.1",
+      "purl": "pkg:npm/json-schema-to-ts@3.1.1"
+    },
+    {
+      "type": "library",
+      "name": "json-schema-traverse",
+      "version": "1.0.0",
+      "purl": "pkg:npm/json-schema-traverse@1.0.0"
+    },
+    {
+      "type": "library",
+      "name": "json-schema-typed",
+      "version": "8.0.2",
+      "purl": "pkg:npm/json-schema-typed@8.0.2"
+    },
+    {
+      "type": "library",
+      "name": "json-stringify-safe",
+      "version": "5.0.1",
+      "purl": "pkg:npm/json-stringify-safe@5.0.1"
+    },
+    {
+      "type": "library",
+      "name": "json5",
+      "version": "2.2.3",
+      "purl": "pkg:npm/json5@2.2.3"
+    },
+    {
+      "type": "library",
+      "name": "jsonfile",
+      "version": "6.2.1",
+      "purl": "pkg:npm/jsonfile@6.2.1"
+    },
+    {
+      "type": "library",
+      "name": "jsonparse",
+      "version": "1.3.1",
+      "purl": "pkg:npm/jsonparse@1.3.1"
+    },
+    {
+      "type": "library",
+      "name": "jsonpointer",
+      "version": "5.0.1",
+      "purl": "pkg:npm/jsonpointer@5.0.1"
+    },
+    {
+      "type": "library",
+      "name": "JSONStream",
+      "version": "1.3.5",
+      "purl": "pkg:npm/JSONStream@1.3.5"
+    },
+    {
+      "type": "library",
+      "name": "jspdf",
+      "version": "4.2.1",
+      "purl": "pkg:npm/jspdf@4.2.1"
+    },
+    {
+      "type": "library",
+      "name": "jszip",
+      "version": "3.10.1",
+      "purl": "pkg:npm/jszip@3.10.1"
+    },
+    {
+      "type": "library",
+      "name": "jwa",
+      "version": "2.0.1",
+      "purl": "pkg:npm/jwa@2.0.1"
+    },
+    {
+      "type": "library",
+      "name": "jws",
+      "version": "4.0.1",
+      "purl": "pkg:npm/jws@4.0.1"
+    },
+    {
+      "type": "library",
+      "name": "kleur",
+      "version": "3.0.3",
+      "purl": "pkg:npm/kleur@3.0.3"
+    },
+    {
+      "type": "library",
+      "name": "lan-network",
+      "version": "0.2.1",
+      "purl": "pkg:npm/lan-network@0.2.1"
+    },
+    {
+      "type": "library",
+      "name": "lazystream",
+      "version": "1.0.1",
+      "purl": "pkg:npm/lazystream@1.0.1"
+    },
+    {
+      "type": "library",
+      "name": "leven",
+      "version": "3.1.0",
+      "purl": "pkg:npm/leven@3.1.0"
+    },
+    {
+      "type": "library",
+      "name": "leven",
+      "version": "4.1.0",
+      "purl": "pkg:npm/leven@4.1.0"
+    },
+    {
+      "type": "library",
+      "name": "lie",
+      "version": "3.3.0",
+      "purl": "pkg:npm/lie@3.3.0"
+    },
+    {
+      "type": "library",
+      "name": "lighthouse-logger",
+      "version": "1.4.2",
+      "purl": "pkg:npm/lighthouse-logger@1.4.2"
+    },
+    {
+      "type": "library",
+      "name": "lightningcss",
+      "version": "1.32.0",
+      "purl": "pkg:npm/lightningcss@1.32.0"
+    },
+    {
+      "type": "library",
+      "name": "lightningcss-linux-x64-gnu",
+      "version": "1.32.0",
+      "purl": "pkg:npm/lightningcss-linux-x64-gnu@1.32.0"
+    },
+    {
+      "type": "library",
+      "name": "lightningcss-win32-x64-msvc",
+      "version": "1.32.0",
+      "purl": "pkg:npm/lightningcss-win32-x64-msvc@1.32.0"
+    },
+    {
+      "type": "library",
+      "name": "linebreak",
+      "version": "1.1.0",
+      "purl": "pkg:npm/linebreak@1.1.0"
+    },
+    {
+      "type": "library",
+      "name": "lines-and-columns",
+      "version": "1.2.4",
+      "purl": "pkg:npm/lines-and-columns@1.2.4"
+    },
+    {
+      "type": "library",
+      "name": "linkify-it",
+      "version": "5.0.2",
+      "purl": "pkg:npm/linkify-it@5.0.2"
+    },
+    {
+      "type": "library",
+      "name": "locate-path",
+      "version": "5.0.0",
+      "purl": "pkg:npm/locate-path@5.0.0"
+    },
+    {
+      "type": "library",
+      "name": "locate-path",
+      "version": "6.0.0",
+      "purl": "pkg:npm/locate-path@6.0.0"
+    },
+    {
+      "type": "library",
+      "name": "locate-path",
+      "version": "7.2.0",
+      "purl": "pkg:npm/locate-path@7.2.0"
+    },
+    {
+      "type": "library",
+      "name": "locate-path",
+      "version": "8.0.0",
+      "purl": "pkg:npm/locate-path@8.0.0"
+    },
+    {
+      "type": "library",
+      "name": "lodash",
+      "version": "4.18.1",
+      "purl": "pkg:npm/lodash@4.18.1"
+    },
+    {
+      "type": "library",
+      "name": "lodash.camelcase",
+      "version": "4.3.0",
+      "purl": "pkg:npm/lodash.camelcase@4.3.0"
+    },
+    {
+      "type": "library",
+      "name": "lodash.debounce",
+      "version": "4.0.8",
+      "purl": "pkg:npm/lodash.debounce@4.0.8"
+    },
+    {
+      "type": "library",
+      "name": "lodash.isplainobject",
+      "version": "4.0.6",
+      "purl": "pkg:npm/lodash.isplainobject@4.0.6"
+    },
+    {
+      "type": "library",
+      "name": "lodash.kebabcase",
+      "version": "4.1.1",
+      "purl": "pkg:npm/lodash.kebabcase@4.1.1"
+    },
+    {
+      "type": "library",
+      "name": "lodash.mapvalues",
+      "version": "4.6.0",
+      "purl": "pkg:npm/lodash.mapvalues@4.6.0"
+    },
+    {
+      "type": "library",
+      "name": "lodash.merge",
+      "version": "4.6.2",
+      "purl": "pkg:npm/lodash.merge@4.6.2"
+    },
+    {
+      "type": "library",
+      "name": "lodash.mergewith",
+      "version": "4.6.2",
+      "purl": "pkg:npm/lodash.mergewith@4.6.2"
+    },
+    {
+      "type": "library",
+      "name": "lodash.snakecase",
+      "version": "4.1.1",
+      "purl": "pkg:npm/lodash.snakecase@4.1.1"
+    },
+    {
+      "type": "library",
+      "name": "lodash.startcase",
+      "version": "4.4.0",
+      "purl": "pkg:npm/lodash.startcase@4.4.0"
+    },
+    {
+      "type": "library",
+      "name": "lodash.throttle",
+      "version": "4.1.1",
+      "purl": "pkg:npm/lodash.throttle@4.1.1"
+    },
+    {
+      "type": "library",
+      "name": "lodash.uniq",
+      "version": "4.5.0",
+      "purl": "pkg:npm/lodash.uniq@4.5.0"
+    },
+    {
+      "type": "library",
+      "name": "lodash.upperfirst",
+      "version": "4.3.1",
+      "purl": "pkg:npm/lodash.upperfirst@4.3.1"
+    },
+    {
+      "type": "library",
+      "name": "log-symbols",
+      "version": "2.2.0",
+      "purl": "pkg:npm/log-symbols@2.2.0"
+    },
+    {
+      "type": "library",
+      "name": "long",
+      "version": "5.3.2",
+      "purl": "pkg:npm/long@5.3.2"
+    },
+    {
+      "type": "library",
+      "name": "loose-envify",
+      "version": "1.4.0",
+      "purl": "pkg:npm/loose-envify@1.4.0"
+    },
+    {
+      "type": "library",
+      "name": "loupe",
+      "version": "3.2.1",
+      "purl": "pkg:npm/loupe@3.2.1"
+    },
+    {
+      "type": "library",
+      "name": "lru-cache",
+      "version": "10.4.3",
+      "purl": "pkg:npm/lru-cache@10.4.3"
+    },
+    {
+      "type": "library",
+      "name": "lru-cache",
+      "version": "11.5.1",
+      "purl": "pkg:npm/lru-cache@11.5.1"
+    },
+    {
+      "type": "library",
+      "name": "lru-cache",
+      "version": "5.1.1",
+      "purl": "pkg:npm/lru-cache@5.1.1"
+    },
+    {
+      "type": "library",
+      "name": "lucide-react",
+      "version": "0.545.0",
+      "purl": "pkg:npm/lucide-react@0.545.0"
+    },
+    {
+      "type": "library",
+      "name": "lucide-react",
+      "version": "1.16.0",
+      "purl": "pkg:npm/lucide-react@1.16.0"
+    },
+    {
+      "type": "library",
+      "name": "lunr",
+      "version": "2.3.9",
+      "purl": "pkg:npm/lunr@2.3.9"
+    },
+    {
+      "type": "library",
+      "name": "lz-string",
+      "version": "1.5.0",
+      "purl": "pkg:npm/lz-string@1.5.0"
+    },
+    {
+      "type": "library",
+      "name": "magic-string",
+      "version": "0.27.0",
+      "purl": "pkg:npm/magic-string@0.27.0"
+    },
+    {
+      "type": "library",
+      "name": "magic-string",
+      "version": "0.30.21",
+      "purl": "pkg:npm/magic-string@0.30.21"
+    },
+    {
+      "type": "library",
+      "name": "magicast",
+      "version": "0.5.3",
+      "purl": "pkg:npm/magicast@0.5.3"
+    },
+    {
+      "type": "library",
+      "name": "make-dir",
+      "version": "4.0.0",
+      "purl": "pkg:npm/make-dir@4.0.0"
+    },
+    {
+      "type": "library",
+      "name": "makeerror",
+      "version": "1.0.12",
+      "purl": "pkg:npm/makeerror@1.0.12"
+    },
+    {
+      "type": "library",
+      "name": "map-or-similar",
+      "version": "1.5.0",
+      "purl": "pkg:npm/map-or-similar@1.5.0"
+    },
+    {
+      "type": "library",
+      "name": "mapbox-gl",
+      "version": "3.27.0",
+      "purl": "pkg:npm/mapbox-gl@3.27.0"
+    },
+    {
+      "type": "library",
+      "name": "markdown-it",
+      "version": "14.2.0",
+      "purl": "pkg:npm/markdown-it@14.2.0"
+    },
+    {
+      "type": "library",
+      "name": "markdown-it",
+      "version": "14.3.1",
+      "purl": "pkg:npm/markdown-it@14.3.1"
+    },
+    {
+      "type": "library",
+      "name": "marky",
+      "version": "1.3.0",
+      "purl": "pkg:npm/marky@1.3.0"
+    },
+    {
+      "type": "library",
+      "name": "matcher",
+      "version": "3.0.0",
+      "purl": "pkg:npm/matcher@3.0.0"
+    },
+    {
+      "type": "library",
+      "name": "math-intrinsics",
+      "version": "1.1.0",
+      "purl": "pkg:npm/math-intrinsics@1.1.0"
+    },
+    {
+      "type": "library",
+      "name": "mdurl",
+      "version": "2.0.0",
+      "purl": "pkg:npm/mdurl@2.0.0"
+    },
+    {
+      "type": "library",
+      "name": "mdurl",
+      "version": "2.1.0",
+      "purl": "pkg:npm/mdurl@2.1.0"
+    },
+    {
+      "type": "library",
+      "name": "media-typer",
+      "version": "1.1.0",
+      "purl": "pkg:npm/media-typer@1.1.0"
+    },
+    {
+      "type": "library",
+      "name": "memoize-one",
+      "version": "5.2.1",
+      "purl": "pkg:npm/memoize-one@5.2.1"
+    },
+    {
+      "type": "library",
+      "name": "memoizerific",
+      "version": "1.11.3",
+      "purl": "pkg:npm/memoizerific@1.11.3"
+    },
+    {
+      "type": "library",
+      "name": "meow",
+      "version": "12.1.1",
+      "purl": "pkg:npm/meow@12.1.1"
+    },
+    {
+      "type": "library",
+      "name": "merge-descriptors",
+      "version": "2.0.0",
+      "purl": "pkg:npm/merge-descriptors@2.0.0"
+    },
+    {
+      "type": "library",
+      "name": "merge-options",
+      "version": "3.0.4",
+      "purl": "pkg:npm/merge-options@3.0.4"
+    },
+    {
+      "type": "library",
+      "name": "merge-stream",
+      "version": "2.0.0",
+      "purl": "pkg:npm/merge-stream@2.0.0"
+    },
+    {
+      "type": "library",
+      "name": "methods",
+      "version": "1.1.2",
+      "purl": "pkg:npm/methods@1.1.2"
+    },
+    {
+      "type": "library",
+      "name": "metro",
+      "version": "0.83.3",
+      "purl": "pkg:npm/metro@0.83.3"
+    },
+    {
+      "type": "library",
+      "name": "metro",
+      "version": "0.83.7",
+      "purl": "pkg:npm/metro@0.83.7"
+    },
+    {
+      "type": "library",
+      "name": "metro-babel-transformer",
+      "version": "0.83.3",
+      "purl": "pkg:npm/metro-babel-transformer@0.83.3"
+    },
+    {
+      "type": "library",
+      "name": "metro-babel-transformer",
+      "version": "0.83.7",
+      "purl": "pkg:npm/metro-babel-transformer@0.83.7"
+    },
+    {
+      "type": "library",
+      "name": "metro-cache",
+      "version": "0.83.3",
+      "purl": "pkg:npm/metro-cache@0.83.3"
+    },
+    {
+      "type": "library",
+      "name": "metro-cache",
+      "version": "0.83.7",
+      "purl": "pkg:npm/metro-cache@0.83.7"
+    },
+    {
+      "type": "library",
+      "name": "metro-cache-key",
+      "version": "0.83.3",
+      "purl": "pkg:npm/metro-cache-key@0.83.3"
+    },
+    {
+      "type": "library",
+      "name": "metro-cache-key",
+      "version": "0.83.7",
+      "purl": "pkg:npm/metro-cache-key@0.83.7"
+    },
+    {
+      "type": "library",
+      "name": "metro-config",
+      "version": "0.83.3",
+      "purl": "pkg:npm/metro-config@0.83.3"
+    },
+    {
+      "type": "library",
+      "name": "metro-config",
+      "version": "0.83.7",
+      "purl": "pkg:npm/metro-config@0.83.7"
+    },
+    {
+      "type": "library",
+      "name": "metro-core",
+      "version": "0.83.3",
+      "purl": "pkg:npm/metro-core@0.83.3"
+    },
+    {
+      "type": "library",
+      "name": "metro-core",
+      "version": "0.83.7",
+      "purl": "pkg:npm/metro-core@0.83.7"
+    },
+    {
+      "type": "library",
+      "name": "metro-file-map",
+      "version": "0.83.3",
+      "purl": "pkg:npm/metro-file-map@0.83.3"
+    },
+    {
+      "type": "library",
+      "name": "metro-file-map",
+      "version": "0.83.7",
+      "purl": "pkg:npm/metro-file-map@0.83.7"
+    },
+    {
+      "type": "library",
+      "name": "metro-minify-terser",
+      "version": "0.83.3",
+      "purl": "pkg:npm/metro-minify-terser@0.83.3"
+    },
+    {
+      "type": "library",
+      "name": "metro-minify-terser",
+      "version": "0.83.7",
+      "purl": "pkg:npm/metro-minify-terser@0.83.7"
+    },
+    {
+      "type": "library",
+      "name": "metro-resolver",
+      "version": "0.83.3",
+      "purl": "pkg:npm/metro-resolver@0.83.3"
+    },
+    {
+      "type": "library",
+      "name": "metro-resolver",
+      "version": "0.83.7",
+      "purl": "pkg:npm/metro-resolver@0.83.7"
+    },
+    {
+      "type": "library",
+      "name": "metro-runtime",
+      "version": "0.83.3",
+      "purl": "pkg:npm/metro-runtime@0.83.3"
+    },
+    {
+      "type": "library",
+      "name": "metro-runtime",
+      "version": "0.83.7",
+      "purl": "pkg:npm/metro-runtime@0.83.7"
+    },
+    {
+      "type": "library",
+      "name": "metro-source-map",
+      "version": "0.83.3",
+      "purl": "pkg:npm/metro-source-map@0.83.3"
+    },
+    {
+      "type": "library",
+      "name": "metro-source-map",
+      "version": "0.83.7",
+      "purl": "pkg:npm/metro-source-map@0.83.7"
+    },
+    {
+      "type": "library",
+      "name": "metro-symbolicate",
+      "version": "0.83.3",
+      "purl": "pkg:npm/metro-symbolicate@0.83.3"
+    },
+    {
+      "type": "library",
+      "name": "metro-symbolicate",
+      "version": "0.83.7",
+      "purl": "pkg:npm/metro-symbolicate@0.83.7"
+    },
+    {
+      "type": "library",
+      "name": "metro-transform-plugins",
+      "version": "0.83.3",
+      "purl": "pkg:npm/metro-transform-plugins@0.83.3"
+    },
+    {
+      "type": "library",
+      "name": "metro-transform-plugins",
+      "version": "0.83.7",
+      "purl": "pkg:npm/metro-transform-plugins@0.83.7"
+    },
+    {
+      "type": "library",
+      "name": "metro-transform-worker",
+      "version": "0.83.3",
+      "purl": "pkg:npm/metro-transform-worker@0.83.3"
+    },
+    {
+      "type": "library",
+      "name": "metro-transform-worker",
+      "version": "0.83.7",
+      "purl": "pkg:npm/metro-transform-worker@0.83.7"
+    },
+    {
+      "type": "library",
+      "name": "micromatch",
+      "version": "4.0.8",
+      "purl": "pkg:npm/micromatch@4.0.8"
+    },
+    {
+      "type": "library",
+      "name": "mime",
+      "version": "1.6.0",
+      "purl": "pkg:npm/mime@1.6.0"
+    },
+    {
+      "type": "library",
+      "name": "mime",
+      "version": "2.6.0",
+      "purl": "pkg:npm/mime@2.6.0"
+    },
+    {
+      "type": "library",
+      "name": "mime",
+      "version": "3.0.0",
+      "purl": "pkg:npm/mime@3.0.0"
+    },
+    {
+      "type": "library",
+      "name": "mime-db",
+      "version": "1.33.0",
+      "purl": "pkg:npm/mime-db@1.33.0"
+    },
+    {
+      "type": "library",
+      "name": "mime-db",
+      "version": "1.52.0",
+      "purl": "pkg:npm/mime-db@1.52.0"
+    },
+    {
+      "type": "library",
+      "name": "mime-db",
+      "version": "1.54.0",
+      "purl": "pkg:npm/mime-db@1.54.0"
+    },
+    {
+      "type": "library",
+      "name": "mime-match",
+      "version": "1.0.2",
+      "purl": "pkg:npm/mime-match@1.0.2"
+    },
+    {
+      "type": "library",
+      "name": "mime-types",
+      "version": "2.1.18",
+      "purl": "pkg:npm/mime-types@2.1.18"
+    },
+    {
+      "type": "library",
+      "name": "mime-types",
+      "version": "2.1.35",
+      "purl": "pkg:npm/mime-types@2.1.35"
+    },
+    {
+      "type": "library",
+      "name": "mime-types",
+      "version": "3.0.2",
+      "purl": "pkg:npm/mime-types@3.0.2"
+    },
+    {
+      "type": "library",
+      "name": "mimic-fn",
+      "version": "1.2.0",
+      "purl": "pkg:npm/mimic-fn@1.2.0"
+    },
+    {
+      "type": "library",
+      "name": "mimic-fn",
+      "version": "2.1.0",
+      "purl": "pkg:npm/mimic-fn@2.1.0"
+    },
+    {
+      "type": "library",
+      "name": "min-indent",
+      "version": "1.0.1",
+      "purl": "pkg:npm/min-indent@1.0.1"
+    },
+    {
+      "type": "library",
+      "name": "minimalistic-assert",
+      "version": "1.0.1",
+      "purl": "pkg:npm/minimalistic-assert@1.0.1"
+    },
+    {
+      "type": "library",
+      "name": "minimatch",
+      "version": "10.2.5",
+      "purl": "pkg:npm/minimatch@10.2.5"
+    },
+    {
+      "type": "library",
+      "name": "minimatch",
+      "version": "10.2.6",
+      "purl": "pkg:npm/minimatch@10.2.6"
+    },
+    {
+      "type": "library",
+      "name": "minimatch",
+      "version": "3.1.5",
+      "purl": "pkg:npm/minimatch@3.1.5"
+    },
+    {
+      "type": "library",
+      "name": "minimatch",
+      "version": "5.1.9",
+      "purl": "pkg:npm/minimatch@5.1.9"
+    },
+    {
+      "type": "library",
+      "name": "minimatch",
+      "version": "9.0.9",
+      "purl": "pkg:npm/minimatch@9.0.9"
+    },
+    {
+      "type": "library",
+      "name": "minimist",
+      "version": "1.2.8",
+      "purl": "pkg:npm/minimist@1.2.8"
+    },
+    {
+      "type": "library",
+      "name": "minipass",
+      "version": "7.1.3",
+      "purl": "pkg:npm/minipass@7.1.3"
+    },
+    {
+      "type": "library",
+      "name": "minizlib",
+      "version": "3.1.0",
+      "purl": "pkg:npm/minizlib@3.1.0"
+    },
+    {
+      "type": "library",
+      "name": "mitt",
+      "version": "3.0.1",
+      "purl": "pkg:npm/mitt@3.0.1"
+    },
+    {
+      "type": "library",
+      "name": "mkdirp",
+      "version": "1.0.4",
+      "purl": "pkg:npm/mkdirp@1.0.4"
+    },
+    {
+      "type": "library",
+      "name": "module-details-from-path",
+      "version": "1.0.4",
+      "purl": "pkg:npm/module-details-from-path@1.0.4"
+    },
+    {
+      "type": "library",
+      "name": "motion-dom",
+      "version": "12.40.0",
+      "purl": "pkg:npm/motion-dom@12.40.0"
+    },
+    {
+      "type": "library",
+      "name": "motion-dom",
+      "version": "12.42.2",
+      "purl": "pkg:npm/motion-dom@12.42.2"
+    },
+    {
+      "type": "library",
+      "name": "motion-utils",
+      "version": "12.39.0",
+      "purl": "pkg:npm/motion-utils@12.39.0"
+    },
+    {
+      "type": "library",
+      "name": "mrmime",
+      "version": "2.0.1",
+      "purl": "pkg:npm/mrmime@2.0.1"
+    },
+    {
+      "type": "library",
+      "name": "ms",
+      "version": "2.0.0",
+      "purl": "pkg:npm/ms@2.0.0"
+    },
+    {
+      "type": "library",
+      "name": "ms",
+      "version": "2.1.3",
+      "purl": "pkg:npm/ms@2.1.3"
+    },
+    {
+      "type": "library",
+      "name": "mutative",
+      "version": "1.1.0",
+      "purl": "pkg:npm/mutative@1.1.0"
+    },
+    {
+      "type": "library",
+      "name": "mz",
+      "version": "2.7.0",
+      "purl": "pkg:npm/mz@2.7.0"
+    },
+    {
+      "type": "library",
+      "name": "namespace-emitter",
+      "version": "2.0.1",
+      "purl": "pkg:npm/namespace-emitter@2.0.1"
+    },
+    {
+      "type": "library",
+      "name": "nanoid",
+      "version": "3.3.18",
+      "purl": "pkg:npm/nanoid@3.3.18"
+    },
+    {
+      "type": "library",
+      "name": "nanoid",
+      "version": "5.1.16",
+      "purl": "pkg:npm/nanoid@5.1.16"
+    },
+    {
+      "type": "library",
+      "name": "negotiator",
+      "version": "0.6.3",
+      "purl": "pkg:npm/negotiator@0.6.3"
+    },
+    {
+      "type": "library",
+      "name": "negotiator",
+      "version": "0.6.4",
+      "purl": "pkg:npm/negotiator@0.6.4"
+    },
+    {
+      "type": "library",
+      "name": "negotiator",
+      "version": "1.0.0",
+      "purl": "pkg:npm/negotiator@1.0.0"
+    },
+    {
+      "type": "library",
+      "name": "nested-error-stacks",
+      "version": "2.0.1",
+      "purl": "pkg:npm/nested-error-stacks@2.0.1"
+    },
+    {
+      "type": "library",
+      "name": "next-themes",
+      "version": "0.4.6",
+      "purl": "pkg:npm/next-themes@0.4.6"
+    },
+    {
+      "type": "library",
+      "name": "node-domexception",
+      "version": "1.0.0",
+      "purl": "pkg:npm/node-domexception@1.0.0"
+    },
+    {
+      "type": "library",
+      "name": "node-fetch",
+      "version": "2.7.0",
+      "purl": "pkg:npm/node-fetch@2.7.0"
+    },
+    {
+      "type": "library",
+      "name": "node-fetch",
+      "version": "3.3.2",
+      "purl": "pkg:npm/node-fetch@3.3.2"
+    },
+    {
+      "type": "library",
+      "name": "node-forge",
+      "version": "1.4.0",
+      "purl": "pkg:npm/node-forge@1.4.0"
+    },
+    {
+      "type": "library",
+      "name": "node-gyp-build",
+      "version": "4.8.4",
+      "purl": "pkg:npm/node-gyp-build@4.8.4"
+    },
+    {
+      "type": "library",
+      "name": "node-int64",
+      "version": "0.4.0",
+      "purl": "pkg:npm/node-int64@0.4.0"
+    },
+    {
+      "type": "library",
+      "name": "node-releases",
+      "version": "2.0.54",
+      "purl": "pkg:npm/node-releases@2.0.54"
+    },
+    {
+      "type": "library",
+      "name": "nodemailer",
+      "version": "9.0.1",
+      "purl": "pkg:npm/nodemailer@9.0.1"
+    },
+    {
+      "type": "library",
+      "name": "normalize-path",
+      "version": "3.0.0",
+      "purl": "pkg:npm/normalize-path@3.0.0"
+    },
+    {
+      "type": "library",
+      "name": "npm-package-arg",
+      "version": "11.0.3",
+      "purl": "pkg:npm/npm-package-arg@11.0.3"
+    },
+    {
+      "type": "library",
+      "name": "npm-run-path",
+      "version": "4.0.1",
+      "purl": "pkg:npm/npm-run-path@4.0.1"
+    },
+    {
+      "type": "library",
+      "name": "npm-run-path",
+      "version": "6.0.0",
+      "purl": "pkg:npm/npm-run-path@6.0.0"
+    },
+    {
+      "type": "library",
+      "name": "nullthrows",
+      "version": "1.1.1",
+      "purl": "pkg:npm/nullthrows@1.1.1"
+    },
+    {
+      "type": "library",
+      "name": "ob1",
+      "version": "0.83.3",
+      "purl": "pkg:npm/ob1@0.83.3"
+    },
+    {
+      "type": "library",
+      "name": "ob1",
+      "version": "0.83.7",
+      "purl": "pkg:npm/ob1@0.83.7"
+    },
+    {
+      "type": "library",
+      "name": "object-assign",
+      "version": "4.1.1",
+      "purl": "pkg:npm/object-assign@4.1.1"
+    },
+    {
+      "type": "library",
+      "name": "object-inspect",
+      "version": "1.13.4",
+      "purl": "pkg:npm/object-inspect@1.13.4"
+    },
+    {
+      "type": "library",
+      "name": "object-is",
+      "version": "1.1.6",
+      "purl": "pkg:npm/object-is@1.1.6"
+    },
+    {
+      "type": "library",
+      "name": "object-keys",
+      "version": "1.1.1",
+      "purl": "pkg:npm/object-keys@1.1.1"
+    },
+    {
+      "type": "library",
+      "name": "object.assign",
+      "version": "4.1.7",
+      "purl": "pkg:npm/object.assign@4.1.7"
+    },
+    {
+      "type": "library",
+      "name": "obug",
+      "version": "2.1.2",
+      "purl": "pkg:npm/obug@2.1.2"
+    },
+    {
+      "type": "library",
+      "name": "on-exit-leak-free",
+      "version": "2.1.2",
+      "purl": "pkg:npm/on-exit-leak-free@2.1.2"
+    },
+    {
+      "type": "library",
+      "name": "on-finished",
+      "version": "2.3.0",
+      "purl": "pkg:npm/on-finished@2.3.0"
+    },
+    {
+      "type": "library",
+      "name": "on-finished",
+      "version": "2.4.1",
+      "purl": "pkg:npm/on-finished@2.4.1"
+    },
+    {
+      "type": "library",
+      "name": "on-headers",
+      "version": "1.1.0",
+      "purl": "pkg:npm/on-headers@1.1.0"
+    },
+    {
+      "type": "library",
+      "name": "once",
+      "version": "1.4.0",
+      "purl": "pkg:npm/once@1.4.0"
+    },
+    {
+      "type": "library",
+      "name": "onetime",
+      "version": "2.0.1",
+      "purl": "pkg:npm/onetime@2.0.1"
+    },
+    {
+      "type": "library",
+      "name": "onetime",
+      "version": "5.1.2",
+      "purl": "pkg:npm/onetime@5.1.2"
+    },
+    {
+      "type": "library",
+      "name": "onnxruntime-common",
+      "version": "1.24.0-dev.20251116-b39e144322",
+      "purl": "pkg:npm/onnxruntime-common@1.24.0-dev.20251116-b39e144322"
+    },
+    {
+      "type": "library",
+      "name": "onnxruntime-common",
+      "version": "1.24.3",
+      "purl": "pkg:npm/onnxruntime-common@1.24.3"
+    },
+    {
+      "type": "library",
+      "name": "onnxruntime-node",
+      "version": "1.24.3",
+      "purl": "pkg:npm/onnxruntime-node@1.24.3"
+    },
+    {
+      "type": "library",
+      "name": "onnxruntime-web",
+      "version": "1.26.0-dev.20260416-b7804b056c",
+      "purl": "pkg:npm/onnxruntime-web@1.26.0-dev.20260416-b7804b056c"
+    },
+    {
+      "type": "library",
+      "name": "open",
+      "version": "7.4.2",
+      "purl": "pkg:npm/open@7.4.2"
+    },
+    {
+      "type": "library",
+      "name": "open",
+      "version": "8.4.2",
+      "purl": "pkg:npm/open@8.4.2"
+    },
+    {
+      "type": "library",
+      "name": "openai",
+      "version": "5.23.2",
+      "purl": "pkg:npm/openai@5.23.2"
+    },
+    {
+      "type": "library",
+      "name": "openai",
+      "version": "6.42.0",
+      "purl": "pkg:npm/openai@6.42.0"
+    },
+    {
+      "type": "library",
+      "name": "optics-ts",
+      "version": "2.4.1",
+      "purl": "pkg:npm/optics-ts@2.4.1"
+    },
+    {
+      "type": "library",
+      "name": "optimism",
+      "version": "0.18.1",
+      "purl": "pkg:npm/optimism@0.18.1"
+    },
+    {
+      "type": "library",
+      "name": "ora",
+      "version": "3.4.0",
+      "purl": "pkg:npm/ora@3.4.0"
+    },
+    {
+      "type": "library",
+      "name": "orval",
+      "version": "8.22.0",
+      "purl": "pkg:npm/orval@8.22.0"
+    },
+    {
+      "type": "library",
+      "name": "oxlint",
+      "version": "1.69.0",
+      "purl": "pkg:npm/oxlint@1.69.0"
+    },
+    {
+      "type": "library",
+      "name": "p-limit",
+      "version": "2.3.0",
+      "purl": "pkg:npm/p-limit@2.3.0"
+    },
+    {
+      "type": "library",
+      "name": "p-limit",
+      "version": "3.1.0",
+      "purl": "pkg:npm/p-limit@3.1.0"
+    },
+    {
+      "type": "library",
+      "name": "p-limit",
+      "version": "4.0.0",
+      "purl": "pkg:npm/p-limit@4.0.0"
+    },
+    {
+      "type": "library",
+      "name": "p-limit",
+      "version": "7.3.0",
+      "purl": "pkg:npm/p-limit@7.3.0"
+    },
+    {
+      "type": "library",
+      "name": "p-locate",
+      "version": "4.1.0",
+      "purl": "pkg:npm/p-locate@4.1.0"
+    },
+    {
+      "type": "library",
+      "name": "p-locate",
+      "version": "5.0.0",
+      "purl": "pkg:npm/p-locate@5.0.0"
+    },
+    {
+      "type": "library",
+      "name": "p-locate",
+      "version": "6.0.0",
+      "purl": "pkg:npm/p-locate@6.0.0"
+    },
+    {
+      "type": "library",
+      "name": "p-queue",
+      "version": "8.1.1",
+      "purl": "pkg:npm/p-queue@8.1.1"
+    },
+    {
+      "type": "library",
+      "name": "p-retry",
+      "version": "4.6.2",
+      "purl": "pkg:npm/p-retry@4.6.2"
+    },
+    {
+      "type": "library",
+      "name": "p-retry",
+      "version": "6.2.1",
+      "purl": "pkg:npm/p-retry@6.2.1"
+    },
+    {
+      "type": "library",
+      "name": "p-retry",
+      "version": "7.1.1",
+      "purl": "pkg:npm/p-retry@7.1.1"
+    },
+    {
+      "type": "library",
+      "name": "p-timeout",
+      "version": "6.1.4",
+      "purl": "pkg:npm/p-timeout@6.1.4"
+    },
+    {
+      "type": "library",
+      "name": "p-try",
+      "version": "2.2.0",
+      "purl": "pkg:npm/p-try@2.2.0"
+    },
+    {
+      "type": "library",
+      "name": "package-json-from-dist",
+      "version": "1.0.1",
+      "purl": "pkg:npm/package-json-from-dist@1.0.1"
+    },
+    {
+      "type": "library",
+      "name": "pako",
+      "version": "0.2.9",
+      "purl": "pkg:npm/pako@0.2.9"
+    },
+    {
+      "type": "library",
+      "name": "pako",
+      "version": "1.0.11",
+      "purl": "pkg:npm/pako@1.0.11"
+    },
+    {
+      "type": "library",
+      "name": "pako",
+      "version": "2.2.0",
+      "purl": "pkg:npm/pako@2.2.0"
+    },
+    {
+      "type": "library",
+      "name": "parent-module",
+      "version": "1.0.1",
+      "purl": "pkg:npm/parent-module@1.0.1"
+    },
+    {
+      "type": "library",
+      "name": "parse-json",
+      "version": "5.2.0",
+      "purl": "pkg:npm/parse-json@5.2.0"
+    },
+    {
+      "type": "library",
+      "name": "parse-ms",
+      "version": "4.0.0",
+      "purl": "pkg:npm/parse-ms@4.0.0"
+    },
+    {
+      "type": "library",
+      "name": "parse-png",
+      "version": "2.1.0",
+      "purl": "pkg:npm/parse-png@2.1.0"
+    },
+    {
+      "type": "library",
+      "name": "parseurl",
+      "version": "1.3.3",
+      "purl": "pkg:npm/parseurl@1.3.3"
+    },
+    {
+      "type": "library",
+      "name": "path-exists",
+      "version": "4.0.0",
+      "purl": "pkg:npm/path-exists@4.0.0"
+    },
+    {
+      "type": "library",
+      "name": "path-exists",
+      "version": "5.0.0",
+      "purl": "pkg:npm/path-exists@5.0.0"
+    },
+    {
+      "type": "library",
+      "name": "path-expression-matcher",
+      "version": "1.5.0",
+      "purl": "pkg:npm/path-expression-matcher@1.5.0"
+    },
+    {
+      "type": "library",
+      "name": "path-is-absolute",
+      "version": "1.0.1",
+      "purl": "pkg:npm/path-is-absolute@1.0.1"
+    },
+    {
+      "type": "library",
+      "name": "path-is-inside",
+      "version": "1.0.2",
+      "purl": "pkg:npm/path-is-inside@1.0.2"
+    },
+    {
+      "type": "library",
+      "name": "path-key",
+      "version": "3.1.1",
+      "purl": "pkg:npm/path-key@3.1.1"
+    },
+    {
+      "type": "library",
+      "name": "path-key",
+      "version": "4.0.0",
+      "purl": "pkg:npm/path-key@4.0.0"
+    },
+    {
+      "type": "library",
+      "name": "path-parse",
+      "version": "1.0.7",
+      "purl": "pkg:npm/path-parse@1.0.7"
+    },
+    {
+      "type": "library",
+      "name": "path-scurry",
+      "version": "1.11.1",
+      "purl": "pkg:npm/path-scurry@1.11.1"
+    },
+    {
+      "type": "library",
+      "name": "path-scurry",
+      "version": "2.0.2",
+      "purl": "pkg:npm/path-scurry@2.0.2"
+    },
+    {
+      "type": "library",
+      "name": "path-to-regexp",
+      "version": "3.3.0",
+      "purl": "pkg:npm/path-to-regexp@3.3.0"
+    },
+    {
+      "type": "library",
+      "name": "path-to-regexp",
+      "version": "8.4.2",
+      "purl": "pkg:npm/path-to-regexp@8.4.2"
+    },
+    {
+      "type": "library",
+      "name": "pathe",
+      "version": "2.0.3",
+      "purl": "pkg:npm/pathe@2.0.3"
+    },
+    {
+      "type": "library",
+      "name": "pathval",
+      "version": "2.0.1",
+      "purl": "pkg:npm/pathval@2.0.1"
+    },
+    {
+      "type": "library",
+      "name": "pdfkit",
+      "version": "0.18.0",
+      "purl": "pkg:npm/pdfkit@0.18.0"
+    },
+    {
+      "type": "library",
+      "name": "performance-now",
+      "version": "2.1.0",
+      "purl": "pkg:npm/performance-now@2.1.0"
+    },
+    {
+      "type": "library",
+      "name": "pg",
+      "version": "8.21.0",
+      "purl": "pkg:npm/pg@8.21.0"
+    },
+    {
+      "type": "library",
+      "name": "pg-cloudflare",
+      "version": "1.4.0",
+      "purl": "pkg:npm/pg-cloudflare@1.4.0"
+    },
+    {
+      "type": "library",
+      "name": "pg-connection-string",
+      "version": "2.13.0",
+      "purl": "pkg:npm/pg-connection-string@2.13.0"
+    },
+    {
+      "type": "library",
+      "name": "pg-int8",
+      "version": "1.0.1",
+      "purl": "pkg:npm/pg-int8@1.0.1"
+    },
+    {
+      "type": "library",
+      "name": "pg-pool",
+      "version": "3.14.0",
+      "purl": "pkg:npm/pg-pool@3.14.0"
+    },
+    {
+      "type": "library",
+      "name": "pg-protocol",
+      "version": "1.14.0",
+      "purl": "pkg:npm/pg-protocol@1.14.0"
+    },
+    {
+      "type": "library",
+      "name": "pg-types",
+      "version": "2.2.0",
+      "purl": "pkg:npm/pg-types@2.2.0"
+    },
+    {
+      "type": "library",
+      "name": "pgpass",
+      "version": "1.0.5",
+      "purl": "pkg:npm/pgpass@1.0.5"
+    },
+    {
+      "type": "library",
+      "name": "picocolors",
+      "version": "1.1.1",
+      "purl": "pkg:npm/picocolors@1.1.1"
+    },
+    {
+      "type": "library",
+      "name": "picomatch",
+      "version": "2.3.2",
+      "purl": "pkg:npm/picomatch@2.3.2"
+    },
+    {
+      "type": "library",
+      "name": "picomatch",
+      "version": "4.0.4",
+      "purl": "pkg:npm/picomatch@4.0.4"
+    },
+    {
+      "type": "library",
+      "name": "pino",
+      "version": "9.14.0",
+      "purl": "pkg:npm/pino@9.14.0"
+    },
+    {
+      "type": "library",
+      "name": "pino-abstract-transport",
+      "version": "2.0.0",
+      "purl": "pkg:npm/pino-abstract-transport@2.0.0"
+    },
+    {
+      "type": "library",
+      "name": "pino-abstract-transport",
+      "version": "3.0.0",
+      "purl": "pkg:npm/pino-abstract-transport@3.0.0"
+    },
+    {
+      "type": "library",
+      "name": "pino-pretty",
+      "version": "13.1.3",
+      "purl": "pkg:npm/pino-pretty@13.1.3"
+    },
+    {
+      "type": "library",
+      "name": "pino-std-serializers",
+      "version": "7.1.0",
+      "purl": "pkg:npm/pino-std-serializers@7.1.0"
+    },
+    {
+      "type": "library",
+      "name": "pirates",
+      "version": "4.0.7",
+      "purl": "pkg:npm/pirates@4.0.7"
+    },
+    {
+      "type": "library",
+      "name": "pkce-challenge",
+      "version": "5.0.1",
+      "purl": "pkg:npm/pkce-challenge@5.0.1"
+    },
+    {
+      "type": "library",
+      "name": "platform",
+      "version": "1.3.6",
+      "purl": "pkg:npm/platform@1.3.6"
+    },
+    {
+      "type": "library",
+      "name": "playwright",
+      "version": "1.60.0",
+      "purl": "pkg:npm/playwright@1.60.0"
+    },
+    {
+      "type": "library",
+      "name": "playwright-core",
+      "version": "1.60.0",
+      "purl": "pkg:npm/playwright-core@1.60.0"
+    },
+    {
+      "type": "library",
+      "name": "plist",
+      "version": "3.1.1",
+      "purl": "pkg:npm/plist@3.1.1"
+    },
+    {
+      "type": "library",
+      "name": "png-js",
+      "version": "1.1.0",
+      "purl": "pkg:npm/png-js@1.1.0"
+    },
+    {
+      "type": "library",
+      "name": "pngjs",
+      "version": "3.4.0",
+      "purl": "pkg:npm/pngjs@3.4.0"
+    },
+    {
+      "type": "library",
+      "name": "polished",
+      "version": "4.3.1",
+      "purl": "pkg:npm/polished@4.3.1"
+    },
+    {
+      "type": "library",
+      "name": "possible-typed-array-names",
+      "version": "1.1.0",
+      "purl": "pkg:npm/possible-typed-array-names@1.1.0"
+    },
+    {
+      "type": "library",
+      "name": "postcss",
+      "version": "8.5.23",
+      "purl": "pkg:npm/postcss@8.5.23"
+    },
+    {
+      "type": "library",
+      "name": "postcss-selector-parser",
+      "version": "6.0.10",
+      "purl": "pkg:npm/postcss-selector-parser@6.0.10"
+    },
+    {
+      "type": "library",
+      "name": "postgres-array",
+      "version": "2.0.0",
+      "purl": "pkg:npm/postgres-array@2.0.0"
+    },
+    {
+      "type": "library",
+      "name": "postgres-bytea",
+      "version": "1.0.1",
+      "purl": "pkg:npm/postgres-bytea@1.0.1"
+    },
+    {
+      "type": "library",
+      "name": "postgres-date",
+      "version": "1.0.7",
+      "purl": "pkg:npm/postgres-date@1.0.7"
+    },
+    {
+      "type": "library",
+      "name": "postgres-interval",
+      "version": "1.2.0",
+      "purl": "pkg:npm/postgres-interval@1.2.0"
+    },
+    {
+      "type": "library",
+      "name": "posthog-js",
+      "version": "1.386.6",
+      "purl": "pkg:npm/posthog-js@1.386.6"
+    },
+    {
+      "type": "library",
+      "name": "preact",
+      "version": "10.29.2",
+      "purl": "pkg:npm/preact@10.29.2"
+    },
+    {
+      "type": "library",
+      "name": "prettier",
+      "version": "3.8.4",
+      "purl": "pkg:npm/prettier@3.8.4"
+    },
+    {
+      "type": "library",
+      "name": "pretty-bytes",
+      "version": "5.6.0",
+      "purl": "pkg:npm/pretty-bytes@5.6.0"
+    },
+    {
+      "type": "library",
+      "name": "pretty-bytes",
+      "version": "6.1.1",
+      "purl": "pkg:npm/pretty-bytes@6.1.1"
+    },
+    {
+      "type": "library",
+      "name": "pretty-format",
+      "version": "27.5.1",
+      "purl": "pkg:npm/pretty-format@27.5.1"
+    },
+    {
+      "type": "library",
+      "name": "pretty-format",
+      "version": "29.7.0",
+      "purl": "pkg:npm/pretty-format@29.7.0"
+    },
+    {
+      "type": "library",
+      "name": "pretty-ms",
+      "version": "9.3.1",
+      "purl": "pkg:npm/pretty-ms@9.3.1"
+    },
+    {
+      "type": "library",
+      "name": "proc-log",
+      "version": "4.2.0",
+      "purl": "pkg:npm/proc-log@4.2.0"
+    },
+    {
+      "type": "library",
+      "name": "process",
+      "version": "0.11.10",
+      "purl": "pkg:npm/process@0.11.10"
+    },
+    {
+      "type": "library",
+      "name": "process-nextick-args",
+      "version": "2.0.1",
+      "purl": "pkg:npm/process-nextick-args@2.0.1"
+    },
+    {
+      "type": "library",
+      "name": "process-warning",
+      "version": "5.0.0",
+      "purl": "pkg:npm/process-warning@5.0.0"
+    },
+    {
+      "type": "library",
+      "name": "progress",
+      "version": "2.0.3",
+      "purl": "pkg:npm/progress@2.0.3"
+    },
+    {
+      "type": "library",
+      "name": "prom-client",
+      "version": "15.1.3",
+      "purl": "pkg:npm/prom-client@15.1.3"
+    },
+    {
+      "type": "library",
+      "name": "promise",
+      "version": "8.3.0",
+      "purl": "pkg:npm/promise@8.3.0"
+    },
+    {
+      "type": "library",
+      "name": "prompts",
+      "version": "2.4.2",
+      "purl": "pkg:npm/prompts@2.4.2"
+    },
+    {
+      "type": "library",
+      "name": "prop-types",
+      "version": "15.8.1",
+      "purl": "pkg:npm/prop-types@15.8.1"
+    },
+    {
+      "type": "library",
+      "name": "protobufjs",
+      "version": "7.6.5",
+      "purl": "pkg:npm/protobufjs@7.6.5"
+    },
+    {
+      "type": "library",
+      "name": "proxy-addr",
+      "version": "2.0.7",
+      "purl": "pkg:npm/proxy-addr@2.0.7"
+    },
+    {
+      "type": "library",
+      "name": "proxy-compare",
+      "version": "2.6.0",
+      "purl": "pkg:npm/proxy-compare@2.6.0"
+    },
+    {
+      "type": "library",
+      "name": "pump",
+      "version": "3.0.4",
+      "purl": "pkg:npm/pump@3.0.4"
+    },
+    {
+      "type": "library",
+      "name": "punycode",
+      "version": "2.3.1",
+      "purl": "pkg:npm/punycode@2.3.1"
+    },
+    {
+      "type": "library",
+      "name": "punycode.js",
+      "version": "2.3.1",
+      "purl": "pkg:npm/punycode.js@2.3.1"
+    },
+    {
+      "type": "library",
+      "name": "pure-rand",
+      "version": "6.1.0",
+      "purl": "pkg:npm/pure-rand@6.1.0"
+    },
+    {
+      "type": "library",
+      "name": "qrcode-terminal",
+      "version": "0.11.0",
+      "purl": "pkg:npm/qrcode-terminal@0.11.0"
+    },
+    {
+      "type": "library",
+      "name": "qs",
+      "version": "6.16.0",
+      "purl": "pkg:npm/qs@6.16.0"
+    },
+    {
+      "type": "library",
+      "name": "query-selector-shadow-dom",
+      "version": "1.0.1",
+      "purl": "pkg:npm/query-selector-shadow-dom@1.0.1"
+    },
+    {
+      "type": "library",
+      "name": "quick-format-unescaped",
+      "version": "4.0.4",
+      "purl": "pkg:npm/quick-format-unescaped@4.0.4"
+    },
+    {
+      "type": "library",
+      "name": "raf",
+      "version": "3.4.1",
+      "purl": "pkg:npm/raf@3.4.1"
+    },
+    {
+      "type": "library",
+      "name": "range-parser",
+      "version": "1.2.0",
+      "purl": "pkg:npm/range-parser@1.2.0"
+    },
+    {
+      "type": "library",
+      "name": "range-parser",
+      "version": "1.2.1",
+      "purl": "pkg:npm/range-parser@1.2.1"
+    },
+    {
+      "type": "library",
+      "name": "raw-body",
+      "version": "3.0.2",
+      "purl": "pkg:npm/raw-body@3.0.2"
+    },
+    {
+      "type": "library",
+      "name": "rc",
+      "version": "1.2.8",
+      "purl": "pkg:npm/rc@1.2.8"
+    },
+    {
+      "type": "library",
+      "name": "react",
+      "version": "19.1.0",
+      "purl": "pkg:npm/react@19.1.0"
+    },
+    {
+      "type": "library",
+      "name": "react-day-picker",
+      "version": "9.14.0",
+      "purl": "pkg:npm/react-day-picker@9.14.0"
+    },
+    {
+      "type": "library",
+      "name": "react-devtools-core",
+      "version": "6.1.5",
+      "purl": "pkg:npm/react-devtools-core@6.1.5"
+    },
+    {
+      "type": "library",
+      "name": "react-docgen",
+      "version": "7.1.1",
+      "purl": "pkg:npm/react-docgen@7.1.1"
+    },
+    {
+      "type": "library",
+      "name": "react-docgen-typescript",
+      "version": "2.4.0",
+      "purl": "pkg:npm/react-docgen-typescript@2.4.0"
+    },
+    {
+      "type": "library",
+      "name": "react-dom",
+      "version": "19.1.0",
+      "purl": "pkg:npm/react-dom@19.1.0"
+    },
+    {
+      "type": "library",
+      "name": "react-hook-form",
+      "version": "7.78.0",
+      "purl": "pkg:npm/react-hook-form@7.78.0"
+    },
+    {
+      "type": "library",
+      "name": "react-i18next",
+      "version": "17.0.8",
+      "purl": "pkg:npm/react-i18next@17.0.8"
+    },
+    {
+      "type": "library",
+      "name": "react-is",
+      "version": "16.13.1",
+      "purl": "pkg:npm/react-is@16.13.1"
+    },
+    {
+      "type": "library",
+      "name": "react-is",
+      "version": "17.0.2",
+      "purl": "pkg:npm/react-is@17.0.2"
+    },
+    {
+      "type": "library",
+      "name": "react-is",
+      "version": "18.3.1",
+      "purl": "pkg:npm/react-is@18.3.1"
+    },
+    {
+      "type": "library",
+      "name": "react-native",
+      "version": "0.81.5",
+      "purl": "pkg:npm/react-native@0.81.5"
+    },
+    {
+      "type": "library",
+      "name": "react-native-is-edge-to-edge",
+      "version": "1.3.1",
+      "purl": "pkg:npm/react-native-is-edge-to-edge@1.3.1"
+    },
+    {
+      "type": "library",
+      "name": "react-native-keyboard-controller",
+      "version": "1.18.5",
+      "purl": "pkg:npm/react-native-keyboard-controller@1.18.5"
+    },
+    {
+      "type": "library",
+      "name": "react-native-safe-area-context",
+      "version": "5.8.0",
+      "purl": "pkg:npm/react-native-safe-area-context@5.8.0"
+    },
+    {
+      "type": "library",
+      "name": "react-refresh",
+      "version": "0.14.2",
+      "purl": "pkg:npm/react-refresh@0.14.2"
+    },
+    {
+      "type": "library",
+      "name": "react-remove-scroll",
+      "version": "2.7.2",
+      "purl": "pkg:npm/react-remove-scroll@2.7.2"
+    },
+    {
+      "type": "library",
+      "name": "react-remove-scroll-bar",
+      "version": "2.3.8",
+      "purl": "pkg:npm/react-remove-scroll-bar@2.3.8"
+    },
+    {
+      "type": "library",
+      "name": "react-resizable-panels",
+      "version": "2.1.9",
+      "purl": "pkg:npm/react-resizable-panels@2.1.9"
+    },
+    {
+      "type": "library",
+      "name": "react-smooth",
+      "version": "4.0.4",
+      "purl": "pkg:npm/react-smooth@4.0.4"
+    },
+    {
+      "type": "library",
+      "name": "react-style-singleton",
+      "version": "2.2.3",
+      "purl": "pkg:npm/react-style-singleton@2.2.3"
+    },
+    {
+      "type": "library",
+      "name": "react-tracked",
+      "version": "1.7.14",
+      "purl": "pkg:npm/react-tracked@1.7.14"
+    },
+    {
+      "type": "library",
+      "name": "react-transition-group",
+      "version": "4.4.5",
+      "purl": "pkg:npm/react-transition-group@4.4.5"
+    },
+    {
+      "type": "library",
+      "name": "readable-stream",
+      "version": "2.3.8",
+      "purl": "pkg:npm/readable-stream@2.3.8"
+    },
+    {
+      "type": "library",
+      "name": "readable-stream",
+      "version": "3.6.2",
+      "purl": "pkg:npm/readable-stream@3.6.2"
+    },
+    {
+      "type": "library",
+      "name": "readable-stream",
+      "version": "4.7.0",
+      "purl": "pkg:npm/readable-stream@4.7.0"
+    },
+    {
+      "type": "library",
+      "name": "readdir-glob",
+      "version": "1.1.3",
+      "purl": "pkg:npm/readdir-glob@1.1.3"
+    },
+    {
+      "type": "library",
+      "name": "readdirp",
+      "version": "5.1.1",
+      "purl": "pkg:npm/readdirp@5.1.1"
+    },
+    {
+      "type": "library",
+      "name": "real-require",
+      "version": "0.2.0",
+      "purl": "pkg:npm/real-require@0.2.0"
+    },
+    {
+      "type": "library",
+      "name": "recast",
+      "version": "0.23.11",
+      "purl": "pkg:npm/recast@0.23.11"
+    },
+    {
+      "type": "library",
+      "name": "recharts",
+      "version": "2.15.4",
+      "purl": "pkg:npm/recharts@2.15.4"
+    },
+    {
+      "type": "library",
+      "name": "recharts-scale",
+      "version": "0.4.5",
+      "purl": "pkg:npm/recharts-scale@0.4.5"
+    },
+    {
+      "type": "library",
+      "name": "redent",
+      "version": "3.0.0",
+      "purl": "pkg:npm/redent@3.0.0"
+    },
+    {
+      "type": "library",
+      "name": "regenerate",
+      "version": "1.4.2",
+      "purl": "pkg:npm/regenerate@1.4.2"
+    },
+    {
+      "type": "library",
+      "name": "regenerate-unicode-properties",
+      "version": "10.2.2",
+      "purl": "pkg:npm/regenerate-unicode-properties@10.2.2"
+    },
+    {
+      "type": "library",
+      "name": "regenerator-runtime",
+      "version": "0.13.11",
+      "purl": "pkg:npm/regenerator-runtime@0.13.11"
+    },
+    {
+      "type": "library",
+      "name": "regexparam",
+      "version": "3.0.0",
+      "purl": "pkg:npm/regexparam@3.0.0"
+    },
+    {
+      "type": "library",
+      "name": "regexpu-core",
+      "version": "6.4.0",
+      "purl": "pkg:npm/regexpu-core@6.4.0"
+    },
+    {
+      "type": "library",
+      "name": "registry-auth-token",
+      "version": "3.3.2",
+      "purl": "pkg:npm/registry-auth-token@3.3.2"
+    },
+    {
+      "type": "library",
+      "name": "registry-url",
+      "version": "3.1.0",
+      "purl": "pkg:npm/registry-url@3.1.0"
+    },
+    {
+      "type": "library",
+      "name": "regjsgen",
+      "version": "0.8.0",
+      "purl": "pkg:npm/regjsgen@0.8.0"
+    },
+    {
+      "type": "library",
+      "name": "regjsparser",
+      "version": "0.13.1",
+      "purl": "pkg:npm/regjsparser@0.13.1"
+    },
+    {
+      "type": "library",
+      "name": "rehackt",
+      "version": "0.1.0",
+      "purl": "pkg:npm/rehackt@0.1.0"
+    },
+    {
+      "type": "library",
+      "name": "remeda",
+      "version": "2.45.0",
+      "purl": "pkg:npm/remeda@2.45.0"
+    },
+    {
+      "type": "library",
+      "name": "require-directory",
+      "version": "2.1.1",
+      "purl": "pkg:npm/require-directory@2.1.1"
+    },
+    {
+      "type": "library",
+      "name": "require-from-string",
+      "version": "2.0.2",
+      "purl": "pkg:npm/require-from-string@2.0.2"
+    },
+    {
+      "type": "library",
+      "name": "require-in-the-middle",
+      "version": "8.0.1",
+      "purl": "pkg:npm/require-in-the-middle@8.0.1"
+    },
+    {
+      "type": "library",
+      "name": "requireg",
+      "version": "0.2.2",
+      "purl": "pkg:npm/requireg@0.2.2"
+    },
+    {
+      "type": "library",
+      "name": "resolve",
+      "version": "1.22.12",
+      "purl": "pkg:npm/resolve@1.22.12"
+    },
+    {
+      "type": "library",
+      "name": "resolve",
+      "version": "1.7.1",
+      "purl": "pkg:npm/resolve@1.7.1"
+    },
+    {
+      "type": "library",
+      "name": "resolve-from",
+      "version": "4.0.0",
+      "purl": "pkg:npm/resolve-from@4.0.0"
+    },
+    {
+      "type": "library",
+      "name": "resolve-from",
+      "version": "5.0.0",
+      "purl": "pkg:npm/resolve-from@5.0.0"
+    },
+    {
+      "type": "library",
+      "name": "resolve-pkg-maps",
+      "version": "1.0.0",
+      "purl": "pkg:npm/resolve-pkg-maps@1.0.0"
+    },
+    {
+      "type": "library",
+      "name": "resolve-workspace-root",
+      "version": "2.0.1",
+      "purl": "pkg:npm/resolve-workspace-root@2.0.1"
+    },
+    {
+      "type": "library",
+      "name": "resolve.exports",
+      "version": "2.0.3",
+      "purl": "pkg:npm/resolve.exports@2.0.3"
+    },
+    {
+      "type": "library",
+      "name": "restore-cursor",
+      "version": "2.0.0",
+      "purl": "pkg:npm/restore-cursor@2.0.0"
+    },
+    {
+      "type": "library",
+      "name": "restructure",
+      "version": "3.0.2",
+      "purl": "pkg:npm/restructure@3.0.2"
+    },
+    {
+      "type": "library",
+      "name": "retry",
+      "version": "0.13.1",
+      "purl": "pkg:npm/retry@0.13.1"
+    },
+    {
+      "type": "library",
+      "name": "retry-request",
+      "version": "7.0.2",
+      "purl": "pkg:npm/retry-request@7.0.2"
+    },
+    {
+      "type": "library",
+      "name": "rgbcolor",
+      "version": "1.0.1",
+      "purl": "pkg:npm/rgbcolor@1.0.1"
+    },
+    {
+      "type": "library",
+      "name": "rimraf",
+      "version": "3.0.2",
+      "purl": "pkg:npm/rimraf@3.0.2"
+    },
+    {
+      "type": "library",
+      "name": "rimraf",
+      "version": "5.0.10",
+      "purl": "pkg:npm/rimraf@5.0.10"
+    },
+    {
+      "type": "library",
+      "name": "roarr",
+      "version": "2.15.4",
+      "purl": "pkg:npm/roarr@2.15.4"
+    },
+    {
+      "type": "library",
+      "name": "rolldown",
+      "version": "1.0.3",
+      "purl": "pkg:npm/rolldown@1.0.3"
+    },
+    {
+      "type": "library",
+      "name": "router",
+      "version": "2.2.0",
+      "purl": "pkg:npm/router@2.2.0"
+    },
+    {
+      "type": "library",
+      "name": "safe-buffer",
+      "version": "5.1.2",
+      "purl": "pkg:npm/safe-buffer@5.1.2"
+    },
+    {
+      "type": "library",
+      "name": "safe-buffer",
+      "version": "5.2.1",
+      "purl": "pkg:npm/safe-buffer@5.2.1"
+    },
+    {
+      "type": "library",
+      "name": "safe-json-stringify",
+      "version": "1.2.0",
+      "purl": "pkg:npm/safe-json-stringify@1.2.0"
+    },
+    {
+      "type": "library",
+      "name": "safe-regex-test",
+      "version": "1.1.0",
+      "purl": "pkg:npm/safe-regex-test@1.1.0"
+    },
+    {
+      "type": "library",
+      "name": "safe-stable-stringify",
+      "version": "2.5.0",
+      "purl": "pkg:npm/safe-stable-stringify@2.5.0"
+    },
+    {
+      "type": "library",
+      "name": "safer-buffer",
+      "version": "2.1.2",
+      "purl": "pkg:npm/safer-buffer@2.1.2"
+    },
+    {
+      "type": "library",
+      "name": "sax",
+      "version": "1.6.0",
+      "purl": "pkg:npm/sax@1.6.0"
+    },
+    {
+      "type": "library",
+      "name": "scheduler",
+      "version": "0.26.0",
+      "purl": "pkg:npm/scheduler@0.26.0"
+    },
+    {
+      "type": "library",
+      "name": "scroll-into-view-if-needed",
+      "version": "3.1.0",
+      "purl": "pkg:npm/scroll-into-view-if-needed@3.1.0"
+    },
+    {
+      "type": "library",
+      "name": "secure-json-parse",
+      "version": "4.1.0",
+      "purl": "pkg:npm/secure-json-parse@4.1.0"
+    },
+    {
+      "type": "library",
+      "name": "semver",
+      "version": "6.3.1",
+      "purl": "pkg:npm/semver@6.3.1"
+    },
+    {
+      "type": "library",
+      "name": "semver",
+      "version": "7.8.4",
+      "purl": "pkg:npm/semver@7.8.4"
+    },
+    {
+      "type": "library",
+      "name": "semver",
+      "version": "7.8.5",
+      "purl": "pkg:npm/semver@7.8.5"
+    },
+    {
+      "type": "library",
+      "name": "semver-compare",
+      "version": "1.0.0",
+      "purl": "pkg:npm/semver-compare@1.0.0"
+    },
+    {
+      "type": "library",
+      "name": "send",
+      "version": "0.19.2",
+      "purl": "pkg:npm/send@0.19.2"
+    },
+    {
+      "type": "library",
+      "name": "send",
+      "version": "1.2.1",
+      "purl": "pkg:npm/send@1.2.1"
+    },
+    {
+      "type": "library",
+      "name": "serialize-error",
+      "version": "2.1.0",
+      "purl": "pkg:npm/serialize-error@2.1.0"
+    },
+    {
+      "type": "library",
+      "name": "serialize-error",
+      "version": "7.0.1",
+      "purl": "pkg:npm/serialize-error@7.0.1"
+    },
+    {
+      "type": "library",
+      "name": "serve",
+      "version": "14.2.6",
+      "purl": "pkg:npm/serve@14.2.6"
+    },
+    {
+      "type": "library",
+      "name": "serve-handler",
+      "version": "6.1.7",
+      "purl": "pkg:npm/serve-handler@6.1.7"
+    },
+    {
+      "type": "library",
+      "name": "serve-static",
+      "version": "1.16.3",
+      "purl": "pkg:npm/serve-static@1.16.3"
+    },
+    {
+      "type": "library",
+      "name": "serve-static",
+      "version": "2.2.1",
+      "purl": "pkg:npm/serve-static@2.2.1"
+    },
+    {
+      "type": "library",
+      "name": "set-function-length",
+      "version": "1.2.2",
+      "purl": "pkg:npm/set-function-length@1.2.2"
+    },
+    {
+      "type": "library",
+      "name": "setimmediate",
+      "version": "1.0.5",
+      "purl": "pkg:npm/setimmediate@1.0.5"
+    },
+    {
+      "type": "library",
+      "name": "setprototypeof",
+      "version": "1.2.0",
+      "purl": "pkg:npm/setprototypeof@1.2.0"
+    },
+    {
+      "type": "library",
+      "name": "shallow-equal",
+      "version": "3.1.0",
+      "purl": "pkg:npm/shallow-equal@3.1.0"
+    },
+    {
+      "type": "library",
+      "name": "sharp",
+      "version": "0.35.3",
+      "purl": "pkg:npm/sharp@0.35.3"
+    },
+    {
+      "type": "library",
+      "name": "shebang-command",
+      "version": "2.0.0",
+      "purl": "pkg:npm/shebang-command@2.0.0"
+    },
+    {
+      "type": "library",
+      "name": "shebang-regex",
+      "version": "3.0.0",
+      "purl": "pkg:npm/shebang-regex@3.0.0"
+    },
+    {
+      "type": "library",
+      "name": "shell-quote",
+      "version": "1.9.0",
+      "purl": "pkg:npm/shell-quote@1.9.0"
+    },
+    {
+      "type": "library",
+      "name": "side-channel",
+      "version": "1.1.1",
+      "purl": "pkg:npm/side-channel@1.1.1"
+    },
+    {
+      "type": "library",
+      "name": "side-channel-list",
+      "version": "1.0.1",
+      "purl": "pkg:npm/side-channel-list@1.0.1"
+    },
+    {
+      "type": "library",
+      "name": "side-channel-map",
+      "version": "1.0.1",
+      "purl": "pkg:npm/side-channel-map@1.0.1"
+    },
+    {
+      "type": "library",
+      "name": "side-channel-weakmap",
+      "version": "1.0.2",
+      "purl": "pkg:npm/side-channel-weakmap@1.0.2"
+    },
+    {
+      "type": "library",
+      "name": "siginfo",
+      "version": "2.0.0",
+      "purl": "pkg:npm/siginfo@2.0.0"
+    },
+    {
+      "type": "library",
+      "name": "signal-exit",
+      "version": "3.0.7",
+      "purl": "pkg:npm/signal-exit@3.0.7"
+    },
+    {
+      "type": "library",
+      "name": "signal-exit",
+      "version": "4.1.0",
+      "purl": "pkg:npm/signal-exit@4.1.0"
+    },
+    {
+      "type": "library",
+      "name": "simple-plist",
+      "version": "1.3.1",
+      "purl": "pkg:npm/simple-plist@1.3.1"
+    },
+    {
+      "type": "library",
+      "name": "sirv",
+      "version": "3.0.2",
+      "purl": "pkg:npm/sirv@3.0.2"
+    },
+    {
+      "type": "library",
+      "name": "sisteransi",
+      "version": "1.0.5",
+      "purl": "pkg:npm/sisteransi@1.0.5"
+    },
+    {
+      "type": "library",
+      "name": "slash",
+      "version": "3.0.0",
+      "purl": "pkg:npm/slash@3.0.0"
+    },
+    {
+      "type": "library",
+      "name": "slate",
+      "version": "0.114.0",
+      "purl": "pkg:npm/slate@0.114.0"
+    },
+    {
+      "type": "library",
+      "name": "slate",
+      "version": "0.124.1",
+      "purl": "pkg:npm/slate@0.124.1"
+    },
+    {
+      "type": "library",
+      "name": "slate-dom",
+      "version": "0.114.0",
+      "purl": "pkg:npm/slate-dom@0.114.0"
+    },
+    {
+      "type": "library",
+      "name": "slate-history",
+      "version": "0.113.1",
+      "purl": "pkg:npm/slate-history@0.113.1"
+    },
+    {
+      "type": "library",
+      "name": "slate-hyperscript",
+      "version": "0.100.0",
+      "purl": "pkg:npm/slate-hyperscript@0.100.0"
+    },
+    {
+      "type": "library",
+      "name": "slate-react",
+      "version": "0.114.2",
+      "purl": "pkg:npm/slate-react@0.114.2"
+    },
+    {
+      "type": "library",
+      "name": "slate-react",
+      "version": "0.124.2",
+      "purl": "pkg:npm/slate-react@0.124.2"
+    },
+    {
+      "type": "library",
+      "name": "slugify",
+      "version": "1.6.9",
+      "purl": "pkg:npm/slugify@1.6.9"
+    },
+    {
+      "type": "library",
+      "name": "sonic-boom",
+      "version": "4.2.1",
+      "purl": "pkg:npm/sonic-boom@4.2.1"
+    },
+    {
+      "type": "library",
+      "name": "sonner",
+      "version": "2.0.7",
+      "purl": "pkg:npm/sonner@2.0.7"
+    },
+    {
+      "type": "library",
+      "name": "source-map",
+      "version": "0.5.7",
+      "purl": "pkg:npm/source-map@0.5.7"
+    },
+    {
+      "type": "library",
+      "name": "source-map",
+      "version": "0.6.1",
+      "purl": "pkg:npm/source-map@0.6.1"
+    },
+    {
+      "type": "library",
+      "name": "source-map-js",
+      "version": "1.2.1",
+      "purl": "pkg:npm/source-map-js@1.2.1"
+    },
+    {
+      "type": "library",
+      "name": "source-map-support",
+      "version": "0.5.21",
+      "purl": "pkg:npm/source-map-support@0.5.21"
+    },
+    {
+      "type": "library",
+      "name": "split2",
+      "version": "4.2.0",
+      "purl": "pkg:npm/split2@4.2.0"
+    },
+    {
+      "type": "library",
+      "name": "sprintf-js",
+      "version": "1.0.3",
+      "purl": "pkg:npm/sprintf-js@1.0.3"
+    },
+    {
+      "type": "library",
+      "name": "sprintf-js",
+      "version": "1.1.3",
+      "purl": "pkg:npm/sprintf-js@1.1.3"
+    },
+    {
+      "type": "library",
+      "name": "stack-utils",
+      "version": "2.0.6",
+      "purl": "pkg:npm/stack-utils@2.0.6"
+    },
+    {
+      "type": "library",
+      "name": "stackback",
+      "version": "0.0.2",
+      "purl": "pkg:npm/stackback@0.0.2"
+    },
+    {
+      "type": "library",
+      "name": "stackblur-canvas",
+      "version": "2.7.0",
+      "purl": "pkg:npm/stackblur-canvas@2.7.0"
+    },
+    {
+      "type": "library",
+      "name": "stackframe",
+      "version": "1.3.4",
+      "purl": "pkg:npm/stackframe@1.3.4"
+    },
+    {
+      "type": "library",
+      "name": "stacktrace-parser",
+      "version": "0.1.11",
+      "purl": "pkg:npm/stacktrace-parser@0.1.11"
+    },
+    {
+      "type": "library",
+      "name": "standardwebhooks",
+      "version": "1.0.0",
+      "purl": "pkg:npm/standardwebhooks@1.0.0"
+    },
+    {
+      "type": "library",
+      "name": "statuses",
+      "version": "1.5.0",
+      "purl": "pkg:npm/statuses@1.5.0"
+    },
+    {
+      "type": "library",
+      "name": "statuses",
+      "version": "2.0.2",
+      "purl": "pkg:npm/statuses@2.0.2"
+    },
+    {
+      "type": "library",
+      "name": "std-env",
+      "version": "4.1.0",
+      "purl": "pkg:npm/std-env@4.1.0"
+    },
+    {
+      "type": "library",
+      "name": "storybook",
+      "version": "8.6.18",
+      "purl": "pkg:npm/storybook@8.6.18"
+    },
+    {
+      "type": "library",
+      "name": "stream-buffers",
+      "version": "2.2.0",
+      "purl": "pkg:npm/stream-buffers@2.2.0"
+    },
+    {
+      "type": "library",
+      "name": "stream-events",
+      "version": "1.0.5",
+      "purl": "pkg:npm/stream-events@1.0.5"
+    },
+    {
+      "type": "library",
+      "name": "stream-shift",
+      "version": "1.0.3",
+      "purl": "pkg:npm/stream-shift@1.0.3"
+    },
+    {
+      "type": "library",
+      "name": "streamx",
+      "version": "2.27.0",
+      "purl": "pkg:npm/streamx@2.27.0"
+    },
+    {
+      "type": "library",
+      "name": "string_decoder",
+      "version": "1.1.1",
+      "purl": "pkg:npm/string_decoder@1.1.1"
+    },
+    {
+      "type": "library",
+      "name": "string_decoder",
+      "version": "1.3.0",
+      "purl": "pkg:npm/string_decoder@1.3.0"
+    },
+    {
+      "type": "library",
+      "name": "string-argv",
+      "version": "0.3.2",
+      "purl": "pkg:npm/string-argv@0.3.2"
+    },
+    {
+      "type": "library",
+      "name": "string-width",
+      "version": "4.2.3",
+      "purl": "pkg:npm/string-width@4.2.3"
+    },
+    {
+      "type": "library",
+      "name": "string-width",
+      "version": "5.1.2",
+      "purl": "pkg:npm/string-width@5.1.2"
+    },
+    {
+      "type": "library",
+      "name": "strip-ansi",
+      "version": "5.2.0",
+      "purl": "pkg:npm/strip-ansi@5.2.0"
+    },
+    {
+      "type": "library",
+      "name": "strip-ansi",
+      "version": "6.0.1",
+      "purl": "pkg:npm/strip-ansi@6.0.1"
+    },
+    {
+      "type": "library",
+      "name": "strip-ansi",
+      "version": "7.2.0",
+      "purl": "pkg:npm/strip-ansi@7.2.0"
+    },
+    {
+      "type": "library",
+      "name": "strip-bom",
+      "version": "3.0.0",
+      "purl": "pkg:npm/strip-bom@3.0.0"
+    },
+    {
+      "type": "library",
+      "name": "strip-final-newline",
+      "version": "2.0.0",
+      "purl": "pkg:npm/strip-final-newline@2.0.0"
+    },
+    {
+      "type": "library",
+      "name": "strip-final-newline",
+      "version": "4.0.0",
+      "purl": "pkg:npm/strip-final-newline@4.0.0"
+    },
+    {
+      "type": "library",
+      "name": "strip-indent",
+      "version": "3.0.0",
+      "purl": "pkg:npm/strip-indent@3.0.0"
+    },
+    {
+      "type": "library",
+      "name": "strip-indent",
+      "version": "4.1.1",
+      "purl": "pkg:npm/strip-indent@4.1.1"
+    },
+    {
+      "type": "library",
+      "name": "strip-json-comments",
+      "version": "2.0.1",
+      "purl": "pkg:npm/strip-json-comments@2.0.1"
+    },
+    {
+      "type": "library",
+      "name": "strip-json-comments",
+      "version": "5.0.3",
+      "purl": "pkg:npm/strip-json-comments@5.0.3"
+    },
+    {
+      "type": "library",
+      "name": "strnum",
+      "version": "2.4.0",
+      "purl": "pkg:npm/strnum@2.4.0"
+    },
+    {
+      "type": "library",
+      "name": "structured-headers",
+      "version": "0.4.1",
+      "purl": "pkg:npm/structured-headers@0.4.1"
+    },
+    {
+      "type": "library",
+      "name": "stubs",
+      "version": "3.0.0",
+      "purl": "pkg:npm/stubs@3.0.0"
+    },
+    {
+      "type": "library",
+      "name": "sucrase",
+      "version": "3.35.0",
+      "purl": "pkg:npm/sucrase@3.35.0"
+    },
+    {
+      "type": "library",
+      "name": "sucrase",
+      "version": "3.35.1",
+      "purl": "pkg:npm/sucrase@3.35.1"
+    },
+    {
+      "type": "library",
+      "name": "superagent",
+      "version": "10.3.0",
+      "purl": "pkg:npm/superagent@10.3.0"
+    },
+    {
+      "type": "library",
+      "name": "supertest",
+      "version": "7.2.2",
+      "purl": "pkg:npm/supertest@7.2.2"
+    },
+    {
+      "type": "library",
+      "name": "supports-color",
+      "version": "5.5.0",
+      "purl": "pkg:npm/supports-color@5.5.0"
+    },
+    {
+      "type": "library",
+      "name": "supports-color",
+      "version": "7.2.0",
+      "purl": "pkg:npm/supports-color@7.2.0"
+    },
+    {
+      "type": "library",
+      "name": "supports-color",
+      "version": "8.1.1",
+      "purl": "pkg:npm/supports-color@8.1.1"
+    },
+    {
+      "type": "library",
+      "name": "supports-hyperlinks",
+      "version": "2.3.0",
+      "purl": "pkg:npm/supports-hyperlinks@2.3.0"
+    },
+    {
+      "type": "library",
+      "name": "supports-preserve-symlinks-flag",
+      "version": "1.0.0",
+      "purl": "pkg:npm/supports-preserve-symlinks-flag@1.0.0"
+    },
+    {
+      "type": "library",
+      "name": "svg-pathdata",
+      "version": "6.0.3",
+      "purl": "pkg:npm/svg-pathdata@6.0.3"
+    },
+    {
+      "type": "library",
+      "name": "symbol-observable",
+      "version": "4.0.0",
+      "purl": "pkg:npm/symbol-observable@4.0.0"
+    },
+    {
+      "type": "library",
+      "name": "tailwind-merge",
+      "version": "3.5.0",
+      "purl": "pkg:npm/tailwind-merge@3.5.0"
+    },
+    {
+      "type": "library",
+      "name": "tailwindcss",
+      "version": "4.3.3",
+      "purl": "pkg:npm/tailwindcss@4.3.3"
+    },
+    {
+      "type": "library",
+      "name": "tapable",
+      "version": "2.3.3",
+      "purl": "pkg:npm/tapable@2.3.3"
+    },
+    {
+      "type": "library",
+      "name": "tar",
+      "version": "7.5.21",
+      "purl": "pkg:npm/tar@7.5.21"
+    },
+    {
+      "type": "library",
+      "name": "tar-stream",
+      "version": "3.2.0",
+      "purl": "pkg:npm/tar-stream@3.2.0"
+    },
+    {
+      "type": "library",
+      "name": "tdigest",
+      "version": "0.1.2",
+      "purl": "pkg:npm/tdigest@0.1.2"
+    },
+    {
+      "type": "library",
+      "name": "teeny-request",
+      "version": "9.0.0",
+      "purl": "pkg:npm/teeny-request@9.0.0"
+    },
+    {
+      "type": "library",
+      "name": "teex",
+      "version": "1.0.1",
+      "purl": "pkg:npm/teex@1.0.1"
+    },
+    {
+      "type": "library",
+      "name": "temp-dir",
+      "version": "2.0.0",
+      "purl": "pkg:npm/temp-dir@2.0.0"
+    },
+    {
+      "type": "library",
+      "name": "terminal-link",
+      "version": "2.1.1",
+      "purl": "pkg:npm/terminal-link@2.1.1"
+    },
+    {
+      "type": "library",
+      "name": "terser",
+      "version": "5.48.0",
+      "purl": "pkg:npm/terser@5.48.0"
+    },
+    {
+      "type": "library",
+      "name": "test-exclude",
+      "version": "6.0.0",
+      "purl": "pkg:npm/test-exclude@6.0.0"
+    },
+    {
+      "type": "library",
+      "name": "text-decoder",
+      "version": "1.2.7",
+      "purl": "pkg:npm/text-decoder@1.2.7"
+    },
+    {
+      "type": "library",
+      "name": "text-extensions",
+      "version": "2.4.0",
+      "purl": "pkg:npm/text-extensions@2.4.0"
+    },
+    {
+      "type": "library",
+      "name": "text-segmentation",
+      "version": "1.0.3",
+      "purl": "pkg:npm/text-segmentation@1.0.3"
+    },
+    {
+      "type": "library",
+      "name": "thenify",
+      "version": "3.3.1",
+      "purl": "pkg:npm/thenify@3.3.1"
+    },
+    {
+      "type": "library",
+      "name": "thenify-all",
+      "version": "1.6.0",
+      "purl": "pkg:npm/thenify-all@1.6.0"
+    },
+    {
+      "type": "library",
+      "name": "thread-stream",
+      "version": "3.2.0",
+      "purl": "pkg:npm/thread-stream@3.2.0"
+    },
+    {
+      "type": "library",
+      "name": "throat",
+      "version": "5.0.0",
+      "purl": "pkg:npm/throat@5.0.0"
+    },
+    {
+      "type": "library",
+      "name": "through",
+      "version": "2.3.8",
+      "purl": "pkg:npm/through@2.3.8"
+    },
+    {
+      "type": "library",
+      "name": "tiny-inflate",
+      "version": "1.0.3",
+      "purl": "pkg:npm/tiny-inflate@1.0.3"
+    },
+    {
+      "type": "library",
+      "name": "tiny-invariant",
+      "version": "1.3.1",
+      "purl": "pkg:npm/tiny-invariant@1.3.1"
+    },
+    {
+      "type": "library",
+      "name": "tiny-invariant",
+      "version": "1.3.3",
+      "purl": "pkg:npm/tiny-invariant@1.3.3"
+    },
+    {
+      "type": "library",
+      "name": "tiny-warning",
+      "version": "1.0.3",
+      "purl": "pkg:npm/tiny-warning@1.0.3"
+    },
+    {
+      "type": "library",
+      "name": "tinybench",
+      "version": "2.9.0",
+      "purl": "pkg:npm/tinybench@2.9.0"
+    },
+    {
+      "type": "library",
+      "name": "tinyexec",
+      "version": "1.2.4",
+      "purl": "pkg:npm/tinyexec@1.2.4"
+    },
+    {
+      "type": "library",
+      "name": "tinyglobby",
+      "version": "0.2.17",
+      "purl": "pkg:npm/tinyglobby@0.2.17"
+    },
+    {
+      "type": "library",
+      "name": "tinyrainbow",
+      "version": "1.2.0",
+      "purl": "pkg:npm/tinyrainbow@1.2.0"
+    },
+    {
+      "type": "library",
+      "name": "tinyrainbow",
+      "version": "3.1.0",
+      "purl": "pkg:npm/tinyrainbow@3.1.0"
+    },
+    {
+      "type": "library",
+      "name": "tinyspy",
+      "version": "3.0.2",
+      "purl": "pkg:npm/tinyspy@3.0.2"
+    },
+    {
+      "type": "library",
+      "name": "tmpl",
+      "version": "1.0.5",
+      "purl": "pkg:npm/tmpl@1.0.5"
+    },
+    {
+      "type": "library",
+      "name": "to-regex-range",
+      "version": "5.0.1",
+      "purl": "pkg:npm/to-regex-range@5.0.1"
+    },
+    {
+      "type": "library",
+      "name": "toidentifier",
+      "version": "1.0.1",
+      "purl": "pkg:npm/toidentifier@1.0.1"
+    },
+    {
+      "type": "library",
+      "name": "totalist",
+      "version": "3.0.1",
+      "purl": "pkg:npm/totalist@3.0.1"
+    },
+    {
+      "type": "library",
+      "name": "tr46",
+      "version": "0.0.3",
+      "purl": "pkg:npm/tr46@0.0.3"
+    },
+    {
+      "type": "library",
+      "name": "ts-algebra",
+      "version": "2.0.0",
+      "purl": "pkg:npm/ts-algebra@2.0.0"
+    },
+    {
+      "type": "library",
+      "name": "ts-dedent",
+      "version": "2.3.0",
+      "purl": "pkg:npm/ts-dedent@2.3.0"
+    },
+    {
+      "type": "library",
+      "name": "ts-interface-checker",
+      "version": "0.1.13",
+      "purl": "pkg:npm/ts-interface-checker@0.1.13"
+    },
+    {
+      "type": "library",
+      "name": "ts-invariant",
+      "version": "0.10.3",
+      "purl": "pkg:npm/ts-invariant@0.10.3"
+    },
+    {
+      "type": "library",
+      "name": "tsconfig-paths",
+      "version": "4.2.0",
+      "purl": "pkg:npm/tsconfig-paths@4.2.0"
+    },
+    {
+      "type": "library",
+      "name": "tslib",
+      "version": "2.8.1",
+      "purl": "pkg:npm/tslib@2.8.1"
+    },
+    {
+      "type": "library",
+      "name": "tsx",
+      "version": "4.22.4",
+      "purl": "pkg:npm/tsx@4.22.4"
+    },
+    {
+      "type": "library",
+      "name": "tsx",
+      "version": "4.23.13",
+      "purl": "pkg:npm/tsx@4.23.13"
+    },
+    {
+      "type": "library",
+      "name": "turbo",
+      "version": "2.9.18",
+      "purl": "pkg:npm/turbo@2.9.18"
+    },
+    {
+      "type": "library",
+      "name": "tw-animate-css",
+      "version": "1.4.0",
+      "purl": "pkg:npm/tw-animate-css@1.4.0"
+    },
+    {
+      "type": "library",
+      "name": "type-detect",
+      "version": "4.0.8",
+      "purl": "pkg:npm/type-detect@4.0.8"
+    },
+    {
+      "type": "library",
+      "name": "type-fest",
+      "version": "0.13.1",
+      "purl": "pkg:npm/type-fest@0.13.1"
+    },
+    {
+      "type": "library",
+      "name": "type-fest",
+      "version": "0.21.3",
+      "purl": "pkg:npm/type-fest@0.21.3"
+    },
+    {
+      "type": "library",
+      "name": "type-fest",
+      "version": "0.7.1",
+      "purl": "pkg:npm/type-fest@0.7.1"
+    },
+    {
+      "type": "library",
+      "name": "type-fest",
+      "version": "2.19.0",
+      "purl": "pkg:npm/type-fest@2.19.0"
+    },
+    {
+      "type": "library",
+      "name": "type-is",
+      "version": "2.1.0",
+      "purl": "pkg:npm/type-is@2.1.0"
+    },
+    {
+      "type": "library",
+      "name": "typedoc",
+      "version": "0.28.20",
+      "purl": "pkg:npm/typedoc@0.28.20"
+    },
+    {
+      "type": "library",
+      "name": "typedoc-plugin-coverage",
+      "version": "4.0.3",
+      "purl": "pkg:npm/typedoc-plugin-coverage@4.0.3"
+    },
+    {
+      "type": "library",
+      "name": "typedoc-plugin-markdown",
+      "version": "4.13.0",
+      "purl": "pkg:npm/typedoc-plugin-markdown@4.13.0"
+    },
+    {
+      "type": "library",
+      "name": "typescript",
+      "version": "6.0.3",
+      "purl": "pkg:npm/typescript@6.0.3"
+    },
+    {
+      "type": "library",
+      "name": "ua-parser-js",
+      "version": "0.7.41",
+      "purl": "pkg:npm/ua-parser-js@0.7.41"
+    },
+    {
+      "type": "library",
+      "name": "uc.micro",
+      "version": "2.1.0",
+      "purl": "pkg:npm/uc.micro@2.1.0"
+    },
+    {
+      "type": "library",
+      "name": "undici",
+      "version": "6.28.0",
+      "purl": "pkg:npm/undici@6.28.0"
+    },
+    {
+      "type": "library",
+      "name": "undici-types",
+      "version": "7.18.2",
+      "purl": "pkg:npm/undici-types@7.18.2"
+    },
+    {
+      "type": "library",
+      "name": "undici-types",
+      "version": "7.24.6",
+      "purl": "pkg:npm/undici-types@7.24.6"
+    },
+    {
+      "type": "library",
+      "name": "unicode-canonical-property-names-ecmascript",
+      "version": "2.0.1",
+      "purl": "pkg:npm/unicode-canonical-property-names-ecmascript@2.0.1"
+    },
+    {
+      "type": "library",
+      "name": "unicode-match-property-ecmascript",
+      "version": "2.0.0",
+      "purl": "pkg:npm/unicode-match-property-ecmascript@2.0.0"
+    },
+    {
+      "type": "library",
+      "name": "unicode-match-property-value-ecmascript",
+      "version": "2.2.1",
+      "purl": "pkg:npm/unicode-match-property-value-ecmascript@2.2.1"
+    },
+    {
+      "type": "library",
+      "name": "unicode-properties",
+      "version": "1.4.1",
+      "purl": "pkg:npm/unicode-properties@1.4.1"
+    },
+    {
+      "type": "library",
+      "name": "unicode-property-aliases-ecmascript",
+      "version": "2.2.0",
+      "purl": "pkg:npm/unicode-property-aliases-ecmascript@2.2.0"
+    },
+    {
+      "type": "library",
+      "name": "unicode-trie",
+      "version": "2.0.0",
+      "purl": "pkg:npm/unicode-trie@2.0.0"
+    },
+    {
+      "type": "library",
+      "name": "unicorn-magic",
+      "version": "0.1.0",
+      "purl": "pkg:npm/unicorn-magic@0.1.0"
+    },
+    {
+      "type": "library",
+      "name": "unicorn-magic",
+      "version": "0.3.0",
+      "purl": "pkg:npm/unicorn-magic@0.3.0"
+    },
+    {
+      "type": "library",
+      "name": "unique-string",
+      "version": "2.0.0",
+      "purl": "pkg:npm/unique-string@2.0.0"
+    },
+    {
+      "type": "library",
+      "name": "universalify",
+      "version": "2.0.1",
+      "purl": "pkg:npm/universalify@2.0.1"
+    },
+    {
+      "type": "library",
+      "name": "unpipe",
+      "version": "1.0.0",
+      "purl": "pkg:npm/unpipe@1.0.0"
+    },
+    {
+      "type": "library",
+      "name": "unplugin",
+      "version": "1.16.1",
+      "purl": "pkg:npm/unplugin@1.16.1"
+    },
+    {
+      "type": "library",
+      "name": "update-browserslist-db",
+      "version": "1.2.3",
+      "purl": "pkg:npm/update-browserslist-db@1.2.3"
+    },
+    {
+      "type": "library",
+      "name": "update-check",
+      "version": "1.5.4",
+      "purl": "pkg:npm/update-check@1.5.4"
+    },
+    {
+      "type": "library",
+      "name": "urql",
+      "version": "5.0.3",
+      "purl": "pkg:npm/urql@5.0.3"
+    },
+    {
+      "type": "library",
+      "name": "use-callback-ref",
+      "version": "1.3.3",
+      "purl": "pkg:npm/use-callback-ref@1.3.3"
+    },
+    {
+      "type": "library",
+      "name": "use-context-selector",
+      "version": "1.4.4",
+      "purl": "pkg:npm/use-context-selector@1.4.4"
+    },
+    {
+      "type": "library",
+      "name": "use-deep-compare",
+      "version": "1.3.0",
+      "purl": "pkg:npm/use-deep-compare@1.3.0"
+    },
+    {
+      "type": "library",
+      "name": "use-sidecar",
+      "version": "1.1.3",
+      "purl": "pkg:npm/use-sidecar@1.1.3"
+    },
+    {
+      "type": "library",
+      "name": "use-sync-external-store",
+      "version": "1.4.0",
+      "purl": "pkg:npm/use-sync-external-store@1.4.0"
+    },
+    {
+      "type": "library",
+      "name": "use-sync-external-store",
+      "version": "1.6.0",
+      "purl": "pkg:npm/use-sync-external-store@1.6.0"
+    },
+    {
+      "type": "library",
+      "name": "util",
+      "version": "0.12.5",
+      "purl": "pkg:npm/util@0.12.5"
+    },
+    {
+      "type": "library",
+      "name": "util-deprecate",
+      "version": "1.0.2",
+      "purl": "pkg:npm/util-deprecate@1.0.2"
+    },
+    {
+      "type": "library",
+      "name": "utils-merge",
+      "version": "1.0.1",
+      "purl": "pkg:npm/utils-merge@1.0.1"
+    },
+    {
+      "type": "library",
+      "name": "utrie",
+      "version": "1.0.2",
+      "purl": "pkg:npm/utrie@1.0.2"
+    },
+    {
+      "type": "library",
+      "name": "uuid",
+      "version": "14.0.1",
+      "purl": "pkg:npm/uuid@14.0.1"
+    },
+    {
+      "type": "library",
+      "name": "validate-npm-package-name",
+      "version": "5.0.1",
+      "purl": "pkg:npm/validate-npm-package-name@5.0.1"
+    },
+    {
+      "type": "library",
+      "name": "vary",
+      "version": "1.1.2",
+      "purl": "pkg:npm/vary@1.1.2"
+    },
+    {
+      "type": "library",
+      "name": "vaul",
+      "version": "1.1.2",
+      "purl": "pkg:npm/vaul@1.1.2"
+    },
+    {
+      "type": "library",
+      "name": "victory-vendor",
+      "version": "36.9.2",
+      "purl": "pkg:npm/victory-vendor@36.9.2"
+    },
+    {
+      "type": "library",
+      "name": "vite",
+      "version": "8.0.16",
+      "purl": "pkg:npm/vite@8.0.16"
+    },
+    {
+      "type": "library",
+      "name": "vitest",
+      "version": "4.1.7",
+      "purl": "pkg:npm/vitest@4.1.7"
+    },
+    {
+      "type": "library",
+      "name": "vitest",
+      "version": "4.1.8",
+      "purl": "pkg:npm/vitest@4.1.8"
+    },
+    {
+      "type": "library",
+      "name": "vlq",
+      "version": "1.0.1",
+      "purl": "pkg:npm/vlq@1.0.1"
+    },
+    {
+      "type": "library",
+      "name": "void-elements",
+      "version": "3.1.0",
+      "purl": "pkg:npm/void-elements@3.1.0"
+    },
+    {
+      "type": "library",
+      "name": "walker",
+      "version": "1.0.8",
+      "purl": "pkg:npm/walker@1.0.8"
+    },
+    {
+      "type": "library",
+      "name": "wcwidth",
+      "version": "1.0.1",
+      "purl": "pkg:npm/wcwidth@1.0.1"
+    },
+    {
+      "type": "library",
+      "name": "web-streams-polyfill",
+      "version": "3.3.3",
+      "purl": "pkg:npm/web-streams-polyfill@3.3.3"
+    },
+    {
+      "type": "library",
+      "name": "web-vitals",
+      "version": "5.1.0",
+      "purl": "pkg:npm/web-vitals@5.1.0"
+    },
+    {
+      "type": "library",
+      "name": "web-vitals",
+      "version": "5.3.0",
+      "purl": "pkg:npm/web-vitals@5.3.0"
+    },
+    {
+      "type": "library",
+      "name": "webidl-conversions",
+      "version": "3.0.1",
+      "purl": "pkg:npm/webidl-conversions@3.0.1"
+    },
+    {
+      "type": "library",
+      "name": "webidl-conversions",
+      "version": "5.0.0",
+      "purl": "pkg:npm/webidl-conversions@5.0.0"
+    },
+    {
+      "type": "library",
+      "name": "webpack-virtual-modules",
+      "version": "0.6.2",
+      "purl": "pkg:npm/webpack-virtual-modules@0.6.2"
+    },
+    {
+      "type": "library",
+      "name": "whatwg-fetch",
+      "version": "3.6.20",
+      "purl": "pkg:npm/whatwg-fetch@3.6.20"
+    },
+    {
+      "type": "library",
+      "name": "whatwg-mimetype",
+      "version": "3.0.0",
+      "purl": "pkg:npm/whatwg-mimetype@3.0.0"
+    },
+    {
+      "type": "library",
+      "name": "whatwg-url",
+      "version": "5.0.0",
+      "purl": "pkg:npm/whatwg-url@5.0.0"
+    },
+    {
+      "type": "library",
+      "name": "whatwg-url-without-unicode",
+      "version": "8.0.0-3",
+      "purl": "pkg:npm/whatwg-url-without-unicode@8.0.0-3"
+    },
+    {
+      "type": "library",
+      "name": "which",
+      "version": "2.0.2",
+      "purl": "pkg:npm/which@2.0.2"
+    },
+    {
+      "type": "library",
+      "name": "which-typed-array",
+      "version": "1.1.22",
+      "purl": "pkg:npm/which-typed-array@1.1.22"
+    },
+    {
+      "type": "library",
+      "name": "why-is-node-running",
+      "version": "2.3.0",
+      "purl": "pkg:npm/why-is-node-running@2.3.0"
+    },
+    {
+      "type": "library",
+      "name": "widest-line",
+      "version": "4.0.1",
+      "purl": "pkg:npm/widest-line@4.0.1"
+    },
+    {
+      "type": "library",
+      "name": "wildcard",
+      "version": "1.1.2",
+      "purl": "pkg:npm/wildcard@1.1.2"
+    },
+    {
+      "type": "library",
+      "name": "wonka",
+      "version": "6.3.6",
+      "purl": "pkg:npm/wonka@6.3.6"
+    },
+    {
+      "type": "library",
+      "name": "wouter",
+      "version": "3.10.0",
+      "purl": "pkg:npm/wouter@3.10.0"
+    },
+    {
+      "type": "library",
+      "name": "wrap-ansi",
+      "version": "7.0.0",
+      "purl": "pkg:npm/wrap-ansi@7.0.0"
+    },
+    {
+      "type": "library",
+      "name": "wrap-ansi",
+      "version": "8.1.0",
+      "purl": "pkg:npm/wrap-ansi@8.1.0"
+    },
+    {
+      "type": "library",
+      "name": "wrappy",
+      "version": "1.0.2",
+      "purl": "pkg:npm/wrappy@1.0.2"
+    },
+    {
+      "type": "library",
+      "name": "write-file-atomic",
+      "version": "4.0.2",
+      "purl": "pkg:npm/write-file-atomic@4.0.2"
+    },
+    {
+      "type": "library",
+      "name": "ws",
+      "version": "8.21.0",
+      "purl": "pkg:npm/ws@8.21.0"
+    },
+    {
+      "type": "library",
+      "name": "xcode",
+      "version": "3.0.1",
+      "purl": "pkg:npm/xcode@3.0.1"
+    },
+    {
+      "type": "library",
+      "name": "xml",
+      "version": "1.0.1",
+      "purl": "pkg:npm/xml@1.0.1"
+    },
+    {
+      "type": "library",
+      "name": "xml-js",
+      "version": "1.6.11",
+      "purl": "pkg:npm/xml-js@1.6.11"
+    },
+    {
+      "type": "library",
+      "name": "xml-naming",
+      "version": "0.1.0",
+      "purl": "pkg:npm/xml-naming@0.1.0"
+    },
+    {
+      "type": "library",
+      "name": "xml2js",
+      "version": "0.6.0",
+      "purl": "pkg:npm/xml2js@0.6.0"
+    },
+    {
+      "type": "library",
+      "name": "xmlbuilder",
+      "version": "11.0.1",
+      "purl": "pkg:npm/xmlbuilder@11.0.1"
+    },
+    {
+      "type": "library",
+      "name": "xmlbuilder",
+      "version": "15.1.1",
+      "purl": "pkg:npm/xmlbuilder@15.1.1"
+    },
+    {
+      "type": "library",
+      "name": "xtend",
+      "version": "4.0.2",
+      "purl": "pkg:npm/xtend@4.0.2"
+    },
+    {
+      "type": "library",
+      "name": "y18n",
+      "version": "5.0.8",
+      "purl": "pkg:npm/y18n@5.0.8"
+    },
+    {
+      "type": "library",
+      "name": "yallist",
+      "version": "3.1.1",
+      "purl": "pkg:npm/yallist@3.1.1"
+    },
+    {
+      "type": "library",
+      "name": "yallist",
+      "version": "5.0.0",
+      "purl": "pkg:npm/yallist@5.0.0"
+    },
+    {
+      "type": "library",
+      "name": "yaml",
+      "version": "2.9.0",
+      "purl": "pkg:npm/yaml@2.9.0"
+    },
+    {
+      "type": "library",
+      "name": "yargs",
+      "version": "17.7.2",
+      "purl": "pkg:npm/yargs@17.7.2"
+    },
+    {
+      "type": "library",
+      "name": "yargs-parser",
+      "version": "21.1.1",
+      "purl": "pkg:npm/yargs-parser@21.1.1"
+    },
+    {
+      "type": "library",
+      "name": "yocto-queue",
+      "version": "0.1.0",
+      "purl": "pkg:npm/yocto-queue@0.1.0"
+    },
+    {
+      "type": "library",
+      "name": "yocto-queue",
+      "version": "1.2.2",
+      "purl": "pkg:npm/yocto-queue@1.2.2"
+    },
+    {
+      "type": "library",
+      "name": "yoctocolors",
+      "version": "2.2.0",
+      "purl": "pkg:npm/yoctocolors@2.2.0"
+    },
+    {
+      "type": "library",
+      "name": "zen-observable",
+      "version": "0.10.0",
+      "purl": "pkg:npm/zen-observable@0.10.0"
+    },
+    {
+      "type": "library",
+      "name": "zen-observable",
+      "version": "0.8.15",
+      "purl": "pkg:npm/zen-observable@0.8.15"
+    },
+    {
+      "type": "library",
+      "name": "zen-observable-ts",
+      "version": "1.2.5",
+      "purl": "pkg:npm/zen-observable-ts@1.2.5"
+    },
+    {
+      "type": "library",
+      "name": "zip-stream",
+      "version": "6.0.1",
+      "purl": "pkg:npm/zip-stream@6.0.1"
+    },
+    {
+      "type": "library",
+      "name": "zod",
+      "version": "3.25.67",
+      "purl": "pkg:npm/zod@3.25.67"
+    },
+    {
+      "type": "library",
+      "name": "zod",
+      "version": "3.25.76",
+      "purl": "pkg:npm/zod@3.25.76"
+    },
+    {
+      "type": "library",
+      "name": "zod",
+      "version": "4.4.3",
+      "purl": "pkg:npm/zod@4.4.3"
+    },
+    {
+      "type": "library",
+      "name": "zod-to-json-schema",
+      "version": "3.25.2",
+      "purl": "pkg:npm/zod-to-json-schema@3.25.2"
+    },
+    {
+      "type": "library",
+      "name": "zustand",
+      "version": "5.0.14",
+      "purl": "pkg:npm/zustand@5.0.14"
+    },
+    {
+      "type": "library",
+      "name": "zustand-x",
+      "version": "6.1.0",
+      "purl": "pkg:npm/zustand-x@6.1.0"
     }
-  ],
-  "vulnerabilities": []
+  ]
 }
