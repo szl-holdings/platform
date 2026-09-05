@@ -88,6 +88,7 @@ overrides:
   path-to-regexp: 8.4.2
   'serve-handler>path-to-regexp': 3.3.0
   brace-expansion: 5.0.9
+  fflate: 0.8.3
   vite: 8.0.16
   'form-data@2': 2.5.6
   'form-data@4': 4.0.6
@@ -98,7 +99,7 @@ overrides:
   '@esbuild-kit/core-utils>esbuild': 0.28.1
   protobufjs: 7.6.5
   protocol-buffers-schema: ^3.6.1
-  '@xmldom/xmldom': ^0.9.10
+  '@xmldom/xmldom': ^0.9.12
   fast-xml-parser: ^5.8.0
   postcss: 8.5.23
   uuid: ^14.0.0
