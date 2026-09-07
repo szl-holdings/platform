@@ -13,7 +13,7 @@ license = { text = "Apache-2.0" }
 authors = [{ name = "Yachay", email = "yachay@szlholdings.dev" }]
 keywords = ["graphql", "strawberry", "federation", "gateway", "observability", "szl"]
 dependencies = [
-    "strawberry-graphql==0.316.0",
+    "strawberry-graphql==0.327.2",
     "httpx>=0.27",
 ]
 
