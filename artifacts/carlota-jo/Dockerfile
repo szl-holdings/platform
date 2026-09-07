@@ -28,7 +28,7 @@ COPY artifacts/carlota-jo/ ./artifacts/carlota-jo/
 ENV NODE_ENV=production
 RUN corepack enable pnpm && pnpm --filter "carlota-jo" run build
 
-FROM nginx:alpine@sha256:db35bfc6b2951e7f8a72db5db120288c127ffaeeb4a6d4b95a26fead017d5913 AS runner
+FROM nginx:alpine@sha256:72ba65eb42c10344912a84ff42408db7d34f2feb642204570ab8fc5ffd29f1d3 AS runner
 COPY --from=builder /app/artifacts/carlota-jo/dist /usr/share/nginx/html
 RUN printf 'server {\n  listen 8080;\n  root /usr/share/nginx/html;\n  index index.html;\n  location / { try_files $uri $uri/ /index.html; }\n}\n' > /etc/nginx/conf.d/default.conf \
     && sed -i 's|pid\s*/run/nginx.pid;|pid /tmp/nginx.pid;|' /etc/nginx/nginx.conf \
