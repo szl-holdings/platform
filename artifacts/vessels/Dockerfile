@@ -54,7 +54,7 @@ RUN --mount=type=cache,id=pnpm-store,target=/root/.local/share/pnpm/store \
 RUN pnpm --filter "@workspace/vessels" run build
 
 # ─── Stage 3: runtime (nginx, non-root, port 8080) ───────────────────────────
-FROM nginx:alpine@sha256:db35bfc6b2951e7f8a72db5db120288c127ffaeeb4a6d4b95a26fead017d5913 AS runner
+FROM nginx:alpine@sha256:72ba65eb42c10344912a84ff42408db7d34f2feb642204570ab8fc5ffd29f1d3 AS runner
 # The app is built with Vite base path "/vessels/". Serve the SPA under both
 # / and /vessels/, add the UDS liveness endpoint, and run unprivileged on 8080.
 COPY --from=builder /app/artifacts/vessels/dist/public /usr/share/nginx/html
