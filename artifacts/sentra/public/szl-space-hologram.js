@@ -81,7 +81,7 @@
     var keys = Object.keys(CURATED);
     var curatedKey = CURATED[id] ? id : keys.find(function (key) { return id.indexOf(key) >= 0 || key.indexOf(id) >= 0; });
     if (curatedKey) {
-      var values = CURATED[curatedKey];
+      const values = CURATED[curatedKey];
       return { id: id, label: values[0], motif: values[1], background: values[2], surface: values[3], foreground: values[4], muted: values[5], accent: values[6], accent2: values[7], source: "curated" };
     }
     var seed = hash(id);
@@ -292,7 +292,7 @@
     var value = ROOT.dataset.szlSpaceLabel || ROOT.dataset.szlSpaceSlug ||
       (meta && meta.getAttribute("content")) || "";
     if (!value) {
-      var match = String(window.location.hostname || "").match(/^(?:szlholdings|szl-holdings)-(.+?)(?:\.static)?\.hf\.space$/i);
+      const match = String(window.location.hostname || "").match(/^(?:szlholdings|szl-holdings)-(.+?)(?:\.static)?\.hf\.space$/i);
       value = match ? match[1] : "";
     }
     return humanize(value) || "SZL Holdings";
