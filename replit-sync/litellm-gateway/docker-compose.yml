@@ -2,9 +2,13 @@
 # (the Hetzner box qualifies). Outbound docker-bridge routing reaches 100.x via the host.
 #   docker compose up -d        # light it up
 #   docker compose down         # turn it off
+#
+# PIN (2026-09-11): LiteLLM retired the main-stable Docker tag. Pin the current
+# stable patch. This is SOFTWARE. It is not a production certificate and does
+# not admit N18 as a live broker.
 services:
   litellm:
-    image: ghcr.io/berriai/litellm:main-stable
+    image: ghcr.io/berriai/litellm:v1.100.1
     container_name: szl-litellm
     restart: unless-stopped
     ports:
