@@ -55,7 +55,7 @@
     "@types/node": "catalog:",
     "@types/react": "catalog:",
     "react": "catalog:",
-    "vitest": "^4.1.7",
+    "vitest": "^4.1.11",
     "typescript": "^6.0.3"
   }
 }

@@ -39,7 +39,7 @@
   "devDependencies": {
     "@types/node": "catalog:",
     "@workspace/alloy-vector-worker": "workspace:*",
-    "vitest": "^4.1.7"
+    "vitest": "^4.1.11"
   },
   "scripts": {
     "build": "tsc --build",

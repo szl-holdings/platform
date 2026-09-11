@@ -196,7 +196,7 @@
     "tsx": "catalog:",
     "turbo": "^2.9.14",
     "typescript": "~6.0.3",
-    "vitest": "^4.1.7",
+    "vitest": "^4.1.11",
     "ws": "^8.18.0"
   },
   "dependencies": {

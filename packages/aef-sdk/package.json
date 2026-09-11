@@ -43,7 +43,7 @@
     "@types/react": "catalog:",
     "react": "catalog:",
     "typescript": "catalog:",
-    "vitest": "^4.1.7"
+    "vitest": "^4.1.11"
   },
   "scripts": {
     "build": "tsc -p tsconfig.json",

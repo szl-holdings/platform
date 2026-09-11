@@ -54,7 +54,7 @@
   "devDependencies": {
     "@types/node": "catalog:",
     "@types/react": "catalog:",
-    "vitest": "^4.1.7"
+    "vitest": "^4.1.11"
   },
   "peerDependencies": {
     "react": "^18.0.0"
