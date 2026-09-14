@@ -22,7 +22,7 @@
 # filtered `@workspace/vessels` Vite build.
 
 # ─── Shared pinned package-manager base ───────────────────────────────────────
-FROM node:26-bookworm-slim@sha256:367679cf9792759492a486e4aa4b421764d71a9546a6dae8aab81a99eb797b3e AS pnpm-base
+FROM node:26-bookworm-slim@sha256:cd9f682fa2885cd1056e830424764158570061c59736a1da836bc3d73df095ae AS pnpm-base
 ARG PNPM_VERSION=10.26.1
 RUN npm install --global "pnpm@${PNPM_VERSION}" \
     && test "$(pnpm --version)" = "${PNPM_VERSION}"
