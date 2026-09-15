@@ -11,7 +11,7 @@ license = {text = "MIT"}
 
 dependencies = [
     "torch>=2.14.0",
-    "transformers>=5.16.1",
+    "transformers>=5.17.0",
 ]
 
 [project.optional-dependencies]
