@@ -2,42 +2,49 @@
 
 ## Overview
 
-The Model Router (`artifacts/api-server/src/services/model-router.ts`) provides provider-abstracted routing across 8 model lanes. It reads API keys from environment variables at request time and falls back gracefully when keys are absent.
+The Model Router provides provider-abstracted routing across model lanes. Provider identities in this document are source configuration, not proof that a provider/model is production-qualified. Live availability remains separately gated by credentials, runtime controls, evaluation receipts, and the active source revision.
+
+## DeepSeek identity boundary — 2026-09-14
+
+DeepSeek's current canonical API alias for V4.1 Flash is `deepseek-flash`. The historical `deepseek-v4-flash` and `deepseek-v4-flash-vision-exp` names are compatibility redirects, and `deepseek-v4-pro` began routing to V4.1 Flash at 04:00 UTC on 2026-09-14. The earlier `deepseek-chat` and `deepseek-reasoner` aliases are retired and must not be used as canonical model identities in A11oy receipts or provider configuration.
+
+The provider registry therefore records `deepseek-flash`, but keeps the DeepSeek provider unavailable by default. This is an identity-drift repair only. It does **not** establish V4.1 Flash production qualification or authorize a route/default change. Exact-source evaluation remains governed by `szl-holdings/szl-frontier#134/#135` and its Forge/Serve/GPU evidence chain.
+
+Any future live receipt must preserve both the requested provider/model alias and the resolved, qualified model identity so upstream compatibility redirects cannot silently change provenance.
 
 ## Model Lanes
 
 ### Strategy Lane
 Deep reasoning and multi-step strategic analysis.
 
-| Model | Provider | Context | Notes |
+| Model | Provider | Status | Notes |
 |---|---|---|---|
-| DeepSeek-R1 | DeepSeek | 128k | Chain-of-thought reasoning flagship |
-| DeepSeek-V4-Pro | DeepSeek | 200k | Extended context reasoning |
-| GLM-5.1 | Zhipu | 128k | |
-| Kimi-K2.6 | Moonshot | 200k | |
+| DeepSeek V4.1 Flash (`deepseek-flash`) | DeepSeek | HOLD / EVALUATION | Current canonical API identity; no production qualification implied |
+| GLM-5.1 | Zhipu | existing lane | |
+| Kimi-K2.6 | Moonshot | existing lane | |
 
-**Env key**: `DEEPSEEK_API_KEY` (primary), `ZHIPU_API_KEY`, `MOONSHOT_API_KEY`
+**Env key**: `DEEPSEEK_API_KEY` (gated), `ZHIPU_API_KEY`, `MOONSHOT_API_KEY`
 
 ### Fast-Ops Lane
-High-throughput, low-latency operational tasks.
+High-throughput operational tasks.
 
-| Model | Provider | Context | Notes |
+| Model | Provider | Status | Notes |
 |---|---|---|---|
-| DeepSeek-V4-Flash | DeepSeek | 64k | Sub-200ms latency |
-| Gemma-4 | Google | 128k | |
-| Qwen3.5-9B | Alibaba | 32k | |
+| DeepSeek V4.1 Flash (`deepseek-flash`) | DeepSeek | HOLD / EVALUATION | Do not infer latency or throughput from upstream claims |
+| Gemma-4 | Google | existing lane | |
+| Qwen3.5-9B | Alibaba | existing lane | |
 
-**Env key**: `DEEPSEEK_API_KEY`, `GOOGLE_AI_API_KEY`, `DASHSCOPE_API_KEY`
+**Env key**: `DEEPSEEK_API_KEY` (gated), `GOOGLE_AI_API_KEY`, `DASHSCOPE_API_KEY`
 
 ### Coding Lane
 Code generation, review, and engineering automation.
 
-| Model | Provider | Context | Notes |
+| Model | Provider | Status | Notes |
 |---|---|---|---|
-| Qwen3-Coder-Next | Alibaba | 131k | Best-in-class code generation |
-| DeepSeek-V4-Pro | DeepSeek | 200k | Fallback |
+| Qwen3-Coder-Next | Alibaba | existing lane | |
+| DeepSeek V4.1 Flash (`deepseek-flash`) | DeepSeek | HOLD / EVALUATION | Candidate only; exact-source and serving gates still apply |
 
-**Env key**: `DASHSCOPE_API_KEY`, `DEEPSEEK_API_KEY`
+**Env key**: `DASHSCOPE_API_KEY`, `DEEPSEEK_API_KEY` (gated)
 
 ### Forecasting Lane
 Time-series forecasting for business metrics.
@@ -67,8 +74,8 @@ Speech-to-text and text-to-speech.
 
 | Model | Provider | Notes |
 |---|---|---|
-| Whisper Large v3 | OpenAI/HF | State-of-the-art ASR |
-| Kokoro-82M | HF | High-quality TTS |
+| Whisper Large v3 | OpenAI/HF | ASR candidate |
+| Kokoro-82M | HF | TTS candidate |
 
 **Env key**: `HF_TOKEN`
 
@@ -87,9 +94,9 @@ Image and media generation.
 
 | Model | Provider | Notes |
 |---|---|---|
-| FLUX.1 | FAL.AI | Best open image generation |
-| FLUX.2 | FAL.AI | Higher resolution |
-| ERNIE-Image | Baidu | Low-cost fallback |
+| FLUX.1 | FAL.AI | Open image-generation candidate |
+| FLUX.2 | FAL.AI | Higher-resolution candidate |
+| ERNIE-Image | Baidu | Alternate candidate |
 
 **Env key**: `FAL_KEY`, `BAIDU_API_KEY`
 
@@ -97,34 +104,12 @@ Image and media generation.
 
 ## Routing Logic
 
-1. The router reads the env key for each model in priority order
-2. The first model whose key is present is selected
-3. If no key is found, the primary model is returned with `mode: "mock"` and `envKeyPresent: false`
-4. Mock mode means the routing configuration is valid but live inference is unavailable
+1. Provider/model source configuration does not by itself authorize live inference.
+2. A provider must be explicitly available under the repository's normal controls before a credential can make it eligible.
+3. The selected model identity must be canonical and non-retired; redirect-only aliases are not admissible as receipt identities.
+4. If no qualified provider is available, the system must remain in mock/unavailable behavior rather than silently promoting a candidate.
+5. A live receipt must bind requested alias, resolved model identity, provider, source/runtime revision, and the applicable evaluation/proof evidence.
 
 ## API
 
-```
-GET  /api/meridian/model-router       — Lane status snapshot
-POST /api/meridian/model-router/route — Route a specific lane request
-```
-
-Example routing request:
-```json
-{
-  "lane": "strategy",
-  "preferredModelId": "deepseek-r1"
-}
-```
-
-Example response:
-```json
-{
-  "lane": "strategy",
-  "selectedModel": { "id": "deepseek-r1", "provider": "deepseek", ... },
-  "fallbacksAttempted": [],
-  "reason": "primary",
-  "envKeyPresent": true,
-  "routedAt": "2026-04-25T..."
-}
-```
+The API surface is implementation-dependent and must be verified against the active source tree before use. Historical examples in this document are not an authorization to call a provider or infer route availability.
