@@ -14,7 +14,7 @@
 # mandated node:22-alpine — see the PR notes for this version discrepancy.
 
 # ─── Stage 1: dependency cache (pnpm fetch from root) ────────────────────────
-FROM node:26-alpine@sha256:ef24c5053d50fdc3e4e56eb4e7ddb7861874ab0fdc797046ba897581deb8e868 AS deps
+FROM node:26-alpine@sha256:dbaa92e5758cbbcf85d65d5403fdb530fe3442cbe8c6dbfb7ef23365450d5070 AS deps
 RUN apk add --no-cache libc6-compat
 RUN corepack enable
 WORKDIR /app
@@ -25,7 +25,7 @@ RUN --mount=type=cache,id=pnpm-store,target=/root/.local/share/pnpm/store \
     pnpm fetch
 
 # ─── Stage 2: builder (install + filtered build) ─────────────────────────────
-FROM node:26-alpine@sha256:ef24c5053d50fdc3e4e56eb4e7ddb7861874ab0fdc797046ba897581deb8e868 AS builder
+FROM node:26-alpine@sha256:dbaa92e5758cbbcf85d65d5403fdb530fe3442cbe8c6dbfb7ef23365450d5070 AS builder
 RUN apk add --no-cache libc6-compat
 RUN corepack enable
 WORKDIR /app
@@ -41,7 +41,7 @@ RUN pnpm --filter @workspace/alloy-runtime-api build
 RUN pnpm --filter @workspace/alloy-runtime-api deploy --prod --legacy /app/deploy
 
 # ─── Stage 3: runtime (minimal) ──────────────────────────────────────────────
-FROM node:26-alpine@sha256:ef24c5053d50fdc3e4e56eb4e7ddb7861874ab0fdc797046ba897581deb8e868 AS runtime
+FROM node:26-alpine@sha256:dbaa92e5758cbbcf85d65d5403fdb530fe3442cbe8c6dbfb7ef23365450d5070 AS runtime
 RUN apk add --no-cache libc6-compat
 WORKDIR /app
 
