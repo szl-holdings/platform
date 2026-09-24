@@ -1,0 +1,27 @@
+# PR #764 branch scope repair — Proof Packet
+
+- **workcell_id:** PLATFORM-764-SCOPE-REPAIR-2026-09-07
+- **agent:** Codex / BuildWarden
+- **objective:** Finish the existing frontend and worker upgrade by correcting the candidate-introduced lint failure while preserving the requested branch-local variable scope.
+- **source_binding:** Original PR head `b8166742bd8a8b7b2b40c5d24f18e644e864d4df`, with current main `9dfbdad1f2d27b6c52e4f1f8302693c0b96d4069` integrated by a forward merge. The successor commit and its hosted admission are separate from this local proof.
+- **plan_summary:** Inspect current comments, exact-head CI logs, and the diff; integrate current main without rewriting history; replace the branch-local declarations in the Sentra and Vessels hologram assets with immutable lexical declarations; check lint, syntax, duplicate parity, and branch behavior. The plan was recorded in the local task session before editing.
+- **patch_summary:** `artifacts/sentra/public/szl-space-hologram.js` and `artifacts/vessels/public/szl-space-hologram.js` declare `values` and the hostname `match` with `const` inside the consuming branches. The existing worker bounds checks, batch queue ordering, and API trace serializer changes are retained. Main's documentation changes are retained by the forward merge.
+- **failure_evidence:** CI Lint [run 34176285616 / job 101906307812](https://github.com/szl-holdings/platform/actions/runs/34176285616/job/101906307812) identifies `lint/correctness/noInnerDeclarations` at the changed declarations. Runtime Audit [run 34176285536 / job 101906228442](https://github.com/szl-holdings/platform/actions/runs/34176285536/job/101906228442) reaches the full audit and aborts at its lint step for the same errors. The latest failure is therefore tied to this candidate's declarations; an older retry diagnostic is not used to explain this run.
+- **test_results:**
+  - Repository-pinned `pnpm@10.26.1 typecheck` before and after the patch — exit `1` before TypeScript execution because `turbo` is unavailable in the incomplete local installation. The original PR head's hosted Typecheck passed; fresh successor hosted Typecheck remains required.
+  - Repository-resolved `biome@2.4.16 lint artifacts/sentra/public/szl-space-hologram.js artifacts/vessels/public/szl-space-hologram.js --diagnostic-level=error` — exit `0`; the focused declarations satisfy the checked-in lint policy.
+  - `node --check artifacts/sentra/public/szl-space-hologram.js` — exit `0`.
+  - `node --check artifacts/vessels/public/szl-space-hologram.js` — exit `0`.
+  - Node strict equality of the complete UTF-8 asset contents — exit `0`; the duplicate assets remain identical.
+  - Bounded Node VM execution of `resolveIdentity` and `declaredIdentity`, comparing the original-head function bodies against the corrected bodies — exit `0`; the curated, generated, explicit-label, recognized-hostname, and fallback branches produced equivalent results for the exercised inputs. This is local function evidence, not a deployed browser witness.
+  - `git diff --check` — exit `0`.
+  - Initial fallback `pnpm typecheck` — interrupted, exit `1`; the fallback unexpectedly started a pnpm 11 installation before dispatch. The pinned package manager was then used directly. Tracked dependency files did not change.
+  - Pinned pnpm `dlx @biomejs/biome@2.4.16` — exit `1` because its temporary importer manifest was unavailable. The downloaded native Biome executable was invoked directly and reported the repository-resolved version before the successful lint check.
+- **screenshot_refs:** N/A for this lexical declaration correction. Rendered content, styles, routes, interactions, and UI layout do not change. No screenshot or deployment claim is inferred from source equivalence.
+- **verification_notes:** Both initializations are used only within their existing branches and are not reassigned. Lexical declarations therefore implement the intended narrower scope and satisfy the lint rule that rejected block-local `var`. No workflow, lint rule, threshold, ignore path, dependency override, lockfile, security guard, or generated security evidence was changed by this repair.
+- **public_claim_check:** No public product or quantitative capability claim was added. Both retained artifacts continue to carry their existing MODELED / SUPERSEDED README disposition.
+- **security_check:** No credentials, tokens, private key material, or environment-file contents were introduced. The exact `fflate@0.8.3` security guard and blocking security workflow remain intact.
+- **known_gaps_update:** No artifact readiness or external service gap was changed. This packet records the local CI-source repair; hosted checks, protected merge, and runtime publication remain distinct evidence.
+- **proof_level:** Standard local proof; hosted successor admission pending.
+- **recorded_at:** 2026-09-08T03:44:48Z
+- **recorded_by:** Codex / BuildWarden

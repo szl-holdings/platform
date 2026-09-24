@@ -171,10 +171,10 @@ function serializeTrace(trace: {
   steps: ReadonlyArray<{ multiplier: bigint; doubled: bigint; selected: boolean }>;
 }) {
   return {
-    product: '0x' + trace.product.toString(16),
+    product: `0x${trace.product.toString(16)}`,
     steps: trace.steps.map((s) => ({
-      multiplier: '0x' + s.multiplier.toString(16),
-      doubled: '0x' + s.doubled.toString(16),
+      multiplier: `0x${s.multiplier.toString(16)}`,
+      doubled: `0x${s.doubled.toString(16)}`,
       selected: s.selected,
     })),
   };

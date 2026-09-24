@@ -12,7 +12,7 @@ All participants in SZL Holdings spaces are expected to follow our [Code of Cond
 
 ## Who Contributes
 
-Development is led by **Stephen Lutar** and a small team of trusted collaborators. Contributions are by invitation and subject to contractual agreements with SZL Holdings.
+Development is led by **Stephen Lutar** as the authorized founder-maintainer, with trusted collaborators admitted by invitation and subject to contractual agreements with SZL Holdings.
 
 ---
 
@@ -20,13 +20,13 @@ Development is led by **Stephen Lutar** and a small team of trusted collaborator
 
 **Security vulnerabilities:** Follow the responsible disclosure process in [SECURITY.md](SECURITY.md). Do not open public issues for security findings.
 
-**Non-security bugs or issues:** You may open a GitHub issue using the provided issue templates. Issues are reviewed and triaged by the SZL Holdings team. We do not guarantee response timelines on non-partner issues.
+**Non-security bugs or issues:** You may open a GitHub issue using the provided issue templates. Issues are reviewed and triaged by the SZL Holdings maintainer. We do not guarantee response timelines on non-partner issues.
 
 ---
 
 ## Pull Request Workflow
 
-All changes go through pull requests targeting `main`. Direct commits to `main` are not permitted once branch protection is enabled.
+All changes go through pull requests targeting `main`. Direct commits to `main` are not the normal admission path.
 
 ### Branch Naming
 
@@ -56,16 +56,16 @@ chore(deps): bump drizzle-orm to 0.38
 
 ### PR Requirements
 
-1. **CI must pass** — lint, typecheck, build (see `.github/workflows/ci.yml`)
+1. **CI must pass** — lint, typecheck, build, security, doctrine, and applicable runtime gates
 2. **PR template completed** — all relevant checklist items addressed
 3. **Scoped changes** — one concern per PR; no unrelated diffs
 4. **Tests included** — new functionality must have test coverage
 5. **Documentation updated** — architecture, API spec, or CHANGELOG as needed
-6. **Code review approved** — at least one approving review from a CODEOWNER
+6. **Exact-head admission** — the maintainer merges only the tested head after current-base checks; founder-maintainer changes do not require an unavailable second human, while external collaborator changes require maintainer review
 
 ### Code Review Expectations
 
-Reviewers check for:
+The maintainer checks for:
 - Correctness and completeness against the stated scope
 - Multi-tenant isolation preserved (all queries scoped by `org_id`)
 - No secrets, credentials, or PII committed
@@ -133,16 +133,17 @@ For full monorepo conventions, see `docs/architecture/architecture.md` and `docs
 
 ---
 
-## Developer Certificate of Origin (DCO)
+## Solo-Maintainer Source Provenance
 
-All commits to this repository must carry a Developer Certificate of Origin sign-off, per the [DCO v1.1](https://developercertificate.org/). This applies to all contributors — internal, partner, and external. Add it with:
+DCO and `Signed-off-by` trailers are not required. Repository provenance is preserved through:
 
-```bash
-git commit -s -m "your commit message"
-# Produces: Signed-off-by: Name <email>
-```
+- GitHub-authenticated commit authorship;
+- pull-request history and current-base checks;
+- exact-head test and policy results;
+- immutable protected merge records;
+- artifact-specific SBOM, attestation, and signature evidence when those workflows succeed.
 
-PRs without a DCO sign-off on every commit will be blocked by CI. By signing off, you certify you wrote the code or have the right to contribute it under the repository's license.
+Every contributor remains responsible for contributing only material they wrote or have the legal right to submit under the repository license and applicable agreement.
 
 ---
 

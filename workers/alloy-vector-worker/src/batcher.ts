@@ -130,10 +130,15 @@ export class MicroBatcher {
     let tokenBudget = 0;
 
     while (partition.entries.length > 0 && batch.length < this.maxBatchSize) {
-      const next = partition.entries[0]!;
+      const next = partition.entries.shift();
+      if (next === undefined) {
+        break;
+      }
       const tokens = Math.ceil(next.input.text.split(/\s+/).length * 1.3);
-      if (batch.length > 0 && tokenBudget + tokens > this.maxTokensPerBatch) break;
-      partition.entries.shift();
+      if (batch.length > 0 && tokenBudget + tokens > this.maxTokensPerBatch) {
+        partition.entries.unshift(next);
+        break;
+      }
       batch.push(next);
       tokenBudget += tokens;
     }

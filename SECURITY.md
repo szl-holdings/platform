@@ -78,21 +78,25 @@ Separation of duties is instead provided by independent, fail-closed controls:
 
 - protected branches and normal pull-request or merge-queue admission;
 - exact-head binding and current-base checks;
-- DCO trailers and protected-branch signature requirements;
+- GitHub-authenticated authorship and immutable pull-request and merge history;
 - CodeQL, dependency, secret, container, policy, and regression workflows;
 - immutable or digest-bound evidence where the corresponding workflow succeeds;
 - explicit rollback instructions and live post-release readback.
 
-The maintainer must not disable a gate, force-push protected history, use an
-administrator merge bypass, self-approve through a bot identity, expose secret
-values, or describe a merge as a deployment without deployment evidence.
+DCO and `Signed-off-by` trailers are not required. Any protected-branch commit-signature
+requirement, when configured, is an independent repository control rather than a DCO
+substitute or a per-commit contributor attestation requirement.
+
+The maintainer must not disable a security or policy gate merely to admit a
+change, force-push protected history, expose secret values, or describe a merge
+as a deployment without deployment evidence.
 
 ## Supply-chain evidence
 
 Supply-chain claims are revision- and workflow-specific:
 
-- DCO and signature status are established by the protected checks and final
-  protected commit, not by this document alone.
+- Source attribution is established by GitHub-authenticated authorship,
+  pull-request history, exact-head checks, and the final protected merge record.
 - An SBOM is release evidence only when the protected SBOM workflow succeeds and
   the resulting artifact is retained for the exact release revision.
 - Build provenance or an attestation is claimed only when its protected workflow
