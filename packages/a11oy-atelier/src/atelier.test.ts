@@ -4,6 +4,7 @@ import {
   type AtelierProvider,
   AtelierProviderResponseError,
   AtelierProviderUnavailableError,
+  isGrokBuildQuotaError,
   XaiResponsesProvider,
 } from './provider.js';
 import { AtelierPolicyDeniedError, askAtelier } from './service.js';
@@ -135,5 +136,39 @@ describe('XaiResponsesProvider', () => {
       client.generate(AtelierAskRequestSchema.parse({ prompt: 'hello' })),
     ).rejects.toBeInstanceOf(AtelierProviderResponseError);
     expect(fetchMock).toHaveBeenCalledTimes(1);
+  });
+});
+
+describe('Grok Build failure classification', () => {
+  it('recognizes a known quota rejection without treating all CLI errors as unavailable', () => {
+    expect(
+      isGrokBuildQuotaError({
+        stderr:
+          'responses API error status=402 Payment Required error_message=Grok Build usage balance exhausted',
+        stdout: '{"type":"error"}',
+      }),
+    ).toBe(true);
+    expect(
+      isGrokBuildQuotaError({
+        stderr:
+          '\u001b[31mERROR\u001b[0m responses API error status=402 Payment Required error_message=Grok Build usage balance exhausted',
+        stdout: '{"type":"error"}',
+      }),
+    ).toBe(true);
+    expect(isGrokBuildQuotaError({ stderr: 'network timeout' })).toBe(false);
+    expect(isGrokBuildQuotaError(new Error('Grok Build usage balance exhausted'))).toBe(false);
+    expect(
+      isGrokBuildQuotaError({
+        stderr:
+          'responses API error status=402 Payment Required error_message=Grok Build usage balance exhausted',
+        stdout: '{"text":"A completed provider answer"}',
+      }),
+    ).toBe(false);
+    expect(
+      isGrokBuildQuotaError({
+        stdout:
+          'responses API error status=402 Payment Required error_message=Grok Build usage balance exhausted',
+      }),
+    ).toBe(false);
   });
 });

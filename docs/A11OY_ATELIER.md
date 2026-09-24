@@ -1,6 +1,6 @@
 # A11oy Atelier
 
-**Status:** Partial — locally integrated; production deployment and durable session persistence are not yet witnessed.
+**Status:** Partial — locally integrated; encrypted single-host restart continuity is available when configured. Production deployment, distributed continuity, and a durable external ledger are not yet witnessed.
 
 **Owner:** SZL Holdings
 
@@ -47,7 +47,13 @@ xAI Responses API    local Grok Build CLI
 response hashes + provider disclosure + EvidenceLedger append
                   |
                   v
-tenant-scoped, 24-hour in-process working memory (maximum 12 turns)
+reserve -> stage -> commit a tenant-scoped Turn Capsule
+                  |
+          +-------+--------+
+          |                |
+          v                v
+in-process store    encrypted local store
+(default; volatile) (configured; one host/process)
 ```
 
 Atelier is the operator workbench. Ayllu remains the governed council/orchestration layer. Frontier Now remains the evidence cockpit. Provider identity is recorded but does not confer control over A11oy policy, storage, or product identity.
@@ -73,17 +79,42 @@ Every accepted answer includes:
 - policy decisions and requested capabilities
 - evidence state and local-only truth label
 - ledger append identifier/state
-- working-memory state
+- Turn Capsule sequence, prior-capsule digest, and continuity state
+- original operator-prompt and provider-prompt hashes
 - latency and reported token usage
 - the exact third-party disclosure
 
-The API appends the completed receipt to the in-process `EvidenceLedger`. Session memory is tenant-scoped and expires after 24 hours. Both are process-local in this phase; a restart loses them. Durable external persistence remains an explicit production gap.
+The API appends the completed receipt to the in-process `EvidenceLedger`; this append is not a durable external ledger write. The Turn Capsule store is a separate continuity boundary. Its default in-process implementation is non-durable and loses session state at restart. When the encrypted local adapter is configured, it retains authenticated capsule state across a restart on one host with the same key. That adapter serializes work within one runtime process and does not provide distributed locking, multi-host coordination, production identity, or external-ledger durability.
+
+## Turn Capsule v1
+
+Before provider invocation, the API requires both a client-generated session ID and a client-generated idempotency key, then reserves one turn for that tenant/session/key scope. Send the same session ID and idempotency key on a retry. A matching retry replays the committed response without a second provider call. Reusing the same idempotency key with different request bytes is rejected, and a different key cannot enter a session while its current turn is pending.
+
+Each committed capsule binds the sanitized request, original operator prompt, context-expanded provider prompt, response, sequence, prior capsule digest, timestamps, retention, and persistence state. `GET /api/a11oy/v1/atelier/sessions/:sessionId/verify` verifies the tenant-scoped chain without returning raw prompt or answer material. Every capsule in a chain shares the first capsule's effective expiry. Twenty-four hours is the maximum logical retrieval window, not a claim that files can self-delete while the process or host is off. The encrypted adapter purges expired indexed state and authenticated orphan payloads on startup, during continuity operations, and on a 15-minute runtime sweep.
+
+The provider response is staged before the capsule commit is acknowledged. If commit cannot complete after a provider response, the API fails closed instead of returning an uncommitted success. A successful encrypted stage is labeled durably preserved pending recovery; the default in-memory stage is labeled as retained only in the current non-durable process. Recovery is not automatic in v1.
 
 ## Configuration
 
 See [Environment Variables Reference](../ENVIRONMENT_VARIABLES.md#a11oy-atelier). Secrets are server-side only. Do not introduce `VITE_A11OY_ATELIER_XAI_API_KEY` or any equivalent browser-exposed provider credential.
 
-For local work, run the runtime API on port `8080` and A11oy Vite on port `4110`, then use the shared proxy at `http://127.0.0.1:9090/a11oy/atelier`.
+Turn Capsule continuity remains volatile unless both A11OY_ATELIER_CONTINUITY_DIR and A11OY_ATELIER_CONTINUITY_KEY are configured. The directory must be an absolute, non-root path; the server-only key must decode to exactly 32 bytes. NODE_ENV=production always requires durable continuity. In other environments, set A11OY_ATELIER_CONTINUITY_REQUIRED=true to refuse Atelier requests instead of falling back to in-process continuity. Invalid or incomplete continuity configuration leaves unrelated runtime routes mounted, while Atelier health and requests fail closed with sanitized UNAVAILABLE state.
+
+The browser stores only a confirmed, tenant-namespaced session ID in sessionStorage; it never stores the raw idempotency key. A reload offers that identifier for an explicit Resume action. The identifier is not authentication, so operators should use New session on a shared browser.
+
+The canonical local ports are runtime API `8080`, A11oy Vite `4110`, and shared proxy `9090`. The shared route is `http://127.0.0.1:9090/a11oy/atelier`. If those ports are occupied, configure a collision-free set before starting the proxy, for example:
+
+```dotenv
+SHARED_PROXY_PORT=19090
+SHARED_PROXY_A11OY_PORT=4110
+SHARED_PROXY_API_PORT=18080
+SHARED_PROXY_BIND_HOST=127.0.0.1
+SHARED_PROXY_LOCAL_API_KEY_BRIDGE=true
+SHARED_PROXY_LOCAL_TENANT_ID=solo-builder
+A11OY_ATELIER_API_BASE_URL=http://127.0.0.1:18080
+```
+
+The runtime API must also be listening on `18080`; the proxy variables only select upstreams. For an authenticated local browser flow, give the runtime API and Vite/proxy processes the same server-only `ALLOY_API_KEY`. The explicit loopback-only bridge attaches that key and a fixed tenant ID only to `/api/a11oy/v1/atelier` requests, and rejects unexpected Host or Origin values; it never bundles the key into browser JavaScript or returns it in proxy status. The bridge fails closed on a non-loopback listener, a missing key or tenant, malformed booleans, invalid ranges, and listener/upstream collisions. This is a single-operator local development bridge, not browser-user authentication. Deployed identity and edge authentication remain separate requirements.
 
 ## Required disclosure
 
@@ -93,6 +124,9 @@ For local work, run the runtime API on port `8080` and A11oy Vite on port `4110`
 
 - Source implementation and local tests are distinct from deployment.
 - Provider configuration health is distinct from a successful inference.
-- A successful inference is distinct from durable persistence.
+- A successful inference is distinct from a committed Turn Capsule.
+- Encrypted local restart continuity is distinct from distributed or production-grade persistence.
+- A committed Turn Capsule is distinct from a durable external `EvidenceLedger` write.
 - An HTTP 200 is distinct from production witness.
+- A local Grok Build witness is distinct from a direct xAI Responses API witness.
 - Solo-builder evidence may include signed commits, exact-head CI, runtime logs, screenshots, and receipts; it must not fabricate independent approval.

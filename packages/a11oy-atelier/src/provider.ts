@@ -39,6 +39,26 @@ function asRecord(value: unknown): JsonRecord | undefined {
     : undefined;
 }
 
+/** Recognize a known pre-response quota rejection without exposing raw CLI diagnostics. */
+export function isGrokBuildQuotaError(error: unknown): boolean {
+  const record = asRecord(error);
+  const stderr = record?.stderr;
+  if (typeof stderr !== 'string') return false;
+  const stdout = record?.stdout;
+  if (typeof stdout === 'string' && stdout.trim()) {
+    try {
+      if (asRecord(JSON.parse(stdout))?.type !== 'error') return false;
+    } catch {
+      return false;
+    }
+  }
+  const ansiSequence = new RegExp(`${String.fromCharCode(27)}\\[[0-9;]*m`, 'g');
+  const diagnostic = stderr.replace(ansiSequence, '');
+  return /responses API error\s+status=402 Payment Required\s+error_message=Grok Build usage balance exhausted\b/.test(
+    diagnostic,
+  );
+}
+
 function optionalNumber(value: unknown): number | undefined {
   return typeof value === 'number' && Number.isFinite(value) && value >= 0 ? value : undefined;
 }
@@ -242,33 +262,43 @@ export class GrokBuildCliProvider implements AtelierProvider {
     const health = this.health(request.model);
     if (!health.available) throw new AtelierProviderUnavailableError(health.reason);
     const model = request.model ?? process.env.A11OY_ATELIER_MODEL ?? DEFAULT_MODEL;
-    const { stdout } = await execFileAsync(
-      this.executable,
-      [
-        '--single',
-        request.prompt,
-        '--model',
-        model,
-        '--reasoning-effort',
-        request.reasoningEffort,
-        '--output-format',
-        'json',
-        '--max-turns',
-        '1',
-        '--no-subagents',
-        '--disable-web-search',
-        '--deny',
-        '*',
-        '--verbatim',
-      ],
-      {
-        cwd: this.cwd,
-        windowsHide: true,
-        timeout: 180_000,
-        maxBuffer: 4 * 1024 * 1024,
-        encoding: 'utf8',
-      },
-    );
+    let stdout: string;
+    try {
+      ({ stdout } = await execFileAsync(
+        this.executable,
+        [
+          '--single',
+          request.prompt,
+          '--model',
+          model,
+          '--reasoning-effort',
+          request.reasoningEffort,
+          '--output-format',
+          'json',
+          '--max-turns',
+          '1',
+          '--no-subagents',
+          '--disable-web-search',
+          '--deny',
+          '*',
+          '--verbatim',
+        ],
+        {
+          cwd: this.cwd,
+          windowsHide: true,
+          timeout: 180_000,
+          maxBuffer: 4 * 1024 * 1024,
+          encoding: 'utf8',
+        },
+      ));
+    } catch (error) {
+      if (isGrokBuildQuotaError(error)) {
+        throw new AtelierProviderUnavailableError(
+          'Grok Build usage balance exhausted. Add provider credits or select another configured provider.',
+        );
+      }
+      throw error;
+    }
     const parsed = extractCliPayload(stdout);
     return {
       text: parsed.text,

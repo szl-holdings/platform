@@ -8,6 +8,8 @@ import { defineConfig } from 'vite';
 
 const vitePort = Number(process.env.VITE_PORT) || 4110;
 const basePath = process.env.BASE_PATH || '/a11oy/';
+const sharedProxyPort = Number(process.env.SHARED_PROXY_PORT);
+const hmrClientPort = Number.isInteger(sharedProxyPort) ? sharedProxyPort : 443;
 
 export default defineConfig({
   base: basePath,
@@ -98,7 +100,7 @@ export default defineConfig({
     strictPort: !!vitePort,
     host: '0.0.0.0',
     allowedHosts: true,
-    hmr: { clientPort: 443, path: basePath },
+    hmr: { clientPort: hmrClientPort, path: basePath },
     fs: {
       strict: false,
       deny: ['**/.*'],

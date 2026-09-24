@@ -1,6 +1,6 @@
 # SZL Holdings — Application Status Register
 
-**Date:** August 26, 2026
+**Date:** September 24, 2026
 **Status:** Authoritative single source of truth for all artifact GA/beta/internal/archived/concept status
 **Update cadence:** Update after each release or Phase completion
 
@@ -46,8 +46,8 @@
 | **URL** | `/a11oy/`; Atelier workbench at `/a11oy/atelier` |
 | **Authentication** | Runtime API key guard; local development may run without a configured key |
 | **Live Data** | Atelier provider adapter may use a configured xAI Responses API or local Grok Build CLI; no mock Atelier answers |
-| **Blockers** | Atelier ledger and session memory are process-local; production identity binding, durable persistence, deployment, and independent runtime witness remain incomplete |
-| **Notes** | Original SZL-owned workbench with deterministic capability denials, provider disclosure, response hashing, EvidenceLedger append, tenant-scoped memory, CLI, health route, and UI. See `docs/A11OY_ATELIER.md`. |
+| **Blockers** | The default Turn Capsule store and `EvidenceLedger` append are process-local and non-durable. The configured encrypted adapter is single-host/single-process only; distributed continuity, a durable external ledger, production identity binding, deployment, direct xAI API witness, and independent runtime witness remain incomplete. The 2026-09-24 local Grok Build inference probe is blocked by HTTP 402 usage-balance exhaustion, despite authenticated CLI and healthy local routing. |
+| **Notes** | Original SZL-owned workbench with deterministic capability denials, provider disclosure, response hashing, idempotent Turn Capsule replay, hash-chain verification, pending-recovery state, CLI, health route, and reload-safe explicit browser session resume. Encrypted local continuity can survive restart with the same configured key; logical expiry is enforced on startup, operations, and a running-service sweep, not while the host is off. This does not change the Partial status. See `docs/A11OY_ATELIER.md`. |
 
 ### Aegis — Unified Defense & Intelligence
 | Attribute | Value |

@@ -8,7 +8,7 @@
 > source-tree and locked-kernel measurements. A value without reproducible
 > evidence is **UNVERIFIED**, not estimated.
 
-**Registry version:** 2.1.3
+**Registry version:** 2.1.4
 
 **Feature baseline inspected:** `platform@433b0c34c54ed28719b9fcab964c0171c2e79034`
 
@@ -38,9 +38,9 @@ mutation one-shots. The validator recomputes them from whichever commit is check
 | DB `pgTable` call sites | **1,067** | Source call sites; not a claim about currently provisioned tables |
 | DB migrations (SQL files) | **149** | Tracked `lib/db/drizzle/*.sql` files; duplicate sequence numbers may exist |
 | API route source files | **44** | Non-test files under `apps/`, `services/`, and `artifacts/api-server/` containing a detected Express route declaration |
-| API handler declarations | **311** | Static non-test HTTP method declarations on `app`, `router`, and named Express Router receivers in the current runtime roots |
+| API handler declarations | **312** | Static non-test HTTP method declarations on `app`, `router`, and named Express Router receivers in the current runtime roots |
 | CI workflows | **46** | Permanent tracked `.github/workflows/*.yml` and `*.yaml`, including exact-head screenshot evidence, hosted observability proof, and public npm release paths |
-| Environment variables (in `.env.example`) | **238** | Lines matching `^[A-Z_]+=` |
+| Environment variables (in `.env.example`) | **244** | Lines matching `^[A-Z_]+=` |
 
 These are source-tree measurements. They do not by themselves prove that a
 service is deployed, reachable, authenticated correctly, or returning HTTP 200.

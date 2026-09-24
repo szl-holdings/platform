@@ -92,8 +92,27 @@ Primary PostgreSQL connection string.
 | `A11OY_ATELIER_API_BASE_URL` | **optional, CLI-only** | Base URL used by `a11oy-atelier`; defaults to `http://127.0.0.1:8080`. |
 | `A11OY_ATELIER_TENANT_ID` | **optional, CLI-only** | Tenant header used by the local CLI; defaults to `default`. |
 | `VITE_A11OY_ATELIER_TENANT_ID` | **optional, non-secret** | Development tenant selector for the browser. Production identity remains authoritative. |
+| `A11OY_ATELIER_CONTINUITY_DIR` | **optional, server-only** | Absolute, non-root directory for encrypted local Turn Capsule continuity. Configure together with `A11OY_ATELIER_CONTINUITY_KEY`. |
+| `A11OY_ATELIER_CONTINUITY_KEY` | **optional, server-only secret** | Exactly 32 bytes encoded as 64 hex characters or padded base64. Configure together with `A11OY_ATELIER_CONTINUITY_DIR`; retain the same key across an intended restart. |
+| `A11OY_ATELIER_CONTINUITY_REQUIRED` | **optional, server-only** | Accepts `true`/`false`, `yes`/`no`, or `1`/`0`; defaults to false outside production. NODE_ENV=production always requires durable continuity; a false flag cannot disable that boundary. |
 
 Atelier does **not** emit mock model responses. If neither the direct API key nor a usable local CLI path is configured, provider selection fails closed. The local CLI adapter disables tools, web search, and subagents for the v1 workbench boundary.
+
+Outside production, without both continuity variables and unless durable continuity is explicitly required, Atelier uses an in-process, non-durable Turn Capsule store. Production, explicit-required mode, and invalid partial configuration fail only the Atelier surface closed with sanitized unavailable health; unrelated runtime routes remain mountable. With both variables, the encrypted local adapter provides authenticated, restart-safe session continuity for a single runtime process on one host. It enforces expiry and orphan cleanup on startup, continuity operations, and a 15-minute running-service sweep; physical files cannot self-delete while the process or host is off. This is not a distributed or multi-host persistence claim: there is no distributed lock or shared database. The EvidenceLedger append remains process-local and is not made durable by the Turn Capsule store.
+
+### Shared local proxy
+
+| Variable | Classification | Purpose |
+|----------|----------------|---------|
+| `SHARED_PROXY_PORT` | **optional, local-only** | Shared-proxy listener; defaults to `9090` and must be an integer from `1024` through `65535`. |
+| `SHARED_PROXY_A11OY_PORT` | **optional, local-only** | A11oy UI upstream for `/a11oy/`; defaults to `4110` and must be an integer from `1` through `65535`. |
+| `SHARED_PROXY_API_PORT` | **optional, local-only** | Runtime API upstream for `/api/` and `/ws/`; defaults to `8080` and must be an integer from `1` through `65535`. |
+| `SHARED_PROXY_BIND_HOST` | **optional, local-only** | Listener address; defaults to `0.0.0.0` and accepts only `0.0.0.0`, `::`, `127.0.0.1`, or `::1`. A local API-key bridge requires a loopback value. |
+| `SHARED_PROXY_LOCAL_API_KEY_BRIDGE` | **optional, local-only** | Accepts `true`/`false`, `yes`/`no`, or `1`/`0`; defaults to false. When enabled on loopback, the server-side proxy attaches `ALLOY_API_KEY` and the fixed local tenant only for `/api/a11oy/v1/atelier` routes, and rejects unexpected Host or Origin values. |
+| `SHARED_PROXY_LOCAL_TENANT_ID` | **required when the local bridge is enabled** | Fixed tenant ID for the loopback-only bridge; a non-empty, trimmed value of at most 128 characters. The proxy ignores browser-supplied tenant headers on Atelier routes. This is local development scoping, not user authentication. |
+| `ALLOY_API_KEY` | **required-prod, server-only secret** | Runtime API credential. The loopback-only bridge reads it in the proxy process but never serializes it into browser assets, forwarded responses, or proxy status. |
+
+The shared proxy resolves these values when it starts. It rejects malformed or out-of-range ports and refuses a listener that equals any configured upstream or the canonical fallback port. Port overrides route traffic only; they do not start or reconfigure the upstream processes. The local API-key bridge is deliberately disabled by default and fails closed unless a loopback bind, a fixed local tenant, and a non-empty, trimmed `ALLOY_API_KEY` are present. It authenticates the local proxy-to-Atelier-API hop without placing the key in browser JavaScript; it is not a substitute for deployed identity, TLS, or an authenticated edge.
 
 ## Server
 
