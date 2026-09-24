@@ -101,7 +101,7 @@ export function Workcells() {
 
         {/* Filters */}
         <div className="flex flex-wrap gap-3 mb-6">
-          <fieldset className="flex gap-1">
+          <fieldset className="flex flex-wrap gap-1">
             <legend className="sr-only">Filter workcells by status</legend>
             {['all', 'running', 'completed', 'idle', 'paused', 'error'].map((s) => (
               <button

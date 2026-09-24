@@ -16,6 +16,7 @@ import {
 import { createServer } from 'node:http';
 import { arch, platform, release, tmpdir } from 'node:os';
 import path from 'node:path';
+import { verifyProductInteractions } from './a11oy-product-interactions.mjs';
 
 const repositoryRoot = path.resolve(process.cwd());
 const repositoryRealRoot = await realpath(repositoryRoot);
@@ -409,6 +410,14 @@ const canonicalIdentity = await readTrackedFile(
   'scripts/qa/capture-screenshot-proof.mjs',
   'canonical capture tool',
 );
+const layoutIdentity = await readTrackedFile(
+  'scripts/qa/screenshot-layout-helpers.mjs',
+  'browser layout verifier',
+);
+const interactionsIdentity = await readTrackedFile(
+  'scripts/qa/a11oy-product-interactions.mjs',
+  'product interaction verifier',
+);
 const viteConfigIdentity = await readTrackedFile(
   'artifacts/a11oy/vite.config.ts',
   'A11oy Vite configuration',
@@ -471,21 +480,6 @@ const canonicalCaptureTimeoutMs = Math.min(
   ),
 );
 
-const absoluteOutputDirectory = await prepareOutputDirectory(outputDirectory);
-const temporaryRoot = await mkdtemp(path.join(tmpdir(), 'a11oy-product-matrix-exact-'));
-const resolvedTemporaryRoot = path.resolve(temporaryRoot);
-const resolvedSystemTemp = path.resolve(tmpdir());
-const relativeTemp = path.relative(resolvedSystemTemp, resolvedTemporaryRoot);
-if (
-  !relativeTemp ||
-  relativeTemp === '..' ||
-  relativeTemp.startsWith(`..${path.sep}`) ||
-  path.isAbsolute(relativeTemp) ||
-  !path.basename(resolvedTemporaryRoot).startsWith('a11oy-product-matrix-exact-')
-) {
-  throw new Error('temporary build path failed ownership validation');
-}
-const buildRoot = path.join(temporaryRoot, 'dist');
 const viteCli = path.join(
   repositoryRoot,
   'artifacts',
@@ -524,6 +518,22 @@ if (captureEnvironment === 'github-actions') {
 }
 const authority = 'LOCAL_NON_AUTHORITATIVE';
 
+const absoluteOutputDirectory = await prepareOutputDirectory(outputDirectory);
+const temporaryRoot = await mkdtemp(path.join(tmpdir(), 'a11oy-product-matrix-exact-'));
+const resolvedTemporaryRoot = path.resolve(temporaryRoot);
+const resolvedSystemTemp = path.resolve(tmpdir());
+const relativeTemp = path.relative(resolvedSystemTemp, resolvedTemporaryRoot);
+if (
+  !relativeTemp ||
+  relativeTemp === '..' ||
+  relativeTemp.startsWith(`..${path.sep}`) ||
+  path.isAbsolute(relativeTemp) ||
+  !path.basename(resolvedTemporaryRoot).startsWith('a11oy-product-matrix-exact-')
+) {
+  throw new Error('temporary build path failed ownership validation');
+}
+const buildRoot = path.join(temporaryRoot, 'dist');
+
 let preview;
 let proofCandidate = null;
 let captureCount = 0;
@@ -555,6 +565,10 @@ try {
   const assetManifestBytes = Buffer.from(`${JSON.stringify(servedAssets)}\n`, 'utf8');
   const servedAssetManifestSha256 = sha256(assetManifestBytes);
   preview = await startExactBuildServer(buildRoot);
+
+  const interactions = await verifyProductInteractions(preview.origin);
+  const interactionBytes = Buffer.from(`${JSON.stringify(interactions, null, 2)}\n`, 'utf8');
+  await writeFile(path.join(absoluteOutputDirectory, 'interactions.json'), interactionBytes);
 
   await runChild(process.execPath, [canonicalCapture], {
     cwd: repositoryRoot,
@@ -667,6 +681,11 @@ try {
         path: canonicalIdentity.repositoryPath,
         sha256: canonicalIdentity.sha256,
       },
+      layout_verifier: { path: layoutIdentity.repositoryPath, sha256: layoutIdentity.sha256 },
+      interaction_verifier: {
+        path: interactionsIdentity.repositoryPath,
+        sha256: interactionsIdentity.sha256,
+      },
       vite_config: {
         path: viteConfigIdentity.repositoryPath,
         sha256: viteConfigIdentity.sha256,
@@ -715,6 +734,12 @@ try {
       metadata_sha256: sha256(canonicalMetadataBytes),
       captures: captureCount,
       timeout_ms: canonicalCaptureTimeoutMs,
+    },
+    interactions: {
+      filename: 'interactions.json',
+      sha256: sha256(interactionBytes),
+      checked_states: interactions.records.length,
+      state: interactions.state,
     },
     non_claims: [
       'This binds presentation evidence to a clean build and an immutable served-asset manifest for the recorded source revision.',

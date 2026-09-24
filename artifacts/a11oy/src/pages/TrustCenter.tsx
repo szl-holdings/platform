@@ -128,7 +128,7 @@ const TRUST_DATA: TrustData = {
       description:
         'Demo proof packets expose hash and parent-reference fields for inspection. Repository fixtures do not establish an immutable external ledger, durable storage, or authorized audit access.',
       controls: [
-        'Demo record: SHA-256-shaped digest and parent reference',
+        'Demo record: illustrative digest and parent-reference labels',
         'Demo record: no durable-storage guarantee',
         'Demo replay: seeded Workcell steps',
         'Demo record: fixture evidence references',
@@ -332,7 +332,7 @@ export function TrustCenter() {
             category: 'Implemented Prototype',
             status: 'DEMO' as const,
             items: [
-              'Proof Ledger demonstration with SHA-256 fields',
+              'Proof Ledger demonstration with illustrative digest fields',
               'Policy-gate demonstration (Covenant Layer)',
               'Seeded multi-domain Signal Mesh',
               'MirrorEval scoring demonstration',

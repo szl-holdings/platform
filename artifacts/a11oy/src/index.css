@@ -46,6 +46,13 @@ body {
   -webkit-font-smoothing: antialiased;
 }
 
+/* Preserve command bytes while allowing complete narrow-screen inspection. */
+.sa-shell .sa-command-list code {
+  overflow-x: visible;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+
 h1,
 h2,
 h3,

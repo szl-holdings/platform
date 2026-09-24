@@ -79,6 +79,10 @@ test('separates Workcell workflow progress from six-state operational availabili
   assert.match(workcellDetail, /no execution authorized/);
   assert.match(workcellReplay, /replay\.operationalAvailability/);
   assert.match(workcellReplayDetail, /No authenticated production execution/);
+  assert.match(workcellReplayDetail, /if \(replayState === 'done'\) setStepIdx\(-1\)/);
+  assert.match(workcellReplayDetail, /Resume Replay/);
+  assert.match(workcellReplayDetail, /\[2000, 1000, 667, 500\]/);
+  assert.match(workcellReplayDetail, /aria-pressed=\{speed === s\}/);
 });
 
 test('labels deterministic linked surfaces as DEMO and exposes their evidence boundaries', () => {
@@ -135,21 +139,21 @@ test('binds architecture and resources to source truth and screenshot reveal mar
   assert.match(resources, /minmax\(min\(300px, 100%\), 1fr\)/);
 });
 
-test('keeps canonical Series A proof intact and adds a bounded 70-view local matrix', () => {
+test('keeps canonical Series A proof intact and adds a bounded 75-view local matrix', () => {
   assert.match(canonicalSeriesAWrapper, /VERIFIED_GITHUB_RUNTIME/);
   assert.match(canonicalSeriesAWrapper, /series-a-proof-helpers\.mjs/);
   assert.equal(capturePlan.schema, 'szl.screenshot-capture-plan/v1');
-  assert.equal(capturePlan.targets.length, 14);
+  assert.equal(capturePlan.targets.length, 15);
   assert.equal(
     capturePlan.targets.reduce((total, target) => total + target.viewports.length, 0),
-    70,
+    75,
   );
   const byRoute = new Map(capturePlan.targets.map((target) => [target.route, target]));
   assert.equal(
     byRoute.get('/a11oy/product-journey')?.expected_heading,
     'One fabric. Two clear ways in.',
   );
-  for (const route of ['/a11oy/series-a', '/a11oy/investor-demo']) {
+  for (const route of ['/a11oy/start', '/a11oy/series-a', '/a11oy/investor-demo']) {
     assert.equal(
       byRoute.get(route)?.expected_heading,
       'See the governed decision loop. Inspect the proof boundary.',
@@ -165,6 +169,8 @@ test('keeps canonical Series A proof intact and adds a bounded 70-view local mat
   assert.match(captureController, /final_scroll_top/);
   assert.match(matrixWrapper, /scripts\/qa\/capture-series-a-product-matrix-proof\.mjs/);
   assert.match(matrixWrapper, /LOCAL_NON_AUTHORITATIVE/);
+  assert.match(matrixWrapper, /verifyProductInteractions\(preview.origin\)/);
+  assert.match(matrixWrapper, /sha256\(interactionBytes\)/);
   assert.match(matrixWrapper, /captured surface has invalid scroll-reveal evidence/);
   assert.equal(
     rootPackage.scripts['screenshots:a11oy:product-proof'],

@@ -18,7 +18,7 @@ export function WorkcellReplayDetail() {
   const wc = SEED_WORKCELLS.find((w) => w.id === params.id);
   const [replayState, setReplayState] = useState<'idle' | 'playing' | 'done'>('idle');
   const [stepIdx, setStepIdx] = useState(-1);
-  const [speed, setSpeed] = useState(800);
+  const [speed, setSpeed] = useState(1000);
 
   const steps = wc
     ? [
@@ -78,7 +78,7 @@ export function WorkcellReplayDetail() {
   }, [replayState, stepIdx, steps.length, speed]);
 
   const startReplay = () => {
-    setStepIdx(-1);
+    if (replayState === 'done') setStepIdx(-1);
     setReplayState('playing');
   };
   const pauseReplay = () => setReplayState('idle');
@@ -108,7 +108,7 @@ export function WorkcellReplayDetail() {
 
   return (
     <Layout>
-      <div className="mb-4 flex items-center gap-3">
+      <div className="mb-4 flex flex-wrap items-center gap-3">
         <Link
           href={`${BASE}/workcells`}
           className="inline-flex min-h-11 items-center text-xs font-mono"
@@ -158,7 +158,7 @@ export function WorkcellReplayDetail() {
         </div>
       </Card>
 
-      <div className="grid lg:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 [&>*]:min-w-0 [overflow-wrap:anywhere]">
         <div className="lg:col-span-2">
           {/* Replay Controls */}
           <Card className="mb-4">
@@ -170,19 +170,24 @@ export function WorkcellReplayDetail() {
                   </ActionButton>
                 ) : (
                   <ActionButton variant="primary" onClick={startReplay}>
-                    {replayState === 'done' ? '↩ Restart' : '▶ Play Replay'}
+                    {replayState === 'done'
+                      ? '↩ Restart'
+                      : stepIdx >= 0
+                        ? '▶ Resume Replay'
+                        : '▶ Play Replay'}
                   </ActionButton>
                 )}
                 <ActionButton variant="ghost" onClick={resetReplay}>
                   ↺ Reset
                 </ActionButton>
               </div>
-              <div className="flex items-center gap-2 text-xs ml-4">
+              <div className="flex flex-wrap items-center gap-2 text-xs sm:ml-4">
                 <span style={{ color: 'var(--color-a11oy-text-ghost)' }}>Speed:</span>
-                {[2000, 1000, 600, 300].map((s) => (
+                {[2000, 1000, 667, 500].map((s) => (
                   <button
                     type="button"
                     key={s}
+                    aria-pressed={speed === s}
                     onClick={() => setSpeed(s)}
                     className="min-h-11 min-w-11 px-2 py-0.5 rounded font-mono"
                     style={{
@@ -193,7 +198,7 @@ export function WorkcellReplayDetail() {
                       fontSize: 11,
                     }}
                   >
-                    {s === 2000 ? '0.5×' : s === 1000 ? '1×' : s === 600 ? '1.5×' : '2×'}
+                    {s === 2000 ? '0.5×' : s === 1000 ? '1×' : s === 667 ? '1.5×' : '2×'}
                   </button>
                 ))}
               </div>

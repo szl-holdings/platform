@@ -501,7 +501,7 @@ export function ProofLedger() {
           sub="seeded traces"
           accent={GOLD}
         />
-        <KpiCard label="CHAIN CHECK" value="DEMO" sub="local consistency" accent="#e5d29e" />
+        <KpiCard label="CHAIN CHECK" value="DEMO" sub="not computed" accent="#e5d29e" />
         <KpiCard
           label="ALGORITHM"
           value="Fixture label"
@@ -516,7 +516,7 @@ export function ProofLedger() {
         />
       </div>
 
-      <div className="flex gap-1 mb-4">
+      <div className="flex flex-wrap gap-1 mb-4">
         {(['chain', 'replay', 'diff'] as const).map((tab) => (
           <button
             type="button"
@@ -562,9 +562,9 @@ export function ProofLedger() {
       </div>
 
       {activeTab === 'chain' && (
-        <Card className="mb-6">
-          <div className="flex items-start justify-between gap-4 mb-4">
-            <div>
+        <Card className="mb-6 min-w-0 [overflow-wrap:anywhere]">
+          <div className="flex flex-wrap items-start justify-between gap-4 mb-4">
+            <div className="min-w-0">
               <div
                 className="text-xs font-mono mb-1"
                 style={{ color: 'var(--color-a11oy-text-ghost)' }}
@@ -575,7 +575,7 @@ export function ProofLedger() {
                 {chain.title}
               </div>
             </div>
-            <div className="text-xs font-mono flex-shrink-0" style={{ color: '#22c55e' }}>
+            <div className="min-w-0 text-xs font-mono" style={{ color: '#e5d29e' }}>
               DEMO · UNVALIDATED CHAIN SHAPE
             </div>
           </div>
@@ -593,7 +593,7 @@ export function ProofLedger() {
           </div>
 
           <div
-            className="grid grid-cols-4 gap-3 text-xs mb-6 p-3 rounded-lg"
+            className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 text-xs mb-6 p-3 rounded-lg"
             style={{
               backgroundColor: 'rgba(34,197,94,0.04)',
               border: '1px solid rgba(34,197,94,0.1)',
@@ -601,13 +601,13 @@ export function ProofLedger() {
           >
             <div>
               <div style={{ color: 'var(--color-a11oy-text-ghost)' }}>Algorithm</div>
-              <div className="font-mono" style={{ color: '#22c55e' }}>
+              <div className="font-mono break-all" style={{ color: '#22c55e' }}>
                 {chain.attestation.algorithm}
               </div>
             </div>
             <div>
               <div style={{ color: 'var(--color-a11oy-text-ghost)' }}>Signer</div>
-              <div className="font-mono" style={{ color: '#22c55e' }}>
+              <div className="font-mono break-all" style={{ color: '#22c55e' }}>
                 {chain.attestation.signer}
               </div>
             </div>
@@ -619,7 +619,7 @@ export function ProofLedger() {
             </div>
             <div>
               <div style={{ color: 'var(--color-a11oy-text-ghost)' }}>Nonce</div>
-              <div className="font-mono" style={{ color: 'var(--color-a11oy-text-sub)' }}>
+              <div className="font-mono break-all" style={{ color: 'var(--color-a11oy-text-sub)' }}>
                 {chain.attestation.nonce}
               </div>
             </div>
@@ -633,8 +633,8 @@ export function ProofLedger() {
                 const isLast = idx === chain.nodes.length - 1;
 
                 return (
-                  <div key={node.id} className="relative flex gap-4">
-                    <div className="flex flex-col items-center">
+                  <div key={node.id} className="relative flex gap-2 sm:gap-4">
+                    <div className="flex flex-shrink-0 flex-col items-center">
                       <button
                         type="button"
                         aria-expanded={isExpanded}
@@ -661,7 +661,7 @@ export function ProofLedger() {
                       )}
                     </div>
 
-                    <div className="flex-1 pb-4">
+                    <div className="flex-1 min-w-0 pb-4">
                       <button
                         type="button"
                         aria-expanded={isExpanded}
@@ -703,7 +703,7 @@ export function ProofLedger() {
                             </div>
                             {!isExpanded && (
                               <div
-                                className="text-xs mt-1 truncate"
+                                className="text-xs mt-1 break-words"
                                 style={{ color: 'var(--color-a11oy-text-ghost)' }}
                               >
                                 {node.detail.slice(0, 72)}…
@@ -745,7 +745,7 @@ export function ProofLedger() {
                                   {node.reasoningTrace.map((step, si) => {
                                     const stepStyle = STEP_TYPE_STYLE[step.type];
                                     return (
-                                      <div key={step.id} className="flex gap-3">
+                                      <div key={step.id} className="flex gap-2 sm:gap-3">
                                         <div className="flex flex-col items-center flex-shrink-0">
                                           <div
                                             className="w-5 h-5 rounded-full flex items-center justify-center text-[8px] font-mono"
@@ -764,8 +764,8 @@ export function ProofLedger() {
                                             />
                                           )}
                                         </div>
-                                        <div className="flex-1 pb-1">
-                                          <div className="flex items-center gap-2 mb-0.5">
+                                        <div className="flex-1 min-w-0 pb-1">
+                                          <div className="flex flex-wrap items-center gap-2 mb-0.5">
                                             <span
                                               className="text-[9px] font-mono px-1 py-0.5 rounded"
                                               style={{
@@ -790,11 +790,11 @@ export function ProofLedger() {
                                           >
                                             {step.content}
                                           </p>
-                                          <div className="flex gap-1 mt-1">
+                                          <div className="flex flex-wrap gap-1 mt-1">
                                             {step.evidenceRefs.map((e) => (
                                               <span
                                                 key={e}
-                                                className="text-[9px] font-mono px-1 py-0.5 rounded"
+                                                className="max-w-full break-all text-[9px] font-mono px-1 py-0.5 rounded"
                                                 style={{
                                                   backgroundColor: 'var(--color-a11oy-deep)',
                                                   color: 'var(--color-a11oy-text-ghost)',
@@ -823,7 +823,7 @@ export function ProofLedger() {
                                 {node.evidenceRefs.map((e) => (
                                   <span
                                     key={e}
-                                    className="text-xs font-mono px-2 py-0.5 rounded"
+                                    className="max-w-full break-all text-xs font-mono px-2 py-0.5 rounded"
                                     style={{
                                       backgroundColor: 'var(--color-a11oy-deep)',
                                       border: '1px solid var(--color-a11oy-border)',
@@ -861,8 +861,8 @@ export function ProofLedger() {
       {activeTab === 'replay' && (
         <>
           <SectionTitle>Reasoning Replay — {chain.title}</SectionTitle>
-          <Card>
-            <div className="flex items-center gap-3 mb-4">
+          <Card className="min-w-0 [overflow-wrap:anywhere]">
+            <div className="flex flex-wrap items-center gap-3 mb-4">
               <button
                 type="button"
                 onClick={() => setReplayStep(Math.max(0, replayStep - 1))}
@@ -899,7 +899,7 @@ export function ProofLedger() {
               </button>
             </div>
 
-            <div className="flex gap-1 mb-4">
+            <div className="flex flex-wrap gap-1 mb-4">
               {chain.nodes.map((node, i) => (
                 <button
                   type="button"
@@ -907,7 +907,7 @@ export function ProofLedger() {
                   aria-label={`Show demo replay step ${i + 1}`}
                   aria-pressed={i === replayStep}
                   aria-current={i === replayStep ? 'step' : undefined}
-                  className="flex min-h-11 flex-1 cursor-pointer items-center border-0 bg-transparent p-0"
+                  className="flex min-h-11 min-w-11 flex-1 cursor-pointer items-center border-0 bg-transparent p-0"
                   onClick={() => setReplayStep(i)}
                 >
                   <span
@@ -931,7 +931,7 @@ export function ProofLedger() {
                     opacity: isCurrent ? 1 : 0.6,
                   }}
                 >
-                  <div className="flex items-center gap-2 mb-1">
+                  <div className="flex flex-wrap items-center gap-2 mb-1">
                     <span
                       className="text-[9px] font-mono px-1.5 py-0.5 rounded"
                       style={{ color: style.color, backgroundColor: style.bg }}
@@ -961,7 +961,7 @@ export function ProofLedger() {
                         return (
                           <div
                             key={step.id}
-                            className="flex items-start gap-2 text-xs p-2 rounded"
+                            className="flex flex-col sm:flex-row items-start gap-2 text-xs p-2 rounded"
                             style={{ backgroundColor: `${ss.color}08` }}
                           >
                             <span

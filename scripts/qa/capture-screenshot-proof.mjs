@@ -4,6 +4,7 @@ import { mkdir, readFile, writeFile } from 'node:fs/promises';
 import path from 'node:path';
 import { promisify } from 'node:util';
 import { chromium } from '@playwright/test';
+import { collectLayoutEvidence } from './screenshot-layout-helpers.mjs';
 
 const execFile = promisify(execFileCallback);
 const planPath = process.env.SCREENSHOT_PLAN || 'audit/screenshot-capture-plan.json';
@@ -571,6 +572,7 @@ try {
       const page = await browser.newPage({
         viewport: { width, height },
         deviceScaleFactor: 1,
+        serviceWorkers: 'block',
       });
       const url = new URL(route, parsedBaseUrl).toString();
       if (new URL(url).origin !== parsedBaseUrl.origin) {
@@ -581,6 +583,16 @@ try {
       const requestFailures = [];
       const badResponses = [];
       const undeclaredRequests = [];
+      // Capture plans declare HTTP origins only; no presentation surface has
+      // declared a live WebSocket channel. Block sockets before connection.
+      await page.context().routeWebSocket('**/*', async (socket) => {
+        if (undeclaredRequests.length < 20) {
+          undeclaredRequests.push(
+            sanitizeConsoleMessage(`WEBSOCKET ${socket.url()} undeclared channel`),
+          );
+        }
+        await socket.close({ code: 1008, reason: 'Screenshot proof forbids WebSocket channels' });
+      });
       page.on('console', (message) => {
         if (message.type() === 'error' && consoleErrors.length < 20) {
           consoleErrors.push(sanitizeConsoleMessage(message.text()));
@@ -652,10 +664,10 @@ try {
           minimumScreenshotRevealElements,
         );
 
-        const state = await page.evaluate(async () => {
+        const layoutEvidence = await page.evaluate(collectLayoutEvidence);
+        const state = await page.evaluate(async (layout) => {
           const root = document.documentElement;
           const text = (document.body?.innerText || '').toUpperCase();
-          const tolerance = 1;
           const interactiveSelector = [
             'a[href]',
             'button',
@@ -722,79 +734,9 @@ try {
             }
             return true;
           };
-          const hasDirectText = (element) =>
-            [...element.childNodes].some(
-              (node) => node.nodeType === Node.TEXT_NODE && normalizeText(node.textContent),
-            );
-          const isMeaningful = (element) =>
-            element.matches(
-              `${interactiveSelector},img,video,canvas,table,pre,code,p,h1,h2,h3,h4,h5,h6,li,dt,dd`,
-            ) || hasDirectText(element);
-          const hasHorizontalContainment = (element) => {
-            for (
-              let ancestor = element.parentElement;
-              ancestor;
-              ancestor = ancestor.parentElement
-            ) {
-              if (
-                ['auto', 'scroll', 'hidden', 'clip'].includes(getComputedStyle(ancestor).overflowX)
-              ) {
-                return true;
-              }
-            }
-            return false;
-          };
           const busy = [...document.querySelectorAll('[aria-busy="true"]')].filter(
             isVisible,
           ).length;
-          const meaningfulVisibleElements = [...document.querySelectorAll('body *')].filter(
-            (element) => isVisible(element) && isMeaningful(element),
-          );
-          const viewportOverflowingElements = meaningfulVisibleElements
-            .filter((element) => {
-              const rect = element.getBoundingClientRect();
-              return (
-                (rect.left < -tolerance || rect.right > root.clientWidth + tolerance) &&
-                !hasHorizontalContainment(element)
-              );
-            })
-            .map(describeElement)
-            .sort(
-              (a, b) =>
-                Math.max(b.right - root.clientWidth, -b.left) -
-                Math.max(a.right - root.clientWidth, -a.left),
-            )
-            .slice(0, 30);
-          const clippedElements = meaningfulVisibleElements
-            .map((element) => {
-              const rect = element.getBoundingClientRect();
-              for (
-                let ancestor = element.parentElement;
-                ancestor && ancestor !== document.body;
-                ancestor = ancestor.parentElement
-              ) {
-                const overflowX = getComputedStyle(ancestor).overflowX;
-                if (!['hidden', 'clip'].includes(overflowX)) continue;
-                const ancestorRect = ancestor.getBoundingClientRect();
-                const clippedLeft = Math.max(0, ancestorRect.left - rect.left);
-                const clippedRight = Math.max(0, rect.right - ancestorRect.right);
-                if (clippedLeft > tolerance || clippedRight > tolerance) {
-                  return {
-                    ...describeElement(element),
-                    clipped_by: describeElement(ancestor),
-                    clipped_left_px: Math.round(clippedLeft * 100) / 100,
-                    clipped_right_px: Math.round(clippedRight * 100) / 100,
-                  };
-                }
-              }
-              return null;
-            })
-            .filter(Boolean)
-            .sort(
-              (a, b) =>
-                b.clipped_left_px + b.clipped_right_px - (a.clipped_left_px + a.clipped_right_px),
-            )
-            .slice(0, 30);
 
           const accessibleName = (element) => {
             const ariaLabel = normalizeText(element.getAttribute('aria-label'));
@@ -989,9 +931,8 @@ try {
             clientWidth: root.clientWidth,
             scrollWidth: root.scrollWidth,
             horizontalOverflow: root.scrollWidth > root.clientWidth + 1,
-            overflowingElements: viewportOverflowingElements,
-            viewportOverflowingElements,
-            clippedElements,
+            overflowingElements: layout.viewportOverflowingElements,
+            ...layout,
             interactiveCount: interactiveElements.length,
             unnamedInteractiveElements,
             undersizedInteractiveElements: undersizedInteractiveElements.slice(0, 30),
@@ -1008,7 +949,7 @@ try {
               null,
             busy,
           };
-        });
+        }, layoutEvidence);
 
         const capturedAt = new Date();
         const date = capturedAt.toISOString().slice(0, 10);
@@ -1062,7 +1003,17 @@ try {
         }
         if (state.clippedElements.length) {
           recordFailures.push(
-            `${state.clippedElements.length} visible content elements were clipped by hidden overflow`,
+            `${state.clippedElements.length} visible content elements were clipped by horizontal overflow`,
+          );
+        }
+        if (state.horizontallyOverflowingContainers.length) {
+          recordFailures.push(
+            `${state.horizontallyOverflowingContainers.length} containers had undeclared horizontal overflow`,
+          );
+        }
+        if (state.textOverflowingElements.length) {
+          recordFailures.push(
+            `${state.textOverflowingElements.length} text ranges exceeded their formatting containers`,
           );
         }
         if (state.unnamedInteractiveElements.length) {
@@ -1123,6 +1074,8 @@ try {
             failures: recordFailures,
             overflowing_elements: state.overflowingElements,
             clipped_elements: state.clippedElements,
+            horizontally_overflowing_containers: state.horizontallyOverflowingContainers,
+            text_overflowing_elements: state.textOverflowingElements,
             unnamed_interactive_elements: state.unnamedInteractiveElements,
             undersized_interactive_elements: state.undersizedInteractiveElements,
             local_link_failures: state.localLinkFailures,
@@ -1155,6 +1108,11 @@ const report = {
   workflow_run_or_command: runIdentity,
   browser: { engine: 'chromium', version: browserVersion },
   allowed_origins: [...allowedOrigins].sort(),
+  network_policy: {
+    http: 'declared-origins-only',
+    service_workers: 'blocked',
+    web_sockets: 'blocked',
+  },
   evidence,
   failures,
 };

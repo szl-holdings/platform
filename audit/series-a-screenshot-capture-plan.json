@@ -3,6 +3,18 @@
   "workcell_id": "P0-SERIES-A-PRODUCT-WIRING-20260811",
   "targets": [
     {
+      "surface": "a11oy-start",
+      "route": "/a11oy/start",
+      "expected_heading": "See the governed decision loop. Inspect the proof boundary.",
+      "viewports": [
+        { "width": 320, "height": 900 },
+        { "width": 390, "height": 900 },
+        { "width": 768, "height": 1024 },
+        { "width": 1366, "height": 900 },
+        { "width": 1728, "height": 1000 }
+      ]
+    },
+    {
       "surface": "a11oy-product-journey",
       "route": "/a11oy/product-journey",
       "expected_heading": "One fabric. Two clear ways in.",

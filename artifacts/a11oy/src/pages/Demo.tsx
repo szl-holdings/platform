@@ -131,7 +131,7 @@ export function Demo() {
         />
       </div>
 
-      <div className="grid lg:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 [&>*]:min-w-0 [overflow-wrap:anywhere]">
         {/* Scenario selector */}
         <div>
           <SectionTitle>Select a Scenario</SectionTitle>
@@ -303,7 +303,7 @@ export function Demo() {
 
               {/* Linked Workcells */}
               <SectionTitle>Linked Workcells ({linkedWC.length})</SectionTitle>
-              <div className="grid sm:grid-cols-2 gap-3 mb-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-4 [&>*]:min-w-0">
                 {linkedWC.map((wc) => (
                   <Card key={wc.id} className="text-xs">
                     <div className="flex items-start justify-between gap-2 mb-1">
@@ -312,10 +312,7 @@ export function Demo() {
                       </span>
                       <VerdictBadge verdict={wc.mirrorEvalResult.verdict} />
                     </div>
-                    <div
-                      className="truncate mb-1"
-                      style={{ color: 'var(--color-a11oy-text-ghost)' }}
-                    >
+                    <div className="mb-1" style={{ color: 'var(--color-a11oy-text-ghost)' }}>
                       {wc.objective}
                     </div>
                     <span

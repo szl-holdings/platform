@@ -139,9 +139,9 @@ export function WorkcellDetail() {
         </p>
       </Card>
 
-      <div className="grid lg:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Main content */}
-        <div className="lg:col-span-2 flex flex-col gap-6">
+        <div className="min-w-0 lg:col-span-2 flex flex-col gap-6 [overflow-wrap:anywhere]">
           {/* Execution Trace (built from agent sequence) */}
           <div>
             <SectionTitle>Demo Execution Trace</SectionTitle>
@@ -367,7 +367,7 @@ export function WorkcellDetail() {
                           )}
                         </div>
                         <div className="flex-1 min-w-0">
-                          <div className="flex items-center gap-1 text-xs mb-0.5">
+                          <div className="flex flex-wrap items-center gap-1 text-xs mb-0.5">
                             <span
                               className="font-mono px-1 py-0.5 rounded"
                               style={{
@@ -390,7 +390,7 @@ export function WorkcellDetail() {
                             </span>
                           </div>
                           <div
-                            className="text-xs truncate"
+                            className="text-xs"
                             style={{ color: 'var(--color-a11oy-text-ghost)' }}
                           >
                             ↓ {hop.scopeNarrowed} · {hop.permissionsGranted.slice(0, 2).join(', ')}
@@ -428,7 +428,7 @@ export function WorkcellDetail() {
                   <div className="flex items-start justify-between gap-2">
                     <div className="flex-1 min-w-0">
                       <div
-                        className="font-medium mb-0.5 truncate"
+                        className="font-medium mb-0.5"
                         style={{ color: 'var(--color-a11oy-text)' }}
                       >
                         {sig.title}
@@ -460,7 +460,7 @@ export function WorkcellDetail() {
         </div>
 
         {/* Right rail */}
-        <div className="flex flex-col gap-6">
+        <div className="min-w-0 flex flex-col gap-6 [overflow-wrap:anywhere]">
           {/* Action Brief */}
           <div>
             <SectionTitle>Demo Action Brief</SectionTitle>

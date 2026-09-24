@@ -212,9 +212,9 @@ export function WorkcellReplay() {
             href={`${BASE}/workcells/${replay.workcellId}/replay`}
             className="block min-h-11"
           >
-            <Card className="cursor-pointer hover:opacity-80 transition-opacity">
-              <div className="flex items-start justify-between gap-3">
-                <div className="flex-1 min-w-0">
+            <Card className="min-w-0 cursor-pointer hover:opacity-80 transition-opacity [overflow-wrap:anywhere]">
+              <div className="flex flex-col sm:flex-row items-start justify-between gap-3">
+                <div className="w-full flex-1 min-w-0">
                   <div className="flex items-center gap-2 mb-1 flex-wrap">
                     <span
                       className="text-xs font-medium"
@@ -244,12 +244,12 @@ export function WorkcellReplay() {
                     </span>
                   </div>
                   <div
-                    className="font-medium text-sm truncate mb-1"
+                    className="font-medium text-sm mb-1"
                     style={{ color: 'var(--color-a11oy-text)' }}
                   >
                     {replay.workcellName}
                   </div>
-                  <div className="flex items-center gap-4 text-xs">
+                  <div className="flex flex-wrap items-center gap-4 text-xs">
                     <span style={{ color: 'var(--color-a11oy-text-ghost)' }}>
                       {new Date(replay.completedAt).toLocaleString('en-US', {
                         month: 'short',
@@ -278,7 +278,7 @@ export function WorkcellReplay() {
                     Evidence: {replay.operationalEvidence}
                   </div>
                 </div>
-                <div className="flex flex-col items-end gap-1.5 flex-shrink-0">
+                <div className="flex max-w-full flex-col items-start sm:items-end gap-1.5 flex-shrink-0">
                   {replay.evalDisposition && (
                     <span
                       className="text-xs px-1.5 py-0.5 rounded font-mono"

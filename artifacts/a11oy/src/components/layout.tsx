@@ -1,4 +1,4 @@
-import { type ReactNode, useEffect, useState } from 'react';
+import { type ReactNode, useEffect, useRef, useState } from 'react';
 import { Link, useLocation } from 'wouter';
 
 const BASE = (import.meta.env.BASE_URL ?? '/a11oy/').replace(/\/$/, '');
@@ -252,6 +252,12 @@ export function Layout({ children, fullscreen = false }: LayoutProps) {
     () => typeof window !== 'undefined' && window.matchMedia('(min-width: 768px)').matches,
   );
   const [location] = useLocation();
+  const toggleRef = useRef<HTMLButtonElement>(null);
+  const navigationRef = useRef<HTMLElement | null>(null);
+  const closeNavigationRef = useRef<HTMLButtonElement>(null);
+  const restoreFocusFrameRef = useRef<number | undefined>(undefined);
+  const mobileDrawerOpen = sidebarOpen && !isDesktop && !fullscreen;
+  const SidebarContainer = isDesktop ? 'aside' : 'dialog';
 
   useEffect(() => {
     const desktop = window.matchMedia('(min-width: 768px)');
@@ -262,6 +268,73 @@ export function Layout({ children, fullscreen = false }: LayoutProps) {
     desktop.addEventListener('change', syncSidebarToViewport);
     return () => desktop.removeEventListener('change', syncSidebarToViewport);
   }, []);
+
+  useEffect(() => {
+    if (!mobileDrawerOpen) return;
+    if (restoreFocusFrameRef.current !== undefined) {
+      cancelAnimationFrame(restoreFocusFrameRef.current);
+      restoreFocusFrameRef.current = undefined;
+    }
+    const drawer = navigationRef.current;
+    if (!(drawer instanceof HTMLDialogElement)) return;
+
+    const previousOverflow = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+    drawer.showModal();
+    closeNavigationRef.current?.focus();
+
+    const containKeyboardFocus = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') {
+        event.preventDefault();
+        setSidebarOpen(false);
+        return;
+      }
+      if (event.key !== 'Tab') return;
+      const controls = Array.from(
+        drawer.querySelectorAll<HTMLElement>(
+          'button:not([disabled]), a[href], [tabindex]:not([tabindex="-1"])',
+        ),
+      ).filter((element) => element.tabIndex >= 0 && element.getClientRects().length > 0);
+      const first = controls[0];
+      const last = controls[controls.length - 1];
+      if (!first || !last) {
+        event.preventDefault();
+        drawer.focus();
+        return;
+      }
+      if (
+        event.shiftKey &&
+        (document.activeElement === first || document.activeElement === drawer)
+      ) {
+        event.preventDefault();
+        last.focus();
+      } else if (!event.shiftKey && document.activeElement === last) {
+        event.preventDefault();
+        first.focus();
+      }
+    };
+
+    drawer.addEventListener('keydown', containKeyboardFocus);
+    return () => {
+      drawer.removeEventListener('keydown', containKeyboardFocus);
+      drawer.close();
+      document.body.style.overflow = previousOverflow;
+      // React removes inert during the closing commit. Wait until that is
+      // complete before restoring focus, and never steal focus from a reopened
+      // drawer (including the development StrictMode effect replay).
+      restoreFocusFrameRef.current = requestAnimationFrame(() => {
+        restoreFocusFrameRef.current = undefined;
+        const toggle = toggleRef.current ?? document.getElementById('navigation-toggle');
+        if (
+          toggle?.isConnected &&
+          !toggle.closest('[inert]') &&
+          !document.querySelector('dialog[open]')
+        ) {
+          toggle.focus();
+        }
+      });
+    };
+  }, [mobileDrawerOpen]);
 
   if (fullscreen) {
     return (
@@ -292,11 +365,13 @@ export function Layout({ children, fullscreen = false }: LayoutProps) {
     >
       {/* TOP BAR — minimal, monochrome */}
       <div
+        inert={mobileDrawerOpen}
         style={{
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'space-between',
-          padding: '0 1.25rem',
+          padding: isDesktop ? '0 1.25rem' : '0 0.5rem',
+          gap: '0.5rem',
           height: 52,
           borderBottom: `1px solid ${TOKENS.border}`,
           position: 'sticky',
@@ -306,13 +381,18 @@ export function Layout({ children, fullscreen = false }: LayoutProps) {
           backdropFilter: 'blur(12px)',
         }}
       >
-        <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+        <div
+          style={{ display: 'flex', alignItems: 'center', gap: isDesktop ? '0.75rem' : '0.25rem' }}
+        >
           <button
+            id="navigation-toggle"
+            ref={toggleRef}
             type="button"
             onClick={() => setSidebarOpen((o) => !o)}
             style={{
               width: 44,
               height: 44,
+              flexShrink: 0,
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
@@ -333,7 +413,7 @@ export function Layout({ children, fullscreen = false }: LayoutProps) {
             style={{
               display: 'flex',
               alignItems: 'center',
-              gap: '0.5rem',
+              gap: isDesktop ? '0.5rem' : '0.25rem',
               minHeight: 44,
               textDecoration: 'none',
             }}
@@ -366,13 +446,15 @@ export function Layout({ children, fullscreen = false }: LayoutProps) {
             </span>
           </Link>
         </div>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: isDesktop ? '1rem' : '0.5rem' }}>
           <div
             style={{
               display: 'flex',
               alignItems: 'center',
-              gap: '0.5rem',
-              fontSize: '0.6875rem',
+              gap: isDesktop ? '0.5rem' : '0.25rem',
+              maxWidth: isDesktop ? undefined : 66,
+              fontSize: isDesktop ? '0.6875rem' : '0.625rem',
+              lineHeight: 1.2,
               fontFamily: TOKENS.mono,
               color: TOKENS.textDim,
               letterSpacing: '0.04em',
@@ -382,18 +464,21 @@ export function Layout({ children, fullscreen = false }: LayoutProps) {
               style={{
                 width: 5,
                 height: 5,
+                flexShrink: 0,
                 borderRadius: '50%',
                 background: TOKENS.accent,
                 boxShadow: `0 0 6px ${TOKENS.accent}`,
               }}
             />
-            Active prototype
+            <span>Active prototype</span>
           </div>
           <Link
             href={b('/start')}
             style={{
-              padding: '0.4rem 0.875rem',
+              padding: isDesktop ? '0.4rem 0.875rem' : '0.4rem 0.5rem',
               minHeight: 44,
+              flexShrink: 0,
+              whiteSpace: 'nowrap',
               display: 'inline-flex',
               alignItems: 'center',
               fontSize: '0.75rem',
@@ -411,40 +496,90 @@ export function Layout({ children, fullscreen = false }: LayoutProps) {
       </div>
 
       <div style={{ display: 'flex', flex: 1, minHeight: 0 }}>
-        {sidebarOpen && !isDesktop && (
-          <button
-            type="button"
-            aria-label="Close navigation"
-            onClick={() => setSidebarOpen(false)}
-            style={{
-              position: 'fixed',
-              inset: '52px 0 0 0',
-              zIndex: 44,
-              border: 0,
-              background: 'rgba(0,0,0,0.62)',
-              cursor: 'pointer',
-            }}
-          />
-        )}
         {sidebarOpen && (
-          <aside
+          <SidebarContainer
             id="primary-navigation"
+            ref={(element) => {
+              navigationRef.current = element;
+            }}
+            aria-label="Primary navigation"
+            aria-modal={isDesktop ? undefined : true}
+            tabIndex={isDesktop ? undefined : -1}
+            className={isDesktop ? undefined : 'backdrop:bg-black/60'}
+            onCancel={
+              isDesktop
+                ? undefined
+                : (event) => {
+                    event.preventDefault();
+                    setSidebarOpen(false);
+                  }
+            }
+            onClose={
+              isDesktop
+                ? undefined
+                : (event) => {
+                    if (!(event.currentTarget as HTMLDialogElement).open) {
+                      setSidebarOpen(false);
+                    }
+                  }
+            }
+            onClick={
+              isDesktop
+                ? undefined
+                : (event) => {
+                    if (event.target !== event.currentTarget) return;
+                    const bounds = event.currentTarget.getBoundingClientRect();
+                    if (
+                      event.clientX < bounds.left ||
+                      event.clientX > bounds.right ||
+                      event.clientY < bounds.top ||
+                      event.clientY > bounds.bottom
+                    ) {
+                      setSidebarOpen(false);
+                    }
+                  }
+            }
             style={{
               width: 200,
+              margin: 0,
+              border: isDesktop ? undefined : 0,
               borderRight: `1px solid ${TOKENS.border}`,
               flexShrink: 0,
               overflowY: 'auto',
               padding: '1.5rem 0',
               background: TOKENS.bg,
+              color: TOKENS.text,
               position: isDesktop ? 'sticky' : 'fixed',
               top: 52,
               height: 'calc(100vh - 52px)',
               left: 0,
               zIndex: isDesktop ? 1 : 45,
               maxWidth: 'calc(100vw - 44px)',
+              maxHeight: 'none',
               boxShadow: isDesktop ? 'none' : '12px 0 32px rgba(0,0,0,0.35)',
             }}
           >
+            {!isDesktop && (
+              <div style={{ padding: '0 1.25rem', marginBottom: '1rem' }}>
+                <button
+                  ref={closeNavigationRef}
+                  type="button"
+                  onClick={() => setSidebarOpen(false)}
+                  style={{
+                    minWidth: 44,
+                    minHeight: 44,
+                    padding: '0.5rem 0.75rem',
+                    border: `1px solid ${TOKENS.borderStrong}`,
+                    borderRadius: 6,
+                    background: 'transparent',
+                    color: TOKENS.text,
+                    cursor: 'pointer',
+                  }}
+                >
+                  Close navigation
+                </button>
+              </div>
+            )}
             {NAV_GROUPS.map((group) => (
               <div key={group.label} style={{ marginBottom: '1.5rem' }}>
                 <div
@@ -496,16 +631,18 @@ export function Layout({ children, fullscreen = false }: LayoutProps) {
                 })}
               </div>
             ))}
-          </aside>
+          </SidebarContainer>
         )}
         <main
           id="main-content"
+          inert={mobileDrawerOpen}
           tabIndex={-1}
           style={{
             flex: 1,
             overflowY: 'auto',
             padding: '1.5rem',
             minWidth: 0,
+            overflowWrap: 'anywhere',
             background: TOKENS.bg,
           }}
         >
