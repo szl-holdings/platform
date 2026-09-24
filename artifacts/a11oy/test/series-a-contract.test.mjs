@@ -178,7 +178,17 @@ test('fails closed when the Omnia network endpoints are absent', () => {
 });
 
 test('exposes the Series A contract suite through the normal package test task', () => {
-  assert.equal(packageJson.scripts.test, packageJson.scripts['test:series-a']);
+  assert.ok(packageJson.scripts.test.startsWith('node --test '));
+  for (const testFile of [
+    'test/series-a-contract.test.mjs',
+    'test/atelier-session-continuity-contract.test.mjs',
+    '../../scripts/qa/series-a-proof-helpers.test.mjs',
+  ]) {
+    assert.ok(
+      packageJson.scripts.test.includes(testFile),
+      `${testFile} must run in the normal task`,
+    );
+  }
 });
 
 test('resets and verifies scroll origin after tab exercise before full-page capture', () => {

@@ -1,10 +1,10 @@
 {
   "meta": {
-    "generated": "2026-08-30",
+    "generated": "2026-09-24",
     "track": "FRONTIER V2 — Wave 1 Truth Lock",
-    "version": "2.1.4",
-    "measurement_base_commit": "433b0c34c54ed28719b9fcab964c0171c2e79034",
-    "note": "Canonical reproducible counts for the current protected-source tree. The listed measurement_base_commit remains the inspected historical baseline; scripts/audit/validate-source-of-truth.js recomputes current-tree metrics from the checked-out commit. Runtime and database values not refreshed on 2026-07-27 remain historical snapshots, not current public claims."
+    "version": "2.1.5",
+    "measurement_base_commit": "ff8e29514a6560e269a875027db240b580b05b25",
+    "note": "Canonical reproducible counts for the integrated Turn Capsule source tree. The listed measurement_base_commit is the inspected protected-main baseline after the legacy DCO compatibility workflow was retired; scripts/audit/validate-source-of-truth.js recomputes current-tree metrics from the checked-out commit. Runtime and database values not refreshed on 2026-09-24 remain historical snapshots, not current public claims."
   },
   "artifacts": {
     "registered": {
@@ -111,7 +111,7 @@
     "handler_declarations": {
       "count": 312,
       "command": "Count non-test get|post|put|patch|delete|use declarations on app/router and named Express Router receivers under apps/, services/, and artifacts/api-server/",
-      "computed": "2026-08-30",
+      "computed": "2026-09-24",
       "note": "A static declaration count. It does not prove deployment, reachability, authentication, or HTTP 200 behavior."
     }
   },
@@ -128,15 +128,15 @@
     "workflows": {
       "count": 46,
       "command": "Count tracked .github/workflows/*.yml and *.yaml files",
-      "computed": "2026-08-20",
-      "note": "Counts the 46 permanent protected-source workflows after adding exact-head screenshot evidence and the hosted observability and public npm release paths, while retiring the obsolete Vite direct-push and Replit-era Hugging Face one-shots."
+      "computed": "2026-09-24",
+      "note": "Counts the permanent protected-source workflows after the read-only legacy DCO compatibility workflow was retired. The frontier receipt-chain gate remains included."
     }
   },
   "env": {
     "declared_vars": {
       "count": 244,
       "command": "Count .env.example lines matching ^[A-Z_]+=",
-      "computed": "2026-08-30"
+      "computed": "2026-09-24"
     }
   },
   "mobile": {
@@ -180,7 +180,7 @@
     },
     "unique_axioms": {
       "count": 14,
-      "definition": "Unique declared axioms in the frozen kernel; 15 raw occurrences with one duplicate."
+      "definition": "Unique declared axioms; 15 raw occurrences with one duplicate."
     },
     "tracked_sorries": {
       "count": 163,

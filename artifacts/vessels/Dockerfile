@@ -22,7 +22,7 @@
 # filtered `@workspace/vessels` Vite build.
 
 # ─── Shared pinned package-manager base ───────────────────────────────────────
-FROM node:26-bookworm-slim@sha256:cd565714d4da3e84bfd341e31448f81d47c6362198f152345297c9c1154e6341 AS pnpm-base
+FROM node:26-bookworm-slim@sha256:cd9f682fa2885cd1056e830424764158570061c59736a1da836bc3d73df095ae AS pnpm-base
 ARG PNPM_VERSION=10.26.1
 RUN npm install --global "pnpm@${PNPM_VERSION}" \
     && test "$(pnpm --version)" = "${PNPM_VERSION}"
@@ -54,7 +54,7 @@ RUN --mount=type=cache,id=pnpm-store,target=/root/.local/share/pnpm/store \
 RUN pnpm --filter "@workspace/vessels" run build
 
 # ─── Stage 3: runtime (nginx, non-root, port 8080) ───────────────────────────
-FROM nginx:alpine@sha256:4a73073bd557c65b759505da037898b61f1be6cbcc3c2c3aeac22d2a470c1752 AS runner
+FROM nginx:alpine@sha256:72ba65eb42c10344912a84ff42408db7d34f2feb642204570ab8fc5ffd29f1d3 AS runner
 # The app is built with Vite base path "/vessels/". Serve the SPA under both
 # / and /vessels/, add the UDS liveness endpoint, and run unprivileged on 8080.
 COPY --from=builder /app/artifacts/vessels/dist/public /usr/share/nginx/html

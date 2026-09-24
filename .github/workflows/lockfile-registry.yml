@@ -16,4 +16,4 @@ permissions:
 
 jobs:
   lockfiles:
-    uses: szl-holdings/.github/.github/workflows/reusable-lockfile-registry-check.yml@5b0d38fadadc073812bfc6175a1e823cd529939f # main
+    uses: szl-holdings/.github/.github/workflows/reusable-lockfile-registry-check.yml@932817603e46212f4226347c95aeb0cc55ec58cb # main

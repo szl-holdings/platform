@@ -386,7 +386,7 @@ export function A11oyAtelier() {
               <strong>{item.provider === 'xai' ? 'xAI API' : 'xAI Grok Build CLI'}</strong>
               <span style={{ color: palette.muted }}>{item.reason}</span>
               <span style={{ color: item.available ? palette.teal : palette.muted }}>
-                {item.available ? 'AVAILABLE' : 'UNAVAILABLE'} {item.localOnly ? '· LOCAL' : ''}
+                {item.available ? 'CONFIGURED' : 'UNAVAILABLE'} {item.localOnly ? '· LOCAL' : ''}
               </span>
             </div>
           ))}

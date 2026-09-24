@@ -1,16 +1,12 @@
 #!/usr/bin/env node
 /**
- * Security SBOM Generator & Vulnerability Scanner
+ * Deterministic CycloneDX SBOM generator.
  *
- * Uses the npm bulk advisory endpoint (POST /-/npm/v1/security/advisories/bulk)
- * which replaced the deprecated /v1/security/audits endpoint.
- *
- * Response schema: { [packageName]: [{ id, url, title, severity, vulnerable_versions, cwe, cvss }] }
- * The package name is the OBJECT KEY — there is no `module_name` field in the response.
- *
- * Fails with exit code 1 if:
- *   - The advisory endpoint is unreachable or returns an error
- *   - Any high or critical severity vulnerability is found
+ * This script is intentionally inventory-only and network-free. Vulnerability
+ * policy is enforced separately by generate-vuln-report.js using the package
+ * manager's own `pnpm audit --audit-level=high` exit status. Keeping SBOM
+ * generation independent from registry availability makes the artifact
+ * reproducible while preserving a fail-closed vulnerability gate.
  */
 
 import { mkdirSync, readFileSync, writeFileSync } from 'node:fs';
@@ -22,10 +18,8 @@ const ROOT = join(__dirname, '../..');
 const OUTPUT_DIR = join(ROOT, 'security');
 const HISTORY_DIR = join(OUTPUT_DIR, 'sbom-history');
 
-const NPM_BULK_ADVISORY_URL = 'https://registry.npmjs.org/-/npm/v1/security/advisories/bulk';
-const SEVERITY_ORDER = ['critical', 'high', 'moderate', 'low'];
-
-function fatal(_message) {
+function fatal(message) {
+  console.error(message);
   process.exit(1);
 }
 
@@ -71,7 +65,36 @@ function addLinkedWorkspacePackages(packages) {
   }
 }
 
-function parseLockfile() {
+export function parseLockfileText(lockfileText) {
+  const packages = {};
+  const marker = lockfileText.indexOf('\npackages:');
+  if (marker < 0) fatal('pnpm-lock.yaml is missing the packages section');
+  const packagesStart = marker + '\npackages:'.length;
+  const followingSection = lockfileText.slice(packagesStart).search(/^\S[^\n]*:/m);
+  const packagesEnd = followingSection < 0 ? lockfileText.length : packagesStart + followingSection;
+  const inPackagesSection = lockfileText.slice(packagesStart, packagesEnd);
+  const pkgRegex = /^ {2}((?:'[^'\n]+'|"[^"\n]+"|[^\s'"\n][^:\n]*)):\s*$/gm;
+  let match;
+  while ((match = pkgRegex.exec(inPackagesSection)) !== null) {
+    const packageKey = match[1].replace(/^(['"])(.*)\1$/, '$2');
+    const canonicalKey = packageKey.split('(', 1)[0];
+    const separator = canonicalKey.lastIndexOf('@');
+    if (separator <= 0) continue;
+    const name = canonicalKey.slice(0, separator).trim();
+    const version = canonicalKey.slice(separator + 1).trim();
+    if (!name || !version || version.includes(' ')) continue;
+    if (!packages[name]) packages[name] = new Set();
+    packages[name].add(version);
+  }
+
+  const result = {};
+  for (const [name, versionSet] of Object.entries(packages)) {
+    result[name] = Array.from(versionSet).sort();
+  }
+  return result;
+}
+
+export function parseLockfile() {
   const lockfilePath = join(ROOT, 'pnpm-lock.yaml');
   let lockfileText;
   try {
@@ -80,96 +103,24 @@ function parseLockfile() {
     fatal(`Cannot read pnpm-lock.yaml: ${err.message}`);
   }
 
-  const packages = {};
-
-  // pnpm v9 lockfile format: packages section entries look like:
-  //   'package-name@version':
-  //   '@scope/package-name@version':
-  //
-  // We scan specifically within the packages: section for these entries.
-  const inPackagesSection = lockfileText.slice(lockfileText.indexOf('\npackages:'));
-
-  // Match quoted package@version entries in the packages section
-  // Handles both scoped (@scope/pkg@ver) and unscoped (pkg@ver) packages
-  const pkgRegex = /^ {2}'((?:@[^@'\n]+\/)?[^@'\n]+)@([^'()\n]+)/gm;
-  let match;
-  while ((match = pkgRegex.exec(inPackagesSection)) !== null) {
-    const name = match[1].trim();
-    const version = match[2].trim();
-    if (!name || !version || version.includes(' ')) continue;
-    if (!packages[name]) {
-      packages[name] = new Set();
-    }
-    packages[name].add(version);
-  }
+  const packages = Object.fromEntries(
+    Object.entries(parseLockfileText(lockfileText)).map(([name, versions]) => [
+      name,
+      new Set(versions),
+    ]),
+  );
   addLinkedWorkspacePackages(packages);
 
   const result = {};
-  for (const [name, versionSet] of Object.entries(packages)) {
-    result[name] = Array.from(versionSet);
+  for (const [name, versions] of Object.entries(packages)) {
+    result[name] = Array.from(versions).sort();
   }
   return result;
 }
 
-async function fetchAdvisories(packages) {
-  const body = {};
-  for (const [name, versions] of Object.entries(packages)) {
-    body[name] = versions;
-  }
-
-  const _packageCount = Object.keys(body).length;
-
-  let response;
-  try {
-    response = await fetch(NPM_BULK_ADVISORY_URL, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        Accept: 'application/json',
-      },
-      body: JSON.stringify(body),
-      signal: AbortSignal.timeout(30_000),
-    });
-  } catch (err) {
-    fatal(`Advisory endpoint request failed: ${err.message}. Check network connectivity.`);
-  }
-
-  if (!response.ok) {
-    const text = await response.text().catch(() => '(no body)');
-    fatal(`Advisory endpoint returned HTTP ${response.status}: ${text}`);
-  }
-
-  let advisories;
-  try {
-    advisories = await response.json();
-  } catch (err) {
-    fatal(`Advisory endpoint returned non-JSON response: ${err.message}`);
-  }
-
-  if (typeof advisories !== 'object' || advisories === null) {
-    fatal('Advisory endpoint returned unexpected response shape (not an object).');
-  }
-
-  return advisories;
-}
-
-/**
- * Flatten advisories from { [pkgName]: AdvisoryEntry[] } into a tagged flat list.
- * The npm bulk advisory endpoint uses the object KEY as the package name —
- * there is no `module_name` field in the advisory entry itself.
- */
-function flattenAdvisories(advisories) {
-  return Object.entries(advisories).flatMap(([pkgName, advs]) =>
-    (Array.isArray(advs) ? advs : [advs]).map((adv) => ({
-      ...adv,
-      packageName: pkgName,
-    })),
-  );
-}
-
-function buildSbom(packages, advisories) {
+export function buildSbom(packages) {
   const components = [];
-  for (const [name, versions] of Object.entries(packages)) {
+  for (const [name, versions] of Object.entries(packages).sort(([a], [b]) => a.localeCompare(b))) {
     for (const version of versions) {
       components.push({
         type: 'library',
@@ -180,26 +131,6 @@ function buildSbom(packages, advisories) {
     }
   }
 
-  const flatVulns = flattenAdvisories(advisories);
-
-  const vulnList = flatVulns.map((adv) => ({
-    id: `npm-advisory-${adv.id}`,
-    source: { name: 'npmjs', url: adv.url },
-    ratings: [
-      {
-        severity: adv.severity,
-        score: adv.cvss?.score ?? null,
-        vector: adv.cvss?.vectorString ?? null,
-      },
-    ],
-    cwes: adv.cwe ?? [],
-    description: adv.title,
-    recommendation: `Upgrade ${adv.packageName} to a non-vulnerable version. Vulnerable range: ${adv.vulnerable_versions ?? 'unknown'}`,
-    affects: adv.vulnerable_versions
-      ? [{ ref: `pkg:npm/${adv.packageName}`, versions: [{ range: adv.vulnerable_versions }] }]
-      : [],
-  }));
-
   return {
     bomFormat: 'CycloneDX',
     specVersion: '1.4',
@@ -207,20 +138,15 @@ function buildSbom(packages, advisories) {
     serialNumber: `urn:uuid:${crypto.randomUUID()}`,
     metadata: {
       timestamp: new Date().toISOString(),
-      scanStatus: 'success',
-      tools: [{ vendor: 'SZL Holdings', name: 'generate-sbom.js', version: '2.2.0' }],
+      scanStatus: 'inventory-only',
+      vulnerabilityAuthority: 'pnpm audit --audit-level=high (separate blocking CI step)',
+      tools: [{ vendor: 'SZL Holdings', name: 'generate-sbom.js', version: '3.1.0' }],
       component: { type: 'application', name: 'szl-platform', version: '1.0.0' },
       statistics: {
         totalPackages: components.length,
-        vulnerabilitiesFound: vulnList.length,
-        critical: flatVulns.filter((v) => v.severity === 'critical').length,
-        high: flatVulns.filter((v) => v.severity === 'high').length,
-        moderate: flatVulns.filter((v) => v.severity === 'moderate').length,
-        low: flatVulns.filter((v) => v.severity === 'low').length,
       },
     },
     components,
-    vulnerabilities: vulnList,
   };
 }
 
@@ -228,39 +154,19 @@ async function main() {
   mkdirSync(OUTPUT_DIR, { recursive: true });
   mkdirSync(HISTORY_DIR, { recursive: true });
   const packages = parseLockfile();
-  const _packageCount = Object.keys(packages).length;
-
-  const advisories = await fetchAdvisories(packages);
-
-  const flatVulns = flattenAdvisories(advisories);
-
-  const sbom = buildSbom(packages, advisories);
+  const sbom = buildSbom(packages);
 
   const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
-  // Timestamped archive goes to sbom-history/ to keep security/ root clean
   const sbomPath = join(HISTORY_DIR, `sbom-${timestamp}.json`);
   const latestPath = join(OUTPUT_DIR, 'sbom-latest.json');
+  const rendered = JSON.stringify(sbom, null, 2) + '\n';
+  writeFileSync(sbomPath, rendered);
+  writeFileSync(latestPath, rendered);
 
-  writeFileSync(sbomPath, JSON.stringify(sbom, null, 2));
-  writeFileSync(latestPath, JSON.stringify(sbom, null, 2));
-
-  if (flatVulns.length > 0) {
-    for (const severity of SEVERITY_ORDER) {
-      const count = flatVulns.filter((v) => v.severity === severity).length;
-      if (count > 0) {
-      }
-    }
-  }
-
-  const highAndCritical = flatVulns.filter(
-    (v) => v.severity === 'critical' || v.severity === 'high',
-  );
-
-  if (highAndCritical.length > 0) {
-    for (const _v of highAndCritical) {
-    }
-    process.exit(1);
-  }
+  console.log(`SBOM generated: ${sbom.metadata.statistics.totalPackages} package components`);
+  console.log('Vulnerability authority: pnpm audit --audit-level=high in generate-vuln-report.js');
 }
 
-main().catch((err) => fatal(err.message));
+if (process.argv[1] && resolve(process.argv[1]) === fileURLToPath(import.meta.url)) {
+  main().catch((err) => fatal(err.message));
+}

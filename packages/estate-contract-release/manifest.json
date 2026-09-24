@@ -14,10 +14,7 @@
       "id": "design-system",
       "role": "CANONICAL_SOURCE",
       "package_name": "@szl-holdings/design-system",
-      "inputs": [
-        "packages/design-system/package.json",
-        "packages/design-system/src"
-      ],
+      "inputs": ["packages/design-system/package.json", "packages/design-system/src"],
       "file_count": 100,
       "bytes": 354178,
       "tree_sha256": "b8b84fb54875d976d6ac87db8976156ed49542073f06b32762b17a0f61efc0df",
@@ -528,10 +525,7 @@
       "id": "design-system-forge-type-contract",
       "role": "EXPORTED_SOURCE_DEPENDENCY",
       "package_name": "@workspace/forge/types",
-      "inputs": [
-        "packages/forge/package.json",
-        "packages/forge/src/types.ts"
-      ],
+      "inputs": ["packages/forge/package.json", "packages/forge/src/types.ts"],
       "file_count": 2,
       "bytes": 4737,
       "tree_sha256": "39b24e39751abdc8fb69e6f3212f8cec9164db25bf6d59e5a13917dea1cd9566",
@@ -559,8 +553,8 @@
         "lib/api-spec/scripts/codegen.mjs"
       ],
       "file_count": 4,
-      "bytes": 2189187,
-      "tree_sha256": "d31aa14ddb9db747df80915b3b4ab4f69b7753441a5105faeb4e90d0cd7322e2",
+      "bytes": 2189188,
+      "tree_sha256": "54f2b5f9101f2c8e15bfdff6cd9899032adca70021ea37805a3306438a8dff73",
       "files": [
         {
           "path": "lib/api-spec/openapi.yaml",
@@ -574,8 +568,8 @@
         },
         {
           "path": "lib/api-spec/package.json",
-          "bytes": 553,
-          "sha256": "20e7818ef118230b691294f104011d5c4cf8071d352813f6be28a814ea7382a6"
+          "bytes": 554,
+          "sha256": "f182a3986f6d32082667158030fdb3208c08a51132eb31228145d96a9fc3b324"
         },
         {
           "path": "lib/api-spec/scripts/codegen.mjs",
@@ -635,10 +629,7 @@
       "id": "api-zod",
       "role": "RUNTIME_AND_GENERATED_OUTPUT_PRESENT",
       "package_name": "@szl-holdings/api-zod",
-      "inputs": [
-        "lib/api-zod/package.json",
-        "lib/api-zod/src"
-      ],
+      "inputs": ["lib/api-zod/package.json", "lib/api-zod/src"],
       "file_count": 661,
       "bytes": 1014791,
       "tree_sha256": "c3b24c7048d461ff83819e60fc6f0c62a0773e1564a9174affff896b03e0c87b",
@@ -3954,10 +3945,7 @@
       "id": "shared-contracts",
       "role": "CANONICAL_SOURCE",
       "package_name": "@szl-holdings/shared-contracts",
-      "inputs": [
-        "packages/shared-contracts/package.json",
-        "packages/shared-contracts/src"
-      ],
+      "inputs": ["packages/shared-contracts/package.json", "packages/shared-contracts/src"],
       "file_count": 9,
       "bytes": 47529,
       "tree_sha256": "ac5dde34c6df9e17350427f272cbb04ebd0aea5401811c6c007cec10f3d0a8c5",
@@ -4025,5 +4013,5 @@
       "claims that hash closure proves registry publication or deployment"
     ]
   },
-  "release_id": "sha256:9af5861b8849ccc11813717187a15e52f644d64e97970b9cf0143eea47abf493"
+  "release_id": "sha256:27ec82606a7fd8dab0a78d8d5ab2d78d784aa7caef6e6291c2df1ca5cb71eee4"
 }

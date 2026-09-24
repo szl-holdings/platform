@@ -1,12 +1,23 @@
 <!--
   platform README — investor-readable rewrite · 2026-06-30
   Honesty doctrine LOCKED. Sign-off: Stephen Lutar <stephenlutar2@gmail.com>
-  DCO + Conventional Commits. No codenames in UI prose.
+  Solo-builder provenance + Conventional Commits. No codenames in UI prose.
 -->
 
 <div align="center">
 
 # platform
+<!-- szl:header v1 -->
+<!-- badges: add this repo's CI / release / status badges here -->
+[![org: szl-holdings](https://img.shields.io/badge/org-szl--holdings-black)](https://github.com/szl-holdings)
+[![doctrine](https://img.shields.io/badge/doctrine-control%20before%20action%20%C2%B7%20evidence%20after-blue)](https://a-11-oy.com)
+
+**Control before action. Evidence after.**
+
+Part of the [szl-holdings](https://github.com/szl-holdings) estate ·
+Product: [a-11-oy.com](https://a-11-oy.com) ·
+Proof: [a11oy.net](https://a11oy.net)
+<!-- /szl:header -->
 
 ### The SZL governed-inference monorepo — every AI action signed, gated, and verifiable.
 
@@ -15,7 +26,6 @@
 [![CodeQL](https://github.com/szl-holdings/platform/actions/workflows/codeql.yml/badge.svg?branch=main)](https://github.com/szl-holdings/platform/actions/workflows/codeql.yml)
 [![SBOM](https://github.com/szl-holdings/platform/actions/workflows/sbom.yml/badge.svg?branch=main)](https://github.com/szl-holdings/platform/actions/workflows/sbom.yml)
 [![SLSA L1](https://img.shields.io/badge/SLSA-L1%20honest-22c55e?style=flat-square)](https://slsa.dev/spec/v1.0/levels)
-[![DCO](https://github.com/szl-holdings/platform/actions/workflows/dco.yml/badge.svg?branch=main)](https://github.com/szl-holdings/platform/actions/workflows/dco.yml)
 [![License: Proprietary](https://img.shields.io/badge/License-Proprietary-0B1F3A.svg?style=flat-square)](./LICENSE)
 [![Doctrine v11](https://img.shields.io/badge/Doctrine-v11_LOCKED-3b82f6?style=flat-square)](https://github.com/szl-holdings/.github/tree/main/doctrine)
 [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.20434276.svg)](https://doi.org/10.5281/zenodo.20434276)

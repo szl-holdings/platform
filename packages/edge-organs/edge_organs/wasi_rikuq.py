@@ -41,7 +41,7 @@ FLAGSHIP_HEALTH: dict[str, list[str]] = {
     "amaru":     ["https://szlholdings-amaru.hf.space/api/amaru/healthz"],
     "sentra":    ["https://szlholdings-sentra.hf.space/api/sentra/healthz"],
     "killinchu": ["https://szlholdings-killinchu.hf.space/api/killinchu/healthz",
-                  "https://szlholdings-vessels.hf.space/api/vessels/healthz"],
+                  "https://szlholdings-killinchu.hf.space/api/vessels/healthz"],
     "rosie":     ["https://szlholdings-rosie.hf.space/api/rosie/healthz"],
 }
 

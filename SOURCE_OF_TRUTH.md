@@ -8,16 +8,17 @@
 > source-tree and locked-kernel measurements. A value without reproducible
 > evidence is **UNVERIFIED**, not estimated.
 
-**Registry version:** 2.1.4
+**Registry version:** 2.1.5
 
-**Feature baseline inspected:** `platform@433b0c34c54ed28719b9fcab964c0171c2e79034`
+**Integration baseline inspected:** `platform@ff8e29514a6560e269a875027db240b580b05b25`
 
-**Measured:** 2026-08-26
+**Measured:** 2026-09-24
 
 **Validator:** `node scripts/audit/validate-source-of-truth.js`
 
-The counts describe the permanent protected-source tree after retiring two obsolete
-mutation one-shots. The validator recomputes them from whichever commit is checked out.
+The counts describe the integrated Turn Capsule source tree after the obsolete
+legacy DCO compatibility workflow was retired. The validator recomputes them
+from whichever commit is checked out.
 
 ---
 
@@ -39,7 +40,7 @@ mutation one-shots. The validator recomputes them from whichever commit is check
 | DB migrations (SQL files) | **149** | Tracked `lib/db/drizzle/*.sql` files; duplicate sequence numbers may exist |
 | API route source files | **44** | Non-test files under `apps/`, `services/`, and `artifacts/api-server/` containing a detected Express route declaration |
 | API handler declarations | **312** | Static non-test HTTP method declarations on `app`, `router`, and named Express Router receivers in the current runtime roots |
-| CI workflows | **46** | Permanent tracked `.github/workflows/*.yml` and `*.yaml`, including exact-head screenshot evidence, hosted observability proof, and public npm release paths |
+| CI workflows | **46** | Permanent tracked `.github/workflows/*.yml` and `*.yaml`, including exact-head screenshot evidence, hosted observability proof, public npm release paths, and the frontier receipt-chain gate; excludes the retired DCO compatibility workflow |
 | Environment variables (in `.env.example`) | **244** | Lines matching `^[A-Z_]+=` |
 
 These are source-tree measurements. They do not by themselves prove that a

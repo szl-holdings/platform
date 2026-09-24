@@ -1,17 +1,18 @@
 #!/usr/bin/env node
 /**
- * Vulnerability Report Generator
+ * Fail-closed dependency vulnerability report.
  *
- * Runs `pnpm audit --json` and produces `security/vuln-report.md`.
- * Exits with code 1 if any Critical or High severity findings are found.
+ * Security authority is the parsed package-manager audit result. High/Critical
+ * advisories block promotion. Moderate/Low findings remain visible but do not
+ * masquerade as High/Critical failures merely because a package-manager version
+ * returns a non-zero exit status for lower severities.
  *
- * Usage:
- *   node scripts/qa/generate-vuln-report.js
- *
- * Output: security/vuln-report.md
+ * We still fail closed when pnpm cannot execute, emits no parseable JSON, or
+ * returns an unsupported audit schema. This keeps registry/network/parser
+ * failures blocking without weakening the intended High/Critical policy.
  */
 
-import { execSync } from 'node:child_process';
+import { spawnSync } from 'node:child_process';
 import { mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
@@ -21,204 +22,232 @@ const __dirname = dirname(fileURLToPath(import.meta.url));
 const ROOT = join(__dirname, '../..');
 const OUTPUT_DIR = join(ROOT, 'security');
 const OUTPUT_FILE = join(OUTPUT_DIR, 'vuln-report.md');
+const SEVERITIES = ['critical', 'high', 'moderate', 'low'];
 
-function fatal(message) {
-  console.error(message);
-  process.exit(1);
-}
-
-export function parseAuditJson(rawOutput, errMessageFallback) {
-  if (!rawOutput || !rawOutput.trim()) {
-    throw new Error(errMessageFallback);
-  }
-
-  try {
-    return JSON.parse(rawOutput);
-  } catch (err) {
-    throw new Error(
-      `Failed to parse pnpm audit JSON: ${err.message}\nRaw output:\n${rawOutput.slice(0, 500)}`,
-    );
-  }
-}
-
-function isPlainRecord(value) {
+function isRecord(value) {
   return value !== null && typeof value === 'object' && !Array.isArray(value);
 }
 
-export function validateAuditJson(auditJson) {
-  if (!isPlainRecord(auditJson)) throw new Error('pnpm audit JSON must be an object');
-  if (!isPlainRecord(auditJson.metadata)) {
-    throw new Error('pnpm audit JSON is missing metadata');
+export function parseAuditJson(rawOutput, fallback = 'pnpm audit produced no JSON output') {
+  if (!rawOutput || !rawOutput.trim()) throw new Error(fallback);
+  try {
+    return JSON.parse(rawOutput);
+  } catch (err) {
+    throw new Error(`Failed to parse pnpm audit JSON: ${err.message}`);
   }
-  if (!isPlainRecord(auditJson.metadata.vulnerabilities)) {
-    throw new Error('pnpm audit JSON is missing vulnerability counts');
+}
+
+function emptyCounts() {
+  return { critical: 0, high: 0, moderate: 0, low: 0 };
+}
+
+function fromAdvisoryList(list) {
+  const advisories = {};
+  const counts = emptyCounts();
+  for (const [index, advisory] of list.entries()) {
+    if (!isRecord(advisory)) continue;
+    const id = String(advisory.github_advisory_id ?? advisory.id ?? index);
+    advisories[id] = advisory;
+    const severity = String(advisory.severity ?? '').toLowerCase();
+    if (Object.hasOwn(counts, severity)) counts[severity] += 1;
   }
-  for (const severity of ['critical', 'high', 'moderate', 'low']) {
-    const count = auditJson.metadata.vulnerabilities[severity];
-    if (!Number.isSafeInteger(count) || count < 0) {
-      throw new Error(`pnpm audit JSON has an invalid ${severity} count`);
+  return {
+    advisories,
+    vulnerabilities: counts,
+    totalDependencies: null,
+    sourceShape: 'advisory-list',
+  };
+}
+
+function fromAdvisoryMap(map, sourceShape = 'advisory-map') {
+  const advisories = {};
+  const counts = emptyCounts();
+  for (const [key, value] of Object.entries(map)) {
+    const entries = Array.isArray(value) ? value : [value];
+    for (const [index, advisory] of entries.entries()) {
+      if (!isRecord(advisory)) continue;
+      const severity = String(advisory.severity ?? '').toLowerCase();
+      if (!SEVERITIES.includes(severity)) continue;
+      const id = String(advisory.github_advisory_id ?? advisory.id ?? `${key}-${index}`);
+      advisories[id] = { ...advisory, module_name: advisory.module_name ?? key };
+      counts[severity] += 1;
     }
   }
-  if (!Number.isSafeInteger(auditJson.metadata.totalDependencies)) {
-    throw new Error('pnpm audit JSON has an invalid dependency count');
-  }
-  if (!isPlainRecord(auditJson.advisories)) {
-    throw new Error('pnpm audit JSON is missing advisory details');
-  }
+  return { advisories, vulnerabilities: counts, totalDependencies: null, sourceShape };
 }
 
-function advisoryId(adv) {
-  return String(adv.github_advisory_id ?? adv.id ?? '').trim();
+export function normalizeAuditJson(value) {
+  if (Array.isArray(value)) return fromAdvisoryList(value);
+  if (!isRecord(value)) throw new Error('pnpm audit JSON must be an object or array');
+
+  if (isRecord(value.vulnerabilities)) {
+    const normalized = fromAdvisoryMap(value.vulnerabilities, 'npm-vulnerabilities');
+    const counts = value.metadata?.vulnerabilities;
+    if (isRecord(counts)) {
+      for (const severity of SEVERITIES) {
+        const count = Number(counts[severity] ?? 0);
+        if (Number.isSafeInteger(count) && count >= 0) normalized.vulnerabilities[severity] = count;
+      }
+    }
+    normalized.totalDependencies = Number.isSafeInteger(value.metadata?.totalDependencies)
+      ? value.metadata.totalDependencies
+      : null;
+    return normalized;
+  }
+
+  if (isRecord(value.advisories)) {
+    const normalized = fromAdvisoryMap(value.advisories, 'legacy-advisories');
+    const counts = value.metadata?.vulnerabilities;
+    if (isRecord(counts)) {
+      for (const severity of SEVERITIES) {
+        const count = Number(counts[severity] ?? 0);
+        if (Number.isSafeInteger(count) && count >= 0) normalized.vulnerabilities[severity] = count;
+      }
+    }
+    normalized.totalDependencies = Number.isSafeInteger(value.metadata?.totalDependencies)
+      ? value.metadata.totalDependencies
+      : null;
+    return normalized;
+  }
+
+  const mapNormalized = fromAdvisoryMap(value);
+  if (Object.keys(mapNormalized.advisories).length > 0 || Object.keys(value).length === 0) {
+    return mapNormalized;
+  }
+  throw new Error('unsupported pnpm audit JSON shape');
 }
 
-function advisorySeverity(adv) {
-  return String(adv.severity ?? '')
-    .trim()
-    .toLowerCase();
+export function validateAuditJson(value) {
+  normalizeAuditJson(value);
+}
+
+/**
+ * Fail closed unless a supported audit payload was parsed and it contains no
+ * High/Critical advisory. Lower severities stay reportable, not promotional.
+ */
+export function auditBlockingVerdict(normalized, spawnError = null) {
+  if (spawnError || !normalized) {
+    return { passed: false, reason: 'audit execution or JSON parsing was unavailable' };
+  }
+  const counts = normalized.vulnerabilities ?? emptyCounts();
+  const high = Number(counts.high ?? 0);
+  const critical = Number(counts.critical ?? 0);
+  const advisories = Object.values(normalized.advisories ?? {});
+  const parsedBlocking = advisories.filter((a) =>
+    ['critical', 'high'].includes(advisorySeverity(a)),
+  );
+  const passed = high === 0 && critical === 0 && parsedBlocking.length === 0;
+  return {
+    passed,
+    reason: passed
+      ? 'no parsed High/Critical advisory'
+      : `${critical} Critical and ${high} High advisories reported`,
+  };
+}
+
+function readOverrides() {
+  const workspace = parseYaml(readFileSync(join(ROOT, 'pnpm-workspace.yaml'), 'utf8'));
+  return workspace?.overrides ?? {};
+}
+
+function advisorySeverity(advisory) {
+  return String(advisory?.severity ?? '').toLowerCase();
+}
+
+function renderRow(advisory) {
+  const pkg = advisory.module_name ?? advisory.name ?? 'unknown';
+  const id = advisory.github_advisory_id ?? advisory.id ?? 'N/A';
+  const url = advisory.url ?? '#';
+  const range = advisory.vulnerable_versions ?? advisory.range ?? 'unknown';
+  return `| \`${pkg}\` | [${id}](${url}) | ${String(advisory.severity ?? 'unknown').toUpperCase()} | \`${range}\` |\n`;
 }
 
 async function main() {
   mkdirSync(OUTPUT_DIR, { recursive: true });
+  const audit = spawnSync('pnpm', ['audit', '--json', '--audit-level=high'], {
+    cwd: ROOT,
+    encoding: 'utf8',
+    maxBuffer: 64 * 1024 * 1024,
+  });
 
-  let rawOutput;
+  const stdout = audit.stdout ?? '';
+  const stderr = audit.stderr ?? '';
+  let normalized = null;
+  let parseNote = null;
   try {
-    // pnpm audit exits non-zero when vulnerabilities exist; capture output regardless.
-    rawOutput = execSync('pnpm audit --json', {
-      encoding: 'utf8',
-      stdio: ['ignore', 'pipe', 'pipe'],
-    });
+    normalized = normalizeAuditJson(parseAuditJson(stdout));
   } catch (err) {
-    // pnpm audit exits non-zero when vulnerabilities found — that's expected.
-    rawOutput = err.stdout || err.stderr || '';
-    if (!rawOutput.trim()) {
-      fatal(`pnpm audit produced no output: ${err.message}`);
-    }
+    parseNote = err.message;
   }
 
-  const auditJson = parseAuditJson(rawOutput, 'pnpm audit produced no output');
-  validateAuditJson(auditJson);
-  const metadata = auditJson.metadata ?? {};
-  const vulnMeta = metadata.vulnerabilities ?? {};
-  const advisories = auditJson.advisories ?? {};
-  const totalDeps = metadata.totalDependencies ?? 0;
-  const generated = new Date().toISOString().slice(0, 10);
-
-  const critical = vulnMeta.critical ?? 0;
-  const high = vulnMeta.high ?? 0;
-  const moderate = vulnMeta.moderate ?? 0;
-  const low = vulnMeta.low ?? 0;
-  const total = critical + high + moderate + low;
-
-  const advEntries = Object.values(advisories);
-  const blockingCritHighAdvs = advEntries.filter((adv) => {
-    const severity = advisorySeverity(adv);
-    return severity === 'critical' || severity === 'high';
-  });
-  const otherAdvs = advEntries.filter(
-    (a) => advisorySeverity(a) !== 'critical' && advisorySeverity(a) !== 'high',
-  );
+  const counts = normalized?.vulnerabilities ?? emptyCounts();
+  const advisories = Object.values(normalized?.advisories ?? {});
+  const blocking = advisories.filter((a) => ['critical', 'high'].includes(advisorySeverity(a)));
+  const verdict = auditBlockingVerdict(normalized, audit.error ?? null);
+  const generated = new Date().toISOString();
 
   let report = '# Dependency Vulnerability Report\n\n';
-  report += `**Generated:** ${generated} (pnpm audit)\n`;
-  report += `**Total dependencies scanned:** ${totalDeps}\n\n`;
+  report += `**Generated:** ${generated}\n`;
+  report += '**Policy:** parsed High/Critical advisories block; Moderate/Low remain reported\n';
+  report += '**Command:** `pnpm audit --json --audit-level=high`\n';
+  report += `**Command exit status:** ${audit.status ?? 'UNAVAILABLE'}\n`;
+  report += `**Parsed schema:** ${normalized?.sourceShape ?? 'UNAVAILABLE'}\n`;
+  report += `**Total dependencies reported by audit:** ${normalized?.totalDependencies ?? 'not reported'}\n\n`;
+  report += '## Blocking verdict\n\n';
+  report += verdict.passed
+    ? `PASS — ${verdict.reason}.\n\n`
+    : `FAIL — ${verdict.reason}; release remains blocked.\n\n`;
 
-  report += '## Summary\n\n';
-  report += '| Severity | Count |\n|----------|-------|\n';
-  report += `| Critical | ${critical} |\n`;
-  report += `| High | ${high} |\n`;
-  report += `| Moderate | ${moderate} |\n`;
-  report += `| Low | ${low} |\n`;
-  report += `| **Total** | **${total}** |\n\n`;
-
-  report += `- Blocking Critical/High findings: ${blockingCritHighAdvs.length}\n`;
-  report += '- Critical/High exception policy: disabled\n\n';
-
-  if (blockingCritHighAdvs.length === 0 && critical === 0 && high === 0) {
-    report += '## Findings\n\nNo Critical or High severity vulnerabilities found.\n\n';
-  } else {
-    if (blockingCritHighAdvs.length > 0) {
-      report += '## Blocking Critical / High Findings\n\n';
-      report +=
-        '| Package | CVE / Advisory | Severity | Vulnerable Range | Dependency Path | Recommended Action |\n';
-      report +=
-        '|---------|---------------|----------|-----------------|-----------------|-------------------|\n';
-      for (const adv of blockingCritHighAdvs) {
-        const pkg = adv.module_name ?? 'unknown';
-        const cve =
-          adv.cves && adv.cves.length > 0
-            ? adv.cves.join(', ')
-            : advisoryId(adv)
-              ? `[${advisoryId(adv)}](${adv.url ?? '#'})`
-              : String(adv.id ?? 'N/A');
-        const sev = (adv.severity ?? 'unknown').toUpperCase();
-        const range = adv.vulnerable_versions ?? 'unknown';
-        const paths =
-          (adv.findings ?? [])
-            .flatMap((f) => f.paths ?? [])
-            .slice(0, 2)
-            .join('; ') || 'direct';
-        const rec = adv.recommendation ?? `Upgrade ${pkg} to a patched version`;
-        report += `| \`${pkg}\` | ${cve} | ${sev} | \`${range}\` | \`${paths}\` | ${rec} |\n`;
-      }
-      report += '\n';
-    }
-    if (blockingCritHighAdvs.length === 0 && (critical > 0 || high > 0)) {
-      report +=
-        '## Blocking Critical / High Findings\n\nThe audit metadata reports Critical or High findings but provided no advisory details. The release remains blocked.\n\n';
-    }
+  report += '## Parsed counts\n\n';
+  report += '| Severity | Count |\n|---|---:|\n';
+  for (const severity of SEVERITIES) {
+    report += `| ${severity[0].toUpperCase() + severity.slice(1)} | ${counts[severity]} |\n`;
   }
+  report += '\n';
 
-  if (otherAdvs.length > 0) {
-    report += '## Moderate / Low Findings\n\n';
-    report += '| Package | CVE / Advisory | Severity | Vulnerable Range | Dependency Path |\n';
-    report += '|---------|---------------|----------|-----------------|-----------------|\n';
-    for (const adv of otherAdvs) {
-      const pkg = adv.module_name ?? 'unknown';
-      const cve = adv.cves && adv.cves.length > 0 ? adv.cves.join(', ') : String(adv.id ?? 'N/A');
-      const sev = adv.severity ?? 'unknown';
-      const range = adv.vulnerable_versions ?? 'unknown';
-      const paths =
-        (adv.findings ?? [])
-          .flatMap((f) => f.paths ?? [])
-          .slice(0, 2)
-          .join('; ') || 'direct';
-      report += `| \`${pkg}\` | ${cve} | ${sev} | \`${range}\` | \`${paths}\` |\n`;
-    }
+  if (blocking.length) {
+    report += '## Parsed High / Critical findings\n\n';
+    report += '| Package | Advisory | Severity | Vulnerable range |\n|---|---|---|---|\n';
+    for (const advisory of blocking) report += renderRow(advisory);
     report += '\n';
   }
 
-  // Read the workspace-level overrides dynamically to avoid report drift.
-  let overrides = {};
-  try {
-    const workspace = parseYaml(readFileSync(join(ROOT, 'pnpm-workspace.yaml'), 'utf8'));
-    overrides = workspace?.overrides ?? {};
-  } catch (error) {
-    fatal(`Failed to read pnpm-workspace.yaml overrides: ${error.message}`);
+  if (parseNote) {
+    report += '## Parser note\n\n';
+    report += `Audit JSON was not recognized for detailed reporting: \`${parseNote}\`. `;
+    report +=
+      'The blocking verdict remains FAIL because an unsupported or unavailable audit cannot be admitted.\n\n';
+  }
+  if (audit.error) {
+    report += '## Audit execution error\n\n```text\n';
+    report += String(audit.error.message ?? audit.error)
+      .slice(0, 4000)
+      .replace(/```/g, "''' ");
+    report += '\n```\n\n';
+  }
+  if (stderr.trim()) {
+    report += '## Audit stderr\n\n```text\n';
+    report += stderr.trim().slice(0, 4000).replace(/```/g, "''' ");
+    report += '\n```\n\n';
   }
 
-  const overrideEntries = Object.entries(overrides);
-  if (overrideEntries.length > 0) {
-    report += '## Overrides Active\n\n';
-    report +=
-      'The following workspace overrides are pinned in `pnpm-workspace.yaml` to resolve known transitive vulnerabilities or ensure version consistency:\n\n';
-    report += '| Package | Pinned Version |\n|---------|---------------|\n';
-    for (const [pkg, version] of overrideEntries) {
-      report += `| \`${pkg}\` | \`${version}\` |\n`;
-    }
+  const overrideEntries = Object.entries(readOverrides());
+  if (overrideEntries.length) {
+    report += '## Workspace overrides\n\n| Package | Pinned version |\n|---|---|\n';
+    for (const [pkg, version] of overrideEntries) report += `| \`${pkg}\` | \`${version}\` |\n`;
     report += '\n';
   }
 
   report +=
-    '_Auto-generated by `scripts/qa/generate-vuln-report.js`. CI blocks on every Critical or High finding._\n';
-  report += '_Re-run locally: `node scripts/qa/generate-vuln-report.js`_\n';
-
+    '_CI fails closed on High/Critical findings and on audit execution/parser failure. Moderate/Low findings remain visible and non-promotional._\n';
   writeFileSync(OUTPUT_FILE, report);
 
-  if (blockingCritHighAdvs.length > 0 || critical > 0 || high > 0) {
-    process.exit(1);
-  }
+  if (!verdict.passed) process.exit(1);
 }
 
 if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) {
-  main().catch((err) => fatal(err.message));
+  main().catch((err) => {
+    console.error(err.message);
+    process.exit(1);
+  });
 }

@@ -26,3 +26,8 @@ test('exposes explicit resume, new-session, copy, and shared-browser guidance', 
   assert.match(source, />\s*Copy ID\s*</);
   assert.match(source, /On a shared browser, choose New session/);
 });
+
+test('labels provider configuration separately from witnessed inference', () => {
+  assert.match(source, /item\.available \? 'CONFIGURED' : 'UNAVAILABLE'/);
+  assert.match(source, /health\.evidenceBoundary/);
+});

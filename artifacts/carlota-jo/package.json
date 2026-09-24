@@ -16,9 +16,6 @@
   },
   "devDependencies": {
     "@szl-holdings/security-headers": "workspace:*",
-    "@replit/vite-plugin-cartographer": "catalog:",
-    "@replit/vite-plugin-dev-banner": "catalog:",
-    "@replit/vite-plugin-runtime-error-modal": "catalog:",
     "@szl-holdings/mcp-client": "workspace:*",
     "@szl-holdings/observability": "workspace:*",
     "@szl-holdings/shared-proxy": "workspace:*",

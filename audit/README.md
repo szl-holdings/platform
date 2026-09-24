@@ -42,8 +42,9 @@ mean.
 
 ## Canonical Current-Tree Numbers (Quick Reference)
 
-> Updated 2026-08-26 after adding the A11oy Atelier package and governed API route. Source:
-> `audit/source-of-truth.json` v2.1.4. Historical runtime/database snapshots
+> Updated 2026-09-24 after integrating the A11oy Atelier Turn Capsule source with
+> the retired legacy DCO compatibility workflow. Source:
+> `audit/source-of-truth.json` v2.1.5. Historical runtime/database snapshots
 > remain in the JSON but are not current public claims.
 
 | Metric | Verified Count | Source |
@@ -62,7 +63,7 @@ mean.
 | DB migrations (SQL files) | 149 | Tracked `lib/db/drizzle/*.sql` files |
 | API route source files | 44 | Non-test files with detected Express route declarations across current runtime roots |
 | API handler declarations | 312 | Static non-test method declarations on `app`, `router`, and named Express Router receivers |
-| CI workflows | 46 | Permanent workflows including exact-head screenshot evidence, hosted observability proof, and public npm release paths |
+| CI workflows | 46 | Permanent workflows including exact-head screenshot evidence, hosted observability proof, public npm release paths, and the frontier receipt-chain gate; excludes the retired DCO compatibility workflow |
 | Environment variables (in `.env.example`) | 244 | Lines matching `^[A-Z_]+=` |
 
 ---
