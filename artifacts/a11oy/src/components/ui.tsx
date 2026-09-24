@@ -26,7 +26,8 @@ export function StatusPill({ status }: { status: UiStatus }) {
   const s = styles[status] ?? styles.LIVE;
   return (
     <span
-      className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-xs font-mono font-medium"
+      data-status-pill={status}
+      className="inline-flex shrink-0 whitespace-nowrap items-center gap-1 px-2 py-0.5 rounded text-xs font-mono font-medium"
       style={{ backgroundColor: s.bg, color: s.color }}
     >
       {status === 'LIVE' && (
@@ -126,7 +127,7 @@ export function PageHeader({
 }) {
   return (
     <div className="mb-8">
-      <div className="flex items-center gap-3 mb-2">
+      <div className="flex flex-wrap items-center gap-3 mb-2">
         <span className="text-xs font-mono" style={{ color: 'var(--color-a11oy-gold)' }}>
           {label}
         </span>

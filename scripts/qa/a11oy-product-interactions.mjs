@@ -89,6 +89,14 @@ export async function verifyProductInteractions(origin) {
               .map((button) => button.getAttribute('aria-label') || button.textContent),
           );
         assert.deepEqual(smallButtons, [], `${width}/${name}: undersized buttons`);
+        const wrappedStatusPills = await page
+          .locator('main [data-status-pill]')
+          .evaluateAll((pills) =>
+            pills
+              .filter((pill) => getComputedStyle(pill).whiteSpace !== 'nowrap')
+              .map((pill) => pill.textContent),
+          );
+        assert.deepEqual(wrappedStatusPills, [], `${width}/${name}: split operational status`);
         assert.deepEqual(errors, [], `${width}/${name} browser errors`);
         records.push({ width, state: name, result: 'PASS', layout });
       };
