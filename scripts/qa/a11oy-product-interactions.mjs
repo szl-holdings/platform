@@ -1,8 +1,14 @@
 import assert from 'node:assert/strict';
 import { readFile } from 'node:fs/promises';
 import { pathToFileURL } from 'node:url';
-import { chromium, expect } from '@playwright/test';
+import { chromium, expect as playwrightExpect } from '@playwright/test';
 import { collectLayoutEvidence } from './screenshot-layout-helpers.mjs';
+
+// Browser action and assertion readiness share one deadline. Playwright's
+// implicit five-second assertion default otherwise expires before the declared
+// ten-second lazy-route readiness budget on a cold local build.
+const READINESS_TIMEOUT_MS = 10_000;
+const expect = playwrightExpect.configure({ timeout: READINESS_TIMEOUT_MS });
 
 // Read-only, loopback-only browser checks. These exercise fixture interfaces;
 // they never approve a Workcell, authenticate a provider, or execute an action.
@@ -37,7 +43,7 @@ export async function verifyProductInteractions(origin) {
         serviceWorkers: 'block',
       });
       const page = await context.newPage();
-      page.setDefaultTimeout(10_000);
+      page.setDefaultTimeout(READINESS_TIMEOUT_MS);
       const errors = [];
       page.on('pageerror', (error) => errors.push(error.name));
       page.on('console', (message) => {
