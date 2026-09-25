@@ -39,7 +39,7 @@ ovis = [
     "qwen-omni-utils==0.0.9",
     "safetensors>=0.5,<1",
     "torch==2.14.0",
-    "transformers==5.3.0",
+    "transformers==5.10.1",
 ]
 
 [tool.hatch.build.targets.wheel]
