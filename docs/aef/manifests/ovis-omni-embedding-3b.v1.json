@@ -1,0 +1,83 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "schemaVersion": "1.0.0",
+  "candidateId": "ovis-omni-embedding-3b@08547b8479edc10edc9878597438ebd076f74dff",
+  "upstream": {
+    "repoId": "ATH-MaaS/Ovis-Omni-Embedding-3B",
+    "repoType": "model",
+    "revision": "08547b8479edc10edc9878597438ebd076f74dff",
+    "license": "apache-2.0",
+    "pipelineTag": "feature-extraction",
+    "library": "transformers",
+    "subfolder": "model",
+    "trustRemoteCode": false
+  },
+  "identity": {
+    "artifactSetDigestAlgorithm": "sha256(canonical repo@revision plus sorted admitted LFS path:digest:size records)",
+    "artifactSetDigest": "4ea7bf104aaf758eb648ea5f954b0aa19575f4e28d286f59103dfe223f4b4926",
+    "nativeDimensions": 2048,
+    "admittedProjectionDimensions": [],
+    "supportedModalities": [
+      "text",
+      "image",
+      "visual_document",
+      "audio",
+      "video",
+      "interleaved"
+    ],
+    "artifacts": [
+      {
+        "path": "model/model-00001-of-00003.safetensors",
+        "sha256": "3859069435a04d363906c0ad05a5fcf480917225de6686f3a37489a27241d9ad",
+        "size": 4985032488
+      },
+      {
+        "path": "model/model-00002-of-00003.safetensors",
+        "sha256": "2ab4c3c8ab840be3614be89ac5521e6f6df48dce62a03adfac31cc83f0209ce4",
+        "size": 4999949856
+      },
+      {
+        "path": "model/model-00003-of-00003.safetensors",
+        "sha256": "6eebd641ef74ae7f865f8ca817ccbf3c6fe20a1b9107f8085f2ec79b2b519556",
+        "size": 1089579000
+      },
+      {
+        "path": "model/tokenizer.json",
+        "sha256": "1ab7a851e5c63d5fafbfdac72e3b4a8d08613f6bbb06ee39036fdf870ef59c93",
+        "size": 11421866
+      }
+    ]
+  },
+  "runtime": {
+    "owner": "services/substrate-py-workers/src/worker/ovis_omni.py",
+    "internalEndpoint": "/aef/ovis/embed",
+    "publicGateway": "/v1/multimodal/embed",
+    "transformers": "5.3.0",
+    "torch": "2.14.0",
+    "qwenOmniUtils": "0.0.9",
+    "remoteMediaAllowed": false,
+    "inputTransport": "cas://sha256/<digest>",
+    "artifactVerificationDefault": true
+  },
+  "governance": {
+    "promotionState": "EVALUATION_HOLD",
+    "productionServingAllowed": false,
+    "fallbackAllowed": false,
+    "highStakesAutonomyAllowed": false,
+    "requiredEvidence": [
+      "exact-revision artifact verification receipt",
+      "runtime and processor version receipt",
+      "SZL-owned per-modality retrieval evaluation",
+      "cross-modal evidence recall and citation recovery",
+      "latency, memory, and throughput measurements",
+      "tenant isolation and CAS boundary tests",
+      "license and privacy review",
+      "adversarial media and prompt-injection evaluation",
+      "approved Forge qualification receipt SHA-256"
+    ]
+  },
+  "sourceReadback": {
+    "observedAt": "2026-09-24T00:00:00Z",
+    "claims": "Publisher-reported benchmark claims are not qualification evidence and are excluded from promotion decisions."
+  }
+}

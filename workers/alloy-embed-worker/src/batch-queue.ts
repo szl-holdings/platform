@@ -1,11 +1,19 @@
-import type { EmbeddingBackend, PoolingStrategy, TruncationPolicy } from './backends/interface.js';
+import type {
+  EmbeddingBackend,
+  PoolingStrategy,
+  RawEmbedResponse,
+  TruncationPolicy,
+} from './backends/interface.js';
 
 export interface BatchItem {
   texts: string[];
   model: string;
   pooling: PoolingStrategy;
   normalize: boolean;
+  /** Backward-compatible vector-only resolver. */
   resolve: (vectors: number[][]) => void;
+  /** Receipt-preserving resolver used by governed routes. */
+  resolveResponse?: (response: RawEmbedResponse) => void;
   reject: (err: Error) => void;
 }
 
@@ -13,10 +21,11 @@ export interface BatchKey {
   backendId: string;
   model: string;
   pooling: PoolingStrategy;
+  normalize: boolean;
 }
 
 function batchKeyString(key: BatchKey): string {
-  return `${key.backendId}|${key.model}|${key.pooling}`;
+  return JSON.stringify([key.backendId, key.model, key.pooling, key.normalize]);
 }
 
 interface PendingBatch {
@@ -45,27 +54,29 @@ export class MicroBatchQueue {
 
   constructor(backends: EmbeddingBackend[], config?: Partial<MicroBatchQueueConfig>) {
     this.cfg = { ...DEFAULT_CONFIG, ...config };
-    this.backends = new Map(backends.map((b) => [b.descriptor.backendId, b]));
+    this.backends = new Map(backends.map((backend) => [backend.descriptor.backendId, backend]));
   }
 
   enqueue(backendId: string, item: BatchItem): void {
-    const key: BatchKey = { backendId, model: item.model, pooling: item.pooling };
+    const key: BatchKey = {
+      backendId,
+      model: item.model,
+      pooling: item.pooling,
+      normalize: item.normalize,
+    };
     const keyStr = batchKeyString(key);
 
     let pending = this.batches.get(keyStr);
-
     if (!pending) {
       const timer = setTimeout(() => {
         void this.flush(keyStr);
       }, this.cfg.flushIntervalMs);
-
       pending = { items: [], timer };
       this.batches.set(keyStr, pending);
     }
 
     pending.items.push(item);
-
-    const totalTexts = pending.items.reduce((n, it) => n + it.texts.length, 0);
+    const totalTexts = pending.items.reduce((count, queued) => count + queued.texts.length, 0);
     if (totalTexts >= this.cfg.maxBatchSize) {
       clearTimeout(pending.timer);
       void this.flush(keyStr);
@@ -75,40 +86,49 @@ export class MicroBatchQueue {
   private async flush(keyStr: string): Promise<void> {
     const pending = this.batches.get(keyStr);
     if (!pending) return;
-
     this.batches.delete(keyStr);
 
-    const [backendId, model, pooling] = keyStr.split('|') as [string, string, PoolingStrategy];
-    const backend = this.backends.get(backendId);
-
-    if (!backend) {
-      const err = new Error(`MicroBatchQueue: no backend registered for id '${backendId}'`);
-      for (const item of pending.items) item.reject(err);
+    let key: [string, string, PoolingStrategy, boolean];
+    try {
+      key = JSON.parse(keyStr) as [string, string, PoolingStrategy, boolean];
+    } catch {
+      const error = new Error('MicroBatchQueue: invalid internal batch key');
+      for (const item of pending.items) item.reject(error);
       return;
     }
 
-    const allTexts: string[] = pending.items.flatMap((it) => it.texts);
-    const normalize = pending.items[0]?.normalize ?? true;
+    const [backendId, model, pooling, normalize] = key;
+    const backend = this.backends.get(backendId);
+    if (!backend) {
+      const error = new Error(`MicroBatchQueue: no backend registered for id '${backendId}'`);
+      for (const item of pending.items) item.reject(error);
+      return;
+    }
 
+    const allTexts = pending.items.flatMap((item) => item.texts);
     try {
-      const response = await backend.embed({
-        texts: allTexts,
-        model,
-        pooling,
-        normalize,
-      });
+      const response = await backend.embed({ texts: allTexts, model, pooling, normalize });
+      if (response.vectors.length !== allTexts.length) {
+        throw new Error(
+          `MicroBatchQueue: backend '${backendId}' returned ${response.vectors.length} vectors for ${allTexts.length} texts`,
+        );
+      }
 
       let offset = 0;
       for (const item of pending.items) {
-        const slice = response.vectors.slice(offset, offset + item.texts.length);
-        offset += item.texts.length;
-        item.resolve(slice);
+        const end = offset + item.texts.length;
+        const sliced: RawEmbedResponse = {
+          ...response,
+          vectors: response.vectors.slice(offset, end),
+          ...(response.tokenCounts ? { tokenCounts: response.tokenCounts.slice(offset, end) } : {}),
+        };
+        offset = end;
+        if (item.resolveResponse) item.resolveResponse(sliced);
+        else item.resolve(sliced.vectors);
       }
-    } catch (err) {
-      const wrapped = err instanceof Error ? err : new Error(String(err));
-      for (const item of pending.items) {
-        item.reject(wrapped);
-      }
+    } catch (error) {
+      const wrapped = error instanceof Error ? error : new Error(String(error));
+      for (const item of pending.items) item.reject(wrapped);
     }
   }
 

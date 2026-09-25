@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import { PromotionStateSchema, Sha256Schema } from '@workspace/aef-contracts';
 
 export const EvidenceEntrySchema = z.object({
   entryId: z.string().min(1),
@@ -33,6 +34,18 @@ export const EvidenceEntrySchema = z.object({
     .object({ approvalRequestId: z.string(), verdict: z.string(), decidedAt: z.string() })
     .optional(),
   scoreBreakdown: z.record(z.number()).optional(),
+  // Immutable model/runtime identity. Optional for backward compatibility with
+  // historical receipts; new embedding paths populate every available field.
+  modelId: z.string().min(1).optional(),
+  modelRevision: z.string().min(1).optional(),
+  artifactSetDigest: Sha256Schema.optional(),
+  processorRevision: z.string().min(1).optional(),
+  runtimeId: z.string().min(1).optional(),
+  runtimeVersion: z.string().min(1).optional(),
+  dimensions: z.number().int().positive().optional(),
+  normalized: z.boolean().optional(),
+  inputDigest: Sha256Schema.optional(),
+  promotionState: PromotionStateSchema.optional(),
 });
 
 export type EvidenceEntry = z.infer<typeof EvidenceEntrySchema>;

@@ -1,81 +1,103 @@
+import { randomUUID } from 'node:crypto';
 import { Router, type IRouter, type RequestHandler, type Request, type Response } from 'express';
-import { HybridSearchRequestSchema } from "@workspace/aef-contracts";
-import { defaultLedgerStore } from "@workspace/aef-evidence-ledger";
-import { PolicyEngine } from "@workspace/aef-policy-guard";
-import { reciprocalRankFusion, applyExactMatchBoosts, normalizeScores, assembleCitations } from "@workspace/aef-retrieval-core";
-import { embedTexts } from "@workspace/alloy-embed-worker";
-import { rerankCandidates } from "@workspace/alloy-rerank-worker";
-import { randomUUID } from "node:crypto";
-import { logger } from "../middleware/logger.js";
-import { getProfile } from "../profiles/default.js";
-import { errorBudgetCounter } from "../middleware/prometheus.js";
-import { getRetrievalStore, getEmbedderSelection } from "../retrieval-store.js";
+import { HybridSearchRequestSchema } from '@workspace/aef-contracts';
+import { defaultLedgerStore } from '@workspace/aef-evidence-ledger';
+import { PolicyEngine } from '@workspace/aef-policy-guard';
+import {
+  applyExactMatchBoosts,
+  assembleCitations,
+  normalizeScores,
+  reciprocalRankFusion,
+} from '@workspace/aef-retrieval-core';
+import { embedTextsWithReceipt } from '@workspace/alloy-embed-worker';
+import { rerankCandidates } from '@workspace/alloy-rerank-worker';
+import { logger } from '../middleware/logger.js';
+import { errorBudgetCounter } from '../middleware/prometheus.js';
+import { getProfile } from '../profiles/default.js';
+import {
+  EmbedderConfigurationError,
+  getEmbedderSelection,
+  getRetrievalStore,
+} from '../retrieval-store.js';
 
 export const hybridSearchRouter: IRouter = Router();
 const policyEngine = new PolicyEngine();
 
-hybridSearchRouter.post("/v1/hybrid-search", (async (req: Request, res: Response) => {
+hybridSearchRouter.post('/v1/hybrid-search', (async (req: Request, res: Response) => {
   const parseResult = HybridSearchRequestSchema.safeParse(req.body);
   if (!parseResult.success) {
-    res.status(400).json({ error: "Validation failed", detail: parseResult.error.issues });
+    res.status(400).json({ error: 'Validation failed', detail: parseResult.error.issues });
     return;
   }
 
   const body = parseResult.data;
-  const tenantId: string = body.tenantId;
+  const tenantId = body.tenantId;
   const traceId = req.traceId;
   const requestedAt = new Date().toISOString();
 
   let profile;
   try {
-    profile = getProfile(body.profileId ?? req.profileId ?? "default");
-  } catch (err) {
-    res.status(400).json({ error: "Profile not found", detail: String(err) });
+    profile = getProfile(body.profileId ?? req.profileId ?? 'default');
+  } catch (error) {
+    res.status(400).json({ error: 'Profile not found', detail: String(error) });
     return;
   }
 
   const policyDecision = policyEngine.evaluate({
     requestId: body.requestId,
-    tenantId: tenantId,
+    tenantId,
     profileId: profile.profileId,
     hasProvenance: body.includeProvenance,
     metadata: body.metadata,
   });
-
   if (!policyDecision.allow) {
-    errorBudgetCounter.inc({ kind: "policy_denied", tenant_id: tenantId });
-    res.status(403).json({ error: "Request blocked by policy", reasons: policyDecision.reasons, traceId });
+    errorBudgetCounter.inc({ kind: 'policy_denied', tenant_id: tenantId });
+    res.status(403).json({
+      error: 'Request blocked by policy',
+      reasons: policyDecision.reasons,
+      traceId,
+    });
     return;
   }
 
   const start = Date.now();
-
-  // ── Embedder: real model backend (bge-m3, 1024-dim) when SUBSTRATE_EMBED_URL
-  //    is configured; dev-hash fallback only when no real endpoint exists.
-  const embedder = getEmbedderSelection();
-
-  let queryVector: number[];
+  let embedder;
   try {
-    const [vec] = await embedTexts([body.query], {
+    embedder = getEmbedderSelection();
+  } catch (error) {
+    if (error instanceof EmbedderConfigurationError) {
+      res.status(503).json({ error: 'Embedding backend is not configured', code: error.code, traceId });
+      return;
+    }
+    throw error;
+  }
+
+  let embedResult;
+  try {
+    embedResult = await embedTextsWithReceipt([body.query], {
       backendId: embedder.backendId,
       model: embedder.model,
-      pooling: "mean",
+      pooling: 'mean',
       normalize: true,
     });
-    queryVector = vec;
-  } catch (err) {
-    errorBudgetCounter.inc({ kind: "embed_error", tenant_id: tenantId });
-    res.status(502).json({ error: "Query embedding failed", detail: String(err), traceId });
+  } catch (error) {
+    errorBudgetCounter.inc({ kind: 'embed_error', tenant_id: tenantId });
+    logger.error({ traceId, error: String(error), backendId: embedder.backendId }, 'Query embedding failed');
+    res.status(502).json({
+      error: 'Query embedding failed',
+      code: 'EMBEDDING_BACKEND_UNAVAILABLE',
+      traceId,
+    });
     return;
   }
 
-  const topK = body.topK;
-  const candidatePool = body.candidatePool;
+  const queryVector = embedResult.vectors[0];
+  if (!queryVector) {
+    res.status(502).json({ error: 'Query embedding returned no vector', code: 'EMPTY_EMBEDDING', traceId });
+    return;
+  }
 
-  // ── Retrieval: query the real store (pgvector cosine ANN + Postgres FTS when
-  //    DATABASE_URL is set; in-memory for local dev). No synthetic fabrication.
   const { bundle, backend: storeBackend } = getRetrievalStore();
-
   let denseHits: Array<{
     chunkId: string;
     sourceId: string;
@@ -90,25 +112,27 @@ hybridSearchRouter.post("/v1/hybrid-search", (async (req: Request, res: Response
     highlights?: string[];
     metadata: Record<string, unknown>;
   }>;
+
   try {
     [denseHits, keywordHits] = await Promise.all([
       bundle.vectors.similaritySearch({
         vector: queryVector,
-        topK: candidatePool,
+        topK: body.candidatePool,
         tenantId,
         ...(body.profileId ? { profileId: body.profileId } : {}),
         ...(body.metadataFilter ? { metadataFilter: body.metadataFilter } : {}),
       }),
       bundle.metadataIndex.keywordSearch({
         terms: body.query,
-        topK: candidatePool,
+        topK: body.candidatePool,
         tenantId,
         ...(body.metadataFilter ? { metadataFilter: body.metadataFilter } : {}),
       }),
     ]);
-  } catch (err) {
-    errorBudgetCounter.inc({ kind: "retrieval_error", tenant_id: tenantId });
-    res.status(502).json({ error: "Retrieval failed", detail: String(err), traceId });
+  } catch (error) {
+    errorBudgetCounter.inc({ kind: 'retrieval_error', tenant_id: tenantId });
+    logger.error({ traceId, error: String(error), storeBackend }, 'Hybrid retrieval failed');
+    res.status(502).json({ error: 'Retrieval backend unavailable', code: 'RETRIEVAL_FAILED', traceId });
     return;
   }
 
@@ -116,121 +140,137 @@ hybridSearchRouter.post("/v1/hybrid-search", (async (req: Request, res: Response
     denseWeight: body.denseWeight,
     keywordWeight: body.keywordWeight,
   });
+  const citations = assembleCitations(normalizeScores(applyExactMatchBoosts(fused, body.query)));
 
-  const boosted = applyExactMatchBoosts(fused, body.query);
-  const normalized = normalizeScores(boosted);
-  const citations = assembleCitations(normalized);
-
-  let finalCitations = citations.slice(0, topK);
+  let finalCitations = citations.slice(0, body.topK);
   let rerankModel: string | undefined;
-
   if (body.rerankEnabled || profile.rerankEnabled) {
     try {
       const rerankResult = await rerankCandidates(
         {
           query: body.query,
-          candidates: finalCitations.map((c) => ({
-            id: c.chunkId,
-            text: String(c.metadata.text ?? ""),
-            score: c.score,
+          candidates: finalCitations.map((citation) => ({
+            id: citation.chunkId,
+            text: String(citation.metadata.text ?? ''),
+            score: citation.score,
           })),
-          topK,
-          model: "aef-dev-rerank",
+          topK: body.topK,
+          model: 'aef-dev-rerank',
         },
         { useFallback: false },
       );
-
       rerankModel = rerankResult.model;
-      const rerankScoreById = new Map(rerankResult.results.map((r) => [r.id, r.score]));
+      const scoreById = new Map(rerankResult.results.map((result) => [result.id, result.score]));
       finalCitations = finalCitations
-        .map((c) => ({ ...c, rerankerScore: rerankScoreById.get(c.chunkId) }))
-        .sort((a, b) => (b.rerankerScore ?? b.score) - (a.rerankerScore ?? a.score));
-    } catch (err) {
-      logger.warn({ traceId, error: String(err) }, "Rerank failed during hybrid-search, using fusion order");
+        .map((citation) => ({ ...citation, rerankerScore: scoreById.get(citation.chunkId) }))
+        .sort((left, right) =>
+          (right.rerankerScore ?? right.score) - (left.rerankerScore ?? left.score),
+        );
+    } catch (error) {
+      logger.warn({ traceId, error: String(error) }, 'Rerank failed; preserving fusion order');
     }
   }
 
+  const execution =
+    embedResult.execution ??
+    ({
+      backendId: embedder.backendId,
+      modelId: embedResult.model,
+      ...(embedder.modelRevision ? { modelRevision: embedder.modelRevision } : {}),
+      ...(embedder.artifactSetDigest ? { artifactSetDigest: embedder.artifactSetDigest } : {}),
+      dimensions: embedResult.dimensions,
+      normalized: true,
+      promotionState: embedder.promotionState,
+      supportedModalities: ['text'],
+    } as const);
   const completedAt = new Date().toISOString();
 
-  const evidenceEntries = finalCitations.map((c, i) => {
+  const evidenceEntries = finalCitations.map((citation, index) => {
     const entry = {
       entryId: randomUUID(),
       requestId: body.requestId,
-      tenantId: tenantId,
+      tenantId,
       profileId: profile.profileId,
       profileVersion: profile.version,
-      chunkId: c.chunkId,
-      sourceId: c.sourceId,
-      sourceUri: c.sourceUri,
-      title: c.title,
-      page: c.page,
-      section: c.section,
-      denseScore: c.denseScore,
-      keywordScore: c.keywordScore,
-      fusedScore: c.fusedScore,
-      boostApplied: c.boostApplied,
-      rerankerScore: c.rerankerScore,
-      finalScore: c.rerankerScore ?? c.score,
+      chunkId: citation.chunkId,
+      sourceId: citation.sourceId,
+      sourceUri: citation.sourceUri,
+      title: citation.title,
+      page: citation.page,
+      section: citation.section,
+      denseScore: citation.denseScore,
+      keywordScore: citation.keywordScore,
+      fusedScore: citation.fusedScore,
+      boostApplied: citation.boostApplied,
+      rerankerScore: citation.rerankerScore,
+      finalScore: citation.rerankerScore ?? citation.score,
       policyAllow: true,
       policyReasons: policyDecision.reasons,
       redactedFields: policyDecision.redactions,
-      // Backend attribution: which embedder + store produced this hit.
-      // `backendId` uses the canonical EvidenceEntry field; embed model + store
-      // are recorded in scoreBreakdown-adjacent metadata via the response too.
-      backendId: `${embedder.backendId}+${storeBackend}`,
+      backendId: `${execution.backendId}+${storeBackend}`,
+      modelId: execution.modelId,
+      modelRevision: execution.modelRevision,
+      artifactSetDigest: execution.artifactSetDigest,
+      processorRevision: execution.processorRevision,
+      runtimeId: execution.runtimeId,
+      runtimeVersion: execution.runtimeVersion,
+      dimensions: execution.dimensions,
+      normalized: execution.normalized,
+      promotionState: execution.promotionState,
       requestedAt,
       completedAt,
     };
     defaultLedgerStore.append(entry);
-    return { ...entry, rank: i + 1 };
+    return { ...entry, rank: index + 1 };
   });
 
-  const hits = finalCitations.map((c, i) => {
-    const evidence = evidenceEntries[i];
-    const textVal = c.metadata.text;
+  const hits = finalCitations.map((citation, index) => {
+    const evidence = evidenceEntries[index];
+    const text = citation.metadata.text;
     return {
-      chunkId: c.chunkId,
-      sourceId: c.sourceId,
-      sourceUri: c.sourceUri,
-      title: c.title,
-      page: c.page,
-      section: c.section,
-      text: typeof textVal === "string" ? textVal : "",
-      denseScore: c.denseScore,
-      keywordScore: c.keywordScore,
-      fusedScore: c.fusedScore,
-      rerankerScore: c.rerankerScore,
-      finalScore: c.rerankerScore ?? c.score,
-      boostApplied: c.boostApplied,
-      selectedRationale: c.boostApplied
-        ? "Exact-match boost applied"
+      chunkId: citation.chunkId,
+      sourceId: citation.sourceId,
+      sourceUri: citation.sourceUri,
+      title: citation.title,
+      page: citation.page,
+      section: citation.section,
+      text: typeof text === 'string' ? text : '',
+      denseScore: citation.denseScore,
+      keywordScore: citation.keywordScore,
+      fusedScore: citation.fusedScore,
+      rerankerScore: citation.rerankerScore,
+      finalScore: citation.rerankerScore ?? citation.score,
+      boostApplied: citation.boostApplied,
+      selectedRationale: citation.boostApplied
+        ? 'Exact-match boost applied'
         : body.rerankEnabled
-          ? "Selected by reranker"
-          : "Selected by reciprocal rank fusion",
+          ? 'Selected by reranker'
+          : 'Selected by reciprocal rank fusion',
       evidenceId: evidence.entryId,
       evidence: body.includeProvenance ? evidence : undefined,
-      metadata: c.metadata,
+      metadata: citation.metadata,
     };
   });
 
   const processingMs = Date.now() - start;
-
   res.status(200).json({
     requestId: body.requestId,
-    tenantId: body.tenantId,
+    tenantId,
     profileId: profile.profileId,
     query: body.query,
     hits,
-    totalCandidates: candidatePool,
+    totalCandidates: body.candidatePool,
     rerankModel,
     processingMs,
     traceId,
     policyReasons: policyDecision.reasons,
-    // Backend transparency: which embedder + store actually served this request.
     backends: {
-      embedModel: embedder.model,
-      embedBackend: embedder.backendId,
+      embedModel: execution.modelId,
+      embedRevision: execution.modelRevision,
+      artifactSetDigest: execution.artifactSetDigest,
+      embedBackend: execution.backendId,
       embedReal: embedder.isReal,
+      promotionState: execution.promotionState,
       retrievalBackend: storeBackend,
     },
   });
@@ -241,9 +281,10 @@ hybridSearchRouter.post("/v1/hybrid-search", (async (req: Request, res: Response
       requestId: body.requestId,
       hitCount: hits.length,
       processingMs,
-      embedBackend: embedder.backendId,
+      embedBackend: execution.backendId,
       retrievalBackend: storeBackend,
+      modelRevision: execution.modelRevision,
     },
-    "hybrid-search completed",
+    'hybrid-search completed',
   );
 }) as unknown as RequestHandler);
