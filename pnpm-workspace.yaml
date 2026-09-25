@@ -116,7 +116,7 @@ overrides:
   'drizzle-kit>esbuild': 0.28.1
   'esbuild-register>esbuild': 0.28.1
   undici: '>=6.28.0'
-  adm-zip: '>=0.6.0'
+  adm-zip: '>=0.6.1'
   'js-yaml@>=4.0.0 <4.3.2': 4.3.2
   'js-yaml@>=5.0.0 <5.2.2': 5.2.2
   'js-yaml@>=3.0.0 <4.0.0': 3.15.2
