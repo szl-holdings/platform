@@ -120,3 +120,24 @@ failed hosted screenshot run into a pass. Those states require their own
 witnessed evidence and are never inferred from HTTP 200, a local build, a
 screenshot, a branch push, a later controller repair, or a green check on a
 different commit.
+
+## 2026-09-24 product upgrade continuation
+
+The retained task branch incorporates protected source
+`ff8e29514a6560e269a875027db240b580b05b25` without rewriting history.
+Source `6ca620d578c39a9b97a47259445782bf6b58f159`, tree
+`12c6248a9ec6f0efa3d4f3556ba99d8b24cbbb7f`, completes the qualified product
+journey, DEMO Workcell availability contract, responsive fixture/evidence
+surfaces, accessible mobile drawer, and correct replay pause/resume controls.
+
+Local qualification: 23 source/helper contracts, 9 browser layout regressions,
+37 runtime tests, three affected-package typechecks, production build, 155
+browser states, and 75 exact-source screenshots. All image and receipt digests
+were independently read back. Evidence is LOCAL_NON_AUTHORITATIVE; existing
+PR #601 is closed and was not reopened. No merge or deployment is inferred.
+
+Full receipts, command outcomes, rejected/superseded attempts and remaining
+aggregate/strict-claims/provider boundaries are recorded in
+`audit/P0_SERIES_A_PRODUCT_UPGRADE_20260924.md` and `audit/screenshot-catalog.md`.
+The old unreproducible `8243029` is BLOCKED/SUPERSEDED, not silently recovered.
+This dated continuation does not replace the historical PR #668 disposition.

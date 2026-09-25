@@ -1,292 +1,184 @@
-# P0 Series A product upgrade — 2026-09-24 evidence packet
+# P0 Series A product upgrade — 2026-09-24 proof packet
 
-## Record and disposition
+## Disposition and source
 
-| Field | Recorded value |
+Implementation and local product proof are complete. Normal branch publication
+awaits the remote readback in the publication receipt below. This is not a
+production-readiness, hosted-CI, merge or deployment claim.
+
+| Identity | Exact value |
 | --- | --- |
 | Workcell | `P0-SERIES-A-PRODUCT-WIRING-20260811` |
-| Canonical task | [P0_SERIES_A_PRODUCT_WIRING_20260811.md](../.codex/tasks/P0_SERIES_A_PRODUCT_WIRING_20260811.md) |
-| Agent / recorded by | Codex desktop agent for Stephen Lutar |
-| Recorded at | `2026-09-24T08:20:47-04:00` |
-| Packet state | **IN PROGRESS — scoped qualification passed; exact-source capture and publication PENDING** |
-| Evidence authority | Local source and browser evidence only; non-authoritative for hosted promotion |
-| Proof level | Level 4 required for the public-facing changes; not yet established for the final candidate |
-
-This record continues the existing task and branch. Fresh scoped checks passed
-after the pinned dependency installation; aggregate qualification, final-source
-browser evidence, and publication remain pending. It does not declare the
-product fully operational or a push successful. Final receipts belong in the
-completion table before this packet is presented as completed proof.
-
-## Objective, scope, and execution plan
-
-Make the thread's A11oy product-wiring implementation durable on the existing
-`codex/p0-platform-work-20260811` branch: preserve current protected source,
-complete the qualified product journey and fixture interfaces, verify the
-changed behavior, capture exact-source presentation evidence, and publish by
-normal push. If publication is unavailable, provide a complete binary-safe
-patch with its exact base, resulting tree, digest, commands, and outcomes.
-
-The scoped implementation covers A11oy route wiring, shared presentation and
-mobile navigation, deterministic Workcell availability fields and seed data,
-the modified demo/proof/governance/trust/architecture/resource surfaces, route
-inventories, and the product-specific browser evidence tools. The execution
-sequence is protected-source reconciliation, scoped fixes, fresh qualification,
-source freeze, exact-source capture and visual review, durable proof, then
-normal branch publication with remote readback. This is a record of the active
-execution contract, not authorization for additional estate-wide changes.
-
-No new PR, PR reopening, PR merge, deployment, force-push, protection bypass,
-credential introduction, or weakening of claims or security gates is included.
-
-## Source and publication identity
-
-| Identity | Value / disposition |
-| --- | --- |
-| Repository | `szl-holdings/platform` |
-| Existing publication branch | `codex/p0-platform-work-20260811` |
-| Existing PR | [#601](https://github.com/szl-holdings/platform/pull/601), observed CLOSED and draft; not reopened by this task |
-| Remote branch head observed September 24 | `4c26025098553390f23fd1273638d8e0c33b2114` |
-| Current protected source incorporated | `ff8e29514a6560e269a875027db240b580b05b25` |
+| Repository / existing branch | `szl-holdings/platform` / `codex/p0-platform-work-20260811` |
+| Remote branch before publication | `4c26025098553390f23fd1273638d8e0c33b2114` |
+| Protected source incorporated and rechecked | `ff8e29514a6560e269a875027db240b580b05b25` |
 | Signed normal integration merge | `d4c3c471684b09d5c975c00cdb55d054f9e7d7c5` |
-| Final implementation source commit | **PENDING — current source freeze** |
-| Final implementation source tree | **PENDING — exact `HEAD^{tree}` at capture** |
-| Final evidence/publication commit and tree | **PENDING — qualification, capture, and evidence completion** |
-| Remote publication readback | **PENDING — normal push and authoritative remote ref readback** |
+| Captured implementation source | `6ca620d578c39a9b97a47259445782bf6b58f159` |
+| Captured source tree | `12c6248a9ec6f0efa3d4f3556ba99d8b24cbbb7f` |
+| Existing PR | [#601](https://github.com/szl-holdings/platform/pull/601), observed CLOSED and draft; not reopened |
+| Authority | `LOCAL_NON_AUTHORITATIVE` |
 
-The integration merge preserves history. The review confirmed that
-`origin/main` resolves to the protected source above and is an ancestor of the
-local integration HEAD. The PR and remote-branch observations were refreshed
-September 24. Refresh the remote again before publication; a push does not
-itself reopen a closed PR or establish exact-head hosted CI.
+The unavailable `8243029` object was not reproducible and was not restored.
+Disposition: BLOCKED / SUPERSEDED BY REPRODUCIBLE CURRENT SOURCE. The historical
+protected PR #668 receipt remains separate and is not overwritten by this run.
 
-The previously reported `8243029` object was not recoverable in the earlier
-task inspection. Its bytes and tests were not reproduced, so it is not restored
-or relied upon as implementation evidence. Its disposition remains
-**BLOCKED / SUPERSEDED BY REPRODUCIBLE CURRENT SOURCE**.
+## Delivered implementation
 
-## Patch summary
-
-Changes observed in the candidate diff include:
-
-- Preserve `/a11oy/start` and `/a11oy/investor-demo` on the protected
-  `SeriesAView`; add `/a11oy/series-a` as another alias and
-  `/a11oy/product-journey` as the qualified investor/developer navigation path.
-  Preserve the Atelier route, navigation entry, and GraphQL provider.
-- Separate Workcell workflow progress from typed operational availability
-  (`REAL`, `DEMO`, `UNAVAILABLE`, `DEGRADED`, `BLOCKED`, `ROADMAP`). Require an
-  evidence explanation; keep the 20 seeded Workcells deterministic `DEMO`
-  records rather than relabeling them live operations.
-- Qualify demo, proof, governance, trust, replay, and fabric copy. Illustrative
-  proof identifiers use fixture labels; the chain check says it is not
-  computed. The demo completion state explicitly produces no policy
-  evaluation, external execution, receipt, hash, or signature.
-- Repair narrow-screen Proof Ledger headers, attestation fields, timeline
-  cards, replay controls, identifiers, and evidence references. Wrap Workcell
-  filters and replay-speed controls; remove truncation that hid fixture
-  content. The additional Series A command styling wraps text without
-  changing the protected command-source bytes.
-- Use a native modal navigation dialog below the desktop breakpoint, with
-  focus containment, an internal close button, Escape handling, background
-  inertness, scroll restoration, and focus restoration. Preserve desktop
-  navigation and minimum-sized interactive controls.
-- Correct local replay pause/resume behavior so resuming does not reset
-  progress, and align the speed labels with their step intervals. These
-  controls advance fixture presentation only.
-- Update page metadata and documentation to describe the active prototype;
-  retain explicit operational non-claims and use system fonts.
-- Add a product-specific exact-source build/capture wrapper and interaction
-  verifier, while preserving the protected Series A capture wrapper. Bind
-  the capture plan, verifier inputs, interaction receipt, image digests,
-  browser/tool versions, and served-asset manifest to the source revision.
-- Strengthen layout verification to detect overflow inside scrollable main
-  containers and text-range overruns, not just document-level scroll width.
-  A horizontal-scroll exemption requires an explicitly declared, named,
-  keyboard-accessible nested region and does not exempt outer clipping.
-  Add browser regression fixtures for those conditions.
-- Keep scroll-triggered capture bounded and require reveal/readback and
-  restoration evidence. Bound the interaction suite with active owned-browser
-  closure; write the final source-bound receipt only after successful cleanup
-  and checkout verification.
-
-These source observations are qualified by the command results below; final
-exact-source browser evidence remains pending.
-
-## Protected-source preservation and review
-
-On the current candidate, the following comparison returned exit `0` with no
-diff. It verifies preservation of the tracked protected Git content for the
-named paths, not dependency bytes or a production deployment:
-
-```powershell
-git diff --exit-code origin/main -- .github pnpm-lock.yaml pnpm-workspace.yaml artifacts/a11oy/vite.config.ts artifacts/a11oy/src/pages/SeriesAView.tsx artifacts/a11oy/src/pages/A11oyAtelier.tsx artifacts/a11oy/src/data/seriesASolutions.ts artifacts/a11oy/src/graphql scripts/qa/capture-series-a-proof.mjs
-git merge-base --is-ancestor origin/main HEAD
-```
-
-The ancestry check also returned exit `0`. App routing inspection confirmed
-that the protected Series A routes and GraphQL/Atelier integration remain.
-The root package change adds the product-proof command; the artifact package
-adds product qualification commands without removing the protected tests.
-The Biome configuration change enables parsing existing Tailwind directives;
-it does not disable a lint rule or weaken a gate.
-
-The read-only capture review identified startup cleanup gaps and an unbounded
-interaction-suite risk. The candidate now reads/parses its plan before browser
-launch, validates dependency manifests before creating its build directory,
-and closes its owned browser on the ten-minute interaction deadline. Review
-of those fixes found no remaining proven source-freeze blocker in the four
-reviewed capture/verifier files. This review is not a claim of exhaustive
-security review or successful final execution.
+- Preserve the protected `/a11oy/start` and `/a11oy/investor-demo` Series A
+  contracts, Atelier/GraphQL integration and canonical capture tool. Add the
+  Series A alias and qualified investor/developer product journey.
+- Separate workflow progress from six-state operational availability with
+  required evidence reasons. All 20 seeded Workcells remain deterministic DEMO
+  records; the operational registry remains empty, frozen and fail-closed.
+- Qualify demo, proof, replay, governance, trust, architecture, resources and
+  fabric copy. Fixture digest/signature-shaped fields are not attestations;
+  the chain check is not computed; demo completion creates no real execution,
+  receipt, hash or signature.
+- Repair responsive grids, evidence panels, full fixture text, filters and
+  replay controls. Shared header items wrap; operational status pills remain
+  intact. Mobile navigation uses a native modal dialog with focus containment,
+  Escape, close-button, backdrop, resize and navigation handling.
+- Correct replay speed intervals and pause/resume without resetting progress.
+- Add exact-source product capture and interaction verification: owned build
+  and server, immutable asset manifests, bounded lifecycle/cleanup, scroll
+  reveal checks, geometry/text-overflow checks and network isolation.
+- React best-practices review kept listeners cleaned up and focus restoration
+  bounded. No new dependency, disabled lint rule or invented authority was added.
 
 ## Qualification ledger
 
-All results in this ledger are fresh September 24 observations. The PATH
-package manager was pnpm `11.19.0`, while the repository declares
-`pnpm@10.26.1`. The cached pinned executable was used explicitly:
+Node v24.19.0; pinned pnpm 10.26.1; Vite 8.0.16; Playwright 1.60.0;
+Chromium 148.0.7778.96. Commands ran from the repository root unless noted.
 
-```powershell
-$env:CI = 'true'
-node C:/Users/steph/AppData/Local/npm-cache/_npx/fc0c0bfc49531a9a/node_modules/pnpm/bin/pnpm.cjs install --frozen-lockfile --ignore-scripts
-```
+| Command / check | Actual outcome |
+| --- | --- |
+| Pinned pnpm `install --frozen-lockfile --ignore-scripts`, `CI=true` | Exit 0; 203 projects / 1,736 packages; frozen resolution up to date; lifecycle scripts deliberately not executed |
+| `node --test artifacts/a11oy/test/series-a-contract.test.mjs artifacts/a11oy/test/product-wiring-contract.test.mjs scripts/qa/series-a-proof-helpers.test.mjs` | Exit 0; 23/23, rerun after final header fix |
+| `node --test scripts/qa/screenshot-layout-helpers.test.mjs` | Exit 0; 9/9 Chromium regressions |
+| `node node_modules/vitest/vitest.mjs run` in `packages/a11oy-runtime` | Exit 0; Vitest 4.1.11; 3 files / 37 tests |
+| `node node_modules/typescript/bin/tsc -p artifacts/a11oy/tsconfig.json --noEmit` | Exit 0, rerun after final header fix |
+| Same tsc command with `lib/a11oy-fabric/tsconfig.json` | Exit 0 |
+| Same tsc command with `packages/a11oy-runtime/tsconfig.json` | Exit 0 |
+| Pinned pnpm `--filter @workspace/a11oy lint:ci` | Exit 0; 192 files, 563 warnings and 74 infos; not warning-free |
+| Scoped Biome format/lint and Oxlint pre-commit checks | Exit 0; two existing Card accessibility warnings remain in shared UI; no rule disabled |
+| Diagnostic Vite production build | Exit 0 |
+| Final exact-source owned Vite production build | Completed; 3,344 modules transformed; 348 served files |
+| Final exact-source product interactions | PASS; 155 states across five widths |
+| Final exact-source screenshot matrix | VERIFIED; 15 routes × 5 widths = 75 images; zero reported failures |
+| `A11OY_URL=http://127.0.0.1:4417 node scripts/qa/smoke-routes.js --web-only --json` | A11oy 21/21 PASS; overall exit 1 because 60 routes on five stopped unrelated services could not connect |
+| `node node_modules/tsx/dist/cli.mjs scripts/brand-check.ts` | Exit 0 |
+| `node node_modules/tsx/dist/cli.mjs scripts/check-banned-brand-strings.ts --changed-from ff8e29514a6560e269a875027db240b580b05b25` | Exit 0; no new violations |
+| `node --experimental-vm-modules scripts/docs/check-docs-claims.js` | Exit 0; 26/26 |
+| `node --experimental-vm-modules scripts/qa/verify-claims.js --strict` | Exit 1; Vessels/AIS lacks MARINETRAFFIC_API_KEY; 90 working, 12 partial, 3 dormant, 1 mock, 0 broken |
+| Aggregate workspace typecheck | NOT QUALIFIED; initial child-pnpm selection failed; retry stopped after unrelated nested package auto-selected its own manager and linked dependencies |
+| Whitespace / added-line credential and retired-name patterns / changed environment files | Diff check passed; zero matching added lines; zero changed environment files; scoped scan, not exhaustive secret certification |
+| Source SSH signature | Verified locally with the existing allowed-signers file |
 
-Installation returned exit `0`: 203 workspace projects, 1,736 packages,
-resolution skipped because the lockfile was up to date, and lifecycle scripts
-intentionally not run. The first attempt without `CI=true` exited `1` with
-`ERR_PNPM_ABORTED_REMOVE_MODULES_DIR_NO_TTY`; the successful retry is the
-dependency basis for the scoped tests below. This proves a completed frozen
-installation, not successful lifecycle scripts or a production deployment.
+Pinned executable:
+`C:/Users/steph/AppData/Local/npm-cache/_npx/fc0c0bfc49531a9a/node_modules/pnpm/bin/pnpm.cjs`.
+The initial install without CI refused noninteractive module-directory
+replacement (exit 1); the later pinned frozen installation passed. The aggregate
+retry encountered evidence-doctrine's own pnpm 11.9.0 declaration and implicit
+three-dev-dependency linking. It was stopped; its generated isolated lockfile
+was retained recoverably in ignored
+`output/evidence-doctrine-generated-lock-20260924.yaml`, not committed. Root
+manifests and the protected lockfile stayed unchanged. No aggregate pass is claimed.
+Fabric, runtime and layout-helper source bytes stayed unchanged after their
+passing runs; A11oy typecheck/contracts and all browser checks were rerun after
+the final header fix.
 
-| Command / check | Current result | Boundary |
+## Durable evidence and independent readback
+
+Retained directory: `docs/assets/screenshots/current/`. PNG filenames remain
+unchanged. JSON sidecars were copied byte-for-byte with `.json.txt` suffixes to
+prevent formatting hooks from changing the evidence. Original-name mapping:
+
+| Original output | Retained sidecar | SHA-256 |
 | --- | --- | --- |
-| Pinned pnpm 10.26.1 installation above | **PASS — exit 0** | Frozen lockfile; scripts ignored; 203 projects / 1,736 packages |
-| Aggregate workspace typecheck | **NOT QUALIFIED — both attempts exited 1** | First attempt selected the wrong child pnpm and refused noninteractive installation; pinned-PATH retry stopped after an unrelated nested package selected its own pnpm 11.9.0 and implicitly linked three dev dependencies. No aggregate pass claimed. Its generated untracked lockfile was retained under ignored `output/evidence-doctrine-generated-lock-20260924.yaml`; root manifests and lockfile were unchanged. |
-| `node node_modules/vitest/vitest.mjs run` from `packages/a11oy-runtime` | **PASS — exit 0; 3 files / 37 tests** | Vitest 4.1.11; current pinned dependencies |
-| `node node_modules/typescript/bin/tsc -p packages/a11oy-runtime/tsconfig.json --noEmit` | **PASS — exit 0** | No diagnostics |
-| `node node_modules/typescript/bin/tsc -p lib/a11oy-fabric/tsconfig.json --noEmit` | **PASS — exit 0** | No diagnostics |
-| `node --test artifacts/a11oy/test/series-a-contract.test.mjs artifacts/a11oy/test/product-wiring-contract.test.mjs scripts/qa/series-a-proof-helpers.test.mjs` | **PASS — exit 0; 23/23 tests** | Includes protected contracts, product wiring, and proof helpers; no failures or skips |
-| `node node_modules/typescript/bin/tsc -p artifacts/a11oy/tsconfig.json --noEmit` | **PASS — exit 0** | No diagnostics |
-| A11oy `lint:ci` | **PASS — exit 0; 192 files; 563 warnings / 74 infos** | Warning-bearing result, not a warning-free baseline |
-| `node --test scripts/qa/screenshot-layout-helpers.test.mjs` | **PASS — exit 0; 9/9 Chromium tests** | Post-install regression run; no failures or skips |
-| Product interaction suite inside exact-source wrapper | **PENDING** | Five widths; local fixture behavior, not an external execution witness |
-| Diagnostic product interaction suite against loopback production preview | **PASS — exit 0, 155 states, Chromium 148.0.7778.96** | Includes 75 initial route/width states plus filters, detail links, replay pause/resume/reset, proof tabs, demo completion/reset, and mobile Escape, close-button, backdrop, resize, and navigation. Initial cold navigation timed out; unchanged checks passed on retry, then the expanded drawer suite passed. Final source-bound rerun remains required. |
-| `node artifacts/a11oy/node_modules/vite/bin/vite.js build --config artifacts/a11oy/vite.config.ts --configLoader runner --outDir ../../output/a11oy-diagnostic-dist --logLevel error` | **PASS — exit 0** | Diagnostic production build; not the frozen-source wrapper receipt |
-| Fresh production build inside exact-source wrapper | **PENDING** | Record immutable served-asset count and digest |
-| `A11OY_URL=http://127.0.0.1:4417 node scripts/qa/smoke-routes.js --web-only --json` | **A11oy 21/21 PASS; overall exit 1** | Sixty routes for five stopped unrelated web services failed to connect. HTTP status checks do not establish rendered behavior. |
-| `node node_modules/tsx/dist/cli.mjs scripts/brand-check.ts` | **PASS — exit 0** | No stdout |
-| `node --experimental-vm-modules scripts/docs/check-docs-claims.js` | **PASS — exit 0; 26/26 checks** | Scoped documentation claims check |
-| `node --experimental-vm-modules scripts/qa/verify-claims.js --strict` | **FAIL — exit 1** | Vessels/AIS requires absent `MARINETRAFFIC_API_KEY`; report: 90 working, 12 partial, 3 dormant, 1 mock, 0 broken |
-| Pre-freeze diff, added-line credential/retired-name patterns, and environment-file checks | **PASS** | Diff check exit 0; zero matching added lines; zero changed environment files. Scoped pattern scan, not exhaustive secret detection. |
-| Final signed-commit verification | **PENDING** | Verify the final commit, not only the prior integration merge |
-| Normal push and remote exact-SHA readback | **PENDING** | Existing branch only; no force or merge |
+| `metadata.json` | `a11oy-product-matrix-2026-09-24-metadata.json.txt` | `ced4ba27026da9ead7cf96a8a05bf678bc0d45529327ee963fb1c55e07ff636f` |
+| `source-bound-metadata.json` | `a11oy-product-matrix-2026-09-24-source-bound-metadata.json.txt` | `76150bbcda8f57a79cf20d9362a68354e2746884a83148d774f208bb566478ba` |
+| `interactions.json` | `a11oy-product-matrix-2026-09-24-interactions.json.txt` | `5ab1584cb791bc751bad5440a1f424a8afb9016f7d4d7f0bb7a19f1b0318fcdd` |
 
-The post-install results above supersede historical September 5 and
-pre-install diagnostics as current scoped qualification. They apply to the
-working candidate based on the signed integration merge; record the frozen
-source commit separately and rerun checks affected by subsequent source edits.
-The strict-claims failure is retained, not waived or converted to a pass.
+Served manifest SHA-256:
+`2fbedb670deb85927761784c89f2dea4669750ce6094def131070f9e00712bbc`.
+Its pre/post-capture values match: 348 files, 16,659,010 bytes. Independent
+readback recomputed all 75 PNG digests, both receipt bindings, the manifest,
+and all nine input hashes against immutable source Git blobs.
 
-## Screenshot disposition and exact-source reproduction
+The terminal session handle was lost after capture. Completion is established
+by the final source-bound receipt (written only after capture, source readback
+and successful cleanup), independently validated files, clean source checkout
+and no remaining capture process. A recovered terminal exit code is not claimed.
 
-The earlier 70-image packet for
-`8f3f8b530fb4c2748bf4b1d9b4367844cab87701` is **REJECTED / SUPERSEDED** as
-completion evidence. Original-resolution inspection of its 320-pixel Proof
-Ledger image found clipped chain-label, attestation, and timeline content,
-despite the old verifier reporting success. The old detector treated ancestor
-horizontal `auto` overflow as an exemption; a vertically scrolling main
-container can acquire that computed horizontal overflow and hide the defect.
-That packet must not be promoted or represented as the new candidate's proof.
+The 155 states include initial routes/layout, Workcell filters and detail links,
+replay speed/pause/resume/completion/reset, proof tabs/replay, demo completion/reset,
+and mobile focus, Escape, close-button, backdrop, resize and route navigation.
+Operational status pills must remain unbroken. This is not a latency SLO or a
+production execution witness. Actual PNG visual review includes the corrected
+mobile Demo/Proof/header surfaces and narrow/wide product/fixture layouts.
+Per-image route, viewport, capture time and SHA-256 are retained in the metadata
+and [screenshot catalog](screenshot-catalog.md).
 
-The current candidate plan declares 15 routes at widths 320, 390, 768, 1366,
-and 1728: 75 captures. The matrix includes the canonical `/a11oy/start`, product journey, Series A aliases,
-Workcell registry/detail/replays, demo, proof, governance, trust, architecture,
-resources, and fabric. **The new packet, visual inspection, durable screenshot
-paths, and catalog entries remain PENDING.** Screenshot files will belong under
-`docs/assets/screenshots/current/`, with matching entries in
-[screenshot-catalog.md](screenshot-catalog.md) and source-bound sidecars.
+### Earlier attempts are not the final proof
 
-Run this from the repository root only after committing the final source,
-recording the fresh qualification results, and leaving a clean checkout. It
-resolves the actual local executables and exact source identity; it does not
-fetch, mutate a remote, read credentials, or claim a successful outcome merely
-because the commands are documented here.
+- Old 70-image source `8f3f8b530fb4c2748bf4b1d9b4367844cab87701`:
+  REJECTED/SUPERSEDED because the old detector missed clipped Proof Ledger content.
+- Initial diagnostic cold navigation timed out; unchanged checks then passed,
+  followed by the expanded 155-state suite.
+- Source `ace98ccfe33fca61c8c6305716f5956e8237f869`: first capture stopped on
+  Chromium ERR_NETWORK_IO_SUSPENDED; retry hit the implicit five-second assertion
+  default despite a declared ten-second action budget. The verifier now explicitly
+  shares the ten-second readiness budget. Content, isolation, geometry and overall
+  suite deadlines remain enforced.
+- Source `022f6f4d2824571f7621678ca3e773f149d0b1ae`: automated 75/155 passed,
+  but visual review found a split DEMO header at 320px. It is intermediate only.
+  The final source repairs it and adds a regression assertion before rerunning
+  the complete build, interaction and capture sequence.
+
+## Exact reproduction
+
+Use a clean checkout of the captured source on the declared branch, the pinned
+dependencies and repository Playwright Chromium. Choose an absent/empty output
+directory. From the repository root:
 
 ```powershell
-$ErrorActionPreference = 'Stop'
-$captureGit = (Get-Command git -CommandType Application -ErrorAction Stop | Select-Object -First 1).Source
-$captureNode = (Get-Command node -CommandType Application -ErrorAction Stop | Select-Object -First 1).Source
-$captureBranch = (& $captureGit symbolic-ref --quiet --short HEAD).Trim()
-if ($LASTEXITCODE -ne 0 -or $captureBranch -ne 'codex/p0-platform-work-20260811') {
-  throw 'Capture requires the existing task branch.'
-}
-$captureStatus = & $captureGit status --porcelain=v1
-if ($LASTEXITCODE -ne 0 -or $captureStatus) {
-  throw 'Commit the candidate and proof draft before exact-source capture.'
-}
-$env:SOURCE_REVISION = (& $captureGit rev-parse HEAD).Trim()
-if ($LASTEXITCODE -ne 0) { throw 'Cannot resolve source revision.' }
-$env:SOURCE_TREE_SHA = (& $captureGit rev-parse 'HEAD^{tree}').Trim()
-if ($LASTEXITCODE -ne 0) { throw 'Cannot resolve source tree.' }
-$env:SOURCE_REF = $captureBranch
+$env:SOURCE_REVISION = '6ca620d578c39a9b97a47259445782bf6b58f159'
+$env:SOURCE_TREE_SHA = '12c6248a9ec6f0efa3d4f3556ba99d8b24cbbb7f'
+$env:SOURCE_REF = 'codex/p0-platform-work-20260811'
 $env:SOURCE_REPOSITORY = 'szl-holdings/platform'
 $env:CAPTURE_ENVIRONMENT = 'local-exact-head'
 $env:CAPTURED_BY = 'Codex desktop agent for Stephen Lutar'
-$env:GIT_EXECUTABLE = $captureGit
-$env:SCREENSHOT_PLAN = 'audit/series-a-screenshot-capture-plan.json'
+$env:GIT_EXECUTABLE = (Get-Command git -CommandType Application | Select-Object -First 1).Source
 $env:RUN_IDENTITY = 'PowerShell: node scripts/qa/capture-series-a-product-matrix-proof.mjs for source ' + $env:SOURCE_REVISION
-$captureStamp = Get-Date -Format 'yyyyMMddTHHmmss'
-$env:SCREENSHOT_OUTPUT_DIR = 'output/a11oy-product-matrix-' + $env:SOURCE_REVISION.Substring(0, 12) + '-' + $captureStamp
-& $captureNode scripts/qa/capture-series-a-product-matrix-proof.mjs
-$captureExitCode = $LASTEXITCODE
-if ($captureExitCode -ne 0) { throw "Exact-source capture failed with exit code $captureExitCode." }
+$env:SCREENSHOT_OUTPUT_DIR = 'output/a11oy-product-matrix-6ca620d578c3-reproduction'
+node scripts/qa/capture-series-a-product-matrix-proof.mjs
 ```
 
-The wrapper builds into a fresh owned temporary directory, serves those assets
-on its own loopback origin, runs the interaction verifier, captures the matrix,
-checks source and asset stability, and closes/removes its owned resources. Its
-`source-bound-metadata.json` binds `metadata.json`, `interactions.json`, image
-SHA-256 values, and the served build manifest. A successful exit still requires
-inspection of the actual images before promotion to the durable catalog.
+The wrapper validates HEAD/tree/ref/origin, clean source and exact tracked input
+bytes, owns the build/server, verifies immutable assets, captures every planned
+surface, verifies images/interactions, and completes cleanup before its final
+receipt. Evidence-only successors must retain this captured source identity
+and prove source/build/capture input continuity; do not relabel old images.
 
-If the later evidence-only commit differs from the captured source commit,
-record both identities and prove that all source/build/capture inputs are
-unchanged. Do not relabel a screenshot with a commit it did not capture.
+## Protected source and operational limits
 
-## Operational, claims, and security boundary
+Protected `.github/`, lockfile/workspace configuration, A11oy Vite config,
+SeriesAView/data, Atelier/GraphQL and canonical Series A capture tool compare
+byte-for-byte with `ff8e29514a6560e269a875027db240b580b05b25`, which is an ancestor.
+The inherited Biome parser change supports Tailwind directives, not disabled rules.
 
-The interface and its seeded workflow states remain `DEMO`. Missing
-authenticated operational evidence remains `UNAVAILABLE`; external actions
-without authority remain `BLOCKED`. Workflow completion, a green fixture
-badge, local browser behavior, HTTP 200, and a signed source commit do not
-establish a production execution, durable external Proof Ledger, hosted
-deployment, current provider integration, customer outcome, or certification.
+This completes source/local product qualification, not estate-wide production
+readiness. Seed workflows are DEMO; absent authenticated operation remains
+UNAVAILABLE; external actions without authority remain BLOCKED. The empty
+operational registry is not populated with invented sources. Strict claims,
+workspace aggregate qualification and exact-head hosted promotion are not closed.
+No new PR, PR reopening, force-push, merge, deployment, gate bypass, credential
+introduction, provider publication, customer outcome, certification or independent
+witness is claimed. The [canonical task](../.codex/tasks/P0_SERIES_A_PRODUCT_WIRING_20260811.md)
+and [known gaps](../docs/operations/known-gaps.md) preserve these boundaries.
 
-The current task does not fill the fail-closed operational registry with
-invented sources or issue an independent-witness claim for a solo build.
-The fresh strict-claims run still fails on Vessels/AIS because the required
-provider authority is absent. No credential is added to make that gate pass.
+## Publication receipt
 
-Public-claim review of the scoped copy and the fresh claims-check outcomes are
-recorded above; the final secret/environment-file review remains PENDING.
-Current source inspection does not establish deployment authority or
-exhaustive absence of secrets. The applicable gaps are tracked in
-[known-gaps.md](../docs/operations/known-gaps.md); the final run must append its
-actual disposition there without overwriting historical receipts. This draft
-does not change artifact readiness in `docs/APP_STATUS.md`.
-
-## Completion receipt — not yet issued
-
-| Required receipt | Status |
-| --- | --- |
-| Exact source commit / tree and signature verification | **PENDING** |
-| Pinned dependency relink and scoped command outcomes | **RECORDED ABOVE — aggregate and final-source qualification remain pending** |
-| Interaction result, state count, browser version, and receipt SHA-256 | **PENDING** |
-| Seventy-five capture records, image digests, and visual inspection | **PENDING** |
-| Durable screenshot paths and catalog / sidecar identities | **PENDING** |
-| Final protected-source preservation and source-byte continuity | **PENDING** |
-| Final claims, security, known-gaps disposition | **PENDING** |
-| Final publication commit / tree and normal-push outcome | **PENDING** |
-| Remote exact-SHA readback and separately observed hosted checks | **PENDING** |
-| Binary-safe fallback patch, base/tree/digest if push is unavailable | **PENDING — conditional fallback; not yet generated for this final candidate** |
-
-No merge, deployment, production-readiness, customer-use, or all-green hosted
-CI assertion is made by this in-progress packet.
+Normal branch push and authoritative remote-ref readback are the remaining
+receipt step. The publication commit/tree are separate from the captured source.
+A local commit or existing PR does not prove successful publication.

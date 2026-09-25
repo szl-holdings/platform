@@ -612,6 +612,14 @@ Operational gaps, process health, test coverage, observability, team ownership.
 
 ## Incident Log
 
+- **2026-09-24 (P0 product upgrade):** Source `6ca620d578c39a9b97a47259445782bf6b58f159`
+  closes the scoped responsive clipping, mobile navigation and replay pause/resume
+  gaps with 155 local interaction states and 75 source-bound screenshots. This is
+  local fixture/product evidence, not production readiness. Vessels/AIS strict
+  claims remains blocked without provider authority; aggregate typecheck is not
+  qualified; exact-head hosted CI, protected promotion, provider publication and
+  deployment remain separate. See `audit/P0_SERIES_A_PRODUCT_UPGRADE_20260924.md`.
+
 - **2026-08-26 (A11oy Atelier local integration):** A11oy Atelier is locally wired through the governed runtime route, deterministic capability policy, xAI API/local Grok Build adapters, EvidenceLedger receipt append, tenant-scoped working memory, CLI, health surface, and A11oy UI. A live local Grok 4.6 witness and browser witness passed. Remaining gaps are production deployment witness, production identity binding, durable external ledger/session persistence, direct xAI API witness, and CI at the eventual remote exact head. Local health or inference evidence must not be reported as deployment.
 
 
