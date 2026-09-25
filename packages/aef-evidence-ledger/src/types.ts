@@ -1,5 +1,15 @@
 import { z } from 'zod';
-import { PromotionStateSchema, Sha256Schema } from '@workspace/aef-contracts';
+
+// Keep the ledger package independently typecheckable. These constraints mirror
+// aef-contracts but are deliberately local so a standalone package build does
+// not require generated declaration output from another composite project.
+const Sha256Schema = z.string().regex(/^[a-f0-9]{64}$/i, 'expected a SHA-256 digest');
+const PromotionStateSchema = z.enum([
+  'DEVELOPMENT',
+  'EVALUATION_HOLD',
+  'QUALIFIED',
+  'REVOKED',
+]);
 
 export const EvidenceEntrySchema = z.object({
   entryId: z.string().min(1),
