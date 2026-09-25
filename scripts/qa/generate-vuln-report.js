@@ -51,12 +51,7 @@ function fromAdvisoryList(list) {
     const severity = String(advisory.severity ?? '').toLowerCase();
     if (Object.hasOwn(counts, severity)) counts[severity] += 1;
   }
-  return {
-    advisories,
-    vulnerabilities: counts,
-    totalDependencies: null,
-    sourceShape: 'advisory-list',
-  };
+  return { advisories, vulnerabilities: counts, totalDependencies: null, sourceShape: 'advisory-list' };
 }
 
 function fromAdvisoryMap(map, sourceShape = 'advisory-map') {
@@ -133,9 +128,7 @@ export function auditBlockingVerdict(normalized, spawnError = null) {
   const high = Number(counts.high ?? 0);
   const critical = Number(counts.critical ?? 0);
   const advisories = Object.values(normalized.advisories ?? {});
-  const parsedBlocking = advisories.filter((a) =>
-    ['critical', 'high'].includes(advisorySeverity(a)),
-  );
+  const parsedBlocking = advisories.filter((a) => ['critical', 'high'].includes(advisorySeverity(a)));
   const passed = high === 0 && critical === 0 && parsedBlocking.length === 0;
   return {
     passed,
@@ -215,14 +208,11 @@ async function main() {
   if (parseNote) {
     report += '## Parser note\n\n';
     report += `Audit JSON was not recognized for detailed reporting: \`${parseNote}\`. `;
-    report +=
-      'The blocking verdict remains FAIL because an unsupported or unavailable audit cannot be admitted.\n\n';
+    report += 'The blocking verdict remains FAIL because an unsupported or unavailable audit cannot be admitted.\n\n';
   }
   if (audit.error) {
     report += '## Audit execution error\n\n```text\n';
-    report += String(audit.error.message ?? audit.error)
-      .slice(0, 4000)
-      .replace(/```/g, "''' ");
+    report += String(audit.error.message ?? audit.error).slice(0, 4000).replace(/```/g, "''' ");
     report += '\n```\n\n';
   }
   if (stderr.trim()) {
@@ -238,8 +228,7 @@ async function main() {
     report += '\n';
   }
 
-  report +=
-    '_CI fails closed on High/Critical findings and on audit execution/parser failure. Moderate/Low findings remain visible and non-promotional._\n';
+  report += '_CI fails closed on High/Critical findings and on audit execution/parser failure. Moderate/Low findings remain visible and non-promotional._\n';
   writeFileSync(OUTPUT_FILE, report);
 
   if (!verdict.passed) process.exit(1);

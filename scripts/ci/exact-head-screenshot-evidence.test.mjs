@@ -730,7 +730,10 @@ test('workflow binds PR, branch, permissions, publication, and artifact contract
   assert.match(workflow, /candidate_pnpm_version/);
   assert.match(workflow, /candidate_node_version/);
   assert.match(workflow, /find "\$resolved_root" ! -type l -perm \/022/);
-  assert.match(workflow, /find "\$SZL_PNPM_ROOT" ! -type l -writable -print -quit/);
+  assert.match(
+    workflow,
+    /find "\$SZL_PNPM_ROOT" ! -type l -writable -print -quit/,
+  );
   assert.match(workflow, /candidate identity can write admitted pnpm runtime/);
   assert.match(workflow, /chmod -R a-w "\$SZL_CANDIDATE_ROOT"/);
   assert.match(workflow, /\$SZL_CANDIDATE_ROOT\/artifacts\/a11oy\/node_modules\/\.vite-temp/);

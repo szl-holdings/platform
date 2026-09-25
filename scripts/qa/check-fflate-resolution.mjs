@@ -31,7 +31,9 @@ if (!/^\s{2}fflate:\s+0\.8\.3\s*$/m.test(WORKSPACE)) {
   fail('pnpm-workspace.yaml must pin the central fflate override to 0.8.3');
 }
 
-const packageVersions = [...LOCKFILE.matchAll(/^\s{2}fflate@([^:]+):/gm)].map((match) => match[1]);
+const packageVersions = [
+  ...LOCKFILE.matchAll(/^\s{2}fflate@([^:]+):/gm),
+].map((match) => match[1]);
 
 if (packageVersions.length === 0) {
   fail('pnpm-lock.yaml contains no fflate package resolution');
@@ -42,9 +44,9 @@ if (uniqueVersions.length !== 1 || uniqueVersions[0] !== '0.8.3') {
   fail(`expected exactly fflate@0.8.3, observed ${uniqueVersions.join(', ')}`);
 }
 
-const dependencyEdges = [...LOCKFILE.matchAll(/^\s{6}fflate:\s+([^\s]+)\s*$/gm)].map(
-  (match) => match[1],
-);
+const dependencyEdges = [
+  ...LOCKFILE.matchAll(/^\s{6}fflate:\s+([^\s]+)\s*$/gm),
+].map((match) => match[1]);
 
 if (dependencyEdges.length === 0) {
   fail('pnpm-lock.yaml contains no dependency edge to fflate');

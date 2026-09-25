@@ -37,16 +37,14 @@ function hashEmbed(text: string, dim: number = DEFAULT_DIM): number[] {
       const byte1 = digest[j + 1];
       const byte2 = digest[j + 2];
       const byte3 = digest[j + 3];
-      if (
-        byte0 === undefined ||
-        byte1 === undefined ||
-        byte2 === undefined ||
-        byte3 === undefined
-      ) {
+      if (byte0 === undefined || byte1 === undefined || byte2 === undefined || byte3 === undefined) {
         break;
       }
       const bits =
-        (byte0 << 24) | ((byte1 << 16) & 0xff0000) | ((byte2 << 8) & 0xff00) | (byte3 & 0xff);
+        (byte0 << 24) |
+        ((byte1 << 16) & 0xff0000) |
+        ((byte2 << 8) & 0xff00) |
+        (byte3 & 0xff);
       const view = Buffer.alloc(4);
       view.writeInt32BE(bits, 0);
       floats.push(view.readFloatBE(0));
@@ -89,6 +87,6 @@ export class DevHashEmbeddingBackend implements EmbeddingBackend {
   }
 
   async health(): Promise<{ healthy: boolean; latencyMs?: number; detail?: string }> {
-    return { healthy: true, detail: 'DevHash backend is always healthy' };
+    return { healthy: true, detail: "DevHash backend is always healthy" };
   }
 }

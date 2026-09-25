@@ -14,7 +14,10 @@
       "id": "design-system",
       "role": "CANONICAL_SOURCE",
       "package_name": "@szl-holdings/design-system",
-      "inputs": ["packages/design-system/package.json", "packages/design-system/src"],
+      "inputs": [
+        "packages/design-system/package.json",
+        "packages/design-system/src"
+      ],
       "file_count": 100,
       "bytes": 354178,
       "tree_sha256": "b8b84fb54875d976d6ac87db8976156ed49542073f06b32762b17a0f61efc0df",
@@ -525,7 +528,10 @@
       "id": "design-system-forge-type-contract",
       "role": "EXPORTED_SOURCE_DEPENDENCY",
       "package_name": "@workspace/forge/types",
-      "inputs": ["packages/forge/package.json", "packages/forge/src/types.ts"],
+      "inputs": [
+        "packages/forge/package.json",
+        "packages/forge/src/types.ts"
+      ],
       "file_count": 2,
       "bytes": 4737,
       "tree_sha256": "39b24e39751abdc8fb69e6f3212f8cec9164db25bf6d59e5a13917dea1cd9566",
@@ -629,7 +635,10 @@
       "id": "api-zod",
       "role": "RUNTIME_AND_GENERATED_OUTPUT_PRESENT",
       "package_name": "@szl-holdings/api-zod",
-      "inputs": ["lib/api-zod/package.json", "lib/api-zod/src"],
+      "inputs": [
+        "lib/api-zod/package.json",
+        "lib/api-zod/src"
+      ],
       "file_count": 661,
       "bytes": 1014791,
       "tree_sha256": "c3b24c7048d461ff83819e60fc6f0c62a0773e1564a9174affff896b03e0c87b",
@@ -3945,7 +3954,10 @@
       "id": "shared-contracts",
       "role": "CANONICAL_SOURCE",
       "package_name": "@szl-holdings/shared-contracts",
-      "inputs": ["packages/shared-contracts/package.json", "packages/shared-contracts/src"],
+      "inputs": [
+        "packages/shared-contracts/package.json",
+        "packages/shared-contracts/src"
+      ],
       "file_count": 9,
       "bytes": 47529,
       "tree_sha256": "ac5dde34c6df9e17350427f272cbb04ebd0aea5401811c6c007cec10f3d0a8c5",

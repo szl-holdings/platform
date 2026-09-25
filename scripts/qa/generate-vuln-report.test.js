@@ -1,7 +1,11 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
 
-import { normalizeAuditJson, parseAuditJson, validateAuditJson } from './generate-vuln-report.js';
+import {
+  normalizeAuditJson,
+  parseAuditJson,
+  validateAuditJson,
+} from './generate-vuln-report.js';
 
 const legacyAudit = {
   advisories: {},
