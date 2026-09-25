@@ -644,8 +644,9 @@ export function A11oyAtelier() {
               lineHeight: 1.55,
             }}
           >
-            Only the non-secret session ID is kept in this tab's session storage. It is not
-            authentication. On a shared browser, choose New session before handing off the tab.
+            This tab stores the session ID and, while a turn is unconfirmed, a prompt-free retry
+            key. Neither is authentication. On a shared browser, choose New session before handing
+            off the tab.
           </p>
         </section>
 

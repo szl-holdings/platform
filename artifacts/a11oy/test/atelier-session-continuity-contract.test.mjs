@@ -35,6 +35,7 @@ test('exposes explicit resume, new-session, copy, and shared-browser guidance', 
   assert.match(source, />\s*Resume\s*</);
   assert.match(source, />\s*New session\s*</);
   assert.match(source, />\s*Copy ID\s*</);
+  assert.match(source, /while a turn is unconfirmed, a prompt-free retry/);
   assert.match(source, /On a shared browser, choose New session/);
 });
 
