@@ -655,6 +655,23 @@ try {
           undefined,
           { timeout: 10_000 },
         );
+        // The boot marker does not establish lazy-route readiness. Require the
+        // planned page identity before sampling layout, links or screenshot bytes.
+        if (expectedHeading) {
+          await page.waitForFunction(
+            (heading) => {
+              const mains = document.querySelectorAll('main');
+              return (
+                mains.length === 1 &&
+                Array.from(mains[0].querySelectorAll('h1')).some(
+                  (element) => element.textContent?.replace(/\s+/g, ' ').trim() === heading,
+                )
+              );
+            },
+            expectedHeading,
+            { timeout: 10_000 },
+          );
+        }
         await page.evaluate(async () => {
           if (document.fonts) await document.fonts.ready;
           window.scrollTo(0, 0);
