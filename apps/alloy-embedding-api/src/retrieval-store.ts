@@ -1,68 +1,80 @@
 /**
  * Retrieval store + embedder selection for the shipping hybrid-search route.
  *
- * Two real arms, selected by environment — no synthetic fabrication on either:
- *
- *   - Store:    pgvector (cosine ANN + Postgres FTS) when DATABASE_URL is set,
- *               otherwise an in-memory StorageBundle for local development.
- *   - Embedder: the real external-http model backend (bge-m3, 1024-dim) when
- *               SUBSTRATE_EMBED_URL is set, otherwise the dev-hash backend.
- *
- * The route always queries the chosen store for real hits; it never invents
- * `synthetic-chunk-*` rows. When the store is empty the route returns zero hits
- * (honest empty result), which is the correct behavior before ingestion runs.
+ * Store: pgvector when DATABASE_URL is set; otherwise in-memory for development.
+ * Embedder: exact external HTTP backend when configured; dev-hash only outside
+ * production. Production without a real embedder fails closed.
  */
 
 import {
   InMemoryStorageBundle,
   createPgVectorStorageBundle,
   type StorageBundle,
-} from "@workspace/aef-storage-adapters";
-import { hasRealEmbedderConfigured } from "@workspace/alloy-embed-worker";
+} from '@workspace/aef-storage-adapters';
+import { hasRealEmbedderConfigured } from '@workspace/alloy-embed-worker';
+import type { PromotionState } from '@workspace/aef-contracts';
 
 export interface EmbedderSelection {
-  /** Backend id passed to embedTexts (and the MicroBatchQueue). */
   backendId: string;
-  /** Model id recorded on evidence entries. */
   model: string;
-  /** Whether this is the real model backend (vs the dev-hash fallback). */
+  modelRevision?: string;
+  artifactSetDigest?: string;
+  promotionState: PromotionState;
   isReal: boolean;
 }
 
-let _store: { bundle: StorageBundle; backend: "pgvector" | "in-memory" } | undefined;
+export class EmbedderConfigurationError extends Error {
+  readonly code = 'REAL_EMBEDDER_REQUIRED';
 
-/**
- * Resolve the active storage bundle. pgvector in production (DATABASE_URL set),
- * in-memory for local dev. Memoized so the pg.Pool is created once.
- */
-export function getRetrievalStore(): { bundle: StorageBundle; backend: "pgvector" | "in-memory" } {
-  if (!_store) {
-    const usePg =
-      Boolean(process.env.DATABASE_URL) && process.env.AEF_STORE_BACKEND !== "in-memory";
-    _store = usePg
-      ? { bundle: createPgVectorStorageBundle(), backend: "pgvector" }
-      : { bundle: new InMemoryStorageBundle(), backend: "in-memory" };
+  constructor(message = 'A real embedding endpoint is required in production') {
+    super(message);
+    this.name = 'EmbedderConfigurationError';
   }
-  return _store;
 }
 
-/**
- * Resolve which embedder the route should call. Prefers the real model backend
- * when a substrate embed endpoint is configured; falls back to dev-hash only
- * when no real endpoint exists and we are not in production.
- */
+let store: { bundle: StorageBundle; backend: 'pgvector' | 'in-memory' } | undefined;
+
+export function getRetrievalStore(): {
+  bundle: StorageBundle;
+  backend: 'pgvector' | 'in-memory';
+} {
+  if (!store) {
+    const usePg = Boolean(process.env.DATABASE_URL) && process.env.AEF_STORE_BACKEND !== 'in-memory';
+    store = usePg
+      ? { bundle: createPgVectorStorageBundle(), backend: 'pgvector' }
+      : { bundle: new InMemoryStorageBundle(), backend: 'in-memory' };
+  }
+  return store;
+}
+
 export function getEmbedderSelection(): EmbedderSelection {
   if (hasRealEmbedderConfigured()) {
     return {
-      backendId: "external-http",
-      model: process.env.HF_EMBED_MODEL ?? "BAAI/bge-m3",
+      backendId: 'external-http',
+      model: process.env.HF_EMBED_MODEL ?? 'BAAI/bge-m3',
+      ...(process.env.HF_EMBED_MODEL_REVISION
+        ? { modelRevision: process.env.HF_EMBED_MODEL_REVISION }
+        : {}),
+      ...(process.env.HF_EMBED_ARTIFACT_SET_DIGEST
+        ? { artifactSetDigest: process.env.HF_EMBED_ARTIFACT_SET_DIGEST }
+        : {}),
+      promotionState:
+        (process.env.AEF_EMBED_PROMOTION_STATE as PromotionState | undefined) ?? 'DEVELOPMENT',
       isReal: true,
     };
   }
-  return { backendId: "dev-hash", model: "aef-dev-hash", isReal: false };
+
+  if (process.env.NODE_ENV === 'production') throw new EmbedderConfigurationError();
+
+  return {
+    backendId: 'dev-hash',
+    model: 'aef-dev-hash',
+    modelRevision: 'sha256-v1',
+    promotionState: 'DEVELOPMENT',
+    isReal: false,
+  };
 }
 
-/** Test seam: reset memoized state so tests can swap env between cases. */
 export function __resetRetrievalStoreForTests(): void {
-  _store = undefined;
+  store = undefined;
 }

@@ -1,135 +1,183 @@
+import { randomUUID } from 'node:crypto';
 import { Router, type IRouter, type RequestHandler, type Request, type Response } from 'express';
-import { EmbedRequestSchema } from "@workspace/aef-contracts";
-import { defaultLedgerStore } from "@workspace/aef-evidence-ledger";
-import { PolicyEngine } from "@workspace/aef-policy-guard";
-import { embedTexts } from "@workspace/alloy-embed-worker";
-import { randomUUID } from "node:crypto";
-import { logger } from "../middleware/logger.js";
-import { getProfile } from "../profiles/default.js";
-import { errorBudgetCounter } from "../middleware/prometheus.js";
+import { EmbedRequestSchema, type EmbeddingExecutionReceipt } from '@workspace/aef-contracts';
+import { defaultLedgerStore } from '@workspace/aef-evidence-ledger';
+import { PolicyEngine } from '@workspace/aef-policy-guard';
+import { embedTextsWithReceipt } from '@workspace/alloy-embed-worker';
+import { logger } from '../middleware/logger.js';
+import { errorBudgetCounter } from '../middleware/prometheus.js';
+import { getProfile } from '../profiles/default.js';
+import { EmbedderConfigurationError, getEmbedderSelection } from '../retrieval-store.js';
 
 export const embedRouter: IRouter = Router();
 const policyEngine = new PolicyEngine();
 
-embedRouter.post("/v1/embed", (async (req: Request, res: Response) => {
+embedRouter.post('/v1/embed', (async (req: Request, res: Response) => {
   const parseResult = EmbedRequestSchema.safeParse(req.body);
   if (!parseResult.success) {
-    res.status(400).json({ error: "Validation failed", detail: parseResult.error.issues });
+    res.status(400).json({ error: 'Validation failed', detail: parseResult.error.issues });
     return;
   }
 
   const body = parseResult.data;
-  const tenantId: string = body.tenantId;
+  const tenantId = body.tenantId;
   const traceId = req.traceId;
   const requestedAt = new Date().toISOString();
 
   let profile;
   try {
-    profile = getProfile(body.profileId ?? req.profileId ?? "default");
-  } catch (err) {
-    res.status(400).json({ error: "Profile not found", detail: String(err) });
+    profile = getProfile(body.profileId ?? req.profileId ?? 'default');
+  } catch (error) {
+    res.status(400).json({ error: 'Profile not found', detail: String(error) });
     return;
   }
 
   const policyDecision = policyEngine.evaluate({
     requestId: body.requestId,
-    tenantId: tenantId,
+    tenantId,
     profileId: profile.profileId,
     hasProvenance: false,
     metadata: body.metadata,
   });
-
   if (!policyDecision.allow) {
-    errorBudgetCounter.inc({ kind: "policy_denied", tenant_id: tenantId });
+    errorBudgetCounter.inc({ kind: 'policy_denied', tenant_id: tenantId });
     res.status(403).json({
-      error: "Request blocked by policy",
+      error: 'Request blocked by policy',
       reasons: policyDecision.reasons,
       traceId,
     });
     return;
   }
 
-  let vectors: number[][];
-  const embedStart = Date.now();
-
-  const substrateUrl = process.env.SUBSTRATE_EMBED_URL;
-  const useDevHash = !substrateUrl && process.env.NODE_ENV !== "production";
-  const primaryBackend = useDevHash ? "dev-hash" : "cpu-local";
-
+  let embedder;
   try {
-    vectors = await embedTexts(body.texts, {
-      backendId: primaryBackend,
-      model: body.model ?? "aef-dev-hash",
-      pooling: "mean",
-      normalize: body.normalize,
-    });
-  } catch (primaryErr) {
-    if (!useDevHash && process.env.NODE_ENV !== "production") {
-      logger.warn({ traceId, primaryBackend, error: String(primaryErr) }, "Primary embed backend failed; falling back to dev-hash");
-      try {
-        vectors = await embedTexts(body.texts, {
-          backendId: "dev-hash",
-          model: body.model ?? "aef-dev-hash",
-          pooling: "mean",
-          normalize: body.normalize,
-        });
-      } catch (fallbackErr) {
-        errorBudgetCounter.inc({ kind: "embed_error", tenant_id: tenantId });
-        logger.error({ traceId, error: String(fallbackErr), tenantId: body.tenantId }, "Embed fallback also failed");
-        res.status(502).json({ error: "Embedding backend error", detail: String(fallbackErr), traceId });
-        return;
-      }
-    } else {
-      errorBudgetCounter.inc({ kind: "embed_error", tenant_id: tenantId });
-      logger.error({ traceId, error: String(primaryErr), tenantId: body.tenantId }, "Embed request failed");
-      res.status(502).json({ error: "Embedding backend error", detail: String(primaryErr), traceId });
+    embedder = getEmbedderSelection();
+  } catch (error) {
+    if (error instanceof EmbedderConfigurationError) {
+      res.status(503).json({ error: 'Embedding backend is not configured', code: error.code, traceId });
       return;
     }
+    throw error;
+  }
+
+  if (body.model && body.model !== embedder.model) {
+    res.status(409).json({
+      error: 'Requested model is not the admitted model',
+      code: 'MODEL_ID_NOT_ADMITTED',
+      admittedModel: embedder.model,
+      traceId,
+    });
+    return;
+  }
+  if (body.modelRevision && body.modelRevision !== embedder.modelRevision) {
+    res.status(409).json({
+      error: 'Requested model revision is not admitted',
+      code: 'MODEL_REVISION_NOT_ADMITTED',
+      admittedRevision: embedder.modelRevision,
+      traceId,
+    });
+    return;
+  }
+
+  const embedStart = Date.now();
+  let result;
+  try {
+    result = await embedTextsWithReceipt(body.texts, {
+      backendId: embedder.backendId,
+      model: embedder.model,
+      pooling: 'mean',
+      normalize: body.normalize,
+    });
+  } catch (error) {
+    errorBudgetCounter.inc({ kind: 'embed_error', tenant_id: tenantId });
+    logger.error(
+      { traceId, error: String(error), tenantId, backendId: embedder.backendId },
+      'Embed request failed',
+    );
+    res.status(502).json({
+      error: 'Embedding backend unavailable',
+      code: 'EMBEDDING_BACKEND_UNAVAILABLE',
+      traceId,
+    });
+    return;
   }
 
   const processingMs = Date.now() - embedStart;
   const completedAt = new Date().toISOString();
-  const dimensions = vectors[0]?.length ?? 0;
+  const dimensions = result.vectors[0]?.length ?? result.dimensions;
+  const execution: EmbeddingExecutionReceipt =
+    result.execution ?? {
+      backendId: embedder.backendId,
+      modelId: result.model,
+      ...(embedder.modelRevision ? { modelRevision: embedder.modelRevision } : {}),
+      ...(embedder.artifactSetDigest ? { artifactSetDigest: embedder.artifactSetDigest } : {}),
+      dimensions,
+      normalized: body.normalize,
+      promotionState: embedder.promotionState,
+      supportedModalities: ['text'],
+    };
 
-  const evidenceEntries = body.texts.map((_text, i) => {
-    const entryId = randomUUID();
+  const evidenceEntries = body.texts.map((_text, index) => {
     const entry = {
-      entryId,
+      entryId: randomUUID(),
       requestId: body.requestId,
-      tenantId: tenantId,
+      tenantId,
       profileId: profile.profileId,
       profileVersion: profile.version,
-      chunkId: `embed-${body.requestId}-${i}`,
-      sourceId: "embed-request",
+      chunkId: `embed-${body.requestId}-${index}`,
+      sourceId: 'embed-request',
       boostApplied: false,
-      finalScore: 1.0,
+      finalScore: 1,
       policyAllow: true,
       policyReasons: policyDecision.reasons,
       redactedFields: policyDecision.redactions,
+      backendId: execution.backendId,
+      modelId: execution.modelId,
+      modelRevision: execution.modelRevision,
+      artifactSetDigest: execution.artifactSetDigest,
+      processorRevision: execution.processorRevision,
+      runtimeId: execution.runtimeId,
+      runtimeVersion: execution.runtimeVersion,
+      dimensions: execution.dimensions,
+      normalized: execution.normalized,
+      promotionState: execution.promotionState,
       requestedAt,
       completedAt,
     };
-
     defaultLedgerStore.append(entry);
     return entry;
   });
 
-  const response = {
+  res.status(200).json({
     requestId: body.requestId,
-    tenantId: body.tenantId,
-    model: body.model ?? "aef-dev-hash",
+    tenantId,
+    model: result.model,
+    modelRevision: execution.modelRevision,
     dimensions,
-    vectors: vectors.map((vector, i) => ({
-      index: i,
-      text: body.texts[i],
+    vectors: result.vectors.map((vector, index) => ({
+      index,
+      text: body.texts[index],
       vector,
+      ...(result.tokenCounts?.[index] !== undefined
+        ? { tokenCount: result.tokenCounts[index] }
+        : {}),
     })),
+    execution,
     processingMs,
     traceId,
-    evidenceIds: evidenceEntries.map((e) => e.entryId),
+    evidenceIds: evidenceEntries.map((entry) => entry.entryId),
     policyReasons: policyDecision.reasons,
-  };
+  });
 
-  logger.info({ traceId, requestId: body.requestId, count: body.texts.length, processingMs }, "embed completed");
-  res.status(200).json(response);
+  logger.info(
+    {
+      traceId,
+      requestId: body.requestId,
+      count: body.texts.length,
+      processingMs,
+      backendId: execution.backendId,
+      modelRevision: execution.modelRevision,
+    },
+    'embed completed',
+  );
 }) as unknown as RequestHandler);
