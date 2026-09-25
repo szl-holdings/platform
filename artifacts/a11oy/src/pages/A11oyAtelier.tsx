@@ -4,6 +4,15 @@ import { Layout } from '../components/layout';
 const API = '/api/a11oy/v1/atelier';
 const TENANT_ID = import.meta.env.VITE_A11OY_ATELIER_TENANT_ID ?? 'default';
 const SESSION_STORAGE_KEY = `a11oy.atelier.session-id.v1:${TENANT_ID}`;
+const PENDING_RETRY_STORAGE_KEY = `a11oy.atelier.pending-retry.v1:${TENANT_ID}`;
+const PENDING_RETRY_TTL_MS = 24 * 60 * 60 * 1000;
+
+interface PendingRetry {
+  fingerprintSha256: string;
+  key: string;
+  sessionId: string;
+  createdAt: number;
+}
 
 function normalizeSessionId(value: string | null | undefined): string | undefined {
   const normalized = value?.trim();
@@ -34,6 +43,54 @@ function forgetStoredSessionId(): void {
   } catch {
     // The in-memory session is still cleared when browser storage is unavailable.
   }
+}
+
+function readPendingRetry(): PendingRetry | undefined {
+  if (typeof window === 'undefined') return undefined;
+  try {
+    const stored = window.sessionStorage.getItem(PENDING_RETRY_STORAGE_KEY);
+    if (!stored) return undefined;
+    const value = JSON.parse(stored) as Partial<PendingRetry>;
+    if (
+      typeof value.fingerprintSha256 !== 'string' ||
+      !/^[a-f0-9]{64}$/.test(value.fingerprintSha256) ||
+      typeof value.key !== 'string' ||
+      !/^[a-f0-9-]{36}$/.test(value.key) ||
+      !normalizeSessionId(value.sessionId) ||
+      typeof value.createdAt !== 'number' ||
+      !Number.isFinite(value.createdAt) ||
+      value.createdAt > Date.now()
+    ) {
+      forgetPendingRetry();
+      return undefined;
+    }
+    return value as PendingRetry;
+  } catch {
+    return undefined;
+  }
+}
+
+function storePendingRetry(value: PendingRetry): boolean {
+  try {
+    window.sessionStorage.setItem(PENDING_RETRY_STORAGE_KEY, JSON.stringify(value));
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+function forgetPendingRetry(): void {
+  try {
+    window.sessionStorage.removeItem(PENDING_RETRY_STORAGE_KEY);
+  } catch {
+    // The in-memory retry remains scoped to this mounted page.
+  }
+}
+
+async function fingerprintRequest(value: string): Promise<string> {
+  const bytes = new TextEncoder().encode(value);
+  const digest = await crypto.subtle.digest('SHA-256', bytes);
+  return Array.from(new Uint8Array(digest), (byte) => byte.toString(16).padStart(2, '0')).join('');
 }
 
 interface ProviderHealth {
@@ -193,15 +250,21 @@ export function A11oyAtelier() {
   const [provider, setProvider] = useState<'auto' | 'xai' | 'grok-build'>('auto');
   const [reasoningEffort, setReasoningEffort] = useState<'low' | 'medium' | 'high'>('medium');
   const [sessionId, setSessionId] = useState<string>();
-  const [resumeSessionId, setResumeSessionId] = useState(() => readStoredSessionId() ?? '');
-  const [sessionNotice, setSessionNotice] = useState<string>();
+  const [initialPendingRetry] = useState(() => readPendingRetry());
+  const [resumeSessionId, setResumeSessionId] = useState(
+    () => readStoredSessionId() ?? initialPendingRetry?.sessionId ?? '',
+  );
+  const [sessionNotice, setSessionNotice] = useState<string | undefined>(() => {
+    if (!initialPendingRetry) return undefined;
+    return Date.now() - initialPendingRetry.createdAt >= PENDING_RETRY_TTL_MS
+      ? 'An earlier turn is unconfirmed and its safe retry window has expired. Do not resend it automatically.'
+      : 'An earlier turn is unconfirmed. Re-enter the same prompt and settings to retry safely; the prompt is not stored in this tab.';
+  });
   const [health, setHealth] = useState<HealthResponse>();
   const [result, setResult] = useState<AskResponse>();
   const [error, setError] = useState<string>();
   const [loading, setLoading] = useState(false);
-  const pendingRetry = useRef<{ fingerprint: string; key: string; sessionId: string } | undefined>(
-    undefined,
-  );
+  const pendingRetry = useRef<PendingRetry | undefined>(initialPendingRetry);
 
   useEffect(() => {
     const previousTitle = document.title;
@@ -240,18 +303,38 @@ export function A11oyAtelier() {
         prompt: trimmed,
         provider,
         reasoningEffort,
-        sessionId: sessionId ?? null,
         capabilities: { tools: false, search: false, durableStorage: false, subagents: false },
       });
-      const matchingRetry =
-        pendingRetry.current?.fingerprint === requestFingerprint ? pendingRetry.current : undefined;
+      const fingerprintSha256 = await fingerprintRequest(requestFingerprint);
+      if (
+        pendingRetry.current &&
+        Date.now() - pendingRetry.current.createdAt >= PENDING_RETRY_TTL_MS
+      ) {
+        setError(
+          'The pending retry window expired. Do not resend it automatically; choose New session only if you intend a new provider request.',
+        );
+        return;
+      }
+      if (pendingRetry.current && pendingRetry.current.fingerprintSha256 !== fingerprintSha256) {
+        setError(
+          'An earlier turn is unconfirmed. Retry with the same prompt, provider, and reasoning effort, or explicitly choose New session.',
+        );
+        return;
+      }
+      const matchingRetry = pendingRetry.current;
       const requestSessionId = sessionId ?? matchingRetry?.sessionId ?? crypto.randomUUID();
       const idempotencyKey = matchingRetry?.key ?? crypto.randomUUID();
       pendingRetry.current = {
-        fingerprint: requestFingerprint,
+        fingerprintSha256,
         key: idempotencyKey,
         sessionId: requestSessionId,
+        createdAt: matchingRetry?.createdAt ?? Date.now(),
       };
+      if (!storePendingRetry(pendingRetry.current)) {
+        setSessionNotice(
+          'Tab storage is unavailable. Keep this tab open: a reload would lose the safe retry key.',
+        );
+      }
       const requestBody = {
         prompt: trimmed,
         provider,
@@ -286,6 +369,7 @@ export function A11oyAtelier() {
       );
       setPrompt('');
       pendingRetry.current = undefined;
+      forgetPendingRetry();
     } catch (reason) {
       setError(reason instanceof Error ? reason.message : String(reason));
     } finally {
@@ -299,19 +383,25 @@ export function A11oyAtelier() {
       setSessionNotice('Enter a session ID between 1 and 128 characters.');
       return;
     }
-    pendingRetry.current = undefined;
+    if (pendingRetry.current?.sessionId !== normalized) {
+      pendingRetry.current = undefined;
+      forgetPendingRetry();
+    }
     setSessionId(normalized);
     setResumeSessionId(normalized);
     setResult(undefined);
     setSessionNotice(
       storeSessionId(normalized)
-        ? 'Session selected for the next request and saved for this browser tab.'
+        ? pendingRetry.current
+          ? 'Session selected. The unconfirmed turn still requires the same prompt and settings for a safe retry.'
+          : 'Session selected for the next request and saved for this browser tab.'
         : 'Session selected for the next request, but tab storage is unavailable.',
     );
   }
 
   function startNewSession() {
     pendingRetry.current = undefined;
+    forgetPendingRetry();
     setSessionId(undefined);
     setResumeSessionId('');
     setResult(undefined);

@@ -137,6 +137,33 @@ describe('XaiResponsesProvider', () => {
     ).rejects.toBeInstanceOf(AtelierProviderResponseError);
     expect(fetchMock).toHaveBeenCalledTimes(1);
   });
+
+  it.each([
+    401, 402, 403, 429,
+  ])('classifies explicit HTTP %i pre-inference rejection as releasable', async (status) => {
+    const fetchMock = vi.fn(
+      async () =>
+        new Response(JSON.stringify({ error: { message: 'private provider diagnostic' } }), {
+          status,
+          headers: { 'content-type': 'application/json' },
+        }),
+    );
+    const client = new XaiResponsesProvider('secret-for-test', fetchMock as typeof fetch);
+    await expect(
+      client.generate(AtelierAskRequestSchema.parse({ prompt: 'hello', provider: 'xai' })),
+    ).rejects.toBeInstanceOf(AtelierProviderUnavailableError);
+    await expect(
+      client.generate(AtelierAskRequestSchema.parse({ prompt: 'hello', provider: 'xai' })),
+    ).rejects.not.toThrow('private provider diagnostic');
+  });
+
+  it('retains ambiguous provider server failures as response errors', async () => {
+    const fetchMock = vi.fn(async () => new Response('{}', { status: 500 }));
+    const client = new XaiResponsesProvider('secret-for-test', fetchMock as typeof fetch);
+    await expect(
+      client.generate(AtelierAskRequestSchema.parse({ prompt: 'hello', provider: 'xai' })),
+    ).rejects.toBeInstanceOf(AtelierProviderResponseError);
+  });
 });
 
 describe('Grok Build failure classification', () => {

@@ -1,6 +1,6 @@
 # SZL Holdings — Known Gaps Register (Security & Operations)
 
-**Last updated:** 2026-09-24 (rev 28 — A11oy Atelier local provider quota witness)
+**Last updated:** 2026-09-25 (rev 29 — A11oy Atelier retry and release boundary)
 **Owner:** Engineering / DevOps  
 **Audience:** Enterprise architects, Series A technical advisors, incoming VP Engineering
 
@@ -91,6 +91,25 @@ response or committed Turn Capsule. Provider balance or another authorized
 provider configuration is required for a new live inference witness. The API
 now surfaces this known pre-response rejection without presenting it as success
 or retaining a retry-blocking ambiguous reservation.
+
+The browser now persists an unconfirmed turn's session ID and idempotency key
+in tab-scoped storage before sending it, alongside a prompt-free request
+fingerprint digest. A reload can reuse the same key only when the operator
+re-enters the same prompt and settings within the 24-hour logical retention
+window. Clearing or disabling tab storage loses that guarantee; the interface
+warns when storage cannot be written. A new session is an explicit decision to
+abandon the pending retry, not evidence that the provider did not bill it.
+Direct xAI API HTTP 401/402/403/429 rejections are classified as known
+pre-inference failures and release reservations; 5xx, transport failures,
+redirects, and malformed responses retain ambiguous reservations. This is
+tested with injected responses, not live direct-API proof.
+
+The authenticated session-read route still inherits the runtime's global API
+key and caller-supplied tenant header. The loopback solo-builder bridge is
+within that boundary; production multi-tenant confidentiality requires an
+identity-to-tenant binding before this route is publicly exposed. Protected
+source merge also does not itself deploy Atelier: a separately witnessed
+hosted build, identity configuration, and functional provider probe remain open.
 
 ---
 

@@ -168,6 +168,18 @@ export class XaiResponsesProvider implements AtelierProvider {
       }
       const payload = (await response.json().catch(() => undefined)) as unknown;
       if (!response.ok) {
+        // These status codes are explicit pre-inference rejections. The route may
+        // release its reservation; timeouts, redirects, and server errors remain
+        // ambiguous and must keep the retry key reserved.
+        const knownRejections: Record<number, string> = {
+          401: 'xAI API authentication was rejected. Check the configured API key.',
+          402: 'xAI API usage balance was exhausted. Add provider credits or select another configured provider.',
+          403: 'xAI API access was denied for this request.',
+          429: 'xAI API rate limit rejected this request. Retry after the provider limit resets.',
+        };
+        if (knownRejections[response.status]) {
+          throw new AtelierProviderUnavailableError(knownRejections[response.status]);
+        }
         const errorRecord = asRecord(asRecord(payload)?.error);
         const message =
           typeof errorRecord?.message === 'string'
