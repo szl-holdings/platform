@@ -38,8 +38,8 @@ commit is checked out.
 | DB schema files | **197** | Tracked `lib/db/src/schema/**/*.ts` files |
 | DB `pgTable` call sites | **1,067** | Source call sites; not a claim about currently provisioned tables |
 | DB migrations (SQL files) | **149** | Tracked `lib/db/drizzle/*.sql` files; duplicate sequence numbers may exist |
-| API route source files | **44** | Non-test files under `apps/`, `services/`, and `artifacts/api-server/` containing a detected Express route declaration |
-| API handler declarations | **311** | Static non-test HTTP method declarations on `app`, `router`, and named Express Router receivers in the current runtime roots |
+| API route source files | **45** | Non-test files under `apps/`, `services/`, and `artifacts/api-server/` containing a detected Express route declaration |
+| API handler declarations | **314** | Static non-test HTTP method declarations on `app`, `router`, and named Express Router receivers in the current runtime roots |
 | CI workflows | **46** | Permanent tracked `.github/workflows/*.yml` and `*.yaml`, including exact-head screenshot evidence, hosted observability proof, public npm release paths, and the frontier receipt-chain gate; excludes the retired DCO compatibility workflow |
 | Environment variables (in `.env.example`) | **238** | Lines matching `^[A-Z_]+=` |
 

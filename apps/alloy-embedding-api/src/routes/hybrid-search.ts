@@ -1,6 +1,6 @@
 import { randomUUID } from 'node:crypto';
 import { Router, type IRouter, type RequestHandler, type Request, type Response } from 'express';
-import { HybridSearchRequestSchema } from '@workspace/aef-contracts';
+import { HybridSearchRequestSchema, type EmbeddingExecutionReceipt } from '@workspace/aef-contracts';
 import { defaultLedgerStore } from '@workspace/aef-evidence-ledger';
 import { PolicyEngine } from '@workspace/aef-policy-guard';
 import {
@@ -171,9 +171,8 @@ hybridSearchRouter.post('/v1/hybrid-search', (async (req: Request, res: Response
     }
   }
 
-  const execution =
-    embedResult.execution ??
-    ({
+  const execution: EmbeddingExecutionReceipt =
+    embedResult.execution ?? {
       backendId: embedder.backendId,
       modelId: embedResult.model,
       ...(embedder.modelRevision ? { modelRevision: embedder.modelRevision } : {}),
@@ -182,7 +181,7 @@ hybridSearchRouter.post('/v1/hybrid-search', (async (req: Request, res: Response
       normalized: true,
       promotionState: embedder.promotionState,
       supportedModalities: ['text'],
-    } as const);
+    };
   const completedAt = new Date().toISOString();
 
   const evidenceEntries = finalCitations.map((citation, index) => {

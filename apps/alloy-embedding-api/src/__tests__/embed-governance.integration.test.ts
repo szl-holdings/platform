@@ -1,7 +1,8 @@
+import { TenantIdSchema } from '@workspace/aef-contracts';
+import { defaultLedgerStore } from '@workspace/aef-evidence-ledger';
 import express, { type Express } from 'express';
 import request from 'supertest';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
-import { defaultLedgerStore } from '@workspace/aef-evidence-ledger';
 import { embedRouter } from '../routes/embed.js';
 
 function buildApp(): Express {
@@ -9,7 +10,7 @@ function buildApp(): Express {
   app.use(express.json());
   app.use((req, _res, next) => {
     req.traceId = 'trace-test';
-    req.tenantId = 'tenant-1';
+    req.tenantId = TenantIdSchema.parse('tenant-1');
     req.profileId = 'default';
     next();
   });

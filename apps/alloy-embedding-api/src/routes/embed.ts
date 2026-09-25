@@ -1,6 +1,6 @@
 import { randomUUID } from 'node:crypto';
 import { Router, type IRouter, type RequestHandler, type Request, type Response } from 'express';
-import { EmbedRequestSchema } from '@workspace/aef-contracts';
+import { EmbedRequestSchema, type EmbeddingExecutionReceipt } from '@workspace/aef-contracts';
 import { defaultLedgerStore } from '@workspace/aef-evidence-ledger';
 import { PolicyEngine } from '@workspace/aef-policy-guard';
 import { embedTextsWithReceipt } from '@workspace/alloy-embed-worker';
@@ -105,9 +105,8 @@ embedRouter.post('/v1/embed', (async (req: Request, res: Response) => {
   const processingMs = Date.now() - embedStart;
   const completedAt = new Date().toISOString();
   const dimensions = result.vectors[0]?.length ?? result.dimensions;
-  const execution =
-    result.execution ??
-    ({
+  const execution: EmbeddingExecutionReceipt =
+    result.execution ?? {
       backendId: embedder.backendId,
       modelId: result.model,
       ...(embedder.modelRevision ? { modelRevision: embedder.modelRevision } : {}),
@@ -116,7 +115,7 @@ embedRouter.post('/v1/embed', (async (req: Request, res: Response) => {
       normalized: body.normalize,
       promotionState: embedder.promotionState,
       supportedModalities: ['text'],
-    } as const);
+    };
 
   const evidenceEntries = body.texts.map((_text, index) => {
     const entry = {

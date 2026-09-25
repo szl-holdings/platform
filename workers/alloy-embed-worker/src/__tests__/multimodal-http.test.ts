@@ -1,3 +1,4 @@
+import { TenantIdSchema } from '@workspace/aef-contracts';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { MultimodalHttpEmbeddingClient } from '../multimodal-http.js';
 import {
@@ -15,7 +16,7 @@ afterEach(() => {
 
 const request = {
   requestId: 'req-1',
-  tenantId: 'tenant-1',
+  tenantId: TenantIdSchema.parse('tenant-1'),
   modelId: OVIS_OMNI_MODEL_ID,
   modelRevision: OVIS_OMNI_REVISION,
   dimensions: 2048 as const,
