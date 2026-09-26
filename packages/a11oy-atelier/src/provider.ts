@@ -11,10 +11,75 @@ import type {
 
 const execFileAsync = promisify(execFile);
 const XAI_RESPONSES_URL = 'https://api.x.ai/v1/responses';
-const DEFAULT_MODEL = 'grok-4.6';
+
+/**
+ * The single reviewed Grok model pin for A11oy Atelier. Changing it is a model
+ * change and needs its own review plus an owner canary receipt.
+ */
+export const DEFAULT_GROK_MODEL = 'grok-4.7';
+
+/**
+ * Code-reviewed allowlist: the pin plus exactly one rollback target (the
+ * previous pin). Adding an id here is itself the reviewed model change.
+ */
+export const ALLOWED_GROK_MODELS: readonly string[] = Object.freeze([
+  DEFAULT_GROK_MODEL,
+  'grok-4.6',
+]);
+
+/** Reported as the health model when the configured override is rejected. */
+const UNRESOLVED_GROK_MODEL = 'UNAVAILABLE';
 
 export class AtelierProviderUnavailableError extends Error {
   readonly code = 'ATELIER_PROVIDER_UNAVAILABLE';
+}
+
+export type GrokModelResolution =
+  | { ok: true; model: string; source: 'SZL_GROK_MODEL' | 'A11OY_ATELIER_MODEL' | 'default' }
+  | { ok: false; reason: string };
+
+/**
+ * Resolves the server-side Grok model without throwing.
+ *
+ * Order: `SZL_GROK_MODEL` (estate key), then `A11OY_ATELIER_MODEL` (deprecated
+ * fallback), then `DEFAULT_GROK_MODEL`. Values are trimmed and blank values are
+ * treated as unset. A value outside `ALLOWED_GROK_MODELS` fails closed: it
+ * never falls back to a later key or to the default, and the rejected value is
+ * never echoed.
+ */
+export function tryResolveGrokModel(env: NodeJS.ProcessEnv = process.env): GrokModelResolution {
+  for (const key of ['SZL_GROK_MODEL', 'A11OY_ATELIER_MODEL'] as const) {
+    const value = env[key]?.trim();
+    if (!value) continue;
+    if (ALLOWED_GROK_MODELS.includes(value)) return { ok: true, model: value, source: key };
+    return {
+      ok: false,
+      reason: `${key} is not an allowlisted Grok model id (allowed: ${ALLOWED_GROK_MODELS.join(', ')}); no provider call was made.`,
+    };
+  }
+  return { ok: true, model: DEFAULT_GROK_MODEL, source: 'default' };
+}
+
+/**
+ * Resolves the server-side Grok model or throws `AtelierProviderUnavailableError`
+ * before any provider call when the configured value is not allowlisted.
+ */
+export function resolveGrokModel(env: NodeJS.ProcessEnv = process.env): string {
+  const resolution = tryResolveGrokModel(env);
+  if (!resolution.ok) throw new AtelierProviderUnavailableError(resolution.reason);
+  return resolution.model;
+}
+
+/**
+ * Model shown by `health()`. A caller-supplied model keeps its existing
+ * precedence; otherwise the non-throwing resolver is used so a rejected env
+ * value is reported as UNAVAILABLE instead of throwing from a health check.
+ */
+function healthModel(
+  requestedModel?: string,
+): { ok: true; model: string } | { ok: false; reason: string } {
+  if (requestedModel !== undefined) return { ok: true, model: requestedModel };
+  return tryResolveGrokModel();
 }
 
 export class AtelierProviderResponseError extends Error {
@@ -101,8 +166,21 @@ export class XaiResponsesProvider implements AtelierProvider {
     private readonly fetchImpl: typeof fetch = fetch,
   ) {}
 
-  health(model = process.env.A11OY_ATELIER_MODEL ?? DEFAULT_MODEL): AtelierProviderHealth {
+  health(requestedModel?: string): AtelierProviderHealth {
     const configured = this.apiKey.trim().length > 0;
+    const resolved = healthModel(requestedModel);
+    if (!resolved.ok) {
+      return {
+        provider: this.id,
+        model: UNRESOLVED_GROK_MODEL,
+        configured,
+        available: false,
+        localOnly: false,
+        evidenceState: 'UNAVAILABLE',
+        reason: resolved.reason,
+      };
+    }
+    const model = resolved.model;
     return {
       provider: this.id,
       model,
@@ -120,7 +198,9 @@ export class XaiResponsesProvider implements AtelierProvider {
     if (!this.apiKey.trim()) {
       throw new AtelierProviderUnavailableError('A11OY_ATELIER_XAI_API_KEY is not configured.');
     }
-    const model = request.model ?? process.env.A11OY_ATELIER_MODEL ?? DEFAULT_MODEL;
+    // Caller-supplied request.model keeps its existing precedence (hardening it
+    // is a separate change); otherwise the allowlisted resolver runs before fetch.
+    const model = request.model ?? resolveGrokModel();
     const controller = new AbortController();
     const timeout = setTimeout(() => controller.abort(), 180_000);
     try {
@@ -220,8 +300,21 @@ export class GrokBuildCliProvider implements AtelierProvider {
     private readonly cwd = process.cwd(),
   ) {}
 
-  health(model = process.env.A11OY_ATELIER_MODEL ?? DEFAULT_MODEL): AtelierProviderHealth {
+  health(requestedModel?: string): AtelierProviderHealth {
     const configured = this.executable.trim().length > 0;
+    const resolved = healthModel(requestedModel);
+    if (!resolved.ok) {
+      return {
+        provider: this.id,
+        model: UNRESOLVED_GROK_MODEL,
+        configured,
+        available: false,
+        localOnly: true,
+        evidenceState: 'UNAVAILABLE',
+        reason: resolved.reason,
+      };
+    }
+    const model = resolved.model;
     const available = configured && existsSync(this.executable);
     return {
       provider: this.id,
@@ -241,7 +334,8 @@ export class GrokBuildCliProvider implements AtelierProvider {
   async generate(request: AtelierAskRequest): Promise<AtelierProviderResult> {
     const health = this.health(request.model);
     if (!health.available) throw new AtelierProviderUnavailableError(health.reason);
-    const model = request.model ?? process.env.A11OY_ATELIER_MODEL ?? DEFAULT_MODEL;
+    // Same precedence and allowlist as the xAI Responses adapter; resolves before exec.
+    const model = request.model ?? resolveGrokModel();
     const { stdout } = await execFileAsync(
       this.executable,
       [
@@ -289,8 +383,11 @@ export function resolveProvider(requested: AtelierAskRequest['provider']): Ateli
   if (xai.health().available) return xai;
   const cli = new GrokBuildCliProvider();
   if (cli.health().available) return cli;
+  const resolution = tryResolveGrokModel();
   throw new AtelierProviderUnavailableError(
-    'No Atelier inference provider is configured. Set A11OY_ATELIER_XAI_API_KEY or A11OY_ATELIER_GROK_CLI_PATH.',
+    resolution.ok
+      ? 'No Atelier inference provider is configured. Set A11OY_ATELIER_XAI_API_KEY or A11OY_ATELIER_GROK_CLI_PATH.'
+      : resolution.reason,
   );
 }
 
