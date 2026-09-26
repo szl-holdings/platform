@@ -164,10 +164,12 @@ describe('XaiResponsesProvider', () => {
   });
 
   it('fails closed when the direct API key is missing', async () => {
-    const client = new XaiResponsesProvider('', vi.fn() as unknown as typeof fetch);
+    const fetchMock = vi.fn();
+    const client = new XaiResponsesProvider('', fetchMock as unknown as typeof fetch);
     await expect(
       client.generate(AtelierAskRequestSchema.parse({ prompt: 'hello' })),
     ).rejects.toBeInstanceOf(AtelierProviderUnavailableError);
+    expect(fetchMock).not.toHaveBeenCalled();
   });
 
   it('rejects provider redirects without following them', async () => {
