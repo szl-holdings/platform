@@ -70,7 +70,7 @@ program
   .option('--session <id>', 'continue a tenant-scoped session')
   .option('--idempotency-key <key>', 'reuse a request safely without another provider call')
   .option('--tenant <id>', 'tenant ID', defaultTenant)
-  .option('--reasoning-effort <effort>', 'low, medium, or high', 'medium')
+  .option('--reasoning-effort <effort>', 'low, medium, high, or xhigh', 'medium')
   .option('--json', 'print the complete response receipt')
   .action(async (promptParts: string[], options) => {
     const idempotencyKey = options.idempotencyKey ?? randomUUID();

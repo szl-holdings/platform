@@ -41,5 +41,7 @@ test('exposes explicit resume, new-session, copy, and shared-browser guidance', 
 
 test('labels provider configuration separately from witnessed inference', () => {
   assert.match(source, /item\.available \? 'CONFIGURED' : 'UNAVAILABLE'/);
+  assert.match(source, /\{item\.model\}/);
+  assert.match(source, /<option value="xhigh">Extra high<\/option>/);
   assert.match(source, /health\.evidenceBoundary/);
 });

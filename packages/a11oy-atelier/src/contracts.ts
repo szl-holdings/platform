@@ -23,7 +23,7 @@ export const AtelierAskRequestSchema = z
     idempotencyKey: z.string().trim().min(1).max(128).optional(),
     provider: z.enum(['auto', 'xai', 'grok-build']).default('auto'),
     model: z.string().trim().min(1).max(128).optional(),
-    reasoningEffort: z.enum(['low', 'medium', 'high']).default('medium'),
+    reasoningEffort: z.enum(['low', 'medium', 'high', 'xhigh']).default('medium'),
     maxOutputTokens: z.number().int().min(1).max(16_384).default(2_048),
     capabilities: AtelierCapabilitiesSchema,
   })

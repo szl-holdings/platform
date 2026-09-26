@@ -157,6 +157,7 @@ export class XaiResponsesProvider implements AtelierProvider {
         body: JSON.stringify({
           model,
           input: request.prompt,
+          reasoning: { effort: request.reasoningEffort },
           max_output_tokens: request.maxOutputTokens,
           store: false,
         }),

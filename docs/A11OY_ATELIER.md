@@ -20,7 +20,7 @@ A11oy Atelier is an SZL-owned, evidence-bound intelligence workbench. It borrows
 
 The initial adapters are:
 
-- **xAI Responses API:** deployable, fixed HTTPS endpoint, server-only key, `store: false`, redirect refusal, one attempt, and a 180-second timeout.
+- **xAI Responses API:** `grok-4.6` by default, fixed HTTPS endpoint, server-only key, selected low/medium/high/xhigh effort sent as `reasoning.effort`, `store: false`, redirect refusal, one attempt, and a 180-second timeout. Atelier intentionally defaults to medium effort; xAI's own default is high if the field is omitted. The provider-health label shows the configured model, not a successful inference witness.
 - **Grok Build CLI:** local-development only, explicit signed executable path, shell-free process invocation, one turn, and tools/web search/subagents denied.
 
 If neither adapter is configured, the system fails closed. It never substitutes a mock model answer.

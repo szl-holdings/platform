@@ -248,7 +248,9 @@ function ReceiptRail({ receipt }: { receipt: AtelierReceipt }) {
 export function A11oyAtelier() {
   const [prompt, setPrompt] = useState('');
   const [provider, setProvider] = useState<'auto' | 'xai' | 'grok-build'>('auto');
-  const [reasoningEffort, setReasoningEffort] = useState<'low' | 'medium' | 'high'>('medium');
+  const [reasoningEffort, setReasoningEffort] = useState<'low' | 'medium' | 'high' | 'xhigh'>(
+    'medium',
+  );
   const [sessionId, setSessionId] = useState<string>();
   const [initialPendingRetry] = useState(() => readPendingRetry());
   const [resumeSessionId, setResumeSessionId] = useState(
@@ -473,7 +475,9 @@ export function A11oyAtelier() {
               }}
             >
               <StatusDot available={item.available} />
-              <strong>{item.provider === 'xai' ? 'xAI API' : 'xAI Grok Build CLI'}</strong>
+              <strong>
+                {item.provider === 'xai' ? 'xAI API' : 'xAI Grok Build CLI'} · {item.model}
+              </strong>
               <span style={{ color: palette.muted }}>{item.reason}</span>
               <span style={{ color: item.available ? palette.teal : palette.muted }}>
                 {item.available ? 'CONFIGURED' : 'UNAVAILABLE'} {item.localOnly ? '· LOCAL' : ''}
@@ -737,6 +741,7 @@ export function A11oyAtelier() {
                     <option value="low">Low</option>
                     <option value="medium">Medium</option>
                     <option value="high">High</option>
+                    <option value="xhigh">Extra high</option>
                   </select>
                 </label>
                 <button

@@ -101,7 +101,7 @@ describe('XaiResponsesProvider', () => {
     );
 
     const response = await client.generate(
-      AtelierAskRequestSchema.parse({ prompt: 'hello', provider: 'xai' }),
+      AtelierAskRequestSchema.parse({ prompt: 'hello', provider: 'xai', reasoningEffort: 'xhigh' }),
     );
 
     expect(response.text).toBe('provider-ok');
@@ -112,8 +112,10 @@ describe('XaiResponsesProvider', () => {
     expect(JSON.parse(String(init?.body))).toMatchObject({
       model: 'grok-4.6',
       input: 'hello',
+      reasoning: { effort: 'xhigh' },
       store: false,
     });
+    expect(AtelierAskRequestSchema.parse({ prompt: 'hello' }).reasoningEffort).toBe('medium');
   });
 
   it('fails closed when the direct API key is missing', async () => {
