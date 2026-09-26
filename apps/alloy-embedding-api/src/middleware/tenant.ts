@@ -1,10 +1,12 @@
 import { type TenantId, TenantIdSchema } from '@workspace/aef-contracts';
 import type { NextFunction, Request, Response } from 'express';
 
-declare module 'express' {
-  interface Request {
-    tenantId: TenantId;
-    profileId: string;
+declare global {
+  namespace Express {
+    interface Request {
+      tenantId: TenantId;
+      profileId: string;
+    }
   }
 }
 

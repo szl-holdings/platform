@@ -22,28 +22,36 @@ name: frontier-chain-verify
 # so it acts as a forcing function for the frontier tooling specifically.
 
 on:
-  workflow_dispatch:
+  workflow_dispatch: null
   push:
-    branches: [main]
+    branches:
+    - main
     paths:
-      - 'tools/a11oy_frontier.py'
-      - 'tools/test_a11oy_frontier.py'
-      - 'docs/A11OY_TOKEN_STATE_FRONTIER.md'
-      - '.github/workflows/frontier-chain-verify.yml'
+    - tools/a11oy_frontier.py
+    - tools/test_a11oy_frontier.py
+    - docs/A11OY_TOKEN_STATE_FRONTIER.md
+    - .github/workflows/frontier-chain-verify.yml
   pull_request:
-    branches: [master, main]
+    branches:
+    - master
+    - main
     paths:
-      - 'tools/a11oy_frontier.py'
-      - 'tools/test_a11oy_frontier.py'
-      - 'docs/A11OY_TOKEN_STATE_FRONTIER.md'
-      - '.github/workflows/frontier-chain-verify.yml'
-
+    - tools/a11oy_frontier.py
+    - tools/test_a11oy_frontier.py
+    - docs/A11OY_TOKEN_STATE_FRONTIER.md
+    - .github/workflows/frontier-chain-verify.yml
+  merge_group:
+    types:
+    - checks_requested
+    branches:
+    - master
+    - main
 permissions:
   contents: read
 
 concurrency:
   group: frontier-chain-verify-${{ github.ref }}
-  cancel-in-progress: true
+  cancel-in-progress: ${{ github.event_name != 'merge_group' }}
 
 jobs:
   verify:

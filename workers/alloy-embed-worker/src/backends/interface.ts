@@ -1,3 +1,9 @@
+import type {
+  EmbeddingExecutionReceipt,
+  EmbeddingModality,
+  PromotionState,
+} from '@workspace/aef-contracts';
+
 export interface RawEmbedRequest {
   texts: string[];
   model: string;
@@ -11,6 +17,7 @@ export interface RawEmbedResponse {
   dimensions: number;
   tokenCounts?: number[];
   backendLatencyMs?: number;
+  execution?: EmbeddingExecutionReceipt;
 }
 
 export type PoolingStrategy = 'cls' | 'mean' | 'last_token';
@@ -25,6 +32,10 @@ export interface EmbeddingBackendDescriptor {
   maxTokens: number;
   defaultPooling: PoolingStrategy;
   defaultTruncation: TruncationPolicy;
+  modelRevision?: string;
+  artifactSetDigest?: string;
+  promotionState?: PromotionState;
+  supportedModalities?: EmbeddingModality[];
 }
 
 export interface EmbeddingBackend {
