@@ -81,7 +81,7 @@ export class EvidenceLedger {
   private readonly entries: LedgerEntry[] = [];
 
   /**
-   * Append a new immutable ledger entry. Also fans the entry out to the
+   * Append a new tamper-evident ledger entry (append-only; never mutated in place). Also fans the entry out to the
    * configured durable backend; persistence failures are surfaced via the
    * onPersistFailure hook (see setLedgerPersistFailureHandler).
    */
