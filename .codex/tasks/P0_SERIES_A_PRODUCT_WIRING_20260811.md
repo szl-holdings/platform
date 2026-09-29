@@ -157,3 +157,22 @@ and brand validation. Full command/attempt/proof/publication receipts are in
 `audit/P0_SERIES_A_PRODUCT_UPGRADE_20260925.md`. Evidence-only successors keep
 the captured source identity. DEMO/provider/aggregate/hosted/deployment boundaries
 remain explicit; no production readiness or PR reopening is inferred.
+
+## 2026-09-29 durable branch publication and source alignment
+
+Normal push completed to the existing branch at
+`4d44542e967eb341b05418f8a0bc550b882bf1dc`, tree
+`223a912e6db7149a48f4f1671db877b61d1688ef`; remote readback matched and GitHub
+verified the signature. Protected base `098d3d7705a4e410490502088b2693747745f613`
+was integrated; a later main advance was observed, not called qualified.
+Fresh production build, 23 source contracts, 37 runtime tests, 190 shared-contract
+tests, four package typechecks, 26 docs checks and 17 scoped Python tests passed.
+Current browser qualification is blocked by missing Chromium and ENOSPC. Prior
+75-image/155-state evidence stays bound to September 25 source, not relabeled.
+
+The live Python product belongs to szl-holdings/a11oy, with its own canonical HF
+publisher; a11oy.net is a static proof site. Signed live execution, provider
+receipt parity and artifact promotion are not established by this Platform push.
+See `audit/P0_SERIES_A_SOURCE_ALIGNMENT_20260929.md` for exact source, commands,
+provider observations, rejected attempts and remaining gates. No new PR, protected
+merge, deployment, force-push, provider write or gate bypass occurred.

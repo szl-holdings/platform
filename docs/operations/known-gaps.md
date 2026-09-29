@@ -612,6 +612,20 @@ Operational gaps, process health, test coverage, observability, team ownership.
 
 ## Incident Log
 
+- **2026-09-29 (P0 publication and operational boundary):** The complete signed
+  implementation and September 25 proof were normally pushed to the existing
+  task branch at `4d44542e967eb341b05418f8a0bc550b882bf1dc`; remote identity and
+  GitHub signature verified. Fresh production build and scoped JS/TS/Python
+  checks passed. Current browser qualification is blocked by missing Chromium
+  and disk exhaustion; earlier screenshots are not relabeled. PR #601 remains
+  closed, and the published head has no Actions runs in the branch/commit query.
+  The documented lib/a11oy-fabric-py path is absent; actual Python checks cover
+  readiness, substrate workers, Live-Wires and Wire-D. The independently served
+  A11oy product still reports absent signer/unminted receipt; a11oy.net remains
+  static. No provider or production gap is closed by branch publication.
+  Exact commands, source mappings and limits:
+  `audit/P0_SERIES_A_SOURCE_ALIGNMENT_20260929.md`.
+
 - **2026-09-25 (P0 current-source completion):** The protected-base successor
   `c62cac56e4ea84ccff641e0cc119bfe67278e577` passed 75 source-bound captures and
   155 browser states after correcting capture's lazy-route readiness race.

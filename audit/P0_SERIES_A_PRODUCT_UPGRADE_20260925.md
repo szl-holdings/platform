@@ -119,9 +119,11 @@ node scripts/qa/capture-series-a-product-matrix-proof.mjs
 
 ## Publication receipt and limits
 
-Normal branch publication and exact remote-SHA readback are recorded in a subsequent
-receipt-only update. Local commit creation is not publication. A fallback binary-safe
-patch is required if normal push is unavailable; no force-push or replacement PR is authorized.
+Normal branch publication succeeded on September 29 at
+`4d44542e967eb341b05418f8a0bc550b882bf1dc`; remote SHA/tree and GitHub signature
+were verified. See [publication and alignment receipt](P0_SERIES_A_SOURCE_ALIGNMENT_20260929.md)
+for integrated protected source, fresh scoped tests and the blocked current-browser
+qualification. This packet's September 25 screenshots retain their original source.
 
 The operational registry stays frozen and empty; seeded Workcells remain DEMO.
 Source/build/browser success does not establish authenticated external operation,
