@@ -96,7 +96,7 @@ Primary PostgreSQL connection string.
 
 Atelier does **not** emit mock model responses. If neither the direct API key nor a usable local CLI path is configured, provider selection fails closed. The local CLI adapter disables tools, web search, and subagents for the v1 workbench boundary.
 
-The Grok model pin lives in code (`DEFAULT_GROK_MODEL` in `packages/a11oy-atelier/src/provider.ts`); changing it or `ALLOWED_GROK_MODELS` is a reviewed model change. `SZL_GROK_MODEL` exists for a no-redeploy rollback to the allowlisted rollback target, not for selecting arbitrary models. Known limitation: a caller-supplied `model` field on an ask request still takes precedence over the server-side pin and is not allowlisted yet.
+The Grok model pin lives in code (`DEFAULT_GROK_MODEL` in `packages/a11oy-atelier/src/provider.ts`); changing it or `ALLOWED_GROK_MODELS` is a reviewed model change. `SZL_GROK_MODEL` exists for a no-redeploy rollback to the allowlisted rollback target, not for selecting arbitrary models. A caller-supplied `model` field on an ask request must also be in `ALLOWED_GROK_MODELS`: an unlisted value fails closed (`ATELIER_PROVIDER_UNAVAILABLE`, HTTP 503, no provider call, value not echoed), and a rejected env override keeps the provider unavailable even when the caller names an allowlisted model. Known limitation: an allowlisted caller `model` still takes precedence over the server-side pin, so during a rollback a caller can still choose either allowlisted id.
 
 ## Server
 

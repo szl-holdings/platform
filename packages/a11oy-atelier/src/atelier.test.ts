@@ -10,7 +10,9 @@ import {
   getAtelierProviderHealth,
   resolveGrokModel,
   resolveProvider,
+  resolveRequestedGrokModel,
   tryResolveGrokModel,
+  tryResolveRequestedGrokModel,
   XaiResponsesProvider,
 } from './provider.js';
 import { AtelierPolicyDeniedError, askAtelier } from './service.js';
@@ -319,5 +321,120 @@ describe('Grok model pin', () => {
     await expect(
       cli.generate(AtelierAskRequestSchema.parse({ prompt: 'hello', provider: 'grok-build' })),
     ).rejects.toBeInstanceOf(AtelierProviderUnavailableError);
+  });
+});
+
+describe('caller-supplied model allowlist', () => {
+  it.each([...ALLOWED_GROK_MODELS])('honours an allowlisted caller model %j', async (model) => {
+    const fetchMock = okFetch();
+    const client = new XaiResponsesProvider(
+      'secret-for-test',
+      fetchMock as unknown as typeof fetch,
+    );
+    const response = await client.generate(
+      AtelierAskRequestSchema.parse({ prompt: 'hello', provider: 'xai', model }),
+    );
+    expect(fetchMock).toHaveBeenCalledTimes(1);
+    expect(sentBody(fetchMock)).toMatchObject({ model });
+    expect(response.model).toBe(model);
+  });
+
+  it('trims an allowlisted caller model through the request schema', async () => {
+    const fetchMock = okFetch();
+    const client = new XaiResponsesProvider(
+      'secret-for-test',
+      fetchMock as unknown as typeof fetch,
+    );
+    await client.generate(AtelierAskRequestSchema.parse({ prompt: 'hello', model: ' grok-4.6 ' }));
+    expect(sentBody(fetchMock)).toMatchObject({ model: 'grok-4.6' });
+  });
+
+  it.each([
+    'grok-4.5',
+    'gpt-4o',
+    'grok-latest',
+    'grok-4.7-latest',
+    'GROK-4.7',
+    'grok 4.7',
+  ])('fails closed with zero fetch calls when the caller model is %j', async (model) => {
+    const fetchMock = vi.fn();
+    const client = new XaiResponsesProvider(
+      'secret-for-test',
+      fetchMock as unknown as typeof fetch,
+    );
+    const failure = client.generate(AtelierAskRequestSchema.parse({ prompt: 'hello', model }));
+    await expect(failure).rejects.toBeInstanceOf(AtelierProviderUnavailableError);
+    await expect(failure).rejects.toThrow(/requested model is not an allowlisted Grok model id/);
+    expect(fetchMock).not.toHaveBeenCalled();
+  });
+
+  it('does not echo the rejected caller model', () => {
+    const resolution = tryResolveRequestedGrokModel('gpt-4o');
+    expect(resolution.ok).toBe(false);
+    if (!resolution.ok) expect(resolution.reason).not.toContain('gpt-4o');
+    expect(() => resolveRequestedGrokModel('gpt-4o')).toThrow(AtelierProviderUnavailableError);
+  });
+
+  it('uses the resolved pin when no caller model is supplied', async () => {
+    expect(tryResolveRequestedGrokModel(undefined)).toEqual({
+      ok: true,
+      model: 'grok-4.7',
+      source: 'default',
+    });
+    vi.stubEnv('SZL_GROK_MODEL', 'grok-4.6');
+    const fetchMock = okFetch();
+    const client = new XaiResponsesProvider(
+      'secret-for-test',
+      fetchMock as unknown as typeof fetch,
+    );
+    const response = await client.generate(AtelierAskRequestSchema.parse({ prompt: 'hello' }));
+    expect(sentBody(fetchMock)).toMatchObject({ model: 'grok-4.6' });
+    expect(response.model).toBe('grok-4.6');
+  });
+
+  it('stays fail-closed on a rejected env override even with an allowlisted caller model', async () => {
+    vi.stubEnv('SZL_GROK_MODEL', 'grok-4.5');
+    const fetchMock = vi.fn();
+    const client = new XaiResponsesProvider(
+      'secret-for-test',
+      fetchMock as unknown as typeof fetch,
+    );
+    await expect(
+      client.generate(AtelierAskRequestSchema.parse({ prompt: 'hello', model: 'grok-4.7' })),
+    ).rejects.toThrow(/SZL_GROK_MODEL is not an allowlisted Grok model id/);
+    expect(fetchMock).not.toHaveBeenCalled();
+    expect(client.health('grok-4.7')).toMatchObject({
+      available: false,
+      evidenceState: 'UNAVAILABLE',
+    });
+  });
+
+  it('reports UNAVAILABLE from health() for an unlisted requested model without echoing it', () => {
+    const client = new XaiResponsesProvider('secret-for-test', vi.fn() as unknown as typeof fetch);
+    const health = client.health('gpt-4o');
+    expect(health).toMatchObject({
+      provider: 'xai',
+      configured: true,
+      available: false,
+      evidenceState: 'UNAVAILABLE',
+    });
+    expect(health.model).not.toBe('gpt-4o');
+    expect(health.reason).not.toContain('gpt-4o');
+    expect(client.health('grok-4.6')).toMatchObject({ model: 'grok-4.6', available: true });
+  });
+
+  it('applies the caller allowlist to the Grok Build CLI adapter before exec', async () => {
+    // process.execPath is only an existing file for the health check; an unlisted
+    // caller model must fail before anything is executed.
+    const cli = new GrokBuildCliProvider(process.execPath);
+    expect(cli.health('grok-4.6')).toMatchObject({ model: 'grok-4.6', available: true });
+    for (const model of ['grok-4.5', 'gpt-4o']) {
+      expect(cli.health(model)).toMatchObject({ available: false, evidenceState: 'UNAVAILABLE' });
+      await expect(
+        cli.generate(
+          AtelierAskRequestSchema.parse({ prompt: 'hello', provider: 'grok-build', model }),
+        ),
+      ).rejects.toBeInstanceOf(AtelierProviderUnavailableError);
+    }
   });
 });
