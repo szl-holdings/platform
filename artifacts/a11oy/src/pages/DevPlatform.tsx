@@ -1799,7 +1799,7 @@ const GLASSWING_SECURITY = {
     {
       name: 'Supply Chain Verification',
       desc: 'Every model, skill, MCP server, and connector is signed and verified. SBOM for all dependencies. Reproducible builds. Governed update pipeline.',
-      metric: '100% verified',
+      metric: 'verified builds (scoped)',
       status: 'Enforced',
     },
     {

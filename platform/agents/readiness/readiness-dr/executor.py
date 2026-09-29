@@ -104,6 +104,8 @@ def main() -> int:
     out = [dr_flagship(fl) for fl in khipu.FLAGSHIPS]
     payload = {"flagships": out}
     khipu.emit(AGENT, payload)
+    # A dump that was read but not uploaded is not a backup: fail closed too.
+    khipu.require_published([o["upload"] for o in out if o.get("upload")], what="DR dump")
     return 0
 
 

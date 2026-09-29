@@ -60,8 +60,8 @@ mean.
 | DB schema files | 197 | Tracked `lib/db/src/schema/**/*.ts` files |
 | DB `pgTable` call sites | 1,067 | Static source call sites; not provisioned-table count |
 | DB migrations (SQL files) | 149 | Tracked `lib/db/drizzle/*.sql` files |
-| API route source files | 44 | Non-test files with detected Express route declarations across current runtime roots |
-| API handler declarations | 311 | Static non-test method declarations on `app`, `router`, and named Express Router receivers |
+| API route source files | 45 | Non-test files with detected Express route declarations across current runtime roots |
+| API handler declarations | 314 | Static non-test method declarations on `app`, `router`, and named Express Router receivers |
 | CI workflows | 46 | Permanent workflows including exact-head screenshot evidence, hosted observability proof, public npm release paths, and the frontier receipt-chain gate; excludes the retired DCO compatibility workflow |
 | Environment variables (in `.env.example`) | 238 | Lines matching `^[A-Z_]+=` |
 
