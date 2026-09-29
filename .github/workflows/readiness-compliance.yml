@@ -6,13 +6,17 @@ name: READINESS-COMPLIANCE
 
 on:
   schedule:
-    - cron: "0 4 * * *"   # daily (UTC)
+    - cron: "10 4 * * *"   # daily (UTC)
   workflow_dispatch: {}
 
 permissions: {}
 
+# All eight readiness agents append to one Hub dataset, so they share one
+# per-asset lock (HF plan D3). GitHub keeps one running and one pending run per
+# group and cancels a pending run only when a third one queues, so the
+# schedules are staggered at least 10 minutes apart (no two agents share a slot).
 concurrency:
-  group: readiness-compliance
+  group: hf-write/dataset/SZLHOLDINGS/readiness-runs
   cancel-in-progress: false
 
 jobs:
@@ -39,7 +43,7 @@ jobs:
           python-version: "3.12"
 
       - name: Install deps
-        run: pip install --no-cache-dir huggingface_hub pynacl
+        run: pip install --no-cache-dir huggingface_hub==2.0.0 pynacl
 
       - name: Run READINESS-COMPLIANCE
         env:

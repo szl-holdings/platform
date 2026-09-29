@@ -116,8 +116,10 @@ def publish_to_hf(agent: str, envelope: dict, dataset: str = HF_DATASET) -> dict
     """Append the signed receipt to the runs dataset.
 
     Path: receipts/<agent>/<UTC-date>/<UTC-timestamp>.json
-    Uses HF_TOKEN. Returns a small status dict. Never raises on auth failure;
-    instead records the failure honestly so the dashboard shows the gap.
+    Uses HF_TOKEN. Returns a small status dict and never raises itself; the
+    caller (emit -> require_published) turns a failed publish into a failed
+    run, because the dashboard and readiness-audit-rift only see receipts that
+    reached the dataset.
     """
     token = os.environ.get("HF_TOKEN")
     date = envelope_emitted_date(envelope)
@@ -146,11 +148,37 @@ def envelope_emitted_date(envelope: dict) -> str:
     return json.loads(raw)["emitted_at_utc"][:10]
 
 
+def require_published(results: list[dict], what: str) -> None:
+    """Fail the run when a Hub write this run owed did not land.
+
+    Anti-fake-green: a receipt (or DR dump) that never reaches
+    SZLHOLDINGS/readiness-runs is invisible to dashboard.html and to
+    readiness-audit-rift, so a green workflow run without it would claim
+    evidence that does not exist. Inside GitHub Actions every missing write is
+    a workflow error and exits 1 (after the receipt was already printed).
+    Outside Actions (local runs, usually without HF_TOKEN) it only warns.
+    """
+    failed = [r for r in results if not (r.get("published") or r.get("uploaded"))]
+    if not failed:
+        return
+    in_actions = os.environ.get("GITHUB_ACTIONS") == "true"
+    prefix = "::error title=readiness publish failed::" if in_actions else "WARNING: "
+    for result in failed:
+        print(
+            f"{prefix}{what} not published to {HF_DATASET} "
+            f"({result.get('reason', 'unknown reason')}; path {result.get('path', '?')})"
+        )
+    sys.stdout.flush()
+    if in_actions:
+        raise SystemExit(1)
+
+
 def emit(agent: str, payload: dict) -> dict:
-    """Sign + publish + print. Standard tail call for every executor."""
+    """Sign + publish + print, then fail closed if the receipt did not land."""
     env = sign_khipu_receipt(agent, payload)
     pub = publish_to_hf(agent, env)
     out = {"receipt": env, "publish": pub}
     json.dump(out, sys.stdout, indent=2)
     sys.stdout.write("\n")
+    require_published([pub], what=f"{agent} receipt")
     return out
