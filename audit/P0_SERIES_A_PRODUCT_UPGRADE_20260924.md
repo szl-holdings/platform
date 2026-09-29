@@ -1,5 +1,9 @@
 # P0 Series A product upgrade — 2026-09-24 proof packet
 
+September 25 completion and current-source publication are recorded in
+[the successor packet](P0_SERIES_A_PRODUCT_UPGRADE_20260925.md). The source
+identity and receipts below remain September 24 evidence, not relabeled proof.
+
 ## Disposition and source
 
 Implementation and local product proof are complete. Normal branch publication

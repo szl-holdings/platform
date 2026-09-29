@@ -141,3 +141,19 @@ aggregate/strict-claims/provider boundaries are recorded in
 `audit/P0_SERIES_A_PRODUCT_UPGRADE_20260924.md` and `audit/screenshot-catalog.md`.
 The old unreproducible `8243029` is BLOCKED/SUPERSEDED, not silently recovered.
 This dated continuation does not replace the historical PR #668 disposition.
+
+## 2026-09-25 current-source completion
+
+Protected source `9e58f052a7fba212bc74dcc4fd92adc412ffa865` was merged normally;
+current source `c62cac56e4ea84ccff641e0cc119bfe67278e577`, tree
+`6d85c83195d3dd529df9e03a6360bc232cec60b7`, passed the complete owned build,
+155 interaction states and 75 screenshots with zero failures (wrapper exit 0).
+The capture verifier now awaits the exact lazy-route identity, closing the
+boot-marker race without weakening content, link or layout gates.
+
+Fresh qualification also passed 23 source/helper tests, 9 layout regressions,
+37 runtime tests, 190 shared-contract tests, four scoped typechecks, docs claims
+and brand validation. Full command/attempt/proof/publication receipts are in
+`audit/P0_SERIES_A_PRODUCT_UPGRADE_20260925.md`. Evidence-only successors keep
+the captured source identity. DEMO/provider/aggregate/hosted/deployment boundaries
+remain explicit; no production readiness or PR reopening is inferred.

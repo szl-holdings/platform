@@ -612,6 +612,14 @@ Operational gaps, process health, test coverage, observability, team ownership.
 
 ## Incident Log
 
+- **2026-09-25 (P0 current-source completion):** The protected-base successor
+  `c62cac56e4ea84ccff641e0cc119bfe67278e577` passed 75 source-bound captures and
+  155 browser states after correcting capture's lazy-route readiness race.
+  Fresh runtime 37/37, shared contracts 190/190, source/helper 23/23, browser
+  layout 9/9 and four scoped typechecks passed. Evidence is local/non-authoritative;
+  strict claims still lacks Vessels/AIS authority, and aggregate/hosted/provider/
+  deployment gates remain open. See `audit/P0_SERIES_A_PRODUCT_UPGRADE_20260925.md`.
+
 - **2026-09-24 (P0 product upgrade):** Source `6ca620d578c39a9b97a47259445782bf6b58f159`
   closes the scoped responsive clipping, mobile navigation and replay pause/resume
   gaps with 155 local interaction states and 75 source-bound screenshots. This is
