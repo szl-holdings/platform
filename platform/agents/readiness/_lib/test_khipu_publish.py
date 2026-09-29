@@ -23,8 +23,8 @@ import re
 import sys
 import types
 import unittest
+import unittest.mock
 from pathlib import Path
-from unittest import mock
 
 LIB = Path(__file__).resolve().parent
 READINESS = LIB.parent
@@ -61,13 +61,13 @@ class EmitFailsClosedTest(unittest.TestCase):
     def setUp(self) -> None:
         _FakeHfApi.uploads = []
         _FakeHfApi.error = None
-        patcher = mock.patch.dict(sys.modules, {"huggingface_hub": _fake_hub()})
+        patcher = unittest.mock.patch.dict(sys.modules, {"huggingface_hub": _fake_hub()})
         patcher.start()
         self.addCleanup(patcher.stop)
 
     def _emit(self, env: dict) -> tuple[str, dict | None, int | None]:
         out = io.StringIO()
-        with mock.patch.dict(os.environ, env, clear=True), contextlib.redirect_stdout(out):
+        with unittest.mock.patch.dict(os.environ, env, clear=True), contextlib.redirect_stdout(out):
             try:
                 result = khipu.emit("readiness-test", {"ok": True})
                 return out.getvalue(), result, None
@@ -110,7 +110,7 @@ class EmitFailsClosedTest(unittest.TestCase):
 
     def test_unuploaded_dr_dump_fails_the_run_in_actions(self) -> None:
         out = io.StringIO()
-        with mock.patch.dict(os.environ, {"GITHUB_ACTIONS": "true"}, clear=True), \
+        with unittest.mock.patch.dict(os.environ, {"GITHUB_ACTIONS": "true"}, clear=True), \
                 contextlib.redirect_stdout(out):
             with self.assertRaises(SystemExit) as caught:
                 khipu.require_published(
@@ -119,7 +119,7 @@ class EmitFailsClosedTest(unittest.TestCase):
                 )
         self.assertEqual(caught.exception.code, 1)
         self.assertIn("DR dump not published", out.getvalue())
-        with mock.patch.dict(os.environ, {"GITHUB_ACTIONS": "true"}, clear=True):
+        with unittest.mock.patch.dict(os.environ, {"GITHUB_ACTIONS": "true"}, clear=True):
             khipu.require_published([{"uploaded": True}, {"published": True}], what="x")
 
 
