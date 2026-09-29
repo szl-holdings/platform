@@ -105,7 +105,7 @@ overrides:
   uuid: ^14.0.0
   qs: 6.16.0
   ws: ^8.20.1
-  hono: 4.12.34
+  'hono': '^4.13.5'
   '@hono/node-server': 2.1.1
   browserslist: 4.28.7
   body-parser: 2.3.0
@@ -123,7 +123,7 @@ overrides:
   nanoid@<4: 3.3.18
   'nanoid@>=4 <5.1.16': 5.1.16
   ip-address: 10.3.1
-  fast-uri: 3.1.6
+  'fast-uri': '^3.1.7'
   linkify-it: 5.0.2
   sharp: 0.35.4
   nodemailer: 9.1.1
@@ -206,3 +206,5 @@ overrides:
   rollup>@rollup/rollup-win32-arm64-msvc: '-'
   rollup>@rollup/rollup-win32-ia32-msvc: '-'
   rollup>@rollup/rollup-win32-x64-gnu: '-'
+  'vitest': '^4.1.11'
+  '@vitest/mocker': '^4.1.11'
