@@ -111,11 +111,11 @@ function extractResponseText(payload: unknown): string {
     const record = asRecord(item);
     // Grok 4.7 always returns encrypted reasoning items. The v1 text capsule
     // neither retains nor exposes them; only final assistant text is admitted.
-    if (!record || record.type !== 'message' || record.role !== 'assistant') continue;
+    if (record?.type !== 'message' || record.role !== 'assistant') continue;
     const content = Array.isArray(record.content) ? record.content : [];
     for (const part of content) {
       const contentRecord = asRecord(part);
-      if (!contentRecord || contentRecord.type !== 'output_text') continue;
+      if (contentRecord?.type !== 'output_text') continue;
       if (typeof contentRecord.text === 'string') chunks.push(contentRecord.text);
       const nested = asRecord(contentRecord.text);
       if (nested && typeof nested.value === 'string') chunks.push(nested.value);
