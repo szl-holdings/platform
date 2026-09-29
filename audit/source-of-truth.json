@@ -1,10 +1,10 @@
 {
   "meta": {
-    "generated": "2026-09-26",
+    "generated": "2026-09-29",
     "track": "FRONTIER V2 — Wave 1 Truth Lock",
-    "version": "2.1.6",
-    "measurement_base_commit": "d46e9a3866d9837100e0d34f48f25de6fc08332b",
-    "note": "Canonical reproducible counts for the integrated Turn Capsule and protected-main source tree. The listed measurement_base_commit is the inspected protected-main baseline after the legacy DCO compatibility workflow was retired; scripts/audit/validate-source-of-truth.js recomputes current-tree metrics from the checked-out commit. Runtime and database values not refreshed on 2026-09-26 remain historical snapshots, not current public claims."
+    "version": "2.1.7",
+    "measurement_base_commit": "f3e0f3ffe7614956d626b40903f50b35080c1614",
+    "note": "Canonical reproducible counts for the integrated Turn Capsule, Grok 4.7 configuration, and protected-main source tree. The listed measurement_base_commit is the inspected protected-main baseline; scripts/audit/validate-source-of-truth.js recomputes current-tree metrics from the checked-out commit. Runtime and database values not refreshed on 2026-09-29 remain historical snapshots, not current public claims."
   },
   "artifacts": {
     "registered": {
@@ -134,9 +134,9 @@
   },
   "env": {
     "declared_vars": {
-      "count": 244,
+      "count": 245,
       "command": "Count .env.example lines matching ^[A-Z_]+=",
-      "computed": "2026-09-24"
+      "computed": "2026-09-29"
     }
   },
   "mobile": {

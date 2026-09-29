@@ -20,10 +20,14 @@ A11oy Atelier is an SZL-owned, evidence-bound intelligence workbench. It borrows
 
 The initial adapters are:
 
-- **xAI Responses API:** `grok-4.6` by default, fixed HTTPS endpoint, server-only key, selected low/medium/high/xhigh effort sent as `reasoning.effort`, `store: false`, redirect refusal, one attempt, and a 180-second timeout. Atelier intentionally defaults to medium effort; xAI's own default is high if the field is omitted. The provider-health label shows the configured model, not a successful inference witness.
+- **xAI Responses API:** `grok-4.7` by default, fixed HTTPS endpoint, server-only key, selected low/medium/high/xhigh effort sent as `reasoning.effort`, `store: false`, redirect refusal, one attempt, and a 180-second timeout. Atelier intentionally defaults to medium effort; xAI's own default is high if the field is omitted. The provider-health label shows the configured model, not a successful inference witness.
 - **Grok Build CLI:** local-development only, explicit signed executable path, shell-free process invocation, one turn, and tools/web search/subagents denied.
 
 If neither adapter is configured, the system fails closed. It never substitutes a mock model answer.
+
+`SZL_GROK_MODEL` selects the reviewed default or the explicit `grok-4.6` rollback. The legacy `A11OY_ATELIER_MODEL` is read only when that key is blank or unset. Caller-supplied model choices pass the same allowlist before API fetch or CLI execution. See the official [Grok 4.7 API contract](https://docs.x.ai/developers/grok-4-7) and [reasoning contract](https://docs.x.ai/developers/model-capabilities/text/reasoning).
+
+Grok 4.7 Responses return encrypted reasoning items by default. Turn Capsule v1 keeps only final assistant text and reported token usage; it discards provider reasoning ciphertext and does not replay it in a later request. Its multi-turn context is the bounded text history described below. Native provider-reasoning continuity would require a separately reviewed storage and replay contract.
 
 ## Governing architecture
 

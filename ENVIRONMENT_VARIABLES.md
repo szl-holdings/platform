@@ -88,7 +88,8 @@ Primary PostgreSQL connection string.
 |----------|----------------|---------|
 | `A11OY_ATELIER_XAI_API_KEY` | **optional, server-only** | Enables the fixed-endpoint xAI Responses API adapter. Never expose through a `VITE_` variable. |
 | `A11OY_ATELIER_GROK_CLI_PATH` | **optional, local-only** | Absolute path to a locally installed, signed Grok Build executable. Do not configure in deployed containers. |
-| `A11OY_ATELIER_MODEL` | **optional** | Provider model identifier; defaults to `grok-4.6`. |
+| `SZL_GROK_MODEL` | **optional, server-only** | Blank or unset uses the reviewed `grok-4.7` default. Only `grok-4.7` and the explicit `grok-4.6` rollback are accepted; other values fail before a provider call. |
+| `A11OY_ATELIER_MODEL` | **optional, deprecated** | Legacy fallback used only when `SZL_GROK_MODEL` is blank or unset. The same two-model allowlist applies. |
 | `A11OY_ATELIER_API_BASE_URL` | **optional, CLI-only** | Base URL used by `a11oy-atelier`; defaults to `http://127.0.0.1:8080`. |
 | `A11OY_ATELIER_TENANT_ID` | **optional, CLI-only** | Tenant header used by the local CLI; defaults to `default`. |
 | `VITE_A11OY_ATELIER_TENANT_ID` | **optional, non-secret** | Development tenant selector for the browser. Production identity remains authoritative. |
@@ -97,6 +98,8 @@ Primary PostgreSQL connection string.
 | `A11OY_ATELIER_CONTINUITY_REQUIRED` | **optional, server-only** | Accepts `true`/`false`, `yes`/`no`, or `1`/`0`; defaults to false outside production. NODE_ENV=production always requires durable continuity; a false flag cannot disable that boundary. |
 
 Atelier does **not** emit mock model responses. If neither the direct API key nor a usable local CLI path is configured, provider selection fails closed. The local CLI adapter disables tools, web search, and subagents for the v1 workbench boundary.
+
+An explicit ask-request `model` takes precedence over the environment but must pass the same allowlist. A rejected value is not echoed in health or errors. The model default is shared by the API and local CLI adapters; health reports configuration, not successful inference.
 
 Outside production, without both continuity variables and unless durable continuity is explicitly required, Atelier uses an in-process, non-durable Turn Capsule store. Production, explicit-required mode, and invalid partial configuration fail only the Atelier surface closed with sanitized unavailable health; unrelated runtime routes remain mountable. With both variables, the encrypted local adapter provides authenticated, restart-safe session continuity for a single runtime process on one host. It enforces expiry and orphan cleanup on startup, continuity operations, and a 15-minute running-service sweep; physical files cannot self-delete while the process or host is off. This is not a distributed or multi-host persistence claim: there is no distributed lock or shared database. The EvidenceLedger append remains process-local and is not made durable by the Turn Capsule store.
 

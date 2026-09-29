@@ -8,11 +8,11 @@
 > source-tree and locked-kernel measurements. A value without reproducible
 > evidence is **UNVERIFIED**, not estimated.
 
-**Registry version:** 2.1.6
+**Registry version:** 2.1.7
 
-**Integration baseline inspected:** `platform@d46e9a3866d9837100e0d34f48f25de6fc08332b`
+**Integration baseline inspected:** `platform@f3e0f3ffe7614956d626b40903f50b35080c1614`
 
-**Measured:** 2026-09-26
+**Measured:** 2026-09-29
 
 **Validator:** `node scripts/audit/validate-source-of-truth.js`
 
@@ -41,7 +41,7 @@ from whichever commit is checked out.
 | API route source files | **45** | Non-test files under `apps/`, `services/`, and `artifacts/api-server/` containing a detected Express route declaration |
 | API handler declarations | **315** | Static non-test HTTP method declarations on `app`, `router`, and named Express Router receivers in the current runtime roots |
 | CI workflows | **46** | Permanent tracked `.github/workflows/*.yml` and `*.yaml`, including exact-head screenshot evidence, hosted observability proof, public npm release paths, and the frontier receipt-chain gate; excludes the retired DCO compatibility workflow |
-| Environment variables (in `.env.example`) | **244** | Lines matching `^[A-Z_]+=` |
+| Environment variables (in `.env.example`) | **245** | Lines matching `^[A-Z_]+=` |
 
 These are source-tree measurements. They do not by themselves prove that a
 service is deployed, reachable, authenticated correctly, or returning HTTP 200.

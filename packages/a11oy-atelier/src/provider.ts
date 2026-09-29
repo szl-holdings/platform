@@ -11,10 +11,46 @@ import type {
 
 const execFileAsync = promisify(execFile);
 const XAI_RESPONSES_URL = 'https://api.x.ai/v1/responses';
-const DEFAULT_MODEL = 'grok-4.6';
+export const DEFAULT_GROK_MODEL = 'grok-4.7';
+export const ALLOWED_GROK_MODELS: readonly string[] = Object.freeze([
+  DEFAULT_GROK_MODEL,
+  'grok-4.6',
+]);
 
 export class AtelierProviderUnavailableError extends Error {
   readonly code = 'ATELIER_PROVIDER_UNAVAILABLE';
+}
+
+type GrokModelResolution = { ok: true; model: string } | { ok: false; reason: string };
+
+/** Resolve an explicit request, estate override, legacy override, or reviewed default. */
+export function tryResolveGrokModel(
+  requestedModel?: string,
+  env: NodeJS.ProcessEnv = process.env,
+): GrokModelResolution {
+  const candidates: readonly [string, string | undefined][] =
+    requestedModel !== undefined
+      ? [['request.model', requestedModel]]
+      : [
+          ['SZL_GROK_MODEL', env.SZL_GROK_MODEL],
+          ['A11OY_ATELIER_MODEL', env.A11OY_ATELIER_MODEL],
+        ];
+  for (const [source, raw] of candidates) {
+    const model = raw?.trim();
+    if (!model && source !== 'request.model') continue;
+    if (model && ALLOWED_GROK_MODELS.includes(model)) return { ok: true, model };
+    return {
+      ok: false,
+      reason: `${source} is not an allowlisted Grok model id; use grok-4.7 or the grok-4.6 rollback. No provider call was made.`,
+    };
+  }
+  return { ok: true, model: DEFAULT_GROK_MODEL };
+}
+
+export function resolveGrokModel(requestedModel?: string): string {
+  const resolution = tryResolveGrokModel(requestedModel);
+  if (!resolution.ok) throw new AtelierProviderUnavailableError(resolution.reason);
+  return resolution.model;
 }
 
 export class AtelierProviderResponseError extends Error {
@@ -73,12 +109,13 @@ function extractResponseText(payload: unknown): string {
   const chunks: string[] = [];
   for (const item of output) {
     const record = asRecord(item);
-    if (!record) continue;
-    if (typeof record.text === 'string') chunks.push(record.text);
+    // Grok 4.7 always returns encrypted reasoning items. The v1 text capsule
+    // neither retains nor exposes them; only final assistant text is admitted.
+    if (!record || record.type !== 'message' || record.role !== 'assistant') continue;
     const content = Array.isArray(record.content) ? record.content : [];
     for (const part of content) {
       const contentRecord = asRecord(part);
-      if (!contentRecord) continue;
+      if (!contentRecord || contentRecord.type !== 'output_text') continue;
       if (typeof contentRecord.text === 'string') chunks.push(contentRecord.text);
       const nested = asRecord(contentRecord.text);
       if (nested && typeof nested.value === 'string') chunks.push(nested.value);
@@ -121,8 +158,21 @@ export class XaiResponsesProvider implements AtelierProvider {
     private readonly fetchImpl: typeof fetch = fetch,
   ) {}
 
-  health(model = process.env.A11OY_ATELIER_MODEL ?? DEFAULT_MODEL): AtelierProviderHealth {
+  health(requestedModel?: string): AtelierProviderHealth {
     const configured = this.apiKey.trim().length > 0;
+    const resolution = tryResolveGrokModel(requestedModel);
+    if (!resolution.ok) {
+      return {
+        provider: this.id,
+        model: 'UNAVAILABLE',
+        configured,
+        available: false,
+        localOnly: false,
+        evidenceState: 'UNAVAILABLE',
+        reason: resolution.reason,
+      };
+    }
+    const model = resolution.model;
     return {
       provider: this.id,
       model,
@@ -140,7 +190,7 @@ export class XaiResponsesProvider implements AtelierProvider {
     if (!this.apiKey.trim()) {
       throw new AtelierProviderUnavailableError('A11OY_ATELIER_XAI_API_KEY is not configured.');
     }
-    const model = request.model ?? process.env.A11OY_ATELIER_MODEL ?? DEFAULT_MODEL;
+    const model = resolveGrokModel(request.model);
     const controller = new AbortController();
     const timeout = setTimeout(() => controller.abort(), 180_000);
     try {
@@ -253,8 +303,21 @@ export class GrokBuildCliProvider implements AtelierProvider {
     private readonly cwd = process.cwd(),
   ) {}
 
-  health(model = process.env.A11OY_ATELIER_MODEL ?? DEFAULT_MODEL): AtelierProviderHealth {
+  health(requestedModel?: string): AtelierProviderHealth {
     const configured = this.executable.trim().length > 0;
+    const resolution = tryResolveGrokModel(requestedModel);
+    if (!resolution.ok) {
+      return {
+        provider: this.id,
+        model: 'UNAVAILABLE',
+        configured,
+        available: false,
+        localOnly: true,
+        evidenceState: 'UNAVAILABLE',
+        reason: resolution.reason,
+      };
+    }
+    const model = resolution.model;
     const available = configured && existsSync(this.executable);
     return {
       provider: this.id,
@@ -274,7 +337,7 @@ export class GrokBuildCliProvider implements AtelierProvider {
   async generate(request: AtelierAskRequest): Promise<AtelierProviderResult> {
     const health = this.health(request.model);
     if (!health.available) throw new AtelierProviderUnavailableError(health.reason);
-    const model = request.model ?? process.env.A11OY_ATELIER_MODEL ?? DEFAULT_MODEL;
+    const model = resolveGrokModel(request.model);
     let stdout: string;
     try {
       ({ stdout } = await execFileAsync(
@@ -325,15 +388,21 @@ export class GrokBuildCliProvider implements AtelierProvider {
   }
 }
 
-export function resolveProvider(requested: AtelierAskRequest['provider']): AtelierProvider {
+export function resolveProvider(
+  requested: AtelierAskRequest['provider'],
+  requestedModel?: string,
+): AtelierProvider {
   if (requested === 'xai') return new XaiResponsesProvider();
   if (requested === 'grok-build') return new GrokBuildCliProvider();
   const xai = new XaiResponsesProvider();
-  if (xai.health().available) return xai;
+  if (xai.health(requestedModel).available) return xai;
   const cli = new GrokBuildCliProvider();
-  if (cli.health().available) return cli;
+  if (cli.health(requestedModel).available) return cli;
+  const resolution = tryResolveGrokModel(requestedModel);
   throw new AtelierProviderUnavailableError(
-    'No Atelier inference provider is configured. Set A11OY_ATELIER_XAI_API_KEY or A11OY_ATELIER_GROK_CLI_PATH.',
+    resolution.ok
+      ? 'No Atelier inference provider is configured. Set A11OY_ATELIER_XAI_API_KEY or A11OY_ATELIER_GROK_CLI_PATH.'
+      : resolution.reason,
   );
 }
 

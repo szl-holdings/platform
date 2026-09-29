@@ -67,6 +67,17 @@ credential to bypass it.
 
 ### 2026-08-30 A11oy Atelier Turn Capsule boundary
 
+**2026-09-29 model migration:** The local source now defaults both Atelier
+adapters to `grok-4.7`, preserves all four reasoning-effort levels, and accepts
+only 4.7 or the explicit 4.6 rollback from environment and request overrides.
+Grok 4.7 provider reasoning ciphertext is discarded; Turn Capsule v1 retains
+bounded text history, not native encrypted-reasoning continuity. A successful
+4.7 inference and committed capsule remain separate runtime gates. Grok Build
+was updated to signed stable 1.0.44; its readback reports an authenticated account
+and a saved 4.7 default. The 2026-09-29 bounded `grok-4.7` canary failed with
+HTTP 402, usage balance exhausted. No direct xAI API key is configured. The
+earlier HTTP 402 balance failure below remains historical evidence.
+
 Turn Capsule v1 adds tenant/session-scoped idempotent replay, one active turn per
 session, a hash-linked 24-hour capsule chain, an authenticated verification
 route, and a staged-response/pending-recovery boundary. The default store remains
