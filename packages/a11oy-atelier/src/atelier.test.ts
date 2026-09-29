@@ -437,4 +437,24 @@ describe('caller-supplied model allowlist', () => {
       ).rejects.toBeInstanceOf(AtelierProviderUnavailableError);
     }
   });
+
+  it('re-checks the caller allowlist in the Grok Build CLI adapter even if health() passes', async () => {
+    // health() is forced available so the generate-time resolver is the only guard.
+    // The executable does not exist, so nothing can run even if that guard regressed.
+    const cli = new GrokBuildCliProvider('/nonexistent/grok-build-cli-for-test');
+    vi.spyOn(cli, 'health').mockReturnValue({
+      provider: 'grok-build',
+      model: 'grok-4.7',
+      configured: true,
+      available: true,
+      localOnly: true,
+      evidenceState: 'OBSERVED',
+      reason: 'forced available for test',
+    });
+    const failure = cli.generate(
+      AtelierAskRequestSchema.parse({ prompt: 'hello', provider: 'grok-build', model: 'gpt-4o' }),
+    );
+    await expect(failure).rejects.toBeInstanceOf(AtelierProviderUnavailableError);
+    await expect(failure).rejects.toThrow(/requested model is not an allowlisted Grok model id/);
+  });
 });
