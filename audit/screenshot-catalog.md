@@ -8,6 +8,25 @@
 
 ## Summary
 
+### 2026-09-29 A11oy Atelier / Grok 4.7
+
+- filename: `a11oy-atelier-2026-09-29.jpg`
+- route: `http://127.0.0.1:19090/a11oy/atelier`
+- surface: A11oy Atelier operator workbench
+- capture_date: `2026-09-29T21:15:57Z`
+- captured_by: Codex / PixelProof
+- capture_environment: `local-exact-head`, Windows, Node `v24.19.0`, installed Microsoft Edge
+- source_revision: `c09107164fcddaededcdff76bd744702f0b93da0`
+- workflow_run_or_command: `node node_modules/@playwright/test/cli.js screenshot --browser chromium --channel msedge --viewport-size '1440,1100' --color-scheme dark --wait-for-selector '[aria-label="Provider health"]' --wait-for-timeout 2000 --full-page 'http://127.0.0.1:19090/a11oy/atelier' 'docs/assets/screenshots/current/a11oy-atelier-2026-09-29.jpg'`
+- viewport: `1440 x 1100`; full-page artifact `1440 x 1195`
+- artifact_sha256: `9b532dbdb9fe1890a8a245b5b4631984f6bf86d401dffefe365d8d3cd6e6d1e7`
+- workcell_id: `ATELIER-GROK47-2026-09-29`
+- proof_level: `4`
+- status: `current`
+- notes: Live configured-provider and encrypted-local-continuity state. The image shows the 4.7 labels, pending-retry privacy copy, composer, reasoning control, and capability denials. It does not show a successful provider answer. The bounded live 4.7 probe returned HTTP 402. Source-bound launch metadata and the screenshot sidecar accompany the proof packet. An unrelated `pnpm-workspace.yaml` line-ending-only working-tree change was preserved and excluded from this patch; application source matched the recorded revision.
+- sidecar: [`a11oy-atelier-2026-09-29.screenshot.json`](a11oy-atelier-2026-09-29.screenshot.json)
+- proof_packet: [`A11OY_ATELIER_GROK47_PROOF_2026-09-29.md`](A11OY_ATELIER_GROK47_PROOF_2026-09-29.md)
+
 | Location | File Count | Disposition |
 |----------|-----------|-------------|
 | `docs/assets/screenshots/current/` | 7 | **REFRESHED 2026-04-22 (Task #3103)** — README screenshot block. Files renamed from product slugs to in-app codenames so captions match chrome (KORA, SEXTANT, DOMAINE, TENAX, FORGE). See Section 0 below. |
