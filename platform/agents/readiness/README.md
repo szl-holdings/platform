@@ -24,9 +24,12 @@ sorries). Author: **Yachay <yachay@szlholdings.dev>**.
 | 8 | [`readiness-audit-rift`](./readiness-audit-rift/) | daily (last) | meta-audit: flags any over-claiming agent |
 
 ### Schedule (UTC)
-- **Hourly** (`0 * * * *`): agents 1–3.
-- **Daily**: operability `30 3`, compliance `0 4`, docs `30 4`, dr `0 5`.
-- **Daily, after the others** (`0 6`): audit-rift — so it always sees fresh peer receipts.
+- **Hourly**: reliability `0 * * * *`, security `20 * * * *`, observability `40 * * * *`.
+- **Daily**: operability `30 3`, compliance `10 4`, docs `30 4`, dr `10 5`.
+- **Daily, after the others** (`10 6`): audit-rift — so it always sees fresh peer receipts.
+- All eight share one per-asset lock, `hf-write/dataset/SZLHOLDINGS/readiness-runs`.
+  GitHub cancels a pending run only when a third run joins the group, so start
+  times are kept at least 10 minutes apart (`_lib/test_khipu_publish.py` enforces this).
 
 ## Layout
 ```
@@ -57,6 +60,9 @@ SZLHOLDINGS/readiness-runs
 If the signing key or `HF_TOKEN` is absent, the envelope is honestly marked
 `signed:false` / `published:false` — **never a fabricated signature** (Doctrine v11 LOCKED 749/14/163
 §2 anti-fake-green, preserved under v11).
+Inside GitHub Actions a receipt (or DR dump) that did not reach the dataset also
+fails the run (`khipu.require_published`), so a green run always has its receipt
+on the Hub; a local run without `HF_TOKEN` only prints a warning.
 
 ## Dashboard
 `dashboard.html` is a static, read-only viewer. It lists the latest receipt for
