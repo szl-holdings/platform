@@ -7,8 +7,11 @@ touches the network or the Hub.
   (anti-fake-green); a local run without HF_TOKEN only warns.
 - All eight agent workflows share the per-asset lock
   hf-write/dataset/SZLHOLDINGS/readiness-runs (HF plan D3), pin the hub client
-  (plan D6), and start at least 10 minutes apart so the shared lock never has
-  to cancel a queued run.
+  (plan D6), and start at least 10 minutes apart (GitHub cancels a pending run
+  only when a third run joins the group).
+
+Every readiness workflow runs this suite before its agent, so a scheduled run
+with a broken contract fails before it publishes anything.
 """
 from __future__ import annotations
 
@@ -151,6 +154,14 @@ class FleetWorkflowContractTest(unittest.TestCase):
                     rf"(?m)^concurrency:\n  group: {re.escape(LOCK)}\n  cancel-in-progress: false$",
                 )
                 self.assertNotIn("event_name", text)
+
+    def test_every_agent_runs_this_contract_before_its_agent(self) -> None:
+        for agent, text in self.text.items():
+            with self.subTest(agent=agent):
+                contract = text.find("-m unittest discover -s platform/agents/readiness/_lib")
+                executor = text.find(f"platform/agents/readiness/{agent}/executor.py")
+                self.assertGreater(contract, 0)
+                self.assertGreater(executor, contract)
 
     def test_every_agent_pins_the_hub_client(self) -> None:
         for agent, text in self.text.items():

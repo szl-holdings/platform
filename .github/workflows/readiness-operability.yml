@@ -42,6 +42,9 @@ jobs:
         with:
           python-version: "3.12"
 
+      - name: Verify the fleet publish contract (stdlib, offline)
+        run: python -m unittest discover -s platform/agents/readiness/_lib -p "test_*.py"
+
       - name: Install deps
         run: pip install --no-cache-dir huggingface_hub==2.0.0 pynacl
 
