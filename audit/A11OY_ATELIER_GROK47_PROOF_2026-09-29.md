@@ -52,7 +52,7 @@ Commands used the existing local dependency installation and Node `v24.19.0`.
 Local Vitest was `4.1.7`; the refreshed protected lockfile selects `4.1.11`.
 This local run is not clean-install or protected-CI proof.
 
-- `node node_modules/vitest/vitest.mjs run --config vitest.config.ts` in `packages/a11oy-atelier`: **exit 0, 40/40** tests in two files. Rerun after the final parser guard cleanup passed. Tests cover four efforts, 4.7 default, 4.6 rollback, invalid model rejection with zero fetch/exec, automatic-provider precedence, final text extraction, ciphertext exclusion, and capsule behavior.
+- `node node_modules/vitest/vitest.mjs run --config vitest.config.ts` in `packages/a11oy-atelier`: **exit 0; atelier_cases_executed=40; atelier_cases_expected=40**, across two source files. The final parser guard cleanup was included in the repeated run. This scoped contract suite covers four efforts, 4.7 default, 4.6 rollback, invalid model rejection with zero fetch/exec, automatic-provider precedence, final text extraction, ciphertext exclusion, and capsule behavior. This is not a platform-wide total.
 - `node node_modules/vitest/vitest.mjs run --config vitest.config.ts --maxWorkers 1 --no-file-parallelism` in `apps/alloy-runtime-api`: **exit 0, 71/71** tests in 12 files. Covers API receipt/reservation, encrypted store, retention, restart, tenant isolation, and known versus ambiguous provider failures.
 - `node node_modules/typescript/bin/tsc -p packages/a11oy-atelier/tsconfig.json --noEmit`: **exit 0** before and after the migration.
 - The same TypeScript command for `apps/alloy-runtime-api`, `artifacts/a11oy`, and `packages/a11oy-cli`: **exit 0** sequentially. Package and API checks were repeated after the automatic-provider precedence repair.
