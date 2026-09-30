@@ -1207,34 +1207,35 @@ export class EncryptedLocalAtelierStateStore implements AtelierStateStore {
     path: string,
     schema: string,
   ): Promise<Record<string, unknown> | undefined> {
-    const before = await lstat(path).catch((error: unknown) => {
-      if (errorCode(error) === 'ENOENT') return undefined;
-      throw error;
-    });
-    if (!before) return undefined;
-    if (!before.isFile() || before.isSymbolicLink() || before.size > MAX_INDEX_BYTES) {
-      throw new AtelierCapsuleIntegrityError('Continuity index is not a bounded regular file.');
-    }
-
-    const flags = fsConstants.O_RDONLY | (fsConstants.O_NOFOLLOW ?? 0);
+    // Open once before inspecting the file. All content and size checks use
+    // this descriptor, not a path that may be replaced between check and use.
+    const flags =
+      fsConstants.O_RDONLY | (fsConstants.O_NOFOLLOW ?? 0) | (fsConstants.O_NONBLOCK ?? 0);
     const handle = await open(path, flags).catch((error: unknown) => {
       if (errorCode(error) === 'ENOENT') return undefined;
+      if (errorCode(error) === 'ELOOP') {
+        throw new AtelierCapsuleIntegrityError('Continuity index must not be a symbolic link.');
+      }
       throw error;
     });
     if (!handle) return undefined;
     try {
       const opened = await handle.stat();
-      if (
-        !opened.isFile() ||
-        opened.size > MAX_INDEX_BYTES ||
-        opened.dev !== before.dev ||
-        opened.ino !== before.ino
-      ) {
-        throw new AtelierCapsuleIntegrityError(
-          'Continuity index changed before authenticated readback.',
-        );
+      if (!opened.isFile() || opened.size > MAX_INDEX_BYTES) {
+        throw new AtelierCapsuleIntegrityError('Continuity index is not a bounded regular file.');
       }
-      const raw = await handle.readFile('utf8');
+      // Bound allocation and bytes consumed even if another writer grows the
+      // open file after stat. The extra byte distinguishes overflow from EOF.
+      const buffer = Buffer.alloc(MAX_INDEX_BYTES + 1);
+      let length = 0;
+      while (length < buffer.length) {
+        const read = await handle.read(buffer, length, buffer.length - length, null);
+        if (read.bytesRead === 0) break;
+        length += read.bytesRead;
+      }
+      if (length > MAX_INDEX_BYTES) {
+        throw new AtelierCapsuleIntegrityError('Continuity index exceeded its read bound.');
+      }
       const afterRead = await handle.stat();
       const current = await lstat(path).catch(() => undefined);
       if (
@@ -1243,14 +1244,16 @@ export class EncryptedLocalAtelierStateStore implements AtelierStateStore {
         current.dev !== afterRead.dev ||
         current.ino !== afterRead.ino ||
         opened.size !== afterRead.size ||
-        opened.mtimeMs !== afterRead.mtimeMs
+        opened.mtimeMs !== afterRead.mtimeMs ||
+        opened.ctimeMs !== afterRead.ctimeMs ||
+        length !== afterRead.size
       ) {
         throw new AtelierCapsuleIntegrityError(
           'Continuity index changed during authenticated readback.',
         );
       }
 
-      const value = objectValue(JSON.parse(raw));
+      const value = objectValue(JSON.parse(buffer.subarray(0, length).toString('utf8')));
       if (
         value?.schema !== schema ||
         typeof value.authenticationTag !== 'string' ||

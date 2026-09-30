@@ -21,6 +21,7 @@ import {
 } from '@szl-holdings/a11oy-atelier';
 import { EvidenceLedger } from '@szl-holdings/evidence-ledger';
 import { type IRouter, type Request, type Response, Router } from 'express';
+import rateLimit from 'express-rate-limit';
 import { ZodError } from 'zod';
 import {
   AtelierContinuityConfigurationError,
@@ -37,6 +38,7 @@ export interface AtelierRouterOptions {
 const MAX_HISTORY_CHARS = 20_000;
 const MAX_PROVIDER_PROMPT_CHARS = 100_000;
 const CONTINUITY_PRUNE_INTERVAL_MS = 15 * 60 * 1_000;
+export const ATELIER_VERIFY_RATE_LIMIT_MAX = 20;
 const continuityPruneIntervals = new Set<ReturnType<typeof setInterval>>();
 
 function tenantId(req: Request): string {
@@ -280,58 +282,74 @@ export function createAtelierRouter(options: AtelierRouterOptions = {}): IRouter
     }
   });
 
-  router.get('/sessions/:sessionId/verify', async (req: Request, res: Response): Promise<void> => {
-    const parsed = AtelierAskRequestSchema.shape.sessionId.safeParse(req.params.sessionId);
-    if (!parsed.success || !parsed.data) {
-      res.status(400).json({ error: 'Invalid session ID', code: 'ATELIER_INVALID_SESSION' });
-      return;
-    }
-    try {
-      const session = await stateStore.getSession(tenantId(req), parsed.data);
-      if (session === null) {
-        res.status(404).json({
-          sessionId: parsed.data,
-          code: 'ATELIER_SESSION_NOT_FOUND',
-          verification: {
-            valid: false,
-            message: 'Session continuity was not found.',
-          },
-        });
+  // Verification reads encrypted state and authenticates the capsule chain.
+  // Limit by client IP, not the caller-selectable tenant or session header.
+  // This is a process-local defence, not a distributed quota or admission gate.
+  router.get(
+    '/sessions/:sessionId/verify',
+    rateLimit({
+      windowMs: 60_000,
+      limit: ATELIER_VERIFY_RATE_LIMIT_MAX,
+      standardHeaders: 'draft-7',
+      legacyHeaders: false,
+      message: {
+        error: 'Too many continuity-verification requests; retry after the window resets.',
+        code: 'ATELIER_VERIFY_RATE_LIMITED',
+      },
+    }),
+    async (req: Request, res: Response): Promise<void> => {
+      const parsed = AtelierAskRequestSchema.shape.sessionId.safeParse(req.params.sessionId);
+      if (!parsed.success || !parsed.data) {
+        res.status(400).json({ error: 'Invalid session ID', code: 'ATELIER_INVALID_SESSION' });
         return;
       }
-      if (session.capsules.length === 0) {
-        res.status(409).json({
+      try {
+        const session = await stateStore.getSession(tenantId(req), parsed.data);
+        if (session === null) {
+          res.status(404).json({
+            sessionId: parsed.data,
+            code: 'ATELIER_SESSION_NOT_FOUND',
+            verification: {
+              valid: false,
+              message: 'Session continuity was not found.',
+            },
+          });
+          return;
+        }
+        if (session.capsules.length === 0) {
+          res.status(409).json({
+            sessionId: parsed.data,
+            capsuleCount: 0,
+            code: 'ATELIER_SESSION_PENDING_OR_EMPTY',
+            verification: {
+              valid: false,
+              message: 'Session continuity has no committed Turn Capsules to verify.',
+            },
+            persistenceState: stateStore.persistence.persistenceState,
+            durable: stateStore.persistence.durable,
+          });
+          return;
+        }
+        const verification = verifyAtelierCapsuleChain(session.capsules);
+        res.status(verification.valid ? 200 : 409).json({
           sessionId: parsed.data,
-          capsuleCount: 0,
-          code: 'ATELIER_SESSION_PENDING_OR_EMPTY',
-          verification: {
-            valid: false,
-            message: 'Session continuity has no committed Turn Capsules to verify.',
-          },
+          capsuleCount: session.capsules.length,
+          verification,
           persistenceState: stateStore.persistence.persistenceState,
           durable: stateStore.persistence.durable,
         });
-        return;
+      } catch (error) {
+        res.status(409).json({
+          sessionId: parsed.data,
+          verification: {
+            valid: false,
+            code: error instanceof AtelierStateError ? error.code : 'ATELIER_SESSION_VERIFY_FAILED',
+            message: 'Session continuity failed authenticated verification.',
+          },
+        });
       }
-      const verification = verifyAtelierCapsuleChain(session.capsules);
-      res.status(verification.valid ? 200 : 409).json({
-        sessionId: parsed.data,
-        capsuleCount: session.capsules.length,
-        verification,
-        persistenceState: stateStore.persistence.persistenceState,
-        durable: stateStore.persistence.durable,
-      });
-    } catch (error) {
-      res.status(409).json({
-        sessionId: parsed.data,
-        verification: {
-          valid: false,
-          code: error instanceof AtelierStateError ? error.code : 'ATELIER_SESSION_VERIFY_FAILED',
-          message: 'Session continuity failed authenticated verification.',
-        },
-      });
-    }
-  });
+    },
+  );
 
   router.post('/ask', async (req: Request, res: Response): Promise<void> => {
     let parsed: AtelierAskRequest;

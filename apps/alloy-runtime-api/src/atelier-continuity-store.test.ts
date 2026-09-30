@@ -1,14 +1,19 @@
 import { createHash, randomBytes } from 'node:crypto';
-import { mkdtemp, readdir, readFile, rm, unlink, writeFile } from 'node:fs/promises';
+import { mkdtemp, open, readdir, readFile, rm, unlink, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import type { AtelierAskResponse } from '@szl-holdings/a11oy-atelier';
-import { afterEach, describe, expect, it } from 'vitest';
+import { afterEach, describe, expect, it, vi } from 'vitest';
 import {
   AtelierContinuityConfigurationError,
   createEncryptedLocalAtelierStateStoreFromEnv,
   EncryptedLocalAtelierStateStore,
 } from './atelier-continuity-store.js';
+
+vi.mock('node:fs/promises', async (importOriginal) => {
+  const actual = await importOriginal<typeof import('node:fs/promises')>();
+  return { ...actual, open: vi.fn(actual.open) };
+});
 
 const roots: string[] = [];
 
@@ -93,10 +98,85 @@ async function commitEncryptedTurn(params: {
 }
 
 afterEach(async () => {
+  const actual = await vi.importActual<typeof import('node:fs/promises')>('node:fs/promises');
+  vi.mocked(open).mockImplementation(actual.open);
+  vi.restoreAllMocks();
   await Promise.all(roots.splice(0).map((root) => rm(root, { recursive: true, force: true })));
 });
 
 describe('EncryptedLocalAtelierStateStore', () => {
+  it('rejects authenticated index replacement after opening the original descriptor', async () => {
+    const rootDirectory = await tempRoot();
+    const masterKey = randomBytes(32);
+    const store = new EncryptedLocalAtelierStateStore({ rootDirectory, masterKey });
+    await commitEncryptedTurn({
+      store,
+      tenantId: 'tenant-replaced-index',
+      sessionId: 'session-replaced-index',
+      idempotencyKey: 'replaced-index-key',
+      prompt: 'original descriptor',
+      answer: 'original answer',
+    });
+    const indexPath = (await filesBelow(join(rootDirectory, 'indexes')))[0];
+    const originalBytes = await readFile(indexPath);
+    const actual = await vi.importActual<typeof import('node:fs/promises')>('node:fs/promises');
+    let replaced = false;
+    vi.mocked(open).mockImplementation(async (filePath, flags, mode) => {
+      const handle = await actual.open(filePath, flags, mode);
+      if (filePath === indexPath && !replaced) {
+        replaced = true;
+        await actual.rename(indexPath, `${indexPath}.retired`);
+        await actual.writeFile(indexPath, originalBytes);
+      }
+      return handle;
+    });
+    const reopened = new EncryptedLocalAtelierStateStore({ rootDirectory, masterKey });
+    await expect(
+      reopened.getSession('tenant-replaced-index', 'session-replaced-index'),
+    ).rejects.toMatchObject({ code: 'ATELIER_CAPSULE_INTEGRITY' });
+    expect(replaced).toBe(true);
+  });
+
+  it('bounds descriptor reads if an authenticated index grows after its initial stat', async () => {
+    const rootDirectory = await tempRoot();
+    const masterKey = randomBytes(32);
+    const store = new EncryptedLocalAtelierStateStore({ rootDirectory, masterKey });
+    await commitEncryptedTurn({
+      store,
+      tenantId: 'tenant-grown-index',
+      sessionId: 'session-grown-index',
+      idempotencyKey: 'grown-index-key',
+      prompt: 'bounded descriptor',
+      answer: 'bounded answer',
+    });
+    const indexPath = (await filesBelow(join(rootDirectory, 'indexes')))[0];
+    const actual = await vi.importActual<typeof import('node:fs/promises')>('node:fs/promises');
+    let consumed = 0;
+    let grew = false;
+    vi.mocked(open).mockImplementation(async (filePath, flags, mode) => {
+      const handle = await actual.open(filePath, flags, mode);
+      if (filePath === indexPath && !grew) {
+        grew = true;
+        const initialStat = await handle.stat();
+        await actual.writeFile(indexPath, 'x'.repeat(256 * 1024 + 64));
+        vi.spyOn(handle, 'stat').mockResolvedValueOnce(initialStat);
+        const read = handle.read.bind(handle);
+        vi.spyOn(handle, 'read').mockImplementation(async (...args) => {
+          const result = await read(...args);
+          consumed += result.bytesRead;
+          return result;
+        });
+      }
+      return handle;
+    });
+    const reopened = new EncryptedLocalAtelierStateStore({ rootDirectory, masterKey });
+    await expect(
+      reopened.getSession('tenant-grown-index', 'session-grown-index'),
+    ).rejects.toMatchObject({ code: 'ATELIER_CAPSULE_INTEGRITY' });
+    expect(grew).toBe(true);
+    expect(consumed).toBe(256 * 1024 + 1);
+  });
+
   it('persists encrypted full replay state and reopens a verifiable session', async () => {
     const rootDirectory = await tempRoot();
     const masterKey = randomBytes(32);
@@ -350,8 +430,32 @@ describe('EncryptedLocalAtelierStateStore', () => {
         },
       }),
     ]);
-    expect(attempts.filter((attempt) => attempt.status === 'fulfilled')).toHaveLength(1);
-    expect(attempts.filter((attempt) => attempt.status === 'rejected')).toHaveLength(1);
+    // A runner that sees the published lease returns pending; a runner that
+    // loses atomic publication rejects. Neither outcome is a second grant.
+    const grants = attempts.filter(
+      (attempt) => attempt.status === 'fulfilled' && attempt.value.status === 'reserved',
+    );
+    expect(grants).toHaveLength(1);
+    const granted = grants[0];
+    if (granted?.status !== 'fulfilled' || granted.value.status !== 'reserved') {
+      throw new Error('expected exactly one granted session lease');
+    }
+    const blocked = attempts.find((attempt) => attempt !== granted);
+    if (blocked?.status === 'fulfilled') {
+      expect(blocked.value).toMatchObject({
+        status: 'pending',
+        code: 'ATELIER_SESSION_BUSY',
+        reservation: { reservationId: granted.value.reservation.reservationId },
+      });
+    } else {
+      expect(blocked).toMatchObject({
+        status: 'rejected',
+        reason: { code: 'ATELIER_CAPSULE_INTEGRITY' },
+      });
+    }
+    expect(
+      (await filesBelow(join(rootDirectory, 'indexes'))).filter((path) => path.endsWith('.json')),
+    ).toHaveLength(1);
     const session = await left.getSession('tenant-race', 'session-race');
     expect(session?.capsules).toHaveLength(0);
   });
