@@ -9,7 +9,11 @@ import {
 } from '@szl-holdings/a11oy-atelier';
 import { afterAll, beforeAll, describe, expect, it, vi } from 'vitest';
 import { mountRouter, type TestClient } from '../__testkit.js';
-import { createAtelierRouter, shutdownAtelierContinuityPruning } from './atelier.js';
+import {
+  ATELIER_VERIFY_RATE_LIMIT_MAX,
+  createAtelierRouter,
+  shutdownAtelierContinuityPruning,
+} from './atelier.js';
 
 const headers = {
   'x-api-key': 'k',
@@ -71,6 +75,63 @@ afterAll(() => {
 });
 
 describe('A11oy Atelier continuity API', () => {
+  it('limits verification before state reads and cannot reset the budget with another tenant', async () => {
+    const limitedStore = new InMemoryAtelierStateStore();
+    const readSession = vi.spyOn(limitedStore, 'getSession');
+    const limitedClient = await mountRouter(
+      '/api/a11oy/v1/atelier',
+      createAtelierRouter({ stateStore: limitedStore }),
+    );
+    try {
+      for (let attempt = 0; attempt < ATELIER_VERIFY_RATE_LIMIT_MAX; attempt += 1) {
+        const result = await limitedClient.req(
+          'GET',
+          `/api/a11oy/v1/atelier/sessions/missing-${attempt}/verify`,
+          { headers },
+        );
+        expect(result.status).toBe(404);
+      }
+      const limited = await limitedClient.req(
+        'GET',
+        '/api/a11oy/v1/atelier/sessions/missing-other/verify',
+        { headers: otherTenant },
+      );
+      expect(limited.status).toBe(429);
+      expect(limited.json.code).toBe('ATELIER_VERIFY_RATE_LIMITED');
+      expect(readSession).toHaveBeenCalledTimes(ATELIER_VERIFY_RATE_LIMIT_MAX);
+      const health = await limitedClient.req('GET', '/api/a11oy/v1/atelier/health', { headers });
+      expect(health.status).toBe(200);
+    } finally {
+      limitedClient.close();
+    }
+  });
+
+  it('rejects unauthenticated verification before consuming the authenticated route budget', async () => {
+    const isolatedStore = new InMemoryAtelierStateStore();
+    const readSession = vi.spyOn(isolatedStore, 'getSession');
+    const isolatedClient = await mountRouter(
+      '/api/a11oy/v1/atelier',
+      createAtelierRouter({ stateStore: isolatedStore }),
+    );
+    try {
+      const rejected = await isolatedClient.req(
+        'GET',
+        '/api/a11oy/v1/atelier/sessions/missing/verify',
+      );
+      expect(rejected.status).toBe(401);
+      expect(readSession).not.toHaveBeenCalled();
+      const authenticated = await isolatedClient.req(
+        'GET',
+        '/api/a11oy/v1/atelier/sessions/missing/verify',
+        { headers },
+      );
+      expect(authenticated.status).toBe(404);
+      expect(readSession).toHaveBeenCalledTimes(1);
+    } finally {
+      isolatedClient.close();
+    }
+  });
+
   it('rejects a retry key without a client session before invoking a provider', async () => {
     const body = { prompt: 'must not charge', idempotencyKey: 'missing-session-key' };
     const first = await client.req('POST', '/api/a11oy/v1/atelier/ask', {
