@@ -101,11 +101,25 @@ export async function verifyProductInteractions(origin) {
         records.push({ width, state: name, result: 'PASS', layout });
       };
       const go = async (route) => {
-        const response = await page.goto(`${target.origin}/a11oy/${route}`);
-        assert.equal(response?.status(), 200, route);
-        await page.waitForFunction(() => document.body.dataset.screenshotReady === 'true');
-        await page.evaluate(async () => document.fonts.ready);
-        await expect(page.locator('main h1')).toBeVisible();
+        try {
+          const response = await page.goto(`${target.origin}/a11oy/${route}`);
+          assert.equal(response?.status(), 200, route);
+          await page.waitForFunction(() => document.body.dataset.screenshotReady === 'true');
+          await page.evaluate(async () => document.fonts.ready);
+          await expect(page.locator('main h1')).toBeVisible();
+        } catch (cause) {
+          // Preserve failure context without more browser calls: an unresponsive
+          // renderer must not strand reporting or extend the readiness deadline.
+          throw new Error(
+            `Product navigation failed: ${JSON.stringify({
+              width,
+              route,
+              lastPassingState: records.at(-1)?.state ?? null,
+              browserErrors: errors.slice(-10),
+            })}`,
+            { cause },
+          );
+        }
       };
 
       for (const entry of capturePlan.targets) {

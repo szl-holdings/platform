@@ -23,6 +23,7 @@
     "@szl-holdings/observability": "workspace:*",
     "@workspace/ouroboros-integrations": "workspace:*",
     "@workspace/ouroboros-invariant": "workspace:*",
+    "@workspace/a11oy-runtime": "workspace:*",
     "express": "^5",
     "express-rate-limit": "^8.5.2",
     "zod": "catalog:"

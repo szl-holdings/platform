@@ -25,6 +25,7 @@ const fabricSchema = read('../../../lib/a11oy-fabric/src/schema.ts');
 const fabricSeeds = read('../../../lib/a11oy-fabric/src/seed/workcells.ts');
 const captureController = read('../../../scripts/qa/capture-screenshot-proof.mjs');
 const matrixWrapper = read('../../../scripts/qa/capture-series-a-product-matrix-proof.mjs');
+const productInteractions = read('../../../scripts/qa/a11oy-product-interactions.mjs');
 const canonicalSeriesAWrapper = read('../../../scripts/qa/capture-series-a-proof.mjs');
 const smokeRoutes = read('../../../scripts/qa/smoke-routes.js');
 const rootPackage = JSON.parse(read('../../../package.json'));
@@ -178,4 +179,32 @@ test('keeps canonical Series A proof intact and adds a bounded 75-view local mat
     rootPackage.scripts['screenshots:a11oy:product-proof'],
     'node scripts/qa/capture-series-a-product-matrix-proof.mjs',
   );
+});
+
+test('retains navigation failure context and cause without relaxing browser readiness', () => {
+  assert.match(productInteractions, /const READINESS_TIMEOUT_MS = 10_000;/);
+  assert.match(
+    productInteractions,
+    /playwrightExpect\.configure\(\{ timeout: READINESS_TIMEOUT_MS \}\)/,
+  );
+  assert.match(productInteractions, /page\.setDefaultTimeout\(READINESS_TIMEOUT_MS\)/);
+  const go = productInteractions.match(/const go = async \(route\) => \{[\s\S]*?\n      \};/)?.[0];
+  assert.ok(go, 'navigation helper remains explicit and bounded');
+  assert.match(go, /assert\.equal\(response\?\.status\(\), 200, route\)/);
+  assert.match(
+    go,
+    /await page\.waitForFunction\(\(\) => document\.body\.dataset\.screenshotReady === 'true'\)/,
+  );
+  assert.match(go, /await page\.evaluate\(async \(\) => document\.fonts\.ready\)/);
+  assert.match(go, /await expect\(page\.locator\('main h1'\)\)\.toBeVisible\(\)/);
+  const failure = go.slice(go.indexOf('catch (cause)'));
+  assert.match(failure, /catch \(cause\)/);
+  assert.match(failure, /throw new Error\(/);
+  assert.match(failure, /Product navigation failed: \$\{JSON\.stringify\(\{\s*width,\s*route,/);
+  assert.match(failure, /lastPassingState: records\.at\(-1\)\?\.state \?\? null/);
+  assert.match(failure, /browserErrors: errors\.slice\(-10\)/);
+  assert.match(failure, /\{ cause \}/);
+  assert.doesNotMatch(failure, /\bawait\b|\bpage\.|\bcontext\./);
+  assert.doesNotMatch(go, /clock\.|setDefaultTimeout|waitForTimeout|setTimeout|\.reload\(/);
+  assert.doesNotMatch(productInteractions, /page\.clock\.resume\(/);
 });

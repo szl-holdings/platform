@@ -37,7 +37,7 @@ RESOLVED = [
     ("B-06", "a11oy 'HF Space module-drift guard' — was the check doing its job against the rename; lexicon PRs merged (#1529, #1548, #1578)"),
     ("B-07", "killinchu CI 'API Health' — green since 2026-08-30 (4 consecutive passes); earlier failure was the estate's own drift signal, not a defect"),
     ("B-08", "Hand-rolled DSSE/ECDSA → in-toto-attestation 0.9.3 — szl-receipt#20 + governed-receipt-spec#5 both MERGED 2026-08-30"),
-]  
+]
 # RESOLVED on 2026-08-30 (kept as history, not gating rows):
 #   B-01 handled materially: org card README + prove-it Space created; collections
 #       UI reconcile is a 2-min HF-UI action (connector has no collection-edit tool).
