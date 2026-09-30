@@ -8,12 +8,9 @@
  * every request emits a span via the env-driven OTLP exporter.
  */
 import express, { type Express } from 'express';
+import { initApiServerOtel, otelRequestSpanMiddleware, shutdownApiServerOtel } from './otel.js';
 import { createRouter } from './router.js';
-import {
-  initApiServerOtel,
-  otelRequestSpanMiddleware,
-  shutdownApiServerOtel,
-} from './otel.js';
+import { shutdownAtelierContinuityPruning } from './routes/v1/atelier.js';
 
 const PORT = process.env.PORT ? parseInt(process.env.PORT, 10) : 4010;
 
@@ -42,6 +39,7 @@ async function main(): Promise<void> {
 
   const shutdown = async () => {
     server.close();
+    shutdownAtelierContinuityPruning();
     await shutdownApiServerOtel();
     process.exit(0);
   };

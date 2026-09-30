@@ -461,6 +461,9 @@ importers:
       '@szl-holdings/workflow-runtime':
         specifier: workspace:*
         version: link:../../packages/workflow-runtime
+      '@workspace/a11oy-runtime':
+        specifier: workspace:*
+        version: link:../../packages/a11oy-runtime
       '@workspace/ouroboros-integrations':
         specifier: workspace:*
         version: link:../../packages/ouroboros-integrations

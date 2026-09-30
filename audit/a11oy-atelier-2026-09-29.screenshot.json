@@ -1,0 +1,19 @@
+{
+  "schema": "a11oy.screenshot.evidence.v1",
+  "workcell_id": "ATELIER-GROK47-2026-09-29",
+  "source_revision": "c09107164fcddaededcdff76bd744702f0b93da0",
+  "route": "http://127.0.0.1:19090/a11oy/atelier",
+  "capture_environment": "local-exact-head",
+  "runtime": "Windows / Node v24.19.0 / Microsoft Edge / Playwright CLI",
+  "captured_at": "2026-09-29T21:15:57Z",
+  "viewport": { "width": 1440, "height": 1100 },
+  "artifact_dimensions": { "width": 1440, "height": 1195 },
+  "artifact": "docs/assets/screenshots/current/a11oy-atelier-2026-09-29.jpg",
+  "artifact_sha256": "9b532dbdb9fe1890a8a245b5b4631984f6bf86d401dffefe365d8d3cd6e6d1e7",
+  "workflow_run_or_command": "node node_modules/@playwright/test/cli.js screenshot --browser chromium --channel msedge --viewport-size '1440,1100' --color-scheme dark --wait-for-selector '[aria-label=\"Provider health\"]' --wait-for-timeout 2000 --full-page 'http://127.0.0.1:19090/a11oy/atelier' 'docs/assets/screenshots/current/a11oy-atelier-2026-09-29.jpg'",
+  "captured_by": "Codex / PixelProof",
+  "proof_level": 4,
+  "status": "current",
+  "inference_witness": "UNAVAILABLE_PROVIDER_HTTP_402",
+  "notes": "Live UI/configuration proof. No successful provider answer or production deployment is established by this image."
+}

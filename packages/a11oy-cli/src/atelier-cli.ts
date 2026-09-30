@@ -1,4 +1,5 @@
 #!/usr/bin/env node
+import { randomUUID } from 'node:crypto';
 import { Command } from 'commander';
 import fetch from 'node-fetch';
 
@@ -22,9 +23,16 @@ function sanitizeTerminal(value: string): string {
     .join('');
 }
 
+function receiptValue(value: unknown, fallback: string): string {
+  if (typeof value === 'string') return sanitizeTerminal(value);
+  if (typeof value === 'number' && Number.isFinite(value)) return String(value);
+  if (typeof value === 'boolean') return String(value);
+  return fallback;
+}
+
 async function request(
   path: string,
-  init: { method?: string; body?: unknown; tenant?: string } = {},
+  init: { method?: string; body?: unknown; tenant?: string; idempotencyKey?: string } = {},
 ) {
   const response = await fetch(`${baseUrl}${path}`, {
     method: init.method ?? 'GET',
@@ -34,6 +42,7 @@ async function request(
       'Content-Type': 'application/json',
       'X-Api-Key': apiKey,
       'X-Tenant-Id': init.tenant ?? defaultTenant,
+      ...(init.idempotencyKey ? { 'Idempotency-Key': init.idempotencyKey } : {}),
     },
     body: init.body === undefined ? undefined : JSON.stringify(init.body),
   });
@@ -59,20 +68,25 @@ program
   .option('--provider <provider>', 'auto, xai, or grok-build', 'auto')
   .option('--model <model>', 'provider model')
   .option('--session <id>', 'continue a tenant-scoped session')
+  .option('--idempotency-key <key>', 'reuse a request safely without another provider call')
   .option('--tenant <id>', 'tenant ID', defaultTenant)
-  .option('--reasoning-effort <effort>', 'low, medium, or high', 'medium')
+  .option('--reasoning-effort <effort>', 'low, medium, high, or xhigh', 'medium')
   .option('--json', 'print the complete response receipt')
   .action(async (promptParts: string[], options) => {
+    const idempotencyKey = options.idempotencyKey ?? randomUUID();
+    const sessionId = options.session ?? randomUUID();
     try {
       const payload = await request('/api/a11oy/v1/atelier/ask', {
         method: 'POST',
         tenant: options.tenant,
+        idempotencyKey,
         body: {
           prompt: promptParts.join(' '),
           provider: options.provider,
           reasoningEffort: options.reasoningEffort,
           ...(options.model ? { model: options.model } : {}),
-          ...(options.session ? { sessionId: options.session } : {}),
+          sessionId,
+          idempotencyKey,
         },
       });
       if (options.json) {
@@ -85,11 +99,17 @@ program
       const receipt = (payload.receipt ?? {}) as Record<string, unknown>;
       process.stdout.write(`${answer}\n\n${disclosure}\n`);
       process.stdout.write(
-        `Receipt ${String(receipt.receiptId ?? 'unavailable')} | ${String(receipt.provider ?? 'unknown')}/${String(receipt.model ?? 'unknown')} | ${String(receipt.evidenceState ?? 'UNKNOWN')}\n`,
+        `Receipt ${receiptValue(receipt.receiptId, 'unavailable')} | ${receiptValue(receipt.provider, 'unknown')}/${receiptValue(receipt.model, 'unknown')} | ${receiptValue(receipt.evidenceState, 'UNKNOWN')}\n`,
+      );
+      process.stdout.write(
+        `Session ${receiptValue(receipt.sessionId, sessionId)} | Turn ${receiptValue(receipt.sequence, 'unavailable')} | capsule ${receiptValue(receipt.capsuleDigest, 'unavailable')} | ${receiptValue(receipt.persistenceState, 'UNAVAILABLE')}\n`,
       );
     } catch (error) {
       process.stderr.write(
         `A11oy Atelier error: ${sanitizeTerminal(error instanceof Error ? error.message : String(error))}\n`,
+      );
+      process.stderr.write(
+        `Retry this exact request with --session ${receiptValue(sessionId, 'unavailable')} --idempotency-key ${receiptValue(idempotencyKey, 'unavailable')}\n`,
       );
       process.exitCode = 1;
     }
