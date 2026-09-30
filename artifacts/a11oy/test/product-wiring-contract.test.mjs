@@ -188,7 +188,7 @@ test('retains navigation failure context and cause without relaxing browser read
     /playwrightExpect\.configure\(\{ timeout: READINESS_TIMEOUT_MS \}\)/,
   );
   assert.match(productInteractions, /page\.setDefaultTimeout\(READINESS_TIMEOUT_MS\)/);
-  const go = productInteractions.match(/const go = async \(route\) => \{[\s\S]*?\n      \};/)?.[0];
+  const go = productInteractions.match(/const go = async \(route\) => \{[\s\S]*?\n {6}\};/)?.[0];
   assert.ok(go, 'navigation helper remains explicit and bounded');
   assert.match(go, /assert\.equal\(response\?\.status\(\), 200, route\)/);
   assert.match(
