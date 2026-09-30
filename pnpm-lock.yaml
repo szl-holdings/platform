@@ -94,7 +94,7 @@ overrides:
   js-yaml@>=3.0.0 <4.0.0: 3.15.2
   nanoid@<4: 3.3.18
   nanoid@>=4 <5.1.16: 5.1.16
-  ip-address: 10.5.1
+  ip-address: 10.7.1
   fast-uri: ^3.1.7
   linkify-it: 5.0.2
   sharp: 0.35.4
@@ -10294,8 +10294,8 @@ packages:
   iobuffer@5.4.0:
     resolution: {integrity: sha512-DRebOWuqDvxunfkNJAlc3IzWIPD5xVxwUNbHr7xKB8E6aLJxIPfNX3CoMJghcFjpv6RWQsrcJbghtEwSPoJqMA==}
 
-  ip-address@10.5.1:
-    resolution: {integrity: sha512-EXujUp9jyOI/chPgtqk6uy7fDq8AeCB/WlfEuPg9LN0fN9lzKAKfuDYi60SMhHwgUiEhZvVYsbGZN+RUU1INiA==}
+  ip-address@10.7.1:
+    resolution: {integrity: sha512-4OUAqU9Z1i3vCnS05hzGiFnEMDpQ+62pAD/MVQOp83fYyNC8GleCqaS0QikQBmcWCrKFiUs/B8ztRRiYOAXuCA==}
     engines: {node: '>= 12'}
 
   ipaddr.js@1.9.1:
@@ -19050,7 +19050,7 @@ snapshots:
   express-rate-limit@8.5.2(express@5.2.1):
     dependencies:
       express: 5.2.1
-      ip-address: 10.5.1
+      ip-address: 10.7.1
 
   express@5.2.1:
     dependencies:
@@ -19667,7 +19667,7 @@ snapshots:
 
   iobuffer@5.4.0: {}
 
-  ip-address@10.5.1: {}
+  ip-address@10.7.1: {}
 
   ipaddr.js@1.9.1: {}
 
