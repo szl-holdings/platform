@@ -13,6 +13,13 @@ export interface ProxyRoute {
 export const CANONICAL_FALLBACK_PORT = 21130;
 export const SHARED_PROXY_PORT = 9090;
 
+export const SHARED_PROXY_PORT_ENV = 'SHARED_PROXY_PORT';
+export const SHARED_PROXY_A11OY_PORT_ENV = 'SHARED_PROXY_A11OY_PORT';
+export const SHARED_PROXY_API_PORT_ENV = 'SHARED_PROXY_API_PORT';
+export const SHARED_PROXY_BIND_HOST_ENV = 'SHARED_PROXY_BIND_HOST';
+export const SHARED_PROXY_LOCAL_API_KEY_BRIDGE_ENV = 'SHARED_PROXY_LOCAL_API_KEY_BRIDGE';
+export const SHARED_PROXY_LOCAL_TENANT_ID_ENV = 'SHARED_PROXY_LOCAL_TENANT_ID';
+
 export const A11OY_PORT = 4110;
 export const API_PORT = 8080;
 export const CARLOTA_JO_PORT = 8098;
@@ -28,25 +35,189 @@ export const SZL_DEMO_VIDEO_PORT = 8765;
 export const PLUGINMESH_PORT = 8190;
 export const CONDUIT_PORT = 5300;
 
-export const PROXY_ROUTES: ProxyRoute[] = [
-  { prefix: '/a11oy/', port: A11OY_PORT },
-  { prefix: '/api/', port: API_PORT },
-  // '/ws/' routes bare WebSocket upgrades to the api-server platform WS
-  // (artifacts/api-server/src/lib/websocket.ts, path: '/ws').
-  { prefix: '/ws/', port: API_PORT },
-  { prefix: '/carlota-jo/', port: CARLOTA_JO_PORT },
-  { prefix: '/command/', port: COMMAND_PORT },
-  { prefix: '/conduit/', port: CONDUIT_PORT },
-  { prefix: '/counsel/', port: COUNSEL_PORT },
-  { prefix: '/lyte/', port: LYTE_PORT },
-  { prefix: '/nexus/', port: PRAXIS_PORT },
-  { prefix: '/sentra/', port: SENTRA_PORT },
-  { prefix: '/terra/', port: TERRA_PORT },
-  { prefix: '/vessels/', port: VESSELS_PORT },
-  { prefix: '/pulse/', port: PULSE_PORT },
-  { prefix: '/szl-demo-video/', port: SZL_DEMO_VIDEO_PORT },
-  { prefix: '/pluginmesh/', port: PLUGINMESH_PORT },
-];
+export interface SharedProxyEnvironment {
+  [key: string]: string | undefined;
+}
+
+export interface SharedProxyRuntimeConfig {
+  listenPort: number;
+  a11oyPort: number;
+  apiPort: number;
+  bindHost: '0.0.0.0' | '::' | '127.0.0.1' | '::1';
+  localApiKeyBridge: boolean;
+  localTenantId: string | undefined;
+  routes: ProxyRoute[];
+}
+
+function readBooleanFlag(environment: SharedProxyEnvironment, name: string): boolean {
+  const value = environment[name];
+  if (value === undefined) return false;
+  if (/^(1|true|yes)$/i.test(value)) return true;
+  if (/^(0|false|no)$/i.test(value)) return false;
+  throw new Error(`Invalid ${name}=${JSON.stringify(value)}: expected true/false, yes/no, or 1/0.`);
+}
+
+function readBindHost(environment: SharedProxyEnvironment): SharedProxyRuntimeConfig['bindHost'] {
+  const value = environment[SHARED_PROXY_BIND_HOST_ENV] ?? '0.0.0.0';
+  if (value === '0.0.0.0' || value === '::' || value === '127.0.0.1' || value === '::1') {
+    return value;
+  }
+  throw new Error(
+    `Invalid ${SHARED_PROXY_BIND_HOST_ENV}=${JSON.stringify(value)}: expected 0.0.0.0, ::, 127.0.0.1, or ::1.`,
+  );
+}
+
+function resolveLocalApiKey(
+  environment: SharedProxyEnvironment,
+  localApiKeyBridge: boolean,
+): string | undefined {
+  if (!localApiKeyBridge) return undefined;
+  const value = environment.ALLOY_API_KEY;
+  if (value === undefined || value.length === 0 || value !== value.trim()) {
+    throw new Error(
+      `${SHARED_PROXY_LOCAL_API_KEY_BRIDGE_ENV}=true requires a non-empty, trimmed ALLOY_API_KEY.`,
+    );
+  }
+  return value;
+}
+
+function resolveLocalTenantId(
+  environment: SharedProxyEnvironment,
+  localApiKeyBridge: boolean,
+): string | undefined {
+  if (!localApiKeyBridge) return undefined;
+  const value = environment[SHARED_PROXY_LOCAL_TENANT_ID_ENV];
+  if (value === undefined || value.length === 0 || value.length > 128 || value !== value.trim()) {
+    throw new Error(
+      `${SHARED_PROXY_LOCAL_API_KEY_BRIDGE_ENV}=true requires a non-empty, trimmed ${SHARED_PROXY_LOCAL_TENANT_ID_ENV} of at most 128 characters.`,
+    );
+  }
+  return value;
+}
+
+export function isTrustedLocalBridgeRequest(
+  host: string | undefined,
+  origin: string | undefined,
+  listenPort: number,
+): boolean {
+  const allowedHosts = new Set([
+    `127.0.0.1:${listenPort}`,
+    `localhost:${listenPort}`,
+    `[::1]:${listenPort}`,
+  ]);
+  const normalizedHost = host?.toLowerCase();
+  if (normalizedHost === undefined || !allowedHosts.has(normalizedHost)) return false;
+  if (origin === undefined) return true;
+  try {
+    const parsedOrigin = new URL(origin);
+    return (
+      parsedOrigin.protocol === 'http:' &&
+      parsedOrigin.host.toLowerCase() === normalizedHost &&
+      parsedOrigin.origin === origin.toLowerCase()
+    );
+  } catch {
+    return false;
+  }
+}
+
+export function isAtelierApiPath(url: string): boolean {
+  try {
+    const pathname = new URL(url, 'http://localhost').pathname;
+    return /^\/api\/a11oy\/v1\/atelier(?:\/|$)/.test(pathname);
+  } catch {
+    return false;
+  }
+}
+
+function buildProxyRoutes(a11oyPort: number, apiPort: number): ProxyRoute[] {
+  return [
+    { prefix: '/a11oy/', port: a11oyPort },
+    { prefix: '/api/', port: apiPort },
+    // '/ws/' routes bare WebSocket upgrades to the api-server platform WS
+    // (artifacts/api-server/src/lib/websocket.ts, path: '/ws').
+    { prefix: '/ws/', port: apiPort },
+    { prefix: '/carlota-jo/', port: CARLOTA_JO_PORT },
+    { prefix: '/command/', port: COMMAND_PORT },
+    { prefix: '/conduit/', port: CONDUIT_PORT },
+    { prefix: '/counsel/', port: COUNSEL_PORT },
+    { prefix: '/lyte/', port: LYTE_PORT },
+    { prefix: '/nexus/', port: PRAXIS_PORT },
+    { prefix: '/sentra/', port: SENTRA_PORT },
+    { prefix: '/terra/', port: TERRA_PORT },
+    { prefix: '/vessels/', port: VESSELS_PORT },
+    { prefix: '/pulse/', port: PULSE_PORT },
+    { prefix: '/szl-demo-video/', port: SZL_DEMO_VIDEO_PORT },
+    { prefix: '/pluginmesh/', port: PLUGINMESH_PORT },
+  ];
+}
+
+/** Canonical routes retained for callers that inspect the default route table. */
+export const PROXY_ROUTES: ProxyRoute[] = buildProxyRoutes(A11OY_PORT, API_PORT);
+
+function readPortOverride(
+  environment: SharedProxyEnvironment,
+  name: string,
+  defaultPort: number,
+  minimumPort = 1,
+): number {
+  const rawValue = environment[name];
+  if (rawValue === undefined) return defaultPort;
+
+  // Deliberately reject whitespace, signs, decimals, scientific notation, and
+  // partial numbers instead of allowing parseInt() to silently reinterpret them.
+  if (!/^[1-9]\d{0,4}$/.test(rawValue)) {
+    throw new Error(
+      `Invalid ${name}=${JSON.stringify(rawValue)}: expected an integer from ${minimumPort} to 65535.`,
+    );
+  }
+
+  const port = Number(rawValue);
+  if (!Number.isSafeInteger(port) || port < minimumPort || port > 65_535) {
+    throw new Error(
+      `Invalid ${name}=${JSON.stringify(rawValue)}: expected an integer from ${minimumPort} to 65535.`,
+    );
+  }
+  return port;
+}
+
+/**
+ * Resolve local-only runtime ports from the environment.
+ *
+ * The listener remains on an unprivileged port. Any collision between that
+ * listener and an upstream route is rejected before the server is created so a
+ * request can never be proxied back into the proxy itself.
+ */
+export function resolveSharedProxyConfig(
+  environment: SharedProxyEnvironment = process.env,
+): SharedProxyRuntimeConfig {
+  const listenPort = readPortOverride(environment, SHARED_PROXY_PORT_ENV, SHARED_PROXY_PORT, 1024);
+  const a11oyPort = readPortOverride(environment, SHARED_PROXY_A11OY_PORT_ENV, A11OY_PORT);
+  const apiPort = readPortOverride(environment, SHARED_PROXY_API_PORT_ENV, API_PORT);
+  const bindHost = readBindHost(environment);
+  const localApiKeyBridge = readBooleanFlag(environment, SHARED_PROXY_LOCAL_API_KEY_BRIDGE_ENV);
+  const localTenantId = resolveLocalTenantId(environment, localApiKeyBridge);
+  const routes = buildProxyRoutes(a11oyPort, apiPort);
+
+  if (localApiKeyBridge && bindHost !== '127.0.0.1' && bindHost !== '::1') {
+    throw new Error(
+      `${SHARED_PROXY_LOCAL_API_KEY_BRIDGE_ENV}=true requires ${SHARED_PROXY_BIND_HOST_ENV}=127.0.0.1 or ::1.`,
+    );
+  }
+  resolveLocalApiKey(environment, localApiKeyBridge);
+
+  const collidingPrefixes = routes
+    .filter((route) => route.port === listenPort)
+    .map((route) => route.prefix);
+  if (CANONICAL_FALLBACK_PORT === listenPort) collidingPrefixes.push('/ (fallback)');
+
+  if (collidingPrefixes.length > 0) {
+    throw new Error(
+      `Invalid ${SHARED_PROXY_PORT_ENV}=${listenPort}: listener collides with upstream ${collidingPrefixes.join(', ')}.`,
+    );
+  }
+
+  return { listenPort, a11oyPort, apiPort, bindHost, localApiKeyBridge, localTenantId, routes };
+}
 
 // ─── Diagnostics state ────────────────────────────────────────────────────────
 
@@ -77,10 +248,11 @@ let wsTunnelIdCounter = 0;
 const upstreamHealth = new Map<number, RouteHealth>();
 
 function getOrInitHealth(port: number): RouteHealth {
-  if (!upstreamHealth.has(port)) {
-    upstreamHealth.set(port, { lastSuccessMs: null, lastFailureMs: null, consecutiveFailures: 0 });
-  }
-  return upstreamHealth.get(port)!;
+  const existing = upstreamHealth.get(port);
+  if (existing !== undefined) return existing;
+  const created = { lastSuccessMs: null, lastFailureMs: null, consecutiveFailures: 0 };
+  upstreamHealth.set(port, created);
+  return created;
 }
 
 function recordUpstreamSuccess(port: number): void {
@@ -97,15 +269,18 @@ function recordUpstreamFailure(port: number): void {
 
 // Resolve the upstream port for a request URL. Strips query/fragment before
 // prefix matching so '/ws?ticket=abc' resolves identically to '/ws'.
-function resolveRoute(url: string): { route: ProxyRoute | null; port: number; label: string } {
+function resolveRoute(
+  url: string,
+  routes: ProxyRoute[],
+): { route: ProxyRoute | null; port: number; label: string } {
   let pathname: string;
   try {
     pathname = new URL(url, 'http://x').pathname;
   } catch {
-    pathname = url.split('?')[0]!.split('#')[0]!;
+    pathname = url.split('?')[0]?.split('#')[0] ?? '/';
   }
   const normalized = pathname.endsWith('/') ? pathname : `${pathname}/`;
-  const route = PROXY_ROUTES.find((r) => normalized.startsWith(r.prefix)) ?? null;
+  const route = routes.find((r) => normalized.startsWith(r.prefix)) ?? null;
   const port = route ? route.port : CANONICAL_FALLBACK_PORT;
   const label = route ? route.prefix : '/ (fallback)';
   return { route, port, label };
@@ -130,7 +305,12 @@ function errorHtml(status: number, title: string, detail: string): string {
 
 // ─── Status payload ───────────────────────────────────────────────────────────
 
-function buildStatusPayload() {
+function buildStatusPayload(
+  routes: ProxyRoute[],
+  listenPort: number,
+  bindHost: SharedProxyRuntimeConfig['bindHost'],
+  localApiKeyBridge: boolean,
+) {
   const wsByRoute: Record<string, number> = {};
   for (const tunnel of wsActiveTunnels.values()) {
     wsByRoute[tunnel.route] = (wsByRoute[tunnel.route] ?? 0) + 1;
@@ -139,6 +319,7 @@ function buildStatusPayload() {
   return {
     uptimeSec: Math.floor((Date.now() - startTimeMs) / 1000),
     startedAt: new Date(startTimeMs).toISOString(),
+    listener: { port: listenPort, bindHost, localApiKeyBridge },
     http: {
       activeConnections: httpActiveConnections,
       totalRequests: httpRequestTotal,
@@ -158,7 +339,7 @@ function buildStatusPayload() {
           : null,
       })),
     },
-    routes: PROXY_ROUTES.map((r) => {
+    routes: routes.map((r) => {
       const h = upstreamHealth.get(r.port);
       return {
         prefix: r.prefix,
@@ -189,7 +370,11 @@ const WS_CLOSE_GOING_AWAY = Buffer.from([0x88, 0x02, 0x03, 0xe9]);
 
 // ─── Plugin ───────────────────────────────────────────────────────────────────
 
-export function sharedProxyPlugin() {
+export function sharedProxyPlugin(environment: SharedProxyEnvironment = process.env) {
+  const runtimeConfig = resolveSharedProxyConfig(environment);
+  const { bindHost, listenPort, localApiKeyBridge, localTenantId, routes } = runtimeConfig;
+  const localApiKey = resolveLocalApiKey(environment, localApiKeyBridge);
+
   return {
     name: 'shared-proxy',
     apply: 'serve' as const,
@@ -202,6 +387,15 @@ export function sharedProxyPlugin() {
       const proxyServer = http.createServer((req, res) => {
         const url = req.url ?? '/';
 
+        if (
+          localApiKeyBridge &&
+          !isTrustedLocalBridgeRequest(req.headers.host, req.headers.origin, listenPort)
+        ) {
+          res.writeHead(403, { 'Content-Type': 'text/plain; charset=utf-8' });
+          res.end('Local proxy request origin is not allowed.');
+          return;
+        }
+
         if (url === '/__health') {
           res.writeHead(200, { 'Content-Type': 'text/plain' });
           res.end('OK');
@@ -209,13 +403,17 @@ export function sharedProxyPlugin() {
         }
 
         if (url === '/__proxy/status') {
-          const body = JSON.stringify(buildStatusPayload(), null, 2);
+          const body = JSON.stringify(
+            buildStatusPayload(routes, listenPort, bindHost, localApiKeyBridge),
+            null,
+            2,
+          );
           res.writeHead(200, { 'Content-Type': 'application/json' });
           res.end(body);
           return;
         }
 
-        const { port: targetPort, label } = resolveRoute(url);
+        const { port: targetPort, label } = resolveRoute(url, routes);
         incrementHttpCount(label);
         httpActiveConnections += 1;
 
@@ -224,14 +422,23 @@ export function sharedProxyPlugin() {
           req.socket.remoteAddress ??
           '127.0.0.1';
 
-        const upstreamHeaders = {
+        const upstreamHeaders: import('node:http').OutgoingHttpHeaders = {
           ...req.headers,
           host: `localhost:${targetPort}`,
           'x-forwarded-for': clientIp,
-          'x-forwarded-host': req.headers.host ?? `localhost:${SHARED_PROXY_PORT}`,
+          'x-forwarded-host': req.headers.host ?? `localhost:${listenPort}`,
           'x-forwarded-proto': 'http',
-          'x-forwarded-port': String(SHARED_PROXY_PORT),
+          'x-forwarded-port': String(listenPort),
         };
+        if (
+          label === '/api/' &&
+          localApiKey !== undefined &&
+          localTenantId !== undefined &&
+          isAtelierApiPath(url)
+        ) {
+          upstreamHeaders['x-api-key'] = localApiKey;
+          upstreamHeaders['x-tenant-id'] = localTenantId;
+        }
 
         const upstream = http.request(
           {
@@ -305,17 +512,17 @@ export function sharedProxyPlugin() {
         };
         proxyServer.once('error', (err: NodeJS.ErrnoException) => {
           if (err.code !== 'EADDRINUSE') {
-            console.error(
-              `[shared-proxy] Failed to bind on port ${SHARED_PROXY_PORT}: ${err.message}`,
+            process.stderr.write(
+              `[shared-proxy] Failed to bind on port ${listenPort}: ${err.message}\n`,
             );
           }
           finish();
         });
         if (process.platform === 'win32') {
           // Windows does not implement SO_REUSEPORT for this listener shape.
-          proxyServer.listen({ port: SHARED_PROXY_PORT, host: '0.0.0.0' }, finish);
+          proxyServer.listen({ port: listenPort, host: bindHost }, finish);
         } else {
-          proxyServer.listen({ port: SHARED_PROXY_PORT, host: '::', reusePort: true }, finish);
+          proxyServer.listen({ port: listenPort, host: bindHost, reusePort: true }, finish);
         }
       });
 
@@ -324,7 +531,15 @@ export function sharedProxyPlugin() {
       proxyServer.on('upgrade', (req, rawSocket, head) => {
         const socket = rawSocket as import('node:net').Socket;
         const url = req.url ?? '/';
-        const { port: targetPort, label } = resolveRoute(url);
+        if (
+          localApiKeyBridge &&
+          !isTrustedLocalBridgeRequest(req.headers.host, req.headers.origin, listenPort)
+        ) {
+          socket.write('HTTP/1.1 403 Forbidden\r\nConnection: close\r\nContent-Length: 0\r\n\r\n');
+          socket.end();
+          return;
+        }
+        const { port: targetPort, label } = resolveRoute(url, routes);
 
         const tunnelId = `ws-${++wsTunnelIdCounter}`;
         let cleanedUp = false;

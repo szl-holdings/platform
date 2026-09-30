@@ -1,10 +1,10 @@
 {
   "meta": {
-    "generated": "2026-08-31",
+    "generated": "2026-09-29",
     "track": "FRONTIER V2 — Wave 1 Truth Lock",
-    "version": "2.1.4",
-    "measurement_base_commit": "e8c569768943dae57b17483195f5aaccc62b902f",
-    "note": "Canonical reproducible counts for the current protected-source tree. The listed measurement_base_commit is the inspected source after the legacy DCO compatibility workflow was retired; scripts/audit/validate-source-of-truth.js recomputes current-tree metrics from the checked-out commit. Runtime and database values not refreshed on 2026-08-31 remain historical snapshots, not current public claims."
+    "version": "2.1.7",
+    "measurement_base_commit": "f3e0f3ffe7614956d626b40903f50b35080c1614",
+    "note": "Canonical reproducible counts for the integrated Turn Capsule, Grok 4.7 configuration, and protected-main source tree. The listed measurement_base_commit is the inspected protected-main baseline; scripts/audit/validate-source-of-truth.js recomputes current-tree metrics from the checked-out commit. Runtime and database values not refreshed on 2026-09-29 remain historical snapshots, not current public claims."
   },
   "artifacts": {
     "registered": {
@@ -105,13 +105,13 @@
     "route_source_files": {
       "count": 45,
       "command": "Count non-test source files under apps/, services/, and artifacts/api-server/ that contain a detected Express route declaration",
-      "computed": "2026-09-25",
+      "computed": "2026-09-26",
       "note": "Derived from declarations rather than /routes/ path names so router.ts, server.ts, and other route-bearing files are included."
     },
     "handler_declarations": {
-      "count": 314,
+      "count": 315,
       "command": "Count non-test get|post|put|patch|delete|use declarations on app/router and named Express Router receivers under apps/, services/, and artifacts/api-server/",
-      "computed": "2026-09-25",
+      "computed": "2026-09-26",
       "note": "A static declaration count. It does not prove deployment, reachability, authentication, or HTTP 200 behavior."
     }
   },
@@ -128,15 +128,15 @@
     "workflows": {
       "count": 46,
       "command": "Count tracked .github/workflows/*.yml and *.yaml files",
-      "computed": "2026-08-31",
+      "computed": "2026-09-24",
       "note": "Counts the permanent protected-source workflows after the read-only legacy DCO compatibility workflow was retired. The frontier receipt-chain gate remains included."
     }
   },
   "env": {
     "declared_vars": {
-      "count": 238,
+      "count": 245,
       "command": "Count .env.example lines matching ^[A-Z_]+=",
-      "computed": "2026-07-25"
+      "computed": "2026-09-29"
     }
   },
   "mobile": {

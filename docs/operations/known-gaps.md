@@ -1,6 +1,6 @@
 # SZL Holdings — Known Gaps Register (Security & Operations)
 
-**Last updated:** 2026-08-26 (rev 26 — Lighthouse gate integrity; PR #668 source/proof boundary)
+**Last updated:** 2026-09-25 (rev 29 — A11oy Atelier retry and release boundary)
 **Owner:** Engineering / DevOps  
 **Audience:** Enterprise architects, Series A technical advisors, incoming VP Engineering
 
@@ -64,6 +64,63 @@ so those states remain UNAVAILABLE. The repository-wide strict claims gate also
 continues to fail closed on the Vessels/AIS mock while MARINETRAFFIC_API_KEY is
 absent; PR #668 does not relabel that external-authority gap or introduce a
 credential to bypass it.
+
+### 2026-08-30 A11oy Atelier Turn Capsule boundary
+
+**2026-09-29 model migration:** The local source now defaults both Atelier
+adapters to `grok-4.7`, preserves all four reasoning-effort levels, and accepts
+only 4.7 or the explicit 4.6 rollback from environment and request overrides.
+Grok 4.7 provider reasoning ciphertext is discarded; Turn Capsule v1 retains
+bounded text history, not native encrypted-reasoning continuity. A successful
+4.7 inference and committed capsule remain separate runtime gates. Grok Build
+was updated to signed stable 1.0.44; its readback reports an authenticated account
+and a saved 4.7 default. The 2026-09-29 bounded `grok-4.7` canary failed with
+HTTP 402, usage balance exhausted. No direct xAI API key is configured. The
+earlier HTTP 402 balance failure below remains historical evidence.
+
+Turn Capsule v1 adds tenant/session-scoped idempotent replay, one active turn per
+session, a hash-linked 24-hour capsule chain, an authenticated verification
+route, and a staged-response/pending-recovery boundary. The default store remains
+in-process and non-durable. When both continuity directory and key are configured,
+the encrypted local adapter can preserve the capsule chain across a restart on
+one host with one runtime process and the same key.
+
+That local adapter is not a distributed database and has no distributed lock or
+multi-host coordination. It does not establish production identity, deployment,
+direct xAI Responses API operation, or an independent runtime witness. The
+`EvidenceLedger` append remains process-local and non-durable; encrypted Turn
+Capsules do not turn it into an external proof ledger. Shared-proxy listener,
+A11oy, and API ports are now configurable for local collision avoidance, but a
+configured route is not proof that either upstream is running.
+
+On 2026-09-24, the local Grok Build CLI reported an authenticated account and
+advertised `grok-4.6`, but a real browser turn and a direct CLI diagnostic both
+failed with HTTP 402, “Grok Build usage balance exhausted.” The current machine
+has no configured direct xAI API key. The local proxy/API health route is ready
+and encrypted continuity is configured, but this run has no successful provider
+response or committed Turn Capsule. Provider balance or another authorized
+provider configuration is required for a new live inference witness. The API
+now surfaces this known pre-response rejection without presenting it as success
+or retaining a retry-blocking ambiguous reservation.
+
+The browser now persists an unconfirmed turn's session ID and idempotency key
+in tab-scoped storage before sending it, alongside a prompt-free request
+fingerprint digest. A reload can reuse the same key only when the operator
+re-enters the same prompt and settings within the 24-hour logical retention
+window. Clearing or disabling tab storage loses that guarantee; the interface
+warns when storage cannot be written. A new session is an explicit decision to
+abandon the pending retry, not evidence that the provider did not bill it.
+Direct xAI API HTTP 401/402/403/429 rejections are classified as known
+pre-inference failures and release reservations; 5xx, transport failures,
+redirects, and malformed responses retain ambiguous reservations. This is
+tested with injected responses, not live direct-API proof.
+
+The authenticated session-read route still inherits the runtime's global API
+key and caller-supplied tenant header. The loopback solo-builder bridge is
+within that boundary; production multi-tenant confidentiality requires an
+identity-to-tenant binding before this route is publicly exposed. Protected
+source merge also does not itself deploy Atelier: a separately witnessed
+hosted build, identity configuration, and functional provider probe remain open.
 
 ---
 
@@ -580,6 +637,8 @@ Operational gaps, process health, test coverage, observability, team ownership.
 ---
 
 ## Incident Log
+
+- **2026-08-30 (A11oy Atelier Turn Capsule v1):** Source now defines idempotent reservation/replay, a tenant-scoped hash-linked capsule chain, verification, staged commit, pending recovery, an optional encrypted local adapter, explicit browser Resume/New session controls, and fail-closed production continuity. Restart continuity applies only when the absolute directory and 32-byte key are configured, the same key is retained, and one runtime process uses one host. Twenty-four hours is a logical maximum retrieval window; physical purge runs on startup, continuity operations, and a 15-minute service sweep, not while the host is off. The default store and `EvidenceLedger` remain non-durable. Distributed coordination, production identity, deployment, direct xAI API witness, and independent runtime witness remain open evidence states. Configurable shared-proxy ports avoid local listener conflicts but do not establish upstream availability.
 
 - **2026-08-26 (A11oy Atelier local integration):** A11oy Atelier is locally wired through the governed runtime route, deterministic capability policy, xAI API/local Grok Build adapters, EvidenceLedger receipt append, tenant-scoped working memory, CLI, health surface, and A11oy UI. A live local Grok 4.6 witness and browser witness passed. Remaining gaps are production deployment witness, production identity binding, durable external ledger/session persistence, direct xAI API witness, and CI at the eventual remote exact head. Local health or inference evidence must not be reported as deployment.
 
