@@ -70,16 +70,62 @@ export function resolveGrokModel(env: NodeJS.ProcessEnv = process.env): string {
   return resolution.model;
 }
 
+export type RequestedGrokModelResolution =
+  | {
+      ok: true;
+      model: string;
+      source: 'request' | 'SZL_GROK_MODEL' | 'A11OY_ATELIER_MODEL' | 'default';
+    }
+  | { ok: false; reason: string };
+
 /**
- * Model shown by `health()`. A caller-supplied model keeps its existing
- * precedence; otherwise the non-throwing resolver is used so a rejected env
- * value is reported as UNAVAILABLE instead of throwing from a health check.
+ * Resolves the Grok model for one request without throwing.
+ *
+ * The server-side resolution (`tryResolveGrokModel`) always runs first, so a
+ * rejected env override keeps the deployment fail-closed even when the caller
+ * names a model. A caller-supplied model is then honoured only when it is a
+ * member of `ALLOWED_GROK_MODELS` (exact match; the request schema has already
+ * trimmed it); anything else fails closed and the rejected value is never
+ * echoed. With no caller model the resolved server-side pin is used.
+ */
+export function tryResolveRequestedGrokModel(
+  requestedModel: string | undefined,
+  env: NodeJS.ProcessEnv = process.env,
+): RequestedGrokModelResolution {
+  const pinned = tryResolveGrokModel(env);
+  if (!pinned.ok) return pinned;
+  if (requestedModel === undefined) return pinned;
+  if (ALLOWED_GROK_MODELS.includes(requestedModel)) {
+    return { ok: true, model: requestedModel, source: 'request' };
+  }
+  return {
+    ok: false,
+    reason: `The requested model is not an allowlisted Grok model id (allowed: ${ALLOWED_GROK_MODELS.join(', ')}); no provider call was made.`,
+  };
+}
+
+/**
+ * Resolves the Grok model for one request or throws
+ * `AtelierProviderUnavailableError` before any provider call.
+ */
+export function resolveRequestedGrokModel(
+  requestedModel: string | undefined,
+  env: NodeJS.ProcessEnv = process.env,
+): string {
+  const resolution = tryResolveRequestedGrokModel(requestedModel, env);
+  if (!resolution.ok) throw new AtelierProviderUnavailableError(resolution.reason);
+  return resolution.model;
+}
+
+/**
+ * Model shown by `health()`. Uses the non-throwing request resolver so a
+ * rejected env value or an unlisted requested model is reported as
+ * UNAVAILABLE instead of throwing from a health check.
  */
 function healthModel(
   requestedModel?: string,
 ): { ok: true; model: string } | { ok: false; reason: string } {
-  if (requestedModel !== undefined) return { ok: true, model: requestedModel };
-  return tryResolveGrokModel();
+  return tryResolveRequestedGrokModel(requestedModel);
 }
 
 export class AtelierProviderResponseError extends Error {
@@ -198,9 +244,9 @@ export class XaiResponsesProvider implements AtelierProvider {
     if (!this.apiKey.trim()) {
       throw new AtelierProviderUnavailableError('A11OY_ATELIER_XAI_API_KEY is not configured.');
     }
-    // Caller-supplied request.model keeps its existing precedence (hardening it
-    // is a separate change); otherwise the allowlisted resolver runs before fetch.
-    const model = request.model ?? resolveGrokModel();
+    // A caller-supplied request.model must be allowlisted; otherwise the pinned
+    // resolver runs. Either way the model is resolved before fetch.
+    const model = resolveRequestedGrokModel(request.model);
     const controller = new AbortController();
     const timeout = setTimeout(() => controller.abort(), 180_000);
     try {
@@ -335,7 +381,7 @@ export class GrokBuildCliProvider implements AtelierProvider {
     const health = this.health(request.model);
     if (!health.available) throw new AtelierProviderUnavailableError(health.reason);
     // Same precedence and allowlist as the xAI Responses adapter; resolves before exec.
-    const model = request.model ?? resolveGrokModel();
+    const model = resolveRequestedGrokModel(request.model);
     const { stdout } = await execFileAsync(
       this.executable,
       [
