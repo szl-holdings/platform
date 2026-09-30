@@ -9,7 +9,7 @@ import os
 import sqlite3
 import unittest
 from pathlib import Path
-from unittest import mock
+import unittest.mock as mock
 
 EXECUTOR = Path(__file__).resolve().parent.parent / "readiness-dr" / "executor.py"
 SPEC = importlib.util.spec_from_file_location("readiness_dr_executor", EXECUTOR)
