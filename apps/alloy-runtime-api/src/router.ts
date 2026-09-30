@@ -55,6 +55,7 @@ const V1_ENDPOINTS = {
     'POST /api/a11oy/v1/atelier/ask',
     'GET /api/a11oy/v1/atelier/health',
     'GET /api/a11oy/v1/atelier/sessions/:sessionId',
+    'GET /api/a11oy/v1/atelier/sessions/:sessionId/verify',
   ],
   tasks: ['POST /v1/tasks/plan', 'POST /v1/tasks/execute'],
   memory: ['POST /v1/memory/write', 'POST /v1/memory/query', 'DELETE /v1/memory/evict-stale'],

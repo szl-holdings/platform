@@ -9,6 +9,10 @@
       "import": "./src/index.ts"
     }
   },
+  "scripts": {
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "test": "node --experimental-strip-types --test src/index.test.mjs"
+  },
   "devDependencies": {
     "@types/node": "catalog:",
     "typescript": "catalog:"
