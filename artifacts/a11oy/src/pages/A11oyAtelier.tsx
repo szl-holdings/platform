@@ -1,8 +1,97 @@
-import { type FormEvent, useEffect, useState } from 'react';
+import { type FormEvent, useEffect, useRef, useState } from 'react';
 import { Layout } from '../components/layout';
 
 const API = '/api/a11oy/v1/atelier';
 const TENANT_ID = import.meta.env.VITE_A11OY_ATELIER_TENANT_ID ?? 'default';
+const SESSION_STORAGE_KEY = `a11oy.atelier.session-id.v1:${TENANT_ID}`;
+const PENDING_RETRY_STORAGE_KEY = `a11oy.atelier.pending-retry.v1:${TENANT_ID}`;
+const PENDING_RETRY_TTL_MS = 24 * 60 * 60 * 1000;
+
+interface PendingRetry {
+  fingerprintSha256: string;
+  key: string;
+  sessionId: string;
+  createdAt: number;
+}
+
+function normalizeSessionId(value: string | null | undefined): string | undefined {
+  const normalized = value?.trim();
+  return normalized && normalized.length <= 128 ? normalized : undefined;
+}
+
+function readStoredSessionId(): string | undefined {
+  if (typeof window === 'undefined') return undefined;
+  try {
+    return normalizeSessionId(window.sessionStorage.getItem(SESSION_STORAGE_KEY));
+  } catch {
+    return undefined;
+  }
+}
+
+function storeSessionId(sessionId: string): boolean {
+  try {
+    window.sessionStorage.setItem(SESSION_STORAGE_KEY, sessionId);
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+function forgetStoredSessionId(): void {
+  try {
+    window.sessionStorage.removeItem(SESSION_STORAGE_KEY);
+  } catch {
+    // The in-memory session is still cleared when browser storage is unavailable.
+  }
+}
+
+function readPendingRetry(): PendingRetry | undefined {
+  if (typeof window === 'undefined') return undefined;
+  try {
+    const stored = window.sessionStorage.getItem(PENDING_RETRY_STORAGE_KEY);
+    if (!stored) return undefined;
+    const value = JSON.parse(stored) as Partial<PendingRetry>;
+    if (
+      typeof value.fingerprintSha256 !== 'string' ||
+      !/^[a-f0-9]{64}$/.test(value.fingerprintSha256) ||
+      typeof value.key !== 'string' ||
+      !/^[a-f0-9-]{36}$/.test(value.key) ||
+      !normalizeSessionId(value.sessionId) ||
+      typeof value.createdAt !== 'number' ||
+      !Number.isFinite(value.createdAt) ||
+      value.createdAt > Date.now()
+    ) {
+      forgetPendingRetry();
+      return undefined;
+    }
+    return value as PendingRetry;
+  } catch {
+    return undefined;
+  }
+}
+
+function storePendingRetry(value: PendingRetry): boolean {
+  try {
+    window.sessionStorage.setItem(PENDING_RETRY_STORAGE_KEY, JSON.stringify(value));
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+function forgetPendingRetry(): void {
+  try {
+    window.sessionStorage.removeItem(PENDING_RETRY_STORAGE_KEY);
+  } catch {
+    // The in-memory retry remains scoped to this mounted page.
+  }
+}
+
+async function fingerprintRequest(value: string): Promise<string> {
+  const bytes = new TextEncoder().encode(value);
+  const digest = await crypto.subtle.digest('SHA-256', bytes);
+  return Array.from(new Uint8Array(digest), (byte) => byte.toString(16).padStart(2, '0')).join('');
+}
 
 interface ProviderHealth {
   provider: 'xai' | 'grok-build';
@@ -17,6 +106,18 @@ interface ProviderHealth {
 interface HealthResponse {
   status: 'ready' | 'provider-unavailable';
   providers: ProviderHealth[];
+  continuity?: {
+    backend: string;
+    persistenceState:
+      | 'IN_PROCESS_NON_DURABLE'
+      | 'ENCRYPTED_LOCAL_DURABLE'
+      | 'PENDING_RECOVERY'
+      | 'UNAVAILABLE';
+    durable: boolean;
+    encryptionState: 'NONE' | 'ENCRYPTED_AT_REST' | 'UNAVAILABLE';
+    evidenceState: 'OBSERVED' | 'UNAVAILABLE';
+    retentionHours: number;
+  };
   evidenceBoundary: string;
 }
 
@@ -31,6 +132,22 @@ interface AtelierReceipt {
   ledgerEntryId: string | null;
   ledgerState: string;
   memoryState: string;
+  schemaVersion?: string;
+  providerPromptSha256?: string;
+  idempotencyKeyDigest?: string;
+  requestDigest?: string;
+  contextDigest?: string;
+  capsuleDigest?: string | null;
+  sequence?: number | null;
+  priorCapsuleDigest?: string | null;
+  persistenceState?:
+    | 'PENDING_STATE_COMMIT'
+    | 'COMMITTED_IN_PROCESS_NON_DURABLE'
+    | 'COMMITTED_ENCRYPTED_LOCAL_DURABLE'
+    | 'PENDING_RECOVERY'
+    | 'UNAVAILABLE';
+  stateRetentionExpiresAt?: string | null;
+  stateDurable?: boolean;
   localOnly: boolean;
   latencyMs: number;
   usage: Record<string, number>;
@@ -40,6 +157,7 @@ interface AskResponse {
   answer: string;
   disclosure: string;
   receipt: AtelierReceipt;
+  replayed?: boolean;
 }
 
 const palette = {
@@ -72,8 +190,19 @@ function StatusDot({ available }: { available: boolean }) {
 }
 
 function ReceiptRail({ receipt }: { receipt: AtelierReceipt }) {
+  const priorCapsule =
+    receipt.priorCapsuleDigest === undefined
+      ? 'UNAVAILABLE'
+      : (receipt.priorCapsuleDigest ?? 'GENESIS');
+  const stateDurable =
+    receipt.stateDurable === undefined ? 'UNAVAILABLE' : receipt.stateDurable ? 'YES' : 'NO';
   const rows = [
     ['Receipt', receipt.receiptId],
+    ['Turn Capsule', receipt.capsuleDigest ?? 'UNAVAILABLE'],
+    ['Sequence', receipt.sequence == null ? 'UNAVAILABLE' : String(receipt.sequence)],
+    ['Prior capsule', priorCapsule],
+    ['Continuity', receipt.persistenceState ?? 'UNAVAILABLE'],
+    ['State durable', stateDurable],
     ['Provider', `${receipt.providerLabel} / ${receipt.model}`],
     ['Provider request', receipt.providerRequestId ?? 'UNAVAILABLE'],
     ['Evidence', receipt.evidenceState],
@@ -119,12 +248,25 @@ function ReceiptRail({ receipt }: { receipt: AtelierReceipt }) {
 export function A11oyAtelier() {
   const [prompt, setPrompt] = useState('');
   const [provider, setProvider] = useState<'auto' | 'xai' | 'grok-build'>('auto');
-  const [reasoningEffort, setReasoningEffort] = useState<'low' | 'medium' | 'high'>('medium');
+  const [reasoningEffort, setReasoningEffort] = useState<'low' | 'medium' | 'high' | 'xhigh'>(
+    'medium',
+  );
   const [sessionId, setSessionId] = useState<string>();
+  const [initialPendingRetry] = useState(() => readPendingRetry());
+  const [resumeSessionId, setResumeSessionId] = useState(
+    () => readStoredSessionId() ?? initialPendingRetry?.sessionId ?? '',
+  );
+  const [sessionNotice, setSessionNotice] = useState<string | undefined>(() => {
+    if (!initialPendingRetry) return undefined;
+    return Date.now() - initialPendingRetry.createdAt >= PENDING_RETRY_TTL_MS
+      ? 'An earlier turn is unconfirmed and its safe retry window has expired. Do not resend it automatically.'
+      : 'An earlier turn is unconfirmed. Re-enter the same prompt and settings to retry safely; the prompt is not stored in this tab.';
+  });
   const [health, setHealth] = useState<HealthResponse>();
   const [result, setResult] = useState<AskResponse>();
   const [error, setError] = useState<string>();
   const [loading, setLoading] = useState(false);
+  const pendingRetry = useRef<PendingRetry | undefined>(initialPendingRetry);
 
   useEffect(() => {
     const previousTitle = document.title;
@@ -159,29 +301,125 @@ export function A11oyAtelier() {
     setLoading(true);
     setError(undefined);
     try {
+      const requestFingerprint = JSON.stringify({
+        prompt: trimmed,
+        provider,
+        reasoningEffort,
+        capabilities: { tools: false, search: false, durableStorage: false, subagents: false },
+      });
+      const fingerprintSha256 = await fingerprintRequest(requestFingerprint);
+      if (
+        pendingRetry.current &&
+        Date.now() - pendingRetry.current.createdAt >= PENDING_RETRY_TTL_MS
+      ) {
+        setError(
+          'The pending retry window expired. Do not resend it automatically; choose New session only if you intend a new provider request.',
+        );
+        return;
+      }
+      if (pendingRetry.current && pendingRetry.current.fingerprintSha256 !== fingerprintSha256) {
+        setError(
+          'An earlier turn is unconfirmed. Retry with the same prompt, provider, and reasoning effort, or explicitly choose New session.',
+        );
+        return;
+      }
+      const matchingRetry = pendingRetry.current;
+      const requestSessionId = sessionId ?? matchingRetry?.sessionId ?? crypto.randomUUID();
+      const idempotencyKey = matchingRetry?.key ?? crypto.randomUUID();
+      pendingRetry.current = {
+        fingerprintSha256,
+        key: idempotencyKey,
+        sessionId: requestSessionId,
+        createdAt: matchingRetry?.createdAt ?? Date.now(),
+      };
+      if (!storePendingRetry(pendingRetry.current)) {
+        setSessionNotice(
+          'Tab storage is unavailable. Keep this tab open: a reload would lose the safe retry key.',
+        );
+      }
+      const requestBody = {
+        prompt: trimmed,
+        provider,
+        reasoningEffort,
+        sessionId: requestSessionId,
+        capabilities: { tools: false, search: false, durableStorage: false, subagents: false },
+      };
       const response = await fetch(`${API}/ask`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json', 'X-Tenant-Id': TENANT_ID },
-        body: JSON.stringify({
-          prompt: trimmed,
-          provider,
-          reasoningEffort,
-          ...(sessionId ? { sessionId } : {}),
-          capabilities: { tools: false, search: false, durableStorage: false, subagents: false },
-        }),
+        headers: {
+          'Content-Type': 'application/json',
+          'X-Tenant-Id': TENANT_ID,
+          'Idempotency-Key': idempotencyKey,
+        },
+        body: JSON.stringify({ ...requestBody, idempotencyKey }),
       });
       const payload = (await response.json()) as AskResponse & { error?: string; code?: string };
       if (!response.ok)
         throw new Error(
           `${payload.error ?? `HTTP ${response.status}`} [${payload.code ?? 'ERROR'}]`,
         );
-      setResult(payload);
-      setSessionId(payload.receipt.sessionId);
+      const confirmedSessionId = normalizeSessionId(payload.receipt.sessionId);
+      if (!confirmedSessionId) throw new Error('Atelier returned an invalid session identifier.');
+      const replayed = response.headers.get('Idempotency-Replayed')?.toLowerCase() === 'true';
+      setResult(replayed && payload.replayed !== true ? { ...payload, replayed: true } : payload);
+      setSessionId(confirmedSessionId);
+      setResumeSessionId(confirmedSessionId);
+      setSessionNotice(
+        storeSessionId(confirmedSessionId)
+          ? 'Session confirmed and saved for this browser tab.'
+          : 'Session confirmed, but tab storage is unavailable. Copy the session ID before leaving.',
+      );
       setPrompt('');
+      pendingRetry.current = undefined;
+      forgetPendingRetry();
     } catch (reason) {
       setError(reason instanceof Error ? reason.message : String(reason));
     } finally {
       setLoading(false);
+    }
+  }
+
+  function resumeSession() {
+    const normalized = normalizeSessionId(resumeSessionId);
+    if (!normalized) {
+      setSessionNotice('Enter a session ID between 1 and 128 characters.');
+      return;
+    }
+    if (pendingRetry.current?.sessionId !== normalized) {
+      pendingRetry.current = undefined;
+      forgetPendingRetry();
+    }
+    setSessionId(normalized);
+    setResumeSessionId(normalized);
+    setResult(undefined);
+    setSessionNotice(
+      storeSessionId(normalized)
+        ? pendingRetry.current
+          ? 'Session selected. The unconfirmed turn still requires the same prompt and settings for a safe retry.'
+          : 'Session selected for the next request and saved for this browser tab.'
+        : 'Session selected for the next request, but tab storage is unavailable.',
+    );
+  }
+
+  function startNewSession() {
+    pendingRetry.current = undefined;
+    forgetPendingRetry();
+    setSessionId(undefined);
+    setResumeSessionId('');
+    setResult(undefined);
+    forgetStoredSessionId();
+    setSessionNotice('New session selected. A session ID will be created with the next request.');
+  }
+
+  async function copySessionId() {
+    if (!sessionId) return;
+    try {
+      await navigator.clipboard.writeText(sessionId);
+      setSessionNotice('Session ID copied.');
+    } catch {
+      setSessionNotice(
+        'Clipboard access was unavailable. Select and copy the session ID manually.',
+      );
     }
   }
 
@@ -237,20 +475,183 @@ export function A11oyAtelier() {
               }}
             >
               <StatusDot available={item.available} />
-              <strong>{item.provider === 'xai' ? 'xAI API' : 'xAI Grok Build CLI'}</strong>
+              <strong>
+                {item.provider === 'xai' ? 'xAI API' : 'xAI Grok Build CLI'} · {item.model}
+              </strong>
               <span style={{ color: palette.muted }}>{item.reason}</span>
               <span style={{ color: item.available ? palette.teal : palette.muted }}>
-                {item.available ? 'AVAILABLE' : 'UNAVAILABLE'} {item.localOnly ? '· LOCAL' : ''}
+                {item.available ? 'CONFIGURED' : 'UNAVAILABLE'} {item.localOnly ? '· LOCAL' : ''}
               </span>
             </div>
           ))}
           {health ? (
-            <div style={{ fontSize: 11, color: palette.muted }}>{health.evidenceBoundary}</div>
+            <>
+              {health.continuity ? (
+                <div
+                  style={{
+                    display: 'grid',
+                    gridTemplateColumns: '16px minmax(140px, 0.35fr) minmax(0, 1fr) auto',
+                    alignItems: 'center',
+                    gap: 10,
+                    border: `1px solid ${palette.borderStrong}`,
+                    background: 'rgba(201,183,135,0.035)',
+                    padding: '0.75rem 0.9rem',
+                    borderRadius: 8,
+                    fontSize: 12,
+                  }}
+                >
+                  <StatusDot available={health.continuity.evidenceState === 'OBSERVED'} />
+                  <strong>A11oy continuity</strong>
+                  <span style={{ color: palette.muted }}>
+                    {health.continuity.backend} · {health.continuity.encryptionState} ·{' '}
+                    {health.continuity.retentionHours}h retention
+                  </span>
+                  <span style={{ color: health.continuity.durable ? palette.teal : palette.gold }}>
+                    {health.continuity.persistenceState}
+                  </span>
+                </div>
+              ) : null}
+              <div style={{ fontSize: 11, color: palette.muted }}>{health.evidenceBoundary}</div>
+            </>
           ) : (
             <div style={{ fontSize: 12, color: palette.muted }}>
               Checking provider configuration…
             </div>
           )}
+        </section>
+
+        <section
+          aria-label="Session continuity"
+          style={{
+            marginBottom: 18,
+            border: `1px solid ${palette.border}`,
+            background: palette.panel,
+            borderRadius: 10,
+            padding: '1rem',
+          }}
+        >
+          <div style={{ fontSize: 11, letterSpacing: '0.16em', color: palette.gold }}>
+            SESSION CONTINUITY
+          </div>
+          <div
+            style={{
+              display: 'flex',
+              flexWrap: 'wrap',
+              gap: 10,
+              alignItems: 'end',
+              marginTop: 12,
+            }}
+          >
+            <label
+              style={{
+                display: 'grid',
+                flex: '1 1 320px',
+                gap: 5,
+                fontSize: 11,
+                color: palette.muted,
+              }}
+            >
+              RESUME SESSION ID
+              <input
+                value={resumeSessionId}
+                onChange={(event) => setResumeSessionId(event.target.value)}
+                maxLength={128}
+                autoComplete="off"
+                spellCheck={false}
+                aria-describedby="atelier-session-privacy"
+                placeholder="Paste a previous session ID"
+                style={{
+                  padding: '0.6rem 0.7rem',
+                  background: palette.bg,
+                  color: palette.text,
+                  border: `1px solid ${palette.border}`,
+                  borderRadius: 6,
+                  font: 'inherit',
+                }}
+              />
+            </label>
+            <button
+              type="button"
+              onClick={resumeSession}
+              disabled={loading || !normalizeSessionId(resumeSessionId)}
+              style={{
+                padding: '0.6rem 0.9rem',
+                border: `1px solid ${palette.borderStrong}`,
+                borderRadius: 6,
+                background: palette.bg,
+                color: palette.text,
+                cursor: loading ? 'not-allowed' : 'pointer',
+              }}
+            >
+              Resume
+            </button>
+            <button
+              type="button"
+              onClick={startNewSession}
+              disabled={loading}
+              style={{
+                padding: '0.6rem 0.9rem',
+                border: `1px solid ${palette.border}`,
+                borderRadius: 6,
+                background: palette.bg,
+                color: palette.text,
+                cursor: loading ? 'not-allowed' : 'pointer',
+              }}
+            >
+              New session
+            </button>
+          </div>
+          <div
+            style={{
+              marginTop: 12,
+              display: 'flex',
+              flexWrap: 'wrap',
+              gap: 10,
+              alignItems: 'center',
+            }}
+          >
+            <span style={{ color: palette.muted, fontSize: 11 }}>ACTIVE SESSION</span>
+            <code style={{ color: palette.text, overflowWrap: 'anywhere' }}>
+              {sessionId ?? 'Created with the next request'}
+            </code>
+            <button
+              type="button"
+              onClick={copySessionId}
+              disabled={!sessionId}
+              style={{
+                padding: '0.45rem 0.75rem',
+                border: `1px solid ${palette.border}`,
+                borderRadius: 6,
+                background: palette.bg,
+                color: palette.text,
+                cursor: sessionId ? 'pointer' : 'not-allowed',
+              }}
+            >
+              Copy ID
+            </button>
+          </div>
+          {sessionNotice ? (
+            <div
+              role="status"
+              aria-live="polite"
+              style={{ marginTop: 10, color: palette.teal, fontSize: 11 }}
+            >
+              {sessionNotice}
+            </div>
+          ) : null}
+          <p
+            id="atelier-session-privacy"
+            style={{
+              margin: '10px 0 0',
+              color: palette.muted,
+              fontSize: 11,
+              lineHeight: 1.55,
+            }}
+          >
+            This tab stores the session ID and, while a turn is unconfirmed, a prompt-free retry
+            key. Neither is authentication. On a shared browser, choose New session before handing
+            off the tab.
+          </p>
         </section>
 
         <div
@@ -340,6 +741,7 @@ export function A11oyAtelier() {
                     <option value="low">Low</option>
                     <option value="medium">Medium</option>
                     <option value="high">High</option>
+                    <option value="xhigh">Extra high</option>
                   </select>
                 </label>
                 <button
@@ -382,7 +784,7 @@ export function A11oyAtelier() {
                 style={{ marginTop: 22, borderTop: `1px solid ${palette.border}`, paddingTop: 20 }}
               >
                 <div style={{ fontSize: 11, letterSpacing: '0.16em', color: palette.teal }}>
-                  ATELIER RESPONSE
+                  {result.replayed ? 'ATELIER RESPONSE · IDEMPOTENT REPLAY' : 'ATELIER RESPONSE'}
                 </div>
                 <div style={{ whiteSpace: 'pre-wrap', lineHeight: 1.72, marginTop: 12 }}>
                   {result.answer}
