@@ -1,6 +1,6 @@
 # SZL Holdings — Known Gaps Register (Security & Operations)
 
-**Last updated:** 2026-09-29 (rev 30 — P0 publication and Atelier release boundaries)
+**Last updated:** 2026-09-30 (rev 30 — P0 proof and separate live readiness boundaries)
 **Owner:** Engineering / DevOps  
 **Audience:** Enterprise architects, Series A technical advisors, incoming VP Engineering
 
@@ -668,6 +668,19 @@ Operational gaps, process health, test coverage, observability, team ownership.
 ---
 
 ## Incident Log
+
+- **2026-09-30 (P0 exact-source browser gap closed locally):** Source
+  `683c13a1ec3ddfc0a347c103a242ae0c8a17ea46`, including protected base
+  `402c9876c032a9bb532f0a3d1f997aa3254c7653`, passed the owned build, 155 browser
+  states and 75 screenshots with zero failures. All source/image/receipt/manifest
+  bindings were independently checked and retained. Earlier missing-browser,
+  ENOSPC and timeout attempts remain failed historical observations. Protected
+  admission/hosted CI and full operational readiness are not inferred. The latest
+  independently deployed A11oy Python status still reports
+  `BLOCKED/github_inventory_unavailable` despite signed persistent receipts.
+  Lambda #57/#58 merged normally and its separate v0.2.0 model-mirror receipt
+  was recovered; that is not first-class kernel or model-quality qualification.
+  Complete proof: `audit/P0_SERIES_A_SOURCE_ALIGNMENT_20260929.md`.
 
 - **2026-09-29 (P0 publication and operational boundary):** The complete signed
   implementation and September 25 proof were normally pushed to the existing

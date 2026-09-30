@@ -176,3 +176,28 @@ receipt parity and artifact promotion are not established by this Platform push.
 See `audit/P0_SERIES_A_SOURCE_ALIGNMENT_20260929.md` for exact source, commands,
 provider observations, rejected attempts and remaining gates. No new PR, protected
 merge, deployment, force-push, provider write or gate bypass occurred.
+
+## 2026-09-30 final protected-base browser qualification
+
+Protected base `402c9876c032a9bb532f0a3d1f997aa3254c7653` is integrated without
+rewriting history. Captured source `683c13a1ec3ddfc0a347c103a242ae0c8a17ea46`,
+tree `3b9f17aa297a54135305fab779f78fd5ddf80af0`, passes the owned build,
+155 interaction states and 75 screenshots with zero failures, wrapper exit 0.
+All PNG, source-input, receipt and manifest bindings were independently checked;
+75 PNGs and three byte-preserved sidecars are retained under the actual UTC date.
+Fresh qualification: 28 source/helper/Atelier contracts, 37 runtime tests,
+190 shared-contract tests, 9 browser-layout fixtures, four typechecks and
+26 docs checks passed. Failed ENOSPC/timeout attempts remain historical failures.
+
+The user subsequently authorized normal PR handling/merges. Lambda #58 and #57
+were reviewed and normally merged with exact-head green checks and valid
+signatures; their tested trees match the verified merge trees. Another active
+publisher subsequently completed v0.2.0 model-mirror publication; its terminal
+receipt and HF tag revision were verified here. No competing dispatch occurred.
+
+The authenticated organization inventory covers 130/130 repositories, not full
+code/runtime certification. Private inventory stays local. A11oy's independently
+deployed Python control plane still reports BLOCKED/github_inventory_unavailable.
+Platform fixtures remain DEMO, not authenticated operations. Full source, test,
+capture, merge, publication and runtime boundaries are in
+`audit/P0_SERIES_A_SOURCE_ALIGNMENT_20260929.md` and `audit/screenshot-catalog.md`.
