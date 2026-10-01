@@ -1,6 +1,6 @@
 # SZL Holdings — Known Gaps Register (Security & Operations)
 
-**Last updated:** 2026-09-25 (rev 29 — A11oy Atelier retry and release boundary)
+**Last updated:** 2026-09-30 (rev 30 — P0 proof and separate live readiness boundaries)
 **Owner:** Engineering / DevOps  
 **Audience:** Enterprise architects, Series A technical advisors, incoming VP Engineering
 
@@ -49,21 +49,52 @@ not an accepted remediation.
 
 ### 2026-08-26 A11oy Series A route boundary
 
-PR #668 now has a source-complete /a11oy/start candidate on
-codex/series-a-product-current-main-v4. The route keeps all six operational
-truth states visible, labels its current scenarios DEMO or UNAVAILABLE, and
-contains the developer-verification and non-claim boundaries on the same
-surface. A local exact-source rail built and hashed 344 files, exercised all
-six tabs and keyboard behavior at five viewports, and promoted digest-matched
-screenshots. That establishes source and local-build behavior only.
+PR #668 merged the source-complete `/a11oy/start` journey normally on
+2026-08-28. Its final branch head was
+`6a79dcfd76c13cd2fb402015bcdbfa5223d602b5`, tree
+`5dafa42faa20c11e13581d79c6de2c6f2fedde1e`. Protected squash commit
+`6bde2b6f2e0a360f31a87c3e8228c141b062585e` is GitHub-verified and has the
+same tree. The five branch commits had valid DCO trailers but were reported as
+unsigned; the verified squash result does not retroactively relabel them.
+Current protected main `bd1e62dea8b229f2e437b01488e76facb4c81b1c`
+retains the merge as an ancestor as observed on 2026-09-04.
 
-Hosted exact-head checks, fresh review, protected merge, deployment, production
-health, customer use, and external-service parity remain separate evidence
-states. No deployment or customer witness is currently attached to this task,
-so those states remain UNAVAILABLE. The repository-wide strict claims gate also
-continues to fail closed on the Vessels/AIS mock while MARINETRAFFIC_API_KEY is
-absent; PR #668 does not relabel that external-authority gap or introduce a
-credential to bypass it.
+That protected head also contains the parsed High/Critical dependency-audit
+repair from commit `d878d23fc3a6ec332f366bbbd7e9f5e00d9e8df5`
+and the mirrored-asset lint repair from verified commit
+`bd1e62dea8b229f2e437b01488e76facb4c81b1c`. The preceding full-suite run
+failed Lint and Runtime Audit because each of the byte-identical Sentra and
+Vessels hologram assets contained two block-local `var` declarations. The
+protected repair makes those four existing hoists explicit and passes the
+full local Oxlint, Biome, and environment-coverage contract. Fresh clean
+hosted checks on an exact candidate head remain the promotion authority; a
+local build from a partially linked dependency tree is not substituted for
+that evidence.
+
+The protected source keeps all six operational truth states visible, labels
+the current scenarios DEMO or UNAVAILABLE, aliases `/a11oy/investor-demo` to
+the same qualified surface, and places developer-verification and non-claim
+boundaries on that surface. The local exact-source rail built and hashed 344
+files, exercised all six tabs and keyboard behavior at five viewports, and
+promoted digest-matched screenshots. The final PR rollup recorded 52 successful
+checks and 3 expected skips, and all four review threads were resolved. These
+facts establish protected source and local-build behavior only.
+
+The separately dispatched exact-head screenshot run
+<https://github.com/szl-holdings/platform/actions/runs/33013248530> failed before
+capture because the isolated candidate identity could not execute pnpm through
+the runner-private path. PR #690 later repaired the controller to expose and
+invoke one candidate-readable pinned pnpm executable, and its controller checks
+passed. That later controller proof does not retroactively create a hosted
+capture receipt for PR #668. Hosted exact-head screenshot evidence therefore
+remains UNAVAILABLE for that merged candidate.
+
+Deployment, production health, customer use, and external-service parity remain
+separate evidence states. No deployment or customer witness is attached to
+this task, so those states remain UNAVAILABLE. The repository-wide strict
+claims gate also continues to fail closed on the Vessels/AIS mock while
+MARINETRAFFIC_API_KEY is absent; PR #668 does not relabel that
+external-authority gap or introduce a credential to bypass it.
 
 ### 2026-08-30 A11oy Atelier Turn Capsule boundary
 
@@ -637,6 +668,49 @@ Operational gaps, process health, test coverage, observability, team ownership.
 ---
 
 ## Incident Log
+
+- **2026-09-30 (P0 exact-source browser gap closed locally):** Source
+  `683c13a1ec3ddfc0a347c103a242ae0c8a17ea46`, including protected base
+  `402c9876c032a9bb532f0a3d1f997aa3254c7653`, passed the owned build, 155 browser
+  states and 75 screenshots with zero failures. All source/image/receipt/manifest
+  bindings were independently checked and retained. Earlier missing-browser,
+  ENOSPC and timeout attempts remain failed historical observations. Protected
+  admission/hosted CI and full operational readiness are not inferred. The latest
+  independently deployed A11oy Python status still reports
+  `BLOCKED/github_inventory_unavailable` despite signed persistent receipts.
+  Lambda #57/#58 merged normally and its separate v0.2.0 model-mirror receipt
+  was recovered; that is not first-class kernel or model-quality qualification.
+  Complete proof: `audit/P0_SERIES_A_SOURCE_ALIGNMENT_20260929.md`.
+
+- **2026-09-29 (P0 publication and operational boundary):** The complete signed
+  implementation and September 25 proof were normally pushed to the existing
+  task branch at `4d44542e967eb341b05418f8a0bc550b882bf1dc`; remote identity and
+  GitHub signature verified. Fresh production build and scoped JS/TS/Python
+  checks passed. Current browser qualification is blocked by missing Chromium
+  and disk exhaustion; earlier screenshots are not relabeled. PR #601 remains
+  closed, and the published head has no Actions runs in the branch/commit query.
+  The documented lib/a11oy-fabric-py path is absent; actual Python checks cover
+  readiness, substrate workers, Live-Wires and Wire-D. The independently served
+  A11oy product still reports absent signer/unminted receipt; a11oy.net remains
+  static. No provider or production gap is closed by branch publication.
+  Exact commands, source mappings and limits:
+  `audit/P0_SERIES_A_SOURCE_ALIGNMENT_20260929.md`.
+
+- **2026-09-25 (P0 current-source completion):** The protected-base successor
+  `c62cac56e4ea84ccff641e0cc119bfe67278e577` passed 75 source-bound captures and
+  155 browser states after correcting capture's lazy-route readiness race.
+  Fresh runtime 37/37, shared contracts 190/190, source/helper 23/23, browser
+  layout 9/9 and four scoped typechecks passed. Evidence is local/non-authoritative;
+  strict claims still lacks Vessels/AIS authority, and aggregate/hosted/provider/
+  deployment gates remain open. See `audit/P0_SERIES_A_PRODUCT_UPGRADE_20260925.md`.
+
+- **2026-09-24 (P0 product upgrade):** Source `6ca620d578c39a9b97a47259445782bf6b58f159`
+  closes the scoped responsive clipping, mobile navigation and replay pause/resume
+  gaps with 155 local interaction states and 75 source-bound screenshots. This is
+  local fixture/product evidence, not production readiness. Vessels/AIS strict
+  claims remains blocked without provider authority; aggregate typecheck is not
+  qualified; exact-head hosted CI, protected promotion, provider publication and
+  deployment remain separate. See `audit/P0_SERIES_A_PRODUCT_UPGRADE_20260924.md`.
 
 - **2026-08-30 (A11oy Atelier Turn Capsule v1):** Source now defines idempotent reservation/replay, a tenant-scoped hash-linked capsule chain, verification, staged commit, pending recovery, an optional encrypted local adapter, explicit browser Resume/New session controls, and fail-closed production continuity. Restart continuity applies only when the absolute directory and 32-byte key are configured, the same key is retained, and one runtime process uses one host. Twenty-four hours is a logical maximum retrieval window; physical purge runs on startup, continuity operations, and a 15-minute service sweep, not while the host is off. The default store and `EvidenceLedger` remain non-durable. Distributed coordination, production identity, deployment, direct xAI API witness, and independent runtime witness remain open evidence states. Configurable shared-proxy ports avoid local listener conflicts but do not establish upstream availability.
 
