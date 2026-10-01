@@ -2,13 +2,14 @@
 """
 READINESS-DR (disaster recovery) executor.
 
-For each flagship that exposes an Unay LMDB store:
-  1. Trigger a backup dump (GET <base>/unay/dump -> newline-delimited JSON of
-     key/value receipt rows, or a binary LMDB copy when /unay/export is present).
-  2. Verify the dump is readable + non-empty.
-  3. Test restore: load the dump into a fresh in-memory sqlite table and query
-     a sample row back, proving the backup is restorable.
-  4. Upload the dump + a restore-proof receipt to the runs dataset.
+For each flagship with GET <base>/unay/dump:
+  1. Validate a non-empty UTF-8 NDJSON response of unique key/value records.
+  2. Load those records into fresh in-memory SQLite and compare every row.
+  3. Attempt to upload the observed response and a receipt to the runs dataset.
+
+This checks only the supplied key/value records' local SQLite round-trip.
+It does not establish source completeness, authenticity, LMDB recovery, or
+production disaster recovery. Binary LMDB exports are not supported here.
 
 Emits backup-and-restore proof receipts (signed). Flagships without an Unay
 endpoint are reported SKIPPED (honest), never GREEN.
@@ -17,7 +18,7 @@ Author: Yachay <yachay@szlholdings.dev>
 """
 from __future__ import annotations
 
-import io
+import contextlib
 import json
 import os
 import sqlite3
@@ -40,29 +41,64 @@ def fetch(url: str, timeout: float = 20.0) -> bytes | None:
     return None
 
 
+def _unique_json_object(pairs: list[tuple[str, object]]) -> dict:
+    obj = {}
+    for key, value in pairs:
+        if key in obj:
+            raise ValueError("duplicate JSON field")
+        obj[key] = value
+    return obj
+
+
+def _reject_nonfinite(value: str) -> None:
+    raise ValueError("non-finite JSON number")
+
+
 def restore_proof(dump: bytes) -> dict:
-    """Load NDJSON rows into a fresh sqlite and read one back."""
+    """Validate supplied NDJSON key/value records and round-trip all in SQLite."""
+    try:
+        text = dump.decode("utf-8")
+    except UnicodeDecodeError:
+        return {"restored": False, "reason": "dump is not valid UTF-8"}
+
     rows = []
-    for line in io.BytesIO(dump).read().decode("utf-8", "replace").splitlines():
-        line = line.strip()
+    keys = set()
+    for line_number, line in enumerate(text.split("\n"), start=1):
+        line = line.strip(" \t\r")
         if not line:
             continue
         try:
-            obj = json.loads(line)
-            rows.append((str(obj.get("key", "")), json.dumps(obj.get("value", obj))))
-        except Exception:
-            # tolerate non-JSON lines by storing raw
-            rows.append(("raw", line))
+            obj = json.loads(line, object_pairs_hook=_unique_json_object,
+                             parse_constant=_reject_nonfinite)
+        except (ValueError, RecursionError):
+            return {"restored": False, "reason": "invalid JSON record", "line": line_number}
+        if not isinstance(obj, dict) or not isinstance(obj.get("key"), str) \
+                or not obj["key"] or "value" not in obj:
+            return {"restored": False, "reason": "record requires a nonempty string key and value field",
+                    "line": line_number}
+        if obj["key"] in keys:
+            return {"restored": False, "reason": "duplicate record key", "line": line_number}
+        try:
+            value = json.dumps(obj["value"], sort_keys=True, allow_nan=False)
+        except (ValueError, RecursionError):
+            return {"restored": False, "reason": "invalid JSON value", "line": line_number}
+        keys.add(obj["key"])
+        rows.append((obj["key"], value))
     if not rows:
-        return {"restored": False, "reason": "empty/unparseable dump"}
-    con = sqlite3.connect(":memory:")
-    con.execute("CREATE TABLE unay(k TEXT, v TEXT)")
-    con.executemany("INSERT INTO unay(k, v) VALUES(?, ?)", rows)
-    con.commit()
-    n = con.execute("SELECT count(*) FROM unay").fetchone()[0]
-    sample = con.execute("SELECT k, v FROM unay LIMIT 1").fetchone()
-    con.close()
-    return {"restored": True, "rows": n, "sample_key": sample[0]}
+        return {"restored": False, "reason": "empty dump"}
+    try:
+        with contextlib.closing(sqlite3.connect(":memory:")) as con:
+            con.execute("CREATE TABLE unay(k TEXT PRIMARY KEY, v TEXT NOT NULL)")
+            con.executemany("INSERT INTO unay(k, v) VALUES(?, ?)", rows)
+            con.commit()
+            restored = con.execute("SELECT k, v FROM unay ORDER BY k").fetchall()
+    except (sqlite3.Error, UnicodeError):
+        return {"restored": False, "reason": "SQLite restore failed"}
+    if restored != sorted(rows):
+        return {"restored": False, "reason": "SQLite key/value integrity mismatch",
+                "expected_rows": len(rows), "observed_rows": len(restored)}
+    return {"restored": True, "rows": len(restored), "sample_key": restored[0][0],
+            "verified_rows": len(restored), "restore_target": "in-memory SQLite"}
 
 
 def dr_flagship(fl: dict) -> dict:
