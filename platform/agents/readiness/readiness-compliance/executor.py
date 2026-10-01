@@ -6,14 +6,12 @@ Checks:
   1. Doctrine v11 numbers consistency across the mesh: scans each flagship's
      README/CITATION for the canonical 749/14/163 and flags any stale numbers
      (626/189/168, v7/v9/v10).
-  2. Wire D DSSE signing produces verifiable envelopes: requests a signed tick
-     from each flagship's /khipu/sign and verifies the DSSE envelope structure
-     (payloadType, signatures[]); when a public key is exposed, verifies sig.
+  2. Wire D envelope structure: requests an envelope from each flagship's
+     /khipu/sign. Structure is observed; signature trust is not verified here.
   3. LEGAL_BOUNDARIES.md on killinchu is accessible.
-  4. Privacy policy + DPA template + GDPR endpoint present (customer-portal /
-     docs-site).
+  4. Privacy policy + DPA template present (customer-portal / docs-site).
 
-Emits a NIST AI RMF + EU AI Act Article 12 (record-keeping) compliance matrix.
+Emits technical observations and an explicitly NOT_ASSESSED framework matrix.
 Author: Yachay <yachay@szlholdings.dev>
 """
 from __future__ import annotations
@@ -60,24 +58,51 @@ def doctrine_consistency() -> list[dict]:
     return rows
 
 
+def nonempty_base64(value: object) -> bool:
+    if not isinstance(value, str) or not value:
+        return False
+    try:
+        return bool(base64.b64decode(value, validate=True))
+    except (ValueError, TypeError):
+        return False
+
+
+def envelope_structure_present(env: object) -> bool:
+    """Inspect fields only; decoding bytes does not authenticate a signer."""
+    if not isinstance(env, dict):
+        return False
+    payload_type = env.get("payloadType")
+    signatures = env.get("signatures")
+    return (isinstance(payload_type, str) and bool(payload_type.strip())
+            and nonempty_base64(env.get("payload"))
+            and isinstance(signatures, list) and bool(signatures)
+            and all(isinstance(sig, dict) and nonempty_base64(sig.get("sig"))
+                    for sig in signatures))
+
+
 def wire_d_dsse() -> list[dict]:
     rows = []
     for fl in khipu.FLAGSHIPS:
         base = khipu.flagship_url(fl)
         if not base:
-            rows.append({"flagship": fl["name"], "verifiable": None, "reason": "url unset"})
+            rows.append({"flagship": fl["name"], "verifiable": None,
+                         "verification_state": "UNAVAILABLE", "reason": "url unset"})
             continue
         try:
             req = urllib.request.Request(f"{base.rstrip('/')}/khipu/sign", method="POST",
                                          data=b"{}", headers={"Content-Type": "application/json"})
             with urllib.request.urlopen(req, timeout=8) as resp:
                 env = json.loads(resp.read(65536).decode())
-            ok = isinstance(env, dict) and "payload" in env and \
-                isinstance(env.get("signatures"), list) and len(env["signatures"]) > 0
-            rows.append({"flagship": fl["name"], "verifiable": bool(ok),
-                         "has_payloadType": "payloadType" in env})
+            structure = envelope_structure_present(env)
+            rows.append({"flagship": fl["name"], "verifiable": None,
+                         "verification_state": "NOT_MEASURED",
+                         "envelope_structure_present": structure,
+                         "has_payloadType": isinstance(env, dict)
+                         and isinstance(env.get("payloadType"), str)
+                         and bool(env["payloadType"].strip())})
         except Exception as exc:
             rows.append({"flagship": fl["name"], "verifiable": False,
+                         "verification_state": "FETCH_ERROR",
                          "reason": f"{type(exc).__name__}: {exc}"})
     return rows
 
@@ -97,22 +122,37 @@ def main() -> int:
     doctrine = doctrine_consistency()
     wired = wire_d_dsse()
     lp = legal_and_privacy()
-    # NIST AI RMF (Measure/Manage) + EU AI Act Art. 12 (logging/record-keeping)
-    art12_ok = all(r.get("verifiable") for r in wired if r.get("verifiable") is not None) or False
+    # Document presence and envelope shape cannot establish framework compliance,
+    # durable automatic logging, signer trust, or an authenticated trace chain.
     matrix = {
         "NIST_AI_RMF": {
-            "MAP": True,
-            "MEASURE": all(r["has_v11_numbers"] for r in doctrine),
-            "MANAGE": lp["legal_boundaries_killinchu"],
-            "GOVERN": lp["privacy_policy_present"] and lp["dpa_template_present"],
+            "MAP": False,
+            "MEASURE": False,
+            "MANAGE": False,
+            "GOVERN": False,
         },
         "EU_AI_Act_Article_12_record_keeping": {
-            "automatic_logging_via_khipu": art12_ok,
-            "traceability": all(r.get("has_payloadType") for r in wired if "has_payloadType" in r) or False,
+            "automatic_logging_via_khipu": False,
+            "traceability": False,
         },
     }
+    observations = {
+        "doctrine_numbers_consistent": bool(doctrine) and all(
+            r.get("has_v11_numbers") is True and not r.get("stale_markers")
+            for r in doctrine),
+        "signed_envelope_structure_present": bool(wired) and all(
+            r.get("envelope_structure_present") is True for r in wired),
+        "signature_verification": "NOT_MEASURED",
+        "automatic_logging": "NOT_MEASURED",
+        "traceability": "NOT_MEASURED",
+    }
     payload = {"doctrine_consistency": doctrine, "wire_d_dsse": wired,
-               "legal_privacy": lp, "compliance_matrix": matrix}
+               "legal_privacy": lp, "technical_observations": observations,
+               "compliance_matrix": matrix, "compliance_assessment": {
+                   "state": "NOT_ASSESSED",
+                   "reason": "Technical observations only; framework assessment, "
+                   "signature trust, durable logging and trace-chain evidence are absent.",
+               }}
     khipu.emit(AGENT, payload)
     return 0
 
