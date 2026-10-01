@@ -272,8 +272,10 @@ distinct from first-class Kernel Hub publication/execution.
 
 The active A11oy release owner advanced canonical Python source to verified
 `3831b4475ed16d78efc337496a87847a6320b06c`, tree
-`81c4cddebb658fe0d3aa1aa87a47c8306fefb8fa`. At approximately `01:52Z`, HF Space
-repo/runtime `765d4d6d8bdeb270d0c06cb5e05d5c36d5bcecda` was RUNNING; domain and
+`81c4cddebb658fe0d3aa1aa87a47c8306fefb8fa`.
+At approximately `01:52Z`, the HF Space
+deployment was RUNNING at repo/runtime revision
+`765d4d6d8bdeb270d0c06cb5e05d5c36d5bcecda`; domain and
 HF-host build-info matched that source with Python 3.14.7.
 [Canonical sync](https://github.com/szl-holdings/a11oy/actions/runs/36639665771)
 and [post-deploy parity](https://github.com/szl-holdings/a11oy/actions/runs/36655775031)
@@ -377,7 +379,8 @@ First-class kernel execution and model quality remain separate gates.
 
 At `2026-09-30T03:53:17.2860752Z`, domain build-info and Series A status reported
 newer Python source `1048d6663ecdb7d5ae1a109a5e47182f52dcb9ac`, Python 3.14.7.
-HF Space repo/runtime was `7db0649e92eb8c49a4ef04157a019cca849598fb`, RUNNING.
+The HF Space deployment was RUNNING at repo/runtime revision
+`7db0649e92eb8c49a4ef04157a019cca849598fb`.
 The signed persistent Series A control plane reported 44,513 receipts but still
 **BLOCKED** with `github_inventory_unavailable` and null GitHub inventory counts.
 This newer runtime identity has not inherited the older source's parity/restart
