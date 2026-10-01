@@ -12,6 +12,7 @@ license = { text = "Apache-2.0" }
 authors = [{ name = "Stephen P. Lutar / SZL Holdings", email = "yachay@szlholdings.dev" }]
 keywords = ["szl", "doctrine-v11", "rosie-v3"]
 dependencies = []
+classifiers = ["Private :: Do Not Upload"]
 
 [project.urls]
 Homepage = "https://github.com/szl-holdings/platform"

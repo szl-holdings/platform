@@ -16,6 +16,7 @@ dependencies = [
     "strawberry-graphql==0.327.7",
     "httpx>=0.27",
 ]
+classifiers = ["Private :: Do Not Upload"]
 
 [project.optional-dependencies]
 server = ["fastapi>=0.110", "uvicorn>=0.29"]
