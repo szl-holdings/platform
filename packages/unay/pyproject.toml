@@ -12,6 +12,7 @@ license = { text = "Apache-2.0" }
 authors = [{ name = "Stephen P. Lutar / SZL Holdings", email = "yachay@szlholdings.dev" }]
 keywords = ["szl", "doctrine-v11", "unay", "memory", "receipts"]
 dependencies = []
+classifiers = ["Private :: Do Not Upload"]
 
 [project.optional-dependencies]
 vss = ["sqlite-vss>=0.1.2"]
