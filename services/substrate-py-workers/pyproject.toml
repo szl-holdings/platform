@@ -24,6 +24,7 @@ dependencies = [
     "Pillow>=10.0.0",
     "pdf2image>=1.17.0",
 ]
+classifiers = ["Private :: Do Not Upload"]
 
 [project.optional-dependencies]
 dev = [

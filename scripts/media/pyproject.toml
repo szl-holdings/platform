@@ -1,7 +1,7 @@
 [project]
 name = "repl-nix-workspace"
 version = "0.1.0"
-description = "Add your description here"
+description = "Internal workspace manifest for the szl-holdings/platform monorepo (dependency pins only; not a distributable package)"
 requires-python = ">=3.11"
 dependencies = [
     "pillow>=12.3.0",
@@ -9,3 +9,4 @@ dependencies = [
     "requests>=2.33.1",
     "requests-oauthlib>=2.0.0",
 ]
+classifiers = ["Private :: Do Not Upload"]

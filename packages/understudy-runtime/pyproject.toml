@@ -17,6 +17,7 @@ keywords = ["agentic", "rag", "mcp", "llm-router", "provenance", "dsse", "doctri
 dependencies = [
   "fastapi>=0.110",
 ]
+classifiers = ["Private :: Do Not Upload"]
 
 [project.optional-dependencies]
 # Real RAG backends (honest 503 fallback if absent)
