@@ -56,7 +56,7 @@ Chromium 148.0.7778.96. Commands ran from the repository root unless noted.
 
 | Command / check | Actual outcome |
 | --- | --- |
-| Pinned pnpm `install --frozen-lockfile --ignore-scripts`, `CI=true` | Exit 0; 203 projects / 1,736 packages; frozen resolution up to date; lifecycle scripts deliberately not executed |
+| Pinned pnpm `install --frozen-lockfile --ignore-scripts`, `CI=true` | Exit 0; 203 workspace projects resolving 1,736 installed dependency entries; frozen resolution up to date; lifecycle scripts deliberately not executed |
 | `node --test artifacts/a11oy/test/series-a-contract.test.mjs artifacts/a11oy/test/product-wiring-contract.test.mjs scripts/qa/series-a-proof-helpers.test.mjs` | Exit 0; 23/23, rerun after final header fix |
 | `node --test scripts/qa/screenshot-layout-helpers.test.mjs` | Exit 0; 9/9 Chromium regressions |
 | `node node_modules/vitest/vitest.mjs run` in `packages/a11oy-runtime` | Exit 0; Vitest 4.1.11; 3 files / 37 tests |

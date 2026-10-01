@@ -39,7 +39,7 @@ but Git correctly reported its conflict with the declared normalization policy.
 ## Local qualification and honest limits
 
 - Pinned pnpm 10.26.1, `CI=true`, `install --frozen-lockfile --ignore-scripts`:
-  exit 0, 203 workspace projects, +29/-25 packages; no lockfile resolution change.
+  exit 0, 203 workspace projects, lockfile entry delta +29/-25; no lockfile resolution change.
 - `node --test artifacts/a11oy/test/series-a-contract.test.mjs artifacts/a11oy/test/product-wiring-contract.test.mjs scripts/qa/series-a-proof-helpers.test.mjs`:
   23/23 passed, including a rerun at final implementation source.
 - `node node_modules/vitest/vitest.mjs run --maxWorkers=1` from
