@@ -868,3 +868,36 @@ The same-origin /api/a11oy/* endpoints returned deterministic ok:false JSON, so 
 | /a11oy/proof | [320x900](../docs/assets/screenshots/current/a11oy-proof-2026-09-30-320x900.png) · [390x900](../docs/assets/screenshots/current/a11oy-proof-2026-09-30-390x900.png) · [768x1024](../docs/assets/screenshots/current/a11oy-proof-2026-09-30-768x1024.png) · [1366x900](../docs/assets/screenshots/current/a11oy-proof-2026-09-30-1366x900.png) · [1728x1000](../docs/assets/screenshots/current/a11oy-proof-2026-09-30-1728x1000.png) |
 | /a11oy/resources | [320x900](../docs/assets/screenshots/current/a11oy-resources-2026-09-30-320x900.png) · [390x900](../docs/assets/screenshots/current/a11oy-resources-2026-09-30-390x900.png) · [768x1024](../docs/assets/screenshots/current/a11oy-resources-2026-09-30-768x1024.png) · [1366x900](../docs/assets/screenshots/current/a11oy-resources-2026-09-30-1366x900.png) · [1728x1000](../docs/assets/screenshots/current/a11oy-resources-2026-09-30-1728x1000.png) |
 | /a11oy/trust | [320x900](../docs/assets/screenshots/current/a11oy-trust-2026-09-30-320x900.png) · [390x900](../docs/assets/screenshots/current/a11oy-trust-2026-09-30-390x900.png) · [768x1024](../docs/assets/screenshots/current/a11oy-trust-2026-09-30-768x1024.png) · [1366x900](../docs/assets/screenshots/current/a11oy-trust-2026-09-30-1366x900.png) · [1728x1000](../docs/assets/screenshots/current/a11oy-trust-2026-09-30-1728x1000.png) |
+
+### 2026-10-02 cyber evidence presentation (CYBER-EVIDENCE-2026-10-02)
+
+Fifteen fresh Microsoft Edge captures from the local A11oy preview, five viewports per modified route. The screenshots prove source presentation only; they do not establish hosted CI, production operation, a security control, certification, or customer use. The app source was unchanged from the successful A11oy build through this capture; unrelated readiness and documentation work was present in the worktree.
+
+Fields common to **every** row below:
+
+- captured_by: `Codex / local Playwright`
+- capture_environment: `local-exact-head` (Windows); browser `Microsoft Edge 154.0.4258.48`; Node `v24.19.0`; Playwright `1.60.0`
+- source_revision: `02b63169036301558f2d4bb91e296bc0a57a6ee1`
+- workflow_run_or_command: `$env:SOURCE_REVISION='02b63169036301558f2d4bb91e296bc0a57a6ee1'; node scripts/qa/capture-cyber-evidence-20261002.mjs`
+- app_start_command: `corepack pnpm --filter @workspace/a11oy exec vite preview --config vite.config.ts --host 127.0.0.1 --port 4173`
+- device_scale_factor: `1`; full-page JPEG; capture status: `current`
+- workcell_id: `CYBER-EVIDENCE-2026-10-02`; proof_level: `4 (local public-claim proof packet)`
+- metadata sidecar: [cyber-evidence-screenshots-2026-10-02.json](cyber-evidence-screenshots-2026-10-02.json), including resolved URL, HTTP 200, page title, zero console/page errors, bytes, and SHA-256 for each row.
+
+| Filename in `docs/assets/screenshots/current/` | Route | Surface | Capture date (UTC) | Viewport | Artifact SHA-256 |
+|---|---|---|---|---|---|
+| `cyber-resilience-phone-2026-10-02.jpg` | `/a11oy/cyber-resilience` | Cyber Resilience Center | `2026-10-02T22:29:15.957Z` | 390 x 844 | `c4e607adf95d1b7f05f6f1523e1f3600bcd4046712b9221607cc250a946aee03` |
+| `cyber-resilience-portrait-2026-10-02.jpg` | `/a11oy/cyber-resilience` | Cyber Resilience Center | `2026-10-02T22:29:17.514Z` | 768 x 1024 | `a2c6cbb0c07894dcaf1acab699221c91ad58d8d5993f0bb0319ece9eb624cdc9` |
+| `cyber-resilience-desktop-2026-10-02.jpg` | `/a11oy/cyber-resilience` | Cyber Resilience Center | `2026-10-02T22:29:19.073Z` | 1440 x 1100 | `cbba8b431aeac57c5288c9eeddfd82540811edb48c3c061f874d8c0fa35557b0` |
+| `cyber-resilience-full-hd-2026-10-02.jpg` | `/a11oy/cyber-resilience` | Cyber Resilience Center | `2026-10-02T22:29:20.566Z` | 1920 x 1080 | `5c836b7dcded4662b529455c19431cd8102cb3fc036dfd15c0473ead44fb0610` |
+| `cyber-resilience-ultrawide-2026-10-02.jpg` | `/a11oy/cyber-resilience` | Cyber Resilience Center | `2026-10-02T22:29:22.227Z` | 2560 x 1440 | `707baf34e6ec064938329eceaa5ba5b11b8b89a80db78a9ea91c8b0942f871f1` |
+| `governed-security-agents-phone-2026-10-02.jpg` | `/a11oy/security-agents` | AI Security Operations | `2026-10-02T22:29:23.813Z` | 390 x 844 | `880f9858dad21c5dbef7923deaa70a27bafedc113831a19cc4de01ff3ef0b4ac` |
+| `governed-security-agents-portrait-2026-10-02.jpg` | `/a11oy/security-agents` | AI Security Operations | `2026-10-02T22:29:25.392Z` | 768 x 1024 | `27464339ee103e9dbb06618aa6cae31369d42b860d8347028a16c35c96bc2eaf` |
+| `governed-security-agents-desktop-2026-10-02.jpg` | `/a11oy/security-agents` | AI Security Operations | `2026-10-02T22:29:27.017Z` | 1440 x 1100 | `b169c19cec13a9ace8be17d4734a33df66e501c8fbd040e50b5dc32ec9465a39` |
+| `governed-security-agents-full-hd-2026-10-02.jpg` | `/a11oy/security-agents` | AI Security Operations | `2026-10-02T22:29:28.475Z` | 1920 x 1080 | `cbd4f32bc3e6d7142a304ae84e041aaf889bf733c567d95780509c2294dd57f8` |
+| `governed-security-agents-ultrawide-2026-10-02.jpg` | `/a11oy/security-agents` | AI Security Operations | `2026-10-02T22:29:29.793Z` | 2560 x 1440 | `8f8f52917736a698a46ded3c2e058e288490c48796ec8df548201341a89e8c36` |
+| `security-compliance-phone-2026-10-02.jpg` | `/a11oy/security-compliance` | Security and Compliance | `2026-10-02T22:29:31.205Z` | 390 x 844 | `380dac005991e5987ecf1a733c35f3f1758e989b2d08dd035aae79bcebf21876` |
+| `security-compliance-portrait-2026-10-02.jpg` | `/a11oy/security-compliance` | Security and Compliance | `2026-10-02T22:29:32.551Z` | 768 x 1024 | `5f790b0350753c4ee5ca1e20dceb6e817aa47a3514d5b5d9ca306fc704a341e1` |
+| `security-compliance-desktop-2026-10-02.jpg` | `/a11oy/security-compliance` | Security and Compliance | `2026-10-02T22:29:33.996Z` | 1440 x 1100 | `936ba644581cb91cea956a145a0e3fec4c57a043db2c819dbf29161c5eb5ffa1` |
+| `security-compliance-full-hd-2026-10-02.jpg` | `/a11oy/security-compliance` | Security and Compliance | `2026-10-02T22:29:35.339Z` | 1920 x 1080 | `a186295504ca7ec713d326255ef3a7470ca9a9c95eb6c93d5a2080b1085add67` |
+| `security-compliance-ultrawide-2026-10-02.jpg` | `/a11oy/security-compliance` | Security and Compliance | `2026-10-02T22:29:36.765Z` | 2560 x 1440 | `1c1c12fed1b93e8487f254eb2a2d91caa19e82beb1a2edc6d08edeba6ed81ed0` |

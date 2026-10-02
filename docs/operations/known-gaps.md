@@ -1,10 +1,44 @@
 # SZL Holdings — Known Gaps Register (Security & Operations)
 
-**Last updated:** 2026-09-30 (rev 30 — P0 proof and separate live readiness boundaries)
+**Last updated:** 2026-10-02 (rev 31 — cyber evidence and cross-lane source boundaries)
 **Owner:** Engineering / DevOps  
 **Audience:** Enterprise architects, Series A technical advisors, incoming VP Engineering
 
 This document is the canonical reference for known security, quality, and compliance gaps in the SZL Holdings platform. It consolidates findings from the internal risk register, the April 2026 hardening sprint, and the secrets remediation audit.
+
+---
+
+## 2026-10-02 cyber evidence workcell
+
+The current A11oy cyber-resilience, governed-security-agent, and security-and-compliance
+pages now label source examples as `DEMO` and missing runtime results as
+`UNAVAILABLE` or `UNVERIFIED`. The readiness-security collector requires an
+observed inventory, exact default-branch head, recent successful workflow
+runs, and a readable security contact. Its release signature check remains
+`UNVERIFIED` because release asset names are not cryptographic verification;
+`GREEN` therefore cannot be reached through that metadata-only path.
+
+The cyber tool-mesh scan, alert escalation, and compliance assessment lack a
+trusted tenant/target binding and result read-back. Their manifests are now
+disabled at the gateway, and direct handler calls reject before a database
+write. They remain blocked until a real adapter and scoped evidence contract
+are supplied. No SIEM/EDR
+integration, containment effect, certification, incident SLA, customer witness,
+or production deployment is established by this workcell. Other A11oy security
+routes can still contain older operational copy; the corrected compliance page
+does not link to those routes as evidence. The six buyer-lane and shared work
+function gates are in
+[`CROSS_LANE_EVIDENCE_REGISTER_20261002.md`](CROSS_LANE_EVIDENCE_REGISTER_20261002.md).
+
+The separate tool-mesh vulnerability report still ignores requested asset and
+CVE filters. A tool-mesh package TypeScript check also remains blocked by the
+same eight `TS6305` missing referenced declarations observed before and after
+the cyber patch; its passing Vitest suite is not a typecheck substitute.
+
+Local tests, build, and screenshots establish source behavior only. Hosted
+exact-head CI, protected merge, provider publication, deployed route read-back,
+and an outside functional witness remain separate, unverified gates. The dated
+proof packet is [`CYBER_LANE_EXECUTION_20261002.md`](CYBER_LANE_EXECUTION_20261002.md).
 
 ---
 
