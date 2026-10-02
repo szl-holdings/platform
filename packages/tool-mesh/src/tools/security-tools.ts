@@ -1,4 +1,4 @@
-import { eq, desc } from 'drizzle-orm';
+import { desc, eq } from 'drizzle-orm';
 import { z } from 'zod';
 import type { ToolHandler } from '../gateway.js';
 import type { ToolManifest } from '../manifest.js';
@@ -10,12 +10,21 @@ export const ThreatScanInputSchema = z.object({
 });
 export type ThreatScanInput = z.infer<typeof ThreatScanInputSchema>;
 
+export class SecurityOperationUnavailableError extends Error {
+  readonly code = 'SECURITY_OPERATION_UNAVAILABLE';
+
+  constructor(toolId: string, missingEvidence: string) {
+    super(`${toolId} is unavailable: ${missingEvidence}. No operation was performed.`);
+    this.name = 'SecurityOperationUnavailableError';
+  }
+}
+
 export const THREAT_SCAN_TOOL_MANIFEST: ToolManifest = {
   id: 'security.threat-scan',
   name: 'Threat Scanner',
   version: '1.0.0',
   description:
-    'Initiate a threat scan against a target host, network segment, or workload. Returns threat indicators, severity levels, and recommended mitigations.',
+    'Unavailable until an authorized, tenant- and target-bound scanner can return observed findings and a scan receipt.',
   domainTags: ['security'],
   policyTier: 'regulated-workflow',
   allowedEnvironments: ['staging', 'production'],
@@ -34,66 +43,19 @@ export const THREAT_SCAN_TOOL_MANIFEST: ToolManifest = {
   },
   rateLimits: { requestsPerMinute: 10, concurrency: 3 },
   timeoutMs: 60000,
-  failureModes: [
-    { type: 'timeout', retryable: true, maxRetries: 1 },
-    { type: 'unavailable', retryable: false, maxRetries: 0 },
-  ],
-  approvalRequired: false,
+  failureModes: [{ type: 'unavailable', retryable: false, maxRetries: 0 }],
+  approvalRequired: true,
   owner: 'security-team',
   observabilityHooks: { emitTrace: true, emitMetrics: true, sensitiveFields: ['targetId'] },
-  enabled: true,
+  enabled: false,
 };
 
 export const threatScanHandler: ToolHandler = async (input) => {
-  const parsed = ThreatScanInputSchema.parse(input);
-  const { db, advisoryFindings, platformJobRunsTable } = await import('@szl-holdings/db');
-
-  const findings = await db
-    .select()
-    .from(advisoryFindings)
-    .where(eq(advisoryFindings.severity, 'critical'))
-    .orderBy(desc(advisoryFindings.generatedAt))
-    .limit(parsed.depth === 'surface' ? 5 : parsed.depth === 'deep' ? 15 : 30);
-
-  const scanRunId = `scan-${Date.now()}`;
-  await db.insert(platformJobRunsTable).values({
-    runId: scanRunId,
-    workflowType: 'threat_scan',
-    domain: 'security',
-    triggeredBy: 'agent-tool-call',
-    payload: { targetId: parsed.targetId, targetType: parsed.targetType, depth: parsed.depth },
-    status: 'running',
-  });
-
-  const threats = findings.map((f) => ({
-    findingId: f.id,
-    title: f.title,
-    severity: f.severity,
-    content: f.content.slice(0, 200),
-    tags: f.tags,
-  }));
-
-  const riskScore = threats.length === 0
-    ? 0
-    : Math.min(
-        100,
-        threats.reduce((score, t) => {
-          if (t.severity === 'critical') return score + 25;
-          if (t.severity === 'high') return score + 15;
-          return score + 5;
-        }, 0),
-      );
-
-  return {
-    scanId: scanRunId,
-    targetId: parsed.targetId,
-    targetType: parsed.targetType,
-    depth: parsed.depth,
-    threats,
-    threatCount: threats.length,
-    riskScore,
-    status: 'completed',
-  };
+  ThreatScanInputSchema.parse(input);
+  throw new SecurityOperationUnavailableError(
+    THREAT_SCAN_TOOL_MANIFEST.id,
+    'no authorized scanner or target-bound scan evidence is connected',
+  );
 };
 
 export const AlertEscalationInputSchema = z.object({
@@ -109,7 +71,7 @@ export const ALERT_ESCALATION_TOOL_MANIFEST: ToolManifest = {
   name: 'Alert Escalator',
   version: '1.0.0',
   description:
-    'Escalate a security alert to the appropriate on-call team or executive stakeholder based on severity and domain.',
+    'Unavailable until an approved delivery adapter can confirm recipient acceptance for a security alert.',
   domainTags: ['security'],
   policyTier: 'executive-facing',
   allowedEnvironments: ['staging', 'production'],
@@ -129,43 +91,19 @@ export const ALERT_ESCALATION_TOOL_MANIFEST: ToolManifest = {
   },
   rateLimits: { requestsPerMinute: 30 },
   timeoutMs: 10000,
-  failureModes: [{ type: 'error', retryable: true, maxRetries: 2 }],
-  approvalRequired: false,
+  failureModes: [{ type: 'unavailable', retryable: false, maxRetries: 0 }],
+  approvalRequired: true,
   owner: 'security-team',
   observabilityHooks: { emitTrace: true, emitMetrics: true, sensitiveFields: [] },
-  enabled: true,
+  enabled: false,
 };
 
 export const alertEscalationHandler: ToolHandler = async (input) => {
-  const parsed = AlertEscalationInputSchema.parse(input);
-  const { db, platformJobRunsTable } = await import('@szl-holdings/db');
-
-  const escalationTarget = parsed.escalateTo ?? (parsed.severity === 'critical' ? 'ciso-oncall' : 'soc-on-call');
-
-  const runId = `escalation-${Date.now()}`;
-  await db.insert(platformJobRunsTable).values({
-    runId,
-    workflowType: 'alert_escalation',
-    domain: 'security',
-    triggeredBy: 'agent-tool-call',
-    status: 'completed',
-    payload: {
-      alertId: parsed.alertId,
-      severity: parsed.severity,
-      reason: parsed.reason,
-      escalateTo: escalationTarget,
-    },
-    result: { escalated: true, escalatedTo: escalationTarget },
-  });
-
-  return {
-    alertId: parsed.alertId,
-    escalated: true,
-    escalatedTo: escalationTarget,
-    severity: parsed.severity,
-    escalationRunId: runId,
-    message: `Alert ${parsed.alertId} (${parsed.severity}) escalated to ${escalationTarget}`,
-  };
+  AlertEscalationInputSchema.parse(input);
+  throw new SecurityOperationUnavailableError(
+    ALERT_ESCALATION_TOOL_MANIFEST.id,
+    'no approved on-call delivery adapter or recipient confirmation is connected',
+  );
 };
 
 export const ComplianceCheckInputSchema = z.object({
@@ -180,7 +118,7 @@ export const COMPLIANCE_CHECK_TOOL_MANIFEST: ToolManifest = {
   name: 'Compliance Checker',
   version: '1.0.0',
   description:
-    'Run a compliance posture check against a specified framework and scope. Returns findings, gap analysis, and optional remediation steps.',
+    'Unavailable until framework controls and assessment evidence are bound to a verified organization and scope.',
   domainTags: ['security'],
   policyTier: 'regulated-workflow',
   allowedEnvironments: ['development', 'staging', 'production'],
@@ -205,70 +143,19 @@ export const COMPLIANCE_CHECK_TOOL_MANIFEST: ToolManifest = {
   },
   rateLimits: { requestsPerMinute: 20 },
   timeoutMs: 30000,
-  failureModes: [{ type: 'timeout', retryable: true, maxRetries: 2 }],
+  failureModes: [{ type: 'unavailable', retryable: false, maxRetries: 0 }],
   approvalRequired: false,
   owner: 'compliance-team',
   observabilityHooks: { emitTrace: true, emitMetrics: true, sensitiveFields: [] },
-  enabled: true,
+  enabled: false,
 };
 
 export const complianceCheckHandler: ToolHandler = async (input) => {
-  const parsed = ComplianceCheckInputSchema.parse(input);
-  const { db, complianceCalendarTable } = await import('@szl-holdings/db');
-
-  const calendarEvents = await db
-    .select()
-    .from(complianceCalendarTable)
-    .orderBy(desc(complianceCalendarTable.dueAt))
-    .limit(20);
-
-  const frameworkKeywords: Record<string, string[]> = {
-    SOC2: ['soc', 'audit', 'exam'],
-    ISO27001: ['iso', 'policy', 'review'],
-    NIST: ['nist', 'exam', 'review'],
-    HIPAA: ['hipaa', 'phi', 'privacy'],
-    GDPR: ['gdpr', 'privacy', 'data'],
-    'PCI-DSS': ['pci', 'payment', 'card'],
-  };
-
-  const keywords = frameworkKeywords[parsed.framework] ?? [];
-  const frameworkEvents = calendarEvents.filter(
-    (e) =>
-      keywords.some((k) => e.title.toLowerCase().includes(k) || (e.description ?? '').toLowerCase().includes(k)),
+  ComplianceCheckInputSchema.parse(input);
+  throw new SecurityOperationUnavailableError(
+    COMPLIANCE_CHECK_TOOL_MANIFEST.id,
+    'calendar events are not scope-bound control assessments',
   );
-
-  const overdueCount = frameworkEvents.filter((e) => e.status === 'overdue').length;
-  const inProgressCount = frameworkEvents.filter((e) => e.status === 'in_progress').length;
-  const passRate =
-    frameworkEvents.length > 0
-      ? Math.round(
-          ((frameworkEvents.length - overdueCount) / frameworkEvents.length) * 100,
-        ) / 100
-      : 1.0;
-
-  const findings = frameworkEvents.slice(0, 5).map((e) => ({
-    eventId: e.eventId,
-    title: e.title,
-    status: e.status,
-    dueAt: e.dueAt?.toISOString(),
-    regulatoryBody: e.regulatoryBody ?? 'internal',
-  }));
-
-  const remediation = parsed.includeRemediation && overdueCount > 0
-    ? [`${overdueCount} overdue compliance event(s) require immediate attention in the compliance calendar`]
-    : [];
-
-  return {
-    framework: parsed.framework,
-    scope: parsed.scope,
-    eventsChecked: calendarEvents.length,
-    frameworkEvents: frameworkEvents.length,
-    overdueCount,
-    inProgressCount,
-    passRate,
-    findings,
-    remediation,
-  };
 };
 
 export const IncidentContainmentInputSchema = z.object({
@@ -390,11 +277,7 @@ export const vulnerabilityReportHandler: ToolHandler = async (input) => {
         .where(eq(advisoryFindings.severity, parsed.severity))
         .orderBy(desc(advisoryFindings.generatedAt))
         .limit(25)
-    : db
-        .select()
-        .from(advisoryFindings)
-        .orderBy(desc(advisoryFindings.generatedAt))
-        .limit(25));
+    : db.select().from(advisoryFindings).orderBy(desc(advisoryFindings.generatedAt)).limit(25));
 
   const vulnerabilities = rows.map((f) => ({
     findingId: f.id,

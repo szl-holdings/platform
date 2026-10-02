@@ -21,6 +21,7 @@ import {
   OPERATIONS_TOOL_MANIFESTS,
 } from './tools/operations-tools.js';
 import {
+  alertEscalationHandler,
   complianceCheckHandler,
   SECURITY_TOOL_MANIFESTS,
   threatScanHandler,
@@ -198,20 +199,65 @@ describe('Security tool manifests', () => {
     expect(result).toMatchObject({ vulnerabilities: [] });
   });
 
-  it('threat-scan handler validates input and returns stub response', async () => {
-    const result = await threatScanHandler(
-      { targetId: 'host-123', targetType: 'host' },
-      SECURITY_TOOL_MANIFESTS.find((m) => m.id === 'security.threat-scan')!,
-    );
-    expect(result).toMatchObject({ targetId: 'host-123', targetType: 'host', threats: [] });
+  const unsupportedOperations = [
+    {
+      toolId: 'security.threat-scan',
+      handler: threatScanHandler,
+      input: { targetId: 'host-123', targetType: 'host' },
+    },
+    {
+      toolId: 'security.alert-escalation',
+      handler: alertEscalationHandler,
+      input: { alertId: 'alert-123', severity: 'critical', reason: 'Needs operator review' },
+    },
+    {
+      toolId: 'security.compliance-check',
+      handler: complianceCheckHandler,
+      input: { framework: 'SOC2', scope: 'org-wide' },
+    },
+  ] as const;
+
+  function requireSecurityManifest(toolId: string) {
+    const manifest = SECURITY_TOOL_MANIFESTS.find((m) => m.id === toolId);
+    if (!manifest) throw new Error(`Missing test manifest: ${toolId}`);
+    return manifest;
+  }
+
+  it.each(unsupportedOperations)('$toolId fails closed through the gateway', async ({
+    toolId,
+    handler,
+    input,
+  }) => {
+    const manifest = requireSecurityManifest(toolId);
+    const registry = new InMemoryToolRegistry();
+    registry.register(manifest);
+    const gateway = makeGateway(registry);
+    gateway.registerHandler(toolId, handler);
+
+    const result = await gateway.invoke(toolId, input, { requestId: `test-${toolId}` });
+    expect(result).toMatchObject({ success: false, error: `Tool is disabled: ${toolId}` });
+    expect(result.output).toBeUndefined();
   });
 
-  it('compliance-check handler validates framework', async () => {
-    const result = await complianceCheckHandler(
-      { framework: 'SOC2', scope: 'org-wide' },
-      SECURITY_TOOL_MANIFESTS.find((m) => m.id === 'security.compliance-check')!,
-    );
-    expect(result).toMatchObject({ framework: 'SOC2', findings: [] });
+  it.each(
+    unsupportedOperations,
+  )('$toolId rejects direct calls without reporting an outcome', async ({
+    toolId,
+    handler,
+    input,
+  }) => {
+    const manifest = requireSecurityManifest(toolId);
+    await expect(handler(input, manifest)).rejects.toMatchObject({
+      code: 'SECURITY_OPERATION_UNAVAILABLE',
+      message: expect.stringContaining('No operation was performed.'),
+    });
+    await expect(handler({}, manifest)).rejects.toMatchObject({ name: 'ZodError' });
+  });
+
+  it('requires approval before any future alert escalation or active target scan', () => {
+    for (const id of ['security.alert-escalation', 'security.threat-scan']) {
+      expect(SECURITY_TOOL_MANIFESTS.find((m) => m.id === id)?.approvalRequired).toBe(true);
+    }
   });
 });
 
