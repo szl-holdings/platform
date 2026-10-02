@@ -65,8 +65,9 @@ The refreshed `origin/main` was
 `f2f8df6f89056e9104587674ccec0855dd5b177a` before integration, 31
 commits after the recorded September baseline. The upstream collector and
 its legacy tests were unchanged; the CI workflow updated the pinned pnpm
-setup action. The local offline contract suite passed 26 tests and the legacy
-suite passed 25 assertions on the unintegrated patch. This is a source-level
-check only. Repeat both suites on the integrated exact head, then use hosted
-PR checks for the CI claim. Provider publication and runtime behavior remain
-`UNAVAILABLE`/`NOT_PROBED` in this proof packet.
+setup action. Both offline commands above passed locally on the signed,
+integrated head `30fcafbf87542e7695377f83bf98185788fae1b6`. Those
+scoped checks are not a canonical platform-wide test total. Hosted PR checks
+are the separate CI authority; see PR #876 for their exact-head result.
+Provider publication and runtime behavior remain `UNAVAILABLE`/`NOT_PROBED`
+in this proof packet.
