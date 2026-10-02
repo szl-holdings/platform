@@ -69,9 +69,12 @@ prints a warning.
 
 ## Dashboard
 `dashboard.html` is a static, read-only viewer. It lists the latest receipt for
-each agent from `SZLHOLDINGS/readiness-runs` and renders a green/amber/red matrix.
-Open it directly, or host it on the docs site. No build step, no secrets — it
-only reads public dataset files.
+each agent from `SZLHOLDINGS/readiness-runs`. Because no trusted public signer
+key is pinned in the browser, it marks fetched verdicts and signing claims
+`UNVERIFIED` even if the receipt asserts GREEN and `signed:true`. The audit-rift
+agent separately verifies peer receipts against its configured fleet key.
+Open the dashboard directly, or host it on the docs site. No build step or
+browser secret is needed; it only reads public dataset files.
 
 ## Running locally
 ```bash
