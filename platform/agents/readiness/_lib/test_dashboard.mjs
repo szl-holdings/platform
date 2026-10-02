@@ -4,8 +4,14 @@ import { test } from 'node:test';
 import vm from 'node:vm';
 
 const html = readFileSync(new URL('../dashboard.html', import.meta.url), 'utf8');
-const script = html.match(/<script>([\s\S]*?)<\/script>/)?.[1];
-assert.ok(script, 'dashboard script must be present');
+const scriptOpen = '<script>';
+const scriptClose = '</script>';
+const scriptStart = html.indexOf(scriptOpen);
+assert.ok(scriptStart >= 0, 'dashboard script opening tag must be present');
+const bodyStart = scriptStart + scriptOpen.length;
+const bodyEnd = html.indexOf(scriptClose, bodyStart);
+assert.ok(bodyEnd > bodyStart, 'dashboard script closing tag must be present');
+const script = html.slice(bodyStart, bodyEnd);
 
 function element(tagName) {
   let text = '';
