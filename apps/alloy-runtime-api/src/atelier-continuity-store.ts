@@ -892,17 +892,15 @@ export class EncryptedLocalAtelierStateStore implements AtelierStateStore {
           );
         }
         const secondPath = join(firstPath, secondShard.name);
-        let removedTemporary = false;
         for (const entry of await this.#directoryEntries(secondPath)) {
-          const entryPath = join(secondPath, entry.name);
           if (entry.name.endsWith('.tmp')) {
             if (!entry.isFile() || entry.isSymbolicLink()) {
               throw new AtelierCapsuleIntegrityError(
                 'Encrypted continuity temporary object is not a regular file.',
               );
             }
-            await unlink(entryPath);
-            removedTemporary = true;
+            // Another store can be preparing this object for atomic publication.
+            // A reader cannot prove that a same-host temporary file is abandoned.
             continue;
           }
           const capsuleId = basename(entry.name, '.json');
@@ -918,10 +916,25 @@ export class EncryptedLocalAtelierStateStore implements AtelierStateStore {
             );
           }
           if (!referenced.has(capsuleId)) {
-            await this.#transport.delete(capsuleId);
+            const orphan = await this.#transport.get(capsuleId);
+            if (!orphan) {
+              await this.#transport.delete(capsuleId);
+              continue;
+            }
+            const expiresAt = orphan.capsule.expiresAt;
+            const expiresAtMs = expiresAt ? Date.parse(expiresAt) : Number.NaN;
+            if (!Number.isFinite(expiresAtMs)) {
+              throw new AtelierCapsuleIntegrityError(
+                'Unindexed encrypted continuity object lacks an authenticated expiry.',
+              );
+            }
+            // A newly published object may still be waiting for its index link.
+            // Only an expired orphan is no longer eligible for that reservation.
+            if (expiresAtMs <= this.#clock().milliseconds) {
+              await this.#transport.delete(capsuleId);
+            }
           }
         }
-        if (removedTemporary) await this.#syncDirectory(secondPath);
       }
     }
   }
@@ -1094,8 +1107,8 @@ export class EncryptedLocalAtelierStateStore implements AtelierStateStore {
             'Continuity index temporary entries must be regular files.',
           );
         }
-        await unlink(join(directory, entry.name));
-        await this.#syncDirectory(directory);
+        // A concurrent writer may still need this candidate for its hard link.
+        // It removes its own temporary file after publishing or failing.
         continue;
       }
       if (!entry.isFile() || entry.isSymbolicLink() || !entry.name.endsWith('.json')) {
