@@ -19,10 +19,14 @@ const workcells = read('../src/pages/Workcells.tsx');
 const workcellDetail = read('../src/pages/WorkcellDetail.tsx');
 const workcellReplay = read('../src/pages/WorkcellReplay.tsx');
 const workcellReplayDetail = read('../src/pages/WorkcellReplayDetail.tsx');
+const workcellProofCoverage = read('../src/components/WorkcellProofCoverage.tsx');
+const workcellProofCoverageEvaluator = read('../src/lib/workcell-proof-coverage.ts');
 const fabric = read('../src/pages/fabric/FabricCockpit.tsx');
 const fabricTypes = read('../../../lib/a11oy-fabric/src/types.ts');
 const fabricSchema = read('../../../lib/a11oy-fabric/src/schema.ts');
 const fabricSeeds = read('../../../lib/a11oy-fabric/src/seed/workcells.ts');
+const pceSeeds = read('../../../lib/a11oy-fabric/src/seed/pceContracts.ts');
+const proofPacketSeeds = read('../../../lib/a11oy-fabric/src/seed/proofPackets.ts');
 const captureController = read('../../../scripts/qa/capture-screenshot-proof.mjs');
 const matrixWrapper = read('../../../scripts/qa/capture-series-a-product-matrix-proof.mjs');
 const productInteractions = read('../../../scripts/qa/a11oy-product-interactions.mjs');
@@ -84,6 +88,59 @@ test('separates Workcell workflow progress from six-state operational availabili
   assert.match(workcellReplayDetail, /Resume Replay/);
   assert.match(workcellReplayDetail, /\[2000, 1000, 667, 500\]/);
   assert.match(workcellReplayDetail, /aria-pressed=\{speed === s\}/);
+});
+
+test('fails closed when Workcell proof references are missing or mismatched', () => {
+  assert.match(workcellReplayDetail, /<WorkcellProofCoverage workcell=\{wc\}/);
+  for (const status of ['SATISFIED', 'MISMATCH', 'UNAVAILABLE']) {
+    assert.match(workcellProofCoverageEvaluator, new RegExp(`'${status}'`));
+  }
+  for (const obligation of ['proof-context', 'proof-policy-binding', 'proof-approval-binding']) {
+    assert.match(workcellProofCoverageEvaluator, new RegExp(`'${obligation}'`));
+  }
+  assert.match(workcellProofCoverageEvaluator, /satisfied === obligations\.length/);
+  assert.match(workcellProofCoverageEvaluator, /policyEvaluationIds\.includes/);
+  assert.match(workcellProofCoverageEvaluator, /approvalRecordIds\.includes/);
+  assert.match(workcellProofCoverageEvaluator, /proofPacket\.kind !== 'action_execution'/);
+  assert.match(
+    workcellProofCoverageEvaluator,
+    /proofPacket\.policyEvaluationId !== storedContract\.policyEvaluationId/,
+  );
+  assert.match(
+    workcellProofCoverageEvaluator,
+    /proofPacket\.approvalRecordId !== approvalRecordId/,
+  );
+  assert.match(workcellProofCoverageEvaluator, /No trace record is resolved/);
+  assert.match(workcellProofCoverageEvaluator, /Scope and actor are not verified/);
+  assert.match(workcellProofCoverage, /DEMO · CONTRACT-TO-EVIDENCE JOIN/);
+  assert.match(
+    workcellProofCoverage,
+    /Any\s+missing or mismatched\s+obligation keeps the result incomplete/,
+  );
+  assert.match(
+    workcellProofCoverage,
+    /does not verify signatures,\s+durable storage, operator\s+identity/,
+  );
+  assert.doesNotMatch(
+    workcellProofCoverage,
+    /status="LIVE"|cryptographically verified|production[- ]ready/i,
+  );
+  assert.match(
+    pceSeeds,
+    /id: 'pce-001'[\s\S]*policyEvaluationId: 'pe-001'[\s\S]*approvalRecordId: 'ar-001'[\s\S]*proofPacketId: 'proof-001'/,
+  );
+  assert.match(
+    proofPacketSeeds,
+    /id: 'proof-001'[\s\S]*kind: 'signal_ingestion'[\s\S]*entityId: 'sig-lyte-002'[\s\S]*entityType: 'signal'/,
+  );
+  for (const control of [
+    'Remove proof reference',
+    'Substitute action ID',
+    'Omit approval reference',
+    'Reset challenges',
+  ]) {
+    assert.match(workcellProofCoverage, new RegExp(control));
+  }
 });
 
 test('labels deterministic linked surfaces as DEMO and exposes their evidence boundaries', () => {

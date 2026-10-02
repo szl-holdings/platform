@@ -1,15 +1,16 @@
-import { useState, useEffect } from 'react';
-import { useParams, Link } from 'wouter';
+import { SEED_WORKCELLS } from '@workspace/a11oy-fabric';
+import { useEffect, useState } from 'react';
+import { Link, useParams } from 'wouter';
 import { Layout } from '../components/layout';
 import {
-  PageHeader,
-  Card,
-  SectionTitle,
   ActionButton,
-  VerdictBadge,
+  Card,
+  PageHeader,
+  SectionTitle,
   TraceStep,
+  VerdictBadge,
 } from '../components/ui';
-import { SEED_WORKCELLS } from '@workspace/a11oy-fabric';
+import { WorkcellProofCoverage } from '../components/WorkcellProofCoverage';
 
 const BASE = (import.meta.env.BASE_URL ?? '/a11oy/').replace(/\/$/, '');
 
@@ -423,6 +424,8 @@ export function WorkcellReplayDetail() {
           </div>
         </div>
       </div>
+
+      <WorkcellProofCoverage workcell={wc} />
     </Layout>
   );
 }
