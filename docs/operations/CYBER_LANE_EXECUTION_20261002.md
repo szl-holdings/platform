@@ -56,15 +56,18 @@ subsequent verification will record its actual result.
   phone layouts retain readable status and evidence text. The compliance page
   no longer links to older routes with contradictory operational claims.
 - `packages/tool-mesh/src/tools/security-tools.ts` disables unsupported threat
-  scan, alert escalation, and compliance assessment manifests. Direct handler
-  calls validate input, then reject with `SECURITY_OPERATION_UNAVAILABLE`
+  scan, alert escalation, compliance assessment, and vulnerability report
+  manifests. Direct handler calls validate input, then reject with
+  `SECURITY_OPERATION_UNAVAILABLE`
   before database access. No scan completion, alert delivery, or compliance
   pass rate is produced. Active scan and escalation are approval-required if
   a future connector enables them. Incident containment's pending gate and
   read-only calendar listing are unchanged.
 - The [six-lane execution register](CROSS_LANE_EVIDENCE_REGISTER_20261002.md)
   records source state, owner, first operational witness, 30/60/90-day gates,
-  and KPI definitions without invented measurements.
+  and KPI definitions without invented measurements. The read-only
+  `scripts/qa/verify-cross-lane-source.mjs` checks the exact committed
+  six-lane source digest and emits `UNKNOWN` for unmeasured external gates.
 
 Signed local source commits before this proof successor: `cb363691a71f877e294f6e3a50f8a1f18764f300`
 (truth-qualified UI), `5c6baf13d3b669b1eb83e1300b428def54b66825`
@@ -84,10 +87,11 @@ between the phone-layout and capture commits.
 | `python -B -m unittest discover -s platform/agents/readiness/readiness-security -p 'test_*.py' -q` | Exit 0, 17/17 focused tests, including stale/numeric doctrine, wrong-head, rate-limit, unsigned receipt, and 30-day run age. |
 | `python -B -m unittest discover -s platform/agents/readiness/_lib -p 'test_*.py' -q` | Exit 0, 68/68 shared library tests. |
 | From `packages/tool-mesh`: `node node_modules/vitest/vitest.mjs run src/tool-mesh.test.ts --maxWorkers=1` | Exit 0, 35/35 before and 40/40 after the patch. Gateway rejects all three unsupported operations and direct handlers throw. |
-| From `packages/tool-mesh`: `node node_modules/vitest/vitest.mjs run --maxWorkers=1` | Exit 0, 112/112 across five files after the patch. |
+| From `packages/tool-mesh`: `node node_modules/vitest/vitest.mjs run --maxWorkers=1` | Exit 0, 112/112 across five files after the first patch. A later successor that blocks vulnerability reports passed 115/115. |
 | `node node_modules/@biomejs/biome/bin/biome check packages/tool-mesh/src/tools/security-tools.ts packages/tool-mesh/src/tool-mesh.test.ts` | The first run found formatting/import order issues and exited 1; after those fixes it exited 0 with seven pre-existing non-null assertion warnings. |
 | `node node_modules/typescript/bin/tsc -p packages/tool-mesh/tsconfig.json --noEmit` | **Unavailable as a clean pass:** both before and after the patch exited 1 with the same eight `TS6305` missing referenced declaration errors. A full dependency build remains an independent gate. |
 | `node --check scripts/qa/capture-cyber-evidence-20261002.mjs` | Exit 0. |
+| `node --test scripts/qa/verify-cross-lane-source.test.mjs` | Exit 0, 4/4 source identity and fail-closed tests. `node scripts/qa/verify-cross-lane-source.mjs` emitted `VERIFIED_LOCAL_SOURCE`; no runtime readiness was asserted. |
 | `SOURCE_REVISION=02b63169036301558f2d4bb91e296bc0a57a6ee1` capture command | Exit 0: 15/15 route and viewport states returned HTTP 200 with expected heading/text, no page or console errors, and no horizontal overflow. |
 | Playwright phone selector click on `/a11oy/security-agents` | Exit 0: selecting Detection Engineering Agent changed the button's `aria-pressed` state and rendered its modeled detail. |
 | `git diff --check` and screenshot SHA-256 read-back | Exit 0 and 15/15 digests match the sidecar. |
@@ -127,6 +131,12 @@ secrets, or `.env` values; hosted secret scanning remains a separate check.
 The [known gaps register](known-gaps.md) records the remaining cosign
 verification, connector/tenant binding, stale neighboring copy, package
 TypeScript declarations, hosted CI, deployment, and outside-witness gates.
-`packages/tool-mesh` vulnerability-report asset and CVE filters remain an
-additional scoped follow-up. No external SIEM, EDR, customer asset, incident,
+`packages/tool-mesh` vulnerability-report is also blocked until a source can
+actually honor tenant, asset, and CVE filters. The hosted check run at
+`df984acc8b6fe00dfbc993a81a78d175d2b2b3af` failed its dependency and
+Grype gates on high-severity `node-forge`
+[`GHSA-86w9-cpqp-85rv`](https://github.com/advisories/GHSA-86w9-cpqp-85rv)
+(no patched version published), and its unit suite and Runtime Audit on a pre-existing
+Atelier cross-process filesystem race. This read-back is a held gate, not a
+security or runtime pass. No external SIEM, EDR, customer asset, incident,
 operator assignment, approval, or containment action was observed or executed.

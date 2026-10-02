@@ -25,8 +25,8 @@
     "packages": false
   },
   "branch_protection": {
-    "branch": "master",
-    "required_status_checks": ["ci", "build"],
+    "branch": "main",
+    "required_status_checks": ["Runtime Audit (audit:full)", "Security Gate (blocking)", "E2E Gate", "severity-gate"],
     "require_pull_request": true,
     "include_administrators": true,
     "allow_force_pushes": false,

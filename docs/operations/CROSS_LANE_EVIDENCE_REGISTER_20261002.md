@@ -35,6 +35,13 @@ source alignment report in `audit/P0_SERIES_A_SOURCE_ALIGNMENT_20260929.md`
 documents earlier Platform source checks and separate A11oy Python, Hugging Face,
 and domain boundaries; it does not upgrade this October source review.
 
+Run `node scripts/qa/verify-cross-lane-source.mjs` for a read-only JSON
+verification of the six declared source states at the local Git HEAD. It
+compares the working file to the committed blob and the reviewed SHA-256 digest.
+`VERIFIED_LOCAL_SOURCE` does not measure hosted CI, merge, publication,
+deployment, or an outside witness; those fields remain `UNKNOWN` in this
+source-only report.
+
 ## Product and repository boundaries
 
 - Build new cyber and legal product behavior in the canonical A11oy path, not
@@ -72,8 +79,9 @@ acceptance for a target-specific effect.
 | Resilience | Existing incident and restore runbooks | Dated tabletop and measured restore/integrity exercise before recovery claims. |
 
 The current `packages/tool-mesh/src/tools/security-tools.ts` needs target-bound
-queries and effect receipts before its completed scan, escalation, compliance,
-or vulnerability outputs can be called operational. Its gateway blocks
+queries and effect receipts before its scan, escalation, compliance, or
+vulnerability outputs can be called operational. Their manifests are disabled
+until a real adapter can supply those outputs. Its gateway blocks
 approval-required execution; a pending containment proposal is a valid state.
 `services/verticals/sentra_cyber/signals.py` is a deterministic stub, so its
 example CVE, SIEM, and attack-surface signals are demo data. Do not connect an

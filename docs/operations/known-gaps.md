@@ -1,6 +1,6 @@
 # SZL Holdings — Known Gaps Register (Security & Operations)
 
-**Last updated:** 2026-10-02 (rev 31 — cyber evidence and cross-lane source boundaries)
+**Last updated:** 2026-10-02 (rev 32 — cyber evidence and hosted gate read-back)
 **Owner:** Engineering / DevOps  
 **Audience:** Enterprise architects, Series A technical advisors, incoming VP Engineering
 
@@ -18,11 +18,11 @@ runs, and a readable security contact. Its release signature check remains
 `UNVERIFIED` because release asset names are not cryptographic verification;
 `GREEN` therefore cannot be reached through that metadata-only path.
 
-The cyber tool-mesh scan, alert escalation, and compliance assessment lack a
-trusted tenant/target binding and result read-back. Their manifests are now
-disabled at the gateway, and direct handler calls reject before a database
-write. They remain blocked until a real adapter and scoped evidence contract
-are supplied. No SIEM/EDR
+The cyber tool-mesh scan, alert escalation, compliance assessment, and
+vulnerability report lack a trusted tenant/target binding and result read-back.
+Their manifests are now disabled at the gateway, and direct handler calls
+reject before database access. They remain blocked until a real adapter and
+scoped evidence contract are supplied. No SIEM/EDR
 integration, containment effect, certification, incident SLA, customer witness,
 or production deployment is established by this workcell. Other A11oy security
 routes can still contain older operational copy; the corrected compliance page
@@ -30,15 +30,20 @@ does not link to those routes as evidence. The six buyer-lane and shared work
 function gates are in
 [`CROSS_LANE_EVIDENCE_REGISTER_20261002.md`](CROSS_LANE_EVIDENCE_REGISTER_20261002.md).
 
-The separate tool-mesh vulnerability report still ignores requested asset and
-CVE filters. A tool-mesh package TypeScript check also remains blocked by the
+The tool-mesh package TypeScript check also remains blocked by the
 same eight `TS6305` missing referenced declarations observed before and after
 the cyber patch; its passing Vitest suite is not a typecheck substitute.
 
-Local tests, build, and screenshots establish source behavior only. Hosted
-exact-head CI, protected merge, provider publication, deployed route read-back,
-and an outside functional witness remain separate, unverified gates. The dated
-proof packet is [`CYBER_LANE_EXECUTION_20261002.md`](CYBER_LANE_EXECUTION_20261002.md).
+Local tests, build, and screenshots establish source behavior only. The hosted
+checks at `df984acc8b6fe00dfbc993a81a78d175d2b2b3af` failed: the dependency
+scan, Grype, and Security Gate report the high-severity `node-forge` advisory
+[`GHSA-86w9-cpqp-85rv`](https://github.com/advisories/GHSA-86w9-cpqp-85rv)
+with no patched version published; the unit suite and
+Runtime Audit report a pre-existing cross-process Atelier file race. These
+failures cannot be treated as a release pass. Protected merge, provider
+publication, deployed route read-back, and an outside functional witness remain
+separate, unverified gates. The dated proof packet is
+[`CYBER_LANE_EXECUTION_20261002.md`](CYBER_LANE_EXECUTION_20261002.md).
 
 ---
 
