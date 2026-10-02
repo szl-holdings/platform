@@ -2,8 +2,8 @@
 
 These are exact public Forge source files for an offline, source-only replay. They
 are not a live Hugging Face census, artifact-byte verification, model evaluation,
-or promotion decision. The four source bindings are a curated subset, not the
-46 known model-type repository IDs described in Forge's metadata audit.
+or promotion decision. The four source bindings are a curated subset of the
+model-type repository IDs described in Forge's metadata audit.
 
 Observed public Forge `main` commit: `53287761f823c3b5114e3e741b17568229688331`.
 
@@ -14,9 +14,8 @@ Observed public Forge `main` commit: `53287761f823c3b5114e3e741b17568229688331`.
 
 The demo reads the existing platform snapshot at
 `audit/evidence/huggingface-public-catalog.snapshot.json`, pinned to platform
-source commit `f2f8df6f89056e9104587674ccec0855dd5b177a`. At checkout parent
-`402c9876c032a9bb532f0a3d1f997aa3254c7653`, its unchanged Git blob SHA-1 was
-`67300a17f2255f7e10cd23eed4cb0dfed597ff29`. The snapshot itself records
+source commit `f2f8df6f89056e9104587674ccec0855dd5b177a`. Its pinned Git
+blob SHA-1 is `67300a17f2255f7e10cd23eed4cb0dfed597ff29`. The snapshot records
 `observedAt=2026-08-20T09:51:06.037Z`; replay at `2026-10-02T00:00:00.000Z`
 correctly treats that inventory as stale. The historical
 `replit-sync/HF_ASSET_MANIFEST.json` is not a current inventory source.
