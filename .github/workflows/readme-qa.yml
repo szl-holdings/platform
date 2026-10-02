@@ -49,16 +49,12 @@ jobs:
         with:
           node-version: "24"
 
-      - name: Setup pnpm
-        uses: pnpm/action-setup@0977fd99725f1db4007ccb2928dbb4e90d06cc86 # v6.0.10
-      - name: Install dependencies
-        run: pnpm install --frozen-lockfile
-
+      # These validators use only Node built-ins; no workspace install is needed.
       - name: Check root README assets
-        run: pnpm readme:check
+        run: node scripts/validate-readme-assets.js
 
       - name: Check README portfolio table is in sync with artifact registry
-        run: pnpm readme:portfolio:check
+        run: node scripts/generate-readme-product-table.js --check
 
       - name: Check profile README assets
         run: node scripts/validate-readme-assets.js --readme profile-readme/README.md

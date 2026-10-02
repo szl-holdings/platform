@@ -13,6 +13,7 @@ dependencies = [
     "pydantic>=2.7.0",
     "structlog>=24.1.0",
 ]
+classifiers = ["Private :: Do Not Upload"]
 
 [project.optional-dependencies]
 dev = [

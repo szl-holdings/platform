@@ -30,6 +30,14 @@ export type PolicyEnforcement = 'block' | 'warn' | 'log' | 'require_approval';
 
 export type WorkcellStatus = 'idle' | 'running' | 'paused' | 'error' | 'completed';
 
+export type OperationalAvailability =
+  | 'REAL'
+  | 'DEMO'
+  | 'UNAVAILABLE'
+  | 'DEGRADED'
+  | 'BLOCKED'
+  | 'ROADMAP';
+
 export type ProofPacketKind =
   | 'signal_ingestion'
   | 'state_transition'

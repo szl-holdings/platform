@@ -1,7 +1,7 @@
 {
   "version": "1.0.0",
   "description": "SZL Holdings ecosystem route manifest — all known artifact routes for audit harnesses",
-  "updated": "2026-04-25",
+  "updated": "2026-09-04",
   "apps": [
     {
       "id": "szl-holdings",
@@ -106,10 +106,15 @@
     },
     {
       "id": "a11oy",
-      "title": "A11oy — Brand Orchestration Layer",
+      "title": "A11oy — Governed Decision Prototype",
       "previewPath": "/a11oy",
       "routes": [
         { "path": "/a11oy/", "label": "Home" },
+        { "path": "/a11oy/start", "label": "Series A Product View" },
+        { "path": "/a11oy/series-a", "label": "Series A Product View Alias" },
+        { "path": "/a11oy/product-journey", "label": "Investor and Developer Journey" },
+        { "path": "/a11oy/investor-demo", "label": "Series A Compatibility View" },
+        { "path": "/a11oy/workcells", "label": "Demo Workcells" },
         { "path": "/a11oy/brand", "label": "Brand Assets" }
       ]
     },
@@ -117,9 +122,7 @@
       "id": "carlota-jo",
       "title": "Carlota Jo Consulting",
       "previewPath": "/carlota-jo",
-      "routes": [
-        { "path": "/carlota-jo/", "label": "Home" }
-      ]
+      "routes": [{ "path": "/carlota-jo/", "label": "Home" }]
     }
   ]
 }

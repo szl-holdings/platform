@@ -1,0 +1,1713 @@
+{
+  "schema": "szl.a11oy-product-interactions/v1",
+  "state": "PASS",
+  "browser": "148.0.7778.96",
+  "records": [
+    {
+      "width": 320,
+      "state": "initial-route:/a11oy/start",
+      "result": "PASS",
+      "layout": {
+        "viewportOverflowingElements": [],
+        "clippedElements": [],
+        "horizontallyOverflowingContainers": [],
+        "textOverflowingElements": []
+      }
+    },
+    {
+      "width": 320,
+      "state": "initial-route:/a11oy/product-journey",
+      "result": "PASS",
+      "layout": {
+        "viewportOverflowingElements": [],
+        "clippedElements": [],
+        "horizontallyOverflowingContainers": [],
+        "textOverflowingElements": []
+      }
+    },
+    {
+      "width": 320,
+      "state": "initial-route:/a11oy/series-a",
+      "result": "PASS",
+      "layout": {
+        "viewportOverflowingElements": [],
+        "clippedElements": [],
+        "horizontallyOverflowingContainers": [],
+        "textOverflowingElements": []
+      }
+    },
+    {
+      "width": 320,
+      "state": "initial-route:/a11oy/investor-demo",
+      "result": "PASS",
+      "layout": {
+        "viewportOverflowingElements": [],
+        "clippedElements": [],
+        "horizontallyOverflowingContainers": [],
+        "textOverflowingElements": []
+      }
+    },
+    {
+      "width": 320,
+      "state": "initial-route:/a11oy/workcells",
+      "result": "PASS",
+      "layout": {
+        "viewportOverflowingElements": [],
+        "clippedElements": [],
+        "horizontallyOverflowingContainers": [],
+        "textOverflowingElements": []
+      }
+    },
+    {
+      "width": 320,
+      "state": "initial-route:/a11oy/workcells/wc-001",
+      "result": "PASS",
+      "layout": {
+        "viewportOverflowingElements": [],
+        "clippedElements": [],
+        "horizontallyOverflowingContainers": [],
+        "textOverflowingElements": []
+      }
+    },
+    {
+      "width": 320,
+      "state": "initial-route:/a11oy/workcells/wc-001/replay",
+      "result": "PASS",
+      "layout": {
+        "viewportOverflowingElements": [],
+        "clippedElements": [],
+        "horizontallyOverflowingContainers": [],
+        "textOverflowingElements": []
+      }
+    },
+    {
+      "width": 320,
+      "state": "initial-route:/a11oy/replay",
+      "result": "PASS",
+      "layout": {
+        "viewportOverflowingElements": [],
+        "clippedElements": [],
+        "horizontallyOverflowingContainers": [],
+        "textOverflowingElements": []
+      }
+    },
+    {
+      "width": 320,
+      "state": "initial-route:/a11oy/demo",
+      "result": "PASS",
+      "layout": {
+        "viewportOverflowingElements": [],
+        "clippedElements": [],
+        "horizontallyOverflowingContainers": [],
+        "textOverflowingElements": []
+      }
+    },
+    {
+      "width": 320,
+      "state": "initial-route:/a11oy/architecture",
+      "result": "PASS",
+      "layout": {
+        "viewportOverflowingElements": [],
+        "clippedElements": [],
+        "horizontallyOverflowingContainers": [],
+        "textOverflowingElements": []
+      }
+    },
+    {
+      "width": 320,
+      "state": "initial-route:/a11oy/fabric",
+      "result": "PASS",
+      "layout": {
+        "viewportOverflowingElements": [],
+        "clippedElements": [],
+        "horizontallyOverflowingContainers": [],
+        "textOverflowingElements": []
+      }
+    },
+    {
+      "width": 320,
+      "state": "initial-route:/a11oy/governance",
+      "result": "PASS",
+      "layout": {
+        "viewportOverflowingElements": [],
+        "clippedElements": [],
+        "horizontallyOverflowingContainers": [],
+        "textOverflowingElements": []
+      }
+    },
+    {
+      "width": 320,
+      "state": "initial-route:/a11oy/proof",
+      "result": "PASS",
+      "layout": {
+        "viewportOverflowingElements": [],
+        "clippedElements": [],
+        "horizontallyOverflowingContainers": [],
+        "textOverflowingElements": []
+      }
+    },
+    {
+      "width": 320,
+      "state": "initial-route:/a11oy/resources",
+      "result": "PASS",
+      "layout": {
+        "viewportOverflowingElements": [],
+        "clippedElements": [],
+        "horizontallyOverflowingContainers": [],
+        "textOverflowingElements": []
+      }
+    },
+    {
+      "width": 320,
+      "state": "initial-route:/a11oy/trust",
+      "result": "PASS",
+      "layout": {
+        "viewportOverflowingElements": [],
+        "clippedElements": [],
+        "horizontallyOverflowingContainers": [],
+        "textOverflowingElements": []
+      }
+    },
+    {
+      "width": 320,
+      "state": "mobile-drawer-open",
+      "result": "PASS",
+      "layout": {
+        "viewportOverflowingElements": [],
+        "clippedElements": [],
+        "horizontallyOverflowingContainers": [],
+        "textOverflowingElements": []
+      }
+    },
+    {
+      "width": 320,
+      "state": "mobile-drawer-close-button",
+      "result": "PASS",
+      "layout": {
+        "viewportOverflowingElements": [],
+        "clippedElements": [],
+        "horizontallyOverflowingContainers": [],
+        "textOverflowingElements": []
+      }
+    },
+    {
+      "width": 320,
+      "state": "mobile-drawer-backdrop-close",
+      "result": "PASS",
+      "layout": {
+        "viewportOverflowingElements": [],
+        "clippedElements": [],
+        "horizontallyOverflowingContainers": [],
+        "textOverflowingElements": []
+      }
+    },
+    {
+      "width": 320,
+      "state": "mobile-drawer-resize-restoration",
+      "result": "PASS",
+      "layout": {
+        "viewportOverflowingElements": [],
+        "clippedElements": [],
+        "horizontallyOverflowingContainers": [],
+        "textOverflowingElements": []
+      }
+    },
+    {
+      "width": 320,
+      "state": "mobile-drawer-navigation",
+      "result": "PASS",
+      "layout": {
+        "viewportOverflowingElements": [],
+        "clippedElements": [],
+        "horizontallyOverflowingContainers": [],
+        "textOverflowingElements": []
+      }
+    },
+    {
+      "width": 320,
+      "state": "workcells-filter-running",
+      "result": "PASS",
+      "layout": {
+        "viewportOverflowingElements": [],
+        "clippedElements": [],
+        "horizontallyOverflowingContainers": [],
+        "textOverflowingElements": []
+      }
+    },
+    {
+      "width": 320,
+      "state": "workcells-filter-completed",
+      "result": "PASS",
+      "layout": {
+        "viewportOverflowingElements": [],
+        "clippedElements": [],
+        "horizontallyOverflowingContainers": [],
+        "textOverflowingElements": []
+      }
+    },
+    {
+      "width": 320,
+      "state": "workcells-filter-idle",
+      "result": "PASS",
+      "layout": {
+        "viewportOverflowingElements": [],
+        "clippedElements": [],
+        "horizontallyOverflowingContainers": [],
+        "textOverflowingElements": []
+      }
+    },
+    {
+      "width": 320,
+      "state": "workcells-filter-paused",
+      "result": "PASS",
+      "layout": {
+        "viewportOverflowingElements": [],
+        "clippedElements": [],
+        "horizontallyOverflowingContainers": [],
+        "textOverflowingElements": []
+      }
+    },
+    {
+      "width": 320,
+      "state": "workcells-filter-error",
+      "result": "PASS",
+      "layout": {
+        "viewportOverflowingElements": [],
+        "clippedElements": [],
+        "horizontallyOverflowingContainers": [],
+        "textOverflowingElements": []
+      }
+    },
+    {
+      "width": 320,
+      "state": "workcells-filter-vertical",
+      "result": "PASS",
+      "layout": {
+        "viewportOverflowingElements": [],
+        "clippedElements": [],
+        "horizontallyOverflowingContainers": [],
+        "textOverflowingElements": []
+      }
+    },
+    {
+      "width": 320,
+      "state": "workcell-detail-navigation",
+      "result": "PASS",
+      "layout": {
+        "viewportOverflowingElements": [],
+        "clippedElements": [],
+        "horizontallyOverflowingContainers": [],
+        "textOverflowingElements": []
+      }
+    },
+    {
+      "width": 320,
+      "state": "replay-complete-after-pause-resume",
+      "result": "PASS",
+      "layout": {
+        "viewportOverflowingElements": [],
+        "clippedElements": [],
+        "horizontallyOverflowingContainers": [],
+        "textOverflowingElements": []
+      }
+    },
+    {
+      "width": 320,
+      "state": "replay-reset",
+      "result": "PASS",
+      "layout": {
+        "viewportOverflowingElements": [],
+        "clippedElements": [],
+        "horizontallyOverflowingContainers": [],
+        "textOverflowingElements": []
+      }
+    },
+    {
+      "width": 320,
+      "state": "proof-replay-final",
+      "result": "PASS",
+      "layout": {
+        "viewportOverflowingElements": [],
+        "clippedElements": [],
+        "horizontallyOverflowingContainers": [],
+        "textOverflowingElements": []
+      }
+    },
+    {
+      "width": 320,
+      "state": "proof-diff",
+      "result": "PASS",
+      "layout": {
+        "viewportOverflowingElements": [],
+        "clippedElements": [],
+        "horizontallyOverflowingContainers": [],
+        "textOverflowingElements": []
+      }
+    },
+    {
+      "width": 320,
+      "state": "proof-chain",
+      "result": "PASS",
+      "layout": {
+        "viewportOverflowingElements": [],
+        "clippedElements": [],
+        "horizontallyOverflowingContainers": [],
+        "textOverflowingElements": []
+      }
+    },
+    {
+      "width": 320,
+      "state": "demo-complete",
+      "result": "PASS",
+      "layout": {
+        "viewportOverflowingElements": [],
+        "clippedElements": [],
+        "horizontallyOverflowingContainers": [],
+        "textOverflowingElements": []
+      }
+    },
+    {
+      "width": 320,
+      "state": "demo-reset",
+      "result": "PASS",
+      "layout": {
+        "viewportOverflowingElements": [],
+        "clippedElements": [],
+        "horizontallyOverflowingContainers": [],
+        "textOverflowingElements": []
+      }
+    },
+    {
+      "width": 390,
+      "state": "initial-route:/a11oy/start",
+      "result": "PASS",
+      "layout": {
+        "viewportOverflowingElements": [],
+        "clippedElements": [],
+        "horizontallyOverflowingContainers": [],
+        "textOverflowingElements": []
+      }
+    },
+    {
+      "width": 390,
+      "state": "initial-route:/a11oy/product-journey",
+      "result": "PASS",
+      "layout": {
+        "viewportOverflowingElements": [],
+        "clippedElements": [],
+        "horizontallyOverflowingContainers": [],
+        "textOverflowingElements": []
+      }
+    },
+    {
+      "width": 390,
+      "state": "initial-route:/a11oy/series-a",
+      "result": "PASS",
+      "layout": {
+        "viewportOverflowingElements": [],
+        "clippedElements": [],
+        "horizontallyOverflowingContainers": [],
+        "textOverflowingElements": []
+      }
+    },
+    {
+      "width": 390,
+      "state": "initial-route:/a11oy/investor-demo",
+      "result": "PASS",
+      "layout": {
+        "viewportOverflowingElements": [],
+        "clippedElements": [],
+        "horizontallyOverflowingContainers": [],
+        "textOverflowingElements": []
+      }
+    },
+    {
+      "width": 390,
+      "state": "initial-route:/a11oy/workcells",
+      "result": "PASS",
+      "layout": {
+        "viewportOverflowingElements": [],
+        "clippedElements": [],
+        "horizontallyOverflowingContainers": [],
+        "textOverflowingElements": []
+      }
+    },
+    {
+      "width": 390,
+      "state": "initial-route:/a11oy/workcells/wc-001",
+      "result": "PASS",
+      "layout": {
+        "viewportOverflowingElements": [],
+        "clippedElements": [],
+        "horizontallyOverflowingContainers": [],
+        "textOverflowingElements": []
+      }
+    },
+    {
+      "width": 390,
+      "state": "initial-route:/a11oy/workcells/wc-001/replay",
+      "result": "PASS",
+      "layout": {
+        "viewportOverflowingElements": [],
+        "clippedElements": [],
+        "horizontallyOverflowingContainers": [],
+        "textOverflowingElements": []
+      }
+    },
+    {
+      "width": 390,
+      "state": "initial-route:/a11oy/replay",
+      "result": "PASS",
+      "layout": {
+        "viewportOverflowingElements": [],
+        "clippedElements": [],
+        "horizontallyOverflowingContainers": [],
+        "textOverflowingElements": []
+      }
+    },
+    {
+      "width": 390,
+      "state": "initial-route:/a11oy/demo",
+      "result": "PASS",
+      "layout": {
+        "viewportOverflowingElements": [],
+        "clippedElements": [],
+        "horizontallyOverflowingContainers": [],
+        "textOverflowingElements": []
+      }
+    },
+    {
+      "width": 390,
+      "state": "initial-route:/a11oy/architecture",
+      "result": "PASS",
+      "layout": {
+        "viewportOverflowingElements": [],
+        "clippedElements": [],
+        "horizontallyOverflowingContainers": [],
+        "textOverflowingElements": []
+      }
+    },
+    {
+      "width": 390,
+      "state": "initial-route:/a11oy/fabric",
+      "result": "PASS",
+      "layout": {
+        "viewportOverflowingElements": [],
+        "clippedElements": [],
+        "horizontallyOverflowingContainers": [],
+        "textOverflowingElements": []
+      }
+    },
+    {
+      "width": 390,
+      "state": "initial-route:/a11oy/governance",
+      "result": "PASS",
+      "layout": {
+        "viewportOverflowingElements": [],
+        "clippedElements": [],
+        "horizontallyOverflowingContainers": [],
+        "textOverflowingElements": []
+      }
+    },
+    {
+      "width": 390,
+      "state": "initial-route:/a11oy/proof",
+      "result": "PASS",
+      "layout": {
+        "viewportOverflowingElements": [],
+        "clippedElements": [],
+        "horizontallyOverflowingContainers": [],
+        "textOverflowingElements": []
+      }
+    },
+    {
+      "width": 390,
+      "state": "initial-route:/a11oy/resources",
+      "result": "PASS",
+      "layout": {
+        "viewportOverflowingElements": [],
+        "clippedElements": [],
+        "horizontallyOverflowingContainers": [],
+        "textOverflowingElements": []
+      }
+    },
+    {
+      "width": 390,
+      "state": "initial-route:/a11oy/trust",
+      "result": "PASS",
+      "layout": {
+        "viewportOverflowingElements": [],
+        "clippedElements": [],
+        "horizontallyOverflowingContainers": [],
+        "textOverflowingElements": []
+      }
+    },
+    {
+      "width": 390,
+      "state": "mobile-drawer-open",
+      "result": "PASS",
+      "layout": {
+        "viewportOverflowingElements": [],
+        "clippedElements": [],
+        "horizontallyOverflowingContainers": [],
+        "textOverflowingElements": []
+      }
+    },
+    {
+      "width": 390,
+      "state": "mobile-drawer-close-button",
+      "result": "PASS",
+      "layout": {
+        "viewportOverflowingElements": [],
+        "clippedElements": [],
+        "horizontallyOverflowingContainers": [],
+        "textOverflowingElements": []
+      }
+    },
+    {
+      "width": 390,
+      "state": "mobile-drawer-backdrop-close",
+      "result": "PASS",
+      "layout": {
+        "viewportOverflowingElements": [],
+        "clippedElements": [],
+        "horizontallyOverflowingContainers": [],
+        "textOverflowingElements": []
+      }
+    },
+    {
+      "width": 390,
+      "state": "mobile-drawer-resize-restoration",
+      "result": "PASS",
+      "layout": {
+        "viewportOverflowingElements": [],
+        "clippedElements": [],
+        "horizontallyOverflowingContainers": [],
+        "textOverflowingElements": []
+      }
+    },
+    {
+      "width": 390,
+      "state": "mobile-drawer-navigation",
+      "result": "PASS",
+      "layout": {
+        "viewportOverflowingElements": [],
+        "clippedElements": [],
+        "horizontallyOverflowingContainers": [],
+        "textOverflowingElements": []
+      }
+    },
+    {
+      "width": 390,
+      "state": "workcells-filter-running",
+      "result": "PASS",
+      "layout": {
+        "viewportOverflowingElements": [],
+        "clippedElements": [],
+        "horizontallyOverflowingContainers": [],
+        "textOverflowingElements": []
+      }
+    },
+    {
+      "width": 390,
+      "state": "workcells-filter-completed",
+      "result": "PASS",
+      "layout": {
+        "viewportOverflowingElements": [],
+        "clippedElements": [],
+        "horizontallyOverflowingContainers": [],
+        "textOverflowingElements": []
+      }
+    },
+    {
+      "width": 390,
+      "state": "workcells-filter-idle",
+      "result": "PASS",
+      "layout": {
+        "viewportOverflowingElements": [],
+        "clippedElements": [],
+        "horizontallyOverflowingContainers": [],
+        "textOverflowingElements": []
+      }
+    },
+    {
+      "width": 390,
+      "state": "workcells-filter-paused",
+      "result": "PASS",
+      "layout": {
+        "viewportOverflowingElements": [],
+        "clippedElements": [],
+        "horizontallyOverflowingContainers": [],
+        "textOverflowingElements": []
+      }
+    },
+    {
+      "width": 390,
+      "state": "workcells-filter-error",
+      "result": "PASS",
+      "layout": {
+        "viewportOverflowingElements": [],
+        "clippedElements": [],
+        "horizontallyOverflowingContainers": [],
+        "textOverflowingElements": []
+      }
+    },
+    {
+      "width": 390,
+      "state": "workcells-filter-vertical",
+      "result": "PASS",
+      "layout": {
+        "viewportOverflowingElements": [],
+        "clippedElements": [],
+        "horizontallyOverflowingContainers": [],
+        "textOverflowingElements": []
+      }
+    },
+    {
+      "width": 390,
+      "state": "workcell-detail-navigation",
+      "result": "PASS",
+      "layout": {
+        "viewportOverflowingElements": [],
+        "clippedElements": [],
+        "horizontallyOverflowingContainers": [],
+        "textOverflowingElements": []
+      }
+    },
+    {
+      "width": 390,
+      "state": "replay-complete-after-pause-resume",
+      "result": "PASS",
+      "layout": {
+        "viewportOverflowingElements": [],
+        "clippedElements": [],
+        "horizontallyOverflowingContainers": [],
+        "textOverflowingElements": []
+      }
+    },
+    {
+      "width": 390,
+      "state": "replay-reset",
+      "result": "PASS",
+      "layout": {
+        "viewportOverflowingElements": [],
+        "clippedElements": [],
+        "horizontallyOverflowingContainers": [],
+        "textOverflowingElements": []
+      }
+    },
+    {
+      "width": 390,
+      "state": "proof-replay-final",
+      "result": "PASS",
+      "layout": {
+        "viewportOverflowingElements": [],
+        "clippedElements": [],
+        "horizontallyOverflowingContainers": [],
+        "textOverflowingElements": []
+      }
+    },
+    {
+      "width": 390,
+      "state": "proof-diff",
+      "result": "PASS",
+      "layout": {
+        "viewportOverflowingElements": [],
+        "clippedElements": [],
+        "horizontallyOverflowingContainers": [],
+        "textOverflowingElements": []
+      }
+    },
+    {
+      "width": 390,
+      "state": "proof-chain",
+      "result": "PASS",
+      "layout": {
+        "viewportOverflowingElements": [],
+        "clippedElements": [],
+        "horizontallyOverflowingContainers": [],
+        "textOverflowingElements": []
+      }
+    },
+    {
+      "width": 390,
+      "state": "demo-complete",
+      "result": "PASS",
+      "layout": {
+        "viewportOverflowingElements": [],
+        "clippedElements": [],
+        "horizontallyOverflowingContainers": [],
+        "textOverflowingElements": []
+      }
+    },
+    {
+      "width": 390,
+      "state": "demo-reset",
+      "result": "PASS",
+      "layout": {
+        "viewportOverflowingElements": [],
+        "clippedElements": [],
+        "horizontallyOverflowingContainers": [],
+        "textOverflowingElements": []
+      }
+    },
+    {
+      "width": 768,
+      "state": "initial-route:/a11oy/start",
+      "result": "PASS",
+      "layout": {
+        "viewportOverflowingElements": [],
+        "clippedElements": [],
+        "horizontallyOverflowingContainers": [],
+        "textOverflowingElements": []
+      }
+    },
+    {
+      "width": 768,
+      "state": "initial-route:/a11oy/product-journey",
+      "result": "PASS",
+      "layout": {
+        "viewportOverflowingElements": [],
+        "clippedElements": [],
+        "horizontallyOverflowingContainers": [],
+        "textOverflowingElements": []
+      }
+    },
+    {
+      "width": 768,
+      "state": "initial-route:/a11oy/series-a",
+      "result": "PASS",
+      "layout": {
+        "viewportOverflowingElements": [],
+        "clippedElements": [],
+        "horizontallyOverflowingContainers": [],
+        "textOverflowingElements": []
+      }
+    },
+    {
+      "width": 768,
+      "state": "initial-route:/a11oy/investor-demo",
+      "result": "PASS",
+      "layout": {
+        "viewportOverflowingElements": [],
+        "clippedElements": [],
+        "horizontallyOverflowingContainers": [],
+        "textOverflowingElements": []
+      }
+    },
+    {
+      "width": 768,
+      "state": "initial-route:/a11oy/workcells",
+      "result": "PASS",
+      "layout": {
+        "viewportOverflowingElements": [],
+        "clippedElements": [],
+        "horizontallyOverflowingContainers": [],
+        "textOverflowingElements": []
+      }
+    },
+    {
+      "width": 768,
+      "state": "initial-route:/a11oy/workcells/wc-001",
+      "result": "PASS",
+      "layout": {
+        "viewportOverflowingElements": [],
+        "clippedElements": [],
+        "horizontallyOverflowingContainers": [],
+        "textOverflowingElements": []
+      }
+    },
+    {
+      "width": 768,
+      "state": "initial-route:/a11oy/workcells/wc-001/replay",
+      "result": "PASS",
+      "layout": {
+        "viewportOverflowingElements": [],
+        "clippedElements": [],
+        "horizontallyOverflowingContainers": [],
+        "textOverflowingElements": []
+      }
+    },
+    {
+      "width": 768,
+      "state": "initial-route:/a11oy/replay",
+      "result": "PASS",
+      "layout": {
+        "viewportOverflowingElements": [],
+        "clippedElements": [],
+        "horizontallyOverflowingContainers": [],
+        "textOverflowingElements": []
+      }
+    },
+    {
+      "width": 768,
+      "state": "initial-route:/a11oy/demo",
+      "result": "PASS",
+      "layout": {
+        "viewportOverflowingElements": [],
+        "clippedElements": [],
+        "horizontallyOverflowingContainers": [],
+        "textOverflowingElements": []
+      }
+    },
+    {
+      "width": 768,
+      "state": "initial-route:/a11oy/architecture",
+      "result": "PASS",
+      "layout": {
+        "viewportOverflowingElements": [],
+        "clippedElements": [],
+        "horizontallyOverflowingContainers": [],
+        "textOverflowingElements": []
+      }
+    },
+    {
+      "width": 768,
+      "state": "initial-route:/a11oy/fabric",
+      "result": "PASS",
+      "layout": {
+        "viewportOverflowingElements": [],
+        "clippedElements": [],
+        "horizontallyOverflowingContainers": [],
+        "textOverflowingElements": []
+      }
+    },
+    {
+      "width": 768,
+      "state": "initial-route:/a11oy/governance",
+      "result": "PASS",
+      "layout": {
+        "viewportOverflowingElements": [],
+        "clippedElements": [],
+        "horizontallyOverflowingContainers": [],
+        "textOverflowingElements": []
+      }
+    },
+    {
+      "width": 768,
+      "state": "initial-route:/a11oy/proof",
+      "result": "PASS",
+      "layout": {
+        "viewportOverflowingElements": [],
+        "clippedElements": [],
+        "horizontallyOverflowingContainers": [],
+        "textOverflowingElements": []
+      }
+    },
+    {
+      "width": 768,
+      "state": "initial-route:/a11oy/resources",
+      "result": "PASS",
+      "layout": {
+        "viewportOverflowingElements": [],
+        "clippedElements": [],
+        "horizontallyOverflowingContainers": [],
+        "textOverflowingElements": []
+      }
+    },
+    {
+      "width": 768,
+      "state": "initial-route:/a11oy/trust",
+      "result": "PASS",
+      "layout": {
+        "viewportOverflowingElements": [],
+        "clippedElements": [],
+        "horizontallyOverflowingContainers": [],
+        "textOverflowingElements": []
+      }
+    },
+    {
+      "width": 768,
+      "state": "workcells-filter-running",
+      "result": "PASS",
+      "layout": {
+        "viewportOverflowingElements": [],
+        "clippedElements": [],
+        "horizontallyOverflowingContainers": [],
+        "textOverflowingElements": []
+      }
+    },
+    {
+      "width": 768,
+      "state": "workcells-filter-completed",
+      "result": "PASS",
+      "layout": {
+        "viewportOverflowingElements": [],
+        "clippedElements": [],
+        "horizontallyOverflowingContainers": [],
+        "textOverflowingElements": []
+      }
+    },
+    {
+      "width": 768,
+      "state": "workcells-filter-idle",
+      "result": "PASS",
+      "layout": {
+        "viewportOverflowingElements": [],
+        "clippedElements": [],
+        "horizontallyOverflowingContainers": [],
+        "textOverflowingElements": []
+      }
+    },
+    {
+      "width": 768,
+      "state": "workcells-filter-paused",
+      "result": "PASS",
+      "layout": {
+        "viewportOverflowingElements": [],
+        "clippedElements": [],
+        "horizontallyOverflowingContainers": [],
+        "textOverflowingElements": []
+      }
+    },
+    {
+      "width": 768,
+      "state": "workcells-filter-error",
+      "result": "PASS",
+      "layout": {
+        "viewportOverflowingElements": [],
+        "clippedElements": [],
+        "horizontallyOverflowingContainers": [],
+        "textOverflowingElements": []
+      }
+    },
+    {
+      "width": 768,
+      "state": "workcells-filter-vertical",
+      "result": "PASS",
+      "layout": {
+        "viewportOverflowingElements": [],
+        "clippedElements": [],
+        "horizontallyOverflowingContainers": [],
+        "textOverflowingElements": []
+      }
+    },
+    {
+      "width": 768,
+      "state": "workcell-detail-navigation",
+      "result": "PASS",
+      "layout": {
+        "viewportOverflowingElements": [],
+        "clippedElements": [],
+        "horizontallyOverflowingContainers": [],
+        "textOverflowingElements": []
+      }
+    },
+    {
+      "width": 768,
+      "state": "replay-complete-after-pause-resume",
+      "result": "PASS",
+      "layout": {
+        "viewportOverflowingElements": [],
+        "clippedElements": [],
+        "horizontallyOverflowingContainers": [],
+        "textOverflowingElements": []
+      }
+    },
+    {
+      "width": 768,
+      "state": "replay-reset",
+      "result": "PASS",
+      "layout": {
+        "viewportOverflowingElements": [],
+        "clippedElements": [],
+        "horizontallyOverflowingContainers": [],
+        "textOverflowingElements": []
+      }
+    },
+    {
+      "width": 768,
+      "state": "proof-replay-final",
+      "result": "PASS",
+      "layout": {
+        "viewportOverflowingElements": [],
+        "clippedElements": [],
+        "horizontallyOverflowingContainers": [],
+        "textOverflowingElements": []
+      }
+    },
+    {
+      "width": 768,
+      "state": "proof-diff",
+      "result": "PASS",
+      "layout": {
+        "viewportOverflowingElements": [],
+        "clippedElements": [],
+        "horizontallyOverflowingContainers": [],
+        "textOverflowingElements": []
+      }
+    },
+    {
+      "width": 768,
+      "state": "proof-chain",
+      "result": "PASS",
+      "layout": {
+        "viewportOverflowingElements": [],
+        "clippedElements": [],
+        "horizontallyOverflowingContainers": [],
+        "textOverflowingElements": []
+      }
+    },
+    {
+      "width": 768,
+      "state": "demo-complete",
+      "result": "PASS",
+      "layout": {
+        "viewportOverflowingElements": [],
+        "clippedElements": [],
+        "horizontallyOverflowingContainers": [],
+        "textOverflowingElements": []
+      }
+    },
+    {
+      "width": 768,
+      "state": "demo-reset",
+      "result": "PASS",
+      "layout": {
+        "viewportOverflowingElements": [],
+        "clippedElements": [],
+        "horizontallyOverflowingContainers": [],
+        "textOverflowingElements": []
+      }
+    },
+    {
+      "width": 1366,
+      "state": "initial-route:/a11oy/start",
+      "result": "PASS",
+      "layout": {
+        "viewportOverflowingElements": [],
+        "clippedElements": [],
+        "horizontallyOverflowingContainers": [],
+        "textOverflowingElements": []
+      }
+    },
+    {
+      "width": 1366,
+      "state": "initial-route:/a11oy/product-journey",
+      "result": "PASS",
+      "layout": {
+        "viewportOverflowingElements": [],
+        "clippedElements": [],
+        "horizontallyOverflowingContainers": [],
+        "textOverflowingElements": []
+      }
+    },
+    {
+      "width": 1366,
+      "state": "initial-route:/a11oy/series-a",
+      "result": "PASS",
+      "layout": {
+        "viewportOverflowingElements": [],
+        "clippedElements": [],
+        "horizontallyOverflowingContainers": [],
+        "textOverflowingElements": []
+      }
+    },
+    {
+      "width": 1366,
+      "state": "initial-route:/a11oy/investor-demo",
+      "result": "PASS",
+      "layout": {
+        "viewportOverflowingElements": [],
+        "clippedElements": [],
+        "horizontallyOverflowingContainers": [],
+        "textOverflowingElements": []
+      }
+    },
+    {
+      "width": 1366,
+      "state": "initial-route:/a11oy/workcells",
+      "result": "PASS",
+      "layout": {
+        "viewportOverflowingElements": [],
+        "clippedElements": [],
+        "horizontallyOverflowingContainers": [],
+        "textOverflowingElements": []
+      }
+    },
+    {
+      "width": 1366,
+      "state": "initial-route:/a11oy/workcells/wc-001",
+      "result": "PASS",
+      "layout": {
+        "viewportOverflowingElements": [],
+        "clippedElements": [],
+        "horizontallyOverflowingContainers": [],
+        "textOverflowingElements": []
+      }
+    },
+    {
+      "width": 1366,
+      "state": "initial-route:/a11oy/workcells/wc-001/replay",
+      "result": "PASS",
+      "layout": {
+        "viewportOverflowingElements": [],
+        "clippedElements": [],
+        "horizontallyOverflowingContainers": [],
+        "textOverflowingElements": []
+      }
+    },
+    {
+      "width": 1366,
+      "state": "initial-route:/a11oy/replay",
+      "result": "PASS",
+      "layout": {
+        "viewportOverflowingElements": [],
+        "clippedElements": [],
+        "horizontallyOverflowingContainers": [],
+        "textOverflowingElements": []
+      }
+    },
+    {
+      "width": 1366,
+      "state": "initial-route:/a11oy/demo",
+      "result": "PASS",
+      "layout": {
+        "viewportOverflowingElements": [],
+        "clippedElements": [],
+        "horizontallyOverflowingContainers": [],
+        "textOverflowingElements": []
+      }
+    },
+    {
+      "width": 1366,
+      "state": "initial-route:/a11oy/architecture",
+      "result": "PASS",
+      "layout": {
+        "viewportOverflowingElements": [],
+        "clippedElements": [],
+        "horizontallyOverflowingContainers": [],
+        "textOverflowingElements": []
+      }
+    },
+    {
+      "width": 1366,
+      "state": "initial-route:/a11oy/fabric",
+      "result": "PASS",
+      "layout": {
+        "viewportOverflowingElements": [],
+        "clippedElements": [],
+        "horizontallyOverflowingContainers": [],
+        "textOverflowingElements": []
+      }
+    },
+    {
+      "width": 1366,
+      "state": "initial-route:/a11oy/governance",
+      "result": "PASS",
+      "layout": {
+        "viewportOverflowingElements": [],
+        "clippedElements": [],
+        "horizontallyOverflowingContainers": [],
+        "textOverflowingElements": []
+      }
+    },
+    {
+      "width": 1366,
+      "state": "initial-route:/a11oy/proof",
+      "result": "PASS",
+      "layout": {
+        "viewportOverflowingElements": [],
+        "clippedElements": [],
+        "horizontallyOverflowingContainers": [],
+        "textOverflowingElements": []
+      }
+    },
+    {
+      "width": 1366,
+      "state": "initial-route:/a11oy/resources",
+      "result": "PASS",
+      "layout": {
+        "viewportOverflowingElements": [],
+        "clippedElements": [],
+        "horizontallyOverflowingContainers": [],
+        "textOverflowingElements": []
+      }
+    },
+    {
+      "width": 1366,
+      "state": "initial-route:/a11oy/trust",
+      "result": "PASS",
+      "layout": {
+        "viewportOverflowingElements": [],
+        "clippedElements": [],
+        "horizontallyOverflowingContainers": [],
+        "textOverflowingElements": []
+      }
+    },
+    {
+      "width": 1366,
+      "state": "workcells-filter-running",
+      "result": "PASS",
+      "layout": {
+        "viewportOverflowingElements": [],
+        "clippedElements": [],
+        "horizontallyOverflowingContainers": [],
+        "textOverflowingElements": []
+      }
+    },
+    {
+      "width": 1366,
+      "state": "workcells-filter-completed",
+      "result": "PASS",
+      "layout": {
+        "viewportOverflowingElements": [],
+        "clippedElements": [],
+        "horizontallyOverflowingContainers": [],
+        "textOverflowingElements": []
+      }
+    },
+    {
+      "width": 1366,
+      "state": "workcells-filter-idle",
+      "result": "PASS",
+      "layout": {
+        "viewportOverflowingElements": [],
+        "clippedElements": [],
+        "horizontallyOverflowingContainers": [],
+        "textOverflowingElements": []
+      }
+    },
+    {
+      "width": 1366,
+      "state": "workcells-filter-paused",
+      "result": "PASS",
+      "layout": {
+        "viewportOverflowingElements": [],
+        "clippedElements": [],
+        "horizontallyOverflowingContainers": [],
+        "textOverflowingElements": []
+      }
+    },
+    {
+      "width": 1366,
+      "state": "workcells-filter-error",
+      "result": "PASS",
+      "layout": {
+        "viewportOverflowingElements": [],
+        "clippedElements": [],
+        "horizontallyOverflowingContainers": [],
+        "textOverflowingElements": []
+      }
+    },
+    {
+      "width": 1366,
+      "state": "workcells-filter-vertical",
+      "result": "PASS",
+      "layout": {
+        "viewportOverflowingElements": [],
+        "clippedElements": [],
+        "horizontallyOverflowingContainers": [],
+        "textOverflowingElements": []
+      }
+    },
+    {
+      "width": 1366,
+      "state": "workcell-detail-navigation",
+      "result": "PASS",
+      "layout": {
+        "viewportOverflowingElements": [],
+        "clippedElements": [],
+        "horizontallyOverflowingContainers": [],
+        "textOverflowingElements": []
+      }
+    },
+    {
+      "width": 1366,
+      "state": "replay-complete-after-pause-resume",
+      "result": "PASS",
+      "layout": {
+        "viewportOverflowingElements": [],
+        "clippedElements": [],
+        "horizontallyOverflowingContainers": [],
+        "textOverflowingElements": []
+      }
+    },
+    {
+      "width": 1366,
+      "state": "replay-reset",
+      "result": "PASS",
+      "layout": {
+        "viewportOverflowingElements": [],
+        "clippedElements": [],
+        "horizontallyOverflowingContainers": [],
+        "textOverflowingElements": []
+      }
+    },
+    {
+      "width": 1366,
+      "state": "proof-replay-final",
+      "result": "PASS",
+      "layout": {
+        "viewportOverflowingElements": [],
+        "clippedElements": [],
+        "horizontallyOverflowingContainers": [],
+        "textOverflowingElements": []
+      }
+    },
+    {
+      "width": 1366,
+      "state": "proof-diff",
+      "result": "PASS",
+      "layout": {
+        "viewportOverflowingElements": [],
+        "clippedElements": [],
+        "horizontallyOverflowingContainers": [],
+        "textOverflowingElements": []
+      }
+    },
+    {
+      "width": 1366,
+      "state": "proof-chain",
+      "result": "PASS",
+      "layout": {
+        "viewportOverflowingElements": [],
+        "clippedElements": [],
+        "horizontallyOverflowingContainers": [],
+        "textOverflowingElements": []
+      }
+    },
+    {
+      "width": 1366,
+      "state": "demo-complete",
+      "result": "PASS",
+      "layout": {
+        "viewportOverflowingElements": [],
+        "clippedElements": [],
+        "horizontallyOverflowingContainers": [],
+        "textOverflowingElements": []
+      }
+    },
+    {
+      "width": 1366,
+      "state": "demo-reset",
+      "result": "PASS",
+      "layout": {
+        "viewportOverflowingElements": [],
+        "clippedElements": [],
+        "horizontallyOverflowingContainers": [],
+        "textOverflowingElements": []
+      }
+    },
+    {
+      "width": 1728,
+      "state": "initial-route:/a11oy/start",
+      "result": "PASS",
+      "layout": {
+        "viewportOverflowingElements": [],
+        "clippedElements": [],
+        "horizontallyOverflowingContainers": [],
+        "textOverflowingElements": []
+      }
+    },
+    {
+      "width": 1728,
+      "state": "initial-route:/a11oy/product-journey",
+      "result": "PASS",
+      "layout": {
+        "viewportOverflowingElements": [],
+        "clippedElements": [],
+        "horizontallyOverflowingContainers": [],
+        "textOverflowingElements": []
+      }
+    },
+    {
+      "width": 1728,
+      "state": "initial-route:/a11oy/series-a",
+      "result": "PASS",
+      "layout": {
+        "viewportOverflowingElements": [],
+        "clippedElements": [],
+        "horizontallyOverflowingContainers": [],
+        "textOverflowingElements": []
+      }
+    },
+    {
+      "width": 1728,
+      "state": "initial-route:/a11oy/investor-demo",
+      "result": "PASS",
+      "layout": {
+        "viewportOverflowingElements": [],
+        "clippedElements": [],
+        "horizontallyOverflowingContainers": [],
+        "textOverflowingElements": []
+      }
+    },
+    {
+      "width": 1728,
+      "state": "initial-route:/a11oy/workcells",
+      "result": "PASS",
+      "layout": {
+        "viewportOverflowingElements": [],
+        "clippedElements": [],
+        "horizontallyOverflowingContainers": [],
+        "textOverflowingElements": []
+      }
+    },
+    {
+      "width": 1728,
+      "state": "initial-route:/a11oy/workcells/wc-001",
+      "result": "PASS",
+      "layout": {
+        "viewportOverflowingElements": [],
+        "clippedElements": [],
+        "horizontallyOverflowingContainers": [],
+        "textOverflowingElements": []
+      }
+    },
+    {
+      "width": 1728,
+      "state": "initial-route:/a11oy/workcells/wc-001/replay",
+      "result": "PASS",
+      "layout": {
+        "viewportOverflowingElements": [],
+        "clippedElements": [],
+        "horizontallyOverflowingContainers": [],
+        "textOverflowingElements": []
+      }
+    },
+    {
+      "width": 1728,
+      "state": "initial-route:/a11oy/replay",
+      "result": "PASS",
+      "layout": {
+        "viewportOverflowingElements": [],
+        "clippedElements": [],
+        "horizontallyOverflowingContainers": [],
+        "textOverflowingElements": []
+      }
+    },
+    {
+      "width": 1728,
+      "state": "initial-route:/a11oy/demo",
+      "result": "PASS",
+      "layout": {
+        "viewportOverflowingElements": [],
+        "clippedElements": [],
+        "horizontallyOverflowingContainers": [],
+        "textOverflowingElements": []
+      }
+    },
+    {
+      "width": 1728,
+      "state": "initial-route:/a11oy/architecture",
+      "result": "PASS",
+      "layout": {
+        "viewportOverflowingElements": [],
+        "clippedElements": [],
+        "horizontallyOverflowingContainers": [],
+        "textOverflowingElements": []
+      }
+    },
+    {
+      "width": 1728,
+      "state": "initial-route:/a11oy/fabric",
+      "result": "PASS",
+      "layout": {
+        "viewportOverflowingElements": [],
+        "clippedElements": [],
+        "horizontallyOverflowingContainers": [],
+        "textOverflowingElements": []
+      }
+    },
+    {
+      "width": 1728,
+      "state": "initial-route:/a11oy/governance",
+      "result": "PASS",
+      "layout": {
+        "viewportOverflowingElements": [],
+        "clippedElements": [],
+        "horizontallyOverflowingContainers": [],
+        "textOverflowingElements": []
+      }
+    },
+    {
+      "width": 1728,
+      "state": "initial-route:/a11oy/proof",
+      "result": "PASS",
+      "layout": {
+        "viewportOverflowingElements": [],
+        "clippedElements": [],
+        "horizontallyOverflowingContainers": [],
+        "textOverflowingElements": []
+      }
+    },
+    {
+      "width": 1728,
+      "state": "initial-route:/a11oy/resources",
+      "result": "PASS",
+      "layout": {
+        "viewportOverflowingElements": [],
+        "clippedElements": [],
+        "horizontallyOverflowingContainers": [],
+        "textOverflowingElements": []
+      }
+    },
+    {
+      "width": 1728,
+      "state": "initial-route:/a11oy/trust",
+      "result": "PASS",
+      "layout": {
+        "viewportOverflowingElements": [],
+        "clippedElements": [],
+        "horizontallyOverflowingContainers": [],
+        "textOverflowingElements": []
+      }
+    },
+    {
+      "width": 1728,
+      "state": "workcells-filter-running",
+      "result": "PASS",
+      "layout": {
+        "viewportOverflowingElements": [],
+        "clippedElements": [],
+        "horizontallyOverflowingContainers": [],
+        "textOverflowingElements": []
+      }
+    },
+    {
+      "width": 1728,
+      "state": "workcells-filter-completed",
+      "result": "PASS",
+      "layout": {
+        "viewportOverflowingElements": [],
+        "clippedElements": [],
+        "horizontallyOverflowingContainers": [],
+        "textOverflowingElements": []
+      }
+    },
+    {
+      "width": 1728,
+      "state": "workcells-filter-idle",
+      "result": "PASS",
+      "layout": {
+        "viewportOverflowingElements": [],
+        "clippedElements": [],
+        "horizontallyOverflowingContainers": [],
+        "textOverflowingElements": []
+      }
+    },
+    {
+      "width": 1728,
+      "state": "workcells-filter-paused",
+      "result": "PASS",
+      "layout": {
+        "viewportOverflowingElements": [],
+        "clippedElements": [],
+        "horizontallyOverflowingContainers": [],
+        "textOverflowingElements": []
+      }
+    },
+    {
+      "width": 1728,
+      "state": "workcells-filter-error",
+      "result": "PASS",
+      "layout": {
+        "viewportOverflowingElements": [],
+        "clippedElements": [],
+        "horizontallyOverflowingContainers": [],
+        "textOverflowingElements": []
+      }
+    },
+    {
+      "width": 1728,
+      "state": "workcells-filter-vertical",
+      "result": "PASS",
+      "layout": {
+        "viewportOverflowingElements": [],
+        "clippedElements": [],
+        "horizontallyOverflowingContainers": [],
+        "textOverflowingElements": []
+      }
+    },
+    {
+      "width": 1728,
+      "state": "workcell-detail-navigation",
+      "result": "PASS",
+      "layout": {
+        "viewportOverflowingElements": [],
+        "clippedElements": [],
+        "horizontallyOverflowingContainers": [],
+        "textOverflowingElements": []
+      }
+    },
+    {
+      "width": 1728,
+      "state": "replay-complete-after-pause-resume",
+      "result": "PASS",
+      "layout": {
+        "viewportOverflowingElements": [],
+        "clippedElements": [],
+        "horizontallyOverflowingContainers": [],
+        "textOverflowingElements": []
+      }
+    },
+    {
+      "width": 1728,
+      "state": "replay-reset",
+      "result": "PASS",
+      "layout": {
+        "viewportOverflowingElements": [],
+        "clippedElements": [],
+        "horizontallyOverflowingContainers": [],
+        "textOverflowingElements": []
+      }
+    },
+    {
+      "width": 1728,
+      "state": "proof-replay-final",
+      "result": "PASS",
+      "layout": {
+        "viewportOverflowingElements": [],
+        "clippedElements": [],
+        "horizontallyOverflowingContainers": [],
+        "textOverflowingElements": []
+      }
+    },
+    {
+      "width": 1728,
+      "state": "proof-diff",
+      "result": "PASS",
+      "layout": {
+        "viewportOverflowingElements": [],
+        "clippedElements": [],
+        "horizontallyOverflowingContainers": [],
+        "textOverflowingElements": []
+      }
+    },
+    {
+      "width": 1728,
+      "state": "proof-chain",
+      "result": "PASS",
+      "layout": {
+        "viewportOverflowingElements": [],
+        "clippedElements": [],
+        "horizontallyOverflowingContainers": [],
+        "textOverflowingElements": []
+      }
+    },
+    {
+      "width": 1728,
+      "state": "demo-complete",
+      "result": "PASS",
+      "layout": {
+        "viewportOverflowingElements": [],
+        "clippedElements": [],
+        "horizontallyOverflowingContainers": [],
+        "textOverflowingElements": []
+      }
+    },
+    {
+      "width": 1728,
+      "state": "demo-reset",
+      "result": "PASS",
+      "layout": {
+        "viewportOverflowingElements": [],
+        "clippedElements": [],
+        "horizontallyOverflowingContainers": [],
+        "textOverflowingElements": []
+      }
+    }
+  ],
+  "non_claim": "Local deterministic fixture interactions only; no external execution or hosted authority."
+}

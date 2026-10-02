@@ -168,6 +168,8 @@ const WEB_DOMAIN_CONFIGS = [
     routes: [
       '/a11oy/',
       '/a11oy/start',
+      '/a11oy/series-a',
+      '/a11oy/product-journey',
       '/a11oy/investor-demo',
       '/a11oy/now',
       '/a11oy/recommendations',

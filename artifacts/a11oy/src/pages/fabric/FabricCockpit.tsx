@@ -13,7 +13,6 @@ import {
   rankSignalsBySeverity,
   SEVERITY_COLORS,
   GOVERNANCE_COLORS,
-  type VerticalId,
 } from '../../data/fabric';
 
 const BASE = (import.meta.env.BASE_URL ?? '/a11oy/').replace(/\/$/, '');
@@ -36,9 +35,21 @@ export function FabricCockpit() {
       <PageHeader
         label="A11OY COMMAND FABRIC"
         title="Universal Intelligence Layer"
-        subtitle="One intelligence layer across every vertical. Signals become risks, risks become decisions, decisions become outcomes, outcomes become memory."
-        status="LIVE"
+        subtitle="Deterministic prototype data shows how signals can become risks, decisions, outcomes, and memory across verticals."
+        status="DEMO"
       />
+
+      <div
+        className="mb-8 rounded-lg border p-4 text-sm"
+        style={{
+          backgroundColor: 'rgba(229,210,158,0.05)',
+          borderColor: 'rgba(229,210,158,0.22)',
+          color: SUB,
+        }}
+      >
+        This command map is a repository-seeded demonstration. Its health, signal, risk, decision,
+        and evidence values are not authenticated production telemetry.
+      </div>
 
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-8">
         <KpiCard
@@ -103,7 +114,7 @@ export function FabricCockpit() {
       </Card>
 
       <SectionTitle>Vertical Command Map</SectionTitle>
-      <div className="grid sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 mb-8">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 mb-8">
         {VERTICALS.map((v) => {
           const twin = DOMAIN_TWINS.find((t) => t.verticalId === v.id);
           if (!twin) return null;
@@ -115,54 +126,62 @@ export function FabricCockpit() {
           return (
             <div
               key={v.id}
-              className="rounded-lg border cursor-pointer transition-all p-4"
-              onClick={() => setSelectedVertical(isSelected ? null : v.id)}
+              className="min-w-0 w-full rounded-lg border p-4 text-left transition-all [overflow-wrap:anywhere]"
               style={{
                 backgroundColor: isSelected ? `${v.colorToken}08` : 'rgba(255,255,255,0.018)',
                 borderColor: isSelected ? v.colorToken : 'rgba(255,255,255,0.08)',
                 borderTop: `3px solid ${v.colorToken}`,
               }}
             >
-              <div className="flex items-center justify-between mb-2">
-                <div className="flex items-center gap-2">
-                  <span style={{ color: v.colorToken, fontSize: '1.1rem' }}>{v.icon}</span>
-                  <span className="font-semibold text-sm" style={{ color: TEXT }}>
-                    {v.name}
+              <button
+                type="button"
+                aria-expanded={isSelected}
+                aria-controls={`vertical-detail-${v.id}`}
+                className="min-h-11 w-full cursor-pointer border-0 bg-transparent p-0 text-left"
+                onClick={() => setSelectedVertical(isSelected ? null : v.id)}
+              >
+                <div className="flex flex-wrap items-center justify-between gap-2 mb-2">
+                  <div className="flex min-w-0 items-center gap-2">
+                    <span style={{ color: v.colorToken, fontSize: '1.1rem' }}>{v.icon}</span>
+                    <span className="font-semibold text-sm" style={{ color: TEXT }}>
+                      {v.name}
+                    </span>
+                  </div>
+                  <span
+                    className="text-[10px] font-mono px-1.5 py-0.5 rounded"
+                    style={{
+                      backgroundColor: `${GOVERNANCE_COLORS[twin.tenaxGovernanceState]}18`,
+                      color: GOVERNANCE_COLORS[twin.tenaxGovernanceState],
+                    }}
+                  >
+                    {twin.tenaxGovernanceState.toUpperCase()}
                   </span>
                 </div>
-                <span
-                  className="text-[10px] font-mono px-1.5 py-0.5 rounded"
-                  style={{
-                    backgroundColor: `${GOVERNANCE_COLORS[twin.tenaxGovernanceState]}18`,
-                    color: GOVERNANCE_COLORS[twin.tenaxGovernanceState],
-                  }}
-                >
-                  {twin.tenaxGovernanceState.toUpperCase()}
-                </span>
-              </div>
-              <p className="text-xs mb-3" style={{ color: GHOST }}>
-                {v.tagline}
-              </p>
-              <div className="grid grid-cols-2 gap-2 text-[10px] font-mono">
-                <div>
-                  <span style={{ color: GHOST }}>Health</span>{' '}
-                  <span style={{ color: TEXT }}>{twin.healthScore}%</span>
+                <p className="text-xs mb-3" style={{ color: GHOST }}>
+                  {v.tagline}
+                </p>
+                <div className="grid grid-cols-2 gap-2 text-[10px] font-mono">
+                  <div>
+                    <span style={{ color: GHOST }}>Health</span>{' '}
+                    <span style={{ color: TEXT }}>{twin.healthScore}%</span>
+                  </div>
+                  <div>
+                    <span style={{ color: GHOST }}>Signals</span>{' '}
+                    <span style={{ color: TEXT }}>{sigCount}</span>
+                  </div>
+                  <div>
+                    <span style={{ color: GHOST }}>Risks</span>{' '}
+                    <span style={{ color: riskCount > 10 ? '#f59e0b' : TEXT }}>{riskCount}</span>
+                  </div>
+                  <div>
+                    <span style={{ color: GHOST }}>Evidence</span>{' '}
+                    <span style={{ color: TEXT }}>{twin.evidenceCompleteness}%</span>
+                  </div>
                 </div>
-                <div>
-                  <span style={{ color: GHOST }}>Signals</span>{' '}
-                  <span style={{ color: TEXT }}>{sigCount}</span>
-                </div>
-                <div>
-                  <span style={{ color: GHOST }}>Risks</span>{' '}
-                  <span style={{ color: riskCount > 10 ? '#f59e0b' : TEXT }}>{riskCount}</span>
-                </div>
-                <div>
-                  <span style={{ color: GHOST }}>Evidence</span>{' '}
-                  <span style={{ color: TEXT }}>{twin.evidenceCompleteness}%</span>
-                </div>
-              </div>
+              </button>
               {isSelected && (
                 <div
+                  id={`vertical-detail-${v.id}`}
                   className="mt-3 pt-3 border-t"
                   style={{ borderColor: 'rgba(255,255,255,0.06)' }}
                 >
@@ -177,7 +196,7 @@ export function FabricCockpit() {
                   </p>
                   <Link
                     href={`${BASE}/fabric/verticals`}
-                    className="inline-block mt-2 text-[10px] font-mono"
+                    className="mt-2 inline-flex min-h-11 items-center text-[10px] font-mono"
                     style={{ color: GOLD }}
                   >
                     View vertical detail →
@@ -189,8 +208,8 @@ export function FabricCockpit() {
         })}
       </div>
 
-      <div className="grid lg:grid-cols-2 gap-6 mb-8">
-        <div>
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+        <div className="min-w-0 [overflow-wrap:anywhere]">
           <SectionTitle>Top Cross-Vertical Risks</SectionTitle>
           <div className="flex flex-col gap-2">
             {topRisks.map((r) => (
@@ -212,10 +231,10 @@ export function FabricCockpit() {
                   {r.riskScore}
                 </div>
                 <div className="flex-1 min-w-0">
-                  <div className="text-xs font-medium truncate" style={{ color: TEXT }}>
+                  <div className="text-xs font-medium" style={{ color: TEXT }}>
                     {r.title}
                   </div>
-                  <div className="flex items-center gap-2 mt-1">
+                  <div className="flex flex-wrap items-center gap-2 mt-1">
                     <span
                       className="text-[10px] font-mono px-1.5 py-0.5 rounded"
                       style={{ backgroundColor: `${GOLD}18`, color: GOLD }}
@@ -241,14 +260,14 @@ export function FabricCockpit() {
           </div>
           <Link
             href={`${BASE}/fabric/risks`}
-            className="inline-block mt-3 text-xs font-mono"
+            className="mt-3 inline-flex min-h-11 items-center text-xs font-mono"
             style={{ color: GOLD }}
           >
             View all risks →
           </Link>
         </div>
 
-        <div>
+        <div className="min-w-0 [overflow-wrap:anywhere]">
           <SectionTitle>Pending Decisions</SectionTitle>
           <div className="flex flex-col gap-2">
             {pendingDecs.map((d) => (
@@ -260,8 +279,8 @@ export function FabricCockpit() {
                   borderColor: 'rgba(255,255,255,0.08)',
                 }}
               >
-                <div className="flex items-start justify-between gap-2 mb-1">
-                  <div className="text-xs font-medium truncate" style={{ color: TEXT }}>
+                <div className="flex flex-wrap items-start justify-between gap-2 mb-1">
+                  <div className="min-w-0 text-xs font-medium" style={{ color: TEXT }}>
                     {d.title}
                   </div>
                   <span
@@ -271,7 +290,7 @@ export function FabricCockpit() {
                     {d.verticalId.toUpperCase()}
                   </span>
                 </div>
-                <div className="flex items-center gap-2">
+                <div className="flex flex-wrap items-center gap-2">
                   <span className="text-[10px] font-mono" style={{ color: GHOST }}>
                     {d.humanOwner}
                   </span>
@@ -287,7 +306,7 @@ export function FabricCockpit() {
           </div>
           <Link
             href={`${BASE}/fabric/decisions`}
-            className="inline-block mt-3 text-xs font-mono"
+            className="mt-3 inline-flex min-h-11 items-center text-xs font-mono"
             style={{ color: GOLD }}
           >
             View decision queue →
@@ -295,8 +314,8 @@ export function FabricCockpit() {
         </div>
       </div>
 
-      <div className="grid lg:grid-cols-2 gap-6 mb-8">
-        <div>
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+        <div className="min-w-0 [overflow-wrap:anywhere]">
           <SectionTitle>Signal Feed</SectionTitle>
           <div className="flex flex-col gap-2">
             {latestSignals.map((s) => (
@@ -313,10 +332,10 @@ export function FabricCockpit() {
                   style={{ backgroundColor: SEVERITY_COLORS[s.severity] }}
                 />
                 <div className="flex-1 min-w-0">
-                  <div className="text-xs truncate" style={{ color: TEXT }}>
+                  <div className="text-xs" style={{ color: TEXT }}>
                     {s.title}
                   </div>
-                  <div className="flex items-center gap-2 mt-0.5">
+                  <div className="flex flex-wrap items-center gap-2 mt-0.5">
                     <span className="text-[10px] font-mono" style={{ color: GOLD }}>
                       {s.verticalId.toUpperCase()}
                     </span>
@@ -333,14 +352,14 @@ export function FabricCockpit() {
           </div>
           <Link
             href={`${BASE}/fabric/signals`}
-            className="inline-block mt-3 text-xs font-mono"
+            className="mt-3 inline-flex min-h-11 items-center text-xs font-mono"
             style={{ color: GOLD }}
           >
             View signal mesh →
           </Link>
         </div>
 
-        <div>
+        <div className="min-w-0 [overflow-wrap:anywhere]">
           <SectionTitle>Domain Command Twins</SectionTitle>
           <div className="flex flex-col gap-2">
             {DOMAIN_TWINS.map((t) => {
@@ -355,11 +374,11 @@ export function FabricCockpit() {
                   }}
                 >
                   <span style={{ color: v?.colorToken ?? GOLD }}>{v?.icon}</span>
-                  <div className="flex-1">
+                  <div className="flex-1 min-w-0">
                     <div className="text-xs font-medium" style={{ color: TEXT }}>
                       {t.name}
                     </div>
-                    <div className="flex items-center gap-3 mt-0.5 text-[10px] font-mono">
+                    <div className="flex flex-wrap items-center gap-3 mt-0.5 text-[10px] font-mono">
                       <span style={{ color: GHOST }}>Health {t.healthScore}%</span>
                       <span style={{ color: GHOST }}>Signals {t.signalVolume}</span>
                       <span style={{ color: GOVERNANCE_COLORS[t.tenaxGovernanceState] }}>
@@ -373,7 +392,7 @@ export function FabricCockpit() {
           </div>
           <Link
             href={`${BASE}/fabric/twins`}
-            className="inline-block mt-3 text-xs font-mono"
+            className="mt-3 inline-flex min-h-11 items-center text-xs font-mono"
             style={{ color: GOLD }}
           >
             View all twins →
@@ -382,7 +401,7 @@ export function FabricCockpit() {
       </div>
 
       <SectionTitle>Fabric Navigation</SectionTitle>
-      <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-3 mb-8">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 mb-8">
         {[
           {
             href: '/fabric/verticals',

@@ -12,6 +12,7 @@ requires-python = ">=3.11"
 authors = [{ name = "Yachay", email = "yachay@szlholdings.dev" }]
 keywords = ["qrng", "csprng", "entropy", "nonce", "ecdsa"]
 dependencies = []
+classifiers = ["Private :: Do Not Upload"]
 
 [project.optional-dependencies]
 test = ["pytest>=8.0.0,<10.0.0"]

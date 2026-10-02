@@ -37,6 +37,8 @@ import khipu  # noqa: E402
 AGENT = "readiness-audit-rift"
 PEERS = ["readiness-reliability", "readiness-security", "readiness-observability",
          "readiness-operability", "readiness-compliance", "readiness-docs", "readiness-dr"]
+WORKFLOW_MARKERS = {"sbom": ("sbom",), "trivy": ("trivy",),
+                    "gitleaks": ("gitleaks", "secret")}
 
 
 def gh(*args: str) -> tuple[int, str]:
@@ -57,7 +59,8 @@ def latest_peer_receipt(agent: str) -> dict | None:
             return None
         latest = sorted(files)[-1]
         local = hf_hub_download(khipu.HF_DATASET, latest, repo_type="dataset", token=token)
-        env = json.load(open(local))
+        with open(local, encoding="utf-8") as stream:
+            env = json.load(stream)
         body = json.loads(base64.b64decode(env["payload"]).decode())
         return {"file": latest, "envelope": env, "body": body}
     except Exception as exc:
@@ -65,13 +68,15 @@ def latest_peer_receipt(agent: str) -> dict | None:
 
 
 def reverify_signature(env: dict) -> bool | None:
-    if not env.get("signed") or not env.get("signatures"):
+    if not isinstance(env, dict):
+        return False
+    if env.get("signed") is not True or not env.get("signatures"):
         return None
     try:
         from nacl.signing import VerifyKey
-        vk = VerifyKey(base64.b64decode(env["publicKeyB64"]))
-        payload = base64.b64decode(env["payload"])
-        sig = base64.b64decode(env["signatures"][0]["sig"])
+        vk = VerifyKey(base64.b64decode(env["publicKeyB64"], validate=True))
+        payload = base64.b64decode(env["payload"], validate=True)
+        sig = base64.b64decode(env["signatures"][0]["sig"], validate=True)
         vk.verify(payload, sig)
         return True
     except Exception:
@@ -85,52 +90,89 @@ def audit_peer(agent: str) -> dict:
     if "error" in rec:
         return {"agent": agent, "status": "FETCH-ERROR", "detail": rec["error"]}
     sig_ok = reverify_signature(rec["envelope"])
-    body = rec["body"]
-    payload = body.get("payload", {})
     finding = {"agent": agent, "receipt_file": rec["file"], "signature_reverified": sig_ok}
+    if sig_ok is False:
+        return {**finding, "status": "FLAGGED", "reason": "invalid receipt signature"}
+    if sig_ok is not True:
+        return {**finding, "status": "UNVERIFIED", "reason": "receipt signature not verified"}
 
     # claim-specific independent re-check (best-effort sampling)
     try:
+        body = rec["body"]
+        payload = body.get("payload", {})
         if agent == "readiness-security":
             repos = payload.get("repos", [])
             green = next((r for r in repos if r["verdict"] == "GREEN"), None)
             if green:
+                controls = green.get("workflows", {}).get("present", {})
+                control = next((c for c in WORKFLOW_MARKERS if controls.get(c) is True), None)
+                if control is None:
+                    return {**finding, "status": "UNVERIFIED",
+                            "reason": "no reported present workflow control to sample"}
                 rc, out = gh(f"repos/{green['repo']}/contents/.github/workflows")
+                if rc != 0:
+                    raise RuntimeError(f"GitHub workflow recheck failed (exit {rc})")
+                names = [f["name"].lower() for f in json.loads(out)
+                         if f["type"] == "file" and f["name"].lower().endswith((".yml", ".yaml"))]
                 finding["resampled_repo"] = green["repo"]
-                finding["over_claimed"] = (rc != 0)
+                finding["sampled_control"] = control
+                finding["over_claimed"] = not any(
+                    marker in name for marker in WORKFLOW_MARKERS[control] for name in names)
         elif agent == "readiness-operability":
             fls = payload.get("flagships", [])
             if fls:
                 import datetime as dt
                 since = (dt.datetime.now(dt.timezone.utc) - dt.timedelta(days=7)).strftime("%Y-%m-%dT%H:%M:%SZ")
                 rc, out = gh(f"repos/{fls[0]['repo']}/commits?since={since}&per_page=50")
-                n = len(json.loads(out)) if rc == 0 else -1
+                if rc != 0:
+                    raise RuntimeError(f"GitHub commit recheck failed (exit {rc})")
+                commits = json.loads(out)
+                if not isinstance(commits, list):
+                    raise ValueError("GitHub commit recheck did not return a list")
+                n = len(commits)
                 claimed = fls[0].get("commits_last_7d", -99)
+                if type(claimed) is not int or claimed < 0:
+                    return {**finding, "status": "UNVERIFIED",
+                            "reason": "reported commit count is missing or invalid"}
                 finding["resampled_repo"] = fls[0]["repo"]
                 finding["claimed_commits"] = claimed
                 finding["independent_commits"] = n
-                finding["over_claimed"] = (rc == 0 and abs(n - claimed) > 2)
+                finding["over_claimed"] = (abs(n - claimed) > 2)
         elif agent == "readiness-docs":
             repos = payload.get("repos", [])
             target = next((r for r in repos if r.get("present", {}).get("README.md")), None)
             if target:
-                rc, _ = gh(f"repos/{target['repo']}/contents/README.md")
+                rc, out = gh(f"repos/{target['repo']}/contents/README.md")
+                if rc != 0:
+                    raise RuntimeError(f"GitHub README recheck failed (exit {rc})")
+                readme = json.loads(out)
+                if (not isinstance(readme, dict) or readme.get("type") != "file"
+                        or readme.get("name") != "README.md" or readme.get("encoding") != "base64"):
+                    raise ValueError("GitHub README recheck did not return a readable file")
+                base64.b64decode("".join(readme["content"].split()), validate=True)
                 finding["resampled_repo"] = target["repo"]
-                finding["over_claimed"] = (rc != 0)
+                finding["over_claimed"] = False
         else:
             # reliability / observability / compliance / dr: structural check
             finding["sampled"] = "structural-only (live endpoints not reachable from CI)"
-            finding["over_claimed"] = False
     except Exception as exc:
         finding["resample_error"] = f"{type(exc).__name__}: {exc}"
+        finding["status"] = "RESAMPLE-ERROR"
+        return finding
 
-    finding["status"] = "FLAGGED" if finding.get("over_claimed") else "VERIFIED"
+    if finding.get("over_claimed") is True:
+        finding["status"] = "FLAGGED"
+    elif finding.get("over_claimed") is False:
+        finding["status"] = "VERIFIED"
+    else:
+        finding["status"] = "UNVERIFIED"
+        finding["reason"] = "no independent claim recheck completed"
     return finding
 
 
 def main() -> int:
     findings = [audit_peer(a) for a in PEERS]
-    flagged = [f["agent"] for f in findings if f.get("status") in ("FLAGGED", "NO-RECEIPT")]
+    flagged = [f["agent"] for f in findings if f.get("status") != "VERIFIED"]
     payload = {"peers_audited": len(PEERS), "flagged_agents": flagged, "findings": findings,
                "meta_verdict": "GREEN" if not flagged else "AMBER"}
     khipu.emit(AGENT, payload)

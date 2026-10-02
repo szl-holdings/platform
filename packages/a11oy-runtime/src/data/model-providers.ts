@@ -28,8 +28,12 @@ export const MODEL_PROVIDERS: ModelProvider[] = [
     name: 'DeepSeek (OpenAI-compatible)',
     envKey: 'DEEPSEEK_API_KEY',
     isAvailable: false,
-    reasoningModel: 'deepseek-reasoner',
-    fastModel: 'deepseek-chat',
+    // DeepSeek retired deepseek-chat/deepseek-reasoner and now publishes
+    // V4.1 Flash through the canonical API alias `deepseek-flash`. Keeping
+    // this provider unavailable preserves the existing production gate: this
+    // source update fixes identity drift but does not qualify or enable a route.
+    reasoningModel: 'deepseek-flash',
+    fastModel: 'deepseek-flash',
     costPer1kTokens: 0.002,
     latencyProfile: 'slow',
     isMock: false,

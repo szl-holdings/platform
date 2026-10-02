@@ -48,7 +48,7 @@ export async function askAtelier(params: {
   }
 
   const startedAt = performance.now();
-  const provider = params.provider ?? resolveProvider(request.provider);
+  const provider = params.provider ?? resolveProvider(request.provider, request.model);
   const result = await provider.generate(request);
   const generatedAt = (params.now ?? (() => new Date()))().toISOString();
   const sessionId = request.sessionId ?? randomUUID();
