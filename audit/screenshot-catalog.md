@@ -868,3 +868,45 @@ The same-origin /api/a11oy/* endpoints returned deterministic ok:false JSON, so 
 | /a11oy/proof | [320x900](../docs/assets/screenshots/current/a11oy-proof-2026-09-30-320x900.png) · [390x900](../docs/assets/screenshots/current/a11oy-proof-2026-09-30-390x900.png) · [768x1024](../docs/assets/screenshots/current/a11oy-proof-2026-09-30-768x1024.png) · [1366x900](../docs/assets/screenshots/current/a11oy-proof-2026-09-30-1366x900.png) · [1728x1000](../docs/assets/screenshots/current/a11oy-proof-2026-09-30-1728x1000.png) |
 | /a11oy/resources | [320x900](../docs/assets/screenshots/current/a11oy-resources-2026-09-30-320x900.png) · [390x900](../docs/assets/screenshots/current/a11oy-resources-2026-09-30-390x900.png) · [768x1024](../docs/assets/screenshots/current/a11oy-resources-2026-09-30-768x1024.png) · [1366x900](../docs/assets/screenshots/current/a11oy-resources-2026-09-30-1366x900.png) · [1728x1000](../docs/assets/screenshots/current/a11oy-resources-2026-09-30-1728x1000.png) |
 | /a11oy/trust | [320x900](../docs/assets/screenshots/current/a11oy-trust-2026-09-30-320x900.png) · [390x900](../docs/assets/screenshots/current/a11oy-trust-2026-09-30-390x900.png) · [768x1024](../docs/assets/screenshots/current/a11oy-trust-2026-09-30-768x1024.png) · [1366x900](../docs/assets/screenshots/current/a11oy-trust-2026-09-30-1366x900.png) · [1728x1000](../docs/assets/screenshots/current/a11oy-trust-2026-09-30-1728x1000.png) |
+
+## A11oy Workcell Proof Coverage Inspector — 2026-10-02 exact-source local proof
+
+The two captures below are **LOCAL_NON_AUTHORITATIVE** evidence from source
+`677c9ab3ed6ce8d1d839c264a49f9a61f3646c74` (tree
+`73efe371333fd5162f9eca9d5fdd38198c313871`). They prove the local build and
+responsive fixture interface; they do not prove hosted deployment, external
+execution, durable storage, cryptographic verification, or production readiness.
+
+### Desktop capture
+
+- `filename`: [a11oy-workcell-proof-coverage-desktop-2026-10-02.jpg](../docs/assets/screenshots/current/a11oy-workcell-proof-coverage-desktop-2026-10-02.jpg)
+- `route`: `/a11oy/workcells/wc-001/replay`
+- `surface`: A11oy Workcell Proof Coverage Inspector — desktop
+- `capture_date`: `2026-10-02T23:44:36.357Z`
+- `captured_by`: Codex / PixelProof
+- `capture_environment`: `local-exact-head`
+- `source_revision`: `677c9ab3ed6ce8d1d839c264a49f9a61f3646c74`
+- `workflow_run_or_command`: `node /tmp/capture-a11oy-workcell-proof-coverage.mjs`
+- `viewport`: `1366x900`
+- `artifact_sha256`: `4b867ba9ecbf1952d2147ef6de6349be57c2237ac78ab2f6602cc31363cb1f4a`
+- `workcell_id`: `A11OY-WORKCELL-PROOF-COVERAGE-20261002`
+- `proof_level`: `4`
+- `status`: `current`
+- `notes`: Stable loaded DEMO fixture with the inspector heading, aggregate incomplete result, challenge controls, and obligation results visible. Direct JPEG capture; no edit, crop, overlay, or synthetic image. [Metadata sidecar](a11oy-workcell-proof-coverage-desktop-2026-10-02.screenshot.json) · [capture script snapshot](a11oy-workcell-proof-coverage-capture-2026-10-02.mjs.txt) · [Proof Packet](A11OY_WORKCELL_PROOF_COVERAGE_PROOF_2026-10-02.md).
+
+### Mobile capture
+
+- `filename`: [a11oy-workcell-proof-coverage-mobile-2026-10-02.jpg](../docs/assets/screenshots/current/a11oy-workcell-proof-coverage-mobile-2026-10-02.jpg)
+- `route`: `/a11oy/workcells/wc-001/replay`
+- `surface`: A11oy Workcell Proof Coverage Inspector — mobile
+- `capture_date`: `2026-10-02T23:44:38.361Z`
+- `captured_by`: Codex / PixelProof
+- `capture_environment`: `local-exact-head`
+- `source_revision`: `677c9ab3ed6ce8d1d839c264a49f9a61f3646c74`
+- `workflow_run_or_command`: `node /tmp/capture-a11oy-workcell-proof-coverage.mjs`
+- `viewport`: `390x900`
+- `artifact_sha256`: `99a0aca18856155e1769f955329f10b13233c5491e60be300b380f57f67a5082`
+- `workcell_id`: `A11OY-WORKCELL-PROOF-COVERAGE-20261002`
+- `proof_level`: `4`
+- `status`: `current`
+- `notes`: Stable loaded narrow DEMO fixture with the inspector heading, aggregate incomplete result, and all three challenge controls visible without horizontal overflow. Direct JPEG capture; no edit, crop, overlay, or synthetic image. [Metadata sidecar](a11oy-workcell-proof-coverage-mobile-2026-10-02.screenshot.json) · [capture script snapshot](a11oy-workcell-proof-coverage-capture-2026-10-02.mjs.txt) · [Proof Packet](A11OY_WORKCELL_PROOF_COVERAGE_PROOF_2026-10-02.md).
