@@ -56,6 +56,7 @@ const PATH_DOMAIN = 'a11oy.atelier.encrypted-local-path.v1';
 const MAX_INDEX_BYTES = 256 * 1024;
 const HEX_64 = /^[a-f0-9]{64}$/;
 const STATE_CAPSULE_ID = /^state_[a-f0-9]{64}$/;
+const TEMPORARY_CANDIDATE = /\.(\d+)\.[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}\.tmp$/;
 const DIRECTORY_SYNC_UNSUPPORTED = new Set([
   'EBADF',
   'EISDIR',
@@ -901,8 +902,16 @@ export class EncryptedLocalAtelierStateStore implements AtelierStateStore {
                 'Encrypted continuity temporary object is not a regular file.',
               );
             }
-            await unlink(entryPath);
-            removedTemporary = true;
+            if (!this.#temporaryWriterIsLive(entry.name)) {
+              removedTemporary =
+                (await unlink(entryPath).then(
+                  () => true,
+                  (error: unknown) => {
+                    if (errorCode(error) === 'ENOENT') return false;
+                    throw error;
+                  },
+                )) || removedTemporary;
+            }
             continue;
           }
           const capsuleId = basename(entry.name, '.json');
@@ -918,7 +927,26 @@ export class EncryptedLocalAtelierStateStore implements AtelierStateStore {
             );
           }
           if (!referenced.has(capsuleId)) {
-            await this.#transport.delete(capsuleId);
+            // Publication writes the encrypted object before its index. A
+            // concurrent writer may still be linking (or withdrawing) that
+            // index. Do not inspect a freshly published object while its
+            // writer is active; require authenticated expiry before shredding.
+            const metadata = await lstat(entryPath).catch((error: unknown) => {
+              if (errorCode(error) === 'ENOENT') return undefined;
+              throw error;
+            });
+            if (!metadata) continue;
+            if (!metadata.isFile() || metadata.isSymbolicLink()) {
+              throw new AtelierCapsuleIntegrityError(
+                'Encrypted continuity object shard contains an unexpected record.',
+              );
+            }
+            if (Date.now() - metadata.mtimeMs < ATELIER_STATE_RETENTION_MS) continue;
+            const object = await this.#transport.get(capsuleId);
+            if (object?.capsule.expiresAt &&
+                Date.parse(object.capsule.expiresAt) <= this.#clock().milliseconds) {
+              await this.#transport.delete(capsuleId);
+            }
           }
         }
         if (removedTemporary) await this.#syncDirectory(secondPath);
@@ -1094,8 +1122,16 @@ export class EncryptedLocalAtelierStateStore implements AtelierStateStore {
             'Continuity index temporary entries must be regular files.',
           );
         }
-        await unlink(join(directory, entry.name));
-        await this.#syncDirectory(directory);
+        if (!this.#temporaryWriterIsLive(entry.name)) {
+          const removed = await unlink(join(directory, entry.name)).then(
+            () => true,
+            (error: unknown) => {
+              if (errorCode(error) === 'ENOENT') return false;
+              throw error;
+            },
+          );
+          if (removed) await this.#syncDirectory(directory);
+        }
         continue;
       }
       if (!entry.isFile() || entry.isSymbolicLink() || !entry.name.endsWith('.json')) {
@@ -1245,7 +1281,11 @@ export class EncryptedLocalAtelierStateStore implements AtelierStateStore {
         current.ino !== afterRead.ino ||
         opened.size !== afterRead.size ||
         opened.mtimeMs !== afterRead.mtimeMs ||
-        opened.ctimeMs !== afterRead.ctimeMs ||
+        (opened.ctimeMs !== afterRead.ctimeMs &&
+          // Atomic creation links a fsynced candidate to its final name,
+          // then unlinks the candidate. That 2-to-1 link-count transition
+          // changes ctime without changing the opened file or its bytes.
+          !(opened.nlink === 2 && afterRead.nlink === 1)) ||
         length !== afterRead.size
       ) {
         throw new AtelierCapsuleIntegrityError(
@@ -1370,9 +1410,25 @@ export class EncryptedLocalAtelierStateStore implements AtelierStateStore {
         throw new AtelierCapsuleIntegrityError(
           'Continuity storage must not contain symbolic links.',
         );
+      if (entry.isFile() && this.#temporaryWriterIsLive(entry.name)) continue;
       if (entry.isFile()) return true;
       if (entry.isDirectory() && (await this.#containsFiles(candidate, markerPath))) return true;
     }
     return false;
+  }
+
+  #temporaryWriterIsLive(name: string): boolean {
+    const match = TEMPORARY_CANDIDATE.exec(name);
+    if (!match) return false;
+    const pid = Number(match[1]);
+    if (!Number.isSafeInteger(pid) || pid < 1) return false;
+    try {
+      process.kill(pid, 0);
+      return true;
+    } catch (error) {
+      if (errorCode(error) === 'EPERM') return true;
+      if (errorCode(error) === 'ESRCH') return false;
+      throw error;
+    }
   }
 }

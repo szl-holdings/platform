@@ -1,8 +1,8 @@
-import { createHash, randomBytes } from 'node:crypto';
-import { mkdtemp, open, readdir, readFile, rm, unlink, writeFile } from 'node:fs/promises';
+import { createHash, randomBytes, randomUUID } from 'node:crypto';
+import { link, mkdtemp, open, readdir, readFile, rm, unlink, utimes, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
-import type { AtelierAskResponse } from '@szl-holdings/a11oy-atelier';
+import { ATELIER_STATE_RETENTION_MS, type AtelierAskResponse } from '@szl-holdings/a11oy-atelier';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import {
   AtelierContinuityConfigurationError,
@@ -105,6 +105,76 @@ afterEach(async () => {
 });
 
 describe('EncryptedLocalAtelierStateStore', () => {
+  it('does not mistake a live key-marker candidate for existing durable state', async () => {
+    const rootDirectory = await tempRoot();
+    const masterKey = randomBytes(32);
+    const candidate = join(
+      rootDirectory,
+      `key-check.json.${process.pid}.${randomUUID()}.tmp`,
+    );
+    await writeFile(candidate, 'in-flight marker candidate');
+    await expect(
+      new EncryptedLocalAtelierStateStore({ rootDirectory, masterKey }).ready(),
+    ).resolves.toBeUndefined();
+    expect(await readFile(candidate, 'utf8')).toBe('in-flight marker candidate');
+  });
+
+  it('accepts only the hard-link cleanup metadata change on an authenticated marker', async () => {
+    const rootDirectory = await tempRoot();
+    const masterKey = randomBytes(32);
+    await new EncryptedLocalAtelierStateStore({ rootDirectory, masterKey }).ready();
+    const markerPath = join(rootDirectory, 'key-check.json');
+    const temporaryPath = `${markerPath}.${process.pid}.${randomUUID()}.tmp`;
+    const actual = await vi.importActual<typeof import('node:fs/promises')>('node:fs/promises');
+    let unlinked = false;
+    vi.mocked(open).mockImplementation(async (filePath, flags, mode) => {
+      const handle = await actual.open(filePath, flags, mode);
+      if (filePath === markerPath && !unlinked) {
+        await link(markerPath, temporaryPath);
+        const read = handle.read.bind(handle);
+        vi.spyOn(handle, 'read').mockImplementation(async (...args) => {
+          const result = await read(...args);
+          if (!unlinked) {
+            unlinked = true;
+            await unlink(temporaryPath);
+          }
+          return result;
+        });
+      }
+      return handle;
+    });
+    await expect(
+      new EncryptedLocalAtelierStateStore({ rootDirectory, masterKey }).ready(),
+    ).resolves.toBeUndefined();
+    expect(unlinked).toBe(true);
+  });
+
+  it('leaves another live writer\'s index and encrypted object candidates intact', async () => {
+    const rootDirectory = await tempRoot();
+    const masterKey = randomBytes(32);
+    const store = new EncryptedLocalAtelierStateStore({ rootDirectory, masterKey });
+    await store.reserveTurn({
+      tenantId: 'tenant-live-temporary',
+      sessionId: 'session-live-temporary',
+      idempotencyKey: 'key-live-temporary',
+      request: {
+        prompt: 'live candidate',
+        sessionId: 'session-live-temporary',
+        idempotencyKey: 'key-live-temporary',
+      },
+    });
+    const indexPath = (await filesBelow(join(rootDirectory, 'indexes')))[0];
+    const objectPath = (await filesBelow(join(rootDirectory, 'capsules', 'objects')))[0];
+    const indexTemporary = `${indexPath}.${process.pid}.${randomUUID()}.tmp`;
+    const objectTemporary = `${objectPath}.${process.pid}.${randomUUID()}.tmp`;
+    await writeFile(indexTemporary, 'index candidate');
+    await writeFile(objectTemporary, 'object candidate');
+
+    await new EncryptedLocalAtelierStateStore({ rootDirectory, masterKey }).ready();
+    expect(await readFile(indexTemporary, 'utf8')).toBe('index candidate');
+    expect(await readFile(objectTemporary, 'utf8')).toBe('object candidate');
+  });
+
   it('rejects authenticated index replacement after opening the original descriptor', async () => {
     const rootDirectory = await tempRoot();
     const masterKey = randomBytes(32);
@@ -561,14 +631,17 @@ describe('EncryptedLocalAtelierStateStore', () => {
     ).toMatchObject({ status: 'reserved' });
   });
 
-  it('deletes an authenticated payload orphaned before index publication', async () => {
+  it('preserves an in-flight unindexed payload until its authenticated expiry', async () => {
     const rootDirectory = await tempRoot();
     const masterKey = randomBytes(32);
+    let currentTime = Date.parse('2026-08-29T12:00:00.000Z');
+    const now = () => new Date(currentTime);
     const store = new EncryptedLocalAtelierStateStore({
       rootDirectory,
       masterKey,
+      now,
     });
-    await store.reserveTurn({
+    const reserved = await store.reserveTurn({
       tenantId: 'tenant-orphan',
       sessionId: 'session-orphan',
       idempotencyKey: 'orphan-key',
@@ -586,12 +659,27 @@ describe('EncryptedLocalAtelierStateStore', () => {
       stateCapsuleId: string;
     };
     await unlink(indexPath);
+    const objectPath = (await filesBelow(join(rootDirectory, 'capsules', 'objects'))).find(
+      (candidate) => candidate.endsWith(`${record.stateCapsuleId}.json`),
+    );
+    if (!objectPath) throw new Error('expected orphaned encrypted object');
+    const oldTime = new Date(Date.now() - ATELIER_STATE_RETENTION_MS - 1_000);
+    await utimes(objectPath, oldTime, oldTime);
 
     const reopened = new EncryptedLocalAtelierStateStore({
       rootDirectory,
       masterKey,
+      now,
     });
     await reopened.ready();
+    expect(
+      (await filesBelow(join(rootDirectory, 'capsules', 'objects'))).some((candidate) =>
+        candidate.endsWith(`${record.stateCapsuleId}.json`),
+      ),
+    ).toBe(true);
+    if (reserved.status !== 'reserved') throw new Error('expected orphan reservation');
+    currentTime = Date.parse(reserved.reservation.expiresAt);
+    await reopened.pruneExpired();
     expect(
       (await filesBelow(join(rootDirectory, 'capsules', 'objects'))).some((candidate) =>
         candidate.endsWith(`${record.stateCapsuleId}.json`),
