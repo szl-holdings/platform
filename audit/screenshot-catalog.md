@@ -868,3 +868,16 @@ The same-origin /api/a11oy/* endpoints returned deterministic ok:false JSON, so 
 | /a11oy/proof | [320x900](../docs/assets/screenshots/current/a11oy-proof-2026-09-30-320x900.png) · [390x900](../docs/assets/screenshots/current/a11oy-proof-2026-09-30-390x900.png) · [768x1024](../docs/assets/screenshots/current/a11oy-proof-2026-09-30-768x1024.png) · [1366x900](../docs/assets/screenshots/current/a11oy-proof-2026-09-30-1366x900.png) · [1728x1000](../docs/assets/screenshots/current/a11oy-proof-2026-09-30-1728x1000.png) |
 | /a11oy/resources | [320x900](../docs/assets/screenshots/current/a11oy-resources-2026-09-30-320x900.png) · [390x900](../docs/assets/screenshots/current/a11oy-resources-2026-09-30-390x900.png) · [768x1024](../docs/assets/screenshots/current/a11oy-resources-2026-09-30-768x1024.png) · [1366x900](../docs/assets/screenshots/current/a11oy-resources-2026-09-30-1366x900.png) · [1728x1000](../docs/assets/screenshots/current/a11oy-resources-2026-09-30-1728x1000.png) |
 | /a11oy/trust | [320x900](../docs/assets/screenshots/current/a11oy-trust-2026-09-30-320x900.png) · [390x900](../docs/assets/screenshots/current/a11oy-trust-2026-09-30-390x900.png) · [768x1024](../docs/assets/screenshots/current/a11oy-trust-2026-09-30-768x1024.png) · [1366x900](../docs/assets/screenshots/current/a11oy-trust-2026-09-30-1366x900.png) · [1728x1000](../docs/assets/screenshots/current/a11oy-trust-2026-09-30-1728x1000.png) |
+
+## SZL readiness matrix — 2026-10-02
+
+| Field | Value |
+| --- | --- |
+| Filename | [szl-readiness-matrix-2026-10-02.jpg](../docs/assets/screenshots/current/szl-readiness-matrix-2026-10-02.jpg) |
+| Route / surface | `http://127.0.0.1:19873/dashboard.html` / SZL Production-Readiness Matrix |
+| Capture date / agent | `2026-10-02T22:10:24.326488+00:00` / Codex readiness-contract agent |
+| Environment / source | `local-exact-head` / `453c7f8b018322a1b599bd5eddfdc274e50515b3` |
+| Workflow run or command | Local `python -m http.server 19873 --bind 127.0.0.1` and `python -c $szlCaptureScript`; full script in [metadata sidecar](../docs/assets/screenshots/current/szl-readiness-matrix-2026-10-02.metadata.md) |
+| Viewport / SHA-256 | `1366x900` / `5a98f8286ba994d4c99350be3d3d53f168a08f8e00210d3ec69f71bd8c32af1f` |
+| Workcell / proof / status | `SZL-READINESS-20261002` / Level 3 local UI source proof / `current` |
+| Boundary | Real public Hub receipts rendered as `UNVERIFIED`; not a provider-write, deployment, or runtime-readiness proof. |

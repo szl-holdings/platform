@@ -39,6 +39,8 @@ jobs:
           python-version: ${{ matrix.python }}
       - name: Run readiness regression tests without external services
         run: python -m unittest discover -s platform/agents/readiness/_lib -p 'test_*.py'
+      - name: Check readiness dashboard DOM safety
+        run: node --test platform/agents/readiness/_lib/test_dashboard.mjs
 
   unit:
     name: Unit tests (vitest)

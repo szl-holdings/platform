@@ -5,7 +5,7 @@ Provides:
   - Flagship + repo registry (single source of truth for the fleet).
   - Khipu receipt construction + DSSE-style signing (Ed25519 if a key is
     present, otherwise an honest UNSIGNED envelope — NEVER a fake signature).
-  - HF dataset publication helper (posts the signed receipt to
+  - HF dataset publication helper (posts only a verified signed receipt to
     SZLHOLDINGS/readiness-runs).
   - Doctrine v11 constants (749/14/163, LOCKED).
 
@@ -97,7 +97,7 @@ def sign_khipu_receipt(agent: str, payload: dict) -> dict:
         try:
             from nacl.signing import SigningKey  # type: ignore
 
-            seed = base64.b64decode(seed_b64)
+            seed = base64.b64decode(seed_b64, validate=True)
             sk = SigningKey(seed)
             sig = sk.sign(body_bytes).signature
             envelope["signatures"] = [{
@@ -107,9 +107,58 @@ def sign_khipu_receipt(agent: str, payload: dict) -> dict:
             }]
             envelope["signed"] = True
             envelope["publicKeyB64"] = base64.b64encode(bytes(sk.verify_key)).decode()
-        except Exception as exc:  # pragma: no cover - defensive
-            envelope["signError"] = f"{type(exc).__name__}: {exc}"
+        except Exception:  # pragma: no cover - defensive
+            # Exception text may include credential material; receipt output is public.
+            envelope["signError"] = "signing unavailable or invalid key"
     return envelope
+
+
+def receipt_signature_error(agent: str, envelope: dict) -> str | None:
+    """Return a bounded reason when a receipt cannot be trusted for upload.
+
+    The envelope's signed flag is a claim, not proof. Verify the payload hash,
+    signer metadata, and Ed25519 signature against the configured fleet key
+    before it can leave this process. The envelope's public key is untrusted.
+    """
+    if envelope.get("signed") is not True:
+        return "unsigned receipt"
+    signatures = envelope.get("signatures")
+    if not isinstance(signatures, list) or len(signatures) != 1:
+        return "expected one Ed25519 signature"
+    signature = signatures[0]
+    if not isinstance(signature, dict) or signature.get("alg") != "ed25519":
+        return "invalid signature metadata"
+    seed_b64 = os.environ.get("KHIPU_SIGNING_KEY_B64")
+    if not seed_b64:
+        return "no KHIPU_SIGNING_KEY_B64"
+    try:
+        from nacl.signing import SigningKey, VerifyKey  # type: ignore
+
+        seed = base64.b64decode(seed_b64, validate=True)
+        expected_public_key = bytes(SigningKey(seed).verify_key)
+        body_bytes = base64.b64decode(envelope["payload"], validate=True)
+        public_key = base64.b64decode(envelope["publicKeyB64"], validate=True)
+        sig_bytes = base64.b64decode(signature["sig"], validate=True)
+        if public_key != expected_public_key:
+            return "signer does not match configured fleet key"
+        if envelope.get("payloadType") != "application/vnd.szl.khipu+json":
+            return "invalid payload type"
+        if envelope.get("payloadSha256") != hashlib.sha256(body_bytes).hexdigest():
+            return "payload digest mismatch"
+        if signature.get("keyid") != hashlib.sha256(public_key).hexdigest()[:16]:
+            return "signer key id mismatch"
+        body = json.loads(body_bytes)
+        if not isinstance(body, dict) or body.get("schema") != "szl.readiness.receipt/v1" \
+                or body.get("agent") != agent:
+            return "receipt identity mismatch"
+        emitted_at = body.get("emitted_at_utc")
+        if not isinstance(emitted_at, str):
+            return "missing receipt timestamp"
+        _dt.datetime.strptime(emitted_at, "%Y-%m-%dT%H:%M:%SZ")
+        VerifyKey(public_key).verify(body_bytes, sig_bytes)
+    except Exception:
+        return "invalid receipt signature or payload"
+    return None
 
 
 def publish_to_hf(agent: str, envelope: dict, dataset: str = HF_DATASET) -> dict:
@@ -122,11 +171,14 @@ def publish_to_hf(agent: str, envelope: dict, dataset: str = HF_DATASET) -> dict
     reached the dataset.
     """
     token = os.environ.get("HF_TOKEN")
+    if not token:
+        return {"published": False, "reason": "no HF_TOKEN", "path": "(not created)"}
+    signature_error = receipt_signature_error(agent, envelope)
+    if signature_error:
+        return {"published": False, "reason": signature_error, "path": "(not created)"}
     date = envelope_emitted_date(envelope)
     ts = utcnow_iso().replace(":", "-")
     path = f"receipts/{agent}/{date}/{ts}.json"
-    if not token:
-        return {"published": False, "reason": "no HF_TOKEN", "path": path}
     try:
         from huggingface_hub import HfApi  # type: ignore
 
@@ -174,7 +226,7 @@ def require_published(results: list[dict], what: str) -> None:
 
 
 def emit(agent: str, payload: dict) -> dict:
-    """Sign + publish + print, then fail closed if the receipt did not land."""
+    """Sign + verify + publish + print; fail Actions if either gate fails."""
     env = sign_khipu_receipt(agent, payload)
     pub = publish_to_hf(agent, env)
     out = {"receipt": env, "publish": pub}
