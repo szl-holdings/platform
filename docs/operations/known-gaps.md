@@ -1,6 +1,6 @@
 # SZL Holdings — Known Gaps Register (Security & Operations)
 
-**Last updated:** 2026-09-30 (rev 30 — P0 proof and separate live readiness boundaries)
+**Last updated:** 2026-10-02 (rev 31 — Workcell proof-coverage boundary)
 **Owner:** Engineering / DevOps  
 **Audience:** Enterprise architects, Series A technical advisors, incoming VP Engineering
 
@@ -152,6 +152,27 @@ within that boundary; production multi-tenant confidentiality requires an
 identity-to-tenant binding before this route is publicly exposed. Protected
 source merge also does not itself deploy Atelier: a separately witnessed
 hosted build, identity configuration, and functional provider probe remain open.
+
+### 2026-10-02 A11oy Workcell proof-coverage boundary
+
+The deterministic Workcell replay now includes a conservative Proof Coverage
+Inspector. It joins the Workcell to repository signal fixtures, its PCE
+contract, and Proof Packet; compares action and trace identifiers; and checks
+policy and approval references for resolution. Each obligation is reported as `SATISFIED`,
+`MISMATCH`, or `UNAVAILABLE`; any unresolved obligation keeps the aggregate
+`INCOMPLETE`. Local challenge controls demonstrate missing packet, changed
+action, and missing approval-reference paths without changing repository data
+or authorizing execution.
+
+The inspector exposes current fixture gaps rather than closing them. For
+`wc-001`, the referenced policy evaluation `pe-001` and approval record
+`ar-001` have no corresponding registries, and `proof-001` covers signal
+ingestion rather than the Workcell or ActionBrief and does not carry those
+contract references. A stored hash-shaped string is not treated as a
+signature-verification result. Durable persistence,
+authenticated actor identity, external attestation, trust-policy verification,
+and production execution remain outside the inspector's evidence boundary and
+unverified. A11oy remains `Partial` in `docs/APP_STATUS.md`.
 
 ---
 

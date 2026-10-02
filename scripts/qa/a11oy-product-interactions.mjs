@@ -23,7 +23,8 @@ export async function verifyProductInteractions(origin) {
       'utf8',
     ),
   );
-  const browser = await chromium.launch({ headless: true });
+  const executablePath = process.env.PLAYWRIGHT_CHROMIUM_PATH?.trim() || undefined;
+  const browser = await chromium.launch({ headless: true, executablePath });
   let timedOut = false;
   // Locator timeouts do not cover evaluate()/font readiness. Close the owned
   // browser at the suite deadline so a stalled renderer cannot strand capture.
@@ -230,6 +231,74 @@ export async function verifyProductInteractions(origin) {
       await page.getByRole('button', { name: '↺ Reset', exact: true }).click();
       await expect(progress).toHaveText(/^0 \/ \d+ steps$/);
       await check('replay-reset');
+
+      const coverageResult = page.getByText(/^\d+\/\d+ obligations satisfied$/);
+      await expect(
+        page.getByRole('heading', {
+          name: 'Does the declared run resolve to the evidence it names?',
+        }),
+      ).toBeVisible();
+      await expect(coverageResult).toBeVisible();
+      const initialCoverage = await coverageResult.textContent();
+      const proofChallenges = [
+        {
+          label: 'Remove proof reference',
+          obligation: 'Proof Packet resolves',
+          expected: 'has no Proof Packet reference',
+        },
+        {
+          label: 'Substitute action ID',
+          obligation: 'Action identity is bound',
+          expected: 'does not match the Workcell ActionBrief',
+        },
+        {
+          label: 'Omit approval reference',
+          obligation: 'Approval reference resolves',
+          expected: 'has no approval-record reference',
+        },
+      ];
+      for (const { label, obligation, expected } of proofChallenges) {
+        const challenge = page.getByRole('button', { name: new RegExp(label) });
+        const liveMessage = page.locator('[data-proof-live-message]');
+        await challenge.click();
+        await expect(challenge).toHaveAttribute('aria-pressed', 'true');
+        await expect(liveMessage).toContainText(`Active challenges: ${label}`);
+        const result = page
+          .getByRole('listitem')
+          .filter({ has: page.getByRole('heading', { name: obligation, exact: true }) });
+        await expect(result).toHaveCount(1);
+        const challengedResult = await result.textContent();
+        await expect(result).toContainText(expected);
+        await check(`proof-coverage:${label.toLowerCase().replaceAll(' ', '-')}`);
+        await challenge.click();
+        await expect(challenge).toHaveAttribute('aria-pressed', 'false');
+        await expect(liveMessage).toContainText('No active challenges');
+        await expect(coverageResult).toHaveText(initialCoverage ?? '');
+        await expect(result).not.toHaveText(challengedResult ?? '');
+        await expect(result).not.toContainText(expected);
+      }
+      for (const { label } of proofChallenges) {
+        await page.getByRole('button', { name: new RegExp(label) }).click();
+      }
+      await page.getByRole('button', { name: 'Reset challenges', exact: true }).click();
+      for (const { label } of proofChallenges) {
+        await expect(page.getByRole('button', { name: new RegExp(label) })).toHaveAttribute(
+          'aria-pressed',
+          'false',
+        );
+      }
+      await expect(coverageResult).toHaveText(initialCoverage ?? '');
+      await expect(page.locator('[data-proof-live-message]')).toContainText('No active challenges');
+      await expect(page.locator('[data-proof-obligation="proof-reference"]')).not.toContainText(
+        'has no Proof Packet reference',
+      );
+      await expect(page.locator('[data-proof-obligation="action-binding"]')).not.toContainText(
+        'does not match the Workcell ActionBrief',
+      );
+      await expect(page.locator('[data-proof-obligation="approval-binding"]')).not.toContainText(
+        'has no approval-record reference',
+      );
+      await check('proof-coverage-reset');
 
       await go('proof');
       await page.getByRole('button', { name: 'Reasoning Replay', exact: true }).click();
