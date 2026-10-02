@@ -24,6 +24,10 @@ import khipu  # noqa: E402
 
 AGENT = "readiness-security"
 REQUIRED_WORKFLOWS = {"sbom": ["sbom"], "trivy": ["trivy"], "gitleaks": ["gitleaks", "secret"]}
+PLATFORM_REPO = "szl-holdings/platform"
+PLATFORM_SECRET_WORKFLOW = "security.yml"
+PLATFORM_SECRET_JOB = "Secret Scan (Gitleaks)"
+PLATFORM_SECRET_STEP = "Run Gitleaks — detect committed secrets"
 SHA40 = re.compile(r"^[0-9a-fA-F]{40}$")
 CONTACT_EMAIL = re.compile(r"\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}\b")
 PRIVATE_ADVISORY = re.compile(r"https://github\.com/[^\s/]+/[^\s/]+/security/advisories/new\b")
@@ -135,6 +139,78 @@ def _unavailable_workflows(status: str) -> dict:
     }
 
 
+def _platform_secret_workflow_status(repo: str, head_sha: str, names: list[str]) -> str:
+    """Validate the platform's Gitleaks job inside security.yml at the observed head."""
+    if PLATFORM_SECRET_WORKFLOW not in names:
+        return "MISSING_WORKFLOW"
+    rc, out = gh(f"repos/{repo}/contents/.github/workflows/{PLATFORM_SECRET_WORKFLOW}?ref={head_sha}")
+    if rc != 0:
+        return "RATE_LIMITED" if out == "RATE_LIMITED" else "READ_FAILED"
+    try:
+        file = json.loads(out)
+        if not isinstance(file, dict) or file.get("type") != "file" or file.get("encoding") != "base64":
+            raise ValueError("invalid workflow file response")
+        if not isinstance(file.get("content"), str) or not file["content"]:
+            raise ValueError("missing workflow content")
+        content = base64.b64decode("".join(file["content"].split()), validate=True).decode("utf-8")
+    except (KeyError, TypeError, ValueError, UnicodeError, binascii.Error):
+        return "INVALID_RESPONSE"
+    jobs = re.search(r"(?m)^jobs:\s*(?:#.*)?$", content)
+    if jobs is None:
+        return "MISSING_WORKFLOW"
+    job_lines = content[jobs.end():].splitlines()
+    job_start = next((i for i, line in enumerate(job_lines)
+                      if re.fullmatch(r"  secret-scan:\s*(?:#.*)?", line)), None)
+    if job_start is None:
+        return "MISSING_WORKFLOW"
+    job_end = next((i for i in range(job_start + 1, len(job_lines))
+                    if re.match(r"^(?:  [A-Za-z0-9_-]+:|[A-Za-z_][A-Za-z0-9_-]*:)", job_lines[i])),
+                   len(job_lines))
+    job = "\n".join(job_lines[job_start:job_end])
+    if not re.search(r"(?m)^\s{6}- name:\s*Run Gitleaks — detect committed secrets\s*$", job):
+        return "MISSING_WORKFLOW"
+    if not re.search(r"(?m)^\s{10,}gitleaks\s+detect(?:\s|$)", job):
+        return "MISSING_WORKFLOW"
+    if re.search(r"(?m)^\s+continue-on-error:", job):
+        return "MISSING_WORKFLOW"
+    return "SUCCESS"
+
+
+def _platform_secret_job_status(repo: str, run_id: int) -> tuple[str, dict]:
+    """Require the named Gitleaks job and its scan step to finish successfully."""
+    rc, out = gh(f"repos/{repo}/actions/runs/{run_id}/jobs?per_page=100")
+    if rc != 0:
+        return ("RATE_LIMITED" if out == "RATE_LIMITED" else "READ_FAILED"), {}
+    try:
+        response = json.loads(out)
+        jobs = response["jobs"]
+        count = response["total_count"]
+        if not isinstance(jobs, list) or any(not isinstance(job, dict) for job in jobs):
+            raise ValueError("invalid jobs list")
+        if type(count) is not int or count < len(jobs):
+            raise ValueError("invalid job count")
+        if count > len(jobs):
+            return "JOB_LIST_INCOMPLETE", {}
+        matching = [job for job in jobs if job.get("name") == PLATFORM_SECRET_JOB]
+        if not matching:
+            return "MISSING_JOB", {}
+        for job in matching:
+            if type(job.get("id")) is not int or job["id"] <= 0 or not isinstance(job.get("steps"), list):
+                raise ValueError("invalid Gitleaks job")
+            scan_steps = [step for step in job["steps"]
+                          if isinstance(step, dict) and step.get("name") == PLATFORM_SECRET_STEP]
+            if len(scan_steps) != 1:
+                return "MISSING_SCAN_STEP", {}
+            if job.get("status") != "completed" or scan_steps[0].get("status") != "completed":
+                return "JOB_IN_PROGRESS", {}
+            if job.get("conclusion") != "success" or scan_steps[0].get("conclusion") != "success":
+                return "JOB_NOT_SUCCESS", {}
+        return "SUCCESS", {"job_ids": [job["id"] for job in matching],
+                           "scan_step": PLATFORM_SECRET_STEP}
+    except (KeyError, TypeError, ValueError):
+        return "INVALID_RESPONSE", {}
+
+
 def workflow_status(repo: str, branch: str, head_sha: str) -> dict:
     rc, out = gh(f"repos/{repo}/contents/.github/workflows?ref={head_sha}")
     if rc != 0:
@@ -152,14 +228,22 @@ def workflow_status(repo: str, branch: str, head_sha: str) -> dict:
 
     files = {ctrl: [name for name in names if any(n in name for n in needles)]
              for ctrl, needles in REQUIRED_WORKFLOWS.items()}
-    present = {ctrl: bool(matches) for ctrl, matches in files.items()}
+    discovery_status = {ctrl: "SUCCESS" if matches else "MISSING_WORKFLOW"
+                        for ctrl, matches in files.items()}
+    if repo.lower() == PLATFORM_REPO:
+        discovery_status["gitleaks"] = _platform_secret_workflow_status(repo, head_sha, names)
+        files["gitleaks"] = [PLATFORM_SECRET_WORKFLOW] if PLATFORM_SECRET_WORKFLOW in names else []
+    present = {ctrl: (True if discovery_status[ctrl] == "SUCCESS" else
+                      False if discovery_status[ctrl] == "MISSING_WORKFLOW" else None)
+               for ctrl in REQUIRED_WORKFLOWS}
     rc, out = gh(f"repos/{repo}/actions/runs?branch={quote(branch, safe='')}&per_page=100")
     if rc != 0:
         read_status = "RATE_LIMITED" if out == "RATE_LIMITED" else "READ_FAILED"
         return {
             "listing_status": "OBSERVED", "runs_status": read_status, "present": present,
             "recent_success": {ctrl: None for ctrl in REQUIRED_WORKFLOWS},
-            "controls": {ctrl: {"status": read_status if present[ctrl] else "MISSING_WORKFLOW",
+            "controls": {ctrl: {"status": read_status if discovery_status[ctrl] == "SUCCESS"
+                                else discovery_status[ctrl],
                                 "workflow_files": files[ctrl]} for ctrl in REQUIRED_WORKFLOWS},
         }
     try:
@@ -171,7 +255,8 @@ def workflow_status(repo: str, branch: str, head_sha: str) -> dict:
         unavailable.update({"listing_status": "OBSERVED", "runs_status": "INVALID_RESPONSE",
                             "present": present})
         unavailable["controls"] = {
-            ctrl: {"status": "INVALID_RESPONSE" if present[ctrl] else "MISSING_WORKFLOW",
+            ctrl: {"status": "INVALID_RESPONSE" if discovery_status[ctrl] == "SUCCESS"
+                   else discovery_status[ctrl],
                    "workflow_files": files[ctrl]} for ctrl in REQUIRED_WORKFLOWS
         }
         return unavailable
@@ -179,8 +264,8 @@ def workflow_status(repo: str, branch: str, head_sha: str) -> dict:
     controls = {}
     recent_ok = {}
     for ctrl, workflow_files in files.items():
-        if not workflow_files:
-            controls[ctrl] = {"status": "MISSING_WORKFLOW", "workflow_files": []}
+        if discovery_status[ctrl] != "SUCCESS":
+            controls[ctrl] = {"status": discovery_status[ctrl], "workflow_files": workflow_files}
             recent_ok[ctrl] = None
             continue
         candidates = [run for run in runs
@@ -208,9 +293,18 @@ def workflow_status(repo: str, branch: str, head_sha: str) -> dict:
         assert created is not None
         completed = latest.get("status") == "completed"
         passed = completed and latest.get("conclusion") == "success"
-        status = ("RUN_IN_PROGRESS" if not completed else
-                  "RUN_NOT_SUCCESS" if not passed else
-                  "STALE_RUN" if now - created > RUN_MAX_AGE else "SUCCESS")
+        job_evidence = {}
+        if ctrl == "gitleaks" and repo.lower() == PLATFORM_REPO:
+            # security.yml also runs dependency and license jobs. Their failures
+            # do not erase an observed successful Gitleaks job at this head.
+            status = ("RUN_IN_PROGRESS" if not completed else
+                      "STALE_RUN" if now - created > RUN_MAX_AGE else "SUCCESS")
+            if status == "SUCCESS":
+                status, job_evidence = _platform_secret_job_status(repo, latest["id"])
+        else:
+            status = ("RUN_IN_PROGRESS" if not completed else
+                      "RUN_NOT_SUCCESS" if not passed else
+                      "STALE_RUN" if now - created > RUN_MAX_AGE else "SUCCESS")
         controls[ctrl] = {
             "status": status,
             "workflow_files": workflow_files,
@@ -218,8 +312,10 @@ def workflow_status(repo: str, branch: str, head_sha: str) -> dict:
             "run_head_sha": latest.get("head_sha"),
             "run_conclusion": latest.get("conclusion"),
             "run_created_at": latest.get("created_at"),
+            **job_evidence,
         }
-        recent_ok[ctrl] = True if status == "SUCCESS" else False if status == "RUN_NOT_SUCCESS" else None
+        recent_ok[ctrl] = True if status == "SUCCESS" else False if status in (
+            "RUN_NOT_SUCCESS", "JOB_NOT_SUCCESS") else None
     return {"listing_status": "OBSERVED", "runs_status": "OBSERVED", "present": present,
             "recent_success": recent_ok, "controls": controls}
 
@@ -278,7 +374,8 @@ def repo_verdict(head: dict, wf: dict, sec: dict, cs: dict) -> tuple[str, list[s
         status = wf.get("controls", {}).get(ctrl, {}).get("status", "UNAVAILABLE")
         if status != "SUCCESS":
             missing.append(f"workflow:{ctrl}:{status}")
-            red = red or status in ("MISSING_WORKFLOW", "RUN_NOT_SUCCESS")
+            red = red or status in ("MISSING_WORKFLOW", "RUN_NOT_SUCCESS", "MISSING_JOB",
+                                    "MISSING_SCAN_STEP", "JOB_NOT_SUCCESS")
     if sec.get("status") != "OBSERVED":
         missing.append(f"SECURITY.md:{sec.get('status', 'UNAVAILABLE')}")
         red = red or sec.get("status") == "MISSING"

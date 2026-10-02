@@ -18,10 +18,13 @@ assert SPEC and SPEC.loader
 security = importlib.util.module_from_spec(SPEC)
 SPEC.loader.exec_module(security)
 
-REPO = "szl-holdings/platform"
+REPO = "szl-holdings/example"
+PLATFORM = "szl-holdings/platform"
 HEAD = "a" * 40
 OLD = "b" * 40
 NOW = datetime(2026, 10, 3, 0, 0, tzinfo=timezone.utc)
+PLATFORM_WORKFLOW = (MODULE_PATH.parents[4] / ".github" / "workflows" / "security.yml").read_text(
+    encoding="utf-8")
 WORKFLOW_FILES = [
     {"name": "sbom.yml", "type": "file"},
     {"name": "trivy.yml", "type": "file"},
@@ -41,12 +44,32 @@ def run(file: str, sha: str = HEAD, conclusion: str = "success", run_id: int = 1
     }
 
 
-def github_reads(runs: list[dict]) -> dict[str, tuple[int, str]]:
+def github_reads(runs: list[dict], repo: str = REPO,
+                 workflow_files: list[dict] = WORKFLOW_FILES) -> dict[str, tuple[int, str]]:
     return {
-        f"repos/{REPO}/contents/.github/workflows?ref={HEAD}": (0, json.dumps(WORKFLOW_FILES)),
-        f"repos/{REPO}/actions/runs?branch=main&per_page=100":
+        f"repos/{repo}/contents/.github/workflows?ref={HEAD}": (0, json.dumps(workflow_files)),
+        f"repos/{repo}/actions/runs?branch=main&per_page=100":
             (0, json.dumps({"workflow_runs": runs})),
     }
+
+
+def platform_reads(workflow_content: str = PLATFORM_WORKFLOW, *,
+                   workflow_conclusion: str = "success", job_conclusion: str = "success",
+                   step_conclusion: str = "success") -> dict[str, tuple[int, str]]:
+    files = [*WORKFLOW_FILES, {"name": "security.yml", "type": "file"}]
+    runs = [run("sbom.yml", run_id=1), run("trivy.yml", run_id=2),
+            run("security.yml", conclusion=workflow_conclusion, run_id=3)]
+    responses = github_reads(runs, PLATFORM, files)
+    responses[f"repos/{PLATFORM}/contents/.github/workflows/security.yml?ref={HEAD}"] = (
+        0, json.dumps({"type": "file", "encoding": "base64", "content":
+                       base64.b64encode(workflow_content.encode()).decode()}))
+    responses[f"repos/{PLATFORM}/actions/runs/3/jobs?per_page=100"] = (0, json.dumps({
+        "total_count": 1, "jobs": [{"id": 300, "name": security.PLATFORM_SECRET_JOB,
+                                    "status": "completed", "conclusion": job_conclusion,
+                                    "steps": [{"name": security.PLATFORM_SECRET_STEP,
+                                               "status": "completed", "conclusion": step_conclusion}]}],
+    }))
+    return responses
 
 
 def fake_gh(responses: dict[str, tuple[int, str]]):
@@ -166,6 +189,110 @@ class SecurityReadinessTest(unittest.TestCase):
         with patch.object(security, "gh", side_effect=fake_gh(responses)):
             observed = security.workflow_status(REPO, "main", HEAD)
         self.assertEqual(observed["controls"]["sbom"]["status"], "NO_CURRENT_HEAD_RUN")
+
+    def test_platform_security_workflow_binds_gitleaks_job_and_scan_step(self) -> None:
+        with patch.object(security, "gh", side_effect=fake_gh(platform_reads(
+            workflow_conclusion="failure"))):
+            observed = security.workflow_status(PLATFORM, "main", HEAD)
+        control = observed["controls"]["gitleaks"]
+        self.assertTrue(observed["present"]["gitleaks"])
+        self.assertEqual(control["status"], "SUCCESS")
+        self.assertEqual(control["workflow_files"], ["security.yml"])
+        self.assertEqual(control["run_head_sha"], HEAD)
+        self.assertEqual(control["run_id"], 3)
+        self.assertEqual(control["run_conclusion"], "failure")
+        self.assertEqual(control["job_ids"], [300])
+        self.assertEqual(control["scan_step"], security.PLATFORM_SECRET_STEP)
+        self.assertTrue(observed["recent_success"]["gitleaks"])
+
+    def test_platform_security_workflow_content_failure_cannot_use_secret_named_file(self) -> None:
+        responses = platform_reads("jobs:\n  secret-scan:\n    name: Secret Scan (Gitleaks)\n")
+        with patch.object(security, "gh", side_effect=fake_gh(responses)):
+            observed = security.workflow_status(PLATFORM, "main", HEAD)
+        self.assertEqual(observed["controls"]["gitleaks"]["status"], "MISSING_WORKFLOW")
+        self.assertFalse(observed["present"]["gitleaks"])
+        self.assertIsNone(observed["recent_success"]["gitleaks"])
+
+    def test_platform_security_workflow_rejects_continue_on_error(self) -> None:
+        content = PLATFORM_WORKFLOW.replace(
+            "  secret-scan:\n", "  secret-scan:\n    continue-on-error: true\n", 1)
+        with patch.object(security, "gh", side_effect=fake_gh(platform_reads(content))):
+            observed = security.workflow_status(PLATFORM, "main", HEAD)
+        self.assertEqual(observed["controls"]["gitleaks"]["status"], "MISSING_WORKFLOW")
+
+    def test_platform_security_workflow_unreadable_content_holds(self) -> None:
+        responses = platform_reads()
+        responses[f"repos/{PLATFORM}/contents/.github/workflows/security.yml?ref={HEAD}"] = (1, "HTTP 500")
+        with patch.object(security, "gh", side_effect=fake_gh(responses)):
+            observed = security.workflow_status(PLATFORM, "main", HEAD)
+        self.assertEqual(observed["controls"]["gitleaks"]["status"], "READ_FAILED")
+        self.assertIsNone(observed["present"]["gitleaks"])
+
+    def test_platform_security_workflow_requires_successful_scan_step(self) -> None:
+        for job_result, step_result in (("failure", "success"), ("success", "skipped")):
+            with self.subTest(job=job_result, step=step_result), patch.object(
+                security, "gh", side_effect=fake_gh(platform_reads(
+                    workflow_conclusion="failure", job_conclusion=job_result,
+                    step_conclusion=step_result))
+            ):
+                observed = security.workflow_status(PLATFORM, "main", HEAD)
+                self.assertEqual(observed["controls"]["gitleaks"]["status"], "JOB_NOT_SUCCESS")
+                self.assertFalse(observed["recent_success"]["gitleaks"])
+                verdict, reasons = security.repo_verdict(
+                    {"status": "OBSERVED"}, observed,
+                    {"status": "OBSERVED", "has_contact": True},
+                    {"status": "UNVERIFIED", "verified": None})
+                self.assertEqual(verdict, "RED")
+                self.assertIn("workflow:gitleaks:JOB_NOT_SUCCESS", reasons)
+
+    def test_platform_security_workflow_job_read_failure_holds(self) -> None:
+        responses = platform_reads()
+        responses[f"repos/{PLATFORM}/actions/runs/3/jobs?per_page=100"] = (1, "HTTP 500")
+        with patch.object(security, "gh", side_effect=fake_gh(responses)):
+            observed = security.workflow_status(PLATFORM, "main", HEAD)
+        self.assertEqual(observed["controls"]["gitleaks"]["status"], "READ_FAILED")
+        self.assertIsNone(observed["recent_success"]["gitleaks"])
+
+    def test_platform_security_workflow_success_without_gitleaks_job_is_red(self) -> None:
+        responses = platform_reads()
+        responses[f"repos/{PLATFORM}/actions/runs/3/jobs?per_page=100"] = (0, json.dumps({
+            "total_count": 1, "jobs": [{"id": 300, "name": "Dependency Vulnerability Scan",
+                                        "status": "completed", "conclusion": "success", "steps": []}],
+        }))
+        with patch.object(security, "gh", side_effect=fake_gh(responses)):
+            observed = security.workflow_status(PLATFORM, "main", HEAD)
+        self.assertEqual(observed["controls"]["gitleaks"]["status"], "MISSING_JOB")
+        verdict, reasons = security.repo_verdict(
+            {"status": "OBSERVED"}, observed,
+            {"status": "OBSERVED", "has_contact": True},
+            {"status": "UNVERIFIED", "verified": None})
+        self.assertEqual(verdict, "RED")
+        self.assertIn("workflow:gitleaks:MISSING_JOB", reasons)
+
+    def test_platform_security_workflow_wrong_head_cannot_use_successful_job(self) -> None:
+        responses = platform_reads()
+        runs_endpoint = f"repos/{PLATFORM}/actions/runs?branch=main&per_page=100"
+        responses[runs_endpoint] = (0, json.dumps({"workflow_runs": [
+            run("sbom.yml", run_id=1), run("trivy.yml", run_id=2),
+            run("security.yml", OLD, run_id=3)]}))
+        with patch.object(security, "gh", side_effect=fake_gh(responses)) as provider:
+            observed = security.workflow_status(PLATFORM, "main", HEAD)
+        self.assertEqual(observed["controls"]["gitleaks"]["status"], "WRONG_HEAD_RUN")
+        self.assertNotIn(f"repos/{PLATFORM}/actions/runs/3/jobs?per_page=100",
+                         [call.args[0] for call in provider.call_args_list])
+
+    def test_platform_security_workflow_stale_run_cannot_use_successful_job(self) -> None:
+        responses = platform_reads(workflow_conclusion="failure")
+        runs_endpoint = f"repos/{PLATFORM}/actions/runs?branch=main&per_page=100"
+        stale = run("security.yml", conclusion="failure", run_id=3)
+        stale["created_at"] = "2026-09-02T00:00:00Z"
+        responses[runs_endpoint] = (0, json.dumps({"workflow_runs": [
+            run("sbom.yml", run_id=1), run("trivy.yml", run_id=2), stale]}))
+        with patch.object(security, "gh", side_effect=fake_gh(responses)) as provider:
+            observed = security.workflow_status(PLATFORM, "main", HEAD)
+        self.assertEqual(observed["controls"]["gitleaks"]["status"], "STALE_RUN")
+        self.assertNotIn(f"repos/{PLATFORM}/actions/runs/3/jobs?per_page=100",
+                         [call.args[0] for call in provider.call_args_list])
 
     def test_security_policy_requires_readable_contact_at_head(self) -> None:
         endpoint = f"repos/{REPO}/contents/SECURITY.md?ref={HEAD}"

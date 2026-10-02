@@ -1,9 +1,12 @@
 # A11oy cross-lane execution register — 2026-10-02
 
 This register turns the linked request to operationalize cybersecurity and
-then every lane into a sequence of measurable gates. It is a **source review** of
-`szl-holdings/platform` at `f2f8df6f89056e9104587674ccec0855dd5b177a`.
-It is not a deployment, customer, or external-security assessment.
+then every lane into a sequence of measurable gates. The six buyer-lane
+scenario labels below are a **source review** of `szl-holdings/platform` at
+`f2f8df6f89056e9104587674ccec0855dd5b177a`. The later description of
+disabled security tool manifests refers to the PR #882 successor at
+`17196755642185597941719afe6a3e6974f3001f`. Neither source snapshot is a
+deployment, customer, or external-security assessment.
 
 ## Evidence vocabulary
 

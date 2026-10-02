@@ -17,13 +17,24 @@ The agent emits one Khipu receipt; it does not modify the observed repositories.
    is never substituted.
 2. For each repo, the agent reads its default branch and exact 40-character
    head SHA. It reads workflow files at that SHA and checks SBOM, Trivy, and
-   Gitleaks/secret workflow files. The most recent matching run must have the
-   same branch and SHA, `status=completed`, and `conclusion=success`. The
-   successful run must have a timezone-aware `created_at` within the previous
-   30 days (inclusive). Missing, malformed, or more than five minutes future
+   Gitleaks/secret workflow files. For `szl-holdings/platform`, the Gitleaks
+   control is the `secret-scan` job inside `security.yml`: the collector reads
+   that file at the observed head, requires the named scan step and `gitleaks
+   detect` command without `continue-on-error`, then requires both the job and
+   scan step to report success in the matching workflow run. A missing or
+   unreadable file, job, step, or jobs API response cannot pass. Other repos
+   retain filename-based Gitleaks/secret discovery. The most recent matching run
+   must have the same branch and SHA and `status=completed`. For the Platform
+   Gitleaks control, a successful job and scan step can pass even when an
+   unrelated job makes the whole `security.yml` run fail; the overall run
+   conclusion remains in the receipt. The other workflow controls require
+   `conclusion=success`. The matching run must have a timezone-aware
+   `created_at` within the previous 30 days (inclusive). Missing, malformed,
+   or more than five minutes future
    timestamps yield `INVALID_RUN_TIMESTAMP`/`HOLD`; an older success yields
    `STALE_RUN`/`HOLD`. A current run still in progress yields
-   `RUN_IN_PROGRESS`/`HOLD`; a completed failed run yields `RED`.
+   `RUN_IN_PROGRESS`/`HOLD`; a failed required workflow or Gitleaks job yields
+   `RED`.
    Any invalid timestamp on a matching current-head run holds that control,
    even if an older success is present. The GitHub run query reads at most 100
    branch runs. If the matching current-head

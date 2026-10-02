@@ -244,6 +244,15 @@ function gitOutput(args) {
   }
 }
 
+export function readCommittedSourceAtObservedHead(readGit = gitOutput) {
+  const gitHead = readGit(['rev-parse', '--verify', 'HEAD']).toString('utf8').trim();
+  if (!/^[0-9a-f]{40}$/.test(gitHead)) {
+    fail('GIT_HEAD_UNAVAILABLE', 'an exact 40-character Git HEAD is required');
+  }
+  // Resolve through this immutable revision; HEAD may move before the next read.
+  return { gitHead, committedSource: readGit(['show', `${gitHead}:${SOURCE_PATH}`]) };
+}
+
 function runCli() {
   let gitHead = null;
   let sourceDigest = null;
@@ -251,7 +260,8 @@ function runCli() {
     if (process.argv.length !== 2) {
       fail('INVALID_ARGUMENTS', 'run without arguments from any directory');
     }
-    gitHead = gitOutput(['rev-parse', '--verify', 'HEAD']).toString('utf8').trim();
+    const observed = readCommittedSourceAtObservedHead();
+    gitHead = observed.gitHead;
     let workingSource;
     try {
       workingSource = readFileSync(path.join(repositoryRoot, SOURCE_PATH));
@@ -259,9 +269,8 @@ function runCli() {
       fail('SOURCE_MISSING', 'buyer-lane source file is unavailable');
     }
     sourceDigest = sha256(workingSource);
-    const committedSource = gitOutput(['show', `HEAD:${SOURCE_PATH}`]);
     process.stdout.write(
-      `${JSON.stringify(verifySnapshot({ gitHead, workingSource, committedSource }), null, 2)}\n`,
+      `${JSON.stringify(verifySnapshot({ gitHead, workingSource, committedSource: observed.committedSource }), null, 2)}\n`,
     );
   } catch (error) {
     process.stdout.write(
