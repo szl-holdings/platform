@@ -99,9 +99,35 @@ export function SecurityCompliance() {
       </Card>
 
       <SectionTitle>Framework Evaluation Targets</SectionTitle>
-      <Card className="mb-6">
+      <div className="grid gap-2 mb-6 md:hidden">
+        {FRAMEWORK_TARGETS.map(target => (
+          <Card key={target.name}>
+            <div className="flex items-start justify-between gap-3">
+              <div>
+                <div className="text-[10px] font-mono uppercase" style={{ color: T.textMuted }}>Framework</div>
+                <div className="text-sm font-medium" style={{ color: T.text }}>{target.name}</div>
+              </div>
+              <div className="shrink-0 text-right">
+                <div className="text-[10px] font-mono uppercase mb-1" style={{ color: T.textMuted }}>Status</div>
+                <StatusBadge status="warn" label="UNVERIFIED" />
+              </div>
+            </div>
+            <div className="mt-3 pt-3 grid gap-2 text-xs" style={{ borderTop: '1px solid ' + T.border }}>
+              <div>
+                <div className="text-[10px] font-mono uppercase" style={{ color: T.textMuted }}>Intent</div>
+                <div style={{ color: T.textDim }}>{target.intent}</div>
+              </div>
+              <div>
+                <div className="text-[10px] font-mono uppercase" style={{ color: T.textMuted }}>Evidence required</div>
+                <div style={{ color: T.textDim }}>{target.evidenceGate}</div>
+              </div>
+            </div>
+          </Card>
+        ))}
+      </div>
+      <Card className="mb-6 hidden md:block">
         <div style={{ overflowX: 'auto' }}>
-          <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+          <table style={{ width: '100%', minWidth: '720px', borderCollapse: 'collapse' }}>
             <thead>
               <tr style={{ borderBottom: '1px solid ' + T.border }}>
                 {['Framework', 'Intent', 'Status', 'Evidence required'].map(heading => (

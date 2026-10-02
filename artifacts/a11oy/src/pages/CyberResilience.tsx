@@ -70,7 +70,7 @@ export function CyberResilience() {
                   A source definition only; execution and result evidence are unavailable.
                 </div>
               </div>
-              <span className="text-xs font-mono" style={{ color: T.accent }}>DEMO</span>
+              <span className="text-xs font-mono" style={{ color: T.accent, flexShrink: 0, whiteSpace: 'nowrap' }}>DEMO</span>
             </div>
           </Card>
         ))}
