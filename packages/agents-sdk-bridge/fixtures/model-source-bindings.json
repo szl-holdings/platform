@@ -1,0 +1,286 @@
+{
+  "schema": "szl.model-source-bindings/v2",
+  "source_repository": "szl-holdings/szl-forge",
+  "policy": {
+    "artifact_equivalence": "NOT_CLAIMED",
+    "reproducible_build": "NOT_CLAIMED",
+    "statement": "The binding identifies the current canonical source, curriculum, schemas, and signed receipts. It does not claim that the published weight bytes can be reproduced from the source snapshot alone."
+  },
+  "artifacts": [
+    {
+      "repo_id": "SZLHOLDINGS/SZL-Forge-1.5B-ReceiptAgent",
+      "artifact_class": "fine_tuned_model",
+      "promotion_state": "NOT_PROMOTED_LIMITED_EVIDENCE",
+      "source_path": "receiptagent",
+      "maturity": "MEASURED_LIMITED",
+      "role": "governed_receipt_draft_proposer",
+      "required_hub_files": [
+        "model.safetensors",
+        "adapter/adapter_model.safetensors",
+        "owner_pubkey.json",
+        "training_receipt.signed.json",
+        "eval_receipt.signed.json"
+      ],
+      "expected_weight_sha256": {
+        "adapter/adapter_model.safetensors": "706aff139489d62cb1ac221c0f92a1a8595cd6a42032c542efe8028684e57cf2",
+        "model.safetensors": "a797592fb35c32cc6ebf5739c0a1d9312123300acaf09987d207d86196bc6e7d"
+      },
+      "lineage": [
+        {
+          "relation": "finetune",
+          "repo_id": "Qwen/Qwen2.5-1.5B-Instruct",
+          "revision": "989aa7980e4cf806f80c7fef2b1adb7bc71aa306",
+          "license": "apache-2.0"
+        }
+      ],
+      "signed_receipts": {
+        "public_key": "owner_pubkey.json",
+        "training": "training_receipt.signed.json",
+        "evaluation": "eval_receipt.signed.json",
+        "claim_scope": "REPOSITORY_DECLARED_KEY_CONTINUITY_ONLY"
+      },
+      "source_files": [
+        "receiptagent/adversarial.jsonl",
+        "receiptagent/eval.jsonl",
+        "receiptagent/eval_receipt.signed.json",
+        "receiptagent/manifest.json",
+        "receiptagent/owner_pubkey.json",
+        "receiptagent/receiptagent.schema.json",
+        "receiptagent/train.jsonl",
+        "receiptagent/train.refusals.jsonl",
+        "receiptagent/train_receiptagent.py",
+        "receiptagent/training_receipt.signed.json"
+      ],
+      "limitations": [
+        "The model proposes receipt drafts; it does not approve actions or mint authoritative receipts.",
+        "The public weight files are observed and hashed separately from the signed training receipt.",
+        "No independent quality certification is claimed."
+      ]
+    },
+    {
+      "repo_id": "SZLHOLDINGS/szl-receiptagent-qwen35-0.8b-v2",
+      "artifact_class": "fine_tuned_adapter",
+      "binding_mode": "VERIFY_IMMUTABLE_RELEASE",
+      "hub_revision": "bd642c7ff18736248e84fd83dace7ab368fc2288",
+      "promotion_state": "NOT_PROMOTED_LIMITED_EVIDENCE",
+      "source_path": "frontier/qwen35-receiptagent-v2",
+      "maturity": "MEASURED_PUBLISHED_LIMITED",
+      "role": "governed_receipt_draft_proposer_v2",
+      "required_hub_files": [
+        "adapter_config.json",
+        "adapter_model.safetensors",
+        "candidate.json",
+        "owner_pubkey.json",
+        "publication.json",
+        "receipts/eval_receipt.signed.json",
+        "receipts/publication_receipt.signed.json",
+        "receipts/training_receipt.signed.json"
+      ],
+      "expected_weight_sha256": {
+        "adapter_model.safetensors": "885fc29fcb4cf55c280dc085fdb0a40f40d6b946fee400dd5e4ed3459fe6334f"
+      },
+      "adapter_binding": {
+        "adapter_file": "adapter_model.safetensors",
+        "adapter_sha256": "885fc29fcb4cf55c280dc085fdb0a40f40d6b946fee400dd5e4ed3459fe6334f",
+        "config_file": "adapter_config.json",
+        "base_model_repo_id": "unsloth/Qwen3.5-0.8B",
+        "base_model_revision": "23c69c53358a07516b5827588b3fdb12ae78fd65",
+        "owner_attested_release_revision": "7a0d9efdebe92ea3b5b26b97cc722c6b5afde621",
+        "training_receipt_base_field": "trainingImplementation",
+        "training_receipt_adapter_sha256_field": "adapterModelSha256"
+      },
+      "lineage": [
+        {
+          "relation": "training_implementation",
+          "repo_id": "unsloth/Qwen3.5-0.8B",
+          "revision": "23c69c53358a07516b5827588b3fdb12ae78fd65",
+          "license": "apache-2.0"
+        },
+        {
+          "relation": "declared_upstream_lineage",
+          "repo_id": "Qwen/Qwen3.5-0.8B",
+          "revision": "2fc06364715b967f1860aea9cf38778875588b17",
+          "license": "apache-2.0"
+        }
+      ],
+      "signed_receipts": {
+        "public_key": "owner_pubkey.json",
+        "training": "receipts/training_receipt.signed.json",
+        "evaluation": "receipts/eval_receipt.signed.json",
+        "release": "receipts/publication_receipt.signed.json",
+        "evaluation_training_receipt_sha256_field": "trainingReceiptCanonicalSha256",
+        "claim_scope": "REPOSITORY_DECLARED_KEY_CONTINUITY_ONLY"
+      },
+      "autonomy_boundary": {
+        "autonomous_execution": false,
+        "controller_validation_required": true,
+        "reason": "The adapter proposes bounded receipt drafts. Approval, execution, and authoritative receipt minting remain outside the weights."
+      },
+      "source_files": [
+        "frontier/qwen35-receiptagent-v2/MODEL_CARD.md",
+        "frontier/qwen35-receiptagent-v2/README.md",
+        "frontier/qwen35-receiptagent-v2/candidate.json",
+        "frontier/qwen35-receiptagent-v2/curriculum.supplement.json",
+        "frontier/qwen35-receiptagent-v2/evaluate_candidate.py",
+        "frontier/qwen35-receiptagent-v2/evidence_chain.py",
+        "frontier/qwen35-receiptagent-v2/publication.json",
+        "frontier/qwen35-receiptagent-v2/qualify_runtime.py",
+        "frontier/qwen35-receiptagent-v2/receipts/eval_receipt.signed.json",
+        "frontier/qwen35-receiptagent-v2/receipts/publication_receipt.signed.json",
+        "frontier/qwen35-receiptagent-v2/receipts/training_receipt.signed.json",
+        "frontier/qwen35-receiptagent-v2/requirements-eval.txt",
+        "frontier/qwen35-receiptagent-v2/train.status-refusals.jsonl",
+        "frontier/qwen35-receiptagent-v2/train_candidate.py",
+        "receiptagent/adversarial.jsonl",
+        "receiptagent/eval.jsonl",
+        "receiptagent/owner_pubkey.json",
+        "receiptagent/receiptagent.schema.json",
+        "receiptagent/train.jsonl",
+        "receiptagent/train.refusals.jsonl"
+      ],
+      "limitations": [
+        "The adapter is bound to the exact Unsloth implementation revision used for training; the canonical Qwen repository is recorded as declared upstream lineage without a byte-equivalence claim.",
+        "The owner-measured gate contains 5 structured-draft and 6 adversarial-refusal cases; it is not a broad quality or safety benchmark.",
+        "The adapter proposes drafts only and is not eligible for autonomous execution.",
+        "This contract verifies the existing immutable Hub release and does not republish or replace its owner-signed publication record."
+      ]
+    },
+    {
+      "repo_id": "SZLHOLDINGS/SZL-Khipu-1.5B",
+      "artifact_class": "fine_tuned_model",
+      "promotion_state": "NOT_PROMOTED_RESEARCH_ONLY",
+      "source_path": "khipu",
+      "maturity": "MEASURED_RESEARCH_ONLY",
+      "role": "governed_retrieval_plan_proposer",
+      "required_hub_files": [
+        "model.safetensors",
+        "adapter/adapter_model.safetensors",
+        "owner_pubkey.json",
+        "training_receipt.signed.json",
+        "eval_receipt.signed.json"
+      ],
+      "expected_weight_sha256": {
+        "adapter/adapter_model.safetensors": "0a71b3a28b9f77ca3651f38c8caa1e34121934f5584dae24454d4c6eea823a66",
+        "model.safetensors": "6f9f5b9df2a877c999e33faf542dc6e62ce63f4a2bf6b358fc48a4b6b113c3c9"
+      },
+      "lineage": [
+        {
+          "relation": "finetune",
+          "repo_id": "Qwen/Qwen2.5-1.5B-Instruct",
+          "revision": "989aa7980e4cf806f80c7fef2b1adb7bc71aa306",
+          "license": "apache-2.0"
+        }
+      ],
+      "signed_receipts": {
+        "public_key": "owner_pubkey.json",
+        "training": "training_receipt.signed.json",
+        "evaluation": "eval_receipt.signed.json",
+        "claim_scope": "REPOSITORY_DECLARED_KEY_CONTINUITY_ONLY"
+      },
+      "source_files": [
+        "khipu/adversarial.jsonl",
+        "khipu/eval.jsonl",
+        "khipu/eval_khipu.py",
+        "khipu/eval_receipt.signed.json",
+        "khipu/khipu.schema.json",
+        "khipu/manifest.json",
+        "khipu/owner_pubkey.json",
+        "khipu/train.abstain.jsonl",
+        "khipu/train.jsonl",
+        "khipu/train_khipu.py",
+        "khipu/training_receipt.signed.json"
+      ],
+      "limitations": [
+        "The signed held-out abstention result is 2/6.",
+        "The curriculum measures synthetic routing-policy conformance, not autonomous navigation of the live Brain.",
+        "The public weight files are observed and hashed separately from the signed training receipt."
+      ]
+    },
+    {
+      "repo_id": "SZLHOLDINGS/SZL-Khipu-1.5B-GGUF",
+      "artifact_class": "quantized_model",
+      "promotion_state": "NOT_PROMOTED_OPERATIONAL_RESEARCH_DEMO",
+      "source_path": "khipu",
+      "maturity": "MEASURED_OPERATIONAL_LIMITED",
+      "role": "bounded_governed_retrieval_plan_proposer",
+      "required_hub_files": [
+        "SZL-Khipu-1.5B-F16.gguf",
+        "SZL-Khipu-1.5B-Q4_K_M.gguf",
+        "SZL-Khipu-1.5B-Q5_K_M.gguf",
+        "SZL-Khipu-1.5B-Q8_0.gguf",
+        "owner_pubkey.json",
+        "training_receipt.signed.json",
+        "eval_receipt.signed.json"
+      ],
+      "expected_weight_sha256": {
+        "SZL-Khipu-1.5B-F16.gguf": "2348ee342efe639e100f3fb31a3dc11b8c12d8c43ecfe45e18041b9f94c71a12",
+        "SZL-Khipu-1.5B-Q4_K_M.gguf": "13c1a1993063e1dff92f7413ccf48eaca6d48efc8801ae9af35961ae3396623a",
+        "SZL-Khipu-1.5B-Q5_K_M.gguf": "3bf460ac163c5dc952c273999c38a41349e3e6d666e4b713aed22c996860fd4c",
+        "SZL-Khipu-1.5B-Q8_0.gguf": "6aff1087f64631679f4cdf032613aee6911dbde38cd3bac6b81bf63741a56f0d"
+      },
+      "lineage": [
+        {
+          "relation": "finetune",
+          "repo_id": "Qwen/Qwen2.5-1.5B-Instruct",
+          "revision": "989aa7980e4cf806f80c7fef2b1adb7bc71aa306",
+          "license": "apache-2.0"
+        },
+        {
+          "relation": "quantized_from",
+          "repo_id": "SZLHOLDINGS/SZL-Khipu-1.5B",
+          "revision": "759c6112b1acae67f30351ef4e652e07671a42fb",
+          "license": "apache-2.0"
+        }
+      ],
+      "signed_receipts": {
+        "public_key": "owner_pubkey.json",
+        "training": "training_receipt.signed.json",
+        "evaluation": "eval_receipt.signed.json",
+        "claim_scope": "REPOSITORY_DECLARED_KEY_CONTINUITY_ONLY"
+      },
+      "runtime_probe": {
+        "base_url": "https://szlholdings-szl-model-inference-lab.hf.space",
+        "model_revision": "67d60ec577730747055491640cfb91fc4a4b5d25",
+        "model_file": "SZL-Khipu-1.5B-Q4_K_M.gguf",
+        "model_sha256": "13c1a1993063e1dff92f7413ccf48eaca6d48efc8801ae9af35961ae3396623a",
+        "release_id": "brain13-1d3960c-controller-9f227f6",
+        "prompt": "Given no evidence, state that you must abstain.",
+        "max_new_tokens": 24,
+        "repeat_count": 2,
+        "required_output_substring": "abstain"
+      },
+      "autonomy_boundary": {
+        "autonomous_execution": false,
+        "controller_validation_required": true,
+        "node_content_inside_weights": false,
+        "reason": "The model proposes routes over handles. A validating controller resolves evidence and retains execution authority."
+      },
+      "source_files": [
+        "khipu/adversarial.jsonl",
+        "khipu/eval.jsonl",
+        "khipu/eval_khipu.py",
+        "khipu/eval_receipt.signed.json",
+        "khipu/khipu.schema.json",
+        "khipu/manifest.json",
+        "khipu/owner_pubkey.json",
+        "khipu/train.abstain.jsonl",
+        "khipu/train.jsonl",
+        "khipu/train_khipu.py",
+        "khipu/training_receipt.signed.json",
+        "spaces/szl-model-inference-lab/app.py",
+        "spaces/szl-model-inference-lab/download_artifacts.py",
+        "spaces/szl-model-inference-lab/release.json",
+        "spaces/szl-model-inference-lab/requirements.txt",
+        "spaces/szl-model-inference-lab/verify_execution_record.py"
+      ],
+      "limitations": [
+        "The signed held-out abstention result is 2/6, so autonomous or high-stakes use is prohibited.",
+        "The live service is a bounded best-effort CPU demo with no SLA.",
+        "Runtime outputs are explicitly unsigned; the signed receipts cover training and evaluation only.",
+        "Production promotion is blocked until controlled restart reproducibility and instrumented energy evidence pass.",
+        "Energy and process-peak memory remain UNAVAILABLE until instrumented measurements are captured.",
+        "The published GGUF bytes are observed and hashed; reproducible quantization from the fine-tuned weights is not claimed."
+      ]
+    }
+  ]
+}
