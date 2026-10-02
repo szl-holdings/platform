@@ -101,6 +101,7 @@ Use [docs/README.md](README.md) for navigation by audience or task.
 |----------|-------------|---------------|
 | [market/SERIES_A_POSITIONING.md](market/SERIES_A_POSITIONING.md) | Evidence-labelled Series A positioning workbench; external publication remains founder-gated | 2026-07 |
 | [market/COMPETITOR_MATRIX.md](market/COMPETITOR_MATRIX.md) | Source-by-source competitor claims and comparison boundaries | 2026-07 |
+| [market/A11OY_LEADER_PATTERN_STUDY_2026-10-02.md](market/A11OY_LEADER_PATTERN_STUDY_2026-10-02.md) | Commit-pinned source study and independent A11oy synthesis across orchestration, observability, governance, durable execution, and attestation | 2026-10 |
 
 ---
 
