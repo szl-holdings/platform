@@ -29,30 +29,29 @@ performed by hand. For each repository in the SZL estate it reports:
     {name, default_branch, latest_push_CI_conclusion (push-event vs schedule-event),
      open_PR_count, last_commit_age_days, has_LICENSE, has_README, top_language}
 
-and computes a health score + flag:
-
-    RED        latest push-event CI on the default branch concluded "failure"
-    STALE      no push to the default branch within 30 days
-    UNLICENSED no LICENSE file present
-    GREEN      none of the above
+The flag covers only captured source metadata and observed CI lanes. It is
+never a production-readiness certificate. Missing, pending or stale evidence
+cannot establish GREEN; failed scheduled and dispatched runs are failures.
 
 Pure Python standard library + the `gh` CLI (invoked via subprocess). No
 third-party dependencies.
 
-SZL doctrine note: scheduled / workflow_dispatch CI failures are frequently
-expected (nightly scans, credential-gated jobs) and are reported separately
-from push-event failures, which represent real breakage of the default branch.
+No API credentials or raw error responses are stored in the report.
 """
 
 from __future__ import annotations
 
 import argparse
+import hashlib
 import json
 import os
+import re
 import subprocess
 import sys
 import time
 from datetime import datetime, timezone
+from concurrent.futures import ThreadPoolExecutor
+from urllib.parse import quote
 
 # Default SZL estate (per the manual 5-dev sweep scope).
 DEFAULT_REPOS = [
@@ -74,8 +73,10 @@ UNAVAILABLE = "unavailable"
 
 # Field sentinel used when an entire repo lookup fails.
 PUSH_EVENTS = {"push"}
-# Treated as "real" CI signal vs. scheduled/dispatch which are often expected.
+# Event classes are reported separately; neither receives a failure exemption.
 SCHEDULE_EVENTS = {"schedule", "workflow_dispatch", "dynamic", "repository_dispatch"}
+FAILED = {"failure", "timed_out", "cancelled", "action_required", "startup_failure", "stale"}
+SHA_RE = re.compile(r"^[0-9a-f]{40}$")
 
 
 # --------------------------------------------------------------------------- #
@@ -95,6 +96,7 @@ def run_gh(args, retries=3, timeout=60):
                 ["gh", *args],
                 capture_output=True,
                 text=True,
+                encoding="utf-8",
                 timeout=timeout,
             )
         except FileNotFoundError:
@@ -109,19 +111,70 @@ def run_gh(args, retries=3, timeout=60):
         last_err = (proc.stderr or "").strip()
         time.sleep(min(2 * attempt, 5))
     if last_err:
-        sys.stderr.write(f"[gh] giving up after {retries} attempts: {last_err}\n")
+        # Provider errors can contain private URLs or credentials. Do not echo them.
+        sys.stderr.write(f"[gh] request unavailable after {retries} attempts\n")
     return False, ""
 
 
 def gh_json(args, retries=3):
     """Run a gh command expected to emit JSON; return (ok, parsed_or_None)."""
     ok, out = run_gh(args, retries=retries)
-    if not ok or not out.strip():
+    if not ok or not isinstance(out, str) or not out.strip():
         return False, None
     try:
         return True, json.loads(out)
     except json.JSONDecodeError:
         return False, None
+
+
+def paginated(endpoint, field=None):
+    """Fetch every bounded API page; partial pages never count as complete."""
+    records = []
+    identifiers = set()
+    observed_total = None
+    separator = "&" if "?" in endpoint else "?"
+    for page in range(1, 101):
+        ok, data = gh_json(["api", f"{endpoint}{separator}per_page=100&page={page}"])
+        if not ok:
+            return False, records
+        rows = data.get(field) if field and isinstance(data, dict) else data
+        if not isinstance(rows, list) or any(not isinstance(row, dict) for row in rows):
+            return False, records
+        if field:
+            total = data.get("total_count")
+            if type(total) is not int or total < 0 or (observed_total is not None and total != observed_total):
+                return False, records
+            observed_total = total
+        page_ids = [row.get("id", row.get("name")) for row in rows]
+        if any(type(identifier) not in (str, int) for identifier in page_ids):
+            return False, records
+        if len(set(page_ids)) != len(page_ids) or identifiers.intersection(page_ids):
+            return False, records
+        identifiers.update(page_ids)
+        records.extend(rows)
+        if len(rows) < 100:
+            if observed_total is not None and len(records) != observed_total:
+                return False, records
+            return True, records
+    return False, records
+
+
+def list_repos(owner):
+    ok, rows = paginated(f"orgs/{quote(owner, safe='')}/repos?type=all")
+    if not ok or any(not isinstance(row.get("name"), str) for row in rows):
+        return False, []
+    names = [row["name"] for row in rows]
+    if len(set(names)) != len(names):
+        return False, []
+    return True, sorted(names, key=str.casefold)
+
+
+def get_head(owner, repo, branch):
+    if branch in (None, UNAVAILABLE):
+        return UNAVAILABLE
+    ok, data = gh_json(["api", f"repos/{owner}/{repo}/commits/{quote(branch, safe='')}", "--jq", "{sha}"])
+    sha = data.get("sha") if ok and isinstance(data, dict) else None
+    return sha if isinstance(sha, str) and SHA_RE.fullmatch(sha) else UNAVAILABLE
 
 
 # --------------------------------------------------------------------------- #
@@ -138,7 +191,8 @@ def get_repo_meta(owner, repo):
             f"repos/{owner}/{repo}",
             "--jq",
             "{default_branch: .default_branch, language: .language, "
-            "pushed_at: .pushed_at, license: (.license.spdx_id // null)}",
+            "pushed_at: .pushed_at, license: (.license.spdx_id // null), "
+            "archived: .archived, private: .private}",
         ]
     )
     if not ok or not isinstance(data, dict):
@@ -147,12 +201,16 @@ def get_repo_meta(owner, repo):
             "top_language": UNAVAILABLE,
             "pushed_at": UNAVAILABLE,
             "license_spdx": UNAVAILABLE,
+            "archived": UNAVAILABLE,
+            "private": UNAVAILABLE,
         }
     return {
         "default_branch": data.get("default_branch") or UNAVAILABLE,
         "top_language": data.get("language") or "none",
         "pushed_at": data.get("pushed_at") or UNAVAILABLE,
         "license_spdx": data.get("license"),  # may be None / NOASSERTION
+        "archived": data.get("archived", UNAVAILABLE),
+        "private": data.get("private", UNAVAILABLE),
     }
 
 
@@ -161,7 +219,9 @@ def path_exists(owner, repo, ref, candidates):
 
     Returns UNAVAILABLE if the contents listing cannot be retrieved.
     """
-    ref_q = "" if ref in (None, UNAVAILABLE) else f"?ref={ref}"
+    if not isinstance(ref, str) or not SHA_RE.fullmatch(ref):
+        return UNAVAILABLE
+    ref_q = f"?ref={ref}"
     ok, data = gh_json(
         ["api", f"repos/{owner}/{repo}/contents{ref_q}", "--jq", "[.[].name]"]
     )
@@ -173,75 +233,70 @@ def path_exists(owner, repo, ref, candidates):
 
 def get_open_pr_count(owner, repo):
     """Count open PRs. Returns UNAVAILABLE on failure."""
-    # search API is reliable and paginates internally for the count.
-    ok, data = gh_json(
-        [
-            "api",
-            "-X",
-            "GET",
-            "search/issues",
-            "-f",
-            f"q=repo:{owner}/{repo} type:pr state:open",
-            "--jq",
-            ".total_count",
-        ]
-    )
-    if not ok or not isinstance(data, int):
-        return UNAVAILABLE
-    return data
+    ok, rows = paginated(f"repos/{owner}/{repo}/pulls?state=open")
+    return len(rows) if ok else UNAVAILABLE
 
 
-def get_latest_ci(owner, repo, default_branch):
-    """Resolve the latest *completed* CI conclusion on the default branch,
-    distinguishing push-event runs from schedule/dispatch runs.
+def get_latest_ci(owner, repo, default_branch, revision=None):
+    """Read all current-revision runs, retaining the latest per workflow/event.
 
-    Returns a dict:
-        {
-          "push": {"conclusion": <str|None>, "event": "push", "url": <str|None>,
-                   "created_at": <str|None>} | None,
-          "schedule": {... } | None,
-          "available": bool,
-        }
+    A newer queued run supersedes an older success. Distinct workflows never
+    mask each other. Missing required workflows cannot be inferred from this
+    endpoint, so this is explicitly an observed-lane snapshot only.
     """
-    if default_branch in (None, UNAVAILABLE):
-        branch_filter = []
-    else:
-        branch_filter = ["-b", default_branch]
-    ok, runs = gh_json(
-        [
-            "run",
-            "list",
-            "-R",
-            f"{owner}/{repo}",
-            *branch_filter,
-            "--limit",
-            "60",
-            "--json",
-            "databaseId,event,conclusion,status,headBranch,createdAt,url",
-        ]
-    )
-    if not ok or not isinstance(runs, list):
-        return {"push": None, "schedule": None, "available": False}
+    missing = {"push": None, "schedule": None, "available": False, "lanes": []}
+    if not isinstance(revision, str) or not SHA_RE.fullmatch(revision):
+        return missing
+    endpoint = (f"repos/{owner}/{repo}/actions/runs?head_sha={revision}"
+                f"&branch={quote(default_branch, safe='')}")
+    ok, runs = paginated(endpoint, "workflow_runs")
+    lanes = {}
+    valid_runs = []
+    for run in runs:
+        valid = (type(run.get("id")) is int and type(run.get("workflow_id")) is int
+                 and all(isinstance(run.get(field), str) for field in
+                         ("created_at", "event", "status", "head_sha", "head_branch"))
+                 and (run.get("conclusion") is None or isinstance(run["conclusion"], str)))
+        if valid:
+            try:
+                valid = run["created_at"].endswith("Z") and bool(datetime.fromisoformat(run["created_at"].replace("Z", "+00:00")))
+            except ValueError:
+                valid = False
+        if valid:
+            valid_runs.append(run)
+        else:
+            ok = False
+    for run in sorted(valid_runs, key=lambda r: (r["created_at"], r["id"]), reverse=True):
+        event = run.get("event")
+        if event not in PUSH_EVENTS | SCHEDULE_EVENTS:
+            continue
+        if run.get("head_sha") != revision or run.get("head_branch") != default_branch:
+            continue
+        workflow_id = run.get("workflow_id")
+        if not isinstance(workflow_id, int):
+            ok = False
+            continue
+        key = (workflow_id, event)
+        if key not in lanes:
+            lanes[key] = {
+                "workflow_id": workflow_id, "name": run.get("name"),
+                "status": run.get("status"), "conclusion": run.get("conclusion"),
+                "event": event, "url": run.get("html_url"),
+                "created_at": run.get("created_at"), "source_revision": revision,
+            }
+    rows = [lanes[key] for key in sorted(lanes)]
 
-    push_latest = None
-    sched_latest = None
-    for r in runs:
-        if r.get("status") != "completed":
-            continue  # in-progress / queued carry no conclusion yet
-        event = r.get("event", "")
-        rec = {
-            "conclusion": r.get("conclusion") or None,
-            "event": event,
-            "url": r.get("url"),
-            "created_at": r.get("createdAt"),
-        }
-        if event in PUSH_EVENTS and push_latest is None:
-            push_latest = rec
-        elif event in SCHEDULE_EVENTS and sched_latest is None:
-            sched_latest = rec
-        if push_latest and sched_latest:
-            break
-    return {"push": push_latest, "schedule": sched_latest, "available": True}
+    def summarize(events):
+        subset = [row for row in rows if row["event"] in events]
+        if not subset:
+            return None
+        failures = [row for row in subset if row["conclusion"] in FAILED]
+        pending = [row for row in subset if row["status"] != "completed" or row["conclusion"] != "success"]
+        selected = (failures or pending or subset)[0]
+        return {**selected, "conclusion": selected["conclusion"] if selected["status"] == "completed" else "pending"}
+
+    return {"push": summarize(PUSH_EVENTS), "schedule": summarize(SCHEDULE_EVENTS),
+            "available": ok, "lanes": rows}
 
 
 # --------------------------------------------------------------------------- #
@@ -272,74 +327,72 @@ def has_license_flag(license_spdx, license_file_present):
     if license_file_present is True:
         return True
     if license_file_present == UNAVAILABLE:
-        if license_spdx in (None, UNAVAILABLE):
-            return UNAVAILABLE
-        # SPDX present and recognised => licensed.
-        return license_spdx not in ("", "NONE")
+        # Mutable metadata cannot establish a file at the captured revision.
+        return UNAVAILABLE
     # license_file_present is False
     return False
 
 
 def score_repo(record):
-    """Compute a health score (0-100) and a flag from a per-repo record.
-
-    Pure function over a plain dict — unit-testable without network access.
-
-    Flag precedence (highest severity first):
-        RED        push-event CI on default branch == "failure"
-        STALE      last_commit_age_days > STALE_DAYS
-        UNLICENSED has_LICENSE is False
-        GREEN      otherwise
-
-    Returns (score:int, flag:str, reasons:list[str]).
-    """
+    """Score only source/observed CI; uncertainty never becomes GREEN."""
     reasons = []
-    score = 100
-
     push_ci = record.get("latest_push_CI_conclusion")
     sched_ci = record.get("latest_schedule_CI_conclusion")
     age = record.get("last_commit_age_days")
     has_license = record.get("has_LICENSE")
     has_readme = record.get("has_README")
-
-    flag = "GREEN"
-
-    # RED — real push-event breakage on the default branch.
-    if push_ci == "failure":
-        score -= 60
-        reasons.append("push-event CI on default branch concluded failure")
-        flag = "RED"
-
-    # STALE — no push within the staleness window.
-    if isinstance(age, int) and age > STALE_DAYS:
-        score -= 25
-        reasons.append(f"no push in {age} days (> {STALE_DAYS}d window)")
-        if flag != "RED":
-            flag = "STALE"
-
-    # UNLICENSED — missing LICENSE.
-    if has_license is False:
-        score -= 20
-        reasons.append("no LICENSE file present")
-        if flag not in ("RED", "STALE"):
-            flag = "UNLICENSED"
-
-    # Minor deductions (do not change the headline flag).
-    if has_readme is False:
-        score -= 5
-        reasons.append("no README present")
-    if sched_ci == "failure":
-        # Scheduled/dispatch failures are often expected; minor, informational.
-        score -= 5
-        reasons.append("scheduled/dispatch CI failing (often expected per doctrine)")
-
-    # Unavailable signals are noted but never fabricated into a pass/fail.
-    if push_ci == UNAVAILABLE:
-        reasons.append("push-event CI status unavailable")
-    if has_license == UNAVAILABLE:
-        reasons.append("LICENSE presence unavailable")
-
-    return max(score, 0), flag, reasons
+    for label, value in (("push", push_ci), ("scheduled/dispatch", sched_ci)):
+        if value in FAILED:
+            reasons.append(f"{label} CI concluded {value}")
+    lanes = record.get("ci_lanes", [])
+    if not isinstance(lanes, list) or any(not isinstance(lane, dict) for lane in lanes):
+        return None, "YELLOW", ["malformed CI lane evidence"]
+    for lane in lanes:
+        if lane.get("conclusion") in FAILED:
+            reasons.append(f"workflow {lane.get('workflow_id')} ({lane.get('event')}) concluded {lane['conclusion']}")
+    if reasons:
+        return 0, "RED", reasons
+    if record.get("archived") is True:
+        return None, "GRAY", ["historical archived source; not scored as operational"]
+    required = {
+        "source_revision": record.get("source_revision"),
+        "push CI": push_ci, "LICENSE": has_license, "README": has_readme,
+        "commit age": age,
+    }
+    unknown = [name for name, value in required.items() if value is None or value == UNAVAILABLE]
+    if len(unknown) == len(required):
+        return None, "GRAY", ["all source/CI signals unavailable"]
+    if unknown:
+        reasons.append("unavailable evidence: " + ", ".join(unknown))
+    if record.get("collection_complete") is not True:
+        reasons.append("collection incomplete or head drifted")
+    revision = record.get("source_revision")
+    if not isinstance(revision, str) or not SHA_RE.fullmatch(revision):
+        reasons.append("no immutable source revision")
+    if record.get("final_source_revision") != revision:
+        reasons.append("final source head missing or different from captured revision")
+    if record.get("ci_available") is not True:
+        reasons.append("CI pagination not established complete")
+    if not lanes or any(lane.get("source_revision") != revision for lane in lanes):
+        reasons.append("CI lanes absent or bound to another revision")
+    if not any(lane.get("event") == "push" for lane in lanes):
+        reasons.append("no current-revision push workflow observed")
+    if push_ci != "success":
+        reasons.append("current source push CI not successful")
+    if sched_ci not in (None, "success"):
+        reasons.append("scheduled/dispatch CI not successful or unavailable")
+    if any(lane.get("status") != "completed" or lane.get("conclusion") != "success"
+           for lane in lanes):
+        reasons.append("one or more observed workflow lanes pending or not successful")
+    if type(age) is not int or age > STALE_DAYS:
+        reasons.append("source freshness is unavailable or outside the observation window")
+    if has_license is not True:
+        reasons.append("LICENSE at captured revision not established")
+    if has_readme is not True:
+        reasons.append("README at captured revision not established")
+    if reasons:
+        return None, "YELLOW", reasons
+    return 100, "GREEN", ["source metadata and observed CI only; readiness not assessed"]
 
 
 # --------------------------------------------------------------------------- #
@@ -350,15 +403,17 @@ def audit_repo(owner, repo, now=None):
     failures; failed fields become UNAVAILABLE."""
     meta = get_repo_meta(owner, repo)
     default_branch = meta["default_branch"]
+    revision = get_head(owner, repo, default_branch)
 
     license_present = path_exists(
-        owner, repo, default_branch, ["LICENSE", "LICENSE.md", "LICENSE.txt", "COPYING"]
+        owner, repo, revision, ["LICENSE", "LICENSE.md", "LICENSE.txt", "COPYING"]
     )
     readme_present = path_exists(
-        owner, repo, default_branch, ["README.md", "README", "README.rst", "README.txt"]
+        owner, repo, revision, ["README.md", "README", "README.rst", "README.txt"]
     )
     open_prs = get_open_pr_count(owner, repo)
-    ci = get_latest_ci(owner, repo, default_branch)
+    ci = get_latest_ci(owner, repo, default_branch, revision)
+    final_revision = get_head(owner, repo, default_branch)
 
     push_rec = ci.get("push")
     sched_rec = ci.get("schedule")
@@ -385,6 +440,19 @@ def audit_repo(owner, repo, now=None):
         "license_spdx": meta["license_spdx"] if meta["license_spdx"] else None,
         "has_README": readme_present,
         "top_language": meta["top_language"],
+        "source_revision": revision,
+        "final_source_revision": final_revision,
+        "archived": meta["archived"],
+        "private": meta["private"],
+        "ci_lanes": ci["lanes"],
+        "ci_available": ci["available"],
+        "collection_complete": (revision != UNAVAILABLE and revision == final_revision
+                                and ci["available"] and open_prs != UNAVAILABLE
+                                and license_present != UNAVAILABLE and readme_present != UNAVAILABLE),
+        "last_observed_at": datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"),
+        "evidence_class": "REPORTED",
+        "runtime_state": "NOT_PROBED",
+        "operational_readiness": UNAVAILABLE,
     }
     score, flag, reasons = score_repo(record)
     record["health_score"] = score
@@ -393,12 +461,10 @@ def audit_repo(owner, repo, now=None):
     return record
 
 
-def audit_estate(repos, owner=DEFAULT_OWNER, now=None):
+def audit_estate(repos, owner=DEFAULT_OWNER, now=None, workers=1):
     now = now or datetime.now(timezone.utc)
-    records = []
-    for repo in repos:
-        sys.stderr.write(f"[audit] {owner}/{repo} ...\n")
-        records.append(audit_repo(owner, repo, now=now))
+    with ThreadPoolExecutor(max_workers=workers) as pool:
+        records = list(pool.map(lambda repo: audit_repo(owner, repo, now=now), sorted(set(repos))))
     return {
         "generated_at_utc": now.strftime("%Y-%m-%dT%H:%M:%SZ"),
         "owner": owner,
@@ -410,6 +476,9 @@ def audit_estate(repos, owner=DEFAULT_OWNER, now=None):
             "no upstream code copied."
         ),
         "repo_count": len(records),
+        "schema_version": "szl-estate-source-ci/v2",
+        "scope": "source metadata and observed current-revision CI lanes only",
+        "collection_complete": all(r["collection_complete"] for r in records),
         "repos": records,
     }
 
@@ -471,12 +540,12 @@ def render_table(report):
 
 
 def render_summary(report):
-    counts = {"GREEN": 0, "RED": 0, "STALE": 0, "UNLICENSED": 0}
+    counts = {"GREEN": 0, "YELLOW": 0, "RED": 0, "GRAY": 0}
     for r in report["repos"]:
         counts[r["flag"]] = counts.get(r["flag"], 0) + 1
     parts = [f"{k}={v}" for k, v in counts.items()]
     return (
-        f"Estate: {report['repo_count']} repos @ {report['generated_at_utc']} | "
+        f"Source/CI snapshot (NOT operational readiness): {report['repo_count']} repos @ {report['generated_at_utc']} | "
         + " ".join(parts)
     )
 
@@ -487,7 +556,62 @@ def render_summary(report):
 def default_report_path(now=None):
     now = now or datetime.now(timezone.utc)
     stamp = now.strftime("%Y%m%dT%H%M%SZ")
-    return os.path.join("/home/user/workspace/estate_audit", f"auto_audit_{stamp}.json")
+    return os.path.join("estate-audit", "local", f"auto_audit_{stamp}.json")
+
+
+def validate_replay(report):
+    """Reject malformed snapshots before rendering or writing any output.
+
+    This checks internal consistency, not authenticity. A local hash is not
+    a signature and replay does not renew the original observation.
+    """
+    if not isinstance(report, dict) or report.get("schema_version") != "szl-estate-source-ci/v2":
+        raise ValueError("unsupported snapshot")
+    rows = report.get("repos")
+    if not isinstance(rows, list) or not rows or type(report.get("repo_count")) is not int or report["repo_count"] != len(rows):
+        raise ValueError("invalid repository count")
+    stamp = report.get("generated_at_utc")
+    if not isinstance(stamp, str) or not stamp.endswith("Z"):
+        raise ValueError("invalid observation time")
+    datetime.fromisoformat(stamp.replace("Z", "+00:00"))
+    required = {"name", "owner", "default_branch", "latest_push_CI_conclusion",
+                "latest_schedule_CI_conclusion", "open_PR_count", "last_commit_age_days",
+                "has_LICENSE", "has_README", "top_language", "source_revision",
+                "final_source_revision", "ci_lanes", "ci_available", "collection_complete"}
+    identities = set()
+    for row in rows:
+        if not isinstance(row, dict) or not required.issubset(row):
+            raise ValueError("invalid repository record")
+        for name in ("name", "owner", "default_branch", "top_language", "source_revision", "final_source_revision"):
+            if not isinstance(row[name], str):
+                raise ValueError("invalid text field")
+        if not re.fullmatch(r"[A-Za-z0-9_.-]+", row["name"]) or not re.fullmatch(r"[A-Za-z0-9_.-]+", row["owner"]):
+            raise ValueError("invalid repository identity")
+        identity = (row["owner"].lower(), row["name"].lower())
+        if identity in identities:
+            raise ValueError("duplicate repository")
+        identities.add(identity)
+        for name in ("latest_push_CI_conclusion", "latest_schedule_CI_conclusion"):
+            if row[name] is not None and not isinstance(row[name], str):
+                raise ValueError("invalid CI conclusion")
+        for name in ("open_PR_count", "last_commit_age_days"):
+            if row[name] != UNAVAILABLE and (type(row[name]) is not int or row[name] < 0):
+                raise ValueError("invalid numeric observation")
+        for name in ("has_LICENSE", "has_README"):
+            if type(row[name]) is not bool and row[name] != UNAVAILABLE:
+                raise ValueError("invalid file observation")
+        for name in ("ci_available", "collection_complete"):
+            if type(row[name]) is not bool:
+                raise ValueError("invalid completeness observation")
+        if not isinstance(row["ci_lanes"], list):
+            raise ValueError("invalid lanes")
+        for lane in row["ci_lanes"]:
+            if not isinstance(lane, dict) or type(lane.get("workflow_id")) is not int:
+                raise ValueError("invalid lane identity")
+            if any(not isinstance(lane.get(name), str) for name in ("event", "status", "source_revision")):
+                raise ValueError("invalid lane observation")
+            if lane.get("conclusion") is not None and not isinstance(lane["conclusion"], str):
+                raise ValueError("invalid lane conclusion")
 
 
 def main(argv=None):
@@ -501,10 +625,14 @@ def main(argv=None):
         help="Repo names to audit (default: the SZL estate).",
     )
     parser.add_argument("--owner", default=DEFAULT_OWNER, help="GitHub org/owner.")
+    parser.add_argument("--all", action="store_true", help="Enumerate every accessible organization repository.")
+    parser.add_argument("--workers", type=int, choices=range(1, 9), default=4)
+    parser.add_argument("--replay", help="Rescore a prior v2 JSON snapshot offline; does not refresh evidence.")
+    parser.add_argument("--require-green", action="store_true", help="Exit 3 unless every source/CI flag is GREEN.")
     parser.add_argument(
         "--json-out",
         default=None,
-        help="Path for the JSON report (default: estate_audit/auto_audit_<UTC>.json).",
+        help="Path for the JSON report (default: estate-audit/local/auto_audit_<UTC>.json).",
     )
     parser.add_argument(
         "--no-table", action="store_true", help="Suppress the stdout table."
@@ -512,21 +640,51 @@ def main(argv=None):
     args = parser.parse_args(argv)
 
     now = datetime.now(timezone.utc)
+    if args.all and args.repos or args.replay and (args.all or args.repos):
+        parser.error("choose explicit repositories, --all, or --replay")
     repos = args.repos if args.repos else DEFAULT_REPOS
     out_path = args.json_out or default_report_path(now)
+    if args.replay:
+        try:
+            with open(args.replay, encoding="utf-8") as stream:
+                report = json.load(stream)
+            validate_replay(report)
+            for row in report["repos"]:
+                row["health_score"], row["flag"], row["flag_reasons"] = score_repo(row)
+            report["collection_complete"] = all(
+                row["collection_complete"] is True and row["ci_available"] is True
+                and row["source_revision"] == row["final_source_revision"]
+                and SHA_RE.fullmatch(row["source_revision"])
+                and all(lane["source_revision"] == row["source_revision"] for lane in row["ci_lanes"])
+                for row in report["repos"])
+            report["replayed_at_utc"] = now.strftime("%Y-%m-%dT%H:%M:%SZ")
+        except (OSError, ValueError, TypeError, AttributeError):
+            parser.error("invalid or unreadable v2 replay snapshot")
+    else:
+        if args.all:
+            ok, repos = list_repos(args.owner)
+            if not ok or not repos:
+                sys.stderr.write("Organization census unavailable/incomplete; no successful empty report written.\n")
+                return 2
+        report = audit_estate(repos, owner=args.owner, now=now, workers=args.workers)
 
-    report = audit_estate(repos, owner=args.owner, now=now)
-
-    os.makedirs(os.path.dirname(out_path), exist_ok=True)
+    os.makedirs(os.path.dirname(os.path.abspath(out_path)), exist_ok=True)
     with open(out_path, "w", encoding="utf-8") as fh:
-        json.dump(report, fh, indent=2, sort_keys=False)
+        json.dump(report, fh, indent=2, sort_keys=True)
+        fh.write("\n")
+    with open(out_path, "rb") as fh:
+        digest = hashlib.sha256(fh.read()).hexdigest()
+    with open(out_path + ".sha256", "w", encoding="ascii") as fh:
+        fh.write(digest + "\n")
 
     if not args.no_table:
         print(render_table(report))
         print()
     print(render_summary(report))
     print(f"JSON report written to: {out_path}")
-    return 0
+    if not report["collection_complete"]:
+        return 2
+    return 3 if args.require_green and any(r["flag"] != "GREEN" for r in report["repos"]) else 0
 
 
 if __name__ == "__main__":
