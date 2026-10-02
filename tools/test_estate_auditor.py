@@ -6,7 +6,7 @@
 Two layers:
   1. Offline (always runs): the pure scoring/derivation functions and the
      report shape against mock dicts. No network, no `gh` required.
-  2. Live (skipped automatically if `gh` is unavailable / unauthenticated):
+  2. Live (opt-in with SZL_AUDIT_LIVE_TEST=1, also requires authenticated gh):
      runs a real 2-repo audit and asserts the JSON has the expected keys and
      does not crash.
 
@@ -46,6 +46,9 @@ EXPECTED_REPO_KEYS = {
     "health_score",
     "flag",
     "flag_reasons",
+    "source_revision", "final_source_revision", "archived", "private",
+    "ci_lanes", "ci_available", "collection_complete", "last_observed_at",
+    "evidence_class", "runtime_state", "operational_readiness",
 }
 
 EXPECTED_TOP_KEYS = {
@@ -90,6 +93,11 @@ def test_score_green():
         "last_commit_age_days": 3,
         "has_LICENSE": True,
         "has_README": True,
+        "source_revision": "a" * 40,
+        "final_source_revision": "a" * 40,
+        "ci_available": True,
+        "ci_lanes": [{"event": "push", "status": "completed", "conclusion": "success", "source_revision": "a" * 40}],
+        "collection_complete": True,
     }
     score, flag, reasons = aud.score_repo(rec)
     check(flag == "GREEN", f"flag GREEN (got {flag})")
@@ -110,8 +118,8 @@ def test_score_red_pushfail():
     check(score < 100, f"score reduced (got {score})")
 
 
-def test_score_schedule_fail_not_red():
-    print("[test] scoring: schedule-only CI failure is NOT RED (doctrine)")
+def test_score_schedule_failure_is_red():
+    print("[test] scoring: schedule-only failure is RED")
     rec = {
         "latest_push_CI_conclusion": "success",
         "latest_schedule_CI_conclusion": "failure",
@@ -120,7 +128,7 @@ def test_score_schedule_fail_not_red():
         "has_README": True,
     }
     score, flag, reasons = aud.score_repo(rec)
-    check(flag == "GREEN", f"schedule failure stays GREEN (got {flag})")
+    check(flag == "RED", f"schedule failure is RED (got {flag})")
     check(
         any("scheduled" in r for r in reasons),
         "schedule failure noted in reasons",
@@ -128,7 +136,7 @@ def test_score_schedule_fail_not_red():
 
 
 def test_score_stale():
-    print("[test] scoring: no push in 45d -> STALE")
+    print("[test] scoring: stale source cannot be GREEN")
     rec = {
         "latest_push_CI_conclusion": "success",
         "latest_schedule_CI_conclusion": None,
@@ -137,11 +145,11 @@ def test_score_stale():
         "has_README": True,
     }
     _, flag, _ = aud.score_repo(rec)
-    check(flag == "STALE", f"flag STALE (got {flag})")
+    check(flag == "YELLOW", f"stale evidence cannot establish GREEN (got {flag})")
 
 
 def test_score_unlicensed():
-    print("[test] scoring: missing LICENSE -> UNLICENSED")
+    print("[test] scoring: missing LICENSE cannot be GREEN")
     rec = {
         "latest_push_CI_conclusion": "success",
         "latest_schedule_CI_conclusion": None,
@@ -150,11 +158,11 @@ def test_score_unlicensed():
         "has_README": True,
     }
     _, flag, _ = aud.score_repo(rec)
-    check(flag == "UNLICENSED", f"flag UNLICENSED (got {flag})")
+    check(flag == "YELLOW", f"missing license cannot establish GREEN (got {flag})")
 
 
 def test_score_precedence():
-    print("[test] scoring: RED outranks STALE + UNLICENSED")
+    print("[test] scoring: failed CI outranks stale and missing LICENSE")
     rec = {
         "latest_push_CI_conclusion": "failure",
         "latest_schedule_CI_conclusion": None,
@@ -176,7 +184,8 @@ def test_unavailable_not_fabricated():
         "has_README": aud.UNAVAILABLE,
     }
     score, flag, reasons = aud.score_repo(rec)
-    check(flag == "GREEN", "all-unavailable does not fabricate RED/STALE")
+    check(flag == "GRAY", "all-unavailable is GRAY, never GREEN")
+    check(score is None, "unknown evidence receives no numeric health score")
     check(
         any("unavailable" in r for r in reasons),
         "unavailable signals surfaced in reasons",
@@ -235,7 +244,7 @@ def test_report_shape_offline():
         "repo_count": 1,
         "repos": [rec],
     }
-    check(set(rec.keys()) == EXPECTED_REPO_KEYS, "mock record has exactly expected keys")
+    check(set(rec.keys()) <= EXPECTED_REPO_KEYS, "legacy rendering fixture remains supported")
     table = aud.render_table(report)
     check("mockrepo" in table and "FLAG" in table, "table renders repo + header")
     summary = aud.render_summary(report)
@@ -246,6 +255,8 @@ def test_report_shape_offline():
 # 2. Live test — real 2-repo audit (skipped if gh unavailable)
 # --------------------------------------------------------------------------- #
 def gh_available():
+    if os.environ.get("SZL_AUDIT_LIVE_TEST") != "1":
+        return False
     if shutil.which("gh") is None:
         return False
     # Use run_gh (text), not gh_json: `.login` is a bare scalar, not JSON.
@@ -261,7 +272,7 @@ def test_live_two_repos():
     tmpdir = tempfile.mkdtemp(prefix="szl_audit_test_")
     out_path = os.path.join(tmpdir, "audit.json")
     rc = aud.main(["platform", "a11oy", "--json-out", out_path, "--no-table"])
-    check(rc == 0, "main() returns 0 (no crash)")
+    check(rc in (0, 2), "main reports complete or incomplete collection without crashing")
     check(os.path.exists(out_path), "JSON report written")
     with open(out_path) as fh:
         report = json.load(fh)
@@ -273,7 +284,7 @@ def test_live_two_repos():
             f"{r['name']} record has exactly expected keys",
         )
         check(
-            r["flag"] in ("GREEN", "RED", "STALE", "UNLICENSED"),
+            r["flag"] in ("GREEN", "YELLOW", "RED", "GRAY"),
             f"{r['name']} flag is valid ({r['flag']})",
         )
     shutil.rmtree(tmpdir, ignore_errors=True)
@@ -284,7 +295,7 @@ def main():
         test_module_imports,
         test_score_green,
         test_score_red_pushfail,
-        test_score_schedule_fail_not_red,
+        test_score_schedule_failure_is_red,
         test_score_stale,
         test_score_unlicensed,
         test_score_precedence,
