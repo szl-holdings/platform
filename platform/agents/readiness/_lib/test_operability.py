@@ -131,7 +131,8 @@ class OperabilityEvidenceTest(unittest.TestCase):
         self.assertEqual(row["signal_details"]["dockerfile_ok"]["reason"], "dockerfile_blob_mismatch")
 
     def test_docker_comments_and_substrings_do_not_count(self) -> None:
-        for raw in [b"# FROM example\n# CMD x\n", b"RUN echo FROM example CMD x\n", b"FROM example\n"]:
+        for raw in [b"# FROM example\n# CMD x\n", b"RUN echo FROM example CMD x\n", b"FROM example\n",
+                    b"FROM\nCMD x\n", b"FROM # missing argument\nCMD x\n"]:
             with self.subTest(raw=raw):
                 blob = hashlib.sha1(f"blob {len(raw)}\0".encode() + raw).hexdigest()
                 with patch.object(operability, "gh", return_value={

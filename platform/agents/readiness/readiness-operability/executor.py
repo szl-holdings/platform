@@ -89,7 +89,7 @@ def dockerfile_structure(repo: str, revision: str, entry: dict) -> bool:
     if hashlib.sha1(f"blob {len(raw)}\0".encode() + raw).hexdigest() != entry["sha"]:
         raise EvidenceUnavailable("dockerfile_blob_mismatch")
     # Instruction presence only; comments and substrings cannot count.
-    instructions = set(re.findall(r"^\s*([A-Za-z]+)\s+\S", body, re.MULTILINE))
+    instructions = set(re.findall(r"^[ \t]*([A-Za-z]+)[ \t]+[^\s#]", body, re.MULTILINE))
     instructions = {value.upper() for value in instructions}
     return "FROM" in instructions and bool({"CMD", "ENTRYPOINT"} & instructions)
 
