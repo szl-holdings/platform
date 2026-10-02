@@ -191,12 +191,26 @@ describe('Security tool manifests', () => {
     expect(threatScan?.policyTier).toBe('regulated-workflow');
   });
 
-  it('vulnerability-report handler returns expected shape', async () => {
-    const result = await vulnerabilityReportHandler(
-      { severity: 'high' },
-      SECURITY_TOOL_MANIFESTS.find((m) => m.id === 'security.vulnerability-report')!,
-    );
-    expect(result).toMatchObject({ vulnerabilities: [] });
+  it.each([
+    {},
+    { severity: 'high' },
+    { cveId: 'CVE-2026-1234', assetId: 'host-123', severity: 'critical' },
+  ])('vulnerability-report rejects direct calls without scoped evidence: %j', async (input) => {
+    const manifest = requireSecurityManifest('security.vulnerability-report');
+    expect(manifest.enabled).toBe(false);
+    await expect(vulnerabilityReportHandler(input, manifest)).rejects.toMatchObject({
+      code: 'SECURITY_OPERATION_UNAVAILABLE',
+      message: expect.stringContaining('not tenant- or asset-bound'),
+    });
+  });
+
+  it('vulnerability-report validates input before its unavailable result', async () => {
+    const manifest = requireSecurityManifest('security.vulnerability-report');
+    await expect(
+      vulnerabilityReportHandler({ severity: 'unknown' }, manifest),
+    ).rejects.toMatchObject({
+      name: 'ZodError',
+    });
   });
 
   const unsupportedOperations = [
@@ -376,11 +390,11 @@ describe('Gateway approval-required flow', () => {
     expect(result.error).toMatch(/approval/i);
   });
 
-  it('allows tool call when guardian has a matching allow rule', async () => {
+  it('blocks vulnerability-report even when guardian has a matching allow rule', async () => {
     const registry = new InMemoryToolRegistry();
-    registry.register(
-      SECURITY_TOOL_MANIFESTS.find((m) => m.id === 'security.vulnerability-report')!,
-    );
+    const manifest = SECURITY_TOOL_MANIFESTS.find((m) => m.id === 'security.vulnerability-report');
+    if (!manifest) throw new Error('Missing vulnerability-report manifest');
+    registry.register(manifest);
 
     const guardian = new GuardianDecisionEngine();
     guardian.addRule({
@@ -400,11 +414,14 @@ describe('Gateway approval-required flow', () => {
 
     const result = await gateway.invoke(
       'security.vulnerability-report',
-      { severity: 'critical' },
+      { cveId: 'CVE-2026-1234', assetId: 'host-123', severity: 'critical' },
       { requestId: 'req-vuln-001' },
     );
-    expect(result.success).toBe(true);
-    expect(result.decisionOutcome).toBe('allow');
+    expect(result).toMatchObject({
+      success: false,
+      error: 'Tool is disabled: security.vulnerability-report',
+    });
+    expect(result.output).toBeUndefined();
   });
 
   it('disabled tool cannot be invoked', async () => {

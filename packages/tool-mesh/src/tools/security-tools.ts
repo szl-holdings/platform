@@ -1,4 +1,3 @@
-import { desc, eq } from 'drizzle-orm';
 import { z } from 'zod';
 import type { ToolHandler } from '../gateway.js';
 import type { ToolManifest } from '../manifest.js';
@@ -241,7 +240,7 @@ export const VULNERABILITY_REPORT_TOOL_MANIFEST: ToolManifest = {
   name: 'Vulnerability Report',
   version: '1.0.0',
   description:
-    'Retrieve vulnerability reports filtered by CVE, asset, or severity from the platform vulnerability database.',
+    'Unavailable until a tenant- and asset-bound vulnerability source can verify CVE and severity filters.',
   domainTags: ['security'],
   policyTier: 'internal-workflow',
   allowedEnvironments: ['development', 'staging', 'production'],
@@ -259,50 +258,19 @@ export const VULNERABILITY_REPORT_TOOL_MANIFEST: ToolManifest = {
   },
   rateLimits: { requestsPerMinute: 60 },
   timeoutMs: 15000,
-  failureModes: [{ type: 'timeout', retryable: true, maxRetries: 2 }],
+  failureModes: [{ type: 'unavailable', retryable: false, maxRetries: 0 }],
   approvalRequired: false,
   owner: 'security-team',
   observabilityHooks: { emitTrace: true, emitMetrics: false, sensitiveFields: [] },
-  enabled: true,
+  enabled: false,
 };
 
 export const vulnerabilityReportHandler: ToolHandler = async (input) => {
-  const parsed = VulnerabilityReportInputSchema.parse(input);
-  const { db, advisoryFindings } = await import('@szl-holdings/db');
-
-  const rows = await (parsed.severity
-    ? db
-        .select()
-        .from(advisoryFindings)
-        .where(eq(advisoryFindings.severity, parsed.severity))
-        .orderBy(desc(advisoryFindings.generatedAt))
-        .limit(25)
-    : db.select().from(advisoryFindings).orderBy(desc(advisoryFindings.generatedAt)).limit(25));
-
-  const vulnerabilities = rows.map((f) => ({
-    findingId: f.id,
-    title: f.title,
-    severity: f.severity,
-    agentDomain: f.agentName,
-    tags: f.tags,
-    summary: f.content.slice(0, 300),
-    reportedAt: f.generatedAt?.toISOString(),
-    acknowledged: f.acknowledged,
-  }));
-
-  const bySeverity = {
-    critical: vulnerabilities.filter((v) => v.severity === 'critical').length,
-    high: vulnerabilities.filter((v) => v.severity === 'high').length,
-    medium: vulnerabilities.filter((v) => v.severity === 'medium').length,
-    low: vulnerabilities.filter((v) => v.severity === 'low').length,
-  };
-
-  return {
-    filter: { cveId: parsed.cveId, assetId: parsed.assetId, severity: parsed.severity },
-    total: vulnerabilities.length,
-    bySeverity,
-    vulnerabilities,
-  };
+  VulnerabilityReportInputSchema.parse(input);
+  throw new SecurityOperationUnavailableError(
+    VULNERABILITY_REPORT_TOOL_MANIFEST.id,
+    'advisory findings are not tenant- or asset-bound and cannot verify CVE filters',
+  );
 };
 
 export const SECURITY_TOOL_MANIFESTS: ToolManifest[] = [

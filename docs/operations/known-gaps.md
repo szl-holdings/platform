@@ -1,10 +1,34 @@
 # SZL Holdings — Known Gaps Register (Security & Operations)
 
-**Last updated:** 2026-10-02 (rev 31 — cyber evidence and cross-lane source boundaries)
+**Last updated:** 2026-10-02 (rev 32 — local cyber and cross-lane verification successor)
 **Owner:** Engineering / DevOps  
 **Audience:** Enterprise architects, Series A technical advisors, incoming VP Engineering
 
 This document is the canonical reference for known security, quality, and compliance gaps in the SZL Holdings platform. It consolidates findings from the internal risk register, the April 2026 hardening sprint, and the secrets remediation audit.
+
+---
+
+## 2026-10-02 local verification successor
+
+The tool-mesh vulnerability report had accepted `assetId` and `cveId` while
+reading global advisory findings that contain neither a tenant nor an asset/CVE
+binding. Its manifest is now disabled, and direct calls reject before importing
+the database. Re-enable it only after a permitted source can enforce tenant,
+asset, and CVE scope, expose source/run identity, and support target-specific
+result read-back. A passing local test is not a live vulnerability assessment.
+
+`scripts/qa/verify-cross-lane-source.mjs` checks the reviewed six-lane source
+contract against its Git HEAD blob and pinned SHA-256. It reports each scenario
+as `DEMO`, each action as `BLOCKED`, and hosted CI, merge, publication,
+deployment, and outside witness as `UNKNOWN`. A changed, missing, or
+unparseable source fails closed. It does not establish operational readiness in
+any buyer lane. The local proof and exact test results are in
+[`audit/CYBER_LOCAL_WIRING_PROOF_20261002.md`](../../audit/CYBER_LOCAL_WIRING_PROOF_20261002.md).
+
+The local repository settings references now use the observed `main` default
+branch and current required-check names. They remain references, not proof that
+protection has been changed or satisfied. Re-read the live ruleset before any
+remote mutation.
 
 ---
 
@@ -30,10 +54,11 @@ does not link to those routes as evidence. The six buyer-lane and shared work
 function gates are in
 [`CROSS_LANE_EVIDENCE_REGISTER_20261002.md`](CROSS_LANE_EVIDENCE_REGISTER_20261002.md).
 
-The separate tool-mesh vulnerability report still ignores requested asset and
-CVE filters. A tool-mesh package TypeScript check also remains blocked by the
-same eight `TS6305` missing referenced declarations observed before and after
-the cyber patch; its passing Vitest suite is not a typecheck substitute.
+The vulnerability report's missing scope is now blocked at the gateway, as
+recorded in the successor section above. A tool-mesh package TypeScript check
+also remains blocked by the same eight `TS6305` missing referenced
+declaration errors observed before and after the cyber patch; its passing
+Vitest suite is not a typecheck substitute.
 
 Local tests, build, and screenshots establish source behavior only. Hosted
 exact-head CI, protected merge, provider publication, deployed route read-back,
