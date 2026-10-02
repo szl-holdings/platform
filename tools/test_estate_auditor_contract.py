@@ -105,6 +105,22 @@ class CollectorTests(unittest.TestCase):
         self.assertEqual(result["push"]["conclusion"], "success")
         self.assertEqual(result["schedule"]["conclusion"], "failure")
 
+    def test_failed_workflow_run_for_current_revision_cannot_be_hidden(self):
+        result = self.collect([run(1), run(2, workflow=2, event="workflow_run", conclusion="failure")])
+        self.assertTrue(result["available"])
+        self.assertEqual(len(result["lanes"]), 2)
+        self.assertEqual(result["push"]["conclusion"], "success")
+        self.assertEqual(aud.score_repo({**good(), "ci_lanes": result["lanes"]})[1], "RED")
+
+    def test_pending_other_event_and_other_branch_label_are_not_green(self):
+        other_event = {**run(2, workflow=2, event="workflow_run", status="queued", conclusion=None),
+                       "head_branch": "release"}
+        with patch.object(aud, "paginated", return_value=(True, [run(1), other_event])) as request:
+            result = aud.get_latest_ci("fixture", "example", "main", HEAD)
+        self.assertNotIn("branch=", request.call_args.args[0])
+        self.assertEqual(len(result["lanes"]), 2)
+        self.assertEqual(aud.score_repo({**good(), "ci_lanes": result["lanes"]})[1], "YELLOW")
+
     def test_partial_failure_is_preserved(self):
         result = self.collect([run(conclusion="failure")], available=False)
         self.assertFalse(result["available"])

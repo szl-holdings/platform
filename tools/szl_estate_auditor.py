@@ -247,15 +247,18 @@ def get_latest_ci(owner, repo, default_branch, revision=None):
     missing = {"push": None, "schedule": None, "available": False, "lanes": []}
     if not isinstance(revision, str) or not SHA_RE.fullmatch(revision):
         return missing
-    endpoint = (f"repos/{owner}/{repo}/actions/runs?head_sha={revision}"
-                f"&branch={quote(default_branch, safe='')}")
+    # The revision, not the event name or branch label, binds a workflow run
+    # to this source snapshot.  In particular, workflow_run post-deploy jobs
+    # must not disappear behind a successful push run for the same commit.
+    endpoint = f"repos/{owner}/{repo}/actions/runs?head_sha={revision}"
     ok, runs = paginated(endpoint, "workflow_runs")
     lanes = {}
     valid_runs = []
     for run in runs:
         valid = (type(run.get("id")) is int and type(run.get("workflow_id")) is int
                  and all(isinstance(run.get(field), str) for field in
-                         ("created_at", "event", "status", "head_sha", "head_branch"))
+                         ("created_at", "event", "status", "head_sha"))
+                 and bool(run.get("event"))
                  and (run.get("conclusion") is None or isinstance(run["conclusion"], str)))
         if valid:
             try:
@@ -268,9 +271,7 @@ def get_latest_ci(owner, repo, default_branch, revision=None):
             ok = False
     for run in sorted(valid_runs, key=lambda r: (r["created_at"], r["id"]), reverse=True):
         event = run.get("event")
-        if event not in PUSH_EVENTS | SCHEDULE_EVENTS:
-            continue
-        if run.get("head_sha") != revision or run.get("head_branch") != default_branch:
+        if run.get("head_sha") != revision:
             continue
         workflow_id = run.get("workflow_id")
         if not isinstance(workflow_id, int):
