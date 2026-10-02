@@ -37,6 +37,14 @@
       "types": "./dist/sdk-runner.d.ts",
       "import": "./src/sdk-runner.ts"
     },
+    "./evidence-steward": {
+      "types": "./dist/evidence-steward-sdk.d.ts",
+      "import": "./src/evidence-steward-sdk.ts"
+    },
+    "./evidence-steward-core": {
+      "types": "./src/evidence-steward-core.d.mts",
+      "import": "./src/evidence-steward-core.mjs"
+    },
     "./behavioral-tracer-bridge": {
       "types": "./dist/behavioral-tracer-bridge.d.ts",
       "import": "./src/behavioral-tracer-bridge.ts"
@@ -62,6 +70,7 @@
     "format": "biome format --write ./src",
     "typecheck": "tsc -p tsconfig.json --noEmit",
     "test": "vitest run",
+    "demo:evidence-steward": "node ./src/evidence-steward-demo.mjs",
     "test:watch": "vitest"
   }
 }
