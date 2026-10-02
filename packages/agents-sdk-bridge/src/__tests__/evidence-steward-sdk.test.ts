@@ -31,9 +31,9 @@ vi.mock('../tool-adapter.js', () => ({
 
 function makeSteward() {
   const steward = {
-    modelIds: ['alpha-model', 'beta-model'],
-    listCatalog: vi.fn(() => ({ ids: ['alpha-model', 'beta-model'] })),
-    inspectAsset: vi.fn(() => ({ asset_id: 'alpha-model' })),
+    modelIds: ['SZLHOLDINGS/alpha-model', 'SZLHOLDINGS/beta-model'],
+    listCatalog: vi.fn(() => ({ ids: ['SZLHOLDINGS/alpha-model', 'SZLHOLDINGS/beta-model'] })),
+    inspectAsset: vi.fn(() => ({ asset_id: 'SZLHOLDINGS/alpha-model' })),
     assessEvidenceGaps: vi.fn(() => ({ gaps: [] })),
     proposeNextStep: vi.fn(() => ({ execution: 'NOT_CONFIGURED' })),
   };
@@ -75,7 +75,12 @@ describe('SZL Evidence Steward SDK tools', () => {
     for (const entry of tools.slice(1)) {
       expect(entry.parameters).toEqual({
         type: 'object',
-        properties: { asset_id: { type: 'string', enum: ['alpha-model', 'beta-model'] } },
+        properties: {
+          asset_id: {
+            type: 'string',
+            enum: ['SZLHOLDINGS/alpha-model', 'SZLHOLDINGS/beta-model'],
+          },
+        },
         required: ['asset_id'],
         additionalProperties: false,
       });
@@ -103,10 +108,47 @@ describe('SZL Evidence Steward SDK tools', () => {
   });
 
   it('rejects an unbounded, unsorted, or duplicate catalog before constructing tools', () => {
-    for (const modelIds of [[], ['beta-model', 'alpha-model'], ['alpha-model', 'alpha-model']]) {
+    for (const modelIds of [
+      [],
+      ['SZLHOLDINGS/beta-model', 'SZLHOLDINGS/alpha-model'],
+      ['SZLHOLDINGS/alpha-model', 'SZLHOLDINGS/alpha-model'],
+      Array.from({ length: 51 }, (_, index) => `SZLHOLDINGS/model-${String(index).padStart(2, '0')}`),
+    ]) {
       const steward = { ...makeSteward(), modelIds };
       expect(() => createEvidenceStewardTools(asSteward(steward))).toThrow(
         'INVALID_BOUNDED_CATALOG',
+      );
+    }
+  });
+
+  it('rejects URL, path, and oversized model IDs before exposing a schema', () => {
+    for (const assetId of [
+      'https://example.com/model',
+      'SZLHOLDINGS/../unsafe',
+      `SZLHOLDINGS/${'x'.repeat(101)}`,
+    ]) {
+      const steward = { ...makeSteward(), modelIds: [assetId] };
+      expect(() => createEvidenceStewardTools(asSteward(steward))).toThrow(
+        'INVALID_BOUNDED_CATALOG',
+      );
+    }
+  });
+
+  it('requires all four backing steward methods before exposing tools or an Agent', () => {
+    for (const method of [
+      'listCatalog',
+      'inspectAsset',
+      'assessEvidenceGaps',
+      'proposeNextStep',
+    ] as const) {
+      const incomplete = makeSteward();
+      Reflect.deleteProperty(incomplete, method);
+      const steward = incomplete as unknown as Parameters<typeof createEvidenceStewardTools>[0];
+      expect(() => createEvidenceStewardTools(steward)).toThrow(
+        'EVIDENCE_STEWARD_METHOD_SET_INCOMPLETE',
+      );
+      expect(() => createEvidenceStewardAgent(steward)).toThrow(
+        'EVIDENCE_STEWARD_METHOD_SET_INCOMPLETE',
       );
     }
   });
@@ -128,7 +170,7 @@ describe('SZL Evidence Steward SDK tools', () => {
     await expect(tools[0].invoke(context, '{')).rejects.toThrow();
     for (const entry of tools.slice(1)) {
       await expect(
-        entry.invoke(context, '{"asset_id":"alpha-model","shell":"echo unsafe"}'),
+        entry.invoke(context, '{"asset_id":"SZLHOLDINGS/alpha-model","shell":"echo unsafe"}'),
       ).rejects.toThrow('INVALID_TOOL_ARGUMENTS');
       await expect(entry.invoke(context, '{"asset_id":"unknown-model"}')).rejects.toThrow(
         'UNBOUND_ASSET_ID',
@@ -153,22 +195,22 @@ describe('SZL Evidence Steward SDK tools', () => {
     expect(agent.tools.map((entry) => entry.name)).toEqual([...EVIDENCE_STEWARD_TOOL_NAMES]);
 
     expect(await tools[0].invoke(context, '{"asset_type":"models","limit":5}')).toBe(
-      JSON.stringify({ ids: ['alpha-model', 'beta-model'] }),
+      JSON.stringify({ ids: ['SZLHOLDINGS/alpha-model', 'SZLHOLDINGS/beta-model'] }),
     );
-    expect(await tools[1].invoke(context, '{"asset_id":"alpha-model"}')).toBe(
-      JSON.stringify({ asset_id: 'alpha-model' }),
+    expect(await tools[1].invoke(context, '{"asset_id":"SZLHOLDINGS/alpha-model"}')).toBe(
+      JSON.stringify({ asset_id: 'SZLHOLDINGS/alpha-model' }),
     );
-    expect(await tools[2].invoke(context, '{"asset_id":"alpha-model"}')).toBe(
+    expect(await tools[2].invoke(context, '{"asset_id":"SZLHOLDINGS/alpha-model"}')).toBe(
       JSON.stringify({ gaps: [] }),
     );
-    expect(await tools[3].invoke(context, '{"asset_id":"alpha-model"}')).toBe(
+    expect(await tools[3].invoke(context, '{"asset_id":"SZLHOLDINGS/alpha-model"}')).toBe(
       JSON.stringify({ execution: 'NOT_CONFIGURED' }),
     );
 
     expect(steward.listCatalog).toHaveBeenCalledWith({ asset_type: 'models', limit: 5 });
-    expect(steward.inspectAsset).toHaveBeenCalledWith({ asset_id: 'alpha-model' });
-    expect(steward.assessEvidenceGaps).toHaveBeenCalledWith({ asset_id: 'alpha-model' });
-    expect(steward.proposeNextStep).toHaveBeenCalledWith({ asset_id: 'alpha-model' });
+    expect(steward.inspectAsset).toHaveBeenCalledWith({ asset_id: 'SZLHOLDINGS/alpha-model' });
+    expect(steward.assessEvidenceGaps).toHaveBeenCalledWith({ asset_id: 'SZLHOLDINGS/alpha-model' });
+    expect(steward.proposeNextStep).toHaveBeenCalledWith({ asset_id: 'SZLHOLDINGS/alpha-model' });
     expect(network).not.toHaveBeenCalled();
   });
 });

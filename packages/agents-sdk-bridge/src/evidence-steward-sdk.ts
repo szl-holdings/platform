@@ -77,11 +77,30 @@ export function assertEvidenceStewardToolSet(
  * so every execute handler independently rejects extra keys and values.
  */
 export function createEvidenceStewardTools(steward: EvidenceSteward) {
+  const requiredMethods = [
+    'listCatalog',
+    'inspectAsset',
+    'assessEvidenceGaps',
+    'proposeNextStep',
+  ] as const;
+  if (
+    !steward ||
+    typeof steward !== 'object' ||
+    requiredMethods.some((name) => typeof steward[name] !== 'function')
+  ) {
+    throw new Error('EVIDENCE_STEWARD_METHOD_SET_INCOMPLETE');
+  }
   const ids = steward.modelIds;
   if (
+    !Array.isArray(ids) ||
     ids.length < 1 ||
     ids.length > 50 ||
-    ids.some((id, index) => typeof id !== 'string' || (index > 0 && ids[index - 1] >= id))
+    ids.some(
+      (id, index) =>
+        typeof id !== 'string' ||
+        !/^SZLHOLDINGS\/[A-Za-z0-9._-]{1,100}$/.test(id) ||
+        (index > 0 && ids[index - 1] >= id),
+    )
   ) {
     throw new Error('INVALID_BOUNDED_CATALOG');
   }

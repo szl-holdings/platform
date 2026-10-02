@@ -349,7 +349,7 @@ export function createEvidenceSteward(sources, asOf) {
     if (stale) add('CATALOG_STALE', 'The tracked public catalog is older than 30 days.', ['catalog']);
     if (!binding) add('CURATED_BINDING_MISSING', 'No curated model source binding covers this asset.', ['bindings']);
     if (!item) add('PORTFOLIO_ENTRY_MISSING', 'The scoped portfolio has no entry for this asset.', ['portfolio']);
-    if (item && !item.github_source) add('SOURCE_UNBOUND', 'The portfolio does not bind an exact GitHub source.', ['portfolio']);
+    if (item && !item.github_source) add('SOURCE_UNBOUND', 'The portfolio does not identify a GitHub source.', ['portfolio']);
     if (classification === 'SOFTWARE') add('SOFTWARE_NOT_MODEL', 'This is software, not qualified model inference.', ['portfolio']);
     if (classification === 'RESEARCH_ONLY') add('RESEARCH_ONLY', 'Research evidence does not qualify autonomous inference.', ['bindings', 'portfolio']);
     if (classification === 'UNKNOWN') add('CLASSIFICATION_UNKNOWN', 'Available sources do not establish a qualifying class.', ['catalog', 'bindings', 'portfolio']);
