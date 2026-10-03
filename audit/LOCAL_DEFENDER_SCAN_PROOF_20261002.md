@@ -27,3 +27,21 @@
 
 The command is documented by
 [Microsoft Start-MpScan](https://learn.microsoft.com/en-us/powershell/module/defender/start-mpscan?view=windowsserver2025-ps).
+
+## Final execution read-back
+
+- At `2026-10-03T01:36:27Z`, `run-local-evolution.ps1` verified local source
+  against signed HEAD `01dfa003be85284c8d89da0b0ba55ce9060b0e33` and returned
+  `PARTIAL`, exit 2. All six lanes retained `DEMO`, live `UNAVAILABLE`, and
+  actions `BLOCKED`; runtime readiness remained `UNKNOWN`.
+- Direct Defender read-back confirmed antivirus and real-time protection on,
+  the completed quick-scan timestamps above, and Tamper Protection off.
+- The user's instruction to handle the remaining Windows Security switch was
+  followed with an attempt to initialize the supported Windows control runtime.
+  That call and a minimal runtime check both failed with `Transport closed`.
+  No Windows Security UI input or setting change occurred.
+- A read-only volume inventory found only C: as a mounted drive letter; no
+  separate backup destination was available. Off-device recovery stays unknown.
+- C: free bytes at the last read-back were `1694154752`; free space remains
+  volatile. No dependency install, model download, or application build ran.
+- This is a supplemental observation record; source logic and UI are unchanged.
