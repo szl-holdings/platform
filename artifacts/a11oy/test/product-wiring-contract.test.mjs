@@ -115,7 +115,7 @@ test('labels deterministic linked surfaces as DEMO and exposes their evidence bo
 });
 
 test('does not present an unrecognized pill status as LIVE', () => {
-  assert.match(ui, /Object\.hasOwn\(styles, status\)/);
+  assert.match(ui, /Object\.keys\(styles\)\.includes\(status\)/);
   assert.match(ui, /\? status\s*:\s*'UNAVAILABLE'/);
   assert.match(ui, /data-status-pill=\{displayStatus\}/);
   assert.match(ui, /\{displayStatus\}/);
