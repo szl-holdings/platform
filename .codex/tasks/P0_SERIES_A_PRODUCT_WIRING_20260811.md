@@ -2,11 +2,38 @@
 
 - **task_id:** P0_SERIES_A_PRODUCT_WIRING_20260811
 - **repository:** szl-holdings/platform
-- **pull_request:** #668
-- **source_lane:** codex/series-a-product-current-main-v4
+- **pull_request:** #601 (latest product promotion); #668 (earlier promotion)
+- **source_lane:** codex/p0-platform-work-20260811
 - **status:** MERGED_SOURCE; HOSTED_CAPTURE_UNAVAILABLE
 - **promotion_authority:** protected pull-request checks and normal squash merge
 - **owner:** solo builder, with Codex execution and auditable receipts
+
+## Current execution receipt — 2026-10-03
+
+MEASURED authenticated readback confirms PR #601 merged on 2026-10-01 at
+`f2f8df6f89056e9104587674ccec0855dd5b177a`, tree
+`1c07dc9f7c0d3be1b3d4408c2edc19fe584fd2b9`. GitHub verifies the merge
+signature. The final PR head `7aa2fc69451baa1ded0302557d7d05ad9cee3dba`
+has the same tree but is reported unsigned; it is not relabeled signed.
+PR #668 remains an ancestor. The owner closed competing PR #671 as
+superseded by #668; its pushed branch is retained as historical evidence.
+
+The current source provides the investor/developer Product Journey, typed
+Workcell availability, qualified DEMO surfaces, responsive navigation and
+replay controls. Fresh local verification on the protected source passed
+37 product/helper/layout tests and all 26 documentation claim checks.
+The source-of-truth validator passed 66 checks. These are scoped observations.
+
+The #601 head rollup has 53 successful checks, three skips and one historical
+Commitlint failure. Its Typecheck, Lint, E2E Gate, Security Gate and truth-drift
+checks passed; the PR is not described as all green. Retained September 30
+screenshots keep their original source identity and LOCAL_NON_AUTHORITATIVE
+boundary. A current hosted capture, deployment and customer-runtime witness
+remain UNAVAILABLE.
+
+The append-only reconciliation packet is
+`audit/P0_SERIES_A_EXECUTION_RECONCILIATION_20261003.md`. The older receipts
+below remain historical records; they do not describe a pending #601 merge.
 
 ## Protected promotion receipt
 
@@ -30,7 +57,7 @@ it does not retroactively make the branch commits cryptographically signed.
 This is the current-main successor record for the P0 product-wiring task. It
 does not copy the stale predecessor branch state or represent predecessor
 screenshots, test counts, workflow runs, commits, or deployment claims as
-current. The live promotion state is tracked on PR #668 so this source record
+current. The latest product promotion is tracked on PR #601 so this source record
 does not require a self-referential commit loop.
 
 ## 2026-09-04 protected-head reconciliation

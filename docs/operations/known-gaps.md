@@ -1,6 +1,6 @@
 # SZL Holdings — Known Gaps Register (Security & Operations)
 
-**Last updated:** 2026-09-30 (rev 30 — P0 proof and separate live readiness boundaries)
+**Last updated:** 2026-10-03 (rev 31 — P0 protected-source promotion reconciliation)
 **Owner:** Engineering / DevOps  
 **Audience:** Enterprise architects, Series A technical advisors, incoming VP Engineering
 
@@ -95,6 +95,31 @@ this task, so those states remain UNAVAILABLE. The repository-wide strict
 claims gate also continues to fail closed on the Vessels/AIS mock while
 MARINETRAFFIC_API_KEY is absent; PR #668 does not relabel that
 external-authority gap or introduce a credential to bypass it.
+
+### 2026-10-03 P0 current-source reconciliation
+
+MEASURED authenticated readback confirms [PR #601](https://github.com/szl-holdings/platform/pull/601)
+merged on 2026-10-01 as verified commit
+`f2f8df6f89056e9104587674ccec0855dd5b177a`, tree
+`1c07dc9f7c0d3be1b3d4408c2edc19fe584fd2b9`. The final PR head has that same
+tree but is unsigned. #668 is retained as an ancestor; owner-closed #671
+remains superseded. The product-source promotion is complete rather than
+pending, and the application register now records the qualified investor and
+developer journey alongside Atelier.
+
+Fresh local product/helper/layout contracts passed 37/37; documentation claims
+passed 26/26 and source-of-truth validation passed 66 checks. The #601 head
+has 53 successful checks, three skips and one Commitlint failure on historical
+merge subjects. That failure is retained; neither history nor its gate was
+rewritten. The passing functional checks do not make the entire rollup green.
+
+September 30 visual evidence remains bound to its captured implementation,
+not relabeled as a new capture of the merge commit. Hosted screenshot evidence,
+authenticated operational Workcells, deployment and customer-runtime witnesses
+remain UNAVAILABLE. The current Partial/DEMO boundary and existing GraphQL,
+Omnia, provider, identity and durability gaps remain unchanged. No production
+readiness is inferred. Commands and dispositions are recorded in
+`audit/P0_SERIES_A_EXECUTION_RECONCILIATION_20261003.md`.
 
 ### 2026-08-30 A11oy Atelier Turn Capsule boundary
 
