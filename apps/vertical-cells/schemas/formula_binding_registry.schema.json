@@ -1,0 +1,29 @@
+{
+  "$id": "https://schemas.a11oy.net/formula-binding-registry.v1.schema.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "properties": {
+    "captured_at": {
+      "format": "date-time",
+      "type": "string"
+    },
+    "formulas": {
+      "items": {
+        "$ref": "formula_binding.schema.json"
+      },
+      "minItems": 1,
+      "type": "array",
+      "uniqueItems": true
+    },
+    "schema": {
+      "const": "szl.formula-binding-registry/v1"
+    }
+  },
+  "required": [
+    "schema",
+    "captured_at",
+    "formulas"
+  ],
+  "title": "SZL Formula Binding Registry",
+  "type": "object"
+}
