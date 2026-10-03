@@ -7,7 +7,7 @@
 - protected-main baseline: `f2f8df6f89056e9104587674ccec0855dd5b177a`
 - branch: `feat/a11oy-atelier-proofweave-release-20261003`
 - proof_level: **4 — local source, focused tests, exact-source live UI, claim and security review**
-- recorded_at: `2026-10-03T12:39:33.7455277Z`
+- recorded_at: `2026-10-03T13:01:01.4027813Z`
 - recorded_by: Codex
 
 ## Plan summary
@@ -38,6 +38,8 @@ excluded. Four continuity-state paths were retained as required integration
 work because the intended Atelier contract standardizes local meter output as
 `MEASURED`. The estate-contract manifest was regenerated after the
 OpenAPI source changed. The resulting source patch spans 42 relevant paths.
+The later three-path canonical handler-count reconciliation is recorded under
+Protected CI reconciliation below and does not change the captured UI bundle.
 
 The patch adds:
 
@@ -81,12 +83,13 @@ described as an earlier setup attempt.
 | `node scripts/docs/generate-api-catalogue.js --check` | **MEASURED — exit 0.** |
 | direct YAML parse/count of `lib/api-spec/openapi.yaml` | **MEASURED — OpenAPI 3.1.0, 4,090 paths, 5,066 operations, Proofweave path present.** |
 | `node scripts/docs/check-docs-claims.js` | **MEASURED — exit 0; 24/24 active claims passed.** The two access-control checks remained explicitly skipped because their optional file was absent. |
+| `node scripts/audit/validate-source-of-truth.js` | **MEASURED — exit 0; all 66 checks passed after the tracked sparse validator inputs were materialized.** The canonical API-handler declaration count is 316. |
 | `node packages/estate-contract-release/src/build.mjs --check` | **MEASURED — exit 0; release `sha256:858b209c12216967068a083a1b357d218a93dad2354da48ea0cb10c71b4b8dcf`, six components.** |
 | `corepack pnpm install --lockfile-only --offline --ignore-scripts --frozen-lockfile` | **MEASURED — exit 0 across 203 workspace projects.** This verifies lockfile consistency only; it is not a clean dependency installation. |
 | `node node_modules/tsx/dist/cli.mjs scripts/brand-check.ts` | **MEASURED — exit 0.** |
 | `node node_modules/tsx/dist/cli.mjs scripts/check-banned-brand-strings.ts --changed-from f2f8df6f89056e9104587674ccec0855dd5b177a` | **MEASURED — exit 0; 22 changed files scanned, no new violations beyond the audit baseline.** |
 | focused Biome check of the changed runtime, CLI, UI, and manifest sources | **MEASURED — exit 0 after import-order normalization.** |
-| high-confidence credential-pattern scan of 44 materialized changed/evidence text paths and the one changed sparse Git object, plus manual classification of the one `xai-` prefix candidate | **MEASURED — exit 0; all 45 logical text paths were covered and no credential candidate remained.** The single prefix candidate was the cited public xAI Frontier Framework PDF URL. |
+| high-confidence credential-pattern scan of 47 materialized changed/evidence text paths and the one changed sparse Git object, plus manual classification of the one `xai-` prefix candidate | **MEASURED — exit 0; all 48 logical text paths were covered and no credential candidate remained.** The single prefix candidate was the cited public xAI Frontier Framework PDF URL. |
 | `git diff --check`, `git diff origin/main...HEAD --check`, and unmerged-path query | **MEASURED — exit 0; no whitespace errors or unmerged paths.** |
 
 Focused test total: **160 passed** across the six listed test commands. This is
@@ -122,6 +125,21 @@ not a repository-wide test total.
   and `git cat-file -e` confirmed that exact file remains tracked in the
   protected-main baseline. Every link in this Proofweave packet and both new
   catalogue links resolved from the working tree.
+
+## Protected CI reconciliation
+
+The first draft-PR Source of Truth run measured 316 API handler declarations
+against a canonical value of 315 and exited 1. This branch adds one authenticated
+Proofweave `POST` handler, so the failure was branch-owned. The count was updated
+to 316 in `audit/source-of-truth.json`, `SOURCE_OF_TRUTH.md`, and
+`audit/README.md`; no validator threshold or detection rule changed.
+
+The first two local full-validator reruns exited 1 after the metric checks had
+already passed because progressively required overclaim-validator scripts and
+ledger inputs were absent from the sparse checkout. After those tracked inputs
+were materialized, the unchanged command passed all 66 checks. These three
+canonical-document edits do not affect the A11oy bundle or the exact-source
+screenshots bound to revision `5341c52477317680991adf958b635d33f3a876b8`.
 
 ## Runtime and screenshot evidence
 
