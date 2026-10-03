@@ -1,6 +1,6 @@
 # SZL Holdings — Known Gaps Register (Security & Operations)
 
-**Last updated:** 2026-10-02 (rev 31 — Workcell proof-coverage boundary)
+**Last updated:** 2026-10-02 (rev 32 — Workcell proof-coverage fail-closed hardening)
 **Owner:** Engineering / DevOps  
 **Audience:** Enterprise architects, Series A technical advisors, incoming VP Engineering
 
@@ -173,6 +173,24 @@ signature-verification result. Durable persistence,
 authenticated actor identity, external attestation, trust-policy verification,
 and production execution remain outside the inspector's evidence boundary and
 unverified. A11oy remains `Partial` in `docs/APP_STATUS.md`.
+
+An adversarial successor review found that the first inspector revision could
+select the first duplicate identifier and could report `COMPLETE` while only
+comparing trace ID strings. The evaluator now requires unique signal, contract,
+packet, trace, policy, and approval references; one coherent `ExecutionTrace`
+record; consistent action and MirrorEval lineage; coherent PCE verification
+fields; packet integrity fields; and a SHA-256-shaped terminal checksum. Empty,
+duplicate, malformed, missing, or contradictory records fail closed as
+`MISMATCH` or `UNAVAILABLE`. The browser contract checks every obligation and
+challenge state rather than accepting an arbitrary count.
+
+That hardening does not manufacture missing runtime evidence. The current
+`wc-001` route intentionally supplies no trace, policy-evaluation, or approval
+registry and remains `INCOMPLETE` at 8/17 obligations. Its malformed terminal
+checksum remains `MISMATCH`. A future `COMPLETE` result would establish only
+deterministic fixture-record coverage; it would not establish signature
+verification, durable storage, authenticated authority, deployment, an external
+side effect, or production execution.
 
 ---
 

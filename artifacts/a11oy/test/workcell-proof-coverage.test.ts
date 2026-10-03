@@ -2,6 +2,7 @@ import assert from 'node:assert/strict';
 import { test } from 'node:test';
 import type {
   BusinessSignal,
+  ExecutionTrace,
   ProofCarryingExecutionContract,
   ProofPacket,
   Workcell,
@@ -9,6 +10,7 @@ import type {
 import { evaluateWorkcellProofCoverage } from '../src/lib/workcell-proof-coverage.ts';
 
 const timestamp = '2026-04-26T12:00:00.000Z';
+const checksum = (character: string) => `sha256:${character.repeat(64)}`;
 const seedSignal: BusinessSignal = {
   id: 'sig-lyte-002',
   vertical: 'lyte-revenue',
@@ -66,7 +68,7 @@ const seedWorkcell: Workcell = {
   pceContractId: 'pce-001',
   requiresApproval: true,
   mockExecutionResult: {},
-  verificationResult: { status: 'passed', checksum: 'fixture-checksum' },
+  verificationResult: { status: 'passed', checksum: checksum('c') },
   proofPacketId: 'proof-001',
   executionTraceId: 'trace-001',
   createdAt: timestamp,
@@ -92,13 +94,35 @@ const completePacket: ProofPacket = {
   kind: 'action_execution',
   entityId: seedWorkcell.id,
   entityType: 'workcell',
-  hash: 'fixture-hash-present',
-  payload: {},
+  hash: checksum('a'),
+  payload: { actionId: seedWorkcell.actionBrief.id },
   policyEvaluationId: seedContract.policyEvaluationId,
   approvalRecordId: seedContract.approvalRecordId,
-  witnessedBy: [],
+  witnessedBy: ['fixture-witness'],
   issuedAt: timestamp,
   vertical: seedWorkcell.vertical,
+};
+const completeTrace: ExecutionTrace = {
+  id: seedWorkcell.executionTraceId,
+  workcellId: seedWorkcell.id,
+  runId: 'run-001',
+  steps: [
+    {
+      stepId: 'step-001',
+      name: 'Fixture execution',
+      tool: 'fixture-tool',
+      input: {},
+      output: {},
+      durationMs: 25,
+      status: 'ok',
+      timestamp,
+    },
+  ],
+  finalStatus: 'completed',
+  durationMs: 25,
+  proofPacketId: seedWorkcell.proofPacketId,
+  startedAt: timestamp,
+  completedAt: '2026-04-26T12:00:00.025Z',
 };
 const seedSignalPacket: ProofPacket = {
   ...completePacket,
@@ -113,6 +137,7 @@ test('marks coverage complete only when every declared reference resolves and ag
     signals: [seedSignal],
     pceContracts: [seedContract],
     proofPackets: [completePacket],
+    executionTraces: [completeTrace],
     policyEvaluationIds: [seedContract.policyEvaluationId],
     approvalRecordIds: [seedContract.approvalRecordId as string],
   });
@@ -158,6 +183,7 @@ test('fails closed when a challenge substitutes the contract action', () => {
     signals: [seedSignal],
     pceContracts: [seedContract],
     proofPackets: [completePacket],
+    executionTraces: [completeTrace],
     policyEvaluationIds: [seedContract.policyEvaluationId],
     approvalRecordIds: [seedContract.approvalRecordId as string],
     challenges: { substituteActionId: true },
@@ -176,6 +202,7 @@ test('fails closed when a proof or approval reference is omitted', () => {
     signals: [seedSignal],
     pceContracts: [seedContract],
     proofPackets: [completePacket],
+    executionTraces: [completeTrace],
     policyEvaluationIds: [seedContract.policyEvaluationId],
     approvalRecordIds: [seedContract.approvalRecordId as string],
     challenges: { removeProofReference: true },
@@ -185,6 +212,7 @@ test('fails closed when a proof or approval reference is omitted', () => {
     signals: [seedSignal],
     pceContracts: [seedContract],
     proofPackets: [completePacket],
+    executionTraces: [completeTrace],
     policyEvaluationIds: [seedContract.policyEvaluationId],
     approvalRecordIds: [seedContract.approvalRecordId as string],
     challenges: { removeApprovalReference: true },
@@ -225,6 +253,7 @@ test('keeps contradictory packet context and contract references incomplete', ()
       signals: [seedSignal],
       pceContracts: [seedContract],
       proofPackets: [fixture.packet],
+      executionTraces: [completeTrace],
       policyEvaluationIds: [seedContract.policyEvaluationId],
       approvalRecordIds: [seedContract.approvalRecordId as string],
     });
@@ -257,6 +286,7 @@ test('rejects approval references and configuration disagreement when approval i
     signals: [seedSignal],
     pceContracts: [declaredApprovalContract],
     proofPackets: [contradictoryPacket],
+    executionTraces: [completeTrace],
   });
 
   assert.equal(declaredCoverage.state, 'INCOMPLETE');
@@ -278,6 +308,7 @@ test('rejects approval references and configuration disagreement when approval i
     signals: [seedSignal],
     pceContracts: [{ ...seedContract, approvalRecordId: undefined }],
     proofPackets: [{ ...completePacket, approvalRecordId: undefined }],
+    executionTraces: [completeTrace],
     policyEvaluationIds: [seedContract.policyEvaluationId],
   });
 
@@ -301,7 +332,220 @@ test('marks contract-dependent obligations unavailable when the PCE contract is 
   });
 
   assert.equal(coverage.state, 'INCOMPLETE');
-  for (const item of coverage.obligations.filter((entry) => entry.id !== 'signal-records')) {
-    assert.equal(item.status, 'UNAVAILABLE', item.id);
+  for (const id of [
+    'contract-record',
+    'contract-integrity',
+    'origin-signal',
+    'action-binding',
+    'trace-binding',
+    'policy-evaluation',
+    'approval-binding',
+    'proof-reference',
+    'proof-subject',
+    'proof-context',
+    'proof-policy-binding',
+    'proof-approval-binding',
+    'proof-integrity',
+    'terminal-state',
+  ] as const) {
+    assert.equal(coverage.obligations.find((item) => item.id === id)?.status, 'UNAVAILABLE', id);
   }
+  assert.equal(
+    coverage.obligations.find((item) => item.id === 'action-context')?.status,
+    'SATISFIED',
+  );
+  assert.equal(
+    coverage.obligations.find((item) => item.id === 'evaluation-lineage')?.status,
+    'SATISFIED',
+  );
+});
+
+test('requires exactly one resolved ExecutionTrace record before coverage can be complete', () => {
+  const base = {
+    workcell: seedWorkcell,
+    signals: [seedSignal],
+    pceContracts: [seedContract],
+    proofPackets: [completePacket],
+    policyEvaluationIds: [seedContract.policyEvaluationId],
+    approvalRecordIds: [seedContract.approvalRecordId as string],
+  };
+  const missing = evaluateWorkcellProofCoverage(base);
+  const duplicate = evaluateWorkcellProofCoverage({
+    ...base,
+    executionTraces: [completeTrace, structuredClone(completeTrace)],
+  });
+  const contradictory = evaluateWorkcellProofCoverage({
+    ...base,
+    executionTraces: [{ ...completeTrace, workcellId: 'wc-other' }],
+  });
+
+  assert.equal(missing.state, 'INCOMPLETE');
+  assert.equal(
+    missing.obligations.find((item) => item.id === 'trace-binding')?.status,
+    'UNAVAILABLE',
+  );
+  for (const coverage of [duplicate, contradictory]) {
+    assert.equal(coverage.state, 'INCOMPLETE');
+    assert.equal(
+      coverage.obligations.find((item) => item.id === 'trace-binding')?.status,
+      'MISMATCH',
+    );
+  }
+});
+
+test('rejects duplicate contract, packet, signal, policy, and approval identities', () => {
+  const base = {
+    workcell: seedWorkcell,
+    signals: [seedSignal],
+    pceContracts: [seedContract],
+    proofPackets: [completePacket],
+    executionTraces: [completeTrace],
+    policyEvaluationIds: [seedContract.policyEvaluationId],
+    approvalRecordIds: [seedContract.approvalRecordId as string],
+  };
+  const cases = [
+    {
+      id: 'contract-record',
+      coverage: evaluateWorkcellProofCoverage({
+        ...base,
+        pceContracts: [seedContract, structuredClone(seedContract)],
+      }),
+    },
+    {
+      id: 'proof-reference',
+      coverage: evaluateWorkcellProofCoverage({
+        ...base,
+        proofPackets: [completePacket, structuredClone(completePacket)],
+      }),
+    },
+    {
+      id: 'signal-records',
+      coverage: evaluateWorkcellProofCoverage({
+        ...base,
+        signals: [seedSignal, structuredClone(seedSignal)],
+      }),
+    },
+    {
+      id: 'policy-evaluation',
+      coverage: evaluateWorkcellProofCoverage({
+        ...base,
+        policyEvaluationIds: [seedContract.policyEvaluationId, seedContract.policyEvaluationId],
+      }),
+    },
+    {
+      id: 'approval-binding',
+      coverage: evaluateWorkcellProofCoverage({
+        ...base,
+        approvalRecordIds: [
+          seedContract.approvalRecordId as string,
+          seedContract.approvalRecordId as string,
+        ],
+      }),
+    },
+  ] as const;
+
+  for (const { id, coverage } of cases) {
+    assert.equal(coverage.state, 'INCOMPLETE', id);
+    assert.equal(coverage.obligations.find((item) => item.id === id)?.status, 'MISMATCH', id);
+  }
+});
+
+test('rejects unverified contracts and malformed causal-chain metadata', () => {
+  const coverage = evaluateWorkcellProofCoverage({
+    workcell: seedWorkcell,
+    signals: [seedSignal],
+    pceContracts: [
+      {
+        ...seedContract,
+        causalChainIds: [],
+        isVerified: false,
+        verifiedAt: undefined,
+      },
+    ],
+    proofPackets: [completePacket],
+    executionTraces: [completeTrace],
+    policyEvaluationIds: [seedContract.policyEvaluationId],
+    approvalRecordIds: [seedContract.approvalRecordId as string],
+  });
+
+  assert.equal(coverage.state, 'INCOMPLETE');
+  assert.equal(
+    coverage.obligations.find((item) => item.id === 'contract-integrity')?.status,
+    'MISMATCH',
+  );
+  assert.match(
+    coverage.obligations.find((item) => item.id === 'contract-integrity')?.detail ?? '',
+    /causal chain.*origin signal.*contract is not verified.*verifiedAt/is,
+  );
+});
+
+test('rejects contradictory ActionBrief and MirrorEval lineage', () => {
+  const coverage = evaluateWorkcellProofCoverage({
+    workcell: {
+      ...seedWorkcell,
+      actionBrief: {
+        ...seedWorkcell.actionBrief,
+        vertical: 'alloy-core',
+        linkedSignalIds: ['sig-other'],
+        approvalTier: 'auto',
+      },
+      mirrorEvalResult: {
+        ...seedWorkcell.mirrorEvalResult,
+        targetId: 'act-other',
+      },
+    },
+    signals: [seedSignal],
+    pceContracts: [seedContract],
+    proofPackets: [completePacket],
+    executionTraces: [completeTrace],
+    policyEvaluationIds: [seedContract.policyEvaluationId],
+    approvalRecordIds: [seedContract.approvalRecordId as string],
+  });
+
+  assert.equal(coverage.state, 'INCOMPLETE');
+  assert.equal(
+    coverage.obligations.find((item) => item.id === 'action-context')?.status,
+    'MISMATCH',
+  );
+  assert.equal(
+    coverage.obligations.find((item) => item.id === 'evaluation-lineage')?.status,
+    'MISMATCH',
+  );
+});
+
+test('requires structured packet integrity and a SHA-256-shaped terminal checksum', () => {
+  const coverage = evaluateWorkcellProofCoverage({
+    workcell: {
+      ...seedWorkcell,
+      verificationResult: { ...seedWorkcell.verificationResult, checksum: 'not-a-checksum' },
+    },
+    signals: [seedSignal],
+    pceContracts: [seedContract],
+    proofPackets: [
+      {
+        ...completePacket,
+        hash: 'x',
+        payload: {},
+        witnessedBy: [],
+        issuedAt: 'not-a-date',
+      },
+    ],
+    executionTraces: [completeTrace],
+    policyEvaluationIds: [seedContract.policyEvaluationId],
+    approvalRecordIds: [seedContract.approvalRecordId as string],
+  });
+
+  assert.equal(coverage.state, 'INCOMPLETE');
+  assert.equal(
+    coverage.obligations.find((item) => item.id === 'proof-integrity')?.status,
+    'MISMATCH',
+  );
+  assert.equal(
+    coverage.obligations.find((item) => item.id === 'terminal-state')?.status,
+    'MISMATCH',
+  );
+  assert.match(
+    coverage.obligations.find((item) => item.id === 'proof-integrity')?.detail ?? '',
+    /not signature verification/i,
+  );
 });
