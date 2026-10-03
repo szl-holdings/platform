@@ -1,9 +1,9 @@
 #!/usr/bin/env node
+import { randomUUID } from 'node:crypto';
 import {
   type AtelierProofweaveRequest,
   verifyAtelierProofweaveResponse,
 } from '@szl-holdings/a11oy-atelier/proofweave-verifier';
-import { randomUUID } from 'node:crypto';
 import { Command, InvalidArgumentError } from 'commander';
 import fetch from 'node-fetch';
 
