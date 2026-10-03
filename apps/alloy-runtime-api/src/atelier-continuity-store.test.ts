@@ -55,6 +55,43 @@ async function tempRoot(): Promise<string> {
   return root;
 }
 
+async function forceMarkerLinkCleanup(
+  markerPath: string,
+  options: {
+    repeat?: boolean;
+    onRetry?: (actual: typeof import('node:fs/promises')) => Promise<void>;
+  } = {},
+): Promise<() => number> {
+  const actual = await vi.importActual<typeof import('node:fs/promises')>('node:fs/promises');
+  let markerReads = 0;
+  vi.mocked(open).mockImplementation(async (filePath, flags, mode) => {
+    if (filePath === markerPath) {
+      markerReads += 1;
+      if (markerReads === 2) await options.onRetry?.(actual);
+    }
+    const handle = await actual.open(filePath, flags, mode);
+    if (filePath !== markerPath || (markerReads > 1 && !options.repeat)) return handle;
+
+    const temporary = `${markerPath}.test-link-${markerReads}`;
+    const changeCtimeWithStableLinkCount = markerReads > 1;
+    if (!changeCtimeWithStableLinkCount) await actual.link(markerPath, temporary);
+    const read = handle.read.bind(handle);
+    let removed = false;
+    vi.spyOn(handle, 'read').mockImplementation(async (...args) => {
+      const result = await read(...args);
+      if (!removed) {
+        removed = true;
+        await new Promise((resolve) => setTimeout(resolve, 10));
+        if (changeCtimeWithStableLinkCount) await actual.link(markerPath, temporary);
+        await actual.unlink(temporary);
+      }
+      return result;
+    });
+    return handle;
+  });
+  return () => markerReads;
+}
+
 async function filesBelow(path: string): Promise<string[]> {
   const files: string[] = [];
   for (const entry of await readdir(path, { withFileTypes: true })) {
@@ -105,6 +142,81 @@ afterEach(async () => {
 });
 
 describe('EncryptedLocalAtelierStateStore', () => {
+  it('retries a stable marker after publication hard-link cleanup', async () => {
+    const rootDirectory = await tempRoot();
+    const masterKey = randomBytes(32);
+    await new EncryptedLocalAtelierStateStore({ rootDirectory, masterKey }).ready();
+    const markerPath = join(rootDirectory, 'key-check.json');
+    const markerBytes = await readFile(markerPath);
+    const markerReads = await forceMarkerLinkCleanup(markerPath);
+
+    await expect(
+      new EncryptedLocalAtelierStateStore({ rootDirectory, masterKey }).ready(),
+    ).resolves.toBeUndefined();
+    expect(markerReads()).toBe(2);
+    expect(await readFile(markerPath)).toEqual(markerBytes);
+  });
+
+  it('rejects repeated marker metadata changes after one retry', async () => {
+    const rootDirectory = await tempRoot();
+    const masterKey = randomBytes(32);
+    await new EncryptedLocalAtelierStateStore({ rootDirectory, masterKey }).ready();
+    const markerReads = await forceMarkerLinkCleanup(join(rootDirectory, 'key-check.json'), {
+      repeat: true,
+    });
+
+    await expect(
+      new EncryptedLocalAtelierStateStore({ rootDirectory, masterKey }).ready(),
+    ).rejects.toMatchObject({
+      code: 'ATELIER_CAPSULE_INTEGRITY',
+    });
+    expect(markerReads()).toBe(2);
+  });
+
+  it('rejects marker replacement with matching bytes during the retry', async () => {
+    const rootDirectory = await tempRoot();
+    const masterKey = randomBytes(32);
+    await new EncryptedLocalAtelierStateStore({ rootDirectory, masterKey }).ready();
+    const markerPath = join(rootDirectory, 'key-check.json');
+    const markerReads = await forceMarkerLinkCleanup(markerPath, {
+      onRetry: async (actual) => {
+        const bytes = await actual.readFile(markerPath);
+        await actual.rename(markerPath, `${markerPath}.retired`);
+        await actual.writeFile(markerPath, bytes);
+      },
+    });
+
+    await expect(
+      new EncryptedLocalAtelierStateStore({ rootDirectory, masterKey }).ready(),
+    ).rejects.toMatchObject({
+      code: 'ATELIER_CAPSULE_INTEGRITY',
+    });
+    expect(markerReads()).toBe(2);
+  });
+
+  it('rejects a changed marker authentication tag during the retry', async () => {
+    const rootDirectory = await tempRoot();
+    const masterKey = randomBytes(32);
+    await new EncryptedLocalAtelierStateStore({ rootDirectory, masterKey }).ready();
+    const markerPath = join(rootDirectory, 'key-check.json');
+    const markerReads = await forceMarkerLinkCleanup(markerPath, {
+      onRetry: async (actual) => {
+        const record = JSON.parse(await actual.readFile(markerPath, 'utf8')) as {
+          authenticationTag: string;
+        };
+        record.authenticationTag = `${record.authenticationTag[0] === '0' ? '1' : '0'}${record.authenticationTag.slice(1)}`;
+        await actual.writeFile(markerPath, JSON.stringify(record));
+      },
+    });
+
+    await expect(
+      new EncryptedLocalAtelierStateStore({ rootDirectory, masterKey }).ready(),
+    ).rejects.toMatchObject({
+      code: 'ATELIER_CAPSULE_INTEGRITY',
+    });
+    expect(markerReads()).toBe(2);
+  });
+
   it('rejects authenticated index replacement after opening the original descriptor', async () => {
     const rootDirectory = await tempRoot();
     const masterKey = randomBytes(32);

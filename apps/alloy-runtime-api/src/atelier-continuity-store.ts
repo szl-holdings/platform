@@ -1206,6 +1206,16 @@ export class EncryptedLocalAtelierStateStore implements AtelierStateStore {
   async #readAuthenticated(
     path: string,
     schema: string,
+    retryIdentity?: {
+      readonly dev: number;
+      readonly ino: number;
+      readonly size: number;
+      readonly mtimeMs: number;
+      readonly mode: number;
+      readonly uid: number;
+      readonly gid: number;
+      readonly bytesSha256: string;
+    },
   ): Promise<Record<string, unknown> | undefined> {
     // Open once before inspecting the file. All content and size checks use
     // this descriptor, not a path that may be replaced between check and use.
@@ -1218,11 +1228,33 @@ export class EncryptedLocalAtelierStateStore implements AtelierStateStore {
       }
       throw error;
     });
-    if (!handle) return undefined;
+    if (!handle) {
+      if (retryIdentity) {
+        throw new AtelierCapsuleIntegrityError(
+          'Continuity index disappeared during authenticated readback.',
+        );
+      }
+      return undefined;
+    }
     try {
       const opened = await handle.stat();
       if (!opened.isFile() || opened.size > MAX_INDEX_BYTES) {
         throw new AtelierCapsuleIntegrityError('Continuity index is not a bounded regular file.');
+      }
+      if (
+        retryIdentity &&
+        (opened.dev !== retryIdentity.dev ||
+          opened.ino !== retryIdentity.ino ||
+          opened.nlink !== 1 ||
+          opened.size !== retryIdentity.size ||
+          opened.mtimeMs !== retryIdentity.mtimeMs ||
+          opened.mode !== retryIdentity.mode ||
+          opened.uid !== retryIdentity.uid ||
+          opened.gid !== retryIdentity.gid)
+      ) {
+        throw new AtelierCapsuleIntegrityError(
+          'Continuity index changed during authenticated readback.',
+        );
       }
       // Bound allocation and bytes consumed even if another writer grows the
       // open file after stat. The extra byte distinguishes overflow from EOF.
@@ -1238,6 +1270,15 @@ export class EncryptedLocalAtelierStateStore implements AtelierStateStore {
       }
       const afterRead = await handle.stat();
       const current = await lstat(path).catch(() => undefined);
+      const ctimeChanged = opened.ctimeMs !== afterRead.ctimeMs;
+      const publishedLinkRemoved =
+        !retryIdentity &&
+        ctimeChanged &&
+        opened.nlink === 2 &&
+        afterRead.nlink === 1 &&
+        opened.mode === afterRead.mode &&
+        opened.uid === afterRead.uid &&
+        opened.gid === afterRead.gid;
       if (
         !current?.isFile() ||
         current.isSymbolicLink() ||
@@ -1245,15 +1286,15 @@ export class EncryptedLocalAtelierStateStore implements AtelierStateStore {
         current.ino !== afterRead.ino ||
         opened.size !== afterRead.size ||
         opened.mtimeMs !== afterRead.mtimeMs ||
-        opened.ctimeMs !== afterRead.ctimeMs ||
+        (ctimeChanged && !publishedLinkRemoved) ||
         length !== afterRead.size
       ) {
         throw new AtelierCapsuleIntegrityError(
           'Continuity index changed during authenticated readback.',
         );
       }
-
-      const value = objectValue(JSON.parse(buffer.subarray(0, length).toString('utf8')));
+      const bytes = buffer.subarray(0, length);
+      const value = objectValue(JSON.parse(bytes.toString('utf8')));
       if (
         value?.schema !== schema ||
         typeof value.authenticationTag !== 'string' ||
@@ -1267,6 +1308,27 @@ export class EncryptedLocalAtelierStateStore implements AtelierStateStore {
         .digest('hex');
       if (!constantTimeEqualHex(authenticationTag, expected)) {
         throw new AtelierCapsuleIntegrityError('Continuity index authentication failed.');
+      }
+      const bytesSha256 = sha256Hex(bytes);
+      if (retryIdentity && bytesSha256 !== retryIdentity.bytesSha256) {
+        throw new AtelierCapsuleIntegrityError(
+          'Continuity index bytes changed during authenticated readback.',
+        );
+      }
+      if (publishedLinkRemoved) {
+        // Publishing via a hard link briefly leaves two names for one inode.
+        // Its removal changes ctime. Verify these bytes, then reread the same
+        // inode once; any byte or metadata change still fails closed.
+        return this.#readAuthenticated(path, schema, {
+          dev: opened.dev,
+          ino: opened.ino,
+          size: opened.size,
+          mtimeMs: opened.mtimeMs,
+          mode: opened.mode,
+          uid: opened.uid,
+          gid: opened.gid,
+          bytesSha256,
+        });
       }
       return value;
     } catch (error) {
