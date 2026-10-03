@@ -1,6 +1,6 @@
 {
   "schema": "szl.public-surfaces.registry/v1",
-  "observed_at": "2026-08-11T08:36:44.786Z",
+  "observed_at": "2026-10-03T10:27:28Z",
   "surfaces": [
     {
       "id": "a11oy-front-door",
@@ -208,19 +208,19 @@
       "kind": "WEB",
       "audience": ["INVESTOR", "DEVELOPER", "OPERATOR"],
       "mode": "MIXED",
-      "availability": "REDIRECTED",
+      "availability": "REACHABLE",
       "canonical_url": "https://a-11-oy.com/killinchu",
       "source_owner": {
-        "repository": "szl-holdings/killinchu",
-        "path": "web/console.html",
+        "repository": "szl-holdings/a11oy",
+        "path": "pages/killinchu.html",
         "role": "RUNTIME_OWNER"
       },
       "observation": {
         "method": "GET",
         "status": 200,
-        "final_url": "https://szlholdings-killinchu.hf.space/"
+        "final_url": "https://a-11-oy.com/killinchu"
       },
-      "note": "The full public-surface sweep observed the approved redirect and final HTTP 200 at the Killinchu Space; this records route reachability only, not aggregate Killinchu health or source parity."
+      "note": "A11oy source 263e5a3cbfda3dbb4d3c3dc8820968cecbed3d3e registers the on-origin route and serves pages/killinchu.html. The page keeps twin runtime state fail-closed; reachability does not establish Hugging Face runtime health or exact deployed-source parity."
     },
     {
       "id": "a11oy-net-thesis",
@@ -444,23 +444,23 @@
     },
     {
       "id": "legacy-command-route",
-      "name": "Historical Command route claim",
+      "name": "A11oy Command Center",
       "kind": "WEB",
       "audience": ["INVESTOR", "DEVELOPER"],
-      "mode": "UNAVAILABLE",
-      "availability": "UNAVAILABLE",
+      "mode": "MIXED",
+      "availability": "REACHABLE",
       "canonical_url": "https://a-11-oy.com/command/",
       "source_owner": {
-        "repository": "szl-holdings/platform",
-        "path": "PRODUCT-SURFACES.md",
-        "role": "CLAIM_OWNER"
+        "repository": "szl-holdings/a11oy",
+        "path": "pages/command-center.html",
+        "role": "RUNTIME_OWNER"
       },
       "observation": {
         "method": "GET",
-        "status": 404,
+        "status": 200,
         "final_url": "https://a-11-oy.com/command/"
       },
-      "note": "Measured HTTP 404 at this historical route; it remains unavailable and no product-surface claim is made."
+      "note": "A11oy source 263e5a3cbfda3dbb4d3c3dc8820968cecbed3d3e registers /command and serves pages/command-center.html. The reachable mixed surface labels local modeled behavior and blocked authority explicitly; reachability is not runtime authorization."
     },
     {
       "id": "legacy-pulse-route",
@@ -484,43 +484,43 @@
     },
     {
       "id": "a11oy-net-chat-gap",
-      "name": "A11oy.net chat route",
+      "name": "A11oy.net chat gateway",
       "kind": "WEB",
       "audience": ["DEVELOPER", "INVESTOR"],
-      "mode": "UNAVAILABLE",
-      "availability": "UNAVAILABLE",
+      "mode": "DOCUMENTATION",
+      "availability": "REDIRECTED",
       "canonical_url": "https://a11oy.net/chat",
       "source_owner": {
         "repository": "szl-holdings/a11oy-net",
-        "path": "index.html",
-        "role": "REMEDIATION_OWNER"
+        "path": "chat/index.html",
+        "role": "RUNTIME_OWNER"
       },
       "observation": {
         "method": "GET",
-        "status": 404,
-        "final_url": "https://a11oy.net/chat"
+        "status": 200,
+        "final_url": "https://a11oy.net/chat/"
       },
-      "note": "Route is not implemented on the current static site and is excluded from the measured public-surface count."
+      "note": "A11oy.net source 16c28a9cbf98e9f7037027a7448cb4e69cb51b0d owns chat/index.html; its immutable bytes matched the live canonicalized page. This is a static proof-registry handoff and does not claim that the separate interactive console is ready."
     },
     {
       "id": "a11oy-net-code-gap",
-      "name": "A11oy.net code route",
+      "name": "A11oy.net code gateway",
       "kind": "WEB",
       "audience": ["DEVELOPER", "INVESTOR"],
-      "mode": "UNAVAILABLE",
-      "availability": "UNAVAILABLE",
+      "mode": "DOCUMENTATION",
+      "availability": "REDIRECTED",
       "canonical_url": "https://a11oy.net/code",
       "source_owner": {
         "repository": "szl-holdings/a11oy-net",
-        "path": "index.html",
-        "role": "REMEDIATION_OWNER"
+        "path": "code/index.html",
+        "role": "RUNTIME_OWNER"
       },
       "observation": {
         "method": "GET",
-        "status": 404,
-        "final_url": "https://a11oy.net/code"
+        "status": 200,
+        "final_url": "https://a11oy.net/code/"
       },
-      "note": "Route is not implemented on the current static site and is excluded from the measured public-surface count."
+      "note": "A11oy.net source 16c28a9cbf98e9f7037027a7448cb4e69cb51b0d owns code/index.html; its immutable bytes matched the live canonicalized page. This is a static proof-registry handoff and does not claim that the separate governed run-loop is ready."
     },
     {
       "id": "a11oy-net-robots-gap",
@@ -580,7 +580,7 @@
         "status": 200,
         "final_url": "https://a11oy.net/manifest.webmanifest"
       },
-      "note": "A11oy.net manifest is currently reachable as JSON metadata and tracked with explicit metadata validation."
+      "note": "A11oy.net source 16c28a9cbf98e9f7037027a7448cb4e69cb51b0d and the live byte-identical manifest declare name 'a11oy Proof Registry' and short_name 'a11oy.net'. Reachability and metadata identity do not establish product-runtime readiness."
     }
   ]
 }

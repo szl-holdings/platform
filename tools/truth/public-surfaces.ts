@@ -120,11 +120,11 @@ const APPROVED_PUBLIC_SURFACE_TARGETS = {
   },
   'a11oy-net-chat-gap': {
     canonicalUrl: 'https://a11oy.net/chat',
-    finalUrl: 'https://a11oy.net/chat',
+    finalUrl: 'https://a11oy.net/chat/',
   },
   'a11oy-net-code-gap': {
     canonicalUrl: 'https://a11oy.net/code',
-    finalUrl: 'https://a11oy.net/code',
+    finalUrl: 'https://a11oy.net/code/',
   },
   'a11oy-net-robots-gap': {
     canonicalUrl: 'https://a11oy.net/robots.txt',
@@ -176,7 +176,7 @@ const APPROVED_PUBLIC_SURFACE_TARGETS = {
   },
   'killinchu-public-console': {
     canonicalUrl: 'https://a-11-oy.com/killinchu',
-    finalUrl: 'https://szlholdings-killinchu.hf.space/',
+    finalUrl: 'https://a-11-oy.com/killinchu',
   },
   'killinchu-readiness-api': {
     canonicalUrl: 'https://szlholdings-killinchu.hf.space/readyz',
@@ -221,6 +221,40 @@ function approvedTargetFor(surfaceId: string): ApprovedSurfaceTarget | null {
     return null;
   }
   return APPROVED_PUBLIC_SURFACE_TARGETS[surfaceId as keyof typeof APPROVED_PUBLIC_SURFACE_TARGETS];
+}
+
+type PublicWebContract = Readonly<{
+  title: string;
+  canonicalUrl: string;
+  requiredText: readonly string[];
+}>;
+
+const PUBLIC_WEB_CONTRACTS = {
+  'a11oy-net-chat-gap': {
+    title: 'A11oy Chat Gateway | Governed Product Console',
+    canonicalUrl: 'https://a11oy.net/chat/',
+    requiredText: ['This gateway does not execute a prompt.'],
+  },
+  'a11oy-net-code-gap': {
+    title: 'A11oy Code Gateway | Governed Run-Loop',
+    canonicalUrl: 'https://a11oy.net/code/',
+    requiredText: ['this page does not execute code'],
+  },
+  'killinchu-public-console': {
+    title: 'a11oy · Killinchu',
+    canonicalUrl: 'https://a-11-oy.com/killinchu',
+    requiredText: ['Effectors stay SIMULATED.', 'no runtime claim made.'],
+  },
+  'legacy-command-route': {
+    title: 'a11oy Command Center',
+    canonicalUrl: 'https://a-11-oy.com/command',
+    requiredText: ['Deny by default.', 'Proof stays on a11oy.net.', 'MODELED on static origin'],
+  },
+} as const satisfies Record<string, PublicWebContract>;
+
+function publicWebContractFor(surfaceId: string): PublicWebContract | null {
+  if (!Object.hasOwn(PUBLIC_WEB_CONTRACTS, surfaceId)) return null;
+  return PUBLIC_WEB_CONTRACTS[surfaceId as keyof typeof PUBLIC_WEB_CONTRACTS];
 }
 
 function isObject(value: unknown): value is Record<string, unknown> {
@@ -540,7 +574,7 @@ async function cancelResponseBody(response: SurfaceFetchResponse): Promise<void>
 async function readBoundedResponseBody(
   surfaceId: string,
   response: SurfaceFetchResponse,
-  bodyKind: 'metadata' | 'API' = 'metadata',
+  bodyKind: 'metadata' | 'API' | 'WEB' = 'metadata',
 ): Promise<{ text: string | null; failure: string | null }> {
   const contentLength = response.headers?.get('content-length');
   if (contentLength && /^\d+$/.test(contentLength)) {
@@ -826,6 +860,44 @@ async function validatePublicApiResponse(
   return [`${surfaceId}: routed API has no body validator`];
 }
 
+async function validatePublicWebResponse(
+  surfaceId: string,
+  response: SurfaceFetchResponse,
+): Promise<string[]> {
+  const contract = publicWebContractFor(surfaceId);
+  if (!contract) return [`${surfaceId}: routed WEB surface has no body validator`];
+
+  const contentType = response.headers?.get('content-type')?.toLowerCase() ?? '';
+  if (!/^text\/html(?:;|$)/i.test(contentType)) {
+    await cancelResponseBody(response);
+    return [`${surfaceId}: expected a text/html response, observed ${contentType || 'missing'}`];
+  }
+
+  const { text, failure } = await readBoundedResponseBody(surfaceId, response, 'WEB');
+  if (failure || text === null) return [failure ?? `${surfaceId}: WEB body is unavailable`];
+
+  const title = text.match(/<title(?:\s[^>]*)?>([^<]*)<\/title>/i)?.[1]?.trim();
+  if (title !== contract.title) {
+    return [`${surfaceId}: WEB body has an unexpected product identity`];
+  }
+
+  const canonicalTags = (text.match(/<link\b[^>]*>/gi) ?? []).filter((tag) =>
+    /\brel\s*=\s*(["'])canonical\1/i.test(tag),
+  );
+  const canonicalUrl =
+    canonicalTags.length === 1
+      ? canonicalTags[0]?.match(/\bhref\s*=\s*(["'])([^"']+)\1/i)?.[2]
+      : null;
+  if (canonicalUrl !== contract.canonicalUrl) {
+    return [`${surfaceId}: WEB body has an unexpected canonical URL`];
+  }
+
+  if (!contract.requiredText.every((requiredText) => text.includes(requiredText))) {
+    return [`${surfaceId}: WEB body is missing its evidence-boundary marker`];
+  }
+  return [];
+}
+
 function isXmlRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === 'object' && value !== null && !Array.isArray(value);
 }
@@ -914,7 +986,7 @@ async function validateMetadataResponse(
     if (!isObject(manifest)) {
       return [`${surfaceId}: manifest metadata must be a JSON object`];
     }
-    if (manifest.name !== 'A11oy Proof Registry' || manifest.short_name !== 'A11oy.net') {
+    if (manifest.name !== 'a11oy Proof Registry' || manifest.short_name !== 'a11oy.net') {
       return [`${surfaceId}: manifest metadata has an unexpected product identity`];
     }
     if (manifest.start_url !== '/' || manifest.scope !== '/') {
@@ -1020,13 +1092,16 @@ async function verifyLivePublicSurface(
     const validateRoutedBody =
       surface.availability !== 'UNAVAILABLE' &&
       (surface.kind === 'METADATA' ||
+        (surface.kind === 'WEB' && publicWebContractFor(surface.id) !== null) ||
         surface.id === 'killinchu-build-info-api' ||
         surface.id === 'killinchu-readiness-api')
         ? async (candidate: SurfaceFetchResponse): Promise<string[]> => {
             if (candidate.status >= 200 && candidate.status < 300) {
               return surface.kind === 'METADATA'
                 ? await validateMetadataResponse(surface.id, candidate)
-                : await validatePublicApiResponse(surface.id, candidate);
+                : surface.kind === 'WEB'
+                  ? await validatePublicWebResponse(surface.id, candidate)
+                  : await validatePublicApiResponse(surface.id, candidate);
             }
             await cancelResponseBody(candidate);
             return [];
