@@ -23,9 +23,7 @@ export function StatusPill({ status }: { status: UiStatus }) {
     ERROR: { bg: 'rgba(245,245,245,0.12)', color: '#f5f5f5' },
     CONNECTING: { bg: 'rgba(94,94,94,0.15)', color: '#d0cec8' },
   };
-  const displayStatus = Object.prototype.hasOwnProperty.call(styles, status)
-    ? status
-    : 'UNAVAILABLE';
+  const displayStatus = Object.hasOwn(styles, status) ? status : 'UNAVAILABLE';
   const s = styles[displayStatus];
   return (
     <span
