@@ -462,6 +462,30 @@ test('wires freshness only to scheduled and explicit manual events', () => {
   assert.doesNotMatch(workItem?.run ?? '', /head -n1/);
 });
 
+test('runs truth contracts inside the required Runtime Audit context', () => {
+  const workflow = YAML.parse(readFileSync('.github/workflows/audit-full.yml', 'utf8')) as {
+    jobs: {
+      audit: {
+        name: string;
+        steps: Array<{
+          name?: string;
+          run?: string;
+          if?: string;
+          'continue-on-error'?: boolean;
+        }>;
+      };
+    };
+  };
+
+  assert.equal(workflow.jobs.audit.name, 'Runtime Audit (audit:full)');
+  const validation = workflow.jobs.audit.steps.find(
+    (step) => step.name === 'Validate claims and public-surface contracts',
+  );
+  assert.equal(validation?.run, 'pnpm claims:validate');
+  assert.equal(validation?.if, undefined);
+  assert.equal(validation?.['continue-on-error'], undefined);
+});
+
 test('rejects a reachable claim backed by an HTTP failure', () => {
   const invalid = registry([
     surface({
