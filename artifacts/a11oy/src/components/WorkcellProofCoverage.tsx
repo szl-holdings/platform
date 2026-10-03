@@ -91,9 +91,10 @@ export function WorkcellProofCoverage({ workcell }: { workcell: Workcell }) {
               Does the declared run resolve to the evidence it names?
             </h2>
             <p className="mt-2 text-sm leading-6" style={{ color: 'var(--color-a11oy-text-sub)' }}>
-              This deterministic check joins repository fixture IDs across the Workcell, PCE
-              contract, signals, policy and approval references, trace, and Proof Packet. Any
-              missing or mismatched obligation keeps the result incomplete.
+              This deterministic check attempts to resolve unique repository fixture records across
+              the Workcell, PCE contract, signals, policy and approval references, ExecutionTrace,
+              and Proof Packet. Any absent, ambiguous, or mismatched obligation keeps the result
+              incomplete.
             </p>
           </div>
           <div
@@ -250,8 +251,8 @@ export function WorkcellProofCoverage({ workcell }: { workcell: Workcell }) {
           }}
         >
           <strong style={{ color: '#e5d29e' }}>Evidence boundary:</strong> this inspector verifies
-          deterministic fixture joins only. It does not verify signatures, durable storage, operator
-          identity, external attestation, or production execution.
+          deterministic fixture-record coverage only. Even COMPLETE would not verify signatures,
+          durable storage, operator identity, external attestation, or production execution.
         </div>
       </Card>
     </section>

@@ -95,12 +95,28 @@ test('fails closed when Workcell proof references are missing or mismatched', ()
   for (const status of ['SATISFIED', 'MISMATCH', 'UNAVAILABLE']) {
     assert.match(workcellProofCoverageEvaluator, new RegExp(`'${status}'`));
   }
-  for (const obligation of ['proof-context', 'proof-policy-binding', 'proof-approval-binding']) {
+  for (const obligation of [
+    'contract-record',
+    'contract-integrity',
+    'action-context',
+    'evaluation-lineage',
+    'trace-binding',
+    'proof-context',
+    'proof-policy-binding',
+    'proof-approval-binding',
+    'proof-integrity',
+  ]) {
     assert.match(workcellProofCoverageEvaluator, new RegExp(`'${obligation}'`));
   }
   assert.match(workcellProofCoverageEvaluator, /satisfied === obligations\.length/);
-  assert.match(workcellProofCoverageEvaluator, /policyEvaluationIds\.includes/);
-  assert.match(workcellProofCoverageEvaluator, /approvalRecordIds\.includes/);
+  assert.match(workcellProofCoverageEvaluator, /policyEvaluationIds\.filter/);
+  assert.match(workcellProofCoverageEvaluator, /policyEvaluationMatches\.length > 1/);
+  assert.match(workcellProofCoverageEvaluator, /approvalRecordIds\.filter/);
+  assert.match(workcellProofCoverageEvaluator, /approvalRecordMatches\.length > 1/);
+  assert.match(workcellProofCoverageEvaluator, /executionTraces\.filter/);
+  assert.match(workcellProofCoverageEvaluator, /traceMatches\.length > 1/);
+  assert.match(workcellProofCoverageEvaluator, /contractMatches\.length === 1/);
+  assert.match(workcellProofCoverageEvaluator, /proofPacketMatches\.length === 1/);
   assert.match(workcellProofCoverageEvaluator, /proofPacket\.kind !== 'action_execution'/);
   assert.match(
     workcellProofCoverageEvaluator,
@@ -110,16 +126,16 @@ test('fails closed when Workcell proof references are missing or mismatched', ()
     workcellProofCoverageEvaluator,
     /proofPacket\.approvalRecordId !== approvalRecordId/,
   );
-  assert.match(workcellProofCoverageEvaluator, /No trace record is resolved/);
+  assert.match(workcellProofCoverageEvaluator, /no ExecutionTrace record resolves/);
   assert.match(workcellProofCoverageEvaluator, /Scope and actor are not verified/);
   assert.match(workcellProofCoverage, /DEMO · CONTRACT-TO-EVIDENCE JOIN/);
   assert.match(
     workcellProofCoverage,
-    /Any\s+missing or mismatched\s+obligation keeps the result incomplete/,
+    /Any\s+absent, ambiguous, or mismatched obligation\s+keeps the result\s+incomplete/,
   );
   assert.match(
     workcellProofCoverage,
-    /does not verify signatures,\s+durable storage, operator\s+identity/,
+    /Even COMPLETE would not verify signatures,\s+durable storage, operator identity/,
   );
   assert.doesNotMatch(
     workcellProofCoverage,
@@ -229,13 +245,51 @@ test('keeps canonical Series A proof intact and adds a bounded 75-view local mat
   assert.match(captureController, /mains\.length === 1/);
   assert.match(matrixWrapper, /scripts\/qa\/capture-series-a-product-matrix-proof\.mjs/);
   assert.match(matrixWrapper, /LOCAL_NON_AUTHORITATIVE/);
-  assert.match(matrixWrapper, /verifyProductInteractions\(preview.origin\)/);
+  assert.match(matrixWrapper, /SOURCE_IDENTITY_PATH = '\/a11oy\/__source-identity\.json'/);
+  assert.match(matrixWrapper, /X-SZL-Served-Asset-SHA256/);
+  assert.match(matrixWrapper, /served asset no longer matches the verified build manifest/);
+  assert.match(matrixWrapper, /expectedServedIdentity: servedIdentity/);
+  assert.match(matrixWrapper, /interactions\.served_identity\?\.state !== 'VERIFIED'/);
   assert.match(matrixWrapper, /sha256\(interactionBytes\)/);
   assert.match(matrixWrapper, /captured surface has invalid scroll-reveal evidence/);
+  assert.match(productInteractions, /schema: 'szl\.a11oy-product-interactions\/v2'/);
+  assert.match(productInteractions, /source identity endpoint/);
+  assert.match(productInteractions, /verifyNavigationIdentity/);
+  assert.match(productInteractions, /x-szl-served-asset-sha256/);
   assert.equal(
     rootPackage.scripts['screenshots:a11oy:product-proof'],
     'node scripts/qa/capture-series-a-product-matrix-proof.mjs',
   );
+});
+
+test('locks the browser rail to exact proof coverage and served-build identity', () => {
+  for (const [scenario, satisfied] of [
+    ['baseline', 8],
+    ["'remove-proof-reference'", 6],
+    ["'substitute-action-id'", 7],
+    ["'omit-approval-reference'", 8],
+    ['combined', 5],
+  ]) {
+    assert.match(
+      productInteractions,
+      new RegExp(`${scenario}: \\{[\\s\\S]*?satisfied: ${satisfied},[\\s\\S]*?total: 17`),
+      scenario,
+    );
+  }
+  for (const [obligation, status] of [
+    ['trace-binding', 'UNAVAILABLE'],
+    ['proof-integrity', 'SATISFIED'],
+    ['terminal-state', 'MISMATCH'],
+  ]) {
+    assert.match(productInteractions, new RegExp(`'${obligation}': '${status}'`), obligation);
+  }
+  assert.match(productInteractions, /obligation IDs must be unique/);
+  assert.match(productInteractions, /assert\.deepEqual\(observedStatuses, expected\.statuses/);
+  assert.match(productInteractions, /await verifyProofCoverage\('combined'\)/);
+  assert.match(productInteractions, /No source\/build identity was supplied/);
+  assert.match(productInteractions, /state: 'UNBOUND'/);
+  assert.match(productInteractions, /state: 'VERIFIED'/);
+  assert.match(productInteractions, /signal: AbortSignal\.timeout\(READINESS_TIMEOUT_MS\)/);
 });
 
 test('retains navigation failure context and cause without relaxing browser readiness', () => {

@@ -1,5 +1,15 @@
 # A11oy Workcell Proof Coverage Inspector proof
 
+> **Historical packet — superseded for current evaluator claims.** An
+> adversarial successor review found that this 12-obligation revision could
+> select the first duplicate identifier and could report `COMPLETE` without a
+> resolved `ExecutionTrace` record. Its exact-source images and hashes remain
+> historical evidence for commit `677c9ab3e`, but the statements below about no
+> remaining implementation blocker and `COMPLETE` semantics must not be used as
+> current assurance. The fail-closed successor requires unique records, resolved
+> trace evidence, integrity fields, and exact browser assertions; its separate
+> proof packet records the new source and results.
+
 - `workcell_id`: `A11OY-WORKCELL-PROOF-COVERAGE-20261002`
 - `agent`: Codex / Pathfinder / PatchPilot / PixelProof / ClaimGuard / ProofSmith
 - `objective`: Study relevant public leaders from official, revision-pinned sources; derive an original A11oy improvement; implement a conservative Workcell proof-coverage interface that exposes missing or contradictory evidence without overstating verification; and leave reproducible Level 4 proof.

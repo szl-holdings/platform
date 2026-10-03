@@ -9,14 +9,260 @@ import { collectLayoutEvidence } from './screenshot-layout-helpers.mjs';
 // ten-second lazy-route readiness budget on a cold local build.
 const READINESS_TIMEOUT_MS = 10_000;
 const expect = playwrightExpect.configure({ timeout: READINESS_TIMEOUT_MS });
+const SOURCE_IDENTITY_PATH = '/a11oy/__source-identity.json';
+const SHA_256 = /^[0-9a-f]{64}$/;
+const GIT_SHA = /^[0-9a-f]{40}$/;
+const PROOF_COVERAGE_BASELINE_STATUSES = Object.freeze({
+  'signal-records': 'UNAVAILABLE',
+  'contract-record': 'SATISFIED',
+  'action-context': 'SATISFIED',
+  'evaluation-lineage': 'SATISFIED',
+  'contract-integrity': 'SATISFIED',
+  'origin-signal': 'SATISFIED',
+  'action-binding': 'SATISFIED',
+  'trace-binding': 'UNAVAILABLE',
+  'policy-evaluation': 'UNAVAILABLE',
+  'approval-binding': 'UNAVAILABLE',
+  'proof-reference': 'SATISFIED',
+  'proof-subject': 'MISMATCH',
+  'proof-context': 'MISMATCH',
+  'proof-policy-binding': 'UNAVAILABLE',
+  'proof-approval-binding': 'UNAVAILABLE',
+  'proof-integrity': 'SATISFIED',
+  'terminal-state': 'MISMATCH',
+});
+const PROOF_COVERAGE_SCENARIOS = Object.freeze({
+  baseline: {
+    state: 'INCOMPLETE',
+    satisfied: 8,
+    total: 17,
+    activeChallenges: [],
+    statuses: PROOF_COVERAGE_BASELINE_STATUSES,
+    details: {
+      'trace-binding':
+        'The trace IDs agree, but no ExecutionTrace record resolves in the supplied registry.',
+      'proof-integrity':
+        'The packet has a SHA-256-shaped reference, payload, unique witnesses, and parseable issue time. This is not signature verification.',
+      'terminal-state':
+        'The Workcell terminal status or verification checksum is missing or malformed.',
+    },
+  },
+  'remove-proof-reference': {
+    state: 'INCOMPLETE',
+    satisfied: 6,
+    total: 17,
+    activeChallenges: ['Remove proof reference'],
+    statuses: {
+      ...PROOF_COVERAGE_BASELINE_STATUSES,
+      'proof-reference': 'UNAVAILABLE',
+      'proof-subject': 'UNAVAILABLE',
+      'proof-context': 'UNAVAILABLE',
+      'proof-integrity': 'UNAVAILABLE',
+      'terminal-state': 'UNAVAILABLE',
+    },
+    details: {
+      'proof-reference': 'The inspected contract has no Proof Packet reference.',
+    },
+  },
+  'substitute-action-id': {
+    state: 'INCOMPLETE',
+    satisfied: 7,
+    total: 17,
+    activeChallenges: ['Substitute action ID'],
+    statuses: {
+      ...PROOF_COVERAGE_BASELINE_STATUSES,
+      'action-binding': 'MISMATCH',
+    },
+    details: {
+      'action-binding': 'The contract action does not match the Workcell ActionBrief.',
+    },
+  },
+  'omit-approval-reference': {
+    state: 'INCOMPLETE',
+    satisfied: 8,
+    total: 17,
+    activeChallenges: ['Omit approval reference'],
+    statuses: PROOF_COVERAGE_BASELINE_STATUSES,
+    details: {
+      'approval-binding':
+        'This approval-required Workcell has no approval-record reference in the inspected contract.',
+      'proof-approval-binding':
+        'The inspected contract has no approval-record reference to compare with the Proof Packet.',
+    },
+  },
+  combined: {
+    state: 'INCOMPLETE',
+    satisfied: 5,
+    total: 17,
+    activeChallenges: ['Remove proof reference', 'Substitute action ID', 'Omit approval reference'],
+    statuses: {
+      ...PROOF_COVERAGE_BASELINE_STATUSES,
+      'action-binding': 'MISMATCH',
+      'proof-reference': 'UNAVAILABLE',
+      'proof-subject': 'UNAVAILABLE',
+      'proof-context': 'UNAVAILABLE',
+      'proof-integrity': 'UNAVAILABLE',
+      'terminal-state': 'UNAVAILABLE',
+    },
+    details: {
+      'action-binding': 'The contract action does not match the Workcell ActionBrief.',
+      'approval-binding':
+        'This approval-required Workcell has no approval-record reference in the inspected contract.',
+      'proof-reference': 'The inspected contract has no Proof Packet reference.',
+      'proof-approval-binding':
+        'The inspected contract has no approval-record reference to compare with the Proof Packet.',
+    },
+  },
+});
+
+async function observeProofCoverage(inspector) {
+  const aggregateState =
+    (await inspector.locator('[role="status"] [data-status-pill]').textContent())?.trim() ?? '';
+  const aggregateSummary =
+    (await inspector.getByText(/^\d+\/\d+ obligations satisfied$/).textContent())?.trim() ?? '';
+  const liveMessage =
+    (await inspector.locator('[data-proof-live-message]').textContent())?.trim() ?? '';
+  const obligations = await inspector.locator('[data-proof-obligation]').evaluateAll((items) =>
+    items.map((item) => ({
+      id: item.getAttribute('data-proof-obligation') ?? '',
+      status: item.querySelector('[data-status-pill]')?.textContent?.trim() ?? '',
+      detail:
+        item.querySelector('[data-proof-detail]')?.textContent?.replace(/\s+/g, ' ').trim() ?? '',
+    })),
+  );
+  return { aggregateState, aggregateSummary, liveMessage, obligations };
+}
+
+function assertProofCoverage(observed, expected, label) {
+  assert.equal(observed.aggregateState, expected.state, `${label} aggregate state`);
+  assert.equal(
+    observed.aggregateSummary,
+    `${expected.satisfied}/${expected.total} obligations satisfied`,
+    `${label} aggregate count`,
+  );
+  const challengeText =
+    expected.activeChallenges.length > 0
+      ? `Active challenges: ${expected.activeChallenges.join(', ')}.`
+      : 'No active challenges.';
+  assert.equal(
+    observed.liveMessage,
+    `${expected.state}. ${expected.satisfied} of ${expected.total} obligations satisfied. ${challengeText}`,
+    `${label} live-region summary`,
+  );
+  assert.equal(observed.obligations.length, expected.total, `${label} obligation row count`);
+  const observedStatuses = Object.fromEntries(
+    observed.obligations.map((item) => [item.id, item.status]),
+  );
+  assert.equal(
+    Object.keys(observedStatuses).length,
+    observed.obligations.length,
+    `${label} obligation IDs must be unique`,
+  );
+  assert.deepEqual(observedStatuses, expected.statuses, `${label} obligation statuses`);
+  for (const [id, detail] of Object.entries(expected.details)) {
+    assert.equal(
+      observed.obligations.find((item) => item.id === id)?.detail,
+      detail,
+      `${label}/${id} detail`,
+    );
+  }
+}
+
+function validateExpectedServedIdentity(identity) {
+  if (!identity) return null;
+  const expected = {
+    sourceRevision: String(identity.sourceRevision ?? '')
+      .trim()
+      .toLowerCase(),
+    sourceTreeSha: String(identity.sourceTreeSha ?? '')
+      .trim()
+      .toLowerCase(),
+    buildManifestSha256: String(identity.buildManifestSha256 ?? '')
+      .trim()
+      .toLowerCase(),
+    indexHtmlSha256: String(identity.indexHtmlSha256 ?? '')
+      .trim()
+      .toLowerCase(),
+    proofNonce: String(identity.proofNonce ?? '')
+      .trim()
+      .toLowerCase(),
+  };
+  assert.match(expected.sourceRevision, GIT_SHA, 'served source revision');
+  assert.match(expected.sourceTreeSha, GIT_SHA, 'served source tree');
+  assert.match(expected.buildManifestSha256, SHA_256, 'served build manifest');
+  assert.match(expected.indexHtmlSha256, SHA_256, 'served index asset');
+  assert.match(expected.proofNonce, SHA_256, 'served proof nonce');
+  return expected;
+}
+
+async function verifyServedIdentity(origin, expected) {
+  if (!expected) {
+    return {
+      state: 'UNBOUND',
+      non_claim:
+        'No source/build identity was supplied; this receipt is browser regression evidence only.',
+    };
+  }
+
+  const response = await fetch(`${origin}${SOURCE_IDENTITY_PATH}`, {
+    cache: 'no-store',
+    redirect: 'error',
+    signal: AbortSignal.timeout(READINESS_TIMEOUT_MS),
+  });
+  assert.equal(response.status, 200, 'source identity endpoint');
+  const expectedHeaders = {
+    'x-szl-source-sha': expected.sourceRevision,
+    'x-szl-source-tree-sha': expected.sourceTreeSha,
+    'x-szl-build-manifest-sha256': expected.buildManifestSha256,
+    'x-szl-proof-nonce': expected.proofNonce,
+  };
+  for (const [name, value] of Object.entries(expectedHeaders)) {
+    assert.equal(response.headers.get(name), value, `source identity header ${name}`);
+  }
+  const document = await response.json();
+  assert.deepEqual(document, {
+    schema: 'szl.a11oy-served-build-identity/v1',
+    source_revision: expected.sourceRevision,
+    source_tree_sha: expected.sourceTreeSha,
+    build_manifest_sha256: expected.buildManifestSha256,
+    index_html_sha256: expected.indexHtmlSha256,
+    base_path: '/a11oy/',
+    proof_nonce: expected.proofNonce,
+  });
+  return {
+    state: 'VERIFIED',
+    identity_path: SOURCE_IDENTITY_PATH,
+    source_revision: expected.sourceRevision,
+    source_tree_sha: expected.sourceTreeSha,
+    build_manifest_sha256: expected.buildManifestSha256,
+    index_html_sha256: expected.indexHtmlSha256,
+    proof_nonce: expected.proofNonce,
+  };
+}
+
+async function verifyNavigationIdentity(response, expected, route) {
+  if (!expected) return;
+  const expectedHeaders = {
+    'x-szl-source-sha': expected.sourceRevision,
+    'x-szl-source-tree-sha': expected.sourceTreeSha,
+    'x-szl-build-manifest-sha256': expected.buildManifestSha256,
+    'x-szl-proof-nonce': expected.proofNonce,
+    'x-szl-served-asset-sha256': expected.indexHtmlSha256,
+  };
+  for (const [name, value] of Object.entries(expectedHeaders)) {
+    assert.equal(await response.headerValue(name), value, `${route} response header ${name}`);
+  }
+}
 
 // Read-only, loopback-only browser checks. These exercise fixture interfaces;
 // they never approve a Workcell, authenticate a provider, or execute an action.
-export async function verifyProductInteractions(origin) {
+export async function verifyProductInteractions(origin, options = {}) {
   const target = new URL(origin);
   assert.ok(['127.0.0.1', 'localhost', '[::1]'].includes(target.hostname));
   assert.equal(target.protocol, 'http:');
   assert.equal(target.username + target.password + target.search + target.hash, '');
+  const expectedServedIdentity = validateExpectedServedIdentity(options.expectedServedIdentity);
+  const servedIdentity = await verifyServedIdentity(target.origin, expectedServedIdentity);
   const capturePlan = JSON.parse(
     await readFile(
       new URL('../../audit/series-a-screenshot-capture-plan.json', import.meta.url),
@@ -37,6 +283,7 @@ export async function verifyProductInteractions(origin) {
   );
   deadline.unref();
   const records = [];
+  const proofCoverageObservations = [];
   try {
     for (const width of [320, 390, 768, 1366, 1728]) {
       const context = await browser.newContext({
@@ -105,6 +352,8 @@ export async function verifyProductInteractions(origin) {
         try {
           const response = await page.goto(`${target.origin}/a11oy/${route}`);
           assert.equal(response?.status(), 200, route);
+          assert.ok(response, `${route} returned no main-resource response`);
+          await verifyNavigationIdentity(response, expectedServedIdentity, route);
           await page.waitForFunction(() => document.body.dataset.screenshotReady === 'true');
           await page.evaluate(async () => document.fonts.ready);
           await expect(page.locator('main h1')).toBeVisible();
@@ -232,37 +481,62 @@ export async function verifyProductInteractions(origin) {
       await expect(progress).toHaveText(/^0 \/ \d+ steps$/);
       await check('replay-reset');
 
-      const coverageResult = page.getByText(/^\d+\/\d+ obligations satisfied$/);
+      const proofCoverageInspector = page.locator(
+        'section[aria-labelledby="proof-coverage-heading"]',
+      );
       await expect(
-        page.getByRole('heading', {
+        proofCoverageInspector.getByRole('heading', {
           name: 'Does the declared run resolve to the evidence it names?',
         }),
       ).toBeVisible();
-      await expect(coverageResult).toBeVisible();
-      const initialCoverage = await coverageResult.textContent();
+      const verifyProofCoverage = async (scenario, expectedScenario = scenario) => {
+        const observed = await observeProofCoverage(proofCoverageInspector);
+        assertProofCoverage(
+          observed,
+          PROOF_COVERAGE_SCENARIOS[expectedScenario],
+          `${width}/${scenario}`,
+        );
+        if (Object.hasOwn(PROOF_COVERAGE_SCENARIOS, scenario)) {
+          proofCoverageObservations.push({
+            width,
+            scenario,
+            aggregate_state: observed.aggregateState,
+            aggregate_summary: observed.aggregateSummary,
+            live_message: observed.liveMessage,
+            obligation_statuses: Object.fromEntries(
+              observed.obligations.map((item) => [item.id, item.status]),
+            ),
+          });
+        }
+      };
+      await verifyProofCoverage('baseline');
       const proofChallenges = [
         {
           label: 'Remove proof reference',
+          scenario: 'remove-proof-reference',
           obligation: 'Proof Packet resolves',
           expected: 'has no Proof Packet reference',
         },
         {
           label: 'Substitute action ID',
+          scenario: 'substitute-action-id',
           obligation: 'Action identity is bound',
           expected: 'does not match the Workcell ActionBrief',
         },
         {
           label: 'Omit approval reference',
+          scenario: 'omit-approval-reference',
           obligation: 'Approval reference resolves',
           expected: 'has no approval-record reference',
         },
       ];
-      for (const { label, obligation, expected } of proofChallenges) {
+      for (const { label, scenario, obligation, expected } of proofChallenges) {
         const challenge = page.getByRole('button', { name: new RegExp(label) });
         const liveMessage = page.locator('[data-proof-live-message]');
         await challenge.click();
         await expect(challenge).toHaveAttribute('aria-pressed', 'true');
         await expect(liveMessage).toContainText(`Active challenges: ${label}`);
+        await verifyProofCoverage(scenario);
         const result = page
           .getByRole('listitem')
           .filter({ has: page.getByRole('heading', { name: obligation, exact: true }) });
@@ -273,13 +547,15 @@ export async function verifyProductInteractions(origin) {
         await challenge.click();
         await expect(challenge).toHaveAttribute('aria-pressed', 'false');
         await expect(liveMessage).toContainText('No active challenges');
-        await expect(coverageResult).toHaveText(initialCoverage ?? '');
+        await verifyProofCoverage(`${scenario}-restored`, 'baseline');
         await expect(result).not.toHaveText(challengedResult ?? '');
         await expect(result).not.toContainText(expected);
       }
       for (const { label } of proofChallenges) {
         await page.getByRole('button', { name: new RegExp(label) }).click();
       }
+      await verifyProofCoverage('combined');
+      await check('proof-coverage:combined');
       await page.getByRole('button', { name: 'Reset challenges', exact: true }).click();
       for (const { label } of proofChallenges) {
         await expect(page.getByRole('button', { name: new RegExp(label) })).toHaveAttribute(
@@ -287,7 +563,7 @@ export async function verifyProductInteractions(origin) {
           'false',
         );
       }
-      await expect(coverageResult).toHaveText(initialCoverage ?? '');
+      await verifyProofCoverage('reset-restored', 'baseline');
       await expect(page.locator('[data-proof-live-message]')).toContainText('No active challenges');
       await expect(page.locator('[data-proof-obligation="proof-reference"]')).not.toContainText(
         'has no Proof Packet reference',
@@ -342,9 +618,16 @@ export async function verifyProductInteractions(origin) {
     }
     assert.equal(timedOut, false, 'product interaction suite exceeded its ten-minute deadline');
     return {
-      schema: 'szl.a11oy-product-interactions/v1',
+      schema: 'szl.a11oy-product-interactions/v2',
       state: 'PASS',
       browser: browser.version(),
+      served_identity: servedIdentity,
+      proof_coverage: {
+        route: '/a11oy/workcells/wc-001/replay',
+        workcell_id: 'wc-001',
+        expectations: PROOF_COVERAGE_SCENARIOS,
+        observations: proofCoverageObservations,
+      },
       records,
       non_claim:
         'Local deterministic fixture interactions only; no external execution or hosted authority.',
