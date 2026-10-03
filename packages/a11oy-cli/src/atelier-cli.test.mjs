@@ -6,6 +6,7 @@ import { fileURLToPath } from 'node:url';
 import { compileAtelierProofweave } from '@szl-holdings/a11oy-atelier';
 
 const cliPath = fileURLToPath(new URL('./atelier-cli.ts', import.meta.url));
+const cliUrl = new URL('./atelier-cli.ts', import.meta.url).href;
 const tenantId = 'test-tenant';
 
 function validCompileResponse(request, overrides = {}) {
@@ -23,9 +24,9 @@ function validCompileResponse(request, overrides = {}) {
   };
 }
 
-function runCli(arguments_, baseUrl) {
+function runNode(arguments_, baseUrl) {
   return new Promise((resolve, reject) => {
-    const child = spawn(process.execPath, ['--import', 'tsx', cliPath, ...arguments_], {
+    const child = spawn(process.execPath, arguments_, {
       env: {
         ...process.env,
         A11OY_ATELIER_API_BASE_URL: baseUrl,
@@ -43,6 +44,15 @@ function runCli(arguments_, baseUrl) {
     child.on('error', reject);
     child.on('close', (code) => resolve({ code, stdout, stderr }));
   });
+}
+
+function runCli(arguments_, baseUrl) {
+  return runNode(['--import', 'tsx', cliPath, ...arguments_], baseUrl);
+}
+
+function runCliWithOversizedObjective(baseUrl) {
+  const bootstrap = `process.argv = [process.execPath, ${JSON.stringify(cliPath)}, 'weave', '--claim', 'FACT:Bounded claim.', 'x'.repeat(100_001)]; await import(${JSON.stringify(cliUrl)});`;
+  return runNode(['--import', 'tsx', '--eval', bootstrap], baseUrl);
 }
 
 async function withServer(handler, run) {
@@ -129,6 +139,21 @@ test('weave rejects budgets outside the compiler contract before making a reques
   );
   assert.notEqual(result.code, 0);
   assert.match(result.stderr, /Maximum Workcells must be an integer from 5 to 8/);
+});
+
+test('weave enforces the complete shared request contract before transport', async () => {
+  let requestCount = 0;
+  const result = await withServer((_incoming, response) => {
+    requestCount += 1;
+    response.statusCode = 500;
+    response.end();
+  }, runCliWithOversizedObjective);
+
+  assert.notEqual(result.code, 0);
+  assert.equal(requestCount, 0);
+  assert.match(result.stderr, /Proofweave request violates the shared compiler contract/);
+  assert.match(result.stderr, /objective/);
+  assert.doesNotMatch(result.stderr, /ECONNREFUSED|ATELIER_HTTP_ERROR/);
 });
 
 test('weave rejects a self-consistent response for a different request', async () => {

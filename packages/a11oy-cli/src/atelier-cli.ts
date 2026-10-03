@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 import { randomUUID } from 'node:crypto';
 import {
-  type AtelierProofweaveRequest,
+  AtelierProofweaveRequestSchema,
   verifyAtelierProofweaveResponse,
 } from '@szl-holdings/a11oy-atelier/proofweave-verifier';
 import { Command, InvalidArgumentError } from 'commander';
@@ -266,7 +266,7 @@ program
         throw new InvalidArgumentError('Objective must not be empty.');
       }
       const claims = options.claim as TypedClaim[];
-      const compileRequest: AtelierProofweaveRequest = {
+      const parsedCompileRequest = AtelierProofweaveRequestSchema.safeParse({
         objective,
         claims: claims.map((claim, index) => ({
           claimId: `claim-${String(index + 1)}`,
@@ -290,7 +290,15 @@ program
           providerDurableStorage: false,
         },
         outputFormat: options.format,
-      };
+      });
+      if (!parsedCompileRequest.success) {
+        const issue = parsedCompileRequest.error.issues[0];
+        const field = issue?.path.join('.');
+        throw new InvalidArgumentError(
+          `Proofweave request violates the shared compiler contract${field ? ` at ${field}` : ''}: ${issue?.message ?? 'validation failed'}.`,
+        );
+      }
+      const compileRequest = parsedCompileRequest.data;
       const payload = await request('/api/a11oy/v1/atelier/proofweave/compile', {
         method: 'POST',
         tenant: options.tenant,

@@ -13,6 +13,7 @@ export type {
   AtelierProofweaveApiResponse,
   AtelierProofweaveRequest,
 } from './proofweave-contract.js';
+export { AtelierProofweaveRequestSchema };
 
 const HASH_PAYLOAD_FIELDS = [
   'schemaVersion',
