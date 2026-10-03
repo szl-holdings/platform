@@ -44,6 +44,9 @@ jobs:
           node --test scripts/qa/check-fflate-resolution.test.mjs
           pnpm run security:fflate
 
+      - name: Verify security override consumer compatibility
+        run: node --test scripts/qa/security-overrides-compat.test.mjs
+
       - name: Run dependency vulnerability scan and generate SBOM
         id: sbom
         run: |
