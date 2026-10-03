@@ -206,15 +206,24 @@ test('resets and verifies scroll origin after tab exercise before full-page capt
   assert.match(captureScript, /scroll_origin: true/);
 });
 
-test('binds hosted provenance and labels local capture as non-authoritative', () => {
-  assert.match(captureScript, /GITHUB_ACTIONS/);
-  assert.match(captureScript, /GITHUB_REPOSITORY/);
-  assert.match(captureScript, /GITHUB_RUN_ID/);
-  assert.match(captureScript, /GITHUB_RUN_ATTEMPT/);
-  assert.match(captureScript, /GITHUB_WORKFLOW_REF/);
-  assert.match(captureScript, /GITHUB_WORKFLOW_SHA/);
-  assert.match(captureScript, /LOCAL_NON_AUTHORITATIVE/);
-  assert.match(captureScript, /VERIFIED_GITHUB_RUNTIME/);
+test('keeps candidate-owned capture provenance unconditionally local', () => {
+  const productionProvenanceSource = captureScript + '\n' + proofHelpers;
+
+  assert.match(captureScript, /const provenance = localCaptureProvenance\(\)/);
+  assert.doesNotMatch(captureScript, /function captureProvenance/);
+  assert.match(captureScript, /function requireRepository\(name\)/);
+  assert.match(captureScript, /const repository = requireRepository\('SOURCE_REPOSITORY'\)/);
+  assert.match(proofHelpers, /const LOCAL_CAPTURE_PROVENANCE = Object\.freeze/);
+  assert.match(proofHelpers, /authority: 'LOCAL_NON_AUTHORITATIVE'/);
+  assert.match(proofHelpers, /provider: 'UNKNOWN'/);
+  assert.doesNotMatch(productionProvenanceSource, /GITHUB_[A-Z0-9_]+/);
+  assert.doesNotMatch(productionProvenanceSource, /VERIFIED_GITHUB_RUNTIME/);
+  assert.doesNotMatch(productionProvenanceSource, /github-actions/);
+  assert.doesNotMatch(productionProvenanceSource, /Hosted metadata binds/);
+  assert.match(captureScript, /hosted_gate_admissible: false/);
+  assert.match(captureScript, /runner_os: process\.platform/);
+  assert.match(captureScript, /runner_arch: process\.arch/);
+  assert.match(captureScript, /if \(initialCheckout\.branch !== sourceRef\)/);
   assert.match(captureScript, /rev-parse', 'HEAD\^\{tree\}'/);
   assert.match(captureScript, /tracked source changed \$\{phase\}/);
   assert.match(captureScript, /untracked or ignored source input exists \$\{phase\}/);
