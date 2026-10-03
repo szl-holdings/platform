@@ -146,17 +146,17 @@ const KILLINCHU_BUILD_INFO_BODY = {
   service: 'killinchu',
   build: {
     state: 'OBSERVED',
-    revision: '859e26cf27164b38c4e289e40a751ce80d403368',
+    revision: '47cbda9ead6548fb4cbf112ba47f1f39411ae6da',
     revision_source: 'env:SZL_GIT_SHA',
   },
   receipt_minted: true,
   release_receipt: {
     state: 'GITHUB_OIDC_ATTESTED',
-    source_revision: '859e26cf27164b38c4e289e40a751ce80d403368',
+    source_revision: '47cbda9ead6548fb4cbf112ba47f1f39411ae6da',
     subject: 'hf-deploy-manifest.json',
-    subject_sha256: '7730a0334485ed3ca4754b38bd288ac004258918f0ede46719e72ae2a2ede960',
-    attestation_id: '39971795',
-    attestation_url: 'https://github.com/szl-holdings/killinchu/attestations/39971795',
+    subject_sha256: '4622b60c4d9818c81ee6d73b470cc44a1597c20022b0d4fd86d2cbaf345d92d2',
+    attestation_id: '52366835',
+    attestation_url: 'https://github.com/szl-holdings/killinchu/attestations/52366835',
     verification:
       'Download hf-deploy-manifest.json from the matching deployment run and run gh attestation verify hf-deploy-manifest.json -R szl-holdings/killinchu',
   },
@@ -972,8 +972,8 @@ test('rejects duplicate, trailing, and over-depth JSON before API contract valid
 
   const candidate = configuredSurface('killinchu-build-info-api');
   const duplicateBody = JSON.stringify(KILLINCHU_BUILD_INFO_BODY).replace(
-    '"source_revision":"859e26cf27164b38c4e289e40a751ce80d403368"',
-    '"source_revision":"859e26cf27164b38c4e289e40a751ce80d403368","source\\u005frevision":"859e26cf27164b38c4e289e40a751ce80d403368"',
+    '"source_revision":"47cbda9ead6548fb4cbf112ba47f1f39411ae6da"',
+    '"source_revision":"47cbda9ead6548fb4cbf112ba47f1f39411ae6da","source\\u005frevision":"47cbda9ead6548fb4cbf112ba47f1f39411ae6da"',
   );
   const failures = await verifyLivePublicSurfaces(registry([candidate]), async (url) =>
     apiResponse(url, duplicateBody),
