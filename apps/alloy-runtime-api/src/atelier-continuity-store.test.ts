@@ -37,7 +37,7 @@ function response(prompt: string, answer: string, sessionId: string): AtelierAsk
       responseSha256: sha256(answer),
       policyEffect: 'allow',
       policyEvaluationId: 'policy_test',
-      evidenceState: 'OBSERVED',
+      evidenceState: 'MEASURED',
       ledgerEntryId: null,
       ledgerState: 'PENDING_API_APPEND',
       memoryState: 'PENDING_API_COMMIT',
