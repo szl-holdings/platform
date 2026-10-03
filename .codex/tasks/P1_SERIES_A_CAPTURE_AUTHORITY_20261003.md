@@ -4,7 +4,7 @@
 - **repository:** szl-holdings/platform
 - **base:** `main@f2f8df6f89056e9104587674ccec0855dd5b177a`
 - **source_branch:** `codex/series-a-capture-provenance-20261003`
-- **status:** SOURCE_PATCHED; PROTECTED_PROMOTION_PENDING
+- **status:** SOURCE_PUBLISHED; HOSTED_CAPTURE_FAILED; PROTECTED_PROMOTION_BLOCKED
 - **evidence_class:** DECLARED plan; verification to be recorded in the proof packet
 
 ## Context
@@ -58,4 +58,9 @@ evidence states. This correction changes only the capture authority boundary.
   a pass. The focused test used the lockfile-matching existing `ws@8.21.0`
   via an ignored local junction; no dependency or lockfile was changed.
 - UI screenshot: N/A. No UI route or rendered component changed.
-- Hosted capture and protected merge: pending exact-head observations.
+- Hosted capture run 37106028221 at PR #884's exact source head failed before
+  artifact publication. Controller repair and a fresh exact-head run are
+  pending; the failed run is not hosted proof.
+- PR #884's first CI pass failed inherited unit and High-severity dependency
+  gates. Protected merge is blocked. The Codex review bot reported a review
+  usage limit, so independent hosted review is unavailable for this head.

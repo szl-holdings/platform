@@ -107,10 +107,15 @@ The P1 successor branch makes candidate metadata unconditionally
 focused local tests are recorded in
 `audit/P1_SERIES_A_CAPTURE_AUTHORITY_PROOF_20261003.md`.
 
-Protected promotion and a successful new screenshot-controller dispatch are
-separate pending observations for that successor. PR #690's controller repair
-has not retroactively produced a capture for merged PR #668. No deployment,
-production, or customer status is inferred from this source correction.
+The first protected screenshot-controller dispatch for successor PR #884,
+[run 37106028221](https://github.com/szl-holdings/platform/actions/runs/37106028221),
+failed before artifact publication. A new controller repair and fresh
+exact-head dispatch are required; no hosted capture is proved. PR #884's
+initial CI also failed an inherited Atelier concurrent-initialization test
+and inherited High-severity `node-forge`/`braces` vulnerability gates. Those
+gates remain blocking. PR #690's controller repair has not retroactively
+produced a capture for merged PR #668. No deployment, production, or customer
+status is inferred from this source correction.
 
 ### 2026-08-30 A11oy Atelier Turn Capsule boundary
 

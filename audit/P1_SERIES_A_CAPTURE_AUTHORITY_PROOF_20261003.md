@@ -72,6 +72,32 @@ permission failure was repaired in PR #690, but no successful new
 record. Hosted CI, source merge, deployment, and customer runtime remain
 separate evidence states.
 
+### Exact-head follow-up, 2026-10-03
+
+The source commit `bc06fa733ad0cb000e1c4cfd5eda00aa9daba348` was
+published normally as PR #884. GitHub reports its commit signature valid for
+`stephenlutar2-hash`; local `git log -1 --show-signature` also reported a good
+signature and the commit carries a DCO trailer. This is source publication,
+not protected promotion.
+
+The protected controller was dispatched from main for PR #884's exact commit
+as [run 37106028221](https://github.com/szl-holdings/platform/actions/runs/37106028221).
+Its capture-contract step passed, but candidate dependency-root preparation
+failed before screenshot publication. The run produced no capture artifact or
+issue receipt. Hosted screenshot evidence therefore remains **UNAVAILABLE**;
+the controller is being repaired separately. The failed run is not a pass.
+
+PR #884's first CI pass is also not green. Its unit job failed in an existing
+Atelier continuity concurrent-initialization test outside this patch, and
+both dependency-audit and Grype High-severity gates failed on inherited
+[`node-forge 1.4.0`](https://github.com/advisories/GHSA-86w9-cpqp-85rv)
+and [`braces 3.0.3`](https://github.com/advisories/GHSA-vfj7-8cjw-p6xm)
+lockfile entries. The PR does not edit the lockfile or those packages. The
+two advisories currently name no patched version. These findings remain
+blocking; no security gate is relaxed and no merge is claimed. Codex's hosted
+review bot returned a review-usage-limit response, so its review is
+**UNAVAILABLE** for this head.
+
 ## Public claim and security checks
 
 No product capability or customer claim is added. The known-gap language
