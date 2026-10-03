@@ -39,7 +39,7 @@ from whichever commit is checked out.
 | DB `pgTable` call sites | **1,067** | Source call sites; not a claim about currently provisioned tables |
 | DB migrations (SQL files) | **149** | Tracked `lib/db/drizzle/*.sql` files; duplicate sequence numbers may exist |
 | API route source files | **45** | Non-test files under `apps/`, `services/`, and `artifacts/api-server/` containing a detected Express route declaration |
-| API handler declarations | **315** | Static non-test HTTP method declarations on `app`, `router`, and named Express Router receivers in the current runtime roots |
+| API handler declarations | **316** | Static non-test HTTP method declarations on `app`, `router`, and named Express Router receivers in the current runtime roots |
 | CI workflows | **47** | Permanent tracked `.github/workflows/*.yml` and `*.yaml`, including exact-head screenshot evidence, hosted observability proof, public npm release paths, and the frontier receipt-chain gate; excludes the retired DCO compatibility workflow |
 | Environment variables (in `.env.example`) | **245** | Lines matching `^[A-Z_]+=` |
 
