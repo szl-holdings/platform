@@ -101,6 +101,22 @@ test('provides keyboard-operable tabs and narrow-screen layouts', () => {
   assert.doesNotMatch(page, /Live Enterprise Execution Fabric/);
 });
 
+test('keeps small muted Series A text legible on the page background', () => {
+  const hex = (value) => value.match(/^#[0-9a-f]{6}$/i)?.[0];
+  const luminance = (color) => {
+    const channels = [1, 3, 5].map((offset) => {
+      const channel = Number.parseInt(color.slice(offset, offset + 2), 16) / 255;
+      return channel <= 0.04045 ? channel / 12.92 : ((channel + 0.055) / 1.055) ** 2.4;
+    });
+    return channels[0] * 0.2126 + channels[1] * 0.7152 + channels[2] * 0.0722;
+  };
+  const background = hex(page.match(/--sa-bg:\s*(#[0-9a-f]{6})/i)?.[1] ?? '');
+  const muted = hex(page.match(/--sa-muted:\s*(#[0-9a-f]{6})/i)?.[1] ?? '');
+  assert.ok(background && muted, 'Series A colors must remain explicit hex values');
+  const [lighter, darker] = [luminance(background), luminance(muted)].sort((a, b) => b - a);
+  assert.ok((lighter + 0.05) / (darker + 0.05) >= 4.5);
+});
+
 test('keeps every Series A action inside the truth-qualified start surface', () => {
   assert.doesNotMatch(data, /demoHref/);
   assert.doesNotMatch(page, /from 'wouter'|href=\{route\(|const route =/);

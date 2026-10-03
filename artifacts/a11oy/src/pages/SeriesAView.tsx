@@ -180,7 +180,7 @@ export function SeriesAView() {
             --sa-border-strong: rgba(201, 183, 135, 0.34);
             --sa-text: #f4f1e9;
             --sa-dim: #a09e98;
-            --sa-muted: #73736f;
+            --sa-muted: #8f8d87;
             --sa-accent: #c9b787;
             min-height: 100vh;
             width: 100%;

@@ -114,6 +114,17 @@ test('labels deterministic linked surfaces as DEMO and exposes their evidence bo
   assert.match(ui, /\| 'UNAVAILABLE'/);
 });
 
+test('does not present an unrecognized pill status as LIVE', () => {
+  assert.match(ui, /hasOwnProperty\.call\(styles, status\)/);
+  assert.match(ui, /\? status\s*:\s*'UNAVAILABLE'/);
+  assert.match(ui, /data-status-pill=\{displayStatus\}/);
+  assert.match(ui, /\{displayStatus\}/);
+  assert.doesNotMatch(ui, /styles\[status\] \?\? styles\.LIVE/);
+  for (const state of ['GATED', 'ROADMAP', 'CONNECTING']) {
+    assert.match(ui, new RegExp(`${state}: \\{[^\\n]+color: '#d0cec8'`));
+  }
+});
+
 test('keeps shared navigation usable on narrow screens and owns one skip target', () => {
   assert.match(layout, /window\.matchMedia\('\(min-width: 768px\)'\)\.matches/);
   assert.match(layout, /addEventListener\('change', syncSidebarToViewport\)/);

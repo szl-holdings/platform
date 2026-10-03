@@ -1,4 +1,4 @@
-import { useState, type ReactNode } from 'react';
+import { type ReactNode, useState } from 'react';
 
 export type UiStatus =
   | 'LIVE'
@@ -16,27 +16,30 @@ export function StatusPill({ status }: { status: UiStatus }) {
     LIVE: { bg: 'rgba(201,183,135,0.15)', color: '#c9b787' },
     DEMO: { bg: 'rgba(229,210,158,0.12)', color: '#e5d29e' },
     UNAVAILABLE: { bg: 'rgba(94,94,94,0.16)', color: '#a8a8a8' },
-    GATED: { bg: 'rgba(94,94,94,0.15)', color: '#5e5e5e' },
+    GATED: { bg: 'rgba(94,94,94,0.15)', color: '#d0cec8' },
     APPROVED: { bg: 'rgba(201,183,135,0.15)', color: '#c9b787' },
-    ROADMAP: { bg: 'rgba(94,94,94,0.15)', color: '#5e5e5e' },
+    ROADMAP: { bg: 'rgba(94,94,94,0.15)', color: '#d0cec8' },
     WARN: { bg: 'rgba(201,183,135,0.15)', color: '#c9b787' },
     ERROR: { bg: 'rgba(245,245,245,0.12)', color: '#f5f5f5' },
-    CONNECTING: { bg: 'rgba(94,94,94,0.15)', color: '#5e5e5e' },
+    CONNECTING: { bg: 'rgba(94,94,94,0.15)', color: '#d0cec8' },
   };
-  const s = styles[status] ?? styles.LIVE;
+  const displayStatus = Object.prototype.hasOwnProperty.call(styles, status)
+    ? status
+    : 'UNAVAILABLE';
+  const s = styles[displayStatus];
   return (
     <span
-      data-status-pill={status}
+      data-status-pill={displayStatus}
       className="inline-flex shrink-0 whitespace-nowrap items-center gap-1 px-2 py-0.5 rounded text-xs font-mono font-medium"
       style={{ backgroundColor: s.bg, color: s.color }}
     >
-      {status === 'LIVE' && (
+      {displayStatus === 'LIVE' && (
         <span
           className="w-1.5 h-1.5 rounded-full animate-pulse"
           style={{ backgroundColor: s.color }}
         />
       )}
-      {status}
+      {displayStatus}
     </span>
   );
 }
