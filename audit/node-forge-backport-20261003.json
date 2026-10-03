@@ -1,0 +1,40 @@
+{
+  "schema_version": 1,
+  "input_source_head": "d887bacbf34ce6a58bd6c16c211bebc79cb20075",
+  "release_status": "BLOCKED",
+  "upstream": {
+    "pull_request": "https://github.com/digitalbazaar/forge/pull/1152",
+    "revision": "ceba34402e329f0365134f23fe19898756527d65",
+    "rsa_source_url": "https://raw.githubusercontent.com/digitalbazaar/forge/ceba34402e329f0365134f23fe19898756527d65/lib/rsa.js",
+    "rsa_sha256": "acc22e5d36e27832c34e02dd3933aad7977d45b047eead5016520735efedc9c5"
+  },
+  "patch": {
+    "path": "patches/node-forge@1.4.0.patch",
+    "sha256": "533aae294734f889198054869a95df727a279a8162aa9341ab0b1ef4de494f42"
+  },
+  "node_forge": {
+    "name": "node-forge",
+    "version": "1.4.0",
+    "license": "(BSD-3-Clause OR GPL-2.0)",
+    "tarball_url": "https://registry.npmjs.org/node-forge/-/node-forge-1.4.0.tgz",
+    "registry_integrity": "sha512-LarFH0+6VfriEhqMMcLX2F7SwSXeWwnEAJEsYm5QKWchiVYVvJyV9v7UDvUv+w5HO23ZpQTXDv/GxdDdMyOuoQ==",
+    "tarball_sha256": "bf9d7ca0d774235354697bd4b5e642af6505e7ce2066762c3b855138cf870820",
+    "pristine_rsa_sha256": "fd4740238145ec26470eb3f06a627c72039538ce1307dbdce40521f94dfd0a50",
+    "installed_patched_rsa_sha256": "acc22e5d36e27832c34e02dd3933aad7977d45b047eead5016520735efedc9c5"
+  },
+  "expo_certificates": {
+    "name": "@expo/code-signing-certificates",
+    "version": "0.0.6",
+    "license": "MIT",
+    "source_revision": "83f39c0e8f9c2833571951f3fc21464c9df4bcaf",
+    "tarball_url": "https://registry.npmjs.org/@expo/code-signing-certificates/-/code-signing-certificates-0.0.6.tgz",
+    "registry_integrity": "sha512-iNe0puxwBNEcuua9gmTGzq+SuMDa0iATai1FlFTMHJ/vUmKvN/V//drXoLJkVb5i5H3iE/n/qIJxyoBnXouD0w==",
+    "tarball_sha256": "0460d57dd2f7d6839e95a42495f2339b6d950c8e171ae6e54778cb594f8fb582"
+  },
+  "limits": [
+    "The upstream fix is prior art, not an original SZL cryptographic invention.",
+    "The package retains its published name, version and registry integrity.",
+    "Strict audit and Grype continue to report the original affected version.",
+    "Local regression evidence is not mobile integration, deployment or an external release witness."
+  ]
+}

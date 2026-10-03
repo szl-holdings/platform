@@ -1,278 +1,189 @@
-import { Link } from 'wouter';
 import { Layout } from '../components/layout';
-import { PageHeader, Card, SectionTitle, KpiCard, InfoRow, StatusBadge } from '../components/ui';
-
-const BASE = (import.meta.env.BASE_URL ?? '/a11oy/').replace(/\/$/, '');
-const link = (path: string) => `${BASE}${path}`;
+import { PageHeader, Card, SectionTitle, KpiCard, StatusBadge } from '../components/ui';
 
 const T = {
-  surface: 'rgba(255,255,255,0.025)',
   border: 'rgba(255,255,255,0.08)',
   text: '#f5f5f5',
   textDim: '#8a8a8a',
   textMuted: '#5e5e5e',
   accent: '#c9b787',
   mono: "ui-monospace, SFMono-Regular, 'SF Mono', Menlo, monospace",
-  serif: "Georgia, 'Times New Roman', Times, serif",
 };
 
-type Cert = {
+type FrameworkTarget = {
   name: string;
-  framework: string;
-  status: 'in-place' | 'attested' | 'in-progress' | 'roadmap';
-  scope: string;
-  refresh: string;
-  evidence: string;
+  intent: string;
+  evidenceGate: string;
 };
 
-const CERTS: Cert[] = [
-  { name: 'SOC 2 Type II', framework: 'AICPA TSC', status: 'attested', scope: 'Security · Availability · Confidentiality', refresh: 'Annual · next 2026-09', evidence: 'Trust Exchange · NDA' },
-  { name: 'ISO/IEC 27001:2022', framework: 'ISO', status: 'attested', scope: 'A11oy platform · sub-processors', refresh: 'Surveillance audit annual', evidence: 'Trust Exchange · NDA' },
-  { name: 'ISO/IEC 42001:2023', framework: 'ISO AI Management', status: 'in-progress', scope: 'A11oy AI management system', refresh: 'Stage-2 audit Q3 2026', evidence: 'Compass dashboard' },
-  { name: 'EU AI Act conformance', framework: 'Regulation (EU) 2024/1689', status: 'in-place', scope: 'High-risk + GPAI obligations', refresh: 'Continuous control mapping', evidence: 'Compass · Trust Exchange' },
-  { name: 'NIST AI RMF 1.0', framework: 'NIST', status: 'in-place', scope: 'Govern · Map · Measure · Manage', refresh: 'Quarterly self-attestation', evidence: 'Compass dashboard' },
-  { name: 'CSA AI Trustworthy Pledge', framework: 'CSA AICM', status: 'attested', scope: 'Agentic profile control set', refresh: 'Annual self-assessment', evidence: 'Public Trust Portal' },
-  { name: 'HIPAA technical safeguards', framework: 'HHS 45 CFR 164.312', status: 'in-place', scope: 'PHI-handling tenants only', refresh: 'BAA on file · annual review', evidence: 'Trust Exchange · BAA' },
-  { name: 'FedRAMP Moderate alignment', framework: 'FedRAMP', status: 'in-progress', scope: 'GovCloud isolation tenancy', refresh: '3PAO assessment Q4 2026', evidence: 'Sovereign tenancy briefing' },
+const FRAMEWORK_TARGETS: FrameworkTarget[] = [
+  { name: 'SOC 2 Type II', intent: 'Readiness target', evidenceGate: 'Independent audit report and scope required before any attestation claim.' },
+  { name: 'ISO/IEC 27001:2022', intent: 'Readiness target', evidenceGate: 'Accredited certificate and scope required before any certification claim.' },
+  { name: 'ISO/IEC 42001:2023', intent: 'Evaluation target', evidenceGate: 'Audited AI management system evidence required.' },
+  { name: 'EU AI Act', intent: 'Legal review target', evidenceGate: 'Product-specific obligation mapping and counsel review required.' },
+  { name: 'NIST AI RMF 1.0', intent: 'Mapping target', evidenceGate: 'Dated control mapping and effectiveness evidence required.' },
+  { name: 'CSA AI Controls Matrix', intent: 'Mapping target', evidenceGate: 'Completed control assessment and supporting evidence required.' },
+  { name: 'HIPAA technical safeguards', intent: 'Legal review target', evidenceGate: 'Scoped PHI flows, safeguards assessment, and contract review required.' },
+  { name: 'FedRAMP Moderate', intent: 'Future evaluation', evidenceGate: 'Authorization package and agency decision required before status claim.' },
 ];
 
-type ControlDomain = {
+type ControlTarget = {
   id: string;
   name: string;
-  posture: string;
-  controls: { name: string; detail: string }[];
+  designGoal: string;
+  evidenceNeeded: string;
 };
 
-const DOMAINS: ControlDomain[] = [
+const CONTROL_TARGETS: ControlTarget[] = [
   {
     id: 'crypto',
     name: 'Cryptography & Key Management',
-    posture: 'Hybrid-PQC by default; classical fallback only on legacy connectors with recorded exceptions.',
-    controls: [
-      { name: 'Data at rest', detail: 'AES-256-GCM with envelope encryption; per-tenant data-encryption keys.' },
-      { name: 'Data in transit', detail: 'TLS 1.3; ML-KEM-1024 hybrid where peer supports; mTLS for agent-to-agent.' },
-      { name: 'Secrets', detail: 'Sealed in HSM-backed vault; access requires authenticated session + covenant policy.' },
-      { name: 'Signing', detail: 'ML-DSA-65 for proof-ledger signatures (hybrid w/ Ed25519 during transition).' },
-      { name: 'Key rotation', detail: 'Tenant DEK ≤ 90 days · KEK ≤ 365 days · platform signing ≤ 180 days; rotation events on the proof ledger.' },
-    ],
+    designGoal: 'Define transport, storage, signing, custody, and rotation controls for each deployed environment.',
+    evidenceNeeded: 'Deployment-bound configuration, key inventory, and independent test results.',
   },
   {
     id: 'access',
     name: 'Identity & Access',
-    posture: 'Zero-trust by construction. No agent or operator carries standing credentials beyond compartment scope.',
-    controls: [
-      { name: 'Operator MFA', detail: 'WebAuthn required; TOTP fallback with session-scoped policy override.' },
-      { name: 'SSO', detail: 'SAML 2.0 + OIDC; SCIM 2.0 for provisioning.' },
-      { name: 'Agent identity', detail: 'Workload identities issued via Agent Identity Registry; PUF-bound on hardware-trust tier.' },
-      { name: 'Just-in-time elevation', detail: 'Operator privilege escalations require typed approval and expire ≤ 4h.' },
-      { name: 'Session', detail: 'Server-side revocation; toast-driven client refresh; idle ≤ 30m, hard ceiling 12h.' },
-    ],
+    designGoal: 'Define operator identity, least privilege, and approval boundaries.',
+    evidenceNeeded: 'IdP configuration, role tests, and dated access review.',
   },
   {
     id: 'data',
     name: 'Data Handling & Residency',
-    posture: 'Data residency is contractual. No cross-region replication without an authored covenant policy.',
-    controls: [
-      { name: 'Regions', detail: 'us-east, us-gov, eu-central, ap-southeast; Sovereign tenancy is single-region.' },
-      { name: 'Tenant isolation', detail: 'Per-tenant DEK, per-tenant connector firewall scopes, hardware compartment on premium tier.' },
-      { name: 'PII tagging', detail: 'Automatic detection on ingress; redaction policies enforced before model invocation.' },
-      { name: 'Retention', detail: 'Configurable 30 days – 7 years; legal hold supported.' },
-      { name: 'Deletion', detail: 'Right-to-delete fulfilled within 30 days; tombstone retained on the proof ledger.' },
-    ],
+    designGoal: 'Define tenant, region, retention, and deletion boundaries before customer use.',
+    evidenceNeeded: 'Data-flow inventory, tenant isolation tests, and region-specific deployment records.',
   },
   {
     id: 'platform',
     name: 'Platform Security',
-    posture: 'Defense in depth across host, network, application, and agent compartment layers.',
-    controls: [
-      { name: 'Network', detail: 'Egress allow-list per connector; private endpoints for sub-processors.' },
-      { name: 'Container', detail: 'Distroless images, signed via cosign, attested in supply-chain ledger.' },
-      { name: 'Vuln management', detail: 'CVE SLA · critical 24h, high 7d, medium 30d; auto-PR via Dependabot/Renovate.' },
-      { name: 'SAST/DAST', detail: 'Pre-merge SAST + secret scan; nightly DAST with proof-ledger-anchored findings.' },
-      { name: 'SBOM', detail: 'CycloneDX SBOM published per release; Agent-BOM published per agent class.' },
-    ],
+    designGoal: 'Run source and dependency checks for each release candidate.',
+    evidenceNeeded: 'Exact-head CI runs, reviewed findings, and released artifact provenance.',
   },
   {
     id: 'agent',
     name: 'Agent Safety & Alignment',
-    posture: 'No model runs in production without passing the Alignment Review Gate. Bypass is impossible.',
-    controls: [
-      { name: 'Pre-promotion eval', detail: 'MirrorEval, Robustness Wall, Constitution test suite required to pass.' },
-      { name: 'Reward-hacking watchdog', detail: 'Behavioral Audit + Verifier Agent flag deceptive or shortcut reasoning.' },
-      { name: 'Red-team', detail: 'Continuous adversarial probes; findings anchored on the proof ledger.' },
-      { name: 'Welfare', detail: 'Agent telemetry monitored; intervention playbooks on signal thresholds.' },
-      { name: 'Kill-switch', detail: 'Per-agent and platform-wide; recorded on actuation; no silent reactivation.' },
-    ],
+    designGoal: 'Require policy and human review before an agent can make an external change.',
+    evidenceNeeded: 'Fail-closed runtime tests and action receipts bound to the deployed revision.',
   },
   {
     id: 'incident',
     name: 'Incident Response & Disclosure',
-    posture: 'Acknowledge fast, communicate often, disclose under embargo only when there is an active in-the-wild exploit.',
-    controls: [
-      { name: 'Detection', detail: '24/7 SOC; mean time to detect P1 ≤ 15 minutes (rolling 90-day).' },
-      { name: 'Notification SLA', detail: 'Customer notification within 24h of confirmed material incident; written follow-up within 72h.' },
-      { name: 'Coordinated disclosure', detail: 'CAVD anchored intake within 24h; staged public disclosure on remediation.' },
-      { name: 'Post-mortem', detail: 'Public-facing PMI within 14d for P1; internal RCA within 7d for all severities.' },
-      { name: 'Drills', detail: 'Quarterly tabletop + annual chaos exercise; results in 90-Day Transparency Report.' },
-    ],
+    designGoal: 'Define intake, escalation, customer notice, and disclosure procedures.',
+    evidenceNeeded: 'Approved runbooks, dated exercises, and applicable contract terms.',
   },
 ];
 
-const STATUS_LABELS: Record<Cert['status'], { label: string; status: 'ok' | 'info' | 'warn' }> = {
-  attested: { label: 'ATTESTED', status: 'ok' },
-  'in-place': { label: 'IN PLACE', status: 'ok' },
-  'in-progress': { label: 'IN PROGRESS', status: 'info' },
-  roadmap: { label: 'ROADMAP', status: 'warn' },
-};
-
 export function SecurityCompliance() {
-  const attested = CERTS.filter((c) => c.status === 'attested' || c.status === 'in-place').length;
-
   return (
     <Layout>
       <PageHeader
         label="TRUST · SECURITY & COMPLIANCE"
         title="Security and Compliance"
-        subtitle="The runtime posture of the A11oy platform. Frameworks, controls, and SLAs the platform commits to and the surfaces where each commitment is observable."
-        status="LIVE"
+        subtitle="A11oy security and compliance design targets. Certification, runtime control effectiveness, incident SLAs, and customer-specific attestations require separate evidence."
+        status="DEMO"
       />
 
-      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-6">
-        <KpiCard label="ATTESTATIONS" value={`${attested}/${CERTS.length}`} sub="active or in-place" accent={T.accent} />
-        <KpiCard label="P1 NOTIFY SLA" value="≤ 24h" sub="confirmed material" accent={T.accent} />
-        <KpiCard label="CVE · CRITICAL" value="≤ 24h" sub="patch SLA" accent={T.accent} />
-        <KpiCard label="ENCRYPTION" value="HYBRID-PQC" sub="ML-KEM + AES-256-GCM" accent={T.accent} />
+      <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-3 mb-6">
+        <KpiCard label="CERTIFICATIONS" value="UNAVAILABLE" sub="No certificate connected" accent={T.accent} />
+        <KpiCard label="AUDIT OPINION" value="UNAVAILABLE" sub="No scoped report connected" accent={T.accent} />
+        <KpiCard label="RUNTIME CONTROLS" value="UNAVAILABLE" sub="No deployed evidence feed" accent={T.accent} />
+        <KpiCard label="INCIDENT SLA" value="UNAVAILABLE" sub="No verified service result" accent={T.accent} />
       </div>
 
       <Card className="mb-6">
-        <div style={{ padding: '1.5rem' }}>
-          <p style={{ fontFamily: T.serif, fontSize: '1rem', lineHeight: 1.7, color: T.text, margin: 0, marginBottom: '0.75rem' }}>
-            Security is not a posture page. It is the runtime layer between every signal and every executed decision.
-          </p>
-          <p style={{ fontFamily: T.serif, fontSize: '0.9375rem', lineHeight: 1.7, color: T.textDim, margin: 0 }}>
-            Each control below is observable on a runtime surface. Each framework below is mapped, control-by-control, in the Compliance Compass. Customers may inspect their own evidence at any time through the Right to Audit.
-          </p>
-          <div style={{ display: 'flex', gap: '0.5rem', marginTop: '1.25rem', flexWrap: 'wrap' }}>
-            <Link href={link('/compass')} style={{ textDecoration: 'none' }}>
-              <StatusBadge status="ok" label="COMPASS · CONTROL MAP" />
-            </Link>
-            <Link href={link('/right-to-audit')} style={{ textDecoration: 'none' }}>
-              <StatusBadge status="info" label="RIGHT TO AUDIT" />
-            </Link>
-            <Link href={link('/trust-portal')} style={{ textDecoration: 'none' }}>
-              <StatusBadge status="info" label="PUBLIC TRUST PORTAL" />
-            </Link>
-          </div>
-        </div>
+        <p className="text-sm" style={{ color: T.text }}>
+          This page is a readiness map for an active prototype. It does not assert SOC 2 or ISO
+          certification, HIPAA compliance, FedRAMP authorization, legal conformance, or operation
+          of the controls below. A route or source definition alone cannot establish those states.
+        </p>
       </Card>
 
-      <SectionTitle>Attestations & Frameworks</SectionTitle>
-      <Card className="mb-6">
+      <SectionTitle>Framework Evaluation Targets</SectionTitle>
+      <div className="grid gap-2 mb-6 md:hidden">
+        {FRAMEWORK_TARGETS.map(target => (
+          <Card key={target.name}>
+            <div className="flex items-start justify-between gap-3">
+              <div>
+                <div className="text-[10px] font-mono uppercase" style={{ color: T.textMuted }}>Framework</div>
+                <div className="text-sm font-medium" style={{ color: T.text }}>{target.name}</div>
+              </div>
+              <div className="shrink-0 text-right">
+                <div className="text-[10px] font-mono uppercase mb-1" style={{ color: T.textMuted }}>Status</div>
+                <StatusBadge status="warn" label="UNVERIFIED" />
+              </div>
+            </div>
+            <div className="mt-3 pt-3 grid gap-2 text-xs" style={{ borderTop: '1px solid ' + T.border }}>
+              <div>
+                <div className="text-[10px] font-mono uppercase" style={{ color: T.textMuted }}>Intent</div>
+                <div style={{ color: T.textDim }}>{target.intent}</div>
+              </div>
+              <div>
+                <div className="text-[10px] font-mono uppercase" style={{ color: T.textMuted }}>Evidence required</div>
+                <div style={{ color: T.textDim }}>{target.evidenceGate}</div>
+              </div>
+            </div>
+          </Card>
+        ))}
+      </div>
+      <Card className="mb-6 hidden md:block">
         <div style={{ overflowX: 'auto' }}>
-          <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+          <table style={{ width: '100%', minWidth: '720px', borderCollapse: 'collapse' }}>
             <thead>
-              <tr style={{ borderBottom: `1px solid ${T.border}` }}>
-                {['Standard', 'Framework', 'Status', 'Scope', 'Refresh', 'Evidence'].map((h) => (
-                  <th key={h} style={{
+              <tr style={{ borderBottom: '1px solid ' + T.border }}>
+                {['Framework', 'Intent', 'Status', 'Evidence required'].map(heading => (
+                  <th key={heading} style={{
                     textAlign: 'left', padding: '0.875rem 1rem',
                     fontFamily: T.mono, fontSize: '0.625rem',
                     color: T.textMuted, textTransform: 'uppercase', letterSpacing: '0.14em',
-                  }}>{h}</th>
+                  }}>{heading}</th>
                 ))}
               </tr>
             </thead>
             <tbody>
-              {CERTS.map((c) => {
-                const sl = STATUS_LABELS[c.status];
-                return (
-                  <tr key={c.name} style={{ borderBottom: `1px solid ${T.border}` }}>
-                    <td style={{ padding: '0.875rem 1rem', fontSize: '0.875rem', color: T.text, fontWeight: 500 }}>{c.name}</td>
-                    <td style={{ padding: '0.875rem 1rem', fontSize: '0.8125rem', color: T.textDim }}>{c.framework}</td>
-                    <td style={{ padding: '0.875rem 1rem' }}><StatusBadge status={sl.status} label={sl.label} /></td>
-                    <td style={{ padding: '0.875rem 1rem', fontSize: '0.8125rem', color: T.textDim }}>{c.scope}</td>
-                    <td style={{ padding: '0.875rem 1rem', fontSize: '0.8125rem', color: T.textDim }}>{c.refresh}</td>
-                    <td style={{ padding: '0.875rem 1rem', fontSize: '0.8125rem', color: T.textDim }}>{c.evidence}</td>
-                  </tr>
-                );
-              })}
+              {FRAMEWORK_TARGETS.map(target => (
+                <tr key={target.name} style={{ borderBottom: '1px solid ' + T.border }}>
+                  <td style={{ padding: '0.875rem 1rem', fontSize: '0.875rem', color: T.text, fontWeight: 500 }}>{target.name}</td>
+                  <td style={{ padding: '0.875rem 1rem', fontSize: '0.8125rem', color: T.textDim }}>{target.intent}</td>
+                  <td style={{ padding: '0.875rem 1rem' }}><StatusBadge status="warn" label="UNVERIFIED" /></td>
+                  <td style={{ padding: '0.875rem 1rem', fontSize: '0.8125rem', color: T.textDim }}>{target.evidenceGate}</td>
+                </tr>
+              ))}
             </tbody>
           </table>
         </div>
       </Card>
 
-      <SectionTitle>Control Domains</SectionTitle>
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(420px, 1fr))', gap: '0.75rem', marginBottom: '2rem' }}>
-        {DOMAINS.map((d) => (
-          <Card key={d.id}>
-            <div style={{ padding: '1.25rem 1.5rem' }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '0.625rem', marginBottom: '0.5rem' }}>
-                <span style={{
-                  fontFamily: T.mono, fontSize: '0.625rem', letterSpacing: '0.14em',
-                  color: T.accent, textTransform: 'uppercase',
-                }}>{d.id}</span>
-              </div>
-              <h3 style={{
-                fontFamily: T.serif, fontSize: '1.1875rem', fontWeight: 400,
-                color: T.text, margin: 0, marginBottom: '0.625rem', letterSpacing: '-0.01em',
-              }}>{d.name}</h3>
-              <p style={{
-                fontSize: '0.8125rem', lineHeight: 1.65, color: T.textDim,
-                margin: 0, marginBottom: '1rem', paddingBottom: '1rem', borderBottom: `1px solid ${T.border}`,
-              }}>{d.posture}</p>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '0.625rem' }}>
-                {d.controls.map((c) => (
-                  <div key={c.name}>
-                    <div style={{
-                      fontFamily: T.mono, fontSize: '0.625rem', color: T.accent,
-                      textTransform: 'uppercase', letterSpacing: '0.12em', marginBottom: '0.1875rem',
-                    }}>{c.name}</div>
-                    <div style={{ fontSize: '0.8125rem', lineHeight: 1.55, color: T.text }}>{c.detail}</div>
-                  </div>
-                ))}
+      <SectionTitle>Control Evidence Plan</SectionTitle>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 360px), 1fr))', gap: '0.75rem', marginBottom: '2rem' }}>
+        {CONTROL_TARGETS.map(target => (
+          <Card key={target.id}>
+            <div style={{ padding: '0.25rem 0.5rem' }}>
+              <div style={{
+                fontFamily: T.mono, fontSize: '0.625rem', letterSpacing: '0.14em',
+                color: T.accent, textTransform: 'uppercase',
+              }}>{target.id} · DESIGN TARGET</div>
+              <h3 style={{ fontSize: '1.125rem', color: T.text, margin: '0.625rem 0' }}>{target.name}</h3>
+              <p style={{ fontSize: '0.8125rem', lineHeight: 1.65, color: T.textDim, marginBottom: '0.75rem' }}>
+                {target.designGoal}
+              </p>
+              <div style={{ borderTop: '1px solid ' + T.border, paddingTop: '0.75rem' }}>
+                <span style={{ fontSize: '0.6875rem', fontFamily: T.mono, color: T.accent }}>EVIDENCE NEEDED</span>
+                <p style={{ fontSize: '0.8125rem', lineHeight: 1.55, color: T.text, marginTop: '0.25rem' }}>
+                  {target.evidenceNeeded}
+                </p>
               </div>
             </div>
           </Card>
         ))}
       </div>
 
-      <SectionTitle>Sub-processors & Supply Chain</SectionTitle>
-      <Card className="mb-6">
-        <div style={{ padding: '1.25rem' }}>
-          <InfoRow label="Sub-processor list" value={<Link href={link('/agent-bom')} style={{ color: T.accent, textDecoration: 'none' }}>Agent-BOM (CycloneDX) →</Link>} />
-          <InfoRow label="Sub-processor change notice" value="30 days advance written notice to customers; right of objection per DPA" />
-          <InfoRow label="Hardware-trust posture" value={<Link href={link('/compartments')} style={{ color: T.accent, textDecoration: 'none' }}>Capability Compartments →</Link>} />
-          <InfoRow label="Connector firewall scopes" value={<Link href={link('/connectors')} style={{ color: T.accent, textDecoration: 'none' }}>Connector Firewall →</Link>} />
-          <InfoRow label="Supply-chain attestation" value={<Link href={link('/supply-chain')} style={{ color: T.accent, textDecoration: 'none' }}>Supply Chain →</Link>} />
-        </div>
-      </Card>
-
-      <SectionTitle>Coordinated Disclosure & Defender Program</SectionTitle>
+      <SectionTitle>Disclosure Readiness</SectionTitle>
       <Card>
-        <div style={{ padding: '1.25rem' }}>
-          <p style={{ fontSize: '0.875rem', lineHeight: 1.7, color: T.text, margin: 0, marginBottom: '1rem' }}>
-            Vulnerabilities, model failures, and policy circumventions are intake under the Coordinated Agent Vulnerability Disclosure (CAVD) program. Anchored intake within 24 hours; staged public disclosure on remediation; defender credit pool active.
-          </p>
-          <div style={{ display: 'flex', gap: '0.625rem', flexWrap: 'wrap' }}>
-            <Link href={link('/cavd')} style={{
-              padding: '0.625rem 1rem', background: 'rgba(201,183,135,0.08)',
-              border: `1px solid rgba(201,183,135,0.25)`, borderRadius: 8,
-              fontFamily: T.mono, fontSize: '0.6875rem', color: T.accent,
-              textDecoration: 'none', textTransform: 'uppercase', letterSpacing: '0.12em',
-            }}>CAVD Intake →</Link>
-            <Link href={link('/defender-credits')} style={{
-              padding: '0.625rem 1rem', background: 'transparent',
-              border: `1px solid ${T.border}`, borderRadius: 8,
-              fontFamily: T.mono, fontSize: '0.6875rem', color: T.text,
-              textDecoration: 'none', textTransform: 'uppercase', letterSpacing: '0.12em',
-            }}>Defender Credit Pool →</Link>
-            <Link href={link('/transparency-report')} style={{
-              padding: '0.625rem 1rem', background: 'transparent',
-              border: `1px solid ${T.border}`, borderRadius: 8,
-              fontFamily: T.mono, fontSize: '0.6875rem', color: T.text,
-              textDecoration: 'none', textTransform: 'uppercase', letterSpacing: '0.12em',
-            }}>90-Day Report →</Link>
-          </div>
-        </div>
+        <p className="text-sm" style={{ color: T.textDim }}>
+          A disclosure intake and defender workflow are design targets. No active intake SLA,
+          defender credit program, customer notification guarantee, or completed transparency
+          report is evidenced on this page.
+        </p>
       </Card>
     </Layout>
   );

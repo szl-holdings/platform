@@ -1,10 +1,69 @@
 # SZL Holdings — Known Gaps Register (Security & Operations)
 
-**Last updated:** 2026-09-30 (rev 30 — P0 proof and separate live readiness boundaries)
+**Last updated:** 2026-10-03 (rev 35 — hosted backport evidence and scoped claim correction)
 **Owner:** Engineering / DevOps  
 **Audience:** Enterprise architects, Series A technical advisors, incoming VP Engineering
 
 This document is the canonical reference for known security, quality, and compliance gaps in the SZL Holdings platform. It consolidates findings from the internal risk register, the April 2026 hardening sprint, and the secrets remediation audit.
+
+---
+
+## 2026-10-02 cyber evidence workcell
+
+**2026-10-03 update — MEASURED local dependency repair; release BLOCKED:**
+`node-forge@1.4.0` has a provenance-bound pnpm backport of upstream PR #1152.
+An isolated pnpm installation passed 13 RSA and Expo certificate/CSR regressions,
+including original-package acceptance and repaired-package rejection of the
+same malformed nested DigestAlgorithm structures. The package name, version,
+registry integrity and license remain unchanged. The existing security workflow
+now requires the installed-byte guard and a hash-verified pristine control.
+**MEASURED hosted readback:** signed source
+`94f7da7b1e9e9b5f8accd7bdedad88dea10116b5` passed the
+[pristine-control and installed-byte/Expo regression steps](https://github.com/szl-holdings/platform/actions/runs/37102544409/job/111144765531).
+Its strict dependency audit, Grype and Security Gate remain **BLOCKED**. Native
+mobile integration, an external release witness, and hosted CI for a later
+prose successor remain **UNKNOWN**. The published advisory range and all
+security gates remain in force; no release pass is claimed. See
+[`NODE_FORGE_BACKPORT_20261003.md`](../../audit/NODE_FORGE_BACKPORT_20261003.md).
+
+The current A11oy cyber-resilience, governed-security-agent, and security-and-compliance
+pages now label source examples as `DEMO` and missing runtime results as
+`UNAVAILABLE` or `UNVERIFIED`. The readiness-security collector requires an
+observed inventory, exact default-branch head, recent successful workflow
+runs, and a readable security contact. Its release signature check remains
+`UNVERIFIED` because release asset names are not cryptographic verification;
+`GREEN` therefore cannot be reached through that metadata-only path.
+
+The cyber tool-mesh scan, alert escalation, compliance assessment, and
+vulnerability report lack a trusted tenant/target binding and result read-back.
+Their manifests are now disabled at the gateway, and direct handler calls
+reject before database access. They remain blocked until a real adapter and
+scoped evidence contract are supplied. No SIEM/EDR
+integration, containment effect, certification, incident SLA, customer witness,
+or production deployment is established by this workcell. Other A11oy security
+routes can still contain older operational copy; the corrected compliance page
+does not link to those routes as evidence. The six buyer-lane and shared work
+function gates are in
+[`CROSS_LANE_EVIDENCE_REGISTER_20261002.md`](CROSS_LANE_EVIDENCE_REGISTER_20261002.md).
+
+The tool-mesh package TypeScript check also remains blocked by the
+same eight `TS6305` missing referenced declarations observed before and after
+the cyber patch; its passing Vitest suite is not a typecheck substitute.
+
+Local tests, build, and screenshots establish source behavior only. The hosted
+checks at `df984acc8b6fe00dfbc993a81a78d175d2b2b3af` failed: the dependency
+scan, Grype, and Security Gate report the high-severity `node-forge` advisory
+[`GHSA-86w9-cpqp-85rv`](https://github.com/advisories/GHSA-86w9-cpqp-85rv)
+with no patched version published; the unit suite and
+Runtime Audit report a pre-existing cross-process Atelier file race. These
+failures cannot be treated as a release pass. A signed successor
+`658ecb845db75b0f83f2e259c84fcd87d595833a` repairs the local file race;
+its focused Atelier tests and package typecheck passed, and the hosted unit suite
+passed at `7e7962a8c8050057f09d494f02087fe56283a05b`. The high-severity
+dependency gate still fails on that head. Protected merge, provider
+publication, deployed route read-back, and an outside functional witness remain
+separate, unverified gates. The dated proof packet is
+[`CYBER_LANE_EXECUTION_20261002.md`](CYBER_LANE_EXECUTION_20261002.md).
 
 ---
 
