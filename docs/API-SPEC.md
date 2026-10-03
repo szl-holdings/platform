@@ -21,7 +21,7 @@ See `DATA-MODEL.md` for schema and table counts; `ARCHITECTURE.md` for system to
 |---|---:|---|---|
 | TypeScript route declarations across scanned workspace roots | UNAVAILABLE | UNAVAILABLE | runtime router inventory is unavailable in `artifacts/SOURCE_OF_TRUTH.json` |
 | Tracked route modules under `artifacts/api-server/src/routes` | 1 | MEASURED | repository tree at truth-lock commit |
-| OpenAPI operations | 5,065 | MEASURED | OpenAPI 3.1 operations in `lib/api-spec/openapi.yaml`, locked by `artifacts/SOURCE_OF_TRUTH.json` |
+| OpenAPI operations | 5,066 | MEASURED | OpenAPI 3.1 operations in `lib/api-spec/openapi.yaml`, locked by `artifacts/SOURCE_OF_TRUTH.json` |
 | OpenAPI path coverage | UNAVAILABLE | UNKNOWN | no current generated path-coverage receipt |
 | GraphQL type count | UNAVAILABLE | UNKNOWN | no current generated schema receipt |
 
@@ -64,7 +64,7 @@ artifact-server route module. The host mount is not inferred here.
 
 ### REST Endpoints
 
-The API contract defines **5,065 REST operations** across **4,071 paths** in `lib/api-spec/openapi.yaml`, rendered into `API-CATALOGUE.md` by `pnpm docs:generate`.
+The API contract defines **5,066 REST operations** across **4,090 paths** in `lib/api-spec/openapi.yaml`, rendered into `API-CATALOGUE.md` by `pnpm docs:generate`.
 Each route file maps to a distinct product domain (e.g. `agents.ts`, `terra.ts`, `vessels.ts`).
 Endpoints follow the pattern `/api/<domain>/<resource>[/:id]` and are versioned via path prefix when needed.
 

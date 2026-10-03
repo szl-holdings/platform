@@ -1,6 +1,10 @@
 #!/usr/bin/env node
+import {
+  type AtelierProofweaveRequest,
+  verifyAtelierProofweaveResponse,
+} from '@szl-holdings/a11oy-atelier/proofweave-verifier';
 import { randomUUID } from 'node:crypto';
-import { Command } from 'commander';
+import { Command, InvalidArgumentError } from 'commander';
 import fetch from 'node-fetch';
 
 const program = new Command();
@@ -10,6 +14,14 @@ const baseUrl = (process.env.A11OY_ATELIER_API_BASE_URL ?? 'http://127.0.0.1:808
 );
 const apiKey = process.env.A11OY_API_KEY ?? process.env.ALLOY_API_KEY ?? '';
 const defaultTenant = process.env.A11OY_ATELIER_TENANT_ID ?? 'default';
+const REQUEST_TIMEOUT_MS = 30_000;
+
+type ProofweaveClaimKind = 'FACT' | 'INFERENCE' | 'RECOMMENDATION';
+
+interface TypedClaim {
+  kind: ProofweaveClaimKind;
+  statement: string;
+}
 
 // biome-ignore lint/suspicious/noControlCharactersInRegex: ANSI CSI escapes are untrusted terminal control data.
 const ANSI_ESCAPE = /\u001B\[[0-?]*[ -/]*[@-~]/g;
@@ -21,6 +33,61 @@ function sanitizeTerminal(value: string): string {
       return code === 9 || code === 10 || code === 13 || (code >= 32 && code !== 127);
     })
     .join('');
+}
+
+function collectTypedClaim(value: string, previous: TypedClaim[] = []): TypedClaim[] {
+  if (previous.length >= 12) {
+    throw new InvalidArgumentError('At most 12 claims may be declared.');
+  }
+  const separator = value.indexOf(':');
+  const kind = value.slice(0, separator).trim().toUpperCase();
+  const statement = value.slice(separator + 1).trim();
+  if (
+    separator <= 0 ||
+    !['FACT', 'INFERENCE', 'RECOMMENDATION'].includes(kind) ||
+    statement.length === 0
+  ) {
+    throw new InvalidArgumentError(
+      'Claims must use KIND:statement where KIND is FACT, INFERENCE, or RECOMMENDATION.',
+    );
+  }
+  return [...previous, { kind: kind as ProofweaveClaimKind, statement }];
+}
+
+function parseIntegerInRange(
+  value: string,
+  minimum: number,
+  maximum: number,
+  label: string,
+): number {
+  if (!/^\d+$/.test(value)) {
+    throw new InvalidArgumentError(`${label} must be an integer from ${minimum} to ${maximum}.`);
+  }
+  const parsed = Number(value);
+  if (!Number.isSafeInteger(parsed) || parsed < minimum || parsed > maximum) {
+    throw new InvalidArgumentError(`${label} must be an integer from ${minimum} to ${maximum}.`);
+  }
+  return parsed;
+}
+
+function parseCost(value: string): number {
+  const parsed = Number(value);
+  if (!Number.isFinite(parsed) || parsed < 0 || parsed > 100) {
+    throw new InvalidArgumentError('Maximum cost must be a finite number from 0 to 100.');
+  }
+  return parsed;
+}
+
+function parseOutputFormat(value: string): 'BRIEF' | 'TECHNICAL_REPORT' | 'DECISION_MEMO' {
+  const format = value.toUpperCase();
+  if (!['BRIEF', 'TECHNICAL_REPORT', 'DECISION_MEMO'].includes(format)) {
+    throw new InvalidArgumentError('Format must be BRIEF, TECHNICAL_REPORT, or DECISION_MEMO.');
+  }
+  return format as 'BRIEF' | 'TECHNICAL_REPORT' | 'DECISION_MEMO';
+}
+
+function record(value: unknown): Record<string, unknown> {
+  return typeof value === 'object' && value !== null ? (value as Record<string, unknown>) : {};
 }
 
 function receiptValue(value: unknown, fallback: string): string {
@@ -45,6 +112,7 @@ async function request(
       ...(init.idempotencyKey ? { 'Idempotency-Key': init.idempotencyKey } : {}),
     },
     body: init.body === undefined ? undefined : JSON.stringify(init.body),
+    signal: AbortSignal.timeout(REQUEST_TIMEOUT_MS),
   });
   const payload = (await response
     .json()
@@ -121,11 +189,178 @@ program
   .option('--tenant <id>', 'tenant ID', defaultTenant)
   .action(async (options) => {
     try {
-      const payload = await request('/api/a11oy/v1/atelier/health', { tenant: options.tenant });
+      const payload = await request('/api/a11oy/v1/atelier/health', {
+        tenant: options.tenant,
+      });
       process.stdout.write(`${JSON.stringify(payload, null, 2)}\n`);
     } catch (error) {
       process.stderr.write(
         `A11oy Atelier doctor failed: ${sanitizeTerminal(error instanceof Error ? error.message : String(error))}\n`,
+      );
+      process.exitCode = 1;
+    }
+  });
+
+program
+  .command('weave')
+  .description('compile a deterministic Proofweave research plan without executing it')
+  .argument('<objective...>', 'research or decision objective')
+  .requiredOption(
+    '--claim <kind:statement>',
+    'typed claim; FACT, INFERENCE, or RECOMMENDATION; repeatable up to 12',
+    collectTypedClaim,
+  )
+  .option('--tenant <id>', 'tenant ID', defaultTenant)
+  .option(
+    '--allow-web',
+    'declare a read-only web capability request; compilation performs no fetch',
+    false,
+  )
+  .option(
+    '--allow-github',
+    'declare a read-only GitHub capability request; compilation performs no fetch',
+    false,
+  )
+  .option(
+    '--max-workcells <count>',
+    'future-execution budget ceiling; compilation creates or runs no Workcells (5-8)',
+    (value) => parseIntegerInRange(value, 5, 8, 'Maximum Workcells'),
+    5,
+  )
+  .option(
+    '--max-provider-calls <count>',
+    'maximum provider calls in a future execution',
+    (value) => parseIntegerInRange(value, 0, 12, 'Maximum provider calls'),
+    6,
+  )
+  .option(
+    '--max-source-fetches <count>',
+    'maximum source fetches in a future execution',
+    (value) => parseIntegerInRange(value, 0, 40, 'Maximum source fetches'),
+    16,
+  )
+  .option(
+    '--max-total-tokens <count>',
+    'maximum token budget for a future execution (1024-200000)',
+    (value) => parseIntegerInRange(value, 1_024, 200_000, 'Maximum total tokens'),
+    50_000,
+  )
+  .option('--max-cost-usd <amount>', 'maximum estimated future cost in USD (0-100)', parseCost, 5)
+  .option(
+    '--max-wall-time-ms <count>',
+    'maximum wall time in milliseconds',
+    (value) => parseIntegerInRange(value, 1_000, 900_000, 'Maximum wall time'),
+    300_000,
+  )
+  .option(
+    '--format <format>',
+    'BRIEF, TECHNICAL_REPORT, or DECISION_MEMO',
+    parseOutputFormat,
+    'TECHNICAL_REPORT',
+  )
+  .option('--json', 'print the complete compiled plan')
+  .action(async (objectiveParts: string[], options) => {
+    try {
+      const objective = objectiveParts.join(' ').trim();
+      if (objective.length === 0) {
+        throw new InvalidArgumentError('Objective must not be empty.');
+      }
+      const claims = options.claim as TypedClaim[];
+      const compileRequest: AtelierProofweaveRequest = {
+        objective,
+        claims: claims.map((claim, index) => ({
+          claimId: `claim-${String(index + 1)}`,
+          statement: claim.statement,
+          kind: claim.kind,
+        })),
+        materials: [],
+        budget: {
+          maxWorkcells: options.maxWorkcells,
+          maxProviderCalls: options.maxProviderCalls,
+          maxSourceFetches: options.maxSourceFetches,
+          maxTotalTokens: options.maxTotalTokens,
+          maxEstimatedCostUsd: options.maxCostUsd,
+          maxWallTimeMs: options.maxWallTimeMs,
+        },
+        requestedCapabilities: {
+          readWeb: options.allowWeb,
+          readGitHub: options.allowGithub,
+          externalWrites: false,
+          providerNativeSubagents: false,
+          providerDurableStorage: false,
+        },
+        outputFormat: options.format,
+      };
+      const payload = await request('/api/a11oy/v1/atelier/proofweave/compile', {
+        method: 'POST',
+        tenant: options.tenant,
+        body: compileRequest,
+      });
+      const proofweave = await verifyAtelierProofweaveResponse(payload, {
+        request: compileRequest,
+        tenantId: options.tenant,
+      });
+      if (options.json) {
+        process.stdout.write(`${JSON.stringify(proofweave, null, 2)}\n`);
+        return;
+      }
+      const stages = Array.isArray(proofweave.stages)
+        ? proofweave.stages
+            .map((stage) =>
+              typeof stage === 'object' && stage !== null && 'name' in stage
+                ? String((stage as Record<string, unknown>).name)
+                : 'UNKNOWN',
+            )
+            .join(' -> ')
+        : 'UNAVAILABLE';
+      const ledger = record(proofweave.ledger);
+      const review = record(proofweave.review);
+      process.stdout.write(
+        `Proofweave ${sanitizeTerminal(String(proofweave.weaveId ?? 'unavailable'))}\n`,
+      );
+      process.stdout.write(
+        sanitizeTerminal(String(proofweave.evidenceClass ?? 'UNKNOWN')) +
+          ' | ' +
+          sanitizeTerminal(String(proofweave.operationalState ?? 'UNKNOWN')) +
+          ' | ' +
+          sanitizeTerminal(String(proofweave.executionState ?? 'UNKNOWN')) +
+          ' | ' +
+          sanitizeTerminal(String(proofweave.persistenceState ?? 'UNKNOWN')) +
+          '\n',
+      );
+      process.stdout.write(
+        `Plan ${sanitizeTerminal(String(proofweave.planSha256 ?? 'unavailable'))}\n`,
+      );
+      process.stdout.write(`${sanitizeTerminal(stages)}\n`);
+      process.stdout.write(
+        'EVIDENCE LEDGER APPEND ' +
+          sanitizeTerminal(String(ledger.appendState ?? 'UNAVAILABLE')) +
+          ' · ' +
+          sanitizeTerminal(String(ledger.entryId ?? 'UNAVAILABLE')) +
+          ' · BACKEND ' +
+          sanitizeTerminal(String(ledger.backendState ?? 'UNAVAILABLE')) +
+          ' · DURABILITY ' +
+          sanitizeTerminal(String(ledger.durablePersistenceEvidenceClass ?? 'UNKNOWN')) +
+          '\n',
+      );
+      process.stdout.write(
+        `TENANT ATTRIBUTION ${sanitizeTerminal(String(proofweave.tenantAttributionEvidenceClass ?? 'UNKNOWN'))}\n`,
+      );
+      process.stdout.write(
+        'AUTOMATED REVIEW ' +
+          sanitizeTerminal(String(review.reviewState ?? 'UNAVAILABLE')) +
+          ' · HUMAN APPROVAL ' +
+          sanitizeTerminal(String(review.humanApprovalState ?? 'UNAVAILABLE')) +
+          '\n',
+      );
+      process.stdout.write(
+        'Compiled plan only: no model call, source fetch, plan-execution write, or provider subagent executed. The API separately dispatched audit metadata to a configuration-dependent EvidenceLedger backend.\n',
+      );
+    } catch (error) {
+      process.stderr.write(
+        'A11oy Proofweave error: ' +
+          sanitizeTerminal(error instanceof Error ? error.message : String(error)) +
+          '\n',
       );
       process.exitCode = 1;
     }
