@@ -138,3 +138,108 @@ remain historical. Its images stay bound to that local captured source.
 No merge, deployment, provider/model publication, database mutation, history
 rewrite, external action authorization, customer outcome, production receipt
 or independent runtime witness is claimed by this session.
+
+## Follow-up plan: isolation diagnostics and terminal CI dispositions
+
+Recorded before the follow-up patch on 2026-10-03:
+
+- The exact-head workflow run `37105707193` fails in isolated dependency-root
+  preparation before browser capture. Its log contains no diagnostic naming
+  the failing assertion. The exact failing predicate and OS cause are UNKNOWN;
+  no permission repair is justified by that log alone.
+- Add named failure messages to the existing candidate source/runtime checks
+  in `.github/workflows/exact-head-screenshot-evidence.yml`. Preserve each
+  predicate, isolated identity, permission mode, read-only tooling boundary,
+  source admission and evidence denial. Do not add tracing of environment
+  values, weaken a guard or claim the hosted fault is fixed.
+- Add regression coverage in
+  `scripts/ci/exact-head-screenshot-evidence.test.mjs` for successful assertions,
+  each rejected predicate, failed runtime inventory and writable runtime
+  findings. Fixed test doubles establish SIMULATED guard/diagnostic behavior,
+  not real user isolation; actual Linux execution is separately required.
+- Document this diagnostic boundary in
+  `docs/standards/exact-head-screenshot-evidence.md`, append measured results to
+  this packet and append security/capture dispositions to the task and gap
+  registers. No rendered UI or dependency graph is changed.
+- Success criteria: diagnostics identify the guard while retaining fail-closed
+  behavior; regression and claim checks pass; a signed forward commit is
+  normally pushed to PR #883. A branch change does not alter the protected-main
+  controller used by workflow dispatch. No merge or deployment is authorized.
+
+### Follow-up measured results
+
+MEASURED readbacks for the initial reconciliation head
+`d4bc06f46a89f85c620c96d6e6407f12fa17c031`:
+
+- Normal push succeeded and [PR #883](https://github.com/szl-holdings/platform/pull/883)
+  was opened. GitHub's commit signature readback reports `isValid: true`,
+  `state: VALID`, signer `stephenlutar2-hash`. Local SSH verification is good
+  but principal trust is not pinned locally; provider verification is a
+  separate measured result, not an independent out-of-band key attestation.
+- All 55 PR checks completed: 50 SUCCESS, two SKIPPED, three FAILURE. Typecheck
+  passed in 14m2s and Runtime Audit in 19m7s; A11oy E2E, accessibility,
+  Lighthouse, source truth and functional checks also passed. This rollup
+  qualifies only `d4bc06f`, not a later diagnostic commit.
+- The dependency report from
+  [Security Audit run 37105562351](https://github.com/szl-holdings/platform/actions/runs/37105562351)
+  parses 2,005 dependencies with zero Critical, two High and one Low finding.
+  Its downloaded Markdown SHA-256 is
+  `c18c884ab23bfc55639e66b18cffb5d0afd9198c85e36e0ac934ed2cb36400c1`.
+  The High findings are
+  [Forge GHSA-86w9-cpqp-85rv](https://github.com/advisories/GHSA-86w9-cpqp-85rv)
+  and [Braces GHSA-vfj7-8cjw-p6xm](https://github.com/advisories/GHSA-vfj7-8cjw-p6xm).
+  Both official advisory records list no patched version, and fresh registry
+  reads report latest `node-forge@1.4.0` and `braces@3.0.3`.
+- Read-only lock graph traversal identifies Expo CLI/code-signing tooling from
+  `lib/mobile-shared` as the Forge parent path and Micromatch/Jest/Metro as the
+  Braces path. The
+  [Grype run 37105562392](https://github.com/szl-holdings/platform/actions/runs/37105562392)
+  independently blocks at its existing High threshold and uploads a Forge
+  finding in `pnpm-lock.yaml`. The aggregate Security Gate correctly fails
+  because the dependency scan fails; secret scanning, lockfile integrity and
+  license reporting pass. No exposure or exploitation is claimed.
+- Authorized command `gh workflow run exact-head-screenshot-evidence.yml
+  --repo szl-holdings/platform --ref main -f
+  candidate_sha=d4bc06f46a89f85c620c96d6e6407f12fa17c031 -f
+  target_branch=codex/p0-series-a-proof-reconciliation-20261003 -f source_pr=883
+  -f route=/a11oy/start` dispatched
+  [run 37105707193](https://github.com/szl-holdings/platform/actions/runs/37105707193).
+  Controller `f2f8df6f89056e9104587674ccec0855dd5b177a` passed the contract.
+  Candidate dependency-root preparation exited 1 before candidate install or
+  browser capture; promotion publication was SKIPPED. No admissible artifact
+  was produced. `gh run view 37105707193 --repo szl-holdings/platform
+  --log-failed` supplies no exact failing predicate. OS cause remains UNKNOWN.
+
+The follow-up patch adds named assertion/inventory failures with unchanged
+predicates, permissions and isolated identity. Messages say an assertion failed
+because a nonzero `sudo` result alone does not prove the candidate can write.
+No speculative chmod, runtime-path rewrite or security exception is added.
+
+MEASURED follow-up local commands:
+
+| Command | Exit | Result |
+| --- | --- | --- |
+| `node node_modules/typescript/bin/tsc -p artifacts/a11oy/tsconfig.json --noEmit --pretty false` | 0 | Focused A11oy typecheck passed on the reconciliation source; no TypeScript source is changed by the follow-up |
+| `pnpm typecheck` | 1 | Repeated after the follow-up; same shell PATH blocker, no worse than baseline |
+| `node --test scripts/ci/exact-head-screenshot-evidence.test.mjs` | 0 | 15 passed, five native-Windows skips, zero failures |
+| `$env:SZL_DIAGNOSTICS_TEST_BASH='C:\Program Files\Git\bin\bash.exe'; node --test scripts/ci/exact-head-screenshot-evidence.test.mjs` | 0 | 16 passed, four real-POSIX skips, zero failures; all seven fixed diagnostic cases execute |
+| `node --check scripts/ci/exact-head-screenshot-evidence.test.mjs` | 0 | Test syntax valid |
+| `node node_modules/@biomejs/biome/bin/biome lint scripts/ci/exact-head-screenshot-evidence.test.mjs` | 0 | Focused lint passed |
+| `node scripts/docs/check-docs-claims.js` | 0 | All 26 claims verified again |
+| `git diff --check` | 0 | No whitespace errors |
+
+An independent session agent also executes the extracted fixture/helper under
+Git Bash: the success case exits zero; all six rejection cases exit one, print
+their named failure and cannot reach the admission marker. That is a second
+SIMULATED diagnostic check, not an independent hosted-isolation witness. The
+four real POSIX tests remain for fresh Linux CI. No rendered UI changed, so
+new local route/product screenshot capture is NOT RUN in this follow-up.
+
+Payload disposition is now SECURITY BLOCKED (unpatched dependency advisories),
+HOSTED CAPTURE BLOCKED (isolation preparation, exact cause UNKNOWN), and
+DIAGNOSTIC SOURCE PATCHED (tests as scoped above). Protected controller
+publication, real isolation and fresh browser artifacts remain separate
+obligations. Historical images are preserved and not recataloged as current.
+Fresh checks and signature readbacks of the forward commit are required;
+the completed `d4bc06f` rollup does not substitute for them. No merge, deploy,
+force-push, package removal, model publication or gate weakening is performed.

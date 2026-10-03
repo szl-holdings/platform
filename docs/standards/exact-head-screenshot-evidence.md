@@ -93,6 +93,15 @@ the workflow kills every process owned by the candidate identity, rechecks the
 exact `HEAD` and clean tracked tree, verifies every evidence byte, and makes the
 evidence tree read-only before upload.
 
+Candidate preparation emits a named diagnostic when a source write-denial
+predicate fails, the admitted pnpm executable is inaccessible or writable, or
+its read-only runtime inventory fails or finds a writable entry. These messages
+do not change any isolation predicate or permission. A preparation failure is
+BLOCKED before browser capture and cannot produce admissible screenshots.
+Do not infer an ancestor-permission fault from a silent historical exit alone.
+The controller is pinned to protected `main`; diagnostic changes in a candidate
+pull request apply to dispatched capture only after normal protected promotion.
+
 The separate publication job receives issue-write permission only after
 capture, verification, remote revalidation, and immutable artifact upload
 succeed. A rerun updates the single exact-title promotion work item with its

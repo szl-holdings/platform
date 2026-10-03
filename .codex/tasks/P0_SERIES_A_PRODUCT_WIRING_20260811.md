@@ -4,7 +4,8 @@
 - **repository:** szl-holdings/platform
 - **pull_request:** #601 (latest product promotion); #668 (earlier promotion)
 - **source_lane:** codex/p0-platform-work-20260811
-- **status:** MERGED_SOURCE; HOSTED_CAPTURE_UNAVAILABLE
+- **status:** MERGED_SOURCE; HOSTED_CAPTURE_BLOCKED; SECURITY_BLOCKED
+- **evidence_pull_request:** #883 (current proof/diagnostic successor)
 - **promotion_authority:** protected pull-request checks and normal squash merge
 - **owner:** solo builder, with Codex execution and auditable receipts
 
@@ -34,6 +35,30 @@ remain UNAVAILABLE.
 The append-only reconciliation packet is
 `audit/P0_SERIES_A_EXECUTION_RECONCILIATION_20261003.md`. The older receipts
 below remain historical records; they do not describe a pending #601 merge.
+
+### Follow-up execution disposition — 2026-10-03
+
+MEASURED PR #883 head `d4bc06f46a89f85c620c96d6e6407f12fa17c031`
+completed 55 checks: 50 successful, two skipped and three failed security checks.
+Typecheck, Runtime Audit, A11oy E2E, accessibility, Lighthouse and truth-drift
+passed. GitHub validates that head's commit signature. The dependency report
+records High advisories for `node-forge@1.4.0` and `braces@3.0.3`; both official
+advisories currently list no patched release. No waiver, package removal,
+dependency override or severity-threshold change is introduced.
+
+[Hosted capture run 37105707193](https://github.com/szl-holdings/platform/actions/runs/37105707193)
+used protected controller `f2f8df6f89056e9104587674ccec0855dd5b177a` and
+that exact PR head. Controller tests passed, but candidate dependency-root
+preparation failed before browser capture; publication was skipped. The log
+does not identify the failing predicate, so its exact OS cause is UNKNOWN.
+The successor adds named fail-closed diagnostics and regression coverage,
+without changing permissions or admission predicates. It is not a capture
+receipt or a demonstrated isolation repair. A candidate workflow patch does
+not replace the protected-main dispatch controller before normal promotion.
+
+Fresh checks of the diagnostic successor are separate from the completed
+`d4bc06f` rollup. Production, hosted screenshots and independent runtime
+qualification remain unavailable; application readiness remains Partial.
 
 ## Protected promotion receipt
 
