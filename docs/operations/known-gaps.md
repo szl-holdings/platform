@@ -1,6 +1,6 @@
 # SZL Holdings — Known Gaps Register (Security & Operations)
 
-**Last updated:** 2026-10-02 (rev 32 — local cyber and cross-lane verification successor)
+**Last updated:** 2026-10-02 (rev 34 — local host observation and scoped finance gates)
 **Owner:** Engineering / DevOps  
 **Audience:** Enterprise architects, Series A technical advisors, incoming VP Engineering
 
@@ -8,27 +8,34 @@ This document is the canonical reference for known security, quality, and compli
 
 ---
 
-## 2026-10-02 local verification successor
+## 2026-10-02 local host observation and finance scope
 
-The tool-mesh vulnerability report had accepted `assetId` and `cveId` while
-reading global advisory findings that contain neither a tenant nor an asset/CVE
-binding. Its manifest is now disabled, and direct calls reject before importing
-the database. Re-enable it only after a permitted source can enforce tenant,
-asset, and CVE scope, expose source/run identity, and support target-specific
-result read-back. A passing local test is not a live vulnerability assessment.
+The free local Windows collector now records bounded Defender event counts,
+firewall logging state, encryption state when permitted, backup-query status,
+and listener counts. A limited current-user daily task runs at 09:15 local and
+retains one source-hash-bound receipt. Its consumer rejects missing, stale,
+inconsistent, and source-mismatched evidence. The first live task run returned
+`PARTIAL` with encryption and backup inaccessible at limited privilege.
 
-`scripts/qa/verify-cross-lane-source.mjs` checks the reviewed six-lane source
-contract against its Git HEAD blob and pinned SHA-256. It reports each scenario
-as `DEMO`, each action as `BLOCKED`, and hosted CI, merge, publication,
-deployment, and outside witness as `UNKNOWN`. A changed, missing, or
-unparseable source fails closed. It does not establish operational readiness in
-any buyer lane. The local proof and exact test results are in
-[`audit/CYBER_LOCAL_WIRING_PROOF_20261002.md`](../../audit/CYBER_LOCAL_WIRING_PROOF_20261002.md).
+A separate elevated read confirmed C: protection on and 100 percent encrypted.
+Allowed/blocked firewall logging was enabled for all three profiles, capped at
+20,480 KB each, and configuration plus log writes were read back. Tamper
+Protection remains off and Windows Backup history remains `UNKNOWN`. A
+successful same-volume restore of the observation source files proves only
+those files; off-device backup and whole-host recovery remain unverified.
 
-The local repository settings references now use the observed `main` default
-branch and current required-check names. They remain references, not proof that
-protection has been changed or satisfied. Re-read the live ruleset before any
-remote mutation.
+Four finance/data tools previously accepted scope/filter fields while querying
+global records: `finance.portfolio-snapshot`, `finance.budget-forecast`,
+`data.portfolio-financials`, and `data.lp-reports`. They are now disabled at the
+gateway and reject direct calls before database access. Their operational gate
+needs tenant/target binding, enforced filters, source identity, and result
+read-back. Neither global data nor generated forecast scaffolding satisfies it.
+
+The six buyer lanes still retain their declared demo/unavailable/action-blocked
+states. Local observations do not supply customer finance, legal, property,
+data-access, or production execution evidence. See the dated
+[`LOCAL_HOST_OPERATIONS_PROOF_20261002.md`](../../audit/LOCAL_HOST_OPERATIONS_PROOF_20261002.md)
+for source, test, task, firewall, and restore evidence and their limits.
 
 ---
 
@@ -42,11 +49,11 @@ runs, and a readable security contact. Its release signature check remains
 `UNVERIFIED` because release asset names are not cryptographic verification;
 `GREEN` therefore cannot be reached through that metadata-only path.
 
-The cyber tool-mesh scan, alert escalation, and compliance assessment lack a
-trusted tenant/target binding and result read-back. Their manifests are now
-disabled at the gateway, and direct handler calls reject before a database
-write. They remain blocked until a real adapter and scoped evidence contract
-are supplied. No SIEM/EDR
+The cyber tool-mesh scan, alert escalation, compliance assessment, and
+vulnerability report lack a trusted tenant/target binding and result read-back.
+Their manifests are now disabled at the gateway, and direct handler calls
+reject before database access. They remain blocked until a real adapter and
+scoped evidence contract are supplied. No SIEM/EDR
 integration, containment effect, certification, incident SLA, customer witness,
 or production deployment is established by this workcell. Other A11oy security
 routes can still contain older operational copy; the corrected compliance page
@@ -54,16 +61,24 @@ does not link to those routes as evidence. The six buyer-lane and shared work
 function gates are in
 [`CROSS_LANE_EVIDENCE_REGISTER_20261002.md`](CROSS_LANE_EVIDENCE_REGISTER_20261002.md).
 
-The vulnerability report's missing scope is now blocked at the gateway, as
-recorded in the successor section above. A tool-mesh package TypeScript check
-also remains blocked by the same eight `TS6305` missing referenced
-declaration errors observed before and after the cyber patch; its passing
-Vitest suite is not a typecheck substitute.
+The tool-mesh package TypeScript check also remains blocked by the
+same eight `TS6305` missing referenced declarations observed before and after
+the cyber patch; its passing Vitest suite is not a typecheck substitute.
 
-Local tests, build, and screenshots establish source behavior only. Hosted
-exact-head CI, protected merge, provider publication, deployed route read-back,
-and an outside functional witness remain separate, unverified gates. The dated
-proof packet is [`CYBER_LANE_EXECUTION_20261002.md`](CYBER_LANE_EXECUTION_20261002.md).
+Local tests, build, and screenshots establish source behavior only. The hosted
+checks at `df984acc8b6fe00dfbc993a81a78d175d2b2b3af` failed: the dependency
+scan, Grype, and Security Gate report the high-severity `node-forge` advisory
+[`GHSA-86w9-cpqp-85rv`](https://github.com/advisories/GHSA-86w9-cpqp-85rv)
+with no patched version published; the unit suite and
+Runtime Audit report a pre-existing cross-process Atelier file race. These
+failures cannot be treated as a release pass. A signed successor
+`658ecb845db75b0f83f2e259c84fcd87d595833a` repairs the local file race;
+its focused Atelier tests and package typecheck passed, and the hosted unit suite
+passed at `7e7962a8c8050057f09d494f02087fe56283a05b`. The high-severity
+dependency gate still fails on that head. Protected merge, provider
+publication, deployed route read-back, and an outside functional witness remain
+separate, unverified gates. The dated proof packet is
+[`CYBER_LANE_EXECUTION_20261002.md`](CYBER_LANE_EXECUTION_20261002.md).
 
 ---
 

@@ -51,6 +51,7 @@ $result = [ordered]@{
   observedAtUtc       = [DateTime]::UtcNow.ToString('o', [Globalization.CultureInfo]::InvariantCulture)
   collectionStatus    = 'PARTIAL'
   defender            = New-Unknown 'NOT_RUN'
+  defenderEvents24h   = New-Unknown 'NOT_RUN'
   firewall            = New-Unknown 'NOT_RUN'
   osVolumeEncryption  = New-Unknown 'NOT_RUN'
   windowsBackup       = New-Unknown 'NOT_RUN'
@@ -72,6 +73,53 @@ try {
   }
 } catch {
   $result.defender = New-Unknown (Get-ReadFailureReason $_)
+}
+
+# Microsoft Defender Antivirus Operational event types: detection (1116), action
+# taken (1117), action failed (1118), and critical action failure (1119).
+# Counts cover retained log records only; they are never proof that the host
+# is threat-free or that older records were not overwritten.
+# https://learn.microsoft.com/en-us/defender-endpoint/troubleshoot-microsoft-defender-antivirus
+try {
+  $defenderLogName = 'Microsoft-Windows-Windows Defender/Operational'
+  $defenderLog = Get-WinEvent -ListLog $defenderLogName -ErrorAction Stop
+  if ($null -eq $defenderLog) { throw 'NO_DEFENDER_EVENT_LOG' }
+  if (-not (Get-RequiredBoolean $defenderLog.IsEnabled)) {
+    $result.defenderEvents24h = New-Unknown 'LOG_DISABLED'
+  } else {
+    $eventLimit = 1000
+    $windowStart = [DateTime]::UtcNow.AddHours(-24).ToLocalTime()
+    $eventCounts = [ordered]@{ '1116' = 0; '1117' = 0; '1118' = 0; '1119' = 0 }
+    try {
+      $events = @(Get-WinEvent -FilterHashtable @{
+        LogName = $defenderLogName
+        Id = @(1116, 1117, 1118, 1119)
+        StartTime = $windowStart
+      } -MaxEvents ($eventLimit + 1) -ErrorAction Stop)
+    } catch {
+      if ($_.FullyQualifiedErrorId -like 'NoMatchingEventsFound,*') {
+        $events = @()
+      } else {
+        throw
+      }
+    }
+
+    $truncated = $events.Count -gt $eventLimit
+    foreach ($event in @($events | Select-Object -First $eventLimit)) {
+      $eventCounts[[string]$event.Id]++
+    }
+    $result.defenderEvents24h = [ordered]@{
+      status = 'OBSERVED'
+      windowHours = 24
+      eventCounts = $eventCounts
+      countSemantics = if ($truncated) { 'LOWER_BOUND' } else { 'EXACT_RETAINED_EVENTS' }
+      truncated = $truncated
+      maxEventsCounted = $eventLimit
+      threatFreeEvidence = $false
+    }
+  }
+} catch {
+  $result.defenderEvents24h = New-Unknown (Get-ReadFailureReason $_)
 }
 
 try {
@@ -145,7 +193,7 @@ try {
   $result.tcpListeners = New-Unknown (Get-ReadFailureReason $_)
 }
 
-$sections = @('defender', 'firewall', 'osVolumeEncryption', 'windowsBackup', 'tcpListeners')
+$sections = @('defender', 'defenderEvents24h', 'firewall', 'osVolumeEncryption', 'windowsBackup', 'tcpListeners')
 $unknownCount = @($sections | Where-Object { $result[$_]['status'] -ne 'OBSERVED' }).Count
 if ($unknownCount -eq 0) { $result.collectionStatus = 'COMPLETE' }
 

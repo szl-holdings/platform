@@ -10,6 +10,12 @@ import {
   documentRetrievalHandler,
 } from './tools/document-retrieval.js';
 import {
+  LP_REPORTS_MANIFEST,
+  lpReportsHandler,
+  PORTFOLIO_DATA_MANIFEST,
+  portfolioDataHandler,
+} from './tools/domain-data-tools.js';
+import {
   budgetForecastHandler,
   FINANCE_TOOL_MANIFESTS,
   portfolioSnapshotHandler,
@@ -298,33 +304,49 @@ describe('Finance tool manifests', () => {
     expect(filing?.policyTier).toBe('regulated-workflow');
   });
 
-  it('portfolio-snapshot handler returns expected shape', async () => {
-    const result = await portfolioSnapshotHandler(
-      { portfolioId: 'portfolio-abc' },
-      FINANCE_TOOL_MANIFESTS.find((m) => m.id === 'finance.portfolio-snapshot')!,
-    );
-    expect(result).toMatchObject({ portfolioId: 'portfolio-abc', allocation: [] });
-  });
+  const unsupportedScopedReports = [
+    {
+      manifest: FINANCE_TOOL_MANIFESTS.find((m) => m.id === 'finance.portfolio-snapshot')!,
+      handler: portfolioSnapshotHandler,
+      validInput: { portfolioId: 'portfolio-abc' },
+    },
+    {
+      manifest: FINANCE_TOOL_MANIFESTS.find((m) => m.id === 'finance.budget-forecast')!,
+      handler: budgetForecastHandler,
+      validInput: { orgId: 'org-1', period: 'quarterly' },
+    },
+    {
+      manifest: PORTFOLIO_DATA_MANIFEST,
+      handler: portfolioDataHandler,
+      validInput: { companySlug: 'company-abc' },
+    },
+    {
+      manifest: LP_REPORTS_MANIFEST,
+      handler: lpReportsHandler,
+      validInput: { reportType: 'quarterly' },
+    },
+  ];
 
-  it('budget-forecast handler returns expected shape', async () => {
-    const result = await budgetForecastHandler(
-      { orgId: 'org-1', period: 'quarterly' },
-      FINANCE_TOOL_MANIFESTS.find((m) => m.id === 'finance.budget-forecast')!,
-    );
-    // The handler synthesises a forecast series from the (here, empty)
-    // historical transactions feed; with no transactions every projected
-    // spend is 0 but the period scaffolding is still produced. We assert
-    // on the structural fields and on the shape of one forecast row
-    // rather than expecting an empty forecast array.
-    expect(result).toMatchObject({ orgId: 'org-1', period: 'quarterly' });
-    expect(Array.isArray((result as { forecast: unknown }).forecast)).toBe(true);
-    const forecast = (result as { forecast: Array<Record<string, unknown>> }).forecast;
-    expect(forecast.length).toBeGreaterThan(0);
-    expect(forecast[0]).toMatchObject({
-      period: 1,
-      currency: 'USD',
-      projectedSpend: 0,
+  it.each(
+    unsupportedScopedReports,
+  )('$manifest.id is blocked by the gateway despite an allow rule', async ({
+    manifest,
+    handler,
+    validInput,
+  }) => {
+    const registry = new InMemoryToolRegistry();
+    registry.register(manifest);
+    const gateway = makeGateway(registry);
+    gateway.registerHandler(manifest.id, handler);
+
+    const result = await gateway.invoke(manifest.id, validInput, {
+      requestId: `req-disabled-${manifest.id}`,
     });
+    expect(result).toMatchObject({
+      success: false,
+      error: `Tool is disabled: ${manifest.id}`,
+    });
+    expect(result.output).toBeUndefined();
   });
 });
 

@@ -114,7 +114,7 @@ function Get-HostReportStatus {
     if ($null -eq $report.observedAtUtc -or [string]::IsNullOrWhiteSpace([string] $report.observedAtUtc)) {
         return 'UNKNOWN'
     }
-    $requiredSections = @('defender', 'firewall', 'osVolumeEncryption', 'windowsBackup', 'tcpListeners')
+    $requiredSections = @('defender', 'defenderEvents24h', 'firewall', 'osVolumeEncryption', 'windowsBackup', 'tcpListeners')
     $statuses = @()
     foreach ($sectionName in $requiredSections) {
         $section = $report[$sectionName]

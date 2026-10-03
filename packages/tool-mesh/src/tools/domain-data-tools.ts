@@ -8,6 +8,15 @@ const STANDARD_OBSERVABILITY = {
   sensitiveFields: [] as string[],
 };
 
+export class DomainDataOperationUnavailableError extends Error {
+  readonly code = 'DOMAIN_DATA_OPERATION_UNAVAILABLE';
+
+  constructor(toolId: string, missingEvidence: string) {
+    super(`${toolId} is unavailable: ${missingEvidence}. No operation was performed.`);
+    this.name = 'DomainDataOperationUnavailableError';
+  }
+}
+
 export const MaritimeVesselsInputSchema = z.object({
   limit: z.number().int().min(1).max(100).default(10).optional(),
 });
@@ -207,7 +216,7 @@ export const PORTFOLIO_DATA_MANIFEST: ToolManifest = {
   name: 'Portfolio Financial Data',
   version: '1.0.0',
   description:
-    'Retrieve investment portfolio company financials including revenue, EBITDA, net income, and period-over-period reporting status.',
+    'Unavailable until financial records can be filtered to the requested company with organization and source provenance.',
   domainTags: ['finance', 'analytics'],
   policyTier: 'executive-facing',
   allowedEnvironments: ['development', 'staging', 'production'],
@@ -221,44 +230,19 @@ export const PORTFOLIO_DATA_MANIFEST: ToolManifest = {
   },
   rateLimits: { requestsPerMinute: 60 },
   timeoutMs: 15000,
-  failureModes: [{ type: 'timeout', retryable: true, maxRetries: 2 }],
+  failureModes: [{ type: 'unavailable', retryable: false, maxRetries: 0 }],
   approvalRequired: false,
   owner: 'fund-ops-team',
   observabilityHooks: STANDARD_OBSERVABILITY,
-  enabled: true,
+  enabled: false,
 };
 
 export const portfolioDataHandler: ToolHandler = async (input) => {
-  const parsed = PortfolioDataInputSchema.parse(input);
-  const limit = parsed.limit ?? 5;
-  try {
-    const { db, fundPortfolioFinancialsTable } = await import('@szl-holdings/db');
-    const { desc } = await import('drizzle-orm');
-    const records = await db
-      .select()
-      .from(fundPortfolioFinancialsTable)
-      .orderBy(desc(fundPortfolioFinancialsTable.createdAt))
-      .limit(limit);
-    return {
-      count: records.length,
-      portfolios: records.map((r) => ({
-        id: r.id,
-        companySlug: r.companySlug,
-        companyName: r.companyName,
-        periodLabel: r.periodLabel,
-        periodEnd: r.periodEnd,
-        reportingStatus: r.reportingStatus,
-        revenue: r.revenue,
-        ebitda: r.ebitda,
-        netIncome: r.netIncome,
-        totalAssets: r.totalAssets,
-        cashAndEquivalents: r.cashAndEquivalents,
-        freeCashFlow: r.freeCashFlow,
-      })),
-    };
-  } catch {
-    return { count: 0, portfolios: [], message: 'Portfolio financial data temporarily unavailable.' };
-  }
+  PortfolioDataInputSchema.parse(input);
+  throw new DomainDataOperationUnavailableError(
+    PORTFOLIO_DATA_MANIFEST.id,
+    'companySlug is not enforced by the financial-record query',
+  );
 };
 
 export const LpReportsInputSchema = z.object({
@@ -271,7 +255,7 @@ export const LP_REPORTS_MANIFEST: ToolManifest = {
   name: 'LP Fund Reports',
   version: '1.0.0',
   description:
-    'Retrieve LP reports with fund performance metrics including IRR, TVPI, DPI, RVPI, fund NAV, and reporting period details.',
+    'Unavailable until LP reports can enforce the requested report type with organization and fund provenance.',
   domainTags: ['finance', 'analytics'],
   policyTier: 'executive-facing',
   allowedEnvironments: ['development', 'staging', 'production'],
@@ -289,43 +273,19 @@ export const LP_REPORTS_MANIFEST: ToolManifest = {
   },
   rateLimits: { requestsPerMinute: 60 },
   timeoutMs: 15000,
-  failureModes: [{ type: 'timeout', retryable: true, maxRetries: 2 }],
+  failureModes: [{ type: 'unavailable', retryable: false, maxRetries: 0 }],
   approvalRequired: false,
   owner: 'fund-ops-team',
   observabilityHooks: STANDARD_OBSERVABILITY,
-  enabled: true,
+  enabled: false,
 };
 
 export const lpReportsHandler: ToolHandler = async (input) => {
-  const parsed = LpReportsInputSchema.parse(input);
-  const limit = parsed.limit ?? 5;
-  try {
-    const { db, fundLpReportsTable } = await import('@szl-holdings/db');
-    const { desc } = await import('drizzle-orm');
-    const reports = await db
-      .select()
-      .from(fundLpReportsTable)
-      .orderBy(desc(fundLpReportsTable.createdAt))
-      .limit(limit);
-    return {
-      count: reports.length,
-      reports: reports.map((r) => ({
-        id: r.id,
-        reportType: r.reportType,
-        reportingPeriod: r.reportingPeriod,
-        periodEnd: r.periodEnd,
-        status: r.status,
-        grossIrr: r.grossIrr,
-        netIrr: r.netIrr,
-        tvpi: r.tvpi,
-        dpi: r.dpi,
-        rvpi: r.rvpi,
-        fundNav: r.fundNav,
-      })),
-    };
-  } catch {
-    return { count: 0, reports: [], message: 'LP report data temporarily unavailable.' };
-  }
+  LpReportsInputSchema.parse(input);
+  throw new DomainDataOperationUnavailableError(
+    LP_REPORTS_MANIFEST.id,
+    'reportType is not enforced by the LP-report query and fund scope is not bound',
+  );
 };
 
 export const PropertyDataInputSchema = z.object({

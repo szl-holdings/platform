@@ -1,4 +1,4 @@
-import { eq, desc, gte } from 'drizzle-orm';
+import { eq } from 'drizzle-orm';
 import { z } from 'zod';
 import type { ToolHandler } from '../gateway.js';
 import type { ToolManifest } from '../manifest.js';
@@ -12,6 +12,15 @@ export const FundTransferInputSchema = z.object({
   memo: z.string().optional(),
 });
 export type FundTransferInput = z.infer<typeof FundTransferInputSchema>;
+
+export class FinanceOperationUnavailableError extends Error {
+  readonly code = 'FINANCE_OPERATION_UNAVAILABLE';
+
+  constructor(toolId: string, missingEvidence: string) {
+    super(`${toolId} is unavailable: ${missingEvidence}. No operation was performed.`);
+    this.name = 'FinanceOperationUnavailableError';
+  }
+}
 
 export const FUND_TRANSFER_TOOL_MANIFEST: ToolManifest = {
   id: 'finance.fund-transfer',
@@ -101,7 +110,7 @@ export const PORTFOLIO_SNAPSHOT_TOOL_MANIFEST: ToolManifest = {
   name: 'Portfolio Snapshot',
   version: '1.0.0',
   description:
-    'Retrieve a point-in-time portfolio snapshot including NAV, allocation breakdown, and performance metrics.',
+    'Unavailable until portfolio accounts and balance snapshots can be scoped to the requested portfolio with source and as-of evidence.',
   domainTags: ['finance', 'analytics'],
   policyTier: 'executive-facing',
   allowedEnvironments: ['development', 'staging', 'production'],
@@ -122,52 +131,19 @@ export const PORTFOLIO_SNAPSHOT_TOOL_MANIFEST: ToolManifest = {
   },
   rateLimits: { requestsPerMinute: 60 },
   timeoutMs: 15000,
-  failureModes: [{ type: 'timeout', retryable: true, maxRetries: 2 }],
+  failureModes: [{ type: 'unavailable', retryable: false, maxRetries: 0 }],
   approvalRequired: false,
   owner: 'fund-ops-team',
   observabilityHooks: { emitTrace: true, emitMetrics: false, sensitiveFields: ['portfolioId'] },
-  enabled: true,
+  enabled: false,
 };
 
 export const portfolioSnapshotHandler: ToolHandler = async (input) => {
-  const parsed = PortfolioSnapshotInputSchema.parse(input);
-  const { db, treasuryAccountsTable, treasuryBalanceSnapshotsTable } = await import('@szl-holdings/db');
-
-  const accounts = await db
-    .select()
-    .from(treasuryAccountsTable)
-    .limit(20);
-
-  const latestSnapshots = await db
-    .select()
-    .from(treasuryBalanceSnapshotsTable)
-    .orderBy(desc(treasuryBalanceSnapshotsTable.snapshotAt))
-    .limit(accounts.length || 10);
-
-  const totalNavUsd = latestSnapshots.reduce((sum, s) => {
-    return sum + parseFloat(s.balanceUsd ?? '0');
-  }, 0);
-
-  const allocation = parsed.includeBreakdown
-    ? accounts.slice(0, latestSnapshots.length).map((acc, i) => ({
-        accountId: acc.accountId ?? acc.id.toString(),
-        label: acc.label,
-        currency: acc.currency,
-        currencyType: acc.currencyType,
-        balanceUsd: latestSnapshots[i]?.balanceUsd ?? '0',
-        provider: acc.provider,
-      }))
-    : [];
-
-  return {
-    portfolioId: parsed.portfolioId,
-    asOf: parsed.asOf ?? new Date().toISOString(),
-    nav: totalNavUsd,
-    navCurrency: 'USD',
-    accountCount: accounts.length,
-    allocation,
-    lastUpdated: latestSnapshots[0]?.snapshotAt?.toISOString() ?? null,
-  };
+  PortfolioSnapshotInputSchema.parse(input);
+  throw new FinanceOperationUnavailableError(
+    PORTFOLIO_SNAPSHOT_TOOL_MANIFEST.id,
+    'account and balance queries are not bound to the requested portfolio or as-of time',
+  );
 };
 
 export const BudgetForecastInputSchema = z.object({
@@ -181,7 +157,7 @@ export const BUDGET_FORECAST_TOOL_MANIFEST: ToolManifest = {
   name: 'Budget Forecast',
   version: '1.0.0',
   description:
-    'Generate a forward-looking budget forecast for a specified period using historical spend and growth signals.',
+    'Unavailable until historical transactions can be scoped to the requested organization with versioned forecast assumptions.',
   domainTags: ['finance', 'analytics'],
   policyTier: 'internal-workflow',
   allowedEnvironments: ['development', 'staging', 'production'],
@@ -205,53 +181,19 @@ export const BUDGET_FORECAST_TOOL_MANIFEST: ToolManifest = {
   },
   rateLimits: { requestsPerMinute: 20 },
   timeoutMs: 20000,
-  failureModes: [{ type: 'timeout', retryable: true, maxRetries: 2 }],
+  failureModes: [{ type: 'unavailable', retryable: false, maxRetries: 0 }],
   approvalRequired: false,
   owner: 'finance-team',
   observabilityHooks: { emitTrace: true, emitMetrics: false, sensitiveFields: [] },
-  enabled: true,
+  enabled: false,
 };
 
 export const budgetForecastHandler: ToolHandler = async (input) => {
-  const parsed = BudgetForecastInputSchema.parse(input);
-  const { db, treasuryTransactionsTable } = await import('@szl-holdings/db');
-
-  const lookbackDate = new Date();
-  lookbackDate.setMonth(lookbackDate.getMonth() - 6);
-
-  const recentTxns = await db
-    .select()
-    .from(treasuryTransactionsTable)
-    .where(gte(treasuryTransactionsTable.occurredAt, lookbackDate))
-    .orderBy(desc(treasuryTransactionsTable.occurredAt))
-    .limit(200);
-
-  const totalSpend = recentTxns
-    .filter((t) => t.txType === 'debit' || t.txType === 'fee')
-    .reduce((sum, t) => sum + parseFloat(t.amountUsd ?? '0'), 0);
-
-  const monthlyAvg = totalSpend / 6;
-  const growthRate = 1.05;
-
-  const periodLength = parsed.period === 'monthly' ? 1 : parsed.period === 'quarterly' ? 3 : 12;
-  const periods = Math.ceil(parsed.horizonMonths / periodLength);
-
-  const forecast = Array.from({ length: periods }, (_, i) => ({
-    period: i + 1,
-    projectedSpend: Math.round(monthlyAvg * periodLength * Math.pow(growthRate, i) * 100) / 100,
-    currency: 'USD',
-    confidence: Math.max(0.5, 0.95 - i * 0.04),
-  }));
-
-  return {
-    orgId: parsed.orgId,
-    period: parsed.period,
-    horizonMonths: parsed.horizonMonths,
-    basedOnTransactions: recentTxns.length,
-    monthlyBaselineUsd: Math.round(monthlyAvg * 100) / 100,
-    forecast,
-    generatedAt: new Date().toISOString(),
-  };
+  BudgetForecastInputSchema.parse(input);
+  throw new FinanceOperationUnavailableError(
+    BUDGET_FORECAST_TOOL_MANIFEST.id,
+    'historical transactions are not bound to the requested organization',
+  );
 };
 
 export const RegulatoryFilingInputSchema = z.object({

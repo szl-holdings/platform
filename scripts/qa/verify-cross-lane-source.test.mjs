@@ -7,6 +7,7 @@ import { fileURLToPath } from 'node:url';
 import {
   PINNED_SOURCE_SHA256,
   parseLaneContract,
+  readCommittedSourceAtObservedHead,
   SOURCE_PATH,
   verifySnapshot,
 } from './verify-cross-lane-source.mjs';
@@ -16,6 +17,21 @@ const root = path.resolve(here, '..', '..');
 const script = path.join(here, 'verify-cross-lane-source.mjs');
 const source = readFileSync(path.join(root, SOURCE_PATH));
 const fakeHead = 'a'.repeat(40);
+
+test('reads the blob at the captured commit even if HEAD moves', () => {
+  const requested = [];
+  const observed = readCommittedSourceAtObservedHead((args) => {
+    requested.push(args);
+    if (requested.length === 1) return Buffer.from(`${fakeHead}\n`);
+    return source;
+  });
+  assert.equal(observed.gitHead, fakeHead);
+  assert.deepEqual(requested, [
+    ['rev-parse', '--verify', 'HEAD'],
+    ['show', `${fakeHead}:${SOURCE_PATH}`],
+  ]);
+  assert.deepEqual(observed.committedSource, source);
+});
 
 test('verifies the pinned six-lane source without promoting runtime evidence', () => {
   const report = verifySnapshot({

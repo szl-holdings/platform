@@ -42,15 +42,14 @@ vi.mock('@workspace/aef-sdk/client', () => {
 });
 
 // ── Mock @szl-holdings/db ─────────────────────────────────────────────────
-// The tool-mesh handlers in src/tools/{security,finance,operations}-tools.ts
+// Some tool-mesh handlers in src/tools/{security,finance,operations}-tools.ts
 // dynamically import @szl-holdings/db at runtime (via `await import(...)`).
 // That module reads DATABASE_URL via getEnv() and constructs a pg Pool at
 // module-load. While DATABASE_URL is now stubbed above so the env validator
 // passes, we still want the unit tests to be hermetic — they should NOT
 // open a real pg.Pool, NOT attempt any TCP connection, and NOT depend on
-// drizzle's query builder semantics. The handlers are pre-MVP stubs that
-// return canonical shapes regardless of DB content; the tests only assert
-// on those shapes, so a no-op chainable proxy is sufficient.
+// drizzle's query builder semantics. The enabled handlers tested here use
+// a no-op chainable proxy; disabled handlers reject before importing the DB.
 //
 // The mock returns:
 //   - `db`: a chainable proxy where every method returns the proxy itself,
