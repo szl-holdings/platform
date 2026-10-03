@@ -1,4 +1,5 @@
 # Screenshot Catalog — SZL Holdings Platform
+**Updated — 2026-10-03 (Workcell A11OY-ATELIER-PROOFWEAVE-20261003)**
 **Track 6 — 2026-04-21**
 **Updated — 2026-07-31 (Workcell VERTICAL-RUNTIME-CONTRACTS-2026-07-31)**
 **Updated — 2026-04-22 (Task #3103, README screenshot block refresh)**
@@ -7,6 +8,29 @@
 ---
 
 ## Summary
+
+### 2026-10-03 A11oy Atelier / Proofweave compile-only surface
+
+- filenames:
+  - `a11oy-atelier-proofweave-2026-10-03-1440x1164.png`
+  - `a11oy-atelier-proofweave-2026-10-03-390x900.png`
+- route: `http://127.0.0.1:4110/a11oy/atelier`
+- surface: A11oy Atelier Proofweave compile-only workbench
+- captured_at: `2026-10-03T11:28:05.872Z` and `2026-10-03T11:28:07.979Z`
+- captured_by: Codex / PixelProof
+- capture_environment: `local-exact-head`, Windows NT 10.0.26200.0, Node `v24.19.0`, Playwright `1.60.0` / Chromium `148.0.7778.96`
+- source_revision: `5341c52477317680991adf958b635d33f3a876b8`
+- workflow_run_or_command: `corepack pnpm --dir artifacts/a11oy build; corepack pnpm --dir artifacts/a11oy exec vite preview --host 127.0.0.1 --port 4110 --strictPort; SOURCE_REVISION=5341c52477317680991adf958b635d33f3a876b8 SCREENSHOT_PLAN=.verification/a11oy-atelier-proofweave-capture-plan.json SCREENSHOT_BASE_URL=http://127.0.0.1:4110 SCREENSHOT_OUTPUT_DIR=.verification/a11oy-atelier-proofweave-screenshot-proof-5341c52 CAPTURE_ENVIRONMENT=local-exact-head CAPTURED_BY="Codex / PixelProof" node scripts/qa/capture-screenshot-proof.mjs`
+- viewports: `1440 x 1164` -> full-page artifact `1440 x 1706`; `390 x 900` -> full-page artifact `390 x 2650`
+- artifact_sha256:
+  - desktop: `b222810bcaad94df4f994143d59d8017047f38ffc5498b5cc7a3ea02f7873e75`
+  - mobile: `c6431c9c9864643e8dd478f8305245011e889eb60daf0f6c94bf8e6e73839237`
+- workcell_id: `A11OY-ATELIER-PROOFWEAVE-20261003`
+- proof_level: `4`
+- status: `current`
+- notes: The local UI and its layout checks are **MEASURED** at the recorded source revision. The images show the five compile stages, the fail-closed production-browser boundary, and the separate Atelier continuity and provider controls. Proofweave plan output is **SIMULATED**, `COMPILED_NOT_EXECUTED`, and `IN_PROCESS_NOT_STORED`. Production browser actions remain **BLOCKED**. Provider/compiler runtime, durable ledger persistence, deployment, protected CI, publication, and independent witness remain **UNKNOWN**. These images do not establish provider inference, plan execution, or human approval.
+- sidecar: [`a11oy-atelier-proofweave-2026-10-03.screenshot.json`](a11oy-atelier-proofweave-2026-10-03.screenshot.json)
+- proof_packet: [`A11OY_ATELIER_PROOFWEAVE_PROOF_20261003.md`](A11OY_ATELIER_PROOFWEAVE_PROOF_20261003.md)
 
 ### 2026-09-29 A11oy Atelier / Grok 4.7
 

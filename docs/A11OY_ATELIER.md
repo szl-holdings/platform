@@ -6,17 +6,25 @@
 
 **Namespace:** `a11oy.atelier`
 
-**Canonical route:** `POST /api/a11oy/v1/atelier/ask`
+**Canonical routes:**
+
+- `POST /api/a11oy/v1/atelier/ask` — governed provider-backed inference.
+- `POST /api/a11oy/v1/atelier/proofweave/compile` — deterministic,
+  compile-only research-plan construction.
 
 **Operator surface:** `/a11oy/atelier`
 
-**CLI:** `a11oy-atelier ask`
+**CLI:** `a11oy-atelier ask` and `a11oy-atelier weave`
 
 > Learn the pattern. Rebuild the expression. Receipt every decision.
 
 ## Product boundary
 
-A11oy Atelier is an SZL-owned, evidence-bound intelligence workbench. It borrows public product patterns—strong reasoning, long-context work, provider choice, and developer ergonomics—while retaining original SZL expression, policy, code, interface, receipts, and product identity. It does not copy xAI source, binaries, model weights, branding, or trade dress.
+A11oy Atelier is an SZL-owned, evidence-bound intelligence workbench. It studies public product
+patterns—strong reasoning, long-context work, provider choice, and developer ergonomics—while
+retaining SZL expression, policy, code, interface, receipts, and product identity. `DECLARED` by the
+implementer: no xAI source, binaries, model weights, branding, or trade dress were intentionally
+copied. This is not an independent provenance or legal conclusion.
 
 The initial adapters are:
 
@@ -34,35 +42,34 @@ Grok 4.7 Responses return encrypted reasoning items by default. Turn Capsule v1 
 ```text
 A11oy Atelier UI / a11oy-atelier CLI
                   |
-                  v
-POST /api/a11oy/v1/atelier/ask
-                  |
-                  v
-deterministic capability policy gate
-                  |
-          +-------+--------+
-          |                |
-          v                v
-xAI Responses API    local Grok Build CLI
-          |                |
-          +-------+--------+
-                  |
-                  v
-response hashes + provider disclosure + EvidenceLedger append
-                  |
-                  v
+          +-------+----------------------------------+
+          |                                          |
+          v                                          v
+POST /api/a11oy/v1/atelier/ask     POST /api/a11oy/v1/atelier/proofweave/compile
+          |                                          |
+deterministic capability gate          deterministic policy compiler
+          |                                          |
+  +-------+--------+                    PATTERN -> CUT -> STITCH
+  |                |                     -> FITTING -> LABEL
+  v                v                                |
+xAI Responses API  local Grok Build CLI             v
+  |                |                      compile receipt + required
+  +-------+--------+                      audit-metadata append
+          |
+response hashes + disclosure + EvidenceLedger append
+          |
 reserve -> stage -> commit a tenant-scoped Turn Capsule
-                  |
-          +-------+--------+
-          |                |
-          v                v
+          |
+  +-------+--------+
+  |                |
+  v                v
 in-process store    encrypted local store
 (default; volatile) (configured; one host/process)
 ```
 
 Atelier is the operator workbench. Ayllu remains the governed council/orchestration layer. Frontier Now remains the evidence cockpit. Provider identity is recorded but does not confer control over A11oy policy, storage, or product identity.
 
-## Default capability policy
+## Ask-route capability policy
 
 Version 1 is reasoning-only. The following capabilities are denied before provider invocation:
 
@@ -73,7 +80,7 @@ Version 1 is reasoning-only. The following capabilities are denied before provid
 
 The policy engine returns deterministic denial reasons. A denied request does not reach a model provider.
 
-## Receipt contract
+## Ask-route receipt contract
 
 Every accepted answer includes:
 
@@ -81,7 +88,7 @@ Every accepted answer includes:
 - provider, model, and provider request identifier
 - prompt and response SHA-256 hashes
 - policy decisions and requested capabilities
-- evidence state and local-only truth label
+- `MEASURED` response/receipt evidence class and a separate local-only lifecycle state
 - ledger append identifier/state
 - Turn Capsule sequence, prior-capsule digest, and continuity state
 - original operator-prompt and provider-prompt hashes
@@ -97,6 +104,60 @@ Before provider invocation, the API requires both a client-generated session ID 
 Each committed capsule binds the sanitized request, original operator prompt, context-expanded provider prompt, response, sequence, prior capsule digest, timestamps, retention, and persistence state. `GET /api/a11oy/v1/atelier/sessions/:sessionId/verify` verifies the tenant-scoped chain without returning raw prompt or answer material. Every capsule in a chain shares the first capsule's effective expiry. Twenty-four hours is the maximum logical retrieval window, not a claim that files can self-delete while the process or host is off. The encrypted adapter purges expired indexed state and authenticated orphan payloads on startup, during continuity operations, and on a 15-minute runtime sweep.
 
 The provider response is staged before the capsule commit is acknowledged. If commit cannot complete after a provider response, the API fails closed instead of returning an uncommitted success. A successful encrypted stage is labeled durably preserved pending recovery; the default in-memory stage is labeled as retained only in the current non-durable process. Recovery is not automatic in v1.
+
+## Proofweave compiler
+
+Proofweave converts an objective, explicit typed claims, source declarations,
+and fixed budgets into a deterministic five-stage plan:
+
+`PATTERN -> CUT -> STITCH -> FITTING -> LABEL`
+
+The compiler emits a hash-addressed plan, stable policy identifiers and digest,
+claim/material metadata, automated-review declarations, limitations, and
+future Workcell responsibility and budget declarations. It labels the result
+with evidence class `SIMULATED` and the separate lifecycle states `DEMO`,
+`COMPILED_NOT_EXECUTED`, and `IN_PROCESS_NOT_STORED`.
+
+The first release does not fetch or validate a declared locator, prove that a
+40-hex Git revision exists or is reachable, invoke a provider, run tools or
+Workcells, start subagents, execute the review, approve a claim, or durably
+store the compiled plan. A required audit-metadata append is the only route
+side effect. Its backend is configuration-dependent, durable persistence is
+`UNKNOWN`, and tenant attribution has evidence class `DECLARED` rather than an authenticated-human
+identity binding.
+
+Non-reference code adaptation is admitted only when the caller declares a
+syntactically valid 40-hex revision and an allowlisted permissive license.
+AGPL, custom, unknown, and unlicensed material can be declared for reference,
+but cannot be incorporated into an adaptation by this policy. This
+pattern-adaptation boundary is `DECLARED`; it is not a formal dual-team
+clean-room or independent-provenance claim.
+
+The linked public-source and license register is a dated implementer record
+based on public sources reviewed as of 2026-08-30. It is not a current or
+exhaustive inventory, an independent provenance audit, or a legal conclusion.
+
+See [Proofweave](A11OY_ATELIER_PROOFWEAVE.md) and the
+[public-source and license boundary](A11OY_ATELIER_LICENSE_BOUNDARY.md).
+
+## Browser authorization boundary
+
+The current browser transport is enabled only by the Vite local-development
+runtime. An authenticated local browser flow uses the explicit loopback-only
+shared-proxy bridge described below; the bridge attaches a server-held key and
+fixed tenant only to Atelier requests. Production browser builds fail closed:
+they do not request Atelier health, submit inference, or submit Proofweave
+compilation because no authenticated server-side session or
+backend-for-frontend (BFF) exists for those browser actions. The operator
+surface displays `BLOCKED` and runtime evidence `UNKNOWN` instead of treating
+an API-key guard as browser identity.
+
+Provider credentials remain server-side. A production browser must never add
+an Atelier API key to a request, browser storage, HTML, or a `VITE_*` variable.
+Enabling production browser actions requires a separately reviewed
+server-authenticated session/BFF implementation and fresh authorization proof.
+The server API and CLI remain separate transports governed by their own
+configuration and access controls.
 
 ## Configuration
 
@@ -129,7 +190,10 @@ The runtime API must also be listening on `18080`; the proxy variables only sele
 ## Current truth boundary
 
 - Source implementation and local tests are distinct from deployment.
+- Local browser development is distinct from authorized production browser access.
 - Provider configuration health is distinct from a successful inference.
+- A compiled Proofweave plan is distinct from plan or Workcell execution.
+- An accepted audit append is distinct from witnessed durable persistence.
 - A successful inference is distinct from a committed Turn Capsule.
 - Encrypted local restart continuity is distinct from distributed or production-grade persistence.
 - A committed Turn Capsule is distinct from a durable external `EvidenceLedger` write.

@@ -499,6 +499,9 @@ importers:
 
   artifacts/a11oy:
     dependencies:
+      '@szl-holdings/a11oy-atelier':
+        specifier: workspace:*
+        version: link:../../packages/a11oy-atelier
       '@szl-holdings/brand-registry':
         specifier: workspace:*
         version: link:../../packages/brand-registry
@@ -587,6 +590,9 @@ importers:
       vite:
         specifier: 8.0.16
         version: 8.0.16(@types/node@25.3.5)(esbuild@0.28.1)(jiti@2.7.0)(terser@5.48.0)(tsx@4.23.15)(yaml@2.9.0)
+      vitest:
+        specifier: ^4.1.11
+        version: 4.1.11(@opentelemetry/api@1.9.1)(@types/node@25.3.5)(@vitest/coverage-v8@4.1.11)(@vitest/ui@4.1.11)(esbuild@0.28.1)(happy-dom@20.10.2)(jiti@2.7.0)(terser@5.48.0)(tsx@4.23.15)(yaml@2.9.0)
       wouter:
         specifier: ^3.3.5
         version: 3.10.0(react@19.1.0)
@@ -2179,6 +2185,9 @@ importers:
 
   packages/a11oy-cli:
     dependencies:
+      '@szl-holdings/a11oy-atelier':
+        specifier: workspace:*
+        version: link:../a11oy-atelier
       chalk:
         specifier: ^5.3.0
         version: 5.6.2

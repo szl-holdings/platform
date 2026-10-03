@@ -224,7 +224,7 @@ export class EncryptedLocalAtelierStateStore implements AtelierStateStore {
     persistenceState: 'ENCRYPTED_LOCAL_DURABLE',
     durable: true,
     encryptionState: 'ENCRYPTED_AT_REST',
-    evidenceState: 'OBSERVED',
+    evidenceState: 'MEASURED',
     retentionHours: ATELIER_STATE_RETENTION_HOURS,
     retentionMs: ATELIER_STATE_RETENTION_MS,
   });
