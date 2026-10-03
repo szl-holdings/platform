@@ -1,6 +1,6 @@
 # SZL Holdings — Known Gaps Register (Security & Operations)
 
-**Last updated:** 2026-10-03 (rev 34 — node-forge backport with release gate retained)
+**Last updated:** 2026-10-03 (rev 35 — hosted backport evidence and scoped claim correction)
 **Owner:** Engineering / DevOps  
 **Audience:** Enterprise architects, Series A technical advisors, incoming VP Engineering
 
@@ -17,9 +17,13 @@ including original-package acceptance and repaired-package rejection of the
 same malformed nested DigestAlgorithm structures. The package name, version,
 registry integrity and license remain unchanged. The existing security workflow
 now requires the installed-byte guard and a hash-verified pristine control.
-New-head hosted CI and native mobile integration remain **UNKNOWN**. The
-published advisory range and all strict audit/Grype/security gates remain in
-force; no release pass is claimed. See
+**MEASURED hosted readback:** signed source
+`94f7da7b1e9e9b5f8accd7bdedad88dea10116b5` passed the
+[pristine-control and installed-byte/Expo regression steps](https://github.com/szl-holdings/platform/actions/runs/37102544409/job/111144765531).
+Its strict dependency audit, Grype and Security Gate remain **BLOCKED**. Native
+mobile integration, an external release witness, and hosted CI for a later
+prose successor remain **UNKNOWN**. The published advisory range and all
+security gates remain in force; no release pass is claimed. See
 [`NODE_FORGE_BACKPORT_20261003.md`](../../audit/NODE_FORGE_BACKPORT_20261003.md).
 
 The current A11oy cyber-resilience, governed-security-agent, and security-and-compliance

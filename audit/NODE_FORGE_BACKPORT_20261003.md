@@ -45,7 +45,7 @@ own `ELIFECYCLE` result was exit 1. A passing baseline is not claimed.
 | `git apply --check <patch>` then `git apply <patch>` in the isolated package copy | Exit 0. Only the seven-added/two-removed-line RSA hunk is applied. Manual Git application preserves CRLF; this copy is not the installed pnpm byte proof. |
 | `pnpm --dir <two-package fixture> install --lockfile-only --ignore-scripts` then `install --frozen-lockfile --ignore-scripts` | Exit 0. Exactly two isolated dependencies installed. pnpm normalizes the repaired RSA file to LF; its bytes match the immutable upstream PR postimage exactly. |
 | `pnpm install --lockfile-only --offline --frozen-lockfile --ignore-scripts` in the Platform worktree | Exit 0, all 203 workspace manifests accepted. No workspace dependencies installed. |
-| `node --test scripts/qa/check-node-forge-backport.test.mjs` with the explicit two-package fixture and pristine control paths | Final exit 0, **13/13** tests passed, **0 skipped**. The first run was 12/13 because the custom extension lookup used the wrong Forge accessor form; it was corrected to `getExtension({id: ...})` and rerun. |
+| `node --test scripts/qa/check-node-forge-backport.test.mjs` with the explicit two-package fixture and pristine control paths | Final exit 0. Local RSA/Expo suite only: 13 cases succeeded; 0 failed; 0 skipped. The first run was 12/13 because the custom extension lookup used the wrong Forge accessor form; it was corrected to `getExtension({id: ...})` and rerun. |
 | `node scripts/qa/prepare-node-forge-pristine.mjs --archive <already verified original tarball>` | Exit 0. No further download. SHA-512 SRI and SHA-256 are checked before extraction; extracted package identity and pristine RSA hash are checked. The final 13/13 replay used this helper's extracted control. |
 | Preparation helper given the repository patch file as an invalid `--archive` input | Child exit 1, `Pristine registry integrity mismatch`, before any extraction. A first output-truncated probe did not retain a reliable child exit; the complete captured retry established exit 1. |
 | `node node_modules/@biomejs/biome/bin/biome check --write <three new scripts and provenance JSON>`; final `check` | Exit 0. Formatting/import fixes applied to the new scripts; final checked scripts have no lint errors. |
@@ -99,9 +99,19 @@ and separately through Expo's certificate library and checks both copies.
 GitHub CI cannot use the isolated patched-fixture override, and a missing
 pristine control fails closed in CI.
 
-**UNKNOWN:** new-head hosted CI and the actual complete workspace CLI dependency
-graph have not run locally or been read back for this uncommitted patch.
-The successful isolated pnpm fixture is not represented as that full graph.
+**MEASURED hosted readback:** signed source
+`94f7da7b1e9e9b5f8accd7bdedad88dea10116b5` has a GitHub `VALID` signature.
+Its [Security Audit dependency-scan job](https://github.com/szl-holdings/platform/actions/runs/37102544409/job/111144765531)
+reports `SUCCESS` for both "Prepare hash-verified pristine node-forge regression
+control" and "Verify installed node-forge backport and Expo signing compatibility".
+These steps exercise the actual installed Expo CLI and certificate-library
+consumer paths with the CI fixture override prohibited. They establish the
+scoped RSA/Expo case result, not an aggregate security or release pass.
+
+**UNKNOWN:** native mobile integration and an independent external release
+witness remain unverified. Results at `94f7da7b1e9e9b5f8accd7bdedad88dea10116b5`
+do not establish hosted CI success for a later prose correction; that successor
+requires its own exact-head readback.
 
 **MEASURED:** a separate internal Codex reviewer replayed the local RSA and Expo
 cases. This is another local implementation; it is not an independent external
@@ -111,12 +121,13 @@ release witness.
 Grype are not suppressed, their thresholds are unchanged, and this work does
 not establish a security-gate pass, protected merge, native mobile integration,
 deployment, certification, authorization, or outside witness. Full security
-scans and broad builds were **NOT RUN** locally; fresh hosted checks are required.
+scans and broad builds were **NOT RUN** locally. The strict dependency audit,
+Grype and Security Gate remain **BLOCKED** at the observed signed source.
 
 Public-claim check: no product copy, metrics, runtime labels, or model/formal
 claims changed. Security check: no credentials, private keys or `.env` values
 were introduced. Known-gap update: the register links this backport and retains
-the published-package release blocker. Proof level: **DECLARED 2**, local code
+the published-package release blocker. Proof level: **DECLARED 2**, code
 and package behavior only. No UI surface changed and no screenshot is claimed.
 
 ## Final root replay before commit
@@ -134,5 +145,34 @@ the new patch key required a missing pristine tarball. The subsequent two-packag
 `pnpm install --frozen-lockfile --ignore-scripts` exited 0. The installed RSA
 hash remained `acc22e5d36e27832c34e02dd3933aad7977d45b047eead5016520735efedc9c5`.
 The root reran `node --test scripts/qa/check-node-forge-backport.test.mjs` against
-that installation and the hash-verified pristine control: exit 0, 13 passed,
-0 failed, 0 skipped. No severity threshold or other security gate was changed.
+that installation and the hash-verified pristine control: exit 0. Local RSA/Expo
+suite only: 13 cases succeeded; 0 failed; 0 skipped. No severity threshold or
+other security gate was changed.
+
+## Claim-drift prose correction
+
+**DECLARED plan recorded in the session before editing:** clarify the two local
+RSA/Expo suite count phrases and refresh the observed hosted step evidence in
+this proof and the known-gaps register. Preserve every result and limit, the
+canonical platform metric artifact, the claim checker and allowlist, and all
+security gates. No package or runtime source changes are included.
+
+**MEASURED baseline:** `pnpm claims:drift` exited 1 at source
+`94f7da7b1e9e9b5f8accd7bdedad88dea10116b5`, identifying only this proof's lines
+48 and 137: its local case count was associated with the unavailable canonical
+platform metric. The [hosted truth-drift job](https://github.com/szl-holdings/platform/actions/runs/37102544459/job/111144766214)
+also failed "Reject hardcoded metric drift"; its earlier deterministic surface,
+local truth and evidence-label validation steps succeeded.
+
+**NOT RUN:** new local baseline/post `pnpm typecheck`, broad builds and route/UI
+checks for this prose-only correction. C: reached zero free bytes during
+diagnosis; only necessary small Markdown writes were resumed after a fresh
+positive-space readback. The earlier measured local typecheck failures above
+remain recorded. No route or UI changed.
+
+**MEASURED post-correction:** `node tools/truth/claims-drift.ts` exited 0 with
+`claims drift: PASS`. Node 24 directly ran the same unchanged checker used by
+`pnpm claims:drift`, avoiding new tsx cache writes. `git diff --check` exited 0.
+A separate internal Codex reviewer found no scoped audit claim failures or
+misleading aggregate hosted-success claim. This is local source validation;
+successor exact-head hosted CI remains **UNKNOWN** until read back.
