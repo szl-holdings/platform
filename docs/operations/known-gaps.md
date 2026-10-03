@@ -42,7 +42,7 @@ with no patched version published; the unit suite and
 Runtime Audit report a pre-existing cross-process Atelier file race. These
 failures cannot be treated as a release pass. A signed successor
 `658ecb845db75b0f83f2e259c84fcd87d595833a` repairs the local file race;
-its focused 16/16 tests and package typecheck passed, and the hosted unit suite
+its focused Atelier tests and package typecheck passed, and the hosted unit suite
 passed at `7e7962a8c8050057f09d494f02087fe56283a05b`. The high-severity
 dependency gate still fails on that head. Protected merge, provider
 publication, deployed route read-back, and an outside functional witness remain
