@@ -74,6 +74,9 @@ separate evidence states.
 
 ### Exact-head follow-up, 2026-10-03
 
+**followup_recorded_at:** 2026-10-03T07:34:00Z. The packet's original
+`recorded_at` above applies only to the initial local verification record.
+
 The source commit `bc06fa733ad0cb000e1c4cfd5eda00aa9daba348` was
 published normally as PR #884. GitHub reports its commit signature valid for
 `stephenlutar2-hash`; local `git log -1 --show-signature` also reported a good
