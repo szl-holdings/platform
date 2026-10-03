@@ -160,7 +160,9 @@ const KILLINCHU_CONSOLE_HTML =
 const COMMAND_CENTER_HTML =
   '<!doctype html><html><head><title>a11oy Command Center</title>' +
   '<link rel="canonical" href="https://a-11-oy.com/command"></head>' +
-  '<body>Deny by default. Proof stays on a11oy.net. MODELED on static origin.</body></html>';
+  '<body>Product origin a-11-oy.com · Proof a11oy.net · Energy UNAVAILABLE in this browser. · ' +
+  'Signer UNSIGNED-honest · No secret values · This surface is MODELED on static origin until ' +
+  'the Space runtime signs a write.</body></html>';
 
 const KILLINCHU_BUILD_INFO_BODY = {
   status: 'OBSERVED',
@@ -1322,9 +1324,24 @@ test('rejects identity, canonical, boundary, and content-type drift on owner-bac
   ]);
   assert.deepEqual(
     await verify(
+      KILLINCHU_CONSOLE_HTML.replace('</title>', '</title><title>a11oy · Killinchu</title>'),
+    ),
+    ['killinchu-public-console: WEB body has an unexpected product identity'],
+  );
+  assert.deepEqual(
+    await verify(
       KILLINCHU_CONSOLE_HTML.replace(
         'https://a-11-oy.com/killinchu',
         'https://example.com/unapproved',
+      ),
+    ),
+    ['killinchu-public-console: WEB body has an unexpected canonical URL'],
+  );
+  assert.deepEqual(
+    await verify(
+      KILLINCHU_CONSOLE_HTML.replace(
+        '</head>',
+        '<link rel="canonical" href="https://a-11-oy.com/killinchu"></head>',
       ),
     ),
     ['killinchu-public-console: WEB body has an unexpected canonical URL'],
@@ -1372,8 +1389,109 @@ test('rejects owner-backed WEB evidence that exists only inside HTML comments', 
   );
   assert.deepEqual(
     await verify(KILLINCHU_CONSOLE_HTML.replace('</body>', '<!-- unterminated</body>')),
-    ['killinchu-public-console: WEB body has malformed HTML comments'],
+    ['killinchu-public-console: WEB body is not structurally valid HTML'],
   );
+});
+
+test('rejects owner-backed WEB evidence from inert document content', async () => {
+  const candidate = configuredSurface('killinchu-public-console');
+  const verify = (body: string) =>
+    verifyLivePublicSurfaces(registry([candidate]), async (url) => webResponse(url, body));
+  const titleTag = '<title>a11oy · Killinchu</title>';
+  const canonicalTag = '<link rel="canonical" href="https://a-11-oy.com/killinchu">';
+
+  for (const [openTag, closeTag] of [
+    ['<script type="application/json">', '</script>'],
+    ['<template>', '</template>'],
+  ]) {
+    assert.deepEqual(
+      await verify(
+        KILLINCHU_CONSOLE_HTML.replace(
+          titleTag,
+          `<title>Compromised</title>${openTag}${titleTag}${closeTag}`,
+        ),
+      ),
+      ['killinchu-public-console: WEB body has an unexpected product identity'],
+    );
+    assert.deepEqual(
+      await verify(
+        KILLINCHU_CONSOLE_HTML.replace(canonicalTag, `${openTag}${canonicalTag}${closeTag}`),
+      ),
+      ['killinchu-public-console: WEB body has an unexpected canonical URL'],
+    );
+  }
+
+  for (const [openTag, closeTag] of [
+    ['<script type="application/json">', '</script>'],
+    ['<style>', '</style>'],
+    ['<template>', '</template>'],
+    ['<noscript>', '</noscript>'],
+    ['<textarea>', '</textarea>'],
+    ['<xmp>', '</xmp>'],
+    ['<iframe>', '</iframe>'],
+    ['<noembed>', '</noembed>'],
+    ['<noframes>', '</noframes>'],
+    ['<svg><text>', '</text></svg>'],
+  ]) {
+    assert.deepEqual(
+      await verify(
+        KILLINCHU_CONSOLE_HTML.replace(
+          'Effectors stay SIMULATED.',
+          `${openTag}Effectors stay SIMULATED.${closeTag}`,
+        ),
+      ),
+      ['killinchu-public-console: WEB body is missing its evidence-boundary marker'],
+    );
+  }
+
+  for (const [openTag, closeTag] of [
+    ['<span hidden>', '</span>'],
+    ['<span aria-hidden="true">', '</span>'],
+    ['<span style="display: none !important">', '</span>'],
+    ['<span style="visibility: hidden">', '</span>'],
+    ['<span style="content-visibility: hidden">', '</span>'],
+  ]) {
+    assert.deepEqual(
+      await verify(
+        KILLINCHU_CONSOLE_HTML.replace(
+          'Effectors stay SIMULATED.',
+          `${openTag}Effectors stay SIMULATED.${closeTag}`,
+        ),
+      ),
+      ['killinchu-public-console: WEB body is missing its evidence-boundary marker'],
+    );
+  }
+
+  assert.deepEqual(
+    await verify(
+      KILLINCHU_CONSOLE_HTML.replace(
+        'Effectors stay SIMULATED.',
+        'Effectors remain inactive.',
+      ).replace('</head>', '<meta name="evidence" content="Effectors stay SIMULATED."></head>'),
+    ),
+    ['killinchu-public-console: WEB body is missing its evidence-boundary marker'],
+  );
+});
+
+test('rejects command boundary markers when every marker is inert', async () => {
+  const candidate = configuredSurface('legacy-command-route');
+  const verify = (body: string) =>
+    verifyLivePublicSurfaces(registry([candidate]), async (url) => webResponse(url, body));
+
+  for (const [openTag, closeTag] of [
+    ['<script type="application/json">', '</script>'],
+    ['<template>', '</template>'],
+  ]) {
+    assert.deepEqual(
+      await verify(
+        COMMAND_CENTER_HTML.replace('<body>', `<body>${openTag}`).replace(
+          '</body>',
+          `${closeTag}</body>`,
+        ),
+      ),
+      ['legacy-command-route: WEB body is missing its evidence-boundary marker'],
+    );
+  }
 });
 
 test('cancels the redirect response body when Location is malformed', async () => {

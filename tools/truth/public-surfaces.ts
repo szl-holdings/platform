@@ -1,4 +1,5 @@
 import { XMLParser, XMLValidator } from 'fast-xml-parser';
+import { type DefaultTreeAdapterMap, parse } from 'parse5';
 
 export const PUBLIC_SURFACE_REGISTRY_SCHEMA = 'szl.public-surfaces.registry/v1';
 export const PUBLIC_SURFACE_MANIFEST_SCHEMA = 'szl.public-surfaces/v1';
@@ -88,6 +89,20 @@ const TRANSIENT_TRANSPORT_CODES = new Set([
   'ETIMEDOUT',
   'UND_ERR_CONNECT_TIMEOUT',
   'UND_ERR_SOCKET',
+]);
+const HTML_NAMESPACE = 'http://www.w3.org/1999/xhtml';
+const NON_EVIDENCE_BODY_ELEMENTS = new Set([
+  'iframe',
+  'noembed',
+  'noframes',
+  'noscript',
+  'plaintext',
+  'script',
+  'style',
+  'template',
+  'textarea',
+  'title',
+  'xmp',
 ]);
 // A worker owns the whole surface transaction. The approved two-hop redirect path is therefore
 // bounded to 2 * (3 * 15 seconds + 750 ms + 1,500 ms) = 94.5 seconds of slot occupancy.
@@ -248,7 +263,14 @@ const PUBLIC_WEB_CONTRACTS = {
   'legacy-command-route': {
     title: 'a11oy Command Center',
     canonicalUrl: 'https://a-11-oy.com/command',
-    requiredText: ['Deny by default.', 'Proof stays on a11oy.net.', 'MODELED on static origin'],
+    requiredText: [
+      'Product origin a-11-oy.com',
+      'Proof a11oy.net',
+      'Energy UNAVAILABLE in this browser.',
+      'Signer UNSIGNED-honest',
+      'No secret values',
+      'This surface is MODELED on static origin until the Space runtime signs a write.',
+    ],
   },
 } as const satisfies Record<string, PublicWebContract>;
 
@@ -860,18 +882,141 @@ async function validatePublicApiResponse(
   return [`${surfaceId}: routed API has no body validator`];
 }
 
-function withoutHtmlComments(input: string): string | null {
-  let cursor = 0;
-  let output = '';
-  while (cursor < input.length) {
-    const commentStart = input.indexOf('<!--', cursor);
-    if (commentStart === -1) return output + input.slice(cursor);
-    output += input.slice(cursor, commentStart);
-    const commentEnd = input.indexOf('-->', commentStart + 4);
-    if (commentEnd === -1) return null;
-    cursor = commentEnd + 3;
+type HtmlNode = DefaultTreeAdapterMap['node'];
+type HtmlElement = DefaultTreeAdapterMap['element'];
+type HtmlTextNode = DefaultTreeAdapterMap['textNode'];
+
+type PublicWebDocument = Readonly<{
+  title: string | null;
+  canonicalUrls: readonly (string | null)[];
+  staticBodyText: string;
+}>;
+
+function isElementNode(node: HtmlNode): node is HtmlElement {
+  return 'tagName' in node;
+}
+
+function isHtmlElement(node: HtmlNode): node is HtmlElement {
+  return isElementNode(node) && node.namespaceURI === HTML_NAMESPACE;
+}
+
+function isTextNode(node: HtmlNode): node is HtmlTextNode {
+  return node.nodeName === '#text' && 'value' in node;
+}
+
+function childNodesOf(node: HtmlNode): HtmlNode[] {
+  return 'childNodes' in node ? node.childNodes : [];
+}
+
+function findHtmlElements(root: HtmlNode, tagName: string): HtmlElement[] {
+  const elements: HtmlElement[] = [];
+  const visit = (node: HtmlNode): void => {
+    if (isHtmlElement(node) && node.tagName === tagName) elements.push(node);
+    for (const child of childNodesOf(node)) visit(child);
+  };
+  visit(root);
+  return elements;
+}
+
+function hasInlineHiddenPresentation(element: HtmlElement): boolean {
+  const attributes = new Map(
+    element.attrs.map((attribute) => [attribute.name.toLowerCase(), attribute.value]),
+  );
+  if (attributes.has('hidden')) return true;
+  if (attributes.get('aria-hidden')?.trim().toLowerCase() === 'true') return true;
+
+  const style = attributes.get('style');
+  if (!style) return false;
+  return style.split(';').some((declaration) => {
+    const separator = declaration.indexOf(':');
+    if (separator === -1) return false;
+    const property = declaration.slice(0, separator).trim().toLowerCase();
+    const value = declaration
+      .slice(separator + 1)
+      .replace(/\s*!important\s*$/i, '')
+      .trim()
+      .toLowerCase();
+    return (
+      (property === 'display' && value === 'none') ||
+      (property === 'visibility' && (value === 'hidden' || value === 'collapse')) ||
+      (property === 'content-visibility' && value === 'hidden')
+    );
+  });
+}
+
+function collectHtmlText(node: HtmlNode, excludeInertBodyContent: boolean): string {
+  if (isTextNode(node)) return node.value;
+  if (
+    excludeInertBodyContent &&
+    isElementNode(node) &&
+    (node.namespaceURI !== HTML_NAMESPACE ||
+      NON_EVIDENCE_BODY_ELEMENTS.has(node.tagName) ||
+      hasInlineHiddenPresentation(node))
+  ) {
+    return '';
   }
-  return output;
+  return childNodesOf(node)
+    .map((child) => collectHtmlText(child, excludeInertBodyContent))
+    .join('');
+}
+
+function normalizedHtmlText(value: string): string {
+  return value.replace(/\s+/g, ' ').trim();
+}
+
+function hasExplicitContainer(element: HtmlElement): boolean {
+  return Boolean(element.sourceCodeLocation?.startTag && element.sourceCodeLocation.endTag);
+}
+
+function parsePublicWebDocument(input: string): PublicWebDocument | null {
+  const parseErrors: string[] = [];
+  let document: DefaultTreeAdapterMap['document'];
+  try {
+    document = parse(input, {
+      scriptingEnabled: true,
+      sourceCodeLocationInfo: true,
+      onParseError: (error) => parseErrors.push(error.code),
+    });
+  } catch {
+    return null;
+  }
+  if (parseErrors.length > 0) return null;
+
+  const heads = findHtmlElements(document, 'head');
+  const bodies = findHtmlElements(document, 'body');
+  if (
+    heads.length !== 1 ||
+    bodies.length !== 1 ||
+    !hasExplicitContainer(heads[0]) ||
+    !hasExplicitContainer(bodies[0])
+  ) {
+    return null;
+  }
+
+  const titles = findHtmlElements(heads[0], 'title');
+  const title =
+    titles.length === 1 && hasExplicitContainer(titles[0])
+      ? normalizedHtmlText(collectHtmlText(titles[0], false))
+      : null;
+
+  const canonicalUrls = findHtmlElements(heads[0], 'link')
+    .filter((element) => {
+      const rel = element.attrs.find((attribute) => attribute.name.toLowerCase() === 'rel')?.value;
+      return rel
+        ?.toLowerCase()
+        .split(/\s+/)
+        .some((token) => token === 'canonical');
+    })
+    .map(
+      (element) =>
+        element.attrs.find((attribute) => attribute.name.toLowerCase() === 'href')?.value ?? null,
+    );
+
+  return {
+    title,
+    canonicalUrls,
+    staticBodyText: normalizedHtmlText(collectHtmlText(bodies[0], true)),
+  };
 }
 
 async function validatePublicWebResponse(
@@ -889,26 +1034,23 @@ async function validatePublicWebResponse(
 
   const { text, failure } = await readBoundedResponseBody(surfaceId, response, 'WEB');
   if (failure || text === null) return [failure ?? `${surfaceId}: WEB body is unavailable`];
-  const effectiveHtml = withoutHtmlComments(text);
-  if (effectiveHtml === null) return [`${surfaceId}: WEB body has malformed HTML comments`];
+  const document = parsePublicWebDocument(text);
+  if (!document) return [`${surfaceId}: WEB body is not structurally valid HTML`];
 
-  const title = effectiveHtml.match(/<title(?:\s[^>]*)?>([^<]*)<\/title>/i)?.[1]?.trim();
-  if (title !== contract.title) {
+  if (document.title !== contract.title) {
     return [`${surfaceId}: WEB body has an unexpected product identity`];
   }
 
-  const canonicalTags = (effectiveHtml.match(/<link\b[^>]*>/gi) ?? []).filter((tag) =>
-    /\brel\s*=\s*(["'])canonical\1/i.test(tag),
-  );
-  const canonicalUrl =
-    canonicalTags.length === 1
-      ? canonicalTags[0]?.match(/\bhref\s*=\s*(["'])([^"']+)\1/i)?.[2]
-      : null;
+  const canonicalUrl = document.canonicalUrls.length === 1 ? document.canonicalUrls[0] : null;
   if (canonicalUrl !== contract.canonicalUrl) {
     return [`${surfaceId}: WEB body has an unexpected canonical URL`];
   }
 
-  if (!contract.requiredText.every((requiredText) => effectiveHtml.includes(requiredText))) {
+  if (
+    !contract.requiredText.every((requiredText) =>
+      document.staticBodyText.includes(normalizedHtmlText(requiredText)),
+    )
+  ) {
     return [`${surfaceId}: WEB body is missing its evidence-boundary marker`];
   }
   return [];
