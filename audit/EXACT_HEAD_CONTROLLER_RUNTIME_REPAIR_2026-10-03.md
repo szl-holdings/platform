@@ -80,3 +80,72 @@ report command exited nonzero, while Grype separately reported vulnerabilities
 at HIGH severity or above. These security findings are not waived by this
 controller repair. Typecheck and the remaining checks require fresh-head
 readback. Hosted capture on protected `main` remains **NOT RUN** for this repair.
+
+## Additive dependency compatibility repair (2026-10-03)
+
+Evidence class: **MEASURED** for the local commands below. This addition starts
+from exact PR #886 head `3dd0fb3e80e91103ee395ec3920a27f45b69d16c`, with protected
+`main` still `f2f8df6f89056e9104587674ccec0855dd5b177a`. The original product PR
+#601 is already merged; its deleted branch is not recreated. Owner-authorized
+coordination is recorded in [the PR comment](https://github.com/szl-holdings/platform/pull/886#issuecomment-5967974460).
+Cross-chat message delivery was **UNAVAILABLE** (transport closed), not assumed
+successful. The separate Atelier repair remains assigned to PR #885.
+
+The frozen baseline installs successfully, but the real legacy minimatch
+consumers throw `expand is not a function` with the blanket brace-expansion v5
+override. The retained compatibility harness reproduces this at the current
+head. Its Git blob is `7d601cc6801e6dc1c1a94bc1074abf71e814bef8`, matching the
+preserved local work, not a claim to recover unavailable historical commit
+`8243029`.
+
+Only minimatch majors 3, 5, and 9 receive API-compatible brace-expansion
+backports (1.1.21, 2.1.7, and 2.1.7 respectively). Modern consumers retain
+5.0.12. Lockfile regeneration's unrelated Metro/Babel changes were removed;
+the resulting frozen install succeeds. The compatibility command is added to
+the existing blocking dependency job. The audit's `always()` condition,
+security-gate dependencies, severity thresholds, release-age admission,
+controller isolation, and publication checks are unchanged.
+
+All pnpm commands here invoke the repository-pinned pnpm 10.26.1 JavaScript
+entrypoint with Node v24.19.0 (`node <pnpm-10.26.1>/bin/pnpm.cjs ...`), because
+pnpm is not directly on the initial shell PATH. These are scoped command
+outcomes, not canonical platform totals or hosted qualification:
+
+| Command | Outcome |
+| --- | --- |
+| `pnpm typecheck` before dependency linking | Exit 1: turbo unavailable; no TypeScript diagnostics reached. |
+| `pnpm install --frozen-lockfile --ignore-scripts` at the baseline | Exit 0. |
+| `node --test scripts/qa/security-overrides-compat.test.mjs` before repair | Exit 1: legacy consumer API errors and lockfile-contract failure. |
+| `pnpm install --lockfile-only --ignore-scripts`, then `pnpm install --frozen-lockfile --ignore-scripts` after scoped regeneration | Both exit 0; existing peer warnings remain. |
+| `node --test scripts/qa/security-overrides-compat.test.mjs scripts/qa/check-fflate-resolution.test.mjs scripts/qa/generate-sbom.test.mjs scripts/qa/generate-vuln-report.test.js` | Exit 0, no failures or skips. |
+| `node --test scripts/ci/exact-head-screenshot-evidence.test.mjs` | Exit 0; POSIX-only cases skipped on Windows, not claimed as passed. |
+| `pnpm --filter @workspace/alloy-embedding-api test --maxWorkers=1` | Exit 0. Uses local fixtures, not provider execution. |
+| `pnpm --filter @workspace/alloy-runtime-api test src/routes/v1/index.test.ts --maxWorkers=1` | Exit 0. |
+| `pnpm --filter @workspace/alloy-runtime-api typecheck`, `pnpm --filter @workspace/alloy-embedding-api typecheck`, `pnpm --filter @workspace/a11oy typecheck` | Each exit 0. |
+| `pnpm --filter @szl/substrate-mcp-gateway typecheck` | Initially exits 2 with TS2339 for `ImportMeta.env` in unchanged `packages/aef-sdk/src/config.ts:20`. After the normal prerequisite `pnpm --filter @workspace/aef-sdk build` exits 0, the identical MCP typecheck exits 0. No source/config workaround was applied. |
+| `pnpm typecheck --concurrency=1` with `NODE_OPTIONS=--max-old-space-size=1536` | Initial post-install attempt exits 1 on a Windows path error during decision-engine's prerequisite build. Direct `pnpm --filter @szl-holdings/decision-engine build` subsequently exits 0. The aggregate retry fails during api-client-react's prerequisite build with heap exhaustion (child exit 134). No aggregate pass is claimed. |
+| `pnpm exec biome check scripts/qa/security-overrides-compat.test.mjs`, `node --check scripts/qa/security-overrides-compat.test.mjs`, `node scripts/qa/check-fflate-resolution.mjs` | Each exit 0; no formatter fixes applied. |
+| `pnpm brand:check`, `pnpm docs:claims-check`, `git diff --check` | Each exit 0. |
+| `pnpm claims:drift` with `TRUTH_ALLOWLIST_BASE_SHA=f2f8df6f89056e9104587674ccec0855dd5b177a`, `pnpm truth:test` | Each exit 0, with no gate or allowlist changes. |
+| `pnpm audit --json --audit-level=high` | Exit 1: high-severity node-forge and braces advisories remain; low-severity DOMPurify finding also remains. |
+
+The current high findings are [GHSA-86w9-cpqp-85rv](https://github.com/advisories/GHSA-86w9-cpqp-85rv)
+and [GHSA-vfj7-8cjw-p6xm](https://github.com/advisories/GHSA-vfj7-8cjw-p6xm).
+The audit response lists no patched version for either. `braces` is a different
+dependency from `brace-expansion`; this repair does not fix or waive those
+findings. The earlier September clean audit is historical, not current evidence.
+
+The aggregate command generated an untracked evidence-doctrine lockfile while
+honoring that nested package's pnpm declaration; it was retained under ignored
+local output, not added to this change. No existing user work was deleted.
+An independent read-only diff review found no actionable compatibility or
+gate-weakening issue; that review is not independent runtime certification.
+
+GitHub REST policy/signature refresh became **UNAVAILABLE** due to HTTP 403
+rate limiting. No alternate credential or policy bypass was attempted. Normal
+Git transport still reads the exact branch heads. A normal additive branch
+push, if accepted, is source durability only: merge and release remain
+**BLOCKED** by the unresolved security findings and fresh-head qualification.
+New screenshots, hosted capture, merge, deployment, HF publication, and model
+evaluation are **NOT RUN** for this compatibility addition. Existing capture
+evidence binds its historical source and does not qualify this changed lockfile.
