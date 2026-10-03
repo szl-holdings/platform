@@ -44,6 +44,12 @@ jobs:
           node --test scripts/qa/check-fflate-resolution.test.mjs
           pnpm run security:fflate
 
+      - name: Prepare hash-verified pristine node-forge regression control
+        run: node scripts/qa/prepare-node-forge-pristine.mjs
+
+      - name: Verify installed node-forge backport and Expo signing compatibility
+        run: node --test scripts/qa/check-node-forge-backport.test.mjs
+
       - name: Run dependency vulnerability scan and generate SBOM
         id: sbom
         run: |

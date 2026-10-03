@@ -1,6 +1,6 @@
 # SZL Holdings — Known Gaps Register (Security & Operations)
 
-**Last updated:** 2026-10-02 (rev 33 — cyber evidence and hosted gate read-back)
+**Last updated:** 2026-10-03 (rev 34 — node-forge backport with release gate retained)
 **Owner:** Engineering / DevOps  
 **Audience:** Enterprise architects, Series A technical advisors, incoming VP Engineering
 
@@ -9,6 +9,18 @@ This document is the canonical reference for known security, quality, and compli
 ---
 
 ## 2026-10-02 cyber evidence workcell
+
+**2026-10-03 update — MEASURED local dependency repair; release BLOCKED:**
+`node-forge@1.4.0` has a provenance-bound pnpm backport of upstream PR #1152.
+An isolated pnpm installation passed 13 RSA and Expo certificate/CSR regressions,
+including original-package acceptance and repaired-package rejection of the
+same malformed nested DigestAlgorithm structures. The package name, version,
+registry integrity and license remain unchanged. The existing security workflow
+now requires the installed-byte guard and a hash-verified pristine control.
+New-head hosted CI and native mobile integration remain **UNKNOWN**. The
+published advisory range and all strict audit/Grype/security gates remain in
+force; no release pass is claimed. See
+[`NODE_FORGE_BACKPORT_20261003.md`](../../audit/NODE_FORGE_BACKPORT_20261003.md).
 
 The current A11oy cyber-resilience, governed-security-agent, and security-and-compliance
 pages now label source examples as `DEMO` and missing runtime results as
