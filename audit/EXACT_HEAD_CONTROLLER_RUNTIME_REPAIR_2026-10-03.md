@@ -32,13 +32,13 @@ the commands below; hosted capture and runtime outcome remain **UNKNOWN**.
   `f2f8df6f89056e9104587674ccec0855dd5b177a`; the repair was based on
   current protected `main` at this check.
 - `node --test scripts/ci/exact-head-screenshot-evidence.test.mjs` passed:
-  19 tests, 14 pass, 5 Windows POSIX-only skips, 0 fail. The new executable
-  Bash binding test is among the Windows skips, so this does not claim that
+  no failures, with POSIX-only cases skipped on Windows. The new executable
+  Bash binding test is among those Windows skips, so this does not claim that
   test passed in CI.
 - `node --check scripts/ci/exact-head-screenshot-evidence.test.mjs` passed.
 - `python -c ... yaml.safe_load(...)` parsed the workflow and found all three
   jobs (`contract`, `capture`, `publish`).
-- Ubuntu WSL `bash -n` passed on all 16 workflow `run` blocks extracted from
+- Ubuntu WSL `bash -n` passed on all workflow `run` blocks extracted from
   that YAML. The initial text-mode stdin attempt produced CRLF parser noise;
   binary stdin produced a clean exit 0. No workflow code was changed for that
   harness artifact.
@@ -67,3 +67,16 @@ Screenshot applicability: **NOT RUN** (workflow-only controller repair).
 No screenshot, artifact identity, issue receipt, signed promotion, deployment,
 or production/customer observation is claimed. A protected-main merge followed
 by a fresh exact-head dispatch and independent review remains necessary.
+
+## Initial PR check disposition
+
+At the first [controller PR](https://github.com/szl-holdings/platform/pull/886)
+head, the capture contract and clean-clone checks passed. `truth-drift` rejected
+hardcoded local test and shell-block totals in this packet as canonical platform
+metrics; this follow-up replaces only that ambiguous prose, without weakening
+the gate or changing the measured local command outcomes. The blocking Security
+Gate also failed because its dependency scan failed: the hosted vulnerability
+report command exited nonzero, while Grype separately reported vulnerabilities
+at HIGH severity or above. These security findings are not waived by this
+controller repair. Typecheck and the remaining checks require fresh-head
+readback. Hosted capture on protected `main` remains **NOT RUN** for this repair.
