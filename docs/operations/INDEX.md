@@ -8,7 +8,7 @@ Runbooks, deployment, incident response, release management, testing, and enviro
 | [deployment-guide.md](deployment-guide.md) | Staging and production deployment procedures |
 | [environment-variables.md](environment-variables.md) | Complete environment variable reference (80+ vars) |
 | [environment-validation.md](environment-validation.md) | Environment validation checklist and automated checks |
-| [known-gaps.md](known-gaps.md) | **Canonical** — Known gaps register rev 32: security, quality, compliance |
+| [known-gaps.md](known-gaps.md) | **Canonical** — Known gaps register rev 33: security, quality, compliance |
 | [CYBER_LANE_EXECUTION_20261002.md](CYBER_LANE_EXECUTION_20261002.md) | Cyber source hardening, focused local proof, and remaining operational gates |
 | [CROSS_LANE_EVIDENCE_REGISTER_20261002.md](CROSS_LANE_EVIDENCE_REGISTER_20261002.md) | Six buyer-lane source states, owners, proof gates, and 30/60/90-day sequence |
 | [audit-findings-register.md](audit-findings-register.md) | All 106 audit findings from Phases 0–13 with status |

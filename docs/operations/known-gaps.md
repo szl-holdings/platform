@@ -1,6 +1,6 @@
 # SZL Holdings — Known Gaps Register (Security & Operations)
 
-**Last updated:** 2026-10-02 (rev 32 — cyber evidence and hosted gate read-back)
+**Last updated:** 2026-10-02 (rev 33 — cyber evidence and hosted gate read-back)
 **Owner:** Engineering / DevOps  
 **Audience:** Enterprise architects, Series A technical advisors, incoming VP Engineering
 
@@ -40,7 +40,11 @@ scan, Grype, and Security Gate report the high-severity `node-forge` advisory
 [`GHSA-86w9-cpqp-85rv`](https://github.com/advisories/GHSA-86w9-cpqp-85rv)
 with no patched version published; the unit suite and
 Runtime Audit report a pre-existing cross-process Atelier file race. These
-failures cannot be treated as a release pass. Protected merge, provider
+failures cannot be treated as a release pass. A signed successor
+`658ecb845db75b0f83f2e259c84fcd87d595833a` repairs the local file race;
+its focused 16/16 tests and package typecheck passed, and the hosted unit suite
+passed at `7e7962a8c8050057f09d494f02087fe56283a05b`. The high-severity
+dependency gate still fails on that head. Protected merge, provider
 publication, deployed route read-back, and an outside functional witness remain
 separate, unverified gates. The dated proof packet is
 [`CYBER_LANE_EXECUTION_20261002.md`](CYBER_LANE_EXECUTION_20261002.md).

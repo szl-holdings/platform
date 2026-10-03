@@ -39,7 +39,7 @@ subsequent verification will record its actual result.
 | `plan_summary` | Repair security readiness, qualify the three A11oy cyber pages, block unsupported tool-mesh effects, then create the six-lane register and proof. |
 | `recorded_at` | 2026-10-02T22:32:07Z |
 | `recorded_by` | Codex |
-| `proof_level` | Level 4, **local source presentation**. Hosted exact-head CI, protected merge, provider publication, deployment, and outside witness are not established by this packet. |
+| `proof_level` | Level 4, **local source presentation** from clean A11oy build inputs at the declared HEAD and pre-screenshot browser responses matched to the local build. Resource responses arriving during or after a full-page screenshot were not separately awaited. Local installed dependencies were not independently attested. Hosted exact-head CI, protected merge, provider publication, deployment, and outside witness are not established by this packet. |
 
 ### Patch summary
 
@@ -73,9 +73,14 @@ Signed local source commits before this proof successor: `cb363691a71f877e294f6e
 (truth-qualified UI), `5c6baf13d3b669b1eb83e1300b428def54b66825`
 (security readiness), `8b559430e66ba1f2f8fec71fbf8d0fed3db31ac0`
 (phone presentation), `bfcb03a4846535dc39fdb361ba3e9ac8477a8131` (tool-mesh block), and
-`02b63169036301558f2d4bb91e296bc0a57a6ee1` (repeatable capture command).
-The capture source is the last of these, and A11oy source bytes are unchanged
-between the phone-layout and capture commits.
+`02b63169036301558f2d4bb91e296bc0a57a6ee1` (original capture command).
+Later signed successors `658ecb845db75b0f83f2e259c84fcd87d595833a`
+(Atelier cross-process read repair) and
+`7e7962a8c8050057f09d494f02087fe56283a05b` (Gitleaks and lane verifier)
+preceded the controlled recapture. The recapture used the latter checkout
+HEAD. Its A11oy build inputs
+were clean at that HEAD. The capture script is byte-bound separately in the
+sidecar because its repair follows that source commit.
 
 ### Tests and verification
 
@@ -84,6 +89,7 @@ between the phone-layout and capture commits.
 | `corepack pnpm --filter @workspace/a11oy typecheck` | Exit 0 after the UI edits. |
 | `corepack pnpm --filter @workspace/a11oy test:series-a` | Exit 0, 24/24 tests. These test the source scenario contract, not production behavior. |
 | `corepack pnpm --filter @workspace/a11oy build` | Exit 0 after the phone-layout fix, 3,344 modules transformed. |
+| Atelier continuity tests and package typecheck at `7e7962a8c8050057f09d494f02087fe56283a05b` | Local 16/16 Atelier tests and package typecheck passed after the cross-process read repair. These are source checks, not runtime deployment evidence. |
 | `python -B -m unittest discover -s platform/agents/readiness/readiness-security -p 'test_*.py' -q` | Exit 0, 17/17 focused tests, including stale/numeric doctrine, wrong-head, rate-limit, unsigned receipt, and 30-day run age. |
 | `python -B -m unittest discover -s platform/agents/readiness/_lib -p 'test_*.py' -q` | Exit 0, 68/68 shared library tests. |
 | From `packages/tool-mesh`: `node node_modules/vitest/vitest.mjs run src/tool-mesh.test.ts --maxWorkers=1` | Exit 0, 35/35 before and 40/40 after the patch. Gateway rejects all three unsupported operations and direct handlers throw. |
@@ -91,8 +97,8 @@ between the phone-layout and capture commits.
 | `node node_modules/@biomejs/biome/bin/biome check packages/tool-mesh/src/tools/security-tools.ts packages/tool-mesh/src/tool-mesh.test.ts` | The first run found formatting/import order issues and exited 1; after those fixes it exited 0 with seven pre-existing non-null assertion warnings. |
 | `node node_modules/typescript/bin/tsc -p packages/tool-mesh/tsconfig.json --noEmit` | **Unavailable as a clean pass:** both before and after the patch exited 1 with the same eight `TS6305` missing referenced declaration errors. A full dependency build remains an independent gate. |
 | `node --check scripts/qa/capture-cyber-evidence-20261002.mjs` | Exit 0. |
-| `node --test scripts/qa/verify-cross-lane-source.test.mjs` | Exit 0, 4/4 source identity and fail-closed tests. `node scripts/qa/verify-cross-lane-source.mjs` emitted `VERIFIED_LOCAL_SOURCE`; no runtime readiness was asserted. |
-| `SOURCE_REVISION=02b63169036301558f2d4bb91e296bc0a57a6ee1` capture command | Exit 0: 15/15 route and viewport states returned HTTP 200 with expected heading/text, no page or console errors, and no horizontal overflow. |
+| `node --test scripts/qa/verify-cross-lane-source.test.mjs` | Exit 0, 5/5 source identity and fail-closed tests. `node scripts/qa/verify-cross-lane-source.mjs` emitted `VERIFIED_LOCAL_SOURCE`; no runtime readiness was asserted. |
+| `SOURCE_REVISION=7e7962a8c8050057f09d494f02087fe56283a05b` controlled capture command | Exit 0: fresh Vite build (3,344 modules), script-owned strict-port preview, and 15/15 route and viewport states with HTTP 200, expected heading/text, zero page/console errors, no horizontal overflow, and responses observed and completed before each screenshot matched by SHA-256 to the build. |
 | Playwright phone selector click on `/a11oy/security-agents` | Exit 0: selecting Detection Engineering Agent changed the button's `aria-pressed` state and rendered its modeled detail. |
 | `git diff --check` and screenshot SHA-256 read-back | Exit 0 and 15/15 digests match the sidecar. |
 | `node node_modules/@commitlint/cli/cli.js --from f2f8df6f89056e9104587674ccec0855dd5b177a --to 02b63169036301558f2d4bb91e296bc0a57a6ee1 --verbose` | Exit 0: all five source and capture commits passed with zero warnings. |
@@ -112,8 +118,19 @@ route at phone (390×844), portrait (768×1024), desktop (1440×1100), Full HD
 capture time, source revision, command, and SHA-256 are in the
 [screenshot catalog](../../audit/screenshot-catalog.md) and
 [machine sidecar](../../audit/cyber-evidence-screenshots-2026-10-02.json).
-The capture ran the built application locally from the declared source. It
-shows page presentation, not a deployed security service or live control.
+The capture script checked A11oy build inputs against the declared HEAD,
+built them locally, started its own strict-port Vite preview, and verified
+the served index and responses completed before each screenshot against
+the built bytes. Late responses during or after a full-page screenshot
+were not separately awaited for byte verification. The
+sidecar records the build manifest SHA-256
+`697e470a50c68ca49486dc5c1ed70026627910322a51816cad0a3803bd61deb2`
+and executing script SHA-256
+`6e400564a6e94228e2cdd7e5af8422f372a583d4391ab43509f6bea0ff53fd77`.
+The 15 recaptured JPEGs were byte-identical to the earlier deterministic
+captures; their new UTC capture times are in the sidecar and catalog.
+Local installed dependencies were not independently attested. The images
+show page presentation, not a deployed security service or live control.
 
 An initial phone capture exposed wrapped `DEMO` badges and an unreadable
 framework table. Those images were rejected and replaced after the responsive
@@ -137,6 +154,9 @@ actually honor tenant, asset, and CVE filters. The hosted check run at
 Grype gates on high-severity `node-forge`
 [`GHSA-86w9-cpqp-85rv`](https://github.com/advisories/GHSA-86w9-cpqp-85rv)
 (no patched version published), and its unit suite and Runtime Audit on a pre-existing
-Atelier cross-process filesystem race. This read-back is a held gate, not a
-security or runtime pass. No external SIEM, EDR, customer asset, incident,
+Atelier cross-process filesystem race. The later signed source repaired the
+Atelier race, and the hosted unit suite passed at `7e7962a8c8050057f09d494f02087fe56283a05b`.
+The first-head failures remain historical evidence; the latest security advisory
+still blocks, and no final new-head CI pass is claimed. This read-back is a
+held gate, not a security or runtime pass. No external SIEM, EDR, customer asset, incident,
 operator assignment, approval, or containment action was observed or executed.
