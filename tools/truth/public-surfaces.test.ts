@@ -1314,6 +1314,44 @@ test('rejects identity, canonical, boundary, and content-type drift on owner-bac
   ]);
 });
 
+test('rejects owner-backed WEB evidence that exists only inside HTML comments', async () => {
+  const candidate = configuredSurface('killinchu-public-console');
+  const verify = (body: string) =>
+    verifyLivePublicSurfaces(registry([candidate]), async (url) => webResponse(url, body));
+
+  assert.deepEqual(
+    await verify(
+      KILLINCHU_CONSOLE_HTML.replace(
+        '<title>a11oy · Killinchu</title>',
+        '<!-- <title>a11oy · Killinchu</title> -->',
+      ),
+    ),
+    ['killinchu-public-console: WEB body has an unexpected product identity'],
+  );
+  assert.deepEqual(
+    await verify(
+      KILLINCHU_CONSOLE_HTML.replace(
+        '<link rel="canonical" href="https://a-11-oy.com/killinchu">',
+        '<!-- <link rel="canonical" href="https://a-11-oy.com/killinchu"> -->',
+      ),
+    ),
+    ['killinchu-public-console: WEB body has an unexpected canonical URL'],
+  );
+  assert.deepEqual(
+    await verify(
+      KILLINCHU_CONSOLE_HTML.replace(
+        'Effectors stay SIMULATED.',
+        '<!-- Effectors stay SIMULATED. -->',
+      ),
+    ),
+    ['killinchu-public-console: WEB body is missing its evidence-boundary marker'],
+  );
+  assert.deepEqual(
+    await verify(KILLINCHU_CONSOLE_HTML.replace('</body>', '<!-- unterminated</body>')),
+    ['killinchu-public-console: WEB body has malformed HTML comments'],
+  );
+});
+
 test('cancels the redirect response body when Location is malformed', async () => {
   const redirected = configuredSurface('a11oy-net-chat-gap');
   let calls = 0;
@@ -1478,7 +1516,7 @@ test('validates the exact A11oy.net webmanifest contract', async () => {
 
   assert.deepEqual(await verify(JSON.stringify(canonicalManifest)), []);
   assert.deepEqual(await verify('{'), [
-    'a11oy-net-webmanifest-gap: manifest metadata is not valid JSON',
+    'a11oy-net-webmanifest-gap: manifest metadata is not valid duplicate-free JSON',
   ]);
   assert.deepEqual(await verify('<html>not a manifest</html>', 'text/html'), [
     'a11oy-net-webmanifest-gap: metadata body is an HTML response',
@@ -1502,6 +1540,24 @@ test('validates the exact A11oy.net webmanifest contract', async () => {
       }),
     ),
     ['a11oy-net-webmanifest-gap: manifest metadata has an unexpected product identity'],
+  );
+  assert.deepEqual(
+    await verify(
+      JSON.stringify(canonicalManifest).replace(
+        '"name":"a11oy Proof Registry"',
+        '"name":"Different product","name":"a11oy Proof Registry"',
+      ),
+    ),
+    ['a11oy-net-webmanifest-gap: manifest metadata is not valid duplicate-free JSON'],
+  );
+  assert.deepEqual(
+    await verify(
+      JSON.stringify(canonicalManifest).replace(
+        '"short_name":"a11oy.net"',
+        '"short_name":"Different","short\\u005fname":"a11oy.net"',
+      ),
+    ),
+    ['a11oy-net-webmanifest-gap: manifest metadata is not valid duplicate-free JSON'],
   );
   assert.deepEqual(
     await verify(JSON.stringify({ ...canonicalManifest, start_url: 'https://evil.example/' })),

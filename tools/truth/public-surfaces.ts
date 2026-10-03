@@ -860,6 +860,20 @@ async function validatePublicApiResponse(
   return [`${surfaceId}: routed API has no body validator`];
 }
 
+function withoutHtmlComments(input: string): string | null {
+  let cursor = 0;
+  let output = '';
+  while (cursor < input.length) {
+    const commentStart = input.indexOf('<!--', cursor);
+    if (commentStart === -1) return output + input.slice(cursor);
+    output += input.slice(cursor, commentStart);
+    const commentEnd = input.indexOf('-->', commentStart + 4);
+    if (commentEnd === -1) return null;
+    cursor = commentEnd + 3;
+  }
+  return output;
+}
+
 async function validatePublicWebResponse(
   surfaceId: string,
   response: SurfaceFetchResponse,
@@ -875,13 +889,15 @@ async function validatePublicWebResponse(
 
   const { text, failure } = await readBoundedResponseBody(surfaceId, response, 'WEB');
   if (failure || text === null) return [failure ?? `${surfaceId}: WEB body is unavailable`];
+  const effectiveHtml = withoutHtmlComments(text);
+  if (effectiveHtml === null) return [`${surfaceId}: WEB body has malformed HTML comments`];
 
-  const title = text.match(/<title(?:\s[^>]*)?>([^<]*)<\/title>/i)?.[1]?.trim();
+  const title = effectiveHtml.match(/<title(?:\s[^>]*)?>([^<]*)<\/title>/i)?.[1]?.trim();
   if (title !== contract.title) {
     return [`${surfaceId}: WEB body has an unexpected product identity`];
   }
 
-  const canonicalTags = (text.match(/<link\b[^>]*>/gi) ?? []).filter((tag) =>
+  const canonicalTags = (effectiveHtml.match(/<link\b[^>]*>/gi) ?? []).filter((tag) =>
     /\brel\s*=\s*(["'])canonical\1/i.test(tag),
   );
   const canonicalUrl =
@@ -892,7 +908,7 @@ async function validatePublicWebResponse(
     return [`${surfaceId}: WEB body has an unexpected canonical URL`];
   }
 
-  if (!contract.requiredText.every((requiredText) => text.includes(requiredText))) {
+  if (!contract.requiredText.every((requiredText) => effectiveHtml.includes(requiredText))) {
     return [`${surfaceId}: WEB body is missing its evidence-boundary marker`];
   }
   return [];
@@ -977,12 +993,9 @@ async function validateMetadataResponse(
         `${surfaceId}: expected an application/manifest+json response, observed ${contentType || 'missing'}`,
       ];
     }
-    let manifest: unknown;
-    try {
-      manifest = JSON.parse(body);
-    } catch {
-      return [`${surfaceId}: manifest metadata is not valid JSON`];
-    }
+    const parsed = parseDuplicateFreeJson(body);
+    if (!parsed.ok) return [`${surfaceId}: manifest metadata is not valid duplicate-free JSON`];
+    const manifest = parsed.value;
     if (!isObject(manifest)) {
       return [`${surfaceId}: manifest metadata must be a JSON object`];
     }
