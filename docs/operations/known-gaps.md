@@ -1,6 +1,6 @@
 # SZL Holdings — Known Gaps Register (Security & Operations)
 
-**Last updated:** 2026-09-30 (rev 30 — P0 proof and separate live readiness boundaries)
+**Last updated:** 2026-10-03 (rev 32 — P0 capture and dependency blocker readback)
 **Owner:** Engineering / DevOps  
 **Audience:** Enterprise architects, Series A technical advisors, incoming VP Engineering
 
@@ -95,6 +95,61 @@ this task, so those states remain UNAVAILABLE. The repository-wide strict
 claims gate also continues to fail closed on the Vessels/AIS mock while
 MARINETRAFFIC_API_KEY is absent; PR #668 does not relabel that
 external-authority gap or introduce a credential to bypass it.
+
+### 2026-10-03 P0 current-source reconciliation
+
+MEASURED authenticated readback confirms [PR #601](https://github.com/szl-holdings/platform/pull/601)
+merged on 2026-10-01 as verified commit
+`f2f8df6f89056e9104587674ccec0855dd5b177a`, tree
+`1c07dc9f7c0d3be1b3d4408c2edc19fe584fd2b9`. The final PR head has that same
+tree but is unsigned. #668 is retained as an ancestor; owner-closed #671
+remains superseded. The product-source promotion is complete rather than
+pending, and the application register now records the qualified investor and
+developer journey alongside Atelier.
+
+Fresh local product/helper/layout contracts passed 37/37; documentation claims
+passed 26/26 and source-of-truth validation passed 66 checks. The #601 head
+has 53 successful checks, three skips and one Commitlint failure on historical
+merge subjects. That failure is retained; neither history nor its gate was
+rewritten. The passing functional checks do not make the entire rollup green.
+
+September 30 visual evidence remains bound to its captured implementation,
+not relabeled as a new capture of the merge commit. Hosted screenshot evidence,
+authenticated operational Workcells, deployment and customer-runtime witnesses
+remain UNAVAILABLE. The current Partial/DEMO boundary and existing GraphQL,
+Omnia, provider, identity and durability gaps remain unchanged. No production
+readiness is inferred. Commands and dispositions are recorded in
+`audit/P0_SERIES_A_EXECUTION_RECONCILIATION_20261003.md`.
+
+### 2026-10-03 exact-head capture and security blockers
+
+MEASURED PR #883 head `d4bc06f46a89f85c620c96d6e6407f12fa17c031`
+completed 50 successful checks, two skips and three security failures.
+The uploaded dependency report identifies High findings for
+[`node-forge <=1.4.0`](https://github.com/advisories/GHSA-86w9-cpqp-85rv) and
+[`braces <=3.0.3`](https://github.com/advisories/GHSA-vfj7-8cjw-p6xm).
+Both official advisories list no patched version as observed on 2026-10-03.
+The resolved source graph reaches Forge through the mobile Expo CLI and its
+code-signing certificates, and reaches Braces through Micromatch/Jest/Metro.
+The Grype High gate independently reports Forge in the lockfile; the aggregate
+Security Gate correctly fails closed. These are dependency findings, not a
+demonstration of exploitation or production exposure. Security is BLOCKED;
+supported mobile functionality, audit thresholds and security gates are not
+removed or bypassed to obtain green checks.
+
+[Capture run 37105707193](https://github.com/szl-holdings/platform/actions/runs/37105707193)
+passes its controller contract, then fails isolated dependency-root preparation
+before browser capture. No screenshot artifact or promotion receipt is produced.
+The exact predicate and OS cause are UNKNOWN because the preparation step's
+bare assertions lack diagnostics. The successor adds named assertion/runtime
+inventory failures and regression tests while preserving all predicates and
+permission modes. This closes the source diagnostic gap only; it does not
+establish successful candidate isolation or hosted visual proof. The dispatched
+controller remains pinned to protected main until normal protected promotion.
+
+Tests with fixed identity/command doubles establish SIMULATED diagnostic
+control flow only. Real Linux isolation, fresh exact-head screenshots and a
+green dependency gate remain separate qualification obligations.
 
 ### 2026-08-30 A11oy Atelier Turn Capsule boundary
 

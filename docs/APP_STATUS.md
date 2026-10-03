@@ -1,6 +1,6 @@
 # SZL Holdings — Application Status Register
 
-**Date:** September 24, 2026
+**Date:** October 3, 2026 (A11oy entry reconciled; other entries retain prior evidence)
 **Status:** Authoritative single source of truth for all artifact GA/beta/internal/archived/concept status
 **Update cadence:** Update after each release or Phase completion
 
@@ -42,8 +42,9 @@
 | **Artifact** | `artifacts/a11oy` |
 | **Package** | `@workspace/a11oy` |
 | **Status** | **Partial** |
-| **Audience** | SZL operator; enterprise evaluators after production hardening |
-| **URL** | `/a11oy/`; Atelier workbench at `/a11oy/atelier` |
+| **Audience** | Investors and developers inspecting the qualified product demonstration; SZL operator; enterprise evaluators after production hardening |
+| **URL** | `/a11oy/`; investor/developer view at `/a11oy/start`; linked demonstration at `/a11oy/product-journey`; Atelier workbench at `/a11oy/atelier` |
+| **Product source** | MEASURED protected-source readback on 2026-10-03: PR #601 merged at `f2f8df6f89056e9104587674ccec0855dd5b177a`. Product Journey, Workcell availability, responsive navigation and replay controls are present. The linked fixtures remain DEMO; external mutation stays BLOCKED and qualifying operational evidence stays UNAVAILABLE. This does not change the Partial status. |
 | **Authentication** | Runtime API key guard; local development may run without a configured key |
 | **Live Data** | Atelier defaults to the allowlisted `grok-4.7` through a configured xAI Responses API or local Grok Build CLI; no mock Atelier answers |
 | **Blockers** | The default Turn Capsule store and `EvidenceLedger` append are process-local and non-durable. The configured encrypted adapter is single-host/single-process only; distributed continuity, a durable external ledger, production identity binding, deployment, direct xAI API witness, and independent runtime witness remain incomplete. The 2026-09-29 `grok-4.7` inference probe returned HTTP 402 usage-balance exhaustion despite signed Grok Build 1.0.44, authenticated account readback, and a saved 4.7 default. Provider reasoning ciphertext is not retained or replayed by the text-based capsule. |
@@ -212,4 +213,4 @@ No archived artifact should be deployed, registered, or referenced as an active 
 
 ---
 
-*Update this document after each development phase. Last updated: August 26, 2026.*
+*Update this document after each development phase. A11oy product-source entry reconciled: October 3, 2026; other entries were not requalified in this pass.*
