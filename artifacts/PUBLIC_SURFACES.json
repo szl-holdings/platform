@@ -1,7 +1,7 @@
 {
   "schema": "szl.public-surfaces/v1",
   "generated_by": "tools/truth/generate-public-surfaces.ts@szl.public-surfaces/v1",
-  "observed_at": "2026-10-03T10:27:28Z",
+  "observed_at": "2026-10-03T10:52:13Z",
   "summary": {
     "declared": 29,
     "customer_facing_products": 1,
@@ -37,7 +37,7 @@
         "status": 200,
         "final_url": "https://szlholdings-a11oy.hf.space/api/build-info"
       },
-      "note": "Measured HTTP 200 at the canonical route; reachability does not assert payload correctness, deployment provenance, or exact source parity."
+      "note": "A bounded live JSON read reported status and build state OBSERVED at deployed A11oy source 5f1bf4deb34e799caa544eb55678b057b9c058f9. Current owner main c215cad6f91d8a6fa547034c5e8b40cfeb9dea20 is its direct route-neutral successor; receipt_minted remained false. Exact deployed-source binding is not a receipt, certification, or byte-for-byte deployment attestation."
     },
     {
       "id": "a11oy-console",
@@ -137,7 +137,7 @@
         "status": 200,
         "final_url": "https://a11oy.net/chat/"
       },
-      "note": "A11oy.net source 16c28a9cbf98e9f7037027a7448cb4e69cb51b0d owns chat/index.html; its immutable bytes matched the live canonicalized page. This is a static proof-registry handoff and does not claim that the separate interactive console is ready."
+      "note": "Current A11oy.net source 26266110d7006baf7918d7cfbdd81a266c4e6d9f owns chat/index.html; its immutable bytes matched the live canonicalized page and the live source witness binds the served static artifact to that exact revision. This is a static proof-registry handoff and does not claim that the separate interactive console is ready."
     },
     {
       "id": "a11oy-net-code-gap",
@@ -157,7 +157,7 @@
         "status": 200,
         "final_url": "https://a11oy.net/code/"
       },
-      "note": "A11oy.net source 16c28a9cbf98e9f7037027a7448cb4e69cb51b0d owns code/index.html; its immutable bytes matched the live canonicalized page. This is a static proof-registry handoff and does not claim that the separate governed run-loop is ready."
+      "note": "Current A11oy.net source 26266110d7006baf7918d7cfbdd81a266c4e6d9f owns code/index.html; its immutable bytes matched the live canonicalized page and the live source witness binds the served static artifact to that exact revision. This is a static proof-registry handoff and does not claim that the separate governed run-loop is ready."
     },
     {
       "id": "a11oy-net-robots-gap",
@@ -237,7 +237,7 @@
         "status": 200,
         "final_url": "https://a11oy.net/manifest.webmanifest"
       },
-      "note": "A11oy.net source 16c28a9cbf98e9f7037027a7448cb4e69cb51b0d and the live byte-identical manifest declare name 'a11oy Proof Registry' and short_name 'a11oy.net'. Reachability and metadata identity do not establish product-runtime readiness."
+      "note": "Current A11oy.net source 26266110d7006baf7918d7cfbdd81a266c4e6d9f and the live byte-identical manifest declare name 'a11oy Proof Registry' and short_name 'a11oy.net'; the live source witness binds the served static artifact to that exact revision. Reachability and metadata identity do not establish product-runtime readiness."
     },
     {
       "id": "a11oy-observability",
@@ -397,7 +397,7 @@
         "status": 200,
         "final_url": "https://szlholdings-killinchu.hf.space/api/build-info"
       },
-      "note": "A bounded JSON body read reported OBSERVED source 47cbda9ead6548fb4cbf112ba47f1f39411ae6da, matching protected Killinchu main, and GitHub OIDC attestation 52366835 for manifest sha256:4622b60c4d9818c81ee6d73b470cc44a1597c20022b0d4fd86d2cbaf345d92d2; this source-binding endpoint does not assert or infer the separate HF runtime content revision."
+      "note": "A bounded exact JSON body read reported OBSERVED Killinchu source dee16139923017abd8277a9bd8c143f8d7869630, matching current signed main, and GitHub OIDC attestation 52400480 for manifest sha256:050a62e33e51c297a72e64824e7f719843bf21285277008c730e1adf451c6ebe. Publication run 37117261412 completed successfully; the endpoint and receipt still do not assert aggregate health or authorization."
     },
     {
       "id": "killinchu-public-console",
@@ -417,7 +417,7 @@
         "status": 200,
         "final_url": "https://a-11-oy.com/killinchu"
       },
-      "note": "A11oy source 263e5a3cbfda3dbb4d3c3dc8820968cecbed3d3e registers the on-origin route and serves pages/killinchu.html. The page keeps twin runtime state fail-closed; reachability does not establish Hugging Face runtime health or exact deployed-source parity."
+      "note": "Current A11oy source c215cad6f91d8a6fa547034c5e8b40cfeb9dea20 registers the on-origin route and retains the exact pages/killinchu.html and handler blobs deployed from its direct parent 5f1bf4deb34e799caa544eb55678b057b9c058f9. Fresh product-origin build-info and Series-A status readbacks report that deployed revision; the Series-A record is OBSERVED and terminal with no critical failures, a SIGNED status, and verified storage mount. The page keeps twin runtime state fail-closed; reachability and source binding do not establish Killinchu Hugging Face runtime health or authorization."
     },
     {
       "id": "killinchu-readiness-api",
@@ -497,7 +497,7 @@
         "status": 200,
         "final_url": "https://a-11-oy.com/command/"
       },
-      "note": "A11oy source 263e5a3cbfda3dbb4d3c3dc8820968cecbed3d3e registers /command and serves pages/command-center.html. The reachable mixed surface labels local modeled behavior and blocked authority explicitly; reachability is not runtime authorization."
+      "note": "Current A11oy source c215cad6f91d8a6fa547034c5e8b40cfeb9dea20 registers /command and retains the exact pages/command-center.html and handler blobs deployed from its direct parent 5f1bf4deb34e799caa544eb55678b057b9c058f9. The reachable mixed surface labels local modeled behavior and blocked authority explicitly; reachability and source binding are not runtime authorization."
     },
     {
       "id": "legacy-counsel-route",
