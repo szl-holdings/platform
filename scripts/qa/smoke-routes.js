@@ -8,6 +8,7 @@
  *   node scripts/qa/smoke-routes.js
  *   node scripts/qa/smoke-routes.js --api-only
  *   node scripts/qa/smoke-routes.js --web-only
+ *   node scripts/qa/smoke-routes.js --group a11oy
  *   node scripts/qa/smoke-routes.js --json
  */
 
@@ -24,6 +25,22 @@ const CONCURRENCY = parseInt(process.env.SMOKE_CONCURRENCY ?? '5', 10);
 const API_ONLY = process.argv.includes('--api-only');
 const WEB_ONLY = process.argv.includes('--web-only');
 const JSON_OUTPUT = process.argv.includes('--json');
+const groupFlags = process.argv.flatMap((arg, index) =>
+  arg === '--group' ? [process.argv[index + 1]] : [],
+);
+const GROUP_ID = groupFlags[0]?.trim().toLowerCase() ?? null;
+
+if (
+  groupFlags.length > 1 ||
+  (groupFlags.length === 1 && (!GROUP_ID || GROUP_ID.startsWith('--')))
+) {
+  console.error('Specify exactly one group value with --group.');
+  process.exit(2);
+}
+if ((API_ONLY && WEB_ONLY) || (GROUP_ID && API_ONLY)) {
+  console.error('--group and --web-only cannot be combined with --api-only.');
+  process.exit(2);
+}
 
 const ROOT = join(__dirname, '../..');
 const ROUTES_INDEX = join(ROOT, 'artifacts/api-server/src/routes/index.ts');
@@ -73,6 +90,7 @@ function discoverApiPrefixes(filePath) {
 // Routes are relative paths appended to baseUrl
 const WEB_DOMAIN_CONFIGS = [
   {
+    id: 'terra',
     name: 'Terra',
     baseUrl: BASE_URL ? `${BASE_URL}` : TERRA_URL,
     routes: [
@@ -91,6 +109,7 @@ const WEB_DOMAIN_CONFIGS = [
     ],
   },
   {
+    id: 'vessels',
     name: 'Vessels',
     baseUrl: BASE_URL ? `${BASE_URL}` : VESSELS_URL,
     routes: [
@@ -109,6 +128,7 @@ const WEB_DOMAIN_CONFIGS = [
     ],
   },
   {
+    id: 'carlota-jo',
     name: 'Carlota Jo',
     baseUrl: BASE_URL ? `${BASE_URL}` : CJ_URL,
     routes: [
@@ -123,6 +143,7 @@ const WEB_DOMAIN_CONFIGS = [
     ],
   },
   {
+    id: 'sentra',
     name: 'Sentra — Cyber Resilience',
     baseUrl: BASE_URL ? `${BASE_URL}` : SENTRA_URL,
     routes: [
@@ -145,6 +166,7 @@ const WEB_DOMAIN_CONFIGS = [
     ],
   },
   {
+    id: 'counsel',
     name: 'Counsel — Legal Matter Command',
     baseUrl: BASE_URL ? `${BASE_URL}` : COUNSEL_URL,
     routes: [
@@ -163,6 +185,7 @@ const WEB_DOMAIN_CONFIGS = [
     ],
   },
   {
+    id: 'a11oy',
     name: 'A11oy — Brand Orchestration',
     baseUrl: BASE_URL ? `${BASE_URL}` : A11OY_URL,
     routes: [
@@ -181,6 +204,7 @@ const WEB_DOMAIN_CONFIGS = [
       '/a11oy/governance',
       '/a11oy/agents',
       '/a11oy/workcells',
+      '/a11oy/replay',
       '/a11oy/connectors',
       '/a11oy/sovereign',
       '/a11oy/verticals',
@@ -190,6 +214,16 @@ const WEB_DOMAIN_CONFIGS = [
     ],
   },
 ];
+const SELECTED_WEB_DOMAIN_CONFIGS = GROUP_ID
+  ? WEB_DOMAIN_CONFIGS.filter(({ id }) => id === GROUP_ID)
+  : WEB_DOMAIN_CONFIGS;
+
+if (GROUP_ID && SELECTED_WEB_DOMAIN_CONFIGS.length === 0) {
+  console.error(
+    `Unknown --group "${GROUP_ID}". Available groups: ${WEB_DOMAIN_CONFIGS.map(({ id }) => id).join(', ')}`,
+  );
+  process.exit(2);
+}
 
 // The runtime API (apps/alloy-runtime-api) mounts its router at the root, so
 // these are the real unauthenticated 2xx endpoints — NOT the legacy /api/*
@@ -246,7 +280,7 @@ async function main() {
   if (!JSON_OUTPUT) {
     console.log(`\nSZL Holdings — Route Smoke Runner`);
     console.log(
-      `Timeout: ${TIMEOUT_MS}ms  Concurrency: ${CONCURRENCY}  API-only: ${API_ONLY}  Web-only: ${WEB_ONLY}\n`,
+      `Timeout: ${TIMEOUT_MS}ms  Concurrency: ${CONCURRENCY}  API-only: ${API_ONLY}  Web-only: ${WEB_ONLY}  Group: ${GROUP_ID ?? 'all'}\n`,
     );
   }
 
@@ -256,7 +290,7 @@ async function main() {
   let totalFailed = 0;
 
   if (!API_ONLY) {
-    for (const { name, baseUrl, routes } of WEB_DOMAIN_CONFIGS) {
+    for (const { name, baseUrl, routes } of SELECTED_WEB_DOMAIN_CONFIGS) {
       if (!JSON_OUTPUT) console.log(`\n[${name}]  base: ${baseUrl}`);
 
       const results = await runDomainBatch(baseUrl, routes, 'web', CONCURRENCY, TIMEOUT_MS);
@@ -294,7 +328,7 @@ async function main() {
     }
   }
 
-  if (!WEB_ONLY) {
+  if (!WEB_ONLY && !GROUP_ID) {
     const apiBaseUrl = BASE_URL || API_URL;
     const apiSections = [
       { label: 'API Health & Core (2xx required)', paths: KNOWN_READ_API_ROUTES, tier: 'api' },
@@ -360,10 +394,10 @@ async function main() {
   if (totalFailed > 0) {
     if (!JSON_OUTPUT)
       console.error(`\nSmoke run FAILED — ${totalFailed} route(s) did not meet expectations.`);
-    process.exit(1);
+    process.exitCode = 1;
   } else {
     if (!JSON_OUTPUT) console.log(`\nSmoke run PASSED`);
-    process.exit(0);
+    process.exitCode = 0;
   }
 }
 
