@@ -141,7 +141,9 @@ test('binds architecture and resources to source truth and screenshot reveal mar
 });
 
 test('keeps canonical Series A proof intact and adds a bounded 75-view local matrix', () => {
-  assert.match(canonicalSeriesAWrapper, /VERIFIED_GITHUB_RUNTIME/);
+  assert.match(canonicalSeriesAWrapper, /localCaptureProvenance\(\)/);
+  assert.match(canonicalSeriesAWrapper, /hosted_gate_admissible: false/);
+  assert.doesNotMatch(canonicalSeriesAWrapper, /VERIFIED_GITHUB_RUNTIME/);
   assert.match(canonicalSeriesAWrapper, /series-a-proof-helpers\.mjs/);
   assert.equal(capturePlan.schema, 'szl.screenshot-capture-plan/v1');
   assert.equal(capturePlan.targets.length, 15);

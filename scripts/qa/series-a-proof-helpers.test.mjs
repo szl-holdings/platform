@@ -1,4 +1,5 @@
 import assert from 'node:assert/strict';
+import { spawnSync } from 'node:child_process';
 import { once } from 'node:events';
 import { mkdir, mkdtemp, readdir, readFile, rm, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
@@ -10,6 +11,51 @@ import {
   publishCaptureDirectory,
   requireOutputDirectory,
 } from './series-a-proof-helpers.mjs';
+
+test('never elevates candidate-owned capture provenance from forged hosted inputs', () => {
+  const forgedHostedEnvironment = {
+    GITHUB_ACTIONS: 'true',
+    GITHUB_REPOSITORY: 'szl-holdings/platform',
+    GITHUB_RUN_ID: '1234',
+    GITHUB_RUN_ATTEMPT: '1',
+    GITHUB_WORKFLOW: 'forged',
+    GITHUB_WORKFLOW_REF: 'szl-holdings/platform/.github/workflows/forged.yml@main',
+    GITHUB_WORKFLOW_SHA: 'a'.repeat(40),
+  };
+  const expectedProvenance = {
+    authority: 'LOCAL_NON_AUTHORITATIVE',
+    provider: 'UNKNOWN',
+    workflow_name: null,
+    workflow_ref: null,
+    workflow_path: null,
+    workflow_revision: null,
+    workflow_source_sha: null,
+    workflow_run_id: null,
+    workflow_run_attempt: null,
+    workflow_run_url: null,
+  };
+  const helperUrl = new URL('./series-a-proof-helpers.mjs', import.meta.url).href;
+  const childScript = [
+    'import { localCaptureProvenance } from ' + JSON.stringify(helperUrl) + ';',
+    'const first = localCaptureProvenance();',
+    'const second = localCaptureProvenance();',
+    'let mutationBlocked = false;',
+    "try { Object.assign(first, { authority: 'VERIFIED_GITHUB_RUNTIME', provider: 'github-actions', workflow_run_id: '1234' }); } catch { mutationBlocked = true; }",
+    'process.stdout.write(JSON.stringify({ provenance: first, frozen: Object.isFrozen(first), same_identity: first === second, mutation_blocked: mutationBlocked }));',
+  ].join('\n');
+  const child = spawnSync(process.execPath, ['--input-type=module', '--eval', childScript], {
+    encoding: 'utf8',
+    env: { ...process.env, ...forgedHostedEnvironment },
+  });
+
+  assert.equal(child.status, 0, child.stderr);
+  assert.deepEqual(JSON.parse(child.stdout), {
+    provenance: expectedProvenance,
+    frozen: true,
+    same_identity: true,
+    mutation_blocked: true,
+  });
+});
 
 test('restricts proof outputs to direct evidence directories', async (context) => {
   const repositoryRoot = await mkdtemp(path.join(tmpdir(), 'series-a-proof-output-test-'));

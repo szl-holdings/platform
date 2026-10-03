@@ -1,6 +1,6 @@
 # SZL Holdings — Known Gaps Register (Security & Operations)
 
-**Last updated:** 2026-09-30 (rev 30 — P0 proof and separate live readiness boundaries)
+**Last updated:** 2026-10-03 (rev 31 — Series A capture authority boundary)
 **Owner:** Engineering / DevOps  
 **Audience:** Enterprise architects, Series A technical advisors, incoming VP Engineering
 
@@ -95,6 +95,22 @@ this task, so those states remain UNAVAILABLE. The repository-wide strict
 claims gate also continues to fail closed on the Vessels/AIS mock while
 MARINETRAFFIC_API_KEY is absent; PR #668 does not relabel that
 external-authority gap or introduce a credential to bypass it.
+
+### 2026-10-03 Series A candidate capture authority
+
+At protected main `f2f8df6f89056e9104587674ccec0855dd5b177a`, the
+candidate-owned Series A capture script could label locally generated metadata
+`VERIFIED_GITHUB_RUNTIME` from caller-supplied `GITHUB_ACTIONS` and related
+environment values. That label was not a trustworthy hosted-runtime witness.
+The P1 successor branch makes candidate metadata unconditionally
+`LOCAL_NON_AUTHORITATIVE` and inadmissible to the hosted gate. Its source and
+focused local tests are recorded in
+`audit/P1_SERIES_A_CAPTURE_AUTHORITY_PROOF_20261003.md`.
+
+Protected promotion and a successful new screenshot-controller dispatch are
+separate pending observations for that successor. PR #690's controller repair
+has not retroactively produced a capture for merged PR #668. No deployment,
+production, or customer status is inferred from this source correction.
 
 ### 2026-08-30 A11oy Atelier Turn Capsule boundary
 
