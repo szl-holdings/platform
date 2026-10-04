@@ -1,6 +1,6 @@
 # SZL Holdings — Known Gaps Register (Security & Operations)
 
-**Last updated:** 2026-10-04 (rev 37 — local NULL-parameter supplement; release remains blocked)
+**Last updated:** 2026-10-04 (rev 38 — local reproducibility repair; release remains blocked)
 **Owner:** Engineering / DevOps  
 **Audience:** Enterprise architects, Series A technical advisors, incoming VP Engineering
 
@@ -9,6 +9,21 @@ This document is the canonical reference for known security, quality, and compli
 ---
 
 ## 2026-10-02 cyber evidence workcell
+
+**2026-10-04 supplement — MEASURED local build-proof repair:** the reproducibility
+workflow now uses RuntimeAudit's narrow ONNX download opt-out while verifying the
+actual bundled CPU runtime, preserves install/build failures, removes stale
+generated outputs and compares real output for every executable build task.
+Genuine regeneration exposed and corrected the missing estate-manifest dependency
+on API codegen. Two complete local builds passed 46 tasks each, but their strict
+comparison correctly failed on Storybook's optional telemetry timestamp. Its
+documented metadata opt-out then passed two scoped native builds with identical
+310-file archives; all 110 retained Storybook files matched their prior bytes.
+The 24 proof controls pass. Full hosted two-checkout/two-install equality at the
+eventual published head remains unmeasured; full local typecheck still meets the
+existing Corepack registry blocker. The original repro timeout and High-severity
+dependency/security failures remain failures. No advisory or gate is waived.
+See [`PLATFORM_REPRO_REPAIR_20261004.md`](../../audit/PLATFORM_REPRO_REPAIR_20261004.md).
 
 **2026-10-04 supplement — MEASURED local NULL-parameter repair:** the existing
 node-forge patch now includes the exact upstream #1157 nonempty primitive
