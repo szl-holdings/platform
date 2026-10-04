@@ -1,6 +1,18 @@
 import { spawnSync } from 'node:child_process';
 import { createHash } from 'node:crypto';
-import { lstatSync, mkdirSync, readdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
+import {
+  closeSync,
+  constants,
+  fstatSync,
+  lstatSync,
+  mkdirSync,
+  openSync,
+  readdirSync,
+  readFileSync,
+  readSync,
+  rmSync,
+  writeFileSync,
+} from 'node:fs';
 import { isAbsolute, join, relative, resolve, sep } from 'node:path';
 import { pathToFileURL } from 'node:url';
 
@@ -17,10 +29,34 @@ function inside(root, candidate) {
 }
 
 function readJson(filename) {
-  const stat = lstatSync(filename);
-  if (!stat.isFile() || stat.isSymbolicLink() || stat.size > 16 * 1024 * 1024)
-    fail('invalid proof JSON file');
-  return JSON.parse(readFileSync(filename, 'utf8'));
+  // Check and consume one inode. A path-based read after lstat could follow a
+  // replacement symlink; NONBLOCK also lets us reject a FIFO without waiting.
+  const fd = openSync(filename, constants.O_RDONLY | constants.O_NOFOLLOW | constants.O_NONBLOCK);
+  try {
+    const before = fstatSync(fd, { bigint: true });
+    if (!before.isFile() || before.size > 16n * 1024n * 1024n) fail('invalid proof JSON file');
+    const size = Number(before.size);
+    const bytes = Buffer.alloc(size + 1);
+    let length = 0;
+    while (length < bytes.length) {
+      const count = readSync(fd, bytes, length, Math.min(bytes.length - length, 64 * 1024), null);
+      if (count === 0) break;
+      length += count;
+    }
+    const after = fstatSync(fd, { bigint: true });
+    const pathAfter = lstatSync(filename, { bigint: true });
+    // atime may change from this read; identity, content and access metadata may not.
+    const fields = ['dev', 'ino', 'mode', 'nlink', 'uid', 'gid', 'size', 'mtimeNs', 'ctimeNs'];
+    if (
+      length !== size ||
+      !pathAfter.isFile() ||
+      fields.some((field) => before[field] !== after[field] || before[field] !== pathAfter[field])
+    )
+      fail('proof JSON file changed during read');
+    return JSON.parse(bytes.subarray(0, length).toString('utf8'));
+  } finally {
+    closeSync(fd);
+  }
 }
 
 function safeStat(root, filename) {

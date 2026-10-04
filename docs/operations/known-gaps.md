@@ -1,6 +1,6 @@
 # SZL Holdings — Known Gaps Register (Security & Operations)
 
-**Last updated:** 2026-10-04 (rev 38 — local reproducibility repair; release remains blocked)
+**Last updated:** 2026-10-04 (rev 39 — native input proof; descriptor read repair pending CI)
 **Owner:** Engineering / DevOps  
 **Audience:** Enterprise architects, Series A technical advisors, incoming VP Engineering
 
@@ -9,6 +9,22 @@ This document is the canonical reference for known security, quality, and compli
 ---
 
 ## 2026-10-02 cyber evidence workcell
+
+**2026-10-04 supplement — MEASURED native input proof and local JSON read repair:**
+published `07a55f869fdfcdf85e99cc90327982323afc9fd5` passed the complete native
+two-checkout/two-install reproducibility workflow: both uncached builds ran 46
+tasks and produced identical 3,455-file archives. Its synthetic merge has the
+same source tree; the verified artifact and exact identities are retained in
+[`PLATFORM_REPRO_READ_RACE_20261004.md`](../../audit/PLATFORM_REPRO_READ_RACE_20261004.md).
+Native Typecheck also passed on that input. CodeQL then identified an actionable
+JSON check/read race. A native filename-replacement regression reproduced an
+outside read on the old helper. The local successor binds validation and bounded
+reading to one no-follow descriptor, rejects file/path drift, and closes the
+descriptor on all paths; all 37 focused controls pass. Fresh successor CodeQL,
+reproducibility and required CI remain pending. The prior-source proof is not
+relabeled as new-source success. The two High node-forge/braces dependency
+findings and their three native security gate failures remain unwaived; release
+remains blocked.
 
 **2026-10-04 supplement — MEASURED local build-proof repair:** the reproducibility
 workflow now uses RuntimeAudit's narrow ONNX download opt-out while verifying the

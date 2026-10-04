@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import { spawnSync } from 'node:child_process';
-import {
+import fs, {
   chmodSync,
   existsSync,
   mkdirSync,
@@ -11,6 +11,7 @@ import {
   utimesSync,
   writeFileSync,
 } from 'node:fs';
+import { syncBuiltinESMExports } from 'node:module';
 import { tmpdir } from 'node:os';
 import { dirname, join, resolve } from 'node:path';
 import test from 'node:test';
@@ -56,6 +57,269 @@ function fixture(t) {
   }
   const capture = (label) => captureBuild({ root, outputDir, sourceSha: SOURCE, plan, label });
   return { base, root, outputDir, plan, put, task, capture };
+}
+
+// Interpose only the scheduling boundary. Every descriptor, stat, replacement
+// and byte read remains a native filesystem operation on this test's files.
+function withNativeFsHooks(hooks, action) {
+  const original = Object.fromEntries(Object.keys(hooks).map((name) => [name, fs[name]]));
+  try {
+    for (const [name, hook] of Object.entries(hooks)) fs[name] = hook(original[name]);
+    syncBuiltinESMExports();
+    return action();
+  } finally {
+    Object.assign(fs, original);
+    syncBuiltinESMExports();
+  }
+}
+
+function proofFixture(t) {
+  const f = fixture(t);
+  f.task('packages/one');
+  f.put('packages/one/dist/index.js', 'inside');
+  f.capture('A');
+  f.capture('B');
+  return { ...f, target: join(f.outputDir, 'capture_A.json') };
+}
+
+test('a proof pathname replacement cannot redirect the checked JSON read', (t) => {
+  const f = proofFixture(t);
+  const { target } = f;
+  const outside = join(f.base, 'outside.json');
+  writeFileSync(outside, readFileSync(target));
+  const originalStat = fs.lstatSync(target);
+  const outsideStat = fs.lstatSync(outside);
+  const nativeStat = fs.statSync;
+  const nativeFstat = fs.fstatSync;
+  let replaced = false;
+  let outsideReads = 0;
+  const replaceAfterCheck = (stat) => {
+    if (
+      !replaced &&
+      BigInt(stat.dev) === BigInt(originalStat.dev) &&
+      BigInt(stat.ino) === BigInt(originalStat.ino)
+    ) {
+      fs.renameSync(target, `${target}.original`);
+      symlinkSync(outside, target);
+      replaced = true;
+    }
+    return stat;
+  };
+  let error;
+  withNativeFsHooks(
+    {
+      lstatSync:
+        (native) =>
+        (...args) =>
+          replaceAfterCheck(native(...args)),
+      fstatSync:
+        (native) =>
+        (...args) =>
+          replaceAfterCheck(native(...args)),
+      readFileSync:
+        (native) =>
+        (filename, ...args) => {
+          const stat = typeof filename === 'number' ? nativeFstat(filename) : nativeStat(filename);
+          if (stat.dev === outsideStat.dev && stat.ino === outsideStat.ino) outsideReads++;
+          return native(filename, ...args);
+        },
+      readSync:
+        (native) =>
+        (fd, ...args) => {
+          const stat = nativeFstat(fd);
+          if (stat.dev === outsideStat.dev && stat.ino === outsideStat.ino) outsideReads++;
+          return native(fd, ...args);
+        },
+    },
+    () => {
+      try {
+        compareBuilds(f.outputDir);
+      } catch (caught) {
+        error = caught;
+      }
+    },
+  );
+  assert.equal(replaced, true);
+  assert.equal(outsideReads, 0, 'replacement bytes must never be read');
+  assert.match(error?.message || '', /proof JSON file changed/);
+  assert.equal(existsSync(join(f.outputDir, 'comparison.json')), false);
+});
+
+for (const change of [
+  'growth',
+  'truncation',
+  'same-size write',
+  'regular replacement',
+  'removal',
+]) {
+  test(`proof JSON ${change} after descriptor validation fails closed`, (t) => {
+    const f = proofFixture(t);
+    const before = fs.statSync(f.target, { bigint: true });
+    const originalContent = readFileSync(f.target, 'utf8');
+    const nativeFstat = fs.fstatSync;
+    let changed = false;
+    let bytesRead = 0;
+    let error;
+    withNativeFsHooks(
+      {
+        fstatSync:
+          (native) =>
+          (...args) => {
+            const stat = native(...args);
+            if (!changed && BigInt(stat.dev) === before.dev && BigInt(stat.ino) === before.ino) {
+              changed = true;
+              if (change === 'growth')
+                fs.truncateSync(f.target, Number(before.size) + 32 * 1024 * 1024);
+              if (change === 'truncation') fs.truncateSync(f.target, Number(before.size) - 1);
+              if (change === 'same-size write') {
+                const content = originalContent.replace('"label": "A"', '"label": "Z"');
+                writeFileSync(f.target, content);
+                // Restoring mtime cannot hide the native ctime/content change.
+                utimesSync(f.target, Number(before.atimeMs) / 1000, Number(before.mtimeMs) / 1000);
+              }
+              if (change === 'regular replacement' || change === 'removal') {
+                fs.renameSync(f.target, `${f.target}.original`);
+                if (change === 'regular replacement') writeFileSync(f.target, originalContent);
+              }
+            }
+            return stat;
+          },
+        readSync:
+          (native) =>
+          (fd, ...args) => {
+            const stat = nativeFstat(fd, { bigint: true });
+            const count = native(fd, ...args);
+            if (stat.dev === before.dev && stat.ino === before.ino) bytesRead += count;
+            return count;
+          },
+      },
+      () => {
+        try {
+          compareBuilds(f.outputDir);
+        } catch (caught) {
+          error = caught;
+        }
+      },
+    );
+    assert.equal(changed, true);
+    if (change === 'removal') assert.equal(error?.code, 'ENOENT');
+    else assert.match(error?.message || '', /proof JSON file changed/);
+    assert.ok(bytesRead <= Number(before.size) + 1, 'reads remain bounded by the admitted size');
+    if (change === 'growth') assert.equal(bytesRead, Number(before.size) + 1);
+    assert.equal(existsSync(join(f.outputDir, 'comparison.json')), false);
+  });
+}
+
+test('symlink and oversized proof JSON inputs are rejected before reading bytes', (t) => {
+  const f = proofFixture(t);
+  fs.renameSync(f.target, `${f.target}.original`);
+  symlinkSync(`${f.target}.original`, f.target);
+  let reads = 0;
+  withNativeFsHooks(
+    {
+      readSync:
+        (native) =>
+        (...args) => {
+          reads++;
+          return native(...args);
+        },
+    },
+    () => {
+      assert.throws(() => compareBuilds(f.outputDir), { code: 'ELOOP' });
+      rmSync(f.target);
+      fs.renameSync(`${f.target}.original`, f.target);
+      fs.truncateSync(f.target, 16 * 1024 * 1024 + 1);
+      assert.throws(() => compareBuilds(f.outputDir), /invalid proof JSON file/);
+    },
+  );
+  assert.equal(reads, 0);
+  assert.equal(existsSync(join(f.outputDir, 'comparison.json')), false);
+});
+
+test('a FIFO proof JSON input fails promptly without waiting for a writer', (t) => {
+  const f = proofFixture(t);
+  rmSync(f.target);
+  const fifo = spawnSync('mkfifo', [f.target], { encoding: 'utf8' });
+  assert.equal(fifo.status, 0, fifo.stderr);
+  const result = spawnSync(
+    process.execPath,
+    [join(repositoryRoot, 'scripts/ci/repro-artifacts.mjs'), 'compare', f.outputDir],
+    { encoding: 'utf8', timeout: 5000 },
+  );
+  assert.equal(result.error, undefined);
+  assert.equal(result.status, 1, result.stderr);
+  assert.match(result.stderr, /invalid proof JSON file/);
+  assert.equal(existsSync(join(f.outputDir, 'comparison.json')), false);
+});
+
+test('short native reads and a read-driven atime update retain a valid comparison', (t) => {
+  const f = proofFixture(t);
+  const original = fs.statSync(f.target);
+  utimesSync(f.target, new Date(0), original.mtime);
+  const before = fs.statSync(f.target, { bigint: true });
+  let reads = 0;
+  const result = withNativeFsHooks(
+    {
+      readSync: (native) => (fd, buffer, offset, length, position) => {
+        reads++;
+        return native(fd, buffer, offset, Math.min(length, 7), position);
+      },
+    },
+    () => compareBuilds(f.outputDir),
+  );
+  const after = fs.statSync(f.target, { bigint: true });
+  assert.equal(result.status, 'PASS');
+  assert.ok(reads > 2);
+  assert.equal(after.mtimeNs, before.mtimeNs);
+  assert.equal(after.ctimeNs, before.ctimeNs);
+  t.diagnostic(`native read updated atime: ${after.atimeNs > before.atimeNs}`);
+});
+
+for (const outcome of ['success', 'invalid JSON', 'metadata failure', 'read failure']) {
+  test(`proof JSON descriptors close after ${outcome}`, (t) => {
+    const f = proofFixture(t);
+    if (outcome === 'invalid JSON') writeFileSync(f.target, '{');
+    const descriptors = [];
+    let error;
+    withNativeFsHooks(
+      {
+        openSync:
+          (native) =>
+          (...args) => {
+            const fd = native(...args);
+            if ([f.target, join(f.outputDir, 'capture_B.json')].includes(args[0]))
+              descriptors.push(fd);
+            return fd;
+          },
+        fstatSync:
+          (native) =>
+          (...args) => {
+            if (outcome === 'metadata failure') throw new Error('injected metadata failure');
+            return native(...args);
+          },
+        readSync:
+          (native) =>
+          (...args) => {
+            if (outcome === 'read failure') throw new Error('injected read failure');
+            return native(...args);
+          },
+      },
+      () => {
+        try {
+          compareBuilds(f.outputDir);
+        } catch (caught) {
+          error = caught;
+        }
+      },
+    );
+    assert.equal(descriptors.length, outcome === 'success' ? 2 : 1);
+    for (const fd of descriptors) assert.throws(() => fs.fstatSync(fd), { code: 'EBADF' });
+    if (outcome === 'success') assert.equal(error, undefined);
+    else {
+      assert.ok(error);
+      assert.equal(existsSync(join(f.outputDir, 'comparison.json')), false);
+    }
+  });
 }
 
 test('captures actual nested workspace outputs and preserves paths, bytes and modes', (t) => {
