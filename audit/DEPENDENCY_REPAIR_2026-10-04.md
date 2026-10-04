@@ -48,7 +48,7 @@ The patch changes the DOMPurify override floor from `>=3.4.13` to
 | Check | Result |
 | --- | --- |
 | Pinned pnpm 10.26.1 lockfile-only resolution | Passed. No unrelated lockfile churn. |
-| `CI=true npm exec --yes --package=pnpm@10.26.1 -- pnpm install --frozen-lockfile --ignore-scripts` | Passed; 1,722 packages installed. Dependency build scripts were not executed. |
+| `CI=true npm exec --yes --package=pnpm@10.26.1 -- pnpm install --frozen-lockfile --ignore-scripts` | Passed; dependency installation completed with the frozen lockfile. Dependency build scripts were not executed. |
 | Pinned `pnpm audit --json` after the update | Completed; 2,005 dependencies, two High findings, zero Critical/Moderate/Low. The two remaining High findings are the pre-existing braces/node-forge advisories above. |
 | `node node_modules/typescript/bin/tsc -b lib/observability/tsconfig.json` | Passed, exit 0, for the affected posthog-js consumer. |
 | `node --test scripts/qa/generate-vuln-report.test.js` | Passed, 6/6 report-control tests. |
