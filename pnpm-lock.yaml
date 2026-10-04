@@ -184,7 +184,7 @@ overrides:
 
 patchedDependencies:
   node-forge@1.4.0:
-    hash: 533aae294734f889198054869a95df727a279a8162aa9341ab0b1ef4de494f42
+    hash: 7f2e5a471cdcf76fe253e7d744134be7538ab548f829e9a0916167b36faa2cdd
     path: patches/node-forge@1.4.0.patch
 
 importers:
@@ -14026,7 +14026,7 @@ snapshots:
       glob: 13.0.6
       lan-network: 0.2.1
       minimatch: 9.0.9
-      node-forge: 1.4.0(patch_hash=533aae294734f889198054869a95df727a279a8162aa9341ab0b1ef4de494f42)
+      node-forge: 1.4.0(patch_hash=7f2e5a471cdcf76fe253e7d744134be7538ab548f829e9a0916167b36faa2cdd)
       npm-package-arg: 11.0.3
       ora: 3.4.0
       picomatch: 4.0.4
@@ -14062,7 +14062,7 @@ snapshots:
 
   '@expo/code-signing-certificates@0.0.6':
     dependencies:
-      node-forge: 1.4.0(patch_hash=533aae294734f889198054869a95df727a279a8162aa9341ab0b1ef4de494f42)
+      node-forge: 1.4.0(patch_hash=7f2e5a471cdcf76fe253e7d744134be7538ab548f829e9a0916167b36faa2cdd)
 
   '@expo/config-plugins@10.1.2':
     dependencies:
@@ -20630,7 +20630,7 @@ snapshots:
       fetch-blob: 3.2.0
       formdata-polyfill: 4.0.10
 
-  node-forge@1.4.0(patch_hash=533aae294734f889198054869a95df727a279a8162aa9341ab0b1ef4de494f42): {}
+  node-forge@1.4.0(patch_hash=7f2e5a471cdcf76fe253e7d744134be7538ab548f829e9a0916167b36faa2cdd): {}
 
   node-gyp-build@4.8.4: {}
 

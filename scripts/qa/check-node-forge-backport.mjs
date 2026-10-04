@@ -7,7 +7,7 @@ import { fileURLToPath } from 'node:url';
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), '../..');
 export const provenance = JSON.parse(
-  readFileSync(join(root, 'audit/node-forge-backport-20261003.json'), 'utf8'),
+  readFileSync(join(root, 'audit/node-forge-backport-20261004.json'), 'utf8'),
 );
 
 export function assertForgeBytes(

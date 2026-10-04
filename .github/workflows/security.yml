@@ -45,7 +45,9 @@ jobs:
           pnpm run security:fflate
 
       - name: Prepare hash-verified pristine node-forge regression control
-        run: node scripts/qa/prepare-node-forge-pristine.mjs
+        run: |
+          node --test scripts/qa/prepare-node-forge-pristine.test.mjs
+          node scripts/qa/prepare-node-forge-pristine.mjs
 
       - name: Verify installed node-forge backport and Expo signing compatibility
         run: node --test scripts/qa/check-node-forge-backport.test.mjs

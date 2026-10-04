@@ -1,6 +1,6 @@
 # SZL Holdings — Known Gaps Register (Security & Operations)
 
-**Last updated:** 2026-10-03 (rev 35 — hosted backport evidence and scoped claim correction)
+**Last updated:** 2026-10-04 (rev 37 — local NULL-parameter supplement; release remains blocked)
 **Owner:** Engineering / DevOps  
 **Audience:** Enterprise architects, Series A technical advisors, incoming VP Engineering
 
@@ -9,6 +9,34 @@ This document is the canonical reference for known security, quality, and compli
 ---
 
 ## 2026-10-02 cyber evidence workcell
+
+**2026-10-04 supplement — MEASURED local NULL-parameter repair:** the existing
+node-forge patch now includes the exact upstream #1157 nonempty primitive
+NULL rejection condition. Six owned-key regressions fail against the prior
+backport and pass after the supplement; the expanded 22-test suite passes
+against actual workspace Expo consumers after a clean frozen install. The
+installed RSA source matches the pinned upstream postimage byte-for-byte.
+An incremental install initially left pristine bytes in a new patch-hash slot;
+the guard rejected that tree and clean installation corrected it. The
+historical receipt is retained and a new provenance receipt binds the changed
+patch. Published advisory ranges, scanner thresholds and release status remain
+unchanged. See
+[`NODE_FORGE_NULL_PARAMETER_20261004.md`](../../audit/NODE_FORGE_NULL_PARAMETER_20261004.md)
+for the native-crypto controls, compatibility checks and remaining hosted/full
+workspace verification limits.
+
+**2026-10-04 update — MEASURED local pristine-control hardening:** the helper
+now fixes the registry URL/hash identity independently of the receipt,
+forbids redirects, bounds compressed/decompressed data, rejects unsafe archive
+paths and member types, and extracts into a private temporary directory without
+an intermediate archive. Its 25 helper regressions and the existing 13 actual
+Expo/cryptography regressions pass locally. Hosted CodeQL/CI for the successor
+remain unmeasured. The dependency gate remains blocked; published node-forge
+and braces advisory ranges have no patched registry version. A supplemental
+owned-key probe also reproduces nonempty ASN.1 NULL acceptance in the existing
+backport; it does not prove unauthorized forgery. See
+[`NODE_FORGE_PRISTINE_CONTROL_20261004.md`](../../audit/NODE_FORGE_PRISTINE_CONTROL_20261004.md)
+for commands, exact scope and the incomplete full-workspace typecheck.
 
 **2026-10-03 update — MEASURED local dependency repair; release BLOCKED:**
 `node-forge@1.4.0` has a provenance-bound pnpm backport of upstream PR #1152.

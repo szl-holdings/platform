@@ -43,9 +43,9 @@ const sha256OID = tlv(0x06, Buffer.from('608648016503040201', 'hex'));
 const sha1OID = tlv(0x06, Buffer.from('2b0e03021a', 'hex'));
 const nullParameter = tlv(0x05, Buffer.alloc(0));
 
-function ownedDigestSignature(children, hash = 'sha256') {
+function ownedDigestSignature(children, hash = 'sha256', transform = (value) => value) {
   const digest = createHash(hash).update(message).digest();
-  const info = sequence([sequence(children), tlv(0x04, digest)]);
+  const info = transform(sequence([sequence(children), tlv(0x04, digest)]));
   const paddingLength = 256 - info.length - 3;
   assert.ok(paddingLength >= 8);
   const block = Buffer.concat([
@@ -101,10 +101,22 @@ const malformedAlgorithms = [
   ['extra NULL', [sha256OID, nullParameter, nullParameter]],
   ['unexpected parameter without NULL', [sha256OID, tlv(0x04, Buffer.from('extra'))]],
 ];
-for (const [label, children] of malformedAlgorithms) {
+for (const [algorithm, oid] of [
+  ['sha256', sha256OID],
+  ['sha1', sha1OID],
+]) {
+  for (const length of [1, 8, 32]) {
+    malformedAlgorithms.push([
+      `${algorithm} primitive NULL with ${length} content bytes`,
+      [oid, tlv(0x05, Buffer.alloc(length, 0x53))],
+      algorithm,
+    ]);
+  }
+}
+for (const [label, children, algorithm = 'sha256'] of malformedAlgorithms) {
   test(`nested algorithm rejects ${label}, outer DigestInfo still has two children`, () => {
-    const { digest, signature } = ownedDigestSignature(children);
-    assert.equal(verify('sha256', message, ownedKeys.publicKey, signature), false);
+    const { digest, signature } = ownedDigestSignature(children, algorithm);
+    assert.equal(verify(algorithm, message, ownedKeys.publicKey, signature), false);
     assert.throws(
       () => forgePublic.verify(digest.toString('binary'), signature.toString('binary')),
       /valid RSASSA-PKCS1-v1_5 DigestInfo/,
@@ -124,17 +136,64 @@ for (const [algorithm, oid] of [
   });
 }
 
-test('pristine package control accepts the same three malformed structures', {
+test('pristine package control accepts the same nine malformed structures', {
   skip: !process.env.NODE_FORGE_BACKPORT_PRISTINE_ROOT,
 }, () => {
   const pristineRoot = process.env.NODE_FORGE_BACKPORT_PRISTINE_ROOT;
   assertForgeBytes(pristineRoot, provenance.node_forge.pristine_rsa_sha256);
   const pristine = createRequire(join(pristineRoot, 'package.json'))('./lib/index.js');
   const pristinePublic = pristine.pki.publicKeyFromPem(publicPEM);
-  for (const [, children] of malformedAlgorithms) {
-    const { digest, signature } = ownedDigestSignature(children);
+  for (const [, children, algorithm = 'sha256'] of malformedAlgorithms) {
+    const { digest, signature } = ownedDigestSignature(children, algorithm);
     assert.ok(pristinePublic.verify(digest.toString('binary'), signature.toString('binary')));
   }
+});
+
+test('empty NULL retains legacy BER indefinite-length DigestInfo verification', () => {
+  const { digest, signature } = ownedDigestSignature(
+    [sha256OID, nullParameter],
+    'sha256',
+    (encoded) =>
+      Buffer.concat([Buffer.from([0x30, 0x80]), encoded.subarray(2), Buffer.from([0, 0])]),
+  );
+  assert.ok(forgePublic.verify(digest.toString('binary'), signature.toString('binary')));
+});
+
+test('RSA-PSS signatures retain native and Forge interoperability', () => {
+  const scheme = forge.pss.create({
+    md: forge.md.sha256.create(),
+    mgf: forge.mgf.mgf1.create(forge.md.sha256.create()),
+    saltLength: 32,
+  });
+  const nativeSignature = sign('sha256', message, {
+    key: ownedKeys.privateKey,
+    padding: constants.RSA_PKCS1_PSS_PADDING,
+    saltLength: 32,
+  });
+  const digest = createHash('sha256').update(message).digest('binary');
+  assert.ok(forgePublic.verify(digest, nativeSignature.toString('binary'), scheme));
+  const forgeSignature = forge.pki
+    .privateKeyFromPem(privatePEM)
+    .sign(forge.md.sha256.create().update(message.toString('binary')), scheme);
+  assert.ok(
+    verify(
+      'sha256',
+      message,
+      {
+        key: ownedKeys.publicKey,
+        padding: constants.RSA_PKCS1_PSS_PADDING,
+        saltLength: 32,
+      },
+      Buffer.from(forgeSignature, 'binary'),
+    ),
+  );
+});
+
+test('NONE verification retains its raw-digest compatibility', () => {
+  const digest = createHash('sha256').update(message).digest('binary');
+  const signature = forge.pki.privateKeyFromPem(privatePEM).sign(digest, 'NONE');
+  assert.ok(forgePublic.verify(digest, signature, 'NONE'));
+  assert.equal(forgePublic.verify('\0'.repeat(32), signature, 'NONE'), false);
 });
 
 test('Expo certificate and binary signature interoperate with native crypto', () => {
