@@ -1,5 +1,24 @@
 # Platform proof JSON read repair — 2026-10-04
 
+## Fixture-only follow-up after native verification
+
+Published successor `b941de4239f41828bf10e51c0fdf8a2a28ba0b93`, tree
+`530519af25bbbf099ff0992473e068d25d818b30`, completed the native
+[reproducibility workflow](https://github.com/szl-holdings/platform/actions/runs/37231876533):
+both fresh builds ran 46 uncached tasks and captured 3,455 matching files, with
+archive SHA-256 `77c9a1eef2a245cc5b8f5c2fc42103bf5fce2e3cca1e7380eb9f0219c53c3608`.
+Typecheck and RuntimeAudit also passed. The original production-reader finding
+was no longer the reported location; CodeQL identified a separate test-fixture
+check/read sequence in alert 4658, comment 4179202463.
+
+The fixture now retains the serialized receipt returned by its own native
+`captureBuild` call. Replacement files use those owned bytes directly, so fixture
+initialization no longer checks and then rereads the proof pathname. Production
+reader, comparison, archive, workflow and dependency bytes are unchanged. All
+native scheduling hooks, inode-read accounting and mutation controls remain.
+Fresh successor CodeQL is required; no query suppression or alert dismissal is
+introduced. The two dependency High findings remain unwaived.
+
 ## Workcell and recorded plan
 
 - Workcell: `platform-repro-read-race-20261004`, follow-up to platform PR #882.

@@ -1,6 +1,6 @@
 # SZL Holdings — Known Gaps Register (Security & Operations)
 
-**Last updated:** 2026-10-04 (rev 39 — native input proof; descriptor read repair pending CI)
+**Last updated:** 2026-10-04 (rev 40 — native reader proof; fixture follow-up pending CI)
 **Owner:** Engineering / DevOps  
 **Audience:** Enterprise architects, Series A technical advisors, incoming VP Engineering
 
@@ -9,6 +9,15 @@ This document is the canonical reference for known security, quality, and compli
 ---
 
 ## 2026-10-02 cyber evidence workcell
+
+**2026-10-04 supplement — MEASURED native reader successor:** published
+`b941de4239f41828bf10e51c0fdf8a2a28ba0b93` passed the complete two-build
+reproducibility run again: 46 uncached tasks per build and 3,455 matching files.
+Typecheck and RuntimeAudit passed. CodeQL's remaining new finding is a fixture
+initialization check/read sequence, addressed by retaining the owned receipt
+returned by the fixture's capture operation. Native mutation controls and all
+production reader/comparison bytes remain intact. Fresh fixture-successor CodeQL
+remains required; the two High dependency findings still block release.
 
 **2026-10-04 supplement — MEASURED native input proof and local JSON read repair:**
 published `07a55f869fdfcdf85e99cc90327982323afc9fd5` passed the complete native

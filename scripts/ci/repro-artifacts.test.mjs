@@ -77,16 +77,16 @@ function proofFixture(t) {
   const f = fixture(t);
   f.task('packages/one');
   f.put('packages/one/dist/index.js', 'inside');
-  f.capture('A');
+  const originalContent = `${JSON.stringify(f.capture('A'), null, 2)}\n`;
   f.capture('B');
-  return { ...f, target: join(f.outputDir, 'capture_A.json') };
+  return { ...f, target: join(f.outputDir, 'capture_A.json'), originalContent };
 }
 
 test('a proof pathname replacement cannot redirect the checked JSON read', (t) => {
   const f = proofFixture(t);
   const { target } = f;
   const outside = join(f.base, 'outside.json');
-  writeFileSync(outside, readFileSync(target));
+  writeFileSync(outside, f.originalContent);
   const originalStat = fs.lstatSync(target);
   const outsideStat = fs.lstatSync(outside);
   const nativeStat = fs.statSync;
@@ -155,7 +155,7 @@ for (const change of [
   test(`proof JSON ${change} after descriptor validation fails closed`, (t) => {
     const f = proofFixture(t);
     const before = fs.statSync(f.target, { bigint: true });
-    const originalContent = readFileSync(f.target, 'utf8');
+    const { originalContent } = f;
     const nativeFstat = fs.fstatSync;
     let changed = false;
     let bytesRead = 0;
