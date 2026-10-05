@@ -20,6 +20,31 @@ describe('Carlota Jo substrate run presentation', () => {
     );
   });
 
+  it('preserves the engine low-confidence dry-run escalation as pending approval', () => {
+    // The engine can return this before its explicit ApprovalGate stage.
+    const run = parsePipelineRun(
+      {
+        status: 'pending-approval',
+        mode: 'dry-run',
+        stageResults: [
+          {
+            stageId: 'retrieve-client-context',
+            stageType: 'Retrieve',
+            status: 'pending-approval',
+            confidence: 0.2,
+            routingDecision: 'escalated-human',
+            approvalId: 'sub-approval-test',
+          },
+        ],
+      },
+      'dry-run',
+    );
+    expect(run.status).toBe('pending-approval');
+    expect(run.mode).toBe('dry-run');
+    expect(run.requestedMode).toBe('dry-run');
+    expect(run.stages[0]?.status).toBe('pending-approval');
+  });
+
   it.each([
     ['pending-approval', 'pending-approval'],
     ['failed', 'failed'],

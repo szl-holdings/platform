@@ -153,7 +153,9 @@ export function SubstrateWorkflowPanel({
                 <span className="text-[9px] font-mono text-sky-400">DEMO · DRY-RUN COMPLETE</span>
               )}
               {status === 'pending-approval' && (
-                <span className="text-[9px] font-mono text-amber-400">⏳ PENDING APPROVAL</span>
+                <span className="text-[9px] font-mono text-amber-400">
+                  {result?.mode === 'dry-run' ? 'DEMO · PENDING APPROVAL' : '⏳ PENDING APPROVAL'}
+                </span>
               )}
               {status === 'failed' && (
                 <span className="text-[9px] font-mono text-red-400">✗ FAILED</span>
@@ -281,8 +283,7 @@ export function SubstrateWorkflowPanel({
           {status === 'pending-approval' && (
             <div className="rounded border border-amber-500/20 bg-amber-500/5 p-2">
               <p className="text-[9px] font-mono text-amber-400">
-                PENDING APPROVAL — paused at approval gate. Practice lead must review before routing
-                commits.
+                PENDING APPROVAL — human review is required before routing continues.
               </p>
             </div>
           )}

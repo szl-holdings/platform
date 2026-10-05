@@ -91,8 +91,7 @@ export function parsePipelineRun(value: unknown, requestedMode: RunMode): RunRes
   if (
     mode !== requestedMode ||
     (status === 'completed' && mode !== 'live') ||
-    (status === 'dry-run-complete' && mode !== 'dry-run') ||
-    (status === 'pending-approval' && mode === 'dry-run')
+    (status === 'dry-run-complete' && mode !== 'dry-run')
   ) {
     status = 'unknown';
   }
