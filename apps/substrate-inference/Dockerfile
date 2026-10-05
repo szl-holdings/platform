@@ -1,5 +1,5 @@
 # ─── Stage 1: dependency builder ────────────────────────────────────────────
-FROM nvidia/cuda:13.4.1-cudnn-devel-ubuntu22.04@sha256:6ae42043f66536500d30c4cd409fe0877d36b5bcfbd31e6ba190ae49a3cd1203 AS builder
+FROM nvidia/cuda:13.4.2-cudnn-devel-ubuntu22.04@sha256:d9e285e3bb16630c577e71070ea73f7b37ea2a2928c64902e340507c640b9618 AS builder
 
 ENV DEBIAN_FRONTEND=noninteractive \
     PYTHONUNBUFFERED=1 \
@@ -38,7 +38,7 @@ RUN pip install "flash-attn>=2.7.0" --no-build-isolation || \
     echo "FlashAttention-2 build skipped (no CUDA headers); will be installed on GPU host"
 
 # ─── Stage 2: slim runtime ───────────────────────────────────────────────────
-FROM nvidia/cuda:13.4.1-cudnn-runtime-ubuntu22.04@sha256:5b445c6af40b57374d11abd73287aeae14c00867878ce0d8c362f10b0d7c0605 AS runtime
+FROM nvidia/cuda:13.4.2-cudnn-runtime-ubuntu22.04@sha256:d5982da4024f00929ce8297a901f2c962b9fb06e3b9df2fdca35ecbdcd6754ee AS runtime
 
 ENV DEBIAN_FRONTEND=noninteractive \
     PYTHONUNBUFFERED=1 \
