@@ -70,12 +70,12 @@ described as an earlier setup attempt.
 
 | Command | Result |
 |---|---|
-| `node ../../node_modules/vitest/vitest.mjs run --config vitest.config.ts` from `packages/a11oy-atelier` | **MEASURED — exit 0; 4 files, 58/58 tests passed.** |
-| `node ../../node_modules/vitest/vitest.mjs run src/routes/v1/atelier.test.ts src/atelier-continuity-store.test.ts --maxWorkers 1 --no-file-parallelism` from `apps/alloy-runtime-api` | **MEASURED — exit 0; 2 files, 40/40 tests passed.** |
-| `corepack pnpm --dir packages/a11oy-cli test` | **MEASURED — exit 0; 12/12 tests passed.** Includes the terminal-injection rejection case for ledger entry IDs and a live-loopback assertion that a full-contract validation failure makes zero HTTP requests. |
+| `node ../../node_modules/vitest/vitest.mjs run --config vitest.config.ts` from `packages/a11oy-atelier` | **MEASURED — exit 0; 4 files, 58/58 Atelier core tests passed.** |
+| `node ../../node_modules/vitest/vitest.mjs run src/routes/v1/atelier.test.ts src/atelier-continuity-store.test.ts --maxWorkers 1 --no-file-parallelism` from `apps/alloy-runtime-api` | **MEASURED — exit 0; 2 files, 40/40 Atelier API tests passed.** |
+| `corepack pnpm --dir packages/a11oy-cli test` | **MEASURED — exit 0; 12/12 A11oy CLI tests passed.** Includes the terminal-injection rejection case for ledger entry IDs and a live-loopback assertion that a full-contract validation failure makes zero HTTP requests. |
 | `corepack pnpm --dir artifacts/a11oy test` | **MEASURED — exit 0; 29/29 Node contract tests and 5/5 Vitest UI tests passed.** Vitest printed its known close-timeout warning after successful completion; the command exited 0. |
-| `node --test lib/api-spec/scripts/codegen.test.mjs` | **MEASURED — exit 0; 3/3 tests passed.** |
-| `node --test packages/estate-contract-release/src/build.test.mjs` | **MEASURED — exit 0; 13/13 tests passed.** |
+| `node --test lib/api-spec/scripts/codegen.test.mjs` | **MEASURED — exit 0; 3/3 API-spec codegen tests passed.** |
+| `node --test packages/estate-contract-release/src/build.test.mjs` | **MEASURED — exit 0; 13/13 estate-contract release tests passed.** |
 | `node ../../node_modules/typescript/bin/tsc -p tsconfig.json --noEmit` from `packages/a11oy-atelier` and `packages/a11oy-cli` | **MEASURED — exit 0 for both packages.** |
 | `corepack pnpm --dir artifacts/a11oy typecheck` | **MEASURED — exit 0.** |
 | `node node_modules/typescript/bin/tsc --ignoreConfig --noEmit --strict --skipLibCheck --target ES2022 --module NodeNext --moduleResolution NodeNext --types node apps/alloy-runtime-api/src/middleware/auth.ts apps/alloy-runtime-api/src/routes/v1/atelier.ts` | **MEASURED — exit 0.** This is the changed API route plus its request-augmentation boundary, not a whole API-project claim. |
@@ -92,8 +92,9 @@ described as an earlier setup attempt.
 | high-confidence credential-pattern scan of 47 materialized changed/evidence text paths and the one changed sparse Git object, plus manual classification of the one `xai-` prefix candidate | **MEASURED — exit 0; all 48 logical text paths were covered and no credential candidate remained.** The single prefix candidate was the cited public xAI Frontier Framework PDF URL. |
 | `git diff --check`, `git diff origin/main...HEAD --check`, and unmerged-path query | **MEASURED — exit 0; no whitespace errors or unmerged paths.** |
 
-Focused test total: **160 passed** across the six listed test commands. This is
-not a repository-wide test total.
+**MEASURED — 160/160 Proofweave-focused tests passed** across the six listed
+commands at source revision `5341c52477317680991adf958b635d33f3a876b8`.
+The repository-wide test total remains **UNAVAILABLE** in the canonical registry.
 
 ## Explicit failed or unavailable checks
 
@@ -241,3 +242,44 @@ truth of user-supplied materials, durable production persistence, production
 authorization, deployment, publication, protected-branch acceptance, model
 quality, scientific validity, or an independent witness. Those layers require
 separate receipts.
+
+## CI claim-scope correction — 2026-10-05
+
+This entry corrects the claim wording in the Verification commands and results
+section as recorded at `38bfdf2bf27e528d99e37255bdc7404585906308`. The original
+measurements and their source revision are unchanged: each count now names its
+focused suite rather than implying a repository-wide total. The canonical
+repository-wide test metric remains **UNAVAILABLE**. `docs/API-SPEC.md` retains
+its April inventory as **REPORTED** historical evidence; the current architecture
+document now agrees with the canonical OpenAPI operation count. No application
+code, scanner rule, allowlist, security threshold, or screenshot changed.
+
+The following checks were run on this three-document correction:
+
+| Command | Result |
+|---|---|
+| `node --import ./node_modules/tsx/dist/loader.mjs --input-type=module --eval $proofClaimCheck` | **MEASURED — exit 0.** The local harness invoked the unchanged `claimFailuresForLines` scanner, reproduced all eight findings from the original documents, and found none in the edited documents. Its YAML operation count matched the canonical registry. This is a changed-document check, not a full `claims:drift` run. |
+| `node --import ./node_modules/tsx/dist/loader.mjs --test tools/truth/claims-drift.test.ts` | **MEASURED — exit 0; 69/69 claims-drift scanner regression tests passed.** |
+| `node scripts/docs/check-docs-claims.js` | **MEASURED — exit 0; 24 documentation checks verified.** Two optional access-control checks were skipped because their input file was absent. |
+| `node scripts/docs/generate-api-catalogue.js --check` | **MEASURED — exit 0.** |
+| `git diff --check` | **MEASURED — exit 0.** |
+| `corepack pnpm typecheck` | **UNAVAILABLE — exit 1.** The sparse local harness could not find `turbo`, both before and after this documentation correction. |
+
+At the recorded source head, protected CI remains **BLOCKED** by HIGH
+advisories for `node-forge` and `braces`. Read-only base comparison found both
+affected versions already on main. The official advisories
+[GHSA-86w9-cpqp-85rv](https://github.com/advisories/GHSA-86w9-cpqp-85rv) and
+[GHSA-vfj7-8cjw-p6xm](https://github.com/advisories/GHSA-vfj7-8cjw-p6xm) listed no
+patched versions when checked. Dependency changes and advisory suppression are
+not part of this correction.
+
+Push is **BLOCKED** by this session's network permissions; the permission request
+returned no network grant. Exact-head protected CI for this correction is
+**UNKNOWN** and has NOT RUN. This entry does not establish merge, deployment,
+provider runtime, or independent witness.
+
+The signed commit attempt is also **BLOCKED**: after Git's bundled shell was
+made available to the unchanged pre-commit hook, its documentation checks
+passed, but Git reported that the configured private signing key was not
+available. No new commit was created; the correction is staged locally.
+Signing and hooks were not disabled, and no alternate key was used.

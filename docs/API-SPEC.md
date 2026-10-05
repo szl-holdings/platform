@@ -51,7 +51,7 @@ artifact-server route module. The host mount is not inferred here.
 | Metric | Stated value | Source |
 |--------|-------------|--------|
 | Route files | 357 | `find artifacts/api-server/src/routes -name '*.ts' ! -name '*.test.ts' ! -name '*.spec.ts' \| wc -l` |
-| Total endpoints | 5,065 | OpenAPI 3.1 operations in `lib/api-spec/openapi.yaml` (run `pnpm docs:generate` to refresh) |
+| Historical OpenAPI operations (REPORTED) | 5,065 | Retained April inventory; current contract evidence is in the Current Evidence section above. |
 | Documented paths | 4,071 | Unique URL paths in the OpenAPI spec |
 | GraphQL types | 120 | `artifacts/api-server/src/graphql/` |
 | Spec format | OpenAPI 3.1 | served at `/api/docs` |
