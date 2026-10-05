@@ -39,9 +39,10 @@
   },
   "packages": {
     "domain_packages_dir": {
-      "count": 162,
+      "count": 163,
       "command": "Count tracked top-level directories under packages/",
-      "computed": "2026-08-26"
+      "computed": "2026-10-05",
+      "note": "MEASURED from the staged braces-safe candidate on protected base f2f8df6f89056e9104587674ccec0855dd5b177a using scripts/audit/validate-source-of-truth.js; source inventory only."
     },
     "shared_lib_packages": {
       "count": 53,
@@ -49,10 +50,10 @@
       "computed": "2026-07-25"
     },
     "total_packages": {
-      "count": 215,
+      "count": 216,
       "command": "packages/ top-level count plus lib/ top-level count",
-      "computed": "2026-08-26",
-      "note": "packages/ (162 directories) + lib/ (53 directories) = 215. packages/proxy-routes.ts is a file and is not counted as a package."
+      "computed": "2026-10-05",
+      "note": "MEASURED staged braces-safe candidate: packages/ (163 directories) + lib/ (53 directories) = 216. packages/proxy-routes.ts is a file and is not counted as a package. Other metric timestamps remain unchanged."
     },
     "apps": {
       "count": 11,

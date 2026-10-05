@@ -52,9 +52,9 @@ mean.
 | Registered artifacts | 6 | Tracked artifact manifests |
 | Artifact directories | 7 | Tracked top-level `artifacts/` children |
 | Registered product verticals | 5 | Registered domain artifacts; A11oy is separate |
-| Domain packages (`packages/`) | 162 | Tracked top-level package directories |
+| Domain packages (`packages/`) | 163 | Tracked top-level package directories |
 | Shared library packages (`lib/`) | 53 | Tracked top-level library directories |
-| Total packages (`packages/` + `lib/`) | 215 | 162 + 53 |
+| Total packages (`packages/` + `lib/`) | 216 | 163 + 53 |
 | Apps (`apps/`) | 11 | Tracked top-level `apps/` children |
 | Services (`services/`) | 11 | Tracked top-level `services/` children |
 | Workers (`workers/`) | 5 | `ls workers/ \| wc -l` |
@@ -65,6 +65,11 @@ mean.
 | API handler declarations | 315 | Static non-test method declarations on `app`, `router`, and named Express Router receivers |
 | CI workflows | 47 | Permanent workflows including exact-head screenshot evidence, hosted observability proof, public npm release paths, and the frontier receipt-chain gate; excludes the retired DCO compatibility workflow |
 | Environment variables (in `.env.example`) | 245 | Lines matching `^[A-Z_]+=` |
+
+Package counts alone were re-measured on 2026-10-05 with
+`node scripts/audit/validate-source-of-truth.js` after staging the private
+`braces-safe` source on base `f2f8df6f89056e9104587674ccec0855dd5b177a`.
+The other metrics and historical runtime snapshots are unchanged.
 
 ---
 

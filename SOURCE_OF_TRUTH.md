@@ -29,9 +29,9 @@ from whichever commit is checked out.
 | Registered artifacts | **6** | Tracked `artifacts/*/(.replit-artifact/)?artifact.toml` files |
 | Artifact directories | **7** | Unique tracked top-level children of `artifacts/` |
 | Registered product verticals | **5** | Registered customer-facing domain artifacts; A11oy is counted separately as the orchestration product |
-| Domain packages (`packages/`) | **162** | Tracked top-level package directories; excludes root file `packages/proxy-routes.ts` |
+| Domain packages (`packages/`) | **163** | Tracked top-level package directories; excludes root file `packages/proxy-routes.ts` |
 | Shared library packages (`lib/`) | **53** | Tracked top-level library directories |
-| Total packages (`packages/` + `lib/`) | **215** | 162 + 53 |
+| Total packages (`packages/` + `lib/`) | **216** | 163 + 53 |
 | Apps (`apps/`) | **11** | Unique tracked top-level children of `apps/` |
 | Services (`services/`) | **11** | Unique tracked top-level children of `services/` |
 | Workers (`workers/`) | **5** | Unique tracked top-level children of `workers/` |
@@ -45,6 +45,13 @@ from whichever commit is checked out.
 
 These are source-tree measurements. They do not by themselves prove that a
 service is deployed, reachable, authenticated correctly, or returning HTTP 200.
+
+Package inventory only was re-measured on 2026-10-05 from the staged
+`braces-safe` candidate on protected base
+`f2f8df6f89056e9104587674ccec0855dd5b177a` using the validator above:
+163 package directories plus 53 shared-library directories, totaling 216.
+This does not refresh any external/runtime measurement or the older
+integration-baseline metadata.
 
 ---
 

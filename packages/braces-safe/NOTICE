@@ -1,0 +1,9 @@
+braces is Copyright (c) 2014-present, Jon Schlinkert.
+The source and upstream tests are distributed under the preserved MIT LICENSE.
+
+This repository-local package is a private SZL Holdings security derivative of
+braces 3.0.3, with source imported from micromatch/braces commit
+28d440b5dd449dbf1fe6f3506cf94ecca4d02660.
+The package name is retained for existing CommonJS consumers. The -szl.1
+version suffix identifies this private derivative, not an upstream release.
+See UPSTREAM.md for provenance, changes, tests, and retirement criteria.

@@ -27,6 +27,11 @@
       "inputs": ["src/**", "test/**", "tests/**", "vitest.config.*"],
       "outputs": []
     },
+    "braces#test": {
+      "dependsOn": [],
+      "inputs": ["$TURBO_DEFAULT$"],
+      "outputs": []
+    },
     "@szl-holdings/estate-contract-release#test": {
       "cache": false,
       "dependsOn": ["^build"],
