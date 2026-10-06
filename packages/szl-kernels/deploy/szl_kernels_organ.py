@@ -14,7 +14,8 @@ serve.py with the standard SZL convention:
 
 ADDITIVE ONLY. Never shadows an existing route. Signing uses the host Space's szl_dsse if
 present, otherwise an honest PLACEHOLDER DSSE envelope (never silently unsigned). State is
-SQLite-backed (SZL_CODEX_DIR, default /tmp/szl_codex) so heartbeats survive Space rebuilds.
+SQLite-backed (SZL_CODEX_DIR, default /tmp/szl_codex) for process/container-local durability.
+It survives a Space rebuild only when SZL_CODEX_DIR names a persistent mounted directory.
 
 Heartbeat cadences are deliberately short for the universal SIGN/MEMORY/WIRE kernels (30s) so
 a `curl /api/<organ>/v3/kernels` immediately shows fresh `last_heartbeat_ago_sec < 60`.
@@ -23,11 +24,15 @@ from __future__ import annotations
 
 import asyncio
 import base64
+import calendar
 import hashlib
+import hmac
 import json
 import os
+import re
 import sqlite3
 import sys
+import threading
 import time
 import uuid
 from contextlib import contextmanager
@@ -37,6 +42,165 @@ from typing import Any, Callable, Optional
 
 KHIPU_PAYLOAD_TYPE = "application/vnd.szl.khipu+json"
 DOCTRINE = "v11"
+WAKE_RECEIPT_MAX_BODY_BYTES = 1024
+WAKE_RECEIPT_MAX_CLOCK_SKEW_SECONDS = 300
+WAKE_RECEIPT_SOURCE = "github-actions/warm-flagships"
+WAKE_RECEIPT_REPOSITORY = "szl-holdings/platform"
+_WAKE_RECEIPT_KEYS = frozenset(
+    {"source", "repository", "run", "run_attempt", "sha", "event", "ts"}
+)
+_WAKE_RECEIPT_EVENTS = frozenset({"schedule", "workflow_dispatch", "push"})
+_WAKE_RECEIPT_RUN_RE = re.compile(r"[1-9][0-9]{0,19}")
+_WAKE_RECEIPT_ATTEMPT_RE = re.compile(r"[1-9][0-9]{0,5}")
+_WAKE_RECEIPT_SHA_RE = re.compile(r"[0-9a-f]{40}")
+_WAKE_RECEIPT_TS_RE = re.compile(
+    r"[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}Z"
+)
+
+
+class WakeReceiptRequestError(ValueError):
+    """A bounded, caller-safe wake-receipt request failure."""
+
+    def __init__(self, status_code: int, reason: str) -> None:
+        super().__init__(reason)
+        self.status_code = status_code
+        self.reason = reason
+
+
+def _configured_bearer_token(value: Optional[str]) -> Optional[str]:
+    """Accept only a non-blank ASCII token whose encoding is 32 to 512 bytes.
+
+    The function deliberately returns no detail about the rejected value and never logs it.
+    """
+    if (
+        not isinstance(value, str)
+        or value != value.strip()
+        or not value.isascii()
+        or any(character.isspace() for character in value)
+    ):
+        return None
+    encoded = value.encode("utf-8")
+    if len(encoded) < 32 or len(encoded) > 512:
+        return None
+    return value
+
+
+def _presented_bearer_token(request: Any) -> Optional[str]:
+    authorization = request.headers.get("authorization") or ""
+    scheme, separator, token = authorization.partition(" ")
+    if (
+        not separator
+        or scheme.lower() != "bearer"
+        or not token
+        or token != token.strip()
+    ):
+        return None
+    if (
+        any(character.isspace() for character in token)
+        or len(token.encode("utf-8")) > 512
+    ):
+        return None
+    return token
+
+
+def _bearer_token_matches(presented: Optional[str], expected: Optional[str]) -> bool:
+    # Hash both values so compare_digest always receives fixed-length inputs.
+    candidate = hashlib.sha256((presented or "").encode("utf-8")).digest()
+    reference = hashlib.sha256((expected or ("\0" * 32)).encode("utf-8")).digest()
+    matches = hmac.compare_digest(candidate, reference)
+    return expected is not None and matches
+
+
+def _unix_time() -> float:
+    return time.time()
+
+
+def _reject_duplicate_json_keys(pairs: list[tuple[str, Any]]) -> dict[str, Any]:
+    result: dict[str, Any] = {}
+    for key, value in pairs:
+        if key in result:
+            raise WakeReceiptRequestError(400, "duplicate JSON key")
+        result[key] = value
+    return result
+
+
+def _parse_wake_receipt(raw: bytes) -> dict[str, str]:
+    if not raw:
+        raise WakeReceiptRequestError(400, "request body is required")
+    try:
+        decoded = raw.decode("utf-8")
+    except UnicodeDecodeError as error:
+        raise WakeReceiptRequestError(400, "request body must be UTF-8 JSON") from error
+    try:
+        body = json.loads(decoded, object_pairs_hook=_reject_duplicate_json_keys)
+    except WakeReceiptRequestError:
+        raise
+    except (TypeError, ValueError, json.JSONDecodeError) as error:
+        raise WakeReceiptRequestError(400, "request body must be valid JSON") from error
+
+    if not isinstance(body, dict):
+        raise WakeReceiptRequestError(400, "request body must be a JSON object")
+    if frozenset(body) != _WAKE_RECEIPT_KEYS:
+        raise WakeReceiptRequestError(
+            400, "request body does not match the wake-receipt schema"
+        )
+    if any(not isinstance(body[key], str) for key in _WAKE_RECEIPT_KEYS):
+        raise WakeReceiptRequestError(400, "wake-receipt fields must be strings")
+    if body["source"] != WAKE_RECEIPT_SOURCE:
+        raise WakeReceiptRequestError(400, "wake-receipt source is not allowed")
+    if body["repository"] != WAKE_RECEIPT_REPOSITORY:
+        raise WakeReceiptRequestError(400, "wake-receipt repository is not allowed")
+    if not _WAKE_RECEIPT_RUN_RE.fullmatch(body["run"]):
+        raise WakeReceiptRequestError(400, "wake-receipt run is invalid")
+    if not _WAKE_RECEIPT_ATTEMPT_RE.fullmatch(body["run_attempt"]):
+        raise WakeReceiptRequestError(400, "wake-receipt run attempt is invalid")
+    if not _WAKE_RECEIPT_SHA_RE.fullmatch(body["sha"]):
+        raise WakeReceiptRequestError(400, "wake-receipt revision is invalid")
+    if body["event"] not in _WAKE_RECEIPT_EVENTS:
+        raise WakeReceiptRequestError(400, "wake-receipt event is not allowed")
+    if not _WAKE_RECEIPT_TS_RE.fullmatch(body["ts"]):
+        raise WakeReceiptRequestError(400, "wake-receipt timestamp is invalid")
+    try:
+        parsed_timestamp = time.strptime(body["ts"], "%Y-%m-%dT%H:%M:%SZ")
+    except ValueError as error:
+        raise WakeReceiptRequestError(400, "wake-receipt timestamp is invalid") from error
+    reported_epoch = calendar.timegm(parsed_timestamp)
+    if abs(_unix_time() - reported_epoch) > WAKE_RECEIPT_MAX_CLOCK_SKEW_SECONDS:
+        raise WakeReceiptRequestError(
+            400, "wake-receipt timestamp is outside the allowed clock skew"
+        )
+    return body
+
+
+async def _read_wake_receipt(request: Any) -> dict[str, str]:
+    content_type = (
+        (request.headers.get("content-type") or "")
+        .partition(";")[0]
+        .strip()
+        .lower()
+    )
+    if content_type != "application/json":
+        raise WakeReceiptRequestError(415, "content type must be application/json")
+
+    content_length = request.headers.get("content-length")
+    if content_length is not None:
+        if not re.fullmatch(r"[0-9]+", content_length):
+            raise WakeReceiptRequestError(400, "content length is invalid")
+        try:
+            declared_length = int(content_length, 10)
+        except ValueError as error:
+            raise WakeReceiptRequestError(400, "content length is invalid") from error
+        if declared_length < 0:
+            raise WakeReceiptRequestError(400, "content length is invalid")
+        if declared_length > WAKE_RECEIPT_MAX_BODY_BYTES:
+            raise WakeReceiptRequestError(413, "request body is too large")
+
+    raw = bytearray()
+    async for chunk in request.stream():
+        if len(raw) + len(chunk) > WAKE_RECEIPT_MAX_BODY_BYTES:
+            raise WakeReceiptRequestError(413, "request body is too large")
+        raw.extend(chunk)
+    return _parse_wake_receipt(bytes(raw))
 
 
 # ────────────────────────── signing / hashing ──────────────────────────
@@ -123,6 +287,10 @@ class CodexEntry:
                 "tags": self.tags, "embedding": self.embedding, "prev_hash": self.prev_hash}
 
 
+class WakeReceiptConflictError(ValueError):
+    """The durable idempotency key was reused for a different request."""
+
+
 class Codex:
     """Versioned, signed, replayable, hash-linked knowledge base (SQLite-backed)."""
 
@@ -136,10 +304,17 @@ class Codex:
         base.parent.mkdir(parents=True, exist_ok=True)
         self.db_path = str(base)
         self._conn = sqlite3.connect(self.db_path, check_same_thread=False)
+        self._write_lock = threading.RLock()
         self._conn.execute(
             "CREATE TABLE IF NOT EXISTS entries (seq INTEGER PRIMARY KEY AUTOINCREMENT, "
             "id TEXT, ts TEXT, signed_payload TEXT, tags TEXT, embedding TEXT, "
             "prev_hash TEXT, entry_hash TEXT)"
+        )
+        self._conn.execute(
+            "CREATE TABLE IF NOT EXISTS wake_receipt_idempotency ("
+            "repository TEXT NOT NULL, run TEXT NOT NULL, run_attempt TEXT NOT NULL, "
+            "request_hash TEXT NOT NULL, entry_id TEXT NOT NULL, entry_hash TEXT NOT NULL, "
+            "PRIMARY KEY (repository, run, run_attempt))"
         )
         self._conn.commit()
 
@@ -152,18 +327,135 @@ class Codex:
 
     def append(self, payload: Any, tags: Optional[list] = None,
                embedding: Optional[list] = None, payload_type: str = KHIPU_PAYLOAD_TYPE) -> CodexEntry:
-        prev = self.head_hash()
-        signed = self.signer(payload, payload_type)
-        entry = CodexEntry(id="ce_" + uuid.uuid4().hex[:20], ts=_now_iso(),
-                           signed_payload=signed, tags=tags or [], embedding=embedding, prev_hash=prev)
-        entry_hash = sha256_hex(canonical_json(entry.to_dict()))
-        self._conn.execute(
-            "INSERT INTO entries (id, ts, signed_payload, tags, embedding, prev_hash, entry_hash) "
-            "VALUES (?,?,?,?,?,?,?)",
-            (entry.id, entry.ts, json.dumps(entry.signed_payload), json.dumps(entry.tags),
-             json.dumps(entry.embedding), entry.prev_hash or "", entry_hash))
-        self._conn.commit()
-        return entry
+        with self._write_lock:
+            cursor = self._conn.cursor()
+            try:
+                cursor.execute("BEGIN IMMEDIATE")
+                row = cursor.execute(
+                    "SELECT entry_hash FROM entries ORDER BY seq DESC LIMIT 1"
+                ).fetchone()
+                prev = row[0] if row else None
+                signed = self.signer(payload, payload_type)
+                entry = CodexEntry(
+                    id="ce_" + uuid.uuid4().hex[:20],
+                    ts=_now_iso(),
+                    signed_payload=signed,
+                    tags=tags or [],
+                    embedding=embedding,
+                    prev_hash=prev,
+                )
+                entry_hash = sha256_hex(canonical_json(entry.to_dict()))
+                cursor.execute(
+                    "INSERT INTO entries (id, ts, signed_payload, tags, embedding, "
+                    "prev_hash, entry_hash) VALUES (?,?,?,?,?,?,?)",
+                    (
+                        entry.id,
+                        entry.ts,
+                        json.dumps(entry.signed_payload),
+                        json.dumps(entry.tags),
+                        json.dumps(entry.embedding),
+                        entry.prev_hash or "",
+                        entry_hash,
+                    ),
+                )
+                self._conn.commit()
+                return entry
+            except BaseException:
+                self._conn.rollback()
+                raise
+            finally:
+                cursor.close()
+
+    def append_wake_once(self, payload: dict[str, str]) -> dict[str, Any]:
+        """Atomically append one canonical wake receipt or return its first result."""
+        repository = payload["repository"]
+        run = payload["run"]
+        run_attempt = payload["run_attempt"]
+        request_hash = sha256_hex(
+            canonical_json(
+                {
+                    key: value
+                    for key, value in payload.items()
+                    if key not in {"received_at", "reported_at"}
+                }
+            )
+        )
+        with self._write_lock:
+            cursor = self._conn.cursor()
+            try:
+                cursor.execute("BEGIN IMMEDIATE")
+                existing = cursor.execute(
+                    "SELECT request_hash, entry_id, entry_hash "
+                    "FROM wake_receipt_idempotency "
+                    "WHERE repository = ? AND run = ? AND run_attempt = ?",
+                    (repository, run, run_attempt),
+                ).fetchone()
+                if existing:
+                    if not hmac.compare_digest(existing[0], request_hash):
+                        raise WakeReceiptConflictError(
+                            "wake-receipt idempotency key conflicts with prior request"
+                        )
+                    self._conn.commit()
+                    current = cursor.execute(
+                        "SELECT entry_hash FROM entries ORDER BY seq DESC LIMIT 1"
+                    ).fetchone()
+                    return {
+                        "entry_id": existing[1],
+                        "entry_hash": existing[2],
+                        "codex_head": current[0] if current else None,
+                        "replay": True,
+                    }
+
+                row = cursor.execute(
+                    "SELECT entry_hash FROM entries ORDER BY seq DESC LIMIT 1"
+                ).fetchone()
+                previous_hash = row[0] if row else None
+                entry = CodexEntry(
+                    id="ce_" + uuid.uuid4().hex[:20],
+                    ts=_now_iso(),
+                    signed_payload=self.signer(payload, KHIPU_PAYLOAD_TYPE),
+                    tags=["wake", "warmer"],
+                    prev_hash=previous_hash,
+                )
+                entry_hash = sha256_hex(canonical_json(entry.to_dict()))
+                cursor.execute(
+                    "INSERT INTO entries (id, ts, signed_payload, tags, embedding, "
+                    "prev_hash, entry_hash) VALUES (?,?,?,?,?,?,?)",
+                    (
+                        entry.id,
+                        entry.ts,
+                        json.dumps(entry.signed_payload),
+                        json.dumps(entry.tags),
+                        json.dumps(entry.embedding),
+                        entry.prev_hash or "",
+                        entry_hash,
+                    ),
+                )
+                cursor.execute(
+                    "INSERT INTO wake_receipt_idempotency "
+                    "(repository, run, run_attempt, request_hash, entry_id, entry_hash) "
+                    "VALUES (?,?,?,?,?,?)",
+                    (
+                        repository,
+                        run,
+                        run_attempt,
+                        request_hash,
+                        entry.id,
+                        entry_hash,
+                    ),
+                )
+                self._conn.commit()
+                return {
+                    "entry_id": entry.id,
+                    "entry_hash": entry_hash,
+                    "codex_head": entry_hash,
+                    "replay": False,
+                }
+            except BaseException:
+                self._conn.rollback()
+                raise
+            finally:
+                cursor.close()
 
     def read(self, limit: int = 20, offset: int = 0) -> list:
         rows = self._conn.execute(
@@ -452,7 +744,12 @@ def build_kernels(organ: str) -> list:
 _MANAGERS: dict[str, KernelManager] = {}
 
 
-def register(app, organ: str, admin_token: Optional[str] = None) -> KernelManager:
+def register(
+    app,
+    organ: str,
+    admin_token: Optional[str] = None,
+    wake_receipt_token: Optional[str] = None,
+) -> KernelManager:
     """ADDITIVE: build the 9 kernels for `organ`, mount /api/<organ>/v3/kernels/*,
     and start all background loops. Returns the KernelManager.
 
@@ -463,14 +760,28 @@ def register(app, organ: str, admin_token: Optional[str] = None) -> KernelManage
 
     mgr = KernelManager(organ=organ, kernels=build_kernels(organ))
     _MANAGERS[organ] = mgr
-    admin_token = admin_token or os.environ.get("SZL_ADMIN_TOKEN")
+    admin_token = _configured_bearer_token(
+        admin_token if admin_token is not None else os.environ.get("SZL_ADMIN_TOKEN")
+    )
+    wake_receipt_token = _configured_bearer_token(
+        wake_receipt_token
+        if wake_receipt_token is not None
+        else os.environ.get("SZL_WAKE_RECEIPT_TOKEN")
+    )
     base = f"/api/{organ}/v3/kernels"
 
-    def _admin_ok(request) -> bool:
-        if not admin_token:
-            return False
-        sent = request.headers.get("x-szl-admin-token") or request.query_params.get("admin_token")
-        return sent == admin_token
+    def _admin_authentication_error(request):
+        if admin_token is None:
+            return JSONResponse(
+                {"error": "admin authentication is unavailable"}, status_code=503
+            )
+        if not _bearer_token_matches(_presented_bearer_token(request), admin_token):
+            return JSONResponse(
+                {"error": "invalid or missing admin bearer token"},
+                status_code=401,
+                headers={"WWW-Authenticate": "Bearer"},
+            )
+        return None
 
     @app.get(base)
     async def _list():
@@ -487,15 +798,60 @@ def register(app, organ: str, admin_token: Optional[str] = None) -> KernelManage
 
     @app.post(base + "/wake-receipt")
     async def _wake(request: Request):
-        # Used by the warm-flagships cron to leave a continuous wake trail in the Khipu chain.
+        # Used only by the authenticated warm-flagships workflow to leave a bounded wake trail.
+        if wake_receipt_token is None:
+            return JSONResponse(
+                {"ok": False, "reason": "wake receipt authentication is unavailable"},
+                status_code=503,
+            )
+        if not _bearer_token_matches(
+            _presented_bearer_token(request), wake_receipt_token
+        ):
+            return JSONResponse(
+                {"ok": False, "reason": "invalid or missing bearer token"},
+                status_code=401,
+                headers={"WWW-Authenticate": "Bearer"},
+            )
         try:
-            body = await request.json()
-        except Exception:
-            body = {}
+            body = await _read_wake_receipt(request)
+        except WakeReceiptRequestError as error:
+            return JSONResponse(
+                {"ok": False, "reason": error.reason}, status_code=error.status_code
+            )
         k = mgr.get("sign")
         if k:
-            entry = k.codex.append({"event": "wake", **body, "ts": _now_iso()}, tags=["wake", "warmer"])
-            return JSONResponse({"ok": True, "codex_head": k.codex.head_hash(), "entry_id": entry.id})
+            try:
+                result = k.codex.append_wake_once(
+                    {
+                        "schema": "szl.wake-receipt.v1",
+                        "event": "wake",
+                        "source": body["source"],
+                        "repository": body["repository"],
+                        "run": body["run"],
+                        "run_attempt": body["run_attempt"],
+                        "revision": body["sha"],
+                        "trigger": body["event"],
+                        "reported_at": body["ts"],
+                        "received_at": _now_iso(),
+                    }
+                )
+            except WakeReceiptConflictError:
+                return JSONResponse(
+                    {
+                        "ok": False,
+                        "reason": "wake-receipt idempotency key conflicts with prior request",
+                    },
+                    status_code=409,
+                )
+            return JSONResponse(
+                {
+                    "ok": True,
+                    "codex_head": result["codex_head"],
+                    "entry_id": result["entry_id"],
+                    "entry_hash": result["entry_hash"],
+                    "replay": result["replay"],
+                }
+            )
         return JSONResponse({"ok": False, "reason": "sign kernel unavailable"}, status_code=503)
 
     @app.get(base + "/{name}")
@@ -520,7 +876,10 @@ def register(app, organ: str, admin_token: Optional[str] = None) -> KernelManage
         return JSONResponse(k.last_heartbeat or {"kernel": f"{organ}.{name}", "alive": False, "note": "no tick yet"})
 
     @app.post(base + "/{name}/tick")
-    async def _tick(name: str):
+    async def _tick(request: Request, name: str):
+        authentication_error = _admin_authentication_error(request)
+        if authentication_error is not None:
+            return authentication_error
         r = await mgr.tick(name)
         if r is None:
             return JSONResponse({"error": "no such kernel", "name": name}, status_code=404)
@@ -528,15 +887,17 @@ def register(app, organ: str, admin_token: Optional[str] = None) -> KernelManage
 
     @app.post(base + "/{name}/start")
     async def _start(request: Request, name: str):
-        if not _admin_ok(request):
-            return JSONResponse({"error": "admin token required"}, status_code=403)
+        authentication_error = _admin_authentication_error(request)
+        if authentication_error is not None:
+            return authentication_error
         ok = mgr.start(name)
         return JSONResponse({"started": ok, "name": name}, status_code=200 if ok else 404)
 
     @app.post(base + "/{name}/stop")
     async def _stop(request: Request, name: str):
-        if not _admin_ok(request):
-            return JSONResponse({"error": "admin token required"}, status_code=403)
+        authentication_error = _admin_authentication_error(request)
+        if authentication_error is not None:
+            return authentication_error
         ok = mgr.stop(name)
         return JSONResponse({"stopped": ok, "name": name}, status_code=200 if ok else 404)
 
