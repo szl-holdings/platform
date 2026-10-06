@@ -12,10 +12,12 @@ serve.py with the standard SZL convention:
     import szl_kernels_organ as _kernels
     _kernels.register(app, organ="rosie")   # mounts /api/rosie/v3/kernels/* + starts loops
 
-ADDITIVE ONLY. Never shadows an existing route. Signing uses the host Space's szl_dsse if
-present, otherwise an honest PLACEHOLDER DSSE envelope (never silently unsigned). State is
-SQLite-backed (SZL_CODEX_DIR, default /tmp/szl_codex) for process/container-local durability.
-It survives a Space rebuild only when SZL_CODEX_DIR names a persistent mounted directory.
+The routes are intended for additive registration, but this module does not detect collisions;
+the caller must reserve the organ prefix before registration. Signing uses the host Space's
+szl_dsse if present, otherwise an honest PLACEHOLDER DSSE envelope (never silently unsigned).
+State is SQLite-backed (SZL_CODEX_DIR, default /tmp/szl_codex) for process/container-local
+durability. It survives a Space rebuild only when SZL_CODEX_DIR names a persistent mounted
+directory.
 
 The lifecycle, receipt, and local Codex hash-chain machinery are implemented here. Except for
 ChainKernel's local hash-chain verification, the universal and vertical kernel actions are
@@ -52,6 +54,8 @@ DOCTRINE = "v11"
 SUBSTRATE_UNAVAILABLE_SUMMARY = "UNAVAILABLE: substrate adapter not connected"
 WAKE_RECEIPT_MAX_BODY_BYTES = 1024
 WAKE_RECEIPT_MAX_CLOCK_SKEW_SECONDS = 300
+CODEX_MAX_PAGE_SIZE = 100
+CODEX_MAX_OFFSET = 10_000
 WAKE_RECEIPT_SOURCE = "github-actions/warm-flagships"
 WAKE_RECEIPT_REPOSITORY = "szl-holdings/platform"
 _WAKE_RECEIPT_KEYS = frozenset(
@@ -750,8 +754,9 @@ def register(
     admin_token: Optional[str] = None,
     wake_receipt_token: Optional[str] = None,
 ) -> KernelManager:
-    """ADDITIVE: build the 9 kernels for `organ`, mount /api/<organ>/v3/kernels/*,
-    and start all background loops. Returns the KernelManager.
+    """Build the canonical kernels, mount /api/<organ>/v3/kernels/*, and start
+    background loops. The caller must ensure that route prefix is unused.
+    Returns the KernelManager.
 
     Call from serve.py:  import szl_kernels_organ as _k; _k.register(app, organ="rosie")
     """
@@ -877,6 +882,20 @@ def register(
         k = mgr.get(name)
         if not k:
             return JSONResponse({"error": "no such kernel", "name": name}, status_code=404)
+        if limit < 1 or limit > CODEX_MAX_PAGE_SIZE:
+            return JSONResponse(
+                {
+                    "error": (
+                        f"limit must be between 1 and {CODEX_MAX_PAGE_SIZE}"
+                    )
+                },
+                status_code=400,
+            )
+        if offset < 0 or offset > CODEX_MAX_OFFSET:
+            return JSONResponse(
+                {"error": f"offset must be between 0 and {CODEX_MAX_OFFSET}"},
+                status_code=400,
+            )
         return JSONResponse({**k.codex.to_envelope(), "entries": k.codex.read(limit=limit, offset=offset)})
 
     @app.get(base + "/{name}/heartbeat")

@@ -131,6 +131,10 @@ class FakeClient:
         handler = self.app.routes[("POST", path)]
         return asyncio.run(handler(request, **(kwargs.get("path_params") or {})))
 
+    def get(self, path: str, **kwargs) -> StubJSONResponse:
+        handler = self.app.routes[("GET", path)]
+        return asyncio.run(handler(**kwargs))
+
     def close(self) -> None:
         return None
 
@@ -548,6 +552,27 @@ class WakeReceiptEndpointTests(unittest.TestCase):
         self.assertEqual(wake.status_code, 503)
         self.assertEqual(tick.status_code, 503)
         self.assertEqual(manager.get("sign").codex.count(), 0)
+
+    def test_codex_read_pagination_is_bounded(self) -> None:
+        client, manager = self.make_client()
+        codex = manager.get("sign").codex
+        codex.append({"fixture": 1})
+        codex.append({"fixture": 2})
+        endpoint = "/api/a11oy/v3/kernels/{name}/codex"
+
+        for parameters in (
+            {"name": "sign", "limit": 0, "offset": 0},
+            {"name": "sign", "limit": KERNELS.CODEX_MAX_PAGE_SIZE + 1, "offset": 0},
+            {"name": "sign", "limit": 20, "offset": -1},
+            {"name": "sign", "limit": 20, "offset": KERNELS.CODEX_MAX_OFFSET + 1},
+        ):
+            with self.subTest(parameters=parameters):
+                response = client.get(endpoint, **parameters)
+                self.assertEqual(response.status_code, 400)
+
+        response = client.get(endpoint, name="sign", limit=1, offset=1)
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(len(response.json()["entries"]), 1)
 
     def test_tick_rejects_missing_wrong_and_legacy_admin_credentials(self) -> None:
         client, manager = self.make_client(admin_token=ADMIN_TOKEN)
